@@ -452,6 +452,9 @@ static int config(struct vf_instance_s* vf,
     {
 	printf("Using constant qscale = %d (VBR)\n", lavc_param_vqscale);
 	lavc_venc_context->flags |= CODEC_FLAG_QSCALE;
+#if LIBAVCODEC_BUILD >= 4668
+        lavc_venc_context->global_quality= FF_QUALITY_SCALE * lavc_param_vqscale;
+#endif
 	vf->priv->pic->quality = lavc_param_vqscale;
     }
 
@@ -640,6 +643,12 @@ static int vf_open(vf_instance_t *vf, char* args){
 	memset(mux_v->bih, 0, sizeof(BITMAPINFOHEADER)+1000);
 	mux_v->bih->biSize=sizeof(BITMAPINFOHEADER)+1000;
     }
+    else if (lavc_param_vcodec && !strcasecmp(lavc_param_vcodec, "asv1"))
+    {
+	mux_v->bih=malloc(sizeof(BITMAPINFOHEADER)+8);
+	memset(mux_v->bih, 0, sizeof(BITMAPINFOHEADER)+8);
+	mux_v->bih->biSize=sizeof(BITMAPINFOHEADER)+8;
+    }
     else if (lavc_param_vcodec && !strcasecmp(lavc_param_vcodec, "wmv2"))
     {
 	mux_v->bih=malloc(sizeof(BITMAPINFOHEADER)+4);
@@ -682,6 +691,8 @@ static int vf_open(vf_instance_t *vf, char* args){
 	mux_v->bih->biCompression = mmioFOURCC('W', 'M', 'V', '2');
     else if (!strcasecmp(lavc_param_vcodec, "huffyuv"))
 	mux_v->bih->biCompression = mmioFOURCC('H', 'F', 'Y', 'U');
+    else if (!strcasecmp(lavc_param_vcodec, "asv1"))
+	mux_v->bih->biCompression = mmioFOURCC('A', 'S', 'V', '1');
     else
 	mux_v->bih->biCompression = mmioFOURCC(lavc_param_vcodec[0],
 		lavc_param_vcodec[1], lavc_param_vcodec[2], lavc_param_vcodec[3]); /* FIXME!!! */
