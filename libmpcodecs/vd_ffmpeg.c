@@ -181,6 +181,11 @@ static int init(sh_video_t *sh){
     ctx->avctx = avcodec_alloc_context();
     avctx = ctx->avctx;
 
+#if LIBAVCODEC_BUILD >= 4691
+    if(lavc_codec->capabilities&CODEC_CAP_CR)
+        avctx->cr_available = 1;
+#endif
+
 #ifdef HAVE_XVMC
     if(lavc_codec->id == CODEC_ID_MPEG2VIDEO_XVMC){
         printf("vd_ffmpeg: XVMC accelerated MPEG2\n");
@@ -276,6 +281,21 @@ static int init(sh_video_t *sh){
 	avctx->extradata = malloc(avctx->extradata_size);
 	memcpy(avctx->extradata, sh->bih+1, avctx->extradata_size);
     }
+    /* Pass palette to codec */
+#if LIBAVCODEC_BUILD >= 4689
+    if (sh->bih && (sh->bih->biBitCount <= 8)) {
+        avctx->palctrl = (AVPaletteControl*)calloc(1,sizeof(AVPaletteControl));
+        avctx->palctrl->palette_changed = 1;
+        if (sh->bih->biSize-sizeof(BITMAPINFOHEADER))
+            /* Palette size in biSize */
+            memcpy(avctx->palctrl->palette, sh->bih+1,
+                   min(sh->bih->biSize-sizeof(BITMAPINFOHEADER), AVPALETTE_SIZE));
+        else
+            /* Palette size in biClrUsed */
+            memcpy(avctx->palctrl->palette, sh->bih+1,
+                   min(sh->bih->biClrUsed * 4, AVPALETTE_SIZE));
+	}
+#endif
     if (sh->ImageDesc &&
 	 sh->format == mmioFOURCC('S','V','Q','3')){
 	avctx->extradata_size = *(int*)sh->ImageDesc;
@@ -318,6 +338,9 @@ static void uninit(sh_video_t *sh){
     if (avctx->extradata_size)
 	free(avctx->extradata);
     avctx->extradata=NULL;
+    if (avctx->palctrl)
+	    free(avctx->palctrl);
+    avctx->palctrl=NULL;
     if(avctx->slice_offset!=NULL) 
         free(avctx->slice_offset);
     avctx->slice_offset=NULL;
@@ -413,6 +436,9 @@ static int init_vo(sh_video_t *sh){
 	case PIX_FMT_YUV422:  ctx->best_csp=IMGFMT_YUY2;break; //huffyuv perhaps in the future
 	case PIX_FMT_RGB24 :  ctx->best_csp=IMGFMT_BGR24;break; //huffyuv
 	case PIX_FMT_RGBA32:  ctx->best_csp=IMGFMT_BGR32;break; //huffyuv / mjpeg
+	case PIX_FMT_BGR24 :  ctx->best_csp=IMGFMT_BGR24;break; //8bps
+	case PIX_FMT_RGB555:  ctx->best_csp=IMGFMT_BGR15;break; //rpza,cram
+	case PIX_FMT_PAL8:    ctx->best_csp=IMGFMT_BGR8;break; //8bps,mrle,cram
 #ifdef HAVE_XVMC
         case PIX_FMT_XVMC_MPEG2_MC:ctx->best_csp=IMGFMT_XVMC_MOCO_MPEG2;break;
         case PIX_FMT_XVMC_MPEG2_IDCT:ctx->best_csp=IMGFMT_XVMC_IDCT_MPEG2;break;
@@ -420,7 +446,6 @@ static int init_vo(sh_video_t *sh){
 	default:
 	    ctx->best_csp=0;
 	}
-
     	if (!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h, ctx->best_csp))
     		return -1;
     }
@@ -440,6 +465,25 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
     if(avctx->pix_fmt == PIX_FMT_YUV410P)
         align=63; //yes seriously, its really needed (16x16 chroma blocks in SVQ1 -> 64x64)
 
+#if LIBAVCODEC_BUILD >= 4691
+  if (pic->buffer_hints) {
+    mp_msg(MSGT_DECVIDEO,MSGL_DBG2, "Buffer hints: %u\n", pic->buffer_hints);
+    type = MP_IMGTYPE_TEMP;
+    if (pic->buffer_hints & FF_BUFFER_HINTS_READABLE)
+        flags |= MP_IMGFLAG_READABLE;
+    if (pic->buffer_hints & FF_BUFFER_HINTS_PRESERVE) {
+        type = MP_IMGTYPE_STATIC;
+        flags |= MP_IMGFLAG_PRESERVE;
+    }
+    if (pic->buffer_hints & FF_BUFFER_HINTS_REUSABLE) {
+        type = MP_IMGTYPE_STATIC;
+        flags |= MP_IMGFLAG_PRESERVE;
+    }
+    flags|=(!avctx->hurry_up && ctx->do_slices) ?
+            MP_IMGFLAG_DRAW_CALLBACK:0;
+    mp_msg(MSGT_DECVIDEO,MSGL_DBG2, type == MP_IMGTYPE_STATIC ? "using STATIC\n" : "using TEMP\n");
+  } else {
+#endif
     if(!pic->reference){
         ctx->b_count++;
         flags|=(!avctx->hurry_up && ctx->do_slices) ?
@@ -449,6 +493,9 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
         flags|= MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE
                 | (ctx->do_slices ? MP_IMGFLAG_DRAW_CALLBACK : 0);
     }
+#if LIBAVCODEC_BUILD >= 4691
+  }
+#endif
 
     if(init_vo(sh)<0){
         avctx->release_buffer= avcodec_default_release_buffer;
@@ -456,6 +503,9 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
         return avctx->get_buffer(avctx, pic);
     }
     
+#if LIBAVCODEC_BUILD >= 4691
+  if (!pic->buffer_hints) {
+#endif
     if(ctx->b_count>1 || ctx->ip_count>2){
         printf("DR1 failure\n");
 
@@ -470,6 +520,9 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
         type= MP_IMGTYPE_IP;
     }
     mp_msg(MSGT_DECVIDEO,MSGL_DBG2, type== MP_IMGTYPE_IPB ? "using IPB\n" : "using IP\n");
+#if LIBAVCODEC_BUILD >= 4691
+  }
+#endif
 
     mpi= mpcodecs_get_image(sh,type, flags,
 			(width+align)&(~align), (height+align)&(~align));
@@ -481,6 +534,11 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
 	avctx->draw_horiz_band= draw_slice;
     } else
 	avctx->draw_horiz_band= NULL;
+
+	// Palette support: libavcodec copies palette to *data[1]
+	if (mpi->bpp == 8)
+		mpi->planes[1] = malloc(AVPALETTE_SIZE);
+
     pic->data[0]= mpi->planes[0];
     pic->data[1]= mpi->planes[1];
     pic->data[2]= mpi->planes[2];
@@ -552,6 +610,11 @@ static void release_buffer(struct AVCodecContext *avctx, AVFrame *pic){
     else
         ctx->b_count--;
   }
+
+	// Palette support: free palette buffer allocated in get_buffer
+	if ((mpi->bpp == 8) && (mpi->planes[1] != NULL))
+		free(mpi->planes[1]);
+
 #if LIBAVCODEC_BUILD >= 4644
     if(pic->type!=FF_BUFFER_TYPE_USER){
         avcodec_default_release_buffer(avctx, pic);
