@@ -22,6 +22,7 @@
 #include "config.h"
 
 #include <inttypes.h>
+#include <stdio.h>
 
 #include "mpeg2_internal.h"
 #include "attributes.h"
