@@ -267,10 +267,10 @@ endif
 	if test ! -d $(MANDIR)/man1 ; then mkdir -p $(MANDIR)/man1; fi
 	for i in $(LANGUAGES); do \
 		if test "$$i" = en ; then \
-			$(INSTALL) -c -m 644 DOCS/en/mplayer.1 $(MANDIR)/man1/mplayer.1 ; \
+			$(INSTALL) -c -m 644 DOCS/man/en/mplayer.1 $(MANDIR)/man1/mplayer.1 ; \
 		else \
 			mkdir -p $(MANDIR)/$$i/man1 ; \
-			$(INSTALL) -c -m 644 DOCS/$$i/mplayer.1 $(MANDIR)/$$i/man1/mplayer.1 ; \
+			$(INSTALL) -c -m 644 DOCS/man/$$i/mplayer.1 $(MANDIR)/$$i/man1/mplayer.1 ; \
 		fi ; \
 	done
 ifeq ($(MENCODER),yes)

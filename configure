@@ -1871,7 +1871,7 @@ for i in $_language ; do
 done
 test -z "$_language" && _language=en
 for i in $LANGUAGES ; do
-  if test -f "DOCS/$i/mplayer.1" ; then
+  if test -f "DOCS/man/$i/mplayer.1" ; then
     LANGUAGES=`echo $LANGUAGES | sed "s/$i *//2" | sed 's/ *$//'`
   else
     LANGUAGES=`echo $LANGUAGES | sed "s/$i *//g" | sed 's/ *$//'`
