@@ -30,7 +30,7 @@ static int init(sh_audio_t *sh_audio)
 {
   sh_audio->channels=sh_audio->wf->nChannels;
   sh_audio->samplerate=sh_audio->wf->nSamplesPerSec;
-  sh_audio->i_bps = (sh_audio->channels * 22050) / 2;
+  sh_audio->i_bps = 44100;
 
   if ((sh_audio->a_in_buffer =
     (unsigned char *)malloc(sh_audio->audio_out_minsize / 2)) == NULL)
