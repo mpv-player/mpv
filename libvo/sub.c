@@ -33,7 +33,9 @@ int vo_osd_progbar_type=-1;
 int vo_osd_progbar_value=100;   // 0..255
 
 inline static void vo_draw_text_progbar(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
-        int i;
+   	unsigned char *s;
+   	unsigned char *sa;
+        int i,w,h,st;
         int y=(dys-vo_font->height)/2;
         int c,font;
         int delimw=vo_font->width[OSD_PB_START]
@@ -69,28 +71,30 @@ inline static void vo_draw_text_progbar(int dxs,int dys,void (*draw_alpha)(int x
         x+=vo_font->width[c]+vo_font->charspace;
 
    	c=OSD_PB_0;
-   	if ((font=vo_font->font[c])>=0)
+   	if ((font=vo_font->font[c])>=0){
+	   w=vo_font->width[c];
+	   h=vo_font->pic_a[font]->h;
+	   s=vo_font->pic_b[font]->bmp+vo_font->start[c];
+	   sa=vo_font->pic_a[font]->bmp+vo_font->start[c];
+	   st=vo_font->pic_a[font]->w;
      	   for (i=mark;i--;){
-	       draw_alpha(x,y,
-			  vo_font->width[c],
-			  vo_font->pic_a[font]->h,
-			  vo_font->pic_b[font]->bmp+vo_font->start[c],
-			  vo_font->pic_a[font]->bmp+vo_font->start[c],
-			  vo_font->pic_a[font]->w);
+	       draw_alpha(x,y,w,h,s,sa,st);
 	       x+=charw;
 	   }
+	}
 
    	c=OSD_PB_1;
-	if ((font=vo_font->font[c])>=0)
+	if ((font=vo_font->font[c])>=0){
+	   w=vo_font->width[c];
+	   h=vo_font->pic_a[font]->h;
+	   s =vo_font->pic_b[font]->bmp+vo_font->start[c];
+	   sa=vo_font->pic_a[font]->bmp+vo_font->start[c];
+	   st=vo_font->pic_a[font]->w;
      	   for (i=elems-mark;i--;){
-	       draw_alpha(x,y,
-			  vo_font->width[c],
-			  vo_font->pic_a[font]->h,
-			  vo_font->pic_b[font]->bmp+vo_font->start[c],
-			  vo_font->pic_a[font]->bmp+vo_font->start[c],
-			  vo_font->pic_a[font]->w);
+	       draw_alpha(x,y,w,h,s,sa,st);
 	       x+=charw;
 	   }
+	}
 
         c=OSD_PB_END;
         if ((font=vo_font->font[c])>=0)
@@ -136,7 +140,7 @@ inline static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,in
       memdxs=dxs;
       memdys=memy=dys;
       
-      // too long lines divide into smaller ones
+      // too long lines divide into a smaller ones
       i=k=lines=lasth=0;
       h=vo_font->height;
       xsize=-vo_font->charspace;
@@ -187,14 +191,14 @@ inline static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,in
 	      } else if (j<len)
 		   continue;
 	      if (h>memy){ // out of the screen so end parsing
-		 memy +=vo_font->height-lasth; // correct y position
+		 memy +=vo_font->height-lasth; // correct the y position
 		 l=0; break;
 	      }
 	      utbl[k++]=0;
 	      xtbl[lines++]=(dxs-xsize)/2;
 	      if (lines==MAX_UCSLINES||k>MAX_UCS){
 		 l=0; break;
-	      } else if(l || j<len){ // not last line or not last char
+	      } else if(l || j<len){ // not the last line or not the last char
 		 lastStripPosition=-1;
 		 xsize=-vo_font->charspace;
 		 lasth=h;
