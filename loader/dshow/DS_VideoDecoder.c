@@ -20,7 +20,7 @@
 #include <sys/mman.h>
 
 //#include <cstdio>
-//#include <iostream>
+#include <iostream>
 //#include <strstream>
 
 #define __MODULE__ "DirectShow_VideoDecoder"
