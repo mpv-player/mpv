@@ -160,6 +160,30 @@ static inline void RENAME(vo_draw_alpha_yuy2)(int w,int h, unsigned char* src, u
     return;
 }
 
+static inline void RENAME(vo_draw_alpha_uyvy)(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
+  int y;
+#if defined(FAST_OSD)
+  w=w>>1;
+#endif
+  for(y=0;y<h;y++){
+    register int x;
+    for(x=0;x<w;x++){
+#ifdef FAST_OSD
+      if(srca[2*x+0]) dstbase[4*x+2]=src[2*x+0];
+      if(srca[2*x+1]) dstbase[4*x+0]=src[2*x+1];
+#else
+      if(srca[x]) {
+	dstbase[2*x+1]=((dstbase[2*x+1]*srca[x])>>8)+src[x];
+	dstbase[2*x]=((((signed)dstbase[2*x]-128)*srca[x])>>8)+128;
+      }
+#endif
+    }
+    src+=srcstride;
+    srca+=srcstride;
+    dstbase+=dststride;
+  }
+}
+
 static inline void RENAME(vo_draw_alpha_rgb24)(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
     int y;
     for(y=0;y<h;y++){

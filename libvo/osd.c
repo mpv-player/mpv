@@ -110,7 +110,7 @@ static const unsigned long long mask24hl  __attribute__((aligned(8))) = 0x0000FF
 void vo_draw_alpha_yv12(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
 #ifdef RUNTIME_CPUDETECT
 #ifdef CAN_COMPILE_X86_ASM
-	// ordered per speed fasterst first
+	// ordered by speed / fastest first
 	if(gCpuCaps.hasMMX2)
 		vo_draw_alpha_yv12_MMX2(w, h, src, srca, srcstride, dstbase, dststride);
 	else if(gCpuCaps.has3DNow)
@@ -140,7 +140,7 @@ void vo_draw_alpha_yv12(int w,int h, unsigned char* src, unsigned char *srca, in
 void vo_draw_alpha_yuy2(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
 #ifdef RUNTIME_CPUDETECT
 #ifdef CAN_COMPILE_X86_ASM
-	// ordered per speed fasterst first
+	// ordered by speed / fastest first
 	if(gCpuCaps.hasMMX2)
 		vo_draw_alpha_yuy2_MMX2(w, h, src, srca, srcstride, dstbase, dststride);
 	else if(gCpuCaps.has3DNow)
@@ -167,10 +167,40 @@ void vo_draw_alpha_yuy2(int w,int h, unsigned char* src, unsigned char *srca, in
 #endif //!RUNTIME_CPUDETECT
 }
 
+void vo_draw_alpha_uyvy(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
+#ifdef RUNTIME_CPUDETECT
+#ifdef CAN_COMPILE_X86_ASM
+	// ordered by speed / fastest first
+	if(gCpuCaps.hasMMX2)
+		vo_draw_alpha_uyvy_MMX2(w, h, src, srca, srcstride, dstbase, dststride);
+	else if(gCpuCaps.has3DNow)
+		vo_draw_alpha_uyvy_3DNow(w, h, src, srca, srcstride, dstbase, dststride);
+	else if(gCpuCaps.hasMMX)
+		vo_draw_alpha_uyvy_MMX(w, h, src, srca, srcstride, dstbase, dststride);
+	else
+		vo_draw_alpha_uyvy_X86(w, h, src, srca, srcstride, dstbase, dststride);
+#else
+		vo_draw_alpha_uyvy_C(w, h, src, srca, srcstride, dstbase, dststride);
+#endif
+#else //RUNTIME_CPUDETECT
+#ifdef HAVE_MMX2
+		vo_draw_alpha_uyvy_MMX2(w, h, src, srca, srcstride, dstbase, dststride);
+#elif defined (HAVE_3DNOW)
+		vo_draw_alpha_uyvy_3DNow(w, h, src, srca, srcstride, dstbase, dststride);
+#elif defined (HAVE_MMX)
+		vo_draw_alpha_uyvy_MMX(w, h, src, srca, srcstride, dstbase, dststride);
+#elif defined (ARCH_X86)
+		vo_draw_alpha_uyvy_X86(w, h, src, srca, srcstride, dstbase, dststride);
+#else
+		vo_draw_alpha_uyvy_C(w, h, src, srca, srcstride, dstbase, dststride);
+#endif
+#endif //!RUNTIME_CPUDETECT
+}
+
 void vo_draw_alpha_rgb24(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
 #ifdef RUNTIME_CPUDETECT
 #ifdef CAN_COMPILE_X86_ASM
-	// ordered per speed fasterst first
+	// ordered by speed / fastest first
 	if(gCpuCaps.hasMMX2)
 		vo_draw_alpha_rgb24_MMX2(w, h, src, srca, srcstride, dstbase, dststride);
 	else if(gCpuCaps.has3DNow)
@@ -200,7 +230,7 @@ void vo_draw_alpha_rgb24(int w,int h, unsigned char* src, unsigned char *srca, i
 void vo_draw_alpha_rgb32(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
 #ifdef RUNTIME_CPUDETECT
 #ifdef CAN_COMPILE_X86_ASM
-	// ordered per speed fasterst first
+	// ordered by speed / fastest first
 	if(gCpuCaps.hasMMX2)
 		vo_draw_alpha_rgb32_MMX2(w, h, src, srca, srcstride, dstbase, dststride);
 	else if(gCpuCaps.has3DNow)
