@@ -494,7 +494,7 @@ lecture de vidéo uniquement (vous pouvez le comprendre comme des fps infinis).
 Affecte une valeur RVB de votre choix à la couleur clé.
 0x000000 est noir et 0xffffff est blanc.
 Géré par les pilotes vidéo cvidix, fbdev, svga, vesa, winvidix, xmga,
-xvidix et xover uniquement.
+xvidix, xover et directx uniquement.
 .
 .TP
 .B \-nocolorkey
@@ -2253,8 +2253,11 @@ Ajuste la position d'origine sur l'écran de la sortie.
 Les variables x et y sont en pixels mesurés à partir du coin supérieur droit
 de l'écran jusqu'au coin supérieur droit de la vidéo affichée, cependant si
 un signe pourcentage est indiqué après la variable, cette valeur est alors
-considérée comme le pourcentage de la taille de l'écran dans cette direction.
+interprétée comme le pourcentage de la taille de l'écran dans cette direction.
 Il gère également le format d'option standard X11 \-geometry.
+Si une fenêtre externe est donnée par l'intermédiaire de l'option \-wid,
+alors les coordonnées x et y sont relatives aux coin supérieur gauche de la
+fenêtre au lieu celui de l'écran.
 .br
 .I NOTE:
 Cette option n'est permise que par les pilotes de sortie vidéo x11, xmga, xv,
@@ -2405,8 +2408,8 @@ nouveau mode d'affichage vidéo.
 Active VBI pour les pilotes de sortie vidéo vesa, dfbmga et svga.
 .
 .TP
-.B \-wid <window\ ID> (voir aussi \-guiwid) (X11 uniquement)
-Dit à MPlayer de s'attacher à une fenêtre X11 existante.
+.B \-wid <window\ ID> (voir aussi \-guiwid) (X11 et DirectX uniquement)
+Dit à MPlayer de s'attacher à une fenêtre existante.
 Utile pour intégrer MPlayer dans un navigateur (avec l'extension plugger
 par exemple).
 .
