@@ -579,19 +579,24 @@ static int uninit(priv_t *priv)
 static int get_capture_buffer_size(priv_t *priv)
 {
     int bufsize, cnt;
-#ifdef HAVE_SYS_SYSINFO_H
-    struct sysinfo si;
-    
-    sysinfo(&si);
-    if (si.totalram<2*1024*1024) {
-	bufsize = 1024*1024;
-    } else {
-	bufsize = si.totalram/2;
-    }
-#else
-    bufsize = 16*1024*1024;
-#endif
 
+    if (tv_param_buffer_size) {
+	bufsize = tv_param_buffer_size*1024*1024;
+    } else {
+#ifdef HAVE_SYS_SYSINFO_H
+	struct sysinfo si;
+	
+	sysinfo(&si);
+	if (si.totalram<2*1024*1024) {
+	    bufsize = 1024*1024;
+	} else {
+	    bufsize = si.totalram/2;
+	}
+#else
+	bufsize = 16*1024*1024;
+#endif
+    }
+    
     cnt = bufsize/(priv->height*priv->bytesperline);
     if (cnt < 2) cnt = 2;
     

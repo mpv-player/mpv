@@ -60,6 +60,7 @@ int tv_param_treble = -1;
 int tv_param_balance = -1;
 int tv_param_forcechan = -1;
 int tv_param_force_audio = 0;
+int tv_param_buffer_size = -1;
 #ifdef HAVE_ALSA9
 int tv_param_alsa = 0;
 #endif
