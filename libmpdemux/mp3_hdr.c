@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "config.h"
+#include "../mp_msg.h"
 
 //----------------------- mp3 audio frame header parser -----------------------
 
@@ -32,12 +33,15 @@ int mp_decode_mp3_header(unsigned char* hbuf){
     // head_check:
     if( (newhead & 0xffe00000) != 0xffe00000 ||  
         (newhead & 0x0000fc00) == 0x0000fc00){
-	printf("head_check failed\n");
+	mp_msg(MSGT_DEMUXER,MSGL_DBG2,"head_check failed\n");
 	return -1;
     }
 #endif
 
-    if((4-((newhead>>17)&3))!=3){ printf("not layer-3\n"); return -1;}
+    if((4-((newhead>>17)&3))!=3){ 
+      mp_msg(MSGT_DEMUXER,MSGL_DBG2,"not layer-3\n"); 
+      return -1;
+    }
 
     if( newhead & ((long)1<<20) ) {
       lsf = (newhead & ((long)1<<19)) ? 0x0 : 0x1;
@@ -53,7 +57,7 @@ int mp_decode_mp3_header(unsigned char* hbuf){
       sampling_frequency = ((newhead>>10)&0x3) + (lsf*3);
 
     if(sampling_frequency>8){
-	printf("invalid sampling_frequency\n");
+	mp_msg(MSGT_DEMUXER,MSGL_DBG2,"invalid sampling_frequency\n");
 	return -1;  // valid: 0..8
     }
 
@@ -70,7 +74,7 @@ int mp_decode_mp3_header(unsigned char* hbuf){
     stereo    = ( (((newhead>>6)&0x3)) == 3) ? 1 : 2;
 
     if(!bitrate_index){
-      fprintf(stderr,"Free format not supported.\n");
+      mp_msg(MSGT_DEMUXER,MSGL_DBG2,"Free format not supported.\n");
       return -1;
     }
 

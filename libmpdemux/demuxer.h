@@ -19,6 +19,7 @@
 #define DEMUXER_TYPE_FILM 14
 #define DEMUXER_TYPE_ROQ 15
 #define DEMUXER_TYPE_MF 16
+#define DEMUXER_TYPE_AUDIO 17
 
 #define DEMUXER_TIME_NONE 0
 #define DEMUXER_TIME_PTS 1
@@ -94,7 +95,7 @@ typedef struct demuxer_st {
   char s_streams[32];   // dvd subtitles (flag)
   
   void* priv;  // fileformat-dependent data
-  demuxer_info_t info;
+  char** info;
 } demuxer_t;
 
 inline static demux_packet_t* new_demux_packet(int len){

@@ -125,6 +125,11 @@ void free_demuxer(demuxer_t *demuxer){
     // free demuxers:
     free_demuxer_stream(demuxer->audio);
     free_demuxer_stream(demuxer->video);
+    if(demuxer->info) {
+      for(i=0;demuxer->info[i] != NULL; i++)
+	free(demuxer->info[i]);
+      free(demuxer->info);
+    }
     free(demuxer);
 }
 
@@ -186,6 +191,7 @@ extern int demux_tv_fill_buffer(demuxer_t *demux, tvi_handle_t *tvh);
 extern int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh);
 #endif
 int demux_y4m_fill_buffer(demuxer_t *demux);
+int demux_audio_fill_buffer(demux_stream_t *ds);
 
 int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
   // Note: parameter 'ds' can be NULL!
@@ -209,6 +215,7 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
     case DEMUXER_TYPE_TV: return demux_tv_fill_buffer(demux, tv_handler);
 #endif
     case DEMUXER_TYPE_Y4M: return demux_y4m_fill_buffer(demux);
+    case DEMUXER_TYPE_AUDIO: return demux_audio_fill_buffer(ds);
   }
   return 0;
 }
@@ -398,6 +405,7 @@ extern void demux_open_real(demuxer_t *demuxer);
 
 extern int nuv_check_file(demuxer_t *demuxer);
 extern void demux_open_nuv(demuxer_t *demuxer);
+extern int demux_audio_open(demuxer_t* demuxer);
 
 demuxer_t* demux_open(stream_t *stream,int file_format,int audio_id,int video_id,int dvdsub_id){
 
@@ -534,6 +542,15 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_ROQ){
       file_format=DEMUXER_TYPE_ROQ;
   } else
       free_demuxer(demuxer);
+}
+//=============== Try to open as audio file: =================
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AUDIO){
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_AUDIO,audio_id,video_id,dvdsub_id);
+  if(demux_audio_open(demuxer)){
+    mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected audio file\n");
+    file_format=DEMUXER_TYPE_AUDIO;
+  } else
+    free_demuxer(demuxer);
 }
 //=============== Try to open as MPEG-PS file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
@@ -749,6 +766,7 @@ int demux_seek_fli(demuxer_t *demuxer,float rel_seek_secs,int flags);
 int demux_seek_mf(demuxer_t *demuxer,float rel_seek_secs,int flags);
 int demux_seek_nuv(demuxer_t *demuxer,float rel_seek_secs,int flags);
 void demux_seek_mov(demuxer_t *demuxer,float pts,int flags);
+extern void demux_audio_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 
 int demux_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
     demux_stream_t *d_audio=demuxer->audio;
@@ -808,6 +826,8 @@ switch(demuxer->file_format){
       demux_seek_fli(demuxer,rel_seek_secs,flags);  break;
   case DEMUXER_TYPE_NUV:
       demux_seek_nuv(demuxer,rel_seek_secs,flags);  break;
+  case DEMUXER_TYPE_AUDIO:
+      demux_audio_seek(demuxer,rel_seek_secs,flags);  break;
 
 
 } // switch(demuxer->file_format)
@@ -817,86 +837,38 @@ return 1;
 
 int demux_info_add(demuxer_t *demuxer, char *opt, char *param)
 {
-    demuxer_info_t *info = &demuxer->info;
+    char **info = demuxer->info;
+    int n = 0;
 
-    if (!strcasecmp(opt, "name"))
-    {
-	if (info->name)
-	{
-	    mp_msg(MSGT_DEMUX, MSGL_WARN, "Demuxer info->name already present\n!");
-	    return(0);
-	}
-	info->name = strdup(param);
-	return(1);
-    }
 
-    if (!strcasecmp(opt, "author"))
-    {
-	if (info->author)
-	{
-	    mp_msg(MSGT_DEMUX, MSGL_WARN, "Demuxer info->author already present\n!");
-	    return(0);
-	}
-	info->author = strdup(param);
-	return(1);
-    }
+    for(n = 0; info && info[2*n] != NULL; n++) 
+      {
+	if(!strcasecmp(opt,info[2*n]))
+	  {
+	    mp_msg(MSGT_DEMUX, MSGL_WARN, "Demuxer info %s already present\n!",opt);
+	    return 0;
+	  }
+      }
+    
+    info = demuxer->info = (char**)realloc(info,(2*(n+2))*sizeof(char*));
+    info[2*n] = strdup(opt);
+    info[2*n+1] = strdup(param);
+    memset(&info[2*(n+1)],0,2*sizeof(char*));
 
-    if (!strcasecmp(opt, "encoder") || !strcasecmp(opt, "software"))
-    {
-	if (info->encoder)
-	{
-	    mp_msg(MSGT_DEMUX, MSGL_WARN, "Demuxer info->encoder already present\n!");
-	    return(0);
-	}
-	info->encoder = strdup(param);
-	return(1);
-    }
-
-    if (!strcasecmp(opt, "comment") || !strcasecmp(opt, "comments"))
-    {
-	if (info->comments)
-	{
-	    mp_msg(MSGT_DEMUX, MSGL_WARN, "Demuxer info->comments already present\n!");
-	    return(0);
-	}
-	info->comments = strdup(param);
-	return(1);
-    }
-
-    if (!strcasecmp(opt, "copyright"))
-    {
-	if (info->copyright)
-	{
-	    mp_msg(MSGT_DEMUX, MSGL_WARN, "Demuxer info->copyright already present\n!");
-	    return(0);
-	}
-	info->copyright = strdup(param);
-	return(1);
-    }
-
-    mp_msg(MSGT_DEMUX, MSGL_DBG2, "Unknown demuxer info->%s (=%s)!\n",
-	opt, param);
-    return(1);
+    return 1;
 }
 
 int demux_info_print(demuxer_t *demuxer)
 {
-    demuxer_info_t *info = &demuxer->info;
+    char **info = demuxer->info;
+    int n;
 
-    if (info->name || info->author || info->encoder || info->comments || info->copyright)
-    {
-	mp_msg(MSGT_DEMUX, MSGL_INFO, "Clip info: \n");
-	if (info->name)
-	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Name: %s\n", info->name);
-	if (info->author)
-	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Author: %s\n", info->author);
-	if (info->copyright)
-	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Copyright: %s\n", info->copyright);
-	if (info->comments)
-	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Comments: %s\n", info->comments);
-	if (info->encoder)
-	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Encoder: %s\n", info->encoder);
-    }
+    if(!info)
+      return 0;
+
+    mp_msg(MSGT_DEMUX, MSGL_INFO, "Clip info: \n");
+    for(n = 0; info[2*n] != NULL ; n++)
+      mp_msg(MSGT_DEMUX, MSGL_INFO, " %s: %s\n",info[2*n],info[2*n+1]);
 
     return 0;
 }
