@@ -656,6 +656,14 @@ This option specifies how much memory (in kBytes) to use when precaching a
 file/\:URL.
 Especially useful on slow media (default is \-nocache).
 .TP
+.B \-cache-min <percentage>
+Playback will start when the cache fill threshold set with this option
+is reached.
+.TP
+.B \-cache-prefill <percentage> (not yet implemented)
+When the cache is emptied MPlayer will pause and restart playback when
+the cache prefill threshold set with this option is reached.
+.TP
 .B \-cdda <option1:option2> (CDDA only)
 This option can be used to tune the CD Audio reading feature of MPlayer.
 
