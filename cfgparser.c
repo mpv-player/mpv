@@ -245,6 +245,7 @@ static int read_option(struct config *conf, int conf_optnr, char *opt, char *par
 			int subconf_optnr;
 			struct config *subconf;
 			char *token;
+			int sscanf_ret;
 
 			if (param == NULL)
 				goto err_missing_param;
@@ -259,13 +260,17 @@ static int read_option(struct config *conf, int conf_optnr, char *opt, char *par
 			token = strtok(param, (char *)&(":"));
 			while(token)
 			{
-			    int sscanf_ret;
+			    /* clear out */
+			    subopt[0] = subparam[0] = 0;
 			    
+//			    sscanf_ret = sscanf(token, "%[^=]=%[^\n\0]", subopt, subparam);
 			    sscanf_ret = sscanf(token, "%[^=]=%s", subopt, subparam);
+
+			    mp_msg(MSGT_CFGPARSER, MSGL_DBG3, "token: '%s', i=%d, subopt='%s', subparam='%s' (ret: %d)\n", token, i, subopt, subparam, sscanf_ret);
 			    switch(sscanf_ret)
 			    {
 				case 1:
-				    subparam = NULL;
+				    subparam[0] = 0;
 				case 2:
 				    if ((ret = read_option((struct config *)subconf, subconf_optnr, subopt, subparam)) < 0)
 				    {
@@ -279,7 +284,6 @@ static int read_option(struct config *conf, int conf_optnr, char *opt, char *par
 				    ret = ERR_NOT_AN_OPTION;
 				    goto out;
 			    }
-			    mp_dbg(MSGT_CFGPARSER, MSGL_DBG3, "token: '%s', i=%d, subopt='%s, subparam='%s'\n", token, i, subopt, subparam);
 			    token = strtok(NULL, (char *)&(":"));
 			}
 
