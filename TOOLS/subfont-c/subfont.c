@@ -1030,6 +1030,7 @@ int main(int argc, char **argv) {
 
     abuffer = (unsigned char*)malloc(width*height);
     if (abuffer==NULL) ERROR("malloc failed.");
+    memset(abuffer, 0, width*height);
     alpha();
     write_bitmap(abuffer, 'a');
 
