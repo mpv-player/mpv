@@ -1082,7 +1082,7 @@ pour une TV 16:9: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
 
 <H4>Utilisation:</H4>
 <DL>
-  <DT><CODE>-vo dxr3:prebuf:sync:&lt;périph.&gt;</CODE></DT>
+  <DT><CODE>-vo dxr3:prebuf:sync:norm=x:&lt;périph.&gt;</CODE></DT>
   <DD><CODE>overlay</CODE> active l'overlay à la place de TVOut. Cela requiert
     que vous ayez correctement configuré l'overlay. La manière la plus facile
     de configurer l'overlay est de d'abord lancer autocal. Ensuite lancez MPlayer
@@ -1096,19 +1096,28 @@ pour une TV 16:9: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
     que quand vous utilisez le prebuffuring MPlayer essaiera de garder le buffer
     vidéo rempli de données à tout moment. Si vous êtes sur une machine lente
     MPlayer utilisera près de, voir exactement 100% du CPU. C'est particulièrement
-    commun si vous lisez de purs flux MPEG (comme les DVDs, SVCDs et ainsi de suite) 
+    courant si vous lisez de purs flux MPEG (comme les DVDs, SVCDs et ainsi de suite) 
     car comme MPlayer n'aura pas besoin de le réencoder en MPEG, il remplira le buffer
     très rapidement.<BR>
     Avec le prebuferring la lecture est <B>bien</B> moins sensible aux autres
     programmes monopolisant le CPU, il ne sautera pas d'images à moins que des
     programmes monopolisent le CPU pour une longue durée<BR>
-    En l'utilisant sans doublebuffering l'em8300 est bien plus sensible à la charge
+    En l'utilisant sans doublebuffering, l'em8300 est bien plus sensible à la charge
     CPU, il est donc hautement recommandé d'activer l'option <CODE>-framedrop</CODE>
+    pour éviter les éventuelles pertes de synchro.<BR> 
     <CODE>sync</CODE> activera le nouveau moteur de synchro. C'est actuellement
     une fonction expérimentale. Avec la fonction sync activé l'horloge interne
-    de l'em8300 sera contrôlée à tout moment, si il commence à dévier de
-    l'horloge de MPlayer elle sera réajustée obligeant l'em8300 à sauter les
+    de l'em8300 sera contrôlée à tout moment, si elle commence à dévier de
+    l'horloge de MPlayer elle sera réajustée, obligeant l'em8300 à sauter les
     éventuelles trames en retard.</BR>
+    <CODE>norm=x</CODE> fixera la norme TV de la carte DXR3 sans avoir besoin d'utiliser
+    des outils externes comme em8300setup. Les normes valides sont 5 = NTSC, 4 = PAL-60,
+    3 = PAL. Les normes spéciales sont 2 (ajustement auto utilisant PAL/PAL-60) et 1
+    (ajustement auto utilisant PAL/NTSC) parce qu'elles décident quelle norme utiliser
+    en regardant le frame rate du film. Les télés modernes peuvent afficher du PAL et
+    du NTSC. Regarder le film au framerate auquel il a été initialement encodé donnera
+    une lecture fluide dans saut de trame. norm = 0 (par défaut) ne change pas la norme
+    courante.<BR>
     <CODE>&lt;périph.&gt;</CODE> = numéro de périphérique à utiliser si vous avez plus
     d'une carte em8300.
     <BR>
