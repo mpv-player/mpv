@@ -85,7 +85,7 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
 			   AM_MEDIA_TYPE* out_fmt)
 {
     int init = 0;
-    char eb[250];
+//    char eb[250];
     const char* em = NULL;
     DS_Filter* This = (DS_Filter*) malloc(sizeof(DS_Filter));
     if (!This)
@@ -159,7 +159,7 @@ DS_Filter* DS_FilterCreate(const char* dllname, const GUID* id,
 
 	enum_pins->vt->Reset(enum_pins);
 	result = enum_pins->vt->Next(enum_pins, (ULONG)256, (IPin**)array, &fetched);
-	Debug printf("Pins enumeration returned %ld pins, error is %x\n", fetched, (int)result);
+	Debug printf("Pins enumeration returned %d pins, error is %x\n", (int)fetched, (int)result);
 
 	for (i = 0; i < fetched; i++)
 	{

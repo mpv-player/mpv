@@ -66,7 +66,6 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 //    png_bytep       data;
     png_bytep     * row_p;
     png_uint_32     png_width=0,png_height=0;
-    char	  * palette = NULL;
     int             depth,color;
     png_uint_32     i;
     mp_image_t* mpi;

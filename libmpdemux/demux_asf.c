@@ -181,6 +181,8 @@ int demux_asf_fill_buffer(demuxer_t *demux){
 	    case 3: plen=LOAD_LE32(p);p+=4;break;	// dword
 	    case 2: plen=LOAD_LE16(p);p+=2;break;	// word
 	    case 1: plen=p[0];p++;break;		// byte
+	    default: plen=0;
+		mp_msg(MSGT_DEMUX,MSGL_V,"Invalid plen type! assuming plen=0\n");
 	    }
 
             // Read sequence:
@@ -284,6 +286,7 @@ int demux_asf_fill_buffer(demuxer_t *demux){
 		    p+=rlen-4;
 		} else {
             	    mp_msg(MSGT_DEMUX,MSGL_V,"unknown segment type (rlen): 0x%02X  \n",rlen);
+		    time2=0; // unknown
 		    p+=rlen;
 		}
               }

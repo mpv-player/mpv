@@ -148,15 +148,15 @@ static int init(int rate,int channels,int format,int flags){
   ao_plugin_data.delay_mult=1;
   ao_plugin_data.delay_fix=0;
 
-  for(i=0;i<NPL,plugin(i);i++){
+  for(i=0;i<NPL && plugin(i);i++){
     use_plugin[i]=plugin(i)->init();
     if(!use_plugin[i]) plugin(i)->uninit();
   }
   npl=i;
-  for(i=0;i<npl,plugin(i);i++)
+  for(i=0;i<npl && plugin(i);i++)
     if(!use_plugin[i+unused]){
       unused++;
-      for(x=i;x<npl,plugin(x+1);x++) plugin(x)=plugin(x+1);
+      for(x=i;x<npl && plugin(x+1);x++) plugin(x)=plugin(x+1);
       plugin(x)=NULL;
       npl--;
       i--;

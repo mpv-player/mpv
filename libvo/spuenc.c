@@ -210,9 +210,6 @@ void
 pixbuf_encode_rle(int x, int y, int w, int h, char *inbuf,  int stride,encodedata *ed){
        	pixbuf pb;
 	int i, row;
-	int lx,ly;
-	int c;
-	unsigned char *pixbuffer;
 	pb.x = w;
 	pb.y = h;
 

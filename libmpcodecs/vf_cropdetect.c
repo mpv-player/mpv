@@ -22,7 +22,6 @@ struct vf_priv_s {
 static int checkline(unsigned char* src,int stride,int len,int bpp){
     int total=0;
     int div=len;
-    int x;
     switch(bpp){
     case 1:
 	while(--len>=0){

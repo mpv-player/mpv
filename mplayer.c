@@ -131,6 +131,7 @@ static int max_framesize=0;
 
 #include "libmpcodecs/dec_audio.h"
 #include "libmpcodecs/dec_video.h"
+//#include "libmpcodecs/vf.h"
 
 //**************************************************************************//
 //**************************************************************************//
@@ -491,7 +492,6 @@ int delay_corrected=1;
 //char* title="MPlayer";
 
 // movie info:
-int out_fmt=0;
 int eof=0;
 
 int osd_function=OSD_PLAY;

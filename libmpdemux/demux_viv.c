@@ -222,10 +222,8 @@ static void vivo_parse_text_header(demuxer_t *demux, int header_len)
 }
 
 int vivo_check_file(demuxer_t* demuxer){
-    int flags=0;
     int i=0;
     int len;
-    int len2;
     int c;
     unsigned char buf[2048+256];
     vivo_priv_t* priv;
@@ -310,8 +308,8 @@ int demux_vivo_fill_buffer(demuxer_t *demux){
 #warning "Calculate PTS from picture header!"
       prefix = 1;
       c = stream_read_char(demux->stream);
-      printf("packet 0x82(pos=%lu) chunk=%x\n",
-        stream_tell(demux->stream), c);
+      printf("packet 0x82(pos=%u) chunk=%x\n",
+        (int)stream_tell(demux->stream), c);
   }
   switch(c&0xF0){
   case 0x00: // header - skip it!
@@ -618,7 +616,7 @@ void demux_open_vivo(demuxer_t* demuxer){
 		/* disable seeking */
 		demuxer->seekable = 0;
 
-		printf("VIVO Video stream %d size: display: %dx%d, codec: %lux%lu\n",
+		printf("VIVO Video stream %d size: display: %dx%d, codec: %ux%u\n",
 		    demuxer->video->id, sh->disp_w, sh->disp_h, sh->bih->biWidth,
 		    sh->bih->biHeight);
 }

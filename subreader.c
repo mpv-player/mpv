@@ -53,7 +53,7 @@ static void trail_space(char *s) {
 subtitle *sub_read_line_sami(FILE *fd, subtitle *current) {
     static char line[LINE_LEN+1];
     static char *s = NULL, *slacktime_s;
-    char text[LINE_LEN+1], *p, *q;
+    char text[LINE_LEN+1], *p=NULL, *q;
     int state;
 
     current->lines = current->start = current->end = 0;
@@ -566,7 +566,7 @@ subtitle *sub_read_line_subrip09(FILE *fd,subtitle *current) {
 
     next = line,i=0;
     
-    current->text[0]==""; // just to be sure that string is clear
+    current->text[0]=""; // just to be sure that string is clear
     
     while ((next =sub_readtext (next, &(current->text[i])))) {
 	if (current->text[i]==ERR) {return ERR;}
@@ -674,7 +674,7 @@ static char icbuffer[ICBUFFSIZE];
 subtitle* subcp_recode (subtitle *sub)
 {
 	int l=sub->lines;
-	size_t ileft, oleft, otlen;
+	size_t ileft, oleft;
 	char *op, *ip, *ot;
 
 	while (l){

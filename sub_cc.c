@@ -135,7 +135,7 @@ static void cc_decode_EIA608(unsigned short int data)
   }
   else if (c1 & 0x10)		// control code / special char
   {
-	  int channel= (c1 & 0x08) >> 3;
+//	  int channel= (c1 & 0x08) >> 3;
 	  c1&=~0x08;
 	  if(data!=lastcode)
 	  {

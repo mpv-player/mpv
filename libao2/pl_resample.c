@@ -172,7 +172,7 @@ static int play(){
   }
   if(pl_resample.up>pl_resample.dn)
     return upsample();
-  if(pl_resample.up<pl_resample.dn)
+//  if(pl_resample.up<pl_resample.dn)
     return downsample();
 }
 

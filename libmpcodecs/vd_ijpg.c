@@ -63,7 +63,6 @@ METHODDEF(void) init_source (j_decompress_ptr cinfo)
 METHODDEF(boolean) fill_input_buffer (j_decompress_ptr cinfo)
 {
  my_src_ptr src = (my_src_ptr) cinfo->src;                                                         
- size_t nbytes;                                                                                    
  src->pub.next_input_byte = src->inbuf;
  src->pub.bytes_in_buffer = src->bufsize;
  return TRUE;

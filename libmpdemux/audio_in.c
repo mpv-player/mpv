@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "config.h"
 
@@ -41,7 +42,6 @@ int audio_in_init(audio_in_t *ai, int type)
 
 int audio_in_setup(audio_in_t *ai)
 {
-    int err;
     
     switch (ai->type) {
 #ifdef HAVE_ALSA9	  
@@ -141,10 +141,9 @@ int audio_in_uninit(audio_in_t *ai)
 	    close(ai->oss.audio_fd);
 	    ai->setup = 0;
 	    return 0;
-	default:
-	    return -1;
 	}
     }
+    return -1;
 }
 
 int audio_in_start_capture(audio_in_t *ai)

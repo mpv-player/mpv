@@ -116,7 +116,6 @@ int getrtp(int fd, struct rtpheader *rh, char** data, int* lengthData) {
   static char buf[1600];
   int headerSize;
   int lengthPacket;
-  int i;
 
   lengthPacket=recv(fd,buf,1590,0);
   // FIXME: error handling to write here

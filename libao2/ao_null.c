@@ -19,7 +19,7 @@ LIBAO_EXTERN(null)
 struct	timeval last_tv;
 int	buffer;
 
-static int drain(){
+static void drain(){
  
     struct timeval now_tv;
     int temp, temp2;

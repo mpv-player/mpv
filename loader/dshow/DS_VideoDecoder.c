@@ -7,6 +7,7 @@
 
 #include "guids.h"
 #include "interfaces.h"
+#include "registry.h"
 
 #ifndef NOAVIFILE_HEADERS
 #include "videodecoder.h"
@@ -852,7 +853,7 @@ vim: vi* sux.
 */
 
 int DS_SetAttr_DivX(char* attribute, int value){
-    int result, status, newkey, count;
+    int result, status, newkey;
         if(strcasecmp(attribute, "Quality")==0){
 	    char* keyname="SOFTWARE\\Microsoft\\Scrunch";
     	    result=RegCreateKeyExA(HKEY_CURRENT_USER, keyname, 0, 0, 0, 0, 0,	   		&newkey, &status);

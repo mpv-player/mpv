@@ -17,6 +17,7 @@
 #include "config.h"
 #include "video_out.h"
 #include "video_out_internal.h"
+#include "sub.h"
 
 #include "../postproc/swscale.h"
 #include "../postproc/rgb2rgb.h"

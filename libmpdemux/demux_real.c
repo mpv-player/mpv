@@ -8,6 +8,9 @@
     TODO: fix the whole syncing mechanism
     
     $Log$
+    Revision 1.26  2002/09/22 02:33:26  arpi
+    tons of warning fixes, also some 10l bugfixes, including Dominik's PVA bug
+
     Revision 1.25  2002/08/27 23:01:54  arpi
     - added matrix cracking/debugging code - disabled
     - use real codec headers for sipr
@@ -578,10 +581,9 @@ loop:
 		// we need a more complicated demuxing
 		// a block may contain multiple packets
 		// as well as a packet may be contained in multiple blocks
-	        int vpkg_header, vpkg_blknum, vpkg_length, vpkg_offset;
-		int vpkg_seqnum=-1, vpkg_oldseqnum=0, vpkg_seqnumread=0;
+	        int vpkg_header, vpkg_length, vpkg_offset;
+		int vpkg_seqnum=-1;
 		int vpkg_subseq=0;
-		int vpkg_ofs;
 
 	    while(len>2){
 		dp_hdr_t* dp_hdr;
@@ -1169,7 +1171,7 @@ void demux_open_real(demuxer_t* demuxer)
 		}
 //		break;
 //	    default:
-skip_this_chunk:
+//skip_this_chunk:
 		/* skip codec info */
 		tmp = stream_tell(demuxer->stream) - codec_pos;
 		mp_msg(MSGT_DEMUX,MSGL_V,"### skipping %d bytes of codec info\n", codec_data_size - tmp);
@@ -1235,7 +1237,6 @@ int demux_seek_real(demuxer_t *demuxer, float rel_seek_secs, int flags)
     demux_stream_t *d_video = demuxer->video;
     sh_audio_t *sh_audio = d_audio->sh;
     sh_video_t *sh_video = d_video->sh;
-    int video_chunk_pos = d_video->pos;
     int vid = d_video->id, aid = d_audio->id;
     int next_offset = 0;
     int rel_seek_frames = 0;

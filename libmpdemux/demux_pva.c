@@ -18,7 +18,9 @@
  */
 
 
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "config.h"
 #include "mp_msg.h"
@@ -124,9 +126,6 @@ demuxer_t * demux_open_pva (demuxer_t * demuxer)
 	sh_video_t *sh_video = new_sh_video(demuxer,0);
 	sh_audio_t * sh_audio = new_sh_audio(demuxer,0);
 	pva_priv_t * priv;
-	unsigned char * buffer;
-
-		
 	
 	stream_reset(demuxer->stream);
 	stream_seek(demuxer->stream,0);
@@ -171,6 +170,8 @@ demuxer_t * demux_open_pva (demuxer_t * demuxer)
 
 	return demuxer;
 }
+
+int pva_get_payload(demuxer_t * d,pva_payload_t * payload);
 
 // 0 = EOF or no stream found
 // 1 = successfully read a packet
@@ -340,7 +341,7 @@ int pva_get_payload(demuxer_t * d,pva_payload_t * payload)
 				if((buffer[0] & 0xf0)!=0x20)
 				{
 					mp_msg(MSGT_DEMUX,MSGL_ERR,"demux_pva: expected audio PTS but badly formatted... (read 0x%02X)\n",buffer[0]);
-					return;
+					return 0;
 				}
 				payload->pts=0LL;
 				payload->pts|=((uint64_t)(buffer[0] & 0x0e) << 29);
@@ -358,6 +359,7 @@ int pva_get_payload(demuxer_t * d,pva_payload_t * payload)
 				break;
 		}
 	}
+	return 1;
 }
 
 int demux_seek_pva(demuxer_t * demuxer,float rel_seek_secs,int flags)

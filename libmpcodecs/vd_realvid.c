@@ -22,11 +22,11 @@ static vd_info_t info = {
 LIBVD_EXTERN(realvid)
 
 
-unsigned long (*rvyuv_custom_message)(unsigned long,unsigned long);
-unsigned long (*rvyuv_free)(unsigned long);
+unsigned long (*rvyuv_custom_message)(unsigned long*,void*);
+unsigned long (*rvyuv_free)(void*);
 unsigned long (*rvyuv_hive_message)(unsigned long,unsigned long);
-unsigned long (*rvyuv_init)(unsigned long,unsigned long);
-unsigned long (*rvyuv_transform)(unsigned long,unsigned long,unsigned long,unsigned long,unsigned long);
+unsigned long (*rvyuv_init)(void*, void*); // initdata,context
+unsigned long (*rvyuv_transform)(char*, char*,unsigned long*,unsigned long*,void*);
 
 void *rv_handle=NULL;
 
@@ -65,7 +65,6 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 /* exits program when failure */
 int load_syms_linux(char *path) {
 		void *handle;
-		char *error;
 
 		mp_msg(MSGT_DECVIDEO,MSGL_INFO, "opening shared obj '%s'\n", path);
 		rv_handle = dlopen (path, RTLD_LAZY);

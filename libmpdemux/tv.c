@@ -77,12 +77,7 @@ int demux_tv_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
 {
     tvi_handle_t *tvh=(tvi_handle_t*)(demux->priv);
     demux_packet_t* dp;
-
-    sh_video_t *sh_video = demux->video->sh;
-    u_int len;
-    int aframeswaiting;
-
-    len = 0;
+    u_int len=0;
 
     /* ================== ADD AUDIO PACKET =================== */
 
@@ -534,6 +529,7 @@ int tv_set_freq(tvi_handle_t *tvh, unsigned long freq)
 	mp_msg(MSGT_TV, MSGL_V, "Current frequency: %lu (%.3f)\n",
 	    freq, (float)freq/16);
     }
+    return(1);
 }
 
 int tv_step_channel(tvi_handle_t *tvh, int direction)
@@ -561,13 +557,16 @@ int tv_step_channel(tvi_handle_t *tvh, int direction)
 	    tv_set_freq(tvh, (unsigned long)(((float)cl.freq/1000)*16));
 	}	
     }
+    return(1);
 }
 
 int tv_step_norm(tvi_handle_t *tvh)
 {
+    return(1);
 }
 
 int tv_step_chanlist(tvi_handle_t *tvh)
 {
+    return(1);
 }
 #endif /* USE_TV */

@@ -66,6 +66,8 @@ static char* banner_text=
 
 #include "fastmemcpy.h"
 
+#include "linux/timer.h"
+
 int vo_doublebuffering=0;
 int vo_directrendering=0;
 int vo_config_count=0;
@@ -110,8 +112,6 @@ double max_video_time_usage=0;
 double max_vout_time_usage=0;
 double cur_video_time_usage=0;
 double cur_vout_time_usage=0;
-static double audio_time_usage=0;
-static int total_time_usage_start=0;
 int benchmark=0;
 
 // A-V sync:
@@ -191,7 +191,6 @@ float lame_param_scale=-1; // unset
 #endif
 
 static int vo_w=0, vo_h=0;
-static int input_pitch, input_bpp;
 
 //-------------------------- config stuff:
 
@@ -1256,7 +1255,6 @@ return interrupted;
 
 static int parse_end_at(struct config *conf, const char* param)
 {
-    int i;
 
     end_at_type = END_AT_NONE;
     

@@ -312,7 +312,7 @@ int
 asf_http_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *streaming_ctrl ) {
   static ASF_stream_chunck_t chunk;
   int read,chunk_size = 0;
-  static int rest = 0, drop_chunk = 0, waiting = 0,eof= 0;
+  static int rest = 0, drop_chunk = 0, waiting = 0;
   asf_http_streaming_ctrl_t *asf_http_ctrl = (asf_http_streaming_ctrl_t*)streaming_ctrl->data;
 
   while(1) {
@@ -612,7 +612,6 @@ asf_http_parse_response( HTTP_header_t *http_hdr ) {
 int
 asf_http_streaming_start( stream_t *stream ) {
 	HTTP_header_t *http_hdr=NULL;
-	URL_t *url_next=NULL;
 	URL_t *url = stream->streaming_ctrl->url;
 	asf_http_streaming_ctrl_t *asf_http_ctrl;
 	ASF_StreamType_e streaming_type;

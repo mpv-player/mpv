@@ -455,7 +455,8 @@ if(dvd_title){
 }
 
 int dvd_parse_chapter_range(struct config *conf, const char *range){
-  char *s, *t;
+  const char *s;
+  char *t;
   conf; /* prevent warning from GCC */
   s = range;
   dvd_chapter = 1;

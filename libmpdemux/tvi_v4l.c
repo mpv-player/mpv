@@ -235,8 +235,6 @@ static void setup_audio_buffer_sizes(priv_t *priv)
 	   priv->audio_buffer_size, priv->audio_in.blocksize, priv->aud_skew_cnt);
 }
 
-static int one = 1, zero = 0;
-
 tvi_handle_t *tvi_init_v4l(char *device, char *adevice)
 {
     tvi_handle_t *h;
@@ -499,7 +497,6 @@ static int init(priv_t *priv)
 
     /* audio init */
     if (!tv_param_noaudio) {
-	int err;
 	
 #ifdef HAVE_ALSA9
 	if (tv_param_alsa)
@@ -1144,7 +1141,7 @@ static void *video_grabber(void *data)
 {
     priv_t *priv = (priv_t*)data;
     struct timeval curtime;
-    double timestamp, skew, prev_skew, xskew, interval, prev_interval;
+    double skew, prev_skew, xskew, interval, prev_interval;
     int frame, nextframe;
     int fsize = priv->bytesperline * priv->height;
     int i;
@@ -1256,6 +1253,7 @@ static void *video_grabber(void *data)
 	}
 
     }
+    return NULL;
 }
 
 static double grab_video_frame(priv_t *priv, char *buffer, int len)
@@ -1287,9 +1285,8 @@ static void *audio_grabber(void *data)
 {
     priv_t *priv = (priv_t*)data;
     struct timeval tv;
-    int ret;
     int i, audio_skew_ptr = 0;
-    double tmp, current_time, current_skew, prev_skew = 0.0;
+    double tmp, current_time, prev_skew = 0.0;
 
     pthread_mutex_lock(&priv->audio_starter);
 
@@ -1355,13 +1352,11 @@ static void *audio_grabber(void *data)
 	    priv->audio_cnt++;
 	}
     }
+    return NULL;
 }
 
 static double grab_audio_frame(priv_t *priv, char *buffer, int len)
 {
-    int in_len = 0;
-    int max_tries = 2;
-
     mp_dbg(MSGT_TV, MSGL_DBG2, "grab_audio_frame(priv=%p, buffer=%p, len=%d)\n",
 	priv, buffer, len);
 

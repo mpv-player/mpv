@@ -75,9 +75,7 @@ static vo_info_t vo_info =
 
 static XGCValues              wGCV;
 
-static XImage               * myximage;
-
-static uint32_t               mDepth, bpp, mode;
+static uint32_t               mDepth;
 static XWindowAttributes      attribs;
 static uint32_t               fgColor;
 

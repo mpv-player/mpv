@@ -15,7 +15,6 @@ static uint8_t *vid_data, *frames[4];
 static int f = -1;
 
 static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
-    int x,y;
     uint32_t bespitch = (mga_vid_config.src_width + 31) & ~31;
     switch(mga_vid_config.format){
     case MGA_VID_FORMAT_YV12:
@@ -38,12 +37,8 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
 static void
 draw_slice_g200(uint8_t *image[], int stride[], int width,int height,int x,int y)
 {
-	uint8_t *src;
-	uint8_t *src2;
 	uint8_t *dest;
-	uint32_t bespitch,h,w;
-
-	bespitch = (mga_vid_config.src_width + 31) & ~31;
+	uint32_t bespitch = (mga_vid_config.src_width + 31) & ~31;
 
 	dest = vid_data + bespitch*y + x;
 	mem2agpcpy_pic(dest, image[0], width, height, bespitch, stride[0]);
@@ -60,11 +55,9 @@ draw_slice_g200(uint8_t *image[], int stride[], int width,int height,int x,int y
 static void
 draw_slice_g400(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
-    uint8_t *src;
     uint8_t *dest;
     uint8_t *dest2;
     uint32_t bespitch,bespitch2;
-    int i;
 
     bespitch = (mga_vid_config.src_width + 31) & ~31;
     bespitch2 = bespitch/2;
@@ -327,7 +320,6 @@ static uint32_t control(uint32_t request, void *data, ...)
 
 
 static int mga_init(){
-	char *frame_mem;
 
 	mga_vid_config.num_frames=(vo_directrendering && !vo_doublebuffering)?1:3;
 	mga_vid_config.version=MGA_VID_VERSION;
@@ -360,6 +352,7 @@ static int mga_uninit(){
 	munmap(frames[0],mga_vid_config.frame_size*mga_vid_config.num_frames);
 	close(f);
 	f = -1;
+  return 0;
 }
 
 static uint32_t preinit(const char *arg)

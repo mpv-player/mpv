@@ -197,9 +197,6 @@ demuxer_t* demux_open_nuv ( demuxer_t* demuxer )
 	sh_video_t *sh_video = NULL;
 	sh_audio_t *sh_audio = NULL;
 	struct rtfileheader rtjpeg_fileheader;
-	struct rtframeheader rtjpeg_frameheader;
-	unsigned long int tbls[128];
-	int bytes_read;
 	nuv_priv_t* priv = (nuv_priv_t*) malloc ( sizeof ( nuv_priv_t) );
 	demuxer->priv = priv;
 	priv->current_audio_frame = 0;

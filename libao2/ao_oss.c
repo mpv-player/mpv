@@ -55,7 +55,7 @@ static int control(int cmd,int arg){
 	case AOCONTROL_SET_VOLUME:
 	{
 	    ao_control_vol_t *vol = (ao_control_vol_t *)arg;
-	    int fd, v, mcmd, devs;
+	    int fd, v, devs;
 
 	    if(ao_data.format == AFMT_AC3)
 		return CONTROL_TRUE;

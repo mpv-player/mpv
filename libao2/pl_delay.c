@@ -55,7 +55,6 @@ static int control(int cmd,int arg){
 // open & setup audio device
 // return: 1=success 0=fail
 static int init(){
-  int i=0;
   float time_delay; // The time in [s] this plugin delays the output data
   
   /* If the output format of any of the below parameters differs from

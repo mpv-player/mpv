@@ -633,8 +633,6 @@ void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags){
 
       if(sh_audio){
         int i;
-//        int apos=0;
-        int last=0;
         int len=0;
 	int skip_audio_bytes=0;
 	int curr_audio_pos=-1;

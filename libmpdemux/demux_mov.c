@@ -524,7 +524,6 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		int temp=stream_read_dword(demuxer->stream);
 		int len=stream_read_dword(demuxer->stream);
 		int i;
-		int x=0;
 		unsigned int pts=0;
 		mp_msg(MSGT_DEMUX,MSGL_V,"MOV: %*sSample duration table! (%d blocks)\n",level,"",len);
 		trak->durmap=malloc(sizeof(mov_durmap_t)*len);
@@ -1416,7 +1415,6 @@ if(trak->samplesize){
     int frame=trak->pos;
     // editlist support:
     if(trak->type == MOV_TRAK_VIDEO && trak->editlist_size>=1){
-	int t;
 	// find the right editlist entry:
 	if(frame<trak->editlist[trak->editlist_pos].start_frame)
 	    trak->editlist_pos=0;

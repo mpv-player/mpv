@@ -65,14 +65,6 @@ static vo_info_t vo_info =
         ""
 };
 
-/* local data */
-static unsigned char *ImageData;
-
-/* X11 related variables */
-static XImage *myximage;
-static int depth, bpp, mode;
-static XWindowAttributes attribs;
-
 #include <X11/extensions/Xv.h>
 #include <X11/extensions/Xvlib.h>
 // FIXME: dynamically allocate this stuff
@@ -98,8 +90,6 @@ int XShmGetEventBase(Display*);
 static XShmSegmentInfo Shminfo[NUM_BUFFERS];
 static int Shmem_Flag;
 #endif
-
-static int gXErrorFlag;
 
 static uint32_t image_width;
 static uint32_t image_height;
@@ -219,7 +209,7 @@ static int xv_get_eq(char *name, int *value)
    then trigger it if it's ok so that the other values are at default upon query */
                 if (xv_atom != None)
                 {
-		    int val, port_value=0, port_min, port_max, port_mid;
+		    int val, port_value=0, port_min, port_max;
 
 		    XvGetPortAttribute(mDisplay, xv_port, xv_atom, &port_value);
 
@@ -279,11 +269,11 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 // char *name = ":0.0";
  XSizeHints hint;
  XVisualInfo vinfo;
- XEvent xev;
-
  XGCValues xgcv;
  XSetWindowAttributes xswa;
+ XWindowAttributes attribs;
  unsigned long xswamask;
+ int depth;
 #ifdef HAVE_XF86VM
  int vm=0;
  unsigned int modeline_width, modeline_height;

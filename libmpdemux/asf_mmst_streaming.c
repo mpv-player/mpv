@@ -290,7 +290,7 @@ static int get_header (int s, uint8_t *header, streaming_ctrl_t *streaming_ctrl)
 int interp_header (uint8_t *header, int header_len) 
 {
   int i;
-  int packet_length;
+  int packet_length=-1;
 
   /*
    * parse header
@@ -459,7 +459,7 @@ while(CheckOuterData)
 		to_skip = a;
 			
 }
-
+return 0; // is this ok?
 }
 
 int

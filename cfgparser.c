@@ -744,7 +744,7 @@ static int config_read_option(m_config_t *config,config_t** conf_list, char *opt
 				goto err_missing_param;
 
 			if (sscanf(param, sizeof(off_t) == sizeof(int) ?
-			"%d%c" : "%lld%c", &tmp_off, dummy) != 1) {
+			"%d%c" : "%lld%c", &tmp_off, &dummy) != 1) {
 				mp_msg(MSGT_CFGPARSER, MSGL_ERR, "parameter must be an integer: %s\n", param);
 				ret = ERR_OUT_OF_RANGE;
 				goto out;

@@ -32,15 +32,15 @@ void *__builtin_new(unsigned long size) {
 void *__ctype_b=NULL;
 #endif
 
-static unsigned long (*raCloseCodec)(unsigned long);
-static unsigned long (*raDecode)(unsigned long,unsigned long,unsigned long,unsigned long,unsigned long,unsigned long);
+static unsigned long (*raCloseCodec)(void*);
+static unsigned long (*raDecode)(void*, char*,unsigned long,char*,unsigned long*,long);
 static unsigned long (*raFlush)(unsigned long,unsigned long,unsigned long);
-static unsigned long (*raFreeDecoder)(unsigned long);
-static unsigned long (*raGetFlavorProperty)(unsigned long,unsigned long,unsigned long,unsigned long);
+static unsigned long (*raFreeDecoder)(void*);
+static unsigned long (*raGetFlavorProperty)(void*,unsigned long,unsigned long,int*);
 //static unsigned long (*raGetNumberOfFlavors2)(void);
-static unsigned long (*raInitDecoder)(unsigned long,unsigned long);
-static unsigned long (*raOpenCodec2)(unsigned long);
-static unsigned long (*raSetFlavor)(unsigned long,unsigned long);
+static unsigned long (*raInitDecoder)(void*, void*);
+static unsigned long (*raOpenCodec2)(void*);
+static unsigned long (*raSetFlavor)(void*,unsigned long);
 //static void  (*raSetDLLAccessPath)(unsigned long);
 static void  (*raSetPwd)(char*,char*);
 
@@ -59,7 +59,7 @@ static int preinit(sh_audio_t *sh){
   // let's check if the driver is available, return 0 if not.
   // (you should do that if you use external lib(s) which is optional)
   unsigned int result;
-  int len;
+  int len=0;
   void* prop;
   char path[4096];
   sprintf(path, REALCODEC_PATH "/%s", sh->codec->dll);
@@ -97,8 +97,7 @@ static int preinit(sh_audio_t *sh){
   sh->samplesize=sh->wf->wBitsPerSample/8;
   sh->channels=sh->wf->nChannels;
 
-  { unsigned char temp2[16]={1,0,0,3,4,0,0,0x14,0,0,0,0,0,1,0,3};
-    // note: temp2[] come from audio stream extra header (last 16 of the total 24 bytes)
+  { 
     ra_init_t init_data={
 	sh->wf->nSamplesPerSec,sh->wf->wBitsPerSample,sh->wf->nChannels,
 	100, // ???
