@@ -449,7 +449,10 @@ http_send_request( URL_t *url, off_t pos ) {
 		server_url = url;
 		http_set_uri( http_hdr, server_url->file );
 	}
-	snprintf(str, 256, "Host: %s", server_url->hostname );
+	if (server_url->port && server_url->port != 80)
+	    snprintf(str, 256, "Host: %s:%d", server_url->hostname, server_url->port );
+	else
+	    snprintf(str, 256, "Host: %s", server_url->hostname );
 	http_set_field( http_hdr, str);
 	if (network_useragent)
 	{
