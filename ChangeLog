@@ -34,7 +34,7 @@ MPlayer (1.0)
     * vqf demuxer
     * seeking in MPEG-ES fixed
     * support for Real multirate files
-    * automatic framerate calculation for MPEG-4 in raw and TS files
+    * framerate autodetection for MPEG-4 and H264 video in ES and TS streams
     * MP3 in Real files
     * more user-friendly info about audio and subtitle tracks in Ogg files
     * avisynth demuxer
