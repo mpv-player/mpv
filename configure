@@ -6169,6 +6169,7 @@ if test "$_largefiles" = yes || freebsd ; then
 fi
 
 echocheck "compiler support for -fno-PIC"
+if x86; then
 cat > $TMPC <<EOF
 int main(void) { return 0; }
 EOF
@@ -6177,6 +6178,9 @@ if cc_check -fno-PIC ; then
   echores "yes"
 else
   echores "no"
+fi
+else
+  echores "only used for x86"
 fi
 
 echocheck "ftello()"
