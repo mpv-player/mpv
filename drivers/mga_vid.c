@@ -792,7 +792,7 @@ if(config->format==MGA_VID_FORMAT_YV12
 	else 
 		baseadrofs = (((ofstop*regs.besviscal)/2)>>16)*regs.bespitch;
 
-    if(config->format==MGA_VID_FORMAT_YV12){
+    if(config->format==MGA_VID_FORMAT_YV12 || !is_g400){
 	regs.besa1corg = (uint32_t) mga_src_base + baseadrofs + regs.bespitch * sh ;
 	regs.besa2corg = (uint32_t) mga_src_base + baseadrofs + 1*frame_size + regs.bespitch * sh;
 	regs.besb1corg = (uint32_t) mga_src_base + baseadrofs + 2*frame_size + regs.bespitch * sh;
