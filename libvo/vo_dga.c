@@ -23,6 +23,9 @@
  * - works only on x86 architectures
  *
  * $Log$
+ * Revision 1.30  2001/08/13 11:08:18  atlka
+ * changes according to -utf8 option, draw_osd() function added
+ *
  * Revision 1.29  2001/07/16 18:41:52  jkeil
  * vo_dga doesn't compile on non-x86 architecture due to x86 asm usage.
  *
@@ -524,10 +527,12 @@ static void check_events(void)
 
 #include "sub.h"
 
+static void draw_osd(void)
+{ vo_draw_text(vo_dga_src_width,vo_dga_src_height,draw_alpha); }
+
 static void flip_page( void ){
 
   if(vo_dga_dbf_mem_offset != 0){
-    vo_draw_text(vo_dga_src_width,vo_dga_src_height,draw_alpha);
 
 #ifdef HAVE_DGA2
     XDGASetViewport (vo_dga_dpy, XDefaultScreen(vo_dga_dpy), 
@@ -539,7 +544,6 @@ static void flip_page( void ){
 #endif
     vo_dga_dbf_current = 1 - vo_dga_dbf_current;
   }
-  check_events();
 }
 
 //---------------------------------------------------------

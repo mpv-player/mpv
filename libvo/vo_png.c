@@ -221,6 +221,10 @@ static uint32_t draw_frame(uint8_t * src[])
 
 }
 
+static void draw_osd(void)
+{
+}
+
 static void flip_page (void)
 {
     char buf[100];

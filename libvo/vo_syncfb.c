@@ -272,8 +272,9 @@ draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
 	return 0;
 }
 
-
-
+static void draw_osd(void)
+{
+}
 
 static void
 flip_page(void)

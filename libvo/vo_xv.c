@@ -328,16 +328,20 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
 
 }
 
+static void draw_osd(void)
+{ vo_draw_text(image_width,image_height,draw_alpha);}
+
 static void flip_page(void)
 {
- vo_draw_text(image_width,image_height,draw_alpha);
- check_events();
  XvShmPutImage(mDisplay, xv_port, mywindow, mygc, xvimage[current_buf],
          0, 0,  image_width, image_height,
          drwX,drwY,drwWidth,(mFullscreen?drwHeight - 1:drwHeight),
          False);
- XFlush(mDisplay);
- current_buf=(current_buf+1)%num_buffers;
+ if (num_buffers>1){
+    current_buf=(current_buf+1)%num_buffers;
+    XFlush(mDisplay);
+ } else
+    XSync(mDisplay, False);   
  return;
 }
 

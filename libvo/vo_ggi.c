@@ -524,12 +524,15 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
 }
 #endif
 
-static void flip_page(void)
+static void draw_osd(void)
 {
-    check_events();
 #ifdef GGI_OSD
     vo_draw_text(ggi_conf.width, ggi_conf.height, draw_alpha);
 #endif
+}
+
+static void flip_page(void)
+{
     ggiFlush(ggi_conf.vis);
 }
 

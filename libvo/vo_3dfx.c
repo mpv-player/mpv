@@ -450,6 +450,10 @@ draw_slice(uint8_t *src[], uint32_t slice_num)
 	return 0;
 }
 
+static void draw_osd(void)
+{
+}
+
 static void 
 flip_page(void) 
 {

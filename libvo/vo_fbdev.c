@@ -1130,10 +1130,13 @@ static void put_frame(void)
 	}
 }
 
-static void flip_page(void)
+static void draw_osd(void)
 {
 	vo_draw_text(in_width, in_height, draw_alpha);
-	check_events();
+}
+
+static void flip_page(void)
+{
 	put_frame();
 }
 

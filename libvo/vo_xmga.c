@@ -161,6 +161,9 @@ static void check_events(void)
 
 }
 
+static void draw_osd(void)
+{ vo_draw_text(mga_vid_config.src_width,mga_vid_config.src_height,draw_alpha);}
+
 static void flip_page(void){
 #ifdef SHOW_TIME
     unsigned int t;
@@ -170,10 +173,7 @@ static void flip_page(void){
     timer=t;
 #endif
 
-    vo_draw_text(mga_vid_config.src_width,mga_vid_config.src_height,draw_alpha);
-
-    check_events();
-    vo_mga_flip_page();
+   vo_mga_flip_page();
 }
 
 static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format )

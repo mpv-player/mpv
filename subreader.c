@@ -437,6 +437,7 @@ char * strreplace( char * in,char * what,char * whereof )
 
 char * sub_filename(char* path,  char * fname )
 {
+ extern int sub_utf8;
  char * sub_name1;
  char * sub_name2;
  char * aviptr1, * aviptr2, * tmp;
@@ -444,7 +445,9 @@ char * sub_filename(char* path,  char * fname )
  FILE * f;
  int pos=0;
  char * sub_exts[] = 
-  { ".sub",
+  { ".utf",
+    ".UTF",
+    ".sub",
     ".SUB",
     ".srt",
     ".SRT",
@@ -484,6 +487,7 @@ char * sub_filename(char* path,  char * fname )
    if((f=fopen( sub_name,"rt" ))) {
      fclose( f );
      printf( "SUB: Detected sub file: %s\n",sub_name );
+     if (i<2) sub_utf8=1;
      return sub_name;
    }
   }

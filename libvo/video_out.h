@@ -72,6 +72,11 @@ typedef struct vo_functions_s
          */
         uint32_t (*draw_slice)(uint8_t *src[], int stride[], int w,int h, int x,int y);
 
+   	/*
+         * Draws OSD to the screen buffer
+         */
+        void (*draw_osd)(void);
+
         /*
          * Blit/Flip buffer to the screen. Must be called after each frame!
          */

@@ -373,7 +373,6 @@ static void Display_Image( XImage *myximage,uint8_t *ImageData )
                  0,0,
                  ( vo_dwidth - myximage->width ) / 2,( vo_dheight - myximage->height ) / 2,
                  myximage->width,myximage->height,True );
-   XFlush( mDisplay );
   }
   else
 #endif
@@ -382,7 +381,6 @@ static void Display_Image( XImage *myximage,uint8_t *ImageData )
                0,0,
                ( vo_dwidth - myximage->width ) / 2,( vo_dheight - myximage->height ) / 2,
                myximage->width,myximage->height );
-    XFlush( mDisplay );
   }
 #endif
 }
@@ -405,10 +403,12 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
     }
 }
 
+static void draw_osd(void)
+{ vo_draw_text(image_width,image_height,draw_alpha); }
+
 static void flip_page( void ){
-    vo_draw_text(image_width,image_height,draw_alpha);
-    check_events();
     Display_Image( myximage,ImageData );
+    XSync(mDisplay, False);
 }
 
 static uint32_t draw_slice( uint8_t *src[],int stride[],int w,int h,int x,int y )

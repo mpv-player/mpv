@@ -37,6 +37,7 @@ static uint32_t query_format(uint32_t format);
 	get_info,\
 	draw_frame,\
 	draw_slice,\
+     	draw_osd,\
 	flip_page,\
 	check_events,\
 	uninit,\

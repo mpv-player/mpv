@@ -332,12 +332,13 @@ static void check_events(void)
     if(e&VO_EVENT_RESIZE) resize(vo_dwidth,vo_dheight);
 }
 
+static void draw_osd(void)
+{
+}
 
 static void
 flip_page(void)
 {
-
-    check_events();
 
 //  glEnable(GL_TEXTURE_2D);
 //  glBindTexture(GL_TEXTURE_2D, texture_id);

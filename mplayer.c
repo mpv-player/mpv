@@ -1216,6 +1216,10 @@ if(1)
   vdecode_time=video_time_usage-vdecode_time;
 
 //------------------------ frame decoded. --------------------
+//------------------------ add OSD to frame contents ---------
+#ifndef USE_LIBVO2
+    video_out->draw_osd();
+#endif
 
     // Increase video timers:
     sh_video->num_frames+=frame_time;
@@ -1255,7 +1259,7 @@ if(1)
 	      printf("\nstill dropping, %.2f\n", time_frame);
 	  }
       }
-
+      video_out->check_events(); // check events AST
     } else {
       // It's time to sleep...
       current_module="sleep";
@@ -1304,6 +1308,7 @@ if(1)
 #ifdef USE_LIBVO2
         if(blit_frame) vo2_flip(video_out,0);
 #else
+	video_out->check_events();
         if(blit_frame) video_out->flip_page();
 #endif
 //        usec_sleep(50000); // test only!
@@ -1532,16 +1537,19 @@ if(auto_quality>0){
     case 'x':
       sub_delay += 0.1;
       break;
+    case '9': c='/'; goto _jump1;
+    case '0': c='*';
+_jump1:
     case '*':
     case '/': {
         float mixer_l, mixer_r;
         mixer_getvolume( &mixer_l,&mixer_r );
         if(c=='*'){
-            mixer_l++; if ( mixer_l > 100 ) mixer_l = 100;
-            mixer_r++; if ( mixer_r > 100 ) mixer_r = 100;
+            if ( ++mixer_l > 100 ) mixer_l = 100;
+            if ( ++mixer_r > 100 ) mixer_r = 100;
         } else {
-            mixer_l--; if ( mixer_l < 0 ) mixer_l = 0;
-            mixer_r--; if ( mixer_r < 0 ) mixer_r = 0;
+            if ( --mixer_l < 0 ) mixer_l = 0;
+            if ( --mixer_r < 0 ) mixer_r = 0;
         }
         mixer_setvolume( mixer_l,mixer_r );
 
@@ -1563,9 +1571,9 @@ if(auto_quality>0){
     case '1':
     case '2':
         if(c=='2'){
-	    if ( v_cont++ > 100 ) v_cont = 100;
+	    if ( ++v_cont > 100 ) v_cont = 100;
         } else {
-    	    if ( v_cont-- < 0 ) v_cont = 0;	    
+    	    if ( --v_cont < 0 ) v_cont = 0;	    
         }
 	if(set_video_colors(sh_video,"Contrast",v_cont)){
 #ifdef USE_OSD
@@ -1582,9 +1590,9 @@ if(auto_quality>0){
     case '3':
     case '4':
         if(c=='4'){
-	    if ( v_bright++ > 100 ) v_bright = 100;
+	    if ( ++v_bright > 100 ) v_bright = 100;
         } else {
-    	    if ( v_bright-- < 0 ) v_bright = 0;	    
+    	    if ( --v_bright < 0 ) v_bright = 0;	    
         }
 	if(set_video_colors(sh_video,"Brightness",v_bright)){
 #ifdef USE_OSD
@@ -1601,9 +1609,9 @@ if(auto_quality>0){
     case '5':
     case '6':
         if(c=='6'){
-	    if ( v_hue++ > 100 ) v_hue = 100;
+	    if ( ++v_hue > 100 ) v_hue = 100;
         } else {
-    	    if ( v_hue-- < 0 ) v_hue = 0;	    
+    	    if ( --v_hue < 0 ) v_hue = 0;	    
         }
 	if(set_video_colors(sh_video,"Hue",v_hue)){
 #ifdef USE_OSD
@@ -1620,9 +1628,9 @@ if(auto_quality>0){
     case '7':
     case '8':
         if(c=='8'){
-	    if ( v_saturation++ > 100 ) v_saturation = 100;
+	    if ( ++v_saturation > 100 ) v_saturation = 100;
         } else {
-    	    if ( v_saturation-- < 0 ) v_saturation = 0;	    
+    	    if ( --v_saturation < 0 ) v_saturation = 0;	    
         }
 	if(set_video_colors(sh_video,"Saturation",v_saturation)){
 #ifdef USE_OSD

@@ -509,7 +509,8 @@ static uint32_t draw_slice(uint8_t *image[], int stride[],
   return (0);
 }
 
-static void flip_page(void) {
+static void draw_osd(void)
+{
   if (y_pos) {
     gl_fillbox(0, 0, WIDTH, y_pos, 0);
     gl_fillbox(0, HEIGHT - y_pos, WIDTH, y_pos, 0);
@@ -520,6 +521,9 @@ static void flip_page(void) {
   }
 
   vo_draw_text(WIDTH, HEIGHT, draw_alpha);
+}
+
+static void flip_page(void) {
   gl_copyscreen(screen);
 }
 
@@ -538,13 +542,9 @@ static void uninit(void) {
     free(scalebuf);
   if (yuvbuf != NULL)
     free(yuvbuf);
-  if (modelist != NULL) {
-    while (modelist->next != NULL) {
-      list = modelist;
-      while (list->next != NULL)
-        list = list->next;
-      free(list);
-    }
-    free(modelist);
+  while (modelist != NULL) {
+       list=modelist;
+       modelist=modelist->next;
+       free(list);
   }
 }

@@ -1152,9 +1152,15 @@ static void check_events (void)
 	}
 }
 
+static void draw_osd(void)
+{	struct sdl_priv_s *priv = &sdl_priv;
+
+	/* update osd/subtitles */
+	vo_draw_text(priv->width,priv->height,draw_alpha);
+}
 
 /**
- * Display the surface we have written our data to and check for events.
+ * Display the surface we have written our data to
  *
  *   params : mode == index of the desired fullscreen mode
  *  returns : doesn't return
@@ -1163,12 +1169,6 @@ static void check_events (void)
 static void flip_page (void)
 {
 	struct sdl_priv_s *priv = &sdl_priv;
-
-	/* update osd/subtitles */
-	vo_draw_text(priv->width,priv->height,draw_alpha);	
-		
-	/* check and react on keypresses and window resizes */
-	check_events();
 
 	switch(priv->format) {
 	    case IMGFMT_RGB15:

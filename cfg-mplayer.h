@@ -35,6 +35,7 @@ extern int vo_dbpp;
 
 #ifdef USE_SUB
 extern int sub_unicode;
+extern int sub_utf8;
 #endif
 
 #ifdef USE_OSD
@@ -92,6 +93,8 @@ struct config conf[]={
         {"noautosub", &sub_auto, CONF_TYPE_FLAG, 0, 1, 0},
 	{"unicode", &sub_unicode, CONF_TYPE_FLAG, 0, 0, 1},
 	{"nounicode", &sub_unicode, CONF_TYPE_FLAG, 0, 1, 0},
+	{"utf8", &sub_utf8, CONF_TYPE_FLAG, 0, 0, 1},
+	{"noutf8", &sub_utf8, CONF_TYPE_FLAG, 0, 1, 0},
 #endif
 #ifdef USE_OSD
 	{"font", &font_name, CONF_TYPE_STRING, 0, 0, 0},

@@ -173,10 +173,12 @@ static void check_events(void)
     int e=vo_x11_check_events(vo_dga_dpy);
 }
 
-static void flip_page( void ){
-    check_events(); 
-  //  printf("vo_dga: In flippage\n");
+static void draw_osd(void)
+{
+}
 
+static void flip_page( void ){
+  //  printf("vo_dga: In flippage\n");
 }
 
 static unsigned int pix_buf_y[4][2048];
