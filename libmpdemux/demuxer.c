@@ -431,9 +431,11 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
       mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedMPEGPSfile);
     file_format=DEMUXER_TYPE_MPEG_PS;
   } else {
+    printf("MPEG packet stats: p100: %d  p101: %d  PES: %d \n",
+	num_elementary_packets100,num_elementary_packets101,num_elementary_packetsPES);
     // some hack to get meaningfull error messages to our unhappy users:
     if(num_elementary_packets100>=2 && num_elementary_packets101>=2 &&
-       abs(num_elementary_packets101-num_elementary_packets100)<8){
+       abs(num_elementary_packets101+8-num_elementary_packets100)<16){
       if(num_elementary_packetsPES>=4 && num_elementary_packetsPES>=num_elementary_packets100-4){
         --pes;continue; // tricky...
       }
