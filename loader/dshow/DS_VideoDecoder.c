@@ -152,14 +152,14 @@ DS_VideoDecoder * DS_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHEAD
 
 	if (!flip)
 	{
-	    this->m_sVhdr2->bmiHeader.biHeight *= -1;
 	    this->iv.m_obh.biHeight *= -1;
+	    this->m_sVhdr2->bmiHeader.biHeight = this->iv.m_obh.biHeight;
 	    result = this->m_pDS_Filter->m_pOutputPin->vt->QueryAccept(this->m_pDS_Filter->m_pOutputPin, &this->m_sDestType);
 	    if (result)
 	    {
-		printf("Decoder does not support upside-down frames\n");
-		this->m_sVhdr2->bmiHeader.biHeight *= -1;
+		printf("Decoder does not support upside-down RGB frames\n");
 		this->iv.m_obh.biHeight *= -1;
+		this->m_sVhdr2->bmiHeader.biHeight = this->iv.m_obh.biHeight;
 	    }
 	}
 
@@ -280,9 +280,9 @@ int DS_VideoDecoder_DecodeInternal(DS_VideoDecoder *this, const void* src, int s
     }
 
 
+    sample->vt->SetActualDataLength(sample, size);
     sample->vt->GetPointer(sample, (BYTE **)&ptr);
     memcpy(ptr, src, size);
-    sample->vt->SetActualDataLength(sample, size);
     sample->vt->SetSyncPoint(sample, is_keyframe);
     sample->vt->SetPreroll(sample, pImage ? 0 : 1);
     // sample->vt->SetMediaType(sample, &m_sOurType);
