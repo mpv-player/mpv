@@ -1,0 +1,85 @@
+VideoOutPlugins - Video Filters
+===============
+
+video filters are plugin-like code modules implementing the interface
+defined in vf.h
+
+basically it means video output manipulation, ie. these plugins can
+modify the image and the image properties (size, colorspace etc) between
+the video decoders (vd.h) and output plugins (libvo or video encoders)
+
+the actual API is a mixture of the video decoder (vd.h) and libvo
+(video_out.h) APIs.
+
+the main differences:
+- vf plugins may be "loaded" multiple times, with different parameters
+  and context - it's new in mplayer, old APIs weren't reentrant
+- vf plugins don't have to implement all functions - all funcs has
+  'fallback' version, so teh plugins only override these if want
+- each vf plugin has its own get_image context, and they can interchange
+  images/buffers using these get_image/put_image calls.
+
+API details:
+-- TO DO --  (see vf.h fpr API and vf_*.c for examples)
+
+Current plugins:
+================
+
+-vop crop[=w:h:x:y]
+    Simple cropping plugin.
+    w,h (cropped width,height) defaults to original width,height
+    x,y (position of cropped subimage on the original image) defaults to center
+    MPI: EXPORT only, using stride manipulation
+-vop expand[=w:h:x:y:o]
+    Expanding _and_ (optional) OSD rendering plugin.
+    w,h (expanded width,height) defaults to original width,height
+    x,y (position of original image on the expanded image) defaults to center
+    o   (0=disable/1=enable SUB/OSD rendering) defaults to 0
+    MPI: DR (if possible) or copy
+    Special: mpcodecs core uses it to solve stride restrictions between filters
+	     mencoder uses (autoload) it to render SUB/OSD
+-vop flip
+    Flips image upside-down.
+    No parameters.
+    MPI: DR (if possible) or EXPORT, using stride manipulation
+    Special: dec_video autoloads it when flipping is required and libvo can't do
+
+-vop scale[=w:h]
+    Software scaling (zoom) _and_ yuv<->rgb colorspace conversion
+    w,h (new width/height after scaling) defaults to original width,height
+	note: if -zoom is used, and underlaying filters (including libvo)
+	uncapable of scaling, then it defaults to d_width/d_height !
+    MPI: TEMP, accepts stride
+    Special: dec_video and mpcodecs core autoloads it for colorspace conv.
+
+-vop yuy2
+    Forced software YV12/I420 -> YUY2 conversion
+    (usefull for video cards/drivers with slow YV12 but fast YUY2 support)
+    MPI: TEMP, accepts stride
+
+-vop rgb2bgr[=swap]
+    RGB 24/32 <-> BGR 24/32 colorspace conversion (default) or
+    RGB 24/32 <-> RGB 24/32 conversion with R<->B swapping ('swap' option)
+    MPI: TEMP, accepts stride
+    
+-vop format[=fourcc]
+    _restrict_ the list of supported colorspaces (query-format()) to a single,
+    given fourcc. The 'fourcc' option defaults to 'yuy2', but may be any
+    format name, like rgb15, bgr24, yv12 etc...
+    note again, it does NOT do any conversion, it just limits the _next_
+    plugins format list.
+    MPI: -
+
+-vop pp[=flags]
+    Postprocessing filter.  (usefull for codecs without built-in
+    postprocessing, like libmpeg12 or libavcodec)
+    Flags is a bitmask set of enabled filters (see manpage for -pp details),
+    defaults to the value of divx_quality (set by -pp commandline option)
+    MPI: DR (if possible) or TEMP
+    Special: dec_video autoloads it if -pp option used but codec can't do pp.
+
+-vop fame
+    Fast software YV12->MPEG1 conversion, usefull for dxr3/dvb drivers
+    MPI: EXPORT special
+
+
