@@ -9,6 +9,9 @@
 ///    (using memory reference as operand of instructions)
 ///  - Phase 6 is rewritten with mixing of cpu and mmx opcodes
 ///  - change function name for support 3DNowEx! automatic detect
+///  - negation of 3dnow reg was replaced with PXOR 0x800000000, MMi instead 
+///    of PFMUL as it was suggested by athlon manual. (Two not separated PFMUL
+///    can not be paired, but PXOR can be).
 ///
 /// note: because K7 processors are an aggresive out-of-order three-way
 ///       superscalar ones instruction order is not significand for them.
@@ -21,6 +24,11 @@
 /// this program. Use it at your own risk.
 ///
 
+.data
+        .align 8
+plus_minus_3dnow: .long 0x00000000, 0x80000000
+
+.text
         .globl dct64_3dnowex
         .type    dct64_3dnowex,@function
 
@@ -412,13 +420,8 @@ dct64_3dnowex:
         movq   %mm5, 120(%esi)
 
         // 5
-        movl $-1,%eax
-        movd %eax,%mm1
+	movq plus_minus_3dnow, %mm0 /* mm0 = 1.0 | -1.0 */
         movl $1,%eax
-        movd %eax,%mm0
-        / L | H
-        punpckldq %mm1,%mm0
-        pi2fd %mm0,%mm0       /* mm0 = 1.0 | -1.0 */
         movd %eax,%mm1
         pi2fd %mm1,%mm1
         movl pnts+16,%eax
@@ -433,7 +436,7 @@ dct64_3dnowex:
         movq 8(%esi),%mm4     /* mm4 = tmp2[2] | tmp2[3]*/
 	pfpnacc %mm4, %mm4
 	pswapd  %mm4, %mm4    /* mm4 = tmp2[2]+tmp2[3]|tmp2[2]-tmp2[3]*/
-        pfmul %mm0,%mm4       /* mm4 = tmp2[2]+tmp2[3]|tmp2[3]-tmp2[2]*/
+        pxor  %mm0,%mm4       /* mm4 = tmp2[2]+tmp2[3]|tmp2[3]-tmp2[2]*/
         pfmul %mm1,%mm4       /* mm4 = tmp2[2]+tmp2[3]|(tmp2[3]-tmp2[2])*cos0*/
         movq %mm4,%mm5
         psrlq $32,%mm5        /* mm5 = (tmp2[3]-tmp2[2])*cos0 */
@@ -449,7 +452,7 @@ dct64_3dnowex:
 	pfpnacc %mm4, %mm4
 	pswapd  %mm4, %mm4
 
-        pfmul %mm0,%mm4
+        pxor  %mm0,%mm4
         pfmul %mm1,%mm4
         movq %mm4,%mm5
         psrlq $32,%mm5
@@ -470,7 +473,7 @@ dct64_3dnowex:
         movq 40(%esi),%mm4
 	pfpnacc %mm4, %mm4
 	pswapd  %mm4, %mm4
-        pfmul %mm0,%mm4
+        pxor  %mm0,%mm4
         pfmul %mm1,%mm4
         movq %mm4,%mm5
         psrlq $32,%mm5
@@ -484,7 +487,7 @@ dct64_3dnowex:
         movq 56(%esi),%mm4
 	pfpnacc %mm4, %mm4
 	pswapd  %mm4, %mm4
-        pfmul %mm0,%mm4
+        pxor  %mm0,%mm4
         pfmul %mm1,%mm4
         movq %mm4,%mm5
         psrlq $32,%mm5
@@ -504,7 +507,7 @@ dct64_3dnowex:
         movq 72(%esi),%mm4
 	pfpnacc %mm4, %mm4
 	pswapd  %mm4, %mm4
-        pfmul %mm0,%mm4
+        pxor  %mm0,%mm4
         pfmul %mm1,%mm4
         movq %mm4,%mm5
         psrlq $32,%mm5
@@ -518,7 +521,7 @@ dct64_3dnowex:
         movq 88(%esi),%mm4
 	pfpnacc %mm4, %mm4
 	pswapd  %mm4, %mm4
-        pfmul %mm0,%mm4
+        pxor  %mm0,%mm4
         pfmul %mm1,%mm4
         movq %mm4,%mm5
         psrlq $32,%mm5
@@ -538,7 +541,7 @@ dct64_3dnowex:
         movq 104(%esi),%mm4
 	pfpnacc %mm4, %mm4
 	pswapd  %mm4, %mm4
-        pfmul %mm0,%mm4
+        pxor  %mm0,%mm4
         pfmul %mm1,%mm4
         movq %mm4,%mm5
         psrlq $32,%mm5
@@ -552,7 +555,7 @@ dct64_3dnowex:
         movq 120(%esi),%mm4
 	pfpnacc %mm4, %mm4
 	pswapd  %mm4, %mm4
-        pfmul %mm0,%mm4
+        pxor  %mm0,%mm4
         pfmul %mm1,%mm4
         movq %mm4,%mm5
         psrlq $32,%mm5

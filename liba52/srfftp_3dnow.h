@@ -33,32 +33,18 @@
 #ifndef SRFFTP_3DNOW_H__
 #define SRFFTP_3DNOW_H__
 
-static complex_t HSQRT2_3DNOW __attribute__ ((aligned (8))) = { 0.707106781188, 0.707106781188 };
+typedef struct
+{
+  unsigned long val[2];
+}i_cmplx_t;
 
-#ifdef HAVE_3DNOWEX
 #define TRANS_FILL_MM6_MM7_3DNOW()\
     __asm__ __volatile__(\
-	"movl	$-1, %%eax\n\t"\
-	"movd	%%eax, %%mm7\n\t"\
-	"negl	%%eax\n\t"\
-	"movd	%%eax, %%mm6\n\t"\
-	"punpckldq %%mm6, %%mm7\n\t" /* -1.0 | 1.0 */\
-	"pi2fd	%%mm7, %%mm7\n\t"\
-	"pswapd	%%mm7, %%mm6\n\t"/* 1.0 | -1.0 */\
-	:::"eax","memory");
-#else
-#define TRANS_FILL_MM6_MM7_3DNOW()\
-    __asm__ __volatile__(\
-	"movl	$-1, %%eax\n\t"\
-	"movd	%%eax, %%mm7\n\t"\
-	"negl	%%eax\n\t"\
-	"movd	%%eax, %%mm6\n\t"\
-	"punpckldq %%mm6, %%mm7\n\t" /* -1.0 | 1.0 */\
-	"punpckldq %%mm7, %%mm6\n\t" /* 1.0 | -1.0 */\
-	"pi2fd	%%mm7, %%mm7\n\t"\
-	"pi2fd	%%mm6, %%mm6\n\t"\
-	:::"eax","memory");
-#endif
+	"movq	%1, %%mm7\n\t"\
+	"movq	%0, %%mm6\n\t"\
+	::"m"(x_plus_minus_3dnow),\
+	"m"(x_minus_plus_3dnow)\
+	:"memory");
 
 #ifdef HAVE_3DNOWEX
 #define PSWAP_MM(mm_base,mm_hlp) "pswapd	"mm_base","mm_base"\n\t"
@@ -85,8 +71,8 @@ static complex_t HSQRT2_3DNOW __attribute__ ((aligned (8))) = { 0.707106781188, 
 	"movq	%5, %%mm1\n\t" /* mm1 = wTB[k*2]*/ \
 	"movq	%%mm0, %%mm5\n\t"/*u.re = wTB[0].re + wTB[k*2].re;*/\
 	"pfadd	%%mm1, %%mm5\n\t"/*u.im = wTB[0].im + wTB[k*2].im; mm5 = u*/\
-	"pfmul  %%mm6, %%mm0\n\t"/*mm0 = wTB[0].re | -wTB[0].im */\
-	"pfmul	%%mm7, %%mm1\n\t"/*mm1 = -wTB[k*2].re | wTB[k*2].im */\
+	"pxor	%%mm6, %%mm0\n\t"/*mm0 = wTB[0].re | -wTB[0].im */\
+	"pxor	%%mm7, %%mm1\n\t"/*mm1 = -wTB[k*2].re | wTB[k*2].im */\
 	"pfadd	%%mm1, %%mm0\n\t"/*v.im = wTB[0].re - wTB[k*2].re;*/\
 	"movq	%%mm0, %%mm4\n\t"/*v.re =-wTB[0].im + wTB[k*2].im;*/\
 	PSWAP_MM("%%mm4","%%mm2")/* mm4 = v*/\
@@ -112,18 +98,18 @@ static complex_t HSQRT2_3DNOW __attribute__ ((aligned (8))) = { 0.707106781188, 
     __asm__ __volatile__(\
 	"movq	%4, %%mm0\n\t"/*u.re = wTB[2].im + wTB[2].re;*/\
 	"movq	%%mm0, %%mm1\n\t"\
-	"pfmul	%%mm7, %%mm1\n\t"\
+	"pxor	%%mm7, %%mm1\n\t"\
 	"pfacc	%%mm1, %%mm0\n\t"/*u.im = wTB[2].im - wTB[2].re; mm0 = u*/\
 	"movq	%5, %%mm1\n\t"  /*a.re = wTB[6].im - wTB[6].re; */\
 	"movq	%%mm1, %%mm2\n\t"\
-	"pfmul	%%mm7, %%mm1\n\t"\
+	"pxor	%%mm7, %%mm1\n\t"\
 	"pfacc	%%mm2, %%mm1\n\t"/*a.im = wTB[6].im + wTB[6].re;  mm1 = a*/\
 	"movq	%%mm1, %%mm2\n\t"\
-	"pfmul	%%mm7, %%mm2\n\t"/*v.im = u.re - a.re;*/\
+	"pxor	%%mm7, %%mm2\n\t"/*v.im = u.re - a.re;*/\
 	"movq	%%mm0, %%mm3\n\t"/*v.re = u.im + a.im;*/\
 	"pfadd	%%mm2, %%mm3\n\t"\
 	PSWAP_MM("%%mm3","%%mm2")/*mm3 = v*/\
-	"pfmul	%%mm6, %%mm1\n\t"/*u.re = u.re + a.re;*/\
+	"pxor	%%mm6, %%mm1\n\t"/*u.re = u.re + a.re;*/\
 	"pfadd	%%mm1, %%mm0\n\t"/*u.im = u.im - a.im; mm0 = u*/\
 	"movq	%8, %%mm2\n\t"\
 	"pfmul	%%mm2, %%mm3\n\t" /* v *= HSQRT2_3DNOW; */\
@@ -133,9 +119,9 @@ static complex_t HSQRT2_3DNOW __attribute__ ((aligned (8))) = { 0.707106781188, 
 	"movq	%%mm1, %%mm2\n\t"\
 	"movq	%%mm3, %%mm4\n\t"\
 	"pfadd	%%mm0, %%mm1\n\t" /*A2 = a1 + u;*/\
-	"pfmul	%%mm6, %%mm4\n\t"/*A6.re  = a1.re + v.re;*/\
+	"pxor	%%mm6, %%mm4\n\t"/*A6.re  = a1.re + v.re;*/\
 	"pfsub	%%mm0, %%mm2\n\t" /*A2 = a1 - u;*/\
-	"pfmul	%%mm7, %%mm3\n\t"/*A14.re = a1.re - v.re;*/\
+	"pxor	%%mm7, %%mm3\n\t"/*A14.re = a1.re - v.re;*/\
 	"movq	%%mm1, %0\n\t"\
 	"movq	%%mm2, %1\n\t"\
 	"movq	%%mm5, %%mm2\n\t"\
@@ -159,7 +145,7 @@ static complex_t HSQRT2_3DNOW __attribute__ ((aligned (8))) = { 0.707106781188, 
 	"pfmul	%%mm0,	%%mm4\n\t"/* mm4 =u.re | u.im */\
 	"pfmul	%%mm0,	%%mm5\n\t"/* mm5 = a.re | a.im */\
 	PSWAP_MM("%%mm5","%%mm3")\
-	"pfmul	%%mm7,	%%mm5\n\t"\
+	"pxor	%%mm7,	%%mm5\n\t"\
 	"pfadd	%%mm5,	%%mm4\n\t"/* mm4 = u*/\
 	"movq	%3,	%%mm1\n\t"\
 	"movq	%2,	%%mm0\n\t"\
@@ -171,9 +157,9 @@ static complex_t HSQRT2_3DNOW __attribute__ ((aligned (8))) = { 0.707106781188, 
 	"pfacc	%%mm0,	%%mm0\n\t"\
 	"movq	%%mm4,	%%mm5\n\t"\
 	"punpckldq %%mm0,%%mm2\n\t"/*mm2 = v.re | a.re*/\
-	"pfmul	%%mm6,	%%mm5\n\t"\
+	"pxor	%%mm6,	%%mm5\n\t"\
 	"movq	%%mm2,	%%mm3\n\t"\
-	"pfmul	%%mm7,	%%mm3\n\t"\
+	"pxor	%%mm7,	%%mm3\n\t"\
 	"pfadd	%%mm3,	%%mm5\n\t"\
 	PSWAP_MM("%%mm5","%%mm3")/* mm5 = v*/\
 	"pfadd	%%mm2,	%%mm4\n\t"\
