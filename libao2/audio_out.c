@@ -33,6 +33,7 @@ extern ao_functions_t audio_out_sdl;
 #ifdef USE_SUN_AUDIO
 extern ao_functions_t audio_out_sun;
 #endif
+extern ao_functions_t audio_out_pcm;
 
 ao_functions_t* audio_out_drivers[] =
 {
@@ -55,6 +56,7 @@ ao_functions_t* audio_out_drivers[] =
 #ifdef USE_SUN_AUDIO
         &audio_out_sun,
 #endif
+	&audio_out_pcm,
 	NULL
 };
 
