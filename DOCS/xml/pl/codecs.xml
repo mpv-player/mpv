@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.50 -->
+<!-- synced with 1.51 -->
 <sect1 id="codecs">
-<title>Wspierane kodeki</title>
+<title>Obsługiwane kodeki</title>
 
 <sect2 id="video-codecs">
 <title>Kodeki Video</title>
@@ -417,16 +417,6 @@ i rozpakuj je do katalogu
 <filename class="directory">/usr/local/lib/codecs</filename>.
 Jeżeli wolisz je trzymać w innym miejscu, użyj opcji
 <option>--with-reallibdir</option> dla <command>configure</command>.
-</para>
-
-<para>
-Pod Mac OS X musisz się upewnić, że <filename>pncrt.Shlb</filename> (łącznie
-z ich dodatkowymi zasobami ("resources fork"-przyp. tłum.)!) znajduje się w tym
-samym katalogu co kodeki Real. Skopiuj je używając, np.
-<screen>ditto -rsrcFork "RealOne Player.app/Contents/MacOS/pncrt.Shlb" "RealOne Player.app/Contents/MacOS/Library/Codecs"</screen>
-Jeżeli tego nie zrobisz lub zapomnisz skopiować dodatkowe zasoby,
-prawdopodobnie spowoduje to błędy tego typu:
-<screen>GetDiskFragment() failed with error -2804: &lt;&lt;Unknown disk fragment&gt;&gt;&lt;&lt;Unknown disk fragment&gt;&gt;&lt;pncrt.Shlb&gt;&lt;&gt;</screen>
 </para>
 
 <note><para>
