@@ -177,6 +177,7 @@ Advanced options:
   --enable-3dnow         build with 3dnow! support [autodetect]
   --enable-3dnowex       build with 3dnow-dsp! support (K7) [autodetect]
   --enable-sse           build with sse support [autodetect]
+  --enable-sse2          build with sse2 support [autodetect]
   --disable-fastmemcpy   disable 3dnow/sse/mmx optimized memcpy() [enable]
   --enable-debug[=1-3]   compile debugging information into mplayer [disable]
   --enable-profile       compile profiling information into mplayer [disable]
@@ -845,6 +846,8 @@ for ac_option do
 
   --enable-sse)	_sse=yes ;;
   --disable-sse) _sse=no ;;
+  --enable-sse2) _sse2=yes ;;
+  --disable-sse2) _sse2=no ;;
   --enable-mmx2) _mmx2=yes ;;
   --disable-mmx2) _mmx2=no ;;
   --enable-3dnow) _3dnow=yes ;;
@@ -954,6 +957,8 @@ _def_3dnowex='#undef HAVE_3DNOWEX'
 test "$_3dnowex" = yes && _def_3dnowex='#define HAVE_3DNOWEX 1'
 _def_sse='#undef HAVE_SSE'
 test "$_sse" = yes && _def_sse='#define HAVE_SSE 1'
+_def_sse2='#undef HAVE_SSE2'
+test "$_sse2" = yes && _def_sse2='#define HAVE_SSE2 1'
 
 
 # Checking kernel version...
@@ -2947,6 +2952,7 @@ $_def_3dnowex	// only define if you have 3DNOWEX (AMD Athlon, etc.)
 $_def_mmx	// only define if you have MMX (newer x86 chips, not P54C/PPro)
 $_def_mmx2	// only define if you have MMX2 (Athlon/PIII/4/CelII)
 $_def_sse	// only define if you have SSE (Intel Pentium III/4 or Celeron II)
+$_def_sse2	// only define if you have SSE2 (Intel Pentium 4)
 
 #ifdef HAVE_MMX
 #define USE_MMX_IDCT 1
