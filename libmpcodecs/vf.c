@@ -33,6 +33,7 @@ extern vf_info_t vf_info_dvbscale;
 extern vf_info_t vf_info_cropdetect;
 extern vf_info_t vf_info_test;
 extern vf_info_t vf_info_noise;
+extern vf_info_t vf_info_yvu9;
 
 char** vo_plugin_args=(char**) NULL;
 
@@ -61,6 +62,7 @@ static vf_info_t* filter_list[]={
     &vf_info_cropdetect,
     &vf_info_test,
     &vf_info_noise,
+    &vf_info_yvu9,
     NULL
 };
 
@@ -164,9 +166,15 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
           // non-direct and not yet allocaed image. allocate it!
 	  mpi->planes[0]=memalign(64, mpi->bpp*mpi->width*(mpi->height+2)/8);
 	  if(mpi->flags&MP_IMGFLAG_PLANAR){
-	      // YV12/I420. feel free to add other planar formats here...
+	      // YV12/I420/YVU9. feel free to add other planar formats here...
 	      if(!mpi->stride[0]) mpi->stride[0]=mpi->width;
-	      if(!mpi->stride[1]) mpi->stride[1]=mpi->stride[2]=mpi->width/2;
+	      if (!mpi->stride[1])
+	      {
+	        if (mpi->imgfmt == IMGFMT_YVU9)
+		    mpi->stride[1]=mpi->stride[2]=mpi->width/4;
+	        else
+		    mpi->stride[1]=mpi->stride[2]=mpi->width/2;
+	      }
 	      if(mpi->flags&MP_IMGFLAG_SWAPPED){
 	          // I420/IYUV  (Y,U,V)
 	          mpi->planes[1]=mpi->planes[0]+mpi->width*mpi->height;
@@ -174,7 +182,10 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 	      } else {
 	          // YV12,YVU9  (Y,V,U)
 	          mpi->planes[2]=mpi->planes[0]+mpi->width*mpi->height;
-	          mpi->planes[1]=mpi->planes[2]+(mpi->width>>1)*(mpi->height>>1);
+		  if (mpi->imgfmt == IMGFMT_YVU9)
+		    mpi->planes[1]=mpi->planes[2]+(mpi->width>>2)*(mpi->height>>2);
+		  else
+	            mpi->planes[1]=mpi->planes[2]+(mpi->width>>1)*(mpi->height>>1);
 	      }
 	  } else {
 	      if(!mpi->stride[0]) mpi->stride[0]=mpi->width*mpi->bpp/8;
@@ -192,6 +203,9 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 		  (mpi->flags&MP_IMGFLAG_YUV)?"YUV":"RGB",
 		  (mpi->flags&MP_IMGFLAG_PLANAR)?"planar":"packed",
 	          mpi->bpp*mpi->width*mpi->height/8);
+	    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"(imgfmt: %x, planes: %x,%x,%x strides: %d,%d,%d)\n",
+		mpi->imgfmt, mpi->planes[0], mpi->planes[1], mpi->planes[2],
+		mpi->stride[0], mpi->stride[1], mpi->stride[2]);
 	    mpi->flags|=MP_IMGFLAG_TYPE_DISPLAYED;
     }
 
