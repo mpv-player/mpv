@@ -127,14 +127,15 @@ void mixer_setvolume( float l,float r ){
 
 #endif
 
+#define MIXER_CHANGE 3
 
 void mixer_incvolume( void )
 {
  float mixer_l, mixer_r;
  mixer_getvolume( &mixer_l,&mixer_r );
- mixer_l++;
+ mixer_l += MIXER_CHANGE;
  if ( mixer_l > 100 ) mixer_l = 100;
- mixer_r++;
+ mixer_r += MIXER_CHANGE;
  if ( mixer_r > 100 ) mixer_r = 100;
  mixer_setvolume( mixer_l,mixer_r );
 }
@@ -143,9 +144,9 @@ void mixer_decvolume( void )
 {
  float mixer_l, mixer_r;
  mixer_getvolume( &mixer_l,&mixer_r );
- mixer_l--;
+ mixer_l -= MIXER_CHANGE;
  if ( mixer_l < 0 ) mixer_l = 0;
- mixer_r--;
+ mixer_r -= MIXER_CHANGE;
  if ( mixer_r < 0 ) mixer_r = 0;
  mixer_setvolume( mixer_l,mixer_r );
 }

@@ -1645,22 +1645,17 @@ if(auto_quality>0){
     case '0':
     case '*':
     case '/': {
-        float mixer_l, mixer_r;
-        mixer_getvolume( &mixer_l,&mixer_r );
         if(c=='*' || c=='0'){
-            if ( ++mixer_l > 100 ) mixer_l = 100;
-            if ( ++mixer_r > 100 ) mixer_r = 100;
+               mixer_incvolume();
         } else {
-            if ( --mixer_l < 0 ) mixer_l = 0;
-            if ( --mixer_r < 0 ) mixer_r = 0;
+               mixer_decvolume();
         }
-        mixer_setvolume( mixer_l,mixer_r );
 
 #ifdef USE_OSD
         if(osd_level){
           osd_visible=sh_video->fps; // 1 sec
           vo_osd_progbar_type=OSD_VOLUME;
-          vo_osd_progbar_value=((mixer_l+mixer_r)*256.0)/200.0;
+          vo_osd_progbar_value=(mixer_getbothvolume()*256.0)/100.0;
           //printf("volume: %d\n",vo_osd_progbar_value);
         }
 #endif
