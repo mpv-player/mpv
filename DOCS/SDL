@@ -1,5 +1,4 @@
-Here are some last minute notes about SDL out in IdegCounter
-release of mplayer.
+Here are some notes about SDL out in MPlayer.
 
 There are several commandline switches for sdl:
 -sdl <name>	specifies sdl driver to use (ie. aalib,
@@ -12,8 +11,12 @@ F toggles fullscreen/windowed mode
 C cycles available fullscreen modes
 W/S mappings for * and / (mixer control)
 
-Please report problems or bugs with sdl out to
-Felix Buenemann <atmosfear@users.sourceforge.net>
+KNOWN BUGS:
+- Keys pressed under aalib console driver repeat forever.
+  It's bug in SDL, I can't change it (tested with SDL 1.2.1).
+
+Please report problems or bugs with sdl out to the MPlayer-users
+mailinglist or directly to Felix Buenemann <atmosfear@users.sf.net>
 
 -- 
-Felix Bünemann, 2001-04-26
+Felix Bünemann, 2001-06-03
