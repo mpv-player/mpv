@@ -41,6 +41,8 @@ mplayer \- Movie Player for Linux
 .RB [ \-forcexv ]
 .RB [ \-ss\ sec ]
 .RB [ \-dumpaudio ]
+.RB [ \-dumpvideo ]
+.RB [ \-dumpsub ]
 .I - or file
 .PP
 .SH DESCRIPTION
@@ -206,7 +208,8 @@ disable XVideo hardware acceleration (with SDL only!)
 force using XVideo (SDL!)
 .TP
 .B \-dumpaudio
-writes audio stream of the file to ./stream.dump
+writes audio stream of the file to ./stream.dump (mostly usable
+with mpeg/ac3)
 .IP
 .SH "ALPHA/BETA CODE"
 .TP
@@ -222,6 +225,12 @@ Specifies the bitrate to encode OpenDivx at
 .B \-encode\ file
 used with '-vo odivx' .
 Specifies the output OpenDivX file. Won't overwrite.
+.TP
+.B \-dumpvideo
+dump video stream to ./stream.dump (only with MPEG-PS) (not very usable)
+.TP
+.B \-dumpsub
+dumps subtitle from VOB to file (not very usable)
 .IP
 .SH KEYBOARD CONTROL
 .TP
