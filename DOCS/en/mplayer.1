@@ -1081,6 +1081,9 @@ bold black outline
 .PD 1
 .
 .TP
+.B \-flip_hebrew
+Turns on flipping subtitles using FriBiDi.
+.TP
 .B \-font <path\ to\ font.desc\ file>
 Search for the OSD/\:SUB fonts in an alternative directory (default for normal
 fonts: ~/\:.mplayer/\:font/\:font.desc, default for FreeType fonts:
@@ -1102,19 +1105,13 @@ The \-subfont-* options are available only with FreeType support compiled in.
 .PD 1
 .
 .TP
-.B \-ifo <vobsub\ ifo\ file>
-Indicate the file that will be used to load palette and frame size for VOBSUB
-subtitles.
-.TP
 .B \-fribidi_charset <charset\ name>
 Specifies the charset that will be passed to FriBiDi when decoding a non-utf8
 subtitles. Default is "ISO8859-8".
 .TP
-.B \-flip_hebrew
-Turns on flipping subtitles using FriBiDi.
-.TP
-.B \-noflip_hebrew
-Turns off flipping subtitles using FriBiDi.
+.B \-ifo <vobsub\ ifo\ file>
+Indicate the file that will be used to load palette and frame size for VOBSUB
+subtitles.
 .TP
 .B \-noautosub
 Turns off automatic loading of subtitle files.
