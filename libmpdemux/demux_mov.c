@@ -83,6 +83,17 @@ typedef struct {
     unsigned int dur;
 } mov_durmap_t;
 
+typedef struct {
+    unsigned int dur;
+    unsigned int pos;
+    int speed;
+    //
+    int frames;
+    int start_sample;
+    int start_frame;
+    int pts_offset;
+} mov_editlist_t;
+
 #define MOV_TRAK_UNKNOWN 0
 #define MOV_TRAK_VIDEO 1
 #define MOV_TRAK_AUDIO 2
@@ -120,6 +131,9 @@ typedef struct {
     mov_durmap_t* durmap;
     int keyframes_size;
     unsigned int* keyframes;
+    int editlist_size;
+    mov_editlist_t* editlist;
+    int editlist_pos;
     //
     void* desc; // image/sound/etc description (pointer to ImageDescription etc)
 } mov_track_t;
@@ -165,7 +179,6 @@ void mov_build_index(mov_track_t* trak){
 		trak->chunks[i].pos = trak->chunks[i-1].pos + trak->chunks[i-1].size;
 	    else
 		trak->chunks[i].pos = 0; /* FIXME: set initial pos */
-    }
 #endif
 
     // calc pts of chunks:
@@ -214,6 +227,36 @@ void mov_build_index(mov_track_t* trak){
 		trak->samples[s].size);
 	    pos+=trak->samples[s].size;
 	    ++s;
+	}
+    }
+
+    // precalc editlist entries
+    if(trak->editlist_size>0){
+	int frame=0;
+	int e_pts=0;
+	for(i=0;i<trak->editlist_size;i++){
+	    mov_editlist_t* el=&trak->editlist[i];
+	    int sample=0;
+	    int pts=el->pos;
+	    el->start_frame=frame;
+	    if(pts<0){
+		// skip!
+		el->frames=0; continue;
+	    }
+	    // find start sample
+	    for(;sample<trak->samples_size;sample++){
+		if(pts<=trak->samples[sample].pts) break;
+	    }
+	    el->start_sample=sample;
+	    el->pts_offset=e_pts-trak->samples[sample].pts;
+	    pts+=el->dur;
+	    e_pts+=el->dur;
+	    // find end sample
+	    for(;sample<trak->samples_size;sample++){
+		if(pts<=trak->samples[sample].pts) break;
+	    }
+	    el->frames=sample-el->start_sample;
+	    frame+=el->frames;
 	}
     }
 
@@ -586,11 +629,16 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		mp_msg(MSGT_DEMUX, MSGL_V,"MOV: %*sEdit list table (%d entries) (ver:%d,flags:%ld)\n",
 		    level, "",entries, ver, flags);
 #if 1
+		trak->editlist_size=entries;
+		trak->editlist=malloc(trak->editlist_size*sizeof(mov_editlist_t));
 		for (i=0;i<entries;i++)
 		{
 		    int dur=stream_read_dword(demuxer->stream);
 		    int mt=stream_read_dword(demuxer->stream);
 		    int mr=stream_read_dword(demuxer->stream); // 16.16fp
+		    trak->editlist[i].dur=dur;
+		    trak->editlist[i].pos=mt;
+		    trak->editlist[i].speed=mr;
 		    mp_msg(MSGT_DEMUX, MSGL_V,"MOV: %*s  entry#%d: duration: %d  start time: %d  speed: %3.1fx\n",level,"",
 			i,
 			dur,mt,(float)mr/65536.0f);
@@ -1322,12 +1370,32 @@ if(trak->samplesize){
     } /* MOV_TRAK_AUDIO */
     pos=trak->chunks[trak->pos].pos;
 } else {
+    int frame=trak->pos;
+    // editlist support:
+    if(trak->type == MOV_TRAK_VIDEO && trak->editlist_size>=1){
+	int t;
+	// find the right editlist entry:
+	if(frame<trak->editlist[trak->editlist_pos].start_frame)
+	    trak->editlist_pos=0;
+	while(trak->editlist_pos<trak->editlist_size-1 &&
+	    frame>=trak->editlist[trak->editlist_pos+1].start_frame)
+		++trak->editlist_pos;
+	if(frame>=trak->editlist[trak->editlist_pos].start_frame+
+	    trak->editlist[trak->editlist_pos].frames) return 0; // EOF
+	// calc real frame index:
+	frame-=trak->editlist[trak->editlist_pos].start_frame;
+	frame+=trak->editlist[trak->editlist_pos].start_sample;
+	// calc pts:
+	pts=(float)(trak->samples[frame].pts+
+	    trak->editlist[trak->editlist_pos].pts_offset)/(float)trak->timescale;
+    } else {
+	if(frame>=trak->samples_size) return 0; // EOF
+	pts=(float)trak->samples[frame].pts/(float)trak->timescale;
+    }
     // read sample:
-    if(trak->pos>=trak->samples_size) return 0; // EOF
-    stream_seek(demuxer->stream,trak->samples[trak->pos].pos);
-    pts=(float)trak->samples[trak->pos].pts/(float)trak->timescale;
-    x=trak->samples[trak->pos].size;
-    pos=trak->samples[trak->pos].pos;
+    stream_seek(demuxer->stream,trak->samples[frame].pos);
+    x=trak->samples[frame].size;
+    pos=trak->samples[frame].pos;
 }
 if(trak->pos==0 && trak->stream_header_len>0){
     // we have to append the stream header...
