@@ -23,8 +23,17 @@ extern char * sub_name;
 extern float  sub_delay;
 extern float  sub_fps;
 extern int    sub_auto;
+extern int    sub_pos;
+extern int    sub_unicode;
 
 extern char * filename;
+
+extern int flip;
+extern int force_ni;
+extern int index_mode;
+extern int frame_dropping;
+
+extern int auto_quality;
 
 extern void exit_player(char* how);
 

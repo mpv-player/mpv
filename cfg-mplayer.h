@@ -322,8 +322,8 @@ static config_t mplayer_opts[]={
 	{"lircconf", &lirc_configfile, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL}, 
 #endif
 
-	{"gui", &use_gui, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
-	{"nogui", &use_gui, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
+	{"gui", &use_gui, CONF_TYPE_FLAG, CONF_GLOBAL|CONF_NOCMD, 0, 1, NULL},
+//	{"nogui", &use_gui, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
       
 #ifdef HAVE_NEW_GUI
 	{"skin", &skinName, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},

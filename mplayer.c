@@ -582,7 +582,9 @@ int gui_no_filename=0;
     mp_register_options(mconfig);
     parse_cfgfiles(mconfig);
 
-
+#ifdef HAVE_NEW_GUI
+    if ( use_gui ) cfg_read();
+#endif
 
     if(m_config_parse_command_line(mconfig, argc, argv, envp) < 0) exit(1); // error parsing cmdline
 

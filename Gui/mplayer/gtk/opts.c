@@ -121,12 +121,11 @@ void ShowPreferences( void )
   int    i = 0;
   char * tmp[3]; tmp[2]="";
   old_audio_driver=0;
-  if ( audio_driver && !gtkAODriver ) gtkAODriver=gstrdup( audio_driver );
   while ( audio_out_drivers[i] )
    {
     const ao_info_t *info = audio_out_drivers[i++]->info;
     if ( !strcmp( info->short_name,"plugin" ) ) continue;
-    if ( !gstrcmp( gtkAODriver,(char *)info->short_name ) ) old_audio_driver=i - 1;
+    if ( !gstrcmp( audio_driver,(char *)info->short_name ) ) old_audio_driver=i - 1;
     tmp[0]=(char *)info->short_name; tmp[1]=(char *)info->name; gtk_clist_append( GTK_CLIST( CLADrivers ),tmp );
    }
   gtk_clist_select_row( GTK_CLIST( CLADrivers ),old_audio_driver,0 );
@@ -138,31 +137,28 @@ void ShowPreferences( void )
  }
 
 // -- 2. page
- gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBDoubleBuffer ),gtkVODoubleBuffer );
- gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBDR ),gtkVODirectRendering );
- gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBFramedrop ),gtkVFrameDrop );
- gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBHFramedrop ),gtkVHardFrameDrop );
- gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBFlip ),gtkVFlip );
+ gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBDoubleBuffer ),vo_doublebuffering );
+ gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBDR ),vo_directrendering );
+
+ gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBFramedrop ),FALSE );
+ gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBHFramedrop ),FALSE );
+ switch ( frame_dropping )
+  {
+   case 2: gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBHFramedrop ),TRUE );
+   case 1: gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBFramedrop ),TRUE );
+  }
+
+ gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBFlip ),flip );
  gtk_adjustment_set_value( HSPanscanadj,vo_panscan );
  {
   int i = 0, c = 0;
   char * tmp[3]; tmp[2]="";
   old_video_driver=0; 
-  if ( video_driver && !gtkVODriver )
-   {
-    while ( video_out_drivers[i] )
-     if ( video_out_drivers[i++]->control( VOCTRL_GUISUPPORT,NULL ) == VO_TRUE )
-      {
-       const vo_info_t *info = video_out_drivers[i - 1]->get_info(); 
-       if ( !gstrcmp( video_driver,(char *)info->short_name ) ) gtkVODriver=gstrdup( video_driver );
-      }
-   }
-  i=0;
   while ( video_out_drivers[i] )
    if ( video_out_drivers[i++]->control( VOCTRL_GUISUPPORT,NULL ) == VO_TRUE )
     { 
      const vo_info_t *info = video_out_drivers[i - 1]->get_info();
-     if ( !gstrcmp( gtkVODriver,(char *)info->short_name ) ) old_video_driver=c; c++;
+     if ( !gstrcmp( video_driver,(char *)info->short_name ) ) old_video_driver=c; c++;
      tmp[0]=(char *)info->short_name; tmp[1]=(char *)info->name; gtk_clist_append( GTK_CLIST( CLVDrivers ),tmp );
     }
   gtk_clist_select_row( GTK_CLIST( CLVDrivers ),old_video_driver,0 );
@@ -174,14 +170,14 @@ void ShowPreferences( void )
  }
 
 // -- 3. page
- gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBNoAutoSub ),!gtkSubAuto );
+ gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBNoAutoSub ),!sub_auto );
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBDumpMPSub ),gtkSubDumpMPSub );
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBDumpSrt ),gtkSubDumpSrt );
- gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBSubUnicode ),gtkSubUnicode );
- gtk_adjustment_set_value( HSSubDelayadj,gtkSubDelay );
- gtk_adjustment_set_value( HSSubFPSadj,gtkSubFPS );
- gtk_adjustment_set_value( HSSubPositionadj,gtkSubPos );
- gtk_adjustment_set_value( HSFontFactoradj,gtkSubFFactor );
+ gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBSubUnicode ),sub_unicode );
+ gtk_adjustment_set_value( HSSubDelayadj,sub_delay );
+ gtk_adjustment_set_value( HSSubFPSadj,sub_fps );
+ gtk_adjustment_set_value( HSSubPositionadj,sub_pos );
+ gtk_adjustment_set_value( HSFontFactoradj,font_factor );
  switch ( osd_level )
   {
    case 0: gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( RBOSDNone ),TRUE ); break;
@@ -191,17 +187,17 @@ void ShowPreferences( void )
 #if 0
  if ( guiIntfStruct.Subtitlename ) gtk_entry_set_text( GTK_ENTRY( ESubtitleName ),guiIntfStruct.Subtitlename );
 #endif
- if ( guiIntfStruct.Fontname ) gtk_entry_set_text( GTK_ENTRY( prEFontName ),guiIntfStruct.Fontname );
+ if ( font_name ) gtk_entry_set_text( GTK_ENTRY( prEFontName ),font_name );
 
 // -- 4. page
- gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBNonInterlaved ),gtkVNIAVI );
- gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBIndex ),gtkVIndex );
+ gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBNonInterlaved ),force_ni );
+ gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBIndex ),index_mode );
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBPostprocess ),gtkVopPP );
- gtk_adjustment_set_value( HSPPQualityadj,gtkVAutoq );
+ gtk_adjustment_set_value( HSPPQualityadj,auto_quality );
  {
   int i = 0;
   for ( i=0;i<7;i++ )
-    if ( lVFM[i].vfm == gtkVVFM ) break;
+    if ( lVFM[i].vfm == video_family ) break;
   gtk_entry_set_text( GTK_ENTRY( EVFM ),lVFM[i].name );
  }
 
@@ -289,23 +285,26 @@ void prButton( GtkButton * button,gpointer user_data )
 	gtkAONoSound=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBNoSound ) );
 	gtkSet( gtkSetExtraStereo,HSExtraStereoMuladj->value,NULL );
 	gtkSet( gtkSetAudioDelay,HSAudioDelayadj->value,NULL );
-        gfree( (void **)&gtkAODriver );
-	gtkAODriver=gstrdup( ao_driver[0] );
-	gfree( (void **)&gtkVODriver );
-	gtkVODriver=gstrdup( vo_driver[0] );
+        gfree( (void **)&audio_driver );
+	audio_driver=gstrdup( ao_driver[0] );
+	gfree( (void **)&video_driver );
+	video_driver=gstrdup( vo_driver[0] );
 
 	// -- 2. page
-	gtkVODoubleBuffer=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBDoubleBuffer ) );
-	gtkVODirectRendering=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBDR ) );
-	gtkVFrameDrop=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBFramedrop ) );
-	gtkVHardFrameDrop=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBHFramedrop ) );
-	gtkVFlip=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBFlip ) );
+	vo_doublebuffering=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBDoubleBuffer ) );
+	vo_directrendering=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBDR ) );
+
+        frame_dropping=0;
+	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBFramedrop ) ) == TRUE ) frame_dropping=1;
+	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBHFramedrop ) ) == TRUE ) frame_dropping=2;
+
+	flip=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBFlip ) );
 	
 	// -- 3. page
 	gtkSet( gtkSetSubAuto,!gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBNoAutoSub ) ),NULL );
 	gtkSubDumpMPSub=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBDumpMPSub ) );
 	gtkSubDumpSrt=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBDumpSrt ) );
-	gtkSubUnicode=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBSubUnicode ) );
+	sub_unicode=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBSubUnicode ) );
 	gtkSet( gtkSetSubDelay,HSSubDelayadj->value,NULL );
 	gtkSet( gtkSetSubFPS,HSSubFPSadj->value,NULL );
 	gtkSet( gtkSetSubPos,HSSubPositionadj->value,NULL );
@@ -313,19 +312,19 @@ void prButton( GtkButton * button,gpointer user_data )
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBOSDNone ) ) ) osd_level=0;
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBOSDIndicator ) ) ) osd_level=1;
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBOSDTandP ) ) ) osd_level=2;
-	guiSetFilename( guiIntfStruct.Fontname,gtk_entry_get_text( GTK_ENTRY( prEFontName ) ) );
+	guiSetFilename( font_name,gtk_entry_get_text( GTK_ENTRY( prEFontName ) ) );
 
 	// -- 4. page
-	gtkVNIAVI=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBNonInterlaved ) );
-	gtkVIndex=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBIndex ) );
+	force_ni=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBNonInterlaved ) );
+	index_mode=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBIndex ) );
 	gtkVopPP=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBPostprocess ) ); 
 	gtkSet( gtkSetAutoq,HSPPQualityadj->value,NULL );
 	{
 	 int i;
 	 char * tmp = gtk_entry_get_text( GTK_ENTRY( EVFM ) );
-	 gtkVVFM=-1;
+	 video_family=-1;
 	 for ( i=0;i<7;i++ )
-	  if ( !strcmp( tmp,lVFM[i].name ) ) { gtkVVFM=lVFM[i].vfm; break; }
+	  if ( !strcmp( tmp,lVFM[i].name ) ) { video_family=lVFM[i].vfm; break; }
 	}
 
    case bCancel:

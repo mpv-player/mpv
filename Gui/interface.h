@@ -5,6 +5,7 @@
 #include "../config.h"
 #include "mplayer/play.h"
 #include "../mplayer.h"
+#include "cfg.h"
 
 #ifdef USE_DVDREAD
  #include "../libmpdemux/stream.h"
@@ -91,8 +92,6 @@ typedef struct
    char * Subtitlename;
    int    SubtitleChanged;
    
-   char * Fontname;
-
    char * Othername;
    int    OtherChanged;
    

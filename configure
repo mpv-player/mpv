@@ -160,6 +160,7 @@ Optional features:
   --disable-new-input    disable new input system [enable]
   --enable-joystick      enable joystick support in new input [disable]
   --enable-i18n          GNU internationalisation [disable]
+  --disable-setlocale    disable setlocale using in mplayer [autodetect]
   --enable-runtime-cpudetection    Enable runtime CPU detection [disable]
   --disable-dvdnav       Disable dvdnav support [autodetect]
   --disable-dvdread      Disable libdvdread support [autodetect]
@@ -975,6 +976,7 @@ _language=en
 _shm=auto
 _linux_devfs=no
 _i18n=no
+_setlocale=auto
 _sighandler=yes
 _libdv=auto
 _cdparanoia=auto
@@ -1000,6 +1002,8 @@ for ac_option do
   --disable-mencoder)	_mencoder=no	;;
   --enable-i18n)	_i18n=yes	;;
   --disable-i18n)	_i18n=no	;;
+  --enable-setlocale)   _setlocale=yes  ;;
+  --disable-setlocale)  _setlocale=no   ;;
   --enable-x11)		_x11=yes	;;
   --disable-x11)	_x11=no		;;
   --enable-xv)		_xv=yes		;;
@@ -1425,6 +1429,26 @@ else
   _def_i18n='#undef USE_I18N'
 fi
 echores "$_i18n"
+
+
+# Checking for setlocale() ...
+# CSAK EGY MARADHAT - A HEGYLAKO
+# Nemnem. a TV Maci !
+echocheck "setlocale()"
+if test "$_setlocale" = auto ; then
+  cat > $TMPC <<EOF
+#include <locale.h>
+int main(void) { setlocale( LC_ALL,"" ); return 0; }
+EOF
+  _setlocale=no
+  cc_check && _setlocale=yes
+fi
+if test "$_setlocale" = yes ; then
+  _def_setlocale='#define USE_SETLOCALE 1'
+else
+  _def_setlocale='#undef USE_SETLOCALE'
+fi
+echores "$_setlocale"
 
 
 echocheck "language"
@@ -4256,6 +4280,9 @@ cat > config.h << EOF
 
 /* use GNU internationalization */
 $_def_i18n
+
+/* use setlocale() function */
+$_def_setlocale
 
 /* Runtime CPU detection */
 $_def_runtime_cpudetection

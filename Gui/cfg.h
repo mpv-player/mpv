@@ -4,23 +4,10 @@
 
 extern int gtkEnableAudioEqualizer;
 
-extern char * gtkVODriver;
-extern int    gtkVODoubleBuffer;
-extern int    gtkVODirectRendering;
-
-extern int    gtkVFrameDrop;
-extern int    gtkVHardFrameDrop;
-extern int    gtkVNIAVI;
-extern int    gtkVFlip;
-extern int    gtkVIndex;
-extern int    gtkVVFM;
-extern int    gtkVAutoq;
-
 extern int    gtkVopPP;
 extern int    gtkVopLAVC;
 extern int    gtkVopFAME;
 
-extern char * gtkAODriver;
 extern int    gtkAONoSound;
 extern float  gtkAODelay;
 extern int    gtkAONorm;
@@ -30,14 +17,8 @@ extern float  gtkAOExtraStereoMul;
 extern char * gtkAOOSSMixer;
 extern char * gtkAOOSSDevice;
 
-extern int    gtkSubAuto; 
-extern int    gtkSubUnicode; 
 extern int    gtkSubDumpMPSub;
 extern int    gtkSubDumpSrt;
-extern float  gtkSubDelay;
-extern float  gtkSubFPS;
-extern int    gtkSubPos;
-extern float  gtkSubFFactor;
 
 extern char * gtkEquChannel1;
 extern char * gtkEquChannel2;

@@ -66,6 +66,13 @@ int gstrcmp( char * a,char * b )
  return strcmp( a,b );
 }
 
+int gstrncmp( char * a,char * b,int size )
+{
+ if ( !a && !b ) return 0;
+ if ( !a || !b ) return -1;
+ return strncmp( a,b,size );
+}
+
 char * gstrdup( char * str )
 {
  if ( !str ) return NULL;
@@ -140,11 +147,10 @@ void guiInit( void )
  gtkInit();
  wsXInit( (void *)mDisplay );
      
- cfg_read(); 
+// cfg_read(); 
  appInit( (void*)mDisplay );
        
  if ( plCurrent && !filename ) mplSetFileName( plCurrent->path,plCurrent->name,STREAMTYPE_FILE );
- if ( sub_delay != 0.0f ) gtkSubDelay=sub_delay;
  if ( sub_name ) guiSetFilename( guiIntfStruct.Subtitlename,sub_name );
 #if defined( USE_OSD ) || defined( USE_SUB )
  guiLoadFont();
@@ -188,18 +194,13 @@ typedef struct
 
 extern ao_functions_t * audio_out;
 extern vo_functions_t * video_out;
-extern int    		flip;
 extern int    		frame_dropping;
-extern int    		sub_pos;
-extern int    		sub_unicode;
 extern int              stream_dump_type;
 extern char **          vo_plugin_args;
-extern int              auto_quality;
 
 #if defined( USE_OSD ) || defined( USE_SUB )
 void guiLoadFont( void )
 {
- font_factor=gtkSubFFactor;
  if ( vo_font )
   {
    int i;
@@ -219,19 +220,19 @@ void guiLoadFont( void )
      }
    free( vo_font ); vo_font=NULL;
   }
- if ( guiIntfStruct.Fontname )
+ if ( font_name )
   {
-   vo_font=read_font_desc( guiIntfStruct.Fontname,font_factor,0 );
+   vo_font=read_font_desc( font_name,font_factor,0 );
    if ( !vo_font ) mp_msg( MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadFont,font_name );
   } 
   else
    {
-    guiIntfStruct.Fontname=gstrdup( get_path( "font/font.desc" ) );
-    vo_font=read_font_desc( guiIntfStruct.Fontname,font_factor,0 );
+    font_name=gstrdup( get_path( "font/font.desc" ) );
+    vo_font=read_font_desc( font_name,font_factor,0 );
     if ( !vo_font )
      {
-      gfree( (void **)&guiIntfStruct.Fontname ); guiIntfStruct.Fontname=gstrdup( DATADIR"/font/font.desc" );
-      vo_font=read_font_desc( guiIntfStruct.Fontname,font_factor,0 );
+      gfree( (void **)&font_name ); font_name=gstrdup( DATADIR"/font/font.desc" );
+      vo_font=read_font_desc( font_name,font_factor,0 );
      }
    }
 }
@@ -431,15 +432,8 @@ int guiGetEvent( int type,char * arg )
 	     }
 	 }
 // -- subtitle
-        gtkSubUnicode=sub_unicode;
-        gtkSubDelay=sub_delay;
-        gtkSubFPS=sub_fps;
-        gtkSubPos=sub_pos;
-#ifdef USE_OSD
-	gtkSubFFactor=font_factor;
-#endif
 #ifdef HAVE_DXR3
-	if ( !gstrcmp( gtkVODriver,"dxr3" ) && guiIntfStruct.FileFormat != DEMUXER_TYPE_MPEG_PS && !gtkVopLAVC && !gtkVopFAME )
+	if ( !gstrcmp( video_driver,"dxr3" ) && guiIntfStruct.FileFormat != DEMUXER_TYPE_MPEG_PS && !gtkVopLAVC && !gtkVopFAME )
 	 {
 	  gtkMessageBox( GTK_MB_FATAL,MSGTR_NEEDLAVCFAME );
 	  guiIntfStruct.Playing=0;
@@ -457,30 +451,20 @@ int guiGetEvent( int type,char * arg )
        guiIntfStruct.DiskChanged=0;
 
 // --- video opts
-       if ( !gtkVODriver )
+       
+       if ( !video_driver )
 	{
          int i = 0;
-	 if ( video_driver && !gtkVODriver )
-	  {
-	   while ( video_out_drivers[i] )
-	    if ( video_out_drivers[i++]->control( VOCTRL_GUISUPPORT,NULL ) == VO_TRUE )
-	     {
-	      const vo_info_t *info = video_out_drivers[i - 1]->get_info();
-	      if ( !gstrcmp( video_driver,(char *)info->short_name ) ) gtkVODriver=gstrdup( video_driver );
-	     }
-	  }
-	  else
            while ( video_out_drivers[i++] )
 	    if ( video_out_drivers[i - 1]->control( VOCTRL_GUISUPPORT,NULL ) == VO_TRUE ) 
 	     {
 	      const vo_info_t *info = video_out_drivers[i - 1]->get_info();
-	      gtkVODriver=gstrdup( (char *)info->short_name );
+	      video_driver=gstrdup( (char *)info->short_name );
 	      break;
 	     }
 	 }
 	
-	if ( gtkVODriver ) { gfree( (void **)&video_driver ); video_driver=gstrdup( gtkVODriver ); }
-	  else { gtkMessageBox( GTK_MB_FATAL,MSGTR_IDFGCVD ); exit_player( "gui init" ); }
+	if ( !video_driver ) { gtkMessageBox( GTK_MB_FATAL,MSGTR_IDFGCVD ); exit_player( "gui init" ); }
 
 	{
 	 int i = 0;
@@ -489,7 +473,7 @@ int guiGetEvent( int type,char * arg )
 	  if ( video_out_drivers[i - 1]->control( VOCTRL_GUISUPPORT,NULL ) == VO_TRUE ) 
 	   {
 	    const vo_info_t *info = video_out_drivers[i - 1]->get_info();
-	    if  ( ( !gstrcmp( gtkVODriver,(char *)info->short_name ) )&&( video_out_drivers[i - 1]->control( VOCTRL_GUI_NOWINDOW,NULL ) == VO_TRUE ) ) 
+	    if  ( ( !gstrcmp( video_driver,(char *)info->short_name ) )&&( video_out_drivers[i - 1]->control( VOCTRL_GUI_NOWINDOW,NULL ) == VO_TRUE ) ) 
 	      { guiIntfStruct.NoWindow=True; break; }
 	   }
 	}
@@ -497,7 +481,7 @@ int guiGetEvent( int type,char * arg )
 #ifdef HAVE_DXR3
 	remove_vop( "lavc" );
 	remove_vop( "fame" );
-	if ( !gstrcmp( gtkVODriver,"dxr3" ) )
+	if ( !gstrcmp( video_driver,"dxr3" ) )
 	 {
 	  #warning workaround for this moment.
 	  osd_level=0;
@@ -510,16 +494,8 @@ int guiGetEvent( int type,char * arg )
 	 }
 #endif
 // ---	 
-	if ( gtkVopPP ) { add_vop( "pp" ); auto_quality=gtkVAutoq; } 
-	 else { remove_vop( "pp" ); auto_quality=0; }
-
-        vo_doublebuffering=gtkVODoubleBuffer;
-        vo_directrendering=gtkVODirectRendering;
-	frame_dropping=gtkVFrameDrop;
-	if ( gtkVHardFrameDrop ) frame_dropping=gtkVHardFrameDrop;
-	flip=gtkVFlip;
-	force_ni=gtkVNIAVI;
-	video_family=gtkVVFM;
+	if ( gtkVopPP ) add_vop( "pp" );
+	 else remove_vop( "pp" );
 		 
 // --- audio opts
 	audio_delay=gtkAODelay;
@@ -532,25 +508,17 @@ int guiGetEvent( int type,char * arg )
 	  ao_plugin_cfg.pl_extrastereo_mul=gtkAOExtraStereoMul;
 	 }
 	mixer_device=gtkAOOSSMixer;
-	if ( audio_driver && !gtkAODriver ) gtkAODriver=gstrdup( audio_driver );
-	gfree( (void **)&audio_driver );
-	if ( !gstrcmp( gtkAODriver,"oss" ) && gtkAOOSSDevice )
+	if ( !gstrncmp( audio_driver,"oss",3 ) && gtkAOOSSDevice )
 	 {
-	  char * tmp = calloc( 1,strlen( gtkAODriver ) + strlen( gtkAOOSSDevice ) + 2 );
-	  sprintf( tmp,"%s:%s",gtkAODriver,gtkAOOSSDevice ); 
+	  char * tmp = calloc( 1,strlen( gtkAOOSSDevice ) + 5 );
+	  sprintf( tmp,"oss:%s",gtkAOOSSDevice );
+	  gfree( (void *)&audio_driver );
 	  audio_driver=tmp;
-	 } else audio_driver=gstrdup( gtkAODriver );
+	 }
 
 // -- subtitle
 #ifdef USE_SUB
-	sub_auto=0;
-	if ( gtkSubAuto && guiIntfStruct.StreamType == STREAMTYPE_FILE && !guiIntfStruct.Subtitlename )
-	 guiSetFilename( guiIntfStruct.Subtitlename,( guiIntfStruct.Filename ? sub_filename( get_path("sub/"),guiIntfStruct.Filename ): "default.sub" ) );
 	sub_name=guiIntfStruct.Subtitlename;
-        sub_unicode=gtkSubUnicode;
-        sub_delay=gtkSubDelay;
-        sub_fps=gtkSubFPS;
-        sub_pos=gtkSubPos;
 	stream_dump_type=0;
 	if ( gtkSubDumpMPSub ) stream_dump_type=4;
 	if ( gtkSubDumpSrt ) stream_dump_type=6;
@@ -563,7 +531,6 @@ int guiGetEvent( int type,char * arg )
 // --- misc		    
         if ( guiIntfStruct.AudioFile ) audio_stream=guiIntfStruct.AudioFile;
 	  else if ( guiIntfStruct.FilenameChanged ) audio_stream=NULL;
-	index_mode=gtkVIndex;
 	
 	break;
   }
@@ -673,24 +640,20 @@ void * gtkSet( int cmd,float fparam, void * vparam )
         return NULL;
 // --- subtitle
    case gtkSetSubAuto:
-        gtkSubAuto=(int)fparam;
+        sub_auto=(int)fparam;
 	return NULL;
    case gtkSetSubDelay:
-//        mp_cmd=(mp_cmd_t *)calloc( 1,sizeof( *mp_cmd ) );
-//        mp_cmd->id=MP_CMD_SUB_DELAY;    mp_cmd->name=strdup( "sub_delay" );
-//	mp_cmd->args[0].v.f=fparam;   mp_cmd->args[1].v.i=1;
-//	mp_input_queue_cmd( mp_cmd );
-        gtkSubDelay=sub_delay=fparam;
+        sub_delay=fparam;
         return NULL;   
    case gtkSetSubFPS:
-        gtkSubFPS=sub_fps=(int)fparam;
+        sub_fps=(int)fparam;
         return NULL;   
    case gtkSetSubPos:
-        gtkSubPos=sub_pos=(int)fparam;
+        sub_pos=(int)fparam;
         return NULL;   
 #if defined( USE_OSD ) || defined( USE_SUB )
    case gtkSetFontFactor:
-        gtkSubFFactor=fparam;
+        font_factor=fparam;
 	guiLoadFont();
 	return NULL;
 #endif
@@ -724,7 +687,7 @@ void * gtkSet( int cmd,float fparam, void * vparam )
 	mp_input_queue_cmd( mp_cmd );
         return NULL;
    case gtkSetAutoq:
-	auto_quality=gtkVAutoq=(int)fparam;
+	auto_quality=(int)fparam;
 	return NULL;
 // --- set equalizers
    case gtkSetContrast:

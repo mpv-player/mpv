@@ -254,7 +254,7 @@ void ShowFileSelect( int type,int modal )
 	gtk_combo_set_popdown_strings( GTK_COMBO( List ),fsList_items );
 	g_list_free( fsList_items );
 	gtk_entry_set_text( GTK_ENTRY( fsFilterCombo ),fsFontFileNames[fsNumberOfFontFilterNames - 1][0] );
-	tmp=guiIntfStruct.Fontname;
+	tmp=font_name;
 	break;
   }
 
@@ -438,11 +438,11 @@ void fs_Ok_released( GtkButton * button,gpointer user_data )
           guiSetDF( guiIntfStruct.AudioFile,fsSelectedDirectory,fsSelectedFile );
           break;
    case fsFontSelector:
-          guiSetDF( guiIntfStruct.Fontname,fsSelectedDirectory,fsSelectedFile );
+          guiSetDF( font_name,fsSelectedDirectory,fsSelectedFile );
 #if defined( USE_OSD ) || defined( USE_SUB )
 	  guiLoadFont();
 #endif
-	  if ( gtkVPreferences ) gtk_entry_set_text( GTK_ENTRY( prEFontName ),guiIntfStruct.Fontname );
+	  if ( gtkVPreferences ) gtk_entry_set_text( GTK_ENTRY( prEFontName ),font_name );
 	  break;
   }
 

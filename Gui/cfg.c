@@ -8,6 +8,10 @@
 #include "../mplayer.h"
 #include "../cfgparser.h"
 
+#ifdef USE_SETLOCALE
+#include <locale.h>
+#endif
+
 #include "../../libvo/video_out.h"
 
 #include "cfg.h"
@@ -19,22 +23,10 @@
 
 int    gtkEnableAudioEqualizer = 0;
 
-char * gtkVODriver = NULL;
-int    gtkVODoubleBuffer = 1;
-int    gtkVODirectRendering = 0;
-int    gtkVFrameDrop = 1;
-int    gtkVHardFrameDrop = 0;
-int    gtkVNIAVI = 0;
-int    gtkVFlip = 0;
-int    gtkVIndex = 1;
-int    gtkVVFM = -1;
-int    gtkVAutoq = 0;
-
 int    gtkVopPP = 0;
 int    gtkVopLAVC = 0;
 int    gtkVopFAME = 0;
 
-char * gtkAODriver = NULL;
 int    gtkAONoSound = 0;
 float  gtkAODelay = 0.0f;
 int    gtkAONorm = 0;
@@ -44,14 +36,8 @@ float  gtkAOExtraStereoMul = 1.0;
 char * gtkAOOSSMixer;
 char * gtkAOOSSDevice;
 
-int    gtkSubAuto = 1; //
-int    gtkSubUnicode = 0; //
 int    gtkSubDumpMPSub = 0;
 int    gtkSubDumpSrt = 0;
-float  gtkSubDelay = 0.0f;
-float  gtkSubFPS = 0.0f;
-int    gtkSubPos = 100; //
-float  gtkSubFFactor = 0.75;
 
 // ---
 
@@ -64,24 +50,23 @@ static config_t gui_opts[] =
 {
  { "enable_audio_equ",&gtkEnableAudioEqualizer,CONF_TYPE_FLAG,0,0,1,NULL },
  
- { "vo_driver",&gtkVODriver,CONF_TYPE_STRING,0,0,0,NULL },
+ { "vo_driver",&video_driver,CONF_TYPE_STRING,0,0,0,NULL },
  { "vo_panscan",&vo_panscan,CONF_TYPE_FLOAT,CONF_RANGE,0.0,1.0,NULL },
  { "vo_doublebuffering",&vo_doublebuffering,CONF_TYPE_FLAG,0,0,1,NULL },
- { "vo_direct_render",&gtkVODirectRendering,CONF_TYPE_FLAG,0,0,1,NULL },
+ { "vo_direct_render",&vo_directrendering,CONF_TYPE_FLAG,0,0,1,NULL },
 
- { "v_framedrop",&gtkVFrameDrop,CONF_TYPE_FLAG,0,0,1,NULL },
- { "v_hard_framedrop",&gtkVHardFrameDrop,CONF_TYPE_FLAG,0,0,1,NULL },
- { "v_flip",&gtkVFlip,CONF_TYPE_FLAG,0,0,1,NULL },
- { "v_ni",&gtkVNIAVI,CONF_TYPE_FLAG,0,0,1,NULL },
- { "v_idx",&gtkVIndex,CONF_TYPE_FLAG,0,0,1,NULL },
- { "v_vfm",&gtkVVFM,CONF_TYPE_INT,CONF_RANGE,-1,10,NULL },
+ { "v_framedrop",&frame_dropping,CONF_TYPE_INT,CONF_RANGE,0,2,NULL },
+ { "v_flip",&flip,CONF_TYPE_FLAG,0,0,1,NULL },
+ { "v_ni",&force_ni,CONF_TYPE_FLAG,0,0,1,NULL },
+ { "v_idx",&index_mode,CONF_TYPE_INT,CONF_RANGE,-1,2,NULL },
+ { "v_vfm",&video_family,CONF_TYPE_INT,CONF_RANGE,-1,10,NULL },
 
  { "vf_pp",&gtkVopPP,CONF_TYPE_FLAG,0,0,1,NULL },
- { "vf_autoq",&gtkVAutoq,CONF_TYPE_INT,CONF_RANGE,0,100,NULL },
+ { "vf_autoq",&auto_quality,CONF_TYPE_INT,CONF_RANGE,0,100,NULL },
  { "vf_lavc",&gtkVopLAVC,CONF_TYPE_FLAG,0,0,1,NULL },
  { "vf_fame",&gtkVopFAME,CONF_TYPE_FLAG,0,0,1,NULL },
 
- { "ao_driver",&gtkAODriver,CONF_TYPE_STRING,0,0,0,NULL },
+ { "ao_driver",&audio_driver,CONF_TYPE_STRING,0,0,0,NULL },
  { "ao_nosound",&gtkAONoSound,CONF_TYPE_FLAG,0,0,1,NULL },
  { "ao_volnorm",&gtkAONorm,CONF_TYPE_FLAG,0,0,1,NULL },
  { "ao_surround",&gtkAOSurround,CONF_TYPE_FLAG,0,0,1,NULL },
@@ -92,11 +77,11 @@ static config_t gui_opts[] =
  { "ao_oss_device",&gtkAOOSSDevice,CONF_TYPE_STRING,0,0,0,NULL },
  
  { "osd_level",&osd_level,CONF_TYPE_INT,CONF_RANGE,0,2,NULL },
- { "sub_auto_load",&gtkSubAuto,CONF_TYPE_FLAG,0,0,1,NULL },
- { "sub_unicode",&gtkSubUnicode,CONF_TYPE_FLAG,0,0,1,NULL },
- { "sub_pos",&gtkSubPos,CONF_TYPE_INT,CONF_RANGE,0,200,NULL },
- { "font_factor",&gtkSubFFactor,CONF_TYPE_FLOAT,CONF_RANGE,0.0,10.0,NULL },
- { "font_name",&guiIntfStruct.Fontname,CONF_TYPE_STRING,0,0,0,NULL },
+ { "sub_auto_load",&sub_auto,CONF_TYPE_FLAG,0,0,1,NULL },
+ { "sub_unicode",&sub_unicode,CONF_TYPE_FLAG,0,0,1,NULL },
+ { "sub_pos",&sub_pos,CONF_TYPE_INT,CONF_RANGE,0,200,NULL },
+ { "font_factor",&font_factor,CONF_TYPE_FLOAT,CONF_RANGE,0.0,10.0,NULL },
+ { "font_name",&font_name,CONF_TYPE_STRING,0,0,0,NULL },
  
  { "gui_skin",&skinName,CONF_TYPE_STRING,0,0,0,NULL },
 
@@ -165,6 +150,10 @@ int cfg_write( void )
  char * cfg = get_path( "gui.conf" );
  FILE * f;
  int    i;
+
+#ifdef USE_SETLOCALE
+ setlocale( LC_ALL,"" );
+#endif
 
 // -- save configuration 
  if ( (f=fopen( cfg,"wt+" )) )
