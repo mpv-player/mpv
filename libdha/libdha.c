@@ -27,6 +27,9 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#ifdef ARCH_ALPHA
+#include <sys/io.h>
+#endif
 #include <unistd.h>
 
 /* instead exit() use libdha_exit, and do the 'mother-application' deinit
@@ -67,8 +70,12 @@ void libdha_exit(const char *message, int level)
 #include "kernelhelper/dhahelper.h"
 
 static int mem=-1;
-void *map_phys_mem(unsigned base, unsigned size)
+void *map_phys_mem(unsigned long base, unsigned long size)
 {
+#ifdef ARCH_ALPHA
+/* TODO: move it into sysdep */
+  base += bus_base();
+#endif
   if ( (mem = open("/dev/dhahelper",O_RDWR)) < 0)
   {
     if ( (mem = open(DEV_MEM,O_RDWR)) == -1) {
@@ -95,8 +102,12 @@ void *map_phys_mem(unsigned base, unsigned size)
 #else
 
 static int mem=-1;
-void *map_phys_mem(unsigned base, unsigned size)
+void *map_phys_mem(unsigned long base, unsigned long size)
 {    
+#ifdef ARCH_ALPHA
+/* TODO: move it into sysdep */
+  base += bus_base();
+#endif
   if ( (mem = open(DEV_MEM,O_RDWR)) == -1) {
     perror("libdha: open(/dev/mem) failed") ; exit(1) ;
   }
@@ -104,7 +115,7 @@ void *map_phys_mem(unsigned base, unsigned size)
 }
 #endif /* CONFIG_DHAHELPER */
 
-void unmap_phys_mem(void *ptr, unsigned size)
+void unmap_phys_mem(void *ptr, unsigned long size)
 {
   int res=munmap(ptr,size) ;
   if (res == -1) { perror("libdha: munmap() failed") ; exit(1) ; }

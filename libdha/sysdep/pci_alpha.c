@@ -11,7 +11,7 @@ static int pci_get_vendor(
           unsigned char dev,
           int func)
 {
-    int retval;
+    unsigned long retval;
     pciconfig_read(bus, dev<<3, PCI_ID_REG, 4, &retval);
     return retval;
 }
@@ -22,7 +22,7 @@ static long pci_config_read_long(
           int func, 
           unsigned cmd)
 {
-    long retval;
+    unsigned long retval;
     pciconfig_read(bus, dev<<3, cmd, 4, &retval);
     return retval;
 }

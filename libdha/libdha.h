@@ -55,8 +55,8 @@ extern void          OUTPORT16(unsigned idx,unsigned short val);
 extern void          OUTPORT32(unsigned idx,unsigned val);
 #define OUTPORT(idx,val) OUTPORT32(idx,val)
 
-extern void *  map_phys_mem(unsigned base, unsigned size);
-extern void    unmap_phys_mem(void *ptr, unsigned size);
+extern void *  map_phys_mem(unsigned long base, unsigned long size);
+extern void    unmap_phys_mem(void *ptr, unsigned long size);
 
 /*  These are the region types  */
 #define MTRR_TYPE_UNCACHABLE 0
