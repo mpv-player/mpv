@@ -83,8 +83,8 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     return control(af,AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET, vol);
   }
   case AF_CONTROL_POST_CREATE:	
-    s->fast = (((af_cfg_t*)arg)->force & AF_INIT_FORMAT_MASK) == 
-      AF_INIT_FLOAT ? 1 : 0;
+    s->fast = ((((af_cfg_t*)arg)->force & AF_INIT_FORMAT_MASK) == 
+      AF_INIT_FLOAT) ? 0 : 1;
     return AF_OK;
   case AF_CONTROL_VOLUME_ON_OFF | AF_CONTROL_SET:
     memcpy(s->enable,(int*)arg,AF_NCH*sizeof(int));
@@ -109,9 +109,12 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
   case AF_CONTROL_PRE_DESTROY:{
     float m = 0.0;
     int i;
-    for(i=0;i<AF_NCH;i++)
-      m=max(m,s->max[i]);
-    af_msg(AF_MSG_INFO,"The maximum volume was %0.2fdB \n",10*log10(m));
+    if(!s->fast){
+      for(i=0;i<AF_NCH;i++)
+	m=max(m,s->max[i]);
+      af_msg(AF_MSG_INFO,"[volume] The maximum volume was %0.2fdB \n",
+	     10*log10(m));
+    }
     return AF_OK;
   }
   }

@@ -279,14 +279,14 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     int rate=0;
     int type=RSMP_INT;
     int sloppy=1;
-    sscanf((char*)arg,"%i:%i:%i", &rate, &type, &sloppy);
+    sscanf((char*)arg,"%i:%i:%i", &rate, &sloppy, &type);
     s->setup = (sloppy?FREQ_SLOPPY:FREQ_EXACT) | 
       (clamp(type,RSMP_LIN,RSMP_FLOAT));
     return af->control(af,AF_CONTROL_RESAMPLE_RATE | AF_CONTROL_SET, &rate);
   }
   case AF_CONTROL_POST_CREATE:	
     if((((af_cfg_t*)arg)->force & AF_INIT_FORMAT_MASK) == AF_INIT_FLOAT)
-      ((af_resample_t*)af->setup)->setup |= RSMP_FLOAT;
+      ((af_resample_t*)af->setup)->setup = RSMP_FLOAT;
     return AF_OK;
   case AF_CONTROL_RESAMPLE_RATE | AF_CONTROL_SET: 
     // Reinit must be called after this function has been called
