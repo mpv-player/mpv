@@ -380,8 +380,8 @@ static void mga_vid_write_regs(int restore)
 	    // restore it
 	    colkey_saved=0;
 
-		printf("[mga] Restoring colorkey (ON: %d  %02X:%02X:%02X)\n",
-			colkey_on,colkey_color[0],colkey_color[1],colkey_color[2]);
+//		printf("[mga] Restoring colorkey (ON: %d  %02X:%02X:%02X)\n",
+//			colkey_on,colkey_color[0],colkey_color[1],colkey_color[2]);
 
 		// Set color key registers:
 		writeb( XKEYOPMODE, mga_mmio_base + PALWTADD);
@@ -430,8 +430,8 @@ static void mga_vid_write_regs(int restore)
 		writeb( XCOLMSK, mga_mmio_base + PALWTADD);
 		colkey_mask[3]=(unsigned char)readb(mga_mmio_base + X_DATAREG);
 
-		printf("[mga] Saved colorkey (ON: %d  %02X:%02X:%02X)\n",
-			colkey_on,colkey_color[0],colkey_color[1],colkey_color[2]);
+//		printf("[mga] Saved colorkey (ON: %d  %02X:%02X:%02X)\n",
+//			colkey_on,colkey_color[0],colkey_color[1],colkey_color[2]);
 
 	}
 	
@@ -471,6 +471,10 @@ if(!restore){
 			break;
 		}
 
+		// Enable colorkeying
+		writeb( XKEYOPMODE, mga_mmio_base + PALWTADD);
+		writeb( 1, mga_mmio_base + X_DATAREG);
+
 		// Disable color keying on alpha channel 
 		writeb( XCOLMSK, mga_mmio_base + PALWTADD);
 		writeb( 0x00, mga_mmio_base + X_DATAREG);
@@ -494,7 +498,12 @@ if(!restore){
 		writeb( XCOLMSK0BLUE, mga_mmio_base + PALWTADD);
 		writeb( 0xff, mga_mmio_base + X_DATAREG);
 	}
-
+	else
+	{
+		// Disable colorkeying
+		writeb( XKEYOPMODE, mga_mmio_base + PALWTADD);
+		writeb( 0, mga_mmio_base + X_DATAREG);
+	}
 }
 
 	// Backend Scaler
