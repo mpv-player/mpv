@@ -628,7 +628,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	  return(0);
 	}
       else {
-	ao_data.buffersize = err;
+	ao_data.buffersize = err * bytes_per_sample;
 	if (verbose>0)
 	  printf("alsa-init: got buffersize=%i\n", ao_data.buffersize);
       }
