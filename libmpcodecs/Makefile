@@ -10,7 +10,7 @@ AUDIO_SRCS_OPT=ad_acm.c ad_dshow.c ad_dmo.c ad_qtaudio.c ad_ffmpeg.c ad_faad.c a
 AUDIO_SRCS=dec_audio.c ad.c $(AUDIO_SRCS_LIB) $(AUDIO_SRCS_NAT) $(AUDIO_SRCS_OPT)
 
 VIDEO_SRCS_LIB=vd_libmpeg2.c vd_nuv.c vd_lzo.c
-VIDEO_SRCS_NAT=vd_null.c vd_cinepak.c vd_qtrpza.c vd_raw.c vd_msvidc.c vd_fli.c vd_qtrle.c vd_qtsmc.c vd_roqvideo.c vd_cyuv.c vd_msrle.c vd_huffyuv.c vd_mpegpes.c vd_svq1.c vd_lcl.c vd_mtga.c
+VIDEO_SRCS_NAT=vd_null.c vd_cinepak.c vd_qtrpza.c vd_raw.c vd_msvidc.c vd_fli.c vd_qtrle.c vd_qtsmc.c vd_roqvideo.c vd_cyuv.c vd_msrle.c vd_huffyuv.c vd_mpegpes.c vd_svq1.c vd_lcl.c vd_mtga.c vd_sgi.c
 VIDEO_SRCS_OPT=vd_realvid.c vd_ffmpeg.c vd_dshow.c vd_dmo.c vd_vfw.c vd_vfwex.c vd_odivx.c vd_divx4.c vd_xanim.c vd_xvid.c vd_libdv.c vd_qtvideo.c
 VIDEO_SRCS=dec_video.c vd.c $(VIDEO_SRCS_NAT) $(VIDEO_SRCS_LIB) $(VIDEO_SRCS_OPT)
 

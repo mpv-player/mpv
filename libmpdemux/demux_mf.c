@@ -98,7 +98,9 @@ demuxer_t* demux_open_mf(demuxer_t* demuxer){
      if ( !strcasecmp( mf_type,"png" )) sh_video->format = mmioFOURCC('M', 'P', 'N', 'G' );
   else
      if ( !strcasecmp( mf_type,"tga" )) sh_video->format = mmioFOURCC('M', 'T', 'G', 'A' );
-  else { mp_msg(MSGT_DEMUX, MSGL_INFO, "[demux_mf] unknow input file type.\n" ); free( mf ); return NULL; }
+   else
+     if (!strcasecmp( mf_type,"sgi" )) sh_video->format = mmioFOURCC('S', 'G', 'I', '1');
+  else { mp_msg(MSGT_DEMUX, MSGL_INFO, "[demux_mf] unknown input file type.\n" ); free( mf ); return NULL; }
 
   sh_video->disp_w = mf_w;
   sh_video->disp_h = mf_h;
