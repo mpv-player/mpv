@@ -89,16 +89,21 @@ static int control(int cmd,int arg){
   return CONTROL_UNKNOWN;
 }
 
+// return rounded 16bit int
+static inline int16_t lround16(double n){
+  return (int16_t)((n)>=0.0?(n)+0.5:(n)-0.5);
+}
+
 // 2nd order Band-pass Filter design
 void bp2(int16_t* a, int16_t* b, float fc, float q){
   double th=2*3.141592654*fc;
   double C=(1 - tan(th*q/2))/(1 + tan(th*q/2));
   
-  a[0] = (int16_t)( 16383.0 * (1 + C) * cos(th) + 0.5);
-  a[1] = (int16_t)(-16383.0 * C + 0.5);
+  a[0] = lround16( 16383.0 * (1 + C) * cos(th));
+  a[1] = lround16(-16383.0 * C);
   
-  b[0] = (int16_t)(-16383.0 * (C - 1)/2 + 0.5);
-  b[1] = (int16_t)(-16383.0 * 1.0050 + 0.5);
+  b[0] = lround16(-16383.0 * (C - 1)/2);
+  b[1] = lround16(-16383.0 * 1.0050);
 }
 
 // empty buffers
