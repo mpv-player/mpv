@@ -15,6 +15,7 @@
 #include <signal.h>
 #include <time.h>
 #include <fcntl.h>
+#include <limits.h>
 
 #include <errno.h>
 
@@ -766,7 +767,7 @@ int gui_no_filename=0;
       play_tree_iter_free(playtree_iter);
       playtree_iter=NULL;
       
-      if (getcwd(cwd, MAXPATHLEN) != (char *)NULL)
+      if (getcwd(cwd, PATH_MAX) != (char *)NULL)
       {
 	  strcat(cwd, "/");
           // Prefix relative paths with current working directory
