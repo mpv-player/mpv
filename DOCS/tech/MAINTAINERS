@@ -47,7 +47,7 @@ Platforms/ports: (see also DOCS/tech/porting-status.txt)
     * OpenBSD support: Björn Sandell
     * Solaris 8 support: Jürgen Keil, Pierre Lombard
     * MIPS support: Oliver Schoenbrunner
-    * Win32/Cygwin/MinGW support: Sascha Sommer, Atmosfear, Diego Biurrun
+    * Win32/Cygwin/MinGW support: Sascha Sommer, Joey Parrish, Diego Biurrun
 
 MPlayer code:
     * A-V sync code, MPlayer/MEncoder core: Alex Beregszaszi
@@ -99,8 +99,8 @@ libvo drivers:
     * vo_mpegpes.c - None
     * vo_null.c - None
     * vo_pgm.c - None
-    * vo_png.c - Felix Bunemann
-    * vo_sdl.c - Felix Bunemann
+    * vo_png.c - Felix Bünemann
+    * vo_sdl.c - Felix Bünemann
     * vo_svga.c - None
     * vo_tdfxfb.c - Alban Bedel
     * vo_tga.c - Daniele Forghieri
