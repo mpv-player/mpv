@@ -1,3 +1,5 @@
+#include "config.h"
+
 #ifdef USE_STREAM_CACHE
 // gcc cache2.c ../linux/shmem.o -o cache2
 
