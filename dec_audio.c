@@ -305,6 +305,7 @@ case AFM_PCM: {
     case 0x7:  sh_audio->sample_format=AFMT_MU_LAW;break;
     case 0x11: sh_audio->sample_format=AFMT_IMA_ADPCM;break;
     case 0x50: sh_audio->sample_format=AFMT_MPEG;break;
+    case 0x736F7774: sh_audio->sample_format=AFMT_S16_LE;sh_audio->codec->driver=AFM_DVDPCM;break;
 //    case 0x2000: sh_audio->sample_format=AFMT_AC3;
     default: sh_audio->sample_format=(sh_audio->samplesize==2)?AFMT_S16_LE:AFMT_U8;
     }
