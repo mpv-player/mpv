@@ -32,7 +32,7 @@
    slow and to 16 if the machine is fast and has MMX.  
 */
 
-#if defined(HAVE_SSE) && !defined(HAVE_3DNOW) // This machine is slow
+#if !defined(HAVE_SSE) && !defined(HAVE_3DNOW) // This machine is slow
 
 #define L   	8	// Filter length
 // Unrolled loop to speed up execution 
