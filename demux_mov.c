@@ -26,8 +26,9 @@ typedef struct {
 } mov_sample_t;
 
 typedef struct {
-    unsigned int size; // samples/chunk
-    int desc;          // for multiple codecs mode - not used
+    unsigned int sample; // number of the first sample in teh chunk
+    unsigned int size;   // number of samples in the chunk
+    int desc;            // for multiple codecs mode - not used
     off_t pos;
 } mov_chunk_t;
 
@@ -38,14 +39,22 @@ typedef struct {
 } mov_chunkmap_t;
 
 typedef struct {
+    unsigned int num;
+    unsigned int dur;
+} mov_durmap_t;
+
+typedef struct {
     int id;
     int type;
     int pos;
     //
     int timescale;
     unsigned int length;
+    int samplesize;  // 0 = variable
+    int duration;    // 0 = variable
     int width,height; // for video
     unsigned int fourcc;
+    //
     int tkdata_len;  // track data 
     unsigned char* tkdata;
     int stdata_len;  // stream data
@@ -56,11 +65,14 @@ typedef struct {
     mov_chunk_t* chunks;
     int chunkmap_size;
     mov_chunkmap_t* chunkmap;
+    int durmap_size;
+    mov_durmap_t* durmap;
 } mov_track_t;
 
 void mov_build_index(mov_track_t* trak){
     int i,j,s;
     int last=trak->chunks_size;
+    unsigned int pts=0;
     printf("MOV track: %d chunks, %d samples\n",trak->chunks_size,trak->samples_size);
     printf("pts=%d  scale=%d  time=%5.3f\n",trak->length,trak->timescale,(float)trak->length/(float)trak->timescale);
     // process chunkmap:
@@ -72,6 +84,30 @@ void mov_build_index(mov_track_t* trak){
 	    trak->chunks[j].size=trak->chunkmap[i].spc;
 	}
 	last=trak->chunkmap[i].first;
+    }
+
+    // calc pts of chunks:
+    s=0;
+    for(j=0;j<trak->chunks_size;j++){
+        trak->chunks[j].sample=s;
+        s+=trak->chunks[j].size;
+    }
+
+    if(!trak->samples_size){
+	// constant sampesize
+	if(trak->durmap_size==1 || (trak->durmap_size==2 && trak->durmap[1].num==1)){
+	} else printf("*** constant samplesize & variable duration not yet supported! ***\nContact the author if you have such sample file!\n");
+	return;
+    }
+    
+    // calc pts:
+    s=0;
+    for(j=0;j<trak->durmap_size;j++){
+	for(i=0;i<trak->durmap[j].num;i++){
+	    trak->samples[s].pts=pts;
+	    ++s;
+	    pts+=trak->durmap[j].dur;
+	}
     }
     
     // calc sample offsets
@@ -242,22 +278,13 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		int x=0;
 		unsigned int pts=0;
 		mp_msg(MSGT_DEMUX,MSGL_V,"MOV: %*sSample duration table! (%d blocks)\n",level,"",len);
+		trak->durmap=malloc(sizeof(mov_durmap_t)*len);
+		memset(trak->durmap,0,sizeof(mov_durmap_t)*len);
+		trak->durmap_size=len;
 		for(i=0;i<len;i++){
-		    unsigned int num=stream_read_dword(demuxer->stream);
-		    unsigned int dur=stream_read_dword(demuxer->stream);
-		    printf("num=%d  dur=%d  [%d] (%d)\n",num,dur,trak->samples_size,x);
-		    num+=x;
-		    // extend array if needed:
-		    if(num>trak->samples_size){
-			trak->samples=realloc(trak->samples,sizeof(mov_sample_t)*num);
-			trak->samples_size=num;
-		    }
-		    // fill array:
-		    while(x<num){
-			trak->samples[x].pts=pts;
-			pts+=dur;
-			++x;
-		    }
+		    trak->durmap[i].num=stream_read_dword(demuxer->stream);
+		    trak->durmap[i].dur=stream_read_dword(demuxer->stream);
+		    pts+=trak->durmap[i].num*trak->durmap[i].dur;
 		}
 		if(trak->length!=pts) printf("Warning! pts=%d  length=%d\n",pts,trak->length);
 		break;
@@ -281,15 +308,15 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		int temp=stream_read_dword(demuxer->stream);
 		int ss=stream_read_dword(demuxer->stream);
 		int len=stream_read_dword(demuxer->stream);
-		int i;
 		mp_msg(MSGT_DEMUX,MSGL_V,"MOV: %*sSample size table!  len=%d  ss=%d\n",level,"",len,ss);
-		// extend array if needed:
-		if(len>trak->samples_size){
+		trak->samplesize=ss;
+		if(!ss){
+		    // variable samplesize
+		    int i;
 		    trak->samples=realloc(trak->samples,sizeof(mov_sample_t)*len);
 		    trak->samples_size=len;
-		}
-		for(i=0;i<len;i++){
-		    trak->samples[i].size=ss?ss:stream_read_dword(demuxer->stream);
+		    for(i=0;i<len;i++)
+			trak->samples[i].size=stream_read_dword(demuxer->stream);
 		}
 		break;
 	    }
@@ -342,6 +369,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		sh_audio_t* sh=new_sh_audio(demuxer,priv->track_db);
 		sh->format=trak->fourcc;
 		printf("!!! audio bits: %d  chans: %d\n",trak->stdata[19],trak->stdata[17]);
+		printf("Fourcc: %.4s\n",&trak->fourcc);
 		// Emulate WAVEFORMATEX struct:
 		sh->wf=malloc(sizeof(WAVEFORMATEX));
 		memset(sh->wf,0,sizeof(WAVEFORMATEX));
@@ -377,6 +405,8 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		sh->bih->biSizeImage=sh->bih->biWidth*sh->bih->biHeight;
 
 		printf("Image size: %d x %d\n",sh->disp_w,sh->disp_h);
+		printf("Fourcc: %.4s  Codec: '%.*s'\n",&trak->fourcc,trak->stdata_len-43,trak->stdata+43);
+		
 		if(demuxer->video->id==-1 || demuxer->video->id==priv->track_db){
 		    // (auto)selected video track:
 		    demuxer->video->id=priv->track_db;
@@ -429,13 +459,21 @@ int demux_mov_fill_buffer(demuxer_t *demuxer,demux_stream_t* ds){
     if(ds->id<0 || ds->id>=priv->track_db) return 0;
     trak=priv->tracks[ds->id];
 
+if(trak->samplesize){
+    // read chunk:
+    if(trak->pos>=trak->chunks_size) return 0; // EOF
+    stream_seek(demuxer->stream,trak->chunks[trak->pos].pos);
+    pts=(float)(trak->chunks[trak->pos].sample*trak->duration)/(float)trak->timescale;
+    ds_read_packet(ds,demuxer->stream,trak->chunks[trak->pos].size*trak->samplesize,pts,trak->chunks[trak->pos].pos,0);
+} else {
     // read sample:
     if(trak->pos>=trak->samples_size) return 0; // EOF
-    
     stream_seek(demuxer->stream,trak->samples[trak->pos].pos);
     pts=(float)trak->samples[trak->pos].pts/(float)trak->timescale;
     ds_read_packet(ds,demuxer->stream,trak->samples[trak->pos].size,pts,trak->samples[trak->pos].pos,0);
+}
     ++trak->pos;
+
     return 1;
     
 }
