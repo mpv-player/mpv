@@ -2536,15 +2536,16 @@ Rotates and flips (optional) the image +/\:- 90 degrees.
 For parameters between 4\-7 rotation is only done if the movie's geometry is
 portrait and not landscape.
 .TP
-.B scale[=w:h[:i[:c[:p]]]]
+.B scale[=w:h[:interlaced[:chr_drop[:param[:presize]]]]]
 Scales the image with the software scaler (slow) and performs a YUV<\->RGB
 colorspace conversion (also see \-sws option).
 .RSs
-.IPs w,h
-new width/height after scaling (default: original width,height)
+.IPs w,h\ \ 
+scaled width/height (default: original width/height)
+.br
 .I NOTE:
 If \-zoom is used, and underlying filters (including libvo) are
-incapable of scaling, then it defaults to d_width/\:d_height!
+incapable of scaling, it defaults to d_width/\:d_height!
 .RSss
  0:   scaled d_width/\:d_height
 .br
@@ -2554,9 +2555,9 @@ incapable of scaling, then it defaults to d_width/\:d_height!
 .br
 -3:   Calculate w/\:h using the other dimension and the original aspect ratio.
 .REss
-.IPs i
-interlaced flag
-.IPs c
+.IPs interlaced
+Toggle interlaced scaling.
+.IPs chr_drop
 chroma skipping
 .RSss
 0: use all available input lines for chroma
@@ -2567,7 +2568,7 @@ chroma skipping
 .br
 3: use only every 8. input line for chroma
 .REss
-.IPs p
+.IPs param
 scaling parameter (depends upon the scaling method used)
 .RSss
 \-sws 2 (bicubic):  sharpness (0 (soft) \- 100 (sharp))
@@ -2575,6 +2576,21 @@ scaling parameter (depends upon the scaling method used)
 \-sws 7 (gaussian): sharpness (0 (soft) \- 100 (sharp))
 .br
 \-sws 9 (lanczos):  filter length (1\-10)
+.REss
+.IPs presize
+Scale to preset sizes.
+.RSss
+qntsc:   352x240 (NTSC quarter screen)
+.br
+qpal:    352x288 (PAL quarter screen)
+.br
+ntsc:    720x480 (standard NTSC)
+.br
+pal:     720x576 (standard PAL)
+.br
+sntsc:   640x480 (square pixel NTSC)
+.br
+spal:    768x576 (square pixel PAL)
 .REss
 .RE
 .TP
@@ -3925,6 +3941,18 @@ adjust
 .B fast\ \ \ 
 switch on faster encoding on subsequent VBR presets modes, slightly lower 
 quality and higher bitrates.
+.TP
+.B highpassfreq=<freq>
+Set a highpass filtering frequency in Hz.
+Frequencies below the specified one will be cut off.
+A value of -1 will disable filtering, a value of 'auto'
+will let lame choose values automatically.
+.TP
+.B lowpassfreq=<freq>
+Set a lowpass filtering frequency in Hz.
+Frequencies above the specified one will be cut off.
+A value of -1 will disable filtering, a value of 'auto'
+will let lame choose values automatically.
 .TP
 .B preset=<value>
 preset values
