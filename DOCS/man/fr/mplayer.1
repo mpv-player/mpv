@@ -1,4 +1,4 @@
-.\" synced with 1.715
+.\" synced with 1.718
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "9 Août 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "15 Septembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -1812,9 +1812,6 @@ de la première carte, quatrième périphérique (ouf\ ! ;-).
 .PD 1
 .
 .sp 1
-FIXME: Documenter les sous-options de  sdl, arts, esd, jack, nas, macosx,
-sgi, sun, dxr2, mpegpes, null, pcm, plugin.
-.sp 1
 Les pilotes de sorties audio sont\ :
 .
 .TP
@@ -1861,6 +1858,13 @@ Définit le périphérique audio d'entrée (/dev/\:dsp par defaut).
 Pilote de sortie audio de la librairie SDL.
 SDL (Simple Directmedia Layer) est une librairie très indépendante de la
 plateforme.
+.PD 0
+.RSs
+.IPs <pilote>
+Choisit explicitement le pilote SDL à utiliser (par défaut\ : SDL choisit
+tout seul).
+.RE
+.PD 1
 .
 .TP
 .B arts\ \ \ 
@@ -1869,6 +1873,12 @@ Sortie audio par le démon Arts.
 .TP
 .B esd\ \ \ \ 
 Sortie audio par le démon ESD.
+.PD 0
+.RSs
+.IPs <serveur>
+Choisit explicitement le serveur ESD (par défaut\ : localhost).
+.RE
+.PD 1
 .
 .TP
 .B jack\ \ \ \ 
@@ -1889,6 +1899,13 @@ Pilote de sortie audio natif de SGI.
 .TP
 .B sun (Sun uniquement)
 Pilote de sortie audio natif de Sun.
+.PD 0
+.RSs
+.IPs <pilote>
+Choisit explicitement le périphérique audio à utiliser (par défaut\ :
+/dev/\:audio).
+.RE
+.PD 1
 .
 .TP
 .B win32 (Windows uniquement)
@@ -2398,11 +2415,6 @@ Essaie le pilote Matrox X11, puis le pilote Xv, puis les autres.
 Utilise le pilote DirectX en désactivant les fonctions d'accélération.
 .RE
 .PD 1
-.
-.sp 1
-FIXME: Documenter les sous-options de x11, xover, dga, sdl, vidix, xvidix,
-fbdev, fbdev2, vesa, aa, bl, ggi, mga, xmga, syncfb, 3dfx, tdfx_vid,
-tdfxfb, dxr2, dxr3, mpegpes, zr, zr2.
 .sp 1
 Les pilotes de sortie disponibles sont:
 .
@@ -2428,7 +2440,14 @@ fonctionne dès que X11 est présent.
 .B xover (X11 uniquement)
 Ajoute la gestion de X11 à tous les pilotes de sortie vidéo basés sur
 l'overlay.
-Actuellement uniquement utilisé par tdfx_vid.
+Géré actuellement uniquement par tdfx_vid.
+.PD 0
+.RSs
+.IPs <pilote_vo>
+Sélectionnne le pilote à utiliser comme source pour l'overlay au-dessus
+de X11.
+.RE
+.PD 1
 .
 .TP
 .B xvmc (X11, \-vc ffmpeg12mc uniquement)
@@ -2461,11 +2480,17 @@ XFree86.
 Considéré comme obsolète.
 .
 .TP
-.B sdl (SDL uniquement)
+.B sdl (voir aussi \-forcexv, \-noxv) (SDL uniquement)
 Pilote de sortie vidéo de la librairie multi-plateforme SDL (Simple
 Directmedia Layer).
 Étant donné que SDL dispose de sa propre couche X11, les options X11 de
 MPlayer n'ont aucun effet sur SDL.
+.PD 0
+.RSs
+.IPs <pilote>
+Choisit explicitement le pilote SDL à utiliser.
+.RE
+.PD 1
 .
 .TP
 .B vidix\ \ 
@@ -2527,11 +2552,26 @@ Choisir le moniteur à utiliser en plein écran.
 .TP
 .B fbdev (Linux uniquement)
 Utilise le framebuffer du noyau pour afficher la vidéo.
+.PD 0
+.RSs
+.IPs <périph>
+Choisit explicitement le périphérique fbdev à utiliser (par ex.\& /dev/\:fb0)
+ou le nom du sous-périphérique vidix si le nom de périphérique commence
+par vidix (par ex.\& vidixsis_vid pour utiliser le pilote sis).
+.RE
+.PD 1
 .
 .TP
 .B fbdev2 (Linux uniquement)
 Utilise le framebuffer du noyau pour afficher la vidéo,
 implémentation différente.
+.PD 0
+.RSs
+.IPs <périph>
+Choisit explicitement le périphérique fbdev à utiliser (par défaut\ :
+/dev/\:fb0).
+.RE
+.PD 1
 .
 .TP
 .B vesa\ \ \ 
@@ -2543,10 +2583,14 @@ carte compatible VESA VBE 2.0.
 Active le mode DGA.
 .IPs nodga
 Désactive le mode DGA.
+.IPs neotv_pal
+Active la sortie TV NeoMagic et la configure en norme PAL.
+.IPs neotv_ntsc
+Active la sortie TV NeoMagic et la configure en norme NTSC.
 .IPs vidix
-FIXME: documenter cela
-.IPs lvo\ \ 
-FIXME: documenter cela
+Utilise le pilote VIDIX
+.IPs lvo:\ \ \ 
+Active le "Linux Video Overlay" au-dessus du mode VESA.
 .RE
 .PD 1
 .
@@ -2584,7 +2628,7 @@ votre implémentation d'OpenGL.
 Faite pour fonctionner même avec l'implémentation la plus simple l'OpenGL.
 .PD 0
 .RSs
-.IPs manyfmts
+.IPs (no)manyfmts
 Active la gestion de plus de formats de couleurs (RGB and BGR).
 Nécessite une version d'OpenGL >= 1.2, ne FONCTIONNE PAS encore correctement.
 .IPs slice-height=<0\-...>
@@ -2605,7 +2649,7 @@ Pas de sortie vidéo.
 Utile pour les benchmarks.
 .
 .TP
-.B aa\ \ \ \ \ 
+.B aa (voir aussi \-aa*)
 Pilote de sortie vidéo art ASCII fonctionnant dans une console texte.
 .
 .TP
@@ -2616,11 +2660,25 @@ texte.
 .TP
 .B bl\ \ \ \ \ 
 Lecture vidéo en utilisant le protocole UDP Blinkenlights.
-Ce pilote est hautement spécifique à certains matériels.
+Ce pilote est très dépendant du matériel.
+.PD 0
+.RSs
+.IPs <sous-périph>
+Choisit explicitement le sous-périphérique Blinkenlights à utiliser (par ex.\&
+arcade:host=localhost:2323 ou hdl:file=nom1,file=nom2).
+Vous devez définir un sous-périphérique.
+.RE
+.PD 1
 .
 .TP
 .B ggi\ \ \ \ 
 Pilote de sortie vidéo pour le système graphique GGI.
+.PD 0
+.RSs
+.IPs <pilote>
+Choisit explicitement le pilote GGI à utiliser.
+.RE
+.PD 1
 .
 .TP
 .B directfb
@@ -2702,10 +2760,25 @@ Pilote de sortie vidéo spécifique aux cartes Matrox utilisant le mécanisme
 de changement de taille (scaling) en espace de couleur YUV sur les cartes
 Gxxx au moyen d'un module noyau.
 Si vous avez une carte Matrox, c'est l'option la plus rapide.
+If you have a Matrox card, this is the fastest option.
+.PD 0
+.RSs
+.IPs <périph>
+Choisit explicitement le périphérique Matrox à utiliser (par defaut\ :
+/dev/\:mga_vid).
+.RE
+.PD 1
 .
 .TP
 .B xmga (Linux, X11 uniquement)
 Le pilote de sortie vidéo MGA, tournant dans une fenêtre X11.
+.PD 0
+.RSs
+.IPs <périph>
+Choisit explicitement le périphérique Matrox à utiliser (par defaut\ :
+/dev/\:mga_vid).
+.RE
+.PD 1
 .
 .TP
 .B syncfb\ 
@@ -2717,29 +2790,43 @@ avec la fréquence de rafraichissement verticale de votre moniteur.
 .TP
 .B 3dfx (Linux uniquement)
 Pilote de sortie vidéo spécifique aux cartes 3Dfx.
-FIXME: Quelle difference y a-t-il entre 3dfx, tdfxfb et tdfx_vid?
+Ce pilote exploite directement les circuits matériels 3Dfx sous X11.
+Ne gère que le 16 bits/pixel.
+FIXME: Meilleure explication des differences entre 3dfx, tdfxfb et tdfx_vid?
 .
 .TP
 .B tdfxfb (Linux uniquement)
 Ce pilote utilise le pilote framebuffer tdfx pour jouer les films avec
-accélération YUV.
-FIXME: Quelle difference y a-t-il entre 3dfx, tdfxfb et tdfx_vid?
+accélération YUV des 3Dfx.
+FIXME: Meilleure explication des differences entre 3dfx, tdfxfb et tdfx_vid?
+.PD 0
+.RSs
+.IPs <périph>
+Choisit explicitement le périphérique fbdev à utiliser (par défaut\ :
+/dev/\:fb0).
+.RE
+.PD 1
 .
 .TP
 .B tdfx_vid (Linux uniquement)
 Pilote de sortie vidéo spécifique aux cartes 3Dfx.
-Fonctionne en conjonction avec un module noyau.
-FIXME: Quelle difference y a-t-il entre 3dfx, tdfxfb et tdfx_vid?
+Ce pilote utilise directement le module noyau tdfx_vid.
+FIXME: Meilleure explication des differences entre 3dfx, tdfxfb et tdfx_vid?
+.PD 0
+.RSs
+.IPs <périph>
+Choisit explicitement le périphérique à utiliser (par défaut\ :
+/dev/\:tdfx_vid).
+.RE
+.PD 1
 .
 .TP
 .B dxr2 (voir aussi \-dxr2) (DXR2 uniquement)
 Pilote de sortie vidéo spécifique aux cartes Creative DXR2.
 .PD 0
 .RSs
-.IPs x11
-Active l'overlay.
-.IPs xv
-Active l'overlay.
+.IPs <pilote_vo>
+Définit le sous-pilote à utiliser pour l'overlay (x11, xv)
 .RE
 .PD 1
 .
@@ -2771,7 +2858,7 @@ Spécifie la norme TV.
 .br
 5: NTSC
 .REss
-.IPs device=<nombre>
+.IPs 0\ 1\ 2\ 3\ 
 Définit le numéro de périphérique à utiliser si vous avez plus d'une carte
 em8300.
 .RE
@@ -2779,12 +2866,16 @@ em8300.
 .
 .TP
 .B mpegpes (DVB uniquement)
-Pilote de sortie vidéo spécifique DVB.
-PD 0
+Pilote de sortie vidéo spécifique DVB ou écriture au format MPEG-PES dans
+un fichier.
+.PD 0
 .RSs
 .IPs card=<1\-4>
 Définit le numéro de périphérique à utiliser si vous avez plus d'une carte
 DVB (API V3 uniquement, comme la série de pilotes 1.x.y).
+.IPs <nom_fichier>
+Si vous n'avez pas de carte DVB, ce pilote de sortie vidéo redirige la sortie
+dans le fichier <nom_fichier> au format MPEG-PES (par défaut\ : ./grab.mpg).
 .RE
 .PD 1
 .
@@ -2798,6 +2889,20 @@ MJPEG.
 Pilote de sortie vidéo pour un certain nombre de cartes de capture/\:lecture
 MJPEG, seconde génération.
 Voir aussi le filtre vidéo zrmjpeg.
+.PD 0
+.RSs
+.IPs dev=<périph>
+Définit le périphérique à utiliser.
+.IPs PAL\ \ \ 
+Active la norme vidéo PAL.
+.IPs SECAM
+Active la norme vidéo SECAM.
+.IPs NTSC\ \ \ 
+Active la norme vidéo NTSC.
+.IPs prebuf
+Active le pré-tamponnage (prebuffering), non géré pour le moment.
+.RE
+.PD 1
 .
 .TP
 .B md5\ \ \ \ 
@@ -2827,7 +2932,7 @@ Entrelace les trames de sortie, en commençant par les champs du bas.
 .REss
 .PD 1
 .RS
-.br
+.sp 1
 .I NOTE\ :
 Si vous ne définissez pas d'options, sortie sera "progressive"
 (c-à-d non entrelacée).
@@ -2840,19 +2945,26 @@ Ne gère que le format RGB avec 24 bits/pixel en entrée et est limité en
 sortie à 256 couleurs.
 .PD 0
 .RSs
-.IPs fps\ \ \ 
+.IPs <fps>\ \ \ 
 Valeur flottante pour définir le nombre de trames/sec (framerate)
 (par défaut\ : 5.0).
-.IPs filename
+.IPs <nom_fichier>
 Définit le nom du fichier de sortie (par défaut\ : ./out.gif).
 .REss
 .PD 1
 .RS
-.br
+.sp 1
 .I NOTE\ :
 Vous devez définir le framerate avant le nom du fichier de sortie pour que
 le framerate ne soit pas inclus dans le nom du fichier.
+.sp 1
+.I EXEMPLE\ :
 .RE
+.PD 0
+.RSs
+mplayer video.nut \-vo gif89a:15.0:test.gif
+.RE
+.PD 1
 .
 .TP
 .B jpeg\ \ \ 
@@ -2898,7 +3010,6 @@ car les plans Y, U, V sont juxtaposés.
 Aux coordonnées (0,0) jusqu'à (largeur,hauteur) est le plan Y,
 aux coordonnées (0,hauteur) jusqu'à (largeur/2,hauteur/2) est le plan U et
 à (largeur/2,hauteur) jusqu'à (largeur/2,hauteur/2) est le plan V.
-Il n'y a pas de sous-options.
 .
 .TP
 .B png (voir aussi \-z)
@@ -2906,24 +3017,22 @@ Sépare chaque trame dans un fichier PNG du réperoire courant.
 Le nom de chaque fichier contient le numéro de trame, précédé au besoin par
 des zéros.
 Ne gère que les formats RGB et BGR 24 bits/pixel.
-Il n'y a pas de sous-options.
 .
 .TP
 .B tga\ \ \ \ 
-sépare chaque trame dans un fichier Targa du réperoire courant.
+Sépare chaque trame dans un fichier Targa du réperoire courant.
 Le nom de chaque fichier contient le numéro de trame, précédé au besoin par
 des zéros.
 L'intérêt de ce pilote de sortie vidéo est de pouvoir facilement extraire
 sans perte des images sans l'aide d'une librairie externe.
 Ne gère que les formats BGR[A] à 15, 24 ou 32 bits/pixel.
-Il n'y a pas de sous-options.
 Vous pouvez forcez un certain format avec le filtre vidéo format.
 .sp 1
 .I EXEMPLE\ :
+.RE
 .PD 0
 .RSs
-.IPs "\-vf format=bgr15"
-Sauve les images avec deux octets par pixel.
+mplayer video.nut \-vf format=bgr15 \-vo tga
 .RE
 .PD 1
 .
@@ -6704,11 +6813,11 @@ Généralement, on peut se contenter d'utiliser les options aspect et
 autoaspect.
 .
 .TP
-.B par_width=<1..255> (par=ext uniquement)
+.B par_width=<1\-255> (par=ext uniquement)
 Définit la largeur du PAR particulier.
 .
 .TP
-.B par_height=<1...255> (par=ext uniquement)
+.B par_height=<1\-255> (par=ext uniquement)
 Définit la hauteur du PAR particulier.
 .
 .TP
@@ -6780,7 +6889,7 @@ Utilise un filtre atténuant l'effet de blocs (deblocking)
 (par défaut\ : activé).
 .
 .TP
-.B deblockalpha=<-6-6>
+.B deblockalpha=<-6\-6>
 Paramètre alphaC0 du filtre de deblocking (par défaut\ : 0).
 Il détermine les seuils du filtre de deblocking de H.264.
 Tout d'abord, cette option détermine à quel point le filtre peut modifier
@@ -6790,12 +6899,12 @@ filtrés.
 Une valeur positive réduit les artefacts de blocking, mais réduira les détails.
 .
 .TP
-.B deblockbeta=<-6-6>
+.B deblockbeta=<-6\-6>
 Paramètre beta du filtre de deblocking (par défaut\ : 0).
 Affecte le gradient maximum autorisé entre deux blocs adjacents
 .
-.TP\ \ \ 
-.B cabac
+.TP
+.B cabac\ \ \ 
 Utilise CABAC (codage de l'information adaptée en fonction du contexte\ :
 Context-Adaptive Binary Arithmetic Coding)
 .
@@ -6819,7 +6928,7 @@ FIXME: indiquer ce que signifie IDC.
 .REss
 .
 .TP
-.B qp_constant=<2-51>
+.B qp_constant=<2\-51>
 Défini le quantificateur à utiliser.
 Une valeur comprise dans l'intervalle 20-40 semble convenir
 (par défaut\ : 26).
@@ -6832,12 +6941,12 @@ Les quantificateurs utiles en H.264 ont tendance à être bien plus importants
 comparés à MPEG[124].
 .
 .TP
-.B qp_min=<2-51> (CBR uniquement)
-Quantificateur minimum.
-Une valeur comprise dans l'intervalle 15-35 semble convenir (par défaut\ : 10)
+.B qp_min=<2\-51> (CBR uniquement)
+Quantificateur minimum, 15\-35 semble être un intervalle raisonnable
+(par défaut\ : 10).
 .
 .TP
-.B qp_max=<2-51> (CBR uniquement)
+.B qp_max=<2\-51> (CBR uniquement)
 quantificateur maximum (par défaut\ : 51)
 .
 .TP
@@ -6856,7 +6965,7 @@ FIXME: expliquer ce que veut dire ratecontrol
 taille initiale du tampon ratecontrol (par défaut\ : 1/4 de rc_buffer_size)
 .
 .TP
-.B rc_sens=<0-100>
+.B rc_sens=<0\-100>
 sensibilité du ratecontrol (default: 4)
 .
 .TP
@@ -6873,13 +6982,13 @@ Active le mode 2-passes.
 La première passe est celle qui récolte des statistiques sur le vidéo.
 .
 .TP
-.B qcompress=<0-1>
+.B qcompress=<0\-1>
 compression des quantificateurs (par défaut\ : 0.6)
 Cela affecte le ratecontrol\ : une faible valeur rend le débit binaire plus
 contant, alors qu'une valeur importante rend les quantificateurs plus contants.
 .
 .TP
-.B qblur=<0-99>
+.B qblur=<0\-99>
 Flou temporel entre les quantificateurs (par défaut\ : 0.5).
 Une faible valeur permet aux quantificateurs de voir leur valeur varier plus
 d'une trame à l'autre\ ; une valeur forte oblige la variation à être plus
@@ -6891,7 +7000,7 @@ Utilise tous les méthodes d'analyse inter-trames (i4x4, psub8x8, psub16x16)
 (par défaut\ : 4x4, psub16x16).
 .
 .TP
-.B log=<-1-3>
+.B log=<-1\-3>
 Ajuste la quantité d'informations de log à afficher à l'écran.
 .RSs
 -1: aucune
