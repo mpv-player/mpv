@@ -4,7 +4,8 @@ KERNEL_INCLUDES = /usr/src/linux/include
 INCLUDES = -I$(KERNEL_INCLUDES)
 CFLAGS = -g -O2  -Wall -D__KERNEL__  -DMODULE  	 -include $(KERNEL_INCLUDES)/linux/modversions.h
 
-all: mga_vid.o mga_vid_test sis_vid.o
+all: mga_vid.o mga_vid_test
+# sis_vid.o
 
 mga_vid.o: mga_vid.c mga_vid.h
 	$(CC) $(CFLAGS) $(INCLUDES) -c $(basename $@).c

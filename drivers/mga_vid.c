@@ -1,4 +1,8 @@
 // YUY2 support (see config.format) added by A'rpi/ESP-team
+// double buffering added by A'rpi/ESP-team
+
+// Set this value, if autodetection fails! (video ram size in megabytes)
+//#define MGA_MEMORY_SIZE 32
 
 /*
  *
@@ -48,7 +52,7 @@
 
 #define MGA_VID_MAJOR 178
 
-#define MGA_VIDMEM_SIZE mga_ram_size
+//#define MGA_VIDMEM_SIZE mga_ram_size
 
 #ifndef PCI_DEVICE_ID_MATROX_G200_PCI 
 #define PCI_DEVICE_ID_MATROX_G200_PCI 0x0520
@@ -139,9 +143,10 @@ static uint32_t vid_overlay_on = 0;
 
 static uint8_t *mga_mmio_base = 0;
 static uint32_t mga_mem_base = 0; 
-static uint32_t mga_src_base = 0;
 
-static uint32_t mga_ram_size = 0;
+static int mga_src_base = 0;	// YUV buffer position in video memory
+
+static uint32_t mga_ram_size = 0;	// how much megabytes videoram we have
 
 static struct pci_dev *pci_dev;
 
@@ -349,7 +354,7 @@ static int mga_vid_set_config(mga_vid_config_t *config)
 {
 	int x, y, sw, sh, dw, dh;
 	int besleft, bestop, ifactor, ofsleft, ofstop, baseadrofs, weight, weights;
-	int frame_size;
+	int frame_size=config->frame_size;
 	x = config->x_org;
 	y = config->y_org;
 	sw = config->src_width;
@@ -365,7 +370,7 @@ static int mga_vid_set_config(mga_vid_config_t *config)
 	//FIXME figure out a better way to allocate memory on card
 	//allocate 2 megs
 	//mga_src_base = mga_mem_base + (MGA_VIDMEM_SIZE-2) * 0x100000;
-	mga_src_base = (MGA_VIDMEM_SIZE-3) * 0x100000;
+	//mga_src_base = (MGA_VIDMEM_SIZE-3) * 0x100000;
 
 	
 	//Setup the BES registers for a three plane 4:2:0 video source 
@@ -406,6 +411,7 @@ switch(config->format){
 	regs.besglobctl = 0;        // YUY2 format selected
         break;
     default:
+	printk("mga_vid: Unsupported pixel format: 0x%X\n",config->format);
 	return -1;
 }
 
@@ -440,12 +446,14 @@ switch(config->format){
 	regs.besviscal = ifactor<<2;
 
 	baseadrofs = ((ofstop*regs.besviscal)>>16)*regs.bespitch;
-	frame_size = ((sw + 31) & ~31) * sh + (((sw + 31) & ~31) * sh) / 2;
+	//frame_size = ((sw + 31) & ~31) * sh + (((sw + 31) & ~31) * sh) / 2;
 	regs.besa1org = (uint32_t) mga_src_base + baseadrofs;
 	regs.besa2org = (uint32_t) mga_src_base + baseadrofs + 1*frame_size;
 	regs.besb1org = (uint32_t) mga_src_base + baseadrofs + 2*frame_size;
 	regs.besb2org = (uint32_t) mga_src_base + baseadrofs + 3*frame_size;
 
+if(config->format==MGA_VID_FORMAT_YV12){
+        // planar YUV frames:
 	if (is_g400) 
 		baseadrofs = (((ofstop*regs.besviscal)/4)>>16)*regs.bespitch;
 	else 
@@ -459,6 +467,7 @@ switch(config->format){
 	regs.besa2c3org = regs.besa2corg + ((regs.bespitch * sh) / 4);
 	regs.besb1c3org = regs.besb1corg + ((regs.bespitch * sh) / 4);
 	regs.besb2c3org = regs.besb2corg + ((regs.bespitch * sh) / 4);
+}
 
 	weight = ofstop * (regs.besviscal >> 2);
 	weights = weight < 0 ? 1 : 0;
@@ -577,6 +586,29 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 				printk("mga_vid: failed copy from userspace\n");
 				return(-EFAULT);
 			}
+			if(mga_config.version != MGA_VID_VERSION){
+				printk("mga_vid: incompatible version! driver: %X  requested: %X\n",MGA_VID_VERSION,mga_config.version);
+				return(-EFAULT);
+			}
+
+			if(mga_config.frame_size==0 || mga_config.frame_size>1024*768*2){
+				printk("mga_vid: illegal frame_size: %d\n",mga_config.frame_size);
+				return(-EFAULT);
+			}
+
+			if(mga_config.num_frames<1 || mga_config.num_frames>4){
+				printk("mga_vid: illegal num_frames: %d\n",mga_config.num_frames);
+				return(-EFAULT);
+			}
+			
+			mga_src_base = (mga_ram_size*0x100000-mga_config.num_frames*mga_config.frame_size);
+			if(mga_src_base<0){
+				printk("mga_vid: not enough memory for frames!\n");
+				return(-EFAULT);
+			}
+			mga_src_base &= (~0xFFFF); // 64k boundary
+			printk("mga YUV buffer base: 0x%X\n", mga_src_base);
+			
 			if (is_g400) 
 			  mga_config.card_type = MGA_G400;
 			else
@@ -675,27 +707,33 @@ static int mga_vid_find_card(void)
 	pci_read_config_dword(dev,  0x40, &card_option);
 	printk("OPTION word: 0x%08x\n", card_option);
 
-	temp = (card_option >> 10) & 0x17;
+//	temp = (card_option >> 10) & 0x17;
 
-	if (is_g400)
-	{
-		switch(temp)
-		{
-			default:
-				mga_ram_size = 16;
-		}
+#ifdef MGA_MEMORY_SIZE
+	mga_ram_size = MGA_MEMORY_SIZE;
+	printk("mga_vid: hard-coded RAMSIZE is %d MB\n", (unsigned int) mga_ram_size);
+
+#else
+	if (is_g400){
+		mga_ram_size = 16;
+	}else{
+		mga_ram_size = 8;
 	}
-	else
-	{
-		// a g200
-		switch(temp)
-		{
-			default:
-				mga_ram_size = 8;
-		}
+
+//	printk("List resources -----------\n");
+	for(temp=0;temp<DEVICE_COUNT_RESOURCE;temp++){
+	    struct resource *res=&pci_dev->resource[temp];
+	    if(res->flags){
+	      int size=(1+res->end-res->start)>>20;
+	      printk("res %d:  start: 0x%X   end: 0x%X  (%d MB) flags=0x%X\n",temp,res->start,res->end,size,res->flags);
+	      if(res->flags&(IORESOURCE_MEM|IORESOURCE_PREFETCH)){
+	          if(size>mga_ram_size && size<=64) mga_ram_size=size;
+	      }
+	    }
 	}
-      
-	printk("mga_vid: RAMSIZE seems to be %d MB\n", (unsigned int) mga_ram_size);
+
+	printk("mga_vid: detected RAMSIZE is %d MB\n", (unsigned int) mga_ram_size);
+#endif
 
 	if ( mga_irq != -1 ) {
 		int tmp = request_irq(mga_irq, mga_handle_irq, SA_INTERRUPT | SA_SHIRQ, "Syncfb Time Base", &mga_irq);
@@ -729,7 +767,7 @@ static int mga_vid_mmap(struct file *file, struct vm_area_struct *vma)
 {
 
 	printk("mga_vid: mapping video memory into userspace\n");
-	if(remap_page_range(vma->vm_start, mga_mem_base + (MGA_VIDMEM_SIZE-3) * 0x100000,
+	if(remap_page_range(vma->vm_start, mga_mem_base + mga_src_base,
 		 vma->vm_end - vma->vm_start, vma->vm_page_prot)) 
 	{
 		printk("mga_vid: error mapping video memory\n");

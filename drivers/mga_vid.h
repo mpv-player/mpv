@@ -19,7 +19,8 @@
 
 typedef struct mga_vid_config_s
 {
-uint32_t card_type;
+uint16_t version;
+uint16_t card_type;
 uint32_t ram_size;
 uint32_t src_width;
 uint32_t src_height;
@@ -32,6 +33,8 @@ uint8_t  colkey_red;
 uint8_t  colkey_green;
 uint8_t  colkey_blue;
 uint32_t format;
+uint32_t frame_size;
+uint32_t num_frames;
 } mga_vid_config_t;
 
 #define MGA_VID_FORMAT_YV12 0x32315659
@@ -44,5 +47,7 @@ uint32_t format;
 
 #define MGA_G200 0x1234
 #define MGA_G400 0x5678
+
+#define MGA_VID_VERSION 0x0201
 
 #endif
