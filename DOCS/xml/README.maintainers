@@ -31,8 +31,13 @@ Adding new translations
    'html.xsl'.  And do not forget to import the toplevel XSL file:
 
 	<xsl:import href="../html.xsl"/>
+5) If you wish to change output encoding of generated files, create html.xsl
+   as suggested in step 4) and add somwhere after <xsl:import .../> such string:
 
-5) If you are using your own HTML stylesheet, edit your Makefile and set
+      <xsl:param name="chunker.output.encoding" select="'your_encoding'"/>
+      
+   Use ru/html.xsl as example.
+6) If you are using your own HTML stylesheet, edit your Makefile and set
    the HTML_STYLESHEET variable to its name.
    
 That's all, in theory.

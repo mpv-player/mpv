@@ -13,8 +13,10 @@ ones successfully, so they are required:
   files.  Version 1.0.18 or later is recommended.
 
 Also it's possible to use the Saxon XSLT Processor. Russian translator
-used it (version 6.4.4) for a while. To enable it change USE_SAXON to 1 in
-the Makefile.
+used it (version 6.4.4) for a while. If you have suitable JavaVM and a saxon.jar
+installed somewhere, configure will try to detect them. If autodetection fails,
+try to tweak DOCS/xml/configure to get it working and send us a patch :)
+
 
 
 Installing the required tools from source
