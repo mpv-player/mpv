@@ -77,8 +77,10 @@ int header_process_sequence_header (picture_t * picture, uint8_t * buffer)
     int width, height;
     int i;
 
-    if ((buffer[6] & 0x20) != 0x20)
+    if ((buffer[6] & 0x20) != 0x20){
+	printf("missing marker bit!\n");
 	return 1;	/* missing marker_bit */
+    }
 
     height = (buffer[0] << 16) | (buffer[1] << 8) | buffer[2];
 
@@ -88,9 +90,11 @@ int header_process_sequence_header (picture_t * picture, uint8_t * buffer)
     width = ((height >> 12) + 15) & ~15;
     height = ((height & 0xfff) + 15) & ~15;
 
-    if ((width > 768) || (height > 576))
-	return 1;	/* size restrictions for MP@ML or MPEG1 */
-
+    if ((width > 768) || (height > 576)){
+	printf("size restrictions for MP@ML or MPEG1 exceeded! (%dx%d)\n",width,height);
+//	return 1;	/* size restrictions for MP@ML or MPEG1 */
+    }
+    
     picture->coded_picture_width = width;
     picture->coded_picture_height = height;
 
