@@ -34,8 +34,8 @@ void JACK_Reset(int deviceID); /* free all buffered data and reset several value
 long JACK_Write(int deviceID, char *data, unsigned long bytes); /* returns the number of bytes written */
 long JACK_GetJackLatency(int deviceID); /* return the latency in milliseconds of jack */
 int  JACK_SetState(int deviceID, enum status_enum state); /* playing, paused, stopped */
-int  JACK_SetVolume(int deviceID, int left, int right); /* returns 0 on success */
-void JACK_GetVolume(int deviceID, int *left, int *right);
+int  JACK_SetVolumeForChannel(int deviceID, unsigned int channel, unsigned int volume);
+void JACK_GetVolumeForChannel(int deviceID, unsigned int channel, unsigned int *volume);
 //
 
 
@@ -57,9 +57,10 @@ static int control(int cmd, void *arg)
 		case AOCONTROL_GET_VOLUME:	
 			{
 				ao_control_vol_t *vol = (ao_control_vol_t *)arg;
-				int l, r;
+				unsigned int l, r;
 				
-				JACK_GetVolume(driver, &l, &r);
+				JACK_GetVolumeForChannel(driver, 0, &l);
+				JACK_GetVolumeForChannel(driver, 1, &r);
 				vol->left = (float )l;
 				vol->right = (float )r;
 				
@@ -68,16 +69,21 @@ static int control(int cmd, void *arg)
 		case AOCONTROL_SET_VOLUME:
 			{
 				ao_control_vol_t *vol = (ao_control_vol_t *)arg;
-				int l = (int )vol->left,
+				unsigned int l = (int )vol->left,
 					r = (int )vol->right,
 					err = 0;
 
-				if((err = JACK_SetVolume(driver, l, r))) {
+				if((err = JACK_SetVolumeForChannel(driver, 0, l))) {
 					mp_msg(MSGT_AO, MSGL_ERR, 
-							"AO: [Jack] Setting volume failed, error %d\n",err);
+						"AO: [Jack] Setting left volume failed, error %d\n",err);
 					return CONTROL_ERROR;
 				}
-				
+				if((err = JACK_SetVolumeForChannel(driver, 1, r))) {
+					mp_msg(MSGT_AO, MSGL_ERR, 
+						"AO: [Jack] Setting right volume failed, error %d\n",err);
+					return CONTROL_ERROR;
+				}
+
 				return CONTROL_OK;
 			}
 	}
