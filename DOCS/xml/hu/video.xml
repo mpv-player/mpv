@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced to 1.75 -->
+<!-- synced to 1.76 -->
 <sect1 id="video">
 <title>Videó kimeneti eszközök</title>
 
@@ -2068,7 +2068,7 @@ Audió kimenethez, ahol az <replaceable>X</replaceable> az eszköz száma (0 ha egy
 </varlistentry>
 
 <varlistentry>
-<term><option>-aop list=resample:fout=<replaceable>xxxxx</replaceable></option></term>
+<term><option>-af resample=<replaceable>xxxxx</replaceable></option></term>
 <listitem><para>
 A em8300 nem tud lejátszani 44100Hz-nél alacsonyabb mintavételű hangot. Ha a
 mintavételi ráta 44100Hz alatt van, válassz 44100Hz-et vagy 48000Hz-et, attól
