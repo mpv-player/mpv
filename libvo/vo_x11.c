@@ -266,7 +266,7 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
  if( flags&0x02 ) vm = 1;
  if( flags&0x08 ) Flip_Flag = 1;
  zoomFlag = flags&0x04;
- if(!fullscreen) zoomFlag=1; //it makes no sense to avoid zooming on windowd mode
+// if(!fullscreen) zoomFlag=1; //it makes no sense to avoid zooming on windowd mode
  
 //printf( "w: %d h: %d\n\n",vo_dwidth,vo_dheight );
 
@@ -278,8 +278,8 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
 
  /* set image size, if zoom is on it will be changed during draw_slice anyway 
     so we dont dupplicate the aspect code here */
- image_width=d_width;
- image_height=d_height;
+ image_width=width;
+ image_height=height;
 
  aspect= ((1<<16)*d_width + d_height/2)/d_height;
 
@@ -565,6 +565,8 @@ uninit(void)
 #endif
 
  vo_x11_uninit(mDisplay, mywindow);
+
+ freeSwsContext(swsContext);
 }
 
 static uint32_t preinit(const char *arg)
