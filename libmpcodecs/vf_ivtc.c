@@ -61,7 +61,7 @@ static void block_diffs_MMX(struct metrics *m, unsigned char *old, unsigned char
 	int i;
 	short out[24]; // output buffer for the partial metrics from the mmx code
 	
-	asm (""
+	asm (
 		"movl $4, %%ecx \n\t"
 		"pxor %%mm4, %%mm4 \n\t" // 4 even difference sums
 		"pxor %%mm5, %%mm5 \n\t" // 4 odd difference sums
@@ -120,7 +120,7 @@ static void block_diffs_MMX(struct metrics *m, unsigned char *old, unsigned char
 	m->o = out[4]+out[5]+out[6]+out[7];
 	m->d = m->e + m->o;
 
-	asm (""
+	asm (
 		// First loop to measure first four columns
 		"movl $4, %%ecx \n\t"
 		"pxor %%mm4, %%mm4 \n\t" // Past spacial noise
@@ -151,6 +151,19 @@ static void block_diffs_MMX(struct metrics *m, unsigned char *old, unsigned char
 		
 		"decl %%ecx \n\t"
 		"jnz 2b \n\t"
+		
+		"movq %%mm0, %%mm1 \n\t"
+		"movq %%mm0, %%mm2 \n\t"
+		"movq %%mm0, %%mm3 \n\t"
+		"pcmpgtw %%mm4, %%mm1 \n\t"
+		"pcmpgtw %%mm5, %%mm2 \n\t"
+		"pcmpgtw %%mm6, %%mm3 \n\t"
+		"pxor %%mm1, %%mm4 \n\t"
+		"pxor %%mm2, %%mm5 \n\t"
+		"pxor %%mm3, %%mm6 \n\t"
+		"psubw %%mm1, %%mm4 \n\t"
+		"psubw %%mm2, %%mm5 \n\t"
+		"psubw %%mm3, %%mm6 \n\t"
 		"movq %%mm4, (%%edx) \n\t"
 		"movq %%mm5, 16(%%edx) \n\t"
 		"movq %%mm6, 32(%%edx) \n\t"
@@ -192,6 +205,19 @@ static void block_diffs_MMX(struct metrics *m, unsigned char *old, unsigned char
 		
 		"decl %%ecx \n\t"
 		"jnz 3b \n\t"
+		
+		"movq %%mm0, %%mm1 \n\t"
+		"movq %%mm0, %%mm2 \n\t"
+		"movq %%mm0, %%mm3 \n\t"
+		"pcmpgtw %%mm4, %%mm1 \n\t"
+		"pcmpgtw %%mm5, %%mm2 \n\t"
+		"pcmpgtw %%mm6, %%mm3 \n\t"
+		"pxor %%mm1, %%mm4 \n\t"
+		"pxor %%mm2, %%mm5 \n\t"
+		"pxor %%mm3, %%mm6 \n\t"
+		"psubw %%mm1, %%mm4 \n\t"
+		"psubw %%mm2, %%mm5 \n\t"
+		"psubw %%mm3, %%mm6 \n\t"
 		"movq %%mm4, 8(%%edx) \n\t"
 		"movq %%mm5, 24(%%edx) \n\t"
 		"movq %%mm6, 40(%%edx) \n\t"
@@ -203,10 +229,9 @@ static void block_diffs_MMX(struct metrics *m, unsigned char *old, unsigned char
 		);
 	m->p = m->t = m->s = 0;
 	for (i=0; i<8; i++) {
-		// FIXME: move abs() into the mmx code!
-		m->p += abs(out[i]);
-		m->t += abs(out[8+i]);
-		m->s += abs(out[16+i]);
+		m->p += out[i];
+		m->t += out[8+i];
+		m->s += out[16+i];
 	}
 	//printf("e=%d o=%d d=%d p=%d t=%d s=%d\n", m->e, m->o, m->d, m->p, m->t, m->s);
 }
