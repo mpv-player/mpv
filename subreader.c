@@ -31,9 +31,9 @@ char *sub_cp=NULL;
 #endif
 #ifdef USE_FRIBIDI
 #include <fribidi/fribidi.h>
-char *fribidi_charset = NULL;
-int flip_hebrew = 1;
-int fribidi_flip_commas = 0;
+char *fribidi_charset = NULL;   ///character set that will be passed to FriBiDi
+int flip_hebrew = 1;            ///flip subtitles using fribidi
+int fribidi_flip_commas = 0;    ///flip comma when fribidi is used
 #endif
 
 extern char* dvdsub_lang;
