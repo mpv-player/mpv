@@ -201,7 +201,8 @@ static int mga_init(){
 	mga_vid_config.version=MGA_VID_VERSION;
 	if (ioctl(f,MGA_VID_CONFIG,&mga_vid_config))
 	{
-		perror("Error in mga_vid_config ioctl");
+		perror("Error in mga_vid_config ioctl()");
+                printf("Your mga_vid driver version is incompatible with this MPlayer version!\n");
 		return -1;
 	}
 	ioctl(f,MGA_VID_ON,0);
