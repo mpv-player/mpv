@@ -28,7 +28,7 @@ SRCS_MPLAYER = mplayer.c ima4.c xacodec.c cpudetect.c mp_msg.c ac3-iec958.c find
 OBJS_MPLAYER = $(SRCS_MPLAYER:.c=.o)
 
 CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader -Ilibvo $(EXTRA_INC) # -Wall
-VO_LIBS = -Llibvo -lvo $(X_LIB) $(DXR3_LIB) $(GGI_LIB) $(MLIB_LIB) $(PNG_LIB) $(SDL_LIB) $(SVGA_LIB) $(AA_LIB)
+VO_LIBS = -Llibvo -lvo $(X_LIB) $(DXR3_LIB) $(GGI_LIB) $(MLIB_LIB) $(PNG_LIB) $(SDL_LIB) $(SVGA_LIB) $(AA_LIB) $(DIRECTFB_LIB)
 ifeq ($(VO2),yes)
 CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader -Ilibvo2 $(EXTRA_INC) # -Wall
 VO_LIBS = -Llibvo2 -lvo2 $(X_LIB) $(DXR3_LIB) $(GGI_LIB) $(MLIB_LIB) $(PNG_LIB) $(SDL_LIB) $(SVGA_LIB)
