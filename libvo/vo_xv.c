@@ -771,7 +771,7 @@ static void query_vaa(vo_vaa_t *vaa)
   vaa->set_video_eq = xv_set_video_eq;
 }
 
-uint32_t control(uint32_t request, void *data, ...)
+static uint32_t control(uint32_t request, void *data, ...)
 {
   switch (request) {
   case VOCTRL_QUERY_VAA:

@@ -23,6 +23,9 @@
  * - works only on x86 architectures
  *
  * $Log$
+ * Revision 1.41  2002/02/09 01:21:48  arpi
+ * 10000hl to Holm... control MUST BE static...
+ *
  * Revision 1.40  2002/02/09 00:47:26  arpi
  * query_ stuff replaced by new control() - patch by David Holm
  *
@@ -1179,7 +1182,7 @@ static uint32_t preinit(const char *arg)
   return 0;
 }
 
-uint32_t control(uint32_t request, void *data, ...)
+static uint32_t control(uint32_t request, void *data, ...)
 {
   switch (request) {
   case VOCTRL_QUERY_FORMAT:

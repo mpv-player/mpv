@@ -92,7 +92,7 @@ static vo_info_t vo_info =
 	""
 };
 
-uint32_t control(uint32_t request, void *data, ...)
+static uint32_t control(uint32_t request, void *data, ...)
 {
 	uint32_t flag = 0;
 	switch (request) {

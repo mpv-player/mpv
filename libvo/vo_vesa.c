@@ -944,7 +944,7 @@ static uint32_t preinit(const char *arg)
   return pre_init_err;
 }
 
-uint32_t control(uint32_t request, void *data, ...)
+static uint32_t control(uint32_t request, void *data, ...)
 {
   switch (request) {
   case VOCTRL_QUERY_FORMAT:

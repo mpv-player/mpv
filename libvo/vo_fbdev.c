@@ -1339,7 +1339,7 @@ static uint32_t preinit(const char *arg)
     if(!pre_init_err) return (pre_init_err=(fb_preinit()?0:-1));
 }
 
-uint32_t control(uint32_t request, void *data, ...)
+static uint32_t control(uint32_t request, void *data, ...)
 {
   switch (request) {
   case VOCTRL_QUERY_FORMAT:
