@@ -2613,6 +2613,19 @@ else
 fi
 echores "$_strsep"
 
+echocheck "fseeko()"
+cat > $TMPC << EOF
+#include <stdio.h>
+int main (void) { int i; i = fseeko(stdin, 0, 0); return 0; }
+EOF
+_fseeko=no
+cc_check && _fseeko=yes
+if test "$_fseeko" = yes ; then
+ _def_fseeko='#define HAVE_FSEEKO 1'
+else
+ _def_fseeko='#undef HAVE_FSEEKO'
+fi
+echores "$_fseeko"
 
 echocheck "vsscanf()"
 cat > $TMPC << EOF
@@ -5697,9 +5710,10 @@ if test "$_largefiles" = yes || freebsd ; then
 fi
 
 echocheck "ftello()"
-# if we don't have ftello map it to ftell
+# if we don't have ftello use the osdep/ compatibility module
 cat > $TMPC << EOF
 #include <stdio.h>
+#include <sys/types.h>
 int main (void) { ftello(stdin); return 0; }
 EOF
 _ftello=no
@@ -6133,11 +6147,14 @@ $_def_soundcard
 /* Define this if your system has the sysinfo header */
 $_def_sys_sysinfo
 
-/* Define this if your system uses ftello() for off_t seeking */
+/* Define this if your system has ftello() */
 
 $_def_ftello
 #ifndef HAVE_FTELLO
-# define ftello(a) ftell(a)
+/* Need these for FILE and off_t an config.h is usually before other includes*/
+#include <stdio.h>
+#include <sys/types.h>
+off_t ftello(FILE *);
 #endif
 
 /* Define this if your system has the "malloc.h" header file */
@@ -6175,6 +6192,15 @@ $_def_scandir
 
 /* Define this if your system has strsep */
 $_def_strsep
+
+/* Define this if your system has fseeko */
+$_def_fseeko
+#ifndef HAVE_FSEEKO
+/* Need these for FILE and off_t an config.h is usually before other includes*/
+#include <stdio.h>
+#include <sys/types.h>
+int fseeko(FILE *, off_t, int);
+#endif
 
 /* Define this if your system has vsscanf */
 $_def_vsscanf
