@@ -7,6 +7,7 @@
 #include <malloc.h>
 #endif
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "mp_msg.h"

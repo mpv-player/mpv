@@ -53,6 +53,8 @@ void stream_enable_cache(stream_t *stream,int size,int min,int prefill);
 int cache_stream_fill_buffer(stream_t *s);
 int cache_stream_seek_long(stream_t *s,off_t pos);
 
+#include <string.h>
+
 inline static int stream_read_char(stream_t *s){
   return (s->buf_pos<s->buf_len)?s->buffer[s->buf_pos++]:
     (cache_stream_fill_buffer(s)?s->buffer[s->buf_pos++]:-256);
