@@ -60,7 +60,7 @@ typedef struct MJpegContext {
 
 /* A very important function pointer */
 extern int (*dct_quantize)(MpegEncContext *s, 
-		DCTELEM *block, int n, int qscale);
+		DCTELEM *block, int n, int qscale, int *overflow);
 
 
 /* Begin excessive code duplication ************************************/
@@ -78,29 +78,38 @@ static const unsigned short aanscales[64] = {
     4520,  6270,  5906,  5315,  4520,  3552,  2446,  1247
 };
 
-static void convert_matrix(int *qmat, UINT16 *qmat16, const UINT16 *quant_matrix, int qscale)
+static void convert_matrix(int (*qmat)[64], uint16_t (*qmat16)[64], uint16_t (*qmat16_bias)[64],
+                           const UINT16 *quant_matrix, int bias)
 {
-    int i;
+    int qscale;
 
-    if (av_fdct == jpeg_fdct_ifast) {
-        for(i=0;i<64;i++) {
-            /* 16 <= qscale * quant_matrix[i] <= 7905 */
-            /* 19952         <= aanscales[i] * qscale * quant_matrix[i]           <= 249205026 */
-            /* (1<<36)/19952 >= (1<<36)/(aanscales[i] * qscale * quant_matrix[i]) >= (1<<36)/249205026 */
-            /* 3444240       >= (1<<36)/(aanscales[i] * qscale * quant_matrix[i]) >= 275 */
-            
-            qmat[block_permute_op(i)] = (int)((UINT64_C(1) << (QMAT_SHIFT + 11)) / 
-                            (aanscales[i] * qscale * quant_matrix[block_permute_op(i)]));
-        }
-    } else {
-        for(i=0;i<64;i++) {
-            /* We can safely suppose that 16 <= quant_matrix[i] <= 255
-               So 16           <= qscale * quant_matrix[i]             <= 7905
-               so (1<<19) / 16 >= (1<<19) / (qscale * quant_matrix[i]) >= (1<<19) / 7905
-               so 32768        >= (1<<19) / (qscale * quant_matrix[i]) >= 67
-            */
-            qmat[i]   = (1 << QMAT_SHIFT_MMX) / (qscale * quant_matrix[i]);
-            qmat16[i] = (1 << QMAT_SHIFT_MMX) / (qscale * quant_matrix[block_permute_op(i)]);
+    for(qscale=1; qscale<32; qscale++){
+        int i;
+        if (av_fdct == jpeg_fdct_ifast) {
+            for(i=0;i<64;i++) {
+                const int j= block_permute_op(i);
+                /* 16 <= qscale * quant_matrix[i] <= 7905 */
+                /* 19952         <= aanscales[i] * qscale * quant_matrix[i]           <= 249205026 */
+                /* (1<<36)/19952 >= (1<<36)/(aanscales[i] * qscale * quant_matrix[i]) >= (1<<36)/249205026 */
+                /* 3444240       >= (1<<36)/(aanscales[i] * qscale * quant_matrix[i]) >= 275 */
+                
+                qmat[qscale][j] = (int)((UINT64_C(1) << (QMAT_SHIFT + 11)) / 
+                                (aanscales[i] * qscale * quant_matrix[j]));
+            }
+        } else {
+            for(i=0;i<64;i++) {
+                /* We can safely suppose that 16 <= quant_matrix[i] <= 255
+                   So 16           <= qscale * quant_matrix[i]             <= 7905
+                   so (1<<19) / 16 >= (1<<19) / (qscale * quant_matrix[i]) >= (1<<19) / 7905
+                   so 32768        >= (1<<19) / (qscale * quant_matrix[i]) >= 67
+                */
+                qmat  [qscale][i] = (1 << QMAT_SHIFT_MMX) / (qscale * quant_matrix[i]);
+                qmat16[qscale][i] = (1 << QMAT_SHIFT_MMX) / (qscale * quant_matrix[block_permute_op(i)]);
+
+                if(qmat16[qscale][i]==0 || qmat16[qscale][i]==128*256) qmat16[qscale][i]=128*256-1;
+
+                qmat16_bias[qscale][i]= ROUNDED_DIV(bias<<(16-QUANT_BIAS_SHIFT), qmat16[qscale][i]);
+            }
         }
     }
 }
@@ -193,6 +202,22 @@ static void encode_block(MpegEncContext *s, DCTELEM *block, int n)
     /* output EOB only if not already 64 values */
     if (last_index < 63 || run != 0)
         jput_bits(&s->pb, huff_size_ac[0], huff_code_ac[0]);
+}
+
+static inline void clip_coeffs(MpegEncContext *s, DCTELEM *block, int last_index)
+{
+    int i;
+    const int maxlevel= s->max_qcoeff;
+    const int minlevel= s->min_qcoeff;
+
+    for(i=0; i<=last_index; i++){
+        const int j = zigzag_direct[i];
+        int level = block[j];
+       
+        if     (level>maxlevel) level=maxlevel;
+        else if(level<minlevel) level=minlevel;
+        block[j]= level;
+    }
 }
 
 /* End excessive code duplication **************************************/
@@ -327,14 +352,15 @@ jpeg_enc_t *jpeg_enc_init(int w, int h, int y_psize, int y_rsize,
 	for (i = 1; i < 64; i++) 
 		j->s->intra_matrix[i] = 
 			(default_intra_matrix[i]*j->s->qscale) >> 3;
-	convert_matrix(j->s->q_intra_matrix, j->s->q_intra_matrix16,
-			j->s->intra_matrix, 8);
+	convert_matrix(j->s->q_intra_matrix, j->s->q_intra_matrix16, 
+			j->s->q_intra_matrix16_bias, 
+			j->s->intra_matrix, j->s->intra_quant_bias);
 	return j;
 }	
 
 int jpeg_enc_frame(jpeg_enc_t *j, unsigned char *y_data, 
 		unsigned char *u_data, unsigned char *v_data, char *bufr) {
-	int i, k, mb_x, mb_y;
+	int i, k, mb_x, mb_y, overflow;
 	short int *dest;
 	unsigned char *source;
 	/* initialize the buffer */
@@ -419,18 +445,26 @@ int jpeg_enc_frame(jpeg_enc_t *j, unsigned char *y_data,
 
 			j->s->block_last_index[0] = 
 				dct_quantize(j->s, j->s->block[0], 
-						0, j->s->qscale);
+						0, 8, &overflow);
+			if (overflow) clip_coeffs(j->s, j->s->block[0], 
+					j->s->block_last_index[0]);
 			j->s->block_last_index[1] = 
 				dct_quantize(j->s, j->s->block[1], 
-						1, j->s->qscale);
+						1, 8, &overflow);
+			if (overflow) clip_coeffs(j->s, j->s->block[1], 
+					j->s->block_last_index[1]);
 
 			if (!j->bw) {
 				j->s->block_last_index[4] =
 					dct_quantize(j->s, j->s->block[2], 
-							4, j->s->qscale);
+							4, 8, &overflow);
+				if (overflow) clip_coeffs(j->s, j->s->block[2], 
+						j->s->block_last_index[2]);
 				j->s->block_last_index[5] =
 					dct_quantize(j->s, j->s->block[3], 
-							5, j->s->qscale);
+							5, 8, &overflow);
+				if (overflow) clip_coeffs(j->s, j->s->block[3], 
+						j->s->block_last_index[3]);
 			}
 			zr_mjpeg_encode_mb(j);
 		}
