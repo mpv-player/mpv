@@ -186,19 +186,17 @@ static void uninit(sh_video_t *sh){
 	free(ctx);
 }
 
-#include "libvo/video_out.h"	// FIXME!!!
-
 static void draw_slice(struct AVCodecContext *s,
                 	UINT8 **src, int linesize,
                 	int y, int width, int height){
-    vo_functions_t * output = s->opaque;
+    sh_video_t * sh = s->opaque;
     int stride[3];
 
     stride[0]=linesize;
     stride[1]=stride[2]=stride[0]/2;
 
-    output->draw_slice (src, stride, width, height, 0, y);
-    
+    mpcodecs_draw_slice (sh,src, stride, width, height, 0, y);
+
 }
 
 // decode a frame
@@ -220,7 +218,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	if(mpi && mpi->flags&MP_IMGFLAG_DRAW_CALLBACK){
 	    // vd core likes slices!
 	    avctx->draw_horiz_band=draw_slice;
-	    avctx->opaque=sh->video_out;
+	    avctx->opaque=sh;
 	}
     }
 
