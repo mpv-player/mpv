@@ -238,7 +238,7 @@ echo "You can get detailed help on configure with: $0 --help"
 echo "Please wait while ./configure discovers your software and hardware environment!"
 
 # Determine our OS name and CPU architecture
-if [ "$_target" == "" ]; then
+if [ "$_target" = "" ]; then
    system_name=`uname -s 2>&1` # name of operating system: Linux, FreeBSD, NetBSD, SunOS
    host_arch=`uname -p 2>&1`   # host's instruction set or processor type
 
