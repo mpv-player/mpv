@@ -45,12 +45,102 @@ static int diff_y_mmx(unsigned char *a, unsigned char *b, int s)
 		"paddd %%mm4, %%mm3 \n\t"
 		"movd %%mm3, %%eax \n\t"
 		"psrlq $32, %%mm3 \n\t"
-		"movd %%mm3, %%ebx \n\t"
-		"addl %%ebx, %%eax \n\t"
+		"movd %%mm3, %%edx \n\t"
+		"addl %%edx, %%eax \n\t"
+		"emms \n\t"
+		: "=a" (ret)
+		: "S" (a), "D" (b), "a" (s)
+		: "%edx"
+		);
+	return ret;
+}
+
+static int licomb_y_mmx(unsigned char *a, unsigned char *b, int s)
+{
+	int ret;
+	asm volatile (
+		"movl $8, %%ecx \n\t"
+		"pxor %%mm6, %%mm6 \n\t"
+		"pxor %%mm7, %%mm7 \n\t"
+		"subl %%eax, %%edi \n\t"
+		
+		".balign 16 \n\t"
+		"2: \n\t"
+
+		"movq (%%esi), %%mm0 \n\t"
+		"movq (%%edi), %%mm1 \n\t"
+		"punpcklbw %%mm7, %%mm0 \n\t"
+		"movq (%%edi,%%eax), %%mm2 \n\t"
+		"punpcklbw %%mm7, %%mm1 \n\t"
+		"punpcklbw %%mm7, %%mm2 \n\t"
+		"paddw %%mm0, %%mm0 \n\t"
+		"paddw %%mm2, %%mm1 \n\t"
+		"movq %%mm0, %%mm2 \n\t"
+		"psubusw %%mm1, %%mm0 \n\t"
+		"psubusw %%mm2, %%mm1 \n\t"
+		"paddw %%mm0, %%mm6 \n\t"
+		"paddw %%mm1, %%mm6 \n\t"
+
+		"movq (%%esi), %%mm0 \n\t"
+		"movq (%%edi), %%mm1 \n\t"
+		"punpckhbw %%mm7, %%mm0 \n\t"
+		"movq (%%edi,%%eax), %%mm2 \n\t"
+		"punpckhbw %%mm7, %%mm1 \n\t"
+		"punpckhbw %%mm7, %%mm2 \n\t"
+		"paddw %%mm0, %%mm0 \n\t"
+		"paddw %%mm2, %%mm1 \n\t"
+		"movq %%mm0, %%mm2 \n\t"
+		"psubusw %%mm1, %%mm0 \n\t"
+		"psubusw %%mm2, %%mm1 \n\t"
+		"paddw %%mm0, %%mm6 \n\t"
+		"paddw %%mm1, %%mm6 \n\t"
+		
+		"movq (%%edi,%%eax), %%mm0 \n\t"
+		"movq (%%esi), %%mm1 \n\t"
+		"punpcklbw %%mm7, %%mm0 \n\t"
+		"movq (%%esi,%%eax), %%mm2 \n\t"
+		"punpcklbw %%mm7, %%mm1 \n\t"
+		"punpcklbw %%mm7, %%mm2 \n\t"
+		"paddw %%mm0, %%mm0 \n\t"
+		"paddw %%mm2, %%mm1 \n\t"
+		"movq %%mm0, %%mm2 \n\t"
+		"psubusw %%mm1, %%mm0 \n\t"
+		"psubusw %%mm2, %%mm1 \n\t"
+		"paddw %%mm0, %%mm6 \n\t"
+		"paddw %%mm1, %%mm6 \n\t"
+		
+		"movq (%%edi,%%eax), %%mm0 \n\t"
+		"movq (%%esi), %%mm1 \n\t"
+		"punpckhbw %%mm7, %%mm0 \n\t"
+		"movq (%%esi,%%eax), %%mm2 \n\t"
+		"punpckhbw %%mm7, %%mm1 \n\t"
+		"punpckhbw %%mm7, %%mm2 \n\t"
+		"paddw %%mm0, %%mm0 \n\t"
+		"paddw %%mm2, %%mm1 \n\t"
+		"movq %%mm0, %%mm2 \n\t"
+		"psubusw %%mm1, %%mm0 \n\t"
+		"psubusw %%mm2, %%mm1 \n\t"
+		"paddw %%mm0, %%mm6 \n\t"
+		"paddw %%mm1, %%mm6 \n\t"
+
+		"addl %%eax, %%esi \n\t"
+		"addl %%eax, %%edi \n\t"
+		"decl %%ecx \n\t"
+		"jnz 2b \n\t"
+		
+		"movq %%mm6, %%mm5 \n\t"
+		"punpcklwd %%mm7, %%mm6 \n\t"
+		"punpckhwd %%mm7, %%mm5 \n\t"
+		"paddd %%mm6, %%mm5 \n\t"
+		"movd %%mm5, %%eax \n\t"
+		"psrlq $32, %%mm5 \n\t"
+		"movd %%mm5, %%edx \n\t"
+		"addl %%edx, %%eax \n\t"
 		
 		"emms \n\t"
 		: "=a" (ret)
 		: "S" (a), "D" (b), "a" (s)
+		: "%edx"
 		);
 	return ret;
 }
@@ -78,6 +168,14 @@ static int licomb_y(unsigned char *a, unsigned char *b, int s)
 		a+=s; b+=s;
 	}
 	return diff;
+}
+
+static int licomb_y_test(unsigned char *a, unsigned char *b, int s)
+{
+	int c = licomb_y(a,b,s);
+	int m = licomb_y_mmx(a,b,s);
+	if (c != m) printf("%d != %d\n", c, m);
+	return m;
 }
 
 
@@ -552,7 +650,10 @@ void pullup_init_context(struct pullup_context *c)
 		c->diff = diff_y;
 		c->licomb = licomb_y;
 #ifdef HAVE_MMX
-		if (c->cpu & PULLUP_CPU_MMX) c->diff = diff_y_mmx;
+		if (c->cpu & PULLUP_CPU_MMX) {
+			c->diff = diff_y_mmx;
+			c->licomb = licomb_y_mmx;
+		}
 #endif
 		break;
 #if 0
