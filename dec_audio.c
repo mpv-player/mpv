@@ -29,6 +29,8 @@ int fakemono=0;
 
 #include "xa/xa_gsm.h"
 
+#include "ac3-iec958.h"
+
 #ifdef USE_DIRECTSHOW
 #include "loader/DirectShow/DS_AudioDec.h"
 #endif
@@ -130,6 +132,11 @@ case AFM_AC3:
   // Dolby AC3 audio:
   sh_audio->audio_out_minsize=4*256*6;
   break;
+case AFM_HWAC3:
+  // Dolby AC3 audio:
+  sh_audio->audio_out_minsize=4*256*6;
+  sh_audio->sample_format = AFMT_AC3;
+  break;
 case AFM_GSM:
   // MS-GSM audio codec:
   sh_audio->audio_out_minsize=4*320;
@@ -217,6 +224,28 @@ case AFM_AC3: {
   } else {
     driver=0; // bad frame -> disable audio
   }
+  break;
+}
+case AFM_HWAC3: {
+  unsigned char *buffer;		    
+  struct hwac3info ai;
+  int len, skipped;
+  len = ds_get_packet(sh_audio->ds, &buffer);
+  if(ac3_iec958_parse_syncinfo(buffer, len, &ai, &skipped) < 0) {
+      fprintf(stderr, "AC3 stream not valid.\n");
+      driver = 0;
+      break;
+  }
+  if(ai.samplerate != 48000) {
+      fprintf(stderr, "Only 48000 Hz streams supported.\n");
+      driver = 0;
+      break;
+  }
+  sh_audio->samplerate=ai.samplerate;
+//  sh_audio->samplesize=ai.framesize;
+  sh_audio->channels=1;
+  sh_audio->i_bps=ai.bitrate*(1000/8);
+  sh_audio->ac3_frame=malloc(6144);
   break;
 }
 case AFM_ALAW: {
@@ -332,6 +361,12 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
         }
         //printf("{3:%d}",avi_header.idx_pos);fflush(stdout);
         break;
+      case AFM_HWAC3: // AC3 through SPDIF
+	if(demux_read_data(sh_audio->ds,sh_audio->ac3_frame, 6144) != 6144) 
+	    break; //EOF 
+	ac3_iec958_build_burst(1536, 0x1F, 1, buf, sh_audio->ac3_frame);
+	len = 6144;
+	break;
 #ifdef USE_WIN32DLL
       case AFM_ACM:
 //        len=sh_audio->audio_out_minsize; // optimal decoded fragment size
@@ -387,6 +422,7 @@ void resync_audio_stream(sh_audio_t *sh_audio){
           break;
         case AFM_ACM:
         case AFM_DSHOW:
+	case AFM_HWAC3:
           sh_audio->a_in_buffer_len=0;        // reset ACM/DShow audio buffer
           break;
         }

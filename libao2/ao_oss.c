@@ -55,6 +55,9 @@ static int control(int cmd,int arg){
 	{
 	    ao_control_vol_t *vol = (ao_control_vol_t *)arg;
 	    int fd, v, mcmd, devs;
+
+	    if(ao_format == AFMT_AC3)
+		return CONTROL_TRUE;
     
 	    if ((fd = open("/dev/mixer", O_RDONLY)) > 0)
 	    {
@@ -119,9 +122,14 @@ static int init(int rate,int channels,int format,int flags){
 
   ao_format=format;
   ioctl (audio_fd, SNDCTL_DSP_SETFMT, &ao_format);
+  if(format == AFMT_AC3 && ao_format != AFMT_AC3) {
+      printf("Can't set audio device %s to AC3 output\n", dsp);
+      return 0;
+  }
   printf("audio_setup: sample format: %s (requested: %s)\n",
     audio_out_format_name(ao_format), audio_out_format_name(format));
   
+  if(format != AFMT_AC3) {
   ao_channels=channels-1;
   ioctl (audio_fd, SNDCTL_DSP_STEREO, &ao_channels);
   
@@ -129,6 +137,7 @@ static int init(int rate,int channels,int format,int flags){
   ao_samplerate=rate;
   ioctl (audio_fd, SNDCTL_DSP_SPEED, &ao_samplerate);
   printf("audio_setup: using %d Hz samplerate (requested: %d)\n",ao_samplerate,rate);
+  }
 
   if(ioctl(audio_fd, SNDCTL_DSP_GETOSPACE, &zz)==-1){
       int r=0;
@@ -191,9 +200,10 @@ static void reset(){
     }
 
   ioctl (audio_fd, SNDCTL_DSP_SETFMT, &ao_format);
+  if(ao_format != AFMT_AC3) {
   ioctl (audio_fd, SNDCTL_DSP_STEREO, &ao_channels);
   ioctl (audio_fd, SNDCTL_DSP_SPEED, &ao_samplerate);
-
+  }
 }
 
 // stop playing, keep buffers (for pause)

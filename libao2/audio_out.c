@@ -87,6 +87,8 @@ char *audio_out_format_name(int format)
 	    return("Unsigned 16-bit (Big-Endian)");
 	case AFMT_MPEG:
 	    return("MPEG (2) audio");
+	case AFMT_AC3:
+	    return("AC3");
 /*
   the following two formats are not available with old linux kernel
   headers (e.g. in 2.2.16)
