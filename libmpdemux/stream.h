@@ -1,6 +1,8 @@
 #ifndef __STREAM_H
 #define __STREAM_H
 
+#include <inttypes.h>
+
 #define STREAM_BUFFER_SIZE 2048
 
 #define STREAMTYPE_FILE 0
