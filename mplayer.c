@@ -2380,10 +2380,20 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       } break;
     case MP_CMD_VOLUME :  {
       int v = cmd->args[0].v.i;
+
+		// start change for absolute volume value
+		int abs = (cmd->nargs > 1) ? cmd->args[1].v.i : 0;
+		
+		if( abs )
+		{
+			mixer_setvolume( (float)v, (float)v );
+		} else {
       if(v > 0)
 	mixer_incvolume();
       else
 	mixer_decvolume();
+		}
+	  
 #ifdef USE_OSD
       if(osd_level){
 	osd_visible=sh_video->fps; // 1 sec
