@@ -2791,7 +2791,7 @@ if(use_gui || playtree_iter != NULL
 ){
 
   current_module="uninit_acodec";
-  if(sh_audio) uninit_video(sh_audio);
+  if(sh_audio) uninit_audio(sh_audio);
   sh_audio=NULL;
 
   current_module="uninit_vcodec";
