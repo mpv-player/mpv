@@ -257,7 +257,8 @@ int parse_config_file(struct config *conf, char *conffile)
 			++line_pos;
 
 		/* read the parameter */
-		for (param_pos = 0; isalnum(line[line_pos]); /* NOTHING */) {
+		for (param_pos = 0; isprint(line[line_pos]) && !isspace(line[line_pos]);
+				/* NOTHING */) {
 			param[param_pos++] = line[line_pos++];
 			if (param_pos >= MAX_PARAM_LEN) {
 				PRINT_LINENUM;
