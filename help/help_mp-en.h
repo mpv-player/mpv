@@ -441,9 +441,9 @@ static char help_text[]=
 
 // m_config.c
 #define MSGTR_SaveSlotTooOld "Too old save slot found from lvl %d: %d !!!\n"
-#define MSGTR_InvalidCfgfileOption "The %s option can't be used in a config file\n"
-#define MSGTR_InvalidCmdlineOption "The %s option can't be used on the command line\n"
-#define MSGTR_InvalidSuboption "Error: option '%s' has no suboption '%s'\n"
+#define MSGTR_InvalidCfgfileOption "The %s option can't be used in a config file.\n"
+#define MSGTR_InvalidCmdlineOption "The %s option can't be used on the command line.\n"
+#define MSGTR_InvalidSuboption "Error: option '%s' has no suboption '%s'.\n"
 #define MSGTR_MissingSuboptionParameter "Error: suboption '%s' of '%s' must have a parameter!\n"
 #define MSGTR_MissingOptionParameter "Error: option '%s' must have a parameter!\n"
 #define MSGTR_OptionListHeader "\n Name                 Type            Min        Max      Global  CL    Cfg\n\n"
