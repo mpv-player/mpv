@@ -79,7 +79,7 @@ Supported video output devices:
 	(Xv emulation on X 3.3.x !)
 - x11:  X11 optionally with SHM extension
 - dga:	X11 DGA extension
-- fsdga:X11 DGA extension with fullscreen scaling
+- fsdga:X11 DGA extension with fullscreen scaling (only with MPEG!)
 - xv:   X11 using overlays with the Xvideo extension (hardware YUV & scaling)
 - gl:   OpenGL renderer, works only with Utah-GLX! (no DRI or nVidia drivers)
 - syncfb: Matrox G400 YUV support on framebuffer (not tested, maybe broken)
