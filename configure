@@ -1242,6 +1242,7 @@ for ac_option do
 
   *)
     echo "Unknown parameter: $ac_option"
+    exit
     ;;
 
   esac
