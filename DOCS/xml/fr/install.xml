@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.24 -->
+<!-- synced with 1.29 -->
 <sect1 id="install">
 <title>Installation</title>
 
@@ -706,7 +706,7 @@ les fonctions d'OSD/SUB. Il y a plusieurs manières de les obtenir :
   <filename>TOOLS/subfont-c/README</filename> pour les détails).
   </para></listitem>
 <listitem><para>
-  Utiliser le plugin de générateur de polices de GIMP dans <filename
+  Utiliser le plugin générateur de polices de <application>GIMP</application> dans <filename
   class="directory">TOOLS/subfont-GIMP</filename> (note: vous devez avoir le
   plugin brut HSI également, voir <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/" />).
  </para></listitem>
@@ -716,18 +716,20 @@ les fonctions d'OSD/SUB. Il y a plusieurs manières de les obtenir :
   Ensuite vous avez deux méthodes:
   <itemizedlist>
     <listitem><para>
-      utiliser l'option <option>-font /chemin/de/arial.ttf</option> pour spécifier
-      un fichier de polices TrueType à chaque fois
+      utiliser l'option <option>-font <replaceable>/chemin/de/police.ttf</replaceable></option>
+      pour spécifier un fichier de polices TrueType à chaque fois
       </para></listitem>
     <listitem><para>
-      créer un lien symbolique:<screen>ln -s /chemin/de/arial.ttf ~/.mplayer/subfont.ttf</screen>
+      créer un lien symbolique:
+      <screen>ln -s <replaceable>/chemin/de/police.ttf</replaceable> ~/.mplayer/subfont.ttf</screen>
       </para></listitem>
       </itemizedlist>
   Si <application>MPlayer</application> a été compilé avec le support
   <systemitem class="library">fontconfig</systemitem>, les méthodes ci-dessus
   ne fonctionneront pas, à la place <option>-font</option> attends un nom de police
   fontconfig et sinon utilise la police sans-serif par défaut. Pour obtenir une liste
-  des polices connues de fontconfig, utilisez <command>fc-list</command>.
+  des polices connues de <systemitem class="library">fontconfig</systemitem>,
+  utilisez <command>fc-list</command>.
   Exemple: <option>-font 'Bitstream Vera Sans'</option>
   </para></listitem>
 <listitem><para>
@@ -737,13 +739,13 @@ les fonctions d'OSD/SUB. Il y a plusieurs manières de les obtenir :
   du FTP, créées par les utilisateurs.
 </para><para>
   <!-- FIXME: this para should be before the list -->
-  Les polices devront disposer du fichier <filename>font.desc</filename> 
-  approprié qui associe les positions maps unicode au code actuel du texte 
+  Les polices devront disposer du fichier <filename>font.desc</filename>
+  approprié qui associe les positions maps unicode au code actuel du texte
   sous-titré. Une autre solution est d'avoir des sous-titres encodés en UTF8 
   et d'utiliser l'option <option>-utf8</option> ou de renommer le fichier 
   des sous-titres en <filename>&lt;nom_video&gt;.utf</filename>. Enregistrer
   de codepages différents en UTF8 peut se faire en utilisant les programmes
-  <command>konwert</command> (Debian) ou <command>iconv</command> (Red Hat).
+  <command>konwert</command> ou <command>iconv</command>.
   </para><para>
   
   <table>
@@ -776,8 +778,8 @@ les fonctions d'OSD/SUB. Il y a plusieurs manières de les obtenir :
 </itemizedlist>
 <para>
 Si vous avez choisi des polices non-TTF, dézippez le fichier vers <filename class="directory">~/.mplayer</filename>
-ou <filename class="directory">$PREFIX/share/mplayer</filename>. Ensuite renommez 
-ou faites un lien symbolique de l'un d'eux sur <filename>font</filename>, par exemple:
+ou <filename class="directory">$PREFIX/share/mplayer</filename>. Ensuite renommez
+ou faites un lien symbolique de l'un d'eux sur <filename class="directory">font</filename>, par exemple:
 
 <screen>ln -s ~/.mplayer/arial-24 ~/.mplayer/font</screen>
 

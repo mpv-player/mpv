@@ -1,4 +1,4 @@
-.\" synced with 1.490
+.\" synced with 1.505
 .\" MPlayer (C) 2000-2003 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < n@tourmentine.com >
@@ -34,7 +34,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "13 Décembre 2003"
+.TH MPlayer 1 "21 Décembre 2003"
 .
 .SH NAME
 mplayer  \- Lecteur Vidéo pour Linux
@@ -2820,13 +2820,17 @@ Le paramètre optionnel f peut valoir 0 pour n'utiliser que les lignes paires,
 ou 1 pour n'utiliser que les lignes impaires.
 Tout autre valeur de f renvoie au comportement par défaut (moyenne).
 .TP
-.B ilpack
+.B ilpack[=mode]\
 Quand de la vidéo entrelacée est stockée aux formats YUV 4:2:0, l'entrelacement
 chroma ne se fait pas proprement à cause du downsampling vertical des canaux
 chroma.
 Ce filtre place les données 4:2:0 au format YUY2 (4:2:2) avec les lignes chroma
 à leur bon emplacement, de façon à ce que à chaque ligne scannée, les données
 luma et chroma proviennent toutes deux du même champs.
+L'argument optionnel sélectionne le mode d'échantillonage.
+Par défaut, l'interpolation linéaire (mode 1) est utilisé.
+Le mode 0 utilise un échantillonage 'plus proche voisin' (nearest-neighbor),
+qui est rapide mais incorrect.
 .TP
 .B decimate[=max:haut:bas:frac]
 Saute les trames qui ne différent pas beaucoup de la trame précédente de façon à
