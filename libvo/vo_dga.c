@@ -23,6 +23,9 @@
  * - works only on x86 architectures
  *
  * $Log$
+ * Revision 1.36  2002/01/08 20:58:53  atmos4
+ * SwScaler support for vo_png by Kim Minh, SwScale w/aspecz for vo_dga by me
+ *
  * Revision 1.35  2001/12/28 20:52:54  alex
  * use XF86VidMode later in init (at line 1031) only if we've got support (if have_vm==1)
  *
@@ -151,7 +154,9 @@
 #include "config.h"
 #include "video_out.h"
 #include "video_out_internal.h"
+#include "../postproc/swscale.h"
 #include "../postproc/rgb2rgb.h"
+#include "aspect.h"
 
 LIBVO_EXTERN( dga )
 
@@ -345,6 +350,13 @@ static int
 
 static unsigned char     *vo_dga_base;
 static Display  *vo_dga_dpy;
+
+/* saved src and dst dimensions for SwScaler */
+static unsigned int scale_srcW = 0,
+                    scale_dstW = 0,
+                    scale_srcH = 0,
+                    scale_dstH = 0;
+
 
 //---------------------------------------------------------
 
@@ -553,12 +565,19 @@ static void flip_page( void ){
 static uint32_t draw_slice( uint8_t *src[],int stride[],
                             int w,int h,int x,int y )
 {
-
-  yuv2rgb( vo_dga_base + vo_dga_dbf_current * vo_dga_dbf_mem_offset + vo_dga_vp_offset + 
+  if (scale_srcW) {
+    uint8_t *dst[3] = {vo_dga_base + vo_dga_dbf_current * vo_dga_dbf_mem_offset + vo_dga_vp_offset, NULL, NULL};
+    SwScale_YV12slice(src,stride,y,h,
+          dst,
+          /*scale_dstW*/ vo_dga_width * HW_MODE.vdm_bytespp, HW_MODE.vdm_bitspp,
+		      scale_srcW, scale_srcH, scale_dstW, scale_dstH);
+  } else {
+    yuv2rgb( vo_dga_base + vo_dga_dbf_current * vo_dga_dbf_mem_offset + vo_dga_vp_offset + 
           (vo_dga_width * y +x) * HW_MODE.vdm_bytespp,
            src[0], src[1], src[2],
            w,h, vo_dga_width * HW_MODE.vdm_bytespp,
            stride[0],stride[1] );
+  }
   return 0;
 };
 
@@ -786,7 +805,7 @@ int check_res( int num, int x, int y, int bpp,
 
 static uint32_t init( uint32_t width,  uint32_t height,
                       uint32_t d_width,uint32_t d_height,
-                      uint32_t fullscreen,char *title,uint32_t format )
+                      uint32_t flags,char *title,uint32_t format )
 {
 
   int x_off, y_off;
@@ -810,7 +829,8 @@ static uint32_t init( uint32_t width,  uint32_t height,
 #endif
 
   if( vo_dga_is_running )return -1;
-  vo_dga_src_format = format;  
+  vo_dga_src_format = format;
+
   wanted_width = d_width;
   wanted_height = d_height;
 
@@ -907,8 +927,30 @@ static uint32_t init( uint32_t width,  uint32_t height,
      width, height,
      SRC_MODE.vdm_depth,
      SRC_MODE.vdm_bitspp);
-  vo_dga_vp_width =mX;
+  vo_dga_vp_width = mX;
   vo_dga_vp_height = mY;
+
+  if((flags&0x04)||(flags&0x01)) { /* -zoom or -fs */
+    scale_dstW = (d_width + 7) & ~7;
+    scale_dstH = d_height;
+    scale_srcW = width;
+	  scale_srcH = height;
+    aspect_save_screenres(mX,mY);
+    aspect_save_orig(scale_srcW,scale_srcH);
+	  aspect_save_prescale(scale_dstW,scale_dstH);
+    SwScale_Init();
+    if(flags&0x01) /* -fs */
+      aspect(&scale_dstW,&scale_dstH,A_ZOOM);
+    else if(flags&0x04) /* -fs */
+      aspect(&scale_dstW,&scale_dstH,A_NOZOOM);
+    vd_printf(VD_INFO,
+       "vo_dga: Aspect corrected size for SwScaler: %4d x %4d.\n",
+       scale_dstW, scale_dstH);
+    /* XXX this is a hack, but I'm lazy ;-) :: atmos */
+    width = scale_dstW;
+    height = scale_dstH;
+  }
+
   vo_dga_width = modelines[j].bytesPerScanline / HW_MODE.vdm_bytespp ;
   dga_modenum =  modelines[j].num;
   max_vpy_pos =  modelines[j].maxViewportY;

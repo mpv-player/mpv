@@ -22,6 +22,7 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 
+#include "../postproc/swscale.h"
 #include "../postproc/rgb2rgb.h"
 
 LIBVO_EXTERN (png)
@@ -44,6 +45,7 @@ static int image_height;
 static int image_format;
 static uint8_t *image_data=NULL;
 //static char *image_data;
+static unsigned int scale_srcW = 0, scale_srcH = 0;
 
 static int bpp = 24;
 static int cspace = RGB;
@@ -63,10 +65,19 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
 static uint32_t
 init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format)
 {
-    image_height = height;
-    image_width = width;
+    if (fullscreen&0x04 && (width != d_width || height != d_height) && format==IMGFMT_YV12) {
+	/* software scaling */
+	image_width = (d_width + 7) & ~7;
+	image_height = d_height;
+	scale_srcW = width;
+	scale_srcH = height;
+	SwScale_Init();
+    }
+    else {
+	image_height = height;
+	image_width = width;
+    }
     image_format = format;
-    
     //printf("Verbose level is %i\n", verbose);
     
     switch(format) {
@@ -262,11 +273,17 @@ static void flip_page (void)
 
 static uint32_t draw_slice( uint8_t *src[],int stride[],int w,int h,int x,int y )
 {
+  if (scale_srcW) {
+    uint8_t *dst[3] = {image_data, NULL, NULL};
+    SwScale_YV12slice(src,stride,y,h,
+		      dst, image_width*((bpp+7)/8), bpp,
+		      scale_srcW, scale_srcH, image_width, image_height);
+  }
+  else {
   uint8_t *dst;
-  
   dst = image_data + (image_width * y + x) * (bpp/8);
   yuv2rgb(dst,src[0],src[1],src[2],w,h,image_width*(bpp/8),stride[0],stride[1]);
-  
+  }
   return 0;
 }
 
