@@ -134,7 +134,7 @@ Q: És mi lesz a DGA driverrel? Nem találom!!!
 A: ./configure automatikusan detektálja hogy van-e DGA-d. Ha a '-vo help'
    opció nem mutat DGA-t, akkor nincs jól felinstallálva az X-ed.
    Próbáld így: ./configure --enable-dga (és olvasd el a VIDEOCARDS file-t)
-   Esetleg próbáld az SDL DGA driverét, a '-vo sdl -sdl dga' opciókkal!
+   Esetleg próbáld az SDL DGA driverét, a '-vo sdl:dga' opciókkal!
 
 Q: Oké, -vo help mutatja a DGA drivert, de valami "permissions"-rõl beszél!
    Segíts!

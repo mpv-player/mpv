@@ -133,7 +133,7 @@ Q: What about DGA driver? I can't find it!!!
 A: ./configure autodetects your DGA driver. If -vo help doesn't show
    DGA, then there's a problem with your X installation.
    Try ./configure --enable-dga (and read VIDEOCARDS)
-   Alternatively, try SDL's DGA driver with '-vo sdl -sdl dga' options.
+   Alternatively, try SDL's DGA driver with '-vo sdl:dga' options.
 
 Q: Ok, -vo help shows DGA driver, but it is babbling about permissions!
    Help me!

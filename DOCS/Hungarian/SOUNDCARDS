@@ -44,7 +44,6 @@ PC Speaker or DAC:
 			Max kHz : 6 ;) (a driver 44.1Khz-t emulál, vagy többet)
 			Driver  : ftp://ftp.infradead.org/pub/pcsp
 
- - MPlayer OSS-hez készül, legalábbis amíg át nem váltunk libxmm-re
  - a 2.4-es kerneleket használd, 2.2 nincs tesztelve !
  - ha kattog a hang és CD-ROM-ról játszol le, kapcsold be az IRQ
    unmasking-ot !

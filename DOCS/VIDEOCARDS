@@ -160,7 +160,7 @@ using the DGA driver:
    privilegies through suid root mplayer.
    !!!! SO YOU HAVE BEEN WARNED ... !!!!
 5. Use '-vo dga' option, and there you go! (hope so:)
-6. Try if the '-vo sdl -sdl dga' options work for you! It's much faster!!!
+6. Try if the '-vo sdl:dga' options work for you! It's much faster!!!
 
 If you have fast enough CPU (P3 800 for example) you can try fsdga for
 fullscreen mpeg playing (using software YUV->RGB scaling):
@@ -179,7 +179,7 @@ a, If you don't have X...
   forced), and don't forget to edit /etc/vga/libvga.config to suit your
   card & monitor.
 
-  Try the aalib target ('-vo sdl -sdl aalib'), it's great! :)
+  Try the aalib target ('-vo sdl:aalib'), it's great! :)
 
 b, You want to use framebuffer...
   ... Whether to build the FBdev target is autodetected during ./configure .

@@ -172,7 +172,7 @@ az fps-t a DGA driverrel:
    a suid MPlayer-en keresztül.
    !!!! ÉN FIGYELMEZTETTELEK ... !!!!
 5. Használd a '-vo dga' opciót, és már megy is! (remélhetõleg :)
-6. Próbáld ki, hogy a '-vo sdl -sdl dga' opció mûködik-e nálad!
+6. Próbáld ki, hogy a '-vo sdl:dga' opció mûködik-e nálad!
    Sokkal gyorsabb!!!
 
 Ha gyors géped van (pl. P3 800) próbáld ki az 'fsdga'-t, így teljesképernyõs
@@ -207,7 +207,7 @@ b, Framebuffer-t akarsz használni...
   Megj.: az FBdev output videomód váltása _nem mûködik_ a VESA
          framebuffer-rel, és ne is kérd, mivel ez nem az MPlayer korlátja!
 
-c, Érdemes továbbá kipróbálni az 'aalib' outputot ('-vo sdl -sdl aalib'),
+c, Érdemes továbbá kipróbálni az 'aalib' outputot ('-vo sdl:aalib'),
   igazán nagyszerû! :)
 
 

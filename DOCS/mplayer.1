@@ -6,8 +6,8 @@
 mplayer \- Movie Player for Linux
 .SH SYNOPSIS
 .B mplayer
-.RB [ \-vo\ output\ driver ]
-.RB [ \-ao\ output\ driver ]
+.RB [ \-vo\ <driver>[:<subdriver>]\ ]
+.RB [ \-ao\ <driver>[:<subdriver>]\ ]
 .RB [ \-vcd\ track\ number ]
 .RB [ \-sb\ byte\ position ]
 .RB [ \-nosound\ ]
@@ -25,7 +25,6 @@ mplayer \- Movie Player for Linux
 .RB [ \-x\ x ]
 .RB [ \-y\ y ]
 .RB [ \-xy\ factor ]
-.RB [ \-dsp\ device ]
 .RB [ \-pp\ quality ]
 .RB [ \-include\ configfile ]
 .RB [ \-lircconf\ configfile ]
@@ -38,8 +37,6 @@ mplayer \- Movie Player for Linux
 .RB [ \-idx ]
 .RB [ \-forceidx ]
 .RB [ \-nodshow ]
-.RB [ \-sdl\ driver ]
-.RB [ \-sdla\ driver ]
 .RB [ \-noxv ]
 .RB [ \-forcexv ]
 .RB [ \-ss\ sec ]
@@ -77,15 +74,22 @@ any options.
 .I NOTE
 Every "flag" option has "noflag" pair, e.g. -fs opposite is -nofs
 .TP
-.B \-vo\ video\ output\ driver
-select video output driver
+.B \-vo\ <driver>[:<subdriver>]
+select video output driver. "subdriver" is valid only when you specify
+a driver like SDL or GGI, which use alternative means to produce video.
+Like: -vo sdl:aalib (or dga, fbdev, svga, x11, ggi)
 
 you can get the list of available drivers executing
 .I mplayer -vo help
 
 .TP
-.B \-ao\ audio\ output\ driver
-select audio output driver
+.B \-ao\ <driver>[:<subdriver>]
+select audio output driver. "subdriver" is valid only when you specify
+SDL as driver, which uses alternative means to produce audio.
+Like: -vo sdl:esd (or arts)
+
+If using OSS, you can specify which sound device to use like this :
+-ao oss:/dev/dsp0
 
 you can get the list of available drivers executing
 .I mplayer -ao help
@@ -119,9 +123,6 @@ scale image to y height
 .TP
 .B \-xy\ factor
 scale image by <factor>
-.TP
-.B \-dsp\ device
-select another DSP output device
 .TP
 .B \-pp\ quality
 apply postprocess filter on decoded image.
@@ -160,7 +161,7 @@ delays subtitles by <sec> seconds. Can be negative.
 .B \-osdlevel\ level
 specifies which mode the OSD should start in (0 : none, 1 : seek, 2: seek+timer)
 (default = 2)
-.IP
+.TP
 .B \-lircconf\ configfile
 specifies a configfile for LIRC (see http://www.lirc.org) if you don't like the default ~/.lircrc 
 .IP
@@ -225,12 +226,6 @@ indexes.
 .TP
 .B \-nodshow
 disables usage of DirectShow video codecs
-.TP
-.B \-sdl\ driver
-specify SDL video driver to use. For example: aalib, dga, fbdev, svga, x11, ggi
-.TP
-.B \-sdla\ driver
-specify SDL audio driver to use. For example: esd
 .TP
 .B \-noxv
 disable XVideo hardware acceleration (with SDL only!)

@@ -60,7 +60,7 @@ Tartalom
 ~~~~~~~~~~~~~~~~
 
  Az MPlayer-ben két helyen lehet DGA-t használni: az SDL driverben
- (-vo sdl -sdl dga), valamint a DGA driverben (-vo dga). A fentiek mindkettõre
+ (-vo sdl:dga), valamint a DGA driverben (-vo dga). A fentiek mindkettõre
  igazak; a következõ néhány részben elmagyarazom, hogy is mûködik az MPlayer
  DGA drivere.
 

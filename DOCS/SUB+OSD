@@ -15,11 +15,9 @@ INSTALLING OSD and SUB
 @ download fonts from mplayer's download page                            @
 @  mplayer.sourceforge.net/homepage/dload.html                           @
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-english, hungarian, czech fonts:
-	http://thot.banki.hu/mp-ftp/releases/mp_font1.zip
-
-english, hungarian, german, czech fonts: (not good for hungarian at least for me)
-	http://thot.banki.hu/mp-ftp/releases/mp_font2.zip
+Standard (Central-European, Latin1) font package:
+	http://thot.banki.hu/mp-ftp/releases/mp_font3.zip
+	(it obsoletes mp_font1.zip and mp_font2.zip)
 
 Cyrillic fonts:
 	http://thot.banki.hu/mp-ftp/releases/bgfont.zip
