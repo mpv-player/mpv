@@ -315,6 +315,8 @@ sh_video=d_video->sh;
   
 
 sh_video->codec=NULL;
+if(out_video_codec){
+
 if(video_family!=-1) mp_msg(MSGT_MENCODER,MSGL_INFO,MSGTR_TryForceVideoFmt,video_family);
 while(1){
   sh_video->codec=find_codec(sh_video->format,
@@ -364,6 +366,7 @@ if(!init_video(sh_video)){
      exit(1);
 }
 
+} // if(out_video_codec)
 
 if(sh_audio){
   // Go through the codec.conf and find the best codec...
