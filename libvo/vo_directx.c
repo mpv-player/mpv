@@ -272,6 +272,8 @@ static uint32_t Directx_CreateOverlay(uint32_t imgfmt)
 			 {mp_msg(MSGT_VO, MSGL_ERR,"unsupported mode\n");break;}  
 		  case DDERR_OUTOFVIDEOMEMORY:
 			 {mp_msg(MSGT_VO, MSGL_ERR,"not enough video memory\n");break;}
+          default:
+             mp_msg(MSGT_VO, MSGL_ERR,"create surface failed with 0x%x\n",ddrval);       
 	   }
 	   return 1;
 	}
@@ -685,6 +687,8 @@ static uint32_t Directx_ManageDisplay()
 					if(ddrval !=DD_OK)mp_msg(MSGT_VO, MSGL_FATAL ,"<vo_directx><FATAL ERROR>UpdateOverlay failed again\n" );
 					break;
 				}
+            default:
+                mp_msg(MSGT_VO, MSGL_ERR ," 0x%x\n",ddrval);      
 		}
 	    /*ok we can't do anything about it -> hide overlay*/
 		if(ddrval != DD_OK)
