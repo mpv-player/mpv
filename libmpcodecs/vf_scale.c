@@ -27,30 +27,32 @@ extern int opt_screen_size_y;
 //===========================================================================//
 
 static unsigned int outfmt_list[]={
+// RGB:
     IMGFMT_BGR32,
-    IMGFMT_BGR24,
-    IMGFMT_BGR16,
-    IMGFMT_BGR15,
-    IMGFMT_BGR8,
-    IMGFMT_BGR4,
-    IMGFMT_BGR1,
     IMGFMT_RGB32,
+    IMGFMT_BGR24,
     IMGFMT_RGB24,
+    IMGFMT_BGR16,
     IMGFMT_RGB16,
+    IMGFMT_BGR15,
     IMGFMT_RGB15,
+    IMGFMT_BGR8,
     IMGFMT_RGB8,
+    IMGFMT_BGR4,
     IMGFMT_RGB4,
+    IMGFMT_BGR1,
     IMGFMT_RGB1,
+// YUV:
+    IMGFMT_444P,
+    IMGFMT_422P,
     IMGFMT_YV12,
     IMGFMT_I420,
     IMGFMT_IYUV,
-    IMGFMT_Y800,
-    IMGFMT_Y8,
     IMGFMT_YVU9,
     IMGFMT_IF09,
-    IMGFMT_444P,
-    IMGFMT_422P,
     IMGFMT_411P,
+    IMGFMT_Y800,
+    IMGFMT_Y8,
     0
 };
 
