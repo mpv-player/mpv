@@ -3,7 +3,7 @@
  *
  * Written by laaz
  * Some code cleanup & realloc() by A'rpi/ESP-team
- * dunnowhat sub format by szabi
+ *
  */
 
 
@@ -544,15 +544,46 @@ void sub_pp_ssa(subtitle *sub) {
         }
 }
 
-subtitle *sub_read_line_dunnowhat(FILE *fd,subtitle *current) {
+/*
+ * PJS subtitles reader.
+ * That's the "Phoenix Japanimation Society" format.
+ * I found some of them in http://www.scriptsclub.org/ (used for anime).
+ * The time is in tenths of second.
+ *
+ * by set, based on code by szabi (dunnowhat sub format ;-)
+ */
+subtitle *sub_read_line_pjs(FILE *fd,subtitle *current) {
     char line[LINE_LEN+1];
-    char text[LINE_LEN+1];
+    char text[LINE_LEN+1], *s, *d;
 
     if (!fgets (line, LINE_LEN, fd))
 	return NULL;
-    if (sscanf (line, "%ld,%ld,\"%[^\"]", &(current->start),
-		&(current->end), text) <3)
+    /* skip spaces */
+    for (s=line; *s && isspace(*s); s++);
+    /* allow empty lines at the end of the file */
+    if (*s==0)
+	return NULL;
+    /* get the time */
+    if (sscanf (s, "%ld,%ld,", &(current->start),
+		&(current->end)) <2) {
 	return ERR;
+    }
+    /* the files I have are in tenths of second */
+    current->start *= 10;
+    current->end *= 10;
+    /* walk to the beggining of the string */
+    for (; *s; s++) if (*s==',') break;
+    if (*s) {
+	for (s++; *s; s++) if (*s==',') break;
+	if (*s) s++;
+    }
+    if (*s!='"') {
+	return ERR;
+    }
+    /* copy the string to the text buffer */
+    for (s++, d=text; *s && *s!='"'; s++, d++)
+	*d=*s;
+    *d=0;
     current->text[0] = strdup(text);
     current->lines = 1;
 
@@ -946,7 +977,7 @@ int sub_autodetect (FILE *fd, int *uses_time) {
 	if (!memcmp(line, "Dialogue: ", 10))
 		{*uses_time=1; return SUB_SSA;}
 	if (sscanf (line, "%d,%d,\"%c", &i, &i, (char *) &i) == 3)
-		{*uses_time=0;return SUB_DUNNOWHAT;}
+		{*uses_time=1;return SUB_PJS;}
 	if (sscanf (line, "FORMAT=%d", &i) == 1)
 		{*uses_time=0; return SUB_MPSUB;}
 	if (sscanf (line, "FORMAT=TIM%c", &p)==1 && p=='E')
@@ -1198,7 +1229,7 @@ sub_data* sub_read_file (char *filename, float fps) {
 	    { sub_read_line_vplayer, NULL, "vplayer" },
 	    { sub_read_line_rt, NULL, "rt" },
 	    { sub_read_line_ssa, sub_pp_ssa, "ssa" },
-	    { sub_read_line_dunnowhat, NULL, "dunnowhat" },
+	    { sub_read_line_pjs, NULL, "pjs" },
 	    { sub_read_line_mpsub, NULL, "mpsub" },
 	    { sub_read_line_aqt, NULL, "aqt" },
 	    { sub_read_line_subviewer2, NULL, "subviewer 2.0" },

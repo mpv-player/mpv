@@ -14,7 +14,7 @@ extern int sub_match_fuzziness;
 #define SUB_VPLAYER   4
 #define SUB_RT        5
 #define SUB_SSA       6
-#define SUB_DUNNOWHAT 7		// FIXME what format is it ?
+#define SUB_PJS       7
 #define SUB_MPSUB     8
 #define SUB_AQTITLE   9
 #define SUB_SUBVIEWER2 10
