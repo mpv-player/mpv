@@ -87,7 +87,7 @@ static char help_text[]=
 #define MSGTR_CouldntInitAudioCodec "Kann Audiocodec nicht finden! -> Kein Ton\n"
 #define MSGTR_TryForceVideoFmt "Erzwinge Videocodecgruppe %d ...\n"
 #define MSGTR_CantFindVfmtFallback "Kann keinen Videocodec für gewünschte Gruppe finden, verwende anderen.\n"
-#define MSGTR_CantFindVideoCodec "Kann Videocodec für Format 0x%X nicht finden!\n"
+#define MSGTR_CantFindVideoCodec "Kann keinen Codec passend zum gewältem -vo und Videoformat 0x%X finden!\n"
 #define MSGTR_VOincompCodec "Sorry, der ausgewählte Videoausgabetreiber ist nicht kompatibel mit diesem Codec.\n"
 #define MSGTR_CouldntInitVideoCodec "FATAL: Kann Videocodec nicht initialisieren :(\n"
 #define MSGTR_EncodeFileExists "Datei existiert: %s (überschreibe nicht deine schönsten AVI's!)\n"
