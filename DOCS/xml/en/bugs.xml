@@ -33,7 +33,8 @@ lame packages, they may have been compiled with gcc 2.96.</para>
 </listitem>
 <listitem>
 <para>sig11 in libmpeg2, when scaling+encoding:</para>
-<para>Problem: known GCC 2.95.2 MMX bug, upgrade to 2.95.3.</para>
+<para>Solution: upgrade to 2.95.3</para>
+<para>Problem: known GCC 2.95.2 MMX bug</para>
 </listitem>
 </itemizedlist>
 </sect1>
