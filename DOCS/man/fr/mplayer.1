@@ -1,4 +1,4 @@
-.\" synced with 1.905
+.\" synced with 1.907
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "01 Mars 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "03 Mars 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -513,13 +513,14 @@ lecture de vidéo uniquement (vous pouvez le comprendre comme des fps infinis).
 Affecte une valeur RVB de votre choix à la couleur clé.
 0x000000 est noir et 0xffffff est blanc.
 Géré par les pilotes de sortie vidéo cvidix, fbdev, svga, vesa, winvidix, xmga,
-xvidix, xover et directx uniquement.
+xvidix, xover, xv (voir -vo xv:ck), xvmc (voir -vo xv:ck) et directx
+uniquement.
 .
 .TP
 .B \-nocolorkey
 Désactive la couleur de transparence.
 Géré par les pilotes de sortie vidéo cvidix, fbdev, svga, vesa, winvidix, xmga,
-xvidix et xover uniquement.
+xvidix, xv (voir -vo xv:ck), xvmc (voir -vo xv:ck) et xover uniquement.
 .
 .TP
 .B \-crash-debug (CODE DE DÉBOGAGE)
@@ -2530,10 +2531,36 @@ Utilise l'extension XVideo de XFree86 4.x pour permettre la
 lecture avec accélération matérielle.
 Si vous ne pouvez pas utiliser un pilote spécifique a votre matériel,
 ceci est probablement la meilleure option.
+Pour obtenir des informations sur quel couleur de transparence (colorkey)
+est utilisée, et comment elle est affichée, lancez MPlayer avec l'option \-v
+puis regardez les lignes commençant par [xv common].
 .PD 0
 .RSs
 .IPs port=<nombre>
 Sélectionne un port XVideo particulier.
+.IPs ck=cur|use|set
+Sélectionne la source à partir de laquelle la couleur de transparence
+est prise (par défaut\ : cur).
+.RSss
+.IPs cur
+Choisi celle utilisée par Xv.
+.IPs use
+Utilise mais ne défini pas la couleur de transparence depuis MPlayer
+(utilisez l'option \-colorkey pour la changer).
+.IPs set
+Comme 'use' mais défini aussi la couleur de transparence donnée.
+.RE
+.IPs ck-method=man|bg|auto
+Défini la méthode de remplissage de la couleur de transparence
+(par défaut\ : man).
+.RSss
+.IPs man
+Rempli la couleur de transparence manuellement (déduit les sautillements
+dans certains cas).
+.IPs bg
+Défini la couleur de transparence d'après l'arrière-plan de la fenêtre.
+.IPs auto
+Laisse Xv remplir la couleur de transparence.
 .RE
 .PD 1
 .
@@ -2560,21 +2587,26 @@ Ce pilote emploie l'extension XvMC (X Video Motion Compensation) de
 XFree86 4.x pour accélérer les lectures de médias MPEG-1/\:2 et VCR2.
 .PD 0
 .RSs
-.IPs benchmark
+.IPs port=<nombre>
+Sélectionne un port XVideo particulier.
+.IPs (no)benchmark
 Désactive l'affichage de toute image.
 Nécessaire pour évaluer les performances (benchmarking) des pilotes qui
 mettent à jour leurs tampons d'affichage uniquement lors du rafraîchissement
 de l'écran (nVidia).
-.IPs queue
+Par défault les images sont affichées (nobenchmark).
+.IPs (no)queue
 Met plusieurs trames dans queue d'affichage pour permettre aux circuits
 matériels de les traiter en parallèle.
-Peut ajouter une faible (imperceptible) et constante désynchronisation A/\:V.
-.IPs sleep
+Peut introduire une faible (imperceptible) et constante désynchronisation
+A/\:V (par défaut\ : noqueue).
+.IPs (no)sleep
 Utilise la fonction sleep() lorsque MPlayer attend la fin de l'affichage de
-l'image (déconseillé sous Linux).
-.IPs wait\ 
-N'utilise pas la fonction sleep() lorsque MPlayer attend la fin de l'affichage
-de l'image (par défaut).
+l'image (déconseillé sous Linux) (par défaut\ : nosleep).
+.IPs ck=cur|use|set
+Comme pour -vo xv:ck (voir \-vo xv).
+.IPs ck-method=man|bg|auto
+Comme pour -vo xv:ck-method (voir \-vo xv).
 .RE
 .PD 1
 .
@@ -8330,6 +8362,13 @@ Défini le débit binaire vidéo kbit/s pour les vidéos MPEG-1/2.
 .TP
 .B vframerate=<23.976 | 24 | 25 | 29.97 | 30 | 50 | 59.94 | 60 >
 Défini le nombre de trames par secondes pour les vidéos MPEG-1/2.
+.
+.TP
+.B telecine
+Active le mode téléciné logiciel\ : le multiplexeur va en quelque sorte
+falsifier le flux vidéo pour qu'il semble avoir été encodé à 29.97 ou
+30 fps\ ; ceci ne fonctionne qu'avec les vidéos MPEG-2 que le nombre
+de trames par secondes est 23.976 ou bien 24 fps.
 .
 .
 .\" --------------------------------------------------------------------------
