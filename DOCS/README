@@ -39,7 +39,7 @@ Win32 codecs?
 Yes, we are using Win32 (Video for Windows, DirectShow) codecs for AVI/ASF
 decoding. They must be installed to the /usr/lib/win32/ directory, with all
 lower case. You can grab the codecs package from our homepage, or can be found
-in your C:\WINDOWS\SYSTEM\ dir, see codecs.c for filenames.
+in your C:\WINDOWS\SYSTEM\ dir, see codecs.conf for filenames.
 
 Supported input formats:
 ~~~~~~~~~~~~~~~~~~~~~~~~
