@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h 1.149 (2004. 10. 21.)
+// Sync'ed with help_mp-en.h 1.155 (2004. 12. 24.)
 
 // ========================= MPlayer help ===========================
 
@@ -167,7 +167,6 @@ static char help_text[]=
 #define MSGTR_AudioFilterChainPreinitError "Hiba az audio szûrõ lánc elõ-inicializálásában!\n"
 #define MSGTR_LinuxRTCReadError "Linux RTC olvasási hiba: %s\n"
 #define MSGTR_SoftsleepUnderflow "Figyelem! Softsleep alulcsordulás!\n"
-#define MSGTR_EDLSKIPStartStopLength "\nEDL_SKIP: kezdet [%f], vég [%f], hossz [%f]\n"
 #define MSGTR_AnsSubVisibility "ANS_SUB_VISIBILITY=%ld\n"
 #define MSGTR_AnsLength "ANS_LENGTH=%ld\n"
 #define MSGTR_AnsVoFullscreen "ANS_VO_FULLSCREEN=%ld\n"
@@ -440,9 +439,9 @@ static char help_text[]=
 
 // m_config.c
 #define MSGTR_SaveSlotTooOld "Túl régi mentési slotot találtam az %d lvl-bõl: %d !!!\n"
-#define MSGTR_InvalidCfgfileOption "A(z) %s kapcsoló nem használható a konfigurációs fájlból\n"
-#define MSGTR_InvalidCmdlineOption "A(z) %s kapcsoló nem használható parancssorból\n"
-#define MSGTR_InvalidSuboption "Hiba: '%s' kapcsolónak nincs '%s' alkapcsolója\n"
+#define MSGTR_InvalidCfgfileOption "A(z) %s kapcsoló nem használható konfigurációs fájlban.\n"
+#define MSGTR_InvalidCmdlineOption "A(z) %s kapcsoló nem használható parancssorból.\n"
+#define MSGTR_InvalidSuboption "Hiba: '%s' kapcsolónak nincs '%s' alopciója.\n"
 #define MSGTR_MissingSuboptionParameter "Hiba: a(z) '%s' '%s' alkapcsolójához paraméter kell!\n"
 #define MSGTR_MissingOptionParameter "Hiba: a(z) '%s' kapcsolóhoz kell egy paraméter!\n"
 #define MSGTR_OptionListHeader "\n Név                  Típus           Min        Max      Globál  CL    Cfg\n\n"
@@ -586,7 +585,7 @@ static char help_text[]=
 #define MSGTR_InsertingAfVolume "[Mixer] Nincs hardveres keverés, hangerõ szûrõ használata.\n"
 #define MSGTR_NoVolume "[Mixer] Hangerõ állítás nem lehetséges.\n"
 
-//  ====================== GUI messages/buttons ========================
+// ====================== GUI messages/buttons ========================
 
 #ifdef HAVE_NEW_GUI
 
@@ -624,12 +623,14 @@ static char help_text[]=
 #define MSGTR_NEMFMR "Nincs elég memória a menü rendereléséhez."
 #define MSGTR_IDFGCVD "Nem talaltam GUI kompatibilis video meghajtót."
 #define MSGTR_NEEDLAVCFAME "Nem MPEG fájl lejátszása nem lehetséges a DXR3/H+ hardverrel újrakódolás nélkül.\nKapcsold be a lavc vagy fame opciót a DXR3/H+ konfigurációs panelen."
+#define MSGTR_UNKNOWNWINDOWTYPE "Ismeretlen ablak típust találtam ..."
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[skin] hiba a skin konfigurációs fájljának %d. sorában: %s"
 #define MSGTR_SKIN_WARNING1 "[skin] figyelmeztetés a skin konfigurációs fájljának %d. sorában: widget (%S) megvan, de nincs elõtte \"section\""
 #define MSGTR_SKIN_WARNING2 "[skin] figyelmeztetés a skin konfigurációs fájljának %d. sorában: widget (%S) megvan, de nincs elõtte \"subsection\""
 #define MSGTR_SKIN_WARNING3 "[skin] figyelmeztetés a skin konfigurációs fájljának %d. sorában: ez az elem nem használható ebben az alrészben (%s)"
+#define MSGTR_SKIN_SkinFileNotFound "[skin] a fájl ( %s ) nem található.\n"
 #define MSGTR_SKIN_BITMAP_16bit  "16 vagy kevesebb bites bitmap nem támogatott (%s).\n"
 #define MSGTR_SKIN_BITMAP_FileNotFound  "fájl nem található (%s)\n"
 #define MSGTR_SKIN_BITMAP_BMPReadError "BMP olvasási hiba (%s)\n"
@@ -646,6 +647,7 @@ static char help_text[]=
 #define MSGTR_SKIN_FONT_NonExistentFontID "nemlétezõ betûtipus azonosító (%s)\n"
 #define MSGTR_SKIN_UnknownParameter "ismeretlen paraméter (%s)\n"
 #define MSGTR_SKIN_SKINCFG_SkinNotFound "Skin nem található (%s).\n"
+#define MSGTR_SKIN_SKINCFG_SelectedSkinNotFound "A kiválasztott skin ( %s ) nem található, a 'default'-ot próbálom meg...\n"
 #define MSGTR_SKIN_SKINCFG_SkinCfgReadError "Skin konfigurációs fájl olvasási hiba (%s).\n"
 #define MSGTR_SKIN_LABEL "Skin-ek:"
 
@@ -811,7 +813,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SaveWinPos "Ablakok pozíciójának mentése"
 #define MSGTR_PREFERENCES_XSCREENSAVER "XScreenSaver leállítása film lejátszásakor"
 #define MSGTR_PREFERENCES_PlayBar "PlayBar engedélyezése"
-#define MSGTR_PREFERENCES_AutoSync "AutoSync ki/be kapcsolása"
+#define MSGTR_PREFERENCES_AutoSync "AutoSync ki/be"
 #define MSGTR_PREFERENCES_AutoSyncValue "Értéke:"
 #define MSGTR_PREFERENCES_CDROMDevice "CD meghajtó:"
 #define MSGTR_PREFERENCES_DVDDevice "DVD meghajtó:"
@@ -827,6 +829,45 @@ static char help_text[]=
 #define MSGTR_MSGBOX_LABEL_FatalError "Végzetes hiba!"
 #define MSGTR_MSGBOX_LABEL_Error "Hiba!"
 #define MSGTR_MSGBOX_LABEL_Warning "Figyelmeztetés!"
+
+// bitmap.c
+
+#define MSGTR_NotEnoughMemoryC32To1 "[c32to1] nincs elég memória a képhez\n"
+#define MSGTR_NotEnoughMemoryC1To32 "[c1to32] nincs elég memória a képhez\n"
+
+// cfg.c
+
+#define MSGTR_ConfigFileReadError "[cfg] hiba a konfigurációs fájl olvasásakor ...\n"
+#define MSGTR_UnableToSaveOption "A(z) '%s' opciót nem sikerült elmenteni.\n"
+
+// interface.c
+
+#define MSGTR_DeletingSubtitles "[GUI] Feliratok törlése.\n"
+#define MSGTR_LoadingSubtitles "[GUI] Feliratok betöltése: %s\n"
+#define MSGTR_AddingVideoFilter "[GUI] Videó szûrõ hozzáadása: %s\n"
+#define MSGTR_RemovingVideoFilter "[GUI] Videó szûrõ eltávolítása: %s\n"
+
+// mw.c
+
+#define MSGTR_NotAFile "Úgy tûnik, hogy ez nem fájl: %s !\n"
+
+// ws.c
+
+#define MSGTR_WS_CouldNotOpenDisplay "[ws] A képernyõ nem nyitható meg.\n"
+#define MSGTR_WS_RemoteDisplay "[ws] Távoli képernyõ, XMITSHM kikapcsolva.\n"
+#define MSGTR_WS_NoXshm "[ws] Bocs, a rendszered nem támogatja az X osztott memória kiterjesztést.\n"
+#define MSGTR_WS_NoXshape "[ws] Bocs, a rendszered nem támogatja az XShape kiterjesztést.\n"
+#define MSGTR_WS_ColorDepthTooLow "[ws] Bocs, a szín mélység túl kicsi.\n"
+#define MSGTR_WS_TooManyOpenWindows "[ws] Túl sok nyitott ablak van.\n"
+#define MSGTR_WS_ShmError "[ws] osztott memória kiterjesztés hibája\n"
+#define MSGTR_WS_NotEnoughMemoryDrawBuffer "[ws] Bocs, nincs elég memória a rajz buffernek.\n"
+#define MSGTR_WS_DpmsUnavailable "A DPMS nem elérhetõ?\n"
+#define MSGTR_WS_DpmsNotEnabled "A DPMS nem engedélyezhetõ.\n"
+
+// wsxdnd.c
+
+#define MSGTR_WS_NotAFile "Úgy tûnik, hogy ez nem fájl...\n"
+#define MSGTR_WS_DDNothing "D&D: Semmi sem jött vissza!\n"
 
 #endif
 
@@ -866,7 +907,7 @@ static char help_text[]=
 #define MSGTR_VO_YUV4MPEG_InterlacedInputNotRGB "Input nem RGB, nem lehet szétválasztani a színeket mezõnként!"
 #define MSGTR_VO_YUV4MPEG_WidthDivisibleBy2 "A kép szélességnek kettõvel oszthatónak kell lennie."
 #define MSGTR_VO_YUV4MPEG_NoMemRGBFrameBuf "Nincs elég memória az RGB framebuffer lefoglalásához."
-#define MSGTR_VO_YUV4MPEG_OutFileOpenError "Nincs elegendõ memória vagy fájl handle a \"stream.yuv\" írásához!"
+#define MSGTR_VO_YUV4MPEG_OutFileOpenError "Nincs elegendõ memória vagy fájl handle a(z) \"%s\" írásához!"
 #define MSGTR_VO_YUV4MPEG_OutFileWriteError "Hiba a kép kimenetre írása közben!"
 #define MSGTR_VO_YUV4MPEG_UnknownSubDev "Ismeretlen aleszköz: %s"
 #define MSGTR_VO_YUV4MPEG_InterlacedTFFMode "Interlaced kimeneti mód használata, top-field elõször."
@@ -893,7 +934,7 @@ static char help_text[]=
 #define MSGTR_AO_OSS_CantSetAC3 "[AO OSS] A(z) %s audio eszköz nem állítható be AC3 kimenetre, S16-ot próbálok...\n"
 #define MSGTR_AO_OSS_CantSetChans "[AO OSS] audio_setup: Nem sikerült az audio eszközt %d csatornára állítani.\n"
 #define MSGTR_AO_OSS_CantUseGetospace "[AO OSS] audio_setup: a vezérlõ nem támogatja a SNDCTL_DSP_GETOSPACE-t :-(\n"
-#define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   ***  Az audio vezérlõd NEM támogatja a select() -et ***\n Fordítsd újra az mplayer-t az #undef HAVE_AUDIO_SELECT sorral a config.h-ban!\n\n"
+#define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   ***  Az audio vezérlõd NEM támogatja a select() -et ***\n Fordítsd újra az MPlayer-t az #undef HAVE_AUDIO_SELECT sorral a config.h-ban!\n\n"
 #define MSGTR_AO_OSS_CantReopen "[AO OSS]\nVégzetes hiba: *** NEM LEHET ÚJRA MEGNYITNI / BEÁLLÍTANI AZ AUDIO ESZKÖZT *** %s\n"
 
 // ao_arts.c
@@ -951,7 +992,7 @@ static char help_text[]=
 #define MSGTR_AO_SUN_RtscWriteFailed "[AO SUN] rtsc: írás sikertelen."
 #define MSGTR_AO_SUN_CantOpenAudioDev "[AO SUN] %s audio eszköz nem elérhetõ, %s  -> nincs hang.\n"
 #define MSGTR_AO_SUN_UnsupSampleRate "[AO SUN] audio_setup: a kártyád nem támogat %d csatornát, %s, %d Hz samplerate-t.\n"
-#define MSGTR_AO_SUN_CantUseSelect "[AO SUN]\n   ***  A hangkártyád NEM támogatja a select()-et ***\nFordítsd újra az mplayer-t az #undef HAVE_AUDIO_SELECT sorral a config.h-ban !\n\n"
+#define MSGTR_AO_SUN_CantUseSelect "[AO SUN]\n   ***  A hangkártyád NEM támogatja a select()-et ***\nFordítsd újra az MPlayer-t az #undef HAVE_AUDIO_SELECT sorral a config.h-ban !\n\n"
 #define MSGTR_AO_SUN_CantReopenReset "[AO SUN]\nVégzetes hiba: *** NEM LEHET ÚJRA MEGNYITNI / BEÁLLÍTANI AZ AUDIO ESZKÖZT (%s) ***\n"
 
 // ao_alsa5.c
@@ -982,3 +1023,25 @@ static char help_text[]=
 // ao_plugin.c
 
 #define MSGTR_AO_PLUGIN_InvalidPlugin "[AO PLUGIN] hibás plugin: %s\n"
+
+// ======================= AF Audio Filters ================================
+
+// libaf 
+
+// af_ladspa.c
+
+#define MSGTR_AF_LADSPA_AvailableLabels "használható cimkék"
+#define MSGTR_AF_LADSPA_WarnNoInputs "FIGYELEM! Ennek a LADSPA pluginnak nincsenek audio bemenetei.\n  A bejövõ audió jelek elvesznek."
+#define MSGTR_AF_LADSPA_ErrMultiChannel "A több-csatornás (>2) plugin (még) nem támogatott.\n  Csak a mono és sztereo plugin-okat használd."
+#define MSGTR_AF_LADSPA_ErrNoOutputs "Ennek a LADSPA pluginnak nincsenek audió bemenetei."
+#define MSGTR_AF_LADSPA_ErrInOutDiff "Különbözik a LADSPA plugin audió bemenetek és kimenetek száma."
+#define MSGTR_AF_LADSPA_ErrFailedToLoad "nem sikerült betölteni"
+#define MSGTR_AF_LADSPA_ErrNoDescriptor "A ladspa_descriptor() függvény nem található a megadott függvénykönyvtár fájlban."
+#define MSGTR_AF_LADSPA_ErrLabelNotFound "A címke nem található a plugin könyvtárban."
+#define MSGTR_AF_LADSPA_ErrNoSuboptions "Nincs alopció megadva"
+#define MSGTR_AF_LADSPA_ErrNoLibFile "Nincs könyvtárfájl megadva"
+#define MSGTR_AF_LADSPA_ErrNoLabel "Nincs szûrõ címke megadva"
+#define MSGTR_AF_LADSPA_ErrNotEnoughControls "Nincs elég vezérlõ megadva a parancssorban"
+#define MSGTR_AF_LADSPA_ErrControlBelow "%s: A(z) #%d bemeneti vezérlõ a(z) %0.4f alsó határ alatt van.\n"
+#define MSGTR_AF_LADSPA_ErrControlAbove "%s: A(z) #%d bemeneti vezérlõ a(z) %0.4f felsõ határ felett van.\n"
+
