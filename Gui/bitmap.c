@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -164,7 +163,7 @@ unsigned char * fExist( unsigned char * fname )
   }
  for ( i=0;i<2;i++ )
   {
-   sprintf( tmp,"%s%s",fname,ext[i] );
+   snprintf( tmp,511,"%s%s",fname,ext[i] );
    fl=fopen( tmp,"rb" );
    if ( fl != NULL )
     {
@@ -186,9 +185,13 @@ int bpRead( char * fname, txSample * bf )
   }
  if ( bf->BPP < 24 )
   {
-   mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[bitmap] sorry, 16 or less bitmaps not supported.\n" );
+   mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[bitmap] Sorry, only 24 and 32 bpp bitmaps are supported.\n" );
    return -1;
   }
+#ifdef WORDS_BIGENDIAN
+ if (bf->BPP == 32)
+    swab(bf->Image, bf->Image, bf->ImageSize);
+#endif
  if ( conv24to32( bf ) ) return -8;
  bgr2rgb( bf );
  Normalize( bf );
@@ -203,7 +206,7 @@ void Convert32to1( txSample * in,txSample * out,int adaptivlimit )
  out->ImageSize=(out->Width * out->Height + 7) / 8;
  mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[c1to32] imagesize: %d\n",out->ImageSize );
  out->Image=(char *)calloc( 1,out->ImageSize );
- if ( out->Image == NULL ) mp_msg( MSGT_GPLAYER,MSGL_STATUS,"nem van ram baze\n" );
+ if ( out->Image == NULL ) mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[c32to1] Not enough memory for image.\n" );
  {
   int i,b,c=0; unsigned int * buf = NULL; unsigned char tmp = 0; int nothaveshape = 1;
   buf=(unsigned int *)in->Image;
@@ -227,7 +230,7 @@ void Convert1to32( txSample * in,txSample * out )
  out->ImageSize=out->Width * out->Height * 4;
  out->Image=(char *)calloc( 1,out->ImageSize );
  mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[c32to1] imagesize: %d\n",out->ImageSize );
- if ( out->Image == NULL ) mp_msg( MSGT_GPLAYER,MSGL_STATUS,"nem van ram baze\n" );
+ if ( out->Image == NULL ) mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[c1to32] Not enough memory for image.\n" );
  {
   int i,b,c=0; unsigned int * buf = NULL; unsigned char tmp = 0;
   buf=(unsigned int *)out->Image;
