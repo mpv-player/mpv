@@ -3,7 +3,7 @@
 
 //=================== STREAMER =========================
 
-#define STREAM_BUFFER_SIZE 4096
+#define STREAM_BUFFER_SIZE 2048
 
 #define STREAMTYPE_FILE 0
 #define STREAMTYPE_VCD  1
@@ -126,7 +126,7 @@ if(verbose>=3){
 
   switch(s->type){
   case STREAMTYPE_FILE:
-    newpos=pos&(~4095);break;
+    newpos=pos&(~(STREAM_BUFFER_SIZE-1));break;
   case STREAMTYPE_VCD:
     newpos=(pos/VCD_SECTOR_DATA)*VCD_SECTOR_DATA;break;
   }

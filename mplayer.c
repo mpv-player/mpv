@@ -50,6 +50,8 @@
 
 #include "codec-cfg.h"
 
+#include "dvdauth.h"
+
 #ifdef USE_DIRECTSHOW
 #include "DirectShow/DS_VideoDec.h"
 #include "DirectShow/DS_AudioDec.h"
@@ -605,6 +607,12 @@ if(vcd_track){
 //============ Open plain FILE ============
   f=open(filename,O_RDONLY);
   if(f<0){ printf("File not found: '%s'\n",filename);return 1; }
+#ifdef HAVE_LIBCSS
+  if (dvd_device) {
+    if (dvd_auth(dvd_device,f)) exit(0);
+    printf("DVD auth sequence seems to be OK.\n");
+  }
+#endif
   stream_type=STREAMTYPE_FILE;
 }
 
@@ -1900,6 +1908,9 @@ switch(file_format){
 //       picture->bitrate=2324*75*8; // standard VCD bitrate (75 sectors / sec)
 
         if(newpos<seek_to_byte) newpos=seek_to_byte;
+#ifdef HAVE_LIBCSS
+        if (dvd_device) newpos&=~(STREAM_BUFFER_SIZE-1);  /* sector boundary */
+#endif
         stream_seek(demuxer->stream,newpos);
         // re-sync video:
         videobuf_code_len=0; // reset ES stream buffer

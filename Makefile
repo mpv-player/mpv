@@ -1,10 +1,8 @@
-# DirectShow support (test code)
-# make -f makefile.DS
-
 # LINUX Makefile made by A'rpi / Astral
 # Some cleanup by LGB: 	* 'make -C dir' instead of 'cd dir;make;cd..'
 #			* for loops instead of linear sequence of make directories
 #			* some minor problems with make clean and distclean were corrected
+#			* DVD support
 
 include config.mak
 
@@ -22,9 +20,9 @@ PRG_CFG = codec-cfg
 prefix = /usr/local
 BINDIR = ${prefix}/bin
 # BINDIR = /usr/local/bin
-SRCS = codec-cfg.c subreader.c linux/getch2.c linux/timer-lx.c linux/shmem.c xa/xa_gsm.c lirc_mp.c cfgparser.c mixer.c
-OBJS = codec-cfg.o subreader.o linux/getch2.o linux/timer-lx.o linux/shmem.o xa/xa_gsm.o lirc_mp.o cfgparser.o mixer.o
-CFLAGS = $(OPTFLAGS) -Iloader -Ilibvo # -Wall
+SRCS = codec-cfg.c subreader.c linux/getch2.c linux/timer-lx.c linux/shmem.c xa/xa_gsm.c lirc_mp.c cfgparser.c mixer.c dvdauth.c
+OBJS = codec-cfg.o subreader.o linux/getch2.o linux/timer-lx.o linux/shmem.o xa/xa_gsm.o lirc_mp.o cfgparser.o mixer.o dvdauth.o
+CFLAGS = $(OPTFLAGS) $(CSS_INC) -Iloader -Ilibvo # -Wall
 A_LIBS = -Lmp3lib -lMP3 -Llibac3 -lac3
 VO_LIBS = -Llibvo -lvo $(X_LIBS)
 
@@ -65,7 +63,7 @@ encore/libencore.a:
 	$(MAKE) -C encore
 
 $(PRG):	.depend mplayer.o $(OBJS) loader/libloader.a loader/DirectShow/libDS_Filter.a libmpeg2/libmpeg2.a opendivx/libdecore.a $(COMMONLIBS) encore/libencore.a
-	$(CC) $(CFLAGS) -o $(PRG) mplayer.o $(OBJS) $(XMM_LIBS) $(LIRC_LIBS) $(A_LIBS) -lm $(TERMCAP_LIB) -Lloader -lloader -Lloader/DirectShow -lDS_Filter -ldl -Llibmpeg2 -lmpeg2 -Lopendivx -ldecore $(VO_LIBS) -Lencore -lencore -lpthread -lstdc++
+	$(CC) $(CFLAGS) -o $(PRG) mplayer.o $(OBJS) $(XMM_LIBS) $(LIRC_LIBS) $(A_LIBS) -lm $(TERMCAP_LIB) -Lloader -lloader -Lloader/DirectShow -lDS_Filter -ldl -Llibmpeg2 -lmpeg2 -Lopendivx -ldecore $(VO_LIBS) $(CSS_LIB) -Lencore -lencore -lpthread -lstdc++
 
 $(PRG_HQ):	.depend mplayerHQ.o $(OBJS) loader/libloader.a libmpeg2/libmpeg2.a opendivx/libdecore.a $(COMMONLIBS) encore/libencore.a
 	$(CC) $(CFLAGS) -o $(PRG_HQ) mplayerHQ.o $(OBJS) $(XMM_LIBS) $(LIRC_LIBS) $(A_LIBS) -lm $(TERMCAP_LIB) -Lloader -lloader -ldl -Llibmpeg2 -lmpeg2 -Lopendivx -ldecore $(VO_LIBS) -Lencore -lencore -lpthread

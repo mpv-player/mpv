@@ -6,6 +6,9 @@
 #
 # Changes in reversed order:
 #
+# 2001/04/16 by LGB
+#  - added libcss stuffs
+#
 # 2001/04/15 by Pontscho
 #  - added --disable-select option
 #  - added X11DIR variable in config.mak and fix syncfb Makefile -L/usr/X11/lib bug 
@@ -17,7 +20,7 @@
 #  - new option: --cc  (to specify C compiler path+name)
 #
 # 2001/03/08 by LGB:
-#  - DGA detection-o-matic :)
+#  - DGA detect-o-matic :)
 #  - '--disable-dga' option to force disabling DGA vo driver compiling into mplayer
 #  - line about '--enable-dga' is added to the help message
 #
@@ -100,6 +103,8 @@ params:
 
         --with-x11libdir=DIR    X library files are in DIR
         --with-win32libdir=DIR  windows codec files
+        --with-csslibdir=DIR    directory contains libcss.so shared library
+        --with-cssincdir=DIR    directory contains libcss header file (css.h)
 
 	--size-x=SIZE		default screen width
 	--size-y=SIZE		default screen height
@@ -179,6 +184,7 @@ pfamily=`cat /proc/cpuinfo | grep 'cpu family' | cut -d ':' -f 2 | cut -d ' ' -f
 pmodel=`cat /proc/cpuinfo | grep "model$TAB" | cut -d ':' -f 2 | cut -d ' ' -f 2`
 pstepping=`cat /proc/cpuinfo | grep 'stepping' | cut -d ':' -f 2 | cut -d ' ' -f 2`
 
+_css=no
 _mmx=no
 _mmx2=no
 _3dnow=no
@@ -460,6 +466,9 @@ rm -f $TMPC $TMPO
 for ac_option
 do
  case "$ac_option" in
+  --enable-css)
+	_css=yes
+	;;
   --enable-sse)
         _sse=yes
         ;;
@@ -526,6 +535,9 @@ do
   --enable-select)
         _select='#define HAVE_AUDIO_SELECT'
 	;;
+  --disable-css)
+	_css=no
+	;;
   --disable-sse)
         _sse=no
         ;;
@@ -582,6 +594,14 @@ do
         _win32libdir=`echo $ac_option | cut -d '=' -f 2`
 	_win32libdirnotify=no
         ;;
+  --with-csslibdir=*)
+        _csslibdir=`echo $ac_option | cut -d '=' -f 2`
+	_css='yes';
+	;;
+  --with-cssincdir=*)
+        _cssincdir=`echo $ac_option | cut -d '=' -f 2`
+        _css='yes';
+        ;;
   --size-x=*)
 	_x=`echo $ac_option | cut -d '=' -f 2`
 	;;
@@ -624,10 +644,29 @@ echo "Checking for DGA 2.0 .. $_dga2"
 echo "Checking for Xf86VM ... $_vm"
 echo "Checking for SVGAlib ... $_svga"
 echo "Checking for FBDev ... $_fbdev"
+echo "Checking for DeCSS support ... $_css"
 # write conf files.
 
 if [ $_gl = yes ]; then
    _gllib='-lGL'
+fi
+
+if [ $_css = yes ]; then
+   if [ ! -z $_csslibdir ]; then
+     _csslib="-L${_csslibdir} -lcss"
+   else
+     _csslib='-lcss'
+   fi
+   _css='#define HAVE_LIBCSS'
+   if [ ! -z $_cssincdir ]; then
+     _cssinc="-I${_cssincdir}"
+   else
+     _cssinc=""
+   fi
+else
+   _css='#undef HAVE_LIBCSS'
+   _csslib=''
+   _cssinc=''
 fi
 
 if [ $_x11 = yes ]; then
@@ -697,6 +736,8 @@ X_LIBS=$_x11libdir $_gllib $_sdllib $_dgalib $_x11lib $_xvlib $_vmlib $_svgalib
 TERMCAP_LIB=$_libtermcap
 XMM_LIBS = $_xmmplibs
 LIRC_LIBS = $_lirclibs
+CSS_LIB = $_csslib
+CSS_INC = $_cssinc
 WIN32_PATH=-DWIN32_PATH=\"$_win32libdir\"
 
 EOF
@@ -868,6 +909,9 @@ $_xmmpaudio
 
 /* LIRC (remote control, see www.lirc.org) support: */
 $_lircdefs
+
+/* DeCSS support using libcss */
+$_css
 
 /* Define this to enable MPEG 1/2 image postprocessing (requires FAST cpu!) */
 #define MPEG12_POSTPROC

@@ -20,6 +20,13 @@ struct config conf[]={
 	{"dsp", &dsp, CONF_TYPE_STRING, 0, 0, 0},
         {"mixer", &mixer_device, CONF_TYPE_STRING, 0, 0, 0},
         {"master", &mixer_usemaster, CONF_TYPE_FLAG, 0, 0, 1},
+#ifdef HAVE_LIBCSS
+        {"dvd", &dvd_device, CONF_TYPE_STRING, 0, 0, 0},
+#else
+        {"dvd", "DVD support was not compiled in. See file DOCS/DVD.\n",
+            CONF_TYPE_PRINT, CONF_NOCFG, 0 , 0},
+#endif
+			    
 #ifdef HAVE_FBDEV
 	{"fb", &fb_dev_name, CONF_TYPE_STRING, 0, 0, 0},
 	{"fbmode", &fb_mode_name, CONF_TYPE_STRING, 0, 0, 0},
