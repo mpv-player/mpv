@@ -351,6 +351,7 @@ static void mga_vid_write_regs(void)
 	writel( regs.besglobctl + ((readl(mga_mmio_base + VCOUNT)+2)<<16),
 			mga_mmio_base + BESGLOBCTL);
 
+#if 0
 	printk(KERN_DEBUG "mga_vid: wrote BES registers\n");
 	printk(KERN_DEBUG "mga_vid: BESCTL = 0x%08x\n",
 			readl(mga_mmio_base + BESCTL));
@@ -358,6 +359,7 @@ static void mga_vid_write_regs(void)
 			readl(mga_mmio_base + BESGLOBCTL));
 	printk(KERN_DEBUG "mga_vid: BESSTATUS= 0x%08x\n",
 			readl(mga_mmio_base + BESSTATUS));
+#endif
 }
 
 static int mga_vid_set_config(mga_vid_config_t *config)
@@ -689,7 +691,7 @@ static int mga_vid_find_card(void)
 	if((dev = pci_find_device(PCI_VENDOR_ID_MATROX, PCI_DEVICE_ID_MATROX_G400, NULL)))
 	{
 		is_g400 = 1;
-		printk(KERN_INFO "mga_vid: Found MGA G400\n");
+		printk(KERN_INFO "mga_vid: Found MGA G400/G450\n");
 	}
 	else if((dev = pci_find_device(PCI_VENDOR_ID_MATROX, PCI_DEVICE_ID_MATROX_G200_AGP, NULL)))
 	{
@@ -721,8 +723,8 @@ static int mga_vid_find_card(void)
 	printk(KERN_INFO "mga_vid: MMIO at 0x%p IRQ: %d  framebuffer: 0x%08lX\n", mga_mmio_base, mga_irq, mga_mem_base);
 
 	pci_read_config_dword(dev,  0x40, &card_option);
-	printk(KERN_DEBUG "OPTION word: 0x%08x\n", card_option);
-	printk(KERN_DEBUG "  memory: %d   %s\n", (card_option>>10)&7, ((card_option>>14)&1)?"SGRAM":"SDRAM");
+	printk(KERN_INFO "mga_vid: OPTION word: 0x%08X  mem: 0x%02X  %s\n", card_option,
+		(card_option>>10)&0x17, ((card_option>>14)&1)?"SGRAM":"SDRAM");
 
 //	temp = (card_option >> 10) & 0x17;
 
@@ -899,7 +901,8 @@ static int mga_vid_initialize(void)
 {
 	mga_vid_in_use = 0;
 
-	printk(KERN_INFO "Matrox MGA G200/G400 YUV Video interface v0.01 (c) Aaron Holtzman \n");
+//	printk(KERN_INFO "Matrox MGA G200/G400 YUV Video interface v0.01 (c) Aaron Holtzman \n");
+	printk(KERN_INFO "Matrox MGA G200/G400/G450 YUV Video interface v2.01 (c) Aaron Holtzman & A'rpi\n");
 	if(register_chrdev(MGA_VID_MAJOR, "mga_vid", &mga_vid_fops))
 	{
 		printk(KERN_ERR "mga_vid: unable to get major: %d\n", MGA_VID_MAJOR);
