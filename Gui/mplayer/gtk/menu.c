@@ -308,8 +308,8 @@ GtkWidget * create_PopUpMenu( void )
     AddMenuItem( SubMenu,MSGTR_MENU_Play"        ", evPlay );
     AddMenuItem( SubMenu,MSGTR_MENU_Pause, evPause );
     AddMenuItem( SubMenu,MSGTR_MENU_Stop, evStop );
-    AddMenuItem( SubMenu,MSGTR_MENU_NextStream, evPrev );
-    AddMenuItem( SubMenu,MSGTR_MENU_PrevStream, evNext );
+    AddMenuItem( SubMenu,MSGTR_MENU_NextStream, evNext );
+    AddMenuItem( SubMenu,MSGTR_MENU_PrevStream, evPrev );
 //    AddSeparator( SubMenu );
 //    AddMenuItem( SubMenu,"Back 10 sec", evBackward10sec );
 //    AddMenuItem( SubMenu,"Fwd 10 sec", evForward10sec );
