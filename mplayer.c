@@ -256,8 +256,11 @@ int has_audio=1;
 //int has_video=1;
 char *audio_codec=NULL; // override audio codec
 char *video_codec=NULL; // override video codec
-int audio_format=0; // override - This might be removed - atmos ::
+int audio_family=-1;     // override audio codec family 
+int video_family=-1;     // override video codec family 
 
+// IMHO this stuff is no longer of use, or is there a special
+// reason why dshow should be completely disabled? - atmos ::
 #ifdef USE_DIRECTSHOW
 int allow_dshow=1;
 #else
@@ -727,7 +730,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
   stream_seek(demuxer->stream,seek_to_byte);
   // Arpi? why is this extra and not in codec selection? - atmos ::
   // Hmm. This should be fixed somehow... I'll check diz later. - arpi
-  if(audio_format) demuxer->audio->type=audio_format; // override audio format
+  if(audio_family!=-1) demuxer->audio->type=audio_family; // override audio format
   if(ds_fill_buffer(demuxer->video)){
     printf("Detected MPEG-PS file format!\n");
     file_format=DEMUXER_TYPE_MPEG_PS;
@@ -1079,9 +1082,16 @@ if(!sh_video){
 if(has_audio){
   // Go through the codec.conf and find the best codec...
   sh_audio->codec=NULL;
+  if(audio_family!=-1) printf("Trying to force audio codec driver family %d ...\n",video_family);
   while(1){
     sh_audio->codec=find_codec(sh_audio->format,NULL,sh_audio->codec,1);
     if(!sh_audio->codec){
+      if(audio_family!=-1) {
+        sh_audio->codec=NULL; /* re-search */
+        printf("Can't find audio codec for forced driver family, fallback to other drivers.\n");
+        audio_family=-1;
+        continue;      
+      }
       printf("Can't find codec for audio format 0x%X !\n",sh_audio->format);
       printf("*** Try to upgrade %s from DOCS/codecs.conf\n",get_path("codecs.conf"));
       printf("*** If it's still not OK, then read DOCS/CODECS!\n");
@@ -1089,6 +1099,7 @@ if(has_audio){
       break;
     }
     if(audio_codec && strcmp(sh_audio->codec->name,audio_codec)) continue;
+    else if(audio_family!=-1 && sh_audio->codec->driver!=audio_family) continue;
     printf("%s audio codec: [%s] drv:%d (%s)\n",audio_codec?"Forcing":"Detected",sh_audio->codec->name,sh_audio->codec->driver,sh_audio->codec->info);
     //has_audio=sh_audio->codec->driver;
     break;
@@ -1110,10 +1121,17 @@ if(has_audio){
 
 // Go through the codec.conf and find the best codec...
 sh_video->codec=NULL;
+if(video_family!=-1) printf("Trying to force video codec driver family %d ...\n",video_family);
 while(1){
   sh_video->codec=find_codec(sh_video->format,
     sh_video->bih?((unsigned int*) &sh_video->bih->biCompression):NULL,sh_video->codec,0);
   if(!sh_video->codec){
+    if(video_family!=-1) {
+      sh_video->codec=NULL; /* re-search */
+      printf("Can't find video codec for forced driver family, fallback to other drivers.\n");
+      video_family=-1;
+      continue;      
+    }
     printf("Can't find codec for video format 0x%X !\n",sh_video->format);
       printf("*** Try to upgrade %s from DOCS/codecs.conf\n",get_path("codecs.conf"));
       printf("*** If it's still not OK, then read DOCS/CODECS!\n");
@@ -1130,6 +1148,7 @@ while(1){
   // is next line needed anymore? - atmos ::
   if(!allow_dshow && sh_video->codec->driver==4) continue; // skip DShow
   else if(video_codec && strcmp(sh_video->codec->name,video_codec)) continue;
+  else if(video_family!=-1 && sh_video->codec->driver!=video_family) continue;
   break;
 }
 //has_video=sh_video->codec->driver;
