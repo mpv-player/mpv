@@ -1187,6 +1187,7 @@ mp_msg(MSGT_CPLAYER,MSGL_INFO,"=================================================
 
 // Go through the codec.conf and find the best codec...
 sh_video->inited=0;
+codecs_reset_selection(0);
 if(video_codec){
     // forced codec by name:
     mp_msg(MSGT_CPLAYER,MSGL_INFO,"Forced video codec: %s\n",video_codec);

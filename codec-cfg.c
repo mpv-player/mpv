@@ -698,6 +698,7 @@ codecs_t* find_codec(unsigned int fourcc,unsigned int *fourccmap,
 		if(!i) return NULL;
 		for (/* NOTHING */; i--; c++) {
                         if(start && c<=start) continue;
+			if(c->flags&CODECS_FLAG_SELECTED) continue;
 			for (j = 0; j < CODECS_MAX_FOURCC; j++) {
 				if (c->fourcc[j]==fourcc || c->driver==0) {
 					if (fourccmap)
