@@ -1,4 +1,4 @@
-.\" synced with 1.808
+.\" synced with 1.810
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -1178,11 +1178,11 @@ czêstotliwo¶æ przechwytywania video (ile klatek na sekundê przechwytywaæ)
 maksymalny rozmiar bufora przechwytywania w megabajtach (domy¶lnie: dynamiczny)
 .IPs norm=<warto¶æ>
 bsdbt848 i v4l dopuszczaj± PAL, SECAM i NTSC.
-Przy v4l2 lista dostêpnych norm jest wy¶wietlana na konsoli.
+Lista dostêpnych norm dla v4l2 jest wy¶wietlana na konsoli.
 Przeczytaj te¿ poni¿sz± opcjê normid.
 .IPs "normid=<warto¶æ> (tylko v4l2)"
-Ustawia normê z podanym numerycznym ID.
-Zale¿y od karty przechwytywania.
+Ustawia normê TV z podanym numerycznym ID.
+Norma zale¿y od karty przechwytywania.
 Lista norm TV jest wypisywana przez MPlayera na konsoli.
 .IPs channel=<warto¶æ>
 Ustawia tuner na kana³ <warto¶æ>.
@@ -3102,6 +3102,10 @@ d³ugo¶ci filtru
 .REss
 .IPs sweep[=prêdko¶æ]
 przemiatanie sinusoidalne
+.IPs hrtf\ 
+Head-related transfer function (funkcja transferowa zwi±zana z g³ow±):
+Konwertuje wielkokana³owe audio do dwóch kana³ów przeznaczonych dla s³uchawek,
+zachowuj±c przestrzenno¶æ d¼wiêku.
 .IPs channels[=il]
 Zmienia ilo¶æ kana³ów wyj¶cia na il.
 Je¶li liczba kana³ów wyj¶ciowych jest wiêksza ni¿ liczba kana³ów wej¶ciowych,
