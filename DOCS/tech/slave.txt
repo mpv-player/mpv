@@ -9,7 +9,7 @@ seek <value> [<type>]
         0 is a relative seek of +/- <value> seconds (default).
         1 is a seek to <value> % in the movie.
         2 is a seek to an absolute position of <value> seconds.
-    
+
 edl_mark
     ???
 
@@ -100,7 +100,22 @@ loadlist <file>
     Load the given playlist file.
 
 change_rectangle <val1> <val2>
-    ???
+    Change the position of the rectangle filter rectangle.
+       <val1>
+           Must be one of the following:
+               0 = width
+               1 = height
+               2 = x position
+               3 = y position
+       <val2>
+           For values of 0 or 1 for <val1>:
+               Integer amount to add/subtract from the width/height.
+               Positive values add to width/height and negative values
+               subtract from it.
+           For values of 2 or 3 for <val1>:
+               Relative integer amount by which to move the upper left corner
+               of the rectangle. Positive values move the rectangle right/down
+               and negative values move the rectangle left/up.
 
 dvdnav <button>
     Press the given dvdnav button.
