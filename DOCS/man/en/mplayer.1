@@ -2773,6 +2773,15 @@ swap fields (exchange even & odd lines)
 .RE
 .PD 1
 .TP
+.B "fil=[i|d]"
+(de)interleaves lines.
+fil=d deinterleaves the fields and puts then left-right
+fil=i interleave them again (reverses the effect of fil=d)
+so this filter is very similar to the il filter but much faster, the main
+dissadvantage is that it doesnt always work. especially if combined with 
+other filters it may produce randomly messed up images, so be happy if it works
+but dont complain if it doesnt for your combination of filters. 
+.TP
 .B "field[=n]"
 Extracts a single field from an interlaced image using stride arithmetic
 to avoid wasting CPU time.
