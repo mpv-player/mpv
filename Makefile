@@ -208,7 +208,7 @@ endif
 
 $(PRG):	$(MPLAYER_DEP)
 	./darwinfixlib.sh $(MPLAYER_DEP)
-	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) libvo/libvo.a libao2/libao2.a $(MENU_LIBS) $(VIDIX_LIBS) $(GUI_LIBS) $(COMMON_LIBS) $(GTK_LIBS) $(VO_LIBS) $(AO_LIBS) $(EXTRA_LIB) $(LIRC_LIB) $(STATIC_LIB) $(ARCH_LIB) -lm
+	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) libvo/libvo.a libao2/libao2.a $(MENU_LIBS) $(VIDIX_LIBS) $(GUI_LIBS) $(COMMON_LIBS) $(GTK_LIBS) $(VO_LIBS) $(AO_LIBS) $(EXTRA_LIB) $(LIRC_LIB) $(STATIC_LIB) $(ARCH_LIB) $(I18NLIBS) -lm
 
 mplayer.exe.spec.c: libmpcodecs/libmpcodecs.a
 	winebuild -fPIC -o mplayer.exe.spec.c -exe mplayer.exe -mcui \
@@ -228,7 +228,7 @@ $(PRG_FIBMAP): fibmap_mplayer.o
 ifeq ($(MENCODER),yes)
 $(PRG_MENCODER): $(MENCODER_DEP)
 	./darwinfixlib.sh $(MENCODER_DEP) libmpcodecs/libmpencoders.a
-	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) libmpcodecs/libmpencoders.a $(ENCORE_LIB) $(COMMON_LIBS) $(EXTRA_LIB) $(MLIB_LIB) $(LIRC_LIB) $(ARCH_LIB) -lm 
+	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) libmpcodecs/libmpencoders.a $(ENCORE_LIB) $(COMMON_LIBS) $(EXTRA_LIB) $(MLIB_LIB) $(LIRC_LIB) $(ARCH_LIB) $(I18NLIBS) -lm 
 endif
 
 codecs.conf.h: $(PRG_CFG)
@@ -245,7 +245,7 @@ $(MPLAYER_DEP): version.h
 $(MENCODER_DEP): version.h
 
 $(PRG_CFG): version.h codec-cfg.c codec-cfg.h
-	$(CC) $(CFLAGS) -g codec-cfg.c mp_msg.c -o $(PRG_CFG) -DCODECS2HTML
+	$(CC) $(CFLAGS) -g codec-cfg.c mp_msg.c -o $(PRG_CFG) -DCODECS2HTML $(I18NLIBS)
 
 install: $(ALL_PRG)
 ifeq ($(VIDIX),yes)

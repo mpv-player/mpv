@@ -1555,13 +1555,16 @@ fi
 # Checking for localization ...
 # CSAK EGY MARADHAT - A HEGYLAKO
 echocheck "i18n"
-if test "$_i18n" = auto ; then
+if test "$_i18n" != no ; then
   cat > $TMPC <<EOF
 #include <libintl.h>
 int main(void) { gettext("test"); return 0; }
 EOF
   _i18n=no
-  cc_check && _i18n=yes
+  _i18n_libs=""
+  for i18n_lib in "" "-lintl"; do
+    cc_check $i18n_lib && _i18n=yes && _i18n_libs=$i18n_lib && break
+  done
 fi
 if test "$_i18n" = yes ; then
   _def_i18n='#define USE_I18N 1'
@@ -1569,7 +1572,11 @@ if test "$_i18n" = yes ; then
 else
   _def_i18n='#undef USE_I18N'
 fi
-echores "$_i18n"
+if test -z $_i18n_libs ; then
+  echores "$_i18n"
+else
+  echores "$_i18n (using $_i18n_libs)"
+fi
 
 
 # Checking for setlocale() ...
@@ -4778,6 +4785,7 @@ PP_LIB = $_ld_pp
 SHARED_PP = $_shared_pp
 CONFIG_RISKY = yes
 LIBMENU = $_menu
+I18NLIBS = $_i18n_libs
 
 OPENDIVX = $_opendivx
 
