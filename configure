@@ -240,6 +240,7 @@ Use these options if autodetection fails:
   --with-sdl-config=PATH   path to sdl*-config (e.g.: /opt/bin/sdl-config)
   --with-gtk-config=PATH   path to gtk*-config (e.g.: /opt/bin/gtk-config)
   --with-glib-config=PATH  path to glib*-config (e.g.: /opt/bin/glib-config)
+  --with-dvdnav-config=PATH  path to dvdnav-config
 
 EOF
     exit 0
@@ -1208,6 +1209,9 @@ for ac_option do
     ;;
   --with-glib-config=*)
     _glibconfig=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --with-dvdnav-config=*)
+    _dvdnavconfig=`echo $ac_option | cut -d '=' -f 2`
     ;;
   --with-madlibdir=*)
     _ld_mad=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
@@ -3057,6 +3061,12 @@ int main(void) { dvdnav_t *dvd=0; return 0; }
 EOF
   _dvdnav=no
   test -n "$_dvdnavdir" && _legal_dvdnavdir=-L$_dvdnavdir/.libs
+  if test -z "$_dvdnavconfig" ; then
+    if ( dvdnav-config --version ) >/dev/null 2>&1 ; then
+      _dvdnavconfig="dvdnav-config"
+    fi
+  fi
+  test -z "$_dvdnavdir" && test -n "$_dvdnavconfig" && _dvdnavdir=`$_dvdnavconfig --cflags`
   _used_css=
   test "$_dvdkit" = no && _used_css=$_ld_css
   cc_check $_inc_extra -I$_dvdnavdir $_legal_dvdnavdir -ldvdnav $_used_css $_ld_dl && _dvdnav=yes
@@ -3064,7 +3074,13 @@ fi
 if test "$_dvdnav" = yes ; then
   _largefiles=yes
   _def_dvdnav='#define USE_DVDNAV 1'
-  _ld_css="$_ld_css $_legal_dvdnavdir -ldvdnav"
+  if test -n "$_legal_dvdnavdir" ; then
+   _ld_css="$_ld_css $_legal_dvdnavdir -ldvdnav"
+  elif test -n "$_dvdnavconfig" ; then
+   _ld_css="$_ld_css `$_dvdnavconfig --libs`"
+  else
+   _ld_css="$_ld_css -ldvdnav"
+  fi
   if test -n "$_dvdnavdir" ; then
    _inc_extra="$_inc_extra -I$_dvdnavdir"
   fi
