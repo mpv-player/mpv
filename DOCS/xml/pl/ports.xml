@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.54 -->
+<!-- synced with 1.55 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -452,16 +452,11 @@ jego skompilowanymi binariami dla Mac OS X ze strony projektu
 <sect1 id="hp-ux">
 <title>HP-UX</title>
 <para>
-Martin Gansser opiekuje się cennym
-<ulink url="http://cloud.prohosting.com/patos/docs/mplayer_on_hpux11.htm">
-dokumentem HOWTO</ulink> ("Jak to zrobić.." - przypisek tłumacza)
-na temat budowania <application>MPlayera</application> na HP-UX. Zawiera on nawet dział
-FAQ!
-</para>
-
-<para>
-W każdym bądź razie, nasze "surowe" źródła <application>MPlayera</application>
-kompilowały się na HP-UX bez żadnych problemów.
+Joe Page umieścił na swojej stronie domowej
+<ulink url="http://users.rcn.com/joepage/mplayer_on_hpux11.htm">dokument
+HOWTO</ulink> stworzony przez Martina Gansser'a dotyczący <application>MPlayera</application>
+na HP-UX. Korzystając z zawartych tam intrukcji program powinien się skompilować bez
+najmnijeszych problemów.
 </para>
 </sect1>
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.48 -->
+<!-- synced with 1.49 -->
 <sect1 id="install">
 <title>Instalacja</title>
 
@@ -103,7 +103,8 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądra z ser
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">directfb</emphasis> - opcjonalna, do pobrania z
-  <ulink url="http://www.directfb.org"/>.
+  <ulink url="http://www.directfb.org"/>. Wymagana jest co najmniej
+  wersja 0.9.13.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">cdparanoia</emphasis> - opcjonalna, do obsługi CDDA.
