@@ -171,7 +171,7 @@ MPlayer podporuje velké mno¾ství výstupních audio a video rozhraní.
 Pracuje s X11, XV, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca, DirectFB,
 Quartz, také mù¾ete pou¾ít GGI, SDL (a v¹echny její ovladaèe), VESA (na v¹ech
 VESA-kompatibilních kartách, dokonce bez X11), nìkteré nízkoúrovòové ovladaèe
-(pro Matrox, 3Dfx a ATI) a nìkterými hardvérovými MPEG dekódovacími kartami, jako je
+(pro Matrox, 3Dfx a ATI) a nìkteré hardvérové MPEG dekódovací karty, jako je
 Siemens DVB, DXR2 a DXR3/\:Hollywood+.
 Mnoho z nich podporuje hardvérové nebo softvérové ¹kálování, tak¾e si mù¾ete
 u¾ít film na celé obrazovce.
@@ -366,18 +366,18 @@ soubor s názvem 'film.avi.conf' s volbami pro tento film a umístìte jej do
 .
 .TP
 .B \-codecs-file <soubor> (viz také volby \-afm, \-ac, \-vfm, \-vc)
-Pou¾ije vypsaný soubor namísto systémového nebo vestavìného souboru codecs.conf.
+Pou¾ije <soubor> namísto systémového nebo vestavìného souboru codecs.conf.
 .
 .TP
 .B \-include <konfiguraèní\ soubor>
-Vypsaný soubor bude zpracován po ostatních konfiguraèních souborech.
+Zadaný <konfiguraèní\ soubor> bude zpracován po ostatních konfiguraèních souborech.
 .
 .TP
 .B \-quiet\ \ 
 Ménì upovídaný výstup na konzoli; konkrétnì potlaèí zobrazování stavového øádku
-(tedy\& A:   0.7 V:   0.6 A-V:  0.068 ...).
+(tedy\ A:   0.7 V:   0.6 A-V:  0.068 ...).
 Volba je u¾iteèná na pomalých nebo vadných terminálech, které nezvládají
-návrat vozíku (tedy\& \\r).
+návrat vozíku (tedy\ \\r).
 .
 .TP
 .B \-v, \-verbose
@@ -404,7 +404,7 @@ vypisuje v¹e co souvisí se vstupními parsery (parser debug)
 Dynamicky mìní úroveò postprocesingu v závislosti na vytí¾ení procesoru.
 Zadané èíslo vyjadøuje maximální úroveò.
 Obvykle zde pou¾ijete velké èíslo.
-Pro zprovoznìní funkce mù¾ete pou¾ít \-vf [s]pp bez parametrù.
+Pro zprovoznìní funkce mù¾ete pou¾ít \-vf\ [s]pp bez parametrù.
 .
 .TP
 .B \-autosync <faktor>
@@ -709,7 +709,7 @@ mno¾ství pamìti.
 .
 .TP
 .B \-bandwidth <hodnota> (pouze sí»)
-Uvede maximální ¹íøku pásma pro pøehrávání ze sítì (pro servery které 
+Nastaví maximální ¹íøku pásma pro pøehrávání ze sítì (pro servery které 
 umí poslat obsah v rùzných datových tocích (bitrate)).
 Pou¾itelné kdy¾ chcete sledovat ¾ivé vysílání a máte pomalé pøipojení.
 .
@@ -769,14 +769,14 @@ Mù¾e být záporné.
 .
 .TP
 .B \-channels <poèet>
-Zmìò poèet výstupních kanálù (default: 2).
+Zmìní poèet výstupních kanálù (default: 2).
 Jestli¾e je poèet výstupních kanálù vy¹¹í ne¾ poèet vstupních kanálù, 
 budou vlo¾eny prázdné kanály (jestli¾e v¹ak mixujeme mono na stereo, pak bude mono
 kanál hrát v obou kanálech).
 Jestli¾e je poèet výstupních kanálù ni¾¹í ne¾ poèet vstupních, výsledek
 závisí na audio dekodéru (\-afm).
-MPlayer po¾ádá dekodér o dekódování zvuku do po¾adovaného poètu kanálù.
-Od teï je na dekodéru, aby si s tím poradil.
+MPlayer po¾ádá dekodér o dekódování zvuku do po¾adovaného poètu kanálù a
+od této chvíle je na dekodéru, aby si s tím poradil.
 Pokud má výstup dekodéru více kanálù ne¾ je po¾adováno, pøebyteèné kanály
 jsou odstøi¾eny.
 To je zpravidla dùle¾ité pouze pokud pøehráváte video s AC3 zvukem (jako DVD).
@@ -784,8 +784,8 @@ V tom pøípadì liba52 provede dekódování a automaticky smíchá zvuk do
 po¾adovaného poètu kanálù.
 .br
 .I POZNÁMKA:
-Tato funkce je zaji¹tìna díky kodekùm (pouze AC3), filtrùm (surround) a
-zvukovými rozhraními (minimálnì OSS).
+Tato funkce je zaji¹tìna pomocí kodekù (pouze AC3), filtrù (surround) a
+zvukových rozhraní (minimálnì OSS).
 .sp 1
 Dostupné volby jsou:
 .sp 1
@@ -832,12 +832,13 @@ Mù¾e být pou¾ito s \-dumpaudio / \-dumpvideo / \-dumpstream.
 .
 .TP
 .B \-dumpstream (pouze MPlayer)
-Ulo¾í surový proud do ./stream.dump.
+Ulo¾í surový datový proud do ./stream.dump.
 Pou¾itelné kdy¾ ripujete z DVD nebo sítì.
 .
 .TP
 .B \-dumpvideo (pouze MPlayer)
-Ulo¾í surový komprimovaný video proud do ./stream.dump (nijak zvlá¹» u¾iteèné).
+Ulo¾í surový komprimovaný video datový proud do ./stream.dump 
+(nijak zvlá¹» u¾iteèné).
 .
 .TP
 .B \-dvbin <volby> (pouze DVB)
@@ -870,13 +871,13 @@ Zde mù¾ete sdìlit MPlayeru které úhly pou¾ít (default: 1).
 .TP
 .B \-forceidx
 Vynutí obnovu indexu.
-Pou¾itelné pro soubory s vadným indexem (nesynchronizované video se zvukem, apod).
+Pou¾itelné pro soubory s vadným indexem (video se rozchází se zvukem, apod.\&).
 Umo¾ní pøevíjení v souborech, kde to nebylo mo¾né.
 Index mù¾ete opravit trvale pomocí MEncoderu (viz dokumentace).
 .br
 .I POZNÁMKA:
-Tato volba pracuje pouze pokud podkladové médium umo¾òuje pøevíjení
-(èili\& ne se std. vstupem, rourou, atd).
+Tato volba pracuje pouze pokud nosný formát umo¾òuje pøevíjení
+(èili\ ne se standardním vstupem, rourou, atd.\&).
 .
 .TP
 .B \-fps <desetinné_èíslo>
@@ -902,8 +903,8 @@ co¾ umo¾ní jejich pøevíjení.
 Pou¾itelné u vadných/\:nekompletních downloadù nebo ¹patnì vytvoøených souborù.
 .br
 .I POZNÁMKA:
-Tato volba pracuje pouze pokud podkladové médium umo¾òuje pøevíjení
-(èili\& ne se std. vstupem, rourou, atd).
+Tato volba pracuje pouze pokud nosný formát umo¾òuje pøevíjení
+(èili\ ne se standardním vstupem, rourou, atd.\&).
 .
 .TP
 .B \-ipv4-only-proxy (pouze sí»)
@@ -938,7 +939,7 @@ výstupní ¹íøka (default: autodetekce)
 .IPs h=<hodnota>
 výstupní vý¹ka (default: autodetekce)
 .IPs fps=<hodnota>
-snímková rychlost výstupu (default: 25)
+rychlost snímkování výstupu (default: 25)
 .IPs type=<hodnota>
 typy vstupních souborù (mo¾nosti: jpeg, png, tga, sgi)
 .RE
@@ -946,8 +947,8 @@ typy vstupních souborù (mo¾nosti: jpeg, png, tga, sgi)
 .
 .TP
 .B \-ni (pouze AVI)
-Vynutí pou¾ití AVI parseru pro neprokládané soubory (umo¾ní pøehrávání
-nìkterých vadných AVI souborù).
+Vynutí pou¾ití AVI parseru navr¾eného pro neprokládané soubory
+(umo¾ní pøehrávání nìkterých vadných AVI souborù).
 .
 .TP
 .B \-nobps (pouze AVI)
@@ -957,7 +958,7 @@ Pomù¾e u nìkterých AVI souborù s vadnou hlavièkou.
 .TP
 .B \-noextbased
 Potlaèí volbu demuxeru podle pøípony souboru.
-Normálnì kdy¾ nemù¾e být s jistotou urèen typ souboru (demuxer) 
+Normálnì kdy¾ nemù¾e být s jistotou urèen nosný formát souboru (demuxer) 
 (soubor nemá hlavièku, nebo z ní nelze typ urèit), je pou¾ita
 pøípona pro výbìr demuxeru.
 V pøípadì selhání je v¾dy pou¾it kontextový výbìr demuxeru.
@@ -992,7 +993,7 @@ poèet kanálù
 .IPs rate=<hodnota>
 rychlost ve vzorcích za sekundu
 .IPs samplesize=<hodnota>
-délka vzorku v bajtech
+velikost vzorku v bajtech
 .IPs bitrate=<hodnota>
 datový tok (bitrate) pro rawaudio soubory
 .IPs format=<hodnota>
@@ -1002,7 +1003,7 @@ fourcc v hexadecimálním tvaru
 .
 .TP
 .B \-rawvideo <volba1:volba2:...>
-Tato volba umo¾ní pøehrávání raw video souborù.
+Tato volba umo¾ní pøehrát surový (raw) video soubor.
 .sp 1
 Dostupné volby jsou:
 .sp 1
@@ -1029,7 +1030,7 @@ velikost snímku v bajtech
 .
 .TP
 .B \-rtsp-stream-over-tcp (pouze live.com)
-Pou¾ívá se v kombinaci 'rtsp://' URL pro urèení ¾e pakety odpovìdi 
+Pou¾ívá se v kombinaci s 'rtsp://' URL pro urèení ¾e pakety odpovìdi 
 protokolu RTP a RTCP budou tunelovány pøes TCP (pro TCP i RTSP se pou¾ije stejné spojení).
 Tato volba je u¾iteèná, jestli¾e va¹e internetové pøipojení nepropou¹tí pøíchozí
 UDP pakety (viz http://www.live.com/\:mplayer/).
@@ -1074,7 +1075,7 @@ Obèas nutné pro pøehrání vadných MPEG-TS souborù.
 .TP
 .B \-tsprobe <bajtová\ pozice>
 Kdy¾ pøehráváte MPEG-TS proud, mù¾ete touto volbou zvolit kolik 
-bajtù v proudu má MPlayer prohledat na po¾adované
+bajtù v datovém proudu má MPlayer prohledat na po¾adované
 audio a video PIDy.
 .
 .TP
@@ -1086,49 +1087,49 @@ Lze pou¾ít s \-vid a \-aid.
 .TP
 .B \-tv <volba1:volba2:...> (pouze TV)
 Touto volbou nastavíte rùzné volby pro TV zachytávací kartu.
-K pøehrávání TV pomocí MPlayeru, pou¾ijte 'tv://' nebo 'tv://<èíslo_kanálu>' 
+K\ pøehrávání TV pomocí MPlayeru, pou¾ijte 'tv://' nebo 'tv://<èíslo_kanálu>' 
 pøípadnì 'tv://<jméno_kanálu> (viz ní¾ volbu channels pro jméno_kanálu)
 jako URL filmu.
 .sp 1
 Dostupné volby jsou:
 .RSs
 .IPs noaudio
-bez zvuku
+Vypne zvuk.
 .IPs driver=<hodnota>
-nastaví ovladaè. Mo¾nosti: dummy, v4l, v4l2, bsdbt848
+Nastaví ovladaè. Mo¾nosti: dummy, v4l, v4l2, bsdbt848
 .IPs device=<hodnota>
 Nastaví TV zaøízení (default: /dev/\:video0).
 .IPs input=<hodnota>
 Nastaví vstup (default: 0 (TV), viz seznam vypsaný na konzoli).
 .IPs freq=<hodnota>
-Nastaví kmitoèet na naladìní pøijímaèe (napø.\& 511.250).
+Nastaví kmitoèet kanálového volièe pøijímaèe (napø.\& 511.250).
 Není kompatibilní s parametrem chanels.
 .IPs outfmt=<hodnota>
-Nastaví výstupní formát pøijímaèe s pøednastavenou hodnotou podporovanou
+Nastaví výstupní formát obrazu pøijímaèe na pøednastavenou hodnotu podporovanou
 V4L ovladaèem (yv12, rgb32, rgb24, rgb16, rgb15, uyvy, yuy2, i420) nebo
 libovolný formát zadaný hexadecimálnì.
 Zkuste outfmt=help pro seznam dostupných formátù.
 .IPs width=<hodnota>
-¹íøka výstupního okna
+Nastaví ¹íøku výstupního okna.
 .IPs height=<hodnota>
-vý¹ka výstupního okna
+Nastaví vý¹ku výstupního okna.
 .IPs fps=<hodnota>
-snímkování zachytávaného videa (snímky za sekundu)
+Nastaví rychlost snímkování zachytávaného videa (snímky za sekundu).
 .IPs buffersize=<hodnota>
-maximální velikost vyrovnávací pamìti pro zachytávání (default: dynamicky)
+Nastaví maximální velikost vyrovnávací pamìti pro zachytávání (default: dynamicky).
 .IPs norm=<hodnota>
 Nastaví TV normu. Dostupné jsou: PAL, SECAM, NTSC.
 Pro v4l2 pou¾ijte ní¾e uvedenou volbu normid.
 .IPs normid=<hodnota> (pouze v4l2)
 Viz výstup na konzoli pro seznam dostupných TV norem.
 .IPs channel=<hodnota>
-Nastav pøijímaè na kanál èíslo <hodnota>.
+Nastaví pøijímaè na kanál èíslo <hodnota>.
 .IPs chanlist=<hodnota>
-Dostupné jsou: europe-east, europe-west, us-bcast, us-cable, atd
+Dostupné jsou: europe-east, europe-west, us-bcast, us-cable, atd.
 .IPs channels=<kanál>\-<jméno>,<kanál>\-<jméno>,...
 Nastaví jména kanálù.
 Pou¾ijte _ místo mezer ve jménech (nebo si pohrajte s citacemi ;-).
-Jména kanálù budou zapsány pomocí OSD, pøíkazy závislého re¾imu
+Jména kanálù budou pak zapsány pomocí OSD. Pøíkazy závislého re¾imu
 tv_step_channel, tv_set_channel a tv_last_channel jsou zase u¾iteèné pro
 ovládání pomocí DO (viz lirc).
 Volba není kompatibilní s volbou frekvence.
@@ -1218,8 +1219,8 @@ Pou¾ije zadaný <øetìzec> jako jméno prohlí¾eèe (user agent) pro HTTP pøenos.
 .TP
 .B \-vid <ID>
 Vybere video kanál (MPG: 0\-15 ASF: 0\-255 MPEG-TS: 17\-8190).
-Z pøehrávaného MPEG-TS proudu pou¾ije MPlayer/\:MEncoder první program
-(pokud je) s vybraným video proudem.
+Z\ pøehrávaného MPEG-TS proudu pou¾ije MPlayer/\:MEncoder první program
+(pokud je) s\ vybraným video proudem.
 .
 .TP
 .B \-vivo <podvolby> (LADÍCÍ KÓD)
@@ -1262,12 +1263,13 @@ Vytvoøí soubor dumpsub.srt v aktuálním adresáøi.
 .
 .TP
 .B \-dumpsub (pouze MPlayer) (BETA KÓD)
-Vydestiluje titulkový pod-proud z VOB proudù.
+Vydestiluje datový proud titulkù z VOB proudù.
 Viz také volby \-dump*sub a \-vobsubout*.
 .
 .TP
 .B \-ffactor <èíslo> (pouze OSD)
 Pøevzorkování alfa mapy fontu.
+.sp 1
 Mo¾nosti:
 .PD 0
 .RSs
@@ -1293,7 +1295,7 @@ fonty: ~/\:.mplayer/\:font/\:font.desc, default pro FreeType fonty:
 ~/.mplayer/\:subfont.ttf).
 .br
 .I POZNÁMKA:
-Pou¾íváte-li FreeType, je parametrem této volby cesta k textovému souboru fontu.
+Pou¾íváte-li FreeType, je parametrem této volby cesta k\ textovému souboru fontu.
 .br
 Pou¾íváte-li fontconfig, je parametrem této volby jméno fontu ve fontconfig.
 .sp 1
@@ -1310,12 +1312,12 @@ Pou¾íváte-li fontconfig, je parametrem této volby jméno fontu ve fontconfig.
 .
 .TP
 .B \-fontconfig (pouze fontconfig)
-Zapne pou¾ití fontconfigem zpravovaných fontù.
+Zapne pou¾ití fontconfigem spravovaných fontù.
 .
 .TP
 .B \-forcedsubsonly
-Zobrazí pouze vynucené titulky pro DVD titulkový proud zvolený napø.\&
-\-slang.
+Zobrazí pouze vynucené titulky pro datový proud DVD titulkù zvolený napø.\&
+pomocí \-slang.
 .
 .TP
 .B \-fribidi-charset <název znakové sady> (pouze FriBiDi)
@@ -1358,7 +1360,7 @@ Zobrazuje DVD titulky v jazyce urèeném pomocí <ID> (0\-31).
 MPlayer vypí¹e dostupné jazyky titulkù je-li spu¹tìn v upovídaném (\-v) re¾imu.
 .
 .TP
-.B \-slang <kód\ zemì[,kód\ zemì,...]> (viz té¾ volbu \-sid)
+.B \-slang <kód\ jazyka[,kód\ jazyka,...]> (viz té¾ volbu \-sid)
 Nastavuje seznam jazykù DVD titulkù k pou¾ití podle priority.
 MPlayer vypí¹e dostupné jazyky titulkù je-li spu¹tìn v upovídaném (\-v) re¾imu.
 .sp 1
@@ -1371,20 +1373,21 @@ Zvolí èeské a pou¾ije anglické, pokud èeské nejsou k dispozici.
 .PD 1
 .
 .TP
-.B \-spuaa <mód> (pouze OSD)
-Mód ¹kálování/\:vyhlazování pro DVD/\:VOBsub.
-K hodnotì módu mù¾ete pøièíst 16 kdy¾ chcete vynutit ¹kálování i kdy¾
+.B \-spuaa <re¾im> (pouze OSD)
+Re¾im ¹kálování/\:vyhlazování pro DVD/\:VOBsub.
+K hodnotì <re¾im> mù¾ete pøièíst 16 kdy¾ chcete vynutit ¹kálování i kdy¾
 velikost originálního a ¹kálovaného snímku souhlasí. Takto napøíklad
 dosáhnete vyhlazení titulkù Gaussovým rozostøením.
-Dostupné módy jsou:
+.sp 1
+Dostupné re¾imy vyhlazování jsou:
 .PD 0
 .RSs
 .IPs 0
 ¾ádné (nejrychlej¹í, ¹karedé)
 .IPs 1
-pøibli¾né (vadný?)
+pøibli¾né (vadné?)
 .IPs 2
-plné (pomalý)
+plné (pomalé)
 .IPs 3
 bilineární (default, rychlé a obstojné)
 .IPs 4
@@ -1521,12 +1524,12 @@ Stejné jako \-audiofile, ale pro titulkové proudy (OggDS?).
 .
 .TP
 .B \-subfont-autoscale <0\-3> (pouze FreeType)
-Nastaví mód auto-¹kálování písma.
+Nastaví re¾im automatického ¹kálování písma.
 .br
 .I POZNÁMKA:
 0 znamená ¾e 'text scale' a 'OSD scale' nastavují vý¹ku fontu v bodech.
 .sp 1
-Mód mù¾e být:
+Re¾im mù¾e být:
 .sp 1
 .PD 0
 .RSs
@@ -1615,7 +1618,7 @@ Nahradí defaultní jméno souboru pou¾ívané \-ao pcm.
 .
 .TP
 .B \-aop <list=plugin1,plugin2...:volba1=hodnota1:vol2=hodn2...>
-Urèuje audio plugin(y) a jejich/\:jejich volby
+Urèuje audio plugin(y) a jeho/\:jejich volby
 (viz také kapitolu o audio pluginech v dokumentaci).
 .sp 1
 Dostupné volby jsou:
@@ -1684,7 +1687,7 @@ Pou¾íváte-li ALSA zadejte jméno mixeru.
 .
 .TP
 .B \-mixer-channel <kanál mixeru>[,index mixeru] (pouze \-ao oss a \-ao alsa)
-Tato volba naøídí MPlayer pou¾ít jiný kanál pro ovládání hlasitosti
+Tato volba naøídí MPlayeru pou¾ít jiný kanál pro ovládání hlasitosti
 ne¾ defaultní PCM.
 Volby pro OSS zahrnují
 .B vol, pcm, line.
@@ -1710,26 +1713,26 @@ Nastaví velikost kroku o který se zmìní hlasitost v procentech celého rozsahu
 .
 .
 .
-.SH "VÝSTUPNÍ ZVUKOVÉ OVLADAÈE (POUZE MPLAYER)"
-Výstupní zvukové ovladaèe jsou rozhraními k rùzným audio výstupním zaøízením.
+.SH "VÝSTUPNÍ ZVUKOVÁ ROZHRANÍ (POUZE MPLAYER)"
+Výstupní zvuková rozhraní zaji¹»ují pøístup k rùzným audio výstupním zaøízením.
 Syntax je:
 .
 .TP
-.B \-ao <ovladaè1[:podvolba1[=hodnota]:...],ovladaè2,...[,]>
+.B \-ao <rozhraní1[:parametr1[=hodnota]:...],rozhraní2,...[,]>
 Nastavuje seznam pou¾itých audio výstupních rozhraní podle priority.
 .PP
 Pokud seznam konèí ',', pak se v pøípadì selhání v¹ech zadaných rozhraní pou¾ijí
 i ostatní.
-Podvolby jsou volitelné a v mnoha pøípadech je nemusíte vùbec pou¾ít.
+Parametry jsou volitelné a v mnoha pøípadech je nemusíte vùbec pou¾ít.
 .br
 .I POZNÁMKA:
-Seznam zakompilovaných ovladaèù (rozhraní) získáte pomocí \-ao help.
+Seznam zakompilovaných rozhraní získáte pomocí \-ao help.
 .sp 1
 .I PØÍKLAD:
 .PD 0
 .RSs
 .IPs "\-ao alsa,oss,"
-Zkusí ALSA ovladaè, potom OSS ovladaè, pak ostatní.
+Zkusí rozhraní ALSA, potom OSS, pak ostatní.
 .IPs "\-ao alsa:mmap:noblock:device=hw=0.3"
 Nastaví noblock-re¾im, mmap-re¾im a jako první kartu nastaví ètvrté zaøízení.
 .RE
@@ -1745,30 +1748,31 @@ Zvukové rozhraní ALSA 0.9/1.x
 .IPs mmap\ \ \ 
 Nastaví experimentální mmap-re¾im (nepracuje s více ne¾ dvìma kanály).
 .IPs noblock
-Nastaví noblock-re¾im.
+Nastaví noblock re¾im.
 .IPs device=<zaøízení>
-Nastaví jméno zaøízení.
+Nastaví jméno zvukového zaøízení.
 Nahraïte jakékoli ',' za '.' a jakékoli ':' za '=' ve jménì ALSA zaøízení.
 .RE
+
 .PD 1
 .
 .TP
 .B alsa1x (ZASTARALÝ)
-Zvukový ovladaè ALSA 1.x.
-Pøekonán obecným alsa audio ovladaèem.
+Zvukové rozhraní ALSA 1.x.
+Pøekonáno obecným alsa audio rozhraním.
 .
 .TP
 .B alsa9 (ZASTARALÝ)
-Zvukový ovladaè ALSA 0.9.
-Pøekonán obecným alsa audio ovladaèem.
+Zvukové rozhraní ALSA 0.9.
+Pøekonáno obecným alsa audio rozhraním.
 .
 .TP
 .B alsa5\ \ 
-Zvukový ovladaè ALSA 0.5
+Zvukové rozhraní ALSA 0.5.
 .
 .TP
 .B oss\ \ \ \ 
-Ovladaè OSS
+Rozhraní OSS.
 .PD 0
 .RSs
 .IPs dsp-device
@@ -1820,7 +1824,7 @@ Nativní SGI zvuk.
 Nativní Sun zvuk.
 .PD 0
 .RSs
-.IPs <device>
+.IPs <zaøízení>
 Explicitnì vybere audio zaøízení k pou¾ití (default: /dev/\:audio).
 .RE
 .PD 1
@@ -1863,7 +1867,7 @@ Seznam a vysvìtlení jednotlivých voleb dostanete pøíkazem
 .TP
 .B \-adapter <hodnota>
 Nastaví grafickou kartu na kterou se bude posílat obrázek.
-K zprovoznìní potøebuje volbu \-vm.
+K\ zprovoznìní potøebuje volbu \-vm.
 Seznam dostupných karet získáte, doplníte-li tuto volbu o \-v.
 V souèasnosti pracuje pouze s \-vo directx.
 .
@@ -1875,12 +1879,12 @@ Funkci podporují pouze tato výstupní rozhraní: fbdev, dga, svga, vesa.
 .TP
 .B \-brightness <-100\-100>
 Nastavuje jas video signálu (default 0).
-Funkci nepodporují v¹echny video rozhraní.
+Funkci nepodporují v¹echna video rozhraní.
 .
 .TP
 .B \-contrast <-100\-100>
 Nastavuje kontrast video signálu (default 0).
-Funkci nepodporují v¹echny video rozhraní.
+Funkci nepodporují v¹echna video rozhraní.
 .
 .TP
 .B \-dfbopts <hodnota> (pouze \-vo directfb)
@@ -1953,7 +1957,7 @@ zaká¾e prokládaný TV výstup
 .IPs norm=<hodnota>
 TV norma (ntsc (default), pal, pal60, palm, paln, palnc)
 .IPs square-pixel
-nastaví re¾im pixelù na square
+nastaví re¾im (tvar) pixelù na ètvercový
 .IPs ccir601-pixel
 nastaví re¾im pixelù na ccir601
 .RE
@@ -1971,15 +1975,16 @@ Nastaví horní oøezovou znaèku (default: 0).
 .IPs cr-bottom=<0\-500>
 Nastaví dolní oøezovou znaèku (default: 0).
 .IPs ck-[r|g|b]=<0\-255>
-Nastaví r(èervená), g(zelená) nebo b(modrá) pøírùstek klíèovací barvy pro pøekrývání.
+Nastaví pøírùstek èervené (ck-r), zelené (ck-g) nebo modré (ck-b) slo¾ky
+klíèovací barvy pro pøekrývání.
 .IPs ck-[r|g|b]min=<0\-255>
-minimální hodnota pøíslu¹ného barevného klíèe
+minimální hodnota pøíslu¹né barevné slo¾ky klíèe
 .IPs ck-[r|g|b]max=<0\-255>
-maximální hodnota pøíslu¹ného barevného klíèe
+maximální hodnota pøíslu¹né barevné slo¾ky klíèe
 .IPs ignore-cache
-Ignoruje nastavení pøekrývání v cache.
+Ignoruje nastavení pøekrývání ulo¾ené v cache.
 .IPs update-cache
-Aktualizuje nastavení pøekrývání v cache.
+Aktualizuje nastavení pøekrývání ulo¾ené v cache.
 .IPs ol-osd
 Zapne pøekrývaný display na obrazovce (OSD).
 .IPs nool-osd
@@ -1990,9 +1995,9 @@ s oknem (default: 0).
 .IPs overlay
 Zapne pøekrývání (default).
 .IPs nooverlay
-Aktivuje TVout.
+Aktivuje TV-out.
 .IPs overlay-ratio=<1\-2500>
-Nastaví pøekrývání (default: 1000).
+Doladí pøekrývání (default: 1000).
 .RE
 .
 .TP
@@ -2001,7 +2006,7 @@ Urèí které framebuffer zaøízení pou¾ít (default: /dev/\:fb0).
 .
 .TP
 .B \-fbmode <název re¾imu> (pouze \-vo fbdev)
-Zmìní video re¾im na ten který je nadepsán jako <název re¾imu> v
+Zmìní video re¾im na ten který je pojmenován jako <název re¾imu> v\ souboru
 /etc/\:fb.modes.
 .br
 .I POZNÁMKA:
@@ -2027,7 +2032,7 @@ Zkuste tuto volbu pokud máte stále problémy s celoobrazovkovým re¾imem.
 .TP
 .B \-fstype <typ1,typ2,...> (pouze X11)
 Nastaví výèet re¾imù celoobrazovkových hladin podle priority, které mají být pou¾ity.
-Jednotlivé re¾imy mù¾ete potlaèit tak, ¾e jim pøedøedíte '\-'.
+Jednotlivé re¾imy mù¾ete potlaèit tak, ¾e jim pøedøadíte '\-'.
 Pokud narazíte na problém typu "film v celoobrazovkovém re¾imu je pøekryt jinými
 okny", zkuste pou¾ít jiné poøadí.
 .br
@@ -2198,7 +2203,8 @@ Je-li pou¾ita s directx video rozhraním, mù¾ete pou¾ít volby \-screenw,
 .
 .TP
 .B \-vsync \ \ 
-Zapne VBI pro video rozhraní vesa, dfbmga a svga.
+Zapne synchronizaci na snímkový zpìtný bìh (VBI) pro video rozhraní vesa,
+dfbmga a svga.
 .
 .TP
 .B \-wid <ID\ okna> (viz také volbu \-guiwid) (pouze X11)
@@ -2208,12 +2214,12 @@ To je vyu¾itelné k vestavìní MPlayeru do internetového prohlí¾eèe
 .
 .TP
 .B \-xineramascreen <0\-...>
-V Xinerama konfiguracích (rozumìjte \& jedna pracovní plocha je rozprostøena 
+V Xinerama konfiguracích (jedna pracovní plocha je rozprostøena 
 na více monitorù) touto volbou sdìlíte MPlayeru kterou obrazovku pou¾ít.
 .
 .TP
 .B \-z <0\-9> (pouze \-vo png)
-Nastaví kompresní úroveò png video rozhraní.
+Nastaví kompresní úroveò výstupu do png formátu.
 0 znamená bez komprese, 9 je maximální komprese.
 .
 .TP
@@ -2280,16 +2286,16 @@ Hodnota je vzta¾ena k levému hornímu rohu obrazovky (default: vystøedìno).
 .
 .
 .SH "VÝSTUPNÍ VIDEO ROZHRANÍ (POUZE MPLAYER)"
-Výstupní video rozhraní jsou rozhraní k rùzným výstupním zaøízením.
+Výstupní video rozhraní jsou rozhraní k rùzným výstupním video zaøízením.
 Syntax je:
 .
 .TP
-.B \-vo <rozhraní1[:podvolba1[=hodnota]:...],rozhraní2,...[,]>
-Udává seznam video rozhraní k pou¾ití podle priority.
+.B \-vo <rozhraní1[:parametr1[=hodnota]:...],rozhraní2,...[,]>
+Nastavuje seznam video rozhraní k pou¾ití podle priority.
 .PP
 Konèí-li seznam èárkou ',', prozkou¹í MPlayer v pøípadì selhání i rozhraní neuvedená
 v seznamu.
-Podvolby jsou volitelné a vìt¹inou mohou být vynechány.
+Parametry jsou volitelné a vìt¹inou mohou být vynechány.
 .br
 .I POZNÁMKA:
 Viz \-vo help pro seznam zakompilovaných video rozhraní.
@@ -2310,7 +2316,7 @@ Dostupná video rozhraní jsou:
 .B xv (pouze X11)
 Pou¾ije roz¹íøení XVideo z XFree86 4.x umo¾òující hardvérovì akcelerované
 pøehrávání.
-Pokud nemù¾ete pou¾ít konkrétní hardvérové rozhraní, je toto patrnì nejlep¹í 
+Pokud nemù¾ete pou¾ít nativní hardvérové rozhraní, je toto patrnì nejlep¹í 
 volba.
 .PD 0
 .RSs
@@ -2581,7 +2587,7 @@ Double (dvojitá) a triple (trojitá) vyrovnávací pamì» dávají nejlep¹í výsledky
 pokud chcete vylouèit trhání.
 Trojitá vyrovnávací pamì» je mnohem úèinnìj¹í vzhledem k tomu ¾e nebrzdí 
 MPlayer pøi èekání na vertikální synchronizaci.
-Jednoduchou (single) vyrovnávací pamì» mù¾ete s klidem vypustit (default: single).
+Jednoduchou (single) vyrovnávací pamì» mù¾ete s\ klidem vypustit (default: single).
 .IPs fieldparity=top|bottom
 Ovládá øazení prokládaných snímkù (default: vypnuto).
 Platné hodnoty jsou top = nejdøíve horní políèka, bottom = nejdøíve spodní políèka.
@@ -2713,7 +2719,7 @@ Viz té¾ lavc video filtr.
 .PD 0
 .RSs
 .IPs overlay
-Aktivuje pøekrývání namísto TV-Outu.
+Aktivuje pøekrývání namísto TV-outu.
 .IPs prebuf
 Zapíná ètení napøed do vyrovnávací pamìti.
 .IPs sync\ 
@@ -2740,7 +2746,7 @@ Urèuje èíslo zaøízení které se má pou¾ít pokud máte více ne¾ jednu em8300 kartu.
 .
 .TP
 .B mpegpes (pouze DVB)
-Výstupní video rozhraní pro DVB, který zapisuje do souboru ve formátu MPEG-PES,
+Výstupní video rozhraní pro DVB, které zapisuje do souboru ve formátu MPEG-PES,
 pokud není nainstalována DVB karta.
 .PD 0
 .RSs
@@ -2775,7 +2781,7 @@ Aktivuje prebuffering, zatím nepodporováno.
 .PD 1
 .
 .TP
-.B md5sum\
+.B md5sum\ 
 Spoèítá MD5 otisk jednotlivì pro v¹echny snímky a zapí¹e je do souboru.
 Podporuje barevné prostory RGB24 a YV12.
 Pou¾itelné pøi hledání chyb.
@@ -2864,7 +2870,7 @@ Musí být vìt¹í nebo rovno 1 (default: 1000).
 .
 .TP
 .B pnm\ \ \ \ 
-Vyexportuje ka¾dý snímek do PNM souboru v aktuálního adresáøe.
+Vyexportuje ka¾dý snímek do PNM souboru v aktuálním adresáøi.
 Ka¾dý ze souborù je pojmenován èíslem snímku vèetnì úvodních nul.
 Podporuje PPM, PGM a PGMYUV soubory v re¾imu raw i ASCII.
 Viz té¾ pnm (5), ppm (5) a pgm (5).
