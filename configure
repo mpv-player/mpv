@@ -903,7 +903,7 @@ _prefix="/usr/local"
 # and have - unless stated otherwise - at least 2 states : yes no
 # If autodetection is available then the third state is: auto
 _libavcodec=auto
-_libavcodecso=no # changed default to no as it causes problems - atmos
+_libavcodecso=auto 
 _fame=auto
 _mp1e=no
 _mencoder=yes
@@ -3516,15 +3516,18 @@ if test "$_libavcodecso" = auto ; then
 # FIXME : check for avcodec_find_encoder_by_name() for mencoder
   cat > $TMPC << EOF
 #define FF_POSTPROCESS 1 
-#include <libffmpeg/avcodec.h>
+#include <ffmpeg/avcodec.h>
 int quant_store[MBR+1][MBC+1];
-int main(void) { return 0; }
+int main(void) { 
+    avcodec_find_encoder_by_name("");
+    return 0; 
+}
 EOF
-  if cc_check -lffmpeg -lm ; then
+  if cc_check -lavcodec -lm ; then
     _libavcodecso=yes
-    echores "yes (using libffmpeg.so)"
+    echores "yes (using libavcodec.so)"
   else
-    echores "no (libffmpeg.so is broken/obsolete)"
+    echores "no (libavcodec.so is broken/obsolete)"
   fi
 else
   echores "$_libavcodecso"
@@ -3541,8 +3544,9 @@ if test "$_libavcodec" = yes ; then
   _def_ffpostprocess='#define FF_POSTPROCESS 1'
   _codecmodules="libavcodec $_codecmodules"
 elif test "$_libavcodecso" = yes ; then
+  _def_libavcodec='#define USE_LIBAVCODEC 1'
   _def_libavcodecso='#define USE_LIBAVCODEC_SO 1'
-  _ld_libavcodec='-lffmpeg'
+  _ld_libavcodec='-lavcodec'
   _def_ffpostprocess='#define FF_POSTPROCESS 1'
   _codecmodules="libavcodec.so $_codecmodules"
 else
