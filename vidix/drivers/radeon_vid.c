@@ -1089,7 +1089,7 @@ int 	vixPlaybackSetEq( const vidix_video_eq_t * eq)
 #ifdef RAGE128
     br = equal.brightness * 64 / 1000;
     if(br < -64) br = -64; if(br > 63) br = 63;
-    sat = (equal.saturation + 1000) * 32 / 1000;
+    sat = (equal.saturation + 1000) * 16 / 1000;
     if(sat < 0) sat = 0; if(sat > 31) sat = 31;
     OUTREG(OV0_COLOUR_CNTL, (br & 0x7f) | (sat << 8) | (sat << 16));
 #else
