@@ -338,3 +338,11 @@ void vf_uninit_filter_chain(vf_instance_t* vf){
 	vf=next;
     }
 }
+
+void vf_list_plugins(){
+    int i=0;
+    while(filter_list[i]){
+        mp_msg(MSGT_VFILTER,MSGL_INFO,"\t%-10s: %s\n",filter_list[i]->name,filter_list[i]->info);
+        i++;
+    }
+}

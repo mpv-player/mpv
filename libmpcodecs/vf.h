@@ -74,6 +74,8 @@ void vf_next_put_image(struct vf_instance_s* vf,mp_image_t *mpi);
 
 vf_instance_t* append_filters(vf_instance_t* last);
 
+void vf_list_plugins();
+
 void vf_uninit_filter(vf_instance_t* vf);
 void vf_uninit_filter_chain(vf_instance_t* vf);
 
