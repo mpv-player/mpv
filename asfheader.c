@@ -53,11 +53,19 @@ typedef struct __attribute__((packed)) {
   unsigned long unk2; //Unknown UINT32 4
 } ASF_stream_header_t;
 
+typedef struct  __attribute__((packed)) {
+  unsigned short title_size;
+  unsigned short author_size;
+  unsigned short copyright_size;
+  unsigned short comment_size;
+  unsigned short rating_size;
+} ASF_content_description_t;
 
 static ASF_header_t asfh;
 static ASF_obj_header_t objh;
 static ASF_file_header_t fileh;
 static ASF_stream_header_t streamh;
+static ASF_content_description_t contenth;
 
 unsigned char* asf_packet=NULL;
 int asf_scrambling_h=1;
@@ -67,6 +75,14 @@ int asf_packetsize=0;
 
 //int i;
 
+void print_asf_string(const char* name, char* string, int length){
+  int i;
+  printf("%s", name);
+  for(i=0;i<length && string[i]!='\0';i+=2){
+    printf("%c", string[i]);
+  }
+  printf("\n");
+}
 
 static char* asf_chunk_type(unsigned char* guid){
   switch(*((unsigned int*)guid)){
@@ -104,7 +120,7 @@ extern void print_wave_header(WAVEFORMATEX *h);
 extern void print_video_header(BITMAPINFOHEADER *h);
 
 int read_asf_header(demuxer_t *demuxer){
-  unsigned char buffer[512];
+  static unsigned char buffer[1024];
   
 #if 1
   //printf("ASF file! (subchunks: %d)\n",asfh.cno);
@@ -126,6 +142,11 @@ if(verbose){
       printf("unk1: %lX  unk2: %X\n",(unsigned long)streamh.unk1,(unsigned int)streamh.unk2);
       printf("FILEPOS=0x%X\n",stream_tell(demuxer->stream));
 }
+      if(streamh.type_size>1024 || streamh.stream_size>1024){
+          printf("FATAL: header size bigger than 1024 bytes!\n");
+          printf("Please contact mplayer authors, and upload/send this file.\n");
+          exit(1);
+      }
       // type-specific data:
       stream_read(demuxer->stream,(char*) buffer,streamh.type_size);
       switch(*((unsigned int*)&streamh.type)){
@@ -179,6 +200,35 @@ if(verbose){
 
 //    case 0x33000890: return "guid_index_chunk";
 
+    case 0x75b22633: // Content description
+      stream_read(demuxer->stream,(char*) &contenth,sizeof(contenth));
+      {
+        char *string;
+        // extract the title
+        string=(char*)malloc(contenth.title_size);
+        stream_read(demuxer->stream, string, contenth.title_size);
+        print_asf_string("\n Title: ", string, contenth.title_size);
+        // extract the author 
+        string=(char*)realloc((void*)string, contenth.author_size);
+        stream_read(demuxer->stream, string, contenth.author_size);
+        print_asf_string(" Author: ", string, contenth.author_size);
+        // extract the copyright
+        string=(char*)realloc((void*)string, contenth.copyright_size);
+        stream_read(demuxer->stream, string, contenth.copyright_size);
+        print_asf_string(" Copyright: ", string, contenth.copyright_size);
+        // extract the comment
+        string=(char*)realloc((void*)string, contenth.comment_size);
+        stream_read(demuxer->stream, string, contenth.comment_size);
+        print_asf_string(" Comment: ", string, contenth.comment_size);
+        // extract the rating
+        string=(char*)realloc((void*)string, contenth.rating_size);
+        stream_read(demuxer->stream, string, contenth.rating_size);
+        print_asf_string(" Rating: ", string, contenth.rating_size);
+	printf("\n");
+        free(string);
+      }
+      break;
+
   } // switch GUID
 
   if((*((unsigned int*)&objh.guid))==0x75b22636) break; // movi chunk
@@ -197,4 +247,3 @@ if(verbose){
 #endif
 return 1;
 }
-
