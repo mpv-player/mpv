@@ -487,13 +487,13 @@ a (possibly slow) conversion has to be done.
 </formalpara>
 <para>
 If you should be lucky enough to have enough offscreen memory left to
-put a whole image there, the DGA driver will use doublebuffering, which
+put a whole image there, the DGA driver will use double buffering, which
 results in much smoother movie replaying. It will tell you whether
-doublebuffering is enabled or not.
+double buffering is enabled or not.
 </para>
 
 <para>
-Doublebuffering means that the next frame of your video is being drawn in
+Double buffering means that the next frame of your video is being drawn in
 some offscreen memory while the current frame is being displayed. When the
 next frame is ready, the graphics chip is just told the location in memory
 of the new frame and simply fetches the data to be displayed from there.
@@ -502,11 +502,11 @@ video data.
 </para>
 
 <para>
-Doublebuffering may be switched on by using the option
+Double buffering may be switched on by using the option
 <option>-double</option> and may be disabled with
 <option>-nodouble</option>. Current default option is to disable
-doublebuffering. When using the DGA driver, onscreen display (OSD) only
-works with doublebuffering enabled. However, enabling doublebuffering may
+double buffering. When using the DGA driver, onscreen display (OSD) only
+works with double buffering enabled. However, enabling double buffering may
 result in a big speed penalty (on my K6-II+ 525 it used an additional 20%
 of CPU time!) depending on the implementation of DGA for your hardware.
 </para>
@@ -579,7 +579,7 @@ with every chipset driver for XFree out there.
   </simpara></listitem>
 <listitem><simpara>
   Some drivers lie about the amount of memory they map into the process's
-  address space, thus vo_dga won't use doublebuffering (SIS?).
+  address space, thus vo_dga won't use double buffering (SIS?).
   </simpara></listitem>
 <listitem><simpara>
   Some drivers seem to fail to report even a single valid mode. In this
@@ -587,7 +587,7 @@ with every chipset driver for XFree out there.
   100000x100000 or something like that.
   </simpara></listitem>
 <listitem><simpara>
-  OSD only works with doublebuffering enabled (else it flickers).
+  OSD only works with double buffering enabled (else it flickers).
   </simpara></listitem>
 </itemizedlist>
 
