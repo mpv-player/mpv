@@ -413,10 +413,10 @@ jego skompilowanymi binariami dla Mac OS X ze strony projektu
 <sect1 id="hpux">
 <title>HP UX</title>
 <para>
-Martin Gansser opiekuje siê cennymi 
+Martin Gansser opiekuje siê cennym
 <ulink url="http://cloud.prohosting.com/patos/docs/mplayer_on_hpux11.htm">
 dokumentem HOWTO</ulink> ("Jak to zrobiæ.." - przypisek t³umacza)
-na temat budowania <application>MPlayera</application> na HP-UX. Ma nawet dzia³
+na temat budowania <application>MPlayera</application> na HP-UX. Zawiera on nawet dzia³
 FAQ!
 </para>
 
