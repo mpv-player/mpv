@@ -3388,9 +3388,11 @@ if (stop_xscreensaver && sh_video) {
   // DVD sub:
 if(vo_config_count && vo_spudec) {
   unsigned char* packet=NULL;
-  int len,timestamp;
+  int len=1,timestamp;
+  current_module="spudec";
+  spudec_heartbeat(vo_spudec,90000*sh_video->timer);
     // Get a sub packet from the dvd or a vobsub and make a timestamp relative to sh_video->timer
-  int get_sub_packet(void) {
+  while(len>0 && packet){
     // Vobsub
     len = 0;
     if(vo_vobsub) {
@@ -3410,11 +3412,6 @@ if(vo_config_count && vo_spudec) {
 	mp_dbg(MSGT_CPLAYER,MSGL_V,"\rDVD sub: len=%d  v_pts=%5.3f  s_pts=%5.3f  ts=%d \n",len,sh_video->pts,d_dvdsub->pts,timestamp);
       }
     }
-    return len;
-  }
-  current_module="spudec";
-  spudec_heartbeat(vo_spudec,90000*sh_video->timer);
-  while(get_sub_packet()>0 && packet){
       if(timestamp < 0) timestamp = 0;
       spudec_assemble(vo_spudec,packet,len,timestamp);
   }
