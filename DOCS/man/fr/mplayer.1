@@ -529,11 +529,11 @@ Les commandes disponibles sont:
 
 .PD 0
 .RSs
-.IPs conf=<fichier>
+.IPs conf=<nom_fichier>
 Défini le fichier de configuration pour les évènements d'entrée (input) au
 lieu de ~/\:.mplayer/\:input.conf par défaut.
 Si vous ne donnez pas le chemin absolu, il sera cherché à
-~/\:.mplayer/\:<fichier>.
+~/\:.mplayer/\:<nom_fichier>.
 .IPs ar-delay
 Temps en msec avant de démarrer la répétition automatique d'une touche
 (0 pour désactiver).
@@ -558,7 +558,7 @@ restera valide.
 .PD 1
 .
 .TP
-.B \-lircconf <fichier> (LIRC uniquement)
+.B \-lircconf <nom_fichier> (LIRC uniquement)
 Indique un fichier de configuration pour LIRC (Linux Infrared Remote
 Control, voir http://www.lirc.org) (par défaut\ : ~/\:.lircrc).
 .
@@ -576,7 +576,7 @@ Répète la lecture <nombre> fois.
 Active le menu OSD.
 .
 .TP
-.B \-menu-cfg <fichier> (OSD menu uniquement)
+.B \-menu-cfg <nom_fichier> (OSD menu uniquement)
 Utilise le menu.conf indiqué.
 .
 .TP
@@ -661,8 +661,8 @@ Au lieu d'intercepter les évènements clavier, MPlayer va lire ses
 commandes via son entrée stdin.
 .br
 .I NOTE\ :
-Voir DOCS/tech/\:slave.txt et \-input expliquent la syntaxe et les commandes
-valides.
+Voir \-input cmdlist pour une liste des commandes esclaves, et
+DOCS/tech/\:slave.txt pour leur description.
 .
 .TP
 .B \-softsleep
@@ -693,7 +693,7 @@ Cette option ne fonctionne uniquement si le flux AC3 comporte ce genre
 d'information de contrôle.
 .
 .TP
-.B \-aid <id> (voir aussi l'option \-alang)
+.B \-aid <ID> (voir aussi l'option \-alang)
 Sélectionne le canal audio (MPEG: 0\-31 AVI/\:OGM: 1\-99 ASF/\:RM: 0\-127
 VOB(AC3): 128\-159 VOB(LPCM): 160\-191 MPEG-TS 17\-8190).
 MPlayer affiche les IDs disponibles quand il est lancé en mode verbeux (-v).
@@ -879,8 +879,8 @@ outrepasser ceux par défaut\ :
 .RSs
 .IPs card=<1\-4>
 Spécifie le numéro de carte à utiliser (par défaut\ : 1).
-.IPs file=<fichier>
-Dit à MPlayer de lire les canaux depuis <fichier>.
+.IPs file=<nom_fichier>
+Dit à MPlayer de lire les canaux depuis <nom_fichier>.
 ~/.mplayer/\:channels.conf.{sat,ter,cbl} par défaut (en fonction de votre
 type de carte) ou ~/.mplayer/\:channels.conf en dernier recours.
 .RE
@@ -891,7 +891,7 @@ type de carte) ou ~/.mplayer/\:channels.conf en dernier recours.
 Définit le nom du périphérique DVD (par défaut\ : /dev/\:dvd).
 .
 .TP
-.B \-dvdangle <id\ angle> (DVD uniquement)
+.B \-dvdangle <ID\ angle> (DVD uniquement)
 Certains DVD contiennent des scènes qui peuvent être vues sous différents
 angles.
 Vous pouvez ainsi dire à MPlayer quels angles utiliser (par défaut\ : 1).
@@ -1279,7 +1279,7 @@ Indique un nom d'utilisateur pour l'identification HTTP.
 Utilise <chaine> comme User-Agent pour les flux sur HTTP.
 .
 .TP
-.B \-vid <id>
+.B \-vid <ID>
 Sélectionne le canal vidéo (MPG: 0\-15 ASF: 0\-255 MPEG-TS: 17\-8190).
 Pour lire un flux MPEG-TS, MPlayer/\:MEncoder utilisera le premier programme
 (si présent) avec le flux vidéo choisi.
@@ -2170,7 +2170,7 @@ Place la fenêtre en bas à gauche de l'écran
 .PD 1
 .
 .TP
-.B \-guiwid <id\ fenêtre> (voir aussi \-wid) (GUI uniquement)
+.B \-guiwid <ID\ fenêtre> (voir aussi \-wid) (GUI uniquement)
 Indique à la GUI (Graphical User Interface\ : interface homme-machine
 graphique) d'utiliser également une fenêtre X11 et de se fixer au bas de
 la vidéo, ce qui est utile pour embarquer une mini-GUI dans un navigateur (avec
@@ -2325,7 +2325,7 @@ nouveau mode d'affichage vidéo.
 Active VBI pour les pilotes de sortie vidéo vesa, dfbmga et svga.
 .
 .TP
-.B \-wid <window\ id> (voir aussi \-guiwid) (X11 uniquement)
+.B \-wid <window\ ID> (voir aussi \-guiwid) (X11 uniquement)
 Dit à MPlayer de s'attacher à une fenêtre X11 existante.
 Utile pour intégrer MPlayer dans un navigateur (avec l'extension plugger
 par exemple).
@@ -2675,7 +2675,7 @@ la majorité des vidéos MPEG.
 Vous devriez activer cette option si vous observez des distortions ou des
 mouvements saccadés lorsque vous regardez une vidéo entrelacée.
 .IPs layer=N
-Forcera l'utilisation de la couche dont l'id est N pour la lecture
+Forcera l'utilisation de la couche dont l'ID est N pour la lecture
 (par défaut\ : -1 - auto).
 .RE
 .PD 1
@@ -2908,7 +2908,7 @@ Essaie tous les codecs excepté le décodeur MP3 de FFmpeg.
 .PD 1
 .
 .TP
-.B \-af <plugin1[=options],plugin2,...>
+.B \-af <filtre1[=paramètre1:paramètre2:...],filtre2,...>
 Active un liste (séparés par une virgule) des filtres audio et de leurs
 options.
 Voir aussi la section des filtres audio de la documentation.
@@ -3396,29 +3396,28 @@ Peut être utilisé pour forcer le zoom avec \-vf scale.
 \-zoom.
 .
 .
-.\" -- Les options décrites ci-dessous ne sont plus garanties d'être à jour --
 .SH "FILTRES VIDÉO"
 Les filtres vidéo vous permettent de modifier le flux vidéo et ses propriétés.
-La syntaxe est:
+La syntaxe est\ :
 .
 .TP
-.B \-vf <filtre1[=paramètres],filtre2,...>
+.B \-vf <filtre1[=paramètre1:paramètre2:...],filtre2,...>
 Initialise une chaine de filtres vidéo.
 .
 .TP
-.B \-vop <...,filtre3[=paramètres],filtre2,filtre1> (OBSOLÈTE)
+.B \-vop <...,filtre2[=paramètre1:paramètre2:...],filtre1> (OBSOLÈTE)
 Initialise une chaine de filtres vidéo, à appliquer en ordre
 .B inverse.
 Utilisez de préférence \-vf.
 .PP
-Les paramètres sont optionnels et si omis, certains d'entre eux
-s'initialiseront avec des valeurs par défaut.
-Utilisez '-1' pour garder la valeur par défaut.
+La plupart des paramètres sont optionnels et s'initialiseront avec des
+valeurs par défaut si omis.
+Pour explicitement utiliser les valeurs par défaut, mettez la valeur à '-1'.
 Les paramètres l:h signifient largeur x hauteur en pixels, x:y signifient
 position x;y à partir de du coin supérieur gauche de la plus grande image.
 .br
 .I NOTE\ :
-Pour avoir une liste complète des filtres disponibles, voir \-vf help.
+Pour avoir une liste complète des filtres vidéo disponibles, voir \-vf help.
 .sp 1
 Les filtres sont gérés en listes.
 Il y a quelques commandes pour gérer la liste de filtres.
@@ -3452,7 +3451,7 @@ particulier.
 .TP
 .B \-vf <filtre=paramètre_nommé=valeur1[:paramètre_nommé2=valeur2:...]>
 Fait correspondre un paramètre nommé à une valeur donnée.
-Utilisez on et off ou yes et no pour positionner les flags des paramètres.
+Utilisez on et off ou yes et no pour positionner les drapeaux des paramètres.
 .PP
 Les filtres disponibles sont:
 .
@@ -3483,7 +3482,7 @@ Valeur dont la hauteur/\:largeur doit être multiple (par défaut\ : 16).
 L'offset est ajusté automatiquement pour que la vidéo soit au centre.
 Prenez 2 pour avoir des dimensions paires (obligatoire pour les vidéo
 4:2:2).
-16 est le meilleur pour encoder avec la plupart des codecs vidéo.
+16 est recommandé pour encoder avec la plupart des codecs vidéo.
 .RE
 .PD 1
 .
@@ -3532,9 +3531,9 @@ rendu OSD/\:sous-titres
 .RE
 .
 .TP
-.B flip
+.B flip\ \ \ 
 Inverse l'image de haut en bas.
-Voir également l'option \-flip.
+Voir aussi l'option \-flip.
 .
 .TP
 .B mirror
@@ -3612,7 +3611,7 @@ spal:    768x576 (PAL à pixels carrés)
 .
 .TP
 .B dsize={aspect|l:h}
-Change la taille/\:le rapport hauteur/\:largeur de l'affichage à un point
+Change la taille ou le rapport hauteur/\:largeur de l'affichage à un point
 arbitraire de la chaine de fitres.
 Aspect peut être donné en tant que fraction (4/\:3) ou que nombre flottant
 (1.33).
@@ -3631,12 +3630,13 @@ YUY2 rapidement.
 .TP
 .B yvu9\ \ \ 
 Force la conversion logicielle d'espace de couleur de YVU9 en YV12.
-À éviter (deprecated), utiliser de préférence le zoom logiciel.
+Utilisez de préférence le zoom logiciel.
 .
 .TP
 .B yuvcsp\ 
 Calle les valeurs de couleurs YUV sur l'intervalle CCIR 601 sans conversion
 réelle.
+.\" -- Les options décrites ci-dessous ne sont plus garanties d'être à jour --
 .
 .TP
 .B rgb2bgr[=swap]
@@ -3683,8 +3683,7 @@ nom du format comme rgb15, bgr24, yv12, etc. (par défaut: yv12)
 .B pp[=filtre1[:option1[:option2...]]/\:[-]filtre2...] (voir aussi \-pphelp)
 Cette option active le filtre interne de post-traitement de MPlayer, et
 propose une interface où vous pouvez passer des options au filtre nommé.
-Pour obtenir une liste des filtres disponibles, utilisez \-pphelp.
-Notez que chaque sous-filtre doit être séparé des autres avec le signe /.
+Les sous-filtres doivent être séparés avec le signe /.
 Chaque filtre est par défaut à 'c' (chrominance).
 Les mots-clés acceptent un préfixe '-' pour désactiver une option.
 Un ':' suivi d'une lettre peut être ajouté à l'option pour indiquer sa portée:
@@ -3700,6 +3699,10 @@ Pas de filtrage de la chrominance (filtrage de la luminance uniquement).
 .PD 1
 .sp 1
 .RS
+.br
+.I NOTE\ :
+\-pphelp affiche une liste des filtres disponibles.
+.sp 1
 .I EXEMPLE\ :
 .RE
 .PD 0
@@ -3726,7 +3729,7 @@ filtre de postprocessing simple
 .IPs qualité
 0\-6
 .IPs qp\ \ \ 
-paramètre pour forcer la quantisation (par défaut\ : 0, utilise le qp de
+paramètre pour forcer la quantisation (par défaut\ : 0, utilise le QP de
 la video)
 .IPs mode\ \ \ 
 0: fort seuillage (hard thresholding) (par défaut)
@@ -3737,7 +3740,7 @@ mais image plus floue)
 .
 .TP
 .B qp=equation
-filtre de changement de qp
+filtre de changement de QP
 .RSs
 .IPs equation
 une équation comme "2+2*sin(PI*qp)"
@@ -4056,6 +4059,7 @@ sortie.
 1 signifie toujours sauter la trame si il n'y a pas eu de sauts ou d'assemblage
 telecine dans les 5 dernières trames.
 2 signifie toujours maintenir le rapport exact 5:4 entre l'entrée et la sortie.
+.br
 .I NOTE:
 Utilisez le mode 1 avec MEncoder.
 .IPs am
@@ -4585,7 +4589,7 @@ affichés durant leur insertion en dur dans le film.
 .
 .TP
 .B \-noodml (\-of avi uniquement)
-Ne pas écrire l'index OpenDML des fichier AVI files >1Go.
+Ne pas écrire l'index OpenDML des fichier AVI >1Go.
 .TP
 .B \-noskip
 Ne saute pas de trames.
@@ -6094,7 +6098,8 @@ Ainsi vous n'avez pas besoin d'utiliser de filtre de désentrelacement.
 Utilise 4 vecteurs de mouvement par macro-bloc.
 Peut améliorer la compressibilité mais ralenti l'encodage.
 .I ATTENTION\ :
-Cette option n'existe plus avec XviD 1.0.x
+Cette option n'existe plus séparément avec XviD 1.0.x, mais est activée
+automatiquement quand me_quality > 4.
 .
 .TP
 .B rc_reaction_delay_factor=<valeur>
@@ -6322,12 +6327,14 @@ filtres
 (découpage/\:expansion/\:redimensionnement/\:etc...).
 .
 .TP
-.B psnr
-affiche le psnr (peak signal to noise ratio\ : rapport du signal crête sur
-bruit) pour l'ensemble de la vidéo après encodage et stocke le psnr par trame
+.B psnr\ \ \ 
+affiche le PSNR (peak signal to noise ratio\ : rapport du signal crête sur
+bruit) pour l'ensemble de la vidéo après encodage et stocke le PSNR par trame
 dans un fichier portant un nom tel que 'psnr_hhmmss.log'.
 Les valeurs renvoyées sont en dB (décibel), plus elles sont hautes, plus la
 vidéo générée est fidèle à l'originale.
+.
+.
 .SS x264enc (\-x264encopts)
 .
 .TP
@@ -6513,7 +6520,7 @@ Affiche les statistiques de rapport signal/bruit.
 .SH FICHIERS
 .
 .TP
-/etc/\:mplayer/\:mplayer.conf
+/usr/\:/local\:etc/\:mplayer/\:mplayer.conf
 paramètres globaux
 .
 .TP
@@ -6539,13 +6546,13 @@ avec une extension .RAW)
 .
 .TP
 ~/.mplayer/\:DVDkeys/
-clés CSS cachées
+clés CSS en cache
 .
 .TP
-Les fichiers Sub sont cherchés dans cet ordre
-(par exemple /mnt/\:cdrom/\:film.avi):
+Dans l'hypothèse que le fichier /chemin/\:vers/\:film.avi soit joué, MPlayer
+cherche les les fichiers sub dans cet ordre\ :
 .RS
-/mnt/\:cdrom/\:film.sub
+ /chemin/\:vers/\:film.avi
 .br
 ~/.mplayer/\:sub/\:film.sub
 .br
@@ -6561,93 +6568,93 @@ Les fichiers Sub sont cherchés dans cet ordre
 .SH EXEMPLES
 .
 .TP
-.B Lecture rapide de DVD
+.B Lecture rapide de DVD\ :
 mplayer dvd://1
 .
 .TP
-.B Lecture en japonais avec sous-titres anglais
+.B Lecture en japonais avec sous-titres anglais\ :
 mplayer dvd://1 \-alang ja \-slang en
 .
 .TP
-.B Ne lire que les chapitres 5, 6, 7
+.B Ne lire que les chapitres 5, 6, 7\ :
 mplayer dvd://1 \-chapter 5-7
 .
 .TP
-.B Lecture DVD multiangle
+.B Lecture d'un DVD multi-angle\ :
 mplayer dvd://1 \-dvdangle 2
 .
 .TP
-.B Lecture depuis un autre périphérique DVD
+.B Lecture depuis un autre périphérique DVD\ :
 mplayer dvd://1 \-dvd-device /dev/\:dvd2
 .
 .TP
-.B Streaming depuis HTTP
+.B Streaming depuis HTTP\ :
 mplayer http://mplayer.hq/\:exemple.avi
 .
 .TP
-.B Streaming en utilisant RTSP
+.B Streaming en utilisant RTSP\ :
 mplayer rtsp://serveur.exemple.com/\:NomFlux
 .
 .TP
-.B Convertit les sous-titres en MPsub (vers ./\:dump.mpsub)
+.B Convertit les sous-titres au format MPsub\ :
 mplayer dummy.avi \-sub source.sub \-dumpmpsub
 .
 .TP
-.B Convertit les sous-titres en MPsub sans afficher le film
+.B Convertit les sous-titres en au format MPsub sans afficher le film\ :
 mplayer /dev/\:zero \-rawvideo on:pal:fps=xx \-vc null \-vo null \-noframedrop
 \-benchmark \-sub source.sub \-dumpmpsub
 .
 .TP
-.B Entrée depuis V4L standard
+.B Entrée depuis V4L standard\ :
 mplayer tv:// \-tv driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420
 \-vo xv
 .
 .TP
-.B Lecture sur carte zoran (ancienne méthode, depréciée)
+.B Lecture sur cartes zoran (ancienne méthode, depréciée)\ :
 mplayer \-vo zr \-vf scale=352:288 file.avi
 .
 .TP
-.B Lecture sur carte zoran (nouvelle méthode)
+.B Lecture sur carte zoran (nouvelle méthode)\ :
 mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg file.avi
 .
 .TP
-.B Encodage du titre #2 d'un DVD, uniquement les chapitres sélectionnés
+.B Encode le titre #2 d'un DVD, uniquement les chapitres sélectionnés\ :
 mencoder dvd://2 \-chapter 10-15 \-o titre2.avi \-oac copy \-ovc divx4
 .
 .TP
-.B Encodage du titre #2 d'un DVD, redimensionnement en 640x480
+.B Encode le titre #2 d'un DVD, redimensionnement en 640x480\ :
 mencoder dvd://2 \-vf scale=640:480 \-o titre2.avi \-oac copy \-ovc divx4
 .
 .TP
-.B Encodage du titre #2 d'un DVD, redimensionnement en 512xHHH (garder
-le rapport hauteur/\:largeur)
+.B Encodage du titre #2 d'un DVD, redimensionnement en 512xHHH (gardant \
+le rapport hauteur/\:largeur)\ :
 mencoder dvd://2 \-vf scale \-zoom \-xy 512 \-o titre2.avi \-oac copy
 \-ovc divx4
 .
 .TP
-.B Même chose, mais avec compression MPEG4 (Divx5) via la famille libavcodec
-mencoder dvd://2 \-o titre2.avi \-ovc lavc
-\-lavcopts vcodec=mpeg4:vhq:vbitrate=1800 \-oac copy
+.B Même chose, mais avec un bitrate de 1800kBit et des macro-blocs optimisés\ :
+mencoder dvd://2 \-o title2.avi \-oac copy \-ovc lavc
+\-lavcopts vcodec=mpeg4:mbd=1:vbitrate=1800
 .
 .TP
-.B Même chose, mais avec compression MJPEG via la famille libavcodec
+.B Même chose, mais une compression MJPEG
 mencoder dvd://2 \-o titre2.avi \-ovc lavc
-\-lavcopts vcodec=mjpeg:vhq:vbitrate=1800 \-oac copy
+\-lavcopts vcodec=mjpeg:mbd=1:vbitrate=1800 \-oac copy
 .
 .TP
-.B Encodage de tous les fichiers *.jpg du répertoire courant
+.B Encode tous les fichiers *.jpg du répertoire courant
 mencoder "mf://*.jpg" \-mf fps=25 \-o output.avi \-ovc divx4
 .
 .TP
-.B Encodage depuis un tuner TV
+.B Encode depuis un tuner TV
 mencoder \-tv driver=v4l:width=640:height=480 tv:// \-o tv.avi \-ovc rawrgb
 .
 .TP
-.B Encodage depuis un pipe
+.B Encode depuis un pipe
 rar p test-SVCD.rar | mencoder \-ovc divx4 \-divx4opts br=800 \-ofps 24 \-
 .
 .TP
-.B Encodage de multiples fichiers *.vob
+.B Encode de multiples fichiers *.vob
 cat *.vob | mencoder <options> \-
 .
 .
