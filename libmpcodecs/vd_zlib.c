@@ -73,10 +73,6 @@ static int init(sh_video_t *sh)
     if (!mpcodecs_config_vo(sh, ctx->width, ctx->height, IMGFMT_BGR|ctx->depth))
 	return(NULL);
 
-    ctx->mpi = mpcodecs_get_image(sh, MP_IMGTYPE_TEMP, MP_IMGFLAG_ALLOCATED,
-	ctx->width, ctx->height);
-    if (!ctx->mpi)
-	return(NULL);
 
     return(1);
 }
@@ -103,6 +99,11 @@ static mp_image_t* decode(sh_video_t *sh, void* data, int len, int flags)
 
     if (len <= 0)
 	return(NULL); // skipped frame
+
+    ctx->mpi = mpcodecs_get_image(sh, MP_IMGTYPE_TEMP, MP_IMGFLAG_ALLOCATED,
+	ctx->width, ctx->height);
+    if (!ctx->mpi)
+	return(NULL);
 
     zstrm->next_in = data;
     zstrm->avail_in = len;
