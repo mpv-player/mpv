@@ -146,7 +146,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
                 vf->priv->Coefs[2] + 256,
                 vf->priv->Coefs[3] + 256);
 
-	vf->priv->pmpi=mpi; // save reference image
+	vf->priv->pmpi=dmpi; // save reference image
 	return vf_next_put_image(vf,dmpi);
 }
 
