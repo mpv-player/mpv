@@ -130,6 +130,8 @@ char* af_fmt2str(int format, char* str, int size)
       i+=snprintf(&str[i],size-i,"MPEG 2 "); break;
     case(AF_FORMAT_AC3): 
       i+=snprintf(&str[i],size-i,"AC3 "); break;
+    case(AF_FORMAT_IMA_ADPCM): 
+      i+=snprintf(&str[i],size-i,"IMA ADPCM "); break;
     default:
       printf("Unknown special\n");
     }
@@ -153,6 +155,37 @@ char* af_fmt2str(int format, char* str, int size)
   }
   str[i] = 0; // make sure it is 0 terminated.
   return str;
+}
+
+char *af_fmt2str_short(int format)
+{
+    switch(format)
+    {
+	// special
+	case AF_FORMAT_MU_LAW: return "mulaw";
+	case AF_FORMAT_A_LAW: return "alaw";
+	case AF_FORMAT_MPEG2: return "mpeg2";
+	case AF_FORMAT_AC3: return "ac3";
+	case AF_FORMAT_IMA_ADPCM: return "imaadpcm";
+	// ordinary
+	case AF_FORMAT_U8: return "u8";
+	case AF_FORMAT_S8: return "s8";
+	case AF_FORMAT_U16_LE: return "u16le";
+	case AF_FORMAT_U16_BE: return "u16be";
+	case AF_FORMAT_S16_LE: return "s16le";
+	case AF_FORMAT_S16_BE: return "s16be";
+	case AF_FORMAT_U24_LE: return "u24le";
+	case AF_FORMAT_U24_BE: return "u24be";
+	case AF_FORMAT_S24_LE: return "s24le";
+	case AF_FORMAT_S24_BE: return "s24be";
+	case AF_FORMAT_U32_LE: return "u32le";
+	case AF_FORMAT_U32_BE: return "u32be";
+	case AF_FORMAT_S32_LE: return "s32le";
+	case AF_FORMAT_S32_BE: return "s32be";
+	case AF_FORMAT_FLOAT_LE: return "floatle";
+	case AF_FORMAT_FLOAT_BE: return "floatbe";
+    }
+    return "??";
 }
 
 // Helper functions to check sanity for input arguments
