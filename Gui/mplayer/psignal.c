@@ -126,6 +126,12 @@ void gtkSigHandler( int s )
    case evExit:
 	gtk_main_quit();
         break;
+   case evShowPopUpMenu:
+//	if ( gtkVisiblePopUpMenu ) gtk_widget_hide( PopUpMenu );
+//	gtk_widget_show( PopUpMenu );
+        gtk_menu_popup( GTK_MENU( PopUpMenu ),NULL,NULL,NULL,NULL,0,0 );
+	gtkVisiblePopUpMenu=1;
+	break;
   }
  gtkShMem->message=0;
 }

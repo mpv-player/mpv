@@ -22,18 +22,12 @@
 #include "../../help_mp.h"
 #include "../error.h"
 
-#include "pixmaps/up.xpm"
-#include "pixmaps/dir.xpm"
-#include "pixmaps/file.xpm"
-#include "pixmaps/about.xpm"
-#include "pixmaps/error.xpm"
-#include "pixmaps/warning.xpm"
-
 GtkWidget     * SkinBrowser;
 GtkWidget     * PlayList;
 GtkWidget     * FileSelect;
 GtkWidget     * AboutBox;
 GtkWidget     * Options;
+GtkWidget     * PopUpMenu;
 
 GtkWidget     * MessageBox;
 
@@ -46,6 +40,7 @@ int             gtkVisibleFileSelect = 0;
 int             gtkVisibleMessageBox = 0;
 int             gtkVisibleAboutBox = 0;
 int             gtkVisibleOptions = 0;
+int             gtkVisiblePopUpMenu = 0;
 
 gtkCommStruct * gtkShMem;
 
@@ -55,6 +50,7 @@ gtkCommStruct * gtkShMem;
 #include "gtk/mb.h"
 #include "gtk/about.h"
 #include "gtk/opts.h"
+#include "gtk/menu.h"
 
 void widgetsCreate( void )
 {
@@ -64,6 +60,7 @@ void widgetsCreate( void )
  FileSelect=create_FileSelect();
  MessageBox=create_MessageBox(0);
  Options=create_Options();
+ PopUpMenu=create_PopUpMenu();
 }
 
 // --- forked function
