@@ -70,8 +70,8 @@ static void gtkThreadProc( int argc,char * argv[] )
 
  widgetsCreate();
 
- gtkParentPID=getpid();
- gtkChildPID=getppid();
+// gtkParentPID=getppid();
+// gtkChildPID=getpid();
  gtkParent=0;
 
  signal( SIGTYPE,gtkSigHandler );
