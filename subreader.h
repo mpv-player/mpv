@@ -5,7 +5,10 @@
 extern int sub_uses_time;
 extern int sub_errs;
 extern int sub_num;         // number of subtitle structs
-extern int sub_format;     // 0 for microdvd, 1 for SubRip, 2 for the third format
+extern int sub_format;     // 0 for microdvd
+			  // 1 for SubRip
+			 // 2 for the third format
+			// 3 for SAMI (smi)
 
 #define SUB_MAX_TEXT 5
 

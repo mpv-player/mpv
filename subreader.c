@@ -17,8 +17,60 @@
 
 int sub_uses_time=0;
 int sub_errs=0;
-int sub_num=0;         // number of subtitle structs
-int sub_format=-1;     // 0 for microdvd, 1 for SubRip, 2 for the third format
+int sub_num=0;          // number of subtitle structs
+int sub_format=-1;     // 0 for microdvd
+		      // 1 for SubRip
+		     // 2 for the third format (what's this?)
+		    // 3 for SAMI (smi)
+
+int eol(char p) {
+    return (p=='\r' || p=='\n' || p=='\0');
+}
+
+
+subtitle *sub_read_line_sami(FILE *fd, subtitle *current) {
+    char line[1001];
+    int i;
+    char *s, *p;
+
+    current->start=0;
+    do {
+	if (! (fgets (line, 1000, fd)))  return 0;
+	s= strstr(line, "Start=");
+	if (s) {
+	    sscanf (s, "Start=%d", &current->start);
+	    if (strstr (s, "<P><br>"))  current->start=0;
+	}
+    } while ( !current->start );
+    
+    if (! (fgets (line, 1000, fd)))  return 0;
+    s=strstr (line, "<P>")+3;
+
+    i=0;
+    do {
+	for (p=s; !eol(*p) && strncmp(p,"<br>",4); p++);
+	if (p==s) {
+	    s+=4;
+	    continue;
+	}
+	current->text[i]=(char *)malloc(p-s+1);
+	strncpy (current->text[i], s, p-s);
+	current->text[i++][p-s]='\0';
+	if (!strncmp(p,"<br>",4)) s=p+4;
+	else s=p;
+    } while (!eol (*p));
+    
+    current->lines=i;
+
+    if (! (fgets (line, 1000, fd)))  return 0;
+    s= strstr(line, "Start=");
+    if (s) {
+        sscanf (s, "Start=%d", &current->end);
+        if (!strstr (s, "<P><br>"))  return ERR;
+    } else return ERR;
+
+    return current;
+}
 
 
 char *sub_readtext(char *source, char **dest) {
@@ -38,8 +90,6 @@ char *sub_readtext(char *source, char **dest) {
     if (*p) return p;  // not-last text field
     else return NULL;  // last text field
 }
-
-
 
 subtitle *sub_read_line_microdvd(FILE *fd,subtitle *current) {
     char line[1001];
@@ -138,20 +188,22 @@ int sub_autodetect (FILE *fd) {
     int i,j=0;
 //    char *p;
     
-    while (1) {
+    while (j < 100) {
 	j++;
 	if (!fgets (line, 1000, fd))
 	    return -1;
 
-//	if (sscanf (line, "{%i}{%i}", &i, &i, p)==2) // ha valaki tudja miert 2, mondja mar el nekem ;)
-	if (sscanf (line, "{%d}{%d}", &i, &i)==2) // ha valaki tudja miert 2, mondja mar el nekem ;)
+	if (sscanf (line, "{%d}{%d}", &i, &i)==2)
 		{sub_uses_time=0;return 0;}
 	if (sscanf (line, "%d:%d:%d.%d,%d:%d:%d.%d",     &i, &i, &i, &i, &i, &i, &i, &i)==8)
 		{sub_uses_time=1;return 1;}
 	if (sscanf (line, "%d:%d:%d,%d --> %d:%d:%d,%d", &i, &i, &i, &i, &i, &i, &i, &i)==8)
 		{sub_uses_time=1;return 2;}
-	if (j>100) return -1;  // too many bad lines or bad coder
+	if (strstr (line, "<SAMI>"))
+		{sub_uses_time=0; return 3;}
     }
+
+    return -1;  // too many bad lines
 }
 
 
@@ -159,18 +211,19 @@ subtitle* sub_read_file (char *filename) {
     FILE *fd;
     int n_max;
     subtitle *first;
-    subtitle * (*func[3])(FILE *fd,subtitle *dest)=
+    subtitle * (*func[4])(FILE *fd,subtitle *dest)=
     {
 	    sub_read_line_microdvd,
 	    sub_read_line_subrip,
-	    sub_read_line_third
+	    sub_read_line_third,
+	    sub_read_line_sami
     };
 
     fd=fopen (filename, "r"); if (!fd) return NULL;
 
     sub_format=sub_autodetect (fd);
     if (sub_format==-1) {printf ("SUB: Could not determine file format\n");return NULL;}
-    printf ("SUB: Detected subtitle file format: %i\n",sub_format);
+    printf ("SUB: Detected subtitle file format: %d\n",sub_format);
     
     rewind (fd);
 
@@ -193,7 +246,7 @@ subtitle* sub_read_file (char *filename) {
 
 //    printf ("SUB: Subtitle format %s time.\n", sub_uses_time?"uses":"doesn't use");
     printf ("SUB: Read %i subtitles", sub_num);
-    if (sub_errs) printf (", %i error(s).\n", sub_errs);
+    if (sub_errs) printf (", %i bad line(s).\n", sub_errs);
     else 	  printf (".\n");
 
     return first;
@@ -247,7 +300,6 @@ char * sub_filename( char * fname )
  return NULL;
 }
 
-#if 0
 int main(int argc, char **argv) {  // for testing
 
     int i,j;
@@ -259,7 +311,7 @@ int main(int argc, char **argv) {  // for testing
         exit(1);
     }
     
-    subs=sub_get_subtitles(argv[1]);
+    subs=sub_read_file(argv[1]);
     if(!subs){
         printf("Couldn't load file... let's write a bugreport :)\n");
         exit(1);
@@ -282,4 +334,3 @@ int main(int argc, char **argv) {  // for testing
     printf ("Read %i subtitles, %i errors.\n", sub_num, sub_errs);
     return 0;
 }
-#endif
