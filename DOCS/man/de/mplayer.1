@@ -5047,6 +5047,64 @@ Bildschirms aktualisiert wird, 1,8MB an RGBA32-Daten an den FIFO schicken.
 1: löschen
 .REss
 .RE
+.PD 1
+.
+.TP
+.B framestep=I|[i]step
+Rendert nur jeden n-ten Frame oder jeden Intra-Keyframe.
+.sp 1
+Rufst du den Filter mit groß geschriebenem I als Parameter auf, so werden
+.B nur
+Keyframes gerendert.
+Für DVDs bedeutet dies im Allgemeinen, dass nur einer von 15/\:12
+(IBBPBBPBBPBBPBB) Frames dargestellt wird, bei AVIs wirkt diese Option bei
+jedem Szenenwechsel oder jedem keyint-Wert (siehe '\-lavcopts keyint=Wert',
+falls du MEncoder zum Encodieren des Videos benutzt).
+.sp 1
+Wird ein Keyframe gefunden, so wird ein 'I!' gefolgt von einem Zeilenumbruch
+ausgegeben, wobei die aktuelle Zeile der Ausgabe von MPlayer/\:MEncoder
+auf dem Bildschirm bleibt, da sie die Zeit (in Sekunden) und die
+Framenummer des Keyframes enthält.
+(Du kannst diese Angabe benutzen, um ein AVI korrekt zu splitten.)
+.sp 1
+Rufst du den Filter mit einem numerischen Parameter 'step' auf, so wird nur
+ein Frame von 'step' vielen angezeigt.
+.sp 1
+Setzt du ein klein geschriebenes 'i' vor diese Nummer, so wird 'I!' angezeigt
+(wie beim Parameter I).
+.sp 1
+Gibst du nur das i an, so passiert nichts mit den Frames, aber es wird
+ein 'I!' für jeden Keyframe ausgegeben.
+.
+.TP
+.B tile=xtiles:ytiles:Ausgabe:Start:delta
+Kachelt eine Reihe von Bildern zu einem größeren Bild.
+Lässt du einen Parameter weg oder benutzt einen Wert kleiner als 0, so wird
+der Standardwert benutzt.
+Du kannst aufhören, wenn du zufrieden bist (... \-vf tile=10:5 ...).
+Es ist vermutlich eine gute Idee, den Filter scale vor das Kacheln zu
+setzen :-)
+.sp 1
+Die Parameter sind folgende:
+.sp 1
+.PD 0
+.RSs
+.IPs <xtiles>
+Anzahl der Kacheln auf der X-Achse (Standard: 5)
+.IPs <ytiles>
+Anzahl der Kacheln auf der Y-Achse (Standard: 5)
+.IPs <Ausgabe>
+Stelle die Kacheln erst dann dar, wenn <Ausgabe> viele Frames erreicht sind,
+wobei <Ausgabe> eine Zahl sein sollte, die kleiner ist als xtile * ytile.
+Fehlende Kacheln werden leer gelassen.
+Du könntest zum Beispiel nach jeden 50 Frames alle 2 Sekunden bei 25 fps
+ein 8 * 7 Kacheln großes Bild erstellen.
+.IPs <Start>
+Dicke des äußeren Rahmens in Pixeln (Standard: 2)
+.IPs <delta>
+Dicke des inneren Rahmens in Pixeln (Standard: 2)
+.RE
+.PD 1
 .\" manpage is synced from top down to this option.
 .
 .
