@@ -187,7 +187,9 @@ static inline void dbgprintf(char* fmt, ...)
 	va_end(va);
     }
 #endif
-#ifdef MPLAYER
+#if 0
+// al3x: it break divx audio. btw it should be if(verbose>2){ ... } anyway...
+// #ifdef MPLAYER
     #include "../mp_msg.h"
     {
 	char buf[1024];
