@@ -13,6 +13,7 @@ extern vf_info_t ve_info_divx4;
 extern vf_info_t ve_info_lavc;
 extern vf_info_t ve_info_vfw;
 extern vf_info_t ve_info_rawrgb;
+extern vf_info_t ve_info_libdv;
 
 static vf_info_t* encoder_list[]={
 #ifdef HAVE_DIVX4ENCORE
@@ -23,6 +24,9 @@ static vf_info_t* encoder_list[]={
 #endif
 #ifdef USE_WIN32DLL
     &ve_info_vfw,
+#endif
+#ifdef HAVE_LIBDV095
+    &ve_info_libdv,
 #endif
     &ve_info_rawrgb,
     NULL
