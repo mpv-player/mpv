@@ -1,7 +1,7 @@
 // Translated by:  Kuba "Qba" Misiorny <jim85@wp.pl>
 // Wszelkie uwagi i poprawki mile widziane :)
 //
-// Synced with help_mp-en.h 1.115
+// Synced with help_mp-en.h 1.116
 
 // ========================= MPlayer help ===========================
 
@@ -13,7 +13,7 @@ static char help_text[]=
 " -vo <drv[:dev]>  wybierz wyj¶ciowy sterownik video [:urz±dzenie (device)] (lista: '-vo help')\n"
 " -ao <drv[:dev]>  wybierz wyj¶ciowy sterownik audio [:urz±dzenie (device)] (lista: '-ao help')\n"
 #ifdef HAVE_VCD
-" vcd://<numer_¶cie¿ki>  odtwórz ¶cie¿kê VCD (Video CD) bezpo¶rednio z napêdu\n"
+" vcd://<numer_¶cie¿ki>  odtwórz ¶cie¿kê (S)VCD (Super Video CD) (bezpo¶rednio z napêdu, bez montowania)\n"
 #endif
 #ifdef USE_DVDREAD
 " dvd://<tytu³>    odtwórz tytu³ bezpo¶rednio z p³yty DVD \n"
@@ -430,7 +430,7 @@ static char help_text[]=
 #define MSGTR_MENU_LoadSubtitle "Za³aduj napisy..."
 #define MSGTR_MENU_DropSubtitle "Wy³±cz napisy..."
 #define MSGTR_MENU_LoadExternAudioFile "Za³aduj zewnêtrzny plik audio..."
-#define MSGTR_MENU_Playing "Odtwarzam"
+#define MSGTR_MENU_Playing "Odtwarzanie"
 #define MSGTR_MENU_Play "Odtwarzaj"
 #define MSGTR_MENU_Pause "Pauza"
 #define MSGTR_MENU_Stop "Stop"
