@@ -410,7 +410,7 @@ it works with the following drivers:
   passthrough you <emphasis role="bold">must</emphasis> use ALSA 0.9 with OSS emulation!
   </simpara></listitem>
 <listitem><simpara>
-  <emphasis role="bold">C-Media with SP/DIF out</emphasis>: hardware AC3
+  <emphasis role="bold">C-Media with S/PDIF out</emphasis>: hardware AC3
   passthrough is possible with these cards, see
   <link linkend="hwac3">Hardware AC3 decoding</link> section.
   </simpara></listitem>

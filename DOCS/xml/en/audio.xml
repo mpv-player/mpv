@@ -196,11 +196,11 @@ They also support several non-Linux systems.
 
   <row>
     <entry>SB Live!</entry>
-    <entry>Analog OK, SP/DIF not working</entry>
+    <entry>Analog OK, S/PDIF not working</entry>
     <entry>Both OK</entry>
     <entry>Both OK</entry>
     <entry>
-      <ulink url="http://opensource.creative.com">Creative's OSS driver (SP/DIF support)</ulink>
+      <ulink url="http://opensource.creative.com">Creative's OSS driver (S/PDIF support)</ulink>
     </entry>
     <entry>192</entry>
     <entry>4.0/5.1</entry>
@@ -276,7 +276,7 @@ They also support several non-Linux systems.
   <row>
     <entry>C-Media cards (CMI8338/8738)</entry>
     <entry>OK</entry>
-    <entry>OK SP/DIF is supported with ALSA 0.9.x</entry>
+    <entry>OK S/PDIF is supported with ALSA 0.9.x</entry>
     <entry>?</entry>
     <entry></entry>
     <entry>44</entry>
