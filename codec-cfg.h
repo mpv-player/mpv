@@ -39,6 +39,7 @@
 #define VFM_DIVX4 7
 #define VFM_RAW 8
 #define VFM_RLE 9
+#define VFM_XANIM 10
 
 #ifndef GUID_TYPE
 #define GUID_TYPE
