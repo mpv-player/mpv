@@ -19,22 +19,18 @@ Probably there is no such file or directory.
 <TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 What's the problem with gcc 2.96 ?
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-gcc 2.96 is RedHat's UNOFFICIAL (it can be found only on RedHat/Mandrake sites, or
-RedHat/Mandrake distributions) and BUGGY gcc release. gcc 2.96 is TOTALLY
-unsupported by <B>MPlayer</B>, because it simply SKIPS MMX/3DNow codes, it just does
-not compile it. Important: this is NOT an <B>MPlayer</B>-specific problem,
-numerous other projects (DRI, avifile, Wine, etc..) have problems with this shit
-too.<BR>
-<B><I>DO NOT USE gcc 2.96 !!!</I></B><BR>
-If you really really want to do so, be sure to use the newest.
+To be short: <B><I>DO NOT USE gcc 2.96 !!!</I></B><BR>
+Check <A HREF="gcc-2.96-3.0.html">this page</A>.
+If you still really really want to do so, be sure to use the latest release.
+<BR>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Great, I have gcc 3.0.1 from RedHat/Mandrake, then I'm fine--!
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-No. There are issues with those, either. :( Use 2.95.x series, those are reliable,
-and faster than 2.96 and 3.x.x . If you really really wish to use 3.0.x , be
-sure to always use the newest.
+No, since there have been/are issues with those compilers.<BR>
+Use 2.95.x series for reliability (not <A HREF="gcc-2.96-3.0.html">2.96</A>).
+Use the latest gcc 3.0.x (starting at 3.0.2) if you want to use a 3.0.x version.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
@@ -80,7 +76,7 @@ making newer tricks and checks to configure to avoid such mails.</P>
 bad because we don't like buggy gcc 2.96, and at the other hand there are the
 'new to linux' guys who are showing us gcc 2.96 is buggy.</P>
 
-<P>Conclusinion: we can't be good. Half of people always will say we are bad.</P>
+<P>Conclusion: we can't be good. Half of people always will say we are bad.</P>
 
 <P>Maybe we should close the project, make it closed source, commercial, and
 provide install support for it. then we could leave current work, so
@@ -100,7 +96,7 @@ In <A HREF="gcc-2.96-3.0.html">this</A> documentation.
 SDL output doesn't work or compile. Problem is ....
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 It is tested with newest SDL (probably runs on 1.1.7+).
-It does NOT work with 1.1.6, 1.1.5 1.1.4 1.1.3 1.0.4 etc, don't ask.
+It does NOT work with any previous version, so don't ask.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
@@ -188,18 +184,19 @@ problem, you are careless enough to do such things.
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 MPlayer doesn't seem to find my libcss. What am I doing wrong ?
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-It's normal. Since a while, <B>MPlayer</B> doesn't depend on libcss for
-DVD playing. You have to install <B>libdvdread</B> and <B>libdvdcss?</B>.
-libcss is to be used for example when you want to play encrypted VOB files
-from hard disk (not for general users).
+It's normal. <B>MPlayer</B> no longer depends on libcss to play a DVD.  You
+have to install <B>libdvdread</B> and <B>libdvdcss</B>. Check for DVD Plauback
+part <A HREF="cd-dvd.html">here</A>. libcss is to be used for example when you
+want to play encrypted VOB files from hard disk (not for general users).
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Hmm, strange. When loading the mga_vid.o kernel module, I found this in the logs:<BR>
 <CODE>Warning: loading mga_vid.o will taint the kernel: no license</CODE>
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-Dunno, downgrade kernel (newer have stupid licensing limitation), upgrade
-<B>MPlayer</B> or something.
+The latest kernels modules needs require a flag indicating its license (mainly
+to avoid kernel hackers' debugging closed sources drivers).
+Upgrade your kernel and your modutils and <B>MPlayer</B>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
@@ -215,7 +212,7 @@ Dunno, upgrading binutils should help. Not our fault, do NOT report!
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 What about DVD playing ?
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-Read the CD/DVD section .
+Read the CD/DVD section in <A HREF="cd-dvd.html">this page</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
@@ -271,8 +268,9 @@ It's a new project, see http://frozenproductions.com for details
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 There are error messages about file not found /usr/lib/win32/....
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-Download & install w32codec.zip from *our* FTP
-(avifile's codec package has different DLL set)
+Download <A HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/w32codec.zip">w32codec.zip</A>
+from *our* FTP (avifile's codec package has different DLL set).
+Install it.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
@@ -580,16 +578,16 @@ Wait for libvo2.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-Can I/When will I be able to encode ?
+How can I encode ?
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-Soon.
+Check <A HREF="encoding.html">this documentation</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 I want to play MP3 files with MPlayer !
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 This feature is not planned. There are much better players (mpg123, 3pm, xmms)
-for this task, use them.
+for this task, use them. BTW, MPlayer stands for Movie Player.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
