@@ -555,7 +555,7 @@ parse_textplain(play_tree_parser_t* p) {
 
   while((line = play_tree_parser_get_line(p)) != NULL) {
     strstrip(line);
-    if(line[0] == '\0')
+    if(line[0] == '\0' || line[0] == '#' || (line[0] == '/' && line[1] == '/'))
       continue;
 
     //Special check for embedded smil or ram reference in file
