@@ -2714,7 +2714,6 @@ echores "$_fbdev"
 echocheck "DVB"
 if test "$_dvb" != no ; then
   _dvb=no
-  test -c /dev/ost/video && _dvb=yes
 cat >$TMPC << EOF
 #include <sys/poll.h>
 #include <sys/ioctl.h>
@@ -2755,7 +2754,6 @@ if test "$_dvbhead" != no ; then
   echocheck "DVB HEAD"
   if test "$_dvbhead" != no ; then
     _dvbhead=no
-    test -c /dev/dvb/adapter0/video0 && _dvbhead=yes
 
 cat >$TMPC << EOF
 #include <sys/poll.h>
