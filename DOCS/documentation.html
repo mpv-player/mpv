@@ -33,11 +33,11 @@
     <UL>
       <LI><A HREF="formats.html#2.1.1">2.1.1 Video</A></LI>
       <UL>
-	<LI><A HREF="formats.html#2.1.1.1">2.1.1.1 MPG, VOB, DAT files</A></LI>
-	<LI><A HREF="formats.html#2.1.1.2">2.1.1.2 AVI files</A></LI>
-	<LI><A HREF="formats.html#2.1.1.3">2.1.1.3 ASF/WMV files</A></LI>
-	<LI><A HREF="formats.html#2.1.1.4">2.1.1.4 QT/MOV files</A></LI>
-	<LI><A HREF="formats.html#2.1.1.5">2.1.1.5 VIV files</A></LI>
+        <LI><A HREF="formats.html#2.1.1.1">2.1.1.1 MPG, VOB, DAT files</A></LI>
+        <LI><A HREF="formats.html#2.1.1.2">2.1.1.2 AVI files</A></LI>
+        <LI><A HREF="formats.html#2.1.1.3">2.1.1.3 ASF/WMV files</A></LI>
+        <LI><A HREF="formats.html#2.1.1.4">2.1.1.4 QT/MOV files</A></LI>
+        <LI><A HREF="formats.html#2.1.1.5">2.1.1.5 VIV files</A></LI>
       </UL>
       <LI><A HREF="formats.html#2.1.2">2.1.2 Audio</A></LI>
     </UL>
@@ -45,11 +45,11 @@
     <UL>
       <LI><A HREF="codecs.html#2.2.1">2.2.1 Video</A></LI>
       <UL>
-	<LI><A HREF="codecs.html#2.2.1.1">2.2.1.1 DivX4</A></LI>
-	<LI><A HREF="codecs.html#2.2.1.2">2.2.1.2 ffmpeg's DivX/libavcodec</A></LI>
-	<LI><A HREF="codecs.html#2.2.1.3">2.2.1.3 XAnim codecs</A></LI>
-	<LI><A HREF="codecs.html#2.2.1.4">2.2.1.4 VIVO video</A></LI>
-	<LI><A HREF="codecs.html#2.2.1.5">2.2.1.5 MPEG1/2 video</A></LI>
+        <LI><A HREF="codecs.html#2.2.1.1">2.2.1.1 DivX4</A></LI>
+        <LI><A HREF="codecs.html#2.2.1.2">2.2.1.2 ffmpeg's DivX/libavcodec</A></LI>
+        <LI><A HREF="codecs.html#2.2.1.3">2.2.1.3 XAnim codecs</A></LI>
+        <LI><A HREF="codecs.html#2.2.1.4">2.2.1.4 VIVO video</A></LI>
+        <LI><A HREF="codecs.html#2.2.1.5">2.2.1.5 MPEG1/2 video</A></LI>
       </UL>
       <LI><A HREF="codecs.html#2.2.2">2.2.2 Audio</A></LI>
       <UL>
@@ -98,6 +98,7 @@
 	<LI><A HREF="video.html#2.3.1.10">2.3.1.10 OpenGL output</A></LI>
 	<LI><A HREF="video.html#2.3.1.11">2.3.1.11 AAlib - text mode displaying</A></LI>
 	<LI><A HREF="video.html#2.3.1.12">2.3.1.12 VESA - output to VESA BIOS</A></LI>
+	<LI><A HREF="video.html#2.3.1.13">2.3.1.13 X11</A></LI>
 	<LI><A HREF="video.html#2.3.1.A">2.3.1.A TVout</A></LI>
 	<UL>
 	  <LI><A HREF="video.html#2.3.1.A.1">2.3.1.A.1 Matrox</A></LI>
@@ -226,7 +227,7 @@ too. So I've decided to write/modify one...</P>
 <LI><B>MPlayer 0.18 "The BugCounter"</B><BR>
     2 months since 0.17 and here's a new release.. Completed ASF support,
     more subtitle formats, introduced libao (similar to libvo but to audio),
-    even more stable than ever, and so on. It's a MUST !  
+    even more stable than ever, and so on. It's a MUST !
 <LI><B>MPlayer 0.50 "The Faszom(C)ounter"</B><BR>
     Hmm. Release again. Tons of new features, beta GUI version, bugs fixed,
     new vo and ao drivers, ported to many systems, including opensource DivX
@@ -340,7 +341,7 @@ into your config file, <CODE>$HOME/.mplayer/config</CODE> .</P>
 
 <P><B><A NAME=1.4>1.4. What about the GUI?</A></B></P>
 
-<P>The GUI is built upon GTK, so gtk (and it's devel stuff) has to be installed.
+<P>The GUI needs GTK (it isn't GTK, but the panels are), so gtk (and it's devel stuff) has to be installed.
 You can build it by specifying <CODE>--enable-gui</CODE> during ./configure .
 Then, to turn on GUI mode, you either
 <UL>
@@ -511,19 +512,19 @@ Now you have to see a timer at the upper left corner of the movie
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>m</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>toggle mute</TD><TR>
 
 </TABLE></P>
-   
+
 <P><B><A NAME=3.2>3.2. Control from LIRC</A></B></P>
 
-<P>Linux Infrared Remote Control - use an easy to build home-brewn IR-receiver, 
+<P>Linux Infrared Remote Control - use an easy to build home-brewn IR-receiver,
 an (almost) arbitrary remote control and control your linux box with it!
 More about it at <A HREF="http://www.lirc.org">www.lirc.org</A>.</P>
 
 <P>If you have installed the lirc-package, you can compile <B>MPlayer</B> with LIRC
 support using  ./configure --enable-lirc</P>
 
-<P>If everything went fine, <B>MPlayer</B> will print a message like 
+<P>If everything went fine, <B>MPlayer</B> will print a message like
 LIRC init was successful.
-on startup. If an error occurs it will tell you. If it doens't tell you 
+on startup. If an error occurs it will tell you. If it doens't tell you
 anything about LIRC there's no support compiled in. That's it :-)</P>
 
 <P>The application name for <B>MPlayer</B> is - oh wonder - mplayer_lirc.
@@ -560,7 +561,7 @@ excerpt from my .lircrc:</P>
    config = QUIT
   end</PRE></P>
 
-<P>If you don't like the standard location for the lirc-config file (~/.lircrc) 
+<P>If you don't like the standard location for the lirc-config file (~/.lircrc)
 use the -lircconf &lt;filename&gt; switch to specify another file.</P>
 
 <P><B><A NAME=3.3>3.3. Streaming from network or pipes</A></B></P>
@@ -600,7 +601,7 @@ dpkg-deb: building package `mplayer' in `../mplayer_0.18-1_i386.deb'.</P>
 
 <P>Here's how it looks like:</P>
 
-<P><PRE>	eyck@incubus:/src/main$ sudo dpkg -i ../mplayer_0.18-1_i386.deb 
+<P><PRE>	eyck@incubus:/src/main$ sudo dpkg -i ../mplayer_0.18-1_i386.deb
 	Password:
 	(Reading database ... 26946 files and directories currently installed.)
 	Preparing to replace mplayer 0.17a-1 (using ../mplayer_0.18-1_i386.deb)
@@ -610,15 +611,15 @@ dpkg-deb: building package `mplayer' in `../mplayer_0.18-1_i386.deb'.</P>
 
 <P><B><A NAME=6.2>6.2. FreeBSD</A></B></P>
 
-<P>To build the package you will need GNU make (gmake, /usr/ports/devel/gmake), 
+<P>To build the package you will need GNU make (gmake, /usr/ports/devel/gmake),
 native BSD make will not work.</P>
 
-<P>To run <B>MPlayer</B> you will need to re-compile the kernel with 
+<P>To run <B>MPlayer</B> you will need to re-compile the kernel with
 "options USER_LDT" (unless you are running -CURRENT, where this is default).
 If you have a CPU with SSE also use "options CPU_ENABLE_SSE" to use it
 (FreeBSD-STABLE required, or use kernel patches).</P>
 
-<P>If <B>MPlayer</B> complains about "CD-ROM Device '/dev/cdrom' not found!" make a 
+<P>If <B>MPlayer</B> complains about "CD-ROM Device '/dev/cdrom' not found!" make a
 symbolic link: <CODE>ln -s /dev/(your_cdrom_device) /dev/cdrom</CODE></P>
 
 <P>There's no DVD support for FreeBSD yet.</P>
@@ -677,7 +678,7 @@ not use GNU as:</P>
 
 <P><PRE>   % gmake
    ...
-   gcc -c -Iloader -Ilibvo -O4 -march=i686 -mcpu=i686 -pipe -ffast-math 
+   gcc -c -Iloader -Ilibvo -O4 -march=i686 -mcpu=i686 -pipe -ffast-math
 	-fomit-frame-pointer  -I/usr/local/include   -o mplayer.o mplayer.c
    Assembler: mplayer.c
    "(stdin)", line 3567 : Illegal mnemonic
@@ -704,7 +705,7 @@ all data is accessed modulo 4GB
 
 <P>On Solaris with an UltraSPARC CPU, you can get some extra speed by
   using the CPU's VIS instructions for certain time consuming operations.
-  VIS acceleration can be used in MPlayer by calling functions in Sun's  
+  VIS acceleration can be used in MPlayer by calling functions in Sun's
   <A HREF="http://www.sun.com/sparc/vis/mediaLib.html">mediaLib</A>.</P>
 
 <P>VIS accelerated operations from mediaLib are used for mpeg2 video

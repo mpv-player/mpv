@@ -23,7 +23,7 @@ gcc 2.96 is RedHat's UNOFFICIAL (it can be found only on RedHat/Mandrake sites, 
 RedHat/Mandrake distributions) and BUGGY gcc release. gcc 2.96 is TOTALLY
 unsupported by <B>MPlayer</B>, because it simply SKIPS MMX/3DNow codes, it just does
 not compile it. Important: this is NOT an <B>MPlayer</B>-specific problem,
-numerous other projects (DRI, avifile, etc..) have problems with this shit
+numerous other projects (DRI, avifile, Wine, etc..) have problems with this shit
 too.<BR>
 <B><I>DO NOT USE gcc 2.96 !!!</I></B><BR>
 If you really really want to do so, be sure to use the newest.
@@ -183,6 +183,15 @@ we get these questions? It's not <B>MPlayer</B> specific at all! Add
 /usr/local/lib to <B>/etc/ld.so.conf</B> and run <B>ldconfig</B> .
 Or install it to /usr/lib , because if you can't solve the /usr/local
 problem, you are careless enough to do such things.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+MPlayer doesn't seem to find my libcss. What am I doing wrong ?
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+It's normal. Since a while, <B>MPlayer</B> doesn't depend on libcss for
+DVD playing. You have to install <B>libdvdread</B> and <B>libdvdcss?</B>.
+libcss is to be used for example when you want to play encrypted VOB files
+from hard disk (not for general users).
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
@@ -402,7 +411,7 @@ sound too slow. When I use -nosound switch, everything is ok (but quiet).
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Ok son, your machine is too slow. RTFM or anything.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
- 
+
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 MPlayer dies with "MPlayer interrupted by signal 4 in module: decode_video".
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
@@ -437,7 +446,7 @@ config file(s).
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-After starting mplayer under KDE(1/2) I just get a black screen and nothing 
+After starting mplayer under KDE(1/2) I just get a black screen and nothing
 happens, after about one minute the video starts playing.
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 The KDE arts sound daemon is blocking the sound device, either wait the time

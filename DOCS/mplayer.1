@@ -172,10 +172,12 @@ apply postprocess filter on decoded image.
 You need a STRONG CPU in order to use this!
 The supported formats and settings are:
 
-        MPEG 1/2   0 (none), 1, 3, 7, 15, 31, 63
-        OpenDivX   0 (none), 1, 3, 7, 15, 31, 63
-        DivX4      0 (none) - 60
-        DivX       0 (none), 1, 2, 3, 4
+        MPEG 1/2   0 (none), TODO
+        OpenDivX   0 (none), TODO
+        DivX4      0 (none), TODO
+        DivX       0 (none), TODO
+
+        -pp 0x20000 TODO
 
 .TP
 .B \-autoq\ quality
@@ -208,7 +210,7 @@ specifies which mode the OSD should start in (0 : none, 1 : seek, 2: seek+timer)
 (default = 2)
 .TP
 .B \-lircconf\ configfile
-specifies a configfile for LIRC (see http://www.lirc.org) if you don't like the default ~/.lircrc 
+specifies a configfile for LIRC (see http://www.lirc.org) if you don't like the default ~/.lircrc
 .TP
 .B \-v
 enable verbose output (more -v means more verbose)
@@ -595,7 +597,7 @@ This manpage is written and maintained by
 .I Gabucino .
 .LP
 .SH STANDARD DISCLAIMER
-Use only at your own risk! There may be errors and inaccuracies that could 
+Use only at your own risk! There may be errors and inaccuracies that could
 be damaging to your system or your eye. Proceed with caution, and although
 this is highly unlikely, the author doesn't take any responsibility for that!
 .\" end of file

@@ -26,8 +26,7 @@ other interesting stuff.</P>
     is needed for CBR/VBR MP3 audio encoding ability. Note that a single
     <CODE>lame</CODE> binary isn't sufficient.</LI>
     <LI>use <CODE>./configure</CODE> with optional parameters as usual, and
-    type : <CODE>make mencoder</CODE> . You have to install it manually for
-    now.
+    type : <CODE>make mencoder</CODE> , then <CODE>make install</CODE> .
   </UL>
 </P>
 
@@ -56,6 +55,21 @@ other interesting stuff.</P>
     (creating VOB files with DivX4/Indeo5/VIVO streams :)</LI>
   </UL>
 </P>
+
+<P><B><I>Encoding 2-pass DivX4</I></B></P>
+
+<P>The name comes from the fact that this method encodes the file <I>twice</I>.
+The first encoding (dubbed <I>pass</I>) creates a temporary file with a size
+of few megabytes. In the second pass, the output file is created, using the
+bitrate data from the temporary file. The resulting file will have much
+better image quality. If this is the first time you heard about this, you
+should consult some guides available on the Net.</P>
+
+<P>This example shows how to encode a DVD to a 2-pass DivX4 AVI. Just two
+commands are needed :<BR>
+<CODE>&nbsp;&nbsp;mplayer -dvd 2 -ovc divx4 -oac mp3lame -divx4opts br=1100
+-o movie.avi -pass 1<BR>
+&nbsp;&nbsp;mplayer -dvd 2 -ovc divx4 -oac mp3lame -divx4opts br=1100 -o movie.avi -pass 2</CODE></P>
 
 <P><B><I>Examples</I></B></P>
 
