@@ -1033,8 +1033,8 @@ if(has_audio){
     printf("Couldn't initialize audio codec! -> nosound\n");
     has_audio=0;
   } else {
-    printf("AUDIO: samplerate=%d  channels=%d  bps=%d  ratio: %d->%d\n",sh_audio->samplerate,sh_audio->channels,sh_audio->samplesize,
-        sh_audio->i_bps,sh_audio->o_bps);
+    printf("AUDIO: srate=%d  chans=%d  bps=%d  sfmt=0x%X  ratio: %d->%d\n",sh_audio->samplerate,sh_audio->channels,sh_audio->samplesize,
+        sh_audio->sample_format,sh_audio->i_bps,sh_audio->o_bps);
   }
 }
 
@@ -1369,8 +1369,13 @@ if(has_audio){
   int r;
   audio_buf_info zz;
 
-  r=(sh_audio->samplesize==2)?AFMT_S16_LE:AFMT_U8;ioctl (audio_fd, SNDCTL_DSP_SETFMT, &r);
+  r=sh_audio->sample_format;
+//  (sh_audio->samplesize==2)?AFMT_S16_LE:AFMT_U8;
+  ioctl (audio_fd, SNDCTL_DSP_SETFMT, &r);
+  printf("audio_setup: sample format: 0x%X  (requested: 0x%X)\n",r,sh_audio->sample_format);
+  
   r=sh_audio->channels-1; ioctl (audio_fd, SNDCTL_DSP_STEREO, &r);
+  
   r=sh_audio->samplerate; if(ioctl (audio_fd, SNDCTL_DSP_SPEED, &r)==-1){
       printf("audio_setup: your card doesn't support %d Hz samplerate => nosound\n",r);
       has_audio=0;
@@ -1416,6 +1421,12 @@ if(has_audio){
   audio_buffer_delay=audio_buffer_size/(float)(sh_audio->o_bps);
 #endif
   printf("Audio buffer size: %d bytes, delay: %5.3fs\n",audio_buffer_size,audio_buffer_delay);
+
+  // fixup audio buffer size:
+  if(outburst<MAX_OUTBURST){
+    sh_audio->a_buffer_size=sh_audio->audio_out_minsize+outburst;
+    printf("Audio out buffer size reduced to %d bytes\n",sh_audio->a_buffer_size);
+  }
 
 //  a_frame=-(audio_buffer_delay);
   a_frame=0;
@@ -1761,14 +1772,14 @@ switch(sh_video->codec->driver){
 
     if(has_audio){
           int delay=get_audio_delay(audio_fd);
-          if(verbose)printf("delay=%d\n",delay);
+          if(verbose>1)printf("delay=%d\n",delay);
           time_frame=v_frame;
           time_frame-=a_frame-(float)delay/(float)sh_audio->o_bps;
     } else {
           if(time_frame<-0.1 || time_frame>0.1) time_frame=0;
     }
     
-      if(verbose)printf("sleep: %5.3f  a:%6.3f  v:%6.3f  \n",stime,a_frame,v_frame);
+      if(verbose>1)printf("sleep: %5.3f  a:%6.3f  v:%6.3f  \n",time_frame,a_frame,v_frame);
       
       while(time_frame>0.005){
           if(time_frame<=0.020)

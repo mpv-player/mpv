@@ -60,8 +60,16 @@ int init_acm_audio_codec(sh_audio_t *sh_audio){
     if(verbose) printf("Audio codec opened OK! ;-)\n");
 
     acmStreamSize(sh_audio->srcstream, in_fmt->nBlockAlign, &srcsize, ACM_STREAMSIZEF_SOURCE);
+    //if(verbose) printf("Audio ACM output buffer min. size: %ld (reported by codec)\n",srcsize);
     srcsize*=2;
-    if(srcsize<MAX_OUTBURST) srcsize=MAX_OUTBURST;
+    //if(srcsize<MAX_OUTBURST) srcsize=MAX_OUTBURST;
+    if(!srcsize){
+        printf("Warning! ACM codec reports srcsize=0\n");
+        srcsize=16384;
+    }
+    // limit srcsize to 4-16kb
+    //while(srcsize && srcsize<4096) srcsize*=2;
+    //while(srcsize>16384) srcsize/=2;
     sh_audio->audio_out_minsize=srcsize; // audio output min. size
     if(verbose) printf("Audio ACM output buffer min. size: %ld\n",srcsize);
 
@@ -78,12 +86,20 @@ int init_acm_audio_codec(sh_audio_t *sh_audio){
     return 1;
 }
 
-int acm_decode_audio(sh_audio_t *sh_audio, void* a_buffer,int len){
+int acm_decode_audio(sh_audio_t *sh_audio, void* a_buffer,int minlen,int maxlen){
         ACMSTREAMHEADER ash;
         HRESULT hr;
         DWORD srcsize=0;
+        DWORD len=minlen;
         acmStreamSize(sh_audio->srcstream,len , &srcsize, ACM_STREAMSIZEF_DESTINATION);
         if(verbose>=3)printf("acm says: srcsize=%ld  (buffsize=%d)  out_size=%d\n",srcsize,sh_audio->a_in_buffer_size,len);
+
+        if(srcsize<sh_audio->wf->nBlockAlign){
+           srcsize=sh_audio->wf->nBlockAlign;
+           acmStreamSize(sh_audio->srcstream, srcsize, &len, ACM_STREAMSIZEF_SOURCE);
+           if(len>maxlen) len=maxlen;
+        }
+
 //        if(srcsize==0) srcsize=((WAVEFORMATEX *)&sh_audio->o_wf_ext)->nBlockAlign;
         if(srcsize>sh_audio->a_in_buffer_size) srcsize=sh_audio->a_in_buffer_size; // !!!!!!
         if(sh_audio->a_in_buffer_len<srcsize){

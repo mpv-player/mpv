@@ -25,6 +25,7 @@ typedef struct {
   char* a_buffer;
   int a_buffer_len;
   int a_buffer_size;
+  int sample_format;
   // win32 codec stuff:
   AVIStreamHeader audio;
   WAVEFORMATEX *wf;

@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <sys/soundcard.h>
+
 #include "config.h"
 
 extern int verbose; // defined in mplayer.c
@@ -46,39 +48,45 @@ int init_audio(sh_audio_t *sh_audio){
 int driver=sh_audio->codec->driver;
 
 extern int init_acm_audio_codec(sh_audio_t *sh_audio);
-extern int acm_decode_audio(sh_audio_t *sh_audio, void* a_buffer,int len);
+//extern int acm_decode_audio(sh_audio_t *sh_audio, void* a_buffer,int len);
+extern int acm_decode_audio(sh_audio_t *sh_audio, void* a_buffer,int minlen,int maxlen);
 
 sh_audio->samplesize=2;
+sh_audio->sample_format=AFMT_S16_LE;
 sh_audio->samplerate=0;
 //sh_audio->pcm_bswap=0;
 
-sh_audio->a_buffer_size=2*MAX_OUTBURST;  // default size, maybe not enough for Win32/ACM
+sh_audio->a_buffer_size=0;
 sh_audio->a_buffer=NULL;
 
 sh_audio->a_in_buffer_len=0;
 
-if(driver==4){
+// setup required min. in/out buffer size:
+sh_audio->audio_out_minsize=8192;// default size, maybe not enough for Win32/ACM
+
+switch(driver){
+case 4:
   // Win32 ACM audio codec:
   if(init_acm_audio_codec(sh_audio)){
     sh_audio->i_bps=sh_audio->wf->nAvgBytesPerSec;
     sh_audio->channels=sh_audio->o_wf.nChannels;
     sh_audio->samplerate=sh_audio->o_wf.nSamplesPerSec;
-    if(sh_audio->a_buffer_size<sh_audio->audio_out_minsize+MAX_OUTBURST)
-        sh_audio->a_buffer_size=sh_audio->audio_out_minsize+MAX_OUTBURST;
+//    if(sh_audio->audio_out_minsize>16384) sh_audio->audio_out_minsize=16384;
+//    sh_audio->a_buffer_size=sh_audio->audio_out_minsize;
+//    if(sh_audio->a_buffer_size<sh_audio->audio_out_minsize+MAX_OUTBURST)
+//        sh_audio->a_buffer_size=sh_audio->audio_out_minsize+MAX_OUTBURST;
   } else {
     printf("Could not load/initialize Win32/ACM AUDIO codec (missing DLL file?)\n");
     driver=0;
   }
-}
-
-if(driver==7){
+  break;
+case 7:
 #ifndef USE_DIRECTSHOW
   printf("Compiled without DirectShow support -> force nosound :(\n");
   driver=0;
 #else
   // Win32 DShow audio codec:
 //  printf("DShow_audio: channs=%d  rate=%d\n",sh_audio->channels,sh_audio->samplerate);
-
   if(DS_AudioDecoder_Open(sh_audio->codec->dll,&sh_audio->codec->guid,sh_audio->wf)){
     printf("ERROR: Could not load/initialize Win32/DirctShow AUDIO codec: %s\n",sh_audio->codec->dll);
     driver=0;
@@ -91,20 +99,49 @@ if(driver==7){
     sh_audio->a_in_buffer_size=sh_audio->audio_in_minsize;
     sh_audio->a_in_buffer=malloc(sh_audio->a_in_buffer_size);
     sh_audio->a_in_buffer_len=0;
+    sh_audio->audio_out_minsize=16384;
   }
 #endif
+  break;
+case 2:
+case 8:
+case 5:
+  // PCM, aLaw
+  sh_audio->audio_out_minsize=2048;
+  break;
+case 3:
+  // Dolby AC3 audio:
+  sh_audio->audio_out_minsize=4*256*6;
+  break;
+case 6:
+  // MS-GSM audio codec:
+  sh_audio->audio_out_minsize=4*320;
+  break;
+case 1:
+  // MPEG Audio:
+  sh_audio->audio_out_minsize=4608;
+  break;
 }
 
 if(!driver) return 0;
 
 // allocate audio out buffer:
+sh_audio->a_buffer_size=sh_audio->audio_out_minsize+MAX_OUTBURST; // worst case calc.
+
+printf("dec_audio: Allocating %d + %d = %d bytes for output buffer\n",
+    sh_audio->audio_out_minsize,MAX_OUTBURST,sh_audio->a_buffer_size);
+
 sh_audio->a_buffer=malloc(sh_audio->a_buffer_size);
+if(!sh_audio->a_buffer){
+    printf("Cannot allocate audio out buffer\n");
+    return 0;
+}
 memset(sh_audio->a_buffer,0,sh_audio->a_buffer_size);
 sh_audio->a_buffer_len=0;
 
 switch(driver){
 case 4: {
-    int ret=acm_decode_audio(sh_audio,sh_audio->a_buffer,sh_audio->a_buffer_size);
+    int ret=acm_decode_audio(sh_audio,sh_audio->a_buffer,4096,sh_audio->a_buffer_size);
     if(ret<0){
         printf("ACM decoding error: %d\n",ret);
         driver=0;
@@ -119,6 +156,14 @@ case 2: {
     sh_audio->channels=h->nChannels;
     sh_audio->samplerate=h->nSamplesPerSec;
     sh_audio->samplesize=(h->wBitsPerSample+7)/8;
+    switch(sh_audio->format){ // hardware formats:
+    case 0x6:  sh_audio->sample_format=AFMT_A_LAW;break;
+    case 0x7:  sh_audio->sample_format=AFMT_MU_LAW;break;
+    case 0x11: sh_audio->sample_format=AFMT_IMA_ADPCM;break;
+    case 0x50: sh_audio->sample_format=AFMT_MPEG;break;
+//    case 0x2000: sh_audio->sample_format=AFMT_AC3;
+    default: sh_audio->sample_format=(sh_audio->samplesize==2)?AFMT_S16_LE:AFMT_U8;
+    }
     break;
 }
 case 8: {
@@ -157,7 +202,10 @@ case 3: {
 }
 case 5: {
   // aLaw audio codec:
-  Gen_aLaw_2_Signed(); // init table
+  if(sh_audio->format==6)
+    Gen_aLaw_2_Signed(); // init table
+  else
+    Gen_uLaw_2_Signed(); // init table
   sh_audio->channels=sh_audio->wf->nChannels;
   sh_audio->samplerate=sh_audio->wf->nSamplesPerSec;
   sh_audio->i_bps=sh_audio->channels*sh_audio->samplerate;
@@ -240,9 +288,12 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
         unsigned short *d=(unsigned short *) buf;
         unsigned char *s=buf;
         len=2*l;
-        while(l>0){
-          --l;
-          d[l]=xa_alaw_2_sign[s[l]];
+        if(sh_audio->format==6){
+        // aLaw
+          while(l>0){ --l; d[l]=xa_alaw_2_sign[s[l]]; }
+        } else {
+        // uLaw
+          while(l>0){ --l; d[l]=xa_ulaw_2_sign[s[l]]; }
         }
         break;
       }
@@ -266,8 +317,11 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
         //printf("{3:%d}",avi_header.idx_pos);fflush(stdout);
         break;
       case 4:
-        len=acm_decode_audio(sh_audio,buf,maxlen);
-//        len=acm_decode_audio(sh_audio,buf,minlen);
+//        len=sh_audio->audio_out_minsize; // optimal decoded fragment size
+//        if(len<minlen) len=minlen; else
+//        if(len>maxlen) len=maxlen;
+//        len=acm_decode_audio(sh_audio,buf,len);
+        len=acm_decode_audio(sh_audio,buf,minlen,maxlen);
         break;
 
 #ifdef USE_DIRECTSHOW
