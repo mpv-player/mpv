@@ -68,7 +68,9 @@ static vf_info_t* filter_list[]={
     &vf_info_bmovl,
     &vf_info_crop,
     &vf_info_expand,
+#ifdef USE_LIBAVCODEC
     &vf_info_pp,
+#endif
     &vf_info_scale,
 //    &vf_info_osd,
     &vf_info_vo,

@@ -137,14 +137,18 @@
 	// postprocessing:
 	{"divxq", "Option -divxq has been renamed to -pp (postprocessing), use -pp !\n",
             CONF_TYPE_PRINT, 0, 0, 0, NULL},
+#ifdef USE_LIBAVCODEC
 	{"pp", readPPOpt, CONF_TYPE_FUNC_PARAM, 0, 0, 0, (cfg_default_func_t)&revertPPOpt},
+#endif
 #ifdef HAVE_ODIVX_POSTPROCESS
         {"oldpp", &use_old_pp, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #else
         {"oldpp", "MPlayer was compiled without opendivx library\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
 	{"npp", "-npp has been removed, use -vop pp and read the fine manual\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+#ifdef USE_LIBAVCODEC
         {"pphelp", &pp_help, CONF_TYPE_PRINT_INDIRECT, CONF_NOCFG, 0, 0, NULL},
+#endif
 
 	{"vop", &vo_plugin_args, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 
