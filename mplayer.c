@@ -514,6 +514,7 @@ int osd_function=OSD_PLAY;
 int osd_last_pts=-303;
 int osd_show_av_delay = 0;
 int osd_show_sub_delay = 0;
+int osd_show_sub_visibility = 0;
 
 int rtc_fd=-1;
 
@@ -2193,6 +2194,13 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	if(sub_pos <0) sub_pos=0;
 	vo_osd_changed(OSDTYPE_SUBTITLE);
     }	break;
+    case MP_CMD_SUB_VISIBILITY:
+    {
+	sub_visibility=1-sub_visibility;
+	osd_show_sub_visibility = 9; // show state of subtitle visibility in OSD
+	vo_osd_changed(OSDTYPE_SUBTITLE);
+	break;
+    }
     case MP_CMD_SCREENSHOT :
       if(vo_config_count) video_out->control(VOCTRL_SCREENSHOT, NULL);
       break;
@@ -2557,6 +2565,10 @@ if(rel_seek_secs || abs_seek_pos){
           osd_show_dvd_nav_delay--;
       } else
 #endif
+      if (osd_show_sub_visibility) {
+	  sprintf(osd_text_tmp, "Subtitles: %sabled", sub_visibility?"en":"dis");
+	  osd_show_sub_visibility--;
+      } else
       if (osd_show_sub_delay) {
 	  sprintf(osd_text_tmp, "Sub delay: %d ms",(int)(sub_delay*1000));
 	  osd_show_sub_delay--;

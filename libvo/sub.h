@@ -97,6 +97,7 @@ extern int sub_utf8;
 extern char *sub_cp;
 #endif
 extern int sub_pos;
+extern int sub_visibility;
 
 //extern void vo_draw_text_osd(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));
 //extern void vo_draw_text_progbar(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));

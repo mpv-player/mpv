@@ -33,6 +33,7 @@ unsigned char* vo_osd_text=NULL;
 int sub_unicode=0;
 int sub_utf8=0;
 int sub_pos=100;
+int sub_visibility=1;
 
 // return the real height of a char:
 static inline int get_height(int c,int h){
@@ -298,8 +299,8 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
    int h,lasth;
    
    obj->flags|=OSDFLAG_CHANGED|OSDFLAG_VISIBLE;
-   
-   if(!vo_sub || !vo_font){
+
+   if(!vo_sub || !vo_font || !sub_visibility){
        obj->flags&=~OSDFLAG_VISIBLE;
        return;
    }
@@ -504,7 +505,7 @@ int vo_update_osd(int dxs,int dys){
 	    vo_update_text_progbar(obj,dxs,dys);
 	    break;
 	case OSDTYPE_SPU:
-	    if(vo_spudec && spudec_visible(vo_spudec)){
+	    if(sub_visibility && vo_spudec && spudec_visible(vo_spudec)){
 	        vo_update_spudec_sub(obj, dxs, dys);
 		obj->flags|=OSDFLAG_VISIBLE|OSDFLAG_CHANGED;
 	    }
