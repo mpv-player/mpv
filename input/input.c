@@ -1239,15 +1239,15 @@ mp_input_parse_config(char *file) {
 	mp_input_free_binds(binds);
 	close(fd);
 	return 0;
-      } else if(r == 0) 
+      } else if(r == 0) {
 	eof = 1;
-      else {
+      } else {
 	bs += r+1;
 	buffer[bs-1] = '\0';
       }
     }
     // Empty buffer : return
-    if(bs <= 0) {
+    if(eof || (bs <= 0)) {
       mp_msg(MSGT_INPUT,MSGL_INFO,"Input config file %s parsed : %d binds\n",file,n_binds);
       if(binds)
 	cmd_binds = binds;
