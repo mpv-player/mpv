@@ -498,7 +498,7 @@ static int parse_str_list(m_option_t* opt,char *name, char *param, void* dst, in
 
   if(!dst) return 1;
 
-  res = malloc((n+1)*sizeof(char*));
+  res = malloc((n+2)*sizeof(char*));
   ptr = param;
   n = 0;
 

@@ -647,7 +647,7 @@ static int config_read_option(m_config_t *config,config_t** conf_list, char *opt
 			    goto out;
 			  }
 			  ret = 1;
-			  res = malloc((n+1)*sizeof(char*));
+			  res = malloc((n+2)*sizeof(char*));
 			  ptr = param;
 			  n = 0;
 //			  while(ptr[0] != '\0') {
