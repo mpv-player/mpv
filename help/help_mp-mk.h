@@ -119,8 +119,6 @@ static char help_text[]=
 #define MSGTR_ErrorInitializingVODevice "Грешка при отварањето/иницијализирањето на избраниот излезен видео (-vo) уред.\n"
 #define MSGTR_ForcedVideoCodec "Присилен видео кодек: %s\n"
 #define MSGTR_ForcedAudioCodec "Присилен аудио кодек: %s\n"
-#define MSGTR_AODescription_AOAuthor "AO: Опис: %s\nAO: Автор: %s\n"
-#define MSGTR_AOComment "AO: Коментар: %s\n"
 #define MSGTR_Video_NoVideo "Видео: нема слика\n"
 #define MSGTR_NotInitializeVOPorVO "\nФАТАЛНО: Не може да ги иницијализира видео филтерите (-vf) или видео излезот (-vo).\n"
 #define MSGTR_Paused "\n  =====  ПАУЗА =====\r" // не повеќе од 23 карактери (статус линија за аудио датотеките)

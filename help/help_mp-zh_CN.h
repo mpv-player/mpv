@@ -118,8 +118,6 @@ static char help_text[]=
 #define MSGTR_ErrorInitializingVODevice "打开/初始化所选的视频输出(-vo)设备是出错!\n"
 #define MSGTR_ForcedVideoCodec "指定的视频解码器: %s\n"
 #define MSGTR_ForcedAudioCodec "指定的音频解码器: %s\n"
-#define MSGTR_AODescription_AOAuthor "AO: 描述: %s\nAO: 作者: %s\n"
-#define MSGTR_AOComment "AO: 备注: %s\n"
 #define MSGTR_Video_NoVideo "视频: no video\n"
 #define MSGTR_NotInitializeVOPorVO "\n致命错误: 无法初始化视频插件(-vf)或视频输出(-vo)!\n"
 #define MSGTR_Paused "\n  =====  暂停  =====\r"

@@ -126,8 +126,6 @@ static char help_text[]=
 #define MSGTR_ErrorInitializingVODevice "Fehler beim Öffnen/Initialisieren des ausgewählten Videoausgabetreibers (-vo).\n"
 #define MSGTR_ForcedVideoCodec "Erzwungener Videocodec: %s\n"
 #define MSGTR_ForcedAudioCodec "Erzwungener Audiocodec: %s\n"
-#define MSGTR_AODescription_AOAuthor "AO: Beschreibung: %s\nAO: Autor: %s\n"
-#define MSGTR_AOComment "AO: Kommentar: %s\n"
 #define MSGTR_Video_NoVideo "Video: kein Video\n"
 #define MSGTR_NotInitializeVOPorVO "\nFATAL: Konnte Videofilter (-vf) oder -ausgabetreiber (-vo) nicht initialisieren.\n"
 #define MSGTR_Paused "\n  =====  PAUSE  =====\r"
@@ -319,7 +317,6 @@ static char help_text[]=
 #define MSGTR_LavcAudioCodecNotFound "Audio LAVC, konnte Encoder für Codec %s nicht finden.\n"
 #define MSGTR_CouldntAllocateLavcContext "Audio LAVC, konnte Kontext nicht zuordnen!\n"
 #define MSGTR_CouldntOpenCodec "Konnte Codec %s nicht öffnen, br=%d\n"
-#define MSGTR_FramesizeBufsizeTag "FRAME_GRÖSSE: %d, BUFFER_GRÖSSE: %d, TAG: 0x%x\n"
 
 // cfg-mencoder.h:
 

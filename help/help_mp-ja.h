@@ -116,8 +116,6 @@ static char help_text[]=
 #define MSGTR_ErrorInitializingVODevice "選択された映像出力(-vo)デバイスを開く事が出来ませんでした.\n"
 #define MSGTR_ForcedVideoCodec "指定された映像コーデック: %s\n"
 #define MSGTR_ForcedAudioCodec "指定された音声コーデック: %s\n"
-#define MSGTR_AODescription_AOAuthor "AO: 詳細: %s\nAO: 著者: %s\n"
-#define MSGTR_AOComment "AO: コメント: %s\n"
 #define MSGTR_Video_NoVideo "Video: 映像がありません\n"
 #define MSGTR_NotInitializeVOPorVO "\nFATAL: 画像フィルター(-vf)か画像出力(-vo)の初期化に失敗しました.\n"
 #define MSGTR_Paused "\n  =====  停止  =====\r" // no more than 23 characters (status line for audio files)

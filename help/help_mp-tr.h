@@ -111,8 +111,6 @@ static char help_text[]=
 #define MSGTR_ErrorInitializingVODevice "Video çýkýþ (-vo) sürücüsünü açarken/yüklerken hata!\n"
 #define MSGTR_ForcedVideoCodec "Video codecine zorlandý: %s\n"
 #define MSGTR_ForcedAudioCodec "Ses codecine zorlandý: %s\n"
-#define MSGTR_AODescription_AOAuthor "AO: Açýklama: %s\nAO: Yapan: %s\n"
-#define MSGTR_AOComment "AO: Yorum: %s\n"
 #define MSGTR_Video_NoVideo "Video: video yok!!!\n"
 #define MSGTR_NotInitializeVOPorVO "\nÖLÜMCÜL: Video Filtreleri (-vf) veya video çýkýþý (-vo) yüklenemedi!\n"
 #define MSGTR_Paused "\n------ DURAKLADI -------\r"

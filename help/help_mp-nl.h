@@ -117,8 +117,6 @@ static char help_text[]=
 #define MSGTR_ErrorInitializingVODevice "Fout bij het openen/initialiseren van het gekozen video_out (-vo) apparaat!\n"
 #define MSGTR_ForcedVideoCodec "Gedwongen video codec: %s\n"
 #define MSGTR_ForcedAudioCodec "Gedwongen audio codec: %s\n"
-#define MSGTR_AODescription_AOAuthor "AO: Beschrijving: %s\nAO: Auteur: %s\n"
-#define MSGTR_AOComment "AO: Commentaar: %s\n"
 #define MSGTR_Video_NoVideo "Video: geen video!!!\n"
 #define MSGTR_NotInitializeVOPorVO "\nFATAAL: Kon de video filters (-vf) of de video uitvoer (-vo) niet initialiseren!\n"
 #define MSGTR_Paused "\n------ GEPAUZEERD -------\r"

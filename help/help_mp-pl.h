@@ -119,8 +119,6 @@ static char help_text[]=
 #define MSGTR_ErrorInitializingVODevice "B³±d przy otwieraniu/inicjalizacji wybranego urz±dzenia video (-vo).\n"
 #define MSGTR_ForcedVideoCodec "Wymuszony kodek video: %s\n"
 #define MSGTR_ForcedAudioCodec "Wymuszony kodek audio: %s\n"
-#define MSGTR_AODescription_AOAuthor "AO: Opis: %s\nAO: Autor: %s\n"
-#define MSGTR_AOComment "AO: Komentarz: %s\n"
 #define MSGTR_Video_NoVideo "Video: brak video\n"
 #define MSGTR_NotInitializeVOPorVO "\nB£¡D KRYTYCZNY: Nie mogê zainicjalizowaæ filtra video (-vf) lub wyj¶cia video (-vo).\n"
 #define MSGTR_Paused "\n  =====  PAUZA  =====\r" // no more than 23 characters (status line for audio files)
@@ -305,7 +303,6 @@ static char help_text[]=
 #define MSGTR_LavcAudioCodecNotFound "Audio LAVC - nie mogê znale¼æ kodeka dla %s\n"
 #define MSGTR_CouldntAllocateLavcContext "Audio LAVC - nie mogê zaalokowaæ tre¶ci!\n"
 #define MSGTR_CouldntOpenCodec "Nie mogê otworzyæ kodeka %s, br=%d\n"
-#define MSGTR_FramesizeBufsizeTag "FRAME_SIZE: %d, BUFFER_SIZE: %d, TAG: 0x%x\n"
 // cfg-mencoder.h:
 
 #define MSGTR_MEncoderMP3LameHelp "\n\n"\

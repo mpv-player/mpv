@@ -118,8 +118,6 @@ static char help_text[]=
 #define MSGTR_ErrorInitializingVODevice "선택한 비디오 출력 (-vo) 장치를 열거나 초기화할 수 없습니다.\n"
 #define MSGTR_ForcedVideoCodec "강제로 사용된 비디오 코덱: %s\n"
 #define MSGTR_ForcedAudioCodec "강제로 사용된 오디오 코덱: %s\n"
-#define MSGTR_AODescription_AOAuthor "AO: 설명: %s\nAO: 만든이: %s\n"
-#define MSGTR_AOComment "AO: 덧말: %s\n"
 #define MSGTR_Video_NoVideo "비디오: 비디오 없음\n"
 #define MSGTR_NotInitializeVOPorVO "\n치명적 오류: 비디오 필터(-vf) 또는 비디오 출력(-vo)을 초기화할 수 없습니다.\n"
 #define MSGTR_Paused "\n  =====  잠시멈춤  =====\r"

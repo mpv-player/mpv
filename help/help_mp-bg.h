@@ -129,8 +129,6 @@ static char help_text[]=
 #define MSGTR_ErrorInitializingVODevice "Грешка при отваряне/пускане на видео драйвера (-vo)!\n"
 #define MSGTR_ForcedVideoCodec "Наложен видео декодер: %s\n"
 #define MSGTR_ForcedAudioCodec "Наложен аудио декодер: %s\n"
-#define MSGTR_AODescription_AOAuthor "AO: Описание: %s\nAO: Автор: %s\n"
-#define MSGTR_AOComment "AO: Коментар: %s\n"
 #define MSGTR_Video_NoVideo "Видео: няма видео!!!\n"
 #define MSGTR_NotInitializeVOPorVO "\nФАТАЛНО: Не мога да пусна видео филтрите (-vf) или видео изхода (-vo)!\n"
 #define MSGTR_Paused "\n  =====  ПАУЗА  =====\r"

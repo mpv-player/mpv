@@ -119,8 +119,6 @@ static char help_text[]=
 #define MSGTR_ErrorInitializingVODevice "Σφάλμα κατά το άνοιγμα/αρχικοποίηση της επιλεγμένης video_out (-vo) συσκευή!\n"
 #define MSGTR_ForcedVideoCodec "Εξαναγκασμός χρήσης του βίντεο codec: %s\n"
 #define MSGTR_ForcedAudioCodec "Εξαναγκασμός χρήσης του codec ήχου: %s\n"
-#define MSGTR_AODescription_AOAuthor "AO: Περιγραφή: %s\n AO: Δημιουργός: %s\n"
-#define MSGTR_AOComment "AO: Σχόλιο: %s\n"
 #define MSGTR_Video_NoVideo "Βίντεο: δεν υπάρχει βίντεο!!!\n"
 #define MSGTR_NotInitializeVOPorVO "\n Σφάλμα: Αδύνατη η αρχικοποίηση του φίλτρου βίντεο (-vf) ή της εξόδου βίντεο (-vo)!\n"
 #define MSGTR_Paused "\n  =====  ΠΑΥΣΗ  =====\r"

@@ -989,7 +989,7 @@ case ACODEC_LAVC:
 	exit(1);
     }
 
-    mp_msg(MSGT_MENCODER, MSGL_V, MSGTR_FramesizeBufsizeTag, lavc_actx->frame_size, lavc_actx->frame_size * 2 * lavc_actx->channels, mux_a->wf->wFormatTag);
+    mp_msg(MSGT_MENCODER, MSGL_V, "FRAME_SIZE: %d, BUFFER_SIZE: %d, TAG: 0x%x\n", lavc_actx->frame_size, lavc_actx->frame_size * 2 * lavc_actx->channels, mux_a->wf->wFormatTag);
 
     break;
 #endif

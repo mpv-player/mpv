@@ -115,8 +115,6 @@ static char help_text[]=
 #define MSGTR_ErrorInitializingVODevice "Errore aprendo/inizializzando il dispositivo di output video (-vo) selezionato!\n"
 #define MSGTR_ForcedVideoCodec "Codec video forzato: %s\n"
 #define MSGTR_ForcedAudioCodec "Codec audio forzato: %s\n"
-#define MSGTR_AODescription_AOAuthor "AO: Descrizione: %s\nAO: Autore: %s\n"
-#define MSGTR_AOComment "AO: Commento: %s\n"
 #define MSGTR_Video_NoVideo "Video: no video!!!\n"
 #define MSGTR_NotInitializeVOPorVO "\nFATAL: Impossibile inizializzare i filtri video (-vf) o l'output video (-vo)!\n"
 #define MSGTR_Paused "\n  =====  PAUSA  =====\r"

@@ -112,8 +112,6 @@ static char help_text[]=
 #define MSGTR_ErrorInitializingVODevice "Chyba pri otváraní/inicializácii vybraných video_out (-vo) zariadení!\n"
 #define MSGTR_ForcedVideoCodec "Vnútený video kodek: %s\n"
 #define MSGTR_ForcedAudioCodec "Vnútený video kodek: %s\n"
-#define MSGTR_AODescription_AOAuthor "AO: Popis: %s\nAO: Autor: %s\n"
-#define MSGTR_AOComment "AO: Komentár: %s\n"
 #define MSGTR_Video_NoVideo "Video: ¾iadne video!!!\n"
 #define MSGTR_NotInitializeVOPorVO "\nFATAL: Nemô¾em inicializova» video filtre (-vf) alebo video výstup (-vo)!\n"
 #define MSGTR_Paused "\n  =====  PAUZA  =====\r"

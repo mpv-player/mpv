@@ -121,8 +121,6 @@ static char help_text[]=
 #define MSGTR_ErrorInitializingVODevice "Hiba a kiválasztott video_out (-vo) egység inicializásakor!\n"
 #define MSGTR_ForcedVideoCodec "Kényszerített video codec: %s\n"
 #define MSGTR_ForcedAudioCodec "Kényszerített audio codec: %s\n"
-#define MSGTR_AODescription_AOAuthor "AO: Leírás: %s\nAO: Készítõ: %s\n"
-#define MSGTR_AOComment "AO: Komment: %s\n"
 #define MSGTR_Video_NoVideo "Video: nincs video!!!\n"
 #define MSGTR_NotInitializeVOPorVO "\nHIBA: Nem sikerült a video filterek (-vf) vagy a video kimenet (-vo) inicializálása!\n"
 #define MSGTR_Paused "\n  =====  SZÜNET  =====\r"

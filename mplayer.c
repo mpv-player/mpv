@@ -601,7 +601,7 @@ void load_per_file_config (m_config_t* conf, const char *const file)
     
     if (!stat (cfg, &st))
     {
-	mp_msg(MSGT_CPLAYER,MSGL_INFO,"Loading config '%s'\n", cfg);
+	mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_LoadingConfig, cfg);
 	m_config_parse_config_file (conf, cfg);
 	return;
     }
@@ -615,7 +615,7 @@ void load_per_file_config (m_config_t* conf, const char *const file)
     {
 	if (!stat (confpath, &st))
 	{
-	    mp_msg(MSGT_CPLAYER,MSGL_INFO,"Loading config '%s'\n", confpath);
+	    mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_LoadingConfig, confpath);
 	    m_config_parse_config_file (conf, confpath);
 	}
 
@@ -722,7 +722,7 @@ void add_subtitles(char *filename, float fps, int silent)
     if (subd == NULL || set_of_sub_size >= MAX_SUBTITLE_FILES) return;
     set_of_subtitles[set_of_sub_size] = subd;
     ++set_of_sub_size;
-    printf("SUB: added subtitle file (%d): %s\n", set_of_sub_size, filename);
+    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_AddedSubtitleFile, set_of_sub_size, filename);
 }
 
 // FIXME: if/when the GUI calls this, global sub numbering gets (potentially) broken.
@@ -960,29 +960,29 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 	int i;
 	video_codec=video_codec_list[0];
 	for(i=0;video_codec_list[i];i++)
-	    printf("vc#%d: '%s'\n",i,video_codec_list[i]);
+	    mp_msg(MSGT_FIXME,MSGL_FIXME,"vc#%d: '%s'\n",i,video_codec_list[i]);
     }
 #endif
     if(audio_codec_list && strcmp(audio_codec_list[0],"help")==0){
       mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AvailableAudioCodecs);
       list_codecs(1);
-      printf("\n");
+      mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
       exit_player_with_rc(NULL, 0);
     }
     if(video_codec_list && strcmp(video_codec_list[0],"help")==0){
       mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AvailableVideoCodecs);
       list_codecs(0);
-      printf("\n");
+      mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
       exit_player_with_rc(NULL, 0);
     }
     if(video_fm_list && strcmp(video_fm_list[0],"help")==0){
       vfm_help();
-      printf("\n");
+      mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
       exit_player_with_rc(NULL, 0);
     }
     if(audio_fm_list && strcmp(audio_fm_list[0],"help")==0){
       afm_help();
-      printf("\n");
+      mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
       exit_player_with_rc(NULL, 0);
     }
     if(af_cfg.list && strcmp(af_cfg.list[0],"help")==0){
@@ -993,7 +993,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 #ifdef HAVE_X11
     if(vo_fstype_list && strcmp(vo_fstype_list[0],"help")==0){
       fstype_help();
-      printf("\n");
+      mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
       exit_player_with_rc(NULL, 0);
     }
 #endif
@@ -1050,9 +1050,9 @@ if (edl_check_mode() == EDL_ERROR && edl_filename)
 
     // Many users forget to include command line in bugreports...
     if(verbose>0){
-      mp_msg(MSGT_CPLAYER, MSGL_INFO, "CommandLine:");
-      for(i=1;i<argc;i++)printf(" '%s'",argv[i]);
-      printf("\n");
+      mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_CommandLine);
+      for(i=1;i<argc;i++)mp_msg(MSGT_FIXME, MSGL_FIXME," '%s'",argv[i]);
+      mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
     }
 
     mp_msg_set_level(verbose+MSGL_STATUS);
@@ -1089,19 +1089,19 @@ if (edl_check_mode() == EDL_ERROR && edl_filename)
   {
     // seteuid(0); /* Can't hurt to try to get root here */
     if ((rtc_fd = open(rtc_device ? rtc_device : "/dev/rtc", O_RDONLY)) < 0)
-	mp_msg(MSGT_CPLAYER, MSGL_WARN, "Failed to open %s: %s (it should be readable by the user.)\n",
+	mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_RTCDeviceNotOpenable,
 	    rtc_device ? rtc_device : "/dev/rtc", strerror(errno));
      else {
 	unsigned long irqp = 1024; /* 512 seemed OK. 128 is jerky. */
 
 	if (ioctl(rtc_fd, RTC_IRQP_SET, irqp) < 0) {
-    	    mp_msg(MSGT_CPLAYER, MSGL_WARN, "Linux RTC init error in ioctl (rtc_irqp_set %lu): %s\n", irqp, strerror(errno));
-	    mp_msg(MSGT_CPLAYER, MSGL_HINT, "Try adding \"echo %lu > /proc/sys/dev/rtc/max-user-freq\" to your system startup scripts.\n", irqp);
+    	    mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_LinuxRTCInitErrorIrqpSet, irqp, strerror(errno));
+    	    mp_msg(MSGT_CPLAYER, MSGL_HINT, MSGTR_IncreaseRTCMaxUserFreq, irqp);
    	    close (rtc_fd);
     	    rtc_fd = -1;
 	} else if (ioctl(rtc_fd, RTC_PIE_ON, 0) < 0) {
 	    /* variable only by the root */
-    	    mp_msg(MSGT_CPLAYER, MSGL_ERR, "Linux RTC init error in ioctl (rtc_pie_on): %s\n", strerror(errno));
+    	    mp_msg(MSGT_CPLAYER, MSGL_ERR, MSGTR_LinuxRTCInitErrorPieOn, strerror(errno));
     	    close (rtc_fd);
 	    rtc_fd = -1;
 	} else
@@ -1154,16 +1154,16 @@ current_module = NULL;
 #ifdef HAVE_MENU
  if(use_menu) {
    if(menu_cfg && menu_init(menu_cfg))
-     mp_msg(MSGT_CPLAYER,MSGL_INFO,"Menu inited: %s\n", menu_cfg);
+     mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_MenuInitialized, menu_cfg);
    else {
      menu_cfg = get_path("menu.conf");
      if(menu_init(menu_cfg))
-       mp_msg(MSGT_CPLAYER,MSGL_INFO,"Menu inited: %s\n", menu_cfg);
+       mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_MenuInitialized, menu_cfg);
      else {
        if(menu_init(MPLAYER_CONFDIR "/menu.conf"))
-         mp_msg(MSGT_CPLAYER,MSGL_INFO,"Menu inited: %s\n", MPLAYER_CONFDIR"/menu.conf");
+         mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_MenuInitialized, MPLAYER_CONFDIR"/menu.conf");
        else {
-         mp_msg(MSGT_CPLAYER,MSGL_INFO,"Menu init failed\n");
+         mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_MenuInitFailed);
          use_menu = 0;
        }
      }
@@ -1216,7 +1216,7 @@ play_next_file:
 // or cache filling
 if(!noconsolecontrols && !slave_mode){
   if(inited_flags&INITED_GETCH2)
-    mp_msg(MSGT_CPLAYER,MSGL_WARN,"WARNING: getch2_init called twice!\n");
+    mp_msg(MSGT_CPLAYER,MSGL_WARN,MSGTR_Getch2InitializedTwice);
   else
     getch2_enable();  // prepare stdin for hotkeys...
   inited_flags|=INITED_GETCH2;
@@ -1335,7 +1335,7 @@ if(stream_dump_type==5){
   FILE *f;
   current_module="dumpstream";
   if(stream->type==STREAMTYPE_STREAM && stream->fd<0){
-    mp_msg(MSGT_CPLAYER,MSGL_FATAL,"Cannot dump this stream - no 'fd' available\n");
+    mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_DumpstreamFdUnavailable);
     exit_player(MSGTR_Exit_error);
   }
   stream_reset(stream);
@@ -1405,7 +1405,7 @@ if (demuxer && demuxer->type==DEMUXER_TYPE_PLAYLIST)
   {	 
     char *temp, *bname;
     
-    mp_msg(MSGT_CPLAYER,MSGL_V,"Adding file %s to element entry\n",playlist_entry);
+    mp_msg(MSGT_CPLAYER,MSGL_V,"Adding file %s to element entry.\n",playlist_entry);
 
     bname=mp_basename(playlist_entry);
     if ((strlen(bname)>10) && !strncmp(bname,"qt",2) && !strncmp(bname+3,"gateQT",6))
@@ -1425,7 +1425,7 @@ if (demuxer && demuxer->type==DEMUXER_TYPE_PLAYLIST)
 	temp[strlen(filename)-strlen(mp_basename(filename))]='\0';
 	strcat(temp, playlist_entry);
 	play_tree_add_file(entry,temp);
-	mp_msg(MSGT_CPLAYER,MSGL_V,"Resolving reference to %s\n",temp);
+	mp_msg(MSGT_CPLAYER,MSGL_V,"Resolving reference to %s.\n",temp);
 	free(temp);
       }
     }
@@ -1464,7 +1464,7 @@ if(!demuxer)
     // don't try to parse raw media as playlist, it's unlikely
     goto goto_next_file;
   }
-  mp_msg(MSGT_CPLAYER,MSGL_INFO,"Falling back on trying to parse playlist %s...\n",filename);
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_FallingBackOnPlaylist,filename);
   stream_reset(stream);
   stream_seek(stream,stream->start_pos);
   entry = parse_playtree(stream,0);
@@ -1782,7 +1782,7 @@ if(use_menu) {
   char* vf_arg[] = { "_oldargs_", menu_root, NULL };
   vf_menu = vf_open_plugin(libmenu_vfs,sh_video->vfilter,"menu",vf_arg);
   if(!vf_menu) {
-    mp_msg(MSGT_CPLAYER,MSGL_ERR,"Can't open libmenu video filter with root menu %s\n",menu_root);
+    mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantOpenLibmenuFilterWithThisRootMenu,menu_root);
     use_menu = 0;
   }
 }
@@ -1812,7 +1812,7 @@ if(auto_quality>0){
     output_quality=get_video_quality_max(sh_video);
     if(auto_quality>output_quality) auto_quality=output_quality;
     else output_quality=auto_quality;
-    mp_msg(MSGT_CPLAYER,MSGL_V,"AutoQ: setting quality to %d\n",output_quality);
+    mp_msg(MSGT_CPLAYER,MSGL_V,"AutoQ: setting quality to %d.\n",output_quality);
     set_video_quality(sh_video,output_quality);
 }
 
@@ -1895,7 +1895,7 @@ if(sh_audio){
 	// output:
 	&ao_data.samplerate, &ao_data.channels, &ao_data.format,
 	audio_out_format_bits(ao_data.format)/8)){
-      mp_msg(MSGT_CPLAYER,MSGL_ERR,"Error at audio filter chain pre-init!\n");
+      mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_AudioFilterChainPreinitError);
   } else {
     mp_msg(MSGT_CPLAYER,MSGL_INFO,"AF_pre: %dHz %dch %s\n",
       ao_data.samplerate, ao_data.channels,
@@ -1920,10 +1920,10 @@ if(sh_audio){
       ao_data.samplerate, ao_data.channels,
       audio_out_format_name(ao_data.format),
       audio_out_format_bits(ao_data.format)/8 );
-    mp_msg(MSGT_CPLAYER,MSGL_V,MSGTR_AODescription_AOAuthor,
+    mp_msg(MSGT_CPLAYER,MSGL_V,"AO: Description: %s\nAO: Author: %s\n",
       audio_out->info->name, audio_out->info->author);
     if(strlen(audio_out->info->comment) > 0)
-      mp_msg(MSGT_CPLAYER,MSGL_V,MSGTR_AOComment, audio_out->info->comment);
+      mp_msg(MSGT_CPLAYER,MSGL_V,"AO: Comment: %s\n", audio_out->info->comment);
     // init audio filters:
 #if 1
     current_module="af_init";
@@ -1933,7 +1933,7 @@ if(sh_audio){
 	ao_data.samplerate, ao_data.channels, ao_data.format,
 	audio_out_format_bits(ao_data.format)/8, /* ao_data.bps, */
 	ao_data.outburst*4, ao_data.buffersize)){
-      mp_msg(MSGT_CPLAYER,MSGL_ERR,"Couldn't find matching filter / ao format!\n");
+      mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_NoMatchingFilter);
 //      mp_msg(MSGT_CPLAYER,MSGL_ERR,"Couldn't find matching filter / ao format! -> NOSOUND\n");
 //      uninit_player(INITED_ACODEC|INITED_AO); // close codec & ao
 //      sh_audio=d_audio->sh=NULL; // -> nosound
@@ -1952,14 +1952,14 @@ if(sh_audio) sh_audio->delay=-audio_delay;
 
 if(!sh_audio){
   mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_NoSound);
-  mp_msg(MSGT_CPLAYER,MSGL_V,"Freeing %d unused audio chunks\n",d_audio->packs);
+  mp_msg(MSGT_CPLAYER,MSGL_V,"Freeing %s unused audio chunks.\n",d_audio->packs);
   ds_free_packs(d_audio); // free buffered chunks
   d_audio->id=-2;         // do not read audio chunks
   //uninit_player(INITED_AO); // close device
 }
 if(!sh_video){
    mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_Video_NoVideo);
-   mp_msg(MSGT_CPLAYER,MSGL_V,"Freeing %d unused video chunks\n",d_video->packs);
+   mp_msg(MSGT_CPLAYER,MSGL_V,"Freeing %s unused video chunks.\n",d_video->packs);
    ds_free_packs(d_video);
    d_video->id=-2;
    //if(!fixed_vo) uninit_player(INITED_VO);
@@ -2250,7 +2250,7 @@ if(time_frame>0.001 && !(vo_flags&256)){
         while (time_frame > 0.000) {
 	    unsigned long rtc_ts;
 	    if (read (rtc_fd, &rtc_ts, sizeof(rtc_ts)) <= 0)
-		    mp_msg(MSGT_CPLAYER, MSGL_ERR, "Linux RTC read error: %s\n", strerror(errno));
+		    mp_msg(MSGT_CPLAYER, MSGL_ERR, MSGTR_LinuxRTCReadError, strerror(errno));
     	    time_frame-=GetRelativeTime();
 	}
     } else
@@ -2268,7 +2268,7 @@ if(time_frame>0.001 && !(vo_flags&256)){
         }
 	if(softsleep){
 	    current_module="sleep_soft";
-	    if(time_frame<0) mp_msg(MSGT_AVSYNC, MSGL_WARN, "Warning! Softsleep underflow!\n");
+	    if(time_frame<0) mp_msg(MSGT_AVSYNC, MSGL_WARN, MSGTR_SoftsleepUnderflow);
 	    while(time_frame>0) time_frame-=GetRelativeTime(); // burn the CPU
 	}
     }
@@ -2357,7 +2357,7 @@ if(time_frame>0.001 && !(vo_flags&256)){
       a_pts=d_audio->pts;
       if(!delay_corrected) if(a_pts) delay_corrected=1;
 #if 0
-      printf("\n#X# pts=%5.3f ds_pts=%5.3f buff=%5.3f total=%5.3f\n",
+      mp_msg(MSGT_FIXME, MSGL_FIXME, "\n#X# pts=%5.3f ds_pts=%5.3f buff=%5.3f total=%5.3f\n",
           a_pts,
 	  ds_tell_pts(d_audio)/(float)sh_audio->i_bps,
 	  -sh_audio->a_in_buffer_len/(float)sh_audio->i_bps,
@@ -2524,14 +2524,14 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
        abs_seek_pos = 0;
        rel_seek_secs = next_edl_record->length_sec;
 #ifdef DEBUG_EDL
-       printf( "\nEDL_SKIP: start [%f], stop [%f], length [%f]\n", next_edl_record->start_sec, next_edl_record->stop_sec, next_edl_record->length_sec );
+       mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_EDLSKIPStartStopLength, next_edl_record->start_sec, next_edl_record->stop_sec, next_edl_record->length_sec );
 #endif
        edl_decision = 1;
      } else if( next_edl_record->action == EDL_MUTE ) {
        mixer_mute(&mixer);
        edl_mute_count++; // new EDL seek behavior needs this
 #ifdef DEBUG_EDL
-       printf( "\nEDL_MUTE: [%f]\n", next_edl_record->start_sec );
+       mp_msg(MSGT_FIXME, MSGL_FIXME, "\nEDL_MUTE: [%f]\n", next_edl_record->start_sec );
 #endif
        edl_decision = 1;
      }
@@ -3154,7 +3154,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	{
 #ifdef USE_SUB
 	if (sh_video) {
-		mp_msg(MSGT_GLOBAL,MSGL_INFO,"ANS_SUB_VISIBILITY=%ld\n", sub_visibility);
+		mp_msg(MSGT_GLOBAL,MSGL_INFO,MSGTR_AnsSubVisibility, sub_visibility);
 	}
 #endif
 	} break;
@@ -3265,16 +3265,16 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	break;
 	
     case MP_CMD_GET_TIME_LENGTH : {
-	mp_msg(MSGT_GLOBAL,MSGL_INFO,"ANS_LENGTH=%ld\n", demuxer_get_time_length(demuxer));
+	mp_msg(MSGT_GLOBAL,MSGL_INFO,MSGTR_AnsLength, demuxer_get_time_length(demuxer));
     } break;
 
 	case MP_CMD_GET_VO_FULLSCREEN : {
 	if(video_out && vo_config_count)
-		mp_msg(MSGT_GLOBAL,MSGL_INFO,"ANS_VO_FULLSCREEN=%ld\n", vo_fs);
+		mp_msg(MSGT_GLOBAL,MSGL_INFO,MSGTR_AnsVoFullscreen, vo_fs);
 	} break;
     
     case MP_CMD_GET_PERCENT_POS : {
-	mp_msg(MSGT_GLOBAL,MSGL_INFO,"ANS_PERCENT_POSITION=%ld\n", demuxer_get_percent_pos(demuxer));
+	mp_msg(MSGT_GLOBAL,MSGL_INFO,MSGTR_AnsPercentPos, demuxer_get_percent_pos(demuxer));
     } break;
 #ifdef HAVE_MENU
     case MP_CMD_CRUN : {
@@ -3296,7 +3296,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       if (stream->type != STREAMTYPE_DVDNAV) break;
 
       if (!dvdnav_event) {
-        printf("DVDNAV Event NULL?!\n");
+        mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_DvdnavNullEvent);
         break;
       }
 
@@ -3310,7 +3310,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       case DVDNAV_HIGHLIGHT: {
           dvdnav_highlight_event_t *hevent = (dvdnav_highlight_event_t*)(dvdnav_event->details);
           if (!hevent) {
-                printf("DVDNAV Event: Highlight event broken\n");
+                mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_DvdnavHighlightEventBroken);
                 break;
           }
 
@@ -3322,7 +3322,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
                      hevent->sx,hevent->sy,
                      hevent->ex,hevent->ey,
                      hevent->pts, d_video->pts);
-                printf("DVDNAV Event: %s\n",dvd_nav_text);
+                mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_DvdnavEvent,dvd_nav_text);
                 //osd_show_dvd_nav_delay = 60;
 
                 osd_show_dvd_nav_highlight=1;
@@ -3333,14 +3333,14 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
           }
           else {
                   osd_show_dvd_nav_highlight=0;
-                  printf("DVDNAV Event: Highlight Hide\n");
+                  mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_DvdnavHighlightHide);
           }
         break;
         }
       case DVDNAV_STILL_FRAME: {
           dvdnav_still_event_t *still_event = (dvdnav_still_event_t*)(dvdnav_event->details);
 
-          printf( "######################################## DVDNAV Event: Still Frame: %d sec(s)\n", still_event->length );
+          mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_DvdnavStillFrame, still_event->length );
           while (dvdnav_stream_sleeping(dvdnav_priv)) {
             usec_sleep(1000); /* 1ms */
           }
@@ -3348,18 +3348,18 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
         break;
         }
       case DVDNAV_STOP: {
-          printf( "DVDNAV Event: Nav Stop\n" );
+          mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_DvdnavNavStop );
         break;
         }
       case DVDNAV_NOP: {
-        printf("DVDNAV Event: Nav NOP\n");
+        mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_DvdnavNavNOP);
         break;
         }
       case DVDNAV_SPU_STREAM_CHANGE: {
 #if DVDNAVVERSION > 012
         dvdnav_spu_stream_change_event_t *stream_change = (dvdnav_spu_stream_change_event_t*)(dvdnav_event->details);
 
-        printf("DVDNAV Event: Nav SPU Stream Change: phys: %d/%d/%d logical: %d\n",
+        mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_DvdnavNavSpuStreamChangeVerbose,
                 stream_change->physical_wide,
                 stream_change->physical_letterbox,
                 stream_change->physical_pan_scan,
@@ -3375,7 +3375,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 #else
         dvdnav_stream_change_event_t *stream_change = (dvdnav_stream_change_event_t*)(dvdnav_event->details);
 
-        printf("DVDNAV Event: Nav SPU Stream Change: phys: %d logical: %d\n",
+        mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_DvdnavNavSpuStreamChange,
                 stream_change->physical,
                 stream_change->logical);
 
@@ -3397,7 +3397,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
         dvdnav_stream_change_event_t *stream_change = (dvdnav_stream_change_event_t*)(dvdnav_event->details);
 #endif
 
-        printf("DVDNAV Event: Nav Audio Stream Change: phys: %d logical: %d\n",
+        mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_DvdnavNavAudioStreamChange,
                 stream_change->physical,
                 stream_change->logical);
 
@@ -3414,14 +3414,14 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
         break;
       }
       case DVDNAV_VTS_CHANGE: {
-        printf("DVDNAV Event: Nav VTS Change\n");
+        mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_DvdnavNavVTSChange);
         break;
         }
       case DVDNAV_CELL_CHANGE: {
         dvdnav_cell_change_event_t *cell_change = (dvdnav_cell_change_event_t*)(dvdnav_event->details);
         cell_playback_t * cell_playback = cell_change->new_cell;
 
-        printf("DVDNAV Event: Nav Cell Change\n");
+        mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_DvdnavNavCellChange);
         osd_show_dvd_nav_highlight=0; /* screen changed, disable menu */
         /*
         printf("new still time: %d\n",cell_playback->still_time);
@@ -3444,14 +3444,14 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       case DVDNAV_SPU_CLUT_CHANGE: {
         uint32_t * new_clut = (uint32_t *)(dvdnav_event->details);
 
-        printf("DVDNAV Event: Nav SPU CLUT Change\n");
+        mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_DvdnavNavSpuClutChange);
         // send new palette to SPU decoder
         if (vo_spudec) spudec_update_palette(vo_spudec,new_clut);
 
         break;
         }
       case DVDNAV_SEEK_DONE: {
-        printf("DVDNAV Event: Nav Seek Done\n");
+        mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_DvdnavNavSeekDone);
         break;
         }
       }
@@ -3481,7 +3481,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
           dvdnav_right_button_select(dvdnav_priv->dvdnav);
           break;
         case MP_CMD_DVDNAV_MENU:
-          printf("Menu call\n");
+          mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_MenuCall);
           dvdnav_menu_call(dvdnav_priv->dvdnav,DVD_MENU_Root);
           break;
         case MP_CMD_DVDNAV_SELECT:

@@ -123,8 +123,6 @@ static char help_text[]=
 #define MSGTR_ErrorInitializingVODevice "Eroare la activarea ieºirii video (-vo) aleasã.\n"
 #define MSGTR_ForcedVideoCodec "Codec video forþat: %s\n"
 #define MSGTR_ForcedAudioCodec "Codec audio forþat: %s\n"
-#define MSGTR_AODescription_AOAuthor "AO: Descriere: %s\nAO: Autor: %s\n"
-#define MSGTR_AOComment "AO: Comentariu: %s\n"
 #define MSGTR_Video_NoVideo "Video: nu existã video\n"
 #define MSGTR_NotInitializeVOPorVO "\nFATAL: Nu pot iniþializa filtrele video (-vf) sau ieºirea video (-vo).\n"
 #define MSGTR_Paused "\n  =====  PAUZÃ  =====\r" // no more than 23 characters (status line for audio files)

@@ -117,8 +117,6 @@ static char help_text[]=
 #define MSGTR_ErrorInitializingVODevice "Ошибка при открытии/инициализации выбранного устройства видео вывода (-vo).\n"
 #define MSGTR_ForcedVideoCodec "Форсирован видео кодек: %s\n"
 #define MSGTR_ForcedAudioCodec "Форсирован аудио кодек: %s\n"
-#define MSGTR_AODescription_AOAuthor "AO: Описание: %s\nAO: Автор: %s\n"
-#define MSGTR_AOComment "AO: Комментарий: %s\n"
 #define MSGTR_Video_NoVideo "Видео: нет видео\n"
 #define MSGTR_NotInitializeVOPorVO "\nFATAL: Не могу инициализировать видео фильтры (-vf) или видео вывод (-vo).\n"
 #define MSGTR_Paused "\n====ПРИОСТАНОВЛЕНО====\r" // no more than 23 characters (status line for audio files)

@@ -120,8 +120,6 @@ static char help_text[]=
 #define MSGTR_ErrorInitializingVODevice "開啟/初始化所選擇的視訊輸出 (-vo) 裝置時發生錯誤。\n"
 #define MSGTR_ForcedVideoCodec "強行使用的視訊 codec: %s\n"
 #define MSGTR_ForcedAudioCodec "強行使用的音效 codec: %s\n"
-#define MSGTR_AODescription_AOAuthor "AO: 描述: %s\nAO: 作者: %s\n"
-#define MSGTR_AOComment "AO: 說明: %s\n"
 #define MSGTR_Video_NoVideo "視訊: 沒有影像\n"
 #define MSGTR_NotInitializeVOPorVO "\n致命錯誤: 無法初始化影像過濾器 (-vf) 或 影像輸出 (-vo)。\n"
 #define MSGTR_Paused "\n  ====== 暫停 ======\r"

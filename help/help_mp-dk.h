@@ -120,8 +120,6 @@ static char help_text[]=
 #define MSGTR_ErrorInitializingVODevice "Fejl under åbning/initialisering af den valgte videodriver (-vo)!\n"
 #define MSGTR_ForcedVideoCodec "Gennemtvunget video-codec: %s\n"
 #define MSGTR_ForcedAudioCodec "Gennemtvunget lyd-codec: %s\n"
-#define MSGTR_AODescription_AOAuthor "AO: Beskrivelse: %s\nAO: forfatter: %s\n"
-#define MSGTR_AOComment "AO: Kommentar: %s\n"
 #define MSGTR_Video_NoVideo "Video: ingen video\n"
 #define MSGTR_NotInitializeVOPorVO "\nFATALT: Kunne ikke initialisere videofiltre (-vf) eller videodriver (-vo)!\n"
 #define MSGTR_Paused "\n  =====  PAUSE  =====\r"

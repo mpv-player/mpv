@@ -119,8 +119,6 @@ static char help_text[]=
 #define MSGTR_ErrorInitializingVODevice "Помилка в╕дкриття/╕н╕ц╕ал╕зац╕╖ вибраного video_out (-vo) пристрою.\n"
 #define MSGTR_ForcedVideoCodec "Примусовий в╕део кодек: %s\n"
 #define MSGTR_ForcedAudioCodec "Примусовий ауд╕о кодек: %s\n"
-#define MSGTR_AODescription_AOAuthor "AO: Опис: %s\nAO: Автор: %s\n"
-#define MSGTR_AOComment "AO: Коментар╕й: %s\n"
 #define MSGTR_Video_NoVideo "В╕део: без в╕део\n"
 #define MSGTR_NotInitializeVOPorVO "\nFATAL: Неможливо ╕н╕ц╕ал╕зувати в╕део ф╕льтри (-vf) або в╕део вив╕д (-vo).\n"
 #define MSGTR_Paused "\n  =====  ПАУЗА  =====\r"

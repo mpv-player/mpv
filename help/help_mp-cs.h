@@ -118,8 +118,6 @@ static char help_text[]=
 #define MSGTR_ErrorInitializingVODevice "Chyba pøi otevírání/inicializaci vybraného video_out (-vo) zaøízení.\n"
 #define MSGTR_ForcedVideoCodec "Vynucen video kodek: %s\n"
 #define MSGTR_ForcedAudioCodec "Vynucen audio kodek: %s\n"
-#define MSGTR_AODescription_AOAuthor "AO: Popis: %s\nAO: Autor: %s\n"
-#define MSGTR_AOComment "AO: Poznámka: %s\n"
 #define MSGTR_Video_NoVideo "Video: ®ádné video\n"
 #define MSGTR_NotInitializeVOPorVO "\nKritická chyba: Nemohu inicializovat video filtry (-vf) nebo video ovladaè (-vo)!\n"
 #define MSGTR_Paused "\n===== POZASTAVENO =====\r"
@@ -291,7 +289,6 @@ static char help_text[]=
 #define MSGTR_LavcAudioCodecNotFound "Audio LAVC, nemohu najít enkodér pro kodek %s\n"
 #define MSGTR_CouldntAllocateLavcContext "Audio LAVC, nemohu alokovat kontext!\n"
 #define MSGTR_CouldntOpenCodec "nemohu otevøít kodek %s, br=%d\n"
-#define MSGTR_FramesizeBufsizeTag "FRAME_SIZE: %d, BUFFER_SIZE: %d, TAG: 0x%x\n"
 
 // cfg-mencoder.h:
 
