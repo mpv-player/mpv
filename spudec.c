@@ -1,4 +1,10 @@
-#undef WITH_NO_ANTIALIASING
+/* Valid values for ANTIALIASING_ALGORITHM:
+   0: none (fastest, most ugly)
+   1: aproximate
+   2: full (slowest, best looking)
+ */
+#define ANTIALIASING_ALGORITHM 1
+
 /* SPUdec.c
    Skeleton of function spudec_process_controll() is from xine sources.
    Further works:
@@ -417,7 +423,8 @@ void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*dra
 	      memset(spu->scaled_image + y * spu->scaled_stride + spu->scaled_width, 0,
 		     spu->scaled_stride - spu->scaled_width);
 	    }
-#ifdef WITH_NO_ANTIALIASING
+#if ANTIALIASING_ALGORITHM == 0
+	  /* no antialiasing */
 	  for (y = 0; y < spu->scaled_height; ++y) {
 	    int unscaled_y = y * 0x100 / scaley;
 	    int strides = spu->stride * unscaled_y;
@@ -428,8 +435,47 @@ void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*dra
 	      spu->scaled_aimage[scaled_strides + x] = spu->aimage[strides + unscaled_x];
 	    }
 	  }
+#elif ANTIALIASING_ALGORITHM == 1
+	  {
+	    /* Intermediate antialiasing. */
+	    for (y = 0; y < spu->scaled_height; ++y) {
+	      const unsigned int unscaled_top = y * spu->orig_frame_height / dys;
+	      unsigned int unscaled_bottom = (y + 1) * spu->orig_frame_height / dys;
+	      if (unscaled_bottom >= spu->height)
+		unscaled_bottom = spu->height - 1;
+	      for (x = 0; x < spu->scaled_width; ++x) {
+		const unsigned int unscaled_left = x * spu->orig_frame_width / dxs;
+		unsigned int unscaled_right = (x + 1) * spu->orig_frame_width / dxs;
+		unsigned int color = 0;
+		unsigned int alpha = 0;
+		unsigned int walkx, walky;
+		unsigned int base, tmp;
+		if (unscaled_right >= spu->width)
+		  unscaled_right = spu->width - 1;
+		for (walky = unscaled_top; walky <= unscaled_bottom; ++walky)
+		  for (walkx = unscaled_left; walkx <= unscaled_right; ++walkx) {
+		    base = walky * spu->stride + walkx;
+		    tmp = canon_alpha(spu->aimage[base]);
+		    alpha += tmp;
+		    color += tmp * spu->image[base];
+		  }
+		base = y * spu->scaled_stride + x;
+		spu->scaled_image[base] = alpha ? color / alpha : 0;
+		spu->scaled_aimage[base] =
+		  alpha * (1 + unscaled_bottom - unscaled_top) * (1 + unscaled_right - unscaled_left);
+		/* spu->scaled_aimage[base] =
+		  alpha * dxs * dys / spu->orig_frame_width / spu->orig_frame_height; */
+		if (spu->scaled_aimage[base]) {
+		  spu->scaled_aimage[base] = 256 - spu->scaled_aimage[base];
+		  if (spu->scaled_aimage[base] + spu->scaled_image[base] > 255)
+		    spu->scaled_image[base] = 256 - spu->scaled_aimage[base];
+		}
+	      }
+	    }
+	  }
 #else
 	  {
+	    /* Best antialiasing.  Very slow. */
 	    /* Any pixel (x, y) represents pixels from the original
 	       rectangular region comprised between the columns
 	       unscaled_y and unscaled_y + 0x100 / scaley and the rows
@@ -584,7 +630,7 @@ void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*dra
 		}
 		/* Finally mix these transparency and brightness information suitably */
 		base = spu->scaled_stride * y + x;
-		spu->scaled_image[base] = color / alpha;
+		spu->scaled_image[base] = alpha > 0 ? color / alpha : 0;
 		spu->scaled_aimage[base] = alpha * scalex * scaley / 0x10000;
 		if (spu->scaled_aimage[base]) {
 		  spu->scaled_aimage[base] = 256 - spu->scaled_aimage[base];
