@@ -14,7 +14,7 @@
  * Also here was used code from CVS of GATOS project and X11 trees.
  */
 
-#define RADEON_VID_VERSION "1.0.2.1"
+#define RADEON_VID_VERSION "1.0.2.2"
 
 /*
   It's entirely possible this major conflicts with something else
@@ -301,6 +301,15 @@ static char *fourcc_format_name(int format)
 #define INREG(addr)		readl((radeon_mmio_base)+addr)
 #define OUTREG(addr,val)	writel(val, (radeon_mmio_base)+addr)
 
+static __inline__ void _radeon_fifo_wait (int entries)
+{
+	int i;
+
+	for (i=0; i<2000000; i++)
+		if ((INREG(RBBM_STATUS) & 0x7f) >= entries)
+			return;
+}
+
 static uint32_t radeon_vid_get_dbpp( void )
 {
   uint32_t dbpp,retval;
@@ -404,7 +413,12 @@ static void radeon_vid_display_video( void )
 
     bes_flags = SCALER_ENABLE |
                 SCALER_SMART_SWITCH |
+#ifdef RADEON
 		SCALER_HORZ_PICK_NEAREST;
+#else
+		SCALER_Y2R_TEMP |
+		SCALER_PIX_EXPAND;
+#endif
     if(besr.double_buff) bes_flags |= SCALER_DOUBLE_BUFFER;
     if(besr.deinterlace_on) bes_flags |= SCALER_ADAPTIVE_DEINT;
 #ifdef RAGE128
@@ -427,9 +441,6 @@ static void radeon_vid_display_video( void )
 	case IMGFMT_IYUV:
 	case IMGFMT_I420:
 	case IMGFMT_YV12:  bes_flags |= SCALER_SOURCE_YUV12;
-#ifdef RAGE128
-			   bes_flags |= SCALER_Y2R_TEMP | SCALER_PIX_EXPAND;
-#endif
 			   break;
         /* 4:2:2 */
 	case IMGFMT_UYVY:  bes_flags |= SCALER_SOURCE_YVYU422; break;
@@ -883,9 +894,9 @@ static void radeon_param_buff_fill( void )
     len = 0;
     len += sprintf(&radeon_param_buff[len],"Interface version: %04X\nDriver version: %s\n",MGA_VID_VERSION,RADEON_VID_VERSION);
     len += sprintf(&radeon_param_buff[len],"Chip: %s\n",ati_card_ids[detected_chip].name);
-    len += sprintf(&radeon_param_buff[len],"Memory: %p:%x\n",radeon_mem_base,radeon_ram_size*0x100000);
+    len += sprintf(&radeon_param_buff[len],"Memory: %x:%x\n",radeon_mem_base,radeon_ram_size*0x100000);
     len += sprintf(&radeon_param_buff[len],"MMIO: %p\n",radeon_mmio_base);
-    len += sprintf(&radeon_param_buff[len],"Overlay offset: %p\n",radeon_overlay_off);
+    len += sprintf(&radeon_param_buff[len],"Overlay offset: %x\n",radeon_overlay_off);
 #ifdef CONFIG_MTRR
     len += sprintf(&radeon_param_buff[len],"Tune MTRR: %s\n",mtrr?"on":"off");
 #endif
@@ -896,7 +907,7 @@ static void radeon_param_buff_fill( void )
     len += sprintf(&radeon_param_buff[len],"Configurable stuff:\n");
     len += sprintf(&radeon_param_buff[len],"~~~~~~~~~~~~~~~~~~~\n");
     len += sprintf(&radeon_param_buff[len],PARAM_DOUBLE_BUFF"%s\n",besr.double_buff?"on":"off");
-    len += sprintf(&radeon_param_buff[len],PARAM_BRIGHTNESS"%i\n",brightness);
+    len += sprintf(&radeon_param_buff[len],PARAM_BRIGHTNESS"%li\n",brightness);
     len += sprintf(&radeon_param_buff[len],PARAM_SATURATION"%u\n",saturation);
     len += sprintf(&radeon_param_buff[len],PARAM_DEINTERLACE"%s\n",besr.deinterlace_on?"on":"off");
     len += sprintf(&radeon_param_buff[len],PARAM_DEINTERLACE_PATTERN"%X\n",besr.deinterlace_pattern);
