@@ -38,6 +38,8 @@
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo file_readahead:2000000 &gt;/proc/ide/[meghajtó]/settings</CODE></P>
 
 <P>Ez 2Mb-ot olvas elõre olvasáskor (karcos CDROM-oknál hasznos).
+  Ha túl magasra állítod, a folytonosan fel-, és lepörgõ meghajtó drámai
+  teljesítménycsökkenést fog okozni.
   Ajánlott továbbá a 'hdparm' program használata:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>hdparm -d1 -a8 -u1 (meghajtó)</CODE></P>
