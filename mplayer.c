@@ -126,9 +126,9 @@ static int max_framesize=0;
 
 #include "stheader.h"
 
-char* encode_name=NULL;
-char* encode_index_name=NULL;
-int encode_bitrate=0;
+//char* encode_name=NULL;
+//char* encode_index_name=NULL;
+//int encode_bitrate=0;
 
 int get_video_quality_max(sh_video_t *sh_video);
 void set_video_quality(sh_video_t *sh_video,int quality);
@@ -318,11 +318,11 @@ void uninit_player(unsigned int mask){
   }
 #endif
 
-  if(mask&INITED_ENCODE){
-    inited_flags&=~INITED_ENCODE;
-    current_module="uninit_encode";
-    avi_fixate();
-  }
+//  if(mask&INITED_ENCODE){
+//    inited_flags&=~INITED_ENCODE;
+//    current_module="uninit_encode";
+//    avi_fixate();
+//  }
 
   if(mask&INITED_STREAM){
     inited_flags&=~INITED_STREAM;
@@ -985,6 +985,7 @@ if(auto_quality>0){
 }
 
 // ================== Init output files for encoding ===============
+#if 0
    if(encode_name){
      // encode file!!!
      FILE *encode_file=fopen(encode_name,"rb");
@@ -1009,6 +1010,7 @@ if(auto_quality>0){
      sh_audio=d_audio->sh=NULL; // force nosound
      inited_flags|=INITED_ENCODE;
    }
+#endif
 
 // ========== Init display (sh_video->disp_w*sh_video->disp_h/out_fmt) ============
 

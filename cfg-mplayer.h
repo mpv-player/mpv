@@ -131,7 +131,7 @@ struct config conf[]={
 	{"monitor_vfreq", &monitor_vfreq_str, CONF_TYPE_STRING, 0, 0, 0},
 	{"monitor_dotclock", &monitor_dotclock_str, CONF_TYPE_STRING, 0, 0, 0},
 #endif
-	{"encode", &encode_name, CONF_TYPE_STRING, 0, 0, 0},
+//	{"encode", &encode_name, CONF_TYPE_STRING, 0, 0, 0},
 #ifdef USE_SUB
 	{"sub", &sub_name, CONF_TYPE_STRING, 0, 0, 0},
 #ifdef USE_ICONV
@@ -229,7 +229,7 @@ struct config conf[]={
         {"oldpp", "MPlayer was compiled without opendivx library", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
 #endif
 	{"autoq", &auto_quality, CONF_TYPE_INT, CONF_RANGE, 0, 100},
-	{"br", &encode_bitrate, CONF_TYPE_INT, CONF_RANGE, 10000, 10000000},
+//	{"br", &encode_bitrate, CONF_TYPE_INT, CONF_RANGE, 10000, 10000000},
 #ifdef HAVE_PNG
 	{"z", &z_compression, CONF_TYPE_INT, CONF_RANGE, 0, 9},
 #endif	
