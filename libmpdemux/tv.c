@@ -343,8 +343,7 @@ int tv_init(tvi_handle_t *tvh)
 	mp_msg(MSGT_TV, MSGL_INFO, " comment: %s\n", tvh->info->comment);
 
     params = malloc(sizeof(tvi_param_t)*2);
-    params[0].opt = malloc(strlen("input"));
-    sprintf((char *)params[0].opt, "input");
+    params[0].opt = strdup("input");
     params[0].value = malloc(sizeof(int));
     (int)*(void **)params[0].value = tv_param_input;
     params[1].opt = params[1].value = NULL;

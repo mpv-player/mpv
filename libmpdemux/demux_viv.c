@@ -191,26 +191,22 @@ static void vivo_parse_text_header(demuxer_t *demux, int header_len)
 	if (!strcmp(opt, "Title"))
 	{
 	    demux_info_add(demux, "name", param);
-	    priv->title = malloc(strlen(param));
-	    strcpy(priv->title, param);
+	    priv->title = strdup(param);
 	}
 	if (!strcmp(opt, "Author"))
 	{
 	    demux_info_add(demux, "author", param);
-	    priv->author = malloc(strlen(param));
-	    strcpy(priv->author, param);
+	    priv->author = strdup(param);
 	}
 	if (!strcmp(opt, "Copyright"))
 	{
 	    demux_info_add(demux, "copyright", param);
-	    priv->copyright = malloc(strlen(param));
-	    strcpy(priv->copyright, param);
+	    priv->copyright = strdup(param);
 	}
 	if (!strcmp(opt, "Producer"))
 	{
 	    demux_info_add(demux, "encoder", param);
-	    priv->producer = malloc(strlen(param));
-	    strcpy(priv->producer, param);
+	    priv->producer = strdup(param);
 	}
 
 	/* get next token */

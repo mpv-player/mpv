@@ -29,12 +29,11 @@ url_new(char* url) {
 	memset( Curl, 0, sizeof(URL_t) );
 
 	// Copy the url in the URL container
-	Curl->url = (char*)malloc(strlen(url)+1);
+	Curl->url = strdup(url);
 	if( Curl->url==NULL ) {
 		printf("Memory allocation failed!\n");
 		return NULL;
 	}
-	strcpy(Curl->url, url);
 
 	// extract the protocol
 	ptr1 = strstr(url, "://");
@@ -86,12 +85,11 @@ url_new(char* url) {
 		// check if it's not a trailing '/'
 		if( strlen(ptr2)>1 ) {
 			// copy the path/filename in the URL container
-			Curl->file = (char*)malloc(strlen(ptr2)+1);
+			Curl->file = strdup(ptr2);
 			if( Curl->file==NULL ) {
 				printf("Memory allocation failed!\n");
 				return NULL;
 			}
-			strcpy(Curl->file, ptr2);
 		}
 	} 
 	// Check if a filenme was given or set, else set it with '/'
