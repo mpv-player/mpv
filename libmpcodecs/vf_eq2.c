@@ -19,6 +19,10 @@
 #include "mp_image.h"
 #include "vf.h"
 
+#ifdef USE_SETLOCALE
+#include <locale.h>
+#endif
+
 
 typedef struct vf_priv_s {
   unsigned char *buf;
@@ -219,7 +223,13 @@ int open (vf_instance_t *vf, char *args)
   eq2->bright = 0.0;
 
   if (args != NULL) {
+#ifdef USE_SETLOCALE
+    setlocale( LC_NUMERIC, "C" );
+#endif
     sscanf (args, "%lf:%lf:%lf", &eq2->gamma, &eq2->contrast, &eq2->bright);
+#ifdef USE_SETLOCALE
+    setlocale( LC_NUMERIC, "" );
+#endif
   }
 
   create_lut (eq2);
