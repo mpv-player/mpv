@@ -46,7 +46,9 @@ static vf_info_t* filter_list[]={
     &vf_info_rotate,
     &vf_info_mirror,
     &vf_info_palette,
+#ifdef USE_LIBAVCODEC
     &vf_info_lavc,
+#endif
     NULL
 };
 
