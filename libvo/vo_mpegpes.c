@@ -130,7 +130,7 @@ static uint32_t preinit(const char *arg){
 	}
 
 #else
-    vo_mpegpes_fd=open("grab.mpg",O_WRONLY|O_CREAT);
+    vo_mpegpes_fd=open("grab.mpg",O_WRONLY|O_CREAT,0666);
     if(vo_mpegpes_fd<0){	
 	perror("vo_mpegpes");
 	return -1;
