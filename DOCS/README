@@ -8,7 +8,7 @@ MPlayer is a movie player for LINUX. It plays most mpeg, avi and asf files,
 supported by many native and win32 DLL codecs. You can watch VCD, DVD and
 even DivX movies too. The another big feature of mplayer is the wide range
 of supported output drivers. It works with X11, Xv, DGA, OpenGL, SVGAlib,
-fbdev, but you can use SDL (and this way all drivers of SDL) and some 
+fbdev, AAlib, but you can use SDL (and this way all drivers of SDL) and some 
 lowlevel card-specific drivers (for Matrox/3dfx/SiS) too! Most of them
 supports software or hardware scaling, so you can enjoy movies in fullscreen.
 And what about the nice big antialiased shaded subtitles (.sub files) with
@@ -47,12 +47,13 @@ or speed problems too. So I've decided to write/modify one...
   Try it, and be amazed! Thousands of new features added... and of course
   old code was improved too, bugs removed etc.
 
-As you see, I didn't write any codecs, just some players. But I spent
+As you see, I didn't write any codecs, just some players. Instead I spent
 a lot of time finding the best way to parse bad damaged input files
 (both mpg and avi) and to do perfect A-V sync with seeking ability.
 My player is rock solid playing damaged mpeg files (useful for some VCDs),
 and it plays bad AVI files which are unplayable with the famous
-windows media player. Even AVI files without index chunk are playable!
+windows media player. Even AVI files without index chunk are playable, and
+you can rebuild their indexes with the -idx option, thus enabling seeking!
 As you see, stability and quality are the most important things for me,
 speed has lower priority, but is still very important.
 
@@ -61,7 +62,7 @@ What about the GUI?
 I'm not a GUI programmer. I hate GUIs, I like the pure black 80x25 console.
 So the player has only keyboard control from the controlling console/xterm now.
 But there is a GUI development for the player, coordinated by Pontscho/Fresh!
-It's still under development, but it will be merged and released soon.
+It's still under development, but it will be merged and released real soon.
 BTW he needs some nice skins, if you are a good graphician, contact him!!!
 
 Supported input formats:
@@ -92,8 +93,8 @@ The most important audio codecs:
 - alaw, msgsm, pcm and other simple old audio formats
 
 If you have a codec not listed here, and not supported yet, just
-read DOCS/CODECS to get info about its status or about
-how to help us adding support for it!
+read http://mplayer.sourceforge.net/DOCS/codecs.html and DOCS/CODECS
+to get info about its status and about how to help us adding support for it!
 
 Supported video output devices:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -107,6 +108,7 @@ General:
 - svga: Output to SVGAlib
 - sdl:	SDL >= v1.1.7 driver (supports software scaling, and versions >=1.1.8
         even support Xvideo (thus hardware rendering) and with >=1.2.0 aalib)
+- aalib:Textmode rendering (through SDL, native driver is coming soon!)
 
 Card specific:
 - mga:	Matrox G200/G400 hardware YUV overlay via the mga_vid device
@@ -134,7 +136,7 @@ NOTE: check DOCS/SOUNDCARDS for details!
 
 Speed:
 ~~~~~~
-Most of time-critical parts are optimized for MMX/MMXext/SSE/3DNow!.
+Most of time-critical parts are optimized for MMX/MMXext/SSE/3DNow!/3Dnow!Ex.
 You can improve rendering speed by setting up MTRR registers, see doc in MTRR.
 Some *old* benchmark results can be found in the doc file SPEED.
 
@@ -229,14 +231,17 @@ Mailing lists:
 There are some public mailing lists on MPlayer. Subscribing can be achieved on
 the following addresses:
 
+- MPlayer core/hungarian developers list:  (HUNGARIAN language ONLY!)
+	http://lists.sourceforge.net/lists/listinfo/mplayer-devel
+
+- MPlayer developers list:  (send your patches here)
+	http://lists.sourceforge.net/lists/listinfo/mplayer-dev-eng
+
 - MPlayer users list:  (send your ideas, bugreports, feature requests here)
 	http://lists.sourceforge.net/lists/listinfo/mplayer-users
 
 - MPlayer & Matrox G200/G400/G450 users: (about TV-out, mga_vid, syncfb, Xv)
 	http://lists.sourceforge.net/lists/listinfo/mplayer-matrox
-
-- MPlayer developers list:  (send your patches here)
-	http://lists.sourceforge.net/lists/listinfo/mplayer-dev-eng
 
 - MPlayer announce:    (information about new releases or big changes in CVS)
 	http://lists.sourceforge.net/lists/listinfo/mplayer-announce
@@ -244,8 +249,8 @@ the following addresses:
 - MPlayer CVS-log:     (announce about _every_ CVS commit)
 	http://lists.sourceforge.net/lists/listinfo/mplayer-cvslog
 
-NOTE: language of above lists are ENGLISH. Please do not send there
-      messages using other language!
+NOTE: language of above lists are ENGLISH, unless explicitly stated otherwise.
+      Please do not send messages using other language!
 
 License:                                                                     
 ~~~~~~~~

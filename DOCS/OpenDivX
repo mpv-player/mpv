@@ -2,10 +2,10 @@
 OpenDivX support in MPlayer
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-See http://www.projectmayo.com for details on the OpenDivX codec.
-It's the opensource successor of the DivX codec, already available
-on most platforms. We use an MMX-optimized Decore.
-OpenDivX version supported in MPlayer : 4.0alpha48
+See http://www.projectmayo.com for details on the OpenDivX codec. It's the
+opensource successor of the DivX codec (really it's a somewhat enhanced version
+of the MPEG-4 standard), already available on most platforms. We use an
+MMX-optimized Decore. OpenDivX version supported in MPlayer : 4.0alpha48
 
 Decoder:
 ~~~~~~~~

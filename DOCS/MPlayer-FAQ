@@ -14,7 +14,7 @@ Q: What about DVD playback?
 A: Read files 'DVD' and 'DVD-FAQ'.
 
 Q: SDL output doesn't work or compile. Problem is ....
-A: It is tested with SDL v1.2.0 (probably runs on 1.1.7+ too).
+A: It is tested with newest SDL (probably runs on 1.1.7+).
    It does NOT work with 1.1.6, 1.1.5 1.1.4 1.1.3 1.0.4 etc, don't ask.
 
 Q: I am still having trouble compiling with SDL support. gcc says something
@@ -33,14 +33,16 @@ A: copy DOCS/inttypes.h to MPlayer directory (cp DOCS/inttypes.h .)
    try again... if fail, contact me
 
 Q: I have Pentium III but ./configure doesn't detect SSE
-A: Only kernel versions 2.4.x supports SSE (or try latest 2.2.19 or newer)
+A: Only kernel versions 2.4.x supports SSE (or try latest 2.2.19 or newer, but
+   be prepared for problems)
 
 Q: -xy option doesn't work with x11 driver (-vo x11)
 A: x11 driver doesn't support scaling, but XF86VidMode support is now
    used: you must specify the -vm and the -fs switch, and you're done.
    Make sure you have the right Modelines in your XF86Config file, and
    try if the DGA driver (and SDL's DGA driver, see VIDEOCARDS) works for you.
-   It's much faster. If even SDL's DGA works, it'll be EVEN more faster!
+   It's much faster. If SDL's DGA works too, use that, it'll be EVEN
+   faster!
 
 Q: audio goes out of sync playing .avi file
 A: try with -bps or -nobps option
@@ -65,7 +67,7 @@ A: It's not zero, but it's built in into codec, so can't be measured separated.
    You should try to play the file using -vo null and then -vo ... and check
    the difference to see video_out speed...
 
-Q: OpenGL (-vo gl) output doesn't work (hangup/black window/X11 errors)
+Q: OpenGL (-vo gl) output doesn't work (hangup/black window/X11 errors/...)
 A: your opengl driver doesn't support dynamic texture chanegs (glTexSubImage)
    it's known not to work with X 4.0.x DRI drivers and nVidia's binary shit.
    it's known to work with Utah-GLX and Matrox G400 card.
@@ -100,20 +102,14 @@ A: It's a known bug (really it's a bug/limitation of the DLL codec)
 
 Q: I've got 'MPlayer interrupted by signal 11' in module audio_setup or
    decode_audio.
-A: It's a damaged file with bad mp3 audio stream. Try it with  -afm 4
+A: This is highly unlikely, since the mp3lib rewrite. Contact us, it may be
+   a bug. Possibly it's a damaged file, try with -afm 4 .
 
 Q: Are there rpm/deb/... packages of MPlayer?
 A: You can make a .deb package for yourself, check DOCS/DEBIAN .
-   There are .rpm packages at
-	ftp://ftp.pld.org.pl/test/i386/
-	ftp://ftp.pld.org.pl/test/i586/
-	ftp://ftp.pld.org.pl/test/i686/
-
-   NOTE : it's _STRONGLY_ discouraged to make and distribute binary packages
-	of MPlayer, since it (currently) _highly_ depends on compile-time
-	options and optimizations!
-
-   NOTE: MANUAL COMPILATION _ALWAYS_ GIVES BETTER PERFORMANCE AND SPEED !
+   It's _STRONGLY_ discouraged to use binary packages
+   of MPlayer, since it (currently) _highly_ depends on compile-time
+   options and optimizations!
 
 Q: Are there any mailing lists on MPlayer?
 A: Yes! See README on how to subscribe them!
@@ -121,7 +117,7 @@ A: Yes! See README on how to subscribe them!
 Q: I've found a nasty bug when I tried to play my favourite video!!
    Who should I inform?
 A: Inform the MPlayer-users mailing list about your problem. *ALWAYS*
-   read the README about what information we NEED to identify your problem.
+   read the BUGREPORTS file about what information we NEED to identify your problem.
    Use the developers addresses (specified in AUTHORS) only if you want to
    flame, or want to ask for a date. ;)
 
@@ -138,12 +134,14 @@ A: ...but you don't have the X development package installed. Or not
 
 Q: I have problems playing files with ... codec. Can I use'em?
 A: Check http://mplayer.sourceforge.net/DOCS/codecs.html,
-   if it doesn't contain your codec, contact us.
+   if it doesn't contain your codec, read
+   http://mplayer.sourceforge.net/DOCS/CODECS, and contact us.
 
 Q: What about DGA driver? I can't find it!!!
 A: ./configure autodetects your DGA driver. If -vo help doesn't show
    DGA, then there's a problem with your X installation.
    Try ./configure --enable-dga (and read VIDEOCARDS)
+   Alternatively, try SDL's DGA driver with '-vo sdl -sdl dga' options.
 
 Q: Ok, -vo help shows DGA driver, but it is babbling about permissions!
    Help me!
@@ -211,5 +209,5 @@ A: Check 'ldd /usr/local/bin/mplayer' output. If it contains
 
 Q: My computer plays M$ DivX AVIs with resolutions ~ 640x300 and stereo mp3
    sound too slow. When I use -nosound switch, everything is ok (but quiet).
-A: Those files probably have 48Khz audio, and your soundcard can't play
+A: Those files probably have 48Khz audio, and your soundcard/driver can't play
    it correctly. Audio downsampling isn't implemented in MPlayer (yet).

@@ -18,7 +18,7 @@
 
 Zoltán Ponekker (Pontscho/Fresh!):  <pontscho@makacs.poliod.hu> 
 - configure script and Makefiles for easy compile
-- GUI system (/still/ coming soon!)
+- GUI system (near complete!?)
 - 3DNow! support into mp3lib
 - 3DNow! support into fastmemcpy.h
 - various X11 driver changes (keyboard handling, fullscreen, bpp detect, etc)
@@ -29,11 +29,11 @@ Gábor Lénárt (LGB): <lgb@lgb.hu>
 - ./configure script improvements
 - Makefile improvements
 - prelimenary DVD support
-- another GUI code (coming soon or later :)
+- another GUI code (is that so..?)
 
 Gábor Bérczi (Gabucino):  <gabucino@k2.jozsef.kando.hu>
 - documentation maintainer, hun-eng translator
-- webpage maintaining
+- webpage maintainer
 - testing, codecs quality & speed comparsions
 - IRC channel #MPlayer operator
 
@@ -52,12 +52,13 @@ Gyula László (Chass, Tégla): <chass-@freemail.hu>
 
 Zoltán Márk Vicián (Se7en): <se7en@sch.bme.hu>
 - SVGAlib support in libvo
+- native AAlib driver (coming soon)
 
 Andreas Ackermann:  <asackerm@stud.informatik.uni-erlangen.de>
 - LIRC support (see DOCS/LIRC)
 - DGA support in libvo
 
-Felix Bünemann: <Felix.Buenemann@gmx.de>
+Felix Bünemann: <atmosfear@users.sourceforge.net>
 - SDL driver maintainer
 - Additional YUV formats fixes
 - New font (mp_font2.zip)
@@ -78,6 +79,8 @@ Jens Hoffmann: <hoffmajs@gmx.de>
 Nick Kurshev: <nickols_k@mail.ru>
 - memcpy optimizations for AMD K7 and Intel Pentium III  (fastmemcpy.h)
 - CDROM tune info
+- further 3DNow! optimizations into mp3lib
+- russian DOCS translation
 
 German Gomez Garcia: <german@piraos.com>
 - DVD .ifo parser and chapter selection [not yet in the main trunk]

@@ -78,7 +78,7 @@ II. OpenGL drivers with *working* *fast* glTexSubImage() support.
    Currently only the old Utah-GLX drivers (for X 3.3.6) have it.
    See http://utah-glx.sourceforge.net for details about how to install it.
 
-   The new X4/DRI and nVidia's binary drivers has no usable glTexSubImage :(
+   The new X4/DRI and nVidia's binary drivers have no usable glTexSubImage :(
 
 III. Native card-specific drivers
 
@@ -88,10 +88,15 @@ There is 3 native drivers for Linux:
   with triple buffering. It works on both framebuffer console and under X.
   
   To use, simply compile the mga_vid.o in the drivers/ subdir (type: make)
-  and load it with insmod mga_vid.o. You should verify the memory size
+  create /dev/mga_vid device :
+	mknod /dev/mga_vid c 178 0
+  and load the driver with insmod mga_vid.o. You should verify the memory size
   detection using the 'dmesg' command. If it's bad, use the mga_ram_size
   option (rmmod mga_vid first), specify card's memory size in MB:
     insmod mga_vid.o mga_ram_size=16
+  To make it load/unload automatically when needed, insert the following line
+  at the end of /etc/modules.conf :
+	alias char-major-178 mga_vid
 
   Using it from MPlayer:  (you should re-compile it with mga_vid support...)
   
@@ -158,6 +163,7 @@ a, If you don't have X...
   forced), and don't forget to edit /etc/vga/libvga.config to suit your
   card & monitor.
 
+  Try the aalib target ('-vo sdl -sdl aalib'), it's great! :)
 
 b, You want to use framebuffer...
   ... Whether to build the FBdev target is autodetected during ./configure .
@@ -165,7 +171,7 @@ b, You want to use framebuffer...
   (Documentation/fb/*) for info on how to enable it, etc.. !
 
   ... but your card doesn't support VBE 2.0 standard (older ISA/PCI
-  cards, such as S3 Trio64) :
+  cards, such as S3 Trio64), only VBE 1.2 (or older?) :
   Well, VESAfb is still available, but you'll have to load SciTech Display
   Doctor (formerly UniVBE) before booting Linux.  Use a DOS boot disk or
   whatever.  And don't forget to register your UniVBE ;))
