@@ -6,8 +6,9 @@ int             mplSubMoved = 0;
 
 void mplSubDraw( wsParamDisplay )
 {
- if ( !appMPlayer.subWindow.Visible ) return;
- if ( mplShMem->Playing ) { vo_expose=1; return; }
+ if ( appMPlayer.subWindow.Visible == wsWindowNotVisible ) return;
+ if ( ( mplShMem->Playing )&&( appMPlayer.subWindow.State == wsWindowExpose ) )
+  { appMPlayer.subWindow.State=0; vo_expose=1; return; }
 
  if ( mplSubRender )
   {
