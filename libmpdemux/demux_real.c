@@ -717,7 +717,8 @@ void demux_open_real(demuxer_t* demuxer)
 //    stream_skip(demuxer->stream, 4); /* number of headers */
 
     /* parse chunks */
-    for (i = 1; i < num_of_headers; i++)
+    for (i = 1; i <= num_of_headers; i++)
+//    for (i = 1; ; i++)
     {
 	int chunk_id, chunk_pos, chunk_size;
 	
@@ -1161,6 +1162,7 @@ void demux_open_real(demuxer_t* demuxer)
     }
 
 header_end:
+//    printf("i=%d num_of_headers=%d   \n",i,num_of_headers);
     priv->num_of_packets = stream_read_dword(demuxer->stream);
 //    stream_skip(demuxer->stream, 4); /* number of packets */
     stream_skip(demuxer->stream, 4); /* next data header */
