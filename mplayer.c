@@ -714,9 +714,6 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
   stream_reset(stream);
   demuxer=new_demuxer(stream,DEMUXER_TYPE_MPEG_PS,audio_id,video_id,dvdsub_id);
   stream_seek(demuxer->stream,seek_to_byte);
-  // Arpi? why is this extra and not in codec selection? - atmos ::
-  // Hmm. This should be fixed somehow... I'll check diz later. - arpi
-  if(audio_family!=-1) demuxer->audio->type=audio_family; // override audio format
   if(ds_fill_buffer(demuxer->video)){
     printf("Detected MPEG-PS file format!\n");
     file_format=DEMUXER_TYPE_MPEG_PS;
@@ -903,7 +900,6 @@ switch(file_format){
   break;
  }
  case DEMUXER_TYPE_MPEG_ES: {
-   d_audio->type=0;
    has_audio=0;sh_audio=NULL;   // ES streams has no audio channel
    d_video->sh=new_sh_video(demuxer,0); // create dummy video stream header, id=0
    break;

@@ -44,7 +44,7 @@ typedef struct {
   demux_packet_t *first;  // read to current buffer from here
   demux_packet_t *last;   // append new packets from input stream to here
   int id;                 // stream ID  (for multiple audio/video streams)
-  int type;               // stream type (currently used only for audio)
+  int type;               // stream type (currently used only for mpg-PS audio)
   struct demuxer_st *demuxer; // parent demuxer structure (stream handler)
 // ---- asf -----
   demux_packet_t *asf_packet;  // read asf fragments here
