@@ -6,6 +6,11 @@
  */
 
 /* ChangeLog added 2002-01-10
+ * 2002-02-03:
+ *  Removal of libmp1e, libavcodec has finally become faster (and it's code is helluva lot cleaner)
+ *  We will call this one the "gentoo" release in favour of the gentoo linux distribution (www.gentoo.org), which
+ *  aims at providing maximum performance
+ *
  * 2002-02-02:
  *  Cleaned out some old code which might have slowed down writes
  *
@@ -41,8 +46,19 @@
 #include "video_out_internal.h"
 #include "../postproc/rgb2rgb.h"
 
-#ifdef USE_MP1E
-#include "../libmp1e/libmp1e.h"
+#ifdef USE_LIBAVCODEC
+#ifdef USE_LIBAVCODEC_SO
+#include <libffmpeg/avcodec.h>
+#else
+#include "libavcodec/avcodec.h"
+#endif
+/* for video encoder */
+static AVCodec *avc_codec = NULL;
+static AVCodecContext *avc_context = NULL;
+static AVPicture avc_picture;
+char *picture_buf = NULL;
+char *avc_outbuf = NULL;
+int avc_outbuf_size = 100000;
 #endif
 
 #ifdef HAVE_MMX
@@ -50,17 +66,6 @@
 #endif
 
 LIBVO_EXTERN (dxr3)
-
-#ifdef USE_MP1E
-/* libmp1e specific stuff */
-static rte_context *mp1e_context = NULL;
-static rte_codec *mp1e_codec = NULL;
-static rte_buffer mp1e_buffer;
-
-/* Color buffer data used with libmp1e */
-static unsigned char *picture_data[3];
-static int picture_linesize[3];
-#endif
 
 /* Resolutions and positions */
 static int v_width, v_height;
@@ -87,79 +92,10 @@ static vo_info_t vo_info =
 	""
 };
 
-#ifdef USE_MP1E
-void write_dxr3(rte_context *context, void *data, size_t size, void *user_data)
-{
-	write(fd_video, data, size);
-}
-#endif
-
 static uint32_t config(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, uint32_t fullscreen, char *title, uint32_t format,const vo_tune_info_t *info)
 {
 	int tmp1, tmp2;
 	em8300_register_t reg;
-	char devname[80];
-	
-	/* Open the control interface */
-	if (vo_subdevice) {
-		sprintf(devname, "/dev/em8300-%s", vo_subdevice);
-	} else {
-		/* Try new naming scheme by default */
-		sprintf(devname, "/dev/em8300-0");
-	}
-	fd_control = open(devname, O_WRONLY);
-	if (fd_control < 1) {
-		/* Fall back to old naming scheme */
-		printf("VO: [dxr3] Error opening %s for writing, trying /dev/em8300 instead\n", devname);
-		sprintf(devname, "/dev/em8300");
-		fd_control = open(devname, O_WRONLY);
-		if (fd_control < 1) {
-			printf("VO: [dxr3] Error opening /dev/em8300 for writing as well!\nBailing\n");
-			return -1;
-		}
-	}
-
-	/* Open the video interface */
-	if (vo_subdevice) {
-		sprintf(devname, "/dev/em8300_mv-%s", vo_subdevice);
-	} else {
-		/* Try new naming scheme by default */
-		sprintf(devname, "/dev/em8300_mv-0");
-	}
-	fd_video = open(devname, O_WRONLY);
-	if (fd_video < 0) {
-		/* Fall back to old naming scheme */
-		printf("VO: [dxr3] Error opening %s for writing, trying /dev/em8300_mv instead\n", devname);
-		sprintf(devname, "/dev/em8300_mv");
-		fd_video = open(devname, O_WRONLY);
-		if (fd_video < 0) {
-			printf("VO: [dxr3] Error opening /dev/em8300_mv for writing as well!\nBailing\n");
-			uninit();
-			return -1;
-		}
-	} else {
-		printf("VO: [dxr3] Opened %s\n", devname);
-	}
-	
-	/* Open the subpicture interface */
-	if (vo_subdevice) {
-		sprintf(devname, "/dev/em8300_sp-%s", vo_subdevice);
-	} else {
-		/* Try new naming scheme by default */
-		sprintf(devname, "/dev/em8300_sp-0");
-	}
-	fd_spu = open(devname, O_WRONLY);
-	if (fd_spu < 0) {
-		/* Fall back to old naming scheme */
-		printf("VO: [dxr3] Error opening %s for writing, trying /dev/em8300_sp instead\n", devname);
-		sprintf(devname, "/dev/em8300_sp");
-		fd_spu = open(devname, O_WRONLY);
-		if (fd_spu < 0) {
-			printf("VO: [dxr3] Error opening /dev/em8300_sp for writing as well!\nBailing\n");
-			uninit();
-			return -1;
-		}
-	}
     
 	/* This activates the subpicture processor, you can safely disable this and still send */
 	/* broken subpics to the em8300, if it's enabled and you send broken subpics you will end */
@@ -182,6 +118,18 @@ static uint32_t config(uint32_t scr_width, uint32_t scr_height, uint32_t width, 
 	reg.reg = 0;
 	reg.val = MVCOMMAND_SYNC;
 	ioctl(fd_control, EM8300_IOCTL_WRITEREG, &reg);
+	
+	/* Set the default playback speed to 0x900 */
+	ioval = 0x900;
+	ioctl(fd_control, EM8300_IOCTL_SCR_SETSPEED, &ioval);
+	
+	/* Flush the buffer and make sure it is clean by syncing it */
+	ioval = EM8300_SUBDEVICE_VIDEO;
+	ioctl(fd_control, EM8300_IOCTL_FLUSH, &ioval);
+	fsync(fd_video);
+	/* We'll be nice and flush the audio buffer as well */
+	ioval = EM8300_SUBDEVICE_AUDIO;
+	ioctl(fd_control, EM8300_IOCTL_FLUSH, &ioval);
 
 	/* Store some variables statically that we need later in another scope */
 	img_format = format;
@@ -207,82 +155,31 @@ static uint32_t config(uint32_t scr_width, uint32_t scr_height, uint32_t width, 
 	}
 	ioctl(fd_control, EM8300_IOCTL_SET_ASPECTRATIO, &ioval);
     
-	if (format == IMGFMT_YV12 || format == IMGFMT_YUY2 || format == IMGFMT_BGR24) {
-#ifdef USE_MP1E
+	if (format != IMGFMT_MPEGPES) {
+#ifdef USE_LIBAVCODEC
 		int size;
-		enum rte_frame_rate frame_rate;
-		enum rte_pixformat pixel_format;
-
-		/* Here follows initialization of libmp1e specific stuff */
-		if (!rte_init()) {
-			printf("VO: [dxr3] Unable to initialize MP1E!\n");
+		
+		avc_codec = avcodec_find_encoder(CODEC_ID_MPEG1VIDEO);
+		if (!avc_codec) {
+			printf("VO: [dxr3] Unable to find mpeg1video codec\n");
+			uninit();
+			return -1;
+		}
+		avc_context = malloc(sizeof(AVCodecContext));
+		memset(avc_context, 0, sizeof(avc_context));
+		avc_context->width = v_width;
+		avc_context->height = v_height;
+		avc_context->frame_rate = 30 * FRAME_RATE_BASE;
+		avc_context->gop_size = 0;
+		avc_context->bit_rate = 8e6;
+		avc_context->flags = CODEC_FLAG_HQ;
+		avc_context->pix_fmt = PIX_FMT_YUV420P;
+		if (avcodec_open(avc_context, avc_codec) < 0) {
+			printf("VO: [dxr3] Unable to open codec\n");
 			uninit();
 			return -1;
 		}
 	
-		mp1e_context = rte_context_new(s_width, s_height, NULL);
-		rte_set_verbosity(mp1e_context, 0);
-	
-		printf("VO: [dxr3] %dx%d => %dx%d\n", v_width, v_height, s_width, s_height);
-
-		if (!mp1e_context) {
-			printf( "VO: [dxr3] Unable to create context!\n" );
-			uninit();
-			return -1;
-		}
-	
-		/* I wonder if we could benefit from using mpeg2 em8300-wise (hardware processing) */
-		if (!rte_set_format(mp1e_context, "mpeg1")) {
-			printf("VO: [dxr3] Unable to set format\n");
-			uninit();
-			return -1;
-		}
-
-		rte_set_mode(mp1e_context, RTE_VIDEO);
-		mp1e_codec = rte_codec_set(mp1e_context, RTE_STREAM_VIDEO, 0, "mpeg1-video");
-
-		if (vo_fps < 24.0) {
-			frame_rate = RTE_RATE_1;
-		} else if (vo_fps < 25.0) {
-			frame_rate = RTE_RATE_2;
-		} else if (vo_fps < 29.97) {
-			frame_rate = RTE_RATE_3;
-		} else if (vo_fps < 30.0) {
-			frame_rate = RTE_RATE_4;
-		} else if (vo_fps < 50.0) {
-			frame_rate = RTE_RATE_5;
-		} else if (vo_fps < 59.97) {
-			frame_rate = RTE_RATE_6;
-		} else if (vo_fps < 60.0) {
-			frame_rate = RTE_RATE_7;
-		} else if (vo_fps > 60.0) {
-			frame_rate = RTE_RATE_8;
-		} else {
-			frame_rate = RTE_RATE_NORATE;
-		}
-
-		if (format == IMGFMT_YUY2) {
-			pixel_format = RTE_YUYV;
-		} else {
-			pixel_format = RTE_YUV420;
-		}
-		if (!rte_set_video_parameters(mp1e_context, pixel_format, mp1e_context->width, mp1e_context->height, frame_rate, 3e6, "I")) {
-			printf("VO: [dxr3] Unable to set mp1e context!\n");
-			rte_context_destroy(mp1e_context);
-			mp1e_context = 0;
-			uninit();
-			return -1;
-		}
-	
-		rte_set_input(mp1e_context, RTE_VIDEO, RTE_PUSH, TRUE, NULL, NULL, NULL);
-		rte_set_output(mp1e_context, (void*) write_dxr3, NULL, NULL);
-	
-		if (!rte_init_context(mp1e_context)) {
-			printf("VO: [dxr3] Unable to init mp1e context!\n");
-			uninit();
-			return -1;
-		}
-
 		/* This stuff calculations the relative position of video and osd on screen */
 		/* Old stuff taken from the dvb driver, should be removed when introducing spuenc */
 		osd_w = s_width;
@@ -303,31 +200,23 @@ static uint32_t config(uint32_t scr_width, uint32_t scr_height, uint32_t width, 
 		} else {
 			s_pos_y = 0;
 		}
-                
+
+		/* Create a pixel buffer and set up pointers for color components */
+		memset(&avc_picture, 0, sizeof(avc_picture));
+		avc_picture.linesize[0] = v_width;
+		avc_picture.linesize[1] = v_width / 2;
+		avc_picture.linesize[2] = v_width / 2;
+		avc_outbuf = malloc(avc_outbuf_size);
+
 		size = s_width * s_height;
-
-		if (format == IMGFMT_YUY2) {
-			/* YUY2 Needs no conversion, so no need for a pixel buffer */
-			picture_data[0] = NULL;
-			picture_linesize[0] = s_width * 2;
-		} else {
-			/* Create a pixel buffer and set up pointers for color components */
-			picture_data[0] = malloc((size * 3)/2);
-			picture_data[1] = picture_data[0] + size;
-			picture_data[2] = picture_data[1] + size / 4;
-			picture_linesize[0] = s_width;
-			picture_linesize[1] = s_width / 2;
-			picture_linesize[2] = s_width / 2;
-		}
-
-		if (!rte_start_encoding(mp1e_context)) {
-			printf("VO: [dxr3] Unable to start mp1e encoding!\n");
-			uninit();
-			return -1;
-		}
-
+		picture_buf = malloc((size * 3) / 2);
+		avc_picture.data[0] = picture_buf;
+		avc_picture.data[1] = avc_picture.data[0] + size;
+		avc_picture.data[2] = avc_picture.data[1] + size / 4;
 		if (format == IMGFMT_BGR24) {
 			yuv2rgb_init(24, MODE_BGR);
+		} else {
+			yuv2rgb_init(24, MODE_RGB);
 		}
 		return 0;
 #endif
@@ -349,17 +238,17 @@ static const vo_info_t* get_info(void)
 
 static void draw_alpha(int x0, int y0, int w, int h, unsigned char* src, unsigned char *srca, int srcstride)
 {
-#ifdef USE_MP1E
+#ifdef USE_LIBAVCODEC
 	/* This function draws the osd and subtitles etc. It will change to use spuenc soon */
 	switch (img_format) {
 	case IMGFMT_BGR24:
 	case IMGFMT_YV12:
 		vo_draw_alpha_yv12(w, h, src, srca, srcstride,
-			picture_data[0] + (x0 + d_pos_x) + (y0 + d_pos_y) * picture_linesize[0], picture_linesize[0]);
+			avc_picture.data[0] + (x0 + d_pos_x) + (y0 + d_pos_y) * avc_picture.linesize[0], avc_picture.linesize[0]);
 		break;
 	case IMGFMT_YUY2:
 		vo_draw_alpha_yuy2(w, h, src, srca, srcstride,
-			picture_data[0] + (x0 + d_pos_x) * 2 + (y0 + d_pos_y) * picture_linesize[0], picture_linesize[0]);
+			avc_picture.data[0] + (x0 + d_pos_x) * 2 + (y0 + d_pos_y) * avc_picture.linesize[0], avc_picture.linesize[0]);
 		break;
 	}
 #endif
@@ -376,46 +265,32 @@ static uint32_t draw_frame(uint8_t * src[])
 {
 	if (img_format == IMGFMT_MPEGPES) {
 		vo_mpegpes_t *p = (vo_mpegpes_t *) src[0];
-
+		
 		if (p->id == 0x20) {
+			ioval = vo_pts / 2;
+			ioctl(fd_spu, EM8300_IOCTL_SPU_SETPTS, &ioval);
 			write(fd_spu, p->data, p->size);
 		} else {
+			ioval = vo_pts / 2;
+			ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &ioval);
 			write(fd_video, p->data, p->size);
 		}
 		return 0;
-	}
-#ifdef USE_MP1E
-	else if (img_format == IMGFMT_YUY2) {
-		picture_data[0] = src[0];
-		return 0;
-	} else if (img_format == IMGFMT_BGR24) {
-		/* BGR24 needs to be converted to YUV420 before libmp1e will touch it */
-		int x, y, w = v_width, h = v_height;
-		unsigned char *s, *dY, *dU, *dV;
-	
-		if ((d_pos_x + w) > picture_linesize[0]) {
-			w = picture_linesize[0] - d_pos_x;
+#ifdef USE_LIBAVCODEC
+	} else {
+		int size = s_width * s_height;
+		if (img_format == IMGFMT_YUY2) {
+			yuy2toyv12(src[0], avc_picture.data[0], avc_picture.data[1], avc_picture.data[2],
+				v_width, v_height, avc_picture.linesize[0], avc_picture.linesize[1], v_width*2);
+		} else if (img_format == IMGFMT_BGR24) {
+			rgb24toyv12(src[0], avc_picture.data[0], avc_picture.data[1], avc_picture.data[2],
+				v_width, v_height, avc_picture.linesize[0], avc_picture.linesize[1], v_width*3);
 		}
-		if ((d_pos_y + h) > s_height) {
-			h = s_height - d_pos_y;
-		}
-
-		s = src[0] + s_pos_y * (w * 3);
-
-		dY = picture_data[0] + d_pos_y * picture_linesize[0];
-		dU = picture_data[1] + (d_pos_y / 2) * picture_linesize[1];
-		dV = picture_data[2] + (d_pos_y / 2) * picture_linesize[2];
-	
-		rgb24toyv12(s, dY, dU, dV, w, h, picture_linesize[0], picture_linesize[1], v_width * 3);
-	
-		mp1e_buffer.data = picture_data[0];
-		mp1e_buffer.time = vo_pts / 90000.0;
-		mp1e_buffer.user_data = NULL;
-		vo_draw_text(osd_w, osd_h, draw_alpha);
-		rte_push_video_buffer(mp1e_context, &mp1e_buffer);
+		size = avcodec_encode_video(avc_context, avc_outbuf, avc_outbuf_size, &avc_picture);
+		write(fd_video, avc_outbuf, size);
 		return 0;
-	}
 #endif
+	}
 	return -1;
 }
 
@@ -427,24 +302,17 @@ static void flip_page(void)
 		ioval = EM8300_SUBDEVICE_VIDEO;
 		ioctl(fd_control, EM8300_IOCTL_FLUSH, &ioval);
 	}
-#ifdef USE_MP1E
+#ifdef USE_LIBAVCODEC
 	if (img_format == IMGFMT_YV12) {
-		mp1e_buffer.data = picture_data[0];
-		mp1e_buffer.time = vo_pts / 90000.0;
-		mp1e_buffer.user_data = NULL;
-		rte_push_video_buffer(mp1e_context, &mp1e_buffer);
-	} else if (img_format == IMGFMT_YUY2) {
-		mp1e_buffer.data = picture_data[0];
-		mp1e_buffer.time = vo_pts / 90000.0;
-		mp1e_buffer.user_data = NULL;
-		rte_push_video_buffer(mp1e_context, &mp1e_buffer);
+		int out_size = avcodec_encode_video(avc_context, avc_outbuf, avc_outbuf_size, &avc_picture);
+		write(fd_video, avc_outbuf, out_size);
 	}
 #endif
 }
 
 static uint32_t draw_slice(uint8_t *srcimg[], int stride[], int w, int h, int x0, int y0)
 {
-#ifdef USE_MP1E
+#ifdef USE_LIBAVCODEC
 	if (img_format == IMGFMT_YV12) {
 		int y;
 		unsigned char *s, *s1;
@@ -453,19 +321,19 @@ static uint32_t draw_slice(uint8_t *srcimg[], int stride[], int w, int h, int x0
 		x0 += d_pos_x;
 		y0 += d_pos_y;
 
-		if ((x0 + w) > picture_linesize[0]) {
-			w = picture_linesize[0] - x0;
+		if ((x0 + w) > avc_picture.linesize[0]) {
+			w = avc_picture.linesize[0] - x0;
 		}
 		if ((y0 + h) > s_height) {
 			h = s_height - y0;
 		}
 
 		s = srcimg[0] + s_pos_x + s_pos_y * stride[0];
-		d = picture_data[0] + x0 + y0 * picture_linesize[0];
+		d = avc_picture.data[0] + x0 + y0 * avc_picture.linesize[0];
 		for(y = 0; y < h; y++) {
 			memcpy(d, s, w);
 			s += stride[0];
-			d += picture_linesize[0];
+			d += avc_picture.linesize[0];
 		}
 
 		w /= 2;
@@ -474,16 +342,16 @@ static uint32_t draw_slice(uint8_t *srcimg[], int stride[], int w, int h, int x0
 		y0 /= 2;
 	
 		s = srcimg[1] + s_pos_x + (s_pos_y * stride[1]);
-		d = picture_data[1] + x0 + (y0 * picture_linesize[1]);
+		d = avc_picture.data[1] + x0 + (y0 * avc_picture.linesize[1]);
 		s1 = srcimg[2] + s_pos_x + (s_pos_y * stride[2]);
-		d1 = picture_data[2] + x0 + (y0 * picture_linesize[2]);
+		d1 = avc_picture.data[2] + x0 + (y0 * avc_picture.linesize[2]);
 		for(y = 0; y < h; y++) {
 			memcpy(d, s, w);
 			memcpy(d1, s1, w);
 			s += stride[1];
 			s1 += stride[2];
-			d += picture_linesize[1];
-			d1 += picture_linesize[2];
+			d += avc_picture.linesize[1];
+			d1 += avc_picture.linesize[2];
 		}
 		return 0;
 	}
@@ -496,13 +364,16 @@ static uint32_t query_format(uint32_t format)
 	uint32_t flag = 0;
 	
 	if (format == IMGFMT_MPEGPES) {
-		/* Hardware accelerated | Hardware supports subpics | Hardware handles syncing */
+		/* Hardware accelerated | Hardware supports subpics */
 		flag = 0x2 | 0x8;
-#ifdef USE_MP1E
+#ifdef USE_LIBAVCODEC
 	} else if (format == IMGFMT_YV12) {
 		/* Conversion needed | OSD Supported */
 		flag = 0x1 | 0x4;
 	} else if (format == IMGFMT_YUY2) {
+		/* Conversion needed | OSD Supported */
+		flag = 0x1 | 0x4;
+	} else if (format == IMGFMT_RGB24) {
 		/* Conversion needed | OSD Supported */
 		flag = 0x1 | 0x4;
 	} else if (format == IMGFMT_BGR24) {
@@ -512,7 +383,7 @@ static uint32_t query_format(uint32_t format)
 		printf("VO: [dxr3] Format unsupported, mail dholm@iname.com\n");
 #else
 	} else {
-		printf("VO: [dxr3] You have disabled libmp1e support, you won't be able to play this format!\n");
+		printf("VO: [dxr3] You have enable libavcodec support (Read DOCS/codecs.html)!\n");
 #endif
 	}
 	return flag;
@@ -521,9 +392,12 @@ static uint32_t query_format(uint32_t format)
 static void uninit(void)
 {
 	printf("VO: [dxr3] Uninitializing\n");
-#ifdef USE_MP1E
-	if (picture_data[0]) {
-		free(picture_data[0]);
+#ifdef USE_LIBAVCODEC
+	if (avc_context) {
+		avcodec_close(avc_context);
+	}
+	if (picture_buf) {
+		free(picture_buf);
 	}
 #endif
 	if (fd_video) {
@@ -543,6 +417,75 @@ static void check_events(void)
 
 static uint32_t preinit(const char *arg)
 {
+	char devname[80];
+	int fdflags = O_WRONLY | O_NONBLOCK;
+	
+	/* Open the control interface */
+	if (vo_subdevice) {
+		sprintf(devname, "/dev/em8300-%s", vo_subdevice);
+	} else {
+		/* Try new naming scheme by default */
+		sprintf(devname, "/dev/em8300-0");
+	}
+	fd_control = open(devname, fdflags);
+	if (fd_control < 1) {
+		/* Fall back to old naming scheme */
+		printf("VO: [dxr3] Error opening %s for writing, trying /dev/em8300 instead\n", devname);
+		sprintf(devname, "/dev/em8300");
+		fd_control = open(devname, fdflags);
+		if (fd_control < 1) {
+			printf("VO: [dxr3] Error opening /dev/em8300 for writing as well!\nBailing\n");
+			return -1;
+		}
+	}
+
+	/* Open the video interface */
+	if (vo_subdevice) {
+		sprintf(devname, "/dev/em8300_mv-%s", vo_subdevice);
+	} else {
+		/* Try new naming scheme by default */
+		sprintf(devname, "/dev/em8300_mv-0");
+	}
+	fd_video = open(devname, fdflags);
+	if (fd_video < 0) {
+		/* Fall back to old naming scheme */
+		printf("VO: [dxr3] Error opening %s for writing, trying /dev/em8300_mv instead\n", devname);
+		sprintf(devname, "/dev/em8300_mv");
+		fd_video = open(devname, fdflags);
+		if (fd_video < 0) {
+			printf("VO: [dxr3] Error opening /dev/em8300_mv for writing as well!\nBailing\n");
+			uninit();
+			return -1;
+		}
+	} else {
+		printf("VO: [dxr3] Opened %s\n", devname);
+	}
+	
+	/* Open the subpicture interface */
+	if (vo_subdevice) {
+		sprintf(devname, "/dev/em8300_sp-%s", vo_subdevice);
+	} else {
+		/* Try new naming scheme by default */
+		sprintf(devname, "/dev/em8300_sp-0");
+	}
+	fd_spu = open(devname, fdflags);
+	if (fd_spu < 0) {
+		/* Fall back to old naming scheme */
+		printf("VO: [dxr3] Error opening %s for writing, trying /dev/em8300_sp instead\n", devname);
+		sprintf(devname, "/dev/em8300_sp");
+		fd_spu = open(devname, fdflags);
+		if (fd_spu < 0) {
+			printf("VO: [dxr3] Error opening /dev/em8300_sp for writing as well!\nBailing\n");
+			uninit();
+			return -1;
+		}
+	}
+
+#ifdef USE_LIBAVCODEC
+	avcodec_init();
+	avcodec_register_all();
+#endif
+	
 	return 0;
 }
 
