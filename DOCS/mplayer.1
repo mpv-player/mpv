@@ -38,7 +38,7 @@
 .\" Title
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2002-10-14"
+.TH MPlayer 1 "2002-10-19"
 .
 .SH NAME
 mplayer  \- Movie Player for Linux
@@ -77,7 +77,7 @@ mencoder \- Movie Encoder for Linux
 .in
 .B mplayer
 'in +\n[.k]u
-.RI [ mms[t] | http | http_proxy | rt[s]p | smb ] :// [user:passwd@] URL
+.RI [ mms[t] | http | http_proxy | rt[s]p ] :// [user:passwd@] URL
 [:port] [options]
 .br
 .in
@@ -104,7 +104,7 @@ It plays most MPEG/\:VOB, AVI, ASF/\:WMA/\:WMV, RM, QT/\:MOV/\:MP4, OGG/\:OGM,
 VIVO, FLI, NuppelVideo, yuv4mpeg, FILM and RoQ files, supported by many
 native, XAnim, and Win32 DLL codecs.
 You can watch VideoCD, SVCD, DVD, 3ivx, DivX\ 3/\:4/\:5 and even WMV movies,
-too (without the avifile library).
+too (without using the avifile library).
 .PP
 Another great feature of MPlayer is the wide range of supported output
 drivers.
@@ -663,6 +663,11 @@ Force audio parameters for the .vivo demuxer (for debugging purposes).
 .br
 See \-vop expand too.
 .TP
+.B \-dumpmicrodvdsub (MPLAYER only)
+Convert the given subtitle (specified with the \-sub switch) to the
+MicroDVD subtitle format.
+Creates a dumpsub.sub file in the current directory.
+.TP
 .B \-dumpmpsub (MPLAYER only)
 Convert the given subtitle (specified with the \-sub switch) to MPlayer's
 subtitle format, MPsub.
@@ -676,11 +681,6 @@ Creates a dumpsub.srt file in the current directory.
 .B \-dumpsub (MPLAYER only) (BETA CODE)
 Dumps the subtitle substream from VOB streams.
 See -dump*sub and -vobsubout* options too.
-.TP
-.B \-dumpmicrodvdsub (MPLAYER only)
-Convert the given subtitle (specified with the \-sub switch) to the
-MicroDVD subtitle format.
-Creates a dumpsub.sub file in the current directory.
 .TP
 .B \-ifo <vobsub\ ifo\ file>
 Indicate the file that will be used to load palette and frame size for VOBSUB
@@ -959,9 +959,9 @@ on.
 Enables doublebuffering.
 Fixes flicker by storing two frames in memory, and displaying one while
 decoding another.
-Can effect OSD.
-Needs twice the memory than a single buffer, so it won't work on cards with
-very few video memory.
+Can affect OSD.
+Needs twice the memory of a single buffer, so it won't work on cards with
+very little video memory.
 .TP
 .B \-dr \ \ \ 
 Turns on direct rendering (not supported by all codecs and video outputs)
@@ -1066,12 +1066,12 @@ Specify options for the JPEG output.
 Available options are: [no]progressiv, [no]baseline, optimize, smooth, quality
 and outdir.
 .TP
-.B \-monitor_dotclock <dotclock\ (or\ pixelclock) range> (fbdev only)
+.B \-monitor_dotclock <dotclock\ (or\ pixelclock) range> (fbdev and vesa only)
 Look into etc/\:example.conf for further information and in DOCS/\:video.html.
 .TP
-.B \-monitor_hfreq <horizontal frequency range> (fbdev only)
+.B \-monitor_hfreq <horizontal frequency range> (fbdev and vesa only)
 .TP
-.B \-monitor_vfreq <vertical frequency range> (fbdev only)
+.B \-monitor_vfreq <vertical frequency range> (fbdev and vesa only)
 .TP
 .B \-monitoraspect <ratio>
 Set aspect ratio of your monitor or TV screen.
@@ -1316,7 +1316,7 @@ error resilience:
 .br
 0: disabled
 .br
-1: carefull (should work with broken encoders)
+1: careful (should work with broken encoders)
 .br
 2: normal (default) (works with compliant encoders)
 .br
@@ -1666,7 +1666,7 @@ be detected as interlaced to drop the frame.
 .TP
 .B \-x <x> (MPLAYER only)
 Scale image to x width (if sw/\:hw scaling available).
-Disables aspect calcs.
+Disables aspect calculations.
 .TP
 .B \-xvidopts <option1:option2:...>
 Specify additional parameters when decoding with XviD.
@@ -1694,7 +1694,7 @@ Set width to <x> and calculate height to keep correct aspect ratio.
 .TP
 .B \-y <y> (MPLAYER only)
 Scale image to y height (if sw/\:hw scaling available).
-Disables aspect calcs.
+Disables aspect calculations.
 .TP
 .B \-zoom \ 
 Allow software scaling, where available.
@@ -2184,7 +2184,7 @@ Note: all these IDCTs do pass the IEEE1180 tests afaik:
 .REss
 .IPs lumi_mask=<0.0\-1.0>
 luminance masking.
-Warning: be carefull, too large values can cause disasterous things.
+Warning: be careful, too large values can cause disasterous things.
 Warning2: large values might look good on some monitors but may look horrible
 on other monitors:
 .RSss
@@ -2194,7 +2194,7 @@ on other monitors:
 .REss
 .IPs dark_mask=<0.0\-1.0>
 darkness masking.
-Warning: be carefull, too large values can cause disasterous things.
+Warning: be careful, too large values can cause disasterous things.
 Warning2: large values might look good on some monitors but may look horrible
 on other monitors / TV / TFT:
 .RSss
@@ -2393,7 +2393,7 @@ go to next/\:previous alternative source (asx playlist only)
 .IPs "p / SPACE"
 pause movie (any key unpauses)
 .IPs "q / ESC"
-stop playing and quit program
+stop playing and quit
 .IPs "+ and \-"
 adjust audio delay by +/\:\- 0.1 second
 .IPs "/ and *"
@@ -2412,6 +2412,8 @@ toggle between OSD states: none / seek / seek+timer
 toggle frame dropping
 .IPs v\ \ \ \ 
 toggle subtitle visibility
+.IPs j\ \ \ \ 
+switch subtitle language
 .IPs "z and x"
 adjust subtitle delay by +/\:\- 0.1 second
 .IPs "r and t"
