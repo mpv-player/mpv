@@ -287,17 +287,30 @@ cddb_read_cache(cddb_data_t *cddb_data) {
 int
 cddb_write_cache(cddb_data_t *cddb_data) {
 	// We have the file, save it for cache.
+	struct stat file_stat;
 	char file_name[100];
-	int file_fd;
+	int file_fd, ret;
 	size_t wrote=0;
 
 	if( cddb_data==NULL || cddb_data->cache_dir==NULL ) return -1;
 
-	sprintf( file_name, "%s%08lx", cddb_data->cache_dir, cddb_data->disc_id);
+	// Check if the CDDB cache dir exist
+	ret = stat( cddb_data->cache_dir, &file_stat );
+	if( ret<0 ) {
+		// Directory not present, create it.
+		ret = mkdir( cddb_data->cache_dir, 0755 );
+		if( ret<0 ) {
+			perror("mkdir");
+			printf("Failed to create directory %s\n", cddb_data->cache_dir );
+			return -1;
+		}
+	}
+	
+	sprintf( file_name, "%s%08lx", cddb_data->cache_dir, cddb_data->disc_id );
 	
 	file_fd = creat(file_name, S_IREAD|S_IWRITE);
 	if( file_fd<0 ) {
-		perror("open");
+		perror("create");
 		return -1;
 	}
 	
@@ -751,16 +764,15 @@ cddb_open(char *dev, char *track) {
 	if( ret==0 ) {
 		cd_info = cddb_parse_xmcd(xmcd_file);
 		free(xmcd_file);
-cd_info_debug( cd_info );	
 	}
 	stream = open_cdda(dev, track);
 
 	priv = ((cdda_priv*)(stream->priv));
-cd_info_debug(priv->cd_info);
 	if( cd_info!=NULL ) { 
 		cd_info_free(priv->cd_info);
 		priv->cd_info = cd_info;
 	}	
+cd_info_debug( cd_info );	
 	return stream;
 }
 #endif
