@@ -1,10 +1,24 @@
 TO DO:
 ~~~~~~
 For the Release:
+- upgrade opendivx decore
+- remove opendivx encore
+
+After the release:
+- finish OSD control (mixer, brightness/contrast/etc..)
+- libvo2...
+- direct rendering
+- interlaced mpeg2 support
+- move video decoding out of mplayer.c
+- move fileformat-dependent code out of mplayer.c
+- qt/mov support
+- real mpeg4 (momusys) support (mp4v)
 - fast forward (changing fps on-the-fly)
 - subtitles with black rectangle background (option)
+- audio downmixing (for fast-forward and for old soundcards)
 
 DONE:
+- fix up fonts (make release version of font generator?) - DONE
 - apply X11/ICCCM compliance patches - DONE
 - play_only_n_frames option (chl) - DONE
 - -benchmark option [Gabucino] - DONE
