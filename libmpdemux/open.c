@@ -66,7 +66,7 @@ char * dvd_audio_stream_types[8] =
         { "ac3","unknown","mpeg1","mpeg2ext","lpcm","unknown","dts" };
 
 char * dvd_audio_stream_channels[6] =
-	{ "unknown", "stereo", "unknown", "unknown", "unknown", "5.1" };
+	{ "mono", "stereo", "unknown", "unknown", "5.1/6.1", "5.1" };
 #endif
 
 #include "cue_read.h"
@@ -349,8 +349,11 @@ if(strncmp("dvd://",filename,6) == 0){
 	  switch ( audio->audio_format )
 	   {
 	    case 0: // ac3
+	  	    d->audio_streams[d->nr_of_channels].id=ac3aid;
+		    ac3aid++;
+		    break;
 	    case 6: // dts
-	            d->audio_streams[d->nr_of_channels].id=ac3aid;
+	            d->audio_streams[d->nr_of_channels].id=ac3aid+8;
 		    ac3aid++;
 		    break;
 	    case 2: // mpeg layer 1/2/3
