@@ -132,6 +132,11 @@ int set_rectangle(sh_video_t *sh_video,int param,int value)
     return 0;
 }
 
+void resync_video_stream(sh_video_t *sh_video)
+{
+    if(mpvdec) mpvdec->control(sh_video, VDCTRL_RESYNC_STREAM, NULL);
+}
+
 void uninit_video(sh_video_t *sh_video){
     if(!sh_video->inited) return;
     mp_msg(MSGT_DECVIDEO,MSGL_V,MSGTR_UninitVideoStr,sh_video->codec->drv);

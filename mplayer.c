@@ -3407,6 +3407,7 @@ if(rel_seek_secs || abs_seek_pos){
 
       if(sh_video){
 	 current_module="seek_video_reset";
+         resync_video_stream(sh_video);
          if(vo_config_count) video_out->control(VOCTRL_RESET,NULL);
       }
       
