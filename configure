@@ -662,8 +662,8 @@ case "$host_arch" in
     3) proc=i386 iproc=386 ;;
     4) proc=i486 iproc=486 ;;
     5) iproc=586       # LGB: models are: K5/SSA5 K5 K5 K5 ? ? K6 K6 K6-2 K6-3
-	# TODO: how to determine if model 13 is a k6-2 or a k6-3? Couldn't find anything on amd.com
-	if test "$pmodel" -eq 9; then
+	# K6 model 13 are the K6-2+ and K6-III+, only differing in cache size.
+	if test "$pmodel" -eq 9 -o "$pmodel" -eq 13; then
 		proc=k6-3
 	elif test "$pmodel" -ge 8; then
 		proc=k6-2
