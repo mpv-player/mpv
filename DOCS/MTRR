@@ -1,5 +1,5 @@
-Setting up MTRR for X11 or mga_vid:
-===================================
+Setting up MTRR for X11 3.3.x, SVGAlib or mga_vid:
+==================================================
 
 1. find the base address
 ~~~~~~~~~~~~~~~~~~~~~~~~

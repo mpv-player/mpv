@@ -8,32 +8,33 @@ Special system/cpu-specific bugs/problems:
   Workaround:  ./configure --disable-fastmemcpy
   SOLVED: disabled SSE code in fastmemcpy.h ;(
 
-2. No image (black image) in RGB 16bpp (x11,dga,fbdev,svga) playing
-  MPEG files on SMP machine:
-  Problem: bug(?) in MMX YV12->RGB16 converter code
-  Workaround: ./configure --disable-mmx
-  SOLVED: bug of gcc-2.96  -  you should use 2.95.2 or 2.95.3
+2. No image (black image) in RGB 15/16bpp (x11,dga,fbdev,svga) playing
+  MPEG or OpenDivX files:
+  Problem: gcc 2.96 bug
+  Workaround: ./configure --disable-mmx, or use gcc 2.95.x
+  SOLVED: code fixed
 
 3. SIGILL (signal 4) or other fault at loading l3codeca.acm:
   Problem: shared libs are loaded to 0x00xxxxxx instead of 0x40xxxxxx
   Workaround: mplayer -afm 1 ...
   SOLVED: you are using some security kernel patch, like OpenWall etc.
 
-4. General SIGILL (signal 4):
+4. SIGILL (signal 4) on P3 using 2.2.x kernels:
+  Problem: kernel 2.2.x doesn't have proper (working) SSE support
+  Solution: upgrade kernel to 2.4.x
+  Workaround: ./configure --disable-sse
+
+5. General SIGILL (signal 4):
   Problem: you compiled and run mplayer in different machines
-    (for example compiled on P3 and runinng on celeron)
-  Solution: compile MPlayer on machine where you will use it
+    (for example compiled on P3 and running on celeron)
+  Solution: compile MPlayer on the same machine where you will use it!
   Workaround: ./configure --disable-sse etc. options
 
 Various A-V sync and other audio problems:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 General audio delay or jerky sound (exists with all or many files):
-- bad select() in audio driver (including ALSA's OSS emulation)
-  Workaround: ./configure --disable-select
-  SOLVED: using ioctls instead of select in the new audio code
-- audio buffer problems
+- audio buffer problems (buffer size badly detected)
   Workaround:  mplayer -abs option
-  SOLVED: using ioctls in the new audio code
 - slow machine (cpu or vga)
   try with -vo null, if it plays well, then you have slow VGA card/driver:
   Workaround: buy a faster card or read DOCS/VIDEOCARDS about how to speed up
@@ -47,11 +48,15 @@ Audio delay/de-sync specific to one or a few files:
 - your soundcard doesn't support 48Khz playback
   Workaround: buy a better soundcard... 
               or try to decrease fps by 10% (use -fps 27 for a 30fps movie)
+- slow machine
+  (if A-V is not around 0, and teh last number in the status line increasing)
+  Workaround: -framedrop
 
 After many > or ^ (fast forward) audio vs. video is going out of sync (ASF/AVI)
 - bug in mplayer code (a-v sync probs after seek... not really bug but
   my avi/asf seeking code is not perfect yet)
   Workaround: -bps
+  SOLVED: code fixed (but -bps still can help)
 
 Signal 11 in decode_audio:
 - mp3lib doesn't handle (yet) well bad/broken audio streams
@@ -69,7 +74,9 @@ First note: options -fs -vm and -zoom are just recommendations, not (yet)
 supported by all drivers. So it isn't a bug if it doesn't work.
 Only a few driver supports scaling/zooming, don't expect this from x11 or dga.
 
-[TODO: known libvo bugs]
+OSD/sub flickering:
+- x11 driver: sorry, it can't be fixed now
+- xv driver: increase number of buffers in libvo/vo_xv.c, and recompile all
 
 
 A'rpi / Astral & ESP-team

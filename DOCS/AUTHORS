@@ -1,10 +1,10 @@
-                            AUTHORS:
-                            ~~~~~~~~
+                                 AUTHORS:
+                                 ~~~~~~~~
 
-====================== The MPlayer project: ===========================
-
-NOTE: Do NOT send bugreports, help & feature requests directly to the authors!
+NOTE: Do *NOT* send bugreports, help & feature requests directly to the authors!
 ===== Read DOCS/BUGREPORTS and subscribe to mplayer-users mailing lists.
+
+========================== The MPlayer project: ===============================
 
 Árpád Gereöffy (A'rpi/ESP-team):  <arpi@thot.banki.hu>
 - player code (mpeg stream demultiplexer and avi/asf parser, A-V sync, seek...)
@@ -43,10 +43,10 @@ Gábor Bérczi (Gabucino):  <gabucino@k2.jozsef.kando.hu>
 - IRC channel #MPlayer operator
 - experimental MINIX port
 
-Szabolcs Berecz: <szabi@inf.elte.hu>
+Szabolcs Berecz (Szabi): <szabi@inf.elte.hu>
 - codecs.conf file parser
 - config file and command line parser
-- mga_vid fixes, module option stc.
+- mga_vid fixes, module option etc.
 - fbdev support in libvo
 - type #7 subtitle support
 
@@ -62,21 +62,21 @@ Zoltán Márk Vicián (Se7en): <se7en@sch.bme.hu>
 - SVGAlib support in libvo
 - native AAlib driver (coming soon)
 
-Alex Beregszaszi (Alex): <alex@naxine.org>
-- ALSA output driver in libao
+Alex Beregszaszi (Al3x): <alex@naxine.org>
+- ALSA output driver in libao2
 - vo_ggi output driver in libvo (www.ggi-project.org)
 
-Andreas Ackermann:  <asackerm@stud.informatik.uni-erlangen.de>
+Andreas Ackermann (Acki):  <asackerm@stud.informatik.uni-erlangen.de>
 - LIRC support (see DOCS/LIRC)
 - DGA support in libvo
 
-Felix Bünemann: <atmosfear@users.sourceforge.net>
+Felix Bünemann (Atmos): <atmosfear@users.sourceforge.net>
 - SDL driver maintainer
 - Additional YUV formats fixes
 - New font (mp_font2.zip)
 - PNG file output support in libvo
 - flipping support (for Indeo 3/4, etc)
-- SDL audio driver
+- SDL audio driver in libao2
 - RAW PCM/WAVE file writer for libao2
 
 TeLeNiEkO: <telenieko@telenieko.com>
@@ -100,7 +100,7 @@ German Gomez Garcia: <german@piraos.com>
 - DVD .ifo parser and chapter selection [not yet in the main trunk]
 - SPDIF AC3 output for SBLive!  [not yet in the main trunk]
 
-Dariush Pietrzak: <eyck@incubus.ar.lublin.pl>
+Dariush Pietrzak (Eyck): <eyck@incubus.ar.lublin.pl>
 - debian packaging support (see debian/* and DOCS/DEBIAN)
 - support for vplayer subtitle format
 - prelimenary support for .RT subtitle format
@@ -108,9 +108,13 @@ Dariush Pietrzak: <eyck@incubus.ar.lublin.pl>
 Jürgen Keil and Marcus Comstedt: <jk@tools.de> <marcus@idonex.se>
 - patched MPlayer to work on Solaris 8 x86
 - configure fixes
+- SUN audio driver in libao2
 
 Vladimir Kushnir: <vkushnir@Alfacom.net>
 - patched MPlayer to work on FreeBSD x86
+
+Bertrand BAUDET: <bertrand_baudet@yahoo.com>
+- network streaming support
 
 Main testers:
   Tibor Balázs (Tibcu)
@@ -144,7 +148,6 @@ Michael Hipp:
 - mpglib author   [isn't used directly but in mp3lib]
 
 Mark Podlipec:
-- xanim author    [I'm using its aLaw+uLaw audio decoder]
 - xa_gsm.c author  [MS-GSM audio codec]
                    [from a GSM library by Jutta Degener and Carsten Bormann]
 

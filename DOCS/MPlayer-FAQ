@@ -25,7 +25,7 @@ A: Where did you install the SDL library? If you installed in /usr/local
 
 Q: It doesn't compile, and it misses uint64_t inttypes.h and similar things...
 A: copy DOCS/inttypes.h to MPlayer directory (cp DOCS/inttypes.h .)
-   try again... if fail, contact me
+   try again... if fail, contact us
 
 Q: I have Pentium III but ./configure doesn't detect SSE
 A: Only kernel versions 2.4.x supports SSE (or try latest 2.2.19 or newer, but

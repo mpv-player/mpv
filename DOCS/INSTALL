@@ -1,31 +1,30 @@
     =======================================================================
-     * HOW TO COMPILE MOVIE PLAYER COMPONENTS * (C) 2000. A'rpi/ESP-team *
+     * HOW TO COMPILE MOVIE PLAYER COMPONENTS * (C) 2001. A'rpi/ESP-team *
     =======================================================================
 
-Pontscho/Fresh! did some script and makefiles so compiling is much
-easier now. If you find a bug in that, please contact us:
-  pontscho@makacs.poliod.hu
-  arpi@esp-team.scene.hu
-
-1. The Player: (mplayer)
-~~~~~~~~~~~~~~~~~~~~~~~~
-  ./configure
-[* check config.h and config.mak files! *]
-  make
-  make install
-[* if you compiled DGA in, check VIDEOCARDS! *]
-
-2. The Codecs: (w32codecs.zip)
+1. The Codecs: (w32codecs.zip)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  unzip w32codecs.zip to /usr/lib/win32
-  Filenames LOWERCASE !
+  download and unzip w32codecs.zip to /usr/lib/win32
 
-3. Drivers: (mga_vid.o)
+Note: the avifile project has similar codecs package, but it differs
+from our, so if you want to use all supported codecs, then use
+our package!
+
+2. Drivers: (mga_vid.o)
 ~~~~~~~~~~~~~~~~~~~~~~~
   cd drivers
   make
   mknod /dev/mga_vid c 178 0
   chmod go+rw /dev/mga_vid
+
+3. The Player: (mplayer)
+~~~~~~~~~~~~~~~~~~~~~~~~
+  ./configure
+[* read messages printed by ./configure, it may be very usefull! *]
+[* check config.h and config.mak files! *]
+  make
+[* check for errors! of none, you should have the ./mplayer binary *]
+  make install
 
 4. Matrox G400 DH TV-out tools:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -34,8 +33,11 @@ easier now. If you find a bug in that, please contact us:
 
 5. Fonts:
 ~~~~~~~~~
-  Get the .zip file from the DOWNLOAD section
+  Download mp_font3.zip (and optional language updates) and
+  unpack to ~/.mplayer/font/ :
+
   cd ~/.mplayer
   mkdir font
   cd font
-  unzip mp_font1.zip
+  unzip mp_font3.zip
+  unzip mp_font3_hu.zip

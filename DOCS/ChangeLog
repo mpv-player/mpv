@@ -2,6 +2,10 @@
 ChangeLog:
 ~~~~~~~~~~
 
+v0.18 "BugCounter" :
+  - all known bugs fixed
+  - thousands of changes, updates, code cleanups, features etc.
+
 v0.17a "IdegCounter++" :
   - first 0.17 release failed - buggy files outdated docs etc :(
     it's (hopefully) fixed now.

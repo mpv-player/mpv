@@ -25,7 +25,9 @@ What?
 
 1. The system info what we always want:
 - linux distribution
-  for example: RedHat 7.1 / Slackware 7.0 + devel packs from 7.1 ...
+  examples: 
+    RedHat 7.1
+    Slackware 7.0 + devel packs from 7.1 ...
 - kernel version:
   uname -a
 - libc version:
@@ -37,24 +39,6 @@ What?
   ld -v
 - binutils version:
   as --version
-
-1.1. Please print us coredump (if it was created).
-Howto:
-please create following command file:
-
-disass $eip $eip+15
-printf "eax=%08lX\n",$eax
-printf "ebx=%08lX\n",$ebx
-printf "ecx=%08lX\n",$ecx
-printf "edx=%08lX\n",$edx
-printf "esp=%08lX\n",$esp
-printf "ebp=%08lX\n",$ebp
-printf "edi=%08lX\n",$edi
-printf "esi=%08lX\n",$esi
-
-Then simply execute following command line:
-gdb mplayer --core=core -batch --command=command_file >mplayer.bug
-
 
 2. Hardware & drivers:
 - CPU info:
@@ -105,8 +89,40 @@ For playback problems:
   the path/filename of the file on the FTP.
   If the file is accessible on the net, then sending the
   _exact_ URL is enough!
-  
+
+5. For crashes (segfault, SIGILL, signal 4 etc):
+
+If you have coredump of the crash, see 5.a, else see 5.b:
+
+5.a: Please print us coredump (if it was created).
+Howto:
+please create following command file:
+
+disass $eip-32 $eip+32
+printf "eax=%08lX\n",$eax
+printf "ebx=%08lX\n",$ebx
+printf "ecx=%08lX\n",$ecx
+printf "edx=%08lX\n",$edx
+printf "esp=%08lX\n",$esp
+printf "ebp=%08lX\n",$ebp
+printf "edi=%08lX\n",$edi
+printf "esi=%08lX\n",$esi
+
+Then simply execute following command line:
+gdb mplayer --core=core -batch --command=command_file >mplayer.bug
+
+5.b.: run MPlayer in gdb:
+[at root/user shell prompt:]
+  # gdb mplayer
+[at gdb prompt:]
+  > run -v [options-to-mplayer] filename
+  ... (wait until it will crash)
+  > bt
+  > disass $eip-32 $eip+32
+Send us the full output of the above things!
+
 In general:
+~~~~~~~~~~~
   If something is big (logs etc) then it's better to upload to the ftp
   (gzipped), and include only path/filename in the bugreport!
 
