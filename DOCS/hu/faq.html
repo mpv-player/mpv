@@ -131,31 +131,31 @@ In file included from /usr/include/g++-v3/bits/std_cwchar.h:42,
   <DD>A: Frissítsd a glibc-det. Mandrake rendszereken például 2.2.4-8mdk-ra.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  Az SDL output nem mûködik/fordul. A baj ....</DT>
-  <DD>A:  A legújabb SDL-lel tesztelünk (valószínûleg fut 1.1.7-en vagy újabb
+  <DT>Q: Az SDL output nem mûködik/fordul. A baj ....</DT>
+  <DD>A: A legújabb SDL-lel tesztelünk (valószínûleg fut 1.1.7-en vagy újabb
      verziókon is). NEM FUT régebbi verziókon, ne is kérdezd.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  Még mindig van valami bajom az SDL támogatással. gcc gagyog valami
+  <DT>Q: Még mindig van valami bajom az SDL támogatással. gcc gagyog valami
      "undefined reference to SDL_EnableKeyRepet'"-rõl. Most mi van?</DT>
-  <DD>A:  Hova installáltad az SDL-t? Ha /usr/local-ba (alapbeállítás), akkor
+  <DD>A: Hova installáltad az SDL-t? Ha /usr/local-ba (alapbeállítás), akkor
      szerkesztd át a config.mak file-t, és írd az "X_LIBS=" után, hogy
      "-L/usr/local/lib ". Most írd be, hogy 'make'. Ennyi!</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  Nem fordul, hiányol valami uint64_t inttypes.h és hasonló dolgokat...</DT>
-  <DD>A:  Másold a etc/inttypes.h-t az MPlayer könyvtárába (cp etc/inttypes.h .)
+  <DT>Q: Nem fordul, hiányol valami uint64_t inttypes.h és hasonló dolgokat...</DT>
+  <DD>A: Másold a etc/inttypes.h-t az MPlayer könyvtárába (cp etc/inttypes.h .)
      Próbáld újra...</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  Pentium III-am van, de a ./configure nem veszi észre az SSE-t.</DT>
-  <DD>A:  Csak a 2.4.x kernelek támogatják az SSE-t (vagy próbáld ki a 2.2.19-et,
+  <DT>Q: Pentium III-am van, de a ./configure nem veszi észre az SSE-t.</DT>
+  <DD>A: Csak a 2.4.x kernelek támogatják az SSE-t (vagy próbáld ki a 2.2.19-et,
      vagy újabbat, viszont biztos hogy gondok lesznek)</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  Matrox G200/G400/G450/G550-em van, hogy fordítsam/használjam az
+  <DT>Q: Matrox G200/G400/G450/G550-em van, hogy fordítsam/használjam az
     mga_vid meghajtót?</DT>
-  <DD>A:  Olvass el mindent.</DD>
+  <DD>A: Olvass el mindent.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: Furi. Az mga_vid.o kernelmodul betöltése közben ez kerül a naplóba:<BR>
@@ -165,9 +165,9 @@ In file included from /usr/include/g++-v3/bits/std_cwchar.h:42,
     Frissítsd a kernelt, a modutilst, és az MPlayert.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  'make' közben MPlayer az X11 file-jaira panaszkodik. Nem értem miért,
+  <DT>Q: 'make' közben MPlayer az X11 file-jaira panaszkodik. Nem értem miért,
      hiszen nálam fent van az X !?</DT>
-  <DD>A:  ...igen, de nincs fent az X fejlesztõi csomag. Vagy nem helyesen.
+  <DD>A: ...igen, de nincs fent az X fejlesztõi csomag. Vagy nem helyesen.
      RedHat alatt XFree86-devel* a neve, Debian alatt xlib6g-dev . Nézd meg,
      hogy az /usr/X11 symlink létezik-e (Mandrake rendszereken lehet probléma).
      Létrehozása a következõ paranccsal történik:<BR>
@@ -177,15 +177,15 @@ In file included from /usr/include/g++-v3/bits/std_cwchar.h:42,
      Elképzelhetõ, hogy a disztribúciód eltér a Linux Filesystem Standard-tõl.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  És mi lesz a DGA driverrel? Nem találom!!!</DT>
-  <DD>A:  ./configure automatikusan detektálja hogy van-e DGA-d. Ha a '-vo help'
+  <DT>Q: És mi lesz a DGA driverrel? Nem találom!!!</DT>
+  <DD>A: ./configure automatikusan detektálja hogy van-e DGA-d. Ha a '-vo help'
      opció nem mutat DGA-t, akkor nincs jól felinstallálva az X-ed.
      Próbáld így: ./configure --enable-dga (RTFM)
      Esetleg próbáld az SDL DGA driverét, a '-vo sdl:dga' opciókkal!</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  Nem tudom lefordítani az SVGAlib-et... 2.3/2.4-es kernelt használok.</DT>
-  <DD>A:  Szerkesztd át az SVGAlib Makefile.cfg-jét, és vedd ki a "BACKGROUND = y"-t.</DD>
+  <DT>Q: Nem tudom lefordítani az SVGAlib-et... 2.3/2.4-es kernelt használok.</DT>
+  <DD>A: Szerkesztd át az SVGAlib Makefile.cfg-jét, és vedd ki a "BACKGROUND = y"-t.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: libdvdcss/libdivxdecore támogatással fordítottam az MPlayer-t, de amikor
@@ -209,17 +209,17 @@ futtasd az <B>ldconfig</B>-ot.</DD>
 
 <DL>
 
-  <DT>Q:  Vannak MPlayer levelezési listák?</DT>
-  <DD>A:  Igen! Lásd <A HREF="documentation.html#mailing_lists">itt</A>.</DD>
+  <DT>Q: Vannak MPlayer levelezési listák?</DT>
+  <DD>A: Igen! Lásd <A HREF="documentation.html#mailing_lists">itt</A>.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  Találtam egy durva hibát, amikor a kedvenc filmemet néztem!
+  <DT>Q: Találtam egy durva hibát, amikor a kedvenc filmemet néztem!
     Kinek írjak?</DT>
-  <DD>A:  Lásd <A HREF="bugreports.html">C</A> függelék.</DD>
+  <DD>A: Lásd <A HREF="bugreports.html">C</A> függelék.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  Problémáim vannak a(z) ... codec-kel. Használhatom?</DT>
-  <DD>A:  Nézd meg itt: <A HREF="http://www.mplayerhq.hu/DOCS/codecs-status.html">http://www.mplayerhq.hu/DOCS/codecs-status.html</A>,
+  <DT>Q: Problémáim vannak a(z) ... codec-kel. Használhatom?</DT>
+  <DD>A: Nézd meg itt: <A HREF="http://www.mplayerhq.hu/DOCS/codecs-status.html">http://www.mplayerhq.hu/DOCS/codecs-status.html</A>,
      és ha nincs benne a te codeced, olvasd el a
      <A HREF="codecs.html#2.1.3">2.1.3</A>-es fejezetet.</DD>
   <DD>&nbsp;</DD>
@@ -229,8 +229,8 @@ futtasd az <B>ldconfig</B>-ot.</DD>
   <DD>A: Olvasd el az <A HREF="documentation.html#rtc">RTC</A> fejezetet.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  És mi lesz a DVD lejátszással?</DT>
-  <DD>A:  Olvasd el a <A HREF="cd-dvd.html">CD/DVD fejezetet</A>.</DD>
+  <DT>Q: És mi lesz a DVD lejátszással?</DT>
+  <DD>A: Olvasd el a <A HREF="cd-dvd.html">CD/DVD fejezetet</A>.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: Az -xy és az -fs opció nem mûködik az x11 kimenettel (-vo x11)</DT>
@@ -243,9 +243,9 @@ DGA drivere, lásd RTFM) mûködik nálad. Sokkal gyorsabb. Ha
 az SDL DGA-ja is mûködik, használd azt, az MÉG gyorsabb!</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  Mit jelentenek azok a számok a status sorban?</DT>
-  <DD>A:  lássuk:<BR><PRE>
-       A:   2.1  V:   2.2  A-V: -0.167  ct:  0.042   57  41%   0%  2.6% 0 4 49%
+  <DT>Q: Mit jelentenek azok a számok a status sorban?</DT>
+  <DD>A: lássuk:<BR><PRE>
+       A:  2.1  V:  2.2  A-V: -0.167  ct: 0.042   57  41%   0%  2.6% 0 4 49%
      - A: audio pozíció másodpercben
      - V: video pozíció másodpercben
      - A-V: audio-video eltérés másodpercben (késés)
@@ -266,13 +266,13 @@ az SDL DGA-ja is mûködik, használd azt, az MÉG gyorsabb!</DD>
     opciókat.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  A video output CPU használata miért 0% MPEG file-oknál?</DT>
-  <DD>A:  Nem nulla, de bele van építve a codecbe, így nem mérhetõ külön. Próbáld
+  <DT>Q: A video output CPU használata miért 0% MPEG file-oknál?</DT>
+  <DD>A: Nem nulla, de bele van építve a codecbe, így nem mérhetõ külön. Próbáld
      ki, hogy -vo null játszod le a file-t, és nézed a kettõ különbségét... </DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  Valami hibaüzenet van, hogy nem találja a /usr/lib/win32/... file-t.</DT>
-  <DD>A:  A *mi* FTP-nkrõl töltsd le a w32codec-0.90.tar.bz2 csomagot.
+  <DT>Q: Valami hibaüzenet van, hogy nem találja a /usr/lib/win32/... file-t.</DT>
+  <DD>A: A *mi* FTP-nkrõl töltsd le a w32codec-0.90.tar.bz2 csomagot.
  (az avifile csomagja különbözik)</DD>
   <DD>&nbsp;</DD>
 
@@ -282,29 +282,29 @@ az SDL DGA-ja is mûködik, használd azt, az MÉG gyorsabb!</DD>
     meghajtóval csak egy darab <B>MPlayer</B> indítható.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  Ööö, mi az az "IdegCounter" ?</DT>
-  <DD>A:  Az "Ideg" magyar szó, és a "Counter" (számláló) angol szó keveréke.
+  <DT>Q: Ööö, mi az az "IdegCounter" ?</DT>
+  <DD>A: Az "Ideg" magyar szó, és a "Counter" (számláló) angol szó keveréke.
      Elõször A'rpi idegességét volt hivatott mérni, miután egy kis CVS kód
      (ööö) "rejtélyesen" eltûnt ;)</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  És mi az a "Faszom(C)ounter" ?</DT>
-  <DD>A:  Tudod te azt.</DD>
+  <DT>Q: És mi az a "Faszom(C)ounter" ?</DT>
+  <DD>A: Tudod te azt.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  A LIRC nem mûködik, mert ...</DT>
-  <DD>A:  Biztos "mplayer"-t használsz "mplayer_lirc" helyett ? Régebben "mplayer_lirc"
+  <DT>Q: A LIRC nem mûködik, mert ...</DT>
+  <DD>A: Biztos "mplayer"-t használsz "mplayer_lirc" helyett ? Régebben "mplayer_lirc"
  kellett, de nemrég visszaváltottunk "mplayer"-re.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  Szépek a feliratok, a legszebbek, amiket valaha lattam, viszont lelassítják
+  <DT>Q: Szépek a feliratok, a legszebbek, amiket valaha lattam, viszont lelassítják
      a lejátszást! Tudom, hogy ez valószínûtlen, de...</DT>
-  <DD>A:  Miután ./configure lefutott, szerkesztd át a config.h-t, és <CODE>#undef FAST_OSD</CODE>
+  <DD>A: Miután ./configure lefutott, szerkesztd át a config.h-t, és <CODE>#undef FAST_OSD</CODE>
      helyett írd be : #define FAST_OSD . Fordítsd újra!</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  Az OSD villog!</DT>
-  <DD>A:  Olyan vo drivert használsz, ami egyszeres bufferelést használ (x11,xv).
+  <DT>Q: Az OSD villog!</DT>
+  <DD>A: Olyan vo drivert használsz, ami egyszeres bufferelést használ (x11,xv).
      Xv esetén használd a -double opciót. Kipróbálhatod még a
      <CODE>-vf expand</CODE> opciót is.</DD>
   <DD>&nbsp;</DD>
@@ -313,25 +313,25 @@ az SDL DGA-ja is mûködik, használd azt, az MÉG gyorsabb!</DD>
   <DD>A: Lásd a <A HREF="codecs.html#wav">2.1.2.2-es fejezetet</A>.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  De a configure azt mondja hogy "Checking for libavcodec ... no" !</DT>
-  <DD>A:  Le kell töltened a libavcodec-et az FFmpeg CVS-bõl. Lásd a
+  <DT>Q: De a configure azt mondja hogy "Checking for libavcodec ... no" !</DT>
+  <DD>A: Le kell töltened a libavcodec-et az FFmpeg CVS-bõl. Lásd a
      <A HREF="codecs.html#wav">2.1.2.2</A>-es fejezetet.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  Icewm-et használok, és a tálca mindig látható!</DT>
+  <DT>Q: Icewm-et használok, és a tálca mindig látható!</DT>
   <DD>A: Ez már nem történhet meg.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>  Q:   Nem tudok hozzáférni a GUI menûhoz. Amikor megnyomom a jobb gombot,
+  <DT>Q: Nem tudok hozzáférni a GUI menûhoz. Amikor megnyomom a jobb gombot,
   nem tudok kiválasztani egy menupontot sem !</DT>
-  <DD>  A:   FVWM-et használsz ? Próbáld ki a következõt :<BR>
+  <DD>A: FVWM-et használsz ? Próbáld ki a következõt :<BR>
   Start -&gt; Settings -&gt; Configuration -&gt; Base Configuration<BR>
   <BR>
   Állítsd a "Use Applications position hints" opciót Yes-re.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>  Q:   Hogy lehet az MPlayer-t háttérben futtatni?</DT>
-  <DD>  A:   Így : <CODE>mplayer &lt;opciók&gt; &lt;filenév&gt; &lt; /dev/null &</CODE></DD>
+  <DT>Q: Hogy lehet az MPlayer-t háttérben futtatni?</DT>
+  <DD>A: Így : <CODE>mplayer &lt;opciók&gt; &lt;filenév&gt; &lt; /dev/null &</CODE></DD>
   <DD>&nbsp;</DD>
 
 </DL>
@@ -340,8 +340,8 @@ az SDL DGA-ja is mûködik, használd azt, az MÉG gyorsabb!</DD>
 
 <DL>
 
-  <DT>Q:  ...... mûködik xine/avifile-al, de nem az MPlayer-rel!</DT>
-  <DD>A:  MPlayer != xine/avifile
+  <DT>Q: ...... mûködik xine/avifile-al, de nem az MPlayer-rel!</DT>
+  <DD>A: MPlayer != xine/avifile
      Az egyetlen közös dolog a kettõben az a Win32 DLL loader. A codec
      csomag, szinkronizáció, demultiplexelés, stb. teljesen különbözik és
      nem összehasonlítható.  Ha valami mûködik aviplay-jel az nem jelenti azt,
@@ -351,13 +351,13 @@ az SDL DGA-ja is mûködik, használd azt, az MÉG gyorsabb!</DD>
      file-t.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  A hang nincs szinkronban egy .avi file lejátszásakor</DT>
-  <DD>A:  Probáld a -bps vagy -nobps opciókat.                
+  <DT>Q: A hang nincs szinkronban egy .avi file lejátszásakor</DT>
+  <DD>A: Probáld a -bps vagy -nobps opciókat.                
      Ha még mindig nem megy, küldd el nekem (FTP-re) a file-t, megnézem!</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  MPlayer valami hibaüzenettel lép ki, amikor l3codeca.acm-et használok.</DT>
-  <DD>A:  Nézd meg, hogy mit ír ki az 'ldd /usr/local/bin/mplayer' . Ha ilyet   
+  <DT>Q: MPlayer valami hibaüzenettel lép ki, amikor l3codeca.acm-et használok.</DT>
+  <DD>A: Nézd meg, hogy mit ír ki az 'ldd /usr/local/bin/mplayer' . Ha ilyet   
      tartalmaz:
         libc.so.6 =&gt; /lib/libc.so.6 (0x4???????)
      ahol "?" bármilyen szám, akkor rendben, a hiba nem itt van. De ha ez:
@@ -371,34 +371,34 @@ az SDL DGA-ja is mûködik, használd azt, az MÉG gyorsabb!</DD>
      l3codeca.acm-et!</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  A gépem ~640x300-as felbontású M$ DivX AVI-kat, amiknek stereo mp3-juk
+  <DT>Q: A gépem ~640x300-as felbontású M$ DivX AVI-kat, amiknek stereo mp3-juk
      van, lassan játssza le. Ha -nosound opcióval próbálom, minden ok (csak
      néma).</DT>
   <DD>A: Jah fiam, hát lassú a géped. Ez van.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  Az MPlayer "MPlayer interrupted by signal 4 in module: decode_video"
+  <DT>Q: Az MPlayer "MPlayer interrupted by signal 4 in module: decode_video"
      üzenettel leáll.</DT>
-  <DD>A:  Azon a gépen futtasd az MPlayer-t, amin lefordítottad! Vagy fordítsd újra!
+  <DD>A: Azon a gépen futtasd az MPlayer-t, amin lefordítottad! Vagy fordítsd újra!
      Semmiképp se használd másik processzoron, mint amin lefordítottad!</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  Gondjaim vannak a kedvenc ablakkezelõm esetén a teljesképernyõs xv/xmga/..
+  <DT>Q: Gondjaim vannak a kedvenc ablakkezelõm esetén a teljesképernyõs xv/xmga/..
      móddal..</DT>
-  <DD>A:  Szólj.. Lásd <A HREF="bugreports.html">bugreports.html</A>.</DD>
+  <DD>A: Szólj.. Lásd <A HREF="bugreports.html">bugreports.html</A>.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  Dehát aviplay-jel mûködik !</DT>
-  <DD>A:  És?</DD>
+  <DT>Q: Dehát aviplay-jel mûködik !</DT>
+  <DD>A: És?</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  Akkor az aviplay sokkal jobb !</DT>
-  <DD>A:  Használd azt, úgyis van szép GUI-ja, meg amúgy is jó kis C++ :)</DD>
+  <DT>Q: Akkor az aviplay sokkal jobb !</DT>
+  <DD>A: Használd azt, úgyis van szép GUI-ja, meg amúgy is jó kis C++ :)</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  Miután elindítom a lejátszást KDE(1/2) alatt, csak sötét képet kapok, és
+  <DT>Q: Miután elindítom a lejátszást KDE(1/2) alatt, csak sötét képet kapok, és
      egy perc múlva elindul a lejátszás.</DT>
-  <DD>A:  A KDE arts sound daemon lefoglalja a hangkártyát, vagy kivárod ezt az idõt,
+  <DD>A: A KDE arts sound daemon lefoglalja a hangkártyát, vagy kivárod ezt az idõt,
      vagy kikapcsolod az arts-daemon-t a control centerben.
      Ha arts-on keresztüli hangot akarsz, akkor használd az SDL audio drivert,
      -ao sdl , és bizonyosodj meg arról hogy az SDL-ed tud arts-ot kezelni.
@@ -462,9 +462,9 @@ a <CODE>-ao sdl</CODE> opciót (SDL meghajtó).</DD>
 
 <DL>
 
-  <DT>Q:  Oké, -vo help mutatja a DGA drivert, de valami "permissions"-rõl beszél!
+  <DT>Q: Oké, -vo help mutatja a DGA drivert, de valami "permissions"-rõl beszél!
      Segíts!</DT>
-  <DD>A:  Csak akkor mûködik, ha root jogaid vannak! Ez egy DGA korlátozás.
+  <DD>A: Csak akkor mûködik, ha root jogaid vannak! Ez egy DGA korlátozás.
      Legyél root (su -), és próbáld újra.
 
      Másik megoldás, hogy az mplayer-t SUID root állítod be, de ELLENJAVALLT!
@@ -480,19 +480,19 @@ a <CODE>-ao sdl</CODE> opciót (SDL meghajtó).</DD>
 			   !!!! ÉN FIGYELMEZTETTELEK ... !!!!</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  Mikor XVideo-t akarok használni, a Voodoo 3/Banshee-m azt mondja:<BR><PRE>
-     X Error of failed request:  BadAccess (attempt to access private resource
+  <DT>Q: Mikor XVideo-t akarok használni, a Voodoo 3/Banshee-m azt mondja:<BR><PRE>
+     X Error of failed request: BadAccess (attempt to access private resource
      denied)
-      Major opcode of failed request:  147 (MIT-SHM)
-      Minor opcode of failed request:  1 (X_ShmAttach)
-      Serial number of failed request:  26
+      Major opcode of failed request: 147 (MIT-SHM)
+      Minor opcode of failed request: 1 (X_ShmAttach)
+      Serial number of failed request: 26
       Current serial number in output stream:27</PRE></DT>
-  <DD>A:  Régi a drivered, frissítsd! Vagy a DRI (legalább) 0.6-os verzióját használd
+  <DD>A: Régi a drivered, frissítsd! Vagy a DRI (legalább) 0.6-os verzióját használd
      (http://dri.sourceforge.net), vagy a DRI cvs-t fordítsd le!</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  Az OpenGL (-vo gl) output nem mûködik.</DT>
-  <DD>A:  Az OpenGL drivered nem támogatja a dinamikus textúraváltást
+  <DT>Q: Az OpenGL (-vo gl) output nem mûködik.</DT>
+  <DD>A: Az OpenGL drivered nem támogatja a dinamikus textúraváltást
      (glTexSubImage).
      Ismert, hogy nem mûködik az nVidia bináris izéivel.
      Ismert, hogy mûködik Utah-GLX/DRI és Matrox G400-zal, valamint DRI és
@@ -501,9 +501,9 @@ a <CODE>-ao sdl</CODE> opciót (SDL meghajtó).</DD>
      textúráik lehetnek.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  nVidia TNT/TNT2 kártyám van, és egy furcsa színekkel teli sáv van a
+  <DT>Q: nVidia TNT/TNT2 kártyám van, és egy furcsa színekkel teli sáv van a
      film alatt! Kinek a hibája ez?</DT>
-  <DD>A:  Az nVidia driver-é. Ezek a hibák CSAK TNT/TNT2 kártyákkal jönnek elõ, és
+  <DD>A: Az nVidia driver-é. Ezek a hibák CSAK TNT/TNT2 kártyákkal jönnek elõ, és
      nem tehetünk róla, a hiba az Ön készülékében van. UPDATE : a legújabb
 meghajtókban végre kijavították..</DD>
   <DD>&nbsp;</DD>
@@ -543,8 +543,8 @@ a készítõi...</DD>
   <DD>A: Igen, lásd fent, a DVD fejezetet.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q:  Hogy állíthatom be a DVD régiókódját ? Nincs windowsom!</DT>
-  <DD>A:  Használd a 'regionset' parancsot :
+  <DT>Q: Hogy állíthatom be a DVD régiókódját ? Nincs windowsom!</DT>
+  <DD>A: Használd a 'regionset' parancsot :
      <A HREF="http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz">http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz</A></DD>
   <DD>&nbsp;</DD>
 
@@ -574,8 +574,8 @@ bekapcsolni a DMA-t a DVD meghajtón.</DD>
 
 <DL>
 
-  <DT>  Q:   Szeretnék pluszminusz 1 képkockánként tekerni.</DT>
-  <DD>  A:   Ez nem lesz megcsinálva. Amikor megvolt, elrontotta az A/V szinkront.
+  <DT>Q: Szeretnék pluszminusz 1 képkockánként tekerni.</DT>
+  <DD>A: Ez nem lesz megcsinálva. Amikor megvolt, elrontotta az A/V szinkront.
   Ha tudod, implementáld és küldj patch-et.</DD>
   <DD>&nbsp;</DD>
 
