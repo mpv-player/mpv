@@ -1,4 +1,6 @@
 
+#define USE_MP_IMAGE
+
 #include "config.h"
 
 #include <stdio.h>
@@ -21,13 +23,14 @@ extern int verbose; // defined in mplayer.c
 #include "parse_es.h"
 
 #include "codec-cfg.h"
-#include "stheader.h"
 
 #ifdef USE_LIBVO2
 #include "libvo2/libvo2.h"
 #else
 #include "libvo/video_out.h"
 #endif
+
+#include "stheader.h"
 
 #include "dec_video.h"
 
@@ -348,11 +351,18 @@ unsigned int out_fmt=sh_video->codec->outfmt[sh_video->outfmtidx];
 
 sh_video->our_out_buffer=NULL;
 
+sh_video->image=new_mp_image(sh_video->disp_w,sh_video->disp_h);
+mp_image_setfmt(sh_video->image,out_fmt);
+
 switch(sh_video->codec->driver){
  case VFM_CINEPAK: {
+#ifdef USE_MP_IMAGE
+   sh_video->image->type=MP_IMGTYPE_STATIC;
+#else
    int bpp=((out_fmt&255)+7)/8;
    sh_video->our_out_buffer = 
      (char*)memalign(64, sh_video->disp_w*sh_video->disp_h*bpp);
+#endif
    sh_video->context = decode_cinepak_init();
    break;
  }
@@ -396,7 +406,16 @@ switch(sh_video->codec->driver){
 //        mp_msg(MSGT_DECVIDEO,MSGL_HINT,"Or you should disable DShow support: make distclean;make -f Makefile.No-DS\n");
       return 0;
    }
-   
+
+#ifdef USE_MP_IMAGE
+   sh_video->image->type=MP_IMGTYPE_STATIC;
+   bpp=sh_video->image->bpp;
+   if(sh_video->image->flags&MP_IMGFLAG_YUV){
+     DS_VideoDecoder_SetDestFmt(ds_vdec,bpp,out_fmt);     // YUV
+   } else {
+     DS_VideoDecoder_SetDestFmt(ds_vdec,out_fmt&255,0);           // RGB/BGR
+   }
+#else
    switch(out_fmt){
    case IMGFMT_YUY2:
    case IMGFMT_UYVY:
@@ -413,6 +432,7 @@ switch(sh_video->codec->driver){
    }
 
    sh_video->our_out_buffer = (char*)memalign(64,sh_video->disp_w*sh_video->disp_h*bpp/8); // FIXME!!!
+#endif
 
    DS_SetAttr_DivX("Quality",divx_quality);
 
@@ -478,8 +498,12 @@ switch(sh_video->codec->driver){
 	decore(0x123, DEC_OPT_INIT, &dec_param, NULL);
 	dec_set.postproc_level = divx_quality;
 	decore(0x123, DEC_OPT_SETPP, &dec_set, NULL);
+#ifdef USE_MP_IMAGE
+	sh_video->image->type=MP_IMGTYPE_STATIC;
+#else
 	sh_video->our_out_buffer = (char*)memalign(64,((bits*dec_param.x_dim+7)/8)*dec_param.y_dim);
 //	sh_video->our_out_buffer = shmem_alloc(dec_param.x_dim*dec_param.y_dim*5);
+#endif
    }
    mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: OpenDivX video codec init OK!\n");
    break;
@@ -542,7 +566,11 @@ switch(sh_video->codec->driver){
  }
  case VFM_RLE: {
    int bpp=((out_fmt&255)+7)/8; // RGB only
-   sh_video->our_out_buffer = (char*)memalign(64,sh_video->disp_w*sh_video->disp_h*bpp); // FIXME!!!
+#ifdef USE_MP_IMAGE
+    sh_video->image->type=MP_IMGTYPE_STATIC;
+#else
+    sh_video->our_out_buffer = (char*)memalign(64,sh_video->disp_w*sh_video->disp_h*bpp); // FIXME!!!
+#endif
    if(bpp==2){  // 15 or 16 bpp ==> palette conversion!
      unsigned int* pal=(unsigned int*)(((char*)sh_video->bih)+40);
      int cols=(sh_video->bih->biSize-40)/4;
@@ -566,9 +594,13 @@ switch(sh_video->codec->driver){
  case VFM_FLI:
  case VFM_QTRLE:
    {
+#ifdef USE_MP_IMAGE
+    sh_video->image->type=MP_IMGTYPE_STATIC;
+#else
    int bpp=((out_fmt&255)+7)/8; // RGB only
    sh_video->our_out_buffer = 
      (char*)memalign(64, sh_video->disp_w*sh_video->disp_h*bpp); // FIXME!!!
+#endif
 if ((sh_video->codec->driver == VFM_QTRLE) && (sh_video->bih->biBitCount != 24))
   printf (
     "    *** FYI: This Quicktime file is using %d-bit RLE Animation\n" \
@@ -579,12 +611,20 @@ if ((sh_video->codec->driver == VFM_QTRLE) && (sh_video->bih->biBitCount != 24))
    break;
    }
  case VFM_NUV:
+#ifdef USE_MP_IMAGE
+    sh_video->image->type=MP_IMGTYPE_STATIC;
+#else
     sh_video->our_out_buffer = (char *)memalign(64, sh_video->disp_w*sh_video->disp_h*3/2);
+#endif
    break;
  case VFM_CYUV: {
-   int bpp=((out_fmt&255)+7)/8;
+//   int bpp=((out_fmt&255)+7)/8;
+#ifdef USE_MP_IMAGE
+    sh_video->image->type=MP_IMGTYPE_STATIC;
+#else
    sh_video->our_out_buffer =
      (char*)memalign(64, sh_video->disp_w*sh_video->disp_h*3);
+#endif
    break;
    }
  }
@@ -598,17 +638,42 @@ int decode_video(vo2_handle_t *video_out,sh_video_t *sh_video,unsigned char *sta
 #else
 int decode_video(vo_functions_t *video_out,sh_video_t *sh_video,unsigned char *start,int in_size,int drop_frame){
 #endif
-unsigned int out_fmt=sh_video->codec->outfmt[sh_video->outfmtidx];
-int planar=(out_fmt==IMGFMT_YV12||out_fmt==IMGFMT_IYUV||out_fmt==IMGFMT_I420);
+
+mp_image_t *mpi=sh_video->image;
+unsigned int out_fmt=mpi->imgfmt; //sh_video->codec->outfmt[sh_video->outfmtidx];
+int planar=(mpi->flags&MP_IMGFLAG_PLANAR)!=0; //(out_fmt==IMGFMT_YV12||out_fmt==IMGFMT_IYUV||out_fmt==IMGFMT_I420);
 int blit_frame=0;
 
-uint8_t* planes_[3];
-uint8_t** planes=planes_;
-int stride_[3];
-int* stride=stride_;
+//uint8_t* planes_[3];
+//uint8_t** planes=planes_;
+//int stride_[3];
+//int* stride=stride_;
 
 unsigned int t=GetTimer();
 unsigned int t2;
+
+#ifdef USE_MP_IMAGE
+if(mpi->type!=MP_IMGTYPE_EXPORT)
+if( !(mpi->flags&MP_IMGFLAG_ALLOCATED) && !(mpi->flags&MP_IMGFLAG_DIRECT) ){
+    // allocate image buffer:
+    sh_video->our_out_buffer = (char *)memalign(64, mpi->width*mpi->height*mpi->bpp/8);
+    if((mpi->flags|MP_IMGFLAG_PLANAR) && (mpi->flags|MP_IMGFLAG_YUV)){
+	// planar YUV
+	mpi->stride[0]=mpi->width;
+	mpi->stride[1]=mpi->stride[2]=mpi->width/2;
+	mpi->planes[0]=sh_video->our_out_buffer;
+	mpi->planes[1]=mpi->planes[0]+mpi->stride[0]*mpi->height;
+	mpi->planes[2]=mpi->planes[1]+mpi->stride[0]*mpi->height/4;
+    } else {
+	// packed YUV / RGB
+	mpi->stride[0]=mpi->width*mpi->bpp;
+	mpi->planes[0]=sh_video->our_out_buffer;
+    }
+    mpi->flags|=MP_IMGFLAG_ALLOCATED;
+    mp_msg(MSGT_DECVIDEO,MSGL_INFO,"mp_image: allocated %d bytes for %dx%dx%d [0x%X] image\n", 
+	    mpi->width*mpi->height*mpi->bpp/8, mpi->width, mpi->height, mpi->bpp, mpi->imgfmt);
+}
+#endif
 
 //printf("decode_frame(start: %p, size: %d, w: %d, h: %d)\n",
 //    start, in_size, sh_video->disp_w, sh_video->disp_h);
@@ -625,8 +690,14 @@ switch(sh_video->codec->driver){
     xacodec_image_t* image=xacodec_decode_frame(start,in_size,drop_frame?1:0);
     if(image){
 	blit_frame=2;
-	planes=image->planes;
-	stride=image->stride;
+	//planes=image->planes;
+	//stride=image->stride;
+	mpi->planes[0]=image->planes[0];
+	mpi->planes[1]=image->planes[1];
+	mpi->planes[2]=image->planes[2];
+	mpi->stride[0]=image->stride[0];
+	mpi->stride[1]=image->stride[1];
+	mpi->stride[2]=image->stride[2];
     }
     break;
   }
@@ -656,16 +727,23 @@ switch(sh_video->codec->driver){
     // let's display
 #ifdef NEW_DECORE
       if(dec_pic.y){
-        planes[0]=dec_pic.y;
-        planes[1]=dec_pic.u;
-        planes[2]=dec_pic.v;
-        stride[0]=dec_pic.stride_y;
-        stride[1]=stride[2]=dec_pic.stride_uv;
+        mpi->planes[0]=dec_pic.y;
+        mpi->planes[1]=dec_pic.u;
+        mpi->planes[2]=dec_pic.v;
+        mpi->stride[0]=dec_pic.stride_y;
+        mpi->stride[1]=mpi->stride[2]=dec_pic.stride_uv;
         blit_frame=2;
       }
 #else
       if(opendivx_src[0]){
-        planes=opendivx_src; stride=opendivx_stride;
+//        planes=opendivx_src;
+//	stride=opendivx_stride;
+	mpi->planes[0]=opendivx_src[0];
+	mpi->planes[1]=opendivx_src[1];
+	mpi->planes[2]=opendivx_src[2];
+	mpi->stride[0]=opendivx_stride[0];
+	mpi->stride[1]=opendivx_stride[1];
+	mpi->stride[2]=opendivx_stride[2];
         blit_frame=2;
       }
 #endif
@@ -734,21 +812,28 @@ if(verbose>1){
 		    sh_video->our_out_buffer = (char*)memalign(64,w*h*3/2);
 		    memset(sh_video->our_out_buffer,0,w*h*3/2);
 		}
-    		stride[0]=w;
-    		stride[1]=stride[2]=w/2;
-    		planes[0]=sh_video->our_out_buffer+stride[0]*yoff+xoff;
-    		planes[2]=sh_video->our_out_buffer+w*h+stride[2]*(yoff>>1)+(xoff>>1);
-    		planes[1]=planes[2]+w*h/4;
+    		mpi->stride[0]=w;
+    		mpi->stride[1]=mpi->stride[2]=w/2;
+    		mpi->planes[0]=sh_video->our_out_buffer+mpi->stride[0]*yoff+xoff;
+    		mpi->planes[2]=sh_video->our_out_buffer+w*h+mpi->stride[2]*(yoff>>1)+(xoff>>1);
+    		mpi->planes[1]=mpi->planes[2]+w*h/4;
 		postprocess(lavc_picture.data,lavc_picture.linesize[0],
-			    planes,stride[0],
+			    mpi->planes,mpi->stride[0],
 			    sh_video->disp_w,sh_video->disp_h,
 			    &quant_store[0][0],MBC+1,lavc_pp);
 	    } else
 #endif
 #endif
 	    {
-		planes=lavc_picture.data;
-		stride=lavc_picture.linesize;
+		//planes=lavc_picture.data;
+		//stride=lavc_picture.linesize;
+		mpi->planes[0]=lavc_picture.data[0];
+		mpi->planes[1]=lavc_picture.data[1];
+		mpi->planes[2]=lavc_picture.data[2];
+		mpi->stride[0]=lavc_picture.linesize[0];
+		mpi->stride[1]=lavc_picture.linesize[1];
+		mpi->stride[2]=lavc_picture.linesize[2];
+		
 		//stride[1]=stride[2]=0;
 		//stride[0]/=2;
 	    }
@@ -802,7 +887,7 @@ if(verbose>1){
 	packet.size=in_size-4;
 	packet.timestamp=sh_video->timer*90000.0;
 	packet.id=0x1E0; //+sh_video->ds->id;
-	planes[0]=(uint8_t*)(&packet);
+	mpi->planes[0]=(uint8_t*)(&packet);
 	blit_frame=2;
     } else {
 	// software decoding:
@@ -884,17 +969,18 @@ t2=GetTimer();t=t2-t;video_time_usage+=t*0.000001f;
 switch(blit_frame){
 case 3:
       if(planar){
-        stride[0]=sh_video->disp_w;
-        stride[1]=stride[2]=sh_video->disp_w/2;
-        planes[0]=sh_video->our_out_buffer;
-        planes[2]=planes[0]+sh_video->disp_w*sh_video->disp_h;
-        planes[1]=planes[2]+sh_video->disp_w*sh_video->disp_h/4;
+        mpi->stride[0]=sh_video->disp_w;
+        mpi->stride[1]=mpi->stride[2]=sh_video->disp_w/2;
+        mpi->planes[0]=sh_video->our_out_buffer;
+        mpi->planes[2]=mpi->planes[0]+sh_video->disp_w*sh_video->disp_h;
+        mpi->planes[1]=mpi->planes[2]+sh_video->disp_w*sh_video->disp_h/4;
       } else {
-        planes[0]=sh_video->our_out_buffer;
+        mpi->planes[0]=sh_video->our_out_buffer;
+	mpi->stride[0]=sh_video->disp_w*mpi->bpp;
 	if(sh_video->bih && sh_video->bih->biSize==1064)
-	    planes[1]=&sh_video->bih[1]; // pointer to palette
+	    mpi->planes[1]=&sh_video->bih[1]; // pointer to palette
 	else
-	    planes[1]=NULL;
+	    mpi->planes[1]=NULL;
       }
 //#define VFM_RAW_POSTPROC
 #ifdef VFM_RAW_POSTPROC
@@ -931,9 +1017,9 @@ case 2:
         vo2_draw_frame(video_out,planes[0],sh_video->disp_w,sh_video->disp_w,sh_video->disp_h);
 #else
     if(planar)
-        video_out->draw_slice(planes,stride,sh_video->disp_w,sh_video->disp_h,0,0);
+        video_out->draw_slice(mpi->planes,mpi->stride,sh_video->disp_w,sh_video->disp_h,0,0);
     else
-        video_out->draw_frame(planes);
+        video_out->draw_frame(mpi->planes);
 #endif
     t2=GetTimer()-t2;vout_time_usage+=t2*0.000001f;
     blit_frame=1;
