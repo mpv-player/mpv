@@ -1418,6 +1418,11 @@ if test "$_vidix" = auto ; then
   sunos && _vidix=no
 fi
 
+# On QNX we must link to libph - Gabucino
+if qnx ; then
+  _ld_arch="$_ld_arch -lph"
+fi
+
 # checking for a working awk, I'm using mawk first, because it's fastest - atmos
 _awk=
 if test "$_vidix" = yes ; then
