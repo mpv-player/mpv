@@ -20,11 +20,12 @@ MPlayer (1.0)
     * integrated Tremor decoder for Ogg/Vorbis
     * fixed decoding of stereo alaw files
     * preload QT DLLs to work around problems with their hardcoded paths
+    * support for Real 10 RV30/40 binary codec
 
     Demuxers:
     * vqf demuxer
     * seeking in MPEG-ES fixed
-    * Real multirate files
+    * support for Real multirate files
     * automatic framerate calculation for MPEG-4 in raw and TS files
     * MP3 in Real files
 
@@ -46,6 +47,7 @@ MPlayer (1.0)
     Others:
     * -z option replaced by -vo png suboption
     * icc fix in the Win32 loader
+    * crash with Turkish locale fixed
 
 
   pre6: "X-mas present" December 23, 2004
