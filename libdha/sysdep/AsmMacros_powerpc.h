@@ -55,8 +55,6 @@ static __inline__ unsigned long inl(short port)
 #define intr_disable()
 #define intr_enable()
 
-#else
-#error This stuff is not ported on your system
 #endif
 
 #endif

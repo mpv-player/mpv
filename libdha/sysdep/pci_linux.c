@@ -32,8 +32,12 @@ static __inline__ int enable_os_io(void)
     dhahelper_initialized = -1;
 #endif
 
+#if defined(__powerpc__) && defined(__linux__)
+/* should be fixed? */
+#else    
     if (iopl(3) != 0)
 	return(errno);
+#endif    
     return(0);
 }
 
@@ -44,7 +48,11 @@ static __inline__ int disable_os_io(void)
 	close(dhahelper_fd);
     else
 #endif
+#if defined(__powerpc__) && defined(__linux__)
+/* should be fixed? */
+#else    
     if (iopl(0) != 0)
 	return(errno);
+#endif    
     return(0);
 }
