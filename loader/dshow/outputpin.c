@@ -1,6 +1,7 @@
 
 #include <cstdio>
-#include <string>
+#include <cstring>
+//#include <string>
 
 #include "outputpin.h"
 #include "allocator.h"
@@ -11,6 +12,8 @@
     An object beyond interface IEnumMediaTypes.
     Returned by COutputPin through call IPin::EnumMediaTypes().
 */
+
+using namespace std;
 
 class CEnumMediaTypes: public IEnumMediaTypes
 {

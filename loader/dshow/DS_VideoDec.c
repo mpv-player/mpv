@@ -14,6 +14,8 @@
 #include <except.h>
 #define __MODULE__ "DirectShow_VideoDecoder"
 
+using namespace std;
+
 #include <errno.h>
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
