@@ -527,6 +527,7 @@ $_cc $TMPC -o $TMPO -lpthread > /dev/null 2>&1 || \
 
 # Atmosfear: added SDL versioncheck and autodetect; removed warnings.
 _sdl=no
+if test ! -z "`$_sdlconfig --version 2>/dev/null`" ; then
 if $_cc `$_sdlconfig --cflags` $TMPC -o $TMPO `$_sdlconfig --libs` > /dev/null 2>&1 ; then
 	_sdlversion=`$_sdlconfig --version | sed 's/[^0-9]//g'`
 	if test "$_sdlversion" -gt 116 ; then
@@ -541,6 +542,7 @@ if $_cc `$_sdlconfig --cflags` $TMPC -o $TMPO `$_sdlconfig --libs` > /dev/null 2
 		_sdl=outdated
 	fi
 fi	
+fi
 
 # Atmosfear: added libcss autodetect
 _css=no
