@@ -415,18 +415,19 @@ static void rivatv_overlay_colorkey (rivatv_info* info, unsigned int chromakey){
 	b = chromakey & 0x000000FF;
 	switch (info->depth) {
 	case 15:
-		key = ((r >> 3) << 10) | ((g >> 3) << 5) | ((b >> 3));
+		key = ((r >> 3) << 10) | ((g >> 3) << 5) | ((b >> 3)) | 0x00008000;
 		break;
-	case 16:
-		key = ((r >> 3) << 11) | ((g >> 2) << 5) | ((b >> 3));
+	case 16: // XXX unchecked
+		key = ((r >> 3) << 11) | ((g >> 2) << 5) | ((b >> 3)) | 0x00008000;
 		break;
-	case 24:
-		key = chromakey & 0x00FFFFFF;
+	case 24: // XXX unchecked, maybe swap order of masking
+		key = (chromakey & 0x00FFFFFF) | 0x00800000;
 		break;
 	case 32:
-		key = chromakey;
+		key = chromakey | 0x80000000;
 		break;
 	}
+	//printf("[nvidia_vid] depth=%d %08X \n", info->depth, chromakey);
     if(!info->use_colorkey)return;
     switch (info->chip.arch) {
 	  case NV_ARCH_10:
