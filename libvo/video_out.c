@@ -66,10 +66,11 @@ extern vo_functions_t video_out_ggi;
 
 vo_functions_t* video_out_drivers[] =
 {
-#ifdef HAVE_MGA
-#ifdef HAVE_X11
+#ifdef HAVE_XMGA
         &video_out_xmga,
 #endif
+#ifdef HAVE_MGA
+
         &video_out_mga,
 #endif
 #ifdef HAVE_SYNCFB
