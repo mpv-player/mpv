@@ -202,8 +202,8 @@ A: Nézd meg, hogy mit ír ki az 'ldd /usr/local/bin/mplayer' . Ha ilyet
 Q: A gépem ~640x300-as felbontású M$ DivX AVI-kat, amiknek stereo mp3-juk
    van, lassan játssza le. Ha -nosound opcióval próbálom, minden ok (csak
    néma).
-A: Ezeknek a file-oknak valószínûleg 48Khz-es audiojuk van, és a
-   hangkártyád/drivered nem támogatja rendesen ezt. Az audio downsampling
+A: Ezeknek a file-oknak valószínûleg 48Khz-es hangjuk van, és a
+   hangkártyád/drivered ezt nem támogatja rendesen. Az audio downsampling
    (még) nincs benne MPlayer-ben.
 
 Q: Az MPlayer "MPlayer interrupted by signal 4 in module: decode_video"
@@ -211,16 +211,16 @@ Q: Az MPlayer "MPlayer interrupted by signal 4 in module: decode_video"
 A: Azon a gépen futtasd az MPlayer-t, amin lefordítottad! Vagy fordítsd újra!
    Semmiképp se használd másik processzoron, mint amin lefordítottad!
 
-Q: Gondjaim vannak a (kedvenc ablakkezelõd), és a teljesképernyõs xv/xmga/..
+Q: Gondjaim vannak a kedvenc ablakkezelõm esetén a teljesképernyõs xv/xmga/..
    móddal..
 A: Igen, ez egy bug. De nem(csak) a miénk. Eddig nem találtunk olyan
-   fullscreen módszert, ami tényleg teljesképernyõs ablakot adna.
+   fullscreen módszert, ami minden ablakkezelõvel mûködik.
    Volt néhány próbálkozás, de valamivel mindig bugzott. Valószínûleg a
    megoldás egy új opció lesz, például -fsmode , a kívánt módszerek közti
    választásara.
    Sajnos a legtöbb elterjedt ablakkezelõ nem kompatibilis a szabványokkal,
    vagy Motif-fal, így a teljesképernyõs mód bekapcsolására irányuló
-   szabványos módszerek nem mûködnek velük. A nemszabványos módszerek pedig
+   szabványos módszerek nem mûködnek velük. A nem szabványos módszerek pedig
    a szabványos ablakkezelõkkel nem mûködnek.
 
 Q: Dehát aviplay-jel mûködik !
@@ -231,7 +231,7 @@ A: Használd azt, úgyis van szép GUI-ja, meg amúgy is jó kis C++ :)
 
 Q: MPEG file-ok lejátszásánál ezt kapom: Can't find codec for video format
    0x10000001
-A: Régi a codecs.conf-od az ~/.mplayer könyvtárban. Frissítsd a DOCS-ból.
+A: Régi a codecs.conf-od az ~/.mplayer könyvtárban. Frissítsd a DOCS-ból!
    
 Q: Miután elindítom a lejátszást KDE(1/2) alatt, csak sötét képet kapok, és
    egy perc múlva elindul a lejátszás.
@@ -249,8 +249,8 @@ A: Olyan vo drivert használsz, ami egyszeres bufferelést használ (x11,xv).
    Növeld ezt : #define NUM_BUFFERS 1
 
 Q: Mi a fene van azzal a 2.96-os gcc-vel ?
-A: gcc 2.96 a RedHat NEM HIVATALOS (csak a RedHat-nál, vagy RedHat
-   disztribúciókban található meg) és HIBAS gcc-je. A gcc 2.96 TELJESEN
+A: gcc 2.96 a RedHat NEM HIVATALOS (csak a RedHat-nél, vagy RedHat
+   disztribúciókban található meg) és HIBÁS gcc-je. A gcc 2.96 TELJESEN
    használhatatlan az MPlayer-rel, mert egyszerûen ÁTUGORJA az MMX
    utasításokat, nem fordítja le õket. Fontos: ez NEM MPlayer-specifikus
    probléma, számos más project (DRI, avifile, stb..) szenved ebbõl fakadó
@@ -266,7 +266,7 @@ A: Nem lehetséges. A legjobb az lenne ha lángok nyelnék el ezeket a
    de az újabb filmek Sorenson-nal vannak tömörítve és ez a codec mélyen bele
    van ágyazva a QT programba, ergo lehetetlen felhasználni.
 
-Q: nVidia TNT/TNT2 kártyám van, és egy furcsa színekkel teli sáv van a film alatt!
-   Kinek a hibája ez?
+Q: nVidia TNT/TNT2 kártyám van, és egy furcsa színekkel teli sáv van a
+   film alatt! Kinek a hibája ez?
 A: Az nVidia driver-é. Ezek a hibák CSAK TNT/TNT2 kártyákkal jönnek elõ, és
    nem tehetünk róla, a hiba az Ön készülékében van.

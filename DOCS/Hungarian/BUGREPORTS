@@ -129,6 +129,7 @@ gdb mplayer --core=core -batch --command=parancs_file >mplayer.bug
 A fenti parancsok teljes kimenetét küldd el nekünk!
 
 Általában véve:
+~~~~~~~~~~~~~~~
   Ha valami nagy (log-ok stb.), akkor jobb ha FTP-re töltöd (gzip-pel),
   és csak a file nevét írod le a bugreportban!
 

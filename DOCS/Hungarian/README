@@ -66,11 +66,12 @@ a számomra, de a sebesség se semmi.
 
 És a grafikus felület?
 ~~~~~~~~~~~~~~~~~~~~~~
-Nem foglalkozom grafikus felületekkel. Utálom õket, a kedvencem az egyszerû
-80x25-ös konzol, ezért a lejátszó csak billentyûzetrõl irányítható. Tervezés
-alatt áll egy grafikus felület, Pontscho/Fresh! által. Erõsen fejlesztés alatt
-áll, de hamarosan kiadjuk és beépítjük. Ha már itt tartunk, kellene neki néhány
-skin, ha jó grafikus vagy, írj neki!!!
+Én nem vagyok GUI (grafikus felület) fejelsztõ. Nem szeretem ezeket,
+szívesebben használom az egyszerû fekete 80x25-ös konzolt.
+Ezért a lejátszó most még csak billentyûzetrõl vezérelhetõ. 
+Pontscho/Fresh! már dolgozik a grafikus felületen, ami még fejlesztési
+stádiumban van ugyan, de hamarosan elkészül és beépítjük. Ha már itt
+tartunk, kellene neki néhány skin, ha jó grafikus vagy, írj neki!!!
 
 Támogatott formátumok:
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -304,7 +305,6 @@ Licensz:
 Az MPlayer tartalmaz jónéhány, más projectekbõl átvett kódot, de jelenleg az
 OpenDivX kivételével minden a General Public License (GPL) version 2 vagy
 késõbbi alá tartozik.
-Lásd DOCS/COPYING
 
 Standard Disclaimer:
 ~~~~~~~~~~~~~~~~~~~~

@@ -32,3 +32,8 @@ A: Jelenleg csak lejátszani lehet DVD-rõl. Semmi több.
 Q: Hogy állíthatom be a DVD régiókódját ? Nincs windowsom!
 A: Használd a 'regionset' parancsot :
    http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz
+
+Q: MPlayer panaszkodik valami átnevezett opcióról...
+A: A '-dvd' opciót a továbbiakban '-dvdauth' néven fejlesztjük.
+   A '-dvd' opció *FOG* a komplett lejátszásra szolgálni.
+   De addig is a '-dvd' nem csinál semmit, csak hibaüzenetet ír.

@@ -50,6 +50,9 @@ o MPlayer és a LIRC
   button = Tape_Stop
   config = QUIT
  end
+
+ Ha nem felel meg a lirc-config file eredeti helye (~/.lircrc), használd
+ a -lircconf <file-név> kapcsolót.
 	      
  Örvendezz,
 

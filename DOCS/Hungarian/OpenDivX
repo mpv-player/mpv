@@ -6,11 +6,11 @@ Az OpenDivX codec részleteirõl a http://www.projectmayo.com címen olvashatsz.
 Ez egy nyílt-forráskódú utódja a DivX codecnek (valójában az MPEG-4 szabvány
 továbbfejlesztése), több platformon létezik. A mi Decore-unk MMX-re
 optimalizált. Az MPlayer jelenleg az OpenDivX 4.0alpha48 verzióját
-támogatja.
+tartalmazza.
 
 Dekóder:
 ~~~~~~~~
-'dvx1' fourcc-vel ellátott AVI és ASF file-oknál használt.
+A 'dvx1' és 'divx' fourcc-vel ellátott AVI és ASF file-oknál használt.
 
 A minõséget a '-pp' opcióval állíthatod.
 Kombináld (add össze) a flageket, amiket használni akarsz:
@@ -27,7 +27,7 @@ Például, ha horiz+vert chroma deblocking-et akarsz, használd ezt:
 
 Megj.: a C filterek csak n*16 pixel magasságú filmeknél használhatóak
 
-Megj.: a postprocess filter-ek mpeg1/2 fileokhoz is használhatóak (-pp)
+Megj.: a postprocess filter-ek mpeg1/2 file-okhoz is használhatóak (-pp)
 
 Enkóder:
 ~~~~~~~~
@@ -35,4 +35,4 @@ Az OpenDivX-be konvertálás egy nagyon kezdetleges hack. A hang automatikusan
 kikapcsolódik. Választd az 'odivx'-et outputként:
   mplayer input.mpg -vo odivx -encode output.avi
 Igen, tudom, hogy még használhatatlan, csak tesztelési célokat szolgál.
-Be van tervezve igazi encoder funkció, de csak a távoli jövõben.
+Tervezünk igazi encoder funkciót is, de csak a távoli jövõben.

@@ -1,5 +1,5 @@
-MTRR beállítása X11 és/vagy mga_vid-hez:
-========================================
+MTRR beállítása X11 3.3.x, SVGAlib és/vagy mga_vid-hez:
+=======================================================
 
 1. báziscím megkeresése
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -31,7 +31,7 @@ hexadecimálisba, vagy használd ezt a táblázatot:
 ~~~~~~~~~~~~~~~~~~
 Most, hogy megvan a báziscím és a méret, állítsuk be a regisztereket!
 
-  Például, a fenti Matrox kártyához (base=0xd8000000) 32Mb rammal
+  Például a fenti Matrox kártyához (base=0xd8000000) 32Mb rammal
   (size=0x2000000) a következõt kell beírni:
 echo "base=0xd8000000 size=0x2000000 type=write-combining" >| /proc/mtrr
 

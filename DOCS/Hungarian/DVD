@@ -91,6 +91,9 @@ az audio dekódoláshoz szükséges CPU használat rögtön visszaesett 24-rõl
 11%-ra. Jól látszik, hogy optimalizálni kell a downmix-et (KNI kód nem számít
 K6/2-n).
 
+FRISS HÍR:
+Már van 3Dnow-ra optimalizált libac3-unk. Wow :-) 
+
 
 Problémák (TODO)
 ~~~~~~~~~~~~~~~~
