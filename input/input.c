@@ -12,8 +12,6 @@
 #include <sys/time.h>
 #include <fcntl.h>
 
-
-
 #include "input.h"
 #include "mouse.h"
 #ifdef MP_DEBUG
@@ -22,10 +20,9 @@
 #include "../linux/getch2.h"
 #include "../linux/keycodes.h"
 #include "../linux/timer.h"
+#include "../cfgparser.h"
 
-#ifdef HAVE_JOYSTICK
 #include "joystick.h"
-#endif
 
 #ifdef HAVE_LIRC
 #include "lirc.h"
@@ -87,7 +84,6 @@ static mp_key_name_t key_names[] = {
   { MOUSE_BTN7, "MOUSE_BTN7" },
   { MOUSE_BTN8, "MOUSE_BTN8" },
   { MOUSE_BTN9, "MOUSE_BTN9" },
-#ifdef HAVE_JOYSTICK
   { JOY_AXIS1_MINUS, "JOY_UP" },
   { JOY_AXIS1_PLUS, "JOY_DOWN" },
   { JOY_AXIS0_MINUS, "JOY_LEFT" },
@@ -124,7 +120,6 @@ static mp_key_name_t key_names[] = {
   { JOY_BTN7, "JOY_BTN7" },
   { JOY_BTN8, "JOY_BTN8" },
   { JOY_BTN9, "JOY_BTN9" },
-#endif
   { 0, NULL }
 };
 
@@ -217,15 +212,37 @@ static unsigned int num_key_fd = 0;
 static mp_input_fd_t cmd_fds[MP_MAX_CMD_FD];
 static unsigned int num_cmd_fd = 0;
 
-static int key_max_fd = -1, cmd_max_fd = -1;
-
 // this is the key currently down
 static int key_down[MP_MAX_KEY_DOWN];
-static unsigned int num_key_down = 0;
-static short last_key_down = 0,key_was_down = 0;
+static unsigned int num_key_down = 0, last_key_down = 0;
+
+// Autorepeat stuff
+static short ar_state = -1;
+static mp_cmd_t* ar_cmd = NULL;
+static unsigned int ar_delay = 100, ar_rate = 8, last_ar = 0;
+
+static int use_joystick = 1, use_lirc = 1;
+
+static config_t input_conf[] = {
+  { "ar-delay", &ar_delay, CONF_TYPE_INT, CONF_GLOBAL, 0, 0, NULL },
+  { "ar-rate", &ar_rate, CONF_TYPE_INT, CONF_GLOBAL, 0, 0, NULL },
+  { NULL, NULL, 0, 0, 0, 0, NULL}
+};
+
+static config_t mp_input_opts[] = {
+  { "input", &input_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+  { "nojoystick", &use_joystick,  CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL },
+  { "joystick", &use_joystick,  CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL },
+  { "nolirc", &use_lirc, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL },
+  { "lirc", &use_lirc, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL },
+  { NULL, NULL, 0, 0, 0, 0, NULL}
+};
 
 static int
 mp_input_default_key_func(int fd);
+
+static char*
+mp_input_get_key_name(int key);
 
 
 int
@@ -242,8 +259,6 @@ mp_input_add_cmd_fd(int fd, int select, mp_cmd_func_t read_func, mp_close_func_t
   if(!select)
     cmd_fds[num_cmd_fd].flags = MP_FD_NO_SELECT;
   num_cmd_fd++;
-  if(fd > cmd_max_fd)
-    cmd_max_fd = fd;
 
   return 1;
 }
@@ -298,8 +313,6 @@ mp_input_add_key_fd(int fd, int select, mp_key_func_t read_func, mp_close_func_t
   if(!select)
     key_fds[num_key_fd].flags |= MP_FD_NO_SELECT;
   num_key_fd++;
-  if(fd > key_max_fd)
-    key_max_fd = fd;
 
   return 1;
 }
@@ -386,8 +399,11 @@ mp_input_parse_cmd(char* str) {
     return NULL;
   }
 
-  for( ; i < MP_CMD_MAX_ARGS && cmd_def->args[i].type != -1 ; i++)
-    memcpy(&cmd->args[i].v,&cmd_def->args[i].v,sizeof(mp_cmd_arg_value_t));
+  for( ; i < MP_CMD_MAX_ARGS && cmd_def->args[i].type != -1 ; i++) {
+    memcpy(&cmd->args[i],&cmd_def->args[i],sizeof(mp_cmd_arg_t));
+    if(cmd_def->args[i].type == MP_CMD_ARG_STRING && cmd_def->args[i].v.s != NULL)
+      cmd->args[i].v.s = strdup(cmd_def->args[i].v.s);
+  }
 
   return cmd;
 }
@@ -475,16 +491,55 @@ mp_input_read_cmd(mp_input_fd_t* mp_fd, char** ret) {
 }
 
 static mp_cmd_t*
+mp_input_get_cmd_from_keys(int n,int* keys, int paused) {
+  int j;
+  // In pause mode we return pause for the first key wich come
+  if(paused)
+    return mp_input_parse_cmd("pause");
+  for(j = 0; cmd_binds[j].cmd != NULL; j++) {
+    if(n > 0) {
+      int found = 1,s;
+      for(s = 0; s < n && cmd_binds[j].input[s] != 0; s++) {
+	if(cmd_binds[j].input[s] != keys[s]) {
+	  found = 0;
+	  break;
+	}
+      }
+      if(found && cmd_binds[j].input[s] == 0 && s == n)
+	break;
+      else
+	continue;
+    } else if(n == 1){
+      if(cmd_binds[j].input[0] == keys[0] && cmd_binds[j].input[1] == 0)
+	break;
+    }
+  }
+  if(cmd_binds[j].cmd == NULL) {
+    printf("No bind found for key %s",mp_input_get_key_name(keys[0]));
+    if(n > 1) {
+      int s;
+      for(s=1; s < n; s++)
+	printf("-%s",mp_input_get_key_name(keys[s]));
+    }
+    printf("                         \n");
+    return NULL;
+  }
+  return  mp_input_parse_cmd(cmd_binds[j].cmd);
+}
+
+static mp_cmd_t*
 mp_input_read_keys(int time,int paused) {
   fd_set fds;
-  struct timeval tv;
-  int i,n=0;
+  struct timeval tv,*time_val;
+  int i,n=0,max_fd = 0;
+  mp_cmd_t* ret;
   static int last_loop = 0;
 
   if(num_key_fd == 0)
     return NULL;
 
   FD_ZERO(&fds);
+  // Remove fd marked as dead and build the fd_set
   for(i = 0; (unsigned int)i < num_key_fd; i++) {
     if( (key_fds[i].flags & MP_FD_DEAD) ) {
       mp_input_rm_key_fd(key_fds[i].fd);
@@ -492,37 +547,38 @@ mp_input_read_keys(int time,int paused) {
       continue;
     } else if(key_fds[i].flags & MP_FD_NO_SELECT)
       continue;
-
+    if(key_fds[i].fd > max_fd)
+      max_fd = key_fds[i].fd;
     FD_SET(key_fds[i].fd,&fds);
     n++;
   }
 
-  if(n > 0 ) {
-
+  if(time >= 0 ) {
     tv.tv_sec=time/1000; 
     tv.tv_usec = (time%1000)*1000;
+    time_val = &tv;
+  } else
+    time_val = NULL;
   
-    while(1) {
-      if(select(key_max_fd+1,&fds,NULL,NULL,&tv) < 0) {
-	if(errno == EINTR)
-	  continue;
-	printf("Select error : %s\n",strerror(errno));
-      }
-      break;
+  while(n > 0) {
+    if(select(max_fd+1,&fds,NULL,NULL,time_val) < 0) {
+      if(errno == EINTR)
+	continue;
+      printf("Select error : %s\n",strerror(errno));
     }
-  } else {
-    FD_ZERO(&fds);
+    break;
   }
     
   for(i = last_loop + 1 ; i != last_loop ; i++) {
     int code = -1;
     unsigned int j;
-
+    // This is to check all fd in turn
     if((unsigned int)i >= num_key_fd) {
       i = -1;
       last_loop++;
       continue;
     }
+    // No input from this fd
     if(! (key_fds[i].flags & MP_FD_NO_SELECT) && ! FD_ISSET(key_fds[i].fd,&fds))
       continue;
     if(key_fds[i].fd == 0) { // stdin is handled by getch2
@@ -532,7 +588,7 @@ mp_input_read_keys(int time,int paused) {
     }
     else
       code = ((mp_key_func_t)key_fds[i].read_func)(key_fds[i].fd);
-    if((code & ~MP_KEY_DOWN)  < 0) {
+    if(code < 0) {
       if(code == MP_INPUT_ERROR)
 	printf("Error on key input fd %d\n",key_fds[i].fd);
       else if(code == MP_INPUT_DEAD) {
@@ -541,75 +597,88 @@ mp_input_read_keys(int time,int paused) {
       }
       continue;
     }
-    if(code & MP_KEY_DOWN) { // key pushed
+    // key pushed
+    if(code & MP_KEY_DOWN) {
       if(num_key_down > MP_MAX_KEY_DOWN) {
 	printf("Too much key down at the same time\n");
 	continue;
       }
       code &= ~MP_KEY_DOWN;
+      // Check if we don't alredy have this key as pushed
+      for(j = 0; j < num_key_down; j++) { 
+	if(key_down[j] == code)
+	  break;
+      }
+      if(j != num_key_down)
+	continue; 
+      key_down[num_key_down] = code;
+      num_key_down++;
+      last_key_down = GetTimer();
+      ar_state = 0;
+      continue;
+    }
+    // key released
+    // Check if the key is in the down key, driver wich can't send push event
+    // send only release event
+    for(j = 0; j < num_key_down; j++) { 
+      if(key_down[j] == code)
+	break;
+    }
+    if(j == num_key_down) { // key was not in the down keys : add it
+      if(num_key_down > MP_MAX_KEY_DOWN) {
+	printf("Too much key down at the same time\n");
+	continue;
+      }
       key_down[num_key_down] = code;
       num_key_down++;
       last_key_down = 1;
-      continue;
+    } 
+    // We ignore key from last combination
+    ret = last_key_down ? mp_input_get_cmd_from_keys(num_key_down,key_down,paused) : NULL;
+    // Remove the key
+    if(j+1 < num_key_down)
+      memmove(&key_down[j],&key_down[j+1],(num_key_down-(j+1))*sizeof(int));
+    num_key_down--;
+    last_key_down = 0;
+    ar_state = -1;
+    if(ar_cmd) {
+      mp_cmd_free(ar_cmd);
+      ar_cmd = NULL;
     }
-    key_was_down = 0;
-    if(num_key_down > 0) { // key released
-      for(j = 0; j < num_key_down; j++) { 
-	if(key_down[j] == code) { // Remove the key from the current combination
-	  if(j+1 < num_key_down)
-	    memmove(&key_down[j],&key_down[j+1],(num_key_down-(j+1))*sizeof(int));
-	  num_key_down--;
-	  key_was_down = 1;
-	  break;
-	}
-      }
-      if(key_was_down && !last_key_down) // Ignore relaesing key part of the combination
-	continue;
-      last_key_down = 0;
-    }
-    if(paused)
-      return mp_input_parse_cmd("pause");
-    for(j = 0; cmd_binds[j].cmd != NULL; j++) {
-      if(num_key_down > 0) {
-	unsigned int found = 1,s;
-	for(s = 0; cmd_binds[j].input[s+1] != 0; s++) {
-	  if(cmd_binds[j].input[s] != key_down[s]) {
-	    found = 0;
-	    break;
-	  }
-	}
-	if(found && s == num_key_down && cmd_binds[j].input[s] == code && cmd_binds[j].input[s+1] == 0)
-	  break;
-	continue;
-      } else {
-	if(cmd_binds[j].input[0] == code && cmd_binds[j].input[1] == 0)
-	  break;
-      }
-    }
-    if(cmd_binds[j].cmd == NULL) {
-      printf("No bind found for key %d",num_key_down > 0 ? key_down[0] : code);
-      if(num_key_down > 0) {
-	unsigned int s;
-	for(s=1; s < num_key_down; s++)
-	  printf("-%d",key_down[s]);
-	printf("-%d",code);
-      }
-      printf("                         \n");
-      continue;
-    }
-    last_loop = i;
-    return mp_input_parse_cmd(cmd_binds[j].cmd);
+    if(ret)
+      return ret;
   }
 
   last_loop = 0;
+
+  // No input : autorepeat ?
+  if(ar_rate > 0 && ar_state >=0 && num_key_down > 0 && ! (key_down[num_key_down-1] & MP_NO_REPEAT_KEY)) {
+    unsigned int t = GetTimer();
+    // First time : wait delay
+    if(ar_state == 0 && (t - last_key_down) >= ar_delay*1000) {
+      ar_cmd = mp_input_get_cmd_from_keys(num_key_down,key_down,paused);      
+      if(!ar_cmd)
+	ar_state = -1;
+      else {
+	ar_state = 1;
+	last_ar = t;
+      }
+      return mp_cmd_clone(ar_cmd);
+      // Then send rate / sec event
+    } else if(ar_state == 1 && (t -last_ar) >= 1000000/ar_rate) {
+      last_ar = t;
+      return mp_cmd_clone(ar_cmd);
+    }
+  }
+
   return NULL;
 }
 
 static mp_cmd_t*
 mp_input_read_cmds(int time) {
   fd_set fds;
-  struct timeval tv;
-  int i,n = 0;
+  struct timeval tv,*time_val;
+  int i,n = 0,max_fd = 0;
   mp_cmd_t* ret;
   static int last_loop = 0;
 
@@ -623,30 +692,31 @@ mp_input_read_cmds(int time) {
       i--;
       continue;
     } else if(cmd_fds[i].flags & MP_FD_NO_SELECT)
-      continue;    
+      continue;
+    if(cmd_fds[i].fd > max_fd)
+      max_fd = cmd_fds[i].fd;
     FD_SET(cmd_fds[i].fd,&fds);
     n++;
   }
 
-  if(n > 0) {
-
+  if(time >= 0) {
     tv.tv_sec=time/1000; 
     tv.tv_usec = (time%1000)*1000;
+    time_val = &tv;
+  } else
+    time_val = NULL;
     
-    while(1) {
-      if((i = select(cmd_max_fd+1,&fds,NULL,NULL,&tv)) <= 0) {
-	if(i < 0) {
-	  if(errno == EINTR)
-	    continue;
-	  printf("Select error : %s\n",strerror(errno));
-	}
-	return NULL;
+  while(n > 0) {
+    if((i = select(max_fd+1,&fds,NULL,NULL,time_val)) <= 0) {
+      if(i < 0) {
+	if(errno == EINTR)
+	  continue;
+	printf("Select error : %s\n",strerror(errno));
       }
-      break;
+      return NULL;
     }
-  } else {
-    FD_ZERO(&fds);
-  }    
+    break;
+  }
 
   for(i = last_loop + 1; i !=  last_loop ; i++) {
     int r = 0;
@@ -701,10 +771,52 @@ mp_cmd_free(mp_cmd_t* cmd) {
     free(cmd->name);
   
   for(i=0; i < MP_CMD_MAX_ARGS && cmd->args[i].type != -1; i++) {
-    if(cmd->args[i].type == MP_CMD_ARG_STRING)
+    if(cmd->args[i].type == MP_CMD_ARG_STRING && cmd->args[i].v.s != NULL)
       free(cmd->args[i].v.s);
   }
   free(cmd);
+}
+
+mp_cmd_t*
+mp_cmd_clone(mp_cmd_t* cmd) {
+  mp_cmd_t* ret;
+  int i;
+#ifdef MP_DEBUG
+  assert(cmd != NULL);
+#endif
+
+  ret = (mp_cmd_t*)malloc(sizeof(mp_cmd_t));
+  memcpy(ret,cmd,sizeof(mp_cmd_t));
+  if(cmd->name)
+    ret->name = strdup(cmd->name);
+  for(i = 0;  i < MP_CMD_MAX_ARGS && cmd->args[i].type != -1; i++) {
+    if(cmd->args[i].type == MP_CMD_ARG_STRING && cmd->args[i].v.s != NULL)
+      ret->args[i].v.s = strdup(cmd->args[i].v.s);
+  }
+
+  return ret;
+}
+
+static char key_str[2];
+
+static char*
+mp_input_get_key_name(int key) {
+  int i;
+
+  if(key == ' ')
+    return "SPACE";
+
+  if(key >> 8 == 0) {
+    snprintf(key_str,2,"%c",(char)key);
+    return key_str;
+  }
+
+  for(i = 0; key_names[i].name != NULL; i++) {
+    if(key_names[i].key == key)
+      return key_names[i].name;
+  }
+  
+  return NULL;
 }
 
 static int
@@ -843,7 +955,7 @@ mp_input_parse_config(char *file) {
 	strncpy(name,iter,end-iter);
 	name[end-iter] = '\0';
 	if(! mp_input_get_input_from_name(name,keys)) {
-	  printf("Unknow key %s\n",name);
+	  printf("Unknow key '%s'\n",name);
 	  mp_input_free_binds(binds);
 	  return 0;
 	}
@@ -856,7 +968,11 @@ mp_input_parse_config(char *file) {
       while(iter[0] == ' ' || iter[0] == '\t') iter++;
       // Found new line
       if(iter[0] == '\n' || iter[0] == '\r') {
-	printf("No command found for key (TODO)\n" /*mp_input_get_key_name(code)*/);
+	int i;
+	printf("No command found for key %s" ,mp_input_get_key_name(keys[0]));
+	for(i = 1; keys[i] != 0 ; i++)
+	  printf("-%s",mp_input_get_key_name(keys[i]));
+	printf("\n");
 	keys[0] = 0;
 	if(iter > buffer) {
 	  memmove(buffer,iter,bs- (iter-buffer));
@@ -912,7 +1028,7 @@ mp_input_init(void) {
     printf("Falling back on default (hardcoded) config\n");
 
 #ifdef HAVE_JOYSTICK
-  {
+  if(use_joystick) {
     int fd = mp_input_joystick_init(NULL);
     if(fd < 0)
       printf("Can't init input joystick\n");
@@ -922,7 +1038,7 @@ mp_input_init(void) {
 #endif
 
 #ifdef HAVE_LIRC
-  {
+  if(use_lirc) {
     int fd = mp_input_lirc_init();
     if(fd > 0)
       mp_input_add_cmd_fd(fd,1,NULL,(mp_close_func_t)close);
@@ -947,9 +1063,15 @@ mp_input_uninit(void) {
   
 
 #ifdef HAVE_LIRC
-  mp_input_lirc_uninit();
+  if(use_lirc)
+    mp_input_lirc_uninit();
 #endif
 
+}
+
+void
+mp_input_register_options(m_config_t* cfg) {
+  m_config_register_options(cfg,mp_input_opts);
 }
 
 #endif /* HAVE_NEW_INPUT */

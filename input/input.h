@@ -32,8 +32,9 @@
 #define MP_INPUT_DEAD -2
 #define MP_INPUT_NOTHING -3
 
-#define MP_KEY_DOWN (1<<30)
+#define MP_KEY_DOWN (1<<29)
 // Key up is the default
+#define MP_NO_REPEAT_KEY (1<<28)
 
 #ifndef MP_MAX_KEY_DOWN
 #define MP_MAX_KEY_DOWN 32
@@ -89,6 +90,9 @@ mp_input_get_cmd(int time, int paused);
 
 void
 mp_cmd_free(mp_cmd_t* cmd);
+
+mp_cmd_t*
+mp_cmd_clone(mp_cmd_t* cmd);
 
 void
 mp_input_init(void);
