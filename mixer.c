@@ -68,7 +68,6 @@ int mixer_l=0; int mixer_r=0;
 
 void mixer_incvolume( void )
 {
- fprintf( stderr,"[mixer] inc.\n" );
  mixer_getvolume( &mixer_l,&mixer_r );
  if ( mixer_l < 100 ) mixer_l++;
  if ( mixer_r < 100 ) mixer_r++;
@@ -77,7 +76,6 @@ void mixer_incvolume( void )
 
 void mixer_decvolume( void )
 {
- fprintf( stderr,"[mixer] dec.\n" );
  mixer_getvolume( &mixer_l,&mixer_r );
  if ( mixer_l > 0 ) mixer_l--;
  if ( mixer_r > 0 ) mixer_r--;
