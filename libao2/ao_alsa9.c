@@ -55,6 +55,7 @@ static int control(int cmd, int arg)
     return(CONTROL_UNKNOWN);
 }
 
+#define start
 /*
     open & setup audio device
     return: 1=success 0=fail
@@ -64,7 +65,6 @@ static int init(int rate_hz, int channels, int format, int flags)
     int err;
     int cards = -1;
     snd_pcm_info_t *alsa_info;
-    int chunck_size;
 
     printf("alsa-init: requested format: %d Hz, %d channels, %s\n", rate_hz,
 	channels, audio_out_format_name(format));
@@ -88,7 +88,6 @@ static int init(int rate_hz, int channels, int format, int flags)
     ao_outburst = OUTBURST;
     ao_buffersize = 16384;
 
-    memset(&alsa_format, 0, sizeof(alsa_format));
     switch (format)
     {
 	case AFMT_S8:
@@ -124,6 +123,8 @@ static int init(int rate_hz, int channels, int format, int flags)
 	    printf("alsa-init: invalid format (%s) requested - output disabled\n",
 		audio_out_format_name(format));
 	    return(0);
+	default:
+	    break;
     }
 
     if ((err = snd_pcm_info_malloc(&alsa_info)) < 0)
@@ -196,6 +197,13 @@ static int init(int rate_hz, int channels, int format, int flags)
 	return(0);
     }
 
+    {
+	int fragment_size = 4096;
+	int fragment_count = 8;
+	snd_pcm_hw_params_set_period_size(alsa_handler, alsa_hwparams, fragment_size / 4, 0);
+	snd_pcm_hw_params_set_periods(alsa_handler, alsa_hwparams, fragment_count, 0);
+    }
+
 #ifdef buffersize
     if ((err = snd_pcm_hw_params_get_buffer_size(alsa_hwparams)) < 0)
     {
@@ -266,6 +274,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	return(0);
     }
 
+#ifdef start
     if ((err = snd_pcm_start(alsa_handler)) < 0)
     {
 	printf("alsa-init: pcm start error: %s\n", snd_strerror(err));
@@ -277,7 +286,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 		return(0);
 	}
     }
-
+#endif
     printf("AUDIO: %d Hz/%d channels/%d bps/%d bytes buffer/%s\n",
 	ao_samplerate, ao_channels+1, ao_bps, ao_buffersize,
 	snd_pcm_format_description(alsa_format));
@@ -384,9 +393,11 @@ static void reset()
 */
 static int play(void* data, int len, int flags)
 {
-    if ((len = snd_pcm_writei(alsa_handler, data, len)) != len)
+    int got_len;
+
+    if ((got_len = snd_pcm_writei(alsa_handler, data, len/4)) != len/4)
     {
-	if (len == -EPIPE) /* underrun? */
+	if (got_len == -EPIPE) /* underrun? */
 	{
 	    printf("alsa-play: alsa underrun, resetting stream\n");
 	    if ((len = snd_pcm_prepare(alsa_handler)) < 0)
