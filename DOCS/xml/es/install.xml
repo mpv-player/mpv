@@ -256,7 +256,7 @@ cuando hagan zoom), por lo tanto la pantalla completa es agradable y muy rápida.
 <itemizedlist>
 <listitem><para>
   <emphasis role="bold">Placas Matrox G200/G400/G450/G550</emphasis>: a pesar de
-  que se provee un <link linend="vidix">controlador Vidix</link>, es recomendado
+  que se provee un <link linkend="vidix">controlador Vidix</link>, es recomendado
   usar el módulo mga_vid en su lugar, porque funciona mucho mejor.
   Por favor vea la sección <link linkend="mga_vid">mga_vid</link> acerca de su
   instalación y uso. Es muy importante hacer estos pasos <emphasis>antes</emphasis>
@@ -430,7 +430,7 @@ funciona con los siguientes controladores:
 <listitem><para>
   Si tiene una placa <emphasis role="bold">sintonizadora de TV</emphasis> compatible con
   V4L, y desea usarla para ver/capturar y codificar películas con <application>MPlayer</application>,
-  lea la sección <link linend="tv-input">entrada de TV</link>.
+  lea la sección <link linkend="tv-input">entrada de TV</link>.
   </para></listitem>
 <listitem><para>
   Existe un buen soporte de <emphasis role="bold">Menu en Pantalla</emphasis> listo
