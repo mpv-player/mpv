@@ -231,7 +231,7 @@ void *load_one_sym_mac(char *symbolName, CFragConnectionID *connID) {
     
     if (strlen(symbolName) > 255)
     {
-	mp_mpsg(MSGT_DECVIDEO, MSGL_V, "FindSymbol symbolname overflow\n");
+	mp_msg(MSGT_DECVIDEO, MSGL_V, "FindSymbol symbolname overflow\n");
 	return NULL;
     }
     
