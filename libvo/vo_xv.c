@@ -623,7 +623,7 @@ static uint32_t preinit(const char *arg)
     }
 
    /* check adaptors */
-    if(xv_port >= adaptors)
+    if(xv_port >= adaptors || xv_port < 0)
     {
     	mp_msg(MSGT_VO, MSGL_WARN,"Xv: Invalid port parameter, overriding with port 0\n");
     	xv_port = 0;
