@@ -241,7 +241,7 @@ extern "C" void demux_open_rtp(demuxer_t* demuxer) {
 	    wf->wBitsPerSample = 8;
 	    wf->cbSize = 0;
 	  } else if (strcmp(subsession->codecName(), "GSM") == 0) {
-	    wf->wFormatTag = sh_audio->format = 0x31;
+	    wf->wFormatTag = sh_audio->format = mmioFOURCC('a','g','s','m');
 	    wf->nChannels = 1;
 	    wf->nAvgBytesPerSec = 1650;
 	    wf->nBlockAlign = 33;
