@@ -46,7 +46,8 @@ static uint32_t             ontop=0;                //always in foreground
 static uint32_t image_width, image_height;          //image width and height
 static uint32_t d_image_width, d_image_height;      //image width and height zoomed 
 static uint8_t  *image=NULL;                        //image data
-static uint32_t image_format;                       //image format
+static uint32_t image_format=0;                       //image format
+static uint32_t primary_image_format;
 static uint32_t vm = 0;                             //exclusive mode, allows resolution switching (not implemented yet)
 static uint32_t fs = 0;                             //display in window or fullscreen 
 static uint32_t dstride;                            //surface stride
@@ -232,8 +233,9 @@ static uint32_t Directx_CreateOverlay(uint32_t imgfmt)
 	ddrval = g_lpdd->lpVtbl->CreateSurface(g_lpdd,&ddsdOverlay, &g_lpddsOverlay, NULL);
 	if(ddrval != DD_OK)
 	{
-	   mp_msg(MSGT_VO, MSGL_ERR,"<vo_directx><ERROR>");
-	   switch(ddrval)
+	   if(ddrval == DDERR_INVALIDPIXELFORMAT)mp_msg(MSGT_VO,MSGL_V,"<vo_directx><ERROR> invalid pixelformat: %s\n",g_ddpf[i].img_format_name);
+       else mp_msg(MSGT_VO, MSGL_ERR,"<vo_directx><ERROR>");
+       switch(ddrval)
 	   {
 	      case DDERR_INCOMPATIBLEPRIMARY:
 			 {mp_msg(MSGT_VO, MSGL_ERR,"incompatible primary surface\n");break;}
@@ -243,8 +245,6 @@ static uint32_t Directx_CreateOverlay(uint32_t imgfmt)
 		     {mp_msg(MSGT_VO, MSGL_ERR,"invalid object\n");break;}
 	      case DDERR_INVALIDPARAMS:
 		     {mp_msg(MSGT_VO, MSGL_ERR,"invalid parameters\n");break;}
-	      case DDERR_INVALIDPIXELFORMAT:
-		     {mp_msg(MSGT_VO, MSGL_ERR,"invalid pixelformat: %s\n",g_ddpf[i].img_format_name);break;}
 	      case DDERR_NODIRECTDRAWHW:
 		     {mp_msg(MSGT_VO, MSGL_ERR,"no directdraw hardware\n");break;}
 	      case DDERR_NOEMULATION:
@@ -295,7 +295,7 @@ static void uninit(void)
 	if (g_lpddsBack != NULL) g_lpddsBack->lpVtbl->Release(g_lpddsBack);
 	g_lpddsBack = NULL;
 	mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>back surface released\n");
-	if(vo_doublebuffering)
+	if(vo_doublebuffering && !nooverlay)
 	{
 		if (g_lpddsOverlay != NULL)g_lpddsOverlay->lpVtbl->Release(g_lpddsOverlay);
         g_lpddsOverlay = NULL;
@@ -687,6 +687,7 @@ static uint32_t Directx_CheckPrimaryPixelformat()
 			   mp_msg(MSGT_VO, MSGL_V ,"<vo_directx><FORMAT PRIMARY>%i %s supported\n",i,g_ddpf[i].img_format_name);
 			   g_ddpf[i].drv_caps = VFCAP_CSP_SUPPORTED |VFCAP_OSD;
 			   formatcount++;
+               primary_image_format=g_ddpf[i].img_format;     
 		   }
 	   }
 	   i++;
@@ -1048,6 +1049,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	image_height = height;
 	d_image_width = d_width;
 	d_image_height = d_height;
+    nooverlay = 0;
     aspect_save_orig(image_width,image_height);
     aspect_save_prescale(d_image_width,d_image_height);
     aspect_save_screenres(GetSystemMetrics(SM_CXSCREEN),GetSystemMetrics(SM_CYSCREEN));
@@ -1107,9 +1109,11 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
     if(Directx_CreatePrimarySurface())return 1;
 	if (!nooverlay && Directx_CreateOverlay(image_format))
 	{
-			nooverlay=1; /*overlay creation failed*/
-			mp_msg(MSGT_VO, MSGL_FATAL,"<vo_directx><FATAL ERROR>can't use overlay mode: please use -vo directx:noaccel\n");
-			return 1;
+			if(format == primary_image_format)nooverlay=1; /*overlay creation failed*/
+			else {
+              mp_msg(MSGT_VO, MSGL_FATAL,"<vo_directx><FATAL ERROR>can't use overlay mode: please use -vo directx:noaccel\n");
+			  return 1;
+            }       
 	}
 	if(nooverlay)
 	{
