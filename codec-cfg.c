@@ -237,6 +237,7 @@ static short get_driver(char *s,int audioflag)
 		"fli",
 		"cinepak",
 		"qtrle",
+		"nuv",
 		NULL
 	};
         char **drv=audioflag?audiodrv:videodrv;

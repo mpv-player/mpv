@@ -128,6 +128,13 @@ void qt_decode_rle(
   int encoded_bpp,
   int bytes_per_pixel);
 
+void decode_nuv(
+  unsigned char *encoded,
+  int encoded_size,
+  unsigned char *decoded,
+  int width,
+  int height);
+
 //**************************************************************************//
 //             The OpenDivX stuff:
 //**************************************************************************//
@@ -544,7 +551,10 @@ if ((sh_video->codec->driver == VFM_QTRLE) && (sh_video->bih->biBitCount != 24))
     "    this Quicktime file to the MPlayer FTP, the team could look at it.\n",
     sh_video->bih->biBitCount);
 
+   break;
    }
+ case VFM_NUV:
+    sh_video->our_out_buffer = (char *)memalign(64, sh_video->disp_w*sh_video->disp_h*3/2);
    break;
  }
 }
@@ -803,6 +813,12 @@ if(verbose>1){
         start, in_size, sh_video->our_out_buffer,
         sh_video->disp_w, sh_video->disp_h,
         ((out_fmt&255)+7)/8);
+    blit_frame = 3;
+    break;
+  case VFM_NUV:
+    decode_nuv(
+        start, in_size, sh_video->our_out_buffer,
+        sh_video->disp_w, sh_video->disp_h);
     blit_frame = 3;
     break;
   case VFM_QTRLE:
