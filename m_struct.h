@@ -24,7 +24,7 @@ typedef struct m_struct_st {
 #define M_ST_MB_P(struct_p, struct_offset)   \
     ((void*) (struct_p) + (unsigned long) (struct_offset))
 #define M_ST_MB(member_type, struct_p, struct_offset)   \
-    (*(member_type*) M_STRUCT_MEMBER_P ((struct_p), (struct_offset)))
+    (*(member_type*) M_ST_MB_P ((struct_p), (struct_offset)))
 
 
 
