@@ -120,7 +120,7 @@ for lang in `grep 'SUBDIRS =' Makefile|cut -d= -f2`; do
 [ 
 EOF
 
-  for file in `find $lang en -name \*.xml -exec basename \{\} \; | uniq`; do
+  for file in `find $lang en -name \*.xml -exec basename \{\} \; | sort | uniq`; do
     echo '<!ENTITY '$file'	SYSTEM "'$file'">' >> $lang/main.xml
   done
 
