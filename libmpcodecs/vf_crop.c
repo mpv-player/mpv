@@ -91,11 +91,40 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     return vf_next_put_image(vf,dmpi);
 }
 
+static void start_slice(struct vf_instance_s* vf, mp_image_t *mpi){
+    if(!vf->next->draw_slice){
+	mpi->flags&=~MP_IMGFLAG_DRAW_CALLBACK;
+	return;
+    }
+    vf_get_image(vf->next, mpi->imgfmt, mpi->type, mpi->flags,
+	vf->priv->crop_w, vf->priv->crop_h);
+}
+
+static void draw_slice(struct vf_instance_s* vf,
+        unsigned char** src, int* stride, int w,int h, int x, int y){
+    //mp_msg(MSGT_VFILTER, MSGL_V, "crop slice %d %d %d %d ->", w,h,x,y);
+    if ((x -= vf->priv->crop_x) < 0) {
+	w += x;
+	x = 0;
+    }
+    if ((y -= vf->priv->crop_y) < 0) {
+	h += y;
+	y = 0;
+    }
+    if (x+w > vf->priv->crop_w) w = vf->priv->crop_w-x;
+    if (y+h > vf->priv->crop_h) h = vf->priv->crop_h-y;
+    //mp_msg(MSGT_VFILTER, MSGL_V, "%d %d %d %d\n", w,h,x,y);
+    if ((w < 0) || (h < 0)) return;
+    vf_next_draw_slice(vf,src,stride,w,h,x,y);
+}
+
 //===========================================================================//
 
 static int open(vf_instance_t *vf, char* args){
     vf->config=config;
     vf->put_image=put_image;
+    vf->start_slice=start_slice;
+    vf->draw_slice=draw_slice;
     vf->default_reqs=VFCAP_ACCEPT_STRIDE;
     if(!vf->priv) {
     vf->priv=malloc(sizeof(struct vf_priv_s));
