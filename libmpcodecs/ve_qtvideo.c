@@ -12,17 +12,13 @@
 #include "../mp_msg.h"
 #include "../bswap.h"
 
-#ifdef USE_WIN32DLL 
+#ifdef WIN32_LOADER 
 #include "ldt_keeper.h" 
 #endif 
 
 #ifdef USE_QTX_CODECS
 #include "../loader/qtx/qtxsdk/components.h"
 #include "wine/windef.h"
-
-#ifdef USE_WIN32DLL
-#include "ldt_keeper.h"
-#endif
 
 #include "codec-cfg.h"
 #include "stream.h"
@@ -296,7 +292,9 @@ static int vf_open(vf_instance_t *vf, char* args){
     mux_v->bih->biBitCount=24;
 
 
+#ifdef WIN32_LOADER
     Setup_LDT_Keeper();
+#endif
     handler = LoadLibraryA("qtmlClient.dll");
     InitializeQTML = (OSErr (*)(long))GetProcAddress(handler, "InitializeQTML");
     GetGWorldPixMap = (PixMapHandle (*)(GWorldPtr))GetProcAddress(handler, "GetGWorldPixMap");
