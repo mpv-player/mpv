@@ -1,5 +1,5 @@
 // Transated by: Johannes Feigl, johannes.feigl@mcse.at
-// Overworked by Klaus Umbach, klaus.umbach@gmx.net
+// Reworked by Klaus Umbach, klaus.umbach@gmx.net
 
 // ========================= MPlayer help ===========================
 
@@ -239,13 +239,16 @@ static char help_text[]=
 #define MSGTR_MessageBox "Message-Box"
 #define MSGTR_PlayList "Playlist"
 #define MSGTR_Equalizer "Equalizer"
-#define MSGTR_SkinBrowser "Skin Browser"
+#define MSGTR_SkinBrowser "Skin-Browser"
+#define MSGTR_Network "Netzwerk-Streaming ..."
 
 // --- buttons ---
 #define MSGTR_Ok "Ok"
 #define MSGTR_Cancel "Abbrechen"
 #define MSGTR_Add "Hinzufügen"
 #define MSGTR_Remove "Entfernen"
+#define MSGTR_Clear "Löschen"
+#define MSGTR_Config "Konfiguration"
 
 // --- error messages ---
 #define MSGTR_NEMDB "Sorry, nicht genug Speicher für den Zeichen-Puffer."
@@ -310,6 +313,21 @@ static char help_text[]=
 #define MSGTR_MENU_SkinBrowser "Skinbrowser"
 #define MSGTR_MENU_Preferences "Einstellungen"
 #define MSGTR_MENU_Exit "Beenden ..."
+
+// --- equalizer
+#define MSGTR_EQU_Audio "Audio"
+#define MSGTR_EQU_Video "Video"
+#define MSGTR_EQU_Contrast "Kontrast: "
+#define MSGTR_EQU_Brightness "Helligkeit: "
+#define MSGTR_EQU_Hue "Farbton: "
+#define MSGTR_EQU_Saturation "Sättigung: "
+#define MSGTR_EQU_Front_Left "Vorne Links"
+#define MSGTR_EQU_Front_Right "Vorne Rechts"
+#define MSGTR_EQU_Back_Left "Hinten Links"
+#define MSGTR_EQU_Back_Right "Hinten Rechts"
+#define MSGTR_EQU_Center "Mitte"
+#define MSGTR_EQU_Bass "Tiefton" // LFE
+#define MSGTR_EQU_All "Alle"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Fataler Fehler ..."
