@@ -453,23 +453,23 @@ void outline(
 	int r,
 	int mwidth) {
 
-    int x, y, mx, my;
+    int x, y;
     for (y = 0; y<height; ++y) {
 	for (x = 0; x<width; ++x, ++s, ++t) {
 	    unsigned max = 0;
 	    unsigned *mrow = m + r;
 	    unsigned char *srow = s -r*width;
+	    int x1=(x<r)?-x:-r;
+	    int x2=(x+r>=width)?(width-x-1):r;
+	    int my;
 
 	    for (my = -r; my<=r; ++my, srow+= width, mrow+= mwidth) {
+		int mx;
 		if (y+my < 0) continue;
 		if (y+my >= height) break;
 
-		for (mx = -r; mx<=r; ++mx) {
-		    unsigned v;
-		    if (x+mx < 0) continue;
-		    if (x+mx >= width) break;
-
-		    v = srow[mx] * mrow[mx];
+		for (mx = x1; mx<=x2; ++mx) {
+		    unsigned v = srow[mx] * mrow[mx];
 		    if (v>max) max = v;
 		}
 	    }
@@ -523,24 +523,25 @@ void blur(
 	int mwidth,
 	unsigned volume) {
 
-    int x, y, mx, my;
+    int x, y;
 
     for (y = 0; y<height; ++y) {
 	for (x = 0; x<width; ++x, ++s, ++t) {
 	    unsigned sum = 0;
 	    unsigned *mrow = m + r;
 	    unsigned char *srow = s -r*width;
+	    int x1=(x<r)?-x:-r;
+	    int x2=(x+r>=width)?(width-x-1):r;
+	    int my;
 
 	    for (my = -r; my<=r; ++my, srow+= width, mrow+= mwidth) {
+		int mx;
 		if (y+my < 0) continue;
 		if (y+my >= height) break;
 
-		for (mx = -r; mx<=r; ++mx) {
-		    if (x+mx < 0) continue;
-		    if (x+mx >= width) break;
-
+		for (mx = x1; mx<=x2; ++mx)
 		    sum+= srow[mx] * mrow[mx];
-		}
+
 	    }
 	    *t = (sum + volume/2) / volume;
 	}
@@ -592,9 +593,12 @@ void alpha() {
     if (DEBUG) eprintf("\n");
 
 
-    outline(buffer, tbuffer, width, height, om, o_r, o_w);	// solid outline
+    if(thickness==1.0)
+      outline1(buffer, tbuffer, width, height);	// FAST solid 1 pixel outline
+    else
+      outline(buffer, tbuffer, width, height, om, o_r, o_w);	// solid outline
+    
     //outline(buffer, tbuffer, width, height, gm, g_r, g_w);	// Gaussian outline
-    //outline1(buffer, tbuffer, width, height);	// solid 1 pixel outline
 
     blur(tbuffer, abuffer, width, height, gm, g_r, g_w, volume);
 
