@@ -542,8 +542,8 @@ switch(sh_video->codec->driver){
    sh_video->our_out_buffer = (char*)memalign(64,sh_video->disp_w*sh_video->disp_h*bpp); // FIXME!!!
    if(bpp==2){  // 15 or 16 bpp ==> palette conversion!
      unsigned int* pal=(unsigned int*)(((char*)sh_video->bih)+40);
-     //int cols=(sh_video->bih->biSize-40)/4;
-     int cols=1<<(sh_video->bih->biBitCount);
+     int cols=(sh_video->bih->biSize-40)/4;
+     //int cols=1<<(sh_video->bih->biBitCount);
      int i;
      if(cols>256) cols=256;
      mp_msg(MSGT_DECVIDEO,MSGL_V,"RLE: converting palette for %d colors.\n",cols);
