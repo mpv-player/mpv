@@ -26,7 +26,7 @@
 #include "../mmx_defs.h"
 #include "../postproc/rgb2rgb.h"
 
-#define WIDTH_ALIGN 32 /* should be 16 for radeons */
+#define WIDTH_ALIGN 16 /* should be 16 for radeons */
 #define NUM_FRAMES 2
 static uint8_t *frames[NUM_FRAMES];
 
@@ -144,56 +144,11 @@ void vlvo_term( void )
 	if(lvo_handler != -1) close(lvo_handler);
 }
 
-static void
-CopyData420(
-   unsigned char *src1,
-   unsigned char *src2,
-   unsigned char *src3,
-   unsigned char *dst1,
-   unsigned char *dst2,
-   unsigned char *dst3,
-   int srcPitch,
-   int srcPitch2,
-   int dstPitch,
-   int h,
-   int w
-){
-   int count;
-
-       count = h;
-       while(count--) {
-	   memcpy(dst1, src1, w);
-	   src1 += srcPitch;
-	   dst1 += dstPitch;
-       }
-
-   w >>= 1;
-   h >>= 1;
-   dstPitch >>= 1;
-
-       count = h;
-       while(count--) {
-	   memcpy(dst2, src2, w);
-	   src2 += srcPitch2;
-	   dst2 += dstPitch;
-       }
-
-       count = h;
-       while(count--) {
-	   memcpy(dst3, src3, w);
-	   src3 += srcPitch2;
-	   dst3 += dstPitch;
-       }
-}
-
-
-uint32_t vlvo_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
+uint32_t vlvo_draw_slice_mga(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
-#if 0
-/* original vo_mga stuff */
     uint8_t *src;
     uint8_t *dest;
-    uint32_t bespitch,bespitch2,srcpitch;
+    uint32_t bespitch,bespitch2;
     int i;
 
     bespitch = (mga_vid_config.src_width + (WIDTH_ALIGN-1)) & ~(WIDTH_ALIGN-1);
@@ -226,41 +181,27 @@ uint32_t vlvo_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y
         src+=stride[2];
         dest += bespitch2;
     }
-#else
+    return 0;
+}
+
+uint32_t vlvo_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
+{
  uint8_t *dst;
  uint8_t bytpp;
+ if(verbose > 1) printf("vesa_lvo: vlvo_draw_slice() was called\n");
  bytpp = (image_bpp+7)/8;
  dst = lvo_mem + (image_width * y + x)*bytpp;
 #ifdef HAVE_RADEON
     if(src_format == IMGFMT_YV12)
-    {
       yv12toyuy2(image[0],image[1],image[2],dst
                  ,w,h,stride[0],stride[1],w*2);
-    }
     else
 #else
     if(src_format == IMGFMT_YV12)
-    {
-        uint32_t dstPitch,d1line,d2line,d3line,d1offset,d2offset,d3offset;
-	dstPitch = (mga_vid_config.src_width + 15) & ~15;  /* of luma */
-	d1line = y * dstPitch;
-	d2line = (mga_vid_config.src_height * dstPitch) + ((y >> 1) * (dstPitch >> 1));
-	d3line = d2line + ((mga_vid_config.src_height >> 1) * (dstPitch >> 1));
-
-	y &= ~1;
-
-	d1offset = (y * dstPitch) + x;
-	d2offset = d2line + (x >> 1);
-	d3offset = d3line + (x >> 1);
-      CopyData420(image[0],image[1],image[2],
-    		  dst+d1offset,dst+d2offset,dst+d3offset,
-		  stride[0],stride[1],dstPitch,h,w);
-    }
+      vlvo_draw_slice_mga(image,stride,w,h,x,y);
     else
 #endif
       memcpy(dst,image[0],mga_vid_config.frame_size);
-#endif
- if(verbose > 1) printf("vesa_lvo: vlvo_draw_slice() was called\n");
  return 0;
 }
 

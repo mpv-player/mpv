@@ -381,7 +381,7 @@ RTRACE("radeon_vid: usr_config: version = %x format=%x card=%x ram=%u src(%ux%u)
     
     besr.fourcc = config->format;
 
-    besr.v_inc = (config->src_height << 20) / XXX_DRW_H; /*9c0e0 -> 9c528*/
+    besr.v_inc = (config->src_height << 20) / XXX_DRW_H;
     h_inc = (config->src_width  << 12) / XXX_DRW_W;
     step_by = 1;
 
@@ -395,7 +395,7 @@ RTRACE("radeon_vid: usr_config: version = %x format=%x card=%x ram=%u src(%ux%u)
     if(is_420)
     {
         uint32_t dstPitch,d1line,d2line,d3line;
-	dstPitch = (XXX_WIDTH + 31) & ~31;  /* of luma */
+	dstPitch = (XXX_WIDTH + 15) & ~15;  /* of luma */
 	d1line = top * dstPitch;
 	d2line = (XXX_HEIGHT * dstPitch) + ((top >> 1) * (dstPitch >> 1));
 	d3line = d2line + ((XXX_HEIGHT >> 1) * (dstPitch >> 1));
@@ -439,7 +439,7 @@ RTRACE("radeon_vid: usr_config: version = %x format=%x card=%x ram=%u src(%ux%u)
     left = (left >> 16) & 7;
     besr.h_inc = h_inc | ((h_inc >> 1) << 16);
     besr.step_by = step_by | (step_by << 8);
-    besr.y_x_start = (config->x_org+8) | (config->y_org << 16); /*5c008->5d009*/
+    besr.y_x_start = (config->x_org+8) | (config->y_org << 16);
     besr.y_x_end = (config->x_org + config->dest_width+8) | ((config->y_org + config->dest_height) << 16);
     besr.p1_blank_lines_at_top = 0x00000fff | ((config->src_height - 1) << 16);
     besr.p23_blank_lines_at_top = is_420 ? 0x000007ff | ((((config->src_height+1)>>1) - 1) << 16) : 0;
