@@ -3243,17 +3243,35 @@ echocheck "freetype 2"
 if test "$_freetype" = yes ; then
     if ( freetype-config --version ) >/dev/null 2>&1 ; then
 	cat > $TMPC << EOF
+#include <stdio.h>
 #include <freetype/freetype.h>
 #if !(FREETYPE_MAJOR >= 2)
 #error "Need FreeType 2.0 or newer"
 #endif
 int main()
 {
+    FT_Library library;
+    FT_Int major=-1,minor=-1,patch=-1;
+    int err=FT_Init_FreeType(&library);
+    if(err){
+	printf("Couldn't initialize freetype2 lib, err code: %d\n",err);
+	exit(err);
+    }
+#if (FREETYPE_MINOR >= 1)
+    FT_Library_Version(library,&major,&minor,&patch); // in v2.1.0+ only :(((
+    printf("freetype2  header version: %d.%d.%d  library version: %d.%d.%d\n",
+	FREETYPE_MAJOR,FREETYPE_MINOR,FREETYPE_PATCH,
+	(int)major,(int)minor,(int)patch );
+    if(major!=FREETYPE_MAJOR || minor!=FREETYPE_MINOR){
+	printf("Library and header version mismatch! Fix it in your distribution!\n");
+	exit(1);
+    }
+#endif
     return 0;
 }
 EOF
 	_freetype=no
-	cc_check `freetype-config --cflags` && _freetype=yes
+	cc_check `freetype-config --cflags` `freetype-config --libs` && ( $TMPO >> "$TMPLOG" ) && _freetype=yes
     else
 	_freetype=no
     fi
