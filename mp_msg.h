@@ -2,14 +2,14 @@
 // verbosity elevel:
 
 #define MSGL_FATAL 0  // will exit/abort
-#define MSGL_ERROR 1  // continues
+#define MSGL_ERR 1    // continues
 #define MSGL_WARN 2   // only warning
 #define MSGL_INFO 3   // -quiet
 #define MSGL_STATUS 4 // v=0
-#define MSGL_VERBOSE 5// v=1
-#define MSGL_DEBUG2 6 // v=2
-#define MSGL_DEBUG3 7 // v=3
-#define MSGL_DEBUG4 8 // v=4
+#define MSGL_V 5      // v=1
+#define MSGL_DBG2 6   // v=2
+#define MSGL_DBG3 7   // v=3
+#define MSGL_DBG4 8   // v=4
 
 // code/module:
 
@@ -23,6 +23,7 @@
 #define MSGT_DEMUXER 5    // demuxer.c (general stuff)
 #define MSGT_DS 6         // demux stream (add/read packet etc)
 #define MSGT_DEMUX 7      // fileformat-specific stuff (demux_*.c)
+#define MSGT_HEADER 8     // fileformat-specific header (*header.c)
 
 #define MSGT_MAX 64
 
