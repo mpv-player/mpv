@@ -40,4 +40,6 @@ static char* help_text=
 "    q or ESC        stop playing and quit program\n"
 "    + or -          adjust audio delay by +/- 0.1 second\n"
 "    o               toggle OSD:  none / seek / seek+timer\n"
+"    * or /          increase or decrease volume\n"
+"    m or c          use mixer master or pcm channel\n"
 "\n";
