@@ -521,11 +521,33 @@ static void mix31to2 (sample_t * samples, sample_t bias)
     int i;
     sample_t common;
 
+#ifdef HAVE_SSE
+	asm volatile(
+		"movlps %1, %%xmm7		\n\t"
+		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+		"movl $-1024, %%esi		\n\t"
+		"1:				\n\t"
+		"movaps 1024(%0, %%esi), %%xmm0	\n\t"  
+		"addps 3072(%0, %%esi), %%xmm0	\n\t"  
+		"addps %%xmm7, %%xmm0		\n\t" // common
+		"movaps (%0, %%esi), %%xmm1	\n\t" 
+		"movaps 2048(%0, %%esi), %%xmm2	\n\t"
+		"addps %%xmm0, %%xmm1		\n\t"
+		"addps %%xmm0, %%xmm2		\n\t"
+		"movaps %%xmm1, (%0, %%esi)	\n\t"
+		"movaps %%xmm2, 1024(%0, %%esi)	\n\t"
+		"addl $16, %%esi		\n\t"
+		" jnz 1b			\n\t"
+	:: "r" (samples+256), "m" (bias)
+	: "%esi"
+	);
+#else
     for (i = 0; i < 256; i++) {
 	common = samples[i + 256] + samples[i + 768] + bias;
 	samples[i] += common;
 	samples[i + 256] = samples[i + 512] + common;
     }
+#endif
 }
 
 static void mix31toS (sample_t * samples, sample_t bias)
@@ -533,12 +555,36 @@ static void mix31toS (sample_t * samples, sample_t bias)
     int i;
     sample_t common, surround;
 
+#ifdef HAVE_SSE
+	asm volatile(
+		"movlps %1, %%xmm7		\n\t"
+		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+		"movl $-1024, %%esi		\n\t"
+		"1:				\n\t"
+		"movaps 1024(%0, %%esi), %%xmm0	\n\t"  
+		"movaps 3072(%0, %%esi), %%xmm3	\n\t" // surround
+		"addps %%xmm7, %%xmm0		\n\t" // common
+		"movaps (%0, %%esi), %%xmm1	\n\t" 
+		"movaps 2048(%0, %%esi), %%xmm2	\n\t"
+		"addps %%xmm0, %%xmm1		\n\t"
+		"addps %%xmm0, %%xmm2		\n\t"
+		"subps %%xmm3, %%xmm1		\n\t"
+		"addps %%xmm3, %%xmm2		\n\t"
+		"movaps %%xmm1, (%0, %%esi)	\n\t"
+		"movaps %%xmm2, 1024(%0, %%esi)	\n\t"
+		"addl $16, %%esi		\n\t"
+		" jnz 1b			\n\t"
+	:: "r" (samples+256), "m" (bias)
+	: "%esi"
+	);
+#else
     for (i = 0; i < 256; i++) {
 	common = samples[i + 256] + bias;
 	surround = samples[i + 768];
 	samples[i] += common - surround;
 	samples[i + 256] = samples[i + 512] + common + surround;
     }
+#endif
 }
 
 static void mix22toS (sample_t * samples, sample_t bias)
