@@ -517,7 +517,7 @@ int gui_no_filename=0;
       gCpuCaps.has3DNow, gCpuCaps.has3DNowExt,
       gCpuCaps.hasSSE, gCpuCaps.hasSSE2);
 #ifdef RUNTIME_CPUDETECT
-  mp_msg(MSGT_CPLAYER,MSGL_INFO,"Compiled with RUNTIME CPU Detection - warning, it's untested!\n");
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"Compiled with RUNTIME CPU Detection - warning, it's not optimal! To get best performance, recompile mplayer from sources with --disable-runtime-cpudetection\n");
 #else
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"Compiled for x86 CPU with features:");
 #ifdef HAVE_MMX
