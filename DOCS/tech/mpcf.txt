@@ -1,0 +1,415 @@
+		MPlayer container format draft 0.01
+
+
+                
+			Intro:
+
+Features / goals: 
+	(supported by the format, not necessary by a specific implementation)
+
+Simple
+	use the same encoding for nearly all fields
+Extendible
+	no limit for the possible values for all fields (using universal vlc)
+	allow adding of new headers in the future
+	allow adding more fields at the end of headers
+Compact
+	~0.2% overhead, for normal bitrates
+	index is <10kb per hour (1 keyframe every 3sec)
+Error resistant
+	seeking / playback without an index
+	headers & index can be repeated
+	audio packet reshuffle
+	checksums to allow quick redownloading of damaged parts
+	gurantees that no mpeg startcode prefixes occur in the headers with the
+	exception of codec specific headers (really?)
+
+
+        
+			Definitions:
+
+MUST	the specific part must be done to conform to this standard
+SHOULD	its recommanded to be done that way but its not strictly required
+
+
+
+			Syntax:
+
+packet header
+	forward ptr				v
+	backward ptr				v
+
+align_byte
+	while(not byte aligned)
+		one				f(1)
+
+reserved_bytes
+	for(i=0; i<forward_ptr - length_of_non_reserved; i++)
+		reserved			u(8)
+  
+main header:
+	packet header
+	main_startcode				f(64)
+	version					v
+	stream_count				v
+	file_size				v
+	length_in msec				v
+	reserved_bytes
+	checksum				u(32)
+
+stream_header:
+	packet_header
+	stream_startcode			f(64)
+	stream_id				v
+	stream_class				v
+	fourcc					v
+	average_bitrate				v
+	language_code				v
+	time_base				v
+	lsb_timestamp_length			v
+	fixed_fps				u(1)
+	codec_specific_header_flag		u(1)
+	reserved				u(6)
+
+video_stream_header:
+	stream_header
+	width					v
+	height					v
+	sample_width				v
+	sample_height				v
+	colorspace_type				v
+	depth					v
+	reserved_bytes
+	checksum				u(32)
+
+audio_stream_header:
+	stream_header
+	samplerate				v
+	channel_count				v
+	sub_packet_size				v
+	shuffle_type				v
+	reserved_bytes
+	checksum				u(32)
+
+codec_specific_header:
+	packet_header
+	codec_specific_startcode		f(64)
+	stream_id				v
+	codec_specific data
+	checksum
+ 
+frame
+	packet header
+	if(keyframe){
+		keyframe_startcode		f(64)
+	}
+	lsb_timestamp				u(lsb_timestamp_length)
+	stream_id				u(log2_stream_count)
+	priority				u(2)
+	checksum_flag				u(1)
+	msb_timestamp_flag			u(1)
+	align_byte
+	if(msb_timestamp_flag)
+		msb_timestamp			v
+	bitstream
+        if(checksum_flag)
+		checksum			u(32)
+
+Index:
+	packet header
+	index_startcode				f(64)
+	stream_id				v
+	index_length				v
+	for(i=0; i<index_length; i++){
+		index_timestamp			v
+		index_position			v
+	}
+	checksum				u(32)
+
+info_header: (optional)
+	packet header
+	info_startcode				f(64)
+	title					sz
+	author					sz
+	copyright				sz
+	description				sz
+        checksum				u(32)
+        
+v
+	value=0
+	do{
+		more_data			u(1)
+		data				u(7)
+		value= 128*value + data
+	}while(more_data)
+	value-=4
+ 
+sz (zero terminated string)
+	for(i=0; next_byte != 0; i++){
+		string[i]			u(8)
+	}
+	zero_byte				f(8)
+Note: the string MUST not be 0 bytes long (only a zero byte coded), instead
+	{'?', 0} should be used instead
+
+f(x)	n fixed bits
+u(x)	unsigned number encoded in x bits in MSB first order
+
+
+forward_ptr
+backward_ptr
+	pointer to the next / previous packet
+	Note: a frame with 0 bytes means that its skiped
+
+version
+	0 for now
+
+file_size
+	size in bytes, can be 0 if not meaningfull (realtime streams, ...)
+
+length_in_msec
+	length of the file in milli seconds (can be 0 if realtime or such)
+
+stream_id
+	Note: streams with a lower relative class MUST have a lower relative id
+	so a stream with class 0 MUST allways have a id which is lower then any
+	stream with class > 0
+	if there is a stream with id n>0 then there MUST be a stream with id n-1
+
+stream_class
+	0	video
+	32	audio
+	64	subtiles
+	Note the remaining values are reserved and MUST NOT be used
+
+fourcc
+	identification for the codec
+	example: 'h'<<24 + '2'<<16 + '6'<<8 + '4'
+        
+language_code 
+	something like 'u'<<24 + 's'<<16 + 'e'<<8 + 'n' (US english), can be 0
+	if unknown
+
+time_base
+	the number of timer ticks per second, this MUST be equal to the fps
+	if the fixed_fps is 1
+	MUST be < 2^15
+
+lsb_timestamp_length
+	length in bits of the lsb_timestamp
+	MUST be <16
+
+fixed_fps
+	1 indicates that the fps is fixed
+
+codec_specific_header_flag
+	1 indicates that this stream has a codec specific header
+        
+msb_timestamp_flag
+	indicates that the msb_timestamp is coded
+	MUST be 1 for keyframes
+        
+msb_timestamp
+	most significant bits of the timestamp, SHOULD be 0 for the first frame
+ 
+lsb_timestamp
+	most significant bits of the timestamp in time_base precission, with 
+	lsb_timestamp_length bits 
+        Example: IBBP display order
+		keyframe msb_timestamp=0 lsb_timestamp=0 -> timestamp=0
+		frame                    lsb_timestamp=3 -> timestamp=3
+		frame                    lsb_timestamp=1 -> timestamp=1
+		frame                    lsb_timestamp=2 -> timestamp=2
+		...
+		keyframe msb_timestamp=1 lsb_timestamp=1 -> timestamp=257
+		frame msb_timestamp=0    lsb_timestamp=255->timestamp=255
+		frame msb_timestamp=1    lsb_timestamp=0 -> timestamp=256
+		frame                    lsb_timestamp=4 -> timestamp=260
+		frame                    lsb_timestamp=2 -> timestamp=258
+		frame                    lsb_timestamp=3 -> timestamp=259
+
+width/height
+	MUST be set to the coded width/height
+
+sample_width/sample_height (aspect ratio)
+	sample_width is the horizontal distance between samples
+	sample_width and sample_height MUST be relative prime if not zero
+	MUST be 0 if unknown
+        
+depth
+	for compatibility with some win32 codecs
+
+priority
+	if 0 then the frame isnt used as reference (b frame) and can be droped
+	MUST be > 0 for keyframes
+
+sub_packet_size
+	size of an audio packet
+	Note a subpacket MUST be in exactly one packet, it cannot be split
+
+shuffle_type
+	audio is often encoded in small fixed size packets, and to increase the
+	error robustness these can be shuffled
+	0 -> no shuffle
+	1-16 -> interleave packets by 2^n 
+
+checksum
+	crc32 checksum using the generator polynomial=0x04c11db7 (same as ogg)
+	bit 23 is forced to 1 to avoid MPEG startcode emulation
+
+checksum_flag
+	indicates that the frame_checksum is coded
+	must be 1 for the last non keyframe before a keyframe
+        
+frame_checksum
+	identical to checksum, but instead of covering just the current 
+	packet, it covers all frames of the same stream id since the last
+	checksum
+	this field is only coded if checksum_flag=1
+        
+index_timestamp
+	value in time_base precission, relative to the last index_timestamp
+
+index_position
+	position in bytes of the first byte of the keyframe header, relative
+	to the last index_position
+
+        
+
+			Structure:
+
+the headers MUST be in exactly the following order (to simplify demuxer design)
+main header
+stream_header (id=0)
+codec_specific_header (id=0)
+stream_header (id=1)
+codec_specific_header (id=1)
+...
+stream_header (id=n)
+codec_specific_header (id=n)
+
+headers may be repated, but if they are then they MUST all be repeated together
+and repeated headers MUST be identical
+
+headers MUST be repeated every 10sec at least ? FIXME
+        
+        
+			Sample code (GPL, & untested)
+
+typedef BufferContext{
+	uint8_t *buf;
+	uint8_t *buf_ptr;
+}BufferContext;
+
+static inline uint64_t get_bytes(BufferContext *bc, int count){
+	uint64_t val=0;
+
+	assert(count>0 && count<9)
+        
+	for(i=0; i<count; i++){
+		val <<=8;
+		val += *(bc->buf_ptr++);
+	}
+        
+	return val;
+}
+
+static inline void put_bytes(BufferContext *bc, int count, uint64_t val){
+	uint64_t val=0;
+
+	assert(count>0 && count<9)
+
+	for(i=count-1; i>=0; i--){
+		*(bc->buf_ptr++)= val >> (8*i);
+	}
+        
+	return val;
+}
+
+static inline uint64_t get_v(BufferContext *bc){
+	uint64_t val= 0;
+
+	for(;;){
+		int tmp= *(bc->buf_ptr++);
+		if(tmp&0x80)
+			val= (val<<7) + tmp - 0x80;
+		else
+			return (val<<7) + tmp - 4;
+	}
+}
+
+static inline void put_v(BufferContext *bc, uint64_t val){
+	int i;
+	val+=4;
+        
+	assert(val);
+
+	for(i=56;; i-=8){
+		if(val>>i) break;
+	}
+
+	for(;i>0; i-=8){
+		*(bc->buf_ptr++)= 0x80 | (val>>i);
+	}
+	*(bc->buf_ptr++)= val&0x7F;
+}
+
+                
+			Example stream
+                
+main header
+video_stream_header (stream 0, video    jpjp, timebase 30, lsb_timestamp_length=8)
+codec_specific_header (stream 0)
+video_stream_header (stream 1  subtitle usen, timebase 30, lsb_timestamp_length=8)
+video_stream_header (stream 2  subtitle atde, timebase 30, lsb_timestamp_length=8)
+audio_stream_header (stream 3, audio    jpjp, timebase 1 , lsb_timestamp_length=8)
+audio_stream_header (stream 4, audio    usen, timebase 1 , lsb_timestamp_length=8)
+index (stream 0)
+keyframe (stream 0, msb_timestamp=0, lsb_timestamp=0)
+keyframe (stream 1, msb_timestamp=0, lsb_timestamp=0)
+keyframe (stream 2, msb_timestamp=0, lsb_timestamp=0)
+keyframe (stream 3, msb_timestamp=0, lsb_timestamp=0)
+keyframe (stream 4, msb_timestamp=0, lsb_timestamp=0)
+frame    (stream 0,                  lsb_timestamp=1)
+frame    (stream 0,                  lsb_timestamp=2)
+...
+frame    (stream 0,                  lsb_timestamp=30)
+keyframe (stream 3, msb_timestamp=0, lsb_timestamp=1)
+keyframe (stream 4, msb_timestamp=0, lsb_timestamp=1)
+frame    (stream 0,                  lsb_timestamp=31)
+frame    (stream 0,                  lsb_timestamp=32)
+...
+frame    (stream 0,                  lsb_timestamp=60)
+frame    (stream 1,                  lsb_timestamp=60)
+frame    (stream 2,                  lsb_timestamp=60)
+keyframe (stream 3, msb_timestamp=0, lsb_timestamp=2)
+keyframe (stream 4, msb_timestamp=0, lsb_timestamp=2)
+frame    (stream 0,                  lsb_timestamp=61)
+frame    (stream 0,                  lsb_timestamp=62)
+...
+main header
+video_stream_header (stream 0, video    jpjp, timebase 30, lsb_timestamp_length=8)
+codec_specific_header (stream 0)
+video_stream_header (stream 1  subtitle usen, timebase 30, lsb_timestamp_length=8)
+video_stream_header (stream 2  subtitle atde, timebase 30, lsb_timestamp_length=8)
+audio_stream_header (stream 3, audio    jpjp, timebase 1 , lsb_timestamp_length=8)
+audio_stream_header (stream 4, audio    usen, timebase 1 , lsb_timestamp_length=8)
+frame    (stream 0,                  lsb_timestamp=255)
+frame    (stream 0, msb_timestamp=1  lsb_timestamp=0)
+frame    (stream 0,                  lsb_timestamp=1)
+frame    (stream 0,                  lsb_timestamp=2)
+frame    (stream 1, msb_timestamp=1  lsb_timestamp=2)
+frame    (stream 2, msb_timestamp=1  lsb_timestamp=2)
+frame    (stream 0,                  lsb_timestamp=3)
+frame    (stream 0,                  lsb_timestamp=4)
+...
+keyframe (stream 3, msb_timestamp=0, lsb_timestamp=9)
+keyframe (stream 4, msb_timestamp=0, lsb_timestamp=9)
+main header
+video_stream_header (stream 0, video    jpjp, timebase 30, lsb_timestamp_length=8)
+codec_specific_header (stream 0)
+video_stream_header (stream 1  subtitle usen, timebase 30, lsb_timestamp_length=8)
+video_stream_header (stream 2  subtitle atde, timebase 30, lsb_timestamp_length=8)
+audio_stream_header (stream 3, audio    jpjp, timebase 1 , lsb_timestamp_length=8)
+audio_stream_header (stream 4, audio    usen, timebase 1 , lsb_timestamp_length=8)
+index (stream 0)
