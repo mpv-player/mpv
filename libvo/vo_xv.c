@@ -1,7 +1,20 @@
 
 // Number of buffers _FOR_DOUBLEBUFFERING_MODE_
 // Use option -double to enable double buffering! (default: single buffer)
-#define NUM_BUFFERS 2
+#define NUM_BUFFERS 3
+
+/*
+Buffer allocation:
+
+-nodr:
+  1: TEMP
+  2: 2*TEMP
+
+-dr:
+  1: TEMP
+  3: 2*STATIC+TEMP
+*/
+
 
 /*
  * vo_xv.c, X11 Xv interface
@@ -72,6 +85,7 @@ static XvAdaptorInfo        *ai;
 static XvImageFormatValues  *fo;
 
 static int current_buf=0;
+static int current_ip_buf=0;
 static int num_buffers=1; // default
 static XvImage* xvimage[NUM_BUFFERS];
 
@@ -348,7 +362,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
  if( flags&0x02 ) vm = 1;
 #endif
  flip_flag=flags&8;
- num_buffers=vo_doublebuffering?NUM_BUFFERS:1;
+ num_buffers=vo_doublebuffering?(vo_directrendering?NUM_BUFFERS:2):1;
 
    /* check image formats */
      fo = XvListImageFormats(mDisplay, xv_port, (int*)&formats);
@@ -479,6 +493,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
        allocate_xvimage(current_buf);
 
      current_buf=0;
+     current_ip_buf=0;
 
      set_gamma_correction();
 
@@ -620,7 +635,7 @@ static void flip_page(void)
          drwX-(vo_panscan_x>>1),drwY-(vo_panscan_y>>1),vo_dwidth+vo_panscan_x,(vo_fs?vo_dheight - 1:vo_dheight)+vo_panscan_y);
   }
  if (num_buffers>1){
-    current_buf=(current_buf+1)%num_buffers;
+    current_buf=vo_directrendering?0:((current_buf+1)%num_buffers);
     XFlush(mDisplay);
  } else
     XSync(mDisplay, False);   
@@ -733,15 +748,25 @@ static uint32_t draw_frame(uint8_t *src[])
 }
 
 static uint32_t get_image(mp_image_t *mpi){
+    int buf=current_buf; // we shouldn't change current_buf unless we do DR!
     if(mpi->type==MP_IMGTYPE_STATIC && num_buffers>1) return VO_FALSE; // it is not static
-    if(mpi->type==MP_IMGTYPE_IPB && num_buffers<3 && mpi->flags&MP_IMGFLAG_READABLE) return VO_FALSE; // not enough
-    if(mpi->type==MP_IMGTYPE_IP  && num_buffers<2 && mpi->flags&MP_IMGFLAG_READABLE) return VO_FALSE; // not enough
     if(mpi->imgfmt!=image_format || mpi->imgfmt==IMGFMT_BGR24) return VO_FALSE; // needs conversion :(
-    if(mpi->height > xvimage[current_buf]->height) return VO_FALSE; //buffer to small
-    if(mpi->width*(mpi->bpp/8) > xvimage[current_buf]->pitches[0]) return VO_FALSE; //buffer to small
 //    if(mpi->flags&MP_IMGFLAG_READABLE) return VO_FALSE; // slow video ram
+    if(mpi->flags&MP_IMGFLAG_READABLE &&
+	(mpi->type==MP_IMGTYPE_IPB || mpi->type==MP_IMGTYPE_IP)){
+	// reference (I/P) frame of IP or IPB:
+	if(num_buffers<2) return VO_FALSE; // not enough
+	current_ip_buf^=1;
+	// for IPB with 2 buffers we can DR only one of the 2 P frames:
+	if(mpi->type==MP_IMGTYPE_IPB && num_buffers<3 && current_ip_buf) return VO_FALSE;
+	buf=current_ip_buf;
+	if(mpi->type==MP_IMGTYPE_IPB) ++buf; // preserve space for B
+    }
+    if(mpi->height > xvimage[buf]->height) return VO_FALSE; //buffer to small
+    if(mpi->width*(mpi->bpp/8) > xvimage[buf]->pitches[0]) return VO_FALSE; //buffer to small
     if( (mpi->flags&(MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_ACCEPT_WIDTH)) ||
-	(mpi->width*(mpi->bpp/8)==xvimage[current_buf]->pitches[0]) ){
+	(mpi->width*(mpi->bpp/8)==xvimage[buf]->pitches[0]) ){
+	current_buf=buf;
 	mpi->planes[0]=xvimage[current_buf]->data+xvimage[current_buf]->offsets[0];
 	mpi->stride[0]=xvimage[current_buf]->pitches[0];
 	mpi->width=mpi->stride[0]/(mpi->bpp/8);
