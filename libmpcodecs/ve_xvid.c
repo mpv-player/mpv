@@ -63,10 +63,11 @@ static int xvidenc_max_quantizer = -1;
 static int xvidenc_min_key_interval = 0;
 static int xvidenc_max_key_interval = -1;
 static int xvidenc_mpeg_quant = 0;
+static int xvidenc_mod_quant = 0;
 static int xvidenc_lumi_mask = 0;
 static int xvidenc_keyframe_boost = 0;
-static int xvidenc_kfthreshold = 0;
-static int xvidenc_kfreduction = 0;
+static int xvidenc_kfthreshold = -1;
+static int xvidenc_kfreduction = -1;
 static int xvidenc_fixed_quant = 0;
 static int xvidenc_debug = 0;
 static int xvidenc_hintedme = 0;
@@ -85,10 +86,11 @@ struct config xvidencopts_conf[] = {
     { "min_key_interval", &xvidenc_min_key_interval, CONF_TYPE_INT, 0, 0, 0, NULL}, /* for XVID_MODE_2PASS_2 */
     { "max_key_interval", &xvidenc_max_key_interval, CONF_TYPE_INT, 0, 0, 0, NULL},
     { "mpeg_quant", &xvidenc_mpeg_quant, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    { "mod_quant", &xvidenc_mod_quant, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     { "lumi_mask", &xvidenc_lumi_mask, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    { "keyframe_boost", &xvidenc_keyframe_boost, CONF_TYPE_INT, 0, 0, 0, NULL}, /* for XVID_MODE_2PASS_2 */
+    { "keyframe_boost", &xvidenc_keyframe_boost, CONF_TYPE_INT, CONF_RANGE, 0, 10000, NULL}, /* for XVID_MODE_2PASS_2 */
     { "kfthreshold", &xvidenc_kfthreshold, CONF_TYPE_INT, 0, 0, 0, NULL}, /* for XVID_MODE_2PASS_2 */
-    { "kfreduction", &xvidenc_kfreduction, CONF_TYPE_INT, 0, 0, 0, NULL}, /* for XVID_MODE_2PASS_2 */
+    { "kfreduction", &xvidenc_kfreduction, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL}, /* for XVID_MODE_2PASS_2 */
     { "fixed_quant", &xvidenc_fixed_quant, CONF_TYPE_INT, CONF_RANGE, 1, 31, NULL}, /* for XVID_MODE_FIXED_QUANT */
     { "debug", &xvidenc_debug, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     { "hintedme", &xvidenc_hintedme, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -230,9 +232,9 @@ config(struct vf_instance_s* vf,
     fp->vbr_state.max_iquant = fp->vbr_state.max_pquant = enc_param.max_quantizer;
     if (xvidenc_keyframe_boost)
 	fp->vbr_state.keyframe_boost = xvidenc_keyframe_boost;
-    if (xvidenc_kfthreshold)
+    if (xvidenc_kfthreshold >= 0)
 	fp->vbr_state.kftreshold = xvidenc_kfthreshold;
-    if (xvidenc_kfreduction)
+    if (xvidenc_kfreduction >= 0)
 	fp->vbr_state.kfreduction = xvidenc_kfreduction;
     if (xvidenc_min_key_interval)
 	fp->vbr_state.min_key_interval = xvidenc_min_key_interval;
@@ -284,8 +286,18 @@ put_image(struct vf_instance_s* vf, mp_image_t *mpi)
     fp->enc_frame.bitstream = fp->mux->buffer;
     fp->enc_frame.length = -1 /* fp->mux->buffer_size */;
     fp->enc_frame.image = mpi->planes[0];
+
+    // get quantizers & I/P decision from the VBR engine
     fp->enc_frame.quant = vbrGetQuant(&fp->vbr_state);
     fp->enc_frame.intra = vbrGetIntra(&fp->vbr_state);
+
+    // modulated quantizer type
+    if (xvidenc_mod_quant && xvidenc_pass == 2) {
+	fp->enc_frame.general |= (fp->enc_frame.quant < 4) ? XVID_MPEGQUANT : XVID_H263QUANT;
+	fp->enc_frame.general &= (fp->enc_frame.quant < 4) ? ~XVID_H263QUANT : ~XVID_MPEGQUANT;
+    }
+
+    // hinted ME, 1st part
     if (xvidenc_hintedme && xvidenc_pass == 1) {
 	fp->enc_frame.hint.hintstream = fp->hintstream;
 	fp->enc_frame.hint.rawhints = 0;
@@ -310,6 +322,8 @@ put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 	else
 	    perror("xvid: hint file read failure");
     }
+
+    // encode frame
     switch (xvid_encore(fp->enc_handle, XVID_ENC_ENCODE, &fp->enc_frame, &enc_stats)) {
     case XVID_ERR_OK:
 	break;
@@ -323,9 +337,15 @@ put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 	mp_msg(MSGT_MENCODER, MSGL_ERR, "xvid: failure\n");
 	break;
     }
+    
+    // write output
     mencoder_write_chunk(fp->mux, fp->enc_frame.length, fp->enc_frame.intra ? 0x10 : 0);
+
+    // update the VBR engine
     vbrUpdate(&fp->vbr_state, enc_stats.quant, fp->enc_frame.intra,
 	      enc_stats.hlength, fp->enc_frame.length, enc_stats.kblks, enc_stats.mblks, enc_stats.ublks);
+
+    // hinted ME, 2nd part
     if (fp->enc_frame.general & XVID_HINTEDME_GET) {
 	size_t wrote = fwrite(&fp->enc_frame.hint.hintlength, sizeof(fp->enc_frame.hint.hintlength), 1, fp->hintfile);
 	if (wrote == 1) {
