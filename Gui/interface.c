@@ -94,6 +94,7 @@ void guiGetEvent( int type,char * arg )
 	break;
    case guiReDrawSubWindow:
 	wsPostRedisplay( &appMPlayer.subWindow );
+	if ( guiIntfStruct.Playing == 1 ) wsSetBackgroundRGB( &appMPlayer.subWindow,0,0,0 );
 	break;
    case guiSetShVideo:
 	 {
