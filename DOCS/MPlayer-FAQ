@@ -79,7 +79,7 @@ A: Download & install w32codec.zip from *our* FTP
    (avifile's codec package has different DLL set)
 
 Q: It wants to load l3codeca.acm, but I don't have such file.
-A: You should use w32codec.zip from MPlayer FTP, instead of avifile's pack!
+A: You should use w32codec.zip from MPlayer FTP instead of avifile's pack!
 
 Q: ...... works with avifile/aviplay while doesn't with MPlayer
 A: MPlayer != avifile
@@ -87,7 +87,7 @@ A: MPlayer != avifile
    The codecs (dll) sets, syncronization, demultiplexing etc is totaly
    different and shouldn't be compared.
    If something works with aviplay it doesn't mean that MPlayer should do
-   it and vice versa. You should contact me, I'll fix the bug!!!
+   it and vice versa. You should contact me, I'll fix the bug!
 
 Q: Indeo 3.x/4.x movies are viewed upside-down!!!?
 A: It's a known bug (really it's a bug/limitation of the DLL codec)
@@ -102,11 +102,9 @@ A: It's a damaged file with bad mp3 audio stream. Try it with  -afm 4
 Q: It aborts with signal 11 playing a file with IMA-ADPCM audio.
 A: This codec isn't yet supported!
 
-Q: Why do you enjoy making that much pre-releases?
-A: Download one and you'll know!
-
 Q: Are there rpm/deb/... packages of MPlayer?
-A: Not yet.
+A: Not yet. However, you can make a .deb package for yourself, check
+   DOCS/DEBIAN
 
 Q: Are there any mailing lists on MPlayer?
 A: Yes! See README on how to subscribe them!
@@ -126,5 +124,5 @@ A: ...but you don't have the X development package installed. It's called
    Mandrake systems). It can be created with the 'ln -sf /usr/X11R6 /usr/X11'
    command. Your distribution may differ from the Linux Filesystem Standard.
 
-Q: I have files with WMV (Windows Media Video) extension. Can I use'em?
-A: No, we couldn't find any way to get it work with MPlayer.
+Q: I have problems playing files with ... codec. Can I use'em?
+A: Check DOCS/TODO , if it doesn't contain your codec, contact us.
