@@ -3,7 +3,7 @@ Section: misc
 Priority: optional
 Maintainer: Dariush Pietrzak <eyck@ghost.anime.pl>
 Standards-Version: 3.2.1
-Build-Depends:gcc, libglib-dev, libgtk-dev, xlibs-dev, libpng2-dev, zlib1g-dev, debhelper (>= 2)
+Build-Depends:gcc, libglib-dev, libgtk-dev, xlibs-dev, libpng-dev, zlib1g-dev, debhelper (>= 2)
 
 Package: mplayer
 Architecture: any
