@@ -439,7 +439,7 @@ unsigned int vf_match_csp(vf_instance_t** vfp,unsigned int* list,unsigned int pr
 
 void vf_clone_mpi_attributes(mp_image_t* dst, mp_image_t* src){
     dst->pict_type= src->pict_type;
-    dst->mpeg2_flags = src->mpeg2_flags;
+    dst->fields = src->fields;
     dst->qscale_type= src->qscale_type;
     if(dst->width == src->width && dst->height == src->height){
 	dst->qstride= src->qstride;

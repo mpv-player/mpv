@@ -37,7 +37,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 {
 	mp_image_t *dmpi;
 	int ret = 0;
-	int flags = mpi->mpeg2_flags;
+	int flags = mpi->fields;
 	int state = vf->priv->state;
 
 	dmpi = vf_get_image(vf->next, mpi->imgfmt,
@@ -47,19 +47,21 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 	vf->priv->in++;
 
 	if ((state == 0 &&
-	     !(flags & MP_IMGMPEG2FLAG_TOP_FIELD_FIRST)) ||
+	     !(flags & MP_IMGFIELD_TOP_FIRST)) ||
 	    (state == 1 &&
-	     flags & MP_IMGMPEG2FLAG_TOP_FIELD_FIRST))
+	     flags & MP_IMGFIELD_TOP_FIRST)) {
 		mp_msg(MSGT_VFILTER, MSGL_WARN,
-		       "softpulldown: Unexpected mpeg2 flags: state=%d top_field_first=%d repeat_first_field=%d\n",
+		       "softpulldown: Unexpected field flags: state=%d top_field_first=%d repeat_first_field=%d\n",
 		       state,
-		       (flags & MP_IMGMPEG2FLAG_TOP_FIELD_FIRST) == 1,
-		       (flags & MP_IMGMPEG2FLAG_REPEAT_FIRST_FIELD) == 1);
+		       (flags & MP_IMGFIELD_TOP_FIRST) != 0,
+		       (flags & MP_IMGFIELD_REPEAT_FIRST) != 0);
+		state ^= 1;
+	}
 
 	if (state == 0) {
 		ret = vf_next_put_image(vf, mpi);
 		vf->priv->out++;
-		if (flags & MP_IMGMPEG2FLAG_REPEAT_FIRST_FIELD) {
+		if (flags & MP_IMGFIELD_REPEAT_FIRST) {
 			my_memcpy_pic(dmpi->planes[0],
 			           mpi->planes[0], mpi->w, mpi->h/2,
 			           dmpi->stride[0]*2, mpi->stride[0]*2);
@@ -95,7 +97,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 		}
 		ret = vf_next_put_image(vf, dmpi);
 		vf->priv->out++;
-		if (flags & MP_IMGMPEG2FLAG_REPEAT_FIRST_FIELD) {
+		if (flags & MP_IMGFIELD_REPEAT_FIRST) {
 			ret |= vf_next_put_image(vf, mpi);
 			vf->priv->out++;
 			state=0;
