@@ -241,6 +241,8 @@ uint32_t vidix_draw_slice_420(uint8_t *image[], int stride[], int w,int h,int x,
     uint8_t *dest;
     unsigned bespitch,apitch;
     int i;
+
+    /* Plane Y */
     apitch = vidix_play.dest.pitch.y-1;
     bespitch = (w + apitch) & ~apitch;
     
@@ -253,8 +255,16 @@ uint32_t vidix_draw_slice_420(uint8_t *image[], int stride[], int w,int h,int x,
         dest += bespitch;
     }
 
+    if (vidix_play.flags & VID_PLAY_INTERLEAVED_UV)
+    {
+	printf("vosub_vidix: interleaving UV planes not supported yet\n");
+	return 0;
+    }
+
+    /* Plane V */
     apitch = vidix_play.dest.pitch.v-1;
     bespitch = (w + apitch) & ~apitch;
+
     dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.v;
     dest += bespitch*y/4 + x;
     src = image[1];
@@ -263,6 +273,8 @@ uint32_t vidix_draw_slice_420(uint8_t *image[], int stride[], int w,int h,int x,
         src+=stride[1];
         dest+=bespitch/2;
     }
+
+    /* Plane U */
     apitch = vidix_play.dest.pitch.u-1;
     bespitch = (w + apitch) & ~apitch;
 
