@@ -84,6 +84,11 @@ int dvb_get_tuner_type(int fe_fd)
       mp_msg(MSGT_DEMUX, MSGL_V, "TUNER TYPE SEEMS TO BE DVB-C\n");
 	  return TUNER_CBL;
 
+#ifdef DVB_ATSC
+	case FE_ATSC:
+      mp_msg(MSGT_DEMUX, MSGL_V, "TUNER TYPE SEEMS TO BE DVB-ATSC\n");
+	  return TUNER_ATSC;
+#endif
 	default:
 	  mp_msg(MSGT_DEMUX, MSGL_ERR, "UNKNOWN TUNER TYPE\n");
 	  return 0;
@@ -386,6 +391,12 @@ static int check_status(int fd_frontend,struct dvb_frontend_parameters* feparams
 			mp_msg(MSGT_DEMUX, MSGL_V, "        SymbolRate: %d\n",feparams->u.qpsk.symbol_rate);
 			mp_msg(MSGT_DEMUX, MSGL_V, "        FEC_inner:  %d\n",feparams->u.qpsk.fec_inner);
 			break;
+#ifdef DVB_ATSC
+			case FE_ATSC:
+			mp_msg(MSGT_DEMUX, MSGL_V, "Event:  Frequency: %d\n",feparams->frequency);
+			mp_msg(MSGT_DEMUX, MSGL_V, "        Modulation: %d\n",feparams->u.vsb.modulation);
+			break;
+#endif
 			default:
 			break;
 		}
@@ -755,6 +766,13 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
       feparams.u.qam.QAM = modulation;
 #endif
       break;
+#ifdef DVB_ATSC
+    case FE_ATSC:
+      mp_msg(MSGT_DEMUX, MSGL_V, "tuning ATSC to %d, modulation=%d\n",freq,modulation);
+      feparams.frequency=freq;
+      feparams.u.vsb.modulation = modulation;
+      break;
+#endif
     default:
       mp_msg(MSGT_DEMUX, MSGL_V, "Unknown FE type. Aborting\n");
       return 0;
