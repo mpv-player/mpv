@@ -21,6 +21,7 @@ daily generated list!!!</P>
 <LI>XAnim codecs</LI>
 <LI>VIVO</LI>
 <LI>FLI</LI>
+<LI>RealVideo 1.0</LI>
 </UL></P>
 
 <P>If you have a Win32 codec not listed here, and not supported yet, just read the <A
@@ -199,6 +200,14 @@ Supports YUV outputs, thus hardware scaling if video output driver allows.
 Used by default.</P>
 
 
+<P><B><A NAME=2.2.1.8>2.2.1.8.  RealVideo</A></B></P>
+
+<P>Currently ONLY the RealVideo 1.0 (fourcc RV10) codec is supported, through
+ffmpeg. Sadly, no new RealMedia files come with this one, only with the newer
+RV20 and RV30 codecs which are closed-source. Their future support is
+unlikely :(</P>
+
+
 <P><B><A NAME=2.2.2>2.2.2.  Audio codecs</A></B></P>
 
 <P>The most important audio codecs above all :<BR>
@@ -210,6 +219,7 @@ Used by default.</P>
 <LI>Voxware audio (using DirectShow DLL)</LI>
 <LI>alaw, msgsm, pcm and other simple old audio formats</LI>
 <LI>VIVO audio (g723, Vivo Siren)</LI>
+<LI>RealAudio: DNET (low bitrate AC3)</LI>
 </UL></P>
 
 
@@ -268,6 +278,13 @@ have <B>Vivo Siren</B>. Both is <U>supported</U>. You can grab the g.723/Siren
 Win32 DLL from
 <A HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/vivog723.acm">here</A>,
 then copy it into the <CODE>/usr/lib/win32</CODE> directory, or respectively.</P>
+
+
+<P><B><A NAME=2.2.2.5>2.2.2.5.  RealAudio</A></B></P>
+
+<P>Currently the only supported one is the DNET codec. Actually it's a
+low-bitrate version of the well-known AC3 codec. It can be found either in
+old and new RealMedia movies.</P>
 
 
 <P><B><A NAME=2.2.3>2.2.3. Win32 codec importing howto</A></B></P>
