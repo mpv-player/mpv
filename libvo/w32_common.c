@@ -58,12 +58,33 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 	    mplayer_put_key(wParam);
 	    break;
 	case WM_LBUTTONDOWN:
+	    if (!vo_nomouse_input && (vo_fs || (wParam & MK_CONTROL))) {
+		mplayer_put_key(MOUSE_BTN0);
+		break;
+	    }
 	    if (!vo_fs) {
 		ReleaseCapture();
 		SendMessage(hWnd, WM_NCLBUTTONDOWN, HTCAPTION, 0);
 		return 0;
 	    }
 	    break;
+	case WM_MBUTTONDOWN:
+	    if (!vo_nomouse_input)
+		mplayer_put_key(MOUSE_BTN1);
+	    break;
+	case WM_RBUTTONDOWN:
+	    if (!vo_nomouse_input)
+		mplayer_put_key(MOUSE_BTN2);
+	    break;
+	case WM_MOUSEWHEEL:
+	    if (!vo_nomouse_input) {
+		int x = GET_WHEEL_DELTA_WPARAM(wParam);
+		if (x > 0)
+		    mplayer_put_key(MOUSE_BTN3);
+		else
+		    mplayer_put_key(MOUSE_BTN4);
+		break;
+	    }
     }
     
     return DefWindowProc(hWnd, message, wParam, lParam);
