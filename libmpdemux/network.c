@@ -184,7 +184,7 @@ char *af2String(int af) {
 // return -1 is unable to connect to a particular port
 
 int
-connect2Server_with_af(char *host, int port, int af) {
+connect2Server_with_af(char *host, int port, int af,int verb) {
 	int socket_server_fd;
 	int err, err_len;
 	int ret,count = 0;
@@ -236,7 +236,7 @@ connect2Server_with_af(char *host, int port, int af) {
 	if ( inet_addr(host)==INADDR_NONE )
 #endif
 	{
-		mp_msg(MSGT_NETWORK,MSGL_STATUS,"Resolving %s for %s...\n", host, af2String(af));
+		if(verb) mp_msg(MSGT_NETWORK,MSGL_STATUS,"Resolving %s for %s...\n", host, af2String(af));
 		
 #ifdef HAVE_GETHOSTBYNAME2
 		hp=(struct hostent*)gethostbyname2( host, af );
@@ -244,7 +244,7 @@ connect2Server_with_af(char *host, int port, int af) {
 		hp=(struct hostent*)gethostbyname( host );
 #endif
 		if( hp==NULL ) {
-			mp_msg(MSGT_NETWORK,MSGL_ERR,"Couldn't resolve name for %s: %s\n", af2String(af), host);
+			if(verb) mp_msg(MSGT_NETWORK,MSGL_ERR,"Couldn't resolve name for %s: %s\n", af2String(af), host);
 			return -2;
 		}
 		
@@ -280,7 +280,7 @@ connect2Server_with_af(char *host, int port, int af) {
 #else
 	inet_ntop(af, our_s_addr, buf, 255);
 #endif
-	mp_msg(MSGT_NETWORK,MSGL_STATUS,"Connecting to server %s[%s]:%d ...\n", host, buf , port );
+	if(verb) mp_msg(MSGT_NETWORK,MSGL_STATUS,"Connecting to server %s[%s]:%d ...\n", host, buf , port );
 
 	// Turn the socket as non blocking so we can timeout on the connection
 #ifndef HAVE_WINSOCK2
@@ -295,7 +295,7 @@ connect2Server_with_af(char *host, int port, int af) {
 #else
 		if( (WSAGetLastError() != WSAEINPROGRESS) && (WSAGetLastError() != WSAEWOULDBLOCK) ) {
 #endif
-			mp_msg(MSGT_NETWORK,MSGL_ERR,"Failed to connect to server with %s\n", af2String(af));
+			if(verb) mp_msg(MSGT_NETWORK,MSGL_ERR,"Failed to connect to server with %s\n", af2String(af));
 			closesocket(socket_server_fd);
 			return -1;
 		}
@@ -350,19 +350,19 @@ connect2Server_with_af(char *host, int port, int af) {
 
 
 int
-connect2Server(char *host, int  port) {
+connect2Server(char *host, int  port, int verb) {
 #ifdef HAVE_AF_INET6
 	int r;
 	int s = -2;
 
-	r = connect2Server_with_af(host, port, network_prefer_ipv4 ? AF_INET:AF_INET6);	
+	r = connect2Server_with_af(host, port, network_prefer_ipv4 ? AF_INET:AF_INET6,verb);	
 	if (r > -1) return r;
 
-	s = connect2Server_with_af(host, port, network_prefer_ipv4 ? AF_INET6:AF_INET);
+	s = connect2Server_with_af(host, port, network_prefer_ipv4 ? AF_INET6:AF_INET,verb);
 	if (s == -2) return r;
 	return s;
 #else	
-	return connect2Server_with_af(host, port, AF_INET);
+	return connect2Server_with_af(host, port, AF_INET,verb);
 #endif
 
 	
@@ -452,11 +452,11 @@ http_send_request( URL_t *url ) {
 
 	if( proxy ) {
 		if( url->port==0 ) url->port = 8080;			// Default port for the proxy server
-		fd = connect2Server( url->hostname, url->port );
+		fd = connect2Server( url->hostname, url->port,1 );
 		url_free( server_url );
 	} else {
 		if( server_url->port==0 ) server_url->port = 80;	// Default port for the web server
-		fd = connect2Server( server_url->hostname, server_url->port );
+		fd = connect2Server( server_url->hostname, server_url->port,1 );
 	}
 	if( fd<0 ) {
 		return -1; 
@@ -785,7 +785,7 @@ extension=NULL;
 					return -1;
 			}
 		} else {
-			mp_msg(MSGT_NETWORK,MSGL_ERR,"Unknown protocol '%s'\n", url->protocol );
+			mp_msg(MSGT_NETWORK,MSGL_V,"Unknown protocol '%s'\n", url->protocol );
 			return -1;
 		}
 	} while( redirect );
@@ -916,7 +916,7 @@ pnm_streaming_start( stream_t *stream ) {
 	if( stream==NULL ) return -1;
 
 	fd = connect2Server( stream->streaming_ctrl->url->hostname,
-	    stream->streaming_ctrl->url->port ? stream->streaming_ctrl->url->port : 7070 );
+	    stream->streaming_ctrl->url->port ? stream->streaming_ctrl->url->port : 7070,1 );
 	printf("PNM:// fd=%d\n",fd);
 	if(fd<0) return -1;
 	
@@ -957,7 +957,7 @@ realrtsp_streaming_start( stream_t *stream ) {
 		redirected = 0;
 
 		fd = connect2Server( stream->streaming_ctrl->url->hostname,
-			port = (stream->streaming_ctrl->url->port ? stream->streaming_ctrl->url->port : 554) );
+			port = (stream->streaming_ctrl->url->port ? stream->streaming_ctrl->url->port : 554),1 );
 		if(fd<0) return -1;
 		
 		mrl = malloc(sizeof(char)*(strlen(stream->streaming_ctrl->url->hostname)+strlen(stream->streaming_ctrl->url->file)+16));

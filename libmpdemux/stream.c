@@ -61,6 +61,9 @@ extern stream_info_t stream_info_netstream;
 #ifdef HAS_DVBIN_SUPPORT
 extern stream_info_t stream_info_dvb;
 #endif
+#ifdef HAVE_FTP
+extern stream_info_t stream_info_ftp;
+#endif
 
 extern stream_info_t stream_info_null;
 extern stream_info_t stream_info_file;
@@ -78,7 +81,9 @@ stream_info_t* auto_open_streams[] = {
 #ifdef HAS_DVBIN_SUPPORT
   &stream_info_dvb,
 #endif
-
+#ifdef HAVE_FTP
+  &stream_info_ftp,
+#endif
   &stream_info_null,
   &stream_info_file,
   NULL

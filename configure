@@ -172,6 +172,7 @@ Optional features:
   --disable-inet6        Disable IPv6 support [autodetect]
   --disable-gethostbyname2
                          gethostbyname() is not provided by the C library [autodetect]
+  --disable-ftp          Disable ftp support [enabled]
 Codecs:
   --enable-gif		 enable gif support [autodetect]
   --enable-png		 enable png input/output support [autodetect]
@@ -1139,6 +1140,7 @@ _fribidi=no
 _fribidiconfig='fribidi-config'
 _inet6=auto
 _gethostbyname2=auto
+_ftp=yes
 for ac_option do
   case "$ac_option" in
   # Skip 1st pass
@@ -1336,6 +1338,8 @@ for ac_option do
   --disable-freetype)   _freetype=no    ;;
   --enable-unrarlib)	_unrarlib=yes	;;
   --disable-unrarlib)	_unrarlib=no	;;
+  --enable-ftp)         _ftp=yes        ;;
+  --disable-ftp)        _ftp=no         ;;
 
   --enable-fribidi)     _fribidi=yes    ;;
   --disable-fribidi)    _fribidi=no     ;;
@@ -4943,6 +4947,16 @@ else
 fi
 echores "$_network"
 
+echocheck "ftp"
+if test "$_ftp" != no ; then
+  _def_ftp='#define HAVE_FTP 1'
+  _inputmodules="ftp $_inputmodules"
+else
+  _noinputmodules="ftp $_noinputmodules"
+  _def_ftp='#undef HAVE_FTP'
+fi
+echores "$_ftp"
+
 # endian testing
 echocheck "byte order"
 if test "$_big_endian" = auto ; then
@@ -5913,6 +5927,9 @@ $_def_faad_version
 
 /* enable network */
 $_def_network
+
+/* enable ftp support */
+$_def_ftp
 
 /* enable winsock2 instead of Unix functions*/
 $_def_winsock2

@@ -447,7 +447,7 @@ int asf_mmst_streaming_start(stream_t *stream)
   path = strchr(url1->file,'/') + 1;
 
   url1->port=1755;
-  s = connect2Server( url1->hostname, url1->port );
+  s = connect2Server( url1->hostname, url1->port, 1);
   if( s<0 ) {
 	  return s;
   }

@@ -656,7 +656,7 @@ asf_http_streaming_start( stream_t *stream, int *demuxer_type ) {
 		} else {
 			if( url->port==0 ) url->port = 80;
 		}
-		fd = connect2Server( url->hostname, url->port );
+		fd = connect2Server( url->hostname, url->port, 1);
 		if( fd<0 ) return fd;
 
 		http_hdr = asf_http_request( stream->streaming_ctrl );

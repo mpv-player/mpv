@@ -252,7 +252,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     return STREAM_ERROR;
   }
 
-  f = connect2Server(p->host,p->port);
+  f = connect2Server(p->host,p->port,1);
   if(f < 0) {
     mp_msg(MSGT_OPEN,MSGL_ERR, "Connection to %s:%d failed\n",p->host,p->port);
     m_struct_free(&stream_opts,opts);
