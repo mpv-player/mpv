@@ -10,21 +10,21 @@
 <BODY>
 
 
-<P><B><A NAME=5>5. FAQ section</A></B></P>
+<P><B><A NAME="faq">5. FAQ section</A></B></P>
 
 <UL>
-  <LI><A HREF="#5.1">5.1 Compilation</A></LI>
-  <LI><A HREF="#5.2">5.2 General questions</A></LI>
-  <LI><A HREF="#5.3">5.3 File playing problems</A></LI>
-  <LI><A HREF="#5.4">5.4 Video/audio driver problems (vo/ao)</A></LI>
-  <LI><A HREF="#5.5">5.5 DVD playback</A></LI>
-  <LI><A HREF="#5.6">5.6 Feature requests</A></LI>
-  <LI><A HREF="#5.7">5.7 Encoding</A></LI>
+  <LI><A HREF="#compilation">5.1 Compilation</A></LI>
+  <LI><A HREF="#general">5.2 General questions</A></LI>
+  <LI><A HREF="#playback">5.3 playback problems</A></LI>
+  <LI><A HREF="#driver">5.4 Video/audio driver problems (vo/ao)</A></LI>
+  <LI><A HREF="#dvd">5.5 DVD playback</A></LI>
+  <LI><A HREF="#features">5.6 Feature requests</A></LI>
+  <LI><A HREF="#encoding">5.7 Encoding</A></LI>
 </UL>
 
 <TABLE BORDER=0 WIDTH="100%" ALIGN=left>
 
-<TR><TD COLSPAN=3><P><B><A NAME=5.1>5.1 Compilation</A></B></P>
+<TR><TD COLSPAN=3><P><B><A NAME="compilation">5.1 Compilation</A></B></P>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD>&nbsp;&nbsp;</TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>Compilation stops with an error message similar to this one:
@@ -64,7 +64,7 @@ you run into problems.
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>Great, I have gcc 3.0.1 from Red Hat/Mandrake, then I'm fine--!
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>No, since there have been/are issues with these compilers as well.<BR>
 To check the status of current compilers' MPlayer support, see the
-<A HREF="documentation.html#1.3">Installation</A> section.
+<A HREF="documentation.html#installation">Installation</A> section.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>I tried to compile MPlayer, but I got this output:
@@ -146,11 +146,11 @@ be prepared for problems).
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>I have a G200/G400, how do I compile/use the mga_vid driver?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>Read the <A HREF="video.html#2.3.1.7">mga_vid documentation</A>.
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>Read the <A HREF="video.html#mga_vid">mga_vid documentation</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>Are there rpm/deb/... packages of <B>MPlayer</B>?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>You can make a .deb package for yourself, check the <A HREF="documentation.html#6.1">Debian packaging</A> section.
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>You can make a .deb package for yourself, check the <A HREF="documentation.html#debian">Debian packaging</A> section.
 There are links to official Red Hat RPM packages available on our
 <A HREF="http://www.mplayerhq.hu/homepage/dload.html">download page</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
@@ -201,7 +201,7 @@ should be good). Since it is not our fault, please do <B>not</B> report!
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 
-<TD COLSPAN=3><B><A NAME="5.2">5.2 General questions</A></B>
+<TD COLSPAN=3><B><A NAME="general">5.2 General questions</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>There is a timer in the upper
@@ -215,8 +215,8 @@ left corner. How can I get rid of it?
 the <CODE>-zoom</CODE> option. You better use XF86VidMode support:
 you must specify the <CODE>-vm</CODE> and the <CODE>-fs</CODE> switch, and
 you're done. Make sure you have the right modelines in your XF86Config file, and
-try to make the <A HREF="video.html#2.3.1.3">DGA driver</A> and
-<A HREF="video.html#2.3.1.4">SDL's DGA driver</A> work for you.
+try to make the <A HREF="video.html#dga">DGA driver</A> and
+<A HREF="video.html#sdl">SDL's DGA driver</A> work for you.
 It's much faster. If SDL's DGA works, use that, it'll be EVEN faster!
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
@@ -272,8 +272,8 @@ the instructions.
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>I have problems playing files with the ... codec. Can I use them?
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>Check the <A HREF="http://www.mplayerhq.hu/DOCS/codecs-status.html">codec status</A>,
 if it doesn't contain your codec, read the
-<A HREF="codecs.html#2.1.3">codec documentation</A>, especially the
-<A HREF="codecs.html#2.2.3">codec importing HOWTO</A> and contact us.
+<A HREF="codecs.html">codec documentation</A>, especially the
+<A HREF="codecs.html#importing">codec importing HOWTO</A> and contact us.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>Umm, what is "IdegCounter"?
@@ -306,12 +306,12 @@ use the <CODE>-double</CODE> option. Also try <CODE>-vop expand</CODE>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>What exactly is this libavcodec thing?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>See the <A HREF="codecs.html#2.2.1.2">FFmpeg section</A>.
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>See the <A HREF="codecs.html#libavcodec">libavcodec section</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>But configure tells me "Checking for libavcodec ... no"!
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>You need to get libavcodec from FFmpeg's CVS. Read the instructions in
-the <A HREF="codecs.html#2.2.1.2">FFmpeg section</A>.
+the <A HREF="codecs.html#libavcodec">libavcodec section</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>Icewm's taskbar keeps covering the movie in fullscreen mode!
@@ -333,7 +333,7 @@ Set "Use Applications position hints" to "Yes".
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD COLSPAN=3>
-<B><A NAME="5.3">5.3 File playing problems</A></B>
+<B><A NAME="playback">5.3 playback problems</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>I can play certain AVIs but I
@@ -345,7 +345,7 @@ compile time!)
 </PRE>
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>Probably the audio uses a codec
 not natively supported by <B>MPlayer</B>. Install the Win32 codec package as
-described in the README or <A HREF="documentation.html#1.3">here</A>.
+described in the README or <A HREF="documentation.html#installation">here</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>... works with avifile/aviplay but doesn't with MPlayer.
@@ -439,14 +439,14 @@ image in MPlayer.
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>When I try to grab from my tuner, it works, but colors are strange. It's OK
 with other applications.
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>Your card probably misreports its colorspace capacity. Try with YUY2 instead
-of default YV12 (see the <A HREF="documentation.html#2.5">TV input documentation</A>).
+of default YV12 (see the <A HREF="documentation.html#tv">TV input documentation</A>).
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>When I start playing, I get this message but everything seems fine:<BR>
 <CODE>Linux RTC init: ioctl (rtc_pie_on): Permission denied</CODE>
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>You need root privileges or a
 specially set up kernel to use the new timing code. For details see the
-<A HREF="documentation.html#1.3">installation section</A> of the documentation.
+<A HREF="documentation.html#installation">installation section</A> of the documentation.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>I have A/V sync problems. Some of my AVIs play fine, but some play with
@@ -475,7 +475,7 @@ connector in <B>before</B> you power on your notebook or use the
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD COLSPAN=3>
-<B><A NAME="5.4">5.4 Video/audio driver problems (vo/ao)</A></B>
+<B><A NAME="driver">5.4 Video/audio driver problems (vo/ao)</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>I have no sound when playing a
@@ -496,7 +496,7 @@ the arts or esd sound daemon? Try disabling the sound daemon, or use the
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><CODE>./configure</CODE> autodetects your DGA driver. If <CODE>-vo help</CODE> doesn't show
 DGA, then there's a problem with your X installation.
 Try <CODE>./configure --enable-dga</CODE> and read the
-<A HREF="video.html#2.3.1.3">documentation</A>.
+<A HREF="video.html#dga">documentation</A>.
 Alternatively, try SDL's DGA driver with the <CODE>-vo sdl:dga</CODE> option.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
@@ -565,7 +565,7 @@ it ... Note: you can force/disable Xv via SDL using <CODE>-forcexv</CODE> and <C
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD COLSPAN="3">
-<B><A NAME="5.5">5.5 DVD playback</A></B>
+<B><A NAME="dvd">5.5 DVD playback</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>
@@ -590,7 +590,7 @@ default.
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>
 What about subtitles? Can MPlayer display them?
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
-Yes! See the <A HREF="cd-dvd.html">DVD chapter</A> of the documentation.
+Yes! See the <A HREF="cd-dvd.html#dvd">DVD chapter</A> of the documentation.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>
@@ -627,11 +627,11 @@ My DVD playback is sluggish!
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
 Use the <CODE>-cache</CODE> option (described in the man page)
 and try enabling DMA for the DVD drive with the hdparm tool (described in the
-<A HREF="cd-dvd.html">DVD chapter</A> of the documentation).
+<A HREF="cd-dvd.html#cd">CD chapter</A> of the documentation).
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD COLSPAN=3>
-<B><A NAME="5.6">5.6 Feature requests</A></B>
+<B><A NAME="features">5.6 Feature requests</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>If <B>MPlayer</B> is paused
@@ -651,11 +651,11 @@ implement it, and send a patch. Don't ask for it.
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>  It's not released, and won't be. Look around the Windows scene (open source
   ASF parsers, open source ASF encoders, etc) and you'll know why. We don't
   want to go to jail. BTW you can compile it yourself, under
-  <A HREF="documentation.html#6.8">Cygwin</A>.
+  <A HREF="documentation.html#cygwin">Cygwin</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD COLSPAN=3>
-<B><A NAME="5.7">5.7 Encoding</A></B>
+<B><A NAME="encoding">5.7 Encoding</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>How can I encode?

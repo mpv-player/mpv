@@ -10,12 +10,12 @@
 <BODY>
 
 
-<P><B><A NAME=2.2>2.2.  Supported codecs</A></B></P>
+<P><B><A NAME="codecs">2.2  Supported codecs</A></B></P>
 
 
-<P><B><A NAME=2.2.1>2.2.1. Video codecs</A></B></P>
+<P><B><A NAME="video_codecs">2.2.1 Video codecs</A></B></P>
 
-<P>See <A HREF="http://www.mplayerhq.hu/DOCS/codecs-status.html">http://www.mplayerhq.hu/DOCS/codecs-status.html</A> for the complete,
+<P>See the <A HREF="http://www.mplayerhq.hu/DOCS/codecs-status.html">codec status table</A> for the complete,
 daily generated list!!!</P>
 
 <P>The most important ones above all:</P>
@@ -36,10 +36,10 @@ daily generated list!!!</P>
 </UL>
 
 <P>If you have a Win32 codec not listed here which is not supported yet, please read the
-<A HREF="#2.2.3">codec importing HOWTO</A> and help us add support
+<A HREF="#importing">codec importing HOWTO</A> and help us add support
 for it!</P>
 
-<P><B><A NAME=2.2.1.1>2.2.1.1. DivX4/DivX5</A></B></P>
+<P><B><A NAME="divx">2.2.1.1 DivX4/DivX5</A></B></P>
 
 <P>This section contains information about the DivX4 codec of
 <A HREF="http://www.projectmayo.com">Project Mayo</A>. Their first available alpha version was OpenDivX 4.0
@@ -90,7 +90,7 @@ according to your current color depth.</P>
   <CODE>-vc divx4</CODE> may be faster or even the fastest solution.</P>
 
 
-<P><B><A NAME=2.2.1.2>2.2.1.2. FFmpeg DivX/libavcodec</A></B></P>
+<P><B><A NAME="libavcodec">2.2.1.2 FFmpeg DivX/libavcodec</A></B></P>
 
 <P>Beginning with version 0.4.2,
 <A HREF="http://ffmpeg.sourceforge.net">FFmpeg</A> contains an
@@ -126,7 +126,7 @@ You must follow the steps above to obtain the source for this library.</P>
   movies without dropped frames on my K6/2 500.</P>
 
 
-<P><B><A NAME=2.2.1.3>2.2.1.3.  XAnim codecs</A></B></P>
+<P><B><A NAME="xanim">2.2.1.3  XAnim codecs</A></B></P>
 
 <P>Foreword:<BR>
 Be advised that the XAnim binary codecs are packaged with a piece of text
@@ -161,7 +161,7 @@ option to tell <B>MPlayer</B> to use them if possible.</P>
 <P>Tested codecs include: <B>Indeo 3.2</B>, <B>4.1</B>, <B>5.0</B>, <B>CVID</B>, <B>3ivX</B>, <B>h263</B>.</P>
 
 
-<P><B><A NAME=2.2.1.4>2.2.1.4.  VIVO video</A></B></P>
+<P><B><A NAME="vivo_video">2.2.1.4  VIVO video</A></B></P>
 
 <P><B>MPlayer</B> can play Vivo (1.0 and 2.0) videos. The most suitable codec
 for 1.0 files is FFmpeg's H263 decoder, you can use it with the <CODE>-vc
@@ -174,7 +174,7 @@ restricting it to the X11 and OpenGL outputs. Hopefully ffh263 will support
 VIVO 2.0 files in the future.</P>
 
 
-<P><B><A NAME=2.2.1.5>2.2.1.5.  MPEG 1/2 video</A></B></P>
+<P><B><A NAME="mpeg">2.2.1.5  MPEG 1/2 video</A></B></P>
 
 <P>MPEG1 and MPEG2 are decoded by the multiplatform native <B>libmpeg2</B> library,
 whose source code is included in <B>MPlayer</B>.
@@ -184,7 +184,7 @@ occurred.
 This recovery technique has no measurable speed penalty.</P>
 
 
-<P><B><A NAME=2.2.1.6>2.2.1.6.  MS Video1</A></B></P>
+<P><B><A NAME="ms_video1">2.2.1.6  MS Video1</A></B></P>
 
 <P>This is a very old and very bad codec from Microsoft. In the past it was
 decoded with the <CODE>msvidc32.dll</CODE> Win32 codec, now we have our own
@@ -192,14 +192,14 @@ open source implementation (by <A HREF="mailto:melanson@pcisys.net">Mike
 Melanson</A>).</P>
 
 
-<P><B><A NAME=2.2.1.7>2.2.1.7.  Cinepak CVID</A></B></P>
+<P><B><A NAME="cinepak">2.2.1.7  Cinepak CVID</A></B></P>
 
 <P><B>MPlayer</B> uses its own open source, multiplatform Cinepak decoder by
 default. It supports YUV outputs, so that hardware scaling is possible if the
 video output driver permits it.</P>
 
 
-<P><B><A NAME=2.2.1.8>2.2.1.8.  RealVideo</A></B></P>
+<P><B><A NAME="realvideo">2.2.1.8  RealVideo</A></B></P>
 
 <B>MPlayer</B> supports decoding all versions of RealVideo:
 <UL>
@@ -224,7 +224,7 @@ video output driver permits it.</P>
   not allow this. You have to get them yourself.</P>
 
 
-<P><B><A NAME=2.2.1.9>2.2.1.9.  XViD</A></B></P>
+<P><B><A NAME="xvid">2.2.1.9  XViD</A></B></P>
 
 <P><B>XViD</B> is a forked development of the OpenDivX codec. It happened when
   ProjectMayo changed OpenDivX to closed-source DivX4, and the non-ProjectMayo
@@ -263,7 +263,7 @@ video output driver permits it.</P>
   </OL>
 
 
-<P><B><A NAME=2.2.1.10>2.2.1.10.  Sorenson</A></B></P>
+<P><B><A NAME="sorenson">2.2.1.10  Sorenson</A></B></P>
 
 <P><B>Sorenson</B> is a video codec developed by Apple. We are currently
   able to decode the first version (SVQ1) with a native decoder.</P>
@@ -281,7 +281,7 @@ video output driver permits it.</P>
 <P><B>Installation:</B> it's compiled and usable per default.</P>
 
 
-<P><B><A NAME=2.2.2>2.2.2.  Audio codecs</A></B></P>
+<P><B><A NAME="audio_codecs">2.2.2  Audio codecs</A></B></P>
 
 <P>The most important audio codecs above all:<BR></P>
 <UL>
@@ -296,7 +296,7 @@ video output driver permits it.</P>
 </UL>
 
 
-<P><B><A NAME=2.2.2.1>2.2.2.1.  Software AC3 decoding</A></B></P>
+<P><B><A NAME="software_ac3">2.2.2.1  Software AC3 decoding</A></B></P>
 
 <P>This is the default decoder used for files with AC3 audio.</P>
 
@@ -323,7 +323,7 @@ Soundblaster Live! cards) from August 2001 or newer (ALSA CVS is also supposed t
 work).</P>
 
 
-<P><B><A NAME=2.2.2.2>2.2.2.2.  Hardware AC3 decoding</A></B></P>
+<P><B><A NAME="hardware_ac3">2.2.2.2  Hardware AC3 decoding</A></B></P>
 
 <P>You need an AC3 capable sound card, with digital out (SP/DIF). The
 card's driver must properly support the AFMT_AC3 format (C-Media does).
@@ -332,7 +332,7 @@ option. It is experimental but known to work with C-Media cards and Soundblaster
 Live! + ALSA (but not OSS) drivers.</P>
 
 
-<P><B><A NAME=2.2.2.3>2.2.2.3.  libmad support</A></B></P>
+<P><B><A NAME="libmad">2.2.2.3  libmad support</A></B></P>
 
 <P><A HREF="http://mad.sourceforge.net">libmad</A> is a multiplatform MPEG audio
 decoding library. It does not handle broken files well, and it sometimes has
@@ -342,7 +342,7 @@ problems with seeking.</P>
 option.</P>
 
 
-<P><B><A NAME=2.2.2.4>2.2.2.4.  VIVO audio</A></B></P>
+<P><B><A NAME="vivo_audio">2.2.2.4  VIVO audio</A></B></P>
 
 <P>The audio codec used in VIVO files depends on whether it is a VIVO/1.0 or
 VIVO/2.0 file. VIVO/1.0 files have <B>g.723</B> audio, and VIVO/2.0 files
@@ -352,7 +352,7 @@ Win32 DLL from
 then copy it into the <CODE>/usr/lib/win32</CODE> directory.</P>
 
 
-<P><B><A NAME=2.2.2.5>2.2.2.5.  RealAudio</A></B></P>
+<P><B><A NAME="realaudio">2.2.2.5  RealAudio</A></B></P>
 
 <B>MPlayer</B> supports decoding all versions of RealAudio:
 <UL>
@@ -363,12 +363,12 @@ then copy it into the <CODE>/usr/lib/win32</CODE> directory.</P>
 
 
 <P>On how to install RealPlayer libraries, see the
-  <A HREF="formats.html#2.1.1.7">RealMedia file format</A> section.</P>
+  <A HREF="formats.html#real">RealMedia file format</A> section.</P>
 
 
-<P><B><A NAME=2.2.3>2.2.3. Win32 codec importing HOWTO</A></B></P>
+<P><B><A NAME="importing">2.2.3 Win32 codec importing HOWTO</A></B></P>
 
-<P><B><A NAME=2.2.3.1>2.2.3.1. VFW codecs</A></B></P>
+<P><B><A NAME="importing_vfw">2.2.3.1 VFW codecs</A></B></P>
 
 <P>VFW (Video for Windows) is the old Video API for Windows. Its codecs have
 the .DLL or (rarely) .DRV extension.
@@ -396,7 +396,7 @@ submit your codec support request by mail, and upload these files to the FTP sit
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>ftp://ftp.mplayerhq.hu/MPlayer/incoming/[codecname]/</CODE></P>
 
 
-<P><B><A NAME=2.2.3.2>2.2.3.2. DirectShow codecs</A></B></P>
+<P><B><A NAME="importing_directshow">2.2.3.2 DirectShow codecs</A></B></P>
 
 <P>DirectShow is the newer Video API, which is even worse than its predecessor.
 Things are harder with DirectShow, since</P>

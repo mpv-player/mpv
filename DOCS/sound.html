@@ -10,7 +10,7 @@
 <BODY>
 
 
-<P><B><A NAME=2.3.2>2.3.2. Audio output devices</A></B></P>
+<P><B><A NAME="audio">2.3.2 Audio output devices</A></B></P>
 
 <P><B>MPlayer</B>'s audio interface is called <I>libao2</I>. It currently
 contains these drivers:</P>
@@ -50,7 +50,7 @@ there may be problems like lost sync and disappearing audio.</LI>
 <P>On <B>Solaris/FreeBSD</B> systems, use the SUN audio driver with the
 <CODE>-ao sun</CODE> option, otherwise neither video nor audio will work.</P>
 
-<P><B><A NAME=2.3.2.1>2.3.2.1. Sound Card experiences, recommendations</A></B></P>
+<P><B><A NAME="experiences">2.3.2.1 Sound Card experiences, recommendations</A></B></P>
 
 <TABLE BORDER=0 WIDTH="100%">
 <TR><TD COLSPAN=3><B>VIA onboard chipset (via82cxxx) 48kHz only</B></TD><TR>
@@ -124,7 +124,7 @@ there may be problems like lost sync and disappearing audio.</LI>
 <LI>If sound clicks when playing from CD-ROM, turn on IRQ unmasking, e.g.
   <CODE>hdparm -u1 /dev/cdrom</CODE> (<CODE>man hdparm</CODE>). This is
   generally beneficial and described more detailed in the
-  <A HREF="cd-dvd.html#4.1">CD-ROM section</A>.</LI>
+  <A HREF="cd-dvd.html#cd">CD-ROM section</A>.</LI>
 <LI>Sharing your sound card with another application like XMMS is <B>strongly discouraged</B>!
   If the other sound application is using ESD, start <B>MPlayer</B> with the <CODE>-vo sdl:esd</CODE> option
   to combine both sound streams! In fact, the option <CODE>-vo sdl:esd</CODE> could be used with ESD 
@@ -134,7 +134,7 @@ there may be problems like lost sync and disappearing audio.</LI>
 </UL>
 
 
-<P><B><A NAME=2.3.2.2>2.3.2.2. Audio plugins</A></B></P>
+<P><B><A NAME="plugins">2.3.2.2 Audio plugins</A></B></P>
 
 <P><B>MPlayer</B> has support for audio plugins. Audio plugins can be used for
   changing the properties of the audio data before the sound reaches the sound
@@ -167,7 +167,7 @@ there may be problems like lost sync and disappearing audio.</LI>
 <P>Currently audio plugins can not be used in <B>MEncoder</B>.</P>
 
 
-<P><B><A NAME=2.3.2.2.1>2.3.2.2.1. Up/Downsampling</A></B></P>
+<P><B><A NAME="resample">2.3.2.2.1 Up/Downsampling</A></B></P>
 
 <P><B>MPlayer</B> fully supports up/downsampling of the sound. This plugin can
   be used if you have a fixed frequency sound card or if you are
@@ -187,7 +187,7 @@ there may be problems like lost sync and disappearing audio.</LI>
   Scaling up will cause the audio and video streams to be played in slow motion
   in addition to audio distortion.</P>
 
-<P><B><A NAME=2.3.2.2.2>2.3.2.2.2. Surround Sound decoding</A></B></P>
+<P><B><A NAME="surround_decoding">2.3.2.2.2 Surround Sound decoding</A></B></P>
 
 <P><B>MPlayer</B> has an audio plugin that can decode matrix encoded
 surround sound. Dolby Surround is an example of a matrix encoded format.
@@ -198,7 +198,7 @@ To use this feature you need a sound card supporting at least 4 channels.</P>
 &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=surround</CODE></P>
 
 
-<P><B><A NAME=2.3.2.2.3>2.3.2.2.3. Sample format converter</A></B></P>
+<P><B><A NAME="format">2.3.2.2.3 Sample format converter</A></B></P>
                                                                                
 <P>If your sound card driver does not support signed 16bit <CODE>int</CODE> data type, 
   this plugin can
@@ -215,14 +215,14 @@ To use this feature you need a sound card supporting at least 4 channels.</P>
 </P>
 
 
-<P><B><A NAME=2.3.2.2.4>2.3.2.2.4. Delay</A></B></P>
+<P><B><A NAME="delay">2.3.2.2.4 Delay</A></B></P>
 
 <P>This plugin delays the sound and is intended as an example of how to develop
   new plugins. It can not be used for anything useful from a users perspective
   and is mentioned here for the sake of completeness only. Do not use this
   plugin unless you are a developer.</P>
 
-<P><B><A NAME=2.3.2.2.5>2.3.2.2.5. Software volume control</A></B></P>
+<P><B><A NAME="volume">2.3.2.2.5 Software volume control</A></B></P>
 
 <P>This plugin is a software replacement for the volume control, and
   can be used on machines with a broken mixer device. It can also be
@@ -259,7 +259,7 @@ To use this feature you need a sound card supporting at least 4 channels.</P>
 </P>
 
 
-<P><B><A NAME=2.3.2.2.6>2.3.2.2.6. Extrastereo</A></B></P>
+<P><B><A NAME="extrastereo">2.3.2.2.6 Extrastereo</A></B></P>
 
 <P>This plugin (linearly) increases the difference between left and right
   channels (like the XMMS extrastereo plugin) which gives some sort of "live"
@@ -276,7 +276,7 @@ To use this feature you need a sound card supporting at least 4 channels.</P>
   -1.0, left and right channels will be swapped.</P>
 
 
-<P><B><A NAME=2.3.2.2.7>2.3.2.2.7. Volume normalizer</A></B></P>
+<P><B><A NAME="normalizer">2.3.2.2.7 Volume normalizer</A></B></P>
 
 <P>This plugin maximizes the volume without distorting the sound.</P>
 
@@ -284,7 +284,7 @@ To use this feature you need a sound card supporting at least 4 channels.</P>
   &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=volnorm</CODE><BR>
 
 
-<P><B><A NAME=2.3.2.2.8>2.3.2.2.8. Surround</A></B></P>
+<P><B><A NAME="surround">2.3.2.2.8 Surround</A></B></P>
 
 <P>Someone should document something, sometime.</P>
 
