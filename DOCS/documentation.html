@@ -61,6 +61,7 @@
               <LI><A HREF="formats.html#film">2.1.1.10 FILM files</A></LI>
               <LI><A HREF="formats.html#roq">2.1.1.11 RoQ files</A></LI>
               <LI><A HREF="formats.html#ogg">2.1.1.12 OGG/OGM files</A></LI>
+              <LI><A HREF="formats.html#sdp">2.1.1.12 SDP files</A></LI>
             </UL>
           </LI>
           <LI><A HREF="formats.html#audio_formats">2.1.2 Audio formats</A>
@@ -435,6 +436,8 @@
     suggested version is <B>always the newest</B> (at least 3.90).</LI>
   <LI><B>libogg</B> - optional, needed for playing OGG file format.</LI>
   <LI><B>libvorbis</B> - optional, needed for playing OGG Vorbis audio.</LI>
+  <LI><B><A HREF="http://www.live.com/mplayer/">LIVE.COM Streaming Media</A></B>
+    - optional, needed for playing RTSP/RTP streams.</LI>
 </UL>
 
 <H4>Codecs:</H4>
@@ -995,12 +998,13 @@ controls.</P>
   <TR><TD></TD><TD>files</TD><TD></TD><TD><CODE>mplayer [default options] [path/]filename1 [options for filename1] filename2 [options for filename2] ...</CODE></TD></TR>
   <TR><TD></TD><TD>VCD</TD><TD></TD><TD><CODE>mplayer [options] -vcd trackno [-cdrom-device /dev/cdrom]</CODE></TD></TR>
   <TR><TD></TD><TD>DVD</TD><TD></TD><TD><CODE>mplayer [options] -dvd titleno [-dvd-device /dev/dvd]</CODE></TD></TR>
-  <TR><TD></TD><TD>net</TD><TD></TD><TD><CODE>mplayer [options] http://site.com/file.asf (playlists can be used too)</CODE></TD></TR>
+  <TR><TD></TD><TD>WWW</TD><TD></TD><TD><CODE>mplayer [options] http://site.com/file.asf (playlists can be used, too)</CODE></TD></TR>
+  <TR><TD></TD><TD>RTSP</TD><TD></TD><TD><CODE>mplayer [options] rtsp://server.example.com/streamName</CODE></TD></TR>
 </TABLE>
 
 <P>
-  Latest versions of MPlayer also accepts VCD and DVD tracks in URL style, just like
-  Xine does: <CODE>mplayer dvd://1</CODE> or <CODE>mplayer vcd://1</CODE></P>
+  Latest versions of MPlayer also accept VCD and DVD tracks in URL style, just like
+  xine does: <CODE>mplayer dvd://1</CODE> or <CODE>mplayer vcd://1</CODE></P>
 
 <PRE>
   mplayer -vo x11 /mnt/Films/Contact/contact2.mpg
@@ -1223,7 +1227,8 @@ end
 
 <H2><A NAME="streaming">3.3 Streaming from network or pipes</A></H2>
 
-<P><B>MPlayer</B> can play files from network, using the HTTP or MMS protocol.</P>
+<P><B>MPlayer</B> can play files from network, using the HTTP, MMS or RTSP/RTP
+  protocol.</P>
 
 <P>Playing goes by simply using adding the URL to the command line.
   <B>MPlayer</B> also honors the http_proxy environment variable, and uses

@@ -271,6 +271,10 @@ Play files according to a playlist (1 file per row or Winamp or ASX format).
 .B \-quiet \ \ 
 Display less output and status messages.
 .TP
+.B \-sdp
+Specifies that the input file is a SDP ('Session Description Protocol')
+file that describes an RTP session (see http://www.live.com/mplayer/).
+.TP
 .B \-skin <skin\ directory> (BETA CODE)
 Load skin from the given directory (WITHOUT path name).
 
@@ -541,6 +545,12 @@ fourcc in hex
 .RE
 .PD 1
 .
+.TP
+.B \-rtsp-stream-over-tcp
+Used with 'rtsp://' URLs to specify that the resulting incoming RTP and RTCP
+packets be streamed over TCP (using the same TCP connection as RTSP). This
+option may be useful if you have a broken Internet connection that does not
+pass incoming UDP packets (see http://www.live.com/mplayer/).
 .TP
 .B \-skipopening
 Skip DVD opening (dvdnav only).
@@ -2605,6 +2615,9 @@ mplayer \-dvdauth /dev/\:dvd /mnt/\:dvd/\:VIDEO_TS/\:VTS_02_4.VOB
 .TP
 .B Stream from HTTP
 mplayer http://mplayer.hq/\:example.avi
+.TP
+.B Stream using RTSP
+mplayer rtsp://server.example.com/\:streamName
 .TP
 .B Convert subtitle to MPsub (to ./\:dump.mpsub)
 mplayer dummy.avi \-sub source.sub \-dumpmpsub
