@@ -625,7 +625,7 @@ void blur(
 
     int x, y;
 
-#if 0
+#if 1
     unsigned char  *s = buffer;
     unsigned short *t = tmp2+1;
     for(y=0; y<height; y++){
