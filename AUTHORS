@@ -495,8 +495,9 @@ Juan Martin <nauj27@teleline.es>
     * Spanish man page translation
     * Spanish documentation translation
 
-Dmitry Baryshkov <lumag@mplayerhq.hu>
+Dmitry Baryshkov <mitya@school.ioffe.ru>
     * Russian documentation translation
+    * FLAC decoding support.
 
 NOTE: If you think you are missing here, feel free to send a patch.
 =====
