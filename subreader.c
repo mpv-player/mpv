@@ -265,6 +265,7 @@ subtitle *sub_read_line_vplayer(FILE *fd,subtitle *current) {
 		
 		if (!(current->start = a1*360000+a2*6000+a3*100))
 			continue;
+                /* removed by wodzu
 		p=line;	
  		// finds the body of the subtitle
  		for (i=0; i<3; i++){              
@@ -276,6 +277,11 @@ subtitle *sub_read_line_vplayer(FILE *fd,subtitle *current) {
 		    printf("SUB: Skipping incorrect subtitle line!\n");
 		    continue;
 		}
+                */
+                // by wodzu: hey! this time we know what length it has! what is
+                // that magic for? it can't deal with space instead of third
+                // colon! look, what simple it can be:
+                p = &line[ plen ];
 
  		i=0;
 		if (*p!='|') {
@@ -488,6 +494,8 @@ int sub_autodetect (FILE *fd) {
 	if (strstr (line, "<SAMI>"))
 		{sub_uses_time=1; return SUB_SAMI;}
 	if (sscanf (line, "%d:%d:%d:",     &i, &i, &i )==3)
+		{sub_uses_time=1;return SUB_VPLAYER;}
+	if (sscanf (line, "%d:%d:%d ",     &i, &i, &i )==3)
 		{sub_uses_time=1;return SUB_VPLAYER;}
 	//TODO: just checking if first line of sub starts with "<" is WAY
 	// too weak test for RT
