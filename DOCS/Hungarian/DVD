@@ -14,10 +14,10 @@ Ez egyben azt is jelenti, hogy a jelenleg létezõ DVD funkciók a fejlesztõknek,
 MPlayer fordítása libcss támogatással
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Elõször fordítsd le és installáld a libcss-t.
-Utána fordítsd újra az MPlayer-t, hogy beleforduljon a libcss tamogatas is.
-Ha nem teszi ezt automatikusan, akkor probald igy :
+Utána fordítsd újra az MPlayer-t, hogy beleforduljon a libcss támogatás is.
+Ha nem teszi ezt automatikusan, akkor probáld így :
 
-./configure --enable-css --withcsslibdir=/usr/local/lib --withcssincdir=/usr/local/include
+./configure --enable-css --with-csslibdir=/usr/local/lib --with-cssincidr=/usr/local/include
 
 (természetesen beírhatod a saját opcióidat is)
 

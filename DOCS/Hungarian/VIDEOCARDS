@@ -9,7 +9,7 @@ scale-t, bilinear filtering-et jelent. Linux alatt jónéhány módszerrel
 lehet ezeket elérni:
 
 I.   Az XFree86 4.0.2 Xv (XVideo) kiterjesztése
-I.1. Kartyaspecifikus beallitasok, tudnivalok
+I.1. Kártyaspecifikus beállítások, tudnivalók
 II.  OpenGL driverek, megfelelõ glTexSubImage() támogatással
 III. Nativ kártyaspecifikus driverek, amik egyes kártyák különleges
      képességeit használják ki
@@ -74,15 +74,15 @@ I.1.
    a, Ha az xvinfo nem írja ki mindezt, de az XVideo kiterjesztés be van
       töltve, és biztos vagy benne, hogy a kartyád tud YUV konverziót, akkor
     - 3dfx voodoo3/banshee tulajok töltsenek le új DRI-t a
-      http://dri.sourceforge.net címrõl (de valoszinuleg X 4.1.0 is jo)
-    - S3 Savage4-esek töltsék le az XFree86 >= 4.0.3-at (4.1.0 ajanlott!)
+      http://dri.sourceforge.net címrõl (de valószínûleg X 4.1.0 is jó)
+    - S3 Savage4-esek töltsék le az XFree86 >= 4.0.3-at (4.1.0 ajánlott!)
     - nVidia felhasználók adják el a kártyájukat... vagy nézzenek el az
       nVidia site-jára
-  b, A GATOS driver (ATI kartyakhoz) alapallapotban bekapcsolt VSYNC-et
-     tartalmaz. Ez azt jelenti hogy a dekodolasi sebesseg (!) hozza van
-     szinkronizalva a monitor frissitesi frekvenciajahoz. Ha a lejatszas
-     lassunak tunik, probald meg valahogy kikapcsolni a VSYNC-et, vagy
-     allitsd a kepfrissitest n*(a film fps-e) Hz-re.
+   b, A GATOS driver (ATI kártyákhoz) alapállapotban bekapcsolt VSYNC-et
+      tartalmaz. Ez azt jelenti, hogy a dekódolási sebesség (!) hozzá van
+      szinkronizálva a monitor frissítési frekvenciájához. Ha a lejátszás
+      lassúnak tûnik, próbáld meg valahogy kikapcsolni a VSYNC-et, vagy
+      állítsd a képfrissítést n*(a film fps-e) Hz-re.
 
 5. MPlayer-t 'xv' támogatással kell fordítani. 'configure'-nak ezt kell
    kiírnia:
@@ -94,12 +94,12 @@ I.1.
 
 II.  OpenGL driverek, megfelelõ glTexSubImage() támogatással
 
-   A régebbi Utah-GLX driver (X 3.3.6) támogatja, minden kartyaval.
+   A régebbi Utah-GLX driver (X 3.3.6) támogatja, minden kártyával.
    Lásd http://utah-glx.sourceforge.net
 
-   Az DRI X 4.0.3-as vagy ujabb verzioja szinten tamogatja, de csak a Matrox
-   es Radeon kartyakkal.
-   Lasd dri.sourceforge.net cimen a letoltesi es installalasi instrukciokat.
+   Az DRI X 4.0.3-as vagy újabb verziója szintén támogatja, de csak a Matrox
+   és Radeon kártyákkal.
+   Lásd dri.sourceforge.net címen a letöltési és installálási instrukciókat.
 
 
 III. Nativ kártyaspecifikus driverek

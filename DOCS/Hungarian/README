@@ -12,7 +12,7 @@ OpenGL, SVGAlib, fbdev, AAlib driverekkel, sõt SDL-lel is (beleértve ezáltal az
 SDL képességeit is), és néhány alacsonyszintû kártyaspecifikus driver
 (Matrox/3dfx/SiS) is használható! Legtöbbjük támogat software vagy hardware
 scaling-et, így a teljesképernyõs mód is elérhetõ. És még nem is szóltam a
-szép, elsimított, árnyékolt feliratozásról (7 tamogatott tipus!), ami támogat
+szép, elsimított, árnyékolt feliratozásról (7 támogatott típus!), ami támogat
 magyar, angol, cirill, cseh és koreai fontokat, valamint OSD-t!
 
 Történet:
@@ -49,9 +49,9 @@ a képminõséggel, vagy a sebességgel is. Elhatároztam, hogy (át)írok egyet...
   Próbáld ki és ess ámulatba! Ezernyi új dolog... és persze a régi kód
   feljavítva, bugok eltávolítva stb.
 - MPlayer 0.18
-  2 hónap telt el a 0.17 óta, és itt az újabb release.. Teljes ASF támogatás,
+  2 hónap telt el a 0.17 óta, és itt az újabb release... Teljes ASF támogatás,
   még több subtitle formátum, libao (mint libvo, csak ez audio-ra), és még
-  stabilabb mint eddig! KÖTELEZÕ !
+  stabilabb, mint eddig! KÖTELEZÕ !
 
 Látható, hogy nem codeceket írtam, csak néhány lejátszót. Sok idõt töltöttem
 azzal is, hogy megtaláljam a megfelelõ módszert a hibás file-ok beolvasására
@@ -107,9 +107,9 @@ Támogatott video outputok:
 Általános:
 - x11:  X11 az SHM kiterjesztéssel
 - xv:   X11 az XVideo kiterjesztés overlay-eivel (hardware támogatás)
-- gl:   OpenGL renderelo, egyenlore csak ezekkel megy:
-        - barmely kartyaval, Utah-GLX-szel
-        - Matrox kartyak + X/DRI >=4.0.3
+- gl:   OpenGL renderelõ, egyelõre csak ezekkel megy:
+        - bármely kártyával, Utah-GLX-szel
+        - Matrox kártyák + X/DRI >=4.0.3
         - Radeon + X/DRI CVS
 - dga:  X11 a DGA kiterjesztéssel
 - fsdga:X11 a DGA kiterjesztéssel + teljesképernyõs render (csak 24/32bpp
@@ -118,7 +118,7 @@ Támogatott video outputok:
 - svga: Megjelenítés SVGAlib-bel
 - sdl:  1.1.7 : software scaling
 	1.1.8 : támogatja a hardware-es gyorsítást XVideo-n keresztül
-	1.2.0 : aalib tamogatas
+	1.2.0 : aalib támogatás
 - aalib:Szöveges módú render (SDL-en keresztül, nativ driver hamarosan!)
 
 Kártyaspecifikus:
@@ -240,30 +240,30 @@ Jónéhány MPlayer lista van. A következõ címeken lehet feliratkozni:
 - MPlayer belsõ/magyar fejlesztõk listája:
 	http://lists.sourceforge.net/lists/listinfo/mplayer-devel
 
-	Nemtom, talan magyar nyelvu FLAME lista :)
-	Tovabba a core csapattagok maganugyei, pl mplayer parti, szponzorok,
+	Nemtom, talán magyar nyelvû FLAME lista :)
+	Továbbá a core csapattagok magánügyei, pl. mplayer parti, szponzorok,
 	stb.
 
 - MPlayer fejlesztõk listája:
 	http://lists.sourceforge.net/lists/listinfo/mplayer-dev-eng
 
-	Ez az MPlayer fejlesztoi lista! Temak: interface/API valtozasok, uj
-	library-k, optimalizacio, ./configure, es IDE kell kuldeni patch-eket.
-	NE kuldj ide bugreportot, kerdest!
-	Ne noveljuk a lista forgalmat.
+	Ez az MPlayer fejlesztõi lista! Témák: interface/API változások, új
+	library-k, optimalizáció, ./configure, és IDE kell küldeni patch-eket.
+	NE küldj ide bugreportot, kérdést!
+	Ne növeljük a lista forgalmát.
 
 - MPlayer felhasználók listája:
 	http://lists.sourceforge.net/lists/listinfo/mplayer-users
 
-	- ide kuldj bugreport-ot (miutan elolvastad DOCS/BUGS, BUGREPORTS)
-	- feature kerest (miutan elolvastad DOCS/TODO)
-	- felhasznaloi kerdeseket (miutan elolvastad DOCS/README, INSTALL, FAQ
+	- ide küldj bugreport-ot (miután elolvastad DOCS/BUGS, BUGREPORTS)
+	- feature kérést (miután elolvastad DOCS/TODO)
+	- felhasználói kérdéseket (miután elolvastad DOCS/README, INSTALL, FAQ
 	  stb.)
 
 - MPlayer & Matrox G200/G400/G450 felhasználók:
 	http://lists.sourceforge.net/lists/listinfo/mplayer-matrox
 
-	Matrox-szal kapcsolatos kerdesek helye,
+	Matrox-szal kapcsolatos kérdések helye,
 	- mga_vid
 	- matrox hivatalos driver-ei (4-es X)
 	- matroxfb-TVout
@@ -271,35 +271,36 @@ Jónéhány MPlayer lista van. A következõ címeken lehet feliratkozni:
 - mpg12play-portable fejlesztõi lista:
 	http://lists.sourceforge.net/lists/listinfo/mplayer-mpg12play
 
-	Ezen a listan tortenik az MPlayer portolasa nem-x86 platformokra
-	(IRIX, Solaris-SPARC, Alpha, Commodore64, Sharp szamologep,
-	Teaskanna, stb...)
+	Ezen a listán történik az MPlayer portolása nem-x86 platformokra
+	(IRIX, Solaris-SPARC, Alpha, Commodore64, Sharp számológép,
+	Teáskanna, stb...)
 
 - MPlayer bejelentések:
 	http://lists.sourceforge.net/lists/listinfo/mplayer-announce
 
-	Alacsony forgalmu lista :)
-	Es read-only. Ide irok vmit, ha kesz az uj verzio.
+	Alacsony forgalmú lista :)
+	És read-only. Ide írok vmit, ha kész az új verzió.
 
-- MPlayer CVS-log:     
+- MPlayer CVS-log:
 	http://lists.sourceforge.net/lists/listinfo/mplayer-cvslog
 
-	CVS-beli valtozasokrol kerdeseket ide kuldj.
-	(ha nem erted mire kell egy valtoztatas, vagy jobb fixet tudsz)
-	Bizonyosodj meg rola hogy a kivant fejleszto is olvassa a listat!
+	CVS-beli változásokról kérdéseket ide küldj.
+	(ha nem érted, mire kell egy változtatás, vagy jobb fixet tudsz)
+	Bizonyosodj meg róla, hogy a kívánt fejlesztõ is olvassa a listát!
 
 Megj.: a fenti listák nyelve ANGOL, kivéve ahol más van feltüntetve.
        Más nyelven ne küldj üzenetet!
 
 Licensz:
 ~~~~~~~~
-Az MPlayer tartalmaz jonehany mas projectekbol atvett kodot, de jelenleg az
-OpenDivX kivetelevel minden a General Public License (GPL) version 2 vagy
-kesobbi ala tartozik.
-Lasd DOCS/COPYING
+Az MPlayer tartalmaz jónéhány, más projectekbõl átvett kódot, de jelenleg az
+OpenDivX kivételével minden a General Public License (GPL) version 2 vagy
+késõbbi alá tartozik.
+Lásd DOCS/COPYING
 
 Standard Disclaimer:
 ~~~~~~~~~~~~~~~~~~~~
 Csak a saját felelõsségedre használd! Hibák és pontatlanságok elõfordulhatnak,
-amik kárt tesznek a rendszeredben és/vagy a szemedben/fuledben. Óvatosan járj
+amik kárt tesznek a rendszeredben és/vagy a szemedben/füledben. Óvatosan járj
 el, mert semmiféle felelõsséget nem vállalunk!
+

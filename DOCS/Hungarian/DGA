@@ -2,76 +2,92 @@
 Tartalom
 ~~~~~~~~
 
- 1. Eloszo
+ 1. Elõszó
  2. Mi az a DGA
- 3. Felbontasvaltas
- 4. DGA es MPlayer
- 5. A DGA driver kepessegei
- 6. Sebesseg
- 7. Ismert hibak
- 8. Beepitendo dolgok
+ 3. Felbontásváltás
+ 4. DGA és MPlayer
+ 5. A DGA driver képességei
+ 6. Sebesség
+ 7. Ismert hibák
+ 8. Beepítendõ dolgok
  
- A. Nehany modeline
+ A. Néhány modeline
 
 
 
-1. Eloszo
+1. Elõszó
 ~~~~~~~~~
- Ez a dokumentum nehany szoban elmagyarazza hogy altalaban veve mi is az a
- DGA, es mit tud az MPlayerben (es mit nem).
+ Ez a dokumentum néhány szóban elmagyarázza, hogy általában véve mi is az a
+ DGA, és mit tud az MPlayerben (és mit nem).
 
 2. Mi a DGA?
 ~~~~~~~~~~~~
 
- A DGA szo a Direct Graphics Access roviditese, es egy olyan modszert takar
- amivel a program az X szerver kikerulesevel kozvetlenul irhat a framebuffer
- memoriaba. Szaknyelven szolva ez a framebuffer memorianak a processz
- teruletere torteno lapozasaval tortenik. Ezt a kernel csak root jogosultsaggal
- engedi. Ez tortenhet root-kent torteno bejelentkezessel, vagy a suid bit
- beallitasaval az mplayer programon (NEM ajanlott!).
+ A DGA szó a Direct Graphics Access rövidítése, és egy olyan módszert takar,
+ amivel a program az X szerver kikerülésével közvetlenül írhat a framebuffer
+ memóriába. Szaknyelven szólva ez a framebuffer memóriának a processz
+ területére történõ lapozásával történik. Ezt a kernel csak root jogosultsággal
+ engedi. Ez történhet root-ként történõ bejelentkezéssel, vagy a suid bit
+ beállításával az mplayer programon (NEM ajánlott!).
 
- A DGA-nak ket verzioja van: a DGA1-et az XFree 3.X.X hasznalja, a DGA2
- pedig az XFree 4.0.1 ota letezik.
+ A DGA-nak két verziója van: a DGA1-et az XFree 3.X.X használja, a DGA2
+ pedig az XFree 4.0.1 óta létezik.
 
- A DGA1 csak a fent leirt kozvetlen hozzaferest nyujtja. A felbontasvaltashoz
- itt szukseg van az XVidMode kiterjesztesre.
+ A DGA1 csak a fent leírt közvetlen hozzáférést nyújtja. A felbontásváltáshoz
+ itt szükség van az XVidMode kiterjesztésre.
 
- A DGA2 tartalmazza az XVidMode tudasat, tovabba engedelyezi a szinmelyseg
- megvaltoztatasat. Igy lehetseges, hogy egy 32 bites melysegu X szervert
- atvaltsunk 15 bitesbe, vagy forditva.
+ A DGA2 tartalmazza az XVidMode tudását, továbbá engedélyezi a színmélység
+ megváltoztatását. Így lehetséges, hogy egy 32 bites mélységû X szervert
+ átváltsunk 15 bitesbe, vagy fordítva.
 
- A DGA-nak van nehany hatranya. Valamelyest fugg a grafikus chiptol, es ennek
- X-es driveretol, ezert nem minden rendszeren mukodik ...
+ A DGA-nak van néhány hátránya. Valamelyest függ a grafikus chiptõl és ennek
+ X-es driverétõl, ezért nem minden rendszeren mûködik ...
 
 
-3. Felbontasvaltas
+3. Felbontásváltás
 ~~~~~~~~~~~~~~~~~~
- A DGA driver kepes felbontasvaltasra. Ezzel kikerulheto a (lassu) szoftveres
- scale, ugyanakkor teljeskepernyos lesz a lejatszas. Idealis esetben pontosan
- egyezo felbontast valaszt, de csak azon videomodok kozul tud valasztani,
- ami az /etc/X11/XF86Config fileban szerepel. Ezeket ugynevezett modeline-okkal
- definialjuk, es a videokartya kepessegeitol fuggenek. Az X szerver ezt
- a konfig filet nezi at indulaskor, es kikapcsolja mindazokat amiket a
- kartya nem tud. A fennmarado modok az X11 log-jaban talalhatoak:
+ A DGA driver képes felbontásváltásra. Ezzel kikerülhetõ a (lassú) szoftveres
+ scale, ugyanakkor teljesképernyõs lesz a lejátszás. Ideális esetben pontosan
+ egyezõ felbontást választ, de csak azon videomódok közül tud választani,
+ ami az /etc/X11/XF86Config fileban szerepel. Ezeket úgynevezett modeline-okkal
+ definiáljuk, és a videokártya képességeitõl függenek. Az X szerver ezt
+ a config file-t nézi át induláskor, és kikapcsolja mindazokat, amiket a
+ kártya nem tud. A fennmaradó módok az X11 log-jában találhatóak:
  /var/log/XFree86.0.log
- Az A fuggelekben nehany modeline pelda talalhato.
+ Az A függelékben néhány modeline példa található.
 
-4. DGA es MPlayer
+4. DGA és MPlayer
 ~~~~~~~~~~~~~~~~
 
- Az MPlayer-ben ket helyen lehet DGA-t hasznalni: az SDL driverben
- (-vo sdl -sdl dga), valamint a DGA driverben (-vo dga). A fentiek mindkettore
- igazak; a kovetkezo nehany reszben elmagyarazom hogy is mukodik az MPlayer
+ Az MPlayer-ben két helyen lehet DGA-t használni: az SDL driverben
+ (-vo sdl -sdl dga), valamint a DGA driverben (-vo dga). A fentiek mindkettõre
+ igazak; a következõ néhány részben elmagyarazom, hogy is mûködik az MPlayer
  DGA drivere.
 
 
-5. A DGA driver kepessegei
+5. A DGA driver képességei
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
- ... folyt. kov. ...
+A DGA driver meghivasa a -vo dga parancssori opcio megadasaval tortenik.
+Az alapertelmezett magatartas szerint a video meretehez legkozelebb eso
+felbontasba valt. Figyelmen kivul hagyja a -vm es -fs kapcsolokat
+(felbontasvaltas es teljeskepernyo) - mindig az adot felbontas leheto legjobb
+kihasznalasara torekszik, igy egy arva CPU ciklusnak sem kell forditodnia a kep
+nagyitasara.
+Ha nem tetszik a mod amit kivalasztott, megadhatod hogy az -x es -y altal
+kijelolt merethez valasszon felbontast.
+A -v opcio megadasaval a DGA driver tobbek kozott kiirja az XF86Config
+filed altal elerheto felbontasokat.
+DGA2-vel megadhatod a hasznalando szinmelyseget is, a -bpp opcioval.
+Hasznalhato: 15, 16, 24 es 32. A hardware-edtol fugg, hogy ezek kozul melyeket
+hasznalhatod, valamint hogy (lassu) konverzio lehetseges-e.
+
+Ha szerencsed van es van meg eleg memoriad hogy a kep megegyszer elferjen,
+akkor a DGA driver doublebuffering-et fog alkalmazni, ami sokkal folyamatosabb
+lejatszast eredmenyez.
 
 
-A. Nehany modeline
+A. Néhány modeline
 ~~~~~~~~~~~~~~~~~~
 Section "Modes"
   Identifier    "Modes[0]"
@@ -86,7 +102,7 @@ Section "Modes"
 EndSection
 
 
- Ezek a bejegyzesek mukodnek az en Riva128-asomon, az nv.o driverrel.
+ Ezek a bejegyzések mûködnek az én Riva128-asomon, az nv.o driverrel.
 
  Acki (acki@acki-netz.de, www.acki-netz.de)                  17.5.2001 
 

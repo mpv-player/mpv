@@ -56,7 +56,7 @@ A: lássuk:
      benne van!)
    - video output cpu használat AVI-nál, MPEG-nél 0 (lásd fent)
    - audio codec cpu használat százalékban
-   - kihagyando kepkockak szama, hogy A-V szinkron megmaradjon
+   - kihagyandó képkockák száma, hogy A-V szinkron megmaradjon
    Legtöbbjük hibakeresési célokat szolgál, és hamarosan megszûnik.
 
 Q: A video output CPU használata miért 0% MPEG file-oknál?
@@ -67,8 +67,8 @@ Q: Az OpenGL (-vo gl) output nem mûködik.
 A: Az OpenGL drivered nem támogatja a dinamikus textúraváltást
    (glTexSubImage).
    Ismert, hogy nem mûködik az nVidia bináris szarjaival.
-   Ismert, hogy mûködik Utah-GLX/DRI és Matrox G400-zal, valamint DRI es
-   Radeon-nal is. DRI-vel ezen a ketton kivul massal nem megy.
+   Ismert, hogy mûködik Utah-GLX/DRI és Matrox G400-zal, valamint DRI és
+   Radeon-nal is. DRI-vel ezen a kettõn kívül mással nem megy.
    Nem fog mûködni 3dfx kártyákkal, mivel ezeknek maximum 256x256-os
    textúráik lehetnek.
 
@@ -227,39 +227,39 @@ Q: Az MPlayer "MPlayer interrupted by signal 4 in module: decode_video"
 A: Azon a gépen futtasd az MPlayer-t, amin lefordítottad! Vagy fordítsd újra!
    Semmiképp se használd másik processzoron, mint amin lefordítottad!
 
-Q: Gondjaim vannak az icewm-el es a teljeskepernyos xv moddal..
+Q: Gondjaim vannak az icewm-el és a teljesképernyõs xv móddal..
 A: Tudjuk, az icewm szar.
 
-Q: Dehat aviplay-jel mukodik !
-A: Es?
+Q: Dehát aviplay-jel mûködik !
+A: És?
 
 Q: Akkor az aviplay sokkal jobb !
-A: Hasznald azt, ugyis van szep GUI-ja, meg amugyis jo kis C++ :)
+A: Használd azt, úgyis van szép GUI-ja, meg amúgy is jó kis C++ :)
 
-Q: MPEG file-ok lejatszasanal ezt kapom: Can't find codec for video format
+Q: MPEG file-ok lejátszásánál ezt kapom: Can't find codec for video format
    0x10000001
-A: Regi a codecs.conf-od az ~/.mplayer konyvtarban. Frissitsd a DOCS-bol.
-
-Q: Miutan elinditom a lejatszast KDE(1/2) alatt, csak sotet kepet kapok, es
-   egy perc mulva elindul a lejatszas.
-A: A KDE arts sound daemon lefoglalja a hangkartyat, vagy kivarod ezt az idot,
+A: Régi a codecs.conf-od az ~/.mplayer könyvtárban. Frissítsd a DOCS-ból.
+   
+Q: Miután elindítom a lejátszást KDE(1/2) alatt, csak sötét képet kapok, és
+   egy perc múlva elindul a lejátszás.
+A: A KDE arts sound daemon lefoglalja a hangkártyát, vagy kivárod ezt az idõt,
    vagy kikapcsolod az arts-daemon-t a control centerben.
 
-Q: Szepek a feliratok, a legszebbek amiket valaha lattam, viszont lelassitjak
-   a lejatszast! Tudom hogy ez valoszinutlen, de...
-A: Miutan ./configure lefutott, szerkeszd at a config.h-t, es #undef FAST_OSD
-   helyett ird be : #define FAST_OSD . Forditsd ujra.
+Q: Szépek a feliratok, a legszebbek, amiket valaha lattam, viszont lelassítják
+   a lejátszást! Tudom, hogy ez valószínûtlen, de...
+A: Miután ./configure lefutott, szerkesztd át a config.h-t, és #undef FAST_OSD
+   helyett írd be : #define FAST_OSD . Fordítsd újra!
 
 Q: Az OSD villog!
-A: Olyan vo drivert hasznalsz ami egyszeres bufferelest hasznal (x11,xv).
-   Xv eseten meg tudod valtoztatni a bufferek szamat a libvo/xv_xv.c-ben :
-   Noveld ezt : #define NUM_BUFFERS 1
+A: Olyan vo drivert használsz, ami egyszeres bufferelést használ (x11,xv).
+   Xv esetén meg tudod változtatni a bufferek számát a libvo/xv_xv.c-ben :
+   Növeld ezt : #define NUM_BUFFERS 1
 
 Q: Mi a fene van azzal a 2.96-os gcc-vel ?
-A: gcc 2.96 a RedHat NEM HIVATALOS (csak a RedHat-nal, vagy RedHat
-   disztribuciokban talalhato meg), es HIBAS gcc-je. A gcc 2.96 TELJESEN
-   hasznalhatatlan az MPlayer-rel, mert egyszeruen ATUGORJA az MMX
-   utasitasokat, nem forditja le oket. Fontos: ez NEM MPlayer-specifikus
-   problema, szamos mas project (DRI, avifile, stb..) szenved ebbol fakado
-   problemaktol.
-   ** NE HASZNALD a gcc 2.96-ot !!! **
+A: gcc 2.96 a RedHat NEM HIVATALOS (csak a RedHat-nál, vagy RedHat
+   disztribúciókban található meg) és HIBAS gcc-je. A gcc 2.96 TELJESEN
+   használhatatlan az MPlayer-rel, mert egyszerûen ÁTUGORJA az MMX
+   utasításokat, nem fordítja le õket. Fontos: ez NEM MPlayer-specifikus
+   probléma, számos más project (DRI, avifile, stb..) szenved ebbõl fakadó
+   problémáktól.
+   ** NE HASZNÁLD a gcc 2.96-ot !!! **
