@@ -256,6 +256,15 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     if(mpi->flags&MP_IMGFLAG_DIRECT || mpi->flags&MP_IMGFLAG_DRAW_CALLBACK){
 	vf->priv->dmpi=mpi->priv;
 	mpi->priv=NULL;
+	if(mpi->flags&MP_IMGFLAG_DRAW_CALLBACK){
+	    if(vf->priv->exp_y>0)
+		vf_next_draw_slice(vf, vf->priv->dmpi->planes, vf->priv->dmpi->stride,
+		vf->priv->dmpi->w,vf->priv->exp_y,0,0);
+	    if(vf->priv->exp_y+mpi->h<vf->priv->dmpi->h)
+		vf_next_draw_slice(vf, vf->priv->dmpi->planes, vf->priv->dmpi->stride,
+		vf->priv->dmpi->w,vf->priv->dmpi->h-(vf->priv->exp_y+mpi->h),
+		0,vf->priv->exp_y+mpi->h);
+	}
 #ifdef OSD_SUPPORT
 	if(vf->priv->osd) draw_osd(vf,mpi->w,mpi->h);
 #endif
