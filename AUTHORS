@@ -225,6 +225,7 @@ David Holm <dholm@telia.com>
 Panagiotis Issaris <takis@lumumba.luc.ac.be>
     * -playlist option
     * NuppelVideo support
+    * various fixes
 
 Mike Melanson <melanson@pcisys.net>
     * MS Video1 codec open-source implementation
@@ -271,7 +272,8 @@ Rik Snel <rsnel@cube.dyndns.org>
     * zr video output driver
 
 Anders Johansson <ajh@atri.curtin.edu.au>
-    * audio plugin system, some effect plugins
+    * old audio plugin system, some effect plugins
+    * new libaf interface design, implementation, plugins
 
 Roberto Togni <rtogni@freemail.it>
     * Open source QT RPZA decoder
@@ -301,6 +303,53 @@ D Richard Felker III <dalias@aerifal.cx>
 Dominik Mierzejewski <dominik@rangers.eu.org>
     * compiler warning fixes
     * official RPM packages
+
+Sascha Sommer <saschasommer@freenet.de>
+    * directx VO driver
+
+Sidik Isani <lksi@cfht.hawaii.edu>
+    * get_delay() smoothing code (-autosync)
+    * RTC initialization fixes
+    * various small fixes
+
+Fredrik Noring <noring@nocrew.org>
+    * -vo DGA fixes
+
+Kees Cook <mplayer@outflux.net>
+    * dvdnav hacks
+    * rawdv demuxer fixes
+
+Hampa Hug <hhug@student.ethz.ch>
+    * LUT-based soft eq video filter (-vop eq2)
+
+Uwe Reder <Uwe.Reder@3SOFT.de>
+    * various x11/vm/fs fixes
+    * sub/osd control fixes
+
+Andriy N. Gritsenko <andrej@lucky.net>
+    * skip-deinterlace video filter
+
+Joey Parrish <joey@yunamusic.com>
+    * various fixes
+    * -vo gif89 author
+
+Juergen Hammelmann <juergen.hammelmann@gmx.de>
+    * TOOLS/menvcd author
+
+Martin Gansser <mgansser@ngi.de>
+    * porting to hpux
+
+Matteo Giani <matgiani@ctonet.it>
+    * PVA demuxer
+    
+Rudolf Marek <MAREKR2@cs.felk.cvut.cz>
+    * gtf code for -vo vesa
+
+Tilman Sauerbeck <tsauerbeck@users.sourceforge.net>
+    * TGA decoder (rle/uncomp), -mf tga support
+
+NOTE: If you feel you were missed here, feel free to send a patch.
+=====
 
 ____________
 Main testers
