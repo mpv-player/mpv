@@ -155,28 +155,28 @@ int a52_frame (a52_state_t * state, uint8_t * buf, int * flags,
 
     chaninfo = !acmod;
     do {
-	bitstream_get (5);	/* dialnorm */
+	bitstream_skip (5);	/* dialnorm */
 	if (bitstream_get (1))	/* compre */
-	    bitstream_get (8);	/* compr */
+	    bitstream_skip (8);	/* compr */
 	if (bitstream_get (1))	/* langcode */
-	    bitstream_get (8);	/* langcod */
+	    bitstream_skip (8);	/* langcod */
 	if (bitstream_get (1))	/* audprodie */
-	    bitstream_get (7);	/* mixlevel + roomtyp */
+	    bitstream_skip (7);	/* mixlevel + roomtyp */
     } while (chaninfo--);
 
-    bitstream_get (2);		/* copyrightb + origbs */
+    bitstream_skip (2);		/* copyrightb + origbs */
 
     if (bitstream_get (1))	/* timecod1e */
-	bitstream_get (14);	/* timecod1 */
+	bitstream_skip (14);	/* timecod1 */
     if (bitstream_get (1))	/* timecod2e */
-	bitstream_get (14);	/* timecod2 */
+	bitstream_skip (14);	/* timecod2 */
 
     if (bitstream_get (1)) {	/* addbsie */
 	int addbsil;
 
 	addbsil = bitstream_get (6);
 	do {
-	    bitstream_get (8);	/* addbsi */
+	    bitstream_skip (8);	/* addbsi */
 	} while (addbsil--);
     }
 
@@ -732,7 +732,7 @@ int a52_block (a52_state_t * state, sample_t * samples)
     if (bitstream_get (1)) {	/* skiple */
 	i = bitstream_get (9);	/* skipl */
 	while (i--)
-	    bitstream_get (8);
+	    bitstream_skip (8);
     }
 
     if (state->output & A52_LFE)

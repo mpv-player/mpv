@@ -86,6 +86,15 @@ bitstream_get(uint32_t num_bits) // note num_bits is practically a constant due 
 #endif
 }
 
+static inline void bitstream_skip(int num_bits)
+{
+#ifdef ALT_BITSTREAM_READER
+	indx+= num_bits;
+#else
+	bitstream_get(num_bits);
+#endif
+}
+
 static inline int32_t 
 bitstream_get_2(uint32_t num_bits)
 {
