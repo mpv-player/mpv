@@ -14,7 +14,7 @@
 static vd_info_t info = {
 	"RealVideo decoder",
 	"realvid",
-	"Florian Schneider & A'rpi",
+	"Florian Schneider & A'rpi", // win32 dlls support by alex
 	"using original closed source codecs for Linux",
 	"binary real video codecs"
 };
@@ -49,8 +49,18 @@ static unsigned long (*rvyuv_free)(void*);
 static unsigned long (*rvyuv_hive_message)(unsigned long,unsigned long);
 static unsigned long (*rvyuv_init)(void*, void*); // initdata,context
 static unsigned long (*rvyuv_transform)(char*, char*,transform_in_t*,unsigned int*,void*);
+#ifdef USE_WIN32DLL
+static unsigned long WINAPI (*wrvyuv_custom_message)(cmsg_data_t* ,void*);
+static unsigned long WINAPI (*wrvyuv_free)(void*);
+static unsigned long WINAPI (*wrvyuv_hive_message)(unsigned long,unsigned long);
+static unsigned long WINAPI (*wrvyuv_init)(void*, void*); // initdata,context
+static unsigned long WINAPI (*wrvyuv_transform)(char*, char*,transform_in_t*,unsigned int*,void*);
+#endif
 
 static void *rv_handle=NULL;
+#ifdef USE_WIN32DLL
+static int dll_type = 0; /* 0 = unix dlopen, 1 = win32 dll */
+#endif
 
 void *__builtin_vec_new(unsigned long size) {
 	return malloc(size);
@@ -89,8 +99,7 @@ static int load_syms_linux(char *path) {
 		void *handle;
 
 		mp_msg(MSGT_DECVIDEO,MSGL_INFO, "opening shared obj '%s'\n", path);
-		rv_handle = dlopen (path, RTLD_LAZY);
-		handle=rv_handle;
+		rv_handle = handle = dlopen (path, RTLD_LAZY);
 		if (!handle) {
 			mp_msg(MSGT_DECVIDEO,MSGL_WARN,"Error: %s\n",dlerror());
 			return 0;
@@ -109,32 +118,48 @@ static int load_syms_linux(char *path) {
        rvyuv_transform) return 1;
 
     mp_msg(MSGT_DECVIDEO,MSGL_WARN,"Error resolving symbols! (version incompatibility?)\n");
+    dlclose(rv_handle);
+    rv_handle = NULL;
     return 0;
 }
 
 #ifdef USE_WIN32DLL
 
 #include "../loader/ldt_keeper.h"
-void* LoadLibraryA(char* name);
-void* GetProcAddress(void* handle,char* func);
+void* WINAPI LoadLibraryA(char* name);
+void* WINAPI GetProcAddress(void* handle,char* func);
+int WINAPI FreeLibrary(void *handle);
 
 static int load_syms_windows(char *path) {
     void *handle;
+
+
+    mp_msg(MSGT_DECVIDEO,MSGL_INFO, "opening win32 dll '%s'\n", path);
     Setup_LDT_Keeper();
     rv_handle = handle = LoadLibraryA(path);
     mp_msg(MSGT_DECVIDEO,MSGL_V,"win32 real codec handle=%p  \n",handle);
+    if (!handle) {
+	mp_msg(MSGT_DECVIDEO,MSGL_WARN,"Error loading dll\n");
+	return 0;
+    }
 
-    rvyuv_custom_message = GetProcAddress(handle, "RV20toYUV420CustomMessage");
-    rvyuv_free = GetProcAddress(handle, "RV20toYUV420Free");
-    rvyuv_hive_message = GetProcAddress(handle, "RV20toYUV420HiveMessage");
-    rvyuv_init = GetProcAddress(handle, "RV20toYUV420Init");
-    rvyuv_transform = GetProcAddress(handle, "RV20toYUV420Transform");
+    wrvyuv_custom_message = GetProcAddress(handle, "RV20toYUV420CustomMessage");
+    wrvyuv_free = GetProcAddress(handle, "RV20toYUV420Free");
+    wrvyuv_hive_message = GetProcAddress(handle, "RV20toYUV420HiveMessage");
+    wrvyuv_init = GetProcAddress(handle, "RV20toYUV420Init");
+    wrvyuv_transform = GetProcAddress(handle, "RV20toYUV420Transform");
     
-    if(rvyuv_custom_message &&
-       rvyuv_free &&
-       rvyuv_hive_message &&
-       rvyuv_init &&
-       rvyuv_transform) return 1;
+    dll_type = 1;
+    
+    if(wrvyuv_custom_message &&
+       wrvyuv_free &&
+       wrvyuv_hive_message &&
+       wrvyuv_init &&
+       wrvyuv_transform) return 1;
+
+    mp_msg(MSGT_DECVIDEO,MSGL_WARN,"Error resolving symbols! (version incompatibility?)\n");
+    FreeLibrary(rv_handle);
+    rv_handle = NULL;
     return 0; // error
 }
 #endif
@@ -182,6 +207,11 @@ static int init(sh_video_t *sh){
 	if(!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_I420)) return 0;
 	// init codec:
 	sh->context=NULL;
+#ifdef USE_WIN32DLL
+	if (dll_type == 1)
+	    result=(*wrvyuv_init)(&init_data, &sh->context);
+	else
+#endif
 	result=(*rvyuv_init)(&init_data, &sh->context);
 	if (result){
 	    mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Couldn't open RealVideo codec, error code: 0x%X  \n",result);
@@ -191,6 +221,12 @@ static int init(sh_video_t *sh){
 	if(extrahdr[1]>=0x20200002){
 	    uint32_t cmsg24[4]={sh->disp_w,sh->disp_h,sh->disp_w,sh->disp_h};
 	    cmsg_data_t cmsg_data={0x24,1+((extrahdr[0]>>16)&7), &cmsg24[0]};
+
+#ifdef USE_WIN32DLL
+	    if (dll_type == 1)
+		(*wrvyuv_custom_message)(&cmsg_data,sh->context);
+	    else
+#endif
 	    (*rvyuv_custom_message)(&cmsg_data,sh->context);
 	}
 	mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: RealVideo codec init OK!\n");
@@ -199,7 +235,20 @@ static int init(sh_video_t *sh){
 
 // uninit driver
 static void uninit(sh_video_t *sh){
+#ifdef USE_WIN32DLL
+	if (dll_type == 1)
+	{
+	    if (wrvyuv_free) wrvyuv_free(sh->context);
+	} else
+#endif
 	if(rvyuv_free) rvyuv_free(sh->context);
+
+#ifdef USE_WIN32DLL
+	if (dll_type == 1)
+	{
+	    if (rv_handle) FreeLibrary(rv_handle);
+	} else
+#endif
 	if(rv_handle) dlclose(rv_handle);
 	rv_handle=NULL;
 }
@@ -236,6 +285,12 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 		sh->disp_w, sh->disp_h);
 	if(!mpi) return NULL;
 	
+#ifdef USE_WIN32DLL
+	if (dll_type == 1)
+	    result=(*wrvyuv_transform)(dp_data, mpi->planes[0], &transform_in,
+		transform_out, sh->context);
+	else
+#endif
 	result=(*rvyuv_transform)(dp_data, mpi->planes[0], &transform_in,
 		transform_out, sh->context);
 
