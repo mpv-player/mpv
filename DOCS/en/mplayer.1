@@ -2275,8 +2275,10 @@ or odd).
 .IPs "detc[=var1=value2:var2=value2:...]"
 Attempts to reverse the "telecine" process to recover a clean,
 non-interlaced stream at film framerate. This filter is still
-experimental but seems to be usable. The following arguments (see
-syntax above) may be used to control its behavior:
+experimental but seems to be usable. Please be aware that there is
+absolutely no use in this filter unless you see interlacing when
+playing the movie! The following arguments (see syntax above) may be
+used to control its behavior:
 .RSss
 dr: Set the frame dropping mode. 0 (default) means don't drop frames
 to maintain fixed output framerate. 1 means always drop a frame when
