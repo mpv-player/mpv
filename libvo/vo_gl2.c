@@ -711,7 +711,11 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	XSync(mDisplay, False);
 
 	//XSelectInput(mDisplay, mywindow, StructureNotifyMask); // !!!!
-        XSelectInput(mDisplay, mywindow, StructureNotifyMask | KeyPressMask );
+        XSelectInput(mDisplay, mywindow, StructureNotifyMask | KeyPressMask
+#ifdef HAVE_NEW_INPUT
+		 | ButtonPressMask | ButtonReleaseMask
+#endif
+        );
 
   glVersion = glGetString(GL_VERSION);
 

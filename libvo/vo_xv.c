@@ -417,7 +417,11 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
    vo_x11_classhint( mDisplay,mywindow,"xv" );
    vo_hidecursor(mDisplay,mywindow);
 
-   XSelectInput(mDisplay, mywindow, StructureNotifyMask | KeyPressMask );
+   XSelectInput(mDisplay, mywindow, StructureNotifyMask | KeyPressMask 
+#ifdef HAVE_NEW_INPUT
+		| ButtonPressMask | ButtonReleaseMask
+#endif
+   );
    XSetStandardProperties(mDisplay, mywindow, hello, hello, None, NULL, 0, &hint);
    if ( mFullscreen ) vo_x11_decoration( mDisplay,mywindow,0 );
    XMapWindow(mDisplay, mywindow);

@@ -421,7 +421,11 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
  if ( vo_window == None ) 
 #endif 
   {
-   XSelectInput( mDisplay,mywindow,StructureNotifyMask | KeyPressMask );
+   XSelectInput( mDisplay,mywindow,StructureNotifyMask | KeyPressMask 
+#ifdef HAVE_NEW_INPUT
+		 | ButtonPressMask | ButtonReleaseMask
+#endif
+    );
   }
  saver_off(mDisplay);
  return 0;

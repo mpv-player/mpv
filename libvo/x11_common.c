@@ -29,6 +29,11 @@
 #include <X11/extensions/xf86vmode.h>
 #endif
 
+#ifdef HAVE_NEW_INPUT
+#include "../input/input.h"
+#include "../input/mouse.h"
+#endif
+
 /*
  * If SCAN_VISUALS is defined, vo_init() scans all available TrueColor
  * visuals for the 'best' visual for MPlayer video display.  Note that
@@ -425,6 +430,17 @@ int vo_x11_check_events(Display *mydisplay){
                vo_x11_putkey( ( (keySym&0xff00) != 0?( (keySym&0x00ff) + 256 ):( keySym ) ) );
 	       ret|=VO_EVENT_KEYPRESS;
                break;
+#ifdef HAVE_NEW_INPUT
+          case ButtonPress:
+               // Ignore mouse whell press event
+               if(Event.xbutton.button == 4 || Event.xbutton.button == 5)
+                    break;
+               mplayer_put_key((MOUSE_BTN0+Event.xbutton.button-1)|MP_KEY_DOWN);
+               break;
+          case ButtonRelease:
+               mplayer_put_key(MOUSE_BTN0+Event.xbutton.button-1);
+               break;
+#endif
          }
       }
 #ifdef HAVE_NEW_GUI
