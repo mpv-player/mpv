@@ -1057,6 +1057,10 @@ int vo_x11_check_events(Display * mydisplay)
                 {
                     int key;
 
+#ifdef HAVE_NEW_GUI
+                    if ( use_gui ) { break; }
+#endif
+
                     XLookupString(&Event.xkey, buf, sizeof(buf), &keySym,
                                   &stat);
 #ifdef XF86XK_AudioPause
@@ -1065,10 +1069,6 @@ int vo_x11_check_events(Display * mydisplay)
                     key =
                         ((keySym & 0xff00) !=
                          0 ? ((keySym & 0x00ff) + 256) : (keySym));
-#ifdef HAVE_NEW_GUI
-                    if ((use_gui) && (key == wsEnter))
-                        break;
-#endif
                     vo_x11_putkey(key);
                     ret |= VO_EVENT_KEYPRESS;
                 }
