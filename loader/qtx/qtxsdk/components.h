@@ -2,23 +2,23 @@
 
 typedef char *                          Ptr;
 typedef Ptr *                           Handle;
-typedef long                            Size;
+typedef int32_t                         Size;
 typedef unsigned char                   Boolean;
 typedef unsigned char                   Str31[32];
-typedef long                            Fixed;
+typedef int32_t                         Fixed;
 
-typedef long OSErr;
+typedef int32_t OSErr;
 typedef int OSType;
 
-typedef long ComponentResult;
+typedef int32_t ComponentResult;
 typedef unsigned char                   UInt8;
 typedef signed char                     SInt8;
 typedef unsigned short                  UInt16;
 typedef signed short                    SInt16;
-typedef unsigned long                   UInt32;
-typedef signed long                     SInt32;
+typedef uint32_t                        UInt32;
+typedef int32_t                         SInt32;
 
-#define FOUR_CHAR_CODE(a,b,c,d)       ((unsigned long)(a)<<24 | (unsigned long)(b)<<16 | (unsigned long)(c)<<8 | (unsigned long)(d)) /* otherwise compiler will complain about values with high bit set */
+#define FOUR_CHAR_CODE(a,b,c,d)       ((uint32_t)(a)<<24 | (uint32_t)(b)<<16 | (uint32_t)(c)<<8 | (uint32_t)(d)) /* otherwise compiler will complain about values with high bit set */
 
 // codec private shit:
 typedef void *GlobalsPtr;
@@ -30,7 +30,7 @@ struct __attribute__((__packed__)) ComponentParameters {
     UInt8                           flags;                      /* call modifiers: sync/async, deferred, immed, etc */
     UInt8                           paramSize;                  /* size in bytes of actual parameters passed to this call */
     short                           what;                       /* routine selector, negative for Component management calls */
-    long                            params[1];                  /* actual parameters for the indicated routine */
+    int32_t                         params[1];                  /* actual parameters for the indicated routine */
 };
 typedef struct ComponentParameters      ComponentParameters;
 
@@ -39,8 +39,8 @@ struct __attribute__((__packed__)) ComponentDescription {
     OSType                          componentType;              /* A unique 4-byte code indentifying the command set */
     OSType                          componentSubType;           /* Particular flavor of this instance */
     OSType                          componentManufacturer;      /* Vendor indentification */
-    unsigned long                   componentFlags;             /* 8 each for Component,Type,SubType,Manuf/revision */
-    unsigned long                   componentFlagsMask;         /* Mask for specifying which flags to consider in search, zero during registration */
+    uint32_t                        componentFlags;             /* 8 each for Component,Type,SubType,Manuf/revision */
+    uint32_t                        componentFlagsMask;         /* Mask for specifying which flags to consider in search, zero during registration */
 };
 typedef struct ComponentDescription     ComponentDescription;
 
@@ -65,14 +65,14 @@ typedef ComponentResourcePtr *          ComponentResourceHandle;
 
 
 struct __attribute__((__packed__)) ComponentRecord {
-    long                            data[1];
+    int32_t                            data[1];
 };
 typedef struct ComponentRecord          ComponentRecord;
 typedef ComponentRecord *               Component;
 
 
 struct __attribute__((__packed__)) ComponentInstanceRecord {
-    long                            data[1];
+    int32_t                            data[1];
 };
 typedef struct ComponentInstanceRecord  ComponentInstanceRecord;
 
@@ -107,7 +107,7 @@ typedef ColorSpec *                     ColorSpecPtr;
 typedef ColorSpec                       CSpecArray[1];
 
 struct __attribute__((__packed__)) ColorTable {
-    long                            ctSeed;                     /*unique identifier for table*/
+    int32_t                         ctSeed;                     /*unique identifier for table*/
     short                           ctFlags;                    /*high bit: 0 = PixMap; 1 = device*/
     short                           ctSize;                     /*number of entries in CTTable*/
     CSpecArray                      ctTable;                    /*array [0..0] of ColorSpec*/
@@ -122,27 +122,27 @@ struct __attribute__((__packed__)) MatrixRecord {
 typedef struct MatrixRecord             MatrixRecord;
 typedef MatrixRecord *                  MatrixRecordPtr;
 
-typedef long                            ImageSequence;
+typedef int32_t                         ImageSequence;
 typedef OSType                          CodecType;
 typedef unsigned short                  CodecFlags;
-typedef unsigned long                   CodecQ;
+typedef uint32_t                        CodecQ;
 
 struct __attribute__((__packed__)) ImageDescription {
-    long                            idSize;                     /* total size of ImageDescription including extra data ( CLUTs and other per sequence data ) */
+    int32_t                         idSize;                     /* total size of ImageDescription including extra data ( CLUTs and other per sequence data ) */
     CodecType                       cType;                      /* what kind of codec compressed this data */
-    long                            resvd1;                     /* reserved for Apple use */
+    int32_t                         resvd1;                     /* reserved for Apple use */
     short                           resvd2;                     /* reserved for Apple use */
     short                           dataRefIndex;               /* set to zero  */
     short                           version;                    /* which version is this data */
     short                           revisionLevel;              /* what version of that codec did this */
-    long                            vendor;                     /* whose  codec compressed this data */
+    int32_t                         vendor;                     /* whose  codec compressed this data */
     CodecQ                          temporalQuality;            /* what was the temporal quality factor  */
     CodecQ                          spatialQuality;             /* what was the spatial quality factor */
     short                           width;                      /* how many pixels wide is this data */
     short                           height;                     /* how many pixels high is this data */
     Fixed                           hRes;                       /* horizontal resolution */
     Fixed                           vRes;                       /* vertical resolution */
-    long                            dataSize;                   /* if known, the size of data for this image descriptor */
+    int32_t                         dataSize;                   /* if known, the size of data for this image descriptor */
     short                           frameCount;                 /* number of frames this description applies to */
     Str31                           name;                       /* name of codec ( in case not installed )  */
     short                           depth;                      /* what depth is this data (1-32) or ( 33-40 grayscale ) */
@@ -173,15 +173,15 @@ enum {
 };
 
 struct __attribute__((__packed__)) PixMapExtension {
-    long                            extSize;                    /*size of struct, duh!*/
-    unsigned long                   pmBits;                     /*pixmap attributes bitfield*/
+    int32_t                         extSize;                    /*size of struct, duh!*/
+    uint32_t                        pmBits;                     /*pixmap attributes bitfield*/
     void *                          pmGD;                       /*this is a GDHandle*/
-    long                            pmSeed;
+    int32_t                         pmSeed;
     Fixed                           gammaLevel;                 /*pixmap gammalevel*/
     Fixed                           requestedGammaLevel;
-    unsigned long                   reserved2;
-    long                            longRowBytes;               /*used when rowBytes > 16382*/
-    unsigned long                   signature;
+    uint32_t                        reserved2;
+    int32_t                         longRowBytes;               /*used when rowBytes > 16382*/
+    uint32_t                        signature;
     Handle                          baseAddrHandle;
 };
 typedef struct PixMapExtension          PixMapExtension;
@@ -196,7 +196,7 @@ struct __attribute__((__packed__)) PixMap {
     Rect                            bounds;                     /*encloses bitmap*/
     short                           pmVersion;                  /*pixMap version number*/
     short                           packType;                   /*defines packing format*/
-    long                            packSize;                   /*length of pixel data*/
+    int32_t                         packSize;                   /*length of pixel data*/
     Fixed                           hRes;                       /*horiz. resolution (ppi)*/
     Fixed                           vRes;                       /*vert. resolution (ppi)*/
     short                           pixelType;                  /*defines pixel type*/
@@ -252,8 +252,8 @@ struct __attribute__((__packed__)) GrafPort {
     short                           txMode;
     short                           txSize;
     Fixed                           spExtra;
-    long                            fgColor;
-    long                            bkColor;
+    int32_t                         fgColor;
+    int32_t                         bkColor;
     short                           colrBit;
     short                           patStretch;
     Handle                          picSave;
@@ -298,7 +298,7 @@ enum {
     transparent                 = 36
 };
 
-typedef unsigned long                   GWorldFlags;
+typedef uint32_t                   GWorldFlags;
 
 
 
@@ -321,10 +321,10 @@ enum {
 
 // callbacks:
 typedef void* ImageCodecDrawBandCompleteUPP;
-typedef long long ICMProgressProcRecord;
-typedef long long ICMCompletionProcRecord;
+typedef int64_t ICMProgressProcRecord;
+typedef int64_t ICMCompletionProcRecord;
 typedef ICMCompletionProcRecord* ICMCompletionProcRecordPtr;
-typedef long long ICMDataProcRecord;
+typedef int64_t ICMDataProcRecord;
 typedef void* ICMFrameTimePtr;
 typedef void* CDSequenceDataSourcePtr;
 typedef void* ICMFrameTimeInfoPtr;
@@ -405,15 +405,15 @@ enum {
 
 
 struct __attribute__((__packed__)) CodecCapabilities {
-    long                            flags;
+    int32_t                         flags;
     short                           wantedPixelSize;
     short                           extendWidth;
     short                           extendHeight;
     short                           bandMin;
     short                           bandInc;
     short                           pad;
-    unsigned long                   time;
-    long                            flags2;                     /* field new in QuickTime 4.0 */
+    uint32_t                        time;
+    int32_t                         flags2;                     /* field new in QuickTime 4.0 */
 };
 typedef struct CodecCapabilities        CodecCapabilities;
 
@@ -421,12 +421,12 @@ struct __attribute__((__packed__)) CodecDecompressParams {
     ImageSequence                   sequenceID;                 /* predecompress,banddecompress */
     ImageDescriptionHandle          imageDescription;           /* predecompress,banddecompress */
     Ptr                             data;
-    long                            bufferSize;
+    int32_t                         bufferSize;
 
-    long                            frameNumber;
-    long                            startLine;
-    long                            stopLine;
-    long                            conditionFlags;
+    int32_t                         frameNumber;
+    int32_t                         startLine;
+    int32_t                         stopLine;
+    int32_t                         conditionFlags;
 
     CodecFlags                      callerFlags; // short
     CodecCapabilities *             capabilities;               /* predecompress,banddecompress */
@@ -443,7 +443,7 @@ struct __attribute__((__packed__)) CodecDecompressParams {
     CodecQ                          accuracy;                   /* predecompress,banddecompress */
     short                           transferMode;               /* predecompress,banddecompress */
     ICMFrameTimePtr                 frameTime;                  /* banddecompress */
-    long                            reserved[1];
+    int32_t                         reserved[1];
 
                                                                 /* The following fields only exist for QuickTime 2.0 and greater */
     SInt8                           matrixFlags;                /* high bit set if 2x resize */
@@ -460,8 +460,8 @@ struct __attribute__((__packed__)) CodecDecompressParams {
                                                                 /* The following fields only exist for QuickTime 2.5 and greater */
     OSType **                       wantedDestinationPixelTypes; /* Handle to 0-terminated list of OSTypes */
 
-    long                            screenFloodMethod;
-    long                            screenFloodValue;
+    int32_t                         screenFloodMethod;
+    int32_t                         screenFloodValue;
     short                           preferredOffscreenPixelSize;
 
                                                                 /* The following fields only exist for QuickTime 3.0 and greater */
@@ -471,12 +471,12 @@ struct __attribute__((__packed__)) CodecDecompressParams {
     Boolean                         needUpdateOnSourceChange;   /* band decompress */
     Boolean                         pad;
 
-    long                            unused;
+    int32_t                         unused;
 
     CGrafPtr                        finalDestinationPort;
 
-    long                            requestedBufferWidth;       /* must set codecWantsSpecialScaling to indicate this field is valid*/
-    long                            requestedBufferHeight;      /* must set codecWantsSpecialScaling to indicate this field is valid*/
+    int32_t                         requestedBufferWidth;       /* must set codecWantsSpecialScaling to indicate this field is valid*/
+    int32_t                         requestedBufferHeight;      /* must set codecWantsSpecialScaling to indicate this field is valid*/
 
                                                                 /* The following fields only exist for QuickTime 4.0 and greater */
     Rect                            displayableAreaOfRequestedBuffer; /* set in predecompress*/
@@ -494,8 +494,8 @@ typedef struct CodecDecompressParams    CodecDecompressParams;
 
 
 struct __attribute__((__packed__)) ImageSubCodecDecompressCapabilities {
-    long                            recordSize;                 /* sizeof(ImageSubCodecDecompressCapabilities)*/
-    long                            decompressRecordSize;       /* size of your codec's decompress record*/
+    int32_t                         recordSize;                 /* sizeof(ImageSubCodecDecompressCapabilities)*/
+    int32_t                         decompressRecordSize;       /* size of your codec's decompress record*/
     Boolean                         canAsync;                   /* default true*/
     UInt8                           pad0;
 
@@ -517,7 +517,7 @@ typedef struct ImageSubCodecDecompressCapabilities ImageSubCodecDecompressCapabi
 
 struct __attribute__((__packed__)) ImageSubCodecDecompressRecord {
     Ptr                             baseAddr;
-    long                            rowBytes;
+    int32_t                         rowBytes;
     Ptr                             codecData;
     ICMProgressProcRecord           progressProcRecord;
     ICMDataProcRecord               dataProcRecord;
@@ -525,7 +525,7 @@ struct __attribute__((__packed__)) ImageSubCodecDecompressRecord {
     UInt8                           frameType;
     Boolean                         inhibitMP;                  /* set this in BeginBand to tell the base decompressor not to call DrawBand from an MP task for this frame.  (Only has any effect for MP-capable subcodecs.  New in QuickTime 5.0.)*/
     UInt8                           pad[2];
-    long                            priv[2];
+    int32_t                         priv[2];
 
                                                                 /* The following fields only exist for QuickTime 5.0 and greater */
     ImageCodecDrawBandCompleteUPP   drawBandCompleteUPP;        /* only used if subcodec set subCodecCallsDrawBandComplete; if drawBandCompleteUPP is non-nil, codec must call it when a frame is finished, but may return from DrawBand before the frame is finished. */
@@ -584,10 +584,10 @@ struct __attribute__((__packed__)) CodecInfo {
     Str31                           typeName;                   /* name of the codec type i.e.: 'Apple Image Compression' */
     short                           version;                    /* version of the codec data that this codec knows about */
     short                           revisionLevel;              /* revision level of this codec i.e: 0x00010001 (1.0.1) */
-    long                            vendor;                     /* Maker of this codec i.e: 'appl' */
-    long                            decompressFlags;            /* codecInfo flags for decompression capabilities */
-    long                            compressFlags;              /* codecInfo flags for compression capabilities */
-    long                            formatFlags;                /* codecInfo flags for compression format details */
+    int32_t                         vendor;                     /* Maker of this codec i.e: 'appl' */
+    int32_t                         decompressFlags;            /* codecInfo flags for decompression capabilities */
+    int32_t                         compressFlags;              /* codecInfo flags for compression capabilities */
+    int32_t                         formatFlags;                /* codecInfo flags for compression format details */
     UInt8                           compressionAccuracy;        /* measure (1-255) of accuracy of this codec for compress (0 if unknown) */
     UInt8                           decompressionAccuracy;      /* measure (1-255) of accuracy of this codec for decompress (0 if unknown) */
     unsigned short                  compressionSpeed;           /* ( millisecs for compressing 320x240 on base mac II) (0 if unknown)  */
@@ -598,7 +598,7 @@ struct __attribute__((__packed__)) CodecInfo {
     short                           minimumWidth;               /* minimum width of image (block size) */
     short                           decompressPipelineLatency;  /* in milliseconds ( for asynchronous codecs ) */
     short                           compressPipelineLatency;    /* in milliseconds ( for asynchronous codecs ) */
-    long                            privateData;
+    int32_t                         privateData;
 };
 typedef struct CodecInfo                CodecInfo;
 
