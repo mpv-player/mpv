@@ -1153,6 +1153,10 @@ if [ $_sse = yes ]; then
  _downmixc='downmix/downmix_kni.S'
  _downmixo='downmix/downmix_kni.o'
 else
+if [ $_3dnow = yes ]; then
+ _downmixc='downmix/downmix_3dnow.S'
+ _downmixo='downmix/downmix_3dnow.o'
+else
 if [ $_binutils = yes ]; then
  _downmixc='downmix/downmix_i386.S'
  _downmixo='downmix/downmix_i386.o'
@@ -1167,7 +1171,7 @@ cat << EOF
 EOF
 fi
 fi
-
+fi
 cat > libac3/config.mak << EOF
 
 include ../config.mak
