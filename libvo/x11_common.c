@@ -18,6 +18,7 @@
 #include "video_out.h"
 #include "aspect.h"
 #include "help_mp.h"
+#include "../osdep/timer.h"
 
 #include <X11/Xmd.h>
 #include <X11/Xlib.h>
@@ -1142,14 +1143,15 @@ static Window xs_windowid = 0;
 static Atom deactivate;
 static Atom screensaver;
 
-static float time_last;
+static unsigned int time_last;
 
-void xscreensaver_heartbeat(float time)
+void xscreensaver_heartbeat(void)
 {
+    unsigned int time = GetTimerMS();
     XEvent ev;
 
     if (mDisplay && xs_windowid &&
-	((time - time_last)>30 ||
+	((time - time_last)>30000 ||
 	 (time - time_last)<0)) {
 	time_last = time;
 
