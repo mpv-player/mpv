@@ -7,6 +7,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <errno.h>
+#include <string.h>
 //#include <sys/soundcard.h>
 
 #include "../config.h"
@@ -101,12 +103,18 @@ static int init(int rate,int channels,int format,int flags){
   if (verbose)
     printf("audio_setup: using '%s' dsp device\n", dsp);
 
-  audio_fd=open(dsp, O_WRONLY);
+  audio_fd=open(dsp, O_WRONLY | O_NONBLOCK);
   if(audio_fd<0){
-    printf("Can't open audio device %s  -> nosound\n",dsp);
+    printf("Can't open audio device %s: %s  -> no sound\n", dsp, strerror(errno));
     return 0;
   }
 
+  /* Remove the non-blocking flag */
+  if(fcntl(audio_fd, F_SETFL, 0) < 0) {
+   printf("Can't make filedescriptor non-blocking: %s -> no sound\n", strerror(errno));
+   return 0;
+  }  
+  
   ao_data.bps=channels*rate;
   if(format != AFMT_U8 && format != AFMT_S8)
     ao_data.bps*=2;
@@ -203,9 +211,9 @@ static void uninit(){
 // stop playing and empty buffers (for seeking/pause)
 static void reset(){
     uninit();
-    audio_fd=open(dsp, O_WRONLY);
-    if(audio_fd<0){
-	printf("\nFatal error: *** CANNOT RE-OPEN / RESET AUDIO DEVICE ***\n");
+    audio_fd=open(dsp, O_WRONLY | O_NONBLOCK);
+    if(audio_fd < 0 || fcntl(audio_fd, F_SETFL, 0) < 0){
+	printf("\nFatal error: *** CANNOT RE-OPEN / RESET AUDIO DEVICE *** %s\n", strerror(errno));
 	return;
     }
 
