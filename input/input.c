@@ -24,6 +24,7 @@
 #include "../linux/getch2.h"
 #include "../linux/keycodes.h"
 #include "../linux/timer.h"
+#include "../mp_msg.h"
 #include "../cfgparser.h"
 
 #include "joystick.h"

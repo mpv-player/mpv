@@ -26,7 +26,12 @@
 #define HELP_MP_DEFINE_STATIC
 #include "help_mp.h"
 
+#ifdef NEW_CONFIG
+#include "m_option.h"
+#include "m_config.h"
+#else
 #include "cfgparser.h"
+#endif
 #include "cfg-mplayer-def.h"
 
 #ifdef USE_SUB
@@ -100,6 +105,13 @@ play_tree_t* playtree;
 //**************************************************************************//
 
 m_config_t* mconfig;
+
+#ifdef NEW_CONFIG
+extern play_tree_t*
+m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv);
+extern int
+m_config_parse_config_file(m_config_t* config, char *conffile);
+#endif
 
 //**************************************************************************//
 //             Config file
@@ -584,9 +596,13 @@ int gui_no_filename=0;
       (strrchr(argv[0],'/') && !strcmp(strrchr(argv[0],'/'),"/gmplayer") ) )
           use_gui=1;
 
+#ifdef NEW_CONFIG
+    mconfig = m_config_new();
+#else
     playtree = play_tree_new();
 
     mconfig = m_config_new(playtree);
+#endif
     m_config_register_options(mconfig,mplayer_opts);
     // TODO : add something to let modules register their options
     mp_input_register_options(mconfig);
@@ -596,7 +612,13 @@ int gui_no_filename=0;
     if ( use_gui ) cfg_read();
 #endif
 
+#ifdef NEW_CONFIG
+    playtree = m_config_parse_mp_command_line(mconfig, argc, argv);
+    if(playtree == NULL)
+      exit(1);
+#else
     if(m_config_parse_command_line(mconfig, argc, argv) < 0) exit(1); // error parsing cmdline
+#endif
 
     playtree = play_tree_cleanup(playtree);
     if(playtree) {

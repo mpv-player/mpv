@@ -2,6 +2,14 @@
  * command line and config file parser
  */
 
+#ifdef NEW_CONFIG
+#ifdef MP_DEBUG
+#warning "NEW_CONFIG defined but still using the old cfgparser.h"
+#endif
+#include "m_config.h"
+#include "m_option.h"
+#else
+
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
@@ -32,13 +40,14 @@
 #define CONF_NOCMD		(1<<3)
 #define CONF_GLOBAL		(1<<4)
 #define CONF_NOSAVE                            (1<<5)
+#define CONF_OLD                                  (1<<6)
 
 
 typedef struct config config_t;
 typedef struct m_config m_config_t;
 typedef struct config_save config_save_t;
 
-#include "playtree.h"
+struct play_tree;
 
 typedef void (*cfg_default_func_t)(config_t *, char*);
 
@@ -62,9 +71,9 @@ struct m_config {
   int parser_mode;  /* COMMAND_LINE or CONFIG_FILE */
   int flags;
   char* sub_conf; // When we save a subconfig
-  play_tree_t* pt; // play tree we use for playlist option, etc
-  play_tree_t* last_entry; // last added entry
-  play_tree_t* last_parent; // if last_entry is NULL we must create child of this
+  struct play_tree* pt; // play tree we use for playlist option, etc
+  struct play_tree* last_entry; // last added entry
+  struct play_tree* last_parent; // if last_entry is NULL we must create child of this
   int recursion_depth;
 };
 
@@ -97,7 +106,7 @@ int m_config_parse_config_file(m_config_t *config, char *conffile);
  */
 int m_config_parse_command_line(m_config_t* config, int argc, char **argv);
 
-m_config_t* m_config_new(play_tree_t* pt);
+m_config_t* m_config_new(struct play_tree* pt);
 
 void m_config_free(m_config_t* config);
 
@@ -190,3 +199,5 @@ float
 m_config_get_float (m_config_t *config, char* arg,int* err_ret);
 
 #endif /* __CONFIG_H */
+
+#endif /* NEW_CONFIG */

@@ -151,6 +151,7 @@ Optional features:
   --disable-cdparanoia   Disable cdparanoia support [autodetect]
   --enable-freetype      Enable freetype2 font rendering support [disabled]
   --disable-unrarlib     Disable Unique RAR File Library [enabled]
+  --enable-new-conf      Enable new config stuff [disabled]
 
 Codecs:
   --enable-gif		 enable gif89a output support [autodetect]
@@ -1013,6 +1014,7 @@ _cdparanoia=auto
 _big_endian=auto
 _freetype=no
 _shared_pp=no
+_new_conf=no
 
 for ac_option do
   case "$ac_option" in
@@ -1192,6 +1194,9 @@ for ac_option do
 
   --enable-shared-pp) _shared_pp=yes ;;
   --disable-shared-pp) _shared_pp=no ;;
+
+  --enable-new-conf) _new_conf=yes ;;
+  --disable-new-conf) _new_conf=no ;;
 
   --language=*)
     LINGUAS=`echo $ac_option | cut -d '=' -f 2`
@@ -4235,6 +4240,14 @@ else
 fi
 echores "$_shared_pp"
 
+echocheck "New config"
+if test "$_new_conf" = yes ; then
+    _def_new_conf='#define NEW_CONFIG 1'
+else
+    _def_new_conf='#undef NEW_CONFIG'
+fi
+echores "$_new_conf"
+
 # --------------- GUI specific tests begin -------------------
 echocheck "GUI"
 echo "$_gui"
@@ -4968,6 +4981,9 @@ $_def_vidix
 
 /* enables / disables new input joystick support */
 $_def_joystick
+
+/* enables / disables new config */
+$_def_new_conf
 
 /* Extension defines */
 $_def_3dnow	// only define if you have 3DNOW (AMD k6-2, AMD Athlon, iDT WinChip, etc.)

@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include "cfgparser.h"
 #include "playtree.h"
 #include "playtreeparser.h"
 #include "libmpdemux/stream.h"

@@ -33,7 +33,14 @@ static char* banner_text=
 #include "cpudetect.h"
 
 #include "codec-cfg.h"
+#ifdef NEW_CONFIG
+#include "m_option.h"
+#include "m_config.h"
+#include "parser-mecmd.h"
+#else
 #include "cfgparser.h"
+#include "playtree.h"
+#endif
 
 #include "libmpdemux/stream.h"
 #include "libmpdemux/demuxer.h"
@@ -41,7 +48,6 @@ static char* banner_text=
 #include "libmpdemux/mp3_hdr.h"
 #include "libmpdemux/aviwrite.h"
 
-#include "playtree.h"
 
 #include "libvo/video_out.h"
 
@@ -196,6 +202,12 @@ float lame_param_scale=-1; // unset
 
 m_config_t* mconfig;
 
+#ifdef NEW_CONFIG
+extern int
+m_config_parse_config_file(m_config_t* config, char *conffile);
+#endif
+
+
 static int cfg_inc_verbose(struct config *conf){ ++verbose; return 0;}
 
 static int cfg_include(struct config *conf, char *filename){
@@ -326,8 +338,12 @@ lame_global_flags *lame;
 double v_pts_corr=0;
 double v_timer_corr=0;
 
+#ifdef NEW_CONFIG
+m_entry_t* filelist = NULL;
+#else
 play_tree_t* playtree;
 play_tree_iter_t* playtree_iter;
+#endif
 char* filename=NULL;
 char* frameno_filename="frameno.avi";
 
@@ -357,13 +373,24 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
   }
 }
 
-  // FIXME: get rid of -dvd and other tricky options and config/playtree
+  // FIXME: get rid of -dvd and other tricky options
   stream2=open_stream(frameno_filename,0,&i);
   if(stream2){
     demuxer2=demux_open(stream2,DEMUXER_TYPE_AVI,-1,-1,-2);
     if(demuxer2) printf(MSGTR_UsingPass3ControllFile,frameno_filename);
   }
 
+  // New config code
+#ifdef NEW_CONFIG
+ mconfig = m_config_new();
+ m_config_register_options(mconfig,mencoder_opts);
+ parse_cfgfiles(mconfig);
+ filelist = m_config_parse_me_command_line(mconfig, argc, argv);
+ if(!filelist) mencoder_exit(1, "error parsing cmdline");
+ m_entry_set_options(mconfig,&filelist[0]);
+ filename = filelist[0].name;
+ // Warn the user if he put more than 1 filename ?
+#else
   playtree = play_tree_new();
   mconfig = m_config_new(playtree);
   m_config_register_options(mconfig,mencoder_opts);
@@ -381,6 +408,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
       filename = play_tree_iter_get_file(playtree_iter,1);
     }
   }
+#endif
 
   if(!filename && !vcd_track && !dvd_title && !tv_param_on){
 	printf(MSGTR_MissingFilename);

@@ -252,8 +252,8 @@ static config_t mplayer_opts[]={
 	{"x", &opt_screen_size_x, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
 	{"y", &opt_screen_size_y, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
 	// set screen dimensions (when not detectable or virtual!=visible)
-	{"screenw", &vo_screenwidth, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
-	{"screenh", &vo_screenheight, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
+	{"screenw", &vo_screenwidth, CONF_TYPE_INT, CONF_RANGE|CONF_OLD, 0, 4096, NULL},
+	{"screenh", &vo_screenheight, CONF_TYPE_INT, CONF_RANGE|CONF_OLD, 0, 4096, NULL},
 	// Geometry string
 	{"geometry", &vo_geometry, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	// set aspect ratio of monitor - usefull for 16:9 TVout

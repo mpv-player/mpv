@@ -510,7 +510,7 @@ uninit(void) {
 
     if (strstr(c->driver->name,"Curses") || strstr(c->driver->name,"Linux")){
 	freopen("/dev/tty", "w", stderr);
-	m_config_set_flag(mconfig,"quiet",0); /* enable mplayer outputs */
+	m_config_set_option(mconfig,"quiet",NULL); /* enable mplayer outputs */
     }
 #ifdef USE_OSD
     if(vo_font_save) {
@@ -729,7 +729,7 @@ static uint32_t preinit(const char *arg)
 
     if ((strstr(c->driver->name,"Curses")) || (strstr(c->driver->name,"Linux"))){
 	freopen("/dev/null", "w", stderr);
-	m_config_set_flag(mconfig,"quiet",0); /* disable mplayer outputs */
+	m_config_set_option(mconfig,"noquiet",NULL); /* disable mplayer outputs */
 	/* disable console blanking */
 	printf("\033[9;0]");
     }

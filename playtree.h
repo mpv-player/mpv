@@ -2,8 +2,8 @@
 #ifndef __PLAYTREE_H
 #define __PLAYTREE_H
 
-#include "libmpdemux/stream.h"
-
+struct stream_st;
+struct m_config;
 
 #define PLAY_TREE_ITER_ERROR 0
 #define PLAY_TREE_ITER_ENTRY 1
@@ -20,7 +20,6 @@ typedef struct play_tree play_tree_t;
 typedef struct play_tree_iter play_tree_iter_t;
 typedef struct play_tree_param play_tree_param_t;
 
-#include "cfgparser.h"
 
 #if 0
 typedef struct play_tree_info play_tree_info_t;
@@ -56,7 +55,7 @@ struct play_tree {
 struct play_tree_iter {
   play_tree_t* root; // Iter root tree
   play_tree_t* tree; // Current tree
-  m_config_t* config; 
+  struct m_config* config; 
   int loop;  // Looping status
   int file;
   int num_files;
@@ -124,7 +123,7 @@ play_tree_set_params_from(play_tree_t* dest,play_tree_t* src);
 /// Iterator
 
 play_tree_iter_t*
-play_tree_iter_new(play_tree_t* pt, m_config_t* config);
+play_tree_iter_new(play_tree_t* pt, struct m_config* config);
 
 play_tree_iter_t*
 play_tree_iter_new_copy(play_tree_iter_t* old);
@@ -148,7 +147,7 @@ char*
 play_tree_iter_get_file(play_tree_iter_t* iter, int d);
 
 play_tree_t*
-parse_playtree(stream_t *stream);
+parse_playtree(struct stream_st *stream);
 
 play_tree_t*
 play_tree_cleanup(play_tree_t* pt);

@@ -8,6 +8,7 @@
 #ifdef MP_DEBUG
 #include <assert.h>
 #endif
+#include "cfgparser.h"
 #include "playtree.h"
 #include "mp_msg.h"
 

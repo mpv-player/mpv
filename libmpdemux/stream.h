@@ -31,7 +31,7 @@
 int vcd_seek_to_track(int fd,int track);
 void vcd_read_toc(int fd);
 
-typedef struct {
+typedef struct stream_st {
   int fd;   // file descriptor, see man open(2)
   int type; // see STREAMTYPE_*
   unsigned int buf_pos,buf_len;

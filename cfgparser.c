@@ -19,6 +19,8 @@
 
 #include "config.h"
 
+#ifndef NEW_CONFIG
+
 #ifdef USE_SETLOCALE
 #include <locale.h>
 #endif
@@ -50,6 +52,7 @@
 #endif
 
 #include "cfgparser.h"
+#include "playtree.h"
 
 static void m_config_list_options(m_config_t *config);
 static void m_config_error(int err,char* opt,char* val);
@@ -1536,3 +1539,5 @@ static void m_config_error(int err,char* opt,char* val) {
     break;
   }
 }
+
+#endif

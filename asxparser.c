@@ -1,3 +1,4 @@
+#include "config.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -5,7 +6,9 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "playtree.h"
 #include "playtreeparser.h"
+#include "libmpdemux/stream.h"
 #include "asxparser.h"
 #include "mp_msg.h"
 #include "cfgparser.h"
