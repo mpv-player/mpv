@@ -116,11 +116,11 @@ static int init(sh_video_t *sh){
 	return 0;
     }
 
-//    result=InitializeQTML(6+16);
-    result=InitializeQTML(0);
+    result=InitializeQTML(6+16);
+//    result=InitializeQTML(0);
     printf("InitializeQTML returned %i\n",result);
-    result=EnterMovies();
-    printf("EnterMovies->%d\n",result);
+//    result=EnterMovies();
+//    printf("EnterMovies->%d\n",result);
 
     memset(&desc,0,sizeof(desc));
     desc.componentType= (((unsigned char)'i')<<24)|
