@@ -458,6 +458,7 @@ Tomas Hurka <tom@hukatronic.cz>
 Moritz Bunkus <moritz@bunkus.org>
     * various OGM hacks/fixes
     * author of ogm-tools
+    * Matroska demuxer
 
 Filip Kalinski <filon@pld.org.pl>
     * X11 fulscreen switching fixes/cleanup
@@ -493,6 +494,9 @@ Andoni Zubimendi <andoni@lpsat.net>.
 Juan Martin <nauj27@teleline.es>
     * Spanish man page translation
     * Spanish documentation translation
+
+Dmitry Baryshkov <lumag@mplayerhq.hu>
+    * Russian documentation translation
 
 NOTE: If you think you are missing here, feel free to send a patch.
 =====
