@@ -64,6 +64,7 @@ Zoltán Márk Vicián (Se7en): <se7en@sch.bme.hu>
 
 Alex Beregszaszi (Alex): <alex@naxine.org>
 - ALSA output driver in libao
+- vo_ggi output driver in libvo (www.ggi-project.org)
 
 Andreas Ackermann:  <asackerm@stud.informatik.uni-erlangen.de>
 - LIRC support (see DOCS/LIRC)
