@@ -1400,8 +1400,7 @@ void demux_open_real(demuxer_t* demuxer)
 #undef stream_skip
 #endif
 		}
-#if 0
-	  } else if (strstr(mimet,"X-MP3")) {
+	  } else if (strstr(mimet,"X-MP3-draft-00")) {
 		    sh_audio_t *sh = new_sh_audio(demuxer, stream_id);
 
 		    /* Emulate WAVEFORMATEX struct: */
@@ -1413,7 +1412,7 @@ void demux_open_real(demuxer_t* demuxer)
 		    sh->wf->nAvgBytesPerSec = 0;//bitrate;
 		    sh->wf->nBlockAlign = 0;//frame_size;
 		    sh->wf->cbSize = 0;
-		    sh->wf->wFormatTag = sh->format = 0x55;
+		    sh->wf->wFormatTag = sh->format = mmioFOURCC('a','d','u',0x55);
 		    
 		    if(demuxer->audio->id==stream_id){
 			    sh->ds=demuxer->audio;
@@ -1421,7 +1420,6 @@ void demux_open_real(demuxer_t* demuxer)
 		    }
 		    
 		    ++a_streams;
-#endif
 	  } else if (strstr(mimet,"x-ralf-mpeg4")) {
 		 mp_msg(MSGT_DEMUX,MSGL_ERR,"Real lossless audio not supported yet\n");
 	  } else {
