@@ -752,8 +752,6 @@ Zeigt einen Frame alle <Sekunden> Sekunden.
 Für Slideshows nützlich.
 Da MPlayer nur zum nächsten Keyframe springen kann, kann diese Option ungenau
 sein.
-Die meisten Formate haben einen Keyframe alle <Sekunden> und <Sekunden+20>
-Sekunden.
 .
 .
 .
@@ -7484,7 +7482,45 @@ Kosten der Genauigkeit beim Spulen.
 Im Gegensatz zu MPEG-1/2/4, leidet H.264 bei großen Werten für keyint nicht
 am DCT-Drift.
 .
-.\" man page is synced from top down to this option.
+.TP
+.B keyint_min=<1\-keyint/\:2>
+Setzt das minimale Intervall zwischen IDR-Frames (Standard: keyint * 0.4).
+Sollten Szenenwechsel innerhalb dieses Intervalls vorkommen, so werden sie als
+Intraframes encodiert und nicht als Beginn einer neuen GOP.
+Bei H.264 sind Intraframes nicht notwendigerweise an eine geschlossene GOP
+gebunden.
+Denn es ist für einen P-Frame möglich, von mehr als einem vorigen Frame aus
+vorhergesagt zu werden (siehe auch frameref).
+Daher läßt sich durch Intraframes nicht notwendigerweise spulen.
+IDR-Frames schränken aufeinanderfolgende P-Frames insofern ein, dass sie auf
+keinen Frame, der vor der IDR-Frame liegt, verweisen.
+.
+.TP
+.B scenecut=<-1\-100>
+Steuert, wie energisch Intraframes extra eingefügt werden (Standard: 40).
+Bei geringen Werten für scenecut erzwingt der Codec häufig einen Intraframe,
+wenn dies den Wert für keyint überschreiten würde.
+Gute Werte für scenecut können eine bessere Positionierung für Intraframes
+finden.
+Hohe Werte verwenden mehr Intraframes als nötig, was Bits verschwendet.
+-1 deaktiviert die Erkennung von Szenenwechseln, so dass Intraframes nur alle
+keyint Frames eingefügt werden, selbst wenn einen Szenenwechsel schon früher
+stattfindet.
+Dies wird nicht empfohlen und verschwendet Bits, da Szenenwechsel, die als
+P-Frames codiert werden, genauso groß sind wie Intraframes, den Zähler für
+keyint aber nicht zurücksetzen.
+.
+.TP
+.B frameref=<1\-15>
+Anzahl der vorigen Frames, die für die Vorhersage in einem P-Frame verwendet
+werden (Standard: 1).
+Dies is effektiv in Animes, scheint aber in Material mit Live-Action wenig
+Unterschied zu machen.
+Manche Decoder sind nicht in der Lage, große frameref-Werte zu handhaben.
+.
+.TP
+.B bframes=<0\-16>
+Anzahl aufeinanderfolgender B-Frames zwischen Intra- und P-Frames (Standard: 0)
 .
 .\" --------------------------------------------------------------------------
 .\" Dateien
