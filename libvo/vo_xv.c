@@ -466,7 +466,7 @@ static void allocate_xvimage(int foo)
   }
  if ( Shmem_Flag ) 
   {
-   xvimage[foo] = XvShmCreateImage(mDisplay, xv_port, xv_format, 0, image_width, image_height, &Shminfo[foo]);
+   xvimage[foo] = (XvImage *) XvShmCreateImage(mDisplay, xv_port, xv_format, NULL, image_width, image_height, &Shminfo[foo]);
 
    Shminfo[foo].shmid    = shmget(IPC_PRIVATE, xvimage[foo]->data_size, IPC_CREAT | 0777);
    Shminfo[foo].shmaddr  = (char *) shmat(Shminfo[foo].shmid, 0, 0);
@@ -480,7 +480,7 @@ static void allocate_xvimage(int foo)
  else
 #endif
   {
-    xvimage[foo] = XvCreateImage(mDisplay, xv_port, xv_format, 0, image_width, image_height);
+    xvimage[foo] = (XvImage *) XvCreateImage(mDisplay, xv_port, xv_format, NULL, image_width, image_height);
     xvimage[foo]->data = malloc(xvimage[foo]->data_size);
     XSync(mDisplay,False);
   }

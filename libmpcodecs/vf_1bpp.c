@@ -148,7 +148,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	break;
     default:
 	mp_msg(MSGT_VFILTER,MSGL_ERR,"Unhandled format: 0x%X\n",dmpi->imgfmt);
-	return NULL;
+	return 0;
     }
 
     return vf_next_put_image(vf,dmpi);
