@@ -10,7 +10,7 @@
 <BODY>
 
 
-<H1><A NAME="B">Appendix B - How to report bugs</A></H1>
+<H1><A NAME="appendix_b">Appendix B - How to report bugs</A></H1>
 
 <P>Good bug reports are a very valuable contribution to the development of any
   software project. But just like writing good software, good problem reports
@@ -21,7 +21,7 @@
   instructions in this document closely.</P>
 
 
-<H2>How to fix bugs</H2>
+<H2><A NAME="fix">B.1 How to fix bugs</A></H2>
 
 <P>If you feel have the necessary skills you are invited to have a go at fixing
   the bug yourself.  Or maybe you already did that?  Please read
@@ -31,15 +31,15 @@
   mailing list will assist you if you have questions.</P>
 
 
-<H2>How to report bugs</H2>
+<H2><A NAME="report">B.2 How to report bugs</A></H2>
 
 <P>First of all please try the latest CVS version of MPlayer as your bug
   might already be fixed there. Development moves extremely fast, most problems
   in official releases are reported within days or even hours, so please use
   <B>only CVS</B> to report bugs. CVS instructions can be found at the bottom of
   <A HREF="http://www.mplayerhq.hu/homepage/dload.html">this page</A> or in the
-  README. If this did not help please refer to
-  <A HREF="documentation.html#known_bugs">the list of known bugs</A> and the
+  README. If this did not help please refer to the
+  <A HREF="documentation.html#known_bugs">list of known bugs</A> and the
   rest of the documentation. If your problem is not known or not solvable by our
   instructions, then please report the bug.</P>
 
@@ -69,7 +69,7 @@
   problem or even an answer.</P>
 
 
-<H3>Where to report bugs?</H3>
+<H2><A NAME="where">B.3 Where to report bugs</A></H2>
 
 <P>Subscribe to the mplayer-users mailing list:<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-users">http://mplayerhq.hu/mailman/listinfo/mplayer-users</A><BR>
@@ -86,9 +86,17 @@
   subscribe to actually receive your answer.</P>
 
 
-<H3>What to report?</H3>
+<H2><A NAME ="what">B.4 What to report</A></H2>
 
-<H4>System Information:</H4>
+<P>You may need to include log, configuration or sample files in your bug
+  report. If some of them are quite big then it is better to upload them to our
+  <A HREF="ftp://mplayerhq.hu/MPlayer/incoming/">FTP server</A> in a compressed
+  format (gzip and bzip2 preferred) and include only the path and file name in
+  your bug report. Our mailing lists have a message size limit of 80k, if you
+  have something bigger you have to compress or upload it.</P>
+
+
+<H3><A NAME="system">B.4.1 System Information</A></H3>
 
 <UL>
   <LI>Your Linux distribution or operating system and version e.g.:
@@ -130,7 +138,7 @@
 </UL>
 
 
-<H4>Hardware &amp; drivers:</H4>
+<H3><A NAME="hardware">B.4.2 Hardware and drivers</A></H3>
 
 <UL>
   <LI>CPU info (this works on Linux only):<BR>
@@ -160,7 +168,7 @@
 </UL>
 
 
-<H4>For compilation problems/errors</H4>
+<H3><A NAME="compilation">B.4.3 Compilation problems</A></H3>
 
 Please include these files:
 
@@ -178,12 +186,12 @@ Only if compilation fails below one of these directories, include these files:
 </UL>
 
 
-<H4>For configure problems</H4>
+<H3><A NAME="configure">B.4.4 Configure problems</A></H3>
 
 Include <CODE>configure.log</CODE>.
 
 
-<H4>For playback problems</H4>
+<H3><A NAME="playback">B.4.5 Playback problems</A></H3>
 
 <P>Please include the output of MPlayer at verbosity level 1, but
   remember to <B>not truncate the output</B> when you paste it into your mail.
@@ -214,13 +222,14 @@ Include <CODE>configure.log</CODE>.
   sufficient.</P>
 
 
-<H4>For crashes</H4>
+<H3><A NAME="crash">B.4.6 Crashes</A></H3>
 
 <P>You have to run MPlayer inside <CODE>gdb</CODE> and send us the complete
   output or if you have a core dump of the crash you can extract useful
   information from the <CODE>Core</CODE> file. Here's how:</P>
 
-<H4>How to conserve information about a reproducible crash</H4>
+
+<H4><A NAME="debug">B.4.6.1 How to conserve information about a reproducible crash</A></H4>
 
 Recompile MPlayer with debugging code enabled:
 
@@ -243,7 +252,7 @@ return you to the command line prompt where you have to enter
   &nbsp;&nbsp;&nbsp;&nbsp;info all-registers</CODE></P>
 
 
-<H4>How to extract meaningful information from a core dump</H4>
+<H4><A NAME="core">B.4.6.2 How to extract meaningful information from a core dump</A></H4>
 
 <P>Please create the following command file:</P>
 
@@ -255,16 +264,7 @@ return you to the command line prompt where you have to enter
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=command_file &gt; mplayer.bug</CODE></P>
 
 
-<H3>General note</H3>
-
-<P>If something is quite big (logs for instance) then it is better to upload
-  it to the FTP server in a compressed format (gzip and bzip2 preferred) and
-  include only the path and filename in your bug report. Our mailing lists
-  have a message size limit of 80k, if you have something bigger you have to
-  compress or upload it.</P>
-
-
-<H2>I know what I am doing...</H2>
+<H2><A NAME="advusers">B.5 I know what I am doing...</A></H2>
 
 <P>If you created a proper bug report following the steps above and you are
   confident it is a bug in MPlayer, not a compiler problem or broken

@@ -214,29 +214,17 @@
           </LI>
         </UL>
       </LI>
-      <LI><A HREF="encoding.html">2.4 Encoding with MEncoder</A>
+      <LI><A HREF="#tv">2.4 TV input</A>
         <UL>
-          <LI><A HREF="encoding.html#2pass">2.4.1 Encoding 2 or 3-pass MPEG-4 ("DIVX")</A></LI>
-          <LI><A HREF="encoding.html#rescaling">2.4.2 Rescaling movies</A></LI>
-          <LI><A HREF="encoding.html#copying">2.4.3 Stream copying</A></LI>
-          <LI><A HREF="encoding.html#fixing">2.4.4 Fixing AVIs with broken index</A></LI>
-          <LI><A HREF="encoding.html#libavcodec">2.4.5 Encoding with the libavcodec codec family</A></LI>
-          <LI><A HREF="encoding.html#image_files">2.4.6 Encoding from multiple input image files (JPEGs or PNGs)</A></LI>
-          <LI><A HREF="encoding.html#vobsub">2.4.7 Extracting DVD subtitles to a Vobsub file</A></LI>
-          <LI><A HREF="encoding.html#aspect">2.4.8 Preserving aspect ratio</A></LI>
+          <LI><A HREF="#tv_compilation">2.4.1 Compilation</A></LI>
+          <LI><A HREF="#tv_tips">2.4.2 Usage tips</A></LI>
+          <LI><A HREF="#tv_examples">2.4.3 Examples</A></LI>
         </UL>
       </LI>
-      <LI><A HREF="#tv">2.5 TV input</A>
+      <LI><A HREF="#edl">2.5 Edit Decision Lists (EDL)</A>
         <UL>
-          <LI><A HREF="#tv_compilation">2.5.1 Compilation</A></LI>
-          <LI><A HREF="#tv_tips">2.5.2 Usage tips</A></LI>
-          <LI><A HREF="#tv_examples">2.5.3 Examples</A></LI>
-        </UL>
-      </LI>
-      <LI><A HREF="#edl">2.6 Edit Decision Lists (EDL)</A>
-        <UL>
-          <LI><A HREF="#edl_using">2.6.1 Using an EDL file</A></LI>
-          <LI><A HREF="#edl_making">2.6.2 Making an EDL file</A></LI>
+          <LI><A HREF="#edl_using">2.5.1 Using an EDL file</A></LI>
+          <LI><A HREF="#edl_making">2.5.2 Making an EDL file</A></LI>
         </UL>
       </LI>
     </UL>
@@ -298,22 +286,53 @@
       <LI><A HREF="#cygwin">6.6 Cygwin</A></LI>
     </UL>
   </LI>
+  <LI><A HREF="encoding.html">7. Encoding with MEncoder</A>
+    <UL>
+      <LI><A HREF="encoding.html#2pass">7.1 Encoding 2 or 3-pass MPEG-4 ("DIVX")</A></LI>
+      <LI><A HREF="encoding.html#rescaling">7.2 Rescaling movies</A></LI>
+      <LI><A HREF="encoding.html#copying">7.3 Stream copying</A></LI>
+      <LI><A HREF="encoding.html#fixing">7.4 Fixing AVIs with broken index</A></LI>
+      <LI><A HREF="encoding.html#libavcodec">7.5 Encoding with the libavcodec codec family</A></LI>
+      <LI><A HREF="encoding.html#image_files">7.6 Encoding from multiple input image files (JPEGs or PNGs)</A></LI>
+      <LI><A HREF="encoding.html#vobsub">7.7 Extracting DVD subtitles to a Vobsub file</A></LI>
+      <LI><A HREF="encoding.html#aspect">7.8 Preserving aspect ratio</A></LI>
+    </UL>
+  </LI>
   <LI><A HREF="#mailing_lists">Appendix A - Mailing lists</A></LI>
   <LI><A HREF="bugreports.html">Appendix B - How to report bugs</A>
     <UL>
-      <LI><A HREF="tech/patches.txt">Appendix B2 - How to send patches</A></LI>
+      <LI><A HREF="bugreports.html#fix">B.1 How to fix bugs</A></LI>
+      <LI><A HREF="bugreports.html#report">B.2 How to report bugs</A></LI>
+      <LI><A HREF="bugreports.html#where">B.3 Where to report bugs</A></LI>
+      <LI><A HREF="bugreports.html#what">B.4 What to report</A>
+        <UL>
+          <LI><A HREF="bugreports.html#system">B.4.1 System information</A></LI>
+          <LI><A HREF="bugreports.html#hardware">B.4.2 Hardware and Drivers</A></LI>
+          <LI><A HREF="bugreports.html#compilation">B.4.3 Compilation problems</A></LI>
+          <LI><A HREF="bugreports.html#configure">B.4.4 Configure problems</A></LI>
+          <LI><A HREF="bugreports.html#playback">B.4.5 Playback problems</A></LI>
+          <LI><A HREF="bugreports.html#crash">B.4.6 Crashes</A>
+            <UL>
+              <LI><A HREF="bugreports.html#debug">B.4.6.1 How to conserve information about a reproducible crash</A></LI>
+              <LI><A HREF="bugreports.html#core">B.4.6.2 How to extract meaningful information from a core dump</A></LI>
+            </UL>
+          </LI>
+        </UL>
+      </LI>
+      <LI><A HREF="bugreports.html#advusers">B.5 I know what I am doing...</A></LI>
     </UL>
   </LI>
   <LI><A HREF="#known_bugs">Appendix C - Known bugs</A></LI>
   <LI><A HREF="skin-en.html">Appendix D - MPlayer skin format</A></LI>
   <LI><A HREF="users_against_developers.html">Appendix E - Developer Cries</A>
     <UL>
-      <LI><A HREF="users_against_developers.html#gcc">GCC 2.96</A></LI>
-      <LI><A HREF="users_against_developers.html#binary">Binary distribution</A></LI>
-      <LI><A HREF="users_against_developers.html#nvidia">nVidia</A></LI>
-      <LI><A HREF="users_against_developers.html#barr">Joe Barr</A></LI>
+      <LI><A HREF="users_against_developers.html#gcc">E.1 GCC 2.96</A></LI>
+      <LI><A HREF="users_against_developers.html#binary">E.2 Binary distribution</A></LI>
+      <LI><A HREF="users_against_developers.html#nvidia">E.3 nVidia</A></LI>
+      <LI><A HREF="users_against_developers.html#barr">E.4 Joe Barr</A></LI>
     </UL>
   </LI>
+  <LI><A HREF="tech/patches.txt">Appendix F - How to send patches</A></LI>
 </UL>
 
 <HR>
@@ -1034,8 +1053,6 @@
   <LI>push any menu key you defined</LI>
 </OL>
 
-<P>
-
 
 <H2><A NAME="rtc">1.5 RTC</A></H2>
 
@@ -1098,16 +1115,13 @@ It's a clear way for everyone to become root.
 <H2><A NAME="output">2.3</A> <A HREF="video.html">Video</A> &amp; <A HREF="sound.html">Audio</A> output devices</H2>
 
 
-<H2><A NAME="encoding">2.4</A> <A HREF="encoding.html">MEncoder - An All-Purpose Encoder</A></H2>
-
-
-<H2><A NAME="tv"><B>2.5 TV input</B></A></H2>
+<H2><A NAME="tv"><B>2.4 TV input</B></A></H2>
 
 <P>This section is about how to enable <B>watching/grabbing from V4L compatible
 TV tuner</B>. See the man page for a description of TV options and keyboard
 controls.</P>
 
-<H3><A NAME="tv_compilation">2.5.1 Compilation</A></H3>
+<H3><A NAME="tv_compilation">2.4.1 Compilation</A></H3>
 
 <OL>
   <LI>First, you have to recompile. <CODE>./configure</CODE> will autodetect
@@ -1118,7 +1132,7 @@ controls.</P>
     xawtv.</LI>
 </OL>
 
-<H3><A NAME="tv_tips">2.5.2 Usage tips</A></H3>
+<H3><A NAME="tv_tips">2.4.2 Usage tips</A></H3>
 
 The full listing of the options is available on the manual page. Here
 are just a few tips:
@@ -1186,7 +1200,7 @@ are just a few tips:
      "full duplex" option in the sound server preference menu.</LI>
 </UL>
 
-<H3><A NAME="tv_examples">2.5.3 Examples</A></H3>
+<H3><A NAME="tv_examples">2.4.3 Examples</A></H3>
 
 <P>Dummy output, to AAlib :)<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=dummy:width=640:height=480 -vo aa</CODE><BR>
@@ -1228,7 +1242,7 @@ on:driver=v4l:width=640:height=480 -vo xv</CODE><BR>
   in the horizontal direction due to a hardware limitation.</P>
 
 
-<H2><A NAME="edl">2.6 Edit Decision Lists (EDL)</A></H2>
+<H2><A NAME="edl">2.5 Edit Decision Lists (EDL)</A></H2>
 
 <P>The edit decision list (EDL) system allows you to automatically skip or mute
   sections of videos during playback, based on a movie specific EDL
@@ -1248,12 +1262,12 @@ on:driver=v4l:width=640:height=480 -vo xv</CODE><BR>
   If you happen to need more, change the <CODE>#define MAX_EDL_ENTRIES</CODE>
   in the <CODE>edl.h</CODE> file.</P>
   
-<H3><A NAME="edl_using">2.6.1 Using an EDL file</A></H3>
+<H3><A NAME="edl_using">2.5.1 Using an EDL file</A></H3>
 
 <P>Include the <CODE>-edl &lt;filename&gt;</CODE> flag when you run MPlayer,
   with the name of the EDL file you want applied to the video.</P>
 
-<H3><A NAME="edl_making">2.6.2 Making an EDL file</A></H3>
+<H3><A NAME="edl_making">2.5.2 Making an EDL file</A></H3>
 
 <P>The current EDL file format is:</P>
 
@@ -1812,6 +1826,10 @@ end
 
 
 
+<H1><A NAME="encoding">7.</A> <A HREF="encoding.html">Encoding with MEncoder</A></H1>
+
+
+
 <H1><A NAME="mailing_lists">Appendix A - Mailing lists</A></H1>
 
 <P>There are some public mailing lists on MPlayer. Unless explicitly
@@ -2004,6 +2022,10 @@ No picture at all (just plain grey/green window):
 
 
 <H1><A NAME="flame_wars">Appendix E</A> - <A HREF="users_against_developers.html">Developer Cries</A></H1>
+
+
+
+<H1><A NAME="patches">Appendix F</A> - <A HREF="tech/patches.txt">How to send patches</A></H1>
 
 
 </BODY>
