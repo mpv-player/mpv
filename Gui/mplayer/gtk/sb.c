@@ -103,6 +103,7 @@ void on_SkinList_select_row( GtkCList * clist,gint row,gint column,GdkEvent * be
   {
    prev=sbSelectedSkin;
    ChangeSkin( sbSelectedSkin );
+   gtkActive( SkinBrowser );
   }
  if( !bevent ) return;
  if( bevent->type == GDK_2BUTTON_PRESS )

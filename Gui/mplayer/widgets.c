@@ -134,15 +134,20 @@ void gtkShow( int type,char * param )
  switch( type )
   {
    case evSkinBrowser:
-//	SkinBrowser=create_SkinBrowser();
 	ShowSkinBrowser();
 //        gtkClearList( SkinList );
         if ( gtkFillSkinList( sbMPlayerPrefixDir ) && gtkFillSkinList( sbMPlayerDirInHome ) )
          {
           gtkSetDefaultToCList( SkinList,param );
+	  gtk_clist_sort( SkinList );
           gtk_widget_show( SkinBrowser );
 	  gtkSetLayer( SkinBrowser );
-         } else gtk_widget_destroy( SkinBrowser );
+         } 
+	 else 
+	  {
+	   gtk_widget_destroy( SkinBrowser );
+	   gtkMessageBox( GTK_MB_ERROR,"Skin dirs not found ... Please install skins." );
+	  }
         break;
    case evPreferences:
         gtkMessageBox( GTK_MB_WARNING,"Sorry, this feature is under development ..." );
