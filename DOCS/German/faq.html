@@ -481,9 +481,11 @@ es passiert nicht. Nach etwa einer Minute beginnt das Video anzuspielen.
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
 Der KDE Arts Sound Daemon blockiert das Sound-Device, du kannst also die Zeit
 warten bis das Video startet oder den Arts-Daemin im Kontoll-Zentum ausschalten.
-Wenn du Arts verwenden willst, wähle die Audio-Ausgabe via SDL (<CODE>ao=sdl</CODE>) und
-stelle sicht das dein SDL mit Arts umgehen kann. Eine andere Möglichkeit ist
-MPlayer mit Artsdsp zu starten.
+Um Arts zu verwenden, sollte die Audio-Ausgabe via den eingebauten Arts Audiotreiber
+(<CODE>ao=arts</CODE>) verwendet werden. Falls dies fehlschlägt oder der Treiber nicht
+einkompiliert wurde, kann SDL (<CODE>ao=sdl</CODE>) verwendet werden, dabei muss
+jedoch sichergestellt werden, dass SDL mit Arts umgehen kann. Eine weitere Möglichkeit
+besteht darin, <B>MPlayer</B> mit artsdsp zu starten.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
