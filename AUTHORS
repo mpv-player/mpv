@@ -300,7 +300,7 @@ Wojtek Kaniewski <wojtekka@bydg.pdi.net>
 Fredrik Kuivinen <freku045@student.liu.se>
     * OSD/subtitles outside movie - for SDL
     * video filter layer draft, first implementation
-    * virtualdub filter support (not yet finised/commited)
+    * virtualdub filter support (not yet finished/committed)
 
 Florian Schneider <flo-mplayer-dev@gmx.net>
     * RealVideo codec libraries interface, .rm demuxer fixes
