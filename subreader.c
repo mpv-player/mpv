@@ -3,6 +3,7 @@
  *
  * Written by laaz
  * Some code cleanup & realloc() by A'rpi/ESP-team
+ * dunnowhat sub format by szabi
  */
 
 
@@ -26,6 +27,7 @@ int sub_format=-1;     // 0 for microdvd
 		   // 4 for vplayer format
 		  // 5 for RT format
 		 // 6 for ssa (Sub Station Alpha)
+		// 7 for ... erm ... dunnowhat. tell me if you know
 
 int eol(char p) {
     return (p=='\r' || p=='\n' || p=='\0');
@@ -143,10 +145,10 @@ subtitle *sub_read_line_microdvd(FILE *fd,subtitle *current) {
     p=line2;
 
     next=p, i=0;
-    while (next =sub_readtext (next, &(current->text[i]))) {
+    while ((next =sub_readtext (next, &(current->text[i])))) {
         if (current->text[i]==ERR) {return ERR;}
 	i++;
-	if (i>=SUB_MAX_TEXT) { printf ("Too many lines in a subtitle\n");current->lines=i;return;}
+	if (i>=SUB_MAX_TEXT) { printf ("Too many lines in a subtitle\n");current->lines=i;return current;}
     }
     current->lines= ++i;
 
@@ -219,8 +221,7 @@ subtitle *sub_read_line_vplayer(FILE *fd,subtitle *current) {
 	char line[1001];
 	char line2[1001];
 	int a1,a2,a3,b1,b2,b3;
-	int setime,etime;
-	char *p=NULL, *q=NULL, *l=NULL,*next;
+	char *p=NULL, *next;
 	int i,len,len2,plen;
 
 	bzero (current, sizeof(current));
@@ -246,7 +247,7 @@ subtitle *sub_read_line_vplayer(FILE *fd,subtitle *current) {
 			while ((next =sub_readtext (next, &(current->text[i])))) {
 				if (current->text[i]==ERR) {return ERR;}
 				i++;
-				if (i>=SUB_MAX_TEXT) { printf ("Too many lines in a subtitle\n");current->lines=i;return;}
+				if (i>=SUB_MAX_TEXT) { printf ("Too many lines in a subtitle\n");current->lines=i;return current;}
 			}
 			current->lines=i+1;
 		}
@@ -287,7 +288,7 @@ subtitle *sub_read_line_rt(FILE *fd,subtitle *current) {
 	while ((next =sub_readtext (next, &(current->text[i])))) {
 		if (current->text[i]==ERR) {return ERR;}
 		i++;
-		if (i>=SUB_MAX_TEXT) { printf ("Too many lines in a subtitle\n");current->lines=i;return;}
+		if (i>=SUB_MAX_TEXT) { printf ("Too many lines in a subtitle\n");current->lines=i;return current;}
 	}
 			current->lines=i+1;
     }
@@ -314,6 +315,23 @@ subtitle *sub_read_line_ssa(FILE *fd,subtitle *current) {
 	strcpy(current->text[0],line2);
 
 	return current;
+}
+
+subtitle *sub_read_line_dunnowhat(FILE *fd,subtitle *current) {
+    char line[1001];
+    char text[1001];
+
+    bzero (current, sizeof(current));
+
+    if (!fgets (line, 1000, fd))
+	return NULL;
+    if (sscanf (line, "%ld,%ld,\"%[^\"]", &(current->start),
+		&(current->end), text) <3)
+	return ERR;
+    current->text[0] = strdup(text);
+    current->lines = 1;
+
+    return current;
 }
 
 int sub_autodetect (FILE *fd) {
@@ -347,6 +365,8 @@ int sub_autodetect (FILE *fd) {
 	// It may be not correct (tell me if it's not)
 	if (!memcmp(line, "Dialogue: Marked", 16))
 		{sub_uses_time=1; return 6;}
+	if (sscanf (line, "%d,%d,\"%c", &i, &i, (char *) &i) == 3)
+		{sub_uses_time=0;return 7;}
     }
 
     return -1;  // too many bad lines
@@ -357,7 +377,7 @@ subtitle* sub_read_file (char *filename) {
     FILE *fd;
     int n_max;
     subtitle *first;
-    subtitle * (*func[7])(FILE *fd,subtitle *dest)=
+    subtitle * (*func[])(FILE *fd,subtitle *dest)=
     {
 	    sub_read_line_microdvd,
 	    sub_read_line_subrip,
@@ -365,7 +385,8 @@ subtitle* sub_read_file (char *filename) {
 	    sub_read_line_sami,
 	    sub_read_line_vplayer,
 	    sub_read_line_rt,
-	    sub_read_line_ssa
+	    sub_read_line_ssa,
+	    sub_read_line_dunnowhat
     };
 
     fd=fopen (filename, "r"); if (!fd) return NULL;
@@ -432,7 +453,9 @@ char * sub_filename(char* path,  char * fname )
     ".rt",
     ".RT",
     ".txt",
-    ".TXT"};
+    ".TXT",
+    ".ssa",
+    ".SSA"};
 
 
  if ( fname == NULL ) return NULL;
@@ -445,7 +468,7 @@ char * sub_filename(char* path,  char * fname )
  strcpy(sub_name1,fname);
 
  sub_name2=malloc (strlen(path) + strlen(fname) + 8);
- if (tmp=strrchr(fname,'/'))
+ if ((tmp=strrchr(fname,'/')))
 	 sprintf (sub_name2, "%s%s", path, tmp+1);
  else
 	 sprintf (sub_name2, "%s%s", path, fname);
@@ -489,7 +512,7 @@ int main(int argc, char **argv) {  // for testing
 
     for(j=0;j<sub_num;j++){
 	egysub=&subs[j];
-        printf ("%i line%c (%i-%i) ",
+        printf ("%i line%c (%li-%li) ",
 		    egysub->lines,
 		    (1==egysub->lines)?' ':'s',
 		    egysub->start,
