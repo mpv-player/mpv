@@ -4,93 +4,172 @@ SLAVE MODE PROTOCOL
 If the -slave option is given, playback is controlled by a line-based protocol.
 Each line must contain one of the following commands:
 
-seek <value> [type=<0/\:1/\:2>]
-	Seek to some place in the movie.
-	Type 0 is a relative seek of +/\:- <value> seconds.
-	Type 1 seek to <value> % in the movie.
-	Type 2 is a seek to an absolute position of <value> seconds.
+seek <value> [<type>]
+    Seek to some place in the movie.
+        0 is a relative seek of +/- <value> seconds (default).
+        1 is a seek to <value> % in the movie.
+        2 is a seek to an absolute position of <value> seconds.
+    
 edl_mark
-	????
+    ???
+
 audio_delay <value>
-	Adjust the audio delay of value seconds
+    Adjust the audio delay of value seconds.
+
 quit
-	Quit MPlayer
+    Quit MPlayer.
+
 pause
-	Pause/\:unpause the playback
-grap_frames
-	Somebody know ?
-pt_step <value> [force=<value>]
-	Go to next/\:previous entry in the playtree.
-pt_up_step <value> [force=<value>]
-	Like pt_step but it jumps to next/\:previous in the parent list.
+    Pause/unpause the playback.
+
+grab_frames
+    ???
+
+pt_step <value> [<force>]
+    Go to next/previous entry in the playtree.
+
+pt_up_step <value> [<force>]
+    Like pt_step but it jumps to next/previous in the parent list.
+
 alt_src_step <value>
-	When more than one source is available it selects the next/\:previous one
-	(only supported by asx playlist).
-sub_delay <value> [abs=<value>]
-	Adjust the subtitles delay of +/\:- <value> seconds or set it to <value>
-	seconds when abs is non zero.
-osd [level=<value>]
-	Toggle OSD mode or set it to level when level >= 0.
-volume <dir>
-	Increase/\:decrease volume
+    When more than one source is available it selects the next/previous one
+    (only supported by ASX playlist).
+
+sub_delay <value> [<abs>]
+    Adjust the subtitles delay of +/- <value> seconds or set it to <value>
+    seconds when abs is nonzero.
+
+osd [<level>]
+    Toggle OSD mode or set it to level when level >= 0.
+
+osd_show_text <value>
+
+volume <value>
+    Increase/decrease volume.
+
 use_master
-	Switch volume control between master and pcm.
+    Switch volume control between master and PCM.
+
 mute
-	Mute/\:unmute sound output.
-[contrast|brightness|hue|saturation] <-100-100> [abs=<value>]
-	Set/\:Adjust video parameters.
-frame_drop [type=<value>]
-	Toggle/\:Set frame dropping mode.
-sub_alignment <value>
-	Set subtitle alignment.
-sub_visibility
-	Toggle subtitle visibility.
-get_sub_visibility
-	Print out subtitle visibility (1 == on, 0 == off).
+    Mute/unmute sound output.
+
+[contrast|gamma|brightness|hue|saturation] <-100 - 100> [<abs>]
+    Set/Adjust video parameters.
+
+frame_drop [<value>]
+    Toggle/Set frame dropping mode.
+
 sub_pos <value>
-	Adjust subtitles position.
+    Adjust subtitles position.
+
+sub_alignment <value>
+    Set subtitle alignment.
+
+sub_visibility
+    Toggle subtitle visibility.
+
+get_sub_visibility
+    Print out subtitle visibility (1 == on, 0 == off).
+
 vobsub_lang
-	Switch the subtitle language when using VOBSub subtitles.
+    Switch the subtitle language when using VOBSub subtitles.
+
 get_percent_pos
-	Print out the current position in the file, in integer percentage [0-100).
+    Print out the current position in the file, in integer percentage [0-100).
+
 get_time_length
-	Print out the length of the current file in seconds.
+    Print out the length of the current file in seconds.
+
 vo_fullscreen
-	Switch to fullscreen mode.
+    Switch to fullscreen mode.
+
 get_vo_fullscreen
-	Print out fullscreen status (1 == fullscreened, 0 == windowed).
-panscan value [value2]
-	???
-loadfile url
-	Load the given file/\:url.
-loadlist file
-	Load the given playlist file.
-change_rectangle val1 val2
-	??? used by the rectangle video filter.
-dvdnav button
-	Press the given dvdnav button.
-	1 is up, 2 is down, 3 is left, 4 is right, 5 is menu and 6 is select.
-tv_step_channel <dir>
-	Select next/\:previous tv channel.
+    Print out fullscreen status (1 == fullscreened, 0 == windowed).
+
+panscan <value> [value2]
+    ???
+
+loadfile <file|url>
+    Load the given file/url.
+
+loadlist <file>
+    Load the given playlist file.
+
+change_rectangle <val1> <val2>
+    ???
+
+dvdnav <button>
+    Press the given dvdnav button.
+        1 up
+	2 down
+	3 left
+	4 right
+	5 menu
+	6 select
+
+dvdnav_event <value>
+    ???
+
+tv_step_channel <channel>
+    Select next/previous tv channel.
+
 tv_step_norm
-	Change TV norm.
+    Change TV norm.
+
 tv_step_chanlist
-	Change channel list.
-tv_set_channel channel
-	Set the current TV channel.
+    Change channel list.
+
+tv_set_channel <channel>
+    Set the current TV channel.
+
 tv_last_channel
-	Set the current TV channel to the last one.
+    Set the current TV channel to the last one.
+
 tv_set_freq <frequency in MHz>
-	Set the tv tuner frequency.
+    Set the tv tuner frequency.
+
 tv_set_norm <norm>
-	Set the tv tuner norm. PAL, SECAM, NTSC and so on..
-tv_set_brightness [-100:100]
-	Set tv tuner brightness.
-tv_set_contrast [-100:100]
-	Set tv tuner contrast.
-tv_set_hue [-100:100]
-	Set tv tuner hue.
-tv_set_saturation [-100:100]
-	Set tv tuner saturation.
-gui_[loadsubtitle|about|play|stop]
-	GUI actions
+    Set the tv tuner norm. PAL, SECAM, NTSC and so on..
+
+tv_set_brightness <-100 - 100>
+    Set tv tuner brightness.
+
+tv_set_contrast <-100 -100>
+    Set tv tuner contrast.
+
+tv_set_hue <-100 - 100>
+    Set tv tuner hue.
+
+tv_set_saturation <-100 - 100>
+    Set tv tuner saturation.
+
+gui_[loadfile|loadsubtitle|about|play|stop|gui_playlist|gui_preferences|skinbrowser]
+    GUI actions
+
+forced_subs_only
+    Display forced subtitles only.
+
+dvb_set_channel <value>
+    Set DVB channel.
+
+screenshot
+    Take a screenshot.
+
+
+menu <value>
+    ???
+
+set_menu <value>
+    ???
+
+help
+    ???
+
+exit
+    ???
+
+hide
+    ???
+
+run <value>
+    ???
