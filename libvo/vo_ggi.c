@@ -52,7 +52,7 @@ static ggi_pixel white;
 static ggi_pixel black;
 #endif
 
-static int ggi_setmode(uint32_t d_width, uint32_t d_height, int d_depth, int format)
+static int ggi_setmode(uint32_t d_width, uint32_t d_height, int d_depth)
 {
     ggi_mode mode =
     {
@@ -109,12 +109,22 @@ static int ggi_setmode(uint32_t d_width, uint32_t d_height, int d_depth, int for
 	return(-1);
     }
     
+    if (ggiGetMode(ggi_vis, &mode) != 0)
+    {
+	printf("ggi-setmode: unable to get mode\n");
+	ggiClose(ggi_vis);
+	ggiExit();
+	return(-1);
+    }
+    
     virt_width = mode.virt.x;
     virt_height = mode.virt.y;
     vo_screenwidth = mode.visible.x;
     vo_screenheight = mode.visible.y;
     vo_depthonscreen = d_depth;
-    ggi_bpp = d_depth; /* why ? */
+//    vo_depthonscreen = GT_DEPTH(mode.graphtype);
+//    ggi_bpp = GT_SIZE(mode.graphtype);
+    ggi_bpp = vo_depthonscreen;
 
 #ifdef get_db_info
     {
@@ -135,9 +145,9 @@ static int ggi_setmode(uint32_t d_width, uint32_t d_height, int d_depth, int for
     }
 
     if (verbose)
-	printf("ggi-setmode: %dx%d (virt: %dx%d) screen depth: %d, bpp: %d, format: %s\n",
+	printf("ggi-setmode: %dx%d (virt: %dx%d) screen depth: %d, bpp: %d\n",
 	    vo_screenwidth, vo_screenheight, virt_width, virt_height,
-	    vo_depthonscreen, ggi_bpp, vo_format_name(ggi_format));
+	    vo_depthonscreen, ggi_bpp);
 
     ggi_bppmul = ggi_bpp/8;
 
@@ -149,7 +159,6 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
     uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format)
 {
     vo_depthonscreen = 32;
-
     printf("ggi-init: This driver has got bugs, if you can, fix them.\n");
 
     if (ggiInit() != 0)
@@ -203,7 +212,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 	    break;
 	case IMGFMT_YV12: /* rgb, 24bit */
 	    ggi_bpp = 16;
-	    yuv2rgb_init(vo_depthonscreen, MODE_RGB);
+	    yuv2rgb_init(32/*vo_depthonscreen*/, MODE_RGB);
 	    break;
 	default:
 	    printf("ggi-init: no suitable image format found (requested: %s)\n",
@@ -212,13 +221,16 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
     }
     ggi_format = format;
 
-    ggiSetFlags(ggi_vis, GGIFLAG_ASYNC);
-
-    if (ggi_setmode(d_width, d_height, vo_depthonscreen, ggi_format) != 0)
+    if (ggi_setmode(d_width, d_height, vo_depthonscreen) != 0)
     {
 	printf("ggi-init: setmode returned with error\n");
 	return(-1);
     }    
+
+    printf("ggi-init: input: %d bpp %s - screen depth: %d\n", ggi_bpp,
+	vo_format_name(ggi_format), vo_depthonscreen);
+
+    ggiSetFlags(ggi_vis, GGIFLAG_ASYNC);
 
     ggi_buffer = (ggi_directbuffer *)ggiDBGetBuffer(ggi_vis, 0);
 
@@ -294,9 +306,28 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
 	case IMGFMT_YV12:
 	case IMGFMT_I420:
 	case IMGFMT_IYUV:
-	    vo_draw_alpha_yv12(w, h, src, srca, stride,
-		ggi_buffer->write+(virt_width*y0+x0),
-		virt_width);
+	    switch (vo_depthonscreen)
+	    {
+		case 32:
+        	    vo_draw_alpha_rgb32(w, h, src, srca, stride, 
+			ggi_buffer->write+4*(virt_width*y0+x0), 4*virt_width);
+		    break;
+		case 24:
+        	    vo_draw_alpha_rgb24(w, h, src, srca, stride, 
+	    		ggi_buffer->write+3*(virt_width*y0+x0), 3*virt_width);
+		    break;
+		case 16:
+        	    vo_draw_alpha_rgb16(w, h, src, srca, stride, 
+			ggi_buffer->write+2*(virt_width*y0+x0), 2*virt_width);
+		    break;
+		case 15:
+        	    vo_draw_alpha_rgb15(w, h, src, srca, stride, 
+			ggi_buffer->write+2*(virt_width*y0+x0), 2*virt_width);
+		    break;
+	    }
+//	    vo_draw_alpha_yv12(w, h, src, srca, stride,
+//		ggi_buffer->write+(virt_width*y0+x0),
+//		virt_width);
 	    break;
 	case IMGFMT_YUY2:
 	case IMGFMT_YVYU:
@@ -312,26 +343,22 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
 	case IMGFMT_RGB15:
         case IMGFMT_BGR15:
             vo_draw_alpha_rgb15(w, h, src, srca, stride, 
-		ggi_buffer->write+2*(virt_width*y0+x0),
-		2*virt_width);
+		ggi_buffer->write+2*(virt_width*y0+x0), 2*virt_width);
             break;
         case IMGFMT_RGB16:
         case IMGFMT_BGR16:
             vo_draw_alpha_rgb16(w, h, src, srca, stride, 
-		ggi_buffer->write+2*(virt_width*y0+x0),
-		2*virt_width);
+		ggi_buffer->write+2*(virt_width*y0+x0), 2*virt_width);
             break;
         case IMGFMT_RGB24:
         case IMGFMT_BGR24:
             vo_draw_alpha_rgb24(w, h, src, srca, stride, 
-		ggi_buffer->write+3*(virt_width*y0+x0),
-		3*virt_width);
+		ggi_buffer->write+3*(virt_width*y0+x0), 3*virt_width);
             break;
         case IMGFMT_RGB32:
         case IMGFMT_BGR32:
             vo_draw_alpha_rgb32(w, h, src, srca, stride, 
-		ggi_buffer->write+4*(virt_width*y0+x0),
-		4*virt_width);
+		ggi_buffer->write+4*(virt_width*y0+x0), 4*virt_width);
 	    break;
     }
 }
@@ -363,8 +390,8 @@ static uint32_t query_format(uint32_t format)
 	case IMGFMT_YV12:
 /*	case IMGFMT_I420:
 	case IMGFMT_IYUV:
-	case IMGFMT_YUY2:
-	case IMGFMT_YVYU:
+*/	case IMGFMT_YUY2:
+/*	case IMGFMT_YVYU:
 	case IMGFMT_UYVY:*/
 	    return(1);
 	case IMGFMT_RGB8:
