@@ -247,7 +247,8 @@ Use these options if autodetection fails:
   --with-win32libdir=DIR   W*ndows DLL files in DIR
   --with-xanimlibdir=DIR   XAnim DLL files in DIR
   --with-reallibdir=DIR    RealPlayer DLL files in DIR
-  --with-xvidcore=PATH     path to XviD libcore.a (e.g. /opt/lib/libcore.a)
+  --with-xvidcore=PATH     path to XviD libxvidcore.a
+                           (e.g. /opt/lib/libxvidcore.a)
   --with-sdl-config=PATH   path to sdl*-config (e.g. /opt/bin/sdl-config)
   --with-freetype-config=PATH  path to freetype-config
                            (e.g. /opt/bin/freetype-config)
