@@ -804,11 +804,9 @@ driver.</P>
 <UL>
   <LI>
     <CODE>cd drivers/radeon<BR>
-    make</CODE><BR></LI>
-  <LI>install the <CODE>radeon_vid.o</CODE> and/or <CODE>rage128_vid.o</CODE> module to your kernelmodules</LI>
-  <LI>execute one of the following :<BR>
-    <CODE>mknod /dev/radeon_vid c 178 0</CODE><BR>
-    <CODE>mknod /dev/rage128_vid c 178 0</CODE></LI>
+    make<BR>
+    make install<BR>
+    make nodes</CODE></LI>
   <LI>add one of the following at the end of the <CODE>/etc/modules.conf</CODE> file :<BR>
     <CODE>&nbsp;&nbsp;alias char-major-178 radeon_vid</CODE><BR>
     <CODE>&nbsp;&nbsp;alias char-major-178 rage128_vid</CODE></LI>
