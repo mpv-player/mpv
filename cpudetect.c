@@ -1,6 +1,8 @@
 #include "config.h"
 #include "cpudetect.h"
 
+CpuCaps gCpuCaps;
+
 #ifdef ARCH_X86
 
 #include <stdio.h>
@@ -22,7 +24,6 @@
 
 /* I believe this code works.  However, it has only been used on a PII and PIII */
 
-CpuCaps gCpuCaps;
 static void check_os_katmai_support( void );
 
 #if 1
@@ -83,7 +84,9 @@ void GetCpuCaps( CpuCaps *caps)
 {
 	unsigned int regs[4];
 	unsigned int regs2[4];
-	
+
+	caps->isX86=1;
+
 	bzero(caps, sizeof(*caps));
 	if (!has_cpuid()) {
 	    printf("CPUID not supported!???\n");
@@ -94,7 +97,7 @@ void GetCpuCaps( CpuCaps *caps)
 	if (regs[0]>=0x00000001)
 	{
 		char *tmpstr;
-		
+
 		do_cpuid(0x00000001, regs2);
 
 		tmpstr=GetCpuFriendlyName(regs, regs2);
@@ -142,7 +145,9 @@ void GetCpuCaps( CpuCaps *caps)
 		caps->hasSSE=0;
 		caps->hasSSE2 = 0;
 #endif
-
+//		caps->has3DNow=1;
+//		caps->hasMMX2 = 0;
+//		caps->hasMMX = 0;
 
 }
 
@@ -166,7 +171,7 @@ char *GetCpuFriendlyName(unsigned int regs[], unsigned int regs2[]){
 	}
 
 	sprintf(vendor,"%.4s%.4s%.4s",&regs[1],&regs[3],&regs[2]);
-	
+
 	for(i=0; i<MAX_VENDORS; i++){
 		if(!strcmp(cpuvendors[i].string,vendor)){
 			if(cpuname[i][CPUID_FAMILY][CPUID_MODEL]){
@@ -337,4 +342,17 @@ static void check_os_katmai_support( void )
    gCpuCaps.hasSSE=0;
 #endif /* __linux__ */
 }
-#endif /* ARCH_X86 */
+#else /* ARCH_X86 */
+
+void GetCpuCaps( CpuCaps *caps)
+{
+	caps->cpuType=0;
+	caps->hasMMX=0;
+	caps->hasMMX2=0;
+	caps->has3DNow=0;
+	caps->has3DNowExt=0;
+	caps->hasSSE=0;
+	caps->hasSSE2=0;
+	caps->isX86=0;
+}
+#endif /* !ARCH_X86 */
