@@ -5,6 +5,9 @@
 #				   pontscho@makacs.poliod.hu
 #
 # Changes in reversed order:
+# 2001/11/14 by Gabucino
+# - dunno who made the --target option but now it even works
+# - fixed some Intel arch test for --target
 #
 # 2001/10/26 by al3x
 # - added detection of zlib (used by libmpdemux/demux_mov.c)
@@ -525,7 +528,7 @@ if test "$_as" = auto ; then
   fi
 fi
 
-if test "$host_arch" = i386 ; then
+if test "$host_arch" = i386 || test "$host_arch" = i486 || test "$host_arch" = i586 || test "$host_arch" = i686; then
     if test -r /proc/cpuinfo ; then
 	# linux with /proc mounted, extract cpu information from it
 	_cpuinfo="cat /proc/cpuinfo"
@@ -698,7 +701,7 @@ int main( void ) { return 0; }
 EOF
 
 case "$host_arch" in
-i386)
+i386|i486|i586|i686)
     _arch="#define ARCH_X86 1"
     _target_arch="TARGET_ARCH_X86=yes"
     _words_endian="#undef WORDS_BIGENDIAN"
@@ -881,6 +884,17 @@ mips)
     die "unsupported architecture $host_arch"
     ;;
 esac
+
+##
+## Gabucino : --target takes effect here (hopefully...) by overwriting
+##            autodetected mcpu/march parameters
+##
+
+if test "$_target" ; then
+  _march="-march=$host_arch"
+  _mcpu="-mcpu=$host_arch"
+  proc="$_target"		# a little cosmetic
+fi
 
 # ---
 
@@ -1618,6 +1632,8 @@ for ac_option do
 	;;
   --as=*)
 	;;
+  --target=*)
+        ;;
   *)
 	echo "Unknown parameter: $ac_option"
 	;;
@@ -1768,12 +1784,12 @@ fi
 # to screen.
 echo "Install prefix: $_prefix"
 echo "Data directory: $_datadir"
-if test "$host_arch" = i386 ; then
+if test "$host_arch" = i386 || test "$host_arch" = i486 || test "$host_arch" = i586 || test "$host_arch" = i686 ; then
     echo "Checking for cpu vendor ... $pvendor ( $pfamily:$pmodel:$pstepping )"
     echo "Checking for cpu type ... $pname"
 fi
 echo "Optimizing to ... $proc"
-if test "$host_arch" = i386 ; then
+if test "$host_arch" = i386 || test "$host_arch" = i486 || test "$host_arch" = i586 || test "$host_arch" = i686 ; then
     echo "Checking for mmx support ... $_mmx"
     echo "Checking for mmx2 support ... $_mmx2"
     echo "Checking for 3dnow support ... $_3dnow"
@@ -2888,7 +2904,7 @@ Use --enable-sdl to force usage of libSDL.
 EOF
 fi
 
-if test "$host_arch" = "i386" ; then
+if test "$host_arch" = "i386" || test "$host_arch" = "i486" || test "$host_arch" = "i586" || test "$host_arch" = "i686" ; then
   if test "$_win32" = no ; then
     if test "$_win32libdir" ; then
       cat <<EOF
