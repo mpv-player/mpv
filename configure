@@ -662,7 +662,7 @@ cat > $TMPC << EOF
 int main (void) { return 0;}
 EOF
 
-$_cc -I/usr/X11R6/unclude $TMPC -o $TMPO -L/usr/X11R6/lib -L/usr/X11/lib -lX11 -lXext -lXxf86dga -lXxf86vm $_socklib > /dev/null 2>&1 && _dga=yes
+$_cc $_x11incdir $TMPC -o $TMPO -L/usr/X11R6/lib -L/usr/X11/lib -lX11 -lXext -lXxf86dga -lXxf86vm $_socklib > /dev/null 2>&1 && _dga=yes
 # Note: the -lXxf86vm library is the VideoMode extension and though it's
 # not needed for DGA, AFAIK every distribution packages together with DGA
 # stuffs named 'X extensions' or something similar. This check can be usefull
@@ -1275,6 +1275,12 @@ if test -z "$CFLAGS"; then
  CFLAGS="-O4 -march=$proc -mcpu=$proc -pipe -ffast-math -fomit-frame-pointer"
 fi
 fi
+# Under FreeBSD (maybe other systems as well?) we have to add to CFLAGS
+# for MT applications: 
+if [ "$system_name" = "FreeBSD" ]; then
+CFLAGS="$CFLAGS -D_THREAD_SAFE"
+fi
+
 echo
 echo "Creating $MCONF"
 cat > $MCONF << EOF
