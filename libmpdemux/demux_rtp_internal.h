@@ -13,6 +13,7 @@ extern "C" {
 }
 
 #ifndef _LIVEMEDIA_HH
+#undef STREAM_SEEK
 #include <liveMedia.hh>
 #endif
 
