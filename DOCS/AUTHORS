@@ -60,6 +60,9 @@ Zoltán Márk Vicián (Se7en): <se7en@sch.bme.hu>
 - SVGAlib support in libvo
 - native AAlib driver (coming soon)
 
+Alex Beregszaszi (Alex): <alex@naxine.org>
+- ALSA output driver in libao
+
 Andreas Ackermann:  <asackerm@stud.informatik.uni-erlangen.de>
 - LIRC support (see DOCS/LIRC)
 - DGA support in libvo

@@ -51,6 +51,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-dvdkey\ key ]
 .RB [ \-stereo\ mode ]
 .RB [ \-srate\ Hz ]
+.RB [ \-osdlevel\ level ]
 .I - or file
 .PP
 .SH DESCRIPTION
@@ -104,7 +105,7 @@ bands around it)
 use XF86VidMode extension for mode changing
 .TP
 .B \-zoom
-use software scaling, where available
+use software scaling, where available (use with -nofs)
 .TP
 .B \-x\ x
 scale image to x width [if driver suppports!]
@@ -151,6 +152,9 @@ specify frame/sec rate of subtitle file
 .TP
 .B \-subdelay\ sec
 delays subtitles by <sec> seconds. Can be negative.
+.TP
+.B \-osdlevel\ level
+specifies which mode the OSD should start in (none,seek,seek+timer)
 .IP
 .SH "ADVANCED OPTIONS"
 .TP
