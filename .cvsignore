@@ -9,3 +9,4 @@ mplayer
 version.h
 build-stamp
 configure-stamp
+libavcodec
