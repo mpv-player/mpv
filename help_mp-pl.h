@@ -10,39 +10,37 @@ static char* banner_text=
 
 static char help_text[]=
 #ifdef HAVE_NEW_GUI
-"U¿ycie:   mplayer [-gui] [opcje] [¶cie¿ka/]nazwa\n"
+"U¿ycie:   mplayer [-gui] [opcje] [url|¶cie¿ka/]nazwa\n"
 #else
-"U¿ycie:   mplayer [opcje] [¶cie¿ka/]nazwa\n"
+"U¿ycie:   mplayer [opcje] [url|¶cie¿ka/]nazwa\n"
 #endif
 "\n"
-"Opcje:\n"
+"Podstawowe opcje: (pe³na lista w manualu)\n"
 " -vo <drv[:dev]> wybór sterownika[:urz±dzenia] video (lista po '-vo help')\n"
 " -ao <drv[:dev]> wybór sterownika[:urz±dzenia] audio (lista po '-ao help')\n"
+#ifdef HAVE_VCD
 " -vcd <trackno>  odtwarzanie bezpo¶rednio ¶cie¿ki VCD (video cd)\n"
+#endif
 #ifdef HAVE_LIBCSS
 " -dvdauth <dev>  urz±dzenie DVD do autentykacji (dla zaszyfrowanych dysków)\n"
 #endif
 #ifdef USE_DVDREAD
 " -dvd <titleno>  odtwarzanie bezpo¶rednio ¶cie¿ki DVD\n"
+" -alang/-slang   jêzyk dla d¼wiêku/napisów (poprzez 2-znakowy kod kraju)\n"
 #endif
 " -ss <timepos>   skok do podanej pozycji (sekundy albo hh:mm:ss)\n"
 " -nosound        odtwarzanie bez d¼wiêku\n"
-#ifdef USE_FAKE_MONO
-" -stereo <mode>  wybór trybu stereo dla MPEG1 (0:stereo 1:lewo 2:prawo)\n"
-#endif
-" -channels <n>   docelowa liczba kana³ów audio\n"
 " -fs -vm -zoom   opcje pe³noekranowe (pe³en ekran,zmiana trybu,skalowanie)\n"
-" -x <x> -y <y>   skalowanie do rozdzielczo¶ci <x>*<y> [je¶li -vo pozwala!]\n"
+" -x <x> -y <y>   wybór rozdzielczo¶ci ekranu (dla zmian trybu video lub \n"
+"                 skalowania softwarowego)\n"
 " -sub <file>     wybór pliku z napisami (zobacz tak¿e -subfps, -subdelay)\n"
 " -playlist <file>wybór pliku z playlist±\n"
 " -vid x -aid y   wybór odtwarzanego strumienia video (x) i audio (y)\n"
 " -fps x -srate y wybór prêdko¶ci odtwarzania video (x fps) i audio (y Hz)\n"
-" -pp <quality>   wybór filtra wyg³adzaj±cego (0-4 dla DivX, 0-63 dla mpeg)\n"
-" -nobps          inna metoda synchronizacji A-V dla plików AVI (mo¿e pomóc!)\n"
+" -pp <quality>   wybór filtra wyg³adzaj±cego (zobacz manual/dokumentacje)\n"
 " -framedrop      gubienie klatek (dla wolnych maszyn)\n"
-" -wid <window id>u¿yj istniej±cgo okna dla wyj¶cia video (np. dla pluggera!)\n"
 "\n"
-"Klawisze:\n"
+"Podstawowe klawisze: (pe³na lista w manualu, sprawd¼ tak¿e input.conf\n"
 " Right,Up,PgUp   skok naprzód o 10 sekund, 1 minutê, 10 minut\n"
 " Left,Down,PgDn  skok do ty³u o 10 sekund, 1 minutê, 10 minut\n"
 " < lub >         przeskok o jedn± pozycjê w playli¶cie\n"
@@ -51,8 +49,8 @@ static char help_text[]=
 " + lub -         regulacja opó¼nienia d¼wiêku o +/- 0.1 sekundy\n"
 " o               prze³±czanie trybów OSD: pusty / belka / belka i zegar\n"
 " * lub /         zwiêkszenie lub zmniejszenie natê¿enia d¼wiêku\n"
-"                 (naci¶nij 'm' ¿eby wybraæ master/pcm)\n"
 " z lub x         regulacja opó¼nienia napisów o +/- 0.1 sekundy\n"
+" r lub t         regulacja po³o¿enia napisów (zobacz tak¿e -vop expand !)\n"
 "\n"
 " **** DOK£ADNY SPIS WSZYSTKICH DOSTÊPNYCH OPCJI ZNAJDUJE SIÊ W MANUALU! ****\n"
 "\n";
