@@ -3960,15 +3960,16 @@ format name like rgb15, bgr24, yv12, etc (default: yv12)
 Enables the specified chain of postprocessing subfilters.
 Subfilters must be separated by '/' and can be disabled by
 prepending a '\-'.
-A subfilter's scope can be determined by appending a ':' followed
-by 'a', 'c' or 'y' (default: c):
+Each subfilter and some options have a short and a long name that can be
+used interchangeably, i.e.\& dr/dering are the same.
+All subfilters share common options to determine their scope:
 .PD 0
 .RSs
-.IPs a
+.IPs a/autoq
 Automatically switch the subfilter off if the CPU is too slow.
-.IPs c
-Do chrominance filtering, too.
-.IPs y
+.IPs c/chrom
+Do chrominance filtering, too (default).
+.IPs y/nochrom
 Do luminance filtering only (no chrominance).
 .RE
 .PD 1
@@ -3978,6 +3979,101 @@ Do luminance filtering only (no chrominance).
 .I NOTE:
 \-pphelp shows a list of available subfilters.
 .sp 1
+Available subfilters are
+.RE
+.RSs
+.IPs hb/hdeblock[:difference[:flatness]]
+horizontal deblocking filter
+.RSss
+<difference>: Difference factor where higher values mean
+more deblocking (default: 32).
+.br
+<flatness>: Flatness threshold where lower values mean
+more deblocking (default: 39).
+.REss
+.IPs vb/vdeblock[:difference[:flatness]]
+vertical deblocking filter
+.RSss
+<difference>: Difference factor where higher values mean
+more deblocking (default: 32).
+.br
+<flatness>: Flatness threshold where lower values mean
+more deblocking (default: 39).
+.REss
+.IPs ha/hadeblock[:difference[:flatness]]
+accurate horizontal deblocking filter
+.RSss
+<difference>: Difference factor where higher values mean
+more deblocking (default: 32).
+.br
+<flatness>: Flatness threshold where lower values mean
+more deblocking (default: 39).
+.REss
+.IPs va/vadeblock[:difference[:flatness]]
+accurate vertical deblocking filter
+.RSss
+<difference>: Difference factor where higher values mean
+more deblocking (default: 32).
+.br
+<flatness>: Flatness threshold where lower values mean
+more deblocking (default: 39).
+.REss
+.sp 1
+The horizontal and vertical deblocking filters share the
+difference and flatness values so you cannot set
+different horizontal and vertical thresholds.
+.sp 1
+.IPs h1/x1hdeblock
+experimental horizontal deblocking filter
+.IPs v1/x1vdeblock
+experimental vertical deblocking filter
+.IPs dr/dering
+deringing filter
+.IPs tn/tmpnoise[:threshold1[:threshold2[:threshold3]]]
+temporal noise reducer
+.RSss
+threshold1: larger -> stronger filtering
+.br
+threshold2: larger -> stronger filtering
+.br
+threshold3: larger -> stronger filtering
+.REss
+.IPs al/autolevels[:f/fullyrange]
+automatic brightness / contrast correction
+.RSss
+f/fullyrange: Stretch luminance to (0\-255).
+.REss
+.IPs lb/linblenddeint
+Linear blend deinterlacing filter that deinterlaces the given block
+by filtering all lines with a (1 2 1) filter.
+.IPs li/linipoldeint
+Linear interpolating deinterlacing filter that deinterlaces the given block
+by linearly interpolating every second line.
+.IPs ci/cubicipoldeint
+Cubic interpolating deinterlacing filter deinterlaces the given block
+by cubically interpolating every second line.
+.IPs md/mediandeint
+Median deinterlacing filter that deinterlaces the given block
+by applying a median filter to every second line.
+.IPs fd/ffmpegdeint
+FFmpeg deinterlacing filter that deinterlaces the given block
+by filtering every second line with a (-1 4 2 4 -1) filter.
+.IPs l5/lowpass5
+Vertically applied FIR lowpass deinterlacing filter that deinterlaces
+the given block by filtering all lines with a (-1 2 6 2 -1) filter.
+.IPs fq/forceQuant[:quantizer]
+Overrides the quantizer table from the input with the constant
+quantizer you specify.
+.RSss
+<quantizer>: quantizer to use
+.REss
+.IPs de/default
+default pp filter combination (hb:a,vb:a,dr:a)
+.IPs fa/fast
+fast pp filter combination (h1:a,v1:a,dr:a)
+.RE
+.RS
+.sp 1
 .I EXAMPLE:
 .RE
 .PD 0
@@ -3985,12 +4081,9 @@ Do luminance filtering only (no chrominance).
 .IPs "\-vf pp=hb/vb/dr/al"
 horizontal and vertical deblocking, deringing and automatic
 brightness/\:contrast
-.IPs "\-vf pp=hb/vb/dr/al/lb"
-horizontal and vertical deblocking, deringing, automatic
-brightness/\:contrast and linear blend deinterlacer
 .IPs "\-vf pp=de/-al"
 default filters without brightness/\:contrast correction
-.IPs "\-vf pp=de/tn:1:2:3"
+.IPs "\-vf pp=default/tmpnoise:1:2:3"
 Enable default filters & temporal denoiser.
 .IPs "\-vf pp=hb:y/vb:a"
 Horizontal deblocking on luminance only, and switch vertical deblocking
