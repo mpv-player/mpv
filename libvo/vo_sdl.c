@@ -94,6 +94,9 @@
 /* define to force software-surface (video surface stored in system memory)*/
 #undef SDL_NOHWSURFACE
 
+/* define to enable surface locks, this might be needed on SMP machines */
+#undef SDL_ENABLE_LOCKS
+
 //#define BUGGY_SDL //defined by configure
 
 /* MONITOR_ASPECT MUST BE FLOAT */
@@ -831,6 +834,28 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	return 0;
 }
 
+#ifdef SDL_ENABLE_LOCKS
+#define	SDL_OVR_LOCK        if (SDL_LockYUVOverlay (priv->overlay)) { \
+				if(verbose) printf("SDL: Couldn't lock YUV overlay\n"); \
+				return -1; \
+	    		    }
+#define SDL_OVR_UNLOCK      SDL_UnlockYUVOverlay (priv->overlay);
+
+#define SDL_SRF_LOCK(srf)   if(SDL_MUSTLOCK(srf)) { \
+				if(SDL_LockSurface (srf)) { \
+					if(verbose) printf("SDL: Couldn't lock RGB surface\n"); \
+					return -1; \
+				} \
+			    }
+
+#define SDL_SRF_UNLOCK(srf) if(SDL_MUSTLOCK(srf)) \
+				SDL_UnlockSurface (srf);
+#else
+#define SDL_OVR_LOCK
+#define SDL_OVR_UNLOCK
+#define SDL_SRF_LOCK(srf)
+#define SDL_SRF_UNLOCK(srf)
+#endif
 
 /**
  * Draw a frame to the SDL YUV overlay.
@@ -851,26 +876,20 @@ static uint32_t draw_frame(uint8_t *src[])
         case IMGFMT_YV12:
         case IMGFMT_I420:
         case IMGFMT_IYUV:
-	    /*if (SDL_LockYUVOverlay (priv->overlay)) {
-		if(verbose) printf("SDL: Couldn't lock YUV overlay\n");
-		return -1;
-	    }*/
+	    SDL_OVR_LOCK
 	    dst = (uint8_t *) *(priv->overlay->pixels);
 	    memcpy (dst, src[0], priv->framePlaneY);
 	    dst += priv->framePlaneY;
 	    memcpy (dst, src[2], priv->framePlaneUV);
 	    dst += priv->framePlaneUV;
 	    memcpy (dst, src[1], priv->framePlaneUV);
-	    /*SDL_UnlockYUVOverlay (priv->overlay);*/
+	    SDL_OVR_UNLOCK
             break;
 
         case IMGFMT_YUY2:
         case IMGFMT_UYVY:
         case IMGFMT_YVYU:
-	    /*if (SDL_LockYUVOverlay (priv->overlay)) {
-		if(verbose) printf("SDL: Couldn't lock YUV overlay\n");
-		return -1;
-	    }*/
+	    SDL_OVR_LOCK
 	    dst = (uint8_t *) *(priv->overlay->pixels);
 	    if(priv->flip) {
 	    	mysrc+=priv->framePlaneYUY;
@@ -881,7 +900,7 @@ static uint32_t draw_frame(uint8_t *src[])
 		}
 	    }
 	    else memcpy (dst, src[0], priv->framePlaneYUY);
-	    /*SDL_UnlockYUVOverlay (priv->overlay);*/
+	    SDL_OVR_UNLOCK
             break;
 	
 	case IMGFMT_RGB15:
@@ -893,12 +912,7 @@ static uint32_t draw_frame(uint8_t *src[])
 	case IMGFMT_RGB32:
 	case IMGFMT_BGR32:
 		if((priv->format&0xFF) == priv->bpp) {
-			/*if(SDL_MUSTLOCK(priv->surface)) {
-				if (SDL_LockSurface (priv->surface)) {
-					if(verbose) printf("SDL: Couldn't lock RGB surface\n");
-					return -1;
-				}
-			}*/
+			SDL_SRF_LOCK(priv->surface)
 			dst = (uint8_t *) priv->surface->pixels;
 			if(priv->flip) {
 				mysrc+=priv->framePlaneRGB;
@@ -909,15 +923,9 @@ static uint32_t draw_frame(uint8_t *src[])
 				}
 			}
 			else memcpy (dst, src[0], priv->framePlaneRGB);
-			/*if(SDL_MUSTLOCK(priv->surface)) 
-				SDL_UnlockSurface (priv->surface);*/
+			SDL_SRF_UNLOCK(priv->surface)
 		} else {
-			/*if(SDL_MUSTLOCK(priv->rgbsurface)) {
-				if (SDL_LockSurface (priv->rgbsurface)) {
-					if(verbose) printf("SDL: Couldn't lock RGB surface\n");
-					return -1;
-				}
-			}*/
+			SDL_SRF_LOCK(priv->rgbsurface)
 			dst = (uint8_t *) priv->rgbsurface->pixels;
 			if(priv->flip) {
 				mysrc+=priv->framePlaneRGB;
@@ -928,8 +936,7 @@ static uint32_t draw_frame(uint8_t *src[])
 				}
 			}
 			else memcpy (dst, src[0], priv->framePlaneRGB);
-			/*if(SDL_MUSTLOCK(priv->rgbsurface)) 
-				SDL_UnlockSurface (priv->rgbsurface);*/
+			SDL_SRF_UNLOCK(priv->rgbsurface)
 		}
 		break;
 
@@ -954,10 +961,7 @@ static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int
 	uint8_t *src;
         int i;
 
-	/*if (SDL_LockYUVOverlay (priv->overlay)) {
-		if(verbose) printf("SDL: Couldn't lock YUV overlay");
-		return -1;
-	}*/
+	SDL_OVR_LOCK
 
 	dst = (uint8_t *) *(priv->overlay->pixels) 
             + (priv->stridePlaneY * y + x);
@@ -988,7 +992,7 @@ static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int
             dst+=priv->stridePlaneUV;
         }
 
-	/*SDL_UnlockYUVOverlay (priv->overlay);*/
+	SDL_OVR_UNLOCK
 
 	return 0;
 }
