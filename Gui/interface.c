@@ -186,8 +186,14 @@ void guiInit( void )
  printf("SKIN dir 1: '%s'\n",skinDirInHome);
  printf("SKIN dir 2: '%s'\n",skinMPlayerDir);
  if ( !skinName ) skinName=strdup( "default" );
- switch ( skinRead( skinName ) )
-  {
+ i = skinRead( skinName );
+ if ((i == -1) && strcmp(skinName,"default"))
+ {
+    mp_msg( MSGT_GPLAYER,MSGL_INFO,"Selected skin ( %s ) not found, trying 'default'...\n", skinName);
+    skinName=strdup( "default" );
+    i = skinRead( skinName );
+ }
+ switch (i) {
    case -1: mp_msg( MSGT_GPLAYER,MSGL_ERR,MSGTR_SKIN_SKINCFG_SkinNotFound,skinName ); exit( 0 );
    case -2: mp_msg( MSGT_GPLAYER,MSGL_ERR,MSGTR_SKIN_SKINCFG_SkinCfgReadError,skinName ); exit( 0 );
   }
