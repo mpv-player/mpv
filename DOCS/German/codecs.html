@@ -86,16 +86,15 @@ der 5.1 Sektion).</P>
 alten OpenDivX (die API ist sehr ähnlich zu OpenDivXs) verursacht, wird der
 OpenDivX-Code deaktiviert und der OpenDivX-Treiber verwendet auch diese libs.</P>
 
-<P>Wir können diese Tatsache ausnützen um zwei Optionen für den Codec zu ver-
-wenden:</P>
+<P>Wir können diese Tatsache ausnützen um zwei Optionen für den Codec zu verwenden:</P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top>-vc&nbsp;odivx</TD><TD>&nbsp;&nbsp;</TD>
-<TD>verwendet DivX4 Codec als eine neue Version von OpenDivX.
+<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-vc&nbsp;odivx</TD><TD>&nbsp;&nbsp;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>verwendet DivX4 Codec als eine neue Version von OpenDivX.
 In diesem Fall produziert es YV12 Bilder in seinem eigenen Buffer, und
-<B>MPlayer</B> (libvo) führ die Colorspace-Konversion durch.</TD><TR>
-<TD></TD><TD VALIGN=top>-vc&nbsp;divx4</TD><TD></TD>
-<TD>verwendet die Colorspace-Konversion des DivX4 Codecs.
+<B>MPlayer</B> (libvo) führ die Colorspace-Konversion durch (<B>EMPFOHLEN</B>).</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-vc&nbsp;divx4</TD><TD></TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>verwendet die Colorspace-Konversion des DivX4 Codecs.
 In diesem Fall kannst du auch YUY2/UYVY verwenden.</TD><TR>
 </TABLE></P>
 
@@ -109,12 +108,12 @@ möglicherweise ist sie jedoch unterschiedlich bei deiner Farbtiefe.</P>
 lungen ist groß:</P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD>0</TD><TD>&nbsp;&nbsp;</TD>
-<TD>kein Postprocessing</TD><TR>
-<TD></TD><TD>10 .. 20</TD>
-<TD></TD><TD>Postprocessing, normal (wie Level 2 mit DivX-DS)</TD><TR>
-<TD></TD><TD>30 .. 60</TD>
-<TD></TD><TD>schweres Postprocessing, verwendet viel CPU Zeit (wie Level 2 bei DivX-DS</TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD>0</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>&nbsp;&nbsp;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>kein Postprocessing</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>10 .. 20</TD>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Postprocessing, normal (wie Level 2 mit DivX-DS)</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>30 .. 60</TD>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>starkes Postprocessing, verwendet viel CPU Zeit (wie Level 2 bei DivX-DS</TD><TR>
 </TABLE></P>
 
 <P><B><A NAME=2.1.2.2>2.1.2.2. ffmpegs DivX/libavcodec</A></B></P>
@@ -127,7 +126,7 @@ Es wurde entfernt vom <B>MPlayer</B>s CVS-Tree, du musst es manuel direkt von
 <B>FFmpeg</B>s Tree:</P>
 
 <P><CODE>
-  cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg login
+  cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg login<BR>
   cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg co ffmpeg
 </CODE></P>
 
@@ -156,7 +155,7 @@ auf ffdivx fixiert und es ist unwarscheindlich dass dich das ändern wird.</P>
 <P>Du wird eine AC3-fähige Soundkarte braucht mit Digital-Out (SP/DIF). Der
 Treiber muss das AFMT_AC3 Format unterstützen (wie es die SB Live! macht).
 Verbinde deinen AC3 Decoder am SP/DIF Ausgang und verwende die '-ac hwac3'
-Option. Es funktioniert möglichweise oder auch nicht (experimentel).</P>
+Option. Es funktioniert möglichweise oder auch nicht (experimentel). (möglicherweise nicht)</P>
 
 
 <P><B><A NAME=2.1.4>2.1.4. Codec Einbindungs-Howto</A></B></P>
