@@ -93,6 +93,9 @@ static mp_cmd_t mp_cmds[] = {
   { MP_CMD_TV_SET_HUE, "tv_set_hue", 1,  { { MP_CMD_ARG_INT ,{0}}, {-1,{0}} }},
   { MP_CMD_TV_SET_SATURATION, "tv_set_saturation", 1,  { { MP_CMD_ARG_INT ,{0}}, {-1,{0}} }},
 #endif
+#ifdef HAS_DVBIN_SUPPORT
+  { MP_CMD_DVB_SET_CHANNEL, "dvb_set_channel", 1, { { MP_CMD_ARG_INT, {0}}, {-1,{0}}  }},
+#endif
   { MP_CMD_VO_FULLSCREEN, "vo_fullscreen", 0, { {-1,{0}} } },
   { MP_CMD_SCREENSHOT, "screenshot", 0, { {-1,{0}} } },
   { MP_CMD_PANSCAN, "panscan",1,  { {MP_CMD_ARG_FLOAT,{0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
