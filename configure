@@ -865,6 +865,7 @@ EOF
     proc=''
     _march=''
     _mcpu=''
+    _altivec_gcc_flags=''
     # XXX: this should be removed imho...
     cpu750=`$_cpuinfo | grep "cpu.*750"`
     if test -n "$cpu750"; then
@@ -875,11 +876,13 @@ EOF
 	proc=`$_cpuinfo | grep 'cpu' | cut -d ':' -f 2 | cut -d ',' -f 1 | cut -b 2- | head -1`
 	if test -n "`$_cpuinfo | grep altivec`"; then
 	    _altivec=yes
+            _altivec_gcc_flags='-maltivec -mabi=altivec'
 	fi
     fi
     if darwin ; then
 	if [ `sysctl -n hw.vectorunit` -eq 1 ]; then
 	    _altivec=yes
+            _altivec_gcc_flags='-faltivec'
  	fi
     fi
     if test -n "$proc"; then
@@ -901,6 +904,7 @@ EOF
     	    esac
 	fi
     fi
+    _mcpu="$_mcpu $_altivec_gcc_flags"
     ;;
 
   alpha)
@@ -2045,7 +2049,7 @@ cat > $TMPC << EOF
 int main(void) { return 0; }
 EOF
 _have_altivec_h=no
-cc_check && _have_altivec_h=yes
+cc_check $_altivec_gcc_flags && _have_altivec_h=yes
 if test "$_have_altivec_h" = yes ; then
   _def_altivec_h='#define HAVE_ALTIVEC_H 1'
 else

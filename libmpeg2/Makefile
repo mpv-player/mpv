@@ -10,11 +10,6 @@ INCLUDE = -I. -I../libvo -I.. $(EXTRA_INC) $(MLIB_INC)
 CFLAGS  = $(OPTFLAGS) $(INCLUDE) -DMPG12PLAY
 
 ifeq ($(TARGET_ALTIVEC),yes)
-ifeq ($(TARGET_OS),Darwin)
-CFLAGS += -faltivec
-else
-CFLAGS += -maltivec -mabi=altivec
-endif
 SRCS += motion_comp_altivec.c idct_altivec.c
 endif
 
