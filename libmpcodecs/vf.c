@@ -44,19 +44,20 @@ static vf_info_t* filter_list[]={
 void vf_mpi_clear(mp_image_t* mpi,int x0,int y0,int w,int h){
     int y;
     if(mpi->flags&MP_IMGFLAG_PLANAR){
+	y0&=~1;h+=h&1;
 	if(x0==0 && w==mpi->width){
 	    // full width clear:
 	    memset(mpi->planes[0]+mpi->stride[0]*y0,0,mpi->stride[0]*h);
 	    memset(mpi->planes[1]+mpi->stride[1]*(y0>>1),128,mpi->stride[1]*(h>>1));
 	    memset(mpi->planes[2]+mpi->stride[2]*(y0>>1),128,mpi->stride[2]*(h>>1));
-	    return;
-	}
+	} else
 	for(y=y0;y<y0+h;y+=2){
 	    memset(mpi->planes[0]+x0+mpi->stride[0]*y,0,w);
 	    memset(mpi->planes[0]+x0+mpi->stride[0]*(y+1),0,w);
 	    memset(mpi->planes[1]+(x0>>1)+mpi->stride[1]*(y>>1),128,(w>>1));
 	    memset(mpi->planes[2]+(x0>>1)+mpi->stride[2]*(y>>1),128,(w>>1));
 	}
+	return;
     }
     // packed:
     for(y=y0;y<y0+h;y++){
