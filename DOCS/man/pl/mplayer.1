@@ -1,4 +1,4 @@
-.\" synced with 1.671
+.\" synced with 1.675
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -1579,10 +1579,15 @@ Dla ALSA mo¿esz u¿yæ nazw, które, na przyk³ad, pokazuje alsamixer, jak
 .B \-nowaveheader (tylko \-ao pcm)
 Nie do³±cza nag³ówków wave.
 U¿ywany przy surowym PCM.
+.TP
+.B \-volstep <0\-100>
+Ustawia wielko¶æ zmiany przy ustawianiu poziomu d¼wiêku miksera (w procentach
+ca³ego zakresu) (domy¶lnie: 3).
 .
 .
 .SH "STEROWNIKI WYJ¦CIOWE D¬WIÊKU (TYLKO MPLAYER)"
-Sterowniki wyj¶cia d¼wiêku to interfejsy do ró¿nych urz±dzeñ wyj¶ciowych.
+Sterowniki wyj¶cia d¼wiêku to interfejsy do ró¿nych urz±dzeñ wyj¶ciowych
+audio.
 Sk³adnia jest nastêpuj±ca:
 .TP
 .B \-ao <sterownik1[:podopcja1[=warto¶æ]:...],sterownik2,...[,]>
@@ -1608,7 +1613,7 @@ czwarte urz±dzenie
 .
 .sp 1
 FIXME: Udokumentowaæ wszystkie podopcje dla sdl, arts, esd, jack, nas, macosx,
-sgi, sun, win32, dxr2, mpegpes, null, pcm, plugin.
+sgi, sun, dxr2, mpegpes, null, pcm, plugin.
 .sp 1
 Dostêpne sterowniki wyj¶ciowe audio:
 .
@@ -2030,7 +2035,7 @@ Wy³±cza wygaszacz ekranu przy starcie i w³±cza go ponownie podczas wychodzenia.
 .TP
 .B \-vm \ \ \ 
 Próbuje zmieniæ na inny tryb video.
-Obs³ugiwane przez sterowniki wyj¶cia video dga, x11/\:xv (XF86VidMode) i sdl.
+Obs³ugiwane przez sterowniki wyj¶cia video dga, x11, xv, sdl i directx.
 Je¿eli jest ona u¿yta ze sterownikiem wyj¶cia video directx, opcje \-screenw,
 \-screenh, \-bpp i \-refreshrate mog± ustawiæ nowy tryb wy¶wietlania.
 .TP
@@ -2102,7 +2107,7 @@ od lewego górnego rogu ekranu (domy¶lnie: obraz wycentrowany).
 .
 .
 .SH "STEROWNIKI WYJ¦CIA VIDEO (TYLKO MPLAYER)"
-Sterowniki wyj¶cia video to interfejsy do ró¿nych urz±dzeñ wyj¶ciowych.
+Sterowniki wyj¶cia video to interfejsy do ró¿nych urz±dzeñ wyj¶ciowych video.
 Sk³adnia jest nastêpuj±ca:
 .TP
 .B \-vo <sterownik1[:podopcja1[=warto¶æ]:...],sterownik2,...[,]>
@@ -2127,7 +2132,7 @@ Wykoszysta sterownik DirectX z wy³±czonymi funkcjami przyspieszaj±cymi.
 .
 .sp 1
 FIXME: W dokumentacji uwzglêdniæ podopcje dla x11, xover, dga, sdl, vidix,
-xvidix, fbdev, fbdev2, vesa, svga, null, aa, bl, ggi, mga, xmga, syncfb, 3dfx,
+xvidix, fbdev, fbdev2, vesa, null, aa, bl, ggi, mga, xmga, syncfb, 3dfx,
 tdfx_vid, tdfxfb, dxr2, dxr3, mpegpes, zr, zr2, yuv4mpeg, gif89a, jpeg, pgm,
 png, tga.
 .sp 1
@@ -2272,6 +2277,28 @@ FIXME: udokumentowaæ
 .TP
 .B svga\ \ \ 
 Sterownik wyj¶cia video korzystaj±cy z biblioteki SVGA.
+.PD 0
+.RSs
+.IPs "<tryb video>"
+Ustawia okre¶lony tryb video.
+Tryb mo¿e byæ podany w formacie <szeroko¶æ>x<wysoko¶æ>x<kolory>,
+np.\& 640x480x16M lub numer trybu graficznego, np.\& 84.
+.IPs bbosd
+Rysuje OSD w czarnym pasku poni¿ej filmue (wolniejsze).
+.IPs native
+Wykorzystuje tylko rdzenne funkcje rysuj±ce.
+Omijane jest bezpo¶rednie renderowanie (direct rendering), OSD i
+akceleracja sprzêtowa.
+.IPs retrace
+Wymusza zmieanê klatki przy przerysowywaniu pionowym.
+U¿yteczne tylko z \-double.
+Wywo³uje ten sam efekt co opcja \-vsync.
+.IPs sq\ \ \ 
+Spróbuje wykorzystaæ tryb video z kwadratowymi pikselami.
+.IPs vidix
+U¿ywa svga z VIDIX.
+.RE
+.PD 1
 .TP
 .B gl\ \ \ \ \ 
 Sterownik wyj¶cia video OpenGL.
