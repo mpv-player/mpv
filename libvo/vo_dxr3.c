@@ -6,6 +6,10 @@
  */
 
 /* ChangeLog added 2002-01-10
+ * 2002-01-03:
+ *  Cleaned up syncing code and renamed setup variables so
+ *   they can be accessed from the GUI.
+ *
  * 2002-01-02:
  *  Added native overlay support, activate with :overlay
  *   you have to run dxr3view to modify settings (or manually
@@ -136,11 +140,17 @@ LIBVO_EXTERN (dxr3)
 static int v_width, v_height;
 static int s_width, s_height;
 static int osd_w, osd_h;
-static int prebuf = 0;
-static int newsync = 0;
-static int overlay = 0;
 static int fullscreen = 0;
 static int img_format = 0;
+
+/* Configuration values
+ * Don't declare these static, they 
+ * should be accessible from the gui.
+ */
+int dxr3_prebuf = 0;
+int dxr3_newsync = 0;
+int dxr3_overlay = 0;
+int dxr3_device_num = 0;
 
 /* File descriptors */
 static int fd_control = -1;
@@ -240,13 +250,19 @@ static uint32_t control(uint32_t request, void *data, ...)
 	case VOCTRL_GUISUPPORT:
 		return VO_TRUE;
 	case VOCTRL_GUI_NOWINDOW:
-		if (overlay) {
+		if (dxr3_overlay) {
 			return VO_FALSE;
+		}
+		return VO_TRUE;
+	case VOCTRL_SET_SPU_PALETTE:
+		if (ioctl(fd_spu, EM8300_IOCTL_SPU_SETPALETTE, data) < 0) {
+			printf("VO: [dxr3] Unable to load new SPU palette!\n");
+			return VO_ERROR;
 		}
 		return VO_TRUE;
 #ifdef HAVE_X11
 	case VOCTRL_FULLSCREEN:
-		if (overlay) {
+		if (dxr3_overlay) {
 			vo_x11_fullscreen();
 			if (fullscreen) {
 				overlay_signalmode(overlay_data, EM8300_OVERLAY_SIGNAL_WITH_VGA);
@@ -260,7 +276,15 @@ static uint32_t control(uint32_t request, void *data, ...)
 		return VO_FALSE;
 #endif
 	case VOCTRL_RESUME:
-		if (prebuf) {
+		if (dxr3_newsync) {
+			ioctl(fd_control, EM8300_IOCTL_SCR_GET, &ioval);
+			pts_offset = vo_pts - (ioval << 1);
+			if (pts_offset < 0) {
+				pts_offset = 0;
+			}
+		}
+		
+		if (dxr3_prebuf) {
 			ioval = EM8300_PLAYMODE_PLAY;
 			if (ioctl(fd_control, EM8300_IOCTL_SET_PLAYMODE, &ioval) < 0) {
 				printf("VO: [dxr3] Unable to set playmode!\n");
@@ -268,7 +292,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 		}
 		return VO_TRUE;
 	case VOCTRL_PAUSE:
-		if (prebuf) {
+		if (dxr3_prebuf) {
 			ioval = EM8300_PLAYMODE_PAUSED;
 			if (ioctl(fd_control, EM8300_IOCTL_SET_PLAYMODE, &ioval) < 0) {
 				printf("VO: [dxr3] Unable to set playmode!\n");
@@ -276,7 +300,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 		}
 		return VO_TRUE;
 	case VOCTRL_RESET:
-		if (prebuf || sync) {
+		if (dxr3_prebuf) {
 			close(fd_video);
 			fd_video = open(fdv_name, O_WRONLY);
 			close(fd_spu);
@@ -293,7 +317,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 		    return 0;
 
 		flag = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_SPU;
-		if (prebuf)
+		if (dxr3_prebuf)
 		    flag |= VFCAP_TIMER;
 		return flag;
 	    }
@@ -392,7 +416,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 #ifdef MVCOMMAND_SYNC
 	reg.microcode_register = 1;
 	reg.reg = 0;
-	reg.val = MVCOMMAND_SYNC;
+	reg.val = MVCOMMAND_START;
 	ioctl(fd_control, EM8300_IOCTL_WRITEREG, &reg);
 #endif
 
@@ -411,8 +435,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	fsync(fd_video);
 	ioval = 0x900;
 	ioctl(fd_control, EM8300_IOCTL_SCR_SETSPEED, &ioval);
-	ioval = 0;
-	ioctl(fd_control, EM8300_IOCTL_SCR_SET, &ioval);
 
 	/* Store some variables statically that we need later in another scope */
 	img_format = format;
@@ -489,7 +511,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 #endif
 
 #ifdef HAVE_X11
-	if (overlay) {
+	if (dxr3_overlay) {
 		XVisualInfo vinfo;
 		XSetWindowAttributes xswa;
 		XSizeHints hint;
@@ -677,7 +699,7 @@ static uint32_t draw_frame(uint8_t * src[])
 static void flip_page(void)
 {
 #ifdef HAVE_X11
-	if (overlay) {
+	if (dxr3_overlay) {
 		int event = vo_x11_check_events(mDisplay);
 		if (event & VO_EVENT_RESIZE) {
 			Window junkwindow;
@@ -696,7 +718,7 @@ static void flip_page(void)
 	}
 #endif
 
-	if (newsync) {
+	if (dxr3_newsync) {
 		ioctl(fd_control, EM8300_IOCTL_SCR_GET, &ioval);
 		ioval <<= 1;
 		if (vo_pts == 0) {
@@ -716,7 +738,7 @@ static void flip_page(void)
 		ioctl(fd_video, EM8300_IOCTL_SPU_SETPTS, &ioval);
 		ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &ioval);
 		prev_pts = vo_pts;
-	} else if (prebuf) {
+	} else if (dxr3_prebuf) {
 		ioctl(fd_spu, EM8300_IOCTL_SPU_SETPTS, &vo_pts);
 		ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts);
 	}
@@ -731,7 +753,7 @@ static void uninit(void)
 {
 	printf("VO: [dxr3] Uninitializing\n");
 #ifdef HAVE_X11
-	if (overlay) {
+	if (dxr3_overlay) {
 		overlay_set_mode(overlay_data, EM8300_OVERLAY_MODE_OFF);
 		overlay_release(overlay_data);
 		
@@ -739,6 +761,7 @@ static void uninit(void)
 		if (!use_gui) {
 #endif
 			vo_x11_uninit();
+
 #ifdef HAVE_NEW_GUI
 		}
 #endif
@@ -770,26 +793,26 @@ static void check_events(void)
 static uint32_t preinit(const char *arg)
 {
 	char devname[80];
-	char devnum = 0;
 	int fdflags = O_WRONLY;
 
 	/* Parse commandline */
 	while (arg) {
-		if (!strncmp("prebuf", arg, 6) && !prebuf) {
+		if (!strncmp("prebuf", arg, 6) && !dxr3_prebuf) {
 			printf("VO: [dxr3] Enabling prebuffering.\n");
-			prebuf = 1;
-		} else if (!strncmp("sync", arg, 4) && !newsync) {
+			dxr3_prebuf = 1;
+			fdflags |= O_NONBLOCK;
+		} else if (!strncmp("sync", arg, 4) && !dxr3_newsync) {
 			printf("VO: [dxr3] Using new sync engine.\n");
-			newsync = 1;
-		} else if (!strncmp("overlay", arg, 7) && !overlay) {
+			dxr3_newsync = 1;
+		} else if (!strncmp("overlay", arg, 7) && !dxr3_overlay) {
 #ifdef HAVE_X11
 			printf("VO: [dxr3] Using overlay.\n");
-			overlay = 1;
+			dxr3_overlay = 1;
 #else
 			printf("VO: [dxr3] Error: You need to compile mplayer with x11 libraries and headers installed to use overlay.\n");
 #endif
 		} else if (arg[0] == '0' || arg[0] == '1' || arg[0] == '2' || arg[0] == '3') {
-			devnum = arg[0];
+			dxr3_device_num = arg[0];
 		}
 		
 		arg = strchr(arg, ':');
@@ -798,19 +821,9 @@ static uint32_t preinit(const char *arg)
 		}
 	}
 	
-	if (prebuf) {
-		fdflags |= O_NONBLOCK;
-	}
-	
 
 	/* Open the control interface */
-	if (devnum) {
-		printf("VO: [dxr3] Forcing use of device %c\n", devnum);
-		sprintf(devname, "/dev/em8300-%c", devnum);
-	} else {
-		/* Try new naming scheme by default */
-		sprintf(devname, "/dev/em8300-0");
-	}
+	sprintf(devname, "/dev/em8300-%d", dxr3_device_num);
 	fd_control = open(devname, fdflags);
 	if (fd_control < 1) {
 		/* Fall back to old naming scheme */
@@ -821,15 +834,12 @@ static uint32_t preinit(const char *arg)
 			printf("VO: [dxr3] Error opening /dev/em8300 for writing as well!\nBailing\n");
 			return -1;
 		}
+	} else {
+		printf("VO: [dxr3] Opened %s\n", devname);
 	}
 
 	/* Open the video interface */
-	if (devnum) {
-		sprintf(devname, "/dev/em8300_mv-%c", devnum);
-	} else {
-		/* Try new naming scheme by default */
-		sprintf(devname, "/dev/em8300_mv-0");
-	}
+	sprintf(devname, "/dev/em8300_mv-%d", dxr3_device_num);
 	fd_video = open(devname, fdflags);
 	if (fd_video < 0) {
 		/* Fall back to old naming scheme */
@@ -848,12 +858,7 @@ static uint32_t preinit(const char *arg)
 	
 	/* Open the subpicture interface */
 	fdflags |= O_NONBLOCK;
-	if (devnum) {
-		sprintf(devname, "/dev/em8300_sp-%c", devnum);
-	} else {
-		/* Try new naming scheme by default */
-		sprintf(devname, "/dev/em8300_sp-0");
-	}
+	sprintf(devname, "/dev/em8300_sp-%d", dxr3_device_num);
 	fd_spu = open(devname, fdflags);
 	if (fd_spu < 0) {
 		/* Fall back to old naming scheme */
@@ -865,14 +870,13 @@ static uint32_t preinit(const char *arg)
 			uninit();
 			return -1;
 		}
+	} else {
+		printf("VO: [dxr3] Opened %s\n", devname);
 	}
 	strcpy(fds_name, devname);
 	
-	ioctl(fd_control, EM8300_IOCTL_SCR_GET, &ioval);
-	pts_offset = vo_pts - (ioval << 1);
-
 #ifdef HAVE_X11
-	if (overlay) {
+	if (dxr3_overlay) {
 	
 		/* Fucked up hack needed to enable overlay.
 		 * Will be removed as soon as I figure out
@@ -912,6 +916,14 @@ static uint32_t preinit(const char *arg)
 #endif
 	}
 #endif
+
+	if (dxr3_newsync) {
+		ioctl(fd_control, EM8300_IOCTL_SCR_GET, &ioval);
+		pts_offset = vo_pts - (ioval << 1);
+		if (pts_offset < 0) {
+			pts_offset = 0;
+		}
+	}
 
 	return 0;
 }

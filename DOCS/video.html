@@ -1173,7 +1173,14 @@ for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
 <H4>Usage:</H4>
 <DL>
   <DT><CODE>-vo dxr3:prebuf:sync:&lt;device&gt;</CODE></DT>
-  <DD><CODE>prebuf</CODE> turns on prebuffering. Prebuffering is a feature
+  <DD><CODE>overlay</CODE> activates the overlay instead of TVOut. It requires
+    that you have a properly configured overlay setup to work right. The easiest
+    way to configure the overlay is to first run autocal. Then run mplayer with
+    dxr3 output and without overlay turned on, run dxr3view. In dxr3view you can
+    tweak the overlay settings and see the effects in realtime, perhaps this
+    feature will be supported by the MPlayer GUI in the future. When overlay is
+    properly set up you will no longer need to use dxr3view.<BR>
+    <CODE>prebuf</CODE> turns on prebuffering. Prebuffering is a feature
     of the em8300 chip that enables it to hold more than one frame of video at
     a time. This means that when you are running with prebuffering
     MPlayer will try to keep the video buffer filled with data at all
@@ -1234,13 +1241,6 @@ for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
     a soundcard. Also read <A HREF="codecs.html#hardware_ac3">hardware AC3</A>
     section for further information on AC3.</DD>
 </DL>
-
-<H4>Overlay</H4>
-
-<P>To get overlay run dxr3view that comes with the em8300 package before
-  starting MPlayer. You can set various options in dxr3view by pressing
-  <CODE>T</CODE> while holding the mouse cursor above the window. Activating
-  rectangle mode seems to work for alot of people.</P>
 
 <H4>MPEG1, MPEG2, VCD and DVD Notes</H4>
 
