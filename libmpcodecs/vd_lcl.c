@@ -1,7 +1,7 @@
 /*
  *
  * LCL (LossLess Codec Library) Decoder for Mplayer
- * (c) 2002 Roberto Togni
+ * (c) 2002, 2003 Roberto Togni
  *
  * Fourcc: MSZH, ZLIB
  *
@@ -488,21 +488,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
   if ((hc->codec == CODEC_ZLIB) && (hc->flags & FLAG_PNGFILTER)) {
     switch (hc->imgtype) {
       case IMGTYPE_YUV111:
-        for (row = 0; row < height; row++) {
-          pixel_ptr = row * width * 3;
-          yq = encoded[pixel_ptr++];
-          uqvq = encoded[pixel_ptr++];
-	  uqvq+=(encoded[pixel_ptr++] << 8);
-          for (col = 1; col < width; col++) {
-            encoded[pixel_ptr] = yq -= encoded[pixel_ptr];
-            uqvq -= (encoded[pixel_ptr+1] | (encoded[pixel_ptr+2]<<8));
-            encoded[pixel_ptr+1] = (uqvq) & 0xff;
-            encoded[pixel_ptr+2] = ((uqvq)>>8) & 0xff;
-            pixel_ptr += 3;
-          }
-        }
-        break;
-      case IMGTYPE_RGB24: // No
+      case IMGTYPE_RGB24:
         for (row = 0; row < height; row++) {
           pixel_ptr = row * width * 3;
           yq = encoded[pixel_ptr++];
