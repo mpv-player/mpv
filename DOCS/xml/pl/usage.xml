@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.18 -->
+<!-- synced with 1.19 -->
 <chapter id="usage">
 <title>Sposób użycia</title>
 
@@ -87,7 +87,7 @@ Odtwarzanie z RTSP:
 Przykłady:
 <screen>
 mplayer -vo x11 <replaceable>/mnt/Films/Contact/contact2.mpg</replaceable>
-mplayer vcd://<replaceable>2</replaceable> -cd-rom-device <replaceable>/dev/hdc</replaceable>
+mplayer vcd://<replaceable>2</replaceable> -cdrom-device <replaceable>/dev/hdc</replaceable>
 mplayer -afm 3 <replaceable>/mnt/DVDtrailers/alien4.vob</replaceable>
 mplayer dvd://<replaceable>1</replaceable> -dvd-device <replaceable>/dev/hdc</replaceable>
 mplayer -abs 65536 -delay -0.4 -nobps <replaceable>~/movies/test.avi</replaceable><!--
