@@ -32,7 +32,7 @@ demuxer_t* init_avi_with_ogg(demuxer_t* demuxer) {
 #include <ogg/ogg.h>
 #include <vorbis/codec.h>
 
-#define BLOCK_SIZE 1024
+#define BLOCK_SIZE 4096
 
 /// Vorbis decoder context : we need the vorbis_info for vorbis timestamping
 /// Shall we put this struct def in a common header ?
@@ -111,6 +111,7 @@ typedef struct ogg_demuxer {
   int num_sub;
   ogg_syncpoint_t* syncpoints;
   int num_syncpoint;
+  off_t pos, last_size;
 } ogg_demuxer_t;
 
 #define NUM_VORBIS_HDR_PACKETS 3
@@ -121,6 +122,8 @@ typedef struct ogg_demuxer {
 #define PACKET_LEN_BITS01       0xc0
 #define PACKET_LEN_BITS2         0x02
 #define PACKET_IS_SYNCPOINT  0x08
+
+extern int index_mode;
 
 
 // get the logical stream of the current page
@@ -294,10 +297,12 @@ void demux_ogg_build_syncpoints_table(demuxer_t* demuxer) {
       }
       p++;
     }
-    if(p > 0)
+    if(p > 1 || (p == 1 && ! ogg_page_continued(page)))
       last_pos = pos;
     pos += np;
+    mp_msg(MSGT_DEMUX,MSGL_INFO,"Building syncpoint table %d%\r",pos*100/s->end_pos);
   }
+  mp_msg(MSGT_DEMUX,MSGL_INFO,"\n");
 
   mp_msg(MSGT_DEMUX,MSGL_V,"Ogg syncpoints table builed: %d syncpoints\n",ogg_d->num_syncpoint);
 
@@ -349,18 +354,19 @@ int demux_ogg_open(demuxer_t* demuxer) {
   sync = &ogg_d->sync;
   page = &ogg_d->page;
 
-  ogg_sync_init(&ogg_d->sync);
+  ogg_sync_init(sync);
 
   while(1) {
     /// Try to get a page
-    np = ogg_sync_pageout(sync,page);
+    ogg_d->pos += ogg_d->last_size;
+    np = ogg_sync_pageseek(sync,page);
     /// Error
     if(np < 0) {
       mp_msg(MSGT_DEMUX,MSGL_DBG2,"OGG demuxer : Bad page sync\n");
       return 0;
     }
     /// Need some more data
-    if(np <= 0) {
+    if(np == 0) {
       int len;
       buf = ogg_sync_buffer(sync,BLOCK_SIZE);
       len = stream_read(s,buf,BLOCK_SIZE);      
@@ -371,7 +377,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
       ogg_sync_wrote(sync,len);
       continue;
     }
-
+    ogg_d->last_size = np;
     // We got one page now
 
     if( ! ogg_page_bos(page) ) { // It's not a begining page
@@ -541,7 +547,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	  ds = demuxer->video;
       }
       /// Add the header packets if the stream isn't seekable
-      if(ds && !s->end_pos) {
+      if(ds && (!s->end_pos || index_mode != 2)) {
 	/// Finish the page, otherwise packets will be lost
 	do {
 	  demux_ogg_add_packet(ds,&ogg_d->subs[ogg_d->num_sub],&pack);
@@ -564,7 +570,9 @@ int demux_ogg_open(demuxer_t* demuxer) {
   else {
     demuxer->movi_start = 0;
     demuxer->movi_end = s->end_pos;
-    demux_ogg_build_syncpoints_table(demuxer);
+    demuxer->seekable = 1;
+    if(index_mode == 2)
+      demux_ogg_build_syncpoints_table(demuxer);
   }
 
   mp_msg(MSGT_DEMUX,MSGL_V,"OGG demuxer : found %d audio stream and %d video stream\n",n_audio,n_video);
@@ -604,11 +612,13 @@ int demux_ogg_fill_buffer(demuxer_t *d) {
 	while(1) {
 	  int pa,len;
 	  char *buf;
+	  ogg_d->pos += ogg_d->last_size;
 	  /// Get the next page from the physical stream
-	  while( (pa = ogg_sync_pageout(sync,page)) != 1) {
+	  while( (pa = ogg_sync_pageseek(sync,page)) <= 0) {
 	    /// Error : we skip some bytes
 	    if(pa < 0) {
 	      mp_msg(MSGT_DEMUX,MSGL_WARN,"OGG : Page out not synced, we skip some bytes\n");
+	      ogg_d->pos -= pa;
 	      continue;
 	    }
 	    /// We need more data
@@ -620,7 +630,7 @@ int demux_ogg_fill_buffer(demuxer_t *d) {
 	    }
 	    ogg_sync_wrote(sync,len);
 	  } /// Page loop
-
+	  ogg_d->last_size = pa;
 	  /// Find the page's logical stream
 	  if( (id = demux_ogg_get_page_stream(ogg_d,&os)) < 0) {
 	    mp_msg(MSGT_DEMUX,MSGL_ERR,"OGG demuxer error : we met an unknow stream\n");
@@ -631,6 +641,7 @@ int demux_ogg_fill_buffer(demuxer_t *d) {
 	    break;
 	  /// Page was invalid => retry
 	  mp_msg(MSGT_DEMUX,MSGL_WARN,"OGG demuxer : got invalid page !!!!!\n");
+	  ogg_d->pos += ogg_d->last_size;
 	}
       } else /// Packet was corrupted
 	mp_msg(MSGT_DEMUX,MSGL_WARN,"OGG : bad packet in stream %d\n",id);
@@ -645,6 +656,7 @@ int demux_ogg_fill_buffer(demuxer_t *d) {
     if(ds) {
       if(!demux_ogg_add_packet(ds,&ogg_d->subs[id],&pack))
 	continue; /// Unuseful packet, get another
+      d->filepos = ogg_d->pos;
       return 1;
     }
 
@@ -750,15 +762,12 @@ void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
   ogg_stream_t* os;
   demux_stream_t* ds;
   sh_audio_t* sh_audio = demuxer->audio->sh;
-  //sh_video_t* sh_video = demuxer->video->sh;
   ogg_packet op;
-  float time_pos,rate;
+  float rate;
   int i,sp;
   vorbis_info* vi = NULL;
-  int64_t gp;
-
-  if(!ogg_d->syncpoints)
-    return;
+  int64_t gp = 0;
+  off_t pos;
 
   if(demuxer->video->id >= 0) {
     ds = demuxer->video;
@@ -772,29 +781,57 @@ void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
   os = &ogg_d->subs[ds->id];
   oss = &os->stream;
 
-  time_pos = flags & 1 ? 0 : os->lastpos/ rate;
-  if(flags & 2)
-    time_pos += ogg_d->syncpoints[ogg_d->num_syncpoint].granulepos / rate * rel_seek_secs;
-  else
-    time_pos += rel_seek_secs;
+  if(ogg_d->syncpoints) {
+    float time_pos = flags & 1 ? 0 : os->lastpos/ rate;
+    if(flags & 2) {
+      if(ogg_d->syncpoints)
+	time_pos += ogg_d->syncpoints[ogg_d->num_syncpoint].granulepos / rate * rel_seek_secs;
+      else
+	time_pos += (demuxer->movi_end - demuxer->movi_start) * rel_seek_secs;
+    } else
+      time_pos += rel_seek_secs;
+    
+    gp = time_pos * rate;
 
-  gp = time_pos * rate;
+    for(sp = 0; sp < ogg_d->num_syncpoint ; sp++) {
+      if(ogg_d->syncpoints[sp].granulepos >= gp)
+	break;
+    }
 
-  for(sp = 0; sp < ogg_d->num_syncpoint ; sp++) {
-    if(ogg_d->syncpoints[sp].granulepos >= gp)
-      break;
+    if(sp >= ogg_d->num_syncpoint)
+      return;
+    pos = ogg_d->syncpoints[sp].page_pos;
+
+  } else {
+    pos = flags & 1 ? demuxer->movi_start : ogg_d->pos;
+    if(flags & 2)
+      pos += (demuxer->movi_end - demuxer->movi_start) * rel_seek_secs;
+    else
+      pos += rel_seek_secs * ogg_d->pos / (os->lastpos / rate);
+
+    if(pos < demuxer->movi_start)
+      pos = demuxer->movi_start;
+    else if(pos > demuxer->movi_end)
+      return;
   }
 
-  if(sp >= ogg_d->num_syncpoint)
-    return;
-
-  stream_seek(demuxer->stream,ogg_d->syncpoints[sp].page_pos);
+  stream_seek(demuxer->stream,pos);
   ogg_sync_reset(sync);
-  for(i = 0 ; i < ogg_d->num_sub ; i++)
+  for(i = 0 ; i < ogg_d->num_sub ; i++) {
     ogg_stream_reset(&ogg_d->subs[i].stream);
+    ogg_d->subs[i].lastpos = ogg_d->subs[i].lastsize = 0;
+  }
+  ogg_d->pos = pos;
+  ogg_d->last_size = 0;
 
   while(1) {
-    int np = ogg_sync_pageout(sync,page);
+    int np;
+    ogg_d->pos += ogg_d->last_size;
+    ogg_d->last_size = 0;
+    np = ogg_sync_pageseek(sync,page);
+
+    if(np < 0)
+      ogg_d->pos -= np;
     if(np <= 0) { // We need more data
       char* buf = ogg_sync_buffer(sync,BLOCK_SIZE);
       int len = stream_read(demuxer->stream,buf,BLOCK_SIZE);
@@ -805,32 +842,28 @@ void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
       ogg_sync_wrote(sync,len);
       continue;
     }
-
-    if(ogg_page_serialno(page) != os->stream.serialno)
+    ogg_d->last_size = np;
+    if(ogg_page_serialno(page) != oss->serialno)
       continue;
+
     if(ogg_stream_pagein(oss,page) != 0)
       continue;
 
-    while(1) {
-      np = ogg_stream_packetpeek(oss,&op);
-      if(np < 0) {
-	ogg_stream_packetout(oss,&op);
+     while(1) {
+      np = ogg_stream_packetout(oss,&op);
+      if(np < 0)
 	continue;
-      } else if(np == 0)
+      else if(np == 0)
 	break;
-      else {
-	float pts;
-	int f;
-	demux_ogg_read_packet(os,&op,vi,&pts,&f);
-	if(f || (os->vorbis && op.granulepos >= gp)) {
-	  if(sh_audio)
- 	    resync_audio_stream(sh_audio); 
-	  return;
-	}
-	ogg_stream_packetout(oss,&op);
-	demux_ogg_read_packet(os,&op,vi,&pts,&f);
+
+      if( ((*op.packet & PACKET_IS_SYNCPOINT)  || os->vorbis )  &&
+	  (!ogg_d->syncpoints || op.granulepos >= gp) ) {
+	demux_ogg_add_packet(ds,os,&op);
+	if(sh_audio)
+	  resync_audio_stream(sh_audio); 
+	return;
       }
-    }
+     }
   }
 
   mp_msg(MSGT_DEMUX,MSGL_ERR,"Can't find the good packet :(\n");  
