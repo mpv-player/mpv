@@ -103,7 +103,7 @@ endif
 
 .SUFFIXES: .cc .c .o
 
-# .PHONY: $(COMMON_DEPS)
+.PHONY: $(COMMON_DEPS)
 
 all:	version.h $(ALL_PRG)
 
