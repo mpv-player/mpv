@@ -1080,6 +1080,7 @@ rtp_open_socket( URL_t *url ) {
 	struct sockaddr_in server_address;
 	struct ip_mreq mcast;
         struct timeval tv;
+	struct hostent *hp;
 
 	mp_msg(MSGT_NETWORK,MSGL_V,"Listening for traffic on %s:%d ...\n", url->hostname, url->port );
 
@@ -1091,12 +1092,16 @@ rtp_open_socket( URL_t *url ) {
 	}
 
 	if( isalpha(url->hostname[0]) ) {
-		struct hostent *hp =(struct hostent*)gethostbyname( url->hostname );
+#ifndef HAVE_WINSOCK2
+		hp =(struct hostent*)gethostbyname( url->hostname );
 		if( hp==NULL ) {
 			mp_msg(MSGT_NETWORK,MSGL_ERR,"Counldn't resolve name: %s\n", url->hostname);
 			return -1;
 		}
 		memcpy( (void*)&server_address.sin_addr.s_addr, (void*)hp->h_addr, hp->h_length );
+#else
+		server_address.sin_addr.s_addr = htonl(INADDR_ANY);
+#endif
 	} else {
 #ifndef HAVE_WINSOCK2
 #ifdef USE_ATON
@@ -1105,8 +1110,7 @@ rtp_open_socket( URL_t *url ) {
 		inet_pton(AF_INET, url->hostname, &server_address.sin_addr);
 #endif
 #else
-		unsigned int addr = inet_addr(url->hostname);
-		memcpy( (void*)&server_address.sin_addr, (void*)&addr, sizeof(addr) );
+		server_address.sin_addr.s_addr = htonl(INADDR_ANY);
 #endif
 	}
 	server_address.sin_family=AF_INET;
@@ -1123,6 +1127,20 @@ rtp_open_socket( URL_t *url ) {
 			return -1;
 		}
 	}
+	
+#ifdef HAVE_WINSOCK2
+	if (isalpha(url->hostname[0])) {
+		hp =(struct hostent*)gethostbyname( url->hostname );
+		if( hp==NULL ) {
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"Counldn't resolve name: %s\n", url->hostname);
+			return -1;
+		}
+		memcpy( (void*)&server_address.sin_addr.s_addr, (void*)hp->h_addr, hp->h_length );
+	} else {
+		unsigned int addr = inet_addr(url->hostname);
+		memcpy( (void*)&server_address.sin_addr, (void*)&addr, sizeof(addr) );
+	}
+#endif
 
 	// Increase the socket rx buffer size to maximum -- this is UDP
 	rxsockbufsz = 240 * 1024;
