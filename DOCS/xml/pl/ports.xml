@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.16 -->
+<!-- synced with 1.17 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -285,15 +285,17 @@ wolna. Używaj SDL.
   <ulink url="http://www.videolan.org/vlc/dx7headers.tgz">pliki nagłówkowe DirectX 7</ulink>,
   żeby skompilować sterownik do wyjścia video DirectX.</para>
 
-<para>Kodeki Win32, biblioteki DLL QuickTime i kodeki Real dla Win32 (nie 
-  kodeki Real dla Linuksa) również działają. Umieść kodeki gdzieś w swojej 
+<para>Możesz wykorzystać kodeki Win32 i Real dla Win32 (nie kodeki Real dla Linuksa),
+  jeżeli chcesz. Umieść je gdzieś w swojej 
   ścieżce (zmienna PATH - przyp. tłumacza) albo użyj opcji
   <option>--with-codecsdir=c:/ścieżka/do/twoich/kodeków</option> (lub
   <option>--with-codecsdir=/ścieżka/do/twoich/kodeków</option> tylko na Cygwin) dla
   <filename>configure</filename>. Mieliśmy doniesienia, że biblioteki Real muszą być
   zapisywalne dla użytkownika, który korzysta z MPlayera, ale tylko na niektórych
   systemach. Spróbuj nadać im atrybut zapisywalności, jeżeli napotkasz jakieś problemy.
-  </para>
+  Biblioteki DLL QuickTime również działają, ale będzisz musiał je umieścić
+  w katalogu systemowym Windowsa 
+  (<filename class="directory">C:\Windows\system\</filename> lub podobnym).</para>
 
 <para>Konsola Cygwin/MinGW jest raczej wolna. Przekierowywanie wyjścia albo używanie 
   opcji <option>-quiet</option>, zgłoszono, jako poprawiające wydajność na
