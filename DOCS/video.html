@@ -688,7 +688,7 @@ will always shown up on head routed to CRTC1 (normaly the monitor),
 so i have to swap CRTC's, but this way your console will framebuffer
 (CRTC2 can't do text-mode) and a bit slow (no acceleration). :(</P>
 
-<P><I>Anyway i also just get monochrome output on the tv ...</I>
+<P><I>Anyway i also just get monochrome output on the tv ...</I><BR>
 Maybe you have NTSC TV? Or just didn't run one of TV-* scripts.</P>
 
 
@@ -700,7 +700,8 @@ have to shutdown it, or it becomes uselessly messy. This section is for them.</P
 <P>
 <LI>compile the matroxfb stuff to modules</LI>
 <LI>load modules with the <CODE>./modules</CODE> script</LI>
-<LI>turn on display cloning with <CODE>./cloning</CODE></LI>
+<LI>turn on display cloning with <CODE>./cloning</CODE> . This way CRTC2
+won't be used, CRTC1 will display on <I>both</I> heads.
 <LI>execute <CODE>./TV-640x512</CODE> or whichever resolution you
 wish to use</LI>
 </P>
