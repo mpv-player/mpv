@@ -811,11 +811,17 @@ subtitle *sub_read_line_jacosub(FILE * fd, subtitle * current)
 		|| (strstr(directive, "RLG") != NULL)) {
 		continue;
 	    }
+	    if (strstr(directive, "JL") != NULL) {
+		current->alignment = SUB_ALIGNMENT_HLEFT;
+	    } else if (strstr(directive, "JR") != NULL) {
+		current->alignment = SUB_ALIGNMENT_HRIGHT;
+	    } else {
+		current->alignment = SUB_ALIGNMENT_HCENTER;
+	    }
 	    strcpy(line2, line1);
 	    p = line2;
 	}
-	for (q = line1; (!eol(*p)) && (current->lines + 1 < SUB_MAX_TEXT);
-	     ++p) {
+	for (q = line1; (!eol(*p)) && (current->lines < SUB_MAX_TEXT); ++p) {
 	    switch (*p) {
 	    case '{':
 		comment++;
@@ -1266,6 +1272,7 @@ sub_data* sub_read_file (char *filename, float fps) {
 	    first[sub_num].start = sub->start;
   	    first[sub_num].end   = sub->end;
 	    first[sub_num].lines = sub->lines;
+	    first[sub_num].alignment = sub->alignment;
   	    for(i = 0; i < sub->lines; ++i){
 		first[sub_num].text[i] = sub->text[i];
   	    }
@@ -1278,6 +1285,7 @@ sub_data* sub_read_file (char *filename, float fps) {
     		first[j + 1].start = first[j].start;
     		first[j + 1].end   = first[j].end;
 		first[j + 1].lines = first[j].lines;
+		first[j + 1].alignment = first[j].alignment;
     		for(i = 0; i < first[j].lines; ++i){
       		    first[j + 1].text[i] = first[j].text[i];
 		}
@@ -1285,6 +1293,7 @@ sub_data* sub_read_file (char *filename, float fps) {
 	    	    first[j].start = sub->start;
 	    	    first[j].end   = sub->end;
 	    	    first[j].lines = sub->lines;
+	    	    first[j].alignment = sub->alignment;
 	    	    for(i = 0; i < SUB_MAX_TEXT; ++i){
 			first[j].text[i] = sub->text[i];
 		    }
@@ -1471,6 +1480,7 @@ if ((suboverlap_enabled == 2) ||
 		    second[sub_num + j].start = first[sub_first + j].start;
 		    second[sub_num + j].end   = first[sub_first + j].end;
 		    second[sub_num + j].lines = first[sub_first + j].lines;
+		    second[sub_num + j].alignment = first[sub_first + j].alignment;
 		    for (ls = 0; ls < second[sub_num + j].lines; ls++) {
 			second[sub_num + j].text[ls] = strdup(first[sub_first + j].text[ls]);
 		    }
@@ -1487,6 +1497,7 @@ if ((suboverlap_enabled == 2) ||
 	    memset(&second[sub_num], '\0', sizeof(subtitle));
 	    second[sub_num].start = local_start;
 	    second[sub_num].end   = local_end;
+	    second[sub_num].alignment = SUB_ALIGNMENT_HCENTER;
 	    n_max = (lines_to_add < SUB_MAX_TEXT) ? lines_to_add : SUB_MAX_TEXT;
 	    for (i = 0, j = 0; j < n_max; ++j) {
 		if (placeholder[counter][j] != -1) {

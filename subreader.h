@@ -27,6 +27,9 @@ extern int sub_format;
 #define MAX_SUBTITLE_FILES 128
 
 #define SUB_MAX_TEXT 10
+#define SUB_ALIGNMENT_HLEFT	1
+#define SUB_ALIGNMENT_HCENTER	0
+#define SUB_ALIGNMENT_HRIGHT	2
 
 typedef struct {
 
@@ -36,6 +39,7 @@ typedef struct {
     unsigned long end;
     
     char *text[SUB_MAX_TEXT];
+    unsigned char alignment;
 } subtitle;
 
 typedef struct {

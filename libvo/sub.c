@@ -14,6 +14,29 @@
 #include "sub.h"
 #include "../spudec.h"
 
+#define NEW_SPLITTING
+
+
+// Structures needed for the new splitting algorithm.
+// osd_text_t contains the single subtitle word.
+// osd_text_p is used to mark the lines of subtitles
+struct osd_text_t {
+    int osd_kerning, //kerning with the previous word
+	osd_length,  //orizontal length inside the bbox
+	text_length, //number of characters
+	*text;       //characters
+    struct osd_text_t *prev,
+                      *next;
+};
+
+struct osd_text_p {
+    int  value;
+    struct osd_text_t *ott;
+    struct osd_text_p *prev,
+                      *next;
+};
+//^
+
 char * __sub_osd_names[]={
     "Seekbar",
     "Play",
@@ -308,13 +331,14 @@ subtitle* vo_sub=NULL;
 
 inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
    unsigned char *t;
-   int c,i,j,l,x,y,font,prevc;
+   int c,i,j,l,x,y,font,prevc,counter;
    int len;
-   int k,lastk;
+   int k;
    int lastStripPosition;
-   int xsize,lastxsize;
+   int xsize;
    int xmin=dxs,xmax=0;
    int h,lasth;
+   int xtblc, utblc;
    
    obj->flags|=OSDFLAG_CHANGED|OSDFLAG_VISIBLE;
 
@@ -329,21 +353,30 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
       // too long lines divide into a smaller ones
       i=k=lasth=0;
       h=vo_font->height;
-      xsize=-vo_font->charspace;
       lastStripPosition=-1;
       l=vo_sub->lines;
 
+    {
+	struct osd_text_t *osl, *cp_ott, *tmp_ott, *tmp;
+	struct osd_text_p *otp_sub = NULL, *otp_sub_tmp,	// these are used to store the whole sub text osd
+	                  *otp, *tmp_otp, *pmt;	// these are used to manage sub text osd coming from a single sub line
+	int *char_seq, char_position, xlimit = dxs * sub_width_p / 100, counter;
+
       while (l) {
+	    xsize = -vo_font->charspace;
 	  l--;
 	  t=vo_sub->text[i++];	  
 	  len=strlen(t)-1;
-	  
-//	  printf("sub(%d) '%s'\n",len,t);
-//	  if(len<0) memy -=h; // according to max of vo_font->pic_a[font]->h 
-//	  else
+	    char_position = 0;
+	    char_seq = (int *) malloc((len + 1) * sizeof(int));
 
 	  prevc = -1;
 
+	    otp = NULL;
+	    osl = NULL;
+	    x = 1;
+
+	    // reading the subtitle words from vo_sub->text[]
 	  for (j=0;j<=len;j++){
 	      if ((c=t[j])>=0x80){
 		 if (sub_utf8){
@@ -362,78 +395,239 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 	      }
 	      if (!c) c++; // avoid UCS 0
 	      render_one_glyph(vo_font, c);
-	      if (c==' '){
-		 lastk=k;
-		 lastStripPosition=j;
-		 lastxsize=xsize;
- 	      } else if ((!suboverlap_enabled) && ((font = vo_font->font[c]) >= 0)) {
- 		/*
- 		   With overlapping subtitles, we need to comment this out,
- 		   beacuse that part of the code creates subtitles with the
- 		   last line blank (" "): in this case previous 'if' statement
- 		   is false an following 'if' is not executed. When, instead,
- 		   a subtitle with a non-blank last line arrives, the following
- 		   code is executed, and the result is a small 'jump' of the
- 		   subtiles. We can not simply delete the following, unless
- 		   having the last subtitle line partly drawn outside the
- 		   screen, so, some lines forward, we introduce an increment
- 		   which affects both blank and non-blank lines.
- 		   *sfalco*
- 		 */
-		  if (vo_font->pic_a[font]->h > h){
-		     h=vo_font->pic_a[font]->h;
-		  }
-	      }
-	      obj->params.subtitle.utbl[k++]=c;
-	      xsize+=vo_font->width[c]+vo_font->charspace+kerning(vo_font,prevc,c);
-	      if (dxs*sub_width_p/100<xsize){
-		  prevc = -1;
-		 if (lastStripPosition>0){
-		    j=lastStripPosition;
-		    xsize=lastxsize;
-		    k=lastk;
-		 } else {
-		    xsize -=vo_font->width[c]+vo_font->charspace+kerning(vo_font,prevc,c);; // go back
-		    k--; // cut line here
-		    while (t[j] && t[j]!=' ') j++; // jump to the nearest space
-		 }
-	      } else if (j<len) {
-		  prevc = c;
-		  continue;
-	      }
-	      if (h>obj->y){ // out of the screen so end parsing
-		 obj->y -= lasth - vo_font->height; // correct the y position
-		 l=0;
-		 break;
-	      }
-	      obj->params.subtitle.utbl[k++]=0;
-	      obj->params.subtitle.xtbl[obj->params.subtitle.lines++]=(dxs-xsize)/2;
-	      if(xmin>(dxs-xsize)/2) xmin=(dxs-xsize)/2;
-	      if(xmax<(dxs+xsize)/2) xmax=(dxs+xsize)/2;
-	      if (obj->params.subtitle.lines==MAX_UCSLINES||k>MAX_UCS){
-		 l=0; len=j; // end parsing
-	      } else if(l || j<len){ // not the last line or not the last char
-		 lastStripPosition=-1;
-		 xsize=-vo_font->charspace;
-		 lasth=h;
-		 h=vo_font->height;
-	      }
-//	      printf("h: %d -> %d  \n",vo_font->height,h);
-	      obj->y -=h; // according to max of vo_font->pic_a[font]->h 
-	      prevc = -1;
-	  }
-      }
 
-    /*
-       Here is the little increment we talked about before. '40' is the
-       ASCII code for '(', which, hopefully, is the highest char of the
-       font.
-       *sfalco*
-     */
-    if(suboverlap_enabled &&
-       vo_font->font[40]>=0 && vo_font->pic_a[vo_font->font[40]])
-	obj->y -= vo_font->pic_a[vo_font->font[40]]->h - vo_font->height;
+		if (c == ' ') {
+		    struct osd_text_t *tmp_ott = (struct osd_text_t *) calloc(1, sizeof(struct osd_text_t));
 
+		    if (osl == NULL) {
+			osl = cp_ott = tmp_ott;
+		    } else {
+			tmp_ott->prev = cp_ott;
+			cp_ott->next = tmp_ott;
+			tmp_ott->osd_kerning =
+			    vo_font->charspace + vo_font->width[' '];
+			cp_ott = tmp_ott;
+		    }
+		    tmp_ott->osd_length = xsize;
+		    tmp_ott->text_length = char_position;
+		    tmp_ott->text = (int *) malloc(char_position * sizeof(int));
+		    for (counter = 0; counter < char_position; ++counter)
+			tmp_ott->text[counter] = char_seq[counter];
+		    char_position = 0;
+		    xsize = 0;
+		    prevc = c;
+		} else {
+		    int delta_xsize = vo_font->width[c] + vo_font->charspace + kerning(vo_font, prevc, c);
+		    
+		    if (xsize + delta_xsize <= dxs) {
+			if (!x) x = 1;
+			prevc = c;
+			char_seq[char_position++] = c;
+			xsize += delta_xsize;
+			if ((!suboverlap_enabled) && ((font = vo_font->font[c]) >= 0)) {
+			    if (vo_font->pic_a[font]->h > h) {
+				h = vo_font->pic_a[font]->h;
+			    }
+			}
+		    } else {
+			if (x) {
+			    mp_msg(MSGT_OSD, MSGL_WARN, "\nSubtitle word '%s' too long!\n", t);
+			    x = 0;
+			}
+		    }
+		}
+	    }// for len (all words from subtitle line read)
+
+	    // osl holds an ordered (as they appear in the lines) chain of the subtitle words
+	    {
+		struct osd_text_t *tmp_ott = (struct osd_text_t *) calloc(1, sizeof(struct osd_text_t));
+
+		if (osl == NULL) {
+		    osl = cp_ott = tmp_ott;
+		} else {
+		    tmp_ott->prev = cp_ott;
+		    cp_ott->next = tmp_ott;
+		    tmp_ott->osd_kerning =
+			vo_font->charspace + vo_font->width[' '];
+		    cp_ott = tmp_ott;
+		}
+		tmp_ott->osd_length = xsize;
+		tmp_ott->text_length = char_position;
+		tmp_ott->text = (int *) malloc(char_position * sizeof(int));
+		for (counter = 0; counter < char_position; ++counter)
+		    tmp_ott->text[counter] = char_seq[counter];
+		char_position = 0;
+		xsize = -vo_font->charspace;
+	    }
+
+	    if (osl != NULL) {
+		int value = 0, exit = 0, minimum = 0;
+
+		// otp will contain the chain of the osd subtitle lines coming from the single vo_sub line.
+		otp = tmp_otp = (struct osd_text_p *) calloc(1, sizeof(struct osd_text_p));
+		tmp_otp->ott = osl;
+		for (tmp_ott = tmp_otp->ott; exit == 0; ) {
+		    while ((tmp_ott != NULL) && (value + tmp_ott->osd_kerning + tmp_ott->osd_length <= xlimit)) {
+			value += tmp_ott->osd_kerning + tmp_ott->osd_length;
+			tmp_ott = tmp_ott->next;
+		    }
+		    if (tmp_ott != NULL) {
+			struct osd_text_p *tmp = (struct osd_text_p *) calloc(1, sizeof(struct osd_text_p));
+
+			tmp_otp->value = value;
+			tmp_otp->next = tmp;
+			tmp->prev = tmp_otp;
+			tmp_otp = tmp;
+			tmp_otp->ott = tmp_ott;
+			value = -2 * vo_font->charspace - vo_font->width[' '];
+		    } else {
+			tmp_otp->value = value;
+			exit = 1;
+		    }
+		}
+
+
+#ifdef NEW_SPLITTING
+		// minimum holds the 'sum of the differences in lenght among the lines',
+		// a measure of the eveness of the lenghts of the lines
+		for (tmp_otp = otp; tmp_otp->next != NULL; tmp_otp = tmp_otp->next) {
+		    pmt = tmp_otp->next;
+		    while (pmt != NULL) {
+			minimum += abs(tmp_otp->value - pmt->value);
+			pmt = pmt->next;
+		    }
+		}
+
+		if (otp->next != NULL) {
+		    int mem1, mem2;
+		    struct osd_text_p *mem, *hold;
+
+		    exit = 0;
+		    // until the last word of a line can be moved to the beginning of following line
+		    // reducing the 'sum of the differences in lenght among the lines', it is done
+		    while (exit == 0) {
+			hold = NULL;
+			exit = 1;
+			for (tmp_otp = otp; tmp_otp->next != NULL; tmp_otp = tmp_otp->next) {
+			    pmt = tmp_otp->next;
+			    for (tmp = tmp_otp->ott; tmp->next != pmt->ott; tmp = tmp->next);
+			    if (pmt->value + tmp->osd_length + pmt->ott->osd_kerning <= xlimit) {
+				mem1 = tmp_otp->value;
+				mem2 = pmt->value;
+				tmp_otp->value = mem1 - tmp->osd_length - tmp->osd_kerning;
+				pmt->value = mem2 + tmp->osd_length + pmt->ott->osd_kerning;
+
+				value = 0;
+				for (mem = otp; mem->next != NULL; mem = mem->next) {
+				    pmt = mem->next;
+				    while (pmt != NULL) {
+					value += abs(mem->value - pmt->value);
+					pmt = pmt->next;
+				    }
+				}
+				if (value < minimum) {
+				    minimum = value;
+				    hold = tmp_otp;
+				    exit = 0;
+				}
+				tmp_otp->value = mem1;
+				tmp_otp->next->value = mem2;
+			    }
+			}
+			// merging
+			if (exit == 0) {
+			    tmp_otp = hold;
+			    pmt = tmp_otp->next;
+			    for (tmp = tmp_otp->ott; tmp->next != pmt->ott; tmp = tmp->next);
+			    mem1 = tmp_otp->value;
+			    mem2 = pmt->value;
+			    tmp_otp->value = mem1 - tmp->osd_length - tmp->osd_kerning;
+			    pmt->value = mem2 + tmp->osd_length + pmt->ott->osd_kerning;
+			    pmt->ott = tmp;
+			}//~merging
+		    }//~while(exit == 0)
+		}//~if(otp->next!=NULL)
+#endif
+
+		// adding otp (containing splitted lines) to otp chain
+		if (otp_sub == NULL) {
+		    otp_sub = otp;
+		    for (otp_sub_tmp = otp_sub; otp_sub_tmp->next != NULL; otp_sub_tmp = otp_sub_tmp->next);
+		} else {
+		    //updating ott chain
+		    tmp = otp_sub->ott;
+		    while (tmp->next != NULL) tmp = tmp->next;
+		    tmp->next = otp->ott;
+		    otp->ott->prev = tmp;
+		    //attaching new subtitle line at the end
+		    otp_sub_tmp->next = otp;
+		    otp->prev = otp_sub_tmp;
+		    do
+			otp_sub_tmp = otp_sub_tmp->next;
+		    while (otp_sub_tmp->next != NULL);
+		}
+	    }//~ if(osl != NULL)
+	} // while
+
+	// write lines into utbl
+	xtblc = 0;
+	utblc = 0;
+	obj->y = dys;
+	obj->params.subtitle.lines = 0;
+	for (tmp_otp = otp_sub; tmp_otp != NULL; tmp_otp = tmp_otp->next) {
+
+	    if ((obj->params.subtitle.lines++) >= MAX_UCSLINES)
+		break;
+
+	    if (h > obj->y) {	// out of the screen so end parsing
+		obj->y -= lasth - vo_font->height;	// correct the y position
+		break;
+	    }
+	    xsize = tmp_otp->value;
+	    obj->params.subtitle.xtbl[xtblc++] = (dxs - xsize) / 2;
+	    if (xmin > (dxs - xsize) / 2)
+		xmin = (dxs - xsize) / 2;
+	    if (xmax < (dxs + xsize) / 2)
+		xmax = (dxs + xsize) / 2;
+
+	    tmp = (tmp_otp->next == NULL) ? NULL : tmp_otp->next->ott;
+	    for (tmp_ott = tmp_otp->ott; tmp_ott != tmp; tmp_ott = tmp_ott->next) {
+		for (counter = 0; counter < tmp_ott->text_length; ++counter) {
+		    if (utblc > MAX_UCS) {
+			break;
+		    }
+		    c = tmp_ott->text[counter];
+		    render_one_glyph(vo_font, c);
+		    obj->params.subtitle.utbl[utblc++] = c;
+		    k++;
+		}
+		obj->params.subtitle.utbl[utblc++] = ' ';
+	    }
+	    obj->params.subtitle.utbl[utblc - 1] = 0;
+	    obj->y -= vo_font->height;
+	}
+	if(obj->params.subtitle.lines)
+	    obj->y = dys - ((obj->params.subtitle.lines - 1) * vo_font->height + vo_font->pic_a[vo_font->font[40]]->h);
+	
+	// free memory
+	if (otp_sub != NULL) {
+	    for (tmp = otp_sub->ott; tmp->next != NULL; free(tmp->prev)) {
+		free(tmp->text);
+		tmp = tmp->next;
+	    }
+	    free(tmp->text);
+	    free(tmp);
+	
+	    for(pmt = otp_sub; pmt->next != NULL; free(pmt->prev)) {
+		pmt = pmt->next;
+	    }
+	    free(pmt);
+	} else {
+		mp_msg(MSGT_OSD, MSGL_WARN, "\nSubtitles requested but not found.\n");
+	}
+	
+    }
+    /// vertical alignment
     h = dys - obj->y;
     if (sub_alignment == 2)
         obj->y = dys * sub_pos / 100 - h;
@@ -461,10 +655,36 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 
     y = obj->y;
     
+    switch(vo_sub->alignment) {
+	case SUB_ALIGNMENT_HLEFT:
+	    obj->alignment |= 0x1;
+	    break;
+	case SUB_ALIGNMENT_HCENTER:
+	    obj->alignment |= 0x0;
+	    break;
+	case SUB_ALIGNMENT_HRIGHT:
+	default:
+	    obj->alignment |= 0x2;
+    }
+
     i=j=0;
-    if ((l=obj->params.subtitle.lines)) for (;;) {
- 	 x=obj->params.subtitle.xtbl[i++]; 
-	 if (sub_justify) x = 10;
+    if ((l = obj->params.subtitle.lines)) {
+	for(counter = dxs; i < l; ++i)
+	    if (obj->params.subtitle.xtbl[i] < counter) counter = obj->params.subtitle.xtbl[i];
+	for (i = 0; i < l; ++i) {
+	    switch (obj->alignment&0x3) {
+		case 1:
+		    // left
+		    x = counter;
+		    break;
+		case 2:
+		    // right
+		    x = 2 * obj->params.subtitle.xtbl[i] - counter - ((obj->params.subtitle.xtbl[i] == counter) ? 0 : 1);
+		    break;
+		default:
+		    //center
+		    x = obj->params.subtitle.xtbl[i];
+	    }
 	 prevc = -1;
 	 while ((c=obj->params.subtitle.utbl[j++])){
 	       x += kerning(vo_font,prevc,c);
@@ -477,9 +697,9 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 			     vo_font->pic_a[font]->w);
 	       x+=vo_font->width[c]+vo_font->charspace;
                prevc = c;
-	 }
-         if (!--l) break;
+	    }
          y+=vo_font->height;
+	}
     }
     
 }
