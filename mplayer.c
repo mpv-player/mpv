@@ -2692,7 +2692,24 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
         break;
         }
       case DVDNAV_SPU_STREAM_CHANGE: {
-        dvdnav_stream_change_event_t * stream_change=(dvdnav_stream_change_event_t*)(dvdnav_event->details);
+#if DVDNAVVERSION > 012
+        dvdnav_spu_stream_change_event_t *stream_change = (dvdnav_spu_stream_change_event_t*)(dvdnav_event->details);
+
+        printf("DVDNAV Event: Nav SPU Stream Change: phys: %d/%d/%d logical: %d\n",
+                stream_change->physical_wide,
+                stream_change->physical_letterbox,
+                stream_change->physical_pan_scan,
+                stream_change->logical);
+
+        if (vo_spudec && dvdsub_id!=stream_change->physical_wide) {
+                mp_msg(MSGT_INPUT,MSGL_DBG2,"d_dvdsub->id change: was %d is now %d\n",
+                        d_dvdsub->id,stream_change->physical_wide);
+                // FIXME: need a better way to change SPU id
+                d_dvdsub->id=dvdsub_id=stream_change->physical_wide;
+                if (vo_spudec) spudec_reset(vo_spudec);
+        }
+#else
+        dvdnav_stream_change_event_t *stream_change = (dvdnav_stream_change_event_t*)(dvdnav_event->details);
 
         printf("DVDNAV Event: Nav SPU Stream Change: phys: %d logical: %d\n",
                 stream_change->physical,
@@ -2705,12 +2722,16 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
                 d_dvdsub->id=dvdsub_id=stream_change->physical;
                 if (vo_spudec) spudec_reset(vo_spudec);
         }
-
+#endif
         break;
         }
       case DVDNAV_AUDIO_STREAM_CHANGE: {
         int aid_temp;
+#if DVDNAVVERSION > 012
+        dvdnav_audio_stream_change_event_t *stream_change = (dvdnav_audio_stream_change_event_t*)(dvdnav_event->details);
+#else
         dvdnav_stream_change_event_t *stream_change = (dvdnav_stream_change_event_t*)(dvdnav_event->details);
+#endif
 
         printf("DVDNAV Event: Nav Audio Stream Change: phys: %d logical: %d\n",
                 stream_change->physical,

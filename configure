@@ -3101,6 +3101,10 @@ if test "$_dvdnav" = yes ; then
   else
    _ld_css="$_ld_css -ldvdnav"
   fi
+  if test -n "$_dvdnavconfig" ; then
+   _dvdnav_version=`$_dvdnavconfig --version | sed "s/\.//g"`
+   _def_dvdnav_version="#define DVDNAVVERSION $_dvdnav_version"
+  fi
   if test -n "$_dvdnavdir" ; then
    _inc_extra="$_inc_extra -I$_dvdnavdir"
   fi
@@ -4412,6 +4416,7 @@ $_def_css
 
 /* DVD navigation support using libdvdnav */
 $_def_dvdnav
+$_def_dvdnav_version
 
 /* Define this to enable MPEG 1/2 image postprocessing (requires a FAST CPU!) */
 #define MPEG12_POSTPROC 1
