@@ -105,6 +105,9 @@
 
 MODULE_AUTHOR("Ani Joshi. (Radeon VE extensions by Nick Kurshev)");
 MODULE_DESCRIPTION("framebuffer driver for ATI Radeon chipset. Ver: "RADEON_VERSION);
+#ifdef MODULE_LICENSE
+MODULE_LICENSE("GPL");
+#endif
 #ifdef CONFIG_MTRR
 MODULE_PARM(nomtrr, "i");
 MODULE_PARM_DESC(nomtrr, "Don't touch MTRR (touch=0(default))");
