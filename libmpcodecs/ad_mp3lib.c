@@ -46,6 +46,7 @@ static int init(sh_audio_t *sh)
   MP3_Init();
 #endif
   MP3_samplerate=MP3_channels=0;
+  MP3_DecodeFrame(NULL,-2); // FIXME: skip the first frame (often trashed)
   sh->a_buffer_len=MP3_DecodeFrame(sh->a_buffer,-1);
   if(!sh->a_buffer_len) return 0; // unsupported layer/format
   sh->channels=2; // hack
