@@ -44,6 +44,7 @@
         <LI><A HREF="formats.html#2.1.1.7">2.1.1.7 RealMedia file-ok</A></LI>   
         <LI><A HREF="formats.html#2.1.1.8">2.1.1.8 NuppelVideo file-ok</A></LI>   
         <LI><A HREF="formats.html#2.1.1.9">2.1.1.9 yuv4mpeg file-ok</A></LI>   
+        <LI><A HREF="formats.html#2.1.1.10">2.1.1.10 FILM file-ok</A></LI>   
       </UL>
       <LI><A HREF="formats.html#2.1.2">2.1.2 Audio</A></LI>
     </UL>
@@ -114,6 +115,7 @@
 	<LI><A HREF="video.html#2.3.1.13">2.3.1.13 X11</A></LI>
 	<LI><A HREF="video.html#2.3.1.14">2.3.1.14 Rage128 (Pro) és Radeon video overlay (radeon_vid)</A></LI>
 	<LI><A HREF="video.html#2.3.1.15">2.3.1.15 Vidix</A></LI>
+	<LI><A HREF="video.html#2.3.1.16">2.3.1.16 Zr (néhány MJPEG dekóder kártyához)</A></LI>
 	<LI><A HREF="video.html#2.3.1.A">2.3.1.A TV kimenet</A></LI>
 	<UL>
 	  <LI><A HREF="video.html#2.3.1.A.1">2.3.1.A.1 Matrox</A></LI>
@@ -223,7 +225,7 @@
 <P>Az <B>MPlayer</B> egy LINUXON mûködõ videolejátszó (fut sok más Unix-on és
   akár nem-x86 processzorokon is. Lásd a <A HREF="#6">6-os fejezetet</A>).  Le
   tudja játszani a legtöbb MPEG, VOB, AVI, VIVO, ASF/WMV, QT/MOV, FLI, RM,
-  NuppelVideo, yuv4mpeg file-t,
+  NuppelVideo, yuv4mpeg, FILM file-t,
   és ezekhez felsorakoztat jónéhány natív, XAnim, és Win32 codecet.  Nézhetsz
   vele <B>VideoCD</B>-t, <B>SVCD</B>-t, <B>DVD</B>-t, <B>3ivx</B>-et, és még
   <B>DivX</B>-et is (ezutóbbihoz egyáltalán nincs szükség az avifile
@@ -503,9 +505,14 @@ meghajtókat érdemes kipróbálni :
   Olvasd el a <A HREF="codecs.html#2.2.2.1">Szoftveres AC3 dekódolás</A>
   fejezetet.</LI>
 
+<LI><B>SP/DIF kimenettel rendelkezõ C-Media kártyák</B> : ha van hardveres
+  AC3 dekódered, ezekkel a kártyákkal át lehet adni annak a bigyónak a
+  kérdéses AC3-at, lásd a <A HREF="codecs.html#2.2.2.2">hardveres AC3
+  dekódolás fejezetet</A>.</LI>
+
 <LI><B>más kártyák</B> speciális funkcióihoz az <B>MPlayer</B> nem tartalmaz
   támogatást. <U>Ajánlott a <A HREF="sound.html#2.3.2">hangkártyák fejezetének</A>
-  elolvasása !</U>
+  elolvasása !</LI></U>
 </UL>
 
 <P><B><I>EGYÉB FUNKCIÓK</I></B></P>

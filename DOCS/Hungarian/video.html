@@ -82,6 +82,10 @@
   size=2><A HREF=#2.3.1.9>tdfxfb</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica,
   sans-serif" size=2>Voodoo3/Banshee hardware YUV támogatás tdfx framebufferen
   (mûködik!)</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2><A HREF=#2.3.1.16>zr</A></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica,
+  sans-serif" size=2>Néhány hardveres MJPEG capture/megjelenítõ kártya
+  támogatása (DC10, DC10+, LML33)</TD><TR>
 
 <TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Egyéb:</B></P></TD><TR>
 
@@ -954,7 +958,9 @@ küldj patchet.</P>
   <BR>
   Viszont ez elég veszélyes, mivel ilyenkor mindenképp a megadott meghajtó
   lesz betöltve, és elõre nem látható következményekhez vezethet, akár
-  lefagyáshoz is. A helyes módszer az, amikor a VIDIX autodetektál.
+  lefagyáshoz is. Csak akkor próbáld ezt ha teljesen biztos vagy abban hogy
+  mûködni fog, viszont az <B>MPlayer</B> automatikusan nem tesz hasonlóan.
+  Szólj a fejlesztõknek. A helyes módszer az, amikor a VIDIX autodetektál.
 </P>
 
 <P>
@@ -967,6 +973,30 @@ küldj patchet.</P>
   jogosultsággal elérhetõ, mivel közvetlen hardveres hozzáférésre van
   szükség. A minimum, hogy a <B>suid</B> bitet bebillented az <B>MPlayer</B>
   binárison.
+</P>
+
+
+<P><B><A NAME=2.3.1.16>2.3.1.16. Zr</A></B></P>
+
+<P>Ez a meghajtó néhány hardveres MJPEG capture/dekóder kártyával használható
+  (DC10+-szal van lett tesztelve, de mûködnie kell LML33-mal és DC10-zel is).
+  A meghajtó elõször JPEG-be kódolja a képkockát, ezután elküdli a kártyának.
+  Az enkódolás a <B>libavcodec</B>-kel történik.</P>
+
+<P>Mûködnie kell továbbá a
+  <A HREF="http://mjpeg.sourceforge.net">http://mjpeg.sourceforge.net</A>
+  címrõl letölthetõ kernel meghajtónak. Ezután már csak újra kell fordítani
+  az <B>MPlayer-t</B> az <CODE>--enable-zr</CODE> configure opcióval.</P>
+
+<P>Néhány megjegyzés:
+<UL>
+  <LI>ne használd az xawtv-t az <B>MPlayer</B>-rel egy idõben ugyanazon az
+    egységen, mert ez a gép lefagyását eredményezi.</LI>
+  <LI>a meghajtó konfigurálása a <CODE>-zr*</CODE> parancssori opciókkal
+    történik. Ezen opciók help-je a <CODE>-zrhelp</CODE> opcióval kérhetõ
+    le.</LI>
+  <LI>csak YV12 formátum használható (például libmpeg2, libavcodec).</LI>
+</UL>
 </P>
 
 

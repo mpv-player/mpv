@@ -44,6 +44,7 @@
         <LI><A HREF="formats.html#2.1.1.7">2.1.1.7 RealMedia files</A></LI>
         <LI><A HREF="formats.html#2.1.1.8">2.1.1.8 NuppelVideo files</A></LI>
         <LI><A HREF="formats.html#2.1.1.9">2.1.1.9 yuv4mpeg files</A></LI>
+        <LI><A HREF="formats.html#2.1.1.10">2.1.1.10 FILM files</A></LI>
       </UL>
       <LI><A HREF="formats.html#2.1.2">2.1.2 Audio</A></LI>
     </UL>
@@ -114,6 +115,7 @@
 	<LI><A HREF="video.html#2.3.1.13">2.3.1.13 X11</A></LI>
 	<LI><A HREF="video.html#2.3.1.14">2.3.1.14 Rage128 / Radeon video overlay</A></LI>
 	<LI><A HREF="video.html#2.3.1.15">2.3.1.15 Vidix</A></LI>
+	<LI><A HREF="video.html#2.3.1.16">2.3.1.16 Zr (for some MJPEG capture/playback boards)</A></LI>
 	<LI><A HREF="video.html#2.3.1.A">2.3.1.A TVout</A></LI>
 	<UL>
 	  <LI><A HREF="video.html#2.3.1.A.1">2.3.1.A.1 Matrox</A></LI>
@@ -238,7 +240,7 @@ Developer Cries
 
 <P><B>MPlayer</B> is a movie player for LINUX (runs on many other Unices, and
 <B>non-x86</B> CPUs, see <A HREF="#6">section 6</A>). It plays most MPEG, VOB,
-AVI, VIVO, ASF/WMV, QT/MOV, FLI, RM, NuppelVideo, yuv4mpeg files, supported by many native, XAnim, and
+AVI, VIVO, ASF/WMV, QT/MOV, FLI, RM, NuppelVideo, yuv4mpeg, FILM files, supported by many native, XAnim, and
 Win32 DLL codecs. You can watch <B>VideoCD</B>, <B>SVCD</B>, <B>DVD</B>,
 <B>3ivx</B>, and even <B>DivX</B> movies too (and you don't need the avifile
 library at all!). The another big feature of mplayer is the wide range of
@@ -497,6 +499,10 @@ the following drivers :
 <LI><B>Soundblaster Live!</B> : with this card you can use 4 or 6 (<B>5.1</B>)
 channels AC3 decoding instead of 2. Read the
 <A HREF="codecs.html#2.2.2.1">Software AC3 decoding</A> section.</LI>
+
+<LI><B>C-Media with SP/DIF out</B> : hardware AC3 passthrough is possible
+  with these cards, see
+  <A HREF="codecs.html#2.2.2.2">Hardware AC3 decoding</A> section.</LI>
 
 <LI><B>other cards'</B> features aren't supported by <B>MPlayer</B>.
   <U>It's very recommended to read the <A HREF="sound.html#2.3.2">soundcards
@@ -1465,6 +1471,11 @@ No closer info yet.</P>
   <LI>surround sound</LI>
 </UL></LI>
 
+<LI><B><A HREF="mailto:rsnel@cube.dyndns.org">Rik Snel</A></B>
+<UL>
+  <LI><CODE>zr</CODE> video output driver</LI>
+</UL></LI>
+
 </UL></P>
 
 <P>Main testers:</P>
@@ -1612,6 +1623,7 @@ other technical help from:</P>
   <LI><B>vo_x11.c</B> - Pontscho
   <LI><B>vo_xmga.c</B> - Pontscho
   <LI><B>vo_xv.c</B> - Pontscho
+  <LI><B>vo_zr.c</B> - <A HREF="mailto:rsnel@cube.dyndns.org">Rik Snel</A>
 </UL></P>
 <P>libao2 drivers:
 <UL>
