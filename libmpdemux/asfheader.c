@@ -34,6 +34,7 @@ extern int verbose; // defined in mplayer.c
 #define ASF_GUID_PREFIX_header_2_0	0xD6E229D1
 #define ASF_GUID_PREFIX_file_header	0x8CABDCA1
 #define	ASF_GUID_PREFIX_content_desc	0x75b22633
+#define	ASF_GUID_PREFIX_stream_group	0x7bf875ce
 
 
 static ASF_header_t asfh;
@@ -268,6 +269,35 @@ while(!stream_eof(demuxer->stream)){
         }
 	mp_msg(MSGT_HEADER,MSGL_V,"\n");
         free(string);
+      break;
+    }
+    case ASF_GUID_PREFIX_stream_group: {
+        uint16_t stream_count, stream_id, i;
+        uint32_t max_bitrate;
+        char *object=NULL, *ptr=NULL;
+        printf("============ ASF Stream group == START ===\n");
+        printf(" object size = %d\n", objh.size);
+        object = (char*)malloc(objh.size);
+	if( object==NULL ) {
+          printf("Memory allocation failed\n");
+	  return 0;
+	}
+        stream_read( demuxer->stream, object, objh.size );
+	// FIXME: We need some endian handling below...
+	ptr = object;
+        stream_count = *(uint16_t*)ptr;
+        ptr += sizeof(uint16_t);
+        printf(" stream count=[0x%x][%u]\n", stream_count, stream_count );
+        for( i=0 ; i<stream_count && ptr<((char*)object+objh.size) ; i++ ) {
+          stream_id = *(uint16_t*)ptr;
+          ptr += sizeof(uint16_t);
+          printf("   stream id=[0x%x][%u]\n", stream_id, stream_id );
+          max_bitrate = *(uint32_t*)ptr;
+          ptr += sizeof(uint32_t);
+          printf("   max bitrate=[0x%x][%u]\n", max_bitrate, max_bitrate );
+        }
+        printf("============ ASF Stream group == END ===\n");
+        free( object );
       break;
     }
   } // switch GUID
