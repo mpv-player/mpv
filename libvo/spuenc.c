@@ -61,17 +61,17 @@ encode_do_control(int x,int y, encodedata* ed, pixbuf* pb) {
 	/* start at x0+2*/
 	i= controlstart;
 	/* display duration... */
-	ed->data[i++]= 0x00;
-	ed->data[i++]= 0x00; //durration before turn off command occurs
+//	ed->data[i++]= 0x00;
+//	ed->data[i++]= 0x00; //durration before turn off command occurs
 			     //in 90000/1024 units
 	
 	/* x1 */
-	x1=i+4;
-	ed->data[i++]= x1 >> 8;//location of next command block
-	ed->data[i++]= x1 & 0xff;
+//	x1=i+4;
+//	ed->data[i++]= x1 >> 8;//location of next command block
+//	ed->data[i++]= x1 & 0xff;
 	/* finish it */
-	ed->data[i++]= 0x02;//turn off command
-	ed->data[i++]= 0xff;//end of command block
+//	ed->data[i++]= 0x02;//turn off command
+//	ed->data[i++]= 0xff;//end of command block
 	x1= i; //marker for last command block address 
 	
 	/* display duration... */

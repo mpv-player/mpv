@@ -499,7 +499,7 @@ static void draw_osd(void)
 {
 	if (img_format != IMGFMT_MPEGPES) {
 		vo_draw_text(osd_w, osd_h, draw_alpha);
-	} else if ((disposd % 30) == 0) {
+	} else if ((disposd % 15) == 0) {
 		vo_draw_text(osd_w, osd_h, draw_alpha);
 		memset(osdpicbuf, 0, s_width * s_height);
 
