@@ -133,7 +133,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
     switch(cf&NBITS_MASK){
     case(B16):{
       register uint16_t s;
-      for(i=1;i<len;i++){
+      for(i=0;i<len;i++){
 	s=((uint16_t*)ca)[i];
 	((uint16_t*)ca)[i]=(uint16_t)(((s&0x00FF)<<8) | (s&0xFF00)>>8);
       }
@@ -141,7 +141,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
     break;
     case(B32):{
       register uint32_t s;
-      for(i=1;i<len;i++){
+      for(i=0;i<len;i++){
 	s=((uint32_t*)ca)[i];
 	((uint32_t*)ca)[i]=(uint32_t)(((s&0x000000FF)<<24) | ((s&0x0000FF00)<<8) |
 				      ((s&0x00FF0000)>>8)  | ((s&0xFF000000)>>24));
@@ -199,11 +199,11 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
     case(B08):
       switch(lf&NBITS_MASK){
       case(B16):
-	for(i=1;i<len;i++)
+	for(i=0;i<len;i++)
 	  ((uint16_t*)la)[i]=((uint16_t)((uint8_t*)ca)[i])<<8;
 	break;
       case(B32):
-	for(i=1;i<len;i++)
+	for(i=0;i<len;i++)
 	  ((uint32_t*)la)[i]=((uint32_t)((uint8_t*)ca)[i])<<24;
 	break;
       }
@@ -215,7 +215,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
 	  ((uint8_t*)la)[i]=(uint8_t)((((uint16_t*)ca)[i])>>8);
 	break;
       case(B32):
-	for(i=1;i<len;i++)
+	for(i=0;i<len;i++)
 	  ((uint32_t*)la)[i]=((uint32_t)((uint16_t*)ca)[i])<<16;
 	break;
       }
@@ -227,7 +227,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
 	  ((uint8_t*)la)[i]=(uint8_t)((((uint32_t*)ca)[i])>>24);
 	break;
       case(B16):
-	for(i=1;i<len;i++)
+	for(i=0;i<len;i++)
 	  ((uint16_t*)la)[i]=(uint16_t)((((uint32_t*)ca)[i])>>16);
 	break;
       }
@@ -236,10 +236,10 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
   }
   // Switch to the correct endainess (again the problem with sun?)
   if((lf&END_MASK)!=LE){
-    switch(cf&NBITS_MASK){
+    switch(lf&NBITS_MASK){
     case(B16):{
       register uint16_t s;
-      for(i=1;i<len;i++){
+      for(i=0;i<len;i++){
 	s=((uint16_t*)la)[i];
 	((uint16_t*)la)[i]=(uint16_t)(((s&0x00FF)<<8) | (s&0xFF00)>>8);
       }
@@ -247,7 +247,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
     break;
     case(B32):{
       register uint32_t s;
-      for(i=1;i<len;i++){
+      for(i=0;i<len;i++){
 	s=((uint32_t*)la)[i];
 	((uint32_t*)la)[i]=(uint32_t)(((s&0x000000FF)<<24) | ((s&0x0000FF00)<<8) |
 				      ((s&0x00FF0000)>>8)  | ((s&0xFF000000)>>24));
