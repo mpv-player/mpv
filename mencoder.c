@@ -183,11 +183,9 @@ char* ac3_filename=NULL;
 
 char *force_fourcc=NULL;
 
-#ifdef HAVE_DIVX4ENCORE
 static int pass=0;
 static char* passtmpfile="divx2pass.log";
 int pass_working=0;
-#endif
 
 static int play_n_frames=-1;
 

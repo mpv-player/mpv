@@ -129,10 +129,10 @@ static config_t mencoder_opts[]={
 
 	{"ffourcc", &force_fourcc, CONF_TYPE_STRING, 0, 4, 4, NULL},
 
-#ifdef HAVE_DIVX4ENCORE
 	{"pass", &pass, CONF_TYPE_INT, CONF_RANGE,0,2, NULL},
 	{"passlogfile", &passtmpfile, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	
+#ifdef HAVE_DIVX4ENCORE
 	{"divx4opts", divx4opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif
 #ifdef HAVE_MP3LAME
