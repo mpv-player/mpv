@@ -136,7 +136,7 @@ Optional features:
   --disable-streaming    disable network streaming support
                          (support for: http/mms/rtp) [enable]
   --disable-vidix        disable VIDIX stuff [enable]
-  --enable-new-input     enable new input system [disable]
+  --disable-new-input    disable new input system [enable]
   --enable-joystick      enable joystick support in new input [disable]
 Video:
   --enable-gl            build with OpenGL render support [autodetect]
@@ -2705,26 +2705,6 @@ if test "$_mencoder" = yes ; then
 fi
 echores "$_mencoder"
 
-echocheck "lirc"
-if test "$_lirc" = auto ; then
-  _lirc=no
-  if test -c /dev/lirc ; then
-      cat > $TMPC <<EOF
-#include <lirc/lirc_client.h>
-int main(void) { return 0; }
-EOF
-      cc_check -llirc_client && _lirc=yes
-  fi
-fi
-if test "$_lirc" = yes ; then
-  _def_lirc='#define HAVE_LIRC 1'
-  _ld_lirc='-llirc_client'
-else
-  _def_lirc='#undef HAVE_LIRC'
-fi
-echores "$_lirc"
-
-
 echocheck "fastmemcpy"
 # fastmemcpy check is done earlier with tests of CPU & binutils features
 if test "$_fastmemcpy" = yes ; then
@@ -2962,6 +2942,7 @@ _def_joystick='#undef HAVE_JOYSTICK'
 echo Checking for new input ... "$_new_input"
 if test "$_new_input" = yes ; then 
   _def_new_input='#define HAVE_NEW_INPUT 1'
+  _ld_new_input="-Linput -linput"
   if test "$_joystick" = yes ; then
     if linux ; then
        # TODO add some check
@@ -2972,6 +2953,31 @@ if test "$_new_input" = yes ; then
   fi
   echo Checking for joystick ... "$_joystick"
 fi
+
+echocheck "lirc"
+if test "$_lirc" = auto ; then
+  _lirc=no
+  if test -c /dev/lirc ; then
+      cat > $TMPC <<EOF
+#include <lirc/lirc_client.h>
+int main(void) { return 0; }
+EOF
+      cc_check -llirc_client && _lirc=yes
+  fi
+fi
+if test "$_lirc" = yes ; then
+  _def_lirc='#define HAVE_LIRC 1'
+  if test "$_new_input" = yes ; then
+     _ld_new_input="-llirc_client $_ld_new_input"
+  else
+     _ld_lirc='-llirc_client'
+  fi
+else
+  _def_lirc='#undef HAVE_LIRC'
+fi
+echores "$_lirc"
+
+
 
 #############################################################################
 echo "Creating config.mak"
@@ -3047,6 +3053,7 @@ DECORE_LIB = $_ld_decore
 MENCODER = $_mencoder
 ENCORE_LIB =  $_ld_encore $_ld_mp3lame
 DIRECTFB_LIB = $_ld_directfb
+NEW_INPUT_LIB = $_ld_new_input
 
 # --- Some stuff for autoconfigure ----
 $_target_arch

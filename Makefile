@@ -51,7 +51,7 @@ AO_LIBS = -Llibao2 -lao2
 A_LIBS = $(ALSA_LIB) $(NAS_LIB) $(MAD_LIB) $(VORBIS_LIB) $(SGIAUDIO_LIB)
 
 CODEC_LIBS = -Lg72x -lg72x -Lmp3lib -lMP3 -Llibac3 -lac3 -Lliba52 -la52 -Lxa -lxa -Llibmpeg2 -lmpeg2 $(AV_LIB)
-COMMON_LIBS = -Llinux -losdep -Lpostproc -lpostproc
+COMMON_LIBS = $(CODEC_LIBS) -Llibmpdemux -lmpdemux  $(NEW_INPUT_LIB)  $(LIB_LOADER) $(A_LIBS) $(CSS_LIB) $(ARCH_LIB) $(DECORE_LIB)  $(TERMCAP_LIB)  $(STREAMING_LIB) $(Z_LIB) $(GTK_LIBS) $(PNG_LIB) -Llinux -losdep -Lpostproc -lpostproc -lm
 ifeq ($(VIDIX),yes)
 MISC_LIBS += -Llibdha -ldha -Lvidix -lvidix
 endif
@@ -99,7 +99,7 @@ all:	$(ALL_PRG)
 .c.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-COMMON_DEPS = g72x/libg72x.a libmpdemux/libmpdemux.a libao2/libao2.a libac3/libac3.a liba52/liba52.a mp3lib/libMP3.a libmpeg2/libmpeg2.a linux/libosdep.a postproc/libpostproc.a opendivx/libdecore.a xa/libxa.a
+COMMON_DEPS = g72x/libg72x.a libmpdemux/libmpdemux.a libao2/libao2.a libac3/libac3.a liba52/liba52.a mp3lib/libMP3.a libmpeg2/libmpeg2.a linux/libosdep.a postproc/libpostproc.a opendivx/libdecore.a xa/libxa.a input/libinput.a
 
 ifeq ($(VIDIX),yes)
 COMMON_DEPS += libdha/libdha.so vidix/libvidix.a
@@ -179,7 +179,7 @@ g72x/libg72x.a:
 input/libinput.a:
 	$(MAKE) -C input
 
-MPLAYER_DEP = $(OBJS_MPLAYER) $(LOADER_DEP) $(MP1E_DEP) $(AV_DEP) $(COMMON_DEPS) input/libinput.a
+MPLAYER_DEP = $(OBJS_MPLAYER) $(LOADER_DEP) $(MP1E_DEP) $(AV_DEP) $(COMMON_DEPS)
 MENCODER_DEP = $(OBJS_MENCODER) $(LOADER_DEP) $(MP1E_DEP) $(AV_DEP) $(COMMON_DEPS)
 
 ifeq ($(GUI),yes)
@@ -194,14 +194,14 @@ VIDIX_LIBS += -Lvidix -lvidix
 endif
 
 $(PRG):	$(MPLAYER_DEP)
-	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) $(CODEC_LIBS) -Llibmpdemux -lmpdemux $(VO_LIBS) $(GUI_LIBS) $(AO_LIBS) $(LIB_LOADER) $(COMMON_LIBS) $(EXTRA_LIB) $(A_LIBS) $(V_LIBS) $(LIRC_LIB) $(CSS_LIB) $(ARCH_LIB) $(DECORE_LIB) $(TERMCAP_LIB) $(STATIC_LIB) $(GTK_LIBS) $(PNG_LIB) $(Z_LIB) $(STREAMING_LIB) $(VIDIX_LIBS) -Linput -linput -lm
+	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) $(VO_LIBS)  $(COMMON_LIBS) $(EXTRA_LIB) $(V_LIBS) $(AO_LIBS) $(VIDIX_LIBS) $(GUI_LIBS)  $(LIRC_LIB) $(STATIC_LIB) 
 
 $(PRG_FIBMAP): fibmap_mplayer.o
 	$(CC) -o $(PRG_FIBMAP) fibmap_mplayer.o
 
 ifeq ($(MENCODER),yes)
 $(PRG_MENCODER): $(MENCODER_DEP)
-	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) $(CODEC_LIBS) $(MLIB_LIB) -Llibmpdemux -lmpdemux $(LIB_LOADER) $(COMMON_LIBS) $(EXTRA_LIB) $(A_LIBS) $(CSS_LIB) $(GTK_LIBS) $(PNG_LIB) $(Z_LIB) $(ARCH_LIB) $(DECORE_LIB) $(ENCORE_LIB) $(TERMCAP_LIB) $(STREAMING_LIB) -lm
+	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) $(COMMON_LIBS) $(EXTRA_LIB) $(ENCORE_LIB) $(MLIB_LIB)
 endif
 
 # Every mplayer dependancy depends on version.h, to force building version.h
