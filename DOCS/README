@@ -191,6 +191,8 @@ server:
 	rar p ast-nssvcd.rar | mplayer -vo xmga -fs -
 
 With an asf grabber or http dump program you can play from the net.
+	wget ftp://micorsops.com/something.avi -O - | mplayer -
+
 (however we planned to add direct asf/http/ftp inputs with seeking and other
 stuff, but for now it's a good workaround)
 
