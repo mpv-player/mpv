@@ -86,7 +86,7 @@ void vo_draw_alpha_rgb32(int w,int h, unsigned char* src, unsigned char *srca, i
 		"pxor %%mm7, %%mm7		\n\t"
 		"xorl %%eax, %%eax		\n\t"
 		"pcmpeqb %%mm6, %%mm6		\n\t" // F..F
-		".align 16\n\t"
+		".balign 16\n\t"
 		"1:				\n\t"
 		"movq (%0, %%eax, 4), %%mm0	\n\t" // dstbase
 		"movq %%mm0, %%mm1		\n\t"
@@ -121,7 +121,7 @@ void vo_draw_alpha_rgb32(int w,int h, unsigned char* src, unsigned char *srca, i
 		"xorl %%eax, %%eax		\n\t"
 		"xorl %%ebx, %%ebx		\n\t"
 		"xorl %%edx, %%edx		\n\t"
-		".align 16\n\t"
+		".balign 16\n\t"
 		"1:				\n\t"
 		"movb (%1, %%eax), %%bl		\n\t"
 		"cmpb $0, %%bl			\n\t"
