@@ -628,20 +628,46 @@
 #define	OV0_P3_X_START_END			0x049C
 #define	OV0_FILTER_CNTL				0x04A0
 #	define FILTER_PROGRAMMABLE_COEF		0x00000000
+#	define FILTER_HARD_SCALE_HORZ_Y		0x00000001
+#	define FILTER_HARD_SCALE_HORZ_UV	0x00000002
+#	define FILTER_HARD_SCALE_VERT_Y		0x00000004
+#	define FILTER_HARD_SCALE_VERT_UV	0x00000008
 #	define FILTER_HARDCODED_COEF		0x0000000F
 #	define FILTER_COEF_MASK			0x0000000F
-/* other values allow us use hardcoded coefs for Y and
-   programmable for UV that's nosense. */
+/* When bit is set hard coded coefficients are used. */
+
 /*
    Top quality 4x4-tap filtered vertical and horizontal scaler.
    It allows up to 64:1 upscaling and downscaling without
    performance or quality degradation.
 */
 #define	OV0_FOUR_TAP_COEF_0			0x04B0
+#	define OV0_FOUR_TAP_PHASE_0_TAP_0	0x0000000F
+#	define OV0_FOUR_TAP_PHASE_0_TAP_1	0x00007F00
+#	define OV0_FOUR_TAP_PHASE_0_TAP_2	0x007F0000
+#	define OV0_FOUR_TAP_PHASE_0_TAP_3	0x0F000000
 #define	OV0_FOUR_TAP_COEF_1			0x04B4
+#	define OV0_FOUR_TAP_PHASE_1_5_TAP_0	0x0000000F
+#	define OV0_FOUR_TAP_PHASE_1_5_TAP_1	0x00007F00
+#	define OV0_FOUR_TAP_PHASE_1_5_TAP_2	0x007F0000
+#	define OV0_FOUR_TAP_PHASE_1_5_TAP_3	0x0F000000
 #define	OV0_FOUR_TAP_COEF_2			0x04B8
+#	define OV0_FOUR_TAP_PHASE_2_6_TAP_0	0x0000000F
+#	define OV0_FOUR_TAP_PHASE_2_6_TAP_1	0x00007F00
+#	define OV0_FOUR_TAP_PHASE_2_6_TAP_2	0x007F0000
+#	define OV0_FOUR_TAP_PHASE_2_6_TAP_3	0x0F000000
 #define	OV0_FOUR_TAP_COEF_3			0x04BC
+#	define OV0_FOUR_TAP_PHASE_3_7_TAP_0	0x0000000F
+#	define OV0_FOUR_TAP_PHASE_3_7_TAP_1	0x00007F00
+#	define OV0_FOUR_TAP_PHASE_3_7_TAP_2	0x007F0000
+#	define OV0_FOUR_TAP_PHASE_3_7_TAP_3	0x0F000000
 #define	OV0_FOUR_TAP_COEF_4			0x04C0
+#	define OV0_FOUR_TAP_PHASE_4_TAP_0	0x0000000F
+#	define OV0_FOUR_TAP_PHASE_4_TAP_1	0x00007F00
+#	define OV0_FOUR_TAP_PHASE_4_TAP_2	0x007F0000
+#	define OV0_FOUR_TAP_PHASE_4_TAP_3	0x0F000000
+/* 0th_tap means that the left most of top most pixel in a set of four will
+   be multiplied by this coefficient. */
 
 #define	OV0_FLAG_CNTL				0x04DC
 #ifdef RAGE128
