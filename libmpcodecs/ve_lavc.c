@@ -53,11 +53,17 @@ static int lavc_param_vqdiff = 3;
 static float lavc_param_vqcompress = 0.5;
 static float lavc_param_vqblur = 0.5;
 static float lavc_param_vb_qfactor = 2.0;
+static float lavc_param_vb_qoffset = 0.0;
 static int lavc_param_vmax_b_frames = 0;
 static int lavc_param_keyint = -1;
 static int lavc_param_vpass = 0;
 static int lavc_param_vrc_strategy = 2;
 static int lavc_param_vb_strategy = 0;
+static int lavc_param_luma_elim_threshold = 3;
+static int lavc_param_chroma_elim_threshold = 5;
+static int lavc_param_packet_size= 0;
+static int lavc_param_strict= 0;
+static int lavc_param_data_partitioning= 0;
 
 #include "cfgparser.h"
 
@@ -80,6 +86,14 @@ struct config lavcopts_conf[]={
 	{"vpass", &lavc_param_vpass, CONF_TYPE_INT, CONF_RANGE, 0, 2, NULL},
 	{"vrc_strategy", &lavc_param_vrc_strategy, CONF_TYPE_INT, CONF_RANGE, 0, 2, NULL},
 	{"vb_strategy", &lavc_param_vb_strategy, CONF_TYPE_INT, CONF_RANGE, 0, 1, NULL},
+#ifdef CODEC_FLAG_PART
+	{"vb_qoffset", &lavc_param_vb_qoffset, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 31.0, NULL},
+	{"vlelim", &lavc_param_luma_elim_threshold, CONF_TYPE_INT, CONF_RANGE, 0, 99, NULL},
+	{"vcelim", &lavc_param_chroma_elim_threshold, CONF_TYPE_INT, CONF_RANGE, 0, 99, NULL},
+	{"vpsize", &lavc_param_packet_size, CONF_TYPE_INT, CONF_RANGE, 0, 100000000, NULL},
+	{"vstrict", &lavc_param_strict, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"vdpart", &lavc_param_data_partitioning, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_PART, NULL},
+#endif
 	{"keyint", &lavc_param_keyint, CONF_TYPE_INT, 0, 0, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
@@ -127,7 +141,16 @@ static int config(struct vf_instance_s* vf,
     lavc_venc_context.b_quant_factor= lavc_param_vb_qfactor;
     lavc_venc_context.rc_strategy= lavc_param_vrc_strategy;
     lavc_venc_context.b_frame_strategy= lavc_param_vb_strategy;
-    
+
+#ifdef CODEC_FLAG_PART
+    lavc_venc_context.b_quant_offset= lavc_param_vb_qoffset;
+    lavc_venc_context.luma_elim_threshold= lavc_param_luma_elim_threshold;
+    lavc_venc_context.chroma_elim_threshold= lavc_param_chroma_elim_threshold;
+    lavc_venc_context.rtp_payload_size= lavc_param_packet_size;
+    if(lavc_param_packet_size )lavc_venc_context.rtp_mode=1;
+    lavc_venc_context.strict_std_compliance= lavc_param_strict;
+#endif
+
     /* keyframe interval */
     if (lavc_param_keyint >= 0) /* != -1 */
 	lavc_venc_context.gop_size = lavc_param_keyint;
@@ -149,6 +172,9 @@ static int config(struct vf_instance_s* vf,
     }
 
     lavc_venc_context.flags|= lavc_param_v4mv ? CODEC_FLAG_4MV : 0;
+#ifdef CODEC_FLAG_PART
+    lavc_venc_context.flags|= lavc_param_data_partitioning;
+#endif
 
     /* lavc internal 2pass bitrate control */
     if(lavc_param_vpass==1)
