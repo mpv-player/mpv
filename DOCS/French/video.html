@@ -90,7 +90,7 @@
 
     <P>dans /var/log/XFree86.0.log</P>
 
-    <P>NOTE: ceci charge seulement l'extension de XFree86. Dans une installation correcte, 
+    <P>NOTE: ceci charge seulement l'extension de XFree86. Dans une installation correcte,
       celle ci est toujours chargée, et ne signifie pas que le support XVideo spécifique à 
       <B>votre carte</B> est chargé !</P>
   </LI>
@@ -131,7 +131,7 @@
 
 <H4><A NAME="xv_3dfx">2.3.1.2.1.1 Cartes 3dfx</A></H4>
 
-<P>Les anciens drivers 3dfx avaient des problèmes avec l'accélération XVideo, 
+<P>Les anciens drivers 3dfx avaient des problèmes avec l'accélération XVideo,
   et ne supportaient ni YUY2 ni YV12. Vérifiez que vous avez bien XFree86 
   version 4.2.0 ou plus, qui doit fonctionner correctement. Les versions précédentes,
   incluant 4.1.0, <B>se plantent avec YV12</B>. Si des problèmes apparaissent en 
@@ -181,7 +181,7 @@
   <LI>Radeon VE - actuellement seule la version CVS de XFree86 a un driver pour cette carte, 
     pas la version 4.1.0. Pas de support TV-out. Bien sûr avec MPlayer vous pouvez
     heureusement avoir un affichage <B>accéléré</B>, avec ou sans <B>sortie TV</B>, et
-    aucune librairie ou X ne sont requis. Lire la section <A HREF="#vidix">Vidix</A>.</LI>
+    aucune librairie ou X ne sont requis. Lire la section <A HREF="#vidix">VIDIX</A>.</LI>
 </UL>
 
 
@@ -204,22 +204,29 @@
 
 <H4><A NAME="xv_trident">2.3.1.2.1.6 Cartes Trident</A></H4>
 
-<P>Si vous voulez utiliser xv avec une carte trident, puisque son support ne
-  fonctionne pas avec 4.1.0, installez XFree 4.2.0. 4.2.0 ajoute le support xv
+<P>Si vous voulez utiliser Xv avec une carte trident, puisque son support ne
+  fonctionne pas avec 4.1.0, installez XFree 4.2.0. 4.2.0 ajoute le support Xv
   plein-écran avec la carte Cyberblade XP.</P>
+
+
+<H4><A NAME="xv_powervr">2.3.1.2.1.7 Cartes Kyro/PowerVR</A></H4>
+
+<P>Si vous voulez utiliser Xv avec une carte Kyro (par exemple Hercules Prophet
+  4000XT), vous devriez télécharger les pilotes depuis le
+  <A HREF="http://www.powervr.com/">site de PowerVR</A>.</P>
 
 
 <H4><A NAME="dga">2.3.1.2.2 DGA</A></H4>
 
 
-<H4><A NAME="dga_summary">2.3.1.2.2.1 Sommaire</A></H4>
+<H4>PRÉAMBULE</H4>
 
-<P>Ce document tente d'expliquer en quelques mots ce qu'est le DGA en 
-  général et ce que peut faire le driver de sortie DGA pour MPlayer 
+<P>Ce document tente d'expliquer en quelques mots ce qu'est le DGA en
+  général et ce que peut faire le driver de sortie DGA pour MPlayer
   (et ce qu'il ne peut pas faire).</P>
 
 
-<H4><A NAME="dga_whatis">2.3.1.2.2.2 Qu'est ce que le DGA</A></H4>
+<H4>QU'EST CE QUE LE DGA</H4>
 
 <P>DGA signifie Direct Graphics Access et permet aux programmes de passer 
   outre le serveur X et de modifier directement la mémoire dans le framebuffer. 
@@ -244,21 +251,21 @@
   cette carte. Cela peut donc ne pas fonctionner sur tout les systèmes ...</P>
 
 
-<H4><A NAME="dga_installation">2.3.1.2.2.3 Installer le support DGA pour MPlayer</A></H4>
+<H4>INSTALLER LE SUPPORT DGA POUR MPLAYER</H4>
 
 <P>Assurez vous d'abord que X charge l'extension DGA, regardez dans /var/log/XFree86.0.log:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>(II) Loading extension XFree86-DGA</CODE></P>
 
 <P>XFree86 4.0.x ou plus est TRÈS RECOMMANDÉ ! Le pilote DGA de MPlayer est
-  automatiquement détecté lors de ./configure, ou bien vous pouvez le forcer 
+  automatiquement détecté lors de ./configure, ou bien vous pouvez le forcer
   avec l'option --enable-dga.</P>
 
-<P>Si le driver ne peut pas passer en résolution inférieure, essayez les options -vm 
-  (uniquement avec X 3.3.x), -fs, -bpp, -zoom pour trouver un mode vidéo qui convienne 
+<P>Si le driver ne peut pas passer en résolution inférieure, essayez les options -vm
+  (uniquement avec X 3.3.x), -fs, -bpp, -zoom pour trouver un mode vidéo qui convienne
   à la vidéo. Il n'existe pas de convertisseur actuellement.. :(</P>
 
-<P>Passez en ROOT. DGA nécessite un accès root pour écrire directement dans la mémoire 
+<P>Passez en ROOT. DGA nécessite un accès root pour écrire directement dans la mémoire
   vidéo. Si vous voulez rester en utilisateur, installez MPlayer SUID root:</P>
 
 <P><CODE>
@@ -271,18 +278,18 @@
 <BLOCKQUOTE>
   <B>Attention: faille de sécurité</B><BR>
   Cela présente une <B>grosse</B> faille de sécurité ! Ne faites <B>jamais</B>
-  ceci sur un serveur ou un ordinateur accessible par d'autres personnes que 
+  ceci sur un serveur ou un ordinateur accessible par d'autres personnes que
   vous, ils pourraient obtenir les privilèges root par l'exécutable mplayer.
 </BLOCKQUOTE>
 
-<P>Utilisez maintenant l'option <CODE>-vo dga</CODE> et c'est parti ! 
+<P>Utilisez maintenant l'option <CODE>-vo dga</CODE> et c'est parti !
   (enfin on peut l'espérer:) Vous pouvez alors essayer l'option
   <CODE>-vo sdl:dga</CODE>. C'est beaucoup plus rapide.</P>
 
 
-<H4><A NAME="dga_resolution">2.3.1.2.2.4 Changement de résolution</A></H4>
+<H4><A NAME="dga_modelines">CHANGEMENT DE RÉSOLUTION</A></H4>
 
-<P>Le driver DGA vous permet de changer la résolution du signal de sortie. 
+<P>Le driver DGA vous permet de changer la résolution du signal de sortie.
   Cela permet d'éviter un redimensionnement logiciel, beaucoup plus lent, 
   et offre une image plein écran. Idéalement il doit passer à la résolution 
   exacte de la vidéo (excepté pour respecter le rapport hauteur/largeur), 
@@ -294,17 +301,31 @@
   pouvez retrouver dans les logs de X quelles modelines sont acceptables.
   Elles peuvent être trouvées dans :<CODE>/var/log/XFree86.0.log</CODE>.</P>
 
-<P>C.f. appendice A pour quelques exemples de modelines.</P>
+<P>Ces entrées doivent fonctionner correctement avec un chip Riva128, en utilisant
+  le module pilote <CODE>nv.o</CODE> du serveur X.</P>
+
+<PRE>
+  Section "Modes"
+    Identifier    "Modes[0]"
+    Modeline	"800x600"  40     800 840 968 1056  600 601 605 628
+    Modeline	"712x600"  35.0   712 740 850 900   400 410 412 425
+    Modeline	"640x480"  25.175 640 664 760 800   480 491 493 525
+    Modeline 	"400x300"  20     400 416 480 528   300 301 303 314 Doublescan
+    Modeline	"352x288"  25.10  352 368 416 432   288 296 290 310
+    Modeline	"352x240"  15.750 352 368 416 432   240 244 246 262 Doublescan
+    Modeline	"320x240"  12.588 320 336 384 400   240 245 246 262 Doublescan
+  EndSection
+</PRE>
 
 
-<H4><A NAME="dga_mplayer">2.3.1.2.2.5 DGA &amp; MPlayer</A></H4>
+<H4>DGA &amp; MPLAYER</H4>
 
 <P>DGA est utilisé en deux endroits par MPlayer: le pilote SDL peut se compiler
   pour en faire usage (-vo sdl:dga) et dans le pilote DGA (-vo dga). Dans les
   sections suivantes je vous expliquerai comment fonctionne le driver DGA pour MPlayer.</P>
 
 
-<H4><A NAME="dga_features">2.3.1.2.2.6 Fonctionnalités du driver DGA</A></H4>
+<H4>FONCTIONNALITÉS</H4>
 
 <P>Le pilote DGA s'invoque en spécifiant -vo dga en ligne de commande. L'action
   par défaut consiste à passer dans une résolution s'approchant au mieux de la
@@ -342,7 +363,7 @@
   de l'implémentation du DGA pour votre matériel.</P>
 
 
-<H4><A NAME="dga_speed">2.3.1.2.2.7 Problèmes de vitesse</A></H4>
+<H4>PROBLÈMES DE VITESSE</H4>
 
 <P>Généralement, l'accès au framebuffer DGA peut s'avérer aussi rapide que le 
   driver X11, apportant en plus l'avantage de bénéficier d'une image plein écran.
@@ -368,7 +389,7 @@
   K6-2 s'avèrent utilisables à partir de 400 MHZ et supérieur.</P>
 
 
-<H4><A NAME="dga_bugs">2.3.1.2.2.8 Bogues connus</A></H4>
+<H4>BOGUES CONNUS</A></H4>
 
 <P>A vrai dire, selon certains développeurs de XFree, DGA est une usine à gaz. Ils 
   recommandent d'éviter son utilisation. Son implémentation n'est pas parfaite avec 
@@ -388,46 +409,6 @@
     ou similaire...</LI>
    <LI>L'OSD fonctionne uniquement avec le doublebuffering activé.</LI>
 </UL>
-
-
-<H4><A NAME="dga_future">2.3.1.2.2.9 Travaux prévus</A></H4>
-
-<UL>
-  <LI>utilisation de la nouvelle interface de rendering X11 pour l'OSD.</LI>
-  <LI>où est ma liste AFAIRE ???? :-(((</LI>
-</UL>
-
-
-<H4><A NAME="dga_modelines">2.3.1.2.2.A Quelques modelines</A></H4>
-
-<PRE>
-  Section "Modes"
-    Identifier    "Modes[0]"
-    Modeline	"800x600"  40     800 840 968 1056  600 601 605 628
-    Modeline	"712x600"  35.0   712 740 850 900   400 410 412 425
-    Modeline	"640x480"  25.175 640 664 760 800   480 491 493 525
-    Modeline 	"400x300"  20     400 416 480 528   300 301 303 314 Doublescan
-    Modeline	"352x288"  25.10  352 368 416 432   288 296 290 310
-    Modeline	"352x240"  15.750 352 368 416 432   240 244 246 262 Doublescan
-    Modeline	"320x240"  12.588 320 336 384 400   240 245 246 262 Doublescan
-  EndSection
-</PRE>
-
-<P>Ces entrées fonctionnent bien sur mon chip Riva128, en utilisant module pilote nv.o
-  du serveur X.</P>
-
-
-<H4><A NAME="dga_bug_reports">2.3.1.2.2.B Rapports de bogues</A></H4>
-
-<P>Si vous constatez des problèmes avec l'utilisation du driver DGA envoyez-moi 
-  un rapport de bogue à l'adresse ci-dessous. Lancez mplayer avec l'option -v et 
-  joignez toutes les lignes commençant par vo_dga à votre mail :</P>
-
-<P>Merci d'inclure également la version de X11 utilisée, la carte graphique et votre 
-  type de processeur. Le module du driver X11 (défini dans XF86-Config) peut également 
-  m'aider. Merci !</P>
-
-<P><I>Acki (acki@acki-netz.de, www.acki-netz.de)</I></P>
 
 
 <H4><A NAME="sdl">2.3.1.2.3 SDL</A></H4>
@@ -485,21 +466,21 @@
 
 <H4><A NAME="svgalib">2.3.1.2.4 SVGAlib</A></H4>
 
-<H4>Installation</H4>
+<H4>INSTALLATION</H4>
 
-<P>Vous devrez installer svgalib et ses paquetages de développement afin que 
-  MPlayer construise son driver SVGAlib driver (autodetecté, mais peut être 
-  forcé), et n'oubliez pas d'éditer /etc/vga/libvga.config pour l'ajuster à 
+<P>Vous devrez installer svgalib et ses paquetages de développement afin que
+  MPlayer construise son driver SVGAlib driver (autodetecté, mais peut être
+  forcé), et n'oubliez pas d'éditer /etc/vga/libvga.config pour l'ajuster à
   votre carte et votre moniteur.</P>
 
-<H4>Notes</H4>
+<H4>NOTES</H4>
 
 <P>Assurez-vous de ne pas utiliser l'option -fs, car elle active l'utilisation
   du redimmensionneur logiciel, et c'est lent. Si vous en avez réellement besoin,
   utilisez l'option <CODE>-sws 4</CODE> qui donnera une qualité mauvaise, mais
   qui est un peu plus rapide.</P>
 
-<H4>Support EGA (4bpp)</H4>
+<H4>SUPPORT EGA (4BPP)</H4>
 
 <P>SVGAlib incorpore EGAlib, et MPlayer a la possibilité d'afficher n'importe
   quel film en 16 couleurs, donc utilisable avec les configurations suivantes:</P>
@@ -528,17 +509,17 @@
 <P>Vous pouvez activer l'OSD et les sous-titres uniquement avec le filtre <CODE>expand</CODE>,
   voir la page de man pour les paramètres exacts.</P>
 
-  
+
 <H4><A NAME="fbdev">2.3.1.2.5 Sortie framebuffer (FBdev)</A></H4>
 
-<P>La compilation de le sortie FBdev est autodétectée durant ./configure . 
-  Lisez la documentation sur le framebuffer dans le sources du noyau 
+<P>La compilation de le sortie FBdev est autodétectée durant ./configure .
+  Lisez la documentation sur le framebuffer dans le sources du noyau
   (Documentation/fb/*) pour avoir plus d'infos.</P>
 
-<P>Si votre carte ne supporte pas le standard VBE 2.0 (anciennes cartes ISA/PCI, 
-  comme les S3 Trio64), et uniquement VBE 1.2 (ou plus ancien ?) : Dans ce cas, 
-  VESAfb reste disponible, mais vous devrez charger SciTech Display Doctor (également 
-  nommé UniVBE) avant de booter Linux. Utilisez une disquette de boot DOS ou similaire. 
+<P>Si votre carte ne supporte pas le standard VBE 2.0 (anciennes cartes ISA/PCI,
+  comme les S3 Trio64), et uniquement VBE 1.2 (ou plus ancien ?) : Dans ce cas,
+  VESAfb reste disponible, mais vous devrez charger SciTech Display Doctor (également
+  nommé UniVBE) avant de booter Linux. Utilisez une disquette de boot DOS ou similaire.
   Et n'oubliez pas d'enregistrer votre copie d'UniVBE ;))</P>
 
 <P>La sortie FBdev accepte certains paramètres additionnels :</P>
@@ -590,8 +571,8 @@
   (A'rpi), et supporte le VSYNC matériel avec triple buffering. Cela fonctionne aussi 
   bien en console framebuffer que sous X.</P>
 
-<P><B>Attention</B>: sur les systèmes non-Linux, utilisez <A HREF="#vidix">VIDIX</A> pour
-  mga_vid!</P>
+<P><B>Attention</B>: Ceci est pour Linux uniquement ! Sur les systèmes non-Linux
+  (testé sur FreeBSD), vous pouvez utiliser <A HREF="#vidix">VIDIX</A> à la place !</P>
 
 <P><B>Installation:</B></P>
 <OL>
@@ -741,7 +722,7 @@
   (Je suppose que la sortie TV est souvent une tête indépendante ou au moins
   une sortie indépendante.)</P>
 
-<H4>Avantages:</H4>
+<H4>AVANTAGES</H4>
 
 <UL>
   <LI>Vous avez la possibilité de voir des films <B>même si Linux ne connaît pas</B>
@@ -763,7 +744,7 @@
     vous devrez spécifier <B>toutes</B> les options de votre moniteur.</LI>
 </UL>
 
-<H4>Désavantages:</H4>
+<H4>DÉSAVANTAGES</H4>
 
 <UL>
   <LI>Il ne fonctionne que sur les <B>systèmes x86</B>.</LI>
@@ -915,12 +896,66 @@ De plus le pilote de sortie vidéo utilisé avec <B>VIDIX</B> n'a pas d'importance
   seule solution est de le porter (principalement libdha). Mais il y a de bon
   espoir qu'il fonctionne sur ces systèmes où X11 fonctionne.
 
-<BLOCKQUOTE>
-  <B>Attention: faille de sécurité</B><BR>
-  Malheureusement vous <B>devez</B> avoir les privilèges du <B>root</B>
-  pour utiliser VIDIX à cause de l'accès direct au matériel. Au moins le
-  bit <B>SUID</B> de l'exécutable MPlayer doit être fixé.
-</BLOCKQUOTE>
+<P>Comme, VIDIX requiert l'accès direct au matériel, vous avez le choix entre le
+  lançer en tant que root ou définir le bit SUID du binaire MPlayer (<B>Attention:
+  c'est une faille de sécurité !</B>. Sinon, vous pouvez utiliser un module noyau
+  spécial, comme ceci:</P>
+
+<OL>
+  <LI>Téléchargez la
+    <A HREF="http://www.arava.co.il/matan/svgalib/">version de développement</A>
+    de svgalib (par exemple 1.9.17),<BR>
+    <B>OU</B><BR>
+    téléchargez une version faite par Alex spécialement pour l'utilisation avec
+    MPlayer (elle ne nécessite pas les sources de svgalib pour compiler)
+    <A HREF="http://www.mplayerhq.hu/~alex/svgalib_helper-1.9.17-mplayer.tar.bz2">
+    ici</A>.</LI>
+  <LI>Compilez le module dans le répertoire <CODE>svgalib_helper</CODE> (il peut être
+    trouvé à l'intérieur du répertoire <CODE>svgalib-1.9.17/kernel/</CODE>
+    si vous avez téléchargé les source depuis le site de svgalib) et faire un insmod.</LI>
+  <LI>Déplacez le répertoire <CODE>svgalib_helper</CODE> dans
+    <CODE>mplayer/main/libdha/svgalib_helper</CODE>.</LI>
+  <LI>Requis si vous avez téléchargé les sources depuis le site de svgalib: Retirez
+    les commentaires avant la ligne CFLAGS contenant la chaine "svgalib_helper" du
+    <CODE>libdha/Makefile</CODE>.</LI>
+  <LI>Recompilez et installez libdha.</LI>
+</OL>
+
+
+<H4><A NAME="vidix_ati">2.3.1.2.12.1 Cartes ATI</A></H4>
+
+<P>Actuellement la plupart des cartes ATI sont supportés nativement, de la Mach64
+  jusqu'aux nouvelles Radeons.</P>
+
+<P>Il y a deux binaires compilés: <CODE>radeon_vid</CODE> pour les cartes Radeon et
+  <CODE>rage128_vid</CODE> pour les Rage 128. Vous pouvez en forcer une ou laisse le
+  système VIDIX le détecter parmis les pilotes disponibles.</P>
+
+
+<H4><A NAME="vidix_matrox">2.3.1.2.12.2 Cartes Matrox</A></H4>
+
+<P>Les Matrox G200,G400,G450 and G550 doivent normalement fonctionner.</P>
+
+<P>Le pilote supporte les égaliseurs vidéo et devrait être presque aussi rapide que
+  le <A HREF="#mga_vid">framebuffer Matrox</A>.</P>
+
+
+<H4><A NAME="vidix_trident">2.3.1.12.3 Cartes Trident</A></H4>
+
+<P>Il y a un pilote disponible pour les chipsets Trident Cyberblade/i1, qui peut
+  être trouvé sur les cartes-mère VIA Epia.</P>
+
+<P>Le pilote a été écrit et est maintenu par Alastair M. Robinson, qui offre les
+  dernières versions des pilote à télécharger sur sa
+  <A HREF="http://www.blackfiveservices.co.uk/EPIAVidix.shtml">page web</A>.
+  Les pilotes sont ajoutés à MPlayer avec un très léger décalage, donc le CVS devrait
+  être toujours à jour.</P>
+
+
+<H4><A NAME="vidix_3dlabs">2.3.1.2.12.4 Cartes 3DLabs</A></H4>
+
+<P>Bien qu'il y ai un pilote pour les chips 3DLabs GLINT R3 et Permedia3,
+  personne ne l'a testé, donc les rapports sont les bienvenus.</P>
 
 
 <H4><A NAME="directfb">2.3.1.2.13 DirectFB</A></H4>
@@ -932,7 +967,7 @@ De plus le pilote de sortie vidéo utilisé avec <B>VIDIX</B> n'a pas d'importance
 
 <P>J'exclurai les fonctionnalités de DirectFB dans cette section.</P>
 
-<P>Bien que Mplayer ne soit pas supporté en tant que "fournisseur vidéo" dans
+<P>Bien que MPlayer ne soit pas supporté en tant que "fournisseur vidéo" dans
   DirectFB, ce pilote de sortie activera la lecture vidéo au travers de DirectFB.
   Il sera - bien sûr - accéléré, sur ma Matrox G400 la vitesse de DirectFB
   était la même que celle de XVideo.</P>
@@ -1271,8 +1306,8 @@ pour une TV 16:9: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
 <H4><A NAME="blinken">2.3.1.4.2 Blinkenlights</A></H4>
 
 <P>Ce pilote est capable de lire en utilisant le protocole UPD Blinkenlights.
-  Si vous ne savez pas ce qu'est Blinkenlights, vous n'avez pas besoin de ce
-  pilote.</P>
+  Si vous ne savez pas ce qu'est <A HREF="http://www.blinkenlights.de/">Blinkenlights</A>,
+  vous n'avez pas besoin de ce pilote.</P>
 
 
 <H4><A NAME="tv-out">2.3.1.5 TV-out</A></H4>

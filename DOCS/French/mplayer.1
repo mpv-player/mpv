@@ -233,7 +233,7 @@ Voir DOCS/documentation.html#edl pour les détails sur comment l'utiliser.
 .TP
 .B \-edlout <nomfichier>
 Créé un nouveau fichier et écrit les enregistrements d'édition de la liste de 
-décision (EDL) dans ce fichier. Durant la lecture, quand l'utilisateur tape 'i', 
+décision (EDL) dans ce fichier. Durant la lecture, quand l'utilisateur tape 'i',
 une entrée à sauter après les deux dernières secondes de la lecture est écrite 
 dans ce fichier. Cela fournit un point de départ depuis lequel l'utilisateur 
 peut régler plus finement les entrées EDL plus tard. 
@@ -249,8 +249,8 @@ xmga, gl2 et svga.
 .B \-framedrop (voir aussi \-hardframedrop)
 Saute l'affichage de certaines trames pour maintenir la synchro A/\:V sur les
 systèmes lents.
-Le décodage des trames B est également retiré et les filtres vidéos ne sont plus
-utilisés.
+Les filtres vidéo ne sont pas appliqués sur de telles trames.
+Pour les trames B même leur décodage est complétement désactivé.
 .TP
 .B \-h, \-help, \-\-help
 Affiche un court résumé des options.
@@ -429,7 +429,7 @@ Particulièrement utile sur des média lents (le comportement par défaut est
 .TP
 .B \-cdda <option1:option2>
 Cette option est utilisé pour régler les capacités de lecture de CD Audio 
-de Mplayer.
+de MPlayer.
 .br
 Les options disponibles sont:
 .

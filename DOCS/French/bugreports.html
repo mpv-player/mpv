@@ -171,7 +171,17 @@
 </UL>
 
 
-<H3><A NAME="compilation">B.4.3 Problèmes de compilation:</H3>
+<H3><A NAME="configure">B.4.3 Problèmes de configuration</A></H3>
+
+<P>Si vous rencontrez des erreurs pendant l'éxecution de <CODE>./configure</CODE>, ou
+  si l'autodetection ou autre chose échoue, lisez <CODE>configure.log</CODE>.
+  Vous pouvez y trouver la réponse, par exemple des versions multiples de la même
+  librairie mélangés dans votre système, ou vous avez oublié d'installer les paquets
+  de développement (ceux avec le suffixe -dev). Si vous pensez que c'est un bogue,
+  incluez <CODE>configure.log</CODE> dans votre rapport de bogue.</P>
+
+
+<H3><A NAME="compilation">B.4.4 Problèmes de compilation</H3>
 
 Veuillez inclure ces fichiers:
 
@@ -188,10 +198,6 @@ Uniquement si la compilation échoue à partir d'un de ces répertoires, incluez ce
   <LI><CODE>libao2/config.mak</CODE></LI>
 </UL>
 
-
-<H3><A NAME="configure">B.4.4 Problèmes de configure</A></H3>
-
-Incluez <CODE>configure.log</CODE>.
 
 <H3><A NAME="playback">B.4.5 Pour les problèmes de lecture</A></H3>
 
@@ -257,7 +263,8 @@ renvoyer à la ligne de commande où vous devrez entrer
 
 <P>créez le fichier de commande suivant:</P>
 
-<P><CODE>disass $pc-32 $pc+32<BR>
+<P><CODE>bt<BR>
+  disass $pc-32 $pc+32<BR>
   info all-registers</CODE></P>
 
 <P>puis exécutez simplement la ligne de commande suivante:</P>

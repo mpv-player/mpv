@@ -155,6 +155,19 @@
 <P>Commande: <CODE>mencoder -idx entree.avi -ovc copy -oac copy -o sortie.avi</CODE></P>
 
 
+<H3><A NAME="appending">7.5.1 Assembler plusieurs fichiers AVI</A></H3>
+
+<P>Un effet secondaire de la fonction de réparation d'AVI permet à MEncoder d'assembler
+  2 (ou plus) fichiers AVI:</P>
+
+<P>Command: <CODE>cat 1.avi 2.avi | mencoder -noidx -ovc copy -oac copy -o sortie.avi -</CODE></P>
+
+<P><B>Note:</B> Cela suppose que <CODE>1.avi</CODE> et <CODE>2.avi</CODE> utilisent
+  les même codecs, résolution, débit, etc et qu'au moins 1.avi ne soit pas endommagé.
+  Vous pouvez avoir besoin de réparer vos fichiers AVI d'entrée d'abord, comme décrit
+  <A HREF="#fixing">ci-dessus</A>.</P>
+
+
 <H2><A NAME="libavcodec">7.6 Encodage avec la famille de codecs libavcodec</A></H2>
 
 <P><A HREF="codecs.html#libavcodec">libavcodec</A> permet un encodage simple dans plein
@@ -219,6 +232,9 @@ Explication du processus:
   &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25:type=png -ovc rawrgb
   -o sortie.avi \*.png</CODE></P>
 
+<P><B>Note:</B> La largeur doit être un entier multiple de 4, c'est une limitation
+  du format AVI RGB brut.</P>
+
 <P><I>Créer un fichier Motion PNG (MPNG) à partir de tous les fichiers PNG du rép courant:</I><BR>
   &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25:type=png -ovc copy
   -oac copy -o sortie.avi \*.png</CODE></P>
@@ -231,9 +247,9 @@ Explication du processus:
 <H2><A NAME="vobsub">7.8 Extractaction des sous-titres DVD dans un fichier Vobsub</A></H2>
 
 <P>MEncoder est capable d'extraire les sous-titres d'un DVD dans des fichiers au format
-  VobSub. Ils consistent en une paire de fichiers terminant par <CODE>.idx</CODE> et 
+  VobSub. Ils consistent en une paire de fichiers terminant par <CODE>.idx</CODE> et
   <CODE>.sub</CODE> et sont généralement compressés dans une seule archive <CODE>.rar</CODE>.
-  Mplayer peut les lire avec les options <CODE>-vobsub</CODE> et <CODE>-vobsubid</CODE>.</P>
+  MPlayer peut les lire avec les options <CODE>-vobsub</CODE> et <CODE>-vobsubid</CODE>.</P>
 
 <P>Vous spécifiez le nom de base (c-a-d sans l'extension <CODE>.idx</CODE> ou
   <CODE>.sub</CODE>) des fichiers de sortie avec <CODE>-vobsubout</CODE> et
@@ -280,7 +296,7 @@ Explication du processus:
 
 <P>MPEG4 a une fonction unique: le flux vidéo peut contenir l'aspect ratio requis.
   Oui, tout comme les fichiers MPEG1/2 (DVD, SVCD). Malheureusement, il n'y a pas
-  de lecteurs vidéo au dehors qui supportent cet attribut. Excepté Mplayer.</P>
+  de lecteurs vidéo au dehors qui supportent cet attribut. Excepté MPlayer.</P>
 
 <P>Cette fonction ne peut être utilisé qu'avec le codec <CODE>mpeg4</CODE>
   de <B>libavcodec</B>. Gardez à l'esprit: bien que MPlayer lise correctement

@@ -104,6 +104,8 @@
     <TH ROWSPAN="2"><B>CARTE SON</B></TH>
     <TH COLSPAN="4"><B>PILOTE</B></TH>
     <TH ROWSPAN="2"><B>kHz Max</B></TH>
+    <TH ROWSPAN="2"><B>Max Canaux</B></TH>
+    <TH ROWSPAN="2"><B>Max Ouverts<FONT SIZE="-2"><A HREF=#note1>[1]</A></FONT></B></TH>
   </TR>
 
   <TR>
@@ -120,6 +122,8 @@
     <TD>&nbsp;</TD>
     <TD>&nbsp;</TD>
     <TD>4-48 kHz ou 48 kHz uniquement, selon le chipset</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
   </TR>
 
   <TR>
@@ -128,26 +132,32 @@
     <TD>aucun</TD>
     <TD>OK</TD>
     <TD><A HREF="http://aureal.sourceforge.net">Pilotes Linux Aureal</A><BR>
-      <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">taille du tampon portée à 32k</A></TD> 
+      <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">taille du tampon portée à 32k</A></TD>
     <TD>48</TD>
-  </TR>
-
-  <TR>
-    <TD><B>GUS PnP</B></TD>
-    <TD>aucun</TD>
-    <TD>OK</TD>
-    <TD>OK</TD>
-    <TD>&nbsp;</TD>
-    <TD>48</TD>
+    <TD>4.1</TD>
+    <TD>5+</TD>
   </TR>
 
   <TR>
     <TD><B>SB Live!</B></TD>
     <TD>Analogique OK, SP/DIF non fonctionnel</TD>
     <TD>Tous deux OK</TD>
-    <TD>&nbsp;</TD>
-    <TD>&nbsp;</TD>
+    <TD>Tous deux OK</TD>
+    <TD><A HREF="http://opensource.creative.com">Pilote OSS de Creative (support SP/DIF)</A></TD>
     <TD>192</TD>
+    <TD>4.0/5.1</TD>
+    <TD>32</TD>
+  </TR>
+
+  <TR>
+    <TD><B>SB 128 PCI (es1371)</B></TD>
+    <TD>OK</TD>
+    <TD>?</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>48</TD>
+    <TD>stéréo</TD>
+    <TD>2</TD>
   </TR>
 
   <TR>
@@ -157,8 +167,22 @@
     <TD>&nbsp;</TD>
     <TD>&nbsp;</TD>
     <TD>48</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
   </TR>
-  
+
+  <TR>
+    <TD><B>GUS PnP</B></TD>
+    <TD>aucun</TD>
+    <TD>OK</TD>
+    <TD>OK</TD>
+    <TD>&nbsp;</TD>
+    <TD>48</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+  </TR>
+
+
   <TR>
     <TD><B>Gravis UltraSound ACE</B></TD>
     <TD>pas OK</TD>
@@ -166,6 +190,8 @@
     <TD>&nbsp;</TD>
     <TD>&nbsp;</TD>
     <TD>44</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
   </TR>
   
   <TR>
@@ -175,8 +201,10 @@
     <TD>&nbsp;</TD>
     <TD>&nbsp;</TD>
     <TD>48</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
   </TR>
-  
+
   <TR>
     <TD><B>ESS 688</B></TD>
     <TD>OK</TD>
@@ -184,8 +212,10 @@
     <TD>&nbsp;</TD>
     <TD>&nbsp;</TD>
     <TD>48</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
   </TR>
-  
+
   <TR>
     <TD><B>Cartes C-Media (lesquelles ?)</B></TD>
     <TD>pas OK (hissing) (?)</TD>
@@ -193,8 +223,10 @@
     <TD>&nbsp;</TD>
     <TD>&nbsp;</TD>
     <TD>?</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
   </TR>
-  
+
   <TR>
     <TD><B>Yamaha cards (*ymf*)</B></TD>
     <TD>pas OK (?) (peut-être <CODE>-ao sdl</CODE>)</TD>
@@ -203,8 +235,10 @@
     <TD>&nbsp;</TD>
     <TD>&nbsp;</TD>
     <TD>?</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
   </TR>
-  
+
   <TR>
     <TD><B>Cartes avec chips envy24 (comme la Terratec EWS88MT)</B></TD>
     <TD>?</TD>
@@ -212,20 +246,27 @@
     <TD>OK</TD>
     <TD>&nbsp;</TD>
     <TD>?</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
   </TR>
 
   <TR>
     <TD><B>PC Speaker ou DAC</B></TD>
-    <TD>OK (Utilisez le pilote SDL: <CODE>-ao sdl</CODE>)</TD>
+    <TD>OK</TD>
     <TD>aucun</TD>
     <TD>&nbsp;</TD>
     <TD><A HREF="http://www.geocities.com/stssppnn/pcsp.html">Pilote PC speaker OSS Linux</a></TD>
     <TD>Ce pilote émule 44.1, peut-être plus.</TD>
+    <TD>mono</TD>
+    <TD>1</TD>
   </TR>
 
 </TABLE>
 
-<P>Les retour sur ce document sont les bienvenus. Merci de nous faire savoir comment 
+<P><A NAME="note1"><B>[1]</B></A>: nombre d'applications pouvant utiliser le périphérique
+  <I>en même temps</I>.</P>
+
+<P>Les retours sur ce document sont les bienvenus. Merci de nous faire savoir comment
   MPlayer et votre(vos) carte(s) son ont fonctionné ensemble.</P>
 
   

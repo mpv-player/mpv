@@ -16,24 +16,27 @@
 <H3><A NAME="video_codecs">2.2.1 Codecs vidéo</A></H3>
 
 <P>Voir la <A HREF="http://www.mplayerhq.hu/DOCS/codecs-status.html">table d'état des codecs</A>
-  pour une liste complète, générée quotidiennement.</P>
+  pour une liste complète, générée quotidiennement. Très peu de codecs sont disponibles
+  en téléchargement sur notre page web. Récupérez-les depuis notre
+  <A HREF="http://www.mplayerhq.hu/MPlayer/releases/codecs/">page des codecs</A>.</P>
 
-<P>Les plus importants par dessus tout:</P>
+<P>Les plus importants d'entre eux:</P>
 <UL>
-  <LI>vidéo MPEG1 (VCD) et MPEG2 (DVD)</LI>
+  <LI>vidéo <B>MPEG1</B> (<B>VCD</B>) et <B>MPEG2</B> (<B>DVD</B>)</LI>
   <LI>décodeurs natifs pour DivX ;-), OpenDivX, DivX4, DivX5,
     M$ MPEG4 v1, v2 et autres variantes MPEG4</LI>
-  <LI>décodeur natif pour Windows Media Video 7 (WMV1), et décodeur de DLL Win32 pour
-    Windows Media Video 8 (WMV2), utilisés tous les deux dans les fichiers .wmv</LI>
-  <LI><B>décodeur Sorenson (SVQ1) natif</B></LI>
-  <LI><B>décodeur Sorenson (SVQ3) Win32</B></LI>
-  <LI>décodeur 3ivx</LI>
-  <LI>codecs Cinepak et Intel Indeo (3.1, 3.2, 4.1, 5.0)</LI>
-  <LI>MJPEG, AVID, VCR2, ASV2 et autres formats matériels</LI>
-  <LI>VIVO 1.0, 2.0, I263 et autres variantes h263(+)</LI>
+  <LI>décodeur natif pour Windows Media Video <B>7/8</B> (<B>WMV1/WMV2</B>), et
+    décodeur de DLL Win32 pour <B>Windows Media Video 9</B> (<B>WMV3</B>), utilisés
+    tous les deux dans les fichiers .wmv</LI>
+  <LI><B>décodeur <B>Sorenson 1 (SVQ1)</B> natif</B></LI>
+  <LI><B>décodeur <B>Sorenson 3 (SVQ3)</B> Win32/QT</B></LI>
+  <LI>décodeur <B>3ivx</B> v1, v2</LI>
+  <LI>codecs Cinepak et <B>Intel Indeo</B> (3.1, 3.2, 4.1, 5.0)</LI>
+  <LI><B>MJPEG</B>, AVID, VCR2, ASV2 et autres formats matériels</LI>
+  <LI>VIVO 1.0, 2.0, I263 et autres variantes <B>h263</B>(+)</LI>
   <LI>FLI/FLC</LI>
-  <LI>codec RealVideo 1.0 de libavcodec, et codecs RealVideo 2.0, 3.0 et 4.0
-    en utilisant les librairies RealPlayer</LI>
+  <LI>codec <B>RealVideo 1.0</B> de libavcodec, et codecs <B>RealVideo 2.0</B>,
+    <B>3.0</B> et <B>4.0</B> en utilisant les librairies RealPlayer</LI>
   <LI>décodeur natif pour HuffYUV</LI>
   <LI>vieux et simples formats variés similaires à RLE</LI>
 </UL>
@@ -82,14 +85,14 @@
 <P><B>Note:</B> Si votre pilote <CODE>-vo</CODE> supporte le rendu direct, alors
   <CODE>-vc divx4</CODE> pourra être plus rapide voir même la solution la plus rapide.</P>
 
-<P>Ce codec peut être téléchargé depuis 
-  <A HREF="http://avifile.sourceforge.net">avifile.</A>
-  
+<P>Le codec binaire de Divx4/5 peut être téléchargé depuis
+  <A HREF="http://avifile.sourceforge.net">avifile.</A> ou
+  <A HREF="http://www.divx.com">divx.com</A>.
 <P>Désarchivez-le, lancez <CODE>./install.sh</CODE> en root et
   n'oubliez pas d'ajouter <CODE>/usr/local/lib</CODE> à votre
   <CODE>/etc/ld.so.conf</CODE> et de lancer <CODE>ldconfig</CODE>.</P>
 
-<P>Récupérez la version CVS de la librairie principale comme ceci:</P>
+<P>Récupérez la version CVS de l'ANCIENNE librairie principale OpenDivx comme ceci:</P>
 
 <OL>
   <LI><CODE>cvs -d:pserver:anonymous@cvs.projectmayo.com:/cvsroot login</CODE></LI>
@@ -100,8 +103,8 @@
     <PRE>
     cd divxcore/decore/build/linux
     make
-    cp libdivxdecore.so /usr/local/lib 
-    ln -s /usr/local/lib/libdivxdecore.so /usr/local/lib/libdivxdecore.so.0 
+    cp libdivxdecore.so /usr/local/lib
+    ln -s /usr/local/lib/libdivxdecore.so /usr/local/lib/libdivxdecore.so.0
     cp ../../src/decore.h /usr/local/include
     </PRE>
     </LI>
@@ -122,17 +125,17 @@
     </LI>
 </OL>
 
-<P>MPlayer détecte si DivX4/DivX5 est correctement installé, donc compilez le normalement. 
+<P>MPlayer détecte si DivX4/DivX5 est correctement installé, donc compilez le normalement.
   Si il ne détecte pas le codec, votre installation ou votre configuration n'est pas
   correcte.</P>
 
-  
+
 <H4><A NAME="libavcodec">2.2.1.2 DivX/libavcodec de FFmpeg</A></H4>
 
 <P><A HREF="http://ffmpeg.sourceforge.net">FFmpeg</A> contient un codec
   <B>open source</B>, qui est capable de décoder des flux encodés avec
-  des codecs vidéo H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1, ou audio
-  WMA (Windows Media Audio). Mais seuls quelques uns peuvent être encodés 
+  des codecs vidéo H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/HuffYUV,
+  ou audio WMA (Windows Media Audio). Mais seuls quelques-uns peuvent être encodés
   avec, mais il offre également une vitesse plus rapide que les codecs Win32
   ou que la librairie DivX4/5 de DivX.com!</P>
 
@@ -165,15 +168,17 @@
 
 <H4><A NAME="xanim">2.2.1.3 Codecs XAnim</A></H4>
 
-<P>Avant-propos:<BR>
+<H5>AVANT-PROPOS</H5>
+<P>
   Soyez prévenu que les codecs binaires XAnim sont packagées avec un un morceau
   de texte revendiquant être la licence liée au logiciel qui, entre autres
   restrictions, interdit à l'utilisateur d'utiliser les codecs en conjonction
   avec n'importe quel autre programme que XAnim. Cependant l'auteur de XAnim n'a
-  encore entrepris d'actions légales contre quiconque pour des problèmes relatifs aux 
+  encore entrepris d'actions légales contre quiconque pour des problèmes relatifs aux
   codecs.
 </P>
 
+<H5>INSTALLATIOB ET UTILISATION</H5>
 <P>MPlayer est capable d'employer les codecs XAnim pour décoder. Suivez
   les instructions pour les activer:</P>
 
@@ -181,9 +186,12 @@
   <LI>Téléchargez les codecs que vous désirez utiliser depuis le
     <A HREF="http://xanim.va.pubnix.com">site d'XAnim</A>. Le codec <B>3ivx</B>
     n'y est pas, il est sur le <A HREF="http://www.3ivx.com">site de 3ivx</A>.</LI>
+  <LI><B>OU</B> téléchargez le pack de codecs depuis notre
+    <A HREF="http://www.mplayerhq.hu/MPlayer/releases/codecs/">page des codecs</A>.
+    </LI>
   <LI>Utilisez l'option <CODE>--with-xanimlibdir</CODE> pour dire à configure où
     trouver les codecs XAnim. Par défaut, il les cherche dans
-    <CODE>/usr/local/lib/xanim/mods, /usr/lib/xanim/mods and /usr/lib/xanim</CODE>.
+    <CODE>/usr/local/lib/xanim/mods, /usr/lib/xanim/mods et /usr/lib/xanim</CODE>.
     Vous pouvez également fixer la variable d'environnement <I>XANIM_MOD_DIR</I> avec
     le répertoire des codecs XAnim.</LI>
   <LI>Renommez/faites des liens symboliques de ces fichiers, en séparant le reste
@@ -191,8 +199,8 @@
     <CODE>vid_cvid.xa, vid_h263.xa, vid_iv50.xa</CODE>.</LI>
 </OL>
 
-<P>XAnim sont des codecs de la famille numéro 10, donc vous pouvez utiliser l'option
-  <CODE>-vfm 10</CODE> pour dire à MPlayer de les utiliser si possible.</P>
+<P>XAnim sont des codecs de la famille <CODE>xanim</CODE>, donc vous pouvez utiliser
+  l'option <CODE>-vfm xanim</CODE> pour dire à MPlayer de les utiliser si possible.</P>
 
 <P>Les codecs testés incluent: <B>Indeo 3.2</B>, <B>4.1</B>, <B>5.0</B>, <B>CVID</B>,
   <B>3ivX</B>, <B>h263</B>.</P>
@@ -200,21 +208,22 @@
 
 <H4><A NAME="vivo_video">2.2.1.4 VIVO video</A></H4>
 
-<P>Mplayer peut lire les vidéos Vivo (1.0 et 2.0). Le codec le plus approprié pour les
-  fichiers 1.0 est le décodeur H263 de FFmpeg, vous pouvez l'utiliser l'option
+<P>MPlayer peut lire les vidéos Vivo (1.0 et 2.0). Le codec le plus approprié pour les
+  fichiers 1.0 est le décodeur H263 de FFmpeg, vous pouvez l'utiliser avec l'option
   <CODE>-vc ffh263</CODE> (par défaut). Pour les fichiers 2.0, utilisez le fichier DLL
-  Win32 <A HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/ivvideo.dll">ivvideo.dll</A>,
-  et installez-le sous <CODE>/usr/lib/win32</CODE> ou l'endroit où vous avez placés les
-  codecs Win32.</P>
+  Win32 par l'intermédiaire de l'option <CODE>-vc vivo</CODE>. Si vous ne fournissez
+  pas d'options en ligne de commande, MPlayer sélectionne le meilleur codec
+  automatiquement.</P>
 
 
 <H4><A NAME="mpeg">2.2.1.5 MPEG 1/2 video</A></H4>
 
 <P>MPEG1 et MPEG2 sont décodé par la librairie multiplateforme <B>libmpeg2</B>
   native, dont le code source est inclus dans MPlayer. Nous gérons la vidéo
-  MPEG 1/2 boguée en attrapant sig11 (segementation fault), et en réinitialisant
-  rapidement le codec, continuant ainsi exactement où l'erreur c'est produite.
-  Cette technique de récupération n'a pas d'influence mesurable sur la vitesse.</P>
+  MPEG 1/2 boguée en attrapant <CODE>signal 11(segmentation fault)</CODE>,
+  et en réinitialisant rapidement le codec, continuant ainsi exactement où
+  l'erreur c'est produite. Cette technique de récupération n'a pas d'influence
+  mesurable sur la vitesse.</P>
 
 
 <H4><A NAME="ms_video1">2.2.1.6 MS Video1</A></H4>
@@ -254,30 +263,32 @@ MPlayer décode toutes les versions de RealVideo:
 
 <H4><A NAME="xvid">2.2.1.9 XViD</A></H4>
 
-<P><B>XViD</B> est un fork du développement du codec OpenDivX. Il est apparu quand
-  ProjectMayo est passé d'OpenDivX au sources-fermées DivX4 (Maintenant DivX5), et 
-  les personnes extérieures à ProjectMayo travaillant sur OpenDivX se sont fâchés, 
-  et ont démarré XViD. Les deux projets ont donc la même origine.</P>
+<P><A HREF="http://www.xvid.org/"><B>XViD</B> est un fork du développement du codec
+  OpenDivX. Il est apparu quand ProjectMayo est passé d'OpenDivX au sources-fermées
+  DivX4 (Maintenant DivX5), et les personnes extérieures à ProjectMayo travaillant
+  sur OpenDivX se sont fâchés, et ont démarré XViD. Les deux projets ont donc la
+  même origine.</P>
 
-<H4>Avantages:</H4>
+<H5>AVANTAGES:</H5>
 
 <UL>
   <LI>open source</LI>
-  <LI>son API est compatible avec DivX4 donc en inclure le support
-    est facile</LI>
+  <LI>son API est compatible avec DivX4 donc en inclure le support est facile</LI>
   <LI>encodage en 2 passes</LI>
   <LI>bonne qualité d'encodage, plus grande vitesse que DivX4 (vous pouvez l'optimiser
     pour votre ordi pendant la compilation)</LI>
 </UL>
 
-<H4>Désavantages:</H4>
+<H5>DÉSAVANTAGES:</H5>
 
 <UL>
-  <LI>actuellement il ne <B>décode</B> pas correctement tous les fichiers DivX/DivX4 (pas un problème puisque libavcodec peut les jouer)</LI>
-  <LI>vous devez choisir DivX4 <B>ou</B> XViD à
-    la compilation</LI>
+  <LI>actuellement il ne <B>décode</B> pas correctement tous les fichiers DivX/DivX4
+  (pas un problème puisque <A HREF="#libavcodec">libavcodec</A> peut les jouer)</LI>
+  <LI>vous devez choisir DivX4 <B>ou</B> XViD à la compilation</LI>
   <LI>en développement</LI>
 </UL>
+
+<H5>INSTALLER LA VERSION CVS DE XVID</H5>
 
 <P>XViD n'est actuellement disponible que depuis le CVS. Voici les instructions
   de téléchargement et d'installation:</P>
@@ -291,7 +302,7 @@ MPlayer décode toutes les versions de RealVideo:
   <LI><CODE>make -f Makefile.linuxx86</CODE></LI>
   <LI>Copiez les fichiers d'entête <CODE>divx4.h</CODE> et <CODE>xvid.h</CODE> depuis
     <CODE>xvidcore/src/</CODE> dans <CODE>/usr/local/include/</CODE>.</LI>
-  <LI>Prenez <CODE>encore2.h</CODE> et <CODE>decore.h</CODE> depuis le paquetage 
+  <LI>Prenez <CODE>encore2.h</CODE> et <CODE>decore.h</CODE> depuis le paquetage
   DivX4Linux, et copiez-les dans <CODE>/usr/local/include/</CODE>.</LI>
   <LI>Recompilez MPlayer avec <CODE>--with-xvidcore=/chemin/de/libxvidcore.a</CODE>.</LI>
 </OL>
@@ -311,7 +322,8 @@ MPlayer décode toutes les versions de RealVideo:
     MPlayer, l'autre est dans libavcodec. Vous pouvez invoquer chacun d'eux avec les
     options <CODE>-vc svq1</CODE> et <CODE>-vc ffsvq1</CODE> respectivement.
     Certains fichiers peuvent fonctionner avec l'un, et pas avec l'autre, donc testez
-    les deux décodeurs.</LI>
+    les deux décodeurs. Le décodeur a été écrit (par reverse-engineering) par les
+    auteurs de <A HREF="http://www.xinehq.de">Xine</A>.</LI>
   <LI>Sorenson 3 (fourcc <I>SVQ3</I>) - décodage supporté par les <B>librairies
     QuickTime Win32</B></LI>
 </UL>
@@ -324,7 +336,7 @@ MPlayer décode toutes les versions de RealVideo:
   <LI>téléchargez le CVS de MPlayer</LI>
   <LI>compilez MPlayer avec:<BR>
    <CODE>$ ./configure --enable-qtx-codecs</CODE></LI>
-  <LI>téléchargez le pack de DLL QuickTime sur <A HREF="http://www.mplayerhq.hu/MPlayer/releases/codecs/">http://www.mplayerhq.hu/Mplayer/releases/codecs</A></LI>
+  <LI>téléchargez le pack de DLL QuickTime sur <A HREF="http://www.mplayerhq.hu/MPlayer/releases/codecs/">http://www.mplayerhq.hu/MPlayer/releases/codecs/</A></LI>
   <LI>décompressez le pack de DLL QuickTime dans votre répertoire de codecs Win32(par défaut:
     <CODE>/usr/lib/win32</CODE>)</LI>
 </OL>
@@ -464,7 +476,7 @@ MPlayer supporte le décodage de presque toutes les versions de RealAudio:
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>ftp://ftp.mplayerhq.hu/MPlayer/incoming/[nomcodec]/</CODE></P>
 
-<P><B>Note:</B> Sur Windows NT/2000/XP cherchez cette info dans la base de registre, 
+<P><B>Note:</B> Sur Windows NT/2000/XP cherchez cette info dans la base de registre,
   c-a-d cherchez "VIDC.HFYU". Pour savoir comment faire cela, regardez la l'ancienne méthode
   DirectShow ci-dessous.</P>
 
@@ -495,7 +507,7 @@ MPlayer supporte le décodage de presque toutes les versions de RealAudio:
 
 <P><B>Note:</B> Si il n'y a pas d'entrée <CODE>Filename</CODE> et que
   <CODE>DisplayName</CODE> contient quelque chose comme <CODE>device:dmo</CODE>,
-  alors c'est un codec DMO, qui n'est actuellement pas supporté par MPlayer.</P>
+  alors c'est un codec DMO.</P>
 
 <P><B>Ancienne Méthode:</B> Respirez à fond et fouillez dans la base de registre...</P>
 
