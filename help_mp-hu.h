@@ -87,7 +87,7 @@ static char help_text[]=
 #define MSGTR_CouldntInitAudioCodec "Nem tudom indítani az audio codecet! -> nincshang ;)\n"
 #define MSGTR_TryForceVideoFmt "Megpróbálom a(z) %d video codec-családot használni ...\n"
 #define MSGTR_CantFindVfmtFallback "A megadott video codec-családban nem találtam idevaló meghajtót, próbálkozok más meghajtóval.\n"
-#define MSGTR_CantFindVideoCodec "Nem találok codecet a(z) 0x%X video-formátumhoz !\n"
+#define MSGTR_CantFindVideoCodec "Nem találok codec-et ami megfelel a kivalasztott vo-hoz es 0x%X video-formátumhoz !\n"
 #define MSGTR_VOincompCodec "A kiválasztott video_out meghajtó inkompatibilis ezzel a codec-kel.\n"
 #define MSGTR_CouldntInitVideoCodec "VÉGZETES HIBA: Nem sikerült a video codecet elindítani :(\n"
 #define MSGTR_EncodeFileExists "A %s file már létezik (nehogy letöröld a kedvenc AVI-dat!)\n"
