@@ -588,6 +588,8 @@ int vo_x11_check_events(Display *mydisplay){
            ret|=VO_EVENT_EXPOSE;
            break;
       case ConfigureNotify:
+	   if (!vo_fs && (Event.xconfigure.width == vo_screenwidth || Event.xconfigure.height == vo_screenheight)) break;
+	   if (vo_fs && Event.xconfigure.width != vo_screenwidth && Event.xconfigure.height != vo_screenheight) break;
            vo_dwidth=Event.xconfigure.width;
            vo_dheight=Event.xconfigure.height;
 #if 0
@@ -755,6 +757,9 @@ void vo_x11_fullscreen( void )
  int x=0,y=0,w=vo_screenwidth,h=vo_screenheight;
 
  if ( WinID >= 0 ) return;
+
+ if ( !vo_fs && (vo_dwidth == vo_screenwidth || vo_dheight == vo_screenheight)) return;
+ if ( vo_fs && vo_dwidth != vo_screenwidth && vo_dheight != vo_screenheight) return;
 
  if ( vo_fs )
   { vo_fs=VO_FALSE; x=vo_old_x; y=vo_old_y; w=vo_old_width; h=vo_old_height; }
