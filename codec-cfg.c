@@ -447,13 +447,13 @@ codecs_t *parse_codec_cfg(char *cfgfile)
 				goto parse_error_out;
 			if (get_token(1, 1) < 0)
 				goto parse_error_out;
-			if (!strcasecmp(token[0], "rulz"))
+			if (!strcasecmp(token[0], ":-)"))
 				codec->status = CODECS_STATUS_WORKING;
-			else if (!strcasecmp(token[0], "suxx"))
+			else if (!strcasecmp(token[0], ":-("))
 				codec->status = CODECS_STATUS_NOT_WORKING;
-			else if (!strcasecmp(token[0], "checkthiz"))
+			else if (!strcasecmp(token[0], "X-("))
 				codec->status = CODECS_STATUS_UNTESTED;
-			else if (!strcasecmp(token[0], "notsogood"))
+			else if (!strcasecmp(token[0], ":-|"))
 				codec->status = CODECS_STATUS_PROBLEMS;
 			else
 				goto parse_error_out;
