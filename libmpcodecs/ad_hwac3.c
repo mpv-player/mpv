@@ -287,7 +287,7 @@ static int dts_decode_header(uint8_t *indata_ptr, int *rate, int *nblks, int *sf
     *nblks != 128 &&
     ftype == 1) 
   {
-    mp_msg(MSGT_DECAUDIO, MSGL_ERR, "DTS: nblks %d not valid for normal frame, REPORT BUG\n", nblks);
+    mp_msg(MSGT_DECAUDIO, MSGL_ERR, "DTS: nblks %d not valid for normal frame, REPORT BUG\n", *nblks);
     return -1;
   }
   
