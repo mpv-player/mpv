@@ -2412,7 +2412,7 @@ fi
 # mencoder requires (optional) those libs: libmp3lame and divx4linux encore
 if test "$_mencoder" != no ; then
 
-  echocheck "libmp3lame (required for mencoder)"
+  echocheck "libmp3lame (for mencoder)"
   _mp3lame=no
   cat > $TMPC <<EOF
 #include <lame/lame.h>
@@ -2428,7 +2428,7 @@ EOF
   fi
   echores "$_mp3lame"
 
-  echocheck "Divx4linux encore (required for mencoder)"
+  echocheck "Divx4linux encore (for mencoder)"
   _divx4linux_encore=no
   cat > $TMPC <<EOF
 #include <encore2.h>
@@ -2808,11 +2808,11 @@ $_def_dvdread
 $_def_decore
 
 /* Indicates if Divx4linux encore is available
-   Note: REQUIRED for mencoder */
+   Note: for mencoder */
 $_def_encore
 
 /* Indicates if libmp3lame is available
-   Note: REQUIRED for mencoder */
+   Note: for mencoder */
 $_def_mp3lame
 
 /* Define libmp1e */
