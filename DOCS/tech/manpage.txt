@@ -17,7 +17,7 @@ What belongs in the man page?
 -----------------------------
 
     - option descriptions (all)
-    - usage (options, config files, controls, slave mode)
+    - usage (options, config files, controls)
     - basic examples
 
 
@@ -145,8 +145,11 @@ General:
     - No line should contain more than 79 characters.
     - Used commands: .TH, .SH, .TP, .IP, .PP, .[R]B, .I, .br, .RS, .RE, .na,
                      .nh, .ad, .hy, macro definitions, comments and some more
-    - Don't forget the quotation marks around expressions, the backslash
-      before a '-' if it's needed, etc...
+    - Don't forget the quotation marks around expressions, etc...
+    - Each new sentence should start on a line of its own.
+    - Put a backslash before a '-' if it denotes a range (1\-10), an option
+      (\-fs) or a dash (mplayer  \- Movie Player for Linux).
+      Use just '-' if it is a hyphen (A-V) or a minus (-1).
 
 
 Option descriptions:
