@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <stdint.h>
+#include <inttypes.h>
 #include "../vidix.h"
 #include "../fourcc.h"
 #include "../../libdha/libdha.h"

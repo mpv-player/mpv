@@ -42,13 +42,7 @@
 #include <fcntl.h>
 #include <dlfcn.h>
 #include <math.h>
-
-#include "config.h"
-
-#ifdef HAVE_STDINT_H
-#include <stdint.h>
-#endif
-
+#include <inttypes.h>
 
 #include "divx4_vbr.h"
 

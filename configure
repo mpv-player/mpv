@@ -1113,20 +1113,20 @@ else
   _streaming=no
 fi
 
-
-echocheck "stdint.h"
+echocheck "inttypes.h (required)"
 cat > $TMPC << EOF
-#include <stdint.h>
+#include <inttypes.h>
 int main(void) { return 0; }
 EOF
-_stdint=no
-cc_check && _stdint=yes
-if test "$_stdint" = yes ; then
-  _def_stdint='#define HAVE_STDINT_H 1'
+_inttypes=no
+cc_check && _inttypes=yes
+if test "$_inttypes" = yes ; then
+  # nothing to do
+  :
 else
-  _def_stdint='#undef HAVE_STDINT_H'
+  die "cannot find header inttypes.h (see in DOC/faq.html)"
 fi
-echores "$_stdint"
+echores "$_inttypes"
 
 
 echocheck "malloc.h"
@@ -2894,9 +2894,6 @@ $_def_rtc
 
 /* Define this if your system has the header file for the OSS sound interface */
 $_def_sys_soundcard
-
-/* Define this if your system has the "stdint.h" header file */
-$_def_stdint
 
 /* Define this if your system has the "malloc.h" header file */
 $_def_malloc
