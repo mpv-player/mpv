@@ -2630,6 +2630,15 @@ if(step_sec>0) {
 #endif
 	video_out->control(VOCTRL_FULLSCREEN, 0);
     } break;
+    case MP_CMD_SUB_POS:
+    {
+        int v;
+	v = cmd->args[0].v.i;
+    
+	sub_pos+=v;
+	if(sub_pos >100) sub_pos=100;
+	if(sub_pos <0) sub_pos=0;
+    }	break;
     default : {
 #ifdef HAVE_NEW_GUI
       if ( ( use_gui )&&( cmd->id > MP_CMD_GUI_EVENTS ) ) guiGetEvent( guiIEvent,(char *)cmd->id );
