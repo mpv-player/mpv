@@ -104,11 +104,9 @@ void md5sum_write_error(void) {
 static uint32_t preinit(const char *arg)
 {
     opt_t subopts[] = {
-        {"outfile",     OPT_ARG_MSTRZ,    &md5sum_outfile,   NULL},
-        {NULL}
+        {"outfile",     OPT_ARG_MSTRZ,    &md5sum_outfile,   NULL, 0},
+        {NULL, 0, NULL, NULL, 0}
     };
-
-    char *buf;      /* buf is used to store parsed string values */
 
     mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
                                             MSGTR_VO_ParsingSuboptions);
@@ -204,7 +202,7 @@ static uint32_t draw_image(mp_image_t *mpi)
     uint32_t strideV = mpi->stride[2];
 
     auth_md5Ctx md5_context;
-    int i;
+    unsigned int i;
 
     if (mpi->flags & MP_IMGFLAG_PLANAR) { /* Planar */
         if (mpi->flags & MP_IMGFLAG_YUV) { /* Planar YUV */

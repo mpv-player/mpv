@@ -121,15 +121,15 @@ static uint32_t preinit(const char *arg)
     int ppm_type = 0, pgm_type = 0, pgmyuv_type = 0,
         raw_mode = 0, ascii_mode = 0;
     opt_t subopts[] = {
-        {"ppm",         OPT_ARG_BOOL,   &ppm_type,      NULL},
-        {"pgm",         OPT_ARG_BOOL,   &pgm_type,      NULL},
-        {"pgmyuv",      OPT_ARG_BOOL,   &pgmyuv_type,   NULL},
-        {"raw",         OPT_ARG_BOOL,   &raw_mode,      NULL},
-        {"ascii",       OPT_ARG_BOOL,   &ascii_mode,    NULL},
-        {"outdir",      OPT_ARG_MSTRZ,  &pnm_outdir,    NULL},
-        {"subdirs",     OPT_ARG_MSTRZ,  &pnm_subdirs,   NULL},
-        {"maxfiles",    OPT_ARG_INT,    &pnm_maxfiles,  (opt_test_f)int_pos},
-        {NULL}
+        {"ppm",         OPT_ARG_BOOL,   &ppm_type,      NULL, 0},
+        {"pgm",         OPT_ARG_BOOL,   &pgm_type,      NULL, 0},
+        {"pgmyuv",      OPT_ARG_BOOL,   &pgmyuv_type,   NULL, 0},
+        {"raw",         OPT_ARG_BOOL,   &raw_mode,      NULL, 0},
+        {"ascii",       OPT_ARG_BOOL,   &ascii_mode,    NULL, 0},
+        {"outdir",      OPT_ARG_MSTRZ,  &pnm_outdir,    NULL, 0},
+        {"subdirs",     OPT_ARG_MSTRZ,  &pnm_subdirs,   NULL, 0},
+        {"maxfiles",    OPT_ARG_INT,    &pnm_maxfiles,  (opt_test_f)int_pos, 0},
+        {NULL, 0, NULL, NULL, 0}
     };
     const char *info_message = NULL;
 
@@ -309,7 +309,7 @@ void pnm_write_pnm(FILE *outfile, mp_image_t *mpi)
     uint32_t strideU = mpi->stride[1];
     uint32_t strideV = mpi->stride[2];
 
-    int i, j;
+    unsigned int i, j;
 
     if (pnm_mode == PNM_RAW_MODE) {
 
@@ -433,7 +433,7 @@ void pnm_write_pnm(FILE *outfile, mp_image_t *mpi)
 
 void pnm_write_image(mp_image_t *mpi)
 {
-    static uint32_t framenum = 0, framecounter = 0, subdircounter = 0;
+    static int framenum = 0, framecounter = 0, subdircounter = 0;
     char buf[BUFLENGTH];
     static char subdirname[BUFLENGTH] = "";
     FILE *outfile;

@@ -219,7 +219,7 @@ static uint32_t jpeg_write(uint8_t * name, uint8_t * buffer)
 
 static uint32_t draw_frame(uint8_t *src[])
 {
-    static uint32_t framecounter = 0, subdircounter = 0;
+    static int framecounter = 0, subdircounter = 0;
     char buf[BUFLENGTH];
     static char subdirname[BUFLENGTH] = "";
 
@@ -316,18 +316,18 @@ static int int_zero_hundred(int *val)
 static uint32_t preinit(const char *arg)
 {
     opt_t subopts[] = {
-        {"progressive", OPT_ARG_BOOL,   &jpeg_progressive_mode, NULL},
-        {"baseline",    OPT_ARG_BOOL,   &jpeg_baseline,         NULL},
+        {"progressive", OPT_ARG_BOOL,   &jpeg_progressive_mode, NULL, 0},
+        {"baseline",    OPT_ARG_BOOL,   &jpeg_baseline,         NULL, 0},
         {"optimize",    OPT_ARG_INT,    &jpeg_optimize,
-                                                (opt_test_f)int_zero_hundred},
+                                            (opt_test_f)int_zero_hundred, 0},
         {"smooth",      OPT_ARG_INT,    &jpeg_smooth,
-                                                (opt_test_f)int_zero_hundred},
+                                            (opt_test_f)int_zero_hundred, 0},
         {"quality",     OPT_ARG_INT,    &jpeg_quality,
-                                                (opt_test_f)int_zero_hundred},
-        {"outdir",      OPT_ARG_MSTRZ,  &jpeg_outdir,           NULL},
-        {"subdirs",     OPT_ARG_MSTRZ,  &jpeg_subdirs,          NULL},
-        {"maxfiles",    OPT_ARG_INT,    &jpeg_maxfiles, (opt_test_f)int_pos},
-        {NULL}
+                                            (opt_test_f)int_zero_hundred, 0},
+        {"outdir",      OPT_ARG_MSTRZ,  &jpeg_outdir,           NULL, 0},
+        {"subdirs",     OPT_ARG_MSTRZ,  &jpeg_subdirs,          NULL, 0},
+        {"maxfiles",    OPT_ARG_INT,    &jpeg_maxfiles, (opt_test_f)int_pos, 0},
+        {NULL, 0, NULL, NULL, 0}
     };
     const char *info_message = NULL;
 
