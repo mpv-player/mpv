@@ -1594,6 +1594,9 @@ if(auto_quality>0){
     case '/': {
         float mixer_l, mixer_r;
         mixer_getvolume( &mixer_l,&mixer_r );
+	#ifdef HAVE_NEW_GUI
+	 if ( use_gui ) mplShMem->Volume=( mixer_l + mixer_r ) / 2;
+	#endif
         if(c=='*' || c=='0'){
             if ( ++mixer_l > 100 ) mixer_l = 100;
             if ( ++mixer_r > 100 ) mixer_r = 100;
