@@ -276,9 +276,10 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
  if ( depth != 15 && depth != 16 && depth != 24 && depth != 32 ) depth=24;
  XMatchVisualInfo( mDisplay,mScreen,depth,TrueColor,&vinfo );
 
- /* set image size, if zoom is on it will be changed during draw_slice anyway 
-    so we dont dupplicate the aspect code here */
- image_width=width;
+ /* set image size (which is indeed neither the input nor output size), 
+    if zoom is on it will be changed during draw_slice anyway so we dont dupplicate the aspect code here 
+ */
+ image_width=(width + 7) & (~7);
  image_height=height;
 
  aspect= ((1<<16)*d_width + d_height/2)/d_height;
@@ -292,8 +293,13 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
 
     hint.x=0;
     hint.y=0;
-    hint.width=image_width;
-    hint.height=image_height;
+    if(zoomFlag){
+	hint.width=d_width;
+	hint.height=d_height;
+    }else{
+	hint.width=width;
+	hint.height=height;
+    }
  
 #ifdef HAVE_XF86VM
     if ( vm )
@@ -395,7 +401,8 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
    	default:  draw_alpha_fnc=draw_alpha_null;
   }
 
-  swsContext= getSwsContextFromCmdLine(width, height, in_format, image_width, image_height, out_format );
+  /* no scaling here, it will be changed during draw_slice if -zoom is on so we dont dupplicate the code */
+  swsContext= getSwsContextFromCmdLine(width, height, in_format, width, height, out_format );
 
 //  printf( "X11 color mask:  R:%lX  G:%lX  B:%lX\n",myximage->red_mask,myximage->green_mask,myximage->blue_mask );
 
