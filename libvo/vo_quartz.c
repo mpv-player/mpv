@@ -87,6 +87,9 @@ static int device_width;
 static int device_height;
 static int device_id;
 
+static short fs_res_x=0;
+static short fs_res_y=0;
+
 static WindowRef theWindow = NULL;
 static WindowGroupRef winGroup = NULL;
 static CGContextRef context;
@@ -928,6 +931,13 @@ static uint32_t preinit(const char *arg)
 				parse_pos = &parse_pos[10];
                 device_id = strtol(parse_pos, &parse_pos, 0);
             }
+            if (strncmp (parse_pos, "fs_res=", 7) == 0)
+            {
+				parse_pos = &parse_pos[7];
+				fs_res_x = strtol(parse_pos, &parse_pos, 0);
+				parse_pos = &parse_pos[1];
+				fs_res_y = strtol(parse_pos, &parse_pos, 0);
+            }
             if (parse_pos[0] == ':') parse_pos = &parse_pos[1];
             else if (parse_pos[0]) parse_err = 1;
         }
@@ -1135,6 +1145,8 @@ void window_resized()
 
 void window_ontop()
 {
+	if(!vo_quartz_fs)
+	{
 	//Cycle between level
 	winLevel++;
 	if(winLevel>2)
@@ -1155,11 +1167,16 @@ void window_ontop()
 		}
 	}
 
+	}
 	SetWindowGroupLevel(winGroup, CGWindowLevelForKey(levelList[winLevel]));
 }
 
 void window_fullscreen()
 {
+	static Ptr restoreState = NULL;
+	RGBColor black={0,0,0};
+	GDHandle deviceHdl;
+
 	//go fullscreen
 	if(vo_fs)
 	{
@@ -1167,6 +1184,18 @@ void window_fullscreen()
 		{
 			HideMenuBar();
 			HideCursor();
+			
+			if(fs_res_x != 0 || fs_res_y != 0)
+			{
+				BeginFullScreen( &restoreState, NULL, &fs_res_x, &fs_res_y, NULL, &black, NULL);
+				
+				//Get Main device info///////////////////////////////////////////////////
+				deviceHdl = GetMainDevice();
+				deviceRect = (*deviceHdl)->gdRect;
+        
+				device_width = deviceRect.right;
+				device_height = deviceRect.bottom;
+			}
 		}
 
 		//save old window size
@@ -1183,6 +1212,18 @@ void window_fullscreen()
 	}
 	else //go back to windowed mode
 	{
+		if(restoreState != NULL)
+		{
+			EndFullScreen(restoreState, NULL);
+		
+			//Get Main device info///////////////////////////////////////////////////
+			deviceHdl = GetMainDevice();
+			deviceRect = (*deviceHdl)->gdRect;
+        
+			device_width = deviceRect.right;
+			device_height = deviceRect.bottom;
+			restoreState = NULL;
+		}
 		ShowMenuBar();
 
 		//show mouse cursor
