@@ -6,6 +6,7 @@ typedef struct {
 } raw_file;
 
 typedef struct {
+    char *name;
     int spacewidth;
     int charspace;
     int height;

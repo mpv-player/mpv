@@ -41,6 +41,7 @@ char section[64];
 int i,j;
 int chardb=0;
 int fontdb=-1;
+int version=0;
 
 desc=malloc(sizeof(font_desc_t));if(!desc) return NULL;
 memset(desc,0,sizeof(font_desc_t));
@@ -122,6 +123,14 @@ while(fgets(sor,1020,f)){
   } else
 
   if(strcmp(section,"[info]")==0){
+      if(pdb==2 && strcmp(p[0],"name")==0){
+          desc->name=strdup(p[1]);
+          continue;
+      }
+      if(pdb==2 && strcmp(p[0],"descversion")==0){
+          version=atoi(p[1]);
+          continue;
+      }
       if(pdb==2 && strcmp(p[0],"spacewidth")==0){
           desc->spacewidth=atoi(p[1]);
           continue;
@@ -135,6 +144,7 @@ while(fgets(sor,1020,f)){
           continue;
       }
   } else
+
   if(strcmp(section,"[characters]")==0){
       if(pdb==3 && strlen(p[0])==1){
           int chr=p[0][0];
