@@ -163,6 +163,7 @@ params:
 	--disable-select        disable audio select() support ( for example required this
 	                        option ALSA or Vortex2 driver )
 
+	--disable-win32         disable Win32 DLL support
 	--disable-dshow         disable DirectShow support (if you don't have
                                 C++ compiler&libs, or you've found dshow codecs
                                 slower than old VfW ones)
@@ -456,8 +457,8 @@ _fbdev=no
 [ "$system_name" = Linux ] && _fbdev=yes
 _lirc=no
 _css=no
-_dshow=yes
-[ "$host_arch" != i386 ] && _dshow=no
+_win32dll=yes _dshow=yes
+[ "$host_arch" != i386 ] && _dshow=no _win32dll=no
 _fastmemcpy=yes
 _streaming=no
 _libavcodec=no
@@ -510,7 +511,7 @@ done
 
 
 _win32libdirnotify=no
-if [ "$host_arch" = i386 ]; then
+if [ $_win32dll = yes ]; then
     if [ -d /usr/lib/win32 ]; then
 	_win32libdir=/usr/lib/win32
     elif [ -d /usr/local/lib/win32 ]; then
@@ -1169,6 +1170,10 @@ for ac_option do
   --disable-select)
         _select='#undef HAVE_AUDIO_SELECT'
 	;;
+  --disable-win32)
+        _win32dll=no
+        _dshow=no # no dshow without win32dlls
+	;;
   --disable-dshow)
         _dshow=no
 	;;
@@ -1408,6 +1413,7 @@ echo "Checking for ESD Audio ... $_esd"
 echo "Checking for Sun Audio ... $_sun_audio"
 echo "Checking for DeCSS support ... $_css"
 echo "Checking for PNG support ... $_png"
+echo "Checking for Win32 DLL support ... $_win32dll"
 echo "Checking for DirectShow ... $_dshow"
 echo "Checking for libavcodec ... $_libavcodec"
 echo "Checking for divx4linux ... $_divx4linux"
@@ -1454,15 +1460,24 @@ else
    _cssinc=''
 fi
 
-if [ $_dshow = yes ]; then
-   _dshowlib='-Lloader/DirectShow -lDS_Filter -lstdc++'
-   _dshowdep='loader/DirectShow/libDS_Filter.a'
-   _dshow='#define USE_DIRECTSHOW'
+
+
+if [ $_win32dll = yes ]; then
+    _win32dll='#define USE_WIN32DLL 1'
+    _win32lib='-Lloader -lloader'
+    _win32dep='loader/libloader.a'
+    if [ $_dshow = yes ]; then
+	_dshow='#define USE_DIRECTSHOW'
+	_dshowlib='-Lloader/DirectShow -lDS_Filter -lstdc++'
+	_dshowdep='loader/DirectShow/libDS_Filter.a'
+    else
+	_dshow='#undef USE_DIRECTSHOW' _dshowlib='' _dshowdep=''
+    fi
 else
-   _dshowlib=''
-   _dshowdep=''
-   _dshow='#undef USE_DIRECTSHOW'
+    _win32dll='#undef USE_WIN32DLL' _win32lib='' _win32dep=''
+    _dshow='#undef USE_DIRECTSHOW' _dshowlib='' _dshowdep=''
 fi
+
 
 if [ $_libavcodec = yes ]; then
    _lavclib='-Llibavcodec -lavcodec'
@@ -1844,6 +1859,8 @@ LIRC_LIBS = $_lirclibs
 CSS_LIB = $_csslib
 CSS_INC = $_cssinc
 SDL_INC = $_sdlcflags
+W32_DEP = $_win32dep
+W32_LIB = $_win32lib
 DS_DEP = $_dshowdep
 DS_LIB = $_dshowlib
 AV_DEP = $_lavcdep
@@ -1948,6 +1965,9 @@ $_css
 
 /* Define this to enable MPEG 1/2 image postprocessing (requires FAST cpu!) */
 #define MPEG12_POSTPROC
+
+/* Win32 DLL support */
+$_win32dll
 
 /* DirectShow support */
 $_dshow

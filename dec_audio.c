@@ -78,8 +78,8 @@ sh_audio->audio_out_minsize=8192;// default size, maybe not enough for Win32/ACM
 
 switch(driver){
 case AFM_ACM:
-#ifndef	ARCH_X86
-  printf("Win32/ACM audio codec unavailable on non-x86 CPU -> force nosound :(\n");
+#ifndef	USE_WIN32DLL
+  printf("Win32/ACM audio codec disabled, or unavailable on non-x86 CPU -> force nosound :(\n");
   driver=0;
 #else
   // Win32 ACM audio codec:
@@ -157,7 +157,7 @@ memset(sh_audio->a_buffer,0,sh_audio->a_buffer_size);
 sh_audio->a_buffer_len=0;
 
 switch(driver){
-#ifdef ARCH_X86
+#ifdef USE_WIN32DLL
 case AFM_ACM: {
     int ret=acm_decode_audio(sh_audio,sh_audio->a_buffer,4096,sh_audio->a_buffer_size);
     if(ret<0){
@@ -332,7 +332,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
         }
         //printf("{3:%d}",avi_header.idx_pos);fflush(stdout);
         break;
-#ifdef ARCH_X86
+#ifdef USE_WIN32DLL
       case AFM_ACM:
 //        len=sh_audio->audio_out_minsize; // optimal decoded fragment size
 //        if(len<minlen) len=minlen; else

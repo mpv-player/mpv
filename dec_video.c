@@ -104,14 +104,12 @@ int get_video_quality_max(sh_video_t *sh_video){
 
 void set_video_quality(sh_video_t *sh_video,int quality){
  switch(sh_video->codec->driver){
-#ifdef ARCH_X86
 #ifdef USE_DIRECTSHOW
   case VFM_DSHOW: {
    if(quality<0 || quality>4) quality=4;
    DS_SetValue_DivX("Quality",quality);
   }
   break;
-#endif
 #endif
 #ifdef MPEG12_POSTPROC
   case VFM_MPEG: {
@@ -147,7 +145,7 @@ unsigned int out_fmt=sh_video->codec->outfmt[sh_video->outfmtidx];
 sh_video->our_out_buffer=NULL;
 
 switch(sh_video->codec->driver){
-#ifdef ARCH_X86
+#ifdef USE_WIN32DLL
  case VFM_VFW: {
    if(!init_video_codec(sh_video,0)) {
 //     GUI_MSG( mplUnknowError )
@@ -213,13 +211,13 @@ switch(sh_video->codec->driver){
    break;
 #endif
  }
-#else	/* !ARCH_X86 */
+#else	/* !USE_WIN32DLL */
  case VFM_VFW:
  case VFM_DSHOW:
  case VFM_VFWEX:
-   fprintf(stderr,"MPlayer does not support win32 codecs on non-x86 platforms!\n");
+   fprintf(stderr,"Support for win32 codecs disabled, or unavailable on non-x86 platforms!\n");
    return 0;
-#endif	/* !ARCH_X86 */
+#endif	/* !USE_WIN32DLL */
  case VFM_ODIVX: {  // OpenDivX
    if(verbose) printf("OpenDivX video codec\n");
    { DEC_PARAM dec_param;
@@ -465,7 +463,7 @@ if(verbose>1){
     break;
   }
 #endif
-#ifdef ARCH_X86
+#ifdef USE_WIN32DLL
   case VFM_VFWEX:
   case VFM_VFW:
   {

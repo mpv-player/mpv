@@ -24,15 +24,12 @@ VO_LIBS = -Llibvo -lvo $(X_LIBS)
 
 PARTS = mp3lib libac3 libmpeg2 opendivx libavcodec encore libvo libao2 drivers drivers/syncfb
 
-ifeq ($(TARGET_ARCH_X86),yes)
+ifneq ($(W32_LIB),)
 PARTS += loader loader/DirectShow
 SRCS += dll_init.c
-LOADER_DEP = loader/libloader.a $(DS_DEP)
-LIB_LOADER = -Lloader -lloader $(DS_LIB)
-else
-LOADER_DEP =
-LIB_LOADER =
 endif
+LOADER_DEP = $(W32_DEP) $(DS_DEP)
+LIB_LOADER = $(W32_LIB) $(DS_LIB)
 
 
 .SUFFIXES: .c .o
