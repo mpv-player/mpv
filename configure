@@ -6,6 +6,9 @@
 #
 # Changes in reversed order:
 #
+# 2001/06/04 by Nick Kurshev
+# - added hard checking of gcc and soft of assembler
+#
 # 2001/05/40 by LGB
 #  - added --prefix support
 #
@@ -188,6 +191,20 @@ do
  esac
 done
 
+# Checking CC version...
+echo "checking version of $CC""... $_cc"
+cc_version=`$_cc -v 2>&1 | sed -n 's/^.*version \([aegcygnustp-]*[0-9.]*\).*$/\1/p'`
+case $cc_version in
+    '') cc_version="v. ?.??, bad"; cc_verc_fail=yes;;
+    2.95.[2-9]|3.[0-9])
+       cc_version="$cc_version, ok";;
+    *) cc_version="$cc_version, bad"; cc_verc_fail=yes;;
+esac
+echo "$cc_version"
+if ! test -z "$cc_verc_fail"; then
+echo "Please downgrade(upgrade) gcc compiler to gcc-2.95.2+ or gcc-3.0+ version"
+exit
+fi
 # ---
 
 pname=`cat /proc/cpuinfo | grep 'model name' | cut -d ':' -f 2`
@@ -730,6 +747,41 @@ do
  esac
 done
 
+# Checking as compatibility...
+if [ $_mmx = 'yes' ]; then
+cat > astest.S <<EOF
+emms
+EOF
+as astest.S -o astest.o &> /dev/null || as_verc_fail=yes
+fi
+if [ $_3dnow = 'yes' ]; then
+cat >> astest.S <<EOF
+femms
+EOF
+as astest.S -o astest.o &> /dev/null || as_verc_fail=yes
+fi
+if [ $_mmx2 = 'yes' ]; then
+cat >> astest.S <<EOF
+movntq	%mm0, (%eax)
+EOF
+as astest.S -o astest.o &> /dev/null || as_verc_fail=yes
+fi
+if [ $_sse = 'yes' ]; then
+cat >> astest.S <<EOF
+xorps %xmm0, %xmm0
+EOF
+as astest.S -o astest.o &> /dev/null || as_verc_fail=yes
+rm -f astest.S astest.o
+fi
+if test -z "$as_verc_fail"; then
+echo "checking assembler...o'k"
+fi
+if ! test -z "$as_verc_fail"; then
+echo "Please upgrade binutils..."
+exit
+fi
+
+
 if [ $_x11 = 'yes' ]; then
  if [ $_mga = 'yes' ]; then
   _xmga=yes
@@ -739,10 +791,7 @@ fi
 # to screen.
 echo -n "Kernel: "
 uname -a
-echo "Using C compiler: $_cc"
 echo "Install prefix: $_prefix"
-$_cc -v
-as --version | head -n 1
 echo "Checking for cpu vendor ... $pvendor ( $pfamily:$pmodel:$pstepping )"
 echo "Checking for cpu type ... $pname"
 echo "Optimizing to ... $proc"
