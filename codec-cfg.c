@@ -37,7 +37,6 @@ static int add_to_fourcc(char *s, char *alias, unsigned int *fourcc,
 		unsigned int *map)
 {
 	int i, j, freeslots;
-	char *aliasp;
 	unsigned int tmp;
 
 	/* find first unused slot */
@@ -47,14 +46,13 @@ static int add_to_fourcc(char *s, char *alias, unsigned int *fourcc,
 	if (!freeslots)
 		goto err_out_too_many;
 
-	aliasp = (alias) ? alias : s;
 	do {
 		tmp = mmioFOURCC(s[0], s[1], s[2], s[3]);
 		for (j = 0; j < i; j++)
 			if (tmp == fourcc[j])
 				goto err_out_duplicated;
 		fourcc[i] = tmp;
-		map[i] = mmioFOURCC(aliasp[0], aliasp[1], aliasp[2], aliasp[3]);
+		map[i] = alias ? mmioFOURCC(alias[0], alias[1], alias[2], alias[3]) : tmp;
 		s += 4;
 		i++;
 	} while ((*(s++) == ',') && --freeslots);
