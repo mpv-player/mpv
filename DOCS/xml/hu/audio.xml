@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.20 -->
+<!-- synced with 1.21 -->
 <sect1 id="audio">
 <title>Audió kimeneti eszközök</title>
 <sect2 id="sync">
@@ -65,8 +65,8 @@ nem gondoskodnak ezen tulajdonság kódolásáról, mivel nem szükséges az MP3-ak
 </para>
 
 <para>
-Más média lejátszók, mint pl. az <ulink url="http://avifile.sourceforge.net">aviplay</ulink>
-vagy a <ulink url="http://xine.sourceforge.net">xine</ulink> valószínűleg
+Más média lejátszók, mint pl. az <ulink url="http://avifile.sf.net">aviplay</ulink>
+vagy a <ulink url="http://xinehq.de">xine</ulink> valószínűleg
 kapásból működnek ezekkel a vezérlőkkel, mert egy "egyszerű" módszert
 használnak belső időzítéssel. A mérések azt mutatják, hogy az ő
 módszereik nem olyan hatékonyak, mint az <application>MPlayer</application>é.
@@ -173,7 +173,7 @@ Ráadásul elérhetőek számos nem-Linux rendszeren is.
   <row>
     <entry>VIA alaplapi (686/A/B, 8233, 8235)</entry>
     <entry>
-      <ulink url="http://sourceforge.net/project/showfiles.php?group_id=3242&amp;release_id=59602">via82cxxx_audio</ulink>
+      <ulink url="http://sf.net/project/showfiles.php?group_id=3242&amp;release_id=59602">via82cxxx_audio</ulink>
     </entry>
     <entry>snd-via82xx</entry>
     <entry></entry>
@@ -189,7 +189,7 @@ Ráadásul elérhetőek számos nem-Linux rendszeren is.
     <entry>nincs</entry>
     <entry>OK</entry>
     <entry>
-      <ulink url="http://aureal.sourceforge.net">Linux Aureal vezérlők</ulink>
+      <ulink url="http://aureal.sf.net">Linux Aureal vezérlők</ulink>
       <ulink url="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">32k-ra növelt buffer méret</ulink>
     </entry>
     <entry>48</entry>
