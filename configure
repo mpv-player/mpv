@@ -105,7 +105,7 @@ case `echo -n` in
   *)	_echo_n='-n '	_echo_c=	;;	# BSD echo
 esac
 
-LANGUAGES=`echo help/help_mp-??.h help/help_mp-??_??.h | sed "s/help_mp-\(..\).h/\1/g" |sed "s/help_mp-\(.....\).h/\1/g"`
+LANGUAGES=`echo help/help_mp-??.h help/help_mp-??_??.h | sed "s/help\/help_mp-\(..\).h/\1/g" |sed "s/help\/help_mp-\(.....\).h/\1/g"`
 
 for parm in "$@" ; do
   if test "$parm" = "--help" || test "$parm" = "-help" || test "$parm" = "-h" ; then
@@ -150,7 +150,7 @@ Optional features:
   --disable-mpdvdkit     Disable mpdvdkit/mpdvdkit2 support [autodetect]
   --disable-css          Disable old-style libcss DVD support [autodetect]
   --disable-cdparanoia   Disable cdparanoia support [autodetect]
-  --enable-freetype      Enable freetype2 font rendering support [disabled]
+  --disable-freetype     Disable freetype2 font rendering support [autodetect]
   --disable-unrarlib     Disable Unique RAR File Library [enabled]
   --disable-new-conf     Disable new experimental config parser code [enabled]
   --enable-menu          Enable osd menu support (need new config) [disabled]
@@ -1034,7 +1034,7 @@ _sighandler=yes
 _libdv=auto
 _cdparanoia=auto
 _big_endian=auto
-_freetype=no
+_freetype=auto
 _shared_pp=no
 _new_conf=yes
 _menu=no
@@ -3567,7 +3567,7 @@ fi
 echores "$_cdparanoia"
 
 echocheck "freetype >= 2.0.9"
-if test "$_freetype" = yes ; then
+if test "$_freetype" = auto ; then
     test -z "$_freetypeconfig" && _freetypeconfig='freetype-config'
     if ( $_freetypeconfig --version ) >/dev/null 2>&1 ; then
 	cat > $TMPC << EOF
