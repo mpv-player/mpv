@@ -749,8 +749,6 @@ current_module = NULL;
   signal(SIGABRT,exit_sighandler); // abort()
 #endif
 
-// ******************* Now, let's see the per-file stuff ********************
-
 #ifdef HAVE_NEW_GUI
   if(use_gui){
        guiInit( argc,argv,envp );
@@ -759,16 +757,22 @@ current_module = NULL;
   }
 #endif
 
+// ******************* Now, let's see the per-file stuff ********************
+
 play_next_file:
 
 // We must enable getch2 here to be able to interrupt network connection
 // or cache filling
 if(!use_stdin && !slave_mode){
-  getch2_enable();  // prepare stdin for hotkeys...
+  if(inited_flags&INITED_GETCH2)
+    mp_msg(MSGT_CPLAYER,MSGL_WARN,"WARNING: getch2_init called twice!\n");
+  else
+    getch2_enable();  // prepare stdin for hotkeys...
   inited_flags|=INITED_GETCH2;
   mp_msg(MSGT_CPLAYER,MSGL_DBG2,"\n[[[init getch2]]]\n");
 }
 
+// =================== GUI idle loop (STOP state) ===========================
 #ifdef HAVE_NEW_GUI
     if ( use_gui ) {
 
@@ -778,7 +782,7 @@ if(!use_stdin && !slave_mode){
 #ifdef HAVE_NEW_INPUT
         mp_cmd_t* cmd;                                                                                   
 #endif
-	usleep(20000);
+	usleep(40000);
 	guiEventHandling();
 #ifdef HAVE_NEW_INPUT
 	if ( (cmd = mp_input_get_cmd(0,0)) != NULL) guiGetEvent( guiIEvent,(char *)cmd->id );
@@ -829,8 +833,11 @@ if(!use_stdin && !slave_mode){
        } 
     }
 #endif
+//---------------------------------------------------------------------------
 
     if(filename) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_Playing, filename);
+
+//==================== Open VOB-Sub ============================
 
     current_module="vobsub";
     if (vobsub_name){
@@ -848,12 +855,7 @@ if(!use_stdin && !slave_mode){
     if(vo_vobsub)
       sub_auto=0; // don't do autosub for textsubs if vobsub found
 
-    stream=NULL;
-    demuxer=NULL;
-    d_audio=NULL;
-    d_video=NULL;
-    sh_audio=NULL;
-    sh_video=NULL;
+//==================== Init Video Out ============================
     
 // check video_out driver name:
     if (video_driver)
@@ -884,6 +886,9 @@ if(!use_stdin && !slave_mode){
     mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_InvalidVOdriver,video_driver?video_driver:"?");
     exit_player(MSGTR_Exit_error);
   }
+
+//==================== Init Audio Out ============================
+
 // check audio_out driver name:
     if (audio_driver)
 	if ((i = strcspn(audio_driver, ":")) > 0)
@@ -925,6 +930,13 @@ if(!use_stdin && !slave_mode){
   }
 
 //============ Open & Sync STREAM --- fork cache2 ====================
+
+  stream=NULL;
+  demuxer=NULL;
+  d_audio=NULL;
+  d_video=NULL;
+  sh_audio=NULL;
+  sh_video=NULL;
 
   current_module="open_stream";
   stream=open_stream(filename,vcd_track,&file_format);
@@ -2929,7 +2941,7 @@ if(benchmark){
 	   100.0*audio_time_usage/total_time_usage,
 	   100.0*(total_time_usage-tot)/total_time_usage,
 	   100.0);
-  if(total_frame_cnt)
+  if(total_frame_cnt && frame_dropping)
     mp_msg(MSGT_CPLAYER,MSGL_INFO,"BENCHMARKn: disp: %d (%3.2f fps)  drop: %d (%d%%)  total: %d (%3.2f fps)\n",
 	total_frame_cnt-drop_frame_cnt,
 	(total_time_usage>0.5)?((total_frame_cnt-drop_frame_cnt)/total_time_usage):0,
@@ -2940,12 +2952,12 @@ if(benchmark){
   
 }
 
-uninit_player(INITED_VO|INITED_AO);
+// time to uninit all, except global stuff:
+uninit_player(INITED_ALL-(INITED_GUI+INITED_LIRC+INITED_INPUT));
 
 if(eof == PT_NEXT_ENTRY || eof == PT_PREV_ENTRY) {
   eof = eof == PT_NEXT_ENTRY ? 1 : -1;
   if(play_tree_iter_step(playtree_iter,eof,0) == PLAY_TREE_ITER_ENTRY) {
-    uninit_player(INITED_ALL-(INITED_GUI+INITED_LIRC+INITED_INPUT));
     eof = 1;
   } else {
     play_tree_iter_free(playtree_iter);
@@ -2954,14 +2966,12 @@ if(eof == PT_NEXT_ENTRY || eof == PT_PREV_ENTRY) {
 } else if (eof == PT_UP_NEXT || eof == PT_UP_PREV) {
   eof = eof == PT_UP_NEXT ? 1 : -1;
   if(play_tree_iter_up_step(playtree_iter,eof,0) == PLAY_TREE_ITER_ENTRY) {
-    uninit_player(INITED_ALL-(INITED_GUI+INITED_LIRC+INITED_INPUT));
     eof = 1;
   } else {
     play_tree_iter_free(playtree_iter);
     playtree_iter = NULL;
   }
 } else { // NEXT PREV SRC
-     uninit_player(INITED_ALL-(INITED_GUI+INITED_LIRC+INITED_INPUT));
      eof = eof == PT_PREV_SRC ? -1 : 1;
 }
 
@@ -2989,9 +2999,10 @@ while(playtree_iter != NULL) {
 #endif
 
 if(use_gui || playtree_iter != NULL
-#if defined( HAVE_NEW_GUI ) && defined( USE_DVDREAD )
- || ( guiIntfStruct.DVDChanged && use_gui )
-#endif 
+// once use_gui is set, this won't be reached -> useless: --A'rpi
+//#if defined( HAVE_NEW_GUI ) && defined( USE_DVDREAD )
+// || ( guiIntfStruct.DVDChanged && use_gui )
+//#endif 
 ){
 
   current_module="uninit_acodec";
