@@ -37,7 +37,6 @@
 		Y42T, V422, V655, CLJR, YUVP, UYVP, Mpeg PES (mpeg-1,2) support
   ...........................................................
   BUGS and LACKS:
-    Wrong aspect of scaling if image_height < 200 && screen_height == 200
     Color and video keys don't work
     Contrast and brightness are unconfigurable on radeons
 */
@@ -327,6 +326,12 @@ static uint32_t radeon_vid_get_dbpp( void )
   return retval;
 }
 
+static int radeon_is_dbl_scan( void )
+{
+  return (INREG(CRTC_GEN_CNTL))&CRTC_DBL_SCAN_EN;
+}
+
+
 static void __init radeon_vid_save_state( void )
 {
   size_t i;
@@ -471,12 +476,6 @@ void radeon_vid_set_color_key(int ckey_on, uint8_t R, uint8_t G, uint8_t B)
 #define XXX_SRC_X   0
 #define XXX_SRC_Y   0
 
-#define XXX_WIDTH   config->src_width
-#define XXX_HEIGHT  config->src_height
-
-#define XXX_DRW_W   config->dest_width
-#define XXX_DRW_H   config->dest_height
-
 static int radeon_vid_init_video( mga_vid_config_t *config )
 {
     uint32_t tmp,src_w,src_h,pitch,h_inc,step_by,left,leftUV,top;
@@ -497,6 +496,8 @@ RTRACE(RVID_MSG"usr_config: version = %x format=%x card=%x ram=%u src(%ux%u) des
     radeon_vid_stop_video();
     left = XXX_SRC_X << 16;
     top = XXX_SRC_Y << 16;
+/* FIXME !!! interlace? */
+    if(radeon_is_dbl_scan()) config->dest_height *= 2;
     src_h = config->src_height;
     src_w = config->src_width;
     switch(config->format)
@@ -553,8 +554,8 @@ RTRACE(RVID_MSG"usr_config: version = %x format=%x card=%x ram=%u src(%ux%u) des
     
     besr.dest_bpp = radeon_vid_get_dbpp();
     besr.fourcc = config->format;
-    besr.v_inc = (src_h << 20) / XXX_DRW_H;
-    h_inc = (src_w << 12) / XXX_DRW_W;
+    besr.v_inc = (src_h << 20) / config->dest_height;
+    h_inc = (src_w << 12) / config->dest_width;
     step_by = 1;
 
     while(h_inc >= (2 << 12)) {
