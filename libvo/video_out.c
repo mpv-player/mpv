@@ -59,7 +59,7 @@ int vo_pts=0; // for hw decoding
 float vo_fps=0; // for mp1e rte
 
 char *vo_subdevice = NULL;
-int vaa_use_dr=1;
+int vo_directrendering=1;
 /****************************************
 *	GAMMA CORRECTION		*
 ****************************************/

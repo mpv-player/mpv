@@ -148,7 +148,7 @@ int init_video(sh_video_t *sh_video,char* codecname,int vfm,int status){
     return 0;
 }
 
-extern int vaa_use_dr;
+extern int vo_directrendering;
 
 int decode_video(vo_functions_t *video_out,sh_video_t *sh_video,unsigned char *start,int in_size,int drop_frame){
 mp_image_t *mpi=NULL;

@@ -88,7 +88,7 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 };
 
 #include "libvo/video_out.h"
-extern int vaa_use_dr;
+extern int vo_directrendering;
 
 // libvo opts:
 int fullscreen=0;
@@ -286,7 +286,7 @@ mp_image_t* mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag, i
 
 	// check libvo first!
 	vo_functions_t* vo=sh->video_out;
-	if(vo && vaa_use_dr) vo->control(VOCTRL_GET_IMAGE,mpi);
+	if(vo && vo_directrendering) vo->control(VOCTRL_GET_IMAGE,mpi);
 	
         if(!(mpi->flags&MP_IMGFLAG_DIRECT)){
           // non-direct and not yet allocaed image. allocate it!

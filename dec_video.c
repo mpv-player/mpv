@@ -802,7 +802,7 @@ if ((sh_video->codec->driver == VFM_QTRLE) && (sh_video->bih->biBitCount != 24))
   return 1;
 }
 
-extern int vaa_use_dr;
+extern int vo_directrendering;
 
 static int use_dr=0,use_dr_422=0;
 static bes_da_t bda;
@@ -813,7 +813,7 @@ void init_video_vaa( unsigned width )
   memset(&bda,0,sizeof(bes_da_t));
   if(vo_vaa.query_bes_da)
     use_dr = vo_vaa.query_bes_da(&bda) ? 0 : 1;
-  if(!vaa_use_dr) use_dr = 0;
+  if(!vo_directrendering) use_dr = 0;
   if(use_dr)
   {
     uint32_t sstride,dstride;

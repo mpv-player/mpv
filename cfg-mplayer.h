@@ -35,7 +35,6 @@ extern int fakemono; // defined in dec_audio.c
 extern char *lirc_configfile;
 #endif
 
-#ifndef USE_LIBVO2
 extern int vo_doublebuffering;
 extern int vo_vsync;
 extern int vo_fsmode;
@@ -48,8 +47,7 @@ extern int vo_gamma_hue;
 extern int vo_gamma_red_intensity;
 extern int vo_gamma_green_intensity;
 extern int vo_gamma_blue_intensity;
-extern int vaa_use_dr;
-#endif
+extern int vo_directrendering;
 
 #ifdef USE_SUB
 extern int sub_unicode;
@@ -253,7 +251,6 @@ static config_t mplayer_opts[]={
         {"flip", &flip, CONF_TYPE_FLAG, 0, -1, 1, NULL},
         {"noflip", &flip, CONF_TYPE_FLAG, 0, -1, 0, NULL},
        
-#ifndef USE_LIBVO2
         {"bpp", &vo_dbpp, CONF_TYPE_INT, CONF_RANGE, 0, 32, NULL},
 	{"fsmode", &vo_fsmode, CONF_TYPE_INT, CONF_RANGE, 0, 15, NULL},
 	{"double", &vo_doublebuffering, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -267,9 +264,10 @@ static config_t mplayer_opts[]={
 	{"red_intensity",&vo_gamma_red_intensity, CONF_TYPE_INT, CONF_RANGE, -1000, 1000, NULL},
 	{"green_intensity",&vo_gamma_green_intensity, CONF_TYPE_INT, CONF_RANGE, -1000, 1000, NULL},
 	{"blue_intensity",&vo_gamma_blue_intensity, CONF_TYPE_INT, CONF_RANGE, -1000, 1000, NULL},
-        {"vaa_dr", &vaa_use_dr, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-        {"vaa_nodr", &vaa_use_dr, CONF_TYPE_FLAG, 0, 1, 0, NULL},
-#endif
+	{"dr", &vo_directrendering, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"nodr", &vo_directrendering, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	{"vaa_dr", "Use -dr, -vaa_dr was obsoleted\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
+	{"vaa_nodr", "Use -nodr, -vaa_nodr was obsoleted\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 
 #ifdef HAVE_AA
 	{"aa*",	vo_aa_parseoption,  CONF_TYPE_FUNC_FULL, 0, 0, 0 , &vo_aa_revertoption},
