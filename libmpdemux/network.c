@@ -685,25 +685,10 @@ extension=NULL;
 		
 		// Checking for RTSP
 		if( !strcasecmp(url->protocol, "rtsp") ) {
-			// Checking for Real rtsp://
-			// Extension based detection, should be replaced with something based on server answer
-			if( url->file!= NULL ) {
-				char *p;
-				for( p = url->file; p[0]; p++ ) {
-					if( p[0] == '.' && tolower(p[1]) == 'r' && (tolower(p[2]) == 'm' || tolower(p[2]) == 'a') && (!p[3] || p[3] == '?' || p[3] == '&') ) {
-						*file_format = DEMUXER_TYPE_REAL;
-						return 0;
-					}
-				}
-			}
-			mp_msg(MSGT_NETWORK,MSGL_INFO,"Not a Realmedia rtsp url. Trying standard rtsp protocol.\n");
-#ifdef STREAMING_LIVE_DOT_COM
-			*file_format = DEMUXER_TYPE_RTP;
+			// Try Real rtsp:// first (it's always built in)
+			// If it fails, try live.com (if compiled in)
+			*file_format = DEMUXER_TYPE_REAL;
 			return 0;
-#else
-			mp_msg(MSGT_NETWORK,MSGL_ERR,"RTSP support requires the \"LIVE.COM Streaming Media\" libraries!\n");
-			return -1;
-#endif
 		// Checking for SIP
 		} else if( !strcasecmp(url->protocol, "sip") ) {
 #ifdef STREAMING_LIVE_DOT_COM
@@ -1217,10 +1202,20 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 	if( (!strcasecmp( stream->streaming_ctrl->url->protocol, "rtsp")) &&
 			(*demuxer_type == DEMUXER_TYPE_REAL)) {
 		stream->fd = -1;
-		ret = realrtsp_streaming_start( stream );
+		if ((ret = realrtsp_streaming_start( stream )) < 0) {
+		    mp_msg(MSGT_NETWORK,MSGL_INFO,"Not a Realmedia rtsp url. Trying standard rtsp protocol.\n");
+#ifdef STREAMING_LIVE_DOT_COM
+		    *demuxer_type =  DEMUXER_TYPE_RTP;
+		    goto try_livedotcom;
+#else
+		    mp_msg(MSGT_NETWORK,MSGL_ERR,"RTSP support requires the \"LIVE.COM Streaming Media\" libraries!\n");
+		    return -1;
+#endif
+		}
 	} else
 
 	// For connection-oriented streams, we can usually determine the streaming type.
+try_livedotcom:
 	switch( *demuxer_type ) {
 		case DEMUXER_TYPE_ASF:
 			// Send the appropriate HTTP request

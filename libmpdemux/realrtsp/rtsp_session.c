@@ -137,7 +137,7 @@ rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host, i
     
   } else
   {
-    printf("rtsp_session: rtsp server type is '%s' instead of Real. Please report.\n",server);
+    printf("rtsp_session: Not a Real server. Server type is '%s'.\n",server);
     rtsp_close(rtsp_session->s);
     free(server);
     free(rtsp_session);
