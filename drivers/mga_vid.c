@@ -153,6 +153,11 @@ static int mga_src_base = 0;	// YUV buffer position in video memory
 
 static uint32_t mga_ram_size = 0;	// how much megabytes videoram we have
 
+static int mga_force_memsize = 0;
+
+MODULE_PARM(mga_force_memsize, "i");
+
+
 static struct pci_dev *pci_dev;
 
 static mga_vid_config_t mga_config; 
@@ -733,6 +738,12 @@ static int mga_vid_find_card(void)
 	printk(KERN_INFO "mga_vid: hard-coded RAMSIZE is %d MB\n", (unsigned int) mga_ram_size);
 
 #else
+	if (mga_force_memsize) {
+		printk(KERN_INFO "mga_vid: memsize forced to %d MB\n", mga_force_memsize);
+		/* we need the size in bytes */
+		mga_ram_size = ((unsigned long) mga_force_memsize) << 20;
+	}
+
 	if (is_g400){
 		switch((card_option>>10)&0x17){
 		    // SDRAM:
@@ -896,13 +907,21 @@ static struct file_operations mga_vid_fops =
  * Main Initialization Function 
  */
 
-
 static int mga_vid_initialize(void)
 {
 	mga_vid_in_use = 0;
 
 //	printk(KERN_INFO "Matrox MGA G200/G400 YUV Video interface v0.01 (c) Aaron Holtzman \n");
 	printk(KERN_INFO "Matrox MGA G200/G400/G450 YUV Video interface v2.01 (c) Aaron Holtzman & A'rpi\n");
+
+	if (mga_force_memsize) {
+		if (mga_force_memsize != 16 || mga_force_memsize != 32 ||
+				mga_force_memsize != 64) {
+			printk(KERN_ERR "mga_vid: invalid memsize: %dMB\n", mga_force_memsize);
+			return -EINVAL;
+		}
+	}
+
 	if(register_chrdev(MGA_VID_MAJOR, "mga_vid", &mga_vid_fops))
 	{
 		printk(KERN_ERR "mga_vid: unable to get major: %d\n", MGA_VID_MAJOR);
