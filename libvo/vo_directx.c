@@ -45,6 +45,7 @@ static LPDIRECTDRAWSURFACE  g_lpddsOverlay = NULL;  //Overlay Surface
 static LPDIRECTDRAWSURFACE  g_lpddsBack = NULL;     //Back surface
 static LPDIRECTDRAWCLIPPER  g_lpddclipper;          //clipper object, can only be used without overlay
 static DDSURFACEDESC		ddsdsf;                 //surface descripiton needed for locking
+static HINSTANCE            hddraw_dll;             //handle to ddraw.dll
 static RECT                 rd;                     //rect of our stretched image
 static RECT                 rs;                     //rect of our source image
 static HWND                 hWnd=NULL;              //handle to the window
@@ -330,12 +331,14 @@ static void uninit(void)
 	mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>window destroyed\n");
 	if (g_lpdd != NULL) g_lpdd->lpVtbl->Release(g_lpdd);
 	mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>directdrawobject released\n");
+	FreeLibrary( hddraw_dll);
+	hddraw_dll= NULL;
+	mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>ddraw.dll freed\n");
 	mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>uninited\n");    
 }
 
 static uint32_t Directx_InitDirectDraw()
 {
-    HINSTANCE  hddraw_dll;
 	HRESULT    (WINAPI *OurDirectDrawCreate)(GUID *,LPDIRECTDRAW *,IUnknown *);
  	LPDIRECTDRAW lpDDraw;
 	mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>Initing DirectDraw\n" );
@@ -372,9 +375,7 @@ static uint32_t Directx_InitDirectDraw()
     }
 	//release our old interface and free ddraw.dll
     lpDDraw->lpVtbl->Release(lpDDraw);
- 	FreeLibrary( hddraw_dll);
-	hddraw_dll= NULL;
-	mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>lpDDraw released & hddraw freed\n" );
+	mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>lpDDraw released\n" );
 	//set cooperativelevel: for our tests, no handle to a window is needed
 	if (g_lpdd->lpVtbl->SetCooperativeLevel(g_lpdd, NULL, DDSCL_NORMAL) != DD_OK)
     {
