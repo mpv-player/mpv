@@ -663,10 +663,13 @@ play_next_file:
 	usleep(20000);
 	EventHandling();
       }
-      
+
 #ifdef USE_SUB
       if ( mplShMem->SubtitleChanged || !mplShMem->FilenameChanged )
-       { sub_name=mplShMem->Subtitlename; mplShMem->SubtitleChanged=0; }
+       {
+        if ( mplShMem->Subtitlename[0] != 0 ) sub_name=mplShMem->Subtitlename;
+        mplShMem->SubtitleChanged=0;
+       }
 #endif
 
       if ( mplShMem->FilenameChanged || !filename )
