@@ -129,6 +129,15 @@ mutatja be. Csak két parancs szükséges :<BR>
 </UL>
 </P>
 
+<A NAME=2.4.3.4><P><B><I>Hibás index-szel rendelkezõ AVI-k rendbehozása</I></B></P>
+
+<P>Legkönnyebb dolog a világon. Egyszerûen átmásoljuk a video és audio
+streameket, és közben a <B>MEncoder</B> létrehozza a megfelelõ indexet is.
+Ez persze nem tudja kijavítani az esetleges hibákat a video és/vagy audio
+stream-ekben.</P>
+
+<P>A parancs : <CODE>mencoder input.avi -ovc copy -oac copy -o output.avi</CODE></P>
+
 <A NAME=2.4.4><P><B><I>Szintaxis</I></B></P>
 
 <P>&nbsp;&nbsp;<CODE>mencoder [opciók] [bemeneti file] [opciók] ...</P>

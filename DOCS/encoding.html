@@ -121,6 +121,14 @@ commands are needed :<BR>
 </UL>
 </P>
 
+<A NAME=2.4.3.4><P><B><I>Fixing AVIs with broken index</I></B></P>
+
+<P>Easiest thing. We simply copy the video and audio streams, and
+<B>MEncoder</B> generates the index. Of course this cannot fix possible bugs in
+the video and/or audio streams.</P>
+
+<P>Command : <CODE>mencoder input.avi -ovc copy -oac copy -o output.avi</CODE></P>
+
 <A NAME=2.4.4><P><B><I>Syntax</I></B></P>
 
 <P>&nbsp;&nbsp;<CODE>mencoder [options] [input file] [options] ...</P>
