@@ -6,6 +6,10 @@
 
 extern int verbose; // defined in mplayer.c
 
+#ifdef USE_FAKE_MONO
+int fakemono=0;
+#endif
+
 #include "stream.h"
 #include "demuxer.h"
 
@@ -157,7 +161,11 @@ case 6: {
 }
 case 1: {
   // MPEG Audio:
+#ifdef USE_FAKE_MONO
+  MP3_Init(fakemono);
+#else
   MP3_Init();
+#endif
   MP3_samplerate=MP3_channels=0;
 //  printf("[\n");
   sh_audio->a_buffer_len=MP3_DecodeFrame(sh_audio->a_buffer,-1);

@@ -25,6 +25,9 @@ static char* help_text=
 #else
 "    -alsa           enable timing code (works better with ALSA)\n"
 #endif
+#ifdef USE_FAKE_MONO
+"    -stereo         select MPEG1 stereo output (0:stereo 1:left 2:right)\n"
+#endif
 "    -aid <id>       select audio channel [MPG: 0-31  AVI: 1-99]\n"
 "    -vid <id>       select video channel [MPG: 0-15  AVI:  -- ]\n"
 "    -fps <value>    force frame rate (if value is wrong in the header)\n"

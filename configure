@@ -1011,6 +1011,13 @@ cat > $CCONF << EOF
    buffer problems, but it seems to be useful for every soundcard drivers) */
 #define ALSA_TIMER
 
+/* Undefine this if you don't want to select mono audio (left or right)
+   with a stereo MPEG layer 2/3 audio stream. The command-line option
+   -stereo has three possible values (0 for stereo, 1 for left-only, 2 for
+   right-only), with 0 being the default.
+   */
+#define USE_FAKE_MONO
+
 /* Undefine this if your soundcard driver has no working select().
    If you have kernel Oops, player hangups, or just no audio, you should
    try to recompile MPlayer with this option disabled! */

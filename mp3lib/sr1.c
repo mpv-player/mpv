@@ -348,7 +348,11 @@ retry1:
 static int tables_done_flag=0;
 
 // Init decoder tables.  Call first, once!
+#ifdef USE_FAKE_MONO
+void MP3_Init(int fakemono){
+#else
 void MP3_Init(){
+#endif
     _CpuID=CpuDetect();
     _i586=ipentium();
 #ifdef HAVE_3DNOW
@@ -362,7 +366,16 @@ void MP3_Init(){
 #endif
 
     make_decode_tables(outscale);
+#ifdef USE_FAKE_MONO
+    if (fakemono == 1)
+        fr.synth=synth_1to1_l;
+    else if (fakemono == 2)
+        fr.synth=synth_1to1_r;
+    else
+        fr.synth=synth_1to1;
+#else
     fr.synth=synth_1to1;
+#endif
     fr.synth_mono=synth_1to1_mono2stereo;
     fr.down_sample=0;
     fr.down_sample_sblimit = SBLIMIT>>(fr.down_sample);

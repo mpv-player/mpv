@@ -18,6 +18,9 @@ extern char *sdl_driver;
 extern int sdl_noxv;
 extern int sdl_forcexv;
 #endif
+#ifdef USE_FAKE_MONO
+extern int fakemono; // defined in dec_audio.c
+#endif
 
 extern int vo_dbpp;
 extern int osd_level;
@@ -76,6 +79,9 @@ struct config conf[]={
 	{"aid", &audio_id, CONF_TYPE_INT, CONF_RANGE, 0, 256},
 	{"vid", &video_id, CONF_TYPE_INT, CONF_RANGE, 0, 256},
 	{"sid", &dvdsub_id, CONF_TYPE_INT, CONF_RANGE, 0, 32},
+#ifdef USE_FAKE_MONO
+	{"stereo", &fakemono, CONF_TYPE_INT, CONF_RANGE, 0, 2},
+#endif
 
 	{"dumpfile", &stream_dump_name, CONF_TYPE_STRING, 0, 0, 0},
 	{"dumpaudio", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 1},
