@@ -43,11 +43,12 @@
 #include <dlfcn.h>
 #include <math.h>
 
-#ifndef __FreeBSD__
+#include "config.h"
+
+#ifdef HAVE_STDINT_H
 #include <stdint.h>
 #endif
 
-#include "config.h"
 
 #include "divx4_vbr.h"
 

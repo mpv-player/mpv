@@ -1114,6 +1114,21 @@ else
 fi
 
 
+echocheck "stdint.h"
+cat > $TMPC << EOF
+#include <stdint.h>
+int main(void) { return 0; }
+EOF
+_stdint=no
+cc_check && _stdint=yes
+if test "$_stdint" = yes ; then
+  _def_stdint='#define HAVE_STDINT_H 1'
+else
+  _def_stdint='#undef HAVE_STDINT_H'
+fi
+echores "$_stdint"
+
+
 echocheck "malloc.h"
 cat > $TMPC << EOF
 #include <malloc.h>
@@ -2544,6 +2559,7 @@ echocheck "streaming"
 # FIXME streaming check
 if test "$_streaming" != no ; then
   _def_streaming='#define STREAMING 1'
+  _ld_streaming="$_ld_sock"
   _inputmodules="network $_inputmodules"
 else
   _def_streaming='#undef STREAMING'
@@ -2730,6 +2746,7 @@ EXTRA_INC = $_inc_extra $_inc_gtk
 WIN32_PATH = -DWIN32_PATH=\\"$_win32libdir\\"
 
 STREAMING = $_streaming
+STREAMING_LIB = $_ld_streaming
 
 VO2 = $_vo2
 
@@ -2872,6 +2889,9 @@ $_def_rtc
 
 /* Define this if your system has the header file for the OSS sound interface */
 $_def_sys_soundcard
+
+/* Define this if your system has the "stdint.h" header file */
+$_def_stdint
 
 /* Define this if your system has the "malloc.h" header file */
 $_def_malloc

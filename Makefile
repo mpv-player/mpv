@@ -163,14 +163,14 @@ GUI_LIBS = -LGui -lgui
 endif
 
 $(PRG):	$(MPLAYER_DEP)
-	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) $(CODEC_LIBS) -Llibmpdemux -lmpdemux $(VO_LIBS) $(AO_LIBS) $(LIB_LOADER) $(GUI_LIBS) $(COMMON_LIBS) $(EXTRA_LIB) $(A_LIBS) $(V_LIBS) $(LIRC_LIB) $(CSS_LIB) $(ARCH_LIB) $(DECORE_LIB) $(TERMCAP_LIB) $(STATIC_LIB) $(GTK_LIBS) $(PNG_LIB) $(Z_LIB) -lm
+	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) $(CODEC_LIBS) -Llibmpdemux -lmpdemux $(VO_LIBS) $(AO_LIBS) $(LIB_LOADER) $(GUI_LIBS) $(COMMON_LIBS) $(EXTRA_LIB) $(A_LIBS) $(V_LIBS) $(LIRC_LIB) $(CSS_LIB) $(ARCH_LIB) $(DECORE_LIB) $(TERMCAP_LIB) $(STATIC_LIB) $(GTK_LIBS) $(PNG_LIB) $(Z_LIB) $(STREAMING_LIB) -lm
 
 $(PRG_FIBMAP): fibmap_mplayer.o
 	$(CC) -o $(PRG_FIBMAP) fibmap_mplayer.o
 
 ifeq ($(MENCODER),yes)
 $(PRG_MENCODER): $(MENCODER_DEP)
-	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) $(CODEC_LIBS) -Llibmpdemux -lmpdemux $(LIB_LOADER) $(GUI_LIBS) $(COMMON_LIBS) $(EXTRA_LIB) $(A_LIBS) $(CSS_LIB) $(GTK_LIBS) $(PNG_LIB) $(Z_LIB) $(ARCH_LIB) $(DECORE_LIB) $(ENCORE_LIB) $(TERMCAP_LIB) -lm
+	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) $(CODEC_LIBS) -Llibmpdemux -lmpdemux $(LIB_LOADER) $(GUI_LIBS) $(COMMON_LIBS) $(EXTRA_LIB) $(A_LIBS) $(CSS_LIB) $(GTK_LIBS) $(PNG_LIB) $(Z_LIB) $(ARCH_LIB) $(DECORE_LIB) $(ENCORE_LIB) $(TERMCAP_LIB) $(STREAMING_LIB) -lm
 endif
 
 # Every mplayer dependancy depends on version.h, to force building version.h
