@@ -17,7 +17,14 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "../osdep/timer.h"
+#ifndef WIN32
 #include "../osdep/shmem.h"
+#else
+#undef DATADIR
+#include <windows.h>
+static DWORD WINAPI ThreadProc(void* s);
+#endif
 
 #include "mp_msg.h"
 
@@ -71,7 +78,7 @@ int cache_read(cache_vars_t* s,unsigned char* buf,int size){
 	// eof?
 	if(s->eof) break;
 	// waiting for buffer fill...
-	usleep(READ_USLEEP_TIME); // 10ms
+	usec_sleep(READ_USLEEP_TIME); // 10ms
 	continue; // try again...
     }
 
@@ -184,12 +191,20 @@ int cache_fill(cache_vars_t* s){
 
 cache_vars_t* cache_init(int size,int sector){
   int num;
+#ifndef WIN32
   cache_vars_t* s=shmem_alloc(sizeof(cache_vars_t));
+#else
+  cache_vars_t* s=malloc(sizeof(cache_vars_t));
+#endif
   memset(s,0,sizeof(cache_vars_t));
   num=size/sector;
   s->buffer_size=num*sector;
   s->sector_size=sector;
+#ifndef WIN32
   s->buffer=shmem_alloc(s->buffer_size);
+#else
+  s->buffer=malloc(s->buffer_size);
+#endif
   s->fill_limit=8*sector;
   s->back_size=size/2;
   s->prefill=size/20; // default: 5%
@@ -199,11 +214,21 @@ cache_vars_t* cache_init(int size,int sector){
 void cache_uninit(stream_t *s) {
   cache_vars_t* c = s->cache_data;
   if(!s->cache_pid) return;
+#ifndef WIN32
   kill(s->cache_pid,SIGKILL);
   waitpid(s->cache_pid,NULL,0);
+#else
+  TerminateThread((HANDLE)s->cache_pid,0);
+  free(c->stream);
+#endif
   if(!c) return;
+#ifndef WIN32
   shmem_free(c->buffer,c->buffer_size);
   shmem_free(s->cache_data,sizeof(cache_vars_t));
+#else
+  free(c->buffer);
+  free(s->cache_data);
+#endif
 }
 
 static void exit_sighandler(int x){
@@ -227,7 +252,16 @@ int stream_enable_cache(stream_t *stream,int size,int min,int prefill){
   s->stream=stream; // callback
   s->prefill=size*prefill;
   
+#ifndef WIN32  
   if((stream->cache_pid=fork())){
+#else
+  {
+    DWORD threadId;
+    stream_t* stream2=malloc(sizeof(stream_t));
+    memcpy(stream2,s->stream,sizeof(stream_t));
+    s->stream=stream2;
+    stream->cache_pid = CreateThread(NULL,0,ThreadProc,s,0,&threadId);
+#endif
     // wait until cache is filled at least prefill_init %
     mp_msg(MSGT_CACHE,MSGL_V,"CACHE_PRE_INIT: %d [%d] %d  pre:%d  eof:%d  \n",
 	s->min_filepos,s->read_filepos,s->max_filepos,min,s->eof);
@@ -243,11 +277,16 @@ int stream_enable_cache(stream_t *stream,int size,int min,int prefill){
     return 1; // parent exits
   }
   
+#ifdef WIN32
+}
+static DWORD WINAPI ThreadProc(void*s){
+#endif
+  
 // cache thread mainloop:
   signal(SIGTERM,exit_sighandler); // kill
   while(1){
-    if(!cache_fill(s)){
-	 usleep(FILL_USLEEP_TIME); // idle
+    if(!cache_fill((cache_vars_t*)s)){
+	 usec_sleep(FILL_USLEEP_TIME); // idle
     }
 //	 cache_stats(s->cache_data);
   }

@@ -8,7 +8,7 @@
 
 #include "../config.h"
 
-#ifdef USE_STREAM_CACHE
+#if defined(USE_STREAM_CACHE) && !defined(WIN32)
 
 #include <stdio.h>
 #include <stdlib.h>
