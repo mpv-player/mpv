@@ -1,4 +1,4 @@
-//#define USE_QTX_CODECS
+#define USE_QTX_CODECS
 
 //  QuickTime MOV file parser by A'rpi
 //  additional work by Atmos
@@ -919,7 +919,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	{	ImageDescription* id=malloc(8+trak->stdata_len);
 		trak->desc=id;
 		id->idSize=8+trak->stdata_len;
-		id->cType=trak->fourcc;
+		id->cType=bswap_32(trak->fourcc);
 		id->version=char2short(trak->stdata,8);
 		id->revisionLevel=char2short(trak->stdata,10);
 		id->vendor=char2int(trak->stdata,12);
@@ -935,11 +935,13 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		id->depth=char2short(trak->stdata,74);
 		id->clutID=char2short(trak->stdata,76);
 		memcpy(((char*)&id->clutID)+2,trak->stdata+78,trak->stdata_len-78);
-		if(1) // debug
+		sh->ImageDesc=id;
+#if 0
 		{   FILE *f=fopen("ImageDescription","wb");
 		    fwrite(id,id->idSize,1,f);
 		    fclose(f);
 		}
+#endif
 	}
 #endif
 
