@@ -1,4 +1,4 @@
-// Last sync on 2003-10-19 with help_mp-en.h 1.111
+// Last sync on 2003-11-10 with help_mp-en.h 1.114
 // Updates & fixes by pl <p_l@gmx.fr> & n.le gaillart <n@tourmentine.com>
 // Original translation by Firebird <firebird@chez.com>
 
@@ -300,6 +300,8 @@ static char help_text[]=
 #define MSGTR_DemuxerInfoAlreadyPresent "Info du demuxer %s déjà présente!\n"
 #define MSGTR_ClipInfo "Information sur le clip: \n"
 
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: contenu NTSC 30fps détecté, ajustement du débit.\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: contenu NTSC 24fps progressif détecté, ajustement du débit.\n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Impossible d'ouvrir le codec.\n"
