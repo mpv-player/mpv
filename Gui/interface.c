@@ -701,6 +701,7 @@ int guiGetEvent( int type,char * arg )
 	  sprintf( tmp,"oss:%s",gtkAOOSSDevice );
 	  gaddlist( &audio_driver_list,tmp );
 	 }
+#endif
 
 // -- subtitle
 #ifdef USE_SUB
