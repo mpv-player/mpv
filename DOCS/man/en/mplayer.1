@@ -4455,26 +4455,25 @@ CBR only, VBR ignores this as it puts each packet in a new chunk.
 .
 .TP
 .B \-audio-preload <0.0\-2.0>
-Sets up audio buffering time interval (default: 0.5s).
+Sets up the audio buffering time interval (default: 0.5s).
 .
 .TP
 .B \-endpos <[[hh:]mm:]ss[.ms]|size[b|kb|mb]> (also see \-ss and \-sb)
-Stop encoding at given time or byte position.
-Can be specified in many ways:
+Stop encoding at the given time or byte position.
 .br
 .I NOTE:
-Byte position won't be accurate, as it can only stop at
+Byte position will not be accurate, as it can only stop at
 a frame boundary.
 .sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
 .IPs "\-endpos 56"
-encode only 56 seconds
+Encode only 56 seconds.
 .IPs "\-endpos 01:10:00"
-encode only 1 hour 10 minutes
+Encode only 1 hour 10 minutes.
 .IPs "\-endpos 100mb"
-encode only 100 MBytes
+Encode only 100 MBytes.
 .RE
 .PD 1
 .
@@ -4486,7 +4485,7 @@ Can be used to override the video fourcc of the output file.
 .PD 0
 .RSs
 .IPs "\-ffourcc div3"
-will have the output file contain 'div3' as video fourcc.
+Will have the output file contain 'div3' as video fourcc.
 .RE
 .PD 1
 .
@@ -4502,7 +4501,7 @@ Specify the info header of the resulting AVI file.
 Available options are:
 .RSs
 .IPs help\ 
-show this description
+Show this description.
 .IPs name=<value>
 title of the work
 .IPs artist=<value>
@@ -4539,9 +4538,10 @@ Outputs to the given filename, instead of the default 'test.avi'.
 .
 .TP
 .B \-oac <codec name>
-Encode with the given audio codec.
-Use \-oac help to get a list of available codecs.
-(no default set)
+Encode with the given audio codec (no default set).
+.br
+.I NOTE:
+Use \-oac help to get a list of available audio codecs.
 .sp 1
 .I EXAMPLE:
 .PD 0
@@ -4549,42 +4549,46 @@ Use \-oac help to get a list of available codecs.
 .IPs "\-oac copy"
 no encoding, just streamcopy
 .IPs "\-oac pcm"
-encode to uncompressed PCM
+Encode to uncompressed PCM.
 .IPs "\-oac mp3lame"
-encode to MP3 (using Lame)
+Encode to MP3 (using LAME).
 .IPs "\-oac lavc"
-encode with a libavcodec codec
+Encode with a libavcodec codec.
 .RE
 .PD 1
 .
 .TP
 .B \-of <format> (BETA CODE!)
-Encode to the specified format.
-Use \-of help to get a list of available formats.
+Encode to the specified container format (default: AVI).
+.br
+.I NOTE:
+Use \-of help to get a list of available container formats.
 .sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
 .IPs "\-of avi"
-Encode to AVI (default).
+Encode to AVI.
 .IPs "\-of mpeg"
 Encode to MPEG.
 .IPs "\-of rawvideo"
-raw video stream (no muxing - video only, one stream only)
+raw video stream (no muxing - one video stream only)
 .RE
 .PD 1
 .
 .TP
 .B \-ofps <fps>
-The output file will have different frame/\:sec than the source.
-You MUST set it for variable fps (asf, some mov) and progressive
+Specify a frames per second (fps) value for the output file,
+which can be different from that of the source material.
+Must be set for variable fps (ASF, some MOV) and progressive
 (29.97fps telecined MPEG) files.
 .
 .TP
 .B \-ovc <codec name>
-Encode with the given video codec.
-Use \-ovc help to get a list of available codecs.
-(no default set)
+Encode with the given video codec (no default set).
+.br
+.I NOTE:
+Use \-ovc help to get a list of available video codecs.
 .sp 1
 .I EXAMPLE:
 .PD 0
@@ -4592,23 +4596,23 @@ Use \-ovc help to get a list of available codecs.
 .IPs "\-ovc copy"
 no encoding, just streamcopy
 .IPs "\-ovc divx4"
-encode to DivX4/\:DivX5
+Encode to DivX4/\:DivX5.
 .IPs "\-ovc raw"
-encode to arbitrary uncompressed format (use \-vf format to select)
+Encode to an arbitrary uncompressed format (use \-vf format to select).
 .IPs "\-ovc lavc"
-encode with a libavcodec codecs
+Encode with a libavcodec codec.
 .RE
 .PD 1
 .
 .TP
 .B \-passlogfile <filename>
-When encoding in 2pass mode, MEncoder dumps first pass' informations
-to the given file instead of the default divx2pass.log.
+Dump first pass information to <filename> instead of the default divx2pass.log
+in 2-pass encoding mode.
 .
 .TP
 .B \-skiplimit <value>
-Maximum skippable frames after non-skipped one
-(\-noskiplimit for unlimited number).
+Specify the maximum number of frames that may be skipped after
+encoding one frame (\-noskiplimit for unlimited).
 .
 .TP
 .B \-vobsubout <basename>
@@ -4623,8 +4627,7 @@ This overrides what is read from the DVD or the .ifo file.
 .
 .TP
 .B \-vobsuboutindex <index>
-Specify the index of the subtitles in the output files.
-(default: 0)
+Specify the index of the subtitles in the output files (default: 0).
 .
 .
 .
@@ -4807,14 +4810,14 @@ quality and higher bitrates.
 Set a highpass filtering frequency in Hz.
 Frequencies below the specified one will be cut off.
 A value of -1 will disable filtering, a value of 0
-will let lame choose values automatically.
+will let LAME choose values automatically.
 .
 .TP
 .B lowpassfreq=<freq>
 Set a lowpass filtering frequency in Hz.
 Frequencies above the specified one will be cut off.
 A value of -1 will disable filtering, a value of 0
-will let lame choose values automatically.
+will let LAME choose values automatically.
 .
 .TP
 .B preset=<value>
