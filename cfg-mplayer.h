@@ -145,8 +145,8 @@ struct config ao_plugin_conf[]={
 
 #ifdef HAVE_JPEG
 struct config jpeg_conf[]={
-	{"progressiv", &jpeg_progressive_mode, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"noprogressiv", &jpeg_progressive_mode, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	{"progressive", &jpeg_progressive_mode, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"noprogressive", &jpeg_progressive_mode, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"baseline", &jpeg_baseline, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"nobaseline", &jpeg_baseline, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"optimize", &jpeg_optimize, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
