@@ -198,6 +198,7 @@
 #if defined(HAVE_XVID3) || defined(HAVE_XVID4)
 	{"xvidopts", xvid_dec_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif
+	{"codecs-file", &codecs_file, CONF_TYPE_STRING, 0, 0, 0, NULL},
 // ------------------------- subtitles options --------------------
 
 #ifdef USE_SUB
@@ -272,6 +273,9 @@ extern int softzoom;
 extern int flip;
 extern int vd_use_slices;
 extern int divx_quality;
+
+/* defined in codec-cfg.c */
+extern char * codecs_file;
 
 /* from dec_audio, currently used for ac3surround decoder only */
 extern int audio_output_channels;

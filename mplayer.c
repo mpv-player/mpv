@@ -893,13 +893,15 @@ int gui_no_filename=0;
     }
 
 // check codec.conf
-if(!parse_codec_cfg(get_path("codecs.conf"))){
-  if(!parse_codec_cfg(MPLAYER_CONFDIR "/codecs.conf")){
-    if(!parse_codec_cfg(NULL)){
-      mp_msg(MSGT_CPLAYER,MSGL_HINT,MSGTR_CopyCodecsConf);
-      exit(0);
+if(!codecs_file || !parse_codec_cfg(codecs_file)){
+  if(!parse_codec_cfg(get_path("codecs.conf"))){
+    if(!parse_codec_cfg(MPLAYER_CONFDIR "/codecs.conf")){
+      if(!parse_codec_cfg(NULL)){
+	mp_msg(MSGT_CPLAYER,MSGL_HINT,MSGTR_CopyCodecsConf);
+	exit(0);
+      }
+      mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_BuiltinCodecsConf);
     }
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_BuiltinCodecsConf);
   }
 }
 

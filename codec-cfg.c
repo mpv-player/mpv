@@ -48,6 +48,8 @@
 #define TYPE_VIDEO	0
 #define TYPE_AUDIO	1
 
+char * codecs_file = NULL;
+
 static int add_to_fourcc(char *s, char *alias, unsigned int *fourcc,
 		unsigned int *map)
 {
