@@ -29,12 +29,12 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
   <emphasis role="bold">gcc</emphasis> - suggested versions are: <emphasis role="bold">2.95.3</emphasis>
   (maybe <emphasis role="bold">2.95.4</emphasis>) and <emphasis role="bold">3.2+</emphasis>.
   <emphasis role="bold">Never</emphasis> use 2.96 or 3.0.x! They generate faulty code for
-  <application>MPlayer</application>.  If you decide to change gcc from
-  2.96, then don't decide in favor of 3.0.x just because it's newer! Early
-  releases of 3.0.x were even more buggy than 2.96. So downgrade to 2.95.x
+  <application>MPlayer</application>. If you decide to change gcc from
+  2.96, then don't decide in favor of 3.x just because it's newer! Early
+  releases of 3.x were even more buggy than 2.96. So downgrade to 2.95.x
   (downgrade <systemitem class="library">libstdc++</systemitem> too, other
   programs may need it) or don't up/downgrade at all (but in this case, be
-  prepared for runtime problems). If you vote for 3.x.x, try to use the
+  prepared for runtime problems). If you vote for 3.x, try to use the
   latest version, early releases had various bugs, so be sure you use at
   least 3.1, it's tested and working. For detailed information about gcc 2.96's
   bugs (that are still NOT fixed, they have been WORKED AROUND in
@@ -43,7 +43,7 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">XFree86</emphasis> - suggested version is <emphasis role="bold">always the
-  newest</emphasis> (4.3.0).  Normally, everyone wants this, as starting
+  newest</emphasis> (4.3). Normally, everyone wants this, as starting
   with XFree86 4.0.2, it contains the <link linkend="xv">XVideo</link>
   extension (somewhere referred to as <emphasis role="bold">Xv</emphasis>)
   which is needed to enable the hardware YUV acceleration (fast image display)
@@ -102,6 +102,9 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
   <emphasis role="bold">libxmms</emphasis> - optional, for XMMS input plugin
   support. At least 1.2.7 is required.
   </para></listitem>
+<listitem><para>
+  <emphasis role="bold">libsmb</emphasis> - optional, for Samba support.
+  </para></listitem>
 </itemizedlist>
 </sect2>
 
@@ -112,7 +115,7 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
 <itemizedlist>
 <listitem><para>
   <emphasis role="bold">libavcodec</emphasis>: This codec package is capable
-  of decoding H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1 encoded video
+  of decoding H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/SVQ1/SVQ3 encoded video
   streams and WMA (Windows Media Audio) v1/v2 audio streams, on multiple
   platforms. It is also known to be the fastest for this task. See
   <link linkend="ffmpeg">this section</link> for details. Features:
@@ -149,7 +152,7 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
     (example: DV, ATI VCR, MJPEG)
     </simpara></listitem>
   <listitem><simpara>
-    needed if you want to play <emphasis role="bold">WMV8, WMV9/WMA9 movies</emphasis>.
+    needed if you want to play <emphasis role="bold">WMV9/WMA9 movies</emphasis>.
    </simpara></listitem>
   <listitem><simpara>
     Not needed for old ASF's with MP41 or MP42 video (though VoxWare audio is
@@ -160,7 +163,7 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">QuickTime codecs</emphasis>: on x86 platforms these
-  codecs can be used to decode Sorenson v1/v3, RPZA, and other QuickTime video,
+  codecs can be used to decode RPZA, and other QuickTime video,
   and QDesign audio streams. Installation instructions can be found in the
   <link linkend="sorenson">Sorenson video codec</link> section.
   </para></listitem>
@@ -437,8 +440,9 @@ make install</screen>
 At this point, <application>MPlayer</application> is ready to use. The
 directory <filename class="directory">$PREFIX/share/mplayer</filename>
 contains the <filename>codecs.conf</filename> file, which is used to tell
-the program all the codecs and their capabilities. This file should always
-be kept up to date together with the main binary. Check if you have
+the program all the codecs and their capabilities. This file is needed only
+when you want to change its properties, as the main binary contains an internal
+copy of it. Check if you have
 <filename>codecs.conf</filename> in your home directory
 (<filename>~/.mplayer/codecs.conf</filename>) left from old
 <application>MPlayer</application> versions, and remove it.
@@ -549,6 +553,10 @@ destination formats, with the given options:
 </para>
 
 <para>
+MEncoder can dump DVD subtitles into <link linkend="menc-feat-extractsub">VobSub</link> format.
+</para>
+
+<para>
 The command line options differ slightly for the different formats:
 </para>
 
@@ -631,6 +639,7 @@ its main feature is being <emphasis>dynamically</emphasis> time-based (although
 it has frame-based mode too).  Example (from <ulink
 url="../../tech/mpsub.sub">DOCS/tech/mpsub.sub</ulink>):
 <programlisting>
+FORMAT=TIME
 # first number  : wait this much after previous subtitle disappeared
 # second number : display the current subtitle for this many seconds
 
@@ -675,6 +684,19 @@ There are many ways to get it:
 
 <itemizedlist>
 <listitem><para>
+  using a TrueType (TTF) font, by the means of the <systemitem class="library">freetype</systemitem>
+library. Version 2.0.9 or greater is mandatory! Then you have two methods:
+  <itemizedlist>
+    <listitem><para>
+      use the <option>-font /path/to/arial.ttf</option> option to specify a
+      TrueType font file on every occasion
+      </para></listitem>
+    <listitem><para>
+      create a symlink:<screen>ln -s /path/to/arial.ttf ~/.mplayer/subfont.ttf</screen>
+      </para></listitem>
+      </itemizedlist>
+  </para></listitem>
+<listitem><para>
   Download ready-to-use font packages from MPlayer site.  Note: currently
   available fonts are limited for ISO 8859-1/2 support, but there are some
   other (including Korean, Russian, ISO 8859-8 etc) fonts at contrib/font
@@ -717,7 +739,7 @@ There are many ways to get it:
   </tbody>
   </tgroup>
   </table>
-  
+
   </para></listitem>
 <listitem><para>
   Use the font generator tool at <filename
@@ -730,19 +752,6 @@ There are many ways to get it:
   class="directory">TOOLS/subfont-GIMP</filename> (note: you must have HSI
   RAW plugin too, see URL below)
   <!-- FIXME: where's that URL? -->
-  </para></listitem>
-<listitem><para>
-  using a TrueType (TTF) font, by the means of the <systemitem class="library">freetype</systemitem>
-library. Version 2.0.9 or greater is mandatory! Then you have two methods:
-  <itemizedlist>
-    <listitem><para>
-      use the <option>-font /path/to/arial.ttf</option> option to specify a
-      TrueType font file on every occasion
-      </para></listitem>
-    <listitem><para>
-      create a symlink:<screen>ln -s /path/to/arial.ttf ~/.mplayer/subfont.ttf</screen>
-      </para></listitem>
-      </itemizedlist>
   </para></listitem>
 </itemizedlist>
 

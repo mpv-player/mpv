@@ -36,7 +36,7 @@ Les plus importants d'entre eux:
   décodeur <emphasis role="bold">Sorenson 1 (SVQ1)</emphasis> natif
   </simpara></listitem>
 <listitem><simpara>
-  décodeur <emphasis role="bold">Sorenson 3 (SVQ3)</emphasis> Win32/QT
+  décodeur <emphasis role="bold">Sorenson 3 (SVQ3)</emphasis> natif
   </simpara></listitem>
 <listitem><simpara>
   décodeur <emphasis role="bold">3ivx</emphasis> v1, v2
@@ -195,7 +195,7 @@ installation ou votre configuration n'est pas correcte.
 <para>
 <ulink url="http://ffmpeg.sourceforge.net">FFmpeg</ulink> contient un codec
 <emphasis role="bold">open source</emphasis> , qui est capable de décoder des
-flux encodés avec des codecs vidéo H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/HuffYUV,
+flux encodés avec des codecs vidéo H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/HuffYUV/SVQ1/SVQ3,
 ou audio WMA (Windows Media Audio). Mais seuls quelques-uns peuvent être encodés
 avec, mais il offre également une vitesse plus rapide que les codecs Win32 ou
 que la librairie DivX4/5 de DivX.com!
@@ -203,8 +203,15 @@ que la librairie DivX4/5 de DivX.com!
 
 <para>
 Il contient plein de bons codecs, les plus importantes étant les variantes
-MPEG4: DivX 3, DivX 4, DivX 5, Windows Media Video 7 (WMV1). Le décodeur WMA
+MPEG4: DivX 3, DivX 4, DivX 5, Windows Media Video 7/8 (WMV1/WMV2). Le décodeur WMA
 est également très intéressant.
+</para>
+
+<para>
+Le codec le plus rescent est le codec <emphasis role="bold">Sorenson 3</emphasis>
+(SVQ3). C'est la première implémentation complètement opensource de ce
+codec. Il est même plus rapide que l'original. Assurez-vous d'utiliser celui-ci à
+la place du codec binaire !
 </para>
 
 <para>
@@ -333,7 +340,7 @@ automatiquement.
 <para>
 MPEG1 et MPEG2 sont décodé par la librairie multiplateforme <systemitem
 class="library">libmpeg2</systemitem> native, dont le code source est
-inclus dans  <application>MPlayer</application>. Nous gérons la vidéo
+inclus dans <application>MPlayer</application>. Nous gérons la vidéo
 MPEG 1/2 boguée en attrapant le <systemitem>Signal 11</systemitem>
 (<systemitem>segmentation fault</systemitem>), et en réinitialisant rapidement
 le codec, continuant ainsi exactement où l'erreur c'est produite. Cette
@@ -505,12 +512,11 @@ décodeurs suivants:
   l'autre est dans libavcodec. Vous pouvez invoquer chacun d'eux avec les options
   <option>-vc svq1</option> et <option>-vc ffsvq1</option> respectivement.
   Certains fichiers peuvent fonctionner avec l'un, et pas avec l'autre, donc
-  testez les deux décodeurs. Le décodeur a été écrit (par reverse-engineering)
-  par les auteurs de <ulink url="http://www.xinehq.de">Xine</ulink>.
+  testez les deux décodeurs.
   </simpara></listitem>
 <listitem><simpara>
-  Sorenson 3 (fourcc <emphasis>SVQ3</emphasis>) - décodage supporté par les
-  <emphasis role="bold">librairies QuickTime Win32</emphasis>
+  Sorenson 3 (fourcc <emphasis>SVQ3</emphasis>) - décodage supporté par le
+  <emphasis role="bold">codec natif</emphasis> (<link linkend="ffmpeg">libavcodec</link>)
   </simpara></listitem>
 </itemizedlist>
 

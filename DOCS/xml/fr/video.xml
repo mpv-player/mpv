@@ -230,8 +230,8 @@ ou passez la vitesse de rafraîchissement à n*(fps du film) Hz.
 </para>
 
 <para>
-Radeon VE - actuellement seule la version CVS de XFree86 a un driver pour cette carte,
-pas la version 4.1.0. Pas de support TV-out. Bien sûr avec <application>MPlayer</application>
+Radeon VE - si vous avez besoin de X, utilisez 4.2.0 ou supérieur pour cette carte.
+Pas de support TV-out. Bien sûr avec <application>MPlayer</application>
 vous pouvez heureusement avoir un affichage <emphasis role="bold">accéleré</emphasis>,
 avec ou sans <emphasis role="bold">sortie TV</emphasis>, et aucune librairie ou X ne
 sont requis. Lire la section <link linkend="vidix">VIDIX</link>.
@@ -243,18 +243,19 @@ sont requis. Lire la section <link linkend="vidix">VIDIX</link>.
 <title>Cartes NeoMagic</title>
 
 <para>
-Ces cartes sont utilisées sur de nombreux portables. Malheureusement, XFree avant la
-version 4.3.0 ne gère pas Xv, mais Stefan Seyfried fournit
-<ulink url="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/">des pilotes Xv</ulink>.
-Choisissez juste celui qui s'applique à votre version de XFree.
+Ces cartes sont utilisées sur de nombreux portables. Vous devez utiliser XFree86 4.3.0
+ou supérieur, ou utiliser
+<ulink url="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/">les pilotes Xv</ulink>
+de Stefan Seyfried.
+Choisissez juste celui qui s'applique à votre version de XFree86.
 </para>
 
 <para>
 XFree86 4.3.0 inclut le support Xv, mais Bohdan Horst a envoyé un petit
 <ulink url="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/neo_driver.patch">patch</ulink>
-pour les sources XFree86 qui accélère les opérations framebuffer jusqu'à 4 fois. Ce
-patch a été inclus dans le CVS de XFree86 et devrait être dans la prochaine version
-suivant 4.3.0.
+pour les sources XFree86 qui accélère les opérations framebuffer (et donc XVideo)
+jusqu'à 4 fois. Ce patch a été inclus dans le CVS de XFree86 et devrait être dans
+la prochaine version suivant 4.3.0.
 </para>
 
 <para>
@@ -809,9 +810,8 @@ La sortie FBdev accepte certains paramètres additionnels:
   <option>-bpp</option>.
   </para></listitem>
 <listitem><para>
-  l'option <option>-zoom</option> n'est pas supportée (le redimensionnement logiciel
-  est trop lent). L'option <option>-fs</option> L'option -fs n'est pas supportée non
-  plus. Vous ne pouvez pas utiliser de modes 8bpp (ou moins).
+  l'option <option>-zoom</option> n'est pas supportée (Utilisez l'option
+  <option>-fs</option>). Vous ne pouvez pas utiliser de modes 8bpp (ou moins).
   </para></listitem>
 <listitem><para>
   vous pouvez vouloir désactiver le curseur:
@@ -1496,7 +1496,9 @@ de Ville Syrjala.
 </para>
 
 <note><para>
-nous n'avons pas pu le faire fonctionner, mais d'autres ont pu. De toutes façons, le
+La première version de DirectFB que nous aurions pu faire fonctionner était la
+0.9.17. (elle est boguée, nécessite ce patch <systemitem>surfacemanager</systemitem>
+disponible sur l'URL ci-dessus). De toutes façons, le
 portage du code CRTC2 dans<emphasis role="bold">mga_vid</emphasis> est sous-jacent.
 </para></note>
 </sect4>

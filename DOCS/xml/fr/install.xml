@@ -32,11 +32,11 @@ recommandés.
   N'utilisez <emphasis role="bold">jamais</emphasis> 2.96 ou 3.0.x! Ils
   g&eacute;n&egrave;rent des erreurs de code. Si vous décidez de changer votre gcc
   2.96, n'optez pas en faveur d'un 3.0.x uniquement parce qu'il sera plus récent!
-  Les premières versions des 3.0.x étaient encore plus boguées que 2.96. Donc
+  Les premières versions des 3.x étaient encore plus boguées que 2.96. Donc
   downgradez vers 2.95.x (downgradez <systemitem class="library">libstdc++</systemitem>
   également, d'autres programmes pourraient en avoir besoin) ou ne changez pas du tout
   (mais dans ce cas, préparez-vous à des problèmes lors de l'exécution). Si vous optez
-  pour un 3.x.x, essayez toujours la dernière version, les plus anciennes avaient des
+  pour un 3.x, essayez toujours la dernière version, les plus anciennes avaient des
   bogues variés, donc assurez-vous d'utiliser au moins 3.1, il est testé et
   fonctionnel. Pour de plus amples informations sur les bogues de gcc 2.96 (qui ne
   sont toujours PAS fixés, il ont été CONTOURNÉS dans MPlayer!), voir la section
@@ -44,7 +44,7 @@ recommandés.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">XFree86</emphasis> - version conseill&eacute;e :
-  <emphasis role="bold">toujours la plus r&eacute;cente</emphasis> (4.3.0).
+  <emphasis role="bold">toujours la plus r&eacute;cente</emphasis> (4.3).
   Normalement, tout le monde veut cela, car à partir de la version 4.0.2, XFree86
   contient l'extension <link linkend="xv">XVideo</link> (parfois appelé
   <emphasis role="bold">Xv</emphasis>) qui est nécessaire pour activer l'accélération
@@ -102,6 +102,9 @@ recommandés.
   <emphasis role="bold">libxmms</emphasis> - optionnel, pour le support des plugins
   d'entrée de XMMS. Au moins 1.2.7 est requis.
   </para></listitem>
+<listitem><para>
+  <emphasis role="bold">libsmb</emphasis> - optionnel, pour le support Samba.
+  </para></listitem>
 </itemizedlist>
 </sect2>
 
@@ -112,7 +115,8 @@ recommandés.
 <itemizedlist>
 <listitem><para>
   <emphasis role="bold">libavcodec</emphasis>: Ce paquet de codecs est capable de
-  décoder les flux encodés en H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1, sur
+  décoder les flux encodés en H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV11/WMV2/SVQ1/SVQ3
+  et les flux audio WMA (Windows Media Audio) v1/v2, sur
   plusieurs plateformes. Il est également considéré comme le plus rapide pour cette
   tâche. Voir <link linkend="ffmpeg">cette section</link> pour de plus amples détails.
   Fonctionnalités:
@@ -149,7 +153,7 @@ recommandés.
    (exemple: DV, ATI VCR, MJPEG)
     </simpara></listitem>
   <listitem><simpara>
-    requis si vous voulez lire des <emphasis role="bold">films WMV8, WMV9/WMA9</emphasis>.
+    requis si vous voulez lire des <emphasis role="bold">films WMV9/WMA9</emphasis>.
    </simpara></listitem>
   <listitem><simpara>
   Non requis pour les vieux ASF avec vidéo MP41 ou MP42 (bien que VoxWare audio soit
@@ -161,7 +165,7 @@ recommandés.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">codecs QuickTime</emphasis>:  sur les plateformes x86 ces
-  codecs peuvent être utilisés pour décoder Sorenson v1/v3, RPZA, et autres vidéos
+  codecs peuvent être utilisés pour décoder RPZA et les autres vidéos
   QuickTime, ainsi que les flux audio QDesign. Les instructions d'installation peuvent
   être trouvées dans la section
   <link linkend="sorenson">codec vidéo Sorenson</link>.
@@ -435,11 +439,11 @@ make install</screen>
 A ce point, <application>MPlayer</application> est prêt à fonctionner. 
 Le répertoire <filename class="directory">$PREFIX/share/mplayer</filename>
 contient le fichier <filename>codecs.conf</filename>, qui est utilisé pour 
-donner au programme la liste des codecs et de leurs capacités. Ce fichier devrait 
-toujours être tenu à jour par rapport au binaire principal. Vérifiez si vous avez un 
-<filename>codecs.conf</filename> dans votre répertoire personnel
-(<filename>~/.mplayer/codecs.conf</filename>) provenant d'une ancienne installation de 
-<application>MPlayer</application>, et supprimez-le.
+donner au programme la liste des codecs et de leurs capacités. Ce fichier n'est requis
+que si vous voulez changer ses propriétés, car le binaire principal en contient une
+copie interne. Vérifiez si vous avez un <filename>codecs.conf</filename> dans votre
+répertoire personnel (<filename>~/.mplayer/codecs.conf</filename>) provenant d'une
+ancienne installation de <application>MPlayer</application>, et supprimez-le.
 </para>
 
 <para>
@@ -555,6 +559,10 @@ dans dans les formats de destination suivants, avec les options associées:
 </para>
 
 <para>
+MEncoder peut convertir les sous-titres DVD au format <link linkend="menc-feat-extractsub">VobSub</link>.
+</para>
+
+<para>
 Les options en ligne de commande diffèrent légèrement suivant les différents formats:
 </para>
 
@@ -642,6 +650,7 @@ A propos des sous-titres DVD, voir la <link linkend="dvd">section DVD</link>.
 avantage est de se baser <emphasis>dynamiquement</emphasis> sur la durée (bien qu'il 
 possède également un mode basé sur les frames). Exemple (de <ulink url="../../tech/mpsub.sub">DOCS/tech/mpsub.sub</ulink>):
 <programlisting>
+FORMAT=TIME
 # premier nombre : attends cette durée après la disparition du dernier sous-titre
 # second nombre  : affiche le sous-titre en cours pour tant de secondes
 
@@ -684,6 +693,20 @@ les fonctions d'OSD/SUB. Plusieurs manières de les obtenir :
 
 <itemizedlist>
 <listitem><para>
+  Utilisez une fonte TrueType (TTF), par l'intermédiaire de la librairie
+  <systemitem class="library">freetype</systemitem>. La Version 2.0.9 ou supérieur est obligatoire!
+  Ensuite vous avez deux méthodes:
+  <itemizedlist>
+    <listitem><para>
+      utilisez l'option <option>-font /chemin/de/arial.ttf</option> pour spécifier
+      un fichier de polices TrueType à chaque fois.
+      </para></listitem>
+    <listitem><para>
+      créez un lien symbolique:<screen>ln -s /chemin/de/arial.ttf ~/.mplayer/subfont.ttf</screen>
+      </para></listitem>
+      </itemizedlist>
+  </para></listitem>
+<listitem><para>
   Téléchargez des paquetages de polices prêtes à l'emploi depuis le site de MPlayer. 
   Note: Les polices actuellement disponibles sont limitées a l'iso 8859-1/2, mais 
   il y en a quelques autres (coréen, russe, 8859-8, etc) dans la section contrib/font
@@ -725,38 +748,24 @@ les fonctions d'OSD/SUB. Plusieurs manières de les obtenir :
   </tbody>
   </tgroup>
   </table>
-  
+
   </para></listitem>
 <listitem><para>
   Utilisez le générateur de polices de <filename
-  class="directory">TOOLS/subfont-c</filename>. C'est un outil complet pour 
+  class="directory">TOOLS/subfont-c</filename>. C'est un outil complet pour
   convertir les polices TTF/Type1/etc vers des paquetages de polices mplayer.
   (lisez <filename>TOOLS/subfont-c/README</filename> pour plus de détails)
   </para></listitem>
 <listitem><para>
   Utilisez le plugin générateur de polices de GIMP situé dans <filename
-  class="directory">TOOLS/subfont-GIMP</filename> (note: vous devez également 
+  class="directory">TOOLS/subfont-GIMP</filename> (note: vous devez également
   avoir le plugin HSI RAW, voir adresse plus bas)
   <!-- FIXME: where's that URL? -->
-  </para></listitem>
-<listitem><para>
-  Utilisez une fonte TrueType (TTF), par l'intermédiaire de la librairie 
-  <systemitem class="library">freetype</systemitem>. La Version 2.0.9 ou supérieur est obligatoire! 
-  Ensuite vous avez deux méthodes:
-  <itemizedlist>
-    <listitem><para>
-      utilisez l'option <option>-font /chemin/de/arial.ttf</option> pour spécifier
-      un fichier de polices TrueType à chaque fois.
-      </para></listitem>
-    <listitem><para>
-      créez un lien symbolique:<screen>ln -s /chemin/de/arial.ttf ~/.mplayer/subfont.ttf</screen>
-      </para></listitem>
-      </itemizedlist>
   </para></listitem>
 </itemizedlist>
 
 <para>
-Si vous avez choisi des polices non-TTF, dézippez le fichier vers <filename class="directory">~/.mplayer</filename> 
+Si vous avez choisi des polices non-TTF, dézippez le fichier vers <filename class="directory">~/.mplayer</filename>
 ou <filename class="directory">$PREFIX/share/mplayer</filename>. Ensuite renommez 
 ou faites un lien symbolique de l'un d'eux sur <filename>font</filename>, par exemple:
 

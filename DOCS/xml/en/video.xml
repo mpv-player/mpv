@@ -230,9 +230,8 @@ set refresh rate to a n*(fps of the movie) Hz.
 </para>
 
 <para>
-Radeon VE - currently only XFree86 CVS has driver for this card, version
-4.1.0 doesn't. And no TV out support. Of course with
-<application>MPlayer</application> you can
+Radeon VE - if you need X, use XFree86 4.2.0 or greater for this card.
+No TV out support. Of course with <application>MPlayer</application> you can
 happily get <emphasis role="bold">accelerated</emphasis> display, with or without
 <emphasis role="bold">TV output</emphasis>, and no libraries or X are needed.
 Read the <link linkend="vidix">VIDIX</link> section.
@@ -244,18 +243,18 @@ Read the <link linkend="vidix">VIDIX</link> section.
 <title>NeoMagic cards</title>
 
 <para>
-These cards can be found in many laptops. Unfortunately, the driver in
-XFree prior to 4.3.0 cannot do Xv, but Stefan Seyfried provided 
+These cards can be found in many laptops. You must use XFree86 4.3.0 or
+above, or else use Stefan Seyfried's
 <ulink url="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/">Xv-capable drivers</ulink>.
-Just choose the one that applies to your version of Xfree.
+Just choose the one that applies to your version of XFree86.
 </para>
 
 <para>
 XFree86 4.3.0 includes Xv support, yet Bohdan Horst sent a small
 <ulink url="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/neo_driver.patch">patch</ulink>
-against the XFree86 sources that speeds up framebuffer operations up to four
-times. The patch has been included in XFree86 CVS and should be in the next
-release after 4.3.0.
+against the XFree86 sources that speeds up framebuffer operations (so XVideo)
+up to four times. The patch has been included in XFree86 CVS and should be in the
+next release after 4.3.0.
 </para>
 
 <para>
@@ -815,14 +814,13 @@ If you want to change to a specific mode, then use
   <filename>/etc/fb.modes</filename>. Can be used together with
   <option>-x</option> and <option>-y</option> options too. The
   <option>-flip</option> option is supported only if the movie's pixel
-  format matches the video mode's pixel format.  Pay attention to the bpp
+  format matches the video mode's pixel format. Pay attention to the bpp
   value, fbdev driver tries to use the current, or if you specify the
   <option>-bpp</option> option, then that.
   </para></listitem>
 <listitem><para>
-  <option>-zoom</option> option isn't supported (software scaling is slow).
-  <option>-fs</option> option isn't supported. You can't use 8 bpp (or less)
-  modes.
+  <option>-zoom</option> option isn't supported (use <option>-vf scale</option>).
+  You can't use 8bpp (or less) modes.
   </para></listitem>
 <listitem><para>
   You possibly want to turn the cursor off:
@@ -1511,8 +1509,10 @@ or directly on Ville Syrjala's
 </para>
 
 <note><para>
-we haven't been able to make this work, but others did. Anyway, porting of
-the CRTC2 code to <emphasis role="bold">mga_vid</emphasis> is underway.
+the first DirectFB version with which we could kick this working was
+0.9.17 (it's buggy, needs that <systemitem>surfacemanager</systemitem> patch from
+the URL above). Anyway, porting of the CRTC2 code to <emphasis role="bold">mga_vid</emphasis>
+is underway.
 </para></note>
 </sect4>
 </sect3>

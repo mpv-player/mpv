@@ -82,6 +82,13 @@ decided to write/modify one...
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">MPlayer 0.90 "The CounterCounter"</emphasis> Apr 6, 2003
+  </para><para>After more than 1 year, we finally concluded that the code was indeed
+    stable again, and ready to be published as a release. Unfortunately we
+    forgot even to increase the version number, and other annoying bugs went
+    in, so get ready for...
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer 0.91 "?"</emphasis> date yet unknown
   </para></listitem>
 </itemizedlist>
 </para>

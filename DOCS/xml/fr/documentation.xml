@@ -72,7 +72,11 @@ ou faites une recherche dans ces fichiers.
 
 <para>
 Règle principale de cette documentation: si ce n'est pas documenté, cela
-<emphasis>n'existe pas</emphasis>. Si je ne dit pas que vous encodez l'audio à partir du tuner TV, c'est que vous ne pouvez pas. Cependant, une bonne quantité de talents combinés est la bienvenue. Bonne chance. Vous en aurez besoin :) Et pour un autre bon conseil, laissez-moi citer Chris Phillips sur la liste de diffusion <ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>:
+<emphasis>n'existe pas</emphasis>. Si je ne dit pas que vous pouvez encoder
+l'audio à partir du tuner TV, c'est que vous ne pouvez pas. Cependant, une bonne
+quantité de talents combinés est la bienvenue. Bonne chance. Vous en aurez besoin :)
+Et pour un autre bon conseil, laissez-moi citer Chris Phillips sur la liste de
+diffusion <ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>:
 </para>
 
 <blockquote><para>
@@ -99,8 +103,8 @@ Règle principale de cette documentation: si ce n'est pas documenté, cela
 (fonctionne sur de nombreux autres Un*x, et processeurs <emphasis role="bold">non-x86</emphasis>
 voir la section <xref linkend="ports"/>). Il lit la majorité des fichiers MPEG,
 VOB, AVI, OGG, VIVO, ASF/WMV, QT/MOV, FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ,
-PVA supportés par de nombreux codecs natifs, XAnim et les DLLs Win32. Vous pouvez
-voir les <emphasis role="bold">VideoCD, SVCD, DVD, 3ivx, RealMedia</emphasis>,
+PVA, Matroska supportés par de nombreux codecs natifs, XAnim et les DLLs Win32. Vous pouvez
+voir les <emphasis role="bold">VideoCD, SVCD, DVD, 3ivx, RealMedia, Sorenson, Theora</emphasis>,
 ainsi que les vidéos au format <emphasis role="bold">DivX</emphasis> (et vous
 n'avez même pas besoin de la bibliothèque avifile pour cela !). L'autre point fort
 de <application>MPlayer</application> supporte la décompression matérielle fournie

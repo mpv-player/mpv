@@ -86,6 +86,14 @@ d'images. J'ai donc d&eacute;cid&eacute; d'en &eacute;crire/modifier un...
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">MPlayer 0.90 "The CounterCounter"</emphasis> 6 Avr 2003
+  </para><para>
+  </para><para>Après plus d'un an, nous avons finalement conclus que le code était
+  de nouveau suffisemment stable, et prèt à sortir en temps que version officielle.
+  Malheureusement nous avons oublié d'incrémenter le numéro de version, et d'autres
+  bogues ennuyeux sont apparus, donc préparez-vous pour...
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer 0.91 "?"</emphasis> date encore inconnue
   </para></listitem>
 </itemizedlist>
 </para>

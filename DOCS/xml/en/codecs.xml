@@ -36,7 +36,7 @@ The most important ones above all:
   native <emphasis role="bold">Sorenson 1 (SVQ1)</emphasis> decoder
   </simpara></listitem>
 <listitem><simpara>
-  Win32/QT <emphasis role="bold">Sorenson 3 (SVQ3)</emphasis> decoder
+  native <emphasis role="bold">Sorenson 3 (SVQ3)</emphasis> decoder
   </simpara></listitem>
 <listitem><simpara>
   <emphasis role="bold">3ivx</emphasis> v1, v2 decoder
@@ -194,7 +194,7 @@ did not install or configure it correctly.
 <para>
 <ulink url="http://ffmpeg.sourceforge.net">FFmpeg</ulink> contains an
 <emphasis role="bold">open source</emphasis> codec package, which is capable
-of decoding streams encoded with H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/HuffYUV
+of decoding streams encoded with H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/HuffYUV/SVQ1/SVQ3
 video, or WMA (Windows Media Audio) audio codecs. Not only some of them can be
 encoded with, but it also offers higher speed than the Win32 codecs or the
 DivX.com DivX4/5 library!
@@ -202,8 +202,15 @@ DivX.com DivX4/5 library!
 
 <para>
 It contains a lot of nice codecs, especially important are the MPEG4 variants:
-DivX3, DivX4, DivX5, Windows Media Video 7 (WMV1). Also a very interesting one
+DivX3, DivX4, DivX5, Windows Media Video 7/8 (WMV1/WMV2). Also a very interesting one
 is the WMA decoder.
+</para>
+
+<para>
+The most recent codec deserving credit is the <emphasis role="bold">Sorenson 3</emphasis>
+(SVQ3) codec. This is the first, completely opensource implementation of this
+codec. It's even faster than the original. Be sure to prefer this instead
+of the binary codec!
 </para>
 
 <para>
@@ -489,7 +496,7 @@ then started XviD. So both projects have the same origin.
 Sorenson is a video codec developed by Sorenson Media and licensed to Apple who
 distribute it with their <application>QuickTime Player</application>. We are
 currently able to decode all version of Sorenson video files with the following
-decoders.
+decoders:
 </para>
 
 <itemizedlist>
@@ -499,13 +506,11 @@ decoders.
   (nearly equal) decoders for SVQ1: one is built in <application>MPlayer</application>,
   the other in libavcodec. You can invoke each of them with the <option>-vc svq1</option>
   and <option>-vc ffsvq1</option> options respectively. Some files may work
-  with one of them, and not with the other, so test both decoders. The decoder
-  was written (reverse engineered) by the <ulink url="http://www.xinehq.de">xine</ulink>
-  authors.
+  with one of them, and not with the other, so test both decoders.
   </simpara></listitem>
 <listitem><simpara>
   Sorenson 3 (fourcc <emphasis>SVQ3</emphasis>) - decoding supported by
-  <emphasis role="bold">Win32 QuickTime libraries</emphasis>
+  <emphasis role="bold">native codec</emphasis> (<link linkend="ffmpeg">libavcodec</link>)
   </simpara></listitem>
 </itemizedlist>
 
