@@ -300,7 +300,7 @@ static void check_events(void)
 
 /** \brief Memory allocation failed.
  *
- * This function can be called if memory allocations failed. It prints a
+ * This function can be called if memory allocation failed. It prints a
  * message and exits the player.
  *
  * \return none     It never returns.
