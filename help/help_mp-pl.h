@@ -351,7 +351,7 @@ static char help_text[]=
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: Kodek nie ustawi³ sh->disp_w i sh->disp_h, próbujê to rozwi±zaæ.\n"
 #define MSGTR_VoConfigRequest "VDec: wymagana konfiguracja vo - %d x %d (preferowana csp: %s)\n"
-#define MSGTR_CouldNotFindColorspace "Nie mogê znale¼æ pasuj±cej przestrzeni koloru - próbujê ponownie ze skal± -vf...\n"
+#define MSGTR_CouldNotFindColorspace "Nie mogê znale¼æ pasuj±cej przestrzeni koloru - próbujê ponownie z -vf scale...\n"
 #define MSGTR_MovieAspectIsSet "Proporcje filmu (obrazu) to %.2f:1 - skalujê do prawid³owych proporcji.\n"
 #define MSGTR_MovieAspectUndefined "Proporcje filmu (obrazu) nie s± zdefiniowane - nie skalujê.\n"
 
