@@ -164,6 +164,7 @@ csp_again:
     if(j<0){
 	// TODO: no match - we should use conversion...
 	if(strcmp(vf->info->name,"scale")){	
+	    mp_msg(MSGT_DECVIDEO,MSGL_INFO,"Couldn't find matching colorspace - retrying with -vop scale...\n");
 	    vf=vf_open_filter(vf,"scale",NULL);
 	    goto csp_again;
 	}
