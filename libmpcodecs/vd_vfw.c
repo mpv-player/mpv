@@ -45,7 +45,7 @@ static int vfw_set_postproc(sh_video_t* sh, int quality)
 {
     vd_vfw_ctx *priv = sh->context;
     // Works only with opendivx/divx4 based DLL
-    return ICSendMessage(priv->handle, ICM_USER+80, (long)(&quality) ,NULL);
+    return ICSendMessage(priv->handle, ICM_USER+80, (long)(&quality), 0);
 }
 
 static void set_csp(BITMAPINFOHEADER *o_bih,unsigned int outfmt){
@@ -238,7 +238,7 @@ static int init(sh_video_t *sh){
     if(verbose) print_video_header(priv->o_bih);
 
     // set postprocessing level in xvid/divx4 .dll
-    ICSendMessage(priv->handle, ICM_USER+80, (long)(&divx_quality) ,NULL);
+    ICSendMessage(priv->handle, ICM_USER+80, (long)(&divx_quality), 0);
 
     // don't do this palette mess always, it makes div3 dll crashing...
     if((sh->codec->outfmt[sh->outfmtidx]==IMGFMT_BGR8) &&
