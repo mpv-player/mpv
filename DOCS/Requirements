@@ -122,6 +122,13 @@ URL:     http://www.frozenproductions.com/xmmp/
 Alt URL: http://xmmp.sourceforge.net
 Note:    For details see DOCS/ChangeLog
 
+aalib
+~~~~~~~
+Brief:   ASCII ARTS Rendering Engine Project
+         Allow to you to watch all videos in ASCII-Mode :) (-vo aa)
+URL:     http://aa-project.sourceforge.net/
+
+
 Enjoy!
 
 	MPlayer team
