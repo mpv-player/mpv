@@ -431,6 +431,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_HFrameDrop "W³±cz gwa³towne zrzucanie ramek (niebezpieczne)"
 #define MSGTR_PREFERENCES_Flip "Odwróæ obraz góra-dó³"
 #define MSGTR_PREFERENCES_Panscan "Panscan: "
+#define MSGTR_PREFERENCES_OSDTimerPercentageTotalTime "Timer, czas procentowy i ca³kowity"
 #define MSGTR_PREFERENCES_OSDTimer "Timer i wska¼niki"
 #define MSGTR_PREFERENCES_OSDProgress "Tylko belki"
 #define MSGTR_PREFERENCES_Subtitle "Napisy:"
