@@ -161,7 +161,7 @@ Usage:
     mplayer -vcd 2 /dev/cdrom
     mplayer -afm 3 /mnt/DVDtrailers/alien4.vob
     mplayer -dvd /dev/dvd /mnt/dvd/matrix.vob
-    mplayer -alsa -abs 65536 -delay -0.4 -nobps ~/movies/test.avi
+    mplayer -abs 65536 -delay -0.4 -nobps ~/movies/test.avi
 
   Note:  in order to use Matrox YUV driver (-vo mga or xmga), first you'll have
          to load the driver: insmod drivers/mga_vid.o , or to make it automatic
