@@ -14,7 +14,8 @@
 	{"vcd", "VCD support is NOT available on this system!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
 #ifdef USE_DVDNAV
-	{"dvdnav", &dvd_nav, CONF_TYPE_FLAG, 0, 0, 1},
+	{"dvdnav", &dvd_nav, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"skipopening", &dvd_nav_skip_opening, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #endif
 #ifdef USE_DVDREAD
 	{"dvd-device", &dvd_device,  CONF_TYPE_STRING, 0, 0, 0, NULL}, 
