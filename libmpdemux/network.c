@@ -1036,6 +1036,9 @@ realrtsp_streaming_start( stream_t *stream ) {
 
 		fd = connect2Server( stream->streaming_ctrl->url->hostname,
 			port = (stream->streaming_ctrl->url->port ? stream->streaming_ctrl->url->port : 554),1 );
+		if(fd<0 && !stream->streaming_ctrl->url->port)
+			fd = connect2Server( stream->streaming_ctrl->url->hostname,
+				port = 7070, 1 );
 		if(fd<0) return -1;
 		
 		file = stream->streaming_ctrl->url->file;
