@@ -49,9 +49,16 @@ Each vo driver _has_ to implement these:
 	 VOCTRL_GUISUPPORT
 		return true only if driver supports co-operation with
 		MPlayer's GUI (not yet used by GUI)
-	 VOCTRL_QUERY_VAA  -  this is used by the vidix extension
-		this is used by the vidix extension to fill a vo_vaa_t struct,
-		I do not know how this works since I'm not the author of this
+	 VOCTRL_SET_EQUALIZER
+		set the video equalizer to the given values
+		two arguments are provided: item and value
+		item is a string, the possible values are (currently):
+		    brightness, contrast, saturation, hue
+	 VOCTRL_GET_EQUALIZER
+		get the current video equalizer values
+		two arguments are provided: item and value
+		item is a string, the possible values are (currenlty):
+		    brightness, contrast, saturation, hue
 
     config():	
       Set up the video system. You get the dimensions and flags.
