@@ -30,6 +30,8 @@
 #include "mmx.h"
 #endif
 
+#include "aspect.h"
+
 LIBVO_EXTERN (dxr3)
 
 #ifdef USE_MP1E
@@ -72,14 +74,15 @@ static vo_info_t vo_info =
 #ifdef USE_MP1E
 void write_dxr3( rte_context* context, void* data, size_t size, void* user_data )
 {
-    if(ioctl(fd_video,EM8300_IOCTL_VIDEO_SETPTS,&vo_pts) < 0)
-	    printf( "VO: [dxr3] Unable to set pts\n" );
+/*    if(ioctl(fd_video,EM8300_IOCTL_VIDEO_SETPTS,&vo_pts) < 0)
+	    printf( "VO: [dxr3] Unable to set pts\n" );*/
     write( fd_video, data, size );
 }
 #endif
 
 static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, uint32_t fullscreen, char *title, uint32_t format)
 {
+    int tmp1,tmp2;
     fd_control = open( "/dev/em8300", O_WRONLY );
     if( fd_control < 1 )
     {
@@ -113,14 +116,34 @@ static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, ui
     if( ioctl( fd_control, EM8300_IOCTL_SET_PLAYMODE, &ioval ) < 0 )
 	printf( "VO: [dxr3] Unable to set playmode!\n" );
     
-    close( fd_control );
-
     img_format = format;
     v_width = width;
     v_height = height;
-    s_width = scr_width;
-    s_height = scr_height;
 
+    /* Calculate screen res */    
+    aspect_save_orig(v_width,v_height);
+    aspect_save_prescale(scr_width,scr_height);
+    aspect_save_screenres(720,576); /* Reference values from DVD spec */
+    aspect(&s_width,&s_height,A_NOZOOM);
+    s_width = (scr_width+15)/16; s_width*=16;
+    s_height = (scr_height+15)/16; s_height*=16;
+    
+    /* Try to figure out whether to use ws output or not */
+    tmp1 = abs(height - ((s_width/4)*3));
+    tmp2 = abs(height - ((s_width/16)*9));
+    if(tmp1 < tmp2)
+    {
+	tmp1 = EM8300_ASPECTRATIO_4_3;
+	printf( "VO: [dxr3] Setting aspect ratio to 4:3\n" );
+    }
+    else
+    {
+	tmp1 = EM8300_ASPECTRATIO_16_9;
+	printf( "VO: [dxr3] Setting aspect ratio to 16:9\n" );
+    }
+    ioctl(fd_control,EM8300_IOCTL_SET_ASPECTRATIO,&tmp1);
+    close(fd_control);
+    
     if( format == IMGFMT_YV12 || format == IMGFMT_YUY2 || format == IMGFMT_BGR24 )
     {
 #ifdef USE_MP1E
@@ -133,9 +156,6 @@ static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, ui
 	    printf( "VO: [dxr3] Unable to initialize MP1E!\n" );
 	    return -1;
 	}
-	
-	s_width = (scr_width+15)/16; s_width*=16;
-	s_height = (scr_height+15)/16; s_height*=16;
 	
 	mp1e_context = rte_context_new( s_width, s_height, NULL );
 	rte_set_verbosity( mp1e_context, 0 );
@@ -219,9 +239,9 @@ static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, ui
 
 	// Set the border colorwou
 	RGBTOYUV(0,0,0)
-        memset( picture_data[0], YUV_s.Y, picture_linesize[0]*s_height );
-        memset( picture_data[1], YUV_s.U, picture_linesize[1]*(s_height/2) );
-        memset( picture_data[2], YUV_s.V, picture_linesize[2]*(s_height/2) );
+        memset( picture_data[0], YUV_s.Y, size );
+        memset( picture_data[1], YUV_s.U, size/4 );
+        memset( picture_data[2], YUV_s.V, size/4 );
 	
 	if( !rte_start_encoding( mp1e_context ) )
 	{
@@ -230,6 +250,7 @@ static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, ui
 	    return -1;
 	}
 
+	if(format == IMGFMT_BGR24) yuv2rgb_init(24, MODE_BGR);
 	return 0;
 #endif
 	return -1;
@@ -264,8 +285,8 @@ static uint32_t draw_frame(uint8_t * src[])
         int data_left;
 	vo_mpegpes_t *p=(vo_mpegpes_t *)src[0];
 
-	if(ioctl(fd_video,EM8300_IOCTL_VIDEO_SETPTS,&p->timestamp) < 0)
-	    printf( "VO: [dxr3] Unable to set pts\n" );
+/*	if(ioctl(fd_video,EM8300_IOCTL_VIDEO_SETPTS,&p->timestamp) < 0)
+	    printf( "VO: [dxr3] Unable to set pts\n" );*/
 	data_left = p->size;
 	while( data_left )
 	    data_left -= write( fd_video, &((unsigned char*)p->data)[p->size-data_left], data_left );
@@ -295,33 +316,7 @@ static uint32_t draw_frame(uint8_t * src[])
 	dU = picture_data[1]+(d_pos_y/2)*picture_linesize[1];
 	dV = picture_data[2]+(d_pos_y/2)*picture_linesize[2];
 	
-	for(y=0;y<h;y++)
-	{
-	    dY+=d_pos_x;
-	    dU+=d_pos_x/4;
-	    dV+=d_pos_x/4;
-	    s+=s_pos_x;
-	    for(x=0;x<w;x+=4)
-	    {
-		RGBTOYUV(s[2],s[1],s[0]);
-		s+=3;
-		*dY = YUV_s.Y;dY++;
-//	The chrominance is shifted, ppl will have to settle with b&w for now ;)
-//		*dU = YUV_s.U;dU++;
-//		*dV = YUV_s.V;dV++;
-		
-		*dY = RGBTOY(s[2],s[1],s[0]);dY++;
-		s+=3;
-		*dY = RGBTOY(s[2],s[1],s[0]);dY++;
-		s+=3;
-		*dY = RGBTOY(s[2],s[1],s[0]);dY++;
-		s+=3;
-	    }
-	    dY+=d_pos_x;
-	    dU+=d_pos_x/4;
-	    dV+=d_pos_x/4;
-	    s+=s_pos_x;
-	}
+	rgb24toyv12(s,dY,dU,dV,w,h,picture_linesize[0],picture_linesize[1],v_width*3);
 	
 	mp1e_buffer.data = picture_data[0];
 	mp1e_buffer.time = vo_pts/90000.0;
@@ -394,11 +389,11 @@ static uint32_t draw_slice( uint8_t *srcimg[], int stride[], int w, int h, int x
 static uint32_t
 query_format(uint32_t format)
 {
-    if(format==IMGFMT_MPEGPES) return 1|256;
+    if(format==IMGFMT_MPEGPES) return 0x2|0x4;
 #ifdef USE_MP1E
     if(format==IMGFMT_YV12) return 0x1|0x4;
     if(format==IMGFMT_YUY2) return 0x1|0x4;
-    if(format==IMGFMT_BGR24) { printf( "VO: [dxr3] WARNING\tExperimental output, black&white only and very slow\n\t(will be inproved later, this format is rarely used)\n" ); return 0x1|0x4; }
+    if(format==IMGFMT_BGR24) return 0x1|0x4;
     else printf( "VO: [dxr3] Format unsupported, mail dholm@iname.com\n" );
 #else
     else printf( "VO: [dxr3] You have disabled libmp1e support, you won't be able to play this format!\n" );
