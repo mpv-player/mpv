@@ -757,9 +757,11 @@ static int grab_video_frame(priv_t *priv, char *buffer, int len)
 	mp_msg(MSGT_TV, MSGL_ERR, "ioctl mcapture failed: %s\n", strerror(errno));
 	return(0);
     }
-    
-    if (ioctl(priv->fd, VIDIOCSYNC, &priv->buf[frame].frame) == -1)
-	mp_msg(MSGT_TV, MSGL_ERR, "ioctl sync failed: %s\n", strerror(errno));
+
+    while (ioctl(priv->fd, VIDIOCSYNC, &priv->buf[frame].frame) < 0 &&
+	(errno == EAGAIN || errno == EINTR));
+	mp_dbg(MSGT_TV, MSGL_DBG3, "picture sync failed\n");
+
     priv->queue++;
     
     mp_dbg(MSGT_TV, MSGL_DBG3, "mmap: %p + offset: %d => %p\n",
