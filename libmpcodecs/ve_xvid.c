@@ -22,11 +22,24 @@
 #include <xvid.h>
 #include "xvid_vbr.h"
 
+#ifndef PMV_EARLYSTOP16
+  #define XVID_DEV
+#endif
+
 #include "cfgparser.h"
 
 /**********************************************************************/
-/* Divx4 quality to XviD encoder motion flag presets */
-static int const divx4_motion_presets[7] = {
+/* motion estimation quality presets */
+static int const motion_presets[7] = {
+#ifdef XVID_DEV
+	0,
+	PMV_QUICKSTOP16,
+	0,
+	0,
+	PMV_HALFPELREFINE16 | PMV_HALFPELDIAMOND8,
+	PMV_HALFPELREFINE16 | PMV_HALFPELDIAMOND8 | PMV_ADVANCEDDIAMOND16,
+	PMV_HALFPELREFINE16 | PMV_EXTSEARCH16 | PMV_HALFPELREFINE8 | PMV_HALFPELDIAMOND8 | PMV_USESQUARES16
+#else
         0,
 	PMV_QUICKSTOP16,
 	PMV_EARLYSTOP16,
@@ -36,24 +49,15 @@ static int const divx4_motion_presets[7] = {
 	PMV_EARLYSTOP16 | PMV_HALFPELREFINE16 | PMV_EXTSEARCH16 | PMV_EARLYSTOP8 | PMV_HALFPELREFINE8 | 
 	PMV_HALFPELDIAMOND8 | PMV_USESQUARES16
 
-};
-
-/* Divx4 quality to general encoder flag presets */
-static int const divx4_general_presets[7] = {
-	0,
-	XVID_H263QUANT,
-	XVID_H263QUANT,
-	XVID_H263QUANT | XVID_HALFPEL,
-	XVID_H263QUANT | XVID_INTER4V | XVID_HALFPEL,
-	XVID_H263QUANT | XVID_INTER4V | XVID_HALFPEL,
-	XVID_H263QUANT | XVID_INTER4V | XVID_HALFPEL
+#endif
 };
 
 extern char* passtmpfile;
 extern void mencoder_write_chunk(aviwrite_stream_t *s,int len,unsigned int flags);
 
 static int xvidenc_pass = 0;
-static int xvidenc_quality = sizeof(divx4_motion_presets) / sizeof(divx4_motion_presets[0]) - 1; /* best quality */
+static int xvidenc_quality = 4;
+static int xvidenc_4mv = 0;
 static int xvidenc_bitrate = -1;
 static int xvidenc_rc_reaction_delay_factor = -1;
 static int xvidenc_rc_averaging_period = -1;
@@ -71,12 +75,22 @@ static int xvidenc_fixed_quant = 0;
 static int xvidenc_debug = 0;
 static int xvidenc_hintedme = 0;
 static char* xvidenc_hintfile = "xvid_hint_me.dat";
+#ifdef XVID_DEV
+static int xvidenc_qpel = 0;
+static int xvidenc_max_bframes = 0;
+static int xvidenc_bquant_ratio = 125;
+static int xvidenc_bquant_offset = 60;
+static int xvidenc_gmc = 0;
+static int xvidenc_me_colour = 0;
+static int xvidenc_reduced = 0;
+#endif
 
 struct config xvidencopts_conf[] = {
     { "pass", &xvidenc_pass, CONF_TYPE_INT, CONF_RANGE, 0, 2, NULL},
-    { "quality", &xvidenc_quality, CONF_TYPE_INT, CONF_RANGE, 0,
-      sizeof(divx4_motion_presets) / sizeof(divx4_motion_presets[0]) - 1, NULL},
-    { "br", &xvidenc_bitrate, CONF_TYPE_INT, CONF_RANGE, 4, 24000000, NULL},
+    { "me_quality", &xvidenc_quality, CONF_TYPE_INT, CONF_RANGE, 0,
+      sizeof(motion_presets) / sizeof(motion_presets[0]) - 1, NULL},
+    { "4mv", &xvidenc_4mv, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    { "bitrate", &xvidenc_bitrate, CONF_TYPE_INT, CONF_RANGE, 4, 24000000, NULL},
     { "rc_reaction_delay_factor", &xvidenc_rc_reaction_delay_factor, CONF_TYPE_INT, 0, 0, 0, NULL},
     { "rc_averaging_period", &xvidenc_rc_averaging_period, CONF_TYPE_INT, 0, 0, 0, NULL},
     { "rc_buffer", &xvidenc_rc_buffer, CONF_TYPE_INT, 0, 0, 0, NULL},
@@ -93,6 +107,15 @@ struct config xvidencopts_conf[] = {
     { "debug", &xvidenc_debug, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     { "hintedme", &xvidenc_hintedme, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     { "hintfile", &xvidenc_hintfile, CONF_TYPE_STRING, 0, 0, 0, NULL},
+#ifdef XVID_DEV
+    { "qpel", &xvidenc_qpel, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    { "max_bframes", &xvidenc_max_bframes, CONF_TYPE_INT, CONF_RANGE, 0, 4, NULL},
+    { "bquant_ratio", &xvidenc_bquant_ratio, CONF_TYPE_INT, CONF_RANGE, 0, 1000, NULL},
+    { "bquant_offset", &xvidenc_bquant_offset, CONF_TYPE_INT, CONF_RANGE, -1000, 1000, NULL},
+    { "reduced", &xvidenc_reduced, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    { "gmc", &xvidenc_gmc, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    { "me_colour", &xvidenc_me_colour, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+#endif
     { NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -148,6 +171,17 @@ config(struct vf_instance_s* vf,
 	enc_param.rc_bitrate = xvidenc_bitrate * 1000;
     else
 	enc_param.rc_bitrate = -1;
+#ifdef XVID_DEV
+    if (xvidenc_max_bframes >= 1 && xvidenc_pass >= 1) {
+	mp_msg(MSGT_MENCODER,MSGL_WARN, "xvid: cannot use bframes with 2-pass, disabling bframes\n");
+	xvidenc_max_bframes = 0;
+    }
+    enc_param.max_bframes = xvidenc_max_bframes;
+    enc_param.bquant_ratio = xvidenc_bquant_ratio;
+    enc_param.bquant_offset = xvidenc_bquant_offset;
+    if (xvidenc_reduced)
+	enc_param.global |= XVID_GLOBAL_REDUCED;
+#endif
     enc_param.rc_reaction_delay_factor = xvidenc_rc_reaction_delay_factor;
     enc_param.rc_averaging_period = xvidenc_rc_averaging_period;
     enc_param.rc_buffer = xvidenc_rc_buffer;
@@ -171,14 +205,24 @@ config(struct vf_instance_s* vf,
 
     // initialize XViD per-frame static parameters
     // ===========================================
-    fp->enc_frame.general = divx4_general_presets[xvidenc_quality];
-    fp->enc_frame.motion = divx4_motion_presets[xvidenc_quality];
-    if (xvidenc_mpeg_quant) {
-	fp->enc_frame.general &= ~XVID_H263QUANT;
-	fp->enc_frame.general |= XVID_MPEGQUANT;
-    }
+    fp->enc_frame.motion = motion_presets[xvidenc_quality];
+    fp->enc_frame.general = XVID_HALFPEL | (xvidenc_mpeg_quant ? XVID_MPEGQUANT : XVID_H263QUANT);
+    if (xvidenc_4mv)
+	fp->enc_frame.general |= XVID_INTER4V;
     if (xvidenc_lumi_mask)
 	fp->enc_frame.general |= XVID_LUMIMASKING;
+#ifdef XVID_DEV
+    if (xvidenc_qpel) {
+	fp->enc_frame.general |= XVID_QUARTERPEL;
+	fp->enc_frame.motion |= PMV_QUARTERPELREFINE16 | PMV_QUARTERPELREFINE8;
+    }
+    if (xvidenc_gmc)
+	fp->enc_frame.general |= XVID_GMC;
+    if (xvidenc_me_colour)
+	fp->enc_frame.general |= XVID_ME_COLOUR;
+    if(xvidenc_reduced)
+	fp->enc_frame.general |= XVID_REDUCED;
+#endif
 
     switch (outfmt) {
     case IMGFMT_YV12:
@@ -310,8 +354,24 @@ put_image(struct vf_instance_s* vf, mp_image_t *mpi)
     fp->enc_frame.image = mpi->planes[0];
 
     // get quantizers & I/P decision from the VBR engine
+#ifdef XVID_DEV
+    if (xvidenc_max_bframes >= 1) {
+	if (!xvidenc_fixed_quant) {
+	    // hack, the internal VBR engine isn't fixed-quant aware
+	    fp->enc_frame.quant = xvidenc_fixed_quant;
+	    fp->enc_frame.intra = -1;
+	    fp->enc_frame.bquant = (xvidenc_fixed_quant * xvidenc_bquant_ratio + xvidenc_bquant_offset) / 100;
+	} else
+	    // use the internal VBR engine since the external one isn't bframe aware
+	    fp->enc_frame.quant = fp->enc_frame.intra = fp->enc_frame.bquant = -1;
+    } else {
+	fp->enc_frame.quant = vbrGetQuant(&fp->vbr_state);
+	fp->enc_frame.intra = vbrGetIntra(&fp->vbr_state);
+    }
+#else
     fp->enc_frame.quant = vbrGetQuant(&fp->vbr_state);
     fp->enc_frame.intra = vbrGetIntra(&fp->vbr_state);
+#endif
 
     // modulated quantizer type
     if (xvidenc_mod_quant && xvidenc_pass == 2) {
@@ -361,7 +421,7 @@ put_image(struct vf_instance_s* vf, mp_image_t *mpi)
     }
     
     // write output
-    mencoder_write_chunk(fp->mux, fp->enc_frame.length, fp->enc_frame.intra ? 0x10 : 0);
+    mencoder_write_chunk(fp->mux, fp->enc_frame.length, fp->enc_frame.intra==1 ? 0x10 : 0);
 
     // update the VBR engine
     vbrUpdate(&fp->vbr_state, enc_stats.quant, fp->enc_frame.intra,

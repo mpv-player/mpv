@@ -12,6 +12,10 @@
 #include <divx4.h>
 #include <xvid.h>
 
+#ifndef PMV_EARLYSTOP16
+  #define XVID_DEV
+#endif
+
 static vd_info_t info = 
 {
 	"xvid decoder",
@@ -165,6 +169,11 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
   dec.bitstream = data;
   dec.length = len;
+#ifdef XVID_DEV
+  dec.general |= XVID_DEC_LOWDELAY;
+  dec.general |= XVID_DEC_DEBLOCKY;
+  dec.general |= XVID_DEC_DEBLOCKUV;
+#endif
   switch(p->cs) {
   case XVID_CSP_USER:
     dec.image = &d4_pic;

@@ -2531,11 +2531,15 @@ Available options are:
 .RSs
 .IPs pass=<1|2>
 specify the pass in 2pass mode
-.IPs quality=<0\-6>
-specify the encoding quality (default=6)
-.IPs br=<value>
+.IPs bitrate=<value>
 sets the bitrate to be used in kbits/\:second if <16000 or in bits/\:second if >16000
 (CBR or 2pass mode, default=687 kbits/s)
+.IPs fixed_quant=<1\-31>
+switch to fixed quantizer mode and specify the quantizer to be used
+.IPs me_quality=<0\-6>
+specify the motion detection quality (default=4)
+.IPs 4mv
+use 4 motion vectors per macro-block, might gives better compression at the cost of a slower encoding (default=off)
 .IPs rc_reaction_delay_factor=<value>
 specify how fast the rate control reacts, lower values are faster
 .IPs rc_averaging_period=<value>
@@ -2570,8 +2574,6 @@ this is *not* the 2pass control file
 (default=10, 2pass mode only)
 .IPs kfreduction=<0-100>
 (default=30, 2pass mode only)
-.IPs fixed_quant=<1\-31>
-switch to fixed quantizer mode and specify the quantizer to be used
 .RE
 
 
