@@ -28,6 +28,18 @@
 #include "libvo/img_format.h"
 #include "xacodec.h"
 
+typedef char xaBYTE;
+typedef short xaSHORT;
+typedef int xaLONG;
+
+typedef unsigned char xaUBYTE;
+typedef unsigned short xaUSHORT;
+typedef unsigned int xaULONG;
+
+#define xaFALSE 0
+#define xaTRUE 1
+
+
 #ifndef RTLD_NOW
 #define RLTD_NOW 2
 #endif
@@ -427,33 +439,53 @@ void XA_2x2_OUT_1BLK_clr8(unsigned char *image, unsigned int x, unsigned int y,
     unsigned int imagex, XA_2x2_Color *cmap2x2)
 {
     unsigned int row_inc = imagex - 3;
-    unsigned char *ip = (unsigned char *)(image + y * imagex + x);
+    unsigned char *ip = (unsigned char *)(image + 4*(y * imagex + x));
 
-    XA_Print("XA_2x2_OUT_1BLK_clr8('image: %08x', 'x: %d', 'y: %d', 'imagex: %d', 'cmap2x2: %08x')",
-	image, x, y, imagex, cmap2x2);
-    ip_OUT_2x2_1BLK(ip, unsigned char, cmap2x2, row_inc);
+//    XA_Print("XA_2x2_OUT_1BLK_clr8('image: %08x', 'x: %d', 'y: %d', 'imagex: %d', 'cmap2x2: %08x')",
+//	image, x, y, imagex, cmap2x2);
+    //ip_OUT_2x2_1BLK(ip, unsigned char, cmap2x2, row_inc);
+    
+    // simplified yv12->rgb32bpp converter (Y only)
+    ip[0]=ip[1]=ip[2]=cmap2x2->clr0_0;
+    ip[4]=ip[5]=ip[6]=cmap2x2->clr1_0;
+    ip+=4*imagex;
+    ip[0]=ip[1]=ip[2]=cmap2x2->clr2_0;
+    ip[4]=ip[5]=ip[6]=cmap2x2->clr3_0;
+    
 }
 
 void XA_2x2_OUT_4BLKS_clr8(unsigned char *image, unsigned int x, unsigned int y,
     unsigned int imagex, XA_2x2_Color *cm0, XA_2x2_Color *cm1, XA_2x2_Color *cm2,
     XA_2x2_Color *cm3)
 {
+/*
     unsigned int row_inc = imagex - 3;
     unsigned char *ip = (unsigned char *)(image + y * imagex + x);
 
-    XA_Print("XA_2x2_OUT_1BLK_clr8('image: %08x', 'x: %d', 'y: %d', 'imagex: %d', 'cm0: %08x', 'cm1: %08x', 'cm2: %08x', 'cm3: %08x')",
+    XA_Print("XA_2x2_OUT_4BLKS_clr8('image: %08x', 'x: %d', 'y: %d', 'imagex: %d', 'cm0: %08x', 'cm1: %08x', 'cm2: %08x', 'cm3: %08x')",
 	image, x, y, imagex, cm0, cm1, cm2, cm3);
     ip_OUT_2x2_2BLKS(ip, unsigned char, cm0, cm1, row_inc);
     ip += row_inc;
     ip_OUT_2x2_2BLKS(ip, unsigned char, cm2, cm3, row_inc);
+*/
+
+XA_2x2_OUT_1BLK_clr8(image,x,y,imagex,cm0);
+XA_2x2_OUT_1BLK_clr8(image,x+2,y,imagex,cm1);
+XA_2x2_OUT_1BLK_clr8(image,x,y+2,imagex,cm2);
+XA_2x2_OUT_1BLK_clr8(image,x+2,y+2,imagex,cm3);
+
+}
+
+void dummy(){
+    XA_Print("dummy() called");
 }
 
 void *YUV2x2_Blk_Func(unsigned int image_type, int blks, unsigned int dith_flag)
 {
     void (*color_func)();
 
-    XA_Print("YUV2x2_Blk_Func('image_type: %d', 'blks: %d', 'dith_flag: %d')",
-	    image_type, blks, dith_flag);
+//    XA_Print("YUV2x2_Blk_Func('image_type: %d', 'blks: %d', 'dith_flag: %d')",
+//	    image_type, blks, dith_flag);
 
     if (blks == 1)
     {
@@ -464,7 +496,7 @@ void *YUV2x2_Blk_Func(unsigned int image_type, int blks, unsigned int dith_flag)
 		break;
 	}
     }
-    else /* blks == 4 */
+    else if(blks == 4)
     {
 	switch(image_type)
 	{
@@ -473,21 +505,67 @@ void *YUV2x2_Blk_Func(unsigned int image_type, int blks, unsigned int dith_flag)
 		break;
 	}
     }
+    else printf("Ajajj!\n");
 
-    XA_Print("YUV2x2_Blk_Func -> %08x", color_func);
+//    XA_Print("YUV2x2_Blk_Func -> %08x", color_func);
 
     return((void *)color_func);
 }
 
-void dummy(){
-    XA_Print("dummy() called");
+
+/*****************************************************************************
+ * Take Four Y's and UV and put them into a 2x2 Color structure.
+ * Convert to display clr.
+ ******************/
+
+void XA_YUV_2x2_clr(cmap2x2,Y0,Y1,Y2,Y3,U,V,map_flag,map,chdr)
+XA_2x2_Color *cmap2x2;
+xaULONG Y0,Y1,Y2,Y3,U,V;
+xaULONG map_flag,*map;
+XA_CHDR *chdr;
+{ xaLONG cr,cg,cb; xaULONG r,g,b;
+
+//  printf("XA_YUV_2x2_clr(%p [%d,%d,%d,%d][%d][%d] %d %p %p)\n",
+//          cmap2x2,Y0,Y1,Y2,Y3,U,V,map_flag,map,chdr);
+
+  cmap2x2->clr0_0=Y0;
+  cmap2x2->clr1_0=Y1;
+  cmap2x2->clr2_0=Y2;
+  cmap2x2->clr3_0=Y3;
+  cmap2x2->clr0_1=U;
+  cmap2x2->clr0_2=V;
+
+//  cmap2x2->clr0_0 = 0x1111;
+//  cmap2x2->clr1_0 = 0x3535;
+//  cmap2x2->clr2_0 = 0x7272;
+//  cmap2x2->clr3_0 = 0xbfbf;
+
+/*
+  xaUBYTE *rl = xa_byte_limit;
+
+  cr = YUV2_VR_tab[V];
+  cb = YUV2_UB_tab[U];
+  cg = YUV2_UG_tab[U] + YUV2_VG_tab[V];
+
+  YUV_TO_RGB(Y0,cr,cg,cb,rl,r,g,b);
+  cmap2x2->clr0_0 = XA_RGB24_To_CLR32(r,g,b,map_flag,map,chdr);
+  YUV_TO_RGB(Y1,cr,cg,cb,rl,r,g,b);
+  cmap2x2->clr1_0 = XA_RGB24_To_CLR32(r,g,b,map_flag,map,chdr);
+  YUV_TO_RGB(Y2,cr,cg,cb,rl,r,g,b);
+  cmap2x2->clr2_0 = XA_RGB24_To_CLR32(r,g,b,map_flag,map,chdr);
+  YUV_TO_RGB(Y3,cr,cg,cb,rl,r,g,b);
+  cmap2x2->clr3_0 = XA_RGB24_To_CLR32(r,g,b,map_flag,map,chdr);
+*/
 }
+
+
 
 void *YUV2x2_Map_Func(unsigned int image_type, unsigned int dith_type)
 {
-    XA_Print("YUV2x2_Map_Func('image_type: %d', 'dith_type: %d')",
-	    image_type, dith_type);
-    return (void*)dummy;
+//    XA_Print("YUV2x2_Map_Func('image_type: %d', 'dith_type: %d')",
+//	    image_type, dith_type);
+    if(image_type!=0)printf("izeeeeee!\n");
+    return (void*)XA_YUV_2x2_clr;
 }
 
 int XA_Add_Func_To_Free_Chain(XA_ANIM_HDR *anim_hdr, void (*function)())
@@ -509,6 +587,7 @@ int XA_Gen_YUV_Tabs(XA_ANIM_HDR *anim_hdr)
 void JPG_Setup_Samp_Limit_Table(XA_ANIM_HDR *anim_hdr)
 {
     XA_Print("JPG_Setup_Samp_Limit_Table('anim_hdr: %08x')", anim_hdr);
+//    xa_byte_limit = jpg_samp_limit + (MAXJSAMPLE + 1);
 }
 
 void JPG_Alloc_MCU_Bufs(XA_ANIM_HDR *anim_hdr, unsigned int width,
