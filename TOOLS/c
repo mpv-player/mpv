@@ -1,5 +1,5 @@
 gcc bios2dump.c -o bios2dump
-
+gcc mem2dump.c -o mem2dump
 gcc subreader.c -o subreader
 gcc movinfo.c -o movinfo
 
