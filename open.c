@@ -174,7 +174,7 @@ if(dvd_title){
     mp_msg(MSGT_OPEN,MSGL_INFO, MSGTR_DVDnumAngles,
              tt_srpt->title[dvd_title].nr_of_angles );
     if( dvd_angle<1 || dvd_angle>tt_srpt->title[dvd_title].nr_of_angles ) {
-	mp_msg(MSGT_OPEN,MSGL_ERR, MSGTR_DVDinvaludAngle, dvd_angle);
+	mp_msg(MSGT_OPEN,MSGL_ERR, MSGTR_DVDinvalidAngle, dvd_angle);
         ifoClose( vmg_file );
         DVDClose( dvd );
         return NULL;
