@@ -523,7 +523,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
     }
 
 
-    if(!num_filenames && !vcd_track && !dvd_title){
+    if(!num_filenames && !vcd_track && !dvd_title && !tv_param_on){
       if(!use_gui){
 	// no file/vcd/dvd -> show HELP:
 	printf("%s",help_text);
