@@ -7,7 +7,7 @@
 #ifndef __ASM_MACROS_POWERPC_H
 #define __ASM_MACROS_POWERPC_H
 
-#if defined(Lynx)
+#if defined(Lynx) || defined(__OpenBSD__)
 
 extern unsigned char *ioBase;
 
@@ -18,7 +18,7 @@ static __inline__ volatile void eieio()
 
 static __inline__ void outb(short port, unsigned char value)
 {
-	*(uchar *)(ioBase + port) = value; eieio();
+	*(unsigned char *)(ioBase + port) = value; eieio();
 }
 
 static __inline__ void outw(short port, unsigned short value)
