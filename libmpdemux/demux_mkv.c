@@ -2838,8 +2838,52 @@ demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, int flags)
       if(demuxer->audio->sh != NULL)
         resync_audio_stream((sh_audio_t *) demuxer->audio->sh); 
     }
-  else
+  else if ((demuxer->movi_end <= 0) || !(flags & 1))
     mp_msg (MSGT_DEMUX, MSGL_V, "[mkv] seek unsupported flags\n");
+  else
+    {
+      void resync_audio_stream(sh_audio_t *sh_audio);
+      mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
+      stream_t *s = demuxer->stream;
+      uint64_t target_filepos;
+      mkv_index_t *index = NULL;
+      int i;
+
+      if (mkv_d->indexes == NULL)  /* no index was found */
+        {                       /* I'm lazy... */
+          mp_msg (MSGT_DEMUX, MSGL_V, "[mkv] seek unsupported flags\n");
+          return;
+        }
+
+      target_filepos = (uint64_t)(demuxer->movi_end * rel_seek_secs);
+      for (i=0; i < mkv_d->num_indexes; i++)
+        if (mkv_d->indexes[i].tnum == demuxer->video->id)
+          if ((index == NULL) ||
+              ((mkv_d->indexes[i].filepos >= target_filepos) &&
+               ((index->filepos < target_filepos) ||
+                (mkv_d->indexes[i].filepos < index->filepos))))
+            index = &mkv_d->indexes[i];
+
+      if (!index)
+        return;
+
+      mkv_d->cluster_size = mkv_d->blockgroup_size = 0;
+      stream_seek (s, index->filepos);
+
+      if (demuxer->video->id >= 0)
+        mkv_d->v_skip_to_keyframe = 1;
+      mkv_d->skip_to_timecode = index->timecode;
+      mkv_d->a_skip_to_keyframe = 1;
+
+      /* Clear subtitles. */
+      if (index->timecode <= mkv_d->last_pts * 1000)
+        clear_subtitles(demuxer, 0, 1);
+
+      demux_mkv_fill_buffer(demuxer);
+
+      if(demuxer->audio->sh != NULL)
+        resync_audio_stream((sh_audio_t *) demuxer->audio->sh); 
+    }
 }
 
 int
