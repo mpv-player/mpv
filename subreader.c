@@ -925,6 +925,7 @@ static void adjust_subs_time(subtitle* sub, float subtime, float fps, int block)
 	subtitle* nextsub;
 	int i = sub_num;
 	unsigned long subfms = (sub_uses_time ? 100 : fps) * subtime;
+	unsigned long overlap = (sub_uses_time ? 100 : fps) / 5; // 0.2s
 	
 	n=m=0;
 	if (i)	for (;;){
@@ -936,6 +937,17 @@ static void adjust_subs_time(subtitle* sub, float subtime, float fps, int block)
 		}
 		if (!--i) break;
 		nextsub = sub + 1;
+	    if(!block){
+		if ((sub->end > nextsub->start) && (sub->end <= nextsub->start + overlap)) {
+		    // these subtitles overlap for less than 0.2 seconds
+		    // and would result in very short overlapping subtitle
+		    // so let's fix the problem here, before overlapping code
+		    // get its hands on them
+		    unsigned delta = sub->end - nextsub->start, half = delta / 2;
+		    sub->end -= half + 1;
+		    nextsub->start += delta - half;
+		}
+	    }
 	    if (block){
 		if (sub->end >= nextsub->start){
 			sub->end = nextsub->start - 1;
