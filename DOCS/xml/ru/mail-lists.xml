@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="koi8-r"?>
+<appendix id="mailinglists">
+<title>Почтовые рассылки</title>
+<para>
+Есть несколько общедоступных рассылок по <application>MPlayer</application>.
+Если это специально не оговорено, язык этих рассылок - <emphasis role="bold">
+английский</emphasis>. Пожалуйста, не присылайте сообщения на других языках
+или HTML почту! Размер письма ограничен 80к. Если у Вас что-то большее,
+выложите это где-нибудь для скачивания. Нажимайте ссылки, чтобы подписаться.
+В почтовых рассылках действуют такие же правила написания и цитирования, как и
+в юзнете[usenet]. Пожалуйста, следуйте им, это делает жизнь читающих письма
+значительно проще. Если Вы не знаете этих правил, пожалуйста, прочитайте
+<ulink url="http://learn.to/edit_messages">HOWTO edit messages [КАК
+редактировать сообщения]</ulink> или (если Вы торопитесь)
+<ulink url="http://www.xs4all.nl/~hanb/documents/quotingguide.html">
+Quoting HOWTO [КАК цитировать]</ulink>.
+<itemizedlist>
+<listitem><para>
+Рассылка анонсов MPlayer'а:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-announce"/>
+Рассылка для объявлений о MPlayer'е. Подпишитесь, если Вы хотите получать
+объявления о новых возможностях.
+</para></listitem>
+<listitem><para>
+Рассылка разработчиков MPlayer'а:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng"/>
+Это рассылка о разработке MPlayer'а! Разговор ведется о изменениях в
+интерфейсе/API, новых библиотеках, оптимизации кода, изменениях в конфигурации.
+Присылайте сюда патчи, а не сообщения об ошибках, вопросы пользователей, запросы
+новых возможностей, чтобы сохранить низким трафик.
+</para></listitem>
+<listitem><para>
+Рассылка пользователей MPlayer'а:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"/>
+  <itemizedlist>
+  <listitem><para>
+  Присылайте сюда сообщения об ошибках, прочитав <link linkend="bugs">Известные
+  ошибки</link> и <link linkend="bugreports">секцию сообщения об ошибках</link>).
+  </para></listitem>
+  <listitem><para>
+  Присылайте сюда запросы новых возможностей (прочитав <emphasis role="bold">
+  всю документацию</emphasis>).
+  </para></listitem>
+  <listitem><para>
+  Присылайте сюда пользовательские вопросы (прочитав <emphasis role="bold"> всю
+  документацию</emphasis>).
+  </para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+Рассылка венгерских пользователей MPlayer'а:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok"/>
+  <itemizedlist>
+  <listitem><para>
+  Рассылка на венгерском языке.
+  </para></listitem>
+  <listitem><para>
+  Тема? Там видно будет... по большей части - флейм[flame] и RTFM вопросы :(
+  </para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+Пользователи MPlayer &amp; Matrox G200/G400/G450/G550:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-matrox"/>
+Вопросы относящиеся к Matrox'ам, например
+  <itemizedlist>
+  <listitem><para>
+  связанные с mga_vid
+  </para></listitem>
+  <listitem><para>
+  официальные Matrox'овские бета драйвера (для 4.x.x)
+  </para></listitem>
+  <listitem><para>
+  касательно matroxfb-TVout
+  </para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+Пользователи MPlayer &amp; DVB карты:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb"/>
+Вещи связанные с аппаратнодекодирующей картой, называемой DVB (не
+  <emphasis role="bold">DXR3</emphasis>!).
+</para></listitem>
+<listitem><para>
+MPlayer CVS-log:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog"/>
+Все изменения в коде MPlayer'а автоматически отсылается в эту рассылку. Сюда
+относятся только вопросы, касательно этих изменений (если Вы не понимаете,
+почему это изменение требуется, или у Вас есть лучшее решение, или Вы
+заметили потенциальную ошибку/проблему в этом изменении).
+</para></listitem>
+<listitem><para>
+Рассылка, относящаяся к переносу MPlayer под CygWin:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin"/>
+Рассылка для обсуждения переноса MPlayer под CygWin:
+</para></listitem>
+<listitem><para>
+Рассылка, относящаяся к переносу MPlayer под OS/2:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-os2"/>
+Рассылка для обсуждения переноса MPlayer под OS/2:
+</para></listitem>
+<listitem><para>
+Рассылка для редакторов и переводчиков MPlayer Weekly News:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-mwn"/>
+Рассылка для дискуссий о новых выпусках Weekly News.
+</para></listitem>
+</itemizedlist>
+<note><para>
+Здесь Вы можете обнаружить архив рассылок с возможностью поиска:
+<ulink url="http://www.mplayerhq.hu/cgi-bin/htsearch"/>.
+</para></note>
+</para>
+</appendix>
