@@ -474,7 +474,9 @@ képernyõ méreteit (mga/fbdev/x11 és/vagy TV kimenet), itt adhatod meg a
 magasságot.
 .TP
 .B \-cache\ kbyte
-Lásd lent.
+Ezzel az opcióval megadható, hogy mennyi memóriát használjon az MPlayer a
+megadott file/URL cache-elésére. Különösen a lassú elérésû hordozókon
+hasznos. Alapállapotban kikapcsolva.
 .IP
 .SH "ALPHA/BETA ÁLLAPOTÚ FUNKCIÓK"
 .TP
@@ -500,10 +502,6 @@ video stream kiírása a ./stream.dump file-ba (csak MPEG-PS-nél)
 .TP
 .B \-sid
 DVD felirat megadása (?) (_NEM FOGJA_ MEGJELENÍTENI! RTFM!)
-.TP
-.B \-cache\ kbyte
-_HA_ cache támogatással fordítottál, ezzel az opcióval kapcsolhatod be.
-Add meg a használni kívánt memória mennyiségét is, kbyte-ban.
 .IP
 .SH IRÁNYÍTÁS A BILLENTYÛZETRÕL
 .TP
@@ -529,7 +527,7 @@ m               master/pcm hangerõállítás között váltás
 
 z v. x          felirat késleltetésének változtatása +- 0.1 mp-cel
 
-(a következõk csak a DirectShow DivX codec használatának esetén élnek)
+(a következõk csak a DirectShow DivX illetve DivX4 codecek használatának esetén élnek)
 
 1 v. 2          kontraszt állítása
 

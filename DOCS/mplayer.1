@@ -469,7 +469,8 @@ If you use an output driver which can't know the resolution of the screen
 resolution.
 .TP
 .B \-cache\ kbytes
-See it below, in the ALPHA/BETA CODE section.
+This option specifies how much memory to use when precaching a file/URL .
+Especially useful on slow media. Default is off.
 .IP
 .SH "ALPHA/BETA CODE"
 .TP
@@ -496,10 +497,6 @@ dump video stream to ./stream.dump (only with MPEG-PS) (not very usable)
 .TP
 .B \-sid
 specify DVD subtitle (?) (IT _WILL NOT_ DISPLAY! RTFM!)
-.TP
-.B \-cache\ kbytes
-_If you compiled with cache support_ , use this option to enable using it.
-Also specify the amount of memory to use, in kbytes.
 .IP
 .SH KEYBOARD CONTROL
 .TP
@@ -526,7 +523,8 @@ m               toggle using master/pcm volume
 
 z or x          adjust subtitle delay by +/- 0.1 second
 
-(the following keys are valid only when using DirectShow DivX codec)
+(the following keys are valid only when using DirectShow DivX codec, or
+the DivX4 codec with -vc divx4)
 
 1 or 2          adjust contrast
 
