@@ -4,7 +4,8 @@
 
 <para>
 This section is about how to enable <emphasis role="bold">watching/grabbing
-from V4L compatible TV tuner</emphasis>.
+from V4L compatible TV tuner</emphasis>. See the man page for a description
+of TV options and keyboard controls.
 </para>
 
 
@@ -20,7 +21,7 @@ from V4L compatible TV tuner</emphasis>.
   </para></step>
 <step><para>
   Make sure your tuner works with another TV software in Linux, for
-  example xawtv.
+  example <application>XawTV</application>.
   </para></step>
 </procedure>
 </sect2>
