@@ -69,6 +69,7 @@ extern vo_functions_t video_out_tdfxfb;
 extern vo_functions_t video_out_null;
 //extern vo_functions_t video_out_odivx;
 extern vo_functions_t video_out_zr;
+extern vo_functions_t video_out_zr2;
 extern vo_functions_t video_out_bl;
 extern vo_functions_t video_out_pgm;
 extern vo_functions_t video_out_md5;
@@ -182,6 +183,7 @@ vo_functions_t* video_out_drivers[] =
 #endif
 #ifdef HAVE_ZR
 	&video_out_zr,
+	&video_out_zr2,
 #endif
 #ifdef HAVE_BL
 	&video_out_bl,
