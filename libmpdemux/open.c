@@ -30,8 +30,6 @@ extern int streaming_start( stream_t *stream, int *demuxer_type, URL_t *url);
 static URL_t* url;
 #endif
 
-int dvbin_param_on=0;
-
 /// We keep these 2 for the gui atm, but they will be removed.
 int dvd_title=0;
 int vcd_track=0;
@@ -70,10 +68,6 @@ char * dvd_audio_stream_channels[6] =
 #endif
 
 #include "cue_read.h"
-
-#ifdef HAS_DVBIN_SUPPORT
-#include "dvbin.h"
-#endif
 
 
 
@@ -455,18 +449,6 @@ if(strncmp("dvd://",filename,6) == 0){
 }
 #endif
 
-#ifdef HAS_DVBIN_SUPPORT
-if(strncmp("dvbin://",filename,8) == 0)
-{
-	stream = new_stream(-1, STREAMTYPE_DVB);
-	if (!stream)
-	   return(NULL);
-       	if (!dvb_streaming_start(stream))
-	   return NULL;
-
-       	return stream;
-}
-#endif
 
 #ifdef MPLAYER_NETWORK
 #ifdef STREAMING_LIVE_DOT_COM

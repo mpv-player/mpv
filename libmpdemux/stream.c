@@ -58,6 +58,10 @@ extern stream_info_t stream_info_cdda;
 #ifdef MPLAYER_NETWORK
 extern stream_info_t stream_info_netstream;
 #endif
+#ifdef HAS_DVBIN_SUPPORT
+extern stream_info_t stream_info_dvb;
+#endif
+
 extern stream_info_t stream_info_null;
 extern stream_info_t stream_info_file;
 
@@ -71,6 +75,10 @@ stream_info_t* auto_open_streams[] = {
 #ifdef MPLAYER_NETWORK
   &stream_info_netstream,
 #endif
+#ifdef HAS_DVBIN_SUPPORT
+  &stream_info_dvb,
+#endif
+
   &stream_info_null,
   &stream_info_file,
   NULL
@@ -207,13 +215,6 @@ int stream_fill_buffer(stream_t *s){
     len = demux_read_data((demux_stream_t*)s->priv,s->buffer,STREAM_BUFFER_SIZE);
     break;
   
-#ifdef HAS_DVBIN_SUPPORT
-  case STREAMTYPE_DVB:
-   len = dvb_streaming_read(s->fd, s->buffer, STREAM_BUFFER_SIZE, s->priv);
-  break;
-#endif
-
-
     
   default: 
     len= s->fill_buffer ? s->fill_buffer(s,s->buffer,STREAM_BUFFER_SIZE) : 0;
@@ -415,11 +416,6 @@ void free_stream(stream_t *s){
   case STREAMTYPE_SMB:
     smbc_close(s->fd);
     break;    
-#endif
-#ifdef HAS_DVBIN_SUPPORT
-  case STREAMTYPE_DVB:
-    dvbin_close(s->priv);
-  break;
 #endif
 
 #ifdef USE_DVDREAD

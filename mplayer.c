@@ -100,8 +100,6 @@ static int quiet=0;
 
 #ifdef HAS_DVBIN_SUPPORT
 #include "libmpdemux/dvbin.h"
-extern dvb_history_t dvb_prev_next;
-dvb_history_t *dvb_history;
 #endif
 
 
@@ -744,12 +742,6 @@ char *tmp;
 
 int gui_no_filename=0;
 
-#ifdef HAS_DVBIN_SUPPORT
-        dvb_prev_next.prev = dvb_prev_next.next = -1;
-	dvb_history = &dvb_prev_next;
-#endif
-
-
 
   srand((int) time(NULL)); 
 
@@ -1337,7 +1329,7 @@ if(stream_cache_size>0){
 }
 
 //============ Open DEMUXERS --- DETECT file type =======================
-
+goto_open_demuxer:
 current_module="demux_open";
 
 demuxer=demux_open(stream,file_format,audio_id,video_id,dvdsub_id,filename);
@@ -2808,18 +2800,29 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       }
     } 
 #ifdef HAS_DVBIN_SUPPORT
-	if(dvbin_param_on == 1)
+	if((stream->type == STREAMTYPE_DVB) && stream->priv)
 	{
+	  dvb_priv_t *priv = (dvb_priv_t*) stream->priv;
+	  if(priv->is_on)
+	  {
+		int dir;
 		int v = cmd->args[0].v.i;
+		
 		if(v > 0)
-			dvb_history = dvb_step_channel((dvb_priv_t*)(demuxer->stream->priv), DVB_CHANNEL_HIGHER, dvb_history);
+			dir = DVB_CHANNEL_HIGHER;
 		else
-			dvb_history = dvb_step_channel((dvb_priv_t*)(demuxer->stream->priv), DVB_CHANNEL_LOWER, dvb_history);
-		uninit_player(INITED_ALL);
-		goto goto_next_file;
+			dir = DVB_CHANNEL_LOWER;
+			
+			
+		if(dvb_step_channel(priv, dir))
+		{
+	  		uninit_player(INITED_ALL-(INITED_STREAM));
+			printf("UNINIT COMPLETE\n");
+			goto goto_open_demuxer;
+		}
+	  }
 	}
-#endif
-
+#endif	
     break;
     case MP_CMD_TV_SET_CHANNEL :  {
       if (file_format == DEMUXER_TYPE_TV) {
@@ -2832,6 +2835,23 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 #endif
       }
     } break;
+#ifdef HAS_DVBIN_SUPPORT	
+  case MP_CMD_DVB_SET_CHANNEL:  
+  {
+	if((stream->type == STREAMTYPE_DVB) && stream->priv)
+	{
+	  dvb_priv_t *priv = (dvb_priv_t*) stream->priv;
+	  if(priv->is_on)
+	  {
+  		if(dvb_set_channel(priv, cmd->args[0].v.i))
+		{
+	  	  uninit_player(INITED_ALL-(INITED_STREAM));
+		  goto goto_open_demuxer;
+		}
+	  }
+	}
+  }
+#endif	
     case MP_CMD_TV_LAST_CHANNEL :  {
       if (file_format == DEMUXER_TYPE_TV) {
 	tv_last_channel((tvi_handle_t*)(demuxer->priv));
@@ -3574,11 +3594,7 @@ while(playtree_iter != NULL) {
   }	
 #endif
 
-if(use_gui || playtree_iter != NULL
-#ifdef HAS_DVBIN_SUPPORT
-		    || dvbin_param_on
-#endif
-	){
+if(use_gui || playtree_iter != NULL){
 
   eof = 0;
   goto play_next_file;

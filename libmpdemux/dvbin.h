@@ -2,6 +2,9 @@
 #ifndef DVBIN_H
 #define DVBIN_H
 
+#include "dvb_defaults.h"
+#include "stream.h"
+
 #ifdef HAVE_DVB_HEAD
 	#include <linux/dvb/dmx.h>
 	#include <linux/dvb/frontend.h>
@@ -57,45 +60,30 @@ typedef struct {
 
 
 typedef struct {
+	int card;
     int fe_fd;
     int sec_fd;
     int demux_fd[3];
     int dvr_fd;
-    int input;
-    int output;
-    int discard;
 
-    dvb_channel_t channel;
     dvb_channels_list *list;
+	int tuner_type;
+	int is_on;
+	stream_t *stream;
+	char new_tuning[256], prev_tuning[256];
+	int retry;
 } dvb_priv_t;
 
 
-extern dvb_history_t *dvb_step_channel(dvb_priv_t*, int, dvb_history_t*);
+#define TUNER_SAT	1
+#define TUNER_TER	2
+#define TUNER_CBL	3
 
-extern dvb_channels_list *dvb_get_channels(char *, const char *);
+extern int dvb_step_channel(dvb_priv_t *, int);
+extern int dvb_set_channel(dvb_priv_t *, int);
+
+extern dvb_channels_list *dvb_get_channels(char *, int);
 extern dvb_history_t dvb_prev_next;
-
-
-
-
-#ifndef DVB_T_LOCATION
-    #ifndef UK
-    #warning No DVB-T country defined in dvb_defaults.h, defaulting to UK
-    #endif
-
-    /* UNITED KINGDOM settings */
-    #define DVB_T_LOCATION              "in United Kingdom"
-    #define BANDWIDTH_DEFAULT           BANDWIDTH_8_MHZ
-    #define HP_CODERATE_DEFAULT         FEC_2_3
-    #define CONSTELLATION_DEFAULT       QAM_64
-    #define TRANSMISSION_MODE_DEFAULT   TRANSMISSION_MODE_2K
-    #define GUARD_INTERVAL_DEFAULT      GUARD_INTERVAL_1_32
-    #define HIERARCHY_DEFAULT           HIERARCHY_NONE
-#endif
-
-#define HIERARCHY_DEFAULT           HIERARCHY_NONE
-#define LP_CODERATE_DEFAULT (0)
-
 
 
 #endif

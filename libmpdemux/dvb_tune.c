@@ -27,57 +27,104 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <error.h>
+#include <errno.h>
 #include "config.h"
 
 #ifdef HAVE_DVB_HEAD
 	#include <linux/dvb/dmx.h>
 	#include <linux/dvb/frontend.h>
-	char* frontenddev[4]={"/dev/dvb/adapter0/frontend0","/dev/dvb/adapter1/frontend0","/dev/dvb/adapter2/frontend0","/dev/dvb/adapter3/frontend0"};
-	char* dvrdev[4]={"/dev/dvb/adapter0/dvr0","/dev/dvb/adapter1/dvr0","/dev/dvb/adapter2/dvr0","/dev/dvb/adapter3/dvr0"};
-	char* demuxdev[4]={"/dev/dvb/adapter0/demux0","/dev/dvb/adapter1/demux0","/dev/dvb/adapter2/demux0","/dev/dvb/adapter3/demux0"};
-	char* secdev[4]={"","","",""};	//UNUSED, ONLY FOR UNIFORMITY
+	static char* dvb_frontenddev[4]={"/dev/dvb/adapter0/frontend0","/dev/dvb/adapter1/frontend0","/dev/dvb/adapter2/frontend0","/dev/dvb/adapter3/frontend0"};
+	char* dvb_dvrdev[4]={"/dev/dvb/adapter0/dvr0","/dev/dvb/adapter1/dvr0","/dev/dvb/adapter2/dvr0","/dev/dvb/adapter3/dvr0"};
+	char* dvb_demuxdev[4]={"/dev/dvb/adapter0/demux0","/dev/dvb/adapter1/demux0","/dev/dvb/adapter2/demux0","/dev/dvb/adapter3/demux0"};
+	static char* dvb_secdev[4]={"","","",""};	//UNUSED, ONLY FOR UNIFORMITY
 #else
 	#include <ost/dmx.h>
 	#include <ost/sec.h>
 	#include <ost/frontend.h>
-	char* frontenddev[4]={"/dev/ost/frontend0","/dev/ost/frontend1","/dev/ost/frontend2","/dev/ost/frontend3"};
-	char* dvrdev[4]={"/dev/ost/dvr0","/dev/ost/dvr1","/dev/ost/dvr2","/dev/ost/dvr3"};
-	char* secdev[4]={"/dev/ost/sec0","/dev/ost/sec1","/dev/ost/sec2","/dev/ost/sec3"};
-	char* demuxdev[4]={"/dev/ost/demux0","/dev/ost/demux1","/dev/ost/demux2","/dev/ost/demux3"};
+	static char* dvb_frontenddev[4]={"/dev/ost/frontend0","/dev/ost/frontend1","/dev/ost/frontend2","/dev/ost/frontend3"};
+	char* dvb_dvrdev[4]={"/dev/ost/dvr0","/dev/ost/dvr1","/dev/ost/dvr2","/dev/ost/dvr3"};
+	static char* dvb_secdev[4]={"/dev/ost/sec0","/dev/ost/sec1","/dev/ost/sec2","/dev/ost/sec3"};
+	char* dvb_demuxdev[4]={"/dev/ost/demux0","/dev/ost/demux1","/dev/ost/demux2","/dev/ost/demux3"};
 #endif
 
 #include "dvbin.h"
-#include "dvb_defaults.h"
 #include "../mp_msg.h"
 
 
-extern int card;
 
-int open_fe(int* fd_frontend, int* fd_sec)
+int dvb_get_tuner_type(dvb_priv_t *priv)
 {
-	if((*fd_frontend = open(frontenddev[card], O_RDWR)) < 0)
+#ifdef HAVE_DVB_HEAD
+  struct dvb_frontend_info fe_info;
+#else
+  FrontendInfo fe_info;
+#endif
+
+  int res, fe_fd = -1;
+  
+  fe_fd = open(dvb_frontenddev[priv->card], O_RDWR);
+  if(fe_fd < 0)
+  {
+  	mp_msg(MSGT_DEMUX, MSGL_ERR, "get_tuner_type(%d, %s), ERROR IN OPENING FRONTEND DEVICE %s: %d\n", priv->card, dvb_frontenddev[priv->card], errno);
+	return 0;
+  }
+  
+  res = ioctl(fe_fd, FE_GET_INFO, &fe_info);
+  if(res < 0)
+  {
+  	mp_msg(MSGT_DEMUX, MSGL_ERR, "FE_GET_INFO error: %d, FD: %d\n\n", errno, fe_fd);
+	return 0;
+  }
+  close(fe_fd);
+
+  switch(fe_info.type)
+  {
+	case FE_OFDM:
+      mp_msg(MSGT_DEMUX, MSGL_INFO, "TUNER TYPE SEEMS TO BE DVB-T\n");
+	  return TUNER_TER;
+
+	case FE_QPSK:
+      mp_msg(MSGT_DEMUX, MSGL_INFO, "TUNER TYPE SEEMS TO BE DVB-S\n");
+	  return TUNER_SAT;
+	  
+	case FE_QAM:
+      mp_msg(MSGT_DEMUX, MSGL_INFO, "TUNER TYPE SEEMS TO BE DVB-C\n");
+	  return TUNER_CBL;
+	  
+	default:
+	  mp_msg(MSGT_DEMUX, MSGL_ERR, "UNKNOWN TUNER TYPE\n");
+	  return 0;  
+  }
+  
+}	
+
+
+static int open_fe(dvb_priv_t *priv)
+{
+	priv->fe_fd = open(dvb_frontenddev[priv->card], O_RDWR);
+	if(priv->fe_fd < 0)
 	{
-		perror("ERROR IN OPENING FRONTEND DEVICE: ");
-		return -1;
+		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR IN OPENING FRONTEND DEVICE %s: %d\n", dvb_frontenddev[priv->card], errno);
+		return 0;
 	}
 #ifdef HAVE_DVB_HEAD
-    	fd_sec=0;
+    priv->sec_fd=0;
 #else
-	if (fd_sec != 0)
-	{
-      		if((*fd_sec = open(secdev[card], O_RDWR)) < 0)
-      		{
-          		perror("ERROR IN OPENING SEC DEVICE: ");
-          		return -1;
-      		}
-    	}
+	priv->sec_fd = open(dvb_secdev[priv->card], O_RDWR);
+    if(priv->sec_fd < 0)
+    {
+		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR IN OPENING SEC DEVICE %s: %d\n", dvb_secdev[priv->card], errno);
+		close(priv->fe_fd);
+      	return 0;
+    }
 #endif
-    	return 1;
+
+    return 1;
 }
 
 
 
-int set_ts_filt(int fd, uint16_t pid, dmx_pes_type_t pestype)
+int dvb_set_ts_filt(int fd, uint16_t pid, dmx_pes_type_t pestype)
 {
 	int i;
 	struct dmx_pes_filter_params pesFilterParams;
@@ -91,21 +138,22 @@ int set_ts_filt(int fd, uint16_t pid, dmx_pes_type_t pestype)
 	pesFilterParams.pesType = pestype;
 #endif
 
-	//pesFilterParams.pesType = pestype;
-
 	pesFilterParams.flags   = DMX_IMMEDIATE_START;
+	//pesFilterParams.flags   = DMX_START;
 
+	//errno = 0;
 	if ((i = ioctl(fd, DMX_SET_PES_FILTER, &pesFilterParams)) < 0)
 	{
-		mp_msg(MSGT_DEMUX, MSGL_DBG2, "ERROR IN SETTING DMX_FILTER %i: ", pid);
+		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR IN SETTING DMX_FILTER %i for fd %d: ERRNO: %d", pid, fd, errno);
+		return 0;
 	}
 
-	mp_msg(MSGT_DEMUX, MSGL_V, "SET PES FILTER ON PID %d, RESULT: %d\n", pid, i );
+	mp_msg(MSGT_DEMUX, MSGL_V, "SET PES FILTER ON PID %d to fd %d, RESULT: %d, ERRNO: %d\n", pid, fd, i, errno);
 	return 1;
 }
 
 
-int demux_stop(int fd)
+int dvb_demux_stop(int fd)
 {
 	int i;
 	i = ioctl(fd, DMX_STOP);
@@ -116,8 +164,18 @@ int demux_stop(int fd)
 }
 
 
+int dvb_demux_start(int fd)
+{
+	int i;
+	i = ioctl(fd, DMX_START);
 
-void make_nonblock(int f)
+	mp_msg(MSGT_DEMUX, MSGL_DBG2, "STARTING FD: %d, RESULT: %d\n", fd, i);
+
+	return (i==0);
+}
+
+
+static void make_nonblock(int f)
 {
 	int oldflags;
 
@@ -139,48 +197,31 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
 	fe_transmit_mode_t TransmissionMode, fe_guard_interval_t guardInterval, fe_bandwidth_t bandwidth);
 
 
-//int dvb_tune(dvb_priv_t *priv, int freq, char pol, int srate, int diseqc, int tone)
 dvb_tune(dvb_priv_t *priv, int freq, char pol, int srate, int diseqc, int tone,
 		fe_spectral_inversion_t specInv, fe_modulation_t modulation, fe_guard_interval_t guardInterval,
 		fe_transmit_mode_t TransmissionMode, fe_bandwidth_t bandWidth, fe_code_rate_t HP_CodeRate)
 {
-	mp_msg(MSGT_DEMUX, MSGL_DBG2, "dvb_tune con Freq: %lu, pol: %c, srate: %lu, diseqc %d, tone %d\n", freq, pol, srate, diseqc, tone);
-	/* INPUT: frequency, polarization, srate */
+	mp_msg(MSGT_DEMUX, MSGL_INFO, "dvb_tune Freq: %lu\n", freq);
+	if(! open_fe(priv))
+	{
+		return 0;
+	}
+	
 	if(freq > 100000000)
 	{
-		if(open_fe(&(priv->fe_fd), 0))
-		{
-		      //tune_it(fd_frontend, 0, freq, 0, 0, tone, specInv, diseqc,modulation,HP_CodeRate,TransmissionMode,guardInterval,bandWidth);
-			tune_it(priv->fe_fd, 0, freq, 0, 0, tone, specInv, diseqc, modulation, HP_CodeRate, TransmissionMode, guardInterval, bandWidth);
-
-			close(priv->fe_fd);
-		}
-		else
-			return 0;
+		tune_it(priv->fe_fd, 0, freq, 0, 0, tone, specInv, diseqc, modulation, HP_CodeRate, TransmissionMode, guardInterval, bandWidth);
 	}
-	else if ((freq != 0) && (pol != 0) && (srate != 0))
+	else if(freq != 0)
 	{
-		if (open_fe(&(priv->fe_fd), &(priv->sec_fd)))
-		{
-			tune_it(priv->fe_fd, priv->sec_fd, freq, srate, pol, tone, specInv, diseqc, modulation, HP_CodeRate, TransmissionMode, guardInterval, bandWidth);
-			close(priv->fe_fd);
-			close(priv->sec_fd);
-		}
-		else
-			return 0;
+		tune_it(priv->fe_fd, priv->sec_fd, freq, srate, pol, tone, specInv, diseqc, modulation, HP_CodeRate, TransmissionMode, guardInterval, bandWidth);
 	}
-
-	priv->channel.freq = freq;
-	priv->channel.srate = srate;
-	priv->channel.pol = pol;
-	priv->channel.diseqc = diseqc;
-	priv->channel.tone = tone;
-	priv->channel.inv = specInv;
-	priv->channel.mod = modulation;
-	priv->channel.gi = guardInterval;
-	priv->channel.trans = TransmissionMode;
-	priv->channel.bw = bandWidth;
-	priv->channel.cr = HP_CodeRate;
+	
+	close(priv->fe_fd);
+	
+#ifdef HAVE_DVB_HEAD
+#else
+	close(priv->sec_fd);
+#endif
 
 	return 1;
 }
@@ -541,7 +582,7 @@ static int check_status(int fd_frontend,FrontendParameters* feparams,int tone)
 
 #ifdef HAVE_DVB_HEAD
 
-struct diseqc_cmd {
+static struct diseqc_cmd {
    struct dvb_diseqc_master_cmd cmd;
    uint32_t wait;
 };
@@ -585,6 +626,7 @@ static int head_diseqc(int secfd, int sat_no, int pol, int hi_lo)
 
 #endif
 
+static unsigned int prev_diseqc = 0;
 
 static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int srate, char pol, int tone,
 	fe_spectral_inversion_t specInv, unsigned int diseqc, fe_modulation_t modulation, fe_code_rate_t HP_CodeRate,
@@ -602,8 +644,12 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
   struct secStatus sec_state;
 #endif
 
+  if(diseqc == prev_diseqc)
+	diseqc = 0;
+  else
+	prev_diseqc = diseqc;
 
-  mp_msg(MSGT_DEMUX, MSGL_V,  "TUNE_IT, fd_frontend %d, fd_sec %d, freq %lu, srate %lu, pol %c, tone %i, specInv, diseqc %u, fe_modulation_t modulation,fe_code_rate_t HP_CodeRate, fe_transmit_mode_t TransmissionMode,fe_guard_interval_t guardInterval, fe_bandwidth_t bandwidth\n",
+  mp_msg(MSGT_DEMUX, MSGL_V,  "TUNE_IT, fd_frontend %d, fd_sec %d\nfreq %lu, srate %lu, pol %c, tone %i, specInv, diseqc %u, fe_modulation_t modulation,fe_code_rate_t HP_CodeRate, fe_transmit_mode_t TransmissionMode,fe_guard_interval_t guardInterval, fe_bandwidth_t bandwidth\n",
 	    fd_frontend, fd_sec, freq, srate, pol, tone, diseqc);
 
 
@@ -615,7 +661,7 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
 
 
 #ifdef HAVE_DVB_HEAD
-  mp_msg(MSGT_DEMUX, MSGL_V, "Using DVB card \"%s\"\n",fe_info.name);
+  mp_msg(MSGT_DEMUX, MSGL_V, "Using DVB card \"%s\"\n", fe_info.name);
 #endif
 
   switch(fe_info.type)
@@ -737,7 +783,7 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
    }
    else
    {
-	mp_msg(MSGT_DEMUX, MSGL_V, "DISEQC SETTING FAILED\n");
+	mp_msg(MSGT_DEMUX, MSGL_ERR, "DISEQC SETTING FAILED\n");
    }
   }
 #else
@@ -768,7 +814,7 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
         if (ioctl(fd_sec,SEC_SEND_SEQUENCE,&scmds) < 0)
 	{
           mp_msg(MSGT_DEMUX, MSGL_ERR, "Error sending DisEqC");
-          return -1;
+          return 0;
         }
       }
 #endif

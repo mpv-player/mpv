@@ -109,7 +109,7 @@
 #endif
 	{"vivo", vivoopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #ifdef HAS_DVBIN_SUPPORT
-	        {"dvbin", dvbin_opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+	{"dvbin", dvbin_opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif
 
 
@@ -328,7 +328,7 @@ struct config tvopts_conf[]={
 
 #ifdef HAS_DVBIN_SUPPORT
 #include "libmpdemux/dvbin.h"
-extern struct config dvbin_opts_conf[];
+extern m_config_t dvbin_opts_conf[];
 #endif
 
 extern int audio_stream_cache;
