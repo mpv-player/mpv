@@ -81,8 +81,8 @@ typedef struct {
 
 extern int dvb_step_channel(dvb_priv_t *, int);
 extern int dvb_set_channel(dvb_priv_t *, int);
+extern int dvb_open_fe(dvb_priv_t *priv);
 
-extern dvb_channels_list *dvb_get_channels(char *, int);
 extern dvb_history_t dvb_prev_next;
 
 

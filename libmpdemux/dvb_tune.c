@@ -33,7 +33,7 @@
 #ifdef HAVE_DVB_HEAD
 	#include <linux/dvb/dmx.h>
 	#include <linux/dvb/frontend.h>
-	static char* dvb_frontenddev[4]={"/dev/dvb/adapter0/frontend0","/dev/dvb/adapter1/frontend0","/dev/dvb/adapter2/frontend0","/dev/dvb/adapter3/frontend0"};
+	char* dvb_frontenddev[4]={"/dev/dvb/adapter0/frontend0","/dev/dvb/adapter1/frontend0","/dev/dvb/adapter2/frontend0","/dev/dvb/adapter3/frontend0"};
 	char* dvb_dvrdev[4]={"/dev/dvb/adapter0/dvr0","/dev/dvb/adapter1/dvr0","/dev/dvb/adapter2/dvr0","/dev/dvb/adapter3/dvr0"};
 	char* dvb_demuxdev[4]={"/dev/dvb/adapter0/demux0","/dev/dvb/adapter1/demux0","/dev/dvb/adapter2/demux0","/dev/dvb/adapter3/demux0"};
 	static char* dvb_secdev[4]={"","","",""};	//UNUSED, ONLY FOR UNIFORMITY
@@ -41,7 +41,7 @@
 	#include <ost/dmx.h>
 	#include <ost/sec.h>
 	#include <ost/frontend.h>
-	static char* dvb_frontenddev[4]={"/dev/ost/frontend0","/dev/ost/frontend1","/dev/ost/frontend2","/dev/ost/frontend3"};
+	char* dvb_frontenddev[4]={"/dev/ost/frontend0","/dev/ost/frontend1","/dev/ost/frontend2","/dev/ost/frontend3"};
 	char* dvb_dvrdev[4]={"/dev/ost/dvr0","/dev/ost/dvr1","/dev/ost/dvr2","/dev/ost/dvr3"};
 	static char* dvb_secdev[4]={"/dev/ost/sec0","/dev/ost/sec1","/dev/ost/sec2","/dev/ost/sec3"};
 	char* dvb_demuxdev[4]={"/dev/ost/demux0","/dev/ost/demux1","/dev/ost/demux2","/dev/ost/demux3"};
@@ -60,22 +60,16 @@ int dvb_get_tuner_type(dvb_priv_t *priv)
   FrontendInfo fe_info;
 #endif
 
-  int res, fe_fd = -1;
-  
-  fe_fd = open(dvb_frontenddev[priv->card], O_RDWR);
-  if(fe_fd < 0)
-  {
-  	mp_msg(MSGT_DEMUX, MSGL_ERR, "get_tuner_type(card %d), ERROR IN OPENING FRONTEND DEVICE %s: ERRNO %d\n", priv->card, dvb_frontenddev[priv->card], errno);
-	return 0;
-  }
-  
+  int res, fe_fd;
+
+  fe_fd = priv->fe_fd;
+
   res = ioctl(fe_fd, FE_GET_INFO, &fe_info);
   if(res < 0)
   {
   	mp_msg(MSGT_DEMUX, MSGL_ERR, "FE_GET_INFO error: %d, FD: %d\n\n", errno, fe_fd);
 	return 0;
   }
-  close(fe_fd);
 
   switch(fe_info.type)
   {
@@ -86,20 +80,20 @@ int dvb_get_tuner_type(dvb_priv_t *priv)
 	case FE_QPSK:
       mp_msg(MSGT_DEMUX, MSGL_INFO, "TUNER TYPE SEEMS TO BE DVB-S\n");
 	  return TUNER_SAT;
-	  
+
 	case FE_QAM:
       mp_msg(MSGT_DEMUX, MSGL_INFO, "TUNER TYPE SEEMS TO BE DVB-C\n");
 	  return TUNER_CBL;
-	  
+
 	default:
 	  mp_msg(MSGT_DEMUX, MSGL_ERR, "UNKNOWN TUNER TYPE\n");
-	  return 0;  
+	  return 0;
   }
-  
-}	
+
+}
 
 
-static int open_fe(dvb_priv_t *priv)
+int dvb_open_fe(dvb_priv_t *priv)
 {
 	priv->fe_fd = open(dvb_frontenddev[priv->card], O_RDWR);
 	if(priv->fe_fd < 0)
@@ -201,29 +195,23 @@ dvb_tune(dvb_priv_t *priv, int freq, char pol, int srate, int diseqc, int tone,
 		fe_spectral_inversion_t specInv, fe_modulation_t modulation, fe_guard_interval_t guardInterval,
 		fe_transmit_mode_t TransmissionMode, fe_bandwidth_t bandWidth, fe_code_rate_t HP_CodeRate)
 {
+	int ris;
+
 	mp_msg(MSGT_DEMUX, MSGL_INFO, "dvb_tune Freq: %lu\n", freq);
-	if(! open_fe(priv))
-	{
-		return 0;
-	}
-	
+
 	if(freq > 100000000)
 	{
-		tune_it(priv->fe_fd, 0, freq, srate, 0, tone, specInv, diseqc, modulation, HP_CodeRate, TransmissionMode, guardInterval, bandWidth);
+		ris = tune_it(priv->fe_fd, 0, freq, srate, 0, tone, specInv, diseqc, modulation, HP_CodeRate, TransmissionMode, guardInterval, bandWidth);
 	}
 	else if(freq != 0)
 	{
-		tune_it(priv->fe_fd, priv->sec_fd, freq, srate, pol, tone, specInv, diseqc, modulation, HP_CodeRate, TransmissionMode, guardInterval, bandWidth);
+		ris = tune_it(priv->fe_fd, priv->sec_fd, freq, srate, pol, tone, specInv, diseqc, modulation, HP_CodeRate, TransmissionMode, guardInterval, bandWidth);
 	}
-	
-	close(priv->fe_fd);
-	
-#ifdef HAVE_DVB_HEAD
-#else
-	close(priv->sec_fd);
-#endif
 
-	return 1;
+	if(ris != 0)
+		mp_msg(MSGT_DEMUX, MSGL_INFO, "dvb_tune, TUNING FAILED\n");
+
+	return (ris == 0);
 }
 
 
@@ -670,7 +658,7 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
 #ifdef HAVE_DVB_HEAD
       if (freq < 1000000) freq*=1000UL;
       feparams.frequency=freq;
-      feparams.inversion=INVERSION_OFF;
+      feparams.inversion=specInv;
       feparams.u.ofdm.bandwidth=bandwidth;
       feparams.u.ofdm.code_rate_HP=HP_CodeRate;
       feparams.u.ofdm.code_rate_LP=LP_CODERATE_DEFAULT;
@@ -681,7 +669,7 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
 #else
       if (freq < 1000000) freq*=1000UL;
       feparams.Frequency=freq;
-      feparams.Inversion=INVERSION_OFF;
+      feparams.Inversion=specInv;
       feparams.u.ofdm.bandWidth=bandwidth;
       feparams.u.ofdm.HP_CodeRate=HP_CodeRate;
       feparams.u.ofdm.LP_CodeRate=LP_CODERATE_DEFAULT;
@@ -823,16 +811,16 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
       mp_msg(MSGT_DEMUX, MSGL_V, "tuning DVB-C to %d, srate=%d\n",freq,srate);
 #ifdef HAVE_DVB_HEAD
       feparams.frequency=freq;
-      feparams.inversion=INVERSION_OFF;
+      feparams.inversion=specInv;
       feparams.u.qam.symbol_rate = srate;
-      feparams.u.qam.fec_inner = FEC_AUTO;
-      feparams.u.qam.modulation = QAM_64;
+      feparams.u.qam.fec_inner = HP_CodeRate;
+      feparams.u.qam.modulation = modulation;
 #else
       feparams.Frequency=freq;
-      feparams.Inversion=INVERSION_OFF;
+      feparams.Inversion=specInv;
       feparams.u.qam.SymbolRate = srate;
-      feparams.u.qam.FEC_inner = FEC_AUTO;
-      feparams.u.qam.QAM = QAM_64;
+      feparams.u.qam.FEC_inner = HP_CodeRate;
+      feparams.u.qam.QAM = modulation;
 #endif
       break;
     default:

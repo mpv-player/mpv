@@ -113,7 +113,7 @@ extern int dvb_get_tuner_type(dvb_priv_t *priv);
 extern int dvb_tune(dvb_priv_t *priv, int freq, char pol, int srate, int diseqc, int tone,
 		fe_spectral_inversion_t specInv, fe_modulation_t modulation, fe_guard_interval_t guardInterval,
 		fe_transmit_mode_t TransmissionMode, fe_bandwidth_t bandWidth, fe_code_rate_t HP_CodeRate);
-extern char *dvb_dvrdev[4], *dvb_demuxdev[4];
+extern char *dvb_dvrdev[4], *dvb_demuxdev[4], *dvb_frontenddev[4];
 
 dvb_channels_list  *dvb_list_ptr = NULL;
 
@@ -348,15 +348,14 @@ static int reset_demuxers(dvb_priv_t *priv)
 	}
 
 	if(channel->vpid)
-  	  	if(! dvb_set_ts_filt(priv->demux_fd[0], channel->vpid, DMX_PES_VIDEO))
+  	  	if(! dvb_set_ts_filt(priv->demux_fd[0], channel->vpid, DMX_PES_OTHER))
 			return 0;
-	//dvb_demux_start(priv->demux_fd[0]);
 
 	if(channel->apid1)
-		if(! dvb_set_ts_filt(priv->demux_fd[1], channel->apid1, DMX_PES_AUDIO))
+		if(! dvb_set_ts_filt(priv->demux_fd[1], channel->apid1, DMX_PES_OTHER))
 			return 0;
 
-	printf("RESET DEMUXERS SUCCEDED, errno=%d\n\n\n", errno);
+	return 1;
 }
 
 
@@ -440,14 +439,12 @@ int dvb_set_channel(dvb_priv_t *priv, int n)
 
 	//sets demux filters and restart the stream
 	if(channel->vpid)
-		if(! dvb_set_ts_filt(priv->demux_fd[0], channel->vpid, DMX_PES_VIDEO))
+		if(! dvb_set_ts_filt(priv->demux_fd[0], channel->vpid, DMX_PES_OTHER))
 			return 0;
-	//dvb_demux_start(priv->demux_fd[0]);
 
 	if(channel->apid1)
-		if(! dvb_set_ts_filt(priv->demux_fd[1], channel->apid1, DMX_PES_AUDIO))
+		if(! dvb_set_ts_filt(priv->demux_fd[1], channel->apid1, DMX_PES_OTHER))
 			return 0;
-	//dvb_demux_start(priv->demux_fd[1]);
 
 	return 1;
 }
@@ -505,6 +502,12 @@ static void dvbin_close(stream_t *stream)
 	close(priv->dvr_fd);
 	close(priv->demux_fd[0]);
 	close(priv->demux_fd[1]);
+
+	close(priv->fe_fd);
+#ifdef HAVE_DVB
+	close(priv->sec_fd);
+#endif
+
 	priv->is_on = 0;
 	priv->stream = NULL;
 	if(dvb_list_ptr)
@@ -572,7 +575,7 @@ static int dvb_streaming_start(dvb_priv_t *priv, struct stream_priv_s *opts, int
 	{
 	    pids[npids] =  channel->vpid;
 	}
-	pestypes[npids] = DMX_PES_VIDEO;
+	pestypes[npids] = DMX_PES_OTHER;
 	npids++;
 
 	if(opts->aid > 0)
@@ -583,7 +586,7 @@ static int dvb_streaming_start(dvb_priv_t *priv, struct stream_priv_s *opts, int
 	{
 	    pids[npids] = channel->apid1;
 	}
-	pestypes[npids] = DMX_PES_AUDIO;
+	pestypes[npids] = DMX_PES_OTHER;
 	npids++;
 
 
@@ -634,10 +637,9 @@ static int dvb_open(stream_t *stream, int mode, void *opts, int *file_format)
 	// I don't force  the file format bacause, although it's almost always TS,
 	// there are some providers that stream an IP multicast with M$ Mpeg4 inside
 	struct stream_priv_s* p = (struct stream_priv_s*)opts;
-	char *name = NULL, *filename;
+	char *filename;
 	dvb_priv_t *priv;
 	int tuner_type = 0;
-
 
 
 	if(mode != STREAM_READ)
@@ -650,16 +652,13 @@ static int dvb_open(stream_t *stream, int mode, void *opts, int *file_format)
 	priv = (dvb_priv_t *)stream->priv;
 	priv->stream = stream;
 
-	name = malloc(sizeof(char)*128);
-
-	if(name == NULL)
-	{
-		mp_msg(MSGT_DEMUX, MSGL_ERR, "COULDN'T MALLOC SOME TMP MEMORY, EXIT!\n");
-		return STREAM_ERROR;
-	}
-
 	priv->card = p->card - 1;
-
+	if(! dvb_open_fe(priv))
+ 	{
+		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR OPENING FRONTEND DEVICE %s: %d\n", dvb_frontenddev[priv->card], errno);
+ 		return STREAM_ERROR;
+ 	}
+	
 	if(!strncmp(p->type, "CBL", 3))
 	{
 		tuner_type = TUNER_CBL;
