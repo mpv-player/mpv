@@ -3,6 +3,8 @@
 // Enable ALSA emulation (using 32kB audio buffer) - timer testing only
 //#define SIMULATE_ALSA
 
+#define RESET_AUDIO(audio_fd) ioctl(audio_fd, SNDCTL_DSP_RESET, NULL)
+//#define RESET_AUDIO(audio_fd)
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1254,6 +1256,7 @@ if(has_audio){
 #endif
   a_frame=-(buffer_delay);
   printf("Audio buffer size: %d bytes, delay: %5.3fs\n",audio_buffer_size,buffer_delay);
+//  RESET_AUDIO(audio_fd);
 }
 
 
@@ -1431,7 +1434,7 @@ switch(sh_video->codec->driver){
     DS_VideoDecoder_DecodeFrame(start, in_size, 0, !drop_frame);
     current_module="draw_frame";
 
-    if(!drop_frame){
+    if(!drop_frame && sh_video->our_out_buffer){
       t2=GetTimer();t=t2-t;video_time_usage+=t*0.000001f;
       if(out_fmt==IMGFMT_YV12||out_fmt==IMGFMT_IYUV||out_fmt==IMGFMT_I420){
         uint8_t* dst[3];
@@ -2034,6 +2037,9 @@ switch(file_format){
       v_frame=0; // !!!!!!
       audio_time_usage=0; video_time_usage=0; vout_time_usage=0;
 //      num_frames=real_num_frames=0;
+
+      RESET_AUDIO(audio_fd);
+
   }
 } // keyboard event handler
 
