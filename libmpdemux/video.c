@@ -86,7 +86,8 @@ switch(d_video->demuxer->file_format){
 #endif
   break;
  }
- case DEMUXER_TYPE_MPEG4_ES: {
+ case DEMUXER_TYPE_MPEG4_ES: 
+ case DEMUXER_TYPE_MPEG4_IN_TS: {
    videobuf_len=0; videobuf_code_len=0;
    mp_msg(MSGT_DECVIDEO,MSGL_V,"Searching for Video Object Start code... ");fflush(stdout);
    while(1){
@@ -410,7 +411,7 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
 	    telecine=1;
 	}
 
-  } else if(demuxer->file_format==DEMUXER_TYPE_MPEG4_ES){
+  } else if((demuxer->file_format==DEMUXER_TYPE_MPEG4_ES) || (demuxer->file_format==DEMUXER_TYPE_MPEG4_IN_TS)){
       //
         while(videobuf_len<VIDEOBUFFER_SIZE-MAX_VIDEO_PACKET_SIZE){
           int i=sync_video_packet(d_video);

@@ -216,6 +216,7 @@ void free_demuxer(demuxer_t *demuxer){
       demux_close_gif(demuxer); break;
 #endif
     case DEMUXER_TYPE_MPEG_TS:
+    case DEMUXER_TYPE_MPEG4_IN_TS:
       demux_close_ts(demuxer); break;
     case DEMUXER_TYPE_REALAUDIO:
       demux_close_ra(demuxer); break;
@@ -358,7 +359,9 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
 #ifdef HAVE_GIF
     case DEMUXER_TYPE_GIF: return demux_gif_fill_buffer(demux);
 #endif
-    case DEMUXER_TYPE_MPEG_TS: return demux_ts_fill_buffer(demux);
+    case DEMUXER_TYPE_MPEG_TS: 
+    case DEMUXER_TYPE_MPEG4_IN_TS: 
+	return demux_ts_fill_buffer(demux);
     case DEMUXER_TYPE_REALAUDIO: return demux_ra_fill_buffer(demux);
   }
   return 0;
@@ -1259,7 +1262,8 @@ switch(file_format){
    break;
  }
 #endif
- case DEMUXER_TYPE_MPEG_TS: {
+ case DEMUXER_TYPE_MPEG_TS: 
+ case DEMUXER_TYPE_MPEG4_IN_TS: {
   demux_open_ts(demuxer);
   break;
  }
@@ -1462,6 +1466,7 @@ switch(demuxer->file_format){
       demux_mkv_seek(demuxer,rel_seek_secs,flags);  break;
 #endif
  case DEMUXER_TYPE_MPEG_TS:
+ case DEMUXER_TYPE_MPEG4_IN_TS:
       demux_seek_ts(demuxer,rel_seek_secs,flags); break;
 
 } // switch(demuxer->file_format)
@@ -1533,6 +1538,8 @@ int demux_control(demuxer_t *demuxer, int cmd, void *arg) {
 	case DEMUXER_TYPE_MPEG4_ES:
 	case DEMUXER_TYPE_MPEG_ES:
 	case DEMUXER_TYPE_MPEG_PS:
+	case DEMUXER_TYPE_MPEG_TS:
+	case DEMUXER_TYPE_MPEG4_IN_TS:
 	    return demux_mpg_control(demuxer,cmd,arg);
 	case DEMUXER_TYPE_ASF:
 	    return demux_asf_control(demuxer,cmd,arg);

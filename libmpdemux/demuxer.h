@@ -42,6 +42,7 @@
 #define DEMUXER_TYPE_MATROSKA 31
 #define DEMUXER_TYPE_REALAUDIO 32
 #define DEMUXER_TYPE_MPEG_TY 33
+#define DEMUXER_TYPE_MPEG4_IN_TS 34
 
 // This should always match the higest demuxer type number.
 // Unless you want to disallow users to force the demuxer to some types
@@ -153,6 +154,21 @@ inline static demux_packet_t* new_demux_packet(int len){
   dp->buffer=len?(unsigned char*)malloc(len+8):NULL;
   if(len) memset(dp->buffer+len,0,8);
   return dp;
+}
+
+inline static void resize_demux_packet(demux_packet_t* dp, int len)
+{
+  if(len)
+  {
+     dp->buffer=(unsigned char *)realloc(dp->buffer,len+8);
+     memset(dp->buffer+len,0,8);
+  }
+  else
+  {
+     if(dp->buffer) free(dp->buffer);
+     dp->buffer=NULL;
+  }
+  dp->len=len;
 }
 
 inline static demux_packet_t* clone_demux_packet(demux_packet_t* pack){
