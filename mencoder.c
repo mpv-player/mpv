@@ -415,7 +415,7 @@ case VCODEC_DIVX4:
     mux_v->bih->biSize=sizeof(BITMAPINFOHEADER);
     mux_v->bih->biWidth=sh_video->disp_w;
     mux_v->bih->biHeight=sh_video->disp_h;
-    mux_v->bih->biPlanes=0;
+    mux_v->bih->biPlanes=1;
     mux_v->bih->biBitCount=24;
     mux_v->bih->biCompression=mmioFOURCC('d','i','v','x');
     mux_v->bih->biSizeImage=mux_v->bih->biWidth*mux_v->bih->biHeight*(mux_v->bih->biBitCount/8);
@@ -460,14 +460,21 @@ case ACODEC_VBRMP3:
     mux_a->h.dwSampleSize=0; // VBR
     mux_a->h.dwScale=4608/4;
     mux_a->h.dwRate=sh_audio->samplerate;
-    mux_a->wf=malloc(sizeof(WAVEFORMATEX));
+    if(sizeof(MPEGLAYER3WAVEFORMAT)!=30) mp_msg(MSGT_MENCODER,MSGL_WARN,"sizeof(MPEGLAYER3WAVEFORMAT)==%d!=30, maybe broken C compiler?\n",sizeof(MPEGLAYER3WAVEFORMAT));
+    mux_a->wf=malloc(sizeof(MPEGLAYER3WAVEFORMAT)); // should be 30
     mux_a->wf->wFormatTag=0x55; // MP3
     mux_a->wf->nChannels=sh_audio->channels;
     mux_a->wf->nSamplesPerSec=sh_audio->samplerate;
-    mux_a->wf->nAvgBytesPerSec=0;
+    mux_a->wf->nAvgBytesPerSec=192000/8; // FIXME!
     mux_a->wf->nBlockAlign=1;
-    mux_a->wf->wBitsPerSample=16;
-    mux_a->wf->cbSize=0; // FIXME for l3codeca.acm
+    mux_a->wf->wBitsPerSample=0; //16;
+    // from NaNdub:  (requires for l3codeca.acm)
+    mux_a->wf->cbSize=12;
+    ((MPEGLAYER3WAVEFORMAT*)(mux_a->wf))->wID=1;
+    ((MPEGLAYER3WAVEFORMAT*)(mux_a->wf))->fdwFlags=2;
+    ((MPEGLAYER3WAVEFORMAT*)(mux_a->wf))->nBlockSize=1024; // ???
+    ((MPEGLAYER3WAVEFORMAT*)(mux_a->wf))->nFramesPerBlock=1;
+    ((MPEGLAYER3WAVEFORMAT*)(mux_a->wf))->nCodecDelay=0;
     break;
 }
 }

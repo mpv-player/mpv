@@ -115,6 +115,9 @@ static void write_avi_list(FILE *f,unsigned int id,int len){
   fwrite(&id,4,1,f);
 }
 
+// muxer->streams[i]->wf->cbSize
+#define WFSIZE(wf) (sizeof(WAVEFORMATEX)+(((wf)->cbSize)?((wf)->cbSize-2):0))
+
 void aviwrite_write_header(aviwrite_t *muxer,FILE *f){
   unsigned int riff[3];
   int i;
@@ -128,11 +131,11 @@ void aviwrite_write_header(aviwrite_t *muxer,FILE *f){
   // update AVI header:
   if(muxer->def_v){
       muxer->avih.dwMicroSecPerFrame=1000000.0*muxer->def_v->h.dwScale/muxer->def_v->h.dwRate;
-      muxer->avih.dwMaxBytesPerSec=1000000; // dummy!!!!! FIXME
-      muxer->avih.dwPaddingGranularity=2; // ???
+//      muxer->avih.dwMaxBytesPerSec=1000000; // dummy!!!!! FIXME
+//      muxer->avih.dwPaddingGranularity=2; // ???
       muxer->avih.dwFlags|=AVIF_ISINTERLEAVED|AVIF_TRUSTCKTYPE;
       muxer->avih.dwTotalFrames=muxer->def_v->h.dwLength;
-      muxer->avih.dwSuggestedBufferSize=muxer->def_v->h.dwSuggestedBufferSize;
+//      muxer->avih.dwSuggestedBufferSize=muxer->def_v->h.dwSuggestedBufferSize;
       muxer->avih.dwWidth=muxer->def_v->bih->biWidth;
       muxer->avih.dwHeight=muxer->def_v->bih->biHeight;
   }
@@ -148,7 +151,7 @@ void aviwrite_write_header(aviwrite_t *muxer,FILE *f){
           hdrsize+=muxer->streams[i]->bih->biSize+8; // strf
 	  break;
       case AVIWRITE_TYPE_AUDIO:
-          hdrsize+=sizeof(WAVEFORMATEX)+muxer->streams[i]->wf->cbSize+8; // strf
+          hdrsize+=WFSIZE(muxer->streams[i]->wf)+8; // strf
 	  break;
       }
   }
@@ -163,7 +166,7 @@ void aviwrite_write_header(aviwrite_t *muxer,FILE *f){
           hdrsize+=muxer->streams[i]->bih->biSize+8; // strf
 	  break;
       case AVIWRITE_TYPE_AUDIO:
-          hdrsize+=sizeof(WAVEFORMATEX)+muxer->streams[i]->wf->cbSize+8; // strf
+          hdrsize+=WFSIZE(muxer->streams[i]->wf)+8; // strf
 	  break;
       }
       write_avi_list(f,listtypeSTREAMHEADER,hdrsize);
@@ -173,7 +176,7 @@ void aviwrite_write_header(aviwrite_t *muxer,FILE *f){
           write_avi_chunk(f,ckidSTREAMFORMAT,muxer->streams[i]->bih->biSize,muxer->streams[i]->bih);
 	  break;
       case AVIWRITE_TYPE_AUDIO:
-          write_avi_chunk(f,ckidSTREAMFORMAT,sizeof(WAVEFORMATEX)+muxer->streams[i]->wf->cbSize,muxer->streams[i]->wf);
+          write_avi_chunk(f,ckidSTREAMFORMAT,WFSIZE(muxer->streams[i]->wf),muxer->streams[i]->wf);
 	  break;
       }
   }
