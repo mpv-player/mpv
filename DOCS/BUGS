@@ -49,7 +49,7 @@ Audio delay/de-sync specific to one or a few files:
   Workaround: buy a better soundcard... 
               or try to decrease fps by 10% (use -fps 27 for a 30fps movie)
 - slow machine
-  (if A-V is not around 0, and teh last number in the status line increasing)
+  (if A-V is not around 0, and the last number in the status line increasing)
   Workaround: -framedrop
 
 After many > or ^ (fast forward) audio vs. video is going out of sync (ASF/AVI)
