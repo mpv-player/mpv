@@ -364,6 +364,8 @@ int demux_audio_open(demuxer_t* demuxer) {
 
 
 int demux_audio_fill_buffer(demux_stream_t *ds) {
+  int l;
+  demux_packet_t* dp;
   sh_audio_t* sh_audio;
   demuxer_t* demux;
   da_priv_t* priv;
@@ -383,52 +385,47 @@ int demux_audio_fill_buffer(demux_stream_t *ds) {
 
   switch(priv->frmt) {
   case MP3 :
-    while(! s->eof || (demux->movi_end && stream_tell(s) >= demux->movi_end) ) {
+    while(1) {
       uint8_t hdr[4];
-      int len;
       stream_read(s,hdr,4);
-      len = mp_decode_mp3_header(hdr);
-      if(len < 0) {
+      if (s->eof || (demux->movi_end && stream_tell(s) >= demux->movi_end))
+        return 0;
+      l = mp_decode_mp3_header(hdr);
+      if(l < 0) {
 	stream_skip(s,-3);
       } else {
-	demux_packet_t* dp;
-	if(s->eof  || (demux->movi_end && stream_tell(s) >= demux->movi_end) )
-	  return 0;
-	dp = new_demux_packet(len);
+	dp = new_demux_packet(l);
 	memcpy(dp->buffer,hdr,4);
-	stream_read(s,dp->buffer + 4,len-4);
-	priv->last_pts = priv->last_pts < 0 ? 0 : priv->last_pts + 1152/(float)sh_audio->samplerate;
-	ds->pts = priv->last_pts - (ds_tell_pts(demux->audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
-	ds_add_packet(ds,dp);
-	return 1;
+	stream_read(s,dp->buffer + 4,l-4);
+	break;
       }
     } break;
   case WAV : {
-    int l = sh_audio->wf->nAvgBytesPerSec;
-    demux_packet_t*  dp = new_demux_packet(l);
+    l = sh_audio->wf->nAvgBytesPerSec;
+    dp = new_demux_packet(l);
     l = stream_read(s,dp->buffer,l);
-    resize_demux_packet(dp, l);
-    priv->last_pts = priv->last_pts < 0 ? 0 : priv->last_pts + l/(float)sh_audio->i_bps;
-    ds->pts = priv->last_pts - (ds_tell_pts(demux->audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
-    ds_add_packet(ds,dp);
-    return 1;
+    break;
   }
   case fLaC: {
-    int l = 65535;
-    demux_packet_t*  dp = new_demux_packet(l);
+    l = 65535;
+    dp = new_demux_packet(l);
     l = stream_read(s,dp->buffer,l);
-    resize_demux_packet(dp, l);
-    priv->last_pts = priv->last_pts < 0 ? 0 : priv->last_pts + l/(float)sh_audio->i_bps;
-    ds->pts = priv->last_pts - (ds_tell_pts(demux->audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
-    ds_add_packet(ds,dp);
-    return 1;
+    break;
   }
   default:
     printf("Audio demuxer : unknown format %d\n",priv->frmt);
+    return 0;
   }
 
-
-  return 0;
+  resize_demux_packet(dp, l);
+  if (priv->last_pts < 0)
+    priv->last_pts = 0;
+  else
+    priv->last_pts += l/(float)sh_audio->i_bps;
+  ds->pts = priv->last_pts - (ds_tell_pts(demux->audio) -
+              sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
+  ds_add_packet(ds, dp);
+  return 1;
 }
 
 static void high_res_mp3_seek(demuxer_t *demuxer,float time) {
