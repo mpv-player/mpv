@@ -6,6 +6,9 @@
  */
 
 /* ChangeLog added 2002-01-10
+ * 2002-02-18:
+ *  Fixed sync problems when pausing video (while using prebuffering)
+ *
  * 2002-02-16:
  *  Fixed bug which would case invalid output when using :noprebuf
  *  Removed equalization code, it caused problems on slow systems
@@ -93,7 +96,6 @@ static int osd_w, osd_h;
 static int noprebuf = 0;
 static int img_format = 0;
 static SwsContext * sws = NULL;
-float scalefactor = 1.0;
 
 /* File descriptors */
 static int fd_control = -1;
@@ -103,8 +105,6 @@ static char fdv_name[80];
 
 /* Static variable used in ioctl's */
 static int ioval = 0;
-static int ptsdiff = 0;
-static int writesize = 0;
 
 static vo_info_t vo_info = 
 {
@@ -242,9 +242,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		printf("VO: [dxr3] Setting aspect ratio to 16:9\n");
 	}
 	ioctl(fd_control, EM8300_IOCTL_SET_ASPECTRATIO, &ioval);
-    
-	size = s_width * s_height;
-	picture_buf = malloc((size * 3) / 2);
 	
 	if (format != IMGFMT_MPEGPES) {
 #ifdef USE_LIBAVCODEC
@@ -308,6 +305,8 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		avc_picture.linesize[0] = s_width;
 		avc_picture.linesize[1] = s_width / 2;
 		avc_picture.linesize[2] = s_width / 2;
+		size = s_width * s_height;
+		picture_buf = malloc((size * 3) / 2);
 		
 		avc_picture.data[0] = picture_buf;
 		avc_picture.data[1] = avc_picture.data[0] + size;
@@ -352,9 +351,6 @@ static void draw_osd(void)
 
 static uint32_t draw_frame(uint8_t * src[])
 {
-	if (!noprebuf) {
-		ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts);
-	}
 	if (img_format == IMGFMT_MPEGPES) {
 		vo_mpegpes_t *p = (vo_mpegpes_t *) src[0];
 		
@@ -364,16 +360,16 @@ static uint32_t draw_frame(uint8_t * src[])
 			}
 			write(fd_spu, p->data, p->size);
 		} else {
-			writesize = p->size;
-			memcpy(picture_buf, p->data, p->size);
+			write(fd_video, p->data, p->size);
 		}
 		return 0;
 #ifdef USE_LIBAVCODEC
 	} else {
-		int srcStride = (img_format == IMGFMT_YUY2) ? (v_width * 2) : (v_width * 3);
+		int size, srcStride = (img_format == IMGFMT_YUY2) ? (v_width * 2) : (v_width * 3);
 		sws->swScale(sws, src, &srcStride, 0, v_height, avc_picture.data, avc_picture.linesize);
 		draw_osd();
-		writesize = avcodec_encode_video(avc_context, picture_buf, avc_outbuf_size, &avc_picture);
+		size = avcodec_encode_video(avc_context, picture_buf, avc_outbuf_size, &avc_picture);
+		write(fd_video, picture_buf, size);
 		return 0;
 #endif
 	}
@@ -382,16 +378,18 @@ static uint32_t draw_frame(uint8_t * src[])
 
 static void flip_page(void)
 {
+	if (!noprebuf) {
+		ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts);
+	}
 #ifdef USE_LIBAVCODEC
 	if (img_format == IMGFMT_YV12) {
-		writesize = avcodec_encode_video(avc_context, picture_buf, avc_outbuf_size, &avc_picture);
+		int size = avcodec_encode_video(avc_context, picture_buf, avc_outbuf_size, &avc_picture);
 		if (!noprebuf) {
 			ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts);
 		}
+		write(fd_video, picture_buf, size);
 	}
 #endif
-	write(fd_video, picture_buf, writesize);
-	writesize = 0;
 }
 
 static uint32_t draw_slice(uint8_t *srcimg[], int stride[], int w, int h, int x0, int y0)
@@ -415,10 +413,10 @@ static void uninit(void)
 	if (avc_context) {
 		avcodec_close(avc_context);
 	}
-#endif
 	if (picture_buf) {
 		free(picture_buf);
 	}
+#endif
 	if (fd_video) {
 		close(fd_video);
 	}
