@@ -55,6 +55,8 @@ void mplFullScreen( void )
   }// else { vo_x11_fullscreen(); appMPlayer.subWindow.isFullScreen=vo_fs; }
 #else
   wsFullScreen( &appMPlayer.subWindow );
+  vo_fs=0;
+  if ( appMPlayer.subWindow.isFullScreen ) vo_fs=1;
 #endif
 
  fullscreen=appMPlayer.subWindow.isFullScreen;
