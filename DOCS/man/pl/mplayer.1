@@ -1,4 +1,4 @@
-.\" synced with 1.875
+.\" synced with 1.876
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -3609,6 +3609,9 @@ W³±cza miêkkie obcinanie (soft-clipping).
 .TP
 .B pan[=n:l01:l02:...l10:l11:l12:...ln0:ln1:ln2:...]
 Dowolnie miksuje kana³y, szczegó³y w DOCS/\:HTML/\:pl/\:audio.html
+Przyk³ad jak zmiksowaæ 6-kana³owy plik do dwóch kana³ów przy pomocy
+tego filtru mo¿esz znale¼æ w przyk³adach pod koniec tej strony podrêcznika
+systemowego man.
 .PD 0
 .RSs
 .IPs n
@@ -7754,7 +7757,9 @@ mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg plik.avi
 .
 .TP
 .B Odtwarzaj d¼wiêk 6-kana³owy w formacie AAC tylko na dwóch g³o¶nikach:
-mplayer -rawaudio on:format=0xff -af pan=6:1:1:0:1:0:1:1:0:1:0:1:1 adts_he-aac160_51.aac
+mplayer \-rawaudio on:format=0xff \-af pan=6:.32:.39:.06:.17:-.17:.33:.32:.06:.39:-.17:.17:.33 adts_he-aac160_51.aac
+Mo¿e bêdziesz chcia³ siê trochê pobawiæ warto¶ciami filtru pan (np. pomno¿yæ przez jaka¶ liczbê),
+aby zwiêkszyæ g³o¶no¶æ albo unikn±æ trzasków.
 .
 .SH PRZYK£ADY U¯YCIA MENCODERA
 .
