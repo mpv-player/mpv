@@ -50,8 +50,8 @@ static int init(sh_video_t *sh){
        accel |= MPEG2_ACCEL_X86_3DNOW;
     if(gCpuCaps.hasAltiVec)
        accel |= MPEG2_ACCEL_PPC_ALTIVEC;
-    #ifdef HAVE_MLIB
-       accel |= MPEG2_ACCEL_MLIB;
+    #ifdef HAVE_VIS
+       accel |= MPEG2_ACCEL_SPARC_VIS;
     #endif
     mpeg2_accel(accel);
 
