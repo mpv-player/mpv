@@ -6,14 +6,16 @@ FOR THE RELEASE:
 ~~~~~~~~~~~~~~~~
 
 demuxer:
-- prebuffering to cache2 (req. for MMS)
-- test and cleanup FLI/FLC support (and implement seek)
+- prebuffering to cache2 (req. for MMS) - URGENT!
+- implement seeking to FLI/FLC
+- test & fix -loop
+- fix vivo audio/video PTS (for A-V sync)
 
 decoders:
-- getting -ss working perfect with MPEG-PES and also seeking (real 1 Minute etc)
-- getting mss1 (Windows Screen Video) DLL codec working...
-- getting PIM1 codec working...
+- getting mss1 (Windows Screen Video) DLL codec working... - kabi
+- getting PIM1 codec (DLL) working... - kabi
 - optimize (or port optimized code from libac3) liba52 (imdct.c, resample.c)
+- testing and commit non-16 width/height libavcodec patch
 
 mencoder:
 - add some kind of "-ss" option, to start at e.g. 1:0:0 at the video
@@ -21,9 +23,10 @@ mencoder:
 - finish 3-pass encoding (audio, video1, video2)
 - add ffmpeg encoders support
 - add win32 encoders support
+- check/fix frame copy
 - implement VBR audio copy
 - Estimated Size and Time
-- image cut/crop filter
+- image cut/crop/extend filter
 
 other:
 - fix DVB a-v sync problems, switch to mp1e
@@ -42,6 +45,7 @@ FUTURE:
 demuxer:
 - implement forward seeking in indexed avi streams
 - implement brute-force broken avi fixer
+- demux_mpg: support for VDR's index files for more accurate seeking
 
 decoders:
 - check and import videodecoding.de stuff
