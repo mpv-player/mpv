@@ -204,7 +204,15 @@ int num_filenames;
 //int out_buffer_size=0x200000;
 //unsigned char* out_buffer=malloc(out_buffer_size);
 
-  mp_msg_init(verbose+MSGL_STATUS);
+  mp_msg_init(MSGL_STATUS);
+
+// check codec.conf
+if(!parse_codec_cfg(get_path("codecs.conf"))){
+  if(!parse_codec_cfg(DATADIR"/codecs.conf")){
+    mp_msg(MSGT_MENCODER,MSGL_HINT,MSGTR_CopyCodecsConf);
+    exit(0);
+  }
+}
 
   num_filenames=parse_command_line(conf, argc, argv, envp, &filenames);
   if(num_filenames<0) exit(1); // error parsing cmdline
@@ -213,13 +221,7 @@ int num_filenames;
 	exit(1);
   }
 
-  // check codec.conf
-  if(!parse_codec_cfg("etc/codecs.conf")){
-    mp_msg(MSGT_CPLAYER,MSGL_HINT,MSGTR_CopyCodecsConf);
-    exit(0);  // From unknown reason a hangup occurs here :((((((
-  }
-
-//  dvd_title=2;
+  mp_msg_init(verbose+MSGL_STATUS);
 
   filename=(num_filenames>0)?filenames[0]:NULL;
   stream=open_stream(filename,vcd_track,&file_format);
@@ -250,26 +252,26 @@ sh_video=d_video->sh;
       exit(1);
   }
 
-  mp_msg(MSGT_CPLAYER,MSGL_INFO,"[V] filefmt:%d  fourcc:0x%X  size:%dx%d  fps:%5.2f  ftime:=%6.4f\n",
+  mp_msg(MSGT_MENCODER,MSGL_INFO,"[V] filefmt:%d  fourcc:0x%X  size:%dx%d  fps:%5.2f  ftime:=%6.4f\n",
    demuxer->file_format,sh_video->format, sh_video->disp_w,sh_video->disp_h,
    sh_video->fps,sh_video->frametime
   );
   
 
 sh_video->codec=NULL;
-if(video_family!=-1) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_TryForceVideoFmt,video_family);
+if(video_family!=-1) mp_msg(MSGT_MENCODER,MSGL_INFO,MSGTR_TryForceVideoFmt,video_family);
 while(1){
   sh_video->codec=find_codec(sh_video->format,
     sh_video->bih?((unsigned int*) &sh_video->bih->biCompression):NULL,sh_video->codec,0);
   if(!sh_video->codec){
     if(video_family!=-1) {
       sh_video->codec=NULL; /* re-search */
-      mp_msg(MSGT_CPLAYER,MSGL_WARN,MSGTR_CantFindVfmtFallback);
+      mp_msg(MSGT_MENCODER,MSGL_WARN,MSGTR_CantFindVfmtFallback);
       video_family=-1;
       continue;      
     }
-    mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantFindVideoCodec,sh_video->format);
-    mp_msg(MSGT_CPLAYER,MSGL_HINT, MSGTR_TryUpgradeCodecsConfOrRTFM,get_path("codecs.conf"));
+    mp_msg(MSGT_MENCODER,MSGL_ERR,MSGTR_CantFindVideoCodec,sh_video->format);
+    mp_msg(MSGT_MENCODER,MSGL_HINT, MSGTR_TryUpgradeCodecsConfOrRTFM,get_path("codecs.conf"));
     exit(1);
   }
   if(video_codec && strcmp(sh_video->codec->name,video_codec)) continue;
@@ -277,7 +279,7 @@ while(1){
   break;
 }
 
-mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s video codec: [%s] drv:%d (%s)\n",video_codec?"Forcing":"Detected",sh_video->codec->name,sh_video->codec->driver,sh_video->codec->info);
+mp_msg(MSGT_MENCODER,MSGL_INFO,"%s video codec: [%s] drv:%d (%s)\n",video_codec?"Forcing":"Detected",sh_video->codec->name,sh_video->codec->driver,sh_video->codec->info);
 
 for(i=0;i<CODECS_MAX_OUTFMT;i++){
     out_fmt=sh_video->codec->outfmt[i];
@@ -288,7 +290,7 @@ for(i=0;i<CODECS_MAX_OUTFMT;i++){
     if(out_fmt==IMGFMT_YUY2) break;
 }
 if(i>=CODECS_MAX_OUTFMT){
-    mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_VOincompCodec);
+    mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_VOincompCodec);
     exit(1); // exit_player(MSGTR_Exit_error);
 }
 sh_video->outfmtidx=i;
@@ -303,7 +305,7 @@ if(out_fmt==IMGFMT_YV12 || out_fmt==IMGFMT_I420 || out_fmt==IMGFMT_IYUV){
 divx_quality=4;
 
 if(!init_video(sh_video)){
-     mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_CouldntInitVideoCodec);
+     mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_CouldntInitVideoCodec);
      exit(1);
 }
 
@@ -312,35 +314,35 @@ if(!init_video(sh_video)){
 if(sh_audio){
   // Go through the codec.conf and find the best codec...
   sh_audio->codec=NULL;
-  if(audio_family!=-1) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_TryForceAudioFmt,audio_family);
+  if(audio_family!=-1) mp_msg(MSGT_MENCODER,MSGL_INFO,MSGTR_TryForceAudioFmt,audio_family);
   while(1){
     sh_audio->codec=find_codec(sh_audio->format,NULL,sh_audio->codec,1);
     if(!sh_audio->codec){
       if(audio_family!=-1) {
         sh_audio->codec=NULL; /* re-search */
-        mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantFindAfmtFallback);
+        mp_msg(MSGT_MENCODER,MSGL_ERR,MSGTR_CantFindAfmtFallback);
         audio_family=-1;
         continue;      
       }
-      mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantFindAudioCodec,sh_audio->format);
-      mp_msg(MSGT_CPLAYER,MSGL_HINT, MSGTR_TryUpgradeCodecsConfOrRTFM,get_path("codecs.conf"));
+      mp_msg(MSGT_MENCODER,MSGL_ERR,MSGTR_CantFindAudioCodec,sh_audio->format);
+      mp_msg(MSGT_MENCODER,MSGL_HINT, MSGTR_TryUpgradeCodecsConfOrRTFM,get_path("codecs.conf"));
       sh_audio=d_audio->sh=NULL;
       break;
     }
     if(audio_codec && strcmp(sh_audio->codec->name,audio_codec)) continue;
     else if(audio_family!=-1 && sh_audio->codec->driver!=audio_family) continue;
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s audio codec: [%s] drv:%d (%s)\n",audio_codec?"Forcing":"Detected",sh_audio->codec->name,sh_audio->codec->driver,sh_audio->codec->info);
+    mp_msg(MSGT_MENCODER,MSGL_INFO,"%s audio codec: [%s] drv:%d (%s)\n",audio_codec?"Forcing":"Detected",sh_audio->codec->name,sh_audio->codec->driver,sh_audio->codec->info);
     break;
   }
 }
 
 if(sh_audio){
-  mp_msg(MSGT_CPLAYER,MSGL_V,"Initializing audio codec...\n");
+  mp_msg(MSGT_MENCODER,MSGL_V,"Initializing audio codec...\n");
   if(!init_audio(sh_audio)){
-    mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CouldntInitAudioCodec);
+    mp_msg(MSGT_MENCODER,MSGL_ERR,MSGTR_CouldntInitAudioCodec);
     sh_audio=d_audio->sh=NULL;
   } else {
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,"AUDIO: srate=%d  chans=%d  bps=%d  sfmt=0x%X  ratio: %d->%d\n",sh_audio->samplerate,sh_audio->channels,sh_audio->samplesize,
+    mp_msg(MSGT_MENCODER,MSGL_INFO,"AUDIO: srate=%d  chans=%d  bps=%d  sfmt=0x%X  ratio: %d->%d\n",sh_audio->samplerate,sh_audio->channels,sh_audio->samplesize,
         sh_audio->sample_format,sh_audio->i_bps,sh_audio->o_bps);
   }
 }
@@ -486,8 +488,10 @@ lame_set_VBR_q(lame,6); // 1 = best vbr q  6=~128k
 
 lame_init_params(lame);
 
+if(verbose){
 lame_print_config(lame);
 lame_print_internals(lame);
+}
     
 }
 #endif
@@ -703,7 +707,9 @@ if(sh_audio){
 
 } // while(!eof)
 
+printf("\nWritting AVI index...\n");
 aviwrite_write_index(muxer,muxer_f);
+printf("Fixup AVI header...\n");
 fseek(muxer_f,0,SEEK_SET);
 aviwrite_write_header(muxer,muxer_f); // update header
 fclose(muxer_f);
