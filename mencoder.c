@@ -286,7 +286,7 @@ static int interrupted=0;
 
 enum end_at_type_t {END_AT_NONE, END_AT_TIME, END_AT_SIZE};
 static enum end_at_type_t end_at_type = END_AT_NONE;
-static int end_at;
+static double end_at;
 
 static void exit_sighandler(int x){
     at_eof=1;
