@@ -517,6 +517,7 @@ if(strncmp("dvd://",filename,6) == 0){
 //	    if (len == -1)	
 //    		   return new_stream(f,STREAMTYPE_STREAM); // open as stream
 	    url_free(url);
+	    url = NULL;
             stream=new_stream(f,STREAMTYPE_SMB);
     	    stream->end_pos=len;
 	    return stream;
@@ -530,10 +531,12 @@ if(strncmp("dvd://",filename,6) == 0){
 	if( streaming_start( stream, file_format, url )<0){
           mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_UnableOpenURL, filename);
 	  url_free(url);
+	  url = NULL;
 	  return NULL;
 	} else {
         mp_msg(MSGT_OPEN,MSGL_INFO,MSGTR_ConnToServer, url->hostname );
 	url_free(url);
+	url = NULL;
 	return stream;
 	}
   }
