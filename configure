@@ -110,6 +110,7 @@ params:
         --enable-dga            build with DGA support [autodetect]
         --enable-svga           build with SVGAlib support [autodetect]
         --enable-sdl            build with SDL render support [autodetect]
+        --enable-ggi            build with GGI render support [autodetect]
         --enable-mga            build with mga_vid support [autodetect, if /dev/mga_vid
                                 is available]
 	--enable-xmga           build with mga_vid X Window support [autodetect,
@@ -291,6 +292,7 @@ _sse=no
 _mga=no
 _gl=no
 _sdl=no
+_ggi=no
 _xv=no
 _vm=no
 _xdpms=no
@@ -316,6 +318,7 @@ _y=1
 _gllib=
 _sdllib=
 _sdlcflags=
+_ggilib=
 _xvlib=
 _x11lib=
 
@@ -568,6 +571,9 @@ $_cc $TMPC -o $TMPO -ltermcap > /dev/null 2>&1 && _termcap=yes
 _png=no
 $_cc $TMPC -o $TMPO -lpng -lz -lm > /dev/null 2>&1 && _png=yes
 
+_ggi=no
+$_cc $TMPC -o $TMPO -lggi > /dev/null 2>&1 && _ggi=yes
+
 _binutils=no
 $_as libac3/downmix/downmix_i386.S -o $TMPO > /dev/null 2>&1 && _binutils=yes
 
@@ -711,7 +717,7 @@ do
   	_debug='-g'
 	;;
   --enable-debug=*)
-        _debug=`echo -n '-g'; echo $ac_option | cut -d '=' -f 2`
+        _debug=`echo $_echo_n '-g'$_echo_c; echo $ac_option | cut -d '=' -f 2`
 	;;
   --enable-css)
 	_css=yes
@@ -743,6 +749,9 @@ do
         ;;
   --enable-sdl)
         _sdl=yes
+        ;;
+  --enable-ggi)
+        _ggi=yes
         ;;
   --enable-mga)
         _mga=yes
@@ -832,6 +841,9 @@ do
         ;;
   --disable-sdl)
         _sdl=no
+        ;;
+  --disable-ggi)
+        _ggi=no
         ;;
   --disable-mga)
         _mga=no
@@ -1029,6 +1041,7 @@ echo "Checking for X11 libs ... $_x11libdir"
 echo "Checking mga_vid device ... $_mga"
 echo "Checking for xmga ... $_xmga" 
 echo "Checking for SDL ... $_sdl"
+echo "Checking for GGI ... $_ggi"
 echo "Checking for OpenGL ... $_gl"
 echo "Checking for Xv ... $_xv"
 echo "Checking for X11 ... $_x11"
@@ -1106,6 +1119,10 @@ fi
 if [ $_sdl = yes ]; then
   _sdllib=`$_sdlconfig --libs` 
   _sdlcflags=`$_sdlconfig --cflags` 
+fi
+
+if [ $_ggi = yes ]; then
+  _ggilib='-lggi'
 fi
 
 if [ $_dga = yes ]; then
@@ -1203,8 +1220,8 @@ CC=$_cc
 X11DIR=$_x11libdir
 # OPTFLAGS=-O4 $_profile $_debug -march=$proc -mcpu=$proc -pipe -fomit-frame-pointer -ffast-math
 OPTFLAGS=$CFLAGS
-# LIBS=-L/usr/lib -L/usr/local/lib $_x11libdir $_gllib $_sdllib $_dgalib $_x11lib $_xvlib
-X_LIBS=$_x11libdir $_gllib $_sdllib $_dgalib $_x11lib $_xvlib $_vmlib $_svgalib $_libpng $_socklib
+# LIBS=-L/usr/lib -L/usr/local/lib $_x11libdir $_gllib $_sdllib $_ggilib $_dgalib $_x11lib $_xvlib
+X_LIBS=$_x11libdir $_gllib $_sdllib $_ggilib $_dgalib $_x11lib $_xvlib $_vmlib $_svgalib $_libpng $_socklib
 TERMCAP_LIB=$_libtermcap
 XMM_LIBS = $_xmmplibs
 LIRC_LIBS = $_lirclibs
@@ -1291,6 +1308,13 @@ if [ $_sdl = yes ]; then
  _aosrc=$_aosrc' ao_sdl.c'
 else
  _sdldef='#undef HAVE_SDL'
+fi
+
+if [ $_ggi = yes ]; then
+ _ggi='#define HAVE_GGI'
+ _vosrc=$_vosrc' vo_ggi.c'
+else
+ _ggi='#undef HAVE_GGI'
 fi
 
 if [ $_x11 = yes ]; then
@@ -1508,6 +1532,7 @@ $_dga2
 $_sdldef
 /* defined for SDLlib with keyrepeat bugs (before 1.2.1) */
 $_sdlbuggy
+$_ggi
 $_3dfx
 $_mga
 $_syncfb
