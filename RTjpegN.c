@@ -25,6 +25,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "config.h"
+#ifdef HAVE_MMX
+#define MMX
+#endif
+
 #include "RTjpegN.h"
 
 #ifdef MMX
