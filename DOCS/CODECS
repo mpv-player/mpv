@@ -22,17 +22,18 @@ Fully functional Win32 VfW/DShow codecs:
   divxc32.dll: works, YUV supported.
   divx_c32.ax: works, YUV and postprocessing supported.
 - Indeo Video 5.0:  (IV50)
-  ir50_32.dll: works, YUV supported.
-- Cinepak:  (CVID)
+  ir50_32.dll (VfW): works, YUV supported.
+  ir50_32.dll (DShow): not tested
+- Cinepak Video:  (CVID)
   iccvid.dll: works, YUV supported.
 - Microsoft Video v1.0 (CRAM)
   msvidc32.dll: works, no YUV
-- ATI VCR2:  (VCR2)
+- ATI VCR-2:  (VCR2)
   ativcr2.dll: works, YUV supported
 - Motion JPEG (MJPG)
   m3jpeg32.dll: can't load (segfault)
   mcmjpg32.dll: works, YUV supported
-- Windows Media Video 1 (WMV1)
+- Windows Media Video 7 (WMV1)
   wmvds32.ax: works, YUV supported
 
 Problems:
@@ -45,10 +46,24 @@ Problems:
   asusasvd.dll: ??? not tested
 - ASUS ASV2: (ASV2)
   asusasv2.dll: loads, image upside-down and very pixelized (no YUY2, but YVYU)
-- I263:  (I263)
-  i263_32.drv: not tested (no sample file)
 - ATI VCR1:  (VCR1)
   ativcr1.dll: can't load (16-bit DLL)
+
+Not tested:
+
+- I263:  (I263)
+  i263_32.drv: not tested (no sample file)
+- Motion Wavelets: (MVW1)
+  icmw_32.dll: not tested (no sample file)
+- Indeo Video 3.1:  (IV31)
+  ir32_32.dll: not tested (no sample file)
+- AngelPotion MPEG-4: (AP41,AP42)
+  APmpg4v1.dll: not tested
+- Windows Media Video 8 (WMV2)
+  wmv8ds32.ax: not tested (no sample file)
+- DV - Sony Digital Video (dvsd)
+  qdv.dll: not tested
+  
 
 Audio codecs:
 ~~~~~~~~~~~~~
@@ -66,7 +81,7 @@ Built-in native codecs:
 
 Fully functional Win32 ACM/DShow codecs:
 
-- DivX audio (0x160, 0x161)
+- Windows Media Audio / DivX audio (0x160, 0x161)
   divxa32.acm: works
 - MS ADPCM (0x2)
   msadp32.acm: works
@@ -79,7 +94,13 @@ Problems:
   imaadp32.acm: segfault
 - MS-GSM: (0x31,0x32)
   msgsm32.acm: segfault  (use built-in codec)
-- VoxWare: (0x75)
+- VoxWare Metasound: (0x75)
   voxmsdec.ax: segfault
 
+Not tested:
+
+- ACELP.net: (0x130)
+  acelpdec.ax: not tested (no sample file)
+- IMC:  (0x401)
+  imc32.acm: not tested (no sample file)
 
