@@ -9,7 +9,9 @@
 #include <string.h>
 #include <signal.h>
 
+#include <gdk/gdkprivate.h>
 #include <gdk/gdkkeysyms.h>
+#include <gdk/gdk.h>
 #include <gtk/gtk.h>
 
 #include "widgets.h"
@@ -64,6 +66,8 @@ void widgetsCreate( void )
 
 // --- forked function
 
+extern char *mDisplayName;
+
 static void gtkThreadProc( int argc,char * argv[] )
 {
  struct sigaction sa;
@@ -73,8 +77,14 @@ static void gtkThreadProc( int argc,char * argv[] )
  #endif
 
  gtk_set_locale();
- gtk_init( &argc,&argv );
+ {
+  char tmp[128];
+  sprintf( tmp,"--display=%s",mDisplayName );
+  argv[argc++]=strdup( tmp );
+  gtk_init( &argc,&argv );
+ }
  gdk_set_use_xshm( TRUE );
+ printf( "[gtk] display: %s\n",gdk_get_display() );
 
  widgetsCreate();
 
@@ -101,7 +111,6 @@ void gtkInit( int argc,char* argv[], char *envp[] )
 }
 
 void gtkDone( void ){
- int status;
  gtkSendMessage(evExit);
  usleep(50000); // 50ms should be enough!
  printf("gtk killed...\n");

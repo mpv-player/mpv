@@ -28,7 +28,7 @@ void mp_msg_c( int x, const char *format, ... ){
     va_list va;
     if((x&255)>mp_msg_levels[x>>8]) return; // do not display
     va_start(va, format);
-#ifdef HAVE_NEW_GUI
+#if defined( HAVE_NEW_GUI ) && !defined( HAVE_MENCODER )
     if(use_gui){
       char tmp[16*80];
       vsnprintf( tmp,8*80,format,va ); tmp[8*80-1]=0;

@@ -657,8 +657,11 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 	} else
 	    printf("Using Linux's hardware RTC timing (%ldHz)\n", irqp);
     }
+#ifdef HAVE_NEW_GUI
 // breaks DGA and SVGAlib and VESA drivers:  --A'rpi
-//    setuid( getuid() ); // strongly test, please check this.
+// and now ? -- Pontscho
+    if(use_gui) setuid( getuid() ); // strongly test, please check this.
+#endif
     if(rtc_fd<0)
 #endif
 	printf("Using %s timing\n",softsleep?"software":"usleep()");

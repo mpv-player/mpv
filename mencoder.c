@@ -193,28 +193,6 @@ static int parse_end_at(struct config *conf, const char* param);
 
 //---------------------------------------------------------------------------
 
-// dummy datas for gui :(
-
-#ifdef HAVE_NEW_GUI
-float rel_seek_secs=0;
-int abs_seek_pos=0;
-int use_gui=0;
-
-void exit_player(char* how){
-}
-void vo_x11_putkey(int key){
-}
-void vo_setwindow( int w,int g ) {
-}
-void vo_setwindowsize( int w,int h ) {
-}
-
-int       vo_resize = 0;
-int       vo_expose = 0;
-
-#endif
-// ---
-
 // mini dummy libvo:
 
 static unsigned char* vo_image=NULL;

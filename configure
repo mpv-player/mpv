@@ -2507,6 +2507,12 @@ EOF
 
 fi
 
+echocheck "mencoder"
+_mencoder_flag='#undef HAVE_MENCODER'
+if test "$_mencoder" = yes ; then
+  _mencoder_flag='#define HAVE_MENCODER'
+fi
+echores "$_mencoder"
 
 echocheck "lirc"
 if test "$_lirc" = auto ; then
@@ -2882,6 +2888,9 @@ $_def_dvdread
 /* Define for using new DivX4Linux library, instead of open-source OpenDivX */
 /* You have to change DECORE_LIBS in config.mak too! */
 $_def_decore
+
+/* If build mencoder */
+$_mencoder_flag
 
 /* Indicates if Divx4linux encore is available
    Note: for mencoder */
