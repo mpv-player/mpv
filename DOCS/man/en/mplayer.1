@@ -430,13 +430,13 @@ Disables colorkeying.
 Only supported by the cvidix, fbdev, svga, vesa, winvidix, xmga, xvidix and
 xover video out drivers.
 .TP
-.B \-edl <filename>
+.B \-edl <filename> (EDL only)
 Enables edit decision list (EDL) actions during playback.
 Video will be skipped over and audio will be muted and unmuted according to
 the entries in the given file.
 See DOCS/HTML/en/edl.html for details on how to use this.
 .TP
-.B \-edlout <filename>
+.B \-edlout <filename> (EDL only)
 Creates a new file and writes edit decision list (EDL) records to that file.
 During playback, when the user hits 'i', an entry to skip over the last two
 seconds of playback will be written to the file.
@@ -1309,7 +1309,7 @@ switched with 'j'.
 .B \-sub-bg-alpha <0\-255>
 Specify the alpha channel value for subtitles and OSD backgrounds.
 Big values mean more transparency.
-The 0 value is an exception and means completly transparent.
+The 0 value is an exception and means completely transparent.
 .TP
 .B \-sub-bg-color <0\-255>
 Specify the color value for subtitles and OSD backgrounds.
