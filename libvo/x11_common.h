@@ -34,6 +34,7 @@ extern int vo_wm_type;
 extern int vo_fs_type;
 extern char** vo_fstype_list;
 extern int vo_ontop;
+extern int vo_rootwin;
 
 extern char *mDisplayName;
 extern Display *mDisplay;

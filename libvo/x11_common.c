@@ -366,6 +366,9 @@ int vo_init(void)
 // Window    mRootWin;
     XWindowAttributes attribs;
     char *dispName;
+	
+	if (vo_rootwin)
+		WinID = 0; // use root win
 
     if (vo_depthonscreen)
         return 1;               // already called
