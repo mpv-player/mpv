@@ -1,4 +1,5 @@
 // Transated by:  Andreas Berntsen  <andreasb@kvarteret.org>
+// Updated for 0.60 by: B. Johannessen <bob@well.com>
 
 // ========================= MPlayer hjelp ===========================
 
@@ -30,6 +31,7 @@ static char help_text[]=
 #ifdef USE_FAKE_MONO
 " -stereo <mode>  velg MPEG1 stereo output (0:stereo 1:venstre 2:høyre)\n"
 #endif
+" -channels <n>   målnummer for lyd output kanaler\n"
 " -fs -vm -zoom   fullskjerm avspillings valg (fullscr,vidmode chg,softw.scale)\n"
 " -x <x> -y <y>   skaler bildet til <x> * <y> oppløsning [hvis -vo driver støtter det!]\n"
 " -sub <fil>      spesifiser hvilken subtitle fil som skal brukes (se også -subfps, -subdelay)\n"
@@ -38,10 +40,12 @@ static char help_text[]=
 " -pp <quality>   slå på etterbehandlingsfilter (0-4 for DivX, 0-63 for mpeg)\n"
 " -nobps          bruk alternativ A-V sync metode for AVI filer (kan være nyttig!)\n"
 " -framedrop      slå på bilde-dropping (for trege maskiner)\n"
+" -wid <window id> bruk eksisterende vindu for video output (nytting med plugger!)\n"
 "\n"
 "Tastatur:\n"
-" <- eller ->       søk bakover/framover 10 sekunder\n"
-" OPP eller NED     søk bakover/framover 1 minutt\n"
+" <- eller ->       søk bakover/fremover 10 sekunder\n"
+" opp eller ned     søk bakover/fremover 1 minutt\n"
+" < or >            søk bakover/fremover i playlisten\n"
 " p eller MELLOMROM pause filmen (trykk en tast for å fortsette)\n"
 " q eller ESC       stopp avspilling og avslutt programmet\n"
 " + eller -         juster lyd-forsinkelse med +/- 0.1 sekund\n"
@@ -49,7 +53,7 @@ static char help_text[]=
 " * eller /         øk eller mink volumet (trykk 'm' for å velge master/pcm)\n"
 " z or x            juster undertittelens forsinkelse med +/- 0.1 sekund\n"
 "\n"
-" * * * SE PÅ MANPAGE FOR DETALJER, FLERE (AVANSERTE) VALG OG TASTER! * * *\n"
+" * * * SE PÅ MANSIDE FOR DETALJER, FLERE (AVANSERTE) VALG OG TASTER! * * *\n"
 "\n";
 #endif
 
@@ -76,7 +80,7 @@ static char help_text[]=
 #define MSGTR_DVDauthOk "DVD auth sekvense ser ut til å være OK.\n"
 #define MSGTR_DumpSelectedSteramMissing "dump: FATALT: valgte stream mangler!\n"
 #define MSGTR_CantOpenDumpfile "Kan ikke åpne dump fil!!!\n"
-#define MSGTR_CoreDumped "core dumpet:)\n"
+#define MSGTR_CoreDumped "core dumpet :)\n"
 #define MSGTR_FPSnotspecified "FPS ikke spesifisert (eller ugyldig) i headeren! Bruk -fps valget!\n"
 #define MSGTR_NoVideoStream "Sorry, ingen video stream... ikke spillbar for øyeblikket\n"
 #define MSGTR_TryForceAudioFmt "Prøver å tvinge lyd-codec driver familie %d ...\n"
@@ -94,11 +98,24 @@ static char help_text[]=
 #define MSGTR_CannotInitVO "FATALT: Kan ikke initialisere video driver!\n"
 #define MSGTR_CannotInitAO "kunne ikke åpne/initialisere lyd-enhet -> NOSOUND\n"
 #define MSGTR_StartPlaying "Starter avspilling...\n"
-#define MSGTR_SystemTooSlow "\n******************************************************************************************"\
-			    "\n** Systemet ditt er for TREGT for å kunne spille dette! Prøv med -framedrop eller RTFM! **"\
-			    "\n******************************************************************************************\n"
 
-#define MSGTR_NoGui "MPlayer er kompilert iten GUI-støtte!\n"
+#define MSGTR_SystemTooSlow "\n\n"\
+"         ************************************************************\n"\
+"         **** Systemed ditt er for TREGT til å spille av dette!  ****\n"\
+"         ************************************************************\n"\
+"!!! Mulige årsaker, problemer, løsninger: \n"\
+"- Vanligste problem: ødelagte _lyd_ drivere, eller lyddrivere med feil. \n"\
+"  Prøv: -ao sdl eller bruk ALSA 0.5/oss emuleringen i ALSA 0.9. Les også\n"\
+"  DOCS/sound.html for flere tips!\n"\
+"- Treg video output. Prøv en annen -vo driver (for liste: -vo help) eller\n"\
+"  prøv med -framedrop! Les DOCS/video.html for flere tips\n"\
+"- Treg CPU. ikke forsøk å spille av store dvd/divx filer på en treg CPU!\n"\
+"  forsøk -hardframedrop\n"\
+"- Feil på filen. forsøk forskjellige kombinasjoner av disse:\n"\
+"  -nobps  -ni  -mc 0  -forceidx\n"\
+"Dersom dette ikke hjelper, les DOCS/bugreports.html !\n\n"
+
+#define MSGTR_NoGui "MPlayer er kompilert uten GUI-støtte!\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI trenger X11!\n"
 #define MSGTR_Playing "Spiller %s\n"
 #define MSGTR_NoSound "Lyd: ingen lyd!!!\n"
@@ -139,7 +156,7 @@ static char help_text[]=
 #define MSGTR_DetectedQTMOVfile "Detekterte QuickTime/MOV filformat!\n"
 #define MSGTR_MissingMpegVideo "Manglende MPEG video stream!? kontakt utvikleren, det kan være en feil :(\n"
 #define MSGTR_InvalidMPEGES "Ugyldig MPEG-ES stream??? kontakt utvikleren, det kan være en feil :(\n"
-#define MSGTR_FormatNotRecognized "============= Sorry, dette filformatet er ikke gjenkjent/støttet ===============\n"\
+#define MSGTR_FormatNotRecognized "======== Beklager, dette filformatet er ikke gjenkjent/støttet ===============\n"\
 				  "=== Hvis det er en AVI, ASF eller MPEG stream, kontakt utvikleren! ===\n"
 #define MSGTR_MissingVideoStream "Ingen video stream funnet!\n"
 #define MSGTR_MissingAudioStream "Ingen lyd stream funnet...  ->nosound\n"
@@ -179,7 +196,7 @@ static char help_text[]=
 #define MSGTR_NoACMSupport "Win32/ACM lyd codec slått av eller ikke tilgjengelig på ikke-x86 CPU -> tvinger nosound :(\n"
 #define MSGTR_NoDShowAudio "Kompilert uten DirectShow støtte -> tvinger nosound :(\n"
 #define MSGTR_NoOggVorbis "OggVorbis lyd codec slått av -> tvinger nosound :(\n"
-
+#define MSGTR_NoXAnimSupport "MPlayer er kompilert uten XAnim støtte!\n"
 #define MSGTR_MpegPPhint "ADVARSEL! Du ba om etterbehandling av bilde for en MPEG 1/2 video,\n" \
 			 "         men kompilerte MPlayer uten MPEG 1/2 etterbehandlingsstøtte!\n" \
 			 "         #define MPEG12_POSTPROC i config.h, og kompiler libmpeg2 på nytt!\n"
@@ -212,6 +229,8 @@ static char help_text[]=
 // --- labels ---
 #define MSGTR_About "Om"
 #define MSGTR_FileSelect "Åpne fil..."
+#define MSGTR_SubtitleSelect "Velg teksting ..."
+#define MSGTR_OtherSelect "Velg ..."
 #define MSGTR_MessageBox "MessageBox"
 #define MSGTR_PlayList "Spilleliste"
 #define MSGTR_SkinBrowser "Velg skin"
@@ -223,9 +242,9 @@ static char help_text[]=
 #define MSGTR_Remove "Fjern"
 
 // --- error messages ---
-#define MSGTR_NEMDB "Sorry, ikke nok minne til tegnebuffer."
-#define MSGTR_NEMFMR "Sorry, ikke nok minne til meny rendering."
-#define MSGTR_NEMFMM "Sorry, ikke nok minne til hovedvindu shape mask."
+#define MSGTR_NEMDB "Beklager, ikke nok minne til tegnebuffer."
+#define MSGTR_NEMFMR "Beklager, ikke nok minne til meny rendering."
+#define MSGTR_NEMFMM "Beklager, ikke nok minne til hovedvindu shape mask."
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[skin] feil i skin konfigurasjonsfil linje %d: %s"
@@ -247,5 +266,47 @@ static char help_text[]=
 #define MSGTR_SKIN_FONT_NonExistentFontID "ikke-ekstisterende skrifttype identifikasjon ( %s )\n"
 #define MSGTR_SKIN_UnknownParameter "ukjent parameter ( %s )\n"
 #define MSGTR_SKINBROWSER_NotEnoughMemory "[skinbrowser] ikke nok minne.\n"
+#define MSGTR_SKIN_SKINCFG_SkinNotFound "Skin ikke funnet ( %s ).\n"
+#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "Skin konfigurasjonfil lesefeil ( %s ).\n"
+#define MSGTR_SKIN_LABEL "Skins:"
+
+
+// --- gtk menus
+#define MSGTR_MENU_AboutMPlayer "Om MPlayer"
+#define MSGTR_MENU_Open "Åpne ..."
+#define MSGTR_MENU_PlayFile "Spill file ..."
+#define MSGTR_MENU_PlayVCD "Spill VCD ..."
+#define MSGTR_MENU_PlayDVD "Spill DVD ..."
+#define MSGTR_MENU_PlayURL "Spill URL ..."
+#define MSGTR_MENU_LoadSubtitle "Last tekst ..."
+#define MSGTR_MENU_Playing "Spiller"
+#define MSGTR_MENU_Play "Spill"
+#define MSGTR_MENU_Pause "Pause"
+#define MSGTR_MENU_Stop "Stopp"
+#define MSGTR_MENU_NextStream "Neste stream"
+#define MSGTR_MENU_PrevStream "Forrige stream"
+#define MSGTR_MENU_Size "Størrelse"
+#define MSGTR_MENU_NormalSize "Normal størrelse"
+#define MSGTR_MENU_DoubleSize "Dobbel størrelse"
+#define MSGTR_MENU_FullScreen "Fullskjerm"
+#define MSGTR_MENU_DVD "DVD"
+#define MSGTR_MENU_PlayDisc "Spill Plate ..."
+#define MSGTR_MENU_ShowDVDMenu "Vis DVD meny"
+#define MSGTR_MENU_Titles "Titler"
+#define MSGTR_MENU_Title "Titel %2d"
+#define MSGTR_MENU_None "(ingen)"
+#define MSGTR_MENU_Chapters "Kapittel"
+#define MSGTR_MENU_Chapter "Kapittel %2d"
+#define MSGTR_MENU_AudioLanguages "Lyd språk"
+#define MSGTR_MENU_SubtitleLanguages "Tekst språk"
+#define MSGTR_MENU_PlayList "Spilleliste"
+#define MSGTR_MENU_SkinBrowser "Skin velger"
+#define MSGTR_MENU_Preferences "Preferanser"
+#define MSGTR_MENU_Exit "Avslutt ..."
+
+// --- messagebox
+#define MSGTR_MSGBOX_LABEL_FatalError "fatal feil ..."
+#define MSGTR_MSGBOX_LABEL_Error "fail ..."
+#define MSGTR_MSGBOX_LABEL_Warning "advarsel ..."
 
 #endif
