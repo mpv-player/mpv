@@ -18,5 +18,6 @@ char *get_path(char *filename){
 			return NULL;
 		sprintf(buff, "%s%s/%s", homedir, config_dir, filename);
 	}
+	mp_msg(MSGT_GLOBAL,MSGL_V,"get_path('%s') -> '%s'\n",filename,buff);
 	return buff;
 }
