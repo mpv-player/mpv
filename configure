@@ -152,6 +152,9 @@ Optional features:
   --enable-largefiles    enable support for files > 2 GBytes [disable]
   --enable-linux-devfs   set default devices to devfs ones [disable]
   --enable-termcap       use termcap database for key codes [autodetect]
+  --with-termcaplib=NAME name of library with termcap functionality
+                         name shuld be given without leading "lib"
+                         checks for "termcap" and "tinfo"
   --disable-iconv        do not use iconv(3) function [autodetect]
   --disable-setlocale    disable setlocale using in mplayer [autodetect]
   --enable-lirc          enable LIRC (remote control) support [autodetect]
@@ -1559,7 +1562,10 @@ for ac_option do
   --with-cdparanoialibdir=*)
     _ld_cdparanoia=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
     ;;
-
+  --with-termcaplib=*)
+    _ld_termcap=-l`echo $ac_option | cut -d '=' -f 2`
+    _termcap=yes
+    ;;
   --prefix=*)
     _prefix=`echo $ac_option | cut -d '=' -f 2`
     ;;
@@ -2469,15 +2475,16 @@ if test "$_termcap" = auto ; then
 int main(void) { return 0; }
 EOF
   _termcap=no
-  cc_check -ltermcap && _termcap=yes
+  cc_check -ltermcap && _termcap=yes && _ld_termcap='-ltermcap'
+  cc_check -ltinfo && _termcap=yes && _ld_termcap='-ltinfo'
 fi
 if test "$_termcap" = yes ; then
   _def_termcap='#define USE_TERMCAP 1'
-  _ld_termcap='-ltermcap'
+  echores "yes (using $_ld_termcap)"
 else
   _def_termcap='#undef USE_TERMCAP'
+  echores no
 fi
-echores "$_termcap"
 
 
 echocheck "termios"
