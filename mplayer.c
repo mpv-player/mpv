@@ -572,10 +572,7 @@ if(!filename){
     printf("Invalid audio output driver name: %s\nUse '-ao help' to get a list of available audio drivers.\n",audio_driver);
     return 0;
   }
-
-// check audio_out
-audio_out=audio_out_drivers[0];
-if(dsp) audio_out->control(AOCONTROL_SET_DEVICE,dsp);
+  if(dsp) audio_out->control(AOCONTROL_SET_DEVICE,dsp);
 
 // check codec.conf
 if(!parse_codec_cfg(get_path("codecs.conf"))){
