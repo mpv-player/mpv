@@ -157,21 +157,32 @@ int demux_audio_open(demuxer_t* demuxer) {
     unsigned int chunk_size;
     WAVEFORMATEX* w;
     int l;
-    sh_audio->wf = w = (WAVEFORMATEX*)malloc(sizeof(WAVEFORMATEX));
     l = stream_read_dword_le(s);
-    if(l < 16) {
-      printf("Bad wav header length : too short !!!\n");
+    if(l < sizeof(WAVEFORMATEX)) {
+      mp_msg(MSGT_DEMUX,MSGL_ERR,"[demux_audio] Bad wav header length: too short (%d)!!!\n",l);
       free_sh_audio(sh_audio);
       return 0;
     }
+    sh_audio->wf = w = (WAVEFORMATEX*)malloc(l);
     w->wFormatTag = sh_audio->format = stream_read_word_le(s);
     w->nChannels = sh_audio->channels = stream_read_word_le(s);
     w->nSamplesPerSec = sh_audio->samplerate = stream_read_dword_le(s);
     w->nAvgBytesPerSec = stream_read_dword_le(s);
     w->nBlockAlign = stream_read_word_le(s);
     w->wBitsPerSample = sh_audio->samplesize = stream_read_word_le(s);
-    w->cbSize = 0;
-    l -= 16;
+    w->cbSize = stream_read_word_le(s);
+    l -= sizeof(WAVEFORMATEX);
+    if (w->cbSize > 0)
+      if (l < w->cbSize) {
+        mp_msg(MSGT_DEMUX,MSGL_ERR,"[demux_audio] truncated extradata (%d < %d)\n",
+	l,w->cbSize);
+        stream_read(s,(char*)((char*)(w)+sizeof(WAVEFORMATEX)),l);
+        l = 0;
+      } else {
+        stream_read(s,(char*)((char*)(w)+sizeof(WAVEFORMATEX)),w->cbSize);
+        l -= w->cbSize;
+      }
+
     if(verbose>0) print_wave_header(w);
     if(l)
       stream_skip(s,l);
