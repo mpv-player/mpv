@@ -1328,8 +1328,7 @@ static void *video_grabber(void *data)
 		// correct the rate fluctuations on a small scale
 		orig_interval = interval;
 		period = priv->video_interval_sum/VIDEO_AVG_BUFFER_SIZE;
-		if ((interval - prev_interval < 95*period/100)
-		    || (interval - prev_interval > 105*period/100) ) {
+		if (interval - prev_interval > 105*period/100) {
 		    if (tolerance > 0) {
 			mp_msg(MSGT_TV, MSGL_DBG3, "correcting timestamp\n");
 			interval = prev_interval + priv->video_interval_sum/VIDEO_AVG_BUFFER_SIZE;
