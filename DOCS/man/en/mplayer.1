@@ -3328,9 +3328,10 @@ This is not a bug, but a side effect of not decoding at full resolution.
 .br
 3: 1/8 resolution
 .REss
+.RS
 If <w> is specified lowres decoding will be used only if the width of the
 video is major than or equal to <w>.
-
+.RE
 .IPs "sb=<number> (MPEG-2 only)"
 Skip the given number of macroblock rows at the bottom.
 .IPs "st=<number> (MPEG-2 only)"
@@ -6929,9 +6930,10 @@ Allows you to specify your own pixel aspect ratio with par_width and
 par_height.
 .RE
 .PD 1
-.br
+.RS
 .I NOTE:
 In general, setting aspect and autoaspect options is enough.
+.RE
 .
 .TP
 .B par_width=<1\-255> (par=ext only)
