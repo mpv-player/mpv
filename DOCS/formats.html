@@ -10,7 +10,7 @@
 <BODY>
 
 
-<P><B><A NAME="formats">2.1 Supported formats</A></B></P>
+<H2><A NAME="formats">2.1 Supported formats</A></H2>
 
 <P>It is important to clarify a common mistake. When people see a file with a
   <B>.AVI</B> extension, they immediately conclude that it is not an MPEG file. 
@@ -31,10 +31,10 @@
 
 
 
-<P><B><A NAME="video_formats">2.1.1 Video formats</A></B></P>
+<H3><A NAME="video_formats">2.1.1 Video formats</A></H3>
 
 
-<P><B><A NAME="mpeg">2.1.1.1 MPEG files</A></B></P>
+<H4><A NAME="mpeg">2.1.1.1 MPEG files</A></H4>
 
 <P>MPEG files come in different guises:</P>
 
@@ -63,7 +63,7 @@
   rescaled during encoding or played with the <CODE>-aspect</CODE> option.</P>
 
 
-<P><B><A NAME="avi">2.1.1.2 AVI files</A></B></P>
+<H4><A NAME="avi">2.1.1.2 AVI files</A></H4>
 
 <P>Designed by Microsoft, <B>AVI (Audio Video Interleaved)</B> is a widespread
   multipurpose format currently used mostly for DivX and DivX4 video. It has
@@ -118,7 +118,7 @@
   two known exceptions: NanDub and <A HREF="encoding.html">MEncoder</A>.</P>
 
 
-<P><B><A NAME="asf">2.1.1.3 ASF/WMV files</A></B></P>
+<H4><A NAME="asf">2.1.1.3 ASF/WMV files</A></H4>
 
 <P>ASF (active streaming format) comes from Microsoft. They developed two
   variants of ASF, v1.0 and v2.0. v1.0 is used by their media tools (Windows
@@ -129,7 +129,7 @@
   .WMA or .WMV.</P>
 
 
-<P><B><A NAME="mov">2.1.1.4 QuickTime/MOV files</A></B></P>
+<H4><A NAME="mov">2.1.1.4 QuickTime/MOV files</A></H4>
 
 <P>These formats were designed by Apple and can contain any codec, CBR or VBR. 
   They usually have a .QT or .MOV extension. Ever since the MPEG4 group chose
@@ -144,7 +144,7 @@
   section. QDesign Music audio currently cannot be played.</P>
 
 
-<P><B><A NAME="vivo">2.1.1.5 VIVO files</A></B></P>
+<H4><A NAME="vivo">2.1.1.5 VIVO files</A></H4>
 
 <P><B>MPlayer</B> happily demuxes VIVO file formats. The biggest disadvantage
   of the format is that it has no index block, nor a fixed packet size or sync
@@ -159,7 +159,7 @@
   instructions.</P>
 
 
-<P><B><A NAME="fli">2.1.1.6 FLI files</A></B></P>
+<H4><A NAME="fli">2.1.1.6 FLI files</A></H4>
 
 <P><B>FLI</B> is a very old file format used by Autodesk Animator, but it is a
   common file format for short animations on the net. <B>MPlayer</B> demuxes
@@ -168,7 +168,7 @@
   so the picture will be messy for a short time after seeking.</P>
 
 
-<P><B><A NAME="real">2.1.1.7 RealMedia (RM) files</A></B></P>
+<H4><A NAME="real">2.1.1.7 RealMedia (RM) files</A></H4>
 
 <P>Yes, <B>MPlayer</B> can read (demux) RealMedia (.rm) files. Seeking works,
   but you have to explicitly specify the <CODE>-forceidx</CODE> option
@@ -177,7 +177,7 @@
   and <A HREF="codecs.html#realaudio">RealAudio</A> codecs.</P>
 
 
-<P><B><A NAME="nuppelvideo">2.1.1.8 NuppelVideo files</A></B></P>
+<H4><A NAME="nuppelvideo">2.1.1.8 NuppelVideo files</A></H4>
 
 <P><A HREF="http://mars.tuwien.ac.at/~roman/nuppelvideo">NuppelVideo</A>
   is a TV grabber tool (AFAIK:). <B>MPlayer</B> can read its .NUV files (only
@@ -187,7 +187,7 @@
   <B>MEncoder</B> to DivX/etc!). Seeking works.</P>
 
 
-<P><B><A NAME="yuv4mpeg">2.1.1.9 yuv4mpeg files</A></B></P>
+<H4><A NAME="yuv4mpeg">2.1.1.9 yuv4mpeg files</A></H4>
 
 <P><A HREF="http://mjpeg.sourceforge.net">yuv4mpeg / yuv4mpeg2</A> is a file
   format used by the <A HREF="http://mjpeg.sf.net">mjpegtools programs</A>. 
@@ -196,18 +196,18 @@
   images.</P>
 
 
-<P><B><A NAME="film">2.1.1.10 FILM files</A></B></P>
+<H4><A NAME="film">2.1.1.10 FILM files</A></H4>
 
 <P>This format is used on old Sega Saturn CD-Rom games.</P>
 
 
-<P><B><A NAME="roq">2.1.1.11 RoQ files</A></B></P>
+<H4><A NAME="roq">2.1.1.11 RoQ files</A></H4>
 
 <P>RoQ files are multimedia files used in some ID games such as Quake III and
   Return to Castle Wolfenstein.</P>
 
 
-<P><B><A NAME="ogg">2.1.1.12 OGG files</A></B></P>
+<H4><A NAME="ogg">2.1.1.12 OGG files</A></H4>
 
 <P>This is a new file format from <A HREF="http://www.xiph.org">Xiphophorus</A>.
   It can contain any video or audio codec, CBR or VBR. You will need to
@@ -215,7 +215,7 @@
   before compiling <B>MPlayer</B> to be able to play it.</P>
 
 
-<P><B><A NAME="audio_formats">2.1.2 Audio formats</A></B></P>
+<H3><A NAME="audio_formats">2.1.2 Audio formats</A></H3>
 
 <P><B>MPlayer</B> is a <B>Movie</B> and not a <B>Media</B> player, although
   it can play some audio file formats (they are listed in the sections below).
@@ -223,7 +223,7 @@
   <A HREF="http://www.xmms.org">xmms</A>.</P>
 
 
-<P><B><A NAME="mp3">2.1.2.1 MP3 files</A></B></P>
+<H4><A NAME="mp3">2.1.2.1 MP3 files</A></H4>
 
 <P>You may have problems playing certain MP3 files that <B>MPlayer</B> will
   misdetect as MPEGs and play incorrectly or not at all. This cannot be fixed
@@ -232,19 +232,19 @@
   described in the manpage may help you in these cases.</P>
 
 
-<P><B><A NAME="wav">2.1.2.2 WAV files</A></B></P>
+<H4><A NAME="wav">2.1.2.2 WAV files</A></H4>
 
 
-<P><B><A NAME="ogg_vorbis">2.1.2.3 OGG files (Vorbis)</A></B></P>
+<H4><A NAME="ogg_vorbis">2.1.2.3 OGG files (Vorbis)</A></H4>
 
 <P>Requires properly installed <CODE>libogg</CODE> and
   <CODE>libvorbis</CODE>.</P>
 
 
-<P><B><A NAME="wma">2.1.2.4 WMA/ASF files</A></B></P>
+<H4><A NAME="wma">2.1.2.4 WMA/ASF files</A></H4>
 
 
-<P><B><A NAME="mp4">2.1.2.5 MP4 files</A></B></P>
+<H4><A NAME="mp4">2.1.2.5 MP4 files</A></H4>
 
 </BODY>
 </HTML>

@@ -9,20 +9,22 @@
 
 <BODY>
 
-<CENTER>
-  <B>MPlayer - Movie Player for LINUX (C) 2000-2002 Arpad Gereoffy (A'rpi/ESP-team)</B><BR>
-  <BR><A HREF="http://www.mplayerhq.hu">http://www.mplayerhq.hu</A><BR><BR>
-  [ English ]
+<H1 ALIGN="center">MPlayer - The Movie Player for LINUX</H1>
+
+<H2 ALIGN="center">
+  &copy; 2000-2002 Arpad Gereoffy (A'rpi/ESP-team)<BR>
+  <A HREF="http://www.mplayerhq.hu">http://www.mplayerhq.hu</A></H2>
+
+<P ALIGN="center">[ English ]
   <A HREF="Hungarian/documentation.html">[ Hungarian ]</A>
   <A HREF="German/documentation.html">[ German ]</A>
   <A HREF="French/documentation.html">[ French ]</A>
   <A HREF="Polish/documentation.html">[ Polish ]</A>
-  <A HREF="Italian/documentation.html">[ Italian ]</A>
-</CENTER>
+  <A HREF="Italian/documentation.html">[ Italian ]</A></P>
 
 <HR>
 
-<P>Table of Contents</P>
+<H2>Table of Contents</H2>
 
 <HR>
 
@@ -301,7 +303,7 @@ Developer Cries
 
 
 
-<P><B><A NAME="reading">0. How to read this documentation</A></B></P>
+<H1><A NAME="reading">0. How to read this documentation</A></H1>
 
 <P>If you are a first-time installer: be sure to read everything from here to
   the end of the Installation section, and follow the links you will find. If
@@ -332,10 +334,10 @@ Developer Cries
 
 
 
-<P><B><A NAME="introduction">1. Introduction</A></B></P>
+<H1><A NAME="introduction">1. Introduction</A></H1>
 
 
-<P><B><A NAME="overview">1.1 Overview</A></B></P>
+<H2><A NAME="overview">1.1 Overview</A></H2>
 
 <P><B>MPlayer</B> is a movie player for LINUX (runs on many other Unices, and
   <B>non-x86</B> CPUs, see the <A HREF="#ports">ports section</A>). It plays most
@@ -368,7 +370,7 @@ Developer Cries
   but the speed is also amazing.</P>
 
 
-<P><B><A NAME="history">1.2 History</A></B></P>
+<H2><A NAME="history">1.2 History</A></H2>
 
 <P>This began a year ago...
   I (A'rpi) have tried lots of players under linux (mtv,xmps,dvdview,livid/oms,videolan,
@@ -417,7 +419,7 @@ Developer Cries
 </UL>
 
 
-<P><B><A NAME="installation">1.3 Installation</A></B></P>
+<H2><A NAME="installation">1.3 Installation</A></H2>
 
 <P>In this chapter I'll try to guide you through the compiling and
   configuring process of <B>MPlayer</B>. It's not easy, but it won't necessarily
@@ -428,7 +430,7 @@ Developer Cries
 
 <P>You need a fairly recent system. On Linux, 2.4.x kernels are recommended.</P>
 
-<P><B>SOFTWARE REQUIREMENTS</B><BR>
+<H4>SOFTWARE REQUIREMENTS</H4>
 
 <UL>
   <LI><B>binutils</B> - suggested version is <B>2.11.x</B> . This program is
@@ -468,7 +470,7 @@ Developer Cries
   <LI><B>libvorbis</B> - optional, needed for playing OGG Vorbis audio.</LI>
 </UL>
 
-<P><B>CODECS</B></P>
+<H4>CODECS</H4>
 
 <UL>
   <LI><B>libavcodec</B>: This codec package is capable of decoding
@@ -538,12 +540,12 @@ Developer Cries
     installation instructions and more information.</LI>
 </UL>
 
-<P><B>VIDEO CARDS</B></P>
+<H4>VIDEO CARDS</H4>
 
 <P>There are generally two kind of video cards. One kind (the newer cards) has
   <B>hardware scaling and YUV acceleration</B> support, the other cards don't.</P>
 
-<P><B>YUV cards</B></P>
+<H4>YUV cards</H4>
 
 <P>They can display and scale (zoom) the picture to any size that fits in
   their memory, with <B>small CPU usage</B> (even when zooming), thus
@@ -603,7 +605,7 @@ Developer Cries
   </LI>
 </UL>
 
-<P><B>Non-YUV cards</B></P>
+<H4>Non-YUV cards</H4>
 
 <P>Fullscreen playing can be achieved by either enabling <B>software scaling</B>
   (use the <CODE>-zoom</CODE> or <A HREF="#filters_scale"><CODE>-vop scale</CODE></A>
@@ -624,7 +626,7 @@ Developer Cries
     <A HREF="video.html#aalib">aalib</A>.</LI>
 </UL>
 
-<P>Some cards:</P>
+<H4>Some cards:</H4>
 
 <UL>
   <LI><B>Cirrus Logic cards</B>:
@@ -652,7 +654,7 @@ Developer Cries
 </UL>
 
 
-<P><B>SOUND CARDS</B></P>
+<H4>SOUND CARDS</H4>
 
 <UL>
   <LI><B>Soundblaster Live!</B>: with this card you can use 4 or 6 (<B>5.1</B>)
@@ -667,7 +669,7 @@ Developer Cries
     section</A>!</U></LI>
 </UL>
 
-<P><B>FEATURES</B></P>
+<H4>FEATURES</H4>
 
 <UL>
   <LI>Decide if you need GUI. If you do, see the <A HREF="#gui">GUI section</A>
@@ -722,7 +724,7 @@ Developer Cries
 </PRE>
 
 
-<P><B><A NAME="gui">1.4 What about the GUI?</A></B></P>
+<H2><A NAME="gui">1.4 What about the GUI?</A></H2>
 
 <P>The GUI needs GTK (it isn't GTK, but the panels are). The skins are stored
   in PNG format, so gtk, libpng (and their devel stuff) has to be installed. 
@@ -752,7 +754,7 @@ Developer Cries
   file directive to use the skin in <CODE>*/Skin/newskin</CODE> directory.</P>
 
 
-<P><B><A NAME="subtitles_osd">1.5 Subtitles and OSD</A></B></P>
+<H2><A NAME="subtitles_osd">1.5 Subtitles and OSD</A></H2>
 
 <P>
   <B>MPlayer</B> can display subtitles along with movie files. Currently the following 
@@ -837,7 +839,7 @@ The command line options differ slightly for the different formats:
   Display</B>.  OSD is used to display current time, volume bar, seek bar
   etc.</P>
 
-<P><B>INSTALLING OSD and SUB</B></P>
+<H4>INSTALLING OSD and SUB</H4>
 
 <P>You need an <B>MPlayer</B> font package to be able to use OSD/SUB feature.
   There are many ways to get it:</P>
@@ -887,7 +889,7 @@ The command line options differ slightly for the different formats:
   in config file.</P>
 
 
-<P><B><A NAME="rtc">1.6 RTC</A></B></P>
+<H2><A NAME="rtc">1.6 RTC</A></H2>
 
 There are three timing methods in <B>MPlayer</B>.
 
@@ -936,25 +938,25 @@ It's a clear way for everyone to become root.
 
 
 
-<P><B><A NAME="features">2. Features</A></B></P>
+<H1><A NAME="features">2. Features</A></H1>
 
 
-<P><A NAME="formats">2.1</A> <A HREF="formats.html">Supported formats</A></P>
+<H2><A NAME="formats">2.1</A> <A HREF="formats.html">Supported formats</A></H2>
 
 
-<P><A NAME="codecs">2.2</A> <A HREF="codecs.html">Supported codecs</A></P>
+<H2><A NAME="codecs">2.2</A> <A HREF="codecs.html">Supported codecs</A></H2>
 
 
-<P><A NAME="output">2.3</A> <A HREF="video.html">Video</A> &amp; <A HREF="sound.html">Audio</A> output devices</P>
+<H2><A NAME="output">2.3</A> <A HREF="video.html">Video</A> &amp; <A HREF="sound.html">Audio</A> output devices</H2>
 
 
-<P><A NAME="encoding">2.4</A> <A HREF="encoding.html">MEncoder - An All-Purpose Encoder</A></P>
+<H2><A NAME="encoding">2.4</A> <A HREF="encoding.html">MEncoder - An All-Purpose Encoder</A></H2>
 
 
-<P><A NAME="tv"><B>2.5 TV input</B></A></P>
+<H2><A NAME="tv"><B>2.5 TV input</B></A></H2>
 
 
-<P><A NAME="tv_overview"><B>2.5.1  Overview</B></A></P>
+<H3><A NAME="tv_overview">2.5.1  Overview</A></H3>
 
 <P>This section is about how to enable <B>watching/grabbing from V4L compatible
 TV tuner</B>.</P>
@@ -963,7 +965,7 @@ TV tuner</B>.</P>
   without tweaking/experimenting!</B></P>
 
 
-<P><A NAME="tv_compilation"><B>2.5.2  Compilation</B></A></P>
+<H3><A NAME="tv_compilation">2.5.2  Compilation</A></H3>
 
 <UL>
   <LI>First, you have to recompile. <CODE>./configure</CODE> will autodetect
@@ -980,7 +982,7 @@ TV tuner</B>.</P>
   You can specify these with the <CODE>outfmt=YV12</CODE> option, see below.</P>
 
 
-<P><A NAME="tv_options"><B>2.5.3  Available options</B></A></P>
+<H3><A NAME="tv_options">2.5.3  Available options</A></H3>
 
 <TABLE BORDER=0>
 <TR>
@@ -1066,7 +1068,7 @@ TV tuner</B>.</P>
 </TABLE>
 
 
-<P><A NAME="tv_keyboard"><B>2.5.4  Keyboard control</B></A></P>
+<H3><A NAME="tv_keyboard">2.5.4  Keyboard control</A></H3>
 
 <TABLE BORDER=0>
   <TR><TD>&nbsp;&nbsp;</TD><TD>h / k</TD><TD>&nbsp;&nbsp;</TD><TD>select previous/next channel</TD></TR>
@@ -1075,7 +1077,7 @@ TV tuner</B>.</P>
 </TABLE>
 
 
-<P><A NAME="tv_examples"><B>2.5.5  Examples</B></A></P>
+<H3><A NAME="tv_examples">2.5.5  Examples</A></H3>
 
 <P>Dummy output, to AAlib :)<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=dummy:width=640:height=480 -vo aa</CODE><BR>
@@ -1090,10 +1092,10 @@ TV tuner</B>.</P>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:noaudio:driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv</CODE></P>
 
 
-<P><A NAME="filters"><B>2.6 filters</B></A></P>
+<H2><A NAME="filters">2.6 filters</A></H2>
 
 
-<P><A NAME="filters_overview"><B>2.6.1  Overview</B></A></P>
+<H3><A NAME="filters_overview">2.6.1  Overview</A></H3>
 
 <P>Both <B>MPlayer</B> and <B>MEncoder</B> support using a universal
   video filter layer, which comprises numerous plugins that are listed and
@@ -1114,7 +1116,7 @@ TV tuner</B>.</P>
   will be explained below.</P>
 
 
-<P><A NAME="filters_usage"><B>2.6.2  Usage</B></A></P>
+<H3><A NAME="filters_usage">2.6.2  Usage</A></H3>
 
 <P><CODE>&nbsp;&nbsp;mplayer/mencoder -vop filter1,filter2,filter3,...</CODE>
   </P>
@@ -1134,7 +1136,7 @@ TV tuner</B>.</P>
 <P>&nbsp;&nbsp;<CODE>mplayer -vop help</CODE></P>
 
 
-<P><A NAME="filters_crop"><B>2.6.3  Crop</B></A></P>
+<H3><A NAME="filters_crop">2.6.3  Crop</A></H3>
 
 <P><B><U>Description</U></B>:</P>
 
@@ -1146,7 +1148,7 @@ TV tuner</B>.</P>
 <P><CODE>&nbsp;&nbsp;-vop crop[=width:height:x:y]</CODE></P>
 
 
-<P><A NAME="filters_expand"><B>2.6.4  Expand</B></A></P>
+<H3><A NAME="filters_expand">2.6.4  Expand</A></H3>
 
 <P><B><U>Description</U></B>:</P>
 
@@ -1160,7 +1162,7 @@ TV tuner</B>.</P>
 <P><CODE>&nbsp;&nbsp;-vop expand[=width:height:x:y]</CODE></P>
 
 
-<P><A NAME="filters_fame"><B>2.6.5  Fame/Lavc</B></A></P>
+<H3><A NAME="filters_fame">2.6.5  Fame/Lavc</A></H3>
 
 <P><B><U>Description</U></B>:</P>
 
@@ -1174,7 +1176,7 @@ TV tuner</B>.</P>
 <P><CODE>&nbsp;&nbsp;-vop lavc</CODE></P>
 
 
-<P><A NAME="filters_flip"><B>2.6.6  Flip</B></A></P>
+<H3><A NAME="filters_flip">2.6.6  Flip</A></H3>
 
 <P><B><U>Description</U></B>:</P>
 
@@ -1186,7 +1188,7 @@ TV tuner</B>.</P>
 <P><CODE>&nbsp;&nbsp;-vop flip</CODE></P>
 
 
-<P><A NAME="filters_format"><B>2.6.7  Format</B></A></P>
+<H3><A NAME="filters_format">2.6.7  Format</A></H3>
 
 <P><B><U>Description</U></B>:</P>
 
@@ -1200,7 +1202,7 @@ TV tuner</B>.</P>
   <CODE>format</CODE> can be for example: rgb32, yuy2, etc...)</P>
 
 
-<P><A NAME="filters_postprocess"><B>2.6.8  Postprocess</B></A></P>
+<H3><A NAME="filters_postprocess">2.6.8  Postprocess</A></H3>
 
 <P><B><U>Description</U></B>:</P>
 
@@ -1213,7 +1215,7 @@ TV tuner</B>.</P>
 <P><CODE>&nbsp;&nbsp;-vop pp[=postprocess options/keywords]</CODE></P>
 
 
-<P><A NAME="filters_rgb2bgr"><B>2.6.9  RGB2BGR</B></A></P>
+<H3><A NAME="filters_rgb2bgr">2.6.9  RGB2BGR</A></H3>
 
 <P><B><U>Description</U></B>:</P>
 
@@ -1226,7 +1228,7 @@ TV tuner</B>.</P>
 <P><CODE>&nbsp;&nbsp;-vop rgb2bgr[=swap]</CODE></P>
 
 
-<P><A NAME="filters_rotate"><B>2.6.10  Rotate</B></A></P>
+<H3><A NAME="filters_rotate">2.6.10  Rotate</A></H3>
 
 <P><B><U>Description</U></B>:</P>
 
@@ -1238,7 +1240,7 @@ TV tuner</B>.</P>
 <P><CODE>&nbsp;&nbsp;-vop rotate[=x]</CODE></P>
 
 
-<P><A NAME="filters_scale"><B>2.6.11  Scale</B></A></P>
+<H3><A NAME="filters_scale">2.6.11  Scale</A></H3>
 
 <P><B><U>Description</U></B>:</P>
 
@@ -1257,7 +1259,7 @@ TV tuner</B>.</P>
 <P><CODE>&nbsp;&nbsp;-vop scale[=width:height]</CODE></P>
 
 
-<P><A NAME="filters_yuy2"><B>2.6.12  YUY2</B></A></P>
+<H3><A NAME="filters_yuy2">2.6.12  YUY2</A></H3>
 
 <P><B><U>Description</U></B>:</P>
 
@@ -1268,7 +1270,7 @@ TV tuner</B>.</P>
 <P><CODE>&nbsp;&nbsp;-vop yuy2</CODE></P>
 
 
-<P><A NAME="filters_mirror"><B>2.6.13  Mirror</B></A></P>
+<H3><A NAME="filters_mirror">2.6.13  Mirror</A></H3>
 
 <P><B><U>Description</U></B>:</P>
 
@@ -1279,7 +1281,7 @@ TV tuner</B>.</P>
 <P><CODE>&nbsp;&nbsp;-vop mirror</CODE></P>
 
 
-<P><A NAME="filters_dvbscale"><B>2.6.14  DVBscale</B></A></P>
+<H3><A NAME="filters_dvbscale">2.6.14  DVBscale</A></H3>
 
 <P><B><U>Description</U></B>:</P>
 
@@ -1290,7 +1292,7 @@ TV tuner</B>.</P>
 <P><CODE>&nbsp;&nbsp;-vop dvbscale</CODE></P>
 
 
-<P><A NAME="filters_cropdetect"><B>2.6.15  Cropdetect</B></A></P>
+<H3><A NAME="filters_cropdetect">2.6.15  Cropdetect</A></H3>
 
 <P><B><U>Description</U></B>:</P>
 
@@ -1305,7 +1307,7 @@ TV tuner</B>.</P>
 <P><CODE>&nbsp;&nbsp;-vop cropdetect[=limit]</CODE></P>
 
 
-<P><A NAME="filters_rectangle"><B>2.6.16  Rectangle</B></A></P>
+<H3>><A NAME="filters_rectangle">2.6.16  Rectangle</A></H3>
 
 <P><B><U>Description</U></B>:</P>
 
@@ -1319,10 +1321,10 @@ TV tuner</B>.</P>
 
 
 
-<P><B><A NAME="usage">3. Usage</A></B></P>
+<H1><A NAME="usage">3. Usage</A></H1>
 
 
-<P><B><A NAME="command_line">3.1 Command line</A></B></P>
+<H2><A NAME="command_line">3.1 Command line</A></H2>
 
 <P><B>MPlayer</B> utilizes a complex playtree. It consists of global options
   written as first (for example <CODE>mplayer -vfm 5</CODE>), and options
@@ -1354,16 +1356,16 @@ TV tuner</B>.</P>
 </PRE>
 
 
-<P><B><A NAME="control">3.2 Control</A></B></P>
+<H2><A NAME="control">3.2 Control</A></H2>
 
 <P><B>MPlayer</B> has a fully configurable, command driven, control layer which
   lets you control <B>MPlayer</B> with keyboard, mouse, joystick or remote
   control (using LIRC).</P>
 
 
-<P><B><A NAME="default_controls">3.2.1 Default controls</A></B></P>
+<H3><A NAME="default_controls">3.2.1 Default controls</A></H3>
 
-<P><B>Keyboard</B></P>
+<H4>Keyboard</H4>
 
 <TABLE BORDER=0>
   <TR><TD>&nbsp;&nbsp;</TD><TD>&lt;-  or  -&gt;</TD><TD>&nbsp;&nbsp;</TD><TD>seek backward/forward  10 seconds</TD></TR>
@@ -1387,7 +1389,7 @@ TV tuner</B>.</P>
   <TR><TD></TD><TD>7 or 8</TD><TD></TD><TD>adjust saturation</TD></TR>
 </TABLE>
 
-<P><B>GUI</B></P>
+<H4>GUI</H4>
 
 <TABLE BORDER=0>
   <TR><TD>&nbsp;&nbsp;</TD><TD>, and .</TD><TD>&nbsp;&nbsp;</TD><TD>previous / next file</TD></TR>
@@ -1404,7 +1406,7 @@ TV tuner</B>.</P>
   <TR><TD></TD><TD>m</TD><TD></TD><TD>toggle mute</TD></TR>
 </TABLE>
 
-<P><B>TV</B></P>
+<H4>TV</H4>
 
 <TABLE BORDER=0>
   <TR><TD>&nbsp;&nbsp;</TD><TD>h  or  l</TD><TD>&nbsp;&nbsp;</TD><TD>select previous/next channel</TD></TR>
@@ -1413,7 +1415,7 @@ TV tuner</B>.</P>
 </TABLE>
 
 
-<P><B><A NAME="controls_configuration">3.2.2 Controls configuration</A></B></P>
+<H3><A NAME="controls_configuration">3.2.2 Controls configuration</A></H3>
 
 <P><B>MPlayer</B> allows you bind any key/button to any <B>MPlayer</B> command
   using a simple config file.  The syntax consist of a key name followed by a
@@ -1440,11 +1442,11 @@ ENTER pt_step 1 1
 </PRE>
 
 
-<P><B><A NAME="key_names">3.2.2.1 Key names</A></B></P>
+<H4><A NAME="key_names">3.2.2.1 Key names</A></H4>
 
 <P>You can have a full list by running <CODE>mplayer -input keylist</CODE></P>
 
-<P><B>Keyboard</B></P>
+<H4>Keyboard</H4>
 
 <UL>
   <LI>Any printable character</LI>
@@ -1466,7 +1468,7 @@ ENTER pt_step 1 1
   <LI>DOWN</LI>
 </UL>
 
-<P><B>Mouse</B></P>
+<H4>Mouse</H4>
 
 <P>Note: mouse is only supported under X</P>
 
@@ -1480,7 +1482,7 @@ ENTER pt_step 1 1
   <LI>MOUSE_BTN9</LI>
 </UL>
 
-<P><B>Joystick</B></P>
+<H4>Joystick</H4>
 
 <P>Note: joystick support must be enabled at compile time</P>
 
@@ -1497,7 +1499,7 @@ ENTER pt_step 1 1
 </UL>
 
 
-<P><B><A NAME="commands">3.2.2.2 Commands</A></B></P>
+<H4><A NAME="commands">3.2.2.2 Commands</A></H4>
 
 <P>You can have a full list of known commands by running "mplayer -input cmdlist"</P>
 
@@ -1560,7 +1562,7 @@ ENTER pt_step 1 1
 </UL>
 
 
-<P><B><A NAME="lirc">3.2.3 Control from LIRC</A></B></P>
+<H3><A NAME="lirc">3.2.3 Control from LIRC</A></H3>
 
 <P>Linux Infrared Remote Control - use an easy to build home-brewn IR-receiver,
   an (almost) arbitrary remote control and control your Linux box with it!
@@ -1610,14 +1612,14 @@ end
   use the -lircconf &lt;filename&gt; switch to specify another file.</P>
 
 
-<P><B><A NAME="slave">3.2.4 Slave mode</A></B></P>
+<H3><A NAME="slave">3.2.4 Slave mode</A></H3>
 
 <P>The slave mode allow you to build simple frontend to <B>MPlayer</B>. When
   enabled (with the <CODE>-slave</CODE> switch) <B>MPlayer</B> will read
   commands separated by new line (\n) from stdin.</P>
 
 
-<P><B><A NAME="streaming">3.3 Streaming from network or pipes</A></B></P>
+<H2><A NAME="streaming">3.3 Streaming from network or pipes</A></H2>
 
 <P><B>MPlayer</B> can play files from network, using the HTTP or MMS protocol.</P>
 
@@ -1638,18 +1640,18 @@ end
 
 
 
-<P><B><A NAME="faq"></A>4. <A HREF="faq.html">FAQ section</A></B></P>
+<H1><A NAME="faq"></A>4. <A HREF="faq.html">FAQ section</A></H1>
 
 
 
-<P><B><A NAME="cd/dvd"></A>5. <A HREF="cd-dvd.html">CD/DVD section</A></B></P>
+<H1><A NAME="cd/dvd"></A>5. <A HREF="cd-dvd.html">CD/DVD section</A></H1>
 
 
 
-<P><B><A NAME="ports">6. Ports</A></B></P>
+<H1><A NAME="ports">6. Ports</A></H1>
 
 
-<P><B><A NAME="debian">6.1 Debian packaging</A></B></P>
+<H2><A NAME="debian">6.1 Debian packaging</A></H2>
 
 <P>To build the package, get the cvs version, or .tgz and uncompress it,
   and cd into programs directory:</P>
@@ -1680,7 +1682,7 @@ end
 </PRE>
 
 
-<P><B><A NAME="freebsd">6.2 FreeBSD</A></B></P>
+<H2><A NAME="freebsd">6.2 FreeBSD</A></H2>
 
 <P>To build the package you will need GNU make (gmake, /usr/ports/devel/gmake),
   native BSD make will not work.</P>
@@ -1696,7 +1698,7 @@ end
 <P>There's no DVD support for FreeBSD yet.</P>
 
 
-<P><B><A NAME="solaris">6.3 Solaris</A></B></P>
+<H2><A NAME="solaris">6.3 Solaris</A></H2>
 
 <P>MPlayer should work on Solaris 2.6 or newer.</P>
 
@@ -1791,7 +1793,7 @@ end
   decoding and for color space conversion in the video output drivers.</P>
 
 
-<P><B><A NAME="strongarm">6.4 StrongARM</A></B></P>
+<H2><A NAME="strongarm">6.4 StrongARM</A></H2>
 
 <P><B>MPlayer</B> is reported to compile on StrongARM. Use the following command line:</P>
 
@@ -1801,13 +1803,13 @@ end
 </PRE>
 
 
-<P><B><A NAME="sgi">6.5 Silicon Graphics / IRIX</A></B></P>
+<H2><A NAME="sgi">6.5 Silicon Graphics / IRIX</A></H2>
 
 <P>Reported working. You'll probably have to use the <I>SGI</I> ao driver.
   Anyone has closer info?</P>
 
 
-<P><B><A NAME="qnx">6.6 QNX</A></B></P>
+<H2><A NAME="qnx">6.6 QNX</A></H2>
 
 <P>Works. You'll need to download SDL for QNX, and install it. Then run
   <B>MPlayer</B> with <CODE>-vo sdl:photon</CODE> and <CODE>-ao sdl:nto</CODE>
@@ -1817,7 +1819,7 @@ end
   QNX has only X <I>emulation</I> which is VERY slow. Use SDL.</P>
 
 
-<P><B><A NAME="openbsd">6.7 OpenBSD</A></B></P> 
+<H2><A NAME="openbsd">6.7 OpenBSD</A></H2> 
     
 <P>To build the package you will need GNU make (gmake,
   /usr/ports/devel/gmake), native BSD make will not work, and a recent
@@ -1839,7 +1841,7 @@ end
   version (/usr/ports/x11/mplayer).</P>
 
 
-<P><A NAME="cygwin"></A><B>6.8. Cygwin</B><BR></P>
+<H2><A NAME="cygwin">6.8. Cygwin</A></H2>
  
 <P>You will have to go to the <B>MPlayer</B> directory, and copy or symlink
   <CODE>etc/cygwin_inttypes.h</CODE> to <CODE>/usr/include/inttypes.h</CODE> to
@@ -1848,7 +1850,7 @@ end
 
 
 
-<P><B><A NAME="authors">Appendix A - Authors</A></B></P>
+<H1><A NAME="authors">Appendix A - Authors</A></H1>
 
 <BLOCKQUOTE>
   <B>Important</B><BR>
@@ -1858,7 +1860,7 @@ end
 
 <P>Read <A HREF="bugreports.html">Appendix C</A> and subscribe to mplayer-users mailing lists.</P>
 
-<P ALIGN=center><B><U>The <B>MPlayer</B> project:</U></B></P>
+<H2>The <B>MPlayer</B> project:</H2>
 
 <UL>
   <LI><B><A HREF="mailto:mplayer-users@mplayerhq.hu">Árpád Gereöffy (A'rpi/ESP-team)</A></B>
@@ -2250,7 +2252,7 @@ end
   </LI>
 </UL>
 
-<P>Main testers:</P>
+<H2>Main testers:</H2>
 
 <UL>
   <LI>Tibor Balázs (Tibcu)
@@ -2261,7 +2263,7 @@ end
   <LI>Bohdan Horst (Nexus)
 </UL>
 
-<P ALIGN=center><B><U>The codecs, libs:</U></B></P>
+<H2>The codecs, libs:</H2>
 
 <UL>
   <LI>Aaron Holtzman:  &lt;aholtzma@engr.uvic.ca&gt;
@@ -2345,15 +2347,15 @@ end
 
 
 
-<P><B><A NAME="maintainers">Appendix A2 - MPlayer code and documentation maintainers</A></B></P>
+<H1><A NAME="maintainers">Appendix A2 - MPlayer code and documentation maintainers</A></H1>
 
-Homepage
+<H2>Homepage</H2>
 <UL>
   <LI><B>Design:</B> Chass and Tornado</LI>
   <LI><B>Contents:</B> Gabucino</LI>
 </UL>
 
-English documentation
+<H2>English documentation</H2>
 <UL>
   <LI><B>user docs:</B> Gabucino</LI>
   <LI><B>review, grammar fixes:</B> Diego Biurrun, Nilmoni Deb</LI>
@@ -2361,7 +2363,7 @@ English documentation
   <LI><B>tech/* docs:</B> A'rpi</LI>
 </UL>
 
-Documentation translations
+<H2>Documentation translations</H2>
 <UL>
   <LI><B>Hungarian:</B> Gabucino</LI>
   <LI><B>German:</B> <A HREF="mailto:jjermann@gmx.net">Jonas Jermann</A></LI>
@@ -2372,7 +2374,7 @@ Documentation translations
   <LI><B>Italian:</B> Matteo Balduzzi</LI>
 </UL>
 
-Platforms/ports
+<H2>Platforms/ports</H2>
 <UL>
   <LI><B>DEBIAN packaging:</B> Dariusz Pietrzak</LI>
   <LI><B>FreeBSD support:</B> Vladimir Kushnir, Nexus</LI>
@@ -2382,7 +2384,7 @@ Platforms/ports
   <LI><B>Win32/Cygwin support:</B> Atmosfear</LI>
 </UL>
 
-MPlayer code:
+<H2>MPlayer code:</H2>
 <UL>
   <LI><B>A-V sync code:</B> A'rpi</LI>
   <LI><B>libmpdemux, libmpcodecs:</B> A'rpi</LI>
@@ -2401,7 +2403,7 @@ MPlayer code:
   <LI><B>VIDIX core, libdha:</B> Nick Kurshev</LI>
 </UL>
 
-libvo drivers:
+<H2>libvo drivers:</H2>
 <UL>
   <LI><B>vo_3dfx.c</B> - OBSOLETED, use xv or tdfxfb</LI>
   <LI><B>vo_tdfxfb.c</B> - Mark Zealey (mark@zealos.org)</LI>
@@ -2430,7 +2432,7 @@ libvo drivers:
   <LI><B>vo_zr.c</B> - <A HREF="mailto:rsnel@cube.dyndns.org">Rik Snel</A></LI>
 </UL>
 
-VIDIX drivers:
+<H2>VIDIX drivers:</H2>
 <UL>
   <LI><B>genfb_vid</B> - al3x</LI>
   <LI><B>mach64_vid</B> - Michael Niedermayer</LI>
@@ -2440,7 +2442,7 @@ VIDIX drivers:
   <LI><B>rage128_vid</B> - Nick Kurshev</LI>
 </UL>
 
-libao2 drivers:
+<H2>libao2 drivers:</H2>
 <UL>
   <LI><B>ao_alsa5.c</B>  - al3x</LI>
   <LI><B>ao_alsa9.c</B>  - al3x (fixed by <A HREF="mailto:joy@pingfm.org">joy_ping</A>)</LI>
@@ -2453,7 +2455,7 @@ libao2 drivers:
   <LI><B>ao_sun.c</B>    - Jürgen Keil</LI>
 </UL>
 
-TOOLS:
+<H2>TOOLS:</H2>
 <UL>
   <LI><B>subfont-c</B> - Artur Zaprzala (zybi@fanthom.irc.pl)</LI>
   <LI><B>subfont-GIMP</B> - lanzz@lanzz.org</LI>
@@ -2465,7 +2467,7 @@ TOOLS:
 
 
 
-<P><B><A NAME="mailing_lists">Appendix B - Mailing lists</A></B></P>
+<H1><A NAME="mailing_lists">Appendix B - Mailing lists</A></H1>
 
 <P>There are some public mailing lists on <B>MPlayer</B>. Subscribing can be
   achieved on the following addresses:</P>
@@ -2525,11 +2527,11 @@ TOOLS:
 
 
 
-<P><B><A NAME="bug_reports"></A><A HREF="bugreports.html">Appendix C</A> - How to report bugs</B></P>
+<H1><A NAME="bug_reports"></A><A HREF="bugreports.html">Appendix C</A> - How to report bugs</H1>
 
 
 
-<P><B><A NAME="known_bugs">Appendix D - Known bugs</A></B></P>
+<H1><A NAME="known_bugs">Appendix D - Known bugs</A></H1>
 
 <P>Special system/CPU-specific bugs/problems:</P>
 <UL>
