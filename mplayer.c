@@ -1532,6 +1532,11 @@ if(!sh_video) {
 
     mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"*** ftime=%5.3f ***\n",frame_time);
 
+    if(sh_video->vf_inited<0){
+	mp_msg(MSGT_CPLAYER,MSGL_FATAL,"\nFATAL: Couldn't initialize video filters (-vop) or video output (-vo) !\n");
+	eof=1; goto goto_next_file;
+    }
+
 // ==========================================================================
     
 //    current_module="draw_osd";
