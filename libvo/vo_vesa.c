@@ -402,6 +402,7 @@ static uint32_t query_format(uint32_t format)
   uint32_t retval;
     if(verbose > 2)
         printf("vo_vesa: query_format was called: %x (%s)\n",format,vo_format_name(format));
+    if(lvo_name) return vlvo_query_info(format);
 	switch(format)
 	{
 		case IMGFMT_YV12:
@@ -681,7 +682,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		if(sd_flags & SUBDEV_NODGA) video_mode_info.PhysBasePtr = 0;
 		if( vesa_zoom || fs_mode )
 		{
-		  if( format==IMGFMT_YV12 )
+		  if( format==IMGFMT_YV12 || lvo_name )
 		  {
 		      /* software scale */
 		      if(vesa_zoom > 1)
