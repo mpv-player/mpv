@@ -327,7 +327,7 @@ mpeg_run(mpeg_t *mpeg)
 	else if ((c & 0xf0) == 0x20)
 	    version = 2;
 	else {
-	    mp_msg(MSGT_VOBSUB,MSGL_ERR, "Unsupported MPEG version: 0x%02x", c);
+	    mp_msg(MSGT_VOBSUB,MSGL_ERR, "VobSub: Unsupported MPEG version: 0x%02x\n", c);
 	    return -1;
 	}
 	if (version == 4) {
@@ -940,16 +940,16 @@ vobsub_parse_ifo(void* this, const char *const name, unsigned int *palette, unsi
     rar_stream_t *fd = rar_open(name, "rb");
     if (fd == NULL) {
         if (force)
-	    mp_msg(MSGT_VOBSUB,MSGL_ERR, "Can't open IFO file");
+	    mp_msg(MSGT_VOBSUB,MSGL_ERR, "VobSub: Can't open IFO file\n");
     } else {
 	// parse IFO header
 	unsigned char block[0x800];
 	const char *const ifo_magic = "DVDVIDEO-VTS";
 	if (rar_read(block, sizeof(block), 1, fd) != 1) {
 	    if (force)
-		mp_msg(MSGT_VOBSUB,MSGL_ERR, "Can't read IFO header");
+		mp_msg(MSGT_VOBSUB,MSGL_ERR, "VobSub: Can't read IFO header\n");
 	} else if (memcmp(block, ifo_magic, strlen(ifo_magic) + 1))
-	    mp_msg(MSGT_VOBSUB,MSGL_ERR, "Bad magic in IFO header\n");
+	    mp_msg(MSGT_VOBSUB,MSGL_ERR, "VobSub: Bad magic in IFO header\n");
 	else {
 	    unsigned long pgci_sector = block[0xcc] << 24 | block[0xcd] << 16
 		| block[0xce] << 8 | block[0xcf];
@@ -982,7 +982,7 @@ vobsub_parse_ifo(void* this, const char *const name, unsigned int *palette, unsi
 	    }
 	    if (rar_seek(fd, pgci_sector * sizeof(block), SEEK_SET)
 		|| rar_read(block, sizeof(block), 1, fd) != 1)
-		mp_msg(MSGT_VOBSUB,MSGL_ERR, "Can't read IFO PGCI");
+		mp_msg(MSGT_VOBSUB,MSGL_ERR, "VobSub: Can't read IFO PGCI\n");
 	    else {
 		unsigned long idx;
 		unsigned long pgc_offset = block[0xc] << 24 | block[0xd] << 16
@@ -1034,7 +1034,7 @@ vobsub_open(const char *const name,const char *const ifo,const int force,void** 
 	    fd = rar_open(buf, "rb");
 	    if (fd == NULL) {
 		if(force)
-		  mp_msg(MSGT_VOBSUB,MSGL_ERR,"VobSub: Can't open IDX file");
+		  mp_msg(MSGT_VOBSUB,MSGL_ERR,"VobSub: Can't open IDX file\n");
 		else {
 		  free(buf);
 		  free(vob);
@@ -1057,7 +1057,7 @@ vobsub_open(const char *const name,const char *const ifo,const int force,void** 
 	    mpg = mpeg_open(buf);
 	    if (mpg == NULL) {
 	      if(force)
-		mp_msg(MSGT_VOBSUB,MSGL_ERR,"VobSub: Can't open SUB file");
+		mp_msg(MSGT_VOBSUB,MSGL_ERR,"VobSub: Can't open SUB file\n");
 	      else {
 		
 		free(buf);
@@ -1070,7 +1070,7 @@ vobsub_open(const char *const name,const char *const ifo,const int force,void** 
 		    off_t pos = mpeg_tell(mpg);
 		    if (mpeg_run(mpg) < 0) {
 			if (!mpeg_eof(mpg))
-			    mp_msg(MSGT_VOBSUB,MSGL_ERR,"mpeg_run error");
+			    mp_msg(MSGT_VOBSUB,MSGL_ERR,"VobSub: mpeg_run error\n");
 			break;
 		    }
 		    if (mpg->packet_size) {
