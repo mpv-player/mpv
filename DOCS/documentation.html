@@ -38,6 +38,7 @@
 	<LI><A HREF="codecs.html#2.1.2.2">2.1.2.2 ffmpeg's DivX/libavcodec</A></LI>
 	<LI><A HREF="codecs.html#2.1.2.3">2.1.2.3 Hardware AC3 decoding</A></LI>
 	<LI><A HREF="codecs.html#2.1.2.4">2.1.2.4 XAnim codecs</A></LI>
+	<LI><A HREF="codecs.html#2.1.2.5">2.1.2.5 libmad support</A></LI>
       </UL>
       <LI><A HREF="mailto:Strange. Where did this chapter go?">2.1.3 The Veiled Mysteries of MPlayer</A></LI>
       <LI><A HREF="codecs.html#2.1.4">2.1.4 Codec importing howto</A></LI>
@@ -121,6 +122,7 @@
       <LI><A HREF="#6.2">6.2 FreeBSD</A></LI>
       <LI><A HREF="#6.3">6.3 Solaris</A></LI>
       <LI><A HREF="#6.4">6.4 StrongARM</A></LI>
+      <LI><A HREF="#6.5">6.5 SGI/Irix</A></LI>
     </UL>
   <LI><A HREF="#A">A. Authors</A></LI>
   <UL>
@@ -660,13 +662,20 @@ all data is accessed modulo 4GB
 <P>VIS accelerated operations from mediaLib are used for mpeg2 video
   decoding and for color space conversion in the video output drivers.</P>
 
+
 <P><B><A NAME=6.4>6.4. StrongARM</A></B></P>
 
 <P><B>MPlayer</B> is reported to compile on StrongARM. Use the following command line:</P>
 
 <P><PRE>  ./configure --target=arm-linux --disable-css --with-x11libdir=/usr/arm/lib
 	      --with-x11incdir=/usr/arm/lib --disable-gcc-checking</PRE></P>
-	      
+
+
+<P><B><A NAME=6.5>6.5. Silicon Graphics Indigo / IRIX</A></B></P>
+
+<P>Reported working. Anyone has closer info?</P>
+
+
 <P><B><A NAME=A>Appendix A - Authors</A></B></P>
 
 <P>NOTE: Do *NOT* send bugreports, help &amp; feature requests directly to the authors!</P>
@@ -1036,6 +1045,13 @@ other technical help from:</P>
   <LI><B>x2mpsub</B> - Gabucino</B>
   <LI><B>others</B> - A'rpi</B>
 </UL></P>
+
+<P>Misc:
+<UL>
+  <LI><B>vbelib.*</B> - Nick Kurshev</B>
+  <LI><B>lrmi.*</B> - copied by Nick Kurshev (originally by Josh Vanderhoof)</B>
+</UL></P>
+
 
 <P><B><A NAME=B>Appendix B - Mailing lists</A></B></P>
 

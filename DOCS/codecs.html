@@ -181,8 +181,8 @@ easy to enable them:</P>
   isn't there, so download it from the <A HREF="http://www.3ivx.com">3ivx site</A>.</LI>
 
   <LI>copy the codecs, or make symlinks for them to <CODE>/usr/lib/xanim/mods</CODE> .
-  Accordingly :<BR> <CODE>ln -s vid_cvid_2.1_linuxELFx86c6.xa vid_cvid.xa</CODE>
-  for all of them.<BR> You can define another search path in xacodec.c:
+  Accordingly :<BR><CODE>ln -s vid_cvid_2.1_linuxELFx86c6.xa vid_cvid.xa</CODE>
+  for all of them.<BR>You can define another search path in xacodec.c:
   <CODE>#define XACODEC_PATH "/usr/lib/xanim/mods"</CODE>.</LI>
 </UL>
 </P>
@@ -191,6 +191,16 @@ easy to enable them:</P>
 option to tell <B>MPlayer</B> to use them if possible.</P>
 
 <P>Tested codecs are: <B>Indeo 3.2</B>, <B>4.1</B>, <B>5.0</B>, <B>CVID</B>, <B>3ivX</B>, <B>h263</B>.</P>
+
+
+<P><B><A NAME=2.1.2.5>2.1.2.5.  libmad support</A></B></P>
+
+<P><A HREF="http://mad.sourceforge.net">libmad</A> is a multiplatform MPEG audio
+decoding library. If you don't know why is it good, you probably don't need it.</P>
+
+<P>To enable support, compile with the <CODE>--enable-mad</CODE> configure
+option.</P>
+
 
 <P><B><A NAME=2.1.4>2.1.4. Codec importing howto</A></B></P>
 
