@@ -159,7 +159,7 @@ commands are needed :<BR>
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> - remove this file,
   which can come from a previous 3-pass encoding (it interferes with current
   one)<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -l-ovc frameno
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc frameno
   -o frameno.avi<BR>
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2
   -lavcopts vcodec=mpeg4:more_options -oac copy -o movie.avi -pass 1<BR>
@@ -286,7 +286,7 @@ unsupported). You can encode to the following codecs :</P>
   global <A HREF=#2.4.5>Options</A> section and in the manpage.</P>
 
 <P><I>Creating a DivX4 file from all the JPEG files in the current dir :</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder \*.jpg -lavcopts -mf on:w=800:h=600:fps=25 -ovc divx4 -o
+  &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc divx4 -o
   output.avi</CODE></P>
 
 <P><I>Creating a DivX4 file from some JPEG files in the current dir :</I><BR>
@@ -443,7 +443,7 @@ unsupported). You can encode to the following codecs :</P>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -lavcopts vcodec=mpeg4:more_options -o title2.avi</CODE></P>
 
 <P>The same, but with libavcodec family, MJPEG compression :<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -lavcopts vcodec=mpeg4:more_options -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg -ffourcc mjpg</CODE></P>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -lavcopts vcodec=mjpeg:more_options -ffourcc mjpg -o title2.avi</CODE></P>
 
 <P>Encoding from DVD, title 2, with rescaling :<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -vop scale=640:480 -sws 2 -lavcopts vcodec=mpeg4:more_options -o title2.avi</CODE></P>
