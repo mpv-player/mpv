@@ -108,6 +108,7 @@ Installation directories:
                          data [/usr/local/share/mplayer]
 
 Optional features:
+  --disable-mencoder     disable mencoder [autodetect]
   --enable-largefiles    enable support for files >2^32 bytes long [disable]
   --enable-termcap       use termcap database for key codes [autodetect]
   --enable-lirc          enable LIRC (remote control) support [autodetect]
@@ -629,6 +630,7 @@ _prefix="/usr/local"
 _libavcodec=auto
 _libavcodecso=auto
 
+_mencoder=auto
 _x11=auto
 _dga=auto
 _dga2=auto
@@ -691,6 +693,8 @@ for ac_option do
 
 
   # Real 2nd pass
+  --enable-mencoder)	_mencoder=yes	;;
+  --disable-mencoder)	_mencoder=no	;;
   --enable-x11)		_x11=yes	;;
   --disable-x11)	_x11=no		;;
   --enable-dga)		_dga=yes	;;
@@ -2148,26 +2152,38 @@ EOF
   fi
   echores "$_divx4linux_decore"
   test "$_divx4linux_decore" = yes && _divx4linux=yes
-  echocheck "Divx4linux encore (for mencoder)"
-  cat > $TMPC <<EOF
-#include <encore2.h>
-int main(void) { (void) encore(0, 0, 0, 0); return 0; }
-EOF
-  _divx4linux_encore=no
-  cc_check  -ldivxencore -lm && _divx4linux_encore=yes
-  echores "$_divx4linux_encore"
 fi
 _def_decore='#undef NEW_DECORE'
 _ld_decore='-Lopendivx -ldecore'
-_def_encore='#undef NEW_ENCORE'
 if test "$_divx4linux_decore" = yes ; then
   _def_decore='#define NEW_DECORE 1'
   _ld_decore='-ldivxdecore opendivx/postprocess.o'
-  if test "$_divx4linux_encore" = yes ; then
-    _def_encore='#define NEW_ENCORE 1'
-    _ld_encore='-ldivxencore'
+fi
+
+
+echocheck "lame and encore (for mencoder)"
+#mencoder requires those libs
+if test "$_mencoder" != no ; then
+  cat > $TMPC <<EOF
+#include <encore2.h>
+#include <lame/lame.h>
+int main(void) { (void) lame_init(); (void) encore(0, 0, 0, 0); return 0; }
+EOF
+  _mencoder=no
+  if cc_check -lmp3lame -ldivxencore -lm ; then
+    _mencoder=yes 
+    _ld_encore='-lmp3lame -ldivxencore -lm'
+  elif cc_check -lmp3lame $_ld_vorbis  -ldivxencore -lm ; then
+    _mencoder=yes 
+    _ld_encore="-lmp3lame -ldivxencore -lm $_ld_vorbis"
   fi
 fi
+if test "$_mencoder" = yes ; then
+  _def_encore='#define NEW_ENCORE 1'
+else
+  _def_encore='#undef NEW_ENCORE'
+fi
+echores "$_mencoder"
 
 
 echocheck "lirc"
@@ -2411,7 +2427,8 @@ SGI_AUDIO_LIB = $_ld_sgiaudio
 ARCH_LIBS =  $_ld_static $_ld_arch $_ld_iconv
 DIVX4LINUX = $_ld_static  $_divx4linux
 DECORE_LIBS = $_ld_static $_ld_decore
-ENCORE_LIBS =  $_ld_static $_ld_encore
+MENCODER = $_mencoder
+ENCORE_LIBS =  $_ld_static $_ld_encore 
 HAVE_MLIB = $_mlib
 MLIB_INC = $_inc_mlib
 MLIB_LIB =  $_ld_static $_ld_mlib

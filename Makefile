@@ -64,6 +64,9 @@ LOADER_DEP = $(W32_DEP) $(DS_DEP)
 LIB_LOADER = $(W32_LIB) $(DS_LIB)
 
 ALL_PRG = $(PRG)
+ifeq ($(MENCODER),yes)
+ALL_PRG += $(PRG_MENCODER)
+endif
 ifeq ($(CSS_USE),yes)
 ALL_PRG += $(PRG_FIBMAP)
 endif
@@ -144,16 +147,18 @@ MENCODER_DEP += Gui/libgui.a
 endif
 
 $(PRG):	$(MPLAYER_DEP)
-	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) -Llibmpdemux -lmpdemux $(XMM_LIBS) $(LIRC_LIBS) $(LIB_LOADER) $(AV_LIB) -Llibmpeg2 -lmpeg2 -Llibao2 -lao2 $(A_LIBS) $(VO_LIBS) $(CSS_LIB) $(GUI_LIBS) $(ARCH_LIBS) $(OSDEP_LIBS) $(PP_LIBS) $(XA_LIBS) $(DECORE_LIBS) $(TERMCAP_LIB) -lm $(STATIC)
+	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) -Llibmpdemux -lmpdemux $(LIRC_LIBS) $(LIB_LOADER) $(AV_LIB) -Llibmpeg2 -lmpeg2 -Llibao2 -lao2 $(A_LIBS) $(VO_LIBS) $(CSS_LIB) $(GUI_LIBS) $(ARCH_LIBS) $(OSDEP_LIBS) $(PP_LIBS) $(XA_LIBS) $(DECORE_LIBS) $(TERMCAP_LIB) -lm $(STATIC)
 
 $(PRG_FIBMAP): fibmap_mplayer.o
 	$(CC) -o $(PRG_FIBMAP) fibmap_mplayer.o
 
+ifeq ($(MENCODER),yes)
 $(PRG_MENCODER): $(MENCODER_DEP)
-	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) -Llibmpeg2 -lmpeg2 -Llibmpdemux -lmpdemux $(X_LIBS) $(XMM_LIBS) $(LIB_LOADER) $(AV_LIB) -lmp3lame $(A_LIBS) $(CSS_LIB) $(GUI_LIBS) $(ARCH_LIBS) $(OSDEP_LIBS) $(PP_LIBS) $(XA_LIBS) $(DECORE_LIBS) $(ENCORE_LIBS) $(TERMCAP_LIB) -lm
+	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) -Llibmpeg2 -lmpeg2 -Llibmpdemux -lmpdemux $(X_LIBS) $(LIB_LOADER) $(AV_LIB) -lmp3lame $(A_LIBS) $(CSS_LIB) $(GUI_LIBS) $(ARCH_LIBS) $(OSDEP_LIBS) $(PP_LIBS) $(XA_LIBS) $(DECORE_LIBS) $(ENCORE_LIBS) $(TERMCAP_LIB) -lm
+endif
 
 # $(PRG_HQ):	depfile mplayerHQ.o $(OBJS) loader/libloader.a libmpeg2/libmpeg2.a opendivx/libdecore.a $(COMMONLIBS) encore/libencore.a
-# 	$(CC) $(CFLAGS) -o $(PRG_HQ) mplayerHQ.o $(OBJS) $(XMM_LIBS) $(LIRC_LIBS) $(A_LIBS) -lm $(TERMCAP_LIB) -Lloader -lloader -ldl -Llibmpeg2 -lmpeg2 -Lopendivx -ldecore $(VO_LIBS) -Lencore -lencore -lpthread
+# 	$(CC) $(CFLAGS) -o $(PRG_HQ) mplayerHQ.o $(OBJS) $(LIRC_LIBS) $(A_LIBS) -lm $(TERMCAP_LIB) -Lloader -lloader -ldl -Llibmpeg2 -lmpeg2 -Lopendivx -ldecore $(VO_LIBS) -Lencore -lencore -lpthread
 
 # $(PRG_AVIP):	depfile aviparse.o $(OBJS) loader/libloader.a $(COMMONLIBS)
 # 	$(CC) $(CFLAGS) -o $(PRG_AVIP) aviparse.o $(OBJS) $(A_LIBS) -lm $(TERMCAP_LIB) -Lloader -lloader -ldl $(VO_LIBS) -lpthread
@@ -175,13 +180,16 @@ $(PRG_CFG): version.h codec-cfg.c codec-cfg.h
 install: $(ALL_PRG)
 	if test ! -d $(BINDIR) ; then mkdir -p $(BINDIR) ; fi
 	$(INSTALL) -m 755 -s $(PRG) $(BINDIR)/$(PRG)
-	if test -x $(PRG_MENCODER) ; then $(INSTALL) -m 755 -s $(PRG_MENCODER) $(BINDIR)/$(PRG_MENCODER) ; fi
 ifeq ($(GUI),yes)
 	-ln -sf $(BINDIR)/$(PRG) $(BINDIR)/gmplayer
 endif
 	if test ! -d $(prefix)/man/man1 ; then mkdir -p $(prefix)/man/man1; fi
 	$(INSTALL) -c -m 644 DOCS/mplayer.1 $(prefix)/man/man1/mplayer.1
-	if test -x $(PRG_MENCODER) ; then $(INSTALL) -c -m 644 DOCS/mencoder.1 $(prefix)/man/man1/mencoder.1 ; fi
+ifeq ($(MENCODER),yes)
+	$(INSTALL) -m 755 -s $(PRG_MENCODER) $(BINDIR)/$(PRG_MENCODER)
+	$(INSTALL) -c -m 644 DOCS/mencoder.1 $(prefix)/man/man1/mencoder.1
+endif
+
 ifeq ($(CSS_USE),yes)
 	@echo "Following task requires root privs. If it fails don't panic"
 	@echo "however it means you can't use fibmap_mplayer."
@@ -191,17 +199,17 @@ ifeq ($(CSS_USE),yes)
 endif
 
 uninstall:
-	rm -f $(BINDIR)/$(PRG)
-	rm -f $(BINDIR)/gmplayer
-	rm -f $(prefix)/man/man1/mplayer.1
-	rm -f $(BINDIR)/$(PRG_FIBMAP)
+	-rm -f $(BINDIR)/$(PRG) $(BINDIR)/gmplayer $(prefix)/man/man1/mplayer.1
+	-rm -f $(BINDIR)/$(PRG_FIBMAP)
+	-rm -f  $(BINDIR)/$(PRG_MENCODER) $(prefix)/man/man1/mencoder.1
 	@echo "Uninstall completed"
 
 clean:
-	rm -f *.o *~ $(OBJS)
+	-rm -f *.o *~ $(OBJS)
 
 distclean:
-	rm -f *~ $(PRG) $(PRG_FIBMAP) $(PRG_HQ) $(PRG_AVIP) $(PRG_TV) $(OBJS) $(PRG_MENCODER) *.o *.a .depend
+	-rm -f *~ $(PRG) $(PRG_FIBMAP) $(PRG_HQ) $(PRG_AVIP) $(PRG_TV) $(OBJS) $(PRG_MENCODER)
+	-rm -f *.o *.a .depend configure.log
 	@for a in $(PARTS); do $(MAKE) -C $$a distclean; done
 
 dep:	depend
