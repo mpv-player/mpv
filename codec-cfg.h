@@ -52,6 +52,7 @@
 #define VFM_CINEPAK 13
 #define VFM_QTRLE 14
 #define VFM_NUV 15
+#define VFM_CYUV 16
 
 #ifndef GUID_TYPE
 #define GUID_TYPE

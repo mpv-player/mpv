@@ -135,6 +135,25 @@ void decode_nuv(
   int width,
   int height);
 
+void *decode_cinepak_init(void);
+
+void decode_cinepak(
+  void *context,
+  unsigned char *buf,
+  int size,
+  unsigned char *frame,
+  int width,
+  int height,
+  int bit_per_pixel);
+
+void decode_cyuv(
+  unsigned char *buf,
+  int size,
+  unsigned char *frame,
+  int width,
+  int height,
+  int bit_per_pixel);
+
 //**************************************************************************//
 //             The OpenDivX stuff:
 //**************************************************************************//
@@ -558,6 +577,12 @@ if ((sh_video->codec->driver == VFM_QTRLE) && (sh_video->bih->biBitCount != 24))
  case VFM_NUV:
     sh_video->our_out_buffer = (char *)memalign(64, sh_video->disp_w*sh_video->disp_h*3/2);
    break;
+ case VFM_CYUV: {
+   int bpp=((out_fmt&255)+7)/8;
+   sh_video->our_out_buffer =
+     (char*)memalign(64, sh_video->disp_w*sh_video->disp_h*3);
+   break;
+   }
  }
 }
   sh_video->inited=1;
@@ -831,6 +856,11 @@ if(verbose>1){
         ((out_fmt&255)+7)/8);
     blit_frame = 3;
     break;
+ case VFM_CYUV:
+   decode_cyuv(start, in_size, sh_video->our_out_buffer,
+      sh_video->disp_w, sh_video->disp_h, (out_fmt==IMGFMT_YUY2)?16:(out_fmt&255));
+   blit_frame = 3;
+   break;
 } // switch
 //------------------------ frame decoded. --------------------
 
