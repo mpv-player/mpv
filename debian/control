@@ -4,7 +4,6 @@ Priority: optional
 Maintainer: Dariush Pietrzak <eyck@ghost.anime.pl>
 Standards-Version: 3.2.1
 Build-Depends:c++-compiler, libglib-dev, libgtk-dev, xlibs-dev, libpng2-dev, zlib1g-dev, debhelper (>= 2)
-Recommends: libsdl1.2-dev
 
 Package: mplayer
 Architecture: any

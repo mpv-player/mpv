@@ -1,3 +1,15 @@
+mplayer (0.50-3) unstable; urgency=low
+
+  * debian/rules: improve install routine; will include mencore if it is
+    built
+  * debian/control: remove invalid source recommends
+  * debian/copyright: mention that binary distribution is not allowed
+  * debian/rules: install /usr/share/mplayer/codecs.conf; this should
+    probably be a config file
+  * turn on fbdev option
+
+ -- Adam Di Carlo <aph@debian.org>  Sat, 15 Dec 2001 03:33:44 -0500
+
 mplayer (0.50-2) unstable; urgency=low
 
   * gui added to package/menu 

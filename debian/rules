@@ -5,7 +5,14 @@
 # This is the debhelper compatability version to use.
 export DH_COMPAT=2
 
-package=mplayer
+package        := mplayer
+prefix := debian/$(package)
+arch   := $(shell dpkg --print-architecture)
+  
+ifeq ($(arch),powerpc)
+  arch-conf += --disable-mp1e
+endif
+
 
 configure: configure-stamp
 configure-stamp:
@@ -20,10 +27,8 @@ build: configure-stamp build-stamp
 build-stamp:
 	dh_testdir
 
-	# Add here commands to compile the package.
-	#$(MAKE)
-	#/usr/bin/docbook-to-man debian/etherconf.sgml > etherconf.1
-	${MAKE} mplayer
+	# commands to compile the package.
+	${MAKE} 
 
 	touch build-stamp
 
@@ -32,49 +37,34 @@ clean:
 	dh_testroot
 	rm -f build-stamp configure-stamp
 
-	# Add here commands to clean up after the build process.
-	#-$(MAKE) clean
-#	$(checkdir)
-#	-rm -f build
+	# commands to clean up after the build process.
 	-$(MAKE) distclean
-#	-rm -f `find . -name "*~"`
-#	-rm -rf debian/tmp debian/files* core debian/substvars
 	dh_clean
 
+# Build architecture-independent files here.
+binary-indep: build
+# We have nothing to do by default.
 
-
-install: build
+# Build architecture-dependent files here.
+binary-arch: build
 	dh_testdir
 	dh_testroot
 	dh_clean -k
 	dh_installdirs
 
-	# Add here commands to install the package into debian/<packagename>
-#	$(MAKE) prefix=`pwd`/debian/`dh_listpackages`/usr install
-#	$(MAKE) install prefix=$(CURDIR)/debian/tmp/usr
-#	install -d $(CURDIR)/debian/tmp/usr/bin
+	# commands to install the package into debian/<packagename>
+	#$(MAKE) prefix=$(prefix)/usr install
 	install -m 755 -s mplayer $(CURDIR)/debian/`dh_listpackages`/usr/bin/mplayer
 	dh_link usr/bin/mplayer usr/bin/gmplayer
+	install -o root -g root -m 0644 etc/codecs.conf $(prefix)/usr/share/mplayer
 
-#Do we really need this?:	
-#	       install -o root -g root -m 4755 fibmap_mplayer usr/bin/fibmap_mplayer
-	       
-
-# Build architecture-independent files here.
-binary-indep: build install
-# We have nothing to do by default.
-
-
-# Build architecture-dependent files here.
-binary-arch: build install
-	dh_testdir
-	dh_testroot
 	dh_installdebconf	
 	dh_installdocs DOCS/*
 	dh_installexamples etc/example.conf
 	dh_installmenu
 #	dh_installmime
-	dh_installmanpages TVout/fbset/fb.modes.5 TVout/fbset/fbset.8
+#	dh_installmanpages TVout/fbset/fb.modes.5 TVout/fbset/fbset.8
+#       dh_installmanpages      # handled by make install above
 	dh_installinfo
 #	dh_undocumented
 	dh_installchangelogs
