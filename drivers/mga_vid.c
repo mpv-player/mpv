@@ -1541,6 +1541,8 @@ void cleanup_module(void)
 
 	if(mga_mmio_base)
 		iounmap(mga_mmio_base);
+	if(mga_param_buff)
+		kfree(mga_param_buff);
 
 	//FIXME turn off BES
 	printk(KERN_INFO "mga_vid: Cleaning up module\n");
