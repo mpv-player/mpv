@@ -839,7 +839,7 @@ depends on the number of output channels:
 <term><option>nch &lt;1-6&gt;</option></term>
 <listitem><para>
 is an integer between <literal>1</literal> and <literal>6</literal> and is used
-for setting the number of output channels. This option is required, leaving it
+for setting the number of input channels. This option is required, leaving it
 empty results in a runtime error.
 </para></listitem>
 </varlistentry>
