@@ -29,14 +29,14 @@
 <row><entry>alsa5</entry><entry>
   native ALSA 0.5 driver
   </entry></row>
-<row><entry>alsa9</entry><entry>
-  native ALSA 0.9 driver (supports hardware AC3 passthrough)
+<row><entry>alsa</entry><entry>
+  native ALSA 0.9/1.0 driver (supports hardware AC3 passthrough)
   </entry></row>
 <row><entry>sun</entry><entry>
   SUN audio driver (<filename>/dev/audio</filename>) for BSD and Solaris8 users
   </entry></row>
 <row><entry>macosx</entry><entry>
-  native MacOSX driver
+  native Mac OS X driver
   </entry></row>
 <row><entry>win32</entry><entry>
   native Win32 driver
@@ -49,6 +49,9 @@
   </entry></row>
 <row><entry>jack</entry><entry>
   JACK (Jack Audio Connection Kit) driver
+  </entry></row>
+<row><entry>polyp</entry><entry>
+  polypaudio driver
   </entry></row>
 </tbody>
 </tgroup>
