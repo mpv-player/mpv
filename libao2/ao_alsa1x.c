@@ -629,7 +629,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	alsa_period_time = alsa_buffer_time/4; ;
 
 	dir = 0;
-	if ((err = snd_pcm_hw_params_set_period_time_near(alsa_handler, alsa_hwparams, alsa_period_time, &dir)) < 0)
+	if ((err = snd_pcm_hw_params_set_period_time_near(alsa_handler, alsa_hwparams, &alsa_period_time, &dir)) < 0)
 	  /* original: alsa_buffer_time/ao_data.bps */
 	  {
 	    printf("alsa-init: unable to set period time: %s\n",
