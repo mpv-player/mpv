@@ -7320,18 +7320,33 @@ small moving objects are better represented by smaller blocks.
 Adjust subpel refinement quality.
 This parameter controls quality versus speed tradeoffs involved in the motion
 estimation decision process.
-It can improve quality significantly.
+subq=5 can compress up to 10% better than subq=1.
 .RSs
-1: fullpixel mode decision, 1 iteration of qpel on the winner (fastest)
+1: Runs fullpixel precision motion estimation on all candidate
+macroblock types.
+Then selects the best type.
+Then refines the motion of that type to fast quarterpixel precision.
+(fastest)
 .br
-2: fullpixel mode decision, 2 iterations of qpel on the winner
+2: As 1, but uses a slightly slower fullpixel search and a slightly slower
+quarterpixel refinement.
 .br
-3: halfpel mode decision, qpel on the winner
+3: Runs halfpixel precision motion estimation on all candidate macroblock
+types.
+Then selects the best type.
+Then refines the motion of that type to quarterpixel precision.
 .br
-4: qpel mode decision
+4: Runs fast quarterpixel precision motion estimation on all candidate
+macroblock types.
+Then selects the best type.
+Then finishes the quarterpixel refinement for that type.
 .br
-5: qpel mode decision, more iterations (best, default)
+5: Runs best quality quarterpixel precision motion estimation on all
+candidate macroblock types, before selecting the best type.
+(best, default)
 .REss
+In the above, "all candidates" doesn't exactly mean all enabled types:
+4x4, 4x8, 8x4 are tried only if 8x8 is better than 16x16.
 .
 .TP
 .B log=<-1\-3>
