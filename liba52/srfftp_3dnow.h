@@ -61,21 +61,21 @@ static complex_t HSQRT2_3DNOW __attribute__ ((aligned (8))) = { 0.707106781188, 
 #endif
 
 #ifdef HAVE_3DNOWEX
-#define PSWAP_MM(mm_base,mm_hlp) "pswapd	"##mm_base","##mm_base"\n\t"
+#define PSWAP_MM(mm_base,mm_hlp) "pswapd	"mm_base","mm_base"\n\t"
 #else
 #define PSWAP_MM(mm_base,mm_hlp)\
-	"movq	"##mm_base","##mm_hlp"\n\t"\
-	"psrlq $32, "##mm_base"\n\t"\
-	"punpckldq "##mm_hlp","##mm_base"\n\t"
+	"movq	"mm_base","mm_hlp"\n\t"\
+	"psrlq $32, "mm_base"\n\t"\
+	"punpckldq "mm_hlp","mm_base"\n\t"
 #endif
 #ifdef HAVE_3DNOWEX
-#define PFNACC_MM(mm_base,mm_hlp)	"pfnacc	"##mm_base","##mm_base"\n\t"
+#define PFNACC_MM(mm_base,mm_hlp)	"pfnacc	"mm_base","mm_base"\n\t"
 #else
 #define PFNACC_MM(mm_base,mm_hlp)\
-	"movq	"##mm_base","##mm_hlp"\n\t"\
-	"psrlq	$32,"##mm_hlp"\n\t"\
-	"punpckldq "##mm_hlp","##mm_hlp"\n\t"\
-	"pfsub	"##mm_hlp","##mm_base"\n\t"
+	"movq	"mm_base","mm_hlp"\n\t"\
+	"psrlq	$32,"mm_hlp"\n\t"\
+	"punpckldq "mm_hlp","mm_hlp"\n\t"\
+	"pfsub	"mm_hlp","mm_base"\n\t"
 #endif
 
 #define TRANSZERO_3DNOW(A0,A4,A8,A12) \
