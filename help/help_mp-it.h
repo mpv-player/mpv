@@ -1,7 +1,7 @@
 // Translated by: Fabio Olimpieri <fabio.olimpieri@tin.it>
 // Updated by: Roberto Togni <see AUTHORS for email address>
 
-// Updated to help_mp-en.h v1.65
+// Updated to help_mp-en.h v1.68
 
 // Translated files should be uploaded to ftp://mplayerhq.hu/MPlayer/incoming
 // and send a notify message to mplayer-dev-eng maillist.
@@ -388,6 +388,9 @@ static char help_text[]=
 #define MSGTR_MENU_Mute "Mute"
 #define MSGTR_MENU_Original "Originale"
 #define MSGTR_MENU_AspectRatio "Aspetto"
+#define MSGTR_MENU_AudioTrack "Traccia audio"
+#define MSGTR_MENU_Track "Traccia %d"
+#define MSGTR_MENU_VideoTrack "Traccia video"
 
 // --- equalizer
 #define MSGTR_EQU_Audio "Audio"
@@ -411,6 +414,7 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "albero delle directory"
 
 // --- preferences
+#define MSGTR_PREFERENCES_Misc "Varie"
 #define MSGTR_PREFERENCES_None "Nessuno"
 #define MSGTR_PREFERENCES_AvailableDrivers "Driver disponibili:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Non riprodurre l'audio"
@@ -491,6 +495,10 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SubtitleOSD "Sottotitoli & OSD"
 #define MSGTR_PREFERENCES_Cache "Cache on/off"
 #define MSGTR_PREFERENCES_LoadFullscreen "Avvia a pieno schermo"
+#define MSGTR_PREFERENCES_CacheSize "Dimensione cache: "
+#define MSGTR_PREFERENCES_XSCREENSAVER "Arresta XScreenSaver"
+#define MSGTR_PREFERENCES_AutoSync "AutoSync on/off"
+#define MSGTR_PREFERENCES_AutoSyncValue "Autosync: "
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Errore fatale!"
