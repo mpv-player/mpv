@@ -380,12 +380,9 @@ static BOOL WINAPI EnumCallbackEx(GUID FAR *lpGUID, LPSTR lpDriverDescription, L
             selected_guid_ptr = &selected_guid;
         }
         mi.cbSize = sizeof(mi);
-        if(myGetMonitorInfo){
+
         if (myGetMonitorInfo(hm, &mi)) {
 			monitor_rect = mi.rcMonitor;
-        }
-        }else{
-            mp_msg(MSGT_VO, MSGL_ERR, "-adapter is not supported on Win95\n");
         }
         mp_msg(MSGT_VO, MSGL_INFO ,"\t\t<--");
     }
@@ -405,7 +402,11 @@ static uint32_t Directx_InitDirectDraw()
 	HINSTANCE user32dll=LoadLibrary("user32.dll");
 	
 	if(user32dll){
-		myGetMonitorInfo=GetProcAddress(user32dll,"GetMonitorInfo");
+		myGetMonitorInfo=GetProcAddress(user32dll,"GetMonitorInfoA");
+		if(!myGetMonitorInfo && vo_adapter_num){
+			mp_msg(MSGT_VO, MSGL_ERR, "<vo_directx> -adapter is not supported on Win95\n");
+			vo_adapter_num = 0;
+		}
 	}
 	
 	mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>Initing DirectDraw\n" );
