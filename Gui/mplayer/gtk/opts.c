@@ -13,6 +13,7 @@
 #include "../../../libao2/audio_out.h"
 #include "../../../libvo/video_out.h"
 
+#include "../../app.h"
 #include "../../cfg.h"
 #include "../../interface.h"
 #include "../widgets.h"
@@ -331,9 +332,15 @@ void ShowPreferences( void )
 // --- 6. page
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBPostprocess ),gtkVopPP );
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBLoadFullscreen ),gtkLoadFullscreen );
- gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBPlayBar ),gtkEnablePlayBar );
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBStopXScreenSaver ),stop_xscreensaver );
  gtk_adjustment_set_value( HSPPQualityadj,auto_quality );
+
+ gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBPlayBar ),gtkEnablePlayBar );
+ if ( !appMPlayer.barIsPresent )
+  {
+   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBPlayBar ),0 );
+   gtk_widget_set_sensitive( CBPlayBar,FALSE );
+  }
 
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBCache ),0 );
  gtk_adjustment_set_value( SBCacheadj,(float)gtkCacheSize );
