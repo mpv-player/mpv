@@ -175,6 +175,7 @@ Optional features:
   --disable-css          Disable old-style libcss DVD support [autodetect]
   --disable-cdparanoia   Disable cdparanoia support [autodetect]
   --disable-freetype     Disable freetype2 font rendering support [autodetect]
+  --disable-fontconfig   Disable fontconfig font lookup support [autodetect]
   --disable-unrarlib     Disable Unique RAR File Library [enabled]
   --enable-menu          Enable OSD menu support (NOT DVD MENU) [disabled]
   --disable-sortsub      Disable subtitles sorting [enabled]
@@ -1185,6 +1186,7 @@ _libdv=auto
 _cdparanoia=auto
 _big_endian=auto
 _freetype=auto
+_fontconfig=auto
 _shared_pp=no
 _menu=no
 _qtx=auto
@@ -1400,6 +1402,8 @@ for ac_option do
   --disable-big-endian) _big_endian=no  ;;
   --enable-freetype)    _freetype=yes   ;;
   --disable-freetype)   _freetype=no    ;;
+  --enable-fontconfig)  _fontconfig=yes ;;
+  --disable-fontconfig) _fontconfig=no  ;;
   --enable-unrarlib)	_unrarlib=yes	;;
   --disable-unrarlib)	_unrarlib=no	;;
   --enable-ftp)         _ftp=yes        ;;
@@ -4274,6 +4278,40 @@ else
 fi
 echores "$_freetype"
 
+if test "$_freetype" = no ; then
+    _fontconfig=no
+fi
+echocheck "fontconfig"
+if test "$_fontconfig" = auto ; then
+    if ( pkg-config fontconfig --modversion) > /dev/null 2>&1 ; then
+        cat > $TMPC << EOF
+#include <stdio.h>
+#include <fontconfig/fontconfig.h>
+int main()
+{
+    int err = FcInit();
+    if(err == FcFalse){
+        printf("Couldn't initialize fontconfig lib\n");
+        exit(err);
+    }
+    return 0;
+    
+}
+EOF
+        _fontconfig=no
+        cc_check `pkg-config fontconfig --cflags --libs` && ( $TMPO >> "$TMPLOG" ) && _fontconfig=yes
+    else
+        _fontconfig=no
+    fi
+fi
+if test "$_fontconfig" = yes ; then
+    _def_fontconfig='#define HAVE_FONTCONFIG'
+    _inc_fontconfig=`pkg-config fontconfig --cflags`
+    _ld_fontconfig=`pkg-config fontconfig --libs`
+else
+    _def_fontconfig='#undef HAVE_FONTCONFIG'
+fi
+echores "$_fontconfig"
 
 echocheck "fribidi with charsets"
 if test "$_fribidi" = yes ; then
@@ -5887,6 +5925,8 @@ CDPARANOIA_INC = $_inc_cdparanoia
 CDPARANOIA_LIB = $_ld_cdparanoia
 FREETYPE_INC = $_inc_freetype
 FREETYPE_LIB = $_ld_freetype
+FONTCONFIG_INC = $_inc_fontconfig
+FONTCONFIG_LIB = $_ld_fontconfig
 FRIBIDI_INC = $_inc_fribidi
 FRIBIDI_LIB = $_ld_fribidi
 LIBLZO_LIB= $_ld_liblzo
@@ -6340,6 +6380,9 @@ $_def_gif_tvt_hack
 
 /* enable FreeType support */
 $_def_freetype
+
+/* enable Fontconfig support */
+$_def_fontconfig
 
 /* enable FriBiDi usage */
 $_def_fribidi

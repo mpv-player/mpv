@@ -288,6 +288,9 @@ extern int vo_flags;
 
 // sub:
 char *font_name=NULL;
+#ifdef HAVE_FONTCONFIG
+int font_fontconfig=0;
+#endif
 float font_factor=0.75;
 char **sub_name=NULL;
 float sub_delay=0;
@@ -1058,8 +1061,15 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 
 //------ load global data first ------
 
-#ifdef USE_OSD
 // check font
+#ifdef USE_OSD
+#ifdef HAVE_FREETYPE
+  init_freetype();
+#endif
+#ifdef HAVE_FONTCONFIG
+  if(!font_fontconfig)
+  {
+#endif
   if(font_name){
        vo_font=read_font_desc(font_name,font_factor,verbose>1);
        if(!vo_font) mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadFont,font_name);
@@ -1069,9 +1079,8 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
        if(!vo_font)
        vo_font=read_font_desc(MPLAYER_DATADIR "/font/font.desc",font_factor,verbose>1);
   }
-#ifdef HAVE_FREETYPE
-  if (!vo_font)
-	init_freetype();
+#ifdef HAVE_FONTCONFIG
+  }
 #endif
 #endif
   vo_init_osd();
@@ -1373,7 +1382,9 @@ if(stream->type==STREAMTYPE_DVD){
 #endif
 
 // CACHE2: initial prefill: 20%  later: 5%  (should be set by -cacheopts)
+#ifdef HAS_DVBIN_SUPPORT
 goto_enable_cache:
+#endif
 if(stream_cache_size>0){
   current_module="enable_cache";
   if(!stream_enable_cache(stream,stream_cache_size*1024,stream_cache_size*1024/5,stream_cache_size*1024/20))

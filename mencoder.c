@@ -175,6 +175,9 @@ static int play_n_frames_mf=-1;
 
 // sub:
 char *font_name=NULL;
+#ifdef HAVE_FONTCONFIG
+int font_fontconfig=0;
+#endif
 float font_factor=0.75;
 char **sub_name=NULL;
 float sub_delay=0;
@@ -443,7 +446,11 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 #ifdef USE_OSD
 #ifdef HAVE_FREETYPE
   init_freetype();
-#else
+#endif
+#ifdef HAVE_FONTCONFIG
+  if(!font_fontconfig)
+  {
+#endif
   if(font_name){
        vo_font=read_font_desc(font_name,font_factor,verbose>1);
        if(!vo_font) mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadFont,font_name);
@@ -452,6 +459,8 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
        vo_font=read_font_desc(get_path("font/font.desc"),font_factor,verbose>1);
        if(!vo_font)
        vo_font=read_font_desc(MPLAYER_DATADIR "/font/font.desc",font_factor,verbose>1);
+  }
+#ifdef HAVE_FONTCONFIG
   }
 #endif
 #endif
