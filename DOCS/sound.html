@@ -104,6 +104,8 @@
     <TH ROWSPAN="2"><B>SOUND CARD</B></TH>
     <TH COLSPAN="4"><B>DRIVER</B></TH>
     <TH ROWSPAN="2"><B>Max kHz</B></TH>
+    <TH ROWSPAN="2"><B>Max Channels</B></TH>
+    <TH ROWSPAN="2"><B>Max Opens</B></TH>
   </TR>
 
   <TR>
@@ -120,6 +122,8 @@
     <TD>&nbsp;</TD>
     <TD>&nbsp;</TD>
     <TD>4-48 kHz or 48 kHz only, depending on the chipset</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
   </TR>
 
   <TR>
@@ -130,24 +134,30 @@
     <TD><A HREF="http://aureal.sourceforge.net">Linux Aureal Drivers</A><BR>
       <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">buffer size increased to 32k</A></TD> 
     <TD>48</TD>
-  </TR>
-
-  <TR>
-    <TD><B>GUS PnP</B></TD>
-    <TD>none</TD>
-    <TD>OK</TD>
-    <TD>OK</TD>
-    <TD>&nbsp;</TD>
-    <TD>48</TD>
+    <TD>4.1</TD>
+    <TD>5+</TD>
   </TR>
 
   <TR>
     <TD><B>SB Live!</B></TD>
     <TD>Analog OK, SP/DIF not working</TD>
     <TD>Both OK</TD>
-    <TD>&nbsp;</TD>
-    <TD>&nbsp;</TD>
+    <TD>Both OK</TD>
+    <TD><A HREF="http://opensource.creative.com">Creative's OSS driver (SP/DIF support)</A></TD>
     <TD>192</TD>
+    <TD>4.0/5.1</TD>
+    <TD>32</TD>
+  </TR>
+
+  <TR>
+    <TD><B>SB 128 PCI (es1371)</B></TD>
+    <TD>OK</TD>
+    <TD>?</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>48</TD>
+    <TD>stereo</TD>
+    <TD>2</TD>
   </TR>
 
   <TR>
@@ -157,6 +167,19 @@
     <TD>&nbsp;</TD>
     <TD>&nbsp;</TD>
     <TD>48</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+  </TR>
+
+  <TR>
+    <TD><B>GUS PnP</B></TD>
+    <TD>none</TD>
+    <TD>OK</TD>
+    <TD>OK</TD>
+    <TD>&nbsp;</TD>
+    <TD>48</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
   </TR>
   
   <TR>
@@ -166,6 +189,8 @@
     <TD>&nbsp;</TD>
     <TD>&nbsp;</TD>
     <TD>44</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
   </TR>
   
   <TR>
@@ -175,6 +200,8 @@
     <TD>&nbsp;</TD>
     <TD>&nbsp;</TD>
     <TD>48</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
   </TR>
   
   <TR>
@@ -184,6 +211,8 @@
     <TD>&nbsp;</TD>
     <TD>&nbsp;</TD>
     <TD>48</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
   </TR>
   
   <TR>
@@ -193,6 +222,8 @@
     <TD>&nbsp;</TD>
     <TD>&nbsp;</TD>
     <TD>?</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
   </TR>
   
   <TR>
@@ -203,6 +234,8 @@
     <TD>&nbsp;</TD>
     <TD>&nbsp;</TD>
     <TD>?</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
   </TR>
   
   <TR>
@@ -212,6 +245,8 @@
     <TD>OK</TD>
     <TD>&nbsp;</TD>
     <TD>?</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
   </TR>
 
   <TR>
@@ -221,6 +256,8 @@
     <TD>&nbsp;</TD>
     <TD><A HREF="http://www.geocities.com/stssppnn/pcsp.html">Linux PC speaker OSS driver</a></TD>
     <TD>The driver emulates 44.1, maybe more.</TD>
+    <TD>mono</TD>
+    <TD>1</TD>
   </TR>
 
 </TABLE>
