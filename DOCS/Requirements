@@ -14,7 +14,12 @@ Brief:    These utilities deal with object files.
 URL:      ftp://ftp.gnu.org/pub/gnu/binutils
 Checking: as --version
           ld --version
-Note:     Preferred versions are 2.9.1 or 2.10.1
+Note:     Preferred versions are:
+	    2.9.1 - if you interest with MMX only support
+	    2.10.1- if you interest with qualitative support of
+		    MMX2, 3dnow, K7, SSE instructions set
+	    2.11  - was tested and works fine with mplayer
+		    (supports SSE2, IA64, AMD's x86-64 sets)
 
 GCC
 ~~~
@@ -31,6 +36,16 @@ Brief:    GNU C library
 URL:      ftp://ftp.gnu.org/pub/gnu/glibc
 Checking: ls -l /lib/libc[.-]*
 Note:     Preferred versions are 2.1.3 or 2.2.3
+
+make
+~~~~
+Brief:    Make utility
+URL:      ftp://ftp.gnu.org/pub/gnu/make
+Checking: make --version
+Note:     Preferred versions are 3.79 and 3.79.1 
+	  (previous 3.7x versions have memory leaks and can cause
+	  problems if your PC has <=32Mb of memory. As rule it's
+	  finished by segfault).
 
 XFree86
 ~~~~~~~
