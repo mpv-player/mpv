@@ -175,12 +175,12 @@ http_build_request( HTTP_header_t *http_hdr ) {
 	if( http_hdr->method==NULL ) http_set_method( http_hdr, "GET");
 	if( http_hdr->uri==NULL ) http_set_uri( http_hdr, "/");
 	else {
-		uri = (char*)malloc((strlen(http_hdr->uri)*3) + 1);
+		uri = (char*)malloc(strlen(http_hdr->uri) + 1);
 		if( uri==NULL ) {
 			mp_msg(MSGT_NETWORK,MSGL_ERR,"Memory allocation failed\n");
 			return NULL;
 		}
-		url_escape_string( uri, http_hdr->uri );
+		strcpy(uri,http_hdr->uri);
 	}
 
 	//**** Compute the request length

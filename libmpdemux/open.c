@@ -113,7 +113,6 @@ static void smb_auth_fn(const char *server, const char *share,
 
 stream_t* open_stream(char* filename,char** options, int* file_format){
 stream_t* stream=NULL;
-char *escfilename=NULL;
 int f=-1;
 off_t len;
 
@@ -486,11 +485,7 @@ if(strncmp("dvd://",filename,6) == 0){
     strncmp("vcd://", filename, 6) && strncmp("dvb://", filename, 6) &&
     strncmp("cdda://", filename, 7) && strncmp("cddb://", filename, 7) &&
     strstr(filename, "://")) {
-     //fix filenames with special characters 
-     escfilename = malloc(strlen(filename)*4);
-     url_escape_string(escfilename,filename);
-     mp_msg(MSGT_OPEN,MSGL_V,"Filename for url is now %s\n",escfilename);
-     url = url_new(escfilename);
+     url = url_new(filename);
     }
   if(url) {
 	if (strcmp(url->protocol, "smb")==0){
