@@ -20,7 +20,7 @@
 <TABLE BORDER=0>
   <TR><TD COLSPAN=4><P><B>General:</B></P></TD></TR>
   <TR><TD>&nbsp;&nbsp;</TD><TD VALIGN=top>oss</TD><TD>&nbsp;&nbsp;</TD><TD>OSS (ioctl) driver (supports hardware AC3 passthrough)</TD></TR>
-  <TR><TD></TD><TD VALIGN=top>sdl</TD><TD></TD><TD>SDL driver (supports up/downsampling, <B>ESD</B>, <B>ARTS</B> etc)</TD></TR>
+  <TR><TD></TD><TD VALIGN=top>sdl</TD><TD></TD><TD>SDL driver (supports <B>ESD</B>, <B>ARTS</B> etc)</TD></TR>
   <TR><TD></TD><TD VALIGN=top>nas</TD><TD></TD><TD>NAS (Network Audio System) driver</TD></TR>
   <TR><TD></TD><TD VALIGN=top>alsa5</TD><TD></TD><TD>native ALSA 0.5 driver</TD></TR>
   <TR><TD></TD><TD VALIGN=top>alsa9</TD><TD></TD><TD>native ALSA 0.9 driver (supports hardware AC3 passthrough)</TD></TR>
@@ -52,7 +52,7 @@
     default). If you experience glitches, halts or anything out of the
     ordinary, try <CODE>-ao sdl</CODE> (NOTE: you need to have SDL libraries
     and header files installed). The SDL audio driver helps in a lot of cases
-    and also supports ESD, ARTS, and up/downsampling. (ESD is the sound daemon
+    and also supports ESD, ARTS. (ESD is the sound daemon
     from GNOME, ARTS is from KDE.)</LI>
   <LI>If you have ALSA version 0.5, then you almost always have to use
     <CODE>-ao alsa5</CODE> , since ALSA 0.5 has buggy OSS emulation code, and
@@ -183,8 +183,8 @@
 <P>MPlayer fully supports up/downsampling of the sound. This plugin can
   be used if you have a fixed frequency sound card or if you are
   stuck with an old sound card that is only capable of max 44.1kHz.
-  Limitations in your hardware are not auto detected, so you have to specify
-  the sample frequency explicitly. This plugin has one switch:
+  Whether is usage of this plugin is neccessary or not, is <B>autodetected</B>.
+  This plugin has one switch:
   <CODE>fout</CODE> which is used for setting the desired output sample
   frequency. It defaults to 48kHz, and is given in
   &lt;Hz&gt;.</P>

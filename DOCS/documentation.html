@@ -174,6 +174,7 @@
                   <LI><A HREF="video.html#tv-out_matrox_g450">2.3.1.5.2 Matrox G450/G550 cards</A></LI>
                   <LI><A HREF="video.html#tv-out_ati">2.3.1.5.3 ATI cards</A></LI>
                   <LI><A HREF="video.html#tv-out_voodoo">2.3.1.5.4 Voodoo 3</A></LI>
+                  <LI><A HREF="video.html#tv-out_nvidia">2.3.1.5.5 nVidia</A></LI>
                 </UL>
               </LI>
             </UL>
@@ -205,6 +206,7 @@
           <LI><A HREF="encoding.html#libavcodec">2.4.5 Encoding with the libavcodec codec family</A></LI>
           <LI><A HREF="encoding.html#image_files">2.4.6 Encoding from multiple input image files (JPEGs or PNGs)</A></LI>
           <LI><A HREF="encoding.html#vobsub">2.4.7 Extracting DVD subtitles to a Vobsub file</A></LI>
+          <LI><A HREF="encoding.html#aspect">2.4.8 Preserving aspect ratio</A></LI>
         </UL>
       </LI>
       <LI><A HREF="#tv">2.5 TV input</A>
@@ -620,13 +622,15 @@
     have problems with YV12 display, see <A HREF="video.html#xv_s3">S3 Xv
     section</A> for details. Older, Trio cards have no, or slow hardware
     support.</LI>
-  <LI><B>nVidia cards</B>: very bad choice for video playing (nVidia
-    <A HREF="users_against_developers.html#nvidia">does not think so</A>). 
-    nVidia's cards have very cheap and bad quality chips. Moreover, <B>the
-    built-in nVidia driver in XFree86 does not support hardware YUV
+  <LI><B>nVidia cards</B>: may or may not be good choice for video playing.
+    If you do not have a GeForce2 (or newer) card, it's not likely to work
+    without bugs.
+    <B>The built-in nVidia driver in XFree86 does not support hardware YUV
     acceleration on all nVidia cards.</B> You have to download nVidia's
-    closed-source drivers from nVidia.com. See the <A
-    HREF="video.html#xv_nvidia">nVidia Xv driver</A> section for details.</LI>
+    closed-source drivers from nVidia.com. See the
+    <A HREF="video.html#xv_nvidia">nVidia Xv driver</A> section for
+    details. Please also check the <A HREF="video.html#tv-out_nvidia">nVidia
+    TV-out section</A> if you wish to use a TV.</LI>
   <LI><B>3DLabs GLINT R3 and Permedia3</B>: a VIDIX driver is provided
     (pm3_vid). Please see the <A HREF="video.html#vidix">VIDIX</A> section for
     details.</LI>
@@ -721,6 +725,8 @@
   <LI>If you have a V4L compatible <B>TV tuner</B> card, and wish to watch/grab
     and encode movies with MPlayer, read the <A HREF="#tv">TV input</A>
     section.</LI>
+  <LI>There is a neat <B>OSD Menu</B> support ready to be used. Check the
+    <A HREF="#menu">OSD Menu</A> section.</LI>
 </UL>
 
 <P>Then build MPlayer:</P>
@@ -952,19 +958,27 @@
 
 <H3><A NAME="menu">1.4.3 OSD menu</A></H3>
 
-<P>MPlayer has an OSD Menu interface, which is not only completely user
-  defined, but is displayed as OSD, on the currently played video!</P>
+<P>MPlayer has a completely user definiable OSD Menu interface.</P>
 
 <H4>Installation</H4>
 
 <OL>
+  <LI>compile MPlayer by passing the <CODE>--enable-new-conf
+    --enable-menu</CODE> parameters to <CODE>./configure</CODE></LI>
+  <LI>make sure you have an OSD font installed</LI>
   <LI>copy <CODE>etc/menu.conf</CODE> to your <CODE>.mplayer</CODE>
     directory</LI>
   <LI>copy <CODE>etc/input.conf</CODE> to your <CODE>.mplayer</CODE>
     directory, or to the system-wide MPlayer config dir (default:
-    <CODE>/usr/local/share/mplayer</CODE>)</LI>
+    <CODE>/usr/local/etc/mplayer</CODE>)</LI>
+  <LI>check and edit <CODE>input.conf</CODE> to enable menu movement
+    keys (it is described there).</LI>
+  <LI>start MPlayer by the following example:<BR>
+    <CODE>$ mplayer -menu file.avi</CODE></LI>
+  <LI>push any menu key you defined</LI>
 </OL>
 
+<P>
 
 
 <H2><A NAME="rtc">1.5 RTC</A></H2>

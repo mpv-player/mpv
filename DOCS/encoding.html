@@ -102,24 +102,22 @@
 
 <H3><A NAME="rescaling">2.4.2 Rescaling movies</A></H3>
 
-<P>Often the need to resize movie images' size emerges. Its reasons can be many,
-  examples are decreasing output file size, encoding SVCDs to DivX. Ripped DVDs
-  are mostly rescaled, for example a 4:3 DVD should be 640x480, especially
-  when you want it to fit to 1 CD, and have good quality at the same time.
-  SVCDs have 480x480 size, and their header contains the aspect ratio the
-  player should use (Ex.: 480x480 + 4:3 = 640x480). However when encoding to
-  AVI (DivX) files, you have be aware that AVI headers don't store this
-  value. Thus, the only solution is rescaling.</P>
+<P>Often the need to resize movie images' size emerges. Its reasons can be
+  many: decreasing file size, network bandwidth, etc. Most people
+  even do rescaling when converting DVDs or SVCDs to DivX AVI. <B>This is bad.</B>
+  Instead of even you doing so, read the <A HREF="#aspect">Preserving
+  aspect ratio</A> section.</P>
 
 <P>The scaling process is handled by the <I>'scale'</I> video filter:
-  <CODE>-vop scale=X:Y</CODE>. Its quality can be set with the
+  <CODE>-vop scale=widht:height</CODE>. Its quality can be set with the
   <CODE>-sws</CODE> option. If it's not specified, MEncoder will use 0:
   fast bilinear.</P>
 
-<P>Usage:<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder sample-svcd.mpg -ovc lavc -lavcopts
-    vcodec=mpeg4:more_options -vop scale=640:480 -oac copy -o
-    output.avi</CODE></P>
+<H5>Usage:</H5>
+
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder input.mpg -ovc lavc -lavcopts
+  vcodec=mpeg4:more_options -vop scale=640:480 -oac copy -o
+  output.avi</CODE></P>
 
 
 <H3><A NAME="copying">2.4.3 Stream copying</A></H3>
@@ -267,6 +265,34 @@ Explanation of the process:
   &nbsp;&nbsp;<CODE>mencoder movie.mpg -ifo movie.ifo -vobsubout subtitles
     -vobsuboutindex 0 -vobsuboutid fr -sid 1</CODE></P>
 
+
+<H3><A NAME="aspect">2.4.8 Preserving aspect ratio</A></H3>
+
+<P>DVDs and SVCDs (i.e. MPEG1/2) files contain an aspect ratio value,
+  which describes how should the player scale the video stream, so humans
+  won't have egg heads (ex.: 480x480 + 4:3 = 640x480). However when encoding
+  to AVI (DivX) files, you have be aware that AVI headers don't store this
+  value. Rescaling the movie is disgusting and time consuming, there
+  must be a better feature!</P>
+
+<P>There is.</P>
+
+<P>MPEG4 has an unique feature: the video stream can contain
+  its needed aspect ratio. Yes, just like MPEG1/2 files (DVD, SVCD).
+  Regretfully, there are <U>no</U> video players outside which support this
+  attribute. Except MPlayer.</P>
+
+<P>This feature can be used only with <B>libavcodec</B>'s <CODE>mpeg4</CODE>
+  codec. Keep in mind: although MPlayer will correctly play the created file,
+  other players will use the wrong aspect ratio.</P>
+
+<P>You seriously should crop the black bands over and below the movie image.
+  See TODO.</P>
+
+<H5>Usage:</H5>
+
+<P><CODE>$ mencoder sample-svcd.mpg -ovc lavc -lavcopts
+  vcodec=mpeg4:aspect=16.0/9.0 -vop crop=714:548:0:14 -oac copy -o output.avi</CODE></P>
 
 </BODY>
 </HTML>

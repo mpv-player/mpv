@@ -1438,5 +1438,39 @@ for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
 
 <P>Check <A HREF="http://www.iki.fi/too/tvout-voodoo3-3000-xfree">this URL</A>.</P>
 
+
+<H4><A NAME="tv-out_nvidia">2.3.1.5.5 nVidia</A></H4>
+
+<P>First, you MUST download the closed-source drivers from
+  <A HREF="http://nvidia.com">http://nvidia.com</A>. I will not describe the
+  installation and configuration process because it does not cover the
+  scope of this documentation.</P>
+
+<P>After XFree86, XVideo, and 3D acceleration is properly working,
+  edit your card's Device section in the <CODE>XF86Config</CODE> file,
+  according to the following example (adapt for your card/TV):</P>
+
+<PRE>
+Section "Device"
+        Identifier      "GeForce"
+        VendorName      "ASUS"   
+        BoardName       "nVidia GeForce2/MX 400"
+        Driver          "nvidia"
+        #Option         "NvAGP" "1"
+        Option          "NoLogo"   
+        Option          "CursorShadow"  "on"
+
+        Option          "TwinView"
+        Option          "TwinViewOrientation" "Clone"
+        Option          "MetaModes" "1024x768,640x480"
+        Option          "ConnectedMonitor" "CRT, TV"  
+        Option          "TVStandard" "PAL-B"
+        Option          "TVOutFormat" "Composite"
+
+EndSection
+</PRE>
+
+<P>Of course the important thing is the TwinView part.</P>
+
 </BODY>
 </HTML>
