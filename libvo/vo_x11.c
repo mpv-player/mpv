@@ -306,7 +306,6 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
 	vo_dy=(vo_screenheight-modeline_height)/2;
 	vo_dwidth=modeline_width;
 	vo_dheight=modeline_height;
-        aspect_save_screenres(modeline_width,modeline_height);
    }
 #endif
     bg=WhitePixel( mDisplay,mScreen );
