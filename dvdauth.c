@@ -20,7 +20,7 @@
 
 #include "dvdauth.h"
 
-char *dvd_device=NULL;
+char *dvd_auth_device=NULL;
 unsigned char key_disc[2048];
 unsigned char key_title[5];
 unsigned char *dvdimportkey=NULL;

@@ -46,10 +46,15 @@ struct config conf[]={
         {"master", &mixer_usemaster, CONF_TYPE_FLAG, 0, 0, 1},
 	{"osdlevel", &osd_level, CONF_TYPE_INT, CONF_RANGE, 0, 2 },
 #ifdef HAVE_LIBCSS
-        {"dvd", &dvd_device, CONF_TYPE_STRING, 0, 0, 0},
+        {"dvdauth", &dvd_auth_device, CONF_TYPE_STRING, 0, 0, 0},
         {"dvdkey", &dvdimportkey, CONF_TYPE_STRING, 0, 0, 0},
+	{"dvd", "Option -dvd will be \"full disk\" mode, old meaning has been renamed to -dvdauth.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
 #else
         {"dvd", "DVD support was not compiled in. See file DOCS/DVD.\n",
+            CONF_TYPE_PRINT, CONF_NOCFG, 0 , 0},
+        {"dvdkey", "DVD support was not compiled in. See file DOCS/DVD.\n",
+            CONF_TYPE_PRINT, CONF_NOCFG, 0 , 0},
+        {"dvdauth", "DVD support was not compiled in. See file DOCS/DVD.\n",
             CONF_TYPE_PRINT, CONF_NOCFG, 0 , 0},
 #endif
 			    

@@ -632,8 +632,8 @@ if(vcd_track){
     }
     printf("DVD command line requested key is stored for descrambling.\n");
   }
-  if (dvd_device) {
-    if (dvd_auth(dvd_device,f)) {
+  if (dvd_auth_device) {
+    if (dvd_auth(dvd_auth_device,f)) {
         GUI_MSG( mplErrorDVDAuth )
         exit(0);
       } 

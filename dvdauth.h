@@ -3,7 +3,7 @@
 #ifndef _MPLAYER_CSS_H
 #define _MPLAYER_CSS_H
 
-extern char *dvd_device;
+extern char *dvd_auth_device;
 extern unsigned char key_disc[];
 extern unsigned char key_title[];
 extern unsigned char *dvdimportkey;
