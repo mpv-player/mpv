@@ -254,6 +254,7 @@ stream_t* new_stream(int fd,int type){
   s->buf_pos=s->buf_len=0;
   s->start_pos=s->end_pos=0;
   s->priv=NULL;
+  s->url=NULL;
   s->cache_pid=0;
   stream_reset(s);
   return s;

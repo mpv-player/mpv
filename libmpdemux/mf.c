@@ -24,8 +24,7 @@ int    mf_h = 288;
 float  mf_fps = 25.0;
 char * mf_type = "jpg";
 
-int stream_open_mf(char * filename,stream_t * stream)
-{
+mf_t* open_mf(char * filename){
  glob_t        gg;
  struct stat   fs;
  int           i;
@@ -70,7 +69,7 @@ int stream_open_mf(char * filename,stream_t * stream)
    mp_msg( MSGT_STREAM,MSGL_INFO,"[mf] search expr: %s\n",fname );
 
    if ( glob( fname,0,NULL,&gg ) )
-    { free( mf ); free( fname ); return 0; }
+    { free( mf ); free( fname ); return NULL; }
 
    mf->nr_of_files=gg.gl_pathc;
    mf->names=malloc( gg.gl_pathc * sizeof( char* ) );
@@ -111,7 +110,6 @@ int stream_open_mf(char * filename,stream_t * stream)
 
 exit_mf:
  free( fname );
- stream->priv=(void*)mf;
- return 1;
+ return mf;
 }
 

@@ -7,17 +7,17 @@
 
 #define STREAM_BUFFER_SIZE 2048
 
-#define STREAMTYPE_FILE 0
-#define STREAMTYPE_VCD  1
-#define STREAMTYPE_STREAM 2    // same as FILE but no seeking (for stdin)
-#define STREAMTYPE_DVD  3
-#define STREAMTYPE_MEMORY  4
-#define STREAMTYPE_TV	5
-#define STREAMTYPE_PLAYLIST 6
-#define STREAMTYPE_MF   7
-#define STREAMTYPE_DS   8
-#define STREAMTYPE_DVDNAV 9   // we cannot safely "seek" in this...
-#define STREAMTYPE_CDDA 10
+#define STREAMTYPE_DUMMY -1    // for placeholders, when the actual reading is handled in the demuxer
+#define STREAMTYPE_FILE 0      // read from seekable file
+#define STREAMTYPE_VCD  1      // raw mode-2 CDROM reading, 2324 bytes/sector
+#define STREAMTYPE_STREAM 2    // same as FILE but no seeking (for net/stdin)
+#define STREAMTYPE_DVD  3      // libdvdread
+#define STREAMTYPE_MEMORY  4   // read data from memory area
+#define STREAMTYPE_TV	5      // FIXME!!! dummy
+#define STREAMTYPE_PLAYLIST 6  // FIXME!!! same as STREAMTYPE_FILE now
+#define STREAMTYPE_DS   8      // read from a demuxer stream
+#define STREAMTYPE_DVDNAV 9    // we cannot safely "seek" in this...
+#define STREAMTYPE_CDDA 10     // raw audio CD reader
 
 #define VCD_SECTOR_SIZE 2352
 #define VCD_SECTOR_OFFS 24
@@ -31,18 +31,19 @@ int vcd_seek_to_track(int fd,int track);
 void vcd_read_toc(int fd);
 
 typedef struct {
-  int fd;
-  int type; // 0=file 1=VCD
+  int fd;   // file descriptor, see man open(2)
+  int type; // see STREAMTYPE_*
   unsigned int buf_pos,buf_len;
   off_t pos,start_pos,end_pos;
   int eof;
   unsigned int cache_pid;
   void* cache_data;
   void* priv; // used for DVD, TV, RTSP etc
-  unsigned char buffer[STREAM_BUFFER_SIZE>VCD_SECTOR_SIZE?STREAM_BUFFER_SIZE:VCD_SECTOR_SIZE];
+  char* url;  // strdup() of filename/url
 #ifdef STREAMING
   streaming_ctrl_t *streaming_ctrl;
 #endif
+  unsigned char buffer[STREAM_BUFFER_SIZE>VCD_SECTOR_SIZE?STREAM_BUFFER_SIZE:VCD_SECTOR_SIZE];
 } stream_t;
 
 #ifdef USE_STREAM_CACHE

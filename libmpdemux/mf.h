@@ -10,8 +10,11 @@ extern char * mf_type;
 
 typedef struct
 {
- int     nr_of_files;
+ int curr_frame;
+ int nr_of_files;
  char ** names;
 } mf_t;
+
+mf_t* open_mf(char * filename);
 
 #endif

@@ -15,21 +15,15 @@
 #include "stheader.h"
 #include "mf.h"
 
-typedef struct
-{
- int nr_of_frames;
- int curr_frame;
-} demuxer_mf_t;
-
 void demux_seek_mf(demuxer_t *demuxer,float rel_seek_secs,int flags){
-  demuxer_mf_t * mf = (demuxer_mf_t *)demuxer->priv;
+  mf_t * mf = (mf_t *)demuxer->priv;
   sh_video_t   * sh_video = demuxer->video->sh;
   int newpos = (flags & 1)?0:mf->curr_frame;
   
-  if ( flags & 2 ) newpos+=rel_seek_secs*mf->nr_of_frames;
+  if ( flags & 2 ) newpos+=rel_seek_secs*mf->nr_of_files;
    else newpos+=rel_seek_secs * sh_video->fps;
   if ( newpos < 0 ) newpos=0;
-  if( newpos > mf->nr_of_frames) newpos=mf->nr_of_frames;
+  if( newpos > mf->nr_of_files) newpos=mf->nr_of_files;
   mf->curr_frame=newpos;
 }
 
@@ -38,49 +32,43 @@ void demux_seek_mf(demuxer_t *demuxer,float rel_seek_secs,int flags){
 //     1 = successfully read a packet
 int demux_mf_fill_buffer(demuxer_t *demuxer){
   mf_t         * mf;
-  demuxer_mf_t * dmf;
   struct stat    fs;
   FILE         * f;
 
-  dmf=(demuxer_mf_t*)demuxer->priv;
-  if ( dmf->curr_frame >= dmf->nr_of_frames ) return 0;
-  mf=(mf_t*)demuxer->stream->priv;
+  mf=(mf_t*)demuxer->priv;
+  if ( mf->curr_frame >= mf->nr_of_files ) return 0;
 
-  stat( mf->names[dmf->curr_frame],&fs );
-//  printf( "[demux_mf] frame: %d (%s,%d)\n",dmf->curr_frame,mf->names[dmf->curr_frame],fs.st_size );
+  stat( mf->names[mf->curr_frame],&fs );
+//  printf( "[demux_mf] frame: %d (%s,%d)\n",mf->curr_frame,mf->names[mf->curr_frame],fs.st_size );
 
-  if ( !( f=fopen( mf->names[dmf->curr_frame],"r" ) ) ) return 0;
+  if ( !( f=fopen( mf->names[mf->curr_frame],"r" ) ) ) return 0;
   {
    sh_video_t     * sh_video = demuxer->video->sh;
    demux_packet_t * dp = new_demux_packet( fs.st_size );
    if ( !fread( dp->buffer,fs.st_size,1,f ) ) return 0;
-   dp->pts=dmf->curr_frame / sh_video->fps;
-   dp->pos=dmf->curr_frame;
+   dp->pts=mf->curr_frame / sh_video->fps;
+   dp->pos=mf->curr_frame;
    dp->flags=0;
    // append packet to DS stream:
    ds_add_packet( demuxer->video,dp );
   }
   fclose( f );
 
-  dmf->curr_frame++;
+  mf->curr_frame++;
   return 1;
 }
 
 demuxer_t* demux_open_mf(demuxer_t* demuxer){
   sh_video_t   *sh_video = NULL;
   mf_t         *mf = NULL;
-  demuxer_mf_t *dmf = NULL;
+  
+  if(!demuxer->stream->url) return NULL;
+  mf=open_mf(demuxer->stream->url);
+  if(!mf) return NULL;
+  mf->curr_frame=0;
 
-  mf=(mf_t*)demuxer->stream->priv;
-  dmf=calloc( 1,sizeof( demuxer_mf_t ) );
-
-  // go back to the beginning
-  stream_reset(demuxer->stream);
-//  stream_seek(demuxer->stream, 0);
   demuxer->movi_start = 0;
   demuxer->movi_end = mf->nr_of_files - 1;
-  dmf->nr_of_frames= mf->nr_of_files;
-  dmf->curr_frame=0;
 
   // create a new video stream header
   sh_video = new_sh_video(demuxer, 0);
@@ -99,7 +87,7 @@ demuxer_t* demux_open_mf(demuxer_t* demuxer){
      if ( !strcasecmp( mf_type,"png" )) sh_video->format = mmioFOURCC('M', 'P', 'N', 'G' );
   else
      if ( !strcasecmp( mf_type,"tga" )) sh_video->format = mmioFOURCC('M', 'T', 'G', 'A' );
-  else { mp_msg(MSGT_DEMUX, MSGL_INFO, "[demux_mf] unknow input file type.\n" ); free( dmf ); return NULL; }
+  else { mp_msg(MSGT_DEMUX, MSGL_INFO, "[demux_mf] unknow input file type.\n" ); free( mf ); return NULL; }
 
   sh_video->disp_w = mf_w;
   sh_video->disp_h = mf_h;
@@ -120,15 +108,15 @@ demuxer_t* demux_open_mf(demuxer_t* demuxer){
   /* disable seeking */
 //  demuxer->seekable = 0;
 
-  demuxer->priv=(void*)dmf;
+  demuxer->priv=(void*)mf;
 
   return demuxer;
 }
 
 void demux_close_mf(demuxer_t* demuxer) {
-  demuxer_mf_t *dmf = demuxer->priv;
+  mf_t *mf = demuxer->priv;
 
-  if(!dmf)
+  if(!mf)
     return;
-  free(dmf);  
+  free(mf);  
 }

@@ -428,13 +428,9 @@ tv_err:
   if (mf_support == 1)
   {
     /* create stream */
-    stream = new_stream(-1, STREAMTYPE_MF);
-    if (!stream)
-       return(NULL);
-
-    if (!stream_open_mf(filename, stream))
-        return(NULL);
-
+    stream = new_stream(-1, STREAMTYPE_DUMMY);
+    if (!stream) return(NULL);
+    stream->url=strdup(filename);
     return(stream);
   }
   
