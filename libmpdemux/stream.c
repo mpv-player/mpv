@@ -6,12 +6,14 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
+#include <sys/wait.h>
 #include <fcntl.h>
 #include <signal.h>
 
 #include "config.h"
 #include "mp_msg.h"
 #include "help_mp.h"
+#include "../linux/shmem.h"
 
 #include "stream.h"
 #include "demuxer.h"
@@ -33,6 +35,7 @@ extern int verbose; // defined in mplayer.c
 #ifdef USE_DVDREAD
 int dvd_read_sector(void* d,void* p2);
 void dvd_seek(void* d,off_t pos);
+void dvd_close(dvd_priv_t *d);
 #endif
 
 #ifdef HAVE_CDDA
@@ -110,7 +113,7 @@ int stream_fill_buffer(stream_t *s){
 }
 
 int stream_seek_long(stream_t *s,off_t pos){
-off_t newpos;
+off_t newpos=0;
 
 //  if(verbose>=3) printf("seek_long to 0x%X\n",(unsigned int)pos);
 
