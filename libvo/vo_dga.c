@@ -23,6 +23,9 @@
  * - works only on x86 architectures
  *
  * $Log$
+ * Revision 1.26  2001/06/18 16:38:06  acki2
+ * - just modified an error message
+ *
  * Revision 1.25  2001/06/17 22:21:47  acki2
  * - if DGA fails to report some valid modes, vo_dga now exits gracefully
  *   instead of crashing ... (100000x100000 bug ...)
@@ -963,7 +966,8 @@ static uint32_t init( uint32_t width,  uint32_t height,
 
   if(vo_dga_vp_width == VO_DGA_INVALID_RES){
     vd_printf( VD_ERR, "vo_dga: Something is wrong with your DGA. There doesn't seem to be a\n"
-		       "single suitable mode!\n");
+		       "         single suitable mode!\n"
+		       "         Please file a bug report (see DOCS/DGA)\n");
 #ifndef HAVE_DGA2
 #ifdef HAVE_XF86VM
     if(vo_dga_vidmodes){
