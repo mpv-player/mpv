@@ -68,7 +68,7 @@ static char help_text[]=
 #define MSGTR_GetpathProblem "get_path(\"config\") Problem\n"
 #define MSGTR_CreatingCfgFile "Erstelle Konfigurationsdatei: %s\n"
 #define MSGTR_InvalidVOdriver "Ungültiger Videoausgabetreibername: %s\n'-vo help' zeigt eine Liste aller.\n"
-#define MSGTR_InvalidAOdriver "Ungültiger Audioausgabetreibername: %s\n'-vo help' zeigt eine Liste aller.\n"
+#define MSGTR_InvalidAOdriver "Ungültiger Audioausgabetreibername: %s\n'-ao help' zeigt eine Liste aller.\n"
 #define MSGTR_CopyCodecsConf "(kopiere/linke etc/codecs.conf nach ~/.mplayer/codecs.conf)\n"
 #define MSGTR_CantLoadFont "Kann Schriftdatei %s nicht laden\n"
 #define MSGTR_CantLoadSub "Kann Untertitel nicht laden: %s\n"
@@ -127,7 +127,7 @@ static char help_text[]=
 
 // demuxer.c, demux_*.c:
 #define MSGTR_AudioStreamRedefined "Warnung! Audiostreamheader %d redefiniert!\n"
-#define MSGTR_VideoStreamRedefined "Warnung! Aideostreamheader %d redefiniert\n"
+#define MSGTR_VideoStreamRedefined "Warnung! Videostreamheader %d redefiniert\n"
 #define MSGTR_TooManyAudioInBuffer "\nDEMUXER: Zu viele (%d in %d bytes) Audiopakete im Puffer!\n"
 #define MSGTR_TooManyVideoInBuffer "\nDEMUXER: Zu viele (%d in %d bytes) Videopakete im Puffer!\n"
 #define MSGTR_MaybeNI "Vielleicht spielst du einen non-interleaved Stream/Datei oder der Codec funktioniert nicht.\n"
@@ -233,7 +233,7 @@ static char help_text[]=
 #define MSGTR_SKIN_WARNING1 "[Skin] Warnung in Skin-Konfigurationsdatei in Zeile %d: Widget gefunden, aber davor wurde \"section\" nicht gefunden ( %s )"
 #define MSGTR_SKIN_WARNING2 "[Skin] Warnung in Skin-Konfigurationsdatei in Zeile %d: Widget gefunden, aber davor wurde \"subsection\" nicht gefunden (%s)"
 #define MSGTR_SKIN_BITMAP_16bit  "Bitmaps mit 16 Bits oder wenige sind nicht unterstützt ( %s ).\n"
-#define MSGTR_SKIN_BITMAP_FileNotFound  "Dateu nicht gefunden ( %s )\n"
+#define MSGTR_SKIN_BITMAP_FileNotFound  "Datei nicht gefunden ( %s )\n"
 #define MSGTR_SKIN_BITMAP_BMPReadError "BMP Lesefehler ( %s )\n"
 #define MSGTR_SKIN_BITMAP_TGAReadError "TGA Lesefehler ( %s )\n"
 #define MSGTR_SKIN_BITMAP_PNGReadError "PNG Lesefehler ( %s )\n"
