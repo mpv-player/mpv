@@ -176,15 +176,15 @@ static int preinit(sh_audio_t *sh){
     EnterMovies();
 #else
     if(loader_init()) return 0; // failed to load DLL
-#endif
     
     printf("loader_init DONE!\n");
 
-#if 1
     error = InitializeQTML(6+16);
     printf("InitializeQTML:%i\n",error);
     if(error) return 0;
+#endif
     
+#if 1
 	OutputFormatInfo.flags = InputFormatInfo.flags = 0;
 	OutputFormatInfo.sampleCount = InputFormatInfo.sampleCount = 0;
 	OutputFormatInfo.buffer = InputFormatInfo.buffer = NULL;
