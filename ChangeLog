@@ -6,7 +6,17 @@ mplayer (0.90)
     * english man page & HTML docs updates
     * audio filter documentation
     * help_diff.sh doesn't depend on BASH any more
-    * Hungarian, French, Italian, Polish(?) docs synced
+    * Hungarian, French, Italian, German, Polish(?) docs synced
+    
+    Important fixes:
+    * X11 fullscreen switching (yes, again...) rewritten, some x11 code cleanup
+    * Voxware and Quicktime DLLs finally work (was broken in some contexts)
+    * VIDIX Radeon support cleanup, should really solve the pink screen bugs
+    * Cygwin: -vo directx crashes and garbled picture with some files fixed
+    * OGM/Ogg seeking (broken frames) fixed, subtitle fixes, XCD support
+    * libaf: big (audio filter layer) updates, floating point support, speedup
+    * ffwma2 fixed (better error resilience)
+    * SPU queueing - fixes missing or early disappearing DVD subtitles
 
     Fixes:
     * mp3lib CPU detection part cleanup, 'decwin' linker problem fixed
@@ -16,14 +26,20 @@ mplayer (0.90)
     * -ao arts, -ao oss: Fix 8-bit sound support
     * -vop expand + ffmpeg codecs conflicts solved, some other -vop bugs fixed
     * -ac ffmp2 with MPEG files (sig11) fixed
-    * libaf: big (audio filter layer) updates, floating point support
     * QT Qclp audio codec initialization fixed
     * mplayer exit codes cleanup (0 for quit/eof, 1 for error)
-    * X11 fullscreen switching (yes, again...) fixes, code cleanup
-    * OGM/Ogg seeking (broken frames) fixed
-    * -ao win32 sync problems solved
-    * -vo directx crashes and garbled picture with some files fixed
-
+    * -ao win32 sync problems solved, -autosync 100 is still recommended
+    * -vo gif89a uninit sig11 fixed
+    * GUI: correct widget destroy event handler
+    * the usual compiler warning fixes :)
+    * use -pphelp instead of -vop pp=help
+    * various bigendian fixes
+    * 16bpp packed yuv fixes in crop, mirror, rotate filters
+    * some -fixed-vo and vo_preinit fixes, -vo sdl,xmga,mga should work...
+    * various Solaris compatibility fixes (should work out of the box)
+    * mms:// port fixes, tries 1755 if 80 failed
+    * libavcodec: various ME fixes, B frames fixes, WMV2 slice decoding fixes
+    
     Features:
     * -ao esd: new EsounD audio driver
     * -vo dxr3: new NORM option
@@ -41,7 +57,13 @@ mplayer (0.90)
     * v4l: user friendly channel tuning
     * Freetype & old-style RAW font support usable (compilable) at the same time
     * vo_directfb2, vo_dfbmga: DirectFB 0.9.16 support
-
+    * libavcodec: motion estimation pre pass, qpel encoding, trellis quantization
+    * libavcodec: Altivec optimizations
+    * keep window's aspect ratio at resizing (x11, xv), requires WM support
+    * GUI: SDL audio config panel, persistant history path, new settings
+    * -geometry option accepts X11 syntax too
+    * real .bin+.cue (S)VCD images support (-vcd 2 -cuefile xxx.cue)
+    * postprocess: YUV 411/422/444 support, stride fixes
 
   rc2:
     General:
