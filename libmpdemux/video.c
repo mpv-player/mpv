@@ -340,7 +340,7 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
 
     telecine_cnt*=0.9; // drift out error
     telecine_cnt+=frame_time-5.0/4.0;
-//    printf("\r telecine = %5.3f     \n",telecine_cnt);
+    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"\r telecine = %3.1f  %5.3f     \n",frame_time,telecine_cnt);
     
     if(telecine){
 	frame_time=1;
