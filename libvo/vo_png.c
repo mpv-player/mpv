@@ -199,10 +199,17 @@ static uint8_t destroy_png(struct pngdata png) {
 
 static uint32_t draw_frame(uint8_t * src[])
 {
+    return -1;
+}
+
+static uint32_t draw_image(mp_image_t* mpi){
     char buf[100];
     int k, bppmul = bpp/8;
     struct pngdata png;
     png_byte *row_pointers[image_height];
+
+    // if -dr or -slices then do nothing:
+    if(mpi->flags&(MP_IMGFLAG_DIRECT|MP_IMGFLAG_DRAW_CALLBACK)) return VO_TRUE;
     
     snprintf (buf, 100, "%08d.png", ++framenum);
 
@@ -214,16 +221,18 @@ static uint32_t draw_frame(uint8_t * src[])
     }	     
 
     if(verbose > 1) printf("PNG Creating Row Pointers\n");
-    for ( k = 0; k < image_height; k++ ) row_pointers[k] = &src[0][image_width*k*bppmul];
-    
+    for ( k = 0; k < image_height; k++ )
+	row_pointers[k] = mpi->planes[0]+mpi->stride[0]*k;
+
     //png_write_flush(png.png_ptr);
     //png_set_flush(png.png_ptr, nrows);
 
     if(verbose > 1) printf("PNG Writing Image Data\n");
     png_write_image(png.png_ptr, row_pointers);
 
-    return destroy_png(png);
+    destroy_png(png);
 
+    return VO_TRUE;
 }
 
 static void draw_osd(void)
@@ -307,6 +316,8 @@ static uint32_t preinit(const char *arg)
 static uint32_t control(uint32_t request, void *data, ...)
 {
   switch (request) {
+  case VOCTRL_DRAW_IMAGE:
+    return draw_image(data);
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
   }
