@@ -279,14 +279,16 @@ static int control(int cmd,int arg){
 	    float volume;
 	    AUDIO_INITINFO(&info);
 	    volume = vol->right > vol->left ? vol->right : vol->left;
-	    info.output_muted = (volume == 0);
-	    if ( !info.output_muted ) {
+	    if ( volume != 0 ) {
 		info.play.gain = volume * AUDIO_MAX_GAIN / 100;
 		if ( vol->right == vol->left )
 		    info.play.balance = AUDIO_MID_BALANCE;
 		else
 		    info.play.balance = (vol->right - vol->left + volume) * AUDIO_RIGHT_BALANCE / (2*volume);
 	    }
+#if !defined (__OpenBSD__) && !defined (__NetBSD__)
+	    info.output_muted = (volume == 0);
+#endif
 	    ioctl( fd,AUDIO_SETINFO,&info );
 	    close( fd );
 	    return CONTROL_OK;
