@@ -3499,11 +3499,11 @@ Les types possibles sont\ :
 .PD 0
 .RSs
 .IPs 0
-bilinéaire rapide (par défaut)
+bilinéaire rapide
 .IPs 1
 bilinéaire
 .IPs 2
-bicubique (bonne qualité)
+bicubique (bonne qualité) (par défaut)
 .IPs 3
 experimental
 .IPs 4
@@ -5343,7 +5343,7 @@ encode avec les présélections ABR à un bitrate constant forcé à 192 kbps.
 .IPs preset=172
 encode avec les présélections ABR à un bitrate moyen de 172 kbps.
 .IPs preset=extreme
-Devrait convenir aux gens très exigeant, ayant une audition extrêmement
+Devrait convenir aux gens très exigeants, ayant une audition extrêmement
 bonne et un équipement HI-FI en rapport.
 .IPs preset=help
 Affiche des options supplémentaires et des informations sur les
@@ -5415,7 +5415,7 @@ fait que cette option ne devrait être utilisée que pour des
 tests de régression, qui nécessitent des fichiers identiques
 bit-à-bit, même quand la version de l'encodeur change.
 Cela supprime également l'entête user-data des flux MPEG-4
-N'utilisez donc cette option que si vous êtes sûrs d'en avoir
+N'utilisez donc cette option que si vous êtes sûr d'en avoir
 besoin.
 .
 .TP
@@ -5635,7 +5635,7 @@ toujours utiliser le nombre maximum de trames B (par défaut)
 .
 .TP
 .B vpass=<1\-3>
-Active le mode deux (ou trois) passes internes, ne le spécifiez que si
+Active le mode deux (ou trois) passes interne ne le spécifiez que si
 vous désirez utiliser l'encodage deux (ou trois) passes\ :
 .PD 0
 .RSs
@@ -6128,7 +6128,7 @@ que l'encodeur remarque que l'objet ne bouge plus et doit voir ses blocs
 affinés).
 Les bits économisés seront redistribués au reste de la vidéo, ce qui peut
 en améliorer la qualité subjective, pourvu que la valeur donnée à tcplx_mask
-soit bien choisie
+soit bien choisie.
 .
 .TP
 .B scplx_mask=<0.0\-1.0>
@@ -6786,7 +6786,7 @@ présente dans le flux).
 Lors de la lecture, la n-vop sera joué en affichant la trame précédente.
 .br
 .I ATTENTION\ :
-Une mauvaise utilisation de cette option peut produire des vidéo de très
+Une mauvaise utilisation de cette option peut produire des vidéos de très
 mauvaise qualité, soyez prévenus\ !
 .
 .TP
@@ -7435,12 +7435,4 @@ jusqu'à février 2004.
 depuis Août 2004.
 .PP
 Merci d'envoyer les mails la concernant sur la liste de diffusion MPlayer-DOCS.
-.
-.
-.SH "DÉNÉGATION STANDARD"
-A utiliser à vos risques et périls !
-Il peut y avoir des erreurs et inexactitudes qui peuvent endommager votre
-système ou vos yeux.
-Procédez avec précaution, et bien que ce ne soit souvent pas le cas, les auteurs
-déclinent toutes responsabilités quand à l'utilisation de ce logiciel !
 .\" end of file
