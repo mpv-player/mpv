@@ -42,8 +42,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     yv12toyuy2(mpi->planes[0],mpi->planes[1],mpi->planes[2], dmpi->planes[0],
 	    mpi->w,mpi->h, mpi->stride[0],mpi->stride[1],dmpi->stride[0]);
     
-    dmpi->qscale=mpi->qscale;
-    dmpi->qstride=mpi->qstride;
+    vf_clone_mpi_attributes(dmpi, mpi);
     
     return vf_next_put_image(vf,dmpi);
 }

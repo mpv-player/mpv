@@ -422,6 +422,15 @@ unsigned int vf_match_csp(vf_instance_t** vfp,unsigned int* list,unsigned int pr
     return best;
 }
 
+void vf_clone_mpi_attributes(mp_image_t* dst, mp_image_t* src){
+    dst->pict_type= src->pict_type;
+    dst->qscale_type= src->qscale_type;
+    if(dst->width == src->width && dst->height == src->height){
+	dst->qstride= src->qstride;
+	dst->qscale= src->qscale;
+    }
+}
+
 int vf_next_config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int voflags, unsigned int outfmt){

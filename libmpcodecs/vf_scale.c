@@ -251,8 +251,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     if(vf->priv->w==mpi->w && vf->priv->h==mpi->h){
 	// just conversion, no scaling -> keep postprocessing data
 	// this way we can apply pp filter to non-yv12 source using scaler
-	dmpi->qscale=mpi->qscale;
-	dmpi->qstride=mpi->qstride;
+        vf_clone_mpi_attributes(dmpi, mpi);
     }
 
     if(vf->priv->palette) dmpi->planes[1]=vf->priv->palette; // export palette!

@@ -55,8 +55,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	for(x=0;x<w;x++) d[2*x]=d[2*x+1]=s[x];
     }
 
-    dmpi->qscale=mpi->qscale;
-    dmpi->qstride=mpi->qstride;
+    vf_clone_mpi_attributes(dmpi, mpi);
     
     return vf_next_put_image(vf,dmpi);
 }

@@ -70,9 +70,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	dmpi->width=mpi->width;
     }
     
-    dmpi->qscale=mpi->qscale;
-    dmpi->qstride=mpi->qstride;
-    dmpi->pict_type=mpi->pict_type;
+    vf_clone_mpi_attributes(dmpi, mpi);
 
     return vf_next_put_image(vf,dmpi);
 }

@@ -74,6 +74,7 @@ vf_instance_t* vf_open_filter(vf_instance_t* next, char *name, char **args);
 vf_instance_t* vf_open_encoder(vf_instance_t* next, char *name, char *args);
 
 unsigned int vf_match_csp(vf_instance_t** vfp,unsigned int* list,unsigned int preferred);
+void vf_clone_mpi_attributes(mp_image_t* dst, mp_image_t* src);
 
 // default wrappers:
 int vf_next_config(struct vf_instance_s* vf,

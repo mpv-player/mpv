@@ -200,8 +200,7 @@ static int put_image( struct vf_instance_s* vf, mp_image_t *mpi ) {
     unsharp( dmpi->planes[1], mpi->planes[1], dmpi->stride[1], mpi->stride[1], mpi->w/2, mpi->h/2, &vf->priv->chromaParam );
     unsharp( dmpi->planes[2], mpi->planes[2], dmpi->stride[2], mpi->stride[2], mpi->w/2, mpi->h/2, &vf->priv->chromaParam );
     
-    dmpi->qscale = mpi->qscale;
-    dmpi->qstride = mpi->qstride;
+    vf_clone_mpi_attributes(dmpi, mpi);
     
 #ifdef HAVE_MMX
     if(gCpuCaps.hasMMX)
