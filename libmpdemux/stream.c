@@ -210,7 +210,7 @@ if(newpos==0 || newpos!=s->pos){
     // A function call that return -1 can tell that the protocol
     // doesn't support seeking.
 #ifdef STREAMING
-    if( s->streaming_ctrl!=NULL ) {
+    if( s->streaming_ctrl!=NULL && s->streaming_ctrl->streaming_seek ) {
       if( s->streaming_ctrl->streaming_seek( s->fd, pos, s->streaming_ctrl )<0 ) {
         mp_msg(MSGT_STREAM,MSGL_INFO,"Stream not seekable!\n");
         return 1;
