@@ -20,6 +20,7 @@
 #include "../../libdha/pci_names.h"
 
 #include "mach64.h"
+#include "../../version.h"
 
 #define UNUSED(x) ((void)(x)) /**< Removes warning about unused arguments */
 
@@ -262,7 +263,10 @@ static int mach64_get_vert_stretch(void)
     int ret;
     int yres= mach64_get_yres();
 
-    if(!supports_lcd_v_stretch) return 1<<16;
+    if(!supports_lcd_v_stretch){
+        if(__verbose>0) printf("[mach64] vertical stretching not supported\n");
+        return 1<<16;
+    }
 
     lcd_index= INREG(LCD_INDEX);
     
@@ -442,6 +446,8 @@ int vixInit(void)
     printf("[mach64] Driver was not probed but is being initializing\n");
     return EINTR;
   }
+  if(__verbose>0) printf("[mach64] version %s\n", VERSION);
+  
   if((mach64_mmio_base = map_phys_mem(pci_info.base2,0x4000))==(void *)-1) return ENOMEM;
   mach64_wait_for_idle();
   mach64_ram_size = INREG(MEM_CNTL) & CTL_MEM_SIZEB;
