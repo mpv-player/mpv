@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="koi8-r"?>
+<!-- synced with 1.4 -->
+<appendix id="bugreports">
+<title>Как сообщать об ошибках</title>
+<para>
+Хорошие сообщения об ошибках вносят значительный вклад в разработку любого
+программного продукта. Но, как и написание хорошей программы, хорошее сообщение
+об ошибке включает в себя некую долю работы. Пожалуйста, осознайте, что
+большинство разработчиков &mdash; занятые люди, получающие огромное количество
+писем. Поэтому, хотя Ваши отзывы необходимы для улучшения MPlayer'а, хотя
+они очень приветствуются, пожалуйста поймите, что Вы должны предоставить
+<emphasis role="bold">Всю</emphasis> требуемую нами информацию, поэтому точно
+следуйте инструкциям в этом документе.
+</para>
+<sect1 id="bugreports_fix">
+<title>Как исправить ошибку</title>
+<para>
+Если Вы ощущаете в себе достаточно сил и умения для самостоятельного решения
+проблемы, пожалуйста, сделайте это. Или может быть Вы уже это сделали?
+Пожалуйста, прочитайте <ulink url="../../tech/patches.txt">этот короткий
+документ</ulink>, чтобы узнать, как сделать так, чтобы Ваш код включили
+в MPlayer.  Люди из рассылки
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</ulink>
+помогут Вас, если у Вас есть вопросы.
+</para>
+</sect1>
+<sect1 id="bugreports_report">
+<title>Как сообщить об ошибке</title>
+<para>
+Прежде всего, пожалуйста, попробуйте использовать новейшую CVS версию
+MPlayer'а, поскольку Ваша ошибка уже может быть исправлена. Разработка
+продвигается очень быстро, большинство проблем в официальных релизах сообщается
+в течение дней, и даже часов, после релиза, поэтому, пожалуйста, для сообщений
+об ошибках используйте <emphasis role="bold">только CVS</emphasis>. Это
+включает и бинарные пакеты MPlayer'а. Вы найдёте инструкции по CVS внизу
+<ulink url="http://www.mplayerhq.hu/homepage/dload.html">этой страницы</ulink>
+или в README. Если это не помогло, пожалуйста, обратитесь к списку
+<link linkend="bugs">известных ошибок</link> и остальной документации. Если
+Ваша проблема не известна или не решается с помощью наших инструкций,
+пожалуйста, сообщите об ошибке.
+</para>
+
+<para>
+Пожалуйста, не присылайте сообщения об ошибках лично какому-нибудь разработчику.
+Это командная работа, и, поэтому, Вашим сообщением могут заинтересоваться
+несколько человек. Довольно часто бывает, что пользователи уже сталкивались
+с Вашей проблемой и знают, как обойти проблему, даже если это ошибка в коде
+MPlayer'а.
+</para>
+
+<para>
+Пожалуйста, опишите Вашу проблему настолько подробно, насколько возможно.
+Проведите маленькое расследование, чтобы выяснить условия, при которых возникает
+проблема. Проявляется ли ошибка только в каких-то конкретных ситуациях?
+Она специфична только для каких-то файлов или типов файлов? Происходит ли это
+с каким-то одним кодеком, или это не зависит от кодека? Можете ли Вы
+воспроизвести это со всеми драйверами вывода? Чем больше Вы предоставите
+информации, тем выше вероятность того, что мы сможем исправить ошибку.
+Пожалуйста, не забудьте включить важную информацию, которую мы просим ниже,
+иначе мы не сможем должным образом диагностировать Вашу проблему.
+</para>
+
+<para>
+Великолепное, отлично написанное руководство по задаванию вопросов
+на общедоступных форумах &mdash; это 
+<ulink url="http://www.catb.org/~esr/faqs/smart-questions.html">How To Ask
+Questions The Smart Way[Как Задавать Вопросы. Правильный Путь.]</ulink>,
+написанное <ulink url="http://www.catb.org/~esr/">Eric S. Raymond</ulink>.
+Есть и другое &mdash;
+<ulink url="http://www.chiark.greenend.org.uk/~sgtatham/bugs.html">How to Report
+Bugs Effectively[Как Эффективно Сообщить об Ошибке]</ulink>, написанное <ulink
+url="http://www.chiark.greenend.org.uk/~sgtatham/">Simon Tatham</ulink>.
+Если Вы будете следовать этим указаниям, Вы сможете получить помощь. Но,
+пожалуйста, учтите, что мы добровольно отслеживаем рассылки в свободное время.
+Мы очень заняты и не можем гарантировать, что Вы получите решение для Вашей
+проблемы (или хотя бы ответ).
+</para>
+
+</sect1>
+
+<sect1 id="bugreports_where">
+<title>Куда сообщать об ошибках</title>
+<para>
+Подпишитесь на рассылку mplayer-users:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"/>
+и отошлите Ваше сообщение на:
+<ulink url="mailto:mplayer-users@mplayerhq.hu"/>
+</para>
+<para>
+Язык этой рассылки &mdash; <emphasis role="bold">английский</emphasis>.
+Пожалуйста, следуйте стандарту <ulink url="http://www.ietf.org/rfc/rfc1855.txt">
+Netiquette Guidelines[Руководство по Сетевому Этикету]</ulink> и
+<emphasis role="bold">не присылайте HTML почту</emphasis> ни на какую из наших
+рассылок. Вас просто проигнорируют или забанят. Если Вы хотите узнать, что такое
+HTML почта и почему это &mdash; зло, прочтите
+<ulink url="http://expita.com/nomime.html">этот документ</ulink>. Он объяснит
+Вам все детали и содержит инструкции по отключению HTML. Также обратите
+внимание, что мы не будем индивидуально CC (отсылать копии) людям, а поэтому
+подписаться &mdash; хорошая идея, если Вы хотите получить ответ.
+</para>
+</sect1>
+
+<sect1 id="bugreports_what">
+<title>Что сообщать</title>
+<para>
+Вам необходимо включить лог, конфигурацию или примеры файлов в сообщение
+об ошибке. Если что-то из этого большое, то лучше загрузить это на наш
+<ulink url="ftp://mplayerhq.hu/MPlayer/incoming/">FTP сервер</ulink>
+в сжатом виде (предпочтительно gzip или bzip2) и включить в сообщение
+об ошибке только путь и имя файла. На наших рассылках стоит ограничение размера
+сообщения в 80Кб. Если у Вас что-то большее, то сожмите или загрузите это.
+</para>
+
+<sect2 id="bugreports_system">
+<title>Системная информация</title>
+<para>
+<itemizedlist>
+<listitem><para>
+Ваш дистрибутив Linux или операционная система и версия, например:
+  <itemizedlist>
+    <listitem><para>Red Hat 7.1</para></listitem>
+    <listitem><para>Slackware 7.0 + пакеты разработки из 7.1 ...</para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+версию ядра:
+<screen>uname -a</screen>
+</para></listitem>
+<listitem><para>
+версию libc:
+<screen>ls -l /lib/libc[.-]*</screen>
+</para></listitem>
+<listitem><para>
+версии gcc и ld:
+<screen>
+gcc -v
+ld -v
+</screen>
+</para></listitem>
+<listitem><para>
+версия binutils:
+<screen>
+as --version
+</screen>
+</para></listitem>
+<listitem><para>
+Если у Вас проблемы с полноэкранным режимом:
+  <itemizedlist>
+    <listitem><para>Тип оконного менеджера и версия</para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+Если у Вас проблема с XVIDIX:
+  <itemizedlist>
+    <listitem><para>глубина цвета X'ов:
+<screen>xdpyinfo | grep &quot;depth of root&quot;</screen>
+    </para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+Если глючит только GUI:
+  <itemizedlist>
+    <listitem><para>версия GTK</para></listitem>
+    <listitem><para>версия GLIB</para></listitem>
+    <listitem><para>версия libpng</para></listitem>
+    <listitem><para>ситуация с GUI, в которых проявляется проблема</para></listitem>
+  </itemizedlist>
+</para></listitem>
+</itemizedlist>
+</para>
+</sect2>
+
+<sect2 id="bugreports_hardware">
+<title>Аппаратура и драйверы</title>
+<para>
+<itemizedlist>
+<listitem><para>
+Информация о CPU (это сработает только под Linux):
+<screen>cat /proc/cpuinfo</screen>
+</para></listitem>
+<listitem><para>
+Производитель и модель видео карты, например:
+  <itemizedlist>
+    <listitem><para>ASUS V3800U чип: nVidia TNT2 Ultra pro 32MB SDRAM</para></listitem>
+    <listitem><para>Matrox G400 DH 32MB SGRAM</para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+Тип драйвера и версия, например:
+  <itemizedlist>
+    <listitem><para>Встроенный в X'ы</para></listitem>
+    <listitem><para>nVidia 0.9.623</para></listitem>
+    <listitem><para>Utah-GLX CVS 2001-02-17</para></listitem>
+    <listitem><para>DRI из X 4.0.3</para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+Тип и драйвер звуковой карты, например:
+  <itemizedlist>
+    <listitem><para>Creative SBLive! Gold с OSS драйверами от oss.creative.com</para></listitem>
+    <listitem><para>Creative SB16 с OSS драйверами из ядра</para></listitem>
+    <listitem><para>GUS PnP с ALSA OSS эмуляцией</para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+Если Вы сомневаетесь, на Linux системах включите вывод
+<command>lspci -vv</command>.
+</para></listitem>
+</itemizedlist>
+</para>
+</sect2>
+
+<sect2 id="bugreports_configure">
+<title>Проблемы конфигурации</title>
+<para>
+Если Вы получаете ошибку при выполнении <command>./configure</command>, или если
+автоопределение чего-то не срабатывает, прочитайте <filename>configure.log
+</filename>. Там Вы можете обнаружить ответ, например если у Вас стоят несколько
+версий одной библиотеки, или если Вы забыли установить пакет разработки (тот
+самый, с суффиксом -dev). Если Вы думаете, что это ошибка, включите в сообщение
+файл <filename>configure.log</filename>.
+</para>
+</sect2>
+
+<sect2 id="bugreports_conpilation">
+<title>Проблемы компиляции</title>
+<para>
+Пожалуйста, включите эти файлы:
+<itemizedlist>
+<listitem><para>config.h</para></listitem>
+<listitem><para>config.mak</para></listitem>
+</itemizedlist>
+Если компиляция ломается в одном из этих каталогов, включите эти файлы:
+<itemizedlist>
+<listitem><para>Gui/config.mak</para></listitem>
+<listitem><para>libvo/config.mak</para></listitem>
+<listitem><para>libao2/config.mak</para></listitem>
+</itemizedlist>
+</para>
+</sect2>
+
+<sect2 id="bugreports_playback">
+<title>Проблемы при воспроизведении</title>
+<para>
+Пожалуйста, включите вывод <application>MPlayer</application>'а с уровнем
+&quot;многословности&quot;[verbose] 1, но запомните: <emphasis role="bold">не
+сокращайте вывод</emphasis>, когда Вы его вставляете в почту. Разработчикам
+понадобятся все сообщения, чтобы правильно диагностировать проблему. Вы можете
+направить вывод в файл, например так:
+<screen>mplayer -v <replaceable>options</replaceable> <replaceable>filename</replaceable> &gt; mplayer.log 2&gt;&amp;1</screen>
+</para>
+
+<para>
+Если проблема специфична для одного или нескольких файлов, пожалуйста, загрузите
+проблемные файлы на:
+<ulink url="ftp://mplayerhq.hu/MPlayer/incoming/"/>
+</para>
+
+<para>
+Также загрузите маленький текстовый файл с базовым именем как у Вашего файла и
+расширением <filename>.txt</filename>. Опишите проблему, возникающую у Вас
+с соответствующим файлом и включите ваш электронный адрес и вывод MPlayer'а
+с уровнем &quot;многословности&quot; 1. Куска файла размером 1-5 Мб обычно
+бывает достаточно, чтобы воспроизвести проблему, но чтобы быть уверенными,
+мы просим вас сделать:
+<screen>dd if=<replaceable>yourfile</replaceable> of=<replaceable>smallfile</replaceable> bs=1024k count=5</screen>
+Это запишет первые 5 Мб файла '<emphasis role="bold">your-file</emphasis>' и
+запишет в файл '<emphasis role="bold">small-file</emphasis>'. Теперь снова
+попытайтесь с эти маленьким файлом, и если проблема все ещё проявляется,
+тогда этого примера будет достаточно для нас.  Пожалуйста,
+<emphasis role="bold">никогда</emphasis> не отсылайте эти файлы по почте!
+Загрузите его и отошлите только путь/имя файла не FTP-сервере. Если файл
+доступен по сети, тогда просто пришлите <emphasis role="bold">точный</emphasis>
+URL, и этого будет достаточно.
+</para>
+</sect2>
+
+<sect2 id="bugreports_crash">
+<title>Краши[crash]</title>
+<para>
+Вы должны запустить <application>MPlayer</application> внутри <command>gdb</command>
+и прислать нам полный вывод, или , если у Вас есть <filename>core</filename>
+dump поломки, Вы можете извлечь необходимую полезную информацию из файла
+core. Вот как:
+</para>
+
+<sect3 id="bugreports_debug">
+<title>Как сохранить информацию о воспроизводимом краше</title>
+<para>
+Перекомпилируйте MPlayer с включённым кодом отладки:
+<screen>
+./configure --enable-debug=3
+make
+</screen>
+и запустите MPlayer внутри gdb:
+<screen>gdb ./mplayer</screen>
+Теперь вы в gdb. Наберите:
+<screen>run -v <replaceable>опции-для-mplayer</replaceable> <replaceable>имя-файла</replaceable></screen>
+и воспроизведите краш. Как только Вы это сделаете, gdb вернёт Вас к приглашению
+командной строки, где Вы должны набрать
+<screen>
+bt
+disass $pc-32 $pc+32
+info all-registers
+</screen>
+</para>
+</sect3>
+
+<sect3 id="bugreports_core">
+<title>Как извлечь полезную информацию из дампа [core dump]</title>
+<para>
+Создайте следующий командный файл:
+<screen>
+bt
+disass $pc-32 $pc+32
+info all-registers
+</screen>
+Теперь просто выполните такую команду:
+<screen>gdb mplayer --core=core -batch --command=<replaceable>командный-файл</replaceable> &gt; mplayer.bug</screen>
+</para>
+</sect3>
+</sect2>
+</sect1>
+
+<sect1 id="bugreports_advusers">
+<title>Я знаю, что я делаю...</title>
+<para>
+Если Вы создали правильное сообщение об ошибке так, как рассказано выше, и Вы
+уверены, что это ошибка в MPlayer'е, а не ошибка компилятора или плохой файл,
+Вы уже прочли всю документацию и не можете найти решение, ваши звуковые драйвера
+в порядке, тогда Вы можете подписаться на рассылку mplayer-advusers и прислать
+сообщение об ошибке туда, чтобы получить более точный и быстрый ответ.
+</para>
+
+<para>
+Обратите внимание, что если Вы будете отсылать туда вопросы новичков или
+вопросы, на которые ответы присутствуют в документации, то Вас проигнорируют
+или обругают вместо того, чтобы ответить. Поэтому не заваливайте нас мелочами
+и подписывайтесь на -advusers только, если Вы действительно знаете, что Вы
+делаете, и ощущаете себя продвинутым пользователем или разработчиком MPlayer.
+Если подходите под этот критерий, Вам не составит труда понять, как надо
+подписаться...
+</para>
+
+</sect1>
+
+</appendix>
