@@ -545,12 +545,12 @@ static uint32_t vm_height;
 
    if(surface_render==NULL)
       surface_render=malloc(MAX_SURFACES*sizeof(xvmc_render_state_t));//easy mem debug
+   memset(surface_render,0,MAX_SURFACES*sizeof(xvmc_render_state_t));
 
    for(i=0; i<MAX_SURFACES; i++){
       rez=XvMCCreateSurface(mDisplay,&ctx,&surface_array[i]);
       if( rez != Success )
 	 break;
-      memset(&surface_render[i],0,sizeof(xvmc_render_state_t));
       surface_render[i].magic = MP_XVMC_RENDER_MAGIC;
       surface_render[i].data_blocks = data_blocks.blocks;
       surface_render[i].mv_blocks = mv_blocks.macro_blocks;
@@ -595,7 +595,7 @@ static uint32_t vm_height;
       if(num_subpic != 0 && xvfmv != NULL){
          if(verbose > 3){//Print All subpicture types for debug
             for(s=0;s<num_subpic;s++)
-               printf("    Subpicture id 0x%08X\n",xvfmv[s].id);
+               print_xvimage_format_values(&xvfmv[s]);
          }
 
          for(s=0;s<num_subpic;s++){
@@ -608,7 +608,7 @@ static uint32_t vm_height;
 
                   subpicture_mode = BLEND_SUBPICTURE;
                   subpicture_info = xvfmv[s];
-                  print_xvimage_format_values(&subpicture_info);
+                  printf("    Subpicture id 0x%08X\n",subpicture_info.id);
                   goto found_subpic;
                }
             }
@@ -1185,6 +1185,7 @@ int i;
                     surface_render[i].state); 
       }
 
+      memset(surface_render,0,MAX_SURFACES*sizeof(xvmc_render_state_t));//for debuging
       free(surface_render);surface_render=NULL;
 
       XvMCDestroyContext(mDisplay,&ctx);
