@@ -101,9 +101,14 @@ typedef struct ov_struct_st {
 
 #ifdef USE_LIBMAD
 #include <mad.h>
+
+#define MAD_SINGLE_BUFFER_SIZE 8192
+#define MAD_TOTAL_BUFFER_SIZE  ((MAD_SINGLE_BUFFER_SIZE)*3)
+
 static struct mad_stream mad_stream;
 static struct mad_frame  mad_frame;
 static struct mad_synth  mad_synth;
+static char*  mad_in_buffer = 0; /* base pointer of buffer */
 
 // ensure buffer is filled with some data
 static void mad_prepare_buffer(sh_audio_t* sh_audio, struct mad_stream* ms, int length)
@@ -117,13 +122,18 @@ static void mad_prepare_buffer(sh_audio_t* sh_audio, struct mad_stream* ms, int 
 
 static void mad_postprocess_buffer(sh_audio_t* sh_audio, struct mad_stream* ms)
 {
+  /* rotate buffer while possible, in order to reduce the overhead of endless memcpy */
   int delta = (unsigned char*)ms->next_frame - (unsigned char *)sh_audio->a_in_buffer;
-  if(delta != 0) {
+  if((unsigned long)(sh_audio->a_in_buffer) - (unsigned long)mad_in_buffer < 
+     (MAD_TOTAL_BUFFER_SIZE - MAD_SINGLE_BUFFER_SIZE - delta)) {
+    sh_audio->a_in_buffer += delta;
+    sh_audio->a_in_buffer_len -= delta;
+  } else {
+    sh_audio->a_in_buffer = mad_in_buffer;
     sh_audio->a_in_buffer_len -= delta;
     memcpy(sh_audio->a_in_buffer, ms->next_frame, sh_audio->a_in_buffer_len);
   }
 }
-
 
 static inline
 signed short mad_scale(mad_fixed_t sample)
@@ -449,9 +459,9 @@ case AFM_FFMPEG:
  case AFM_MAD:
    printf(__FILE__ ":%d:mad: setting minimum outputsize\n", __LINE__);
    sh_audio->audio_out_minsize=4608;
-   if(sh_audio->audio_in_minsize<8192) sh_audio->audio_in_minsize=8192;
+   if(sh_audio->audio_in_minsize<MAD_SINGLE_BUFFER_SIZE) sh_audio->audio_in_minsize=MAD_SINGLE_BUFFER_SIZE;
    sh_audio->a_in_buffer_size=sh_audio->audio_in_minsize;
-   sh_audio->a_in_buffer=malloc(sh_audio->a_in_buffer_size);
+   mad_in_buffer = sh_audio->a_in_buffer = malloc(MAD_TOTAL_BUFFER_SIZE);
    sh_audio->a_in_buffer_len=0;
    break;
 #endif
