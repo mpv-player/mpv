@@ -23,6 +23,7 @@
         <LI><A HREF="codecs.html#2.1.2">2.1.2 Supported audio & video codecs</A>
 	     <UL><LI><A HREF="codecs.html#2.1.2.1">2.1.2.1 DivX4</A></LI>
 	     <LI><A HREF="codecs.html#2.1.2.2">2.1.2.2 ffmpeg's DivX/libavcodec</A></LI>
+	     <LI><A HREF="codecs.html#2.1.2.3">2.1.2.3 Hardware AC3 decoding</A></LI>
 	     </UL>
 	</LI><LI><A HREF="codecs.html#2.1.4">2.1.4 Codec importing howto</A></LI>
 	     <UL><LI><A HREF="codecs.html#2.1.4.1">2.1.4.1 VFW codecs</A></LI>
@@ -87,7 +88,7 @@
 </LI><LI><A HREF="#6">6. Misc OS'es</A>
      <UL><LI><A HREF="#6.1">6.1 Debian packaging</A>
      </LI><LI><A HREF="#6.2">6.2 FreeBSD</A>
-     </LI><LI><A HREF="#6.3">6.3 Solaris 8</A>
+     </LI><LI><A HREF="#6.3">6.3 Solaris</A>
      </LI><LI><A HREF="#6.4">6.4 StrongARM</A>
      </LI></UL>
 </LI><LI><A HREF="#A">A. Authors</A>
@@ -361,7 +362,9 @@ symbolic link: <CODE>ln -s /dev/(your_cdrom_device) /dev/cdrom</CODE></P>
 Feel free to add it :-)</P>
 
 
-<P><B><A NAME=6.3>6.3. Solaris 8</A></B></P>
+<P><B><A NAME=6.3>6.3. Solaris</A></B></P>
+
+<P>MPlayer should work on Solaris 2.6 or newer.</P>
 
 <P>AVI file playback works best on Solaris x86, because you have the
 option to use the win32 codecs on the x86 platform.  On Solaris SPARC,
@@ -424,11 +427,20 @@ disk block >4GB on a device using a logical blocksize != DEV_BSIZE
 (i.e. CDROM and DVD media).  Due to a 32bit int overflow, a disk
 address modulo 4GB is accessed.
 (http://groups.yahoo.com/group/solarisonintel/message/22516)
+
 <LI>The similar bug is present in the hsfs(7FS) filesystem code (aka
 ISO9660), hsfs currently does not support partitions/disks >4GB,
 all data is accessed modulo 4GB
 (http://groups.yahoo.com/group/solarisonintel/message/22592)
 </UL></P>
+
+<P>On Solaris with an UltraSPARC CPU, you can get some extra speed by
+  using the CPU's VIS instructions for certain time consuming operations.
+  VIS acceleration can be used in MPlayer by calling functions in Sun's  
+  <A HREF="http://www.sun.com/sparc/vis/mediaLib.html">mediaLib</A>.</P>
+
+<P>VIS accelerated operations from mediaLib are used for mpeg2 video
+  decoding and for color space conversion in the video output drivers.</P>
 
 <P><B><A NAME=6.4>6.4. StrongARM</A></B></P>
 

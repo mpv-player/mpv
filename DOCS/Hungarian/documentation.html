@@ -23,6 +23,7 @@
         <LI><A HREF="codecs.html#2.1.2">2.1.2 Támogatott audio és video codec-ek</A>
 	     <UL><LI><A HREF="codecs.html#2.1.2.1">2.1.2.1 DivX4</A></LI>
 	     <LI><A HREF="codecs.html#2.1.2.2">2.1.2.2 ffmpeg DivX/libavcodec</A></LI>
+	     <LI><A HREF="codecs.html#2.1.2.3">2.1.2.3 Hardware-es AC3 dekodolas</A></LI>
 	     </UL>
 	</LI><LI><A HREF="codecs.html#2.1.4">2.1.4 Hogyan használj ismeretlen Win32 codec-et</A></LI>
 	     <UL><LI><A HREF="codecs.html#2.1.4.1">2.1.4.1 VFW</A></LI>
@@ -87,7 +88,7 @@
 </LI><LI><A HREF="#6">6. Különféle operációs rendszerek</A>
      <UL><LI><A HREF="#6.1">6.1 Debian csomagolás</A>
      </LI><LI><A HREF="#6.2">6.2 FreeBSD</A>
-     </LI><LI><A HREF="#6.3">6.3 Solaris 8</A>
+     </LI><LI><A HREF="#6.3">6.3 Solaris</A>
      </LI><LI><A HREF="#6.4">6.4 StrongARM</A>
      </LI></UL>
 </LI><LI><A HREF="../documentation.html#A">A. Készítõk</A>
@@ -381,7 +382,7 @@
   Nyugodtan csinálj egyet :-)
 
 
-  <A NAME=6.3>6.3.  Solaris 8</A>
+  <A NAME=6.3>6.3.  Solaris</A>
 
   Az AVI file-ok lejátszása legjobban Solarix x86-on mûködik, mert itt
   megteheted hogy win32-es codec-eket használsz, az x86-os platform miatt.
@@ -448,6 +449,13 @@
      all data is accessed modulo 4GB
      (http://groups.yahoo.com/group/solarisonintel/message/22592)
 
+<P>On Solaris with an UltraSPARC CPU, you can get some extra speed by
+  using the CPU's VIS instructions for certain time consuming operations. 
+  VIS acceleration can be used in MPlayer by calling functions in Sun's   
+  <A HREF="http://www.sun.com/sparc/vis/mediaLib.html">mediaLib</A>.</P>
+   
+<P>VIS accelerated operations from mediaLib are used for mpeg2 video
+  decoding and for color space conversion in the video output drivers.</P>
 
   <A NAME=6.4>6.4.  StrongARM</A>
 
