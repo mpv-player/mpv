@@ -24,13 +24,10 @@ As root you can then install the <filename>.deb</filename> package as usual:
 </para>
 
 <para>
-Christian Marillat has been making unofficial Debian
+Christian Marillat has been making unofficial Debian packages of
 <application>MPlayer</application>, <application>MEncoder</application> and
-font packages for a while, you can (apt-)get them from a
-<ulink url="ftp://ftp.nerim.net/debian-marillat/index.html">mirror of his homepage</ulink>
-since his
-<ulink url="http://marillat.free.fr/">original homepage</ulink>
-seems to be down.
+our bitmap fonts for a while, you can (apt-)get them from
+<ulink url="http://hpisi.nerim.net/">his homepage</ulink>.
 </para>
 </sect2>
 
