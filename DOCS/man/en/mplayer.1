@@ -668,16 +668,21 @@ When playing an MPEG-TS stream, MPlayer/\:MEncoder will use the first program
 (if present) with the chosen audio stream.
 .
 .TP
-.B \-alang <two letter\ country\ code> (also see \-aid) (DVD only)
-Selects the DVD audio language and tries to play audio streams whose
-language matches the given code.
+.B \-alang <country\ code> (also see \-aid)
+Play the audio stream whose language matches the given code.
+Different container formats employ different language codes.
+DVDs use ISO 639-1 two letter language codes, Matroska and NUT use ISO 639-2
+three letter language codes while OGM uses a free-form identifier.
 MPlayer prints a list of available languages when run in verbose (\-v) mode.
 .sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
-.IPs "\-alang hu,en"
-Plays Hungarian and falls back on English if Hungarian is not available.
+.IPs "mplayer dvd://1 \-alang hu,en"
+Chooses the Hungarian language track on a DVD and falls back on English if
+Hungarian is not available.
+.IPs "mplayer \-alang jpn example.mkv"
+Plays a Matroska file in Japanese.
 .RE
 .PD 1
 .
