@@ -33,6 +33,14 @@
  *			0.1.0-ve.1
  *	2001-09-25	MTRR support (by NK)
  *			0.1.0-ve.2
+ *	2001-12-17	sync with 0.1.1:
+ *			PanelYRes - module parameter
+ *			- rage theatre (please see gatos.sf.net)
+ *			- buggy tvout detection (need radeon_i2c)
+ *			+ better powerpc support
+ *			+ better radeon2 pll computing
+ *			* Note: my stuff still work better for me than official
+ *			  linux driver :(
  *	Special thanks to ATI DevRel team for their hardware donations.
  *
  * LIMITATIONS: on dualhead Radeons (VE, M6, M7) driver doesn't work in
@@ -50,7 +58,7 @@
  *
 */
 
-#define RADEON_VERSION	"0.1.0-ve.2"
+#define RADEON_VERSION	"0.1.1-ve"
 
 #include <linux/config.h>
 #include <linux/module.h>
@@ -80,6 +88,9 @@
 #ifdef CONFIG_MTRR
 #include <asm/mtrr.h>
 #endif
+#if defined(__powerpc__)
+#include <asm/prom.h>
+#endif
 
 #include "radeon.h"
 
@@ -92,6 +103,14 @@
 #define RTRACE(...)	((void)0)
 #endif
 
+MODULE_AUTHOR("Ani Joshi. (Radeon VE extensions by Nick Kurshev)");
+MODULE_DESCRIPTION("framebuffer driver for ATI Radeon chipset. Ver: "RADEON_VERSION);
+#ifdef CONFIG_MTRR
+MODULE_PARM(nomtrr, "i");
+MODULE_PARM_DESC(nomtrr, "Don't touch MTRR (touch=0(default))");
+#endif
+MODULE_PARM(yres_panel, "i");
+MODULE_PARM_DESC(yres_panel, "Force DFP height");
 
 
 enum radeon_chips {
@@ -116,24 +135,6 @@ enum radeon_montype
     MT_DFP, /* DFP-digital flat panel monitor. (24-pin DVI-I connector) */
     MT_CTV, /* Composite TV out (not in VE) */
     MT_STV  /* S-Video TV out (probably in VE only) */
-};
-
-enum radeon_ddctype
-{
-    DDC_NONE_DETECTED,
-    DDC_MONID,
-    DDC_DVI,
-    DDC_VGA,
-    DDC_CRT2
-};
-
-enum radeon_connectortype
-{
-    CONNECTOR_NONE,
-    CONNECTOR_PROPRIETARY,
-    CONNECTOR_CRT,
-    CONNECTOR_DVI_I,
-    CONNECTOR_DVI_D
 };
 
 static struct pci_device_id radeonfb_pci_table[] __devinitdata = {
@@ -218,7 +219,6 @@ struct radeon_regs {
 	u32 mpp_tb_config;
 	u32 mpp_gp_config;
 	u32 subpic_cntl;
-	u32 viph_control;
 	u32 i2c_cntl_1;
 	u32 gen_int_cntl;
 	u32 cap0_trig_cntl;
@@ -313,11 +313,9 @@ struct radeonfb_info {
 	int hasCRTC2;
 	int crtDispType;
 	int dviDispType;
-	int hasTVout;
 	int isM7;
 	int isM6;
 	int isR200;
-	int theatre_num;
 				/* Computed values for FPs */
 	int PanelXRes;
 	int PanelYRes;
@@ -381,7 +379,10 @@ struct radeonfb_info {
 /*#define DUAL_MONITOR(rinfo)    (rinfo->crtDispType != MT_NONE && rinfo->dviDispType != MT_NONE)*/
 /* Disable DUAL monitor support for now */
 #define DUAL_MONITOR(rinfo)    (0)
-#define PRIMARY_MONITOR(rinfo) (rinfo->dviDispType != MT_NONE && rinfo->dviDispType != MT_STV && rinfo->dviDispType != MT_CTV ? rinfo->dviDispType : rinfo->crtDispType)
+#define PRIMARY_MONITOR(rinfo) (rinfo->dviDispType != MT_NONE &&\
+				rinfo->dviDispType != MT_STV &&\
+				rinfo->dviDispType != MT_CTV ?\
+				rinfo->dviDispType : rinfo->crtDispType)
 
 static struct fb_var_screeninfo radeonfb_default_var = {
         640, 480, 640, 480, 0, 0, 8, 0,
@@ -613,6 +614,8 @@ static char fontname[40] __initdata;
 static char *mode_option __initdata;
 static char noaccel __initdata = 0;
 static int  nomtrr __initdata = 0;
+static int  yres_panel __initdata = 0;
+static char panel_yres __initdata = 0;
 
 #if 0
 #ifdef FBCON_HAS_CFB8
@@ -676,6 +679,9 @@ static int radeonfb_do_maximize(struct radeonfb_info *rinfo,
 				struct fb_var_screeninfo *var,
 				struct fb_var_screeninfo *v,
 				int nom, int den);
+#if defined(__powerpc__)
+extern struct device_node *pci_device_to_OF_node(struct pci_dev *dev);
+#endif
 
 static struct fb_ops radeon_fb_ops = {
 	fb_get_fix:		radeonfb_get_fix,
@@ -777,25 +783,6 @@ static void _radeon_wait_for_idle(struct radeonfb_info *rinfo)
     }
 }
 
-
-static u32 RADEONVIP_idle(struct radeonfb_info *rinfo)
-{
-   u32 timeout;
-   
-   _radeon_wait_for_idle(rinfo);
-   timeout = INREG(VIPH_TIMEOUT_STAT);
-   if(timeout & VIPH_TIMEOUT_STAT__VIPH_REG_STAT) /* lockup ?? */
-   {
-       radeon_fifo_wait(2);
-       OUTREG(VIPH_TIMEOUT_STAT, (timeout & 0xffffff00) | VIPH_TIMEOUT_STAT__VIPH_REG_AK);
-       _radeon_wait_for_idle(rinfo);
-       return (INREG(VIPH_CONTROL) & 0x2000) ? VIP_BUSY : VIP_RESET;
-   }
-   _radeon_wait_for_idle(rinfo);
-   return (INREG(VIPH_CONTROL) & 0x2000) ? VIP_BUSY : VIP_IDLE ;
-}
-
-
 int __init radeonfb_init (void)
 {
 #ifdef CONFIG_MTRR
@@ -804,6 +791,7 @@ int __init radeonfb_init (void)
         printk("radeonfb: Parameter NOMTRR set\n");
     }
 #endif
+    if (yres_panel) panel_yres = yres_panel;
     return pci_module_init (&radeonfb_driver);
 }
 
@@ -821,8 +809,9 @@ int __init radeonfb_setup (char *options)
         if (!options || !*options)
                 return 0;
  
-        for (this_opt = strtok (options, ","); this_opt;
-             this_opt = strtok (NULL, ",")) {
+	while ((this_opt = strsep (&options, ",")) != NULL) {
+		if (!*this_opt)
+			continue;
                 if (!strncmp (this_opt, "font:", 5)) {
                         char *p;
                         int i;
@@ -840,7 +829,10 @@ int __init radeonfb_setup (char *options)
 		mtrr = 0;
 		}
 #endif
-                else    mode_option = this_opt;
+		else if (!strncmp(this_opt, "panel_yres:", 11)) {
+			panel_yres = simple_strtoul((this_opt+11), NULL, 0);
+                } else
+			mode_option = this_opt;
         }
 
 	return 0;
@@ -850,83 +842,6 @@ int __init radeonfb_setup (char *options)
 module_init(radeonfb_init);
 module_exit(radeonfb_exit);
 #endif
-
-
-MODULE_AUTHOR("Ani Joshi. (Radeon VE extensions by Nick Kurshev)");
-MODULE_DESCRIPTION("framebuffer driver for ATI Radeon chipset. Ver: "RADEON_VERSION);
-#ifdef CONFIG_MTRR
-MODULE_PARM(nomtrr, "i");
-MODULE_PARM_DESC(nomtrr, "Don't touch MTRR (touch=0(default))");
-#endif
-
-/* address format:
-     ((device & 0x3)<<14)   | (fifo << 12) | (addr)
-*/
-
-static int RADEONVIP_read(struct radeonfb_info *rinfo, u32 address, u32 count, u8 *buffer)
-{
-   u32 status,tmp;
-
-   if((count!=1) && (count!=2) && (count!=4))
-   {
-    printk("radeonfb: Attempt to access VIP bus with non-stadard transaction length\n");
-    return 0;
-   }
-   
-   radeon_fifo_wait(2);
-   OUTREG(VIPH_REG_ADDR, address | 0x2000);
-   while(VIP_BUSY == (status = RADEONVIP_idle(rinfo)));
-   if(VIP_IDLE != status) return 0;
-   
-/*
-         disable VIPH_REGR_DIS to enable VIP cycle.
-         The LSB of VIPH_TIMEOUT_STAT are set to 0
-         because 1 would have acknowledged various VIP
-         interrupts unexpectedly 
-*/	
-   radeon_fifo_wait(2);
-   OUTREG(VIPH_TIMEOUT_STAT, INREG(VIPH_TIMEOUT_STAT) & (0xffffff00 & ~VIPH_TIMEOUT_STAT__VIPH_REGR_DIS) );
-/*
-         the value returned here is garbage.  The read merely initiates
-         a register cycle
-*/
-    _radeon_wait_for_idle(rinfo);
-    INREG(VIPH_REG_DATA);
-    
-    while(VIP_BUSY == (status = RADEONVIP_idle(rinfo)));
-    if(VIP_IDLE != status) return 0;
-/*
-        set VIPH_REGR_DIS so that the read won't take too long.
-*/
-    _radeon_wait_for_idle(rinfo);
-    tmp=INREG(VIPH_TIMEOUT_STAT);
-    OUTREG(VIPH_TIMEOUT_STAT, (tmp & 0xffffff00) | VIPH_TIMEOUT_STAT__VIPH_REGR_DIS);	      
-    _radeon_wait_for_idle(rinfo);
-    switch(count){
-        case 1:
-	     *buffer=(u8)(INREG(VIPH_REG_DATA) & 0xff);
-	     break;
-	case 2:
-	     *(u16 *)buffer=(u16) (INREG(VIPH_REG_DATA) & 0xffff);
-	     break;
-	case 4:
-	     *(u32 *)buffer=(u32) ( INREG(VIPH_REG_DATA) & 0xffffffff);
-	     break;
-	}
-     while(VIP_BUSY == (status = RADEONVIP_idle(rinfo)));
-     if(VIP_IDLE != status) return 0;
- /*	
- so that reading VIPH_REG_DATA would not trigger unnecessary vip cycles.
-*/
-     OUTREG(VIPH_TIMEOUT_STAT, (INREG(VIPH_TIMEOUT_STAT) & 0xffffff00) | VIPH_TIMEOUT_STAT__VIPH_REGR_DIS);
-     return 1;
-}
-
-static int theatre_read(struct radeonfb_info *rinfo,u32 reg, u32 *data)
-{
-   if(rinfo->theatre_num<0) return 0;
-   return RADEONVIP_read(rinfo, ((rinfo->theatre_num & 0x3)<<14) | reg,4, (u8 *) data);
-}
 
 static char * GET_MON_NAME(int type)
 {
@@ -958,10 +873,13 @@ static int radeon_get_dfp_info(struct radeonfb_info *rinfo)
     unsigned long r;
     unsigned short a, b;	
 
-    r = INREG(FP_VERT_STRETCH);
-    r &= 0x00fff000;
-    rinfo->PanelYRes = (unsigned short)(r >> 0x0c) + 1;
-
+    if (panel_yres) {
+    	rinfo->PanelYRes = panel_yres;
+    } else {
+	r = INREG(FP_VERT_STRETCH);
+	r &= 0x00fff000;
+	rinfo->PanelYRes = (unsigned short)(r >> 0x0c) + 1;
+    }
     switch(rinfo->PanelYRes)
     {
         case 480: rinfo->PanelXRes = 640;
@@ -1008,8 +926,50 @@ static int radeon_get_dfp_info(struct radeonfb_info *rinfo)
                  - b + 1;
     rinfo->VSyncWidth = (unsigned short)((r & FP_V_SYNC_WID_MASK)
                  >> FP_V_SYNC_WID_SHIFT);
-    
+
     return 1;
+}
+
+static void radeon_get_moninfo (struct radeonfb_info *rinfo)
+{
+	unsigned int tmp;
+
+	tmp = INREG(RADEON_BIOS_4_SCRATCH);
+
+	if (rinfo->hasCRTC2) {
+		/* primary DVI port */
+		if (tmp & 0x08)
+			rinfo->dviDispType = MT_DFP;
+		else if (tmp & 0x4)
+			rinfo->dviDispType = MT_LCD;
+		else if (tmp & 0x200)
+			rinfo->dviDispType = MT_CRT;
+		else if (tmp & 0x10)
+			rinfo->dviDispType = MT_CTV;
+		else if (tmp & 0x20)
+			rinfo->dviDispType = MT_STV;
+
+		/* secondary CRT port */
+		if (tmp & 0x2)
+			rinfo->crtDispType = MT_CRT;
+		else if (tmp & 0x800)
+			rinfo->crtDispType = MT_DFP;
+		else if (tmp & 0x400)
+			rinfo->crtDispType = MT_LCD;
+		else if (tmp & 0x1000)
+			rinfo->crtDispType = MT_CTV;
+		else if (tmp & 0x2000)
+			rinfo->crtDispType = MT_STV;
+	} else {
+		rinfo->dviDispType = MT_NONE;
+
+		tmp = INREG(FP_GEN_CNTL);
+
+		if (tmp & FP_EN_TMDS)
+			rinfo->crtDispType = MT_DFP;
+		else
+			rinfo->crtDispType = MT_CRT;
+	}
 }
 
 static int radeonfb_pci_register (struct pci_dev *pdev,
@@ -1027,6 +987,8 @@ static int radeonfb_pci_register (struct pci_dev *pdev,
 	}
 
 	memset (rinfo, 0, sizeof (struct radeonfb_info));
+
+	rinfo->pdev = pdev;
 
 	/* enable device */
 	{
@@ -1072,6 +1034,8 @@ static int radeonfb_pci_register (struct pci_dev *pdev,
 		kfree (rinfo);
 		return -ENODEV;
 	}
+
+	rinfo->chipset = pdev->device;
 
 	/* chipset */
 	switch (pdev->device) {
@@ -1193,60 +1157,7 @@ static int radeonfb_pci_register (struct pci_dev *pdev,
 
 	RTRACE("radeonfb: probed %s %dk videoram\n", (rinfo->ram_type), (rinfo->video_ram/1024));
 
- /*****
-   VE and M6 have both DVI and CRT ports (for M6 DVI port can be switch to
-   DFP port). The DVI port can also be conneted to a CRT with an adapter.
-   Here is the definition of ports for this driver---
-   (1) If both port are connected, DVI port will be treated as the Primary 
-       port (uses CRTC1) and CRT port will be treated as the Secondary port
-       (uses CRTC2)
-   (2) If only one port is connected, it will treated as the Primary port
-       (??? uses CRTC1 ???)
- *****/
-	if(rinfo->hasCRTC2) {
-	/* Using BIOS scratch registers works with for VE/M6,
-	no such registers in regular RADEON!!!*/
-		tmp = INREG(RADEON_BIOS_4_SCRATCH);
-		/*check Primary (DVI/DFP port)*/
-		if(tmp & 0x08) rinfo->dviDispType = MT_DFP;
-		else if(tmp & 0x04) rinfo->dviDispType = MT_LCD;
-		else if(tmp & 0x0200) rinfo->dviDispType = MT_CRT;
-		else if(tmp & 0x10) rinfo->dviDispType = MT_CTV;
-		else if(tmp & 0x20) rinfo->dviDispType = MT_STV;
-		/*check Secondary (CRT port).*/
-		if(tmp & 0x02) rinfo->crtDispType = MT_CRT;
-		else if(tmp & 0x800) rinfo->crtDispType = MT_DFP;
-		else if(tmp & 0x400) rinfo->crtDispType = MT_LCD;
-		else if(tmp & 0x1000) rinfo->crtDispType = MT_CTV;
-		else if(tmp & 0x2000) rinfo->crtDispType = MT_STV;
-		if(rinfo->dviDispType == MT_NONE && 
-		   rinfo->crtDispType == MT_NONE) {
-			printk("radeonfb: No monitor detected!!!\n");
-			release_mem_region (rinfo->mmio_base_phys,
-					    pci_resource_len(pdev, 2));
-			release_mem_region (rinfo->fb_base_phys,
-					    pci_resource_len(pdev, 0));
-			kfree (rinfo);
-			return -ENODEV;
-		}
-	}
-	else {
-	  /*Regular Radeon ASIC, only one CRTC, but it could be
-	    used for DFP with a DVI output, like AIW board*/
-		rinfo->dviDispType = MT_NONE;
-		tmp = INREG(FP_GEN_CNTL);
-		if(tmp & FP_EN_TMDS) rinfo->crtDispType = MT_DFP;
-		else rinfo->crtDispType = MT_CRT;
-	}
-
-	if(bios_seg) {
-/*
-  FIXME!!! TVout support currently is incomplete 
-  On Radeon VE TVout is recognized as STV monitor on DVI port.
-*/
-		char * bios_ptr = bios_seg + 0x48L;
-		rinfo->hasTVout = readw(bios_ptr+0x32);
-	}
+	radeon_get_moninfo(rinfo);
 
 	if((rinfo->dviDispType == MT_DFP || rinfo->dviDispType == MT_LCD ||
 	    rinfo->crtDispType == MT_DFP))
@@ -1284,7 +1195,7 @@ static int radeonfb_pci_register (struct pci_dev *pdev,
 		rinfo->palette[i].blue = default_blu[j];
 	}
 
-	pdev->driver_data = rinfo;
+	pci_set_drvdata(pdev, rinfo);
 
 	if (register_framebuffer ((struct fb_info *) rinfo) < 0) {
 		printk ("radeonfb: could not register framebuffer\n");
@@ -1311,7 +1222,6 @@ static int radeonfb_pci_register (struct pci_dev *pdev,
 	}
 	else
 	    printk("radeonfb: CRT port has %s monitor connected\n",GET_MON_NAME(rinfo->crtDispType));
-	printk("radeonfb: This card has %sTVout\n",rinfo->hasTVout ? "" : "no ");
 #ifdef CONFIG_MTRR
 	if (mtrr) {
 		rinfo->mtrr.vram = mtrr_add(rinfo->fb_base_phys,
@@ -1321,22 +1231,6 @@ static int radeonfb_pci_register (struct pci_dev *pdev,
 		printk("radeonfb: MTRR set to ON\n");
 	}
 #endif /* CONFIG_MTRR */
-   rinfo->theatre_num = -1;
-   for(i=0;i<4;i++)
-   {
-	if(RADEONVIP_read(rinfo, ((i & 0x03)<<14) | VIP_VIP_VENDOR_DEVICE_ID, 4, (u8 *)&tmp) && 
-	          (tmp==RT_ATI_ID))
-        {
-           rinfo->theatre_num=i;
-	   break;
-	}
-   }
-   if(rinfo->theatre_num >= 0) {
-     printk("radeonfb: Device %d on VIP bus ids as %x\n",i,tmp);
-     theatre_read(rinfo,VIP_VIP_REVISION_ID, &tmp);
-     printk("radeonfb: Detected Rage Theatre revision %8.8X\n", tmp);
-   }
-   else printk("radeonfb: Rage Theatre was not detected\n");
    return 0;
 }
 
@@ -1344,7 +1238,7 @@ static int radeonfb_pci_register (struct pci_dev *pdev,
 
 static void __devexit radeonfb_pci_unregister (struct pci_dev *pdev)
 {
-        struct radeonfb_info *rinfo = pdev->driver_data;
+        struct radeonfb_info *rinfo = pci_get_drvdata(pdev);
  
         if (!rinfo)
                 return;
@@ -1436,7 +1330,24 @@ static char *radeon_find_rom(struct radeonfb_info *rinfo)
         return NULL;
 }
 
+#if defined(__powerpc__)
+static int radeon_read_OF (struct radeonfb_info *rinfo)
+{
+	struct device_node *dp;
+	unsigned int *xtal;
 
+	dp = pci_device_to_OF_node(rinfo->pdev);
+
+	xtal = (unsigned int *) get_property(dp, "ATY,RefCLK", 0);
+
+	rinfo->pll.ref_clk = *xtal / 10;
+
+	if (*xtal)
+		return 1;
+	else
+		return 0;
+}
+#endif	
 
 static void radeon_get_pllinfo(struct radeonfb_info *rinfo, char *bios_seg)
 {
@@ -1465,13 +1376,57 @@ static void radeon_get_pllinfo(struct radeonfb_info *rinfo, char *bios_seg)
         	rinfo->pll.ppll_min = pll.PCLK_min_freq;
         	rinfo->pll.ppll_max = pll.PCLK_max_freq;
 	} else {
+#if defined(__powerpc__)
+		if (radeon_read_OF(rinfo)) {
+			unsigned int tmp, Nx, M, ref_div, xclk;
+
+			tmp = INPLL(M_SPLL_REF_FB_DIV);
+			ref_div = INPLL(PPLL_REF_DIV) & 0x3ff;
+
+			Nx = (tmp & 0xff00) >> 8;
+			M = (tmp & 0xff);
+			xclk = ((((2 * Nx * rinfo->pll.ref_clk) + (M)) /
+				(2 * M)));
+ 
+			rinfo->pll.xclk = xclk;
+			rinfo->pll.ref_div = ref_div;
+			rinfo->pll.ppll_min = 12000;
+			rinfo->pll.ppll_max = 35000;
+
+			printk("radeonfb: ref_clk=%d, ref_div=%d, xclk=%d from OF\n",
+				rinfo->pll.ref_clk, rinfo->pll.ref_div, rinfo->pll.xclk);
+
+			return;
+		}
+#endif
 		/* no BIOS or BIOS not found, use defaults */
 
-		rinfo->pll.ppll_max = 35000;
-		rinfo->pll.ppll_min = 12000;
-		rinfo->pll.xclk = 16600;
-		rinfo->pll.ref_div = 67;
-		rinfo->pll.ref_clk = 2700;
+		switch (rinfo->chipset) {
+			case PCI_DEVICE_ID_RV200_QW:
+				rinfo->pll.ppll_max = 35000;
+				rinfo->pll.ppll_min = 12000;
+				rinfo->pll.xclk = 23000;
+				rinfo->pll.ref_div = 12;
+				rinfo->pll.ref_clk = 2700;
+				break;
+			case PCI_DEVICE_ID_R200_QL:
+				rinfo->pll.ppll_max = 35000;
+				rinfo->pll.ppll_min = 12000;
+				rinfo->pll.xclk = 27500;
+				rinfo->pll.ref_div = 12;
+				rinfo->pll.ref_clk = 2700;
+				break;
+			case PCI_DEVICE_ID_RADEON_QD:
+			case PCI_DEVICE_ID_RADEON_QE:
+			case PCI_DEVICE_ID_RADEON_QF:
+			case PCI_DEVICE_ID_RADEON_QG:
+			default:
+			    rinfo->pll.ppll_max = 35000;
+			    rinfo->pll.ppll_min = 12000;
+			    rinfo->pll.xclk = 16600;
+			    rinfo->pll.ref_div = 67;
+			    rinfo->pll.ref_clk = 2700;
+		};
 	}
 }
 
@@ -1486,7 +1441,6 @@ RTRACE("radeonfb: radeon_init_common_regs is called\n");
 	save->mpp_tb_config	= 0;
 	save->mpp_gp_config	= 0;
 	save->subpic_cntl	= 0;
-	save->viph_control	= 0;
 	save->i2c_cntl_1	= 0;
 	save->rbbm_soft_reset	= 0;
 	save->cap0_trig_cntl	= 0;
@@ -2190,7 +2144,7 @@ static void radeon_set_dispsw (struct radeonfb_info *rinfo, struct display *disp
 			disp->line_length = disp->var.xres_virtual * 2;
                         break;
 #endif
-#ifdef FBCON_HAS_CFB32
+#ifdef FBCON_HAS_CFB24
                 case 24:
                         disp->dispsw = &fbcon_cfb24;
                         disp->dispsw_data = &rinfo->con_cmap.cfb24;
@@ -2744,28 +2698,6 @@ static int radeon_setcolreg (unsigned regno, unsigned red, unsigned green,
 		OUTREG(PALETTE_DATA, (red << 16) | (green << 8) | blue);
 	}
 
-#if 0
-	col = (red << 16) | (green << 8) | blue;
-
-	if (rinfo->depth == 16) {
-		pindex = regno << 3;
-
-		if ((rinfo->depth == 16) && (regno >= 32)) {
-			pindex -= 252;
-
-			col = (rinfo->palette[regno >> 1].red << 16) |
-					(green << 8) |
-					(rinfo->palette[regno >> 1].blue);
-		} else {
-			col = (red << 16) | (green << 8) | blue;
-		}
-	}
-	
-	OUTREG8(PALETTE_INDEX, pindex);
-	radeon_fifo_wait(32);
-	OUTREG(PALETTE_DATA, col);
-#endif
-
 #if defined(FBCON_HAS_CFB16) || defined(FBCON_HAS_CFB32)
  	if (regno < 32) {
         	switch (rinfo->depth) {
@@ -2806,7 +2738,6 @@ RTRACE("radeonfb: radeon_save_common_regs is called\n");
 	save->mpp_tb_config	= INREG(MPP_TB_CONFIG);
 	save->mpp_gp_config	= INREG(MPP_GP_CONFIG);
 	save->subpic_cntl	= INREG(SUBPIC_CNTL);
-	save->viph_control	= INREG(VIPH_CONTROL);
 	save->i2c_cntl_1	= INREG(I2C_CNTL_1);
 	save->gen_int_cntl	= INREG(GEN_INT_CNTL);
 	save->cap0_trig_cntl	= INREG(CAP0_TRIG_CNTL);
@@ -2889,21 +2820,6 @@ RTRACE("radeonfb: radeon_save_dda_regs is called\n");
 	save->dda_on_off	= INREG(DDA_ON_OFF);
 }
 
-#if 0
-static void radeon_save_palette(struct radeonfb_info *rinfo,
-                               struct radeon_regs *save)
-{
-    int i;
-RTRACE("radeonfb: radeon_save_palette is called\n"); 
-    PAL_SELECT(1);
-    INPAL_START(0);
-    for (i = 0; i < 256; i++) save->palette2[i] = INPAL_NEXT();
-    PAL_SELECT(0);
-    INPAL_START(0);
-    for (i = 0; i < 256; i++) save->palette[i] = INPAL_NEXT();
-}
-#endif
-
 static void radeon_write_common_regs(struct radeonfb_info *rinfo,
                                struct radeon_regs *restore)
 {
@@ -2915,7 +2831,6 @@ RTRACE("radeonfb: radeon_write_common_regs is called\n");
 	OUTREG(MPP_TB_CONFIG,		restore->mpp_tb_config );
 	OUTREG(MPP_GP_CONFIG,		restore->mpp_gp_config );
 	OUTREG(SUBPIC_CNTL,		restore->subpic_cntl);
-	OUTREG(VIPH_CONTROL,		restore->viph_control);
 	OUTREG(I2C_CNTL_1,		restore->i2c_cntl_1);
 	OUTREG(GEN_INT_CNTL,		restore->gen_int_cntl);
 	OUTREG(CAP0_TRIG_CNTL,		restore->cap0_trig_cntl);
@@ -3067,29 +2982,6 @@ RTRACE("radeonfb: radeon_write_dda_regs is called\n");
 	OUTREG(DDA_ON_OFF,	restore->dda_on_off);
 }
 
-#if 0
-static void radeon_write_palette(struct radeonfb_info *rinfo,
-                               struct radeon_regs *restore)
-{
-    int i;
-
-RTRACE("radeonfb: radeon_write_palette is called\n"); 
-    PAL_SELECT(1);
-    OUTPAL_START(0);
-    for (i = 0; i < 256; i++) {
-	RADEONWaitForFifo(32); /* delay */
-	OUTPAL_NEXT_CARD32(restore->palette2[i]);
-    }
-
-    PAL_SELECT(0);
-    OUTPAL_START(0);
-    for (i = 0; i < 256; i++) {
-	RADEONWaitForFifo(32); /* delay */
-	OUTPAL_NEXT_CARD32(restore->palette[i]);
-    }
-}
-#endif
-
 static void radeon_save_mode (struct radeonfb_info *rinfo,
                                struct radeon_regs *save)
 {
@@ -3120,7 +3012,7 @@ RTRACE("radeonfb: radeon_save_state is called\n");
 	radeon_save_mode(rinfo,save);
 }
 
-static int radeon_load_video_mode (struct radeonfb_info *rinfo,
+static int  radeon_load_video_mode (struct radeonfb_info *rinfo,
                                     struct fb_var_screeninfo *mode)
 {
 
@@ -3178,7 +3070,6 @@ RTRACE("radeonfb: radeon_write_state is called\n");
 }
 
 #if 0
-
 /*
  * text console acceleration
  */
@@ -3222,8 +3113,6 @@ static void fbcon_radeon_bmove(struct display *p, int srcy, int srcx,
 	OUTREG(DST_HEIGHT_WIDTH, (height << 16) | width);
 }
 
-
-
 static void fbcon_radeon_clear(struct vc_data *conp, struct display *p,
 			       int srcy, int srcx, int height, int width)
 {
@@ -3251,14 +3140,11 @@ static void fbcon_radeon_clear(struct vc_data *conp, struct display *p,
 	OUTREG(DST_WIDTH_HEIGHT, (width << 16) | height);
 }
 
-
-
-
 #ifdef FBCON_HAS_CFB8
 static struct display_switch fbcon_radeon8 = {
 	setup:			fbcon_cfb8_setup,
 	bmove:			fbcon_radeon_bmove,
-	clear:			fbcon_cfb8_clear,
+	clear:			fbcon_radeon_clear,
 	putc:			fbcon_cfb8_putc,
 	putcs:			fbcon_cfb8_putcs,
 	revc:			fbcon_cfb8_revc,
@@ -3266,5 +3152,4 @@ static struct display_switch fbcon_radeon8 = {
 	fontwidthmask:		FONTWIDTH(4)|FONTWIDTH(8)|FONTWIDTH(12)|FONTWIDTH(16)
 };
 #endif
-
-#endif /* 0 */
+#endif
