@@ -28,7 +28,7 @@ distclean:
 dep:    depend
 
 depend:
-	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
+	$(CC) -MM $(CFLAGS) $(FREETYPE_INC) $(SRCS) 1>.depend
 
 #
 # include dependency files if they exist

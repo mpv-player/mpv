@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <string.h>
 
 #include "img_format.h"
 #include "mp_image.h"

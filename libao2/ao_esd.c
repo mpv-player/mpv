@@ -26,6 +26,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <time.h>
 #ifdef	__svr4__
 #include <stropts.h>
 #endif

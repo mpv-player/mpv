@@ -9,16 +9,14 @@
 #include <dlfcn.h>
 #include <dirent.h>
 #include <inttypes.h>
+#include <string.h>
+#include <sys/stat.h>
 
 #include "../cfgparser.h"
 #include "../libao2/afmt.h"
 #include "stream.h"
 #include "demuxer.h"
 #include "stheader.h"
-
-#include <dirent.h>
-#include <string.h>
-#include <sys/stat.h>
 
 #define XMMS_PACKETSIZE 65536  // some plugins won't play if this is too small
 
