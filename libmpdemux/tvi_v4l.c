@@ -59,7 +59,7 @@ static tvi_info_t info = {
 
 #define MAX_AUDIO_CHANNELS	10
 
-#define VID_BUF_SIZE_IMMEDIATE 2
+#define VID_BUF_SIZE_IMMEDIATE 3
 
 typedef struct {
     /* general */
