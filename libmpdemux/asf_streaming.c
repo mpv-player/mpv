@@ -340,7 +340,18 @@ asf_http_streaming_seek( int fd, off_t pos, streaming_ctrl_t *streaming_ctrl ) {
 }
 
 int
-asf_http_streaming_type(char *content_type, char *features) {
+asf_header_check( HTTP_header_t *http_hdr ) {
+	ASF_obj_header_t *objh;
+	if( http_hdr==NULL ) return -1;
+	if( http_hdr->body==NULL || http_hdr->body_size<sizeof(ASF_obj_header_t) ) return -1;
+
+	objh = (ASF_obj_header_t*)http_hdr->body;
+	if( ASF_LOAD_GUID_PREFIX(objh->guid)==0x75B22630 ) return 0;
+	return -1;
+}
+
+int
+asf_http_streaming_type(char *content_type, char *features, HTTP_header_t *http_hdr ) {
 	if( content_type==NULL ) return ASF_Unknown_e;
 	if( !strcasecmp(content_type, "application/octet-stream") ) {
 		if( features==NULL ) {
@@ -354,6 +365,18 @@ asf_http_streaming_type(char *content_type, char *features) {
 			return ASF_Prerecorded_e;
 		}
 	} else {
+		// Ok in a perfect world, web servers should be well configured
+		// so we could used mime type to know the stream type,
+		// but guess what? All of them are not well configured.
+		// So we have to check for an asf header :(, but it works :p
+		if( asf_header_check( http_hdr )==0 ) {
+			printf("=====> ASF Plain text\n");
+			return ASF_PlainText_e;
+		} else {
+			printf("=====> ASF Redirector\n");
+			return ASF_Redirector_e;
+		}
+/*
 		if(	(!strcasecmp(content_type, "audio/x-ms-wax")) ||
 			(!strcasecmp(content_type, "audio/x-ms-wma")) ||
 			(!strcasecmp(content_type, "video/x-ms-asf")) ||
@@ -370,6 +393,7 @@ asf_http_streaming_type(char *content_type, char *features) {
 			printf("=====> ASF unknown content-type: %s\n", content_type );
 			return ASF_Unknown_e;
 		}
+*/
 	}
 	return ASF_Unknown_e;
 }
@@ -532,7 +556,7 @@ asf_http_parse_response( HTTP_header_t *http_hdr ) {
 		pragma = http_get_next_field( http_hdr );
 	}
 
-	return asf_http_streaming_type( content_type, features );
+	return asf_http_streaming_type( content_type, features, http_hdr );
 }
 
 int
@@ -624,9 +648,11 @@ asf_http_streaming_start( stream_t *stream ) {
 							printf("No stream found\n");
 							return -1;
 						}
+						asf_http_ctrl->request++;
+						done = 0;
+					} else {
+						done = 1;
 					}
-					asf_http_ctrl->request++;
-					done = 0;
 				}
 				break;
 			case ASF_Redirector_e:
