@@ -6365,20 +6365,61 @@ sinnvoller Bereich
 .PD 1
 .
 .TP
-.\" man page is synced from top down to this option.
 .B tcplx_mask=<0.0\-1.0>
 Maskierung der zeitlichen Komplexität (Standard: 0.0 (deaktiviert)).
-.IPs scplx_mask=<0.0\-1.0>
-Maskierung der räumlichen Komplexität.
-Größere Werte helfen bei Blockartefakten, falls bei der Decodierung kein
-Filter gegen Blockartefakte eingesetzt wird.
-Schneide alle schwarzen Balken weg, um eine bessere Qualität zu erzielen:
-.RSss
-0.0: deaktiviert (Standard)
+Stell dir eine Szene mit einem Vogel vor, der durch die ganze Szene fliegt;
+tcplx_mask wird die Quantisierungsparameter der zum Vogel gehörenden
+Macroblöcke erhöhen (und so deren Qualität verringern), da das menschliche
+Auge normalerweise nicht die Zeit hat, alle Details des Vogels wahrzunehmen.
+Sei gewarnt, dass es für kurze Zeit schrecklich aussieht, wenn das Objekt
+anhält (z.B.\& bei der Landung des Vogels), bis der Encoder bemerkt, dass das
+Objekt angehalten hat und die Blöcke neu definiert werden müssen.
+Die eingesparten Bits werden auf andere Teile des Videos verwendet, was die
+subjektiv wahrgenommene Qualität erhöhen kann \- vorausgesetzt, tcplx_mask ist
+sorgfältig gewählt.
+.
+.TP
+.B scplx_mask=<0.0\-1.0>
+Gebietsbezogene Maskierung der Komplexität.
+Größere Werte helfen bei Blockartefakten, falls kein Deblocking-Filter
+beim Decodieren benutzt wird, was vielleicht keine gute Idee ist.
 .br
-0.0\-0.5: sinnvoller Bereich
-.REss
-.IPs naq\ \ 
+Stell die eine Szene vor mit Gras (was üblicherweise eine hohe gebietsbezogene
+Komplexität hat), einem blauen Himmel und einem Haus; scplx_mask wird die
+Quantisierungsparameter der zum Gras gehörenden Macroblöcke erhöhen, was deren
+Qualität verringert, um mehr Bits auf den Himmel und das Haus zu verwenden.
+.br
+.I TIP:
+Schneide alle schwarzen Balken komplett ab, da sie die Qualität der
+Macroblöcke verringern (gilt auch ohne scplx_mask).
+.PD 0
+.RSs
+.IPs 0.0\ \ 
+deaktiviert (Standard)
+.IPs 0.0\-0.5
+sinnvoller Bereich
+.RE
+.PD 1
+.sp 1
+.RS
+.I ANMERKUNG:
+Diese Einstellung hat nicht denselben Effekt wie die Benutzung einer
+benutzerdefinierten Matrix, die hohe Frequenzen stärker komprimieren würde, da
+scplx_mask die Qualität nur bei Änderung des DC-Koeffizienten verringert.
+Das Ergebnis mit scplx_mask wird vermutlich nicht so gut aussehen.
+.RE
+.
+.TP
+.B p_mask=<0.0\-1.0> (siehe auch vi_qfactor)
+Verringert die Qualität von Interblöcken.
+Dies ist das Äquivalent zum Erhöhen der Qualität der Intrablöcke, da dieselbe
+mittlere Bitrate von der Bitratenkontrolle zur ganzen Videosequenz zugeteilt
+wird (Standard: 0.0 (deaktiviert)).
+p_mask=1.0 verdoppelt die Anzahl der jedem Intrablock zugeteilten Bits.
+.
+.TP
+.\" man page is synced from top down to this option.
+.B naq\ \ \ \ 
 Normalisierte adaptive Quantisierung (experimentell).
 Wenn adaptive Quantisierung benutzt wird (*_mast), dann wird der
 durchschnittliche Quantizer pro Makroblock eventuell nicht mehr dem
