@@ -3595,7 +3595,15 @@ if test "$_cdparanoia" = auto ; then
 int main(void) { return 1; }
 EOF
     _cdparanoia=no
-    cc_check $_inc_cdparanoia $_ld_cdparanoia -lcdda_interface -lcdda_paranoia -lm && _cdparanoia=yes
+    if cc_check $_inc_cdparanoia $_ld_cdparanoia -lcdda_interface -lcdda_paranoia -lm ; then
+        _cdparanoia=yes
+    else
+	for I in /usr/include/cdda /usr/local/include/cdda ; do
+            if cc_check -I$I $_ld_cdparanoia -lcdda_interface -lcdda_paranoia -lm ; then
+	        _cdparanoia=yes; _inc_cdparanoia="-I$I"; break
+            fi
+        done
+    fi
 fi
 if test "$_cdparanoia" = yes ; then
     _def_cdparanoia='#define HAVE_CDDA'
