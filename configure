@@ -4301,10 +4301,11 @@ if test "$_real" = auto ; then
       if test -z "$_reallibdir" ; then
 	for I in "$_libdir/codecs" "$_libdir/real" /usr/lib/real \
 	  /usr/lib/RealPlayer*/Codecs /usr/local/RealPlayer*/Codecs \
-	  /usr/local/lib/RealPlayer*/Codecs /opt/RealPlayer*/Codecs; do
+	  /usr/local/lib/RealPlayer*/Codecs /opt/RealPlayer*/Codecs \
+	  /opt/RealPlayer*/Real/Codecs; do
           if test -d "$I" ; then
             _reallibdir="$I"
-            break;
+            #break; 8 comes before 9 so loop on ::atmos
           fi;
         done
       fi
