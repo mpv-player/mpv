@@ -185,6 +185,7 @@ int mov_check_file(demuxer_t* demuxer){
 	  flags|=2;
 	  break;
 	case MOV_FOURCC('f','r','e','e'):
+	case MOV_FOURCC('s','k','i','p'):
 	  /* unused, if you edit a mov, you can use space provided by free atoms (redefining it) */
 	  break;
 	case MOV_FOURCC('w','i','d','e'):
