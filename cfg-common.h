@@ -4,7 +4,7 @@
 #ifdef USE_STREAM_CACHE
 	{"cache", &stream_cache_size, CONF_TYPE_INT, CONF_RANGE, 4, 65536},
 #else
-	{"cache", "MPlayer was compiled WITHOUT cache2 support", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
+	{"cache", "MPlayer was compiled WITHOUT cache2 support\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
 #endif
 #ifdef HAVE_VCD
 	{"vcd", &vcd_track, CONF_TYPE_INT, CONF_RANGE, 1, 99},
@@ -80,14 +80,14 @@
 #ifdef HAVE_ODIVX_POSTPROCESS
         {"oldpp", &use_old_pp, CONF_TYPE_FLAG, 0, 0, 1},
 #else
-        {"oldpp", "MPlayer was compiled without opendivx library", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
+        {"oldpp", "MPlayer was compiled without opendivx library\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
 #endif
 	{"sws", &sws_flags, CONF_TYPE_INT, 0, 0, 2},
 
 #ifdef USE_TV
 	{"tv", tvopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0},
 #else
-	{"tv", "MPlayer was compiled without TV Interface support", CONF_TYPE_PRINT, 0, 0, 0},
+	{"tv", "MPlayer was compiled without TV Interface support\n", CONF_TYPE_PRINT, 0, 0, 0},
 #endif
 
 #else
