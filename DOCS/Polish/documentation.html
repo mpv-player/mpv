@@ -395,10 +395,10 @@ nagrane za pomoc± cyfrowych kamer (np.: DV)</LI>
 </UL>
 </LI>
 
-<LI><B>DivX4</B> : informacje na temat tego kodeka mozna uzyskaæ w sekcji <A
+<LI><B>DivX4</B>: informacje na temat tego kodeka mo¿na uzyskaæ w sekcji <A
 HREF="codecs.html#2.2.1.1">2.2.1.1</A>. Je¿eli nie chcesz u¿ywaæ
-<B>MEncodera</B>, prawdopodobnie nie bêdziesz chcia³ u¿ywaæ tego kodeka, skoro
-<B>libavcodec</B> (zobacz wy¿ej) jest znacznie od niego szybszy.<BR>
+<B>MEncodera</B>, nie bêdziesz chcia³ u¿ywaæ te¿ tego kodeka, gdy¿
+<B>libavcodec</B> (zobacz powy¿ej) jest znacznie od niego szybszy.<BR>
 W³a¶ciwo¶ci :<UL>
   <LI>potrafi odgrywaæ stare filmy <B>DivX3</B> znacznie szybciej ni¿ Win32
 DLL, ale wolniej ni¿ <B>libavcodec</B>!</LI>
@@ -461,7 +461,7 @@ sprzêtowe.</LI>
 
 <LI><B>Karty Nvidia</B>: to bardzo z³y wybór je¶li chodzi o odtwarzanie
 obrazów. (NVidia ma <A HREF="users_against_developers.html#nvidia">inne
-opcje</A>!).  Karty Nvidii s± produkowane na Dalekim Wschodzie i zawieraj±
+opcje</A>!). Karty Nvidii s± produkowane na Dalekim Wschodzie i zawieraj±
 bardzo tanie i z³ej jako¶ci chipy. Co wiêcej, <U>wbudowany sterownik Nvidii w
 XFree86 nie zawiera wsparcia dla sprzêtowej akceleracji YUV!</U> Musisz
 ¶ci±gn±æ sterowniki Nvidii, które s± closed-source, ze strony nvidia.com.
@@ -718,18 +718,20 @@ TV komatybilnego z V4L </B>.</P>
 
 <P>
 <UL>
-    <LI>first, you have to recompile. <CODE>./configure</CODE> will autodetect
-kernel headers of v4l stuff, and the existence of /dev/video* entries. If they
-exist, TV support will be built (see configure's output!).</LI>
-  <LI>make sure your tuner works with another TV softwares in Linux, for example
-xawtv.</LI>
+    <LI>Najpierw musisz wykonaæ rekompilacjê. <CODE>./configure</CODE>
+automatycznie wykryje nag³ówki j±dra zwiazane z v4l oraz wej¶cia
+/dev/video*. Je¶li one istniej±, obs³uga TV bêdzie utworzona (zobacz komunikaty
+configure!).</LI>
+  <LI>upewnij siê, ¿e twój tuner dzia³a z innymi programami dla TV pod
+Linuksem, np. z xawtv.</LI>
 </UL>
 </P>
 
-<P><B>Hint</B> : are the colors messed up? Then your tuner can't display in
-YV12 colorspace. Try I420 (you must use the <CODE>-vc rawi420</CODE> option
-too!), or YUY2, UYVY, RGB32 (this one with <CODE>-vo sdl</CODE>) colorspaces.
-You can specify these with the <CODE>outfmt=YV12</CODE> option see below.</P>
+<P><B>Wskazówka</B>: czy kolory s± prawid³owe? Je¶li nie, to znaczy, ¿e twój
+tuner nie potrafi wy¶wietlaæ w modelu kolorów YV12. Spróbuj I420 (musisz u¿yæ
+tak¿e opcji <CODE>-vc rawi420</CODE>!) lub w modelach YUY2, UYVY, RGB32 (tutaj
+zastosuj opcjê <CODE>-vo sdl</CODE>). Mo¿esz to wyspecyfikowaæ za pomoc± opcji
+<CODE>outfmt=YV12</CODE>, zobacz poni¿ej.</P>
 
 <A NAME=2.5.3><P><B><I>2.5.3. Dostêpne opcje</I></B><BR>
 <TABLE BORDER=0>
@@ -737,85 +739,83 @@ You can specify these with the <CODE>outfmt=YV12</CODE> option see below.</P>
   <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>on</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>use TV
-  input</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>u¿yj wej¶cia TV</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>driver</I></TD>
   <TD></TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-    <B>dummy</B> - NULL TV input :) Used for testing only, generates dummy
-    input.<BR>
-    <B>v4l</B> - captures images from standard V4L interface (default
+    <B>dummy</B> - wej¶cie TV jest NULL :) U¿ywane tylko do testów,  generuje
+    wej¶cie dummy.<BR>
+    <B>v4l</B> - zgrywa obrazki ze standardowego interfejsu V4L (domy¶lnie
     <CODE>/dev/video0</CODE>)</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>device</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>specify other
-  device than the default <CODE>/dev/video0</CODE></TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>okre¶l inne ni¿ domy¶lne <CODE>/dev/video0</CODE> urz±dzenie</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>input</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>give from which
-  input of the TV tuner you which to grab from (e.g. <B>television</B>,
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>podaj, z
+  jakiego wej¶cia tunera TV chcesz odbieraæ (np.<B>television</B>,
   <B>s-video</B>, <B>composite</B>, ...)<BR>
-    Prints the available ones during init.</TD>
+    Dostêpne wej¶cia s± wypisywane przy inicjalizacji.</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>freq</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>specify the
-  frequency to set the tuner (e.g. <B>511.250</B>)</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>okre¶l czêstotliwo¶æ,
+  aby ustawiæ tuner (np. <B>511.250</B>)</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>outfmt</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>in which output
-  format should the tuner transport images to us (<B>rgb32</B>, <B>rgb24</B>, <B>yv12</B>,
-  <B>uyvy</B>, <B>i420</B> (for i420 you have to pass the <CODE>-vc i420</CODE>
-  option, because of a fourcc conflict))</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>w jakim
+  formacie wyj¶ciowym tuner powinien przetransportowaæ obrazy do nas
+  (<B>rgb32</B>, <B>rgb24</B>, <B>yv12</B>, <B>uyvy</B>, <B>i420</B> (dla i420
+  musisz podaæ opcjê <CODE>-vc i420</CODE>, z powodu konfliktu fourcc))</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>width</I></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-  the width of the output window, in pixels</TD>
+  szeroko¶æ w pikselach okna wyj¶ciowego</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>height</I></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-  the height of the output window, in pixels</TD>
+  wysoko¶æ w pikselach okna wyj¶ciowego</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>norm</I></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-  available: PAL, SECAM, NTSC</TD>
+  dostêpne: PAL, SECAM, NTSC</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>channel</I></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-  set the tuner to the given channel</TD>
+  ustaw tuner na podany kana³</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>chanlist</I></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-  available: <CODE>us-bcast, us-cable, europe-west, europe-east, etc</CODE></TD>
+  dostêpne: <CODE>us-bcast, us-cable, europe-west, europe-east, etc</CODE></TD>
 </TR>
 </TABLE>
 </P>
@@ -823,18 +823,18 @@ You can specify these with the <CODE>outfmt=YV12</CODE> option see below.</P>
 <A NAME=2.5.4><P><B><I>2.5.4. Sterowanie z klawiatury</I></B></P>
 
 <TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>h  or  l</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>select previous/next channel</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>n</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>change norm</TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>h  or  l</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>prze³±cz poprzedni/nastêpny kana³</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>n</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>zmieñ normê</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>b</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>change channel list</TD><TR>
 </TABLE>
 
 <A NAME=2.5.5><P><B><I>2.5.5. Przyk³ady</I></B></P>
 
 <P>
-Dummy output, to AAlib :)<BR>
+Wyj¶cie Dummy, dla AAlib :)<BR>
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=dummy:width=640:height=480 -vo aa</CODE><BR>
 <BR>
-Input from standard V4L<BR>
+Wej¶cie ze standardowego V4L<BR>
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv</CODE><BR>
 </P>
 
@@ -858,29 +858,32 @@ Input from standard V4L<BR>
 <P><B><A NAME=3.1>3.1. Sterowanie za pomoc± kalwiatury</A></B></P>
 
 <P><TABLE BORDER=0>
-<TR><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>&lt;-  or  -&gt;</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>seek backward/forward  10 seconds</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>up or down</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>seek backward/forward   1 minute</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>pgup/pgdown</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>seek backward/forward  10 minutes</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>&lt; or &gt;</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>seek backward/forward  in playlist</TD><TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>p or SPACE</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>pause movie (press any key)</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>q or ESC</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>stop playing and quit program</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>+ or -</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>adjust audio delay by +/- 0.1 second</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>/ or *</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>decrease/increase volume</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>o</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>toggle OSD: none / seek / seek+timer</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>m</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>toggle using master/pcm volume</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>z or x</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>adjust subtitle delay by +/- 0.1 second</TD></TR>
+<TR><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>&lt;-  or  -&gt;</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>poszukiwanie wstecz/naprzód o 10 sekund</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>up or down</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>poszukiwanie wstecz/naprzód o 1 minutê</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>pgup/pgdown</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>poszukiwanie wstecz/naprzód o 10 minut</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>&lt; or &gt;</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>poszukiwanie wstecz/naprzód po playli¶cie</TD><TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>p or SPACE</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>zatrzymanie filmu (wci¶nij jakikolwiek przycisk)</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>q or ESC</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>zakoñczenie odgrywania i wyj¶cie z programu</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>+ or -</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>dopasuj opó¼nienie d¼wiêku o +/- 0.1 sekundy</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>/ or *</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>zmniejsz/zwiêksz g³o¶no¶æ</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>o</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>w³±cz/wy³±cz OSD: nic /pasek poszukiwania / pasek poszukiwania + zegar</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>m</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>w³±cz/wy³±cz u¿ywanie d¼wiêku  master/pcm</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>z or x</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>dopasuj opó¼nienie napisów o +/- 0.1 sekundy</TD></TR>
 
-<TR><TD COLSPAN=4><P><I><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>(the following keys are valid only when using DirectShow DivX codec or DivX4 codec with -vc divx4)</I></P></TD></TR>
+<TR><TD COLSPAN=4><P><I><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+(nastêpuj±ce klawisze s± wa¿ne tylko wtedy, gdy u¿ywasz kodeka DirectShow DivX lub 
+DivX4 z opcj± -vc divx4)</I></P></TD></TR>
 
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>1 or 2</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>adjust contrast</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>3 or 4</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>adjust brightness</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>5 or 6</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>adjust hue</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>7 or 8</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>adjust saturation</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>1 lub 2</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>dostosuj kontrast</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>3 lub 4</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>dostosuj jasno¶æ</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>5 lub 6</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>dostosuj nasilenie</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>7 lub 8</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>dostosuj saturation</TD></TR>
 
-<TR><TD COLSPAN=4><P><I><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>(the following keys are valid only with TV input support</I></P></TD></TR>
+<TR><TD COLSPAN=4><P><I><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+(nastêpuj±ce klawisze s± wa¿ne tylko przy obs³udze wej¶cia TV)</I></P></TD></TR>
 
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>h  or  l</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>select previous/next channel</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>n</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>change norm</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>h  lub  l</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>wybierz poprzedni/nastêpny kana³</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>n</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>zmieñ normê</TD></TR>
 <TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>b</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>change channel list</TD></TR>
 </TABLE></P>
 
