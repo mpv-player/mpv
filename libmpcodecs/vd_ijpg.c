@@ -28,11 +28,8 @@ static vd_info_t info = {
 
 LIBVD_EXTERN(ijpg)
 
-static unsigned int out_fmt=0;
-
 static int last_w=-1;
 static int last_h=-1;
-static unsigned int last_c=-1;
 
 // to set/get/query special features/parameters
 static int control(sh_video_t *sh,int cmd,void* arg,...){
@@ -125,11 +122,12 @@ METHODDEF(void) my_error_exit (j_common_ptr cinfo)
 static struct     jpeg_decompress_struct cinfo;
 static struct     my_error_mgr jerr;
 static int        row_stride;
-				  
+static unsigned char *temp_row=NULL;
+
 // decode a frame
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
  mp_image_t * mpi = NULL;
- int	      width,height,depth,i,j;
+ int	      width,height,depth,i;
 
  if ( len <= 0 ) return NULL; // skipped frame
 
@@ -150,16 +148,17 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
  depth=cinfo.output_components * 8;
 
  switch( depth ) {
-   case 8:  out_fmt=IMGFMT_BGR8;  break;
-   case 24: out_fmt=IMGFMT_BGR24; break;
+   case 8:
+   case 24: break;
    default: mp_msg( MSGT_DECVIDEO,MSGL_ERR,"Sorry, unsupported JPEG colorspace: %d.\n",depth ); return NULL;
  }
 
- if ( last_w!=width || last_h!=height || last_c!=out_fmt )
+ if ( last_w!=width || last_h!=height )
   {
-   last_w=width; last_h=height; last_c=out_fmt;
-   if ( !out_fmt ) return NULL;
-   if(!mpcodecs_config_vo( sh,width,height,out_fmt )) return NULL;
+   if(!mpcodecs_config_vo( sh,width,height, IMGFMT_RGB24 )) return NULL;
+   if(temp_row) free(temp_row);
+   temp_row=malloc(3*width+16);
+   last_w=width; last_h=height;
   }
 
  mpi=mpcodecs_get_image( sh,MP_IMGTYPE_TEMP,MP_IMGFLAG_ACCEPT_STRIDE,width,height );
@@ -169,17 +168,37 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
  for ( i=0;i < height;i++ )
   {
-   char * row = mpi->planes[0] + mpi->stride[0] * i;
+   unsigned char * drow = mpi->planes[0] + mpi->stride[0] * i;
+   unsigned char * row = (mpi->imgfmt==IMGFMT_RGB24 && depth==24) ? drow : temp_row;
    jpeg_read_scanlines( &cinfo,(JSAMPLE**)&row,1 );
-#warning workaround for rgb2bgr
-   if ( depth == 24 )
-    for ( j=0;j < width * 3;j+=3 )
-     {
-      char c;
-      c=row[j];
-      row[j]=row[j+2];
-      row[j+2]=c;
-     }
+   if(depth==8){
+       // grayscale -> rgb/bgr 24/32
+       int x;
+       if(mpi->bpp==32)
+         for(x=0;x<width;x++) drow[4*x]=0x010101*row[x];
+       else
+         for(x=0;x<width;x++) drow[3*x+0]=drow[3*x+1]=drow[3*x+2]=row[x];
+   } else {
+       int x;
+       switch(mpi->imgfmt){
+       // rgb24 -> bgr24
+       case IMGFMT_BGR24:
+           for(x=0;x<3*width;x+=3){
+	       drow[x+0]=row[x+2];
+	       drow[x+1]=row[x+1];
+	       drow[x+2]=row[x+0];
+	   }
+	   break;
+       // rgb24 -> bgr32
+       case IMGFMT_BGR32:
+           for(x=0;x<width;x++){
+	       drow[4*x+0]=row[3*x+2];
+	       drow[4*x+1]=row[3*x+1];
+	       drow[4*x+2]=row[3*x+0];
+	   }
+	   break;
+       }
+   }
   }
   
  jpeg_finish_decompress(&cinfo);                                                                   
