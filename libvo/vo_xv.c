@@ -402,7 +402,8 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
     }
 //   dwidth=d_width; dheight=d_height; //XXX: what are the copy vars used for?
    vo_dwidth=d_width; vo_dheight=d_height;
-   hint.flags = PPosition | PSize;
+   hint.flags = PPosition | PSize /* | PBaseSize */;
+   hint.base_width = hint.width; hint.base_height = hint.height;
    XGetWindowAttributes(mDisplay, DefaultRootWindow(mDisplay), &attribs);
    depth=attribs.depth;
    if (depth != 15 && depth != 16 && depth != 24 && depth != 32) depth = 24;
@@ -433,6 +434,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	))
    );
    XSetStandardProperties(mDisplay, vo_window, hello, hello, None, NULL, 0, &hint);
+   XSetWMNormalHints( mDisplay,vo_window,&hint );
    if ( vo_fs ) vo_x11_decoration( mDisplay,vo_window,0 );
    XMapWindow(mDisplay, vo_window);
 #ifdef HAVE_XINERAMA
@@ -553,6 +555,7 @@ static void check_events(void)
  if(e&VO_EVENT_RESIZE)
   {
    XGetGeometry( mDisplay,vo_window,&mRoot,&drwX,&drwY,&vo_dwidth,&vo_dheight,&drwBorderWidth,&drwDepth );
+   drwX = drwY = 0;
    mp_msg(MSGT_VO,MSGL_V, "[xv] dx: %d dy: %d dw: %d dh: %d\n",drwX,drwY,vo_dwidth,vo_dheight );
 
    aspect(&dwidth,&dheight,A_NOZOOM);

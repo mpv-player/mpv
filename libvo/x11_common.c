@@ -390,10 +390,9 @@ void vo_x11_decoration( Display * vo_Display,Window w,int d )
 
   if ( !WinID ) return;
 
-#if 0
   if(vo_fsmode&1){
     XSetWindowAttributes attr;
-    attr.override_redirect = True;
+    attr.override_redirect = (!d) ? True : False;
     XChangeWindowAttributes(vo_Display, w, CWOverrideRedirect, &attr);
 //    XMapWindow(vo_Display, w);
   }
@@ -401,7 +400,6 @@ void vo_x11_decoration( Display * vo_Display,Window w,int d )
   if(vo_fsmode&8){
     XSetTransientForHint (vo_Display, w, RootWindow(vo_Display,mScreen));
   }
-#endif
 
  vo_MotifHints=XInternAtom( vo_Display,"_MOTIF_WM_HINTS",0 );
  if ( vo_MotifHints != None )
@@ -588,16 +586,15 @@ void vo_x11_fullscreen( void )
    vo_fs=VO_TRUE;
    vo_old_x=vo_dx; vo_old_y=vo_dy; vo_old_width=vo_dwidth;   vo_old_height=vo_dheight;
    vo_dx=0;        vo_dy=0;        vo_dwidth=vo_screenwidth; vo_dheight=vo_screenheight;
-   vo_x11_decoration( mDisplay,vo_window,0 );
   }
   else
    {
     vo_fs=VO_FALSE;
     vo_dx=vo_old_x; vo_dy=vo_old_y; vo_dwidth=vo_old_width; vo_dheight=vo_old_height;
-    vo_x11_decoration( mDisplay,vo_window,1 );
    }
  vo_x11_sizehint( vo_dx,vo_dy,vo_dwidth,vo_dheight,0 );
  XMoveResizeWindow( mDisplay,vo_window,vo_dx,vo_dy,vo_dwidth,vo_dheight );
+ vo_x11_decoration( mDisplay,vo_window,(vo_fs) ? 0 : 1 );
  XMapRaised( mDisplay,vo_window );
  
  XRaiseWindow( mDisplay,vo_window );
