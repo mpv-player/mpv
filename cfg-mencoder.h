@@ -14,6 +14,7 @@ extern int use_old_pp;
 extern int sws_flags;
 extern int readPPOpt(void *, char *arg);
 extern void revertPPOpt(void *conf, char* opt);
+extern char *pp_help;
 
 #ifdef HAVE_DIVX4ENCORE
 extern struct config divx4opts_conf[];

@@ -160,7 +160,7 @@ struct config jpeg_conf[]={
 extern int sws_flags;
 extern int readPPOpt(void *conf, char *arg);
 extern void revertPPOpt(void *conf, char* opt);
-
+extern char* pp_help;
 
 /*
  * CONF_TYPE_FUNC_FULL :

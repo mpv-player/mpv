@@ -765,7 +765,11 @@ m_option_type_t m_option_type_func = {
 /////////////////// Print
 
 static int parse_print(m_option_t* opt,char *name, char *param, void* dst, int src) {
-  mp_msg(MSGT_CFGPARSER, MSGL_INFO, "%s", (char *) opt->p);
+  if(opt->type->flags&M_OPT_TYPE_INDIRECT)
+    mp_msg(MSGT_CFGPARSER, MSGL_INFO, "%s", *(char **) opt->p);
+  else
+    mp_msg(MSGT_CFGPARSER, MSGL_INFO, "%s", (char *) opt->p);
+
   if(opt->priv == NULL)
     exit(1); // Call something else instead ??
   return 1;
@@ -783,6 +787,20 @@ m_option_type_t m_option_type_print = {
   NULL,
   NULL
 };
+
+m_option_type_t m_option_type_print_indirect = {
+  "Print",
+  "",
+  0,
+  M_OPT_TYPE_INDIRECT,
+  parse_print,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL
+};
+
 
 /////////////////////// Subconfig
 #undef VAL

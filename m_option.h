@@ -17,6 +17,7 @@ extern m_option_type_t m_option_type_string_list;
 extern m_option_type_t m_option_type_position;
 
 extern m_option_type_t m_option_type_print;
+extern m_option_type_t m_option_type_print_indirect;
 extern m_option_type_t m_option_type_subconfig;
 extern m_option_type_t m_option_type_imgfmt;
 
@@ -59,6 +60,7 @@ extern m_option_type_t m_option_type_span;
 #define CONF_TYPE_FUNC		(&m_option_type_func)
 #define CONF_TYPE_FUNC_PARAM	(&m_option_type_func_param)
 #define CONF_TYPE_PRINT		(&m_option_type_print)
+#define CONF_TYPE_PRINT_INDIRECT (&m_option_type_print_indirect)
 #define CONF_TYPE_FUNC_FULL	(&m_option_type_func_full)
 #define CONF_TYPE_SUBCONFIG	(&m_option_type_subconfig)
 #define CONF_TYPE_STRING_LIST           (&m_option_type_string_list)

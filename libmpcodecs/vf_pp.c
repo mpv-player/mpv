@@ -152,11 +152,6 @@ static int open(vf_instance_t *vf, char* args){
     if(!vf->priv->outfmt) return 0; // no csp match :(
     
     if(args){
-	if(!strcmp("help", args)){
-		printf("%s", pp_help);
-		exit(1);
-	}
-	
 	hex_mode= strtol(args, &endptr, 0);
 	if(*endptr){
             name= args;
