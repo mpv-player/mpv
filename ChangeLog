@@ -2,6 +2,10 @@
 mplayer (0.90)
 
   pre11:  "CodecCounter"
+    Docs:
+    * new French translation
+    * Irix section
+    * varous updates (both English & Hungarian)
 
     Codecs:
     * New codec pack download page (there are several packs for various IFs)
@@ -33,7 +37,6 @@ mplayer (0.90)
     * -stop-xscreensaver fixed, support for KDE screensaver too
     * More compiler warning fixes
     * Altivec (G4) support
-    * Docs updates (both english & hungarian)
 
   pre10:  "BirthdayCounter"
     Docs:
