@@ -1,0 +1,120 @@
+
+2 stuff van. A playtree maga, meg az iterator.
+A playtree testesiti meg az adatot, az iteratort meg az mplayer
+hasznalja arra hogy egyik bejegyzesrol a masikra lepjen
+
+Eloszor, a play_tree struct :
+
+
+struct play_tree {
+  play_tree_t* parent;
+  play_tree_t* child;
+  play_tree_t* next;
+  play_tree_t* prev;
+
+  play_tree_param_t* params;
+  int loop;
+  char** files;
+  int entry_type;
+};
+
+A play_tree_t* tartalmazza a linkeket a 4 iranyba, a params tartalmazza
+az adott bejegyzes osszes parameteret, a loop 1ertelmu (loop < 0 vegtelen
+loopot jelent), a files tartalmazza az adott bejegyzes osszes file-jat,
+es az entry_type kurvaegyertelmuen az adott bejegyzes tipusat adja meg
+(node, file, dvd, vcd, tv)
+
+Egy bejegyzes egynel tobb filet is tartalmazhat, mie'?
+
+Mert egy bejegyzes lehet network stream is, es altalaban egynel tobb
+szerver van. De mind ugyanazt kuldi, sz'al ez egy olyan bejegyzes
+aminek tobb forrasa van.
+
+Es mit basszak ezzel a szarral?
+
+Eloszor csinalj egy entryt a play_tree_new func segitsegevel. Ez letrehozza
+a structot, es default ertekekkel tolti fel.
+Eztan ez lehet node vagy leaf is. Node lesz rogton, ha a play_tree_set_child
+vagy a play_tree_set_parent segitsegevel odalinkeled egy masikhoz.
+Vagy leaf lesz, ha a play_tree_add_file-t nyomod ra.
+Ha egy bejegyzes legalabb 1 filet tartalmaz, nem lehet node (egy assert
+lesz raised) es ha egy bejegyzesnek van egy childje amihez nem adhatsz
+filet (?) (itt is assert lesz)
+Aztan hogy letrehozz egy listat a bejegyzesekrol, hasznald a play_tree_
+_append_entry-t, a play_tree_prepend_entry-t vagy a play_tree_insert_entryt.
+Ezek kozul barmelyikben hasznalhatod a lista barmelyik bejegyzeset elso
+argumentumkent, nem csak az elsot. Ugyanez ervenyes arra amikor egy
+node childjet allitod, a child argumentum barmelyik, listaban levo
+bejegyzes lehet.
+A bejegyzes treebol valo kiszedesehez hasznald a play_tree_removet. Ha a
+masodik arg (free_it) true, akkor felszabaditja, ha a bejegyzest freezni
+kell, es a harmadik arg is true, akkor a childjeit is.
+
+Amikor a tree kesz, hasznalhatod a play_tree_cleanupot hogy eltavolitsd az
+osszes nemhasznalt bejegyzest.
+
+Playlist betoltesehez hasznald a parse_playtree-t ami egy stream_t-t fogad
+argumentumkent, vagy a parse_playlist_file-t ami filenevet.
+Mind2 funkcio NULL-t ad vissza hiba eseten, vagy ha egy uj (torolt)
+fa eseten, amit hozzaadhatsz valahova a treedbe. (?)_
+
+Hogy lehet DVD-t VCD-t TV-t?
+
+igy
+     dvd://x where x is the title number.
+     vcd://x where x is the track number
+     tv://x where x is the channel
+
+
+Kesz a playtreem, mit basszak a play_tree_iter-rel?
+
+Ez egy iterator arra a celra hogy a treet atfesuljed jol.
+<bazmeg ezt a mondatot szerintem o se ertette - SKIP>
+Ezt a play_tree_iter_new-vel hozod letre, ami argumentumkent egy play_tree_t
+es egy m_config_t-t eszik, amik aztan arra lesznek hasznalva hogy az
+egyes bejegyzesek parametereit allitgassad. Miutan az iter pontot jol
+semmibe krealtad, init az elso lepest. A listaban egy masik bejegyzesre
+torteno atlepeshez hasznald a play_tree_iter_step-et. A masodik
+argumentum a lepes iranya, pozitiv ertekek elore, negativok hatra, es
+0 nem mozdul. A harmadik meg azt mondja meg hogy erdekel-e a node vagy se.
+Ha igen, az iterator megall a nodeknel, maskulonben a kovetkezo
+ervenyes bejegyzeshez megy.
+This function return different values :
+PLAY_TREE_ITER_ERROR  : egyertelmu
+PLAY_TREE_ITER_ENTRY : entryn vagyunk
+PLAY_TREE_ITER_NODE  : nodeon vagyunk
+PLAY_TREE_ITER_END : targyalason vagyok ;)
+(( Megj : kene rakni ide egy PLAY_TREE_ITER_BEGININGet a kezdethez.
+Nemtom mit kene visszadni ilyen esetben. PLAY_TREE_ITER_ERROR ? ))
+
+Van meg a play_tree_iter_up_step ami egy loop megtoresere vagy az adott
+lista skipelesere jo. Ugyanazok az argok mint a play_tree_iter_stepnel.
+A kulonbseg az hogy ez visszamehet a jelenlegi lista parentjehez, es az
+argumentumok szerint lephet.
+
+Eztan amikor az iter visszadta a PLAY_TREE_ITER_ENTRYt, hasznalhatod
+a play_tree_iter_get_file-t hogy megkapd a filet. Ha egynel tobbszor
+hivod meg, visszaadja az adott bejegyzeshez tartozo kovetkezo filet,
+vagy loopolja a listat ha nincs tobb file. Megnezheted hogy hany
+file all rendelkezesre az iter->num_files-sel (?) es hogy melyik adta
+vissza, azt meg az iter->file-al (?).
+Ha a bejegyzes DVD,VCD vagy tv, a visszaadott string nem file, hanem
+"DVD title x", "VCD track x" or "TV channel x".
+Hogy ezeket megkulonboztessuk egy normalis filetol, lehet csekkolni
+az iter->tree->entry_type-ot. Tartalmazhat :
+ PLAY_TREE_ENTRY_DVD, PLAY_TREE_ENTRY_VCD, 
+PLAY_TREE_ENTRY_TV or PLAY_TREE_ENTRY_FILE.
+
+Ha csekkelni akarsz meg az iterrel, mint pl hogy a kovetkezo
+bejegyzes helyes-e, egy klont kell letrehoznod a play_tree_iter_new_copy-val.
+Ez az iter nem fogja befolyasolni a configot, szal azt qrsz vele amit akarsz.
+
+Es amikor annyit basztal az iterrel amennyit akartal, szabaditsd meg
+szenvedeseitol a play_tree_iter_free-vel.
+
+
+Miutan megvolt config parsing, az iterator az mplayer.c-ben jon letre.
+Meg, a stream megnyitasa utan, ha a stream egy playlist, behelyettesiti
+a bejegyzest amelyik a playlistet tarolta azzal mi a parsing eredmenye.
+Az event handlingben megnezi hogy egy lepes megoldhato-e, stb. Es vegul
+a vegen a kovetkezo bejegyzesre m1.
