@@ -1761,9 +1761,6 @@ if [ $_x11 = yes ]; then
   fi
 fi
 
-echo XXXXXXXXXX $_xdpms_3 $_xdpms_4
-
-
 if [ $_xv = yes ]; then
   _xvlib='-lXv'
 fi
