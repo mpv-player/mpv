@@ -423,11 +423,7 @@ int demux_asf_control(demuxer_t *demuxer,int cmd, void *arg){
 	    return DEMUXER_CTRL_OK;
 
 	case DEMUXER_CTRL_GET_PERCENT_POS:
-	    if (demuxer->movi_end==demuxer->movi_start) {
 		return DEMUXER_CTRL_DONTKNOW;
-	    }
-    	    *((int *)arg)=(int)((demuxer->filepos-demuxer->movi_start)/((demuxer->movi_end-demuxer->movi_start)/100));
-	    return DEMUXER_CTRL_OK;
 
 	default:
 	    return DEMUXER_CTRL_NOTIMPL;

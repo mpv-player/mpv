@@ -846,9 +846,7 @@ int demux_avi_control(demuxer_t *demuxer,int cmd, void *arg){
 
 	case DEMUXER_CTRL_GET_PERCENT_POS:
     	    if (!priv->numberofframes) {
-		if (demuxer->movi_end==demuxer->movi_start) return DEMUXER_CTRL_DONTKNOW;
-		*((int *)arg)=(int)((demuxer->filepos-demuxer->movi_start)/((demuxer->movi_end-demuxer->movi_start)/100));
-		return DEMUXER_CTRL_OK; 
+              return DEMUXER_CTRL_DONTKNOW;
 	    }
 	    *((int *)arg)=(int)(priv->video_pack_no*100/priv->numberofframes);
 	    if (sh_video->video.dwLength<=1) return DEMUXER_CTRL_GUESS;

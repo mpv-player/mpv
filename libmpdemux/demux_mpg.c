@@ -520,20 +520,14 @@ int demux_mpg_control(demuxer_t *demuxer,int cmd, void *arg){
               *((unsigned long *)arg)=(long)mpg_d->final_pts;
               return DEMUXER_CTRL_GUESS;
             }
-	    if(!sh_video || !sh_video->i_bps)  // unspecified or VBR 
     		return DEMUXER_CTRL_DONTKNOW;
-	    *((unsigned long *)arg)=(demuxer->movi_end-demuxer->movi_start)/sh_video->i_bps;
-	    return DEMUXER_CTRL_GUESS;
 
 	case DEMUXER_CTRL_GET_PERCENT_POS:
-	    if (demuxer->movi_end==demuxer->movi_start) 
-    		return DEMUXER_CTRL_DONTKNOW;
             if (mpg_d && mpg_d->has_valid_timestamps && mpg_d->final_pts > 0.0) {
               *((int *)arg)=(int)(100 * mpg_d->last_pts / mpg_d->final_pts);
               return DEMUXER_CTRL_OK;
             }
-    	    *((int *)arg)=(int)((demuxer->filepos-demuxer->movi_start)/((demuxer->movi_end-demuxer->movi_start)/100));
-	    return DEMUXER_CTRL_OK;
+	    return DEMUXER_CTRL_DONTKNOW;
 
 	default:
 	    return DEMUXER_CTRL_NOTIMPL;

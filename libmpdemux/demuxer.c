@@ -1717,7 +1717,12 @@ int demux_control(demuxer_t *demuxer, int cmd, void *arg) {
 
 unsigned long demuxer_get_time_length(demuxer_t *demuxer){     
     unsigned long get_time_ans;     
+    sh_video_t *sh_video = demuxer->video->sh;
+    // <= 0 means DEMUXER_CTRL_NOTIMPL or DEMUXER_CTRL_DONTKNOW
     if (demux_control(demuxer, DEMUXER_CTRL_GET_TIME_LENGTH,(void *)&get_time_ans)<=0)  {
+      if (sh_video && sh_video->i_bps)
+        get_time_ans = (demuxer->movi_end-demuxer->movi_start)/sh_video->i_bps;
+      else
         get_time_ans=0;     
     }
     return get_time_ans;
@@ -1727,9 +1732,14 @@ int demuxer_get_percent_pos(demuxer_t *demuxer){
     int ans = 0;
     int res = demux_control(demuxer, DEMUXER_CTRL_GET_PERCENT_POS, &ans);
     int len = (demuxer->movi_end - demuxer->movi_start) / 100;
-    if (res == DEMUXER_CTRL_NOTIMPL && len > 0)
+    if (res <= 0) {
+      if (len > 0)
       ans = (demuxer->filepos - demuxer->movi_start) / len;
-    if (ans>100 || ans<0) ans=0;
+      else
+       ans = 0;
+    }
+    if (ans < 0) ans = 0;
+    if (ans > 100) ans = 100;
     return ans;
 }
 

@@ -3328,12 +3328,7 @@ demux_mkv_control (demuxer_t *demuxer, int cmd, void *arg)
     case DEMUXER_CTRL_GET_PERCENT_POS:
       if (mkv_d->duration == 0)
         {
-          if (demuxer->movi_start == demuxer->movi_end)
             return DEMUXER_CTRL_DONTKNOW;
-
-          *((int *)arg) = (int)((demuxer->filepos - demuxer->movi_start) /
-                                ((demuxer->movi_end-demuxer->movi_start)/100));
-          return DEMUXER_CTRL_OK;
         }
 
       *((int *) arg) = (int) (100 * mkv_d->last_pts / mkv_d->duration);
