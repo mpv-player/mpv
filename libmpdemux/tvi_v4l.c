@@ -97,19 +97,19 @@ typedef struct {
     int                         audio_buffer_size;
     int                         aud_skew_cnt;
     unsigned char		*audio_ringbuffer;
-    double			*audio_skew_buffer;
+    long long			*audio_skew_buffer;
     volatile int		audio_head;
     volatile int		audio_tail;
     volatile int		audio_cnt;
-    volatile double             audio_skew;
+    volatile long long          audio_skew;
     volatile double             audio_skew_factor;
-    volatile double             audio_skew_measure_time;
+    volatile long long          audio_skew_measure_time;
     volatile int                audio_drop;
 
     int                         first;
     int                         video_buffer_size;
     unsigned char		*video_ringbuffer;
-    double			*video_timebuffer;
+    long long			*video_timebuffer;
     volatile int		video_head;
     volatile int		video_tail;
     volatile int		video_cnt;
@@ -121,9 +121,9 @@ typedef struct {
     pthread_mutex_t             audio_starter;
     pthread_mutex_t             skew_mutex;
 
-    double                      starttime;
+    long long                   starttime;
     double                      audio_secs_per_block;
-    double                      audio_skew_total;
+    long long                   audio_skew_total;
     long			audio_recv_blocks_total;
     long			audio_sent_blocks_total;
     
@@ -689,7 +689,7 @@ static int start(priv_t *priv)
     if (!tv_param_noaudio) {
 	setup_audio_buffer_sizes(priv);
 	bytes_per_sample = priv->audio_in.bytes_per_sample;
-	priv->audio_skew_buffer = (double*)malloc(sizeof(double)*priv->aud_skew_cnt);
+	priv->audio_skew_buffer = (long long*)malloc(sizeof(long long)*priv->aud_skew_cnt);
 	if (!priv->audio_skew_buffer) {
 	    mp_msg(MSGT_TV, MSGL_ERR, "cannot allocate skew buffer: %s\n", strerror(errno));
 	    return 0;
@@ -708,8 +708,8 @@ static int start(priv_t *priv)
 	priv->audio_tail = 0;
 	priv->audio_cnt = 0;
 	priv->audio_drop = 0;
-	priv->audio_skew = 0.0;
-	priv->audio_skew_total = 0.0;
+	priv->audio_skew = 0;
+	priv->audio_skew_total = 0;
 	priv->audio_recv_blocks_total = 0;
 	priv->audio_sent_blocks_total = 0;
     }
@@ -737,7 +737,7 @@ static int start(priv_t *priv)
 	mp_msg(MSGT_TV, MSGL_ERR, "cannot allocate video buffer: %s\n", strerror(errno));
 	return 0;
     }
-    priv->video_timebuffer = (double*)malloc(sizeof(double) * priv->video_buffer_size);
+    priv->video_timebuffer = (long long*)malloc(sizeof(long long) * priv->video_buffer_size);
     if (!priv->video_timebuffer) {
 	mp_msg(MSGT_TV, MSGL_ERR, "cannot allocate time buffer: %s\n", strerror(errno));
 	return 0;
@@ -1177,7 +1177,7 @@ static void *video_grabber(void *data)
 {
     priv_t *priv = (priv_t*)data;
     struct timeval curtime;
-    double skew, prev_skew, xskew, interval, prev_interval;
+    long long skew, prev_skew, xskew, interval, prev_interval;
     int frame, nextframe;
     int fsize = priv->bytesperline * priv->height;
     int i;
@@ -1193,8 +1193,8 @@ static void *video_grabber(void *data)
 	   (errno == EAGAIN || errno == EINTR));
     mp_dbg(MSGT_TV, MSGL_DBG3, "\npicture sync failed\n");
 
-    prev_interval = 0.0;
-    prev_skew = 0.0;
+    prev_interval = 0;
+    prev_skew = 0;
 
     for (framecount = 0; !priv->shutdown;)
     {
@@ -1226,26 +1226,26 @@ static void *video_grabber(void *data)
 	    if (first) {
 		// this was a first frame - let's launch the audio capture thread immediately
 		// before that, just initialize some variables
-		priv->starttime = curtime.tv_sec + curtime.tv_usec*.000001;
+		priv->starttime = (long long)1e6*curtime.tv_sec + curtime.tv_usec;
 		priv->audio_skew_measure_time = 0;
 		pthread_mutex_unlock(&priv->audio_starter);
 		// first frame must always have timestamp of zero
-		xskew = 0.0;
-		skew = 0.0;
-		interval = 0.0;
+		xskew = 0;
+		skew = 0;
+		interval = 0;
 		first = 0;
 	    } else {
 		if (!priv->immediate_mode) {
-		    interval = curtime.tv_sec + curtime.tv_usec*.000001 - priv->starttime;
+		    interval = (long long)1e6*curtime.tv_sec + curtime.tv_usec - priv->starttime;
 		} else {
 		    interval = (double)framecount/priv->fps;
 		}
 
 		if (!priv->immediate_mode && (
-			(interval - prev_interval < 1.0/priv->fps*0.85)
-			|| (interval - prev_interval > 1.0/priv->fps*1.15) ) ) {
+			(interval - prev_interval < (long long)0.85e6/priv->fps)
+			|| (interval - prev_interval > (long long)1.15e6/priv->fps) ) ) {
 		    mp_msg(MSGT_TV, MSGL_V, "\nvideo capture thread: frame delta ~ %.1lf fps\n",
-			   1.0/(interval - prev_interval));
+			   (double)1e6/(interval - prev_interval));
 		}
 
 		// interpolate the skew in time
@@ -1262,8 +1262,8 @@ static void *video_grabber(void *data)
 		}
 	    }
 
-	    mp_msg(MSGT_TV, MSGL_DBG3, "\nfps = %lf, v_interval = %lf, a_skew = %f, corr_skew = %f\n",
-		   1.0/(interval - prev_interval), interval/2, xskew, skew);
+	    mp_msg(MSGT_TV, MSGL_DBG3, "\nfps = %lf, interval = %lf, a_skew = %f, corr_skew = %f\n",
+		   (double)1e6/(interval - prev_interval), (double)1e-6*interval, (double)1e-6*xskew, (double)1e-6*skew);
 	    mp_msg(MSGT_TV, MSGL_DBG3, "vcnt = %d, acnt = %d\n", priv->video_cnt, priv->audio_cnt);
 
 	    prev_skew = skew;
@@ -1307,7 +1307,7 @@ static double grab_video_frame(priv_t *priv, char *buffer, int len)
 	usleep(10000);
     }
 
-    interval = priv->video_timebuffer[priv->video_head];
+    interval = (double)priv->video_timebuffer[priv->video_head]*1e-6;
     memcpy(buffer, priv->video_ringbuffer+priv->video_head*priv->bytesperline * priv->height, len);
     priv->video_cnt--;
     priv->video_head = (++priv->video_head)%priv->video_buffer_size;
@@ -1324,13 +1324,13 @@ static void *audio_grabber(void *data)
     priv_t *priv = (priv_t*)data;
     struct timeval tv;
     int i, audio_skew_ptr = 0;
-    double tmp, current_time, prev_skew = 0.0;
+    long long tmp, current_time, prev_skew = 0;
 
     pthread_mutex_lock(&priv->audio_starter);
 
     audio_in_start_capture(&priv->audio_in);
     for (i = 0; i < priv->aud_skew_cnt; i++)
-	priv->audio_skew_buffer[i] = 0.0;
+	priv->audio_skew_buffer[i] = 0;
 
     for (; !priv->shutdown;)
     {
@@ -1340,24 +1340,13 @@ static void *audio_grabber(void *data)
 	gettimeofday(&tv, NULL);
 
 	priv->audio_recv_blocks_total++;
-	current_time = tv.tv_sec + tv.tv_usec*.000001 - priv->starttime;
+	current_time = (long long)1e6*tv.tv_sec + tv.tv_usec - priv->starttime;
 
-	// compute the moving sum of the skews
-	if (priv->audio_recv_blocks_total % 1024 == 0) {
-	    // recompute the moving sum to avoid truncation errors
-	    priv->audio_skew_buffer[audio_skew_ptr] = current_time
-		- priv->audio_secs_per_block*priv->audio_recv_blocks_total;
-	    audio_skew_ptr = (audio_skew_ptr+1) % priv->aud_skew_cnt;
-	    for (i = 0, tmp = 0.0; i < priv->aud_skew_cnt; i++)
-		tmp += priv->audio_skew_buffer[i];
-	    priv->audio_skew_total = tmp;
-	} else {
-	    priv->audio_skew_total -= priv->audio_skew_buffer[audio_skew_ptr];
-	    priv->audio_skew_buffer[audio_skew_ptr] = current_time
-		- priv->audio_secs_per_block*priv->audio_recv_blocks_total;
-	    priv->audio_skew_total += priv->audio_skew_buffer[audio_skew_ptr];
-	    audio_skew_ptr = (audio_skew_ptr+1) % priv->aud_skew_cnt;
-	}
+	priv->audio_skew_total -= priv->audio_skew_buffer[audio_skew_ptr];
+	priv->audio_skew_buffer[audio_skew_ptr] = current_time
+	    - 1e6*priv->audio_secs_per_block*priv->audio_recv_blocks_total;
+	priv->audio_skew_total += priv->audio_skew_buffer[audio_skew_ptr];
+	audio_skew_ptr = (audio_skew_ptr+1) % priv->aud_skew_cnt;
 
 	pthread_mutex_lock(&priv->skew_mutex);
 	// linear interpolation - here we interpolate current skew value
@@ -1367,9 +1356,8 @@ static void *audio_grabber(void *data)
 	    priv->audio_skew = priv->audio_skew_total/priv->aud_skew_cnt;
 	    priv->audio_skew += (priv->audio_skew*priv->aud_skew_cnt)/(2*priv->audio_recv_blocks_total-priv->aud_skew_cnt);
 	} else {
-//	    priv->audio_skew = 2*priv->audio_skew_total/priv->aud_skew_cnt;
-	    priv->audio_skew = (priv->aud_skew_cnt+priv->audio_recv_blocks_total)/priv->aud_skew_cnt*priv->audio_skew_total/priv->audio_recv_blocks_total;
-//	    priv->audio_skew = current_time - priv->audio_secs_per_block*priv->audio_recv_blocks_total;
+	    // this smoothes the evolution of audio_skew at startup a bit
+	    priv->audio_skew = ((priv->aud_skew_cnt+priv->audio_recv_blocks_total)*priv->audio_skew_total)/(priv->aud_skew_cnt*priv->audio_recv_blocks_total);
 	}
 	// current skew factor (assuming linearity)
 	// used for further interpolation in video_grabber
@@ -1377,7 +1365,7 @@ static void *audio_grabber(void *data)
 	// stress testing by dropping half of the audio frames ;)
 	// especially when using ALSA with large block sizes
 	// where audio_skew remains a long while behind
-	priv->audio_skew_factor = (priv->audio_skew-prev_skew)/(current_time - priv->audio_skew_measure_time);
+	priv->audio_skew_factor = (double)(priv->audio_skew-prev_skew)/(current_time - priv->audio_skew_measure_time);
 	priv->audio_skew_measure_time = current_time;
 	prev_skew = priv->audio_skew;
 	pthread_mutex_unlock(&priv->skew_mutex);
