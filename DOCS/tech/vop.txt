@@ -46,6 +46,11 @@ Current plugins:
     MPI: DR (if possible) or EXPORT, using stride manipulation
     Special: dec_video autoloads it when flipping is required and libvo can't do
 
+-vop rotate[=mirror]
+    Rotate image +/- 90 degrees
+    Optional mirror parameter (0..3) controls horizontal and vertical mirroring
+    MPI: TEMP
+
 -vop scale[=w:h]
     Software scaling (zoom) _and_ yuv<->rgb colorspace conversion
     w,h (new width/height after scaling) defaults to original width,height
@@ -83,5 +88,4 @@ Current plugins:
 -vop fame
     Fast software YV12->MPEG1 conversion, usefull for dxr3/dvb drivers
     MPI: EXPORT special
-
 
