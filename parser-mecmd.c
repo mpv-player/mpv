@@ -86,7 +86,7 @@ m_config_parse_me_command_line(m_config_t *config, int argc, char **argv)
 	mp_msg(MSGT_CFGPARSER, MSGL_DBG3, "this_opt = option: %s\n", opt);
 	mp_opt = m_config_get_option(config,opt);
 	if(!mp_opt) {
-	  tmp = M_OPT_UNKNOW;
+	  tmp = M_OPT_UNKNOWN;
 	  mp_msg(MSGT_CFGPARSER, MSGL_ERR, "%s is not an MEncoder option\n",opt);
 	  goto err_out;
 	}

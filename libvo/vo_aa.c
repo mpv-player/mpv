@@ -666,7 +666,7 @@ vo_aa_parseoption(m_option_t * conf, char *opt, char *param){
 	return 1; /* all opt & params accepted */
 
     }
-    return M_OPT_UNKNOW;
+    return M_OPT_UNKNOWN;
 		
 }
 

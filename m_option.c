@@ -491,7 +491,7 @@ static int parse_str_list(m_option_t* opt,char *name, char *param, void* dst, in
     else if(strcasecmp(n,"-clr") == 0)
       op = OP_CLR;
     else
-      return M_OPT_UNKNOW;
+      return M_OPT_UNKNOWN;
   }
 
   // Clear the list ??
@@ -870,7 +870,7 @@ static int parse_subconf(m_option_t* opt,char *name, char *param, void* dst, int
 	  }
 	  if(!subopts[i].name) {
 	    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: Unknown suboption %s\n",name,subopt);
-	    return M_OPT_UNKNOW;
+	    return M_OPT_UNKNOWN;
 	  }
 	  r = m_option_parse(&subopts[i],subopt,
 			     subparam[0] == 0 ? NULL : subparam,NULL,src);
@@ -1030,7 +1030,7 @@ static int get_obj_param(char* opt_name,char* obj_name, m_struct_t* desc,
     opt = m_option_list_find(desc->fields,str);
     if(!opt) {
       mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: %s doesn't have a %s parameter\n",opt_name,obj_name,str);
-      return M_OPT_UNKNOW;
+      return M_OPT_UNKNOWN;
     }
     r = m_option_parse(opt,str,p,NULL,M_CONFIG_FILE);
     if(r < 0) {
@@ -1356,7 +1356,7 @@ static int parse_obj_settings_list(m_option_t* opt,char *name,
 	     "  %3$s-clr\n"
 	     " Clear the cureent list.\n",name,n,prefix);
       
-      return M_OPT_UNKNOW;
+      return M_OPT_UNKNOWN;
     }
   }
 
@@ -1385,7 +1385,7 @@ static int parse_obj_settings_list(m_option_t* opt,char *name,
     break;
   default:
     mp_msg(MSGT_VFILTER,MSGL_ERR, "Option %s: FIXME\n",name);
-    return M_OPT_UNKNOW;
+    return M_OPT_UNKNOWN;
   }
 
   if(!strcmp(param,"help")) {

@@ -207,7 +207,7 @@ struct m_option {
 #define M_COMMAND_LINE 1
 
 // Option parser error code
-#define M_OPT_UNKNOW		-1
+#define M_OPT_UNKNOWN		-1
 #define M_OPT_MISSING_PARAM	-2
 #define M_OPT_INVALID		-3
 #define M_OPT_OUT_OF_RANGE	-4

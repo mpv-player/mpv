@@ -187,7 +187,7 @@ int m_config_parse_config_file(m_config_t* config, char *conffile)
 		tmp = m_config_set_option(config, opt, param);
 		if (tmp < 0) {
 			PRINT_LINENUM;
-			if(tmp == M_OPT_UNKNOW) {
+			if(tmp == M_OPT_UNKNOWN) {
 				mp_msg(MSGT_CFGPARSER,MSGL_WARN,"Warning unknown option %s at line %d\n", opt,line_num);
 				continue;
 			}

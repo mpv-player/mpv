@@ -229,7 +229,7 @@ m_config_parse_option(m_config_t *config, char* arg, char* param,int set) {
   co = m_config_get_co(config,arg);
   if(!co){
 //    mp_msg(MSGT_CFGPARSER, MSGL_ERR,"Unknown option: %s\n",arg);
-    return M_OPT_UNKNOW;
+    return M_OPT_UNKNOWN;
   }
 
 #ifdef MP_DEBUG
@@ -263,7 +263,7 @@ m_config_parse_option(m_config_t *config, char* arg, char* param,int set) {
 	sprintf(n,"%s:%s",co->name,lst[2*i]);
 	sr = m_config_parse_option(config,n,lst[2*i+1],set);
 	if(sr < 0){
-	  if(sr == M_OPT_UNKNOW){
+	  if(sr == M_OPT_UNKNOWN){
 	    mp_msg(MSGT_CFGPARSER, MSGL_ERR,"Error: option '%s' has no suboption '%s'\n",co->name,lst[2*i]);
 	    r = M_OPT_INVALID;
 	  } else
