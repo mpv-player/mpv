@@ -35,7 +35,9 @@
 #include "bswap.h"
 #include "aspect.h"
 #include "vesa_lvo.h"
+#ifdef CONFIG_VIDIX
 #include "vosub_vidix.h"
+#endif
 
 #include "../postproc/swscale.h"
 #include "../postproc/rgb2rgb.h"
@@ -100,7 +102,9 @@ uint8_t   multi_idx=0; /* active buffer */
 
 /* Linux Video Overlay */
 static const char *lvo_name = NULL;
+#ifdef CONFIG_VIDIX
 static const char *vidix_name = NULL;
+#endif
 static int pre_init_err = 0;
 
 #define HAS_DGA()  (win.idx == -1)
@@ -135,7 +139,9 @@ static void vesa_term( void )
 {
   int err;
   if(lvo_name) vlvo_term();
+#ifdef CONFIG_VIDIX
   else if(vidix_name) vidix_term();
+#endif
   if((err=vbeRestoreState(init_state)) != VBE_OK) PRINT_VBE_ERR("vbeRestoreState",err);
   if((err=vbeSetMode(init_mode,NULL)) != VBE_OK) PRINT_VBE_ERR("vbeSetMode",err);
   if(HAS_DGA()) vbeUnmapVideoBuffer((unsigned long)win.ptr,win.high);
@@ -333,7 +339,11 @@ static void flip_page(void)
     if(!HAS_DGA()) __vbeCopyData(dga_buffer);
     flip_trigger = 0;
   }
-  if(vo_doublebuffering && multi_size > 1 && !lvo_name && !vidix_name)
+  if(vo_doublebuffering && multi_size > 1 && !lvo_name
+#ifdef CONFIG_VIDIX
+   && !vidix_name
+#endif
+   )
   {
     int err;
     if((err=vbeSetDisplayStart(multi_buff[multi_idx],1)) != VBE_OK)
@@ -391,7 +401,11 @@ static uint32_t draw_frame(uint8_t *src[])
       if(verbose > 2)
           printf("vo_vesa: rgb2rgb_fnc was called\n");
     } 
-    if((!rgb2rgb_fnc || !HAS_DGA()) && !lvo_name && !vidix_name) __vbeCopyData(data);
+    if((!rgb2rgb_fnc || !HAS_DGA()) && !lvo_name
+#ifdef CONFIG_VIDIX
+     && !vidix_name
+#endif
+     ) __vbeCopyData(data);
     return 0;
 }
 
@@ -406,8 +420,10 @@ static uint32_t parseSubDevice(const char *sd)
    if(strcmp(sd,"dga") == 0)   { flags &= ~(SUBDEV_NODGA); flags |= SUBDEV_FORCEDGA; }
    else
    if(memcmp(sd,"lvo:",4) == 0) lvo_name = &sd[4]; /* lvo_name will be valid within init() */
+#ifdef CONFIG_VIDIX
    else
    if(memcmp(sd,"vidix",5) == 0) vidix_name = &sd[5]; /* vidix_name will be valid within init() */
+#endif
    else { printf("vo_vesa: Unknown subdevice: '%s'\n", sd); return -1; }
    return flags;
 }
@@ -424,7 +440,9 @@ static uint32_t query_format(uint32_t format)
         printf("vo_vesa: subdevice %s have been initialized\n",vo_subdevice);
       if(vo_subdevice) parseSubDevice(vo_subdevice);
       if(lvo_name) pre_init_err = vlvo_preinit(lvo_name);
+#ifdef CONFIG_VIDIX
       else if(vidix_name) pre_init_err = vidix_preinit(vidix_name,&video_out_vesa);
+#endif
       if(verbose > 2)
         printf("vo_subdevice: initialization returns: %i\n",pre_init_err);
       first = 0;
@@ -432,7 +450,9 @@ static uint32_t query_format(uint32_t format)
     if(!pre_init_err) 
     {
       if(lvo_name) return vlvo_query_info(format);
+#ifdef CONFIG_VIDIX
       else if(vidix_name) return vidix_query_fourcc(format);
+#endif
     }
 	switch(format)
 	{
@@ -716,7 +736,11 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		if(sd_flags & SUBDEV_NODGA) video_mode_info.PhysBasePtr = 0;
 		if( vesa_zoom || fs_mode )
 		{
-		  if(format==IMGFMT_YV12 || lvo_name || vidix_name)
+		  if(format==IMGFMT_YV12 || lvo_name
+#ifdef CONFIG_VIDIX
+		   || vidix_name
+#endif
+		   )
 		  {
 		      /* software scale */
 		      if(vesa_zoom > 1)
@@ -735,7 +759,11 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		      }
 		      scale_srcW=width;
 	    	      scale_srcH=height;
-		      if(!lvo_name && !vidix_name) SwScale_Init();
+		      if(!lvo_name
+#ifdef CONFIG_VIDIX
+		       && !vidix_name
+#endif
+		       ) SwScale_Init();
 		      if(verbose) printf("vo_vesa: Using SCALE\n");
 		  }      
     		  else
@@ -744,7 +772,11 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		      return -1;
 		  }
 		}
-		if(format != IMGFMT_YV12 && image_bpp != video_mode_info.BitsPerPixel && !lvo_name && !vidix_name)
+		if(format != IMGFMT_YV12 && image_bpp != video_mode_info.BitsPerPixel && !lvo_name
+#ifdef CONFIG_VIDIX
+		 && !vidix_name
+#endif
+		 )
 		{
 		  if(image_bpp == 24 && video_mode_info.BitsPerPixel == 32) rgb2rgb_fnc = rgb24to32;
 		  else 
@@ -840,7 +872,11 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		else
 		{
 		  cpy_blk_fnc = __vbeCopyBlock;
-		  if((yuv_fmt || rgb2rgb_fnc) && !lvo_name && !vidix_name)
+		  if((yuv_fmt || rgb2rgb_fnc) && !lvo_name
+#ifdef CONFIG_VIDIX
+		   && !vidix_name
+#endif
+		   )
 		  {
 		    if(!(dga_buffer = memalign(64,video_mode_info.XResolution*video_mode_info.YResolution*video_mode_info.BitsPerPixel)))
 		    {
@@ -878,6 +914,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		  }
 		  else printf("vo_vesa: Using video overlay: %s\n",lvo_name);
 		}
+#ifdef CONFIG_VIDIX
 		else
 		if(vidix_name)
 		{
@@ -892,6 +929,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		  }
 		  else printf("vo_vesa: Using VIDIX\n");
 		}
+#endif
 	}
 	else
 	{

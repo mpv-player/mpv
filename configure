@@ -130,7 +130,7 @@ Optional features:
                          (use this option if it does not compile) [enable] 
   --disable-streaming    disable network streaming support
                          (support for: http/mms/rtp) [enable]
-
+  --disable-vidix	 disable VIDIX stuff [enable]
 Video:
   --enable-gl            build with OpenGL render support [autodetect]
   --enable-dga[=n]       build with DGA [n in {1, 2} ] support [autodetect]
@@ -705,6 +705,7 @@ _select=yes
 _tv=yes
 _tv_v4l=auto
 _streaming=yes
+_vidix=yes
 _divx4linux=auto
 _lirc=auto
 _gui=no
@@ -801,6 +802,8 @@ for ac_option do
   --disable-fastmemcpy)	_fastmemcpy=no	;;
   --enable-streaming)	_streaming=yes	;;
   --disable-streaming)	_streaming=no	;;
+  --enable-vidix)	_vidix=yes	;;
+  --disable-vidix)	_vidix=no	;;
   --enable-divx4linux)	_divx4linux=yes	;;
   --disable-divx4linux)	_divx4linux=no	;;
   --enable-lirc)	_lirc=yes	;;
@@ -2732,7 +2735,9 @@ test "$_debug" && _def_debug='#define MP_DEBUG 1'
 _def_linux='#undef TARGET_LINUX'
 linux && _def_linux='#define TARGET_LINUX 1'
 
-
+_def_vidix='#define CONFIG_VIDIX 1'
+test "$_vidix" = no && _def_vidix='#undef CONFIG_VIDIX'
+echo Checking for vidix ... "$_vidix"
 #############################################################################
 echo "Creating config.mak"
 cat > config.mak << EOF
@@ -2752,6 +2757,7 @@ WIN32_PATH = -DWIN32_PATH=\\"$_win32libdir\\"
 
 STREAMING = $_streaming
 STREAMING_LIB = $_ld_streaming
+VIDIX = $_vidix
 
 VO2 = $_vo2
 
@@ -3038,6 +3044,9 @@ $_def_vorbis
 
 $_def_streaming
 
+/* enables / disables vidix usage */
+$_def_vidix
+
 /* Extension defines */
 $_def_3dnow	// only define if you have 3DNOW (AMD k6-2, AMD Athlon, iDT WinChip, etc.)
 $_def_3dnowex	// only define if you have 3DNOWEX (AMD Athlon, etc.)
@@ -3221,6 +3230,13 @@ development headers/packages are installed).
 If you suspect a bug, please read DOCS/bugreports.html.
 
 EOF
+
+if test "$_vidix" = no ; then
+cat <<EOF
+You've disabled VIDIX. Although it would be better to PORT it instead.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+EOF
+fi
 
 # Last move:
 rm -f "$TMPO" "$TMPC" "$TMPS" "$TMPCPP"

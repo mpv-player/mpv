@@ -14,8 +14,10 @@ PRG_TV = tvision
 PRG_CFG = codec-cfg
 PRG_MENCODER = mencoder
 # these subdirectories required installation due binaries within them
-SUBDIRS = libdha vidix
+ifeq ($(VIDIX),yes)
+SUBDIRS += libdha vidix
 DO_MAKE = @ for i in $(SUBDIRS); do $(MAKE) -C $$i $@; done
+endif
 
 #prefix = /usr/local
 BINDIR = ${prefix}/bin
@@ -45,12 +47,16 @@ AO_LIBS = -Llibao2 -lao2
 A_LIBS = $(ALSA_LIB) $(NAS_LIB) $(MAD_LIB) $(VORBIS_LIB) $(SGIAUDIO_LIB)
 
 CODEC_LIBS = -Lg72x -lg72x -Lmp3lib -lMP3 -Llibac3 -lac3 -Lliba52 -la52 -Lxa -lxa -Llibmpeg2 -lmpeg2 $(AV_LIB)
-COMMON_LIBS = -Llinux -losdep -Lpostproc -lpostproc -Lvidix -lvidix
-MISC_LIBS = -Llibdha -ldha
-
+COMMON_LIBS = -Llinux -losdep -Lpostproc -lpostproc
+ifeq ($(VIDIX),yes)
+MISC_LIBS += -Llibdha -ldha -Lvidix -lvidix
+endif
 CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader $(VO_INC) $(EXTRA_INC) # -Wall
 
-PARTS = g72x libmpdemux mp3lib libac3 liba52 libmp1e libmpeg2 opendivx libavcodec libao2 drivers drivers/syncfb linux postproc xa libdha vidix
+PARTS = g72x libmpdemux mp3lib libac3 liba52 libmp1e libmpeg2 opendivx libavcodec libao2 drivers drivers/syncfb linux postproc xa
+ifeq ($(VIDIX),yes)
+PARTS += libdha vidix
+endif
 ifeq ($(VO2),yes)
 PARTS += libvo2
 else
@@ -89,8 +95,11 @@ all:	$(ALL_PRG)
 .c.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-COMMON_DEPS = g72x/libg72x.a libmpdemux/libmpdemux.a libao2/libao2.a libac3/libac3.a liba52/liba52.a mp3lib/libMP3.a libmpeg2/libmpeg2.a opendivx/libdecore.a linux/libosdep.a postproc/libpostproc.a libdha/libdha.so vidix/libvidix.a xa/libxa.a
+COMMON_DEPS = g72x/libg72x.a libmpdemux/libmpdemux.a libao2/libao2.a libac3/libac3.a liba52/liba52.a mp3lib/libMP3.a libmpeg2/libmpeg2.a opendivx/libdecore.a linux/libosdep.a postproc/libpostproc.a xa/libxa.a
 
+ifeq ($(VIDIX),yes)
+COMMON_DEPS += libdha/libdha.so vidix/libvidix.a
+endif
 ifeq ($(VO2),yes)
 COMMON_DEPS += libvo2/libvo2.a
 else
@@ -172,7 +181,10 @@ MENCODER_DEP += Gui/libgui.a
 GUI_LIBS = -LGui -lgui
 endif
 
-VIDIX_LIBS = -Lvidix -lvidix
+VIDIX_LIBS =
+ifeq ($(VIDIX),yes)
+VIDIX_LIBS += -Lvidix -lvidix
+endif
 
 $(PRG):	$(MPLAYER_DEP)
 	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) $(CODEC_LIBS) -Llibmpdemux -lmpdemux $(VO_LIBS) $(AO_LIBS) $(LIB_LOADER) $(GUI_LIBS) $(COMMON_LIBS) $(EXTRA_LIB) $(A_LIBS) $(V_LIBS) $(LIRC_LIB) $(CSS_LIB) $(ARCH_LIB) $(DECORE_LIB) $(TERMCAP_LIB) $(STATIC_LIB) $(GTK_LIBS) $(PNG_LIB) $(Z_LIB) $(STREAMING_LIB) $(VIDIX_LIBS) -lm
@@ -197,7 +209,9 @@ $(PRG_CFG): version.h codec-cfg.c codec-cfg.h
 	$(CC) $(CFLAGS) -g codec-cfg.c -o $(PRG_CFG) -DCODECS2HTML
 
 install: $(ALL_PRG)
+ifeq ($(VIDIX),yes)
 	$(DO_MAKE)
+endif
 	if test ! -d $(BINDIR) ; then mkdir -p $(BINDIR) ; fi
 	$(INSTALL) -m 755 -s $(PRG) $(BINDIR)/$(PRG)
 ifeq ($(GUI),yes)

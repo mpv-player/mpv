@@ -28,7 +28,9 @@
 #include "fastmemcpy.h"
 #include "sub.h"
 #include "../postproc/rgb2rgb.h"
+#ifdef CONFIG_VIDIX
 #include "vosub_vidix.h"
+#endif
 #include "aspect.h"
 
 LIBVO_EXTERN(fbdev)
@@ -42,10 +44,11 @@ static vo_info_t vo_info = {
 
 extern int verbose;
 
+#ifdef CONFIG_VIDIX
 /* Name of VIDIX driver */
 static const char *vidix_name = NULL;
 static int pre_init_err = 0;
-
+#endif
 /******************************
 *	fb.modes support      *
 ******************************/
@@ -730,13 +733,14 @@ struct fb_cmap *make_directcolor_cmap(struct fb_var_screeninfo *var)
   return cmap;
 }
 
+#ifdef CONFIG_VIDIX
 static uint32_t parseSubDevice(const char *sd)
 {
    if(memcmp(sd,"vidix",5) == 0) vidix_name = &sd[5]; /* vidix_name will be valid within init() */
    else { printf(FBDEV "Unknown subdevice: '%s'\n", sd); return -1; }
    return 0;
 }
-
+#endif
 
 static int fb_preinit(void)
 {
@@ -906,7 +910,11 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 	if (!fb_preinit())
 		return 1;
 
-	if (zoom && !vidix_name) {
+	if (zoom
+#ifdef CONFIG_VIDIX
+	 && !vidix_name
+#endif
+	 ) {
 		printf(FBDEV "-zoom is not supported\n");
 		return 1;
 	}
@@ -1062,6 +1070,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 	fb_size = fb_finfo.smem_len;
 	frame_buffer = NULL;
 	next_frame = NULL;
+#ifdef CONFIG_VIDIX
 	if(vidix_name)
 	{
 	    unsigned image_width,image_height,x_offset,y_offset;
@@ -1099,6 +1108,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 	    
 	}
 	else
+#endif
 	{
 	    if ((frame_buffer = (uint8_t *) mmap(0, fb_size, PROT_READ | PROT_WRITE,
 				    MAP_SHARED, fb_dev_fd, 0)) == (uint8_t *) -1) {
@@ -1143,11 +1153,14 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 
 static uint32_t query_format(uint32_t format)
 {
+#ifdef CONFIG_VIDIX
   static int first = 1;
+#endif
 	int ret = 0x4; /* osd/sub is supported on every bpp */
 
 	if (!fb_preinit())
 		return 0;
+#ifdef CONFIG_VIDIX
 	if(first)
 	{
 	    first = 1;
@@ -1159,6 +1172,7 @@ static uint32_t query_format(uint32_t format)
 	if(!pre_init_err)
 	    if(vidix_name)
 		return vidix_query_fourcc(format);
+#endif
 	if ((format & IMGFMT_BGR_MASK) == IMGFMT_BGR) {
 		int bpp = format & 0xff;
 
@@ -1280,6 +1294,8 @@ static void uninit(void)
         close(fb_tty_fd);
 	close(fb_dev_fd);
 	if(frame_buffer) munmap(frame_buffer, fb_size);
+#ifdef CONFIG_VIDIX
 	if(vidix_name) vidix_term();
+#endif
 }
 
