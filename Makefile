@@ -312,7 +312,7 @@ endif
 # include dependencies to get make to recurse into lib dirs,
 # if the user desires such behavior
 #
-ifneq ($(wildcard .libdeps))
+ifneq ($(wildcard .libdeps),)
 include .libdeps
 endif
 
