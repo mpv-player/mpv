@@ -542,6 +542,8 @@ static int
 mp_input_read_cmd(mp_input_fd_t* mp_fd, char** ret) {
   char* end;
   (*ret) = NULL;
+  
+  if(mp_fd->flags & MP_FD_DEAD) return MP_INPUT_NOTHING;
 
   // Allocate the buffer if it dont exist
   if(!mp_fd->buffer) {
@@ -554,18 +556,21 @@ mp_input_read_cmd(mp_input_fd_t* mp_fd, char** ret) {
   while( !(mp_fd->flags & MP_FD_GOT_CMD) && !(mp_fd->flags & MP_FD_EOF) && (mp_fd->size - mp_fd->pos > 1) ) {
     int r = ((mp_cmd_func_t)mp_fd->read_func)(mp_fd->fd,mp_fd->buffer+mp_fd->pos,mp_fd->size - 1 - mp_fd->pos);
     // Error ?
+    if(r == MP_INPUT_NOTHING) break;
     if(r < 0) {
       if(errno == EINTR)
 	continue;
       else if(errno == EAGAIN)
 	break;
-      mp_msg(MSGT_INPUT,MSGL_ERR,"Error while reading cmd fd %d : %s\n",mp_fd->fd,strerror(errno));
-      return MP_INPUT_ERROR;
+      mp_msg(MSGT_INPUT,MSGL_WARN,"Error while reading cmd fd %d : %s\n",mp_fd->fd,strerror(errno));
+      return r; // MP_INPUT_ERROR or MP_INPUT_DEAD
       // EOF ?
-    } else if(r == 0) {
+    }
+    if(r == 0) {
       mp_fd->flags |= MP_FD_EOF;
       break;
     }
+    // r > 0
     mp_fd->pos += r;
     break;
   }
