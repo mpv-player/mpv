@@ -1093,17 +1093,17 @@ static long WINAPI expHeapDestroy(void* heap)
     return 1;
 }
 
-static long WINAPI expHeapFree(int arg1, int arg2, void* ptr)
+static long WINAPI expHeapFree(HANDLE heap, DWORD dwFlags, LPVOID lpMem)
 {
-    dbgprintf("HeapFree(0x%x, 0x%x, pointer 0x%x) => 1\n", arg1, arg2, ptr);
-    if (heapfreehack != ptr && ptr != (void*)0xffffffff)
-	my_release(ptr);
+    dbgprintf("HeapFree(0x%x, 0x%x, pointer 0x%x) => 1\n", heap, dwFlags, lpMem);
+    if (heapfreehack != lpMem && lpMem != (void*)0xffffffff)
+	my_release(lpMem);
     else
     {
 	if (!heapfreehackshown++)
-	    printf("Info: HeapFree deallocating same memory twice! (%p)\n", ptr);
+	    printf("Info: HeapFree deallocating same memory twice! (%p)\n", lpMem);
     }
-    heapfreehack = ptr;
+    heapfreehack = lpMem;
     return 1;
 }
 static long WINAPI expHeapSize(int heap, int flags, void* pointer)
@@ -1210,7 +1210,7 @@ static void WINAPI expInitializeCriticalSection(CRITICAL_SECTION* c)
 	    return;
 	}
 	dbgprintf("got unused space at %d\n", i);
-	cs = expmalloc(sizeof(struct CRITSECT));
+	cs = malloc(sizeof(struct CRITSECT));
 	if (!cs)
 	{
 	    printf("InitializeCriticalSection(%p) - out of memory\n", c);
@@ -2142,8 +2142,8 @@ static int WINAPI expLoadLibraryA(char* name)
 
     // PIMJ and VIVO audio are loading  kernel32.dll
     if (strcasecmp(name, "kernel32.dll") == 0 || strcasecmp(name, "kernel32") == 0)
-//	return MODULE_HANDLE_kernel32;
-	return ERROR_SUCCESS; /* yeah, we have also the kernel32 calls */
+	return MODULE_HANDLE_kernel32;
+//	return ERROR_SUCCESS; /* yeah, we have also the kernel32 calls */
 			      /* exported -> do not return failed! */
 
     if (strcasecmp(name, "user32.dll") == 0 || strcasecmp(name, "user32") == 0)
@@ -2232,6 +2232,7 @@ static void* WINAPI expSleep(int time)
     dbgprintf("Sleep(%d) => 0\n", time);
     return 0;
 }
+
 // why does IV32 codec want to call this? I don't know ...
 static int WINAPI expCreateCompatibleDC(int hdc)
 {
@@ -2812,7 +2813,20 @@ long CoCreateInstance(GUID* rclsid, struct IUnknown* pUnkOuter,
 
 static int WINAPI expIsRectEmpty(CONST RECT *lprc)
 {
-    int r = (!lprc || (lprc->right == lprc->left) || (lprc->top == lprc->bottom));
+    int r = 0;
+//    int r = (!lprc || (lprc->right == lprc->left) || (lprc->top == lprc->bottom));
+    int w,h;
+    
+    if (lprc)
+    {
+	w = lprc->right - lprc->left;
+	h = lprc->bottom - lprc->top;
+	if (w <= 0 || h <= 0)
+	    r = 1;
+    }
+    else
+	r = 1;
+
     dbgprintf("IsRectEmpty(%p) => %s\n", lprc, (r) ? "TRUE" : "FALSE");
 //    printf("Rect: left: %d, top: %d, right: %d, bottom: %d\n",
 //	lprc->left, lprc->top, lprc->right, lprc->bottom);
@@ -3216,6 +3230,15 @@ static void expfree(void* mem)
     dbgprintf("free(%p)\n", mem);
     my_release(mem);
 }
+/* needed by atrac3.acm */
+static void *expcalloc(int num, int size)
+{
+    void* result=my_mreq(num*size,1);
+    dbgprintf("calloc(%d,%d) => %p\n", num,size,result);
+    if(result==0)
+	printf("WARNING: calloc() failed\n");
+    return result;
+}
 static void* expnew(int size)
 {
     //    printf("NEW:: Call from address %08x\n STACK DUMP:\n", *(-1+(int*)&size));
@@ -3238,11 +3261,32 @@ static int expdelete(void* memory)
     my_release(memory);
     return 0;
 }
+#if 1
 static int exp_initterm(int v1, int v2)
 {
     dbgprintf("_initterm(0x%x, 0x%x) => 0\n", v1, v2);
     return 0;
 }
+#else
+/* merged from wine - 2002.04.21 */
+typedef void (*_INITTERMFUNC)(void);
+static int exp_initterm(_INITTERMFUNC *start, _INITTERMFUNC *end)
+{
+    _INITTERMFUNC *current = start;
+
+    dbgprintf("_initterm(0x%x, 0x%x)\n", start, end);
+    while (current < end)
+    {
+	if (*current)
+	{
+	    printf("call init func: %p\n", *current);
+	    (**current)();
+	}
+	current++;
+    }
+    return 0;
+}
+#endif
 
 static int expwsprintfA(char* string, char* format, ...)
 {
@@ -3897,6 +3941,7 @@ struct exports exp_kernel32[]=
     FF(GlobalMemoryStatus,-1)
     FF(SetThreadPriority,-1)
     FF(ExitProcess,-1)
+    {"LoadLibraryExA", -1, (void*)&LoadLibraryExA},
 };
 
 struct exports exp_msvcrt[]={
@@ -3939,6 +3984,8 @@ struct exports exp_msvcrt[]={
     FF(printf,-1)
     FF(getenv,-1)
     FF(_EH_prolog,-1)
+    FF(calloc,-1)
+    {"ceil",-1,(void*)&ceil}
 };
 struct exports exp_winmm[]={
     FF(GetDriverModuleHandle, -1)
@@ -4016,6 +4063,13 @@ struct exports exp_wsock32[]={
 struct exports exp_msdmo[]={
     FF(memcpy, -1) // just test
 };
+/* needed for Morgand MJPEG */
+struct exports exp_msvfw32[]={
+    {"ICOpen", -1, (void *)&ICOpen},
+    {"ICClose", -1, (void *)&ICClose},
+    {"ICDecompress", -1, (void *)&ICDecompress},
+    {"ICSendMessage", -1, (void *)&ICSendMessage}
+};
 
 #define LL(X) \
     {#X".dll", sizeof(exp_##X)/sizeof(struct exports), exp_##X},
@@ -4033,6 +4087,7 @@ struct libs libraries[]={
     LL(comctl32)
     LL(wsock32)
     LL(msdmo)
+    LL(msvfw32)
 };
 
 static char* called_unk = "Called unk_%s\n";
@@ -4092,6 +4147,19 @@ void* LookupExternal(const char* library, int ordinal)
 
     printf("External func %s:%d\n", library, ordinal);
 
+    for(i=0; i<sizeof(libraries)/sizeof(struct libs); i++)
+    {
+	if(strcasecmp(library, libraries[i].name))
+	    continue;
+	for(j=0; j<libraries[i].length; j++)
+	{
+	    if(ordinal!=libraries[i].exps[j].id)
+		continue;
+	    //printf("Hit: 0x%p\n", libraries[i].exps[j].func);
+	    return libraries[i].exps[j].func;
+	}
+    }
+
     /* ok, this is a hack, and a big memory leak. should be fixed. - alex */
     {
 	HMODULE *hand;
@@ -4121,18 +4189,6 @@ void* LookupExternal(const char* library, int ordinal)
     }
 
 no_dll:
-    for(i=0; i<sizeof(libraries)/sizeof(struct libs); i++)
-    {
-	if(strcasecmp(library, libraries[i].name))
-	    continue;
-	for(j=0; j<libraries[i].length; j++)
-	{
-	    if(ordinal!=libraries[i].exps[j].id)
-		continue;
-	    //printf("Hit: 0x%p\n", libraries[i].exps[j].func);
-	    return libraries[i].exps[j].func;
-	}
-    }
     if(pos>150)return 0;
     sprintf(export_names[pos], "%s:%d", library, ordinal);
     return add_stub(pos);
