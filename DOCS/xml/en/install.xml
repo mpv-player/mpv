@@ -266,7 +266,7 @@ zooming), thus fullscreen is nice and very fast.
   installation and usage. It is important to do these steps
   <emphasis>before</emphasis> compiling <application>MPlayer</application>,
   otherwise no mga_vid support will be built. Also check out the
-  <link linkend="tvout-mga-g400">Matrox TV-out</link> section.  If you
+  <link linkend="tvout-mga-g400">Matrox TV-out</link> section.
   <emphasis role="bold"> If you don't use Linux</emphasis>, your only
   possibility is the VIDIX driver: read the <link linkend="vidix">VIDIX</link> section.
   </para></listitem>
