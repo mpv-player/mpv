@@ -2061,7 +2061,7 @@ Use the _NETWM_STATE_BELOW hint if available.
 Use the _NETWM_STATE_FULLSCREEN hint if available.
 .IPs layer
 Use the _WIN_LAYER hint with the default layer.
-.IPs layer=<0..15>
+.IPs layer=<0...15>
 Use the _WIN_LAYER hint with the given layer number.
 .IPs netwm
 Force NETWM style.
@@ -3024,7 +3024,7 @@ completely and +60dB equals a gain of 1000).
 .br
 sc: Enable soft clipping.
 .REss
-.IPs pan[=n:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...]
+.IPs pan[=n:l01:l02:...l10:l11:l12:...ln0:ln1:ln2:...]
 Mixes channels arbitrarily, see DOCS/\:HTML/\:en/\:devices.html#audio-dev for details.
 .RSss
 n: number of input channels (1\-6)
@@ -3229,7 +3229,7 @@ checks to detect damaged bitstreams.
 .IPs gray\ 
 grayscale only decoding (a bit faster than with color)
 .IPs "idct=<0\-99> (see \-lavcopts)"
-For best decoding quality use the same idct algorithm for decoding and encoding.
+For best decoding quality use the same IDCT algorithm for decoding and encoding.
 This may come at a price in accuracy, though.
 .IPs lowres=<number>
 Decode at lower resolutions.
@@ -5179,7 +5179,7 @@ debug level
 .
 .
 .SS lavc (\-lavcopts)
-Many lavc options are very specialized and tersely documented.
+Many libavcodec (lavc for short) options are tersely documented.
 Read the source for full details.
 .PP
 .I EXAMPLE:
@@ -5191,14 +5191,14 @@ Read the source for full details.
 .
 .TP
 .B acodec=<value>
-Audio codec (default: mp2):
+audio codec (default: mp2)
 .PD 0
 .RSs
-.IPs mp2
+.IPs mp2\ \ 
 MPEG Layer 2
-.IPs mp3
+.IPs mp3\ \ 
 MPEG Layer 3
-.IPs ac3
+.IPs ac3\ \ 
 AC3
 .IPs adpcm_ima_wav
 IMA Adaptive PCM (4bits per sample, 4:1 compression)
@@ -5207,7 +5207,7 @@ IMA Adaptive PCM (4bits per sample, 4:1 compression)
 .
 .TP
 .B abitrate=<value>
-Audio bitrate in kBit (default 224).
+audio bitrate in kbps (default: 224)
 .
 .TP
 .B atag=<value>
@@ -5215,7 +5215,7 @@ Use the specified Windows audio format tag (e.g.\& atag=0x55).
 .
 .TP
 .B bit_exact
-Use only bit exact algorithms (except (i)dct).
+Use only bit exact algorithms (except (I)DCT).
 Additionally bit_exact disables several optimizations and thus
 should only be used for regression tests, which need binary
 identical files even if the encoder version changes.
@@ -5230,7 +5230,7 @@ May have a slight negative effect on motion estimation.
 .
 .TP
 .B vcodec=<value>
-Use the specified codec (default: mpeg4):
+Employ the specified codec (default: mpeg4).
 .PD 0
 .RSs
 .IPs mjpeg
@@ -5247,11 +5247,11 @@ DivX 4/\:5
 DivX 3
 .IPs msmpeg4v2
 MS MPEG4v2
-.IPs wmv1
+.IPs wmv1\ 
 Windows Media Video, version 1 (AKA WMV7)
-.IPs wmv2
+.IPs wmv2\ 
 Windows Media Video, version 2 (AKA WMV8)
-.IPs rv10
+.IPs rv10\ 
 an old RealVideo codec
 .IPs mpeg1video
 MPEG1 video
@@ -5259,11 +5259,11 @@ MPEG1 video
 MPEG2 video
 .IPs huffyuv
 HuffYUV
-.IPs asv1
+.IPs asv1\ 
 ASUS Video v1
-.IPs asv2
+.IPs asv2\ 
 ASUS Video v2
-.IPs ffv1
+.IPs ffv1\ 
 FFmpeg's lossless video codec
 .RE
 .PD 1
@@ -5280,20 +5280,20 @@ resulting in lower quality and some decoders will not be able to decode it).
 Recommended for normal mpeg4/\:mpeg1video encoding (default).
 .IPs 3
 Recommended for h263(p)/\:msmpeg4.
-The reason for preferring 3 over 2 is that 2 could lead to overflows
-(this will be fixed for h263(p) by changing the quantizer per MB in
-the future, msmpeg4 cannot be fixed as it does not support that).
+The reason for preferring 3 over 2 is that 2 could lead to overflows.
+(This will be fixed for h263(p) by changing the quantizer per MB in
+the future, msmpeg4 cannot be fixed as it does not support that.)
 .RE
 .
 .TP
 .B lmin=<0.01\-255.0>
-Minimum lagrange multiplier for ratecontrol, you probably want it to be
+Minimum Lagrange multiplier for ratecontrol, you probably want it to be
 equal to or lower than vqmin (default: 2.0).
 .RE
 .
 .TP
 .B lmax=<0.01\-255.0>
-maximum lagrange multiplier for ratecontrol (default: 31.0)
+maximum Lagrange multiplier for ratecontrol (default: 31.0)
 .RE
 .
 .TP
@@ -5304,7 +5304,7 @@ A lower value means better quality but larger files (default: 0 (disabled)).
 .
 .TP
 .B vqmax=<1\-31>
-maximum quantizer (pass\ 1/\:2) 10\-31 should be a sane range (default: 31)
+Maximum quantizer (pass\ 1/\:2), 10\-31 should be a sane range (default: 31).
 .
 .TP
 .B mbqmin=<1\-31>
@@ -5333,10 +5333,6 @@ sane range for MPEG4
 .TP
 .B vme=<0\-5>
 motion estimation method.
-.br
-.I NOTE:
-0\-3 currently ignores the amount of Bits spent,
-so quality may be low.
 Available methods are:
 .PD 0
 .RSs
@@ -5355,10 +5351,17 @@ EPZS: size=1 diamond, size can be adjusted with the *dia options
 X1 (experimental, currently aliased to EPZS)
 .RE
 .PD 1
+.sp 1
+.RS
+.br
+.I NOTE:
+0\-3 currently ignores the amount of bits spent,
+so quality may be low.
+.RE
 .
 .TP
 .B me_range=<0\-9999>
-motion estimation search range, 0 (default) means unlimited
+motion estimation search range (default: 0 (unlimited))
 .
 .TP
 .B mbd=<0\-2>
@@ -5368,11 +5371,11 @@ This is slow but results in better quality and file size.
 .PD 0
 .RSs
 .IPs 0
-use mbcmp (default)
+Use mbcmp (default).
 .IPs 1
-select the MB mode which needs the fewest bits (=vhq)
+Select the MB mode which needs the fewest bits (=vhq).
 .IPs 2
-select the MB mode which has the best rate distortion
+Select the MB mode which has the best rate distortion.
 .RE
 .PD 1
 .
@@ -5400,14 +5403,14 @@ Does absolutely nothing at the moment.
 .
 .TP
 .B keyint=<0\-300>
-maximum interval between keyframes in frames.
+maximum interval between keyframes in frames (default: 250 or one
+keyframe every ten seconds in a 25fps movie).
 Keyframes are needed for seeking as seeking is only possible to a keyframe but
 keyframes need more space than other frames so larger numbers here mean
 slightly smaller files, but less precise seeking, 0 means no keyframes.
 Values >300 are not recommended as the quality might be bad depending upon
 decoder, encoder and luck.
 For a strict MPEG1/\:2/\:4 compliance this would have to be <=132.
-(default: 250 or one keyframe every ten seconds in a 25fps movie)
 .
 .TP
 .B sc_threshold=<-1000000\-1000000>
@@ -5420,12 +5423,15 @@ no scene changes are detected (default 0).
 .TP
 .B vb_strategy=<0\-1>
 strategy to choose between I/\:P/\:B-frames (pass\ 2):
+.PD 0
 .RSs
 .IPs 0
-always use the maximum number of B-frames (default)
+Always use the maximum number of B-frames (default).
 .IPs 1
-avoid B-frames in high motion scenes (will cause bitrate misprediction)
+Avoid B-frames in high motion scenes.
+This will cause bitrate misprediction.
 .RE
+.PD 1
 .
 .TP
 .B vpass=<1\-3>
@@ -5484,8 +5490,8 @@ change individual frame type and PSNR little bit more (up to 0.03dB).
 .
 .TP
 .B aspect=<x/\:y>
-Store movie aspect internally, just like MPEG files.
-Much nicer solution than rescaling, because quality isn't decreased.
+Store movie aspect internally, just like with MPEG files.
+Much nicer than rescaling, because quality is not decreased.
 Only MPlayer will play these files correctly, other players will display
 them with wrong aspect.
 The aspect parameter can be given as a ratio or a floating point number.
@@ -5509,16 +5515,18 @@ always on.
 .
 .TP
 .B vbitrate=<value>
-Specify bitrate (pass\ 1/\:2).
-Warning: 1kBit = 1000 Bits.
+Specify bitrate (pass\ 1/\:2) (default: 800).
+.br
+.I WARNING:
+1kBit = 1000 Bits
+.PD 0
 .RSs
 .IPs 4\-16000
 (in kbit)
 .IPs 16001\-24000000
 (in bit)
-.IPs 800
-default
 .RE
+.PD 1
 .
 .TP
 .B vratetol=<value>
@@ -5577,40 +5585,39 @@ I/\:B-frame quantizer = P-frame quantizer * v{b|i}_qfactor + v{b|i}_qoffset
 .br
 else
 .br
-do normal ratecontrol (dont lock to next P-frame quantizer) and
+do normal ratecontrol (do not lock to next P-frame quantizer) and
 set q= -q * v{b|i}_qfactor + v{b|i}_qoffset
-.
-.TP
-.B \ 
-Tip: To do constant quantizer encoding with different quantizers for
+.br
+.I HINT:
+To do constant quantizer encoding with different quantizers for
 I/\:P- and B-frames you can use:
-lmin= <ip_quant>:lmax= <ip_quant>:vb_qfactor= <b_quant/\:ip_quant>
+lmin= <ip_quant>:lmax= <ip_quant>:vb_qfactor= <b_quant/\:ip_quant>.
 .
 .TP
 .B vqblur=<0.0\-1.0> (pass 1)
-Quantizer blur, larger values will average the quantizer more over
-time (slower change).
+Quantizer blur (default: 0.5), larger values will average the
+quantizer more over time (slower change).
+.PD 0
 .RSs
 .IPs 0.0
-qblur disabled
-.IPs 0.5
-(default)
+Quantizer blur disabled.
 .IPs 1.0
-average the quantizer over all previous frames
+Average the quantizer over all previous frames.
 .RE
+.PD 1
 .
 .TP
 .B vqblur=<0.0\-99.0> (pass 2)
-Quantizer gaussian blur, larger values will average the quantizer more
-over time (slower change) (default: 0.5).
+Quantizer gaussian blur (default: 0.5), larger values will average
+the quantizer more over time (slower change).
 .
 .TP
 .B vqcomp=<value>
-quantizer compression, depends upon vrc_eq (pass\ 1/\:2) (default: 0.5)
+Quantizer compression, depends upon vrc_eq (pass\ 1/\:2) (default: 0.5).
 .
 .TP
 .B vrc_eq=<equation>
-main ratecontrol equation (pass\ 1/\:2):
+main ratecontrol equation (pass\ 1/\:2)
 .RE
 .RSs
 .IPs 1\ \ \ \ 
@@ -5624,7 +5631,10 @@ with qcomp 0.5 or something like that (default)
 .RE
 .PP
 .RS
-infix operators: +,-,*,/,^
+infix operators:
+.RE
+.RSs
+.IPs +,-,*,/,^
 .RE
 .PP
 .RS
@@ -5634,7 +5644,7 @@ variables:
 .IPs tex\ \ 
 texture complexity
 .IPs iTex,pTex
-intra, non intra texture complexity
+intra, non-intra texture complexity
 .IPs avgTex
 average texture complexity
 .IPs avgIITex
@@ -5642,9 +5652,9 @@ average intra texture complexity in I-frames
 .IPs avgPITex
 average intra texture complexity in P-frames
 .IPs avgPPTex
-average non intra texture complexity in P-frames
+average non-intra texture complexity in P-frames
 .IPs avgBPTex
-average non intra texture complexity in B-frames
+average non-intra texture complexity in B-frames
 .IPs mv\ \ \ 
 Bits used for motion vectors
 .IPs fCode
@@ -5658,9 +5668,9 @@ temporal complexity
 .IPs qComp
 qcomp from the command line
 .IPs "isI, isP, isB"
-is 1 if picture type is I/\:P/\:B else 0
+Is 1 if picture type is I/\:P/\:B else 0.
 .IPs Pi,E\ 
-see your favorite math book
+See your favorite math book.
 .RE
 .PP
 .RS
@@ -5680,15 +5690,17 @@ is 1 if a==b, 0 otherwise
 .
 .TP
 .B vrc_override=<options>
-User specified quality for specific parts (ending, credits, ..) (pass\ 1/\:2).
+User specified quality for specific parts (ending, credits, ...) (pass\ 1/\:2).
 The options are <start-frame>, <end-frame>, <quality>[/\:<start-frame>,
 <end-frame>, <quality>[/\:...]]:
+.PD 0
 .RSs
 .IPs "quality (2\-31)"
 quantizer
 .IPs "quality (-500\-0)"
 quality correction in %
 .RE
+.PD 1
 .
 .TP
 .B vrc_init_cplx=<0\-1000>
@@ -5696,93 +5708,96 @@ initial complexity (pass\ 1)
 .
 .TP
 .B vqsquish=<0,1>
-specify how to keep the quantizer between qmin and qmax (pass\ 1/\:2):
+Specify how to keep the quantizer between qmin and qmax (pass\ 1/\:2).
 .PD 0
 .RSs
 .IPs 0
-use clipping
+Use clipping.
 .IPs 1
-use a nice differentiable function (default)
+Use a nice differentiable function (default).
 .RE
 .PD 1
 .
 .TP
 .B vlelim=<-1000\-1000>
 Sets single coefficient elimination threshold for luminance.
-Negative values will also consider the dc coefficient (should be at least -4
+Negative values will also consider the DC coefficient (should be at least -4
 or lower for encoding at quant=1):
 .PD 0
 .RSs
 .IPs 0
 disabled (default)
 .IPs -4
-(JVT recommendation)
+JVT recommendation
 .RE
 .PD 1
 .
 .TP
 .B vcelim=<-1000\-1000>
 Sets single coefficient elimination threshold for chrominance.
-Negative values will also consider the dc coefficient (should be at least -4
+Negative values will also consider the DC coefficient (should be at least -4
 or lower for encoding at quant=1):
 .PD 0
 .RSs
 .IPs 0
 disabled (default)
 .IPs 7
-(JVT recommendation)
+JVT recommendation
 .RE
+.PD 1
 .
 .TP
 .B vstrict=<-1,0,1>
 strict standard compliance
+.PD 0
 .RSs
 .IPs 0
 disabled (default)
 .IPs 1
-only recommended if you want to feed the output into the MPEG4 reference
-decoder
+Only recommended if you want to feed the output into the
+MPEG4 reference decoder.
 .IPs -1
-allows non-standard YV12 huffyuv encoding (20% smaller files, but cannot be
-played by the official huffyuv codec)
+Allows non-standard YV12 HuffYUV encoding (20% smaller files, but cannot be
+played by the official HuffYUV codec).
 .RE
 .PD 1
 .
 .TP
 .B vdpart\ 
-data partitioning.
+Data partitioning.
 Adds 2 Bytes per video packet, improves error-resistance when transferring over
-unreliable channels (eg.\& streaming over the internet)
+unreliable channels (e.g.\& streaming over the internet).
 Each video packet will be encoded in 3 separate partitions:
 .PD 0
 .RSs
 .IPs "1. MVs"
-(movement)
+movement
 .IPs "2. DC coefficients"
-(low res picture)
+low res picture
 .IPs "3. AC coefficients"
-(details)
+details
 .RE
 .PD 1
-.
-.TP
-.B \ 
+.RS
 MV & DC are most important, loosing them looks far worse than loosing
 the AC and the 1. & 2. partition.
-(MV&DC) are far smaller than the 3. partition (AC) meaning that errors
-will hit the AC partition much more often than the MV&DC partitions.
+(MV & DC) are far smaller than the 3. partition (AC) meaning that errors
+will hit the AC partition much more often than the MV & DC partitions.
 Thus, the picture will look better with partitioning than without,
 as without partitioning an error will trash AC/\:DC/\:MV equally.
+.RE
 .
 .TP
-.B vpsize=<0\-10000>
-video packet size, improves error-resistance (also see vdpart):
+.B vpsize=<0\-10000> (also see vdpart)
+Video packet size, improves error-resistance.
+.PD 0
 .RSs
-.IPs 0
+.IPs 0\ \ \ \ 
 disabled (default)
 .IPs 100-1000
 good choice
 .RE
+.PD 1
 .
 .TP
 .B ss\ \ \ \ \ 
@@ -5794,21 +5809,21 @@ grayscale only encoding (faster)
 .
 .TP
 .B vfdct=<0\-10>
-dct algorithm:
+DCT algorithm
 .PD 0
 .RSs
 .IPs 0
-automatically select a good one (default)
+Automatically select a good one (default).
 .IPs 1
 fast integer
 .IPs 2
 accurate integer
 .IPs 3
-mmx
+MMX
 .IPs 4
 mlib
 .IPs 5
-altivec
+AltiVec
 .IPs 6
 floating point AAN
 .RE
@@ -5816,22 +5831,22 @@ floating point AAN
 .
 .TP
 .B idct=<0\-99>
-idct algorithm.
+IDCT algorithm
 .br
 .I NOTE:
 To the best of our knowledge all these IDCTs do pass the IEEE1180 tests.
 .PD 0
 .RSs
 .IPs 0
-automatically select a good one (default)
+Automatically select a good one (default).
 .IPs 1
-jpeg reference integer
+JPEG reference integer
 .IPs 2
 simple
 .IPs 3
 simplemmx
 .IPs 4
-libmpeg2mmx (inaccurate, DON'T USE for encoding with keyint >100)
+libmpeg2mmx (inaccurate, do not use for encoding with keyint >100)
 .IPs 5
 ps2
 .IPs 6
@@ -5839,7 +5854,7 @@ mlib
 .IPs 7
 arm
 .IPs 8
-altivec
+AltiVec
 .IPs 9
 sh4
 .RE
@@ -5859,13 +5874,15 @@ Be careful, overly large values can cause disastrous things.
 .br
 .I WARNING:
 Large values might look good on some monitors but may look horrible
-on other monitors:
+on other monitors.
+.PD 0
 .RSs
-.IPs 0.0
+.IPs 0.0\ \ 
 disabled (default)
 .IPs 0.0\-0.3
 sane range
 .RE
+.PD 1
 .
 .TP
 .B dark_mask=<0.0\-1.0>
@@ -5881,17 +5898,19 @@ Be careful, overly large values can cause disastrous things.
 .br
 .I WARNING:
 Large values might look good on some monitors but may look horrible
-on other monitors / TV / TFT:
+on other monitors / TV / TFT.
+.PD 0
 .RSs
-.IPs 0.0
+.IPs 0.0\ \ 
 disabled (default)
 .IPs 0.0\-0.3
 sane range
 .RE
+.PD 1
 .
 .TP
 .B tcplx_mask=<0.0\-1.0>
-temporal complexity masking (default: 0.0 (disabled))
+Temporal complexity masking (default: 0.0 (disabled)).
 Imagine a scene with a bird flying across the whole scene; tcplx_mask
 will raise the quantizers of the bird's macroblocks (thus decreasing their
 quality), as the human eye usually does not have time to see all the bird's
@@ -5916,18 +5935,22 @@ the sky and the house.
 .I HINT:
 Crop any black borders completely as they will reduce the quality
 of the macroblocks (also applies without scplx_mask).
+.PD 0
 .RSs
-.IPs 0.0
+.IPs 0.0\ \ 
 disabled (default)
 .IPs 0.0\-0.5
 sane range
 .RE
+.PD 1
 .sp 1
+.RS
 .I NOTE:
 This setting does not have the same effect as using a custom matrix that
 would compress high frequencies harder, as scplx_mask will reduce the
 quality of P blocks even if only DC is changing.
 The result of scplx_mask will probably not look as good.
+.RE
 .
 .TP
 .B p_mask=<0.0\-1.0> (also see vi_qfactor)
@@ -5947,7 +5970,7 @@ average.
 .
 .TP
 .B ildct\ \ 
-use interlaced dct
+Use interlaced DCT.
 .
 .TP
 .B ilme\ \ \ 
@@ -5955,10 +5978,11 @@ Use interlaced motion estimation (mutually exclusive with qpel).
 .
 .TP
 .B alt\ \ \ \ 
-use alternative scantable
+Use alternative scantable.
 .
 .TP
 .B top=<-1\-1>\ \ \ 
+.PD 0
 .RSs
 .IPs -1
 automatic
@@ -5967,25 +5991,28 @@ bottom field first
 .IPs 1
 top field first
 .RE
+.PD 1
 .
 .TP
 .B format=<value>
+.PD 0
 .RSs
-.IPs YV12
+.IPs YV12\ 
 default
-.IPs 444P
+.IPs 444P\ 
 for ffv1
-.IPs 422P
-for huffyuv, lossless jpeg and ffv1
+.IPs 422P\ 
+for HuffYUV, lossless JPEG and ffv1
 .IPs 411P,YVU9
-for lossless jpeg and ffv1
+for lossless JPEG and ffv1
 .IPs BGR32
-for lossless jpeg and ffv1
+for lossless JPEG and ffv1
 .RE
+.PD 1
 .
 .TP
 .B pred\ \ \ 
-(for huffyuv)
+(for HuffYUV)
 .PD 0
 .RSs
 .IPs 0
@@ -6021,9 +6048,9 @@ mean prediction
 .PD 0
 .RSs
 .IPs 0
-vlc coding (golomb rice)
+vlc coding (Golomb-Rice)
 .IPs 1
-arithmetic coding (cabac)
+arithmetic coding (CABAC)
 .RE
 .PD 1
 .
@@ -6042,7 +6069,9 @@ large context model
 .TP
 .B qpel\ \ \ 
 Use quarter pel motion compensation (mutually exclusive with ilme).
-Hint: This seems only useful for high bitrate encodings.
+.br
+.I HINT:
+This seems only useful for high bitrate encodings.
 .
 .TP
 .B mbcmp=<0\-2000>
@@ -6054,11 +6083,11 @@ sum of absolute differences, fast (default)
 .IPs "1 (SSE)"
 sum of squared errors
 .IPs "2 (SATD)"
-sum of absolute hadamard transformed differences
+sum of absolute Hadamard transformed differences
 .IPs "3 (DCT)"
-sum of absolute dct transformed differences
+sum of absolute DCT transformed differences
 .IPs "4 (PSNR)"
-sum of the squared quantization errors (don't use, low quality)
+sum of squared quantization errors (avoid, low quality)
 .IPs "5 (BIT)"
 number of bits needed for the block
 .IPs "6 (RD)"
@@ -6072,13 +6101,13 @@ sum of squared vertical differences
 .IPs "10 (NSSE)"
 noise preserving sum of squared differences
 .IPs +256\ 
-use chroma too, doesn't work (correctly) with B-frames currently
+Also use chroma, currently does not work (correctly) with B-frames.
 .RE
 .PD 1
 .
 .TP
 .B ildctcmp=<0\-2000>
-Sets the comparison function for interlaced dct decision
+Sets the comparison function for interlaced DCT decision
 (see mbcmp for available comparison functions).
 .
 .TP
@@ -6106,7 +6135,7 @@ video rather than filtering it away before encoding.
 .
 .TP
 .B predia=<-99\-6>
-Diamond type and size for motion estimation pre pass
+diamond type and size for motion estimation pre-pass
 .
 .TP
 .B dia=<-99\-6>
@@ -6124,7 +6153,7 @@ Big normal diamonds are better quality than shape-adaptive diamonds.
 Shape-adaptive diamonds are a good tradeoff between speed and quality.
 .br
 .I NOTE:
-The sizes of the normal diamonds and shape adaptive ones don't have
+The sizes of the normal diamonds and shape adaptive ones do not have
 the same meaning.
 .RSs
 .IPs -3
@@ -6157,14 +6186,14 @@ normal size=2 diamond
 .B trell\ \ 
 Trellis searched quantization.
 This will find the optimal encoding for each 8x8 block.
-Trellis searched quantization is quite simple a optimal quantization in the PSNR
-vs bitrate sense (assuming that there would be no rounding errors introduced
-by the IDCT, which is obviously not the case) it simply finds a block for
-the minimum of error and lambda*bits.
+Trellis searched quantization is quite simply an optimal quantization in
+the PSNR versus bitrate sense (Assuming that there would be no rounding
+errors introduced by the IDCT, which is obviously not the case.).
+It simply finds a block for the minimum of error and lambda*bits.
 .PD 0
 .RSs
 .IPs lambda
-quantization parameter (QP) dependant constant
+quantization parameter (QP) dependent constant
 .IPs bits\ 
 amount of bits needed to encode the block
 .IPs error
@@ -6190,14 +6219,14 @@ lambda of each macroblock
 .
 .TP
 .B last_pred=<0\-99>
-Amount of motion predictors from the previous frame
+amount of motion predictors from the previous frame
 .PD 0
 .RSs
 .IPs 0
 (default)
 .IPs a
-will use 2a+1 x 2a+1 macroblock square of motion vector predictors from the
-previous frame
+Will use 2a+1 x 2a+1 macroblock square of motion vector predictors from the
+previous frame.
 .RE
 .PD 1
 .
@@ -6217,7 +6246,7 @@ always
 .
 .TP
 .B subq=<1\-8>
-subpel refinement quality (for qpel) (default: 8 (high quality)).
+subpel refinement quality (for qpel) (default: 8 (high quality))
 .br
 .I NOTE:
 This has a significant effect on speed.
@@ -6234,10 +6263,10 @@ Use MPEG quantizers instead of H.263.
 .
 .TP
 .B aic\ \ \ \ 
-ac prediction (=advanced intra prediction for H.263+)
+ac prediction (advanced intra prediction for H.263+)
 .br
 .I NOTE:
-vqmin should be 8 or larger for AIC H.263+.
+vqmin should be 8 or larger for H.263+ AIC.
 .
 .TP
 .B aiv\ \ \ \ 
@@ -6246,7 +6275,7 @@ alternatice inter vlc for H.263+
 .TP
 .B umv\ \ \ \ 
 unlimited MVs (H.263+ only)
-Allow encoding of abritarily long MVs.
+Allows encoding of abritarily long MVs.
 .
 .TP
 .B ibias=<-256\-256>
@@ -6271,7 +6300,7 @@ A more positive bias (-32 \- -16 instead of -64) seems to improve the PSNR.
 .
 .TP
 .B nr=<0\-100000>
-noise reduction, 0 is disabled
+Noise reduction, 0 means disabled.
 .
 .TP
 .B qns=<0\-3>
@@ -6288,11 +6317,11 @@ startpoint for the iterative search.
 .IPs 0
 disabled (default)
 .IPs 1
-only lower the absolute value of coefficients
+Only lower the absolute value of coefficients.
 .IPs 2
-only change coefficients before the last non zero coefficient + 1
+Only change coefficients before the last non-zero coefficient + 1.
 .IPs 3
-try all
+Try all.
 .RE
 .PD 1
 .
@@ -6322,7 +6351,7 @@ If you specify vcodec=mpeg2video this value can be 8, 9, 10 or 11.
 .TP
 .B cgop\ \ \ 
 Close all GOPs.
-Currently it doesn't work (yet).
+Currently it does not work.
 .
 .
 .SS nuv (\-nuvopts)
@@ -6735,7 +6764,7 @@ allocation
 (default: 5).
 .
 .TP
-.B container_frame_overhead=<0..>
+.B container_frame_overhead=<0...>
 Specifies a frame average overhead per frame, in bytes.
 Most of the time users express their target bitrate for video w/o taking
 care of the video container overhead.
