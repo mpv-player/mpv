@@ -27,7 +27,7 @@ VO_LIBS = -Llibvo -lvo $(X_LIBS)
 
 # .PHONY: all clean
 
-all:	$(PRG) $(PRG_HQ)
+all:	$(PRG)
 # $(PRG_AVIP)
 
 .c.o:
