@@ -283,6 +283,9 @@ install: $(ALL_PRG)
 ifeq ($(VIDIX),yes)
 	$(DO_MAKE)
 endif
+ifeq ($(SHARED_PP),yes)
+	$(MAKE) install -C libavcodec/libpostproc
+endif
 	if test ! -d $(BINDIR) ; then mkdir -p $(BINDIR) ; fi
 	$(INSTALL) -m 755 $(INSTALLSTRIP) $(PRG) $(BINDIR)/$(PRG)
 ifeq ($(GUI),yes)

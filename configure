@@ -6672,6 +6672,8 @@ DATADIR = \$(DESTDIR)$_datadir
 MANDIR = \$(DESTDIR)$_mandir
 CONFDIR = \$(DESTDIR)$_confdir
 LIBDIR = \$(DESTDIR)$_libdir
+# FFmpeg uses libdir instead of LIBDIR
+libdir = \$(LIBDIR)
 #AR = ar
 CC = $_cc
 HOST_CC = $_host_cc
