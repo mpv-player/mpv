@@ -39,7 +39,7 @@ extern int divx_quality;
 int init_acm_audio_codec(sh_audio_t *sh_audio){
     HRESULT ret;
     WAVEFORMATEX *in_fmt=sh_audio->wf;
-    unsigned long srcsize=0;
+    unsigned int srcsize=0;
 
     mp_msg(MSGT_WIN32,MSGL_V,"======= Win32 (ACM) AUDIO Codec init =======\n");
 

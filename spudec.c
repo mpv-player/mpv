@@ -252,6 +252,7 @@ static void spudec_process_control(spudec_handle_t *this)
       }
     }
   next_control:
+    ;
   }
 }
 
