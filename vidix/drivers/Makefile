@@ -4,6 +4,11 @@ include ../../config.mak
 
 BINDIR = $(LIBDIR)/mplayer/vidix
 
+CYBERBLADE_VID=cyberblade_vid.so
+CYBERBLADE_SRCS=cyberblade_vid.c
+CYBERBLADE_OBJS=cyberblade_vid.o
+CYBERBLADE_LIBS=-L../../libdha -ldha -lm
+CYBERBLADE_CFLAGS=$(OPTFLAGS) -fPIC -I. -I..
 
 RADEON_VID=radeon_vid.so
 RADEON_SRCS=radeon_vid.c
@@ -21,7 +26,7 @@ PM3_VID=pm3_vid.so
 PM3_SRCS=pm3_vid.c
 PM3_OBJS=pm3_vid.o
 PM3_LIBS=-L../../libdha -ldha
-PM3_CFLAGS=$(OPTFLAGS) -fPIC -I. -I.. 
+PM3_CFLAGS=$(OPTFLAGS) -fPIC -I. -I..
 
 MACH64_VID=mach64_vid.so
 MACH64_SRCS=mach64_vid.c
@@ -33,7 +38,7 @@ MGA_VID=mga_vid.so
 MGA_SRCS=mga_vid.c
 MGA_OBJS=mga_vid.o
 MGA_LIBS=-L../../libdha -ldha -lm
-MGA_CFLAGS=$(OPTFLAGS) -fPIC -I. -I.. 
+MGA_CFLAGS=$(OPTFLAGS) -fPIC -I. -I..
 
 MGA_CRTC2_VID=mga_crtc2_vid.so
 MGA_CRTC2_SRCS=mga_vid.c
@@ -41,12 +46,18 @@ MGA_CRTC2_OBJS=mga_crtc2_vid.o
 MGA_CRTC2_LIBS=-L../../libdha -ldha -lm
 MGA_CRTC2_CFLAGS=$(OPTFLAGS) -fPIC -I. -I.. -DCRTC2
 
-all:    $(RADEON_VID) $(RAGE128_VID) $(MACH64_VID) $(NVIDIA_VID) $(GENFB_VID) $(MGA_VID) $(MGA_CRTC2_VID) $(PM3_VID)
+all:    $(CYBERBLADE_VID) $(RADEON_VID) $(RAGE128_VID) $(MACH64_VID) $(NVIDIA_VID) $(GENFB_VID) $(MGA_VID) $(MGA_CRTC2_VID) $(PM3_VID)
 
 
 .SUFFIXES: .c .o
 
 # .PHONY: all clean
+
+$(CYBERBLADE_OBJS):    $(CYBERBLADE_SRCS)
+	$(CC) -c $(CYBERBLADE_CFLAGS) -o $@ $<
+
+$(CYBERBLADE_VID):     $(CYBERBLADE_OBJS)
+	$(LD) $(CYBERBLADE_LIBS) -shared -soname $(CYBERBLADE_VID) -o $(CYBERBLADE_VID) $(CYBERBLADE_OBJS)
 
 $(PM3_OBJS):    $(PM3_SRCS)
 	$(CC) -c $(PM3_CFLAGS) -o $@ $<
