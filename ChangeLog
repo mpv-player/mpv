@@ -49,12 +49,18 @@ mplayer (1.0)
     * more robust Real demuxer (can resync after errors)
     * support for AAC inside Real
     * MPEG Aspect code 4 fixed
-    * support for seeking in HTTP streams
     * support for selecting subtitle streams with -slang inside Ogg
     * wrapper demuxer for FFMpeg's libavformat (Nut is playable this way)
-    * Nullsoft video (NSV) demuxer
-    * updated LIVE.COM streaming code
     * much improved seeking in Ogg
+
+    Streaming:
+    * Nullsoft streaming video (NSV) demuxer
+    * support for URL redirection
+    * support for seeking in HTTP streams
+    * updated LIVE.COM streaming code
+    * fallback to live.com RTSP after Real RTSP
+    * suggests -playlist if normal streaming fails
+    * many improvements and bug fixes in the streaming code
 
     Decoders:
     * compilation failure without zlib in vd/lcl fixed
@@ -179,11 +185,10 @@ mplayer (1.0)
     * small improvements and bug fixes all over the place
 
     Ports:
-    * fixed compilation of Matroska on MinGW32/Cygwin
+    * fixed compilation of Matroska on MinGW/Cygwin
     * support for detecting non-Intel CPUs under Cygwin
     * sub autoloading under Windows
-    * removed pthread dependency (compiles out of the box on a default NetBSD
-      install)
+    * removed pthread dependency (out of the box compilation on NetBSD)
     * more 64 bit fixes
     * a lot of Mac OS X fixes
     * prefer TOOLS/cpuinfo over linuxemu's /proc/cpuinfo under FreeBSD/x86
@@ -256,7 +261,7 @@ mplayer (1.0)
     * inline vs always_inline - some speedups
     * MMX2 optimized FDCT
     * accurate 2-4-8 DCT
-    * much faster DV encoding (it beats libdv)
+    * much faster DV encoding (beats libdv)
     * support Cinepak files with funky (not divisible by 4) resolutions
     * Altivec optimized FDCT
     * XvMC speedups
@@ -291,7 +296,7 @@ mplayer (1.0)
     * Radeon 9800 (R350) support in VIDIX
     * proper fix for buffer size workarounds in vo_zr
     * new vo_zr2 driver, which uses the advantages of the filter layer
-    * fixed vesa when used together with pthread
+    * fixed vo_vesa when used together with pthread
     * runtime stay-on-top functionality (in almost all output drivers)
     * ALSA 1.x support
 
@@ -310,7 +315,8 @@ mplayer (1.0)
     * GUI file selector updated for newer formats
     * Fontconfig support
     * proper VobSub seeking support
-    * removed oldskool libcss support (nobody uses it and it has drawbacks)
+    * removed oldskool libcss support (nobody uses it, it has drawbacks and
+      possible security implications)
 
     MEncoder:
     * FFmpeg/libavcodec audio encoding support
