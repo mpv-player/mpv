@@ -557,7 +557,7 @@ void mplMainKeyHandle( int State,int Type,int Key )
    case wsS:         msg=evStop; break;
    case wsp:
    case wsP:         msg=evPlayList; break;
-   default:          mplayer_put_key( Key ); return;
+   default:          vo_x11_putkey( Key ); return;
   }
  if ( ( msg != evNone )&&( Type == wsKeyPressed ) )
   {
