@@ -106,7 +106,17 @@ static int init(sh_video_t *sh){
 	  return 0;
     }
 #ifdef DECORE_DIVX5
-    dec_param.codec_version = (sh->format==mmioFOURCC('D','I','V','3'))?311:500;
+    switch(sh->format) {
+      case mmioFOURCC('D','I','V','3'):
+       	dec_param.codec_version = 311;
+	break;
+      case mmioFOURCC('D','I','V','X'):
+       	dec_param.codec_version = 400;
+	break;
+      case mmioFOURCC('D','X','5','0'):
+      default: // Fallback to DivX 5 behaviour
+       	dec_param.codec_version = 500;
+    }
     dec_param.build_number = 0;
 #endif
     dec_param.x_dim = sh->disp_w;
