@@ -46,6 +46,8 @@ typedef struct {
 #ifdef HAVE_OGGVORBIS
   struct ov_struct_st *ov; // should be assigned on init  TODO: use *context
 #endif
+  unsigned char *codecdata;
+  int codecdata_len;
 } sh_audio_t;
 
 typedef struct {

@@ -118,6 +118,14 @@ inline static uint64_t stream_read_qword(stream_t *s){
   return y;
 }
 
+inline static unsigned int stream_read_int24(stream_t *s){
+  unsigned int y;
+  y = stream_read_char(s);
+  y=(y<<8)|stream_read_char(s);
+  y=(y<<8)|stream_read_char(s);
+  return y;
+}
+
 inline static int stream_read(stream_t *s,char* mem,int total){
   int len=total;
   while(len>0){

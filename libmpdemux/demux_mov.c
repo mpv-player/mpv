@@ -30,6 +30,7 @@
 #include "bswap.h"
 
 #include "qtpalette.h"
+#include "parse_mp4.h" // MP3 specific stuff
 
 #ifdef HAVE_ZLIB
 #include <zlib.h>
@@ -40,8 +41,14 @@
 #define BE_16(x) (be2me_16(*(unsigned short *)(x)))
 #define BE_32(x) (be2me_32(*(unsigned int *)(x)))
 
+#ifndef WORDS_BIGENDIAN
 #define char2short(x,y) ((x[y]<<8)|x[y+1])
 #define char2int(x,y) ((x[y]<<24)|(x[y+1]<<16)|(x[y+2]<<8)|x[y+3])
+#else
+#warning Check the implementation of char2short and char2int on BIGENDIAN!!!
+#define char2short(x,y) (x[y]|(x[y+1]<<8))
+#define char2int(x,y) (x[y]|(x[y+1]<<8)|(x[y+2]<<16)|(x[y+3]<<24))
+#endif
 
 typedef struct {
     unsigned int pts; // duration
@@ -671,7 +678,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		    trak->durmap[0].num, trak->timescale/trak->durmap[0].dur,
 		    char2short(trak->stdata,24)/trak->durmap[0].dur);*/
 		sh->samplerate=char2short(trak->stdata,24);
-		if((sh->samplerate < 8000) && trak->durmap) {
+		if((sh->samplerate < 7000) && trak->durmap) {
 		  switch(char2short(trak->stdata,24)/trak->durmap[0].dur) {
 		    // TODO: add more cases.
 		    case 31:
@@ -696,13 +703,26 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		if((trak->stdata[9]==0) && trak->stdata_len >= 36) { // version 0 with extra atoms
 		    int atom_len = char2int(trak->stdata,28);
 		    switch(char2int(trak->stdata,32)) { // atom type
-		      case MOV_FOURCC('e','s','d','s'):
+		      case MOV_FOURCC('e','s','d','s'): {
+			esds_t *esds; 				  
 			mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found MPEG4 audio Elementary Stream Descriptor atom (%d)!\n", atom_len);
-			if(atom_len >= 28)
-			  mp_msg(MSGT_DEMUX, MSGL_INFO, "Audio compressed datarate: %dkbit/s\n",
-			      char2int(trak->stdata,62)/1000);
-			  sh->i_bps=char2int(trak->stdata,62)/8;
-			break;
+			if(atom_len >= 8) {
+			  if(!mp4_parse_esds(&trak->stdata[36], atom_len-8, esds)) {
+			    
+			    sh->i_bps = esds->avgBitrate/8; 
+
+			    // dump away the codec specific configuration for the AAC decoder
+			    sh->codecdata_len = esds->decoderConfigLen;
+			    sh->codecdata = (unsigned char *)malloc(sh->codecdata_len);
+			    memcpy(sh->codecdata, esds->decoderConfig, sh->codecdata_len);
+			  }
+#if 0
+	  		  { FILE* f=fopen("esds.dat","wb");
+			  fwrite(&trak->stdata[36],atom_len-8,1,f);
+			  fclose(f); }
+#endif			  
+			}
+		      } break;
 		      default:
 			mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found unknown audio atom %c%c%c%c (%d)!\n",
 			    trak->stdata[32],trak->stdata[33],trak->stdata[34],trak->stdata[35],
