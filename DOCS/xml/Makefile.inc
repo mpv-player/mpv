@@ -17,6 +17,7 @@ HTML_STYLESHEET ?= ../default.css
 # This is the main target...
 $(HTMLDIR)/index.html: documentation.xml $(XSL_DEPS)
 	@if test "$(HTMLDIR)" = "" ; then echo "Error: HTMLDIR not set!!!"; echo "Typically this means, that you've run make from subdir of DOCS/xml. Don't do this!" ; false; fi
+	if test "$(USE_SYMLINKS)" = "yes" ; then for file in ../en/*.xml ; do if ! test -r `basename $$file` ; then ln -s $$file `basename $$file` ; fi ; done ; fi
 	-rm -f $(HTMLDIR)/*
 	../xmllint.sh $<
 	cp $(HTML_STYLESHEET) $(HTMLDIR)/
@@ -24,3 +25,6 @@ $(HTMLDIR)/index.html: documentation.xml $(XSL_DEPS)
 
 ../html.xsl:
 	cd .. && sh configure
+
+distclean:
+	if test "$(USE_SYMLINKS)" = "yes" ; then for file in *.xml ; do if test -L $$file && test "`readlink $$file`" = "../en/$$file" ; then rm $$file ; fi ; done ; fi
