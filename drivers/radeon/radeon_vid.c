@@ -14,7 +14,7 @@
  * Also here was used code from CVS of GATOS project and X11 trees.
  */
 
-#define RADEON_VID_VERSION "0.9.9"
+#define RADEON_VID_VERSION "0.9.9.1"
 
 /*
   It's entirely possible this major conflicts with something else
@@ -400,7 +400,7 @@ RTRACE("radeon_vid: usr_config: version = %x format=%x card=%x ram=%u src(%ux%u)
 	d1line = top * dstPitch;
 	d2line = (src_h * dstPitch) + ((top >> 1) * (dstPitch >> 1));
 	d3line = d2line + ((src_h >> 1) * (dstPitch >> 1));
-        besr.vid_buf0_base_adrs = (radeon_overlay_off + d1line) & VIF_BUF0_BASE_ADRS_MASK;
+        besr.vid_buf0_base_adrs = ((radeon_overlay_off + d1line) & VIF_BUF0_BASE_ADRS_MASK) | VIF_BUF1_PITCH_SEL;
         besr.vid_buf1_base_adrs = ((radeon_overlay_off + d2line) & VIF_BUF1_BASE_ADRS_MASK) | VIF_BUF1_PITCH_SEL;
         besr.vid_buf2_base_adrs = ((radeon_overlay_off + d3line) & VIF_BUF2_BASE_ADRS_MASK) | VIF_BUF2_PITCH_SEL;
     }
