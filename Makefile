@@ -298,6 +298,7 @@ distclean:
 	-rm -f *~ $(PRG) $(PRG_FIBMAP) $(PRG_MENCODER) $(PRG_CFG) $(OBJS)
 	-rm -f *.o *.a .depend configure.log codecs.conf.h
 	@for a in $(PARTS); do $(MAKE) -C $$a distclean; done
+	$(MAKE) -C libavcodec distclean LIBPREF=lib LIBSUF=.a
 
 strip:
 	strip -s $(ALL_PRG)
