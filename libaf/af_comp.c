@@ -26,8 +26,8 @@ typedef struct af_comp_s
   float time[AF_NCH];		// Forgetting factor for power estimate
   float	pow[AF_NCH];		// Estimated power level [dB]
   float	tresh[AF_NCH];		// Threshold [dB]
-  float	attack[AF_NCH];		// Attack time [ms]
-  float	release[AF_NCH];	// Release time [ms]
+  int	attack[AF_NCH];		// Attack time [ms]
+  int	release[AF_NCH];	// Release time [ms]
   float	ratio[AF_NCH];		// Compression ratio
 }af_comp_t;
 

@@ -187,9 +187,9 @@ int af_from_dB(int n, float* in, float* out, float k, float mi, float ma);
    AF_OK if of and AF_ERROR if fail */
 int af_to_dB(int n, float* in, float* out, float k);
 /* Helper function used to convert from ms to sample time*/
-int af_from_ms(int n, float* in, float* out, int rate, float mi, float ma);
+int af_from_ms(int n, float* in, int* out, int rate, float mi, float ma);
 /* Helper function used to convert from sample time to ms */
-int af_to_ms(int n, float* in, float* out, int rate); 
+int af_to_ms(int n, int* in, float* out, int rate); 
 /* Helper function for testing the output format */
 int af_test_output(struct af_instance_s* af, af_data_t* out);
 

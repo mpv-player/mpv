@@ -29,7 +29,7 @@ inline int af_to_dB(int n, float* in, float* out, float k)
   if(!in || !out) 
     return AF_ERROR;
 
-  for(i=0;i<AF_NCH;i++){
+  for(i=0;i<n;i++){
     if(in[i] == 0.0)
       out[i]=-200.0;
     else
@@ -38,30 +38,30 @@ inline int af_to_dB(int n, float* in, float* out, float k)
   return AF_OK;
 }
 
-/* Convert from ms to sample time*/
-inline int af_from_ms(int n, float* in, float* out, int rate, float mi, float ma)
+/* Convert from ms to sample time */
+inline int af_from_ms(int n, float* in, int* out, int rate, float mi, float ma)
 {
   int i = 0; 
   // Sanity check
   if(!in || !out) 
     return AF_ERROR;
 
-  for(i=0;i<AF_NCH;i++)
-    out[i]=clamp(in[i],ma,mi);
+  for(i=0;i<n;i++)
+    out[i]=(int)((float)rate * clamp(in[i],mi,ma)/1000.0);
 
   return AF_OK;
 }
 
 /* Convert from sample time to ms */
-inline int af_to_ms(int n, float* in, float* out, int rate)
+inline int af_to_ms(int n, int* in, float* out, int rate)
 {
   int i = 0; 
   // Sanity check
-  if(!in || !out) 
+  if(!in || !out || !rate) 
     return AF_ERROR;
 
-  for(i=0;i<AF_NCH;i++)
-    out[i]=in[i];
+  for(i=0;i<n;i++)
+    out[i]=1000.0 * (float)in[i]/((float)rate);
   
   return AF_OK;
 }
