@@ -98,9 +98,27 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 
 //===========================================================================//
 
+static int query_format(struct vf_instance_s* vf, unsigned int fmt){
+    if(IMGFMT_IS_RGB(fmt) || IMGFMT_IS_BGR(fmt)) return vf_next_query_format(vf, fmt);
+    // we can support only symmetric (chroma_x_shift==chroma_y_shift) YUV formats:
+    switch(fmt) {
+	case IMGFMT_YV12:
+	case IMGFMT_I420:
+	case IMGFMT_IYUV:
+	case IMGFMT_YVU9:
+//	case IMGFMT_IF09:
+	case IMGFMT_Y8:
+	case IMGFMT_Y800:
+	case IMGFMT_444P:
+	    return vf_next_query_format(vf, fmt);
+    }
+    return 0;
+}
+
 static int open(vf_instance_t *vf, char* args){
     vf->config=config;
     vf->put_image=put_image;
+    vf->query_format=query_format;
     vf->priv=malloc(sizeof(struct vf_priv_s));
     vf->priv->direction=args?atoi(args):0;
     return 1;
