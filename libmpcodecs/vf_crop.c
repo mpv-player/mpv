@@ -107,20 +107,30 @@ static void start_slice(struct vf_instance_s* vf, mp_image_t *mpi){
 static void draw_slice(struct vf_instance_s* vf,
         unsigned char** src, int* stride, int w,int h, int x, int y){
     unsigned char *src2[3];
-    src2[0] = src[0] + vf->priv->crop_y*stride[0] + vf->priv->crop_x;
+    src2[0] = src[0];
     if (vf->priv->dmpi->flags & MP_IMGFLAG_PLANAR) {
-	src2[1] = src[1] + (vf->priv->crop_y>>vf->priv->dmpi->chroma_y_shift)*stride[1]
-		+ (vf->priv->crop_x>>vf->priv->dmpi->chroma_x_shift);
-	src2[2] = src[2] + (vf->priv->crop_y>>vf->priv->dmpi->chroma_y_shift)*stride[2]
-		+ (vf->priv->crop_x>>vf->priv->dmpi->chroma_x_shift);
+	    src2[1] = src[1];
+	    src2[2] = src[2];
     }
     //mp_msg(MSGT_VFILTER, MSGL_V, "crop slice %d %d %d %d ->", w,h,x,y);
     if ((x -= vf->priv->crop_x) < 0) {
-	w += x;
+	x = -x;
+	src2[0] += x;
+	if (vf->priv->dmpi->flags & MP_IMGFLAG_PLANAR) {
+		src2[1] += x>>vf->priv->dmpi->chroma_x_shift;
+		src2[2] += x>>vf->priv->dmpi->chroma_x_shift;
+	}
+	w -= x;
 	x = 0;
     }
     if ((y -= vf->priv->crop_y) < 0) {
-	h += y;
+	y = -y;
+	src2[0] += y*stride[0];
+	if (vf->priv->dmpi->flags & MP_IMGFLAG_PLANAR) {
+		src2[1] += (y>>vf->priv->dmpi->chroma_y_shift)*stride[1];
+		src2[2] += (y>>vf->priv->dmpi->chroma_y_shift)*stride[2];
+	}
+	h -= y;
 	y = 0;
     }
     if (x+w > vf->priv->crop_w) w = vf->priv->crop_w-x;
