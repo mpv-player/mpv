@@ -5,6 +5,7 @@
 
 #include "../config.h"
 #include "../mp_msg.h"
+#include "../cpudetect.h"
 
 #include "img_format.h"
 #include "mp_image.h"
@@ -20,7 +21,66 @@ struct vf_priv_s {
 	int contrast;
 };
 
-static void process(unsigned char *dest, int dstride, unsigned char *src, int sstride,
+#ifdef HAVE_MMX
+static void process_MMX(unsigned char *dest, int dstride, unsigned char *src, int sstride,
+		    int w, int h, int brightness, int contrast)
+{
+	int i;
+	int pel;
+	int dstep = dstride-w;
+	int sstep = sstride-w;
+	short brvec[4];
+	short contvec[4];
+	short centvec[4] = { -128, -128, -128, -128 };
+
+	brightness = ((brightness+100)*511)/200-128;
+	contrast = ((contrast+100)*256)/200;
+
+	brvec[0] = brvec[1] = brvec[2] = brvec[3] = brightness;
+	contvec[0] = contvec[1] = contvec[2] = contvec[3] = contrast;
+		
+	while (h--) {
+		asm (
+			"movq (%5), %%mm3 \n\t"
+			"movq (%6), %%mm4 \n\t"
+			"movq (%7), %%mm5 \n\t"
+			"pxor %%mm0, %%mm0 \n\t"
+			".align 16 \n\t"
+			"1: \n\t"
+			"movq (%0), %%mm1 \n\t"
+			"movq (%0), %%mm2 \n\t"
+			"punpcklbw %%mm0, %%mm1 \n\t"
+			"punpckhbw %%mm0, %%mm2 \n\t"
+			"paddw %%mm5, %%mm1 \n\t"
+			"paddw %%mm5, %%mm2 \n\t"
+			"pmullw %%mm4, %%mm1 \n\t"
+			"pmullw %%mm4, %%mm2 \n\t"
+			"psraw $7, %%mm1 \n\t"
+			"psraw $7, %%mm2 \n\t"
+			"paddsw %%mm3, %%mm1 \n\t"
+			"paddsw %%mm3, %%mm2 \n\t"
+			"packuswb %%mm2, %%mm1 \n\t"
+			"addl $8, %0 \n\t"
+			"movq %%mm1, (%1) \n\t"
+			"addl $8, %1 \n\t"
+			"decl %4 \n\t"
+			"jnz 1b \n\t"
+			: "=r" (src), "=r" (dest)
+			: "0" (src), "1" (dest), "r" (w/8), "r" (brvec), "r" (contvec), "r" (centvec)
+		);
+		for (i = w&7; i; i--)
+		{
+			pel = ((*src++ - 128) * contrast)/256 + brightness;
+			*dest++ = pel > 255 ? 255 : (pel < 0 ? 0 : pel);
+		}
+		src += sstep;
+		dest += dstep;
+	}
+	asm volatile ( "emms \n\t" ::: "memory" );
+}
+#endif
+
+static void process_C(unsigned char *dest, int dstride, unsigned char *src, int sstride,
 		    int w, int h, int brightness, int contrast)
 {
 	int i;
@@ -29,13 +89,12 @@ static void process(unsigned char *dest, int dstride, unsigned char *src, int ss
 	int sstep = sstride-w;
 
 	brightness = ((brightness+100)*511)/200-128;
-	contrast = ((contrast+100)*512)/200;
+	contrast = ((contrast+100)*256)/200;
 
 	while (h--) {
 		for (i = w; i; i--)
 		{
-			/* slow */
-			pel = ((*src++ - 128) * contrast)/256 + brightness;
+			pel = ((*src++ - 128) * contrast)/128 + brightness;
 			*dest++ = pel > 255 ? 255 : (pel < 0 ? 0 : pel);
 		}
 		src += sstep;
@@ -43,7 +102,10 @@ static void process(unsigned char *dest, int dstride, unsigned char *src, int ss
 	}
 }
 
-/* FIXME: add packed yuv version of process, and optimized code! */
+static void (*process)(unsigned char *dest, int dstride, unsigned char *src, int sstride,
+		       int w, int h, int brightness, int contrast);
+
+/* FIXME: add packed yuv version of process */
 
 static void put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 {
@@ -141,6 +203,12 @@ static int open(vf_instance_t *vf, char* args)
 	vf->priv = malloc(sizeof(struct vf_priv_s));
 	memset(vf->priv, 0, sizeof(struct vf_priv_s));
 	if (args) sscanf(args, "%d:%d", &vf->priv->brightness, &vf->priv->contrast);
+
+	process = process_C;
+#ifdef HAVE_MMX
+	if(gCpuCaps.hasMMX) process = process_MMX;
+#endif
+	
 	return 1;
 }
 
