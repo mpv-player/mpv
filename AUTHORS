@@ -398,6 +398,10 @@ Kovriga, Gregory <gkovriga@techunix.technion.ac.il>
     * GUI DVD fixes
     * various small bug fixes in ASX/URL parser
 
+Krämer, Sebastian <mplayer@skraemer.de>
+    * german manpage translation
+    * german manpage maintainer
+
 Kühling, David <dvdkhlng@gmx.de>
     * libtheora support, Ogg/Theora demuxing changes
 
