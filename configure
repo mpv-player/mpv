@@ -288,7 +288,7 @@ echo $_echo_n "Checking version of $_cc ... $_echo_c"
 cc_version=`$_cc -v 2>&1 | sed -n 's/^.*version \([aegcygnustp-]*[0-9.]*\).*$/\1/p'`
 case $cc_version in
     '') cc_version="v. ?.??, bad"; cc_verc_fail=yes;;
-    2.95.[2-9]|3.[0-9])
+    2.95.[2-9]|2.95.[2-9].[0-9]|3.[0-9])
        cc_version="$cc_version, ok";;
     *) cc_version="$cc_version, bad"; cc_verc_fail=yes;;
 esac
