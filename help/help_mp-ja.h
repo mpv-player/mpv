@@ -1,13 +1,13 @@
-// Sync'ed with help_mp-en.h 1.115
 // Translated to Japanese. Encoding: EUC-JP
-
 // Translated by smoker <http://smokerz.net/~smoker/>
+
+// This translation is not complete yet.
 
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
 static char help_text[]=
-"Usage:   mplayer [options] [url|path/]filename\n"
+"使い方:   mplayer [オプション] [url|パス/]ファイル名\n"
 "\n"
 "基本的なオプション: (man page に全て網羅されています)\n"
 " -vo <drv[:dev]>  映像出力ドライバ及びデバイスを選択します ('-vo help'で一覧表示されます)\n"
@@ -246,14 +246,13 @@ static char help_text[]=
 #define MSGTR_ACMiniterror "Win32/ACM音声コーデックの読み込み及び初期化をすることが出来ません (DLLファイルは大丈夫ですか?).\n"
 #define MSGTR_MissingLAVCcodec "'%s' を libavcodecから見付けることが出来ません ...\n"
 
-#define MSGTR_MpegNoSequHdr "MPEG: FATAL: EOF while searching for sequence header.\n"
 #define MSGTR_CannotReadMpegSequHdr "FATAL: シーケンスヘッダ(sequence header)を読み込めません.\n"
 #define MSGTR_CannotReadMpegSequHdrEx "FATAL: 拡張シーケンスヘッダ(sequence header extension)を読み込めません.\n"
 #define MSGTR_BadMpegSequHdr "MPEG: 不正なシーケンスヘッダ(sequence header)\n"
 #define MSGTR_BadMpegSequHdrEx "MPEG: 不正な拡張シーケンスヘッダ(sequence header)\n"
 
 #define MSGTR_ShMemAllocFail "共有メモリの確保に失敗\n"
-#define MSGTR_CantAllocAudioBuf "音声出力バッファーの確保に失敗Cannot allocate audio out buffer\n"
+#define MSGTR_CantAllocAudioBuf "音声出力バッファーの確保に失敗\n"
 
 #define MSGTR_UnknownAudio "未知の、もしくは壊れた音声フォーマットです -> 無音声になります\n"
 
@@ -285,15 +284,13 @@ static char help_text[]=
 // vd.c
 #define MSGTR_VoConfigRequest "VDec: 映像出力設定 - %d x %d (preferred csp: %s)\n"
 #define MSGTR_CouldNotFindColorspace "一致するカラースペースが見付かりません - '-vop'をつけて試みて下さい...\n"
-#define MSGTR_MovieAspectIsSet "Movie-Aspect is %.2f:1 - prescaling to correct movie aspect.\n"
-#define MSGTR_MovieAspectUndefined "Movie-Aspect is undefined - no prescaling applied.\n"
 
 // ====================== GUI messages/buttons ========================
 
 #ifdef HAVE_NEW_GUI
 
 // --- labels ---
-#define MSGTR_About "About"
+#define MSGTR_About "アバウト"
 #define MSGTR_FileSelect "ファイル選択 ..."
 #define MSGTR_SubtitleSelect "サブタイトル選択 ..."
 #define MSGTR_OtherSelect "選択 ..."
@@ -329,7 +326,7 @@ static char help_text[]=
 #define MSGTR_SKIN_WARNING1 "[skin] 警告: スキン設定ファイル %d 行: widget found but before \"section\" not found ( %s )"
 #define MSGTR_SKIN_WARNING2 "[skin] 警告: スキン設定ファイル %d 行: widget found but before \"subsection\" not found (%s)"
 #define MSGTR_SKIN_WARNING3 "[skin] 警告: スキン設定ファイル %d 行: this subsection not supported by this widget (%s)"
-#define MSGTR_SKIN_BITMAP_16bit  "16 bits or less depth bitmap not supported (%s).\n"
+#define MSGTR_SKIN_BITMAP_16bit  "16 ビット以下の解消度はサポートされていません (%s).\n"
 #define MSGTR_SKIN_BITMAP_FileNotFound  "ファイルが存在しません (%s)\n"
 #define MSGTR_SKIN_BITMAP_BMPReadError "bmp 読み込みエラー (%s)\n"
 #define MSGTR_SKIN_BITMAP_TGAReadError "tga 読み込みエラー (%s)\n"
@@ -381,7 +378,6 @@ static char help_text[]=
 #define MSGTR_MENU_Exit "終了 ..."
 #define MSGTR_MENU_Mute "消音"
 #define MSGTR_MENU_Original "オリジナル"
-#define MSGTR_MENU_AspectRatio "Aspect ratio"
 #define MSGTR_MENU_Track "トラック %d"
 #define MSGTR_MENU_VideoTrack "映像トラック"
 
