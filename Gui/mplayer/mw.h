@@ -529,13 +529,13 @@ void mplMainKeyHandle( int State,int Type,int Key )
 
    case wsEscape:    msg=evExit; break;
 
-   case wsUp:        msg=evForward1min; break;
-   case wsDown:      msg=evBackward1min; break;
-   case wsRight:     msg=evForward10sec; break;
-   case wsLeft:      msg=evBackward10sec; break;
+//   case wsUp:        msg=evForward1min; break;
+//   case wsDown:      msg=evBackward1min; break;
+//   case wsRight:     msg=evForward10sec; break;
+//   case wsLeft:      msg=evBackward10sec; break;
 
-   case wsGrayMul:   msg=evIncVolume; break;
-   case wsGrayDiv:   msg=evDecVolume; break;
+//   case wsGrayMul:   msg=evIncVolume; break;
+//   case wsGrayDiv:   msg=evDecVolume; break;
 
    case wsEnter:     msg=evPlay; break;
    case wsSpace:     msg=evPause; break;
@@ -560,7 +560,7 @@ void mplMainKeyHandle( int State,int Type,int Key )
  if ( ( msg != evNone )&&( Type == wsKeyPressed ) )
   {
    mplMsgHandle( msg,0 );
-   mplMainRender=1;
-   wsPostRedisplay( &appMPlayer.mainWindow );
+//   mplMainRender=1;
+//   wsPostRedisplay( &appMPlayer.mainWindow );
   }
 }
