@@ -78,7 +78,7 @@ int mLocalDisplay;
 int WinID = -1;
 int vo_mouse_autohide = 0;
 int vo_wm_type = 0;
-static int vo_fs_type = 0;
+int vo_fs_type = 0; // needs to be accessible for GUI X11 code
 static int vo_fs_flip = 0;
 char **vo_fstype_list;
 
@@ -1403,25 +1403,30 @@ void vo_x11_fullscreen(void)
     if (vo_fs)
     {
         // fs->win
-        vo_x11_ewmh_fullscreen(_NET_WM_STATE_REMOVE);   // removes fullscreen state if wm supports EWMH
-
+        if ( ! (vo_fs_type & vo_wm_FULLSCREEN) ) // not needed with EWMH fs
+        {
         if (vo_dwidth != vo_screenwidth && vo_dheight != vo_screenheight)
             return;
-        vo_fs = VO_FALSE;
         x = vo_old_x;
         y = vo_old_y;
         w = vo_old_width;
         h = vo_old_height;
+        }
+
+        vo_x11_ewmh_fullscreen(_NET_WM_STATE_REMOVE);   // removes fullscreen state if wm supports EWMH
+        vo_fs = VO_FALSE;
     } else
     {
         // win->fs
         vo_x11_ewmh_fullscreen(_NET_WM_STATE_ADD);      // sends fullscreen state to be added if wm supports EWMH
 
+        vo_fs = VO_TRUE;
+        if ( ! (vo_fs_type & vo_wm_FULLSCREEN) ) // not needed with EWMH fs
+        {
         if (vo_old_width &&
             (vo_dwidth == vo_screenwidth && vo_dwidth != vo_old_width) &&
             (vo_dheight == vo_screenheight && vo_dheight != vo_old_height))
             return;
-        vo_fs = VO_TRUE;
         vo_old_x = vo_dx;
         vo_old_y = vo_dy;
         vo_old_width = vo_dwidth;
@@ -1430,7 +1435,7 @@ void vo_x11_fullscreen(void)
         y = 0;
         w = vo_screenwidth;
         h = vo_screenheight;
-
+        }
     }
     {
         long dummy;
@@ -1448,6 +1453,8 @@ void vo_x11_fullscreen(void)
         vo_fs_flip = 1;
     }
 
+    if ( ! (vo_fs_type & vo_wm_FULLSCREEN) ) // not needed with EWMH fs
+    {
     vo_x11_decoration(mDisplay, vo_window, (vo_fs) ? 0 : 1);
     vo_x11_sizehint(x, y, w, h, 0);
     vo_x11_setlayer(mDisplay, vo_window, vo_fs);
@@ -1456,9 +1463,11 @@ void vo_x11_fullscreen(void)
         vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
 
     XMoveResizeWindow(mDisplay, vo_window, x, y, w, h);
+    }
 #ifdef HAVE_XINERAMA
     vo_x11_xinerama_move(mDisplay, vo_window);
 #endif
+
     XMapRaised(mDisplay, vo_window);
     XRaiseWindow(mDisplay, vo_window);
     XFlush(mDisplay);
