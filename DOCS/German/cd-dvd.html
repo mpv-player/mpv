@@ -1,3 +1,4 @@
+
 <HTML>
 <BODY BGCOLOR=white>
 
@@ -108,6 +109,11 @@ Für
     
 <P><I>Lese die Dokumentationen dieser Pakete um diesen Schritt einfach zu machen.</I></P></LI>
   
+<LI><P><B>Alte DVD Unterstützung - <I>OPTIONAL</I></B></P>
+
+<P><I>Nützlich, wenn du verschlüsselte VOB0s von der Festplatte abspielen willst. Kompiliere und installiere <B>libcss</B>
+ 0.0.1 (nicht neuer) (wenn <B>MPlayer</B> es nicht findet, dann benutze die Option <CODE>-csslib /pfad/zu/libcss.so</CODE>).</P></LI>    
+    
 <LI><P><B>Kompiliere MPlayer neu.</B></P>
   
 <P><I>Lass <CODE>./configure</CODE> laufen. Wenn du libdvdread richtig installiert hast,
@@ -128,17 +134,56 @@ installiert sind.</P>
 <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Aktiviert die DVD-Unterstützung und wählt den Titel aus.</TD><TR>
 <TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-chapter &lt;chapter_id&gt;&nbsp;</TD>
 <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Wählt das DVD-Kapitel (Standard: wiedergabe von Kapitel 1)</TD><TR>
+  Beispiel : <CODE>-chapter 5-10</CODE> oder <CODE>-chapter -9</CODE></TD><TR>
 <TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-dvdangle &lt;angle_id&gt;&nbsp;</TD>
 <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Zum aus wählen der Kamera-Perspektive (Standard: 1)</TD><TR>
-<TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-sid &lt;subtitle_id&gt;&nbsp;</TD></TABLE>
-<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Aktiviert die Anzeige der DVD-Untertitel (mit subtitle_id oder Sprache angegeben) (normalerweise ausgeschaltet)<BR>
-  Für eine Liste der verfügbaren Sprachen verwende die <CODE>-v</CODE> Option und schau die die Ausgabe an.</TD><TR>
+<TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-alang &lt;Ländercode&gt;&nbsp;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  Der <CODE>Ländercode</CODE> sagt <B>MPlayer</B> welche Sprache bevorzugt werden soll.
+  Gib die Option <CODE>-v</CODE> nach den DVD-Optionen an und betrachte die Ausgabe, 
+  um eine Liste der verfügbaren Sprachen zu erhalten.<BR>
+  Zum Beispiel :<BR>
+  &nbsp;&nbsp;<CODE>-alang hu,en</CODE> - versucht zuerst den ungarischen Ton zu finden und spielt
+  den englischen Ton, falls es jenen nicht findet.</TD></TR>
+<TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-slang &lt;Ländercode&gt;&nbsp;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  Aktiviert die DVD-Untertitel. Der <CODE>Ländercode</CODE> sagt <B>MPlayer</B>,
+  welche Sprache bevorzugt werden soll.
+  Gib die Option <CODE>-v</CODE> nach den DVD-Optionen an und betrachte die Ausgabe,
+  um eine Liste der verf|gbaren Sprachen zu erhalten.<BR>
+  Zum Beispiel :<BR>
+  &nbsp;&nbsp;<CODE>-slang hu,en</CODE> - versucht zuerst die ungarischen Untertitel abzubilden und zeigt
+  die englischen Untertitel, dalls es jene nicht findet.</TD></TR>
+<TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-sid &lt;subtitel_id&gt;&nbsp;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  Aktiviert die DVD-Untertitel Ausgabe für einen bestimmten Kanal durch die gegebenen <CODE>subtitel_id</CODE> 
+  (Die Werte können von 0-31 gehen). Nützlich um z.B. schlecht erstellte DVDs abzuspielen, 
+  wo eine Länderangabe den falschen Kanal wählt.</TD></TR>
+<TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-csslib &lt;pfad/dateiname&gt;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  (alte DVD Option) Diese Option wird benützt um übliche Lage <CODE>libcss.so</CODE> zu überschreiben.
+</TD></TR>
+<TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-dvdauth &lt;DVD Device&gt;&nbsp;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  (alte DVD Option) Aktiviert die DVD Authentifizierung des angegebenen Devices.
+</TD></TR>
+<TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-dvdkey &lt;CSS key&gt;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  (alte DVD Option) Wenn keine DVD dekodiert wird, gibt diese Option den CSS key an, welcher benötigt wird,
+  um die DVD zu knacken. (Der CSS key wird bei der Authentifizierung mit der DVD angezeigt).
+</TD></TR>
+</TABLE>
 
 <P>Standard-Geräte ist <CODE>/dev/dvd</CODE>, du kannst das in config.h (compile time
 option) ändern, oder du kannst es als Dateinamen für <B>MPlayer</B> angeben:
 </P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 /dev/dvd</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -slang de /dev/dvd</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -slang de /dev/dvd -chapter 20-25</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 2 -alang en -chapter 5 -dvdangle 2</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvdauth /dev/dvd /mnt/cd/video_ts/vts_03_1.vob</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvdkey C005D4A16D vts_03_1.vob</CODE></P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -sid 5 /dev/dvd</CODE></P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 2 -chapter 5 -dvdangle 2</CODE></P>
 
@@ -166,23 +211,6 @@ homepage. Wir sind nicht die Autoren von libdvdread.
 Was ist mit den Untertiteln? Kann MPlayer sie anzeigen?
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Ja! Siehe oben im DVD-Kapitel.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-I höre keinen Sound / schlechten Sound (Spanisch oder anderen grässliche Dinge).
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-<B>MPlayer</B> verwendent zur Zeit noch nicht alle Informationen der IFO Blöcke
-der DVD. Du kannst den richtigen DVD-Audio Stream mit der '-aid 128' Option
-auswählen, wobei 128 die Stream ID des gewünschten Audio-Streams ist. Du kannst
-probiren mit Nummern: 128,129,... und so weiter. Natürlich wird diese Problem
-in Zukunft gelöst werden.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-Es gibt eigenartige Effekte (ändlich wie Interlace) speziell wenn schnellere
-Bewegungen von Objekten in Film gezeigt werden.
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-Bekanntes Problem, wie versuchen es später zu lösen (wenn wir zu libvo2 wechseln).
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
@@ -222,6 +250,13 @@ Wo kann ich die libdvdread und libcss Pakete bekommen?
 Von der Seite von Ogle:
 <A HREF="http://www.dtek.chalmers.se/groups/dvd">http://www.dtek.chalmers.se/groups/dvd</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+Ist es möglich nur ausgewählte Kapitell abzuspielen ?
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+Yes, siehe in der <CODE>-chapter</CODE> Option.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
 </TABLE>
 
 </BODY>
