@@ -78,10 +78,10 @@ depend: pci_names.c
 	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
 
 install:
-	mkdir -p $(prefix)/lib
-	install -m 755 -s -p $(LIBNAME) $(prefix)/lib/$(LIBNAME)
-	rm -f $(prefix)/lib/libdha.so
-	ln -sf $(LIBNAME) $(prefix)/lib/$(SHORTNAME)
+	mkdir -p $(LIBDIR)
+	install -m 755 -s -p $(LIBNAME) $(LIBDIR)/$(LIBNAME)
+	rm -f $(LIBDIR)/libdha.so
+	ln -sf $(LIBNAME) $(LIBDIR)/$(SHORTNAME)
 ifeq ($(TARGET_OS),OpenBSD)
 	ldconfig -R
 else
@@ -89,7 +89,7 @@ else
 endif
 
 uninstall:
-	rm -f $(prefix)/lib/libdha.so $(prefix)/lib/$(SHORTNAME) $(prefix)/lib/$(LIBNAME)
+	rm -f $(LIBDIR)/libdha.so $(LIBDIR)/$(SHORTNAME) $(LIBDIR)/$(LIBNAME)
 ifeq ($(TARGET_OS),OpenBSD)
 	ldconfig -R
 else
