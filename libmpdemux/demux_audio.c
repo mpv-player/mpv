@@ -66,7 +66,7 @@ int demux_audio_open(demuxer_t* demuxer) {
     } else if( hdr[0] == 'f' && hdr[1] == 'm' && hdr[2] == 't' && hdr[3] == ' ' ) {
       frmt = WAV;
       break;      
-    } else if(mp_decode_mp3_header(hdr) > 0) {
+    } else if((n = mp_decode_mp3_header(hdr)) > 0) {
       frmt = MP3;
       break;
     }
@@ -84,7 +84,7 @@ int demux_audio_open(demuxer_t* demuxer) {
   switch(frmt) {
   case MP3:
     sh_audio->format = 0x55;
-    demuxer->movi_start = st_pos-3;
+    demuxer->movi_start = st_pos-HDR_SIZE+n;
     for(n = 0; n < 5 ; n++) {
       pos = mp_decode_mp3_header(hdr);
       if(pos < 0)
@@ -160,7 +160,6 @@ int demux_audio_open(demuxer_t* demuxer) {
   priv = (da_priv_t*)malloc(sizeof(da_priv_t));
   priv->frmt = frmt;
   demuxer->priv = priv;
-//  demuxer->movi_start = st_pos;
   demuxer->audio->id = 0;
   demuxer->audio->sh = sh_audio;
   sh_audio->ds = demuxer->audio;
