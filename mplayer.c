@@ -1021,10 +1021,11 @@ if(stream_dump_type==5){
   int len;
   FILE *f;
   current_module="dumpstream";
-  if(stream->fd<0){
-    mp_msg(MSGT_CPLAYER,MSGL_FATAL,"Cannot dump this stream - no 'fd' available\n");
-    exit_player(MSGTR_Exit_error);
-  }
+// this check is bad! for example DVD, CDDA etc support uses stream but fd=-1 !
+//  if(stream->fd<0){
+//    mp_msg(MSGT_CPLAYER,MSGL_FATAL,"Cannot dump this stream - no 'fd' available\n");
+//    exit_player(MSGTR_Exit_error);
+//  }
   stream_reset(stream);
   stream_seek(stream,stream->start_pos);
   f=fopen(stream_dump_name,"wb");
@@ -1221,6 +1222,7 @@ current_module="find_audio_codec";
 if(sh_audio){
   // Go through the codec.conf and find the best codec...
   sh_audio->codec=NULL;
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
   if(audio_fm) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_TryForceAudioFmtStr,audio_fm);
   while(1){
     sh_audio->codec=find_codec(sh_audio->format,NULL,sh_audio->codec,1);
