@@ -82,6 +82,7 @@ extern char *mDisplayName;
 extern int WinID;
 extern int ice_layer;
 extern int stop_xscreensaver;
+extern int vo_x11_keepaspect;
 #endif
 
 #ifdef HAVE_AA
@@ -294,6 +295,8 @@ static config_t mplayer_opts[]={
 	{"icelayer", &ice_layer, CONF_TYPE_INT, CONF_RANGE, 0, 15, NULL},
 	{"stop_xscreensaver", &stop_xscreensaver, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"nostop_xscreensaver", &stop_xscreensaver, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	{"keepaspect", &vo_x11_keepaspect, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"nokeepaspect", &vo_x11_keepaspect, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 #endif
 
 #ifdef HAVE_XINERAMA
