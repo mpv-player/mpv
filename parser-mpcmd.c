@@ -60,7 +60,6 @@ play_tree_t*
 m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
 {
   int i,j,start_title=-1,end_title=-1;
-  int tmp = 0;
   char *opt,*splitpos=NULL;
   char entbuf[10];
   int no_more_opts = 0;
@@ -130,6 +129,7 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
 			
     if ((no_more_opts == 0) && (*opt == '-') && (*(opt+1) != 0)) /* option */
       {
+	int tmp = 0;
 	/* remove trailing '-' */
 	opt++;
 
