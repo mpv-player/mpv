@@ -6,6 +6,7 @@ native BSD make will not work.
 
 2. To run mplayer you will need to re-compile the kernel with 
 "options USER_LDT" (unless you are running -CURRENT, where this is default).
+If you have a CPU with SSE also use "options CPU_ENABLE_SSE" to use it.
 
 3. If mplayer complains about "CD-ROM Device '/dev/cdrom' not found!" make a 
 symbolic link : ln -s /dev/<your_cdrom_device> /dev/cdrom 
