@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.49 -->
+<!-- synced with 1.50 -->
 <sect1 id="install">
 <title>Telepítés</title>
 
@@ -235,10 +235,9 @@ Nem árt, ha vmi újabb rendszered van. Linuxon a 2.4.x-es kernel javasolt.
   </para></listitem>
 <listitem><para>
   Az <emphasis role="bold">Ogg Vorbis</emphasis> audió dekódoláshoz helyesen
-  telepített <systemitem class="library">libvorbis</systemitem> kell. Használd
-  a deb/rpm csomagokat, ha elérhetőek, vagy fordítsd le
-  <ulink url="http://ogg.org/ogg/vorbis/download/vorbis_nightly_cvs.tgz">forrásból</ulink>
-  (ez egy naponta frissített tarball a Vorbis CVS-ből).
+  telepített <systemitem class="library">libvorbis</systemitem> kell.
+  A bináris csomagokat és a forráskódot beszerezheted az
+  <ulink url="http://www.vorbis.com/download.psp">Ogg Vorbis oldaláról</ulink>
   </para></listitem>
 <listitem><para>
   <application>MPlayer</application> tudja használni a RealPlayer 8 vagy a
@@ -731,7 +730,7 @@ az OSD/SUB jellemzőket. Sok helyről beszerezheted:
 <listitem><para>
   A <application>GIMP</application> betű generátor plugin-jét használod, amit
   <filename class="directory">TOOLS/subfont-GIMP</filename> néven találsz
-  (megjegyzés: HSI RAW plugin is kell, lásd <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/" />).
+  (megjegyzés: HSI RAW plugin is kell, lásd <ulink url="http://realtime.ssu.ac.kr/~lethean/index.php?pagename=MplayerKoreanFonts" />).
  </para></listitem>
 <listitem><para>
   TrueType (TTF) betűket használsz, amik megfelelnek a <systemitem class="library">freetype</systemitem>
@@ -790,7 +789,7 @@ az OSD/SUB jellemzőket. Sok helyről beszerezheted:
     felhasználók által készített különböző betűtípusok
     </entry></row>
   <row><entry>
-    <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/"></ulink>
+    <ulink url="http://realtime.ssu.ac.kr/~lethean/index.php?pagename=MplayerKoreanFonts"></ulink>
     </entry><entry>
     koreai betűk és RAW plugin
     </entry></row>
