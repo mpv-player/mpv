@@ -2153,10 +2153,13 @@ echores "$_jpg"
 
 if test "$_jpg" = yes ; then
   _def_jpg='#define HAVE_JPEG 1'
+  _vosrc="$_vosrc vo_jpeg.c"
+  _vomodules="jpeg $_vomodules"
   _ld_jpg="-ljpeg"
   _mkf_jpg="yes"
 else
   _def_jpg='#undef HAVE_JPEG'
+  _novomodules="jpeg $_novomodules"
   _mkf_jpg="no"
 fi
 

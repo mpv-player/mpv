@@ -21,6 +21,14 @@ extern char *fb_dev_name;
 #ifdef HAVE_PNG
 extern int z_compression;
 #endif
+#ifdef HAVE_JPEG
+extern int jpeg_baseline;
+extern int jpeg_progressive_mode;
+extern int jpeg_optimize;
+extern int jpeg_smooth;
+extern int jpeg_quality;
+extern char * jpeg_outdir;
+#endif
 #ifdef HAVE_SDL
 //extern char *sdl_driver;
 extern int sdl_noxv;
@@ -114,6 +122,20 @@ struct config ao_plugin_conf[]={
 	{"softclip", &ao_plugin_cfg.pl_volume_softclip, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
+
+#ifdef HAVE_JPEG
+struct config jpeg_conf[]={
+	{"progressiv", &jpeg_progressive_mode, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"noprogressiv", &jpeg_progressive_mode, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	{"baseline", &jpeg_baseline, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"nobaseline", &jpeg_baseline, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	{"optimize", &jpeg_optimize, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
+	{"smooth", &jpeg_smooth, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
+	{"quality", &jpeg_quality, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
+	{"outdir", &jpeg_outdir, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{NULL, NULL, 0, 0, 0, 0, NULL}
+};
+#endif
 
 extern int sws_flags;
 extern int readPPOpt(void *conf, char *arg);
@@ -224,6 +246,9 @@ static config_t mplayer_opts[]={
 
 #ifdef HAVE_PNG
 	{"z", &z_compression, CONF_TYPE_INT, CONF_RANGE, 0, 9, NULL},
+#endif
+#ifdef HAVE_JPEG
+	{"jpeg", jpeg_conf, CONF_TYPE_SUBCONFIG, 0,0,0, NULL},
 #endif
 #ifdef HAVE_SDL
 	{"sdl", "Use -vo sdl:driver instead of -vo sdl -sdl driver\n",
