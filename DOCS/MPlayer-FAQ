@@ -188,3 +188,6 @@ A: A mixture of a hungarian and an english word. In english, "Ideg" means
 
 Q: I can't compile SVGAlib.. I'm using 2.3/2.4 kernel.
 A: You have to edit SVGAlib's Makefile.cfg and comment "BACKGROUND = y" out.
+
+Q: LIRC doesn't work, because ...
+A: Are you sure you use "mplayer_lirc" instead of "mplayer" ?
