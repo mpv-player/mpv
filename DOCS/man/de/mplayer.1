@@ -2501,7 +2501,7 @@ Momentan nur von tdfx_vid unterstützt.
 .PD 0
 .RSs
 .IPs <vo_Treiber>
-Wähle den Treiber, der als Quelle für das Overlay überhalb von X11 benutzt
+Wähle den Treiber, der als Quelle für das Overlay oberhalb von X11 benutzt
 werden soll.
 .RE
 .PD 1
@@ -4729,7 +4729,7 @@ Durchlauf 2 liest dann dieses Logfile und benutzt die Informationen für die
 eigentliche Arbeit.
 Beachte, dass diese Durchläufe
 .B nicht
-den Durchläufen 1 und 2 des Encodierungs-Vorgangs entsprechen.
+den Durchläufen 1 und 2 des Encodierungsvorgangs entsprechen.
 Um divtc two-pass mit der two-pass-Videoencodierung zu benutzen, sind drei
 Schritte nötig: zuerst divtc Durchlauf 1 und Encoder Durchlauf 1, dann divtc
 Durchlauf 2 und Encoder Durchlauf 1, schließlich dann divtc
@@ -4967,7 +4967,7 @@ Anzahl der Zeilen, die von der Mitte des Bildes ausgewählt werden sollen
 .
 .TP
 .B bmovl=versteckt:opak:fifo
-Der Bitmap-Overlay-Filter liest Bitmaps von einem FIFO und zeigt sie überhalb
+Der Bitmap-Overlay-Filter liest Bitmaps von einem FIFO und zeigt sie oberhalb
 des Filmfensters an.
 Er erlaubt dabei Transformationen der Bilder.
 Ein kleines Beispielprogramm findest du in TOOLS/\:bmovl-test.c.
@@ -5045,7 +5045,7 @@ Bildschirms aktualisiert wird, 1,8MB an RGBA32-Daten an den FIFO schicken.
 .
 .TP
 .B framestep=I|[i]step
-Rendert nur jeden n-ten Frame oder jeden Intra-Keyframe.
+Rendert nur jeden n-ten Frame oder jeden Intraframe (Keyframe).
 .sp 1
 Rufst du den Filter mit groß geschriebenem I als Parameter auf, so werden
 .B nur
