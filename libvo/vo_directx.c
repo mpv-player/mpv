@@ -31,6 +31,7 @@
 #include "../osdep/keycodes.h"
 #include "../mp_msg.h"
 #include "aspect.h"
+#include "geometry.h"
 
 static LPDIRECTDRAW2        g_lpdd = NULL;          //DirectDraw Object
 static LPDIRECTDRAWSURFACE  g_lpddsPrimary = NULL;  //Primary Surface: viewport through the Desktop
@@ -49,7 +50,6 @@ static uint8_t  *image=NULL;                        //image data
 static uint32_t image_format=0;                       //image format
 static uint32_t primary_image_format;
 static uint32_t vm = 0;                             //exclusive mode, allows resolution switching (not implemented yet)
-static uint32_t fs = 0;                             //display in window or fullscreen 
 static uint32_t dstride;                            //surface stride
 static uint32_t nooverlay = 0;                      //NonOverlay mode
 static DWORD    destcolorkey;                       //colorkey for our surface
@@ -58,6 +58,7 @@ static COLORREF windowcolor = RGB(0,0,16);          //windowcolor == colorkey
 extern void mplayer_put_key(int code);              //let mplayer handel the keyevents 
 extern void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));
 extern int vo_doublebuffering;                      //tribblebuffering    
+extern int vo_fs;
 
 /*****************************************************************************
  * DirectDraw GUIDs.
@@ -384,7 +385,7 @@ static uint32_t Directx_ManageDisplay(uint32_t width,uint32_t height)
     uint32_t        xscreen = GetSystemMetrics(SM_CXSCREEN);
     uint32_t        yscreen = GetSystemMetrics(SM_CYSCREEN);
 	POINT           point_window;
-	if(fs)
+	if(vo_fs)
 	{
 		/*center and zoom image*/
 		rd_window.top = 0;
@@ -466,7 +467,7 @@ static uint32_t Directx_ManageDisplay(uint32_t width,uint32_t height)
 		rs.right=image_width;
 		rs.top=0;
 		rs.bottom=image_height;
-        if(!fs)rd_window = rd;         /*don't crop the window !!!*/
+        if(!vo_fs)rd_window = rd;         /*don't crop the window !!!*/
         if(rd.left < 0)         //move out left
 		{
            rs.left=(-rd.left*1000)/xstretch1000;
@@ -501,17 +502,17 @@ static uint32_t Directx_ManageDisplay(uint32_t width,uint32_t height)
         if ((capsDrv.dwCaps & DDCAPS_ALIGNBOUNDARYDEST) && capsDrv.dwAlignBoundaryDest)
 		{
 			rd.left = (rd.left + capsDrv.dwAlignBoundaryDest / 2) & -(signed)(capsDrv.dwAlignBoundaryDest);
-	        if(!fs)rd_window.left = (rd_window.left + capsDrv.dwAlignBoundaryDest / 2) & -(signed)(capsDrv.dwAlignBoundaryDest); //don't forget the window
+	        if(!vo_fs)rd_window.left = (rd_window.left + capsDrv.dwAlignBoundaryDest / 2) & -(signed)(capsDrv.dwAlignBoundaryDest); //don't forget the window
 		}
         if ((capsDrv.dwCaps & DDCAPS_ALIGNSIZEDEST) && capsDrv.dwAlignSizeDest)
 		{
 			rd.right = rd.left + ((rd.right - rd.left) & -(signed) (capsDrv.dwAlignSizeDest));
-	        if(!fs)rd_window.right = rd_window.left + ((rd_window.right - rd_window.left) & -(signed) (capsDrv.dwAlignSizeDest)); //don't forget the window
+	        if(!vo_fs)rd_window.right = rd_window.left + ((rd_window.right - rd_window.left) & -(signed) (capsDrv.dwAlignSizeDest)); //don't forget the window
 		}
 		/*create an overlay FX structure to specify a destination color key*/
 		ZeroMemory(&ovfx, sizeof(ovfx));
         ovfx.dwSize = sizeof(ovfx);
-        if(fs)
+        if(vo_fs)
 		{
 			ovfx.dckDestColorkey.dwColorSpaceLowValue = 0; 
             ovfx.dckDestColorkey.dwColorSpaceHighValue = 0;
@@ -528,9 +529,9 @@ static uint32_t Directx_ManageDisplay(uint32_t width,uint32_t height)
         else ontop = 1;
 	}
 	/*calculate window rect with borders*/
-	if(!fs)AdjustWindowRect(&rd_window,WS_OVERLAPPEDWINDOW|WS_SIZEBOX,0);
+	if(!vo_fs)AdjustWindowRect(&rd_window,WS_OVERLAPPEDWINDOW|WS_SIZEBOX,0);
 
-	if((fs) || (!fs && ontop))hWndafter=HWND_TOPMOST;
+	if((vo_fs) || (!vo_fs && ontop))hWndafter=HWND_TOPMOST;
 	else hWndafter=HWND_NOTOPMOST;
 
 	/*display the window*/
@@ -1042,7 +1043,9 @@ static uint32_t put_image(mp_image_t *mpi){
 static uint32_t
 config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t options, char *title, uint32_t format)
 {
-	fs = options & 0x01;
+    int wx=-1;
+    int wy=-1;
+	vo_fs = options & 0x01;
 	vm = options & 0x02;
 	image_format =  format;
 	image_width = width;
@@ -1053,8 +1056,11 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
     aspect_save_orig(image_width,image_height);
     aspect_save_prescale(d_image_width,d_image_height);
     aspect_save_screenres(GetSystemMetrics(SM_CXSCREEN),GetSystemMetrics(SM_CYSCREEN));
-	aspect(&d_image_width,&d_image_height,A_NOZOOM);
-	SetWindowText(hWnd,title);
+    geometry(&wx, &wy, &d_image_width, &d_image_height,GetSystemMetrics(SM_CXSCREEN),GetSystemMetrics(SM_CYSCREEN));
+    aspect(&d_image_width,&d_image_height,A_NOZOOM);
+	if(wx !=-1)SetWindowPos(hWnd,NULL, wx, wy,d_image_width,d_image_height,SWP_SHOWWINDOW|SWP_NOOWNERZORDER);
+    SetWindowText(hWnd,title);
+    
 	/*release all surfaces*/
 	if (g_lpddsBack != NULL) g_lpddsBack->lpVtbl->Release(g_lpddsBack);
 	g_lpddsBack = NULL;
@@ -1069,7 +1075,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	/*set cooperativelevel*/
 	if(vm)  /*exclusive mode*/
 	{	
-		fs=1;
+		vo_fs=1;
 		if (g_lpdd->lpVtbl->SetCooperativeLevel(g_lpdd, hWnd, DDSCL_EXCLUSIVE|DDSCL_FULLSCREEN) != DD_OK)
 		{
 			mp_msg(MSGT_VO, MSGL_FATAL,"<vo_directx><FATAL ERROR>can't set cooperativelevel for exclusive mode");
@@ -1094,7 +1100,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		}
 	    mp_msg(MSGT_VO, MSGL_V,"<vo_directx><INFO>using normal cooperativelevel\n");
 	}
-	if(fs)
+	if(vo_fs)
 	{
 		/*remove the borders*/
 		SetWindowLong( hWnd, GWL_STYLE, 0 );  
@@ -1164,9 +1170,9 @@ static uint32_t control(uint32_t request, void *data, ...)
 				uint32_t height = 0;
 				window_placement.length = sizeof(WINDOWPLACEMENT);
                 GetWindowPlacement(hWnd, &window_placement);
-				if(fs)   /*go to windowed*/  
+				if(vo_fs)   /*go to windowed*/  
 				{
-					fs = 0;  
+					vo_fs = 0;  
 		            /*prevent the screen being filled with garbage*/
 		            window_placement.showCmd = SW_SHOWMINIMIZED; 		   
 		            SetWindowPlacement(hWnd,&window_placement);
@@ -1188,7 +1194,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 				}
 		        else    /*go to fullscreen*/
 				{
-					fs = 1;
+					vo_fs = 1;
 		            /*remove decoration and maximize*/
 		            SetWindowLong(hWnd,GWL_STYLE,0);       
 		            window_placement.showCmd = SW_SHOWMAXIMIZED;      
