@@ -44,7 +44,7 @@ static vf_info_t* filter_list[]={
 void vf_mpi_clear(mp_image_t* mpi,int x0,int y0,int w,int h){
     int y;
     if(mpi->flags&MP_IMGFLAG_PLANAR){
-	if(x==0 && w==mpi->width){
+	if(x0==0 && w==mpi->width){
 	    // full width clear:
 	    memset(mpi->planes[0]+mpi->stride[0]*y0,0,mpi->stride[0]*h);
 	    memset(mpi->planes[1]+mpi->stride[1]*(y0>>1),128,mpi->stride[1]*(h>>1));
@@ -146,7 +146,7 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 	  } else {
 	      if(!mpi->stride[0]) mpi->stride[0]=mpi->width*mpi->bpp/8;
 	  }
-	  vf_mpi_clear(mpi,mpi->width,mpi->height);
+	  vf_mpi_clear(mpi,0,0,mpi->width,mpi->height);
 	  mpi->flags|=MP_IMGFLAG_ALLOCATED;
         }
     }
