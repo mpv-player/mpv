@@ -31,6 +31,7 @@ extern ad_functions_t mpcodecs_ad_roqaudio;
 extern ad_functions_t mpcodecs_ad_dshow;
 extern ad_functions_t mpcodecs_ad_acm;
 extern ad_functions_t mpcodecs_ad_msgsm;
+extern ad_functions_t mpcodecs_ad_faad;
 
 ad_functions_t* mpcodecs_ad_drivers[] =
 {
@@ -55,6 +56,9 @@ ad_functions_t* mpcodecs_ad_drivers[] =
   &mpcodecs_ad_dshow,
 #endif
   &mpcodecs_ad_acm,
+#endif
+#ifdef HAVE_FAAD
+ &mpcodecs_ad_faad,
 #endif
   NULL
 };
