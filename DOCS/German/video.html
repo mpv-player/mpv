@@ -415,7 +415,7 @@ des nv.o XServer Treibermodules.</P>
 
 <P><B><A NAME=2.2.1.3.B>2.2.1.3.B. Fehlerberichte</A></B></P>
 
-<P>Wenn du Probleme mit dem DGA-Treibers hat, sende einen Fehlerbericht
+<P>Wenn du Probleme mit dem DGA-Treibers hast, sende einen Fehlerbericht
 (e-Mail Adresse siehe untern). Bitte starte MPlayer mit der -v Option und
 sende alle Zeilen beginnend mit vo_dga: in dem Fehlerbericht.</P>
  
@@ -429,7 +429,7 @@ auch möglicherweise. Danke!</P>
 
 <P><B><A NAME=2.2.1.4>2.2.1.4. SDL</A></B></P>
 
-<P>Hier sind einige Hinweise über SDL-Ausgabe in <B>MPlayer</B>.</P>
+<P>Hier findest du einige Hinweise über die SDL-Ausgabe in <B>MPlayer</B>.</P>
 
 <P><TABLE BORDER=0>
 <TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Es gibt einige Commandline-Optionen für SDL:</B></P></TD><TR>
@@ -442,55 +442,53 @@ esd, arts)</TD><TR>
 
 <TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>SDL-Tasten:</B></P></TD><TR>
 
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>F</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>wählt Vollbild/Fenster Modus</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>F</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>wählt Vollbild-/Fenster-Modus</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>C</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>verfügbare Zyklen beim Vollbild-Modus</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>W/S</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>zusammenhängend mit * und / (Mixer-Kontrolle)</TD><TR>
 
 </TABLE></P>
 
 <P><B>BEKANNTE FEHLER:</B></P>
-<P><UL><LI>Wenn Tasten unter dem sdl:aalib Konsolentreiber verwendet werden, wieder-
-holt es sich für immer. (verwende -vo aa !)
+<P><UL><LI>Wenn diese Tasten unter dem sdl:aalib Konsolentreiber verwendet werden,
+wiederholen sie sich für immer. (verwende -vo aa !)
 Es ist ein Bug in SDL, ich kann es nicht ändern (getestet mit SDL 1.2.1).
 </UL></P>
 
 <P><B><A NAME=2.2.1.5>2.2.1.5. SVGAlib</A></B></P>
 
-<P>Wenn du kein X hast, kannst du SVGAlib verwenden! Sie dir sicher, dass du
-nicht die -fs Option verwendest, seit es Software-Scaling unterstützt und es
-nun sehr LANGSAM ist, ausser wenn du eine echt schnelle CPU (und/oder MTRR?)
-hast. :(</P>
+<P>Wenn du kein X hast, kannst du SVGAlib verwenden! Stelle sicher, dass du
+nicht die -fs Option verwendest, da es Software-Scaling unterstützt, das nur 
+sehr LANGSAM ist, ausser wenn du eine echt schnelle CPU (und/oder MTRR?) hast. :(</P>
 
 <P>Natürlich musst du die svgalib und das Development-Paket installieren, damit
-<B>MPlayer</B> seinen SVGAlib Treiber einbaut (wird automatisch erkannt, kann aber
+<B>MPlayer</B> seinen SVGAlib Treiber einbauen kann (wird automatisch erkannt, kann aber
 erzwungen werden) und vergiss nicht die /etc/vga/libvga.config passend zu deiner
-Karte &amp; Monitor zu editieren.</P>
+Karte und deinem Monitor zu editieren.</P>
 
 <P><B><A NAME=2.2.1.6>2.2.1.6. Framebuffer Ausgabe (FBdev)</A></B></P>
 
-<P>Ob die FBdev Unterstützung eingebaut wird wird während des ./configure
+<P>Ob die FBdev Unterstützung eingebaut wird während des ./configure
 Scripts entschieden. Lese die Framebuffer Dokumentation von den Kernel Sourcen
 (Documentation/fb/*) um zu erfahren wie man es einschaltet, usw.. !</P>
 
-<P>Wenn deine Karte den VBE 2.0 Standard (ältere ISA/PCI Karten wie S3 Trio64)
-nicht unterstützt, nur VBE 1.2 (oder älter?) :
-Nun, VESAfb ist auch verfügbar, aber du musst den SciTech Display Doctor 
-(genannt UniVBE) vor Linux laden. Verwenden eine DOS-Startdiskette oder was
-auch immer. Und vergiss nicht deinen UniVBE zu registrieren ;))</P>
+<P>Möglicherweise unterstützt deine Karte den VBE 2.0 Standard nicht (ältere ISA/PCI
+Karten wie S3 Trio64), nur VBE 1.2 (oder älter?): Nun, VESAfb ist auch verfügbar, aber
+du musst den SciTech Display Doctor (genannt UniVBE) vor Linux laden. Verwende eine
+DOS-Startdiskette oder was auch immer. Und vergiss nicht dein UniVBE zu registrieren ;))</P>
 
 <P>Bei der FBdev Ausgabe können einige zusätzliche Parameter verwendet werden:</P>
 
 <P><TABLE BORDER=0>
 <TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fb</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 spezifiziert den zu verwendenden Framebuffer (/dev/fd0)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fbmode</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Modus-Name der verwendet werden soll (siehe /etc/fb.modes)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fbmodeconfig</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Konfiguratiosdatei für Modus-Namen (standard ist /etc/fb.modes)</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fbmode</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Modus das verwendet werden soll (siehe /etc/fb.modes)</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fbmodeconfig</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Konfigurationsdatei für das Modus (standard ist /etc/fb.modes)</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-monitor_hfreq</TD><TD></TD><TD ROWSPAN=3><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>WICHTIGE Werte, siehe example.conf</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-monitor_vfreq</TD><TD></TD><TR>		
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-monitor_dotclock</TD><TD></TD><TR>
 </TABLE></P>
 
-<P>Wenn du zu einem speziellen Modus welchsel willst, verwende</P>
+<P>Wenn du zu einem speziellen Modus wechseln willst, verwende</P>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -vm -fbmode (NamedesModus) Dateiname</CODE></P>
 
@@ -500,20 +498,19 @@ Die -flip Option wird nur unterstützt, wenn das Pixel-Format des Videos mit dem
 Video-Modus übereinstimmt. 
 Unter Beobachtung des bpp-Wertes, versucht der fbdev-Treiber den aktuellen oder
 den mit der -bpp Option eingestellten Wert zu verwenden.
-<LI><B>-zoom</B> Option ist nicht unterstützt (Software-Scaling ist langsam).
--fs Option ist nicht unterstützt. Du kannst keine 8bpp (oder weniger) Moduse
+<LI><B>-zoom</B> Option wird nicht unterstützt (Software-Scaling ist langsam).
+-fs Option wird nicht unterstützt. Du kannst keine Moduse mit 8bpp (oder weniger) 
 verwenden.</UL></P>
 
 <P>HINWEIS: FBdev Video-Modus-Änderungen _funktionieren nicht_ mit dem VESA
-Framebuffer, also frage nicht danach, wenn ist keine <B>MPlayer</B> Beschrän-
-kung ist.</P>
+Framebuffer, also frage nicht danach, denn es ist keine <B>MPlayer</B> Beschränkung.</P>
 
 <P><B><A NAME=2.2.1.7>2.2.1.7. Matrox Framebuffer (mga_vid)</A></B></P>
 
-<P>Diese Abschnitt ist über Matrox G200/G400/G450/G550 BES (Back-End Scaler) Unter-
-stützung, dem mga_vid Kernel-Treiber. Ist wird aktiv entwickelt von mir
-(A'rpi), und es hat Hardware-VSYNC-Unterstützung mit dreifach-Buffering. Es
-funktiert auf beidem, Konsole oder auch unter X.</P>
+<P>Diese Abschnitt handelt über Matrox G200/G400/G450/G550 BES (Back-End Scaler)
+Unterstützung, dem mga_vid Kernel-Treiber. Er wird von mir (A'rpi) aktiv entwickelt
+und besitzt Hardware-VSYNC-Unterstützung mit dreifach-Buffering. Er funktioniert auf
+Konsole oder auch unter X.</P>
   
 <P>Um es zu verwenden, kompiliere als erstes mga_vid.o:</P>
 
@@ -534,8 +531,8 @@ als erstes) und gib die Speichergröße der Karte in MB an:</P>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;insmod mga_vid.o mga_ram_size=16</CODE></P>
 
-<P>Um den Treiber automatisch geladen/ungeladen zu machen, wenn er braucht
-wird, füge die folgende Zeile an Ende der /etc/modules.conf Datei ein:</P>
+<P>Um den Treiber automatisch zu laden / unzuladen wenn er braucht wird, füge
+die folgende Zeile an Ende der /etc/modules.conf Datei ein:</P>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;alias char-major-178 mga_vid</CODE></P>
 
@@ -544,8 +541,8 @@ wird, füge die folgende Zeile an Ende der /etc/modules.conf Datei ein:</P>
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;depmod -a</CODE></P>
 
 <P>Jetzt musst du <B>MPlayer</B> (neu)kompilieren, ./configure wird automatisch
-/dev/mga_vid erkennen und den 'mga' Treiber einbauen. Die Verwendung mit
-<B>MPlayer</B> wird mit '-vo mga' wenn man eine matroxfb Konsole hat oder mit
+/dev/mga_vid erkannen und den 'mga' Treiber einbauen. Die Verwendung mit
+<B>MPlayer</B> wird wenn man eine matroxfb Konsole hat mit '-vo mga' oder mit
 '-vo xmga' unter XFree86 3.x.x oder 4.x.x realisiert.</P>
 
 <P>Der mga_vid Treiber arbeitet nun auch mit dem Xv zusammen.
@@ -563,24 +560,24 @@ aktuell. Es sollte getestet und der Code auf den letzten Stand gebracht werden.<
 
 <P>Dieser Treiber verwendet den Kernel-tdfx Framebuffer-Treiber um Filme mit
 YUV-Beschleunigung zu spielen. Du brauchst einen Kernel mit tdfxfb Support und
-rekompiliere <B>MPlayer</B> mit <CODE>./configure --enable-tdfxfb</CODE></P>
+kompiliere <B>MPlayer</B> mit <CODE>./configure --enable-tdfxfb</CODE> neu.</P>
 
 <P><B><A NAME=2.2.1.10>2.2.1.10. OpenGL Ausgabe</A></B></P>
 
-<P><B>MPlayer</B> unterstützt die Ausgabe von Videos über OpenGL. Unglück-
-licherweise unterstützten nicht alle Treiber diese Fähigkeit. Zum Beispiel
-haben es allen Karte mit Utah-GLX Treibern Unterstützung (für XFree86 3.3.6).
+<P><B>MPlayer</B> unterstützt die Ausgabe von Videos über OpenGL. Unglücklicherweise
+unterstützten nicht alle Treiber diese Fähigkeit. Zum Beispiel
+haben es allen Karte mit Utah-GLX Treibern (für XFree86 3.3.6) Unterstützung.
 Siehe <A HREF="http://utah-glx.sourceforge.net">http://utah-glx.sourceforge.net</A>
 für Details für die Installation.</P>
 
-<P>XFree86(DRI) >= 4.0.3 unterstützt nur Matrox und Radeon Karden.
+<P>XFree86(DRI) >= 4.0.3 unterstützt nur Matrox und Radeon Karten.
 Siehe <A HREF="http://dri.sourceforge.net">http://dri.sourceforge.net</A> für Downloads
 und Installtionsanweisungen.</P>
 
-<P><B><A NAME=2.2.1.11>2.2.1.11. AAlib - text mode displaying</B></P>
+<P><B><A NAME=2.2.1.11>2.2.1.11. AAlib - Textmodus-Ausgabe</B></P>
 
-<P><B>AAlib</B> ist eine Library für die Anzeige im grafischen Modus, unter Ver-
-wendung des ASCII Renderer. Es gibt EINE MENGE von Programmen die es bereits
+<P><B>AAlib</B> ist eine Bibliothek für die Anzeige im Textmodus, unter Verwendung
+des ASCII Renderer. Es gibt EINE GROSSE ANZAHL von Programmen die es bereits
 unterstützen, wie Doom, Quake, usw. MPlayer enthält einen sehr gut brauchbaren
 Treiber dafür.
 Wenn ./configure erkennt, dass aalib installiert ist, wird der aalib libvo
@@ -591,11 +588,11 @@ Treiber eingebaut.</P>
 <TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>1</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>verringert Kontrast</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>2</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>erhöht Kontrast</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>3</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>verringert Schärfe</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>4</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>erhöht Schärft</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>4</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>erhöht Schärfe</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>5</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>schaltet schnelles Rendern ein/aus</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>6</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>setzt das Farbmischungs-Modus (keine, error dithering, floyd steinberg)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>7</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Invertiere Bild</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>a</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>welchselt zwischen AA und MPlayer Kontrolle)</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>6</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>wählt das Farbmischungs-Modus (keine, error dithering, floyd steinberg)</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>7</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>invertiert Bild</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>a</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>wechselt zwischen AA und MPlayer Kontrolle)</TD><TR>
 
 <TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Die folgenden Kommandozeilen-Optionen können verwendet werden:</B></P></TD><TR>
 
