@@ -114,12 +114,16 @@ extern int sws_chr_vshift;
 extern int sws_chr_hshift;
 extern float sws_chr_gblur;
 extern float sws_lum_gblur;
+extern float sws_chr_sharpen;
+extern float sws_lum_sharpen;
 
 struct config scaler_filter_conf[]={
 	{"lgb", &sws_lum_gblur, CONF_TYPE_FLOAT, 0, 0, 100.0, NULL},
 	{"cgb", &sws_chr_gblur, CONF_TYPE_FLOAT, 0, 0, 100.0, NULL},
 	{"cvs", &sws_chr_vshift, CONF_TYPE_INT, 0, 0, 0, NULL},
 	{"chs", &sws_chr_hshift, CONF_TYPE_INT, 0, 0, 0, NULL},
+	{"ls", &sws_lum_sharpen, CONF_TYPE_FLOAT, 0, 0, 100.0, NULL},
+	{"cs", &sws_chr_sharpen, CONF_TYPE_FLOAT, 0, 0, 100.0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
