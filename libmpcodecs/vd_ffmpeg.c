@@ -184,7 +184,6 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 		sh->aspect = 16.0/9.0;
 		break;
 	    case FF_ASPECT_SQUARE:
-	    default:
 		sh->aspect = 0.0;
 		break;
 	}
