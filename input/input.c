@@ -55,7 +55,7 @@ static mp_cmd_t mp_cmds[] = {
   { MP_CMD_EDL_MARK, "edl_mark", 0, { {-1,{0}} } },
 #endif
   { MP_CMD_AUDIO_DELAY, "audio_delay", 1, { {MP_CMD_ARG_FLOAT,{0}}, {-1,{0}} } },
-  { MP_CMD_QUIT, "quit", 0, { {-1,{0}} } },
+  { MP_CMD_QUIT, "quit", 0, { {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
   { MP_CMD_PAUSE, "pause", 0, { {-1,{0}} } },
   { MP_CMD_GRAB_FRAMES, "grab_frames",0, { {-1,{0}} }  },
   { MP_CMD_PLAY_TREE_STEP, "pt_step",1, { { MP_CMD_ARG_INT ,{0}}, { MP_CMD_ARG_INT ,{0}}, {-1,{0}} } },

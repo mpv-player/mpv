@@ -614,7 +614,7 @@ static int libmpdemux_was_interrupted(int eof) {
   if((cmd = mp_input_get_cmd(0,0)) != NULL) {
        switch(cmd->id) {
        case MP_CMD_QUIT:
-	 exit_player_with_rc(MSGTR_Exit_quit, 0);
+	 exit_player_with_rc(MSGTR_Exit_quit, (cmd->nargs > 0)? cmd->args[0].v.i : 0);
        case MP_CMD_PLAY_TREE_STEP: {
 	 eof = (cmd->args[0].v.i > 0) ? PT_NEXT_ENTRY : PT_PREV_ENTRY;
        } break;
@@ -2541,7 +2541,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       brk_cmd = 1;
     } break;
     case MP_CMD_QUIT : {
-      exit_player_with_rc(MSGTR_Exit_quit, 0);
+      exit_player_with_rc(MSGTR_Exit_quit, (cmd->nargs > 0)? cmd->args[0].v.i : 0);
     }
     case MP_CMD_GRAB_FRAMES : {
       grab_frames=2;
