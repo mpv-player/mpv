@@ -110,6 +110,7 @@ void gtkDone( void ){
 
 void gtkMessageBox( int type,gchar * str )
 {
+ if ( !gtkIsOk ) return;
  gtkShMem->mb.type=type;
  strcpy( gtkShMem->mb.str,str );
  gtkSendMessage( evMessageBox );

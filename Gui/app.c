@@ -3,8 +3,11 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "app.h"
 #include "../config.h"
+#include "../mp_msg.h"
+#include "../help_mp.h"
+
+#include "app.h"
 #include "error.h"
 #include "wm/wskeys.h"
 #include "skin/skin.h"
@@ -109,8 +112,8 @@ void appInit( int argc,char* argv[], char *envp[], void* disp )
  initDebug(NULL); // write messages to stderr
  switch ( skinRead( skinName ) )
   {
-   case -1: dbprintf( 0,"[app] skin configfile not found.\n" ); exit( 0 );
-   case -2: dbprintf( 0,"[app] skin configfile read error.\n" ); exit( 0 );
+   case -1: mp_msg( MSGT_GPLAYER,MSGL_ERR,MSGTR_SKIN_SKINCFG_SkinNotFound,skinName ); exit( 0 );
+   case -2: mp_msg( MSGT_GPLAYER,MSGL_ERR,MSGTR_SKIN_SKINCFG_SkinCfgReadError,skinName ); exit( 0 );
   }
  mplInit( argc,argv,envp,disp ); // does gtk & ws initialization, create windows
 }

@@ -261,5 +261,7 @@ static char help_text[]=
 #define MSGTR_SKIN_FONT_NonExistentFontID "nemlétezõ betûtipus azonosító ( %s )\n"
 #define MSGTR_SKIN_UnknownParameter "ismeretlen paraméter ( %s )\n"
 #define MSGTR_SKINBROWSER_NotEnoughMemory "[skinböngészõ] nincs elég memória.\n"
+#define MSGTR_SKIN_SKINCFG_SkinNotFound "Skin nem található ( %s ).\n"
+#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "Skin configfile olvasási hiba ( %s ).\n"
 
 #endif
