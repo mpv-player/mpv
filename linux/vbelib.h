@@ -199,6 +199,7 @@ extern int vbeGetControllerInfo(struct VbeInfoBlock *);
 extern int vbeGetModeInfo(unsigned mode,struct VesaModeInfoBlock *);
 extern int vbeSetMode(unsigned mode,struct VesaCRTCInfoBlock *);
 extern int vbeGetMode(unsigned *mode);
+extern int vbeGetPixelClock(unsigned *mode,unsigned *pixel_clock);
 extern int vbeSaveState(void **data); /* note never copy this data */
 extern int vbeRestoreState(void *data);
 extern int vbeGetWindow(unsigned *win_num); /* win_A=0 or win_B=1 */

@@ -201,3 +201,85 @@ void libvo_register_options(void* cfg) {
   vo_dxr2_register_options(cfg);
 #endif
 }
+#if defined(HAVE_FBDEV)||defined(HAVE_VESA)  
+/* Borrowed from vo_fbdev.c 
+Monitor ranges related functions*/
+
+char *monitor_hfreq_str = NULL;
+char *monitor_vfreq_str = NULL;
+char *monitor_dotclock_str = NULL;
+
+float range_max(range_t *r)
+{
+float max = 0;
+
+	for (/* NOTHING */; (r->min != -1 && r->max != -1); r++)
+		if (max < r->max) max = r->max;
+	return max;
+}
+
+
+int in_range(range_t *r, float f)
+{
+	for (/* NOTHING */; (r->min != -1 && r->max != -1); r++)
+		if (f >= r->min && f <= r->max)
+			return 1;
+	return 0;
+}
+
+range_t *str2range(char *s)
+{
+	float tmp_min, tmp_max;
+	char *endptr = s;	// to start the loop
+	range_t *r = NULL;
+	int i;
+
+	if (!s)
+		return NULL;
+	for (i = 0; *endptr; i++) {
+		if (*s == ',')
+			goto out_err;
+		if (!(r = (range_t *) realloc(r, sizeof(*r) * (i + 2)))) {
+			printf("can't realloc 'r'\n");
+			return NULL;
+		}
+		tmp_min = strtod(s, &endptr);
+		if (*endptr == 'k' || *endptr == 'K') {
+			tmp_min *= 1000.0;
+			endptr++;
+		} else if (*endptr == 'm' || *endptr == 'M') {
+			tmp_min *= 1000000.0;
+			endptr++;
+		}
+		if (*endptr == '-') {
+			tmp_max = strtod(endptr + 1, &endptr);
+			if (*endptr == 'k' || *endptr == 'K') {
+				tmp_max *= 1000.0;
+				endptr++;
+			} else if (*endptr == 'm' || *endptr == 'M') {
+				tmp_max *= 1000000.0;
+				endptr++;
+			}
+			if (*endptr != ',' && *endptr)
+				goto out_err;
+		} else if (*endptr == ',' || !*endptr) {
+			tmp_max = tmp_min;
+		} else
+			goto out_err;
+		r[i].min = tmp_min;
+		r[i].max = tmp_max;
+		if (r[i].min < 0 || r[i].max < 0)
+			goto out_err;
+		s = endptr + 1;
+	}
+	r[i].min = r[i].max = -1;
+	return r;
+out_err:
+	if (r)
+		free(r);
+	return NULL;
+}
+
+/* Borrowed from vo_fbdev.c END */
+#endif
+

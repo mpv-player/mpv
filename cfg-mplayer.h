@@ -6,13 +6,16 @@
 
 extern int use_stdin;
 
+#if defined(HAVE_FBDEV)||defined(HAVE_VESA)
+extern char *monitor_hfreq_str;
+extern char *monitor_vfreq_str;
+extern char *monitor_dotclock_str;
+#endif
+
 #ifdef HAVE_FBDEV
 extern char *fb_dev_name;
 extern char *fb_mode_cfgfile;
 extern char *fb_mode_name;
-extern char *monitor_hfreq_str;
-extern char *monitor_vfreq_str;
-extern char *monitor_dotclock_str;
 #else
 #ifdef HAVE_DIRECTFB
 extern char *fb_dev_name;

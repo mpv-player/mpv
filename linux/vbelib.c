@@ -376,6 +376,26 @@ int vbeGetMode(unsigned *mode)
   return retval;
 }
 
+int vbeGetPixelClock(unsigned *mode,unsigned *pixel_clock) // in Hz
+{
+  struct LRMI_regs r;
+  int retval;
+  memset(&r,0,sizeof(struct LRMI_regs));
+  r.eax = 0x4f0b;
+  r.ebx = 0;
+  r.edx = *mode;
+  r.ecx = *pixel_clock;
+  if(!VBE_LRMI_int(0x10,&r)) return VBE_VM86_FAIL;
+  retval = r.eax & 0xffff;
+  if(retval == 0x4f)
+  {
+    *pixel_clock = r.ecx;
+    retval = VBE_OK;
+  }
+  return retval;
+}
+
+
 int vbeSaveState(void **data)
 {
   struct LRMI_regs r;

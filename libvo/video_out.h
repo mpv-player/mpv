@@ -241,4 +241,20 @@ extern float vo_fps;
 
 extern char *vo_subdevice;
 
+#if defined(HAVE_FBDEV)||defined(HAVE_VESA) 
+
+typedef struct {
+        float min;
+	float max;
+	} range_t;
+
+extern float range_max(range_t *r);
+extern int in_range(range_t *r, float f);
+extern range_t *str2range(char *s);
+extern char *monitor_hfreq_str;
+extern char *monitor_vfreq_str;
+extern char *monitor_dotclock_str;
+
+#endif 
+		
 #endif

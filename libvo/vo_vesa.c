@@ -16,7 +16,7 @@
   - refresh rate support (need additional info from mplayer)
 */
 #include "config.h"
-
+#include "gtf.h"
 #include <stdio.h>
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
@@ -53,6 +53,10 @@ extern vo_functions_t video_out_png;
 #endif
 
 extern int verbose;
+
+extern char *monitor_hfreq_str;
+extern char *monitor_vfreq_str;
+extern char *monitor_dotclock_str;
 
 #define MAX_BUFFERS 3
 
@@ -523,18 +527,69 @@ unsigned fillMultiBuffer( unsigned long vsize, unsigned nbuffs )
   return i;
 }
 
+static int set_refresh(unsigned x, unsigned y, unsigned mode,struct VesaCRTCInfoBlock *crtc_pass)
+{
+    unsigned pixclk;
+    float H_freq;
+    
+    range_t *monitor_hfreq = NULL;
+    range_t *monitor_vfreq = NULL;
+    range_t *monitor_dotclock = NULL;
 
+    monitor_hfreq = str2range(monitor_hfreq_str);
+    monitor_vfreq = str2range(monitor_vfreq_str);
+    monitor_dotclock = str2range(monitor_dotclock_str);
+    
+		if (!monitor_hfreq || !monitor_vfreq || !monitor_dotclock) {
+			printf("vo_vesa: you have to specify the capabilities of"
+					" the monitor. Not changing refresh rate.\n");
+			return 0;
+		}
+
+    H_freq = range_max(monitor_hfreq)/1000;
+    
+//    printf("H_freq MAX %f\n",H_freq);
+    
+    do
+    {
+    H_freq -= 0.1;
+    GTF_calcTimings(x,y,H_freq,GTF_HF,0, 0,crtc_pass);		      
+//    printf("PixelCLK %d\n",(unsigned)crtc_pass->PixelClock);    
+    }
+    while (!in_range(monitor_vfreq,crtc_pass->RefreshRate/100));
+    
+    pixclk = crtc_pass->PixelClock;
+//    printf("PIXclk before %d\n",pixclk);
+    vbeGetPixelClock(&mode,&pixclk); 
+//    printf("PIXclk after %d\n",pixclk);
+    GTF_calcTimings(x,y,pixclk/1000000,GTF_PF,0,0,crtc_pass);
+//    printf("Flags: %x\n",(unsigned) crtc_pass->Flags);
+/*    
+    printf("hTotal %d\n",crtc_pass->hTotal);
+    printf("hSyncStart %d\n",crtc_pass->hSyncStart);
+    printf("hSyncEnd %d\n",crtc_pass->hSyncEnd);
+    
+    printf("vTotal %d\n",crtc_pass->vTotal);
+    printf("vSyncStart %d\n",crtc_pass->vSyncStart);
+    printf("vSyncEnd %d\n",crtc_pass->vSyncEnd);
+    
+    printf("RR %d\n",crtc_pass->RefreshRate);
+    printf("PixelCLK %d\n",(unsigned)crtc_pass->PixelClock);*/
+    return 1;
+}
 /* fullscreen:
  * bit 0 (0x01) means fullscreen (-fs)
  * bit 1 (0x02) means mode switching (-vm)
  * bit 2 (0x04) enables software scaling (-zoom)
  * bit 3 (0x08) enables flipping (-flip) (NK: and for what?)
  */
+
 static uint32_t
 config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format,const vo_tune_info_t *info)
 {
-  struct VbeInfoBlock vib;
+  struct VbeInfoBlock vib;  
   struct VesaModeInfoBlock vmib;
+  struct VesaCRTCInfoBlock crtc_pass;
   size_t i,num_modes;
   uint32_t w,h;
   unsigned short *mode_ptr,win_seg;
@@ -831,11 +886,26 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 			PRINT_VBE_ERR("vbeSaveState",err);
 			return -1;
 		}
-		if((err=vbeSetMode(video_mode,NULL)) != VBE_OK)
+		/* TODO: check for VBE 3, monitor limitation
+		         user might pass refresh value
+			 GTF constants might be read from monitor
+			 for best results
+		*/
+		if (((int)(vib.VESAVersion >> 8) & 0xff) > 2) {
+		
+		if (set_refresh(dstW,dstH,video_mode,&crtc_pass))
+		video_mode = video_mode | 0x800;
+		
+		}
+		
+		;
+		
+		if ((err=vbeSetMode(video_mode,&crtc_pass)) != VBE_OK)
 		{
 			PRINT_VBE_ERR("vbeSetMode",err);
 			return -1;
 		}
+		
 		/* Now we are in video mode!!!*/
 		/* Below 'return -1' is impossible */
 		if(verbose)
