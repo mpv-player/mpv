@@ -462,6 +462,14 @@ int use_stdin=0; //int f; // filedes
 
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s",banner_text);
 
+#ifdef HAVE_NEW_GUI
+//  this one segfaults if running 'mplayer' (without path containing '/')
+//  if ( !strcmp( strrchr( argv[0],'/' ),"/gmplayer" ) ) appInit( argc,argv,envp );
+  if ( strstr( argv[0],"gmplayer" ) ) appInit( argc,argv,envp );
+
+#endif
+
+
 #ifdef HAVE_GUI
   if ( nogui ) {
 #endif
@@ -559,6 +567,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 #ifdef USE_TERMCAP
   load_termcap(NULL); // load key-codes
 #endif
+
 
   //========= Catch terminate signals: ================
   // terminate requests:

@@ -80,7 +80,7 @@ mplayerwithoutlink: $(MPLAYER_DEP)
 	@for a in $(PARTS); do $(MAKE) -C $$a all ; done
 
 $(PRG):	$(MPLAYER_DEP)
-	$(CC) $(CFLAGS) -o $(PRG) mplayer.o $(OBJS) $(XMM_LIBS) $(LIRC_LIBS) $(A_LIBS) -lm $(TERMCAP_LIB) $(LIB_LOADER) $(AV_LIB) -Llibmpeg2 -lmpeg2 -Llibao2 -lao2 $(VO_LIBS) $(CSS_LIB) -Lencore -lencore $(DECORE_LIBS) $(ARCH_LIBS)
+	$(CC) $(CFLAGS) -o $(PRG) mplayer.o $(OBJS) $(XMM_LIBS) $(LIRC_LIBS) $(A_LIBS) -lm $(TERMCAP_LIB) $(LIB_LOADER) $(AV_LIB) -Llibmpeg2 -lmpeg2 -Llibao2 -lao2 $(VO_LIBS) $(CSS_LIB) -Lencore -lencore $(DECORE_LIBS) $(GUI_LIBS) $(ARCH_LIBS)
 
 $(PRG_FIBMAP): fibmap_mplayer.o
 	$(CC) -o $(PRG_FIBMAP) fibmap_mplayer.o
