@@ -78,10 +78,10 @@ static int add_to_fourcc(char *s, char *alias, unsigned int *fourcc,
 		goto err_out_parse_error;
 	return 1;
 err_out_duplicated:
-	mp_msg(MSGT_CODECCFG,MSGL_ERR,"duplicated fourcc");
+	mp_msg(MSGT_CODECCFG,MSGL_ERR,"duplicated FourCC");
 	return 0;
 err_out_too_many:
-	mp_msg(MSGT_CODECCFG,MSGL_ERR,"too many fourcc/format...");
+	mp_msg(MSGT_CODECCFG,MSGL_ERR,"too many FourCCs/formats...");
 	return 0;
 err_out_parse_error:
 	mp_msg(MSGT_CODECCFG,MSGL_ERR,"parse error");
@@ -97,7 +97,7 @@ static int add_to_format(char *s, char *alias,unsigned int *fourcc, unsigned int
 	for (i = 0; i < CODECS_MAX_FOURCC && fourcc[i] != 0xffffffff; i++)
 		/* NOTHING */;
 	if (i == CODECS_MAX_FOURCC) {
-		mp_msg(MSGT_CODECCFG,MSGL_ERR,"too many fourccs/formats...");
+		mp_msg(MSGT_CODECCFG,MSGL_ERR,"too many FourCCs/formats...");
 		return 0;
 	}
 
@@ -319,7 +319,7 @@ static int validate_codec(codecs_t *c, int type)
 
 #if 0
 	if (c->fourcc[0] == 0xffffffff) {
-		mp_msg(MSGT_CODECCFG,MSGL_ERR,"\ncodec(%s) does not have fourcc/format!\n", c->name);
+		mp_msg(MSGT_CODECCFG,MSGL_ERR,"\ncodec(%s) does not have FourCC/format!\n", c->name);
 		return 0;
 	}
 
