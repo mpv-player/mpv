@@ -24,6 +24,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
 
 static int open(vf_instance_t *vf, char* args){
     vf->query_format=query_format;
+    vf->default_caps=0;
     vf->priv=malloc(sizeof(struct vf_priv_s));
 
     if(args){
