@@ -46,6 +46,8 @@ static vo_info_t vo_info =
         ""
 };
 
+extern int verbose;
+
 /* since it doesn't seem to be defined on some platforms */
 int XShmGetEventBase(Display*);
 
@@ -95,7 +97,6 @@ static uint32_t               drwcX,drwcY,dwidth,dheight,mFullscreen;
  static uint32_t               mdwidth,mdheight;
 #endif
 
-
 static void (*draw_alpha_fnc)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride);
 
 static void draw_alpha_yv12(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
@@ -113,6 +114,56 @@ static void draw_alpha_uyvy(int x0,int y0, int w,int h, unsigned char* src, unsi
 static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
 }
 
+extern int vo_gamma_brightness;
+extern int vo_gamma_saturation;
+extern int vo_gamma_contrast;
+extern int vo_gamma_hue;
+extern int vo_gamma_red_intense;
+extern int vo_gamma_green_intense;
+extern int vo_gamma_blue_intense;
+
+static void set_gamma_correction( unsigned int xv_port )
+{
+ XvAttribute *attributes;
+ int howmany;
+// get available attributes
+     attributes = XvQueryPortAttributes(mDisplay, xv_port, &howmany);
+     for (i = 0; i < howmany && attributes; i++)
+     {
+            if (attributes[i].flags & XvSettable)
+            {
+		int xv_min,xv_max,xv_atomka;
+                xv_min = attributes[i].min_value;
+                xv_max = attributes[i].max_value;
+                xv_atomka = XInternAtom(mDisplay, attributes[i].name, True);
+// since we have SET_DEFAULTS first in our list, we can check if it's available
+// then trigger it if it's ok so that the other values are at default upon query
+                if (xv_atomka != None)
+                {
+		    int port_value,port_min,port_max,port_mid;
+		    if(strcmp(attributes[i].name,"XV_BRIGHTNESS") == 0)
+				port_value = vo_gamma_brightness;
+		    else
+		    if(strcmp(attributes[i].name,"XV_SATURATION") == 0)
+				port_value = vo_gamma_saturation;
+		    else
+		    if(strcmp(attributes[i].name,"XV_CONTRAST") == 0)
+				port_value = vo_gamma_contrast;
+		    else
+		    if(strcmp(attributes[i].name,"XV_HUE") == 0)
+				port_value = vo_gamma_hue;
+		    else continue;
+		    port_min = xv_min;
+		    port_max = xv_max;
+		    port_mid = (port_min + port_max) / 2;
+		    port_value = port_mid + (port_value * (port_max - port_min)) / 2000;
+		    if(verbose > 1)
+			printf("vo_xv: set gamma %s to %i (min %i max %i mid %i)\n",attributes[i].name,port_value,port_min,port_max,port_mid);
+                    XvSetPortAttribute(mDisplay, xv_port, xv_atomka, port_value);
+                }
+        }
+    }
+}
 
 /*
  * connect to server, create and map window,
@@ -131,6 +182,8 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
  XGCValues xgcv;
  XSetWindowAttributes xswa;
  unsigned long xswamask;
+ XvAttribute *attributes;
+ int howmany, j, notyetset = 0;
 
  aspect_save_orig(width,height);
  aspect_save_prescale(d_width,d_height);
@@ -290,6 +343,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
          }
        }
      #endif
+     set_gamma_correction(xv_port);
 
      XGetGeometry( mDisplay,mywindow,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
      drwX=0; drwY=0;
