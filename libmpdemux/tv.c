@@ -236,6 +236,7 @@ static int open_tv(tvi_handle_t *tvh)
 
     /* Handle channels names */
     if (tv_param_channels) {
+	char** channels = tv_param_channels;
 	mp_msg(MSGT_TV, MSGL_INFO, "TV Channels names detected.\n");
 	tv_channel_list = malloc(sizeof(tv_channels_t));
 	tv_channel_list->index=1;
@@ -243,8 +244,8 @@ static int open_tv(tvi_handle_t *tvh)
 	tv_channel_list->prev=NULL;
 	tv_channel_current = tv_channel_list;
 
-	while (*tv_param_channels) {
-		char* tmp = *(tv_param_channels++);
+	while (*channels) {
+		char* tmp = *(channels++);
 		char* sep = strchr(tmp,'-');
 		int i;
 		struct CHANLIST cl;
