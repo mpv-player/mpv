@@ -88,7 +88,7 @@ static int format2oss(int format)
     case AF_FORMAT_AC3: return AFMT_AC3;
 #endif
     }
-    printf("Unknown/not supported internal format: %s\n", af_fmt2str_short(format));
+    mp_msg(MSGT_AO, MSGL_V, "OSS: Unknown/not supported internal format: %s\n", af_fmt2str_short(format));
     return -1;
 }
 
