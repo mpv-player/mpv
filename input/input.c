@@ -298,7 +298,7 @@ static mp_cmd_t* ar_cmd = NULL;
 static unsigned int ar_delay = 100, ar_rate = 8, last_ar = 0;
 
 static int use_joystick = 1, use_lirc = 1;
-static char* config_file = CONFDIR"/input.conf";
+static char* config_file = "input.conf";
 
 static char* js_dev = NULL;
 
@@ -1250,8 +1250,12 @@ mp_input_init(void) {
   if(!file)
     return;
   
-  if(! mp_input_parse_config(file))
-    mp_msg(MSGT_INPUT,MSGL_WARN,"Falling back on default (hardcoded) input config\n");
+  if(! mp_input_parse_config(file)) {
+    // Try global conf dir
+    file = CONFDIR"/input.conf";
+    if(! mp_input_parse_config(file))
+      mp_msg(MSGT_INPUT,MSGL_WARN,"Falling back on default (hardcoded) input config\n");
+  }
 
 #ifdef HAVE_JOYSTICK
   if(use_joystick) {
