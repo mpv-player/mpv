@@ -78,6 +78,7 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmtStr "Wymuszam zastosowanie kodeka audio z rodziny %s ...\n"
 #define MSGTR_CantFindAfmtFallback "Nie mogê znale¼æ kodeka audio dla wymuszonej rodziny, wracam do standardowych.\n"
 #define MSGTR_CantFindAudioCodec "Nie mogê znale¼æ kodeka dla formatu audio 0x%X.\n"
+#define MSGTR_RTFMCodecs "Przeczytaj DOCS/pl/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "Nie moge zainicjowaæ sterownika audio -> brak d¼wiêku.\n"
 #define MSGTR_TryForceVideoFmtStr "Wymuszam zastosowanie kodeka video z rodziny %s ...\n"
 #define MSGTR_CantFindVideoCodec "Nie mogê znale¼æ kodeka dla wybranego -vo i formatu video 0x%X.\n"
