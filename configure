@@ -6,6 +6,10 @@
 #
 # Changes in reversed order:
 #
+# 2001/04/15 by Pontscho
+#  - added --disable-select option
+#  - added X11DIR variable in config.mak and fix syncfb Makefile -L/usr/X11/lib bug 
+#
 # 2001/03/24 by Mike Graffam:
 #  - added autodetect code for XF86VidMode, along with explicit --enable-vm
 #
@@ -90,6 +94,9 @@ params:
 	--enable-termcap	use termcap database for key codes
 	--enable-xmmp	        use XMMP audio drivers
 	--enable-lirc	        enable LIRC (remote control) support
+
+	--disable-select        disable audio select() support ( for example required this
+	                        option ALSA or Vortex2 driver )
 
         --with-x11libdir=DIR    X library files are in DIR
         --with-win32libdir=DIR  windows codec files
@@ -201,6 +208,8 @@ _gllib=
 _sdllib=
 _xvlib=
 _x11lib=
+
+_select='#define HAVE_AUDIO_SELECT'
 
 for i in `echo $pparam`; do
 
@@ -514,6 +523,9 @@ do
   --enable-lirc)
 	_lirc=yes
 	;;
+  --enable-select)
+        _select='#define HAVE_AUDIO_SELECT'
+	;;
   --disable-sse)
         _sse=no
         ;;
@@ -562,6 +574,9 @@ do
 	;;
   --disable-termcap)
 	_termcap=no
+	;;
+  --disable-select)
+        _select='#undef HAVE_AUDIO_SELECT'
 	;;
   --with-win32libdir=*)
         _win32libdir=`echo $ac_option | cut -d '=' -f 2`
@@ -837,7 +852,7 @@ cat > $CCONF << EOF
 /* Undefine this if your soundcard driver has no working select().
    If you have kernel Oops, player hangups, or just no audio, you should
    try to recompile MPlayer with this option disabled! */
-#define HAVE_AUDIO_SELECT
+$_select
 
 /* You have a choice for MP3 decoding: mp3lib(mpg123) or Win32(l3codeca.acm)
    #define this if you prefer mpg123 (with 3Dnow! support) than l3codeca.acm
