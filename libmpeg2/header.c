@@ -803,7 +803,7 @@ static void prescale (mpeg2dec_t * mpeg2dec, int index)
 	mpeg2dec->scaled[index] = mpeg2dec->q_scale_type;
 	for (i = 0; i < 32; i++) {
 	    k = mpeg2dec->q_scale_type ? non_linear_scale[i] : (i << 1);
-	    decoder->quantizer_scale = k;
+	    decoder->quantizer_scales[i] = k;
 	    for (j = 0; j < 64; j++)
 		decoder->quantizer_prescale[index][i][j] =
 		    k * mpeg2dec->quantizer_matrix[index][j];

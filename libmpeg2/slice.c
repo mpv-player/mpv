@@ -142,6 +142,7 @@ static inline void get_quantizer_scale (mpeg2_decoder_t * const decoder)
 
     quantizer_scale_code = UBITS (bit_buf, 5);
     DUMPBITS (bit_buf, bits, 5);
+    decoder->quantizer_scale = decoder->quantizer_scales[quantizer_scale_code];
 
     decoder->quantizer_matrix[0] =
 	decoder->quantizer_prescale[0][quantizer_scale_code];
