@@ -151,29 +151,6 @@ support, see the <link linkend="install">Installation</link> section.
 
 <qandaentry>
 <question><para>
-I tried to compile <application>MPlayer</application>, but I got this output:
-<screen>
-    In file included from /usr/include/g++-v3/bits/std_cwchar.h:42,
-                     from /usr/include/g++-v3/bits/fpos.h:40,
-                     from /usr/include/g++-v3/bits/char_traits.h:40,
-                     from /usr/include/g++-v3/bits/std_string.h:41,
-                     from /usr/include/g++-v3/string:31,
-                     from libwin32.h:36,
-                     from DS_AudioDecoder.h:4,
-                     from DS_AudioDec.cpp:5:
-    /usr/include/wchar.h: In function Long long int wcstoq(const wchar_t*,
-       wchar_t**, int)':
-    /usr/include/wchar.h:514: cannot convert `const wchar_t* __restrict' to
-    `const
-</screen>
-</para></question>
-<answer><para>
-Upgrade your glibc to the latest release. On Mandrake, use 2.2.4-8mdk.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
 .. gcc 2.96 ... (Yes, some people are STILL flaming about gcc 2.96!)
 </para></question>
 <answer><para>
