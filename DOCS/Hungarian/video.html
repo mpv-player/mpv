@@ -1106,5 +1106,40 @@ A <B>VIDIX</B> számára mindez teljesen lényegtelen.
   Nézd meg <A HREF="http://www.iki.fi/too/tvout-voodoo3-3000-xfree">ezt az URL-t</A>.
 </P>
 
+
+<H4><A NAME=tv-out_nvidia>2.3.1.5.5 nVidia</A></H4>
+
+<P>Elõszöris le KELL töltened az nVidia zárt forráskódú meghajtóját a
+  <A HREF="http://nvidia.com">http://nvidia.com</A>-ról. A letöltési és
+  installálási procedúrát nem írom le, mert túlmutat ezen dokumentáció
+  keretein.</P>
+
+<P>Miután az XFree86, az XVideo, és a 3D gyorsítás is megfelelõen mûködik,
+  szerkeszd át az <CODE>XF86Config</CODE> file-t az alábbiaknak megfelelõen
+  (értelemszerûen alakítsd át a leírtakat hogy fedjék a kártyád/TV-d
+  tulajdonságait):</P>
+
+<PRE>
+Section "Device"
+        Identifier      "GeForce"
+        VendorName      "ASUS"   
+        BoardName       "nVidia GeForce2/MX 400"
+        Driver          "nvidia"
+        #Option         "NvAGP" "1"
+        Option          "NoLogo"   
+        Option          "CursorShadow"  "on"
+
+        Option          "TwinView"
+        Option          "TwinViewOrientation" "Clone"
+        Option          "MetaModes" "1024x768,640x480"
+        Option          "ConnectedMonitor" "CRT, TV"  
+        Option          "TVStandard" "PAL-B"
+        Option          "TVOutFormat" "Composite"
+
+EndSection
+</PRE>
+
+<P>Természetesen csak a TwinView rész a lényeges.</P>
+
 </BODY>
 </HTML>

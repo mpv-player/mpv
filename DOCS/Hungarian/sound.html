@@ -21,7 +21,7 @@ a következõ meghajtókat tartalmazza :</P>
 <TR><TD COLSPAN=4><B>Általános:</B></TD></TR>
 
 <TR><TD>&nbsp;&nbsp;</TD><TD VALIGN=top>oss</TD><TD>&nbsp;&nbsp;</TD><TD>OSS (ioctl) meghajtó</TD></TR>
-<TR><TD></TD><TD VALIGN=top>sdl</TD><TD></TD><TD>SDL meghajtó (up/downsampling támogatás, <B>ESD</B>, <B>ARTS</B>, stb)</TD></TR>
+<TR><TD></TD><TD VALIGN=top>sdl</TD><TD></TD><TD>SDL meghajtó (<B>ESD</B>, <B>ARTS</B>, stb)</TD></TR>
 <TR><TD></TD><TD VALIGN=top>nas</TD><TD></TD><TD>NAS (Network Audio System) meghajtó</TD></TR>
 <TR><TD></TD><TD VALIGN=top>alsa5</TD><TD></TD><TD>natív ALSA 0.5 meghajtó</TD></TR>
 <TR><TD></TD><TD VALIGN=top>alsa9</TD><TD></TD><TD>natív ALSA 0.9 meghajtó (mûködik, de vannak vele problémák -&gt; használd az OSS meghajtót)</TD></TR>
@@ -184,9 +184,8 @@ a következõ meghajtókat tartalmazza :</P>
 <H5><A NAME=resample>2.3.2.2.1.  Up/Downsampling</A></H5>
 
 <P>Az <B>MPlayer</B> képes az audio stream frekvenciáját növelni illetve
-csökkenteni. Ennek szükségessége nincs autodetektálva, így külön meg kell adni
-például ha csak 44.1Khz-et tudó kártyád van, és 48Khz-es audiot akarsz
-lejátszani. Valamint: ez a funkció még nem mûködik a <B>MEncoder</B>-ben.</P>
+csökkenteni. Ennek szükségessége <B>autodetektálva van</B>.
+Ez a funkció még nem mûködik a <B>MEncoder</B>-ben.</P>
 
 <P>Használat :<BR>
 &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=resample:fout=&lt;a kívánt

@@ -11,90 +11,10 @@
 
 <H2><A NAME=2.4>2.4 Enkódolás a MEncoderrel</A></H2>
 
-<P>A <B>MEncoder</B> (<B>MPlayer</B>'s Movie Encoder) egy egyszerû film
-  enkóder, az MPlayer által lejátszható formátumok
-  (<B>AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</B>) más - MPlayerrel
-  lejátszható - formátumokba kódolására. Sokféle codec-kel tud enkódolni,
-  például <B>DivX4</B>-gyel (1 vagy 2 menetes), a libavcodec-et alkotó
-  codec-ekkel, audiot tekintve pedig
-  <B>PCM</B>/<B>MP3</B>/<B>VBR MP3</B> a választék. Rendelkezik továbbá stream
-  másoló, és video átméretezõ képességgel.</P>
+<P>A rendelkezésre álló opciók és példák teljes listáját lásd a man
+  page-ben.</P>
 
-
-<H3><A NAME=compilation>2.4.1 Fordítás</A></H3>
-
-<P>
-  <UL>
-    <LI><B>OPCIONÁLIS</B> - olvasd el az <B>MPlayer</B> fordítási útmutatóját.</LI>
-    <LI><B>OPCIONÁLIS (CSAK LINUX)</B> - töltsd le a legújabb <B>DivX4linux</B> könyvtárat például
-      <A HREF="http://avifile.sourceforge.net/download.htm">innen</A>, és
-      installáld HELYESEN. Ez szükséges a DivX4 (1/2 menetes) enkódoláshoz.</LI>
-    <LI><B>OPCIONÁLIS</B> - <A HREF="codecs.html#xvid">töltsd le és
-      installáld az <B>XViD</B>-et</A>. Nem túl hasznos, a libavcodec
-      <I>mpeg4</I> codec-e sokkal gyorsabban és jobb minõségben kódol.</LI>
-    <LI><B>OPCIONÁLIS</B> - ha a libavcodec codec-ekkel is akarsz enkódolni,
-      installáld a libavcodec-et, ahogyan az a <A HREF="codecs.html#libavcodec">libavcodec
-      fejezetben</A> le van írva.</LI>
-    <LI><B>OPCIONÁLIS</B> - töltsd és fordítsd le a <B>libmp3lame-t</B> (a lame 3.89bétából vagy
-      CVS-bõl).<BR>
-      <B>A lame 3.90 elõtti verzióit NE GCC 2.96-TAL FORDÍTSD! Nem fognak
-      helyesen mûködni!</B><BR>
-      Ez szükségeltetik a CBR/VBR MP3 audio enkódoláshoz. Egy
-      egyszerû <CODE>lame</CODE> bináris nem elég. Mégvalami: minél kevesebb
-      optimalizációt használsz a lame fordításánál, annál jobb lesz a minõsége.
-      A minõséget a fordítás utáni <CODE>make test</CODE> paranccsal
-      ellenõrizheted. A kiírt számnak <B>30</B>-nál kevesebbnek kell lennie.
-      Azért ne ess pánikba ha pl <B>400</B> fölötti értéket kapsz, nem
-      valószínû hogy hallod a különbséget. Jaigen, ha a fordítód nem tudja
-      a tesztet lefuttatni.. Nos, töröld már le azt a nyavajás <B>GCC 2.96</B>-ot.</LI>
-    <LI><B>OPCIONÁLIS</B> - <CODE>libjpeg</CODE> és <CODE>libpng</CODE> -
-      lásd az <A HREF="documentation.html#installation">Installálás</A> 
-      fejezetet</LI>
-  </UL>
-</P>
-
-<P>Kész. Mint minden bizonnyal tudod, más enkódolóknak szükségük van az
-  <I>avifile</I> könyvtárra. A <B>MEncoder</B>-nek egyáltalán nincs.</P>
-
-<H3><A NAME=features>2.4.2 MEncoder funkciók</A></H3>
-
-<P>
-  <UL>
-    <LI>enkódolás az összes file formátumból amit az <B>MPlayer</B> lejátszani
-      képes</LI>
-    <LI>az ffmpeg/libavcodec által támogatott összes codec használata kódolásra
-      is</LI>
-    <LI>enkódolás <B>V4L kompatibilis TV tunerekrõl</B></LI>
-    <LI>enkódolása/multiplexelése interleaved AVI-knak, megfelelõ index-szel</LI>
-    <LI>opcionálisan külsõ audio stream használata</LI>
-    <LI>1, 2 vagy 3 menetes enkódolás</LI>
-    <LI><B>VBR</B> MP3 audio - <B>FONTOS</B>: a VBR-es mp3-ak nem minden
-      körülmények között lejátszhatóak windows rendszereken! Viszont a
-      <B>MEncoderrel</B> által létrehozott CBR AVI-k teljesen lejátszhatatlanok
-      Win32 lejátszókkal :)</LI>
-    <LI>PCM audio</LI>
-    <LI>stream másolás</LI>
-    <LI>bemeneti file A/V szinkronizálása (PTS-alapú, az -mc 0 opcióval
-      kikapcsolható)</LI>
-    <LI>FPS javítás az <CODE>-ofps</CODE> opcióval (hasznos ha 29.97fps-es
-      VOB-ot kódolsz 24fps-es AVI-ba)</LI>
-    <LI>a video filter réteg használata (crop, expand, flip, postprocess,
-      rotate, scale, RGB/YUV konverzió)</LI>
-    <LI>a kimeneti file-ba bele tudja kódolni mind a DVD/VOBsub, mind a
-      szöveges feliratokat</LI>
-    <LI>DVD feliratok külsõ VOBsub file-ba történõ rippelése</LI>
-  </UL>
-</P>
-
-<H4>Tervezett funkciók:</H4>
-
-<UL>
-  <LI>még szélesebb skálája a be/kimeneti formátumoknak, codec-eknek
-    (VOB file-ok DivX4/Indeo5/VIVO videoval... :)</LI>
-  <LI>audio enkódolása v4l-rõl (BSD-n már kész?)</LI>
-</UL>
-
-<H4><A NAME=2pass>2.4.2.1 2, 3 menetes DivX4 enkódolása</A></H4>
+<H3><A NAME=2pass>2.4.1 2, 3 menetes DivX4 enkódolása</A></H3>
 
 <P><U><B>2 menetes enkódolás:</B></U> az elnevezés onnan jön, hogy ezzel a
   módszerrel a file <I>kétszer</I> lesz enkódolva. Az elsõ menet néhány pár
@@ -181,17 +101,14 @@
 </UL>
 
 
-<H4><A NAME=rescaling>2.4.2.2 Átméretezés</A></H4>
+<H3><A NAME=rescaling>2.4.2 Filmek átméretezése</A></H3>
 
-<P>Gyakran elõjön a filmek átméretezésének igénye. Ennek oka sokféle lehet,
-  például a fileméret csökkentése, vagy SVCD-bõl DivX-be kódolás. A rippelt
-  DVD-ket legtöbbször átméretezik (például egy 4:3-as DVD-t 640x480-ra),
-  különösen akkor ha a cél az 1 CD-s méret és ezzel együtt a jó minõség is.
-  Az SVCD-k képmérete 480x480, és a lejátszóprogramok az ezen fileok
-  fejlécében található aspektusinformáció alapján számítják ki a megjelenítendõ
-  kép méretét (pl.: 480x480 + 4:3 = 640x480). Ezért AVI (DivX) file-okba
-  történõ kódolásnál figyelembe kell venni azt is, hogy az AVI file-ok ezen
-  információ eltárolására nem képesek. Így az egyetlen megoldás az átméretezés.</P>
+<P>Gyakran elõjön a filmek átméretezésének igénye. Ennek sok oka lehet,
+  például a fileméret csökkentése, illetve a szükséges hálózati
+  sávszélesség csökkentése. A legtöbb ember átméretezést hajt végre
+  DVD-k vagy SVCD-k DivX AVI-ba történõ konvertálása során.
+  <B>Ez helytelen.</B> Mielõtt te is ilyen megoldásra vetemednél, olvasd
+  el az <A HREF="#aspect">Aspect ratio megõrzése</A> fejezetet.</P>
 
 <P>Az átméretezést a <I>'scale'</I> nevû video filter végzi:
   <CODE>-vop scale=X:Y</CODE>. A minõségét pedig az <CODE>-sws</CODE> opcióval
@@ -201,7 +118,7 @@
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder sample-svcd.mpg -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=1300 -vop
   scale=640:480 -oac copy -o output.avi</CODE></P>
 
-<H4><A NAME=copying>2.4.2.3 Stream másolása</A></H4>
+<H3><A NAME=copying>2.4.3 Stream másolása</A></H3>
 
 <P>A <B>MEncoder</B> kétféleképpen tudja a bemeneti stream-eket kezelni:
   <B>enkódolja</B> vagy csak <B>átmásolja</B> õket. Ez a rész a <B>másolásról</B>
@@ -222,7 +139,7 @@
     használni.</LI>
 </UL>
 
-<H4><A NAME=fixing>2.4.2.4 Hibás index-szel rendelkezõ AVI-k rendbehozása</A></H4>
+<H3><A NAME=fixing>2.4.4 Hibás index-szel rendelkezõ AVI-k rendbehozása</A></H3>
 
 <P>A legkönnyebb dolog a világon. Egyszerûen átmásoljuk a video és audio
   streameket, és közben a <B>MEncoder</B> létrehozza a megfelelõ indexet is.
@@ -232,7 +149,7 @@
 <P>A parancs: <CODE>mencoder -idx input.avi -ovc copy -oac copy -o output.avi</CODE></P>
 
 
-<H4><A NAME=libavcodec>2.4.2.5 Enkódolás a <I>libavcodec</I> codec-ekkel</A></H4>
+<H3><A NAME=libavcodec>2.4.5 Enkódolás a <I>libavcodec</I> codec-ekkel</A></H3>
 
 <P>A <A HREF="codecs.html#libavcodec">libavcodec</A>-kel egyszerûen lehet kódolni
   jónéhány érdekes video és audio formátumba (jelenleg az audio codec-ek nem
@@ -257,7 +174,7 @@
     -lavcopts vcodec=mjpeg -oac copy</CODE></P>
 
 
-<H4><A NAME=image_files>2.4.2.6 Enkódolás több bemeneti file-ból (JPEG, PNG)</A></H4>
+<H3><A NAME=image_files>2.4.6 Enkódolás több bemeneti file-ból (JPEG, PNG)</A></H3>
 
 <P>A <B>MEncoder</B> képes több JPEG vagy PNG file-ból filmet létrehozni.
   Egyszerû framecopy használatával pedig MJPEG (Motion JPEG) vagy MPNG
@@ -301,7 +218,7 @@
   -o kimenet.avi</CODE></P>
 
 
-<H4><A NAME=vobsub>2.4.2.7  DVD feliratok VOBsub formátumúvá alakítása</A></H4>
+<H3><A NAME=vobsub>2.4.7  DVD feliratok VOBsub formátumúvá alakítása</A></H3>
 
 <P>A <B>MEncoder</B> képes DVD-rõl kivonni a feliratot, és átalakítani
   Vobsub formátumú felirattá. Ezek egy <CODE>.idx</CODE> és egy
@@ -339,10 +256,36 @@
   &nbsp;&nbsp;<CODE>mencoder movie.mpg -ifo movie.ifo -vobsubout subtitles
     -vobsuboutindex 0 -vobsuboutid fr -sid 1</CODE></P>
 
-<H3><A NAME=options>2.4.3 Opciók</A></H3>
 
-<P>A rendelkezésre álló összes opció listája példákkal együtt a manpage-ben
-  található.</P>
+<H3><A NAME=aspect>2.4.8 Aspect ratio megõrzése</A></H3>
+
+<P>A DVD-k és az SVCD-k (tehát az MPEG1/2 file-ok) tartalmazzák azt az értéket
+  amibõl a lejátszó tudni fogja merre és mennyire kell a képet széthúzni,
+  hogy ne tojásfejû emberek ugráljanak a képen (például: 480x480 + 4:3 =
+  640x480). Viszont amikor az ilyen file-okat AVI-ba (DivX) konvertáljuk,
+  szembe találjuk magunkat a problémával miszerint az AVI formátum
+  nem képes ezt az értéket (aspect ratio) eltárolni. A filmek felbontásának
+  átméretezése undorító, és idõigényes feladat, kell hát legyen egy jobb
+  megoldás!</P>
+
+<P>Van is.</P>
+
+<P>Az MPEG4 formátumnak egyik egyedülálló tulajdonsága, hogy beleírható az
+  aspect ratio értéke (csakúgy mint az MPEG1/2 file-oknál). Ennek egyetlen
+  hátulütõje, hogy jelenleg az MPlayer az egyetlen lejátszó amelynek megvan
+  ez a képessége.</P>
+
+<P>A használata csakis a <B>libavcodec</B> <CODE>mpeg4</CODE> codec-ével
+  lehetséges.</P>
+
+<P>Semmiképpen ne felejtsd el levágni a film tetejérõl és aljáról a fekete
+  sávokat. Lásd TODO.</P>
+
+<H4>Használata:</H4>
+
+<P><CODE>$ mencoder sample-svcd.mpg -ovc lavc -lavcopts
+  vcodec=mpeg4:aspect=16.0/9.0 -vop crop=714:548:0:14 -oac copy -o output.avi</CODE></P>
+
 
 </BODY>
 </HTML>

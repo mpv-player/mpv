@@ -39,6 +39,7 @@
       <UL>
         <LI><A HREF="#mpsub">1.4.1 Az MPlayer saját feliratformátuma (MPsub)</A></LI>
         <LI><A HREF="#install_osd">1.4.2 OSD és feliratok installálása</A></LI>
+        <LI><A HREF="#menu">1.4.3 OSD Menü</A></LI>
       </UL>
     <LI><A HREF="#rtc">1.5 RTC</A></LI>
   </UL>
@@ -162,6 +163,7 @@
 	  <LI><A HREF="video.html#tv-out_matrox_g450">2.3.1.5.2 Matrox G450/G550</A></LI>
 	  <LI><A HREF="video.html#tv-out_ati">2.3.1.5.3 ATI</A></LI>
 	  <LI><A HREF="video.html#tv-out_voodoo">2.3.1.5.4 Voodoo 3/Banshee</A></LI>
+	  <LI><A HREF="video.html#tv-out_nvidia">2.3.1.5.5 nVidia</A></LI>
 	</UL>
       </UL>
       <LI><A HREF="sound.html">2.3.2 Hangkártyák, audio kimenetek</A></LI>
@@ -182,18 +184,14 @@
     </UL>
     <LI><A HREF="encoding.html">2.4 MEncoder - Az MPlayer-en alapuló enkóder</A></LI>
       <UL>
-        <LI><A HREF="encoding.html#compilation">2.4.1 Fordítás</A></LI>
-        <LI><A HREF="encoding.html#features">2.4.2 Funkciók</A></LI>
-          <UL>
-            <LI><A HREF="encoding.html#2pass">2.4.2.1 2 vagy 3 menetes DivX4 enkódolása</A></LI>
-            <LI><A HREF="encoding.html#rescaling">2.4.2.2 Átméretezés</A></LI>
-            <LI><A HREF="encoding.html#copying">2.4.2.3 Stream másolása</A></LI>
-            <LI><A HREF="encoding.html#fixing">2.4.2.4 Hibás index-û AVI-k rendbehozása</A></LI>
-            <LI><A HREF="encoding.html#libavcodec">2.4.2.5 Enkódolás a libavcodec codec-ekkel</A></LI>
-            <LI><A HREF="encoding.html#image_files">2.4.2.6 Enkódolás több bemeneti file-ból (JPEG, PNG)</A></LI>  
-            <LI><A HREF="encoding.html#vobsub">2.4.2.7 DVD feliratok VOBsub formátumúvá alakítása</A></LI>  
-          </UL>
-        <LI><A HREF="encoding.html#options">2.4.3 Opciók</A></LI>
+        <LI><A HREF="encoding.html#2pass">2.4.1 2 vagy 3 menetes DivX4 enkódolása</A></LI>
+        <LI><A HREF="encoding.html#rescaling">2.4.2 Filmek átméretezése</A></LI>
+        <LI><A HREF="encoding.html#copying">2.4.3 Stream másolása</A></LI>
+        <LI><A HREF="encoding.html#fixing">2.4.4 Hibás index-û AVI-k rendbehozása</A></LI>
+        <LI><A HREF="encoding.html#libavcodec">2.4.5 Enkódolás a libavcodec codec-ekkel</A></LI>
+        <LI><A HREF="encoding.html#image_files">2.4.6 Enkódolás több bemeneti file-ból (JPEG, PNG)</A></LI>  
+        <LI><A HREF="encoding.html#vobsub">2.4.7 DVD feliratok VOBsub formátumúvá alakítása</A></LI>  
+        <LI><A HREF="encoding.html#aspect">2.4.8 Aspect ratio megõrzése</A></LI>
       </UL>
     <LI><A HREF="#tv">2.5 TV bemenet</A></LI>
     <UL>
@@ -313,6 +311,53 @@
   <B>MEncoder</B>-rel), így tekerni is lehet bennük! Amint az látszik, a
   stabilitás és a minõség a legfontosabbak, és a sebesség is
   számít.</P>
+
+<P>A <B>MEncoder</B> (<B>MPlayer</B>'s Movie Encoder) egy egyszerû film
+  enkóder, az MPlayer által lejátszható formátumok
+  (<B>AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</B>) más - MPlayerrel
+  lejátszható - formátumo~kba kódolására. Sokféle codec-kel tud enkódolni,
+  például <B>DivX4</B>-gyel (1 vagy 2 menetes), a libavcodec-et alkotó
+  codec-ekkel, audiot tekintve pedig
+  <B>PCM</B>/<B>MP3</B>/<B>VBR MP3</B> a választék. Rendelkezik továbbá stream
+  másoló, és video átméretezõ képességgel.</P>
+
+<H4>MEncoder funkciók</H4>
+
+<P>
+  <UL>
+    <LI>enkódolás az összes file formátumból amit az <B>MPlayer</B> lejátszani
+      képes</LI>
+    <LI>az ffmpeg/libavcodec által támogatott összes codec használata kódolásra
+      is</LI>
+    <LI>enkódolás <B>V4L kompatibilis TV tunerekrõl</B></LI>
+    <LI>enkódolása/multiplexelése interleaved AVI-knak, megfelelõ index-szel</LI>
+    <LI>opcionálisan külsõ audio stream használata</LI>
+    <LI>1, 2 vagy 3 menetes enkódolás</LI>
+    <LI><B>VBR</B> MP3 audio - <B>FONTOS</B>: a VBR-es mp3-ak nem minden
+      körülmények között lejátszhatóak windows rendszereken! Viszont a
+      <B>MEncoderrel</B> által létrehozott CBR AVI-k teljesen lejátszhatatlanok
+      Win32 lejátszókkal :)</LI>
+    <LI>PCM audio</LI>
+    <LI>stream másolás</LI>
+    <LI>bemeneti file A/V szinkronizálása (PTS-alapú, az -mc 0 opcióval
+      kikapcsolható)</LI>
+    <LI>FPS javítás az <CODE>-ofps</CODE> opcióval (hasznos ha 29.97fps-es
+      VOB-ot kódolsz 24fps-es AVI-ba)</LI>
+    <LI>a video filter réteg használata (crop, expand, flip, postprocess,
+      rotate, scale, RGB/YUV konverzió)</LI>
+    <LI>a kimeneti file-ba bele tudja kódolni mind a DVD/VOBsub, mind a
+      szöveges feliratokat</LI>
+    <LI>DVD feliratok külsõ VOBsub file-ba történõ rippelése</LI>
+  </UL>
+</P>
+
+<H4>Tervezett funkciók:</H4>
+
+<UL>
+  <LI>még szélesebb skálája a be/kimeneti formátumoknak, codec-eknek
+    (VOB file-ok DivX4/Indeo5/VIVO videoval... :)</LI>
+  <LI>audio enkódolása v4l-rõl (BSD-n már kész?)</LI>
+</UL>
 
 
 <H2><A NAME=history>1.1 Történelem</A></H2>
@@ -568,12 +613,15 @@
   fejezetet</A>. Régi, Trio chip-es kártyáknak nincs, vagy lassú a
   hardveres támogatásuk.</LI>
 
-<LI><B>Nvidia kártyák</B>: nagyon rossz választás videolejátszásra. Ezek
-  a kártyák olcsó távolkeleti alkatrészekbõl készülnek, amik rossz képminõséget
-  adnak más kártyákhoz képest. Továbbá az <U>XFree86-ban található Nvidia
-  meghajtó nem tartalmaz hardveres YUV gyorsítást!</U> Ehhez le kell töltened
-  az Nvidia zárt forráskódú meghajtóját az nvidia.com-rõl. Részleteket
-  lásd az <A HREF="video.html#xv_nvidia">Nvidia Xv meghajtó</A> fejezetben.</LI>
+<LI><B>Nvidia kártyák</B>: lehet hogy jó, lehet hogy rossz választás
+  videolejátszásra. Ha a kártyád nem GeForce2 (vagy újabb), valószínûleg
+  kisebb-nagyobb hibákba fogsz ütközni a használatával.
+  Ezenkívül az <U>XFree86-ban található nVidia meghajtó nem minden nVidia
+  kártyához tartalmaz hardveres YUV gyorsítást!</U> Le kell töltened
+  az nVidia zárt forráskódú meghajtóját az nvidia.com-rõl. Részleteket
+  lásd az <A HREF="video.html#xv_nvidia">Nvidia Xv meghajtó</A> fejezetben.
+  Ha van használatba szeretnéd venni a TV-det, olvasd el az
+  <A HREF="video.html#tv-out_nvidia">nVidia TV kimenet</A> fejezetet.</LI>
 
 <LI><B>3DLabs GLINT R3 és Permedia3</B>: egy VIDIX driver áll rendelkezésre
   (pm3_vid). Lásd <A HREF="video.html#vidix">itt</A>.</LI>
@@ -674,6 +722,8 @@
     <A HREF="encoding.html#mencoder">MEncoder fejezetet</A> is.</LI>
   <LI>Ha van V4L kompatibilis <B>TV tunered</B>, nézd meg a <A HREF=#tv>TV bemenet</A>
     fejezetet.</LI>
+  <LI>Érdemes megnézni az <B>OSD Menüt</B>, az installálását lásd
+    <A HREF="#menu">ebben a fejezetben</A>.</LI>
 </UL>
 
 <P>Ezután fordítsd le az <B>MPlayer</B>-t:</P>
@@ -887,6 +937,30 @@ Naboo was under an attack.<BR>
 
 <P>Az alapértelmezést megváltoztathatod az <CODE>osdlevel=</CODE> változóval a
   konfigurációs file-ban.</P>
+
+
+<H3><A NAME="menu">1.4.3 OSD menü</A></H3>
+
+<P>Az MPlayer tartalmaz egy OSD menüt, ami teljesen újradefiniálható a
+  felhasználó igényei szerint.</P>
+
+<H4>Installálás</H4>
+
+<OL>
+  <LI>fordítsd le az MPlayer-t a <CODE>--enable-new-conf --enable-menu</CODE>
+    opciókat átadva a <CODE>./configure</CODE> script-nek</LI>
+  <LI>bizonyosodj meg róla hogy mûködik az OSD fontod</LI>
+  <LI>másold át az <CODE>etc/menu.conf</CODE> file-t a saját
+    <CODE>.mplayer</CODE> könyvtáradba</LI>
+  <LI>másold át az <CODE>etc/input.conf</CODE> file-t a saját
+    <CODE>.mplayer</CODE> könyvtáradba, vagy igény szerint az
+    <CODE>/usr/local/etc/mplayer</CODE> könyvtárba</LI>
+  <LI>olvasd el, és a leírtak szerint szerkeszd át az
+    <CODE>input.conf</CODE>-ot, hogy a menü irányító gombokat definiáld.</LI>
+  <LI>a következõ séma szerint indítsd az MPlayer-t:<BR>
+    <CODE>$ mplayer -menu file.avi</CODE></LI>
+  <LI>nyomd meg valamelyik (definiált) menü gombot</LI>
+</OL>
 
 
 <H2><A NAME="rtc">1.5 RTC</A></H2>
@@ -1393,32 +1467,6 @@ Közelebbi információ valakinél?</P>
   nem mûködik/fordul, ezeket fordításnál ki kell kapcsolni, a
   <CODE>./configure --disable-win32 --disable-gl --disable-mpdvdkit</CODE>
   paranccsal.</P>
-
-<P>Az SDL is mûködik, bár egy kicsit rugdosni kell:<BR>
-  A <CODE>./configure</CODE> lefuttatása után a következõképpen kell
-  átírni a <CODE>config.mak</CODE> file-t:</P>
-
-<PRE>
-  SDL_LIB = -L/usr/local/lib -lmingw32 -lSDLmain -lSDL -mwindows -mno-cygwin
-</PRE>
-
-<P>erre:</P>
-
-<PRE>
-  SDL_LIB = -L/usr/local/lib -lSDL -mcygwin
-</PRE>
-
-<P>és ezt:</P>
-
-<PRE>
-  SDL_INC = -I/usr/local/include -I/usr/local/include/SDL -Dmain=SDL_main -I/u
-</PRE>
-
-<P>erre:</P>
-
-<PRE>
-  SDL_INC = -I/usr/local/include -I/usr/local/include/SDL -Uunix -mcygwin
-</PRE>
 
 <P>Az SDL Cygwin-es verzióját a <A HREF="http://www.libsdl.org/extras/win32/cygwin/">libSDL site-ról</A>
   töltheted le.</P>
