@@ -22,11 +22,16 @@ int main(int argc, char **argv)
 	
 	for(;;)
 	{
-		int c0= fgetc(f0);
-		int c1= fgetc(f1);
-		int d= c0-c1;
-		if(c0<0 && c1<0) break;
-		if(c0<0 || c1<0)
+		short c0;
+		short c1;
+		int d;
+		
+		int e0= fread(&c0, 2, 1, f0);
+		int e1= fread(&c1, 2, 1, f1);
+		
+		d=c0-c1;
+		if(e0==0 && e1==0) break;
+		if(e0==0 || e1==0)
 		{
 			printf("FATAL error, files have different size!\n");
 			exit(1);
@@ -35,7 +40,7 @@ int main(int argc, char **argv)
 		if(d<0) d=-d; // ABS
 		if(d>1)
 		{
-			printf("FATAL error, too large differnce found!\n");
+			printf("FATAL error, too large differnce found (%d)!\n", d);
 			exit(1);
 		}
 		
