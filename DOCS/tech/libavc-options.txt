@@ -1,0 +1,104 @@
+Description of what all thouse libavcodec options do ...
+WARNING: iam no encoding expert so the recomanditions might be bad ...
+if u find any errors, missing stuff, ... send a patch or cvs commit if u have an cvs account :)
+
+vqmin 1-31 (minimum quantizer) for pass1/2
+	1 is not recomanded (much larger file, little quality difference and possible other weird things)
+	2 is recommanded for normal mpeg4/mpeg1video encoding
+	3 is recommanded for h263(p)/msmpeg4 (default)
+	   the reason for 3 instead of 2 is that 2 could lead to overflows (this will be fixed for h263(p)
+	   by chageing the quanizer per MB in the future, but msmpeg4 doesnt support that so it cant be fixed
+	   for that)
+
+vqscale 1-31 quantizer for constant quantizer /constant quality encoding
+	1 is not recomanded (much larger file, little quality difference and possible other weird things)
+	lower means better quality but larger files
+	see vqmin
+
+vqmax 1-31 (maximum quantizer) for pass1/2
+	15 default
+	10-31 should be a sane range
+
+vqdiff  1-31 (maximum quantizer difference between I or P frames) for pass1/2
+	3 default
+
+vmax_b_frames 0-4 (maximum number of b frames between non b frames)
+	0 no b frames (default)
+
+vme 0-5 (motion estimation)
+	0 none  (not recommanded, very lq)
+	1 full  (not recommanded, too slow)
+	2 log   (not recommanded, lq)
+	3 phods (not recommanded, lq)
+	4 EPZS  (default)
+	5 X1
+
+vhq (high quality mode)
+	encode each MB as in all modes and choose the best (this is slow but better filesize/quality)
+	disabled by default
+
+v4mv
+	allow 4 MV per MB (little difference in filesize/quality)
+	disabled by default
+	cannot be used with b frames or in lq mode currently
+	disabled by default
+
+keyint  0-300 (maximum interval between keyframes)
+	keyframes are needed for seeking as seeking is only possible to a keyframe but keyframes need more space
+	than non keyframes so larger numbers here mean slightly smaller files
+	0 no keyframes 
+	>300 is not recomanded as the quality might be bad (depends upon decoder & encoder & luck)
+
+vb_strategy 0-1 for pass 2
+	0 allways use the max number of b frames (default)
+	1 avoid b frames in high motion scenes (this will cause bitrate missprediction)
+
+vpass
+	1 first pass
+        2 second pass
+
+vbitrate (kbits per sec) for pass1/2
+	800 is default
+
+vratetol (filesize tolerance in kbit) for pass1/2
+	this is just approximate, the real difference can be much smaller or larger
+	1000- 100000 is a sane range
+	8000 is default
+
+vb_qfactor (1.0-31.0) (BFrame quantizer= PFrame quantizer * vb_qfactor) for pass1/2
+	2.0 is default
+	tip: to do constant quantizer encoding with different quantizers for I/P and B frames
+	     u can use vqmin=<ip-quant>:vqmax=<ip-quant>:vb_qfactor=<b_quant/ip_quant>
+
+vqblur (0.0-1.0) quantizer blur (for pass1)
+	0.0 qblur disabled
+	0.5 is the default
+	1.0 average the quantizer over all previous frames
+	larger values will average the quantizer over time more so that the quantizer will be changed slower
+
+vqcomp (0.0-1.0) quantizer compression (for pass1/2)
+	0.0 constant bitrate encoding, so fast moton frames will get as many bits as low motion
+	    (high motion scenes look bad)
+	0.5 (default)
+	1.0 constant quantizer encoding (low motion scenes look bad)
+
+vrc_strategy (0,1,2)
+	FIXME
+
+Notes:	1. lavc will strictly follows the quantizer limits vqmin, vqmax, vqdiff even if 
+	   it violates the bitrate / bitrate tolerance
+	2. changing some options between pass1 & 2 can reduce the quality
+
+FAQ:	Q: the file is much too small
+	A: vqmin=2 or 1 (be carefull with 1, it could cause strange things to happen)
+	Q: i want to use -pass 1 & -pass 2 with vmax_b_frames>0
+	A: read DOCS/tech/patches.txt and send a patch ;)
+
+glossary:
+MB	Macroblock (16x16 luminance & 8x8 chrominance samples)
+MV	Motion vector
+ME	Motion estimation
+MC	Motion compensation
+
+example:
+mencoder foobar.avi -lavcopts vcodec=mpeg4:vhq:keyint=300:vqscale=2 -o new-foobar.avi
