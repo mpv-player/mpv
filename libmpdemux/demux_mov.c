@@ -865,7 +865,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		sh->wf->wBitsPerSample=(trak->stdata[18]<<8)+trak->stdata[19];
 		// sh->wf->nSamplesPerSec=trak->timescale;
 		sh->wf->nSamplesPerSec=(trak->stdata[24]<<8)+trak->stdata[25];
-		if(trak->stdata_len >= 44 && trak->stdata[9]>=1){
+		if(trak->stdata_len >= 44 && trak->stdata[9]>=1 && char2int(trak->stdata,28)>0){
 		//Audio header: samp/pack=4096 bytes/pack=743 bytes/frame=1486 bytes/samp=2
 		  sh->wf->nAvgBytesPerSec=(sh->wf->nChannels*sh->wf->nSamplesPerSec*
 		      char2int(trak->stdata,32)+char2int(trak->stdata,28)/2)
