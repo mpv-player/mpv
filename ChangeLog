@@ -3,12 +3,14 @@ mplayer (1.0)
   pre4: "New Year Release"
   
     DOCS:
-    * Copyright file covers files coming from other projects and their licenses
+    * new Copyright file covers files from other projects and their licenses
+    * new DOCS/tech/translations.txt explains how to properly translate MPlayer
     * new Japanese console message translation
     * Polish translation almost finished
+    * Italian man page translation
     * DVD ripping guide
     * video out driver section added to the man page
-    * XML build system rewritten
+    * XML build system rewritten - now supports building individual languages
     * Miscellaneous updates all over the place
 
     Ports:
@@ -19,6 +21,7 @@ mplayer (1.0)
     * fbdev driver updated for Linux 2.6
     * support for ELF only OpenBSD
     * optimizing for PPC 970 (aka G5)
+    * SDL support fixed on MinGW
 
     Demuxers:
     * Matroska containing RealVideo works better
@@ -28,7 +31,7 @@ mplayer (1.0)
     * tvi/bsdbt848 now working under FreeBSD 5.2-CURRENT
     * tvi/bsdbt848 audio part working under NetBSD
     * LIVE.COM demuxer updated to conform with latest libraries
-    * New, independent, C implementation of the Matroska demuxer
+    * new, independent, C implementation of the Matroska demuxer
     * fix for rare Real files
     * MPEG Aspect code 4 fixed
 
@@ -42,12 +45,12 @@ mplayer (1.0)
     * Altivec optimized resampler in liba52
 
     Filters:
-    * vf/bmovl bugfixes
-    * vf/filmdint now handles 15fps NTSC input
-    * huge updates and speedup on vf/pullup
-    * big updates to vf/ilpack (proper interpolation and MMX optimizations)
-    * new filter: vf/zrmjpeg (fast MJPEG encoder using libavcodec for Zoran)
-    * interlaced scaling support in vf/scale
+    * vf_bmovl bugfixes
+    * vf_filmdint now handles 15fps NTSC input
+    * huge updates and speedup on vf_pullup
+    * big updates to vf_ilpack (proper interpolation and MMX optimizations)
+    * new filter: vf_zrmjpeg (fast MJPEG encoder using libavcodec for Zoran)
+    * interlaced scaling support in vf_scale
 
     Drivers:
     * ao/esd behaves better over network now
@@ -62,9 +65,9 @@ mplayer (1.0)
     * H.263 AIC and MQ encoding support
     * fixed low delay decoding
     * fixed H.263+ encoding without UMV
-    * lot of CBR improvements
+    * lots of CBR improvements
     * MB type and QP visualization
-    * lot of code cleanup
+    * lots of code cleanup
     * intra & inter dequantization split -> speedup
     * fixed stereo IMA ADPCM encoding
     * VBV delay setting support (MPEG2 CBR)
@@ -88,13 +91,13 @@ mplayer (1.0)
     * "packed" XVID decoding
     * fixed some bugs in RV20 B-frames decoding
     * closed GOP encoding
-    
+
     Others:
-    * -codecs-file option for specifying alternative codecs.conf files
+    * -codecs-file option for specifying alternative codecs.conf file
     * fixed some minor bugs in the GUI
     * prevent sig11 when $HOME is not set
     * fix some command line handling corruptions
-    * swedish and polish yes/no options in config files
+    * Swedish and Polish yes/no options in config files
     * support binding F11 and F12 keys
 
 
@@ -343,7 +346,7 @@ mplayer (1.0)
 
 
   pre1:  "Development" on the beach
-    NOTE: the mplayer 'main' branch was forked at the time of 0.90-rc4, so
+    NOTE: the MPlayer 'main' branch was forked at the time of 0.90-rc4, so
     0.90-rc5 (and later 0.90 releases) changes are independent!
     (it also means that there are main-only and 0_90-only changes)
 
