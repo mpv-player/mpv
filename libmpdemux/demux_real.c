@@ -396,7 +396,7 @@ int demux_real_fill_buffer(demuxer_t *demuxer)
     version = stream_read_word(demuxer->stream); /* version */
     len = stream_read_word(demuxer->stream);
     if ((version==0x4441) && (len==0x5441)) { // new data chunk
-	mp_msg(MSGT_DEMUX,MSGL_INFO,"demux_real: New data chunk is comming!!!\n");
+	mp_msg(MSGT_DEMUX,MSGL_INFO,"demux_real: New data chunk is coming!!!\n");
 	stream_skip(demuxer->stream,14); 
 	demuxer->filepos = stream_tell(demuxer->stream);
         version = stream_read_word(demuxer->stream); /* version */
