@@ -1,4 +1,4 @@
-.\" MPlayer (C) 2000-2002 Arpad Gereoffy
+n.\" MPlayer (C) 2000-2002 Arpad Gereoffy
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: imoteph (imoteph@wp.pl) & Zorg (kmaterka@wp.pl)
 .\"
@@ -178,6 +178,9 @@ mf= type=png:fps=25
 
 .SH "OPCJE ODTWARZACZA (TYLKO MPLAYER)"
 .TP
+.B \-, \-use-stdin
+Czytaj dane z stdin. Opcja \-idx nie wspó³pracuje w po³±czeniu z tym.
+.TP
 .B \-autoq <jako¶æ> (u¿ywaj z \-vop pp)
 Dynamiczne zmiany poziomu postprocesingu w zale¿no¶ci od dostêpnego wolnego
 czasu procesora.
@@ -205,6 +208,19 @@ efektem w³±czanie tej opcji, dla wszystkich sterowników d¼wiêku.
 .B \-benchmark
 Poka¿ statystyki u¿ycia procesora i przesuwania klatek na koñcu.
 U¿ywaj w kombinacji z \-nosound i \-vo null dla benchmarku tylko wideo.
+.TP
+.B \-edl <nazwa\ pliku>
+W³±cza edytowani± listê decyzji (ang. edit decision list (EDL)) podczas odtwarzania.
+Wideo bêdzie pominiête,  audio bêdzie wyciszanie i podg³aszane zgodzie z wpasami
+w podanym pliku. Po szczegó³y i informacje jak tego u¿ywaæ siêgnij
+do DOCS/documentation.html#edl.
+.TP
+.B \-edlout <nazwa\ pliku>
+Tworzy nowy plik i zapisuje edytowan± listê decyzji (EDL) zapisywan± do tego pliku.
+Podczas odtwarzania, kiedy u¿ytkownik wci¶nie 'i', wpisy do pominiêtych dwóch
+ostatnich sekund zostan± zapisane do pliku. Prowadzi to do startowege punktu, z którego
+u¿ytkownik mo¿e 'delikatnie ustawic' wpisy EDL pó¼niej. Po szczegó³y siêgnij do
+DOCS/documentation.html#edl.
 .TP
 .B \-framedrop (zobacz tak¿e opcjê \-hardframedrop !)
 Opuszczanie klatek: dekoduj wszystkie klatki (oprócz B), wideo mo¿na pomin±æ.
@@ -282,12 +298,12 @@ Wy¶wietlaj mniej komunikatów statusu.
 .B \-really\-quiet \ \
 Wy¶wietlaj jeszcze mniej komunikatów statusu.
 .TP
-.B \-rnd \ \
-Odtwarzaj pliki w losowej kolejno¶ci.
-.TP
 .B \-sdp
 Okre¶leniem  tego pliku wej¶ciowego jest SDP ('Protokó³ Rodzaju Sesji')
 Plik ten opisuje sesjê RTP (zobacz http://www.live.com/mplayer/).
+.TP
+.B \-shuffle \ \
+Odtwarzaj pliki w losowej kolejno¶ci.
 .TP
 .B \-skin <katalog\ skórki> (KOD BETA)
 Za³aduj skórkê z podanego katalogu (BEZ nazwy ¶cie¿ki).
@@ -323,8 +339,6 @@ Ustaw prêdko¶æ têpa odtwarzania.
 .B \-sstep <sek>
 Okre¶l ilo¶æ sekund, miêdzy wy¶wietlonymi klatkami.
 U¿yteczny w pokazie klatek (slideshow).
-.TP
-.B \-use-stdin
 
 
 .SH "OPCJE DEMUXERA/STRUMIENI"
@@ -645,7 +659,7 @@ szeroko¶æ okna danych wyj¶ciowych
 .IPs height=<warto¶æ>
 wysoko¶æ okna danych wyj¶ciowych
 .IPs buffersize=<warto¶æ>
-przechwyæ rozmiar buforu w megabajtach (domy¶lnie jest to po³owa pamiêci fizycznej)
+maksymalny rozmiar buforu przechwytuj±cego w megabajtach (domy¶lnie jest to po³owa pamiêci fizycznej)
 .IPs norm=<warto¶æ>
 dostêpne: PAL, SECAM, NTSC
 .IPs channel=<warto¶æ>
@@ -898,6 +912,11 @@ To samo co \-audiofile, ale dla strumieni napisów (OggDS?).
 Okre¶l pozycje napisów na ekranie.
 Warto¶æ jest poziom± pozycj± napisów w % wysoko¶ci ekranu.
 .TP
+.B \-subwidth <10\-100>
+Okre¶l maksymaln± szeroko¶æ napisów na ekranie. Wpe³ni u¿yteczne dla
+wyj¶cia TV.
+Warto¶æ jest szeroko¶ci± napisów w % szeroko¶ci ekranu.
+.TP
 .B \-unicode
 Przeka¿ MPlayerowi by przetwarza³ plik napisów jako UNICODE.
 .TP
@@ -1041,6 +1060,10 @@ kompresuj mo¿liwo¶ci "programowego\-wycinania" (tylko plugin g³o¶no¶ci)
 .TP
 .B \-delay <sekundy>
 Opó¼nienie audio w sekundach (mog± byæ +/\:\- warto¶ci rzeczywiste).
+.TP
+.B \-format <0\-8192>
+Wybierz format u¿ywany do wyj¶cia z warstwy filtruj±cej (ang. filter layer).
+Format jest wybierany zgodnie z definicjami w libao2/afmt.h.
 .TP
 .B \-mixer <urz±dzenie>
 Ta opcja mówi MPlayerowi, by u¿ywa³ innego urz±dzenia do miksowania ni¿
@@ -1273,8 +1296,8 @@ Nie przechwytuj kursora muszki po zmianie VidMode (\-vm), u¿yteczne do
 ustawieñ multihead.
 .TP
 .B \-noslices
-Wy³±cz rysowanie przez 16-pikselow± slices/\:bands, zamiast tego rysuj dopóki
-klatka jest w pojedynczym ruchu.
+Wy³±cz rysowanie przez 16-pikselow± slices/\:bands, zamiast tego rysuj ca³±
+klatkê w pojedynczym ruchu.
 Mo¿liwe, ¿e przyspieszy, lub spowolni - w zale¿no¶ci od karty/\:pamiêci.
 Przyniesie efekt tylko z kodekami libmpeg2 i libavcodec.
 .TP
@@ -1282,7 +1305,7 @@ Przyniesie efekt tylko z kodekami libmpeg2 i libavcodec.
 W³±cz  Pan & Scan functionality, tj.\& w poleceniu wy¶wietlania filmu 16:9
 na ekranie 4:3, boki filmu bêd± przyciête, wiec dostajemy obraz 4:3, który
 doskonale pasuje.
-Ta opcja dzia³a tylko ze sterownikami xv, xmga, oraz vidix.
+Ta opcja dzia³a tylko ze sterownikami xv, xmga, mga i xvidix.
 .br
 Zakres pomiêdzy 0.0 a 1.0 podaje jak du¿o obraz ma byæ przyciêty.
 .TP
@@ -1732,6 +1755,11 @@ Dostêpne filtry to:
 .IPs crop[=w:h:x:y]
 Przycina dan± czê¶æ partii obrazu i wyrzuca resztê.
 Przydatne do usuwania czarnych obramowañ z szerokoekranowych filmów.
+.IPs cropdetect[=0\-255]
+Oblicza niezbêdne parametry przycinaj±ce i wy¶wiatla proponowane na standardowe
+wyj¶cie (and. stdout).
+Próg mo¿e byæ opcjonalnie okre¶lony od niczego (0) do wszystkiego (255).
+(domy¶lnie: 24)
 .IPs rectangle[=w:h:x:y]
 Rysuje prostok±t o wskazanej d³ugo¶ci i wysoko¶ci na wyznaczonych
 wspó³rzêdnych obrazu (do testu u¿yj corp).
@@ -1777,10 +1805,6 @@ Koder realtime MPEG1 dla u¿ycia z DVB/\:DXR3 (libfame)
 .IPs dvbscale[=aspect]
 Ustaw optymalne skalowanie dla kart DVB.
 (aspect = DVB_HEIGHT*ASPECTRATIO, domy¶lnie: 768)
-.IPs cropdetect[=0\-255]
-Oblicza niezbêdne parametry i podaje sugerowane parametry do stdout.
-Próg dodatkowo mo¿e byæ okre¶lonony od niczego (0), do wszystkiego (255).
-(domy¶lnie: 24)
 .IPs "noise[=luma[u][t|a][h][p]:chroma[u][t|a][h][p]]"
 Dodaje zaburzenie
 .RSss
@@ -1812,6 +1836,8 @@ Wykrywa i przesuwa pierwsz± z przeplataj±cych siê klatek w strumieniu wideo.
 Warto¶ci mog± byæ do 0.0 do 1.0 - pierwszy (domy¶lnie 0.1) jest wzglêdn±
 ró¿nic± pomiêdzy s±siaduj±cym pikselem, drugi (domy¶lnie 0.15) jest t± parti±
 obrazu wykrytego jako przeplataj±cy do przesuniêcia klatki.
+.IPs lavcdeint
+U¿yj filtra deinterlesingu kodeka libavcodec.
 .IPs "unsharp=l|cWxH:amount[:l|cWxH:amount]"
 Maska "odostrzaj±ca" / rozmycie gaussian.
 .RSss
@@ -1842,16 +1868,12 @@ radius: rozmiar do filtrowania
 .br
 power: jak czêsto filtr powinien byæ stosowany
 .REss
-
-
-
-!!! .IPs 1bpp
-!!! .IPs 2xsai
-!!! .IPs eq2
-!!! .IPs yvu9
-!!! wiêcej (IMHO wszystkie -vop help powinny byæ udokumentowane),
-!!! zw³aszcza bmovl (patrz plik .c), dodaæ vo/test?
-
+.IPs 2xsai
+U¿yj podwójne skalowanie i wstaw algorytm ze skalowania oraz rozmyj obrazy.
+.IPs 1bpp
+.IPs eq2
+.IPs yvu9
+.IPs bmovl
 
 
 .RE
@@ -2054,6 +2076,8 @@ regulacja bitrate metod±
 ¶rednie bitrate
 .IPs cbr
 sta³e bitrate
+.br
+Wymó¶ tryb kodowania CBR na  podsekwencji trybów ABR
 .IPs br=<0\-1024>
 wska¿ bitrate w kBit (tylko dla CBR i ABR)
 .IPs q=<0\-9>
@@ -2083,7 +2107,40 @@ ustaw g³o¶no¶æ wej¶cia audio
 .br
 2: modyfikuj
 .REss
+.IPs fast
+prze³±cz w szybsze kodowanie w podsekwencji trybów VBR, ma³o obni¿a
+jako¶æ i wiêksze bitrate'y.
+.IPs preset=<warto¶æ>
+udostêpnia ustawienia najwiêkszych mo¿liwych jako¶ci.
+.RSss
+medium: kodowanie VBR, dobra jako¶æ, bitrate 150\-180 kbps.
+.br
+standard: kodowanie VBR, wysoka jako¶æ, bitrate170\-210 kbps.
+.br
+extreme: kodowanie VBR, bardzo wysoka jako¶æ, bitrate 200\-240 kbps.
+.br
+insane: kodowanie CBR, wy¿sza jako¶æ, bitrate 320 kbps.
+.br
+<8-320>: kodowanie ABR na ¶redniej podanego bitrate'u w kbps.
+.br
+.REss
 .RE
+
+.I PRZYK£ADY:
+.PD 0
+.RSs
+.IPs "\-lameopts fast:preset=standard"
+dla wiêkszo¶ci ludzi i typów muzyki ju¿ ca³kowicie wysoka jako¶æ.
+.IPs "\-lameopts  cbr:preset=192"
+koduj z ABR na wymuszonym sta³ym bitrate 192 kbps.
+.IPs "\-lameopts      preset=172"
+koduj z ABR na ¶rednim bitrate 172 kbs.
+.IPs "\-lameopts      preset=extreme"
+dla ludzi z niezwykle dobrym s³uchem i podobnym sprzêtem.
+.IPs "\-lameopts preset=help"
+wy¶wietl dodatkowe opcje i informacje dotycz±ce opcji.
+.RE
+.PD 1
 .
 .TP
 .B \-lavcopts <opcja1:opcja2:...>
@@ -2507,11 +2564,16 @@ Dostêpne opcje to:
 .RSs
 .IPs pass=<1|2>
 wyszczególnij kroki w trybie 2-krokowym mode
-.IPs quality=<0\-6>
-okre¶l jako¶æ kodowania (domy¶lnie=6)
-.IPs br=<warto¶æ>
+.IPs bitrate<warto¶æ>
 ustaw u¿ywany bitrate, w bitach/\:sekundy, je¿eli <16000 lub w bits/\:second je¿eli >16000
 (CBR lub tryb 2-krokowy, standardowo=687 kbits/s)
+.IPs fixed_quant=<1\-31>
+prze³±cz do trybu sta³ego quantizera i wybierz quantizer, który ma byæ u¿yty
+.IPs me_quality=<0\-6>
+okre¶l jako¶æ detekcji ruchu (domy¶lne = 4)
+.IPs 4mv
+u¿yj 4 vektory ruchu na makro-blok, mo¿e daæ lepsz± jako¶æ na koszt
+wolnego kodowania (domy¶lne=off)
 .IPs rc_reaction_delay_factor=<warto¶æ>
 okre¶l szybko¶æ reakcji kontroli tempa, ma³e warto¶ci s± szybsze
 .IPs rc_averaging_period=<warto¶æ>
@@ -2546,8 +2608,6 @@ to *nie* jest plik kontrolny trybu 2-krokowego
 (domy¶lnie=10, tylko tryb 2krokowy)
 .IPs kfreduction=<0-100>
 (domy¶lnie=30, tylko tryb 2krokowy)
-.IPs fixed_quant=<1\-31>
-prze³±cz do trybu sta³ego quantizera i wybierz quantizer, który ma byc u¿yty
 .RE
 
 
@@ -2611,6 +2671,8 @@ prze³±cz jêzyk napisów
 modyfikuj zwlekanie napisów przez by +/\:\- 0.1 sekund
 .IPs "r i t"
 modyfikuj pozycjê napisów
+.IPs "i"
+ustaw znak EDL
 
 .PP
 (Nastêpuj±ce klawisze s± wa¿ne tylko, kiedy u¿ywamy \-vo xv lub
@@ -2875,11 +2937,11 @@ Strona przet³umaczona przez (kolejno¶æ przypadkowa):
 .br
 .B Konrada Materkê < kmaterka@wp.pl >
 .PP
-Maile odno¶nie manuala prosimy przesy³aæ do grupy maillingowej MPlayer-users,
+Pocztê odno¶nie manuala prosimy przesy³aæ do grupy maillingowej MPlayer-users,
 informacje o b³êdach w t³umaczeniu bezpo¶rednio do t³umaczy.
 
 
-.SH "STANDARDOWY ADNOTACJA"
+.SH "ADNOTACJA"
 U¿ywaj tylko na w³asn± odpowiedzialno¶æ!
 Mog± znajdowaæ siê tu b³êdy i nie¶cis³o¶ci, które mog³yby uszkodziæ Twój system,
 lub Twoje oczy.
@@ -2892,6 +2954,5 @@ b³êdnie lub nie powinny byæ t³umaczone.
 Je¶li zauwa¿ysz jaki¶ b³±d, popraw go i prze¶lij do autorów manuala
 (oryginalnego, b±d¼ t³umaczenia).
 T³umaczenie oparte na oryginalnym pliku do³±czonym do wersji 0.90-pre4, poprawiane
-sukcesywnie, do wersji 0.90rc1. Mamy nadzieje, ¿e w przysz³o¶ci t³umaczenie
-te¿ bêdzie uaktualniane, zg³aszanie b³êdów na pewno w tym pomo¿e.
+sukcesywnie, do wersji CVS z dnia 27-12-2002.
 .\" end of file
