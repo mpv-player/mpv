@@ -110,8 +110,9 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o movie.avi
 <para>
 <application>MEncoder</application> puede crear archivos con formato de salida
 MPEG (MPEG-PS). Probablemente esto sea util con el codec <emphasis>mpeg1video</emphasis>
-de libavcodec, porque los reproductores - excepto <application>MPlayer</application> -
-esperan video MPEG1, y audio en MPEG1 layer 2 (MP2) en los archivos MPEG.
+de <link linkend="ffmpeg">libavcodec</link>, porque los reproductores - excepto
+<application>MPlayer</application> - esperan video MPEG1, y audio en MPEG1 layer 2
+(MP2) en los archivos MPEG.
 </para>
 
 <para>
@@ -236,7 +237,8 @@ se describe <link linkend="menc-feat-fix-avi">más arriba</link>.
 <para>
 <link linkend="ffmpeg">libavcodec</link> provee desde codificación simple hasta
 un montón de interesantes formatos de video y audio (actualmente sus codecs de
-audio no están soportados). Puede codificar con los siguientes codecs:
+audio no están soportados). Puede codificar con los siguientes codecs (más o menos
+actualizado):
 
 <informaltable frame="all">
 <tgroup cols="2">
@@ -245,7 +247,10 @@ audio no están soportados). Puede codificar con los siguientes codecs:
 </thead>
 <tbody>
 <row><entry>mjpeg</entry><entry>
-   Motion JPEG
+  Motion JPEG
+  </entry></row>
+<row><entry>ljpeg</entry><entry>
+  Lossless JPEG
   </entry></row>
 <row><entry>h263</entry><entry>
   H263
@@ -262,17 +267,32 @@ audio no están soportados). Puede codificar con los siguientes codecs:
 <row><entry>msmpeg4v2</entry><entry>
   pre-standard MPEG-4 by MS, v2 (usado en archivos asf antiguos)
   </entry></row>
-  <row><entry>wmv1</entry><entry>
+<row><entry>wmv1</entry><entry>
   Windows Media Video, version 1 (aka WMV7)
+  </entry></row>
+<row><entry>wmv2</entry><entry>
+  Windows Media Video, version 2 (aka WMV8)
   </entry></row>
 <row><entry>rv10</entry><entry>
   un codec RealVideo antiguo
   </entry></row>
 <row><entry>mpeg1video</entry><entry>
-  MPEG1 video :)
+  MPEG1 video
+  </entry></row>
+<row><entry>mpeg2video</entry><entry>
+  MPEG2 video
   </entry></row>
 <row><entry>huffyuv</entry><entry>
   compresión sin pérdidas 
+  </entry></row>
+<row><entry>asv1</entry><entry>
+  ASUS Video v1
+  </entry></row>
+<row><entry>asv2</entry><entry>
+  ASUS Video v2
+  </entry></row>
+<row><entry>ffv1</entry><entry>
+  codec de video si pérdidas de FFmpeg
   </entry></row>
 </tbody>
 </tgroup>
@@ -462,15 +482,14 @@ es repugnante y consume tiempo, ¡siempre debe haber un camino mejor!
 
 <para>
 MPEG4 tiene una característica única: el flujo de video puede contener
-la razón de aspecto necesaria. Sí, igual que los archivos MPEG1/2 (DVD, SVCD).
+la razón de aspecto necesaria. Sí, igual que MPEG1/2 (DVD, SVCD) y los archivos H263.
 Por lástima, <emphasis role="bold">no</emphasis> hay reproductores de video
-ahí fuera que soporten esta característica.
-Excepto <application>MPlayer</application>.
+ahí fuera que soporten esta característica de MPEG4, excepto <application>MPlayer</application>.
 </para>
 
 <para>
 Esta característica puede ser usada solo con el codec
-<systemitem>mpeg4</systemitem> de <emphasis role="bold">libavcodec</emphasis>.
+<systemitem>mpeg4</systemitem> de <link linkend="ffmpeg">libavcodec</link>.
 Tenga en mente: aunque <application>MPlayer</application> puede reproducir
 correctamente el archivo creado, otros reproductores pueden usar una razón
 de aspecto incorrecta.
@@ -483,12 +502,75 @@ Vea la página de manual para usar los filtros <systemitem>cropdetect</systemitem
 y <systemitem>crop</systemitem>.
 </para>
 
-<formalpara>
-<title>Uso</title>
 <para>
+Uso
 <screen>mencoder sample-svcd.mpg -ovc lavc -lavcopts vcodec=mpeg4:autoaspect -vf crop=714:548:0:14 -oac copy -o salida.avi</screen>
 </para>
-</formalpara>
+</sect1>
+
+<sect1 id="custommatrices"><title>Matrices inter/intra personalizadas</title>
+
+<para>
+Con ésta característica de <link linkend="ffmpeg">libavcodec</link> puede
+personalizar las matrices inter (marcos-I/marcos clave) e intra (marcos-P/marcos
+de predicción). Está soportado por muchos codecs:
+<systemitem>mpeg1video</systemitem> y <systemitem>mpeg2video</systemitem>
+se ha informado que funcionan.
+</para>
+
+<para>
+Un uso normal de esta característica es establecer las matrices preferidas
+por las especificaciones <ulink url="http://www.kvcd.net/">KVCD</ulink>.
+</para>
+
+<para>
+La <emphasis role="bold">Matriz de Cuantización de KVCD &quot;Notch&quot;</emphasis>
+</para>
+
+<para>
+Intra:
+<screen>
+ 8  9 12 22 26 27 29 34
+ 9 10 14 26 27 29 34 37
+12 14 18 27 29 34 37 38
+22 26 27 31 36 37 38 40
+26 27 29 36 39 38 40 48
+27 29 34 37 38 40 48 58
+29 34 37 38 40 48 58 69
+34 37 38 40 48 58 69 79
+</screen>
+
+Inter:
+<screen>
+16 18 20 22 24 26 28 30
+18 20 22 24 26 28 30 32
+20 22 24 26 28 30 32 34
+22 24 26 30 32 32 34 36
+24 26 28 32 34 34 36 38
+26 28 30 32 34 36 38 40
+28 30 32 34 36 38 42 42
+30 32 34 36 38 40 42 44
+</screen>
+</para>
+
+<para>
+Uso:
+<screen>
+$ mencoder input.avi -o output.avi -oac copy -ovc lavc -lavcopts inter_matrix=...:intra_matrix=...
+</screen>
+</para>
+
+<para>
+<screen>
+$ mencoder input.avi -ovc lavc -lavcopts
+vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
+12,14,18,27,29,34,37,38,22,26,27,31,36,37,38,40,26,27,29,36,39,38,40,48,27,
+29,34,37,38,40,48,58,29,34,37,38,40,48,58,69,34,37,38,40,48,58,69,79
+:inter_matrix=16,18,20,22,24,26,28,30,18,20,22,24,26,28,30,32,20,22,24,26,
+28,30,32,34,22,24,26,30,32,32,34,36,24,26,28,32,34,34,36,38,26,28,30,32,34,
+36,38,40,28,30,32,34,36,38,42,42,30,32,34,36,38,40,42,44 -oac copy -o svcd.mpg
+</screen>
+</para>
 </sect1>
 
 </chapter>

@@ -188,15 +188,16 @@ lo detecta, puede que no esté instalado o configurado correctamente.
 </sect3>
 
 
-<sect3 id="ffmpeg" xreflabel="FFmpeg DivX/libavcodec">
+<sect3 id="ffmpeg" xreflabel="FFmpeg/libavcodec">
 <title>FFmpeg DivX/libavcodec</title>
 
 <para>
 <ulink url="http://ffmpeg.sourceforge.net">FFmpeg</ulink> contiene un paquete de
 codec <emphasis role="bold">de código abierto</emphasis> que es capaz de decodificar
-flujos codificados con codecs de video H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/HuffYUV/SVQ1/SVQ3, o WMA (Windows Media Audio). No solo todos pueden ser
-decodificados con él, sino que ¡también ofrece una velocidad mayor que la biblioteca de
-codecs Win32 o DivX.com DivX4.5!
+flujos codificados con codecs de video H263/MJPEG/LJPEG/RV10/DivX3/DivX4/DivX5/MP41/
+MP42/WMV1/WMV2/HuffYUV/SVQ1/SVQ3/MPEG1/MPEG2/VCR1/VCR2/ASV1/ASV2/CLJR,
+o WMA (Windows Media Audio). No solo todos pueden ser decodificados con él, sino que
+¡también ofrece una velocidad mayor que la biblioteca de codecs Win32 o DivX.com DivX4.5!
 </para>
 
 <para>
