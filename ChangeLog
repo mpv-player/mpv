@@ -54,7 +54,8 @@ MPlayer (1.0)
     * Windows Media Audio 9 Voice support via binary DLL
     * Windows Media Video 9 Advanced support via binary DLL
     * Windows Media Screen Codec 2 support via binary DLL
-    * Windows Media Picture Codec support via binary DLL
+    * Windows Media Image Codec support via binary DLL
+    * Windows Media Image 2 Codec support via binary DLL
     * VDOWave video support via binary DLL
     * Miro VideoXL video support via lavc
     * Creative ADPCM audio support via lavc or binary DLL
