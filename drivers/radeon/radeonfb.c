@@ -13,13 +13,22 @@
  *			and minor mode tweaking, 0.0.9
  *
  *	2001-09-07	Radeon VE support
+ *	2001-09-10	Radeon VE QZ support by Nick Kurshev <nickols_k@mail.ru>
+ *			(limitations: on dualhead Radeons (VE, M6, M7)
+ *			 driver works only on second head (DVI port).
+ *			 TVout is not supported too. M6 & M7 chips
+ *			 currently are not supported. Driver has a lot
+ *			 of other bugs. Probably they can be solved by
+ *			 importing XFree86 code, which has ATI's support).,
+ *			 0.0.11
+ *
  *
  *	Special thanks to ATI DevRel team for their hardware donations.
  *
  */
 
 
-#define RADEON_VERSION	"0.0.10"
+#define RADEON_VERSION	"0.0.11"
 
 
 #include <linux/config.h>
@@ -64,7 +73,8 @@ enum radeon_chips {
 	RADEON_QE,
 	RADEON_QF,
 	RADEON_QG,
-	RADEON_VE
+	RADEON_QY,
+	RADEON_QZ
 };
 
 
@@ -73,7 +83,8 @@ static struct pci_device_id radeonfb_pci_table[] __devinitdata = {
 	{ PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_RADEON_QE, PCI_ANY_ID, PCI_ANY_ID, 0, 0, RADEON_QE},
 	{ PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_RADEON_QF, PCI_ANY_ID, PCI_ANY_ID, 0, 0, RADEON_QF},
 	{ PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_RADEON_QG, PCI_ANY_ID, PCI_ANY_ID, 0, 0, RADEON_QG},
-	{ PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_RADEON_VE, PCI_ANY_ID, PCI_ANY_ID, 0, 0, RADEON_VE},
+	{ PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_RADEON_QY, PCI_ANY_ID, PCI_ANY_ID, 0, 0, RADEON_QY},
+	{ PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_RADEON_QZ, PCI_ANY_ID, PCI_ANY_ID, 0, 0, RADEON_QZ},
 	{ 0, }
 };
 MODULE_DEVICE_TABLE(pci, radeonfb_pci_table);
@@ -176,7 +187,7 @@ struct radeonfb_info {
 	struct radeon_regs state;
 	struct radeon_regs init_state;
 
-	char name[10];
+	char name[14];
 	char ram_type[12];
 
 	u32 mmio_base_phys;
@@ -643,8 +654,11 @@ static int radeonfb_pci_register (struct pci_dev *pdev,
 		case PCI_DEVICE_ID_RADEON_QG:
 			strcpy(rinfo->name, "Radeon QG ");
 			break;
-		case PCI_DEVICE_ID_RADEON_VE:
-			strcpy(rinfo->name, "Radeon VE ");
+		case PCI_DEVICE_ID_RADEON_QY:
+			strcpy(rinfo->name, "Radeon VE QY");
+			break;
+		case PCI_DEVICE_ID_RADEON_QZ:
+			strcpy(rinfo->name, "Radeon VE QZ");
 			break;
 		default:
 			return -ENODEV;
