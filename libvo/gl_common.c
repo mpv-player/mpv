@@ -271,7 +271,11 @@ void releaseGlContext(XVisualInfo **vinfo, GLXContext *context) {
     XFree(*vinfo);
   *vinfo = NULL;
   if (*context)
+  {
+    glFinish();
+    glXMakeCurrent(mDisplay, None, NULL);
     glXDestroyContext(mDisplay, *context);
+  }
   *context = 0;
 }
 #endif
