@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Version:          0.1.2
+# Version:          0.1.3
 #
 # Licence:          GPL
 #
@@ -19,10 +19,16 @@
 # 2002/04/11        v0.1.0: first version
 # 2002/04/12        v0.1.1: 
 # 2002/04/14        v0.1.2:
-#                      - handles now multiple vcd's
-#                      - support's mp3 audio as option
-#                      - use of mp2enc/lame instead of toolame because of support 
-#                        of resampling and mp3
+#                     - handles now multiple vcd's
+#                     - support's mp3 audio as option
+#                     - use of mp2enc/lame instead of toolame because of support
+#                       of resampling and mp3
+# 2002/04/16        v0.1.3:
+#                     - new option "-burnonly"
+#                     - new option "-vbr"
+#                     - removes mpg file after mastering cd image
+#                       (mplayer can read bin images!)
+#                     - bug fixes
 #
 ################################################################################
 #
@@ -40,7 +46,7 @@ VIDEO="stream.yuv"
 ################################################################################
 
 function usage() {
-   echo "usage: $HOWCALLED <filename> [options] [mplayer options]"
+   echo "usage: $HOWCALLED <name> [options] [mplayer options]"
    echo
    echo "$HOWCALLED options:"
    echo
@@ -49,14 +55,15 @@ function usage() {
    echo "-abr <n>      output audio bitrate in kbs [224]"
    echo "-asr <n>      output audio sample rate in Hz [48000]"
    echo "-blank        cleans cd-rw before burning"
+   echo "-burnonly     burn only the premastered <name>*.cue/<name>*.bin images"
    echo "-cdsize <n>   maximal size of cd images [646]"
    echo "-denoise      denoises mpeg stream"
    echo "-noburn       disables burning"
    echo "-mp3          outputs audio in mp3 instead of mp2 format"
    echo "-mpg          don't encode from source, multiplex/burn"
    echo "              only the encoded mpg stream"
-   echo "-vcdout       encode to VCD format [default]"
-   echo "-svcdout      encode to SVCD format"
+   echo "-svcdout      encode to SVCD format [VCD default]"
+   echo "-vbr <n>      output video bitrate in kbs [VCD:1152, SVCD:2500]"
    echo
    echo "example:"
    echo "'$HOWCALLED crazy -dvd 3 -w' encodes and burns dvd title 3 to VCD in 16:9."
@@ -81,17 +88,21 @@ params=""
 wide=""
 blank=0
 burn=1
+burnonly=0
 mp3=0
 mkstream=1
 abr=224
 abrset=0
 asr=44100
+vbr=1152
+vbrset=0
 denoise="cat -"
 norm="VCD"
 mplexnorm="-f 2 -m 1 -V"
 max=646
-mpegnorm="-f 2 -b 1152 -B 260"
+mpegnorm="-f 2 -b $vbr -B 260"
 imaget="-t vcd2"
+
 while [ "$1"x != "x" ]; do
    case $1 in
       -w)
@@ -120,6 +131,10 @@ while [ "$1"x != "x" ]; do
       -noburn)
         burn=0
 	;;
+      -burnonly)
+        burnonly=1
+	burn=1
+	;;
       -mp3)
         mp3=1
         ;;
@@ -129,17 +144,13 @@ while [ "$1"x != "x" ]; do
       -denoise)
         denoise="yuvdenoise"
         ;;
-      -vcdout)
-      	norm="VCD"
-	mplexnorm="-f 2 -m 1 -V"
-	mpegnorm="-f 2 -b 1152 -B 260"
-	imaget="-t vcd2"
-	;;
       -svcdout)
         norm="SVCD"
-	mplexnorm="-f 4 -m 2 -V"
-	mpegnorm="-f 4 -b 2500 -B 260"
-	imaget="-t svcd"
+	;;
+      -vbr)
+        vbr=$2
+        vbrset=1
+	shift 1
 	;;
       *)
 	params="$params $1"
@@ -149,17 +160,15 @@ while [ "$1"x != "x" ]; do
 done
 
 # some configs
-if [ -n "$wide" ]; then
-   if [ "$norm" == "SVCD" ]; then
-      wide=""
-      mpegnorm="$mpegnorm -a 3"
-   fi
+if [ "$norm" == "SVCD" ]; then
+   [ $vbrset -eq 0 ] && vbr=2500
+   mplexnorm="-f 5 -m 2 -V"
+   mpegnorm="-f 5 -b $vbr -B 260 -a 2"
+   imaget="-t svcd"
 fi
 
 # with mp3 audio set the default audio bitrate to 128 kbs
-if [ $mp3 -eq 1 -a $abrset -eq 0 ]; then
-   abr=128
-fi
+[ $mp3 -eq 1 -a $abrset -eq 0 ] && abr=128
 
 # audio sample rate in kHz
 ((a=$asr / 1000))
@@ -168,45 +177,53 @@ fi
 [ $b -le 99 ] && b="0$b00"
 kasr="$a.$b"
 
-# encode streams
-if [ $mkstream -eq 1 ]; then
-   # start mplayer
-   mplayer -noframedrop -vo yuv4mpeg -ao pcm -waveheader $params &
+if [ $burnonly -eq 0 ]; then
+   # encode streams
+   if [ $mkstream -eq 1 ]; then
+      # start mplayer
+      mplayer -noframedrop -vo yuv4mpeg -ao pcm -waveheader \
+              -osdlevel 0 $params &
 
-   # mjpegtools
-   ($denoise < $VIDEO | \
-      yuvscaler -v 0 $wide -O $norm | \
-      mpeg2enc -v 0 -s $mpegnorm -S $max -g 6 -G 15 -r 16 -o $NAME.mpv) &
+      # mjpegtools
+      ($denoise < $VIDEO | \
+         yuvscaler -v 0 $wide -O $norm | \
+         mpeg2enc -v 0 -s $mpegnorm -S $max -g 6 -G 15 -r 16 -o $NAME.mpv) &
    
-   # wait for finishing the subprocesses
-   wait
+      # wait for finishing the subprocesses
+      wait
 
-   if [ $mp3 -eq 0 ]; then
-     # mp2enc/lame can't read audiodump.wav directly from named pipe,
-     # we have to read the whole file.
-     mp2enc -b $abr -r $asr -o $NAME.mpa < $AUDIO
-   else
-     lame -b $abr --resample $kasr - $NAME.mpa < $AUDIO
+      if [ $mp3 -eq 0 ]; then
+        # mp2enc/lame can't read audiodump.wav directly from named pipe,
+        # we have to read the whole file.
+        mp2enc -b $abr -r $asr -o $NAME.mpa < $AUDIO
+      else
+        lame -b $abr --resample $kasr - $NAME.mpa < $AUDIO
+      fi
    fi
+
+   # remove wav file, won't need anymore!
+   rm -f $AUDIO
+
+   # multiplex streams
+   [ -f $NAME.mpv -a -f $NAME.mpa ] || exit 1
+   rm -f ${NAME}*.mpg
+   mplex $mplexnorm $NAME.mpv $NAME.mpa -o ${NAME}%d.mpg
+
+   # create cd images
+   for mpg in ${NAME}*.mpg; do 
+      [ -f $mpg ] || exit 1
+      cue="`basename $mpg .mpg`.cue"
+      bin="`basename $mpg .mpg`.bin"
+      rm -f $cue $bin
+      vcdimager $imaget -c $cue -b $bin $mpg
+      [ -f $bin -a -f $cue ] && rm -f $mpg
+   done
+
+# end of streaming/mastering
 fi
 
-# remove pipe and wav file, won't need anymore!
+# remove pipe, won't need anymore!
 rm -f $VIDEO
-rm -f $AUDIO
-
-# multiplex streams
-[ -f $NAME.mpv -a -f $NAME.mpa ] || exit 1
-rm -f ${NAME}*.mpg
-mplex $mplexnorm $NAME.mpv $NAME.mpa -o ${NAME}%d.mpg
-
-# create cd images
-for mpg in ${NAME}*.mpg; do 
-   [ -f $mpg ] || exit 1
-   cue="`basename $mpg .mpg`.cue"
-   bin="`basename $mpg .mpg`.bin"
-   rm -f $cue $bin
-   vcdimager $imaget -c $cue -b $bin $mpg
-done
 
 # burn the (s)vcd's
 [ $burn -eq 0 ] && exit 0
