@@ -1,4 +1,3 @@
-
 #define VCODEC_COPY 0
 #define VCODEC_FRAMENO 1
 #define VCODEC_DIVX4 2
@@ -61,11 +60,13 @@ static char* banner_text=
 #else
 #include "libavcodec/avcodec.h"
 #endif
+extern int avcodec_inited;
+
+/* for video encoder */
 static AVCodec *lavc_venc_codec=NULL;
 static AVCodecContext lavc_venc_context;
 static AVPicture lavc_venc_picture;
-extern int avcodec_inited;
-
+/* video options */
 char *lavc_param_vcodec = NULL;
 int lavc_param_vbitrate = -1;
 int lavc_param_vhq = 0; /* default is realtime encoding */
@@ -203,7 +204,7 @@ static unsigned char* vo_image_ptr=NULL;
 static uint32_t draw_slice(uint8_t *src[], int stride[], int w,int h, int x0,int y0){
   int y;
 //  printf("draw_slice %dx%d %d;%d\n",w,h,x0,y0);
-  if(scale_srcW)
+  if(scale_srcW || scale_srcH)
   {
       uint8_t* dstPtr[3]= {
       		vo_image, 
@@ -234,12 +235,14 @@ static uint32_t draw_slice(uint8_t *src[], int stride[], int w,int h, int x0,int
       memcpy(d,s,w);
   }
   } // !swscaler
+  return(0);
 }
 
 static uint32_t draw_frame(uint8_t *src[]){
   // printf("This function shouldn't be called - report bug!\n");
   // later: add YUY2->YV12 conversion here!
   vo_image_ptr=src[0];
+  return(0);
 }
 
 vo_functions_t video_out;
@@ -613,7 +616,6 @@ mux_v->codec=out_video_codec;
 
 switch(mux_v->codec){
 case VCODEC_COPY:
-    printf("sh_video->bih: %x\n", sh_video->bih);
     if (sh_video->bih)
 	mux_v->bih=sh_video->bih;
     else
@@ -632,7 +634,6 @@ case VCODEC_COPY:
 	mux_v->bih->biBitCount, mux_v->bih->biCompression);
     break;
 case VCODEC_RAW:
-    printf("sh_video->bih: %x\n", sh_video->bih);
     if (sh_video->bih)
 	mux_v->bih=sh_video->bih;
     else
@@ -700,23 +701,57 @@ case VCODEC_LIBAVCODEC:
     mux_v->bih->biHeight=vo_h;
     mux_v->bih->biPlanes=1;
     mux_v->bih->biBitCount=24;
-    mux_v->bih->biCompression=mmioFOURCC(lavc_param_vcodec[0],
-	lavc_param_vcodec[1], lavc_param_vcodec[2], lavc_param_vcodec[3]); /* FIXME!!! */
+    if (!lavc_param_vcodec)
+    {
+	printf("No libavcodec codec specified! It's requested!\n");
+	return 0; /* FIXME */
+    }
+    else
+    {
+        const char *vcodec = lavc_param_vcodec;
+        if (!strcasecmp(vcodec, "mpeg1video"))
+        {
+	    mux_v->bih->biCompression = mmioFOURCC('m', 'p', 'g', '1');
+        }
+        else if (!strcasecmp(vcodec, "h263") || !strcasecmp(vcodec, "h263p"))
+        {
+	    mux_v->bih->biCompression = mmioFOURCC('h', '2', '6', '3');
+        }
+        else if (!strcasecmp(vcodec, "rv10"))
+        {
+	    mux_v->bih->biCompression = mmioFOURCC('R', 'V', '1', '0');
+        }
+        else if (!strcasecmp(vcodec, "mjpeg"))
+        {
+	    mux_v->bih->biCompression = mmioFOURCC('M', 'J', 'P', 'G');
+        }
+        else if (!strcasecmp(vcodec, "mpeg4"))
+        {
+	    mux_v->bih->biCompression = mmioFOURCC('M', 'P', '4', 'S');
+        }
+        else if (!strcasecmp(vcodec, "msmpeg4"))
+        {
+	    mux_v->bih->biCompression = mmioFOURCC('d', 'i', 'v', '3');
+        }
+	else
+	    mux_v->bih->biCompression = mmioFOURCC(lavc_param_vcodec[0],
+		lavc_param_vcodec[1], lavc_param_vcodec[2], lavc_param_vcodec[3]); /* FIXME!!! */
+    }
     mux_v->bih->biSizeImage=mux_v->bih->biWidth*mux_v->bih->biHeight*(mux_v->bih->biBitCount/8);
 
     printf("videocodec: libavcodec (%dx%d fourcc=%x [%.4s])\n",
 	mux_v->bih->biWidth, mux_v->bih->biHeight, mux_v->bih->biCompression,
-	    &mux_v->bih->biCompression);
+	    (char *)&mux_v->bih->biCompression);
 #endif
 }
 
 /* force output fourcc to .. */
-if (force_fourcc != NULL)
+if ((force_fourcc != NULL) && (strlen(force_fourcc) >= 4))
 {
     mux_v->bih->biCompression = mmioFOURCC(force_fourcc[0], force_fourcc[1],
 					    force_fourcc[2], force_fourcc[3]);
     printf("Forcing output fourcc to %x [%.4s]\n",
-	mux_v->bih->biCompression, &mux_v->bih->biCompression);
+	mux_v->bih->biCompression, (char *)&mux_v->bih->biCompression);
 }
 
 // ============= AUDIO ===============
@@ -733,7 +768,6 @@ mux_a->codec=out_audio_codec;
 
 switch(mux_a->codec){
 case ACODEC_COPY:
-    printf("sh_audio->wf: %x\n", sh_audio->wf);
     mux_a->h.dwSampleSize=sh_audio->audio.dwSampleSize;
     mux_a->h.dwScale=sh_audio->audio.dwScale;
     mux_a->h.dwRate=sh_audio->audio.dwRate;
@@ -1044,7 +1078,6 @@ if(verbose){
 }
 break;
 #endif
-    
 }
 
 signal(SIGINT,exit_sighandler);  // Interrupt from keyboard
@@ -1257,7 +1290,6 @@ case VCODEC_LIBAVCODEC:
 
 	out_size = avcodec_encode_video(&lavc_venc_context, mux_v->buffer, mux_v->buffer_size,
 	    &lavc_venc_picture);
-//	printf("out_size = %d\n", out_size);
 	aviwrite_write_chunk(muxer,mux_v,muxer_f,out_size,lavc_venc_context.key_frame?0x10:0);
 #endif
     }
