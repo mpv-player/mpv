@@ -203,6 +203,15 @@ int xacodec_query(xacodec_driver_t *codec_driver, XA_CODEC_HDR *codec_hdr)
 {
     long codec_ret;
 
+#if 0
+    /* the brute one */
+    if (codec_driver->dec_func)
+    {
+	codec_hdr->decoder = codec_driver->dec_func;
+	mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "We got decoder's address at init! %p\n", codec_hdr->decoder);
+	return(1);
+    }
+#endif
     codec_ret = codec_driver->iq_func(codec_hdr);
     switch(codec_ret)
     {
@@ -251,11 +260,11 @@ int xacodec_init_video(sh_video_t *vidinfo, int out_format)
 
     codec_hdr.anim_hdr = malloc(4096);
     codec_hdr.description = vidinfo->codec->info;
-    codec_hdr.compression = bswap_32(vidinfo->format);
+    codec_hdr.compression = bswap_32(vidinfo->bih->biCompression);
     codec_hdr.decoder = NULL;
     codec_hdr.avi_ctab_flag = 0;
     codec_hdr.avi_read_ext = NULL;
-    codec_hdr.xapi_rev = 0x0001;
+    codec_hdr.xapi_rev = XAVID_API_REV;
     codec_hdr.extra = NULL;
     codec_hdr.x = vidinfo->disp_w;
     codec_hdr.y = vidinfo->disp_h;
