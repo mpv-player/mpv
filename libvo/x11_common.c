@@ -461,7 +461,7 @@ int vo_x11_check_events(Display *mydisplay){
    #ifdef HAVE_NEW_GUI
     if ( use_gui ) guiGetEvent( 0,(char*)&Event );
    #endif
-   if ( vo_window == Event.xany.window )
+   //if ( vo_window == Event.xany.window ) // removed because it does not work with DGA ::atmos
     switch( Event.type )
      {
       case Expose:
@@ -539,12 +539,14 @@ void vo_x11_fullscreen( void )
    }
    vo_dx=0;        vo_dy=0;        vo_dwidth=vo_screenwidth; vo_dheight=vo_screenheight;
    vo_x11_decoration( mDisplay,vo_window,0 );
+printf("dendeco! \n");
   }
   else
    {
     vo_fs=VO_FALSE;
     vo_dx=vo_old_x; vo_dy=vo_old_y; vo_dwidth=vo_old_width; vo_dheight=vo_old_height;
     vo_x11_decoration( mDisplay,vo_window,1 );
+printf("reendeco! \n");
    }
  vo_x11_sizehint( vo_dx,vo_dy,vo_dwidth,vo_dheight );
  XMoveResizeWindow( mDisplay,vo_window,vo_dx,vo_dy,vo_dwidth,vo_dheight );
