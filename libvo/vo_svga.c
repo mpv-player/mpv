@@ -77,13 +77,15 @@ static void checksupportedmodes() {
 static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
                      uint32_t d_height, uint32_t fullscreen, char *title, 
 		     uint32_t format) {
+  uint32_t wid = (d_width > 0 ? d_width : width);
+  
   if (!checked) {
     checksupportedmodes(); // Looking for available video modes
   }
   pformat = format;
   if (format == IMGFMT_YV12) bpp = 32;
   else bpp = format & 255;
-  if (d_width > 800)
+  if (wid > 800)
     switch (bpp) {
       case 32: vid_mode = 36; break;
       case 24: vid_mode = 25; break;
@@ -91,7 +93,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
       case 15: vid_mode = 23; break;
     }
   else
-    if (d_width > 640)
+    if (wid > 640)
       switch (bpp) {
         case 32: vid_mode = 35; break;
         case 24: vid_mode = 22; break;
