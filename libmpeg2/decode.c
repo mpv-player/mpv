@@ -5,7 +5,12 @@
 #define PACKAGE "mpeg2dec"
 #define VERSION "0.2.0-release"
 
+#include "config.h"
+
 #include <stdio.h>
+#ifdef HAVE_MALLOC_H
+#include <malloc.h>
+#endif
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -15,7 +20,6 @@
 #include <setjmp.h>
 
 
-#include "config.h"
 
 #include "video_out.h"
 #include <inttypes.h>

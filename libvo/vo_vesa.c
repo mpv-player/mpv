@@ -15,19 +15,19 @@
     note: triple buffering requires VBE 3.0 - need volunteers.
   - refresh rate support (need additional info from mplayer)
 */
+#include "config.h"
+
 #include <stdio.h>
+#ifdef HAVE_MALLOC_H
+#include <malloc.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <stddef.h>
 #include <limits.h>
 
-#include "config.h"
 #include "video_out.h"
 #include "video_out_internal.h"
-
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
-#endif
 
 #include "fastmemcpy.h"
 #include "sub.h"

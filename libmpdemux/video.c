@@ -1,10 +1,14 @@
 // read video frame
 
+#include "config.h"
+
 #include <stdio.h>
+#ifdef HAVE_MALLOC_H
+#include <malloc.h>
+#endif
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "config.h"
 #include "mp_msg.h"
 #include "help_mp.h"
 
