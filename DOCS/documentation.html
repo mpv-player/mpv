@@ -192,7 +192,7 @@
       <LI><A HREF=#2.6.2>2.6.2 Usage</A></LI>
       <LI><A HREF=#2.6.3>2.6.3 Crop</A></LI>
       <LI><A HREF=#2.6.4>2.6.4 Expand</A></LI>
-      <LI><A HREF=#2.6.5>2.6.5 Fame</A></LI>
+      <LI><A HREF=#2.6.5>2.6.5 Fame/Lavc</A></LI>
       <LI><A HREF=#2.6.6>2.6.6 Flip</A></LI>
       <LI><A HREF=#2.6.7>2.6.7 Format</A></LI>
       <LI><A HREF=#2.6.8>2.6.8 Postprocess</A></LI>
@@ -200,7 +200,9 @@
       <LI><A HREF=#2.6.10>2.6.10 Rotate</A></LI>
       <LI><A HREF=#2.6.11>2.6.11 Scale</A></LI>
       <LI><A HREF=#2.6.12>2.6.12 YUY2</A></LI>
-      <LI><A HREF=#2.6.13>2.6.13 Lavc</A></LI>
+      <LI><A HREF=#2.6.13>2.6.13 Mirror</A></LI>
+      <LI><A HREF=#2.6.14>2.6.14 DVBscale</A></LI>
+      <LI><A HREF=#2.6.15>2.6.15 Cropdetect</A></LI>
     </UL>
   </UL>
   <LI><A HREF="#3">3. Usage</A></LI>
@@ -1010,6 +1012,9 @@ Input from standard V4L<BR>
   last called filter (after that libvo comes, or when using <B>MEncoder</B>,
   encoding).</P>
 
+<P>You can get the list of available video filters with the<BR>
+  "<CODE>mplayer -vop help</CODE>" command line.</P>
+
 
 <A NAME=2.6.3><P><B><I>2.6.3.  Crop</I></B></P>
 
@@ -1039,15 +1044,18 @@ Input from standard V4L<BR>
 <P><CODE>&nbsp;&nbsp;-vop expand[=width:height:x:y]</CODE></P>
 
 
-<A NAME=2.6.5><P><B><I>2.6.5.  Fame</I></B></P>
+<A NAME=2.6.5><P><B><I>2.6.5.  Fame/Lavc</I></B></P>
 
 <P><B><U>Description</U></B>:</P>
 
-<P>Realtime MPEG1 encoder (for use with DVB/DXR3).</P>
+<P>Realtime MPEG1 encoder (using libfame or libavcodec) (for use with
+  DVB/DXR3).</P>
 
 <P><B><U>Usage</U></B>:</P>
 
 <P><CODE>&nbsp;&nbsp;-vop fame</CODE></P>
+
+<P><CODE>&nbsp;&nbsp;-vop lavc</CODE></P>
 
 
 <A NAME=2.6.6><P><B><I>2.6.6.  Flip</I></B></P>
@@ -1144,15 +1152,38 @@ Input from standard V4L<BR>
 <P><CODE>&nbsp;&nbsp;-vop yuy2</CODE></P>
 
 
-<A NAME=2.6.13><P><B><I>2.6.13.  Lavc</I></B></P>
+<A NAME=2.6.13><P><B><I>2.6.13.  Mirror</I></B></P>
 
 <P><B><U>Description</U></B>:</P>
 
-<P>Realtime MPEG1 encoder (for use with DVB/DXR3).</P>
+<P>Flips the image on Y axis.</P>
 
 <P><B><U>Usage</U></B>:</P>
 
-<P><CODE>&nbsp;&nbsp;-vop lavc</CODE></P>
+<P><CODE>&nbsp;&nbsp;-vop mirror</CODE></P>
+
+
+<A NAME=2.6.14><P><B><I>2.6.14.  DVBscale</I></B></P>
+
+<P><B><U>Description</U></B>:</P>
+
+<P>Calculates Y scaling for DVB card.</P>
+
+<P><B><U>Usage</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop dvbscale</CODE></P>
+
+
+<A NAME=2.6.15><P><B><I>2.6.15.  Cropdetect</I></B></P>
+
+<P><B><U>Description</U></B>:</P>
+
+<P>Calculates needed cropping parameters. It will print the recommended -vop
+  option to stdout.</P>
+
+<P><B><U>Usage</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop cropdetect</CODE></P>
 
 
 <P><B><A NAME=3>3. Usage</A></B></P>

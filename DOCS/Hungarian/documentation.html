@@ -192,7 +192,7 @@
       <LI><A HREF=#2.6.2>2.6.2 Használat</A></LI>
       <LI><A HREF=#2.6.3>2.6.3 Crop</A></LI> 
       <LI><A HREF=#2.6.4>2.6.4 Expand</A></LI>
-      <LI><A HREF=#2.6.5>2.6.5 Fame</A></LI>
+      <LI><A HREF=#2.6.5>2.6.5 Fame/Lavc</A></LI>
       <LI><A HREF=#2.6.6>2.6.6 Flip</A></LI>
       <LI><A HREF=#2.6.7>2.6.7 Format</A></LI>
       <LI><A HREF=#2.6.8>2.6.8 Postprocess</A></LI>
@@ -200,7 +200,9 @@
       <LI><A HREF=#2.6.10>2.6.10 Rotate</A></LI>
       <LI><A HREF=#2.6.11>2.6.11 Scale</A></LI> 
       <LI><A HREF=#2.6.12>2.6.12 YUY2</A></LI>  
-      <LI><A HREF=#2.6.13>2.6.13 Lavc</A></LI>  
+      <LI><A HREF=#2.6.13>2.6.13 Mirror</A></LI>  
+      <LI><A HREF=#2.6.14>2.6.14 DVBscale</A></LI>  
+      <LI><A HREF=#2.6.15>2.6.15 Cropdetect</A></LI>  
     </UL>
   </UL>
   <LI><A HREF="#3">3. Használat</A></LI>
@@ -1023,6 +1025,9 @@ Szabványos V4L-rõl bemenet<BR>
   az utolsó filter, utána már a libvo következik, illetve <B>MEncoder</B>
   esetén az enkódolás.</P>
 
+<P>A rendelkezésre álló video filterek listája a
+  <CODE>mplayer -vop help</CODE> paranccsal kérhetõ le.</P>
+
 
 <A NAME=2.6.3><P><B><I>2.6.3.  Crop</I></B></P>
 
@@ -1052,15 +1057,18 @@ Szabványos V4L-rõl bemenet<BR>
 <P><CODE>&nbsp;&nbsp;-vop expand[=szélesség:magasság:x:y]</CODE></P>
 
 
-<A NAME=2.6.5><P><B><I>2.6.5.  Fame</I></B></P>
+<A NAME=2.6.5><P><B><I>2.6.5.  Fame/Lavc</I></B></P>
 
 <P><B><U>Leírás</U></B>:</P>
 
-<P>Valósidejû MPEG1 enkóder (DVB és DXR3 kártyákhoz).</P>
+<P>Valósidejû MPEG1 enkóder (DVB és DXR3 kártyákhoz), libfame vagy libavcodec
+  használatával.</P>
 
 <P><B><U>Használat</U></B>:</P>
 
 <P><CODE>&nbsp;&nbsp;-vop fame</CODE></P>
+
+<P><CODE>&nbsp;&nbsp;-vop lavc</CODE></P>
 
 
 <A NAME=2.6.6><P><B><I>2.6.6.  Flip</I></B></P>
@@ -1161,15 +1169,49 @@ Szabványos V4L-rõl bemenet<BR>
 <P><CODE>&nbsp;&nbsp;-vop yuy2</CODE></P>
 
 
-<A NAME=2.6.13><P><B><I>2.6.13.  Lavc</I></B></P>
+<A NAME=2.6.13><P><B><I>2.6.13.  Mirror</I></B></P>
 
 <P><B><U>Leírás</U></B>:</P>
 
-<P>Runtime MPEG1 enkóder (DVB és DXR3 kártyákhoz).</P>
+<P>Kép tükrözése Y tengelyen.</P>
 
 <P><B><U>Használat</U></B>:</P>
 
-<P><CODE>&nbsp;&nbsp;-vop lavc</CODE></P>
+<P><CODE>&nbsp;&nbsp;-vop mirror</CODE></P>
+
+
+<A NAME=2.6.14><P><B><I>2.6.14.  DVBscale</I></B></P>
+
+<P><B><U>Leírás</U></B>:</P>
+
+<P>Y tengely nagyítását számítja ki, DVB kártyákhoz.</P>
+
+<P><B><U>Használat</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop dvbscale</CODE></P>
+
+
+<A NAME=2.6.15><P><B><I>2.6.15.  Cropdetect</I></B></P>
+
+<P><B><U>Leírás</U></B>:</P>
+
+<P>Kiszámítja a megfelelõ vágáshoz szükséges paramétereket, és stdout-ra
+  kiírja.</P>
+
+<P><B><U>Használat</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop cropdetect</CODE></P>
+
+
+<A NAME=2.6.13><P><B><I>2.6.13.  Mirror</I></B></P>
+
+<P><B><U>Leírás</U></B>:</P>
+
+<P>Kép tükrözése Y tengelyen.</P>
+
+<P><B><U>Használat</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop mirror</CODE></P>
 
 
 <P><B><A NAME=3>3.  Használat</A></B></P>
