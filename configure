@@ -3215,8 +3215,10 @@ fi
 
 cat <<EOF
 
-If you cannot understand why a test failed please check $TMPLOG.
-If you believe it is a bug in configure, please report it.
+Check $TMPLOG if you wonder why an autodetection failed (check whether the
+development headers/packages are installed).
+
+If you suspect a bug, please read DOCS/bugreports.html.
 
 EOF
 
