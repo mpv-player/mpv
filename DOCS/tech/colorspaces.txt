@@ -3,7 +3,7 @@ In general
 
 There are planar and packed modes.
 - Planar mode means: you have 3 separated image, one for each component,
-each image 8 bites/pixel. To get the real colored pixel, you have to
+each image 8 bits/pixel. To get the real colored pixel, you have to
 mix the components from all planes. The resolution of planes may differ!
 - Packed mode means: you have all components mixed/interleaved together,
 so you have small "packs" of components in a single, big image.
@@ -37,16 +37,16 @@ the [0-255] range. Rumour has it that the valid range is actually a subset
 of [0-255] (I've seen an RGB range of [16-235] mentioned) but clamping the
 values into [0-255] seems to produce acceptable results to me.
 
-Julien (surname unknown) suggests that there are problems with the above
-formulae and suggests the following instead: 
-         Y = 0.299R + 0.587G + 0.114B
+Julien (sorry, I can't call back his surname) suggests that there are
+problems with the above formula and suggests the following instead: 
+    Y  = 0.299R + 0.587G + 0.114B
     Cb = U'= (B-Y)*0.565
     Cr = V'= (R-Y)*0.713
 with reciprocal versions:
     R = Y + 1.403V'
     G = Y - 0.344U' - 0.714V'
     B = Y + 1.770U'
-note: this formule doesn't contain the +128 offsets of U,V values!
+note: this formula doesn't contain the +128 offsets of U,V values!
 
 Conclusion:
 Y = luminance, the weighted average of R G B components. (0=black 255=white)
@@ -57,7 +57,7 @@ V = Cr = red component  (0=green 128=grey 255=red)
 Huh. The planar YUV modes.
 ==========================
 
-The most missunderstood thingie...
+The most misunderstood thingie...
 
 In MPlayer, we usually have 3 pointers to the Y, U and V planes, so it
 doesn't matter what is the order of the planes in the memory:
@@ -82,23 +82,22 @@ YVU9:   9 bpp, full sized Y plane followed by 4x4 subsampled V and U planes
 Huh 2. RGB vs. BGR ?
 ====================
 
-The 2nd most missunderstood thingie...
+The 2nd most misunderstood thingie...
 
 You know, there are Intel and Motorola, and they use different byteorder.
 There are also others, like MIPS or Alpha, they all follow either Intel
 or Motorola byteorder.
-Unfortunatelly, the packed colorspaces depend on CPU byteorder. So, RGB
+Unfortunately, the packed colorspaces depend on CPU byteorder. So, RGB
 on Intel and Motorola means different order of bytes.
 
 In MPlayer, we have constants IMGFMT_RGBxx and IMGFMT_BGRxx.
-Unfortunatelly, some codecs and vo drivers follow Intel, some follow Motorola
+Unfortunately, some codecs and vo drivers follow Intel, some follow Motorola
 byteorder, so they are incompatible. We had to find a stable base, so long
-time ago I've choose OpenGL, as it's a wide-spreaded standard, and it well
-defines what is RGB and what is BGR. So, MPlayer's RGB is compatible with
-OpenGL's GL_RGB on all platforms, and the same stay for BGR - GL_BGR.
-Unfortunatelly, most of the x86 codecs call our BGR to RGB, so it sometimes
+time ago I've chosen OpenGL, as it's a wide-spreaded standard, and it well
+defines what RGB is and what BGR is. So, MPlayer's RGB is compatible with
+OpenGL's GL_RGB on all platforms, and the same goes for BGR - GL_BGR.
+Unfortunately, most of the x86 codecs call our BGR to RGB, so it sometimes
 confuse developers.
 
 If you are unsure, try the OpenGL driver (-vo gl). There is at least software
-OpenGL implementation for all major platforms and OSes.
-
+OpenGL implementation for all major platforms and OS's.
