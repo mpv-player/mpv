@@ -275,6 +275,7 @@ http_send_request( URL_t *url ) {
 	http_set_field( http_hdr, str);
 	http_set_field( http_hdr, "User-Agent: MPlayer/"VERSION);
 	http_set_field( http_hdr, "Connection: closed");
+	http_add_basic_authentication( http_hdr, url->username, url->password );
 	if( http_build_request( http_hdr )==NULL ) {
 		return -1;
 	}
@@ -492,6 +493,42 @@ extension=NULL;
 						redirect = 1;	
 					}
 					break;
+				case 401: // Authorization required
+					{
+					char username[50], password[50];
+					char *aut;
+					aut = http_get_field(http_hdr, "WWW-Authenticate");
+					if( aut!=NULL ) {
+						char *aut_space;
+						aut_space = strstr(aut, "realm=");
+						if( aut_space!=NULL ) aut_space += 6;
+						mp_msg(MSGT_NETWORK,MSGL_ERR,"Authorization required for %s, please enter:\n", aut_space);
+					} else {
+						mp_msg(MSGT_NETWORK,MSGL_ERR,"Authorization required, please enter:\n");
+					}
+					mp_msg(MSGT_NETWORK,MSGL_ERR,"username: ");
+					// FIXME
+					scanf("%s", username);
+					printf("%s\n", username);
+					mp_msg(MSGT_NETWORK,MSGL_ERR,"password: ");
+					// FIXME
+					scanf("%s", password);
+					printf("%s\n", password);
+					url->username = (char*)malloc(strlen(username)+1);
+					if( url->username==NULL ) {
+						mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
+						return -1;
+					}
+					strcpy(url->username, username);
+					url->password = (char*)malloc(strlen(password)+1);
+					if( url->password==NULL ) {
+						mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
+						return -1;
+					}
+					strcpy(url->password, password);
+					redirect = 1;
+					break;
+					}
 				default:
 					mp_msg(MSGT_NETWORK,MSGL_ERR,"Server returned %d: %s\n", http_hdr->status_code, http_hdr->reason_phrase );
 					return -1;
