@@ -1,7 +1,7 @@
 // Translated by:  Kuba "Qba" Misiorny <jim85@wp.pl>
 // Wszelkie uwagi i poprawki mile widziane :)
 //
-// Synced with help_mp-en.h 1.121
+// Synced with help_mp-en.h 1.123
 
 // ========================= MPlayer help ===========================
 
@@ -363,7 +363,8 @@ static char help_text[]=
 // x11_common.c
 #define MSGTR_EwmhFullscreenStateFailed "\nX11: Nie mog³em wys³aæ zdarzenia pe³nego ekranu EWMH!\n"
 
-#define MSGTR_NeedAfVolume "Mikser: To wyj¶cie audio wymaga \"-af volume\", aby zmieniaæ g³o¶no¶æ.\n"
+ #define MSGTR_InsertingAfVolume "[Mixer] Nie ma sprzêtowego miksowania, w³±czam filtr g³o¶no¶ci.\n"
+ #define MSGTR_NoVolume "[Mixer] Regulacja g³o¶no¶ci niedostêpna.\n"
 
 
 // ====================== GUI messages/buttons ========================
@@ -382,8 +383,7 @@ static char help_text[]=
 #define MSGTR_SkinBrowser "Przegl±darka skórek"
 #define MSGTR_Network "Strumieniowanie sieciowe..."
 #define MSGTR_Preferences "Preferencje"
-#define MSGTR_OSSPreferences "Konfiguracja sterownika OSS"
-#define MSGTR_SDLPreferences "Konfiguracja sterownika SDL"
+#define MSGTR_AudioPreferences "Konfiguracja sterownika audio"
 #define MSGTR_NoMediaOpened "Nie otwarto ¿adnego no¶nika."
 #define MSGTR_VCDTrack "¶cie¿ka VCD: %d"
 #define MSGTR_NoChapter "Brak rozdzia³u"
@@ -508,6 +508,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Misc "Inne"
 
 #define MSGTR_PREFERENCES_None "Brak"
+#define MSGTR_PREFERENCES_DriverDefault "domy¶lne ustawienia sterownika"
 #define MSGTR_PREFERENCES_AvailableDrivers "Dostêpne sterowniki:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Nie odtwarzaj d¼wiêku"
 #define MSGTR_PREFERENCES_NormalizeSound "Normalizuj d¼wiêk"
@@ -548,9 +549,9 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Kodeki & demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "Cache (pamiêæ podrêczna)"
 #define MSGTR_PREFERENCES_FRAME_Misc "Inne"
-#define MSGTR_PREFERENCES_OSS_Device "Urz±dzenie:"
-#define MSGTR_PREFERENCES_OSS_Mixer "Mixer:"
-#define MSGTR_PREFERENCES_SDL_Driver "Sterownik:"
+#define MSGTR_PREFERENCES_Audio_Device "Urz±dzenie:"
+#define MSGTR_PREFERENCES_Audio_Mixer "Mikser:"
+#define MSGTR_PREFERENCES_Audio_MixerChannel "Kana³ miksera:"
 #define MSGTR_PREFERENCES_Message "Pamiêtaj, ¿e niektóre opcje wymagaj± zrestartowania odtwarzania!"
 #define MSGTR_PREFERENCES_DXR3_VENC "Enkoder video:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "U¿yj LAVC (FFmpeg)"
