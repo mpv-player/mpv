@@ -4,7 +4,7 @@ include ../Makefile.inc
 #HTML_STYLESHEET = mystyle.css
 
 # Change to yes to enable symlinking missing files to English master versions
-USE_SYMLINKS = yes
+USE_SYMLINKS = no
 
 # Dependency information.
 $(HTMLDIR)/index.html: $(wildcard *.xml)
