@@ -395,8 +395,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
     
 //    vo_x11_sizehint( hint.x, hint.y, hint.width, hint.height,0 );   
     
-    printf("\n!!!!!! %d;%d %dx%d  \n",hint.x,hint.y,hint.width,hint.height);
- 
     if ( vo_gc != None ) XFreeGC( mDisplay,vo_gc );
     vo_gc = XCreateGC(mDisplay, vo_window, 0L, &xgcv);
     XFlush(mDisplay);
