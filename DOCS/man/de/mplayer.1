@@ -192,7 +192,7 @@ PJS und unser eigenes: MPsub) unterstützt, ebenso wie DVD-Untertitel
 (MPlayer's Movie Encoder) ist ein einfacher Movie-Encoder, der so entworfen
 wurde, dass er alle von MPlayer abspielbaren Filme (siehe oben) in andere
 von MPlayer abspielbare Formate (siehe unten) umwandeln kann.
-Er encodiert nach DivX4, XviD, jeden der libavcodec-Codecs und Audio
+Er encodiert nach MPEG-4 (DivX/XviD), jeden der libavcodec-Codecs und Audio
 nach PCM/\:MP3/\:VBR\-MP3, das ganze in 1, 2 oder 3 Durchgängen.
 Weiterhin kann er Streams kopieren und verfügt über ein mächtiges
 Filter\-System (Entfernen (cropping) und Hinzufügen (expanding) von Rändern, 
@@ -1201,9 +1201,12 @@ second).
 Maximalgröße des Capture-Puffers in Megabytes (standardmäßig: dynamische
 Größe)
 .IPs norm=<Wert>
-mögliche Werte: PAL, SECAM, NTSC.
-Siehe normid-Option unten für V4L2.
-.IPs "normid=<Wert> (nur bei V4L2)"
+Für bsdbt848 and v4l sind die Normen PAL, SECAM und NTSC verfügbar.
+Für v4l2, siehe Option normid und die Ausgabe von MPlayer für eine Liste der
+verfügbaren TV-Normen.
+.IPs "normid=<ID> (nur bei V4L2)"
+Setzt die TV-Norm auf die angegebene ID.
+Die TV-Norm hängt von der Videokarte ab. 
 Siehe MPlayer-Output für eine Liste der verfügbaren TV-Normen.
 .IPs channel=<Wert>
 Setzt den Tuner auf Kanal <Wert>.
@@ -1807,6 +1810,9 @@ Die Namen von ALSA-Mixerkanälen gefolgt von einer Nummer müssen im Format
 <Name,Nummer> angegeben werden, z.B.\& muß ein Kanal, der im alsamixer 'PCM 1'
 heißt, umbenannt werden in
 .BR PCM,1 .
+.TP
+.B \-softvol
+Erzwingt den Gebrauch des Softwaremixers anstelle des Mixers der Soundkarte.
 .
 .TP
 .B \-nowaveheader (nur bei \-ao pcm)
@@ -2492,7 +2498,8 @@ werden soll.
 .TP
 .B xvmc (nur bei X11 mit \-vc ffmpeg12mc)
 Ein Videoausgabetreiber, der die XvMC- (X Video Motion Compensation)
-Unterstützung von XFree86 4.x benutzt, um das Decodieren von MPEG1/\:2 und VCR2
+Unterstützung von XFree86 4.x benutzt, um das Decodieren von MPEG-1/\:2 und
+VCR2
 zu beschleunigen.
 .PD 0
 .RSs
@@ -2542,7 +2549,8 @@ Sehr schneller Videoausgabetreiber bei Karten, die dies unterstützen.
 .IPs <Subdevice>
 Wähle explizit einen VIDIX-Subdevice-Treiber, der benutzt werden soll.
 Verfügbare Subdevice-Treiber sind cyberblade_vid, mach64_vid, mga_crtc2_vid,
-mga_vid, nvidia_vid, pm3_vid, radeon_vid, rage128_vid und sis_vid.
+mga_vid, nvidia_vid, pm3_vid, radeon_vid, rage128_vid, sis_vid und
+unichrome_vid.
 .RE
 .PD 1
 .
@@ -3182,6 +3190,11 @@ der Filterlänge gesetzt.
 .REss
 .IPs sweep[=Geschwindigkeit]
 Sinus des Durchlaufs
+.IPs hrtf
+.br
+"Head-related transfer function": Konvertiert mehrkanäliges
+Audiosignal auf zwei Kanäle für Kopfhörer, behält dabei die Räumlichkeit des
+Klangs.
 .IPs channels[=nch]
 Ändert die Anzahl der Kanäle in nch Ausgabekanäle.
 Falls die Anzahl der Ausgabekanäle größer ist als die Anzahl der
@@ -3620,7 +3633,7 @@ funktioniert.
 .IPs "\-vc -divxds,-divx,"
 Probiert alle Codecs außer den Win32-DivX-Codecs.
 .IPs "\-vc ffmpeg12,mpeg12,"
-Probiert zuerst libavcodecs MPEG1/\:2-Codec, gefolgt von libmpeg2, und
+Probiert zuerst libavcodecs MPEG-1/\:2-Codec, gefolgt von libmpeg2, und
 dann erst andere.
 .RE
 .PD 1
@@ -4206,6 +4219,14 @@ Beachte, dass er den gleichen MMX-optimierten Code benutzt wie der
 eq-Filter, wenn alle Gammawerte 1.0
 betragen!
 Die Parameter werden als Fließkommazahlen angegeben.
+.RSs
+.IPs rg
+Gammawert der roten Komponente
+.IPs gg
+Gammawert der grünen Komponente
+.IPs bg
+Gammawert der blauen Komponente
+.RE
 Die Parameter rg, gg, bg sind unabhängige Gammawerte für die einzelnen
 Farbkomponenten Rot, Grün und Blau.
 Der Parameter weight kann verwendet werden, um die Wirkung hoher Gammawerte auf
@@ -4885,7 +4906,7 @@ msmpeg4: DivX 3
 .br
 rv10: ein alter RealVideo\-Codec
 .br
-mpeg1video: MPEG1\-Video :)
+mpeg1video: MPEG-1-Video :)
 .REss
 .IPs vqmin=<2\-31>
 minimaler Quantizer (bei Durchgang 1/\:2) (Standardwert: 2)
@@ -4934,7 +4955,7 @@ vier Motion-Vectors pro Makroblock (etwas bessere Qualität)
 Maximale Anzahl von Bildern zwischen zwie Schlüsselbildern (key frames).
 Größere Intervalle resultieren in kleineren Dateien aber ungenauerem Spulen.
 Ein Wert von 0 bedeutet keine Schlüsselbilder, und Werte > 300 sind nicht
-empfehlenswert. Bei strikter Einhaltung des MPEG1/\:2/\:4\-Standards muss
+empfehlenswert. Bei strikter Einhaltung des MPEG-1/\:2/\:4\-Standards muss
 der Wert <= 132 sein (Standardwert: 250, was einem Schlüsselbild alle
 zehn Sekunden bei einem 25fps\-Film bedeutet).
 .IPs vb_strategy=<0\-1>
@@ -4955,7 +4976,7 @@ Aktiviert den internen Modus für zwei Durchgänge (standardmäßig deaktiviert):
 .REss
 .IPs aspect=<x.x/y.y>
 Speichert das Höhen\-/:Breitenverhältnis intern im Videostream, genauso wie
-bei MPEG1/\:2. Deutlich bessere Lösung als Skalierung, da hierbei die
+bei MPEG-1/\:2. Deutlich bessere Lösung als Skalierung, da hierbei die
 Qualität nicht gemindert wird. Momentan kann nur MPlayer solche Dateien
 mit dem richtigen Verhältnis wiedergeben, andere Player zeigen ein falsches
 Verhältnis.
@@ -5129,7 +5150,7 @@ Strikte Einhaltung der Standards.
 .RSss
 0: deaktiviert (Standardeinstellung)
 .br
-1: Nur empfehlenswert, wenn die Ausgabe mit einem MPEG4 Referenzdekoder
+1: Nur empfehlenswert, wenn die Ausgabe mit einem MPEG-4 Referenzdekoder
 dekodiert werden soll.
 .br
 -1: Erlaubt nichstandardkonforme YV12-Huffyuv-Encodierung (20% kleinere
@@ -5604,7 +5625,7 @@ mencoder \dvd://2 \-vf scale=640:480 \-o title2.avi \-oac copy \-ovc divx4
 mencoder \dvd://2 \-vf scale \-zoom \-xy 512 \-o title2.avi \-oac copy
 \-ovc divx4
 .TP
-.B Das gleiche, aber mit libavcodecs MPEG4\-Codec
+.B Das gleiche, aber mit libavcodecs MPEG-4-Codec
 mencoder \dvd://2 \-o title2.avi \-ovc lavc
 \-lavcopts vcodec=mpeg4:vhq:vbitrate=1800 \-oac copy
 .TP
