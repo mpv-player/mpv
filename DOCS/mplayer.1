@@ -1305,8 +1305,9 @@ Font directory. There must be a font.desc file and files with .RAW extension.
 Cracked CSS keys
 .br
 
-.I Sub files
-are searched in this priority (for example /mnt/movie/movie.avi):
+.I Subtitles
+.br
+Sub files are searched in this priority (for example /mnt/movie/movie.avi):
 .br
     /mnt/cdrom/movie.sub
 .br
@@ -1354,7 +1355,7 @@ mencoder -dvd 2 -vop scale -zoom -xy 512 -o title2.avi
 mencoder -dvd 2 -o title2.avi -ovc lavc -lavcopts vcodec=mpeg4:vhq:vbitrate=1800
 .TP
 .B Encoding all *.jpg files in the current dir
-mencoder *.jpg -mf on:fps=25 -o output.avi
+mencoder \\*.jpg -mf on:fps=25 -o output.avi
 .TP
 .B Encoding from tuner (see documentation!)
 mencoder -tv on:driver=v4l:width=640:height=480 -o tv.avi
