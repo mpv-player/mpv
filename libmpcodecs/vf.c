@@ -268,11 +268,14 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 	  mpi->flags|=MP_IMGFLAG_ALLOCATED;
         }
     }
+    if(mpi->flags&MP_IMGFLAG_DRAW_CALLBACK)
+	if(vf->start_slice) vf->start_slice(vf,mpi);
     if(!(mpi->flags&MP_IMGFLAG_TYPE_DISPLAYED)){
-	    mp_msg(MSGT_DECVIDEO,MSGL_V,"*** [%s] %s mp_image_t, %dx%dx%dbpp %s %s, %d bytes\n",
+	    mp_msg(MSGT_DECVIDEO,MSGL_V,"*** [%s] %s%s mp_image_t, %dx%dx%dbpp %s %s, %d bytes\n",
 		  vf->info->name,
 		  (mpi->type==MP_IMGTYPE_EXPORT)?"Exporting":
 	          ((mpi->flags&MP_IMGFLAG_DIRECT)?"Direct Rendering":"Allocating"),
+	          (mpi->flags&MP_IMGFLAG_DRAW_CALLBACK)?" (slices)":"",
 	          mpi->width,mpi->height,mpi->bpp,
 		  (mpi->flags&MP_IMGFLAG_YUV)?"YUV":((mpi->flags&MP_IMGFLAG_SWAPPED)?"BGR":"RGB"),
 		  (mpi->flags&MP_IMGFLAG_PLANAR)?"planar":"packed",

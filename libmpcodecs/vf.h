@@ -31,6 +31,8 @@ typedef struct vf_instance_s {
         mp_image_t *mpi);
     int (*put_image)(struct vf_instance_s* vf,
         mp_image_t *mpi);
+    void (*start_slice)(struct vf_instance_s* vf,
+        mp_image_t *mpi);
     void (*draw_slice)(struct vf_instance_s* vf,
         unsigned char** src, int* stride, int w,int h, int x, int y);
     void (*uninit)(struct vf_instance_s* vf);
