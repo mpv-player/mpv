@@ -42,21 +42,9 @@ void afm_help(){
 	    mpcodecs_ad_drivers[i]->info->name);
 }
 
-int init_audio(sh_audio_t *sh_audio)
+int init_audio_codec(sh_audio_t *sh_audio)
 {
   unsigned i;
-  for (i=0; mpcodecs_ad_drivers[i] != NULL; i++)
-//    if(mpcodecs_ad_drivers[i]->info->id==sh_audio->codec->driver){
-    if(!strcmp(mpcodecs_ad_drivers[i]->info->short_name,sh_audio->codec->drv)){
-	mpadec=mpcodecs_ad_drivers[i]; break;
-    }
-  if(!mpadec){
-      mp_msg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_AudioCodecFamilyNotAvailableStr,
-          sh_audio->codec->name, sh_audio->codec->drv);
-      return 0; // no such driver
-  }
-  
-  mp_msg(MSGT_DECAUDIO,MSGL_INFO,MSGTR_OpeningAudioDecoder,mpadec->info->short_name,mpadec->info->name);
 
   // reset in/out buffer size/pointer:
   sh_audio->a_buffer_size=0;
@@ -125,11 +113,103 @@ int init_audio(sh_audio_t *sh_audio)
 
   if(!sh_audio->o_bps)
   sh_audio->o_bps=sh_audio->channels*sh_audio->samplerate*sh_audio->samplesize;
+
+  mp_msg(MSGT_DECAUDIO,MSGL_INFO,"AUDIO: %d Hz, %d ch, sfmt: 0x%X (%d bps), ratio: %d->%d (%3.1f kbit)\n",
+	sh_audio->samplerate,sh_audio->channels,
+	sh_audio->sample_format,sh_audio->samplesize,
+        sh_audio->i_bps,sh_audio->o_bps,sh_audio->i_bps*8*0.001);
   
   return 1;
 }
 
-int init_best_audio_codec(sh_audio_t *sh_audio,char* audio_codec,char* audio_fm){
+int init_audio(sh_audio_t *sh_audio,char* codecname,char* afm,int status){
+    unsigned int orig_fourcc=sh_audio->wf?sh_audio->wf->wFormatTag:0;
+    sh_audio->codec=NULL;
+    while(1){
+	int i;
+	// restore original fourcc:
+	if(sh_audio->wf) sh_audio->wf->wFormatTag=i=orig_fourcc;
+	if(!(sh_audio->codec=find_codec(sh_audio->format,
+          sh_audio->wf?(&i):NULL, sh_audio->codec,1) )) break;
+	if(sh_audio->wf) sh_audio->wf->wFormatTag=i;
+	// ok we found one codec
+	if(sh_audio->codec->flags&CODECS_FLAG_SELECTED) continue; // already tried & failed
+	if(codecname && strcmp(sh_audio->codec->name,codecname)) continue; // -ac
+	if(afm && strcmp(sh_audio->codec->drv,afm)) continue; // afm doesn't match
+	if(sh_audio->codec->status<status) continue; // too unstable
+	sh_audio->codec->flags|=CODECS_FLAG_SELECTED; // tagging it
+	// ok, it matches all rules, let's find the driver!
+	for (i=0; mpcodecs_ad_drivers[i] != NULL; i++)
+	    if(!strcmp(mpcodecs_ad_drivers[i]->info->short_name,sh_audio->codec->drv)) break;
+	mpadec=mpcodecs_ad_drivers[i];
+	if(!mpadec){ // driver not available (==compiled in)
+            mp_msg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_AudioCodecFamilyNotAvailableStr,
+        	sh_audio->codec->name, sh_audio->codec->drv);
+	    continue;
+	}
+	// it's available, let's try to init!
+	// init()
+	mp_msg(MSGT_DECAUDIO,MSGL_INFO,MSGTR_OpeningAudioDecoder,mpadec->info->short_name,mpadec->info->name);
+	if(!init_audio_codec(sh_audio)){
+	    mp_msg(MSGT_DECAUDIO,MSGL_INFO,MSGTR_ADecoderInitFailed);
+	    continue; // try next...
+	}
+	// Yeah! We got it!
+	return 1;
+    }
+    return 0;
+}
+
+int init_best_audio_codec(sh_audio_t *sh_audio,char** audio_codec_list,char** audio_fm_list){
+char* ac_l_default[2]={"",(char*)NULL};
+// hack:
+if(!audio_codec_list) audio_codec_list=ac_l_default;
+// Go through the codec.conf and find the best codec...
+sh_audio->inited=0;
+codecs_reset_selection(1);
+while(!sh_audio->inited && *audio_codec_list){
+  char* audio_codec=*(audio_codec_list++);
+  if(audio_codec[0]){
+    if(audio_codec[0]=='-'){
+      // disable this codec:
+      select_codec(audio_codec+1,1);
+    } else {
+      // forced codec by name:
+      mp_msg(MSGT_DECAUDIO,MSGL_INFO,MSGTR_ForcedAudioCodec,audio_codec);
+      init_audio(sh_audio,audio_codec,NULL,-1);
+    }
+  } else {
+    int status;
+    // try in stability order: UNTESTED, WORKING, BUGGY. never try CRASHING.
+    if(audio_fm_list){
+      char** fmlist=audio_fm_list;
+      // try first the preferred codec families:
+      while(!sh_audio->inited && *fmlist){
+        char* audio_fm=*(fmlist++);
+	mp_msg(MSGT_DECAUDIO,MSGL_INFO,MSGTR_TryForceAudioFmtStr,audio_fm);
+	for(status=CODECS_STATUS__MAX;status>=CODECS_STATUS__MIN;--status)
+	    if(init_audio(sh_audio,NULL,audio_fm,status)) break;
+      }
+    }
+    if(!sh_audio->inited)
+	for(status=CODECS_STATUS__MAX;status>=CODECS_STATUS__MIN;--status)
+	    if(init_audio(sh_audio,NULL,NULL,status)) break;
+  }
+}
+
+if(!sh_audio->inited){
+    mp_msg(MSGT_DECAUDIO,MSGL_HINT, MSGTR_TryUpgradeCodecsConfOrRTFM,get_path("codecs.conf"));
+    mp_msg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_CantFindAudioCodec,sh_audio->format);
+    return 0; // failed
+}
+
+mp_msg(MSGT_DECAUDIO,MSGL_INFO,"Selected audio codec: [%s] afm:%s (%s)\n",
+    sh_audio->codec->name,sh_audio->codec->drv,sh_audio->codec->info);
+return 1; // success
+}
+
+
+int init_best_audio_codec_old(sh_audio_t *sh_audio,char* audio_codec,char* audio_fm){
   // Go through the codec.conf and find the best codec...
   sh_audio->codec=NULL;
   if(audio_fm) mp_msg(MSGT_DECAUDIO,MSGL_INFO,MSGTR_TryForceAudioFmtStr,audio_fm);
@@ -153,7 +233,7 @@ int init_best_audio_codec(sh_audio_t *sh_audio,char* audio_codec,char* audio_fm)
     break;
   }
   // found it...
-  if(!init_audio(sh_audio)){
+  if(!init_audio_codec(sh_audio)){
     mp_msg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_CouldntInitAudioCodec);
     return 0;
   }

@@ -94,9 +94,11 @@ static char* spudec_ifo=NULL;
 static int has_audio=1;
 char *audio_codec=NULL; // override audio codec
 char *video_codec=NULL; // override video codec
+char **audio_codec_list=NULL; // override video codec
 char **video_codec_list=NULL; // override video codec
 char* audio_fm=NULL;     // override audio codec family 
 char* video_fm=NULL;     // override video codec family 
+char** audio_fm_list=NULL;     // override video codec family 
 char** video_fm_list=NULL;     // override video codec family 
 
 int out_audio_codec=-1;
@@ -488,7 +490,7 @@ sh_video=d_video->sh;
 if(sh_audio && (out_audio_codec || seek_to_sec || !sh_audio->wf)){
   // Go through the codec.conf and find the best codec...
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
-  if(!init_best_audio_codec(sh_audio,audio_codec,audio_fm)){
+  if(!init_best_audio_codec(sh_audio,audio_codec_list,audio_fm_list)){
     sh_audio=d_audio->sh=NULL; // failed to init :(
   }
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");

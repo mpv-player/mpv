@@ -178,9 +178,11 @@ int has_audio=1;
 int has_video=1;
 char *audio_codec=NULL; // override audio codec
 char *video_codec=NULL; // override video codec
+char **audio_codec_list=NULL; // override video codec
 char **video_codec_list=NULL; // override video codec
 char *audio_fm=NULL;    // override audio codec family 
 char *video_fm=NULL;    // override video codec family 
+char **audio_fm_list=NULL;    // override video codec family 
 char **video_fm_list=NULL;    // override video codec family 
 
 // streaming:
@@ -631,7 +633,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 	    printf("vc#%d: '%s'\n",i,video_codec_list[i]);
     }
 #endif
-    if(audio_codec && strcmp(audio_codec,"help")==0){
+    if(audio_codec_list && strcmp(audio_codec_list[0],"help")==0){
       mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AvailableAudioCodecs);
       list_codecs(1);
       printf("\n");
@@ -648,7 +650,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
       printf("\n");
       exit(0);
     }
-    if(audio_fm && strcmp(audio_fm,"help")==0){
+    if(audio_fm_list && strcmp(audio_fm_list[0],"help")==0){
       afm_help();
       printf("\n");
       exit(0);
@@ -1216,7 +1218,7 @@ if(sh_audio){
   // Go through the codec.conf and find the best codec...
   current_module="init_audio_codec";
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
-  if(!init_best_audio_codec(sh_audio,audio_codec,audio_fm)){
+  if(!init_best_audio_codec(sh_audio,audio_codec_list,audio_fm_list)){
     sh_audio=d_audio->sh=NULL; // failed to init :(
   }
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
