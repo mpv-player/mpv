@@ -47,6 +47,7 @@
 #define VFM_MSVIDC 11
 #define VFM_FLI 12
 #define VFM_CINEPAK 13
+#define VFM_QTRLE 14
 
 #ifndef GUID_TYPE
 #define GUID_TYPE

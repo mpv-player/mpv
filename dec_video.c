@@ -111,7 +111,7 @@ void AVI_Decode_Video1_8(
   unsigned char *palette_map,
   int bytes_per_pixel);
 
-void AVI_Decode_Fli(
+void Decode_Fli(
   unsigned char *encoded,
   int encoded_size,
   unsigned char *decoded,
@@ -119,6 +119,14 @@ void AVI_Decode_Fli(
   int height,
   int bytes_per_pixel);
 
+void qt_decode_rle(
+  unsigned char *encoded,
+  int encoded_size,
+  unsigned char *decoded,
+  int width,
+  int height,
+  int encoded_bpp,
+  int bytes_per_pixel);
 
 //**************************************************************************//
 //             The OpenDivX stuff:
@@ -522,16 +530,20 @@ switch(sh_video->codec->driver){
      }
    }
    break;
- case VFM_MSVIDC: {
+ case VFM_MSVIDC:
+ case VFM_FLI:
+ case VFM_QTRLE:
+   {
    int bpp=((out_fmt&255)+7)/8; // RGB only
    sh_video->our_out_buffer = 
      (char*)memalign(64, sh_video->disp_w*sh_video->disp_h*bpp); // FIXME!!!
-   }
-   break;
- case VFM_FLI: {
-   int bpp=((out_fmt&255)+7)/8; // RGB only
-   sh_video->our_out_buffer = 
-     (char*)memalign(64, sh_video->disp_w*sh_video->disp_h*bpp); // FIXME!!!
+if ((sh_video->codec->driver == VFM_QTRLE) && (sh_video->bih->biBitCount != 24))
+  printf (
+    "    *** FYI: This Quicktime file is using %d-bit RLE Animation\n" \
+    "    encoding, which is not yet supported by MPlayer. But if you upload\n" \
+    "    this Quicktime file to the MPlayer FTP, the team could look at it.\n",
+    sh_video->bih->biBitCount);
+
    }
    break;
  }
@@ -785,9 +797,17 @@ if(verbose>1){
     blit_frame = 3;
     break;
   case VFM_FLI:
-      AVI_Decode_Fli(
+    Decode_Fli(
         start, in_size, sh_video->our_out_buffer,
         sh_video->disp_w, sh_video->disp_h,
+        ((out_fmt&255)+7)/8);
+    blit_frame = 3;
+    break;
+  case VFM_QTRLE:
+    qt_decode_rle(
+        start, in_size, sh_video->our_out_buffer,
+        sh_video->disp_w, sh_video->disp_h,
+        sh_video->bih->biBitCount,
         ((out_fmt&255)+7)/8);
     blit_frame = 3;
     break;

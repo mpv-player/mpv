@@ -25,7 +25,7 @@
 // to index 4-byte entries
 static unsigned char palette[256 * 4];
 
-void AVI_Decode_Fli(
+void Decode_Fli(
   unsigned char *encoded,
   int encoded_size,
   unsigned char *decoded,
