@@ -7,7 +7,7 @@
 
 /* ChangeLog added 2002-01-10
  * 2002-01-17:
- *  Testrelease of new sync engine (using previously undocumented feature of em8300). Seeking does not work with this one!
+ *  Testrelease of new sync engine (using previously undocumented feature of em8300).
  *
  * 2002-01-15:
  *  Preliminary subpic support with -vc mpegpes and dvd's
@@ -449,9 +449,13 @@ static uint32_t draw_frame(uint8_t * src[])
 static void flip_page(void)
 {
 	static int prev_pts = 0;
+	/* Flush the device if a seek occured */
 	if (prev_pts > vo_pts) {
-		printf("WARNING: Seeking will break a/v sync currently\n");
+		printf("\nWARNING: Seeking may or may not break a/v sync (sometimes seeking again helps)\n");
+		ioval = EM8300_SUBDEVICE_VIDEO;
+		ioctl(fd_control, EM8300_IOCTL_FLUSH, &ioval);
 	}
+	prev_pts = vo_pts;
 #ifdef USE_MP1E
 	if (img_format == IMGFMT_YV12) {
 		mp1e_buffer.data = picture_data[0];
@@ -464,7 +468,6 @@ static void flip_page(void)
 		mp1e_buffer.user_data = NULL;
 		rte_push_video_buffer(mp1e_context, &mp1e_buffer);
 	}
-	prev_pts = vo_pts;
 #endif
 }
 
