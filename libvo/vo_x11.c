@@ -538,13 +538,13 @@ static uint32_t draw_slice( uint8_t *src[],int stride[],int w,int h,int x,int y 
 static uint32_t draw_frame( uint8_t *src[] ){
       int stride[3]= {0,0,0};
       
-      if     (in_format==IMGFMT_YUY2)  stride[0]=swsContext->srcW*2;
-      else if(in_format==IMGFMT_BGR15) stride[0]=swsContext->srcW*2;
-      else if(in_format==IMGFMT_BGR16) stride[0]=swsContext->srcW*2;
-      else if(in_format==IMGFMT_BGR24) stride[0]=swsContext->srcW*3;
-      else if(in_format==IMGFMT_BGR32) stride[0]=swsContext->srcW*4;
+      if     (in_format==IMGFMT_YUY2)  stride[0]=srcW*2;
+      else if(in_format==IMGFMT_BGR15) stride[0]=srcW*2;
+      else if(in_format==IMGFMT_BGR16) stride[0]=srcW*2;
+      else if(in_format==IMGFMT_BGR24) stride[0]=srcW*3;
+      else if(in_format==IMGFMT_BGR32) stride[0]=srcW*4;
       
-      return draw_slice(src, stride, swsContext->srcW, swsContext->srcH, 0, 0);
+      return draw_slice(src, stride, srcW, srcH, 0, 0);
 }
 
 static uint32_t query_format( uint32_t format )
