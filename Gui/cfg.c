@@ -6,6 +6,7 @@
 #include "../config.h"
 #include "../mp_msg.h"
 #include "../help_mp.h"
+#include "../mixer.h"
 #include "../mplayer.h"
 #include "../m_config.h"
 #include "../m_option.h"
@@ -45,6 +46,9 @@ char * gtkAOALSADevice;
 #endif
 #ifdef HAVE_SDL
 char * gtkAOSDLDriver;
+#endif
+#ifdef USE_ESD
+char * gtkAOESDDevice;
 #endif
 
 int    gtkCacheOn = 0;
@@ -108,6 +112,7 @@ static m_option_t gui_opts[] =
 
  { "ao_driver",&audio_driver_list,CONF_TYPE_STRING_LIST,0,0,0,NULL },
  { "ao_volnorm",&gtkAONorm,CONF_TYPE_FLAG,0,0,1,NULL },
+ { "softvol",&soft_vol,CONF_TYPE_FLAG,0,0,1,NULL },
  { "ao_surround",&gtkAOSurround,CONF_TYPE_FLAG,0,0,1,NULL },
  { "ao_extra_stereo",&gtkAOExtraStereo,CONF_TYPE_FLAG,0,0,1,NULL },
  { "ao_extra_stereo_coefficient",&gtkAOExtraStereoMul,CONF_TYPE_FLOAT,CONF_RANGE,-10,10,NULL },
@@ -123,6 +128,9 @@ static m_option_t gui_opts[] =
 #endif
 #ifdef HAVE_SDL
  { "ao_sdl_subdriver",&gtkAOSDLDriver,CONF_TYPE_STRING,0,0,0,NULL },
+#endif
+#ifdef USE_ESD
+ { "ao_esd_device",&gtkAOESDDevice,CONF_TYPE_STRING,0,0,0,NULL },
 #endif
 
  { "dvd_device",&dvd_device,CONF_TYPE_STRING,0,0,0,NULL },

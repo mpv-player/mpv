@@ -735,6 +735,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_DoNotPlaySound "Do not play sound"
 #define MSGTR_PREFERENCES_NormalizeSound "Normalize sound"
 #define MSGTR_PREFERENCES_EnEqualizer "Enable equalizer"
+#define MSGTR_PREFERENCES_SoftwareMixer "Enable Software Mixer"
 #define MSGTR_PREFERENCES_ExtraStereo "Enable extra stereo"
 #define MSGTR_PREFERENCES_Coefficient "Coefficient:"
 #define MSGTR_PREFERENCES_AudioDelay "Audio delay"

@@ -25,6 +25,9 @@ extern char * gtkAOALSADevice;
 #ifdef HAVE_SDL
 extern char * gtkAOSDLDriver;
 #endif
+#ifdef USE_ESD
+extern char * gtkAOESDDevice;
+#endif
 #ifdef HAVE_DXR3
 extern char * gtkDXR3Device;
 #endif

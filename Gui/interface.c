@@ -875,6 +875,19 @@ int guiGetEvent( int type,char * arg )
 	  free(tmp);
 	 }
 #endif
+#ifdef USE_ESD
+	if ( audio_driver_list && !gstrncmp( audio_driver_list[0],"esd",3 ) )
+	 {
+	  char *tmp;
+	  if (gtkAOESDDevice) {
+	  tmp = calloc( 1,strlen( gtkAOESDDevice ) + 10 );
+	  sprintf( tmp,"esd:%s",gtkAOESDDevice );
+	  } else
+	    tmp = strdup("esd");
+	  gaddlist( &audio_driver_list,tmp );
+	  free(tmp);
+	 }
+#endif
 // -- subtitle
 #ifdef USE_SUB
 	//subdata->filename=gstrdup( guiIntfStruct.Subtitlename );

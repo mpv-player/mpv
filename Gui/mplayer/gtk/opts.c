@@ -52,6 +52,7 @@ static GtkWidget * CBAudioEqualizer;
 //static GtkWidget * CBSurround;
 static GtkWidget * CBExtraStereo;
 static GtkWidget * CBNormalize;
+static GtkWidget * CBSoftwareMixer;
 static GtkWidget * CBDoubleBuffer;
 static GtkWidget * CBDR;
 static GtkWidget * CBFramedrop;
@@ -180,6 +181,7 @@ void ShowPreferences( void )
 #endif
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBExtraStereo ),gtkAOExtraStereo );
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBNormalize ),gtkAONorm );
+ gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBSoftwareMixer ),soft_vol );
  gtk_adjustment_set_value( HSExtraStereoMuladj,gtkAOExtraStereoMul );
  {
   int    i = 0;
@@ -207,6 +209,7 @@ void ShowPreferences( void )
     gtk_widget_set_sensitive( AConfig,FALSE );
     if ( !strncmp( ao_driver[0],"oss",3 ) ||
          !strncmp( ao_driver[0],"alsa",4 ) ||
+         !strncmp( ao_driver[0],"esd",3 ) ||
          !strncmp( ao_driver[0],"sdl",3 ) )
       gtk_widget_set_sensitive( AConfig,TRUE );
    }
@@ -407,6 +410,7 @@ void ShowPreferences( void )
 // -- signals
  gtk_signal_connect( GTK_OBJECT( CBExtraStereo ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)0 );
  gtk_signal_connect( GTK_OBJECT( CBNormalize ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)1 );
+ gtk_signal_connect( GTK_OBJECT( CBSoftwareMixer ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)1 );
  gtk_signal_connect( GTK_OBJECT( CBAudioEqualizer ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)2 );
  gtk_signal_connect( GTK_OBJECT( CBShowVideoWindow ),"toggled",GTK_SIGNAL_FUNC( prToggled ), (void*)3 );
 #ifdef HAVE_FREETYPE
@@ -509,6 +513,7 @@ void prButton( GtkButton * button,gpointer user_data )
         gtkEnableAudioEqualizer=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBAudioEqualizer ) );
 	gtkAOExtraStereo=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBExtraStereo ) );
 	gtkAONorm=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBNormalize ) );
+	soft_vol=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBSoftwareMixer ) );
 	gtkSet( gtkSetExtraStereo,HSExtraStereoMuladj->value,NULL );
 	audio_delay=HSAudioDelayadj->value;
 
@@ -605,6 +610,7 @@ void prButton( GtkButton * button,gpointer user_data )
         gtk_widget_set_sensitive( AConfig,FALSE );
         if ( !strncmp( ao_driver[0],"oss",3 ) ||
              !strncmp( ao_driver[0],"alsa",4 ) ||
+             !strncmp( ao_driver[0],"esd",3 ) ||
              !strncmp( ao_driver[0],"sdl",3 ) ) {
           ShowAudioConfig();
           gtk_widget_set_sensitive( AConfig,TRUE );
@@ -727,6 +733,7 @@ static void prCListRow( GtkCList * clist,gint row,gint column,GdkEvent * event,g
 	gtk_widget_set_sensitive( AConfig,FALSE );
 	if ( !strncmp( ao_driver[0],"oss",3 ) ||
 	     !strncmp( ao_driver[0],"alsa",4 ) ||
+	     !strncmp( ao_driver[0],"esd",3 ) ||
 	     !strncmp( ao_driver[0],"sdl",3 ) )
 	  gtk_widget_set_sensitive( AConfig,TRUE );
 	break;
@@ -836,6 +843,7 @@ GtkWidget * create_Preferences( void )
 
   CBNormalize=AddCheckButton( MSGTR_PREFERENCES_NormalizeSound,vbox3 );
   CBAudioEqualizer=AddCheckButton( MSGTR_PREFERENCES_EnEqualizer,vbox3 );
+  CBSoftwareMixer=AddCheckButton( MSGTR_PREFERENCES_SoftwareMixer,vbox3 );
 #if 0
   CBSurround=AddCheckButton( "Enable surround",vbox3 );
 #endif
@@ -1253,6 +1261,7 @@ GtkWidget * create_Preferences( void )
 
 #if 0
   gtk_signal_connect( GTK_OBJECT( CBNormalize ),"toggled",GTK_SIGNAL_FUNC( on_CBNormalize_toggled ),NULL );
+  gtk_signal_connect( GTK_OBJECT( CBSoftwareMixer ),"toggled",GTK_SIGNAL_FUNC( on_CBSoftwareMixer_toggled ),NULL );
   gtk_signal_connect( GTK_OBJECT( CBSurround ),"toggled",GTK_SIGNAL_FUNC( on_CBSurround_toggled ),NULL );
   gtk_signal_connect( GTK_OBJECT( CBExtraStereo ),"toggled",GTK_SIGNAL_FUNC( on_CBExtraStereo_toggled ),NULL );
   gtk_signal_connect( GTK_OBJECT( CBDoubleBuffer ),"toggled",GTK_SIGNAL_FUNC( on_CBDoubleBuffer_toggled ),NULL );
@@ -1382,6 +1391,14 @@ GList *appendSDLDevices(GList *l) {
 }
 #endif
 
+#ifdef USE_ESD
+GList *appendESDDevices(GList *l) {
+  l = g_list_append(l, (gpointer)"Enter Remote IP");
+  l = g_list_append(l, (gpointer)"Use Software Mixer");
+  return l;
+}
+#endif
+
 // Gets text string from a gtk entry, interpreting 
 // MSGTR_PREFERENCES_DriverDefault as null string.
 char *getGtkEntryText(GtkWidget *from) {
@@ -1434,6 +1451,11 @@ void ShowAudioConfig() {
     setGtkEntryText(CEAudioDevice, gtkAOSDLDriver);
   }
 #endif
+#ifdef USE_ESD
+  if (strncmp(ao_driver[0], "esd", 3) == 0) {
+    setGtkEntryText(CEAudioDevice, gtkAOESDDevice);
+  }
+#endif
 
   gtk_widget_show(AudioConfig);
   gtkSetLayer(AudioConfig);
@@ -1473,6 +1495,12 @@ static void audioButton(GtkButton *button, gpointer user_data) {
       if (strncmp(ao_driver[0], "sdl", 3) == 0) {
         gfree(&gtkAOSDLDriver);
         gtkAOSDLDriver = gstrdup(getGtkEntryText(CEAudioDevice));
+      }
+#endif
+#ifdef USE_ESD
+      if (strncmp(ao_driver[0], "esd", 3) == 0) {
+        gfree(&gtkAOESDDevice);
+        gtkAOESDDevice = gstrdup(getGtkEntryText(CEAudioDevice));
       }
 #endif
    case 0:
@@ -1524,6 +1552,10 @@ GtkWidget *create_AudioConfig() {
 #ifdef HAVE_SDL
   if (strncmp(ao_driver[0], "sdl", 3) == 0)
     items = appendSDLDevices(items);
+#endif
+#ifdef USE_ESD
+  if (strncmp(ao_driver[0], "esd", 3) == 0)
+    items = appendESDDevices(items);
 #endif
   gtk_combo_set_popdown_strings(GTK_COMBO(CBAudioDevice), items);
   g_list_free(items);

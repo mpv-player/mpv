@@ -210,6 +210,9 @@ Dönmez, Ismail (cartman) <ismail.donmez@boun.edu.tr>
 Egger, Christoph <christoph_egger@gmx.de>
     * vo_ggi updates
 
+Elsinghorst, Paul Wilhelm <paul@uni-bonn.de>
+    * GUI: remote ESD support including software mixer 
+
 Ernesti, Bernd <mplayer@lists.veego.de>
     * NetBSD support patches
 
