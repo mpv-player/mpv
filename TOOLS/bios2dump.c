@@ -37,7 +37,7 @@ int main( int argc, char *argv[])
   sprintf(outname,"%04X_%04X.int%02X",int_seg,int_off,int_no);
   if(!(fd_out = fopen(outname,"wb")))
   {
-    perror("Can't open file - /dev/mem");
+    perror("Can't open output file");
     fclose(fd_mem);
     return EXIT_FAILURE;
   }
