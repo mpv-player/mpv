@@ -31,7 +31,6 @@ MPlayer (1.0)
     * RealVideo binary codecs support on Mac OS X (still buggy)
     * bigendian fixes in vf.c, vo_tga
     * OpenBSD portability fixes
-    * OpenBSD VCD support
     * OpenBSD/VAX support
     * AMD64 support
 
@@ -81,7 +80,7 @@ MPlayer (1.0)
     * vf_spp memory corruption fix on reallocation
 
     FFmpeg/libavcodec:
-    * MPEG-2 8,9,10 bit encoding precision
+    * MPEG2 encoding with 8, 9, 10, 11 bit intra DC precision
     * DC clipping fix, intra_dc_precision > 0 support
     * Cinepak fixes and palette support
     * support skipping of MB rows during decoding
@@ -125,6 +124,7 @@ MPlayer (1.0)
     * miscellaneous bug fixes and cleanups
     * multi-threaded encoding with lavc
     * fixed a bug with Real files introduced in pre4
+    * -use-stdin renamed to -noconsolecontrols
 
 
   pre4: "YAML Counter" Apr 28, 2004
@@ -296,7 +296,6 @@ MPlayer (1.0)
     * fixed long standing lame quality option off-by-one bug in MEncoder
     * MPL2 subtitle support
     * less verbosity in Win32 loader and other places
-    * -use-stdin renamed to -noconsolecontrols
 
 
   pre3try2: security fix release Mar 3, 2004
