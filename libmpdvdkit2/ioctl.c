@@ -82,7 +82,6 @@
 #   include <stropts.h>
 #   include <sys/scsi/scsi_types.h>
 #   include <sys/scsi/impl/uscsi.h>
-#   include <sys/smedia.h>
 #endif
 #ifdef DARWIN_DVD_IOCTL
 #   include <IOKit/storage/IODVDMediaBSDClient.h>
