@@ -27,8 +27,8 @@ Homepage:
 
 English documentation:
     * user docs: Diego Biurrun
-    * input layer, LIRC, slave mode docs: Alban Bedel
     * man page: Diego Biurrun
+    * input layer, LIRC, slave mode docs: Alban Bedel
     * tech/* docs: Alex Beregszaszi
     * tech/* documentation docs: Diego Biurrun
 
@@ -40,7 +40,7 @@ Documentation translations:
     * Russian: Dmitry Baryshkov
     * Polish: Waclaw Schiller
     * Italian: Daniele Forghieri
-    * Chinese (simplified): Lu Ran
+    * Chinese (simplified): Lu Ran (outdated)
     * Spanish: Juan Martin
 
 Platforms/ports: (see also DOCS/tech/porting-status.txt)
@@ -90,6 +90,10 @@ demuxers:
     * demux_ogg.c - Moritz Bunkus
     * demux_realaud.c - Roberto Togni
     * demux_rtp* - Ross Finlayson
+
+codec libraries:
+    * FFmpeg: Michael Niedermayer
+    * XviD: Ivan Kalvachev
 
 video filters:
     * general: Richard Felker, Michael Niedermayer
@@ -148,8 +152,6 @@ VIDIX drivers:
 
 libao2 drivers:
     * ao_alsa5.c - None
-    * ao_alsa9.c - Zsolt Barat
-    * ao_alsa1x.c - Zsolt Barat
     * ao_alsa.c - Zsolt Barat
     * ao_arts.c - None
     * ao_dxr2.c - None
