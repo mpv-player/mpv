@@ -30,11 +30,6 @@ int vo_dwidth=0;
 int vo_dheight=0;
 int vo_dbpp=0;
 
-int vo_old_x = 0;
-int vo_old_y = 0;
-int vo_old_width = 0;
-int vo_old_height = 0;
-
 int vo_doublebuffering = 0;
 int vo_vsync = 0;
 int vo_fs = 0;

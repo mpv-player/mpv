@@ -170,11 +170,6 @@ extern int vo_dwidth;
 extern int vo_dheight;
 extern int vo_dbpp;
 
-extern int vo_old_x;
-extern int vo_old_y; 
-extern int vo_old_width;
-extern int vo_old_height;
-
 extern int vo_doublebuffering;
 extern int vo_directrendering;
 extern int vo_vsync;

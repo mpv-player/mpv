@@ -66,6 +66,12 @@ int WinID=-1;
 int vo_mouse_autohide = 0;
 int vo_wm_type = -1;
 
+static int vo_old_x = 0;
+static int vo_old_y = 0;
+static int vo_old_width = 0;
+static int vo_old_height = 0;
+
+
 #ifdef HAVE_XINERAMA
 int xinerama_screen = 0;
 int xinerama_x = 0;
@@ -495,6 +501,7 @@ void vo_x11_uninit()
 	  vo_window=None;
 	}
 	vo_fs=0;
+	vo_old_width=vo_old_height=0;
     }
 }
 
@@ -529,8 +536,8 @@ int vo_x11_check_events(Display *mydisplay){
            ret|=VO_EVENT_EXPOSE;
            break;
       case ConfigureNotify:
-	   if (!vo_fs && (Event.xconfigure.width == vo_screenwidth || Event.xconfigure.height == vo_screenheight)) break;
-	   if (vo_fs && Event.xconfigure.width != vo_screenwidth && Event.xconfigure.height != vo_screenheight) break;
+//	   if (!vo_fs && (Event.xconfigure.width == vo_screenwidth || Event.xconfigure.height == vo_screenheight)) break;
+//	   if (vo_fs && Event.xconfigure.width != vo_screenwidth && Event.xconfigure.height != vo_screenheight) break;
            vo_dwidth=Event.xconfigure.width;
            vo_dheight=Event.xconfigure.height;
 #if 0
@@ -693,16 +700,24 @@ void vo_x11_setlayer( int layer )
 
 void vo_x11_fullscreen( void )
 {
- int x=0,y=0,w=vo_screenwidth,h=vo_screenheight;
+ int x,y,w,h;
 
  if ( WinID >= 0 ) return;
 
- if ( !vo_fs && (vo_dwidth == vo_screenwidth || vo_dheight == vo_screenheight)) return;
- if ( vo_fs && vo_dwidth != vo_screenwidth && vo_dheight != vo_screenheight) return;
-
- if ( vo_fs )
-  { vo_fs=VO_FALSE; x=vo_old_x; y=vo_old_y; w=vo_old_width; h=vo_old_height; }
-   else { vo_fs=VO_TRUE; vo_old_x=vo_dx; vo_old_y=vo_dy; vo_old_width=vo_dwidth;   vo_old_height=vo_dheight; }
+ if ( vo_fs ){
+   // fs->win
+   if(vo_dwidth != vo_screenwidth && vo_dheight != vo_screenheight) return;
+   vo_fs=VO_FALSE;
+   x=vo_old_x; y=vo_old_y; w=vo_old_width; h=vo_old_height;
+ } else {
+   // win->fs
+   if(vo_old_width && 
+     (vo_dwidth==vo_screenwidth && vo_dwidth!=vo_old_width) &&
+     (vo_dheight==vo_screenheight && vo_dheight!=vo_old_height) ) return;
+   vo_fs=VO_TRUE;
+   vo_old_x=vo_dx; vo_old_y=vo_dy; vo_old_width=vo_dwidth; vo_old_height=vo_dheight;
+   x=0; y=0; w=vo_screenwidth; h=vo_screenheight;
+ }
 
  vo_x11_decoration( mDisplay,vo_window,(vo_fs) ? 0 : 1 );
  vo_x11_sizehint( x,y,w,h,0 );
