@@ -45,6 +45,9 @@ typedef struct {
     int vo_inited;
     int convert;
     int yuy2_support;
+#if LIBAVCODEC_BUILD >= 4615
+    int yvu9_support;
+#endif
 } vd_ffmpeg_ctx;
 
 //#ifdef FF_POSTPROCESS
@@ -77,6 +80,9 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 	if( (*((int*)arg)) == IMGFMT_IYUV ) return CONTROL_TRUE;
 	if( (*((int*)arg)) == IMGFMT_I420 ) return CONTROL_TRUE;
 	if( (*((int*)arg)) == IMGFMT_YUY2 && ctx->yuy2_support ) return CONTROL_TRUE;
+#if LIBAVCODEC_BUILD >= 4615
+	if( (*((int*)arg)) == IMGFMT_YVU9 && ctx->yvu9_support ) return CONTROL_TRUE;
+#endif
 	return CONTROL_FALSE;
     }
     return CONTROL_UNKNOWN;
@@ -251,6 +257,9 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	sh->disp_h = avctx->height;
 	ctx->vo_inited=1;
 	ctx->yuy2_support=(avctx->pix_fmt==PIX_FMT_YUV422P);
+#if LIBAVCODEC_BUILD >= 4615
+	ctx->yvu9_support=(avctx->pix_fmt==PIX_FMT_YUV410P);
+#endif
     	if (!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,
 	    ctx->yuy2_support ? IMGFMT_YUY2 : IMGFMT_YV12))
     		return NULL;
