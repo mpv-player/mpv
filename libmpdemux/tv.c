@@ -422,7 +422,7 @@ int demux_open_tv(demuxer_t *demuxer)
     sh_video->ds = demuxer->video;
     demuxer->video->id = 0;
 
-//    demuxer->seekable = 0;
+    demuxer->seekable = 0;
 
     /* here comes audio init */
 
