@@ -183,6 +183,16 @@ static int init(sh_video_t *sh){
 #endif
     }
 #endif
+    if(   sh->format == mmioFOURCC('R', 'V', '1', '0')
+       || sh->format == mmioFOURCC('R', 'V', '1', '3')){
+        unsigned int* extrahdr=(unsigned int*)(sh->bih+1);
+        avctx->extradata_size= 8;
+	avctx->extradata = malloc(avctx->extradata_size);
+        ((uint32_t*)avctx->extradata)[0] = extrahdr[0];
+        ((uint32_t*)avctx->extradata)[1] = extrahdr[1];
+//        printf("%X %X %d %d\n", extrahdr[0], extrahdr[1]);
+    }
+
     /* open it */
     if (avcodec_open(avctx, lavc_codec) < 0) {
         mp_msg(MSGT_DECVIDEO,MSGL_ERR, MSGTR_CantOpenCodec);
