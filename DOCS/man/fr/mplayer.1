@@ -1,4 +1,4 @@
-.\" synced with 1.745
+.\" synced with 1.748
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "26 Septembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "27 Septembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -5008,8 +5008,9 @@ sont affichés lors de leur incrustation dans l'image.
 .
 .TP
 .B \-noencodedups
-Ne pas encoder en double les trames en double\ ;
-Les coder par une trame nulle pour indiquer qu'elle était en double.
+Ne pas encoder en les trames répétées\ ;
+Encoder chacune d'elles par une trame nulle pour indiquer qu'elle était
+en double.
 Les trames nulles seront écrites quand même, sauf si un filtre ou un
 encodeur capable de gérer l'encodage de doublons est chargé.
 Pour le moment, le seul filtre le permettant est harddup.
@@ -5103,12 +5104,12 @@ Envoie les informations de la première passe du mode deux passes dans
 .
 .TP
 .B \-skiplimit <valeur>
-Définit le nombre maximal de trames pouvant être sautés après avoir encodé
+Définit le nombre maximal de trames pouvant être sautées après avoir encodé
 une trame (\-noskiplimit pour un nombre illimité).
 .
 .TP
-.B \-vobsubout <nomdebase>
-Définit le nomdebase pour les fichiers .idx et .sub de destination.
+.B \-vobsubout <nom_de_base>
+Définit le nom de base pour les fichiers .idx et .sub de destination.
 Cela désactive le rendu des sous-titres dans le film encodé et le redirige
 vers un groupe de fichiers de sous-titre VOBsub.
 .
@@ -5191,8 +5192,8 @@ spécifie la dureté/\:douceur
 .
 .TP
 .B pass=<1\-2>
-Avec ça vous pouvez encoder des fichiers DivX4 2passes.
-D'abord encodez avec pass=1, puis avec les mêmes paramètres encodez avec
+Permet d'encoder des fichiers DivX4 en 2 passes.
+Encodez d'abord avec pass=1, puis avec les mêmes paramètres encodez avec
 pass=2.
 .
 .TP
@@ -5301,15 +5302,15 @@ qualité légèrement inférieure et bitrates plus importants.
 .
 .TP
 .B highpassfreq=<fréq>
-Définit la fréquence du filtre passe-haut en Hz.
-Les fréquences en dessous de celle définie seront coupées.
+Définit la fréquence de coupure du filtre passe-haut en Hz.
+Les fréquences en dessous de la fréquence de coupure seront supprimées.
 Une fréquence de -1 désactivera le filtrage, tandis que 0
 laissera LAME choisir la fréquence automatiquement.
 .
 .TP
 .B lowpassfreq=<fréq>
-Définit la fréquence du filtre passe-bas en Hz.
-Les fréquences au dessus de celle définie seront coupées.
+Définit la fréquence de coupure du filtre passe-bas en Hz.
+Les fréquences au dessus de la fréquence de coupure seront supprimées.
 Une fréquence de -1 désactivera le filtrage, tandis que 0
 laissera LAME choisir la fréquence automatiquement.
 .
@@ -5335,14 +5336,15 @@ encodage ABR au bitrate moyen indiqué.
 .PD 0
 .RSs
 .IPs fast:preset=standard
-pour la plupart des gens et la plupart des musiques et déjà d'assez grande
-qualité.
+Devrait convenir à la plupart des gens et à plupart des musiques car ce
+preset est déjà d'assez grande qualité.
 .IPs cbr:preset=192
 encode avec les présélections ABR à un bitrate constant forcé à 192 kbps.
 .IPs preset=172
 encode avec les présélections ABR à un bitrate moyen de 172 kbps.
 .IPs preset=extreme
-pour les gens avec une oreille extrêmement bonne et un équipement en rapport.
+Devrait convenir aux gens très exigeant, ayant une audition extrêmement
+bonne et un équipement HI-FI en rapport.
 .IPs preset=help
 Affiche des options supplémentaires et des informations sur les
 paramètres de présélections.
@@ -5413,7 +5415,7 @@ fait que cette option ne devrait être utilisée que pour des
 tests de régression, qui nécessitent des fichiers identiques
 bit-à-bit, même quand la version de l'encodeur change.
 Cela supprime également l'entête user-data des flux MPEG-4
-N'utilisez donc cette options que si vous êtes sûr d'en avoir
+N'utilisez donc cette option que si vous êtes sûrs d'en avoir
 besoin.
 .
 .TP
@@ -5600,8 +5602,8 @@ Ne fait absolument rien pour l'instant.
 .TP
 .B keyint=<0\-300>
 intervalle (en trames) entre les trames-clé (keyframe).
-Les trames-clé sont nécessaires pour les déplacement puisque celui-ci n'est
-possible que d'une trames-clé vers une autre, mais celles-ci prennent plus
+Les trames-clé sont nécessaires pour les déplacements puisque celui-ci n'est
+possible que d'une trame-clé vers une autre, mais celles-ci prennent plus
 de place que les autres trames.
 De plus grands nombres ici signifient donc des fichiers légèrement plus
 petits, mais un déplacement moins précis, 0 signifie pas de
@@ -5633,7 +5635,7 @@ toujours utiliser le nombre maximum de trames B (par défaut)
 .
 .TP
 .B vpass=<1\-3>
-Active le mode deux (ou trois) passes interne, ne le spécifiez que si
+Active le mode deux (ou trois) passes internes, ne le spécifiez que si
 vous désirez utiliser l'encodage deux (ou trois) passes\ :
 .PD 0
 .RSs
@@ -5647,7 +5649,7 @@ Nième passe (seconde et troisième passes de l'encodage trois passes)
 .RS
 Voici comment cela fonctionne, et comment l'utiliser\ :
 .br
-La première passes (vpass=1) écrit le fichier de statistiques.
+La première passe (vpass=1) écrit le fichier de statistiques.
 Vous devriez désactiver des options gourmandes en temps processeur,
 comme le fait le mode "turbo".
 .br
@@ -5803,7 +5805,7 @@ lmin= <ip_quant>:lmax= <ip_quant>:vb_qfactor= <b_quant/\:ip_quant>
 .
 .TP
 .B vqblur=<0.0\-1.0> (passe 1)
-Flou quantificateur, plus la valeur est grande, plus les les quantificateurs
+Flou quantificateur, plus la valeur est grande, plus les quantificateurs
 seront semblables d'une trame à l'autre (variations plus basses).
 .RSs
 .IPs 0.0
@@ -5816,7 +5818,7 @@ fait une moyenne du quantificateur d'après toutes les trames précédentes
 .
 .TP
 .B vqblur=<0.0\-99.0> (passe 2)
-Flou gaussien quantificateur, plus la valeur est grande, plus les les
+Flou gaussien quantificateur, plus la valeur est grande, plus les
 quantificateurs seront semblables d'une trame à l'autre
 (variations plus basses) (par défaut\ : 0.5).
 .
@@ -5992,7 +5994,7 @@ partitions AC et 1. & 2.
 que les erreurs atteindrons la partition AC bien plus souvent que les
 partitions MV&DC.
 Ainsi, l'image sera plus belle avec le partitionnement que sans, car sans
-partitionement une erreur plantera AC/\:DC/\:MV équitablement.
+partitionnement une erreur plantera AC/\:DC/\:MV équitablement.
 .
 .TP
 .B vpsize=<0\-10000>
@@ -6071,7 +6073,7 @@ Le luminance masking (masquage des zones saturées de lumière) est un
 algorithme psychosensoriel qui est sensé tenir compte de la moindre
 sensibilité rétinienne aux zones saturées de lumière.
 Le luminance masking compresse plus fortement les zones très lumineuses,
-écomisant ainsi des bits, pouvant être redistribués à d'autres trames,
+économisant ainsi des bits, pouvant être redistribués à d'autres trames,
 augmentant ainsi la qualité subjective globale de la vidéo, tout en
 dégradant probablement un peu le PSNR.
 .br
@@ -6095,7 +6097,7 @@ Le darkness masking (masquage des zones sombres) est un
 algorithme psychosensoriel qui est sensé tenir compte de la moindre
 sensibilité rétinienne aux zones plus sombres.
 Le darkness masking compresse plus fortement les zones très sombres,
-écomisant ainsi des bits, pouvant être redistribués à d'autres trames,
+économisant ainsi des bits, pouvant être redistribués à d'autres trames,
 augmentant ainsi la qualité subjective globale de la vidéo, tout en
 dégradant probablement un peu le PSNR.
 .br
@@ -6161,7 +6163,7 @@ p_mask=1.0 double la quantité de bits donnés à chaque bloc intra.
 .B naq\ \ \ \ 
 Normalise la quantisation adaptive (expérimental).
 En utilisant la quantisation adaptive (*_mask), le quantificateur moyen
-par MB peut ne pas correspondre au quantificateur par trame demandé.
+par MB peut ne pas correspondre au quantificateur par trame demandée.
 Naq essaiera d'ajuster les quantificateurs par MB pour maintenir une
 moyenne correcte.
 .
@@ -6333,7 +6335,7 @@ L'utilisation de diamants plus petits ne limitent pas la recherche à
 de petits vecteurs de mouvement.
 En revanche, la recherche risque de se terminer avant d'avoir trouvé
 celui serait vraiment meilleur, surtout en présence de bruit.
-De plus grands diamants permettent un recherche plus étendue du meilleur
+De plus grands diamants permettent une recherche plus étendue du meilleur
 vecteur de mouvement, et sont par conséquent plus lents mais améliorent la
 qualité.
 .br
@@ -6445,7 +6447,7 @@ Ceci a un effet significatif sur la vitesse.
 Affiche le PSNR (peak signal to noise ratio, Raport Signal sur Bruit)
 pour l'ensemble de la vidéo après l'encodage et stocke le PSNR par trame
 dans un fichier comme 'psnr_012345.log'.
-Les valeurs retournés sont en dB (décibel), le plus haut est le mieux.
+Les valeurs retournées sont en dB (décibel), le plus haut est le mieux.
 .
 .TP
 .IPs mpeg_quant
@@ -6560,7 +6562,7 @@ Donc vous pouvez en fait obtenir du i420 brut, du i420 compressé par lzo, du
 rtjpeg, ou le rtjpeg compressé par lzo.
 .br
 .I NOTE:
-La documentation de nuvrec contiens quelques conseils et exemples sur les
+La documentation de nuvrec contient quelques conseils et exemples sur les
 paramètres à utiliser avec les encodages TV courants.
 .
 .TP
@@ -6710,9 +6712,9 @@ pour augmenter la qualité des trame-clés.
 .
 .TP
 .B kfreduction=<0\-100>
-Les deux options ci-dessus contrôlent la taille des trames-clées qui vous
+Les deux options ci-dessus contrôlent la taille des trames-clés qui vous
 semblent trop proches l'une de l'autre.
-kfthreshold contrôle la réduction de la distance inter trame-clées et
+kfthreshold contrôle la réduction de la distance inter trame-clés et
 kfreduction contrôle leur réduction de débit binaire.
 La dernière trame-clé est traitée normalement.
 (défaut\ : 0, mode 2passes uniquement)
@@ -6784,8 +6786,8 @@ présente dans le flux).
 Lors de la lecture, la n-vop sera joué en affichant la trame précédente.
 .br
 .I ATTENTION\ :
-Une mauvaise utilisation de cette option peut produire des vidéo vraiment
-moches, soyez prévenus\ !
+Une mauvaise utilisation de cette option peut produire des vidéo de très
+mauvaise qualité, soyez prévenus\ !
 .
 .TP
 .B qpel\ \ \ 
@@ -6965,7 +6967,7 @@ Cette option contrôle le pourcentage maximum de diminution par rapport
 Définit l'overhead moyen par trame, en octets.
 La plupart des utilisateurs indiquent la taille visée de leur vidéo
 sans tenir compte de l'overhead du conteneur vidéo.
-Ce petit, mais à peut près constant overhead peut faire excéder la taille
+Ce petit, mais à peu près constant overhead peut faire excéder la taille
 du fichier généré.
 XviD permet aux utilisateurs de donner le l'overhead par trame de
 leur conteneur (donner une moyenne par trame).
@@ -7440,5 +7442,5 @@ A utiliser à vos risques et périls !
 Il peut y avoir des erreurs et inexactitudes qui peuvent endommager votre
 système ou vos yeux.
 Procédez avec précaution, et bien que ce ne soit souvent pas le cas, les auteurs
-déclinent toute responsabilités quant à l'utilisation de ce logiciel !
+déclinent toutes responsabilités quand à l'utilisation de ce logiciel !
 .\" end of file
