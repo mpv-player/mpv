@@ -749,6 +749,7 @@ unsigned int t2;
 
 memset(&bda,0,sizeof(bes_da_t));
 painted = 0;
+  use_dr = 0;
   if(vo_vaa.query_bes_da)
     use_dr = vo_vaa.query_bes_da(&bda) ? 0 : 1;
 #ifdef USE_MP_IMAGE

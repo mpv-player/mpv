@@ -92,7 +92,7 @@ int lavc_param_keyint = -1;
              Video accelerated architecture
 **************************************************************************/
 vo_vaa_t vo_vaa;
-
+int vo_doublebuffering;
 
 //--------------------------
 
