@@ -1374,6 +1374,9 @@ int audio_stream_cache = 0;
 
 extern int hr_mp3_seek;
 
+extern float stream_cache_min_percent;
+extern float stream_cache_prefill_percent;
+
 demuxer_t* demux_open(stream_t *vs,int file_format,int audio_id,int video_id,int dvdsub_id,char* filename){
   stream_t *as = NULL,*ss = NULL;
   demuxer_t *vd,*ad = NULL,*sd = NULL;
@@ -1386,8 +1389,8 @@ demuxer_t* demux_open(stream_t *vs,int file_format,int audio_id,int video_id,int
       return NULL;
     }
     if(audio_stream_cache) {
-      if(!stream_enable_cache(as,audio_stream_cache*1024,audio_stream_cache*1024/5,
-			      audio_stream_cache*1024/20)) {
+      if(!stream_enable_cache(as,audio_stream_cache*1024,audio_stream_cache*1024*(stream_cache_min_percent / 100.0),
+			      audio_stream_cache*1024*(stream_cache_prefill_percent / 100.0))) {
 	free_stream(as);
 	mp_msg(MSGT_DEMUXER,MSGL_ERR,"Can't enable audio stream cache\n");
 	return NULL;

@@ -198,6 +198,9 @@ cache_vars_t* cache_init(int size,int sector){
 #endif
   memset(s,0,sizeof(cache_vars_t));
   num=size/sector;
+  if(num < 16){
+     num = 16;
+  }//32kb min_size
   s->buffer_size=num*sector;
   s->sector_size=sector;
 #ifndef WIN32
@@ -206,8 +209,7 @@ cache_vars_t* cache_init(int size,int sector){
   s->buffer=malloc(s->buffer_size);
 #endif
   s->fill_limit=8*sector;
-  s->back_size=size/2;
-  s->prefill=size/20; // default: 5%
+  s->back_size=s->buffer_size/2;
   return s;
 }
 
@@ -246,11 +248,20 @@ int stream_enable_cache(stream_t *stream,int size,int min,int prefill){
     return 1;
   }
 
-  if(size<32*1024) size=32*1024; // 32kb min
   s=cache_init(size,ss);
   stream->cache_data=s;
   s->stream=stream; // callback
-  s->prefill=size*prefill;
+  s->prefill=prefill;
+
+
+  //make sure that we won't wait from cache_fill
+  //more data than it is alowed to fill
+  if (s->prefill > s->buffer_size - s->fill_limit ){
+     s->prefill = s->buffer_size - s->fill_limit;
+  }
+  if (min > s->buffer_size - s->fill_limit) {
+     min = s->buffer_size - s->fill_limit;
+  }
   
 #ifndef WIN32  
   if((stream->cache_pid=fork())){
