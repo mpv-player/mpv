@@ -840,19 +840,22 @@
 
 <P>VobSub subtitles consist of a big (some megabytes) .SUB file, and optional
   .IDX and/or .IFO files.<BR>
-  Usage: if you have files like <CODE>sample.sub</CODE>,
-  <CODE>sample.ifo</CODE>, <CODE>sample.idx</CODE> - you have to pass the
-  <CODE>-vobsub sample -vobsubid
-  &lt;id&gt;</CODE> options (optionally with pathname, of course). The
-  <CODE>-vobsubid</CODE> option is like <CODE>-sid</CODE> for DVDs, you can
-  choose between subtitle tracks (languages) with it.</P>
+  Usage: If you have files like <CODE>sample.sub</CODE>,
+  <CODE>sample.ifo</CODE>(optional), <CODE>sample.idx</CODE> - you have to pass
+  MPlayer the <CODE>-vobsub sample [-vobsubid &lt;id&gt;]</CODE> options (full
+  path optional). The <CODE>-vobsubid</CODE> option is like <CODE>-sid</CODE>
+  for DVDs, you can choose between subtitle tracks (languages) with it. In case
+  that <CODE>-vobsubid</CODE>  is omitted, MPlayer will try to use the languages
+  given by the <CODE>-slang</CODE> option and fall back to the
+  <CODE>langidx<CODE> item in the .IDX file to set the subtitle language. If
+  that fails, there will be no subtitles.</P>
 
 <H4>Other subtitles</H4>
 
 <P>The other formats consist of a single text file containing timing,
   placement and text information.<BR>
-  Usage: if you have a file like <CODE>sample.txt</CODE>, you have to pass the
-  option <CODE>-sub sample.txt</CODE> (optionally with pathname, of course).</P>
+  Usage: If you have a file like <CODE>sample.txt</CODE>, you have to pass the
+  option <CODE>-sub sample.txt</CODE> (full path optional).</P>
 
 <H4>Adjusting subtitle timing and placement:</H4>
 
@@ -876,6 +879,11 @@
   have to manually convert the frame rate. There is a little perl script in the
   <CODE>contrib</CODE> directory of the MPlayer FTP site to do this conversion
   for you.</P>
+  
+<P>MPlayer will try to guess the subtitle files you want to use when playing a 
+  movie. If, like in most cases, subtitle and movie files have the same name and
+  are in the same place, you do not need to set the subtitle options. Just play
+  the movie, MPlayer will handle the subtitles automatically.</P>
 
 <P>About DVD subtitles, read the <A HREF="cd-dvd.html#dvd">DVD section</A>.</P>
 
@@ -1353,6 +1361,8 @@ ENTER pt_step 1 1
     <P>Toggle subtitle visibility.</P></LI>
   <LI><B>sub_pos</B> (int) val
     <P>Adjust subtitles position.</P></LI>
+  <LI><B>vobsub_lang</B>
+    <P>Change the language of VobSub subtitles.</P></LI>
   <LI><B>vo_fullscreen</B>
     <P>Switch fullscreen mode.</P></LI>
   <LI><B>tv_step_channel</B> (int) dir
