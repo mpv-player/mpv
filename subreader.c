@@ -1694,10 +1694,15 @@ char** sub_filenames(char* path, char *fname)
 		// we have a (likely) subtitle file
 		if (found) {
 		    int prio = 0;
-		    sprintf(tmpresult, "%s %s", f_fname_trim, tmp_sub_id);
-		    if (strcmp(tmp_fname_trim, tmpresult) == 0 && sub_match_fuzziness >= 1) {
-			// matches the movie name + lang extension
-			prio = 5;
+		    if (tmp_sub_id)
+		    {
+			sprintf(tmpresult, "%s %s", f_fname_trim, tmp_sub_id);
+			printf("dvdsublang...%s\n", tmpresult);
+			if (strcmp(tmp_fname_trim, tmpresult) == 0 && sub_match_fuzziness >= 1) {
+			    // matches the movie name + lang extension
+			    prio = 5;
+			    break;
+			}
 		    } else if (strcmp(tmp_fname_trim, f_fname_trim) == 0) {
 			// matches the movie name
 			prio = 4;
