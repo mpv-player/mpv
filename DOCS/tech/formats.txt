@@ -1,9 +1,10 @@
 1. Input layer, supported devices, methods:
   - plain file, with seeking
   - STDIN, without seeking backward
-  - network streaming (currently plain wget-like HTTP, no MMS support yet)
+  - network streaming (currently plain wget-like HTTP and MMS (.asx))
   - VCD (Video CD) track, by direct CDROM device access (not requires mounting disc)
   - DVD titles using .IFO structure, by direct DVD device access (not requires mounting disc)
+  - DVD titles using menu navigation (experimental/alpha, not yet finished)
 
 2. Demuxer/parser layer, supported file/media formats:
 
