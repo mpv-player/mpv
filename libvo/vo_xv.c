@@ -38,6 +38,8 @@ LIBVO_EXTERN(xv)
 #include "sub.h"
 #include "aspect.h"
 
+#include "../postproc/rgb2rgb.h"
+
 static vo_info_t vo_info =
 {
         "X11/Xv",
@@ -88,6 +90,7 @@ static int CompletionType = -1;
 static uint32_t image_width;
 static uint32_t image_height;
 static uint32_t image_format;
+static int flip_flag;
 
 static Window                 mRoot;
 static uint32_t               drwX,drwY,drwWidth,drwHeight,drwBorderWidth,drwDepth;
@@ -343,6 +346,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 
  mFullscreen=flags&1;
  if( flags&0x02 ) vm = 1;
+ flip_flag=flags&8;
  num_buffers=vo_doublebuffering?NUM_BUFFERS:1;
  
  if (!vo_init()) return -1;
@@ -469,15 +473,11 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
     {
      fo = XvListImageFormats(mDisplay, xv_port, (int*)&formats);
      xv_format=0;
-     for(i = 0; i < formats; i++)
-      {
+     if(format==IMGFMT_BGR24) format=IMGFMT_YV12;
+     for(i = 0; i < formats; i++){
        printf("Xvideo image format: 0x%x (%4.4s) %s\n", fo[i].id,(char*)&fo[i].id, (fo[i].format == XvPacked) ? "packed" : "planar");
-
-       if (fo[i].id == format)
-        {
-         xv_format = fo[i].id;
-        }
-      }
+       if (fo[i].id == format) xv_format = fo[i].id;
+     }
      if (!xv_format) xv_port = 0;
     }
 
@@ -681,9 +681,8 @@ static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int
 
 static uint32_t draw_frame(uint8_t *src[])
 {
- int foo;
 
- switch (xv_format) {
+ switch (image_format) {
  case IMGFMT_YUY2:
  case IMGFMT_UYVY:
  case IMGFMT_YVYU:
@@ -721,6 +720,25 @@ static uint32_t draw_frame(uint8_t *src[])
         memcpy(xvimage[current_buf]->data+image_width*image_height*5/4,src[2],image_width*image_height/4);
      }
      break;
+
+ case IMGFMT_BGR24:
+
+    if(flip_flag)	// tricky, using negative src stride:
+     rgb24toyv12(src[0]+3*image_width*(image_height-1),
+                 xvimage[current_buf]->data,
+		 xvimage[current_buf]->data+image_width*image_height*5/4,
+		 xvimage[current_buf]->data+image_width*image_height,
+		 image_width,image_height,
+		 image_width,image_width/2,-3*image_width);
+    else
+     rgb24toyv12(src[0],
+                 xvimage[current_buf]->data,
+		 xvimage[current_buf]->data+image_width*image_height*5/4,
+		 xvimage[current_buf]->data+image_width*image_height,
+		 image_width,image_height,
+		 image_width,image_width/2,3*image_width);
+     break;
+
  }
 
   return 0;
@@ -729,17 +747,23 @@ static uint32_t draw_frame(uint8_t *src[])
 static uint32_t query_format(uint32_t format)
 {
 
+switch(format){
+ case IMGFMT_YUY2:
+ case IMGFMT_UYVY:
+ case IMGFMT_YVYU:
+
+ case IMGFMT_YV12:
+ case IMGFMT_I420:
+ case IMGFMT_IYUV:
+
+ case IMGFMT_BGR24:
+
 // umm, this is a kludge, we need to ask the server.. (see init function above)
     return 1;
-/*
- switch(format)
-  {
-   case IMGFMT_YV12:
-   case IMGFMT_YUY2: 
-       return 1;
-  }
- return 0;
-*/
+}
+
+return 0;
+
 }
 
 static void uninit(void) 
