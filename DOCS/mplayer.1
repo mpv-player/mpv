@@ -236,8 +236,9 @@ Currently the following drivers are fixed-vo compliant: x11, xv, xvidix, xmga,
 gl2, and svga.
 .TP
 .B \-framedrop (also see \-hardframedrop)
-Skips displaying some frames to maintain A/\:V sync on slow systems.
-Decoding of B frames is also skipped and video filters are not used.
+Skip displaying some frames to maintain A/\:V sync on slow systems.
+Video filters are not applied to such frames.
+For B frames even decoding is skipped completely.
 .TP
 .B \-h, \-help, \-\-help
 Show short summary of options.
