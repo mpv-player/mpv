@@ -1018,6 +1018,7 @@ current_module="init_libvo";
      moviewidth=screen_size_x=sh_video->disp_w;
      movieheight=screen_size_y=sh_video->disp_h;
      mplShMem->StreamType=stream->type;
+     mplSetFileName( filename );
     }
 #endif
 
@@ -1893,7 +1894,7 @@ if(use_gui || ++curr_filename<num_filenames){
 
   video_out=NULL;
   audio_out=NULL;
-    
+
   goto play_next_file;
 }
 

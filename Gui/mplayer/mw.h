@@ -170,10 +170,6 @@ void mplMainDraw( wsParamDisplay )
          }
   }
 
-// --- erosen ideiglenes.
- strcpy( gtkShMem->fs.filename,mplShMem->Filename );
-// ---
-
  if ( mplMainRender )
   {
    memcpy( mplDrawBuffer,appMPlayer.main.Bitmap.Image,appMPlayer.main.Bitmap.ImageSize );
@@ -212,7 +208,7 @@ drawrenderedtext:
    mplMainRender=0;
   }
  wsPutImage( &appMPlayer.mainWindow );
- XFlush( wsDisplay );
+// XFlush( wsDisplay );
 }
 
 #define IZE(x) printf("@@@ " x " @@@\n");
@@ -501,7 +497,7 @@ rollerhandled:
           switch ( itemtype )
            {
             case itPLMButton:
-                 wsMoveWindow( &appMPlayer.mainWindow,RX - abs( sx ),RY - abs( sy ) );
+                 wsMoveWindow( &appMPlayer.mainWindow,False,RX - abs( sx ),RY - abs( sy ) );
                  mplMainRender=0;
                  break;
             case itPRMButton:

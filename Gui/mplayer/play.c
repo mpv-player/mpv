@@ -40,7 +40,7 @@ void mplFullScreen( void )
  if ( appMPlayer.subWindow.isFullScreen )
   {
    wsResizeWindow( &appMPlayer.subWindow,sx,sy );
-   wsMoveWindow( &appMPlayer.subWindow,appMPlayer.sub.x,appMPlayer.sub.y );
+   wsMoveWindow( &appMPlayer.subWindow,True,appMPlayer.sub.x,appMPlayer.sub.y );
    wsWindowDecoration( &appMPlayer.subWindow,appMPlayer.subWindow.Decorations );
    appMPlayer.subWindow.isFullScreen=0;
   }
@@ -48,7 +48,7 @@ void mplFullScreen( void )
    {
     sx=appMPlayer.subWindow.Width; sy=appMPlayer.subWindow.Height;
     wsResizeWindow( &appMPlayer.subWindow,wsMaxX,wsMaxY );
-    wsMoveWindow( &appMPlayer.subWindow,0,0 );
+    wsMoveWindow( &appMPlayer.subWindow,True,0,0 );
     wsWindowDecoration( &appMPlayer.subWindow,0 );
     appMPlayer.subWindow.isFullScreen=1;
    }
@@ -70,7 +70,7 @@ void mplStop()
  if ( !appMPlayer.subWindow.isFullScreen )
   {
    wsResizeWindow( &appMPlayer.subWindow,appMPlayer.sub.width,appMPlayer.sub.height );
-   wsMoveWindow( &appMPlayer.subWindow,appMPlayer.sub.x,appMPlayer.sub.y );
+   wsMoveWindow( &appMPlayer.subWindow,True,appMPlayer.sub.x,appMPlayer.sub.y );
   }
  mplSubRender=1;
  wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
@@ -183,7 +183,7 @@ void ChangeSkin( void )
  if ( ( !appMPlayer.subWindow.isFullScreen )&&( !mplShMem->Playing ) )
   {
    wsResizeWindow( &appMPlayer.subWindow,appMPlayer.sub.width,appMPlayer.sub.height );
-   wsMoveWindow( &appMPlayer.subWindow,appMPlayer.sub.x,appMPlayer.sub.y );
+   wsMoveWindow( &appMPlayer.subWindow,True,appMPlayer.sub.x,appMPlayer.sub.y );
   } 
  wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
  if ( appMPlayer.sub.Bitmap.Image ) wsConvert( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Image,appMPlayer.sub.Bitmap.ImageSize );
@@ -199,7 +199,7 @@ void ChangeSkin( void )
   { message( False,MSGTR_NEMDB ); return; }
  wsVisibleWindow( &appMPlayer.mainWindow,wsHideWindow );
  wsResizeWindow( &appMPlayer.mainWindow,appMPlayer.main.width,appMPlayer.main.height );
- wsMoveWindow( &appMPlayer.mainWindow,appMPlayer.main.x,appMPlayer.main.y );
+ wsMoveWindow( &appMPlayer.mainWindow,True,appMPlayer.main.x,appMPlayer.main.y );
  wsResizeImage( &appMPlayer.mainWindow,appMPlayer.main.width,appMPlayer.main.height );
  wsSetShape( &appMPlayer.mainWindow,appMPlayer.main.Mask.Image );
  mainVisible=1; mplMainRender=1; wsPostRedisplay( &appMPlayer.mainWindow );
@@ -222,6 +222,11 @@ void mplResizeToMovieSize( unsigned int width,unsigned int height )
  if ( !appMPlayer.subWindow.isFullScreen )
   {
    wsResizeWindow( &appMPlayer.subWindow,width,height );
-   wsMoveWindow( &appMPlayer.subWindow,appMPlayer.sub.x,appMPlayer.sub.y );
+   wsMoveWindow( &appMPlayer.subWindow,True,appMPlayer.sub.x,appMPlayer.sub.y );
   } 
+}
+
+void mplSetFileName( char * fname )
+{
+ if ( ( fname )&&( gtkShMem ) ) strcpy( gtkShMem->fs.filename,fname );
 }

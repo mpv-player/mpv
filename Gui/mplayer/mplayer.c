@@ -50,14 +50,15 @@ void mplTimerHandler( int signum )
 void mplInit( int argc,char* argv[], char *envp[], void* disp )
 {
  int i;
- // allocates shmem to gtkShMem
- // fork() a process which runs gtkThreadProc()  [gtkPID]
- gtkInit( argc,argv,envp );
- strcpy( gtkShMem->sb.name,skinName ); 
 
  // allocates shmem to mplShMem
  // init fields of this struct to default values
  mplMPlayerInit( argc,argv,envp );
+
+ // allocates shmem to gtkShMem
+ // fork() a process which runs gtkThreadProc()  [gtkPID]
+ gtkInit( argc,argv,envp );
+ strcpy( gtkShMem->sb.name,skinName ); 
 
  message=mplErrorHandler;  // error messagebox drawing function
 

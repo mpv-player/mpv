@@ -79,7 +79,7 @@ void mplShowMenu( int mx,int my )
 
  mplMenuItem = 0;
 
- wsMoveWindow( &appMPlayer.menuWindow,x,y );
+ wsMoveWindow( &appMPlayer.menuWindow,False,x,y );
  wsVisibleWindow( &appMPlayer.menuWindow,wsShowWindow );
  wsMoveTopWindow( &appMPlayer.menuWindow );
 }

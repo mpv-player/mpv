@@ -107,7 +107,6 @@ inline int wsSearch( Window win );
 
 void wsWindowDecoration( wsTWindow * win,long d )
 {
-//XUnmapWindow( wsDisplay,win->WindowID );
  wsMotifHints=XInternAtom( wsDisplay,"_MOTIF_WM_HINTS",0 );
  if ( wsMotifHints != None )
   {
@@ -118,17 +117,6 @@ void wsWindowDecoration( wsTWindow * win,long d )
    XChangeProperty( wsDisplay,win->WindowID,wsMotifHints,wsMotifHints,32,
                     PropModeReplace,(unsigned char *)&wsMotifWmHints,5 );
   }
-//XMapWindow( wsDisplay,win->WindowID );
-// if ( d )
-//  {
-//   win->SizeHint.win_gravity=ForgetGravity;
-//  }
-//   else
-//    {
-//     win->SizeHint.win_gravity=StaticGravity;
-//    }
-// win->SizeHint.flags=PWinGravity;
-// XSetWMSizeHints( wsDisplay,win->WindowID,&win->SizeHint,win->AtomWMSizeHint );
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -856,20 +844,24 @@ void wsPutImage( wsTWindow * win )
 // ----------------------------------------------------------------------------------------------
 //    Move window to x, y.
 // ----------------------------------------------------------------------------------------------
-void wsMoveWindow( wsTWindow * win,int x, int y )
+void wsMoveWindow( wsTWindow * win,int b,int x, int y )
 {
- switch ( x )
+ if ( b )
   {
-   case -1: win->X=( wsMaxX / 2 ) - ( win->Width / 2 ); break;
-   case -2: win->X=wsMaxX - win->Width; break;
-   default: win->X=x; break;
+   switch ( x )
+    {
+     case -1: win->X=( wsMaxX / 2 ) - ( win->Width / 2 ); break;
+     case -2: win->X=wsMaxX - win->Width; break;
+     default: win->X=x; break;
+    }
+   switch ( y )
+    {
+     case -1: win->Y=( wsMaxY / 2 ) - ( win->Height / 2 ); break;
+     case -2: win->Y=wsMaxY - win->Height; break;
+     default: win->Y=y; break;
+    }
   }
- switch ( y )
-  {
-   case -1: win->Y=( wsMaxY / 2 ) - ( win->Height / 2 ); break;
-   case -2: win->Y=wsMaxY - win->Height; break;
-   default: win->Y=y; break;
-  }
+  else { win->X=x; win->Y=y; }
 
  win->SizeHint.flags=PPosition | PWinGravity;
  win->SizeHint.x=win->X;

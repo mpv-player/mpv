@@ -203,7 +203,7 @@ extern void wsMainLoop( void );
 // ----------------------------------------------------------------------------------------------
 extern void wsCreateWindow( wsTWindow * win,int X,int Y,int wX,int hY,int bW,int cV,unsigned char D,char * label );
 extern void wsDestroyWindow( wsTWindow * win );
-extern void wsMoveWindow( wsTWindow * win,int x, int y );
+extern void wsMoveWindow( wsTWindow * win,int b,int x, int y );
 extern void wsResizeWindow( wsTWindow * win,int sx, int sy );
 extern void wsIconify( wsTWindow win );
 extern void wsMoveTopWindow( wsTWindow * win );

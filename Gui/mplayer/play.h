@@ -91,4 +91,6 @@ extern void mplPlayerThread( void );
 extern void ChangeSkin( void );
 extern void EventHandling( void );
 
+extern void mplSetFileName( char * fname );
+
 #endif
