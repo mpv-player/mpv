@@ -212,6 +212,9 @@ stream_t* new_memory_stream(unsigned char* data,int len){
 
 stream_t* new_stream(int fd,int type){
   stream_t *s=malloc(sizeof(stream_t));
+  if(s==NULL) return NULL;
+  memset(s,0,sizeof(stream_t));
+  
   s->fd=fd;
   s->type=type;
   s->buf_pos=s->buf_len=0;
