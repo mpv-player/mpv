@@ -3,13 +3,12 @@
 // real codecs:
 #define VCODEC_DIVX4 2
 #define VCODEC_LIBAVCODEC 4
-#define VCODEC_RAWRGB 6
 #define VCODEC_VFW 7
 #define VCODEC_LIBDV 8
 #define VCODEC_XVID 9
 #define VCODEC_QTVIDEO 10
 #define VCODEC_NUV 11
-#define VCODEC_RAWYUV 12
+#define VCODEC_RAW 12
 
 #define ACODEC_COPY 0
 #define ACODEC_PCM 1
@@ -681,10 +680,8 @@ default:
 	sh_video->vfilter=vf_open_encoder(NULL,"divx4",(char *)mux_v); break;
     case VCODEC_LIBAVCODEC:
         sh_video->vfilter=vf_open_encoder(NULL,"lavc",(char *)mux_v); break;
-    case VCODEC_RAWRGB:
-        sh_video->vfilter=vf_open_encoder(NULL,"rawrgb",(char *)mux_v); break;
-    case VCODEC_RAWYUV:
-        sh_video->vfilter=vf_open_encoder(NULL,"rawyuv",(char *)mux_v); break;
+    case VCODEC_RAW:
+        sh_video->vfilter=vf_open_encoder(NULL,"raw",(char *)mux_v); break;
     case VCODEC_VFW:
         sh_video->vfilter=vf_open_encoder(NULL,"vfw",(char *)mux_v); break;
     case VCODEC_LIBDV:

@@ -3832,10 +3832,8 @@ Use \-ovc help to get a list of available codecs.
 no encoding, just streamcopy
 .IPs "\-ovc divx4"
 encode to DivX4/\:DivX5
-.IPs "\-ovc rawrgb"
-encode to uncompressed RGB24
-.IPs "\-ovc rawyuv"
-encode to uncompressed YUV (I420)
+.IPs "\-ovc raw"
+encode to arbitrary uncompressed format (use \-vf format to select)
 .IPs "\-ovc lavc"
 encode with a libavcodec codecs
 .RE
@@ -5273,7 +5271,7 @@ mencoder dvd://2 \-o titel2.avi \-ovc lavc
 mencoder "mf://*.jpg" \-mf fps=25 \-o output.avi \-ovc divx4
 .TP
 .B Encoding from tuner
-mencoder \-tv driver=v4l:width=640:height=480 tv:// \-o tv.avi \-ovc rawrgb
+mencoder \-tv driver=v4l:width=640:height=480 tv:// \-o tv.avi \-ovc raw
 .TP
 .B Encoding from a pipe
 rar p test-SVCD.rar | mencoder \-ovc divx4 \-divx4opts br=800 \-ofps 24 \-
