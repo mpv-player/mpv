@@ -2,6 +2,7 @@
 * Leandro Lucarella <leandro at lucarella.com.ar>,
 * Jesús Climent <jesus.climent at hispalinux.es>,
 * Sefanja Ruijsenaars <sefanja at gmx.net>
+* Andoni Zubimendi <andoni@lpsat.net>
 */
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -68,23 +69,22 @@ static char help_text[]=
 #define MSGTR_InvalidVOdriver "Nombre del driver de salida de vídeo incorrecto: %s\nUsa '-vo help' para obtener la lista de drivers de salida de vídeo disponibles.\n"
 #define MSGTR_InvalidAOdriver "Nombre del driver de salida de audio incorrecto: %s\nUsa '-ao help' para obtener la lista de drivers de salida de audio disponibles.\n"
 #define MSGTR_CopyCodecsConf "Copia o enlaza <árbol del código fuente de MPlayer>/etc/codecs.conf a ~/.mplayer/codecs.conf\n"
+#define MSGTR_BuiltinCodecsConf "Usando codecs.conf interno por defecto.\n" 
 #define MSGTR_CantLoadFont "No se puede cargar fuente: %s.\n"
 #define MSGTR_CantLoadSub "No se puede cargar la subtítulación: %s.\n"
 #define MSGTR_ErrorDVDkey "Error procesando la clave del DVD.\n"
 #define MSGTR_CmdlineDVDkey "Se usará la clave DVD solicitada para la descodificación.\n"
 #define MSGTR_DVDauthOk "La secuencia de autorización del DVD parece estar bien.\n"
-#define MSGTR_DumpSelectedSteramMissing "Dump: no se encuentra el stream seleccionado.\n"
+#define MSGTR_DumpSelectedStreamMissing "Dump: no se encuentra el stream seleccionado.\n"
 #define MSGTR_CantOpenDumpfile "No se puede abrir el archivo de dump.\n"
 #define MSGTR_CoreDumped "Core dumped.\n"
 #define MSGTR_FPSnotspecified "FPS no especificado (o inválido) en la cabecera! Usa la opción -fps.\n"
-#define MSGTR_NoVideoStream "No hay  stream de vídeo; no es reproducible todavía.\n"
 #define MSGTR_TryForceAudioFmtStr "Tratando de forzar la familia del codec de audio %d...\n"
 #define MSGTR_CantFindAfmtFallback "No se encuentra codec de audio para la familia forzada, se usarán otros drivers.\n"
 #define MSGTR_CantFindAudioCodec "No se encuentra codec para el formato de audio 0x%X!\n"
 #define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Intenta actualizar %s en etc/codecs.conf\n*** Si todavía no funciona, lee DOCS/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "No se pudo inicializar el codec de audio, no se reproducirá sonido!\n"
 #define MSGTR_TryForceVideoFmtStr "Tratando de forzar la familia del codec de vídeo %d ...\n"
-#define MSGTR_CantFindVfmtFallback "No se encuentra codec de video para la familia forzada, se usan otros drivers.\n"
 #define MSGTR_CantFindVideoCodec "No se encuentra codec para el formato de vídeo 0x%X!\n"
 #define MSGTR_VOincompCodec "Disculpe, el dispositivo de salida de vídeo es incompatible con este codec.\n"
 #define MSGTR_CannotInitVO "FATAL: No se puede inicializar el driver de vídeo!\n"
@@ -120,18 +120,38 @@ static char help_text[]=
 #define MSGTR_AvailableVideoCodecs "Codecs de vídeo disponibles:\n"
 #define MSGTR_AvailableAudioFm "\nFamilias/drivers de codecs de audio (compilados dentro de MPlayer) disponibles:\n"
 #define MSGTR_AvailableVideoFm "\nFamilias/drivers de codecs de vídeo (compilados dentro de MPlayer) disponibles:\n"
+#define MSGTR_AvailableFsType "Modos disponibles de cambio a pantalla completa:\n"
 #define MSGTR_UsingRTCTiming "Usando el RTC timing por hardware de Linux (%ldHz).\n"
-#define MSGTR_CannotReadVideoPropertiers "Vídeo: no se puede leer las propiedades.\n"
+#define MSGTR_CannotReadVideoProperties "Vídeo: no se puede leer las propiedades.\n"
 #define MSGTR_NoStreamFound "No se ha encontrado stream.\n"
 #define MSGTR_InitializingAudioCodec "Inicializando codec de audio...\n"
 #define MSGTR_ErrorInitializingVODevice "Error abriendo/inicializando el dispositivo de la salida de vídeo (-vo)!\n"
 #define MSGTR_ForcedVideoCodec "Forzado el codec de vídeo: %s.\n"
+#define MSGTR_ForcedAudioCodec "Forzado el codec de audio: %s\n"
 #define MSGTR_AODescription_AOAuthor "AO: Descripción: %s\nAO: Autor: %s.\n"
 #define MSGTR_AOComment "AO: Comentario: %s.\n"
 #define MSGTR_Video_NoVideo "Vídeo: no hay vídeo!\n"
 #define MSGTR_NotInitializeVOPorVO "\nFATAL: No se pudieron inicializar los filtros de vídeo (-vop) o de salida de vídeo (-vo)!\n"
 #define MSGTR_Paused "\n------ PAUSADO -------\r"
 #define MSGTR_PlaylistLoadUnable "\nNo se puede cargar la lista de reproducción %s.\n"
+#define MSGTR_Exit_SIGILL_RTCpuSel \
+"- MPlayer se detuvo por una 'Instrucción Ilegal'.\n"\
+"  Esto puede ser un defecto en nuestra rutina nueva de autodetección de CPU...\n"\
+"  Por favor lee DOCS/bugreports.html.\n"
+#define MSGTR_Exit_SIGILL \
+"- MPlayer se detuvo por una 'Instrucción Ilegal'.\n"\
+"  Esto ocurre normalmente cuando ejecuta el programa en una CPU diferente de\n"\
+"  la cual MPlayer fue compilado/optimizado.\n  Verifica eso!\n"
+#define MSGTR_Exit_SIGSEGV_SIGFPE \
+"- MPlayer se detuvo por mal uso de CPU/FPU/RAM.\n"\
+"  Recompila MPlayer con la opción --enable-debug y hace un backtrace en 'gdb' y\n"\
+"  un desensamblado. Para más detalles, vea DOCS/bugreports.html#crash.b.\n"
+#define MSGTR_Exit_SIGCRASH \
+"- MPlayer se detuvo. Esto no debería haber pasado.\n"\
+"  Puede ser un defecto en el código de MPlayer _o_ en sus drivers _o_ en su versión\n"\
+"  de gcc. Si piensa que es la culpa de MPlayer, por favor lea DOCS/bugreports.html\n"\
+"  y siga las instrucciones que allí se encuentran. No podemos y no lo ayudaremos a\n"\
+"  menos que nos provea esa información cuando este reportando algún posible defecto.\n"
 
 // mencoder.c:
 
@@ -157,6 +177,56 @@ static char help_text[]=
 #define MSGTR_VideoStreamResult "\nStream de vídeo: %8.3f kbit/s (%d bps), tamaño: %d bytes, %5.3f segundos, %d frames\n"
 #define MSGTR_AudioStreamResult "\nStream de audio: %8.3f kbit/s (%d bps), tamaño: %d bytes, %5.3f segundos\n"
 
+// cfg-mencoder.h
+
+#define MSGTR_MEncoderMP3LameHelp "\n\n"\
+" vbr=<0-4>     método de tasa de bits variable\n"\
+"                0: cbr\n"\
+"                1: mt\n"\
+"                2: rh(default)\n"\
+"                3: abr\n"\
+"                4: mtrh\n"\
+"\n"\
+" abr           tasa de bits media\n"\
+"\n"\
+" cbr           tasa de bits constante\n"\
+"               Forzar también modo de codificación CBR en modos ABR \n"\
+"               preseleccionados subsecuentemente\n"\
+"\n"\
+" br=<0-1024>   especifica tasa de bits en kBit (solo CBR y ABR)\n"\
+"\n"\
+" q=<0-9>       calidad (0-mejor, 9-peor) (solo para VBR)\n"\
+"\n"\
+" aq=<0-9>      calidad del algoritmo (0-mejor/lenta, 9-peor/rápida)\n"\
+"\n"\
+" ratio=<1-100> razón de compresión\n"\
+"\n"\
+" vol=<0-10>    configura ganancia de entrada de audio\n"\
+"\n"\
+" mode=<0-3>    (por defecto: auto)\n"\
+"                0: estéreo\n"\
+"                1: estéreo-junto\n"\
+"                2: canal dual\n"\
+"                3: mono\n"\
+"\n"\
+" padding=<0-2>\n"\
+"                0: no\n"\
+"                1: todo\n"\
+"                2: ajustar\n"\
+"\n"\
+" fast          activa codificación rápida en modos VBR preseleccionados\n"\
+"               subsecuentes, más baja calidad y tasas de bits más altas.\n"\
+"\n"\
+" preset=<value> provee configuracion con la mejor calidad posible.\n"\
+"                 medium: codificación VBR, buena calidad\n"\
+"                 (rango de 150-180 kbps de tasa de bits)\n"\
+"                 standard:  codificación VBR, alta calidad\n"\
+"                 (rango de 170-210 kbps de tasa de bits)\n"\
+"                 extreme: codificación VBR, muy alta calidad\n"\
+"                 (rango de 200-240 kbps de tasa de bits)\n"\
+"                 insane:  codificación CBR, la mejor calidad configurable\n"\
+"                 (320 kbps de tasa de bits)\n"\
+"                 <8-320>: codificación ABR con tasa de bits en promedio en los kbps dados.\n\n"
 
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "Dispositivo de CD-ROM '%s' no encontrado.\n"
@@ -165,6 +235,10 @@ static char help_text[]=
 #define MSGTR_UnableOpenURL "No se puede abrir URL: %s\n"
 #define MSGTR_ConnToServer "Connectado al servidor: %s\n"
 #define MSGTR_FileNotFound "Archivo no encontrado: '%s'\n"
+
+#define MSGTR_SMBInitError "No se puede inicializar la librería libsmbclient: %d\n"
+#define MSGTR_SMBFileNotFound "No se puede abrir desde la red: '%s'\n"
+#define MSGTR_SMBNotCompiled "MPlayer no fue compilado con soporte de lectura de SMB\n"
 
 #define MSGTR_CantOpenDVD "No se puede abrir el dispositivo de DVD: %s\n"
 #define MSGTR_DVDwait "Leyendo la estructura del disco, espere por favor...\n"
@@ -186,22 +260,7 @@ static char help_text[]=
 #define MSGTR_MaybeNI "¿Estás reproduciendo un stream o archivo 'non-interleaved' o falló el codec?\n " \
 		"Para archivos .AVI, intente forzar el modo 'non-interleaved' con la opción -ni.\n"
 #define MSGTR_SwitchToNi "\nDetectado .AVI mal interleaveado - cambiando al modo -ni!\n"
-#define MSGTR_DetectedFILMfile "Detectado formato de archivo FILM.\n"
-#define MSGTR_DetectedFLIfile "Detectado formato de archivo FLI.\n"
-#define MSGTR_DetectedROQfile "Detectado formato de archivo RoQ.\n"
-#define MSGTR_DetectedREALfile "Detectado formato de archivo REAL.\n"
-#define MSGTR_DetectedAVIfile "Detectado formato de archivo AVI.\n"
-#define MSGTR_DetectedASFfile "Detectado formato de archivo ASF.\n"
-#define MSGTR_DetectedMPEGPESfile "Detectado formato de archivo MPEG-PES.\n"
-#define MSGTR_DetectedMPEGPSfile "Detectado formato de archivo MPEG-PS.\n"
-#define MSGTR_DetectedMPEGESfile "Detectado formato de archivo MPEG-ES.\n"
-#define MSGTR_DetectedQTMOVfile "Detectado formato de archivo QuickTime/MOV.\n"
-#define MSGTR_DetectedYUV4MPEG2file "Detectado formato de archivo YUV4MPEG2.\n"
-#define MSGTR_DetectedNuppelVideofile "Detectado formato de archivo NuppelVideo .\n"
-#define MSGTR_DetectedVIVOfile "Detectado formato de archivo VIVO.\n"
-#define MSGTR_DetectedBMPfile "Detectado formato de archivo BMP.\n"
-#define MSGTR_DetectedOGGfile "Detectado formato de archivo OGG.\n"
-#define MSGTR_DetectedRAWDVfile "Detectado formato de archivo RAWDV.\n"
+#define MSGTR_Detected_XXX_FileFormat "Detectado formato de archivo %s.\n"
 #define MSGTR_DetectedAudiofile "Detectado archivo de audio.\n"
 #define MSGTR_NotSystemStream "Esto no es formato MPEG System Stream... (tal vez Transport Stream?)\n"
 #define MSGTR_InvalidMPEGES "Stream MPEG-ES inválido? Contacta con el autor, podría ser un fallo.\n"
@@ -239,6 +298,9 @@ static char help_text[]=
 #define MSGTR_TVInputNotSeekable "Entrada de TV no es buscable.\n"
 #define MSGTR_DemuxerInfoAlreadyPresent "Información de demuxer %s ya está disponible.\n"
 #define MSGTR_ClipInfo "Información de clip: \n"
+
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: Secuencia progresiva detectada, dejando modo 3:2 TELECINE\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: modo 3:2 TELECINE detectado, habilitando telecine fx inverso. Cuadros por segundo cambiado a %5.3f!  \n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "No se pudo abrir codec.\n"
@@ -314,6 +376,7 @@ static char help_text[]=
 #define MSGTR_Network "Streaming por red ..."
 #define MSGTR_Preferences "Preferencias"
 #define MSGTR_OSSPreferences "Configuración del driver OSS"
+#define MSGTR_SDLPreferences "Configuración del driver SDL"
 #define MSGTR_NoMediaOpened "no se abrió audio/vídeo"
 #define MSGTR_VCDTrack "pista VCD %d"
 #define MSGTR_NoChapter "sin capítulo"
@@ -341,6 +404,7 @@ static char help_text[]=
 #define MSGTR_SKIN_ERRORMESSAGE "[skin] error en configuración de skin en la línea %d: %s"
 #define MSGTR_SKIN_WARNING1 "[skin] advertencia en configuración de skin en la línea %d: widget encontrado pero \"section\" posterior no encontrada ( %s )"
 #define MSGTR_SKIN_WARNING2 "[skin] advertencia en configuración de skin en la línea %d: widget encontrado pero \"subsection\" posterior no encontrada (%s)"
+#define MSGTR_SKIN_WARNING3 "[skin] advertencia en configuración de skin en la linea %d: subsection no suportada por widget (%s)"
 #define MSGTR_SKIN_BITMAP_16bit  "Mapa de bits de 16 bits o menos no soportado ( %s ).\n"
 #define MSGTR_SKIN_BITMAP_FileNotFound  "Archivo no encontrado ( %s ).\n"
 #define MSGTR_SKIN_BITMAP_BMPReadError "Error al leer bmp ( %s ).\n"
@@ -396,6 +460,12 @@ static char help_text[]=
 #define MSGTR_MENU_SkinBrowser "Navegador de skins"
 #define MSGTR_MENU_Preferences "Preferencias"
 #define MSGTR_MENU_Exit "Salir"
+#define MSGTR_MENU_Mute "Mudo"
+#define MSGTR_MENU_Original "Original"
+#define MSGTR_MENU_AspectRatio "Relación de aspecto"
+#define MSGTR_MENU_AudioTrack "Pista de Audio"
+#define MSGTR_MENU_Track "Pista %d"
+#define MSGTR_MENU_VideoTrack "Pista de Video"
 
 
 // --- equalizer
@@ -410,8 +480,14 @@ static char help_text[]=
 #define MSGTR_EQU_Back_Left "Fondo izquierdo"
 #define MSGTR_EQU_Back_Right "Fondo dercho"
 #define MSGTR_EQU_Center "Centro"
-#define MSGTR_EQU_Bass "Bass"
+#define MSGTR_EQU_Bass "Bajo"
 #define MSGTR_EQU_All "Todos"
+#define MSGTR_EQU_Channel1 "Canal 1:"
+#define MSGTR_EQU_Channel2 "Canal 2:"
+#define MSGTR_EQU_Channel3 "Canal 3:"
+#define MSGTR_EQU_Channel4 "Canal 4:"
+#define MSGTR_EQU_Channel5 "Canal 5:"
+#define MSGTR_EQU_Channel6 "Canal 6:"
 
 // --- playlist
 #define MSGTR_PLAYLIST_Path "Ubicación"
@@ -420,6 +496,12 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "Árbol de directorios"
 
 // --- preferences
+#define MSGTR_PREFERENCES_Audio "Audio"
+#define MSGTR_PREFERENCES_Video "Vídeo"
+#define MSGTR_PREFERENCES_SubtitleOSD "Subtítulos y OSD"
+#define MSGTR_PREFERENCES_Codecs "Codecs y demuxer"
+#define MSGTR_PREFERENCES_Misc "Misc"
+
 #define MSGTR_PREFERENCES_None "Ninguno"
 #define MSGTR_PREFERENCES_AvailableDrivers "Drivers disponibles:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "No reproducir sonido"
@@ -428,17 +510,15 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_ExtraStereo "Activar estereo extra"
 #define MSGTR_PREFERENCES_Coefficient "Coeficiente:"
 #define MSGTR_PREFERENCES_AudioDelay "Retraso de audio"
-#define MSGTR_PREFERENCES_Audio "Audio"
-#define MSGTR_PREFERENCES_VideoEqu "Activar equalizador de video"
 #define MSGTR_PREFERENCES_DoubleBuffer "Activar buffering doble"
 #define MSGTR_PREFERENCES_DirectRender "Activar renderización directa"
 #define MSGTR_PREFERENCES_FrameDrop "Activar frame dropping"
 #define MSGTR_PREFERENCES_HFrameDrop "Activar frame dropping DURO (peligroso)"
 #define MSGTR_PREFERENCES_Flip "Visualizar imagen al revés"
 #define MSGTR_PREFERENCES_Panscan "Panscan: "
-#define MSGTR_PREFERENCES_Video "Vídeo"
 #define MSGTR_PREFERENCES_OSDTimer "Timer e indicadores"
 #define MSGTR_PREFERENCES_OSDProgress "Sólo barra de progreso"
+#define MSGTR_PREFERENCES_OSDTimerPercentageTotalTime "Timer, porcentaje y tiempo total"
 #define MSGTR_PREFERENCES_Subtitle "Subtítulo:"
 #define MSGTR_PREFERENCES_SUB_Delay "Retraso: "
 #define MSGTR_PREFERENCES_SUB_FPS "FPS:"
@@ -447,12 +527,13 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SUB_Unicode "Subtítulo unicode"
 #define MSGTR_PREFERENCES_SUB_MPSUB "Convertir el subtítulo dado al formato de subtítulos de MPlayer"
 #define MSGTR_PREFERENCES_SUB_SRT "Convertir el subtítulo dado al formato basado en tiempo SubViewer (SRT)"
+#define MSGTR_PREFERENCES_SUB_Overlap "Superposición de subtitulos"
 #define MSGTR_PREFERENCES_Font "Fuente:"
 #define MSGTR_PREFERENCES_FontFactor "Factor de fuente:"
 #define MSGTR_PREFERENCES_PostProcess "Activar postprocesado"
 #define MSGTR_PREFERENCES_AutoQuality "Calidad automática: "
 #define MSGTR_PREFERENCES_NI "Usar non-interleaved AVI parser"
-#define MSGTR_PREFERENCES_IDX "Rebuild index table, if needed"
+#define MSGTR_PREFERENCES_IDX "Reconstruir tabla de indices, si se necesita"
 #define MSGTR_PREFERENCES_VideoCodecFamily "Familia de codec de vídeo:"
 #define MSGTR_PREFERENCES_AudioCodecFamily "Familia de codec de audio:"
 #define MSGTR_PREFERENCES_FRAME_OSD_Level "Nivel OSD"
@@ -460,8 +541,11 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_Font "Fuente"
 #define MSGTR_PREFERENCES_FRAME_PostProcess "Postprocesado"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec y demuxer"
+#define MSGTR_PREFERENCES_FRAME_Cache "Cache"
+#define MSGTR_PREFERENCES_FRAME_Misc "Misc"
 #define MSGTR_PREFERENCES_OSS_Device "Dispositivo:"
 #define MSGTR_PREFERENCES_OSS_Mixer "Mezclador:"
+#define MSGTR_PREFERENCES_SDL_Driver "Controlador:"
 #define MSGTR_PREFERENCES_Message "Algunas opciones requieren reiniciar la reproducción."
 #define MSGTR_PREFERENCES_DXR3_VENC "Codificador de vídeo:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Usar LAVC (ffmpeg)"
@@ -497,7 +581,22 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontTextScale "Escalado de texto:"
 #define MSGTR_PREFERENCES_FontOSDScale "Escalado de OSD:"
 #define MSGTR_PREFERENCES_SubtitleOSD "Subtítulos y OSD"
+#define MSGTR_PREFERENCES_Cache "Cache si/no"
+#define MSGTR_PREFERENCES_CacheSize "Tamaño de Cache: "
+#define MSGTR_PREFERENCES_LoadFullscreen "Empezar en pantalla completa"
+#define MSGTR_PREFERENCES_XSCREENSAVER "Detener Salvador de Pantallas de X"
+#define MSGTR_PREFERENCES_PlayBar "Habilitar barra de reproducción"
+#define MSGTR_PREFERENCES_AutoSync "AutoSync si/no"
+#define MSGTR_PREFERENCES_AutoSyncValue "Autosync: "
+#define MSGTR_PREFERENCES_CDROMDevice "Dispositivo de CD-ROM:"
+#define MSGTR_PREFERENCES_DVDDevice "Dispositivo de DVD:"
+#define MSGTR_PREFERENCES_FPS "Cuadros por segundo de la Pelicula:"
+#define MSGTR_PREFERENCES_ShowVideoWindow "Mostrar ventana de video cuando este inactiva"
 
+#define MSGTR_ABOUT_UHU " Desarrollo de GUI patrocinado por UHU Linux\n"
+#define MSGTR_ABOUT_CoreTeam "   Equipo principal de MPlayer:\n"
+#define MSGTR_ABOUT_AdditionalCoders "   Otros programadores:\n"
+#define MSGTR_ABOUT_MainTesters "   Testeadores más importantes:\n"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Error fatal"
