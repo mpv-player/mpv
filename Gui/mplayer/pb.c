@@ -143,6 +143,7 @@ void mplPBMouseHandle( int Button,int X,int Y,int RX,int RY )
 	switch( itemtype )
 	 {
 	  case itPotmeter:
+	  case itVPotmeter:
 	  case itHPotmeter:
 	       btnModify( item->msg,(float)( X - item->x ) / item->width * 100.0f );
 	       mplEventHandling( item->msg,item->value );
