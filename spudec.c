@@ -378,8 +378,8 @@ void spudec_assemble(void *this, unsigned char *packet, unsigned int len, unsign
 #if 1
   // check if we have a complete packet (unfortunatelly packet_size is bad
   // for some disks)
-//  if (spu->packet_offset == spu->packet_size)
-  { unsigned int x=0,y;
+  if (spu->packet_offset == spu->packet_size){
+    unsigned int x=0,y;
     while(x+4<=spu->packet_offset){
       y=get_be16(spu->packet+x+2); // next control pointer
       mp_msg(MSGT_SPUDEC,MSGL_DBG2,"SPUtest: x=%d y=%d off=%d size=%d\n",x,y,spu->packet_offset,spu->packet_size);
