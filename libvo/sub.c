@@ -142,10 +142,10 @@ inline static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,in
       memdxs=dxs;
       memdys=dys;
       
-      memy=dys-vo_font->height/2;
+      memy=dys;
       
       // too long lines divide into smaller ones
-      i=k=lines=0; l=vo_sub->lines;
+      i=k=lines=y=0; l=vo_sub->lines;
       while (l--){
 	  t=vo_sub->text[i++];	  
 	  len=strlen(t)-1;
@@ -174,11 +174,15 @@ inline static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,in
 		 lastk=k;
 		 lastStripPosition=j;
 		 lastxsize=xsize;
+	      } else if (!l && ((font=vo_font->font[c])>=0)){
+		  if (vo_font->pic_a[font]->h > y)
+		     y=vo_font->pic_a[font]->h;
 	      }
 	      xsize+=vo_font->width[c]+vo_font->charspace;
 	      if (dxs<xsize && lastStripPosition>0){
 		 j=lastStripPosition;
 		 k=lastk;
+		 y=vo_font->height;
 	      } else if (j==len){
 		 lastxsize=xsize;
 	      } else
@@ -188,11 +192,13 @@ inline static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,in
 	      if (lines==MAX_UCSLINES||k>MAX_UCS){
 		 l=0;
 		 break;
-	      }
-	      memy-=vo_font->height;
-	      xsize=lastxsize=-vo_font->charspace;
-	  }
-        }
+	      } else if(l || j<len){ // not last line or there is no eol
+		 y=vo_font->height;
+		 xsize=lastxsize=-vo_font->charspace;
+	      } 
+	      memy-=y;    // according to max of vo_font->pic_a[font]->h 
+	  }		  // in last line
+      }
    }
    
    y = memy;
@@ -206,8 +212,7 @@ inline static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,in
 	       if ((font=vo_font->font[c])>=0)
 		  draw_alpha(x,y,
 			     vo_font->width[c],
-//			      vo_font->pic_a[font]->h,
-			     (y+vo_font->pic_a[font]->h<=dys)?vo_font->pic_a[font]->h:dys-y,
+			     vo_font->pic_a[font]->h,
 			     vo_font->pic_b[font]->bmp+vo_font->start[c],
 			     vo_font->pic_a[font]->bmp+vo_font->start[c],
 			     vo_font->pic_a[font]->w);
@@ -215,7 +220,7 @@ inline static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,in
 	 }
       } else { 
 	 while (utbl[k++]) ; // skip lines with negative y value
-	 i++;		     // seldom case but who know ;-)
+	 i++;		     // seldom case but who knows ;-)
       }
       y+=vo_font->height;
    }
