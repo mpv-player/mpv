@@ -1,6 +1,6 @@
 /* Translated by:  Nick Kurshev <nickols_k@mail.ru>,
  *		Dmitry Baryshkov <mitya@school.ioffe.ru>
-   Was synced with help_mp-en.h: rev 1.116
+   Was synced with help_mp-en.h: rev 1.121
  ========================= MPlayer help =========================== */
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -8,10 +8,10 @@ static char help_text[]=
 "Запуск:   mplayer [опции] [URL|path/]filename\n"
 "\n"
 "Базовые опции: (полный список см. на man-странице)\n"
-" -vo <drv[:dev]> выбор драйвера и устройства видео вывода (список см. с '-vo help')\n"
-" -ao <drv[:dev]> выбор драйвера и устройства аудио вывода (список см. с '-ao help')\n"
+" -vo <drv[:dev]> выбор драйвера и устройства видео вывода (см. '-vo help')\n"
+" -ao <drv[:dev]> выбор драйвера и устройства аудио вывода (см. '-ao help')\n"
 #ifdef HAVE_VCD
-" vcd://<номер трека> играть дорожку (S)VCD (Super Video CD) (указывайте устройство, не монтируйте его)\n"
+" vcd://<номер трека> играть дорожку (S)VCD (Super Video CD)\n     (указывайте устройство, не монтируйте его)\n"
 #endif
 #ifdef USE_DVDREAD
 " dvd://<номер ролика> играть DVD ролик с устройства вместо файла\n"
@@ -19,7 +19,7 @@ static char help_text[]=
 #endif
 " -ss <время>     переместиться на заданную (секунды или ЧЧ:ММ:СС) позицию\n"
 " -nosound        без звука\n"
-" -fs             опции полноэкранного проигрывания (fullscr,vidmode chg,softw.scale)\n"
+" -fs             полноэкранное проигрывание (или -vm,-zoom, подробности в man'е)\n"
 " -x <x> -y <y>   установить разрешение дисплея (использовать с -vm или -zoom)\n"
 " -sub <файл>     указать файл субтитров (см. также -subfps, -subdelay)\n"
 " -playlist <файл> указать playlist\n"
@@ -36,12 +36,12 @@ static char help_text[]=
 " p или ПРОБЕЛ    приостановить фильм (любая клавиша - продолжить)\n"
 " q или ESC       остановить воспроизведение и выход\n"
 " + или -         регулировать задержку звука по +/- 0.1 секунде\n"
-" o               цикличный перебор OSD режимов:  нет / навигация / навигация+таймер\n"
+" o               цикличный перебор режимов OSD: нет/ навигация/ навигация+таймер\n"
 " * или /         прибавить или убавить PCM громкость\n"
 " z или x         регулировать задержку субтитров по +/- 0.1 секунде\n"
 " r или t         регулировка вертикальной позиции субтитров,см. также -vf expand\n"
 "\n"
-" * * * ПОДРОБНЕЕ СМ. ДОКУМЕНТАЦИЮ, О ДОПОЛНИТЕЛЬНЫХ ОПЦИЯХ И КЛЮЧАХ! * * *\n"
+" * * * ПОДРОБНЕЕ О ДОПОЛНИТЕЛЬНЫХ ОПЦИЯХ И КЛЮЧАХ СМ. В ДОКУМЕНТАЦИИ! * * *\n"
 "\n";
 #endif
 
@@ -54,7 +54,7 @@ static char help_text[]=
 #define MSGTR_Exit_eof "Конец файла"
 #define MSGTR_Exit_error "Фатальная ошибка"
 #define MSGTR_IntBySignal "\nMPlayer прерван сигналом %d в модуле: %s \n"
-#define MSGTR_NoHomeDir "Не могу найти HOME(домашний) каталог\n"
+#define MSGTR_NoHomeDir "Не могу найти каталог HOME(домашний)\n"
 #define MSGTR_GetpathProblem "проблемы в get_path(\"config\")\n"
 #define MSGTR_CreatingCfgFile "Создание файла конфигурации: %s\n"
 #define MSGTR_InvalidVOdriver "Недопустимое имя драйвера видео вывода: %s\nСм. '-vo help' чтобы получить список доступных драйверов.\n"
@@ -69,9 +69,9 @@ static char help_text[]=
 #define MSGTR_DumpSelectedStreamMissing "dump: FATAL: Выбранный поток потерян!\n"
 #define MSGTR_CantOpenDumpfile "Не могу открыть файл для дампирования!!!\n"
 #define MSGTR_CoreDumped "Core dumped ;)\n"
-#define MSGTR_FPSnotspecified "В заголовке кадры/сек не указаны (или недопустимые)! Используйте -fps опцию!\n"
+#define MSGTR_FPSnotspecified "В заголовке кадры/сек не указаны (или недопустимые)! Используйте опцию -fps!\n"
 #define MSGTR_TryForceAudioFmtStr "Попытка форсировать семейство аудио кодеков %s...\n"
-#define MSGTR_CantFindAfmtFallback "Не могу найти аудио кодек для форсированного семейства драйверов, переход на другие драйвера.\n"
+#define MSGTR_CantFindAfmtFallback "Не могу найти аудио кодек для форсированного семейства драйверов,\n переход на другие драйвера.\n"
 #define MSGTR_CantFindAudioCodec "Не могу найти кодек для аудио формата 0x%X!\n"
 #define MSGTR_RTFMCodecs "Прочтите DOCS/HTML/ru/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "Не смог инициализировать аудио кодек! -> без звука\n"
@@ -87,17 +87,17 @@ static char help_text[]=
 "         *****************************************************************\n"\
 "Возможные причины, проблемы, обходы: \n"\
 "- Наиболее частая: плохой/сырой _аудио_ драйвер\n"\
-"  - Попытайтесь -ao sdl или используйте ALSA 0.5 или эмуляцию oss на ALSA 0.9.\n"\
+"  - Попытайтесь -ao sdl или используйте ALSA 0.5 или эмуляцию OSS на ALSA 0.9.\n"\
 "  - Поэкспериментируйте с различными значениями -autosync, начните с 30.\n"\
 "- Медленный видео вывод\n"\
-"  - Попытайтесь другие -vo driver (список: -vo help) или попытайтесь с -framedrop!\n"\
+"  - Попытайтесь другие -vo driver (список: -vo help) или с -framedrop!\n"\
 "- Медленный ЦПУ\n"\
-"  - Не пытайтесь воспроизводить большие DVD/DivX на медленных процессорах! попытайтесь -hardframedrop\n"\
+"  - Не смотрите большие DVD/DivX на медленных CPU! попробуйте -hardframedrop\n"\
 "- Битый файл.\n"\
 "  - Попытайтесь различные комбинации: -nobps  -ni  -mc 0  -forceidx\n"\
 "- Медленный носитель (смонтированные NFS/SMB, DVD, VCD и т. п.)\n"\
 "  - Используйте -cache 8192.\n"\
-"- Используете ли Вы -cache для проигрывания не-'слоёных'[non-interleaved] AVI файлов?\n"\
+"- Используете ли Вы -cache для проигрывания не-'слоёных' AVI файлов?\n"\
 "  - Используйте -nocache.\n"\
 "Читайте DOCS/HTML/ru/devices.html для советов по подстройке/ускорению.\n"\
 "Если ничего не помогло, тогда читайте DOCS/HTML/ru/bugreports.html!\n\n"
@@ -107,7 +107,7 @@ static char help_text[]=
 #define MSGTR_Playing "Проигрывание %s.\n"
 #define MSGTR_NoSound "Аудио: без звука!!!\n"
 #define MSGTR_FPSforced "Кадры/сек форсированы в %5.3f (ftime: %5.3f).\n"
-#define MSGTR_CompiledWithRuntimeDetection "Скомпилировано для определениея типа процессора во время выполнения - ПРЕДУПРЕЖДЕНИЕ - это не оптимально!\nДля получения максимальной производительности, перекомпилируйте MPlayer c --disable-runtime-cpudetection.\n"
+#define MSGTR_CompiledWithRuntimeDetection "Скомпилировано для определениея типа процессора во время выполнения -\nПРЕДУПРЕЖДЕНИЕ - это не оптимально!\nДля получения максимальной производительности,\nперекомпилируйте MPlayer c --disable-runtime-cpudetection.\n"
 #define MSGTR_CompiledWithCPUExtensions "Скомпилировано для x86 CPU со следующими расширениями:"
 #define MSGTR_AvailableVideoOutputPlugins "Доступные плагины вывода видео:\n"
 #define MSGTR_AvailableVideoOutputDrivers "Доступные драйвера вывода видео:\n"
@@ -131,23 +131,24 @@ static char help_text[]=
 #define MSGTR_PlaylistLoadUnable "\nНе могу загрузить playlist %s.\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- MPlayer сломался из-за 'Неправильной инструкции'.\n"\
-"  Это может быть ошибкой нашего нового кода определения типа CPU во время выполнения...\n"\
+"  Это может быть ошибка нашего нового кода определения типа CPU при выполнении...\n"\
 "  Пожалуйста, читайте DOCS/HTML/ru/bugreports.html.\n"
 #define MSGTR_Exit_SIGILL \
 "- MPlayer сломался из-за 'Неправильной инструкции'.\n"\
-"  Обычно, это происходит когда вы его запускаете на CPU, отличном от того, для которого\n"\
-"  он был скомпилирован/оптимизирован.\n"\
+"  Обычно, это происходит когда вы его запускаете на CPU, отличном от того,\n"\
+"  для которого он был скомпилирован/оптимизирован.\n"\
 "  Проверьте это!\n"
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- MPlayer сломался из-за плохого использования CPU/FPU/RAM.\n"\
 "  Перекомпилируйте MPlayer с --enable-debug и сделайте 'gdb' backtrace и\n"\
-"  дизассемблирование. Для подробностей, см. DOCS/HTML/ru/bugreports_what.html#bugreports_crash\n"
+"  дизассемблирование.\n"\
+"  Подробности, см. DOCS/HTML/ru/bugreports_what.html#bugreports_crash.\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer сломался. Это не должно происходить.\n"\
 "  Это может быть ошибкой в коде MPlayer'а _или_ в Вашем драйвере _или_\n"\
 "  Вашей версии gcc. Если Вы думаете, что в этом виноват MPlayer, пожалуйста,\n"\
-"  прочтите DOCS/HTML/ru/bugreports.html и следуйте инструкциям оттуда. Мы не сможем\n"\
-"  и не будем помогать, если Вы не предоставите эту информацию,\n"\
+"  прочтите DOCS/HTML/ru/bugreports.html и следуйте инструкциям оттуда.\n"\
+"  Мы не сможем и не будем помогать, если Вы не предоставите эту информацию,\n"\
 "  сообщая о возможной ошибке.\n"
 
 
@@ -158,8 +159,8 @@ static char help_text[]=
 #define MSGTR_CannotOpenFile_Device "Не могу открыть файл/устройство.\n"
 #define MSGTR_ErrorDVDAuth "Ошибка при DVD авторизации.\n"
 #define MSGTR_CannotOpenDemuxer "Не могу открыть демуксер[demuxer].\n"
-#define MSGTR_NoAudioEncoderSelected "\nКодировщик аудио (-oac) не выбран. Выберете какой-нибудь (см. -oac help) или используйте -nosound.\n"
-#define MSGTR_NoVideoEncoderSelected "\nКодировщик видео (-ovc) не выбран. Выберете какой-нибудь (см. -ovc help), используйте -ovc help!\n"
+#define MSGTR_NoAudioEncoderSelected "\nКодировщик аудио (-oac) не выбран. Выберете нужный (см. -oac help)\nили используйте -nosound.\n"
+#define MSGTR_NoVideoEncoderSelected "\nКодировщик видео (-ovc) не выбран. Выберете нужный (см. -ovc help).\n"
 #define MSGTR_InitializingAudioCodec "Инициализация аудио кодека...\n"
 #define MSGTR_CannotOpenOutputFile "Не могу открыть файл '%s'для вывода.\n"
 #define MSGTR_EncoderOpenFailed "Не могу открыть кодировщик.\n"
@@ -171,8 +172,8 @@ static char help_text[]=
 #define MSGTR_WritingAVIIndex "\nПишу индекс AVI...\n"
 #define MSGTR_FixupAVIHeader "Подправляю заголовок AVI...\n"
 #define MSGTR_RecommendedVideoBitrate "Рекомендуемый битпоток для %s CD: %d\n"
-#define MSGTR_VideoStreamResult "\nПоток видео: %8.3f kbit/s  (%d bps)  размер: %d байт(а/ов)  %5.3f сек.  %d кадр(а/ов)\n"
-#define MSGTR_AudioStreamResult "\nПоток аудио: %8.3f kbit/s  (%d bps)  размер: %d байт(а/ов)  %5.3f сек.\n"
+#define MSGTR_VideoStreamResult "\nПоток видео: %8.3f кбит/s (%d б/с) размер: %d байт/а/ов  %5.3f сек. %d кадр/а/ов\n"
+#define MSGTR_AudioStreamResult "\nПоток аудио: %8.3f кбит/с (%d б/с) размер: %d байт/а/ов  %5.3f сек.\n"
 
 // cfg-mencoder.h:
 
@@ -187,13 +188,13 @@ static char help_text[]=
 " abr           усреднённый битпоток\n"\
 "\n"\
 " cbr           постоянный битпоток\n"\
-"               Также форсирует CBR режим кодирования в некоторых предустановленных ABR режимах\n"\
+"               Также вызывает CBR кодирование в предустановленных ABR режимах\n"\
 "\n"\
-" br=<0-1024>   укажите битпоток в kBit (только CBR и ABR)\n"\
+" br=<0-1024>   укажите битпоток в кБит (только CBR и ABR)\n"\
 "\n"\
 " q=<0-9>       качество (0-высшее, 9-наименьшее) (только для VBR)\n"\
 "\n"\
-" aq=<0-9>      качество алгоритма (0-лучшее/самый медленный, 9-худшее/быстрейший)\n"\
+" aq=<0-9>      качество алгоритма(0-лучшее/самый медленный, 9-худшее/быстрейший)\n"\
 "\n"\
 " ratio=<1-100> коэффициент сжатия\n"\
 "\n"\
@@ -210,7 +211,7 @@ static char help_text[]=
 "                1: все\n"\
 "                2: регулируемое\n"\
 "\n"\
-" fast          Переключиться на быстрое кодирование в некоторых предустановленных VBR\n"\
+" fast          Переключиться на быстрое кодирование в предустановленных VBR\n"\
 "               режимах, значительно худшее качество и высокие битпотоки.\n"\
 "\n"\
 " preset=<value> Представляют наибольшие возможные установки качества.\n"\
@@ -222,7 +223,7 @@ static char help_text[]=
 "                 (амплитуда битпотока - 200-240 kbps)\n"\
 "                 insane:  CBR кодирование, лучшее предустановленное качество\n"\
 "                 (битпоток 320 kbps)\n"\
-"                 <8-320>: ABR кодирование с заданным в kbit'ах средним битпотоком.\n\n"
+"                 <8-320>: ABR кодирование с заданным в кбит средним битпотоком.\n\n"
 
 
 
@@ -276,7 +277,7 @@ static char help_text[]=
 
 #define MSGTR_UsingNINI "Использование 'НЕСЛОЁНОГО' испорченного формата AVI файла!\n"
 #define MSGTR_CouldntDetFNo "Не смог определить число кадров (для абсолютного перемещения).\n"
-#define MSGTR_CantSeekRawAVI "Не могу переместиться в сыром потоке AVI! (требуется индекс, попробуйте с ключом -idx!)\n"
+#define MSGTR_CantSeekRawAVI "Не могу перемещаться в сырых потоках AVI! (необходим индекс, попробуйте с -idx!)\n"
 #define MSGTR_CantSeekFile "Не могу перемещаться в этом файле!\n"
 
 #define MSGTR_EncryptedVOB "Шифрованный VOB файл! См. DOCS/HTML/ru/dvd.html\n"
@@ -293,12 +294,12 @@ static char help_text[]=
 #define MSGTR_CannotOpenSubtitlesStream "Не могу открыть поток субтитров: %s\n"
 #define MSGTR_OpeningAudioDemuxerFailed "Не могу открыть демуксер[demuxer] аудио: %s\n"
 #define MSGTR_OpeningSubtitlesDemuxerFailed "Не могу открыть демуксер[demuxer] субтитров: %s\n"
-#define MSGTR_TVInputNotSeekable "По TV входу нельзя перемещаться! (Возможно перемещение будет для смены каналов ;)\n"
+#define MSGTR_TVInputNotSeekable "По TV нельзя перемещаться! (Возможно перемещение будет для смены каналов ;)\n"
 #define MSGTR_DemuxerInfoAlreadyPresent "Информация демуксера[demuxer] %s уже существует!\n"
 #define MSGTR_ClipInfo "Информация о клипе:\n"
 
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: обнаружено 30fps NTSC содержимое, переключаю частоту кадров.\n"
-#define MSGTR_EnterTelecineMode "\ndemux_mpg: обнаружено 24fps постепенное[progressive] NTSC содержимое, переключаю частоту кадров.\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: обнаружено 24fps поступательное NTSC содержимое, переключаю частоту кадров.\n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Не смог открыть кодек\n"
@@ -344,7 +345,7 @@ static char help_text[]=
 #define MSGTR_CouldNotFindVideoFilter "Не могу найти видео фильтр '%s'.\n"
 #define MSGTR_CouldNotOpenVideoFilter "Не могу открыть видео фильтр '%s'.\n"
 #define MSGTR_OpeningVideoFilter "Открываю видео фильтр: "
-#define MSGTR_CannotFindColorspace "Не могу найти общее цветовое пространство, даже вставив 'scale' :(\n"
+#define MSGTR_CannotFindColorspace "Не могу найти подходящее цветовое пространство, даже вставив 'scale' :(\n"
 
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: Кодек не установил sh->disp_w и sh->disp_h, попытаюсь обойти.\n"
@@ -353,6 +354,15 @@ static char help_text[]=
 #define MSGTR_MovieAspectIsSet "Movie-Aspect - %.2f:1 - премасштабирую для коррекции соотношения сторон фильма.\n"
 #define MSGTR_MovieAspectUndefined "Movie-Aspect не определён - премасштабирование не применяется.\n"
 
+// vd_dshow.c, vd_dmo.c
+#define MSGTR_DownloadCodecPackage "Вам нужно обновить/установить пакет бинарных кодеков.\nСм. http://mplayerhq.hu/homepage/dload.html\n"
+#define MSGTR_DShowInitOK "INFO: инициализация Win32/DShow видео кодека прошла успешно.\n"
+#define MSGTR_DMOInitOK "INFO: инициализация Win32/DMO видео кодека прошла успешно.\n"
+
+// x11_common.c
+#define MSGTR_EwmhFullscreenStateFailed "\nX11: Не могу отослать событие EWMH 'на весь экран'!\n"
+
+#define MSGTR_NeedAfVolume "Микшер: Этому драйверу вывода аудио для изменения громкости звука\n необходимо указывать \"-af volume\".\n"
 
 // ====================== GUI messages/buttons ========================
 
@@ -398,9 +408,9 @@ static char help_text[]=
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[skin] ошибка в файле конфигурации скина на строке %d: %s" 
-#define MSGTR_SKIN_WARNING1 "[skin] предупреждение: в файле конфигурации скина на строке %d: widget найден но до этого не найдена \"section\" (%s)"
-#define MSGTR_SKIN_WARNING2 "[skin] предупреждение: в файле конфигурации скина на строке %d: widget найден но до этого не найдена \"subsection\" (%s)"
-#define MSGTR_SKIN_WARNING3 "[skin] предупреждение: в файле конфигурации скина на строке %d: эта подсекция не поддерживается этим виджетом[widget] (%s)"
+#define MSGTR_SKIN_WARNING1 "[skin] предупреждение: в файле конфигурации скина на строке %d:\n widget найден но до этого не найдена \"section\" (%s)"
+#define MSGTR_SKIN_WARNING2 "[skin] предупреждение: в файле конфигурации скина на строке %d:\n widget найден но до этого не найдена \"subsection\" (%s)"
+#define MSGTR_SKIN_WARNING3 "[skin] предупреждение: в файле конфигурации скина на строке %d:\n эта подсекция не поддерживается данным виджетом[widget] (%s)"
 #define MSGTR_SKIN_BITMAP_16bit  "Глубина bitmap в 16 бит и меньше не поддерживается (%s).\n"
 #define MSGTR_SKIN_BITMAP_FileNotFound  "файл не найден (%s)\n"
 #define MSGTR_SKIN_BITMAP_BMPReadError "ошибка чтения BMP (%s)\n"
