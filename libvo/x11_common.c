@@ -91,7 +91,11 @@ int vo_init( void )
    }
    XDestroyImage( mXImage );
 // XCloseDisplay( mDisplay );
-#warning Better local display detection method is needed. 
+/* slightly improved local display detection AST */
+ if ( strncmp(mDisplayName, "unix:", 5) == 0)
+		mDisplayName += 4;
+ else if ( strncmp(mDisplayName, "localhost:", 10) == 0)
+		mDisplayName += 9;
  if (*mDisplayName==':') mLocalDisplay=1; else mLocalDisplay=0;
  printf("vo: X11 running at %dx%d depth: %d (\"%s\" => %s display)\n",vo_screenwidth,vo_screenheight,vo_depthonscreen,mDisplayName,mLocalDisplay?"local":"remote");
  return 1;
