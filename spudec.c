@@ -506,6 +506,7 @@ void spudec_assemble(void *this, unsigned char *packet_bytes, unsigned int len, 
     if (last_packet->size < last_packet->offset + len){
       mp_msg(MSGT_SPUDEC,MSGL_WARN,"SPUasm: invalid fragment\n");
       last_packet->size = last_packet->offset = 0;
+      return;
     } else {
       memcpy(last_packet->data + last_packet->offset, packet_bytes, len);
       last_packet->offset += len;
