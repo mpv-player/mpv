@@ -592,11 +592,34 @@ static void mix22toS (sample_t * samples, sample_t bias)
     int i;
     sample_t surround;
 
+#ifdef HAVE_SSE
+	asm volatile(
+		"movlps %1, %%xmm7		\n\t"
+		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+		"movl $-1024, %%esi		\n\t"
+		"1:				\n\t"
+		"movaps 2048(%0, %%esi), %%xmm0	\n\t"  
+		"addps 3072(%0, %%esi), %%xmm0	\n\t" // surround
+		"movaps (%0, %%esi), %%xmm1	\n\t" 
+		"movaps 1024(%0, %%esi), %%xmm2	\n\t"
+		"addps %%xmm7, %%xmm1		\n\t"
+		"addps %%xmm7, %%xmm2		\n\t"
+		"subps %%xmm0, %%xmm1		\n\t"
+		"addps %%xmm0, %%xmm2		\n\t"
+		"movaps %%xmm1, (%0, %%esi)	\n\t"
+		"movaps %%xmm2, 1024(%0, %%esi)	\n\t"
+		"addl $16, %%esi		\n\t"
+		" jnz 1b			\n\t"
+	:: "r" (samples+256), "m" (bias)
+	: "%esi"
+	);
+#else
     for (i = 0; i < 256; i++) {
 	surround = samples[i + 512] + samples[i + 768];
 	samples[i] += bias - surround;
 	samples[i + 256] += bias + surround;
     }
+#endif
 }
 
 static void mix32to2 (sample_t * samples, sample_t bias)
@@ -675,8 +698,29 @@ static void move2to1 (sample_t * src, sample_t * dest, sample_t bias)
 {
     int i;
 
+#ifdef HAVE_SSE
+	asm volatile(
+		"movlps %2, %%xmm7		\n\t"
+		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+		"movl $-1024, %%esi		\n\t"
+		"1:				\n\t"
+		"movaps (%0, %%esi), %%xmm0	\n\t"  
+		"movaps 16(%0, %%esi), %%xmm1	\n\t"  
+		"addps 1024(%0, %%esi), %%xmm0	\n\t"
+		"addps 1040(%0, %%esi), %%xmm1	\n\t"
+		"addps %%xmm7, %%xmm0		\n\t"
+		"addps %%xmm7, %%xmm1		\n\t"
+		"movaps %%xmm0, (%1, %%esi)	\n\t"
+		"movaps %%xmm1, 16(%1, %%esi)	\n\t"
+		"addl $32, %%esi		\n\t"
+		" jnz 1b			\n\t"
+	:: "r" (src+256), "r" (dest+256), "m" (bias)
+	: "%esi"
+	);
+#else
     for (i = 0; i < 256; i++)
 	dest[i] = src[i] + src[i + 256] + bias;
+#endif
 }
 
 static void zero (sample_t * samples)
