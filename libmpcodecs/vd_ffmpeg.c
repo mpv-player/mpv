@@ -70,6 +70,8 @@ typedef struct {
     int qp_stat[32];
     double qp_sum;
     double inv_qp_sum;
+    int ip_count;
+    int b_count;
 } vd_ffmpeg_ctx;
 
 //#ifdef FF_POSTPROCESS
@@ -162,6 +164,7 @@ static int init(sh_video_t *sh){
     if(sh->format == mmioFOURCC('H','F','Y','U'))
         ctx->do_dr1=0;
     ctx->b_age= ctx->ip_age[0]= ctx->ip_age[1]= 256*256*256*64;
+    ctx->ip_count= ctx->b_count= 0;
 
 #if LIBAVCODEC_BUILD >= 4645
     ctx->pic = avcodec_alloc_frame();
@@ -377,24 +380,27 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
     int width= avctx->width;
     int height= avctx->height;
     int align=15;
-
+//printf("get_buffer %d %d %d\n", pic->reference, ctx->ip_count, ctx->b_count);
     if(avctx->pix_fmt == PIX_FMT_YUV410P)
         align=63; //yes seriously, its really needed (16x16 chroma blocks in SVQ1 -> 64x64)
 
-    if(init_vo(sh)<0){
-        printf("init_vo failed\n");
-
-        avctx->get_buffer= avcodec_default_get_buffer;
-        avctx->release_buffer= avcodec_default_release_buffer;
-        return avctx->get_buffer(avctx, pic);
-    }
-
-    if(!pic->reference)
+    if(!pic->reference){
+        ctx->b_count++;
         flags|=(!avctx->hurry_up && ctx->do_slices) ?
                 MP_IMGFLAG_DRAW_CALLBACK:0;
-    else
+    }else{
+        ctx->ip_count++;
         flags|= MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE
                 | (ctx->do_slices ? MP_IMGFLAG_DRAW_CALLBACK : 0);
+    }
+
+    if(init_vo(sh)<0 || ctx->b_count>1 || ctx->ip_count>2){
+        printf("DR1 failure\n");
+
+        ctx->do_dr1=0; //FIXME
+        avctx->get_buffer= avcodec_default_get_buffer;
+        return avctx->get_buffer(avctx, pic);
+    }
 
     if(avctx->has_b_frames){
         type= MP_IMGTYPE_IPB;
@@ -471,12 +477,26 @@ else
 }
 
 static void release_buffer(struct AVCodecContext *avctx, AVFrame *pic){
+    mp_image_t* mpi= pic->opaque;
+    sh_video_t * sh = avctx->opaque;
+    vd_ffmpeg_ctx *ctx = sh->context;
     int i;
-    
+
+//printf("release buffer %d %d %d\n", mpi ? mpi->flags&MP_IMGFLAG_PRESERVE : -99, ctx->ip_count, ctx->b_count); 
+
+  if(ctx->ip_count <= 2 && ctx->b_count<=1){
+    if(mpi->flags&MP_IMGFLAG_PRESERVE)
+        ctx->ip_count--;
+    else
+        ctx->b_count--;
+  }
 #if LIBAVCODEC_BUILD >= 4644
-    assert(pic->type == FF_BUFFER_TYPE_USER);
+    if(pic->type!=FF_BUFFER_TYPE_USER){
+        avcodec_default_release_buffer(avctx, pic);
+        return;
+    }
 #endif
-    
+
     for(i=0; i<4; i++){
         pic->data[i]= NULL;
     }
@@ -539,6 +559,8 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
     ret = avcodec_decode_video(avctx, pic,
 	     &got_picture, data, len);
+    dr1= ctx->do_dr1;
+
     if(ret<0) mp_msg(MSGT_DECVIDEO,MSGL_WARN, "Error while decoding frame!\n");
 //printf("repeat: %d\n", pic->repeat_pict);
 //-- vstats generation
