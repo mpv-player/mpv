@@ -158,10 +158,10 @@ static char help_text[]=
 "  disassembly. For details, see DOCS/en/bugreports.html#crash\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer crashed. This shouldn't happen.\n"\
-"  It can be a bug in the MPlayer code _or_ in your drivers _or_ in your gcc\n"\
-"  version. If you think it's MPlayer's fault, please read DOCS/en/bugreports.html\n"\
-"  and follow the instructions there. We can't and won't help unless you provide\n"\
-"  this information when reporting a possible bug.\n"
+"  It can be a bug in the MPlayer code _or_ in your drivers _or_ in your\n"\
+"  gcc version. If you think it's MPlayer's fault, please read\n"\
+"  DOCS/en/bugreports.html and follow the instructions there. We can't and\n"\
+"  won't help unless you provide this information when reporting a possible bug.\n"
 
 
 // mencoder.c:
