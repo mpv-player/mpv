@@ -119,12 +119,12 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">bio2jack</emphasis> - optional, for JACK audio output
-  support, needed only in compile time. You can obtain it from 
+  support, needed only in compile time. You can obtain it from
   <ulink url="http://bio2jack.sf.net/">http://bio2jack.sf.net</ulink>. Since it
-  doesn't have install option you have to manually put the file 
-  <filename>libbio2jack.a</filename> somewhere in your library path 
-  (e.g. <filename>/usr/local/lib</filename>) or use the 
-  <option>--with-bio2jack=DIR</option> switch to tell 
+  doesn't have install option you have to manually put the file
+  <filename>libbio2jack.a</filename> somewhere in your library path
+  (e.g. <filename>/usr/local/lib</filename>) or use the
+  <option>--with-bio2jack=DIR</option> switch to tell
   <filename>./configure</filename> where that file is.
   </para></listitem>
 </itemizedlist>
@@ -275,7 +275,7 @@ the other cards don't.
 They can display and scale (zoom) the picture to any size that fits in
 their memory, with <emphasis role="bold">small CPU usage</emphasis> (even when
 zooming), thus fullscreen is nice and very fast.
-  
+
 <itemizedlist>
 <listitem><para>
   <emphasis role="bold">Matrox G200/G400/G450/G550 cards</emphasis>: although a
@@ -316,7 +316,7 @@ zooming), thus fullscreen is nice and very fast.
   If you do not have a GeForce2 (or newer) card, it's not likely to work without bugs.
   <emphasis role="bold">the built-in nVidia driver in XFree86 does not support
   hardware YUV acceleration on all nVidia cards.</emphasis> You have
-  to download nVidia's closed-source drivers from <ulink url="http://nvidia.com">nVidia.com</ulink>. 
+  to download nVidia's closed-source drivers from <ulink url="http://nvidia.com">nVidia.com</ulink>.
   See the <link linkend="nvidia">nVidia Xv driver</link> section for details. Please also check
   the <link linkend="tvout-nvidia">nVidia TV-out</link> section if you wish to
   use a TV.
@@ -742,7 +742,7 @@ OSD/SUB feature. There are many ways to get it:
   Use the font generator <application>GIMP</application> plugin at <filename
   class="directory">TOOLS/subfont-GIMP</filename> (note: you must have HSI
   RAW plugin too, see <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/" />).
- </para></listitem>  
+ </para></listitem>
 <listitem><para>
   using a TrueType (TTF) font, by the means of the <systemitem class="library">freetype</systemitem>
   library. Version 2.0.9 or greater is mandatory! Then you have two methods:
@@ -760,7 +760,7 @@ OSD/SUB feature. There are many ways to get it:
   <systemitem class="library">fontconfig</systemitem> support, the above methods
   won't work, instead the <option>-font</option> expects a
   <systemitem class="library">fontconfig</systemitem> font name
-  and defaults to the sans-serif font. To get a list of fonts known to 
+  and defaults to the sans-serif font. To get a list of fonts known to
   <systemitem class="library">fontconfig</systemitem>,
   use <command>fc-list</command>. Example: <option>-font
   <replaceable>'Bitstream Vera Sans'</replaceable></option>
@@ -780,7 +780,7 @@ OSD/SUB feature. There are many ways to get it:
   as the video file. Recoding from different codepages to UTF8 could be
   done by using <command>konwert</command> or <command>iconv</command> programs.
   </para><para>
-  
+
   <table>
   <title>Some URLs</title>
   <tgroup cols="2">

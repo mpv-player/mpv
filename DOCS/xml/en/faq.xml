@@ -103,7 +103,7 @@ This is a known problem of <application>gcc</application> 3.2, upgrade
 to 3.3 to solve the problem. How to install gcc is described in the
 <link linkend="gcc-296">gcc 2.96</link> section. Alternatively you can use
 an external FAAD library as described in the
-<link linkend="aac">AAC</link> section. 
+<link linkend="aac">AAC</link> section.
 </para></answer>
 </qandaentry>
 
@@ -1362,7 +1362,7 @@ movie on any CD. Check if you have libmp3lame installed properly.
 I can't encode ASF files to AVI/DivX because it uses 1000 fps?
 </para></question>
 <answer><para>
-Because ASF uses variable frame rate but AVI uses a fixed one, you 
+Because ASF uses variable frame rate but AVI uses a fixed one, you
 have to set it by hand using <option>-ofps</option>.
 </para></answer>
 </qandaentry>
@@ -1374,7 +1374,7 @@ How can I put subtitles in the output file?
 </para></question>
 <answer><para>
 Just pass the <option>-sub &lt;filename&gt;</option> (or <option>-sid</option>,
-<option>-vobsub</option>, respectively) option to <application>MEncoder</application>.
+respectively) option to <application>MEncoder</application>.
 </para></answer>
 </qandaentry>
 

@@ -966,7 +966,7 @@ The rest is payload (non-interleaved) 16bit data.
 <varlistentry>
 <term><option>mmapped_file</option></term>
 <listitem><para>
-The file you want this filter to export to. The default is to map to 
+The file you want this filter to export to. The default is to map to
 <filename>~/.mplayer/mplayer-af_export</filename>.
 </para></listitem>
 </varlistentry>
@@ -1096,7 +1096,7 @@ Usage:
 <screen>
 mplayer <replaceable>media.avi</replaceable> -aop list=format:format=<replaceable>outfmt</replaceable></screen>
 
-where <literal><replaceable>outfmt</replaceable></literal> is the 
+where <literal><replaceable>outfmt</replaceable></literal> is the
 required output format.
 </para>
 </sect4>

@@ -411,7 +411,7 @@ resource fork!) is in the same directory as the Real codecs. Copy it using, for
 example
 <screen>ditto -rsrcFork "RealOne Player.app/Contents/MacOS/pncrt.Shlb" "RealOne Player.app/Contents/MacOS/Library/Codecs"</screen>
 Not doing so, or forgetting to copy the resource fork, will result in errors
-such as: 
+such as:
 <screen>GetDiskFragment() failed with error -2804: &lt;&lt;Unknown disk fragment&gt;&gt;&lt;&lt;Unknown disk fragment&gt;&gt;&lt;pncrt.Shlb&gt;&lt;&gt;</screen>
 </para>
 

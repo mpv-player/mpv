@@ -208,7 +208,7 @@ on the mplayer-users mailing list for an MMX/3DNow! enabled driver.
 nVidia isn't always a very good choice under Linux (according to nVidia, this
 is <link linkend="nvidia-opinions">not true</link>)... XFree86's
 open-source driver supports most of these cards, but for some cases, you'll
-have to use the binary closed-source nVidia driver, available at 
+have to use the binary closed-source nVidia driver, available at
 <ulink url="http://www.nvidia.com/object/linux.html">nVidia's web site</ulink>.
 You'll always need this driver if you want 3D acceleration, too.
 </para>
@@ -903,7 +903,7 @@ make<!--
 <step><para>
   To make it load/unload automatically when needed, first insert the
   following line at the end of <filename>/etc/modules.conf</filename>:
-  
+
   <programlisting>alias char-major-178 mga_vid</programlisting>
 
   Then copy the <filename>mga_vid.o</filename> module to the appropriate
@@ -1640,7 +1640,7 @@ This is very experimental code, just like nvidia_vid.
 </para>
 
 <para>
-It's been tested on SiS 650/651/740 (the most common chipsets used in the 
+It's been tested on SiS 650/651/740 (the most common chipsets used in the
 SiS versions of the "Shuttle XPC" barebones boxes out there)
 </para>
 
@@ -1689,9 +1689,9 @@ G400/G450/G550 cards, displaying video
 </para>
 
 <para>
-Ville Syrjala's has a 
+Ville Syrjala's has a
 <ulink url="http://www.sci.fi/~syrjala/directfb/Matrox_TV-out_README.txt">README</ulink>
-and a 
+and a
 <ulink url="http://www.sci.fi/~syrjala/directfb/matrox_tv-out_howto">HOWTO</ulink>
 on his homepage that explain how to make DirectFB TV output run on Matrox cards.
 </para>
@@ -1881,7 +1881,7 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </screen>
 
 <para>
-  If you have more than one card you also need to specify the number of the card 
+  If you have more than one card you also need to specify the number of the card
   where the channel is visible (e.g. 2) with the syntax:
 </para>
 
@@ -2309,7 +2309,7 @@ for Matrox G450/G550 TV-out instructions, please see the next section!
       Yoh. Next task is to make the cursor on tty1 (or whatever) to
       disappear, and turn off screen blanking. Execute the following
       commands:
-      
+
       <screen>
 echo -e '\033[?25l'
 setterm -blank 0<!--
@@ -2330,7 +2330,7 @@ setterm -blank 0<!--
       <screen>
 mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>filename</replaceable><!--
    --></screen>
-   
+
       (If you use X, now change to matroxfb with for example
       <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>F1</keycap>.)
       Change <literal>640</literal> and <literal>512</literal> if you set

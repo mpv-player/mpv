@@ -182,7 +182,7 @@ You need the following files to build a skin:
 </para>
 </sect2>
 </sect1>
- 
+
 <sect1 id="skin-file">
 <title>The skin file</title>
 <para>
@@ -254,7 +254,7 @@ section = movieplayer
   window = sub
   ; ... items for subwindow ...
   end
-  
+
   window = menu
   ; ... items for menu ...
   end
