@@ -454,8 +454,8 @@ static int fb_init(void)
 	} else if (fb_mode_depth) {
 		printf("fb_init: Do _not_ use the 'fbdepth' parameter! "
 				"this parameter will be removed\n");
-		if (fb_mode_depth != 15 || fb_mode_depth != 16 ||
-				fb_mode_depth != 24 || fb_mode_depth != 32) {
+		if (fb_mode_depth != 15 && fb_mode_depth != 16 &&
+				fb_mode_depth != 24 && fb_mode_depth != 32) {
 			printf("fb_init: can't switch to %d bpp\n", fb_mode_depth);
 			return 1;
 		}
