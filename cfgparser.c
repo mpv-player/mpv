@@ -2,6 +2,8 @@
  * command line and config file parser
  * by Szabolcs Berecz <szabi@inf.elte.hu>
  * (C) 2001
+ *
+ * subconfig support by alex
  */
 
 //#define DEBUG
@@ -52,7 +54,7 @@ static int init_conf(struct config *conf, int mode)
 	return 1;
 }
 
-static int read_option(char *opt, char *param)
+static int read_option(struct config *conf, int conf_optnr, char *opt, char *param)
 {
 	int i;
 	long tmp_int;
@@ -60,36 +62,41 @@ static int read_option(char *opt, char *param)
 	int ret = -1;
 	char *endptr;
 
-	for (i = 0; i < nr_options; i++) {
+//	printf("read_option: conf=%p optnr=%d opt='%s' param='%s'\n",
+//	    conf, conf_optnr, opt, param);
+
+	for (i = 0; i < conf_optnr; i++) {
 		int namelength;
 		/* allow 'aa*' in config.name */
-		namelength=strlen(config[i].name);
-		if ( (config[i].name[namelength-1]=='*') && 
-			    !memcmp(opt, config[i].name, namelength-1))
+		namelength=strlen(conf[i].name);
+		if ( (conf[i].name[namelength-1]=='*') && 
+			    !memcmp(opt, conf[i].name, namelength-1))
 		        break;
 	    
 	    
-		if (!strcasecmp(opt, config[i].name))
+		if (!strcasecmp(opt, conf[i].name))
 			break;
 	}
-	if (i == nr_options) {
+	if (i == conf_optnr) {
 		if (parser_mode == CONFIG_FILE)
 			printf("invalid option:\n");
 		ret = ERR_NOT_AN_OPTION;
 		goto out;
 	}
-	if (config[i].flags & CONF_NOCFG && parser_mode == CONFIG_FILE) {
+//	printf("read_option: name='%s' p=%p type=%d\n",
+//	    conf[i].name, conf[i].p, conf[i].type);
+	if (conf[i].flags & CONF_NOCFG && parser_mode == CONFIG_FILE) {
 		printf("this option can only be used on command line:\n");
 		ret = ERR_NOT_AN_OPTION;
 		goto out;
 	}
-	if (config[i].flags & CONF_NOCMD && parser_mode == COMMAND_LINE) {
+	if (conf[i].flags & CONF_NOCMD && parser_mode == COMMAND_LINE) {
 		printf("this option can only be used in config file:\n");
 		ret = ERR_NOT_AN_OPTION;
 		goto out;
 	}
 
-	switch (config[i].type) {
+	switch (conf[i].type) {
 		case CONF_TYPE_FLAG:
 			/* flags need a parameter in config file */
 			if (parser_mode == CONFIG_FILE) {
@@ -101,14 +108,14 @@ static int read_option(char *opt, char *param)
 				    !strcasecmp(param, "j") ||
 				    !strcasecmp(param, "i") ||
 				    !strcmp(param, "1"))
-					*((int *) config[i].p) = config[i].max;
+					*((int *) conf[i].p) = conf[i].max;
 				else if (!strcasecmp(param, "no") ||
 				    !strcasecmp(param, "nein") ||
 				    !strcasecmp(param, "nicht") ||
 				    !strcasecmp(param, "nem") ||
 				    !strcasecmp(param, "n") ||
 				    !strcmp(param, "0"))
-					*((int *) config[i].p) = config[i].min;
+					*((int *) conf[i].p) = conf[i].min;
 				else {
 					printf("invalid parameter for flag:\n");
 					ret = ERR_OUT_OF_RANGE;
@@ -116,7 +123,7 @@ static int read_option(char *opt, char *param)
 				}
 				ret = 1;
 			} else {	/* parser_mode == COMMAND_LINE */
-				*((int *) config[i].p) = config[i].max;
+				*((int *) conf[i].p) = conf[i].max;
 				ret = 0;
 			}
 			break;
@@ -131,21 +138,21 @@ static int read_option(char *opt, char *param)
 				goto out;
 			}
 
-			if (config[i].flags & CONF_MIN)
-				if (tmp_int < config[i].min) {
-					printf("parameter must be >= %d:\n", (int) config[i].min);
+			if (conf[i].flags & CONF_MIN)
+				if (tmp_int < conf[i].min) {
+					printf("parameter must be >= %d:\n", (int) conf[i].min);
 					ret = ERR_OUT_OF_RANGE;
 					goto out;
 				}
 
-			if (config[i].flags & CONF_MAX)
-				if (tmp_int > config[i].max) {
-					printf("parameter must be <= %d:\n", (int) config[i].max);
+			if (conf[i].flags & CONF_MAX)
+				if (tmp_int > conf[i].max) {
+					printf("parameter must be <= %d:\n", (int) conf[i].max);
 					ret = ERR_OUT_OF_RANGE;
 					goto out;
 				}
 
-			*((int *) config[i].p) = tmp_int;
+			*((int *) conf[i].p) = tmp_int;
 			ret = 1;
 			break;
 		case CONF_TYPE_FLOAT:
@@ -165,50 +172,50 @@ static int read_option(char *opt, char *param)
 				goto out;
 			}
 
-			if (config[i].flags & CONF_MIN)
-				if (tmp_float < config[i].min) {
-					printf("parameter must be >= %f:\n", config[i].min);
+			if (conf[i].flags & CONF_MIN)
+				if (tmp_float < conf[i].min) {
+					printf("parameter must be >= %f:\n", conf[i].min);
 					ret = ERR_OUT_OF_RANGE;
 					goto out;
 				}
 
-			if (config[i].flags & CONF_MAX)
-				if (tmp_float > config[i].max) {
-					printf("parameter must be <= %f:\n", config[i].max);
+			if (conf[i].flags & CONF_MAX)
+				if (tmp_float > conf[i].max) {
+					printf("parameter must be <= %f:\n", conf[i].max);
 					ret = ERR_OUT_OF_RANGE;
 					goto out;
 				}
 
-			*((float *) config[i].p) = tmp_float;
+			*((float *) conf[i].p) = tmp_float;
 			ret = 1;
 			break;
 		case CONF_TYPE_STRING:
 			if (param == NULL)
 				goto err_missing_param;
 
-			if (config[i].flags & CONF_MIN)
-				if (strlen(param) < config[i].min) {
+			if (conf[i].flags & CONF_MIN)
+				if (strlen(param) < conf[i].min) {
 					printf("parameter must be >= %d chars:\n",
-							(int) config[i].min);
+							(int) conf[i].min);
 					ret = ERR_OUT_OF_RANGE;
 					goto out;
 				}
 
-			if (config[i].flags & CONF_MAX)
-				if (strlen(param) > config[i].max) {
+			if (conf[i].flags & CONF_MAX)
+				if (strlen(param) > conf[i].max) {
 					printf("parameter must be <= %d chars:\n",
-							(int) config[i].max);
+							(int) conf[i].max);
 					ret = ERR_OUT_OF_RANGE;
 					goto out;
 				}
 
-			*((char **) config[i].p) = strdup(param);
+			*((char **) conf[i].p) = strdup(param);
 			ret = 1;
 			break;
 		case CONF_TYPE_FUNC_PARAM:
 			if (param == NULL)
 				goto err_missing_param;
-			if ((((cfg_func_param_t) config[i].p)(config + i, param)) < 0) {
+			if ((((cfg_func_param_t) conf[i].p)(config + i, param)) < 0) {
 				ret = ERR_FUNC_ERR;
 				goto out;
 			}
@@ -216,24 +223,58 @@ static int read_option(char *opt, char *param)
 			break;
 		case CONF_TYPE_FUNC_FULL:
 			if (param!=NULL && param[0]=='-'){
-			    ret=((cfg_func_arg_param_t) config[i].p)(config + i, opt, NULL);
+			    ret=((cfg_func_arg_param_t) conf[i].p)(config + i, opt, NULL);
 			    if (ret>=0) ret=0;
 			    /* if we return >=0: param is processed again (if there is any) */
 			}else{
-			    ret=((cfg_func_arg_param_t) config[i].p)(config + i, opt, param);
+			    ret=((cfg_func_arg_param_t) conf[i].p)(config + i, opt, param);
 			    /* if we return 0: need no param, precess it again */
 			    /* if we return 1: accepted param */
 			}
 			break;
 		case CONF_TYPE_FUNC:
-			if ((((cfg_func_t) config[i].p)(config + i)) < 0) {
+			if ((((cfg_func_t) conf[i].p)(config + i)) < 0) {
 				ret = ERR_FUNC_ERR;
 				goto out;
 			}
 			ret = 0;
 			break;
+		case CONF_TYPE_SUBCONFIG:
+		    {
+			char *subparam;
+			char *subopt;
+			int subconf_optnr;
+			struct config *subconf;
+			char *token;
+
+			if (param == NULL)
+				goto err_missing_param;
+
+			subparam = malloc(strlen(param));
+			subopt = malloc(strlen(param));
+
+			subconf = conf[i].p;
+			for (subconf_optnr = 0; subconf[subconf_optnr].name != NULL; subconf_optnr++)
+			    /* NOTHING */;
+
+			token = strtok(param, (char *)&(":"));
+			while(token)
+			{
+			    int i;
+			    
+			    if ((i = sscanf(token, "%[^=]=%s", subopt, subparam)) == 2)
+				read_option(&conf[i].p, subconf_optnr, subopt, subparam);
+//			    printf("token: '%s', i=%d, subopt='%s, subparam='%s'\n", token, i, subopt, subparam);
+			    token = strtok(NULL, (char *)&(":"));
+			}
+
+			free(subparam);
+			free(subopt);
+			ret = 1;
+			break;
+		    }
 		case CONF_TYPE_PRINT:
-			printf("%s", (char *) config[i].p);
+			printf("%s", (char *) conf[i].p);
 			exit(1);
 		default:
 			printf("Unknown config type specified in conf-mplayer.h!\n");
@@ -414,7 +455,7 @@ int parse_config_file(struct config *conf, char *conffile)
 			ret = -1;
 		}
 
-		tmp = read_option(opt, param);
+		tmp = read_option(config, nr_options, opt, param);
 		switch (tmp) {
 		case ERR_NOT_AN_OPTION:
 		case ERR_MISSING_PARAM:
@@ -476,7 +517,7 @@ next:
 		    opt++;
 //		    printf("this_opt = option: %s\n", opt);
 
-		    tmp = read_option(opt, argv[i + 1]);
+		    tmp = read_option(config, nr_options, opt, argv[i + 1]);
 
 		    switch (tmp) {
 		    case ERR_NOT_AN_OPTION:
