@@ -23,13 +23,13 @@ static char help_text[]=
 " -vo <drv[:dev]> sceglie driver e dispositivo output video ('-vo help' lista)\n"
 " -ao <drv[:dev]> sceglie driver e dispositivo output audio ('-ao help' lista)\n"
 #ifdef HAVE_VCD
-" -vcd <trackno>  legge traccia VCD (Video CD) da dispositivo anziché da file\n"
+" vcd://<trackno>  legge traccia VCD (Video CD) da dispositivo anziché da file\n"
 #endif
 #ifdef HAVE_LIBCSS
 " -dvdauth <dev>  dispositivo DVD per l\'autenticazione (per dischi criptati)\n"
 #endif
 #ifdef USE_DVDREAD
-" -dvd <titleno>  legge titolo/traccia DVD dal dispositivo anziché da file\n"
+" dvd://<titleno>  legge titolo/traccia DVD dal dispositivo anziché da file\n"
 " -alang/-slang   sceglie lingua audio/sottotitoli DVD (cod nazione 2 caratteri)\n"
 #endif
 " -ss <timepos>   cerca una determinata posizione (in secondi o in hh:mm:ss) \n"

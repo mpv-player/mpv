@@ -35,9 +35,9 @@
   mutatja be. Csak két parancs szükséges:<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> - töröld ezt a file-t,
     ami egy esetleges elõzõ 3 menetes enkódolásból származhat<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc -lavcopts
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -ovc lavc -lavcopts
     vcodec=mpeg4:opciók -oac copy -o film.avi -pass 1<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc -lavcopts
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -ovc lavc -lavcopts
     vcodec=mpeg4:opciók -oac copy -o film.avi -pass 2<BR>
 
 <P><U><B>3 menetes enkódolás:</B></U> ez egyfajta bõvített kétmenetes
@@ -78,11 +78,11 @@
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> - esetlegesen egy elõzõ
   enkódolásbol származó file törlése (bezavar a most következõnek)<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc frameno
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -ovc frameno
     -o frameno.avi -oac mp3lame -lameopts vbr=3:opciók<BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc
+  &nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -ovc lavc
     -lavcopts vcodec=mpeg4:vbitrate=1100 -oac copy -o movie.avi -pass 1<BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc
+  &nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -ovc lavc
     -lavcopts vcodec=mpeg4:vbitrate=1100 -oac copy -o movie.avi -pass 2</CODE>
 </P>
 
@@ -193,7 +193,7 @@
   <CODE>vcodec</CODE> opciónak, pl: <CODE>-lavcopts vcodec=msmpeg4</CODE></P>
 
 <P>Egy példa, MJPEG tömörítéssel:<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi -ovc lavc
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -o title2.avi -ovc lavc
     -lavcopts vcodec=mjpeg -oac copy</CODE></P>
 
 
@@ -267,10 +267,10 @@
 
 <P><I>Két felirat másolása DVD-rõl, 3 menetes enkódolás közben</I><BR>
   &nbsp;&nbsp;<CODE>rm subtitles.idx subtitles.sub</CODE><BR>
-  &nbsp;&nbsp;<CODE>mencoder -dvd 1 -vobsubout subtitles -vobsuboutindex 0
+  &nbsp;&nbsp;<CODE>mencoder dvd://1 -vobsubout subtitles -vobsuboutindex 0
     -sid 2 -o frameno.avi -ovc frameno -oac mp3lame -lameopts vbr=3</CODE><BR>
-  &nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -pass 1</CODE><BR>
-  &nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -pass 2 -vobsubout
+  &nbsp;&nbsp;<CODE>mencoder dvd://1 -oac copy -ovc divx4 -pass 1</CODE><BR>
+  &nbsp;&nbsp;<CODE>mencoder dvd://1 -oac copy -ovc divx4 -pass 2 -vobsubout
     subtitles -vobsuboutindex 1 -sid 5</CODE></P>
 
 <P><I>Francia nyelvû felirat másolása MPEG-bõl</I><BR>

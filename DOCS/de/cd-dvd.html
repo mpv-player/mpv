@@ -80,9 +80,9 @@ HREF="http://das.ist.org/~georg/">Plextor-SCSI-Laufwerken</A> funktioniert.</P>
 verf&uuml;gbaren Optionen willst. Die Syntax bei einer normalen Digital
 Versatile Disc (DVD) sieht wie folgt aus:</P>
 
-<P><CODE>mplayer -dvd &lt;track&gt; [-dvd-device &lt;Ger&auml;t&gt;]</CODE></P>
+<P><CODE>mplayer dvd://&lt;track&gt; [-dvd-device &lt;Ger&auml;t&gt;]</CODE></P>
 
-<P>Beispiel: <CODE>mplayer -dvd 1 -dvd-device /dev/hdc</CODE></P>
+<P>Beispiel: <CODE>mplayer dvd://1 -dvd-device /dev/hdc</CODE></P>
 
 <P>Das Standard-DVD-Ger&auml;t ist  <CODE>/dev/dvd</CODE>. Wenn das bei dir
 anders ist, so erstelle einen symbolischen Link auf das richtige Ger&auml;t,
@@ -256,11 +256,11 @@ nur unter Linux). <B>Warnung:</B> Du kannst nur f&uuml;nf mal den Gebietscode
 
 <P><B>Abspielen von Standard Video-CDs:</B></P>
 
-<P><CODE>mplayer -vcd &lt;Tracknummer&gt; [-cdrom-device
+<P><CODE>mplayer vcd://&lt;Tracknummer&gt; [-cdrom-device
 &lt;Ger&auml;t&gt;]</CODE></P>
 
 <P>Beispiele:<BR>
-<CODE>mplayer -vcd 2 -cdrom-device /dev/hdc</CODE><BR></P>
+<CODE>mplayer vcd://2 -cdrom-device /dev/hdc</CODE><BR></P>
 
 <P>Das Standard-CD-Rom-Laufwerk ist <CODE>/dev/cdrom</CODE>. Falls das bei dir
 nicht der Fall ist, erstelle einen symbolischen Link oder gib das richtige
@@ -291,7 +291,7 @@ Daten von der VCD extrahieren und diese mit MPlayer abspielen.</P>
     enthalten. &Auml;hnlich wie bei Audio-CDs k&ouml;nnen diese Spuren
     <B>nicht gemountet</B> werden (hast du jemals eine Audio-CD gemountet,
     um sie abzuspielen?). Da die meisten Filme sich auf der zweiten Spur
-    befinden, solltest du zuerst <CODE>-vcd 2</CODE> ausprobieren.</LI>
+    befinden, solltest du zuerst <CODE>vcd://2</CODE> ausprobieren.</LI>
   <LI>Es existieren auch VCDs ohne die erste Spur (nur eine Spur, &uuml;berhaupt
     kein Dateisystem). Diese lassen sich abspielen aber nicht mounten.</LI>
 </UL>

@@ -64,9 +64,9 @@ CDROM.</P>
 <P>Per la lista completa delle opzioni disponibili, leggete la pagina di man.
 La sintassi per la riproduzione di un DVD standard è la seguente:</P>
 
-<P><CODE>mplayer -dvd &lt;track&gt; [-dvd-device &lt;device&gt;]</CODE></P>
+<P><CODE>mplayer dvd://&lt;track&gt; [-dvd-device &lt;device&gt;]</CODE></P>
 
-<P>Esempio:<CODE>mplayer -dvd 1 -dvd-device /dev/hdc</CODE></P>
+<P>Esempio:<CODE>mplayer dvd://1 -dvd-device /dev/hdc</CODE></P>
 
 <P>Il dispositivo DVD predefinito è <CODE>/dev/dvd</CODE>. Se il tuo sistema è 
 diverso, crea un symlink o specifica il dispositivo corretto sulla linea di comando 
@@ -203,10 +203,10 @@ con l'opzione <CODE>-dvd-device</CODE>.</P>
 La sintassi per vedere i Video CD standard (VCD) è la seguente:</P>
 
 <P>
-mplayer -vcd <I>numerotraccia</I> [-cdrom-device device]<BR><BR>
+mplayer vcd://<I>numerotraccia</I> [-cdrom-device device]<BR><BR>
 Esempi:<BR>
-mplayer -vcd 1<BR>
-mplayer -fs -vcd 2 -cdrom-device /dev/hdc<BR>
+mplayer vcd://1<BR>
+mplayer -fs vcd://2 -cdrom-device /dev/hdc<BR>
 </P>
 
 <P><B>Nota:</B> Almeno i Plextor e alcuni CD-ROM SCSI della Toshiba hanno
@@ -232,7 +232,7 @@ e vedere il file risultante con MPlayer.</P>
     film... Le tracce <B>non possono essere montate</B>! E' come con le tracce audio
     (es. Tu non hai mai montato un cd audio per leggerlo, vero?).
     Dato che di solito i film sono contenuti nella traccia due, dovresti provare
-    l'opzione <CODE>-vcd 2</CODE> per prima.</LI>
+    l'opzione <CODE>vcd://2</CODE> per prima.</LI>
   <LI>Esistono anche dischi VCD senza la prima traccia (traccia singola e privi
     di qualunque filesystem). Sono sempre leggibili, ma non possono essere montati.</LI>
 </UL>

@@ -539,7 +539,7 @@ oder Streams zu rippen, die über's Netzwerk abgespielt werden.
 Schreibt den unbehandelten, komprimierten Videostream nach ./\:stream.dump
 (nicht sehr nützlich).
 .TP
-.B \-dvd <Titel\-ID>
+.B \dvd://<Titel\-ID>
 Gibt an, welche Filme (durch die Titel-ID spezifiziert) abgespielt werden
 sollen. Beispielsweise ist '1' eine Vorschau und '2' der tatsächliche Film.
 
@@ -831,7 +831,7 @@ für mplayer).
 .B \-user <Benutzername> (siehe auch \-passwd)
 Gibt den Benutzernamen für die HTTP-Authentifizierung an.
 .TP
-.B \-vcd <Titel>
+.B \vcd://<Titel>
 Spielt den Video\-CD\-Titel direkt von einem Gerät oder einem Diskabbild
 ab (siehe \-cuefile).
 .TP
@@ -3521,19 +3521,19 @@ Film namens /mnt/\:cdrom/\:film.avi):
 .SH BEISPIELE
 .TP
 .B Simples Kommando für DVD
-mplayer \-dvd 1
+mplayer \dvd://1
 .TP
 .B Audio auf japanisch mit englischen Untertiteln
-mplayer \-dvd 1 \-alang ja \-slang en
+mplayer \dvd://1 \-alang ja \-slang en
 .TP
 .B Spiele nur Kapitel 5, 6, 7
-mplayer \-dvd 1 \-chapter 5\-7
+mplayer \dvd://1 \-chapter 5\-7
 .TP
 .B bei DVDs mit mehreren Kameraperspektiven
-mplayer \-dvd 1 \-dvdangle 2
+mplayer \dvd://1 \-dvdangle 2
 .TP
 .B Abspielen von einem anderen DVD\-Gerät
-mplayer \-dvd 1 \-dvd\-device /dev/\:dvd2
+mplayer \dvd://1 \-dvd\-device /dev/\:dvd2
 .TP
 .B Abspielen mit alter DVD\-Unterstützung (VOB)
 mplayer \-dvdauth /dev/\:dvd /mnt/\:dvd/\:VIDEO_TS/\:VTS_02_4.VOB
@@ -3552,21 +3552,21 @@ mplayer \-tv on:driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420
 \-vo xv
 .TP
 .B Encodiere Titel Nr. 2 der DVD, aber nur ausgewählte Kapitel
-mencoder \-dvd 2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc divx4
+mencoder \dvd://2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc divx4
 .TP
 .B Encodiere Titel Nr. 2 der DVD und skaliere auf 640x480
-mencoder \-dvd 2 \-vf scale=640:480 \-o title2.avi \-oac copy \-ovc divx4
+mencoder \dvd://2 \-vf scale=640:480 \-o title2.avi \-oac copy \-ovc divx4
 .TP
 .B Encodiere Titel Nr. 2 der DVD und skaliere auf 512xHHH unter Beibehaltung des Höhen\-/\:Breitenverhältnisses
-mencoder \-dvd 2 \-vf scale \-zoom \-xy 512 \-o title2.avi \-oac copy
+mencoder \dvd://2 \-vf scale \-zoom \-xy 512 \-o title2.avi \-oac copy
 \-ovc divx4
 .TP
 .B Das gleiche, aber mit libavcodecs MPEG4\-Codec
-mencoder \-dvd 2 \-o title2.avi \-ovc lavc
+mencoder \dvd://2 \-o title2.avi \-ovc lavc
 \-lavcopts vcodec=mpeg4:vhq:vbitrate=1800 \-oac copy
 .TP
 .B Das gleiche, aber mit libavcodecs MJPEG\-Codec
-mencoder \-dvd 2 \-o titel2.avi \-ovc lavc
+mencoder \dvd://2 \-o titel2.avi \-ovc lavc
 \-lavcopts vcodec=mjpeg:vhq:vbitrate=1800 \-oac copy
 .TP
 .B Encodiere alls .jpg\-Dateien im aktuellen Verzeichnis

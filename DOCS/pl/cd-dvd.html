@@ -196,9 +196,9 @@
 <P>Po kompletn± listê dostêpnych opcji, prosimy o przeczytanie manuala.
   Sk³adnia dla standardowego Video CD (VCD) jest nastêpuj±ca:</P>
 
-<P><CODE>mplayer -vcd &lt;¶cie¿ka&gt; [-cdrom-device &lt;uz±dzenie&gt;]</CODE></P>
+<P><CODE>mplayer vcd://&lt;¶cie¿ka&gt; [-cdrom-device &lt;uz±dzenie&gt;]</CODE></P>
 
-<P>Przyk³ad: <CODE>mplayer -vcd 2 -cdrom-device /dev/hdc</CODE></P>
+<P>Przyk³ad: <CODE>mplayer vcd://2 -cdrom-device /dev/hdc</CODE></P>
 
 <P>Domy¶lnym u¿±dzeniem VCD jest <CODE>/dev/cdrom</CODE>. Je¿eli twoje ustawienia s± inne,
   stwórz link symboliczny lub podaj poprawne urz±dzenie w lini komend opcj±
@@ -226,7 +226,7 @@
     zawieraj±ce jeden pakiet danych MPEG PS na sektor zamiast systemu plików.
     Podobnie do ¶cie¿ek audio CD, te ¶cie¿ki <B>nie mog± byæ zamontowane</B> (Montowa³e¶ kiedykolwiek
     audio CD, by je odtworzyæ?). Poniewa¿ wiêkszo¶æ filmów jest w tej ¶ie¿ce,
-    powiniene¶ najpierw spróbowaæ <CODE>-vcd 2</CODE>.</LI>
+    powiniene¶ najpierw spróbowaæ <CODE>vcd://2</CODE>.</LI>
   <LI>Istniej± dyski VCD bez pierwszej ¶cie¿ki (pojedyñcza ¶cie¿ka i ca³kowity
     brak systemu plików). Nadal mo¿na je odtworzyæ, ale nie mog± byæ zamontowane.</LI>
 </UL>

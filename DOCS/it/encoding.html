@@ -36,9 +36,9 @@ dovresti consultare alcune guide disponibili in rete.</P>
 
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> - rimuovi questo file che può essere rimasto
   da una precedente codifica a 3 passaggi (interferisce col processo attuale)<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc -lavcopts
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -ovc lavc -lavcopts
     vcodec=mpeg4:vpass=1 -oac copy -o movie.avi<BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc -lavcopts
+  &nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -ovc lavc -lavcopts
     vcodec=mpeg4:vpass=2 -oac copy -o movie.avi</CODE></P>
 
 <P><U><B>codifica a 3 passaggi :</B></U> questa è un' estensione della codifica a 2 passaggi,
@@ -77,11 +77,11 @@ dovresti consultare alcune guide disponibili in rete.</P>
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> - rimuovi questo file,
   che può essere rimasto da una precedente codifica a 3 passaggi (interferisce con quella attuale)<BR>
 
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc frameno
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -ovc frameno
   -o frameno.avi -oac mp3lame -lameopts vbr=3<BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc
+  &nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -ovc lavc
     -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o movie.avi<BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc
+  &nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -ovc lavc
     -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o movie.avi</CODE></P>
 
 <H2><A NAME="rescaling">7.2 Codificare in formato MPEG</A></H2>
@@ -195,7 +195,7 @@ supportati). Puoi codificare i seguenti codec :</P>
   <CODE>vcodec</CODE>, come : <CODE>-lavcopts vcodec=msmpeg4</CODE></P>
 
 <P>Un esempio, con la compressione MJPEG :<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi -ovc lavc 
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -o title2.avi -ovc lavc 
   -lavcopts vcodec=mjpeg -oac copy</CODE></P>
 
 
@@ -266,10 +266,10 @@ Quindi dovresti rimuoverli prima di ogni nuova esecuzione.</P>
 
 <P><I>Copiare due sottotitoli da un DVD usando la codifica a tre passaggi</I><BR>   
 &nbsp;&nbsp;<CODE>rm sottotitoli.idx sottotitoli.sub</CODE><BR>    
-&nbsp;&nbsp;<CODE>mencoder -dvd 1 -vobsubout sottotitoli -vobsuboutindex 0 
+&nbsp;&nbsp;<CODE>mencoder dvd://1 -vobsubout sottotitoli -vobsuboutindex 0 
 -sid 2 -o frameno.avi -ovc frameno -oac mp3lame -lameopts vbr=3</CODE><BR>
-  &nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -divx4opts pass=1</CODE><BR>
-  &nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -divx4opts pass=2 -vobsubout
+  &nbsp;&nbsp;<CODE>mencoder dvd://1 -oac copy -ovc divx4 -divx4opts pass=1</CODE><BR>
+  &nbsp;&nbsp;<CODE>mencoder dvd://1 -oac copy -ovc divx4 -divx4opts pass=2 -vobsubout
     subtitles -vobsuboutindex 1 -sid 5</CODE></P>
 
 <P><I>Copiare un sottotitolo francese da un file MPEG</I><BR>

@@ -288,7 +288,7 @@ int dvd_auth ( char *dev , char *filename )
 	}
 
 	if (!(*dl_CSSisEncrypted)(dvd)) {
-		printf("DVD: DVD is unencrypted! Skipping authentication!\n(note: you should not use -dvd switch for unencrypted discs!)\n");
+		printf("DVD: DVD is unencrypted! Skipping authentication!\n(note: you should not use dvd:// switch for unencrypted discs!)\n");
 		DVDCloseDevice(dvd);
 		return 0;
 	} else printf("DVD: DVD is encrypted, issuing authentication ...\n");

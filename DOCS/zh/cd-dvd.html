@@ -56,9 +56,9 @@ HREF="http://das.ist.org/~georg/">Plextor的SCSI驱动器</A>。</P>
 
 <P>可用选项的完整列表参见man page。播放标准的数字多功能碟片(DVD)的语法如下：</P>
 
-<P><CODE>mplayer -dvd &lt;track&gt; [-dvd-device &lt;device&gt;]</CODE></P>
+<P><CODE>mplayer dvd://&lt;track&gt; [-dvd-device &lt;device&gt;]</CODE></P>
 
-<P>示例：<CODE>mplayer -dvd 1 -dvd-device /dev/hdc</CODE></P>
+<P>示例：<CODE>mplayer dvd://1 -dvd-device /dev/hdc</CODE></P>
 
 <P>默认的DVD设备是<CODE>/dev/dvd</CODE>。如果你的设置不同，作一个符号链接，或者在命令行中用<CODE>-dvd-device</CODE>选项
 指定一个正确的设备。</P>
@@ -144,9 +144,9 @@ DVD驱动器的地区(在Linux下)。<B>警告：</B> 你只有5次设置地区的机会。</P>
 
 <P>播放标准的Video CDs：</P>
 
-<P><CODE>mplayer -vcd &lt;track&gt; [-cdrom-device &lt;device&gt;]</CODE></P>
+<P><CODE>mplayer vcd://&lt;track&gt; [-cdrom-device &lt;device&gt;]</CODE></P>
 
-<P>示例：<CODE>mplayer -vcd 2 -cdrom-device /dev/hdc</CODE></P>
+<P>示例：<CODE>mplayer vcd://2 -cdrom-device /dev/hdc</CODE></P>
 
 <P>默认的VCD设备是<CODE>/dev/cdrom</CODE>。如果你的设置不同，作一个符号链接，或者在命令行中用<CODE>-cdrom-device</CODE>选项
 指定一个正确的设备。</P>
@@ -167,7 +167,7 @@ MPlayer播放获得的文件。</P>
 (图像，文字等等)。</LI>
   <LI>第二和之后的轨道是未处理的2324字节/扇区的MPEG(电影)轨，每个扇区包含一个MPEG PS数据包而没有文件系统。音频CD的轨道也类似。
 这些轨道是<B>无法被mount的</B>(你曾经mount一个音频CD然后播放过吗？)。大部分电影都在这个轨道，所以你应该先试试
-<CODE>-vcd 2</CODE>。</LI>
+<CODE>vcd://2</CODE>。</LI>
   <LI>有些VCD碟片没有第一个轨道(单轨道而根本没有文件系统)。它们也可以播放，但是不能mount。</LI>
 </UL>
 

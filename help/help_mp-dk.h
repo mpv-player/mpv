@@ -17,13 +17,13 @@ static char help_text[]=
 " -vo <drv[:enhed]> vælg videodriver og -enhed (se '-vo help' for en komplet liste)\n"
 " -ao <drv[:enhed]> vælg lyddriver og -enhed (se '-ao help' for en komplet liste)\n"
 #ifdef HAVE_VCD
-" -vcd <trackno>  afspil et VCD (Video CD) spor fra et drev i stedet for en fil\n"
+" vcd://<trackno>  afspil et VCD (Video CD) spor fra et drev i stedet for en fil\n"
 #endif
 #ifdef HAVE_LIBCSS
 " -dvdauth <dev>  specificer DVD enhed til godkendelse (krypterede diske)\n"
 #endif
 #ifdef USE_DVDREAD
-" -dvd <titleno>  afspiller DVD titel fra et drev i stedet for en fil\n"
+" dvd://<titleno>  afspiller DVD titel fra et drev i stedet for en fil\n"
 " -alang/-slang   vælg DVD lyd / undertekst sprog (vha. landekode på 2 tegn)\n"
 #endif
 " -ss <timepos>   søger til en given position (sekund eller hh:mm:ss)\n"

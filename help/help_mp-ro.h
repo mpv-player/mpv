@@ -14,12 +14,12 @@ static char help_text[]=
 "Opþiuni:\n"
 " -vo <drv[:disp]> Ieºirea video: driver&dispozitiv ('-vo help' pentru o listã)\n"
 " -ao <drv[:disp]> Ieºirea audio: driver&dispozitiv ('-ao help' pentru o listã)\n"
-" -vcd <numãr pistã>  foloseºte <pista> de pe dispozitivul VCD în loc de fiºier\n"
+" vcd://<numãr pistã>  foloseºte <pista> de pe dispozitivul VCD în loc de fiºier\n"
 #ifdef HAVE_LIBCSS
 " -dvdauth <disp>  dispozitivul DVD pentru autentificare (la discuri encriptate)\n"
 #endif
 #ifdef USE_DVDREAD
-" -dvd <titlu>  foloseºte titlu/pista de pe dispozitivul DVD în loc de fiºier\n"
+" dvd://<titlu>  foloseºte titlu/pista de pe dispozitivul DVD în loc de fiºier\n"
 #endif
 " -ss <poziþia>   sare la poziþia (secunde sau oo:mm:ss)\n"
 " -nosound        fãrã sunet\n"

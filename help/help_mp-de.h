@@ -17,13 +17,13 @@ static char help_text[]=
 " -vo <drv[:dev]>  Videoausgabetreiber & -gerät (siehe '-vo help' für eine Liste)\n"
 " -ao <drv[:dev]>  Audioausgabetreiber & -gerät (siehe '-ao help' für eine Liste)\n"
 #ifdef HAVE_VCD
-" -vcd <tracknr>   Spiele einen VCD-Titel (Video CD) anstelle einer Datei\n"
+" vcd://<tracknr>   Spiele einen VCD-Titel (Video CD) anstelle einer Datei\n"
 #endif
 #ifdef HAVE_LIBCSS
 " -dvdauth <dev>   Benutze DVD-Gerät für die Authentifizierung (für verschl. DVDs)\n"
 #endif
 #ifdef USE_DVDREAD
-" -dvd <titelnr>   Spiele DVD-Titel von Gerät anstelle einer Datei\n"
+" dvd://<titelnr>   Spiele DVD-Titel von Gerät anstelle einer Datei\n"
 " -alang/-slang    Wähle DVD Audio/Untertitel Sprache (2-Zeichen-Ländercode)\n"
 #endif
 " -ss <zeitpos>    Starte Abspielen ab Position (Sekunden oder hh:mm:ss)\n"

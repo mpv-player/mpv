@@ -508,7 +508,7 @@ Hasznos DVD rippeléshez, vagy hálozati lejátszáshoz.
 Nyers, tömörítetlen video stream kiírása a ./\:stream.dump file-ba
 (nem túl hasznos)
 .TP
-.B \-dvd <cím\ id>
+.B \dvd://<cím\ id>
 Megadja az MPlayernek hogy mely ID-vel ellátott filmeket játssza le.
 Például néha az '1'-es egy elõzetes, és a '2'-es az igazi film.
 
@@ -783,7 +783,7 @@ külsõ kábelen fog menni.
 .B \-user <felhasználóné> (lásd a \-passwd opciót)
 Felhasználónév megadása HTTP autentikációhoz.
 .TP
-.B \-vcd <sáv>
+.B \vcd://<sáv>
 Megadott video CD sáv lejátszása egységrõl, vagy image fileból
 (lásd a \-cuefile opciót)
 .TP
@@ -3333,19 +3333,19 @@ A felirat file-ok keresési sorrendje a következõ (a példa film
 .SH PÉLDÁK
 .TP
 .B DVD lejátszás indítása
-mplayer \-dvd 1
+mplayer \dvd://1
 .TP
 .B Japán hanggal, és angol felirattal
-mplayer \-dvd 1 \-alang ja \-slang en
+mplayer \dvd://1 \-alang ja \-slang en
 .TP
 .B Csak az 5, 6, 7 fejezetek lejátszása
-mplayer \-dvd 1 \-chapter 5\-7
+mplayer \dvd://1 \-chapter 5\-7
 .TP
 .B Más nézõpont kiválasztása
-mplayer \-dvd 1 \-dvdangle 2
+mplayer \dvd://1 \-dvdangle 2
 .TP
 .B Más DVD egység használata
-mplayer \-dvd 1 \-dvd\-device /dev/\:dvd2
+mplayer \dvd://1 \-dvd\-device /dev/\:dvd2
 .TP
 .B Régi tipusú DVD (VOB) lejátszás
 mplayer \-dvdauth /dev/\:dvd /mnt/\:dvd/\:VIDEO_TS/\:VTS_02_4.VOB
@@ -3364,22 +3364,22 @@ mplayer \-tv on:driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420
 \-vo xv
 .TP
 .B DVD 2-es sávjának enkódolása, csak a kiválasztott fejezetekkel
-mencoder \-dvd 2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc divx4
+mencoder \dvd://2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc divx4
 .TP
 .B DVD 2-es sávjának enkódolása, átméretezés 640x480-ba
-mencoder \-dvd 2 \-vf scale=640:480 \-o title2.avi \-oac copy \-ovc divx4
+mencoder \dvd://2 \-vf scale=640:480 \-o title2.avi \-oac copy \-ovc divx4
 .TP
 .B DVD 2-es sávjának enkódolása, átméretezés 512xMMM-be (képarány
 megtartásával)
-mencoder \-dvd 2 \-vf scale \-zoom \-xy 512 \-o title2.avi \-oac copy
+mencoder \dvd://2 \-vf scale \-zoom \-xy 512 \-o title2.avi \-oac copy
 \-ovc divx4
 .TP
 .B Ugyanez, de a libavcodec-kel, MPEG4 tömörítéssel
-mencoder \-dvd 2 \-o title2.avi \-ovc lavc
+mencoder \dvd://2 \-o title2.avi \-ovc lavc
 \-lavcopts vcodec=mpeg4:vhq:vbitrate=1800 \-oac copy
 .TP
 .B Ugyanez MJPEG-gel
-mencoder \-dvd 2 \-o titel2.avi \-ovc lavc
+mencoder \dvd://2 \-o titel2.avi \-ovc lavc
 \-lavcopts vcodec=mjpeg:vhq:vbitrate=1800 \-oac copy
 .TP
 .B A jelenlegi könyvtárban lévõ összes *.jpg file enkódolása

@@ -13,13 +13,13 @@ static char help_text[]=
 " -vo <drv[:dev]>  selecteer video uitvoer driver & device (zie '-vo help' voor lijst)\n"
 " -ao <drv[:dev]>  selecteer audio uitvoer driver & device (zie '-ao help' voor lijst)\n"
 #ifdef HAVE_VCD
-" -vcd <trackno>   speel VCD (Video CD) track van device in plaats van standaard bestand\n"
+" vcd://<trackno>   speel VCD (Video CD) track van device in plaats van standaard bestand\n"
 #endif
 #ifdef HAVE_LIBCSS
 " -dvdauth <dev>   specificeer DVD device voor authenticatie (voor geencrypteerde schijven)\n"
 #endif
 #ifdef USE_DVDREAD
-" -dvd <titelnr>   speel DVD titel/track van device in plaats van gewoon bestand\n"
+" dvd://<titelnr>   speel DVD titel/track van device in plaats van gewoon bestand\n"
 " -alang/-slang    selecteer DVD audio/ondertitelingstaal (door middel van 2-karakter landcode)\n"
 #endif
 " -ss <timepos>    ga naar opgegeven (seconden of hh:mm:ss) positie\n"

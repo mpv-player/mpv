@@ -1209,13 +1209,13 @@ dla filename1] filename2 [opcje dla filename2] ...</CODE></TD>
 <TD></TD>
 <TD> <FONT CLASS="text">VCD</TD>
 <TD></TD>
-<TD><CODE> <FONT CLASS="text">mplayer [opcje] -vcd trackno
+<TD><CODE> <FONT CLASS="text">mplayer [opcje] vcd://trackno
 /dev/cdrom</CODE></TD>
 <TR>
 <TD></TD>
 <TD> <FONT CLASS="text">DVD</TD>
 <TD></TD>
-<TD><CODE> <FONT CLASS="text">mplayer [opcje] -dvd titleno
+<TD><CODE> <FONT CLASS="text">mplayer [opcje] dvd://titleno
 [-dvd-device /dev/dvd]</CODE></TD>
 <TR>
 <TD></TD>
@@ -1231,9 +1231,9 @@ tak, jak to robi Xine: <CODE>mplayer dvd://1</CODE> albo <CODE>mplayer
 vcd://1</CODE></P>
 
 <P><PRE>  mplayer -vo x11 /mnt/Films/Contact/contact2.mpg
-  mplayer -vcd 2 
+  mplayer vcd://2 
   mplayer -afm 3 /mnt/DVDtrailers/alien4.vob
-  mplayer -dvd 1 -dvd-device /dev/hdc
+  mplayer dvd://1 -dvd-device /dev/hdc
   mplayer -abs 65536 -delay -0.4 -nobps ~/movies/test.avi</PRE></P>
 
 <P><B><A NAME=3.2>3.2. Sterowanie</A></B></P>

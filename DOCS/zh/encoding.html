@@ -26,9 +26,9 @@ HREF="../tech/encoding-tips.txt">±àÂë¼¼ÇÉ</A>¡£ËÑË÷<A HREF="http://mplayerhq.hu/
 
 <P>Õâ¸öÀı×ÓÑİÊ¾ÈçºÎ°ÑDVD±àÂë³ÉÎª2-passµÄMPEG-4("DIVX")µÄAVI¡£Ö»ĞèÒªÁ½¸öÃüÁî£º<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> -- É¾µôÕâ¸öÎÄ¼ş£¬Ëü¿ÉÄÜÀ´×ÔÒÔÇ°µÄ3-pass±àÂë(Ëü»á¸ÉÈÅµ±Ç°±àÂë)<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc -lavcopts
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -ovc lavc -lavcopts
     vcodec=mpeg4:vpass=1 -oac copy -o movie.avi<BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc -lavcopts
+  &nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -ovc lavc -lavcopts
     vcodec=mpeg4:vpass=2 -oac copy -o movie.avi</CODE></P>
 
 <P><U><B>3-pass±àÂë£º</B></U>ÕâÊÇ2-pass±àÂëµÄÀ©Õ¹£¬¶ÔÒôÆµµÄ±àÂëÊ¹ÓÃÒ»¸öµ¥¶ÀµÄ±àÂë¡£ÕâÖÖ·½·¨Ìá¹©ÍÆ¼öÊÓÆµ±ÈÌØÂÊµÄ¹À¼ÆÒÔÊ¹Ö®ÄÜ¹»ÊÊºÏCDµÄÈİÁ¿¡£Í¬Ê±£¬
@@ -54,11 +54,11 @@ MEncoderÔÚÕâ¸öpass½áÊøÖ®ºó£¬½«¶ÔÓÚ650Mb£¬700Mb£¬ºÍ800MbµÄÄ¿±ê´óĞ¡´òÓ¡ÍÆ¼öµÄ±ÈÌØÂ
 <H4>3-pass±àÂëµÄÀı×Ó£º</H4>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> -- ÒÆÈ¥Õâ¸öÎÄ¼ş£¬Ëü¿ÉÄÜÀ´×ÔÒÔÇ°µÄ3-pass±àÂë(Ëü»á¸ÉÈÅµ±Ç°±àÂë)<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc frameno
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -ovc frameno
     -o frameno.avi -oac mp3lame -lameopts vbr=3<BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc
+  &nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -ovc lavc
     -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o movie.avi<BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc
+  &nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -ovc lavc
     -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o movie.avi</CODE></P>
 
 <H2><A NAME="mpeg">7.2 ±àÂëÎªMPEG¸ñÊ½</A></H2>
@@ -141,7 +141,7 @@ MEncoder½«Ê¹ÓÃ0£º¿ìËÙ¶ş´ÎÏßĞÔËõ·Å¡£</P>
 <P>µÚÒ»À¸ÊÇÓ¦¸ÃÔÚ<CODE>vcodec</CODE>Ñ¡ÏîÀïÉèÖÃµÄ±àÂë¸ñÊ½µÄÃû³Æ£¬±ÈÈç£º<CODE>-lavcopts vcodec=msmpeg4</CODE></P>
 
 <P>ÀıÈç£¬¶ÔÓÚÊ¹ÓÃMJPEGÑ¹Ëõ£º<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi -ovc lavc
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -o title2.avi -ovc lavc
     -lavcopts vcodec=mjpeg -oac copy</CODE></P>
 
 
@@ -204,10 +204,10 @@ MPNG(Motion PNG )»òMTGA(Motion TGA)ÎÄ¼ş¡£</P>
 
 <P><I>ÔÚ½øĞĞ3-pass±àÂëµÄÍ¬Ê±´ÓDVD¸´ÖÆÁ½·İ×ÖÄ»</I><BR>
   &nbsp;&nbsp;<CODE>rm subtitles.idx subtitles.sub</CODE><BR>
-  &nbsp;&nbsp;<CODE>mencoder -dvd 1 -vobsubout subtitles -vobsuboutindex 0
+  &nbsp;&nbsp;<CODE>mencoder dvd://1 -vobsubout subtitles -vobsuboutindex 0
     -sid 2 -o frameno.avi -ovc frameno</CODE><BR>
-  &nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -pass 1</CODE><BR>
-  &nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -pass 2 -vobsubout
+  &nbsp;&nbsp;<CODE>mencoder dvd://1 -oac copy -ovc divx4 -pass 1</CODE><BR>
+  &nbsp;&nbsp;<CODE>mencoder dvd://1 -oac copy -ovc divx4 -pass 2 -vobsubout
     subtitles -vobsuboutindex 1 -sid 5</CODE></P>
 
 <P><I>´ÓÒ»¸öMPEGÎÄ¼şÖĞ¸´ÖÆ·¨Óï×ÖÄ»</I><BR>

@@ -19,13 +19,13 @@ static char help_text[]=
 " -vo <drv[:dev]> výber výstup. video ovládaèa&zariadenia (-vo help pre zoznam)\n"
 " -ao <drv[:dev]> výber výstup. audio ovládaèa&zariadenia (-ao help pre zoznam)\n"
 #ifdef HAVE_VCD
-" -vcd <trackno>  prehra» VCD (video cd) stopu zo zariadenia namiesto zo súboru\n"
+" vcd://<trackno>  prehra» VCD (video cd) stopu zo zariadenia namiesto zo súboru\n"
 #endif
 #ifdef HAVE_LIBCSS
 " -dvdauth <dev>  urèenie DVD zariadenia pre overenie autenticity (pre kódované disky)\n"
 #endif
 #ifdef USE_DVDREAD
-" -dvd <titleno>  prehra» DVD titul/stopu zo zariadenia (mechaniky) namiesto súboru\n"
+" dvd://<titleno>  prehra» DVD titul/stopu zo zariadenia (mechaniky) namiesto súboru\n"
 " -alang/-slang   vybra» jazyk DVD zvuku/titulkov(pomocou 2-miest. kódu krajiny)\n"
 #endif
 " -ss <timepos>   posun na pozíciu (sekundy alebo hh:mm:ss)\n"

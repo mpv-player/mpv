@@ -20,7 +20,7 @@ static char help_text[]=
 " -ao <drv[:dev]> seleciona o driver de saída de audio & dispositivo\n"
 "                 ('-vo help' para listar)\n"
 #ifdef HAVE_VCD
-" -vcd <numtrilha> reproduz trilha de VCD (Video CD) do dispositivo em vez de um\n"
+" vcd://<numtrilha> reproduz trilha de VCD (Video CD) do dispositivo em vez de um\n"
 "                 arquivo\n"
 #endif
 #ifdef HAVE_LIBCSS
@@ -28,7 +28,7 @@ static char help_text[]=
 "                 encriptados)\n"
 #endif
 #ifdef USE_DVDREAD
-" -dvd <numtítilo> reproduz título de DVD do dispositivo em vez de um arquivo\n"
+" dvd://<numtítilo> reproduz título de DVD do dispositivo em vez de um arquivo\n"
 " -alang/-slang   seleciona o idioma/legenda do DVD (pelo código país de duas\n"
 "                 letras)\n"
 #endif

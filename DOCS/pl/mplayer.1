@@ -523,7 +523,7 @@ Zrzuca strumieñ napisów ze strumienia VOB.
 Zrzuca surowy skompresowany strumieñ video do ./\:stream.dump (nie bardzo
 u¿yteczny).
 .TP
-.B \-dvd <id\ tytu³u>
+.B \dvd://<id\ tytu³u>
 Przeka¿ MPlayerowi które filmy (okre¶lone przez id tytu³u) ma odtwarzaæ.
 Dla przyk³adu czasem '1' to trailery, a '2' to prawdziwy film.
 
@@ -830,7 +830,7 @@ wybierz jako¶æ kompresji jpeg
 .B \-user <nazwa u¿ytkownika> (zobacz tak¿e opcjê \-passwd)
 Wyszczególnienie nazwy u¿ytownika do autentyfikacji http.
 .TP
-.B \-vcd <¶cie¿ka>
+.B \vcd://<¶cie¿ka>
 Odtwarzaj ¶cie¿kê video CD z urz±dzenia lub obrazu pliku (zobacz \-cuefile).
 .TP
 .B \-vid <id>
@@ -3667,19 +3667,19 @@ Napisy s± szukane w katalogu filmu
 .SH "PRZYK£ADY"
 .TP
 .B Szybki start odtwarzania DVD
-mplayer \-dvd 1
+mplayer \dvd://1
 .TP
 .B Odtwarzaj w japoñskim z angielskimi napisami
-mplayer \-dvd 1 \-alang ja \-slang en
+mplayer \dvd://1 \-alang ja \-slang en
 .TP
 .B Odtwarzaj tylko rozdzia³y 5, 6, 7
-mplayer \-dvd 1 \-chapter 5\-7
+mplayer \dvd://1 \-chapter 5\-7
 .TP
 .B Odtwarzanie DVD z ró¿nych ujêæ
-mplayer \-dvd 1 \-dvdangle 2
+mplayer \dvd://1 \-dvdangle 2
 .TP
 .B Odtwarzanie z innego urz±dzenia DVD
-mplayer \-dvd 1 \-dvd\-device /dev/\:dvd2
+mplayer \dvd://1 \-dvd\-device /dev/\:dvd2
 .TP
 .B Odtwarzanie starego stylu DVD (VOB)
 mplayer \-dvdauth /dev/\:dvd /mnt/\:dvd/\:VIDEO_TS/\:VTS_02_4.VOB
@@ -3698,22 +3698,22 @@ mplayer \-tv on:driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420
 \-vo xv
 .TP
 .B Kodowanie tytu³u #2 DVD, tylko wybranych rozdzia³ów
-mencoder \-dvd 2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc divx4
+mencoder \dvd://2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc divx4
 .TP
 .B Kodowanie tytu³u #2 DVD, zmieniaj±c rozmiar do 640x480
-mencoder \-dvd 2 \-vf scale=640:480 \-o title2.avi \-oac copy \-ovc divx4
+mencoder \dvd://2 \-vf scale=640:480 \-o title2.avi \-oac copy \-ovc divx4
 .TP
 .B Kodowanie tytu³u #2 DVD, zmieniaj±c rozmiar do 512xHHH (zachowaj stosunek
 obrazu)
-mencoder \-dvd 2 \-vf scale \-zoom \-xy 512 \-o title2.avi \-oac copy
+mencoder \dvd://2 \-vf scale \-zoom \-xy 512 \-o title2.avi \-oac copy
 \-ovc divx4
 .TP
 .B To samo, ale z rodzin± kodeków libavcodec, kompresja MPEG4 (Divx5)
-mencoder \-dvd 2 \-o title2.avi \-ovc lavc
+mencoder \dvd://2 \-o title2.avi \-ovc lavc
 \-lavcopts vcodec=mpeg4:vhq:vbitrate=1800 \-oac copy
 .TP
 .B To samo, ale z rodzin± kodeków libavcodec, kompresja MJPEG
-mencoder \-dvd 2 \-o titel2.avi \-ovc lavc
+mencoder \dvd://2 \-o titel2.avi \-ovc lavc
 \-lavcopts vcodec=mjpeg:vhq:vbitrate=1800 \-oac copy
 .TP
 .B Kodowanie wszystkich plików *.jpg w aktualnym katalog

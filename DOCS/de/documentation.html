@@ -1475,8 +1475,8 @@ nach dem Dateinamen, welche nur f&uuml;r die jeweilige Datei/URL/etc gelten
 <TABLE BORDER=0>
   <TR><TD>&nbsp;&nbsp;</TD><TD>Datei</TD><TD>&nbsp;&nbsp;</TD><TD><CODE>mplayer [Optionen] [Pfad/]Dateiname</CODE></TD></TR>
   <TR><TD></TD><TD>Datei</TD><TD></TD><TD><CODE>mplayer [standard Optionen] [Pfad/]Dateiname [Optionen f&uuml;r datei1] datei2 datei3 [Optionen f&uuml;r datei3]</CODE></TD></TR>
-  <TR><TD></TD><TD>VCD</TD><TD></TD><TD><CODE>mplayer [Optionen] -vcd Tracknr [-cdrom-device /dev/cdrom]</CODE></TD></TR>
-  <TR><TD></TD><TD>DVD</TD><TD></TD><TD><CODE>mplayer [Optionen] -dvd Titelnr [-dvd-device /dev/dvd]</CODE></TD></TR>
+  <TR><TD></TD><TD>VCD</TD><TD></TD><TD><CODE>mplayer [Optionen] vcd://Tracknr [-cdrom-device /dev/cdrom]</CODE></TD></TR>
+  <TR><TD></TD><TD>DVD</TD><TD></TD><TD><CODE>mplayer [Optionen] dvd://Titelnr [-dvd-device /dev/dvd]</CODE></TD></TR>
   <TR><TD></TD><TD>Netz</TD><TD></TD><TD><CODE>mplayer [Optionen] http://site.com/datei.asf (playlist kann auch benutzt werden)</CODE></TD></TR>
 </TABLE>
 
@@ -1486,9 +1486,9 @@ oder <CODE>mplayer vcd://1</CODE></P>
 
 <PRE>
   mplayer -vo x11 /mnt/Filme/Contact/contact2.mpg
-  mplayer -vcd 2
+  mplayer vcd://2
   mplayer -afm 3 /mnt/DVDtrailers/alien4.vob
-  mplayer -dvd 1
+  mplayer dvd://1
   mplayer -abs 65536 -delay -0.4 -nobps ~/movies/test.avi
 </PRE>
 
@@ -2040,7 +2040,7 @@ anzeigt. So funktioniert es (pass bei Bedarf den Laufwerksbuchstaben an):</P>
 <P>DVDs funktionieren ebenfalls. Setze daf&uuml;r einfach dsa DVD-Ger&auml;t
 korrekt:</P>
 
-<P><CODE>mplayer -dvd &lt;Titel&gt; -dvd-device '\\.\d:'</CODE></P>
+<P><CODE>mplayer dvd://&lt;Titel&gt; -dvd-device '\\.\d:'</CODE></P>
 
 <P>Die QuickTime-DLLs sollen angeblich ebenfalls funktionieren. Compiliere
 MPlayer mit <CODE>--enable-qtx-codecs</CODE> und kopiere die Codecs an den

@@ -52,7 +52,7 @@ And now comes the question: how do I chose my encoding parameters
 so that the results will be good? First let's take a look at a
 typical mencoder line:
 
-mencoder -dvd 1 -o /dev/null -oac copy -ovc lavc \
+mencoder dvd://1 -o /dev/null -oac copy -ovc lavc \
   -lavcopts vcodec=mpeg4:vbitrate=1000:vhq:vqmin=2:\
   vlelim=-4:vcelim=9:lumi_mask=0.05:dark_mask=0.01:vpass=1 \
   -vf crop=716:572:2:2,scale=640:480
@@ -440,7 +440,7 @@ viewed fullscreen.
 4)  I would  recommend  using the  Ogg  Vorbis audio  codec  with the  .ogm
 container format. Ogg  Vorbis compress audio better than MP3.  On a typical
 old,  mono-only audio  stream, a  45 kbits/s  Vorbis stream  is ok.  How to
-extract  & compress  an audio  stream  from a  ripped DVD  (mplayer -dvd  1
+extract  & compress  an audio  stream  from a  ripped DVD  (mplayer dvd:// 1
 -dumpstream) :
 
 rm -f audiodump.pcm ; mkfifo -m 600 audiodump.pcm
@@ -507,7 +507,7 @@ powerful enough or both. I'm extracting the vobsub subtitles and simply use
 them with the .ogm
 
 / .avi :
-1) rip the DVD to harddisk with "mplayer -dvd 1 -dumpstream"
+1) rip the DVD to harddisk with "mplayer dvd://1 -dumpstream"
 2) mount the DVD and copy the .ifo file
 2) extract all vobsubs to one single file with something like :
 

@@ -17,13 +17,13 @@ static char help_text[]=
 " -vo <pil[:pér]>  sélectionne le pilote et le périph. vidéo ('-vo help' pour la liste)\n"
 " -ao <pil[:pér]>  sélectionne le pilote et le périph. audio ('-ao help' pour la liste)\n"
 #ifdef HAVE_VCD
-" -vcd <n°piste>   lit une piste VCD (Video CD) plutôt qu'un fichier\n"
+" vcd://<n°piste>   lit une piste VCD (Video CD) plutôt qu'un fichier\n"
 #endif
 #ifdef HAVE_LIBCSS
 " -dvdauth <pér>   précise le chemin du lecteur DVD (pour les DVD cryptés)\n"
 #endif
 #ifdef USE_DVDREAD
-" -dvd <n°titre>   joue un titre DVD plutôt qu'un fichier\n"
+" dvd://<n°titre>   joue un titre DVD plutôt qu'un fichier\n"
 " -alang/-slang    sélectionne la langue audio/sous-titres (code pays à 2 lettres)\n"
 #endif
 " -ss <temps>      démarre la lecture à 'temps' (temps en secondes ou hh:mm:ss)\n"

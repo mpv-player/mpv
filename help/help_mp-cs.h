@@ -15,13 +15,13 @@ static char help_text[]=
 " -vo <ovl[:zaø]>  výbìr výst. video ovladaèe a zaøízení (-vo help pro seznam)\n"
 " -ao <ovl[:zaø]>  výbìr výst. audio ovladaèe a zaøízení (-ao help pro seznam)\n"
 #ifdef HAVE_VCD
-" -vcd <èíslo>     pøehrát VCD (Video CD) stopu ze zaøízení místo ze souboru\n"
+" vcd://<èíslo>     pøehrát VCD (Video CD) stopu ze zaøízení místo ze souboru\n"
 #endif
 #ifdef HAVE_LIBCSS
 " -dvdauth <zaø>   urèení DVD zaøízení pro autentizaci (pro kódované disky)\n"
 #endif
 #ifdef USE_DVDREAD
-" -dvd <èíslo>     pøehrát DVD titul ze zaøízení (mechaniky), místo ze souboru\n"
+" dvd://<èíslo>     pøehrát DVD titul ze zaøízení (mechaniky), místo ze souboru\n"
 " -alang/-slang    zvolit jazyk audia/titulkù na DVD (dvouznakový kód zemì)\n"
 #endif
 " -ss <timepos>    posun na danou pozici (sekundy nebo hh:mm:ss)\n"

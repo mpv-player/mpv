@@ -208,8 +208,8 @@ filepicker.
 
 To play a VCD track or a DVD title, try:
 
-  mplayer -vcd 2 -cdrom-device /dev/hdc
-  mplayer -dvd 1 -alang en -slang hu -dvd-device /dev/hdd
+  mplayer vcd://2/dev/hdc
+  mplayer dvd://1 -alang en -slang hu -dvd-device /dev/hdd
 
 See 'mplayer -help' and 'man mplayer' for further options.
 

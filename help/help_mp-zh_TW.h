@@ -17,13 +17,13 @@ static char help_text[]=
 " -vo <drv[:dev]>  選擇視訊輸出驅動程式及裝置 (用 '-vo help' 查看列表)\n"
 " -ao <drv[:dev]>  選擇音效輸出驅動程式及裝置 (用 '-ao help' 查看列表)\n"
 #ifdef HAVE_VCD
-" -vcd <trackno>   從裝置而並非一般檔案播放 VCD (Video CD) track\n"
+" vcd://<trackno>   從裝置而並非一般檔案播放 VCD (Video CD) track\n"
 #endif
 #ifdef HAVE_LIBCSS
 " -dvdauth <dev>   指定要授權的 DVD 裝置 (用於加密光碟)\n"
 #endif
 #ifdef USE_DVDREAD
-" -dvd <titleno>   從裝置而並非一般檔案播放 DVD title\n"
+" dvd://<titleno>   從裝置而並非一般檔案播放 DVD title\n"
 " -alang/-slang    選擇 DVD 音效/字幕的語言 (使用兩位的國家代號)\n"
 #endif
 " -ss <timepos>    搜索至指定 (秒或 hh:mm:ss) 的位置\n"

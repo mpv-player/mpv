@@ -15,12 +15,12 @@ static char help_text[]=
 "Valg:\n"
 " -vo <drv[:dev]> velg video-ut driver og enhet (se '-vo help' for liste)\n"
 " -ao <drv[:dev]> velg lyd-ut driver og enhet (se '-ao help' for liste)\n"
-" -vcd <sporno>   spill VCD (video cd) spor fra enhet i stedet for fil\n"
+" vcd://<sporno>   spill VCD (video cd) spor fra enhet i stedet for fil\n"
 #ifdef HAVE_LIBCSS
 " -dvdauth <dev>  spesifiser DVD enhet for autentikasjon (for krypterte disker)\n"
 #endif
 #ifdef USE_DVDREAD
-" -dvd <tittelno> spill DVD tittel/spor fra enhet i stedet for fil\n"
+" dvd://<tittelno> spill DVD tittel/spor fra enhet i stedet for fil\n"
 #endif
 " -ss <timepos>   søk til gitt (sekunder eller hh:mm:ss) posisjon\n"
 " -nosound        ikke spill av lyd\n"

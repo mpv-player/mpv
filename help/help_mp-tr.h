@@ -17,13 +17,13 @@ static char help_text[]=
 " -vo <drv[:aygýt]> video çýkýþ sürücüsünü & aygýtýný seçin ('-vo help' ile listeyi görebilirsiniz)\n"
 " -ao <drv[:aygýt]> ses çýkýþ sürücüsünü & aygýtýný seçin ('-ao help' ile listeyi görebilirsiniz)\n"
 #ifdef HAVE_VCD
-" -vcd <trackno>  vcd yi Çalmaya baþlar. (Video CD) VCD track numarasýný girebilirsiniz\n"
+" vcd://<trackno>  vcd yi Çalmaya baþlar. (Video CD) VCD track numarasýný girebilirsiniz\n"
 #endif
 #ifdef HAVE_LIBCSS
 " -dvdauth <aygit>  Doðrulamak için bir DVD aygýtý seçin (Þifreli dvdler için)\n"
 #endif
 #ifdef USE_DVDREAD
-" -dvd <baþlýkno>  DVD baþlýðý çal. Baþlýk numarasýný gireblirsiniz.\n"
+" dvd://<baþlýkno>  DVD baþlýðý çal. Baþlýk numarasýný gireblirsiniz.\n"
 " -alang/-slang    DVD dublaj/altyazý dili seçin (2-char country codu tarafýndan)\n"
 #endif
 " -ss <zamanpoz>    Verilmiþ pozisyonu ara (saniye yada hh:mm:ss)\n"

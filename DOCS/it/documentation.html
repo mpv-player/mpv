@@ -1238,8 +1238,8 @@ Input da standard V4L<BR>
 <P><TABLE BORDER=0>
 <TD>&nbsp;&nbsp;</TD><TD>file</TD><TD>&nbsp;&nbsp;</TD><TD><CODE>mplayer [opzioni] [percorso/]nomefile</CODE></TD><TR>
 <TD></TD><TD>file</TD><TD></TD><TD><CODE>mplayer [opzioni di default] [percorso/]nomefile1 [opzioni per nomefile1] nomefile2 [opzioni per nomefile2] ...</CODE></TD><TR>
-<TD></TD><TD>VCD</TD><TD></TD><TD><CODE>mplayer [opzioni] -vcd numtraccia [-cdrom-device /dev/cdrom]</CODE></TD><TR>
-<TD></TD><TD>DVD</TD><TD></TD><TD><CODE>mplayer [opzioni] -dvd numtitolo [-dvd-device /dev/dvd]</CODE></TD><TR>
+<TD></TD><TD>VCD</TD><TD></TD><TD><CODE>mplayer [opzioni] vcd://numtraccia [-cdrom-device /dev/cdrom]</CODE></TD><TR>
+<TD></TD><TD>DVD</TD><TD></TD><TD><CODE>mplayer [opzioni] dvd://numtitolo [-dvd-device /dev/dvd]</CODE></TD><TR>
 <TD></TD><TD>rete</TD><TD></TD><TD><CODE>mplayer [opzioni] http://sito.com/file.[mpg|avi] (si possono usare anche playlist)</CODE></TD><TR>
 <TR><TD></TD><TD>RTSP</TD><TD></TD><TD><CODE>mplayer [opzioni] rtsp://server.example.com/nomeStream</CODE></TD></TR>
 </TABLE></P>
@@ -1250,9 +1250,9 @@ Xine: <CODE>mplayer dvd://1</CODE> o <CODE>mplayer vcd://1</CODE>
 </P>
 
 <P><PRE>  mplayer -vo x11 /mnt/Films/Contact/contact2.mpg
-  mplayer -vcd 2
+  mplayer vcd://2
   mplayer -afm 3 /mnt/DVDtrailers/alien4.vob
-  mplayer -dvd 1 -dvd-device /dev/hdc
+  mplayer dvd://1 -dvd-device /dev/hdc
   mplayer -abs 65536 -delay -0.4 -nobps ~/movies/test.avi</PRE></P>
 
 <H2><A NAME="control">3.2. Controllo</A></H2>
@@ -1739,7 +1739,7 @@ far compilare Mplayer.</P>
 <P>Anche i DVD funzionano, basta impostare il dispositivo DVD con la lettera
  del drive CD-ROM:</P>
 
-<P><CODE>mplayer -dvd &lt;title&gt; -dvd-device '\\.\d:'</CODE></P>
+<P><CODE>mplayer dvd://&lt;title&gt; -dvd-device '\\.\d:'</CODE></P>
 
 <P>ci è stato riferito che le DLL di QuickTime sembrano funzionare. Compila con
  <CODE>--enable-qtx-codecs</CODE> e metti i codec nella posizione predefinita

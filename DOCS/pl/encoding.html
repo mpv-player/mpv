@@ -37,9 +37,9 @@
   dwie komendy s± potrzebne:<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> - usuñ plik, który mo¿e
     pochodziæ z poprzedniego 3-krokowego kodowania (mo¿e kolidowaæ z obecnym)<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc -lavcopts
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -ovc lavc -lavcopts
     vcodec=mpeg4:vpass=1 -oac copy -o movie.avi<BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc -lavcopts
+  &nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -ovc lavc -lavcopts
     vcodec=mpeg4:vpass=2 -oac copy -o movie.avi</CODE></P>
 
 <P><U><B>Kodowanie 3-krokowe:</B></U> to przed³u¿enie 2-krokowego kodowania,
@@ -75,11 +75,11 @@
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> - usuñ plik, który mo¿e
     pochodziæ z poprzedniego 3-krokowego kodowania (mo¿e kolidowaæ z obecnym)<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc frameno
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -ovc frameno
     -o frameno.avi -oac mp3lame -lameopts vbr=3<BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc
+  &nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -ovc lavc
     -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o movie.avi<BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc
+  &nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -ovc lavc
     -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o movie.avi</CODE></P>
 
 
@@ -185,7 +185,7 @@ formatów wideo i audio (obecnie kodeki audio s± niedostêpne). Mo¿esz kodowaæ do 
   <CODE>vcodec</CODE>, czyli: <CODE>-lavcopts vcodec=msmpeg4</CODE></P>
 
 <P>Przyk³ad z kompresj± MJPEG:<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi -ovc lavc
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -o title2.avi -ovc lavc
     -lavcopts vcodec=mjpeg -oac copy</CODE></P>
 
 
@@ -265,10 +265,10 @@ RAW RGB AVI.</P>
 
 <P><I>Kopiowanie dwóch napisów z DVD podczas kodowania 3-krokowego</I><BR>
   &nbsp;&nbsp;<CODE>rm subtitles.idx subtitles.sub</CODE><BR>
-  &nbsp;&nbsp;<CODE>mencoder -dvd 1 -vobsubout subtitles -vobsuboutindex 0
+  &nbsp;&nbsp;<CODE>mencoder dvd://1 -vobsubout subtitles -vobsuboutindex 0
     -sid 2 -o frameno.avi -ovc frameno -oac mp3lame -lameopts vbr=3</CODE><BR>
-  &nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -divx4opts pass=1</CODE><BR>
-  &nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -divx4opts pass=2 -vobsubout
+  &nbsp;&nbsp;<CODE>mencoder dvd://1 -oac copy -ovc divx4 -divx4opts pass=1</CODE><BR>
+  &nbsp;&nbsp;<CODE>mencoder dvd://1 -oac copy -ovc divx4 -divx4opts pass=2 -vobsubout
     subtitles -vobsuboutindex 1 -sid 5</CODE></P>
 
 <P><I>Kopiowanie francuskich napisów z pliku MPEG</I><BR>

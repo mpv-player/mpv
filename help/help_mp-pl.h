@@ -19,13 +19,13 @@ static char help_text[]=
 " -vo <drv[:dev]> wybór sterownika[:urz±dzenia] video (lista po '-vo help')\n"
 " -ao <drv[:dev]> wybór sterownika[:urz±dzenia] audio (lista po '-ao help')\n"
 #ifdef HAVE_VCD
-" -vcd <trackno>  odtwarzanie bezpo¶rednio ¶cie¿ki VCD (video cd)\n"
+" vcd://<trackno>  odtwarzanie bezpo¶rednio ¶cie¿ki VCD (video cd)\n"
 #endif
 #ifdef HAVE_LIBCSS
 " -dvdauth <dev>  urz±dzenie DVD do autoryzacji (dla zaszyfrowanych dysków)\n"
 #endif
 #ifdef USE_DVDREAD
-" -dvd <titleno>  odtwarzanie bezpo¶rednio tytu³u DVD\n"
+" dvd://<titleno>  odtwarzanie bezpo¶rednio tytu³u DVD\n"
 " -alang/-slang   jêzyk dla d¼wiêku/napisów (poprzez 2-znakowy kod kraju)\n"
 #endif
 " -ss <timepos>   skok do podanej pozycji (sekundy albo hh:mm:ss)\n"

@@ -43,10 +43,10 @@ einige Guides im Internet lesen.</P>
   welche von einer fr&uuml;heren 3-Pass-Encodierung kommen kann (Sie f&uuml;hrt zu
   einem Konflikt mit der momentanen Encodierung).<BR>
 
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -lavcopts
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -lavcopts
 vcodec=mpeg4:vpass=1 -oac copy -o film.avi</CODE><BR>
 
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -lavcopts
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -lavcopts
 vcodec=mpeg4:vpass=2 -oac copy -o film.avi</CODE></P>
 
 <P><U><B>3-Pass-Encodierung:</B></U> Dies ist eine Erweiterung der
@@ -93,13 +93,13 @@ encodiert. Das Schema: </P>
   welche von einer fr&uuml;heren 3-Pass-Encodierung kommen kann (Sie f&uuml;hrt
   zu einem Konflikt mit der momentanen Encodierung).<BR>
 
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc frameno
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -ovc frameno
   -o frameno.avi -oac mp3lame -lameopts vbr=3<BR>
 
-&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc
+&nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -ovc lavc
   -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o movie.avi<BR>
 
-&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc
+&nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -ovc lavc
   -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o movie.avi</CODE></P>
 
 
@@ -219,7 +219,7 @@ Codecs encodieren:</P>
 <CODE>-lavcopts vcodec=msmpeg4</CODE></P>
 
 <P>Ein Beispiel mit MJPEG-Compression:<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o titel2.avi -ovc lavc -lavcopts
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder dvd://2 -o titel2.avi -ovc lavc -lavcopts
 vcodec=mjpeg -oac copy</CODE></P>
 
 <H3><A NAME="image_files">7.7 Encodierung von mehreren Einzelbildern
@@ -317,13 +317,13 @@ also vor dem Starten gel&ouml;scht werden.</P>
 
 &nbsp;&nbsp;<CODE>rm untertitel.idx untertitel.sub</CODE><BR>
 
-&nbsp;&nbsp;<CODE>mencoder -dvd 1 -vobsubout untertitel -vobsuboutindex 0 -sid
+&nbsp;&nbsp;<CODE>mencoder dvd://1 -vobsubout untertitel -vobsuboutindex 0 -sid
 2 -o frameno.avi -ovc frameno -oac mp3lame -lameopts vbr=3</CODE><BR>
 
-&nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -divx4opts
+&nbsp;&nbsp;<CODE>mencoder dvd://1 -oac copy -ovc divx4 -divx4opts
 pass=1</CODE><BR>
 
-&nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -divx4opts pass=2
+&nbsp;&nbsp;<CODE>mencoder dvd://1 -oac copy -ovc divx4 -divx4opts pass=2
   -vobsubout untertitel -vobsuboutindex 1 -sid 5</CODE></P>
 
 

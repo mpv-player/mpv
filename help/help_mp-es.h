@@ -26,12 +26,12 @@ static char help_text[]=
 "Opciones básicas: ('man mplayer' para una lista completa)\n"
 " -vo <driver[:disp]>  Seleccionar driver de salida de vídeo y dispositivo ('-vo help' para obtener una lista).\n"
 " -ao <driver[:disp]>  Seleccionar driver de salida de audio y dispositivo ('-ao help' para obtener una lista).\n"
-" -vcd <numpista>      Reproducir pista de VCD (Video CD) desde un dispositivo en vez de un archivo regular.\n"
+" vcd://<numpista>      Reproducir pista de VCD (Video CD) desde un dispositivo en vez de un archivo regular.\n"
 #ifdef HAVE_LIBCSS
 " -dvdauth <disp>      Especificar dispositivo DVD para autenticación (para discos encriptados).\n"
 #endif
 #ifdef USE_DVDREAD
-" -dvd <número>        Reproducir título o pista de DVD desde un dispositivo en vez de un archivo regular.\n"
+" dvd://<número>        Reproducir título o pista de DVD desde un dispositivo en vez de un archivo regular.\n"
 " -alang <lengua>      Seleccionar lengua para el audio del DVD (con código de país de dos caracteres. p. ej. 'es').\n"
 " -alang <lengua>      Seleccionar lengua para los subtítulos del DVD.\n"
 #endif

@@ -447,7 +447,7 @@ Full 5.1
 .B \-dumpvideo (仅用于MPLAYER)
 将原始的视频压缩流复制到./\:stream.dump(不是十分好用).
 .TP
-.B \-dvd <节目标识>
+.B \dvd://<节目标识>
 告诉MPlayer播放哪个电影(通过节目标识指定). 比如有时'1'是一部预告片,
 而'2'才是真正的电影.
 
@@ -726,7 +726,7 @@ tv_set_channel和tv_last_channel等命令将可以被遥控器(参见lirc)使用.
 .B \-user <用户名> (参见\-passwd选项)
 设定http认证的用户名.
 .TP
-.B \-vcd <音轨>
+.B \vcd://<音轨>
 从设备或镜像文件中播放video CD音轨(参见\-cuefile).
 .TP
 .B \-vid <标识>
@@ -3424,19 +3424,19 @@ GUI播放列表
 .SH 示例
 .TP
 .B 快速DVD播放
-mplayer \-dvd 1
+mplayer \dvd://1
 .TP
 .B 播放日文对话和英文字幕
-mplayer \-dvd 1 \-alang ja \-slang en
+mplayer \dvd://1 \-alang ja \-slang en
 .TP
 .B 只播放5, 6, 7场景
-mplayer \-dvd 1 \-chapter 5\-7
+mplayer \dvd://1 \-chapter 5\-7
 .TP
 .B 多视角DVD播放
-mplayer \-dvd 1 \-dvdangle 2
+mplayer \dvd://1 \-dvdangle 2
 .TP
 .B 从其它DVD设备播放
-mplayer \-dvd 1 \-dvd\-device /dev/\:dvd2
+mplayer \dvd://1 \-dvd\-device /dev/\:dvd2
 .TP
 .B 老师DVD(VOB)播放
 mplayer \-dvdauth /dev/\:dvd /mnt/\:dvd/\:VIDEO_TS/\:VTS_02_4.VOB
@@ -3455,21 +3455,21 @@ mplayer \-tv on:driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420
 \-vo xv
 .TP
 .B 编码DVD节目#2中选择的场景
-mencoder \-dvd 2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc divx4
+mencoder \dvd://2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc divx4
 .TP
 .B 编码DVD节目#2, 缩放到640x480
-mencoder \-dvd 2 \-vf scale=640:480 \-o title2.avi \-oac copy \-ovc divx4
+mencoder \dvd://2 \-vf scale=640:480 \-o title2.avi \-oac copy \-ovc divx4
 .TP
 .B 编码DVD节目#2, 缩放到512xHHH(保持长宽比)
-mencoder \-dvd 2 \-vf scale \-zoom \-xy 512 \-o title2.avi \-oac copy
+mencoder \dvd://2 \-vf scale \-zoom \-xy 512 \-o title2.avi \-oac copy
 \-ovc divx4
 .TP
 .B 同上, 但使用libavcodec族, MPEG4(Divx5)压缩
-mencoder \-dvd 2 \-o title2.avi \-ovc lavc
+mencoder \dvd://2 \-o title2.avi \-ovc lavc
 \-lavcopts vcodec=mpeg4:vhq:vbitrate=1800 \-oac copy
 .TP
 .B 同上, 但使用libavcodec族, MJPEG压缩
-mencoder \-dvd 2 \-o titel2.avi \-ovc lavc
+mencoder \dvd://2 \-o titel2.avi \-ovc lavc
 \-lavcopts vcodec=mjpeg:vhq:vbitrate=1800 \-oac copy
 .TP
 .B 编码当前目录下的所有*.jpg文件

@@ -201,7 +201,7 @@ if ($writecd) {
 # here comes the fun part...
 
 print "precacheing...\n";
-$status = system ("mencoder -dvd $dvd_track -ovc copy -oac copy -alang $lang -o $vob_tempfile 1>/dev/tty8 2>/dev/tty8");
+$status = system ("mencoder dvd://$dvd_track -ovc copy -oac copy -alang $lang -o $vob_tempfile 1>/dev/tty8 2>/dev/tty8");
 die "Prechacheing failed. mencoder exited with Status Code $?" unless $status == 0;
 
 print "Encoding Audio...\n";

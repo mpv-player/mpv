@@ -17,12 +17,12 @@ static char help_text[]=
 "선택사항들:\n"
 " -vo <drv[:dev]>  비디오 출력 드라이버 및 장치 선택 (목록보기는 '-vo help')\n"
 " -ao <drv[:dev]>  오디오 출력 드라이버 및 장치 선택 (목록보기는 '-ao help')\n"
-" -vcd <trackno>   파일이 아닌 장치로부터 VCD (비디오 cd) 트랙 재생\n"
+" vcd://<trackno>   파일이 아닌 장치로부터 VCD (비디오 cd) 트랙 재생\n"
 #ifdef HAVE_LIBCSS
 " -dvdauth <dev>   인증을 위해 DVD 장치 지정 (암호화된 디스크용)\n"
 #endif
 #ifdef USE_DVDREAD
-" -dvd <titleno>   파일이 아닌 장치로부터 DVD 타이틀/트랙 재생\n"
+" dvd://<titleno>   파일이 아닌 장치로부터 DVD 타이틀/트랙 재생\n"
 #endif
 " -ss <timepos>    특정 위치로 찾아가기 (초 또는 시:분:초)\n"
 " -nosound         소리 재생 안함\n"

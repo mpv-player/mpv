@@ -18,13 +18,13 @@ static char help_text[]=
 " -vo <drv[:dev]> videomeghajtó és -alegység kiválasztása (lista: '-vo help')\n"
 " -ao <drv[:dev]> audiomeghajtó és -alegység kiválasztása (lista: '-ao help')\n"
 #ifdef HAVE_VCD
-" -vcd <sávszám>  lejátszás VCD (video cd)-sávból, közvetlenül az eszközrõl\n"
+" vcd://<sávszám>  lejátszás VCD (video cd)-sávból, közvetlenül az eszközrõl\n"
 #endif
 #ifdef HAVE_LIBCSS
 " -dvdauth <megh> DVD-meghajtó elérési útjának megadása (kódolt lemezekhez)\n"
 #endif
 #ifdef USE_DVDREAD
-" -dvd <titleno>  a megadott DVD sáv lejátszása, file helyett\n"
+" dvd://<titleno>  a megadott DVD sáv lejátszása, file helyett\n"
 " -alang/-slang   DVD audio/felirat nyelv kiválasztása (2 betûs országkóddal)\n"
 #endif
 " -ss <idõpoz>    a megadott (másodperc v. óra:perc:mperc) pozícióra tekerés\n"

@@ -990,8 +990,8 @@ konwert(Debian)»òÕßiconv(Red Hat)³ÌĞòÍê³É¡£<BR>
 <TABLE BORDER=0>
 <TR><TD>&nbsp;&nbsp;</TD><TD>µ¥Ò»ÎÄ¼ş</TD><TD>&nbsp;&nbsp;</TD><TD><CODE>mplayer [options] [path/]filename</CODE></TD></TR>
   <TR><TD></TD><TD>¶à¸öÎÄ¼ş</TD><TD></TD><TD><CODE>mplayer [default options] [path/]filename1 [options for filename1] filename2 [options for filename2] ...</CODE></TD></TR>
-  <TR><TD></TD><TD>VCD</TD><TD></TD><TD><CODE>mplayer [options] -vcd trackno [-cdrom-device /dev/cdrom]</CODE></TD></TR>
-  <TR><TD></TD><TD>DVD</TD><TD></TD><TD><CODE>mplayer [options] -dvd titleno [-dvd-device /dev/dvd]</CODE></TD></TR>
+  <TR><TD></TD><TD>VCD</TD><TD></TD><TD><CODE>mplayer [options] vcd://trackno [-cdrom-device /dev/cdrom]</CODE></TD></TR>
+  <TR><TD></TD><TD>DVD</TD><TD></TD><TD><CODE>mplayer [options] dvd://titleno [-dvd-device /dev/dvd]</CODE></TD></TR>
   <TR><TD></TD><TD>WWW</TD><TD></TD><TD><CODE>mplayer [options] http://site.com/file.asf(Ò²¿ÉÒÔÊ¹ÓÃplaylist)</CODE></TD></TR>
   <TR><TD></TD><TD>RTSP</TD><TD></TD><TD><CODE>mplayer [options] rtsp://server.example.com/streamName</CODE></TD></TR>
 </TABLE>
@@ -1001,9 +1001,9 @@ konwert(Debian)»òÕßiconv(Red Hat)³ÌĞòÍê³É¡£<BR>
 
 <PRE>
   mplayer -vo x11 /mnt/Films/Contact/contact2.mpg
-  mplayer -vcd 2
+  mplayer vcd://2
   mplayer -afm 3 /mnt/DVDtrailers/alien4.vob
-  mplayer -dvd 1 -dvd-device /dev/hdc
+  mplayer dvd://1 -dvd-device /dev/hdc
   mplayer -abs 65536 -delay -0.4 -nobps ~/movies/test.avi
 </PRE>
 
@@ -1422,7 +1422,7 @@ HREF="http://www.videolan.org/vlc/dx7headers.tgz">DirectX 7Í·ÎÄ¼ş</A>£¬°ÑËüÃÇ½âÑ
 
 <P>DVDÍ¬Ñù¿ÉÒÔ£¬ÓÃÏÂÃæµÄÃüÁîDVDÉè±¸ÉèÖÃ³ÉÄãµÄCD-ROMÇı¶¯Æ÷£º</P>
 
-<P><CODE>mplayer -dvd &lt;title&gt; -dvd-device '\\.\d:'</CODE></P>
+<P><CODE>mplayer dvd://&lt;title&gt; -dvd-device '\\.\d:'</CODE></P>
 
 <P>QuickTime DLL¾İËµÒ²ÄÜ¹¤×÷¡£ÓÃ<CODE>--enable-qtx-codecs</CODE>±àÒë²¢°Ñ±à½âÂëÆ÷·Åµ½Ä¬ÈÏµÄWindows DLLÎ»
 ÖÃ£¬<CODE>C:\WINNT\system32</CODE>»òÕß<CODE>C:\Windows\system</CODE>È¡¾öÓÚÄãµÄWindowsµÄ°æ±¾¡£</P>

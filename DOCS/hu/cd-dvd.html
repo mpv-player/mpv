@@ -63,9 +63,9 @@
 <P>A rendelkezésre álló opciók teljes listája a man page-ben tekinthetõ
   meg. Egy szabványos DVD lemez lejátszása a következõképpen történik:</P>
 
-<P><CODE>mplayer -dvd &lt;sáv&gt; [-dvd-device &lt;egység&gt;]</CODE></P>
+<P><CODE>mplayer dvd://&lt;sáv&gt; [-dvd-device &lt;egység&gt;]</CODE></P>
 
-<P>Például: <CODE>mplayer -dvd 1 -dvd-device /dev/hdc</CODE></P>
+<P>Például: <CODE>mplayer dvd://1 -dvd-device /dev/hdc</CODE></P>
 
 <P>Az alapértelmezett DVD egység a <CODE>/dev/dvd</CODE>. Ha a rendszered ettõl
   különbözik, egy megfelelõ symlink-kel, vagy a <CODE>-dvd-device</CODE>
@@ -245,7 +245,7 @@
     MPEG (film) sávog, mindegyik egy-egy MPEG-PS adat/sector-t tartalmaz
     filerendszer helyett. Hasonlóan az audio CD sávokhoz, ezeket a sávokat
     <B>sem lehet mountolni</B> (Mountoltál már valaha audio CD-t hogy
-    lejátszd?). Mivel a legtöbb film ebben a sávban van, a <CODE>-vcd 2</CODE>
+    lejátszd?). Mivel a legtöbb film ebben a sávban van, a <CODE>vcd://2</CODE>
     opciót kell használnod.</LI>
   <LI>Léteznek VCD lemezek amelyeken nincs rajta az elsõ sáv (tehát csak
     egyetlen sávot tartalmaznak, filerendszer nélkül). Ezek is lejátszhatóak,

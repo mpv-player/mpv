@@ -153,10 +153,10 @@ function usage() {
    echo "'$HOWCALLED teneriffa teneriffa.avi'"
    echo "this creates a VCD from an avi file."
    echo
-   echo "'$HOWCALLED crazy -dvd 3 -w':"
+   echo "'$HOWCALLED crazy dvd://3 -w':"
    echo "encodes and burns dvd title 3 to VCD in 16:9."
    echo
-   echo "'$HOWCALLED carter -dvd 1 -sid 0 -aid 128 -ss 3:00 -frames 1500 \\"
+   echo "'$HOWCALLED carter dvd://1 -sid 0 -aid 128 -ss 3:00 -frames 1500 \\"
    echo "        -noburn -vnorm n -vfr 1':"
    echo "this encodes 1500 frames of dvd title 1 with subtitle 0 and audio stream"
    echo "128 starting from 3:00 with frame rate 29.97 fps and input video norm NTSC"
