@@ -22,7 +22,7 @@ static char help_text[]=
 " -dvdauth <dev>  выбор устройства DVD для авторизации (для шифрованных дисков)\n"
 #endif
 #ifdef USE_DVDREAD
-" -dvd <номер ролика> играть DVD полик с устройства вместо файла\n"
+" -dvd <номер ролика> играть DVD ролик с устройства вместо файла\n"
 " -alang/-slang   выбрать язык аудио/субтитров DVD (двубуквенный код страны)\n"
 #endif
 " -ss <время>     переместиться на заданную (секунды или ЧЧ:ММ:СС) позицию\n"
@@ -34,7 +34,7 @@ static char help_text[]=
 " -vid x -aid y   опции для выбора видео (x) и аудио (y) потока для проигрывания\n"
 " -fps x -srate y опции для изменения видео (x кадр/сек) и аудио (y Hz) скорости\n"
 " -pp <quality>   разрешить фильтр постобработки (подробности на man-странице)\n"
-" -framedrop      включить отбасывание кадров (для медленных машин)\n"
+" -framedrop      включить отбрасывание кадров (для медленных машин)\n"
 "\n"
 "Основные кнопки: (полный список в странице man, также смотри input.conf)\n"
 " <-  или ->      перемещение вперед/назад на 10 секунд\n"
@@ -343,7 +343,7 @@ static char help_text[]=
 
 // LIRC:
 #define MSGTR_SettingUpLIRC "Установка поддержки LIRC...\n"
-#define MSGTR_LIRCdisabled "Вы не сможете использовать Ваше пкльт управления\n"
+#define MSGTR_LIRCdisabled "Вы не сможете использовать Ваше пульт управления\n"
 #define MSGTR_LIRCopenfailed "Неудачное открытие поддержки LIRC!\n"
 #define MSGTR_LIRCcfgerr "Неудачная попытка чтения файла конфигурации LIRC %s !\n"
 
@@ -535,7 +535,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontFactor "Коэффициент шрифта:"
 #define MSGTR_PREFERENCES_PostProcess "Включить постобработку"
 #define MSGTR_PREFERENCES_AutoQuality "Авто качество: "
-#define MSGTR_PREFERENCES_NI "Использовать нечередованный AVI парсер"
+#define MSGTR_PREFERENCES_NI "Использовать 'неслоеный' AVI парсер"
 #define MSGTR_PREFERENCES_IDX "Если требуется, создавать индексную таблицу"
 #define MSGTR_PREFERENCES_VideoCodecFamily "Семейство видео кодеков:"
 #define MSGTR_PREFERENCES_AudioCodecFamily "Семейство аудио кодеков:"
@@ -586,6 +586,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Cache "Кэш вкл/выкл"
 #define MSGTR_PREFERENCES_CacheSize "Размер кэша: "
 #define MSGTR_PREFERENCES_LoadFullscreen "Стартовать на полный экран"
+#define MSGTR_PREFERENCES_SaveWinPos "Сохранять позицию окна"
 #define MSGTR_PREFERENCES_XSCREENSAVER "Останавливать XScreenSaver"
 #define MSGTR_PREFERENCES_PlayBar "Включить playbar"
 #define MSGTR_PREFERENCES_AutoSync "AutoSync вкл/выкл"
