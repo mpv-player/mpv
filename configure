@@ -3037,7 +3037,7 @@ echores "$_tga"
 
 echocheck "DirectFB headers presence"
 if test -z "$_inc_directfb" ; then
-  for I in /usr/include /usr/local/include; do
+  for I in /usr/include /usr/local/include $_inc_extra; do
     if test -d "$I/directfb" && test -f "$I/directfb/directfb.h" ; then
       _inc_directfb="-I$I/directfb"
       echores "yes (using $_inc_directfb)"
