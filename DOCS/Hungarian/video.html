@@ -603,6 +603,84 @@ Here are some important:</P></B></TD><TR>
 	Lásd a http://aa-project.sourceforge.net/tune/ címet további
 	részletekért.</P>
 
+
+<P><B><A NAME=2.2.1.12>2.2.1.12.  VESA - megjelenítés a VESA BIOS segítségével</B></P>
+<P>
+Ez egy <B>általános meghajtó</B> minden olyan kártyára, melynek VESA VBE 2.0
+kompatibilis BIOS-a van. Ezen kívül még egy oka van ezen meghajtó
+kifejlesztésének - a TV-n történõ lejátszással kapcsolatos gondok.<BR>
+<B>VESA BIOS EXTENSION (VBE) 3.0-ás verzió Dátum: Szeptember 16, 1998</B> (70. oldal)
+ezt írja:
+</P>
+
+<P>
+<code><i>
+<b>Duál-Kontroller Elv</b><br>
+A VBE 3.0 támogatja a duál-kontroller elvet, miszerint mivel mindkét
+kontroller tipikusan ugyanattól az OEM-tõl került ki, ugyanazon a grafikus
+kártyán ugyanazon BIOS ROM irányítása alatt, lehetséges az applikáció elöl
+elrejteni a tényt, hogy tulajdonképpen két kontroller van jelen.
+Ennek megvan az a hátránya hogy nem lehet egyszerre használni a két adaptert,
+de cserébe a VBE 3.0 elõtti programok normálisan futhatnak. A 00h VBE
+funkció (Kontroller Információ Lekérése) visszaadja az adapterek
+információit, beleértve a rendelkezésre álló videomódok kombinált
+listáját. Mikor egy program kiválaszt egy módot, a megfelelõ kontroller
+aktiválódik.
+</i></code>
+</P>
+
+<P>
+Azaz ezzel a meghajtóval van esély hogy a TV kimenetet mûködésre bírd.<BR>
+</P>
+
+<P>
+<b>Elõnyök:</b><BR>
+ - Akkor is nézhetsz filmeket ha a Linux <B>nem is ismeri</B> a kártyádat.<BR>
+ - Nem kell semmilyen grafikai program a Linuxodra (mint az XFree86, fbdev, stb).
+Ez a meghajtó <B>szöveges módból</B> is futtatható.<BR>
+ - Lehetséges hogy mûködni fog vele a <B>TV kimenet</B>. (ATI kártyákkal
+legalábbis)<BR>
+ - A meghajtó a <B>10h megszakítást</B> hívja, tehát nem emulátor -
+az <B>igazi</B> BIOS-t hívja, <B>valós</B> módban. (igazából vm86 módból)<BR>
+ - Legfontosabb :) <B>320x200-as felbontásban</B> nézhetsz vele DVD-t, ha nincs elég erõs processzorod
+a magasabb módokhoz.<BR>
+</P>
+
+<P>
+<b>Hátrányok:</b><BR>
+ - Csak <B>x86 rendszereken</B> mûködik.<BR>
+ - Ez a <B>leglassabb</B> meghajtó az <B>MPlayer</B> meghajtói közül.<BR>
+ - Csak <B>ROOT</B> használhatja.<BR>
+ - Csak <B>Linux</B>on elérhetõ.<BR>
+ - Jelenleg <B>nem használ hardveres gyorsítást</B> (mint például a YUV
+overlay, vagy hardveres skálázás)<BR>
+</P>
+
+<P>
+<TABLE BORDER=0>
+<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Jelenleg a következõ opciókat veszi figyelembe:</B></P></TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-vo vesa:opciók</TD><TD>&nbsp;&nbsp;</TD><TD>
+<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>hamarosan implementálva lesz (Will specify mode parameters such as refresh rate, interlacing, doublescan and so on. Samples: i43,  85,  d100)</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-screenw, -screenh, -bpp</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>felhasználó által megadott videomód használata</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-x, -y</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>megadott skálázás használata</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-zoom</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>skálázás bekapcsolása</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fs</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>teljesképernyõs módra nagyítás</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fs -zoom</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>megadott skálázás teljesképernyõs módra</TD><TR>
+</TABLE>
+</P>
+
+<P>
+<b>Ismert problémák, és elkerülésük :</b><br>
+ - Ha van installálva <B>NLS</B> betûtipus a Linuxodon és szöveges módból
+futtatod a meghajtót, kilépés után a <B>ROM betütipus</B> lesz betöltve.
+A szokásos betûtipusodat a <B><I>setsysfont</I></B> programmal töltheted
+be.<BR>
+ - Gyakran kilépés után <B>fekete a képernyõ</B>. Ilyenkor válts át egy
+másik konzolra, és vissza.<BR>
+ - A <B>mûködõ TV kimenethez</B> be kell dugnod a TV kábelt bootolás elõtt,
+mivel a BIOS csak akkor inicializálja magát.
+</P>
+
 <P><B><A NAME=2.2.1.A>2.2.1.A.  TV kimenet</A></B></P>
 
 <P><B><A NAME=2.2.1.A.1>2.2.1.A.1.  Matrox kártyák</A></B></P>
@@ -741,11 +819,25 @@ a másolásvédelmet a chipjeiken. Ígyhát nincs esélyünk TV kimenetre.</P>
 <LI><b>Radeon VE</b> és <b>Rage PRO LT</b> : <i>ImpacTV2+</i> ami jelenleg nem támogatott Linux alatt.</P>
 
 <P>
-A másik oldalról megközelítve - x86-os rendszereken elvileg lehetséges lenne
-a TV kimenet a <B>VESA meghajtókon</B> át, de mivel a Linuxnak túlságosan
-le vannak szûkítve a <I>vm86 rendszerhívásai</I> - ez gyakorlatilag lehetetlen.
+Szerencsére ha elég gyors processzorod van (Duron, Celeron2 vagy jobb),
+<B>használhatod a TV kimenetet</B> a <A HREF=#2.2.1.12>VESA meghajtón</A>
+keresztül.
+</P>
+
+<P>
+A <B>VESA meghajtó</B> nem használ hardveres gyorsítást, hanem <B>DGA-t</B>
+szimulál egy 64k-s ablakon keresztül, ami a BIOS 32 bites funkcióin
+keresztül konfigurálható. Az ATI kártyák elég gyors memóriával rendelkeznek,
+így az itt elveszített sebesség minimális. Más kártyákkal ellentétben
+itt nincs meghatározva a TV-n használható módok száma, így <B>320x200</B>-tól
+<B>1024x768</B>-ig bármilyen módot használhatsz.<BR>
+Egy dologra kell figyelned : a PC bekapcsolásakor <B>legyen bedugva a TV
+kábele</B>, mert a BIOS csak bootolásnál inicializálja magát.
+</P>
+
+<P>
+A részleteket lásd a <A HREF=#2.2.1.12>VESA meghajtó</A> leírásánál.
 </P>
 
 </BODY>
-
 </HTML>
