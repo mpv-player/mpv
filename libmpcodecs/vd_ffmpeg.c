@@ -70,9 +70,8 @@ static int init(sh_video_t *sh){
 	return 0;
     }
 
-// currently buggy with B frames...    
-//    if(vd_use_slices && lavc_codec->capabilities&CODEC_CAP_DRAW_HORIZ_BAND)
-//	ctx->do_slices=1;
+    if(vd_use_slices && lavc_codec->capabilities&CODEC_CAP_DRAW_HORIZ_BAND)
+	ctx->do_slices=1;
     
     ctx->avctx = malloc(sizeof(AVCodecContext));
     memset(ctx->avctx, 0, sizeof(AVCodecContext));
