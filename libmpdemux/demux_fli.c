@@ -54,6 +54,7 @@ demuxer_t* demux_open_fli(demuxer_t* demuxer){
   sh_video_t *sh_video = NULL;
   fli_frames_t *frames = (fli_frames_t *)malloc(sizeof(fli_frames_t));
   int frame_number;
+  int speed;
 
   // go back to the beginning
   stream_reset(demuxer->stream);
@@ -94,7 +95,10 @@ demuxer_t* demux_open_fli(demuxer_t* demuxer){
   stream_skip(demuxer->stream, 4);
 
   // get the speed
-  sh_video->fps = 1000 / stream_read_word_le(demuxer->stream);
+  speed = stream_read_word_le(demuxer->stream);
+  if (speed == 0)
+    speed = 1;
+  sh_video->fps = 1000 / speed;
   sh_video->frametime = 1/sh_video->fps;
 
   // build the frame index
