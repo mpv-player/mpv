@@ -33,10 +33,19 @@
 #include "cfgparser.h"
 #include "cfg-mplayer-def.h"
 
+#ifdef USE_SUB
 #include "subreader.h"
+#endif
 
+#ifdef USE_LIBVO2
+#include "libvo2/libvo2.h"
+#else
 #include "libvo/video_out.h"
+#endif
+
+//#ifdef USE_OSD
 #include "libvo/sub.h"
+//#endif
 
 #include "libao2/audio_out.h"
 
@@ -79,7 +88,9 @@ int verbose=0;
 
 #define ABS(x) (((x)>=0)?(x):(-(x)))
 
+#ifdef USE_SUB
 void find_sub(subtitle* subtitles,int key);
+#endif
 
 static int
 usec_sleep(int usec_delay)
@@ -186,7 +197,11 @@ int frameratecode2framerate[16] = {
 
 //**************************************************************************//
 
+#ifdef USE_LIBVO2
+static vo2_handle_t *video_out=NULL;
+#else
 static vo_functions_t *video_out=NULL;
+#endif
 static ao_functions_t *audio_out=NULL;
 
 float c_total=0;
@@ -321,7 +336,11 @@ void exit_player(char* how){
    if ( nogui )
   #endif
      getch2_disable();
+#ifdef USE_LIBVO2
+  if(video_out) vo2_close(video_out);
+#else
   if(video_out) video_out->uninit();
+#endif
   if(audio_out) audio_out->uninit();
   if(encode_name) avi_fixate();
 #ifdef HAVE_LIRC
@@ -367,7 +386,11 @@ extern void skip_audio_frame(sh_audio_t *sh_audio);
 
 // dec_video.c:
 extern int init_video(sh_video_t *sh_video);
+#ifdef USE_LIBVO2
+extern int decode_video(vo2_handle_t *video_out,sh_video_t *sh_video,unsigned char *start,int in_size,int drop_frame);
+#else
 extern int decode_video(vo_functions_t *video_out,sh_video_t *sh_video,unsigned char *start,int in_size,int drop_frame);
+#endif
 
 #include "mixer.h"
 #include "cfg-mplayer.h"
@@ -404,7 +427,9 @@ if ((conffile = get_path("")) == NULL) {
  int mplayer(int argc,char* argv[], char *envp[]){
 #endif
 
+#ifdef USE_SUB
 static subtitle* subtitles=NULL;
+#endif
 
 static demuxer_t *demuxer=NULL;
 
@@ -458,6 +483,7 @@ int f; // filedes
       printf("\n");
     }
 
+#ifndef USE_LIBVO2
     if(video_driver && strcmp(video_driver,"help")==0){
       printf("Available video output drivers:\n");
       i=0;
@@ -468,6 +494,7 @@ int f; // filedes
       printf("\n");
       exit(0);
     }
+#endif
     if(audio_driver && strcmp(audio_driver,"help")==0){
       printf("Available audio output drivers:\n");
       i=0;
@@ -489,6 +516,9 @@ if(!filename){
   }
 }
 
+#ifdef USE_LIBVO2
+    video_out=vo2_new(video_driver);
+#else
 // check video_out driver name:
     if (video_driver)
 	if ((i = strcspn(video_driver, ":")) > 0)
@@ -513,11 +543,12 @@ if(!filename){
       video_out = video_out_drivers[i];break;
     }
   }
+#endif
   if(!video_out){
-    fprintf(stderr,"Invalid video output driver name: %s\nUse '-vo help' to get a list of available video drivers.\n",video_driver);
+    fprintf(stderr,"Invalid video output driver name: %s\nUse '-vo help' to get a list of available video drivers.\n",video_driver?video_driver:"?");
     return 0;
   }
-  
+
 // check audio_out driver name:
     if (audio_driver)
 	if ((i = strcspn(audio_driver, ":")) > 0)
@@ -558,6 +589,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 }
 
 // check font
+#ifdef USE_OSD
   if(font_name){
        vo_font=read_font_desc(font_name,font_factor,verbose>1);
        if(!vo_font) fprintf(stderr,"Can't load font: %s\n",font_name);
@@ -567,7 +599,9 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
        if(!vo_font)
        vo_font=read_font_desc(DATADIR"/font/font.desc",font_factor,verbose>1);
   }
+#endif
 
+#ifdef USE_SUB
 // check .sub
   if(sub_name){
        subtitles=sub_read_file(sub_name);
@@ -580,7 +614,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
       }
       if ( subtitles == NULL ) subtitles=sub_read_file(get_path("default.sub")); // try default:
   }
-
+#endif
 
 if(vcd_track){
 //============ Open VideoCD track ==============
@@ -812,7 +846,11 @@ for(i=0;i<CODECS_MAX_OUTFMT;i++){
     int ret;
     out_fmt=sh_video->codec->outfmt[i];
     if(out_fmt==0xFFFFFFFF) continue;
+#ifdef USE_LIBVO2
+    ret=vo2_query_format(video_out);
+#else
     ret=video_out->query_format(out_fmt);
+#endif
     if(verbose) printf("vo_debug: query(%s) returned 0x%X\n",vo_format_name(out_fmt),ret);
     if(ret) break;
 }
@@ -894,6 +932,7 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
      if(screen_size_y<=8) screen_size_y*=sh_video->disp_h;
    }
 
+#ifndef USE_LIBVO2
    { const vo_info_t *info = video_out->get_info();
      printf("VO: [%s] %dx%d => %dx%d %s %s%s%s%s\n",info->short_name,
          sh_video->disp_w,sh_video->disp_h,
@@ -913,6 +952,7 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
     if(strlen(info->comment) > 0)
         printf("VO: Comment: %s\n", info->comment);
    }
+#endif
 
    if(verbose) printf("video_out->init(%dx%d->%dx%d,flags=%d,'%s',0x%X)\n",
                       sh_video->disp_w,sh_video->disp_h,
@@ -929,6 +969,15 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
      }
    #endif
 
+#ifdef USE_LIBVO2
+   if(!vo2_start(video_out,
+               sh_video->disp_w,sh_video->disp_h,out_fmt,0,
+                      fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3) )){
+     fprintf(stderr,"FATAL: Cannot initialize video driver!\n");
+     GUI_MSG( mplCantInitVideoDriver )
+     exit(1);
+   }
+#else
    if(video_out->init(sh_video->disp_w,sh_video->disp_h,
                       screen_size_x,screen_size_y,
                       fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3),
@@ -937,6 +986,7 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
      GUI_MSG( mplCantInitVideoDriver )
      exit(1);
    }
+#endif
    if(verbose) printf("INFO: Video OUT driver init OK!\n");
 
    fflush(stdout);
@@ -1292,7 +1342,11 @@ if(1)
       }
 
         current_module="flip_page";
+#ifdef USE_LIBVO2
+        if(blit_frame) vo2_flip(video_out,0);
+#else
         if(blit_frame) video_out->flip_page();
+#endif
 //        usec_sleep(50000); // test only!
 
     }
@@ -1383,10 +1437,12 @@ if(1)
   }
 #endif
 
+#ifdef USE_OSD
   if(osd_visible){
     --osd_visible;
     if(!osd_visible) vo_osd_progbar_type=-1; // disable
   }
+#endif
 
   if(osd_function==OSD_PAUSE){
       printf("\n------ PAUSED -------\r");fflush(stdout);
@@ -1401,7 +1457,9 @@ if(1)
              lirc_mp_getinput()<=0 &&
 #endif
              (!f || getch2(20)<=0) && mplayer_get_key()<=0){
+#ifndef USE_LIBVO2
 	     video_out->check_events();
+#endif
              if(!f) usec_sleep(1000); // do not eat the CPU
          }
          osd_function=OSD_PLAY;
@@ -1485,12 +1543,14 @@ if(1)
         }
         mixer_setvolume( mixer_l,mixer_r );
 
+#ifdef USE_OSD
         if(osd_level){
           osd_visible=sh_video->fps; // 1 sec
           vo_osd_progbar_type=OSD_VOLUME;
           vo_osd_progbar_value=(mixer_l+mixer_r)*5/4;
           //printf("volume: %d\n",vo_osd_progbar_value);
         }
+#endif
       }
       break; 
     case 'm':
@@ -1526,6 +1586,7 @@ if(1)
         current_module=NULL;
       }
 
+#ifdef USE_OSD
         // Set OSD:
       if(osd_level){
         int len=((demuxer->movi_end-demuxer->movi_start)>>8);
@@ -1535,6 +1596,7 @@ if(1)
           vo_osd_progbar_value=(demuxer->filepos-demuxer->movi_start)/len;
         }
       }
+#endif
       
       c_total=0;
       max_pts_correction=0.1;
@@ -1545,6 +1607,7 @@ if(1)
   rel_seek_secs=0;
   
 //================= Update OSD ====================
+#ifdef USE_OSD
   if(osd_level>=2){
       int pts=d_video->pts;
       if(pts==osd_last_pts-1) ++pts; else osd_last_pts=pts;
@@ -1555,7 +1618,9 @@ if(1)
   }
 //  for(i=1;i<=11;i++) osd_text_buffer[10+i]=i;osd_text_buffer[10+i]=0;
 //  vo_osd_text=osd_text_buffer;
+#endif
   
+#ifdef USE_SUB
   // find sub
   if(subtitles && d_video->pts>0){
       int pts=d_video->pts;
@@ -1564,6 +1629,7 @@ if(1)
       find_sub(subtitles,sub_uses_time?(100*(pts+sub_delay)):((pts+sub_delay)*sub_fps)); // FIXME! frame counter...
       current_module=NULL;
   }
+#endif
   
   // DVD sub:
   { unsigned char* packet=NULL;

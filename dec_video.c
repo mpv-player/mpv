@@ -28,7 +28,11 @@ extern int frameratecode2framerate[16];
 //#include <inttypes.h>
 //#include "libvo/img_format.h"
 
+#ifdef USE_LIBVO2
+#include "libvo2/libvo2.h"
+#else
 #include "libvo/video_out.h"
+#endif
 
 #include "libmpeg2/mpeg2.h"
 #include "libmpeg2/mpeg2_internal.h"
@@ -260,7 +264,11 @@ switch(sh_video->codec->driver){
   return 1;
 }
 
+#ifdef USE_LIBVO2
+int decode_video(vo2_handle_t *video_out,sh_video_t *sh_video,unsigned char *start,int in_size,int drop_frame){
+#else
 int decode_video(vo_functions_t *video_out,sh_video_t *sh_video,unsigned char *start,int in_size,int drop_frame){
+#endif
 unsigned int out_fmt=sh_video->codec->outfmt[sh_video->outfmtidx];
 int planar=(out_fmt==IMGFMT_YV12||out_fmt==IMGFMT_IYUV||out_fmt==IMGFMT_I420);
 int blit_frame=0;
@@ -416,10 +424,17 @@ case 3:
       } else
         planes[0]=sh_video->our_out_buffer;
 case 2:
+#ifdef USE_LIBVO2
+    if(planar)
+        vo2_draw_slice(video_out,planes,stride,sh_video->disp_w,sh_video->disp_h,0,0);
+    else
+        vo2_draw_frame(video_out,planes[0],sh_video->disp_w,sh_video->disp_w,sh_video->disp_h);
+#else
     if(planar)
         video_out->draw_slice(planes,stride,sh_video->disp_w,sh_video->disp_h,0,0);
     else
         video_out->draw_frame(planes);
+#endif
     t2=GetTimer()-t2;vout_time_usage+=t2*0.000001f;
     blit_frame=1;
     break;

@@ -2,6 +2,10 @@
 //             .SUB 
 //**************************************************************************//
 
+#include "config.h"
+
+#ifdef USE_OSD
+
 #include <stdio.h>
 
 #include "libvo/video_out.h"
@@ -104,3 +108,4 @@ void find_sub(subtitle* subtitles,int key){
     vo_sub=NULL; // no sub here
 }
 
+#endif

@@ -27,11 +27,19 @@ extern int fakemono; // defined in dec_audio.c
 extern char *lirc_configfile;
 #endif
 
+#ifndef USE_LIBVO2
 extern int vo_doublebuffering;
 extern int vo_fsmode;
 extern int vo_dbpp;
-extern int osd_level;
+#endif
+
+#ifdef USE_SUB
 extern int sub_unicode;
+#endif
+
+#ifdef USE_OSD
+extern int osd_level;
+#endif
 
 extern char *ao_outputfilename;
 extern int ao_pcm_waveheader;
@@ -77,14 +85,18 @@ struct config conf[]={
 	{"monitor_dotclock", &monitor_dotclock_str, CONF_TYPE_STRING, 0, 0, 0},
 #endif
 	{"encode", &encode_name, CONF_TYPE_STRING, 0, 0, 0},
+#ifdef USE_SUB
 	{"sub", &sub_name, CONF_TYPE_STRING, 0, 0, 0},
 	{"subdelay", &sub_delay, CONF_TYPE_FLOAT, 0, 0.0, 10.0},
 	{"subfps", &sub_fps, CONF_TYPE_FLOAT, 0, 0.0, 10.0},
         {"noautosub", &sub_auto, CONF_TYPE_FLAG, 0, 1, 0},
 	{"unicode", &sub_unicode, CONF_TYPE_FLAG, 0, 0, 1},
 	{"nounicode", &sub_unicode, CONF_TYPE_FLAG, 0, 1, 0},
+#endif
+#ifdef USE_OSD
 	{"font", &font_name, CONF_TYPE_STRING, 0, 0, 0},
 	{"ffactor", &font_factor, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 10.0},
+#endif
 	{"bg", &play_in_bg, CONF_TYPE_FLAG, 0, 0, 1},
 	{"nobg", &play_in_bg, CONF_TYPE_FLAG, 0, 1, 0},
 	{"sb", &seek_to_byte, CONF_TYPE_INT, CONF_MIN, 0, 0},
@@ -168,10 +180,13 @@ struct config conf[]={
         {"flip", &flip, CONF_TYPE_FLAG, 0, -1, 1},
         {"noflip", &flip, CONF_TYPE_FLAG, 0, -1, 0},
        
+#ifndef USE_LIBVO2
         {"bpp", &vo_dbpp, CONF_TYPE_INT, CONF_RANGE, 0, 32},
 	{"fsmode", &vo_fsmode, CONF_TYPE_INT, CONF_RANGE, 0, 15},
 	{"double", &vo_doublebuffering, CONF_TYPE_FLAG, 0, 0, 1},
 	{"nodouble", &vo_doublebuffering, CONF_TYPE_FLAG, 0, 1, 0},
+#endif
+
 #ifdef HAVE_LIRC
 	{"lircconf", &lirc_configfile, CONF_TYPE_STRING, 0, 0, 0}, 
 #endif
