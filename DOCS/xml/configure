@@ -25,7 +25,8 @@ fi
 
 
 
-echo "Searching for stylesheet..."
+echo "Searching stylesheets..."
+echo "Searching html/chunk.xsl..."
 for _try_chunk_xsl in /usr/share/sgml/docbook/stylesheet/xsl/nwalsh/html/chunk.xsl /usr/share/sgml/docbook/yelp/docbook/html/chunk.xsl /usr/local/share/sgml/docbook/stylesheet/xsl/nwalsh/html/chunk.xsl /usr/local/share/sgml/docbook/yelp/docbook/html/chunk.xsl /usr/share/docbook-xsl/html/chunk.xsl
 do
   if test -f "$_try_chunk_xsl"
@@ -44,7 +45,26 @@ else
   echo "Found chunk.xsl at $_chunk_xsl"
 fi
 
-cat > html.xsl << EOF
+echo "Searching for html/docbook.xsl..."
+for _try_docbook_xsl in /usr/share/sgml/docbook/stylesheet/xsl/nwalsh/html/docbook.xsl /usr/share/sgml/docbook/yelp/docbook/html/docbook.xsl /usr/local/share/sgml/docbook/stylesheet/xsl/nwalsh/html/docbook.xsl /usr/local/share/sgml/docbook/yelp/docbook/html/docbook.xsl /usr/share/docbook-xsl/html/docbook.xsl
+do
+  if test -f "$_try_docbook_xsl"
+  then
+    _docbook_xsl=$_try_docbook_xsl
+    break
+  fi
+done
+
+if test -z "$_docbook_xsl"
+then
+  _docbook_xsl=/usr/share/sgml/docbook/stylesheet/xsl/nwalsh/html/docbook.xsl
+  echo "Not found. Using default ($_docbook_xsl)"
+  _fake_docbook_xsl=yes
+else
+  echo "Found docbook.xsl at $_docbook_xsl"
+fi
+
+cat > html-chunk.xsl << EOF
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!-- **************************************************
      This file is generated automatically. DO NOT EDIT.
@@ -53,6 +73,21 @@ cat > html.xsl << EOF
                 version="1.0">
 
   <xsl:import href="$_chunk_xsl"/>
+  <xsl:include href="html-common.xsl"/>
+
+</xsl:stylesheet>
+EOF
+
+
+cat > html.xsl << EOF
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!-- **************************************************
+     This file is generated automatically. DO NOT EDIT.
+     ************************************************** -->
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                version="1.0">
+
+  <xsl:import href="$_docbook_xsl"/>
   <xsl:include href="html-common.xsl"/>
 
 </xsl:stylesheet>
@@ -114,7 +149,28 @@ then
     then
       if test -z "$_fake_chunk_xsl"
       then
-        _xsltcommand="cd \$1 && if test \"\`dirname \$2 | head -c 1\`\" = \".\" ; then $_java  -classpath $_saxon_jar com.icl.saxon.StyleSheet \$_IN_DIR/\$3 \$_IN_DIR/\$2 ; else $_java  -classpath $_saxon_jar com.icl.saxon.StyleSheet \$_IN_DIR/\$3 \$2 ;fi"
+#        _xsltcommand="cd \$1 && if test \"\`dirname \$2 | head -c 1\`\" = \".\" ; then $_java  -classpath $_saxon_jar com.icl.saxon.StyleSheet \$_IN_DIR/\$3 \$_IN_DIR/\$2 ; else $_java  -classpath $_saxon_jar com.icl.saxon.StyleSheet \$_IN_DIR/\$3 \$2 ;fi"
+	_xsltcommand="
+if test \"\`dirname \$2 | head -c 1\`\" = \".\"
+then
+  _STYLESHEET=\$_IN_DIR/\$2
+else
+  _STYLESHEET=\$2
+fi
+
+if test -d \$1
+then
+  _DIRNAME=\"\$1\"
+  _OUTPUT=\"\"
+else
+  _DIRNAME=\"\`dirname \$1\`\"
+  _OUTPUT=\"-o \`basename \$1\`\"
+fi
+
+cd \$_DIRNAME &&
+  java  -classpath /usr/share/java/saxon.jar com.icl.saxon.StyleSheet \$_OUTPUT \$_IN_DIR/\$3 \$_STYLESHEET
+  "
+
         echo "Found the Saxon XSLT Processor ($_saxon_jar), using Java VM '$_java'."
       else
         echo "Found the Saxon XSLT processor but no stylesheets on your system."
@@ -189,11 +245,12 @@ EOF
 chmod +x $_xsltwrapper
 
 
-
+echo "Searching xml checker..."
 for _try_xmllint in xmllint
 do
-  if command -v $_try_xmllint
+  if command -v $_try_xmllint > /dev/null
   then
+    echo "Found: $_try_xmllint"
     if test -n "$_catalog"
     then
       _xmllint_command="$_try_xmllint --noout --noent --postvalid --catalogs \$*"
@@ -206,6 +263,7 @@ done
 
 if test -z "$_xmllint_command"
 then
+  echo "Not found"
   _xmllint_command=true
 fi
 

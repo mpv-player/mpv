@@ -1,3 +1,4 @@
 html.xsl
+html-chunk.xsl
 xsltproc.sh
 xmllint.sh

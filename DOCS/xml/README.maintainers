@@ -28,21 +28,47 @@ Adding new translations
 3) Set <book lang="XX"> to your language code if the DocBook XSL
    stylesheets support it.
 4) If you want to use a customized XSL stylesheet, create one and name it
-   'html.xsl'.  And do not forget to import the toplevel XSL file:
+   'html-common.xsl'. Also create two additional XSL stylesheets ('html.xsl'
+   and 'html-chunk.xsl', with such content:
 
-	<xsl:import href="../html.xsl"/>
+   html.xsl:
+
+   <?xml version="1.0" encoding="ISO-8859-1"?>
+   <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                version="1.0">
+
+  <xsl:import href="../html.xsl"/>
+  <xsl:include href="html-common.xsl"/>
+
+  </xsl:stylesheet>
+
+  html-chunk.xsl:
+  
+  <?xml version="1.0" encoding="ISO-8859-1"?>
+  <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                version="1.0">
+
+  <xsl:import href="../html-chunk.xsl"/>
+  <xsl:include href="html-common.xsl"/>
+
+  </xsl:stylesheet>
+
 
    Note: You mustn't xsl:include or xsl:import chunk.xsl directly!
    Including it can (and will) break building of documentation if chunk.xsl
    is installed at a nonstandard location.
-5) If you wish to change output encoding of generated files, create html.xsl
-   as suggested in step 4) and add somwhere after <xsl:import .../> such string:
+5) If you wish to change output encoding of generated files, create
+   html-common.xsl as suggested in step 4) and add such strings somewhere
+   between <xsl:stylesheet ...> and </xsl:stylesheet> tags
+   (please, pay attention to quotes):
 
       <xsl:param name="chunker.output.encoding" select="'your_encoding'"/>
-      
-   Use ru/html.xsl as example.
+      <xsl:output encoding="your_encoding"/>
+
+   Use ru/html-common.xsl as example.
 6) If you are using your own HTML stylesheet, edit your Makefile and set
-   the HTML_STYLESHEET variable to its name.
+   the HTML_STYLESHEET variable to its name. Please, don't give name
+   'default.css' to your HTML stylesheet.
 7) In each translated file after the <?xml ... ?> tag you must put a note
    like <!-- synced with 1.2 -->, where 1.2 is the revision of corresponding
    English file (see comment at the top of file).

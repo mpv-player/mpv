@@ -8,3 +8,4 @@ USE_SYMLINKS = no
 
 # Dependency information.
 $(HTMLDIR)/index.html: $(wildcard *.xml)
+$(HTMLFILE): $(wildcard *.xml)
