@@ -1754,12 +1754,29 @@ static void set_gr_key( void )
 	switch(dbpp)
 	{
 	case 15:
+#ifdef RADEON
+		if(RadeonFamily == 200)
+			besr.graphics_key_clr=
+				  ((radeon_grkey.ckey.blue &0xF8))
+				| ((radeon_grkey.ckey.green&0xF8)<<8)
+				| ((radeon_grkey.ckey.red  &0xF8)<<16);
+		else
+#endif
 		besr.graphics_key_clr=
 			  ((radeon_grkey.ckey.blue &0xF8)>>3)
 			| ((radeon_grkey.ckey.green&0xF8)<<2)
 			| ((radeon_grkey.ckey.red  &0xF8)<<7);
 		break;
 	case 16:
+#ifdef RADEON
+		/* This test may be too general/specific */
+		if(RadeonFamily == 200)
+			besr.graphics_key_clr=
+				  ((radeon_grkey.ckey.blue &0xF8))
+				| ((radeon_grkey.ckey.green&0xFC)<<8)
+				| ((radeon_grkey.ckey.red  &0xF8)<<16);
+		else
+#endif
 		besr.graphics_key_clr=
 			  ((radeon_grkey.ckey.blue &0xF8)>>3)
 			| ((radeon_grkey.ckey.green&0xFC)<<3)
