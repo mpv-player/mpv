@@ -782,6 +782,7 @@ mp_input_read_key_code(int time) {
 
   FD_ZERO(&fds);
   // Remove fd marked as dead and build the fd_set
+  // n == number of fd's to be select() checked
   for(i = 0; (unsigned int)i < num_key_fd; i++) {
     if( (key_fds[i].flags & MP_FD_DEAD) ) {
       mp_input_rm_key_fd(key_fds[i].fd);
@@ -795,8 +796,11 @@ mp_input_read_key_code(int time) {
     n++;
   }
 
-  if(n == 0 || num_key_fd == 0)
+  if(num_key_fd == 0)
     return MP_INPUT_NOTHING;
+
+// if we have fd's without MP_FD_NO_SELECT flag, call select():
+if(n>0){
 
   if(time >= 0 ) {
     tv.tv_sec=time/1000; 
@@ -805,7 +809,7 @@ mp_input_read_key_code(int time) {
   } else
     time_val = NULL;
   
-  while(n > 0) {
+  while(1) {
     if(select(max_fd+1,&fds,NULL,NULL,time_val) < 0) {
       if(errno == EINTR)
 	continue;
@@ -813,7 +817,9 @@ mp_input_read_key_code(int time) {
     }
     break;
   }
-    
+
+}
+
   for(i = last_loop + 1 ; i != last_loop ; i++) {
     int code = -1;
     // This is to check all fd in turn
