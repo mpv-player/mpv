@@ -369,19 +369,19 @@ static float vsf(fb_mode_t *m)	//vertical scan frequency
 typedef struct {
 	float min;
 	float max;
-} range;
+} range_t;
 
-static int in_range(range *r, float f)
+static int in_range(range_t *r, float f)
 {
-	for (/* NOTHING */; r; r++) {
+	for (/* NOTHING */; (r->min != -1 && r->max != -1); r++) {
 		if (f >= r->min && f <= r->max)
 			return 1;
 	}
 	return 0;
 }
 
-static fb_mode_t *find_best_mode(int xres, int yres, range *hfreq,
-		range *vfreq, range *dotclock)
+static fb_mode_t *find_best_mode(int xres, int yres, range_t *hfreq,
+		range_t *vfreq, range_t *dotclock)
 {
 	int i;
 	fb_mode_t *best = fb_modes;
@@ -408,6 +408,112 @@ static fb_mode_t *find_best_mode(int xres, int yres, range *hfreq,
 	return best;
 }
 
+static void set_bpp(struct fb_var_screeninfo *p, int bpp)
+{
+	p->bits_per_pixel = (bpp == 15) ? 16 : bpp;
+	p->red.msb_right = p->green.msb_right = p->blue.msb_right = 0;
+	switch (bpp) {
+		case 32:
+		case 24:
+			p->red.offset = 16;
+			p->red.length = 8;
+			p->green.offset = 8;
+			p->green.length = 8;
+			p->blue.offset = 0;
+			p->blue.length = 8;
+			break;
+		case 16:
+			p->red.offset = 11;
+			p->red.length = 5;
+			p->green.offset = 5;
+			p->green.length = 6;
+			p->blue.offset = 0;
+			p->blue.length = 5;
+			break;
+		case 15:
+			p->red.offset = 10;
+			p->red.length = 5;
+			p->green.offset = 5;
+			p->green.length = 5;
+			p->blue.offset = 0;
+			p->blue.length = 5;
+			break;
+	}
+}
+
+static void fb_mode2fb_vinfo(fb_mode_t *m, struct fb_var_screeninfo *v)
+{
+	v->xres = m->xres;
+	v->yres = m->yres;
+	v->xres_virtual = m->vxres;
+	v->yres_virtual = m->vyres;
+	set_bpp(v, m->depth);
+	v->pixclock = m->pixclock;
+	v->left_margin = m->left;
+	v->right_margin = m->right;
+	v->upper_margin = m->upper;
+	v->lower_margin = m->lower;
+	v->hsync_len = m->hslen;
+	v->vsync_len = m->vslen;
+	v->sync = m->sync;
+	v->vmode = m->vmode;
+}
+
+static range_t *str2range(char *s)
+{
+	float tmp_min, tmp_max;
+	char *endptr = s;	// to start the loop
+	range_t *r = NULL;
+	int i, j;
+
+	if (!s)
+		return NULL;
+	for (i = 0; *endptr; i++) {
+		if (*s == ',')
+			goto out_err;
+		if (!(r = (range_t *) realloc(r, sizeof(*r) * i + 2))) {
+			printf("can't realloc 'r'\n");
+			return NULL;
+		}
+		tmp_min = strtod(s, &endptr);
+		if (*endptr == 'k' || *endptr == 'K') {
+			tmp_min *= 1000.0;
+			endptr++;
+		} else if (*endptr == 'm' || *endptr == 'M') {
+			tmp_min *= 1000000.0;
+			endptr++;
+		}
+		if (*endptr == '-') {
+			tmp_max = strtod(endptr + 1, &endptr);
+			if (*endptr == 'k' || *endptr == 'K') {
+				tmp_max *= 1000.0;
+				endptr++;
+			} else if (*endptr == 'm' || *endptr == 'M') {
+				tmp_max *= 1000000.0;
+				endptr++;
+			}
+			if (*endptr != ',' && *endptr)
+				goto out_err;
+		} else if (*endptr == ',' || !*endptr) {
+			tmp_max = tmp_min;
+		} else
+			goto out_err;
+		r[i].min = tmp_min;
+		r[i].max = tmp_max;
+		s = endptr + 1;
+	}
+	/* check if we have negative numbers... */
+	for (j = 0; j < i; j++)
+		if (r[j].min < 0 || r[j].max < 0)
+			goto out_err;
+	r[i].min = r[i].max = -1;
+	return r;
+out_err:
+	if (r)
+		free(r);
+	return NULL;
+}
+
 /******************************
 *	    vo_fbdev	      *
 ******************************/
@@ -418,11 +524,13 @@ static fb_mode_t *find_best_mode(int xres, int yres, range *hfreq,
 char *fb_dev_name = NULL;
 char *fb_mode_cfgfile = "/etc/fb.modes";
 char *fb_mode_name = NULL;
-int fb_mode_depth = 0;
-int fb_mode_auto = 0;
-char *monitor_hfreq = NULL;
-char *monitor_vfreq = NULL;
-char *monitor_dotclock = NULL;
+char *monitor_hfreq_str = NULL;
+char *monitor_vfreq_str = NULL;
+char *monitor_dotclock_str = NULL;
+
+range_t *monitor_hfreq = NULL;
+range_t *monitor_vfreq = NULL;
+range_t *monitor_dotclock = NULL;
 
 static int fb_preinit_done = 0;
 static int fb_works = 0;
@@ -440,6 +548,11 @@ static int fb_bpp_we_want;	// 32: 32  24: 24  16: 16  15: 15
 static int fb_screen_width;
 static fb_mode_t *fb_mode = NULL;
 
+static void (*put_frame)(void);
+static int left_band_width;
+static int right_band_width;
+static int upper_band_height;
+static int lower_band_height;
 static uint8_t *next_frame;
 static int in_width;
 static int in_height;
@@ -518,39 +631,6 @@ struct fb_cmap *make_directcolor_cmap(struct fb_var_screeninfo *var)
   return cmap;
 }
 
-static void set_bpp(struct fb_var_screeninfo *p, int bpp)
-{
-	p->bits_per_pixel = (bpp == 15) ? 16 : bpp;
-	p->red.msb_right = p->green.msb_right = p->blue.msb_right = 0;
-	switch (bpp) {
-		case 32:
-		case 24:
-			p->red.offset = 16;
-			p->red.length = 8;
-			p->green.offset = 8;
-			p->green.length = 8;
-			p->blue.offset = 0;
-			p->blue.length = 8;
-			break;
-		case 16:
-			p->red.offset = 11;
-			p->red.length = 5;
-			p->green.offset = 5;
-			p->green.length = 6;
-			p->blue.offset = 0;
-			p->blue.length = 5;
-			break;
-		case 15:
-			p->red.offset = 10;
-			p->red.length = 5;
-			p->green.offset = 5;
-			p->green.length = 5;
-			p->blue.offset = 0;
-			p->blue.length = 5;
-			break;
-	}
-}
-
 static int fb_preinit(void)
 {
 	if (!fb_dev_name && !(fb_dev_name = getenv("FRAMEBUFFER")))
@@ -566,41 +646,19 @@ static int fb_preinit(void)
 		printf(FBDEV "Can't get VSCREENINFO: %s\n", strerror(errno));
 		goto err_out_fd;
 	}
+	fb_orig_vinfo = fb_vinfo;
 
 	fb_bpp = (fb_vinfo.bits_per_pixel == 32) ? 32 :
 		(fb_vinfo.red.length + fb_vinfo.green.length +
 		 fb_vinfo.blue.length);
-
-	if ((!!fb_mode_name + !!fb_mode_depth + !!fb_mode_auto) > 1) {
-		printf(FBDEV "Use can use only one of the following parameters:"
-				"-fbmode, -fbdepth, -fbauto\n");
-		goto err_out;
-	}
-	if (fb_mode_name || fb_mode_auto)
-		if (parse_fbmode_cfg(fb_mode_cfgfile) < 0)
-			goto err_out;
-
-	if (fb_mode_name) {
-		if (!(fb_mode = find_mode_by_name(fb_mode_name))) {
-			printf(FBDEV "can't find requested video mode\n");
+	if (vo_dbpp) {
+		if (vo_dbpp != 15 && vo_dbpp != 16 && vo_dbpp != 24 &&
+				vo_dbpp != 32) {
+			printf(FBDEV "can't switch to %d bpp\n", vo_dbpp);
 			goto err_out;
 		}
-		fb_bpp = fb_mode->depth;
-	} else if (fb_mode_depth) {
-		printf(FBDEV "Do _not_ use the 'fbdepth' parameter! "
-				"this parameter will be removed\n");
-		if (fb_mode_depth != 15 && fb_mode_depth != 16 &&
-				fb_mode_depth != 24 && fb_mode_depth != 32) {
-			printf(FBDEV "can't switch to %d bpp\n", fb_mode_depth);
-			goto err_out;
-		}
-		fb_bpp = fb_mode_depth;
-	} else if (fb_mode_auto) {
-		printf(FBDEV "Not implemented. try later... :)\n");
-		goto err_out;
-		fb_bpp = fb_mode->depth;
+		fb_bpp = vo_dbpp;		
 	}
-	fb_bpp_we_want = fb_bpp;
 
 	fb_preinit_done = 1;
 	fb_works = 1;
@@ -613,10 +671,17 @@ err_out:
 	return 1;
 }
 
+static void put_frame_without_bands(void);
+static void put_frame_with_bands(void);
+
 static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 		uint32_t d_height, uint32_t fullscreen, char *title,
 		uint32_t format)
 {
+#define FS	(fullscreen & 0x01)
+#define VM	(fullscreen & 0x02)
+#define ZOOM	(fullscreen & 0x04)
+
 	struct fb_cmap *cmap;
 
 	if (!fb_preinit_done)
@@ -625,25 +690,58 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 	if (!fb_works)
 		return 1;
 
-	fb_orig_vinfo = fb_vinfo;
-	if (fb_mode_name) {
-		fb_vinfo.xres = fb_mode->xres;
-		fb_vinfo.yres = fb_mode->yres;
-		fb_vinfo.xres_virtual = fb_mode->vxres;
-		fb_vinfo.yres_virtual = fb_mode->vyres;
-		set_bpp(&fb_vinfo, fb_mode->depth);
-		fb_vinfo.pixclock = fb_mode->pixclock;
-		fb_vinfo.left_margin = fb_mode->left;
-		fb_vinfo.right_margin = fb_mode->right;
-		fb_vinfo.upper_margin = fb_mode->upper;
-		fb_vinfo.lower_margin = fb_mode->lower;
-		fb_vinfo.hsync_len = fb_mode->hslen;
-		fb_vinfo.vsync_len = fb_mode->vslen;
-		fb_vinfo.sync = fb_mode->sync;
-		fb_vinfo.vmode = fb_mode->vmode;
-	} else if (fb_mode_depth) {
-		set_bpp(&fb_vinfo, fb_mode_depth);
+	if (ZOOM) {
+		printf(FBDEV "-zoom is not supported\n");
+		return 1;
 	}
+	if (fb_mode_name && !VM) {
+		printf(FBDEV "-fbmode can be used only with -vm"
+				" (is it the right behaviour?)\n");
+		return 1;
+	}
+	if (VM)
+		if (parse_fbmode_cfg(fb_mode_cfgfile) < 0)
+			return 1;
+	if ((!d_width + !d_height) == 1) {
+		printf(FBDEV "use both -x and -y, or none of them\n");
+		return 1;
+	}
+	if (d_width) {
+		out_width = d_width;
+		out_height = d_height;
+	} else {
+		out_width = width;
+		out_height = height;
+	}
+	in_width = width;
+	in_height = height;
+	pixel_format = format;
+
+	if (fb_mode_name) {
+		if (!(fb_mode = find_mode_by_name(fb_mode_name))) {
+			printf(FBDEV "can't find requested video mode\n");
+			return 1;
+		}
+		fb_mode2fb_vinfo(fb_mode, &fb_vinfo);
+	} else if (VM) {
+		monitor_hfreq = str2range(monitor_hfreq_str);
+		monitor_vfreq = str2range(monitor_vfreq_str);
+		monitor_dotclock = str2range(monitor_dotclock_str);
+		if (!monitor_hfreq || !monitor_vfreq || !monitor_dotclock) {
+			printf(FBDEV "you have to specify the capabilities of"
+					" the monitor.\n");
+			return 1;
+		}
+		if (!(fb_mode = find_best_mode(out_width, out_height,
+					monitor_hfreq, monitor_vfreq,
+					monitor_dotclock))) {
+			printf(FBDEV "can't find best video mode\n");
+			return 1;
+		}
+		fb_mode2fb_vinfo(fb_mode, &fb_vinfo);
+	}
+	fb_bpp_we_want = fb_bpp;
+	set_bpp(&fb_vinfo, fb_bpp);
 	fb_vinfo.xres_virtual = fb_vinfo.xres;
 	fb_vinfo.yres_virtual = fb_vinfo.yres;
 
@@ -782,13 +880,30 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 					fb_finfo.visual);
 			return 1;
 	}
+	if (FS || (d_width && VM)) {
+		out_width = fb_vinfo.xres;
+		out_height = fb_vinfo.yres;
+	}
+	if (out_width < in_width || out_height < in_height) {
+		printf(FBDEV "screensize is smaller than video size\n");
+		return 1;
+	}
+	left_band_width = (out_width - in_width) / 2;
+	right_band_width = (out_width - in_width + 1) / 2;
+	upper_band_height = (out_height - in_height) / 2;
+	lower_band_height = (out_height - in_height + 1) / 2;
+	if (left_band_width || right_band_width || upper_band_height ||
+			lower_band_height)
+		put_frame = put_frame_with_bands;
+	else
+		put_frame = put_frame_without_bands;
 
 	fb_pixel_size = fb_vinfo.bits_per_pixel / 8;
 	fb_real_bpp = fb_vinfo.red.length + fb_vinfo.green.length +
 		fb_vinfo.blue.length;
 	fb_bpp = (fb_pixel_size == 4) ? 32 : fb_real_bpp;
 	if (fb_bpp_we_want != fb_bpp)
-		printf(FBDEV "can't set bpp (requested %d, got %d bpp)!!!\n",
+		printf(FBDEV "requested %d bpp, got %d bpp)!!!\n",
 				fb_bpp_we_want, fb_bpp);
 	fb_screen_width = fb_finfo.line_length;
 	fb_size = fb_finfo.smem_len;
@@ -808,11 +923,6 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 		printf(FBDEV "pixel per line: %d\n", fb_screen_width / fb_pixel_size);
 	}
 
-	in_width = width;
-	in_height = height;
-	out_width = width;
-	out_height = height;
-	pixel_format = format;
 	if (!(next_frame = (uint8_t *) malloc(in_width * in_height * fb_pixel_size))) {
 		printf(FBDEV "Can't malloc next_frame: %s\n", strerror(errno));
 		return 1;
@@ -933,16 +1043,50 @@ static void check_events(void)
 {
 }
 
-static void put_frame(void)
+static void put_frame_without_bands(void)
 {
 	int i, out_offset = 0, in_offset = 0;
 
 	for (i = 0; i < in_height; i++) {
 		memcpy(frame_buffer + out_offset, next_frame + in_offset,
-				in_width * fb_pixel_size);
+		in_width * fb_pixel_size);
 		out_offset += fb_screen_width;
 		in_offset += in_width * fb_pixel_size;
 	}
+}
+
+static void put_frame_with_bands(void)
+{
+	int i, out_offset = 0, in_offset = 0, w, bw, tmp;
+
+	if (upper_band_height) {
+		out_offset = upper_band_height * out_width * fb_pixel_size;
+		memset(frame_buffer, 0x00, out_offset);
+	}
+	if (left_band_width) {
+		tmp = left_band_width * fb_pixel_size;
+		memset(frame_buffer + out_offset, 0x00, tmp);
+		out_offset += tmp;
+	}
+	w = in_width * fb_pixel_size;
+	bw = (left_band_width + right_band_width) * fb_pixel_size;
+	for (i = 0; i < in_height - 1; i++) {
+		memcpy(frame_buffer + out_offset, next_frame + in_offset, w);
+		if (bw)
+			memset(frame_buffer + out_offset + w, 0x00, bw);
+		out_offset += fb_screen_width;
+		in_offset += w;
+	}
+	memcpy(frame_buffer + out_offset, next_frame + in_offset, w);
+	out_offset += w;
+	if (right_band_width) {
+		tmp = right_band_width * fb_pixel_size;
+		memset(frame_buffer + out_offset, 0x00, tmp);
+		out_offset += tmp;
+	}
+	if (lower_band_height)
+		memset(frame_buffer + out_offset, 0x00, lower_band_height *
+				out_width * fb_pixel_size);
 }
 
 extern void vo_draw_text(int dxs, int dys, void (*draw_alpha)(int x0, int y0,
@@ -953,7 +1097,7 @@ static void flip_page(void)
 {
 	vo_draw_text(in_width, in_height, draw_alpha);
 	check_events();
-	put_frame();
+	(*put_frame)();
 }
 
 static void uninit(void)
