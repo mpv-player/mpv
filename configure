@@ -361,7 +361,7 @@ fi
 
 $_cc $TMPC -o $TMPO $_x11libdir/ -lGL &> /dev/null && _gl=yes
 $_cc $TMPC -o $TMPO $_x11libdir/ -lXxf86vm &> /dev/null && _vm=yes
-$_cc $TMPC -o $TMPO -lvga -lvgagl &> /dev/null && _svga=yes
+$_cc $TMPC -o $TMPO -lvgagl -lvga &> /dev/null && _svga=yes
 $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext &> /dev/null && _x11=yes
 $_cc $TMPC -o $TMPO $_x11libdir -lXv &> /dev/null && _xv=yes
 $_cc $TMPC -o $TMPO $_x11libdir -L/usr/local/lib/ -lpthread &> /dev/null || \
@@ -610,7 +610,7 @@ if [ $_dga = yes ]; then
 fi
 
 if [ $_svga = yes ]; then
-  _svgalib='-lvga -lvgagl'
+  _svgalib='-lvgagl -lvga'
 fi
 
 if [ $_vm = yes ]; then
