@@ -75,6 +75,11 @@
 #include "../postproc/rgb2rgb.h"
 #include "../postproc/swscale.h"
 
+#ifndef USE_LIBAVCODEC
+#  define USE_LIBFAME
+#else
+#  undef USE_LIBFAME
+#endif
 #ifdef USE_LIBFAME
 #include "../libfame/fame.h"
 static unsigned char *outbuf = NULL;
@@ -276,10 +281,10 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		fame_params.width = s_width;
 		fame_params.height = s_height;
 		fame_params.coding = "I";
-		fame_params.quality = 100;
-		fame_params.bitrate = 0;
+		fame_params.quality = 90;
+		fame_params.bitrate = 6e6;
 		fame_params.slices_per_frame = 1;
-		fame_params.frames_per_sequence = (int) round(vo_fps);
+		fame_params.frames_per_sequence = (int) (vo_fps + 0.5);
 		fame_params.shape_quality = 100;
 		fame_params.search_range = 8;
 		fame_params.verbose = 0;
@@ -337,7 +342,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 			avc_context->gop_size = 15;
 		}
 		avc_context->frame_rate = (int) vo_fps * FRAME_RATE_BASE;
-		avc_context->bit_rate = 8e6;
+		avc_context->bit_rate = 6e6;
 		avc_context->flags = CODEC_FLAG_HQ | CODEC_FLAG_QSCALE;
 		avc_context->quality = 2;
 		avc_context->pix_fmt = PIX_FMT_YUV420P;
@@ -423,7 +428,7 @@ static uint32_t draw_frame(uint8_t * src[])
 #ifdef USE_LIBFAME
 		size = fame_encode_frame(fame_ctx, &fame_yuv, NULL);
 		write(fd_video, outbuf, size);
-#else USE_LIBAVCODEC
+#elif USE_LIBAVCODEC
 		size = avcodec_encode_video(avc_context, picture_data[0], avc_outbuf_size, &avc_picture);
 		write(fd_video, picture_data[0], size);
 #endif
@@ -499,7 +504,7 @@ static uint32_t preinit(const char *arg)
 	int fdflags = O_WRONLY;
 
 #ifdef USE_LIBFAME
-	printf("VO: [dxr3] You are using fame, due to a small problem I have to disable prebuffering\n");
+	printf("VO: [dxr3] Prebuffering is temporarily disabled\n");
 	noprebuf = 1;
 #else
 	/* Open the control interface */
