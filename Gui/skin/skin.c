@@ -160,19 +160,6 @@ int __base( char * in )
     }
    mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[skin]  %d,%d %dx%d\n",defList->sub.x,defList->sub.y,defList->sub.width,defList->sub.height );
   }
-/*
- if ( !strcmp( winList,"eq" ) )
-  {
-   defList->eq.x=x;
-   defList->eq.y=y;
-   defList->eq.type=itBase;
-   strcpy( tmp,path ); strcat( tmp,fname );
-   if ( skinBPRead( tmp,&defList->eq.Bitmap ) ) return 1;
-   defList->eq.width=defList->eq.Bitmap.Width;
-   defList->eq.height=defList->eq.Bitmap.Height;
-   mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[skin]  width: %d height: %d\n",defList->eq.width,defList->eq.height );
-  }
-*/
  if ( !strcmp( winList,"menu" ) )
   {
    defList->menuBase.type=itBase;
@@ -180,6 +167,22 @@ int __base( char * in )
    if ( skinBPRead( tmp,&defList->menuBase.Bitmap ) ) return 1;
    defList->menuBase.width=defList->menuBase.Bitmap.Width;
    defList->menuBase.height=defList->menuBase.Bitmap.Height;
+   #ifdef HAVE_XSHAPE
+    Convert32to1( &defList->menuBase.Bitmap,&defList->menuBase.Mask,0x00ff00ff );
+#if 0
+    {
+     if ( defList->menuBase.Mask.Image != NULL )
+      {
+       txSample d;
+       Convert1to32( &defList->menuBase.Mask,&d );
+       tgaWriteTexture( "debug.tga",&d );
+      }
+    }
+#endif
+    mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[skin]  mask: %dx%d\n",defList->menuBase.Mask.Width,defList->menuBase.Mask.Height );
+   #else
+    defList->menuBase.Mask.Image=NULL;
+   #endif
    mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[skin]  width: %d height: %d\n",defList->menuBase.width,defList->menuBase.height );
   }
  return 0;

@@ -80,6 +80,7 @@ void mplShowMenu( int mx,int my )
 
  wsMoveWindow( &appMPlayer.menuWindow,False,x,y );
  wsMoveTopWindow( wsDisplay,appMPlayer.menuWindow.WindowID );
+ wsSetLayer( wsDisplay,appMPlayer.menuWindow.WindowID,1 );
  mplMenuRender=1;
  wsVisibleWindow( &appMPlayer.menuWindow,wsShowWindow );
  wsPostRedisplay( &appMPlayer.menuWindow );
@@ -131,6 +132,8 @@ void mplMenuInit( void )
  wsCreateWindow( &appMPlayer.menuWindow,
  appMPlayer.menuBase.x,appMPlayer.menuBase.y,appMPlayer.menuBase.width,appMPlayer.menuBase.height,
  wsNoBorder,wsShowMouseCursor|wsHandleMouseButton|wsHandleMouseMove,wsOverredirect|wsHideFrame|wsMaxSize|wsMinSize|wsHideWindow,"MPlayer menu" );
+
+ wsSetShape( &appMPlayer.menuWindow,appMPlayer.menuBase.Mask.Image );
 
  #ifdef DEBUG
   mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[menu.h] menu: 0x%x\n",(int)appMPlayer.menuWindow.WindowID );

@@ -182,6 +182,7 @@ void ChangeSkin( char * name )
     { mp_msg( MSGT_GPLAYER,MSGL_STATUS,MSGTR_NEMDB ); return; }
    wsResizeWindow( &appMPlayer.menuWindow,appMPlayer.menuBase.width,appMPlayer.menuBase.height );
    wsResizeImage( &appMPlayer.menuWindow,appMPlayer.menuBase.width,appMPlayer.menuBase.height );
+   wsSetShape( &appMPlayer.menuWindow,appMPlayer.menuBase.Mask.Image );
    wsVisibleWindow( &appMPlayer.menuWindow,wsHideWindow );
   }
 
