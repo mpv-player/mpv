@@ -134,6 +134,26 @@ void GetCpuCaps( CpuCaps *caps)
 	if (regs[1] == 0x68747541 &&    // AuthenticAMD
             regs[3] == 0x69746e65 &&
             regs[2] == 0x444d4163) {
+		do_cpuid(0x00000001, regs2);
+		printf("CPU family: %d\n",(regs2[0] >> 8)&0xf);
+		switch ((regs2[0] >> 8)&0xf) {
+			case 3:
+				caps->cpuType=CPUTYPE_I386;
+				break;
+			case 4:
+				caps->cpuType=CPUTYPE_I486;
+				break;
+			case 5:
+				caps->cpuType=CPUTYPE_I586;
+				break;
+			case 6:
+				caps->cpuType=CPUTYPE_I686;
+				break;
+			default:
+				caps->cpuType=CPUTYPE_I386;
+				printf("Unknown cpu type, default to i386\n");
+				break;
+		}
 		do_cpuid(0x80000000, regs);
 		printf("AMD cpuid-level: 0x%X\n",regs[0]);
 		if (regs[0]>=0x80000001) {
