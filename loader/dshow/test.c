@@ -8,7 +8,6 @@
 
 int main(int argc,char* argv[]){
     FILE *f;
-    FILE *f2;
     BITMAPINFOHEADER bih;
     int len;
     char *src;
@@ -19,7 +18,7 @@ int main(int argc,char* argv[]){
     f=fopen("test.divx","rb");
     
     fread(&bih,sizeof(BITMAPINFOHEADER),1,f);
-    printf("frame dim: %d x %d \n",bih.biWidth,bih.biHeight);
+    printf("frame dim: %d x %d \n",(int)bih.biWidth,(int)bih.biHeight);
 
     src=(char*)malloc(512000);
     len=fread(src,1,512000,f);

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "cmediasample.h"
-#define E_NOTIMPL 0x80004003
+//#define E_NOTIMPL 0x80004003
 CMediaSample::CMediaSample(IMemAllocator* allocator, long _size):refcount(0)
 {
     vt=new IMediaSample_vt;
