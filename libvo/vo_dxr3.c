@@ -95,7 +95,7 @@
 #include "cpudetect.h"
 #include "spuenc.h"
  
-#define USE_LIBFAME
+//#define USE_LIBFAME // this is done in configure now
 
 /* Libfame codec initialisation */
 #ifdef USE_LIBFAME
