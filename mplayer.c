@@ -186,6 +186,7 @@ vo_functions_t *video_out=NULL;
 ao_functions_t *audio_out=NULL;
 
 int fixed_vo=0;
+int eof=0;
 
 // benchmark:
 double video_time_usage=0;
@@ -436,7 +437,7 @@ static void uninit_player(unsigned int mask){
   if(mask&INITED_AO){
     inited_flags&=~INITED_AO;
     current_module="uninit_ao";
-    audio_out->uninit(1); audio_out=NULL;
+    audio_out->uninit(eof?0:1); audio_out=NULL;
   }
 
 #ifdef HAVE_NEW_GUI
@@ -721,7 +722,6 @@ int file_format=DEMUXER_TYPE_UNKNOWN;
 int delay_corrected=1;
 
 // movie info:
-int eof=0;
 
 int osd_function=OSD_PLAY;
 int osd_last_pts=-303;
