@@ -3644,7 +3644,7 @@ fi
 
 
 if test -z "$_livelibdir" ; then
-    for I in $_libdir/live /usr/lib/live /usr/local/lib/live; do
+    for I in $_libdir/live /usr/lib/live /usr/local/live /usr/local/lib/live; do
       if test -d "$I" ; then
         _livelibdir="$I"
         break;
