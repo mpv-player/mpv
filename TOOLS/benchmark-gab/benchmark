@@ -2,6 +2,11 @@
 
 . ./variables
 
+if [ ! -e $MPBIN ]; then
+  wrtlog No MPlayer binary compiled for this arch, trying ./mplayer
+  export MPBIN="./mplayer"
+fi
+
 function benchsamples {
 for i in `ls samples/* | grep -v -e '\.opts'`; do
   BENCHOPTS=`cat $i.opts 2> /dev/null`
@@ -12,17 +17,17 @@ for i in `ls samples/* | grep -v -e '\.opts'`; do
   wrtlog "$DEFAULTOPTS"
   wrtlog "Options for this file:"
   wrtlog "$BENCHOPTS"
-  BENCH="`$BUILD/mplayer $DEFAULTOPTS $BENCHOPTS $i 2>&1 | grep BENCHMARKs`"
+  BENCH="`$MPBIN $DEFAULTOPTS $BENCHOPTS $i 2>&1 | grep BENCHMARKs`"
   VC=`echo $BENCH | awk '{print $11}'`
   SYS=`echo $BENCH | awk '{print $9}'`
   wrtlog Total: $VC \(Sys: $SYS\)
 
-  BENCH="`$BUILD/mplayer $DEFAULTOPTS $BENCHOPTS $i 2>&1 | grep BENCHMARKs`"
+  BENCH="`$MPBIN $DEFAULTOPTS $BENCHOPTS $i 2>&1 | grep BENCHMARKs`"
   VC=`echo $BENCH | awk '{print $11}'`
   SYS=`echo $BENCH | awk '{print $9}'`
   wrtlog Total: $VC \(Sys: $SYS\)
 
-  BENCH="`$BUILD/mplayer $DEFAULTOPTS $BENCHOPTS $i 2>&1 | grep BENCHMARKs`"
+  BENCH="`$MPBIN $DEFAULTOPTS $BENCHOPTS $i 2>&1 | grep BENCHMARKs`"
   VC=`echo $BENCH | awk '{print $11}'`
   SYS=`echo $BENCH | awk '{print $9}'`
   wrtlog Total: $VC \(Sys: $SYS\)

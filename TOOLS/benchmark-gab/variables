@@ -3,10 +3,12 @@ export PATH=$PATH:/sbin:/usr/local/bin:/usr/local/sbin:/usr/X11R6/bin
 
 VENDOR="`cat /proc/cpuinfo | grep vendor_id | cut -c 13-`"
 MODEL="`cat /proc/cpuinfo | grep "model name" | cut -c 14-`"
+CPUFLAGS="`cat /proc/cpuinfo | grep flags | cut -c 10-`"
 MHZ="`cat /proc/cpuinfo  | grep MHz | cut -c 12-14` MHz"
 MEMORY="`cat /proc/meminfo | grep MemTotal | awk '{print $2}'` Kb"
-BUILD="`echo $VENDOR $MODEL $MHZ | tr [\ ] [_]`"
+BUILD="`echo $VENDOR $MODEL $MHZ | tr [\ ] [_] | tr [\/] [_]`"
 VGA="`lspci | grep VGA | cut -c 36-`"
+MPBIN="$BUILD/mplayer"
 
 export LOGFILE="`pwd`/log-$BUILD-`date +\"%Y-%m-%d\"`"
 export COMPILEOPTIONS="--enable-runtime-cpudetection"
