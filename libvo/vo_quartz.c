@@ -208,49 +208,7 @@ static OSStatus MainWindowEventHandler(EventHandlerCallRef nextHandler, EventRef
 
 	result = CallNextEventHandler(nextHandler, event);
 	
-	if(class == kEventClassCommand)
-	{
-		HICommand theHICommand;
-		GetEventParameter( event, kEventParamDirectObject, typeHICommand, NULL, sizeof( HICommand ), NULL, &theHICommand );
-		
-		switch ( theHICommand.commandID )
-		{
-			case kHICommandQuit:
-				mplayer_put_key(KEY_ESC);
-				break;
-				
-			case kHalfScreenCmd:
-					ShowMenuBar();
-					ShowCursor();
-					SizeWindow(theWindow, (imgRect.right/2), (imgRect.bottom/2), 1);
-					RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
-					window_resized();
-				break;
-
-			case kNormalScreenCmd:
-					ShowMenuBar();
-					ShowCursor();
-					SizeWindow(theWindow, imgRect.right, imgRect.bottom, 1);
-					RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
-					window_resized();
-				break;
-
-			case kDoubleScreenCmd:
-					ShowMenuBar();
-					ShowCursor();
-					SizeWindow(theWindow, (imgRect.right*2), (imgRect.bottom*2), 1);
-					RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
-					window_resized();
-				break;
-
-			case kFullScreenCmd:
-				vo_fs = (!(vo_fs)); window_fullscreen();
-				break;
-
-			default:break;
-		}
-	}
-	else if(class == kEventClassKeyboard)
+	if(class == kEventClassKeyboard)
 	{
 		char macCharCodes;
 		UInt32 macKeyCode;
@@ -273,37 +231,6 @@ static OSStatus MainWindowEventHandler(EventHandlerCallRef nextHandler, EventRef
 		{
 			switch(macCharCodes)
 			{
-				case '0':
-					{
-						ShowMenuBar();
-						ShowCursor();
-						SizeWindow(theWindow, (imgRect.right/2), (imgRect.bottom/2), 1);
-						RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
-						window_resized();
-					}
-					break;
-					
-				case '1':
-					{
-						ShowMenuBar();
-						ShowCursor();
-						SizeWindow(theWindow, imgRect.right, imgRect.bottom, 1);
-						RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
-						window_resized();
-					}
-					break;
-					
-				case '2':
-					{
-						ShowMenuBar();
-						ShowCursor();
-						SizeWindow(theWindow, (imgRect.right*2), (imgRect.bottom*2), 1);
-						RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
-						window_resized();
-					}
-					break;
-				
-				case 'f': vo_fs = (!(vo_fs)); window_fullscreen(); break;
 				case '[': SetWindowAlpha(theWindow, winAlpha-=0.05); break;
 				case ']': SetWindowAlpha(theWindow, winAlpha+=0.05); break;		
 			}	
@@ -378,6 +305,10 @@ static OSStatus MainWindowCommandHandler(EventHandlerCallRef nextHandler, EventR
 	UInt32 kind = GetEventKind (event); 
 
 	result = CallNextEventHandler(nextHandler, event);
+	
+	uint32_t d_width;
+	uint32_t d_height;
+	aspect(&d_width,&d_height,A_NOZOOM);
 
 	if(class == kEventClassCommand)
 	{
@@ -393,7 +324,7 @@ static OSStatus MainWindowCommandHandler(EventHandlerCallRef nextHandler, EventR
 			case kHalfScreenCmd:
 					ShowMenuBar();
 					ShowCursor();
-					SizeWindow(theWindow, (imgRect.right/2), (imgRect.bottom/2), 1);
+					SizeWindow(theWindow, (d_width/2), (d_height/2), 1);
 					RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
 					window_resized();
 				break;
@@ -401,7 +332,7 @@ static OSStatus MainWindowCommandHandler(EventHandlerCallRef nextHandler, EventR
 			case kNormalScreenCmd:
 					ShowMenuBar();
 					ShowCursor();
-					SizeWindow(theWindow, imgRect.right, imgRect.bottom, 1);
+					SizeWindow(theWindow, d_width, d_height, 1);
 					RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
 					window_resized();
 				break;
@@ -409,7 +340,7 @@ static OSStatus MainWindowCommandHandler(EventHandlerCallRef nextHandler, EventR
 			case kDoubleScreenCmd:
 					ShowMenuBar();
 					ShowCursor();
-					SizeWindow(theWindow, (imgRect.right*2), (imgRect.bottom*2), 1);
+					SizeWindow(theWindow, (d_width*2), (d_height*2), 1);
 					RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
 					window_resized();
 				break;
