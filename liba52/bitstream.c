@@ -31,7 +31,12 @@
 
 #define BUFFER_SIZE 4096
 
+#ifdef ALT_BITSTREAM_READER
+int indx=0;
+uint32_t * buffer_start;
+#else
 static uint32_t * buffer_start;
+#endif
 
 uint32_t bits_left;
 uint32_t current_word;
@@ -43,6 +48,9 @@ void bitstream_set_ptr (uint8_t * buf)
     align = (int)buf & 3;
     buffer_start = (uint32_t *) (buf - align);
     bits_left = 0;
+#ifdef ALT_BITSTREAM_READER
+    indx=0;
+#endif
     bitstream_get (align * 8);
 }
 

@@ -21,6 +21,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+// alternative (faster) bitstram reader (reades upto 3 bytes over the end of the input)
+#define ALT_BITSTREAM_READER
+ 
 /* (stolen from the kernel) */
 #ifdef WORDS_BIGENDIAN
 
@@ -46,18 +49,33 @@
 #	endif
 #endif
 
+#ifdef ALT_BITSTREAM_READER
+extern uint32_t *buffer_start; 
+extern int indx;
+#else
 extern uint32_t bits_left;
 extern uint32_t current_word;
+#endif
 
 void bitstream_set_ptr (uint8_t * buf);
 uint32_t bitstream_get_bh(uint32_t num_bits);
 int32_t bitstream_get_bh_2(uint32_t num_bits);
 
+
 static inline uint32_t 
-bitstream_get(uint32_t num_bits)
+bitstream_get(uint32_t num_bits) // note num_bits is practically a constant due to inlineing
 {
+#ifdef ALT_BITSTREAM_READER
+    uint32_t result= swab32( *(uint32_t *)(((uint8_t *)buffer_start)+(indx>>3)) );
+
+    result<<= (indx&0x07);
+    result>>= 32 - num_bits;
+    indx+= num_bits;
+    
+    return result;
+#else
     uint32_t result;
-	
+    
     if(num_bits < bits_left) {
 	result = (current_word << (32 - bits_left)) >> (32 - num_bits);
 	bits_left -= num_bits;
@@ -65,11 +83,21 @@ bitstream_get(uint32_t num_bits)
     }
 
     return bitstream_get_bh(num_bits);
+#endif
 }
 
 static inline int32_t 
 bitstream_get_2(uint32_t num_bits)
 {
+#ifdef ALT_BITSTREAM_READER
+    int32_t result= swab32( *(uint32_t *)(((uint8_t *)buffer_start)+(indx>>3)) );
+
+    result<<= (indx&0x07);
+    result>>= 32 - num_bits;
+    indx+= num_bits;
+        
+    return result;
+#else
     int32_t result;
 	
     if(num_bits < bits_left) {
@@ -79,4 +107,5 @@ bitstream_get_2(uint32_t num_bits)
     }
 
     return bitstream_get_bh_2(num_bits);
+#endif
 }
