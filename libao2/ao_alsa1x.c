@@ -48,7 +48,7 @@ static snd_pcm_t *alsa_handler;
 static snd_pcm_format_t alsa_format;
 static snd_pcm_hw_params_t *alsa_hwparams;
 static snd_pcm_sw_params_t *alsa_swparams;
-const char *alsa_device;
+static char *alsa_device;
 
 /* possible 4096, original 8192 
  * was only needed for calculating chunksize? */
@@ -826,6 +826,9 @@ static int xrun(u_char *str_mode)
 
   return(1); /* ok, data should be accepted again */
 }
+
+static int play_normal(void* data, int len);
+static int play_mmap(void* data, int len);
 
 static int play(void* data, int len, int flags)
 {
