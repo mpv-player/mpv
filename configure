@@ -2626,7 +2626,7 @@ fi
 echocheck "DVD support (libmpdvdkit)"
 if test "$_dvdkit" = auto ; then
  _dvdkit=no
- if linux || bsd || sunos ; then
+ if linux || freebsd ; then
   test -f "./libmpdvdkit/Makefile" && _dvdkit=yes
  fi
 fi
@@ -2638,10 +2638,10 @@ if test "$_dvdkit" = yes ; then
   fi
   _def_dvd_linux='#undef HAVE_LINUX_DVD_STRUCT'
   _def_dvd_bsd='#undef HAVE_BSD_DVD_STRUCT'
-  if linux || netbsd || openbsd ; then
+  if linux || netbsd || openbsd || bsdos ; then
     _def_dvd_linux='#define HAVE_LINUX_DVD_STRUCT 1'
   else
-    if freebsd || bsdos ; then
+    if freebsd ; then
      _def_dvd_bsd='#define HAVE_BSD_DVD_STRUCT 1'
     fi
   fi
