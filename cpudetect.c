@@ -90,8 +90,8 @@ void GetCpuCaps( CpuCaps *caps)
 	/*if (!has_cpuid())
 		return;*/
 	do_cpuid(0x00000000, regs);
-	printf("CPU vendor name: %.4s%.4s%.4s\n",&regs[1],&regs[3],&regs[2]);
-//	if (regs[0]>0x00000001) 
+	printf("CPU vendor name: %.4s%.4s%.4s  cpuid level: %d\n",&regs[1],&regs[3],&regs[2],regs[0]);
+	if (regs[0]>0x00000001) 
 	{
 		do_cpuid(0x00000001, regs2);
 		printf("CPU family: %d\n",(regs2[0] >> 8)&0xf);
@@ -109,6 +109,7 @@ void GetCpuCaps( CpuCaps *caps)
 				caps->cpuType=CPUTYPE_I686;
 				break;
 			default:
+				caps->cpuType=CPUTYPE_I386;
 				printf("Unknown cpu type, default to i386\n");
 				break;
 		}
@@ -136,7 +137,8 @@ void GetCpuCaps( CpuCaps *caps)
 		do_cpuid(0x80000000, regs);
 		if (regs[0]>=0x80000001) {
 			do_cpuid(0x80000001, regs2);
-			caps->hasMMX2 = (regs[3] & (1 << 22 )) >> 22; // 0x400000
+			caps->hasMMX  = (regs2[3] & (1 << 23 )) >> 23; // 0x0800000
+			caps->hasMMX2 = (regs2[3] & (1 << 22 )) >> 22; // 0x400000
 			caps->has3DNow    = (regs2[3] & (1 << 31 )) >> 31; //0x80000000
 			caps->has3DNowExt = (regs2[3] & (1 << 30 )) >> 30;
 		}

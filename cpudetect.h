@@ -1,9 +1,9 @@
 #ifdef ARCH_X86
 
-#define CPUTYPE_I386	0
-#define CPUTYPE_I486	1
-#define CPUTYPE_I586	2
-#define CPUTYPE_I686    3
+#define CPUTYPE_I386	3
+#define CPUTYPE_I486	4
+#define CPUTYPE_I586	5
+#define CPUTYPE_I686    6
 
 typedef struct cpucaps_s {
 	int cpuType;
