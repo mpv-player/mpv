@@ -278,15 +278,8 @@ do{
   // sure: head=0x000001XX
   mp_dbg(MSGT_DEMUX,MSGL_DBG4,"*** head=0x%X\n",head);
   if(demux->synced==0){
-    if(head==0x1BA) demux->synced=1;
-#if 0
-    else if(head>=0x1C0 && head<=0x1EF){
-      demux->synced=2;
-      mp_msg(MSGT_DEMUX,MSGL_V,"Mpeg PES stream synced at 0x%X (%d)!\n",demux->filepos,demux->filepos);
-      num_elementary_packets100=0; // requires for re-sync!
-      num_elementary_packets101=0; // requires for re-sync!
-    }
-#endif
+    if(head==0x1BA) demux->synced=1; else
+    if(head==0x1BD || (head>=0x1C0 && head<=0x1EF)) demux->synced=3; // PES?
   } else
   if(demux->synced==1){
     if(head==0x1BB || head==0x1BD || (head>=0x1C0 && head<=0x1EF)){
@@ -296,7 +289,7 @@ do{
       num_elementary_packets101=0; // requires for re-sync!
     } else demux->synced=0;
   } // else
-  if(demux->synced==2){
+  if(demux->synced>=2){
       ret=demux_mpg_read_packet(demux,head);
       if(!ret)
         if(--max_packs==0){
@@ -304,6 +297,7 @@ do{
           mp_msg(MSGT_DEMUX,MSGL_ERR,MSGTR_DoesntContainSelectedStream);
           return 0;
         }
+      if(demux->synced==3) demux->synced=(ret==1)?2:0; // PES detect
   } else {
     if(head>=0x100 && head<0x1B0){
       if(head==0x100) ++num_elementary_packets100; else
