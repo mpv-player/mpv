@@ -49,7 +49,7 @@ static char help_text[]=
 #define MSGTR_Exit_frames "Zadana liczba klatek odtworzona"
 #define MSGTR_Exit_quit "Wyj¶cie"
 #define MSGTR_Exit_eof "Koniec pliku"
-#define MSGTR_IntBySignal "\nMPlayer przerwany sygna³em %d w module: %s \n"
+#define MSGTR_Exit_error "Fatal error" // FIXME!!
 #define MSGTR_NoHomeDir "Nie mogê znale¼æ katalogu HOME\n"
 #define MSGTR_GetpathProblem "problem z get_path(\"config\")\n"
 #define MSGTR_CreatingCfgFile "Stwarzam plik z konfiguracj±: %s\n"

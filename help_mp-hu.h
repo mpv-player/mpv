@@ -49,6 +49,7 @@ static char help_text[]=
 #define MSGTR_Exit_frames "Kért számú képkocka lejátszásra került"
 #define MSGTR_Exit_quit "Kilépés"
 #define MSGTR_Exit_eof "Vége a file-nak"
+#define MSGTR_Exit_error "Végzetes hiba"
 #define MSGTR_IntBySignal "\nAz MPlayer futása a %s modulban kapott %d szignál miatt megszakadt \n"
 #define MSGTR_NoHomeDir "Nem találom a HOME konyvtárat\n"
 #define MSGTR_GetpathProblem "get_path(\"config\") probléma\n"
