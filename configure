@@ -1575,6 +1575,21 @@ fi
 echores "$_posix4"
 
 
+echocheck "lrintf"
+cat > $TMPC << EOF
+#include <math.h>
+int main(void) { (void) lrintf(0.0); return 0; }
+EOF
+_lrintf=no
+cc_check -lm && _lrintf=yes
+if test "$_lrintf" = yes ; then
+  _def_lrintf="#define HAVE_LRINTF 1"
+else
+  _def_lrintf="#undef HAVE_LRINTF"
+fi
+echores "$_lrintf"
+
+
 echocheck "nanosleep"
 # also check for nanosleep
 cat > $TMPC << EOF
@@ -4862,6 +4877,9 @@ $_def_vcd
 **       See ./configure --help for details.
 **
 *---------------------------------------------------------------------------*/
+
+/* C99 lrintf function available */
+$_def_lrintf
 
 /* nanosleep support */
 $_def_nanosleep
