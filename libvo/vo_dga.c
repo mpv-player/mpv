@@ -29,6 +29,11 @@
  *   this, you're well off and may use these modes; for mpeg 
  *   movies things could be different, but I was too lazy to implement 
  *   it ...
+ * o you may define VO_DGA_FORCE_DEPTH to the depth you desire 
+ *   if you don't like the choice the driver makes
+ *   Beware: unless you can use DGA2.0 this has to be your X Servers
+ *           depth!!!
+ * o Added double buffering :-))
  */
 
 
@@ -42,6 +47,7 @@
 #include "video_out_internal.h"
 #include "yuv2rgb.h"
 
+//#undef HAVE_DGA2
 
 LIBVO_EXTERN( dga )
 
@@ -67,13 +73,20 @@ static int       vo_dga_src_height;      // height of video in pixels
 static int       vo_dga_bpp;             // bytes per pixel in framebuffer
 static int       vo_dga_src_offset=0;    // offset in src
 static int       vo_dga_vp_offset=0;     // offset in dest
-static int       vo_dga_bytes_per_line;  // longwords per line to copy
+static int       vo_dga_bytes_per_line;  // bytes per line to copy
 static int       vo_dga_src_skip;        // bytes to skip after copying one line 
                                          // (not supported yet) in src
 static int       vo_dga_vp_skip;         // dto. for dest 
 static int       vo_dga_lines;           // num of lines to copy
 static int       vo_dga_src_format;                                 
 static int       vo_dga_planes;          // bits per pixel on screen
+
+static int       vo_dga_dbf_mem_offset;  // offset in bytes for alternative 
+                                         // framebuffer (0 if dbf is not 
+					 // possible)
+static int       vo_dga_dbf_y_offset;    // y offset (in scanlines)
+static int       
+                 vo_dga_dbf_current;     // current buffer (0 or 1)
 
 static unsigned char     *vo_dga_base;
 static Display  *vo_dga_dpy;
@@ -116,15 +129,9 @@ static uint32_t draw_frame( uint8_t *src[] ){
 
   char *s, *d;
 
-  if( vo_dga_src_format==IMGFMT_YV12 ){
-    // We'll never reach this point, because YV12 codecs always
-    // calls draw_slice
-    printf("vo_dga: draw_frame() doesn't support IMGFMT_YV12 (yet?)\n");
-  }else{
-    s = *src;
-    d = (&((char *)vo_dga_base)[vo_dga_vp_offset]);
-    rep_movsl(d, s, lpl, vo_dga_vp_skip, numlines );
-  }
+  s = *src;
+  d = (&((char *)vo_dga_base)[vo_dga_vp_offset + vo_dga_dbf_current * vo_dga_dbf_mem_offset]);
+  rep_movsl(d, s, lpl, vo_dga_vp_skip, numlines );
 
   return 0;
 }
@@ -139,6 +146,20 @@ static void check_events(void)
 //---------------------------------------------------------
 
 static void flip_page( void ){
+
+  
+  if(vo_dga_dbf_mem_offset != 0){
+
+#ifdef HAVE_DGA2
+    XDGASetViewport (vo_dga_dpy, XDefaultScreen(vo_dga_dpy), 
+		    0, vo_dga_dbf_current * vo_dga_dbf_y_offset, 
+		    XDGAFlipRetrace);
+#else
+    XF86DGASetViewPort (vo_dga_dpy, XDefaultScreen(vo_dga_dpy),
+		                        0, vo_dga_dbf_current * vo_dga_dbf_y_offset);
+#endif
+    vo_dga_dbf_current = 1 - vo_dga_dbf_current;
+  }
   check_events();
 }
 
@@ -226,6 +247,10 @@ static uint32_t query_format( uint32_t format )
       printf("vo_dga: You're running 15/16 bit X Server; your hardware might use unsuitable RGB-mask!\n");
    }
 #endif
+#ifdef VO_DGA_FORCE_DEPTH
+   dga_depths = 1<<(VO_DGA_FORCE_DEPTH-1); 
+#endif
+   
    dga_depths_init = 1;
  
    if( dga_depths == 0){
@@ -275,60 +300,6 @@ uninit(void)
 #endif
   XCloseDisplay(vo_dga_dpy);
 }
-
-
-#if 0
-       if (
-          (modelines[i].viewportWidth >= X) && 
-          (modelines[i].viewportHeight >= Y) &&
-	  ( 
-	   // prefer a better resolution either in X or in Y
-	   // as long as the other dimension is at least the same
-	   // 
-	   // hmm ... MAYBE it would be more clever to focus on the 
-	   // x-resolution; I had 712x400 and 640x480 and the movie 
-	   // was 640x360; 640x480 would be the 'right thing' here
-	   // but since 712x400 was queried first I got this one. 
-	   // I think there should be a cmd-line switch to let the
-	   // user choose the mode he likes ...   (acki2)
-	   
-	   (
-            ((modelines[i].viewportWidth < mX) &&
-	    !(modelines[i].viewportHeight > mY)) ||
-	    ((modelines[i].viewportHeight < mY) &&
-	    !(modelines[i].viewportWidth > mX)) 
-	   ) 
-	   // but if we get an identical resolution choose
-	   // the one with the lower refreshrate (saves bandwidth !!!)
-	   // as long as it's above 50 Hz (acki2 on 30/3/2001)
-	   ||
-	   (
-	    (modelines[i].viewportWidth == mX) &&
-	    (modelines[i].viewportHeight == mY) &&
-	      (
-	       (
-		modelines[i].verticalRefresh >= mVBI && mVBI < 50
-	       )  
-	       ||
-               (
-		mVBI >= 50 && 
-		modelines[i].verticalRefresh < mVBI &&
-		modelines[i].verticalRefresh >= 50
-	       )
-	      )
-	     )
-	    )
-	  )  
-	  {
-           mX=modelines[i].viewportWidth;
-           mY=modelines[i].viewportHeight;
-	   mVBI = modelines[i].verticalRefresh;
-           j=i;
-	   printf(".ok!!\n");
-        }else{
-           printf(".no\n");
-	}
-#endif
 
 
 //----------------------------------------------------------
@@ -577,10 +548,24 @@ static uint32_t init( uint32_t width,  uint32_t height,
   XGrabPointer (vo_dga_dpy, DefaultRootWindow(vo_dga_dpy), True, 
                 ButtonPressMask,GrabModeAsync, GrabModeAsync, 
                 None, None, CurrentTime);
-   
+  
+// TODO: chekc if mem of graphics adaptor is large enough for dbf
+
+  
+  // set up variables for double buffering ...
+  
+  vo_dga_dbf_y_offset = y_off + vo_dga_src_height;
+  vo_dga_dbf_mem_offset = vo_dga_width * vo_dga_bpp *  vo_dga_dbf_y_offset;
+  vo_dga_dbf_current = 0;
+  
+  if(format ==IMGFMT_YV12 )vo_dga_dbf_mem_offset = 0;
+  // disable doublebuffering for YV12
+  
   // now clear screen
 
-  memset(vo_dga_base, 0, vo_dga_width * vo_dga_vp_height * vo_dga_bpp);  
+  memset(vo_dga_base, 0, vo_dga_width *  
+	 (vo_dga_vp_height + (vo_dga_dbf_mem_offset != 0 ? (vo_dga_src_height+y_off) : 0)) * 
+         vo_dga_bpp);  
 
   vo_dga_is_running = 1;
   return 0;
