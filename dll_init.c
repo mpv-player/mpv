@@ -53,7 +53,7 @@ int init_acm_audio_codec(sh_audio_t *sh_audio){
         if(ret==ACMERR_NOTPOSSIBLE)
             printf("ACM_Decoder: Unappropriate audio format\n");
         else
-            printf("ACM_Decoder: acmStreamOpen error %d", ret);
+            printf("ACM_Decoder: acmStreamOpen error %d", (int)ret);
         sh_audio->srcstream=NULL;
         return 0;
     }
@@ -63,11 +63,11 @@ int init_acm_audio_codec(sh_audio_t *sh_audio){
     acmStreamSize(sh_audio->srcstream, srcsize, &srcsize, ACM_STREAMSIZEF_SOURCE);
     if(srcsize<OUTBURST) srcsize=OUTBURST;
     sh_audio->audio_out_minsize=srcsize; // audio output min. size
-    if(verbose) printf("Audio ACM output buffer min. size: %d\n",srcsize);
+    if(verbose) printf("Audio ACM output buffer min. size: %ld\n",srcsize);
 
     acmStreamSize(sh_audio->srcstream, srcsize, &srcsize, ACM_STREAMSIZEF_DESTINATION);
     sh_audio->audio_in_minsize=srcsize; // audio input min. size
-    if(verbose) printf("Audio ACM input buffer min. size: %d\n",srcsize);
+    if(verbose) printf("Audio ACM input buffer min. size: %ld\n",srcsize);
 
     sh_audio->a_in_buffer_size=sh_audio->audio_in_minsize;
     sh_audio->a_in_buffer=malloc(sh_audio->a_in_buffer_size);
@@ -81,7 +81,7 @@ int acm_decode_audio(sh_audio_t *sh_audio, void* a_buffer,int len){
         HRESULT hr;
         DWORD srcsize=0;
         acmStreamSize(sh_audio->srcstream,len , &srcsize, ACM_STREAMSIZEF_DESTINATION);
-        if(verbose>=3)printf("acm says: srcsize=%d  (buffsize=%d)  out_size=%d\n",srcsize,sh_audio->a_in_buffer_size,len);
+        if(verbose>=3)printf("acm says: srcsize=%ld  (buffsize=%d)  out_size=%d\n",srcsize,sh_audio->a_in_buffer_size,len);
 //        if(srcsize==0) srcsize=((WAVEFORMATEX *)&sh_audio->o_wf_ext)->nBlockAlign;
         if(srcsize>sh_audio->a_in_buffer_size) srcsize=sh_audio->a_in_buffer_size; // !!!!!!
         if(sh_audio->a_in_buffer_len<srcsize){
@@ -99,12 +99,12 @@ int acm_decode_audio(sh_audio_t *sh_audio, void* a_buffer,int len){
         ash.cbDstLength=len;
         hr=acmStreamPrepareHeader(sh_audio->srcstream,&ash,0);
         if(hr){
-          printf("ACM_Decoder: acmStreamPrepareHeader error %d\n",hr);
+          printf("ACM_Decoder: acmStreamPrepareHeader error %d\n",(int)hr);
 					return -1;
         }
         hr=acmStreamConvert(sh_audio->srcstream,&ash,0);
         if(hr){
-          printf("ACM_Decoder: acmStreamConvert error %d\n",hr);
+          printf("ACM_Decoder: acmStreamConvert error %d\n",(int)hr);
 					return -1;
         }
         //printf("ACM convert %d -> %d  (buf=%d)\n",ash.cbSrcLengthUsed,ash.cbDstLengthUsed,a_in_buffer_len);
@@ -117,7 +117,7 @@ int acm_decode_audio(sh_audio_t *sh_audio, void* a_buffer,int len){
         len=ash.cbDstLengthUsed;
         hr=acmStreamUnprepareHeader(sh_audio->srcstream,&ash,0);
         if(hr){
-          printf("ACM_Decoder: acmStreamUnprepareHeader error %d\n",hr);
+          printf("ACM_Decoder: acmStreamUnprepareHeader error %d\n",(int)hr);
         }
         return len;
 }
@@ -146,7 +146,7 @@ int init_video_codec(sh_video_t *sh_video){
 
   ret = ICDecompressGetFormat(sh_video->hic, sh_video->bih, &sh_video->o_bih);
   if(ret){
-    printf("ICDecompressGetFormat failed: Error %d\n", ret);
+    printf("ICDecompressGetFormat failed: Error %d\n", (int)ret);
     return 0;
   }
   if(verbose) printf("ICDecompressGetFormat OK\n");
@@ -221,26 +221,26 @@ int init_video_codec(sh_video_t *sh_video){
 
   if(verbose) {
     printf("Starting decompression, format:\n");
-	printf("  biSize %d\n", sh_video->bih->biSize);
-	printf("  biWidth %d\n", sh_video->bih->biWidth);
-	printf("  biHeight %d\n", sh_video->bih->biHeight);
+	printf("  biSize %ld\n", sh_video->bih->biSize);
+	printf("  biWidth %ld\n", sh_video->bih->biWidth);
+	printf("  biHeight %ld\n", sh_video->bih->biHeight);
 	printf("  biPlanes %d\n", sh_video->bih->biPlanes);
 	printf("  biBitCount %d\n", sh_video->bih->biBitCount);
-	printf("  biCompression 0x%x ('%.4s')\n", sh_video->bih->biCompression, &sh_video->bih->biCompression);
-	printf("  biSizeImage %d\n", sh_video->bih->biSizeImage);
+	printf("  biCompression 0x%lx ('%.4s')\n", sh_video->bih->biCompression, (char *)&sh_video->bih->biCompression);
+	printf("  biSizeImage %ld\n", sh_video->bih->biSizeImage);
     printf("Dest fmt:\n");
-	printf("  biSize %d\n", sh_video->o_bih.biSize);
-	printf("  biWidth %d\n", sh_video->o_bih.biWidth);
-	printf("  biHeight %d\n", sh_video->o_bih.biHeight);
+	printf("  biSize %ld\n", sh_video->o_bih.biSize);
+	printf("  biWidth %ld\n", sh_video->o_bih.biWidth);
+	printf("  biHeight %ld\n", sh_video->o_bih.biHeight);
 	printf("  biPlanes %d\n", sh_video->o_bih.biPlanes);
 	printf("  biBitCount %d\n", sh_video->o_bih.biBitCount);
-	printf("  biCompression 0x%x ('%.4s')\n", sh_video->o_bih.biCompression, &sh_video->o_bih.biCompression);
-	printf("  biSizeImage %d\n", sh_video->o_bih.biSizeImage);
+	printf("  biCompression 0x%lx ('%.4s')\n", sh_video->o_bih.biCompression, (char *)&sh_video->o_bih.biCompression);
+	printf("  biSizeImage %ld\n", sh_video->o_bih.biSizeImage);
   }
 
   ret = ICDecompressQuery(sh_video->hic, sh_video->bih, &sh_video->o_bih);
   if(ret){
-    printf("ICDecompressQuery failed: Error %d\n", ret);
+    printf("ICDecompressQuery failed: Error %d\n", (int)ret);
     return 0;
   }
   if(verbose) printf("ICDecompressQuery OK\n");
@@ -248,7 +248,7 @@ int init_video_codec(sh_video_t *sh_video){
   
   ret = ICDecompressBegin(sh_video->hic, sh_video->bih, &sh_video->o_bih);
   if(ret){
-    printf("ICDecompressBegin failed: Error %d\n", ret);
+    printf("ICDecompressBegin failed: Error %d\n", (int)ret);
     return 0;
   }
 
@@ -267,7 +267,7 @@ int init_video_codec(sh_video_t *sh_video){
 
   sh_video->our_out_buffer = shmem_alloc(sh_video->o_bih.biSizeImage);
   if(!sh_video->our_out_buffer){
-    printf("not enough memory for decoded picture buffer (%d bytes)\n", sh_video->o_bih.biSizeImage);
+    printf("not enough memory for decoded picture buffer (%ld bytes)\n", sh_video->o_bih.biSizeImage);
     return 0;
   }
 
