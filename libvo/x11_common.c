@@ -762,6 +762,7 @@ void saver_on(Display *mDisplay) {
                 }
             }
 	}
+	dpms_disabled=0;
     }
 #endif
 
@@ -771,6 +772,7 @@ void saver_on(Display *mDisplay) {
 	XGetScreenSaver(mDisplay, &dummy, &interval, &prefer_blank, &allow_exp);
 	XSetScreenSaver(mDisplay, timeout_save, interval, prefer_blank, allow_exp);
 	XGetScreenSaver(mDisplay, &timeout_save, &interval, &prefer_blank, &allow_exp);
+	timeout_save=0;
     }
 
     if (xscreensaver_was_running && stop_xscreensaver)
