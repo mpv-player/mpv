@@ -40,18 +40,19 @@ man pages:
     * Hungarian: Gabor Mizda
     * Italian: Daniele Forghieri
     * Polish: Waclaw Schiller
-    * Spanish: Juan Martin
+    * Spanish: Juan Martin, Reynaldo H. Verdejo Pinochet (outdated)
     * Swedish: Carl Fürstenberg (incomplete)
 
 Documentation translations:
     * Chinese (simplified): Lu Ran (outdated)
+    * Czech: Jiri Heryan
     * French: Nicolas Le Gaillart (outdated)
     * German: outdated
     * Hungarian: Gabor Mizda (incomplete)
     * Italian: outdated
     * Polish: Waclaw Schiller
     * Russian: Dmitry Baryshkov (incomplete)
-    * Spanish: Juan Martin (outdated)
+    * Spanish: Juan Martin, Reynaldo H. Verdejo Pinochet (outdated)
 
 Platforms/ports: (see also DOCS/tech/porting-status.txt)
     * Debian packaging: Dariusz Pietrzak
