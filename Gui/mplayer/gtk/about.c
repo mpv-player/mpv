@@ -30,7 +30,7 @@ GtkWidget * create_About( void )
   GtkWidget     * Ok;
 
   GtkStyle      * pixmapstyle;
-  GtkPixmap     * pixmapwid;
+  GdkPixmap     * pixmapwid;
   GdkBitmap     * mask;
 
   GtkAccelGroup * accel_group;
@@ -85,7 +85,7 @@ GtkWidget * create_About( void )
   gtk_container_add( GTK_CONTAINER( frame4 ),vbox1 );
 
   pixmapstyle=gtk_widget_get_style( About );
-  pixmapwid=gdk_pixmap_colormap_create_from_xpm_d( About->window,gdk_colormap_get_system(),&mask,&pixmapstyle->bg[GTK_STATE_NORMAL],(gchar ** )about_xpm );
+  pixmapwid=gdk_pixmap_colormap_create_from_xpm_d( About->window,gdk_colormap_get_system(),&mask,&pixmapstyle->bg[GTK_STATE_NORMAL],about_xpm );
   pixmap1=gtk_pixmap_new( pixmapwid,mask );
 
   gtk_widget_set_name( pixmap1,"pixmap1" );
@@ -156,7 +156,8 @@ GtkWidget * create_About( void )
                    "       ao_sun.c - Jürgen Keil\n\n" \
                    "Homepage:\n" \
                    "        Design:  Chass\n" \
-                   "        Contents: Gabucino\n\n" \
+                   "        Contents: Gabucino\n" \
+		   "                  LGB\n\n" \
                    "English documentation:\n" \
                    "        tech-*.txt: A'rpi\n" \
                    "        all the others: Gabucino\n\n" \
@@ -185,6 +186,8 @@ GtkWidget * create_About( void )
   gtk_widget_ref( hbuttonbox1 );
   gtk_object_set_data_full( GTK_OBJECT( About ),"hbuttonbox1",hbuttonbox1,
                            ( GtkDestroyNotify ) gtk_widget_unref );
+  gtk_widget_set_usize( hbuttonbox1,-2,25 );
+  gtk_button_box_set_child_size( GTK_BUTTON_BOX( hbuttonbox1 ),75,0 );
   gtk_widget_show( hbuttonbox1 );
   gtk_box_pack_start( GTK_BOX( vbox1 ),hbuttonbox1,FALSE,FALSE,0 );
 
@@ -194,7 +197,6 @@ GtkWidget * create_About( void )
   gtk_object_set_data_full( GTK_OBJECT( About ),MSGTR_Ok,Ok,( GtkDestroyNotify ) gtk_widget_unref );
   gtk_widget_show( Ok );
   gtk_container_add( GTK_CONTAINER( hbuttonbox1 ),Ok );
-  GTK_WIDGET_SET_FLAGS( Ok,GTK_CAN_DEFAULT );
 
   gtk_signal_connect( GTK_OBJECT( About ),"destroy",GTK_SIGNAL_FUNC( ab_Ok_released ),NULL );
   gtk_signal_connect( GTK_OBJECT( Ok ),"released",GTK_SIGNAL_FUNC( ab_Ok_released ),NULL );
