@@ -71,6 +71,10 @@ int tv_param_alsa = 0;
 #endif
 char* tv_param_adevice = NULL;
 #endif
+int tv_param_brightness = 0;
+int tv_param_contrast = 0;
+int tv_param_hue = 0;
+int tv_param_saturation = 0;
 
 /* ================== DEMUX_TV ===================== */
 /*
@@ -442,6 +446,12 @@ int demux_open_tv(demuxer_t *demuxer)
 
     /* set height */
     funcs->control(tvh->priv, TVI_CONTROL_VID_GET_HEIGHT, &sh_video->disp_h);
+
+    /* set color eq */
+    tv_set_color_options(tvh, TV_COLOR_BRIGHTNESS, tv_param_brightness);
+    tv_set_color_options(tvh, TV_COLOR_HUE, tv_param_hue);
+    tv_set_color_options(tvh, TV_COLOR_SATURATION, tv_param_saturation);
+    tv_set_color_options(tvh, TV_COLOR_CONTRAST, tv_param_contrast);
 
     demuxer->video->sh = sh_video;
     sh_video->ds = demuxer->video;

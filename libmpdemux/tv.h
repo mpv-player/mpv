@@ -42,6 +42,10 @@ extern int tv_param_alsa;
 #endif
 extern char* tv_param_adevice;
 #endif
+extern int tv_param_brightness;
+extern int tv_param_contrast;
+extern int tv_param_hue;
+extern int tv_param_saturation;
 
 typedef struct tvi_info_s
 {

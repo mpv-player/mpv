@@ -929,6 +929,12 @@ static int start(priv_t *priv)
     return(1);
 }
 
+// 2nd order polynomial with p(-100)=0, p(100)=65535, p(0)=y0
+static int poly(int x, int y0)
+{
+    return ((65535-2*y0)*x*x+6553500*x+20000*y0)/20000;
+}
+
 static int control(priv_t *priv, int cmd, void *arg)
 {
     mp_msg(MSGT_TV, MSGL_DBG2, "\ndebug: control(priv=%p, cmd=%d, arg=%p)\n",
@@ -1042,19 +1048,19 @@ static int control(priv_t *priv, int cmd, void *arg)
 	    }
 	    return(TVI_CONTROL_TRUE);
 	case TVI_CONTROL_VID_SET_BRIGHTNESS:
-	    priv->picture.brightness = (int)*(void **)arg;
+	    priv->picture.brightness = 65535*((int)*(void **)arg+100)/200;
 	    control(priv, TVI_CONTROL_VID_SET_PICTURE, 0);
 	    return(TVI_CONTROL_TRUE);
 	case TVI_CONTROL_VID_SET_HUE:
-	    priv->picture.hue = (int)*(void **)arg;
+	    priv->picture.hue = 65535*((int)*(void **)arg+100)/200;
 	    control(priv, TVI_CONTROL_VID_SET_PICTURE, 0);
 	    return(TVI_CONTROL_TRUE);
 	case TVI_CONTROL_VID_SET_SATURATION:
-	    priv->picture.colour = (int)*(void **)arg;
+	    priv->picture.colour = 65535*((int)*(void **)arg+100)/200;
 	    control(priv, TVI_CONTROL_VID_SET_PICTURE, 0);
 	    return(TVI_CONTROL_TRUE);
 	case TVI_CONTROL_VID_SET_CONTRAST:
-	    priv->picture.contrast = (int)*(void **)arg;
+	    priv->picture.contrast = poly((int)*(void **)arg, 24576);
 	    control(priv, TVI_CONTROL_VID_SET_PICTURE, 0);
 	    return(TVI_CONTROL_TRUE);
 	case TVI_CONTROL_VID_GET_FPS:
