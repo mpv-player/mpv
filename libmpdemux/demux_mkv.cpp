@@ -896,7 +896,7 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
   mkv_track_t *track;
   sh_audio_t *sh_a;
   sh_video_t *sh_v;
-  uint64_t seek_pos, current_pos;
+  uint64_t seek_pos, current_pos, cues_pos;
   int seek_element_is_cue;
 
 #ifdef USE_ICONV
@@ -962,6 +962,8 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
     mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] + a segment...\n");
     
     mkv_d->segment = (KaxSegment *)l0;
+    mkv_d->tc_scale = MKVD_TIMECODESCALE;
+    cues_pos = 0;
 
     upper_lvl_el = 0;
     exit_loop = 0;
@@ -976,8 +978,6 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
         // General info about this Matroska file
         mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |+ segment information...\n");
         
-        mkv_d->tc_scale = MKVD_TIMECODESCALE;
-
         l2 = es->FindNextElement(l1->Generic().Context, upper_lvl_el,
                                  0xFFFFFFFFL, true, 1);
         while (l2 != NULL) {
@@ -1340,14 +1340,8 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
             } // while (l3 != NULL)
 
             if (!mkv_d->cues_found && (seek_pos > 0) &&
-                seek_element_is_cue && (s->end_pos != 0)) {
-              current_pos = io.getFilePointer();
-              io.setFilePointer(mkv_d->segment->GetGlobalPosition(seek_pos));
-              mkv_d->cues_found = parse_cues(mkv_d);
-              if (s->eof)
-                stream_reset(s);
-              io.setFilePointer(current_pos);
-            }
+                seek_element_is_cue && (s->end_pos != 0))
+              cues_pos = mkv_d->segment->GetGlobalPosition(seek_pos);
 
           } else
             mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |  + unknown element, level 2: "
@@ -1410,6 +1404,19 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
       free_mkv_demuxer(mkv_d);
       return 0;
     }
+
+    // If we have found an entry for the cues in the meta seek data but no
+    // cues at the front of the file then read them now. This way the
+    // timecode scale will have been initialized correctly.
+    if (cues_pos && !mkv_d->cues_found) {
+      current_pos = io.getFilePointer();
+      io.setFilePointer(cues_pos);
+      mkv_d->cues_found = parse_cues(mkv_d);
+      if (s->eof)
+        stream_reset(s);
+      io.setFilePointer(current_pos);
+    }
+
 
   } catch (exception &ex) {
     mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] caught exception\n");
