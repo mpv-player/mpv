@@ -5440,76 +5440,106 @@ specify the pass in 2pass mode
 .B bitrate=<value>
 sets the bitrate to be used in kbits/\:second if <16000 or in bits/\:second
 if >16000
-(CBR or 2pass mode, default=687 kbits/s)
+(CBR or 2pass mode, default: 687 kbits/s)
 .TP
 .B fixed_quant=<1\-31>
 switch to fixed quantizer mode and specify the quantizer to be used
 .TP
 .B me_quality=<0\-6>
-specify the motion detection quality (default=6)
+This option controls the motion estimation subsystem.
+The higher the value, the more precise the estimation should be.
+The more precise the motion estimation is, the more bits can be saved.
+Precision is gained at the expense of CPU time so decrease this setting if
+you need realtime encoding.
+(default: 6)
 .TP
 .B interlacing
-enable support for interlaced content (default=off)
+For interlaced video material, turn this option on.
+.I Note: 
+This option does not deinterlace video, it encodes it field-based
+(default: off).
 .TP
 .B 4mv\ \ \ \ 
 use 4 motion vectors per macro-block, might give better compression at the
-cost of a slower encoding (default=off)
+cost of a slower encoding (default: off).
+.br
+.I WARNING:
+This option doesn't exist in XviD-1.0.x.
 .TP
 .B rc_reaction_delay_factor=<value>
-specify how fast the rate control reacts, lower values are faster
+This parameter controls the delay in frames before the CBR rate controller
+will react to bitrate changes and will try to compensate the change to obtain
+a constant bitrate over an averaging range of frames.
 .TP
 .B rc_averaging_period=<value>
-period to reach the required average
+Real CBR is hard to achieve.
+Depending on the video material, bitrate can be variable, and hard to predict.
+That's why XviD uses an averaging period for which it guarantees a given
+amount of bits (minus a small variation).
+This settings expresses the "number of frames" for which XviD averages
+bitrate and tries to achieve CBR.
 .TP
 .B rc_buffer=<value>
 size of the rate control buffer
 .TP
 .B quant_range=<1\-31>\-<1\-31>[/<1\-31>\-<1\-31>]
-min & max quantizer for all frames (default=2\-31, CBR mode)
+min & max quantizer for all frames (default: 2\-31, CBR mode)
 .br
-min & max quantizer for I/P frames (default=2\-31/2\-31, 2pass mode)
+min & max quantizer for I/P frames (default: 2\-31/2\-31, 2pass mode)
 .TP
 .B min_key_interval=<value>
-minimum interval between key frames (default=0, 2pass only)
+minimum interval between key frames (default: 0, 2pass only)
 .TP
 .B max_key_interval=<value>
-maximum interval between key frames (default=10*fps)
+maximum interval between key frames (default: 10*fps)
 .TP
 .B mpeg_quant
-use MPEG quantizers instead of H.263 (default=off)
+use MPEG quantizers instead of H.263.
+For high bitrates, you will find that MPEG quantization preserves more detail.
+For low bitrates, the smoothing of H.263 will give you less block noise.
+When using custom matrices, MPEG must be used.
+(default: off)
 .TP
 .B mod_quant
 decide whether to use MPEG or H.263 quantizers on a frame-by-frame basis.
-(default=off, 2pass mode only)
+(default: off, 2pass mode only)
 .TP
 .B greyscale
-encode in black & white (default=off)
+Make XviD discard chroma planes so the encoded video is greyscale only.
+Note that this does not speed up encoding, it just prevents chroma data
+from being written in the last stage of encoding.
+(default: off)
 .TP
 .B debug\ \ 
-Save per-frame statistics in xvid.dbg (default=off).
+Save per-frame statistics in ./xvid.dbg (default: off).
 This is NOT the 2pass control file.
 .TP
 .B keyframe_boost=<0\-1000>
-(default=0, 2pass mode only)
+Shift some bits from the pool for other frame types to intra frames,
+thus improving keyframe quality.
+(default: 0, 2pass mode only)
 .TP
 .B kfthreshold=<value>
-(default=10, 2pass mode only)
+(default: 10, 2pass mode only)
 .TP
 .B kfreduction=<0\-100>
-(default=30, 2pass mode only)
+The above two settings can be used to adjust the size of keyframes that
+you consider too close to the first (in a row).
+kfthreshold sets the range in which keyframes are reduced, and
+kfreduction determines the bitrate reduction they get.
+The last i-frame will get treated normally. 
+(default: 30, 2pass mode only)
 .RE
 .PP
 
 The following options are only available with the latest stable
-XviD 0.9.2 (api3) version and are marked as experimental and unstable.
-The newest development version of XviD 1.0 (api4) supports
-them fully.
+releases of XviD 1.0.x (api4).
 .TP
 .B packed\ 
-create a bitstream that can be decoded delay-free (default=off)
+create a bitstream that can be decoded delay-free (default: off)
 .br
 .I WARNING:
-this will generate an illegal bitstream, and WILL NOT be 
+this will generate an illegal bitstream, and WILL NOT be
 decodeable by ISO-MPEG4 decoders except DivX/libavcodec/XviD
 .br
 .I WARNING:
@@ -5517,40 +5547,84 @@ this will also store a fake DivX version in the file so the bug
 autodetection of some decoders might be confused
 .TP
 .B divx5bvop
-generate DivX5 compatible B-frames (default=on)
+generate DivX5 compatible B-frames (default: on)
 .TP
 .B qpel\ \ \ 
-enable quarter-pixel motion estimation (default=off)
+MPEG4 uses a half pixel precision for its motion search by default.
+The standard proposes a mode where encoders are allowed to use quarter
+pixel precision.
+This option usually results in a sharper image.
+Unfortunately it has a great impact on bitrate and sometimes the
+higher bitrate use will prevent it from giving a better image
+quality at a fixed bitrate.
+It's better to test with and without this option and see whether it
+is worth activating.
+(default: off)
 .TP
 .B gmc\ \ \ \ 
-enable global motion compensation, may save bits on panning scenes (default=off)
+Enable Global Motion Compensation, which makes XviD generate Sprite
+Frames which best describe Pan/Zoom/Rotating images.
+The decision whether to activate this option or not to save bits
+depends highly on the video material.
+(default: off)
+.TP
+.B trellis
+Trellis Quantization is a kind of adaptive quantization method that
+saves bits by modifying quantized coefficients to make them more
+compressible by the entropy encoder.
+Its impact on quality is good, and if VHQ uses too much CPU for you,
+this setting can be a good alternative to save a few bits (and gain
+quality at fixed bitrate) at a lesser cost than with VHQ (default: off).
+.TP
+.B cartoon
+Activate this if your encoded sequence is an anime/cartoon.
+It modifies some XviD internal thresholds so XviD takes better decisions on
+frame types and motion vectors for flat looking cartoons.
 .TP
 .B chroma_me
-uses chroma information to estimate motion (default=off)
+The usual motion estimation algorithm uses only the luminance information to
+find the best motion vector.
+However for some video material, using the chroma planes can help find
+better vectors.
+This setting toggles the use of chroma planes for motion estimation
+(default: off).
 .TP
 .B chroma_opt
-enable a chroma optimizer prefilter (default=off)
+enable a chroma optimizer prefilter (default: off)
 .TP
 .B reduced
-enable encoding reduced resolution frames (default=off)
+enable encoding reduced resolution frames (default: off)
 .TP
 .B max_bframes=<0\-4>
-maximum number of B frames to put between I/P frames (default=0)
+maximum number of B frames to put between I/P frames (default: 0)
 .TP
 .B bquant_ratio=<0\-1000>
-quantizer ratio between B and non B frames, 150=1.50 (default=150)
+quantizer ratio between B and non B frames, 150=1.50 (default: 150)
 .TP
 .B bquant_offset=<-1000\-1000>
-quantizer offset between B and non B frames, 100=1.00 (default=100)
+quantizer offset between B and non B frames, 100=1.00 (default: 100)
 .TP
 .B bf_threshold=<-255\-255>
-change the probability of a frame to be a bframe (default=0)
+Sometimes B frames do not look good, and introduce artifacts when most of
+the frame is static and some small zones have high motion (in a static
+scene with a man talking, his mouth will probably look bad if what is
+surrounding the man and his mouth is completly static).
+This setting allows you to favorize or not, the use of B frames.
+The higher the value, the higher the probability of B frames being used.
+(default: 0)
 .TP
 .B hq_ac\ \ 
-enable a better prediction of AC component (default=off)
+Activates High Quality AC coefficient prediction from neighbor blocks.
+(default:off)
 .TP
 .B vhq=<0\-4>
-enable a higher quality ME search using DCT, faster to slower:
+The motion search algorithm is based on a search in the usual color domain
+and tries to find a motion vector that minimizes the difference between the
+reference frame and the encoded frame.
+With this setting activated, XviD will also use the frequency domain (DCT)
+to search for a motion vector that minimizes not only the spatial
+difference but also the encoding length of the block.
+Fastest to slowest:
 .PD 0
 .RSs
 .IPs 0
@@ -5569,8 +5643,8 @@ wide search
 .B aspect=<x/y | f (float value)>
 Store movie aspect internally, just like MPEG files.
 Much nicer solution than rescaling, because quality isn't decreased.
-MPlayer and few others players will play these files correctly, others will display
-them with the wrong aspect.
+MPlayer and a few others players will play these files correctly, others
+will display them with the wrong aspect.
 The aspect parameter can be given as a ratio or a floating point number.
 .TP
 .B autoaspect
@@ -5580,7 +5654,8 @@ filter chain.
 .TP
 .B psnr\ \ \ 
 Print the psnr (peak signal to noise ratio) for the whole video after encoding
-and store the per frame psnr in a file with a name like 'psnr_hhmmss.log'.
+and store the per frame psnr in a file with a name like 'psnr_hhmmss.log' in
+the current directory.
 Returned values are in dB (decibel), the higher the better.
 .
 .
