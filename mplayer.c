@@ -737,7 +737,7 @@ if(has_video==2){
   if(avi_header.video.fccHandler==mmioFOURCC('d', 'i', 'v', 'x')) has_video=3;
   if(avi_header.bih.biCompression==mmioFOURCC('d', 'v', 'x', '1')) has_video=3;
   if(avi_header.bih.biCompression==mmioFOURCC('d', 'i', 'v', 'x')) has_video=3;
-  if(avi_header.bih.biCompression==mmioFOURCC('D', 'I', 'V', 'X')) has_video=3; // Gabucino
+//  if(avi_header.bih.biCompression==mmioFOURCC('D', 'I', 'V', 'X')) has_video=3; // Gabucino
 }
 
 switch(has_video){
