@@ -233,6 +233,32 @@ static void query_vaa(vo_vaa_t *vaa)
   vaa->get_video_eq = mga_get_video_eq;
   vaa->set_video_eq = mga_set_video_eq;
 }
+
+static void mga_fullscreen()
+{
+	uint32_t w,h;
+	if ( !vo_fs ) {
+		vo_fs=VO_TRUE;
+		w=vo_screenwidth; h=vo_screenheight;
+		aspect(&w,&h,A_ZOOM);
+	} else {
+		vo_fs=VO_FALSE;
+		w=vo_dwidth; h=vo_dheight;
+		aspect(&w,&h,A_NOZOOM);
+	}
+	mga_vid_config.dest_width = w;
+	mga_vid_config.dest_height= h;
+	if (vo_screenwidth && vo_screenheight) {
+		mga_vid_config.x_org=(vo_screenwidth-w)/2;
+		mga_vid_config.y_org=(vo_screenheight-h)/2;
+	} else {
+		mga_vid_config.x_org= 0;
+		mga_vid_config.y_org= 0;
+	}
+	if ( ioctl( f,MGA_VID_CONFIG,&mga_vid_config ) )
+		printf( "Error in mga_vid_config ioctl (wrong mga_vid.o version?)" );
+}
+
 static uint32_t control(uint32_t request, void *data, ...)
 {
   switch (request) {
@@ -243,11 +269,13 @@ static uint32_t control(uint32_t request, void *data, ...)
     return query_format(*((uint32_t*)data));
   case VOCTRL_GET_IMAGE:
     return get_image(data);
-#ifdef VO_XMGA
   case VOCTRL_FULLSCREEN:
+#ifdef VO_XMGA
     vo_x11_fullscreen();
-    return VO_TRUE;
+#else
+    mga_fullscreen();
 #endif
+    return VO_TRUE;
   }
   return VO_NOTIMPL;
 }

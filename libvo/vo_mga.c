@@ -84,10 +84,13 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		aspect_save_prescale(d_width,d_height);
 		aspect_save_screenres(vo_screenwidth,vo_screenheight);
 	
-		if(fullscreen&0x01) /* -fs */
+		if(fullscreen&0x01) { /* -fs */
 			aspect(&d_width,&d_height,A_ZOOM);
-		else
+			vo_fs = VO_TRUE;
+		} else {
 			aspect(&d_width,&d_height,A_NOZOOM);
+			vo_fs = VO_FALSE;
+		}
 		printf("vo_mga aspect(): resized to %dx%d\n",d_width,d_height);
 	}
 
