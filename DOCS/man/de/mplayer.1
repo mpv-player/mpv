@@ -6826,7 +6826,48 @@ Wenn du vcodec=mpeg2video angibst, kann dieser Wert 8, 9, 10 oder 11 sein.
 .B cgop\ \ \ 
 Schließt alle GOPs.
 Funktioniert momentan nicht.
-.\" man page is synced from top down to this option.
+.
+.
+.SS nuv (\-nuvopts)
+.
+NuppelVideo basiert auf RTJPEG und LZO.
+Normalerweise werden Frames zuerst mit RTJPEG encodiert und dann mit LZO
+komprimiert; es ist jedoch möglich, entweder einen oder beide Durchgänge zu
+deaktivieren.
+Als Ergebnis kannst du also tatsächlich raw i420, LZO-komprimiertes i420,
+RTJPEG, oder normales LZO-komprimiertes RTJPEG ausgeben.
+.br
+.I ANMERKUNG:
+Die nuvrec-Dokumentation enthält einige Anweisungen und Beispiele zu
+Einstellungen, die für die meisten TV-Encodierungen genutzt werden können.
+.
+.TP
+.B c=<0\-20>
+Chrominanzschwellenwert (Standard: 1)
+.
+.TP
+.B l=<0\-20>
+Helligkeitsschwellenwert (Standard: 1)
+.
+.TP
+.B lzo\ \ \ \ 
+Aktiviert LZO-Kompression (Standard).
+.
+.TP
+.B nolzo\ \ 
+Deaktiviert LZO-Kompression.
+.
+.TP
+.B q=<3\-255>
+Qualitätslevel (Standard: 255)
+.
+.TP
+.B raw \ \ \ 
+Deaktiviert RTJPEG-Encodierung.
+.
+.TP
+.B rtjpeg\ 
+Aktiviert RTJPEG-Encodierung (Standard).
 .
 .
 .SS xvidenc (\-xvidencopts)
@@ -7337,6 +7378,7 @@ P-Frames mit der Option vhq getan wird.
 Dies liefert besser aussehende B-Frames, während fast keine
 Performance-Einbußen auftreten.
 .
+.\" man page is synced from top down to this option.
 .
 .\" --------------------------------------------------------------------------
 .\" Dateien
