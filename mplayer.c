@@ -1790,8 +1790,8 @@ switch(sh_video->codec->driver){
     if(in_size){
       sh_video->bih->biSizeImage = in_size;
 
-      sh_video->bih->biWidth = 1280;
-      sh_video->o_bih.biWidth = 1280;
+//      sh_video->bih->biWidth = 1280;
+//      sh_video->o_bih.biWidth = 1280;
 	    //      ret = ICDecompress(avi_header.hic, ICDECOMPRESS_NOTKEYFRAME|(ICDECOMPRESS_HURRYUP|ICDECOMPRESS_PREROL), 
       ret = ICDecompress(sh_video->hic, ICDECOMPRESS_NOTKEYFRAME |
                         ( (drop_frame==2)?(ICDECOMPRESS_HURRYUP|ICDECOMPRESS_PREROL):0 ) , 
