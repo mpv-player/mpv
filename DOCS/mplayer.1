@@ -66,10 +66,29 @@ is MPlayer with a graphical user interface.
 It has the same options as MPlayer.
 
 .SH GENERAL NOTES
+.B Check the HTML documentation, too!
+.br
 Every "flag" option has a "noflag" counterpart, e.g.  the opposite of the \-fs
 option is \-nofs.
 .br
-.B Check the HTML documentation, too!
+You can put all of the options in a config file which will be read every time
+.B mplayer
+is run. The system-wide config file is '/etc/mplayer.conf', the user specific
+one is '~/.mplayer/config'. User specific options override system-wide options
+and options given on the command line override either. The syntax of the config
+files is 'option=<value>', everything after a '#' is considered a comment.
+Options that work without values can be enabled by setting them to 'yes' or '1'
+and disabled by setting them to 'no' or '0'.
+
+.I EXAMPLE
+.br
+# Use Matrox driver by default.
+.br
+vo=xmga
+.br
+# I love practicing handstands while watching videos.
+.br
+flip=yes
 
 .SH "DEMUXER/STREAM OPTIONS"
 .TP
