@@ -49,7 +49,7 @@
 
 #include <x264.h>
 
-#if X264_BUILD < 0x000d
+#if X264_BUILD < 0x000e
 #error We do not support old versions of x264. Get the latest from SVN.
 #endif
 
@@ -65,8 +65,8 @@ extern char* passtmpfile;
 static int bitrate = -1;
 static int qp_constant = 26;
 static int frame_ref = 1;
-static int iframe = 250;
-static int idrframe = 2;
+static int keyint_max = 250;
+static int keyint_min = -1;
 static int scenecut_threshold = 40;
 static int bframe = 0;
 static int deblock = 1;
@@ -75,6 +75,7 @@ static int deblockbeta = 0;
 static int cabac = 1;
 static int cabacidc = -1;
 static int p4x4mv = 0;
+static int p8x8mv = 1;
 static int b8x8mv = 1;
 static int direct_pred = X264_DIRECT_PRED_TEMPORAL;
 static float ip_factor = 1.4;
@@ -98,8 +99,8 @@ m_option_t x264encopts_conf[] = {
     {"bitrate", &bitrate, CONF_TYPE_INT, CONF_RANGE, 0, 24000000, NULL},
     {"qp_constant", &qp_constant, CONF_TYPE_INT, CONF_RANGE, 1, 51, NULL},
     {"frameref", &frame_ref, CONF_TYPE_INT, CONF_RANGE, 1, 15, NULL},
-    {"keyint", &iframe, CONF_TYPE_INT, CONF_RANGE, 1, 24000000, NULL},
-    {"idrint", &idrframe, CONF_TYPE_INT, CONF_RANGE, 1, 24000000, NULL},
+    {"keyint", &keyint_max, CONF_TYPE_INT, CONF_RANGE, 1, 24000000, NULL},
+    {"keyint_min", &keyint_min, CONF_TYPE_INT, CONF_RANGE, 1, 24000000, NULL},
     {"scenecut", &scenecut_threshold, CONF_TYPE_INT, CONF_RANGE, -1, 100, NULL},
     {"bframes", &bframe, CONF_TYPE_INT, CONF_RANGE, 0, 16, NULL},
     {"deblock", &deblock, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -111,6 +112,8 @@ m_option_t x264encopts_conf[] = {
     {"cabacidc", &cabacidc, CONF_TYPE_INT, CONF_RANGE, -1, 2, NULL},
     {"4x4mv", &p4x4mv, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"no4x4mv", &p4x4mv, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+    {"8x8mv", &p8x8mv, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    {"no8x8mv", &p8x8mv, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"b8x8mv", &b8x8mv, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"nob8x8mv", &b8x8mv, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"direct_pred", &direct_pred, CONF_TYPE_INT, CONF_RANGE, 0, 2, NULL},
@@ -143,8 +146,8 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     
     x264_param_default(&mod->param);
     mod->param.i_frame_reference = frame_ref;
-    mod->param.i_idrframe = idrframe;
-    mod->param.i_iframe = iframe;
+    mod->param.i_keyint_max = keyint_max;
+    mod->param.i_keyint_min = keyint_min > 0 ? keyint_min : keyint_max * 2 / 5;
     mod->param.i_scenecut_threshold = scenecut_threshold;
     mod->param.i_bframe = bframe;
     mod->param.b_deblocking_filter = deblock;
@@ -206,9 +209,11 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     }
     mod->param.rc.f_ip_factor = ip_factor;
     mod->param.rc.f_pb_factor = pb_factor;
-    mod->param.analyse.inter = X264_ANALYSE_I4x4 | X264_ANALYSE_PSUB16x16;
+    mod->param.analyse.inter = X264_ANALYSE_I4x4;
     if(p4x4mv)
         mod->param.analyse.inter |= X264_ANALYSE_PSUB8x8;
+    if(p8x8mv)
+        mod->param.analyse.inter |= X264_ANALYSE_PSUB16x16;
     if(b8x8mv)
         mod->param.analyse.inter |= X264_ANALYSE_BSUB16x16;
     mod->param.analyse.i_direct_mv_pred = direct_pred;
@@ -324,7 +329,8 @@ static int put_image(struct vf_instance_s *vf, mp_image_t *mpi)
     }
     if(i_size>0) {
         int keyframe = (mod->pic.i_type == X264_TYPE_IDR) ||
-                       (mod->pic.i_type == X264_TYPE_I && frame_ref == 1);
+                       (mod->pic.i_type == X264_TYPE_I
+                        && frame_ref == 1 && !bframe);
         muxer_write_chunk(mod->mux, i_size, keyframe?0x10:0);
     }
     return 1;
