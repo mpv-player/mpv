@@ -61,6 +61,7 @@ int vlvo_preinit(const char *drvname)
 	video_out_vesa.draw_frame=vlvo_draw_frame;
 	video_out_vesa.flip_page=vlvo_flip_page;
 	video_out_vesa.draw_osd=vlvo_draw_osd;
+	video_out_vesa.query_format=vlvo_query_info;
 	return 0;
 }
 

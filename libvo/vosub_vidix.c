@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 #include "config.h"
 
@@ -37,10 +38,19 @@ static uint8_t *vidix_mem = NULL;
 static uint8_t next_frame;
 static unsigned image_bpp,image_height,image_width,src_format;
 extern int verbose;
+static int video_on=0;
 
 static vidix_capability_t vidix_cap;
 static vidix_playback_t   vidix_play;
 static vidix_fourcc_t	  vidix_fourcc;
+
+static int  vidix_get_bes_da(bes_da_t *);
+
+static void vidix_query_vaa(vo_vaa_t *vaa)
+{
+  memset(vaa,0,sizeof(vo_vaa_t));
+  vaa->query_bes_da=vidix_get_bes_da;
+}
 
 int vidix_preinit(const char *drvname,void *server)
 {
@@ -72,6 +82,7 @@ int vidix_preinit(const char *drvname,void *server)
 	((vo_functions_t *)server)->flip_page=vidix_flip_page;
 	((vo_functions_t *)server)->draw_osd=vidix_draw_osd;
 	((vo_functions_t *)server)->query_format=vidix_query_fourcc;
+	((vo_functions_t *)server)->query_vaa=vidix_query_vaa;
 	return 0;
 }
 
@@ -215,6 +226,7 @@ int vidix_start(void)
 		vdlPlaybackSetEq(vidix_handler,&vid_eq);
 	}
     }
+    video_on=1;
     return 0;
 }
 
@@ -226,6 +238,7 @@ int vidix_stop(void)
 	printf("vosub_vidix: Can't stop playback: %s\n",strerror(err));
 	return -1;
     }
+    video_on=0;
     return 0;
 }
 
@@ -398,8 +411,7 @@ uint32_t vidix_query_fourcc(uint32_t format)
   if(verbose > 1) printf("vosub_vidix: query_format was called: %x (%s)\n",format,vo_format_name(format));
   vidix_fourcc.fourcc = format;
   vdlQueryFourcc(vidix_handler,&vidix_fourcc);
-  if (vidix_fourcc.depth == VID_DEPTH_NONE)
-    return(0);
+  if (vidix_fourcc.depth == VID_DEPTH_NONE) return(0);
   return(0x2); /* hw support without conversion */
 }
 
@@ -416,4 +428,23 @@ int vidix_grkey_get(vidix_grkey_t *gr_key)
 int vidix_grkey_set(const vidix_grkey_t *gr_key)
 {
     return(vdlSetGrKeys(vidix_handler, gr_key));
+}
+
+static int  vidix_get_bes_da(bes_da_t *info)
+{
+  if(!video_on) return EPERM;
+  info->dest.x = vidix_play.src.x;
+  info->dest.y = vidix_play.src.y;
+  info->dest.w = vidix_play.src.w;
+  info->dest.h = vidix_play.src.h;
+  info->dest.pitch.y = vidix_play.dest.pitch.y;
+  info->dest.pitch.u = vidix_play.dest.pitch.u;
+  info->dest.pitch.v = vidix_play.dest.pitch.v;
+  info->flags = vidix_play.flags;
+  info->frame_size = vidix_play.frame_size;
+  info->num_frames = vidix_play.num_frames;
+  memcpy(info->offsets,vidix_play.offsets,sizeof(unsigned)*vidix_play.num_frames);
+  memcpy(&info->offset,&vidix_play.offset,sizeof(vidix_yuv_t));
+  info->dga_addr = vidix_play.dga_addr;
+  return 0;
 }
