@@ -248,8 +248,8 @@ So beschloss ich einen Player zu schreiben/zu modifizieren...</P>
 
 <P><B><A NAME=1.3>1.3. Installation</A></B></P>
 
-<P>Du wirdst die folgende Pakete und Versionen benötigen, wenn du keine Probleme
-erleben willst:<BR>
+<P><B><I>VORAUSSETZUNGEN</I></B><BR>
+
 <UL>
   <LI><B>binutils</B> - vorgeschlagene Version ist <B>2.11.x</B>. Diese Programm ist
   verantworlich für das Erzeugen von MMX/3DNow!/usw Befehlen, deshalb sehr wichtig.</LI>
@@ -264,59 +264,78 @@ erleben willst:<BR>
 </UL>
 </P>
 	  
-<P>Lese folgendes, bevor du versuchst <B>MPlayer</B> zu kompilieren:</P>
+<P>Lese folgendes bevor du versuchst <B>MPlayer</B> zu kompilieren:</P>
 
 <UL>
 
-<LI>Wenn du <B>gcc 2.96</B> auf deinem System hast, <A HREF="../users_against_developers.html"><B><I>LESE HIER (Englisch)</A> oder die <A HREF="faq.html">FAQ</A> !</I></B></LI>
+<LI>Wenn du <B>gcc 2.96</B> auf deinem System hast, <A HREF="../users_against_developers.html"><B><I>LESE HIER (Englisch)</A>
+und die <A HREF="faq.html">FAQ</A> !</I></B></LI>
+</UL>
 
-<LI>Wenn du planst, <B>MPlayer</B> auf einer x86 Architektur zu verwenden, willst
-du möglichweise die Win32 Codecs verwenden. Wenn du zum Beispiel Videos dir mit einer
-Digitalkamara (z.B. DV) abspielen oder encodieren willst musst du die installieren. 
-Lade dir dazu die w32codecs.zip herrunter und entpacke sie nach /usr/lib/win32 .
-Hinweis: Das Avifile-Projekt hat ein ähnliches Codecs-Paket, aber es unterscheidet
+<P><B><I>CODECS</I></B></P>
+
+<UL>
+<LI><B>libavcodec</B> : Wenn die diese DivX3/DivX4/usw Codecs verwenden willst schau die Sektion
+<A HREF="codecs.html#2.2.1.2">2.2.1.2</A> vor dem Kompilieren an. Features:<BR>
+<UL>
+	<LI>es kann <B><I>DivX/DivX4</I>-Wiedergabe auf nicht-x86 Maschinen ermöglichen</B></LI>
+	<LI>dieser Codec hat die <B>größte Geschwindigkeit beim Dekodieren</B> von DivX und DivX4
+	Filmen (auch schneller als der orginal DivX4-Codec) !</LI>
+</UL>
+</LI>
+
+<LI><B>Win32 Codecs</B> : Wenn du planst, <B>MPlayer</B> auf einer x86 Architektur zu verwenden,
+willst du sie möglicherweise brauchen. Lade dir dazu die w32codecs.zip herrunter und entpacke sie
+nach /usr/lib/win32 . Hinweis: Das Avifile-Projekt hat ein ähnliches Codecs-Paket, aber es unterscheidet
 sich von unserem. Also wenn du alle unterstützten Codecs verwenden willst, verwende
-unser Paket! Wie auch immer, du kannst auch unserer Paket für avifile nutzen.</LI>
+unser Paket! Wie auch immer, du kannst auch unserer Paket für avifile nutzen. Features:<BR>
+<UL>
+	<LI>du wirdst sie möglichweise brauchen um Video abzuspielen oder zu encodieren,
+	welche mit einer digitalen Kamera aufgezeichnet wurden (z.B. DV)</LI>
+	<LI>erforderlich um <B>WMV Filme</B> oder ältere ASFs abzuspielen</LI>
+</UL>
+</LI>
 
-<LI>Wenn du eine Matrox G200/G400/G450/G550 Karte verwendest schau bitte auf die
+<LI><B>DivX4</B> : Informationen zu diesem Codec sind in der Sektion <A HREF="codecs.html#2.2.1.1">2.2.1.1</A>
+erhältlich. Wenn du <B>MEncoder</B> nicht verwendest, kannst du auch <B>libavcodec</B> (siehe oben)
+verwenden, welcher schneller wäre.<BR>
+Features:<UL>
+	<LI>du kannst alte <B>DivX3</B>-Film schneller als beim Win32-DLL-Codec betrachten</LI>
+	<LI>es ist Closed-Source und es ist nur in einer x86-Version verfügbar.</LI>
+	<LI><I>Du brauchst diesen Codec auf für <B>MEncoder</B>, siehe unten !</I></LI>
+</UL>
+</LI>
+
+<LI>Wenn du <B>3ivx</B> Filme abspiele willst lese die <A HREF=codecs.html#2.2.1.3>XAnim Codecs-Sekion</A>.</LI>
+</UL>
+
+<P><B><I>VIDEOKARTEN</I></B></P>
+
+<UL>
+<LI><B>Matrox G200/G400/G450/G550 Karten</B> : <LI>schau bitte auf die
 <A HREF="video.html#2.3.1.7">Sektion 2.3.1.7</A> um einen großen Geschwindigkeitsvorteil
 zu erhalten. Es ist wichtig, dass du diese Schritte <I>vor</I> dem Kompilieren von <B>MPlayer</B>
 machst, ansonsten wird die Matrox-spezifische Unterstützung nicht eingebaut.
 Schau dir auch die <A HREF="video.html#2.3.1.A.1">Matrox TV-Out</A> Sektion an.</LI>
 
-<LI>Wenn du eine 3Dfx Voodoo3/Banshee Karte verwendest schau bitte auf die
+<LI><B>3Dfx Voodoo3/Banshee Karten</B> : <LI>schau bitte auf die
 <A HREF="video.html#2.2.1.9">Sektion 2.2.1.9</A> um einen großen Geschwindigkeitsvorteil
 zu erhalten. Es ist wichtig, dass du diese Schritte <I>vor</I> dem Kompilieren von <B>MPlayer</B>
 machst, ansonsten wird die 3Dfx-Unterstützung nicht eingebaut.</LI>
 
-<LI>Wenn du eine ATI Karte besitzt schau bitte auf die <A HREF="video.html#2.3.1.A.2">
+<LI><B>ATI Karten</B> : <LI>schau bitte auf die <A HREF="video.html#2.3.1.A.2">
 ATI-Karten Sektion</A> für Dokumentationen zum TV-Out und um zu erfahren, welches
-Features deiner Karter under Linux/MPlayer unterstützt werden. Wenn du eine <B>Radeon</B>
-Karte besitzt, wir heben einen <B>radeon_vid</B>-Treiber für dich mit TV-Out ! Siehe <A
+Features deiner Karter under Linux/MPlayer unterstützt werden. Wenn du eine <B>Radeon</B> oder <B>Rage 128</B>
+Karte besitzt, wir haben einen <B>XXX_vid</B>-Treiber für dich mit TV-Out ! Siehe <A
 HREF="video.html#2.3.1.14">hier</A>!</LI>
 
-<LI>Wenn du den ProjectMayos <B>DivX4</B> Codec verwenden willst, siehe
-<A HREF="codecs.html#2.1.2.1">Sektion 2.1.2.1</A> vor dem Kompilieren. Dieser Codec kann
-<B>DivX</B> Filme um einiges schneller als die Win32 DLLs abspielen.
-Wenn du Filme mit dem neuem <B>DivX4</B> Codec abspielen willst ist es zu
-empfehlen <B>recommended</B> diese Bibliothek anstatt der DivX.dll auf dem
-w32codecs.zip Paket zu verwenden. Es ist Closed-Source und nur in einer x86
-Version verfügbar. <I>Du brauchst diesen Codec auf für <B>MEncoder</B>, siehe unten !</I></LI>
-
-<LI>Wenn du planst ffmpegs <B>libavcodec</B> zu verwenden, schaue vor dem Kompilieren
-auf die <A HREF="codecs.html#2.1.2.2">Sektion 2.1.2.2</A>. Du wirdst dies brauchen
-um <B>DivX/DivX4</B> Unterstützung auf einer nicht-x86 Maschine zu gewinnen.
-Dieser Codec gat beste <B>Geschwindigkeit bei Dekodieren</B> von DivX und DivX4
-Filmen (ist auch schneller als das orignal DivX4) !</LI>
+<P><B><I>FEATURES</I></B></P>
 
 <LI>Für DVD-Unterstützung musst libdvdread und libdvdcss kompilieren. Lese dazu die
 <A HREF="cd-dvd.html#4.2">Sektion 4.2</A>.</LI>
 
 <LI>Entscheinde dich, ob du GUI brauchst. Wenn du es braucht, wirf einen Blick auf die
 <A HREF=#1.4>Sektion 1.4</A> vor dem Kompilieren.</LI>
-
-<LI>Wenn du <B>3ivx</B> Filme abspielen willst siehe <A HREF=codecs.html#2.2.1.3>
-XAnim Codecs Sektion</A>.</LI>
 
 <LI>Wenn du eine V4L-kompatible <B>TV-Tuner</B> Karte hast und du mit <B>MPlayer</B>
 fernsehen oder encodieren willst, siehe in der <A HREF=#2.5>TV-Input</A> Sektion.</LI>
