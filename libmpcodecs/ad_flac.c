@@ -108,32 +108,19 @@ FLAC__StreamDecoderReadStatus flac_read_callback (const FLAC__StreamDecoder *dec
 FLAC__StreamDecoderWriteStatus flac_write_callback(const FLAC__StreamDecoder *decoder, const FLAC__Frame *frame, const FLAC__int32 * const buffer[], void *client_data)
 {
 	FLAC__byte *buf = ((flac_struct_t*)(client_data))->buf;
-	int channel, sample;
 	int bps = ((flac_struct_t*)(client_data))->sh->samplesize;
+	int lowendian = (((flac_struct_t*)(client_data))->sh->sample_format == AFMT_S16_LE);
+	int unsigned_data = (((flac_struct_t*)(client_data))->sh->sample_format == AFMT_U8);
 	mp_msg(MSGT_DECAUDIO, MSGL_DBG2, "\nWrite callback (%d bytes)!!!!\n", bps*frame->header.blocksize*frame->header.channels);
 	if (buf == NULL)
 	{
 		/* This is used in control for skipping 1 audio frame */
 		return FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE;
 	}
-#if 0
-	for (sample = 0; sample < frame->header.blocksize; sample ++)
-		for (channel = 0; channel < frame->header.channels; channel ++)
-			switch (bps)
-			{
-				case 3:
-					buf[bps*(sample*frame->header.channels+channel)+2] = (FLAC__byte)(buffer[channel][sample]>>16);
-				case 2:
-					buf[bps*(sample*frame->header.channels+channel)+1] = (FLAC__byte)(buffer[channel][sample]>>8);
-					buf[bps*(sample*frame->header.channels+channel)+0] = (FLAC__byte)(buffer[channel][sample]);
-					break;
-				case 1:
-					buf[bps*(sample*frame->header.channels+channel)] = buffer[channel][sample]^0x80;
-					break;
-			}
-#else
-	FLAC__plugin_common__apply_gain(
+	FLAC__replaygain_synthesis__apply_gain(
 				buf,
+				lowendian,
+				unsigned_data,
 				buffer,
 				frame->header.blocksize,
 				frame->header.channels,
@@ -144,7 +131,6 @@ FLAC__StreamDecoderWriteStatus flac_write_callback(const FLAC__StreamDecoder *de
 				dither,
 				&(((flac_struct_t*)(client_data))->dither_context)
 		);
-#endif
 	((flac_struct_t*)(client_data))->written += bps*frame->header.blocksize*frame->header.channels;
 	return FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE;
 }
@@ -238,7 +224,12 @@ void flac_metadata_callback (const FLAC__StreamDecoder *decoder, const FLAC__Str
 			((flac_struct_t*)client_data)->bits_per_sample = metadata->data.stream_info.bits_per_sample;
 			sh->samplesize = (metadata->data.stream_info.bits_per_sample<=8)?1:2;
 			/* FIXME: need to support dithering to samplesize 4 */
-			sh->sample_format=(sh->samplesize==1)?AFMT_U8:AFMT_S16_LE; // sample format, see libao2/afmt.h
+			sh->sample_format=(sh->samplesize==1)?AFMT_U8:
+#ifdef WORDS_BIGENDIAN
+				AFMT_S16_BE;
+#else
+				AFMT_S16_LE;
+#endif
 			sh->o_bps = sh->samplesize * metadata->data.stream_info.channels * metadata->data.stream_info.sample_rate;
 			sh->i_bps = metadata->data.stream_info.bits_per_sample * metadata->data.stream_info.channels * metadata->data.stream_info.sample_rate / 8 / 2;
 			// input data rate (compressed bytes per second)
@@ -460,7 +451,7 @@ static int init(sh_audio_t *sh_audio){
 
 	FLAC__stream_decoder_process_until_end_of_metadata(context->flac_dec);
 
-	FLAC__plugin_common__init_dither_context(&(context->dither_context), sh_audio->samplesize * 8, noise_shaping);
+	FLAC__replaygain_synthesis__init_dither_context(&(context->dither_context), sh_audio->samplesize * 8, noise_shaping);
 	
 	return 1; // return values: 1=OK 0=ERROR
 }
