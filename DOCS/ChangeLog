@@ -12,12 +12,13 @@ Note: If you've sent patches not applied in pre22, please send them again!
 
 *** 0.11 release is coming SOON!!! ***
 
-v0.11-pre25:  small fixes again :(
+v0.11-CVS:  yeah, we moved to SourceForge CVS!
   - DOCS updated (email address changed from arpi@* -> maillist)
   - LIRC fix, mplayer_lirc changed back to mplayer [Andreas Ackermann]
   - stream.c: unsigned int fixes, required for some strange .asf files
   - asfheader.c: using w=h=b=1 for audio_concealment_none
   - VCD-related stuff moved from stream.c to vcd_read.c
+  - added DGA driver by Andreas Ackermann
 
 v0.11-pre24:  small fixes again :(
   - DOCS/LIRC changed: users *must* enable lirc support manually, it is
