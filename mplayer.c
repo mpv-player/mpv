@@ -535,12 +535,11 @@ if ((conffile = get_path("")) == NULL) {
 
   printf("%s",banner_text);
 
-  parse_cfgfiles();
-
 #ifdef HAVE_GUI
   if ( nogui )
    {
 #endif
+    parse_cfgfiles();
     if (parse_command_line(conf, argc, argv, envp, &filename) < 0) exit(1);
 
     // Many users forget to include command line in bugreports...
