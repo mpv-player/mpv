@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with 1.3 -->
+<!-- synced with 1.4 -->
 <appendix id="mailinglists">
 <title>Почтовые рассылки</title>
 <para>
@@ -29,6 +29,12 @@ Quoting HOWTO [КАК цитировать]</ulink>.
 интерфейсе/API, новых библиотеках, оптимизации кода, изменениях в конфигурации.
 Чтобы сохранить низкий трафик, присылайте сюда патчи, а не сообщения об ошибках, вопросы пользователей, запросы
 новых возможностей.
+</para></listitem>
+<listitem><para>
+Рассылка MPlayer DOCS:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs"/>
+Эта рассылка для дискуссий по MPlayer'овской документации и переводам.
+Также, сюда отсылаются логи CVS, относящиеся к документации и домашней странице.
 </para></listitem>
 <listitem><para>
 Рассылка пользователей MPlayer'а:

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with 1.7 -->
+<!-- synced with 1.9 -->
 <appendix id="users-vs-dev">
 <title>Плач разработчиков</title>
 
@@ -29,10 +29,9 @@ GCC 2.96 с Linux-Mandrake серии 8.0.
 <ulink url="http://gcc.gnu.org/gcc-2.96.html">официальный ответ</ulink>
 на GCC 2.96. У многих разработчики со всему мира возникали проблемы с
 GCC 2.96, и они рекомендовали другие компиляторы. Примеры &mdash; это
-<ulink url="http://www.mysql.com/downloads/mysql-3.23.html">MySQL</ulink>,
-<ulink url="http://avifile.sourceforge.net/news-old1.htm">avifile</ulink>
+<ulink url="http://www.mysql.com/downloads/mysql-3.23.html">MySQL</ulink>
 и
-<ulink url="http://www.winehq.com/news/?view=92#RH 7.1 gcc fixes compiler bug">Wine</ulink>.
+<ulink url="http://avifile.sourceforge.net/news-old1.htm">avifile</ulink>.
 Прочие интересные ссылки &mdash; это 
 <ulink url="http://www.atnf.csiro.au/people/rgooch/linux/docs/kernel-newsflash.html">
 Linux kernel news flash о ядре 2.4.17</ulink>
@@ -47,8 +46,6 @@ Linux kernel news flash о ядре 2.4.17</ulink>
 </formalpara>
 
 <para>
-Вы можете прочитать о другой стороне этой истории
-<ulink url="http://www.bero.org/gcc296.html">на этом сайте</ulink>.
 GCC 2.96 не допускает символ <literal>|</literal> (pipe[канал]) в ассемблерных
 комментариях, поскольку он поддерживает Intel'евский и AT&amp;T синтаксисы, а
 буква <literal>|</literal> &mdash; символ в Intel'евском варианте. Проблема
@@ -77,7 +74,7 @@ Red Hat заявляет, что GCC 2.96-85 и далее исправлены. Ситуация действительно
 <ulink url="ftp://updates.redhat.com">ftp сервере</ulink>RedHat, или просто
 перейти на 3.0.4 пакеты, предлагаемые начиная с версии 7.2. Вы также можете
 использовать
-<ulink url="ftp://people.redhat.com/jakub/gcc/3.2-10/">gcc-3.2-10 пакеты</ulink>
+<ulink url="ftp://people.redhat.com/jakub/gcc/3.2.3-11/">gcc-3.2.3-11 пакеты</ulink>
 (неофициальные, но работают нормально) и поставить их совместно с gcc-2.96,
 который у Вас стоит. MPlayer их обнаружит, и будет использовать 3.2 вместо
 2.96. Если Вы не хотите или не можете использовать пакеты, вот как Вы можете
@@ -138,8 +135,9 @@ OpenDivX, который не разрешал распространение в скомпилированном виде. Этот код
 <para>
 Другим препятствием к распространению в двоичном виде была оптимизация времени
 компиляции под конкретную архитектуру процессора. Теперь <application>MPlayer
-</application>поддерживает определение CPU во время выполнения (при компиляции
-укажите опцию <option>--enable-runtime-cpudetection</option>). Это по умолчанию
+</application>поддерживает определение CPU во время выполнения (укажите
+<command>configure</command>
+опцию <option>--enable-runtime-cpudetection</option>). Это по умолчанию
 выключено, поскольку это вызывает небольшую потерю в скорости, но зато теперь
 возможно создавать бинарии, которые будут работать на разных CPU из семейства
 Intel.
@@ -157,8 +155,6 @@ Intel.
 <ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>
 о проблемах, связанных с этими драйверами с закрытым исходным кодом, их плохим
 качеством, нестабильностью и плохой поддержкой пользователей и специалистов.
-Вот пример на 
-<ulink url="http://www.nvnews.net/forum/showthread.php?s=fda5725bc2151e29453b2da3bd5d2930&amp;threadid=14306">nVidia Linux Forum</ulink>.
 Многие из этих проблем продолжают появляться снова и снова. Мы всегда
 связывались после этого с nVidia, и они говорили, что эти ошибки не существуют,
 что нестабильность вызывается плохими AGP чипами, и что они не получали
@@ -178,90 +174,73 @@ nVidia драйвер и столкнулись с проблемой, связанной с драйвером, знайте, что
 
 <para>
 Джо Барр получил дурную репутацию, после написания менее, чем благосклонного
-<ulink url="http://www.linuxworld.com/site-stories/2001/1214.mplayer.html">
-обзора <application>MPlayer</application>'а</ulink>. Он нашёл, что
-<application>MPlayer</application> сложно установить, а затем он был не вполне
-захотел
-<ulink
-url="http://www.linuxworld.com/linuxworld/lw-2000-06/lw-06-exam.html">читать документацию</ulink>.
-Он также заключил, что разработчики были недружелюбны, а документация неполной
-и оскорбительной. Вам решать. Затем, он негативно упомянул <application>MPlayer</application> в
-<ulink url="http://www.linuxworld.com/site-stories/2001/1227.predictions.html">
-10 Linux predictions for 2002[10 предсказаний о Linux на 2002]</ulink>.
-В появившемся затем 
-<ulink url="http://www.linuxworld.com/site-stories/2002/0125.xine.html">обзоре xine</ulink>
+обзора <application>MPlayer</application>'а, названного
+<ulink url="http://www.linuxworld.com/story/32880.htm">MPlayer: The project from hell[MPlayer: проект из ада]</ulink>.
+Он счёл, что <application>MPlayer</application> сложно установить, и заявил,
+что разработчики были недружелюбны, а документация неполной
+и оскорбительной. Вам решать. Затем, он негативно упомянул Arpi в
+<ulink url="http://www.linuxworld.com/story/32887.htm">10 Linux predictions for 2002[10 предсказаний о Linux на 2002]</ulink>.
+В появившемся затем обзоре xine, названном
+<ulink url="http://www.linuxworld.com/story/32716.htm">A streaming media player for the rest of us[Потоковый проигрыватель фильмов для остальных]</ulink>
 он продолжил раздувать спор. Иронично, но в конце этой статьи он цитирует
 интервью с Гюнтером Барцхом[G&uuml;nter Bartsch], первоначальным автором <application>xine</application>,
-что превосходно подытоживает ситуацию:
+которое превосходно подытоживает ситуацию:
 
-<blockquote><para>
+<blockquote>
+<para>
+However, he also went on to say that he was "surprised" by my column about
+<application>Mplayer</application> and thought it was unfair, reminding me that it is
+a free software project. "If you don't like it," Bartsch said, "you're free not to use it."
+</para>
+<para>
 [Однако, он также сказал, что он был "удивлён" моей колонкой о <application>MPlayer</application>'е и
 подумал, что это было бы неправильно напоминать мне, что это проект свободного
 программного обеспечения. "Если он вам не нравится", сказал Барцх, "Вы свободны
 не использовать его."]
 </para>
-<para>
-[However, he also went on to say that he was "surprised" by my column about
-<application>Mplayer</application> and thought it was unfair, reminding me that it is
-a free software project. "If you don't like it," Bartsch said, "you're free not to use it."]
-</para></blockquote>
-</para>
+</blockquote>
 
-<para>
-Он не отвечает на наши письма. Его редактор не отвечает на наши письма.
-Вот несколько цитат от разных людей о Джо Барре, чтобы Вы могли сформировать
-своё мнение:
-</para>
-
-<para>
-Марк Рассбах[Marc Rassbach]
-<ulink url="http://daily.daemonnews.org/view_story.php3?story_id=2102">кое-что сказал</ulink>
-об этом человеке.
+Спустя почти два года, в октябре 2003, он написал другой обзор, названный
+Almost two years later in october 2003 he wrote another review called
+<ulink url="http://www.newsforge.com/article.pl?sid=03/10/02/0343200">Mplayer revisited[Снова MPlayer]</ulink>.
+В этой статье он пришёл к таким заключениям:
 
 <blockquote><para>
-Вы все должно быть помните LinuxWorld 2000, когда от заявил, что Linus T
-сказал, что 'FreeBSD &mdash; это только горстка программистов'. Linus НИЧЕГО
-подобного не говорил. Когда Джо притянули к ответу, его реакцией было  позвать
-BSD сторонников и сопляков.
-</para>
-<para>
-[You may all remember the LinuxWorld 2000, when he claimed that Linus T said
-that 'FreeBSD is just a handful of programmers'. Linus said NOTHING of the
-sort. When Joe was called on this, his reaction was to call BSD supporters
-assholes and jerks.]
+I would have to say that there have been improvements in the number of
+features, in performance, and in documentation. It's still not the
+easiest install in the world, especially for newbies, but it's a
+little better than it used to be.
+</para><para>
+[Я должен сказать, что улучшения коснулись многих возможностей,
+производительности и документации. Это всё ещё не простейшая в мире установка,
+особенно для новичков, но это лучше, чем то, что было.]
 </para></blockquote>
-</para>
 
-<para>
-<ulink url="http://www.mplayerhq.hu/pipermail/mplayer-users/2001-December/009118.html">Цитируя</ulink>
-Robert Munro из рассылки
-<ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>:
+и
 
-<blockquote>
-<para>
-Он интересен, но он не вполне способен избегать, м-м-м-... споров. Несколько
-лет тому назад, Джо Барр имел обыкновение регулярно бывать на форуме Will
-Zachmann'а Canopus на Compuserve. Тогда он был сторонником OS/2 (я тоже был
-фаном OS/2).
+<blockquote><para>
+But more importantly, I didn't notice any recent comments about user
+abuse. I think I deserve some of the credit for that, even if I do say
+so myself. Arpi and the rest of the project team must feel that way
+too, because they have taken care to remember me in a special section
+of the documentation included in the tarball. Like I said at the
+start, some things haven't changed at all.
 </para>
 <para>
-[He's interesting, but not good at avoiding, um... controversy.  Joe Barr
-used to be one of the regulars on Will Zachmann's Canopus forum on
-Compuserve, years ago.  He was an OS/2 advocate then (I was an OS/2 fan
-too).]
-</para>
+Но, что более важно, я не заметил никаких комментариев о пользовательской
+ругани. Я полагаю, что я тоже заслуживаю похвалу за это, хотя мне и приходится
+говорить это самому. Arpi и остальные из команды, наверное, тоже так думают,
+поскольку они выделили мне специальную секцию в документации, включённой
+в архив. Как я сказал вначале, некоторые вещи совсем не изменились.
+</para></blockquote>
 
-<para>
-Как правило он чрезмерно флеймил людей, и, как мне кажется, у него тогда были
-тяжёлые времена. Судя по его последним колонкам, он немного смягчился.
-Определённо, в то время тонкий юмор не был его стилем, совсем не был.
-</para>
-<para>
-[He used to go over-the-top, flaming people, and I suspect he had some hard
-times, then. He's mellowed some, judging by his columns recently.
-Moderately subtle humor was not his mode in those earlier days, not at all.]
-</para>
-</blockquote>
+Мы бы не смогли лучше сформулировать наши чувства по отношению к Джо Барру:
+&quot;
+Это всё ещё не лучшая исследовательская статья в мире, но она лучше, чем была.]
+[It's still not the fairest or best researched article in the world,
+but it's better than it used to be.&quot; Надеемся, что в следующий раз
+наши ожидания совпадут. Тем не менее, благодарность за зрелость относится только
+к нашему увеличивающемуся возрасту, и, может быть, утомлению от от воин флейма.
 </para>
 
 </sect1>
