@@ -3,6 +3,7 @@
 
 #include "mp_msg.h"
 #include <inttypes.h>
+#include <sys/types.h>
 
 #define STREAM_BUFFER_SIZE 2048
 
@@ -53,7 +54,7 @@ int stream_enable_cache(stream_t *stream,int size,int min,int prefill);
 // no cache
 #define cache_stream_fill_buffer(x) stream_fill_buffer(x)
 #define cache_stream_seek_long(x,y) stream_seek_long(x,y)
-#define stream_enable_cache(x,y) 1
+#define stream_enable_cache(x,y,z,w) 1
 #endif
 
 int cache_stream_fill_buffer(stream_t *s);
