@@ -841,6 +841,7 @@ if (seek_to_sec) {
         sscanf(seek_to_sec, "%f", &d);
 
     demux_seek(demuxer, d, 1);
+    if(demuxer2) demux_seek(demuxer2, d, 1);
 }
 
 if(tv_param_on == 1) 
