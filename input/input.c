@@ -101,6 +101,7 @@ static mp_cmd_t mp_cmds[] = {
   { MP_CMD_CHELP, "help", 0, { {-1,{0}} } },
   { MP_CMD_CEXIT, "exit", 0, { {-1,{0}} } },
   { MP_CMD_CHIDE, "hide", 0, { {MP_CMD_ARG_INT,{3000}}, {-1,{0}} } },
+  { MP_CMD_CRUN, "run", 1, { {MP_CMD_ARG_STRING,{0}}, {-1,{0}} } },
 #endif
   
   { 0, NULL, 0, {} }
@@ -513,14 +514,38 @@ mp_input_parse_cmd(char* str) {
 	ptr = NULL;
       }
       break;
-    case MP_CMD_ARG_STRING:
-      e = strchr(ptr,' ');
-      if(!e) e = ptr+strlen(ptr);
-      l = e-ptr;
+    case MP_CMD_ARG_STRING: {
+      char term;
+      char* ptr2 = ptr, *start;
+
+      if(ptr[0] == '\'' || ptr[0] == '"') {
+	term = ptr[0];
+	ptr2++;
+      } else
+	term = ' ';
+      start = ptr2;
+      while(1) {
+	e = strchr(ptr2,term);
+	if(!e) break;
+	if(e <= ptr2 || *(e - 1) != '\\') break;
+	ptr2 = e + 1;
+      }
+      
+      if(term != ' ' && (!e || e[0] == '\0')) {
+	mp_msg(MSGT_INPUT,MSGL_ERR,"Command %s : argument %d is unterminated\n",cmd_def->name,i+1);
+	ptr = NULL;
+	break;
+      } else if(!e) e = ptr+strlen(ptr);
+      l = e-start;
       cmd->args[i].v.s = (char*)malloc((l+1)*sizeof(char));
-      strncpy(cmd->args[i].v.s,ptr,l);
+      strncpy(cmd->args[i].v.s,start,l);
       cmd->args[i].v.s[l] = '\0';
-      break;
+      ptr2 = start;
+       for(e = strchr(ptr2,'\\') ; e ; e = strchr(ptr2,'\\')) {
+	memmove(e,e+1,strlen(e));
+	ptr2 = e + 1;
+      }
+    } break;
     case -1:
       ptr = NULL;
     default :
@@ -702,9 +727,6 @@ static mp_cmd_t*
 mp_input_get_cmd_from_keys(int n,int* keys, int paused) {
   char* cmd = NULL;
   mp_cmd_t* ret;
-  // In pause mode we return pause for the first key which come
-  if(paused)
-    return mp_input_parse_cmd("pause");
 
   if(cmd_binds)
     cmd = mp_input_find_bind_for_key(cmd_binds,n,keys);

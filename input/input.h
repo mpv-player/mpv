@@ -58,6 +58,7 @@
 #define MP_CMD_CHELP 7000
 #define MP_CMD_CEXIT 7001
 #define MP_CMD_CHIDE 7002
+#define MP_CMD_CRUN 7003
 
 // The args types
 #define MP_CMD_ARG_INT 0
