@@ -404,7 +404,7 @@ static void read_key(menu_t* menu,int c) {
 	  menu->show = 0;
 	mpriv->show_ts = 0;
 	break;
-      case MP_CMD_CRUN:
+      case MP_CMD_RUN:
 	run_shell_cmd(menu,c->args[0].v.s);
 	break;
       default: // Send the other commands to mplayer

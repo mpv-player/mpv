@@ -61,6 +61,7 @@
 #define MP_CMD_SPEED_INCR 57
 #define MP_CMD_SPEED_MULT 58
 #define MP_CMD_SPEED_SET 59
+#define MP_CMD_RUN 60
 
 #define MP_CMD_GUI_EVENTS       5000
 #define MP_CMD_GUI_LOADFILE     5001
@@ -90,7 +91,6 @@
 #define MP_CMD_CHELP 7000
 #define MP_CMD_CEXIT 7001
 #define MP_CMD_CHIDE 7002
-#define MP_CMD_CRUN 7003
 
 // The arg types
 #define MP_CMD_ARG_INT 0
