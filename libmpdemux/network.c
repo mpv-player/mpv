@@ -32,9 +32,10 @@
 extern int verbose;
 extern m_config_t *mconfig;
 
-/* Variables for the command line option -user & -passwd */
+/* Variables for the command line option -user, -passwd & -bandwidth */
 char *network_username;
 char *network_password;
+int   network_bandwidth;
 
 
 static struct {
@@ -791,7 +792,7 @@ rtp_streaming_start( stream_t *stream ) {
 
 int
 streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
-	int ret;
+	int ret, val;
 	if( stream==NULL ) return -1;
 
 	stream->streaming_ctrl = streaming_ctrl_new();
@@ -804,6 +805,20 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 		return -1;
 	}
 	ret = -1;
+	
+	// Get the bandwidth available
+	ret = m_config_is_option_set(mconfig,"bandwidth");
+	if(ret < 0) {
+		mp_msg(MSGT_NETWORK,MSGL_ERR,"Unable to know if the bandwidth limit was set\n");
+	} else {
+		val = m_config_get_int( mconfig, "bandwidth", NULL);
+		if( val<0 ) {
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"Unable to retrieve the bandwidth option value\n");
+			stream->streaming_ctrl->bandwidth = 0;	// Don't limit bandwidth
+		} else {
+			stream->streaming_ctrl->bandwidth = val;
+		}
+	}
 	
 	// For RTP streams, we usually don't know the stream type until we open it.
 	if( !strcasecmp( stream->streaming_ctrl->url->protocol, "rtp")) {
@@ -857,11 +872,11 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 		stream->streaming_ctrl = NULL;
 	} else if( stream->streaming_ctrl->buffering ) {
 		int cache_size = 0; 
-		int ret, val;
-		ret = m_config_is_option_set(mconfig,"cache");
-		if(ret < 0) {
+		int cache_opt, val;
+		cache_opt = m_config_is_option_set(mconfig,"cache");
+		if(cache_opt < 0) {
 			mp_msg(MSGT_NETWORK,MSGL_ERR,"Unable to know if cache size option was set\n");
-		} else if(!ret) {
+		} else if(!cache_opt) {
 			// cache option not set, will use our computed value.
 			// buffer in KBytes, *5 because the prefill is 20% of the buffer.
 			val = (stream->streaming_ctrl->prebuffer_size/1024)*5;
