@@ -560,7 +560,7 @@ static int check_track_information(mkv_demuxer_t *d) {
         // This track seems to be ok.
         t->ok = 1;
         mp_msg(MSGT_DEMUX, MSGL_INFO, "[mkv] Track ID %u: video (%s), "
-               "-vid: %u\n", t->tnum, t->codec_id, t->xid);
+               "-vid %u\n", t->tnum, t->codec_id, t->xid);
 
         break;
 
@@ -714,17 +714,17 @@ static int check_track_information(mkv_demuxer_t *d) {
 
         // This track seems to be ok.
         t->ok = 1;
-        mp_msg(MSGT_DEMUX, MSGL_INFO, "[mkv] Track ID %u: audio (%s), -aid: "
+        mp_msg(MSGT_DEMUX, MSGL_INFO, "[mkv] Track ID %u: audio (%s), -aid "
                "%u%s%s\n", t->tnum, t->codec_id, t->xid,
-               t->language != NULL ? ", -alang: " : "",
+               t->language != NULL ? ", -alang " : "",
                t->language != NULL ? t->language : "");
         break;
 
       case 's':                 // Text subtitles do not need any data
         t->ok = 1;              // except the CodecID.
         mp_msg(MSGT_DEMUX, MSGL_INFO, "[mkv] Track ID %u: subtitles (%s), "
-               "-sid: %u%s%s\n", t->tnum, t->codec_id, t->xid,
-               t->language != NULL ? ", -slang: " : "",
+               "-sid %u%s%s\n", t->tnum, t->codec_id, t->xid,
+               t->language != NULL ? ", -slang " : "",
                t->language != NULL ? t->language : "");
         break;
 
