@@ -592,6 +592,10 @@ Sommer, Sascha (Faust3) <saschasommer@freenet.de>
     * nvidia_vid driver
     * dhahelperwin for direct hardware access under Windows NT/2000/XP
 
+Strasser, Alexander (beastd) <eclipse7@gmx.net>
+    * string handling security audit
+    * EWMH fullscreen
+
 Svoboda, Jiri (zar) <Jiri.Svoboda@seznam.cz>
     * AQT type subtitles support
     * CRTC2 YUV support in mga_vid
