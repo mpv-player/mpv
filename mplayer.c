@@ -383,8 +383,6 @@ void exit_sighandler(int x){
   exit_player(NULL);
 }
 
-int divx_quality=0;
-
 extern int vcd_get_track_end(int fd,int track);
 extern int init_audio(sh_audio_t *sh_audio);
 extern int init_video_codec(sh_video_t *sh_video);
@@ -393,48 +391,48 @@ extern void write_avi_header_1(FILE *f,int fcc,float fps,int width,int height);
 extern int vo_init(void);
 extern int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen);
 
-char* filename=NULL; //"MI2-Trailer.avi";
-int i;
+// options:
+int divx_quality=0;
 char *seek_to_sec=NULL;
 int seek_to_byte=0;
-int f; // filedes
-stream_t* stream=NULL;
-int file_format=DEMUXER_TYPE_UNKNOWN;
 int has_audio=1;
 //int has_video=1;
-//
 int audio_format=0; // override
+
 #ifdef USE_DIRECTSHOW
 int allow_dshow=1;
 #else
 int allow_dshow=0;
 #endif
-#ifdef ALSA_TIMER
-int alsa=1;
-#else
-int alsa=0;
-#endif
+
+//#ifdef ALSA_TIMER
+//int alsa=1;
+//#else
+//int alsa=0;
+//#endif
+
+// streaming:
 int audio_id=-1;
 int video_id=-1;
 int dvdsub_id=-1;
-float default_max_pts_correction=-1;//0.01f;
-int delay_corrected=1;
-float force_fps=0;
-int force_srate=0;
-float audio_delay=0;
-float initial_pts_delay=0;
 int vcd_track=0;
-#ifdef VCD_CACHE
-int vcd_cache_size=128;
-#endif
+char *stream_dump_name=NULL;
+int stream_dump_type=0;
 int index_mode=-1;  // -1=untouched  0=don't use index  1=use (geneate) index
+int force_ni=0;
+
+float default_max_pts_correction=-1;//0.01f;
 #ifdef AVI_SYNC_BPS
 int pts_from_bps=1;
 #else
 int pts_from_bps=0;
 #endif
+
+float force_fps=0;
+int force_srate=0;
+float audio_delay=0;
 int frame_dropping=0; // option  0=no drop  1= drop vo  2= drop decode
-char* title="MPlayer";
+
 // screen info:
 char* video_driver=NULL; //"mga"; // default
 char* audio_driver=NULL;
@@ -445,35 +443,24 @@ int flip=-1;
 int screen_size_x=0;//SCREEN_SIZE_X;
 int screen_size_y=0;//SCREEN_SIZE_Y;
 int screen_size_xy=0;
-// movie info:
-int out_fmt=0;
-char *dsp=NULL;
-int force_ni=0;
-char *conffile;
-int conffile_fd;
+
+// sub:
 char *font_name=NULL;
 float font_factor=0.75;
 char *sub_name=NULL;
 float sub_delay=0;
 float sub_fps=0;
 int   sub_auto = 1;
-char *stream_dump_name=NULL;
-int stream_dump_type=0;
-//int user_bpp=0;
 
-int osd_visible=100;
-int osd_function=OSD_PLAY;
-int osd_last_pts=-303;
-
-float a_frame=0;    // Audio
-
-float rel_seek_secs=0;
+char *dsp=NULL;
 
 #include "mixer.h"
 #include "cfg-mplayer.h"
 
 void parse_cfgfiles( void )
 {
+char *conffile;
+int conffile_fd;
 if (parse_config_file(conf, "/etc/mplayer.conf") < 0)
   exit(1);
 if ((conffile = get_path("")) == NULL) {
@@ -501,6 +488,32 @@ if ((conffile = get_path("")) == NULL) {
 #else
  int mplayer(int argc,char* argv[], char *envp[]){
 #endif
+
+char* filename=NULL; //"MI2-Trailer.avi";
+stream_t* stream=NULL;
+int file_format=DEMUXER_TYPE_UNKNOWN;
+//
+int delay_corrected=1;
+float initial_pts_delay=0;
+#ifdef VCD_CACHE
+int vcd_cache_size=128;
+#endif
+char* title="MPlayer";
+
+// movie info:
+int out_fmt=0;
+//int user_bpp=0;
+
+int osd_visible=100;
+int osd_function=OSD_PLAY;
+int osd_last_pts=-303;
+
+float a_frame=0;    // Audio
+
+float rel_seek_secs=0;
+
+int i;
+int f; // filedes
 
   printf("%s",banner_text);
 
@@ -1471,7 +1484,7 @@ if(!has_audio){
   ds_free_packs(d_audio); // free buffered chunks
   d_audio->id=-2;         // do not read audio chunks
   if(sh_audio) if(sh_audio->a_buffer) free(sh_audio->a_buffer);
-  alsa=1;
+  //alsa=1;
   // fake, required for timer:
 #if 1
   sh_audio=NULL;
@@ -2126,6 +2139,7 @@ switch(file_format){
           int id=((AVIINDEXENTRY *)demuxer->idx)[i].ckid;
           if(avi_stream_id(id)==d_video->id) ++d_video->pack_no;
       }
+      num_frames=d_video->pack_no;
       avi_video_pts=d_video->pack_no*(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
 
       if(has_audio){
