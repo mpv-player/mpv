@@ -1,5 +1,5 @@
 //  Sync'ed with help_mp-en.h 1.105
-//  Translated to Bulgarian Language file. Used encoding: M$ CP1251
+//  Translated to Bulgarian. encoding: M$ CP1251
 
 // Приемам всякакви предложения, поправки и съвети на ivan@cacad.com
 // Ако направите промени може да ги пратите на mplayer-dev-eng maillist
