@@ -55,18 +55,21 @@ struct config ovc_conf[]={
 	{"rawrgb", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_RAWRGB, NULL},
 	{"vfw", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_VFW, NULL},
 	{"libdv", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_LIBDV, NULL},
-	{"help", "\nAvailable codecs:\n   copy\n   frameno\n   rawrgb\n"
+	{"help", "\nAvailable codecs:\n"
+	"   copy     - frame copy, without re-encoding. doesn't work with filters!\n"
+	"   frameno  - special audio-only file for 3-pass encoding, see DOCS!\n"
+	"   rawrgb   - uncompressed RGB 24bpp video\n"
 #ifdef HAVE_DIVX4ENCORE
-	"   divx4\n"
+	"   divx4    - using divx4linux/divx5linux or xvid (depends on configuration)\n"
 #endif
 #ifdef USE_LIBAVCODEC
-	"   lavc\n"
+	"   lavc     - using libavcodec codecs - best quality!\n"
 #endif
 #ifdef USE_WIN32DLL
-	"   vfw\n"
+	"   vfw      - using VfW DLLs, currently only AVID is supported\n"
 #endif
 #ifdef HAVE_LIBDV095
-	"   libdv\n"
+	"   libdv    - DV encoding using libdv v0.9.5\n"
 #endif
 	"\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
@@ -77,11 +80,16 @@ struct config oac_conf[]={
 	{"pcm", &out_audio_codec, CONF_TYPE_FLAG, 0, 0, ACODEC_PCM, NULL},
 #ifdef HAVE_MP3LAME
 	{"mp3lame", &out_audio_codec, CONF_TYPE_FLAG, 0, 0, ACODEC_VBRMP3, NULL},
-	{"help", "\nAvailable codecs:\n   copy\n   pcm\n   mp3lame\n\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #else
 	{"mp3lame", "MPlayer was compiled without libmp3lame support!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-	{"help", "\nAvailable codecs:\n   copy\n   pcm\n\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
+	{"help", "\nAvailable codecs:\n"
+	"   copy     - frame copy, without re-encoding (usefull for AC3)\n"
+	"   pcm      - uncompressed PCM audio\n"
+#ifdef HAVE_MP3LAME
+	"   mp3lame  - cbr/abr/vbr MP3 using libmp3lame\n"
+#endif
+	"\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 

@@ -101,22 +101,8 @@ extern int softzoom;
 extern int flip;
 
 
-#ifdef HAVE_MP3LAME
-int out_audio_codec=ACODEC_VBRMP3;
-#else
-int out_audio_codec=ACODEC_PCM;
-#endif
-
-int out_video_codec=
-#ifdef USE_LIBAVCODEC
-    VCODEC_LIBAVCODEC;
-#else
-#ifdef HAVE_DIVX4ENCORE
-    VCODEC_DIVX4;
-#else
-    VCODEC_COPY;
-#endif
-#endif
+int out_audio_codec=-1;
+int out_video_codec=-1;
 
 // audio stream skip/resync functions requires only for seeking.
 // (they should be implemented in the audio codec layer)
@@ -480,6 +466,15 @@ sh_video=d_video->sh;
    demuxer->file_format,sh_video->format, sh_video->disp_w,sh_video->disp_h,
    sh_video->fps,sh_video->frametime
   );
+
+  if(sh_audio && out_audio_codec<0){
+    mp_msg(MSGT_MENCODER,MSGL_FATAL,"\nNo audio encoder (-oac) selected! Select one or use -nosound. Use -oac help !\n");
+    mencoder_exit(1,NULL);
+  }
+  if(sh_video && out_video_codec<0){
+    mp_msg(MSGT_MENCODER,MSGL_FATAL,"\nNo video encoder (-ovc) selected! Select one, use -ovc help !\n");
+    mencoder_exit(1,NULL);
+  }
 
 if(sh_audio && (out_audio_codec || seek_to_sec || !sh_audio->wf)){
   // Go through the codec.conf and find the best codec...
