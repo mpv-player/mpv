@@ -381,10 +381,12 @@ Gregory Kovriga <gkovriga@techunix.technion.ac.il>
 Rémi Guyomarch <rguyom@pobox.com>
     * various fixes
     * 'unsharp' video filter
+    * xvid encoding support
 
 Salvatore Falco <sfalco@studenti.ing.uniroma1.it>
-    * jacosub support
-    * overlapping subtitles supoprt
+    * jacosub parsing & dump support
+    * overlapping subtitles & sub sorting support
+    * SAMI subtitles dump support
 
 Ville Syrjälä <syrjala@sci.fi>
     * -vo dfbmga driver (G400 DVDMax-like feature using dfb 0.9.14)
@@ -403,10 +405,42 @@ Nicolas Le Gaillart <n@tourmentine.com>
 
 hephooey@fastmail.fm
     * Chinese documentation translation
+    * Various VOBSUB-related patches
 
 András Mohari <mayday@varoshaza.nagyatad.hu>
     * skin documentation
     * various docs updates and fixes
+
+Dénes Balatoni <pnis@coder.hu>
+    * xmms inputplugin support
+    * various minor feature additions & fixes mostly to 
+      make mplayer work better on my pda
+
+Oskar Liljeblad <oskar@osk.mine.nu>
+    * OSD related patches
+
+Bernd Ernesti <mplayer@lists.veego.de>
+    * NetBSD support patches
+
+Michael Halcrow <mah69@email.byu.edu>
+    * EDL 0.5 - edit lists support
+
+Eviv Bulgroz <ebulgroz@yahoo.com>
+    * Presets support for mp3lame encoding
+    * various bugfixes
+
+Matan Ziv-Av <matan@svgalib.org>
+    * vo_svga fixes, improvements
+    * svgalib kernel helper support for VIDIX/libdha
+
+Puk Madick <pingy@swirvemail.com>
+    * KDE/gnome2 fullscreen fix
+    * configparser fixes
+
+Tomas Hurka <tom@hukatronic.cz>
+    * Darwin DVD support (mpdvdkit2)
+    * various fixes
+    
 
 NOTE: If you think you are missing here, feel free to send a patch.
 =====
