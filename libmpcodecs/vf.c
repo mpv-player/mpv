@@ -78,6 +78,7 @@ extern vf_info_t vf_info_pullup;
 extern vf_info_t vf_info_framestep;
 extern vf_info_t vf_info_tile;
 extern vf_info_t vf_info_delogo;
+extern vf_info_t vf_info_hue;
 
 // list of available filters:
 static vf_info_t* filter_list[]={
@@ -143,6 +144,7 @@ static vf_info_t* filter_list[]={
     &vf_info_framestep,
     &vf_info_tile,
     &vf_info_delogo,
+    &vf_info_hue,
     NULL
 };
 
