@@ -26,6 +26,7 @@ extern af_info_t af_info_export;
 extern af_info_t af_info_volnorm;
 extern af_info_t af_info_extrastereo;
 extern af_info_t af_info_lavcresample;
+extern af_info_t af_info_sweep;
 
 static af_info_t* filter_list[]={ 
    &af_info_dummy,
@@ -48,6 +49,7 @@ static af_info_t* filter_list[]={
 #ifdef USE_LIBAVCODEC
    &af_info_lavcresample,
 #endif
+   &af_info_sweep,
    NULL 
 };
 
