@@ -1,6 +1,6 @@
 MPlayer (1.0)
 
-  pre5: "Niu ririsu" June 29, 2004
+  pre5: "Linuxtag release" July 1, 2004
 
     Name:
     * It's "MPlayer - The Movie Player" instead of
@@ -15,6 +15,7 @@ MPlayer (1.0)
     * several bug fixes and improvements in the MEncoder documentation
     * -vo winvidix documented
     * AUTHORS file massively extended
+    * German man page partially updated
     * Hungarian XML documentation translation started
 
     Ports:
@@ -90,7 +91,8 @@ MPlayer (1.0)
     * X11 code reindented
     * further gcc 3.4 support fixes
     * mixer API written for changing volume through libaf
-    * -rtc RTC device option
+    * -rtc-device option for specifying the RTC device
+    * desktop/menu icon added
     * miscellaneous bug fixes and cleanups
 
 
