@@ -2,7 +2,7 @@
 // double buffering added by A'rpi/ESP-team
 
 // Set this value, if autodetection fails! (video ram size in megabytes)
-//#define MGA_MEMORY_SIZE 32
+// #define MGA_MEMORY_SIZE 16
 
 //#define MGA_ALLOW_IRQ
 
@@ -741,8 +741,8 @@ static int mga_vid_find_card(void)
 	if (mga_force_memsize) {
 		printk(KERN_INFO "mga_vid: memsize forced to %d MB\n", mga_force_memsize);
 		/* we need the size in bytes */
-		mga_ram_size = ((unsigned long) mga_force_memsize) << 20;
-	}
+		mga_ram_size = ((unsigned long) mga_force_memsize);
+	} else {
 
 	if (is_g400){
 		switch((card_option>>10)&0x17){
@@ -777,7 +777,7 @@ static int mga_vid_find_card(void)
 		    case 0:  mga_ram_size = 8; break;
 		    default: mga_ram_size = 16;
 		}
-	}
+	} }
 #if 0
 //	printk("List resources -----------\n");
 	for(temp=0;temp<DEVICE_COUNT_RESOURCE;temp++){
@@ -915,7 +915,7 @@ static int mga_vid_initialize(void)
 	printk(KERN_INFO "Matrox MGA G200/G400/G450 YUV Video interface v2.01 (c) Aaron Holtzman & A'rpi\n");
 
 	if (mga_force_memsize) {
-		if (mga_force_memsize != 16 || mga_force_memsize != 32 ||
+		if (mga_force_memsize != 16 && mga_force_memsize != 32 &&
 				mga_force_memsize != 64) {
 			printk(KERN_ERR "mga_vid: invalid memsize: %dMB\n", mga_force_memsize);
 			return -EINVAL;
