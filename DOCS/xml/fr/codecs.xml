@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.28 -->
+<!-- synced with 1.32 -->
 <sect1 id="codecs">
 <title>Codecs Supportés</title>
 
@@ -55,9 +55,9 @@ Les plus importants d'entre eux:
   FLI/FLC
   </simpara></listitem>
 <listitem><simpara>
-  Codec <emphasis role="bold">RealVideo 1.0</emphasis> de libavcodec, et
-  codecs <emphasis role="bold">RealVideo 2.0, 3.0</emphasis> et
-  <emphasis role="bold">4.0</emphasis> en utilisant les librairies RealPlayer
+  <emphasis role="bold">RealVideo 1.0 &amp; 2.0</emphasis> de libavcodec, et
+  <emphasis role="bold">RealVideo 3.0 &amp; 4.0</emphasis> en utilisant les
+  librairies RealPlayer
   </simpara></listitem>
 <listitem><simpara>
   décodeur natif pour HuffYUV
@@ -392,11 +392,11 @@ si le pilote de sortie vidéo le permet.
 
 <itemizedlist>
 <listitem><simpara>
-  RealVideo 1.0 (fourcc RV10) - en/décodage supporté par
+  RealVideo 1.0, 2.0 (fourcc RV10, RV20) - en/décodage supporté par
   <systemitem class="library">libavcodec</systemitem>
   </simpara></listitem>
 <listitem><simpara>
-  RealVideo 2.0, 3.0, 4.0 (fourcc RV20, RV30, RV40) - décodage supporté par
+  RealVideo 3.0, 4.0 (fourcc RV30, RV40) - décodage supporté par
   <emphasis role="bold">les librairies RealPlayer</emphasis>
   </simpara></listitem>
 </itemizedlist>

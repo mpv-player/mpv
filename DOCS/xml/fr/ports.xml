@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.24 -->
+<!-- synced with 1.33 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Ports</title>
 
@@ -39,8 +39,10 @@ Dominik Mierzejewski a créé et maintient des paquets Red Hat RPM officiels de
 
 <para>
 Les paquets Mandrake sont disponibles sur le <ulink url="http://plf.zarb.org/">P.L.F.</ulink>,
-SuSE inclus une version limitée de MPlayer dans sa distribution. Vous pouvez obtenir des RPMs fonctionnels
-sur <ulink url="http://packman.links2linux.de/?action=128">links2linux.de</ulink>.
+SuSE incluait une version limitée de <application>MPlayer</application> dans sa
+distribution. Ils l'ont retiré dans leurs dernières versions. Vous pouvez obtenir
+des RPMs fonctionnels sur
+<ulink url="http://packman.links2linux.de/?action=128">links2linux.de</ulink>.
 </para>
 </sect2>
 
@@ -151,7 +153,7 @@ instructions MMX, SSE et 3DNOW! qui ne peuvent pas être assemblées en utilisant 
 
 <para>Le script <filename>configure</filename> essaie de trouver quel assembleur est utilisé par votre
 commande &quot;gcc&quot; (au cas ou l'autodétection échoue, utilisez l'option
-<option>--as=/endroit/ou/vous/avez/installe/gnu-as</option> pour indiquer au script
+<option>--as=<replaceable>/endroit/ou/vous/avez/installe/gnu-as</replaceable></option> pour indiquer au script
 <filename>configure</filename> où il peut trouver GNU &quot;as&quot; sur votre système).
 </para>
 
@@ -222,7 +224,7 @@ pour la conversion de palette dans les pilotes de sortie vidéo.
 <para>
 Vous pouvez soit essayer d'installer le programme d'installation GNU, et (si vous ne l'avez pas mis
 dans votre chemin par défaut) précisez ensuite l'endroit où il est:
-<screen>./configure --with-install=/chemin/et/nom/de/l'installation</screen>
+<screen>./configure --with-install=<replaceable>/chemin/et/nom/de/l'installation</replaceable></screen>
 </para>
 
 <para>
@@ -302,18 +304,17 @@ X qui est TRÈS lente. Utilisez SDL.
   <option>-autosync 100</option>. Si certaines de ces options vous sont utiles,
   vous pouvez les placer dans votre fichier de config.</para>
 
-<para>Il existe des versions précompilées créées par Sascha Sommer disponibles sur
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/">notre page web</ulink>.
-  Joey Parrish a réalisé des
-  <ulink url="http://joey.nicewarrior.org/cygmp/">paquets Windows non-officiels</ulink>
-  complets avec installeur.</para>
+<para>Sascha Sommer fait des versions officielles pour Windows de temps en temps,
+  Joey Parrish fait des paquets non-officiels pour Windows complets avec installeur.
+  Ils sont dans la section Windows de la
+  <ulink url="http://www.mplayerhq.hu/homepage/projects.html">page de nos projets</ulink>.</para>
 
 <sect2 id="cygwin">
-<title>Cygwin</title>
+<title><application>Cygwin</application></title>
 
 <para>
-Les versions de Cygwin antérieures à 1.5.0 n'incluent pas <filename>inttypes.h</filename>.
-Mettez cet
+Les versions de <application>Cygwin</application> antérieures à 1.5.0
+n'incluent pas <filename>inttypes.h</filename>. Mettez cet
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/inttypes.h">inttypes.h</ulink>
 dans <filename class="directory">/usr/include/</filename> pour que
 <application>MPlayer</application> puisse compiler.</para>
@@ -341,12 +342,14 @@ dans <filename class="directory">/usr/include/</filename> pour que
 
 
 <sect2 id="mingw">
-<title>MinGW</title>
+<title><application>MinGW</application></title>
 
-<para>Installer une version de MinGW qui puisse compiler MPlayer était considéré
-  comme compliqué, mais fonctionne désormais sans modifications. Installez simplement
-  MinGW 3.1.0 ou plus récent et MSYS 1.0.9 ou plus récent et dites au postinstall
-  de MSYS que MinGW est installé.</para>
+<para>Installer une version de <application>MinGW</application> qui puisse
+  compiler <application>MPlayer</application> était considéré comme compliqué,
+  mais fonctionne désormais sans modifications. Installez simplement
+  <application>MinGW</application> 3.1.0 ou plus récent et MSYS 1.0.9 ou plus
+  récent et dites au postinstall de MSYS que <application>MinGW</application>
+  est installé.</para>
 
 <para>Si vous utilisez une version de MinGW antérieure à 3.1.0, vous devez
   remplacer
@@ -387,6 +390,47 @@ GCC 2.95.x d'Apple ne supporte pas bien la syntaxe C99.
 On peut obtenir une GUI Aqua et un binaire <application>MPlayer</application>
 pour Mac OS X depuis le projet
 <ulink url="http://mplayerosx.sf.net/">MPlayerOSX</ulink>.
+</para>
+</sect1>
+
+<sect1 id="hpux">
+<title>HP UX</title>
+<para>
+Martin Gansser maintiens un précieux
+<ulink url="http://cloud.prohosting.com/patos/docs/mplayer_on_hpux11.htm">HOWTO</ulink>
+sur la compilation <application>MPlayer</application> sous HP-UX.
+Il contient même une FAQ !
+</para>
+
+<para>
+De toute façon, notre source "brut" de <application>MPlayer</application> compile
+déjà sous HP-UX sans problèmes.
+</para>
+</sect1>
+
+<sect1 id="amiga">
+<title>Amiga/MorphOS (GeekGadgets)</title>
+<para>
+Nicholas Det de Genesi a réalisé un gros et puissant portage de <application>MPlayer
+</application> pour MorphOS. Malheureusement, il est basé sur la série 0.90.
+</para>
+
+<para>
+Téléchargez-le sur <ulink url="http://www.morphzone.org/">MorphZone</ulink>:
+<itemizedlist>
+<listitem><para>
+<ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=90">
+Binaire de <application>MPlayer</application> 0.91</ulink>
+</para></listitem>
+<listitem><para>
+<ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=91">
+Source de <application>MPlayer</application> 0.91</ulink>
+</para></listitem>
+<listitem><para>
+<ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=912">
+Binaire de <application>MEncoder</application> 0.91</ulink>
+</para></listitem>
+</itemizedlist>
 </para>
 </sect1>
 

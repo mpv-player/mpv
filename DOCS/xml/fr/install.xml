@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.18 -->
+<!-- synced with 1.24 -->
 <sect1 id="install">
 <title>Installation</title>
 
@@ -694,13 +694,24 @@ le temps de lecture, la barre de volume, d'avance/retour rapide, le contraste, e
 <title>Installer l'OSD et les sous-titres</title>
 
 <para>
-Vous aurez besoin d'un paquetages de polices pour MPlayer afin d'utiliser 
-les fonctions d'OSD/SUB. Plusieurs manières de les obtenir :
+Vous aurez besoin d'un paquet de polices <application>MPlayer</application> afin d'utiliser
+les fonctions d'OSD/SUB. Il y a plusieurs manières de les obtenir :
 </para>
 
 <itemizedlist>
 <listitem><para>
-  Utilisez une fonte TrueType (TTF), par l'intermédiaire de la librairie
+  Utiliser le générateur de polices de <filename
+  class="directory">TOOLS/subfont-c</filename>. C'est un outil complet pour
+  convertir les polices TTF/Type1/etc en paquets de polices mplayer (voir
+  <filename>TOOLS/subfont-c/README</filename> pour les détails).
+  </para></listitem>
+<listitem><para>
+  Utiliser le plugin de générateur de polices de GIMP dans <filename
+  class="directory">TOOLS/subfont-GIMP</filename> (note: vous devez avoir le
+  plugin brut HSI également, voir <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/" />).
+ </para></listitem>
+<listitem><para>
+  Utiliser une fonte TrueType (TTF), par l'intermédiaire de la librairie
   <systemitem class="library">freetype</systemitem>. La Version 2.0.9 ou supérieur est obligatoire!
   Ensuite vous avez deux méthodes:
   <itemizedlist>
@@ -712,9 +723,15 @@ les fonctions d'OSD/SUB. Plusieurs manières de les obtenir :
       créer un lien symbolique:<screen>ln -s /chemin/de/arial.ttf ~/.mplayer/subfont.ttf</screen>
       </para></listitem>
       </itemizedlist>
+  Si <application>MPlayer</application> a été compilé avec le support
+  <systemitem class="library">fontconfig</systemitem>, les méthodes ci-dessus
+  ne fonctionneront pas, à la place <option>-font</option> attends un nom de police
+  fontconfig et sinon utilise la police sans-serif par défaut. Pour obtenir une liste
+  des polices connues de fontconfig, utilisez <command>fc-list</command>.
+  Exemple: <option>-font 'Bitstream Vera Sans'</option>
   </para></listitem>
 <listitem><para>
-  Téléchargez des paquetages de polices prêtes à l'emploi depuis le site de MPlayer.
+  Télécharger des paquetages de polices prêtes à l'emploi depuis le site de MPlayer.
   Note: Les polices actuellement disponibles sont limitées a l'iso 8859-1/2, mais
   il y en a quelques autres (coréen, russe, 8859-8, etc) dans la section contrib/font
   du FTP, créées par les utilisateurs.
@@ -724,9 +741,8 @@ les fonctions d'OSD/SUB. Plusieurs manières de les obtenir :
   approprié qui associe les positions maps unicode au code actuel du texte 
   sous-titré. Une autre solution est d'avoir des sous-titres encodés en UTF8 
   et d'utiliser l'option <option>-utf8</option> ou de renommer le fichier 
-  des sous-titres en <filename>&lt;nom_video&gt;.utf</filename>. Enregistrer 
+  des sous-titres en <filename>&lt;nom_video&gt;.utf</filename>. Enregistrer
   de codepages différents en UTF8 peut se faire en utilisant les programmes
-  <!-- FIXME: iconv (Debian) konwert (Red Hat) instead? -->
   <command>konwert</command> (Debian) ou <command>iconv</command> (Red Hat).
   </para><para>
   
@@ -750,27 +766,14 @@ les fonctions d'OSD/SUB. Plusieurs manières de les obtenir :
   <row><entry>
     <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/"></ulink>
     </entry><entry>
-    polices coréeenes &amp; plugin RAW
+    polices coréennes et plugin RAW
     </entry></row>
   </tbody>
   </tgroup>
   </table>
 
   </para></listitem>
-<listitem><para>
-  Utilisez le générateur de polices de <filename
-  class="directory">TOOLS/subfont-c</filename>. C'est un outil complet pour
-  convertir les polices TTF/Type1/etc vers des paquetages de polices mplayer.
-  (lisez <filename>TOOLS/subfont-c/README</filename> pour plus de détails)
-  </para></listitem>
-<listitem><para>
-  Utilisez le plugin générateur de polices de GIMP situé dans <filename
-  class="directory">TOOLS/subfont-GIMP</filename> (note: vous devez également
-  avoir le plugin HSI RAW, voir adresse plus bas)
-  <!-- FIXME: where's that URL? -->
-  </para></listitem>
 </itemizedlist>
-
 <para>
 Si vous avez choisi des polices non-TTF, dézippez le fichier vers <filename class="directory">~/.mplayer</filename>
 ou <filename class="directory">$PREFIX/share/mplayer</filename>. Ensuite renommez 
@@ -786,7 +789,7 @@ avec la touche <keycap>o</keycap>).
 (les sous-titres sont <emphasis>toujours activés</emphasis>, pour les désactiver merci de lire la page de man)
 </para>
 <para>
-L'OSD possède 4 états: (interchangeable avec <keycap>o</keycap>):
+L'OSD possède 4 états (interchangeable avec <keycap>o</keycap>):
 <orderedlist>
 <listitem><simpara>
   barre de volume + barre d'avancement (par défaut)

@@ -117,17 +117,6 @@ outils de ce genre.
 </para></note>
 
 <formalpara>
-<title>Ancienne méthode de lecture DVD - OPTIONNELLE</title>
-<para>
-Utile si vous voulez lire des VOBs encodés depuis le <emphasis role="bold">disque dur</emphasis>.
-Compilez et installez <emphasis role="bold">libcss</emphasis> 0.0.1 (pas plus récent) pour cela
-(Si MPlayer ne le détecte pas, utilisez l'option <option>-csslib /chemin/de/libcss.so</option>
-Pour l'utiliser, vous devez être root, utilisez un binaire de MPlayer suid root, ou laissez MPlayer
-utiliser le wrapper fibmap_mplayer suid-root.
-</para>
-</formalpara>
-
-<formalpara>
 <title>structure d'un DVD</title>
 <para>
 Les disques DVD utilisent tous des secteurs de 2048 octets par secondes avec ECC/CRC. Ils ont
@@ -146,29 +135,13 @@ la navigation DVD. C'est également requis pour décrypter le contenu.
 </para>
 
 <para>
-L'ensemble de l'ancienne méthode de lecture DVD avec <systemitem>libcss</systemitem> à donc besoin d'un
-système de fichier DVD monté et un accès basé sur les secteurs bruts pour accéder au périphérique.
-Malheureusement vous devez être root (sous Linux) pour obtenir l'adresse du secteur d'un fichier. Vous
-avez alors les deux solutions suivantes:
-
-<itemizedlist>
-<listitem><para>
-Soyez root ou utilisez un binaire de <application>MPlayer</application> suid-root.
-</para></listitem>
-
-<listitem><para>
-Laissez <application>MPlayer</application> appeler le wrapper fibmap_mplayer suid-root pour accéder
-au DVD (utilisé dans l'ancienne méthode de lecture DVD avec <systemitem>libcss</systemitem>).
-</para></listitem>
-
-<listitem><para>
-N'utilisez pas le pilote de système de fichier du noyau du tout et ré-implémentez le dans l'espace
-utilisateur. <systemitem>libdvdread</systemitem> 0.9.x et <systemitem>libmpdvdkit</systemitem> le font
-(nouvelle méthode de lecture DVD). Les pilotes du système de fichier udf ne sont pas requis car ils
-utilisent leur propre pilote. De plus le dvd n'a pas besoin d'être monté puisque l'accès basé sur les
-secteurs bruts est utilisé.
-</para></listitem>
-</itemizedlist>
+Le support DVD nécessite un accès brut aux secteurs du périphérique. Malheureusement
+vous devez (sous Linux) être root pour avoir accès aux secteurs d'un fichier. C'est
+pourquoi nous n'utilisons pas du tout le pilote de système de fichier du noyau, à
+la place nous l'avons réimplémenté en espace utilisateur. <systemitem>libdvdread</systemitem>
+0.9.x et <systemitem>libmpdvdkit</systemitem> font cela. Le pilote pour système
+de fichier UDF du noyau n'est pas requis puisqu'ils ont déjà leur pilote UDF incorporé.
+De plus le DVD n'a pas besoin d'être monté tant que l'accès brut aux secteurs est utilisé.
 </para>
 
 <para>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.36 -->
+<!-- synced with 1.42 -->
 <sect2 id="video-dev">
 <title>Sorties vidéo</title>
 
@@ -152,7 +152,11 @@ screen #0
   </para></listitem>
 <listitem><para>
   Finalement, vérifiez si <application>MPlayer</application> a été compilé avec le
-  support 'xv'. <filename>./configure</filename> doit vous le préciser.
+  support 'xv'. Faites un <command>mplayer -vo help | grep xv</command>
+  Si le support 'xv' à été compilé une ligne similaire à celle-ci devrait apparaitre:
+    <screen>
+  xv      X11/Xv<!--
+  --></screen>
   </para></listitem>
 </orderedlist>
 </para>
@@ -205,8 +209,9 @@ diffusion mplayer-users.
 nVidia n'est pas un très bon chois sous Linux (d'après nVidia, ce n'est
 <link linkend="nvidia-opinions">pas vrai</link>)... Les pilotes open-source de
 XFree86 supportent la plupart de ces cartes, mais dans certains cas, vous devrez
-utiliser les pilotes binaires closed-source de nVidia, disponibles sur le site web
-de nVidia. Vous aurez toujours besoin de ce pilote si vous voulez l'accélération 3D.
+utiliser les pilotes binaires closed-source de nVidia, disponibles sur le
+<ulink url="http://www.nvidia.com/object/linux.html">site web de nVidia</ulink>.
+Vous aurez toujours besoin de ce pilote si vous voulez l'accélération 3D.
 </para>
 
 <para>
@@ -215,10 +220,10 @@ Plaignez-vous en à nVidia.
 </para>
 
 <para>
-MPlayer contient également un pilote <link linkend="vidix">VIDIX</link>
-(<link linkend="vidix-nvidia">nvidia_vid</link>) pour la plupart des cartes
+Cependant, <application>MPlayer</application> contient un pilote
+<link linkend="vidix">VIDIX</link> pour la plupart des cartes
 nVidia. Actuellement il est en phase béta, et a quelques inconvénients. Pour
-plus d'informations, <link linkend="vidix-nvidia">cliquez ici</link>.
+plus d'informations, voir la section <link linkend="vidix-nvidia">VIDIX nVidia</link>.
 </para>
 </sect5>
 
@@ -361,10 +366,10 @@ Assurez vous d'abord que X charge l'extension DGA, regardez dans
 
 <programlisting>(II) Loading extension XFree86-DGA</programlisting>
 
-XFree86 4.0.x ou plus est TRÈS RECOMMANDÉ ! Le pilote DGA de
-<application>MPlayer</application> est automatiquement détecté lors de
-<filename>./configure</filename>, ou vous pouvez le forcer avec l'option
-<option>--enable-dga</option>.
+XFree86 4.0.x ou plus est <emphasis role="bold">hautement recommandé</emphasis> !
+Le pilote DGA de <application>MPlayer</application> est automatiquement
+détecté par <filename>./configure</filename>, ou vous pouvez le forcer avec
+l'option <option>--enable-dga</option>.
 </para>
 </formalpara>
 
@@ -2108,21 +2113,20 @@ SVP !
 
     <procedure>
     <step><para>
-      Entrez <filename class="directory">TVout/matroxset</filename> et tapez
-      <command>make</command>. Installez <filename class="directory">matroxset</filename> into
+      Entrez dans <filename class="directory">TVout</filename> et tapez
+      <command>./compile.sh</command>. Installez
+      <filename class="directory">TVout/matroxset/matroxset</filename>
       quelque part dans votre <envar>PATH</envar>.
       </para></step>
     <step><para>
-      Si <command>fbset</command> n'est pas installé, entrez dans
-      <filename class="directory">TVout/fbset</filename> et tapez <command>make</command>.
-      Installez <filename class="directory">fbset</filename> quelque part dans votre
-      <envar>PATH</envar>.
+      Si <command>fbset</command> n'est pas installé, mettez
+      <filename class="directory">TVout/fbset/fbset</filename>
+      quelque part dans votre <envar>PATH</envar>.
       </para></step>
     <step><para>
-      Si <command>con2fb</command> n'est pas installé, entrez dans
-      <filename class="directory">TVout/con2fb</filename> et tapez <command>make</command>.
-      Installez <filename class="directory">con2fb</filename> quelque part dans votre
-      <envar>PATH</envar>.
+      Si <command>con2fb</command> n'est pas installé, mettez
+      <filename class="directory">TVout/con2fb/con2fb</filename>
+      quelque part dans votre <envar>PATH</envar>.
       </para></step>
     <step><para>
       Ensuite entrez dans le répertoire <filename class="directory">TVout/</filename>
