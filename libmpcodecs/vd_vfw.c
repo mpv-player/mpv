@@ -60,7 +60,7 @@ static int init(sh_video_t *sh){
 
 // uninit driver
 static void uninit(sh_video_t *sh){
-
+    vfw_close_video_codec(sh, (sh->codec->driver==VFM_VFWEX));
 }
 
 //mp_image_t* mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag, int w, int h);
