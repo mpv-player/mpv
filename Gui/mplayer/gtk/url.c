@@ -34,7 +34,7 @@ void ShowURLDialogBox( void )
   }
  
  gtk_widget_show( URL );
- gtkVURLDialogBox=1; gtkVisible++;
+ gtkVURLDialogBox=1; gtkIncVisible();
 }
 
 void HideURLDialogBox( void )
@@ -42,7 +42,7 @@ void HideURLDialogBox( void )
  if ( !gtkVURLDialogBox ) return;
  gtk_widget_hide( URL );
  gtk_widget_destroy( URL );
- gtkVURLDialogBox=0; gtkVisible--;
+ gtkVURLDialogBox=0; gtkDecVisible();
 }
 
 static gboolean on_URL_destroy_event( GtkWidget * widget,GdkEvent * event,gpointer user_data )

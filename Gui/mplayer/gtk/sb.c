@@ -29,13 +29,13 @@ void ShowSkinBrowser( void )
 {
  if ( gtkVSkinBrowser ) gtkActive( SkinBrowser );
    else SkinBrowser=create_SkinBrowser();
- gtkVisible++;
+ gtkIncVisible();
 }
 
 void HideSkinBrowser( void )
 {
  if ( !gtkVSkinBrowser ) return;
- gtkVSkinBrowser=0; gtkVisible--;
+ gtkVSkinBrowser=0; gtkDecVisible();
  gtk_widget_destroy( SkinBrowser );
 }
 

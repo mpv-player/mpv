@@ -228,7 +228,7 @@ void ShowPreferences( void )
  gtk_signal_connect( GTK_OBJECT( CLADrivers ),"select_row",GTK_SIGNAL_FUNC( prCListRow ),(void*)0 );
  gtk_signal_connect( GTK_OBJECT( CLVDrivers ),"select_row",GTK_SIGNAL_FUNC( prCListRow ),(void*)1 );
 
- gtkVPreferences=1; gtkVisible++;
+ gtkVPreferences=1; gtkIncVisible();
  gtk_widget_show( Preferences );
  gtkSetLayer( Preferences );
  gtkMessageBox( GTK_MB_WARNING,MSGTR_PREFERENCES_Message );
@@ -237,7 +237,7 @@ void ShowPreferences( void )
 void HidePreferences( void )
 {
  if ( !gtkVPreferences ) return;
- gtkVPreferences=0; gtkVisible--;
+ gtkVPreferences=0; gtkDecVisible();
  gtk_widget_hide( Preferences ); gtk_widget_destroy( Preferences );
  HideOSSConfig();
 }
@@ -1465,7 +1465,7 @@ void ShowOSSConfig( void )
 
  gtk_widget_show( OSSConfig );
  gtkSetLayer( OSSConfig );
- gtkVOSSConfig=1; gtkVisible++;
+ gtkVOSSConfig=1; gtkIncVisible();
 }
 
 void HideOSSConfig( void )
@@ -1473,7 +1473,7 @@ void HideOSSConfig( void )
  if ( !gtkVOSSConfig ) return;
  gtk_widget_hide( OSSConfig );
  gtk_widget_destroy( OSSConfig ); 
- gtkVOSSConfig=0; gtkVisible--;
+ gtkVOSSConfig=0; gtkDecVisible();
 }
 
 static void ossDestroy( GtkObject * object,gpointer user_data )

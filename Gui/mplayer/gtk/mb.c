@@ -20,11 +20,11 @@ void ShowMessageBox( char * msg )
    else MessageBox=create_MessageBox( 0 );
  gtkSetLayer( MessageBox );
  if ( strlen( msg ) < 20 ) gtk_widget_set_usize( MessageBox,196,-1 );
- gtkVisible++;
+ gtkIncVisible();
 }
 
 static void on_Ok_released( GtkButton * button,gpointer user_data  )
-{ gtkVMessageBox=0; gtk_widget_hide( MessageBox ); gtk_widget_destroy( MessageBox ); gtkVisible--; }
+{ gtkVMessageBox=0; gtk_widget_hide( MessageBox ); gtk_widget_destroy( MessageBox ); gtkDecVisible(); }
 
 static void on_MessageBox_show( GtkButton * button,gpointer user_data  )
 { gtkVMessageBox=(int)user_data; }

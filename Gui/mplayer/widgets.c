@@ -184,7 +184,7 @@ void gtkShow( int type,char * param )
          } 
 	 else 
 	  {
-	   gtk_widget_destroy( SkinBrowser ); gtkVisible--;
+	   gtk_widget_destroy( SkinBrowser ); gtkDecVisible();
 	   gtkMessageBox( GTK_MB_ERROR,"Skin dirs not found ... Please install skins." );
 	  }
         break;
@@ -218,10 +218,10 @@ void gtkShow( int type,char * param )
    case evShowPopUpMenu:
         gtkPopupMenu=evNone;
         gtkPopupMenuParam=0;
-        if ( PopUpMenu ) { gtk_widget_hide_on_delete( PopUpMenu ); gtkVisible--; }
+        if ( PopUpMenu ) { gtk_widget_hide_on_delete( PopUpMenu ); gtkDecVisible(); }
         PopUpMenu=create_PopUpMenu();
         gtk_menu_popup( GTK_MENU( PopUpMenu ),NULL,NULL,NULL,NULL,0,0 );
-	gtkVisible++;
+	gtkIncVisible();
         break;
    case evHidePopUpMenu:
         if ( PopUpMenu ) { gtk_widget_hide_on_delete( PopUpMenu ); /*gtkVisible--;*/ PopUpMenu=NULL; }
@@ -233,4 +233,6 @@ void gtkShow( int type,char * param )
   }
 }
 
+void gtkIncVisible( void ) { gtkVisible++; }
+void gtkDecVisible( void ) { if ( gtkVisible > 0 ) gtkVisible--; }
 

@@ -61,4 +61,7 @@ extern void gtkMessageBox( int type,gchar * str );
 extern void gtkSetLayer( GtkWidget * wdg );
 extern void gtkActive( GtkWidget * wdg );
 
+extern void gtkIncVisible( void );
+extern void gtkDecVisible( void );
+
 #endif

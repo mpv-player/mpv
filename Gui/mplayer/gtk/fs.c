@@ -286,7 +286,7 @@ void ShowFileSelect( int type,int modal )
   
  gtk_window_set_modal( GTK_WINDOW( fsFileSelect ),modal );
 
- gtk_widget_show( fsFileSelect ); gtkVisible++;
+ gtk_widget_show( fsFileSelect ); gtkIncVisible();
 }
 
 void HideFileSelect( void )
@@ -294,7 +294,7 @@ void HideFileSelect( void )
  if ( !gtkVFileSelect ) return;
  gtk_widget_hide( fsFileSelect );
  gtk_widget_destroy( fsFileSelect );
- gtkVFileSelect=0; gtkVisible--;
+ gtkVFileSelect=0; gtkDecVisible();
 }
 
 void fs_fsFileSelect_destroy( GtkObject * object,gpointer user_data )

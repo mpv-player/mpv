@@ -142,13 +142,13 @@ void ShowEqualizer( void )
 
  if ( gtk_notebook_get_current_page( GTK_NOTEBOOK( Notebook ) ) == 0 ) gtk_widget_show( Config );
  gtk_widget_show( Equalizer );
- gtkVisible++;
+ gtkIncVisible();
 }
 
 void HideEqualizer( void )
 {
  if ( !gtkVEqualizer ) return;
- gtkVEqualizer=0; gtkVisible--;
+ gtkVEqualizer=0; gtkDecVisible();
  gtk_widget_hide( Equalizer );
  gtk_widget_destroy( Equalizer );
  if ( gtkVEquConfig ) HideEquConfig();
