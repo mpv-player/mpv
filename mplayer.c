@@ -573,7 +573,11 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 play_next_file:
     filename=(num_filenames>0)?filenames[curr_filename]:NULL;
 #ifdef HAVE_NEW_GUI
-    strcpy( mplShMem->Filename,filename );
+    if ( use_gui ) 
+     {
+      strcpy( mplShMem->Filename,filename );
+      mplShMem->Playing=1;
+     } 
 #endif    
     if(filename) mp_msg(MSGT_CPLAYER,MSGL_INFO,"Playing %s\n", filename);
 
@@ -952,6 +956,16 @@ current_module="init_libvo";
     if(strlen(info->comment) > 0)
         mp_msg(MSGT_CPLAYER,MSGL_V,"VO: Comment: %s\n", info->comment);
    }
+#endif
+
+#ifdef HAVE_NEW_GUI
+   if ( use_gui )
+    {
+     if ( !appMPlayer.subWindow.isFullScreen ) 
+       wsResizeWindow( &appMPlayer.subWindow,sh_video->disp_w,sh_video->disp_h );
+     screen_size_x=appMPlayer.subWindow.Width;
+     screen_size_y=appMPlayer.subWindow.Height;
+    }
 #endif
 
    mp_msg(MSGT_CPLAYER,MSGL_V,"video_out->init(%dx%d->%dx%d,flags=%d,'%s',0x%X)\n",
