@@ -5649,7 +5649,7 @@ Benutze die angegebene Windows-Audioformatkennung (z.B.\& atag=0x55).
 .B bit_exact
 Benutze nur bitgenaue Algorithmen (außer (I)DCT).
 Zusätzlich deaktiviert bit_exact mehrere Optimierungen und sollte daher
-nur für Regresstionstests verwendet werden, die binär identische Dateien
+nur für Regressionstests verwendet werden, die binär identische Dateien
 benötigen, selbst wenn sich die Version des Encoders ändert.
 Dies unterdrückt in MPEG-4-Streams außerdem den user_data-Header.
 Benutze diese Option nicht, wenn du nicht genau weißt, was du tust.
@@ -5837,37 +5837,96 @@ Bewegungskompensation überlappender Blöcke (H.263+)
 Loop-Filter (H.263+)
 Beachte, dass diese Option nicht funktioniert.
 .
+.TP
+.B inter_threshold <-1000\-1000>
+Bewirkt zur Zeit gar nichts.
+.
+.TP
+.B keyint=<0\-300>
+Maximale Anzahl von Bildern zwischen zwei Keyframes (Standard: 250, was einem
+Keyframe alle zehn Sekunden bei einem 25fps-Film entspricht).
+Keyframes werden für das Spulen in Filmen gebraucht, da nur ein Sprung zu
+Keyframes möglich ist; Keyframes jedoch benötigen mehr Platz als andere Frames,
+daher bedeutet ein höherer Wert hier geringfügig kleinere Dateien und damit
+weniger genaues Spulen.
+0 ist gleichbedeutend mit 1, was jeden Frame zu einem Keyframe macht.
+Werte > 300 werden nicht empfohlen, da die Qualität abhängig von Decoder,
+Encoder und Glück schlecht sein kann.
+Für eine strikte Einhaltung von MPEG-1/2/4 müsste dieser Wert <=132 sein.
+.
+.TP
+.B sc_threshold=<-1000000\-1000000>
+Schwellenwert für die Erkennung eines Szenenwechsels.
+Libavcodec fügt einen Keyframe ein, wenn er einen Szenenwechsel entdeckt.
+Mit dieser Option kannst du die Sensitivität dieser Erkennung bestimmen.
+-1000000 bedeutet, dass mit jedem Frame ein Szenenwechsel erkannt wird,
+1000000 bedeutet, dass gar keine Szenenwechsel erkannt werden (Standard: 0).
+.
+.TP
+.B vb_strategy=<0\-1>
+Strategie, mit der zwischen I-/\:P-/\:B\-Frames gewählt wird (beim ersten
+Durchlauf):
+.
+.PD 0
+.RSs
+.IPs 0
+Benutzt immer die maximale Anzahl B-Frames (Standard).
+.IPs 1
+Vermeide B-Frames in schnell bewegten Szenen.
+.RE
+.PD 1
+.
+.TP
+.B vpass=<1\-2>
+Aktiviert den internen Modus für zwei (oder drei) Durchläufe.
+Gib diese Option nur an, wenn du mit zwei (oder drei) Durchläufen encodieren
+möchtest.
+.PD 0
+.RSs
+.IPs 1
+erster Durchlauf (siehe auch turbo)
+.IPs 2
+zweiter Durchlauf
+.IPs 3
+n-ter Durchlauf (zweiter und dritter Durchlauf beim three-pass-Modus)
+.RE
+.RS
+Hier also wie es funktioniert und benutzt wird:
+.br
+Der erste Durchlauf (vpass=1) schreibt eine Datei mit Statistiken.
+Du möchtest vielleicht ein paar CPU-intensive Optionen wie "turbo"
+deaktivieren.
+.br
+Im two-pass-Modus (vpass=2) wird im zweiten Durchlauf die Statistikdatei
+gelesen, und die Bitratenkontrolle fällt dementsprechende Entscheidungen.
+.br
+Im three-pass-Modus (vpass=3, kein Druckfehler) wird beides getan: Erst
+werden die Statistiken eingelesen, dann überschrieben.
+Wenn die Möglichkeit besteht, dass du diesen Vorgang abbrechen musst, solltest
+du die Datei divx2pass.log vorher sichern.
+Du kannst alle Encodierungsoptionen verwenden, außer sehr CPU-lastigen
+wie "qns".
+.br
+Der dritte Durchlauf (vpass=3) ist derselbe wie der zweite, außer dass er für
+die Arbeit die Statistiken des zweiten Durchlaufs hat.
+Du kannst alle Encodierungsoptionen verwenden, auch CPU-intensive.
+.RE
+.PD 1
+.sp 1
+.RS
+huffyuv:
+.RE
+.PD 0
+.RSs
+.IPs "pass 1"
+Speichert Statistiken.
+.IPs "pass 2"
+Encodiert mit einer optimalen Huffman-Tabelle, basierend auf den Statistiken
+des ersten Durchlaufs.
+.RE
+.PD 1
 .\" manpage is synced from top down to this option.
-.IPs vhq\ \ 
-Modus für hohe Qualität. Encodiert jeden Makroblock in allen Modi und
-wählt dann das kleinste Ergebnis (langsam) (Standard: hohe Qualität
-deaktiviert)
-.IPs v4mv
-vier Motion-Vectors pro Makroblock (etwas bessere Qualität)
-(standardmäßig deaktivert).
-.IPs keyint=<0\-300>
-Maximale Anzahl von Bildern zwischen zwie Schlüsselbildern (key frames).
-Größere Intervalle resultieren in kleineren Dateien aber ungenauerem Spulen.
-Ein Wert von 0 bedeutet keine Schlüsselbilder, und Werte > 300 sind nicht
-empfehlenswert. Bei strikter Einhaltung des MPEG-1/\:2/\:4\-Standards muss
-der Wert <= 132 sein (Standardwert: 250, was einem Schlüsselbild alle
-zehn Sekunden bei einem 25fps\-Film bedeutet).
-.IPs vb_strategy=<0\-1>
-Strategie, mit der zwischen I/\:P/\:B\-Frames gewählt wird (beim zweiten
-Durchgang).
-.RSss
-0: Benutzt immer die maximale Anzahl von B\-Frames (Standard).
-.br
-1: Vermeidet B\-Frames in Szenen mit viel Bewegung (was zu falschen
-Vorhersagen bei der Bitrate führt).
-.REss
-.IPs vpass=<1\-2>
-Aktiviert den internen Modus für zwei Durchgänge (standardmäßig deaktiviert):
-.RSss
-1: erster Durchgang
-.br
-2: zweiter Durchgang
-.REss
+.
 .IPs aspect=<x.x/y.y>
 Speichert das Höhen\-/:Breitenverhältnis intern im Videostream, genauso wie
 bei MPEG-1/\:2. Deutlich bessere Lösung als Skalierung, da hierbei die
