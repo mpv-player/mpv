@@ -36,8 +36,8 @@ typedef struct ao_plugin_local_data_s
 static ao_plugin_local_data_t ao_plugin_local_data={NULL,0,0.0,NULL,NULL,AO_PLUGINS};
 
 // global data 
-volatile ao_plugin_data_t ao_plugin_data; // Data used by the plugins
-volatile ao_plugin_cfg_t  ao_plugin_cfg=CFG_DEFAULTS; // Set in cfg-mplayer.h
+ao_plugin_data_t ao_plugin_data;             // Data used by the plugins
+ao_plugin_cfg_t  ao_plugin_cfg=CFG_DEFAULTS; // Set in cfg-mplayer.h
 
 // to set/get/query special features/parameters
 static int control(int cmd,int arg){
@@ -45,6 +45,15 @@ static int control(int cmd,int arg){
   case AOCONTROL_SET_PLUGIN_DRIVER:
     ao_plugin_local_data.driver=(ao_functions_t*)arg;
     return CONTROL_OK;
+  case AOCONTROL_GET_VOLUME:
+  case AOCONTROL_SET_VOLUME:
+  {
+    int r=audio_plugin_volume.control(cmd,arg);
+    if(CONTROL_OK != r)
+      return driver()->control(cmd,arg);
+    else
+      return r;
+  }
   default:
     return driver()->control(cmd,arg);
   }

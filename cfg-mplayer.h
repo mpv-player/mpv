@@ -106,6 +106,7 @@ struct config ao_plugin_conf[]={
 	{"delay", &ao_plugin_cfg.pl_delay_len, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
 	{"format", &ao_plugin_cfg.pl_format_type, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
 	{"fout", &ao_plugin_cfg.pl_resample_fout, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
+	{"volume", &ao_plugin_cfg.pl_volume_volume, CONF_TYPE_INT, CONF_RANGE, 0, 255, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -141,7 +142,7 @@ static config_t mplayer_opts[]={
 //	{"dsp", &dsp, CONF_TYPE_STRING, CONF_NOCFG, 0, 0, NULL},
 	{"dsp", "Use -ao oss:dsp_path!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
         {"mixer", &mixer_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
-	{"master", "Option -master was obsolete and has been removed\n" , CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+	{"master", "Option -master has been removed, use -aop list=volume instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"channels", &audio_output_channels, CONF_TYPE_INT, CONF_RANGE, 2, 6, NULL},
 #ifdef HAVE_X11
 	{"display", &mDisplayName, CONF_TYPE_STRING, 0, 0, 0, NULL},
