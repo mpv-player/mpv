@@ -2272,11 +2272,6 @@ In Xinerama configurations (i.e.\& a single desktop that spans across multiple
 displays) this option tells MPlayer which screen to display movie on.
 .
 .TP
-.B \-z <0\-9> (\-vo png only)
-Specifies the compression level of the png video output driver.
-0 is no compression, 9 is the maximum compression.
-.
-.TP
 .B \-zrbw (\-vo zr only)
 Display in black and white.
 For optimal performance, this can be combined with '\-lavdopts gray'.
@@ -2977,10 +2972,17 @@ Must be equal to or larger than 1 (default: 1000).
 .PD 1
 .
 .TP
-.B png (also see \-z)
+.B png\ \ 
 Output each frame into a PNG file in the current directory.
 Each file takes the frame number padded with leading zeros as name.
 24bpp RGB and BGR formats are supported.
+.PD 0
+.RSs
+.IPs z=<0-9>
+Specifies the compression level.
+0 is no compression, 9 is maximum compression.
+.RE
+.PD 1
 .
 .TP
 .B tga\ \ \ \ 

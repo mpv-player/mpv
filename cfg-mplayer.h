@@ -189,7 +189,7 @@ m_option_t mplayer_opts[]={
 
 	// -vo png only:
 #ifdef HAVE_PNG
-	{"z", &z_compression, CONF_TYPE_INT, CONF_RANGE, 0, 9, NULL},
+	{"z", "-z is replaced by -vo png:z=<0-9>\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #endif
 	// -vo jpeg only:
 #ifdef HAVE_JPEG

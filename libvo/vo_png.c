@@ -17,6 +17,7 @@
 #include "config.h"
 #include "video_out.h"
 #include "video_out_internal.h"
+#include "subopt-helper.h"
 
 static vo_info_t info = 
 {
@@ -43,19 +44,11 @@ static uint32_t
 config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format)
 {
     
-    if((z_compression >= 0) && (z_compression <= 9)) {
 	    if(z_compression == 0) {
 		    printf("PNG Warning: compression level set to 0, compression disabled!\n");
-		    printf("PNG Info: Use the -z <n> switch to set compression level from 0 to 9.\n");
+		    printf("PNG Info: Use -vo png:z=<n> to set compression level from 0 to 9.\n");
 		    printf("PNG Info: (0 = no compression, 1 = fastest, lowest - 9 best, slowest compression)\n");
 	    }	    
-    }
-    else {	    	    
-	    printf("PNG Warning: compression level out of range setting to 1!\n");
-	    printf("PNG Info: Use the -z <n> switch to set compression level from 0 to 9.\n");
-	    printf("PNG Info: (0 = no compression, 1 = fastest, lowest - 9 best, slowest compression)\n");
-	    z_compression = Z_BEST_SPEED;
-    }
     
     if(verbose)	printf("PNG Compression level %i\n", z_compression);   
 	  	
@@ -206,12 +199,23 @@ static void uninit(void){}
 
 static void check_events(void){}
 
+static int int_zero_to_nine(int *sh)
+{
+    if ( (*sh < 0) || (*sh > 9) )
+        return 0;
+    return 1;
+}
+
+static opt_t subopts[] = {
+    {"z",   OPT_ARG_INT, &z_compression, (opt_test_f)int_zero_to_nine},
+    {NULL}
+};
+
 static uint32_t preinit(const char *arg)
 {
-    if(arg) 
-    {
-	printf("PNG Unknown subdevice: %s\n",arg);
-	return ENOSYS;
+    z_compression = 0;
+    if (subopt_parse(arg, subopts) != 0) {
+        return -1;
     }
     return 0;
 }
