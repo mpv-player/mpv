@@ -584,6 +584,16 @@ switch(sh_video->codec->driver){
 #else
         dec_param.color_depth = 32;
 #endif
+#ifdef DECORE_DIVX5
+	/* codec_version should be 311, 400 or 500 according
+	 * to DivX version used in video, let's hope 500 is 
+	 * compatible with all DivX4 content, otherwise we
+	 * should find some logic to also choose between
+	 * 400 and 500 - Atmos
+	 */
+	dec_param.codec_version = (sh_video->format==mmioFOURCC('D','I','V','3'))?311:500;
+	dec_param.build_number = 0;
+#endif
 	dec_param.x_dim = sh_video->bih->biWidth;
 	dec_param.y_dim = sh_video->bih->biHeight;
 	decore(0x123, DEC_OPT_INIT, &dec_param, NULL);
@@ -617,6 +627,10 @@ switch(sh_video->codec->driver){
 	  mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Unsupported out_fmt: 0x%X\n",out_fmt);
 	  return 0;
 	}
+#ifdef DECORE_DIVX5
+	dec_param.codec_version = (sh_video->format==mmioFOURCC('D','I','V','3'))?311:500;
+	dec_param.build_number = 0;
+#endif
 	dec_param.x_dim = sh_video->bih->biWidth;
 	dec_param.y_dim = sh_video->bih->biHeight;
 	decore(0x123, DEC_OPT_INIT, &dec_param, NULL);
