@@ -1,4 +1,4 @@
-/* 
+/*
  * vo_dxr3.c - DXR3/H+ video out
  *
  * Copyright (C) 2002 David Holm <dholm@iname.com>
@@ -6,6 +6,9 @@
  */
 
 /* ChangeLog added 2002-01-10
+ * 2002-07-18:
+ *  Disabled spuenc support, this is still not stable enough =(
+ *
  * 2002-07-05:
  *  Removed lavc and fame encoder to be compatible with new libvo style.
  *  Added graphic equalizer support.
@@ -182,7 +185,7 @@ uint32_t control(uint32_t request, void *data, ...)
 	case VOCTRL_QUERY_VAA:
 	    {
 		vo_vaa_t *vaa = data;
-		
+
 		memset(vaa,0,sizeof(vo_vaa_t));
 		vaa->get_video_eq=get_video_eq;
 		vaa->set_video_eq=set_video_eq;
@@ -197,7 +200,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	int tmp1, tmp2, size;
 	em8300_register_t reg;
 	extern float monitor_aspect;
-	
+
 	/* Softzoom turned on, downscale */
 	/* This activates the subpicture processor, you can safely disable this and still send */
 	/* broken subpics to the em8300, if it's enabled and you send broken subpics you will end */
@@ -331,10 +334,12 @@ static void draw_osd(void)
 		 * as if it hasn't and we re-send it it will "blink" as the last one
 		 * is turned off, and the new one (same one) is turned on
 		 */
+/*		Subpics are not stable yet =(
+		expect lockups if you enable		
 		if (!noprebuf) {
 			ioctl(fd_spu, EM8300_IOCTL_SPU_SETPTS, &vo_pts);
 		}
-		write(fd_spu, spued->data, spued->count);
+		write(fd_spu, spued->data, spued->count);*/
 	}
 	disposd++;
 #endif
