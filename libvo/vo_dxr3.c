@@ -6,6 +6,9 @@
  */
 
 /* ChangeLog added 2002-01-10
+ * 2002-04-03:
+ *  Carl George added spuenc support
+ *
  * 2002-03-26:
  *  XorA added an option parser and support for selecting encoder
  *  codec. We thank him again.
@@ -86,7 +89,8 @@
 #include "postproc/rgb2rgb.h"
 #include "postproc/swscale.h"
 #include "cpudetect.h"
-
+#include "spuenc.h"
+ 
 #define USE_LIBFAME
 
 /* Libfame codec initialisation */
@@ -153,6 +157,13 @@ static int fd_control = -1;
 static int fd_video = -1;
 static int fd_spu = -1;
 static char fdv_name[80];
+
+/* on screen display/subpics */
+static char *osdpicbuf = NULL;
+static int osdpicbuf_w;
+static int osdpicbuf_h;
+static int disposd = 0;
+static encodedata *spued;
 
 /* Static variable used in ioctl's */
 static int ioval = 0;
@@ -432,6 +443,21 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		return 0;
 	} else if (format == IMGFMT_MPEGPES) {
 		printf("VO: [dxr3] Format: MPEG-PES (no conversion needed)\n");
+		osdpicbuf = malloc(s_width * s_height);
+		if (osdpicbuf == NULL) {
+			printf("vo_dxr3: out of mem\n");
+			return -1;
+		}
+		spued = (encodedata *) malloc(sizeof(encodedata));
+		if (spued == NULL) {
+			printf("vo_dxr3:out of mem\n");
+			return -1;
+		}
+		osd_w = s_width;
+		osd_h = s_height;
+		osdpicbuf_w = s_width;
+		osdpicbuf_h = s_height;
+		
 		return 0;
 	}
 
@@ -447,18 +473,48 @@ static const vo_info_t* get_info(void)
 
 static void draw_alpha(int x, int y, int w, int h, unsigned char* src, unsigned char *srca, int srcstride)
 {
-#if defined(USE_LIBFAME) || defined(USE_LIBAVCODEC)
+	int lx, ly, bx;
+	unsigned char *buf;
+	buf = &osdpicbuf[(y * osdpicbuf_w) + x];
+	if (img_format == IMGFMT_MPEGPES) {
+		for (ly = 0; ly < h - 1; ly++) {
+			for(lx = 0; lx < w; lx++) {
+				if ((srca[(ly * srcstride) + lx] != 0) && (src[(ly * srcstride) + lx] != 0)) {
+					if(src[(ly * srcstride) + lx] >= 128) {
+						buf[ly * osdpicbuf_w + lx] = 3;
+					}
+				}
+			}
+		}	
+		pixbuf_encode_rle(x, y, osdpicbuf_w, osdpicbuf_h - 1, osdpicbuf, osdpicbuf_w, spued);
+	} else {
+#if defined(USE_LIBAVCODEC) || defined(USE_LIBFAME)
 	vo_draw_alpha_yv12(w, h, src, srca, srcstride,
 		picture_data[0] + x + y * picture_linesize[0], picture_linesize[0]);
 #endif
+	}
 }
 
 static void draw_osd(void)
 {
 	if (img_format != IMGFMT_MPEGPES) {
 		vo_draw_text(osd_w, osd_h, draw_alpha);
+	} else if ((disposd % 30) == 0) {
+		vo_draw_text(osd_w, osd_h, draw_alpha);
+		memset(osdpicbuf, 0, s_width * s_height);
+
+		/* could stand some check here to see if the subpic hasn't changed
+		 * as if it hasn't and we re-send it it will "blink" as the last one
+		 * is turned off, and the new one (same one) is turned on
+		 */
+		if (!noprebuf) {
+			ioctl(fd_spu, EM8300_IOCTL_SPU_SETPTS, &vo_pts);
+		}
+		write(fd_spu, spued->data, spued->count);
 	}
+	disposd++;
 }
+
 
 static uint32_t draw_frame(uint8_t * src[])
 {
@@ -567,6 +623,12 @@ static void uninit(void)
 	}
 	if (fd_control) {
 		close(fd_control);
+	}
+	if(osdpicbuf) {
+		free(osdpicbuf);
+	}
+	if(spued) {
+		free(spued);
 	}
 }
 
