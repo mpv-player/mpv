@@ -3582,6 +3582,14 @@ static HANDLE WINAPI expCreateFileA(LPCSTR cs1,DWORD i1,DWORD i2,
 	return r;
     }
 
+    // Needed by wnvplay1.dll
+    if (strstr(cs1, "WINNOV.bmp"))
+    {
+	int r;
+	r=open("/dev/null", 0);
+	return r;
+    }
+
 #if 0
     /* we need this for some virtualdub filters */
     {
