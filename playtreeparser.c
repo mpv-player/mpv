@@ -12,20 +12,16 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include "playtree.h"
+#include "playtreeparser.h"
 #include "libmpdemux/stream.h"
 #include "mp_msg.h"
 
 extern play_tree_t*
-asx_parser_build_tree(char* buffer);
-
-
-static char* buffer = NULL;
-static int buffer_size = 0, buffer_end = 0;
-
+asx_parser_build_tree(char* buffer, int ref);
 
 
 play_tree_t*
-parse_asx(stream_t* stream) {
+parse_asx(play_tree_parser_t* p) {
   int r;
   int comments = 0,read = 1,eof = 0;
 
@@ -35,70 +31,70 @@ parse_asx(stream_t* stream) {
     if(read && eof) // Eof reached before anything useful
       return NULL;
     if(read) {
-      if(buffer_size - buffer_end < 50) buffer_size += 255;
-      buffer = (char*)realloc(buffer,buffer_size*sizeof(char));
-      if(buffer == NULL) {
-	mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",buffer_size*sizeof(char));
-	buffer_size = buffer_end = 0;
+      if(p->buffer_size - p->buffer_end < 50) p->buffer_size += 255;
+      p->buffer = (char*)realloc(p->buffer,p->buffer_size*sizeof(char));
+      if(p->buffer == NULL) {
+	mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",p->buffer_size*sizeof(char));
+	p->buffer_size = p->buffer_end = 0;
 	return NULL;
       }
   
-      r = stream_read(stream,buffer+buffer_end,buffer_size-buffer_end-1);
+      r = stream_read(p->stream,p->buffer+p->buffer_end,p->buffer_size-p->buffer_end-1);
       if(r < 0) {
 	mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't read from stream r=%d\n",r);
 	return NULL;
       } else if(r == 0)
 	eof = 1;
-      buffer_end += r;
-      buffer[buffer_end] = '\0';
+      p->buffer_end += r;
+      p->buffer[p->buffer_end] = '\0';
     }
 
     if(comments)  { // Jump comments
       int e;
-      char* end = strstr(buffer,"-->");
+      char* end = strstr(p->buffer,"-->");
       if(!end) {
-	if(buffer[buffer_end-1] != '-')
-	  buffer_end = 0; // Drop buffer content if last char isn't '-'
+	if(p->buffer[p->buffer_end-1] != '-')
+	  p->buffer_end = 0; // Drop buffer content if last char isn't '-'
 	continue;
       }
       comments = 0;
-      e = end - buffer + 3;
-      if(e >= buffer_end) { // > seems impossible
-	buffer_end = 0; // Drop buffer content
+      e = end - p->buffer + 3;
+      if(e >= p->buffer_end) { // > seems impossible
+	p->buffer_end = 0; // Drop buffer content
 	read = 1;
 	continue;
       }
-      buffer_end -= e;
-      memmove(buffer,end+3,buffer_end); // Drop comments
+      p->buffer_end -= e;
+      memmove(p->buffer,end+3,p->buffer_end); // Drop comments
       continue;
     } 
     
-    for(r= 0 ; r < buffer_end ; r++) {
-      if(strchr(" \n\r\t",buffer[r]) != NULL) // Jump space
+    for(r= 0 ; r < p->buffer_end ; r++) {
+      if(strchr(" \n\r\t",p->buffer[r]) != NULL) // Jump space
 	continue;
-      if(buffer[r] != '<') {
-	mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"First char isn't '<' but '%c'\n",buffer[r]);
-	mp_msg(MSGT_PLAYTREE,MSGL_DBG3,"Buffer = [%s]\n",buffer);
+      if(p->buffer[r] != '<') {
+	mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"First char isn't '<' but '%c'\n",p->buffer[r]);
+	mp_msg(MSGT_PLAYTREE,MSGL_DBG3,"Buffer = [%s]\n",p->buffer);
 	return NULL;
       }
       break; // Stop on first '<'
     }
-    if(r  > buffer_end-4) { // We need more
+    if(r  > p->buffer_end-4) { // We need more
       if(r > 0) { // Drop unuseful beggining
-	buffer_end -= r;
-	memmove(buffer,&buffer[r],buffer_end);
+	p->buffer_end -= r;
+	memmove(p->buffer,&p->buffer[r],p->buffer_end);
       }
       read = 1;
       continue;
     }
 
-    if(strncmp(&buffer[r],"<!--",4) == 0) { // Comments
+    if(strncmp(&p->buffer[r],"<!--",4) == 0) { // Comments
       read = 0;
       comments = 1;
       continue;
     }
 
-    if(strncasecmp(&buffer[r],"<ASX",4) != 0) // First element is not a comment nor an asx : end
+    if(strncasecmp(&p->buffer[r],"<ASX",4) != 0) // First element is not a comment nor an asx : end
       return NULL;
 	
 	
@@ -108,29 +104,27 @@ parse_asx(stream_t* stream) {
   // We have an asx : load it in memory and parse
 
   while(!eof) {
-    if(buffer_size - buffer_end < 50) buffer_size += 255;
-    buffer = (char*)realloc(buffer,buffer_size*sizeof(char));
-    if(buffer == NULL) {
-	mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",buffer_size*sizeof(char));
-	buffer_size = buffer_end = 0;
+    if(p->buffer_size - p->buffer_end < 50) p->buffer_size += 255;
+    p->buffer = (char*)realloc(p->buffer,p->buffer_size*sizeof(char));
+    if(p->buffer == NULL) {
+	mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",p->buffer_size*sizeof(char));
+	p->buffer_size = p->buffer_end = 0;
 	return NULL;
       }
-    r = stream_read(stream,buffer+buffer_end,buffer_size-buffer_end-1);
+    r = stream_read(p->stream,p->buffer+p->buffer_end,p->buffer_size-p->buffer_end-1);
     if(r > 0)
-      buffer_end += r;
+      p->buffer_end += r;
     if(r <= 0)
       break;
-    buffer[buffer_end] = '\0';
+    p->buffer[p->buffer_end] = '\0';
   }
 
- mp_msg(MSGT_PLAYTREE,MSGL_DBG3,"Parsing asx file : [%s]\n",buffer);
-  return asx_parser_build_tree(buffer);
-  
-
+ mp_msg(MSGT_PLAYTREE,MSGL_DBG3,"Parsing asx file : [%s]\n",p->buffer);
+ return asx_parser_build_tree(p->buffer,p->deep);
 }
 
 play_tree_t*
-parse_textplain(stream_t *stream) {
+parse_textplain(play_tree_parser_t* p) {
   char* end;
   char* file;
   int eof = 0,r,p_end=-1,resize = 0;
@@ -138,12 +132,12 @@ parse_textplain(stream_t *stream) {
 
   mp_msg(MSGT_PLAYTREE,MSGL_V,"Trying plaintext...\n");
 
-  if(buffer_size < 255 && ! stream->eof) {
-    buffer_size = 255;
-    buffer = (char*)realloc(buffer,buffer_size*sizeof(char));
-    if(buffer == NULL) {
-      mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",buffer_size*sizeof(char));
-      buffer_size = buffer_end = 0;
+  if(p->buffer_size < 255 && ! p->stream->eof) {
+    p->buffer_size = 255;
+    p->buffer = (char*)realloc(p->buffer,p->buffer_size*sizeof(char));
+    if(p->buffer == NULL) {
+      mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",p->buffer_size*sizeof(char));
+      p->buffer_size = p->buffer_end = 0;
       return NULL;
       }
   }
@@ -151,41 +145,41 @@ parse_textplain(stream_t *stream) {
 
   while(!eof) {
     if(resize) {
-      buffer_size += 255;
-      buffer = (char*)realloc(buffer,buffer_size*sizeof(char));
+      p->buffer_size += 255;
+      p->buffer = (char*)realloc(p->buffer,p->buffer_size*sizeof(char));
       resize = 0;
-      if(buffer == NULL) {
-	mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",buffer_size*sizeof(char));
-	buffer_size = buffer_end = 0;
+      if(p->buffer == NULL) {
+	mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",p->buffer_size*sizeof(char));
+	p->buffer_size = p->buffer_end = 0;
 	if(list) play_tree_free_list(list,1);
 	return NULL;
       }
     }
-    if(!stream->eof) {
-      r = stream_read(stream,buffer+buffer_end,buffer_size-buffer_end-1);
+    if(!p->stream->eof) {
+      r = stream_read(p->stream,p->buffer+p->buffer_end,p->buffer_size-p->buffer_end-1);
       if(r < 0) {
 	mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't read from stream r=%d\n",r);
 	return NULL;
       } else if(r == 0)
 	eof = 1;
-    buffer_end += r;
-    buffer[buffer_end] = '\0';
+    p->buffer_end += r;
+    p->buffer[p->buffer_end] = '\0';
     } else eof = 1;
     r = 0;
     while(1) {
       p_end = r;
-      for( ; buffer[r] != '\0' ; r++) {
-	if(strchr(" \n\r\t",buffer[r]) != NULL)
+      for( ; p->buffer[r] != '\0' ; r++) {
+	if(strchr(" \n\r\t",p->buffer[r]) != NULL)
 	  continue;
 	break;
       }
-      if(buffer[r] == '\0') {
+      if(p->buffer[r] == '\0') {
 	p_end = r;
 	if(!eof)
 	  resize = 1;
 	break;
       }
-      end = strchr(&buffer[r],'\n');      
+      end = strchr(&p->buffer[r],'\n');      
       if(!end) {
 	if(!eof) {
 	  p_end = r;
@@ -195,26 +189,26 @@ parse_textplain(stream_t *stream) {
 	  break;
 	}
 	entry = play_tree_new();
-	play_tree_add_file(entry,&buffer[r]);
-	r = buffer_end;
+	play_tree_add_file(entry,&p->buffer[r]);
+	r = p->buffer_end;
 	
       }
       else {
-	if(r > 0 && buffer[r-1] == '\r') r--;
-	file = (char*)malloc((end-(&buffer[r])+1)*sizeof(char));
+	if(r > 0 && p->buffer[r-1] == '\r') r--;
+	file = (char*)malloc((end-(&p->buffer[r])+1)*sizeof(char));
 	if(file == NULL) {
-	  mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",buffer_size*sizeof(char));
-	  buffer_size = buffer_end = 0;
+	  mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",p->buffer_size*sizeof(char));
+	  p->buffer_size = p->buffer_end = 0;
 	  if(list) play_tree_free_list(list,1);
 	  return NULL;
 	}
 	// TODO : Check if the given file exist and is readable (or it'a an url)	  
-	strncpy(file,&buffer[r],end-(&buffer[r]));
-	file[end-(&buffer[r])] = '\0';
+	strncpy(file,&p->buffer[r],end-(&p->buffer[r]));
+	file[end-(&p->buffer[r])] = '\0';
 	entry = play_tree_new();
 	play_tree_add_file(entry,file);	
 	free(file);
-	r += end-(&buffer[r]);
+	r += end-(&p->buffer[r]);
 	p_end = r;
       }
       if(entry) {
@@ -224,12 +218,12 @@ parse_textplain(stream_t *stream) {
 	entry = NULL;
       }
     }
-    if(!eof && p_end > 0 && p_end < buffer_end) {
-      memmove(buffer,&buffer[p_end],buffer_end-p_end);
-      buffer_end -= p_end;
-    } else if(!eof && !resize && p_end == buffer_end) {
-      buffer_end = 0;
-      buffer[0] = '\0';
+    if(!eof && p_end > 0 && p_end < p->buffer_end) {
+      memmove(p->buffer,&p->buffer[p_end],p->buffer_end-p_end);
+      p->buffer_end -= p_end;
+    } else if(!eof && !resize && p_end == p->buffer_end) {
+      p->buffer_end = 0;
+      p->buffer[0] = '\0';
     }
   }
    
@@ -241,35 +235,22 @@ parse_textplain(stream_t *stream) {
 
 play_tree_t*
 parse_playtree(stream_t *stream) {
-  play_tree_t* tree = NULL;
-  
+  play_tree_parser_t* p;
+  play_tree_t* ret;
+
 #ifdef MP_DEBUG
   assert(stream != NULL);
   assert(stream->type == STREAMTYPE_PLAYLIST);
 #endif
 
-  while(1) {
-    tree = parse_asx(stream);
-    if(tree) break;
-    // Here come the others formats ( textplain must stay the last one )
-    tree = parse_textplain(stream);
-    if(tree) break;
-    break;
-  }
+  p = play_tree_parser_new(stream,0);
+  if(!p)
+    return NULL;
 
-  if(tree)
-    mp_msg(MSGT_PLAYTREE,MSGL_V,"Playlist succefully parsed\n");
-  else mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Error while parsing playlist\n");
+  ret = play_tree_parser_get_play_tree(p);
+  play_tree_parser_free(p);
 
-  if(tree)
-    tree = play_tree_cleanup(tree);
-
-  if(!tree) mp_msg(MSGT_PLAYTREE,MSGL_WARN,"Warning empty playlist\n");
-
-  if(buffer) free(buffer);
-  buffer = NULL;
-  buffer_end = buffer_size = 0;
-  return tree;
+  return ret;
 }
 
 play_tree_t*
@@ -298,4 +279,63 @@ parse_playlist_file(char* file) {
 
   return ret;
 
+}
+
+
+play_tree_parser_t*
+play_tree_parser_new(stream_t* stream,int deep) {
+  play_tree_parser_t* p;
+
+  p = (play_tree_parser_t*)calloc(1,sizeof(play_tree_parser_t));
+  if(!p)
+    return NULL;
+  p->stream = stream;
+  p->deep = deep;
+
+  return p;
+
+}
+
+void
+play_tree_parser_free(play_tree_parser_t* p) {
+
+#ifdef MP_DEBUG
+  assert(p != NULL);
+#endif
+
+  if(p->buffer) free(p->buffer);
+  free(p->buffer);
+}
+
+play_tree_t*
+play_tree_parser_get_play_tree(play_tree_parser_t* p) {
+  play_tree_t* tree = NULL;
+
+#ifdef MP_DEBUG
+  assert(p != NULL);
+#endif
+
+  while(1) {
+    tree = parse_asx(p);
+    if(tree) break;
+    // Here come the others formats ( textplain must stay the last one )
+    tree = parse_textplain(p);
+    if(tree) break;
+    break;
+  }
+
+  if(tree)
+    mp_msg(MSGT_PLAYTREE,MSGL_V,"Playlist succefully parsed\n");
+  else mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Error while parsing playlist\n");
+
+  if(tree)
+    tree = play_tree_cleanup(tree);
+  
+  if(!tree) mp_msg(MSGT_PLAYTREE,MSGL_WARN,"Warning empty playlist\n");
+
+  if(p->buffer) free(p->buffer);
+  p->buffer = NULL;
+  p->buffer_end = p->buffer_size = 0;
+
+  return tree;
 }
