@@ -2218,8 +2218,9 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       abs = (cmd->nargs > 1) ? cmd->args[1].v.i : 0;
       if(abs) {
 	abs_seek_pos = 3;
-	osd_function= (v > sh_video->timer) ? OSD_FFW : OSD_REW;
-	rel_seek_secs = v;
+	if(sh_video)
+	  osd_function= (v > sh_video->timer) ? OSD_FFW : OSD_REW;
+	rel_seek_secs = v/100.0;
       }
       else {
 	rel_seek_secs+= v;
