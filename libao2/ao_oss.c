@@ -76,7 +76,7 @@ static int format2oss(int format)
     case AF_FORMAT_AC3: return AFMT_AC3;
 #endif
     }
-    printf("Unknown format: %x\n", format);
+    printf("Unknown/not supported internal format: %s\n", af_fmt2str_short(format));
     return -1;
 }
 
@@ -116,7 +116,7 @@ static int oss2format(int format)
     case AFMT_AC3: return AF_FORMAT_AC3;
 #endif
     }
-    printf("Unknown format: %x\n", format);
+    printf("Unknown/not supported OSS format: %x\n", format);
     return -1;
 }
 
