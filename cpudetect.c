@@ -320,7 +320,10 @@ LONG CALLBACK win32_sig_handler_sse(EXCEPTION_POINTERS* ep)
  */
 static void check_os_katmai_support( void )
 {
-#if defined(__FreeBSD__)
+#ifdef ARCH_X86_64
+   gCpuCaps.hasSSE=1;
+   gCpuCaps.hasSSE2=1;
+#elif defined(__FreeBSD__)
    int has_sse=0, ret;
    size_t len=sizeof(has_sse);
 
