@@ -12,6 +12,7 @@ typedef struct {
   unsigned int format;
   codecs_t *codec;
   // output format:
+  float timer;		   // value of old a_frame
   int samplerate;
   int samplesize;
   int channels;
@@ -45,6 +46,7 @@ typedef struct {
   unsigned int format;
   codecs_t *codec;
   // output format:
+  float timer;		   // value of old v_frame
   float fps;
   float frametime;  // 1/fps
   int disp_w,disp_h;   // display size (filled by fileformat parser)

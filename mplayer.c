@@ -339,7 +339,7 @@ void exit_player(char* how){
   #endif
      getch2_disable();
   if(video_out) video_out->uninit();
-  if(audio_out && has_audio) audio_out->uninit();
+  if(audio_out) audio_out->uninit();
   if(encode_name) avi_fixate();
 #ifdef HAVE_LIRC
   #ifdef HAVE_GUI
@@ -453,7 +453,7 @@ int osd_visible=100;
 int osd_function=OSD_PLAY;
 int osd_last_pts=-303;
 
-float a_frame=0;    // Audio
+//float a_frame=0;    // Audio
 
 float rel_seek_secs=0;
 
@@ -1056,7 +1056,6 @@ switch(file_format){
  }
 } // switch(file_format)
 
-//if(verbose) printf("file successfully opened  (has_audio=%d)\n",has_audio);
 
 if(sh_video)
 printf("[V] filefmt:%d  fourcc:0x%X  size:%dx%d  fps:%5.2f  ftime:=%6.4f\n",
@@ -1072,7 +1071,7 @@ if(!sh_video){
 }
 
 //================== Init AUDIO (codec) ==========================
-if(has_audio){
+if(sh_audio){
   // Go through the codec.conf and find the best codec...
   sh_audio->codec=NULL;
   if(audio_family!=-1) printf("Trying to force audio codec driver family %d ...\n",audio_family);
@@ -1088,22 +1087,21 @@ if(has_audio){
       printf("Can't find codec for audio format 0x%X !\n",sh_audio->format);
       printf("*** Try to upgrade %s from DOCS/codecs.conf\n",get_path("codecs.conf"));
       printf("*** If it's still not OK, then read DOCS/CODECS!\n");
-      has_audio=0;
+      sh_audio=NULL;
       break;
     }
     if(audio_codec && strcmp(sh_audio->codec->name,audio_codec)) continue;
     else if(audio_family!=-1 && sh_audio->codec->driver!=audio_family) continue;
     printf("%s audio codec: [%s] drv:%d (%s)\n",audio_codec?"Forcing":"Detected",sh_audio->codec->name,sh_audio->codec->driver,sh_audio->codec->info);
-    //has_audio=sh_audio->codec->driver;
     break;
   }
 }
 
-if(has_audio){
+if(sh_audio){
   if(verbose) printf("Initializing audio codec...\n");
   if(!init_audio(sh_audio)){
     printf("Couldn't initialize audio codec! -> nosound\n");
-    has_audio=0;
+    sh_audio=0;
   } else {
     printf("AUDIO: srate=%d  chans=%d  bps=%d  sfmt=0x%X  ratio: %d->%d\n",sh_audio->samplerate,sh_audio->channels,sh_audio->samplesize,
         sh_audio->sample_format,sh_audio->i_bps,sh_audio->o_bps);
@@ -1200,7 +1198,7 @@ if(!init_video(sh_video)){
      if((encode_file=fopen(encode_index_name,"wb")))
        fclose(encode_file);
      else encode_index_name=NULL;
-     has_audio=0; // disable audio !!!!!
+     sh_audio=0; // disable audio !!!!!
    }
 
 // ========== Init keyboard FIFO (connection to libvo) ============
@@ -1285,7 +1283,7 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
 
 float frame_correction=0; // average of A-V timestamp differences
 int frame_corr_num=0;   //
-float v_frame=0;    // Video
+//float v_frame=0;    // Video
 float time_frame=0; // Timer
 float c_total=0;
 float max_pts_correction=0;//default_max_pts_correction;
@@ -1337,7 +1335,7 @@ int drop_frame_cnt=0;
 //================ SETUP AUDIO ==========================
   current_module="setup_audio";
 
-if(has_audio){
+if(sh_audio){
   
   const ao_info_t *info=audio_out->info;
   printf("AO: [%s] %iHz %s %s\n"
@@ -1356,7 +1354,7 @@ if(has_audio){
   if(!audio_out->init(force_srate?force_srate:sh_audio->samplerate,
       sh_audio->channels,sh_audio->sample_format,0)){
     printf("couldn't open/init audio device -> NOSOUND\n");
-    has_audio=0;
+    sh_audio=0; audio_out=NULL;
   }
 
 //  printf("Audio buffer size: %d bytes, delay: %5.3fs\n",audio_buffer_size,audio_buffer_delay);
@@ -1367,25 +1365,26 @@ if(has_audio){
 //    printf("Audio out buffer size reduced to %d bytes\n",sh_audio->a_buffer_size);
 //  }
 
-//  a_frame=-(audio_buffer_delay);
+//  sh_audio->timer=-(audio_buffer_delay);
 }
 
-  a_frame=0;
+  sh_video->timer=0;
+  if(sh_audio) sh_audio->timer=0;
 
-if(!has_audio){
+if(!sh_audio){
   printf("Audio: no sound\n");
   if(verbose) printf("Freeing %d unused audio chunks\n",d_audio->packs);
   ds_free_packs(d_audio); // free buffered chunks
   d_audio->id=-2;         // do not read audio chunks
   if(sh_audio) if(sh_audio->a_buffer) free(sh_audio->a_buffer);
-  sh_audio=NULL;
+  if(audio_out){ audio_out->uninit(); audio_out=NULL;} // close device
 }
 
   current_module=NULL;
 
 //==================== START PLAYING =======================
 
-if(file_format==DEMUXER_TYPE_AVI && has_audio){
+if(file_format==DEMUXER_TYPE_AVI && sh_audio){
   //a_pts=d_audio->pts;
   if(verbose) printf("Initial frame delay  A: %d  V: %d\n",(int)sh_audio->audio.dwInitialFrames,(int)sh_video->video.dwInitialFrames);
   if(!pts_from_bps){
@@ -1394,8 +1393,8 @@ if(file_format==DEMUXER_TYPE_AVI && has_audio){
     if(verbose) printf("AVI Initial frame delay: %5.3f\n",x);
   }
   if(verbose){
-//    printf("v: audio_delay=%5.3f  buffer_delay=%5.3f  a_pts=%5.3f  a_frame=%5.3f\n",
-//             audio_delay,audio_buffer_delay,a_pts,a_frame);
+//    printf("v: audio_delay=%5.3f  buffer_delay=%5.3f  a_pts=%5.3f  sh_audio->timer=%5.3f\n",
+//             audio_delay,audio_buffer_delay,a_pts,sh_audio->timer);
     printf("START:  a_pts=%5.3f  v_pts=%5.3f  \n",d_audio->pts,d_video->pts);
   }
   delay_corrected=0; // has to correct PTS diffs
@@ -1423,7 +1422,7 @@ while(!eof){
     }
 
 /*========================== PLAY AUDIO ============================*/
-while(has_audio){
+while(sh_audio){
   unsigned int t;
   int playsize=audio_out->get_space();
   
@@ -1450,11 +1449,11 @@ while(has_audio){
   if(playsize>0){
       sh_audio->a_buffer_len-=playsize;
       memcpy(sh_audio->a_buffer,&sh_audio->a_buffer[playsize],sh_audio->a_buffer_len);
-      a_frame+=playsize/(float)(sh_audio->o_bps);
+      sh_audio->timer+=playsize/(float)(sh_audio->o_bps);
   }
 
   break;
-} // if(has_audio)
+} // if(sh_audio)
 
 /*========================== UPDATE TIMERS ============================*/
 #if 0
@@ -1574,7 +1573,7 @@ if(1)
           sh_video->fps=1.0f/d;
         }
     }
-    v_frame+=frame_time;
+    sh_video->timer+=frame_time;
     time_frame+=frame_time;  // for nosound
 
     if(file_format==DEMUXER_TYPE_MPEG_PS) d_video->pts+=frame_time;
@@ -1583,11 +1582,11 @@ if(1)
 
     if(drop_frame){
 
-      if(has_audio){
+      if(sh_audio && !d_audio->eof){
           int delay=audio_out->get_delay();
           if(verbose>1)printf("delay=%d\n",delay);
-          time_frame=v_frame;
-          time_frame-=a_frame-(float)delay/(float)sh_audio->o_bps;
+          time_frame=sh_video->timer;
+          time_frame-=sh_audio->timer-(float)delay/(float)sh_audio->o_bps;
 	  if(time_frame>-2*frame_time) {
 	    drop_frame=0; // stop dropping frames
 	    if (verbose>0) printf("\nstop frame drop %.2f\n", time_frame);
@@ -1604,11 +1603,11 @@ if(1)
 
       time_frame-=GetRelativeTime(); // reset timer
 
-      if(has_audio){
+      if(sh_audio && !d_audio->eof){
           int delay=audio_out->get_delay();
           if(verbose>1)printf("delay=%d\n",delay);
-          time_frame=v_frame;
-          time_frame-=a_frame-(float)delay/(float)sh_audio->o_bps;
+          time_frame=sh_video->timer;
+          time_frame-=sh_audio->timer-(float)delay/(float)sh_audio->o_bps;
           // we are out of time... drop next frame!
 	  if(time_frame<-2*frame_time){
 	      drop_frame=frame_dropping; // tricky!
@@ -1621,7 +1620,7 @@ if(1)
 	  
       }
 
-      if(verbose>1)printf("sleep: %5.3f  a:%6.3f  v:%6.3f  \n",time_frame,a_frame,v_frame);
+//      if(verbose>1)printf("sleep: %5.3f  a:%6.3f  v:%6.3f  \n",time_frame,sh_audio->timer,sh_video->timer);
       
       while(time_frame>0.005){
           if(time_frame<=0.020)
@@ -1646,12 +1645,12 @@ if(1)
       continue;
     }
 
-//    printf("A:%6.1f  V:%6.1f  A-V:%7.3f  frame=%5.2f   \r",d_audio->pts,d_video->pts,d_audio->pts-d_video->pts,a_frame);
+//    printf("A:%6.1f  V:%6.1f  A-V:%7.3f  frame=%5.2f   \r",d_audio->pts,d_video->pts,d_audio->pts-d_video->pts,sh_audio->timer);
 //    fflush(stdout);
 
 #if 1
 /*================ A-V TIMESTAMP CORRECTION: =========================*/
-  if(has_audio){
+  if(sh_audio){
     float a_pts=0;
     float v_pts=0;
 
@@ -1698,12 +1697,12 @@ if(1)
           max_pts_correction=default_max_pts_correction;
         else
           max_pts_correction=sh_video->frametime*0.10; // +-10% of time
-        a_frame+=x; c_total+=x;
+        sh_audio->timer+=x; c_total+=x;
         printf(" ct:%7.3f  %3d  %2d%% %2d%% %4.1f%% %d\r",c_total,
         (int)num_frames,
-        (v_frame>0.5)?(int)(100.0*video_time_usage/(double)v_frame):0,
-        (v_frame>0.5)?(int)(100.0*vout_time_usage/(double)v_frame):0,
-        (v_frame>0.5)?(100.0*audio_time_usage/(double)v_frame):0
+        (sh_video->timer>0.5)?(int)(100.0*video_time_usage/(double)sh_video->timer):0,
+        (sh_video->timer>0.5)?(int)(100.0*vout_time_usage/(double)sh_video->timer):0,
+        (sh_video->timer>0.5)?(100.0*audio_time_usage/(double)sh_video->timer):0
         ,drop_frame_cnt
         );
         fflush(stdout);
@@ -1721,9 +1720,9 @@ if(1)
 //      printf("A: ---   V:%6.1f   \r",v_pts);
       printf("V:%6.1f  %3d  %2d%%  %2d%%  %3.1f%% \r",v_pts,
         (int)num_frames,
-        (v_frame>0.5)?(int)(100.0*video_time_usage/(double)v_frame):0,
-        (v_frame>0.5)?(int)(100.0*vout_time_usage/(double)v_frame):0,
-        (v_frame>0.5)?(100.0*audio_time_usage/(double)v_frame):0
+        (sh_video->timer>0.5)?(int)(100.0*video_time_usage/(double)sh_video->timer):0,
+        (sh_video->timer>0.5)?(int)(100.0*vout_time_usage/(double)sh_video->timer):0,
+        (sh_video->timer>0.5)?(100.0*audio_time_usage/(double)sh_video->timer):0
         );
 
       fflush(stdout);
@@ -1740,7 +1739,7 @@ if(1)
 
   if(osd_function==OSD_PAUSE){
       printf("\n------ PAUSED -------\r");fflush(stdout);
-      if (audio_out && has_audio)
+      if (audio_out && sh_audio)
          audio_out->pause();	// pause audio, keep data if possible
 #ifdef HAVE_GUI
       if ( nogui )
@@ -1758,13 +1757,13 @@ if(1)
 #ifdef HAVE_GUI
         } else while( osd_function != OSD_PLAY ) usec_sleep( 1000 );
 #endif
-      if (audio_out && has_audio)
+      if (audio_out && sh_audio)
         audio_out->resume();	// resume audio
   }
 
 
     if(!force_redraw) break;
-  } //  while(v_frame<a_frame || force_redraw)
+  } //  while(sh_video->timer<sh_audio->timer || force_redraw)
 
 
 //================= Keyboard events, SEEKing ====================
@@ -1797,11 +1796,11 @@ if(1)
     // delay correction:
     case '+':
       audio_delay+=0.1;  // increase audio buffer delay
-      a_frame-=0.1;
+      if(sh_audio) sh_audio->timer-=0.1;
       break;
     case '-':
       audio_delay-=0.1;  // decrease audio buffer delay
-      a_frame+=0.1;
+      if(sh_audio) sh_audio->timer+=0.1;
       break;
     // quit
     case KEY_ESC: // ESC
@@ -1872,7 +1871,7 @@ if(1)
     float skip_audio_secs=0;
 
     // clear demux buffers:
-    if(has_audio){ ds_free_packs(d_audio);sh_audio->a_buffer_len=0;}
+    if(sh_audio){ ds_free_packs(d_audio);sh_audio->a_buffer_len=0;}
     ds_free_packs(d_video);
     
 //    printf("sh_audio->a_buffer_len=%d  \n",sh_audio->a_buffer_len);
@@ -1924,7 +1923,7 @@ switch(file_format){
       num_frames=d_video->pack_no;
       avi_video_pts=d_video->pack_no*(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
 
-      if(has_audio){
+      if(sh_audio){
         int i;
         int apos=0;
         int last=0;
@@ -2017,13 +2016,13 @@ switch(file_format){
     stream_seek(demuxer->stream,newpos);
 
     ds_fill_buffer(d_video);
-    if(has_audio) ds_fill_buffer(d_audio);
+    if(sh_audio) ds_fill_buffer(d_audio);
     
     while(1){
-	if(has_audio){
+	if(sh_audio){
 	  // sync audio:
           if (d_video->pts > d_audio->pts){
-	      if(!ds_fill_buffer(d_audio)) has_audio=0; // skip audio. EOF?
+	      if(!ds_fill_buffer(d_audio)) sh_audio=NULL; // skip audio. EOF?
 	      continue;
 	  }
 	}
@@ -2059,7 +2058,7 @@ switch(file_format){
 } // switch(file_format)
 
       //====================== re-sync audio: =====================
-      if(has_audio){
+      if(sh_audio){
 
         if(skip_audio_bytes){
           demux_read_data(d_audio,NULL,skip_audio_bytes);
@@ -2106,8 +2105,8 @@ switch(file_format){
       frame_corr_num=0; // -5
       frame_correction=0;
       force_redraw=5;
-      a_frame=-skip_audio_secs;
-      v_frame=0; // !!!!!!
+      if(sh_audio) sh_audio->timer=-skip_audio_secs;
+      sh_video->timer=0; // !!!!!!
       audio_time_usage=0; video_time_usage=0; vout_time_usage=0;
 
   }
