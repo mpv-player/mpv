@@ -93,7 +93,9 @@ static int init(int rate,int channels,int format,int flags){
 	if (subopt_parse(ao_subdevice, subopts) != 0) {
 	  return 0;
 	}
-	ao_outputfilename = strndup(file.str, file.len);
+	ao_outputfilename = malloc(file.len + 1);
+	memcpy(ao_outputfilename, file.str, file.len);
+	ao_outputfilename[file.len] = 0;
 
 	/* bits is only equal to format if (format == 8) or (format == 16);
 	   this means that the following "if" is a kludge and should
