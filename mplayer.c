@@ -2964,7 +2964,7 @@ if(rel_seek_secs || abs_seek_pos){
 	  osd_show_vobsub_changed--;
       } else
       if (osd_show_sub_delay) {
-	  sprintf(osd_text_tmp, "Sub delay: %d ms %.10f", ROUND(sub_delay*1000));
+	  sprintf(osd_text_tmp, "Sub delay: %d ms", ROUND(sub_delay*1000));
 	  osd_show_sub_delay--;
       } else
       if (osd_show_sub_pos) {
@@ -2990,8 +2990,8 @@ if(rel_seek_secs || abs_seek_pos){
           }
           if (percentage >= 0)
             sprintf(percentage_text, " (%d%%)", percentage);
-          else
-            sprintf(percentage_text, "");
+	  else
+	    percentage_text[0] = 0;
           if (osd_level == 3) 
             sprintf(osd_text_tmp,"%c %02d:%02d:%02d / %02d:%02d:%02d%s",osd_function,pts/3600,(pts/60)%60,pts%60,len/3600,(len/60)%60,len%60,percentage_text);
           else
