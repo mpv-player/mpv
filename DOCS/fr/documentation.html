@@ -825,11 +825,8 @@
   au format PNG, donc gtk, libpng (ainsi que leurs paquets devel, généralement gtk-dev
   et libpng-dev) doivent être installés.
   Vous pouver la compiler en spécifiant l'option <CODE>--enable-gui</CODE> durant l'étape
-  <CODE>./configure</CODE>. Ensuite, pour l'activer vous devrez soit :</P>
-  <UL>
-    <LI>spécifier <CODE>gui=yes</CODE> dans votre fichier de configuration</LI>
-    <LI><CODE>ln -s $PREFIX/bin/mplayer $PREFIX/bin/gmplayer</CODE> ,
-      et lancer <CODE>gmplayer</CODE> au lieu de <CODE>mplayer</CODE>.</LI>
+  <CODE>./configure</CODE>. Ensuite, pour activer le mode GUI, vous devrez lancer
+  le programme <CODE>gmplayer</CODE>.</LI>
   </UL>
 
 <P>Actuellement vous ne pouvez pas utiliser l'option <CODE>-gui</CODE> en ligne de commande,
@@ -1133,7 +1130,7 @@ astuces:
 
 <UL>
   <LI>Utilisez l'option <CODE>channels</CODE>. Un exemple:<BR>
-    <CODE>-tv on:channels=26-MTV1,23-TV2</CODE><BR>
+    <CODE>-tv channels=26-MTV1,23-TV2 tv://</CODE><BR>
     Explication: en utilisant cette option, seuls les canaux 26 et 23 seront utilisables,
     et il y a un joli texte OSD lors des changements de canal affichant le nom du nouveau.
     Les espaces dans le nom du canal doivent être remplacés par le caractère
@@ -1196,11 +1193,11 @@ astuces:
 <H3><A NAME="tv_examples">2.4.3 Exemples</A></H3>
 
 <P>Sortie muette, vers AAlib :)<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=dummy:width=640:height=480 -vo aa</CODE><BR>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv driver=dummy:width=640:height=480 -vo aa tv://</CODE><BR>
   <BR>
   Entrée depuis V4L standard<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv
-on:driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv</CODE><BR>
+  driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv tv://</CODE><BR>
   <BR>
 
   Un exemple plus élaboré. MEncoder capture l'image PAL entière, coupe
@@ -1208,11 +1205,11 @@ on:driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv</CODE><BR>
   L'audio est compressé à un bitrate constant de 64kbps, en
   utilisant le codec LAME. Cette combinaison est adaptée pour capturer des films.
   <BR> <CODE> &nbsp;&nbsp;&nbsp;&nbsp;mencoder -tv
-  on:driver=v4l:width=768:height=576 \<BR>
+  driver=v4l:width=768:height=576 \<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;-ovc lavc -lavcopts
   vcodec=mpeg4:vbitrate=900 \<BR> &nbsp;&nbsp;&nbsp;&nbsp;-oac
   mp3lame -lameopts cbr:br=64 \<BR> &nbsp;&nbsp;&nbsp;&nbsp;-vf
-  crop=720:544:24:16,pp=lb -o sortie.avi </CODE><BR>
+  crop=720:544:24:16,pp=lb -o sortie.avi tv://</CODE><BR>
 
   <BR>
   Cela dimensionne également l'image en 384x288 et compresse la
@@ -1221,10 +1218,10 @@ on:driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv</CODE><BR>
   un bitrate plus bas au détriment de la qualité. Cela peut être utilisé
   pour capturer des longues séries TV, quand la qualité n'est pas très importante.<BR>
   <CODE>
-  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -tv on:driver=v4l:width=768:height=576 \<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -tv driver=v4l:width=768:height=576 \<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;-ovc lavc -lavcopts vcodec=mpeg4:vbitrate=350:vhq:vqmax=31:keyint=300 \<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;-oac mp3lame -lameopts cbr:br=48 \<BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;-vf crop=720:540:24:18,pp=tn/lb,scale=384:288 -sws 1 -o sortie.avi
+  &nbsp;&nbsp;&nbsp;&nbsp;-vf crop=720:540:24:18,pp=tn/lb,scale=384:288 -sws 1 -o sortie.avi tv://
   </CODE><BR>
 
   Il est également possible de spécifier des dimensions d'image plus
