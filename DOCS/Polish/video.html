@@ -24,6 +24,9 @@
 <LI>Matrox cards with X/DRI >=4.0.3
 <LI>Radeon with X/DRI CVS</UL></TD><TR>
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2><A HREF=#2.3.1.10>gl2</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
+  Helvetica, sans-serif" size=2>OpenGL renderer, multiple textures version</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
   size=2><A HREF=#2.3.1.3>dga</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
   Helvetica, sans-serif" size=2>X11 DGA extension</TD><TR>
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
@@ -47,6 +50,9 @@
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
   size=2><a href=#2.3.1.12>vesa</a></TD><TD></TD><TD><FONT face="Verdana, Arial,
   Helvetica, sans-serif" size=2>Output to VESA BIOS.</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2>directfb</TD><TD></TD><TD><FONT face="Verdana, Arial,
+  Helvetica, sans-serif" size=2>Direct Framebuffer Device</TD><TR>
 
 <TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif"
   size=2>Card specific:</B></P></TD><TR>
@@ -268,6 +274,12 @@ Unfortunately, the DGA driver in X 4.1.0 doesn't work, you'll have to wait for
 Drivers provided by <A HREF="mailto:tomee@cpi.pl">Tomek Jarzynka</A>.
 </P>
 
+<P><B><A NAME=2.3.1.2.6>2.3.1.2.6. Trident cards</A></B></P>
+
+<P>If you want to use xv with a trident card, provided that it doesn't
+work with 4.1.0, try the latest cvs of Xfree or wait for Xfree 4.2.0.
+The latest cvs adds support for fullscreen xv support with the
+Cyberblade XP card.</P>
 
 <P><B><A NAME=2.3.1.3>2.3.1.3. DGA</A></B></P>
 
@@ -592,10 +604,13 @@ memory size in MB:</P>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;insmod mga_vid.o mga_ram_size=16</CODE></P>
 
-<P>To make it load/unload automatically when needed, insert the following line
+<P>To make it load/unload automatically when needed, first insert the following line
 at the end of /etc/modules.conf:</P>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;alias char-major-178 mga_vid</CODE></P>
+
+<P>Then copy the <CODE>mga_vid.o</CODE> module to the appropriate place under
+  <CODE>/lib/modules/&lt;kernel version&gt;/somewhere</CODE>.</P>
 
 <P>Then run</P>
 

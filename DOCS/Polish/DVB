@@ -1,72 +1,77 @@
 
-Some words about Siemens-DVB card support.         by A'rpi
-==========================================
+Kilka s³ów o obs³udze karty Siemens-DVB.         autor: A'rpi
+========================================
 
-NOTE: this is very experimental!
+UWAGA: ona jest na etapie eksperymentalnym!
 
-Requirements:
-~~~~~~~~~~~~~
-- Siemens DVB-S card or compatible (technotrend,galaxis,hauppage etc)
-  see www.linuxtv.org for details and download latest driver there.
-- MPlayer-CVS, ffmpeg-libavcodec. divx4linux is recommended for speed & pp.
-- Fast CPU - at least for software decoding (divx...)
+Wymagania:
+~~~~~~~~~~
+- karta Siemens DVB-S albo kompatybilna (technotrend, galaxis, hauppage itp.)
+  zobacz szczegó³y na www.linuxtv.org i ¶ci±gnij najnowszy sterownik.
+- MPlayer-CVS, ffmpeg-libavcodec. divx4linux jest polecany ze wzglêdu na
+  prêdko¶æ i pp.
+- Szybki CPU - przynajmniej do dekodowania programowego (divx...)
 
 
-How to enable?
-~~~~~~~~~~~~~~
+Jak w³±czyæ?
+~~~~~~~~~~~~
 
-1. Download ffmpeg-CVS and copy libavcodec to mplayer (see DOC for details)
-   Move this line from #ifdef CONFIG_ENCODERS .. #endif section to outside
-   (after the #endif line) at libavcodec/utils.c:361 :
+1. ¦ci±gnij ffmpeg-CVS i przekopiuj libavcodec do ¼róde³ mplayera (szczegó³y
+znajdziesz w  DOC)
+   Przenie¶ t± liniê z sekcji #ifdef CONFIG_ENCODERS .. #endif poza ni± 
+   (po linii #endif) w libavcodec/utils.c:361 :
        register_avcodec(&mpeg1video_encoder);
 
-2. Compile mplayer:
-    ./configure should detect it. If didn't, force with ./configure --enable-dvb
-        If you have ost headers at non-standard path, set it with:
-	--with-extraincdir=<your DVB source dir>/ost/include
+2. Skompiluj mplayer:
+    ./configure powinno wykryæ to. Je¿eli nie, wymu¶ to za pomoc± opcji
+    ./configure --enable-dvb
+    Je¶li masz nag³ówki ost w niestandardowym miejscu, podaj ¶cie¿kê do nich:
+	--with-extraincdir=<twój katalog ze ¼ród³ami DVB>/ost/include
     make
     make install
    
 
-How to use?
+Jak u¿ywaæ?
 ~~~~~~~~~~~
-To play standard mpeg 1/2 files:  (hardware decoding)
+Aby odtwarzaæ standardowe pliki mpeg 1/2:  (sprzêtowe dekodowanie)
 
   mplayer -ao mpegpes -vo mpegpes -vc mpegpes file.mpg|vob
 
-To play non-standard mpeg files:  (software decoding)
+Aby odtwarzaæ niestandardowe pliki mpeg:  (dekodowanie programowe)
 
   mplayer -ao mpegpes -vo mpegpes file.mpg|vob
 
-To play divx files:
+Aby odtwarzaæ pliki divx:
 
   mplayer -vo mpegpes -vc ffdivx|odivx file.avi|asf
   
-To play non-25fps movies, or with slow CPU, add option:  -framedrop
+Aby odtwarzaæ filmy nie-25fps lub przy wolnym CPU, dodaj opcjê:  -framedrop
 
-Image size:
-~~~~~~~~~~~
-DVB card allows only 2 vertical resolutions: 288 and 576.
-If your video height differs, you have to clip it or extend by adding
-black bands. It's done by mplayer, just specify image size using the
--x and -y options. You must use either -y 288 or -y 576.
+Rozmiary obrazka:
+~~~~~~~~~~~~~~~~~
+Karta DVB pozwala tylko na dwie pionowe rozdzielczo¶ci: 288 i 576. Je¿eli
+wysoko¶æ twojego video jest inna, musisz j± obci±æ albo rozszerzyæ dodaj±c
+czarne paski. Zrobi to dla ciebie mplayer, tylko podaj rozmiary obrau u¿ywaj±c
+opcji -x oraz -y. Musisz zastosowaæ -y 288 albo -y 576.
 
-To force pan&scan (16:9 at 4:3 TV), add options:  -x 352 -y 288
+Aby wymusiæ pan&scan (16:9 na 4:3 TV) dodaj opcje:  -x 352 -y 288
 
-Mailing list:
-~~~~~~~~~~~~~
+Lista mailowa:
+~~~~~~~~~~~~~~
   http://mplayerhq.hu/mailman/listinfo/mplayer-dvb
 
-List's language is ENGLISH. Please avoid using german or other languages!
-Subscribe, and ask/discuss your problems here.
-I'll also post feature announces to this list.
+Jêzykiem listy jest ANGIELSKI. Unikaj, proszê, u¿ywania niemieckiego lub innych
+jêzyków!
+Zasubskrybuj i pytaj/dyskutuj tu o swoich problemach.
+Ja równie¿ wysy³am zapowiedzi na t± listê.
 
-Future plans/TODO:
-~~~~~~~~~~~~~~~~~~
+Plany/TODO na przysz³o¶æ:
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- display OSD and subtitles using DVB card's OSD feature
-- better (more fluent) playback of non-25fps movies
-- more speed optimizations
-- YUY2 support (for win32 codecs, like Indeo5 and WMV 7/8)
-- realtime transcoding between mpeg2 <-> mpeg4 (partial decompression)
+- wy¶wietlanie OSD i napisów za pomoc± w³a¶ciwo¶ci OSD kart DVB
+- lepsze (bardziej p³ynne) odgrywanie filmów nie-25fps
+- wiêksza optymalizacja prêdko¶ci
+- obs³uga YUY2 (dla kodeków win32, takich, jak Indeo5 i WMV 7/8)
+- transkodowanie w czasie rzeczywistym pomiêdzy mpeg2 <-> mpeg4 (czê¶ciowa
+  dekompresja)
 

@@ -1,6 +1,20 @@
 DXR3/H+ video/audio output plugins manual by David Holm
 =======================================================
 
+2001-12-28: There is a whole bunch of updates since the
+            last time. For one thing, digital audio now
+	    works thanks to Steven Brookes.
+	    This is the first version to exclusively
+	    use the dxr3's hardware sync. It seems as if
+	    there are some bugs in the driver, so bugreports
+	    will be appreciated.
+	    Also, you will need to get the em8300 drivers
+	    from cvs unless a version newer than 0.9.0 has
+	    been released.
+	    Note1: Seeking won't work with -vc mpegpes!
+	    Note2: You now MUST use -ao dxr3 for proper
+	    a/v sync!
+	    
 2001-12-04: Thanks to Inaki Garci'a Etxebarria of
 	    zapping.sourceforge.net we have now
 	    abandoned rte since it caused problems for
@@ -11,12 +25,6 @@ DXR3/H+ video/audio output plugins manual by David Holm
 2001-11-29: Thanks to Felix Buenemann I managed to
 	    optimize the odivx playback as well as add
 	    support for the rest of the codecs!
-	    
-2001-11-28: ffmpeg replaced with mp1e, divx playback
-	    won't get much faster than this, huge thanks
-	    goes out to Ivan Kalvachev for helping me
-	    fix the final mp1e bugs (and contributing
-	    to the libvo2 development)
 	    
 1. Introduction
 
@@ -77,10 +85,14 @@ spoils most of the useful features of this card except for tv-out ;).
 Remember that if you edit the codecs.conf file and move the mpegpes
 section will have to specify "-vc mpeg12" if you want to playback
 any of these video types _without_ "-vo dxr3"!
+Use -ac hwac3 if you want AC3 audio to be handled by hardware (please
+send some feedback on this).
 
 DIVX Notes
 When playing divx's add "-vc odivx" for maximum performance.
 I've switched to mp1e from ffmpeg so it should be lightning fast now.
+libmp1e currently does not work on nonx86 processor and nonmmx processors.
+I'm in the process of fixing this.
 
 Other codecs:
 No "-vc <codec>" switches should be required as mplayer will autodetect.

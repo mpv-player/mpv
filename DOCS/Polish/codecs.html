@@ -24,6 +24,7 @@ codziennie tworzon± listê!!!</P>
 <LI>Kodeki XAnim</LI>
 <LI>VIVO</LI>
 <LI>FLI</LI>
+<LI>RealVideo 1.0</LI>
 </UL></P>
 
 <P>Je¶li masz kodeka Win32 nie wymienionego tutaj, oraz jeszcze nie
@@ -131,7 +132,7 @@ przenie¶æ!!!</P>
 <P>Nastêpnie skompiluj. configure wykrywa czy wszystko jest w porz±dku i mo¿e
 byæ skompilowane. Ten kodek równie¿ <B>wspiera postprocessing!</B></P>
 
-<P>W celu u¿ycia go, od¶wie¿ swój plik codecs.conf, zgodnie z tym, co mówi±
+<P>W celu u¿ycia go, uaktualnij swój plik codecs.conf, zgodnie z tym, co mówi±
 strony podrêcznika lub  example.conf (opcja -vfm).</P>
 
 <P>Aby osi±gn±æ <B>najwiêksz± prêdko¶æ</B> na moim K6, usuwam sekcjê
@@ -211,10 +212,16 @@ HREF="mailto:melanson@pcisys.net">Mike'a Melansona</A>).</P>
 
 <P><B><A NAME=2.2.1.7>2.2.1.7. Cinepak CVID</A></B></P>
 
-<P>Najlepszym sposobem, aby ogl±daæ obrazy Cinepak za pomoc± <B>MPlayera</B>
-jest u¿ycie kodeka XAnim <CODE>vid_cvid.xa</CODE>, poniewa¿ obs³uguje on wyj¶cia
-YV12, YUY2, w przeciwieñstwie do kodeka Win32, który wspiera wy³±cznie RGB.</P>
+<P><B>MPlayer</B> posiada teraz swój w³asny opensource, wieloplatformowy
+dekoder Cinepak. Obs³uguje on wyj¶cia YUV, wykonuje skalowanie sprzêtowe, je¶li
+sterowniki wyj¶cia video na to pozwalaj±. Jest u¿ywany domy¶lnie.</P>
 
+<P><B><A NAME=2.2.1.8>2.2.1.8.  RealVideo</A></B></P>
+
+<P> Aktualnie obs³ugiwany jest TYLKO kodek RealVideo 1.0 (fourcc RV10), poprzez
+ffmpeg. To smutne, ale ¿adne nowe pliki RealMedia nie s± z nim dostarczone,
+tylko nowe kodeki RV20 i RV30, które s± closed-source. Ma³o prawdopodbne jest
+wsparcie dla nich w przysz³o¶ci :(</P>
 
 <P><B><A NAME=2.2.2>2.2.2. Kodeki d¼wiêku</A></B></P>
 
@@ -227,6 +234,7 @@ YV12, YUY2, w przeciwieñstwie do kodeka Win32, który wspiera wy³±cznie RGB.</P>
 <LI>Voxware audio (u¿ycie DirectShow DLL)</LI>
 <LI>alaw, msgsm, pcm i inne proste stare formaty d¼wiêkowe</LI>
 <LI>VIVO audio (g723, Vivo Siren)</LI>
+<LI>RealAudio: DNET (niska bitrate AC3)</LI>
 </UL></P>
 
 
@@ -288,6 +296,11 @@ Mo¿esz ¶ci±gn±æ kodek g.723/Siren Win32 DLL z
 strony</A>, a nastêpnie skopiowaæ go do katalogu <CODE>/usr/lib/win32</CODE>
 lub innego odpowiedniego.</P>
 
+<P><B><A NAME=2.2.2.5>2.2.2.5.  RealAudio</A></B></P>
+
+<P>Aktualnie jedynym obs³ugiwanym kodekiem jest DNET. W³a¶ciwie jest to wersja
+low-bitrate dobrze znanego kodeka AC3. Mo¿e on siê pojawiæ zarówno w starszych
+jak i w nowych filmach RealMedia</P>
 
 <P><B><A NAME=2.2.3>2.2.3. Importowanie kodeków Win32</A></B></P>
 

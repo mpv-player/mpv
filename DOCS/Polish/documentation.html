@@ -39,6 +39,10 @@
         <LI><A HREF="formats.html#2.1.1.3">2.1.1.3 Pliki ASF/WMV</A></LI>
         <LI><A HREF="formats.html#2.1.1.4">2.1.1.4 Pliki QT/MOV</A></LI>
         <LI><A HREF="formats.html#2.1.1.5">2.1.1.5 Pliki VIV</A></LI>
+	<LI><A HREF="formats.html#2.1.1.6">2.1.1.6 Pliki FLI</A></LI>
+	<LI><A HREF="formats.html#2.1.1.7">2.1.1.7 Pliki RealMedia</A></LI>
+	<LI><A HREF="formats.html#2.1.1.8">2.1.1.8 Pliki NuppelVideo</A></LI>
+	<LI><A HREF="formats.html#2.1.1.9">2.1.1.9 Pliki yuv4mpeg</A></LI>
       </UL>
       <LI><A HREF="formats.html#2.1.2">2.1.2 D¼wiêk</A></LI>
     </UL>
@@ -53,6 +57,7 @@
         <LI><A HREF="codecs.html#2.2.1.5">2.2.1.5 Obraz MPEG1/2</A></LI>
         <LI><A HREF="codecs.html#2.2.1.6">2.2.1.6 MS Video1</A></LI>
         <LI><A HREF="codecs.html#2.2.1.7">2.2.1.7 Cinepak CVID</A></LI>
+	<LI><A HREF="codecs.html#2.2.1.8">2.2.1.8 RealVideo</A></LI>
       </UL>
       <LI><A HREF="codecs.html#2.2.2">2.2.2 D¼wiêk</A></LI>
       <UL>
@@ -60,6 +65,7 @@
 	<LI><A HREF="codecs.html#2.2.2.2">2.2.2.2 Dekodowanie sprzêtowe AC3</A></LI>
 	<LI><A HREF="codecs.html#2.2.2.3">2.2.2.3 Wsparcie dla libmad</A></LI>
 	<LI><A HREF="codecs.html#2.2.2.4">2.2.2.4 D¼wiêk VIVO</A></LI>
+	<LI><A HREF="codecs.html#2.2.2.5">2.2.2.5 RealAudio</A></LI>
       </UL>
       <LI><A HREF="codecs.html#2.2.3">2.2.3 Jak importowaæ kodeki Win32</A></LI>
       <UL>
@@ -79,6 +85,7 @@
 	  <LI><A HREF="video.html#2.3.1.2.3">2.3.1.2.3 nVidia</A></LI>
 	  <LI><A HREF="video.html#2.3.1.2.4">2.3.1.2.4 ATI</A></LI>
 	  <LI><A HREF="video.html#2.3.1.2.5">2.3.1.2.5 NeoMagic</A></LI>
+	  <LI><A HREF="video.html#2.3.1.2.6">2.3.1.2.6 Trident cards</A></LI>
 	</UL>
 	<LI><A HREF="video.html#2.3.1.3">2.3.1.3 DGA</A></LI>
 	<UL>
@@ -115,6 +122,10 @@
       <LI><A HREF="sound.html#2.3.2">2.3.2 D¼wiêk</A></LI>
       <UL>
 	<LI><A HREF="sound.html#2.3.2.1">2.3.2.1 Do¶wiadczenia z kartami d¼wiêkowymi, rekomendacje</A></LI>
+	<LI><A HREF="sound.html#2.3.2.2">2.3.2.2 Wtyczki audio</A></LI>
+	  <UL>
+	    <LI><A HREF="sound.html#2.3.2.2.1">2.3.2.2.1 Up/Downsampling</A></LI>
+	  </UL>  
       </UL>
     </UL>
     <LI><A HREF="encoding.html#2.4">2.4 MEncoder - koder oparty na MPlayerze</A></LI>
@@ -128,6 +139,7 @@
             <LI><A HREF="encoding.html#2.4.3.2">2.4.3.2 Przeskalowywanie filmów</A></LI>
             <LI><A HREF="encoding.html#2.4.3.3">2.4.3.3 Streamcopy</A></LI>
 	    <LI><A HREF="encoding.html#2.4.3.4">2.4.3.4 Naprawa plików AVI z uszkodzonym indeksem</A></LI>
+	    <LI><A HREF="encoding.html#2.4.3.5">2.4.3.5 Kodowanie z u¿yciem rodzinu kodeków libavcodec</A></LI>
           </UL>
         <LI><A HREF="encoding.html#2.4.4">2.4.4 Sk³adnia</A></LI>
         <LI><A HREF="encoding.html#2.4.5">2.4.5 Dostêpne opcje</A></LI>
@@ -316,7 +328,9 @@ graficznych nie korzysta siê z XFree86. Zobacz listê poni¿ej.</LI>
   <LI><B>make</B> - sugerowana wersja, to <B>wersja najnowsza</B> (nie starsza
 ni¿ 3.79.x). Jest to zazwyczaj ma³o istotne.</LI>
   <LI><B>SDL</B> - nie jest to niezbêdne, ale mo¿e pomóc w niektórych
-przypadkach. Zawsze u¿ywaj najnowszej wersji (pocz±wszy od 1.2.x).</LI>
+przypadkach (z³y d¼wiêk, karty graficzne, które maj± dziwne opó¼nienia podczas
+u¿ywania sterownika xv). Zawsze u¿ywaj najnowszej wersji (pocz±wszy od
+1.2.x).</LI>
 </UL>
 
 <P><B><I>KODEKI</I></B></P>
@@ -372,56 +386,57 @@ u¿ywania XAnim:).</LI>
 
 <P><B><I>KARTY GRAFICZNE</I></B></P>
 
-<P>There are generally two kind of videocards. One kind (the newer cards) has
-<B>hardware YUV acceleration</B> support, the other cards don't.</P>
+<P>Generelnie istniej± dwa rodzaje kart graficznych. Karty posiadaj±ce obs³ugê
+<B>sprzêtowej akceleracji YUV</B> (nowsze) oraz pozosta³e karty, nie posiadaj±ce
+tego.</P>
 
 <P>
 <B><I>KARTY YUV</I></B></P>
 
-<P>
-They can display and scale (zoom) the picture to any size that fits in
-their memory, with <B>small CPU usage</B> (zooming doesn't increase it!), thus
-you get a nice and very fast fullscreen playing.</P>
+<P> Potrafi± one wy¶wietlaæ i skalowaæ (zoom) obrazki do dowolnego rozmiaru,
+jaki mie¶ci siê w ich pamiêci, z <B>ma³ym zu¿yciem CPU</B> (zooming nie
+zwieksza go!), dziêki czemu masz bardzo szybkie pe³noekranowe odtwarzanie.</P>
 
 <P>
-<UL>
-<LI><B>Karty Matrox G200/G400/G450/G550</B> : please see the <A HREF="video.html#2.3.1.7">mga_vid</A>
-section in order to gain big speedup. It is important to do these steps
-<I>before</I> compiling <B>MPlayer</B>, otherwise no Matrox-specific support will be
-built. Also check out the <A HREF="video.html#2.3.1.A.1">Matrox TV-out</A>
-section.</LI>
-
-<LI><B>Karty 3Dfx Voodoo3/Banshee</B> : please see the <A
-HREF="video.html#2.3.1.9">2.3.1.9</A> section in order to gain big speedup. It
-is important to do these steps <I>before</I> compiling <B>MPlayer</B>,
-otherwise no 3Dfx support will be built. Also see the <A HREF="video.html#2.3.1.A.3">3dfx
-TV out section</A>.</LI>
-
-<LI><B>Karty ATI</B> : see the <A HREF="video.html#2.3.1.A.2">ATI cards
-section</A> of the TV-out documentation, to know what features of your card is
-supported under Linux/MPlayer. If you have a <B>Radeon</B> or <B>Rage128</B> card, we have a
-<B>XXX_vid</B> driver for you, with TV out ! Check <A
-HREF="video.html#2.3.1.14">this</A> section !</LI>
-
-<LI><B>Karty S3</B> : the Savage chips have hardware acceleration. Use as
-new XFree86 version as possible, older drivers are buggy. Savage chips
-have problems with YV12 display, see <A HREF="video.html#2.3.1.2.2">S3 Xv
-section</A> for details. Older, non-Savage cards have no, or slow hardware
-support.</LI>
-
-<LI><B>Karty Nvidia</B> : very bad choice for video playing. Nvidia's
-cards are manufactured on the far-east, and have very cheap and bad
-quality chips. Moreover, <U>the built-in Nvidia driver in XFree86 doesn't
-contain support for hardware YUV acceleration!</U> You have to download
-Nvidia's closed-source drivers from nvidia.com . See details in <A
-HREF="video.html#2.3.1.2.3">Nvidia Xv driver</A> section.</LI>
-
-<LI><B>Inne karty</B> : none of the above?
   <UL>
-    <LI>Try if the XFree86 driver (and your card) supports hardware
-      acceleration. See the <A HREF="video.html#2.3.1.2">Xv section</A> for
-      details.</LI>
-    <LI>If it doesn't, your card is one of the :</LI>
+    <LI><B>Karty Matrox G200/G400/G450/G550</B>: w celu uzyskania du¿ego
+zwiêkszenia prêdko¶ci zobacz sekcjê <A HREF="video.html#2.3.1.7">mga_vid</A>.
+Wa¿ne jest, aby wykonaæ te kroki <I>zanim</I> skompilujesz <B>MPlayera</B>, w
+przeciwnym razie ¿adne specjalne wsparcie dla Matroxa nie zostanie zbudowane.
+Zobacz równie¿ sekcjê <A HREF="video.html#2.3.1.A.1">Matrox TV-out</A>.</LI>
+
+<LI><B>Karty 3Dfx Voodoo3/Banshee</B>: w celu uzyskania du¿ego zwiêkszenia
+prêdko¶ci zobacz sekcjê <A HREF="video.html#2.3.1.9">2.3.1.9</A>. Wa¿ne jest,
+aby wykonaæ te kroki <I>zanim</I> skompilujesz <B>MPlayera</B>, w przeciwnym
+razie ¿adne wsparcie dla 3Dfx nie zostanie zbudowane. Zobacz równie¿ sekcjê <A
+HREF="video.html#2.3.1.A.3">3dfx TV-out</A>.</LI>
+
+<LI><B>Karty ATI</B>: zobacz sekcjê <A HREF="video.html#2.3.1.A.2">karty
+ATI</A> z dokukmentacji TV-out, aby siê dowiedzieæ, jakie w³a¶ciwo¶ci twojej
+karty s± obs³ugiwane pod Linuksem/MPlayerem. Je¿eli masz kartê <B>Radeon</B>
+lub <B>Rage128</B>, mamy dla ciebie sterownik <B>XXX_vid</B>, z wyj¶ciem TV!
+Sprawd¼ <A HREF="video.html#2.3.1.14">t±</A> sekcjê!</LI>
+
+<LI><B>Karty S3</B>: chipy Savage posiadaj± akceleracjê sprzêtow±. U¿ywaj tak
+nowej wersji XFree86, jak to tylko mo¿liwe. Starsze sterowniki zawieraj± b³êdy.
+Chipy Savage maj± k³opoty z wyswietlaniem YV12. Zobacz sekcjê 
+<A HREF="video.html#2.3.1.2.2">S3 Xv</A>, aby dowiedzieæ siê wiêcej szczegó³ów.
+Starsze, karty - nie Savage, nie zawieraj±, b±d¼ maj± bardzo wolne wsparcie
+sprzêtowe.</LI>
+
+<LI><B>Karty Nvidia</B>: to bardzo z³y wybór je¶li chodzi o odtwarzanie
+obrazów. Karty Nvidii s± produkowane na Dalekim Wschodzie i zawieraj± bardzo
+tanie i z³ej jako¶ci chipy. Co wiêcej, <U>wbudowany sterownik Nvidii w XFree86
+nie zawiera wsparcia dla sprzêtowej akceleracji YUV!</U> Musisz ¶ci±gn±æ
+sterowniki Nvidii, które s± closed-source, ze strony nvidia.com. Zobacz wiêcej
+szczegó³ów w sekcji <A HREF="video.html#2.3.1.2.3"> Sterowniki Nvidia Xv</LI>.
+
+<LI><B>Inne karty</B>: ¿adna z wy¿ej wymienionych?
+  <UL>
+    <LI>Sprawd¼ czy sterownik XFree86 (i twoja karta) obs³uguje akceleracjê
+sprzêtow±. Szczegó³y znajdziesz w sekcji <A HREF="video.html#2.3.1.2">Xv</A>.
+</LI>
+    <LI>Je¶li nie, twojej karty nale¿y szukaæ tutaj:</LI>
   </UL>
 </LI>
 
@@ -431,19 +446,17 @@ HREF="video.html#2.3.1.2.3">Nvidia Xv driver</A> section.</LI>
 <P>
 <B><I>Karty bez YUV</I></B></P>
 
-<P>
-Fullscreen playing can be achieved by either zooming
-(<B>by software</B>, this is slooow), or changing to a smaller videomode, for
-example to 352x288. If you don't have YUV accel, this latter method is
-the recommended one. Throughout <B>MPlayer</B>, <U>this behaviour can
-be switched on by using the <CODE>-vm</CODE> option</U> and with
-the following drivers :
+<P> Pe³noekranowe odgrywanie mo¿e byæ osi±gniête albo przez (<B>sprzêtowy</B>,
+zbyt wolny) zooming, albo przez zmianê na mniejszy trybu video (videomode), np.
+na 352x288. Je¶li nie masz akceleracji YUV, ta druga metoda jest
+rekomendowana. Za pomoc± <B>MPlayera</B>, <U>to zachowanie mo¿e byæ w³±czone za
+pomoc± opcji <CODE>-vm</CODE></U>  z nastêpuj±cymi sterownikami:
 <UL>
-  <LI><B>using</B> XFree86 : see details in
-    <A HREF="video.html#2.3.1.3">DGA driver</A> and
-    <A HREF="video.html#2.3.1.13">X11 driver</A> sections. DGA is
-    recommended!</LI>
-  <LI><B>not using</B> XFree86 : try the drivers in the following order :
+  <LI><B>using</B> XFree86: zobacz szczegó³y w sekcji:
+    <A HREF="video.html#2.3.1.3">sterownik DGA</A> oraz
+    <A HREF="video.html#2.3.1.13">sterownik X11</A>. DGA jest
+rekomendowany!</LI>
+  <LI><B>nie u¿ywaj±c</B> XFree86: spróbuj kolejno tych sterowników:
     <A HREF="video.html#2.3.1.12">vesa</A>,
     <A HREF="video.html#2.3.1.6">fbdev</A>,
     <A HREF="video.html#2.3.1.5">svgalib</A>,
@@ -455,42 +468,43 @@ the following drivers :
 
 <UL>
 
-<LI><B>Soundblaster Live!</B> : with this card you can use 4 or 6 (<B>5.1</B>)
-channels AC3 decoding instead of 2. Read the
-<A HREF="codecs.html#2.2.2.1">Software AC3 decoding</A> section.</LI>
+<LI><B>Soundblaster Live!</B>: z t± kart± mo¿esz u¿ywaæ 4 lub 6 (<B>5.1</B>)
+kana³ów dekodowania AC3, zamiast, jak dot±d, 2. Przeczytaj sekcjê <A
+HREF="codecs.html#2.2.2.1">Programowe dekodowanie AC3</A>.</LI>
 
-<LI><B>other cards'</B> features aren't supported by <B>MPlayer</B>.
-  <U>It's very recommended to read the <A HREF="sound.html#2.3.2">soundcards
-  section</A> !</U>
+<LI>w³a¶ciwo¶ci <B>innych kart</B> nie s± obs³ugiwane przez <B>MPlayera</B>.
+  <U>Bardzo zaleca siê przeczytanie sekcji<A HREF="sound.html#2.3.2">karty
+d¼wiêkowe</A>!</U>
 </UL>
 
 <P><B><I>W£A¦CIWO¦CI</I></B></P>
 
 <UL>
-<LI>For DVD support, you'll have to compile libdvdcss and libdvdread, and
-in this order!
-See <A HREF="cd-dvd.html#4.2">section 4.2</A> for more information.</LI>
+<LI>Aby mieæ obs³ugê DVD, musisz skompilowaæ libdvdcss i libdvdread, dok³adnie
+w takiej kolejno¶ci! Zobacz szczegó³y w <A HREF="cd-dvd.html#4.2">sekcji
+4.2</A>.</LI>
 
-<LI>Decide if you need GUI. If you do, see the <A HREF=#1.4>1.4 section</A>
-before compiling.</LI>
+<LI>Zdecyduj czy potrzebujesz GUI. Je¿eli tak, zobacz, przed kompilacj±, 
+<A HREF=#1.4>sekcjê 1.4</A> .</LI>
 
-<LI>If you want to install <B>MEncoder</B> (our great all-purpose encoder),
-see the <A HREF="encoding.html#2.4">MEncoder section</A> .</LI>
+<LI>Je¿eli chcesz zainstalowaæ <B>MEncoder</B> (nasz wspania³y wszechstronny
+koder), zobacz sekcjê <A HREF="encoding.html#2.4">MEncoder</A>.</LI>
 
 
-<LI>If you have a V4L compatible <B>TV tuner</B> card, and wish to watch/grab and
-encode movies with <B>MPlayer</B>, read the <A HREF=#2.5>TV input</A> section.</LI>
+<LI>Je¿eli masz <B>tuner TV</B> zgodny z V4L i chcesz ogl±daæ/nagrywaæ oraz 
+kodowaæ filmy za pomoc± <B>MPlayera</B>, przeczytaj sekcjê <A HREF=#2.5>wej¶cie
+TV</A>.</LI>
 
-<LI>There are two timer codes in <B>MPlayer</B>. To use the old
-method, you don't have to do anything. It uses <CODE>usleep()</CODE> to tune
-A/V sync, with +/- 10ms accuracy. However sometimes the sync has to be tuned
-even finer. The new timer code uses PC's RTC (Real Time Clock) for this task,
-because it has precise 1ms timers. This requires root, or a <I>setuid root</I>
-<B>MPlayer</B> binary (or a little kernel hacking, but that's unadvised). You
-can see the new timer's efficiency in the status line. Note: <B>NEVER install
-setuid MPlayer binary on a multiuser system!</B> It's a clear way for everyone
-to gain root.</LI>
-
+<LI>S± dwa kody timera w <B>MPlayerze</B>. Aby u¿yæ starej metody, nie
+musisz robiæ nic. Stosuje ona <CODE>usleep()</CODE>, aby dostroiæ A/V sync, z
+dok³adno¶ci± +/- 10ms. Jakkolwiek, czasami synchronizacja musi byæ dostrojona
+nawet lepiej. Nowy kod timera w tym celu RTC (Real Time Clock) komputera,
+poniewa¿ ma on precyzyjno¶æ tak±, jak timers 1ms. Wymaga to uprawnieñ roota
+(ew. <I>setuid root</I>) dla binariów <B>MPlayera</B> (lub drobnych zmian w
+j±drze, ale to jest odradzane). Mo¿esz zobaczyæ wydajno¶æ nowego timera w
+status line. Uwaga: <B>NIGDY nie instaluj binariów MPlayera jako setuid w
+systemie wielu u¿ytkowników!</B> To prosta droga dla ka¿dego, by zdobyæ
+uprawnienia roota.</LI>
 </UL>
 
 <P>Then build <B>MPlayer</B>:</P>
@@ -498,6 +512,11 @@ to gain root.</LI>
 <PRE>    ./configure
     make
     make install</PRE>
+
+<P><B>Debian users</B> can build a .deb package for themselves, it's very
+simple. Just exec <CODE>fakeroot debian/rules binary</CODE> in <B>MPlayer</B>'s
+root dir. Detailed instructions can be found <A
+HREF="documentation.html#6.1">here</A>.</P>
 
 <P><B><I>ALWAYS browse the output of ./configure</I></B>, and the
 <CODE>configure.log</CODE> file, they contain info about what will be built,
@@ -609,6 +628,7 @@ Some URLs:
 It's a complete tool to convert from TTF/Type1/etc font to mplayer font pkg.
 (read TOOLS/subfont-c/README for details)
 
+
 <LI>use the font generator GIMP plugin at TOOLS/subfont-GIMP
 (note: you must have HSI RAW plugin too, see URL below)
 </UL>
@@ -652,21 +672,18 @@ TV tuner</B>.</P>
 
 <P>
 <UL>
-  <LI>first, you have to add the <CODE>--enable-tv</CODE> flag to <CODE>./configure</CODE>,
-    and recompile.</LI>
+    <LI>first, you have to recompile. <CODE>./configure</CODE> will autodetect
+kernel headers of v4l stuff, and the existence of /dev/video* entries. If they
+exist, TV support will be built (see configure's output!).</LI>
   <LI>make sure your tuner works with another TV softwares in Linux, for example
-    xawtv.</LI>
+xawtv.</LI>
 </UL>
 </P>
 
-<P><B>Hint</B>: if <B>MPlayer</B> prints <CODE>ioctl: can't sync</CODE> or something
-  like this, your tuner can't capture the requested image size. Try using
-  <CODE>width=640:height=480</CODE> options.</P>
-
-<P><B>Hint #2</B> : are the colors fucked up? Then your tuner can't display
-  in YV12 colorspace. Try YUY2, UYVY or if none of these works: RGB32 (this one
-  with <CODE>-vo sdl</CODE>).
-  You can specify these with the <CODE>outfmt=YV12</CODE> option see below.</P>
+<P><B>Hint</B> : are the colors messed up? Then your tuner can't display in
+YV12 colorspace. Try I420 (you must use the <CODE>-vc rawi420</CODE> option
+too!), or YUY2, UYVY, RGB32 (this one with <CODE>-vo sdl</CODE>) colorspaces.
+You can specify these with the <CODE>outfmt=YV12</CODE> option see below.</P>
 
 <P><B><I>Available options</I></B><BR>
 <TABLE BORDER=0>
@@ -1099,7 +1116,7 @@ No closer info yet.</P>
 
 <P><UL>
 
-<LI><B><A HREF="mailto:arpi@thot.banki.hu">Árpád Gereöffy (A'rpi/ESP-team)</A></B>
+<LI><B><A HREF="mailto:send mail to mplayer-users!">Árpád Gereöffy (A'rpi/ESP-team)</A></B>
 <UL>
   <LI>player code (mpeg stream demultiplexer and avi/asf parser, A-V sync, seek...)</LI>
   <LI>mp3lib, based on mpglib sources  [MP3 audio decoder]</LI>
@@ -1184,6 +1201,13 @@ No closer info yet.</P>
   <LI>xanim codecs support (incomplete yet!)</LI>
   <LI>VIVO files support</LI>
   <LI>TV grabbing support</LI>
+  <LI>Quicktime hackings</LI>
+  <LI>libavcodec support in MEncoder</LI>
+  <LI>RM fileformat demuxer</LI>
+  <LI>mencoder framecopy</LI>
+  <LI>yuv4mpeg support</LI>
+  <LI>subconfig</LI>
+  <LI>various stuff</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:asackerm@stud.informatik.uni-erlangen.de">Andreas Ackermann (Acki)</A></B>
@@ -1204,6 +1228,7 @@ No closer info yet.</P>
   <LI>OggVorbis audio support</LI>
   <LI>Various aspect code</LI>
   <LI>Win32 port</LI>
+  <LI>priority support in codecs.conf</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:telenieko@telenieko.com">TeLeNiEkO</A></B>
@@ -1248,12 +1273,12 @@ No closer info yet.</P>
 <LI><B><A HREF="mailto:marcus@idonex.se">Marcus Comstedt</A></B>
 <UL>
   <LI>initial solaris8-x86 support</LI>
+  <LI>configure fixes</LI>
 </UL></LI>
 
-<LI><B><A HREF="mailto:jk@tools.de">Jürgen Keil and Marcus Comstedt</A></B>
+<LI><B><A HREF="mailto:jk@tools.de">Jürgen Keil</A></B>
 <UL>
   <LI>patched <B>MPlayer</B> to work on Solaris 8 x86</LI>
-  <LI>configure fixes</LI>
   <LI>various fixes (win32, configure, etc)</LI>
   <LI>SUN audio driver in libao2</LI>
   <LI>mediaLib support in libavcodec</LI>
@@ -1297,18 +1322,24 @@ No closer info yet.</P>
 
 <LI><B><A HREF="mailto:iive@yahoo.com">Ivan Kalvatchev</A></B>
 <UL>
-  <LI>interlaced MPEG2 support</LI>
+  <LI>interlaced MPEG2 support (libmpeg2)</LI>
+  <LI>libvo2 draft</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:p_l@gmx.fr">pl</A></B>
 <UL>
-  <LI>./configure fixes</LI>
+  <LI>new ./configure script</LI>
+  <LI>general code maintaining, fixes, patch commiting</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:michaelni@gmx.at">Michael Niedermayer</A></B>
 <UL>
-  <LI>postprocessing support</LI>
+  <LI>new postprocessing code (with deinterlacing etc...)</LI>
   <LI>software scaling C/MMX/MMX2/3DNow support (swscale.c)</LI>
+  <LI>various rgb/yuv bpp converters</LI>
+  <LI>new, better IDCT code for libavcodec</LI>
+  <LI>runtime cpu detection</LI>
+  <LI>SSE optimization of liba52</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:sgoethel@jausoft.com">Sven Goethel</A></B>
@@ -1323,7 +1354,7 @@ No closer info yet.</P>
 
 <LI><B><A HREF="mailto:eanholt@gladstone.uoregon.edu">Eric Anholt</A></B>
 <UL>
-  <LI>runtime CPU detection</LI>
+  <LI>CPU detection code</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:Jiri.Svoboda@seznam.cz">Jiri Svoboda</A></B>
@@ -1347,6 +1378,7 @@ No closer info yet.</P>
 <LI><B><A HREF="mailto:dholm@telia.com">David Holm</A></B>
 <UL>
   <LI>DXR3 support</LI>
+  <LI>libmp1e import</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:takis@lumumba.luc.ac.be">Panagiotis Issaris</A></B>
@@ -1358,6 +1390,7 @@ No closer info yet.</P>
 <UL>
   <LI>MS Video1 codec open-source implementation</LI>
   <LI>FLI demuxer, decoder</LI>
+  <LI>Generic ADPCM decoder (supports stereo IMA4 too)</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:ranma@gmx.at">Tobias Diedrich</A></B>
@@ -1369,7 +1402,28 @@ No closer info yet.</P>
 <UL>
   <LI>-slave mode</LI>
 </UL></LI>
-
+<LI><B><A HREF="mailto:timf@mail.csse.monash.edu.au">Tim Ferguson</A></B>
+<UL>
+  <LI>Opensource Cinepak decoder</LI>
+</UL></LI>
+<LI><B><A HREF="mailto:itrs@softwell.com.tw">Sam Lin</A></B>
+<UL>
+  <LI>-wid (plugger) patch</LI>
+</UL></LI>
+<LI><B><A HREF="mailto:johannes.feigl@mcse.at">Johannes Feigl</A></B>
+<UL>
+  <LI>german docs translation</LI>
+  <LI>some improvements in configure, small patches</LI>
+  <LI>found somebody (Thilo Wunderlich) how send a DVB card</LI>
+</UL></LI>
+<LI><B><A HREF="mailto:kmkaplan@selfoffice.com">Kim Minh Kaplan</A></B>
+<UL>
+  <LI>DVD subtitles display support</LI>
+</UL></LI>
+<LI><B><A HREF="mailto:bkuschak@yahoo.com">Brian Kuschak</A></B>
+<UL>
+  <LI>RTP streaming support (reading)</LI>
+</UL></LI>  
 </UL></P>
 
 <P>Main testers:</P>
@@ -1560,6 +1614,15 @@ This list should be kept low-traffic.</P>
 <LI>send user questions here (after reading all this documentation)</LI>
 </UL></P>
 
+</LI><LI>MPlayer hungarian users list:<BR>
+<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok">http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok</A>
+<P>
+  <UL>
+    <LI>hungarian language list</LI>
+    <LI>topic? We'll see about it...</LI>
+  </UL>
+</P>
+
 </LI><LI>Lista u¿ytkowników MPlayera posiadaj±cych Matrox G200/G400/G450/G550:<BR>
 <A HREF="http://lists.sourceforge.net/lists/listinfo/mplayer-matrox">http://lists.sourceforge.net/lists/listinfo/mplayer-matrox</A>
 <P>Send matrox-related questions here<UL>
@@ -1619,6 +1682,10 @@ otherwise.  Please do not send messages using other language!</P>
   (for example compiled on P3 and running on celeron)<BR>
   Solution: compile MPlayer on the same machine where you will use it!<BR>
   Workaround: ./configure --disable-sse etc. options</LI>
+<LI>"Internal buffer inconsistency" during MEncoder run:<BR>
+Problem: known gcc 2.96 bug, no fix yet. If you have gcc 2.95, you
+have a libmp3lame library that was compiled with gcc 2.96 (installed from
+a deb/rpm package?). Check which lib does MEncoder found : ldd mencoder.</LI>
 </UL>
 
 <P>Various A-V sync and other audio problems:</P>

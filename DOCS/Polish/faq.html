@@ -72,7 +72,7 @@ who can't even use windows, and never tried to compile a kernel. They installed
 (with default options) Mandrake or RedHat or Suse, and without RTFM'ing they
 send messages saying 'it doesn't work! help me! please! i'm new to the linux!
 help! oh! help me!'. We can't stop them, but at least we try to force them RTFM
-and to read fuckin' messages of ./configure and mplayer.</P>
+and to read messages of ./configure and mplayer.</P>
 
 <P>And you clever guys come and flame us with gcc 2.96 and binary packages.
 Instead of helping users or making patches to help solve problems.</P>
@@ -183,11 +183,7 @@ I try to start it, it says:<BR>
 shared object file: No such file or directory</CODE><BR>
 I checked up on the file and it IS there in /usr/local/lib.
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-What are you doing on Linux? Can't you install a library? Why do
-we get these questions? It's not <B>MPlayer</B> specific at all! Add
-/usr/local/lib to <B>/etc/ld.so.conf</B> and run <B>ldconfig</B> .
-Or install it to /usr/lib , because if you can't solve the /usr/local
-problem, you are careless enough to do such things.
+Add /usr/local/lib to <B>/etc/ld.so.conf</B> and run <B>ldconfig</B> .
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
@@ -217,7 +213,7 @@ Dunno, upgrading binutils should help (2.11.92.* or newer should be good). Not o
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 I'd like to compile <B>MPlayer</B> on Minix !
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-Me too.
+Me too. :)
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 
@@ -362,10 +358,10 @@ the <A HREF="codecs.html#2.1.2.2">ffmpeg section</A>.
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 The GUI isn't usable with icewm, because some panel are over the movie!!
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-Known, icewm is shit and dictatoric. Unsolvable. In detail: icewm sucks
-because its taskbar overrides GUI's window resize queries. If it asks for
+Known, icewm is dictatoric. Unsolvable. In detail:
+its taskbar overrides GUI's window resize queries. If it asks for
 resize to 800x600, then it resizes window to 800x(600-taskbar_size). It's bad.
-Very bad. In short: shit.
+Very bad.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
@@ -492,9 +488,9 @@ There this movie is, and when I play it I get video-audio desync and/or MPlayer 
 This can have multiple reasons.<BR>
   <LI>your CPU <B>and/or</B> video card <B>and/or</B> bus is too SLOW. <B>MPlayer</B>
   displays a message if this is the case. (and the dropped frames counter is going up fast)</LI>
-  <LI>if it is an AVI, maybe it has shit interleaving. Try the <I>-ni</I> option.</LI>
-  <LI>your sound driver is shit, or you use ALSA 0.5 with <I>-ao oss</I>. See the <A HREF="sound.html">soundcards section</A>.</LI>
-  <LI>the AVI has shit header, try with the <I>-nobps</I> option, and/or <I>-mc 0</I> .</LI>
+  <LI>if it is an AVI, maybe it has bad interleaving. Try the <I>-ni</I> option.</LI>
+  <LI>your sound driver is buggy, or you use ALSA 0.5 with <I>-ao oss</I>. See the <A HREF="sound.html">soundcards section</A>.</LI>
+  <LI>the AVI has bad header, try with the <I>-nobps</I> option, and/or <I>-mc 0</I> .</LI>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
@@ -536,15 +532,6 @@ only sound! It prints:<BR>
 <CODE>Detected video codec: [null] drv:0 (NULL codec (no decoding))</CODE>
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Update your <CODE>codecs.conf</CODE>
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-I'm using the GUI. During startup, MPlayer prints :<BR>
-<PRE><CODE>Gtk-WARNING **: This process is currently running setuid or setgid.
-This is not a supported use of GTK+. You must create a helper
-program instead. For further details, see...</CODE></PRE>
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-You can't use GTK in a suid-root binary, as pointed out in the GUI section.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 
@@ -602,7 +589,7 @@ for output, thus it should work for you. Compile in libavcodec support.
 OpenGL (-vo gl) output doesn't work (hangup/black window/X11 errors/...).
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Your opengl driver doesn't support dynamic texture changes (glTexSubImage)
-It's known not to work with nVidia's binary shit.
+It's known not to work with nVidia's binary mess.
 It's known to work with Utah-GLX/DRI and Matrox G400 card. Also with
 DRI and Radeon card. It won't work with DRI others than these.
 it will not work with 3DFX cards because the 256x256 texture size limit.
@@ -661,7 +648,7 @@ for this task, use them. BTW, MPlayer stands for Movie Player.
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 I'd like to seek +/- 1 frames, instead of 10 seconds.
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-This won't be done. It was, but then it fucked up A/V sync. Feel free to
+This won't be done. It was, but then it messed up A/V sync. Feel free to
 implement it, and send a patch. Don't ask for it.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
