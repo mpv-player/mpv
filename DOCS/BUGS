@@ -38,8 +38,8 @@ General audio delay or jerky sound (exists with all or many files):
 
 Audio delay specific to one or a few files:
 - bad file (pleae upload the file, so we can check & fix)
-  Workaround: -ni or -bps options
-              -delay option or +/- keys at runtime to adjuts delay
+  Workaround: -ni or -bps option
+              -delay option or +/- keys at runtime to adjust delay
 - your soundcard doesn't support 48Khz playback
   Workaround: buy a better soundcard...
 - file has VBR mp3 audio
