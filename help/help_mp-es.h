@@ -4,7 +4,7 @@
 // Sefanja Ruijsenaars <sefanja at gmx.net>
 // Andoni Zubimendi <andoni at lpsat.net>
 
-// Updated to help_mp-en.h v1.97
+// Updated to help_mp-en.h v1.100
 
 // Translated files should be sent to the mplayer-dev-eng mailing list or
 // to the help messages maintainer, see DOCS/tech/MAINTAINERS.
@@ -17,7 +17,7 @@
 #ifdef HELP_MP_DEFINE_STATIC
 static char* banner_text=
 "\n\n"
-"MPlayer " VERSION "(C) 2000-2002 Arpad Gereoffy (DOCS para más información)\n"
+"MPlayer " VERSION "(C) 2000-2003 Árpád Gereöffy (DOCS para más información)\n"
 "\n";
 
 static char help_text[]=
@@ -54,7 +54,7 @@ static char help_text[]=
 " p ó ESPACIO     Pausar el vídeo (presione cualquier tecla para continuar).\n"
 " q ó ESC         Detener la reproducción y salir del programa.\n"
 " + ó -           Ajustar el retardo de audio en más o menos 0.1 segundos.\n"
-" o               Cambiar modo OSD:  nada / búsqueda / búsqueda y tiempo.\n"
+" o               Cambiar modo OSD:  nada / búsqueda / búsqueda + tiempo.\n"
 " * ó /           Aumentar o disminuir el volumen (presione 'm' para elegir entre master/pcm).\n"
 " z ó x           Ajustar el retardo de la subtítulación en más o menos 0.1 segundos.\n"
 " r ó t           Ajustar posición de la subtítulación (mira también -vop expand).\n"
@@ -91,7 +91,7 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmtStr "Tratando de forzar la familia del codec de audio %d...\n"
 #define MSGTR_CantFindAfmtFallback "No se encuentra codec de audio para la familia forzada, se usarán otros drivers.\n"
 #define MSGTR_CantFindAudioCodec "No se encuentra codec para el formato de audio 0x%X!\n"
-#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Intenta actualizar %s en etc/codecs.conf\n*** Si todavía no funciona, lee DOCS/codecs.html!\n"
+#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Intenta actualizar %s en etc/codecs.conf\n*** Si todavía no funciona, lee DOCS/en/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "No se pudo inicializar el codec de audio, no se reproducirá sonido!\n"
 #define MSGTR_TryForceVideoFmtStr "Tratando de forzar la familia del codec de vídeo %d ...\n"
 #define MSGTR_CantFindVideoCodec "No se encuentra codec para el formato de vídeo 0x%X!\n"
@@ -106,13 +106,13 @@ static char help_text[]=
 "       **************************************************************\n"\
 "Posibles razones, problemas, soluciones: \n"\
 "- Más común: driver de _audio_ con errores. Solución: intenta -ao sdl, o usa\n"\
-"  ALSA 0.5 o la emulación OSS de ALSA 0.9. Lee DOCS/sound.html para más información.\n"\
+"  ALSA 0.5 o la emulación OSS de ALSA 0.9. Lee DOCS/en/sound.html para más información.\n"\
 "- Salida de vídeo lenta: prueba otro driver -vo (para obtener una lista, -vo help) o\n"\
-"  intenta iniciar con la opción -framedrop. Lee DOCS/video.html para más sugerencias.\n"\
+"  intenta iniciar con la opción -framedrop. Lee DOCS/en/video.html para más sugerencias.\n"\
 "- CPU lenta: no reproduzcas DVD o DivX grandes en una CPU lenta. Intenta iniciar con\n"\
 "  la opción -hardframedrop.\n"\
 "- Archivo erróneo: prueba combinaciones de: -nobps, -ni, -mc 0, -forceidx\n"\
-"  Si ninguna funciona, lee DOCS/bugreports.html\n\n"
+"  Si ninguna funciona, lee DOCS/en/bugreports.html\n\n"
 
 #define MSGTR_NoGui "MPlayer fue compilado sin soporte para interfaz gráfica.\n"
 #define MSGTR_GuiNeedsX "La interfaz gráfica de MPlayer requiere X11!\n"
@@ -146,7 +146,7 @@ static char help_text[]=
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- MPlayer se detuvo por una 'Instrucción Ilegal'.\n"\
 "  Esto puede ser un defecto en nuestra rutina nueva de autodetección de CPU...\n"\
-"  Por favor lee DOCS/bugreports.html.\n"
+"  Por favor lee DOCS/en/bugreports.html.\n"
 #define MSGTR_Exit_SIGILL \
 "- MPlayer se detuvo por una 'Instrucción Ilegal'.\n"\
 "  Esto ocurre normalmente cuando ejecuta el programa en una CPU diferente de\n"\
@@ -154,11 +154,11 @@ static char help_text[]=
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- MPlayer se detuvo por mal uso de CPU/FPU/RAM.\n"\
 "  Recompila MPlayer con la opción --enable-debug y hace un backtrace en 'gdb' y\n"\
-"  un desensamblado. Para más detalles, vea DOCS/bugreports.html#crash\n"
+"  un desensamblado. Para más detalles, vea DOCS/en/bugreports.html#crash\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer se detuvo. Esto no debería haber pasado.\n"\
 "  Puede ser un defecto en el código de MPlayer _o_ en sus drivers _o_ en su versión\n"\
-"  de gcc. Si piensa que es la culpa de MPlayer, por favor lea DOCS/bugreports.html\n"\
+"  de gcc. Si piensa que es la culpa de MPlayer, por favor lea DOCS/en/bugreports.html\n"\
 "  y siga las instrucciones que allí se encuentran. No podemos y no lo ayudaremos a\n"\
 "  menos que nos provea esa información cuando este reportando algún posible defecto.\n"
 
@@ -289,7 +289,7 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "No se puede avanzar o retroceder en un stream crudo .AVI (se requiere índice, prueba con -idx).\n"
 #define MSGTR_CantSeekFile "No se puede avanzar o retroceder en este archivo.\n"
 
-#define MSGTR_EncryptedVOB "Archivo VOB encriptado (no se compiló con soporte de libcss). Lee DOCS/cd-dvd.html.\n"
+#define MSGTR_EncryptedVOB "Archivo VOB encriptado (no se compiló con soporte de libcss). Lee DOCS/en/cd-dvd.html.\n"
 #define MSGTR_EncryptedVOBauth "Stream encriptado pero no pediste autenticación.\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Cabecera comprimida no suportada (por ahora).\n"
