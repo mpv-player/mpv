@@ -1,7 +1,12 @@
 
 mplayer (0.90)
 
+    * Xanim Codecs working on PPC
+    * RealPlayer Codecs working on PPC
     * -ao esd: new EsounD audio driver
+    * Radeon 9000 support in VIDIX
+    * Initial PPC (Big-Endian) support in VIDIX Rage128 driver
+    * PNM streaming support
 	
   rc2:
     General:
@@ -33,6 +38,7 @@ mplayer (0.90)
     * CDDA seeking fixed
     * Win32/RealPlayer codecs DLL & 64bit Alpha Linux RealPlayer codecs support
     * XMMS Input plugins (demuxer & codec) support
+    * Fixed a bug in MMX optimized mp3lib (triggered by OpenBSD)
 
   rc1:  "CodecCounter"
     Docs:
