@@ -57,13 +57,16 @@
  *
  */
 
-
-
-
-/* $XFree86: xc/programs/Xserver/hw/xfree86/SuperProbe/AsmMacros.h,v 3.13 1999/03/28 15:32:21 dawes Exp $ */
+/* $XFree86: xc/programs/Xserver/hw/xfree86/drivers/chips/util/AsmMacros.h,v 1.1 2001/11/16 21:13:34 tsi Exp $ */
 
 #if defined(__GNUC__)
-#if defined(linux) && defined(__alpha__)
+#if defined(linux) && (defined(__alpha__) || defined(__ia64__))
+#undef	inb
+#undef	inw
+#undef	inl
+#undef	outb
+#undef	outw
+#undef	outl
 #define inb _inb
 #define inw _inw
 #define inl _inl
@@ -251,6 +254,18 @@ short port;
 }
 
 #else
+#if defined(__FreeBSD__) && defined(__alpha__)
+
+#include <sys/types.h>
+
+extern void outb(u_int32_t port, u_int8_t val);
+extern void outw(u_int32_t port, u_int16_t val);
+extern void outl(u_int32_t port, u_int32_t val);
+extern u_int8_t inb(u_int32_t port);
+extern u_int16_t inw(u_int32_t port);
+extern u_int32_t inl(u_int32_t port);
+
+#else
 #ifdef GCCUSESGAS
 static __inline__ void
 outb(port, val)
@@ -373,6 +388,7 @@ inl(port)
 #endif /* arm32 */
 #endif /* linux && __sparc__ */
 #endif /* linux && __alpha__ */
+#endif /* __FreeBSD__ && __alpha__ */
 
 #if defined(linux) || defined(__arm32__) || (defined(Lynx) && defined(__powerpc__))
 
