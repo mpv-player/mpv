@@ -17,14 +17,14 @@ Description: Which Video Output driver would you like?
 Template: mplayer/overwrite
 Type: boolean
 Default: false
-Description: Overwrite /etc/mplayer.conf ?
- Should I overwrite your current /etc/mplayer.conf with the one created on the fly based on your answers?
+Description: Overwrite /etc/mplayer/mplayer.conf ?
+ Should I overwrite your current /etc/mplayer/mplayer.conf with the one created on the fly based on your answers?
 
 Template: mplayer/cfgnote
 Type: note
 Description: Create your ~/.mplayer/conf file.
 	Remember to read documentation and edit your ~/.mplayer/conf
-	(or /etc/mplayer.conf) file. This binary depends heavily on
+	(or /etc/mplayer/mplayer.conf) file. This binary depends heavily on
 	your hardware - which means that it needs tweaking for every single
 	machine it's installed to. And it also it means that it will use
 	your setup very effectively. Look at /usr/share/doc/mplayer

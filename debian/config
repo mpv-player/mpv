@@ -19,7 +19,7 @@ checkupgrade();			# Find out if we have to upgrade.
 mainloop(letsgo());
 
 sub checkupgrade {
-  open(MCFG, "</etc/mplayer.conf") || return 1;
+  open(MCFG, "</etc/mplayer/mplayer.conf") || return 1;
   my $line = <MCFG>;
   return 1 if ($line =~ /mplayer DEBCONF AREA/);
   exit(0) if (input($PRIORITY, 'mplayer/replace-existing-files') eq "question skipped");

@@ -1,3 +1,10 @@
+mplayer (0.90-2) unstable; urgency=low
+
+  * Use the confdir we compile with in the helper scripts
+    (/etc/mplayer/mplayer.conf instead of /etc/mplayer).
+
+ -- Diego Biurrun <diego@biurrun.de>  Tue, 27 Aug 2002 11:18:50 +0200
+
 mplayer (0.90-1) unstable; urgency=low
 
   * 0.90 release including latest alsa9 fixes
