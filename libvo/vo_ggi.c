@@ -5,8 +5,15 @@
   
   Uses libGGI - http://www.ggi-project.org/
 
+  TODO:
+   * implement non-directbuffer support
+   * improve directbuffer draw_frame (memcpy)
+   * check on many devices
+   * implement gamma handling
+   * implement direct rendering support
+
   Thanks to Andreas Beck for his patches.
-  Many thanks to Atmosfear, he hacked this driver to working with Planar
+  Many thanks to Atmosfear, he hacked this driver to work with Planar
   formats, and he fixed the RGB handling.
 */
 
@@ -24,8 +31,6 @@
 #include "fastmemcpy.h"
 
 #include <ggi/ggi.h>
-
-#undef GET_DB_INFO
 
 /* maximum buffers */
 #define GGI_FRAMES 4
@@ -61,6 +66,8 @@ static struct ggi_conf_s {
     /* destination */
     int dstwidth;
     int dstheight;
+    
+    int async;
 } ggi_conf;
 
 static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
@@ -139,6 +146,12 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	return(-1);
     }
 
+    if ((mode.graphtype == GT_INVALID) || (mode.graphtype == GT_AUTO))
+    {
+	mp_msg(MSGT_VO, MSGL_ERR, "[ggi] not supported depth/bpp\n");
+	return(-1);
+    }
+
     ggi_conf.gmode = mode;
 
 #if 1
@@ -154,7 +167,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     vo_dx = vo_dy = 0;
     vo_dwidth = mode.virt.x;
     vo_dheight = mode.virt.y;
-    vo_dbpp = GT_ByPP(mode.graphtype);
+    vo_dbpp = GT_SIZE(mode.graphtype);
 
     ggi_conf.srcwidth = width;
     ggi_conf.srcheight = height;
@@ -175,7 +188,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	case IMGFMT_IYUV:
 	case IMGFMT_I420:
 	case IMGFMT_YV12:
-	    ggi_conf.srcdepth = vo_dbpp*8;
+	    ggi_conf.srcdepth = vo_dbpp;
 	    yuv2rgb_init(ggi_conf.srcdepth, MODE_RGB);
 	    break;
 	default:
@@ -202,7 +215,8 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
         ggi_conf.buffer[i] = NULL;
 
     /* get available number of buffers */
-    for (i = 0; DB = ggiDBGetBuffer(ggi_conf.vis, i), i < ggi_conf.frames; i++)
+    for (i = 0; DB = (ggi_directbuffer *)ggiDBGetBuffer(ggi_conf.vis, i),
+	i < ggi_conf.frames; i++)
     {
         if (!(DB->type & GGI_DB_SIMPLE_PLB) ||
     	    (DB->page_size != 0) ||
@@ -235,7 +249,13 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 
     mp_msg(MSGT_VO, MSGL_INFO, "[ggi] input: %dx%dx%d, output: %dx%dx%d, frames: %d\n",
 	ggi_conf.srcwidth, ggi_conf.srcheight, ggi_conf.srcdepth, 
-	vo_dwidth, vo_dheight, vo_dbpp*8, ggi_conf.frames);
+	vo_dwidth, vo_dheight, vo_dbpp, ggi_conf.frames);
+
+    if (ggiGetFlags(ggi_conf.vis) & GGIFLAG_ASYNC)
+    {
+	mp_msg(MSGT_VO, MSGL_INFO, "[ggi] using asynchron mode\n");
+	ggi_conf.async = 1;
+    }
 
     return(0);
 }
@@ -286,7 +306,7 @@ static uint32_t draw_frame(uint8_t *src[])
 static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
     unsigned char *srca, int stride)
 {
-    switch(vo_dbpp*8)
+    switch(vo_dbpp)
     {
     case 32:
         vo_draw_alpha_rgb32(w, h, src, srca, stride, 
@@ -319,6 +339,9 @@ static void flip_page(void)
 	ggiGetWriteFrame(ggi_conf.vis), ggiGetDisplayFrame(ggi_conf.vis));
 
     ggi_conf.currframe = (ggi_conf.currframe+1) % ggi_conf.frames;
+    
+    if (ggi_conf.async)
+	ggiFlush(ggi_conf.vis);
 }
 
 static uint32_t draw_slice(uint8_t *src[], int stride[], int w, int h,
@@ -370,8 +393,8 @@ static uint32_t preinit(const char *arg)
 	return(-1);
     }
 
-    if (arg)
-	ggi_conf.driver = arg;
+    if ((char *)arg)
+	ggi_conf.driver = strdup(arg);
     else
 	ggi_conf.driver = NULL;
     
@@ -391,19 +414,42 @@ static uint32_t preinit(const char *arg)
 
 static void uninit(void)
 {
+    if (ggi_conf.driver)
+	free(ggi_conf.driver);
     ggiClose(ggi_conf.vis);
     ggiExit();
 }
 
+#ifdef GGI_GAMMA
+/* GAMMA handling */
+static int ggi_get_video_eq(vidix_video_eq_t *info)
+{
+    memset(info, 0, sizeof(vidix_video_eq_t));
+}
+
+static void query_vaa(vo_vaa_t *vaa)
+{
+    memset(vaa, 0, sizeof(vo_vaa_t));
+    vaa->get_video_eq = ggi_get_video_eq;
+    vaa->set_video_eq = ggi_set_video_eq;
+}
+#endif
+
 static uint32_t control(uint32_t request, void *data, ...)
 {
   switch (request) {
+#ifdef GGI_GAMMA
+  case VOCTRL_QUERY_VAA:
+    query_vaa((vo_vaa_t*)data);
+    return VO_TRUE;
+#endif
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
   }
   return VO_NOTIMPL;
 }
 
+/* EVENT handling */
 #include "../linux/keycodes.h"
 extern void mplayer_put_key(int code);
 
