@@ -164,6 +164,13 @@
 
 #include "config.h"
 
+#ifdef STREAMING
+/* defined in network.c */
+extern char *network_username;
+extern char *network_password;
+extern int   network_bandwidth;
+#endif
+
 #include "libmpdemux/tv.h"
 
 #ifdef USE_TV

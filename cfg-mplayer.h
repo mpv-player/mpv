@@ -99,13 +99,6 @@ extern int xinerama_screen;
 extern int nortc;
 #endif
 
-#ifdef STREAMING
-/* defined in network.c */
-extern char *network_username;
-extern char *network_password;
-extern int   network_bandwidth;
-#endif
-
 /* from libvo/aspect.c */
 extern float monitor_aspect;
 
