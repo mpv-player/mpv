@@ -1376,7 +1376,7 @@ while(has_audio){
       time_frame=0;
     } else {
         while(time_frame>0.022){
-            usleep(time_frame-0.22);
+            usleep(time_frame-0.022);
             time_frame-=GetRelativeTime();
         }
         while(time_frame>0.007){
