@@ -917,7 +917,7 @@ static int setup_surfaces(void)
 
     surfwidth = priv->width;
     surfheight = priv->height + (priv->surface->h - priv->dstheight) / v_scale;
-
+    surfheight&= ~1;
     /* Place the image in the middle of the screen */
     priv->y = (surfheight - priv->height) / 2;
     priv->y_screen_top = priv->y * v_scale;
