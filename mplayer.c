@@ -1187,12 +1187,25 @@ switch(sh_video->codec->driver){
    if(verbose) printf("OpenDivX video codec\n");
    { DEC_PARAM dec_param;
      DEC_SET dec_set;
+//     DEC_MEM_REQS dec_mem;
 	dec_param.x_dim = sh_video->bih->biWidth;
 	dec_param.y_dim = sh_video->bih->biHeight;
-	dec_param.color_depth = 32;
+#if 0
+        // 0.50-CVS
+        decore(0x123, DEC_OPT_MEMORY_REQS, &dec_param, &dec_mem);
+        dec_param.buffers.mp4_edged_ref_buffers=malloc(dec_mem.mp4_edged_ref_buffers_size);
+        dec_param.buffers.mp4_edged_for_buffers=malloc(dec_mem.mp4_edged_for_buffers_size);
+        dec_param.buffers.mp4_display_buffers=malloc(dec_mem.mp4_display_buffers_size);
+        dec_param.buffers.mp4_state=malloc(dec_mem.mp4_state_size);
+        dec_param.buffers.mp4_tables=malloc(dec_mem.mp4_tables_size);
+        dec_param.buffers.mp4_stream=malloc(dec_mem.mp4_stream_size);
+#else
+        dec_param.color_depth = 32;
+#endif
 	decore(0x123, DEC_OPT_INIT, &dec_param, NULL);
 	dec_set.postproc_level = divx_quality;
 	decore(0x123, DEC_OPT_SETPP, &dec_set, NULL);
+
    }
    if(verbose) printf("INFO: OpenDivX video codec init OK!\n");
    break;
