@@ -6060,34 +6060,36 @@ Durchgängen.
 .
 .SH DATEIEN
 .TP
-/etc/\:mplayer/\:mplayer.conf
+/usr/\:local/\:etc/\:mplayer/\:mplayer.conf
 systemweite Einstellungen
+.
 .TP
 ~/.mplayer/\:config
 Benutzereinstellungen
+.
 .TP
 ~/.mplayer/\:input.conf
 Eingabebelegungen (siehe '\-input keylist' für eine vollständige Auflistung
 aller Tastennamen)
-.TP
-~/.mplayer/\:gui.conf
-GUI\-Konfigurationsdatei
+.
 .TP
 ~/.mplayer/\:gui.pl
-GUI\-Playliste
+Playlist für die GUI
+.
 .TP
 ~/.mplayer/\:font/
 Schriftartenverzeichnis (es müssen sich eine Datei font.desc und Dateien mit
 der Erweiterung .RAW in dem Verzeichnis befinden)
+.
 .TP
 ~/.mplayer/\:DVDkeys/
-geknackte CSS\-Schlüssel
-.PD 0
+zwischengespeicherte CSS-Schlüssel
+.
 .TP
-Untertiteldateien werden in dieser Reihenfolge gesucht (bei z.B.\& einem
-Film namens /mnt/\:cdrom/\:film.avi):
-.RSs
-/mnt/\:cdrom/\:film.sub
+Angenommen, dass /Pfad/\:zum/\:film.avi abgespielt wird,
+sucht MPlayer nach lUntertiteldateien in folgender Reihenfolge:
+.RS
+/Pfad/\:zum/\:film.sub
 .br
 ~/.mplayer/\:sub/\:film.sub
 .br
@@ -6101,78 +6103,115 @@ Film namens /mnt/\:cdrom/\:film.avi):
 .\" --------------------------------------------------------------------------
 .
 .SH BEISPIELE
+.
 .TP
-.B Simples Kommando für DVD
-mplayer \dvd://1
+.B Simples Kommando für das Abspielen einer DVD:
+mplayer dvd://1
+.
 .TP
-.B Audio auf japanisch mit englischen Untertiteln
-mplayer \dvd://1 \-alang ja \-slang en
+.B Audio auf japanisch mit englischen Untertiteln:
+mplayer dvd://1 \-alang ja \-slang en
+.
 .TP
-.B Spiele nur Kapitel 5, 6, 7
-mplayer \dvd://1 \-chapter 5\-7
+.B Spiele nur die Kapitel 5, 6, 7:
+mplayer dvd://1 \-chapter 5-7
+.
 .TP
-.B bei DVDs mit mehreren Kameraperspektiven
-mplayer \dvd://1 \-dvdangle 2
+.B Spiele nur die Titel 5, 6, 7:
+mplayer dvd://5-7
+.
 .TP
-.B Abspielen von einem anderen DVD\-Gerät
-mplayer \dvd://1 \-dvd\-device /dev/\:dvd2
+.B bei einer DVD mit mehreren Kameraperspektiven:
+mplayer dvd://1 \-dvdangle 2
+.
 .TP
-.B Abspielen mit alter DVD\-Unterstützung (VOB)
-mplayer \-dvdauth /dev/\:dvd /mnt/\:dvd/\:VIDEO_TS/\:VTS_02_4.VOB
+.B Abspielen von einem anderen DVD-Gerät:
+mplayer dvd://1 \-dvd-device /dev/\:dvd2
+.
 .TP
-.B Streaming per HTTP
+.B Spiele DVD-Videos direkt aus einem Verzeichnis mit VOB-Dateien:
+mplayer dvd://1 \-dvd-device /Pfad/\:zum/\:Verzeichnis/
+.
+.TP
+.B Kopiere den Titel einer DVD auf die Festplatte, speichere die Datei unter dem Namen "title1.vob":
+mplayer dvd://1 \-dumpstream \-dumpfile title1.vob
+.
+.TP
+.B Streaming per HTTP:
 mplayer http://mplayer.hq/\:example.avi
+.
 .TP
-.B Streaming mit RTSP
+.B Streaming mit RTSP:
 mplayer rtsp://server.example.com/\:streamName
+.
 .TP
-.B Konvertiere Untertitel in's MPsub\-Format (nach ./\:dump.mpsub)
+.B Konvertiere Untertitel in das MPsub-Format:
 mplayer dummy.avi \-sub source.sub \-dumpmpsub
+.
 .TP
-.B Lies vom Standard\-V4L\-Gerät
-mplayer \-tv on:driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420
+.B Konvertiere Untertitel in das MPsub-Format, ohne dabei das Video anzuschauen:
+mplayer /dev/\:zero \-rawvideo on:pal:fps=xx \-vc null \-vo null \-noframedrop
+\-benchmark \-sub source.sub \-dumpmpsub
+.
+.TP
+.B Lies vom Standard-V4L-Gerät:
+mplayer tv:// \-tv driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420
 \-vo xv
+.
 .TP
-.B Encodiere Titel Nr. 2 der DVD, aber nur ausgewählte Kapitel
-mencoder \dvd://2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc divx4
+.B Wiedergabe auf Zoran-Karten (alte Bauweise, veraltet):
+mplayer \-vo zr \-vf scale=352:288 Datei.avi
+.
 .TP
-.B Encodiere Titel Nr. 2 der DVD und skaliere auf 640x480
-mencoder \dvd://2 \-vf scale=640:480 \-o title2.avi \-oac copy \-ovc divx4
+.B Wiedergabe auf Zoran-Karten (neue Bauweise):
+mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg Datei.avi
+.
 .TP
-.B Encodiere Titel Nr. 2 der DVD und skaliere auf 512xHHH unter Beibehaltung des Höhen\-/\:Breitenverhältnisses
-mencoder \dvd://2 \-vf scale \-zoom \-xy 512 \-o title2.avi \-oac copy
-\-ovc divx4
+.B Encodiere Titel Nr. 2 der DVD, aber nur ausgewählte Kapitel:
+mencoder dvd://2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc
+lavc \-lavcopts vcodec=mpeg4
+.
 .TP
-.B Das gleiche, aber mit libavcodecs MPEG-4-Codec
-mencoder \dvd://2 \-o title2.avi \-ovc lavc
-\-lavcopts vcodec=mpeg4:vhq:vbitrate=1800 \-oac copy
+.B Encodiere Titel Nr. 2 der DVD und skaliere auf 640x480:
+mencoder dvd://2 \-vf scale=640:480 \-o title2.avi \-oac copy \-ovc
+lavc \-lavcopts vcodec=mpeg4
+.
 .TP
-.B Das gleiche, aber mit libavcodecs MJPEG\-Codec
-mencoder \dvd://2 \-o titel2.avi \-ovc lavc
-\-lavcopts vcodec=mjpeg:vhq:vbitrate=1800 \-oac copy
+.B Encodiere Titel Nr. 2 der DVD und skaliere auf 512xHHH unter Beibehaltung des Höhen-/Breitenverhältnisses:
+mencoder dvd://2 \-vf scale \-zoom \-xy 512 \-o title2.avi \-oac
+copy \-ovc lavc \-lavcopts vcodec=mpeg4
+.
 .TP
-.B Encodiere alls .jpg\-Dateien im aktuellen Verzeichnis
-mencoder \\*.jpg \-mf on:fps=25 \-o output.avi \-ovc divx4
+.B Das gleiche, aber mit einer Bitrate von 1800kBit und optimierten Makroblocks:
+mencoder dvd://2 \-o title2.avi \-oac copy \-ovc
+lavc \-lavcopts vcodec=mpeg4:mbd=1:vbitrate=1800
+.
 .TP
-.B Encodiere das Fernsehsignal
-mencoder \-tv on:driver=v4l:width=640:height=480 \-o tv.avi \-ovc rawrgb
+.B Das gleiche, aber mit MJPEG-Kompression:
+mencoder dvd://2 \-o titel2.avi \-ovc lavc \-lavcopts
+vcodec=mjpeg:mbd=1:vbitrate=1800 \-oac copy
+.
 .TP
-.B Encodiere und lies von einer Pipe
-rar p test-SVCD.rar | mencoder \-ovc divx4 \-divx4opts br=800 \-ofps 24
-\-\- \-
+.B Encodiere alle .jpg-Dateien im aktuellen Verzeichnis:
+mencoder "mf://*.jpg" \-mf fps=25 \-o output.avi \-ovc lavc \-lavcopts
+vcodec=mpeg4
+.
 .TP
-.B Encodiere mehrere .vob\-Dateien
-cat *.vob | mencoder <options> \-
+.B Encodiere aus einem Fernsehsignal (gib ein Format mit \-vf format an):
+mencoder \-tv driver=v4l:width=640:height=480 tv:// \-o tv.avi \-ovc raw
+.
+.TP
+.B Encodiere aus einer Pipe:
+rar p test-SVCD.rar | mencoder \-ovc lavc \-lavcopts
+vcodec=mpeg4:vbitrate=800 \-ofps 24 -
 .
 .
-.\"
 .\" --------------------------------------------------------------------------
 .\" Fehler, Autoren, Haftunsausschluss
-.\"
 .\" --------------------------------------------------------------------------
 .
 .SH FEHLER/\:BUGS
-Berichte uns davon, wenn du einen findest, sei aber sicher, daß Du vorher die
+Berichte uns davon, wenn du einen findest, sei aber sicher, dass Du vorher die
 ganze Dokumentation gelesen hast.
 Viele Fehler sind das Resultat eines fehlerhaften Setups oder falscher
 Benutzung der Parameter.
@@ -6186,7 +6225,7 @@ erstellt.
 MPlayer wurde ursprünglich von Arpad Gereöffy geschrieben.
 Siehe Datei AUTHORS für eine Liste einiger der vielen anderen Beitragenden.
 .PP
-MPlayer is (C) 2000\-2004 The MPlayer Team
+MPlayer is (C) 2000\-2005 The MPlayer Team
 .PP
 Diese Manpage wurde zum größten Teil von Gabucino, Diego Biurrun und
 Jonas Jermann geschrieben und von Moritz Bunkus und Sebastian Krämer
@@ -6194,4 +6233,3 @@ ins Deutsche übersetzt.
 Sie wird gepflegt von Sebastian Krämer.
 Schicke Mails die Manpage betreffend bitte an die MPlayer-DOCS-Mailingliste.
 .\" Ende der Datei
-
