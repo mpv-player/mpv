@@ -36,6 +36,7 @@
 #include <string.h>
 #include <inttypes.h>
 #include <unistd.h>
+#include <math.h>
 
 #include "../vidix.h"
 #include "../fourcc.h"
