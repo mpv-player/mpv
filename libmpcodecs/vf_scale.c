@@ -21,7 +21,7 @@
 static struct vf_priv_s {
     int w,h;
     int v_chr_drop;
-    int param;
+    double param[2];
     unsigned int fmt;
     struct SwsContext *ctx;
     struct SwsContext *ctx2; //for interlaced slices only
@@ -31,7 +31,7 @@ static struct vf_priv_s {
 } vf_priv_dflt = {
   -1,-1,
   0,
-  0,
+  {SWS_PARAM_DEFAULT, SWS_PARAM_DEFAULT},
   0,
   NULL,
   NULL,
@@ -186,18 +186,17 @@ static int config(struct vf_instance_s* vf,
     // new swscaler:
     sws_getFlagsAndFilterFromCmdLine(&int_sws_flags, &srcFilter, &dstFilter);
     int_sws_flags|= vf->priv->v_chr_drop << SWS_SRC_V_CHR_DROP_SHIFT;
-    int_sws_flags|= vf->priv->param      << SWS_PARAM_SHIFT;
     vf->priv->ctx=sws_getContext(width, height >> vf->priv->interlaced,
 	    outfmt,
 		  vf->priv->w, vf->priv->h >> vf->priv->interlaced,
 	    best,
-	    int_sws_flags | get_sws_cpuflags(), srcFilter, dstFilter);
+	    int_sws_flags | get_sws_cpuflags(), srcFilter, dstFilter, vf->priv->param);
     if(vf->priv->interlaced){
         vf->priv->ctx2=sws_getContext(width, height >> 1,
 	    outfmt,
 		  vf->priv->w, vf->priv->h >> 1,
 	    best,
-	    int_sws_flags | get_sws_cpuflags(), srcFilter, dstFilter);
+	    int_sws_flags | get_sws_cpuflags(), srcFilter, dstFilter, vf->priv->param);
     }
     if(!vf->priv->ctx){
 	// error...
@@ -438,14 +437,16 @@ static int open(vf_instance_t *vf, char* args){
     vf->priv->w=
     vf->priv->h=-1;
     vf->priv->v_chr_drop=0;
-    vf->priv->param=0;
+    vf->priv->param[0]=
+    vf->priv->param[1]=SWS_PARAM_DEFAULT;
     vf->priv->palette=NULL;
     } // if(!vf->priv)
-    if(args) sscanf(args, "%d:%d:%d:%d",
+    if(args) sscanf(args, "%d:%d:%d:%lf:%lf",
     &vf->priv->w,
     &vf->priv->h,
     &vf->priv->v_chr_drop,
-    &vf->priv->param);
+    &vf->priv->param[0],
+    &vf->priv->param[1]);
     mp_msg(MSGT_VFILTER,MSGL_V,"SwScale params: %d x %d (-1=no scaling)\n",
     vf->priv->w,
     vf->priv->h);
@@ -524,7 +525,7 @@ struct SwsContext *sws_getContextFromCmdLine(int srcW, int srcH, int srcFormat, 
 	SwsFilter *dstFilterParam, *srcFilterParam;
 	sws_getFlagsAndFilterFromCmdLine(&flags, &srcFilterParam, &dstFilterParam);
 
-	return sws_getContext(srcW, srcH, srcFormat, dstW, dstH, dstFormat, flags | get_sws_cpuflags(), srcFilterParam, dstFilterParam);
+	return sws_getContext(srcW, srcH, srcFormat, dstW, dstH, dstFormat, flags | get_sws_cpuflags(), srcFilterParam, dstFilterParam, NULL);
 }
 
 /// An example of presets usage
@@ -572,7 +573,8 @@ static m_option_t vf_opts_fields[] = {
   {"h", ST_OFF(h), CONF_TYPE_INT, M_OPT_MIN,-3 ,0, NULL},
   {"interlaced", ST_OFF(interlaced), CONF_TYPE_INT, M_OPT_RANGE, 0, 1, NULL},
   {"chr-drop", ST_OFF(v_chr_drop), CONF_TYPE_INT, M_OPT_RANGE, 0, 3, NULL},
-  {"param", ST_OFF(param), CONF_TYPE_INT, M_OPT_RANGE, 0, 100, NULL},
+  {"param" , ST_OFF(param[0]), CONF_TYPE_DOUBLE, M_OPT_RANGE, 0.0, 100.0, NULL},
+  {"param2", ST_OFF(param[1]), CONF_TYPE_DOUBLE, M_OPT_RANGE, 0.0, 100.0, NULL},
   // Note that here the 2 field is NULL (ie 0)
   // As we want this option to act on the option struct itself
   {"presize", 0, CONF_TYPE_OBJ_PRESETS, 0, 0, 0, &size_preset},

@@ -752,7 +752,7 @@ void sws_spu_image(unsigned char *d1, unsigned char *d2, int dw, int dh, int ds,
 		oldvar = spu_gaussvar;
 	}
 	
-	ctx=sws_getContext(sw, sh, IMGFMT_Y800, dw, dh, IMGFMT_Y800, SWS_GAUSS, &filter, NULL);
+	ctx=sws_getContext(sw, sh, IMGFMT_Y800, dw, dh, IMGFMT_Y800, SWS_GAUSS, &filter, NULL, NULL);
 	sws_scale(ctx,&s1,&ss,0,sh,&d1,&ds);
 	for (i=ss*sh-1; i>=0; i--) if (!s2[i]) s2[i] = 255; //else s2[i] = 1;
 	sws_scale(ctx,&s2,&ss,0,sh,&d2,&ds);

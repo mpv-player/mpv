@@ -3291,7 +3291,7 @@ sincR
 .IPs 9
 lanczos
 .IPs 10
-bicubic spline
+natural bicubic spline
 .RE
 .PD 1
 .sp 1
@@ -3549,7 +3549,7 @@ For parameters between 4\-7 rotation is only done if the movie's geometry is
 portrait and not landscape.
 .
 .TP
-.B scale[=w:h[:interlaced[:chr_drop[:param[:presize]]]]]
+.B scale[=w:h[:interlaced[:chr_drop[:param[:param2[:presize]]]]]]
 Scales the image with the software scaler (slow) and performs a YUV<\->RGB
 colorspace conversion (also see \-sws).
 .RSs
@@ -3582,9 +3582,19 @@ chroma skipping
 3: Use only every 8. input line for chroma.
 .REss
 .IPs param
-scaling parameter (depends upon the scaling method used)
+scaling parameters (depend upon the scaling method used)
 .RSss
-\-sws 2 (bicubic):  sharpness (0 (soft) \- 100 (sharp))
+\-sws 2 (bicubic):  B (blurring) and C (ringing)
+.br
+(0.00, 0.60) default
+.br
+(0.00, 0.75) VirtualDubs "precise bicubic"
+.br
+(0.00, 0.50) Catmull-Rom spline
+.br
+(0.33, 0.33) Mitchell-Netravali spline
+.br
+(1.00, 0.00) cubic B-spline
 .br
 \-sws 7 (gaussian): sharpness (0 (soft) \- 100 (sharp))
 .br
