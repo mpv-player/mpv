@@ -296,6 +296,8 @@ static int vf_open(vf_instance_t *vf, char* args){
 	mux_v->bih->biCompression = mmioFOURCC('D', 'I', 'V', 'X');
     else if (!strcasecmp(lavc_param_vcodec, "msmpeg4"))
 	mux_v->bih->biCompression = mmioFOURCC('d', 'i', 'v', '3');
+    else if (!strcasecmp(lavc_param_vcodec, "msmpeg4v2"))
+	mux_v->bih->biCompression = mmioFOURCC('M', 'P', '4', '2');
     else
 	mux_v->bih->biCompression = mmioFOURCC(lavc_param_vcodec[0],
 		lavc_param_vcodec[1], lavc_param_vcodec[2], lavc_param_vcodec[3]); /* FIXME!!! */
