@@ -551,7 +551,7 @@ nop_streaming_start( stream_t *stream ) {
 
 	stream->streaming_ctrl->streaming_read = nop_streaming_read;
 	stream->streaming_ctrl->streaming_seek = nop_streaming_seek;
-	stream->streaming_ctrl->prebuffer_size = 4096;	// KBytes
+	stream->streaming_ctrl->prebuffer_size = 8192;	// KBytes
 	stream->streaming_ctrl->buffering = 1;
 	stream->streaming_ctrl->status = streaming_playing_e;
 	return 0;
