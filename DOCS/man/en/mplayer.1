@@ -183,7 +183,7 @@ DVD subtitles (SPU streams, VOBsub and Closed Captions).
 (MPlayer's Movie Encoder) is a simple movie encoder, designed to encode
 MPlayer-playable movies (see above) to other MPlayer-playable formats (see
 below).
-It encodes to MPEG4 (DivX/XviD), one of the libavcodec codecs and
+It encodes to MPEG-4 (DivX/XviD), one of the libavcodec codecs and
 PCM/\:MP3/\:VBRMP3 audio in 1, 2 or 3\ passes.
 Furthermore it has stream copying abilities, a powerful filter system (crop,
 expand, flip, postprocess, rotate, scale, noise, rgb/\:yuv conversion) and
@@ -2403,7 +2403,7 @@ Select the driver to use as source to overlay on top of X11.
 .TP
 .B xvmc (X11 with \-vc ffmpeg12mc only)
 Video output driver that uses the XvMC (X Video Motion Compensation)
-extension of XFree86 4.x to speed up MPEG1/\:2 and VCR2 decoding.
+extension of XFree86 4.x to speed up MPEG-1/2 and VCR2 decoding.
 .PD 0
 .RSs
 .IPs benchmark
@@ -3322,9 +3322,9 @@ This is not a bug, but a side effect of not decoding at full resolution.
 .br
 3: 1/8 resolution
 .REss
-.IPs "sb=<number> (MPEG2 only)"
+.IPs "sb=<number> (MPEG-2 only)"
 Skip the given number of macroblock rows at the bottom.
-.IPs "st=<number> (MPEG2 only)"
+.IPs "st=<number> (MPEG-2 only)"
 Skip the given number of macroblock rows at the top.
 .IPs vismv=<value>
 vismv:
@@ -3481,7 +3481,7 @@ Try divx4linux codec first, then fall back on others.
 .IPs "\-vc -divxds,-divx,"
 Skip Win32 DivX codecs.
 .IPs "\-vc ffmpeg12,mpeg12,"
-Try libavcodec's MPEG1/\:2 codec, then libmpeg2, then others.
+Try libavcodec's MPEG-1/2 codec, then libmpeg2, then others.
 .RE
 .PD 1
 .
@@ -3949,7 +3949,7 @@ You should see a red, green and blue stripe from top to bottom.
 .
 .TP
 .B lavc[=quality:fps]
-Fast software YV12 to MPEG1 conversion with libavcodec for use with DVB/\:DXR3.
+Fast software YV12 to MPEG-1 conversion with libavcodec for use with DVB/\:DXR3.
 Faster and of better quality than \-vf fame.
 .RSs
 .IPs quality
@@ -3964,7 +3964,7 @@ force output fps (float value) (default: 0, autodetect based on height)
 .
 .TP
 .B fame\ \ \ 
-Fast software YV12 to MPEG1 conversion with libfame for use with DVB/\:DXR3.
+Fast software YV12 to MPEG-1 conversion with libfame for use with DVB/\:DXR3.
 .
 .TP
 .B dvbscale[=aspect]
@@ -4410,7 +4410,7 @@ Sum of Absolute Difference threshold, default is 64.
 .
 .TP
 .B softpulldown
-This filter works only correct with MEncoder and acts on the MPEG2 flags
+This filter works only correct with MEncoder and acts on the MPEG-2 flags
 used for soft 3:2 pulldown (soft telecine).
 If you want to use the ivtc or detc filter on movies that are partly soft
 telecined, inserting this filter before them should make them more reliable.
@@ -5336,7 +5336,7 @@ H.263
 .IPs h263p
 H.263+
 .IPs mpeg4
-MPEG4 (DivX 4/5)
+MPEG-4 (DivX 4/5)
 .IPs msmpeg4
 DivX 3
 .IPs msmpeg4v2
@@ -5348,9 +5348,9 @@ Windows Media Video, version 2 (AKA WMV8)
 .IPs rv10\ 
 an old RealVideo codec
 .IPs mpeg1video
-MPEG1 video
+MPEG-1 video
 .IPs mpeg2video
-MPEG2 video
+MPEG-2 video
 .IPs huffyuv
 HuffYUV
 .IPs asv1\ 
@@ -5421,7 +5421,7 @@ maximum number of B-frames between non-B-frames:
 .IPs 0
 no B-frames (default)
 .IPs 0\-2
-sane range for MPEG4
+sane range for MPEG-4
 .RE
 .PD 1
 .
@@ -5506,7 +5506,7 @@ slightly smaller files but less precise seeking.
 0 is equivalent to 1, which makes every frame a keyframe.
 Values >300 are not recommended as the quality might be bad depending upon
 decoder, encoder and luck.
-For a strict MPEG1/\:2/\:4 compliance this would have to be <=132.
+For a strict MPEG-1/2/4 compliance this would have to be <=132.
 .
 .TP
 .B sc_threshold=<-1000000\-1000000>
@@ -5647,7 +5647,7 @@ minimum bitrate in kbit/\:sec (pass\ 1/\:2)
 .TP
 .B vrc_buf_size=<value>
 buffer size in kbit (pass\ 1/\:2).
-For MPEG1/\:2 this also sets the vbv buffer size, use 327 for VCD,
+For MPEG-1/2 this also sets the vbv buffer size, use 327 for VCD,
 917 for SVCD and 1835 for DVD.
 .
 .TP
@@ -5850,7 +5850,7 @@ strict standard compliance
 disabled (default)
 .IPs 1
 Only recommended if you want to feed the output into the
-MPEG4 reference decoder.
+MPEG-4 reference decoder.
 .IPs -1
 Allows non-standard YV12 HuffYUV encoding (20% smaller files, but cannot be
 played by the official HuffYUV codec).
@@ -6592,7 +6592,7 @@ Decide whether to use MPEG or H.263 quantizers on a frame-by-frame basis
 .br
 .I WARNING:
 This will generate an illegal bitstream, and most likely not be decodable
-by any MPEG4 decoder besides libavcodec or XviD.
+by any MPEG-4 decoder besides libavcodec or XviD.
 .br
 .I WARNING:
 As of XviD-1.0.x, this option is no longer available.
@@ -6652,7 +6652,7 @@ you are doing.
 .br
 .I WARNING:
 This will generate an illegal bitstream, and will not be
-decodable by ISO-MPEG4 decoders except DivX/\:libavcodec/\:XviD.
+decodable by ISO-MPEG-4 decoders except DivX/\:libavcodec/\:XviD.
 .br
 .I WARNING:
 This will also store a fake DivX version in the file so the bug
@@ -6704,7 +6704,7 @@ own risks!
 .
 .TP
 .B (no)qpel
-MPEG4 uses a half pixel precision for its motion search by default.
+MPEG-4 uses a half pixel precision for its motion search by default.
 The standard proposes a mode where encoders are allowed to use quarter
 pixel precision.
 This option usually results in a sharper image.
@@ -6893,7 +6893,7 @@ the Display Aspect Ratio).
 PAR is the ratio of the width and height of a single pixel.
 So both are related like this: DAR = PAR * (width/height).
 .br
-MPEG4 defines 5 pixel aspect ratios and one extended
+MPEG-4 defines 5 pixel aspect ratios and one extended
 one, giving the opportunity to specify a specific pixel aspect
 ratio.
 5 standard modes can be specified:

@@ -15,7 +15,7 @@ encoding with <application>MEncoder</application>.
 </para>
 
 <sect1 id="menc-feat-mpeg4">
-<title>Encoding 2-pass MPEG4 (&quot;DivX&quot;)</title>
+<title>Encoding 2-pass MPEG-4 (&quot;DivX&quot;)</title>
 
 <para>
 The name comes from the fact that this method encodes the file <emphasis>twice</emphasis>.
@@ -31,7 +31,7 @@ net.
 <example>
 <title>copy audio track</title>
 <para>
-2-pass encode of a DVD to an MPEG4 (&quot;DivX&quot;) AVI while copying
+2-pass encode of a DVD to an MPEG-4 (&quot;DivX&quot;) AVI while copying
 the audio track.
 <screen>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o <replaceable>movie.avi</replaceable>
@@ -43,7 +43,7 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o <replacea
 <example>
 <title>encode audio track</title>
 <para>
-2-pass encode of a DVD to an MPEG4 (&quot;DivX&quot;) AVI while encoding
+2-pass encode of a DVD to an MPEG-4 (&quot;DivX&quot;) AVI while encoding
 the audio track to MP3.
 <screen>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac mp3lame -lameopts vbr=3 -o <replaceable>movie.avi</replaceable>
@@ -60,14 +60,14 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac mp3lame -lameopts
 files. It's probably useful only with
 <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>'s
 <emphasis>mpeg1video</emphasis> codec, because players - except
-<application>MPlayer</application> - expect MPEG1 video, and MPEG1 layer 2 (MP2)
+<application>MPlayer</application> - expect MPEG-1 video, and MPEG-1 layer 2 (MP2)
 audio streams in MPEG files.
 </para>
 
 <para>
 This feature is not very useful right now, aside that it probably has many bugs,
 but the more importantly because <application>MEncoder</application> currently
-cannot encode MPEG1 layer 2 (MP2) audio, which all other players expect in MPEG files.
+cannot encode MPEG-1 layer 2 (MP2) audio, which all other players expect in MPEG files.
 </para>
 
 <para>
@@ -124,7 +124,7 @@ them. This section is about <emphasis role="bold">copying</emphasis>.
 <listitem><para>
   <emphasis role="bold">Video stream</emphasis> (option <option>-ovc copy</option>):
   nice stuff can be done :) Like, putting (not converting!) FLI or VIVO or
-  MPEG1 video into an AVI file! Of course only
+  MPEG-1 video into an AVI file! Of course only
   <application>MPlayer</application> can play such files :) And it probably
   has no real life value at all. Rationally: video stream copying can be
   useful for example when only the audio stream has to be encoded (like,
@@ -210,13 +210,13 @@ You can encode to the following codecs (more or less up to date):
   H.263+
   </entry></row>
 <row><entry>mpeg4</entry><entry>
-  ISO standard MPEG4 (DivX 5, XVID compatible)
+  ISO standard MPEG-4 (DivX 5, XVID compatible)
   </entry></row>
 <row><entry>msmpeg4</entry><entry>
-  pre-standard MPEG4 variant by MS, v3 (AKA DivX3)
+  pre-standard MPEG-4 variant by MS, v3 (AKA DivX3)
   </entry></row>
 <row><entry>msmpeg4v2</entry><entry>
-  pre-standard MPEG4 by MS, v2 (used in old asf files)
+  pre-standard MPEG-4 by MS, v2 (used in old asf files)
   </entry></row>
 <row><entry>wmv1</entry><entry>
   Windows Media Video, version 1 (AKA WMV7)
@@ -228,10 +228,10 @@ You can encode to the following codecs (more or less up to date):
   an old RealVideo codec
   </entry></row>
 <row><entry>mpeg1video</entry><entry>
-  MPEG1 video
+  MPEG-1 video
   </entry></row>
 <row><entry>mpeg2video</entry><entry>
-  MPEG2 video
+  MPEG-2 video
   </entry></row>
 <row><entry>huffyuv</entry><entry>
   lossless compression
@@ -291,7 +291,7 @@ The explanation of the <option>-mf</option> option is in the man page.
 
 <informalexample>
 <para>
-Creating an MPEG4 file from all the JPEG files in the current directory:
+Creating an MPEG-4 file from all the JPEG files in the current directory:
 <screen>
 mencoder mf://*.jpg -mf type=jpg:w=800:h=600:fps=25 -ovc lavc -lavcopts vcodec=mpeg4 -oac copy -o <replaceable>output.avi</replaceable>
 </screen>
@@ -300,7 +300,7 @@ mencoder mf://*.jpg -mf type=jpg:w=800:h=600:fps=25 -ovc lavc -lavcopts vcodec=m
 
 <informalexample>
 <para>
-Creating an MPEG4 file from some JPEG files in the current directory:
+Creating an MPEG-4 file from some JPEG files in the current directory:
 <screen>
 mencoder mf://<replaceable>frame001.jpg,frame002.jpg</replaceable> -mf type=jpg:w=800:h=600:fps=25 -ovc lavc -lavcopts vcodec=mpeg4 -oac copy -o <replaceable>output.avi</replaceable>
 </screen>
@@ -415,7 +415,7 @@ mencoder <replaceable>movie.mpg</replaceable> -ifo <replaceable>movie.ifo</repla
 <sect1 id="aspect">
 <title>Preserving aspect ratio</title>
 <para>
-DVDs and SVCDs (i.e. MPEG1/2) files contain an aspect ratio value, which
+DVDs and SVCDs (i.e. MPEG-1/2) files contain an aspect ratio value, which
 describes how the player should scale the video stream, so humans won't
 have egg heads (ex.: 480x480 + 4:3 = 640x480). However when encoding to AVI
 (DivX) files, you have be aware that AVI headers don't store this value.
@@ -426,10 +426,10 @@ way!
 <para>There is</para>
 
 <para>
-MPEG4 has an unique feature: the video stream can contain its needed aspect
-ratio. Yes, just like MPEG1/2 (DVD, SVCD) and H.263 files. Regretfully, there are
+MPEG-4 has an unique feature: the video stream can contain its needed aspect
+ratio. Yes, just like MPEG-1/2 (DVD, SVCD) and H.263 files. Regretfully, there are
 <emphasis role="bold">no</emphasis> video players outside which support this
-attribute of MPEG4, except <application>MPlayer</application>.
+attribute of MPEG-4, except <application>MPlayer</application>.
 </para>
 
 <para>
@@ -519,7 +519,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </sect1>
 
 <sect1 id="menc-feat-dvd-mpeg4">
-<title>Making a high quality MPEG4 (&quot;DivX&quot;) rip of a DVD movie</title>
+<title>Making a high quality MPEG-4 (&quot;DivX&quot;) rip of a DVD movie</title>
 
 <para>
   One frequently asked question is "How do I make the highest quality DVD
@@ -529,14 +529,14 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <para>
   This question is perhaps at least somewhat wrongly posed. After all, if
-  you don't care about file size, why not simply copy the MPEG2 video
+  you don't care about file size, why not simply copy the MPEG-2 video
   stream from the DVD whole? Sure, your AVI will end up being 5GB, give
   or take, but if you want the best quality and don't care about size,
   this is certainly your best option.
 </para>
 
 <para>
-  In fact, the reason you want to transcode a DVD into MPEG4 is
+  In fact, the reason you want to transcode a DVD into MPEG-4 is
   specifically because you <emphasis role="bold">do</emphasis> care about
   file size.
 </para>
@@ -666,7 +666,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   <application>MPlayer</application> provides a crop detection filter that
   will determine the crop rectangle (<option>-vf cropdetect</option>).
-  Because MPEG4 uses 16x16 macroblocks, you'll want to make sure that each
+  Because MPEG-4 uses 16x16 macroblocks, you'll want to make sure that each
   dimension of the video you're encoding is a multiple of 16 or else you
   will be degrading quality, especially at lower bitrates. You can do this
   by rounding the width and height of the crop rectangle down to the nearest

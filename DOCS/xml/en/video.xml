@@ -1734,7 +1734,7 @@ Configure should detect your DVB card. If it did not, force detection with
 <formalpara>
 <title>USAGE</title>
 <para>
-Hardware decoding (playing standard MPEG1/2 files) can be done with this command:
+Hardware decoding (playing standard MPEG-1/2 files) can be done with this command:
 </para>
 </formalpara>
 
@@ -1743,7 +1743,7 @@ Hardware decoding (playing standard MPEG1/2 files) can be done with this command
 </para>
 
 <para>
-Software decoding or transcoding different formats to MPEG1 can be achieved using
+Software decoding or transcoding different formats to MPEG-1 can be achieved using
 a command like this:
 </para>
 <para><screen>
@@ -1758,14 +1758,14 @@ NTSC. You <emphasis role="bold">must</emphasis> rescale for other heights by add
 <option>-vf</option> option. DVB cards accept various widths, like 720, 704,
 640, 512, 480, 352 etc and do hardware scaling in horizontal direction, so you
 do not need to scale horizontally in most cases. For a 512x384 (aspect 4:3)
-MPEG4 (DivX) try:
+MPEG-4 (DivX) try:
 </para>
 
 <para><screen>mplayer -ao mpegpes -vo mpegpes -vf scale=512:576</screen></para>
 
 <para>If you have a widescreen movie and you do not want to scale it to full height,
 you can use the <option>expand=w:h</option> filter to add black bands. To view a
-640x384 MPEG4 (DivX), try:
+640x384 MPEG-4 (DivX), try:
 </para>
 
 <para>
@@ -1774,7 +1774,7 @@ you can use the <option>expand=w:h</option> filter to add black bands. To view a
 </para>
 
 <para>
-If your CPU is too slow for a full size 720x576 MPEG4 (DivX), try downscaling:
+If your CPU is too slow for a full size 720x576 MPEG-4 (DivX), try downscaling:
 </para>
 
 <para>
@@ -1805,7 +1805,7 @@ In order to play non-25fps movies on a PAL TV or with a slow CPU, add the
 </para>
 
 <para>
-To keep the aspect ratio of MPEG4 (DivX) files and get the optimal scaling
+To keep the aspect ratio of MPEG-4 (DivX) files and get the optimal scaling
 parameters (hardware horizontal scaling and software vertical scaling
 while keeping the right aspect ratio), use the new dvbscale filter:
 </para>
@@ -1944,7 +1944,7 @@ mailing list. Please remember that the list language is English.
 <para>
 In the future you may expect the ability to display OSD and subtitles using
 the native OSD feature of DVB cards, as well as more fluent playback of
-non-25fps movies and realtime transcoding between MPEG2 and MPEG4 (partial
+non-25fps movies and realtime transcoding between MPEG-2 and MPEG-4 (partial
 decompression).
 </para>
 </sect3>
@@ -2045,8 +2045,8 @@ rate of the movie. norm = 0 (default) does not change the current norm.
 <option><replaceable>device</replaceable></option> = device number to use if you have more than one em8300
 card.
 Any of these options may be left out.
-<option>:prebuf:sync</option> seems to work great when playing MPEG4 (DivX) movies. People
-have reported problems using the prebuf option when playing MPEG1/2 files. You
+<option>:prebuf:sync</option> seems to work great when playing MPEG-4 (DivX) movies. People
+have reported problems using the prebuf option when playing MPEG-1/2 files. You
 might want to try running without any options first, if you have sync problems,
 or DVD subtitle problems, give <option>:sync</option> a try.
 </para></listitem>
@@ -2073,8 +2073,8 @@ This does not work with digital audio output (<option>-ac hwac3</option>).
 <varlistentry>
 <term><option>-vf lavc/fame</option></term>
 <listitem><para>
-To watch non-MPEG content on the em8300 (i.e. MPEG4 (DivX) or RealVideo)
-you have to specify an MPEG1 video filter such as
+To watch non-MPEG content on the em8300 (i.e. MPEG-4 (DivX) or RealVideo)
+you have to specify an MPEG-1 video filter such as
 <systemitem class="library">libavcodec</systemitem> (lavc) or
 <systemitem class="library">libfame</systemitem> (fame). At
 the moment lavc is both faster and gives better image quality, it is suggested
@@ -2093,10 +2093,10 @@ becomes stable. For now all we can do is accept this for a fact.
 <varlistentry>
 <term><option>-vf expand=-1:-1:-1:-1:1</option></term>
 <listitem><para>
-Although the DXR3 driver can put some OSD onto the MPEG1/2/4 video, it has
+Although the DXR3 driver can put some OSD onto the MPEG-1/2/4 video, it has
 much lower quality than <application>MPlayer</application>'s traditional OSD,
 and has several refresh problems as well. The command line above will firstly
-convert the input video to MPEG4 (this is mandatory, sorry), then apply an
+convert the input video to MPEG-4 (this is mandatory, sorry), then apply an
 expand filter which won't expand anything (-1: default), but apply the normal
 OSD onto the picture (that's what the "1" at the end does).
 </para></listitem>

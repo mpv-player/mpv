@@ -19,12 +19,12 @@ The most important ones above all:
 
 <itemizedlist>
 <listitem><simpara>
-  <emphasis role="bold">MPEG1</emphasis> (<emphasis role="bold">VCD</emphasis>) and
-  <emphasis role="bold">MPEG2</emphasis> (<emphasis role="bold">DVD</emphasis>) video
+  <emphasis role="bold">MPEG-1</emphasis> (<emphasis role="bold">VCD</emphasis>) and
+  <emphasis role="bold">MPEG-2</emphasis> (<emphasis role="bold">DVD</emphasis>) video
   </simpara></listitem>
 <listitem><simpara>
   native decoders for <emphasis role="bold">DivX ;-), OpenDivX (DivX4),
-  DivX 5 (Pro), 3ivX, M$ MPEG4</emphasis> v1, v2 and other MPEG4 variants
+  DivX 5 (Pro), 3ivX, M$ MPEG-4</emphasis> v1, v2 and other MPEG-4 variants
   </simpara></listitem>
 <listitem><simpara>
   native decoder for <emphasis role="bold">Windows Media Video 7/8</emphasis>
@@ -85,7 +85,7 @@ This section contains information about the DivX4 and DivX5 codecs of
 Their first available alpha version was OpenDivX 4.0 alpha 47 and 48.
 Support for this was included in <application>MPlayer</application> in the
 past, and built by default. We also used its postprocessing code to
-optionally enhance visual quality of MPEG1/2 movies. Now we use our own,
+optionally enhance visual quality of MPEG-1/2 movies. Now we use our own,
 for all file types.
 </para>
 
@@ -203,7 +203,7 @@ DivX.com DivX4/5 libraries!
 </para>
 
 <para>
-It contains a lot of nice codecs, especially important are the MPEG4 variants:
+It contains a lot of nice codecs, especially important are the MPEG-4 variants:
 DivX3, DivX4, DivX5, Windows Media Video 7/8 (WMV1/WMV2). Also a very interesting one
 is the WMA decoder.
 </para>
@@ -353,11 +353,11 @@ automatically.
 
 
 <sect3 id="mpeg12">
-<title>MPEG 1/2 video</title>
+<title>MPEG-1/2 video</title>
 <para>
-MPEG1 and MPEG2 are decoded by the multiplatform native <systemitem
+MPEG-1 and MPEG-2 are decoded by the multiplatform native <systemitem
 class="library">libmpeg2</systemitem> library, whose source code is
-included in <application>MPlayer</application>.  We handle buggy MPEG 1/2
+included in <application>MPlayer</application>.  We handle buggy MPEG-1/2
 video files by catching <systemitem>Signal 11</systemitem>
 (<systemitem>segmentation fault</systemitem>), and quickly
 reinitializing the codec, continuing exactly from where the failure

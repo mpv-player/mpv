@@ -7,24 +7,24 @@
 It is important to clarify a common mistake. When people see a file with a
 <filename>.AVI</filename> extension, they immediately conclude that it is
 not an MPEG file.  That is not true. At least not entirely. Contrary to
-popular belief such a file <emphasis>can</emphasis> contain MPEG1 video.
+popular belief such a file <emphasis>can</emphasis> contain MPEG-1 video.
 </para>
 
 <para>
 You see, a <emphasis role="bold">codec</emphasis> is not the same as a
 <emphasis role="bold">file format</emphasis>.
-Examples of video <emphasis role="bold">codecs</emphasis> are: MPEG1, MPEG2,
-MPEG4 (DivX), Indeo5, 3ivx.
+Examples of video <emphasis role="bold">codecs</emphasis> are: MPEG-1, MPEG-2,
+MPEG-4 (DivX), Indeo5, 3ivx.
 Examples of file <emphasis role="bold">formats</emphasis> are: MPG, AVI, ASF.
 </para>
 
 <para>
 In theory, you can put an OpenDivX video and MP3 audio
 into an <emphasis role="bold">MPG format file</emphasis>. However, most
-players will not play it, since they expect MPEG1 video and MP2 audio (unlike
+players will not play it, since they expect MPEG-1 video and MP2 audio (unlike
 <emphasis role="bold">AVI</emphasis>, <emphasis role="bold">MPG</emphasis>
 does not have the necessary fields to describe its video and audio streams).
-Or you might put MPEG1 video into an AVI file.
+Or you might put MPEG-1 video into an AVI file.
 <ulink url="http://ffmpeg.org/">FFmpeg</ulink> and
 <link linkend="mencoder"><application>MEncoder</application></link> can create these files.
 </para>
@@ -43,7 +43,7 @@ MPEG files come in different guises:
 <itemizedlist>
 <listitem><simpara>
   MPG: This is the most <emphasis role="bold">basic</emphasis> form of the
-  MPEG file formats. It contains MPEG1 video, and MP2 (MPEG-1 layer 2) or
+  MPEG file formats. It contains MPEG-1 video, and MP2 (MPEG-1 layer 2) or
   rarely MP1 audio.
   </simpara></listitem>
 <listitem><simpara>
@@ -56,7 +56,7 @@ MPEG files come in different guises:
 <listitem><simpara>
   VOB: This is the MPEG file format on <emphasis role="bold">DVDs</emphasis>.
   It is the same as MPG, plus the capability to contain subtitles or non-MPEG
-  (AC3) audio. It contains encoded MPEG2 video and usually AC3 audio, but DTS,
+  (AC3) audio. It contains encoded MPEG-2 video and usually AC3 audio, but DTS,
   MP2 and uncompressed LPCM are allowed, too. <emphasis role="bold">Read the
   <link linkend="dvd">DVD</link> section</emphasis>!
   </simpara></listitem>
@@ -85,7 +85,7 @@ option.
 
 <para>
 Designed by Microsoft, <emphasis role="bold">AVI (Audio Video Interleaved)</emphasis>
-is a widespread multipurpose format currently used mostly for MPEG4 (DivX and DivX4)
+is a widespread multipurpose format currently used mostly for MPEG-4 (DivX and DivX4)
 video. It has many known drawbacks and shortcomings (for example in streaming). It
 supports one video stream and 0 to 99 audio streams and can be as big as
 2GB, but there exists an extension allowing bigger files called
@@ -183,8 +183,8 @@ v2.0 files :). Note that ASF files nowadays come with the extension
 <para>
 These formats were designed by Apple and can contain any codec, CBR or VBR.
 They usually have a <filename>.QT</filename> or <filename>.MOV</filename>
-extension. Note that since the MPEG4 group chose QuickTime as the recommended
-file format for MPEG4, their MOV files come with a <filename>.MPG</filename> or
+extension. Note that since the MPEG-4 group chose QuickTime as the recommended
+file format for MPEG-4, their MOV files come with a <filename>.MPG</filename> or
 <filename>.MP4</filename> extension (Interestingly the video and audio
 streams in these files are real MPG and AAC files. You can even extract them with the
 <option>-dumpvideo</option> and <option>-dumpaudio</option> options.).
@@ -261,7 +261,7 @@ its <filename>.NUV</filename> files (only NuppelVideo 5.0). Those files can
 contain uncompressed YV12, YV12+RTJpeg compressed, YV12 RTJpeg+lzo
 compressed, and YV12+lzo compressed frames.
 <application>MPlayer</application> decodes (and also <emphasis role="bold">encodes</emphasis>
-them with <application>MEncoder</application> to MPEG4 (DivX)/etc!) them all.
+them with <application>MEncoder</application> to MPEG-4 (DivX)/etc!) them all.
 Seeking works.
 </para>
 </sect3>

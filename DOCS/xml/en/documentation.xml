@@ -61,7 +61,7 @@ many other Unices, and <emphasis role="bold">non-x86</emphasis> CPUs, see
 QT/MOV/MP4, FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ, PVA, Matroska files, supported by
 many native, XAnim, RealPlayer, and Win32 DLL codecs. You can watch
 <emphasis role="bold">VideoCD, SVCD, DVD, 3ivx, RealMedia, Sorenson, Theora</emphasis>, and
-<emphasis role="bold">MPEG4 (DivX)</emphasis> movies too. Another big
+<emphasis role="bold">MPEG-4 (DivX)</emphasis> movies too. Another big
 feature of <application>MPlayer</application> is the wide range of
 supported output drivers. It works with X11, Xv, DGA, OpenGL, SVGAlib,
 fbdev, AAlib, libcaca, DirectFB, but you can use GGI and SDL (and this way all
@@ -93,7 +93,7 @@ Encoder) is a simple movie encoder, designed to encode
 <application>MPlayer</application>-playable movies
 (<emphasis role="bold">AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</emphasis>)
 to other <application>MPlayer</application>-playable formats (see below). It
-can encode with various codecs, like <emphasis role="bold">MPEG4 (DivX4)</emphasis>
+can encode with various codecs, like <emphasis role="bold">MPEG-4 (DivX4)</emphasis>
 (1 or 2 passes), <systemitem class="library">libavcodec</systemitem>,
 <emphasis role="bold">PCM/MP3/VBR MP3</emphasis>
 audio.
