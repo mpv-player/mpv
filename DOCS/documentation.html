@@ -34,6 +34,7 @@
       <LI><A HREF="#installation">1.3 Installation</A></LI>
       <LI><A HREF="#gui">1.4 What about the GUI?</A></LI>
       <LI><A HREF="#subtitles_osd">1.5 Subtitles and OSD</A></LI>
+      <LI><A HREF="#rtc">1.6 RTC</A></LI>
     </UL>
   </LI>
   <LI><A HREF="#features">2. Features</A>
@@ -691,52 +692,7 @@ you get a nice and very fast fullscreen playing.</P>
   and encode movies with <B>MPlayer</B>, read the <A HREF="#tv">TV input</A>
   section.</LI>
 
-<LI>There are three timing methods in <B>MPlayer</B>.
-  <UL>
-    <LI><B>To use the old method</B>, you don't have to do anything. It uses
-      <CODE>usleep()</CODE> to tune A/V sync, with +/- 10ms accuracy. However
-      sometimes the sync has to be tuned even finer.</LI>
-    <LI><B>The new timer</B> code uses PC's RTC (Real Time Clock) for this task,
-      because it has precise 1ms timers. It is automagically enabled when
-      available, but requires root privileges, a <I>setuid root</I>
-      <B>MPlayer</B> binary or a properly set up kernel.
-      <BR>
-      If you are running kernel 2.4.19pre8 or later you can adjust the maximum
-      RTC frequency for normal users through the <CODE>/proc</CODE> filesystem.
-      Use this command to enable RTC for normal users:
-      <P>
-        <CODE>echo 1024 > /proc/sys/dev/rtc/max-user-freq</CODE>
-      </P>
-      If you do not have such a new kernel, you can also change one line in
-      <CODE>drivers/char/rtc.c</CODE> and recompile your kernel. Find the
-      section that reads
-      <PRE>
-	 * We don't really want Joe User enabling more
-	 * than 64Hz of interrupts on a multi-user machine.
-	 */
-	if ((rtc_freq > 64) && (!capable(CAP_SYS_RESOURCE)))
-      </PRE>
-      and change the 64 to 1024. You should really know what you are doing, though.
-      <BR>
-      You can see the new timer's efficiency in the status line.
-      <BR>
-      The power management functions of some notebook BIOSes with speedstep CPUs
-      interact badly with RTC. Audio and video may get out of sync. Plugging the
-      external power connector in before you power up your notebook seems to help.
-      You can always turn off RTC support with the <CODE>-nortc</CODE> switch.
-      In some hardware combinations (confirmed during usage of non-DMA DVD
-      drive on an ALi1541 board) usage of the RTC timer causes skippy playback.
-      
-      It's recommended to use the following method in these cases.</LI>
-    <LI><B>The third timer code</B> is turned on with the <CODE>-softsleep</CODE>
-      option. It has the efficiency of the RTC, but it doesn't use RTC. On the other
-      hand, it requires more CPU.</LI>
-  </UL>
-</LI>
 </UL>
-
-Note: <B>NEVER install a setuid root MPlayer binary on a multiuser system!</B>
-It's a clear way for everyone to gain root.
 
 <P>Then build <B>MPlayer</B>:</P>
 
@@ -919,9 +875,9 @@ Naboo was under an attack.<BR>
     programs.<BR>
     Some URLs:
     <UL>
-      <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/">ftp://ftp.mplayerhq.hu/MPlayer/releases/</A> - ISO fonts
-      <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/">ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/</A> - various fonts by users
-      <LI><A HREF="http://realtime.ssu.ac.kr/~lethean/mplayer">http://realtime.ssu.ac.kr/~lethean/mplayer</A> - Korean fonts & RAW plugin
+      <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/">ftp://ftp.mplayerhq.hu/MPlayer/releases/</A> - ISO fonts</LI>
+      <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/">ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/</A> - various fonts by users</LI>
+      <LI><A HREF="http://realtime.ssu.ac.kr/~lethean/mplayer">http://realtime.ssu.ac.kr/~lethean/mplayer</A> - Korean fonts & RAW plugin</LI>
     </UL>
   </LI>
 
@@ -949,6 +905,52 @@ Naboo was under an attack.<BR>
 
 <P>You can change default behaviour by setting <CODE>osdlevel=</CODE> variable
   in config file.</P>
+
+<P><B><A NAME="rtc">1.6 RTC</A></B></P>
+
+There are three timing methods in <B>MPlayer</B>.
+<UL>
+  <LI><B>To use the old method</B>, you don't have to do anything. It uses
+    <CODE>usleep()</CODE> to tune A/V sync, with +/- 10ms accuracy. However
+    sometimes the sync has to be tuned even finer.</LI>
+  <LI><B>The new timer</B> code uses PC's RTC (Real Time Clock) for this task,
+    because it has precise 1ms timers. It is automagically enabled when
+    available, but requires root privileges, a <I>setuid root</I>
+    <B>MPlayer</B> binary or a properly set up kernel.
+    <BR>
+    If you are running kernel 2.4.19pre8 or later you can adjust the maximum
+    RTC frequency for normal users through the <CODE>/proc</CODE> filesystem.
+    Use this command to enable RTC for normal users:
+    <P>
+      <CODE>echo 1024 > /proc/sys/dev/rtc/max-user-freq</CODE>
+    </P>
+    If you do not have such a new kernel, you can also change one line in
+    <CODE>drivers/char/rtc.c</CODE> and recompile your kernel. Find the
+    section that reads
+    <PRE>
+       * We don't really want Joe User enabling more
+       * than 64Hz of interrupts on a multi-user machine.
+       */
+      if ((rtc_freq > 64) && (!capable(CAP_SYS_RESOURCE)))
+    </PRE>
+    and change the 64 to 1024. You should really know what you are doing, though.
+    <BR>
+    You can see the new timer's efficiency in the status line.
+    <BR>
+    The power management functions of some notebook BIOSes with speedstep CPUs
+    interact badly with RTC. Audio and video may get out of sync. Plugging the
+    external power connector in before you power up your notebook seems to help.
+    You can always turn off RTC support with the <CODE>-nortc</CODE> switch.
+    In some hardware combinations (confirmed during usage of non-DMA DVD
+    drive on an ALi1541 board) usage of the RTC timer causes skippy playback.
+    It's recommended to use the third method in these cases.</LI>
+  <LI><B>The third timer code</B> is turned on with the <CODE>-softsleep</CODE>
+    option. It has the efficiency of the RTC, but it doesn't use RTC. On the other
+    hand, it requires more CPU.</LI>
+</UL>
+
+<B>Note:</B> <B>NEVER install a setuid root MPlayer binary on a multiuser system!</B>
+It's a clear way for everyone to become root.
 
 
 <P><B><A NAME="features">2. Features</A></B></P>
@@ -1925,7 +1927,7 @@ end
 <LI><B><A HREF="mailto:gabucino@mplayerhq.hu">Gábor Bérczi (Gabucino)</A></B>
 <UL>
   <LI>documentation writer & maintainer</LI>
-  <LI>hungarian translation of documentation, homepage, and help output</LI>
+  <LI>Hungarian translation of documentation, homepage, and help output</LI>
   <LI>second homepage design&amp;gfx</LI>
   <LI>homepage maintainer</LI>
   <LI>testing, codecs quality &amp; speed comparisons</LI>
@@ -2540,25 +2542,25 @@ TOOLS:
 achieved on the following addresses:</P>
 
 <UL>
-<LI>MPlayer developers list:<BR>
-<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng</A>
-<P>This list is about mplayer development! Talking about interface/API changes,
+<LI>MPlayer developers list:
+<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng</A><BR>
+This list is about mplayer development! Talking about interface/API changes,
 new libraries, code optimization, configure changes, and send patches here.
-Do NOT send bugreports, user questions, feature requests, flame here!
-This list should be kept low-traffic.</P>
+Do NOT send bug reports, user questions, feature requests or flames here!
+This list should be kept low-traffic.
 </LI>
-<LI>MPlayer users list:<BR>
+<LI>MPlayer users list:
 <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-users">http://mplayerhq.hu/mailman/listinfo/mplayer-users</A>
 <UL>
-<LI>send bugreports here (after reading <A HREF="#known_bugs">Known Bugs</A> section, and <A HREF="bugreports.html">Appendix C</A>)</LI>
-<LI>send feature requests here (after reading the WHOLE documentation)</LI>
-<LI>send user questions here (after reading the WHOLE documentation)</LI>
+<LI>Send bug reports here (after reading the <A HREF="#known_bugs">Known Bugs</A> section, and <A HREF="bugreports.html">Appendix C</A>).</LI>
+<LI>Send feature requests here (after reading the WHOLE documentation).</LI>
+<LI>Send user questions here (after reading the WHOLE documentation).</LI>
 </UL>
 </LI>
-<LI>MPlayer hungarian users list:<BR>
+<LI>MPlayer Hungarian users list:
 <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok">http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok</A>
-<P><UL>
-<LI>hungarian language list</LI>
+<UL>
+<LI>Hungarian language list</LI>
 <LI>topic? We'll see about it... mostly flame and RTFM questions up to now :(</LI>
 </UL>
 </LI>
@@ -2571,24 +2573,23 @@ Send Matrox related questions here
 <LI>and about matroxfb-TVout stuff.</LI>
 </UL>
 </LI>
-<LI>MPlayer &amp; DVB card users:<BR>
-<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb">http://mplayerhq.hu/mailman/listinfo/mplayer-dvb</A>
-<P>Things related to the hardware decoder card called DVB. (NOT dxr3!)</P>
+<LI>MPlayer &amp; DVB card users:
+<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb">http://mplayerhq.hu/mailman/listinfo/mplayer-dvb</A><BR>
+Things related to the hardware decoder card called DVB (NOT DXR3!).
 </LI>
-<LI>MPlayer CVS-log: <BR>
-<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog">http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog</A>
-<P>Send only questions about CVS changes here.
-(if you don't understand why a change is required or you've better fix or you've
-noticed possible bug/problem in the committed patch)
-Be sure in that your target developer reads this list!</P>
+<LI>MPlayer CVS-log:
+<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog">http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog</A><BR>
+Send only questions about CVS changes here (if you do not understand why a
+change is required or you have a better fix or you have noticed a possible
+bug/problem in the committed patch). Be sure in that your target developer reads this list!
 </LI>
 </UL>
 
-<P>NOTE: language of above lists are ENGLISH, unless explicitly stated
-otherwise.  Please do not send messages using other language!</P>
+<P><B>Note:</B> The Languages of above lists are ENGLISH, unless explicitly
+  stated otherwise.  Please do not send messages using another language!</P>
 
-<P>NOTE: you can reach the searchable mailing list archives
-<A HREF="http://www.mplayerhq.hu/cgi-bin/htsearch">here</A>.
+<P><B>Note:</B> You can reach the searchable mailing list archives
+  <A HREF="http://www.mplayerhq.hu/cgi-bin/htsearch">here</A>.
 
 
 <P><B><A NAME="bug_reports"></A><A HREF="bugreports.html">Appendix C</A> - How to report bugs</B></P>
