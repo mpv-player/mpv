@@ -88,15 +88,12 @@ typedef struct
     uint32_t		dwReserved[4];
 } MainAVIHeader;
 
-/* The RECT structure */
-typedef struct tagRECT
-{
+typedef struct rectangle_t {
     short  left;
     short  top;
     short  right;
     short  bottom;
-} RECT, *PRECT, *LPRECT;
-typedef const RECT *LPCRECT;
+} rectangle_t;
 
 typedef struct {
     FOURCC		fccType;
@@ -112,7 +109,7 @@ typedef struct {
     uint32_t		dwSuggestedBufferSize;
     uint32_t		dwQuality;
     uint32_t		dwSampleSize;
-    RECT		rcFrame;
+    rectangle_t		rcFrame;
 } AVIStreamHeader;
 
 /* Flags for index */
