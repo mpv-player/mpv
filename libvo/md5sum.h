@@ -77,7 +77,7 @@
 
 /* #include "auth_common.h"   This was in the original. */
 
-#include <stdint.h> /* This was not... */
+#include <inttypes.h> /* This was not... */
 
 /* -------------------------------------------------------------------------- **
  * Typedefs:
