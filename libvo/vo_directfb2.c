@@ -217,13 +217,13 @@ if (verbose) printf("DirectFB: Preinit entered\n");
    */
 
         DFBCHECK (DirectFBCreate (&dfb));
-        if (DFB_OK != dfb->SetCooperativeLevel (dfb, DFSCL_EXCLUSIVE)) {
-	    printf("DirectFB: Warning - cannot swith to exclusive mode");
-            if (DFB_OK != dfb->SetCooperativeLevel (dfb, DFSCL_FULLSCREEN)) {
-		printf("DirectFB: Warning - cannot swith to fullscreen mode");
-	    };
-	};
 
+#if DIRECTFBVERSION != 917
+        if (DFB_OK != dfb->SetCooperativeLevel (dfb, DFSCL_FULLSCREEN)) {
+            printf("DirectFB: Warning - cannot swith to fullscreen mode");
+        };
+#endif
+	
   /*
    * (Get keyboard)
    */
@@ -277,6 +277,9 @@ DFBSurfacePixelFormat convformat(uint32_t format)
     	    case IMGFMT_YV12:  return  DSPF_YV12; break;
     	    case IMGFMT_I420:  return  DSPF_I420; break;
 //    	    case IMGFMT_IYUV:  return  DSPF_IYUV; break;
+    	    case IMGFMT_RGB8:  return  DSPF_RGB332; break;
+    	    case IMGFMT_BGR8:  return  DSPF_RGB332; break;
+	
 	    default: return 0;
 	}
 return 0;	
@@ -308,7 +311,7 @@ DFBEnumerationResult test_format_callback( unsigned int                 id,
 	       return DFENUM_OK;
      } else {
         DFBDisplayLayerConfig        dlc;
-	
+
 	if (params->setsize) {
     	    dlc.flags	= DLCONF_WIDTH |DLCONF_HEIGHT;
 	    dlc.width	= params->width;
@@ -528,19 +531,22 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 	    printf("DirectFB: ConfigError - no suitable layer found\n");
 	    params.id = DLID_PRIMARY;
 	}
-/*	Uncomment following if you want to use tvout on CRTC2 (requieres patch for DirectFB from Ville Syrjala)
-	params.id=2;
-	params.scale=0;
-	params.result=1;
-*/
+
 	if (verbose) printf("DirectFB: Config - layer %i\n",params.id);
 
-
-// try to setp-up proper configuration
-
+	// setup layer
 
         DFBCHECK (dfb->GetDisplayLayer( dfb, params.id, &layer));
+	
+#if DIRECTFBVERSION > 916
+	ret = layer->SetCooperativeLevel (layer, DLSCL_EXCLUSIVE);
 
+        if (DFB_OK != ret) {
+	    DirectFBError("MPlayer - Switch layer to exlusive mode.",ret);
+	    printf("DirectFB: Warning - cannot swith layer to exclusive mode. This could cause\nproblems. You may need to select correct pixel format manually!\n");
+	};
+#endif
+	
 	if (params.scale) {
             if (verbose) printf("DirectFB: Config - set layer config (size)\n");
             dlc.flags       = DLCONF_WIDTH | DLCONF_HEIGHT;
@@ -549,13 +555,16 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 
 	    ret = layer->SetConfiguration(layer,&dlc);
 
-	    if (ret && (params.scale || verbose)) printf("DirectFB: ConfigError in layer configuration (size)\n");
-
+	    if (ret) {
+		printf("DirectFB: ConfigError in layer configuration (size)\n");
+		DirectFBError("MPlayer - Layer size change.",ret);
+	    };
 	}
 
         // look if we need to change pixel fromat of layer
 	// and just for sure fetch also all layer propreties
 	dlc.flags       = DLCONF_PIXELFORMAT | DLCONF_WIDTH | DLCONF_HEIGHT | DLCONF_OPTIONS | DLCONF_BUFFERMODE;
+
 	ret = layer->GetConfiguration(layer,&dlc);
 
 	dlc.flags       = DLCONF_PIXELFORMAT | DLCONF_WIDTH | DLCONF_HEIGHT;
@@ -571,14 +580,72 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
     	    dlc.flags       = DLCONF_PIXELFORMAT;
 	    dlc.pixelformat = convformat(params.format);
 
-	    printf("DirectFB: Format [%x]\n",dlc.pixelformat);
+	    printf("DirectFB: Desired pixelformat: %x\n",dlc.pixelformat);
 
     	    if (verbose) printf("DirectFB: Config - set layer config (format)\n");
 	    ret = layer->SetConfiguration(layer,&dlc);
 
 	    if (ret) {
-		printf("DirectFB: ConfigError in layer configuration (format)\n");
-		return CONFIG_ERROR;
+		unsigned int bpp;
+		printf("DirectFB: ConfigError in layer configuration (format, flags=%x)\n",dlc.flags);
+		DirectFBError("MPlayer - layer pixelformat change",ret);
+
+		// ugly fbdev workabout - try to switch pixelformat via videomode change
+		switch (dlc.pixelformat) {
+		    case DSPF_ARGB: 
+		    case DSPF_RGB32: bpp=32;break;
+    		    case DSPF_RGB24: bpp=24;break;
+	            case DSPF_RGB16: bpp=16;break;
+#if DIRECTFBVERSION > 915
+    		    case DSPF_ARGB1555: bpp=15;break;
+#else
+        	    case DSPF_RGB15: bpp=15;break;
+#endif
+		    case DSPF_RGB332 : bpp=8;break;
+		}
+		
+		switch (dlc.pixelformat) {
+		    case DSPF_ARGB:
+		    case DSPF_RGB32:
+    		    case DSPF_RGB24:
+	            case DSPF_RGB16:
+#if DIRECTFBVERSION > 915
+    		    case DSPF_ARGB1555:
+#else
+        	    case DSPF_RGB15:
+#endif
+		    case DSPF_RGB332:
+				    printf("DirectFB: Trying to recover via videomode change (VM).\n");
+				    // get size
+		        	    dlc.flags = DLCONF_WIDTH | DLCONF_HEIGHT;
+				    if (DFB_OK==layer->GetConfiguration(layer,&dlc)) {
+					// try to set videomode
+				        printf("DirectFB: Videomode  %ix%i BPP %i\n",dlc.width,dlc.height,bpp);
+				    	ret = dfb->SetVideoMode(dfb,dlc.width,dlc.height,bpp);
+					if (ret) DirectFBError("MPlayer - VM - pixelformat change",ret);
+
+				    };
+
+				    //get current pixel format
+				    dlc.flags       = DLCONF_PIXELFORMAT;
+	    			    ret = layer->GetConfiguration(layer,&dlc);
+				    if (ret) {
+					DirectFBError("MPlayer - VM - Layer->GetConfiguration",ret);
+					} else {
+				        printf("DirectFB: Layer has now pixelformat [%x]\n",dlc.pixelformat);
+					};
+
+				    // check if we were succesfull
+				    if ((dlc.pixelformat != convformat(params.format)) || (ret != DFB_OK)) {
+				        printf("DirectFB: Recovery failed!.\n");
+					return CONFIG_ERROR;
+					}
+
+				    break;
+				    
+		    default: return CONFIG_ERROR;	
+			
+		};
 	    };
 	};
 
