@@ -89,6 +89,7 @@ Alex Beregszaszi (al3x) <alex@naxine.org>
       loader)
     * libmpcodecs / libmpdemux hacking
     * co-patch-maintainer
+    * dynamic a/v plugins (external shared ad/vd/.. objects)
 
 Andreas Ackermann (Acki) <asackerm@stud.informatik.uni-erlangen.de>
     * LIRC support (see documentation)
