@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with 1.21 -->
+<!-- synced with 1.25 -->
 <sect1 id="codecs">
 <title>Поддерживаемые кодеки</title>
 
@@ -190,16 +190,16 @@ cp ../../src/encore.h /usr/local/include
 </sect3>
 
 
-<sect3 id="ffmpeg" xreflabel="FFmpeg DivX/libavcodec">
-<title>FFmpeg DivX/libavcodec</title>
+<sect3 id="ffmpeg" xreflabel="FFmpeg/libavcodec">
+<title>FFmpeg/libavcodec</title>
 
 <para>
 <ulink url="http://ffmpeg.sourceforge.net">FFmpeg</ulink> содержит пакет кодеков
 с <emphasis role="bold">открытым исходным кодом</emphasis>, который способен
-декодировать потоки, закодированные H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/HuffYUV/SVQ1/SVQ3
-видео , или WMA (Windows Media Audio) аудио кодеками. Кроме того, с некоторыми
-из них можно ещё и закодировать, причём этот пакет быстрее, чем Win32 кодеки или
-DivX.com DivX4/5 библиотека!
+декодировать потоки, закодированные различными видео и  аудио кодеками.
+Кроме того, этот пакет предоставляет потрясающие кодирующие возможности,
+причём производительность выше, чем у Win32 кодеков или DivX.com DivX4/5
+библиотеки!
 </para>
 
 <para>
@@ -216,28 +216,40 @@ DivX.com DivX4/5 библиотека!
 </para>
 
 <para>
+Полный список доступных кодеков доступен на странице FFmpeg.
+Пожжерживаемые <ulink url="http://www.ffmpeg.org/ffmpeg-doc.html#SEC19">видео</ulink>
+и <ulink url="http://www.ffmpeg.org/ffmpeg-doc.html#SEC20">аудио</ulink> кодеки.
+</para>
+
+<para>
 Если вы используете релиз <application>MPlayer</application>'а, то у Вас в пакете
 уже есть libavcodec, просто компилируйте как обычно. Если Вы используете MPlayer
 из CVS, Вы должны извлечь libavcodec из CVS дерева FFmpeg, поскольку релизы
-FFmpeg <emphasis role="bold">не</emphasis> работают с 
-<application>MPlayer</application>'ом. Чтобы добиться этого:
+FFmpeg <emphasis role="bold">не</emphasis> очень редки. Как правило, CVS
+достаточно стабилен и предоставляет больше возможностей. Чтобы это сделать:
 </para>
 
 <procedure>
 <step><para>
-  <screen>cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg login</screen>
+  <screen>cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg login</screen>
   </para></step>
 <step><para>
-  <screen>cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg co ffmpeg</screen>
+  <screen>cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg co ffmpeg</screen>
   </para></step>
 <step><para>
   Переместите каталог <filename>libavcodec</filename> из исходного кода FFmpeg
   в корень <application>MPlayer</application>'овского CVS дерева.
   Это должно выглядеть так:
-  <filename>main/libavcodec</filename>
+  <filename class="directory">main/libavcodec</filename>
   </para><para>
   Символической ссылки <emphasis role="bold">не</emphasis> достаточно, Вы должны
   скопировать/переместить его!
+  </para></step>
+<step><para>
+  Если Вы хотите, чтобы libavcodec обновлялся каждый раз, когда Вы обновляете
+  <application>MPlayer</application>'овский CVS, добавьте такую строчку в файл:
+  <filename>main/CVS/Entries</filename>:
+  <screen>D/libavcodec////</screen>
   </para></step>
 <step><para>
   Скомпилируйте. <filename>configure</filename> должен определить проблемы до
