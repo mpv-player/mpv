@@ -611,7 +611,7 @@ int real_get_rdt_chunk(rtsp_t *rtsp_session, char **buffer) {
     printf("rdt chunk not recognized: got 0x%02x\n", header[0]);
     return 0;
   }
-  size=(header[1]<<12)+(header[2]<<8)+(header[3]);
+  size=(header[1]<<16)+(header[2]<<8)+(header[3]);
   flags1=header[4];
   if ((flags1!=0x40)&&(flags1!=0x42))
   {
@@ -634,7 +634,7 @@ int real_get_rdt_chunk(rtsp_t *rtsp_session, char **buffer) {
   }
   flags2=header[7];
   // header[5..6] == frame number in stream
-  unknown1=(header[5]<<12)+(header[6]<<8)+(header[7]);
+  unknown1=(header[5]<<16)+(header[6]<<8)+(header[7]);
   n=rtsp_read_data(rtsp_session, header, 6);
   if (n<6) return 0;
   ts=BE_32(header);
