@@ -82,6 +82,8 @@ typedef struct {
 
 static int get_buffer(AVCodecContext *avctx, AVFrame *pic);
 static void release_buffer(AVCodecContext *avctx, AVFrame *pic);
+static enum PixelFormat get_format(struct AVCodecContext * avctx, 
+                                   const enum PixelFormat * pix_fmt);
 
 #ifdef HAVE_XVMC
 static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic);
@@ -197,6 +199,7 @@ static int init(sh_video_t *sh){
         assert(ctx->do_dr1);//these are must to!
         assert(ctx->do_slices); //it is (vo_)ffmpeg bug if this fails
         avctx->flags|= CODEC_FLAG_EMU_EDGE;//do i need that??!!
+        avctx->get_format= get_format;//for now only this decoder will use it
         avctx->get_buffer= mc_get_buffer;
         avctx->release_buffer= mc_release_buffer;
         avctx->draw_horiz_band = mc_render_slice;
@@ -423,7 +426,7 @@ static void draw_slice(struct AVCodecContext *s,
 }
 
 
-static int init_vo(sh_video_t *sh){
+static int init_vo(sh_video_t *sh, enum PixelFormat pix_fmt){
     vd_ffmpeg_ctx *ctx = sh->context;
     AVCodecContext *avctx = ctx->avctx;
 #if LIBAVCODEC_BUILD >= 4687
@@ -447,7 +450,7 @@ static int init_vo(sh_video_t *sh){
 	sh->disp_w = avctx->width;
 	sh->disp_h = avctx->height;
 	ctx->vo_inited=1;
-	switch(avctx->pix_fmt){
+	switch(pix_fmt){
 	case PIX_FMT_YUV410P: ctx->best_csp=IMGFMT_YVU9;break; //svq1
 	case PIX_FMT_YUV420P: ctx->best_csp=IMGFMT_YV12;break; //mpegs
 	case PIX_FMT_YUV422P: ctx->best_csp=IMGFMT_422P;break; //mjpeg / huffyuv
@@ -517,7 +520,7 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
   }
 #endif
 
-    if(init_vo(sh)<0){
+    if(init_vo(sh,avctx->pix_fmt) < 0){
         avctx->release_buffer= avcodec_default_release_buffer;
         avctx->get_buffer= avcodec_default_get_buffer;
         return avctx->get_buffer(avctx, pic);
@@ -794,7 +797,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
     if(!got_picture) return NULL;	// skipped image
 
-    if(init_vo(sh)<0) return NULL;
+    if(init_vo(sh,avctx->pix_fmt) < 0) return NULL;
 
     if(dr1 && pic->opaque){
         mpi= (mp_image_t*)pic->opaque;
@@ -843,6 +846,32 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     return mpi;
 }
 
+static enum PixelFormat get_format(struct AVCodecContext * avctx, 
+                                    const enum PixelFormat * fmt){
+sh_video_t * sh = avctx->opaque;
+vd_ffmpeg_ctx *ctx = sh->context;
+int i;
+
+#ifdef HAVE_XVMC
+    if(avctx->xvmc_acceleration){
+        avctx->get_buffer= mc_get_buffer;
+        avctx->release_buffer= mc_release_buffer;
+        avctx->draw_horiz_band = mc_render_slice;
+        printf("vd_ffmpeg: XVMC accelerated MPEG2\n");
+        assert(ctx->do_dr1);//these are must to!
+        assert(ctx->do_slices); //it is (vo_)ffmpeg bug if this fails
+        avctx->flags|= CODEC_FLAG_EMU_EDGE;//do i need that??!!
+        avctx->slice_flags=SLICE_FLAG_CODED_ORDER|SLICE_FLAG_ALLOW_FIELD;
+    }
+#endif
+    for(i=0;fmt[i]!=-1;i++){
+        printf("trying pixfmt=%d\n",i);
+        if( init_vo(sh,fmt[i]) >= 0)
+	    return fmt[i];
+    }
+    return fmt[0];
+}
+
 #ifdef HAVE_XVMC
 static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic){
     sh_video_t * sh = avctx->opaque;
@@ -864,7 +893,7 @@ static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic){
     if(verbose > 4)
         printf("vd_ffmpeg::mc_get_buffer\n");
 
-    if(init_vo(sh)<0){
+    if(init_vo(sh,avctx->pix_fmt) < 0){
         printf("vd_ffmpeg: Unexpected init_vo error\n");
         exit(1);
 //        return -1;//!!fixme check error conditions
