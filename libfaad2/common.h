@@ -34,7 +34,7 @@
 extern "C" {
 #endif
 
-/* Allow build on cygwin*/
+/* Allow build on Cygwin*/
 #if defined(__CYGWIN__)
 #define __STRICT_ANSI__
 #endif

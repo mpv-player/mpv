@@ -53,3 +53,4 @@ void sbr_qmf_synthesis_64_sse(sbr_info *sbr, qmfs_info *qmfs, qmf_t X[MAX_NTSRHF
 }
 #endif
 #endif
+

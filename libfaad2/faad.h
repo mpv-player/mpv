@@ -1,6 +1,6 @@
 /*
 ** FAAD2 - Freeware Advanced Audio (AAC) Decoder including SBR decoding
-** Copyright (C) 2003 M. Bakker, Ahead Software AG, http://www.nero.com
+** Copyright (C) 2003-2004 M. Bakker, Ahead Software AG, http://www.nero.com
 **
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 **
 ** $Id: faad.h,v 1.47 2004/04/03 19:08:37 menno Exp $
 **/
+
 /* warn people for update */
 #pragma message("please update faad2 include filename and function names!")
 

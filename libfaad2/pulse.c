@@ -39,7 +39,8 @@ uint8_t pulse_decode(ic_stream *ics, int16_t *spec_data, uint16_t framelen)
 
     k = ics->swb_offset[pul->pulse_start_sfb];
 
-    for(i = 0; i <= pul->number_pulse; i++) {
+    for (i = 0; i <= pul->number_pulse; i++)
+    {
         k += pul->pulse_offset[i];
 
         if (k >= framelen)
