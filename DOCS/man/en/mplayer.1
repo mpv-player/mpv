@@ -5161,10 +5161,16 @@ rate distortion optimal, slow
 sum of absolute vertical differences 
 .IPs "9 (VSSE)"
 sum of squared vertical differences
+.IPs "10 (NSSE)"
+noise preserving sum of squared differences
 .IPs +256\ 
 use chroma too, doesn't work (correctly) with B frames currently
 .RE
 .PD 1
+.TP
+.B nsse_weight=<0\-100>
+nsse weight, larger weights will result in more noise, 
+with 0 NSSE is identical to SSE
 .TP
 .B predia=<-99\-6>
 Diamond type and size for motion estimation pre pass
