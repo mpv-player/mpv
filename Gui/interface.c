@@ -142,13 +142,14 @@ void guiInit( void )
  memset( &gtkEquChannels,0,sizeof( gtkEquChannels ) );
  gtkAOOSSMixer=strdup( PATH_DEV_MIXER );
  gtkAOOSSDevice=strdup( PATH_DEV_DSP );
+ fullscreen=gtkLoadFullscreen;       
    
  gtkInit();
  wsXInit( (void *)mDisplay );
      
 // cfg_read(); 
  appInit( (void*)mDisplay );
-       
+
  if ( plCurrent && !filename ) mplSetFileName( plCurrent->path,plCurrent->name,STREAMTYPE_FILE );
  if ( sub_name ) guiSetFilename( guiIntfStruct.Subtitlename,sub_name );
 #if defined( USE_OSD ) || defined( USE_SUB )

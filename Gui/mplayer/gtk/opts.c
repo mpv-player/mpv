@@ -63,6 +63,7 @@ static GtkWidget * CBDumpMPSub;
 static GtkWidget * CBDumpSrt;
 static GtkWidget * CBPostprocess;
 static GtkWidget * CBCache;
+static GtkWidget * CBLoadFullscreen;
 
 static GtkWidget * SBCache;
 static GtkAdjustment * SBCacheadj;
@@ -264,6 +265,7 @@ void ShowPreferences( void )
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBNonInterlaved ),force_ni );
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBIndex ),index_mode );
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBPostprocess ),gtkVopPP );
+ gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBLoadFullscreen ),gtkLoadFullscreen );
  gtk_adjustment_set_value( HSPPQualityadj,auto_quality );
  {
   int     i;
@@ -462,6 +464,7 @@ void prButton( GtkButton * button,gpointer user_data )
 	force_ni=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBNonInterlaved ) );
 	index_mode=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBIndex ) );
 	gtkVopPP=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBPostprocess ) ); 
+	gtkLoadFullscreen=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBLoadFullscreen ) );
 	gtkSet( gtkSetAutoq,HSPPQualityadj->value,NULL );
 
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBCache ) ) ) gtkSet( gtkSetCacheSize,SBCacheadj->value,NULL );
@@ -1807,6 +1810,37 @@ GtkWidget * create_Preferences( void )
   gtk_object_set_data_full( GTK_OBJECT( Preferences ),"SBCache",SBCache,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( SBCache );
   gtk_box_pack_start( GTK_BOX( hbox5 ),SBCache,TRUE,TRUE,0 );
+
+  frame11=gtk_frame_new( MSGTR_PREFERENCES_FRAME_Misc );
+  gtk_widget_set_name( frame11,"frame11" );
+  gtk_widget_ref( frame11 );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame11",frame11,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( frame11 );
+  gtk_box_pack_start( GTK_BOX( vbox601 ),frame11,FALSE,FALSE,0 );
+  gtk_frame_set_shadow_type( GTK_FRAME( frame11 ),GTK_SHADOW_ETCHED_OUT );
+
+  frame=gtk_frame_new( NULL );
+  gtk_widget_set_name( frame,"frame" );
+  gtk_widget_ref( frame );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame",frame,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( frame );
+  gtk_container_add( GTK_CONTAINER( frame11 ),frame );
+  gtk_container_set_border_width( GTK_CONTAINER( frame ),0 );
+  gtk_frame_set_shadow_type( GTK_FRAME( frame ),GTK_SHADOW_NONE );
+
+  vbox602=gtk_vbox_new( FALSE,0 );
+  gtk_widget_set_name( vbox602,"vbox602" );
+  gtk_widget_ref( vbox602 );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"vbox602",vbox602,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( vbox602 );
+  gtk_container_add( GTK_CONTAINER( frame ),vbox602 );
+
+  CBLoadFullscreen=gtk_check_button_new_with_label( MSGTR_PREFERENCES_LoadFullscreen );
+  gtk_widget_set_name( CBLoadFullscreen,"CBLoadFullscreen" );
+  gtk_widget_ref( CBLoadFullscreen );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"CBLoadFullscreen",CBLoadFullscreen,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( CBLoadFullscreen );
+  gtk_box_pack_start( GTK_BOX( vbox602 ),CBLoadFullscreen,FALSE,FALSE,0 );
 
   label4=gtk_label_new( "Misc" );
   gtk_widget_set_name( label4,"label4" );

@@ -26,6 +26,7 @@ extern char * gtkEquChannel3;
 extern char * gtkEquChannel4;
 extern char * gtkEquChannel5;
 extern char * gtkEquChannel6;
+extern int    gtkLoadFullscreen;
 
 extern int cfg_read( void );
 extern int cfg_write( void );

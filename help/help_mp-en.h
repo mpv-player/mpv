@@ -439,6 +439,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_PostProcess "Postprocessing"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec & demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "Cache"
+#define MSGTR_PREFERENCES_FRAME_Misc "Misc"
 #define MSGTR_PREFERENCES_OSS_Device "Device:"
 #define MSGTR_PREFERENCES_OSS_Mixer "Mixer:"
 #define MSGTR_PREFERENCES_Message "Please remember that you need to restart playback for some options to take effect!"
@@ -477,6 +478,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontOSDScale "OSD scale:"
 #define MSGTR_PREFERENCES_SubtitleOSD "Subtitle & OSD"
 #define MSGTR_PREFERENCES_Cache "Cache on/off"
+#define MSGTR_PREFERENCES_LoadFullscreen "Started in fullscreen"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Fatal error!"
