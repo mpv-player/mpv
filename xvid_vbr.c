@@ -47,9 +47,9 @@
 #define DEFAULT_DESIRED_SIZE    700
 #define DEFAULT_AUDIO_BITRATE   128
 #define DEFAULT_MOVIE_LENGTH      2
-#define DEFAULT_TWOPASS_BOOST   150
+#define DEFAULT_TWOPASS_BOOST  1000
 #define DEFAULT_FPS           25.0f
-#define DEFAULT_CREDITS_SIZE     10
+#define DEFAULT_CREDITS_SIZE      0
 
 #define DEFAULT_XVID_DBG_FILE   "xvid.dbg"
 #define DEFAULT_XVID_STATS_FILE "xvid.stats"
@@ -160,9 +160,13 @@ int vbrSetDefaults(vbr_control_t *state)
 	/* Default statistic filename */
 	state->filename = DEFAULT_XVID_STATS_FILE;
 
-	/* Default is a 2hour movie on 700Mo CD-ROM + 128kbit sound track */
+	/*
+	 * Default is a 2hour movie on 700Mo CD-ROM + 128kbit sound track
+	 * This represents a target bitrate of 687kbit/s
+	 */
 	state->desired_size = DEFAULT_DESIRED_SIZE*1024*1024 -
 		DEFAULT_MOVIE_LENGTH*3600*DEFAULT_AUDIO_BITRATE*1000/8;
+	state->desired_bitrate = state->desired_size*8/(DEFAULT_MOVIE_LENGTH*3600);
 
 	/* Credits */
 	state->credits_mode = VBR_CREDITS_MODE_RATE;
@@ -182,7 +186,7 @@ int vbrSetDefaults(vbr_control_t *state)
 	/* Keyframe boost */
 	state->keyframe_boost = 0;
 	state->kftreshold = 10;
-	state->kfreduction = 20;
+	state->kfreduction = 30;
 	state->min_key_interval = 1;
 	state->max_key_interval = (int)DEFAULT_FPS*10;
 
@@ -202,13 +206,13 @@ int vbrSetDefaults(vbr_control_t *state)
 	state->alt_curve_bonus_bias = 50;
 	state->bitrate_payback_method = VBR_PAYBACK_BIAS;
 	state->bitrate_payback_delay = 250;
-	state->twopass_max_bitrate = state->desired_size*8 / (120*60);
+	state->twopass_max_bitrate = DEFAULT_TWOPASS_BOOST*state->desired_bitrate;
 	state->twopass_max_overflow_improvement = 60;
 	state->twopass_max_overflow_degradation = 60;
 	state->max_iquant = 31;
-	state->min_iquant = 1;
+	state->min_iquant = 2;
 	state->max_pquant = 31;
-	state->min_pquant = 1;
+	state->min_pquant = 2;
 	state->fixed_quant = 3;
 
 	state->max_framesize = (1.0/(float)DEFAULT_FPS) * state->twopass_max_bitrate / 8;
@@ -252,7 +256,6 @@ int vbrInit(vbr_control_t *state)
 		if(state->debug_file == NULL)
 			return(-1);
 
-		setvbuf(state->debug_file, NULL, _IOLBF, 0);
 		fprintf(state->debug_file, "# XviD Debug output\n");
 		fprintf(state->debug_file, "# quant | intra | header bytes"
 			"| total bytes | kblocks | mblocks | ublocks"
@@ -1117,12 +1120,13 @@ static int vbr_init_2pass2(void *sstate)
 	state->curve_comp_error = 0.0;
 	state->last_quant = 0;
 
-	/* Two pass maximum boost computed from frame mean */
-	state->twopass_max_bitrate = DEFAULT_TWOPASS_BOOST/100.0 *
-		state->average_frame * state->fps * 8;
-
-	state->max_framesize = state->average_frame *
-		DEFAULT_TWOPASS_BOOST/100.0;
+	/*
+	 * Above this frame size limit, normal vbr rules will not apply
+	 * This means :
+	 *      1 - Quant can de/increase more than -/+2 between 2 frames
+	 *      2 - Leads to artifacts because of 1
+	 */
+	state->max_framesize = state->twopass_max_bitrate/state->fps;
 
 	/* Get back to the beginning of frame statistics */
 	fseek(state->pass1_file, pos_firstframe, SEEK_SET);

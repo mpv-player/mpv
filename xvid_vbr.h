@@ -117,13 +117,13 @@ typedef struct _vbr_control_t
 	int alt_curve_bonus_bias;
 	int bitrate_payback_method;
 	int bitrate_payback_delay;
-	int twopass_max_bitrate;
-	int twopass_max_overflow_improvement;
-	int twopass_max_overflow_degradation;
 	int max_iquant;
 	int min_iquant;
 	int max_pquant;
 	int min_pquant;
+	int twopass_max_bitrate;
+	int twopass_max_overflow_improvement;
+	int twopass_max_overflow_degradation;
 
 	/*
 	 * For VBR_MODE_FIXED_QUANT - the quantizer that has to be used for all
