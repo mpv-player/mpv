@@ -1,5 +1,5 @@
 /* Translated by:  Nick Kurshev <nickols_k@mail.ru>,
- *		Dmitry Baryshkov <lumag@qnc.ru>
+ *		Dmitry Baryshkov <mitya@school.ioffe.ru>
    Was synced with help_mp-en.h: rev 1.115
  ========================= MPlayer help =========================== */
 
@@ -11,7 +11,7 @@ static char help_text[]=
 " -vo <drv[:dev]> выбор драйвера и устройства видео вывода (список см. с '-vo help')\n"
 " -ao <drv[:dev]> выбор драйвера и устройства аудио вывода (список см. с '-ao help')\n"
 #ifdef HAVE_VCD
-" vcd://<номер трека> играть дорожку VCD (video cd) с устройства вместо файла\n"
+" vcd://<номер трека> играть дорожку (S)VCD (Super Video CD) (указывайте устройство, не монтируйте его)\n"
 #endif
 #ifdef USE_DVDREAD
 " dvd://<номер ролика> играть DVD ролик с устройства вместо файла\n"
@@ -107,7 +107,7 @@ static char help_text[]=
 #define MSGTR_Playing "Проигрывание %s.\n"
 #define MSGTR_NoSound "Аудио: без звука!!!\n"
 #define MSGTR_FPSforced "Кадры/сек форсированы в %5.3f (ftime: %5.3f).\n"
-#define MSGTR_CompiledWithRuntimeDetection "Скомпилировано с Определением типа процессора во время выполнения - ПРЕДУПРЕЖДЕНИЕ - это не оптимально!\nДля получения максимальной производительности, перекомпилируйте MPlayer c --disable-runtime-cpudetection.\n"
+#define MSGTR_CompiledWithRuntimeDetection "Скомпилировано для определениея типа процессора во время выполнения - ПРЕДУПРЕЖДЕНИЕ - это не оптимально!\nДля получения максимальной производительности, перекомпилируйте MPlayer c --disable-runtime-cpudetection.\n"
 #define MSGTR_CompiledWithCPUExtensions "Скомпилировано для x86 CPU со следующими расширениями:"
 #define MSGTR_AvailableVideoOutputPlugins "Доступные плагины вывода видео:\n"
 #define MSGTR_AvailableVideoOutputDrivers "Доступные драйвера вывода видео:\n"
