@@ -1461,7 +1461,7 @@ static void m_config_list_options(m_config_t *config) {
 static void m_config_error(int err,char* opt,char* val) {
   switch(err) {
   case ERR_NOT_AN_OPTION:
-    mp_msg(MSGT_CFGPARSER, MSGL_ERR,"'%s' is not an mplayer option\n",opt);
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR,"'%s' is not a mplayer/mencoder option\n",opt);
     break;
   case ERR_MISSING_PARAM:
     mp_msg(MSGT_CFGPARSER, MSGL_ERR,"option '%s' need a parameter\n",opt);
