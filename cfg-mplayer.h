@@ -94,6 +94,10 @@ extern int use_old_pp;
 extern int xinerama_screen;
 #endif
 
+#ifdef HAVE_RTC
+extern int nortc;
+#endif
+
 /* from libvo/aspect.c */
 extern float monitor_aspect;
 
@@ -305,6 +309,10 @@ static config_t mplayer_opts[]={
 
 #ifdef HAVE_XINERAMA
 	{"xineramascreen", &xinerama_screen, CONF_TYPE_INT, CONF_RANGE, 0, 32, NULL},
+#endif
+
+#ifdef HAVE_RTC
+	{"nortc", &nortc, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #endif
 
 #define MAIN_CONF

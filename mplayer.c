@@ -291,6 +291,10 @@ static stream_t* stream=NULL;
 
 char* current_module=NULL; // for debugging
 
+#ifdef HAVE_RTC
+int nortc;
+#endif
+
 static unsigned int inited_flags=0;
 #define INITED_VO 1
 #define INITED_AO 2
@@ -679,6 +683,8 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 #endif
 
 #ifdef HAVE_RTC
+  if(!nortc)
+  {
     if ((rtc_fd = open("/dev/rtc", O_RDONLY)) < 0)
 	perror ("Linux RTC init: open");
     else {
@@ -697,6 +703,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 	} else
 	    printf("Using Linux's hardware RTC timing (%ldHz)\n", irqp);
     }
+  }
 #ifdef HAVE_NEW_GUI
 // breaks DGA and SVGAlib and VESA drivers:  --A'rpi
 // and now ? -- Pontscho
