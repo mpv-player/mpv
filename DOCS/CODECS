@@ -91,13 +91,13 @@ Fully functional Win32 ACM/DShow codecs:
   l3codeca.acm: works  (or you can use the built-in 3dnow-optimized codec)
 - VoxWare Metasound: (0x75)
   voxmsdec.ax: works
+- MS-GSM: (0x31,0x32)
+  msgsm32.acm: works   (or you can use the  built-in codec)
 
 Problems:
 
 - IMA ADPCM (0x11)
   imaadp32.acm: segfault
-- MS-GSM: (0x31,0x32)
-  msgsm32.acm: segfault  (use built-in codec)
 
 Not tested:
 
