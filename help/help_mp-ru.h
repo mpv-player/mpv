@@ -1,6 +1,6 @@
 /* Translated by:  Nick Kurshev <nickols_k@mail.ru>,
  *		Dmitry Baryshkov <lumag@qnc.ru>
-   Was synced with help_mp-en.h: rev 1.111
+   Was synced with help_mp-en.h: rev 1.113
  ========================= MPlayer help =========================== */
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -301,6 +301,8 @@ static char help_text[]=
 #define MSGTR_DemuxerInfoAlreadyPresent "Информация демуксера[demuxer] %s уже существует!\n"
 #define MSGTR_ClipInfo "Информация о клипе:\n"
 
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: обнаружено 30fps NTSC содержимое, переключаю частоту кадров.\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: обнаружено 24fps постепенное[progressive] NTSC содержимое, переключаю частоту кадров.\n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Не смог открыть кодек\n"
