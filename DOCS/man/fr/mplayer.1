@@ -34,12 +34,12 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "9 Février 2004" "The MPlayer Project" "Le Lecteur Vidéo Pour Linux"
+.TH MPlayer 1 "9 Février 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
-mplayer  \- Lecteur Vidéo pour Linux
+mplayer  \- Lecteur vidéo
 .br
-mencoder \- Encodeur Vidéo pour Linux
+mencoder \- Encodeur vidéo
 .
 .\" --------------------------------------------------------------------------
 .\" Synopsis
@@ -142,18 +142,17 @@ mencoder \- Encodeur Vidéo pour Linux
 .
 .SH DESCRIPTION
 .B mplayer
-est un lecteur vidéo pour LINUX (il fonctionne sur beaucoup d'autres
+est un lecteur vidéo pour Linux (il fonctionne sur beaucoup d'autres
 Unices et processeurs non\-x86, voir la documentation).
 Il joue la plupart des formats MPEG/\:VOB, AVI, ASF/\:WMA/\:WMV,
 RM, QT/\:MOV/\:MP4, OGG/\:OGM, VIVO, FLI, NuppelVideo, yuv4mpeg, FILM
-et RoQ, supportés par plusieurs codecs natifs, par XAnim et par
-les codecs Win32.
+et RoQ, supportés par plusieurs codecs natifs et par des codecs binaires.
 Vous pouvez regarder des VideoCD, SVCD, DVD, 3ivx, DivX\ 3/\:4/\:5 et
-même des films WMV (sans utiliser la bibliothèque avifile).
+même des films WMV.
 .PP
 Un autre gros atout de MPlayer est la grande variété de pilotes de
-sortie supportés.
-Il fonctionne avec X11, XV, DGA, OpenGL, SVGAlib, fbdev, AAlib,
+sortie audio et vidéo supportés.
+Il fonctionne avec X11, XV, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca,
 DirectFB, Quartz, mais vous pouvez aussi utiliser GGI, SDL (et de cette
 façon tous leurs drivers), VESA (sur n'importe quelle carte compatible
 VESA, même sans X11), quelques drivers spécifiques à certaines cartes
@@ -167,7 +166,7 @@ informations, de belles et grandes polices lissées et des effets
 visuels pour confirmer les contrôles au clavier. Les polices
 européennes/\:ISO 8859-1,2 (Hongroise, Anglaise, Tchèque, etc),
 Cyrillique et Coréenne sont supportées ainsi que 11 formats de
-sous-titres (MicroDVD, SubRip, SubViewer, Sami, VPlayer, RT,
+sous-titres (MicroDVD, SubRip, OGM, SubViewer, Sami, VPlayer, RT,
 SSA, AQTitle, JACOsub, PJS et le nôtre: MPsub) et les sous-titres
 DVD (SPU streams, VobSub et Closed Captions).
 .PP
@@ -177,25 +176,154 @@ des vidéos jouables par MPlayer (voir ci-dessus) dans d'autres formats jouables
 par MPlayer (voir ci-dessous).
 Il encode en DivX4, XviD, un des codecs libavcodec, et en PCM/\:MP3/\:VBRMP3
 audio en 1, 2 ou 3\ passes.
-Il permet également de copier des flux de données (stream), possède un puissant
-système de plugins (découpage, expansion, retournement, postprocess, rotation,
-redimensionnement, bruit, conversion rgb/\:yuv) et bien plus.
+Il permet également de copier des flux de données (stream), possède un
+puissant système de plugins (découpage, expansion, retournement, postprocess,
+rotation, redimensionnement, bruit, conversion rgb/\:yuv) et bien plus.
 .PP
 .B gmplayer
 est l'interface graphique de MPlayer.
 Il possède les mêmes options que MPlayer.
-
-
+.PP
+.B Regardez également la documentation HTML !
+.
+.
+.\" --------------------------------------------------------------------------
+.\" Contrôle au clavier
+.\" --------------------------------------------------------------------------
+.
+.SH "CONTRÔLE AU CLAVIER"
+MPlayer dispose d'une couche de contrôle pleinement configurable, qui
+vous permet de contrôler MPlayer avec le clavier, la souris, le joystick
+ou une télécommande (en utilisant LIRC).
+.br
+Le fichier de configuration par défaut pour le système d'entrée est
+~/.mplayer/\:input.conf mais cela peut être outrepassé en utilisant
+l'option \-input conf.
+.br
+Ces touches peuvent/\:ne peuvent pas fonctionner, suivant votre pilote de
+sortie vidéo.
+.TP
+.B contrôle général
+.PD 0
+.RSs
+.IPs "<\- et \->"
+recule/\:avance de 10 secondes
+.IPs "haut et bas"
+recule/\:avance d'1 minute
+.IPs "pgup et pgdown"
+recule/\:avance de 10 minutes
+.IPs "< et >"
+recule/\:avance dans la liste de lecture (playlist)
+.IPs "HOME et END"
+va à la prochaine/précédente entrée dans la liste parente
+.IPs "INS et DEL"
+va à la prochaine/précédente source (liste de lecture asx uniquement)
+.IPs "p / ESPACE"
+met le film en pause (n'importe quelle touche pour redémarrer)
+.IPs "q / ESC"
+stoppe la lecture est quitte
+.IPs "+ et -"
+ajuste le décalage audio de +/\:- 0.1 seconde
+.IPs "/ et *"
+réduit/\:augmente le volume
+.IPs "9 et 0"
+réduit/\:augmente le volume
+.IPs m\ \ \ \ 
+coupe le son (mute)
+.IPs f\ \ \ \ 
+bascule en plein-écran
+.IPs T\ \ \ \ 
+bascule le mode toujours visible.
+Supporté par les drivers de sortie vidéo basés sur X11, à l'exception
+de SDL et de directx et gl2 sous Windows.
+.IPs "w et e"
+réduit/\:augmente l'intervalle panscan
+.IPs o\ \ \ \ 
+bascule entre les états OSD: aucun / déplacement /
+déplacement + chrono / déplacement + chrono + durée totale
+.IPs d\ \ \ \ 
+bascule les modes de sauts de trame: aucun / saut d'affichage / saut de
+décodage (voir \-framedrop et \-hardframedrop)
+.IPs v\ \ \ \ 
+bascule l'affichage des sous-titres
+.IPs j\ \ \ \ 
+change de langue de sous-titres
+.IP F\ \ \ \ 
+bascule l'affichage des "sous-titres forcés"
+.IPs a\ \ \ \ 
+.IPs a\ \ \ \ 
+bascule l'alignement des sous-titres: haut/milieu/bas
+.IPs "z et x"
+ajuste le décalage des sous-titres de +/\:- 0.1 seconde
+.IPs "r et t"
+ajuste la position des sous-titres
+.IPs i
+créé une marque EDL
+.RE
+.PD 1
+.PP
+(Les touches suivantes ne sont valides qu'en utilisant une sortie vidéo
+accélérée matériellement (xv, (x)vidix, (x)mga, etc) ou le filtre égualiseur
+logiciel (\-vf eq ou \-vf eq2).
+.PP
+.PD 0
+.RSs
+.IPs "1 et 2"
+ajuste le contraste
+.IPs "3 et 4"
+ajuste la luminosité
+.IPs "5 et 6"
+ajuste la couleur
+.IPs "7 et 8"
+ajuste la saturation
+.RE
+.PD 1
+.
+.TP
+.B Contrôle clavier de la GUI
+.PD 0
+.RSs
+.IPs "ENTRÉE"
+démarre la lecture
+.IPs s
+stoppe la lecture
+.IPs l
+charge un fichier
+.IPs c
+navigateur de skins
+.IPs p
+bascule la liste de lecture
+.RE
+.PD 1
+.
+.TP
+.B Contrôle entrée TV
+.PD 0
+.RSs
+.IPs "h et k"
+sélectionne le précédent/\:prochain canal
+.IPs n
+change de norme
+.IPs u
+change la liste des canaux
+.RE
+.PD 1
+.
+.
+.
 .\" --------------------------------------------------------------------------
 .\" Options
 .\" --------------------------------------------------------------------------
 .
 .SH "NOTES GÉNÉRALES"
-.B Regardez également la documentation HTML !
 .PP
 Chaque option a son opposé, par ex.\& l'inverse de l'option
 \-fs est \-nofs.
 .PP
+.PP
+Si une option est documentée comme (XXX uniquement), cela veut dire
+qu'elle ne fonctionnera uniquement si vous activers l'option XXX ou
+que XXX a été compilé dans mplayer.
 Vous pouvez placer toutes les options dans un fichier de configuration qui sera
 lu à chaque exécution de MPlayer.
 Le fichier de configuration général 'mplayer.conf' se trouve dans le répertoire
@@ -238,123 +366,40 @@ créez un fichier nommé 'film.avi.conf' contenant les options spécifiques à ce
 fichier et placez-le dans ~/.mplayer ou dans le même répertoire que le fichier.
 .
 .
-.\" --------------------------------------------------------------------------
-.\" Contrôle clavier
-.\" --------------------------------------------------------------------------
-.
-.SH "CONTROLE CLAVIER"
-.I NOTE:
-.br
-MPlayer dispose d'une couche de contrôle pleinement configurable, qui
-vous permet de contrôler MPlayer avec le clavier, la souris, le joystick
-ou une télécommande (en utilisant LIRC).
-.br
-Le fichier de configuration par défaut pour le système d'entrée est
-~/.mplayer/\:input.conf mais cela peut être outrepassé en utilisant
-l'option \-input conf.
-.br
-Ces touches peuvent/\:ne peuvent pas fonctionner, suivant votre pilote de
-sortie vidéo.
+.SH "OPTIONS GÉNÉRALES"
 .TP
-.B contrôle général
+.B \-codecs-file <nomfichier>
+Défini le fichier de codecs au lieu de celui du système ou de celui inclus
+dans mplayer.
+Voir aussi \-afm, \-ac, \-vfm et \-vc.
+.TP
+.B \-include <fichier\ de\ configuration>
+Spécifie le fichier de configuration à analyser après ceux par défaut.
+.TP
+.B \-quiet
+Avec cette option, la ligne d'état (c-a-d A:   0.7 V:   0.6 A-V:  0.068 ...) ne
+sera pas affichée.
+Cela est particulièrement utile sur les terminaux lents ou endommagés qui ne
+gèrent pas les retours chariot (c-a-d \\r).
+.TP
+.B \-v, \-verbose
+Active le mode verbeux (plus de \-v signifie plus de verbosité).
+.
 .PD 0
 .RSs
-.IPs "<\- et \->"
-recule/\:avance de 10 secondes
-.IPs "haut et bas"
-recule/\:avance d'1 minute
-.IPs "pgup et pgdown"
-recule/\:avance de 10 minutes
-.IPs "< et >"
-recule/\:avance dans la liste de lecture
-.IPs "HOME et END"
-va à la prochaine/précédente entrée dans la liste parente
-.IPs "INS et DEL"
-va à la prochaine/précédente source (liste de lecture asx uniquement)
-.IPs "p / ESPACE"
-met le film en pause (n'importe quelle touche pour redémarrer)
-.IPs "q / ESC"
-stoppe la lecture est quitte
-.IPs "+ et -"
-ajuste le décalage audio de +/\:- 0.1 seconde
-.IPs "/ et *"
-réduit/\:augmente le volume
-.IPs "9 et 0"
-réduit/\:augmente le volume
-.IPs m\ \ \ \
-coupe le son (mute)
-.IPs f\ \ \ \
-bascule en plein-écran
-.IPs T\ \ \ \
-bascule le mode toujours visible.
-.IPs "w et e"
-réduit/\:augmente l'intervalle panscan
-.IPs o\ \ \ \
-bascule entre les états OSD: aucun / déplacement / déplacement+chrono
-.IPs d\ \ \ \
-bascule les modes de sauts de trame: aucun / saut d'affichage / saut de 
-décodage (voir \-framedrop et \-hardframedrop)
-.IPs v\ \ \ \
-bascule l'affichage des sous-titres
-.IPs j\ \ \ \
-change de langue de sous-titres
-.IPs a\ \ \ \
-bascule l'alignement des sous-titres: haut/milieu/bas
-.IPs "z et x"
-ajuste le décalage des sous-titres de +/\:- 0.1 seconde
-.IPs "r et t"
-ajuste la position des sous-titres
-.IPs i
-créé une marque EDL
-.RE
-.PD 1
-.PP
-(Les touches suivantes ne sont valides qu'en utilisant une sortie vidéo
-accélérée matériellement (xv, (x)vidix, (x)mga, etc) ou le filtre égualiseur
-logiciel (\-vf eq ou \-vf eq2).
-.PP
-.PD 0
-.RSs
-.IPs "1 et 2"
-ajuste le contraste
-.IPs "3 et 4"
-ajuste la luminosité
-.IPs "5 et 6"
-ajuste la couleur
-.IPs "7 et 8"
-ajuste la saturation
+.IPs 0
+uniquement quelques sorties informelles (par défaut)
+.IPs 1
+quelques infos basiques de débogage, entête avi, valeurs des fonctions 
+(débogage de l'initialisation)
+.IPs 2
+affiche les indexes avi, entrées de tronquage, plus d'infos de débogage 
+(débogage du lecteur)
+.IPs 3
+affiche tout ce qui est relatif aux parseurs d'entrée (déboguage des parsers)
 .RE
 .PD 1
 .
-.TP
-.B Contrôle clavier de la GUI
-.PD 0
-.RSs
-.IPs "ENTREE"
-démarre la lecture
-.IPs s
-stoppe la lecture
-.IPs l
-charge un fichier
-.IPs c
-navigateur de skins
-.IPs p
-bascule la liste de lecture
-.RE
-.PD 1
-.
-.TP
-.B Contrôle entrée TV
-.PD 0
-.RSs
-.IPs "h et k"
-sélectionne le précédent/\:prochain canal
-.IPs n
-change de norme
-.IPs u
-change la liste des canaux
-.RE
-.PD 1
 .
 .
 .SH "OPTIONS DE LECTURE (MPLAYER UNIQUEMENT)"
@@ -371,11 +416,11 @@ Ajuste graduellement la synchro A/\:V en fonction de la mesure du décalage
 audio.
 En spécifiant \-autosync\ 0, valeur par défaut, la synchronisation des trames
 sera entièrement basée sur la mesure du décalage audio.
-En spécifiant \-autosync\ 1 ce sera la même chose, mais cela changera légèrement
-l'algorithme de correction A/\:V utilisé.
-On peut souvent améliorer la lecture d'une vidéo possédant un taux de transfert
-irrégulier, mais qui peut-être lue avec \-nosound, en initialisant cette option
-à une valeur entière supérieure à 1.
+En spécifiant \-autosync\ 1 ce fera la même chose, mais cela changera
+légèrement l'algorithme de correction A/\:V utilisé.
+On peut souvent améliorer la lecture d'une vidéo possédant un débit binaire
+vidéo irrégulier, mais qui peut-être lue avec \-nosound, en initialisant
+cette option à une valeur entière supérieure à 1.
 Plus cette valeur sera élevée, plus le débit sera proche de \-nosound.
 Essayez \-autosync\ 30 pour faire disparaître les problèmes avec les drivers
 audio qui ne possèdent pas une mesure de décalage audio parfaite.
@@ -386,52 +431,53 @@ activé, pour tous les drivers audio.
 .TP
 .B \-benchmark
 Affiche quelques statistiques sur l'utilisation CPU et les trames sautées
-à la fin. À utiliser avec \-nosound et \-vo null pour mesurer les performances
+à la fin de la lecture.
+À utiliser avec \-nosound et \-vo null pour mesurer les performances
 du codec vidéo.
 .br
 .I NOTE:
 Avec cette option MPlayer ignorera également la durée des trames pendant la
-lecture de vidéo uniquement (vous pouvez le prendre comme des fps infinis).
+lecture de vidéo uniquement (vous pouvez le comprendre comme des fps infinis).
 .TP
 .B \-colorkey <nombre>
 Affecte une valeur RVB de votre choix à la couleur clé.
 0x000000 est noir et 0xffffff est blanc.
-Supporté par les pilotes vidéo vidix, fbdev, svga, vesa, winvidix, xmga, xvidix
-et xover uniquement.
+Supporté par les pilotes vidéo cvidix, fbdev, svga, vesa, winvidix, xmga,
+xvidix et xover uniquement.
 .TP
 .B \-nocolorkey
 Désactive la couleur clé.
 Supporté par les pilotes vidéo cvidix, fbdev, svga, vesa, winvidix, xmga,
 xvidix et xover uniquement.
 .TP
-.B \-edl <nomfichier>
+.B \-edl <nomfichier> (EDL uniquement)
 Active les actions d'édition de liste de décision (EDL) durant la lecture.
-La vidéo sera sautée et le son coupé et remis suivant les entrées du fichier
-indiqué.
+La vidéo sera sautée et le son coupé et remis suivant les entrées du
+fichier indiqué.
 Voir DOCS/HTML/fr/edl.html pour les détails sur comment l'utiliser.
 .TP
 .B \-edlout <nomfichier>
-Créé un nouveau fichier et écrit les enregistrements d'édition de la liste de
-décision (EDL) dans ce fichier. Durant la lecture, quand l'utilisateur tape 'i',
-une entrée à sauter après les deux dernières secondes de la lecture est écrite
-dans ce fichier. Cela fournit un point de départ depuis lequel l'utilisateur
-peut régler plus finement les entrées EDL plus tard.
+Créé un nouveau fichier et écrit les enregistrements d'édition de la liste
+de décision (EDL) dans ce fichier.
+Durant la lecture, quand l'utilisateur tape 'i', une entrée à sauter
+après les deux dernières secondes de la lecture est écrite dans ce fichier.
+Cela fournit un point de départ depuis lequel l'utilisateur peut régler
+plus finement les entrées EDL plus tard.
 Voir DOCS/HTML/fr/edl.html pour les détails.
 .TP
 .B \-enqueue (GUI uniquement)
-Ajoute les fichiers donnés en ligne de commande à la liste de lecture au lieu
-de les jouer immédiatement.
+Ajoute les fichiers donnés en ligne de commande à la liste de lecture au
+lieu de les jouer immédiatement.
 .TP
 .B \-fixed-vo (CODE BETA!)
-force un système de vidéo fixe pour des fichiers multiples (une
-(dès)initialisation pour pour tous les fichiers).
-Ainsi une seule fenêtre sera ouverte pour tous les fichiers.
+Force l'initialistation d'une seule fenêtre vidéo pour la lecture d'une
+série de de fichiers.
 Actuellement les pilotes suivants fonctionnent avec fixed-vo: gl2, mga, svga,
-x11, xmga, xv et xvidix.
+x11, xmga, xv, xvidix et dfbmga.
 .TP
 .B \-framedrop (voir aussi \-hardframedrop)
-Saute l'affichage de certaines trames pour maintenir la synchro A/\:V sur les
-systèmes lents.
+Saute l'affichage de certaines trames pour maintenir la synchro A/\:V sur
+les machines lentes.
 Les filtres vidéo ne sont pas appliqués sur de telles trames.
 Pour les trames B même leur décodage est complétement désactivé.
 .TP
@@ -468,26 +514,27 @@ Temps en msec avant de démarrer la répétition automatique d'une touche
 .IPs ar-rate
 Combien de frappes par seconde pendant la répétition automatique.
 .IPs keylist
-Afficher toutes les clés pouvant être attachées.
+Afficher toutes les touches pouvant être attachées.
 .IPs cmdlist
 Afficher toutes les commandes pouvant être attachées.
 .IPs js-dev
-Spécifier le périphérique joystick à utiliser (/dev/\:input/\:js0 par défaut).
+Spécifier le périphérique joystick à utiliser (/dev/\:input/\:js0 par
+défaut).
 .IPs file
 Lit les commandes depuis un fichier donné.
 Utile surtout avec une communication fifo.
 .br
 .I NOTE:
-Quand le fichier indiqué est un fifo MPlayer ouvre chaque extrémité donc vous
-pouvez avoir plusieurs \'echo "seek 10" > mp_pipe\' et le pipe restera valide.
+Quand le fichier indiqué est un fifo MPlayer ouvre chaque extrémité
+donc vous pouvez avoir plusieurs \'echo "seek 10" > mp_pipe\' et le pipe
+restera valide.
 .RE
 .PD 1
 .
 .TP
-.B \-lircconf <fichier>
+.B \-lircconf <fichier> (LIRC uniquement)
 Indique un fichier de configuration pour LIRC (Linux Infrared Remote
-Control, voir http://www.lirc.org) si vous n'aimez pas le ~/\:.lircrc par
-défaut.
+Control, voir http://www.lirc.org) (~/\:.lircrc par défaut).
 .TP
 .B \-list-options
 Affiche toutes les options disponibles.
@@ -496,14 +543,26 @@ Affiche toutes les options disponibles.
 Répète la lecture <nombre> fois.
 0 signifie illimité.
 .TP
-.B \-menu (CODE BETA)
+.B \-menu (OSD menu uniquement)
 Active le menu OSD.
 .TP
-.B \-menu-cfg <fichier> (CODE BETA)
+.B \-menu-cfg <fichier> (OSD menu uniquement)
 Utilise le menu.conf indiqué.
 .TP
-.B \-menu-root <valeur> (CODE BETA)
+.B \-menu-root <valeur> (OSD menu uniquement)
 Spécifie le menu principal.
+.TP
+.B \-noconsolecontrols
+Empêche MPlayer de réagir aux commandes clavier depuis l'entrée
+standard.
+Utile quand il lit des données depuis l'entrée standard.
+Ce mode est automatiquement activé lorsque \- est présent sur la
+ligne de commande.
+Il se peut peut vous ayez à l'activer manuellement, ex.\&
+si vous ouvrez /dev/stdin (ou équivalent sur votre système),
+utilisez stdin dans une liste de lecture (playlist) ou tentez de
+lire depuis la couche stdin par le truchement des commandes loadfile
+ou loadlist du mode esclave.
 .TP
 .B \-nojoystick
 Désactive le support joystick.
@@ -512,94 +571,93 @@ Activé par défaut, si il a été compilé pour.
 .B \-nolirc
 Désactive le support de LIRC.
 .TP
-.B \-nomouseinput
-Désactive l'entrée des boutons de la souris (le menu contextuel de mozplayerxp
-dépends de cette option).
+.B \-nomouseinput (X11 uniquement)
+Désactive l'interprétation des boutons de la souris (le menu contextuel
+de mozplayerxp dépends de cette option).
 .TP
-.B \-nortc
+.B \-nortc (RTC uniquement)
 Désactive l'utilisation du RTC Linux (real-time clock \- /dev/\:rtc)
 comme mécanisme de synchro.
 .TP
 .B \-playlist <fichier>
-Lit les fichiers en fonction d'une playlist (1 fichier par ligne, ou aux
+Joue les fichiers d'après une liste de lecture (1 fichier par ligne, ou aux
 formats Winamp ou ASX).
 .br
 .I NOTE:
 Cette option est considérée comme une entrée donc les options trouvées à la
 suite s'appliqueront uniquement aux éléments de la liste de lecture.
+.br
+FIXME: Cette decription est quelque peu alambiquée, et devrait être mieux
+documentée.
 .TP
-.B \-quiet
-Avec cette option, la ligne d'état (c-a-d A:   0.7 V:   0.6 A-V:  0.068 ...) ne
-sera pas affichée.
-Cela est particulièrement utile sur les terminaux lents ou endommagés qui ne
-gèrent pas les retours chariot (c-a-d \\r).
-.TP
-.B \-really-quiet
-Affiche encore moins de messages.
+.B \-really-quiet (voir aussi \-quiet)
+Affiche encore moins de messages d'état que \-quiet.
+.B \-rtc-device <périph>
+Utilise ce périphérique spécial RTC pour améliorer la synchro.
 .TP
 .B \-shuffle
 Joue les fichiers en ordre aléatoire.
 .TP
-.B \-skin <répertoire\ des\ skin>
-Charge les skins depuis le répertoire spécifié (SANS chemin).
-
+.B \-skin <nom_skin> (GUI uniquement)
+Charge le skin <nom_skin> (revêtement décoratif) depuis les répertoires
+par défaut /usr/local/share/mplayer/Skin/ et ~/.mplayer/Skin/.
+.sp 1
 .I EXEMPLE:
 .PD 0
 .RSs
 .IPs "\-skin fittyfene"
-essaie /usr/\:local/\:share/\:mplayer/\: en premier, puis
-~/.mplayer/\: en cas d'échec.
+Essaie /usr/local/share/mplayer/Skin/fittyfene en premier, puis
+~/.mplayer/Skin/fittyfene en cas d'échec.
 .RE
 .PD 1
 .
 .TP
-.B \-slave \ \
+.B \-slave (voir aussi \-input)
 Cette option enclenche le mode esclave.
-Ceci est prévu pour l'utilisation de MPlayer en tant que base
-(backend) pour d'autres programmes.
-Au lieu d'intercepter les évènements clavier, MPlayer va lire des
-commandes simples via son entrée stdin.
-La section
-.B PROTOCOLE DU MODE ESCLAVE
-explique la syntaxe.
+Ceci est prévu pour l'utilisation de MPlayer en tant que base (backend)
+pour d'autres programmes.
+Au lieu d'intercepter les évènements clavier, MPlayer va lire ses
+commandes via son entrée stdin.
+Voir DOCS/tech/slave.txt et \-input expliquent la syntaxe et les commandes
+valides.
 .TP
 .B \-softsleep
-Utilise des timers logiciels de haute qualité.
+Utilise des timers logiciels de haute qualité au lieu de RTC.
 Aussi précis que le RTC sans nécessiter de privilèges spéciaux,
-au prix toutefois d'une consommation CPU plus importante.
+au prix toutefois d'une charge CPU accrue.
 .TP
 .B \-speed <0.01\-100>
-Règle la vitesse de lecture.
+Accélère ou diminue la vitesse de lecture en fonction du facteur donné
+en paramètre.
 .TP
 .B \-sstep <sec>
 Spécifie le nombre de secondes entre chaque trame.
 Utile pour les diaporamas.
+.
+.
+.SH "OPTIONS DEMULTIPLEXEUR/FLUX"
 .TP
-.B \-, \-use-stdin
-L'entrée standard (alias stdin) sera utilisée pour lire les données au lieu des
-évenements-clé. Si vous ouvrez /dev/stdin (ou l'équivalent sur votre système),
-utilisez stdin dans une liste de lecture ou essaiez de lire depuis stdin ensuite
-via les commandes openfile ou openlist vous aurez
-.B besoin
-de cette option.
-.
-.
-.SH "OPTIONS DEMUXER/FLUX"
+.B \-a52drc <niveau>
+Active le contrôle de volume dynamique des flux audios AC3.
+<niveau> est un flottant compris entre 0 et 1, où 0 signifie aucun contrôle
+et 1 (defaut) signifie un contrôle total (rendre les passages bruyants plus
+calmes et vice versa).
+Cette option ne fonctionne uniquement si le flux AC3 comporte ce genre
+d'information de contrôle.
 .TP
 .B \-aid <id> (voir aussi l'option \-alang)
-Sélectionne le canal audio [MPEG: 0\-31 AVI/\:OGM: 1\-99 ASF/\:RM: 0\-127
-VOB(AC3): 128\-159 VOB(LPCM): 160\-191 MPEG-TS 17\-8190].
-MPlayer affiche les IDs disponibles quand il tourne en mode verbeux (-v).
+Sélectionne le canal audio (MPEG: 0\-31 AVI/\:OGM: 1\-99 ASF/\:RM: 0\-127
+VOB(AC3): 128\-159 VOB(LPCM): 160\-191 MPEG-TS 17\-8190).
+MPlayer affiche les IDs disponibles quand il est lancé en mode verbeux (-v).
 Pour jouer des flux MPEG-TS, MPlayer/MEncoder utilisera le premier programme
 (si présent) avec le flux audio choisi.
 .TP
-.B \-alang <code\ de\ pays\ à\ deux\ lettres> (voir aussi l'option \-aid)
-Fonctionne uniquement pour la lecture de DVD.
+.B \-alang <code\ de\ pays\ à\ deux\ lettres> (voir aussi \-aid) \
+(DVD uniquement)
 Cela sélectionne la piste audio et tente toujours de lire les flux audio
 dont la langue correspond au code donné.
-Pour afficher la liste des langues disponibles, utilisez l'option \-v et
-regardez le résultat.
-
+Pour afficher la liste des langues disponibles, utilisez l'option \-v.
+.sp 1
 .I EXEMPLE:
 .PD 0
 .RSs
@@ -612,12 +670,12 @@ disponible.
 .TP
 .B \-audio-demuxer <nombre> (\-audiofile uniquement)
 Force le type de demuxer audio pour \-audiofile.
-Indiquez l'ID demuxer comme défini dans demuxers.h.
-Utilisez \-audio-demuxer 17 pour forcer la détection des .mp3.
+Indiquez l'ID du demultiplexeur comme défini dans libmpdemux/demuxer.h.
+Utilisez \-audio-demuxer 17 pour forcer la détection des MP3.
 .TP
 .B \-audiofile <nomfichier>
-Joue l'audio depuis un fichier externe (WAV, MP3 ou Ogg Vorbis) pendant la
-visualisation d'un film.
+Joue la piste audio depuis un fichier externe (WAV, MP3 ou Ogg Vorbis)
+pendant la visualisation d'un film.
 .TP
 .B \-audiofile-cache <Koctets>
 Active la mise en cache pour le flux utilisé par \-audiofile, en utilisant
@@ -628,8 +686,8 @@ Spécifie la bande passante maximum pour le streaming par le réseau (pour les
 serveurs capable d'envoyer du contenu à différents débits).
 Utile si vous voulez voir en direct des média streamés avec un connexion lente.
 .TP
-.B \-cdrom-device <chemin\ périphérique>
-Outrepasse le nom par défaut du lecteur de CDROM /dev/\:cdrom.
+.B \-cdrom-device <périph>
+Outrepasse le nom par défaut du lecteur de CDROM (/dev/\:cdrom).
 .TP
 .B \-cache <Koctets>
 Cette option indique combien de mémoire (en Ko) à utiliser mettant un fichier
@@ -3783,9 +3841,6 @@ le fichier de destination contiendra 'div3' en tant que fourcc vidéo.
 .PD 1
 .
 .TP
-.B \-include <fichier\ de\ configuration>
-Spécifie le fichier de configuration à analyser après ceux par défaut.
-.TP
 .B \-info <option1:option2:...> (AVI uniquement)
 Spécifie l'entête d'info dans le fichier AVI de destination.
 .br
@@ -3893,24 +3948,6 @@ divx2pass.log.
 .B \-skiplimit <valeur>
 Nombre maximal de trames sautables après une non-sautée
 (\-noskiplimit pour un nombre illimité).
-.TP
-.B \-v, \-verbose
-Active le mode verbeux (plus de \-v signifie plus de verbosité).
-.
-.PD 0
-.RSs
-.IPs 0
-uniquement quelques sorties informelles (par défaut)
-.IPs 1
-quelques infos basiques de débogage, entête avi, valeurs des fonctions 
-(débogage de l'initialisation)
-.IPs 2
-affiche les indexes avi, entrées de tronquage, plus d'infos de débogage 
-(débogage du lecteur)
-.IPs 3
-affiche tout ce qui est relatif aux parseurs d'entrée (déboguage des parsers)
-.RE
-.PD 1
 .
 .TP
 .B \-vobsubout <nomdebase>
@@ -5486,6 +5523,10 @@ Cette page de man est écrite et maintenue par
 .TP
 et traduite en français par
 .B Nicolas Le Gaillart < nicolas@legaillart.com >
+jusqu'à février 2004.
+.br
+.B Guillaume Poirier < gpoirier@irisa.fr >
+depuis Août 2004.
 .PP
 Merci d'envoyer les mails la concernant sur la liste de diffusion MPlayer-DOCS.
 .
