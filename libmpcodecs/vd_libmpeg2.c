@@ -76,7 +76,7 @@ static void draw_slice (void * _sh, uint8_t ** src, unsigned int y){
     const mpeg2_info_t * info = mpeg2_info (mpeg2dec);
     int stride[3];
 
-    printf("draw_slice() y=%d  \n",y);
+//    printf("draw_slice() y=%d  \n",y);
 
     stride[0]=mpeg2dec->decoder.stride;
     stride[1]=stride[2]=mpeg2dec->decoder.uv_stride;
