@@ -313,6 +313,7 @@ Diego Biurrun <diego@biurrun.de>
 
 Sascha Sommer <saschasommer@freenet.de>
     * directx VO driver
+	* windows waveout AO driver
 
 Sidik Isani <lksi@cfht.hawaii.edu>
     * get_delay() smoothing code (-autosync)
