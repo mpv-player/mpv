@@ -270,8 +270,10 @@ int xacodec_init_video(sh_video_t *vidinfo, int out_format)
 	case IMGFMT_BGR32:
 	    codec_hdr.depth = 32;
 	    break;
+	case IMGFMT_IYUV:
 	case IMGFMT_I420:
-	    codec_hdr.depth = 32;
+	case IMGFMT_YV12:
+	    codec_hdr.depth = 12;
 	    break;
 	default:
 	    mp_msg(MSGT_DECVIDEO, MSGL_FATAL, "xacodec: not supported image format (%s)\n",
@@ -705,11 +707,39 @@ void *XA_YUV411111_Func(unsigned int image_type)
     return((void *)color_func);
 }
 
+void XA_YUV221111_To_CLR8(image,imagex,imagey,i_x,i_y,yuv,yuv_tabs,map_flag,map,chdr)
+xaUBYTE *image;		xaULONG imagex,imagey,i_x,i_y;
+YUVBufs *yuv;	YUVTabs *yuv_tabs;
+xaULONG map_flag,*map;	XA_CHDR *chdr;
+{
+    printf("XA_YUV221111_To_CLR8(%p  %dx%d %d;%d  %p %p %d %p %p)\n",
+	image,imagex,imagey,i_x,i_y,yuv,yuv_tabs,map_flag,map,chdr);
+
+    printf("YUV: %p %p %p %X (%X) %Xx%X %Xx%X\n",
+	yuv->Ybuf,yuv->Ubuf,yuv->Vbuf,yuv->the_buf,yuv->the_buf_size,
+	yuv->y_w,yuv->y_h,yuv->uv_w,yuv->uv_h);
+
+    memcpy(image,yuv->Ybuf,imagex*imagey);
+    memcpy(image+imagex*imagey,yuv->Vbuf,imagex*imagey/4);
+    memcpy(image+imagex*imagey*5/4,yuv->Ubuf,imagex*imagey/4);
+
+/*
+    unsigned char *Ybuf;
+    unsigned char *Ubuf;
+    unsigned char *Vbuf;
+    unsigned char *the_buf;
+    unsigned int the_buf_size;
+    unsigned short y_w, y_h;
+    unsigned short uv_w, uv_h;
+*/
+
+}
+
 /* YUV 22 11 11 routines */
 void *XA_YUV221111_Func(unsigned int image_type)
 {
     XA_Print("XA_YUV221111_Func('image_type: %d')", image_type);    
-    return((void *)XA_dummy);
+    return((void *)XA_YUV221111_To_CLR8);
 }
 
 YUVBufs jpg_YUVBufs;
