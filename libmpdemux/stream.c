@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
+#include <signal.h>
 
 #include "config.h"
 #include "mp_msg.h"
@@ -176,13 +177,15 @@ stream_t* new_stream(int fd,int type){
   s->buf_pos=s->buf_len=0;
   s->start_pos=s->end_pos=0;
   s->priv=NULL;
+  s->cache_pid=0;
   stream_reset(s);
   return s;
 }
 
 void free_stream(stream_t *s){
+  printf("*** free_stream() called ***\n");
+  if(s->cache_pid) kill(s->cache_pid,SIGTERM);
   if(s->priv) free(s->priv);
   free(s);
 }
-
 

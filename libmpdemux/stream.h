@@ -27,17 +27,27 @@ typedef struct {
   int type; // 0=file 1=VCD
   unsigned int buf_pos,buf_len;
   off_t start_pos,end_pos;
+  unsigned int cache_pid;
+  void* cache_data;
   void* priv; // used for DVD
   unsigned char buffer[STREAM_BUFFER_SIZE>VCD_SECTOR_SIZE?STREAM_BUFFER_SIZE:VCD_SECTOR_SIZE];
 } stream_t;
 
-int stream_fill_buffer(stream_t *s);
+#ifdef USE_STREAM_CACHE
+void stream_enable_cache(stream_t *s,int size);
+#else
+// no cache
+#define cache_stream_fill_buffer(x) stream_fill_buffer(x)
+#define cache_stream_seek_long(x,y) stream_seek_long(x,y)
+#define stream_enable_cache(x,y)
+#endif
 
-int stream_seek_long(stream_t *s,off_t pos);
+int cache_stream_fill_buffer(stream_t *s);
+int cache_stream_seek_long(stream_t *s,off_t pos);
 
 inline static int stream_read_char(stream_t *s){
   return (s->buf_pos<s->buf_len)?s->buffer[s->buf_pos++]:
-    (stream_fill_buffer(s)?s->buffer[s->buf_pos++]:-256);
+    (cache_stream_fill_buffer(s)?s->buffer[s->buf_pos++]:-256);
 //  if(s->buf_pos<s->buf_len) return s->buffer[s->buf_pos++];
 //  stream_fill_buffer(s);
 //  if(s->buf_pos<s->buf_len) return s->buffer[s->buf_pos++];
@@ -81,7 +91,7 @@ inline static void stream_read(stream_t *s,char* mem,int len){
     int x;
     x=s->buf_len-s->buf_pos;
     if(x==0){
-      if(!stream_fill_buffer(s)) return; // EOF
+      if(!cache_stream_fill_buffer(s)) return; // EOF
       x=s->buf_len-s->buf_pos;
     }
     if(s->buf_pos>s->buf_len) printf("stream_read: WARNING! s->buf_pos>s->buf_len\n");
@@ -112,7 +122,7 @@ inline static int stream_seek(stream_t *s,off_t pos){
     }
   }
   
-  return stream_seek_long(s,pos);
+  return cache_stream_seek_long(s,pos);
 }
 
 inline static int stream_skip(stream_t *s,int len){
@@ -123,7 +133,7 @@ inline static int stream_skip(stream_t *s,int len){
   while(len>0){
     int x=s->buf_len-s->buf_pos;
     if(x==0){
-      if(!stream_fill_buffer(s)) return 0; // EOF
+      if(!cache_stream_fill_buffer(s)) return 0; // EOF
       x=s->buf_len-s->buf_pos;
     }
     if(x>len) x=len;

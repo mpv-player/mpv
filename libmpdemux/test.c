@@ -23,7 +23,7 @@ void skip_audio_frame(sh_audio_t *sh_audio){
 void resync_audio_stream(sh_audio_t *sh_audio){
 }
 
-int verbose=1; // must be global!
+int verbose=5; // must be global!
 
 //---------------
 
@@ -47,8 +47,10 @@ int file_format=DEMUXER_TYPE_UNKNOWN;
 	printf("Cannot open file/device\n");
 	exit(1);
   }
-  
+
   printf("success: format: %d  data: 0x%X - 0x%X\n",file_format, (int)(stream->start_pos),(int)(stream->end_pos));
+
+  stream_enable_cache(stream,2048*1024);
 
   demuxer=demux_open(stream,file_format,-1,-1,-1);
   if(!demuxer){
