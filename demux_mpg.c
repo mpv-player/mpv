@@ -13,10 +13,6 @@ extern int verbose; // defined in mplayer.c
 //#define MAX_PS_PACKETSIZE 2048
 #define MAX_PS_PACKETSIZE (224*1024)
 
-//static void parse_dvdsub(unsigned char *buf,int len){
-//    printf("\rDVDsub packet: %d  \n",len);
-//}
-
 static int mpeg_pts_error=0;
 
 static unsigned int read_mpeg_timestamp(stream_t *s,int c){
@@ -33,7 +29,6 @@ static unsigned int read_mpeg_timestamp(stream_t *s,int c){
   return pts;
 }
 
-//static char dvdaudio_table[256];
 //static unsigned int packet_start_pos=0;
 
 extern void *new_sh_audio(demuxer_t *demux,int id);
@@ -65,7 +60,6 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
   len=stream_read_word(demux->stream);
   if(verbose>=3)  printf("PACKET len=%d",len);
 //  if(len==62480){ demux->synced=0;return -1;} /* :) */
-//  if(len==0 || len>MAX_PS_PACKETSIZE) return -2;  // invalid packet !!!!!!
   if(len==0 || len>MAX_PS_PACKETSIZE){
     if(verbose>=2) printf("Invalid PS packet len: %d\n",len);
     return -2;  // invalid packet !!!!!!
@@ -144,10 +138,8 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
         if(!demux->s_streams[aid]){
             printf("==> Found subtitle: %d\n",aid);
             demux->s_streams[aid]=1;
-            // new_sh_audio(aid);
         }
 
-        //if(demux->audio->id==-1) demux->audio->id=aid; // autodetect :)
         if(demux->sub->id==aid){
             ds=demux->sub;
         }
@@ -170,11 +162,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
         c=stream_read_char(demux->stream);//type|=c<<16;
 //        printf("[%06X]",type);
         len-=3;
-        if(ds->type==-1){
-          // autodetect type
-          ds->type=((aid&0xE0)==0xA0)?2:3;
-        }
-        if(ds->type==2 && len>=2){
+        if((aid&0xE0)==0xA0 && len>=2){
           // read PCM header
           int head;
           head=stream_read_char(demux->stream); head=c<<8;
@@ -215,7 +203,6 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
     if(demux->audio->id==aid){
       ds=demux->audio;
       if(!ds->sh) ds->sh=demux->a_streams[aid];
-      if(ds->type==-1) ds->type=1;
     }
   } else
   if(id>=0x1E0 && id<=0x1EF){
@@ -252,7 +239,6 @@ int num_elementary_packets101=0;
 int num_elementary_packets1B6=0;
 
 int demux_mpg_es_fill_buffer(demuxer_t *demux){
-//if(demux->type==DEMUXER_TYPE_MPEG_ES)
   // Elementary video stream
   if(demux->stream->eof) return 0;
   demux->filepos=stream_tell(demux->stream);

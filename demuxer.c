@@ -23,7 +23,6 @@ demux_stream_t* new_demuxer_stream(struct demuxer_st *demuxer,int id){
   ds->bytes=0;
   ds->first=ds->last=NULL;
   ds->id=id;
-  ds->type=-1;
   ds->demuxer=demuxer;
 //----------------
   ds->asf_seq=-1;

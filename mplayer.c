@@ -911,11 +911,10 @@ switch(file_format){
     has_audio=0;sh_audio=NULL;
   } else {
     sh_audio=d_audio->sh;sh_audio->ds=d_audio;
-    if(verbose) printf("detected MPG-PS audio format: %d\n",d_audio->type);
-    switch(d_audio->type){
-      case 1: sh_audio->format=0x50;break; // mpeg
-      case 2: sh_audio->format=0x10001;break;  // dvd pcm
-      case 3: sh_audio->format=0x2000;break; // ac3
+    switch(d_audio->id & 0xE0){  // 1110 0000 b  (high 3 bit: type  low 5: id)
+      case 0x00: sh_audio->format=0x50;break; // mpeg
+      case 0xA0: sh_audio->format=0x10001;break;  // dvd pcm
+      case 0x80: sh_audio->format=0x2000;break; // ac3
       default: has_audio=0;sh_audio=NULL; // unknown type
     }
   }
