@@ -2,10 +2,9 @@
 #define __STREAM_H
 
 #include "mp_msg.h"
+#include <string.h>
 #include <inttypes.h>
 #include <sys/types.h>
-
-#define STREAM_BUFFER_SIZE 2048
 
 #define STREAMTYPE_DUMMY -1    // for placeholders, when the actual reading is handled in the demuxer
 #define STREAMTYPE_FILE 0      // read from seekable file
@@ -17,6 +16,8 @@
 #define STREAMTYPE_DS   8      // read from a demuxer stream
 #define STREAMTYPE_DVDNAV 9    // we cannot safely "seek" in this...
 #define STREAMTYPE_CDDA 10     // raw audio CD reader
+
+#define STREAM_BUFFER_SIZE 2048
 
 #define VCD_SECTOR_SIZE 2352
 #define VCD_SECTOR_OFFS 24
@@ -47,17 +48,14 @@ typedef struct {
 
 #ifdef USE_STREAM_CACHE
 int stream_enable_cache(stream_t *stream,int size,int min,int prefill);
+int cache_stream_fill_buffer(stream_t *s);
+int cache_stream_seek_long(stream_t *s,off_t pos);
 #else
-// no cache
+// no cache, define wrappers:
 #define cache_stream_fill_buffer(x) stream_fill_buffer(x)
 #define cache_stream_seek_long(x,y) stream_seek_long(x,y)
 #define stream_enable_cache(x,y,z,w) 1
 #endif
-
-int cache_stream_fill_buffer(stream_t *s);
-int cache_stream_seek_long(stream_t *s,off_t pos);
-
-#include <string.h>
 
 inline static int stream_read_char(stream_t *s){
   return (s->buf_pos<s->buf_len)?s->buffer[s->buf_pos++]:
