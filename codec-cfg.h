@@ -34,6 +34,7 @@
 #define VFM_FFMPEG 5
 #define VFM_VFWEX 6
 #define VFM_DIVX4 7
+#define VFM_RAW 8
 
 typedef struct {
 	unsigned long f1;

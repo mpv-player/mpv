@@ -215,6 +215,7 @@ static short get_driver(char *s,int audioflag)
 		"ffmpeg",
 		"vfwex",
 		"divx4",
+		"raw",
 		NULL
 	};
         char **drv=audioflag?audiodrv:videodrv;

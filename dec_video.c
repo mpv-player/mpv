@@ -316,6 +316,9 @@ switch(sh_video->codec->driver){
    mpeg2_allocate_image_buffers (picture);
    break;
  }
+ case VFM_RAW: {
+   break;
+ }
 }
 
   return 1;
@@ -499,6 +502,10 @@ else
   case VFM_MPEG:
     mpeg2_decode_data(video_out, start, start+in_size,drop_frame);
     if(!drop_frame) blit_frame=1;
+    break;
+  case VFM_RAW:
+    planes[0]=start;
+    blit_frame=2;
     break;
 } // switch
 //------------------------ frame decoded. --------------------
