@@ -202,8 +202,17 @@ typedef struct af_control_ext_s{
 #define AF_CONTROL_EQUALIZER_GAIN 	0x00001C00 | AF_CONTROL_FILTER_SPECIFIC
 
 
-// Set delay length in seconds
+// Delay length in ms, arg is a control_ext with a float*
 #define AF_CONTROL_DELAY_LEN		0x00001D00 | AF_CONTROL_FILTER_SPECIFIC
+
+
+// Subwoofer
+
+// Channel number which to insert the filtered data, arg in int*
+#define AF_CONTROL_SUB_CH		0x00001E00 | AF_CONTROL_FILTER_SPECIFIC
+
+// Cutoff frequency [Hz] for lowpass filter, arg is float*
+#define AF_CONTROL_SUB_FC		0x00001F00 | AF_CONTROL_FILTER_SPECIFIC
 
 
 #endif /*__af_control_h */

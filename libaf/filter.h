@@ -45,13 +45,17 @@
 
 // Exported functions
 extern _ftype_t fir(unsigned int n, _ftype_t* w, _ftype_t* x);
+
 extern _ftype_t* pfir(unsigned int n, unsigned int k, unsigned int xi, _ftype_t** w, _ftype_t** x, _ftype_t* y, unsigned int s);
 
 extern int updateq(unsigned int n, unsigned int xi, _ftype_t* xq, _ftype_t* in);
 extern int updatepq(unsigned int n, unsigned int k, unsigned int xi, _ftype_t** xq, _ftype_t* in, unsigned int s);
 
 extern int design_fir(unsigned int n, _ftype_t* w, _ftype_t* fc, unsigned int flags, _ftype_t opt);
+
 extern int design_pfir(unsigned int n, unsigned int k, _ftype_t* w, _ftype_t** pw, _ftype_t g, unsigned int flags);
+
+extern int szxform(_ftype_t* a, _ftype_t* b, _ftype_t Q, _ftype_t fc, _ftype_t fs, _ftype_t *k, _ftype_t *coef);
 
 /* Add new data to circular queue designed to be used with a FIR
    filter. xq is the circular queue, in pointing at the new sample, xi

@@ -14,6 +14,10 @@
 #include <math.h>
 #include "dsp.h"
 
+/******************************************************************************
+*  FIR filter implementations
+******************************************************************************/
+
 /* C implementation of FIR filter y=w*x
 
    n number of filter taps, where mod(n,4)==0
@@ -73,6 +77,9 @@ inline int updatepq(unsigned int n, unsigned int d, unsigned int xi, _ftype_t** 
   return (++xi)&(n-1);
 }
 
+/******************************************************************************
+*  FIR filter design
+******************************************************************************/
 
 /* Design FIR filter using the Window method
 
@@ -255,3 +262,172 @@ int design_pfir(unsigned int n, unsigned int k, _ftype_t* w, _ftype_t** pw, _fty
   }
   return -1;
 }
+
+/******************************************************************************
+*  IIR filter design
+******************************************************************************/
+
+/* Helper functions for the bilinear transform */
+
+/* Pre-warp the coefficients of a numerator or denominator.
+   Note that a0 is assumed to be 1, so there is no wrapping
+   of it.  
+*/
+void prewarp(_ftype_t* a, _ftype_t fc, _ftype_t fs)
+{
+  _ftype_t wp;
+  wp = 2.0 * fs * tan(M_PI * fc / fs);
+  a[2] = a[2]/(wp * wp);
+  a[1] = a[1]/wp;
+}
+
+/* Transform the numerator and denominator coefficients of s-domain
+   biquad section into corresponding z-domain coefficients.
+   
+   The transfer function for z-domain is:
+
+          1 + alpha1 * z^(-1) + alpha2 * z^(-2)
+   H(z) = -------------------------------------
+          1 + beta1 * z^(-1) + beta2 * z^(-2)
+
+   Store the 4 IIR coefficients in array pointed by coef in following
+   order:
+   beta1, beta2    (denominator)
+   alpha1, alpha2  (numerator)
+   
+   Arguments:
+   a       - s-domain numerator coefficients
+   b       - s-domain denominator coefficients
+   k 	   - filter gain factor. Initially set to 1 and modified by each
+             biquad section in such a way, as to make it the
+             coefficient by which to multiply the overall filter gain
+             in order to achieve a desired overall filter gain,
+             specified in initial value of k.  
+   fs 	   - sampling rate (Hz)
+   coef    - array of z-domain coefficients to be filled in.
+ 
+   Return: On return, set coef z-domain coefficients and k to the gain
+   required to maintain overall gain = 1.0;
+*/
+void bilinear(_ftype_t* a, _ftype_t* b, _ftype_t* k, _ftype_t fs, _ftype_t *coef)
+{
+  _ftype_t ad, bd;
+
+  /* alpha (Numerator in s-domain) */
+  ad = 4. * a[2] * fs * fs + 2. * a[1] * fs + a[0];
+  /* beta (Denominator in s-domain) */
+  bd = 4. * b[2] * fs * fs + 2. * b[1] * fs + b[0];
+
+  /* Update gain constant for this section */
+  *k *= ad/bd;
+
+  /* Denominator */
+  *coef++ = (2. * b[0] - 8. * b[2] * fs * fs)/bd; /* beta1 */
+  *coef++ = (4. * b[2] * fs * fs - 2. * b[1] * fs + b[0])/bd; /* beta2 */
+
+  /* Numerator */
+  *coef++ = (2. * a[0] - 8. * a[2] * fs * fs)/ad; /* alpha1 */
+  *coef   = (4. * a[2] * fs * fs - 2. * a[1] * fs + a[0])/ad;   /* alpha2 */
+}
+
+
+
+/* IIR filter design using bilinear transform and prewarp. Transforms
+   2nd order s domain analog filter into a digital IIR biquad link. To
+   create a filter fill in a, b, Q and fs and make space for coef and k.
+   
+
+   Example Butterworth design: 
+
+   Below are Butterworth polynomials, arranged as a series of 2nd
+   order sections:
+
+   Note: n is filter order.
+   
+   n  Polynomials
+   -------------------------------------------------------------------
+   2  s^2 + 1.4142s + 1
+   4  (s^2 + 0.765367s + 1) * (s^2 + 1.847759s + 1)
+   6  (s^2 + 0.5176387s + 1) * (s^2 + 1.414214 + 1) * (s^2 + 1.931852s + 1)
+   
+   For n=4 we have following equation for the filter transfer function:
+                       1                              1
+   T(s) = --------------------------- * ----------------------------
+          s^2 + (1/Q) * 0.765367s + 1   s^2 + (1/Q) * 1.847759s + 1
+   
+   The filter consists of two 2nd order sections since highest s power
+   is 2.  Now we can take the coefficients, or the numbers by which s
+   is multiplied and plug them into a standard formula to be used by
+   bilinear transform.
+
+   Our standard form for each 2nd order section is:
+
+          a2 * s^2 + a1 * s + a0
+   H(s) = ----------------------
+          b2 * s^2 + b1 * s + b0
+
+   Note that Butterworth numerator is 1 for all filter sections, which
+   means s^2 = 0 and s^1 = 0
+
+   Lets convert standard Butterworth polynomials into this form:
+
+             0 + 0 + 1                  0 + 0 + 1
+   --------------------------- * --------------------------
+   1 + ((1/Q) * 0.765367) + 1   1 + ((1/Q) * 1.847759) + 1
+
+   Section 1:
+   a2 = 0; a1 = 0; a0 = 1;
+   b2 = 1; b1 = 0.765367; b0 = 1;
+
+   Section 2:
+   a2 = 0; a1 = 0; a0 = 1;
+   b2 = 1; b1 = 1.847759; b0 = 1;
+
+   Q is filter quality factor or resonance, in the range of 1 to
+   1000. The overall filter Q is a product of all 2nd order stages.
+   For example, the 6th order filter (3 stages, or biquads) with
+   individual Q of 2 will have filter Q = 2 * 2 * 2 = 8.
+
+
+   Arguments:
+   a       - s-domain numerator coefficients, a[1] is always assumed to be 1.0
+   b       - s-domain denominator coefficients
+   Q	   - Q value for the filter
+   k 	   - filter gain factor. Initially set to 1 and modified by each
+             biquad section in such a way, as to make it the
+             coefficient by which to multiply the overall filter gain
+             in order to achieve a desired overall filter gain,
+             specified in initial value of k.  
+   fs 	   - sampling rate (Hz)
+   coef    - array of z-domain coefficients to be filled in.
+
+   Note: Upon return from each call, the k argument will be set to a
+   value, by which to multiply our actual signal in order for the gain
+   to be one. On second call to szxform() we provide k that was
+   changed by the previous section. During actual audio filtering
+   k can be used for gain compensation.
+
+   return -1 if fail 0 if success.
+*/
+int szxform(_ftype_t* a, _ftype_t* b, _ftype_t Q, _ftype_t fc, _ftype_t fs, _ftype_t *k, _ftype_t *coef)
+{
+  _ftype_t at[3];
+  _ftype_t bt[3];
+
+  if(!a || !b || !k || !coef || (Q>1000.0 || Q< 1.0)) 
+    return -1;
+
+  memcpy(at,a,3*sizeof(_ftype_t));
+  memcpy(bt,b,3*sizeof(_ftype_t));
+
+  bt[1]/=Q;
+
+  /* Calculate a and b and overwrite the original values */
+  prewarp(at, fc, fs);
+  prewarp(bt, fc, fs);
+  /* Execute bilinear transform */
+  bilinear(at, bt, k, fs, coef);
+
+  return 0;
+}
+
