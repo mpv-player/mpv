@@ -95,21 +95,22 @@ with a subdirectory named 'libavcodec' inside will be created. Copy (symbolic
 linking does NOT suffice) this subdirectory into the MPlayer source tree.
 
 
-______________________________
-STEP2: Installing Win32 Codecs
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+_______________________________
+STEP2: Installing Binary Codecs
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 MPlayer and libavcodec have builtin support for the most common audio and video
 formats, but some formats require external codecs. Examples include Real, Indeo
-and Sorenson3 (newer Quicktime) formats. Support for Windows Media formats
-except WMV9 exists but still has some bugs, your mileage may vary. This step is
-not mandatory, but recommended for getting MPlayer to play a broader range of
+and QuickTime audio formats. Support for Windows Media formats except WMV9
+exists but still has some bugs, your mileage may vary. This step is not
+mandatory, but recommended for getting MPlayer to play a broader range of
 formats. Please note that most codecs only work on Intel x86 compatible PCs.
 
 Unpack the codecs archives and put the contents in a directory where MPlayer
-will find them. The default directory is /usr/lib/win32/ but you can change
-that to something else by using the '--with-win32libdir=DIR' option when you
-run './configure'.
+will find them. The default directory is /usr/local/lib/codecs/ (it used to be
+/usr/local/lib/win32 in the past, this also works) but you can change that to
+something else by using the '--with-codecsdir=DIR' option when you run
+'./configure'.
 
 
 __________________________
