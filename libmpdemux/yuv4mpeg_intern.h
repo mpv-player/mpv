@@ -75,4 +75,4 @@
 #define Y4M_DAR_MPEG2_3 { 16, 9 }
 #define Y4M_DAR_MPEG2_4 { 221, 100 }
 
-#endif __YUV4MPEG_INTERN_H__
+#endif /* __YUV4MPEG_INTERN_H__ */
