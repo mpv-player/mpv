@@ -70,9 +70,14 @@ extern int verbose; // defined in mplayer.c
 
 void mp_msg_init();
 void mp_msg_set_level(int verbose);
-void mp_msg_c( int x, const char *format, ... );
 
 #include "config.h"
+
+#ifdef TARGET_OS2
+// va_start/vsnprintf seems to be broken under OS2 :(
+#define mp_msg(mod,lev, fmt, args... ) do{if(lev<=mp_msg_levels[mod]) printf( fmt, ## args );}while(0)
+#define mp_dbg(mod,lev, args... ) 
+#else
 
 #ifdef USE_I18N
 #include <libintl.h>
@@ -81,6 +86,8 @@ void mp_msg_c( int x, const char *format, ... );
 #else
 #define mp_gettext(String) String
 #endif
+
+void mp_msg_c( int x, const char *format, ... );
 
 #ifdef __GNUC__
 #define mp_msg(mod,lev, args... ) mp_msg_c((mod<<8)|lev, ## args )
@@ -102,4 +109,5 @@ void mp_msg_c( int x, const char *format, ... );
 #endif
 #endif
 
+#endif
 #endif
