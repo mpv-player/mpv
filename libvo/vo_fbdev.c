@@ -27,7 +27,6 @@
 #include "video_out_internal.h"
 #include "fastmemcpy.h"
 #include "sub.h"
-#include "yuv2rgb.h"
 #include "../postproc/rgb2rgb.h"
 
 LIBVO_EXTERN(fbdev)

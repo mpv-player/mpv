@@ -32,7 +32,7 @@
 #undef GGI_PLANAR_NOCONV
 
 #ifndef GGI_PLANAR_NOCONV
-#include "yuv2rgb.h"
+#include "../postproc/rgb2rgb.h"
 #endif
 
 LIBVO_EXTERN (ggi)

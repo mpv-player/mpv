@@ -30,7 +30,6 @@
 #endif
 
 #include "fastmemcpy.h"
-#include "yuv2rgb.h"
 #include "sub.h"
 #include "linux/vbelib.h"
 #include "bswap.h"

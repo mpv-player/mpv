@@ -28,7 +28,7 @@ LIBVO_EXTERN(gl)
 //#include <X11/keysym.h>
 #include <GL/glx.h>
 #include <errno.h>
-#include "yuv2rgb.h"
+#include "../postproc/rgb2rgb.h"
 
 #include <GL/gl.h>
 

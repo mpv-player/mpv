@@ -77,7 +77,7 @@ extern int verbose;
 #endif
 
 #ifdef YV12_CONV_METH
-#include "yuv2rgb.h"
+#include "../postproc/rgb2rgb.h"
 #endif
 
 static vo_info_t vo_info = 

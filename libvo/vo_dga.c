@@ -23,8 +23,8 @@
  * - works only on x86 architectures
  *
  * $Log$
- * Revision 1.32  2001/11/02 15:27:38  nick
- * *** empty log message ***
+ * Revision 1.33  2001/11/06 11:21:08  nick
+ * Move yuv2rgb to postprocess
  *
  *
  * Revision 1.31  2001/10/30 17:04:31  nick
@@ -145,7 +145,7 @@
 #include "config.h"
 #include "video_out.h"
 #include "video_out_internal.h"
-#include "yuv2rgb.h"
+#include "../postproc/rgb2rgb.h"
 
 LIBVO_EXTERN( dga )
 

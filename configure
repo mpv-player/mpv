@@ -2316,7 +2316,6 @@ if test "$_mlib" = yes ; then
  _mlibdef='#define HAVE_MLIB'
  _mlibinc="-I$_mlibdir/include"
  _mliblib="-L$_mlibdir/lib -R$_mlibdir/lib -lmlib"
- _vosrc=$_vosrc' yuv2rgb_mlib.c'
 else
  _mlibdef='#undef HAVE_MLIB'
  _mlibinc= _mliblib=

@@ -32,7 +32,6 @@ LIBVO_EXTERN( x11 )
 #include <X11/extensions/xf86vmode.h>
 #endif
 #include <errno.h>
-#include "yuv2rgb.h"
 
 #include "x11_common.h"
 

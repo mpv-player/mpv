@@ -18,8 +18,6 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 
-#include "yuv2rgb.h"
-
 #include "sub.h"
 #include "../postproc/rgb2rgb.h"
 
