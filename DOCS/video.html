@@ -1175,7 +1175,7 @@ for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
     the TV.<BR> <B>This method doesn't give you accelerated playback</B> as
     under Windoze! The second head has only YUV framebuffer, the <I>BES</I>
     (Back End Scaler, the YUV scaler on G200/G400/G450/G550 cards) doesn't work
-    on it!  The windows driver somehow workarounds this, probably by using the
+    on it!  The Windows driver somehow works around this, probably by using the
     3D engine to zoom, and the YUV framebuffer to display the zoomed
     image. If you really want to use X, use the <CODE>-vo x11 -fs -zoom</CODE>
     options, but it will be <B>SLOW</B>, and has <B>Macrovision</B> copy protection
