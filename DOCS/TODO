@@ -14,7 +14,7 @@ Libvo features:
 - framebuffer and svgalib support (both)
 - real fullscreen (black bands at unused areas) support - DONE for xmga & x11
 - fix X4.0.x/DRI OpenGL (doesn't really work, at least mga & tdfx & nvidia)
-- change libmpeg2 & libvo interface to be compatible with libmpeg2-0.2.0 release
+- "raw" X11 output - for viewing over network (without MIT-SHM)
 
 Player features:
 - libcss support
@@ -27,7 +27,9 @@ Player features:
 - support for more codecs  (sample .avi files and .dll needed!) - HELP!
 - support for MPEG TS (transport streams) and PES format - I need sample files!
 - verify valid range of numeric options (like '-xy 0')
+- DirectShow support
 
 Requested codecs:
 - WMV (failing to load)
 - ASUS ASV1 (loaded, but picture is upside-down and very pixelized)
+- VoxWare audio (DirectShow required)
