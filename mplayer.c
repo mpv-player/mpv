@@ -3033,6 +3033,14 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       }
 #endif
     } break;
+    case MP_CMD_GET_SUB_VISIBILITY:
+	{
+#ifdef USE_SUB
+	if (sh_video) {
+		mp_msg(MSGT_GLOBAL,MSGL_INFO,"ANS_SUB_VISIBILITY=%ld\n", sub_visibility);
+	}
+#endif
+	} break;
     case MP_CMD_VOBSUB_LANG:
     if (vo_vobsub)
     {
@@ -3066,6 +3074,11 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	mp_msg(MSGT_GLOBAL,MSGL_INFO,"ANS_LENGTH=%ld\n", demuxer_get_time_length(demuxer));
     } break;
 
+	case MP_CMD_GET_VO_FULLSCREEN : {
+	if(video_out && vo_config_count)
+		mp_msg(MSGT_GLOBAL,MSGL_INFO,"ANS_VO_FULLSCREEN=%ld\n", vo_fs);
+	} break;
+    
     case MP_CMD_GET_PERCENT_POS : {
 	mp_msg(MSGT_GLOBAL,MSGL_INFO,"ANS_PERCENT_POSITION=%ld\n", demuxer_get_percent_pos(demuxer));
     } break;
