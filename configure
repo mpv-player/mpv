@@ -2113,20 +2113,16 @@ echocheck "XAnim DLL"
 if test "$_xanim" = auto ; then
   _xanim=no
   if test "$_dl" = yes ; then
-    if x86 ; then
-      if test -z "$_xanimlibdir" ; then
-        for I in /usr/local/lib/xanim/mods /usr/lib/xanim/mods /usr/lib/xanim ; do
+    if test -z "$_xanimlibdir" ; then
+	for I in /usr/local/lib/xanim/mods /usr/lib/xanim/mods /usr/lib/xanim ; do
           if test -d "$I" ; then
             _xanimlibdir="$I"
             break;
           fi;
         done
-      fi
-      test "$_xanimlibdir" && _xanim=yes
-      echores "yes (found: $_xanimlibdir)"
-    else
-      echores "not supported on non-x86"
     fi
+    test "$_xanimlibdir" && _xanim=yes
+    echores "yes (found: $_xanimlibdir)"
   else
     echores "dl support needed"
   fi
@@ -2320,6 +2316,7 @@ echocheck "TV interface"
 # FIXME tv check
 if test "$_tv" = yes ; then
   _def_tv='#define USE_TV 1'
+  _inputmodules="tv $_inputmodules"
 else
   _def_tv='#undef USE_TV'
 fi
