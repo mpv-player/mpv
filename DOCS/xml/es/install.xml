@@ -42,7 +42,7 @@ núcleo 2.4.x es recomendado.
   y asegúrese de usar por lo menos 3.1, está probado y funciona. Para información
   detallada sobre los problemas de gcc 2.96 (que todavía NO están arreglados, ¡pero
   han sido SOLUCIONADOS en <application>MPlayer</application>!), vea la sección
-  <link linkend="gcc-296"gcc 2.96</link> y la <xref linkend="faq"/>.
+  <link linkend="gcc-296">gcc 2.96</link> y la <xref linkend="faq"/>.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">XFree86</emphasis> - versión sugerida <emphasis role="bold">siempre la 
@@ -122,7 +122,7 @@ núcleo 2.4.x es recomendado.
   H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/SVQ1/SVQ3
   y decodificar flujo de audio WMA (Windows Media Audio) v1/v2, en múltiples
   plataformas. Es también reconocido como el más rápido para esta tarea. Vea
-  <lin linkend="ffmpeg">está sección</link> para más detalles. Características:
+  <link linkend="ffmpeg">está sección</link> para más detalles. Características:
   <itemizedlist>
   <listitem><simpara>
     obtener la decodificación de formatos de vídeo mencionados arriba, en máquinas no-x86
@@ -187,6 +187,7 @@ núcleo 2.4.x es recomendado.
     puede reproducir películas viejas en <emphasis role="bold">DivX3</emphasis>
     mucho más rápido que la DLL de Win32 ¡pero más lento que <emphasis role="bold">
     libavcodec</emphasis>!
+    </simpara></listitem>
   <listitem><simpara>
     es de código cerrado, y solo la versión para x86 esta disponible.
     </simpara></listitem>
@@ -329,7 +330,7 @@ cuando hagan zoom), por lo tanto la pantalla completa es agradable y muy rápida.
 <title>Placas sin YUV</title>
 <para>
 Se puede conseguir una reproducción a pantalla completa tanto activando
-el escalado por software </emphass> (use la opción <option>-zoom</option> o <option>-vf</option>,
+el <emphasis role="bold">escalado por software</emphasis> (use la opción <option>-zoom</option> o <option>-vf</option>,
 pero le advierto: esto es lento), o cambiando a un modo de vídeo más chico, por ejemplo
 352x288. Si no posee aceleración YUV, este último método es lo recomendado.
 El cambio de modo de vídeo se activa usando la opción <option>-vm</option> y
@@ -432,7 +433,7 @@ funciona con los siguientes controladores:
   lea la sección <link linend="tv-input">entrada de TV</link>.
   </para></listitem>
 <listitem><para>
-  Existe un buen soporte de <emphasis role="bold"Menu en Pantalla</emphasis> listo
+  Existe un buen soporte de <emphasis role="bold">Menu en Pantalla</emphasis> listo
   para ser usado. Verifique la sección <link linkend="subosd">Menú en Pantalla</link>.
   </para></listitem>
 </itemizedlist>
