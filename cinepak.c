@@ -667,9 +667,10 @@ void (*cvid_v4)(mp_image_t *mpi, unsigned int x, unsigned int y, cvid_codebook *
 		y_bottom += y1;
 		top_size -= 12;
 		x = 0;
-		if(x1 != (unsigned int)mpi->width) 
-			mp_msg(MSGT_DECVIDEO, MSGL_WARN, "CVID: Warning x1 (%ld) != width (%d)\n", x1, mpi->width);
-x1 = mpi->width;
+//		if(x1 != (unsigned int)mpi->width) 
+//			mp_msg(MSGT_DECVIDEO, MSGL_WARN, "CVID: Warning x1 (%ld) != width (%d)\n", x1, mpi->width);
+
+//x1 = mpi->width;
 #if DBUG
 	mp_msg(MSGT_DECVIDEO, MSGL_WARN, "   %d) %04lx %04ld <%ld,%ld> <%ld,%ld> yt %ld  %d\n",
 		cur_strip, strip_id, top_size, x0, y0, x1, y1, y_bottom);
@@ -782,7 +783,7 @@ x1 = mpi->width;
 								}
 
 							x += 4;
-							if(x >= (unsigned int)mpi->width)
+							if(x >= (unsigned int)x1)
 								{
 								x = 0;
 								y += 4;
@@ -832,7 +833,7 @@ x1 = mpi->width;
 
 							mask >>= 1;
 							x += 4;
-							if(x >= (unsigned int)mpi->width)
+							if(x >= (unsigned int)x1)
 								{
 								x = 0;
 								y += 4;
@@ -849,7 +850,7 @@ x1 = mpi->width;
 						cvid_v1(mpi, x, y, v1_codebook + get_byte());
 						chunk_size--;
 						x += 4;
-						if(x >= (unsigned int)mpi->width)
+						if(x >= (unsigned int)x1)
 							{
 							x = 0;
 							y += 4;
