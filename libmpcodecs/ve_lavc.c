@@ -504,7 +504,7 @@ static int config(struct vf_instance_s* vf,
     switch(lavc_param_vpass){
     case 1: 
 	lavc_venc_context->flags|= CODEC_FLAG_PASS1; 
-	stats_file= fopen(passtmpfile, "w");
+	stats_file= fopen(passtmpfile, "wb");
 	if(stats_file==NULL){
 	    mp_msg(MSGT_MENCODER,MSGL_ERR,"2pass failed: filename=%s\n", passtmpfile);
             return 0;
@@ -512,7 +512,7 @@ static int config(struct vf_instance_s* vf,
 	break;
     case 2:
 	lavc_venc_context->flags|= CODEC_FLAG_PASS2; 
-	stats_file= fopen(passtmpfile, "r");
+	stats_file= fopen(passtmpfile, "rb");
 	if(stats_file==NULL){
 	    mp_msg(MSGT_MENCODER,MSGL_ERR,"2pass failed: filename=%s\n", passtmpfile);
             return 0;
