@@ -177,14 +177,8 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
 	    s->pow[ch] = t*s->pow[ch] + pow*s->time; // LP filter
 	  /* Soft clipping, the sound of a dream, thanks to Jon Wattes
 	     post to Musicdsp.org */
-	  if(s->soft){
-	    if (x >=  M_PI/2)
-	      x = 1.0;
-	    else if(x <= -M_PI/2)
-	      x = -1.0;
-	    else
-	      x = sin(x);
-	  }
+	  if(s->soft)
+	    x=af_softclip(x);
 	  // Hard clipping
 	  else
 	    x=clamp(x,-1.0,1.0);
