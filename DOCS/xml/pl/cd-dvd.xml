@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with 1.9 -->
+<!-- synced with 1.11 -->
 <chapter id="cd-dvd">
 <title>Używanie CD/DVD</title>
 
@@ -87,7 +87,8 @@ man. Składnia dla standardowego DVD (Digital Versatile Disc) jest następująca
 
 <para>
 Przykład:
-<screen>mplayer dvd://1 -dvd-device /dev/hdc</screen>
+<screen>mplayer dvd://<replaceable>1</replaceable> -dvd-device <replaceable>/dev/hdc</replaceable></screen>
+
 </para>
 
 <para>
@@ -125,19 +126,10 @@ oraz <systemitem>libdvdcss</systemitem>, ale to rozwiązanie jest
 niekompatybilności bibliotek oraz zmniejszenie prędkości.
 </para>
 
-<formalpara>
-<title>Obsługa DVD - stary sposób - OPCJONALNE</title>
-<para>
-Użyteczne, jeżeli chcesz odtwarzać zakodowane pliki VOB z
-<emphasis role="bold">twardego dysku</emphasis>.
-W tym celu skompiluj i zainstaluj <emphasis role="bold">libcss</emphasis> 0.0.1
-(nie nowsze) (Jeżeli MPlayer nie radzi sobie, użyj opcji
-<option>-csslib /ścieżka/do/libcss.so</option>). Aby użyć tej metody musisz mieć
-uprawnienia roota, binarka <application>MPlayer</application> musi miec suid lub
-pozwól <application>MPlayerowi</application> na uruchamianie owijacza (wrapper)
-fibmap_mplayer z suid-root.
-</para>
-</formalpara>
+<note><para>
+W przypadku problemów z dekodowaniem DVD, spróbuj wyłączyć supermount, bądź
+inne tego typu udogodnienia.
+</para></note>
 
 <formalpara>
 <title>Struktura dysku DVD</title>
