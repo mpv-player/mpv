@@ -1021,6 +1021,16 @@ int vixInit( void )
   radeon_ram_size = INREG(CONFIG_MEMSIZE);
   /* mem size is bits [28:0], mask off the rest. Range: from 1Mb up to 512 Mb */
   radeon_ram_size &=  CONFIG_MEMSIZE_MASK;
+#ifdef RADEON
+  /* according to XFree86 4.2.0, some production M6's return 0 for 8MB */
+  if (radeon_ram_size == 0 &&
+      (def_cap.device_id == DEVICE_ATI_RADEON_MOBILITY_M6 ||
+       def_cap.device_id == DEVICE_ATI_RADEON_MOBILITY_M62))
+  {
+      printf(RADEON_MSG" Workarounding buggy Radeon Mobility M6 (0 vs. 8MB ram)\n");
+      radeon_ram_size = 8192*1024;
+  }
+#endif
   if((radeon_mem_base = map_phys_mem(pci_info.base0,radeon_ram_size))==(void *)-1) return ENOMEM;
   memset(&besr,0,sizeof(bes_registers_t));
   radeon_vid_make_default();
