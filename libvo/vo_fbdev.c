@@ -439,7 +439,6 @@ static fb_mode_t *find_best_mode(int xres, int yres, range_t *hfreq,
 
 static void set_bpp(struct fb_var_screeninfo *p, int bpp)
 {
-/*	p->bits_per_pixel = (bpp == 15) ? 16 : bpp; */
 	p->bits_per_pixel = (bpp + 1) & ~1;
 	p->red.msb_right = p->green.msb_right = p->blue.msb_right = 0;
 	switch (bpp) {
@@ -449,24 +448,24 @@ static void set_bpp(struct fb_var_screeninfo *p, int bpp)
 			p->red.length = 8;
 			p->green.offset = 8;
 			p->green.length = 8;
-			p->blue.offset = 0;
 			p->blue.length = 8;
+			p->blue.offset = 0;
 			break;
 		case 16:
 			p->red.offset = 11;
+			p->green.length = 6;
 			p->red.length = 5;
 			p->green.offset = 5;
-			p->green.length = 6;
-			p->blue.offset = 0;
 			p->blue.length = 5;
+			p->blue.offset = 0;
 			break;
 		case 15:
 			p->red.offset = 10;
+			p->green.length = 5;
 			p->red.length = 5;
 			p->green.offset = 5;
-			p->green.length = 5;
-			p->blue.offset = 0;
 			p->blue.length = 5;
+			p->blue.offset = 0;
 			break;
 	}
 }
