@@ -143,7 +143,7 @@ MPlayer (1.0)
     * OBMC fixes
     * FLAC decoder
     * better support for DivX5
-    * MMX and SSE2-optimized VP3/Theora decoding
+    * MMX- and SSE2-optimized VP3/Theora decoding
     * support for Theora alpha3
     * many H.264 improvements
     * more robust MJPEG startcode search mechanism
