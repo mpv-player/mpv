@@ -320,7 +320,7 @@ int init_audio(sh_audio_t *sh_audio){
 int driver=sh_audio->codec->driver;
 
 sh_audio->samplesize=2;
-#if WORDS_BIGENDIAN
+#ifdef WORDS_BIGENDIAN
 sh_audio->sample_format=AFMT_S16_BE;
 #else
 sh_audio->sample_format=AFMT_S16_LE;
@@ -405,8 +405,9 @@ case AFM_A52:
 case AFM_HWAC3:
   // Dolby AC3 audio:
   sh_audio->audio_out_minsize=4*256*6;
-  sh_audio->sample_format = AFMT_AC3;
-  sh_audio->channels=1;
+//  sh_audio->sample_format = AFMT_AC3;
+//  sh_audio->sample_format = AFMT_S16_LE;
+  sh_audio->channels=2;
   break;
 case AFM_GSM:
   // MS-GSM audio codec:
@@ -630,8 +631,8 @@ case AFM_HWAC3: {
 
   // o_bps is calculated from samplesize*channels*samplerate
   // a single ac3 frame is always translated to 6144 byte packet. (zero padding)
-  sh_audio->channels=1;
-  sh_audio->samplesize=4;   // 1*4*(6*256) = 6144 (very TRICKY!)
+  sh_audio->channels=2;
+  sh_audio->samplesize=2;   // 2*2*(6*256) = 6144 (very TRICKY!)
 
   break;
 }
