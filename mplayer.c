@@ -343,6 +343,7 @@ static char* menu_root = "main";
 
 #ifdef HAVE_RTC
 static int nortc;
+static char* rtc_device;
 #endif
 
 #ifdef USE_EDL
@@ -1093,8 +1094,9 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
   if(!nortc)
   {
     // seteuid(0); /* Can't hurt to try to get root here */
-    if ((rtc_fd = open("/dev/rtc", O_RDONLY)) < 0)
-	mp_msg(MSGT_CPLAYER, MSGL_WARN, "Failed to open /dev/rtc: %s (/dev/rtc should be readable by the user.)\n", strerror(errno));
+    if ((rtc_fd = open(rtc_device ? rtc_device : "/dev/rtc", O_RDONLY)) < 0)
+	mp_msg(MSGT_CPLAYER, MSGL_WARN, "Failed to open %s: %s (it should be readable by the user.)\n",
+	    rtc_device ? rtc_device : "/dev/rtc", strerror(errno));
      else {
 	unsigned long irqp = 1024; /* 512 seemed OK. 128 is jerky. */
 

@@ -412,6 +412,7 @@ m_option_t mplayer_opts[]={
 	{"softsleep", &softsleep, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #ifdef HAVE_RTC
 	{"nortc", &nortc, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+        {"rtc", &rtc_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
 
 	{"slave", &slave_mode, CONF_TYPE_FLAG,CONF_GLOBAL , 0, 1, NULL},
