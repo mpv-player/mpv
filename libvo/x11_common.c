@@ -538,6 +538,7 @@ int vo_x11_check_events(Display *mydisplay){
       case ConfigureNotify:
 //	   if (!vo_fs && (Event.xconfigure.width == vo_screenwidth || Event.xconfigure.height == vo_screenheight)) break;
 //	   if (vo_fs && Event.xconfigure.width != vo_screenwidth && Event.xconfigure.height != vo_screenheight) break;
+           if ( vo_window == None ) break;
            vo_dwidth=Event.xconfigure.width;
            vo_dheight=Event.xconfigure.height;
 #if 0
