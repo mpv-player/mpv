@@ -741,7 +741,7 @@ Optionally specify which chapter to end playing at (default: 1).
 Send cookies when making HTTP requests.
 .TP
 .B \-cookies-file <filename> (network only)
-Read HTTP cookies from specified file (default: ~/.mozilla/ and ~/.netscape/)
+Read HTTP cookies from <filename> (default: ~/.mozilla/ and ~/.netscape/)
 and skip reading from default locations.
 The file is assumed to be in Netscape format.
 .TP
@@ -1475,7 +1475,7 @@ Specify the VOBsub subtitle ID.
 .
 .SH "AUDIO OUTPUT OPTIONS (MPLAYER ONLY)"
 .TP
-.B \-abs <value> (-ao oss only) (OBSOLETE)
+.B \-abs <value> (\-ao oss only) (OBSOLETE)
 Override audio driver/\:card buffer size detection.
 .TP
 .B \-aofile <filename>
@@ -1575,7 +1575,7 @@ on the command line.
 Suboptions are optional and can mostly be omitted.
 .br
 .I NOTE:
-See \-ao help for a list of compiled-in drivers.
+See \-ao help for a list of compiled-in audio output drivers.
 .sp 1
 .I EXAMPLE:
 .PD 0
@@ -1927,11 +1927,11 @@ Specify standard or progressive JPEG.
 .IPs [no]baseline
 Specify use of baseline or not.
 .IPs optimize=<value>
-optimization factor [0\-100]
+optimization factor (0\-100)
 .IPs smooth=<value>
-smooth factor [0\-100]
+smooth factor (0\-100)
 .IPs quality=<value>
-quality factor [0\-100]
+quality factor (0\-100)
 .IPs outdir=<value>
 directory to save the JPEG files
 .RE
@@ -2093,7 +2093,7 @@ command line.
 Suboptions are optional and can mostly be omitted.
 .br
 .I NOTE:
-See \-vo help for a list of compiled-in drivers.
+See \-vo help for a list of compiled-in video output drivers.
 .sp 1
 .I EXAMPLE:
 .PD 0
@@ -2548,19 +2548,19 @@ Mixes channels arbitrarily, see DOCS/HTML/en/devices.html#audio-dev for details.
 .RSss
 n: number of output channels (1\-6).
 .br
-lij: how much of input channel j is mixed into output channel i.
+lij: How much of input channel j is mixed into output channel i.
 .REss
 .IPs sub[=fc:ch]
 Add sub-woofer channel.
 .RSss
-fc: Cutoff frequency for low-pass filter (20Hz to 300Hz) default is 60Hz.
+fc: cutoff frequency for low-pass filter (20Hz to 300Hz) (default: 60Hz)
 .br
 ch: channel number for the sub-channel.
 .REss
 .IPs surround[=d]
 Decoder for matrix encoded surround sound, works on many 2 channel files.
 .RSss
-d: delay time in ms for the rear speakers (0ms to 1000ms) default is 15ms.
+d: delay time in ms for the rear speakers (0ms to 1000ms) (default: 15ms)
 .REss
 .IPs delay[=ch1:ch2:...]
 Delays the sound output.
@@ -2585,11 +2585,11 @@ Forces the insertion of audio filters to one of the following:
 .RSss
 0: Completely automatic insertion of filters (default)
 .br
-1: Optimize for accuracy
+1: Optimize for accuracy.
 .br
-2: Optimize for speed
+2: Optimize for speed.
 .br
-3: Turn off auto
+3: Turn off auto.
 .REss
 .IPs list=<filters>
 Same as \-af (see \-af option).
