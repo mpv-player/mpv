@@ -5,6 +5,8 @@
     
     The description of the algorithm you can read here:
       http://www.pcisys.net/~melanson/video1.txt
+
+    32bpp support (c) alex
 */
 
 #define LE_16(x) *(unsigned short *)(x)
@@ -131,12 +133,16 @@ void AVI_Decode_Video1_16(
                 decoded[pixel_ptr++] = quad[pixel_x >> 1][pixel_y >> 1].c1_r;
                 decoded[pixel_ptr++] = quad[pixel_x >> 1][pixel_y >> 1].c1_g;
                 decoded[pixel_ptr++] = quad[pixel_x >> 1][pixel_y >> 1].c1_b;
+		if (bytes_per_pixel == 4) /* 32bpp */
+		    pixel_ptr++;
               }
               else
               {
                 decoded[pixel_ptr++] = quad[pixel_x >> 1][pixel_y >> 1].c2_r;
                 decoded[pixel_ptr++] = quad[pixel_x >> 1][pixel_y >> 1].c2_g;
                 decoded[pixel_ptr++] = quad[pixel_x >> 1][pixel_y >> 1].c2_b;
+		if (bytes_per_pixel == 4) /* 32bpp */
+		    pixel_ptr++;
               }
 
               // get the next flag ready to go
@@ -157,12 +163,16 @@ void AVI_Decode_Video1_16(
                 decoded[pixel_ptr++] = quad[0][0].c1_r;
                 decoded[pixel_ptr++] = quad[0][0].c1_g;
                 decoded[pixel_ptr++] = quad[0][0].c1_b;
+		if (bytes_per_pixel == 4) /* 32bpp */
+		    pixel_ptr++;
               }
               else
               {
                 decoded[pixel_ptr++] = quad[0][0].c2_r;
                 decoded[pixel_ptr++] = quad[0][0].c2_g;
                 decoded[pixel_ptr++] = quad[0][0].c2_b;
+		if (bytes_per_pixel == 4) /* 32bpp */
+		    pixel_ptr++;
               }
 
               // get the next flag ready to go
@@ -186,6 +196,8 @@ void AVI_Decode_Video1_16(
             decoded[pixel_ptr++] = quad[0][0].c1_r;
             decoded[pixel_ptr++] = quad[0][0].c1_g;
             decoded[pixel_ptr++] = quad[0][0].c1_b;
+	    if (bytes_per_pixel == 4) /* 32bpp */
+		pixel_ptr++;
           }
           pixel_ptr -= row_dec;
         }
@@ -275,12 +287,16 @@ void AVI_Decode_Video1_8(
               decoded[pixel_ptr++] = quad[0][0].c1_r;
               decoded[pixel_ptr++] = quad[0][0].c1_g;
               decoded[pixel_ptr++] = quad[0][0].c1_b;
+	      if (bytes_per_pixel == 4) /* 32bpp */
+		pixel_ptr++;
             }
             else
             {
               decoded[pixel_ptr++] = quad[0][0].c2_r;
               decoded[pixel_ptr++] = quad[0][0].c2_g;
               decoded[pixel_ptr++] = quad[0][0].c2_b;
+	      if (bytes_per_pixel == 4) /* 32bpp */
+		pixel_ptr++;
             }
 
             // get the next flag ready to go
@@ -319,12 +335,16 @@ void AVI_Decode_Video1_8(
               decoded[pixel_ptr++] = quad[pixel_x >> 1][pixel_y >> 1].c1_r;
               decoded[pixel_ptr++] = quad[pixel_x >> 1][pixel_y >> 1].c1_g;
               decoded[pixel_ptr++] = quad[pixel_x >> 1][pixel_y >> 1].c1_b;
+	      if (bytes_per_pixel == 4) /* 32bpp */
+		pixel_ptr++;
             }
             else
             {
               decoded[pixel_ptr++] = quad[pixel_x >> 1][pixel_y >> 1].c2_r;
               decoded[pixel_ptr++] = quad[pixel_x >> 1][pixel_y >> 1].c2_g;
               decoded[pixel_ptr++] = quad[pixel_x >> 1][pixel_y >> 1].c2_b;
+	      if (bytes_per_pixel == 4) /* 32bpp */
+		pixel_ptr++;
             }
 
             // get the next flag ready to go
@@ -348,6 +368,8 @@ void AVI_Decode_Video1_8(
             decoded[pixel_ptr++] = quad[0][0].c1_r;
             decoded[pixel_ptr++] = quad[0][0].c1_g;
             decoded[pixel_ptr++] = quad[0][0].c1_b;
+	    if (bytes_per_pixel == 4) /* 32bpp */
+		pixel_ptr++;
           }
           pixel_ptr -= row_dec;
         }
