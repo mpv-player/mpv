@@ -315,6 +315,7 @@ void exit_player(char* how){
    if ( nogui )
   #endif
      getch2_disable();
+
 #ifdef USE_LIBVO2
   if(video_out) vo2_close(video_out);
 #else
@@ -328,6 +329,7 @@ void exit_player(char* how){
   #endif
   lirc_mp_cleanup();
 #endif
+
   exit(1);
 }
 
@@ -461,22 +463,24 @@ int use_stdin=0; //int f; // filedes
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s",banner_text);
 
 #ifdef HAVE_GUI
-  if ( nogui )
-   {
+  if ( nogui ) {
 #endif
+
     parse_cfgfiles();
-    if ((num_filenames=parse_command_line(conf, argc, argv, envp, &filenames)) < 0) exit(1);
-    printf("XXX num_filenames: %d\n",num_filenames);
-    curr_filename=0;
-    filename=(num_filenames>0)?filenames[curr_filename]:NULL;
-    
-    mp_msg_init(verbose+MSGL_STATUS);
+    num_filenames=parse_command_line(conf, argc, argv, envp, &filenames);
+    if(num_filenames<0) exit(1); // error parsing cmdline
+    if(!num_filenames && !vcd_track && !dvd_title){
+	// no file/vcd/dvd -> show HELP:
+	printf("%s",help_text);
+	exit(0);
+    }
 
     // Many users forget to include command line in bugreports...
     if(verbose){
       printf("CommandLine:");
       for(i=1;i<argc;i++)printf(" '%s'",argv[i]);
       printf("\n");
+      printf("num_filenames: %d\n",num_filenames);
     }
 
 #ifndef USE_LIBVO2
@@ -501,78 +505,14 @@ int use_stdin=0; //int f; // filedes
       printf("\n");
       exit(0);
     }
+
 #ifdef HAVE_GUI
    }
 #endif
 
-if(!filename){
-  if(!vcd_track && !dvd_title){
-    printf("%s",help_text); exit(0);
-  }
-}
+    mp_msg_init(verbose+MSGL_STATUS);
 
-#ifdef USE_LIBVO2
-    video_out=vo2_new(video_driver);
-#else
-// check video_out driver name:
-    if (video_driver)
-	if ((i = strcspn(video_driver, ":")) > 0)
-	{
-	    size_t i2 = strlen(video_driver);
-
-	    if (video_driver[i] == ':')
-	    {
-		vo_subdevice = malloc(i2-i);
-		if (vo_subdevice != NULL)
-		    strncpy(vo_subdevice, (char *)(video_driver+i+1), i2-i);
-		video_driver[i] = '\0';
-	    }
-//	    printf("video_driver: %s, subdevice: %s\n", video_driver, vo_subdevice);
-	}
-  if(!video_driver)
-    video_out=video_out_drivers[0];
-  else
-  for (i=0; video_out_drivers[i] != NULL; i++){
-    const vo_info_t *info = video_out_drivers[i]->get_info ();
-    if(strcmp(info->short_name,video_driver) == 0){
-      video_out = video_out_drivers[i];break;
-    }
-  }
-#endif
-  if(!video_out){
-    mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_InvalidVOdriver,video_driver?video_driver:"?");
-    return 0;
-  }
-
-// check audio_out driver name:
-    if (audio_driver)
-	if ((i = strcspn(audio_driver, ":")) > 0)
-	{
-	    size_t i2 = strlen(audio_driver);
-
-	    if (audio_driver[i] == ':')
-	    {
-		ao_subdevice = malloc(i2-i);
-		if (ao_subdevice != NULL)
-		    strncpy(ao_subdevice, (char *)(audio_driver+i+1), i2-i);
-		audio_driver[i] = '\0';
-	    }
-//	    printf("audio_driver: %s, subdevice: %s\n", audio_driver, ao_subdevice);
-	}
-  if(!audio_driver)
-    audio_out=audio_out_drivers[0];
-  else
-  for (i=0; audio_out_drivers[i] != NULL; i++){
-    const ao_info_t *info = audio_out_drivers[i]->info;
-    if(strcmp(info->short_name,audio_driver) == 0){
-      audio_out = audio_out_drivers[i];break;
-    }
-  }
-  if (!audio_out){
-    mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_InvalidAOdriver,audio_driver);
-    return 0;
-  }
-/*DSP!!  if(dsp) audio_out->control(AOCONTROL_SET_DEVICE,(int)dsp);*/
+//------ load global data first ------
 
 // check codec.conf
 if(!parse_codec_cfg(get_path("codecs.conf"))){
@@ -611,16 +551,122 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
   }
 #endif
 
+
+#ifdef HAVE_LIRC
+ #ifdef HAVE_GUI
+  if ( nogui )
+ #endif
+  lirc_mp_setup();
+#endif
+
+#ifdef USE_TERMCAP
+  load_termcap(NULL); // load key-codes
+#endif
+
+  //========= Catch terminate signals: ================
+  // terminate requests:
+  signal(SIGTERM,exit_sighandler); // kill
+  signal(SIGHUP,exit_sighandler);  // kill -HUP  /  xterm closed
+
+  #ifdef HAVE_GUI
+   if ( nogui )
+  #endif
+     signal(SIGINT,exit_sighandler);  // Interrupt from keyboard
+
+  signal(SIGQUIT,exit_sighandler); // Quit from keyboard
+  // fatal errors:
+  signal(SIGBUS,exit_sighandler);  // bus error
+  signal(SIGSEGV,exit_sighandler); // segfault
+  signal(SIGILL,exit_sighandler);  // illegal instruction
+  signal(SIGFPE,exit_sighandler);  // floating point exc.
+  signal(SIGABRT,exit_sighandler); // abort()
+
+
+// ******************* Now, let's see the per-file stuff ********************
+
+    curr_filename=0;
+play_next_file:
+    filename=(num_filenames>0)?filenames[curr_filename]:NULL;
+
+#ifdef USE_LIBVO2
+    current_module="vo2_new";
+    video_out=vo2_new(video_driver);
+    current_module=NULL;
+#else
+// check video_out driver name:
+    if (video_driver)
+	if ((i = strcspn(video_driver, ":")) > 0)
+	{
+	    size_t i2 = strlen(video_driver);
+
+	    if (video_driver[i] == ':')
+	    {
+		vo_subdevice = malloc(i2-i);
+		if (vo_subdevice != NULL)
+		    strncpy(vo_subdevice, (char *)(video_driver+i+1), i2-i);
+		video_driver[i] = '\0';
+	    }
+//	    printf("video_driver: %s, subdevice: %s\n", video_driver, vo_subdevice);
+	}
+  if(!video_driver)
+    video_out=video_out_drivers[0];
+  else
+  for (i=0; video_out_drivers[i] != NULL; i++){
+    const vo_info_t *info = video_out_drivers[i]->get_info ();
+    if(strcmp(info->short_name,video_driver) == 0){
+      video_out = video_out_drivers[i];break;
+    }
+  }
+#endif
+  if(!video_out){
+    mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_InvalidVOdriver,video_driver?video_driver:"?");
+    exit_player(MSGTR_Exit_error);
+  }
+
+// check audio_out driver name:
+    if (audio_driver)
+	if ((i = strcspn(audio_driver, ":")) > 0)
+	{
+	    size_t i2 = strlen(audio_driver);
+
+	    if (audio_driver[i] == ':')
+	    {
+		ao_subdevice = malloc(i2-i);
+		if (ao_subdevice != NULL)
+		    strncpy(ao_subdevice, (char *)(audio_driver+i+1), i2-i);
+		audio_driver[i] = '\0';
+	    }
+//	    printf("audio_driver: %s, subdevice: %s\n", audio_driver, ao_subdevice);
+	}
+  if(!audio_driver)
+    audio_out=audio_out_drivers[0];
+  else
+  for (i=0; audio_out_drivers[i] != NULL; i++){
+    const ao_info_t *info = audio_out_drivers[i]->info;
+    if(strcmp(info->short_name,audio_driver) == 0){
+      audio_out = audio_out_drivers[i];break;
+    }
+  }
+  if (!audio_out){
+    mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_InvalidAOdriver,audio_driver);
+    exit_player(MSGTR_Exit_error);
+  }
+/*DSP!!  if(dsp) audio_out->control(AOCONTROL_SET_DEVICE,(int)dsp);*/
+
+
+  current_module="open_stream";
   stream=open_stream(filename,vcd_track,&file_format);
-  if(!stream) return 1; // error...
-  use_stdin=filename && (!strcmp(filename,"-"));
+  if(!stream) exit_player(MSGTR_Exit_error); // error...
   stream->start_pos+=seek_to_byte;
 
+  use_stdin=filename && (!strcmp(filename,"-"));
+
 #ifdef HAVE_LIBCSS
+  current_module="libcss";
   if (dvdimportkey) {
     if (dvd_import_key(dvdimportkey)) {
 	mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_ErrorDVDkey);
-	exit(1);
+	exit_player(MSGTR_Exit_error);
     }
     mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_CmdlineDVDkey);
   }
@@ -628,7 +674,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 //  if (dvd_auth(dvd_auth_device,f)) {
     if (dvd_auth(dvd_auth_device,filename)) {
         GUI_MSG( mplErrorDVDAuth )
-        exit(0);
+	exit_player(MSGTR_Exit_error);
       } 
     mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_DVDauthOk);
   }
@@ -638,8 +684,10 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 
 if(!has_audio) audio_id=-2; // do NOT read audio packets...
 
+current_module="demux_open";
+
 demuxer=demux_open(stream,file_format,audio_id,video_id,dvdsub_id);
-if(!demuxer) exit(1); // ERROR
+if(!demuxer) exit_player(MSGTR_Exit_error); // ERROR
 
 file_format=demuxer->file_format;
 
@@ -651,6 +699,7 @@ d_dvdsub=demuxer->sub;
 if(stream_dump_type){
   FILE *f;
   demux_stream_t *ds=NULL;
+  current_module="dump";
   // select stream to dump
   switch(stream_dump_type){
   case 1: ds=d_audio;break;
@@ -659,7 +708,7 @@ if(stream_dump_type){
   }
   if(!ds){        
       mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_DumpSelectedSteramMissing);
-      exit(1);
+      exit_player(MSGTR_Exit_error);
   }
   // disable other streams:
   if(d_audio && d_audio!=ds) {ds_free_packs(d_audio); d_audio->id=-2; }
@@ -667,7 +716,10 @@ if(stream_dump_type){
   if(d_dvdsub && d_dvdsub!=ds) {ds_free_packs(d_dvdsub); d_dvdsub->id=-2; }
   // let's dump it!
   f=fopen(stream_dump_name?stream_dump_name:"stream.dump","wb");
-  if(!f){ mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_CantOpenDumpfile);exit(1); }
+  if(!f){
+    mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_CantOpenDumpfile);
+    exit_player(MSGTR_Exit_error);
+  }
   while(!ds->eof){
     unsigned char* start;
     int in_size=ds_get_packet(ds,&start);
@@ -677,15 +729,17 @@ if(stream_dump_type){
   }
   fclose(f);
   mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_CoreDumped);
-  exit(1);
+  exit_player(MSGTR_Exit_eof);
 }
 
 sh_audio=d_audio->sh;
 sh_video=d_video->sh;
 
+current_module="video_read_properties";
+
 if(sh_video){
 
-  if(!video_read_properties(sh_video)) exit(1); // couldn't read header?
+  if(!video_read_properties(sh_video)) exit_player(MSGTR_Exit_error); // couldn't read header?
 
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"[V] filefmt:%d  fourcc:0x%X  size:%dx%d  fps:%5.2f  ftime:=%6.4f\n",
    file_format,sh_video->format, sh_video->disp_w,sh_video->disp_h,
@@ -694,7 +748,7 @@ if(sh_video){
 
   if(!sh_video->fps && !force_fps){
     mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_FPSnotspecified);
-    exit(1);
+    exit_player(MSGTR_Exit_error);
   }
 
 }
@@ -703,10 +757,13 @@ fflush(stdout);
 
 if(!sh_video){
     mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_NoVideoStream);
-    exit(1);
+    exit_player(MSGTR_Exit_error);
 }
 
 //================== Init AUDIO (codec) ==========================
+
+current_module="init_audio_codec";
+
 if(sh_audio){
   // Go through the codec.conf and find the best codec...
   sh_audio->codec=NULL;
@@ -745,6 +802,8 @@ if(sh_audio){
 
 //================== Init VIDEO (codec & libvo) ==========================
 
+current_module="init_video_codec";
+
 // Go through the codec.conf and find the best codec...
 sh_video->codec=NULL;
 if(video_family!=-1) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_TryForceVideoFmt,video_family);
@@ -760,7 +819,7 @@ while(1){
     }
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantFindVideoCodec,sh_video->format);
     mp_msg(MSGT_CPLAYER,MSGL_HINT, MSGTR_TryUpgradeCodecsConfOrRTFM,get_path("codecs.conf"));
-    exit(1);
+    exit_player(MSGTR_Exit_error);
   }
   // is next line needed anymore? - atmos ::
   if(!allow_dshow && sh_video->codec->driver==VFM_DSHOW) continue; // skip DShow
@@ -785,7 +844,7 @@ for(i=0;i<CODECS_MAX_OUTFMT;i++){
 }
 if(i>=CODECS_MAX_OUTFMT){
     mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_VOincompCodec);
-    exit(1);
+    exit_player(MSGTR_Exit_error);
 }
 sh_video->outfmtidx=i;
 
@@ -801,7 +860,7 @@ mp_msg(MSGT_CPLAYER,MSGL_DBG2,"vo_debug1: out_fmt=%s\n",vo_format_name(out_fmt))
 
 if(!init_video(sh_video)){
      mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_CouldntInitVideoCodec);
-     exit(1);
+     exit_player(MSGTR_Exit_error);
 }
 
 if(auto_quality>0){
@@ -820,12 +879,12 @@ if(auto_quality>0){
      if(encode_file){
        fclose(encode_file);
        mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_EncodeFileExists,encode_name);
-       return 0;
+       exit_player(MSGTR_Exit_error);
      }
      encode_file=fopen(encode_name,"wb");
      if(!encode_file){
        mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_CantCreateEncodeFile);
-       return 0;
+       exit_player(MSGTR_Exit_error);
      }
      write_avi_header_1(encode_file,mmioFOURCC('d', 'i', 'v', 'x'),sh_video->fps,sh_video->disp_w,sh_video->disp_h);
      fclose(encode_file);
@@ -843,6 +902,8 @@ if(auto_quality>0){
 make_pipe(&keyb_fifo_get,&keyb_fifo_put);
 
 // ========== Init display (sh_video->disp_w*sh_video->disp_h/out_fmt) ============
+
+current_module="init_libvo";
 
 #ifdef X11_FULLSCREEN
    if(fullscreen){
@@ -907,7 +968,7 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
                sh_video->disp_w,sh_video->disp_h,out_fmt,0,
                       fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3) )){
      mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_CannotInitVO );
-     exit(1);
+     exit_player(MSGTR_Exit_error);
    }
 #else
    if(video_out->init(sh_video->disp_w,sh_video->disp_h,
@@ -915,7 +976,7 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
                       fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3),
                       title,out_fmt)){
      mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_CannotInitVO);
-     exit(1);
+     exit_player(MSGTR_Exit_error);
    }
 #endif
    mp_msg(MSGT_CPLAYER,MSGL_V,"INFO: Video OUT driver init OK!\n");
@@ -941,42 +1002,6 @@ double cvideo_base_vtime;
 double cvideo_base_vframe;
 double vdecode_time;
 
-#ifdef HAVE_LIRC
- #ifdef HAVE_GUI
-  if ( nogui )
- #endif
-  lirc_mp_setup();
-#endif
-
-  #ifdef HAVE_GUI
-   if ( nogui )
-    {
-  #endif
-#ifdef USE_TERMCAP
-  load_termcap(NULL); // load key-codes
-#endif
-  if(!use_stdin) getch2_enable();
-  #ifdef HAVE_GUI
-   }
-  #endif 
-
-  //========= Catch terminate signals: ================
-  // terminate requests:
-  signal(SIGTERM,exit_sighandler); // kill
-  signal(SIGHUP,exit_sighandler);  // kill -HUP  /  xterm closed
-
-  #ifdef HAVE_GUI
-   if ( nogui )
-  #endif
-     signal(SIGINT,exit_sighandler);  // Interrupt from keyboard
-
-  signal(SIGQUIT,exit_sighandler); // Quit from keyboard
-  // fatal errors:
-  signal(SIGBUS,exit_sighandler);  // bus error
-  signal(SIGSEGV,exit_sighandler); // segfault
-  signal(SIGILL,exit_sighandler);  // illegal instruction
-  signal(SIGFPE,exit_sighandler);  // floating point exc.
-  signal(SIGABRT,exit_sighandler); // abort()
 
 //================ SETUP AUDIO ==========================
   current_module="setup_audio";
@@ -1027,35 +1052,18 @@ if(!sh_audio){
 
   current_module=NULL;
 
-//==================== START PLAYING =======================
-
-if(file_format==DEMUXER_TYPE_AVI && sh_audio){
-#if 0
-  //a_pts=d_audio->pts;
-  if(verbose) printf("Initial frame delay  A: %d  V: %d\n",(int)sh_audio->audio.dwInitialFrames,(int)sh_video->video.dwInitialFrames);
-  if(!pts_from_bps){
-    float x=(float)(sh_audio->audio.dwInitialFrames-sh_video->video.dwInitialFrames)*sh_video->frametime;
-//    audio_delay-=x;
-    if(verbose) printf("AVI Initial frame delay: %5.3f\n",x);
-    delay_corrected=0; // has to correct PTS diffs
-  }
-  if(verbose){
-//    printf("v: audio_delay=%5.3f  buffer_delay=%5.3f  a_pts=%5.3f  sh_audio->timer=%5.3f\n",
-//             audio_delay,audio_buffer_delay,a_pts,sh_audio->timer);
-    printf("START:  a_pts=%5.3f  v_pts=%5.3f  \n",d_audio->pts,d_video->pts);
-  }
-  d_video->pts=0;d_audio->pts=0; // PTS is outdated now!
-#endif
-} else {
-  pts_from_bps=0; // it must be 0 for mpeg/asf !
-}
+if(file_format!=DEMUXER_TYPE_AVI) pts_from_bps=0; // it must be 0 for mpeg/asf!
 if(force_fps){
   sh_video->fps=force_fps;
   sh_video->frametime=1.0f/sh_video->fps;
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"FPS forced to be %5.3f  (ftime: %5.3f)\n",sh_video->fps,sh_video->frametime);
 }
 
+//==================== START PLAYING =======================
+
 mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_StartPlaying);fflush(stdout);
+
+if(!use_stdin) getch2_enable();  // prepare stdin for hotkeys...
 
 InitTimer();
 
@@ -1081,8 +1089,8 @@ while(sh_audio){
   //if(playsize>outburst) playsize=outburst;
 
   // Update buffer if needed
-  t=GetTimer();
   current_module="decode_audio";   // Enter AUDIO decoder module
+  t=GetTimer();
   while(sh_audio->a_buffer_len<playsize && !d_audio->eof){
     int ret=decode_audio(sh_audio,&sh_audio->a_buffer[sh_audio->a_buffer_len],
         playsize-sh_audio->a_buffer_len,sh_audio->a_buffer_size-sh_audio->a_buffer_len);
@@ -1517,8 +1525,10 @@ if(auto_quality>0){
       break;
     // quit
     case KEY_ESC: // ESC
-    case KEY_ENTER: // ESC
     case 'q': exit_player(MSGTR_Exit_quit);
+    case KEY_ENTER: // ESC
+      eof=1;  // jump to next file
+      break;
     case 'g': grab_frames=2;break;
     // pause
     case 'p':
@@ -1765,7 +1775,32 @@ if(rel_seek_secs || abs_seek_pos){
 
 mp_msg(MSGT_GLOBAL,MSGL_V,"EOF code: %d  \n",eof);
 
-exit_player(MSGTR_Exit_eof);
 }
+
+++curr_filename;
+if(curr_filename<num_filenames){
+    // partial uninit:
+
+  // restore terminal:
+  #ifdef HAVE_GUI
+   if ( nogui )
+  #endif
+     getch2_disable();
+
+#ifdef USE_LIBVO2
+  if(video_out) vo2_close(video_out);
+#else
+  if(video_out) video_out->uninit();
+#endif
+  video_out=NULL;
+  if(audio_out) audio_out->uninit();
+  audio_out=NULL;
+//  if(encode_name) avi_fixate();
+    
+    goto play_next_file;
+}
+
+exit_player(MSGTR_Exit_eof);
+
 return 1;
 }
