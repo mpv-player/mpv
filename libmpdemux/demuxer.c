@@ -658,6 +658,7 @@ return demuxer;
 int demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags);
 int demux_seek_asf(demuxer_t *demuxer,float rel_seek_secs,int flags);
 int demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,int flags);
+int demux_seek_y4m(demuxer_t *demuxer,float rel_seek_secs,int flags);
 int demux_seek_fli(demuxer_t *demuxer,float rel_seek_secs,int flags);
 void demux_seek_mov(demuxer_t *demuxer,float pts,int flags);
 
@@ -708,6 +709,9 @@ switch(demuxer->file_format){
 
   case DEMUXER_TYPE_MOV:
       demux_seek_mov(demuxer,rel_seek_secs,flags);  break;
+
+  case DEMUXER_TYPE_Y4M:
+      demux_seek_y4m(demuxer,rel_seek_secs,flags);  break;
 
   case DEMUXER_TYPE_FLI:
       demux_seek_fli(demuxer,rel_seek_secs,flags);  break;
