@@ -68,20 +68,7 @@ void uninit(struct vf_instance_s* vf)
     free(vf->priv->Line);
 }
 
-//#define LowPass(Prev, Curr, Coef) (((Prev)*Coef[Prev - Curr] + (Curr)*(65536-(Coef[Prev - Curr]))) / 65536)
-//#define LowPass(Prev, Curr, Coef) ((  Prev*Coef[Prev-Curr] + Curr*(65536-(Coef[Prev-Curr]))  )/65536)
-//#define LowPass(Prev, Curr, Coef) ((  Prev*Coef[Prev-Curr] + Curr*65536 - Curr*Coef[Prev-Curr]  )/65536)
-//#define LowPass(Prev, Curr, Coef) (((int)(Curr)) + ((  (int)Prev*Coef[Prev-Curr] - (int)Curr*Coef[Prev-Curr]  )>>16) )
-//#define LowPass(Prev, Curr, Coef) (Curr + ((  Prev*Coef[Prev-Curr] - Curr*Coef[Prev-Curr]  )>>16) )
-//#define LowPass(Prev, Curr, Coef) (Curr + ((  (Prev-Curr)*(Coef[Prev-Curr])  )>>16) )
-
-//#define LowPass(Prev, Curr, Coef) (Curr + (((Prev - Curr)*Coef[Prev - Curr]) / 65536))
-#define LowPass(Prev, Curr, Coef) (Curr + ((((unsigned int)(Prev - Curr))*Coef[Prev - Curr]) / 65536))
-//#define LowPass(Prev, Curr, Coef) (Curr + ((((unsigned int)(Prev - Curr))*Coef[((unsigned int)(Prev - Curr))]) / 65536))
-//#define LowPass(Prev, Curr, Coef) (Curr + ((((unsigned char)(Prev - Curr))*Coef[Prev - Curr]) / 65536))
-//#define LowPass(Prev, Curr, Coef) (Curr + (( ((((int)(Prev))-((int)(Curr)))) *Coef[Prev - Curr]) / 65536))
-//#define LowPass(Prev, Curr, Coef) (Curr + (((unsigned int)((Prev - Curr)*Coef[Prev - Curr])) / 65536))
-//#define LowPass(Prev, Curr, Coef) (Curr + (((Prev - Curr)*Coef[Prev - Curr]) >> 16))
+#define LowPass(Prev, Curr, Coef) (Curr + Coef[Prev - Curr])
 
 static void deNoise(unsigned char *Frame,        // mpi->planes[x]
                     unsigned char *FramePrev,    // pmpi->planes[x]
@@ -185,14 +172,16 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
 static void PrecalcCoefs(int *Ct, double Dist25)
 {
     int i;
-    double Gamma, Simil;
+    double Gamma, Simil, C;
 
     Gamma = log(0.25) / log(1.0 - Dist25/255.0);
 
     for (i = -256; i <= 255; i++)
     {
         Simil = 1.0 - ABS(i) / 255.0;
-        Ct[256+i] = pow(Simil, Gamma) * 65536;
+//        Ct[256+i] = lround(pow(Simil, Gamma) * (double)i);
+        C = pow(Simil, Gamma) * (double)i;
+        Ct[256+i] = (C<0) ? (C-0.5) : (C+0.5);
     }
 }
 
