@@ -66,6 +66,15 @@ In order to make this work, be sure to check the following:
    It must support YUY2 packed, and YV12 planar pixel formats to be
    usable with MPlayer.
 
+   If xvinfo doesn't show these, but XVideo extension is loaded and you're
+   sure your card can do YUV conversion,
+    - 3dfx voodoo3/banshee users download a new DRI from
+      http://dri.sourceforge.net
+    - S3 Savage4 users download the beta Xv driver from
+      ftp://thot.banki.hu
+    - nVidia users sell their card.. or download the nVidia driver from
+      nVidia's website
+
 5. Be sure MPlayer is compiled with the "xv" target. "./configure" should say:
 	Checking for Xv ... yes
 

@@ -70,6 +70,15 @@ Ha mukodesre akarod birni, a kovetkezoket kell figyelembe venned:
    Tamogatnia kell a YUY2 packed, YV12 planar pixelformatumokat, hogy
    hasznalhato legyen MPlayer-rel.
 
+   Ha az xvinfo nem irja ki mindezt, de az XVideo kiterjesztes be van toltve,
+   es biztos vagy benne hogy a kartyad tud YUV konverziot,
+    - 3dfx voodoo3/banshee tulajok toltsenek le uj DRI-t a
+      http://dri.sourceforge.net cimrol
+    - S3 Savage4-esek toltsek le a beta Xv drivert a
+      ftp://thot.banki.hu-rol
+    - nVidia felhasznalok adjak el a kartyajukat... vagy nezzenek el az
+      nVidia site-jara
+
 5. MPlayer-t 'xv' tamogatassal kell forditani. 'configure'-nak ezt kell
    kiirnia:
 	Checking for Xv ... yes
