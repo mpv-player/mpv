@@ -3019,6 +3019,27 @@ Available filters are:
 Changes the sample rate of the audio stream to an integer srate in Hz.
 It only supports the 16-bit little-endian format.
 With MEncoder, you need to also use \-srate <srate>.
+.IPs lavcresample[=srate[:length[:linear[:count[:cutoff]]]]]
+Changes the sample rate of the audio stream to an integer srate in Hz.
+It only supports the 16-bit little-endian format.
+With MEncoder, you need to also use \-srate <srate>.
+.RSss
+srate: the output sample rate
+.br
+length: length of the filter with respect to the lower sampling rate
+default: 16
+.br
+linear: if 1 then filters will be linearly interpolated between polyphase 
+entries
+.br
+count: log2 of the number of polyphase entries 
+(..., 10->1024, 11->2048, 12->4096, ...)
+default: 10->1024
+.br
+cutoff: cutoff frequency (0.0-1.0), default set depending upon filter length
+.REss
+.IPs sweep[=speed]
+sine sweep
 .IPs channels[=nch]
 Change the number of channels to nch output channels.
 If the number of output channels is bigger than the number of input channels
