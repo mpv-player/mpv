@@ -29,7 +29,7 @@ Type: select
 Default: x11
 Choices: ${vochoices}
 Description: MPlayer Video Output
-  Mplayer can use very wide range of video output drivers:
+  MPlayer can use very wide range of video output drivers:
  ( order aproximately by speed: )
  	 * mga, xmga - direct hardware access on MGA cards (G200/400/450), needs /dev/mga_vid
  	   this driver can work without X and display video on secondary head of matrox cards
