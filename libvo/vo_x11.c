@@ -298,8 +298,7 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
 
     xswa.background_pixel=0;
     xswa.border_pixel=0;
-    xswa.colormap=theCmap;
-    xswamask=CWBackPixel | CWBorderPixel | CWColormap;
+    xswamask=CWBackPixel | CWBorderPixel;
 
 #ifdef HAVE_XF86VM
     if ( vm )
@@ -323,6 +322,8 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
      {
       if ( vo_window == None )
        {
+        xswa.colormap=theCmap;
+        xswamask|=CWColormap;
         vo_window=XCreateWindow( mDisplay,mRootWin,
     			 vo_dx,vo_dy,
 			 vo_dwidth,vo_dheight,
