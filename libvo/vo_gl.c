@@ -428,7 +428,7 @@ static uint32_t preinit(const char *arg)
 	return ENOSYS;
     }
 
-	if(!vo_init()) return 1;
+    if( !vo_init() ) return -1; // Can't open X11
 
     return 0;
 }

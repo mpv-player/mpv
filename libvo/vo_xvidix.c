@@ -416,7 +416,7 @@ static uint32_t preinit(const char *arg)
 	vidix_name = NULL;
     }
 
-    if (!vo_init()) return(1);
+    if (!vo_init()) return(-1);
 
     if (vidix_preinit(vidix_name, &video_out_xvidix) != 0)
 	return(1);

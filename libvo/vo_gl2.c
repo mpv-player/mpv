@@ -622,8 +622,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	image_width = width;
 	image_format = format;
   
-	if(!vo_init()) return -1;
-
 	aspect_save_orig(width,height);
 	aspect_save_prescale(d_width,d_height);
 	aspect_save_screenres(vo_screenwidth,vo_screenheight);
@@ -1108,6 +1106,7 @@ static uint32_t preinit(const char *arg)
 	printf("[gl2] Unknown subdevice: %s\n",arg);
 	return ENOSYS;
     }
+    if( !vo_init() ) return -1; // Can't open X11
     return 0;
 }
 
