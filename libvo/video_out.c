@@ -84,6 +84,7 @@ extern vo_functions_t video_out_png;
 extern vo_functions_t video_out_ggi;
 extern vo_functions_t video_out_aa;
 extern vo_functions_t video_out_mpegpes;
+extern vo_functions_t video_out_yuv4mpeg;
 extern vo_functions_t video_out_dxr3;
 #ifdef HAVE_VESA
 extern vo_functions_t video_out_vesa;
@@ -154,6 +155,7 @@ vo_functions_t* video_out_drivers[] =
         &video_out_pgm,
         &video_out_md5,
 	&video_out_mpegpes,
+	&video_out_yuv4mpeg,
 #ifdef HAVE_VESA
 	&video_out_vesa,
 #endif
