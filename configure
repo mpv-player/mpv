@@ -1512,23 +1512,21 @@ else
 fi
 echores "$_directfb"
 
+if test "$_directfb" = yes; then
 echocheck "DirectFB >= 0.9.9"
-if test "$_directfb" = auto; then
-    _directfb=no
-    cat > $TMPC <<EOF
+  _directfb099=no
+  cat > $TMPC <<EOF
 #include <directfb.h>
-nt main(void) { IDirectFBEventBuffer *foo; return 0; }
+int main(void) { IDirectFBEventBuffer *foo; return 0; }
 EOF
-  linux && test -c /dev/fb0 && cc_check -ldirectfb && _directfb=yes
-fi
-if test "$_directfb" = yes ; then
-  _def_directfb='#define HAVE_DIRECTFB099 1'
+  cc_check -ldirectfb && _directfb099=yes
+if test "$_directfb099" = yes ; then
+  _def_directfb099='#define HAVE_DIRECTFB099 1'
 else
-  _def_directfb='#undef HAVE_DIRECTFB'
+  _def_directfb099='#undef HAVE_DIRECTFB099'
 fi
-echores "$_directfb"
-
-
+echores "$_directfb099"
+fi
 
 # Checking for localization ...
 echocheck "language"
@@ -3456,6 +3454,7 @@ $_def_ggi
 $_def_3dfx
 $_def_tdfxfb
 $_def_directfb
+$_def_directfb099
 $_def_zr
 $_def_mga
 $_def_xmga
