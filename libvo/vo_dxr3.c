@@ -429,17 +429,15 @@ static uint32_t preinit(const char *arg)
 	int fdflags = O_WRONLY;
 	
 	/* Open the control interface */
-	if (!strcmp("noprebuf", vo_subdevice)) {
+	if (arg && !strcmp("noprebuf", arg)) {
 		printf("VO: [dxr3] Disabling prebuffering.\n");
 		noprebuf = 1;
 		fdflags |= O_NONBLOCK;
-		free(vo_subdevice);
-		vo_subdevice = NULL;
 	}
 	
-	if (vo_subdevice) {
-		printf("VO: [dxr3] Forcing use of device %s\n", vo_subdevice);
-		sprintf(devname, "/dev/em8300-%s", vo_subdevice);
+	if (arg && !noprebuf) {
+		printf("VO: [dxr3] Forcing use of device %s\n", arg);
+		sprintf(devname, "/dev/em8300-%s", arg);
 	} else {
 		/* Try new naming scheme by default */
 		sprintf(devname, "/dev/em8300-0");
@@ -457,8 +455,8 @@ static uint32_t preinit(const char *arg)
 	}
 
 	/* Open the video interface */
-	if (vo_subdevice) {
-		sprintf(devname, "/dev/em8300_mv-%s", vo_subdevice);
+	if (arg && !noprebuf) {
+		sprintf(devname, "/dev/em8300_mv-%s", arg);
 	} else {
 		/* Try new naming scheme by default */
 		sprintf(devname, "/dev/em8300_mv-0");
@@ -480,8 +478,8 @@ static uint32_t preinit(const char *arg)
 	strcpy(fdv_name, devname);
 	
 	/* Open the subpicture interface */
-	if (vo_subdevice) {
-		sprintf(devname, "/dev/em8300_sp-%s", vo_subdevice);
+	if (arg && !noprebuf) {
+		sprintf(devname, "/dev/em8300_sp-%s", arg);
 	} else {
 		/* Try new naming scheme by default */
 		sprintf(devname, "/dev/em8300_sp-0");
