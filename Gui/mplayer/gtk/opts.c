@@ -173,7 +173,7 @@ void ShowPreferences( void )
    {
     const ao_info_t *info = audio_out_drivers[i++]->info;
     if ( !strcmp( info->short_name,"plugin" ) ) continue;
-    if ( !gstrcmp( audio_driver,(char *)info->short_name ) ) old_audio_driver=i - 1;
+    if ( audio_driver_list && !gstrcmp( audio_driver_list[0],(char *)info->short_name ) ) old_audio_driver=i - 1;
     tmp[0]=(char *)info->short_name; tmp[1]=(char *)info->name; gtk_clist_append( GTK_CLIST( CLADrivers ),tmp );
    }
   gtk_clist_select_row( GTK_CLIST( CLADrivers ),old_audio_driver,0 );
@@ -199,6 +199,7 @@ void ShowPreferences( void )
  if (flip != -1)
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBFlip ),flip );
  gtk_adjustment_set_value( HSPanscanadj,vo_panscan );
+
  {
   int i = 0, c = 0;
   char * tmp[3]; tmp[2]="";
@@ -207,7 +208,7 @@ void ShowPreferences( void )
    if ( video_out_drivers[i++]->control( VOCTRL_GUISUPPORT,NULL ) == VO_TRUE )
     { 
      const vo_info_t *info = video_out_drivers[i - 1]->get_info();
-     if ( !gstrcmp( video_driver,(char *)info->short_name ) ) old_video_driver=c; c++;
+     if ( video_driver_list && !gstrcmp( video_driver_list[0],(char *)info->short_name ) ) old_video_driver=c; c++;
      tmp[0]=(char *)info->short_name; tmp[1]=(char *)info->name; gtk_clist_append( GTK_CLIST( CLVDrivers ),tmp );
     }
   gtk_clist_select_row( GTK_CLIST( CLVDrivers ),old_video_driver,0 );
@@ -418,10 +419,9 @@ void prButton( GtkButton * button,gpointer user_data )
 	gtkAONoSound=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBNoSound ) );
 	gtkSet( gtkSetExtraStereo,HSExtraStereoMuladj->value,NULL );
 	gtkSet( gtkSetAudioDelay,HSAudioDelayadj->value,NULL );
-        gfree( (void **)&audio_driver );
-	audio_driver=gstrdup( ao_driver[0] );
-	gfree( (void **)&video_driver );
-	video_driver=gstrdup( vo_driver[0] );
+
+	gaddlist( &audio_driver_list,ao_driver[0] );
+	gaddlist( &video_driver_list,vo_driver[0] );
 
 	// -- 2. page
 	vo_doublebuffering=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBDoubleBuffer ) );
@@ -473,37 +473,17 @@ void prButton( GtkButton * button,gpointer user_data )
 	{
 	 int i;
 	 char * tmp = gtk_entry_get_text( GTK_ENTRY( EVFM ) );
-	 if ( video_fm_list )
-	  {
-	   for ( i=0;video_fm_list[i];i++ ) gfree( (void **)&video_fm_list[i] );
-	   gfree( (void **)&video_fm_list );
-	  }
          for( i=0;mpcodecs_vd_drivers[i];i++ )
-           if ( !gstrcmp( tmp,(char *)mpcodecs_vd_drivers[i]->info->name ) ) 
-	    {
-	     video_fm_list=malloc( 8 );
-	     video_fm_list[0]=gstrdup( (char *)mpcodecs_vd_drivers[i]->info->short_name ); 
-	     video_fm_list[1]=NULL;
-	     break;
-	    }
+          if ( !gstrcmp( tmp,(char *)mpcodecs_vd_drivers[i]->info->name ) ) 
+	   { gaddlist( &video_fm_list,(char *)mpcodecs_vd_drivers[i]->info->short_name ); break; }
 	}
 
 	{
 	 int i;
 	 char * tmp = gtk_entry_get_text( GTK_ENTRY( EAFM ) );
-	 if ( audio_fm_list )
-	  {
-	   for ( i=0;audio_fm_list[i];i++ ) gfree( (void **)&audio_fm_list[i] );
-	   gfree( (void **)&audio_fm_list );
-	  }
          for( i=0;mpcodecs_ad_drivers[i];i++ )
-           if ( !gstrcmp( tmp,(char *)mpcodecs_ad_drivers[i]->info->name ) )
-	    {
-	     audio_fm_list=malloc( 8 );
-	     audio_fm_list[0]=gstrdup( (char *)mpcodecs_ad_drivers[i]->info->short_name );
-	     audio_fm_list[1]=NULL;
-	     break;
-	    }
+          if ( !gstrcmp( tmp,(char *)mpcodecs_ad_drivers[i]->info->name ) )
+	   { gaddlist( &audio_fm_list,(char *)mpcodecs_ad_drivers[i]->info->short_name ); break; }
 	}
 
    case bCancel:

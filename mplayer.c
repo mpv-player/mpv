@@ -215,8 +215,6 @@ static int play_n_frames=-1;
 static int play_n_frames_mf=-1;
 
 // screen info:
-char* video_driver=NULL; // OBSOLETE, FIXME gui
-char* audio_driver=NULL; // OBSOLETE, FIXME gui
 char** video_driver_list=NULL;
 char** audio_driver_list=NULL;
 

@@ -90,6 +90,21 @@ void gset( char ** str,char * what )
    else gstrcat( str,what );
 }
 
+void gaddlist( char *** list,char * entry )
+{
+ int i;
+
+ if ( (*list) )
+  {
+   for ( i=0;(*list)[i];i++ ) free( (*list)[i] );
+   free( (*list) );
+  }
+
+ (*list)=malloc( 8 );
+ (*list)[0]=gstrdup( entry );
+ (*list)[1]=NULL;
+}
+
 #ifdef USE_ICONV
 char * gconvert_uri_to_filename( char * str )
 {
@@ -462,7 +477,7 @@ int guiGetEvent( int type,char * arg )
 	 }
 // -- subtitle
 #ifdef HAVE_DXR3
-	if ( !gstrcmp( video_driver,"dxr3" ) && guiIntfStruct.FileFormat != DEMUXER_TYPE_MPEG_PS && !gtkVopLAVC && !gtkVopFAME )
+	if ( video_driver_list && !gstrcmp( video_driver_list[0],"dxr3" ) && guiIntfStruct.FileFormat != DEMUXER_TYPE_MPEG_PS && !gtkVopLAVC && !gtkVopFAME )
 	 {
 	  gtkMessageBox( GTK_MB_FATAL,MSGTR_NEEDLAVCFAME );
 	  guiIntfStruct.Playing=0;
@@ -481,19 +496,19 @@ int guiGetEvent( int type,char * arg )
 
 // --- video opts
        
-       if ( !video_driver )
+       if ( !video_driver_list )
 	{
          int i = 0;
            while ( video_out_drivers[i++] )
 	    if ( video_out_drivers[i - 1]->control( VOCTRL_GUISUPPORT,NULL ) == VO_TRUE ) 
 	     {
 	      const vo_info_t *info = video_out_drivers[i - 1]->get_info();
-	      video_driver=gstrdup( (char *)info->short_name );
+	      gaddlist( &video_driver_list,(char *)info->short_name );
 	      break;
 	     }
 	 }
 	
-	if ( !video_driver ) { gtkMessageBox( GTK_MB_FATAL,MSGTR_IDFGCVD ); exit_player( "gui init" ); }
+	if ( !video_driver_list && !video_driver_list[0] ) { gtkMessageBox( GTK_MB_FATAL,MSGTR_IDFGCVD ); exit_player( "gui init" ); }
 
 	{
 	 int i = 0;
@@ -502,7 +517,7 @@ int guiGetEvent( int type,char * arg )
 	  if ( video_out_drivers[i - 1]->control( VOCTRL_GUISUPPORT,NULL ) == VO_TRUE ) 
 	   {
 	    const vo_info_t *info = video_out_drivers[i - 1]->get_info();
-	    if  ( ( !gstrcmp( video_driver,(char *)info->short_name ) )&&( video_out_drivers[i - 1]->control( VOCTRL_GUI_NOWINDOW,NULL ) == VO_TRUE ) ) 
+	    if  ( ( video_driver_list && !gstrcmp( video_driver_list[0],(char *)info->short_name ) )&&( video_out_drivers[i - 1]->control( VOCTRL_GUI_NOWINDOW,NULL ) == VO_TRUE ) ) 
 	      { guiIntfStruct.NoWindow=True; break; }
 	   }
 	}
@@ -510,7 +525,7 @@ int guiGetEvent( int type,char * arg )
 #ifdef HAVE_DXR3
 	remove_vop( "lavc" );
 	remove_vop( "fame" );
-	if ( !gstrcmp( video_driver,"dxr3" ) )
+	if ( video_driver_list && !gstrcmp( video_driver_list[0],"dxr3" ) )
 	 {
 	  if ( ( guiIntfStruct.StreamType != STREAMTYPE_DVD)&&( guiIntfStruct.StreamType != STREAMTYPE_VCD ) )
 	   {
@@ -534,12 +549,11 @@ int guiGetEvent( int type,char * arg )
 	  ao_plugin_cfg.pl_extrastereo_mul=gtkAOExtraStereoMul;
 	 }
 	mixer_device=gtkAOOSSMixer;
-	if ( !gstrncmp( audio_driver,"oss",3 ) && gtkAOOSSDevice )
+	if ( audio_driver_list && !gstrncmp( audio_driver_list[0],"oss",3 ) && gtkAOOSSDevice )
 	 {
 	  char * tmp = calloc( 1,strlen( gtkAOOSSDevice ) + 5 );
 	  sprintf( tmp,"oss:%s",gtkAOOSSDevice );
-	  gfree( (void *)&audio_driver );
-	  audio_driver=tmp;
+	  gaddlist( &audio_driver_list,tmp );
 	 }
 
 // -- subtitle

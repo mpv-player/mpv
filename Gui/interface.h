@@ -197,6 +197,7 @@ extern char * gconvert_uri_to_filename( char * str );
 extern char * gstrdup( char * str );
 extern int    gstrcmp( char * a,char * b );
 extern void   gfree( void ** p );
+extern void   gaddlist( char *** list,char * entry );
 
 #define guiSetFilename( s,n ) { gfree( (void **)&s ); s=gstrdup( n ); }
 

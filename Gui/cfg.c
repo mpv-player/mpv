@@ -52,7 +52,7 @@ static config_t gui_opts[] =
 {
  { "enable_audio_equ",&gtkEnableAudioEqualizer,CONF_TYPE_FLAG,0,0,1,NULL },
  
- { "vo_driver",&video_driver,CONF_TYPE_STRING,0,0,0,NULL },
+ { "vo_driver",&video_driver_list,CONF_TYPE_STRING_LIST,0,0,0,NULL },
  { "vo_panscan",&vo_panscan,CONF_TYPE_FLOAT,CONF_RANGE,0.0,1.0,NULL },
  { "vo_doublebuffering",&vo_doublebuffering,CONF_TYPE_FLAG,0,0,1,NULL },
  { "vo_direct_render",&vo_directrendering,CONF_TYPE_FLAG,0,0,1,NULL },
@@ -69,7 +69,7 @@ static config_t gui_opts[] =
  { "vf_lavc",&gtkVopLAVC,CONF_TYPE_FLAG,0,0,1,NULL },
  { "vf_fame",&gtkVopFAME,CONF_TYPE_FLAG,0,0,1,NULL },
 
- { "ao_driver",&audio_driver,CONF_TYPE_STRING,0,0,0,NULL },
+ { "ao_driver",&audio_driver_list,CONF_TYPE_STRING_LIST,0,0,0,NULL },
  { "ao_nosound",&gtkAONoSound,CONF_TYPE_FLAG,0,0,1,NULL },
  { "ao_volnorm",&gtkAONorm,CONF_TYPE_FLAG,0,0,1,NULL },
  { "ao_surround",&gtkAOSurround,CONF_TYPE_FLAG,0,0,1,NULL },
