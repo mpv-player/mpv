@@ -78,6 +78,10 @@ extern vo_functions_t video_out_dxr3;
 extern vo_functions_t video_out_vesa;
 #endif
 extern vo_functions_t video_out_directfb;
+#ifdef CONFIG_VIDIX
+extern vo_functions_t video_out_xvidix;
+#endif
+
 vo_functions_t* video_out_drivers[] =
 {
 #ifdef HAVE_XMGA
@@ -142,5 +146,8 @@ vo_functions_t* video_out_drivers[] =
 #ifdef HAVE_DIRECTFB
 	&video_out_directfb,
 #endif	
+#ifdef CONFIG_VIDIX
+	&video_out_xvidix,
+#endif
         NULL
 };
