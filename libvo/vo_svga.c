@@ -1,5 +1,5 @@
 /*
-  Video driver for SVGAlib - alpha version
+  Video driver for SVGAlib - alpha, slow
   by Zoltan Mark Vician <se7en@sch.bme.hu>
   Code started: Mon Apr  1 23:25:47 2000
 */
@@ -75,12 +75,14 @@ static void checksupportedmodes() {
 static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
                      uint32_t d_height, uint32_t fullscreen, char *title, 
 		     uint32_t format) {
-static uint8_t bpp;
+  static uint8_t bpp;
+  
   if (!checked) {
     checksupportedmodes(); // Looking for available video modes
   }
   pformat = format;
-  if(format==IMGFMT_YV12) bpp=32; else bpp=format&255;
+  if (format == IMGFMT_YV12) bpp = 32; 
+  else bpp = format & 255;
   if (d_width > 800)
     switch (bpp) {
       case 32: vid_mode = 36; break;
@@ -125,10 +127,17 @@ static uint8_t bpp;
   orig_w = width;
   orig_h = height;
   if (fullscreen && (WIDTH != orig_w)) {
-    maxw = WIDTH;
-    scaling = maxw / (orig_w*1.0);
-    maxh = (uint32_t) (orig_h * scaling);
-    scalebuf = malloc(maxw * maxh * BYTESPERPIXEL);
+    if (((orig_w*1.0) / orig_h) < (4.0/3)) {
+      maxh = HEIGHT;
+      scaling = maxh / (orig_h * 1.0);
+      maxw = (uint32_t) (orig_w * scaling);
+      scalebuf = malloc(maxw * maxh * BYTESPERPIXEL);
+    } else {
+        maxw = WIDTH;
+        scaling = maxw / (orig_w * 1.0);
+        maxh = (uint32_t) (orig_h * scaling);
+        scalebuf = malloc(maxw * maxh * BYTESPERPIXEL);
+      }
   } else {
       maxw = orig_w;
       maxh = orig_h;
@@ -142,8 +151,8 @@ static uint8_t bpp;
     yuvbuf = malloc(maxw * maxh * BYTESPERPIXEL);
   }
   
-  printf("SVGAlib resolution: %dx%d %dbpp - ",WIDTH,HEIGHT,bpp);
-  if (maxw != orig_w || maxh != orig_h) printf("Video scaled to: %dx%d\n",maxw,maxh);
+  printf("SVGAlib resolution: %dx%d %dbpp - ", WIDTH, HEIGHT, bpp);
+  if (maxw != orig_w || maxh != orig_h) printf("Video scaled to: %dx%d %f.2\n",maxw,maxh,scaling);
   else printf("No video scaling\n");
 
   return (0);
@@ -225,8 +234,13 @@ static uint32_t draw_slice(uint8_t *image[], int stride[],
 
 
 static void flip_page(void) {
-  gl_fillbox(0, 0, WIDTH, y_pos, 0);
-  gl_fillbox(0, HEIGHT - y_pos, WIDTH, y_pos, 0);
+  if (y_pos) {
+    gl_fillbox(0, 0, WIDTH, y_pos, 0);
+    gl_fillbox(0, HEIGHT - y_pos, WIDTH, y_pos, 0);
+  } else {
+      gl_fillbox(0, 0, x_pos, HEIGHT, 0);
+      gl_fillbox(WIDTH - x_pos, 0, x_pos, HEIGHT, 0);
+    } 
   vo_draw_text(WIDTH, HEIGHT, draw_alpha);
   gl_copyscreen(screen);
 }
