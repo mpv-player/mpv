@@ -2075,7 +2075,9 @@ variable bitrate method
 .IPs abr\ \ 
 average bitrate
 .IPs cbr\ \ 
-constant bitrate
+constant bitrate.
+.br
+Forces also CBR mode encoding on subsequent ABR presets modes
 .IPs br=<0\-1024>
 specify bitrate in kBit (CBR and ABR only)
 .IPs q=<0\-9>
@@ -2105,7 +2107,39 @@ set audio input gain
 .br
 2: adjust
 .REss
+.IPs fast
+switch on faster encoding on subsequent VBR presets modes, slightly lower quality and higher bitrates.
+.IPs preset
+provide the highest possible quality settings.
+.RSss
+medium: VBR encoding, good quality, 150\-180 kbps bitrate range.
+.br
+standard: VBR encoding, high quality, 170\-210 kbps bitrate range.
+.br
+extreme: VBR encoding, very high quality, 200\-240 kbps bitrate range.
+.br
+insane: CBR encoding, highest preset quality, 320 kbps bitrate.
+.br
+<8-320>: ABR encoding at average given kbps bitrate.
+.br
+.REss
 .RE
+
+.I EXAMPLE:
+.PD 0
+.RSs
+.IPs "\-lameopts fast:preset=standard"
+for most people on most music and already quite high in quality.
+.IPs "\-lameopts  cbr:preset=192"
+encode with ABR presets at a 192 kbps forced constant bitrate.
+.IPs "\-lameopts      preset=172"
+encode with ABR presets at a 172 kbps average bitrate.
+.IPs "\-lameopts      preset=extreme"
+for people with extremely good hearing and similar equipment.
+.IPs "\-lameopts preset=help"
+print additional options and informations on presets settings.
+.RE
+.PD 1
 .
 .TP
 .B \-lavcopts <option1:option2:...>

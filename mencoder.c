@@ -196,6 +196,12 @@ int lame_param_padding=-1; // unset
 int lame_param_br=-1; // unset
 int lame_param_ratio=-1; // unset
 float lame_param_scale=-1; // unset
+#if HAVE_MP3LAME >= 392
+int lame_param_fast=0; // unset
+static char* lame_param_preset=NULL; // unset
+static int  lame_presets_set( lame_t gfp, int fast, int cbr, const char* preset_name );
+static void  lame_presets_longinfo_dm ( FILE* msgfp );
+#endif
 #endif
 
 //static int vo_w=0, vo_h=0;
@@ -832,6 +838,12 @@ if(lame_param_scale>0) {
     printf("Setting audio input gain to %f\n", lame_param_scale);
     lame_set_scale(lame,lame_param_scale);
 }
+#if HAVE_MP3LAME >= 392
+if(lame_param_preset != NULL){
+  printf ("\npreset=%s\n\n",lame_param_preset);
+  lame_presets_set(lame,lame_param_fast, (lame_param_vbr==0), lame_param_preset);
+}
+#endif
 lame_init_params(lame);
 if(verbose>0){
     lame_print_config(lame);
@@ -1342,5 +1354,240 @@ static uint8_t* flip_upside_down(uint8_t* dst, const uint8_t* src, int width,
 
     free(tmp);
     return dst;
+}
+#endif
+
+#if HAVE_MP3LAME >= 392
+/* lame_presets_set 
+   taken out of presets_set in lame-3.93.1/frontend/parse.c and modified */
+static int  lame_presets_set( lame_t gfp, int fast, int cbr, const char* preset_name )
+{
+    int mono = 0;
+
+    if (strcmp(preset_name, "help") == 0) {
+        fprintf(stdout, "LAME version %s (%s)\n\n", get_lame_version(), get_lame_url());
+        lame_presets_longinfo_dm( stdout );
+        return -1;
+    }
+
+
+
+    //aliases for compatibility with old presets
+
+    if (strcmp(preset_name, "phone") == 0) {
+        preset_name = "16";
+        mono = 1;
+    }
+    if ( (strcmp(preset_name, "phon+") == 0) ||
+         (strcmp(preset_name, "lw") == 0) ||
+         (strcmp(preset_name, "mw-eu") == 0) ||
+         (strcmp(preset_name, "sw") == 0)) {
+        preset_name = "24";
+        mono = 1;
+    }
+    if (strcmp(preset_name, "mw-us") == 0) {
+        preset_name = "40";
+        mono = 1;
+    }
+    if (strcmp(preset_name, "voice") == 0) {
+        preset_name = "56";
+        mono = 1;
+    }
+    if (strcmp(preset_name, "fm") == 0) {
+        preset_name = "112";
+    }
+    if ( (strcmp(preset_name, "radio") == 0) ||
+         (strcmp(preset_name, "tape") == 0)) {
+        preset_name = "112";
+    }
+    if (strcmp(preset_name, "hifi") == 0) {
+        preset_name = "160";
+    }
+    if (strcmp(preset_name, "cd") == 0) {
+        preset_name = "192";
+    }
+    if (strcmp(preset_name, "studio") == 0) {
+        preset_name = "256";
+    }
+
+#if HAVE_MP3LAME >= 393
+    if (strcmp(preset_name, "medium") == 0) {
+
+        if (fast > 0)
+           lame_set_preset(gfp, MEDIUM_FAST);
+        else
+           lame_set_preset(gfp, MEDIUM);
+
+        return 0;
+    }
+#endif
+    
+    if (strcmp(preset_name, "standard") == 0) {
+
+        if (fast > 0)
+           lame_set_preset(gfp, STANDARD_FAST);
+        else
+           lame_set_preset(gfp, STANDARD);
+
+        return 0;
+    }
+    
+    else if (strcmp(preset_name, "extreme") == 0){
+
+        if (fast > 0)
+           lame_set_preset(gfp, EXTREME_FAST);
+        else
+           lame_set_preset(gfp, EXTREME);
+
+        return 0;
+    }
+    					
+    else if (((strcmp(preset_name, "insane") == 0) || 
+              (strcmp(preset_name, "320"   ) == 0))   && (fast < 1)) {
+
+        lame_set_preset(gfp, INSANE);
+ 
+        return 0;
+    }
+
+    // Generic ABR Preset
+    if (((atoi(preset_name)) > 0) &&  (fast < 1)) {
+        if ((atoi(preset_name)) >= 8 && (atoi(preset_name)) <= 320){
+            lame_set_preset(gfp, atoi(preset_name));
+
+            if (cbr == 1 )
+                lame_set_VBR(gfp, vbr_off);
+
+            if (mono == 1 ) {
+                lame_set_mode(gfp, MONO);
+            }
+
+            return 0;
+
+        }
+        else {
+            fprintf(stderr, "LAME version %s (%s)\n\n", get_lame_version(), get_lame_url());
+            fprintf(stderr,"Error: The bitrate specified is out of the valid range for this preset\n"
+                           "\n"
+                           "When using this mode you must enter a value between \"8\" and \"320\"\n"
+                           "\n"
+                           "For further information try: \"-lameopts preset=help\"\n"                  
+                   );
+            return -1;
+        }
+    }
+
+
+
+    fprintf(stderr, "LAME version %s (%s)\n\n", get_lame_version(), get_lame_url());
+    fprintf(stderr,"Error: You did not enter a valid profile and/or options with preset\n"
+                   "\n"
+                   "Available profiles are:\n"
+                   "\n"
+                   "   <fast>        standard\n"
+                   "   <fast>        extreme\n"
+                   "                 insane\n"
+                   "   <cbr> (ABR Mode) - The ABR Mode is implied. To use it,\n"
+                   "                      simply specify a bitrate. For example:\n"
+                   "                      \"preset=185\" activates this\n"
+                   "                      preset and uses 185 as an average kbps.\n" 
+                   "\n"
+                   "    Some examples:\n"
+                   "\n"
+   		   "    \"-lameopts fast:preset=standard  \"\n"
+   		   " or \"-lameopts  cbr:preset=192       \"\n"
+   		   " or \"-lameopts      preset=172       \"\n"
+   		   " or \"-lameopts      preset=extreme   \"\n"
+                   "\n"
+                   "For further information try: \"-lameopts preset=help\"\n"                  
+           );
+    mencoder_exit(1, "error parsing cmdline");
+}
+#endif
+
+#if HAVE_MP3LAME >= 392
+/* lame_presets_longinfo_dm
+   taken out of presets_longinfo_dm in lame-3.93.1/frontend/parse.c and modified */
+static void  lame_presets_longinfo_dm ( FILE* msgfp )
+{
+        fprintf ( msgfp,
+        "\n" 
+        "The preset switches are designed to provide the highest possible quality.\n"
+        "\n"
+        "They have for the most part been subject to and tuned via rigorous double blind\n"
+        "listening tests to verify and achieve this objective.\n"
+        "\n"
+        "These are continually updated to coincide with the latest developments that\n"
+        "occur and as a result should provide you with nearly the best quality\n"
+        "currently possible from LAME.\n"
+        "\n"
+        "To activate these presets:\n"
+        "\n"
+        "   For VBR modes (generally highest quality):\n"
+        "\n"
+        "     \"preset=standard\" This preset should generally be transparent\n"
+        "                             to most people on most music and is already\n"
+        "                             quite high in quality.\n"
+        "\n"
+        "     \"preset=extreme\" If you have extremely good hearing and similar\n"
+        "                             equipment, this preset will generally provide\n"
+        "                             slightly higher quality than the \"standard\"\n"
+        "                             mode.\n"
+        "\n"
+        "   For CBR 320kbps (highest quality possible from the preset switches):\n"
+        "\n"
+        "     \"preset=insane\"  This preset will usually be overkill for most\n"
+        "                             people and most situations, but if you must\n"
+        "                             have the absolute highest quality with no\n"
+        "                             regard to filesize, this is the way to go.\n"
+        "\n"
+        "   For ABR modes (high quality per given bitrate but not as high as VBR):\n"
+        "\n"
+        "     \"preset=<kbps>\"  Using this preset will usually give you good\n"
+        "                             quality at a specified bitrate. Depending on the\n"
+        "                             bitrate entered, this preset will determine the\n"
+        "                             optimal settings for that particular situation.\n"
+        "                             While this approach works, it is not nearly as\n"
+        "                             flexible as VBR, and usually will not attain the\n"
+        "                             same level of quality as VBR at higher bitrates.\n"  
+        "\n"
+        "The following options are also available for the corresponding profiles:\n"
+        "\n"
+        "   <fast>        standard\n"
+        "   <fast>        extreme\n"
+        "                 insane\n"
+        "   <cbr> (ABR Mode) - The ABR Mode is implied. To use it,\n"
+        "                      simply specify a bitrate. For example:\n"
+        "                      \"preset=185\" activates this\n"
+        "                      preset and uses 185 as an average kbps.\n" 
+        "\n"
+        "   \"fast\" - Enables the new fast VBR for a particular profile. The\n"
+        "            disadvantage to the speed switch is that often times the\n"
+        "            bitrate will be slightly higher than with the normal mode\n"
+        "            and quality may be slightly lower also.\n"
+	"   Warning: with the current version fast presets might result in too\n"
+	"            high bitrate compared to regular presets.\n"
+        "\n"
+        "   \"cbr\"  - If you use the ABR mode (read above) with a significant\n"
+        "            bitrate such as 80, 96, 112, 128, 160, 192, 224, 256, 320,\n"
+        "            you can use the \"cbr\" option to force CBR mode encoding\n"
+        "            instead of the standard abr mode. ABR does provide higher\n"
+        "            quality but CBR may be useful in situations such as when\n"
+        "            streaming an mp3 over the internet may be important.\n"
+        "\n"
+        "    For example:\n"
+        "\n"
+        "    \"-lameopts fast:preset=standard  \"\n"
+        " or \"-lameopts  cbr:preset=192       \"\n"
+        " or \"-lameopts      preset=172       \"\n"
+        " or \"-lameopts      preset=extreme   \"\n"
+        "\n"
+        "\n"
+        "A few aliases are available for ABR mode:\n"
+        "phone => 16kbps/mono        phon+/lw/mw-eu/sw => 24kbps/mono\n"
+        "mw-us => 40kbps/mono        voice => 56kbps/mono\n"
+        "fm/radio/tape => 112kbps    hifi => 160kbps\n"
+        "cd => 192kbps               studio => 256kbps");
+	mencoder_exit(0, NULL);
 }
 #endif
