@@ -407,6 +407,11 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "Drzewo katalogów"
 
 // --- preferences
+#define MSGTR_PREFERENCES_Audio "D¼wiêk"
+#define MSGTR_PREFERENCES_Video "Video"
+#define MSGTR_PREFERENCES_SubtitleOSD "Napisy i OSD"
+#define MSGTR_PREFERENCES_Misc "Ró¿ne"
+
 #define MSGTR_PREFERENCES_None "Puste"
 #define MSGTR_PREFERENCES_AvailableDrivers "Dostêpne sterowniki:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Nie odtwarzaj d¼wiêku"
@@ -415,14 +420,12 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_ExtraStereo "W³±cz extra stereo"
 #define MSGTR_PREFERENCES_Coefficient "Coefficient:"
 #define MSGTR_PREFERENCES_AudioDelay "Opó¼nienie d¼wiêku"
-#define MSGTR_PREFERENCES_Audio "D¼wiêk"
 #define MSGTR_PREFERENCES_DoubleBuffer "W³±cz podwójne buforowanie"
-#define MSGTR_PREFERENCES_DirectRender "W³±cz bezpo¶rednie rysowanie"
+#define MSGTR_PREFERENCES_DirectRender "W³±cz rysowanie bezpo¶rednie"
 #define MSGTR_PREFERENCES_FrameDrop "W³±cz zrzucanie ramek"
 #define MSGTR_PREFERENCES_HFrameDrop "W³±cz gwa³towne zrzucanie ramek (niebezpieczne)"
 #define MSGTR_PREFERENCES_Flip "Odwróæ obraz góra-dó³"
 #define MSGTR_PREFERENCES_Panscan "Panscan: "
-#define MSGTR_PREFERENCES_Video "Video"
 #define MSGTR_PREFERENCES_OSDTimer "Timer i wska¼niki"
 #define MSGTR_PREFERENCES_OSDProgress "Tylko belki"
 #define MSGTR_PREFERENCES_Subtitle "Napisy:"
@@ -484,9 +487,9 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontOutLine "Obramowanie:"
 #define MSGTR_PREFERENCES_FontTextScale "Skalowanie tekstu:"
 #define MSGTR_PREFERENCES_FontOSDScale "Skalowanie OSD:"
-#define MSGTR_PREFERENCES_SubtitleOSD "Napisy i OSD"
 #define MSGTR_PREFERENCES_Cache "Cache w³±cz/wy³±cz"
 #define MSGTR_PREFERENCES_LoadFullscreen "Rozpocznij na pe³nym ekranie"
+#define MSGTR_PREFERENCES_CacheSize "Wielko¶æ cache: "
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "b³±d krytyczny ..."
