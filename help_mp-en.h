@@ -1,3 +1,5 @@
+// ========================= MPlayer help ===========================
+
 #ifdef HELP_MP_DEFINE_STATIC
 static char* banner_text=
 "\n\n"
@@ -49,6 +51,8 @@ static char help_text[]=
 "\n";
 #endif
 
+// ========================= MPlayer messages ===========================
+
 // mplayer.c: 
 
 #define MSGTR_Exiting "\nExiting... (%s)\n"
@@ -91,9 +95,14 @@ static char help_text[]=
 #define MSGTR_SystemTooSlow "\n************************************************************************"\
 			    "\n** Your system is too SLOW to play this! try with -framedrop or RTFM! **"\
 			    "\n************************************************************************\n"
-//#define MSGTR_
 
-// open.c: 
+#define MSGTR_NoGui "MPlayer was compiled WITHOUT GUI support!\n"
+#define MSGTR_GuiNeedsX "MPlayer GUI requires X11!\n"
+#define MSGTR_Playing "Playing %s\n"
+#define MSGTR_NoSound "Audio: no sound!!!\n"
+#define MSGTR_FPSforced "FPS forced to be %5.3f  (ftime: %5.3f)\n"
+
+// open.c, stream.c:
 #define MSGTR_CdDevNotfound "CD-ROM Device '%s' not found!\n"
 #define MSGTR_ErrTrackSelect "Error selecting VCD track!"
 #define MSGTR_ReadSTDIN "Reading from stdin...\n"
@@ -101,7 +110,19 @@ static char help_text[]=
 #define MSGTR_ConnToServer "Connected to server: %s\n"
 #define MSGTR_FileNotFound "File not found: '%s'\n"
 
-// demuxer.c:
+#define MSGTR_CantOpenDVD "Couldn't open DVD device: %s\n"
+#define MSGTR_DVDwait "Reading disc structure, please wait...\n"
+#define MSGTR_DVDnumTitles "There are %d titles on this DVD.\n"
+#define MSGTR_DVDinvalidTitle "Invalid DVD title number: %d\n"
+#define MSGTR_DVDnumChapters "There are %d chapters in this DVD title.\n"
+#define MSGTR_DVDinvalidChapter "Invalid DVD chapter number: %d\n"
+#define MSGTR_DVDnumAngles "There are %d angles in this DVD title.\n"
+#define MSGTR_DVDinvaludAngle "Invalid DVD angle number: %d\n"
+#define MSGTR_DVDnoIFO "Can't open the IFO file for DVD title %d.\n"
+#define MSGTR_DVDnoVOBs "Can't open title VOBS (VTS_%02d_1.VOB).\n"
+#define MSGTR_DVDopenOk "DVD successfully opened!\n"
+
+// demuxer.c, demux_*.c:
 #define MSGTR_AudioStreamRedefined "Warning! Audio stream header %d redefined!\n"
 #define MSGTR_VideoStreamRedefined "Warning! video stream header %d redefined!\n"
 #define MSGTR_TooManyAudioInBuffer "\nDEMUXER: Too many (%d in %d bytes) audio packets in the buffer!\n"
@@ -117,11 +138,71 @@ static char help_text[]=
 #define MSGTR_InvalidMPEGES "Invalid MPEG-ES stream??? contact the author, it may be a bug :(\n"
 #define MSGTR_FormatNotRecognized "============= Sorry, this file format not recognized/supported ===============\n"\
 				  "=== If this file is an AVI, ASF or MPEG stream, please contact the author! ===\n"
-#define MSGTR_MissingASFvideo "ASF: no video stream found!\n"
-#define MSGTR_MissingASFaudio "ASF: No Audio stream found...  ->nosound\n"
-#define MSGTR_MissingMPEGaudio "MPEG: No Audio stream found...  ->nosound\n"
+#define MSGTR_MissingVideoStream "No video stream found!\n"
+#define MSGTR_MissingAudioStream "No Audio stream found...  ->nosound\n"
+#define MSGTR_MissingVideoStreamBug "Missing video stream!? Contact the author, it may be a bug :(\n"
 
-//#define MSGTR_
+#define MSGTR_DoesntContainSelectedStream "demux: file doesn't contain the selected audio or video stream\n"
+
+#define MSGTR_NI_Forced "Forced"
+#define MSGTR_NI_Detected "Detected"
+#define MSGTR_NI_Message "%s NON-INTERLEAVED AVI file-format!\n"
+
+#define MSGTR_UsingNINI "Using NON-INTERLEAVED Broken AVI file-format!\n"
+#define MSGTR_CouldntDetFNo "Couldn't determine number of frames (for absoulte seek)  \n"
+#define MSGTR_CantSeekRawAVI "Can't seek in raw .AVI streams! (index required, try with the -idx switch!)  \n"
+#define MSGTR_CantSeekFile "Can't seek in this file!  \n"
+
+#define MSGTR_EncryptedVOB "Encrypted VOB file (not compiled with libcss support)! Read file DOCS/DVD\n"
+#define MSGTR_EncryptedVOBauth "Encrypted stream but authentication was not requested by you!!\n"
+
+#define MSGTR_MOVcomprhdr "MOV: Compressed headers not (yet) supported!\n"
+#define MSGTR_MOVvariableFourCC "MOV: Warning! variable FOURCC detected!?\n"
+#define MSGTR_MOVtooManyTrk "MOV: Warning! too many tracks!"
+#define MSGTR_MOVnotyetsupp "\n****** Quicktime MOV format not yet supported!!!!!!! *******\n"
+
+// dec_video.c & dec_audio.c:
+#define MSGTR_CantOpenCodec "could not open codec\n"
+#define MSGTR_CantCloseCodec "could not close codec\n"
+
+#define MSGTR_MissingDLLcodec "ERROR: Couldn't open required DirectShow codec: %s\n"
+#define MSGTR_ACMiniterror "Could not load/initialize Win32/ACM AUDIO codec (missing DLL file?)\n"
+#define MSGTR_MissingLAVCcodec "Can't find codec '%s' in libavcodec...\n"
+
+#define MSGTR_NoDShowSupport "MPlayer was compiled WITHOUT directshow support!\n"
+#define MSGTR_NoWfvSupport "Support for win32 codecs disabled, or unavailable on non-x86 platforms!\n"
+#define MSGTR_NoDivx4Support "MPlayer was compiled WITHOUT DivX4Linux (libdivxdecore.so) support!\n"
+#define MSGTR_NoLAVCsupport "MPlayer was compiled WITHOUT ffmpeg/libavcodec support!\n"
+#define MSGTR_NoACMSupport "Win32/ACM audio codec disabled, or unavailable on non-x86 CPU -> force nosound :(\n"
+#define MSGTR_NoDShowAudio "Compiled without DirectShow support -> force nosound :(\n"
+#define MSGTR_NoOggVorbis "OggVorbis audio codec disabled -> force nosound :(\n"
+
+#define MSGTR_MpegPPhint "WARNING! You requested image postprocessing for an MPEG 1/2 video,\n" \
+			 "         but compiled MPlayer without MPEG 1/2 postprocessing support!\n" \
+			 "         #define MPEG12_POSTPROC in config.h, and recompile libmpeg2!\n"
+#define MSGTR_MpegNoSequHdr "MPEG: FATAL: EOF while searching for sequence header\n"
+#define MSGTR_CannotReadMpegSequHdr "FATAL: Cannot read sequence header!\n"
+#define MSGTR_CannotReadMpegSequHdrEx "FATAL: Cannot read sequence header extension!\n"
+#define MSGTR_BadMpegSequHdr "MPEG: Bad sequence header!\n"
+#define MSGTR_BadMpegSequHdrEx "MPEG: Bad sequence header extension!\n"
+
+#define MSGTR_ShMemAllocFail "Cannot allocate shared memory\n"
+#define MSGTR_CantAllocAudioBuf "Cannot allocate audio out buffer\n"
+#define MSGTR_NoMemForDecodedImage "not enough memory for decoded picture buffer (%ld bytes)\n"
+
+#define MSGTR_AC3notvalid "AC3 stream not valid.\n"
+#define MSGTR_AC3only48k "Only 48000 Hz streams supported.\n"
+#define MSGTR_UnknownAudio "Unknown/missing audio format, using nosound\n"
+
+// LIRC:
+#define MSGTR_SettingUpLIRC "Setting up lirc support...\n"
+#define MSGTR_LIRCdisabled "You won't be able to use your remote control\n"
+#define MSGTR_LIRCopenfailed "Failed opening lirc support!\n"
+#define MSGTR_LIRCsocketerr "Something's wrong with the lirc socket: %s\n"
+#define MSGTR_LIRCcfgerr "Failed to read LIRC config file %s !\n"
+
+
+// ====================== GUI messages/buttons ========================
 
 #ifdef HAVE_NEW_GUI
 

@@ -497,12 +497,12 @@ int gui_no_filename=0;
 
 #ifndef HAVE_NEW_GUI
     if(use_gui){
-      mp_msg(MSGT_CPLAYER,MSGL_WARN,"MPlayer was compiled WITHOUT GUI support!\n");
+      mp_msg(MSGT_CPLAYER,MSGL_WARN,MSGTR_NoGui);
       use_gui=0;
     }
 #else
     if(use_gui && !vo_init()){
-      mp_msg(MSGT_CPLAYER,MSGL_WARN,"MPlayer GUI requires X11!\n");
+      mp_msg(MSGT_CPLAYER,MSGL_WARN,MSGTR_GuiNeedsX);
       use_gui=0;
     }
 #endif
@@ -639,7 +639,7 @@ play_next_file:
     }
 #endif
 
-    if(filename) mp_msg(MSGT_CPLAYER,MSGL_INFO,"Playing %s\n", filename);
+    if(filename) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_Playing, filename);
 
 #ifdef USE_SUB
 // check .sub
@@ -1117,7 +1117,7 @@ if(sh_audio){
   if(sh_audio) sh_audio->timer=0;
 
 if(!sh_audio){
-  mp_msg(MSGT_CPLAYER,MSGL_INFO,"Audio: no sound!!!\n");
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_NoSound);
   if(verbose) mp_msg(MSGT_CPLAYER,MSGL_V,"Freeing %d unused audio chunks\n",d_audio->packs);
   ds_free_packs(d_audio); // free buffered chunks
   d_audio->id=-2;         // do not read audio chunks
@@ -1130,7 +1130,7 @@ if(demuxer->file_format!=DEMUXER_TYPE_AVI) pts_from_bps=0; // it must be 0 for m
 if(force_fps){
   sh_video->fps=force_fps;
   sh_video->frametime=1.0f/sh_video->fps;
-  mp_msg(MSGT_CPLAYER,MSGL_INFO,"FPS forced to be %5.3f  (ftime: %5.3f)\n",sh_video->fps,sh_video->frametime);
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_FPSforced,sh_video->fps,sh_video->frametime);
 }
 
 //==================== START PLAYING =======================
@@ -1318,7 +1318,7 @@ if(1)
         if(d>0){
           if(verbose)
             if((int)sh_video->fps==1000)
-              printf("\rASF framerate: %d fps             \n",(int)(1.0f/d));
+              mp_msg(MSGT_CPLAYER,MSGL_STATUS,"\rASF framerate: %d fps             \n",(int)(1.0f/d));
           sh_video->frametime=d; // 1ms
           sh_video->fps=1.0f/d;
         }

@@ -6,6 +6,7 @@
 
 #include "config.h"
 #include "mp_msg.h"
+#include "help_mp.h"
 
 #include "config.h"
 #include "dvdauth.h"
@@ -107,7 +108,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
 #ifdef HAVE_LIBCSS
         css=1;
 #else
-        mp_msg(MSGT_DEMUX,MSGL_WARN,"Encrypted VOB file (not compiled with libcss support)! Read file DOCS/DVD\n");
+        mp_msg(MSGT_DEMUX,MSGL_WARN,MSGTR_EncryptedVOB);
 #endif
     }
     c=stream_read_char(demux->stream); pts_flags=c>>6;
@@ -231,7 +232,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
 #ifdef HAVE_LIBCSS
     if (css) {
 	    if (descrambling) CSSDescramble(demux->stream->buffer,key_title); else
-		    mp_msg(MSGT_DEMUX,MSGL_WARN,"Encrypted stream but authentication was not requested by you!!\n");
+		    mp_msg(MSGT_DEMUX,MSGL_WARN,MSGTR_EncryptedVOBauth);
     }
 #endif
     ds_read_packet(ds,demux->stream,len,pts/90000.0f,demux->filepos,0);
@@ -310,7 +311,7 @@ do{
       if(!ret)
         if(--max_packs==0){
           demux->stream->eof=1;
-          mp_msg(MSGT_DEMUX,MSGL_ERR,"demux: file doesn't contain the selected audio or video stream\n");
+          mp_msg(MSGT_DEMUX,MSGL_ERR,MSGTR_DoesntContainSelectedStream);
           return 0;
         }
   } else {

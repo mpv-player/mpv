@@ -6,6 +6,7 @@
 
 #include "config.h"
 #include "mp_msg.h"
+#include "help_mp.h"
 
 #include "stream.h"
 #include "demuxer.h"
@@ -221,7 +222,7 @@ do{
       if(!ret && priv->skip_video_frames<=0)
         if(--max_packs==0){
           demux->stream->eof=1;
-          mp_msg(MSGT_DEMUX,MSGL_ERR,"demux: file doesn't contain the selected audio or video stream\n");
+          mp_msg(MSGT_DEMUX,MSGL_ERR,MSGTR_DoesntContainSelectedStream);
           return 0;
         }
 } while(ret!=1);
@@ -298,7 +299,7 @@ do{
       if(!ret && priv->skip_video_frames<=0)
         if(--max_packs==0){
           demux->stream->eof=1;
-          mp_msg(MSGT_DEMUX,MSGL_ERR,"demux: file doesn't contain the selected audio or video stream\n");
+          mp_msg(MSGT_DEMUX,MSGL_ERR,MSGTR_DoesntContainSelectedStream);
           return 0;
         }
 } while(ret!=1);
@@ -409,16 +410,16 @@ demuxer_t* demux_open_avi(demuxer_t* demuxer){
         }
       }
       if(v_pos==-1){
-        mp_msg(MSGT_DEMUX,MSGL_ERR,"AVI_NI: missing video stream!? contact the author, it may be a bug :(\n");
+        mp_msg(MSGT_DEMUX,MSGL_ERR,"AVI_NI: " MSGTR_MissingVideoStream);
 	return NULL;
 //        GUI_MSG( mplErrorAVINI )
       }
       if(a_pos==-1){
-        mp_msg(MSGT_DEMUX,MSGL_INFO,"AVI_NI: No audio stream found -> nosound\n");
+        mp_msg(MSGT_DEMUX,MSGL_INFO,"AVI_NI: " MSGTR_MissingAudioStream);
         sh_audio=NULL;
       } else {
         if(force_ni || abs(a_pos-v_pos)>0x100000){  // distance > 1MB
-          mp_msg(MSGT_DEMUX,MSGL_INFO,"%s NON-INTERLEAVED AVI file-format!\n",force_ni?"Forced":"Detected");
+          mp_msg(MSGT_DEMUX,MSGL_INFO,MSGTR_NI_Message,force_ni?MSGTR_NI_Forced:MSGTR_NI_Detected);
           demuxer->type=DEMUXER_TYPE_AVI_NI; // HACK!!!!
 	  pts_from_bps=1; // force BPS sync!
         }
@@ -426,7 +427,7 @@ demuxer_t* demux_open_avi(demuxer_t* demuxer){
   } else {
       // no index
       if(force_ni){
-          mp_msg(MSGT_DEMUX,MSGL_INFO,"Using NON-INTERLEAVED Broken AVI file-format!\n");
+          mp_msg(MSGT_DEMUX,MSGL_INFO,MSGTR_UsingNINI);
           demuxer->type=DEMUXER_TYPE_AVI_NINI; // HACK!!!!
 	  priv->idx_pos_a=
 	  priv->idx_pos_v=demuxer->movi_start;
@@ -435,7 +436,7 @@ demuxer_t* demux_open_avi(demuxer_t* demuxer){
       demuxer->seekable=0;
   }
   if(!ds_fill_buffer(d_video)){
-    mp_msg(MSGT_DEMUX,MSGL_ERR,"AVI: missing video stream!? contact the author, it may be a bug :(\n");
+    mp_msg(MSGT_DEMUX,MSGL_ERR,"AVI: " MSGTR_MissingVideoStreamBug);
     return NULL;
 //    GUI_MSG( mplAVIErrorMissingVideoStream )
   }
@@ -443,7 +444,7 @@ demuxer_t* demux_open_avi(demuxer_t* demuxer){
   if(d_audio->id!=-2){
     mp_msg(MSGT_DEMUX,MSGL_V,"AVI: Searching for audio stream (id:%d)\n",d_audio->id);
     if(!ds_fill_buffer(d_audio)){
-      mp_msg(MSGT_DEMUX,MSGL_INFO,"AVI: No Audio stream found...  ->nosound\n");
+      mp_msg(MSGT_DEMUX,MSGL_INFO,"AVI: " MSGTR_MissingAudioStream);
       sh_audio=NULL;
     } else {
       sh_audio=d_audio->sh;sh_audio->ds=d_audio;
@@ -499,7 +500,7 @@ void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags){
 	    // bad video header, try to get it from audio
 	    if(sh_audio) total=sh_video->fps*sh_audio->audio.dwLength/sh_audio->wf->nAvgBytesPerSec;
 	    if(total<=1){
-              mp_msg(MSGT_SEEK,MSGL_WARN,"Couldn't determine number of frames (for absoulte seek)  \n");
+              mp_msg(MSGT_SEEK,MSGL_WARN,MSGTR_CouldntDetFNo);
 	      total=0;
 	    }
 	}

@@ -9,6 +9,8 @@
 #include <fcntl.h>
 
 #include "config.h"
+#include "mp_msg.h"
+#include "help_mp.h"
 
 #include "stream.h"
 
@@ -116,7 +118,7 @@ if(newpos==0 || newpos!=s->pos){
   case STREAMTYPE_STREAM:
     //s->pos=newpos; // real seek
     if(newpos<s->pos){
-      printf("Cannot seek backward in linear streams!\n");
+      mp_msg(MSGT_STREAM,MSGL_INFO,"Cannot seek backward in linear streams!\n");
       return 1;
     }
     while(s->pos<newpos){
@@ -134,10 +136,11 @@ if(newpos==0 || newpos!=s->pos){
     s->buf_pos=pos; // byte position in sector
     return 1;
   }
+  
 #ifdef _LARGEFILE_SOURCE
-  if(verbose) printf("stream_seek: WARNING! Can't seek to 0x%llX !\n",(long long)(pos+newpos));
+  mp_msg(MSGT_STREAM,MSGL_V,"stream_seek: WARNING! Can't seek to 0x%llX !\n",(long long)(pos+newpos));
 #else
-  if(verbose) printf("stream_seek: WARNING! Can't seek to 0x%X !\n",(pos+newpos));
+  mp_msg(MSGT_STREAM,MSGL_V,"stream_seek: WARNING! Can't seek to 0x%X !\n",(pos+newpos));
 #endif
   return 0;
 }

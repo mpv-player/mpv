@@ -43,6 +43,11 @@ extern int verbose; // defined in mplayer.c
 #define MSGT_OPEN 16	// open.c (stream opening)
 #define MSGT_DVD 17	// open.c (DVD init/read/seek)
 
+#define MSGT_PARSEES 18	// parse_es.c (mpeg stream parser)
+#define MSGT_LIRC 19	// lirc_mp.c
+
+#define MSGT_STREAM 20  // stream.c
+
 #define MSGT_MAX 64
 
 void mp_msg_init(int verbose);

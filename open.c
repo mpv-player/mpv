@@ -127,11 +127,11 @@ if(dvd_title){
     if(!filename) filename=DEFAULT_DVD_DEVICE;
     dvd = DVDOpen(filename);
     if( !dvd ) {
-        mp_msg(MSGT_OPEN,MSGL_ERR, "Couldn't open DVD: %s\n",filename);
+        mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,filename);
         return NULL;
     }
 
-    mp_msg(MSGT_OPEN,MSGL_INFO, "Reading disc structure, please wait...\n");
+    mp_msg(MSGT_OPEN,MSGL_INFO,MSGTR_DVDwait);
 
     /**
      * Load the video manager to find out the information about the titles on
@@ -147,10 +147,10 @@ if(dvd_title){
     /**
      * Make sure our title number is valid.
      */
-    mp_msg(MSGT_OPEN,MSGL_INFO, "There are %d titles on this DVD.\n",
+    mp_msg(MSGT_OPEN,MSGL_INFO, MSGTR_DVDnumTitles,
              tt_srpt->nr_of_srpts );
     if( dvd_title < 1 || dvd_title > tt_srpt->nr_of_srpts ) {
-	mp_msg(MSGT_OPEN,MSGL_ERR, "Invalid DVD title number: %d\n", dvd_title);
+	mp_msg(MSGT_OPEN,MSGL_ERR, MSGTR_DVDinvalidTitle, dvd_title);
         ifoClose( vmg_file );
         DVDClose( dvd );
         return NULL;
@@ -159,10 +159,10 @@ if(dvd_title){
     /**
      * Make sure the chapter number is valid for this title.
      */
-    mp_msg(MSGT_OPEN,MSGL_INFO, "There are %d chapters in this DVD title.\n",
+    mp_msg(MSGT_OPEN,MSGL_INFO, MSGTR_DVDnumChapters,
              tt_srpt->title[dvd_title].nr_of_ptts );
     if( dvd_chapter<1 || dvd_chapter>tt_srpt->title[dvd_title].nr_of_ptts ) {
-	mp_msg(MSGT_OPEN,MSGL_ERR, "Invalid DVD chapter number: %d\n", dvd_chapter);
+	mp_msg(MSGT_OPEN,MSGL_ERR, MSGTR_DVDinvalidChapter, dvd_chapter);
         ifoClose( vmg_file );
         DVDClose( dvd );
         return NULL;
@@ -171,10 +171,10 @@ if(dvd_title){
     /**
      * Make sure the angle number is valid for this title.
      */
-    mp_msg(MSGT_OPEN,MSGL_INFO, "There are %d angles in this DVD title.\n",
+    mp_msg(MSGT_OPEN,MSGL_INFO, MSGTR_DVDnumAngles,
              tt_srpt->title[dvd_title].nr_of_angles );
     if( dvd_angle<1 || dvd_angle>tt_srpt->title[dvd_title].nr_of_angles ) {
-	mp_msg(MSGT_OPEN,MSGL_ERR, "Invalid DVD angle number: %d\n", dvd_angle);
+	mp_msg(MSGT_OPEN,MSGL_ERR, MSGTR_DVDinvaludAngle, dvd_angle);
         ifoClose( vmg_file );
         DVDClose( dvd );
         return NULL;
@@ -185,7 +185,7 @@ if(dvd_title){
      */
     vts_file = ifoOpen( dvd, tt_srpt->title[dvd_title].title_set_nr );
     if( !vts_file ) {
-	mp_msg(MSGT_OPEN,MSGL_ERR, "Can't open the IFO file for DVD title %d.\n",
+	mp_msg(MSGT_OPEN,MSGL_ERR, MSGTR_DVDnoIFO,
                  tt_srpt->title[dvd_title].title_set_nr );
         ifoClose( vmg_file );
         DVDClose( dvd );
@@ -197,7 +197,7 @@ if(dvd_title){
     title = DVDOpenFile( dvd, tt_srpt->title[dvd_title].title_set_nr,
                          DVD_READ_TITLE_VOBS );
     if( !title ) {
-	mp_msg(MSGT_OPEN,MSGL_ERR, "Can't open title VOBS (VTS_%02d_1.VOB).\n",
+	mp_msg(MSGT_OPEN,MSGL_ERR, MSGTR_DVDnoVOBs,
                  tt_srpt->title[dvd_title].title_set_nr );
         ifoClose( vts_file );
         ifoClose( vmg_file );
@@ -205,7 +205,7 @@ if(dvd_title){
         return NULL;
     }
 
-    mp_msg(MSGT_OPEN,MSGL_INFO, "DVD successfully opened!\n");
+    mp_msg(MSGT_OPEN,MSGL_INFO, MSGTR_DVDopenOk);
     // store data
     d=malloc(sizeof(dvd_priv_t)); memset(d,0,sizeof(dvd_priv_t));
     d->dvd=dvd;

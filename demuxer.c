@@ -407,7 +407,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
       file_format=DEMUXER_TYPE_MPEG_ES; //  <-- hack is here :)
     } else {
       if(demuxer->synced==2)
-        mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_MissingMpegVideo);
+        mp_msg(MSGT_DEMUXER,MSGL_ERR,"MPEG: " MSGTR_MissingVideoStreamBug);
       else
         mp_msg(MSGT_DEMUXER,MSGL_V,"Not MPEG System Stream format... (maybe Transport Stream?)\n");
     }
@@ -465,7 +465,7 @@ switch(file_format){
 //  demuxer->idx_pos=0;
 //  demuxer->endpos=avi_header.movi_end;
   if(!ds_fill_buffer(d_video)){
-    mp_msg(MSGT_DEMUXER,MSGL_WARN,MSGTR_MissingASFvideo);
+    mp_msg(MSGT_DEMUXER,MSGL_WARN,"ASF: " MSGTR_MissingVideoStream);
     sh_video=NULL;
     //printf("ASF: missing video stream!? contact the author, it may be a bug :(\n");
     //GUI_MSG( mplASFErrorMissingVideoStream )
@@ -482,7 +482,7 @@ switch(file_format){
   if(audio_id!=-2){
     mp_msg(MSGT_DEMUXER,MSGL_V,"ASF: Searching for audio stream (id:%d)\n",d_audio->id);
     if(!ds_fill_buffer(d_audio)){
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_MissingASFaudio);
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,"ASF: " MSGTR_MissingAudioStream);
       sh_audio=NULL;
     } else {
       sh_audio=d_audio->sh;sh_audio->ds=d_audio;
@@ -503,7 +503,7 @@ switch(file_format){
 
   if(audio_id!=-2) {
    if(!ds_fill_buffer(d_audio)){
-    mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_MissingMPEGaudio);
+    mp_msg(MSGT_DEMUXER,MSGL_INFO,"MPEG: " MSGTR_MissingAudioStream);
     sh_audio=NULL;
    } else {
     sh_audio=d_audio->sh;sh_audio->ds=d_audio;
@@ -534,9 +534,9 @@ int demux_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
 
 if(!demuxer->seekable){
     if(demuxer->file_format==DEMUXER_TYPE_AVI)
-	mp_msg(MSGT_SEEK,MSGL_WARN,"Can't seek in raw .AVI streams! (index required, try with the -idx switch!)  \n");
+	mp_msg(MSGT_SEEK,MSGL_WARN,MSGTR_CantSeekRawAVI);
     else
-	mp_msg(MSGT_SEEK,MSGL_WARN,"Can't seek in this file!  \n");
+	mp_msg(MSGT_SEEK,MSGL_WARN,MSGTR_CantSeekFile);
     return 0;
 }
 

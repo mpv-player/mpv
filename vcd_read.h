@@ -62,7 +62,7 @@ void vcd_read_toc(int fd){
       if (ioctl(fd,CDROMREADTOCENTRY,&tocentry)==-1)
 	{ perror("read CDROM toc entry: "); return; }
         
-      printf("track %02d:  adr=%d  ctrl=%d  format=%d  %02d:%02d:%02d  mode: %d\n",
+      mp_msg(MSGT_OPEN,MSGL_INFO,"track %02d:  adr=%d  ctrl=%d  format=%d  %02d:%02d:%02d  mode: %d\n",
           (int)tocentry.cdte_track,
           (int)tocentry.cdte_adr,
           (int)tocentry.cdte_ctrl,

@@ -7,6 +7,8 @@
 extern int verbose; // defined in mplayer.c
 
 #include "config.h"
+#include "mp_msg.h"
+#include "help_mp.h"
 
 #include "stream.h"
 #include "demuxer.h"
@@ -46,7 +48,7 @@ int sync_video_packet(demux_stream_t *ds){
     c=demux_getc(ds);if(c<0){ return 0;} // EOF
     videobuf_code[3]=c;
   }
-  if(verbose>=2) if(skipped) printf("videobuf: %d bytes skipped  (next: 0x1%02X)\n",skipped,videobuf_code[3]);
+  if(skipped) mp_dbg(MSGT_PARSEES,MSGL_DBG2,"videobuf: %d bytes skipped  (next: 0x1%02X)\n",skipped,videobuf_code[3]);
   return 0x100|videobuf_code[3];
 }
 
@@ -90,7 +92,7 @@ int packet_start;
   
   videobuf_len-=4;
 
-  if(verbose>=2) printf("videobuf: packet 0x1%02X  len=%d  (total=%d)\n",videobuffer[packet_start+3],videobuf_len-packet_start,videobuf_len);
+  mp_dbg(MSGT_PARSEES,MSGL_DBG2,"videobuf: packet 0x1%02X  len=%d  (total=%d)\n",videobuffer[packet_start+3],videobuf_len-packet_start,videobuf_len);
 
   // Save next packet code:
   videobuf_code[0]=videobuffer[videobuf_len];

@@ -5,6 +5,7 @@
 
 #include "config.h"
 #include "mp_msg.h"
+#include "help_mp.h"
 
 #include "stream.h"
 #include "demuxer.h"
@@ -50,7 +51,7 @@ int init_acm_audio_codec(sh_audio_t *sh_audio){
         if(ret==ACMERR_NOTPOSSIBLE)
             mp_msg(MSGT_WIN32,MSGL_ERR,"ACM_Decoder: Unappropriate audio format\n");
         else
-            mp_msg(MSGT_WIN32,MSGL_ERR,"ACM_Decoder: acmStreamOpen error %d", (int)ret);
+            mp_msg(MSGT_WIN32,MSGL_ERR,"ACM_Decoder: acmStreamOpen error: %d", (int)ret);
         sh_audio->srcstream=NULL;
         return 0;
     }
@@ -283,7 +284,7 @@ int init_video_codec(sh_video_t *sh_video,int ex){
 
   sh_video->our_out_buffer = memalign(64,sh_video->o_bih.biSizeImage);
   if(!sh_video->our_out_buffer){
-    mp_msg(MSGT_WIN32,MSGL_ERR,"not enough memory for decoded picture buffer (%ld bytes)\n", sh_video->o_bih.biSizeImage);
+    mp_msg(MSGT_WIN32,MSGL_ERR,MSGTR_NoMemForDecodedImage, sh_video->o_bih.biSizeImage);
     return 0;
   }
 

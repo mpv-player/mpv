@@ -37,10 +37,9 @@ void lirc_mp_setup(void){
   int lirc_flags;
   int lirc_sock;
 
-  printf("Setting up lirc support...\n");
+  mp_msg(MSGT_LIRC,MSGL_INFO,MSGTR_SettingUpLIRC);
   if((lirc_sock=lirc_init("mplayer_lirc",1))==-1){
-    printf("Failed opening lirc support!\n");
-    printf("You won't be able to use your remote control\n");
+    mp_msg(MSGT_LIRC,MSGL_ERR,MSGTR_LIRCopenfailed MSGTR_LIRCdisabled);
     return;
   }
 
@@ -51,21 +50,18 @@ void lirc_mp_setup(void){
      fcntl(lirc_sock,F_SETFL,lirc_flags|O_NONBLOCK);
   }else{
     lirc_deinit();
-    printf("Something's wrong with the lirc socket: %s\n", 
-            strerror(errno));
-    printf("You won't be able to use your remote control\n");
+    mp_msg(MSGT_LIRC,MSGL_ERR,MSGTR_LIRCsocketerr MSGTR_LIRCdisabled,strerror(errno));
     return;
   }
 
 
   if(lirc_readconfig( lirc_configfile,&lirc_config,NULL )!=0 ){
-    printf("Failed to read config file %s !\n", 
+    mp_msg(MSGT_LIRC,MSGL_ERR,MSGTR_LIRCcfgerr MSGTR_LIRCdisabled,
 		    lirc_configfile == NULL ? "~/.lircrc" : lirc_configfile);
-    printf("You won't be able to use your remote control\n");
     lirc_deinit();
     return;
   }
-  printf("LIRC init was successful.\n");
+  mp_msg(MSGT_LIRC,MSGL_V,"LIRC init was successful.\n");
   lirc_is_setup = 1;
 }
 
@@ -73,7 +69,7 @@ void lirc_mp_setup(void){
 
 void lirc_mp_cleanup(void){
   if(lirc_is_setup != 0){
-    printf("Cleaning up lirc stuff.\n");
+    mp_msg(MSGT_LIRC,MSGL_V,"Cleaning up lirc stuff.\n");
     lirc_mp_getinput(NULL);
     lirc_freeconfig(lirc_config);
     lirc_deinit();
@@ -137,7 +133,7 @@ int lirc_mp_getinput(){
         }
         free(code);
         if(ret==-1){ 
-           printf("LIRC: lirc_code2char() returned an error!\n");
+           mp_msg(MSGT_LIRC,MSGL_V,"LIRC: lirc_code2char() returned an error!\n");
         }
       }
     }

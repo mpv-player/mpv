@@ -5,6 +5,7 @@
 
 #include "config.h"
 #include "mp_msg.h"
+#include "help_mp.h"
 
 #include "libao2/afmt.h"
 
@@ -98,7 +99,7 @@ sh_audio->audio_out_minsize=8192;// default size, maybe not enough for Win32/ACM
 switch(driver){
 case AFM_ACM:
 #ifndef	USE_WIN32DLL
-  mp_msg(MSGT_DECAUDIO,MSGL_ERR,"Win32/ACM audio codec disabled, or unavailable on non-x86 CPU -> force nosound :(\n");
+  mp_msg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_NoACMSupport);
   driver=0;
 #else
   // Win32 ACM audio codec:
@@ -111,20 +112,20 @@ case AFM_ACM:
 //    if(sh_audio->a_buffer_size<sh_audio->audio_out_minsize+MAX_OUTBURST)
 //        sh_audio->a_buffer_size=sh_audio->audio_out_minsize+MAX_OUTBURST;
   } else {
-    mp_msg(MSGT_DECAUDIO,MSGL_ERR,"Could not load/initialize Win32/ACM AUDIO codec (missing DLL file?)\n");
+    mp_msg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_ACMiniterror);
     driver=0;
   }
 #endif
   break;
 case AFM_DSHOW:
 #ifndef USE_DIRECTSHOW
-  mp_msg(MSGT_DECAUDIO,MSGL_ERR,"Compiled without DirectShow support -> force nosound :(\n");
+  mp_msg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_NoDShowAudio);
   driver=0;
 #else
   // Win32 DShow audio codec:
 //  printf("DShow_audio: channs=%d  rate=%d\n",sh_audio->channels,sh_audio->samplerate);
   if(DS_AudioDecoder_Open(sh_audio->codec->dll,&sh_audio->codec->guid,sh_audio->wf)){
-    mp_msg(MSGT_DECAUDIO,MSGL_ERR,"ERROR: Could not load/initialize Win32/DirectShow AUDIO codec: %s\n",sh_audio->codec->dll);
+    mp_msg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_MissingDLLcodec,sh_audio->codec->dll);
     driver=0;
   } else {
     sh_audio->i_bps=sh_audio->wf->nAvgBytesPerSec;
@@ -141,7 +142,7 @@ case AFM_DSHOW:
   break;
 case AFM_VORBIS:
 #ifndef	HAVE_OGGVORBIS
-  mp_msg(MSGT_DECAUDIO,MSGL_ERR,"OggVorbis audio codec disabled -> force nosound :(\n");
+  mp_msg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_NoOggVorbis);
   driver=0;
 #else
   /* OggVorbis audio via libvorbis, compatible with files created by nandub and zorannt codec */
@@ -173,7 +174,7 @@ case AFM_MPEG:
   break;
 case AFM_FFMPEG:
 #ifndef USE_LIBAVCODEC
-   mp_msg(MSGT_DECAUDIO,MSGL_ERR,"MPlayer was compiled WITHOUT libavcodec support!\n");
+   mp_msg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_NoLAVCsupport);
    return 0;
 #else
   // FFmpeg Audio:
@@ -192,7 +193,7 @@ mp_msg(MSGT_DECAUDIO,MSGL_V,"dec_audio: Allocating %d + %d = %d bytes for output
 
 sh_audio->a_buffer=malloc(sh_audio->a_buffer_size);
 if(!sh_audio->a_buffer){
-    mp_msg(MSGT_DECAUDIO,MSGL_ERR,"Cannot allocate audio out buffer\n");
+    mp_msg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_CantAllocAudioBuf);
     return 0;
 }
 memset(sh_audio->a_buffer,0,sh_audio->a_buffer_size);
@@ -203,7 +204,7 @@ switch(driver){
 case AFM_ACM: {
     int ret=acm_decode_audio(sh_audio,sh_audio->a_buffer,4096,sh_audio->a_buffer_size);
     if(ret<0){
-        mp_msg(MSGT_DECAUDIO,MSGL_WARN,"ACM decoding error: %d\n",ret);
+        mp_msg(MSGT_DECAUDIO,MSGL_INFO,"ACM decoding error: %d\n",ret);
         driver=0;
     }
     sh_audio->a_buffer_len=ret;
@@ -268,12 +269,12 @@ case AFM_HWAC3: {
   len = ds_get_packet(sh_audio->ds, &buffer); // maybe 1 packet is not enough,
     // at least for mpeg, PS packets contain about max. 2000 bytes of data.
   if(ac3_iec958_parse_syncinfo(buffer, len, &ai, &skipped) < 0) {
-      mp_msg(MSGT_DECAUDIO,MSGL_ERR, "AC3 stream not valid.\n");
+      mp_msg(MSGT_DECAUDIO,MSGL_ERR, MSGTR_AC3notvalid);
       driver = 0;
       break;
   }
   if(ai.samplerate != 48000) {
-      mp_msg(MSGT_DECAUDIO,MSGL_ERR,"Only 48000 Hz streams supported.\n");
+      mp_msg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_AC3only48k);
       driver = 0;
       break;
   }
@@ -303,13 +304,13 @@ case AFM_FFMPEG: {
     }
     lavc_codec = (AVCodec *)avcodec_find_decoder_by_name(sh_audio->codec->dll);
     if(!lavc_codec){
-	mp_msg(MSGT_DECAUDIO,MSGL_ERR,"Can't find codec '%s' in libavcodec...\n",sh_audio->codec->dll);
+	mp_msg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_MissingLAVCcodec,sh_audio->codec->dll);
 	return 0;
     }
     memset(&lavc_context, 0, sizeof(lavc_context));
     /* open it */
     if (avcodec_open(&lavc_context, lavc_codec) < 0) {
-        mp_msg(MSGT_DECAUDIO,MSGL_ERR, "could not open codec\n");
+        mp_msg(MSGT_DECAUDIO,MSGL_ERR, MSGTR_CantOpenCodec);
         return 0;
     }
    mp_msg(MSGT_DECAUDIO,MSGL_V,"INFO: libavcodec init OK!\n");
@@ -480,7 +481,7 @@ case AFM_VORBIS: {
 }
 
 if(!sh_audio->channels || !sh_audio->samplerate){
-  mp_msg(MSGT_DECAUDIO,MSGL_WARN,"Unknown/missing audio format, using nosound\n");
+  mp_msg(MSGT_DECAUDIO,MSGL_WARN,MSGTR_UnknownAudio);
   driver=0;
 }
 
@@ -512,7 +513,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
 	    int x=ds_get_packet(sh_audio->ds,&start);
 	    if(x<=0) break; // error
 	    y=avcodec_decode_audio(&lavc_context,buf,&len2,start,x);
-	    if(y<0){ printf("lavc_audio: error\n");break; }
+	    if(y<0){ mp_msg(MSGT_DECAUDIO,MSGL_V,"lavc_audio: error\n");break; }
 	    if(y<x) sh_audio->ds->buffer_pos+=y-x;  // put back data (HACK!)
 	    if(len2>0){
 	      //len=len2;break;

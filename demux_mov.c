@@ -7,6 +7,7 @@
 
 #include "config.h"
 #include "mp_msg.h"
+#include "help_mp.h"
 
 #include "stream.h"
 #include "demuxer.h"
@@ -143,7 +144,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		    }
 		    mp_msg(MSGT_DEMUX,MSGL_V,"\n");
 		    if(fourcc!=trak->fourcc && i)
-			mp_msg(MSGT_DEMUX,MSGL_WARN,"MOV: Warning! variable FOURCC detected!?\n");
+			mp_msg(MSGT_DEMUX,MSGL_WARN,MSGTR_MOVvariableFourCC);
 		    if(!stream_seek(demuxer->stream,pos+len)) break;
 		}
 		break;
@@ -168,7 +169,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	if(id==MOV_FOURCC('t','r','a','k')){
 //	    if(trak) printf("MOV: Warning! trak in trak?\n");
 	    if(priv->track_db>=MOV_MAX_TRACKS){
-		mp_msg(MSGT_DEMUX,MSGL_WARN,"MOV: Warning! too many tracks!");
+		mp_msg(MSGT_DEMUX,MSGL_WARN,MSGTR_MOVtooManyTrk);
 		return;
 	    }
 	    trak=malloc(sizeof(mov_track_t));
@@ -180,7 +181,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	    trak=NULL;
 	} else
 	if(id==MOV_FOURCC('c','m','o','v')){
-	    mp_msg(MSGT_DEMUX,MSGL_ERR,"MOV: Compressed headers not (yet) supported!\n");
+	    mp_msg(MSGT_DEMUX,MSGL_ERR,MSGTR_MOVcomprhdr);
 	    return;
 	}
 	
@@ -202,7 +203,7 @@ int mov_read_header(demuxer_t* demuxer){
     // Build tables:
     // ...
     
-    mp_msg(MSGT_DEMUX,MSGL_ERR,"\n****** Quicktime MOV format not yet supported!!!!!!! *******\n");
+    mp_msg(MSGT_DEMUX,MSGL_ERR,MSGTR_MOVnotyetsupp);
 
     return 1;
 }
