@@ -196,7 +196,7 @@ typedef struct {
 	VIDEO_FIELD_DESC FieldInfo[2];
 } VideoPropHeader;
 
-enum {
+typedef enum {
 	FORMAT_UNKNOWN,
 	FORMAT_PAL_SQUARE,
 	FORMAT_PAL_CCIR_601,
@@ -204,7 +204,7 @@ enum {
 	FORMAT_NTSC_CCIR_601,
 } VIDEO_FORMAT;
 
-enum {
+typedef enum {
 	STANDARD_UNKNOWN,
 	STANDARD_PAL,
 	STANDARD_NTSC,
