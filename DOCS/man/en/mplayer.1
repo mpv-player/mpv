@@ -745,18 +745,18 @@ Give the demuxer ID as defined in libmpdemux/demuxer.h.
 Use \-demuxer 17 to force .mp3 detection.
 .TP
 .B \-dumpaudio (MPLAYER only)
-Dumps raw compressed audio stream to ./\:stream.dump (useful with mpeg/\:ac3).
+Dumps raw compressed audio stream to ./stream.dump (useful with mpeg/\:ac3).
 .TP
 .B \-dumpfile <filename> (MPLAYER only)
 Specify which file MPlayer should dump to.
 Should be used together with \-dumpaudio / \-dumpvideo / \-dumpstream.
 .TP
 .B \-dumpstream (MPLAYER only)
-Dumps the raw stream to ./\:stream.dump.
+Dumps the raw stream to ./stream.dump.
 Useful when ripping from DVD or network.
 .TP
 .B \-dumpvideo (MPLAYER only)
-Dump raw compressed video stream to ./\:stream.dump (not very usable).
+Dump raw compressed video stream to ./stream.dump (not very usable).
 .TP
 .B \-dvbin <options> (DVB only)
 Pass the following parameters to the DVB input module, in order to override
@@ -1539,7 +1539,7 @@ Signed 32-bit (Big-Endian)
 .B \-mixer <device>
 This option will tell MPlayer to use a different device for mixing than
 /dev/\:mixer.
-.TP      
+.TP
 .B \-mixer-channel <mixer line> (\-ao oss only)
 This option will tell MPlayer to use a different channel for controlling
 volume than the default PCM.
@@ -1551,6 +1551,96 @@ For a complete list of options look for SOUND_DEVICE_NAMES in
 .B \-nowaveheader (\-ao pcm only)
 Don't include wave header.
 Used for RAW PCM.
+.
+.
+.SH "AUDIO OUTPUT DRIVERS (MPLAYER ONLY)"
+Audio output drivers are interfaces to different output facilities.
+The syntax is:
+.TP
+.B \-ao <driver1[:option],driver2,...[,]>
+Specify a priority list of audio output drivers to be used.
+.PP
+If the list has a trailing ',' it will fall back to drivers not listed
+on the command line.
+Suboptions are optional and can mostly be omitted.
+.br
+.I NOTE:
+See \-ao help for a list of compiled-in drivers.
+
+.I EXAMPLE:
+.PD 0
+.RSs
+.IPs "\-ao alsa,oss,"
+Try the ALSA driver, then the OSS driver, then others.
+.br
+.IPs "\-ao alsa:option"
+Uses the ALSA driver with a suboption.
+FIXME: Add a good example
+.RE
+.PD 1
+.
+
+Available audio output drivers are:
+FIXME: Document all suboptions.
+.
+.TP
+.B alsa\ \ \ 
+ALSA 0.9/1.x audio output driver.
+.TP
+.B alsa1x\ 
+ALSA 1.x audio output driver.
+.TP
+.B alsa5\ \ 
+ALSA 0.5 audio output driver.
+.TP
+.B alsa9\ \ 
+ALSA 0.9 audio output driver.
+.TP
+.B oss\ \ \ \ 
+OSS audio output driver
+.TP
+.B sdl\ \ \ \ 
+Highly platform independent SDL (Simple Directmedia Layer) library
+audio output driver.
+.TP
+.B arts\ \ \ 
+Audio output through the Arts daemon.
+.TP
+.B esd\ \ \ \ 
+Audio output through the ESD daemon.
+.TP
+.B nas\ \ \ \ 
+Audio output through NAS.
+.TP
+.B macosx (Mac OS X only)
+Native Mac OS X audio output driver.
+.TP
+.B sgi (SGI only)
+Native SGI audio output driver.
+.TP
+.B sun (Sun only)
+Native Sun audio output driver.
+.TP
+.B win32 (Windows only)
+Native Windows waveout audio output driver.
+.TP
+.B dxr2 (DXR2 only)
+Creative DXR2 specific output driver.
+Also see the \-dxr2 option.
+.TP
+.B mpegpes (DVB only)
+DVB specific output driver.
+.TP
+.B null\ \ \ 
+Produces no audio output but maintains video playback speed.
+Use \-nosound for benchmarking.
+.TP
+.B pcm\ \ \ \ 
+Raw PCM/wave file writer audio output.
+Writes the sound to ./audiodump.wav.
+.TP
+.B plugin\ \ 
+Plugin audio output driver.
 .
 .
 .SH "VIDEO OUTPUT OPTIONS (MPLAYER ONLY)"
@@ -2251,6 +2341,7 @@ It has effect only with libmpeg2 and libavcodec codecs.
 .TP
 .B \-nosound
 Do not play/\:encode sound.
+Useful for benchmarking.
 .TP
 .B \-novideo
 Do not play/\:encode video.
@@ -3594,7 +3685,11 @@ Uses the DirectX driver with acceleration features turned off.
 .PD 1
 .
 
-Available output drivers are:
+Available video output drivers are:
+FIXME: Document suboptions for x11, xover, xvmc, dga, sdl, vidix, xvidix,
+cvidix, winvidix, fbdev, fbdev2, vesa, svga, null, aa, bl, ggi, mga, xmga,
+syncfb, 3dfx, tdfx_vid, dxr2, dxr3, mpegpes, zr, zr2, md5, yuv4mpeg, gif89a,
+jpeg, pgm, png, tga.
 .
 .TP
 .B xv (X11 only)
@@ -3620,14 +3715,26 @@ Currently only supported by tdfx_vid.
 .B xvmc (X11 only)
 This video output driver employs the XvMC (X Video Motion Compensation)
 extension of XFree86 4.x.
+FIXME: The suboption descriptions are incomplete/imprecise.
+.PD 0
+.RSs
+.IPs benchmark=<number>
+Disable display of image to prevent vsync on benchmarking.
+.IPs wait
+.IPs sleep
+Use sleep function while waiting for rendering to finish (not recomended on Linux).
+.IPs queue
+Use display queue to allow more paralel work of the video hardware.
+.RE
+.PD 1
 .TP
 .B dga (X11 only)
 Output video through the XFree86 Direct Graphics Access extension.
 Considered obsolete.
 .TP
-.B sdl\ \ \ \ 
+.B sdl (SDL only)
 Highly platform independent SDL (Simple Directmedia Layer) library
-output driver.
+video output driver.
 .TP
 .B vidix\ \ 
 VIDIX (VIDeo Interface for *niX) is an interface to the
@@ -3805,9 +3912,9 @@ YUV acceleration.
 3Dfx specific output driver.
 Works in conjunction with a kernel module.
 .TP
-.B dxr2\ \ \ 
+.B dxr2 (DXR2 only)
 Creative DXR2 specific output driver.
-Also see the -dxr2 option.
+Also see the \-dxr2 option.
 .PD 0
 .RSs
 .IPs x11
@@ -3817,7 +3924,7 @@ Enables overlay.
 .RE
 .PD 1
 .TP
-.B dxr3\ \ \ 
+.B dxr3 (DXR3 only)
 Sigma Designs em8300 MPEG decoder chip (Creative DXR3, Sigma Designs
 Hollywood Plus) specific output driver.
 Also see the lavc video filter.
@@ -3849,7 +3956,7 @@ Specifies the device number to use if you have more than one em8300 card.
 .RE
 .PD 1
 .TP
-.B mpegpes
+.B mpegpes (DVB only)
 DVB specific output driver.
 .TP
 .B zr\ \ \ \ \ 
@@ -5439,7 +5546,7 @@ mplayer http://mplayer.hq/\:example.avi
 .B Stream using RTSP
 mplayer rtsp://server.example.com/\:streamName
 .TP
-.B Convert subtitle to MPsub (to ./\:dump.mpsub)
+.B Convert subtitle to MPsub (to ./dump.mpsub)
 mplayer dummy.avi \-sub source.sub \-dumpmpsub
 .TP
 .B Convert subtitle to MPsub without watching the movie
