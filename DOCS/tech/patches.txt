@@ -59,6 +59,8 @@ that your patch will be included.
     The subject line is very important if you do not want your patch to get
     lost in the noise. We need the uppercase [PATCH] to be able to search
     for unapplied patches, so please use it.
+    Do not send your patch as a reply to some other unrelated mail, compose
+    a new message, otherwise it will probably get overlooked.
     Do not compress your patch unless it is larger than 80k or if you know
     that your mailer messes up (reformats) text attachments. It only makes
     handling the patch more difficult. If you have to compress your patch,
