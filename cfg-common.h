@@ -12,7 +12,7 @@
 	{"cuefile", "-cuefile is deprecated, use cue://filname:N where N is the track number.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"cdrom-device", &cdrom_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #ifdef USE_DVDNAV
-	{"dvdnav", "-dvdnav deprecated, use dvdnav:// instead.\n", CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"dvdnav", "-dvdnav deprecated, use dvdnav:// instead.\n", CONF_TYPE_PRINT, 0, 0, 1, NULL},
 	{"skipopening", &dvd_nav_skip_opening, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #endif
 #ifdef USE_DVDREAD
