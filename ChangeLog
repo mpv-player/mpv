@@ -31,7 +31,8 @@ mplayer (0.90)
     * libavcodec: native WMA v1/v2 (aka. DivX audio) decoder
     * hw-accelerated video eq for -vo x11 and gl2, using DirectColor colormap
     * overlapping subtitles support, jacosub (*.js) format support
-    * -vo dxr3 got a new syncengine, ':sync', read the manual for more info
+    * -vo dxr3 got a new syncengine, ':sync', also added native overlay support,
+      activate with ':overlay', read the manual for more info on how to set up
     * QDMC/QDM2 audio codec support, using quicktime 5 win32 DLLs (libwine!)
     * libavcodec: various MJPEG decoding fixes - now it decodes all sample files!
     * mencvcd updates, sox/toolame support etc
