@@ -60,12 +60,12 @@ static int control(int cmd,int arg){
   switch(cmd){
   case AOCONTROL_PLUGIN_SET_LEN:
     if(pl_format.data) 
-      uninit();
+      free(pl_format.data);
     pl_format.len = ao_plugin_data.len;
-    if(ao_plugin_data.data)
-      free(ao_plugin_data.data);
     pl_format.data=(void*)malloc(ao_plugin_data.len);
-    ao_plugin_data.len=(int)(((double)ao_plugin_data.len)*pl_format.sz_mult);
+    if(!pl_format.data)
+      return CONTROL_ERROR;
+    ao_plugin_data.len=(int)(((double)ao_plugin_data.len)/pl_format.sz_mult);
     return CONTROL_OK;
   }
   return -1;
@@ -97,7 +97,7 @@ static int init(){
   case(AFMT_A_LAW):
   case(AFMT_MPEG):
   case(AFMT_AC3):
-    printf("[pl_format] Audio format not yet suported \n");
+    printf("[pl_format] Input audio format not yet suported \n");
     return 0;
   default: 
     printf("[pl_format] Unrecognised input audio format\n"); //This can not happen .... 
@@ -126,7 +126,7 @@ static int init(){
   case(AFMT_A_LAW):
   case(AFMT_MPEG):
   case(AFMT_AC3):
-    printf("[pl_format] Audio format not yet suported \n");
+    printf("[pl_format] Output audio format not yet suported \n");
     return 0;
   default:
     printf("[pl_format] Unrecognised audio output format\n");
@@ -141,7 +141,7 @@ static int init(){
   // We are changing the format
   ao_plugin_data.format=ao_plugin_cfg.pl_format_type;
 
-  // Perhaps the buffer size
+  // And perhaps the buffer size
   pl_format.sz_mult=1;
   if((pl_format.in&NBITS_MASK) > (pl_format.out&NBITS_MASK))
     pl_format.sz_mult/=(double)(1<<((pl_format.in&NBITS_MASK)-(pl_format.out&NBITS_MASK)));
@@ -161,9 +161,7 @@ static void uninit(){
 
 // empty buffers
 static void reset(){
-  int i = 0;
-  for(i=0;i<pl_format.len;i++)
-    ((char*)pl_format.data)[i]=0;
+  memset(pl_format.data, 0, pl_format.len);
 }
 
 // processes 'ao_plugin_data.len' bytes of 'data'
@@ -175,8 +173,7 @@ static int play(){
   void* out_data=pl_format.data;
   int len=(ao_plugin_data.len)>>(pl_format.in&NBITS_MASK);
   ao_plugin_data.len=(int)(((double)ao_plugin_data.len)*=pl_format.sz_mult);
-  ao_plugin_data.len;
-
+  
   // Change to little endian (Is this true for sun ?)
   if((pl_format.in&END_MASK)!=LE){
     switch(pl_format.in&NBITS_MASK){
@@ -186,8 +183,8 @@ static int play(){
 	s=((uint16_t*)in_data)[i];
 	((uint16_t*)in_data)[i]=(uint16_t)(((s&0x00FF)<<8) | (s&0xFF00)>>8);
       }
-      break;
     }
+    break;
     case(B32):{
       register uint32_t s;
       for(i=1;i<len;i++){
@@ -195,60 +192,50 @@ static int play(){
 	((uint32_t*)in_data)[i]=(uint32_t)(((s&0x000000FF)<<24) | ((s&0x0000FF00)<<8) |
 					   ((s&0x00FF0000)>>8)  | ((s&0xFF000000)>>24));
       }
-      break;
     }
+    break;
     }
   }
-  
   // Change signed/unsigned
   if((pl_format.in&SIGN_MASK) != (pl_format.out&SIGN_MASK)){
-    switch(pl_format.in&NBITS_MASK){
-    case(B08):{
+    switch((pl_format.in&NBITS_MASK)){
+    case(B08):
       switch(pl_format.in&SIGN_MASK){
-      case(US):{
+      case(US):
 	for(i=0;i<len;i++)
-	  ((int8_t*)in_data)[i]=(int8_t)(-127+((int)((uint8_t*)in_data)[i]));
+	((int8_t*)in_data)[i]=(int8_t)(-127+((int)((uint8_t*)in_data)[i]));
 	break;
-      }
-      case(SI):{
+      case(SI):
 	for(i=0;i<len;i++)
-	  ((uint8_t*)in_data)[i]=(uint8_t)(+127+((int)((int8_t*)in_data)[i]));
+	((uint8_t*)in_data)[i]=(uint8_t)(+128+((int)((int8_t*)in_data)[i]));
 	break;
       }
       break;
-      }
-    }
-    case(B16):{
+    case(B16):
       switch(pl_format.in&SIGN_MASK){
-      case(US):{
+      case(US):
 	for(i=0;i<len;i++)
 	  ((int16_t*)in_data)[i]=(int16_t)(-32767+((int)((uint16_t*)in_data)[i]));
 	break;
-      }
-      case(SI):{
+      case(SI):
 	for(i=0;i<len;i++)
-	  ((uint16_t*)in_data)[i]=(uint16_t)(+32767+((int)((int16_t*)in_data)[i]));
+	  ((uint16_t*)in_data)[i]=(uint16_t)(+32768+((int)((int16_t*)in_data)[i]));
 	break;
       }
       break;
-      }
-    }
-    case(B32):{
+    case(B32):
       switch(pl_format.in&SIGN_MASK){
-      case(US):{
+      case(US):
 	for(i=0;i<len;i++)
-	  ((int32_t*)in_data)[i]=(int32_t)(-(1<<31-1)+((uint32_t*)in_data)[i]);
+	((int32_t*)in_data)[i]=(int32_t)(-(1<<31-1)+((uint32_t*)in_data)[i]);
 	break;
-      }
-      case(SI):{
+      case(SI):
 	for(i=0;i<len;i++)
-	  ((uint32_t*)in_data)[i]=(uint32_t)(+(1<<31-1)+((int32_t*)in_data)[i]);
+	((uint32_t*)in_data)[i]=(uint32_t)(+(1<<31)+((int32_t*)in_data)[i]);
 	break;
       }
       break;
-      }
-    }
-    }
+    }	
   }
   // Change the number of bits
   if((pl_format.in&NBITS_MASK) == (pl_format.out&NBITS_MASK)){
@@ -257,51 +244,44 @@ static int play(){
       ((char*)out_data)[i]=((char*)in_data)[i];
   } else {
     switch(pl_format.in&NBITS_MASK){
-    case(B08):{
+    case(B08):
       switch(pl_format.out&NBITS_MASK){
-      case(B16):{
+      case(B16):
 	for(i=1;i<len;i++)
 	  ((uint16_t*)out_data)[i]=((uint16_t)((uint8_t*)in_data)[i])<<8;
 	break;
-      }
-      case(B32):{
+      case(B32):
 	for(i=1;i<len;i++)
 	  ((uint32_t*)out_data)[i]=((uint32_t)((uint8_t*)in_data)[i])<<24;
 	break;
       }
-      }
-    }
-    case(B16):{
+      break;
+    case(B16):
       switch(pl_format.out&NBITS_MASK){
-      case(B08):{
+      case(B08):
 	for(i=0;i<len;i++)
 	  ((uint8_t*)out_data)[i]=(uint8_t)((((uint16_t*)in_data)[i])>>8);
 	break;
-      }
-      case(B32):{
+      case(B32):
 	for(i=1;i<len;i++)
 	  ((uint32_t*)out_data)[i]=((uint32_t)((uint16_t*)in_data)[i])<<16;
 	break;
       }
-      }
-    }	
-    case(B32):{
+      break;
+    case(B32):
       switch(pl_format.out&NBITS_MASK){
-      case(B08):{
+      case(B08):
 	for(i=0;i<len;i++)
 	  ((uint8_t*)out_data)[i]=(uint8_t)((((uint32_t*)in_data)[i])>>24);
 	break;
-      }
-      case(B16):{
+      case(B16):
 	for(i=1;i<len;i++)
 	  ((uint16_t*)out_data)[i]=(uint16_t)((((uint32_t*)in_data)[i])>>16);
 	break;
       }
-      }
-    }
+      break;      
     }
   }
-
   // Switch to the correct endainess (agiain the problem with sun?)
   if((pl_format.out&END_MASK)!=LE){
     switch(pl_format.in&NBITS_MASK){
@@ -311,8 +291,8 @@ static int play(){
 	s=((uint16_t*)out_data)[i];
 	((uint16_t*)out_data)[i]=(uint16_t)(((s&0x00FF)<<8) | (s&0xFF00)>>8);
       }
-      break;
     }
+    break;
     case(B32):{
       register uint32_t s;
       for(i=1;i<len;i++){
@@ -320,11 +300,10 @@ static int play(){
 	((uint32_t*)out_data)[i]=(uint32_t)(((s&0x000000FF)<<24) | ((s&0x0000FF00)<<8) |
 					    ((s&0x00FF0000)>>8)  | ((s&0xFF000000)>>24));
       }
-      break;
     }
+    break;
     }
   }
-
   ao_plugin_data.data=out_data;
   return 1;
 }
