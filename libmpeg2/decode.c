@@ -59,6 +59,8 @@ static int drop_frame = 0;
 int quant_store[MBR+1][MBC+1]; // [Review]
 #endif
 
+static table_init_state=0;
+
 void mpeg2_init (void)
 {
 
@@ -86,8 +88,11 @@ void mpeg2_init (void)
     
     picture->pp_options=0;
 
-    idct_init ();
-    motion_comp_init ();
+    if(!table_init_state){
+	idct_init ();
+	motion_comp_init ();
+	table_init_state=1;
+    }
 }
 
 static vo_frame_t frames[4];
