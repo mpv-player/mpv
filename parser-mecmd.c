@@ -119,9 +119,13 @@ m_config_parse_me_command_line(m_config_t *config, int argc, char **argv)
 	    break;
 	  }
 	}
-	if(!entry || (mp_opt->flags & M_OPT_GLOBAL))
+	if(!entry || (mp_opt->flags & M_OPT_GLOBAL)){
 	  tmp = m_config_set_option(config, opt, argv[i + 1]);
-	else {
+	  if(tmp < 0){
+//	    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "m_config_set_option() failed (%d)\n",tmp);
+	    goto err_out;
+	  }
+	} else {
 	  tmp = m_config_check_option(config, opt, argv[i + 1]);
 	  if(tmp >= 0) {
 	    entry->opts = realloc(entry->opts,(no+2)*2*sizeof(char*));
@@ -129,10 +133,11 @@ m_config_parse_me_command_line(m_config_t *config, int argc, char **argv)
 	    entry->opts[2*no+1] = argv[i + 1] ? strdup(argv[i + 1]) : NULL;
 	    entry->opts[2*no+2] =  entry->opts[2*no+3] = NULL;
 	    no++;
+	  } else {
+//	    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "m_config_set_option() failed (%d)\n",tmp);
+	    goto err_out;
 	  }
 	}
-	if (tmp < 0)
-	  goto err_out;
 	i += tmp;
       } else /* filename */
 	add_file(argv[i]);
