@@ -566,7 +566,7 @@ decoders:
   MMX/SSE/3DNow! optimization)
   </simpara></listitem>
 <listitem><simpara>
-  AC3 passing through soundcard hardware
+  AC3 passing through sound card hardware
   </simpara></listitem>
 <listitem><simpara>
   AAC
