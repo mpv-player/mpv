@@ -10,22 +10,22 @@ HTML_CHUNKED = ../HTML
 HTML_SINGLE = ../HTML-single
 
 .PHONY: all
-all: build-html-chunked build-html-single
+all: html-chunked html-single
 
 .PHONY: help
 help:
 	@echo "Targets:"
 	@echo "********"
 	@echo "all               : Build everything (default)."
-	@echo "build-html-single : Build HTML documentation (single file)."
-	@echo "build-html-chunked: Build HTML documentation (multiple files)."
+	@echo "html-single       : Build HTML documentation (single file)."
+	@echo "html-chunked      : Build HTML documentation (multiple files)."
 	@echo "clean-html-single : Purge the 'HTML-single' directory."
 	@echo "clean-html-chunked: Purge the 'HTML' directory."
 	@echo "clean             : Purge the 'HTML' and 'HTML-single' directories."
 	@echo "distclean         : Remove ALL generated files."
 
-.PHONY: build-html-chunked
-build-html-chunked: xsltproc.sh xmllint.sh
+.PHONY: html-chunked
+html-chunked: xsltproc.sh xmllint.sh
 	@test -d $(HTML_CHUNKED) || mkdir $(HTML_CHUNKED)
 	@for dir in $(SUBDIRS); do\
 		test -f $$dir/Makefile &&\
@@ -33,8 +33,8 @@ build-html-chunked: xsltproc.sh xmllint.sh
 		if $(MAKE) HTMLDIR=../$(HTML_CHUNKED)/$$dir -C $$dir html-chunked; then :; else exit 1; fi;\
 	done
 
-.PHONY: build-html-single
-build-html-single: xsltproc.sh xmllint.sh
+.PHONY: html-single
+html-single: xsltproc.sh xmllint.sh
 	@test -d $(HTML_SINGLE) || mkdir $(HTML_SINGLE)
 	@for dir in $(SUBDIRS); do\
 		test -f $$dir/Makefile &&\
