@@ -34,17 +34,16 @@ extern "C" int DS_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHEADER*
     ci.dll=dllname;
     ci.guid=*guid;
 
-//    try {
+    try {
 	DS_VideoDecoder* dec=new DS_VideoDecoder(ci, *format, flip);
-//    } catch (FatalError &e) {
-//	_handle=NULL;
-//	return -1;
-//    }
-    
-    _d_ptr=d_ptr;
-    _handle=(void*)dec;
+	_d_ptr=d_ptr;
+	_handle=(void*)dec;
+	return 0;
+    } catch (FatalError &e) {  }
 
-    return 0;
+    _handle=NULL;
+    return -1;
+
 }
 
 extern "C" void DS_VideoDecoder_Start(){
