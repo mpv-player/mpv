@@ -1,7 +1,9 @@
 // AVI & MPEG Player    v0.18   (C) 2000-2001. by A'rpi/ESP-team
 
-#include "version.h"
-#include "config.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 #include <sys/ioctl.h>
 #include <sys/mman.h>
@@ -15,11 +17,9 @@
 #include <time.h>
 
 #include <fcntl.h>
-#include <unistd.h>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "version.h"
+#include "config.h"
 
 #ifdef __FreeBSD__
 #include <sys/cdrio.h>

@@ -6,7 +6,11 @@
 
 //#define DUMP2FILE
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
+
 #include <fcntl.h>
 #include <netdb.h>
 #include <netinet/in.h>
@@ -19,9 +23,6 @@
 
 #include <errno.h>
 #include <ctype.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
 
 #include "stream.h"
 #include "demuxer.h"

@@ -1,14 +1,14 @@
 
-#include "config.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
-#include <unistd.h>
 
-#include <stdio.h>
-#include <stdlib.h>
+#include "config.h"
 
 #include "stream.h"
 
