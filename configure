@@ -4,24 +4,15 @@
 # MPlayer configurator.   (C) 2000 Pontscho/fresh!mindworkz
 #				   pontscho@makacs.poliod.hu
 #
-# some changes by A'rpi/ESP-team:
-#  - some english bugfix :)
-#  - removed _??exists flags, _?? is enough...
-#  - creating only config.mak files instead of whole Makefiles
+# Changes in reversed order:
 #
-# some changes by LGB (Gábor Lénárt):
-#  - SOME gcc may support 'k7', so I added tests for ALL CPU type optimization
-#    switches with the ability to find out the best optimization for your CPU.
-#  - Help moved to the begining to avoid tests if user only wants help.
-#  - A one lined help to indicate detailed help for users
-#  - Fixed /tmp race (PIDs can be predicted, I added random numbers as well)
+# 2000/02/25 by LGB:
+#  - TMPDIR or TEMPDIR variable is honored during tests for temporary files
+#  - ChangeLog inside configure was reversed ;-)
 #
 # some changes by A'rpi/ESP-team:
-#  - the --win32libdir patch by Aaron Hope applied
-#  - some english bugfix again :)
-#  - cpu type selection changed:
-#    ( k7->k6->k5-> ) || (i686->pentiumpro-> ) pentium-> i486 -> i386 -> error!
-#  - cpu type for AMD/family=5 changed k6->k5
+#  - added 'athlon' target for the new athlongcc [Ian Kumlien]
+#  - applied _win32libdir=-L patch by Magnus Pfeffer
 #
 # some changes by LGB:
 #  - Ehhh, AMD K6-2 returns with cpuid 5 ;-) Changing back Arpi's last change :)
@@ -33,8 +24,23 @@
 #  - Some useless { ... } are removed
 #
 # some changes by A'rpi/ESP-team:
-#  - added 'athlon' target for the new athlongcc [Ian Kumlien]
-#  - applied _win32libdir=-L patch by Magnus Pfeffer
+#  - the --win32libdir patch by Aaron Hope applied
+#  - some english bugfix again :)
+#  - cpu type selection changed:
+#    ( k7->k6->k5-> ) || (i686->pentiumpro-> ) pentium-> i486 -> i386 -> error!
+#  - cpu type for AMD/family=5 changed k6->k5
+#
+# some changes by LGB (Gábor Lénárt):
+#  - SOME gcc may support 'k7', so I added tests for ALL CPU type optimization
+#    switches with the ability to find out the best optimization for your CPU.
+#  - Help moved to the begining to avoid tests if user only wants help.
+#  - A one lined help to indicate detailed help for users
+#  - Fixed /tmp race (PIDs can be predicted, I added random numbers as well)
+#
+# some changes by A'rpi/ESP-team:
+#  - some english bugfix :)
+#  - removed _??exists flags, _?? is enough...
+#  - creating only config.mak files instead of whole Makefiles
 #
 # --
 
@@ -80,9 +86,19 @@ echo "Please wait while ./configure discovers your software and hardware environ
 
 # LGB: temporary files
 
-TMPC="/tmp/mplayer-conf-${RANDOM}-$$-${RANDOM}.c"
-TMPO="/tmp/mplayer-conf-${RANDOM}-$$-${RANDOM}.o"
+TMPC="mplayer-conf-${RANDOM}-$$-${RANDOM}.c"
+TMPO="mplayer-conf-${RANDOM}-$$-${RANDOM}.o"
 
+if [ ! -z $TMPDIR ]; then
+	TMPC="${TMPDIR}/${TMPC}"
+	TMPO="${TMPDIR}/${TMPO}"
+elif [ ! -z $TEMPDIR ]; then
+	TMPC="${TEMPDIR}/${TMPC}"
+	TMPO="${TEMPDIR}/${TMPO}"
+else
+	TMPC="/tmp/${TMPC}"
+	TMPO="/tmp/${TMPO}"
+fi
 
 # ---
 
