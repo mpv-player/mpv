@@ -1,7 +1,7 @@
 // Translated by:  Kuba "Qba" Misiorny <jim85@wp.pl>
 // Wszelkie uwagi i poprawki mile widziane :)
 //
-// Last sync on 2003-10-20 with help_mp-en.h 1.111
+// Last sync on 2003-11-03 with help_mp-en.h 1.112
 
 // ========================= MPlayer help ===========================
 
@@ -303,8 +303,8 @@ static char help_text[]=
 #define MSGTR_DemuxerInfoAlreadyPresent "Informacje %s o demuxerze s± ju¿ obecne!\n"
 #define MSGTR_ClipInfo "Informacje klipu:\n" // Clip info:\n"
 
-#define MSGTR_LeaveTelecineMode "\ndemux_mpg: Wykryto progresywn± sekwencjê, wychodzê z trybu 3:2 TELECINE.\n"
-#define MSGTR_EnterTelecineMode "\ndemux_mpg: Wykryto 3:2 TELECINE, w³±czam odwrócone telecine fx.\nFPS zosta³o zmienione na %5.3f!\n"
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: Wykryto zawarto¶æ 30fps NTSC, zmieniam liczbê ramek na sekundê.\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: Wykryto progresywn± zawarto¶æ 24fps NTSC, zmieniam liczbê ramek na sekundê"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Nie mogê otworzyæ kodeka.\n"
