@@ -328,16 +328,36 @@ static int open_tv(tvi_handle_t *tvh)
 
     if (tv_channel_list) {
 	int i;
-	int channel;
+	int channel = 0;
 	if (tv_param_channel)
+	 {
+	   if (isdigit(*tv_param_channel))
+		/* if tv_param_channel begins with a digit interpret it as a number */
 		channel = atoi(tv_param_channel);
+	   else
+	      {
+		/* if tv_param_channel does not begin with a digit 
+		   set the first channel that contains tv_param_channel in its name */
+
+		tv_channel_current = tv_channel_list;
+		while ( tv_channel_current ) {
+			if ( strstr(tv_channel_current->name, tv_param_channel) )
+			  break;
+			tv_channel_current = tv_channel_current->next;
+			}
+		if ( !tv_channel_current ) tv_channel_current = tv_channel_list;
+	      }
+	 }
 	else
 		channel = 1;
 
+	if ( channel ) {
 	tv_channel_current = tv_channel_list;
 	for (i = 1; i < channel; i++)
 		if (tv_channel_current->next)
 			tv_channel_current = tv_channel_current->next;
+	}
+
 	mp_msg(MSGT_TV, MSGL_INFO, "Selected channel: %s - %s (freq: %.3f)\n", tv_channel_current->number,
 			tv_channel_current->name, (float)tv_channel_current->freq/1000);
 	tv_set_freq(tvh, (unsigned long)(((float)tv_channel_current->freq/1000)*16));
