@@ -68,11 +68,11 @@ typedef struct af_resample_s
 {
   int16_t*  	w;	// Current filter weights
   int16_t** 	xq; 	// Circular buffers
-  int16_t	xi; 	// Index for circular buffers
-  int16_t	wi;	// Index for w
-  uint16_t	i; 	// Number of new samples to put in x queue
-  uint16_t  	dn;     // Down sampling factor
-  uint16_t	up;	// Up sampling factor 
+  uint32_t	xi; 	// Index for circular buffers
+  uint32_t	wi;	// Index for w
+  uint32_t	i; 	// Number of new samples to put in x queue
+  uint32_t  	dn;     // Down sampling factor
+  uint32_t	up;	// Up sampling factor 
 } af_resample_t;
 
 // Euclids algorithm for calculating Greatest Common Divisor GCD(a,b)
@@ -93,17 +93,17 @@ inline int gcd(register int a, register int b)
 
 static int upsample(af_data_t* c,af_data_t* l, af_resample_t* s)
 {
-  uint16_t		ci    = l->nch; 	// Index for channels
-  uint16_t		len   = 0; 		// Number of input samples
-  uint16_t		nch   = l->nch;   	// Number of channels
-  uint16_t		inc   = s->up/s->dn; 
-  uint16_t		level = s->up%s->dn; 
-  uint16_t		up    = s->up;
-  uint16_t		dn    = s->dn;
+  uint32_t		ci    = l->nch; 	// Index for channels
+  uint32_t		len   = 0; 		// Number of input samples
+  uint32_t		nch   = l->nch;   	// Number of channels
+  uint32_t		inc   = s->up/s->dn; 
+  uint32_t		level = s->up%s->dn; 
+  uint32_t		up    = s->up;
+  uint32_t		dn    = s->dn;
 
   register int16_t*	w     = s->w;
-  register uint16_t	wi    = 0;
-  register uint16_t	xi    = 0; 
+  register uint32_t	wi    = 0;
+  register uint32_t	xi    = 0; 
 
   // Index current channel
   while(ci--){
@@ -115,7 +115,7 @@ static int upsample(af_data_t* c,af_data_t* l, af_resample_t* s)
     wi = s->wi; xi = s->xi;
 
     while(in < end){
-      register uint16_t	i = inc;
+      register uint32_t	i = inc;
       if(wi<level) i++;
 
       ADDQUE(xi,x,in);
@@ -137,17 +137,17 @@ static int upsample(af_data_t* c,af_data_t* l, af_resample_t* s)
 
 static int downsample(af_data_t* c,af_data_t* l, af_resample_t* s)
 {
-  uint16_t		ci    = l->nch; 	// Index for channels
-  uint16_t		len   = 0; 		// Number of output samples
-  uint16_t		nch   = l->nch;   	// Number of channels
-  uint16_t		inc   = s->dn/s->up; 
-  uint16_t		level = s->dn%s->up; 
-  uint16_t		up    = s->up;
-  uint16_t		dn    = s->dn;
+  uint32_t		ci    = l->nch; 	// Index for channels
+  uint32_t		len   = 0; 		// Number of output samples
+  uint32_t		nch   = l->nch;   	// Number of channels
+  uint32_t		inc   = s->dn/s->up; 
+  uint32_t		level = s->dn%s->up; 
+  uint32_t		up    = s->up;
+  uint32_t		dn    = s->dn;
 
-  register uint16_t	i     = 0;
-  register uint16_t	wi    = 0;
-  register uint16_t	xi    = 0;
+  register uint32_t	i     = 0;
+  register uint32_t	wi    = 0;
+  register uint32_t	xi    = 0;
   
   // Index current channel
   while(ci--){
