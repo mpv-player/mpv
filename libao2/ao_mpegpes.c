@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef HAVE_DVB
 #include <sys/ioctl.h>
+#endif
 
 #include "../config.h"
 
