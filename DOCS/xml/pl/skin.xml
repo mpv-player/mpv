@@ -1080,7 +1080,7 @@ Sygna³ pusty - nic nie robi (mo¿e za wyj±tkiem wersji z CVS:-)).
 </varlistentry>
 
 <varlistentry>
-  <term><emphasis role="bold">evPlayList</emphasis></term>
+  <term><emphasis role="bold">evPlaylist</emphasis></term>
   <listitem><para>
 Otwórz/zamknij okno listy odtwarzania.
     </para></listitem>

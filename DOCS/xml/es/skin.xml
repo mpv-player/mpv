@@ -1072,7 +1072,7 @@ Mensaje vacío, no tiene efecto (excepto quizá en las versiones CVS :-)).
 </varlistentry>
 
 <varlistentry>
-  <term><emphasis role="bold">evPlayList</emphasis></term>
+  <term><emphasis role="bold">evPlaylist</emphasis></term>
   <listitem><para>
 Abre/cierra la ventana de lista de reproducción.
     </para></listitem>

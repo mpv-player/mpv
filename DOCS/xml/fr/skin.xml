@@ -1067,7 +1067,7 @@ Message vide, sans effet. (à part peut-être dans les versions CVS :-)).
 </varlistentry>
 
 <varlistentry>
-  <term><emphasis role="bold">evPlayList</emphasis></term>
+  <term><emphasis role="bold">evPlaylist</emphasis></term>
   <listitem><para>
 Ouvre/ferme la playlist.
     </para></listitem>
