@@ -137,8 +137,8 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 		    (info->current_picture->flags&PIC_FLAG_PROGRESSIVE_FRAME)) ?
 			    MP_IMGFLAG_DRAW_CALLBACK:0)
 		: (MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE),
-		info->sequence->picture_width,
-		info->sequence->picture_height);
+		(info->sequence->picture_width+7)&(~7),
+		(info->sequence->picture_height+7)&(~7) );
 	    if(!mpi) return 0; // VO ERROR!!!!!!!!
 	    mpeg2_set_buf(mpeg2dec, mpi->planes, mpi);
 
