@@ -105,56 +105,6 @@ soffrire la vostra ingiusta collera?</P>
 </UL>
 </P>
 
-<A NAME=binary><P><B><I>Distribuzione binaria di MPlayer</I></B></P>
-
-<P>Tonnellate di utenti ci hanno chiesto questo. Per esempio gli utenti Debian tendono a dire: Oh,
-Posso fare <CODE>apt-get install avifile</CODE>, perchè dovrei <B>compilare MPlayer</B> ?
-Sebbene questo possa sembrare ragionevole, la questione è un po' più complessa che
-quei-fottuti-sviluppatori-MPlayer-odiano-gcc-2.96-e-RedHat-e-Debian.</P>
-
-<P>Ragioni: <B>Legge</B></P>
-
-<P><B>MPlayer</B> designa il <U>codice sorgente</U>. Questo contiene molti file con licenze
-incompatibili specialmente a livello di clausole di redistribuzione. Come file sorgente, possono
-coesistere in uno stesso progetto.</P>
-
-<P>Quindi, <U>NON POSSONO ESISTERE NE BINARI NE PACCHETTI BINARI DI <B>MPlayer</B> IN QUANTO
-TALI OGGETTI VANNO CONTRO LE LICENZE</U>. PERSONE CHE DISTRIBUISCONO TALI PACCHETTI BINARI STANNO
-COMPIENDO ATTIVITA' ILLEGALI.</P>
-
-<P>Quindi se conosci qualcuno che mantiene un pacchetto binario mandagli
-questo testo e contattaci o chiedi a lui di farlo. Quello che sta facendo è illegale e
-NON E' PIU' <B>MPlayer</B>, ma il <U>suo</U> mplayer. Se qualcosa non va con quel pacchetto, è
-colpa sua. Non venite a lamentarvi sulle mailing list di <B>MPlayer</B>, sarete probabilmente
-messi in blacklist.</P>
-
-<P>Ragioni: <B>Tecniche</B></P>
-
-<P>
-<UL>
-  <LI>Le ottimizzazioni di velocità di <B>MPlayer</B> (MMX, SSE, fastmemcpy, ecc) sono
-    stabilite durante la compilazione. Così un binario compilato contiene codice
-    specifico del processore. Un binario <B>MPlayer</B> compilato per K6 non funzionerà su
-    Pentium e vice versa. Questo deve essere aggirato dal riconoscimento a
-    runtime, che non è una cosa facile da fare perchè da come risultato una grande diminuzione di
-    velocità. Se non ci credi (è stato spiegato in dettaglio 10000 volte su
-    mplayer-users, cerca negli archivi), risolvi il problema e mandaci una patch. Qualcuno
-    aveva cominciato a lavorarci, ma da allora è scomparso.</LI>
-  <LI>Il sistema audio/video di <B>MPlayer</B> non è basato su plugin. E' compilato
-    nel binario, facendolo così dipendere da varie librerie (la
-    GUI dipende da GTK, DivX4 dipende da libdivxdecore, SDL dipende da libSDL,
-    ogni versione di SDL contiene un bug proprio che deve essere aggirato alla
-    compilazione, l'output X11 compila diversamente per X3 e X4, ecc). Potrai dire:
-    si, facciamo 30 versioni di binari scaricabili! Noi no. Inseriremo
-    queste cose come plugin nel futuro.</LI>
-</UL>
-
-<P>Risolveremo (almeno vorremmo) 2 di questi problemi nel prossimo rilascio :
-i problemi legali (stiamo rimuovendo tutto il codice non-GPL e convincendo altri a
-cambiare la loro licenza in GPL) e il riconoscimento della CPU a runtime. Comunque, la dipendenza
-da varie librerie, versioni e parametri ambientali rimarrà.</P>
-
-
 <A NAME=nvidia><P><B><I>NVidia</I></B></P>
 
 <P>Non ci piacciono i driver binari di nvidia, la loro qualità, instabilità,

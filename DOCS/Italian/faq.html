@@ -16,12 +16,12 @@
 
 <TABLE BORDER=0 WIDTH=100% ALIGN=left>
 
-<TD COLSPAN=3><P><B><A NAME=5.1><FONT CLASS="text">5.1 Compilazione</A></B></P>
+<TR><TD COLSPAN=3><P><B><A NAME=5.1><FONT CLASS="text">5.1 Compilazione</A></B></P>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%>
 <B><FONT CLASS="text">
-configure finisce con questo testo, e MPlayer non compila !<BR>
+Configure finisce con questo testo, e MPlayer non compila !<BR>
 <CODE>Your gcc does not support even i386 for '-march' and '-mcpu'.</CODE>
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
 <TD><FONT CLASS="text">
@@ -194,11 +194,6 @@ Ci sono pacchetti rpm/deb/... di <B>MPlayer</B>?
 <TD><FONT CLASS="text">
 Puoi farti un pacchetto .deb, guarda la sezione <A
  HREF="documentation.html#6.1">6.1</A>.
-E' _FORTEMENTE_ scoraggiato l'uso di pacchetti precompilati
-di <B>MPlayer</B>, in quanto (attualmente) dipende _fortemente_ dalle opzioni
-e ottimizzazioni di compilazione!
-I Pacchetti precompilati sono COMPLETAMENTE non-supportati dal team
- <B>MPlayer</B>!
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%>
@@ -249,19 +244,6 @@ Ho controllato il file e C'E', in /usr/local/lib.
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
 <TD><FONT CLASS="text">
 Aggiungi /usr/local/lib a <B>/etc/ld.so.conf</B> e  esegui <B>ldconfig</B> .
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%>
-<B><FONT CLASS="text">
-Sembra che MPlayer non trovi la mia libcss. Cosa sbaglio ?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
-<TD><FONT CLASS="text">
-E' normale. <B>MPlayer</B> non utilizza più libcss per leggere i DVD.  Devi
-installare <B>libdvdread</B> e <B>libdvdcss</B>. Leggi la sezione
-sui DVD <A HREF="cd-dvd.html">qui</A>. libcss deve essere usato per esempio se
- vuoi
-leggere file VOB criptati dall'hard disk (non per la maggior parte degli
- utenti).
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%>
@@ -888,16 +870,6 @@ Teoricamente si può operare un reverse engineer sui codec Real fatti per Linux
  (sono
 disponibili come file .so), ma in pratica è veramente difficile, anche se
 si conoscesse con che compilatore Real ha fatto il codice assembler.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
-<TD WIDTH=100%><B><FONT CLASS="text">
-Quando sarà implementato &lt;la tua caratteristica preferita&gt; (come il
- posizionamento dei sottotitoli)?
-
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
-<TD><FONT CLASS="text">
-Aspetta libvo2.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
