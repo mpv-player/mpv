@@ -229,26 +229,56 @@ Mailing lists:
 There are some public mailing lists on MPlayer. Subscribing can be achieved on
 the following addresses:
 
-- MPlayer core/hungarian developers list:  (HUNGARIAN language ONLY!)
+- MPlayer core/hungarian developers list:
 	http://lists.sourceforge.net/lists/listinfo/mplayer-devel
 
-- MPlayer developers list:  (send your patches here)
+	I dunno, it is the FLAME list in hungarian language :)
+	Also some talking about mplayer core team internals, like mplayer
+	party, sponsors etc can be here.
+
+- MPlayer developers list:
 	http://lists.sourceforge.net/lists/listinfo/mplayer-dev-eng
 
-- MPlayer users list:  (send your ideas, bugreports, feature requests here)
+	This list is about mplayer development! Talking about interface/API changes,
+	new libraryes, code optimization, ./configure changes, and send patches here.
+	Do NOT send bugreports, user questions, feature requests here!
+	This list should be kept low-traffic.
+
+- MPlayer users list:  
 	http://lists.sourceforge.net/lists/listinfo/mplayer-users
 
-- MPlayer & Matrox G200/G400/G450 users: (about TV-out, mga_vid, syncfb, Xv)
+	- send bugreports here (after reading DOCS/BUGS, BUGREPORTS)
+	- send feature requests here (after reading DOCS/TODO)
+	- send user questions here (after reading DOCS/README, INSTALL, FAQ etc)
+
+- MPlayer & Matrox G200/G400/G450 users:
 	http://lists.sourceforge.net/lists/listinfo/mplayer-matrox
+
+	Send matrox-related questions here,
+	- things about mga_vid,
+	- matrox's official beta drivers (for X 4.xx)
+	- and about matroxfb-TVout stuff.
 
 - mpg12play-portable developers:
 	http://lists.sourceforge.net/lists/listinfo/mplayer-mpg12play
 
-- MPlayer announce:    (information about new releases or big changes in CVS)
+	This list is for talking about mplayer ports to non-x86 platforms
+	(IRIX, Solaris-SPARC, Alpha, Commodore64, Sharp Calculator,
+	Teapot etc...)
+
+- MPlayer announce:    
 	http://lists.sourceforge.net/lists/listinfo/mplayer-announce
 
-- MPlayer CVS-log:     (announce about _every_ CVS commit)
+	Very low traffic list :)
+	And it's read-only. I'll post something shit there if a new release
+	is done.
+
+- MPlayer CVS-log:     
 	http://lists.sourceforge.net/lists/listinfo/mplayer-cvslog
+
+	Send only questions about CVS changes here.
+	(if you don't understand why a change is required or you've better fix)
+	Be sure in that your target developer reads this list!
 
 NOTE: language of above lists are ENGLISH, unless explicitly stated otherwise.
       Please do not send messages using other language!

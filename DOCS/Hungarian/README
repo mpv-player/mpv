@@ -233,26 +233,56 @@ Levelezési listák:
 ~~~~~~~~~~~~~~~~~~
 Jónéhány MPlayer lista van. A következõ címeken lehet feliratkozni:
 
-- MPlayer belsõ/magyar fejlesztõk listája:  (kizárólag MAGYAR nyelvû!)
+- MPlayer belsõ/magyar fejlesztõk listája:
 	http://lists.sourceforge.net/lists/listinfo/mplayer-devel
+
+	Nemtom, talan magyar nyelvu FLAME lista :)
+	Tovabba a core csapattagok maganugyei, pl mplayer parti, szponzorok,
+	stb.
 
 - MPlayer fejlesztõk listája:
 	http://lists.sourceforge.net/lists/listinfo/mplayer-dev-eng
 
+	Ez az MPlayer fejlesztoi lista! Temak: interface/API valtozasok, uj
+	library-k, optimalizacio, ./configure, es IDE kell kuldeni patch-eket.
+	NE kuldj ide bugreportot, kerdest!
+	Ne noveljuk a lista forgalmat.
+
 - MPlayer felhasználók listája:
 	http://lists.sourceforge.net/lists/listinfo/mplayer-users
+
+	- ide kuldj bugreport-ot (miutan elolvastad DOCS/BUGS, BUGREPORTS)
+	- feature kerest (miutan elolvastad DOCS/TODO)
+	- felhasznaloi kerdeseket (miutan elolvastad DOCS/README, INSTALL, FAQ
+	  stb.)
 
 - MPlayer & Matrox G200/G400/G450 felhasználók:
 	http://lists.sourceforge.net/lists/listinfo/mplayer-matrox
 
-- mpg12play-portable fejlesztõi lista:
-        http://lists.sourceforge.net/lists/listinfo/mplayer-mpg12play
+	Matrox-szal kapcsolatos kerdesek helye,
+	- mga_vid
+	- matrox hivatalos driver-ei (4-es X)
+	- matroxfb-TVout
 
-- MPlayer bejelentések: (új kiadott verziók, nagyobb változások)
+- mpg12play-portable fejlesztõi lista:
+	http://lists.sourceforge.net/lists/listinfo/mplayer-mpg12play
+
+	Ezen a listan tortenik az MPlayer portolasa nem-x86 platformokra
+	(IRIX, Solaris-SPARC, Alpha, Commodore64, Sharp szamologep,
+	Teaskanna, stb...)
+
+- MPlayer bejelentések:
 	http://lists.sourceforge.net/lists/listinfo/mplayer-announce
 
-- MPlayer CVS-log:     (_minden_ kódváltozásról)
+	Alacsony forgalmu lista :)
+	Es read-only. Ide irok vmit, ha kesz az uj verzio.
+
+- MPlayer CVS-log:     
 	http://lists.sourceforge.net/lists/listinfo/mplayer-cvslog
+
+	CVS-beli valtozasokrol kerdeseket ide kuldj.
+	(ha nem erted mire kell egy valtoztatas, vagy jobb fixet tudsz)
+	Bizonyosodj meg rola hogy a kivant fejleszto is olvassa a listat!
 
 Megj.: a fenti listák nyelve ANGOL, kivéve ahol más van feltüntetve.
        Más nyelven ne küldj üzenetet!
