@@ -174,14 +174,14 @@ controler with libavcodec.<BR>
 <UL>
 <B>2-pass encoding</B> :<BR>
 <CODE>rm -f lavc_stats.txt<BR>
-mencoder -dvd 2 -ovc lavc -lacvopts vcodec=mpeg4:vpass=1 (audio-options) -o movie.avi<BR>
-mencoder -dvd 2 -ovc lavc -lacvopts vcodec=mpeg4:vpass=2 (audio-options) -o movie.avi</CODE><BR>
+mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 (audio-options) -o movie.avi<BR>
+mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 (audio-options) -o movie.avi</CODE><BR>
 <BR>
 <B>3-pass encoding</B> :<BR>
 <CODE>rm -f frameno.avi lavc_stats.txt<BR>
 mencoder -dvd 2 -ovc frameno (audio-options) -o frameno.avi<BR>
-mencoder -dvd 2 -ovc lavc -lacvopts vcodec=mpeg4:vpass=1 -oac copy -o movie.avi<BR>
-mencoder -dvd 2 -ovc lavc -lacvopts vcodec=mpeg4:vpass=2 -oac copy -o movie.avi</CODE><BR>
+mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o movie.avi<BR>
+mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o movie.avi</CODE><BR>
 </UL>
 </P>
 
