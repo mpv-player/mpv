@@ -17,7 +17,57 @@
 //#define MAX_PS_PACKETSIZE 2048
 #define MAX_PS_PACKETSIZE (224*1024)
 
+typedef struct mpg_demuxer {
+  float last_pts;
+  float final_pts;
+  int has_valid_timestamps;
+} mpg_demuxer_t;
+
 static int mpeg_pts_error=0;
+
+/// Open an mpg physical stream
+int demux_mpg_open(demuxer_t* demuxer) {
+  stream_t *s = demuxer->stream;
+  off_t pos = stream_tell(s);
+  off_t end_seq_start = demuxer->movi_end-500000; // 500000 is a wild guess
+  float half_pts = 0.0;
+  mpg_demuxer_t* mpg_d;
+
+  if (!ds_fill_buffer(demuxer->video)) return 0;
+  mpg_d = (mpg_demuxer_t*)calloc(1,sizeof(mpg_demuxer_t));
+  demuxer->priv = mpg_d;
+  mpg_d->final_pts = 0.0;
+  mpg_d->has_valid_timestamps = 1;
+  if (demuxer->seekable && stream_tell(demuxer->stream) < end_seq_start) {
+    stream_seek(s,(pos + end_seq_start / 2));
+    while ((!s->eof) && ds_fill_buffer(demuxer->video) && half_pts == 0.0) {
+      half_pts = mpg_d->last_pts;
+    }
+    stream_seek(s,end_seq_start);
+    while ((!s->eof) && ds_fill_buffer(demuxer->video)) {
+      if (mpg_d->final_pts < mpg_d->last_pts) mpg_d->final_pts = mpg_d->last_pts;
+    }
+    // educated guess about validity of timestamps
+    if (mpg_d->final_pts > 3 * half_pts || mpg_d->final_pts < 1.5 * half_pts) {
+      mpg_d->has_valid_timestamps = 0;
+    }
+    ds_free_packs(demuxer->audio);
+    ds_free_packs(demuxer->video);
+    demuxer->stream->eof=0; // clear eof flag
+    demuxer->video->eof=0;
+    demuxer->audio->eof=0;
+    
+    stream_seek(s,pos);
+    ds_fill_buffer(demuxer->video);
+  }
+  return 1;
+}
+
+void demux_close_mpg(demuxer_t* demuxer) {
+  mpg_demuxer_t* mpg_d = demuxer->priv;
+  if (mpg_d) free(mpg_d);
+}
+
 
 static unsigned int read_mpeg_timestamp(stream_t *s,int c){
   int d,e;
@@ -222,6 +272,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
     mp_dbg(MSGT_DEMUX,MSGL_DBG2,"DEMUX_MPG: Read %d data bytes from packet %04X\n",len,id);
 //    printf("packet start = 0x%X  \n",stream_tell(demux->stream)-packet_start_pos);
     ds_read_packet(ds,demux->stream,len,pts/90000.0f,demux->filepos,0);
+    if (demux->priv) ((mpg_demuxer_t*)demux->priv)->last_pts = pts/90000.0f;
 //    if(ds==demux->sub) parse_dvdsub(ds->last->buffer,ds->last->len);
     return 1;
   }
@@ -357,21 +408,41 @@ void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,int flags){
     demux_stream_t *d_video=demuxer->video;
     sh_audio_t *sh_audio=d_audio->sh;
     sh_video_t *sh_video=d_video->sh;
+    mpg_demuxer_t *mpg_d=(mpg_demuxer_t*)demuxer->priv;
+    int precision = 1;
+    float oldpts = mpg_d->last_pts;
+    off_t oldpos = demuxer->filepos;
+    float newpts = (flags & 1) ? 0.0 : oldpts;
+    off_t newpos = (flags & 1) ? demuxer->movi_start : oldpos;
 
   //================= seek in MPEG ==========================
-    off_t newpos=(flags&1)?demuxer->movi_start:demuxer->filepos;
+  //calculate the pts to seek to
+    if(flags & 2) {
+      if (mpg_d->final_pts > 0.0)
+        newpts += mpg_d->final_pts * rel_seek_secs;
+      else
+        newpts += rel_seek_secs * (demuxer->movi_end - demuxer->movi_start) * oldpts / oldpos;
+    } else
+      newpts += rel_seek_secs;
+    if (newpts < 0) newpts = 0;
 	
     if(flags&2){
 	// float seek 0..1
 	newpos+=(demuxer->movi_end-demuxer->movi_start)*rel_seek_secs;
     } else {
 	// time seek (secs)
-        if(!sh_video || !sh_video->i_bps) // unspecified or VBR
+        if (mpg_d && mpg_d->has_valid_timestamps) {
+          if (mpg_d->final_pts > 0.0)
+            newpos += rel_seek_secs * (demuxer->movi_end - demuxer->movi_start) / mpg_d->final_pts;
+          else if (oldpts > 0.0)
+            newpos += rel_seek_secs * (oldpos - demuxer->movi_start) / oldpts;
+        } else if(!sh_video || !sh_video->i_bps) // unspecified or VBR
           newpos+=2324*75*rel_seek_secs; // 174.3 kbyte/sec
         else
           newpos+=sh_video->i_bps*rel_seek_secs;
     }
 
+    while (1) {
         if(newpos<demuxer->movi_start){
 	    if(demuxer->stream->type!=STREAMTYPE_VCD) demuxer->movi_start=0; // for VCD
 	    if(newpos<demuxer->movi_start) newpos=demuxer->movi_start;
@@ -407,6 +478,20 @@ void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,int flags){
           if(i==0x1B3 || i==0x1B8) break; // found it!
           if(!i || !skip_video_packet(d_video)) break; // EOF?
         }
+        if (!precision || abs(newpts - mpg_d->last_pts) < 0.5 || (mpg_d->last_pts == oldpts)) break;
+        if ((newpos - oldpos) * (mpg_d->last_pts - oldpts) < 0) { // invalid timestamps
+          mpg_d->has_valid_timestamps = 0;
+          break;
+        }
+        precision--;
+        //prepare another seek because we are off by more than 0.5s
+        newpos += (newpts - mpg_d->last_pts) * (newpos - oldpos) / (mpg_d->last_pts - oldpts);
+        ds_free_packs(d_audio);
+        ds_free_packs(d_video);
+        demuxer->stream->eof=0; // clear eof flag
+        d_video->eof=0;
+        d_audio->eof=0;
+    }
 }
 
 int demux_mpg_control(demuxer_t *demuxer,int cmd, void *arg){
@@ -414,9 +499,14 @@ int demux_mpg_control(demuxer_t *demuxer,int cmd, void *arg){
     demux_stream_t *d_video=demuxer->video;
 /*    sh_audio_t *sh_audio=d_audio->sh;*/
     sh_video_t *sh_video=d_video->sh;
+    mpg_demuxer_t *mpg_d=(mpg_demuxer_t*)demuxer->priv;
 
     switch(cmd) {
 	case DEMUXER_CTRL_GET_TIME_LENGTH:
+            if (mpg_d && mpg_d->has_valid_timestamps) {
+              *((unsigned long *)arg)=(long)mpg_d->final_pts;
+              return DEMUXER_CTRL_GUESS;
+            }
 	    if(!sh_video || !sh_video->i_bps)  // unspecified or VBR 
     		return DEMUXER_CTRL_DONTKNOW;
 	    *((unsigned long *)arg)=(demuxer->movi_end-demuxer->movi_start)/sh_video->i_bps;
@@ -425,6 +515,10 @@ int demux_mpg_control(demuxer_t *demuxer,int cmd, void *arg){
 	case DEMUXER_CTRL_GET_PERCENT_POS:
 	    if (demuxer->movi_end==demuxer->movi_start) 
     		return DEMUXER_CTRL_DONTKNOW;
+            if (mpg_d && mpg_d->has_valid_timestamps && mpg_d->final_pts > 0.0) {
+              *((int *)arg)=(int)(100 * mpg_d->last_pts / mpg_d->final_pts);
+              return DEMUXER_CTRL_OK;
+            }
     	    *((int *)arg)=(int)((demuxer->filepos-demuxer->movi_start)/((demuxer->movi_end-demuxer->movi_start)/100));
 	    return DEMUXER_CTRL_OK;
 

@@ -134,6 +134,7 @@ extern void demux_close_nsv(demuxer_t* demuxer);
 extern void demux_close_nuv(demuxer_t* demuxer);
 extern void demux_close_audio(demuxer_t* demuxer);
 extern void demux_close_ogg(demuxer_t* demuxer);
+extern void demux_close_mpg(demuxer_t* demuxer);
 extern void demux_close_rtp(demuxer_t* demuxer);
 extern void demux_close_demuxers(demuxer_t* demuxer);
 extern void demux_close_avi(demuxer_t *demuxer);
@@ -232,6 +233,8 @@ void free_demuxer(demuxer_t *demuxer){
     case DEMUXER_TYPE_MPEG_TS:
     case DEMUXER_TYPE_MPEG4_IN_TS:
       demux_close_ts(demuxer); break;
+    case DEMUXER_TYPE_MPEG_PS:
+      demux_close_mpg(demuxer); break;
     case DEMUXER_TYPE_REALAUDIO:
       demux_close_ra(demuxer); break;
 #ifdef USE_LIBAVFORMAT
@@ -616,6 +619,7 @@ extern void demux_open_nsv(demuxer_t *demuxer);
 extern void demux_open_nuv(demuxer_t *demuxer);
 extern int demux_audio_open(demuxer_t* demuxer);
 extern int demux_ogg_open(demuxer_t* demuxer);
+extern int demux_mpg_open(demuxer_t* demuxer);
 extern int demux_rawaudio_open(demuxer_t* demuxer);
 extern int demux_rawvideo_open(demuxer_t* demuxer);
 extern int smjpeg_check_file(demuxer_t *demuxer);
@@ -990,7 +994,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
   num_h264_pps=0;
   num_mp3audio_packets=0;
 
-  if(ds_fill_buffer(demuxer->video)){
+  if(demux_mpg_open(demuxer)){
     if(!pes)
       mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"MPEG-PES");
     else
