@@ -170,10 +170,24 @@ will be messy for a short time after seeking.</P>
 
 <P><B><A NAME=2.1.1.7>2.1.1.7. RealMedia (RM) files</A></B></P>
 
-<P>Yes, <B>MPlayer</B> can read (demux) RealMedia (.rm) files. Seeking works
-(the format supports keyframes). Here are the lists of the supported
-<A HREF="codecs.html#2.2.1.8">RealVideo</A>
-and <A HREF="codecs.html#2.2.2.5">RealAudio</A> codecs.
+<P>Yes, <B>MPlayer</B> can read (demux) RealMedia (.rm) files. Seeking works,
+  but you have to explicitly specify the <CODE>-forceidx</CODE> option
+  (the format supports keyframes). Here are the lists of the supported
+  <A HREF="codecs.html#2.2.1.8">RealVideo</A>
+  and <A HREF="codecs.html#2.2.2.5">RealAudio</A> codecs.</P>
+
+<P>It's recommended to download and install RealPlayer8 or RealONE, because
+  <B>MPlayer</B> can use their libraries to decode files with RealVideo 2.0 or
+  RealVideo 3.0 video! All you have to do is:</P>
+<P>
+  &nbsp;&nbsp;<CODE>ln -s /usr/local/RealPlayer8/Codecs $PREFIX/real</CODE>
+</P>
+
+<P>NOTE: RealPlayer's installation path may differ from the above, please check
+  it.</P>
+
+<P>NOTE: RealPlayer libraries currently <B>can only be used on x86 platform,
+  and Linux or FreeBSD</B>!</P>
 
 
 <P><B><A NAME=2.1.1.8>2.1.1.8. NuppelVideo files</A></B></P>

@@ -29,7 +29,8 @@ daily generated list!!!</P>
 <LI>MJPEG, AVID, VCR2, ASV2 and other hardware formats</LI>
 <LI>VIVO 1.0, 2.0, I263 and other h263(+) variants</LI>
 <LI>FLI/FLC</LI>
-<LI>RealVideo 1.0</LI>
+<LI>RealVideo 1.0 from ffmpeg, and RealVideo 2.0, 3.0 using RealPlayer
+  libraries</LI>
 <LI>Various old simple RLE-like formats</LI>
 </UL>
 
@@ -217,9 +218,16 @@ video output driver permits it.</P>
 
 <P><B><A NAME=2.2.1.8>2.2.1.8.  RealVideo</A></B></P>
 
-<P>Currently <B>only</B> the RealVideo 1.0 (fourcc RV10) codec is supported through
-FFmpeg. Sadly, new RealMedia files come with the newer and closed source RV20 and
-RV30 codecs instead. Their future support is unlikely :(</P>
+<P><B>MPlayer</B> supports decoding all versions of RealVideo:
+  <UL>
+    <LI>RealVideo 1.0 (fourcc RV10) - en/decoding supported by <B>libavcodec</B></LI>
+    <LI>RealVideo 2.0 (fourcc RV20) - decoding supported by <B>RealPlayer libraries</B></LI>
+    <LI>RealVideo 3.0 (fourcc RV20) - decoding supported by <B>RealPlayer libraries</B></LI>
+  </UL>
+</P>
+
+<P>On how to install RealPlayer libraries, see the
+  <A HREF="formats.html#2.1.1.7">RealMedia file format</A> section.</P>
 
 
 <P><B><A NAME=2.2.1.9>2.2.1.9.  XViD</A></B></P>
@@ -335,6 +343,8 @@ then copy it into the <CODE>/usr/lib/win32</CODE> directory.</P>
 <P>Currently the only supported one is the DNET codec. Actually it is a
 low-bitrate version of the well known AC3 codec. It can be found in both
 old and new RealMedia movies.</P>
+
+<P>RealAudio libraries from RealPlayer can't be used right now.</P>
 
 
 <P><B><A NAME=2.2.3>2.2.3. Win32 codec importing HOWTO</A></B></P>
