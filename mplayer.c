@@ -702,7 +702,7 @@ current_module="demux_open";
 demuxer=demux_open(stream,file_format,audio_id,video_id,dvdsub_id);
 if(!demuxer) goto goto_next_file; // exit_player(MSGTR_Exit_error); // ERROR
 
-file_format=demuxer->file_format;
+//file_format=demuxer->file_format;
 
 d_audio=demuxer->audio;
 d_video=demuxer->video;
@@ -736,7 +736,7 @@ if(stream_dump_type){
   while(!ds->eof){
     unsigned char* start;
     int in_size=ds_get_packet(ds,&start);
-    if( (file_format==DEMUXER_TYPE_AVI || file_format==DEMUXER_TYPE_ASF)
+    if( (demuxer->file_format==DEMUXER_TYPE_AVI || demuxer->file_format==DEMUXER_TYPE_ASF)
 	&& stream_dump_type==2) fwrite(&in_size,1,4,f);
     if(in_size>0) fwrite(start,in_size,1,f);
   }
@@ -755,7 +755,7 @@ if(sh_video){
   if(!video_read_properties(sh_video)) goto goto_next_file; // exit_player(MSGTR_Exit_error); // couldn't read header?
 
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"[V] filefmt:%d  fourcc:0x%X  size:%dx%d  fps:%5.2f  ftime:=%6.4f\n",
-   file_format,sh_video->format, sh_video->disp_w,sh_video->disp_h,
+   demuxer->file_format,sh_video->format, sh_video->disp_w,sh_video->disp_h,
    sh_video->fps,sh_video->frametime
   );
 
@@ -1062,7 +1062,7 @@ if(!sh_audio){
 
   current_module=NULL;
 
-if(file_format!=DEMUXER_TYPE_AVI) pts_from_bps=0; // it must be 0 for mpeg/asf!
+if(demuxer->file_format!=DEMUXER_TYPE_AVI) pts_from_bps=0; // it must be 0 for mpeg/asf!
 if(force_fps){
   sh_video->fps=force_fps;
   sh_video->frametime=1.0f/sh_video->fps;
@@ -1160,7 +1160,7 @@ if(1)
 
   vdecode_time=video_time_usage;
 
-  if(file_format==DEMUXER_TYPE_MPEG_ES || file_format==DEMUXER_TYPE_MPEG_PS){
+  if(demuxer->file_format==DEMUXER_TYPE_MPEG_ES || demuxer->file_format==DEMUXER_TYPE_MPEG_PS){
         int in_frame=0;
         float newfps;
         //videobuf_len=0;
@@ -1241,7 +1241,7 @@ if(1)
     sh_video->num_frames+=frame_time;
     ++sh_video->num_frames_decoded;
     frame_time*=sh_video->frametime;
-    if(file_format==DEMUXER_TYPE_ASF && !force_fps){
+    if(demuxer->file_format==DEMUXER_TYPE_ASF && !force_fps){
         // .ASF files has no fixed FPS - just frame durations!
         float d=d_video->pts-pts1;
         if(d>=0 && d<5) frame_time=d;
@@ -1256,7 +1256,7 @@ if(1)
     sh_video->timer+=frame_time;
     time_frame+=frame_time;  // for nosound
 
-    if(file_format==DEMUXER_TYPE_MPEG_PS) d_video->pts+=frame_time;
+    if(demuxer->file_format==DEMUXER_TYPE_MPEG_PS) d_video->pts+=frame_time;
     
     mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"*** ftime=%5.3f ***\n",frame_time);
 
