@@ -287,11 +287,13 @@ Available options are:
 
     on                use TV input
     noaudio           no sound
-    driver=<value>    available: dummy, v4l, bsdbt848
+    driver=<value>    available: dummy, v4l,
+                      bsdbt848
     device=<value>    Specify other device than the
                       default /dev/video0.
-    input=<value>     available: television,
-                      s-video, composite, etc
+    input=<value>     Specify other input than the
+                      default 0 (Television)
+                      (see output for a list)
     freq=<value>      Specify the frequency to set
                       the tuner to (e.g. 511.250).
     outfmt=<value>    output format of the tuner
@@ -454,16 +456,25 @@ Select type of MP2/MP3 stereo output.
     Right channel  2
 .TP
 .B \-sws <software\ scaler\ type>
+.I NOTE:
+Also see DOCS/tech/swscaler_*.txt.
+.br
 This option sets the quality (and speed, respectively) of the software scaler,
 with the \-zoom option. For example with x11 or other outputs which lack
 hardware acceleration. Possible settings are:
 
     0  fast bilinear (default)
     1  bilinear
-    2  bicubic (best quality)
-    3  ?
-    4  nearest neighbor (bad quality)
-    5  area averaging scaling support
+    2  bicubic (good quality)
+    3  experimental (?)
+    4  nearest neighbour (bad quality)
+    5  area
+    6  luma bicubic / chroma bilinear
+    7  gauss
+    8  sincR
+    9  lanczos
+   10  bicubic spline
+
 .TP
 .B \-vc <codec name>
 Force usage of a specific video codec, according to its name in codecs.conf,
@@ -489,7 +500,7 @@ Force usage of a specific codec FAMILY, and FALLBACK to default if failed.
     \-vfm 7   use DivX4 codec (YUY2)
              (same as \-vc divx4 but fallback)
     \-vfm 10  use XAnim codecs
-.br
+
 .I NOTE:
 If libdivxdecore support was compiled in, then type 3 and 7 now contains
 just the same DivX4 codec, but different APIs to reach it. For difference
