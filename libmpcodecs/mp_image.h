@@ -71,15 +71,19 @@ static inline void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
 	return;
     }
     mpi->num_planes=1;
-    if( (out_fmt&IMGFMT_RGB_MASK) == IMGFMT_RGB ){
-	mpi->bpp=((out_fmt&255)+7)&(~7);
-	if(out_fmt==IMGFMT_RGB1) mpi->bpp=1;
+    if (IMGFMT_IS_RGB(out_fmt)) {
+	if (IMGFMT_RGB_DEPTH(out_fmt) < 8)
+	    mpi->bpp = IMGFMT_RGB_DEPTH(out_fmt);
+	else
+	    mpi->bpp=(IMGFMT_RGB_DEPTH(out_fmt)+7)&(~7);
 	return;
     }
-    if( (out_fmt&IMGFMT_BGR_MASK) == IMGFMT_BGR ){
-	mpi->bpp=((out_fmt&255)+7)&(~7);
+    if (IMGFMT_IS_BGR(out_fmt)) {
+	if (IMGFMT_BGR_DEPTH(out_fmt) < 8)
+	    mpi->bpp = IMGFMT_BGR_DEPTH(out_fmt);
+	else
+	    mpi->bpp=(IMGFMT_BGR_DEPTH(out_fmt)+7)&(~7);
 	mpi->flags|=MP_IMGFLAG_SWAPPED;
-	if(out_fmt==IMGFMT_BGR1) mpi->bpp=1;
 	return;
     }
     mpi->flags|=MP_IMGFLAG_YUV;
