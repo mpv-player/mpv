@@ -1,4 +1,4 @@
-.\" synced with 1.907
+.\" synced with 1.916
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -488,14 +488,15 @@ Z t± opcj± MPlayer ignoruje czas trwania klatki, je¶li odtwarza tylko video
 Zmienia kolor kluczowy (colorkey) na wybran± warto¶æ RGB.
 0x000000 to czarny a 0xffffff to bia³y.
 Obs³ugiwane tylko przez sterowniki wyj¶cia video cvidix, fbdev, svga, vesa,
-winvidix, xmga, xvidix, xover i directx.
+winvidix, xmga, xvidix, xover, xv (sprawd¼ równie¿ \-vo xv:ck), xvmc
+(sprawd¼ równie¿ \-vo xv:ck) i directx.
 .
 .TP
 .B \-nocolorkey
 Wy³±cza kolor kluczowy.
 Obs³ugiwane tylko przez sterowniki wyj¶cia video cvidix, fbdev, svga, vesa,
-winvidix, xmga, xvidix, xv (sprawd¼ równie¿ -vo xv:ck), xvmc
-(sprawd¼ równie¿ -vo xv:ck) i xover.
+winvidix, xmga, xvidix, xv (sprawd¼ równie¿ \-vo xv:ck), xvmc
+(sprawd¼ równie¿ \-vo xv:ck) i xover.
 .
 .TP
 .B \-crash-debug (kod do debugowania)
@@ -584,7 +585,7 @@ Lista wszystkich klawiszy, które mog± byæ przypisane do komend.
 Lista wszystkich komend, które mog± byæ przypisane do klawiszy.
 .IPs js-dev
 Wybiera u¿ywany joystick (domy¶lnie: /dev/\:input/\:js0).
-.IPs file\ 
+.IPs file=<nazwazbioru>
 Czyta polecenia z podanego zbioru.
 Opcja g³ównie przydatna przy kolejce FIFO.
 .br
@@ -851,11 +852,13 @@ Warto¶æ mo¿e byæ ujemna.
 .RE
 .
 .TP
-.B \-channels <numer>
+.B \-channels <ilo¶æ>
 Wybiera liczbê kana³ów do odtwarzania (domy¶lnie: 2).
 Je¿eli liczba kana³ów wyj¶cia jest wiêksza ni¿ liczba kana³ów wej¶cia,
-zostan± wstawione puste kana³y (poza miksowaniem mono na stereo, wtedy
-w obydwóch kana³ach wyj¶cia zostanie powielony kana³ mono).
+zostan± wstawione puste kana³y przy pomocy filru audio channels (poza
+miksowaniem mono na stereo, wtedy w obydwóch kana³ach wyj¶cia zostanie
+powielony kana³ mono).
+Kolejno¶æ kana³ów bêdzie taka jak domy¶lna dla filtra channels.
 Je¿eli liczba kana³ów wyj¶cia jest mniejsza od liczby kana³ów wej¶cia,
 wynik zale¿y od dekodera audio (\-afm).
 MPlayer prosi dekoder by dekodowa³ audio do wybranej ilo¶ci kana³ów.
@@ -1143,8 +1146,9 @@ pocz±tku.
 Wybiera czêstotliwo¶æ próbkowania, która bêdzie dalej wykorzystywana
 (oczywi¶cie karty maj± te¿ swoje ograniczenia).
 Je¿eli wybrana czêstotliwo¶æ jest inna ni¿ w obecnie przetwarzanym strumieniu,
-do wartwy d¼wiêkowej zastosowany zostanie filtr resample lub lavcresample,
-aby zniwelowaæ ró¿nicê. Opcja \-af-adv steruje typem przepróbkowywania.
+w wartwie d¼wiêkowej zostanie zastosowany filtr resample lub lavcresample,
+aby zniwelowaæ ró¿nicê.
+Opcja \-af-adv steruje typem przepróbkowywania.
 Domy¶lne jest szybkie przepróbkowywanie, które mo¿e zniekszta³ciæ d¼wiêk.
 .
 .TP
@@ -1932,11 +1936,6 @@ sterownik wyj¶ciowy wtyczki
 .SH "OPCJE WYJ¦CIA VIDEO (TYLKO MPLAYER)"
 .
 .TP
-.B \-aa* (tylko \-vo aa)
-Mo¿esz otrzymaæ listê oraz wyja¶nienia dostêpnych opcji wykonuj±c
-.I mplayer \-aahelp
-.
-.TP
 .B \-adapter <warto¶æ>
 Ustawia kartê graficzn±, która otrzyma obraz.
 Do poprawnego dzia³ania wymaga opcji \-vm.
@@ -2379,10 +2378,11 @@ Dostêpne sterowniki wyj¶ciowe:
 .B xv (tylko X11)
 Wykorzystuje rozszerzenie XVideo oferowane przez XFree86 4.x, aby w³±czyæ
 sprzêtow± akceleracjê odtwarzania.
-Je¿eli nie mo¿esz skorzystaæ ze sterownika napisanego specjalnie dla Twojego sprzêtu,
-to prawdopodobnie jest najlepsza opcja.
-Informacje po co wykorzystywany jest kolorkluczowy i jak jest rysowany uruchom MPlayera
-z opcj± -v, i poszukaj linii na pocz±tku opisanych [xv common].
+Je¿eli nie mo¿esz skorzystaæ ze sterownika napisanego specjalnie dla Twojego
+sprzêtu, to prawdopodobnie jest najlepsza opcja.
+¯eby uzyskaæ informacje jaki kolor kluczowy jest u¿ywany i jak jest rysowany
+uruchom MPlayera z opcj± \-v, i poszukaj wierszy oznaczonych na pocz±tku
+[xv common].
 .PD 0
 .RSs
 .IPs port=<numer>
@@ -2393,10 +2393,10 @@ Okre¶la ¼ród³o, z którego pobierany jest kolor kluczowy (domy¶lnie: cur).
 .IPs cur
 Opcja domy¶lna, pobiera kolor kluczowy ustawiony w Xv.
 .IPs use
-Wykorzystuje, ale nie ustawia koloru kluczowego z MPlayera (podaj opcjê -colorkey,
-aby to zmieniæ).
+Wykorzystuje, ale nie ustawia koloru kluczowego z MPlayera (podaj opcjê
+\-colorkey, aby to zmieniæ).
 .IPs set
-Podobjie jak use, ale ustawia równie¿ dostarczony kolor kluczowy.
+Podobnie jak use, ale ustawia równie¿ dostarczony kolor kluczowy.
 .RE
 .IPs ck-method=man|bg|auto
 Ustawia metodê rysowania koloru kluczowego (domy¶lnie: man).
@@ -2406,7 +2406,7 @@ Rêcznie rysuje kolor kluczowy (ogranicza, w niektórych przypadkach, migotanie).
 .IPs bg
 Ustawia kolor kluczowy jako t³o.
 .IPs auto
-Pozwala rysowaæ kolor kluczowy przez Xv.
+Pozostawia Xv rysowanie koloru kluczowego.
 .RE
 .RE
 .PD 1
@@ -2439,15 +2439,21 @@ Okre¶la port XVideo.
 .IPs (no)benchmark
 Nie wy¶wietla obrazów.
 Konieczne dla prawid³owego testowania wydajno¶ci dla sterowników, które
-zmieniaj± bufor obrazu tylko przy przerysowywaniu monitoru (nVidia).
+zmieniaj± bufor obrazu tylko przy przerysowywaniu monitora (nVidia).
 Domy¶lnie nie wy³±cza wy¶wietlania obrazu (nobenchmark).
 .IPs (no)queue
 Kolejkuje klatki do wy¶wietlenia, aby umo¿liwiæ bardziej równoleg³± pracê
 urz±dzenia video.
-Mo¿e spowodowaæ ma³± (nie zauwa¿aln±) sta³± desynchronizacjê A/\:V (domy¶lnie: noqueue).
+Mo¿e spowodowaæ ma³± (nie zauwa¿aln±) sta³± desynchronizacjê A/\:V
+(domy¶lnie: noqueue).
 .IPs (no)sleep
 Wykorzystuje funkcjê sleep podczas czekania na zakoñczenie renderowania
-(niezalecane na Linuksie). Domy¶lnie nie u¿ywa funkcji sleep (nosleep).
+(niezalecane na Linuksie).
+Domy¶lnie nie u¿ywa funkcji sleep (nosleep).
+.IPs ck=cur|use|set
+To samo co \-vo xv:ck (zobacz tak¿e \-vo xv).
+.IPs ck-method=man|bg|auto
+To samo co \-vo xv:ck-method (zobacz tak¿e \-vo xv).
 .RE
 .PD 1
 .
@@ -2467,8 +2473,8 @@ tu ¿adnego wp³ywu.
 .IPs driver=<sterownik>
 Wybiera sterownik SDL, który bêdzie u¿ywany do wy¶wietlania.
 .IPs (no)forcexv
-Wykorzystuje rozszerzenie XVideo przy odtwarzaniu przez sterownik wyj¶cia video sdl
-(domy¶lnie: forcexv).
+Wykorzystuje rozszerzenie XVideo przy odtwarzaniu przez sterownik wyj¶cia video
+sdl (domy¶lnie: forcexv).
 .IPs (no)hwaccel
 Wykorzystuje sprzêtowo wspomagany skalator (domy¶lnie: hwaccel).
 .RE
@@ -2658,8 +2664,10 @@ Nie tworzy danych wyj¶ciowych video.
 U¿yteczne dla testowania wydajno¶ci.
 .
 .TP
-.B aa (patrz te¿ \-aa*)
+.B aa\ \ \ \ \ 
 Sterownik wyj¶cia video ASCII art, który dzia³a na konsoli tekstowej.
+Mo¿esz dostaæ listê i opis dostêpnych podopcji wywo³uj±c
+.I mplayer \-vo aa:help
 .
 .TP
 .B caca\ \ \ 
@@ -3095,27 +3103,30 @@ Wymusza jeden z trybów wstawiania filtrów audio:
 1: Optymalizuje pod wzglêdem dok³adno¶ci.
 .br
 2: Optymalizuje pod wzglêdem szybko¶ci.
+.I UWAGA:
+Niektóre funkcje filtów audio mog± po kryjomu przestaæ dzia³aæ i mo¿e spa¶æ
+jako¶æ d¼wiêku.
 .br
 3: Nie korzysta z automatycznego wstawiania filtórw i optymalizacji.
-.I Uwaga:
-MPlayer mo¿e siê wykrzaczyæ siê podczas dzia³ania, je¶li bêdzie
+.I UWAGA:
+MPlayer mo¿e wykrzaczyæ siê podczas dzia³ania, je¶li bêdzie
 ustawiony bêdzie ten parametr.
 .br
-4: Korzysta z automatycznego wstawiania filtrów i zachowuje siê tak jak
+4: Korzysta z automatycznego wstawiania filtrów tak jak
 w przypadku parametru 0, ale u¿ywa przetwarzania zmiennoprzecinkowego,
-je¶li jest to tylko mo¿liwe.
+je¶li tylko jest to mo¿liwe.
 .br
-5: Korzysta z automatycznego wstawiania filtrów i zachowuje siê tak jak
+5: Korzysta z automatycznego wstawiania filtrów tak jak
 w przypadku parametru 1, ale u¿ywa przetwarzania zmiennoprzecinkowego,
-je¶li jest to tylko mo¿liwe.
+je¶li tylko jest to mo¿liwe.
 .br
-6: Korzysta z automatycznego wstawiania filtrów i zachowuje siê tak jak
+6: Korzysta z automatycznego wstawiania filtrów tak jak
 w przypadku parametru 2, ale u¿ywa przetwarzania zmiennoprzecinkowego,
-je¶li jest to tylko mo¿liwe.
+je¶li tylko jest to mo¿liwe.
 .br
-7: Nie korzysta z automatycznego wstawiania filtrów i zachowuje siê tak jak
+7: Nie korzysta z automatycznego wstawiania filtrów tak jak
 w przypadku parametru 3, ale u¿ywa przetwarzania zmiennoprzecinkowego,
-je¶li jest to tylko mo¿liwe.
+je¶li tylko jest to mo¿liwe.
 .REss
 .IPs list=<filtry>
 Tak samo jak \-af.
@@ -3561,7 +3572,7 @@ Dostêpne s± filtry:
 .B resample[=czprób[:sloppy][:typ]]
 Zmienia czêstotliwo¶æ próbkowania strumienia audio.
 Mo¿e byæ przydatny, je¶li masz kartê o sta³ej sta³ej, ustalonej
-czêstotliwo¶ci próbkowania lub je¶li posiadasz wy³±cznie star± kartê,
+czêstotliwo¶ci próbkowania lub je¶li posiadasz star± kartê,
 która obs³u¿y max 44.1kHz.
 Filtr ten jest automatycznie w³±czany, je¶li zajdzie taka potrzeba.
 Obs³uguje on 16-bitowy ca³kowitoliczbowy lub rzeczywisty, natywny format endian
@@ -3572,26 +3583,28 @@ Z MEncoderem musisz te¿ u¿yæ opcji \-srate <czprób>.
 .PD 0
 .RSs
 .IPs <czprób>
-Wyj¶ciowa czêstotliwo¶æ próbkowania w Hz przyjmuje warto¶ci z zakresu
-od 8000 do 192000. Je¿eli czêstotliwo¶æ wej¶ciowa i wyj¶ciowa s± takie
-same albo je¿eli ten parametr jest pominiêty, filtr jest automatycznie wy³±czany.
+Wyj¶ciowa czêstotliwo¶æ próbkowania w Hz.
+Przyjmuje warto¶ci z zakresu od 8000 do 192000.
+Je¿eli czêstotliwo¶æ wej¶ciowa i wyj¶ciowa s± takie same albo je¿eli ten
+parametr jest pominiêty, filtr jest automatycznie wy³±czany.
 Wysoka czêstotliwo¶æ przewa¿nie zwiêksza jako¶æ d¼wiêku, szczególnie
-je¿eli filtr jest u¿yty wraz z innymi.
+w po³±czeniu z innymi filtrami.
 .IPs <sloppy>
 Pozwala (1) lub nie pozwala (0), aby czêstotliwo¶æ wyj¶ciowa ró¿ni³a siê w
 nieznacznym stopniu od warto¶ci podanej przez parametr <czprób> (domy¶lnie: 1).
-Opcja ta mo¿e zostaæ u¿yta je¿eli pocz±tek odtwarzania jest bardzo wolny
+Opcja ta mo¿e zostaæ u¿yta je¿eli pocz±tek odtwarzania jest bardzo wolny.
 .IPs <typ>
 Okre¶la metodê wykorzystywan± przy zmianie próbkowania.
 .RSss
-0: interpolacja liniowa (szybka, ale niska jako¶æ podczas zwiêkszania czêstotliwo¶ci
-próbkowania)
+0: interpolacja liniowa (szybka, ale niska jako¶æ, szczególnie  podczas
+zwiêkszania czêstotliwo¶ci próbkowania)
 .br
-1: wielofazowe przetwarzanie banku filtrów przy u¿yciu obliczeñ ca³kowitoliczbowych 
-(filterbank and integer processing)
+1: wielofazowe przetwarzanie banku filtrów przy u¿yciu obliczeñ
+ca³kowitoliczbowych (filterbank and integer processing)
 .br
-2: wielofazowe przetwarzanie banku filtrów przy u¿yciu obliczeñ zmiennoprzecinkowych 
-(filterbank and integer processing) (najwolniejsze, ale daj±ce najlepsz± jako¶æ)
+2: wielofazowe przetwarzanie banku filtrów przy u¿yciu obliczeñ
+zmiennoprzecinkowych (filterbank and integer processing)
+(najwolniejsze, ale daj±ce najlepsz± jako¶æ)
 .REss
 .PD 1
 .RE
@@ -3609,8 +3622,9 @@ z dok³adnego skalowania i interpolacji liniowej.
 .
 .TP
 .B lavcresample[=czprób[:d³ug[:lin[:liczba[:obcinanie]]]]]
-Zmienia czêstotliwo¶æ próbkowania strumienia audio na ca³kowit± liczbê <czprób> wyra¿on±
-w Hz. Obs³uguje tylko 16-bitowy natywny format endian.
+Zmienia czêstotliwo¶æ próbkowania strumienia audio na ca³kowit± liczbê <czprób>
+wyra¿on± w Hz.
+Obs³uguje tylko 16-bitowy natywny format endian.
 .br
 .I INFORMACJA:
 Z MEncoderem musisz te¿ u¿yæ opcji \-srate <czprób>.
@@ -3670,8 +3684,9 @@ Je¿eli czêstotliwo¶æ próbkowania odtwarzanego d¼wiêku jest ni¿sza ni¿
 ¶rodkowa czêstotliwo¶æ dla odpowiedniego pasma, to jest ono wy³±czane.
 Znanym b³êdem jest to, ¿e w³a¶ciwo¶ci dla najwy¿szego pasma nie s± ca³kowicie
 symetryczne, je¿eli czêstotliwo¶æ próbki jest zbli¿ona do czêstotliwo¶ci
-¶rodkowej danego pasma. Mo¿na obej¶æ ten problem zwiêkszaj±c jej
-czêstotliwo¶æ, zanim ta dotrze do filtru korektora.
+¶rodkowej danego pasma.
+Mo¿na obej¶æ ten problem zwiêkszaj±c jej czêstotliwo¶æ, zanim ta dotrze do
+filtru korektora.
 .RE
 .PD 0
 .RSs
@@ -3696,8 +3711,9 @@ Dodaje, usuwa, kopiuje lub przekierowuje kana³y.
 Je¿eli podana jest tylko opcja <lkan>, filtr u¿ywa domy¶lnego przekierowywania,
 które dzia³a nastêpuj±co: Je¶li liczba kana³ów wyj¶ciowych jest wiêksza ni¿
 wej¶ciowych, tworzone s± puste kana³y (w przypadku miksowania z mono do stereo,
-kana³ mono jest powtarzany w obu kana³ach wyj¶ciowych). Je¿eli liczba kana³ów
-wyj¶ciowych jest mniejsza ni¿ wej¶ciowych, nadmiarowe kana³y s± usuwane.
+kana³ mono jest powtarzany w obu kana³ach wyj¶ciowych).
+Je¿eli liczba kana³ów wyj¶ciowych jest mniejsza ni¿ wej¶ciowych, nadmiarowe
+kana³y s± usuwane.
 .PD 0
 .RSs
 .IPs <lkan>
@@ -3705,7 +3721,7 @@ liczba wyj¶ciowych kana³ów (1\-6)
 .IPs <nr>\ 
 liczba dróg przekierowania (1\-6)
 .IPs <od1:do1:od2:do2:od3:do3:...>
-Pary liczb z zakreu od 0 do 5, które okre¶laj±, gdzie przekierowaæ konkretny
+Pary liczb z zakresu od 0 do 5, które okre¶laj±, gdzie przekierowaæ konkretny
 kana³.
 .RE
 .sp 1
@@ -3714,20 +3730,20 @@ kana³.
 .RE
 .RSs
 .IPs "mplayer -af channels=4:4:0:1:1:0:2:2:3:3 media.avi"
-Zmieni lizbê kana³ów na 4 i ustawi 4 drogi przekierowania, które zamieni±
+Zmieni liczbê kana³ów na 4 i ustawi 4 drogi przekierowania, które zamieni±
 kana³ 0 z 1, a 2 i 3 pozostawi± niezmienione.
 Zauwa¿, ¿e je¿eli odtwarzany by³ zbiór zawieraj±cy 2 kana³y, kana³y 2 i 3
 bêd± puste, ale 0 i 1 zostan± zamienione.
 .IPs "mplayer -af channels=6:4:0:0:0:1:0:2:0:3 media.avi"
-Zmieni liczbê kana³ów na 6 i ustawi 4 drogi przeierowania, które
-skopiuj± kana³ 0 do 0 i 3, a kana³y 4 i 5 bêd± zawiera³y ciszê.
+Zmieni liczbê kana³ów na 6 i ustawi 4 drogi przekierowania, które
+skopiuj± kana³ 0 do 0 do 3, a kana³y 4 i 5 bêd± zawiera³y ciszê.
 .RE
 .PD 1
 .
 .TP
 .B format[=format] (zobacz równie¿ \-format)
 Konwertuje format próbki.
-Uruchamiany automatycznie, je¿eli jest on potrzebny przez kartê d¼wiêkow± lub
+Uruchamiany automatycznie, je¿eli jest potrzebny przez kartê d¼wiêkow± lub
 inny filtr.
 .PD 0
 .RSs
@@ -3749,18 +3765,21 @@ Implementuje programow± regulacjê g³o¶no¶ci.
 U¿ywaj go ostro¿nie, gdy¿ mo¿e obni¿yæ stosunek sygna³u do szumu.
 W wiêkszo¶ci wypadków najlepszym rozwi±zaniem jest ustawienie miksera PCM na
 maksymaln± warto¶æ, wy³±czenie filtru i regulacja g³o¶no¶ci poziomem g³o¶no¶ci
-ogólnej miksera. Je¿eli Twoja karta ma cyfrowy mikser PCM zamiast analogowego i
-zauwa¿ysz przek³amania, u¿yj miksera MASTER. Je¿eli do komputera pod³±czony jest
-zewnêtrzny wzmacniacz (co zazwyczaj ma miejsce), poziom ha³asu mo¿e zostaæ
-zredukowany poprzez dostrojenie g³ównego poziomu g³o¶no¶ci (master level) i
-pokrêt³a g³o¶no¶ci, dopóki syczenie w tle nie ustanie.
+ogólnej miksera.
+Je¿eli Twoja karta ma cyfrowy mikser PCM zamiast analogowego i zauwa¿ysz
+przek³amania, u¿yj miksera MASTER.
+Je¿eli do komputera pod³±czony jest zewnêtrzny wzmacniacz (co zazwyczaj ma
+miejsce), poziom ha³asu mo¿e zostaæ zredukowany poprzez dostrojenie g³ównego
+poziomu g³o¶no¶ci (master level) i pokrêt³a g³o¶no¶ci,
+dopóki syczenie w tle nie ustanie.
 .br
-Ten filtr ma drug± w³a¶ciwo¶æ: Mierzy ogólny, maksymalny poziom d¼wiêku i wypisuje
-go po zakoñczeniu MPlayera. Oszacowana g³o¶no¶æ mo¿e byæ u¿yta do ustawienia poziomu
-d¼wiêku w MEncoderze tak, ¿eby maksymalny zasiêg dynamiczny by³ mo¿liwy do osi±gniêcia.
+Ten filtr ma inn± w³a¶ciwo¶æ: Mierzy ogólny, maksymalny poziom d¼wiêku
+i wypisuje go po zakoñczeniu MPlayera.
+Oszacowana g³o¶no¶æ mo¿e byæ u¿yta do ustawienia poziomu d¼wiêku w MEncoderze
+tak, by by³ u¿ywany maksymalny zasiêg dynamiczny.
 .br
 .I INFORMACJA:
-Filtr mo¿e zostaæ u¿yty tylko jeden raz przy przetwarzaniu ka¿dego strumiania
+Filtr mo¿e zostaæ u¿yty tylko jeden raz przy przetwarzaniu ka¿dego strumienia
 audio.
 .PD 0
 .RSs
@@ -3769,7 +3788,6 @@ Ustawia wzmocnienie w dB dla wszystkich kana³ów w strumieniu od
 warto¶ci -200dB do +60dB, gdzie -200dB oznacza ca³kowite wyciszenie
 a +60dB 1000-krotne wzmocnienie (domy¶lnie: 0).
 .IPs <sc>\ 
-W³±cza miêkkie obcinanie (soft-clipping).
 W³±cza (1) lub wy³±cza (2) soft-clipping (miêkkie obcinanie).
 Soft-clipping mo¿e sprawiæ, ¿e d¼wiêk stanie siê ³±godniejszy, je¿eli
 zastosowano wysokie poziomy g³o¶no¶ci.
@@ -3784,7 +3802,7 @@ Metoda ta powoduje przek³amania i powinna byæ u¿yta tylko w ostateczno¶ci.
 .RE
 .RSs
 .IPs "mplayer -af volume=10.1:0 media.avi"
-Wzmocni g³o¶no¶æ o 10.1dB i zastosuje hard-clippin (twarde obcinanie), je¿eli
+Wzmocni g³o¶no¶æ o 10.1dB i zastosuje hard-clipping (twarde obcinanie), je¿eli
 poziom jest zbyt wysoki.
 .RE
 .PD 1
@@ -3792,17 +3810,15 @@ poziom jest zbyt wysoki.
 .TP
 .B pan=n[:l01:l02:...l10:l11:l12:...ln0:ln1:ln2:...]
 Dowolnie miksuje kana³y.
-Najpro¶ciej t³umacz±c jest to po³±czenie programowej regulacji
-g³o¶no¶ci i filtru kana³ów, który mo¿e zostaæ wykorzystany do
-zmiksowania wielu kana³ów do tylko kilku, np. \& d¼wiêku w trybie
-stereo do mono lub zmiany "szeroko¶ci" centralnego g³o¶nika w
-systemie d¼wiêku przestrzennego.
+Najpro¶ciej t³umacz±c jest to po³±czenie filtru volume i channels,
+które mo¿e zostaæ wykorzystane do zmiksowania wielu kana³ów do kilku,
+np.\& d¼wiêku w trybie stereo do mono lub zmiany "szeroko¶ci" centralnego
+g³o¶nika w systemie d¼wiêku przestrzennego.
 Filtr jest trudny w u¿yciu i bêdzie wymaga³ zastosowania ¿mudnej metody prób i
-b³êdów, zanim zostanie osi±gniêty oczekiwany rezultat. Liczba parametrów filtru
-zale¿y od liczby kana³ów.
+b³êdów, zanim zostanie osi±gniêty oczekiwany rezultat.
+Liczba parametrów filtru zale¿y od liczby kana³ów.
 Przyk³ad jak zmiksowaæ 6-kana³owy d¼wiêk do 2 kana³ów z wykorzystaniem
 tego filtru znajduje siê w czê¶ci przyk³adów blisko koñca.
-
 .PD 0
 .RSs
 .IPs <n>\ \ 
@@ -3816,10 +3832,10 @@ Jak du¿o z kana³u wej¶ciowego j jest miksowane w kana³ wyj¶ciowy i (0\-1).
 .RE
 .RSs
 .IPs "mplayer -af pan=1:0.5:0.5 -channels 1 media.avi"
-Zmiksuje d¼wiêk ze stereo do modo.
+Zmiksuje d¼wiêk ze stereo do mono.
 .IPs "mplayer -af pan=3:1:0:1:0.5:0.5 -channels 3 media.avi"
-Da 3 kana³y wyj¶ciowe, pozostawiaj±c 0 i 1 bez zmian oraz miksuj±æ 0 i 1
-do 2 kana³u (który mo¿e naprzyk³ad zostaæ wys³any do subwoofera).
+Da 3 kana³y wyj¶ciowe, pozostawiaj±c 0 i 1 bez zmian oraz miksuj±c 0 i 1
+do 2 kana³u (który mo¿e, na przyk³ad, zostaæ wys³any do subwoofera).
 .RE
 .PD 1
 .
@@ -3827,24 +3843,25 @@ do 2 kana³u (który mo¿e naprzyk³ad zostaæ wys³any do subwoofera).
 .B sub[=fc:kan]
 Dodaje kana³ subwoofera do strumienia d¼wiêkowego.
 Dane audio u¿yte do stworzenia tego kana³u s± ¶redni± d¼wiêku w 0 i 1 kanale.
-D¼wiêk wynikowy zostanie poddany dzia³aniu dolnoprzepustowego filtru Butterwortha
-czwartego rzêdu z domy¶ln± czêstotliwo¶ci± graniczn±
+D¼wiêk wynikowy zostanie poddany dzia³aniu dolnoprzepustowego filtru
+Butterwortha czwartego rzêdu z domy¶ln± czêstotliwo¶ci± graniczn±
 na poziomie 60Hz i dodany do oddzielnego kana³u w strumieniu audio.
 .br
-.I Uwaga
-Wy³±cz ten filtr, je¿eli odtwarzasz DVD z d¼wiêkiem w systemie Dolby Digital 5.1,
-w przeciwnym wypadku, jego dzia³anie zak³óci d¼wiêk subwoofera. 
+.I UWAGA:
+Wy³±cz ten filtr, je¿eli odtwarzasz DVD z d¼wiêkiem w systemie Dolby Digital
+5.1, w przeciwnym wypadku jego dzia³anie zak³óci d¼wiêk subwoofera. 
 .PD 0
 .RSs
 .IPs <fc>\ 
-Czêstotliwo¶æ graniczna filtru dolnoprzepustowego wyra¿ona w Hz(20Hz do 300Hz)
+Czêstotliwo¶æ graniczna filtru dolnoprzepustowego wyra¿ona w Hz (20Hz do 300Hz)
 (domy¶lnie: 60Hz).
-Dla uzyskania najlepszego rezultatu, spróbuj ustawiæ j± na jak najni¿sz±. Wzbogaci
-to do¶wiadczenia p³yn±ce z u¿ywania d¼wiêku stereo i w systemie przestrzennym.
+Dla uzyskania najlepszego rezultatu, spróbuj ustawiæ j± na jak najni¿sz±.
+Wzbogaci to do¶wiadczenia p³yn±ce z u¿ywania d¼wiêku stereo i w systemie
+przestrzennym.
 .IPs <kan>\ 
 Okre¶la numer kana³u, do którego zostanie wys³any d¼wiêk subwoofera.
-Mo¿e przyjmowaæ warto¶ci z zakresu od 0 do 5 (domy¶lnie: 5). Zauwa¿, ¿e
-liczb± kana³ów zwiêkszy siê do <kan>, je¿eli zajdzie taka potrzeba.
+Mo¿e przyjmowaæ warto¶ci z zakresu od 0 do 5 (domy¶lnie: 5).
+Zauwa¿, ¿e liczb± kana³ów zwiêkszy siê do <kan>, je¿eli zajdzie taka potrzeba.
 .RE
 .sp 1
 .RS
@@ -3859,15 +3876,16 @@ do 4 kana³u wyj¶ciowego.
 .
 .TP
 .B surround[=opo¼nienie]
-Dekoder macierzowo zakodowanego d¼wiêku przestrzennego takiego jak Dolby Surround.
+Dekoder macierzowo zakodowanego d¼wiêku przestrzennego takiego jak Dolby
+Surround.
 Wiele plików zawieraj±cych 2 kana³y audio, w rzeczywisto¶ci zawiera d¼wiêk
-przestrzenny zakodowany w tym systemie. Aby u¿yæ tego filtru potrzebujesz karty z
-obs³ug± przynajmniej 4 kana³ów.
+przestrzenny zakodowany w tym systemie.
+Aby u¿yæ tego filtru potrzebujesz karty z obs³ug± przynajmniej 4 kana³ów.
 .PD 0
 .RSs
 .IPs <opó¼nienie>
 Ustawia opó¼nienie w ms dla tylnych g³o¶ników (0ms do 1000ms) (domy¶lnie: 20ms).
-Powinno byæ ustawione tak, ¿e: je¶li d1 to odleg³o¶æ od pozycji s³uchacza do
+Powinno byæ ustawione tak: je¶li d1 to odleg³o¶æ od pozycji s³uchacza do
 przednich g³o¶ników a d2 to odleg³o¶æ od tylnych g³o¶ników, to opó¼nienie d
 powinno byæ ustawione na 15ms, je¿eli d1 <= d2 i 15 + 5*(d1-d2) je¿eli d1 > d2.
 Domy¶lna warto¶æ dla d to 20ms.
@@ -3878,33 +3896,35 @@ Domy¶lna warto¶æ dla d to 20ms.
 .RE
 .RSs
 .IPs "mplayer \-af surround=15 \-channels 4 media.avi"
-Doda d¼wiêk przestrzenny dekoduj±c d¼wiêk dla tylnych g³o¶ników z opó¼nieniem 15ms.
+Doda d¼wiêk przestrzenny dekoduj±c d¼wiêk dla tylnych g³o¶ników z opó¼nieniem
+15ms.
 .RE
 .PD 1
 .
 .TP
 .B delay[=kan1:kan2:...]
 Opó¼nia d¼wiêk wys³any do g³o¶ników, tak ¿eby dotar³ on z ró¿nych kana³ów
-jednocze¶nie. Jest to u¿yteczne, je¿eli masz wiêcej ni¿ 2 g³o¶niki.
+jednocze¶nie.
+Jest to u¿yteczne, je¿eli masz wiêcej ni¿ 2 g³o¶niki.
 .PD 0
 .RSs
 .IPs kan1,kan2,...
 Opó¼nienie w ms, które ma byæ zastosowane do ka¿dego kana³u
-(liczba rzeczywsita z zakresu od 0 do 1000).
+(liczba rzeczywsta z zakresu od 0 do 1000).
 .RE
 .PD 1
 .sp 1
 .RS
 Aby obliczyæ opó¼nienie dla poszczególnych kana³ów, wykonaj nastêpuje czynno¶ci:
 .IP 1. 3
-Oblicz odleg³o¶æ od g³o¶ników do pozycji s³uchacza (w metrach), da Ci to warto¶ci
-od s1 do s5 (dla systemu 5.1). Nie ma sensu braæ pod uwagê subwoofera
-(i tak nie us³yszysz ró¿nicy).
+Oblicz odleg³o¶æ od g³o¶ników do pozycji s³uchacza (w metrach), da Ci to
+warto¶ci od s1 do s5 (dla systemu 5.1).
+Nie ma sensu braæ pod uwagê subwoofera (i tak nie us³yszysz ró¿nicy).
 .IP 2. 3
 Odejmij odleg³o¶æ od s1 do s5 od odleg³o¶ci maksymalnej
 tzn. s[i] = max(s) - s[i]; i = 1...5.
 .IP 3.
-Calculate the required delays in ms as d[i] = 1000*s[i]/342; i = 1...5.
+Oblicz ¿±dane opó¼nienia w ms jako d[i] = 1000*s[i]/342; i = 1...5.
 .RE
 .PD 0
 .sp 1
@@ -3913,7 +3933,7 @@ Calculate the required delays in ms as d[i] = 1000*s[i]/342; i = 1...5.
 .RE
 .RSs
 .IPs "mplayer \-af delay=10.5:10.5:0:0:7:0 media.avi"
-Opó¼ni d¼wiêk w przednim-lewym i prawym g³o¶niku o 10.5ms, dwa
+Opó¼ni d¼wiêk w lewym i prawym przednim g³o¶niku o 10.5ms, dwa
 tylne kana³y i subwoofer o 0ms, a centralny o 7ms.
 .RE
 .PD 1
@@ -3925,7 +3945,7 @@ Eksportuje przychodz±cy sygna³ do innych procesów u¿ywaj±c mapowania pamiêci
 Zmapowane obszary zawieraj± nag³ówek: 
 .sp 1
 .nf
-int lkan                      /*liczba kana³ów*/
+int lkan                     /*liczba kana³ów*/
 int rozm                     /*rozmiar bufora*/
 unsigned long long licznik   /*U¿ywany do zachowania synchronizacji,
                                aktualizowany za ka¿dym razem kiedy
@@ -3954,15 +3974,15 @@ Wyeksportuje 1024 próbek na kana³ do "/tmp/mplayer-af_export".
 .
 .TP
 .B extrastereo[=wsp]
-Zwiêksza zwiêksza (liniowo) ró¿nicê miêdzy lewym a prawym kana³em
+Zwiêksza (liniowo) ró¿nicê miêdzy lewym a prawym kana³em
 dodaj±c efekt "przekazu na ¿ywo" do odtwarzania.
 .PD 0
 .RSs
 .IPs <wsp>
 Okre¶la wspó³czynnik ró¿nicy wyra¿ony liczb± rzeczywist± (domy¶lnie: 2.5).
 Je¶li podasz mu warto¶æ 0.0, d¼wiêk bêdzie odtwarzany w trybie mono
-(¶rednia z dwóch kana³ów). Je¶li natomiast ustawisz go na 1.0, d¼wiêk pozostamie
-niezmieniony, a je¶li na -1.0, lewy kana³ z prawym zostan± zamienione.
+(¶rednia z dwóch kana³ów), przy 1.0, d¼wiêk pozostanie niezmieniony, a je¶li
+podasz -1.0, lewy kana³ zostanie zamieniony z prawym.
 .RE
 .PD 1
 .
@@ -4171,9 +4191,11 @@ skalowaæ, domy¶lnie jest d_width/\:d_height!
 .br
 -1:   oryginalna wysoko¶æ/\:szeroko¶æ
 .br
--2:   oblicza w/\:h u¿ywaj±c tej drugiej warto¶ci i preskalowanych proporcji.
+-2:   Oblicza w/\:h u¿ywaj±c tej drugiej warto¶ci i preskalowanych proporcji.
 .br
--3:   oblicza w/\:h u¿ywaj±c tej drugiej warto¶ci i oryginalnych proporcji.
+-3:   Oblicza w/\:h u¿ywaj±c tej drugiej warto¶ci i oryginalnych proporcji.
+.br
+-(n+8): Jak -n powy¿ej, ale zaokr±gla wymiar do najbli¿szej wielokrotno¶ci 16.
 .REss
 .IPs <przeplot>
 Prze³±cza skalowanie z przeplotem.
@@ -7350,7 +7372,7 @@ klatka nie bêdzie kodowana (tzw. n-vop zostanie wstawiany w strumieñ).
 Przy odtwarzaniu, natrafienie na n-vop, powoduje wy¶wietlenie poprzedniej
 klatki.
 .br
-.I OSTRZE¯ENIE:
+.I UWAGA:
 Odtwarzanie z tym parametrem mo¿e spowodowaæ, ¿e film bêdzie poszarpany, wiêc
 u¿ywaj go na swoj± w³asn± odpowiedzialno¶æ!
 .
@@ -7715,7 +7737,7 @@ kodowane jako ramki P, które s± tak du¿e jak ramki I,
 ale nie resetuj± "licznika keyint".
 .
 .TP
-.B frameref=<1\-15>
+.B frameref=<1\-16>
 Ilo¶æ poprzednich ramek wykorzystanych do przewidywania w ramek P
 (domy¶lnie: 1).
 Ma to do¶æ znaczny wp³yw na Anime, ale przy materia³ach z "¿ywymi"
@@ -7735,8 +7757,22 @@ Je¿eli opcja ta jest wy³±czona, u¿yta jest maksymalna liczba klatek B.
 .
 .TP
 .B b_bias=<-100\-100>
-Kontroluje decycje podejmowane przez b_adapt.
-Wy¿szczy wspó³czynnik b_bias generuje wiêksz± liczbê klatek B. (domy¶lnie: 0)
+Kontroluje decycy\je podejmowane przez b_adapt.
+Wy¿szy wspó³czynnik b_bias generuje wiêksz± liczbê klatek B. (domy¶lnie: 0)
+.
+.TP
+.B (no)b_pyramid
+Pozwala na stosowanie ramek B jako odno¶ników do przewidywania innych ramek.
+Na przyk³ad rozwa¿my 3 kolejne ramki B: I0 B1 B2 B3 P4.
+Bez tej opcji ramki B wystêpuj± tak samo jak w MPEG-[124].
+Zatem s± kodowane w kolejno¶ci I0 P4 B1 B2 B3 i wyszystkie klatki B s±
+przewidywane z I0 i P4.
+Z t± opcj± s± kodowane w kolejno¶ci I0 P4 B2 B1 B3.
+B2 jest takie samo jak powy¿ej, ale B1 jest przewidywane z I0 i B2
+a B3 jest przewidywane z B2 i P4.
+Wynikiem tego jest nieco lepsza kompresja bez straty szybko¶ci.
+Wymaga bframes >= 2.
+Wada: zwiêksza opó¼nienie dekodowania do 2 ramek.
 .
 .TP
 .B (no)deblock
@@ -7767,7 +7803,7 @@ Ma wp³yw na maksymalny, dozwolony gradient miêdzy dwoma przylegaj±cymi blokami.
 .B (no)cabac
 Wykorzystuje CABAC (Context-Adaptive Binary Arithmetic Coding)
 (domy¶lnie: w³±czony).
-Nieco spowalnia kodowanie i dekodowanie, ale oszczêdza ok³lo 10-15% bitów.
+Nieco spowalnia kodowanie i dekodowanie, ale oszczêdza oko³o 10-15% bitów.
 Nie powiniene¶ go wy³±czaæ, chyba ¿e zale¿y Ci na szybko¶ci.
 .
 .TP
@@ -7802,7 +7838,8 @@ pomiêdzy klatkami (domy¶lnie: 1).
 .
 .TP
 .B rc_buffer_size=<warto¶æ> (tylko CBR lub tryb dwuprzebiegowy)
-rozmiar bufora kontroli tempa w kbitach (domy¶lnie: 1 sekunda przy okre¶lonym bitrate)
+rozmiar bufora kontroli tempa w kbitach
+(domy¶lnie: 1 sekunda przy okre¶lonym bitrate)
 .
 .TP
 .B rc_init_buffer=<0.0\-1.0> (tylko CBR)
@@ -7935,6 +7972,17 @@ wszystkich aktywnych typów:
 4x4, 4x8, 8x4 s± sprawdzane tylko, je¿eli 8x8 jest lepszy ni¿ 16x16.
 .
 .TP
+.B (no)chroma_me
+Bierze pod uwagê informacje o barwie podczas szukania ruchu podpikseli
+(domy¶lnie: w³aczone).
+Wymaga subq=5.
+.
+.TP
+.B chroma_qp_offset=<-12\-12>
+U¿ywa innego kwantyzatora do barw w porównaniu do jasno¶ci.
+Sensowne warto¶ci s± w zakresie <-2\-2> (domy¶lnie: 0).
+.
+.TP
 .B level_idc=<10\-51>
 Ustawia parametr Level strumienia bitów, wed³ug definicji w aneksie A standardu
 H.264 (domy¶lnie: 40 - Level 4.0).
@@ -8014,9 +8062,9 @@ pocz±tkowe pts video, w milisekundach (domy¶lnie: 200)
 pocz±tkowe pts audio, w milisekundach (domy¶lnie: 200)
 .
 .TP
-.B vdelay=<-32760\--1>
-pocz±tkowy czas opó¼nienia obrazu w w milisekundach (domy¶lnie: 0)
-U¿ywaj, je¶li chcesz opó¼niæ obraz wzglêdem d¼wiêku.
+.B vdelay=<1\-32760>
+Pocz±tkowe opó¼nienie obrazu w w milisekundach (domy¶lnie: 0),
+u¿ywaj, je¶li chcesz opó¼niæ obraz wzglêdem d¼wiêku.
 .
 .TP
 .B drop\ \ \ 
@@ -8042,12 +8090,16 @@ Ustawia bitrate video w kbit/s dla filmów MPEG-1/2.
 .TP
 .B vframerate=<23.976 | 24 | 25 | 29.97 | 30 | 50 | 59.94 | 60 >
 Ustawia ilo¶æ klatek na sekundê dla filmów MPEG-1/2.
+Ta opcja zostanie zignorowana je¶li bêdzie u¿yta razem z opcj± telecine.
 .
 .TP
 .B telecine
 W³±cza tryb miêkkiego telecine: muxer oszukuje strumieñ obrazu tak, aby wygl±da³
 jak kodowany przy 29.97 lub 30 fps; dzia³a to tylko z filmami MPEG-2, kiedy
-ilo¶æ klatek na sekundê wynosi 23.976 lub 24.
+wyj¶ciowa ilo¶æ klatek na sekundê, po ewentualnej konwersji przez \-ofps wynosi
+23.976 lub 24.
+Wszystkie pozosta³e warto¶ci s± niekompatybilne z t± opcj±.
+.
 .
 .\" --------------------------------------------------------------------------
 .\" Pliki
@@ -8168,6 +8220,7 @@ mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg plik.avi
 .TP
 .B Odtwarzaj d¼wiêk 6-kana³owy w formacie AAC tylko na dwóch g³o¶nikach:
 mplayer \-rawaudio on:format=0xff \-af pan=6:.32:.39:.06:.17:-.17:.33:.32:.06:.39:-.17:.17:.33 adts_he-aac160_51.aac
+.br
 Mo¿e bêdziesz chcia³ siê trochê pobawiæ warto¶ciami filtru pan (np. pomno¿yæ
 przez jaka¶ liczbê), aby zwiêkszyæ g³o¶no¶æ albo unikn±æ trzasków.
 .
