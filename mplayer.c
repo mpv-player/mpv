@@ -477,10 +477,12 @@ int use_stdin=0; //int f; // filedes
 
 int gui_no_filename=0;
 
+vo_tune_info_t vtune;
+
   mp_msg_init(MSGL_STATUS);
 
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s",banner_text);
-
+  memset(&vtune,0,sizeof(vo_tune_info_t));
   /* Test for cpu capabilities (and corresponding OS support) for optimizing */
 #ifdef ARCH_X86
   GetCpuCaps(&gCpuCaps);
@@ -1239,7 +1241,7 @@ if(flip==-1){
 
 mp_msg(MSGT_CPLAYER,MSGL_DBG2,"vo_debug1: out_fmt=%s\n",vo_format_name(out_fmt));
 
-if(!init_video(sh_video)){
+if(!init_video(sh_video,&vtune.pitch[0])){
      mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_CouldntInitVideoCodec);
      goto goto_next_file; // exit_player(MSGTR_Exit_error);
 }
@@ -1349,7 +1351,7 @@ current_module="init_libvo";
    if(video_out->config(sh_video->disp_w,sh_video->disp_h,
                       screen_size_x,screen_size_y,
                       fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3),
-                      title,out_fmt,NULL)){
+                      title,out_fmt,&vtune)){
 #endif
      mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_CannotInitVO);
      goto goto_next_file; // exit_player(MSGTR_Exit_error);

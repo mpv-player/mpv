@@ -413,8 +413,10 @@ void uninit_video(sh_video_t *sh_video){
     sh_video->inited=0;
 }
 
-int init_video(sh_video_t *sh_video){
+int init_video(sh_video_t *sh_video,int *pitches)
+{
 unsigned int out_fmt=sh_video->codec->outfmt[sh_video->outfmtidx];
+pitches[0] = pitches[1] =pitches[2] = 0; /* fake unknown */
 
 sh_video->our_out_buffer=NULL;
 
@@ -581,6 +583,9 @@ switch(sh_video->codec->driver){
    mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_NoLAVCsupport);
    return 0;
 #else
+   /* Just because we know that */
+   pitches[0] = 16;
+   pitches[1] = pitches[2] = 8;
    mp_msg(MSGT_DECVIDEO,MSGL_V,"FFmpeg's libavcodec video codec\n");
     if(!avcodec_inited){
       avcodec_init();
@@ -620,6 +625,9 @@ switch(sh_video->codec->driver){
 #else
    if(divx_quality) mp_msg(MSGT_DECVIDEO,MSGL_HINT,MSGTR_MpegPPhint);
 #endif
+   /* Just because we know that */
+   pitches[0] = 16;
+   pitches[1] = pitches[2] = 8;
    // send seq header to the decoder:
    mpeg2_decode_data(NULL,videobuffer,videobuffer+videobuf_len,0);
    mpeg2_allocate_image_buffers (picture);
