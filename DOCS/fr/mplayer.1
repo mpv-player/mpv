@@ -774,7 +774,9 @@ se place à 1\ heure 10\ min
 .TP
 .B \-tv <option1:option2:...>
 Cette option active les facultés de capture TV de MPlayer. Pour regarder la TV
-avec MPlayer, utilisez 'tv://' ou 'tv://<numéro_canal>' comme URL de film.
+avec MPlayer, utilisez 'tv://' ou 'tv://<numéro_canal>' ou même
+'tv://<nom_canal>' (voir l'option channels pour numéro_canal plus bas) comme URL
+de film.
 
 .I NOTE:
 .br
@@ -829,7 +831,8 @@ avec une télécommande (voir. lirc).
 Non compatible avec le paramètre frequency.
 Attention : Le numéro de canal sera sa position dans la liste des 'channels',
 en commençant à 1. 
-Exemple: utilisez tv://1, tv://2, tv_set_channel 1, tv_set_channel 2, etc.
+Exemple: utilisez tv://1, tv://2, tv://TV1, tv_set_channel 1, tv_set_channel 2,
+tv_set_channel TV1, etc.
 .IPs [brightness|contrast|hue|saturation]=<\-100\-100>
 fixe les paramètres de couleur de la carte graphique.
 .IPs audiorate=<valeur>
