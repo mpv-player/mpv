@@ -700,15 +700,24 @@ static void set_fullmode (int mode) {
 		screen_surface_h = priv->XHeight;
 	}
 	else if (mode < 0) {
-        int i;
+        int i,j,imax;
 		mode = 0; // Default to the biggest mode avaible
+		if (verbose) for(i=0;priv->fullmodes[i];++i) 
+	           printf("SDL Mode: %d:  %d x %d\n", i, priv->fullmodes[i]->w, priv->fullmodes[i]->h);
 		for(i = findArrayEnd(priv->fullmodes) - 1; i >=0; i--) {
 		  if( (priv->fullmodes[i]->w >= priv->dstwidth) && 
 		      (priv->fullmodes[i]->h >= priv->dstheight) ) {
-		    mode = i;
-		    break;
+		      imax = i;
+		      for (j = findArrayEnd(priv->fullmodes) - 1; j >=0; j--) {
+			  if (priv->fullmodes[j]->w > priv->fullmodes[imax]->w
+			      && priv->fullmodes[j]->h == priv->fullmodes[imax]->h)
+			      imax = j;
+		      }
+		      mode = imax;
+		      break;
+		    }
 		  }
-		}
+		if (verbose) printf("SET SDL Mode: %d:  %d x %d\n", mode, priv->fullmodes[mode]->w, priv->fullmodes[mode]->h);
 		priv->fullmode = mode;
         screen_surface_h = priv->fullmodes[mode]->h;
         screen_surface_w = priv->fullmodes[mode]->w;
