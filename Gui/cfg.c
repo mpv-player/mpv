@@ -230,6 +230,21 @@ int cfg_read( void )
   }
  free( cfg );
 
+// -- reade file loader history
+ cfg=get_path( "gui.history" );
+ if ( (f=fopen( cfg,"rt+" )) )
+  {
+   int i = 0;
+   while ( !feof( f ) )
+    {
+     char tmp[512];
+     if ( gfgets( tmp,512,f ) == NULL ) continue;
+     fsHistory[i++]=gstrdup( tmp );
+    }
+   fclose( f );
+  }
+ free( cfg );
+
 #ifdef USE_SETLOCALE
  setlocale( LC_ALL,"" );
 #endif
@@ -311,6 +326,18 @@ int cfg_write( void )
      if ( URLList->url ) fprintf( f,"%s\n",URLList->url );
      URLList=URLList->next;
     }
+   fclose( f );
+  }
+ free( cfg );
+
+// -- save file loader history
+ cfg=get_path( "gui.history" );
+ if ( (f=fopen( cfg,"wt+" )) )
+  {
+   int i = 0;
+//   while ( fsHistory[i] != NULL )
+   for ( i=0;i < 5; i++)
+     if( fsHistory[i] ) fprintf( f,"%s\n",fsHistory[i] );
    fclose( f );
   }
  free( cfg );

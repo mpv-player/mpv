@@ -29,9 +29,10 @@ GtkWidget * AddFrame( char * title,int type,GtkWidget * parent,int add )
  frame=gtk_frame_new( title );
  gtk_widget_set_name( frame,"frame" );
  gtk_widget_show( frame );
+ gtk_frame_set_shadow_type( GTK_FRAME( frame ),type );
+ if ( !parent ) return frame;
  if ( add ) gtk_container_add( GTK_CONTAINER( parent ),frame );
   else gtk_box_pack_start( GTK_BOX( parent ),frame,FALSE,FALSE,0 );
- gtk_frame_set_shadow_type( GTK_FRAME( frame ),type );
  return frame;
 }
 

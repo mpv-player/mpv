@@ -90,9 +90,10 @@ static GtkWidget * HSSubDelay;
 static GtkWidget * HSSubPosition;
 static GtkWidget * HSSubFPS;
 static GtkWidget * HSPPQuality;
+static GtkWidget * HSFPS;
 
 static GtkAdjustment * HSExtraStereoMuladj, * HSAudioDelayadj, * HSPanscanadj, * HSSubDelayadj;
-static GtkAdjustment * HSSubPositionadj, * HSSubFPSadj, * HSPPQualityadj;
+static GtkAdjustment * HSSubPositionadj, * HSSubFPSadj, * HSPPQualityadj, * HSFPSadj;
 
 #ifndef HAVE_FREETYPE
 static GtkWidget     * HSFontFactor;
@@ -246,6 +247,8 @@ void ShowPreferences( void )
   if ( !gstrcmp( vo_driver[0],"dxr3" ) ) gtk_widget_set_sensitive( VConfig,TRUE );
 #endif
  }
+ 
+  gtk_adjustment_set_value( HSFPS,force_fps );
 
 // -- 3. page
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBSubOverlap ),suboverlap_enabled );
@@ -499,6 +502,7 @@ void prButton( GtkButton * button,gpointer user_data )
 	sub_delay=HSSubDelayadj->value;
 	sub_fps=HSSubFPSadj->value;
 	sub_pos=(int)HSSubPositionadj->value;
+	force_fps=HSFPSadj->value;
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBOSDNone ) ) ) osd_level=0;
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBOSDIndicator ) ) ) osd_level=1;
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBOSDTandP ) ) ) osd_level=2;
@@ -840,12 +844,27 @@ GtkWidget * create_Preferences( void )
   CBHFramedrop=AddCheckButton( MSGTR_PREFERENCES_HFrameDrop,vbox5 );
   CBFlip=AddCheckButton( MSGTR_PREFERENCES_Flip,vbox5 );
 
-  hbox3=AddHBox( vbox5,1 );
+  table1=gtk_table_new( 3,2,FALSE );
+  gtk_widget_set_name( table1,"table1" );
+  gtk_widget_show( table1 );
+  gtk_box_pack_start( GTK_BOX( vbox5 ),table1,FALSE,FALSE,0 );
 
-  AddLabel( MSGTR_PREFERENCES_Panscan,hbox3 );
+  label=AddLabel( MSGTR_PREFERENCES_Panscan,NULL );
+    gtk_table_attach( GTK_TABLE( table1 ),label,0,1,0,1,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+
+  label=AddLabel( MSGTR_PREFERENCES_FPS,NULL );
+    gtk_table_attach( GTK_TABLE( table1 ),label,0,1,1,2,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 
   HSPanscanadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,1,0.001,0,0 ) );
-  HSPanscan=AddHScaler( HSPanscanadj,hbox3,1 );
+  HSPanscan=AddHScaler( HSPanscanadj,NULL,1 );
+    gtk_table_attach( GTK_TABLE( table1 ),HSPanscan,1,2,0,1,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+
+  HSFPSadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,1000,0.001,0,0 ) );
+  HSFPS=gtk_spin_button_new( GTK_ADJUSTMENT( HSFPSadj ),1,3 );
+    gtk_widget_set_name( HSFPS,"HSFPS" );
+    gtk_widget_show( HSFPS );
+    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( HSFPS ),TRUE );
+    gtk_table_attach( GTK_TABLE( table1 ),HSFPS,1,2,1,2,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 
   label=AddLabel( MSGTR_PREFERENCES_Video,NULL );
     gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook1 ),gtk_notebook_get_nth_page( GTK_NOTEBOOK( notebook1 ),1 ),label );
@@ -892,23 +911,27 @@ GtkWidget * create_Preferences( void )
   label=AddLabel( MSGTR_PREFERENCES_SUB_Delay,NULL );
     gtk_table_attach( GTK_TABLE( table1 ),label,0,1,0,1,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 
+  label=AddLabel( MSGTR_PREFERENCES_SUB_POS,NULL );
+    gtk_table_attach( GTK_TABLE( table1 ),label,0,1,1,2,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );    
+
   label=AddLabel( MSGTR_PREFERENCES_SUB_FPS,NULL );
-    gtk_table_attach( GTK_TABLE( table1 ),label,0,1,1,2,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+    gtk_table_attach( GTK_TABLE( table1 ),label,0,1,2,3,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 
   HSSubDelayadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-10.0,10,0.01,0,0 ) );
   HSSubDelay=AddHScaler( HSSubDelayadj,NULL,1 );
     gtk_table_attach( GTK_TABLE( table1 ),HSSubDelay,1,2,0,1,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 
-  label=AddLabel( MSGTR_PREFERENCES_SUB_POS,NULL );
-    gtk_table_attach( GTK_TABLE( table1 ),label,0,1,2,3,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );    
-
   HSSubPositionadj=GTK_ADJUSTMENT( gtk_adjustment_new( 100,0,100,1,0,0 ) );
   HSSubPosition=AddHScaler( HSSubPositionadj,NULL,0 );
-    gtk_table_attach( GTK_TABLE( table1 ),HSSubPosition,1,2,2,3,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+    gtk_table_attach( GTK_TABLE( table1 ),HSSubPosition,1,2,1,2,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 
   HSSubFPSadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,100,0.01,0,0 ) );
-  HSSubFPS=AddHScaler( HSSubFPSadj,NULL,1 );
-    gtk_table_attach( GTK_TABLE( table1 ),HSSubFPS,1,2,1,2,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+  HSSubFPS=gtk_spin_button_new( GTK_ADJUSTMENT( HSSubFPSadj ),1,3 );
+    gtk_widget_set_name( HSSubFPS,"HSSubFPS" );
+    gtk_widget_show( HSSubFPS );
+    gtk_widget_set_usize( HSSubFPS,60,-1 );
+    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( HSSubFPS ),TRUE );
+    gtk_table_attach( GTK_TABLE( table1 ),HSSubFPS,1,2,2,3,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 
   vbox9=AddVBox( vbox8,0 );
 

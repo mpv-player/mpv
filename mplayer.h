@@ -26,6 +26,7 @@ extern int osd_visible;
 extern char * font_name;
 extern float  font_factor;
 extern float movie_aspect;
+extern float force_fps;
 
 extern char * sub_name;
 extern float  sub_delay;

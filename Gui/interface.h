@@ -169,6 +169,10 @@ extern plItem * plLastPlayed;
 
 extern URLItem * URLList;
 
+#define fsPersistant_MaxPath 512
+#define fsPersistant_MaxPos 5
+extern char * fsHistory[fsPersistant_MaxPos];
+
 #define gtkSetContrast       0
 #define gtkSetBrightness     1
 #define gtkSetHue	     2

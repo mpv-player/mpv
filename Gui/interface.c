@@ -597,7 +597,8 @@ int guiGetEvent( int type,char * arg )
 #endif
 	break;
    case guiSetDefaults:
-        if ( guiIntfStruct.Playing == 1 && guiIntfStruct.FilenameChanged )
+//        if ( guiIntfStruct.Playing == 1 && guiIntfStruct.FilenameChanged )
+	if ( guiIntfStruct.FilenameChanged )
          {
           audio_id=-1;
 	  video_id=-1;
@@ -607,10 +608,12 @@ int guiGetEvent( int type,char * arg )
 	  autosync=0;
 	  vcd_track=0;
 	  dvd_title=0;
+	  force_fps=0;
 	 }				
 	wsPostRedisplay( &appMPlayer.subWindow );
 	break;
    case guiSetParameters:
+        guiGetEvent( guiSetDefaults,NULL );
         switch ( guiIntfStruct.StreamType ) 
          {
 	  case STREAMTYPE_PLAYLIST:
@@ -753,6 +756,8 @@ plItem * plList = NULL;
 plItem * plLastPlayed = NULL;
 
 URLItem *URLList = NULL;
+
+char    *fsHistory[fsPersistant_MaxPos] = { NULL,NULL,NULL,NULL,NULL };
 
 #if defined( MP_DEBUG ) && 0
 void list( void )

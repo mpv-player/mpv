@@ -304,14 +304,12 @@ void ShowFileSelect( int type,int modal )
  
  if ( fsTopList_items ) g_list_free( fsTopList_items ); fsTopList_items=NULL;
  {
-  char hist[fsPersistant_MaxPath + 1];
+  char * hist;
+  int  i, c = 1;
   
-  bzero( hist,fsPersistant_MaxPath + 1 );
-  if ( fs_PersistantHistory( 0,hist,0 ) == 0 )
-   { 
-    fsTopList_items=g_list_append( fsTopList_items,hist );
-    chdir( hist );
-   } else fsTopList_items=g_list_append( fsTopList_items,(gchar *)get_current_dir_name() );
+  for ( i=0;i < fsPersistant_MaxPos;i++ )
+   if ( fsHistory[i] ) { fsTopList_items=g_list_append( fsTopList_items,fsHistory[i] ); c=0; }
+  if ( c ) fsTopList_items=g_list_append( fsTopList_items,(gchar *)get_current_dir_name() );
  }
  if ( getenv( "HOME" ) ) fsTopList_items=g_list_append( fsTopList_items,getenv( "HOME" ) );
  fsTopList_items=g_list_append( fsTopList_items,"/home" );
@@ -332,60 +330,16 @@ void HideFileSelect( void )
  fsFileSelect=NULL;
 }
 
-//----------------------------------------------------
+int fs_PersistantHistory( char * subject )
+{
+ int i;
 
-/*
- * int fs_PersistantHistory(int rw_command, char *subject)
- *
- * is used to read/write in the $HOME/.mplayer/persistant_history file
- * parameters:  rw_command = (0,1) <=> (read,write)
- *              subject - for i/o
- *              pos - position in history file (line)
- * return:      0 = ok
- *
- */
-	 
- int fs_PersistantHistory(int rw_command, char *subject, int pos)
- {
-  FILE *pfile;
-  
-  char path[fsPersistant_MaxPath+1];
-  int fdata,fpos = 0;
-  char *subpath = NULL;
-  const char *ph_filename = fsPersistant_FilePath;
-  
-  if (!subject) return -1;
-  if (pos < 0 || pos > fsPersistant_MaxPos) return -2;
-  bzero(path,fsPersistant_MaxPath+1);
-  
-  subpath = getenv("HOME");
-  if (!subpath) return -3;
-  if (strlen(subpath)+strlen(fsPersistant_FilePath) > fsPersistant_MaxPath) return -4;
-  memcpy(path, subpath, strlen(subpath));
-  memcpy(path+strlen(subpath), ph_filename, strlen(ph_filename));
+ for ( i=0;i < fsPersistant_MaxPos;i++ ) if ( fsHistory[i] && !strcmp( fsHistory[i],subject ) ) return 0;
+ gfree( (void **)&fsHistory[fsPersistant_MaxPos - 1] );
+ for ( i=fsPersistant_MaxPos - 1;i;i-- ) fsHistory[i]=fsHistory[i - 1];
+ fsHistory[0]=gstrdup( subject );
 
-  if (rw_command == 0)
-  {
-   pfile = fopen(path,"r");
-   if (!pfile) return -5;
-   while ((fdata = fgetc(pfile)) != EOF)
-   {
-    if (fpos > fsPersistant_MaxPath) { fclose(pfile);return -6; }
-    subject[fpos++] = fdata;
-   }
-   fclose(pfile);
-   return 0;
-  }
-
-  if (rw_command == 1)
-  {
-   pfile = fopen(path,"w+");
-   if (!pfile) return -6;
-   fprintf(pfile,"%s",subject);
-   fclose(pfile);
-   return 0;
-  }
-  else return -10;
+ return 0;
 }
 //-----------------------------------------------
 
@@ -482,7 +436,6 @@ void fs_Ok_released( GtkButton * button,gpointer user_data )
    fsSelectedFile=fsThatDir;
    CheckDir( fsFNameList,get_current_dir_name() );
    gtk_entry_set_text( GTK_ENTRY( fsPathCombo ),(unsigned char *)get_current_dir_name() );
-   fs_PersistantHistory(1,get_current_dir_name(),0);      //totem, write into history
    return;
   }
 
@@ -516,6 +469,7 @@ void fs_Ok_released( GtkButton * button,gpointer user_data )
           guiIntfStruct.FilenameChanged=1;
 	  gfree( (void **)&guiIntfStruct.AudioFile );
 	  gfree( (void **)&guiIntfStruct.Subtitlename );
+          fs_PersistantHistory( fsSelectedDirectory );      //totem, write into history
           break;
 #ifdef USE_SUB
    case fsSubtitleSelector:
@@ -553,7 +507,7 @@ void fs_Ok_released( GtkButton * button,gpointer user_data )
 void fs_Cancel_released( GtkButton * button,gpointer user_data )
 {
  HideFileSelect();
- fs_PersistantHistory(1,get_current_dir_name(),0);      //totem, write into history file
+ fs_PersistantHistory( get_current_dir_name() );      //totem, write into history file
 }
 
 void fs_fsFNameList_select_row( GtkWidget * widget,gint row,gint column,GdkEventButton *bevent,gpointer user_data )

@@ -9,10 +9,6 @@
 #define fsAudioSelector    3
 #define fsFontSelector     4
 
-#define fsPersistant_MaxPath    512
-#define fsPersistant_MaxPos     10
-#define fsPersistant_FilePath   "/.mplayer/phistory"
-
 #include <errno.h>
 
 extern GtkWidget   * fsFileSelect;

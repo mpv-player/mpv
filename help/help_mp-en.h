@@ -584,6 +584,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_AutoSyncValue "Autosync: "
 #define MSGTR_PREFERENCES_CDROMDevice "CD-ROM device:"
 #define MSGTR_PREFERENCES_DVDDevice "DVD device:"
+#define MSGTR_PREFERENCES_FPS "Movie FPS:"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Fatal error!"
