@@ -199,8 +199,7 @@ static uint32_t draw_frame(uint8_t * src[])
     struct pngdata png;
     png_byte *row_pointers[image_height];
     
-    sprintf (buf, "%08d.png", ++framenum);
-    //printf("%s\n", buf);
+    snprintf (buf, 100, "%08d.png", ++framenum);
 
     png = create_png(buf);
 
@@ -231,8 +230,7 @@ static void flip_page (void)
   
   if(image_format == IMGFMT_YV12) {
 
-    sprintf (buf, "%08d.png", ++framenum);
-    //printf("%s\n", buf);
+    snprintf (buf, 100, "%08d.png", ++framenum);
 
     png = create_png(buf);
 
@@ -285,6 +283,3 @@ uninit(void)
 static void check_events(void)
 {
 }
-
-
-
