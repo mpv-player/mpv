@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.9 -->
+<!-- synced with 1.10 -->
 <chapter id="usage">
 <title>Uso</title>
 
@@ -428,10 +428,10 @@ por ejemplo para reproducir desde FTP:
 <screen>wget ftp://micorsops.com/algo.avi -O - | mplayer -</screen>
 </para>
 
-<para>
+<note><para>
 Nota: también es recomendable activar la CACHE cuando se reproduce desde la red:
 <screen>wget ftp://micorsops.com/algo.avi -O - | mplayer -cache 8192 -</screen>
-</para>
+</para></note>
 </sect1>
 
 <sect1 id="mpst" xreflabel="Remote streams">

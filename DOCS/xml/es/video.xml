@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.19 -->
+<!-- synced with 1.20 -->
 <sect2 id="video-dev">
 <title>Dispositivos de salida de video</title>
 
@@ -1504,6 +1504,42 @@ de retardo, ya que CVS siempre debe estar actualizado.
 <para>
 Aunque hay un controlador para los chips 3DLabs GLINT R3 y Permedia3, ninguno
 ha sido probado, así que cualquier comentario o informe será bienvenido.
+</para>
+</sect5>
+
+<sect5 id="vidix-nvidia">
+<title>Tarjetas nVidia</title>
+<para>
+Hay controladores para nVidia relativamente recientes, se sabe que funcionan bien
+con los chipset Riva 128, TNT y GeForce2, también se nos ha informado de que funciona
+con otros.
+</para>
+
+<para>
+Es recomendable usar los controladores binarios de nVidia para X antes de usar el
+controlador VIDIX, porque algunos de los registros que es necesario inicializar
+aún no han sido descubiertos, por lo que probablemente falle con el controlador
+de Código Abierto de XFree86 <filename>nv.o</filename>.
+</para>
+
+<para>
+¡Esperamos que nos informe!
+</para>
+</sect5>
+
+<sect5 id="vidix-sis">
+<title>Tarjetas SiS</title>
+<para>
+Se trata de un código muy experimental, al igual que el nvidia_vid.
+</para>
+
+<para>
+Ha sido probado en SiS 650/651/740 (los chipset más comunes usados en las versiones
+SiS de las placas base "Shuttle XPC")
+</para>
+
+<para>
+¡Esperamos que nos informe!
 </para>
 </sect5>
 </sect4>

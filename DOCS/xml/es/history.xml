@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.5 -->
+<!-- synced with 1.6 -->
 <!-- FIXME: history really should be in the appendix -->
 <sect1 id="history">
 <title>Historia</title>
@@ -96,7 +96,19 @@ uno...
     desperfecto, por lo que debería prepararse para...
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">MPlayer 0.91 "?"</emphasis> fecha todavía desconocida
+  <emphasis role="bold">MPlayer 0.91</emphasis> Ago 13, 2003
+  </para><para>Lo que se menciona más arriba y un montón de otros fallos han sido
+    corregidos. Esta es la última versión estable.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer 1.0pre1 "Development on the beach"</emphasis> Sep 1, 2003
+  </para><para>Aunque no es una liberación estable, la mencionamos aquí porque
+    es la primera pre versión de la serie 1.0 de MPlayer y se pretende que sea
+    de ayuda en la <emphasis>gran fiesta de caza de fallos</emphasis>.
+    ¡Este es un enorme paso adelante!
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer 1.0</emphasis> fecha aún desconocida
   </para></listitem>
 </itemizedlist>
 </para>

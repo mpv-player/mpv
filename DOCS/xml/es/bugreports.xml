@@ -303,13 +303,13 @@ info all-registers
 <sect3 id="bugreports_core">
 <title>Cómo extraer información significativa desde un volcado core</title>
 <para>
-Por favor cree el siguiente archivo de comandos:
+Cree el siguiente archivo de órdenes:
 <screen>
 bt
 disass $pc-32 $pc+32
 info all-registers
 </screen>
-y después ejecute lo siguiente en su línea de órdenes:
+y después ejecute ésta orden:
 <screen>gdb mplayer --core=core -batch --command=<replaceable>command_file</replaceable> &gt; mplayer.bug</screen>
 </para>
 </sect3>
