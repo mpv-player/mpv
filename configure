@@ -51,16 +51,19 @@ die () {
 }
 
 # OS test booleans functions
-linux()   { test "$system_name" = "Linux"   ; return "$?" ; }
-sunos()   { test "$system_name" = "SunOS"   ; return "$?" ; }
-irix()    { test "$system_name" = "IRIX"    ; return "$?" ; }
-cygwin()  { test "$system_name" = "CYGWIN"  ; return "$?" ; }
-freebsd() { test "$system_name" = "FreeBSD" ; return "$?" ; }
-netbsd()  { test "$system_name" = "NetBSD"  ; return "$?" ; }
-bsdos()   { test "$system_name" = "BSD/OS"  ; return "$?" ; }
-openbsd() { test "$system_name" = "OpenBSD" ; return "$?" ; }
+issystem() {
+  test "`echo $system_name | tr A-Z a-z`" = "`echo $1 | tr A-Z a-z`"
+}
+linux()   { issystem "Linux"   ; return "$?" ; }
+sunos()   { issystem "SunOS"   ; return "$?" ; }
+irix()    { issystem "IRIX"    ; return "$?" ; }
+cygwin()  { issystem "CYGWIN"  ; return "$?" ; }
+freebsd() { issystem "FreeBSD" ; return "$?" ; }
+netbsd()  { issystem "NetBSD"  ; return "$?" ; }
+bsdos()   { issystem "BSD/OS"  ; return "$?" ; }
+openbsd() { issystem "OpenBSD" ; return "$?" ; }
 bsd()     { freebsd || netbsd || bsdos || openbsd ; return "$?" ; }
-qnx()     { test "$system_name" = "QNX"     ; return "$?" ; }
+qnx()     { issystem "QNX"     ; return "$?" ; }
 
 # arch test boolean functions
 x86() {
@@ -1043,9 +1046,9 @@ EOF
 cc_check $_ld_sock -lsocket && _ld_sock="$_ld_sock -lsocket"
 cc_check $_ld_sock -lnsl && _ld_sock="$_ld_sock -lnsl"
 if test "$_ld_sock" ; then
-  echores "using $_ld_sock"
+  echores "yes (using $_ld_sock)"
 else
-  echores "not needed"
+  echores "no"
 fi
 
 
@@ -1163,7 +1166,7 @@ elif cc_check -pthread ; then
 else
   die "Lib pthread not found. (needed by windows and networking stuff)"
 fi
-echores "using $_ld_pthread"
+echores "yes (using $_ld_pthread)"
 
 
 echocheck "sys/soundcard.h"
@@ -1373,11 +1376,11 @@ fi
 
 if test "$_xdpms4" = yes ; then
   _def_xdpms='#define HAVE_XDPMS 1'
-  echores "using xdpms4"
+  echores "yes (using Xdpms 4)"
 elif test "$_xdpms3" = yes ; then
   _def_xdpms='#define HAVE_XDPMS 1'
   _ld_x11="$_ld_x11 -lXdpms"
-  echores "using xdpms3"
+  echores "yes (using Xdpms 3)"
 else
   _def_xdpms='#undef HAVE_XDPMS'
   echores "no"
@@ -1480,14 +1483,14 @@ if test "$_dga" = 1 ; then
   _ld_dga='-lXxf86dga'
   _vosrc="$_vosrc vo_dga.c"
   _vomodules="dga $_vomodules"
-  echores "using DGA 1.0"
+  echores "yes (using DGA 1.0)"
 elif test "$_dga" = 2 ; then
   _def_dga='#define HAVE_DGA 1'
   _def_dga2='#define HAVE_DGA2 1'
   _ld_dga='-lXxf86dga'
   _vosrc="$_vosrc vo_dga.c"
   _vomodules="dga $_vomodules"
-  echores "using DGA 2.0"
+  echores "yes (using DGA 2.0)"
 elif test "$_dga" = no ; then
   echores "no"
 else
@@ -1686,9 +1689,9 @@ echocheck "VESA support"
 if x86 && linux ; then
   _vosrc="$_vosrc vo_vesa.c vesa_lvo.c"
   _vomodules="vesa $_vomodules"
-  echores "ok"
+  echores "yes"
 else
-  echores "not supported on this OS/architecture"
+  echores "no (not supported on this OS/architecture"
 fi
 
 
