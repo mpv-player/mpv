@@ -691,8 +691,13 @@ case 3:
         planes[0]=sh_video->our_out_buffer;
         planes[2]=planes[0]+sh_video->disp_w*sh_video->disp_h;
         planes[1]=planes[2]+sh_video->disp_w*sh_video->disp_h/4;
-      } else
+      } else {
         planes[0]=sh_video->our_out_buffer;
+	if(sh_video->bih && sh_video->bih->biSize==1064)
+	    planes[1]=&sh_video->bih[1]; // pointer to palette
+	else
+	    planes[1]=NULL;
+      }
 case 2:
 #ifdef USE_LIBVO2
     if(planar)
