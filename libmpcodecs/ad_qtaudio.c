@@ -193,7 +193,7 @@ static int preinit(sh_audio_t *sh){
     if(sh->codecdata){
 	error = SoundConverterSetInfo(myConverter,siDecompressionParams,sh->codecdata);
 	printf("SoundConverterSetInfo:%i\n",error);
-	if(error) return 0;
+//	if(error) return 0;
     }
 
     WantedBufferSize=OutputFormatInfo.numChannels*OutputFormatInfo.sampleRate*2;
