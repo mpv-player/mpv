@@ -117,6 +117,15 @@ static int synth_1to1(real *bandPtr,int channel,unsigned char *out,int *pnt)
   int clip = 0;
   int bo1;
 
+  #ifdef HAVE_SSE_MP3
+  //if ( _3dnow )
+   {
+    int ret;
+    ret=synth_1to1_sse( bandPtr,channel,out+*pnt );
+    *pnt+=128;
+    return ret;
+   }
+  #endif
   #ifdef HAVE_3DNOWEX
   if ( _3dnow > 1 )
    {

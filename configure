@@ -1181,15 +1181,20 @@ EOF
 echo "Creating mp3lib/config.mak"
 
 if [ $_3dnowex = yes ]; then
- _3dnowobjectsrcs='dct36_k7.s dct64_k7.s decode_k7.s dct36_3dnow.s dct64_3dnow.s decode_3dnow.s'
- _3dnowobjectobjs='dct36_k7.o dct64_k7.o decode_k7.o dct36_3dnow.o dct64_3dnow.o decode_3dnow.o'
+ _mp3libobjectsrcs='dct36_k7.s dct64_k7.s decode_k7.s dct36_3dnow.s dct64_3dnow.s decode_3dnow.s'
+ _mp3libobjectobjs='dct36_k7.o dct64_k7.o decode_k7.o dct36_3dnow.o dct64_3dnow.o decode_3dnow.o'
 else
 if [ $_3dnow = yes ]; then
- _3dnowobjectsrcs='dct36_3dnow.s dct64_3dnow.s decode_3dnow.s'
- _3dnowobjectobjs='dct36_3dnow.o dct64_3dnow.o decode_3dnow.o'
+ _mp3libobjectsrcs='dct36_3dnow.s dct64_3dnow.s decode_3dnow.s'
+ _mp3libobjectobjs='dct36_3dnow.o dct64_3dnow.o decode_3dnow.o'
 else
- _3dnowobjectsrcs=
- _3dnowobjectobjs=
+if [ $_sse = yes ]; then
+ _mp3libobjectsrcs='decode_sse.s'
+ _mp3libobjectobjs='decode_sse.o'
+else
+ _mp3libobjectsrcs=
+ _mp3libobjectobjs=
+fi
 fi
 fi
 
@@ -1197,8 +1202,8 @@ cat > mp3lib/config.mak << EOF
 
 include ../config.mak
 
-OPTIONAL_SRCS = $_3dnowobjectsrcs
-OPTIONAL_OBJS = $_3dnowobjectobjs
+OPTIONAL_SRCS = $_mp3libobjectsrcs
+OPTIONAL_OBJS = $_mp3libobjectobjs
 
 EOF
 

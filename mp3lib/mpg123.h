@@ -128,3 +128,9 @@ extern void dct64(real *a,real *b,real *c);
  extern void dct36_3dnowex(real *,real *,real *,real *,real *);
  extern int  synth_1to1_3dnowex( real *,int,unsigned char * );
 #endif
+#ifdef HAVE_SSE_MP3
+// extern void dct64_3dnow( real *,real *, real * );
+// extern void dct36_3dnow(real *,real *,real *,real *,real *);
+ extern int  synth_1to1_sse( real *,int,unsigned char * );
+#endif
+
