@@ -8,7 +8,7 @@
      Set parameters
      ************** -->
 
-  <xsl:param name="toc.section.depth" select="'3'"/>
+  <xsl:param name="toc.section.depth" select="'4'"/>
 
   <xsl:param name="html.stylesheet" select="'default.css'"/>
   <xsl:param name="html.stylesheet.type" select="'text/css'"/>
