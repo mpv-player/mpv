@@ -169,7 +169,7 @@ void ShowPreferences( void )
  {
   int    i = 0;
   char * tmp[3]; tmp[2]="";
-  old_audio_driver=0;
+  old_audio_driver=-1;
   while ( audio_out_drivers[i] )
    {
     const ao_info_t *info = audio_out_drivers[i++]->info;
@@ -183,12 +183,15 @@ void ShowPreferences( void )
      }
     tmp[0]=(char *)info->short_name; tmp[1]=(char *)info->name; gtk_clist_append( GTK_CLIST( CLADrivers ),tmp );
    }
-  gtk_clist_select_row( GTK_CLIST( CLADrivers ),old_audio_driver,0 );
-  gtk_clist_get_text( GTK_CLIST( CLADrivers ),old_audio_driver,0,(char **)&ao_driver );
-  gtk_widget_set_sensitive( AConfig,FALSE );
+  if ( old_audio_driver > -1 )
+   {
+    gtk_clist_select_row( GTK_CLIST( CLADrivers ),old_audio_driver,0 );
+    gtk_clist_get_text( GTK_CLIST( CLADrivers ),old_audio_driver,0,(char **)&ao_driver );
+    gtk_widget_set_sensitive( AConfig,FALSE );
 #ifdef USE_OSS_AUDIO
-  if ( !strncmp( ao_driver[0],"oss",3 ) ) gtk_widget_set_sensitive( AConfig,TRUE );
+    if ( !strncmp( ao_driver[0],"oss",3 ) ) gtk_widget_set_sensitive( AConfig,TRUE );
 #endif
+   }
  }
 
 // -- 2. page
