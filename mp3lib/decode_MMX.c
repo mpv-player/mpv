@@ -47,10 +47,10 @@ unsigned long __attribute__((aligned(8))) costab_mmx[] =
 	1060439283,
 };
 
+static int temp;
 void synth_1to1_MMX_s(real *bandPtr, int channel, short *samples,
                       short *buffs, int *bo)
 {
-
 __asm __volatile(
         "movl %1,%%ecx\n\t"
         "movl %2,%%edi\n\t"
@@ -67,7 +67,7 @@ __asm __volatile(
         "movl %%eax,(%%edx)\n\t"
 ".L1:\n\t"
         "leal (%%esi,%%eax,2),%%edx\n\t"
-        "movl %%eax,%%ebp\n\t"
+        "movl %%eax,%5\n\t"
         "incl %%eax\n\t"
         "pushl %0\n\t"
         "andl %%ebx,%%eax\n\t"
@@ -76,7 +76,7 @@ __asm __volatile(
 	"testl $1, %%eax\n\t"
 	"jnz .L2\n\t"
         "xchgl %%edx,%%ecx\n\t"
-	"incl %%ebp\n\t"
+	"incl %5\n\t"
         "leal 544(%%esi),%%esi\n\t"
 ".L2:\n\t"
 	"emms\n\t"
@@ -84,7 +84,7 @@ __asm __volatile(
         "pushl %%ecx\n\t"
         "call *"MANGLE(dct64_MMX_func)"\n\t"
 	"leal 1(%%ebx), %%ecx\n\t"
-        "subl %%ebp,%%ebx\n\t"
+        "subl %5,%%ebx\n\t"
 	"pushl %%ecx\n\t"
 	"leal "MANGLE(decwins)"(%%ebx,%%ebx,1), %%edx\n\t"
 	"shrl $1, %%ecx\n\t"
@@ -240,6 +240,6 @@ __asm __volatile(
 	"movw %%ax,(%%edi)\n\t"
 	"emms\n\t"
         :
-	:"m"(bandPtr),"m"(channel),"m"(samples),"m"(buffs),"m"(bo)
-	:"memory","%ebp","%edi","%esi","%ebx");
+	:"m"(bandPtr),"m"(channel),"m"(samples),"m"(buffs),"m"(bo), "m"(temp)
+	:"memory","%edi","%esi","%ebx");
 }
