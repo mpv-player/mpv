@@ -158,10 +158,10 @@ I am still having trouble compiling with SDL support. gcc says something
 about &quot;undefined reference to `SDL_EnableKeyRepeat'&quot;. What now?
 </para></question>
 <answer><para>
-Where did you install the SDL library? If you installed in <filename>/usr/local</filename>
-(the default) then edit the top level <filename>config.mak</filename> and add
-&quot;-L/usr/local/lib&quot; after &quot;X_LIBS=&quot;. Now type
-<command>make</command>. You're done!
+Where did you install the SDL library? If you installed in
+<filename class="directory">/usr/local</filename> (the default) then edit the
+top level <filename>config.mak</filename> and add &quot;-L/usr/local/lib&quot;
+after &quot;X_LIBS=&quot;. Now type <command>make</command>. You're done!
 </para></answer>
 </qandaentry>
 
@@ -197,7 +197,7 @@ Read the <link linkend="mga_vid">mga_vid documentation</link>.
 
 <qandaentry>
 <question><para>
-Are there rpm/deb/... packages of MPlayer?
+Are there rpm/deb/... packages of <application>MPlayer</application>?
 </para></question>
 <answer><para>
 You can make a .deb package for yourself, check the
@@ -302,7 +302,7 @@ Me too. :)
 <title>General questions</title>
 <qandaentry>
 <question><para>
-How do I create a proper patch for MPlayer?
+How do I create a proper patch for <application>MPlayer</application>?
 </para></question>
 <answer><para>
 We made a <ulink url="../../tech/patches.txt">short document</ulink>
@@ -312,7 +312,7 @@ describing all the necessary details. Please follow the instructions.
 
 <qandaentry>
 <question><para>
-How can I support MPlayer development?
+How can I support <application>MPlayer</application> development?
 </para></question>
 <answer><para>
 We are more than happy to accept your hardware and software
@@ -323,7 +323,7 @@ They help us in continuously improving MPlayer.
 
 <qandaentry>
 <question><para>
-How can I become an MPlayer developer?
+How can I become an <application>MPlayer</application> developer?
 </para></question>
 <answer><para>
 We always welcome coders and documenters. Read the
@@ -336,7 +336,7 @@ mailing list and start coding.
 
 <qandaentry>
 <question><para>
-Can I run multiple instances of MPlayer?
+Can I run multiple instances of <application>MPlayer</application>?
 </para></question>
 <answer><para>
 Yes. Some video out drivers like xv, dga or (x)mga are exclusive, some are
@@ -436,7 +436,7 @@ Download the Win32 codecs from our
 
 <qandaentry>
 <question><para>
-Are there any mailing lists on MPlayer?
+Are there any mailing lists on <application>MPlayer</application>?
 </para></question>
 <answer><para>
 Yes. See the bottom of the info page on
@@ -451,7 +451,7 @@ I've found a nasty bug when I tried to play my favorite video! Who should I info
 </para></question>
 <answer><para>
 Please read the
-<ulink url="http://www.mplayerhq.hu/DOCS/bugreports.html">bug reporting guidelines</ulink>
+<link linkend="bugreports">bug reporting guidelines</link>
 and follow the instructions.
 </para></answer>
 </qandaentry>
@@ -481,7 +481,7 @@ some (umm) &quot;mysterious&quot; disappearance of CVS code ;)
 
 <qandaentry>
 <question><para>
-And what is &quot;Faszom(C)ounter&quot;
+And what is &quot;Faszom(C)ounter&quot;?
 </para></question>
 <answer><para>
 &quot;Fasz&quot; is a Hungarian word you don't want to know, the others are
@@ -528,22 +528,13 @@ You use a vo driver with single buffering (x11,xv). With xv, use the
 What exactly is this libavcodec thing?
 </para></question>
 <answer><para>
-
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-But configure tells me &quot;Checking for libavcodec ... no&quot;!
-</para></question>
-<answer><para>
 See the <link linkend="ffmpeg">libavcodec section</link>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Icewm's taskbar keeps covering the movie in fullscreen mode!
+But configure tells me &quot;Checking for libavcodec ... no&quot;!
 </para></question>
 <answer><para>
 You need to get libavcodec from FFmpeg's CVS. Read the instructions in the
@@ -553,13 +544,26 @@ You need to get libavcodec from FFmpeg's CVS. Read the instructions in the
 
 <qandaentry>
 <question><para>
-I can't access the GUI menu. I press right click, but I can't
-access any menu items!
+Icewm's taskbar keeps covering the movie in fullscreen mode!
 </para></question>
 <answer><para>
 This shouldn't happen anymore, if it still does use the <option>-fstype</option>
 layer option and report it to the <ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>
 mailing list.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+I can't access the GUI menu. I press right click, but I can't
+access any menu items!
+</para></question>
+<answer><para>
+Are you using FVWM? Try the following:
+<orderedlist>
+<listitem><para>Start -> Settings -> Configuration -> Base Configuration</para></listitem>
+<listitem><para>Set &quot;Use Applications position hints&quot; to &quot;Yes&quot;</para></listitem>
+</orderedlist>
 </para></answer>
 </qandaentry>
 
@@ -586,20 +590,22 @@ I can play certain AVIs but I get no sound and this kind of error:
 </screen>
 </para></question>
 <answer><para>
-Probably the audio uses a codec not natively supported by MPlayer. Install the
-Win32 codec package as described in the README or in the
-<link linkend="install">Installation</link> section.
+Probably the audio uses a codec not natively supported by <application>MPlayer</application>.
+Install the Win32 codec package as described in the <filename>README</filename>
+or in the <link linkend="install">Installation</link> section.
 </para></answer>
 </qandaentry>
 <qandaentry>
 <question><para>
-... works with avifile/aviplay but doesn't with <application>MPlayer</application>.
+... works with <application>avifile/aviplay</application> but doesn't with
+<application>MPlayer</application>.
 </para></question>
 <answer><para>
-MPlayer is not avifile. The only common thing between these players is the Win32
-DLL loader. The codecs (DLL) set, synchronization, demultiplexing etc is totally
-different and shouldn't be compared. If something works with aviplay it doesn't
-mean that MPlayer will work and vice versa.
+<application>MPlayer</application> is not <application>avifile</application>.
+The only common thing between these players is the Win32 DLL loader. The codecs
+(DLL) set, synchronization, demultiplexing etc is totally different and shouldn't
+be compared. If something works with <application>aviplay</application> it doesn't
+mean that <application>MPlayer</application> will work and vice versa.
 </para></answer>
 </qandaentry>
 <qandaentry>
@@ -682,7 +688,7 @@ video starts or disable the arts-daemon in kontrol center. If you want to use
 arts sound, specify audio output via our native arts audio driver
 (<option>-ao arts</option>). If it fails or isn't compiled in, try SDL
 (<option>-ao sdl</option>) and make sure your SDL can handle arts sound. Yet
-another option is to start MPlayer with artsdsp.
+another option is to start <application>MPlayer</application> with artsdsp.
 </para></answer>
 </qandaentry>
 <qandaentry>
@@ -776,9 +782,10 @@ I get very strange percentage values (way too big) while playing files on my not
 </para></question>
 <answer><para>
 It's an effect of the power management / power saving system of your notebook
-(BIOS, not kernel). Plug the external power connector in before you power on
-your notebook. You can also try whether
-<ulink url="http://www.brodo.de/cpufreq/">cpufreq</ulink> (a SpeedStep interface for Linux) helps you.
+(BIOS, not kernel). Plug the external power connector in
+<emphasis role="bold">before</emphasis> you power on your notebook. You can also
+try whether <ulink url="http://www.brodo.de/cpufreq/">cpufreq</ulink>
+(a SpeedStep interface for Linux) helps you.
 </para></answer>
 </qandaentry>
 <qandaentry>
@@ -794,12 +801,11 @@ or use the <option>-nortc</option> option.
 </qandaentry>
 <qandaentry> 
 <question><para>
-While playing a movie it suddenly gets jerky and I get     
-the following message:
+While playing a movie it suddenly gets jerky and I get the following message:
 <screen>Badly interleaved AVI file detected - switching to -ni mode...</screen>
 </para></question>
 <answer><para>
-Badly interleaved files and <option>-cache</option> don't work well together.       
+Badly interleaved files and <option>-cache</option> don't work well together.
 Try <option>-nocache</option>.
 </para></answer>
 </qandaentry>
@@ -962,6 +968,17 @@ which is present in <application>MPlayer</application> source, and used by defau
 </qandaentry>
 <qandaentry>
 <question><para>
+Can I compile libdvdread and libdvdcss on my sweet SPARC under Solaris?
+</para></question>
+<answer><para>
+Who knows ... It's said to work, so please test it and send feedback. Refer to
+the documentation of libdvdread and its homepage as well. We're not the authors
+of libdvdread. Use <emphasis role="bold">libmpdvdkit2</emphasis>, which is present
+in <application>MPlayer</application> source, and used by default.
+</para></answer>
+</qandaentry>
+<qandaentry>
+<question><para>
 What about subtitles? Can MPlayer display them?
 </para></question>
 <answer><para>
@@ -973,7 +990,7 @@ Yes. See the <link linkend="dvd">DVD chapter</link> of the documentation.
 How can I set the region code of my DVD-drive? I don't have Windows!
 </para></question>
 <answer><para>
-Use the <ulink url="http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz">regionset tool</ulink>
+Use the <ulink url="http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz">regionset tool</ulink>.
 </para></answer>
 </qandaentry>
 <qandaentry>
@@ -1062,8 +1079,47 @@ in the same directory as the file.
 <title>Encoding</title>
 <qandaentry>
 <question><para>
-My tuner works, I can hear the sound and watch the video with MPlayer,
-but MEncoder doesn't encode audio!
+How can I encode?
+</para></question>
+<answer><para>
+Read the <application>MEncoder</application> <link linkend="mencoder">documentation</link>
+</para></answer>
+</qandaentry>
+<qandaentry>
+<question><para>
+How can I create VCDs?
+</para></question>
+<answer><para>
+Try the <filename>mencvcd</filename> script from the <filename class="directory">TOOLS</filename>
+subdirectory. With it you can encode DVDs or other movies to VCD or SVCD format
+and even burn them directly to CD.
+</para></answer>
+</qandaentry>
+<qandaentry>
+<question><para>
+How can I join two video files?
+</para></question>
+<answer><para>
+This has been discussed to no end on mplayer-users. Go search the
+<ulink url="http://mplayerhq.hu/cgi-bin/htsearch?restrict=/mplayer-users/">archives</ulink>
+for a complete answer. This is a complicated topic and your mileage may vary a
+lot depending on the kind of files you want to merge. MPEGs can be concatenated
+into a single file with luck. For AVIs there are two tools,
+<ulink url="http://fixounet.free.fr/avidemux/">avidemux</ulink> and
+<application>avimerge</application> (part of the
+<ulink url="http://www.theorie.physik.uni-goettingen.de/~ostreich/transcode/">transcode</ulink>
+tool set), available that might do the job. You can also try <application>MEncoder</application>
+if you have two files sharing the same dimensions and codec. Try
+<screen>
+     cat file1 file2 > file3
+     mencoder -ovc copy -oac copy -o out.avi -forceidx file3.avi
+</screen>
+</para></answer>
+</qandaentry>
+<qandaentry>
+<question><para>
+My tuner works, I can hear the sound and watch the video with <application>MPlayer</application>,
+but <application>MEncoder</application> doesn't encode audio!
 </para></question>
 <answer><para>
 TV audio encoding for Linux is currently unimplemented, we're working
@@ -1080,7 +1136,7 @@ You have to specify the <option>-sid</option> option correctly!
 </qandaentry>
 <qandaentry>
 <question><para>
-MEncoder segfaults on startup!
+<application>MEncoder</application> segfaults on startup!
 </para></question>
 <answer><para>
 Upgrade DivX4Linux.
@@ -1104,7 +1160,7 @@ No, VFAT doesn't support 2GB+ files.
 </qandaentry>
 <qandaentry>
 <question><para>
-Why is the recommended bitrate printed by MEncoder negative?
+Why is the recommended bitrate printed by <application>MEncoder</application> negative?
 </para></question>
 <answer><para>
 Because the bitrate you encoded the audio with is too large to fit the
