@@ -322,6 +322,12 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
  XGCValues xgcv;
  XSetWindowAttributes xswa;
  unsigned long xswamask;
+#ifdef HAVE_XF86VM
+ int vm=0;
+ unsigned int modeline_width, modeline_height;
+ static uint32_t vm_width;
+ static uint32_t vm_height;
+#endif
 
  aspect_save_orig(width,height);
  aspect_save_prescale(d_width,d_height);
@@ -336,6 +342,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
 #endif
 
  mFullscreen=flags&1;
+ if( flags&0x02 ) vm = 1;
  num_buffers=vo_doublebuffering?NUM_BUFFERS:1;
  
  if (!vo_init()) return -1;
@@ -351,7 +358,21 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
    hint.width = d_width;
    hint.height = d_height;
    aspect(&d_width,&d_height,A_NOZOOM);
-
+#ifdef HAVE_XF86VM
+    if ( vm )
+      {
+	if ((d_width==0) && (d_height==0))
+	  { vm_width=image_width; vm_height=image_height; }
+	else
+	  { vm_width=d_width; vm_height=d_height; }
+	vo_vm_switch(vm_width, vm_height,&modeline_width, &modeline_height);
+	hint.x=(vo_screenwidth-modeline_width)/2;
+	hint.y=(vo_screenheight-modeline_height)/2;
+	hint.width=modeline_width;
+	hint.height=modeline_height;
+      }
+    else
+#endif
    if ( mFullscreen )
     {
      hint.width=vo_screenwidth;
@@ -402,6 +423,17 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
    mygc = XCreateGC(mDisplay, mywindow, 0L, &xgcv);
    XFlush(mDisplay);
    XSync(mDisplay, False);
+#ifdef HAVE_XF86VM
+    if ( vm )
+     {
+      /* Grab the mouse pointer in our window */
+      XGrabPointer(mDisplay, mywindow, True, 0,
+                   GrabModeAsync, GrabModeAsync,
+                   mywindow, None, CurrentTime);
+      XSetInputFocus(mDisplay, mywindow, RevertToNone, CurrentTime);
+     }
+#endif
+
 #ifdef HAVE_NEW_GUI
   }
   else
@@ -721,6 +753,10 @@ static void uninit(void)
   XDestroyWindow( mDisplay,mywindow );
  }
  for( i=0;i<num_buffers;i++ ) deallocate_xvimage( i );
+#ifdef HAVE_XF86VM
+ vo_vm_close(mDisplay);
+#endif
+
 }
 
 static uint32_t preinit(const char *arg)
