@@ -35,7 +35,7 @@ int af_format_decode(int ifmt)
   case(AFMT_FLOAT):
     ofmt = AF_FORMAT_F | AF_FORMAT_NE; break;
   default: 
-    if (ifmt & AFMT_AF_FLAGS == AFMT_AF_FLAGS) {
+    if ((ifmt & AFMT_AF_FLAGS) == AFMT_AF_FLAGS) {
       ofmt = ifmt & ~AFMT_AF_FLAGS;
       break;
     }
