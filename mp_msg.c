@@ -44,12 +44,12 @@ void mp_msg_c( int x, const char *format, ... ){
               gtkMessageBox( GTK_MB_ERROR|GTK_MB_SIMPLE,tmp );
        	   break;
        case MSGL_WARN:
-              printf( "%s",tmp );
+              fprintf( stderr, "%s",tmp );
 	      fflush(stdout);
               gtkMessageBox( GTK_MB_WARNING|GTK_MB_SIMPLE,tmp );
        	   break;
        default:
-              printf( "%s",tmp );
+              fprintf(stderr, "%s",tmp );
 	      fflush(stdout);
       }
     } else
@@ -60,7 +60,7 @@ void mp_msg_c( int x, const char *format, ... ){
       fflush(stderr);
     } else {
 //	printf("%%%%%% ");
-      vprintf(format, va);
+      vfprintf(stderr,format, va);
       fflush(stdout);
     }
     va_end(va);
