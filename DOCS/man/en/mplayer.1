@@ -208,7 +208,7 @@ backward/\:forward in playlist
 .IPs "HOME and END"
 go to next/\:previous playtree entry in the parent list
 .IPs "INS and DEL"
-go to next/\:previous alternative source (asx playlist only)
+go to next/\:previous alternative source (ASX playlist only)
 .IPs "p / SPACE"
 pause movie (any key unpauses)
 .IPs "q / ESC"
@@ -632,7 +632,7 @@ Plays Hungarian and falls back to English if Hungarian is not available.
 .B \-audio-demuxer <number> (\-audiofile only)
 Force audio demuxer type for \-audiofile.
 Give the demuxer ID as defined in libmpdemux/demuxer.h.
-Use \-audio-demuxer 17 to force .mp3 detection.
+Use \-audio-demuxer 17 to force MP3 detection.
 .TP
 .B \-audiofile <filename>
 Play audio from an external file (WAV, MP3 or Ogg Vorbis) while viewing a
@@ -648,7 +648,7 @@ able to send content in different bitrates).
 Useful if you want to watch live streamed media behind a slow connection.
 .TP
 .B \-cdrom-device <path\ to\ device>
-Override default CDROM drive name /dev/\:cdrom.
+Override default CD-ROM drive name /dev/\:cdrom.
 .TP
 .B \-cache <kBytes>
 This option specifies how much memory (in kBytes) to use when precaching a
@@ -741,20 +741,20 @@ and ~/.mozilla/.
 .B \-demuxer <number>
 Force demuxer type.
 Give the demuxer ID as defined in libmpdemux/demuxer.h.
-Use \-demuxer 17 to force .mp3 detection.
+Use \-demuxer 17 to force MP3 detection.
 .TP
-.B \-dumpaudio (MPLAYER only)
+.B \-dumpaudio (MPlayer only)
 Dumps raw compressed audio stream to ./stream.dump (useful with mpeg/\:ac3).
 .TP
-.B \-dumpfile <filename> (MPLAYER only)
+.B \-dumpfile <filename> (MPlayer only)
 Specify which file MPlayer should dump to.
 Should be used together with \-dumpaudio / \-dumpvideo / \-dumpstream.
 .TP
-.B \-dumpstream (MPLAYER only)
+.B \-dumpstream (MPlayer only)
 Dumps the raw stream to ./stream.dump.
 Useful when ripping from DVD or network.
 .TP
-.B \-dumpvideo (MPLAYER only)
+.B \-dumpvideo (MPlayer only)
 Dump raw compressed video stream to ./stream.dump (not very usable).
 .TP
 .B \-dvbin <options> (DVB only)
@@ -943,7 +943,7 @@ This option is obsolete, because MPlayer has OpenDML support.
 .TP
 .B \-sb <byte\ position> (see \-ss option too)
 Seek to byte position.
-Useful for playback from CDROM images / .VOB files with junk at the beginning.
+Useful for playback from CD-ROM images / .VOB files with junk at the beginning.
 .TP
 .B \-srate <Hz>
 Selects the given output sampling rate, resampling if necessary.
@@ -1132,32 +1132,32 @@ Force audio parameters for the .vivo demuxer (for debugging purposes).
 .I NOTE:
 See \-vf expand too.
 .TP
-.B \-dumpjacosub (MPLAYER only)
+.B \-dumpjacosub (MPlayer only)
 Convert the given subtitle (specified with the \-sub option) to the time-based
 JACOsub subtitle format.
 Creates a dumpsub.js file in the current directory.
 .TP
-.B \-dumpmicrodvdsub (MPLAYER only)
+.B \-dumpmicrodvdsub (MPlayer only)
 Convert the given subtitle (specified with the \-sub option) to the
 MicroDVD subtitle format.
 Creates a dumpsub.sub file in the current directory.
 .TP
-.B \-dumpmpsub (MPLAYER only)
+.B \-dumpmpsub (MPlayer only)
 Convert the given subtitle (specified with the \-sub option) to MPlayer's
 subtitle format, MPsub.
 Creates a dump.mpsub file in the current directory.
 .TP
-.B \-dumpsami (MPLAYER only)
+.B \-dumpsami (MPlayer only)
 Convert the given subtitle (specified with the \-sub option) to the time-based
 SAMI subtitle format.
 Creates a dumpsub.smi file in the current directory.
 .TP
-.B \-dumpsrtsub (MPLAYER only)
+.B \-dumpsrtsub (MPlayer only)
 Convert the given subtitle (specified with the \-sub option) to the time-based
 SubViewer (SRT) subtitle format.
 Creates a dumpsub.srt file in the current directory.
 .TP
-.B \-dumpsub (MPLAYER only) (BETA CODE)
+.B \-dumpsub (MPlayer only) (BETA CODE)
 Dumps the subtitle substream from VOB streams.
 See \-dump*sub and \-vobsubout* options too.
 .TP
@@ -1222,7 +1222,7 @@ subtitles.
 .B \-noautosub
 Turns off automatic loading of subtitle files.
 .TP
-.B \-osdlevel <0\-3> (MPLAYER only)
+.B \-osdlevel <0\-3> (MPlayer only)
 Specifies which mode the OSD should start in.
 .
 .PD 0
@@ -2884,7 +2884,7 @@ try XAnim codecs first
 .PD 1
 .
 .TP
-.B \-x <x> (MPLAYER only)
+.B \-x <x> (MPlayer only)
 Scale image to x width (if sw/\:hw scaling available).
 Disables aspect calculations.
 .TP
@@ -2923,7 +2923,7 @@ Set width to value and calculate height to keep correct aspect ratio.
 .PD 1
 .
 .TP
-.B \-y <y> (MPLAYER only)
+.B \-y <y> (MPlayer only)
 Scale image to y height (if sw/\:hw scaling available).
 Disables aspect calculations.
 .TP
