@@ -70,6 +70,7 @@ Supported input formats:
 - MPEG 1/2 System Stream (PS/PES/VOB) and Elementary Stream (ES) file formats
 - RIFF AVI file format
 - ASF 1.0 file format
+- supports reading from file or stdin
 
 Supported audio & video codecs:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -166,6 +167,32 @@ Usage:
          insert the following line at the end of /etc/modules.conf:
          alias char-major-178 mga_vid
          and run 'depmod -a' .
+
+Playing from stdin:
+~~~~~~~~~~~~~~~~~~~
+Now it's possible.
+
+To play something by reading from stdin, just use '-' as filename:
+
+cat test.mpg | mplayer -vo xv -
+
+Restrictions:
+	mpg: no backward seeking
+	asf: no backward seeking
+	avi: no index reading -> no seeking at all, and playing of some files are
+		+impossible
+
+No control from controlling terminal/xterm, but hotkeys and osd works
+from the window. or course LIRC still works everywhere.
+
+This feature combined with external wrappers extends possibilities.
+For example, to play a movie just downloaded from your favourite divx
+server:
+	rar p ast-nssvcd.rar | mplayer -vo xmga -fs -
+
+With an asf grabber or http dump program you can play from the net.
+(however we planned to add direct asf/http/ftp inputs with seeking and other
+stuff, but for now it's a good workaround)
 
 TV output:
 ~~~~~~~~~~
