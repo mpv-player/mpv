@@ -158,7 +158,7 @@ int subopt_parse( char const * const str, opt_t * opts )
                   if (tmp.str && tmp.len > 0) {
                     *valp = malloc(tmp.len + 1);
                     memcpy(*valp, tmp.str, tmp.len);
-                    *valp[tmp.len] = 0;
+                    (*valp)[tmp.len] = 0;
                   }
                   break;
                 }
