@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <signal.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <sys/time.h>
 #include <fcntl.h>
 #include <ctype.h>
@@ -308,6 +309,9 @@ static char* config_file = "input.conf";
 
 static char* js_dev = NULL;
 
+static char* in_file = NULL;
+static int in_file_fd = -1;
+
 static int mp_input_print_key_list(config_t* cfg);
 static int mp_input_print_cmd_list(config_t* cfg);
 
@@ -319,6 +323,7 @@ static config_t input_conf[] = {
   { "keylist", mp_input_print_key_list, CONF_TYPE_FUNC, CONF_GLOBAL, 0, 0, NULL },
   { "cmdlist", mp_input_print_cmd_list, CONF_TYPE_FUNC, CONF_GLOBAL, 0, 0, NULL },
   { "js-dev", &js_dev, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL },
+  { "file", &in_file, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL },
   { NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -1281,6 +1286,19 @@ mp_input_init(void) {
       mp_input_add_cmd_fd(fd,1,NULL,(mp_close_func_t)close);
   }
 #endif
+
+  if(in_file) {
+    struct stat st;
+    if(stat(in_file,&st))
+      mp_msg(MSGT_INPUT,MSGL_ERR,"Can't stat %s: %s\n",in_file,strerror(errno));
+    else {
+      in_file_fd = open(in_file,S_ISFIFO(st.st_mode) ? O_RDWR : O_RDONLY);
+      if(in_file_fd >= 0)
+	mp_input_add_cmd_fd(in_file_fd,1,NULL,(mp_close_func_t)close);
+      else
+	mp_msg(MSGT_INPUT,MSGL_ERR,"Can't open %s: %s\n",in_file,strerror(errno));
+    }
+  }
 
 }
 
