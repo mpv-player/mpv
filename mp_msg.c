@@ -53,6 +53,7 @@ void mp_msg_c( int x, const char *format, ... ){
     if((x&255)>mp_msg_levels[x>>8]) return; // do not display
     va_start(va, format);
     vsnprintf(tmp, MSGSIZE_MAX, mp_gettext(format), va);
+    va_end(va);
     tmp[MSGSIZE_MAX-1] = 0;
 
 #if defined(HAVE_NEW_GUI) && !defined(FOR_MENCODER)
@@ -73,13 +74,11 @@ void mp_msg_c( int x, const char *format, ... ){
     }
 #endif
 
-    fprintf(stderr, "%s", tmp);
-    if ((x & 255) <= MSGL_ERR)
-	fflush(stderr);
-    else
-	fflush(stdout);
-
-    va_end(va);
+    if ((x & 255) <= MSGL_WARN){
+	fprintf(stderr, "%s", tmp);fflush(stderr);
+    } else {
+	printf("%s", tmp);fflush(stdout);
+    }
 #else
     va_list va;
     if((x&255)>mp_msg_levels[x>>8]) return; // do not display
