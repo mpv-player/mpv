@@ -1131,7 +1131,7 @@ for ac_option do
   --disable-sdl)
         _sdl=no
         ;;
-  --disable-sdl)
+  --disable-aa)
         _aa=no
         ;;
   --disable-ggi)
