@@ -1,7 +1,7 @@
 /*
   Video driver for SVGAlib - alpha, slow
   by Zoltan Mark Vician <se7en@sch.bme.hu>
-  Code started: Mon Apr  1 23:25:47 2000
+  Code started: Mon Apr  1 23:25:47 2001
 */
 
 #include <stdio.h>
