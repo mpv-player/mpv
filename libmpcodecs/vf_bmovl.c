@@ -395,11 +395,20 @@ put_image(struct vf_instance_s* vf, mp_image_t* mpi){
 						dmpi->planes[2][pos] = vf->priv->bitmap.v[pos];
 					}
 				} else { // Alphablended pixel
-					dmpi->planes[0][pos] = (dmpi->planes[0][pos]*(1.0-(alpha/255.0))) + (vf->priv->bitmap.y[pos]*(alpha/255.0));
+					dmpi->planes[0][pos] = 
+						((255 - alpha) * (int)dmpi->planes[0][pos] + 
+						alpha * (int)vf->priv->bitmap.y[pos]) >> 8;
+					
 					if ((ypos%2) && (xpos%2)) {
 						pos = ( (ypos/2) * dmpi->stride[1] ) + (xpos/2);
-						dmpi->planes[1][pos] = (dmpi->planes[1][pos]*(1.0-(alpha/255.0))) + (vf->priv->bitmap.u[pos]*(alpha/255.0));
-						dmpi->planes[2][pos] = (dmpi->planes[2][pos]*(1.0-(alpha/255.0))) + (vf->priv->bitmap.v[pos]*(alpha/255.0));
+
+						dmpi->planes[1][pos] = 
+							((255 - alpha) * (int)dmpi->planes[1][pos] + 
+							alpha * (int)vf->priv->bitmap.u[pos]) >> 8;
+						
+						dmpi->planes[2][pos] = 
+							((255 - alpha) * (int)dmpi->planes[2][pos] + 
+							alpha * (int)vf->priv->bitmap.v[pos]) >> 8;
 					}
 			    }
 			} // for xpos
