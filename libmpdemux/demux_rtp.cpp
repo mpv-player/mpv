@@ -94,6 +94,8 @@ typedef struct RTPState {
   struct timeval firstSyncTime;
 };
 
+extern "C" char* network_username;
+extern "C" char* network_password;
 int rtspStreamOverTCP = 0; 
 
 extern "C" void demux_open_rtp(demuxer_t* demuxer) {
@@ -124,7 +126,15 @@ extern "C" void demux_open_rtp(demuxer_t* demuxer) {
 	break;
       }
 
-      sdpDescription = rtspClient->describeURL(url);
+      // If we were given a user name (and optional password), then use them: 
+      if (network_username != NULL) {
+	char const* password
+	  = network_password == NULL ? "" : network_password;
+	sdpDescription
+	  = rtspClient->describeWithPassword(url, network_username, password);
+      } else {
+	sdpDescription = rtspClient->describeURL(url);
+      }
       if (sdpDescription == NULL) {
 	fprintf(stderr, "Failed to get a SDP description from URL \"%s\": %s\n",
 		url, env->getResultMsg());
@@ -306,6 +316,7 @@ Boolean insertRTPData(demuxer_t* demuxer, demux_stream_t* ds,
   dp->len = dataLen;
   dp->pts = 0;
   bufferQueue->savePendingBuffer(dp);
+  return True;
 }
 
 static void teardownRTSPSession(RTPState* rtpState); // forward
