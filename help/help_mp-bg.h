@@ -264,8 +264,6 @@ static char help_text[]=
 #define MSGTR_DemuxerInfoAlreadyPresent "Информацията на demuxer-а %s е вече известна!\n"
 #define MSGTR_ClipInfo "Информация за парчето: \n"
 
-#define MSGTR_LeaveTelecineMode "\ndemux_mpg: Засечена прогресивна поредица, напускам режима 3:2 TELECINE\n"
-#define MSGTR_EnterTelecineMode "\ndemux_mpg: 3:2 TELECINE засечен, задействам inverse telecine fx. Кадрите са намалени на %5.3f!  \n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "не мога да отворя декодера\n"

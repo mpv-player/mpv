@@ -300,8 +300,6 @@ static char help_text[]=
 #define MSGTR_DemuxerInfoAlreadyPresent "Info du demuxer %s déjà présente!\n"
 #define MSGTR_ClipInfo "Information sur le clip: \n"
 
-#define MSGTR_LeaveTelecineMode "\ndemux_mpg: seq progressive détectée, quitte le mode TELECINE 3:2\n"
-#define MSGTR_EnterTelecineMode "\ndemux_mpg: 3:2 TELECINE détecté, active les effets telecine inversés. FPS changé à %5.3f!  \n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Impossible d'ouvrir le codec.\n"

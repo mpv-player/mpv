@@ -302,8 +302,6 @@ static char help_text[]=
 #define MSGTR_DemuxerInfoAlreadyPresent "已經有 demuxer 資訊 %s﹗\n"
 #define MSGTR_ClipInfo "片段資料:\n"
 
-#define MSGTR_LeaveTelecineMode "\ndemux_mpg: 偵測到遞增的 seq，離開 3:2 TELECINE 模式。\n"
-#define MSGTR_EnterTelecineMode "\ndemux_mpg: 偵測到 3:2 TELECINE，使用 inverse telecine fx。\nFPS 改變為 %5.3f﹗\n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "無法開啟 codec。\n"

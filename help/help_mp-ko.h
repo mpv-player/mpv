@@ -298,8 +298,6 @@ static char help_text[]=
 #define MSGTR_DemuxerInfoAlreadyPresent "해석기 정보 %s(이)가 이미 존재합니다!\n"
 #define MSGTR_ClipInfo "클립 정보: \n"
 
-#define MSGTR_LeaveTelecineMode "\ndemux_mpg: Progressive 시퀀스 감지, 3:2 TELECINE 모드를 종료합니다.\n"
-#define MSGTR_EnterTelecineMode "\ndemux_mpg: 3:2 TELECINE 감지. 역전된 telecine fx를 사용합니다. FPS가 %5.3f로 변경되었습니다!  \n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "코덱을 열 수 없습니다.\n"

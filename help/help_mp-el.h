@@ -298,8 +298,6 @@ static char help_text[]=
 #define MSGTR_DemuxerInfoAlreadyPresent "Οι πληροφορίες για το demuxer %s υπάρχουν ήδη!\n"
 #define MSGTR_ClipInfo "Πληροφορίες του μέσου: \n"
 
-#define MSGTR_LeaveTelecineMode "\ndemux_mpg: Βρέθηκε progressive seq, επαναφορά σε 3:2 TELECINE mode\n"
-#define MSGTR_EnterTelecineMode "\ndemux_mpg: Βρέθηκε 3:2 TELECINE, ενεργοποίηση του inverse telecine fx. τα FPS άλλαξαν σε %5.3f!  \n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Αδύνατο το άνοιγμα του codec\n"

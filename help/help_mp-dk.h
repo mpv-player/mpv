@@ -301,8 +301,6 @@ static char help_text[]=
 #define MSGTR_DemuxerInfoAlreadyPresent "Demuxer info %s findes allerede!\n"
 #define MSGTR_ClipInfo "Klip info: \n"
 
-#define MSGTR_LeaveTelecineMode "\ndemux_mpg: Progressiv følge detekteret, forbliver i 3:2 TELECINE mode\n"
-#define MSGTR_EnterTelecineMode "\ndemux_mpg: 3:2 TELECINE detekteret, benytter inverse telecine f.eks. Billedfrekvensen ændret til %5.3f!\n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "kunne ikke åbne codec\n"

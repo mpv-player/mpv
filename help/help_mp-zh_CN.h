@@ -300,8 +300,6 @@ static char help_text[]=
 #define MSGTR_DemuxerInfoAlreadyPresent "Demuxer info %s 已经显示!\n"
 #define MSGTR_ClipInfo "Clip info: \n"
 
-#define MSGTR_LeaveTelecineMode "\ndemux_mpg: 检测到渐进序列, 离开3:2 TELECINE模式.\n"
-#define MSGTR_EnterTelecineMode "\ndemux_mpg: 检测到3:2 TELECINE, 启用反转telecine特效.\nFPS变为%5.3f!\n"
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "无法打开解码器\n"
 #define MSGTR_CantCloseCodec "无法关闭解码器\n"

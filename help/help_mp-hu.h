@@ -302,8 +302,6 @@ static char help_text[]=
 #define MSGTR_DemuxerInfoAlreadyPresent "%s demuxer info már jelen van!\n"
 #define MSGTR_ClipInfo "Clip info: \n"
 
-#define MSGTR_LeaveTelecineMode "\ndemux_mpg: Progresszív file, kilépés a 3:2 TELECINE módból\n"
-#define MSGTR_EnterTelecineMode "\ndemux_mpg: 3:2 TELECINE detektálva, inverz telecine fix használata. Az új FPS: %5.3f!  \n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Nem tudom megnyitni a kodeket\n"
