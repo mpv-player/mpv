@@ -23,7 +23,7 @@
 #define X_ADJUST 0
 #else
 #define RADEON_MSG "Radeon_vid:"
-#define X_ADJUST 8
+#define X_ADJUST (!IsR200 ? 8 : 0)
 #ifndef RADEON
 #define RADEON
 #endif
