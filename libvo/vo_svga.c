@@ -451,17 +451,16 @@ static uint32_t draw_frame(uint8_t *src[]) {
   if (bpp_conv) {
     switch(bpp) {
       case 32: {
-        uint16_t *source = (uint16_t *) src[0];
-        uint16_t *dest = (uint16_t *) bppbuf;
-        uint16_t *end;
+        uint8_t *source = src[0];
+        uint8_t *dest = bppbuf;
+	register uint32_t i = 0;
     
-	end = source + (maxw * maxh * 2);
-        while (source < end) {
-	  *dest++ = *source++;
-	  (uint8_t *)dest = (uint8_t *)source;
-	  *(((uint8_t *)dest)+1) = 0;
-	  dest++;
-	  source++;
+	while (i < (maxw * maxh * 4)) {
+	  dest[i] = source[i];
+	  dest[i+1] = source[i+1];
+	  dest[i+2] = source[i+2];
+	  dest[i+3] = 0;
+	  i += 4;
 	}
       } break;
       case 16: {
@@ -470,13 +469,12 @@ static uint32_t draw_frame(uint8_t *src[]) {
 #else
         uint16_t *source = (uint16_t *) src[0];
         uint16_t *dest = (uint16_t *) bppbuf;
-        uint16_t *end;
+	register uint32_t i = 0;
 	register uint16_t srcdata;
 	
-	end = source + (maxw * maxh);
-	while (source < end) {
-	  srcdata = *source++;
-	  *dest++ = (srcdata & 0x1f) | ((srcdata & 0x7fe0) << 1);
+	while (i < (maxw * maxh)) {
+	  srcdata = source[i];
+	  dest[i++] = (srcdata & 0x1f) | ((srcdata & 0x7fe0) << 1);
 	}
 #endif
       } break;
