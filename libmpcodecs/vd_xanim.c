@@ -13,7 +13,7 @@ static vd_info_t info = {
 	"xanim",
 	VFM_XANIM,
 	"A'rpi & Alex",
-	"XAnim... TODO: name+url here",
+	"Xanim (http://xanim.va.pubnix.com/)",
 	"binary codec plugins"
 };
 
