@@ -43,7 +43,7 @@ $(HTMLDIR)/index.html: documentation.xml $(CHUNK_XSL_DEPS)
 		echo "Don't do this!"; \
 		false; \
 	fi
-	if test "$(USE_SYMLINKS)" = "yes" ; then \
+	@if test "$(USE_SYMLINKS)" = "yes" ; then \
 		for file in ../en/*.xml ; do \
 		if ! test -r `basename $$file` ; then \
 			ln -s $$file `basename $$file` ; \
@@ -52,7 +52,7 @@ $(HTMLDIR)/index.html: documentation.xml $(CHUNK_XSL_DEPS)
 	fi
 	-rm -f $(HTMLDIR)/*
 	../xmllint.sh $<
-	cp $(HTML_STYLESHEET) $(HTMLDIR)/
+	cp -f $(HTML_STYLESHEET) $(HTMLDIR)/
 	../xsltproc.sh $(HTMLDIR)/ $(HTML_CHUNK_XSL) $<
 
 $(HTMLFILE): documentation.xml $(XSL_DEPS)
@@ -62,7 +62,7 @@ $(HTMLFILE): documentation.xml $(XSL_DEPS)
 		echo "Don't do this!"; \
 		false; \
 	fi
-	if test "$(USE_SYMLINKS)" = "yes" ; then \
+	@if test "$(USE_SYMLINKS)" = "yes" ; then \
 		for file in ../en/*.xml ; do \
 		if ! test -r `basename $$file` ; then \
 			ln -s $$file `basename $$file` ; \

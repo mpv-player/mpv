@@ -248,7 +248,7 @@ chmod +x $_xsltwrapper
 echo "Searching for XML checker..."
 for _try_xmllint in xmllint
 do
-  if command -v $_try_xmllint > /dev/null
+  if command -v $_try_xmllint > /dev/null 2>&1
   then
     echo "Found: $_try_xmllint"
     if test -n "$_catalog"
