@@ -13,7 +13,6 @@ CpuCaps gCpuCaps;
 
 #include <stdio.h>
 #include <string.h>
-#include "osdep/timer.h"
 
 #if defined (__NetBSD__) || defined(__OpenBSD__)
 #include <sys/param.h>
@@ -210,29 +209,6 @@ void GetCpuCaps( CpuCaps *caps)
 }
 
 
-static inline unsigned long long int rdtsc( void )
-{
-  unsigned long long int retval;
-  __asm __volatile ("rdtsc":"=A"(retval)::"memory");
-  return retval;
-}
-
-/* Returns CPU clock in khz */
-static unsigned int GetCpuSpeed(void)
-{
-	unsigned long long int tscstart, tscstop;
-	unsigned int start, stop;
-
-	tscstart = rdtsc();
-	start = GetTimer();
-	usec_sleep(50000);
-	stop = GetTimer();
-	tscstop = rdtsc();
-
-	return((tscstop-tscstart)/((stop-start)/1000.0));
-}
-
-
 #define CPUID_EXTFAMILY	((regs2[0] >> 20)&0xFF) /* 27..20 */
 #define CPUID_EXTMODEL	((regs2[0] >> 16)&0x0F) /* 19..16 */
 #define CPUID_TYPE		((regs2[0] >> 12)&0x04) /* 13..12 */
@@ -242,37 +218,23 @@ static unsigned int GetCpuSpeed(void)
 
 char *GetCpuFriendlyName(unsigned int regs[], unsigned int regs2[]){
 #include "cputable.h" /* get cpuname and cpuvendors */
-	char vendor[17], cpuspeed[16];
+	char vendor[17];
 	char *retname;
-	int i=0;
+	int i;
 
 	if (NULL==(retname=(char*)malloc(256))) {
 		mp_msg(MSGT_CPUDETECT,MSGL_FATAL,"Error: GetCpuFriendlyName() not enough memory\n");
 		exit(1);
 	}
 
-	/* Measure CPU speed */
-	if (gCpuCaps.hasTSC && (i = GetCpuSpeed()) > 0) {
-		if (i < 1000000) {
-			i += 50; /* for rounding */
-			snprintf(cpuspeed,15, " %d.%d MHz", i/1000, (i/100)%10);
-		} else {
-			//i += 500; /* for rounding */
-			snprintf(cpuspeed,15, " %d MHz", i/1000);
-		}
-	} else { /* No TSC Support */
-		cpuspeed[0]='\0';
-	}
-	
-
 	sprintf(vendor,"%.4s%.4s%.4s",(char*)(regs+1),(char*)(regs+3),(char*)(regs+2));
 
 	for(i=0; i<MAX_VENDORS; i++){
 		if(!strcmp(cpuvendors[i].string,vendor)){
 			if(cpuname[i][CPUID_FAMILY][CPUID_MODEL]){
-				snprintf(retname,255,"%s %s%s",cpuvendors[i].name,cpuname[i][CPUID_FAMILY][CPUID_MODEL],cpuspeed);
+				snprintf(retname,255,"%s %s",cpuvendors[i].name,cpuname[i][CPUID_FAMILY][CPUID_MODEL]);
 			} else {
-				snprintf(retname,255,"unknown %s %d. Generation CPU%s",cpuvendors[i].name,CPUID_FAMILY,cpuspeed); 
+				snprintf(retname,255,"unknown %s %d. Generation CPU",cpuvendors[i].name,CPUID_FAMILY); 
 				mp_msg(MSGT_CPUDETECT,MSGL_WARN,"unknown %s CPU:\n",cpuvendors[i].name);
 				mp_msg(MSGT_CPUDETECT,MSGL_WARN,"Vendor:   %s\n",cpuvendors[i].string);
 				mp_msg(MSGT_CPUDETECT,MSGL_WARN,"Type:     %d\n",CPUID_TYPE);
