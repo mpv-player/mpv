@@ -24,10 +24,10 @@
 
 #warning nem kellene ket typedef GUID-nak...
 typedef struct {
-	long f1;
-	short f2;
-	short f3;
-	char f4[8];
+	unsigned long f1;
+	unsigned short f2;
+	unsigned short f3;
+	unsigned char f4[8];
 } GUID;
 
 typedef struct {

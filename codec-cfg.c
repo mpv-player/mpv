@@ -133,29 +133,25 @@ int add_to_fourcc(char *s, char *alias, unsigned int *fourcc,
 	return 1;
 }
 
-int add_to_format(char *s, unsigned int *format)
+int add_to_format(char *s, unsigned int *fourcc, unsigned int *fourccmap)
 {
-	return 1;
-}
+//        printf("\n-----[%s][%s]-----\n",s,format);
 
-/*
-short get_flags(char *s)
-{
-	static char *flagstr[] = {
-		"flip",
-		"noflip",
-		"yuvhack",
-		NULL
-	};
-        int j;
+	int i;
 
-        printf("flags='%s'\n",s);
-
-	if (!s)
+	/* find first unused slot */
+	for (i = 0; i < CODECS_MAX_FOURCC && fourcc[i] != 0xffffffff; i++)
+		/* NOTHING */;
+	if (i == CODECS_MAX_FOURCC) {
+		printf("too many fourcc...\n");
 		return 0;
+	}
+        
+        fourcc[i]=fourccmap[i]=strtoul(s,NULL,0);
+
 	return 1;
 }
-*/
+
 
 int add_to_out(char *sfmt, char *sflags, unsigned int *outfmt,
 		unsigned char *outflags)
@@ -252,7 +248,8 @@ codecs_t *parse_codec_cfg(char *cfgfile)
 		}\
 	} while (0)
 
-	codecs_t *codecs = NULL;
+	codecs_t *codecs = NULL;  // array of codecs
+	codecs_t *codec = NULL;   // currect codec
 	int free_slots = 0;
 	int tmp, i;
 	int state = 0;
@@ -284,40 +281,35 @@ codecs_t *parse_codec_cfg(char *cfgfile)
 		if (tmp == RET_EOL)
 			continue;
 		if (!strcmp(token, "audiocodec") || !strcmp(token, "videocodec")) {
-			if (codecs) {
-//				tmp = ~state & STATE_MASK;
-//				if (tmp != GOT_FOURCC && tmp != GOT_FORMAT)
-//					goto parse_error_out;
-				nr_codecs++;
-			}
 			PRINT_LINENUM;
-			GET_MEM;
+                        
+		        if (!(codecs = (codecs_t *) realloc(codecs,
+				sizeof(codecs_t) * (nr_codecs + 1)))) {
+			    perror("parse_codec_cfg: can't realloc 'codecs'");
+			    goto err_out;
+		        }
+                        codec=&codecs[nr_codecs];
+			nr_codecs++;
+                        memset(codec,0,sizeof(codecs_t));
+			memset(codec->fourcc, 0xff, sizeof(codec->fourcc));
+			memset(codec->outfmt, 0xff, sizeof(codec->outfmt));
 			state = 0;
-			codecs[nr_codecs].comment = NULL;
-			memset(codecs[nr_codecs].fourcc, 0xff,
-					sizeof(codecs[nr_codecs].fourcc) );
-/*
-			memset(codecs[nr_codecs].fourccmap, 0xff,
-					sizeof(codecs[nr_codecs].fourccmap) *
-					CODECS_MAX_FOURCC);
-*/
-			memset(codecs[nr_codecs].outfmt, 0xff,
-					sizeof(codecs[nr_codecs].outfmt) );
+                        
 			if (*token == 'a') {		/* audiocodec */
 				printf("audio");
-				codecs[nr_codecs].flags |= CODECS_FLAG_AUDIO;
+				codec->flags |= CODECS_FLAG_AUDIO;
 			} else if (*token == 'v') {	/* videocodec */
 				printf("video");
-				codecs[nr_codecs].flags &= !CODECS_FLAG_AUDIO;
+				codec->flags &= !CODECS_FLAG_AUDIO;
 			} else {
 				printf("itt valami nagyon el van baszva\n");
 				goto err_out;
 			}
 			if (get_token() < 0)
 				goto parse_error_out;
-			codecs[nr_codecs].name = strdup(token);
+			codec->name = strdup(token);
 			state |= GOT_NAME;
-			printf(" %s\n", codecs[nr_codecs].name);
+			printf(" %s\n", codec->name);
 		} else if (!strcmp(token, "info")) {
 			if (!(state & GOT_NAME))
 				goto parse_error_out;
@@ -325,9 +317,9 @@ codecs_t *parse_codec_cfg(char *cfgfile)
 			printf("info");
 			if (state & GOT_INFO || get_token() < 0)
 				goto parse_error_out;
-			codecs[nr_codecs].info = strdup(token);
+			codec->info = strdup(token);
 			state |= GOT_INFO;
-			printf(" %s\n", codecs[nr_codecs].info);
+			printf(" %s\n", codec->info);
 		} else if (!strcmp(token, "comment")) {
 			if (!(state & GOT_NAME))
 				goto parse_error_out;
@@ -336,11 +328,11 @@ codecs_t *parse_codec_cfg(char *cfgfile)
 			if (get_token() < 0)
 				goto parse_error_out;
 #if 1
-			if (!codecs[nr_codecs].comment)
-				codecs[nr_codecs].comment = strdup(token);
-			printf(" %s\n", codecs[nr_codecs].comment);
+			if (!codec->comment)
+				codec->comment = strdup(token);
+			printf(" %s\n", codec->comment);
 #else
-			add_comment(token, &codecs[nr_codecs].comment);
+			add_comment(token, &codec->comment);
 			printf(" FIXMEEEEEEEEEEEEEEE\n");
 #endif
 		} else if (!strcmp(token, "fourcc")) {
@@ -348,7 +340,7 @@ codecs_t *parse_codec_cfg(char *cfgfile)
 				goto parse_error_out;
 			PRINT_LINENUM;
 			printf("fourcc");
-			if (codecs[nr_codecs].flags & CODECS_FLAG_AUDIO) {
+			if (codec->flags & CODECS_FLAG_AUDIO) {
 				printf("\n'fourcc' in audiocodec definition!\n");
 				goto err_out;
 			}
@@ -357,8 +349,8 @@ codecs_t *parse_codec_cfg(char *cfgfile)
 			param1 = strdup(token);
 			get_token();
 			if (!add_to_fourcc(param1, token,
-						codecs[nr_codecs].fourcc,
-						codecs[nr_codecs].fourccmap))
+						codec->fourcc,
+						codec->fourccmap))
 				goto err_out;
 			state |= GOT_FOURCC;
 			printf(" %s: %s\n", param1, token);
@@ -368,13 +360,13 @@ codecs_t *parse_codec_cfg(char *cfgfile)
 				goto parse_error_out;
 			PRINT_LINENUM;
 			printf("format");
-			if (!(codecs[nr_codecs].flags & CODECS_FLAG_AUDIO)) {
+			if (!(codec->flags & CODECS_FLAG_AUDIO)) {
 				printf("\n'format' in videocodec definition!\n");
 				goto err_out;
 			}
 			if (get_token() < 0)
 				goto parse_error_out;
-			if (!add_to_format(token, codecs[nr_codecs].fourcc))
+			if (!add_to_format(token, codec->fourcc,codec->fourccmap))
 				goto err_out;
 			state |= GOT_FORMAT;
 			printf(" %s\n", token);
@@ -385,7 +377,7 @@ codecs_t *parse_codec_cfg(char *cfgfile)
 			printf("driver");
 			if (get_token() < 0)
 				goto parse_error_out;
-			if ((codecs[nr_codecs].driver = get_driver(token)) == -1)
+			if ((codec->driver = get_driver(token)) == -1)
 				goto err_out;
 			printf(" %s\n", token);
 		} else if (!strcmp(token, "dll")) {
@@ -395,35 +387,24 @@ codecs_t *parse_codec_cfg(char *cfgfile)
 			printf("dll");
 			if (get_token() < 0)
 				goto parse_error_out;
-			codecs[nr_codecs].dll = strdup(token);
-			printf(" %s\n", codecs[nr_codecs].dll);
+			codec->dll = strdup(token);
+			printf(" %s\n", codec->dll);
 		} else if (!strcmp(token, "guid")) {
 			if (!(state & GOT_NAME))
 				goto parse_error_out;
 			PRINT_LINENUM;
 			printf("guid");
-			if (get_token() < 0)
-				goto parse_error_out;
-			sscanf(token, "%ld,", &codecs[nr_codecs].guid.f1);
-			if (get_token() < 0)
-				goto parse_error_out;
-			sscanf(token, "%d,", &tmp);
-			codecs[nr_codecs].guid.f2 = tmp;
-			if (get_token() < 0)
-				goto parse_error_out;
-			sscanf(token, "%d,", &tmp);
-			codecs[nr_codecs].guid.f3 = tmp;
-			for (i = 0; i < 7; i++) {
-				if (get_token() < 0)
-					goto parse_error_out;
-				sscanf(token, "%d,", &tmp);
-				codecs[nr_codecs].guid.f4[i] = tmp;
+			if (get_token() < 0) goto parse_error_out;
+                        printf("'%s'",token);
+                        codec->guid.f1=strtoul(token,NULL,0);
+			if (get_token() < 0) goto parse_error_out;
+                        codec->guid.f2=strtoul(token,NULL,0);
+			if (get_token() < 0) goto parse_error_out;
+                        codec->guid.f3=strtoul(token,NULL,0);
+			for (i = 0; i < 8; i++) {
+			    if (get_token() < 0) goto parse_error_out;
+                            codec->guid.f4[i]=strtoul(token,NULL,0);
 			}
-			if (get_token() < 0)
-				goto parse_error_out;
-			sscanf(token, "%d", &tmp);
-			codecs[nr_codecs].guid.f4[7] = tmp;
-			printf(" %s\n", token);
 		} else if (!strcmp(token, "out")) {
 			if (!(state & GOT_NAME))
 				goto parse_error_out;
@@ -433,8 +414,8 @@ codecs_t *parse_codec_cfg(char *cfgfile)
 				goto parse_error_out;
 			param1 = strdup(token);
 			get_token();
-			if (!add_to_out(param1, token, codecs[nr_codecs].outfmt,
-						codecs[nr_codecs].outflags))
+			if (!add_to_out(param1, token, codec->outfmt,
+						codec->outflags))
 				goto err_out;
 			printf(" %s: %s\n", param1, token);
 			free(param1);
@@ -484,16 +465,24 @@ int main(void)
             printf("comment='%s'\n",c->comment);
             printf("dll='%s'\n",c->dll);
             printf("flags=%X  driver=%d\n",c->flags,c->driver);
+
             for(j=0;j<CODECS_MAX_FOURCC;j++){
               if(c->fourcc[j]!=0xFFFFFFFF){
                   printf("fourcc %02d:  %08X (%.4s) ===> %08X (%.4s)\n",j,c->fourcc[j],&c->fourcc[j],c->fourccmap[j],&c->fourccmap[j]);
               }
             }
+
             for(j=0;j<CODECS_MAX_OUTFMT;j++){
               if(c->outfmt[j]!=0xFFFFFFFF){
                   printf("outfmt %02d:  %08X (%.4s)  flags: %d\n",j,c->outfmt[j],&c->outfmt[j],c->outflags[j]);
               }
             }
+
+            printf("GUID: %08X %04X %04X",c->guid.f1,c->guid.f2,c->guid.f3);
+            for(j=0;j<8;j++) printf(" %02X",c->guid.f4[j]);
+            printf("\n");
+
+            
         }
         
 	return 0;
