@@ -27,6 +27,7 @@ static uint32_t               drwcX,drwcY,dwidth,dheight;
 
 static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
     uint32_t bespitch = (mga_vid_config.src_width + 31) & ~31;
+    x0+=mga_vid_config.src_width*(vo_panscan_x>>1)/(vo_dwidth+vo_panscan_x);
     switch(mga_vid_config.format){
     case MGA_VID_FORMAT_YV12:
     case MGA_VID_FORMAT_IYUV:
@@ -44,7 +45,7 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
 
 static void draw_osd(void)
 {
-    vo_draw_text(mga_vid_config.src_width,mga_vid_config.src_height,draw_alpha);
+    vo_draw_text(mga_vid_config.src_width-mga_vid_config.src_width*vo_panscan_x/(vo_dwidth+vo_panscan_x),mga_vid_config.src_height,draw_alpha);
 }
 
 
