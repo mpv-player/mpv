@@ -4,7 +4,10 @@
 /// This code based 'dct64_3dnow.s' by Syuuhei Kashiyama
 /// <squash@mb.kcom.ne.jp>,only some types of changes have been made:
 ///
-///  - added new opcode PSWAPD
+///  - added new opcodes PSWAPD, PFPNACC
+///  - decreased number of opcodes (as it was suggested by k7 manual)
+///    (using memory reference as operand of instructions)
+///  - Phase 6 is rewritten with mixing of cpu and mmx opcodes
 ///  - change function name for support 3DNowEx! automatic detect
 ///
 /// note: because K7 processors are an aggresive out-of-order three-way
@@ -20,125 +23,128 @@
 
         .globl dct64_3dnowex
         .type    dct64_3dnowex,@function
+
+/* Discrete Cosine Tansform (DCT) for subband synthesis */
+/* void dct64(real *a,real *b,real *c) */
 dct64_3dnowex:
         subl $256,%esp
         pushl %ebp
         pushl %edi
         pushl %esi
         pushl %ebx
-        leal 16(%esp),%ebx
-        movl 284(%esp),%edi
-        movl 276(%esp),%ebp
-        movl 280(%esp),%edx
-        leal 128(%ebx),%esi
+        leal 16(%esp),%ebx   /* ebx -> real tmp1[32] */
+        movl 284(%esp),%edi  /* edi -> c */
+        movl 276(%esp),%ebp  /* ebp -> a */
+        movl 280(%esp),%edx  /* edx -> b */
+        leal 128(%ebx),%esi  /* esi -> real tmp2[32] */
 
         / femms
 
         // 1
         movl pnts,%eax
-        movq 0(%edi),%mm0
-        movq %mm0,%mm1
-        movd 124(%edi),%mm2
-        punpckldq 120(%edi),%mm2
-        movq 0(%eax),%mm3
-        pfadd %mm2,%mm0
-        movq %mm0,0(%ebx)
-        pfsub %mm2,%mm1
-        pfmul %mm3,%mm1
-        pswapd %mm1, %mm1
-        movq   %mm1, 120(%ebx)
+
+        movq 0(%edi),%mm0        /* mm0 = c[0x00] | c[0x01]*/
+        movq %mm0,%mm1           /* mm1 = mm0 */
+        movd 124(%edi),%mm2      /* mm2 = c[0x1f] */
+        punpckldq 120(%edi),%mm2 /* mm2 = c[0x1f] | c[0x1E] */
+        pfadd %mm2,%mm0          /* mm0 = c[0x00]+c[0x1F] | c[0x1E]+c[0x01] */
+        movq %mm0,0(%ebx)        /* tmp[0, 1] = mm0 */
+        pfsub %mm2,%mm1          /* c[0x00]-c[0x1f] | c[0x01]-c[0x1e] */
+        pfmul 0(%eax),%mm1       /* (c[0x00]-c[0x1f])*pnts[0]|(c[0x01]-c[0x1e])*pnts[1]*/
+        pswapd %mm1, %mm1        /* (c[0x01]-c[0x1e])*pnts[1]|(c[0x00]-c[0x1f])*pnts[0]*/
+        movq   %mm1, 120(%ebx)   /* tmp1[30, 31]=mm1 */
+
         movq 8(%edi),%mm4
         movq %mm4,%mm5
         movd 116(%edi),%mm6
         punpckldq 112(%edi),%mm6
-        movq 8(%eax),%mm7
         pfadd %mm6,%mm4
         movq %mm4,8(%ebx)
         pfsub %mm6,%mm5
-        pfmul %mm7,%mm5
+        pfmul 8(%eax),%mm5
         pswapd %mm5, %mm5
         movq   %mm5, 112(%ebx)
+
         movq 16(%edi),%mm0
         movq %mm0,%mm1
         movd 108(%edi),%mm2
         punpckldq 104(%edi),%mm2
-        movq 16(%eax),%mm3
         pfadd %mm2,%mm0
         movq %mm0,16(%ebx)
         pfsub %mm2,%mm1
-        pfmul %mm3,%mm1
+        pfmul 16(%eax),%mm1
         pswapd %mm1, %mm1
         movq   %mm1, 104(%ebx)
+
         movq 24(%edi),%mm4
         movq %mm4,%mm5
         movd 100(%edi),%mm6
         punpckldq 96(%edi),%mm6
-        movq 24(%eax),%mm7
         pfadd %mm6,%mm4
         movq %mm4,24(%ebx)
         pfsub %mm6,%mm5
-        pfmul %mm7,%mm5
+        pfmul 24(%eax),%mm5
         pswapd %mm5, %mm5
         movq   %mm5, 96(%ebx)
+
         movq 32(%edi),%mm0
         movq %mm0,%mm1
         movd 92(%edi),%mm2
         punpckldq 88(%edi),%mm2
-        movq 32(%eax),%mm3
         pfadd %mm2,%mm0
         movq %mm0,32(%ebx)
         pfsub %mm2,%mm1
-        pfmul %mm3,%mm1
+        pfmul 32(%eax),%mm1
         pswapd %mm1, %mm1
         movq   %mm1, 88(%ebx)
+
         movq 40(%edi),%mm4
         movq %mm4,%mm5
         movd 84(%edi),%mm6
         punpckldq 80(%edi),%mm6
-        movq 40(%eax),%mm7
         pfadd %mm6,%mm4
         movq %mm4,40(%ebx)
         pfsub %mm6,%mm5
-        pfmul %mm7,%mm5
+        pfmul 40(%eax),%mm5
         pswapd %mm5, %mm5
         movq   %mm5, 80(%ebx)
+
         movq 48(%edi),%mm0
         movq %mm0,%mm1
         movd 76(%edi),%mm2
         punpckldq 72(%edi),%mm2
-        movq 48(%eax),%mm3
         pfadd %mm2,%mm0
         movq %mm0,48(%ebx)
         pfsub %mm2,%mm1
-        pfmul %mm3,%mm1
+        pfmul 48(%eax),%mm1
         pswapd %mm1, %mm1
         movq   %mm1, 72(%ebx)
+
         movq 56(%edi),%mm4
         movq %mm4,%mm5
         movd 68(%edi),%mm6
         punpckldq 64(%edi),%mm6
-        movq 56(%eax),%mm7
         pfadd %mm6,%mm4
         movq %mm4,56(%ebx)
         pfsub %mm6,%mm5
-        pfmul %mm7,%mm5
+        pfmul 56(%eax),%mm5
         pswapd %mm5, %mm5
         movq   %mm5, 64(%ebx)
 
         // 2
         movl pnts+4,%eax
         / 0, 14
-        movq 0(%ebx),%mm0
+        movq 0(%ebx),%mm0            /* mm0 = tmp1[0] | tmp1[1] */
         movq %mm0,%mm1
-        movd 60(%ebx),%mm2
-        punpckldq 56(%ebx),%mm2
-        movq 0(%eax),%mm3
-        pfadd %mm2,%mm0
-        movq %mm0,0(%esi)
-        pfsub %mm2,%mm1
-        pfmul %mm3,%mm1
-        pswapd %mm1, %mm1
-        movq   %mm1, 56(%esi)
+        movd 60(%ebx),%mm2           /* mm2 = tmp1[0x0F] */
+        punpckldq 56(%ebx),%mm2      /* mm2 = tmp1[0x0E] | tmp1[0x0F] */
+        movq 0(%eax),%mm3            /* mm3 = pnts[0] | pnts[1] */
+        pfadd %mm2,%mm0              /* mm0 = tmp1[0]+tmp1[0x0F]|tmp1[1]+tmp1[0x0E]*/
+        movq %mm0,0(%esi)            /* tmp2[0, 1] = mm0 */
+        pfsub %mm2,%mm1              /* mm1 = tmp1[0]-tmp1[0x0F]|tmp1[1]-tmp1[0x0E]*/
+        pfmul %mm3,%mm1              /* mm1 = (tmp1[0]-tmp1[0x0F])*pnts[0]|(tmp1[1]-tmp1[0x0E])*pnts[1]*/
+        pswapd %mm1, %mm1            /* mm1 = (tmp1[1]-tmp1[0x0E])*pnts[1]|(tmp1[0]-tmp1[0x0F])*pnts[0]*/
+        movq   %mm1, 56(%esi)        /* tmp2[0x0E, 0x0F] = mm1 */
         / 16, 30
         movq 64(%ebx),%mm0
         movq %mm0,%mm1
@@ -314,19 +320,19 @@ dct64_3dnowex:
         movq   %mm6, 112(%ebx)
 
         // 4
-        movl pnts+12,%eax
-        movq 0(%eax),%mm0
-        movq 0(%ebx),%mm1
+        movl pnts+12,%eax    
+        movq 0(%eax),%mm0      /* mm0 = pnts[3] | pnts[4] */
+        movq 0(%ebx),%mm1      /* mm1 = tmp1[0] | tmp1[1] */
         / 0
         movq %mm1,%mm2
-        movd 12(%ebx),%mm3
-        punpckldq 8(%ebx),%mm3
-        pfadd %mm3,%mm1
-        pfsub %mm3,%mm2
-        pfmul %mm0,%mm2
-        movq %mm1,0(%esi)
-        pswapd %mm2, %mm2
-        movq   %mm2, 8(%esi)
+        movd 12(%ebx),%mm3     /* mm3 = tmp1[3] */
+        punpckldq 8(%ebx),%mm3 /* mm3 = tmp1[3] | tmp1[2] */
+        pfadd %mm3,%mm1        /* mm1 = tmp1[0]+tmp1[3] | tmp1[1]+tmp1[2]*/
+        pfsub %mm3,%mm2        /* mm2 = tmp1[0]-tmp1[3] | tmp1[0]-tmp1[2]*/
+        pfmul %mm0,%mm2        /* mm2 = tmp1[0]-tmp1[3]*pnts[3]|tmp1[0]-tmp1[2]*pnts[4]*/
+        movq %mm1,0(%esi)      /* tmp2[0, 1] = mm1 */
+        pswapd %mm2, %mm2      /* mm2 = tmp1[0]-tmp1[2]*pnts[4]|tmp1[0]-tmp1[3]*pnts[3] */
+        movq   %mm2, 8(%esi)   /* tmp2[2, 3] = mm2 */
         movq 16(%ebx),%mm4
         / 4
         movq %mm4,%mm5
@@ -412,41 +418,37 @@ dct64_3dnowex:
         movd %eax,%mm0
         / L | H
         punpckldq %mm1,%mm0
-        pi2fd %mm0,%mm0
-        / 1.0 | -1.0
+        pi2fd %mm0,%mm0       /* mm0 = 1.0 | -1.0 */
         movd %eax,%mm1
         pi2fd %mm1,%mm1
         movl pnts+16,%eax
         movd 0(%eax),%mm2
-        punpckldq %mm2,%mm1
-        / 1.0 | cos0
-        movq 0(%esi),%mm2
+        punpckldq %mm2,%mm1   /* mm1 = 1.0 | cos0 */
+        movq 0(%esi),%mm2     /* mm2 = tmp2[0] | tmp2[1] */
         / 0
-        movq %mm2,%mm3
-        pfmul %mm0,%mm3
-        pfacc %mm3,%mm2
-        pfmul %mm1,%mm2
-        movq %mm2,0(%ebx)
-        movq 8(%esi),%mm4
+	pfpnacc %mm2, %mm2
+	pswapd %mm2, %mm2     /* mm2 = tmp2[0]+tmp2[1]|tmp2[0]-tmp2[1]*/
+        pfmul %mm1,%mm2       /* mm2 = tmp2[0]+tmp2[1]|(tmp2[0]-tmp2[1])*cos0*/
+        movq %mm2,0(%ebx)     /* tmp1[0, 1] = mm2 */
+        movq 8(%esi),%mm4     /* mm4 = tmp2[2] | tmp2[3]*/
+	pfpnacc %mm4, %mm4
+	pswapd  %mm4, %mm4    /* mm4 = tmp2[2]+tmp2[3]|tmp2[2]-tmp2[3]*/
+        pfmul %mm0,%mm4       /* mm4 = tmp2[2]+tmp2[3]|tmp2[3]-tmp2[2]*/
+        pfmul %mm1,%mm4       /* mm4 = tmp2[2]+tmp2[3]|(tmp2[3]-tmp2[2])*cos0*/
         movq %mm4,%mm5
-        pfmul %mm0,%mm5
-        pfacc %mm5,%mm4
-        pfmul %mm0,%mm4
-        pfmul %mm1,%mm4
-        movq %mm4,%mm5
-        psrlq $32,%mm5
-        pfacc %mm5,%mm4
-        movq %mm4,8(%ebx)
+        psrlq $32,%mm5        /* mm5 = (tmp2[3]-tmp2[2])*cos0 */
+        pfacc %mm5,%mm4       /* mm4 = tmp2[2]+tmp2[3]+(tmp2[3]-tmp2[2])*cos0|(tmp2[3]-tmp2[2])*cos0*/
+        movq %mm4,8(%ebx)     /* tmp1[2, 3] = mm4 */
         movq 16(%esi),%mm2
         / 4
-        movq %mm2,%mm3
-        pfmul %mm0,%mm3
-        pfacc %mm3,%mm2
+	pfpnacc %mm2, %mm2
+	pswapd %mm2, %mm2
+
         pfmul %mm1,%mm2
         movq 24(%esi),%mm4
-        movq %mm4,%mm5
-        pfmul %mm0,%mm5
-        pfacc %mm5,%mm4
+	pfpnacc %mm4, %mm4
+	pswapd  %mm4, %mm4
+
         pfmul %mm0,%mm4
         pfmul %mm1,%mm4
         movq %mm4,%mm5
@@ -460,15 +462,14 @@ dct64_3dnowex:
         movq %mm4,24(%ebx)
         movq 32(%esi),%mm2
         / 8
-        movq %mm2,%mm3
-        pfmul %mm0,%mm3
-        pfacc %mm3,%mm2
+	pfpnacc %mm2, %mm2
+	pswapd %mm2, %mm2
+
         pfmul %mm1,%mm2
         movq %mm2,32(%ebx)
         movq 40(%esi),%mm4
-        movq %mm4,%mm5
-        pfmul %mm0,%mm5
-        pfacc %mm5,%mm4
+	pfpnacc %mm4, %mm4
+	pswapd  %mm4, %mm4
         pfmul %mm0,%mm4
         pfmul %mm1,%mm4
         movq %mm4,%mm5
@@ -477,14 +478,12 @@ dct64_3dnowex:
         movq %mm4,40(%ebx)
         movq 48(%esi),%mm2
         / 12
-        movq %mm2,%mm3
-        pfmul %mm0,%mm3
-        pfacc %mm3,%mm2
+	pfpnacc %mm2, %mm2
+	pswapd %mm2, %mm2
         pfmul %mm1,%mm2
         movq 56(%esi),%mm4
-        movq %mm4,%mm5
-        pfmul %mm0,%mm5
-        pfacc %mm5,%mm4
+	pfpnacc %mm4, %mm4
+	pswapd  %mm4, %mm4
         pfmul %mm0,%mm4
         pfmul %mm1,%mm4
         movq %mm4,%mm5
@@ -498,15 +497,13 @@ dct64_3dnowex:
         movq %mm4,56(%ebx)
         movq 64(%esi),%mm2
         / 16
-        movq %mm2,%mm3
-        pfmul %mm0,%mm3
-        pfacc %mm3,%mm2
+	pfpnacc %mm2, %mm2
+	pswapd %mm2, %mm2
         pfmul %mm1,%mm2
         movq %mm2,64(%ebx)
         movq 72(%esi),%mm4
-        movq %mm4,%mm5
-        pfmul %mm0,%mm5
-        pfacc %mm5,%mm4
+	pfpnacc %mm4, %mm4
+	pswapd  %mm4, %mm4
         pfmul %mm0,%mm4
         pfmul %mm1,%mm4
         movq %mm4,%mm5
@@ -515,14 +512,12 @@ dct64_3dnowex:
         movq %mm4,72(%ebx)
         movq 80(%esi),%mm2
         / 20
-        movq %mm2,%mm3
-        pfmul %mm0,%mm3
-        pfacc %mm3,%mm2
+	pfpnacc %mm2, %mm2
+	pswapd %mm2, %mm2
         pfmul %mm1,%mm2
         movq 88(%esi),%mm4
-        movq %mm4,%mm5
-        pfmul %mm0,%mm5
-        pfacc %mm5,%mm4
+	pfpnacc %mm4, %mm4
+	pswapd  %mm4, %mm4
         pfmul %mm0,%mm4
         pfmul %mm1,%mm4
         movq %mm4,%mm5
@@ -536,15 +531,13 @@ dct64_3dnowex:
         movq %mm4,88(%ebx)
         movq 96(%esi),%mm2
         / 24
-        movq %mm2,%mm3
-        pfmul %mm0,%mm3
-        pfacc %mm3,%mm2
+	pfpnacc %mm2, %mm2
+	pswapd %mm2, %mm2
         pfmul %mm1,%mm2
         movq %mm2,96(%ebx)
         movq 104(%esi),%mm4
-        movq %mm4,%mm5
-        pfmul %mm0,%mm5
-        pfacc %mm5,%mm4
+	pfpnacc %mm4, %mm4
+	pswapd  %mm4, %mm4
         pfmul %mm0,%mm4
         pfmul %mm1,%mm4
         movq %mm4,%mm5
@@ -553,14 +546,12 @@ dct64_3dnowex:
         movq %mm4,104(%ebx)
         movq 112(%esi),%mm2
         / 28
-        movq %mm2,%mm3
-        pfmul %mm0,%mm3
-        pfacc %mm3,%mm2
+	pfpnacc %mm2, %mm2
+	pswapd %mm2, %mm2
         pfmul %mm1,%mm2
         movq 120(%esi),%mm4
-        movq %mm4,%mm5
-        pfmul %mm0,%mm5
-        pfacc %mm5,%mm4
+	pfpnacc %mm4, %mm4
+	pswapd  %mm4, %mm4
         pfmul %mm0,%mm4
         pfmul %mm1,%mm4
         movq %mm4,%mm5
@@ -574,32 +565,32 @@ dct64_3dnowex:
         movq %mm4,120(%ebx)
 
         // Phase6
-        movl 0(%ebx),%eax
-        movl %eax,1024(%ebp)
+        movd 0(%ebx),%mm0
+        movd %mm0,1024(%ebp)
         movl 4(%ebx),%eax
         movl %eax,0(%ebp)
         movl %eax,0(%edx)
-        movl 8(%ebx),%eax
-        movl %eax,512(%ebp)
-        movl 12(%ebx),%eax
-        movl %eax,512(%edx)
+        movd 8(%ebx),%mm2
+        movd %mm2,512(%ebp)
+        movd 12(%ebx),%mm3
+        movd %mm3,512(%edx)
 
         movl 16(%ebx),%eax
         movl %eax,768(%ebp)
-        movl 20(%ebx),%eax
-        movl %eax,256(%edx)
+        movd 20(%ebx),%mm5
+        movd %mm5,256(%edx)
 
-        movl 24(%ebx),%eax
-        movl %eax,256(%ebp)
-        movl 28(%ebx),%eax
-        movl %eax,768(%edx)
+        movd 24(%ebx),%mm6
+        movd %mm6,256(%ebp)
+        movd 28(%ebx),%mm7
+        movd %mm7,768(%edx)
 
-        movq 32(%ebx),%mm0
-        movq 48(%ebx),%mm1
-        pfadd %mm1,%mm0
-        movd %mm0,896(%ebp)
+        movq 32(%ebx),%mm0       /* mm0 = tmp1[8] | tmp1[9] */
+        movq 48(%ebx),%mm1       /* mm1 = tmp1[12] | tmp1[13] */
+        pfadd %mm1,%mm0          /* mm0 = tmp1[8]+tmp1[12]| tmp1[9]+tmp1[13]*/
+        movd %mm0,896(%ebp)      /* a[0xE0] = tmp1[8]+tmp1[12] */
         psrlq $32,%mm0
-        movd %mm0,128(%edx)
+        movd %mm0,128(%edx)      /* a[0x20] = tmp1[9]+tmp1[13] */
         movq 40(%ebx),%mm2
         pfadd %mm2,%mm1
         movd %mm1,640(%ebp)
@@ -679,5 +670,5 @@ dct64_3dnowex:
         popl %ebp
         addl $256,%esp
 
-        ret
+        ret  $12
 

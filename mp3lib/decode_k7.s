@@ -95,7 +95,6 @@ synth_1to1_3dnowex:
 .L74:
         pushl %eax
         call  dct64_3dnowex
-        addl  $12,%esp
         movl  16(%esp),%edx
         leal  0(,%edx,4),%edx
         movl  $decwin+64,%eax
