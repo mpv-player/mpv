@@ -104,10 +104,10 @@ __asm__ __volatile__(\
 #undef PREFETCH
 #undef EMMS
 
-#ifdef HAVE_3DNOW
-#define PREFETCH  "prefetch"
-#elif defined ( HAVE_MMX2 )
+#ifdef HAVE_MMX2
 #define PREFETCH "prefetchnta"
+#elif defined ( HAVE_3DNOW )
+#define PREFETCH  "prefetch"
 #else
 #define PREFETCH "/nop"
 #endif
