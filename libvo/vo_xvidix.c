@@ -74,19 +74,6 @@ static uint32_t drwX, drwY, drwWidth, drwHeight, drwBorderWidth,
 
 static void set_window(int force_update,const vo_tune_info_t *info)
 {
-#ifdef HAVE_NEW_GUI
-	if (vo_fs)
-	{
-	    dwidth = vo_screenwidth;
-	    dheight = vo_screenwidth * vo_dheight / vo_dwidth;
-	}
-	else
-	{
-	    dwidth = vo_dwidth;
-	    dheight = vo_dheight;
-	}
-#endif
-
     XGetGeometry(mDisplay, vo_window, &mRoot, &drwX, &drwY, &drwWidth,
 	&drwHeight, &drwBorderWidth, &drwDepth);
     drwX = drwY = 0;
@@ -98,11 +85,9 @@ static void set_window(int force_update,const vo_tune_info_t *info)
 	    drwcX, drwcY, drwX, drwY, drwWidth, drwHeight);
 
     /* following stuff copied from vo_xmga.c */
-    aspect(&dwidth, &dheight, A_NOZOOM);
 #if X11_FULLSCREEN
     if (vo_fs)
     {
-	aspect(&dwidth, &dheight, A_ZOOM);
 	drwX = (vo_screenwidth - (dwidth > vo_screenwidth ? vo_screenwidth : dwidth)) / 2;
 	drwcX += drwX;
 	drwY = (vo_screenheight - (dheight > vo_screenheight ? vo_screenheight : dheight)) / 2;
@@ -287,7 +272,8 @@ if (vo_window == None)
 	window_height = vo_screenheight;
     }
 #endif
-
+    dwidth = d_width;
+    dheight = d_height;
     /* Make the window */
     XGetWindowAttributes(mDisplay, DefaultRootWindow(mDisplay), &attribs);
 
