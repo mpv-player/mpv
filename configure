@@ -6148,7 +6148,7 @@ SLIBPREF=lib
 SLIBSUF=.so
 
 # video output
-X_LIB = $_ld_gl $_ld_dga $_ld_xv $_ld_xvmc $_ld_vm $_ld_xinerama $_ld_x11 $_ld_mad $_ld_sock
+X_LIB = $_ld_gl $_ld_dga $_ld_xv $_ld_xvmc $_ld_vm $_ld_xinerama $_ld_x11 $_ld_sock
 GGI_LIB = $_ld_ggi
 MLIB_LIB =  $_ld_mlib
 MLIB_INC = $_inc_mlib
