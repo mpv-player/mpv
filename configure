@@ -1161,13 +1161,14 @@ echores "$_dl"
 echocheck "pthread"
 cat > $TMPC << EOF
 #include <pthread.h>
-int main(void) { (void) pthread_create (0, 0, 0, 0); return 0; }
+void* func(void *arg) { return arg; }
+int main(void) { pthread_t tid; return pthread_create (&tid, 0, func, 0) == 0 ? 0 : 1; }
 EOF
-if cc_check ; then              # QNX
+if ( cc_check && $TMPO ) ; then              # QNX
   _ld_pthread=''
-elif cc_check -lpthread ; then
+elif ( cc_check -lpthread && $TMPO ) ; then
   _ld_pthread='-lpthread'
-elif cc_check -pthread ; then
+elif ( cc_check -pthread && $TMPO ) ; then
   _ld_pthread='-pthread'
 else
   die "Lib pthread not found. (needed by windows and networking stuff)"
@@ -1334,38 +1335,43 @@ echores "$_vsscanf"
 
 
 echocheck "X11 headers"
-if test -z "$_x11incdir" ; then
+if test -z "$_inc_x11" ; then
   for I in /usr/include /usr/X11R6/include /usr/X11/include /usr/openwin/include ; do
     if test -d "$I/X11" ; then
-      _x11incdir="$I"
+      _inc_x11="-I$I"
       echores "yes (found: $I)"
       break
     fi
   done
+  if test -z "$_inc_x11" ; then
+    _x11=no
+    echores "not found"
+  fi
+else
+  echores "yes (use: $_inc_x11)"
 fi
-if test -z "$_x11incdir" ; then
-  _x11=no
-  echores "not found"
-elif test "$_x11incdir" != "/usr/include" ; then
-  _inc_x11="-I$_x11incdir"
+if test "$_inc_x11" = "-I/usr/include" ; then
+  _inc_x11=""
 fi
 
 
 echocheck "X11 libs"
-if test -z "$_x11libdir" ; then
+if test -z "$_ld_x11" ; then
   for I in /usr/X11R6/lib /usr/X11/lib /usr/lib32 /usr/openwin/lib ; do
     if test -d "$I" ; then
-      _x11libdir="$I"
+      _ld_x11="-L$I"
       echores "yes (found: $I)"
       break;
     fi
   done
+  if test -z "$_ld_x11" ; then
+    _x11=no
+    echores "not found"
+  fi
+else
+  echores "yes (use: $_ld_x11)"
 fi
-if test -z "$_x11libdir" ; then
-  _x11=no
-  echores "not found"
-fi
-_ld_x11="-L$_x11libdir -lX11 -lXext $_ld_sock"
+_ld_x11="$_ld_x11 -lX11 -lXext $_ld_sock"
 
 
 #########
@@ -1801,11 +1807,11 @@ if test "$_nas" = auto || test "$_nas" = yes ; then
 int main(void) { return 0; }
 EOF
   _nas=no
-  cc_check -laudio -lX11 -lXt -lm -I$_x11incdir -L$_x11libdir && _nas=yes
+  cc_check -laudio $_inc_x11 $_ld_x11 -lXt -lm && _nas=yes
 fi
 if test "$_nas" = yes ; then
   _def_nas='#define HAVE_NAS 1'
-  _ld_nas="-laudio -lX11 -lXt -L$_x11libdir"
+  _ld_nas="-laudio  $_ld_x11 -lXt"
   _aosrc="$_aosrc ao_nas.c"
   _aomodules="nas $_aomodules"
 else
