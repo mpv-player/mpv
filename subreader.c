@@ -33,6 +33,7 @@ char *sub_cp=NULL;
 #include <fribidi/fribidi.h>
 char *fribidi_charset = NULL;
 int flip_hebrew = 1;
+int fribidi_flip_commas = 0;
 #endif
 
 extern char* dvdsub_lang;
@@ -1208,7 +1209,7 @@ subtitle* sub_fribidi (subtitle *sub, int sub_utf8)
       break;
     }
     len = fribidi_charset_to_unicode (char_set_num, ip, len, logical);
-    base = FRIBIDI_TYPE_ON;
+    base = fribidi_flip_commas?FRIBIDI_TYPE_ON:FRIBIDI_TYPE_L;
     log2vis = fribidi_log2vis (logical, len, &base,
 			       /* output */
 			       visual, NULL, NULL, NULL);

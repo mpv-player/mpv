@@ -59,6 +59,12 @@ typedef struct {
     int sub_errs;
 } sub_data;
 
+#ifdef  USE_FRIBIDI
+extern char *fribidi_charset;
+extern int flip_hebrew;
+extern int fribidi_flip_commas;
+#endif
+
 sub_data* sub_read_file (char *filename, float pts);
 subtitle* subcp_recode1 (subtitle *sub);
 // enca_fd is the file enca uses to determine the codepage.
