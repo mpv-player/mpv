@@ -428,7 +428,7 @@ static void flip_page( void )
 #else
 		XF86DGASetViewPort(vo_dga_dpy, XDefaultScreen(vo_dga_dpy),
 				   0,
-				   VIDEO_BUFFER_DISPLAY.y);
+				   CURRENT_VIDEO_BUFFER.y);
 #endif
 		switch_video_buffers();
 	}
