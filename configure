@@ -125,7 +125,7 @@ Optional features:
 
 Video:
   --enable-gl            build with OpenGL render support [autodetect]
-  --enable-dga           build with DGA support [autodetect]
+  --enable-dga[=n]       build with DGA [n in {1, 2} ] support [autodetect]
   --enable-svga          build with SVGAlib support [autodetect]
   --enable-sdl           build with SDL render support [autodetect]
   --enable-aa            build with AAlib render support [autodetect]
@@ -631,13 +631,14 @@ fi
 
 _prefix="/usr/local"
 
+# GOTCHA: the variables below defines the default behavior for autodetection
+# and have - unless stated otherwise - at least 2 states : yes no
+# If autodetection is available then the third state is: auto
 _libavcodec=auto
 _libavcodecso=no # changed default to no as it causes problems - atmos
-
 _mencoder=auto
 _x11=auto
-_dga=auto
-_dga2=auto
+_dga=auto	# 1 2 no auto
 _xv=auto
 _sdl=auto
 _png=auto
@@ -668,7 +669,7 @@ _alsa=auto
 _fastmemcpy=yes
 _win32=auto
 _dshow=auto
-_def_select='#define HAVE_AUDIO_SELECT'
+_select=yes
 _tv=no
 _streaming=no
 _divx4linux=auto
@@ -702,10 +703,6 @@ for ac_option do
   --disable-mencoder)	_mencoder=no	;;
   --enable-x11)		_x11=yes	;;
   --disable-x11)	_x11=no		;;
-  --enable-dga)		_dga=yes	;;
-  --disable-dga)	_dga=no		;;
-  --enable-dga2)	_dga2=yes	;;
-  --disable-dga2)	_dga2=no	;;
   --enable-xv)		_xv=yes		;;
   --disable-xv)		_xv=no		;;
   --enable-sdl)		_sdl=yes	;;
@@ -788,10 +785,12 @@ for ac_option do
   --disable-vo2)	_vo2=no		;;
   --enable-shm)		_shm=yes	;;
   --disable-shm)	_shm=no         ;;
+  --enable-select)	_select=yes	;;
+  --disable-select)	_select=no	;;
 
-  --enable-select)	_def_select='#define HAVE_AUDIO_SELECT'	;;
-  --disable-select)	_def_select='#undef HAVE_AUDIO_SELECT'	;;
-
+  --enable-dga) _dga=auto ;; # as we don't know if it's 1 or 2
+  --enable-dga=*) _dga=`echo $ac_option | cut -d '=' -f 2` ;;
+  --disable-dga) _dga=no ;;
 
   --language=*)
     LINGUAS=`echo $ac_option | cut -d '=' -f 2`
@@ -1452,47 +1451,43 @@ echores "$_vm"
 
 
 echocheck "DGA"
-if test "$_x11" = yes && test "$_dga" != no ; then
+# Version 2 is preferred to version 1 if available
+if test "$_dga" = auto ; then
   cat > $TMPC << EOF
 #include <X11/Xlib.h>
 #include <X11/extensions/xf86dga.h>
-int main (void) { (void) XDGAQueryExtension(0, 0, 0); return 0; }
+int main (void) { (void) XF86DGASetViewPort(0, 0, 0, 0); return 0; }
 EOF
   _dga=no
-  cc_check $_inc_x11 $_ld_x11 -lXxf86dga -lXxf86vm && _dga=yes
-else
-  _dga=no
+  cc_check $_inc_x11 $_ld_x11 -lXxf86dga -lXxf86vm && _dga=1
+
+  cat > $TMPC << EOF
+#include <X11/Xlib.h>
+#include <X11/extensions/xf86dga.h>
+int main (void) { (void) XDGASetViewport(0, 0, 0, 0, 0); return 0; }
+EOF
+  cc_check $_inc_x11 $_ld_x11 -lXxf86dga && _dga=2
 fi
-if test "$_dga" = yes ; then
+
+_def_dga='#undef HAVE_DGA'
+_def_dga2='#undef HAVE_DGA2'
+if test "$_dga" = 1 ; then
   _def_dga='#define HAVE_DGA 1'
   _ld_dga='-lXxf86dga -lXxf86vm'
   _vosrc="$_vosrc vo_dga.c"
   _vomodules="dga $_vomodules"
-else
-  _def_dga='#undef HAVE_DGA'
-fi
-echores "$_dga"
-
-
-echocheck "DGA 2.0"
-if test "$_x11" = yes && test "$_dga2" != no ; then
-  cat > $TMPC << EOF
-#include <X11/Xlib.h>
-#include <X11/extensions/xf86dga.h>
-int main (void) { XDGAMode mode; XDGADevice device; return 0; }
-EOF
-  _dga2=no
-  cc_check $_inc_x11 $_ld_x11 -lXxf86dga -lXxf86vm && _dga2=yes
-fi
-if test "$_dga2" = yes ; then
+  echores "using DGA 1.0"
+elif test "$_dga" = 2 ; then
   _def_dga2='#define HAVE_DGA2 1'
-  _ld_dga2='-lXxf86dga -lXxf86vm'
+  _ld_dga='-lXxf86dga'
   _vosrc="$_vosrc vo_dga.c"
-  _vomodules="dga2 $_vomodules"
+  _vomodules="dga $_vomodules"
+  echores "using DGA 2.0"
+elif test "$_dga" = no ; then
+  echores "no"
 else
-  _def_dga2='#undef HAVE_DGA2'
+  die "DGA version must be 1 or 2"
 fi
-echores "$_dga2"
 
 
 echocheck "OpenGL"
@@ -2323,6 +2318,15 @@ fi
 echores "$_tv"
 
 
+echocheck "select"
+if test "$_select" = no ; then
+  _def_select='#undef HAVE_AUDIO_SELECT'
+elif test  "$_select" = yes ; then
+  _def_select='#define HAVE_AUDIO_SELECT 1'
+fi
+echores "$_select"
+
+
 echocheck "streaming"
 # FIXME streaming check
 if test "$_streaming" = yes ; then
@@ -2523,7 +2527,7 @@ X11_INC = $_inc_x11
 X11DIR = $_ld_x11
 
 # video output
-X_LIB = $_ld_x11 $_ld_gl $_ld_dga $_ld_dga2 $_ld_xv $_ld_vm $_ld_xinerama $_ld_mad $_ld_sock 
+X_LIB = $_ld_x11 $_ld_gl $_ld_dga $_ld_xv $_ld_vm $_ld_xinerama $_ld_mad $_ld_sock 
 DXR3_LIB =  $_ld_dxr3
 GGI_LIB = $_ld_ggi
 MLIB_LIB =  $_ld_mlib
