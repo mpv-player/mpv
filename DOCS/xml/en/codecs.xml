@@ -531,14 +531,14 @@ decoders:
 <procedure>
 <title>COMPILING MPLAYER WITH QUICKTIME LIBRARIES SUPPORT</title>
 <note><para>currently only 32bit Intel platforms are supported.</para></note>
-<step><para>download MPlayer CVS</para></step>
+<step><para>download <application>MPlayer</application> CVS</para></step>
 <step><para>download QuickTime DLL pack from
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/"/>
 </para></step>
 <step><para>extract QuickTime DLL pack to your Win32 codecs directory
 (default: <filename class="directory">/usr/local/lib/codecs/</filename>)
 </para></step>
-<step><para>compile MPlayer</para></step>
+<step><para>compile <application>MPlayer</application></para></step>
 </procedure>
 
 </sect3>
@@ -726,7 +726,8 @@ libraries. For installation instructions please see the
 AAC (Advanced Audio Coding) is an audio codec sometimes found in MOV and MP4
 files. An open source decoder called FAAD is available from
 <ulink url="http://www.audiocoding.com"/>.
-MPlayer includes libfaad 2.0RC1, so you do not need to get it separately.
+<application>MPlayer</application> includes libfaad 2.0RC1, so you do not need
+to get it separately.
 </para>
 
 <para>

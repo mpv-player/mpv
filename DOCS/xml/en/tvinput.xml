@@ -82,9 +82,9 @@ dimensions sane.
 <listitem>
 <para>
 Watch out for CPU load. It shouldn't cross the 90% boundary for most of the
-time. If you have a large capture buffer, MEncoder can survive an overload
-for few seconds but nothing more. It's better to turn off the 3D OpenGL
-screensavers and similar stuff.
+time. If you have a large capture buffer, <application>MEncoder</application>
+can survive an overload for few seconds but nothing more. It's better to
+turn off the 3D OpenGL screensavers and similar stuff.
 </para>
 </listitem>
 
@@ -92,10 +92,10 @@ screensavers and similar stuff.
 <para>
 Don't mess with the system clock. <application>MEncoder</application> uses the
 system clock for doing A/V sync. If you adjust the system clock (especially
-backwards in time), MEncoder gets confused and you will lose frames. This is
-an important issue if you are hooked to a network and run some time
-synchronization software like NTP. You have to turn NTP off during the capture
-process if you want to capture reliably.
+backwards in time), <application>MEncoder</application> gets confused and you
+will lose frames. This is an important issue if you are hooked to a network
+and run some time synchronization software like NTP. You have to turn NTP
+off during the capture process if you want to capture reliably.
 </para>
 </listitem>
 
@@ -129,7 +129,8 @@ your soundcard via an external cable connection between video card and line-in,
 or using the built-in ADC in the bt878 chip. In the latter case, you have to
 load the <emphasis role="bold">btaudio</emphasis> driver. Read the
 <filename>linux/Documentation/sound/btaudio</filename> file (in the kernel
-tree, not MPlayer's) for some instructions on using this driver.
+tree, not <application>MPlayer's</application>) for some instructions on using
+this driver.
 </para>
 </listitem>
 
@@ -169,10 +170,10 @@ mplayer -tv driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv tv://
 
 <informalexample>
 <para>
-A more sophisticated example. This makes MEncoder capture the full PAL
-image, crop the margins, and deinterlace the picture using a linear blend
-algorithm. Audio is compressed with a constant bitrate of 64kbps, using
-LAME codec. This setup is suitable for capturing movies.
+A more sophisticated example. This makes <application>MEncoder</application>
+capture the full PAL image, crop the margins, and deinterlace the picture
+using a linear blend algorithm. Audio is compressed with a constant bitrate
+of 64kbps, using LAME codec. This setup is suitable for capturing movies.
 <screen>
      mencoder -tv driver=v4l:width=768:height=576 \
      -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=900 \

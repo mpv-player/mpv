@@ -93,9 +93,9 @@ line with the <option>-dvd-device</option> option.
 <application>MPlayer</application> uses <systemitem>libdvdread</systemitem> and
 <systemitem>libdvdcss</systemitem> for DVD decryption and playback. These two
 libraries are contained in the <filename class="directory">libmpdvdkit2/</filename>
-subdirectory of the MPlayer source tree, you do not have to install them separately.
-We opted for this solution because we had to fix a <systemitem>libdvdread</systemitem>
-bug and apply a patch which adds
+subdirectory of the <application>MPlayer</application> source tree, you do not have
+to install them separately. We opted for this solution because we had to fix a
+<systemitem>libdvdread</systemitem> bug and apply a patch which adds
 <emphasis role="bold">cracked CSS keys caching support</emphasis> to
 <systemitem>libdvdcss</systemitem> This results in a large speed increase because the
 keys do not have to be cracked every time before playing.
@@ -119,9 +119,10 @@ facilities.
 <para>
 Useful if you want to play encoded VOBs from <emphasis role="bold">hard disk</emphasis>.
 Compile and install <emphasis role="bold">libcss</emphasis> 0.0.1 (not newer) for this
-(If MPlayer fails to detect it, use the <option>-csslib /path/to/libcss.so</option>
-option). To use it, you need to be root, use a suid root MPlayer binary or let
-MPlayer call the suid-root fibmap_mplayer wrapper program.
+(If <application>MPlayer</application> fails to detect it, use the
+<option>-csslib /path/to/libcss.so</option> option). To use it, you need to be root,
+use a suid root <application>MPlayer</application> binary or let
+<application>MPlayer</application> call the suid-root fibmap_mplayer wrapper program.
 </para>
 </formalpara>
 

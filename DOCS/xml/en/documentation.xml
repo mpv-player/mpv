@@ -28,7 +28,7 @@
 
 <book id="index" lang="en">
 <bookinfo id="toc">
-<title>MPlayer - The Movie Player for LINUX</title>
+<title><application>MPlayer</application> - The Movie Player for LINUX</title>
 <subtitle><ulink url="http://www.mplayerhq.hu"></ulink></subtitle>
 <date>March 24, 2003</date>
 <copyright>
@@ -112,18 +112,19 @@ but the speed is also amazing.
 </para>
 
 <para>
-<application>MEncoder</application> (MPlayer's Movie Encoder) is a simple movie
-encoder, designed to encode MPlayer-playable movies
+<application>MEncoder</application> (<application>MPlayer's</application> Movie
+Encoder) is a simple movie encoder, designed to encode
+<application>MPlayer</application>-playable movies
 (<emphasis role="bold">AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</emphasis>)
-to other MPlayer-playable formats (see below). It can encode with various codecs,
-like <emphasis role="bold">DivX4</emphasis> (1 or 2 passes), libavcodec,
-<emphasis role="bold">PCM/MP3/VBR MP3</emphasis> audio. Also has powerful plugin
-system for video manipulation.
+to other <application>MPlayer</application>-playable formats (see below). It
+can encode with various codecs, like <emphasis role="bold">DivX4</emphasis>
+(1 or 2 passes), libavcodec, <emphasis role="bold">PCM/MP3/VBR MP3</emphasis>
+audio. Also has powerful plugin system for video manipulation.
 </para>
 
 
 <itemizedlist>
-<title>MEncoder features</title>
+<title><application>MEncoder</application> features</title>
 <listitem><simpara>
   Encoding from the wide range of fileformats and decoders of
   <application>MPlayer</application>

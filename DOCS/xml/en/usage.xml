@@ -112,8 +112,8 @@ control (using LIRC). See the man page for the complete list of keyboard control
 
 <para>
 <application>MPlayer</application> allows you bind any key/button to any
-MPlayer command using a simple config file.  The syntax consist of a key
-name followed by a command. The default config file location is
+<application>MPlayer</application> command using a simple config file.
+The syntax consist of a key name followed by a command. The default config file location is
 <filename>$HOME/.mplayer/input.conf</filename> but it can be overridden
 using the <option>-input <replaceable>conf</replaceable></option> option
 (relative path are relative to <filename>$HOME/.mplayer</filename>).

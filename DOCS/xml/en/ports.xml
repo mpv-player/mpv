@@ -8,24 +8,25 @@
 <para>
 The main development platform is Linux on x86, although
 <application>MPlayer</application> works on many other Linux ports.
-Binary packages of MPlayer are available from several sources. However,
-<emphasis role="bold">none of these packages are supported</emphasis>.
+Binary packages of <application>MPlayer</application> are available from several
+sources. However, <emphasis role="bold">none of these packages are supported</emphasis>.
 Report problems to the authors, not to us.
 </para>
 
 <sect2 id="debian">
 <title>Debian packaging</title>
 <para>
-To build a Debian package, run the following command in the MPlayer
-source directory:
+To build a Debian package, run the following command in the
+<application>MPlayer</application> source directory:
 <screen>fakeroot debian/rules binary</screen>
 As root you can then install the <filename>.deb</filename> package as usual:
 <screen>dpkg -i ../mplayer_<replaceable>version</replaceable>.deb</screen>
 </para>
 
 <para>
-Christian Marillat has been making unofficial Debian MPlayer, MEncoder and font
-packages for a while, you can (apt-)get them from his
+Christian Marillat has been making unofficial Debian
+<application>MPlayer</application>, <application>MEncoder</application> and
+font packages for a while, you can (apt-)get them from his
 <ulink url="http://marillat.free.fr/">homepage</ulink>.
 </para>
 </sect2>
@@ -40,24 +41,25 @@ Dominik Mierzejewski created and maintains official Red Hat RPM packages of
 
 <para>
 Mandrake RPM packages are available from the <ulink url="http://plf.zarb.org/">P.L.F.</ulink>.
-SuSE used to include a crippled version of MPlayer in their distribution.
-They have removed it in their latest releases. You can get working RPMs
-from <ulink url="http://packman.links2linux.de/?action=128">links2linux.de</ulink>.
+SuSE used to include a crippled version of <application>MPlayer</application>
+in their distribution. They have removed it in their latest releases. You can
+get working RPMs from
+<ulink url="http://packman.links2linux.de/?action=128">links2linux.de</ulink>.
 </para>
 </sect2>
 
 <sect2 id="arm">
 <title>ARM</title>
 <para>
-MPlayer works on Linux PDAs with ARM CPU e.g. Sharp Zaurus, Compaq Ipaq. The
-easiest way to obtain MPlayer is to get it from one of the
-<ulink url="http://www.openzaurus.org">OpenZaurus</ulink> package feeds. If
+<application>MPlayer</application> works on Linux PDAs with ARM CPU e.g. Sharp Zaurus,
+Compaq Ipaq. The easiest way to obtain <application>MPlayer</application> is to get it
+from one of the<ulink url="http://www.openzaurus.org">OpenZaurus</ulink> package feeds. If
 you want to compile it yourself, you should look at the
 <ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/mplayer?nav=index.html|src/.|src/packages">MPlayer</ulink>
 and the
 <ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/libavcodec?nav=index.html|src/.|src/packages">libavcodec</ulink>
 directory in the OpenZaurus distribution buildroot. These always have the latest
-Makefile and patches used for building a CVS MPlayer with libavcodec.
+Makefile and patches used for building a CVS <application>MPlayer</application> with libavcodec.
 If you need a GUI frontend, you can use xmms-embedded.
 </para>
 </sect2>
@@ -67,24 +69,25 @@ If you need a GUI frontend, you can use xmms-embedded.
 <title>*BSD</title>
 <para>
 <application>MPlayer</application> runs on FreeBSD, OpenBSD, NetBSD,
-BSD/OS and Darwin. There are ports/pkgsrc/fink/etc versions of MPlayer
+BSD/OS and Darwin. There are ports/pkgsrc/fink/etc versions of <application>MPlayer</application>
 available that are probably easier to use than our raw sources.
 </para>
 
 <para>
-To build MPlayer you will need GNU make (gmake - native BSD make
-will not work) and a recent version of binutils.
+To build <application>MPlayer</application> you will need GNU make
+(gmake - native BSD make will not work) and a recent version of binutils.
 </para>
 
 <para>
-If MPlayer complains about not finding <filename>/dev/cdrom</filename> or
-<filename>/dev/dvd</filename>, create an appropriate symbolic link:
+If <application>MPlayer</application> complains about not finding <filename>/dev/cdrom</filename>
+or <filename>/dev/dvd</filename>, create an appropriate symbolic link:
 <screen>ln -s /dev/<replaceable>your_cdrom_device</replaceable> /dev/cdrom</screen>
 </para>
 
 <para>
-To use Win32 DLLs with MPlayer you will need to re-compile the kernel with
-&quot;<envar>option USER_LDT</envar>&quot; (unless you run FreeBSD-CURRENT,
+To use Win32 DLLs with <application>MPlayer</application> you will need to
+re-compile the kernel with &quot;<envar>option USER_LDT</envar>&quot;
+(unless you run FreeBSD-CURRENT,
 where this is the default).
 </para>
 
@@ -123,10 +126,10 @@ See the <link linkend="macos">Mac OS</link> section.
 </para>
 
 <para>
-On <emphasis role="bold">UltraSPARCs</emphasis>, MPlayer takes advantage of their
-<emphasis role="bold">VIS</emphasis> extensions (equivalent to MMX), currently
-only in <emphasis>libmpeg2</emphasis>, <emphasis>libvo</emphasis> and
-<emphasis>libavcodec</emphasis>, but not in mp3lib. You can watch a VOB file
+On <emphasis role="bold">UltraSPARCs</emphasis>, <application>MPlayer</application>
+takes advantage of their <emphasis role="bold">VIS</emphasis> extensions
+(equivalent to MMX), currently only in <emphasis>libmpeg2</emphasis>, <emphasis>libvo</emphasis>
+and <emphasis>libavcodec</emphasis>, but not in mp3lib. You can watch a VOB file
 on a 400MHz CPU. You'll need
 <ulink url="http://www.sun.com/sparc/vis/mediaLib.html">mLib</ulink> installed.
 </para>
@@ -212,7 +215,7 @@ The hsfs problem can be fixed by installing patch 109764-04 (sparc) / 109765-04 
 <para>
 On Solaris with an UltraSPARC CPU, you can get some extra speed by using the
 CPU's VIS instructions for certain time consuming operations. VIS acceleration
-can be used in MPlayer by calling functions in Sun's
+can be used in <application>MPlayer</application> by calling functions in Sun's
 <ulink url="http://www.sun.com/sparc/vis/mediaLib.html">mediaLib</ulink>.
 </para>
 
@@ -245,7 +248,7 @@ to:
 
   $(INSTALL) -m 644 codecs.conf $(CONFDIR)/
 </programlisting>
-And then do (from within the MPlayer source dir):
+And then do (from within the <application>MPlayer</application> source dir):
 <screen>cp DOCS/mplayer.1 . ; cp etc/codecs.conf .</screen>
 and then go on with building and installing.
 </para>
@@ -268,9 +271,9 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 <sect1 id="windows">
 <title>Windows</title>
 
-<para>Yes, MPlayer runs on Windows under
-  <ulink url="http://www.cygwin.com/">Cygwin</ulink> and
-  <ulink url="http://www.mingw.org/">MinGW</ulink>.
+<para>Yes, <application>MPlayer</application> runs on Windows under
+  <ulink url="http://www.cygwin.com/"><application>Cygwin</application></ulink> and
+  <ulink url="http://www.mingw.org/"><application>MinGW</application></ulink>.
   It does not have a GUI yet, but the command line version is almost completely
   functional. <ulink url="../../tech/patches.txt">Patches</ulink> are always welcome.
   You should check out the
@@ -290,16 +293,18 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 <para>You can use Win32 codecs and Real Win32 codecs (not Real Linux codecs)
   if you want to. Put the codecs somewhere in your path or pass
   <option>--with-codecsdir=c:/path/to/your/codecs</option> (alternatively
-  <option>--with-codecsdir=/path/to/your/codecs</option> only on Cygwin) to
-  <filename>configure</filename>. We have had some reports that Real DLLs need
-  to be writable by the user running MPlayer, but only on some systems. Try
-  making them writable if you have problems. QuickTime DLLs also work, but you
-  will have to put them in your Windows system directory
+  <option>--with-codecsdir=/path/to/your/codecs</option> only on
+  <application>Cygwin</application>) to <filename>configure</filename>. We
+  have had some reports that Real DLLs need to be writable by the user running
+  <application>MPlayer</application>, but only on some systems. Try making
+  them writable if you have problems. QuickTime DLLs also work, but you will
+  have to put them in your Windows system directory
   (<filename class="directory">C:\Windows\system\</filename> or similar).</para>
 
-<para>The Cygwin/MinGW console is rather slow. Redirecting output or using
-  the <option>-quiet</option> option has been reported to improve performance
-  on some systems. Direct rendering (<option>-dr</option>) may also help.
+<para>The <application>Cygwin</application>/<application>MinGW</application>
+  console is rather slow. Redirecting output or using the
+  <option>-quiet</option> option has been reported to improve performance on
+  some systems. Direct rendering (<option>-dr</option>) may also help.
   You can prevent OSD flicker through double buffering with the
   <option>-double</option> option. If playback is jerky, try
   <option>-autosync 100</option>. If some of these options help you, you
@@ -311,7 +316,7 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
   <ulink url="http://www.mplayerhq.hu/homepage/projects.html">our projects page</ulink>.</para>
 
 <sect2 id="cygwin">
-<title>Cygwin</title>
+<title><application>Cygwin</application></title>
 
 <para>Cygwin versions prior to 1.5.0 do not include <filename>inttypes.h</filename>.
   Put this
@@ -322,7 +327,8 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 <para>DirectX header files need to be extracted to <filename class="directory">/usr/include/</filename> or
   <filename class="directory">/usr/local/include/</filename>.</para>
 
-<para>Instructions and files for making SDL run under Cygwin can be found on the
+<para>Instructions and files for making SDL run under
+  <application>Cygwin</application> can be found on the
   <ulink url="http://www.libsdl.org/extras/win32/cygwin/">libsdl site</ulink>.</para>
 
 <para>You can play VCDs by playing the <filename>.DAT</filename> or <filename>.MPG</filename> files
@@ -342,21 +348,22 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 
 
 <sect2 id="mingw">
-<title>MinGW</title>
+<title><application>MinGW</application></title>
 
-<para>Installing a version of MinGW that could compile MPlayer used to be quite
-  tricky, but it works out of the box now. Just install MinGW 3.1.0 or later
-  and MSYS 1.0.9 or later and tell the MSYS postinstall that MinGW is
-  installed.</para>
+<para>Installing a version of <application>MinGW</application> that could
+  compile <application>MPlayer</application> used to be quite tricky, but it
+  works out of the box now. Just install <application>MinGW</application>
+  3.1.0 or later and MSYS 1.0.9 or later and tell the MSYS postinstall that
+  <application>MinGW</application> is installed.</para>
 
-<para>If you use a version of MinGW before 3.1.0, you need to replace
-  <filename>/mingw/include/sys/types.h</filename> with this
+<para>If you use a version of <application>MinGW</application> before 3.1.0,
+  you need to replace <filename>/mingw/include/sys/types.h</filename> with this
   <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/types.h"><filename>types.h</filename></ulink>.</para>
 
 <para>Extract DirectX header files to <filename class="directory">/mingw/include/</filename>.</para>
 
-<para>VCDs and DVDs work almost like Cygwin (adjust for the drive letter of your
-  CD-ROM/DVD-ROM):</para>
+<para>VCDs and DVDs work almost like <application>Cygwin</application> (adjust
+  for the drive letter of your CD-ROM/DVD-ROM):</para>
 
 <screen>mplayer d:/mpegav/avseq01.dat</screen>
 

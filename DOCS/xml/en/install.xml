@@ -187,7 +187,8 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
   and encoding. Features:
   <itemizedlist>
   <listitem><simpara>
-    1 pass or 2 pass encoding with <link linkend="mencoder">MEncoder</link>
+    1 pass or 2 pass encoding with
+    <link linkend="mencoder"><application>MEncoder</application></link>
     </simpara></listitem>
   <listitem><simpara>
     can play old <emphasis role="bold">DivX3</emphasis> movies much faster than
@@ -203,7 +204,8 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
   Divx4Linux. Features:
   <itemizedlist>
   <listitem><simpara>
-    1 pass or 2 pass encoding with <link linkend="mencoder">MEncoder</link>
+    1 pass or 2 pass encoding with
+    <link linkend="mencoder"><application>MEncoder</application></link>
     </simpara></listitem>
   <listitem><simpara>
     it's open-source, so it's multiplatform.
@@ -426,7 +428,8 @@ it works with the following drivers:
   </para></listitem>
 <listitem><para>
   If you want to install <application>MEncoder</application> (our great
-  all-purpose encoder), see the <link linkend="mencoder">MEncoder</link> section.
+  all-purpose encoder), see the
+  <link linkend="mencoder"><application>MEncoder</application></link> section.
   </para></listitem>
 <listitem><para>
   If you have a V4L compatible <emphasis role="bold">TV tuner</emphasis> card,
@@ -463,9 +466,9 @@ copy of it. Check if you have
 Note that if you have a <filename>codecs.conf</filename> in
 <filename>~/.mplayer/</filename>,  the builtin and system
 <filename>codecs.conf</filename> will be ignored completely.
-Do not do this unless you want to fiddle with MPlayer internals as this can
-can cause many problems.  If you want to change the codecs search order, use
-the <option>-vc</option>, <option>-ac</option>, <option>-vfm</option>,
+Do not do this unless you want to fiddle with <application>MPlayer</application>
+internals as this can can cause many problems. If you want to change the codecs
+search order, use the <option>-vc</option>, <option>-ac</option>, <option>-vfm</option>,
 or <option>-afm</option> options either on the command line or in your
 config file (see the manual page).
 </para>
@@ -494,8 +497,8 @@ header files (usually the -dev packages) and their version matches. The
 <para>
 Though not mandatory, the fonts should be installed in order to gain OSD,
 and subtitle functionality. The recommended method is installing a TTF
-font file and telling MPlayer to use it. See the <link linkend="subosd">Subtitles
-and OSD</link> section for details.
+font file and telling <application>MPlayer</application> to use it.
+See the <link linkend="subosd">Subtitles and OSD</link> section for details.
 </para>
 
 </sect2>
@@ -543,8 +546,8 @@ directory.
 <title>Subtitles and OSD</title>
 
 <para>
-MPlayer can display subtitles along with movie files. Currently the
-following formats are supported:
+<application>MPlayer</application> can display subtitles along with movie files.
+Currently the following formats are supported:
 <itemizedlist>
 <listitem><para>VobSub</para></listitem>
 <listitem><para>OGM</para></listitem>
@@ -563,7 +566,7 @@ following formats are supported:
 </para>
 
 <para>
-MPlayer can dump the previously listed subtitle formats
+<application>MPlayer</application> can dump the previously listed subtitle formats
 (<emphasis role="bold">except the three first</emphasis>) into the following
 destination formats, with the given options:
 <itemizedlist>
@@ -576,7 +579,8 @@ destination formats, with the given options:
 </para>
 
 <para>
-MEncoder can dump DVD subtitles into <link linkend="menc-feat-extractsub">VobSub</link> format.
+<application>MEncoder</application> can dump DVD subtitles into
+<link linkend="menc-feat-extractsub">VobSub</link> format.
 </para>
 
 <para>
@@ -644,7 +648,8 @@ format uses absolute frame numbers for its timing, and therefore the
 <application>MPlayer</application> has no way to guess the frame rate of
 the subtitle file, you have to manually convert the frame rate. There is a
 little perl script in the <filename class="directory">contrib</filename>
-directory of the MPlayer FTP site to do this conversion for you.
+directory of the <application>MPlayer</application> FTP site to do this
+conversion for you.
 </para>
 
 <para>
@@ -653,7 +658,7 @@ About DVD subtitles, read the <link linkend="dvd">DVD</link> section.
 
 
 <sect2 id="mpsub">
-<title>MPlayer's own subtitle format (MPsub)</title>
+<title><application>MPlayer's</application> own subtitle format (MPsub)</title>
 
 <para>
 <application>MPlayer</application> introduces a new subtitle format called
@@ -701,8 +706,8 @@ seek bar etc.
 <title>Installing OSD and subtitles</title>
 
 <para>
-You need an MPlayer font package to be able to use OSD/SUB feature.
-There are many ways to get it:
+You need an <application>MPlayer</application> font package to be able to use
+OSD/SUB feature. There are many ways to get it:
 </para>
 
 <itemizedlist>
@@ -720,10 +725,10 @@ library. Version 2.0.9 or greater is mandatory! Then you have two methods:
       </itemizedlist>
   </para></listitem>
 <listitem><para>
-  Download ready-to-use font packages from MPlayer site.  Note: currently
-  available fonts are limited for ISO 8859-1/2 support, but there are some
-  other (including Korean, Russian, ISO 8859-8 etc) fonts at contrib/font
-  section of FTP, made by users.
+  Download ready-to-use font packages from <application>MPlayer</application>
+  site. Note: currently available fonts are limited for ISO 8859-1/2 support,
+  but there are some other (including Korean, Russian, ISO 8859-8 etc) fonts at
+  contrib/font section of FTP, made by users.
   </para><para>
   <!-- FIXME: this para should be before the list -->
   Font should have appropriate <filename>font.desc</filename> file which
@@ -824,7 +829,7 @@ variable in config file, or the <option>-osdlevel</option> command line option.
 <title>OSD menu</title>
 
 <para>
-MPlayer has a completely user definiable OSD Menu interface.
+<application>MPlayer</application> has a completely user definiable OSD Menu interface.
 </para>
 
 <note><simpara>
@@ -871,7 +876,7 @@ the Preferences menu is currently UNIMPLEMENTED!
 <sect1 id="rtc">
 <title>RTC</title>
 <para>
-There are three timing methods in MPlayer.
+There are three timing methods in <application>MPlayer</application>.
 
 <itemizedlist>
 <listitem><simpara>

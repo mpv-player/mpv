@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!-- $Revision$ -->
 <chapter id="mencoder">
-<title>Encoding with MEncoder</title>
+<title>Encoding with <application>MEncoder</application></title>
 
 <para>
 For the complete list of available <application>MEncoder</application> options
@@ -76,7 +76,7 @@ once, unlike in 2-pass mode. The schematics:
 mencoder <replaceable>file/DVD</replaceable> -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=1:vbitrate=<replaceable>bitrate</replaceable><!--
 --></screen>
 This is the first pass of video encoding. Optionally specify the video
-bitrate MEncoder printed at the end of the previous pass.
+bitrate <application>MEncoder</application> printed at the end of the previous pass.
   </para></step>
 <step><para>
   <emphasis>Third pass:</emphasis>
@@ -118,12 +118,13 @@ audio streams in MPEG files.
 
 <para>
 this feature is not very useful right now, aside that it probably has many bugs,
-but the more importantly because MEncoder currently cannot encode MPEG1 layer 2
-(MP2) audio, which all other players expect in MPEG files.
+but the more importantly because <application>MEncoder</application> currently
+cannot encode MPEG1 layer 2 (MP2) audio, which all other players expect in MPEG files.
 </para>
 
 <para>
-To change MEncoder's output file format, use the <option>-of mpeg</option> option.
+To change <application>MEncoder's</application> output file format,
+use the <option>-of mpeg</option> option.
 </para>
 
 <para>
@@ -215,8 +216,8 @@ mencoder -idx <replaceable>input.avi</replaceable> -ovc copy -oac copy -o <repla
 <title>Appending multiple AVI files</title>
 
 <para>
-As a side-effect, the broken AVI fixer function enables MEncoder to append
-2 (or more) AVI files:
+As a side-effect, the broken AVI fixer function enables <application>MEncoder</application>
+to append 2 (or more) AVI files:
 </para>
 
 <para>

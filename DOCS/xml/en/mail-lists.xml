@@ -14,27 +14,28 @@ mails a lot easier. If you do not know them please read
 are in a hurry) <ulink url="http://www.xs4all.nl/~hanb/documents/quotingguide.html">Quoting HOWTO</ulink>.
 <itemizedlist>
 <listitem><para>
-MPlayer announce list:
+<application>MPlayer</application> announce list:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-announce"/>
-List for MPlayer announcements. Subscribe here if you want to get
-announcements about new features.
+List for <application>MPlayer</application> announcements.
+Subscribe here if you want to get announcements about new features.
 </para></listitem>
 <listitem><para>
-MPlayer developers list:
+<application>MPlayer</application> developers list:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng"/>
-This list is about MPlayer development! Talking about interface/API changes,
-new libraries, code optimization, configure changes is ontopic here. Send patches
-but not bug reports, user questions, feature requests or flames here to keep the
-list traffic low.
+This list is about <application>MPlayer</application> development!
+Talking about interface/API changes, new libraries, code optimization,
+configure changes is ontopic here. Send patches but not bug reports,
+user questions, feature requests or flames here to keep the list traffic low.
 </para></listitem>
 <listitem><para>
-MPlayer DOCS list:
+<application>MPlayer</application> DOCS list:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs"/>
-This list is about MPlayer documentation and translation discussions.
+This list is about <application>MPlayer</application> documentation
+and translation discussions.
 Documentation and homepage related CVS logs are also sent here.
 </para></listitem>
 <listitem><para>
-MPlayer users list:
+<application>MPlayer</application> users list:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"/>
   <itemizedlist>
   <listitem><para>
@@ -52,7 +53,7 @@ MPlayer users list:
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-MPlayer Hungarian users list:
+<application>MPlayer</application> Hungarian users list:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok"/>
   <itemizedlist>
   <listitem><para>
@@ -64,7 +65,7 @@ MPlayer Hungarian users list:
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-MPlayer &amp; Matrox G200/G400/G450/G550 users:
+<application>MPlayer</application> &amp; Matrox G200/G400/G450/G550 users:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-matrox"/>
 Matrox related questions like
   <itemizedlist>
@@ -80,30 +81,30 @@ Matrox related questions like
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-MPlayer &amp; DVB card users:
+<application>MPlayer</application> &amp; DVB card users:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb"/>
 Things related to the hardware decoder card called DVB (not <emphasis role="bold">DXR3</emphasis>!).
 </para></listitem>
 <listitem><para>
-MPlayer CVS-log:
+<application>MPlayer</application> CVS-log:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog"/>
-All changes in MPlayer code are automatically sent to this list. Only
-questions about these changes belong here (if you do not understand why a
-change is required or you have a better fix or you have noticed a possible
-bug/problem in the commit).
+All changes in <application>MPlayer</application> code are automatically
+sent to this list. Only questions about these changes belong here
+(if you do not understand why a change is required or you have a better
+fix or you have noticed a possible bug/problem in the commit).
 </para></listitem>
 <listitem><para>
-MPlayer Cygwin-porting list:
+<application>MPlayer</application> Cygwin-porting list:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin"/>
-List for discussion about MPlayer's Cygwin port.
+List for discussion about <application>MPlayer's</application> Cygwin port.
 </para></listitem>
 <listitem><para>
-MPlayer OS/2-porting list:
+<application>MPlayer</application> OS/2-porting list:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-os2"/>
-List for discussion about MPlayer's OS/2 port.
+List for discussion about <application>MPlayer's</application> OS/2 port.
 </para></listitem>
 <listitem><para>
-MPlayer Weekly News' editors and translators list:
+<application>MPlayer</application> Weekly News' editors and translators list:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-mwn"/>
 List for discussion about the Weekly News releases.
 </para></listitem>

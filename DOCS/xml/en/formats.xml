@@ -25,7 +25,7 @@ players will not play it, since they expect MPEG1 video and MP2 audio (unlike
 does not have the necessary fields to describe its video and audio streams).
 Or you might put MPEG1 video into an AVI file.
 <ulink url="http://ffmpeg.sourceforge.net/">FFmpeg</ulink> and
-<link linkend="mencoder">MEncoder</link> can create these files.
+<link linkend="mencoder"><application>MEncoder</application></link> can create these files.
 </para>
 
 
@@ -155,8 +155,8 @@ supported by most players. The file format makes it possible to use VBR
 audio, but most players expect CBR audio, thus they fail with VBR. VBR is
 uncommon and Microsoft's AVI specs only describe CBR audio. I also noticed
 that most AVI encoders/multiplexers create bad files when using VBR audio.
-There are only two known exceptions:
-<application>NanDub</application> and <link linkend="mencoder">MEncoder</link>.
+There are only two known exceptions: <application>NanDub</application> and
+<link linkend="mencoder"><application>MEncoder</application></link>.
 </para>
 </sect3>
 
@@ -337,8 +337,8 @@ The PVA specifications can be downloaded from the following address:
 <para>
 The <emphasis role="bold">GIF</emphasis> format is a common format for web
 graphics. There are two versions of the GIF spec, GIF87a and GIF89a. The
-main difference is that GIF89a allows for animation. MPlayer supports both
-formats through use of <systemitem class="library">libungif</systemitem> or
+main difference is that GIF89a allows for animation. <application>MPlayer</application>
+supports both formats through use of <systemitem class="library">libungif</systemitem> or
 another libgif-compatible library. Non-animated GIFs will be displayed as
 single frame videos. (Use the <option>-loop</option> and <option>-fixed-vo</option>
 options to display these longer.)

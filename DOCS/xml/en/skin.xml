@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!-- $Revision$ -->
 <appendix id="skin">
-<title>MPlayer skin format</title>
+<title><application>MPlayer</application> skin format</title>
 <para>
-The purpose of this document is to describe the MPlayer skin format.
-The information contained here might be wrong, for
+The purpose of this document is to describe the
+<application>MPlayer</application> skin format. The information contained here
+might be wrong, for
 <orderedlist>
 <listitem><para>It is not me who wrote the GUI.</para></listitem>
 <listitem><para>The GUI is not finished.</para></listitem>
@@ -21,9 +22,9 @@ So do not be surprised if something does not work as described here.
 <title>Overview</title>
 <para>
 It does not really have anything to do with the skin format, but you should
-know that MPlayer has <emphasis role="bold">no</emphasis> builtin skin, so
-<emphasis role="bold">at least one skin must be installed in order to be able
-to use the GUI.</emphasis>
+know that <application>MPlayer</application> has <emphasis role="bold">no</emphasis>
+builtin skin, so <emphasis role="bold">at least one skin must be installed
+in order to be able to use the GUI.</emphasis>
 </para>
 
 <sect2 id="skin-overview-directories">
@@ -44,9 +45,9 @@ The directories searched for skins are (in order):
 </para>
 
 <para>
-Note that the first path may vary according to the way MPlayer was configured
-(see the <option>--prefix</option> and <option>--datadir</option> arguments of
-the <command>configure</command> script).
+Note that the first path may vary according to the way <application>MPlayer</application>
+was configured (see the <option>--prefix</option> and <option>--datadir</option>
+arguments of the <command>configure</command> script).
 </para>
 
 <para>
@@ -62,8 +63,8 @@ listed above, for example:
 <para>
 In the main window and in the playbar (see below) you can use images with
 `transparency': Regions filled with the color #FF00FF (magenta) are fully
-transparent when viewed by MPlayer. This means that you can even have shaped
-windows if your X server has the XShape extension.
+transparent when viewed by <application>MPlayer</application>. This means
+that you can even have shaped windows if your X server has the XShape extension.
 </para>
 </sect2>
 
@@ -85,11 +86,11 @@ by a right click).
 <itemizedlist>
 <listitem><para>
   The <emphasis role="bold">main window</emphasis> and/or the
-  <emphasis role="bold">playbar</emphasis> is where you can control MPlayer.
-  The background of the window is an image. Various items can (and must) be placed
-  in the window: <emphasis>buttons</emphasis>, <emphasis>potmeters</emphasis>
-  (sliders) and <emphasis>labels</emphasis>. For every item, you must specify its
-  position and size.
+  <emphasis role="bold">playbar</emphasis> is where you can control
+  <application>MPlayer</application>. The background of the window is an image.
+  Various items can (and must) be placed in the window: <emphasis>buttons</emphasis>,
+  <emphasis>potmeters</emphasis> (sliders) and <emphasis>labels</emphasis>.
+  For every item, you must specify its position and size.
 </para><para>
   A <emphasis role="bold">button</emphasis> has three states (pressed, released,
   disabled), thus its image must be divided into three parts vertically. See the
@@ -125,12 +126,13 @@ by a right click).
 </para></listitem>
 
 <listitem><para>
-  The <emphasis role="bold">skin menu</emphasis> is just a way to control MPlayer by
-  means of menu entries. Two images are required for the menu: one of them is
-  the base image that shows the menu in its normal state, the other one is used
-  to display the selected entries. When you pop up the menu, the first image is
-  shown. If you move the mouse over the menu entries, the currently selected
-  entry is copied from the second image over the menu entry below the mouse pointer
+  The <emphasis role="bold">skin menu</emphasis> is just a way to control
+  <application>MPlayer</application> by means of menu entries. Two images
+  are required for the menu: one of them is the base image that shows the
+  menu in its normal state, the other one is used to display the selected
+  entries. When you pop up the menu, the first image is shown. If you move
+  the mouse over the menu entries, the currently selected entry is copied
+  from the second image over the menu entry below the mouse pointer
   (the second image is never shown as a whole).
 </para><para>
   A menu entry is defined by its position and size in the image (see the
@@ -141,9 +143,10 @@ by a right click).
 
 <para>
   There is an important thing not mentioned yet: For buttons, potmeters and
-  menu entries to work, MPlayer must know what to do if they are clicked. This
-  is done by <link linkend="skin-gui">messages</link> (events). For these items
-  you must define the messages to be generated when they are clicked.
+  menu entries to work, <application>MPlayer</application> must know what to
+  do if they are clicked. This is done by <link linkend="skin-gui">messages</link>
+  (events). For these items you must define the messages to be generated when
+  they are clicked.
 </para>
 </sect2>
 
@@ -154,8 +157,8 @@ You need the following files to build a skin:
 <itemizedlist>
 <listitem><para>
   The configuration file named <link linkend="skin-file">skin</link> tells
-  MPlayer how to put different parts of the skin together and what to do if
-  you click somewhere in the window.
+  <application>MPlayer</application> how to put different parts of the skin
+  together and what to do if you click somewhere in the window.
 </para></listitem>
 <listitem><para>
   The background image for the main window.
@@ -266,7 +269,7 @@ end
 The name of an image file must be given without leading directories - images
 are searched for in the <filename class="directory">Skin</filename> directory.
 You may (but you need not) specify the extension of the file. If the file does
-not exist, MPlayer tries to load the file
+not exist, <application>MPlayer</application> tries to load the file
 <filename>&lt;filename&gt;.&lt;ext&gt;</filename>, where <literal>png</literal>
 and <literal>PNG</literal> are tried for <filename>&lt;ext&gt;</filename>
 (in this order). The first matching file will be used.
@@ -295,8 +298,8 @@ shown in this illustration:
 Here is an example to make this clear. Suppose that you have an image called
 <filename>main.png</filename> that you use for the main window:
 <programlisting>base = main, -1, -1</programlisting>
-MPlayer tries to load <filename>main</filename>, <filename>main.png</filename>,
-<filename>main.PNG</filename> files.
+<application>MPlayer</application> tries to load <filename>main</filename>,
+<filename>main.png</filename>, <filename>main.PNG</filename> files.
 </para>
 
 

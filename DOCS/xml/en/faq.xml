@@ -25,7 +25,7 @@ How can I support <application>MPlayer</application> development?
 <answer><para>
 We are more than happy to accept your hardware and software
 <ulink url="http://www.mplayerhq.hu/homepage/donations.html">donations</ulink>.
-They help us in continuously improving MPlayer.
+They help us in continuously improving <application>MPlayer</application>.
 </para></answer>
 </qandaentry>
 
@@ -112,7 +112,7 @@ to 3.1 to solve the problem. How to install gcc is described in the
 
 <qandaentry>
 <question><para>
-Configure ends with this text, and MPlayer won't compile!
+Configure ends with this text, and <application>MPlayer</application> won't compile!
 <screen>Your gcc does not support even i386 for '-march' and '-mcpu'</screen>
 </para></question>
 <answer><para>
@@ -144,14 +144,14 @@ Great, I have gcc 3.0.1 from Red Hat/Mandrake, then I'm fine!
 </para></question>
 <answer><para>
 No, since there have been/are issues with these compilers as well.
-To check the status of current compilers' MPlayer support, see the
-<link linkend="install">Installation</link> section.
+To check the status of current compilers' <application>MPlayer</application>
+support, see the <link linkend="install">Installation</link> section.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-I tried to compile MPlayer, but I got this output:
+I tried to compile <application>MPlayer</application>, but I got this output:
 <screen>
     In file included from /usr/include/g++-v3/bits/std_cwchar.h:42,
                      from /usr/include/g++-v3/bits/fpos.h:40,
@@ -185,12 +185,13 @@ list (the word 'ideg' is described below):
 And we have idegs. And our idegcounter overflowed again and again.
 </para>
 <para>
-Unfortunately MPlayer is out of our control. It's used by lamers, Linux
-users who can't even use Windows, and never tried to compile a kernel. They
-installed (with default options) Mandrake or Red Hat or SuSE, and without
-RTFM'ing they send messages saying 'it doesn't work! help me! please! i'm
-new to Linux! help! oh! help me!'. We can't stop them, but at least we try
-to force them to RTFM and to read the messages of ./configure and MPlayer.
+Unfortunately <application>MPlayer</application> is out of our control.
+It's used by lamers, Linux users who can't even use Windows, and never
+tried to compile a kernel. They installed (with default options) Mandrake
+or Red Hat or SuSE, and without RTFM'ing they send messages saying
+'it doesn't work! help me! please! i'm new to Linux! help! oh! help me!'.
+We can't stop them, but at least we try to force them to RTFM and to read
+the messages of ./configure and <application>MPlayer</application>.
 </para>
 <para>
 And you clever guys come and flame us with gcc 2.96 and binary packages.
@@ -290,8 +291,8 @@ Upgrade your kernel, modutils and <application>MPlayer</application>.
 
 <qandaentry>
 <question><para>
-During 'make', MPlayer complains about X11 libraries. I don't understand,
-I DO have X installed!?
+During 'make', <application>MPlayer</application> complains about X11 libraries.
+I don't understand, I DO have X installed!?
 </para></question>
 <answer><para>
 ... but you don't have the X development package installed. Or not correctly.
@@ -321,7 +322,8 @@ You have to edit SVGAlib's <filename>Makefile.cfg</filename> and comment
 
 <qandaentry>
 <question><para>
-I compiled MPlayer with libdvdcss/libdivxdecore support, but when I try to start it, it says:
+I compiled <application>MPlayer</application> with libdvdcss/libdivxdecore support,
+but when I try to start it, it says:
 <screen>
 error while loading shared libraries: lib*.so.0: cannot load shared object file: No such file or directory
 </screen>
@@ -346,7 +348,7 @@ or newer should be good). Since it is not our fault, please do
 
 <qandaentry>
 <question><para>
-MPlayer dies with segmentation fault upon pthread check!
+<application>MPlayer</application> dies with segmentation fault upon pthread check!
 </para></question>
 <answer><para>
 <command>chmod 644 /usr/lib/libc.so</command>
@@ -515,7 +517,7 @@ And what is &quot;Faszom(C)ounter&quot;?
 </para></question>
 <answer><para>
 &quot;Fasz&quot; is a Hungarian word you don't want to know, the others are
-connected to the perverted minds of the MPlayer developers.
+connected to the perverted minds of the <application>MPlayer</application> developers.
 </para></answer>
 </qandaentry>
 
@@ -601,7 +603,7 @@ to <systemitem>Yes</systemitem></para></listitem>
 
 <qandaentry>
 <question><para>
-How can I run MPlayer in the background?
+How can I run <application>MPlayer</application> in the background?
 </para></question>
 <answer><para>
 Use:
@@ -622,7 +624,7 @@ Do you have a stray <filename>codecs.conf</filename> file in
 <filename>~/.mplayer/</filename>, <filename>/etc/</filename>,
 <filename>/usr/local/etc/</filename> or a similar location? Remove it,
 outdated <filename>codecs.conf</filename> files can cause obscure
-problems. MPlayer will use its builtin one instead.
+problems. <application>MPlayer</application> will use its builtin one instead.
 </para></answer>
 </qandaentry>
 
@@ -665,7 +667,7 @@ then there is a problem with your kernel/libc. Maybe you are using some security
 patches (for example Solar Designer's OpenWall patch) which forces loading
 libraries to very low addresses. Because <filename>l3codeca.acm</filename> is a
 non-relocatable DLL, it must be loaded to <literal>0x00400000</literal>, we can't
-change this. You should use a non-patched kernel, or use MPlayer's
+change this. You should use a non-patched kernel, or use <application>MPlayer's</application>
 <option>-afm 1</option> option to disable using <filename>l3codeca.acm</filename>.
 </para></answer>
 </qandaentry>
@@ -687,10 +689,11 @@ documentation to see if you can improve performance.
 <screen>MPlayer interrupted by signal 4 in module: decode_video</screen>
 </para></question>
 <answer><para>
-Try running MPlayer on the machine you compiled on. Or recompile with runtime
-CPU detection (<command>./configure --enable-runtime-cpudetection</command>).
-Don't use MPlayer on a CPU different from the one it was compiled on, without
-using the feature mentioned just now.
+Try running <application>MPlayer</application> on the machine you compiled on.
+Or recompile with runtime CPU detection
+(<command>./configure --enable-runtime-cpudetection</command>).
+Don't use <application>MPlayer</application> on a CPU different from the one
+it was compiled on, without using the feature mentioned just now.
 </para></answer>
 </qandaentry>
 
@@ -759,7 +762,7 @@ This can have multiple reasons.
 <itemizedlist>
 <listitem><para>
 Your CPU <emphasis role="bold">and/or</emphasis> video card <emphasis role="bold">and/or</emphasis>
-bus is too slow. MPlayer displays a message if this is the case (and the
+bus is too slow. <application>MPlayer</application> displays a message if this is the case (and the
 dropped frames counter goes up fast).
 </para></listitem>
 <listitem><para>
@@ -884,7 +887,7 @@ I have no sound when playing a video and get error messages similar to this one:
 <answer><para>
 Are you running KDE or GNOME with the ARTS or ESD sound daemon? Try disabling
 the sound daemon or use the <option>-ao arts</option> or <option>-ao esd</option>
-option to make MPlayer use ARTS or ESD.
+option to make <application>MPlayer</application> use ARTS or ESD.
 </para></answer>
 </qandaentry>
 
@@ -908,8 +911,8 @@ Help me!
 </para></question>
 <answer><para>
 It works only if running as root! It's a DGA limitation. You should become root
-(<command>su -</command>), and try again. Another solution is making MPlayer SUID
-root, but it's not recommended!
+(<command>su -</command>), and try again. Another solution is making
+<application>MPlayer</application> SUID root, but it's not recommended!
 <screen>
      chown root /usr/local/bin/mplayer
      chmod 755 /usr/local/bin/mplayer
@@ -918,7 +921,7 @@ root, but it's not recommended!
 <warning><para>
 This is a <emphasis role="bold">big</emphasis> security risk! <emphasis role="bold">Never</emphasis>
 do this on a server or on a computer that you do not control completely because
-other users can gain root privileges through SUID root MPlayer.
+other users can gain root privileges through SUID root <application>MPlayer</application>.
 <emphasis role="bold">You have been warned</emphasis>.
 </para></warning>
 </para></answer>
@@ -1038,7 +1041,7 @@ in <application>MPlayer</application> source, and used by default.
 
 <qandaentry>
 <question><para>
-What about subtitles? Can MPlayer display them?
+What about subtitles? Can <application>MPlayer</application> display them?
 </para></question>
 <answer><para>
 Yes. See the <link linkend="dvd">DVD chapter</link>.
@@ -1070,8 +1073,9 @@ Where can I get libdvdread and libdvdcss packages?
 </para></question>
 <answer><para>
 You don't need to. Use <emphasis role="bold">libmpdvdkit2</emphasis>, which is
-present in the MPlayer source, and used by default. You can get the mentioned
-packages from the <ulink url="http://www.dtek.chalmers.se/groups/dvd/">Ogle site</ulink>.
+present in the <application>MPlayer</application> source, and used by default.
+You can get the mentioned packages from the
+<ulink url="http://www.dtek.chalmers.se/groups/dvd/">Ogle site</ulink>.
 </para></answer>
 </qandaentry>
 
@@ -1100,8 +1104,9 @@ in the <link linkend="drives">CD chapter</link>).
 <title>Feature requests</title>
 <qandaentry>
 <question><para>
-If MPlayer is paused and I try to seek or press any key at all, MPlayer
-ceases to be paused. I would like to be able to seek in the paused movie.
+If <application>MPlayer</application> is paused and I try to seek or press any key at all,
+<application>MPlayer</application> ceases to be paused. I would like to be able
+to seek in the paused movie.
 </para></question>
 <answer><para>
 This is very tricky to implement without losing A/V synchronization.
@@ -1121,7 +1126,8 @@ Feel free to implement it, and send a patch. Don't ask for it.
 
 <qandaentry>
 <question><para>
-How can I make MPlayer remember the options I use for this particular file?
+How can I make <application>MPlayer</application> remember the options I use
+for this particular file?
 </para></question>
 <answer><para>
 Create a file named <filename>movie.avi.conf</filename> with the file-specific
@@ -1138,7 +1144,8 @@ in the same directory as the file.
 How can I encode?
 </para></question>
 <answer><para>
-Read the <link linkend="mencoder">MEncoder</link> section.
+Read the <link linkend="mencoder"><application>MEncoder</application></link>
+section.
 </para></answer>
 </qandaentry>
 
@@ -1249,7 +1256,7 @@ How can I put subtitles in the output file?
 </para></question>
 <answer><para>
 Just pass the <option>-sub &lt;filename&gt;</option> (or <option>-sid</option>,
-<option>-vobsub</option>, respectively) option to MEncoder.
+<option>-vobsub</option>, respectively) option to <application>MEncoder</application>.
 </para></answer>
 </qandaentry>
 

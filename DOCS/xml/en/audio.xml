@@ -400,7 +400,7 @@ Use automatic insertion of filters and optimize for quality.
 <term><option>3</option></term>
 <listitem><para>
 Use no automatic insertion of filters and no optimization.
-<emphasis>Warning:</emphasis> It may be possible to crash MPlayer
+<emphasis>Warning:</emphasis> It may be possible to crash <application>MPlayer</application>
 using this setting.
 </para></listitem>
 </varlistentry>
@@ -492,7 +492,7 @@ to rectify the difference.
 <title>Up/Downsampling</title>
 
 <para>
-MPlayer fully supports sound up/down-sampling through the
+<application>MPlayer</application> fully supports sound up/down-sampling through the
 <option>resample</option> filter. It can be used if you
 have a fixed frequency sound card or if you are stuck with an old sound card
 that is only capable of max 44.1kHz. This filter is automatically enabled if
@@ -740,9 +740,9 @@ would amplify the sound by 10.1dB and hard-clip if the sound level is too high.
 
 <para>
 This filter has a second feature: It measures the overall maximum sound level
-and prints out that level when MPlayer exits. This volume estimate can be used
-for setting the sound level in MEncoder such that the maximum dynamic range is
-utilized.
+and prints out that level when <application>MPlayer</application> exits.
+This volume estimate can be used for setting the sound level in
+<application>MEncoder</application> such that the maximum dynamic range is utilized.
 </para>
 </sect4>
 
