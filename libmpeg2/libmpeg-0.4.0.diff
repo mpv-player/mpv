@@ -1,6 +1,15 @@
 diff -ur libmpeg2/cpu_accel.c libmpeg2/cpu_accel.c
 --- libmpeg2/cpu_accel.c	2003-10-06 04:31:52.000000000 +0200
 +++ libmpeg2/cpu_accel.c	2004-02-18 13:48:26.000000000 +0100
+@@ -108,7 +108,7 @@
+ }
+ #endif /* ARCH_X86 */
+ 
+-#if defined(ARCH_PPC) || defined(ARCH_SPARC)
++#if defined(ARCH_PPC) || (defined(ARCH_SPARC) && defined(HAVE_VIS))
+ #include <signal.h>
+ #include <setjmp.h>
+ 
 @@ -195,6 +195,7 @@
  #ifdef ARCH_ALPHA
  static inline uint32_t arch_accel (void)
@@ -156,7 +165,7 @@ diff -ur libmpeg2/idct.c libmpeg2/idct.c
 diff -ur libmpeg2/motion_comp.c libmpeg2/motion_comp.c
 --- libmpeg2/motion_comp.c	2003-10-06 04:31:52.000000000 +0200
 +++ libmpeg2/motion_comp.c	2004-02-18 13:48:37.000000000 +0100
-@@ -43,10 +43,12 @@
+@@ -43,20 +43,24 @@
      else
  #endif
  #ifdef ARCH_PPC
@@ -169,6 +178,18 @@ diff -ur libmpeg2/motion_comp.c libmpeg2/motion_comp.c
  #ifdef ARCH_ALPHA
      if (accel & MPEG2_ACCEL_ALPHA)
  	mpeg2_mc = mpeg2_mc_alpha;
+     else
+ #endif
+ #ifdef ARCH_SPARC
++#ifdef HAVE_VIS
+     if (accel & MPEG2_ACCEL_SPARC_VIS)
+ 	mpeg2_mc = mpeg2_mc_vis;
+     else
+ #endif
++#endif
+ 	mpeg2_mc = mpeg2_mc_c;
+ }
+ 
 diff -ur libmpeg2/mpeg2_internal.h libmpeg2/mpeg2_internal.h
 --- libmpeg2/mpeg2_internal.h	2003-12-22 12:24:02.000000000 +0100
 +++ libmpeg2/mpeg2_internal.h	2004-08-02 18:09:17.000000000 +0200
