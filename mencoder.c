@@ -372,7 +372,7 @@ demux_stream_t *d_dvdsub=NULL;
 sh_audio_t *sh_audio=NULL;
 sh_video_t *sh_video=NULL;
 int file_format=DEMUXER_TYPE_UNKNOWN;
-int i,pitches[3];
+int i;
 unsigned int out_fmt;
 
 aviwrite_t* muxer=NULL;
@@ -624,7 +624,7 @@ if (IMGFMT_IS_BGR(out_fmt))
 if (IMGFMT_IS_RGB(out_fmt))
     vo_image_ptr = vo_image = malloc(vo_w*vo_h*IMGFMT_RGB_DEPTH(out_fmt)/8);
 
-if(!init_video(sh_video,pitches)){
+if(!init_video(sh_video,NULL)){
      mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_CouldntInitVideoCodec);
      mencoder_exit(1,NULL);
 }
