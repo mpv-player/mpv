@@ -63,6 +63,7 @@ static int qp_constant = 26;
 static int frame_ref = 1;
 static int iframe = 250;
 static int idrframe = 2;
+static int scenecut_threshold = 40;
 static int bframe = 0;
 static int deblock = 1;
 static int deblockalpha = 0;
@@ -92,6 +93,7 @@ m_option_t x264encopts_conf[] = {
     {"frameref", &frame_ref, CONF_TYPE_INT, CONF_RANGE, 1, 15, NULL},
     {"keyint", &iframe, CONF_TYPE_INT, CONF_RANGE, 1, 24000000, NULL},
     {"idrint", &idrframe, CONF_TYPE_INT, CONF_RANGE, 1, 24000000, NULL},
+    {"scenecut", &scenecut_threshold, CONF_TYPE_INT, CONF_RANGE, -1, 100, NULL},
     {"bframes", &bframe, CONF_TYPE_INT, CONF_RANGE, 0, 16, NULL},
     {"deblock", &deblock, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"nodeblock", &deblock, CONF_TYPE_FLAG, 0, 1, 0, NULL},
@@ -132,6 +134,7 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     mod->param.i_frame_reference = frame_ref;
     mod->param.i_idrframe = idrframe;
     mod->param.i_iframe = iframe;
+    mod->param.i_scenecut_threshold = scenecut_threshold;
     mod->param.i_bframe = bframe;
     mod->param.b_deblocking_filter = deblock;
     mod->param.i_deblocking_filter_alphac0 = deblockalpha;

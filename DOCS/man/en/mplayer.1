@@ -6779,6 +6779,16 @@ IDR-Frames restrict subsequent P-frames from referring to any frame
 prior to the IDR-Frame.
 .
 .TP
+.B scenecut=<-1\-100>
+Controls how aggressively to insert extra I-frames (default: 40).
+With small values of scenecut, the codec often has to force an I-frame
+when it would exceed keyint.
+Good values of scenecut may find a better location for the I-frame.
+Large values use more I-frames than necessary, thus wasting bits.
+-1 disables scene-cut detection, so I-frames are be inserted only every
+other keyint frames, which probably leads to ugly encoding artifacts.
+.
+.TP
 .B frameref=<1\-15>
 Number of previous frames used as predictors in a P frame (default: 1).
 This is effective in Anime, but seems to make little difference in
