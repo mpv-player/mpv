@@ -205,7 +205,7 @@ static int parse_chunk (vo_functions_t * output, int code, uint8_t * buffer)
     case 0x00:	/* picture_start_code */
 	if (header_process_picture_header (picture, buffer)) {
 	    printf ("bad picture header\n");
-	    exit (1);
+	    //exit (1);
 	}
 
 	drop_frame = drop_flag && (picture->picture_coding_type == B_TYPE);
@@ -215,14 +215,14 @@ static int parse_chunk (vo_functions_t * output, int code, uint8_t * buffer)
     case 0xb3:	/* sequence_header_code */
 	if (header_process_sequence_header (picture, buffer)) {
 	    printf ("bad sequence header\n");
-	    exit (1);
+	    //exit (1);
 	}
 	break;
 
     case 0xb5:	/* extension_start_code */
 	if (header_process_extension (picture, buffer)) {
 	    printf ("bad extension\n");
-	    exit (1);
+	    //exit (1);
 	}
 	break;
 
