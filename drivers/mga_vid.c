@@ -1,4 +1,5 @@
-#define CRTC2
+//#define CRTC2
+
 // YUY2 support (see config.format) added by A'rpi/ESP-team
 // double buffering added by A'rpi/ESP-team
 
