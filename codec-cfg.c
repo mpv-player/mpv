@@ -487,11 +487,7 @@ int parse_codec_cfg(char *cfgfile)
 	int tmp, i;
 	
 	// in case we call it a second time
-	if(video_codecs!=NULL)free(video_codecs);
-	video_codecs=NULL;
- 
- 	if(audio_codecs!=NULL)free(audio_codecs);
-	audio_codecs=NULL;
+	codecs_uninit_free();
 	
 	nr_vcodecs = 0;
 	nr_acodecs = 0;
@@ -715,12 +711,7 @@ err_out_parse_error:
 err_out_print_linenum:
 	PRINT_LINENUM;
 err_out:
-	if (audio_codecs)
-		free(audio_codecs);
-	if (video_codecs)
-		free(video_codecs);
-	video_codecs=NULL;
-	audio_codecs=NULL;
+	codecs_uninit_free();
 
 	free(line);
 	line=NULL;
@@ -733,6 +724,32 @@ err_out_not_valid:
 err_out_release_num:
 	mp_msg(MSGT_CODECCFG,MSGL_ERR,MSGTR_OutdatedCodecsConf);
 	goto err_out_print_linenum;
+}
+
+static void codecs_free(codecs_t* codecs,int count) {
+	int i;
+		for ( i = 0; i < count; i++)
+			if ( (codecs[i]).name ) {
+				if( (codecs[i]).name )
+					free((codecs[i]).name);
+				if( (codecs[i]).info )
+					free((codecs[i]).info);
+				if( (codecs[i]).comment )
+					free((codecs[i]).comment);
+				if( (codecs[i]).dll )
+					free((codecs[i]).dll);
+				if( (codecs[i]).drv )
+					free((codecs[i]).drv);
+			}
+		if (codecs)
+			free(codecs);
+}
+
+void codecs_uninit_free() {
+	codecs_free(video_codecs,nr_vcodecs);
+	video_codecs=NULL;
+	codecs_free(audio_codecs,nr_acodecs);
+	audio_codecs=NULL;
 }
 
 codecs_t *find_audio_codec(unsigned int fourcc, unsigned int *fourccmap,
