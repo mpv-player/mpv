@@ -28,6 +28,7 @@ static char help_text[]=
 #ifdef USE_FAKE_MONO
 " -stereo <mode>   selecteer MPEG1 stereo uitvoer (0:stereo 1:links 2:rechts)\n"
 #endif
+" -channels <n>    gewenst aantal audio uitvoer kanalen\n"
 " -fs -vm -zoom    volledig scherm afspeel opties (fullscr,vidmode chg,softw.scale)\n"
 " -x <x> -y <y>    herschaal beeld naar <x> * <y> resolutie [als -vo driver het ondersteunt!]\n"
 " -sub <bestand>   specificeer het te gebruiken ondertitel bestand (zie ook -subfps, -subdelay)\n"
@@ -39,16 +40,16 @@ static char help_text[]=
 " -framedrop       activeer frame-dropping (voor trage machines)\n"
 "\n"
 "Toetsen:\n"
-" <-  of  ->       ga 10 seconden achterwaards/voorwaards\n"
-" omhoog of omlaag ga 1 minuut achterwaards/voorwaards\n"
-" PGUP of PGDOWN   ga 10 minuten achterwaards/voorwaards\n"
+" <-  of  ->       ga 10 seconden achterwaarts/voorwaarts\n"
+" omhoog of omlaag ga 1 minuut achterwaarts/voorwaarts\n"
+" PGUP of PGDOWN   ga 10 minuten achterwaarts/voorwaarts\n"
 " < or >           ga naar vorige/volgende item in playlist\n"
 " p of SPACE       pauzeer film (druk eender welke toets om verder te gaan)\n"
 " q of ESC         stop afspelen en sluit programma af\n"
-" + of -           pas audio vertraging aan met +/- 0.1 second\n"
+" + of -           pas audio vertraging aan met +/- 0.1 seconde\n"
 " o                cycle OSD mode:  geen / zoekbalk / zoekbalk+tijd\n"
 " * of /           verhoog of verlaag volume (druk 'm' om master/pcm te selecteren)\n"
-" z of x           pas ondertiteling vertraging aan met +/- 0.1 second\n"
+" z of x           pas ondertiteling vertraging aan met +/- 0.1 seconde\n"
 "\n"
 " * * * ZIE MANPAGE VOOR DETAILS, OVERIGE (GEAVANCEERDE) OPTIES EN TOETSEN ! * * *\n"
 "\n";
@@ -66,7 +67,7 @@ static char help_text[]=
 #define MSGTR_IntBySignal "\nMPlayer onderbroken door signal %d in module: %s \n"
 #define MSGTR_NoHomeDir "Kan HOME dir niet vinden\n"
 #define MSGTR_GetpathProblem "get_path(\"config\") probleem\n"
-#define MSGTR_CreatingCfgFile "Bezig met het creeren van config bestand: %s\n"
+#define MSGTR_CreatingCfgFile "Bezig met het creëren van config bestand: %s\n"
 #define MSGTR_InvalidVOdriver "Foutieve video uitvoer driver naam: %s\nGebruik '-vo help' om een lijst met beschikbare video drivers te verkrijgen.\n"
 #define MSGTR_InvalidAOdriver "Foutieve audio uitvoer driver naam: %s\nGebruik '-ao help' om een lijst met beschikbare audio drivers te verkrijgen.\n"
 #define MSGTR_CopyCodecsConf "(copy/ln etc/codecs.conf (van MPlayer source tree) naar ~/.mplayer/codecs.conf)\n"
@@ -83,7 +84,7 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmt "Probeer audio codec driver familie %d te forceren...\n"
 #define MSGTR_CantFindAfmtFallback "Kan audio codec voor geforceerde driver familie niet vinden, val terug op andere drivers.\n"
 #define MSGTR_CantFindAudioCodec "Kan codec voor audio format 0x%X niet vinden!\n"
-#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Probeer %s te upgraden van etc/codecs.conf\n*** Als het nog steeds niet OK is, lees dan DOCS/CODECS!\n"
+#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Probeer %s te upgraden van etc/codecs.conf\n*** Als het nog steeds niet OK is, lees dan DOCS/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "Kon audio codec niet initialiseren! -> nosound\n"
 #define MSGTR_TryForceVideoFmt "Probeer video codec driver familie %d te forceren...\n"
 #define MSGTR_CantFindVfmtFallback "Kan video codec voor geforceerde driver familie niet vinden, val terug op andere drivers.\n"
@@ -91,7 +92,7 @@ static char help_text[]=
 #define MSGTR_VOincompCodec "Sorry, geselecteerde video_out device is incompatibel met deze codec.\n"
 #define MSGTR_CouldntInitVideoCodec "FATAL: Kon video codec niet initialiseren :(\n"
 #define MSGTR_EncodeFileExists "Bestand bestaat reeds: %s (overschrijf uw favoriete AVI niet!)\n"
-#define MSGTR_CantCreateEncodeFile "Kan bestand voor encoding niet creeren\n"
+#define MSGTR_CantCreateEncodeFile "Kan bestand voor encoding niet creëren\n"
 #define MSGTR_CannotInitVO "FATAL: Kan video driver niet initialiseren!\n"
 #define MSGTR_CannotInitAO "Kon audio device niet open/init -> NOSOUND\n"
 #define MSGTR_StartPlaying "Start afspelen...\n"
@@ -157,8 +158,8 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Kan niet in raw .AVI streams verplaatsen! (index nodig, probeer met de -idx optie!)  \n"
 #define MSGTR_CantSeekFile "Kan niet verplaatsen in dit bestand!  \n"
 
-#define MSGTR_EncryptedVOB "Geencrypteerd VOB bestand (niet gecompileerd met libcss ondersteuning)! Lees DOCS/DVD bestand\n"
-#define MSGTR_EncryptedVOBauth "Geencrypteerde stream maar autenticatie was niet aangevraagd door u!!\n"
+#define MSGTR_EncryptedVOB "Geencrypteerd VOB bestand (niet gecompileerd met libcss ondersteuning)! Lees DOCS/cd-dvd.html bestand\n"
+#define MSGTR_EncryptedVOBauth "Geencrypteerde stream maar authenticatie was niet aangevraagd door u!!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Gecomprimeerde headers (nog) niet ondersteund!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Waarschuwing! variabele FOURCC gedetecteerd!?\n"
@@ -180,7 +181,7 @@ static char help_text[]=
 #define MSGTR_NoACMSupport "Win32/ACM audio codec uitgeschakeld, of niet beschikbaar op niet-x86 CPU -> forceer nosound :(\n"
 #define MSGTR_NoDShowAudio "Gecompileerd zonder DirectShow ondersteuning -> forceer nosound :(\n"
 #define MSGTR_NoOggVorbis "OggVorbis audio codec uigeschakeld -> forceer nosound :(\n"
-
+#define MSGTR_NoXAnimSupport "MPlayer werd gecompileerd ZONDER XAnim ondersteuning!\n"
 #define MSGTR_MpegPPhint "WAARSCHUWING! Je vroeg beeld postprocessing aan voor een MPEG 1/2 video,\n" \
 			 "         maar compileerde MPlayer zonder MPEG 1/2 postprocessing ondersteuning!\n" \
 			 "         #define MPEG12_POSTPROC in config.h, en hercompileer libmpeg2!\n"
