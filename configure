@@ -140,6 +140,7 @@ Optional features:
   --disable-win32        disable Win32 DLL support [autodetect]
   --disable-dshow        disable DirectShow support [autodetect]
   --disable-xanim        disable XAnim DLL support [autodetect]
+  --disable-real         disable RealPlayer8 DLL support [autodetect]
   --disable-xvid         disable XviD codec [autodetect]
   --disable-divx4linux   disable DivX4linux codec [autodetect]
   --enable-opendivx      enable _old_ OpenDivx codec [disable]
@@ -864,6 +865,7 @@ _dvdnav=yes
 _dvdread=auto
 _dvdkit=auto
 _xanim=auto
+_real=auto
 _xinerama=auto
 _mga=auto
 _xmga=auto
@@ -984,6 +986,8 @@ for ac_option do
   --disable-dvdnav)	_dvdnav=no	;;
   --enable-xanim)	_xanim=yes	;;
   --disable-xanim)	_xanim=no	;;
+  --enable-real)	_real=yes	;;
+  --disable-real)	_real=no	;;
   --enable-xinerama)	_xinerama=yes	;;
   --disable-xinerama)	_xinerama=no	;;
   --enable-mga)		_mga=yes	;;
@@ -3216,6 +3220,30 @@ else
   _nocodecmodules="xanim $_nocodecmodules"
 fi
 
+echocheck "RealPlayer8 DLL"
+if test "$_real" = auto ; then
+  _real=no
+  if test "$_dl" = yes ; then
+    if linux ; then
+      _real=yes
+      echores "yes"
+    else
+      echores "no (untested on non-linux arch)"
+    fi
+  else
+    echores "no (dynamic loader support needed)"
+  fi
+else
+  echores "$_real"
+fi
+if test "$_real" = yes ; then
+  _def_real='#define USE_REALCODECS 1'
+  _codecmodules="real $_codecmodules"
+else
+  _def_real='#undef USE_REALCODECS'
+  _nocodecmodules="real $_nocodecmodules"
+fi
+
 
 echocheck "iconv"
 if test "$_iconv" = auto ; then
@@ -3774,6 +3802,7 @@ fi
 _ld_dl_dynamic=''
 bsd && _ld_dl_dynamic='-rdynamic'
 test "$_xanim" = yes && _ld_dl_dynamic='-rdynamic'
+test "$_real" = yes && _ld_dl_dynamic='-rdynamic'
 
 _ld_arch="$_ld_arch $_ld_pthread $_ld_dl $_ld_dl_dynamic"
 bsdos && _ld_arch="$_ld_arch -ldvd"
@@ -4149,6 +4178,9 @@ $_def_fame
 $_def_xanim
 /* Default search path */
 $_def_xanim_path
+
+/* RealPlayer DLL support */
+$_def_real
 
 /* Use 3dnow/mmxext/sse/mmx optimized fast memcpy() [maybe buggy... signal 4]*/
 $_def_fastmemcpy
