@@ -82,8 +82,10 @@ static int config(struct vf_instance_s* vf,
     }
 
     // calculate the missing parameters:
-    if(vf->priv->w<=0) vf->priv->w=width;
-    if(vf->priv->h<=0) vf->priv->h=height;
+    if(vf->priv->w<0) vf->priv->w=width; else
+    if(vf->priv->w==0) vf->priv->w=d_width;
+    if(vf->priv->h<0) vf->priv->h=height; else
+    if(vf->priv->h==0) vf->priv->h=d_height;
     
     printf("SwScale scaling %dx%d %s to %dx%d %s  \n",
 	width,height,vo_format_name(outfmt),
@@ -103,6 +105,7 @@ static int config(struct vf_instance_s* vf,
 	return 0;
     }
     vf->priv->fmt=best;
+    
     return vf_next_config(vf,vf->priv->w,vf->priv->h,d_width,d_height,flags,best);
 }
 
@@ -169,7 +172,7 @@ static int open(vf_instance_t *vf, char* args){
     if(args) sscanf(args, "%d:%d",
     &vf->priv->w,
     &vf->priv->h);
-    printf("SwScale: %d x %d\n",
+    printf("SwScale: %d x %d (-1=no scaling)\n",
     vf->priv->w,
     vf->priv->h);
     return 1;
