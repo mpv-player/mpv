@@ -1083,6 +1083,7 @@ void demux_open_real(demuxer_t* demuxer)
 		    int codecdata_length;
 		    int i;
 		    char *buft;
+		    int hdr_size;
 		    
 		    mp_msg(MSGT_DEMUX,MSGL_V,"Found audio stream!\n");
 		    version = stream_read_word(demuxer->stream);
@@ -1138,7 +1139,9 @@ void demux_open_real(demuxer_t* demuxer)
 		    stream_skip(demuxer->stream, 4); /* .ra4 or .ra5 */
 		    stream_skip(demuxer->stream, 4); // ???
 		    stream_skip(demuxer->stream, 2); /* version (4 or 5) */
-		    stream_skip(demuxer->stream, 4); // header size == 0x4E
+//		    stream_skip(demuxer->stream, 4); // header size == 0x4E
+		    hdr_size = stream_read_dword(demuxer->stream); // header size
+		    mp_msg(MSGT_DEMUX,MSGL_V,"header size: %d\n", hdr_size);
 		    flavor = stream_read_word(demuxer->stream);/* codec flavor id */
 		    coded_frame_size = stream_read_dword(demuxer->stream);/* needed by codec */
 		    //stream_skip(demuxer->stream, 4); /* coded frame size */
@@ -1190,6 +1193,10 @@ void demux_open_real(demuxer_t* demuxer)
 		    sh->wf->cbSize = 0;
 		    sh->format = MKTAG(buf[0], buf[1], buf[2], buf[3]);
 
+		    if ((version != 3) && (hdr_size != 0x4e)) {
+		    	mp_msg(MSGT_DEMUX,MSGL_V,"skipping %d extra header bytes\n", hdr_size-0x4e);
+		    	stream_skip(demuxer->stream, hdr_size-0x4e);
+		    }
 #if 0
 		    switch (sh->format){
 			case MKTAG('d', 'n', 'e', 't'):
@@ -1226,6 +1233,15 @@ void demux_open_real(demuxer_t* demuxer)
                             break;
 
 			case MKTAG('2', '8', '_', '8'):
+			    sh->wf->cbSize = 10;
+			    sh->wf = realloc(sh->wf, sizeof(WAVEFORMATEX)+sh->wf->cbSize);
+			    ((short*)(sh->wf+1))[0]=sub_packet_size;
+			    ((short*)(sh->wf+1))[1]=sub_packet_h;
+			    ((short*)(sh->wf+1))[2]=flavor;
+			    ((short*)(sh->wf+1))[3]=coded_frame_size;
+			    ((short*)(sh->wf+1))[4]=0;
+			    break;
+
 			case MKTAG('s', 'i', 'p', 'r'):
 #if 0
 			    sh->format = 0x130;
