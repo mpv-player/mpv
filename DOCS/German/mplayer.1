@@ -1,7 +1,7 @@
 .\" MPlayer (C) 2000-2002 Arpad Gereoffy <sendmail@to.mplayer-users>
 .\" Diese Manpage wurde/wird erstellt von Jonas
 .\"
-.TH MPlayer
+.TH MPlayer 1
 .SH NAME
 mplayer \- Movie Player für Linux
 .SH ÜBERSICHT
@@ -20,7 +20,7 @@ mplayer \- Movie Player für Linux
 .RB [ \-delay\ <Sekunden> ]
 .RB [ \-nobps ]
 .RB [ \-aid\ <id> ]
-.RB [ \-alang\ <Audiostream\ Sprache> ]
+.RB [ \-alang\ <Tonstream\ Sprache> ]
 .RB [ \-vid\ <id> ]
 .RB [ \-fps\ <Rate> ]
 .RB [ \-mc\ <Sekunden/5f> ]
@@ -130,9 +130,8 @@ europäische/ISO 8859-1,2 (ungarisch, englisch, tschechisch, etc), kyrillische un
 Schriften unterstützt.
 .LP
 .SH "GUI OPTIONEN"
-.I HINWEIS:
-Der GUI-Code muss *explizit* kompiliert werden. Lies in der Dokumentation für weitere
-Details.
+.I HINWEIS
+Der GUI-Code muss *explizit* kompiliert werden. Lies in der Dokumentation für weitere Details.
 .TP
 .B \-gui
 startet MPlayer im GUI-Modus
@@ -144,10 +143,10 @@ lädt die Skin aus diesem Verzeichnis (OHNE Pfadname!). Zum Beispiel probiert '-s
     ~/.mplayer/Skin/fittyfene
 .LP
 .SH "DVD OPTIONEN"
-.I HINWEIS:
+.I HINWEIS
 Diese Optionen sind nur mit einkompilierter DVD-Unterstützung gültig. Lies in der Dokumentation für weitere
 Details.
-.I HINWEIS:
+.I HINWEIS
 Für die DVD-Wiedergabe wird manchmal deinterlacing benötigt: benutze die '-pp 0x20000' oder '-npp lb' Optionen.
 .TP
 .B \-dvd\ Titelid
@@ -184,7 +183,7 @@ auf dessen Ausgabe benutzt werden.
 .LP
 .SH "ALLGEMEINE OPTIONEN"
 .TP
-.I HINWEIS:
+.I HINWEIS
 Jede "flag" Option hat ein "noflag" Partner, -fs hat z.B. -nofs als Gegenteil.
 .TP
 .B \-vo\ <Treiber>[:<Device>]
@@ -349,7 +348,7 @@ sucht die OSD/SUB-Schriften in einem anderen Verzeichnis (normal :
 .IP
 .SH "ERWEITERTE OPTIONEN"
 .TP
-.I HINWEIS:
+.I HINWEIS
 Diese Optionen können dir helfen dein spezielles Problem zu lösen.. Lies dazu auch in der
 Dokumentation !
 .TP
@@ -394,7 +393,7 @@ z.B.:
 
 Siehe '-vc help' für eine VOLLSTÄNDIGE Liste !
 
-.I HINWEIS:
+.I HINWEIS
 Wenn libdivxdecore-Unterstützung einkompiliert wurde, enthalten Typ 3 und 7 nun den gleichen 
 DivX4 Codec aber unterschiedliche APIs, um diesen zu erreichen. Für Unterschiede zwischen
 diesen und wann welcher benutzt wird, lies in der DivX4 Sektion  in der Dokumentation.
@@ -429,7 +428,7 @@ Dies ist der numerische Modus des Postprocessing-Gebrauchs. Die '-npp' Option, w
 beschrieben wird, erzeugt dieselben Effekte, wird jedoch mit Buchstaben verwendet. Um mehrere Filter 
 gleichzeitig zu benutzen, müssen bloss die jeweiligen Hexadezimalwerte addiert werden.
 
-.I BEISPIEL:
+.I BEISPIEL
 Die folgenden Werte sollten gute Resultate liefern:
     \-pp 0x20000 <=> \-npp lb (deinterlacing - für DVD/MPEG2 Wiedergabe)
     \-pp 0x7f    <=> \-npp hb,vb,dr,al (glättet die Bilder)
@@ -438,7 +437,7 @@ Die folgenden Werte sollten gute Resultate liefern:
 Diese Option erlaubt einem, etwas "literarischere" Optionen für das Postprocessing zu übergeben und ist eine
 andere Möglichkeit, diese aufzurufen (nicht mit -pp).
 
-.I BEISPIEL:
+.I BEISPIEL
     '-pp 0x2007f' <=> '-npp hb,vb,dr,al,lb'
     '-pp 0x7f'    <=> '-npp hb,vb,dr,al'
 
@@ -474,7 +473,7 @@ Die Optionen für -npp ist eine durch Kommas getrennte Liste der folgenden Schlüs
 
 Diese Schlüsselwörter akkzeptieren ein '-' Präfix um die Option zu deaktivieren.
 
-.I BEISPIEL:
+.I BEISPIEL
     '-npp de,-al' bedeutet 'normale Filter ohne Helligkeits/Kontrast-Korrekturen'
 
 Ein ':' gefolgt von einem Buchstaben kann zu einer Option hinzugefügt werden um 
@@ -485,7 +484,7 @@ dessen Zuständigkeitsbereich festzulegen.
 
 Jeder Filter enthält 'c' (Chromafilterung) als Standard.
 
-.I BEISPIEL:
+.I BEISPIEL
     '-npp de,tn:1:2:3' bedeutet 'aktiviere die Standardfilterung und die zeitliche Rauschfilterung'
     '-npp hb:y,vb:a -autoq 6' bedeutet 'deblocke horizontal nur Luma und schalte
     automatisch das vertikale deblocking an/aus, abhängig von vorhandener CPU-Zeit'
@@ -637,7 +636,7 @@ gibt an, welches Framebuffer-Device verwendet werden soll. Standardmässig wird /
 .B \-fbmode\ <Modusname> (nur FBdev)
 ändert den Videomodus zu einem unter der Bezeichnung <Modusname> in /etc/fb.modes eingetragenem.
 .TP
-.I HINWEIS:
+.I HINWEIS
 Der VESA Framebuffer unterstützt keinen Moduswechsel.
 .TP
 .B \-fbmodeconfig\ <Dateiname> (nur FBdev)
@@ -681,7 +680,7 @@ braucht jedoch mehr CPU.
 .IP
 .SH "ALPHA/BETA CODE"
 .TP
-.I HINWEIS:
+.I HINWEIS
 Diese Optionen sind nur zur Vollständigkeit beigefügt! Sie können, können aber auch NICHT laufen!
 wenn du nicht weisst, was diese sind, dann benutze sie NICHT! Vergewissere dich in beiden Fällen
 in der Dokumentation!
@@ -694,7 +693,7 @@ verwendet eine alternative A/V-Synchronisationsmethode. Wo ist dies nützlich?
 .IP
 .SH TASTATURKONTROLLE
 .TP
-.I HINWEIS:
+.I HINWEIS
 Diese Tasten können/können aber auch nicht funktionieren, es hängt ganz vom Videoausgabe-Treiber ab.
 .TP
 	  <-  oder  ->      springt 10 Sekunden rückwärts/forwärts
@@ -733,7 +732,7 @@ ODER -vo xvidix ODER -vc divxds Optionen verwendet. Letztere ist langsam!)
 Wenn die -slave Option angegeben wurde, wird die Wiedergabe durch ein Zeilen-basiertes Protokoll mit
 folgenden Kürzeln kontrolliert: 
 .TP
-stop            pausiert die Wiedergabe
+	  stop            pausiert die Wiedergabe
 
 play            setzt die Wiedergabe fort
 
@@ -765,7 +764,8 @@ Untertitel-Dateien werden nach dieser Priorität durchsucht: (z.B. /mnt/cdrom/fil
      (utf/UTF/sub/SUB/srt/SRT/smi/SMI/rt/RT/txt/TXT/ssa/SSA)
     $HOME/.mplayer/default.sub
 .IP
-.SH "BEISPIELE:"
+.SH "BEISPIELE"
+.TP
 .B einfache DVD-Wiedergabe
 mplayer -dvd 1
 .TP

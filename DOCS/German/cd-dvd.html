@@ -48,29 +48,29 @@ Verwendung:</P>
 
 <P>Du kannst auch folgendes probieren:</P>
 
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo current_speed:4 >/proc/ide/<CDROM-Gerät>/settings</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo current_speed:4 >/proc/ide/[CDROM-Device]/settings</CODE></P>
 
 <P>Aber man braucht dazu Root-Privilegien. Ich verwende auch diesen Befehl:</P>
 
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo file_readahead:2000000 >/proc/ide/<CDROM-Device>/settings</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo file_readahead:2000000 >/proc/ide/[CDROM-Device]/settings</CODE></P>
 
 <P>für 2MB Lesepuffer für die Dateien (nützlich bei zerkratzten CDs).
 Es ist auch zu empfehlenswert das CD-Rom via 'hdparm' einzustellellen:</P>
 
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>hdparm -d1 -a8 -u1 (CDROM-Device</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>hdparm -d1 -a8 -u1 (CDROM-Device)</CODE></P>
 
 <P>um den DMA-Zugriff, Vorauslesen und IRQ-Unmasking zu aktivieren.
 (Wenn du das nicht verstehst *lies die hdparm manpage*)</P>
 
-<P>Bitte schau dir "<CODE>/proc/ide/<CDROM-Gerät>/settings</CODE>" an um das CD-ROM feinein-
+<P>Bitte schau dir "<CODE>/proc/ide/[CDROM-Gerät]/settings</CODE>" an um das CD-ROM feinein-
 zustellen.</P>
 
 <P><B><A NAME=4.2>4.2. DVD Wiedergabe</A></B></P>
   
 <P>Ja, richtige DVD-Unterstützung wurde erreicht. Du brauchst nicht mehr manuell
 VOB Dateien von der Disk abspielen und über die Dateien im video_ts Verzeichnis
-bescheid wissen, du musst dir nicht gedanken machen, ob es sich um eine verschüs-
-selte DVD handelt oder nicht (in alten Versionen von <B>MPlayer</B> musstest du
+bescheid wissen, du musst dir nicht gedanken machen, ob es sich um eine 
+verschüsselte DVD handelt oder nicht (in alten Versionen von <B>MPlayer</B> musstest du
 den '-dvdauth /dev/dvd' Parameter verwenden, wenn es eine verschlüsselte DVD war),
 und du brauchst nicht mal mehr die DVD mounten um sie spielen zu können :)</P>
   
@@ -89,9 +89,9 @@ ausführst.</P>
 <UL>  
 <LI><P><B>Laden der Sourcen von libdvdread und libdvdcss.</B></P>
   
-<P><I>Du sie hier downloaden:
+<P><I>Du kannst sie hier downloaden:
 <A HREF="http://www.dtek.chalmers.se/groups/dvd">http://www.dtek.chalmers.se/groups/dvd</A>
-(klicke auf 'download' im Menü links, und du kannst libdvdcss und libdvdread in der
+(klicke auf 'download' im Menü links und du kannst libdvdcss und libdvdread in der
 Tabelle finden).</I></P>
   
 <P><B><I>WICHTIG !</I></B><BR>
@@ -100,7 +100,7 @@ Für
   <LI>libdvdread 0.8 - wirst du <B>libcss</B> statt libdvdcss brauchen</LI>
   <LI>libdvdread 0.9 - du brauchst <B>libdvdcss 0.0.3</B> ! Verwende keine neueren
     Versionen, sie werden nicht funktionieren!</LI>
-  <LI>Verwende zum Beispiel <B><U>nie</U></B> libdvdcss <B>1.0</B>, es wird ungewöhlich langsam sein!</LI>
+  <LI>Verwende zum Beispiel <B><U>nie</U></B> libdvdcss <B>1.0</B>, sie wird ungewöhlich langsam sein!</LI>
 </UL>
 </P>
 </LI>
@@ -112,7 +112,7 @@ Für
 <LI><P><B>Alte DVD Unterstützung - <I>OPTIONAL</I></B></P>
 
 <P><I>Nützlich, wenn du verschlüsselte VOB0s von der Festplatte abspielen willst. Kompiliere und installiere <B>libcss</B>
- 0.0.1 (nicht neuer) (wenn <B>MPlayer</B> es nicht findet, dann benutze die Option <CODE>-csslib /pfad/zu/libcss.so</CODE>).</P></LI>    
+ 0.0.1 (nicht neuer) (wenn <B>MPlayer</B> sie nicht findet, dann benutze die Option <CODE>-csslib /pfad/zu/libcss.so</CODE>).</P></LI>    
     
 <LI><P><B>Kompiliere MPlayer neu.</B></P>
   
@@ -133,7 +133,7 @@ installiert sind.</P>
 <TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-dvd &lt;title_id&gt;&nbsp;</TD>
 <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Aktiviert die DVD-Unterstützung und wählt den Titel aus.</TD><TR>
 <TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-chapter &lt;chapter_id&gt;&nbsp;</TD>
-<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Wählt das DVD-Kapitel (Standard: wiedergabe von Kapitel 1)</TD><TR>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Wählt das DVD-Kapitel (Standard: wiedergabe von Kapitel 1).
   Beispiel : <CODE>-chapter 5-10</CODE> oder <CODE>-chapter -9</CODE></TD><TR>
 <TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-dvdangle &lt;angle_id&gt;&nbsp;</TD>
 <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Zum aus wählen der Kamera-Perspektive (Standard: 1)</TD><TR>
@@ -184,8 +184,6 @@ Option) ändern, oder du kannst es mit Hilfe der <CODE>-dvd-device</CODE> Option 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 2 -alang en -chapter 5 -dvdangle 2</CODE></P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvdauth /dev/dvd /mnt/cd/video_ts/vts_03_1.vob</CODE></P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvdkey C005D4A16D vts_03_1.vob</CODE></P>
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -sid 5 -dvd-device /dev/dvd</CODE></P>
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 2 -chapter 5 -dvdangle 2</CODE></P>
 
 <P><B><A NAME=4.3>4.3. DVD Wiedergabe FAQ</A></B></P>
 

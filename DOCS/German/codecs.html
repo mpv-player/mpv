@@ -52,7 +52,7 @@ ist. :(</P>
 
 <P>Entpacke es und starte <CODE>./install.sh</CODE> als Root.</P>
 
-<P>Hinweis: vergiss NICHT /usr/local/lib deiner /etc/ld.so.conf hinzuzufügen!</P>
+<P>Hinweis: vergiss NICHT <CODE>/usr/local/lib</CODE> deiner <CODE>/etc/ld.so.conf</CODE> hinzuzufügen!</P>
 
 <P><B>MPlayer</B> erkennt automatisch, wenn DivX4 installiert ist, und kompiliert
 es wie gewöhnlich. Wenn es nicht erkannt wird, wurde es nicht exakt wir oben
@@ -93,19 +93,18 @@ ist groß:</P>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>starkes Postprocessing, benötigt viel CPU Zeit (wie Level 4 bei DivX-DS)</TD><TR>
 </TABLE></P>
 
-<P><B><A NAME=2.1.2.2>2.1.2.2. ffmpegs DivX/libavcodec</A></B></P>
+<P><B><A NAME=2.1.2.2>2.1.2.2. ffmpeg's DivX/libavcodec</A></B></P>
 
 <P>Seit Beginn der Version 0.4.2 enthält <A HREF="http://ffmpeg.sourceforge.net">ffmpeg</A> einen <B>Open-Source</B>
 DivX-Codec, welcher kompatibel mit dem traditionellen DivX ist. <B>MPlayer</B>
 unterstützt diesen Codec und er ermöglicht, <B>DivX/DivX4 Filme auf nicht-x86
-Platformen zu sehen!</B> und es besitzt eine schnelle <B>DivX/DivX4</B> Dekodierung
-als der Win32 Codec oder die orginal DivX4 Codec. Es wurde von <B>MPlayer</B>s
-CVS-Tree entfernt, du musst es manuel direkt von <B>FFmpeg</B>s Tree beziehen:</P>
+Platformen zu sehen!</B> und es besitzt eine schnellere <B>DivX/DivX4</B> Dekodierung
+als der Win32 Codec oder die orginale DivX4 Codec.</P>
 
 <P>Es beinhaltet auch viele nette Codecs, wie RealVideo 1.0, MJPEG, h263,
 h263+, etc.</P>
 
-<P>Wenn du MPlayer benützest
+<P>Wenn du MPlayer benützt
 
 <UL>
   <LI>Vom Release : dann hasst du die libavcodec gleich im Packet, kompliliere
@@ -169,7 +168,7 @@ ist sehr einfach dies einzuschalten:</P>
 </UL>
 </P>
   
-<P>Diese Codecs sind die Video Codec Family Nummer 10, also kannst du die <CODE>-vfm 10</CODE>
+<P>Diese Codecs sind die Video Codec Familie Nummer 10, also kannst du die <CODE>-vfm 10</CODE>
 Option verwenden um <B>MPlayer</B> zu sagen, dass er sie verwenden soll, wenn möglich.</P>
 	  
 <P>Getestete Codecs sind: <B>Indeo 3.2</B>, <B>4.1</B>, <B>5.0</B>, <B>CVID</B>, <B>3ivX</B>, <B>h263</B>.</P>
@@ -254,15 +253,16 @@ Centre und LFE.</P>
 besitzen, die die Anzahl der Ausgabekanäle via SNDCTL_DSP_CHANNELS ioctl unterstützt. Eine Treiberversion
 von August 2001 oder neuer vom emu10k1 Treiber (verwendet bei SB Live Karten) sollte das unterstützen.</P>
 
-<P>Ausgabe mit mehr als 2 Kanälen sollte als expermentel betrachtet werden.</P>
-
 
 <P><B><A NAME=2.2.2.2>2.2.2.2. Hardwaremäßige AC3 Dekodierung</A></B></P>
 
 <P>Du wird eine AC3-fähige Soundkarte brauchen mit Digital-Out (SP/DIF). Der
 Treiber muss das AFMT_AC3 Format unterstützen (wie die SB Live!).
 Verbinde deinen AC3 Decoder am SP/DIF Ausgang und verwende die '-ac hwac3'
-Option. Es funktioniert möglichweise oder auch nicht (experimentel).</P>
+Option. Es funktioniert möglichweise oder auch nicht (experimentel). (wahrscheinlich 
+läuft es momentan nur mit C-Media Karten, es steht dir jedoch frei es auch für die SB Live
+zu korrigieren)
+</P>
 
 <P><B><A NAME=2.2.2.3>2.2.2.3. libmad Unterstützung</A></B></P>
 
@@ -286,7 +286,7 @@ kopieren.</P>
 <P><B><A NAME=2.2.2.5>2.2.2.5.  RealAudio</A></B></P>
 
 <P>Momentan ist der DNET Codec der einzige unterstützte Codec. Eigentlich ist er eine
-Version mit tiefer Bitrate des bekannten AC3 Codec. Er kann in alten und neuen RealMedia movies gefunden werden.</P>
+Version mit tiefer Bitrate des bekannten AC3 Codec. Er kann in alten und neuen RealMedia Filmen gefunden werden.</P>
 
 
 <P><B><A NAME=2.1.4>2.1.4. Win32 Codec Einbindungs-Howto</A></B></P>

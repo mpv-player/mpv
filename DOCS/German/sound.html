@@ -75,7 +75,7 @@ ansonsten wirst du weder Video noch Ton haben.</P>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Max kHz:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>48</TD><TR>
 
 <TD COLSPAN=3><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Gravis UltraSound ACE</B></TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>max 44Khz. <I>ebenfalls Probleme</I></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>nicht OK</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ALSA:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OK</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Max kHz:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>48</TD><TR>
 
@@ -105,23 +105,23 @@ ansonsten wirst du weder Video noch Ton haben.</P>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ALSA:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>?</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Max kHz:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>?</TD><TR>
 
-<TD COLSPAN=3><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>PC Speaker or DAC</B></TD><TR>
+<TD COLSPAN=3><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>PC Speaker oder DAC</B></TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OK (<I>verwende den SDL-Treiber: -ao sdl</I>)</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ALSA:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>kein Treiber</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Max kHz:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>der Treiber emuliert 44.1, möglichweise mehr</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Max kHz:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>der Treiber emuliert 44.1, möglicherweise mehr</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Treiber:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><A HREF="ftp://ftp.infradead.org/pub/pcsp">ftp://ftp.infradead.org/pub/pcsp</A></TD><TR>
 </TABLE></P>
 
 <P><UL>
-<LI>verwende mindestens 2.4 wenn möglich, 2.2 ist ungetestet
-<LI>wenn der sound während der Wiedergeben von CD-ROM "klickende" Geräusche
-     macht, schalte die Interupt-Unmaskierung ein !
-     Zum Beispiel "hdparm -u1 /dev/cdrom" (siehe "man hdparm" !!!)
-     Dies ist allgemein empfohlen... (für XMMS, usw...)
-     Lese Sektion <A HREF="cd-dvd.html#4.1">4.1</A>.
-<LI> verwende deine Soundkarte nicht mit einer anderen Anwendung ( z.B. XMMS ) !
-     wenn du ESD verwendest, starte MPlayer mit dem Esddsp-Utility !
-<LI> Sag uns bitte, wie MPlayer und deine Soundkarte(n) zusammen funktionieren!
+<LI>Verwende mindestens 2.4 wenn möglich, 2.2 ist ungetestet
+<LI>Wenn der sound während der Wiedergabe von CD-ROM "klickende" Geräusche
+    verursacht, schalte die Interupt-Unmaskierung ein !
+    Zum Beispiel "hdparm -u1 /dev/cdrom" (siehe "man hdparm" !!!)
+    Dies ist allgemein empfohlen... (für XMMS, usw...)
+    Lese Sektion <A HREF="cd-dvd.html#4.1">4.1</A>.
+<LI>Verwende deine Soundkarte nicht mit einer anderen Anwendungen ( z.B. XMMS ) !
+    Wenn du ESD verwendest, starte MPlayer mit dem Esddsp-Utility !
+<LI>Sag uns bitte, wie MPlayer und deine Soundkarte(n) zusammen funktionieren!
 </UL></P>
 
 
@@ -142,7 +142,7 @@ ansonsten wirst du weder Video noch Ton haben.</P>
   Plugins.
 </P>
 
-<P>Die Plugins können auch durch Schalter haben, welche irh Verhalten ändern.
+<P>Die Plugins können auch Schalter haben, welche ihr Verhalten ändern.
   Diese Schalter sind im unteren Abschnitt im Detail beschrieben. Ein Plugin wird
   mit den Standardeinstellungen gestartet, wenn dessen Optionen nicht mitgegeben werden.
   Ein Beispiel, wie man Plugins in Kombination mit Plugin spezifischen Schaltern verwendet:
@@ -163,28 +163,28 @@ ansonsten wirst du weder Video noch Ton haben.</P>
 
 <P><B>MPlayer</B> unterstützt vollständiges up/downsampling von Audiostreams.
 Dieses Plugin kann z.B. verwendet werden, wenn du eine Soundkarte mit fester Frequenz
-besitzst oder wenn du eine alte Soundkarte am Hals hast, welche nur max 44.1kHz verarbeitet.
-Beschränkungen in deiner Hardware werden nicht automatisch erkannt, also must du die 
+besitzt oder wenn du eine alte Soundkarte am Hals hast, welche nur max 44.1kHz verarbeitet.
+Beschränkungen in deiner Hardware werden nicht automatisch erkannt, also musst du die 
 Sample-Frequenz explizit angeben. Dieses Plugin hat einen Schalter:
 <CODE>fout</CODE>, welcher benutzt wird um die gewünschte Ausgabefrequenz zu setzen.
 Der Standard ist 48kHz, und wird in &lt;Hz&gt; angegeben.
 
 <P>Verwendung:<BR>
-&nbsp;&nbsp;<CODE>mplayer media.avi -aop list=resample:fout=&lt;erforderliche Frequenz in Hz, z.B. 44100&gt;</CODE></P>
+&nbsp;&nbsp;<CODE>mplayer medium.avi -aop list=resample:fout=&lt;erforderliche Frequenz in Hz, z.B. 44100&gt;</CODE></P>
 
 
-<P><B><A NAME=2.3.2.2.2>2.3.2.2.2. Surround Sound Dekodierung</A></B></P>
+<P><B><A NAME=2.3.2.2.2>2.3.2.2.2. Surround Sound Decodierung</A></B></P>
 
-<P><B>MPlayer</b> hat ein Audio-Plugin das matrix kodierten Surround Sound dekodieren kann.
-Dolby Surround ist ein Beispiel eines matrix kodierten Formats.</p>
+<P><B>MPlayer</b> hat ein Audio-Plugin das matrix codierten Surround Sound decodieren kann.
+Dolby Surround ist ein Beispiel eines matrix codierten Formats.</p>
 
-<P>Eigentlich enthalten viele Dateien mit 2 Audio Kanälen matrixed Surround
+<P>Eigentlich enthalten viele Dateien mit 2 Audio Kanälen matrix Surround
 Sound.</p>
 
 <P>Um dieses Feature zu benutzen, brauchst du eine Soundkarte mit mindestens 4 Kanälen.</P>
 
 <P>Verwendung :<BR>
-&nbsp;&nbsp;<CODE>mplayer media.avi -aop list=surround</CODE></P>
+&nbsp;&nbsp;<CODE>mplayer medium.avi -aop list=surround</CODE></P>
 
 
 <P><B><A NAME=2.3.2.2.3>2.3.2.2.3. Sample Format Konvertierer</A></B></P>
@@ -198,7 +198,7 @@ Sound.</p>
 </P>
 
 <P>Verwendung :<BR>
-  &nbsp;&nbsp;<CODE>mplayer media.avi -aop
+  &nbsp;&nbsp;<CODE>mplayer medium.avi -aop
   list=format:format=&lt;required output format&gt;</CODE>
 </P>
 

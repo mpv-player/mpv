@@ -546,7 +546,7 @@ DOS-Startdiskette oder was auch immer. Und vergiss nicht dein UniVBE zu registri
 
 <P><TABLE BORDER=0>
 <TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fb</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-spezifiziert den zu verwendenden Framebuffer (/dev/fd0)</TD><TR>
+spezifiziert den zu verwendenden Framebuffer (/dev/fb0)</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fbmode</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Modus das verwendet werden soll (siehe /etc/fb.modes)</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fbmodeconfig</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Konfigurationsdatei für das Modus (standard ist /etc/fb.modes)</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-monitor_hfreq</TD><TD></TD><TD ROWSPAN=3><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>WICHTIGE Werte, siehe example.conf</TD><TR>
@@ -759,7 +759,10 @@ fbdev usw.). Dieser Treiber kann vom <b>Textmodus</b> aus betrieben werden.<BR>
 <TABLE BORDER=0>
 <TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Diese Commandline-Parameter sind zur Zeit verfügbar für VESA:</B></P></TD><TR>
 <TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-vo vesa:opts</TD>
-<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>wird bald implementiert werden. (Du kannst damit Parameter wie Wiederholrate, Interlacing, Doublescan und so weiter einstellen. Beispiele: i43,  85,  d100)</TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  erkennt momentan: <b>dga</b> um den DGA-Modus zu erzwingen und <b>nodga</b> um ihn zu deaktivieren. Hinweis: Du kannst diese
+  Parameter auslassen um den DGA-Modus <b>automatisch</b> erkennen zu können. (In Zukunft wirst du Parameter wie Wiederholrate,
+  Interlacing, Doublescan und so weiter einstellen. Beispiele: i43,  85,  d100)</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-screenw, -screenh, -bpp</TD>
   <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>verwendet von Anwender definierte Modie</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-x, -y</TD>
@@ -770,6 +773,9 @@ fbdev usw.). Dieser Treiber kann vom <b>Textmodus</b> aus betrieben werden.<BR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Vollbild-Scaling</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fs -zoom</TD>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Vollbild-Scaling des prescalten Bildes</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-double</TD>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>aktiviert den Doppelpuffer-Modus (double buffering). 
+  (Nur im DGA Modus möglich). Sollte längsämer sein als single buffering, hat jedoch keine Flimmereffekte.</TD><TR>
 </TABLE>
 </P>
   
@@ -1062,8 +1068,8 @@ Du must diese also erst zum Laufen bringen. Kompiliere <B>MPlayer</B> danach neu
     des gezoomten Bildes. Wenn du wirklich X verwenden möchtest, benutze die <CODE>-vo x11 -fs -zoom</CODE> Option.
     Es wird jedoch <B>LANGSAM</B>  sein und hat einen <B>Macrovision</B> Kopierschutz aktiviert. Also wird 
     es nur bei einem direkt verbunden TV funkionieren, nicht bei einem VCR.
-    (Du kannst den Macrovision umgehen indem du <A HREF="http://avifile.sourceforge.net/mgamacro.pl">diese</A> Perl
-    Script verwendest.)</LI>
+    (Du kannst den Macrovision umgehen indem du <A HREF="http://avifile.sourceforge.net/mgamacro.pl">dieses</A> Perl
+    Skript verwendest.)</LI>
   <LI><B>Framebuffer</B>: benützt das <B>matroxfb Module</B> in den 2.4 Kernels.
     2.2 Kernels haben dieses TVout Feature nicht integriert, sind also unbrauchbar für dies.
     Du musst dazu ALLE matroxfb-spezifischen Features aktiviert haben (ausser MultiHead)
@@ -1156,11 +1162,10 @@ es keine Möglichkeit den TV-Out bei ATI-Karten zu aktivieren.</P>
 <LI><B>ATI Mach64</B> verwendet <I>ImpacTV</I>, welcher von Gatos unterstützt wird.
 <LI><B>ASIC Radeon VIVO</B> verwendet <I>Rage Theatre</I>, welcher von Gatos unterstützt wird.
 <LI><B>Radeon VE</B> und <B>Rage PRO LT</B> verwenden <I>ImpacTV2+</I>, welcher unter Linux nicht
-unterstützt wird.</P>
-Aber mit <B>MPlayer</B> erhältst du <B>vollständige Hardware-Beschleunigung</B> und <B>TV Ausgabe</B>
-für Radeon Karten !
-Lies die <a href=#2.3.1.12>VESA Treiber</a> und <A HREF=#2.3.1.14>Radeon
-Beschleunigung</A> Abschnitte.</P>
+unterstützt wird. 
+<LI>Aber mit <B>MPlayer</B> erhältst du <B>vollständige Hardware-Beschleunigung</B> 
+und <B>TV Ausgabe</B> für Radeon Karten ! Lies die <a href=#2.3.1.12>VESA Treiber</a> und 
+<A HREF=#2.3.1.14>Radeon Beschleunigung</A> Abschnitte.</P>
 
 <P>
 Glücklicherweise können Benutzer mit genügend schnellen CPUs (Duron, Celeron2 und besser) 
