@@ -164,15 +164,12 @@ lehetséges.</P>
 <P>Az <B>MPlayer</B> képes lejátszani Vivo (1.0 és 2.0) file-okat. Az 1.0-ás
 fileokra a legmegfelelõbb az FFmpeg-beli H263 codec, amit a <CODE>-vc ffh263</CODE>
 opcióval lehet használni (új libavcodec szükséges !). A 2.0-ás fileokhoz
-az XAnim H263 dekódere jó (támogat gyors YV12 kimenetet). A <CODE>-vc h263xa</CODE>
-opcióval lehet használatba venni. Természetesen be kell fordítanod
-az XAnim codec-ek támogatását, lásd az <A HREF=#2.2.1.3>XAnim video
-codec-ek</A> fejezetet. Ha ez nem mûködik, szedd le az <CODE>ivvideo.dll</CODE>
-file-t <A
+szedd le az <CODE>ivvideo.dll</CODE> Win32 DLL file-t <A
 HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/ivvideo.dll">innen</A>),
 és installáld a <CODE>/usr/lib/win32</CODE> könyvtárba, vagy ahol tárolod
 a Win32-es codeceket. Ezutóbbi codec nem támogat se YV12 se YUY2 kimenetet,
-csak BGR-t, ezért kizárólag X11 és OpenGL kimenetekkel mûködik. Ne használd.</P>
+csak BGR-t, ezért kizárólag X11 és OpenGL kimenetekkel mûködik. Remélhetõleg
+hamarosan az ffh263 is tud VIVO 2.0-ás file-okat dekódolni.</P>
 
 <P>Olvasd el a <A HREF=#2.2.2.3>VIVO audio codec</A> fejezetet is!</P>
 
