@@ -63,7 +63,7 @@
 
 
 char *dvd_auth_device=NULL;
-char *dvd_device=NULL;
+extern char *dvd_device;
 char *dvd_raw_device=NULL;
 char *css_so=NULL;
 unsigned char key_disc[2048];
