@@ -1204,8 +1204,6 @@ if(sh_audio && !demuxer2){
 
 } // while(!at_eof)
 
-if (demuxer) free_demuxer(demuxer);
-
 #ifdef HAVE_MP3LAME
 // fixup CBR mp3 audio header:
 if(sh_audio && mux_a->codec==ACODEC_VBRMP3 && !lame_param_vbr){
@@ -1249,8 +1247,8 @@ if(sh_audio)
 printf(MSGTR_AudioStreamResult,
     (float)(mux_a->size/mux_a->timer*8.0f/1000.0f), (int)(mux_a->size/mux_a->timer), (int)mux_a->size, (float)mux_a->timer);
 
-if(sh_video) uninit_video(sh_video);
-sh_video=NULL;
+if(sh_video){ uninit_video(sh_video);sh_video=NULL; }
+if(demuxer) free_demuxer(demuxer);
 if(stream) free_stream(stream); // kill cache thread
 
 return interrupted;
