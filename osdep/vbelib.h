@@ -82,6 +82,8 @@ static inline void * PhysToVirtSO(unsigned short seg,unsigned short off)
 #define MODE_WIN_RELOCATABLE 	(1 << 0)
 #define MODE_WIN_READABLE 	(1 << 1)
 #define MODE_WIN_WRITEABLE 	(1 << 2)
+#define NEO_PAL 0
+#define NEO_NTSC 1
 
 /* SuperVGA mode information block */
 struct VesaModeInfoBlock {
@@ -211,6 +213,7 @@ extern int vbeSetScanLineLengthB(unsigned num_bytes);
 extern int vbeGetDisplayStart(unsigned *pixel_num,unsigned *scan_line);
 extern int vbeSetDisplayStart(unsigned long offset, int vsync);
 extern int vbeSetScheduledDisplayStart(unsigned long offset, int vsync);
+extern int vbeSetTV(unsigned int vesa_mode,unsigned int TV_mode);
 /*
    Func 0x08-0x09:
    Support of palette currently is not implemented.

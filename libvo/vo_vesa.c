@@ -123,6 +123,10 @@ static int vidix_opened = 0;
 static vidix_grkey_t gr_key;
 #endif
 
+/* Neomagic TV out */
+static int neomagic_tvout = 0;
+static int neomagic_tvnorm = NEO_PAL;
+ 
 #define HAS_DGA()  (win.idx == -1)
 #define MOVIE_MODE (MODE_ATTR_COLOR | MODE_ATTR_GRAPHICS)
 #define FRAME_MODE (MODE_WIN_RELOCATABLE | MODE_WIN_WRITEABLE)
@@ -443,6 +447,10 @@ static uint32_t parseSubDevice(const char *sd)
    if(strcmp(sd,"nodga") == 0) { flags |= SUBDEV_NODGA; flags &= ~(SUBDEV_FORCEDGA); }
    else
    if(strcmp(sd,"dga") == 0)   { flags &= ~(SUBDEV_NODGA); flags |= SUBDEV_FORCEDGA; }
+   else
+   if(strcmp(sd,"neotv_pal") == 0)   { neomagic_tvout = 1; neomagic_tvnorm = NEO_PAL; }
+   else
+   if(strcmp(sd,"neotv_ntsc") == 0)   { neomagic_tvout = 1; neomagic_tvnorm = NEO_NTSC; }
    else
    if(memcmp(sd,"lvo:",4) == 0) lvo_name = &sd[4]; /* lvo_name will be valid within init() */
 #ifdef CONFIG_VIDIX
@@ -927,6 +935,15 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 			return -1;
 		}
 		
+		if (neomagic_tvout) {
+		    err = vbeSetTV(video_mode,neomagic_tvnorm);
+		    if (err!=0x4f) {
+		    printf("vo_vesa: Sorry unsupported mode, try -x 640 -zoom\n");
+		    }
+		    else {
+		    printf("vo_vesa: Oh you really have picture on TV!\n");
+		    } 
+		}
 		/* Now we are in video mode!!!*/
 		/* Below 'return -1' is impossible */
 		if(verbose)

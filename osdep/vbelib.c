@@ -6,6 +6,7 @@
    You can redistribute this file under terms and conditions
    of GNU General Public licence v2.
    Written by Nick Kurshev <nickols_k@mail.ru>
+   Neomagic TV out support by Rudolf Marek <r.marek et sh.cvut.cz>
 */
 
 #include <../config.h>
@@ -336,6 +337,46 @@ int vbeGetModeInfo(unsigned mode,struct VesaModeInfoBlock *data)
   return retval;
 }
 
+
+int vbeSetTV(unsigned int vesa_mode,unsigned int TV_mode) {
+
+#define NR_MODES 8
+
+unsigned int mode_table[NR_MODES] =    
+			{0x101,0x103,0x111,0x114,0x120,0x121,0x122,0x123};
+unsigned int tv_table[][NR_MODES] = {
+	        	{0x201,0x202,0x211,0x212,0x221,0x231,0x222,0x232},
+	        	{0x200,0x203,0x210,0x213,0x220,0x230,0xFFFF,0xFFFF}};
+
+/*
+
+Alternate mode map. If modes like 320x240 and 400x300 does not work, but
+640x480 and 800x600 work, then try to replace above two lines with this
+lines and write email to me if it works.
+r.marek et sh.cvut.cz
+
+	        	{0x201,0x202,0x211,0x212,0x222,0x223,0x224,0x225},
+	        	{0x200,0x203,0x210,0x213,0x220,0x221,0xFFFF,0xFFFF}};
+
+*/				 
+  int i,retval;
+  struct LRMI_regs r;
+
+  memset(&r,0,sizeof(struct LRMI_regs));
+  for (i=0;((mode_table[i]!=(vesa_mode&0x3FF))&&(i<NR_MODES));i++) ;
+  
+  if (i==NR_MODES) return 0;
+  if(verbose > 1) printf("vbelib: Trying to set TV mode %x\n",tv_table[TV_mode][i]);
+  r.eax = 0x4f14;
+  r.ebx = 0x20;
+  r.edx = 0;
+  r.edi = 0;
+  r.ecx =  tv_table[TV_mode][i];
+  retval = VBE_LRMI_int(0x10,&r);
+  if(!retval) return VBE_VM86_FAIL;
+  return r.eax & 0xffff;
+  
+}
 int vbeSetMode(unsigned mode,struct VesaCRTCInfoBlock *data)
 {
   struct LRMI_regs r;

@@ -456,6 +456,7 @@ Makovicka, Jindrich (henry) <makovick@KMLinux.fjfi.cvut.cz>
 
 Marek, Rudolf <MAREKR2@cs.felk.cvut.cz>
     * gtf code for -vo vesa
+    * neomagic tv out support through vesa vbe
 
 Megyer, László (Lez, Laaz) <lez@sch.bme.hu>
     * subtitle reader
