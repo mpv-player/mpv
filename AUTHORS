@@ -551,6 +551,9 @@ Schoenbrunner, Oliver <oliver.schoenbrunner@jku.at>
     * SGI audio driver
     * MIPS support
 
+Simon, Peter <simon.peter@linuxuser.hu>
+    * TOOLS/wma2ogg.pl author
+
 Snel, Rik <rsnel@cube.dyndns.org>
     * zr video output driver
 
