@@ -5571,14 +5571,14 @@ mplayer -vo zr -vf scale=352:288 file.avi
 mplayer -vo zr2 -vf scale=352:288,zrmjpeg file.avi
 .TP
 .B Encoding DVD title #2, only selected chapters
-mencoder dvd://2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc divx4
+mencoder dvd://2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mpeg4
 .TP
 .B Encoding DVD title #2, resizing to 640x480
-mencoder dvd://2 \-vf scale=640:480 \-o title2.avi \-oac copy \-ovc divx4
+mencoder dvd://2 \-vf scale=640:480 \-o title2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mpeg4
 .TP
 .B Encoding DVD title #2, resizing to 512xHHH (keep aspect ratio)
 mencoder dvd://2 \-vf scale \-zoom \-xy 512 \-o title2.avi \-oac copy
-\-ovc divx4
+\-ovc lavc \-lavcopts vcodec=mpeg4
 .TP
 .B The same, but with libavcodec family, MPEG4 (Divx5) compression
 mencoder dvd://2 \-o title2.avi \-ovc lavc
@@ -5589,13 +5589,13 @@ mencoder dvd://2 \-o titel2.avi \-ovc lavc
 \-lavcopts vcodec=mjpeg:vhq:vbitrate=1800 \-oac copy
 .TP
 .B Encoding all *.jpg files in the current dir
-mencoder "mf://*.jpg" \-mf fps=25 \-o output.avi \-ovc divx4
+mencoder "mf://*.jpg" \-mf fps=25 \-o output.avi \-ovc lavc \-lavcopts vcodec=mpeg4
 .TP
 .B Encoding from tuner
 mencoder \-tv driver=v4l:width=640:height=480 tv:// \-o tv.avi \-ovc raw
 .TP
 .B Encoding from a pipe
-rar p test-SVCD.rar | mencoder \-ovc divx4 \-divx4opts br=800 \-ofps 24 \-
+rar p test-SVCD.rar | mencoder \-ovc lavc \-lavcopts vcodec=mpeg4:vbitrate=800 \-ofps 24 \-
 .
 .
 .\" --------------------------------------------------------------------------
