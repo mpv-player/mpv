@@ -33,7 +33,7 @@
 .\" Title
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2004-01-16" "The MPlayer Project" "The Movie Player"
+.TH MPlayer 1 "2004-08-27" "The MPlayer Project" "The Movie Player"
 .
 .SH NAME
 mplayer  \- movie player
@@ -204,10 +204,7 @@ It has the same options as MPlayer.
 MPlayer has a fully configurable, command-driven control layer
 which allows you to control MPlayer using keyboard, mouse, joystick
 or remote control (with LIRC).
-.br
-The default configuration file for the input system is
-~/.mplayer/\:input.conf but it can be overriden
-using the \-input option.
+See the \-input option for ways to customize it.
 .
 .TP
 .B general control
@@ -506,8 +503,9 @@ Available commands are:
 .PD 0
 .RSs
 .IPs conf=<file>
-Read alternative input.conf.
-If no full path is given, ~/\:.mplayer/\:<file> is assumed.
+Specify input configuration file other than the default
+~/\:.mplayer/\:input.conf.
+~/\:.mplayer/\:<file> is assumed if no full path is given.
 .IPs ar-delay
 Delay in msec before we start to autorepeat a key (0 to disable).
 .IPs ar-rate
@@ -520,10 +518,10 @@ Prints all commands that can be bound to keys.
 Specifies the joystick device to use (default: /dev/\:input/\:js0).
 .IPs file\ 
 Read commands from the given file.
-Mostly useful with a fifo.
+Mostly useful with a FIFO.
 .br
 .I NOTE:
-When the given file is a fifo MPlayer opens both ends so you can do
+When the given file is a FIFO MPlayer opens both ends so you can do
 several 'echo "seek 10" > mp_pipe' and the pipe will stay valid.
 .RE
 .PD 1
@@ -945,7 +943,7 @@ extension is used to select the demuxer.
 Always falls back to content-based demuxer selection.
 .
 .TP
-.B \-passwd <password> (see \-user option too) (network only)
+.B \-passwd <password> (also see \-user) (network only)
 Specify password for HTTP authentication.
 .
 .TP
@@ -1026,7 +1024,7 @@ Currently this only works with AVI files.
 This option is obsolete now that MPlayer has OpenDML support.
 .
 .TP
-.B \-sb <byte\ position> (see \-ss option too)
+.B \-sb <byte\ position> (also see \-ss)
 Seek to byte position.
 Useful for playback from CD-ROM images or VOB files with junk at the beginning.
 .
@@ -1036,7 +1034,7 @@ Selects the given output sampling rate, resampling if necessary.
 MEncoder passes this value to LAME for resampling.
 .
 .TP
-.B \-ss <time> (see \-sb option too)
+.B \-ss <time> (also see \-sb)
 Seek to given time position.
 .sp 1
 .I EXAMPLE:
@@ -1601,7 +1599,8 @@ Override the default filename employed by \-ao pcm.
 .
 .TP
 .B \-aop <list=plugin1,plugin2...:option1=value1:opt2=val2...>
-Specify audio plugin(s) and their options (see documentation too).
+Specify audio plugin(s) and their options
+(also see the audio plugins section of the documentation).
 .sp 1
 Available options are:
 .RSs
@@ -1995,7 +1994,6 @@ Try this option if you still experience fullscreen problems.
 .B \-fstype <type1,type2,...> (X11 only)
 Specify a priority list of fullscreen modes to be used.
 You can negate the modes by prefixing them with '\-'.
-.br
 If you experience problems like the fullscreen window being covered
 by other windows try using a different order.
 .br
@@ -2079,7 +2077,7 @@ Not supported by all video output drivers.
 .TP
 .B \-jpeg <option1:option2:...> (\-vo jpeg only)
 Specify options for the jpeg video output driver.
-.br
+.sp 1
 Available options are:
 .sp 1
 .PD 0
@@ -2751,11 +2749,10 @@ Each file takes the frame number padded with leading zeros as name.
 Specify a priority list of audio codecs to be used, according to their codec
 name in codecs.conf.
 Use a '-' before the codec name to omit it.
+If the list has a trailing ',' it will fallback to codecs not listed.
 .br
 .I NOTE:
 See \-ac help for a full list of available codecs.
-.br
-If the list has a trailing ',' it will fallback to codecs not listed.
 .sp 1
 .I EXAMPLE:
 .PD 0
@@ -2774,7 +2771,7 @@ try other codecs except FFmpeg's MP3 decoder
 .TP
 .B \-af <filter1[=option1:option2:...],filter2,...>
 Activate a comma separated list of audio filters and their options.
-.br
+.sp 1
 Available filters are:
 .RSs
 .IPs resample[=srate[:sloppy][:type]]
@@ -2845,7 +2842,7 @@ nsamples: number of samples per channel (default: 512)
 .RE
 .
 .TP
-.B \-af-adv <force=(0\-3):list=(filters)> (see \-af option too)
+.B \-af-adv <force=(0\-3):list=(filters)> (also see \-af)
 Specify advanced audio filter options:
 .RSs
 .IPs force=<0\-3>
@@ -2860,7 +2857,7 @@ Forces the insertion of audio filters to one of the following:
 3: Turn off auto.
 .REss
 .IPs list=<filters>
-Same as \-af (see \-af option).
+Same as \-af.
 .RE
 .
 .TP
@@ -2918,7 +2915,7 @@ If decoding with libavcodec, you can specify its parameters here.
 .RS
 .I NOTE:
 Just add the values of the things you want to enable.
-.br
+.sp 1
 Available options are:
 .RE
 .RSs
@@ -3016,8 +3013,7 @@ manually work around encoder bugs:
 .br
 1024 (mpeg4): edge padding bug (autodetected per fourcc/\:ver)
 .REss
-.IPs idct=<0\-99>
-(see lavcopts)
+.IPs "idct=<0\-99> (see \-lavcopts)"
 For best decoding quality use the same idct algorithm for decoding and encoding.
 This may come at a price in accuracy, though.
 .IPs gray\ 
@@ -3056,7 +3052,7 @@ The valid range of \-oldpp values varies by codec, mostly
 0\-6, where 0=disable 6=slowest/\:best.
 .
 .TP
-.B \-pp <quality> (see \-vf pp option too!)
+.B \-pp <quality> (also see \-vf pp)
 Set postprocess level of the DLL.
 This option is NO LONGER USABLE with MPlayer's postprocess filter, but only
 with Win32 DirectShow DLLs which have internal postprocessing routines.
@@ -3065,7 +3061,7 @@ The valid range of \-pp values varies by codec, mostly
 0\-6, where 0=disable 6=slowest/\:best.
 .
 .TP
-.B \-pphelp (see \-vf pp option too)
+.B \-pphelp (also see \-vf pp)
 Show a summary about the available postprocess filters and their usage.
 .
 .TP
@@ -3110,7 +3106,7 @@ Right channel
 .PD 1
 .
 .TP
-.B \-sws <software\ scaler\ type> (see \-vf scale option too)
+.B \-sws <software\ scaler\ type> (also see \-vf scale)
 This option sets the quality (and speed, respectively) of the software scaler,
 with the \-zoom option.
 For example with x11 or other outputs which lack hardware acceleration.
@@ -3153,11 +3149,10 @@ bicubic spline
 Specify a priority list of video codecs to be used, according to their codec
 name in codecs.conf.
 Use a '-' before the codec name to omit it.
+If the list has a trailing ',' it will fallback to codecs not listed.
 .br
 .I NOTE:
 See \-vc help for a full list of available codecs.
-.br
-If the list has a trailing ',' it will fallback to codecs not listed.
 .sp 1
 .I EXAMPLE:
 .PD 0
@@ -3180,11 +3175,6 @@ to their names in codecs.conf.
 It falls back to default if none is OK.
 .br
 .I NOTE:
-If libdivxdecore support was compiled in, then odivx and divx4 now contains
-just the same DivX4 codec, but different APIs to reach it.
-For difference between them and when to use which, check the DivX4 section in
-the documentation.
-.br
 See \-vfm help for a full list of available drivers.
 .sp 1
 .I EXAMPLE:
@@ -3254,8 +3244,7 @@ Could be used to force scaling with \-vf scale.
 .
 .
 .SH "VIDEO FILTERS"
-Video filter are plugins that allow you to modify the video stream and its
-properties.
+Video filters allow you to modify the video stream and its properties.
 The syntax is:
 .
 .TP
@@ -3517,16 +3506,13 @@ format name like rgb15, bgr24, yv12, etc (default: yv12)
 .PD 1
 .
 .TP
-.B pp[=filter1[:option1[:option2...]]/\:[-]filter2...] (see \-pphelp too)
+.B pp[=filter1[:option1[:option2...]]/\:[-]filter2...] (also see \-pphelp)
 This option enables usage of MPlayer's internal postprocessing filter,
 and also gives an interface where you can pass options to the named filter.
 To get a list of available filters, use \-pphelp.
 Note that each sub-filter must be separated with a / sign.
-.br
 Each filter defaults to 'c' (chrominance).
-.br
 The keywords accept a '-' prefix to disable the option.
-.br
 A ':' followed by a letter may be appended to the option to indicate its
 scope:
 .PD 0
@@ -4369,9 +4355,8 @@ Tile a series of images into a single, bigger image.
 If you omit a parameter or use a value less than 0, then the default
 value is used.
 You can also stop when you're OK (... \-vf tile=10:5 ...).
-.
 It is probably a good idea to put the scale filter before the tile :-)
-.br
+.sp 1
 The parameters are:
 .sp 1
 .PD 0
@@ -4464,7 +4449,7 @@ CBR only, VBR ignores this as it puts each packet in a new chunk.
 Sets up audio buffering time interval (default: 0.5s).
 .
 .TP
-.B \-endpos <[[hh:]mm:]ss[.ms]|size[b|kb|mb]> (see \-ss and \-sb option too)
+.B \-endpos <[[hh:]mm:]ss[.ms]|size[b|kb|mb]> (also see \-ss and \-sb)
 Stop encoding at given time or byte position.
 Can be specified in many ways:
 .br
@@ -4504,7 +4489,7 @@ This can be used to change the aspect ratio with \-ovc copy.
 .TP
 .B \-info <option1:option2:...> (AVI only)
 Specify the info header of the resulting AVI file.
-.br
+.sp 1
 Available options are:
 .RSs
 .IPs help\ 
@@ -4533,7 +4518,7 @@ when hardcoding subtitles onto a movie.
 .
 .TP
 .B \-noodml (\-of avi only)
-Do not write OpenDML index for files >1GB.
+Do not write OpenDML index for AVI files >1GB.
 .
 .TP
 .B \-noskip
@@ -4752,7 +4737,6 @@ average bitrate
 .TP
 .B cbr\ \ \ \ 
 constant bitrate.
-.br
 Forces also CBR mode encoding on subsequent ABR presets modes
 .
 .TP
@@ -5420,7 +5404,7 @@ as without partitioning an error will trash AC/\:DC/\:MV equally.
 .
 .TP
 .B vpsize=<0\-10000>
-video packet size, improves error-resistance (see \-vdpart option too):
+video packet size, improves error-resistance (also see vdpart):
 .RSs
 .IPs 0
 disabled (default)
@@ -5733,7 +5717,6 @@ normal size=1 diamond (default) =EPZS type diamond
      000
       0
 .fi
-.br
 .IPs 2
 normal size=2 diamond
 .nf
@@ -5843,11 +5826,8 @@ Allow encoding of abritarily long MVs.
 .
 .TP
 .B ibias=<-256\-256>
-intra quantizer bias (256 == 1.0)
-.br
-MPEG style quantizer default: 96
-.br
-H.263 style quantizer default: 0
+intra quantizer bias (256 equals 1.0, MPEG style quantizer default: 96,
+H.263 style quantizer default: 0)
 .br
 .I NOTE:
 The H.263 MMX quantizer cannot handle positive biases (set vfdct=1 or 2),
@@ -5855,17 +5835,15 @@ the MPEG MMX quantizer cannot handle negative biases (set vfdct=1 or 2).
 .
 .TP
 .B pbias=<-256\-256>
-inter quantizer bias (256 == 1.0)
-.br
-MPEG style quantizer default: 0
-.br
-H.263 style quantizer default: -64
+inter quantizer bias (256 equals 1.0, MPEG style quantizer default: 0,
+H.263 style quantizer default: -64)
 .br
 .I NOTE:
 The H.263 MMX quantizer cannot handle positive biases (set vfdct=1 or 2),
 the MPEG MMX quantizer cannot handle negative biases (set vfdct=1 or 2).
 .br
-Tip: a more positive bias (-32 \- -16 instead of -64) seems to improve the PSNR
+.I HINT:
+A more positive bias (-32 \- -16 instead of -64) seems to improve the PSNR.
 .
 .TP
 .B nr=<0\-100000>
@@ -5970,7 +5948,6 @@ Specify the pass in 2pass mode.
 .B bitrate=<value>
 Sets the bitrate to be used in kbits/\:second if <16000 or in bits/\:second
 if >16000.
-.br
 If <value> is negative, XviD will use its absolute value as the target size
 (in kbytes) of the video and compute the associated bitrate automagically.
 (CBR or 2pass mode, default: 687 kbits/\:s)
@@ -6022,9 +5999,9 @@ size of the rate control buffer
 .
 .TP
 .B quant_range=<1\-31>\-<1\-31>[/\:<1\-31>\-<1\-31>]
-min & max quantizer for all frames (default: 2\-31, CBR mode)
+CBR mode: min & max quantizer for all frames (default: 2\-31)
 .br
-min & max quantizer for I/\:P frames (default: 2\-31/\:2\-31, 2pass mode)
+2pass mode: min & max quantizer for I/\:P frames (default: 2\-31/\:2\-31)
 .
 .TP
 .B min_key_interval=<value>
@@ -6258,7 +6235,7 @@ The current version of x264 (r38) hasn't yet implemented this feature.
 Each <value> I-Frames are IDR-Frames.
 In H.264, I-Frames do not necessarily bound a closed GOP because it is
 allowable for a P-frame to be predicted from more frames than just the one
-frame before it (see the frameref option).
+frame before it (also see frameref).
 Therefore, I-frames are not necessarily seekable. IDR-Frames restrict
 subsequent P-frames from referring to any frame prior to the IDR-Frame
 (default: 2)
@@ -6412,7 +6389,7 @@ user settings
 .
 .TP
 ~/.mplayer/\:input.conf
-input bindings (see '\-input keylist' for full keylist)
+input bindings (see '\-input keylist' for the full list)
 .
 .TP
 ~/.mplayer/\:gui.conf
@@ -6552,21 +6529,12 @@ explains how to create useful bug reports.
 .
 .
 .SH AUTHORS
-MPlayer was initially written by Arpad Gereoffy.
+MPlayer was initially written by Arpad Gereöffy.
 See the AUTHORS file for a list of some of the many other contributors.
-.
-.TP
-MPlayer is (C) 2000\-2004
-.B The MPlayer Team
-.
-.TP
-This man page is written and maintained by
-.B Gabucino
-.br
-.B Diego Biurrun
-.br
-.B Jonas Jermann
-.
 .PP
+MPlayer is (C) 2000\-2004 The MPlayer Team
+.PP
+This man page was written mainly by Gabucino, Jonas Jermann and Diego Biurrun.
+It is maintained by Diego Biurrun.
 Please send mails about it to the MPlayer-DOCS mailing list.
 .\" end of file
