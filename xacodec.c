@@ -61,7 +61,7 @@ int XA_Print(char *fmt, ...)
 
     va_start(vallist, fmt);
     vsnprintf(buf, 1024, fmt, vallist);
-    mp_msg(MSGT_DECVIDEO, MSGL_HINT, "[xacodec] %s", buf);
+    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "[xacodec] %s\n", buf);
     va_end(vallist);
 }
 
@@ -273,9 +273,10 @@ int xacodec_init_video(sh_video_t *vidinfo, int out_format)
     xacodec_driver->decinfo->special = 0;
     xacodec_driver->decinfo->extra = codec_hdr.extra;
 
+//    vidinfo->our_out_buffer = malloc(codec_hdr.y * codec_hdr.x * ((codec_hdr.depth+7)/8));
     vidinfo->our_out_buffer = malloc(codec_hdr.y * codec_hdr.x * codec_hdr.depth);
 
-    printf("out_buf size: %d\n", codec_hdr.y * codec_hdr.x * codec_hdr.depth);
+//    printf("out_buf size: %d\n", codec_hdr.y * codec_hdr.x * codec_hdr.depth);
 
     if (vidinfo->our_out_buffer == NULL)
     {
@@ -478,10 +479,15 @@ void *YUV2x2_Blk_Func(unsigned int image_type, int blks, unsigned int dith_flag)
     return((void *)color_func);
 }
 
+void dummy(){
+    XA_Print("dummy() called");
+}
+
 void *YUV2x2_Map_Func(unsigned int image_type, unsigned int dith_type)
 {
     XA_Print("YUV2x2_Map_Func('image_type: %d', 'dith_type: %d')",
 	    image_type, dith_type);
+    return (void*)dummy;
 }
 
 int XA_Add_Func_To_Free_Chain(XA_ANIM_HDR *anim_hdr, void (*function)())
