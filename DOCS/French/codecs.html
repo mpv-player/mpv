@@ -271,7 +271,8 @@ MPlayer décode toutes les versions de RealVideo:
 
 <H4><A NAME="sorenson">2.2.1.10 Sorenson</A></H4>
 
-<P><B>Sorenson</B> est un codec video développé par Apple. Nous sommes
+<P><B>Sorenson</B> est une famille de codec vidéo développée par Sorenson Media et
+  licenciée à Apple qui le distribue avec son lecteur QuickTime. Nous sommes
   actuellement capables de décoder toutes les versions des fichiers Sorenson
   avec les décodeurs suivants:</P>
 
@@ -295,7 +296,7 @@ MPlayer décode toutes les versions de RealVideo:
   <LI>téléchargez le CVS de MPlayer</LI>
   <LI>compilez MPlayer avec:<BR>
    <CODE>$ ./configure --enable-qtx-codecs</CODE></LI>
-  <LI>téléchargez le pack de DLL QuickTime sur <A HREF="http://www.mplayerhq.hu/~alex/codecs">http://www.mplayerhq.hu/~alex/codecs</A></LI>
+  <LI>téléchargez le pack de DLL QuickTime sur <A HREF="http://www.mplayerhq.hu/MPlayer/releases/codecs/">http://www.mplayerhq.hu/Mplayer/releases/codecs</A></LI>
   <LI>décompressez le pack de DLL QuickTime dans votre répertoire de codecs Win32(par défaut:
     <CODE>/usr/lib/win32</CODE>)</LI>
 </OL>
@@ -305,18 +306,20 @@ MPlayer décode toutes les versions de RealVideo:
 <P>Les plus importants codecs audio par-dessus tout:<BR></P>
 
 <UL>
-  <LI>MPEG layer 2, and layer 3 (MP3) audio (code <B>natif</B>, avec
+  <LI>MPEG layer 2 (MP2), et layer 3 (MP3) audio (code <B>natif</B>, avec
     optimisation MMX/SSE/3DNow!)</LI>
   <LI>MPEG layer 1 audio (code <B>natif</B>, avec libavcodec)</LI>
   <LI>Windows Media Audio v1, v2 (code <B>natif</B>, avec libavcodec)</LI>
+  <LI>Windows Media Audio 9 (WMAv3) (en utilisant les DLL DMO)</LI>
   <LI>AC3 Dolby audio (code <B>natif</B>, avec optimisation
     MMX/SSE/3DNow!)</LI>
   <LI>AC3 par l'intermédiaire de la carte son</LI>
   <LI>codec Ogg Vorbis audio (librairie <B>native</B>)</LI>
-  <LI>Voxware audio (utilisant DirectShow DLL)</LI>
-  <LI>alaw, msgsm, pcm et autres vieux formats simples</LI>
+  <LI>RealAudio: DNET (AC3 bas débit), Cook, Sipro et ATRAC3</LI>
+  <LI>QuickTime: codecs audio Qualcomm et QDesign</LI>
   <LI>VIVO audio (g723, Vivo Siren)</LI>
-  <LI>RealAudio: DNET (bas débit AC3), Cook, Sipro, Atrac</LI>
+  <LI>Voxware audio (en utilisant les DLL DirectShow)</LI>
+  <LI>alaw et ulaw, formats variés gsm, adpcm, pcm et autres vieux formats simples</LI>
 </UL>
 
 
@@ -383,7 +386,7 @@ MPlayer supporte le décodage de presque toutes les versions de RealAudio:
 
 <UL>
   <LI>RealAudio DNET - décodage supporté par <B>liba52</B></LI>
-  <LI>RealAudio Cook/Sipro/Atrac - décodage supporté par <B>les librairies RealPlayer</B></LI>
+  <LI>RealAudio Cook/Sipro/ATRAC3 - décodage supporté par <B>les librairies RealPlayer</B></LI>
 </UL>
 
 <P>Pour savoir comment installer les librairies RealPlayer, voyez la section
@@ -397,6 +400,11 @@ MPlayer supporte le décodage de presque toutes les versions de RealAudio:
   QuickTime libraries. Pour les instructions d'installation merci de voir la section
   <A HREF="#sorenson">codec vidéo Sorenson</A>.</P>
 
+<H4><A NAME="qclp">2.2.2.7 Codecs Qualcomm</A></H4>
+
+<P>Le flux audio Qualcomm (fourcc: <I>Qclp</I>) se trouve dans les fichiers MOV/QT.
+  Il peut être décodé par les librairies QuickTime. Pour les instructions d'installation
+  veuillez lire la section <A HREF="#sorenson">codec vidéo Sorenson</A>.</P>
 
 <H3><A NAME="importing">2.2.3 Comment importer des codecs</A></H3>
 

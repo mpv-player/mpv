@@ -104,6 +104,7 @@
               <LI><A HREF="codecs.html#vivo_audio">2.2.2.4 VIVO audio</A></LI>
               <LI><A HREF="codecs.html#realaudio">2.2.2.5 RealAudio</A></LI>
               <LI><A HREF="codecs.html#qdesign">2.2.2.6 Codecs QDesign</A></LI>
+	      <LI><A HREF="codecs.html#qclp">2.2.2.7 Codecs Qualcomm</A></LI>
              </UL>
           </LI>
           <LI><A HREF="codecs.html#importing">2.2.3 HOWTO importation des codecs Win32</A>
@@ -912,7 +913,7 @@ par moi (Gabucino). Son principal avantage est de se baser
     peut se faire en utilisant les programmes konwert (debian) ou iconv (RedHat).</BR>
     Quelques liens:
     <UL>
-      <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/">ftp://ftp.mplayerhq.hu/MPlayer/releases/</A> - polices ISO</LI>
+      <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/fonts/">ftp://ftp.mplayerhq.hu/MPlayer/releases/fonts/</A> - polices ISO</LI>
       <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/">ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/</A> - contributions d'utilisateurs</LI>
       <LI><A HREF="http://realtime.ssu.ac.kr/~lethean/mplayer">http://realtime.ssu.ac.kr/~lethean/mplayer</A> - polices coréeenes &amp; plugin RAW</LI>
     </UL>
@@ -1643,8 +1644,9 @@ end
   <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">mplayer-cygwin</A>
   pour obtenir de l'aide et les dernières informations.</P>
 
-<P>Pour avoir de la vidéo DirectX native (<CODE>-vo directx</CODE>), installez
+<P>Pour avoir de la vidéo DirectX native (<CODE>-vo directx</CODE>), désarchivez
   <A HREF="http://www.videolan.org/vlc/dx7headers.tgz">les fichier d'entête DirectX 7</A>
+  dans <CODE>/usr/include/<CODE> ou <CODE>/usr/local/include/<CODE> 
   et recompilez. Cela , utilisé avec <CODE>-ao win32</CODE> devrait vous donner les meilleurs
   résultats. Si l'image est distordue, essayez de désactiver l'accélération matérielle avec
   <CODE>-vo directx:noaccel</CODE>.</P>
@@ -1678,6 +1680,10 @@ end
   Quoting HOWTO</A>.</P>
 
 <UL>
+  <LI>Liste d'annonces de MPlayer:
+    <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-announce">http://mplayerhq.hu/mailman/listinfo/mplayer-announce</A><BR>
+    Liste pour les annonces MPlayer! inscrivez-vous si vous voulez obtenir les annonces
+    de nouvelles fonctionalités.</LI>
   <LI>Liste des développeurs de MPlayer:
     <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng</A><BR>
     Cette liste est à propos du développement de MPlayer! Parler des changements
@@ -1692,7 +1698,7 @@ end
         et <A HREF="bugreports.html">Rapport de bogue</A>).</LI>
       <LI>Envoyez vos suggestions ici (après avoir <B>entiérement</B>
         lu la documentation).</LI>
-      <LI>Envoyez vos questions d'utilisateur ici (après avoir <B>entiérement</B>
+      <LI>Envoyez vos questions d'utilisateur ici (après avoir <B>entièrement</B>
         lu la documentation).</LI>
     </UL>
   </LI>
@@ -1722,9 +1728,18 @@ end
     cette liste. Seules les questions à propos de ses changements sont autorisées ici
     (si vous ne comprenez pas pourquoi un changement est requis ou si vous en avez un meilleur
     ou si vous avez remarquer un bogue/problème possible dans l'envoi).</LI>
-  <LI>Liste de MPlayer Cygwin-porting:
+  <LI>Liste du portage Cygwin de MPlayer:
     <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin">http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin</A><BR>
     Liste pour la discussion à propos du port MPlayer sur Cygwin.</LI>
+  <LI>Liste de portage OS/2 de MPlayer:
+    <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-os2">http://mplayerhq.hu/mailman/listinfo/mplayer-os2</A><BR>
+    Liste pour les discussions sur le portage OS/2 de MPlayer.
+  </LI>
+  <LI>Liste des éditeurs et traducteurs des MPlayer Weekly News (Nouvelles Hebdomadaires de MPlayer):
+    <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-mwn">http://mplayerhq.hu/mailman/listinfo/mplayer-mwn</A><BR>
+    Liste pour les discussions sur les Weekly News.
+  </LI>
+
 </UL>
 
 <P><B>Note:</B> Vous pouvez obtenir les archives avec recherche possible à
