@@ -1044,6 +1044,8 @@ realrtsp_streaming_start( stream_t *stream ) {
 		if(fd<0) return -1;
 		
 		mrl = malloc(sizeof(char)*(strlen(stream->streaming_ctrl->url->hostname)+strlen(stream->streaming_ctrl->url->file)+16));
+		if (stream->streaming_ctrl->url->file[0] == '/')
+		    stream->streaming_ctrl->url->file++;
 		sprintf(mrl,"rtsp://%s:%i/%s",stream->streaming_ctrl->url->hostname,port,stream->streaming_ctrl->url->file);
 		rtsp = rtsp_session_start(fd,&mrl, stream->streaming_ctrl->url->file,
 			stream->streaming_ctrl->url->hostname, port, &redirected);
