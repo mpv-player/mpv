@@ -1,4 +1,4 @@
-// AVI & MPEG Player    v0.11   (C) 2000-2001. by A'rpi/ESP-team
+// AVI & MPEG Player    v0.18   (C) 2000-2001. by A'rpi/ESP-team
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1361,6 +1361,13 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
          (flip==1)?"flip ":""
 //         fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3)
      );
+    printf("VO: Description: %s\n"
+           "VO: Author: %s\n",
+        info->name,
+        info->author	
+     );
+    if(strlen(info->comment) > 0)
+        printf("VO: Comment: %s\n", info->comment);
    }
 
 //   if(verbose) printf("Destination size: %d x %d  out_fmt=%0X\n",
@@ -1455,6 +1462,20 @@ int drop_frame_cnt=0;
   current_module="setup_audio";
 
 if(has_audio){
+  
+  const ao_info_t *info=audio_out->info;
+  printf("AO: [%s] %iHz %s %s\n"
+         "AO: Description: %s\n"
+         "AO: Author: %s\n",
+      info->short_name,
+      force_srate?force_srate:sh_audio->samplerate,
+      sh_audio->channels>1?"Stereo":"Mono",
+      audio_out_format_name(sh_audio->sample_format),
+      info->name,
+      info->author	
+   );
+  if(strlen(info->comment) > 0)
+      printf("AO: Comment: %s\n", info->comment);
 
   if(!audio_out->init(force_srate?force_srate:sh_audio->samplerate,
       sh_audio->channels,sh_audio->sample_format,0)){
