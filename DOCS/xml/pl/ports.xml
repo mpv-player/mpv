@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.52 -->
+<!-- synced with 1.54 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -18,7 +18,24 @@ Zgłaszaj problemy do ich opiekunów, a nie do nas.
 <para>
 Aby zbudować pakiet dla Debiana, wywołaj poniższą komendę w katalogu ze źródłami
 <application>MPlayera</application>:
+
 <screen>fakeroot debian/rules binary</screen>
+
+Jeśli chcesz przekazać własne opcje do skryptu configure, możesz ustawić zmienną
+środowiskową <envar>DEB_BUILD_OPTIONS</envar>. Na przykład, jeśli chcesz
+obsługi menu i GUI, wyglądało by to tak:
+
+<screen>DEB_BUILD_OPTIONS="--enable-gui --enable-menu" fakeroot debian/rules binary</screen>
+
+Możesz przekazać również niektóre zmienne do Makefile. Na przykład, jeśli chcesz
+kompilować przy pomocy gcc 3.4, nawet jeśli nie jest to domyślny kompilator:
+
+<screen>CC=gcc-3.4 DEB_BUILD_OPTIONS="--enable-gui" fakeroot debian/rules binary</screen>
+
+Aby wyczyściś katalog ze źródłami wykonaj poniższa komendę:
+
+<screen>fakeroot debian/rules clean</screen>
+
 Jako superużytkownik możesz zainstalować pakiet <filename>.deb</filename> tak, jak zwykle:
 <screen>dpkg -i ../mplayer_<replaceable>wersja</replaceable>.deb</screen>
 </para>
@@ -290,14 +307,18 @@ wolna. Używaj SDL.
   zakłóceń w dźwięku i obrazie albo wywołać błąd, i zakończyć działanie programu.
   Jeżeli występują zakłócenia obrazu, spróbuj
   wyłączyć sprzętową akcelerację przez opcję <option>-vo directx:noaccel</option>. Ściągnij
-  <ulink url="http://www.videolan.org/vlc/dx7headers.tgz">pliki nagłówkowe DirectX 7</ulink>,
-  żeby skompilować sterownik do wyjścia video DirectX. Co więcej, musisz mieć
-  zainstalowany DirectX 7 lub nowszy, aby to wyjście zadziałało.</para>
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/dx7headers.tgz">pliki
+  nagłówkowe DirectX 7</ulink>, żeby skompilować sterownik do wyjścia video
+  DirectX. Co więcej, musisz mieć zainstalowany DirectX 7 lub nowszy,
+  aby to wyjście zadziałało.</para>
 
 <para><link linkend="vidix">VIDIX</link> działa teraz również pod Windowsem jako
   <option>-vo winvidix</option>, chociaż jego obsługa jest eksperymentalna i wymaga
   trochę ręcznego przygotowania. Pobierz
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/dhahelper.sys">dhahelper.sys</ulink>
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/dhahelperwin/dhahelper.sys">dhahelper.sys</ulink>
+  lub
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/dhahelperwin/withmtrr/dhahelper.sys">dhahelper.sys
+  (z wsparciem dla MTRR)</ulink>
   i skopiuj go do
   <filename class="directory">libdha/dhahelperwin</filename> w drzewie źródłowym
   <application>MPlayera</application>. Uruchom konsolę, następnie przejdź do tego katalogu i wykonaj
@@ -365,18 +386,14 @@ wolna. Używaj SDL.
 <para>Sascha Sommer wydaje, od czasu do czasu, oficjalne paczki dla Windowsa,
   Joey Parrish tworzy nieoficjalne paczki z instalatorem.
   Poszukaj ich w sekcji Windows
-  <ulink url="http://www.mplayerhq.hu/homepage/projects.html#windows">na stronie naszych
-  projektów</ulink>.</para>
-
+  <ulink url="http://www.mplayerhq.hu/homepage/design7/projects.html#windows">na stronie
+  naszych projektów</ulink>.</para>
 
 <sect2 id="cygwin">
 <title><application>Cygwin</application></title>
 
-<para><application>Cygwin</application> w wersji wcześniejszej niż 1.5.0 nie
-zawiera <filename>inttypes.h</filename>. Umieść plik
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/inttypes.h">inttypes.h</ulink>
-  w katalogu <filename class="directory">/usr/include/</filename>, żeby umożliwić kompilację
-  <application>MPlayera</application>.</para>
+<para>Aby skompilować <application>MPlayera</application> wymagana jest wersja
+    <application>Cygwina</application> 1.5.0 lub późniejsza.</para>
 
 <para>Pliki nagłówkowe DirectX muszą być rozpakowane do
   <filename class="directory">/usr/include/</filename> lub
@@ -397,11 +414,6 @@ zawiera <filename>inttypes.h</filename>. Umieść plik
   działać "prosto z pudełka". Zainstaluj <application>MinGW</application>
   3.0.0 lub nowszy. Zainstaluj MSYS 1.0.9 lub nowszy i wskaż systemowi poinstalacyjnemu
   MSYSa, że <application>MinGW</application> jest zainstalowane.</para>
-
-<para>Jeżeli używasz <application>MinGW</application> wcześniejszego niż 3.1.0,
-  zastąp <filename>/mingw/include/sys/types.h</filename> tym
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/types.h"><filename>types.h</filename></ulink>.
-</para>
 
 <para>Rozpakuj pliki nagłówkowe DirectX do <filename class="directory">/mingw/include/</filename>.</para>
 

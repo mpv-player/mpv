@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.13 -->
+<!-- synced with 1.14 -->
 <appendix id="users-vs-dev">
 <title>Deweloperzy wyrywają sobie włosy</title>
 
@@ -31,7 +31,7 @@ na GCC 2.96. Wielu developerów ze świata zaczęło mieć problemy z tym
 kompilatorem i zarekomendowali inne. Przykłady to
 <ulink url="http://www.mysql.com/downloads/mysql-3.23.html">MySQL</ulink>
 i
-<ulink url="http://avifile.sourceforge.net/news-old1.htm">avifile</ulink>.
+<ulink url="http://avifile.sf.net/news-old1.htm">avifile</ulink>.
 Inne interesujące linki:
 <ulink url="http://www.atnf.csiro.au/people/rgooch/linux/docs/kernel-newsflash.html">
  Krótka wiadomość o jądrze 2.4.17</ulink>
