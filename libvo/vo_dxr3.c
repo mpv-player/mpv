@@ -276,8 +276,8 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		fame_params.quality = 100;
 		fame_params.bitrate = 0;
 		fame_params.slices_per_frame = 1;
-		fame_params.frames_per_sequence = 0xffffffff;
-		fame_params.frame_rate_num = 60;
+		fame_params.frames_per_sequence = 25;
+		fame_params.frame_rate_num = 25;
 		fame_params.frame_rate_den = 1;
 		fame_params.shape_quality = 100;
 		fame_params.search_range = 8;
@@ -309,7 +309,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		} else {
 			avc_context->gop_size = 15;
 		}
-		avc_context->frame_rate = vo_fps * FRAME_RATE_BASE;
+		avc_context->frame_rate = (int) vo_fps * FRAME_RATE_BASE;
 		avc_context->bit_rate = 8e6;
 		avc_context->flags = CODEC_FLAG_HQ | CODEC_FLAG_QSCALE;
 		avc_context->quality = 2;
@@ -471,10 +471,6 @@ static uint32_t preinit(const char *arg)
 	char devname[80];
 	int fdflags = O_WRONLY;
 
-/* With fame we loose sync and seeking =( */
-#ifdef USE_LIBFAME
-	noprebuf = 1;
-#endif
 	/* Open the control interface */
 	if (arg && !strcmp("noprebuf", arg)) {
 		printf("VO: [dxr3] Disabling prebuffering.\n");
@@ -544,8 +540,7 @@ static uint32_t preinit(const char *arg)
 		}
 	}
 
-#ifdef USE_LIBFAME
-#elif USE_LIBAVCODEC
+#if !defined(USE_LIBFAME) && defined(USE_LIBAVCODEC)
 	avcodec_init();
 	avcodec_register_all();
 #endif
