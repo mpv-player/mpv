@@ -863,13 +863,13 @@ printf("Found video codec: [%s] drv:%d (%s)\n",sh_video->codec->name,sh_video->c
 
 for(i=0;i<CODECS_MAX_OUTFMT;i++){
     out_fmt=sh_video->codec->outfmt[i];
-    if(vo_dbpp){
-        if( ((out_fmt & IMGFMT_BGR_MASK) == IMGFMT_BGR) && ((out_fmt & 0xff) == vo_dbpp) || (out_fmt & IMGFMT_BGR_MASK) != IMGFMT_BGR){
-	     if(video_out->query_format(out_fmt)) break;
-	}
-    }else{
+//    if(vo_dbpp){
+//        if( ((out_fmt & IMGFMT_BGR_MASK) == IMGFMT_BGR) && ((out_fmt & 0xff) == vo_dbpp) || (out_fmt & IMGFMT_BGR_MASK) != IMGFMT_BGR){
+//	     if(video_out->query_format(out_fmt)) break;
+//	}
+//    }else{
   	  if(video_out->query_format(out_fmt)) break;
-    }
+//    }
 }
 if(i>=CODECS_MAX_OUTFMT){
     printf("Sorry, selected video_out device is incompatible with this codec.\n");
