@@ -190,11 +190,18 @@ for example :
     -ac ac3        use AC3 codec
 .TP
 .B \-vfm <1-5>
-force usage of a specific codec FAMILY. For example:
+force usage of a specific codec FAMILY, and fallback to others if failed.
+For example:
 
     -vfm 2         use VFW (Win32) codecs
+    -vfm 3         use OpenDivX codec (YV12)
     -vfm 4         use DirectShow (Win32) codecs
     -vfm 5         use libavcodec codecs
+    -vfm 7         use DivX4Linux codec (YUY2)
+
+NOTE : type 3 and 7 now contains just the one same codec, then OpenDivX 4.0
+beta. For difference between them and when to use which, check the OpenDivX
+section in the documentation.
 .TP
 .B \-afm <1-5>
 force usage of a specific audio format. For example:
