@@ -1,28 +1,19 @@
 #!/bin/sh
 
-# This script walks through the master (stdin) help/message file, and
-# prints (stdout) only those messages which are missing from the help
-# file given as parameter ($1).
+# This script compares a translated help file to the master file and prints
+# out any missing messages.  Needs the language code as parameter ($1).
 #
-# Example: help_diff.sh help_mp-hu.h < help_mp-en.h > missing.h
+# Example: help_diff.sh hu
 
-curr=""
+exec < help_mp-en.h
 
-while read -r line; do
-	if echo "$line" | grep -q '^#define'; then
+while read line; do
+	if echo "$line" | grep '^#define' > /dev/null 2>&1; then
 		curr=`echo "$line" | cut -d ' ' -f 2`
-		if grep -q "^#define $curr " $1; then
-			curr=""
+		if grep "^#define $curr" help_mp-$1.h > /dev/null 2>&1; then
+			true
+		else
+			echo "$line"
 		fi
-	else
-		if [ -z "$line" ]; then
-			curr=""
-		fi
-	fi
-
-	if [ -n "$curr" ]; then
-		echo "$line"
 	fi
 done
-
-
