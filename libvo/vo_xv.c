@@ -452,7 +452,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
      }
 #endif
 #ifdef HAVE_NEW_GUI
-  } else guiGetEvent( guiSetShVideo,0 );
+  } else if(use_gui) guiGetEvent( guiSetShVideo,0 );
 #endif
 
      mp_msg(MSGT_VO,MSGL_V, "using Xvideo port %d for hw scaling\n",xv_port );

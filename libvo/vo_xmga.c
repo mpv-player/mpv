@@ -299,7 +299,7 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
 #endif
    vo_gc=XCreateGC( mDisplay,vo_window,GCForeground,&wGCV );
 #ifdef HAVE_NEW_GUI
-  } else guiGetEvent( guiSetShVideo,0 );
+  } else if(use_gui) guiGetEvent( guiSetShVideo,0 );
 #endif
 
  set_window();
