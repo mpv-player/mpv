@@ -456,34 +456,7 @@ MPlayer supports decoding nearly all versions of RealAudio:
 <P>AAC (Advanced Audio Coding) is an audio codec sometimes found in MOV and MP4
   files. An open source decoder called FAAD is available from
   <A HREF="http://www.audiocoding.com/">AudioCoding.com</A>.
-  You can download the second generation codec FAAD2 at their
-  <A HREF="http://www.audiocoding.com/download.php">download page</A>.
-  Unfortunately FAAD2 1.1 does not compile under Linux, so you will have to use
-  the CVS version:</P>
-
-<OL>
-  <LI>cvs -d:pserver:anonymous@cvs.audiocoding.com:/cvsroot/faac login</LI>
-  <LI>cvs -z3 -d:pserver:anonymous@cvs.audiocoding.com:/cvsroot/faac co faad2</LI>
-</OL>
-
-<P>You do not need all of faad2 to decode AAC files, libfaad is enough. Build
-  it like this:</P>
-
-<OL>
-  <LI>cd faad2/</LI>
-  <LI>chmod +x bootstrap</LI>
-  <LI>./bootstrap</LI>
-  <LI>./configure</LI>
-  <LI>cd libfaad</LI>
-  <LI>make</LI>
-  <LI>make install</LI>
-</OL>
-
-<P>Binaries are not available from audiocoding.com, but you can (apt-)get
-  Debian packages from
-  <A HREF="http://marillat.free.fr/">Christian Marillat's homepage</A>
-  and Mandrake RPMs from the
-  <A HREF="http://plf.zarb.org/">P.L.F</A>.</P>
+  MPlayer includes libfaad 2.0RC1, so you do not need to get it separately.</P>
 
 
 
