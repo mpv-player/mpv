@@ -106,7 +106,7 @@ url_new(char* url) {
 
 void
 url_free(URL_t* url) {
-	if(url) return;
+	if(!url) return;
 	if(url->url) free(url->url);
 	if(url->protocol) free(url->protocol);
 	if(url->hostname) free(url->hostname);
