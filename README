@@ -70,9 +70,9 @@ created. You can later update your sources by saying
 from within that directory.
 
 
-___________________________________
-STEP1: Installing FFmpeg libavcodec
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+_______________________________________________
+STEP1: Installing FFmpeg libavcodec/libavformat
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you are using an official (pre)release or a CVS snapshot, skip this step,
 since official releases include libavcodec. CVS sources do not include
@@ -93,6 +93,11 @@ cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg co ffmpeg/libavcodec
 When asked for a password, you can just hit enter. A directory named 'ffmpeg'
 with a subdirectory named 'libavcodec' inside will be created. Copy (symbolic
 linking does NOT suffice) this subdirectory into the MPlayer source tree.
+
+FFmpeg also contains libavformat, a library to decode container formats that
+can optionally be used to extend MPlayer's container format support. Get it
+from FFmpeg CVS by the same steps outlined above for libavcodec, just
+substitute libavcodec by libavformat everywhere.
 
 
 _______________________________
