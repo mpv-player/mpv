@@ -133,6 +133,8 @@ Optional features:
   --disable-streaming    disable network streaming support
                          (support for: http/mms/rtp) [enable]
   --disable-vidix	 disable VIDIX stuff [enable]
+  --enable-new-input     enable new input system [disable]
+  --enable-joystick      enable joystick support in new input [disable]
 Video:
   --enable-gl            build with OpenGL render support [autodetect]
   --enable-dga[=n]       build with DGA [n in {1, 2} ] support [autodetect]
@@ -743,6 +745,8 @@ _tv=yes
 _tv_v4l=auto
 _streaming=yes
 _vidix=yes
+_new_input=no
+_joystick=no
 _divx4linux=auto
 _opendivx=yes
 _lirc=auto
@@ -844,6 +848,10 @@ for ac_option do
   --disable-streaming)	_streaming=no	;;
   --enable-vidix)	_vidix=yes	;;
   --disable-vidix)	_vidix=no	;;
+  --enable-new-input)            _new_input=yes      ;;
+  --disable-new-input)           _new_input=no       ;;
+  --enable-joystick)                 _joystick=yes           ;;
+  --disable-joystick)                _joystick=no            ;;
   --enable-divx4linux)	_divx4linux=yes	;;
   --disable-divx4linux)	_divx4linux=no	;;
   --enable-opendivx)	_opendivx=yes	;;
@@ -2869,6 +2877,23 @@ if test "$_vidix" = yes && test "$_x11" = yes; then
   _vomodules="xvidix $_vomodules"
 fi
 echo Checking for vidix ... "$_vidix"
+
+_def_new_input='#undef HAVE_NEW_INPUT'
+_def_joystick='#undef HAVE_JOYSTICK'
+echo Checking for new input ... "$_new_input"
+if test "$_new_input" = yes ; then 
+  _def_new_input='#define HAVE_NEW_INPUT 1'
+  if test "$_joystick" = yes ; then
+    if linux ; then
+       # TODO add some check
+       _def_joystick='#define HAVE_JOYSTICK 1'
+    else
+       _joystick="no (unsupported under $system_name)"
+    fi
+  fi
+  echo Checking for joystick ... "$_joystick"
+fi
+
 #############################################################################
 echo "Creating config.mak"
 cat > config.mak << EOF
@@ -3192,6 +3217,12 @@ $_def_streaming
 
 /* enables / disables vidix usage */
 $_def_vidix
+
+/* enables / disables new input */
+$_def_new_input
+
+/* enables / disables new input joystick support */
+$_def_joystick
 
 /* Extension defines */
 $_def_3dnow	// only define if you have 3DNOW (AMD k6-2, AMD Athlon, iDT WinChip, etc.)
