@@ -1,10 +1,10 @@
 typedef struct vd_info_s
 {
-        /* driver name ("Matrox Millennium G200/G400" */
+        /* codec long name ("Autodesk FLI/FLC Animation decoder" */
         const char *name;
-        /* short name (for config strings) ("mga") */
+        /* short name (same as driver name in codecs.conf) ("dshow") */
         const char *short_name;
-	/* -vfm id */
+	/* codec family: -vfm id */
 	const int id;
         /* interface author/maintainer */
         const char *maintainer;
@@ -14,7 +14,7 @@ typedef struct vd_info_s
         const char *comment;
 } vd_info_t;
 
-/* interface towards mplayer and */
+/* interface of video decoder drivers */
 typedef struct vd_functions_s
 {
 	vd_info_t *info;
@@ -36,10 +36,9 @@ extern vd_functions_t* mpcodecs_vd_drivers[];
 
 #define VDCTRL_QUERY_FORMAT 3 /* test for availabilty of a format */
 #define VDCTRL_QUERY_MAX_PP_LEVEL 4 /* test for postprocessing support (max level) */
-#define VDCTRL_SET_PP_LEVEL 5 /* test for postprocessing support (max level) */
+#define VDCTRL_SET_PP_LEVEL 5 /* set postprocessing level */
 
 // callbacks:
 int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outfmt);
 mp_image_t* mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag, int w, int h);
-
 
