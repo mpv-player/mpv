@@ -606,7 +606,7 @@ vobsub_open(const char *const name)
 	    strcat(buf, ".ifo");
 	    fd = fopen(buf, "rb");
 	    if (fd == NULL)
-		perror("Can't open IFO file");
+		perror("VobSub: Can't open IFO file");
 	    else {
 		// parse IFO header
 		unsigned char block[0x800];
@@ -661,7 +661,7 @@ vobsub_open(const char *const name)
 	    strcat(buf, ".idx");
 	    fd = fopen(buf, "rb");
 	    if (fd == NULL)
-		perror("Can't open IDX file");
+		perror("VobSub: Can't open IDX file");
 	    else {
 		while (vobsub_parse_one_line(vob, fd) >= 0)
 		    /* NOOP */ ;
@@ -673,7 +673,7 @@ vobsub_open(const char *const name)
 	    strcat(buf, ".sub");
 	    mpg = mpeg_open(buf);
 	    if (mpg == NULL)
-		perror("Can't open SUB file");
+		perror("VobSub: Can't open SUB file");
 	    else {
 		long last_pts_diff = 0;
 		while (!mpeg_eof(mpg)) {
