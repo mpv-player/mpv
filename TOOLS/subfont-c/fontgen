@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# Font Generator script by alex@naxine.org
+
+if [ -z $1 ]; then
+    echo "fontgen: too few parameters"
+    echo "fontgen: Usage: $0 <input font filename> <output dir>"
+    exit
+fi
+
+if [ ! -r $1 ]; then
+    echo "fontgen: input font file not readable"
+    exit
+fi
+
+subfont_exec=subfont
+#unicode="--unicode"
+#font=arial.ttf
+#font=mints-mild.pcf
+#font=/home/alex/artwiz-mints-mild-latin2.hex
+font=$1
+if [ ! -z $2 ]; then
+    outdir="--outdir $2"
+    mkdir $2
+fi
+#font=verdana.ttf
+encoding=iso-8859-2
+fontsize=12
+symbolssize=10
+blur=2
+outline=1.5
+
+if [ ! -x $subfont_exec ]; then
+    echo "fontgen: 'subfont' not found or not executable!"
+    echo "fontgen: trying to make sources"
+    
+    make || exit
+    
+    if [ ! -x $subfont_exec ]; then
+	echo "failed"
+	exit
+    fi
+    
+    exit
+fi
+
+# subfont <encoding> <size> <input>
+echo "fontgen: creating font..."
+./$subfont_exec $outdir $unicode --blur $blur --outline $outline "$encoding" $fontsize "$font" || exit
+echo "fontgen: creating osd symbols..."
+./$subfont_exec $outdir --append --blur $blur --outline $outline encodings/osd-mplayer $symbolssize osd/osd.pfb || exit
+
+exit
