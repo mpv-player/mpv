@@ -539,17 +539,17 @@ if(demuxer->audio->id>=-1){
 void demux_close_vivo(demuxer_t *demuxer)
 {
     vivo_priv_t* priv=demuxer->priv;
-    
-    if (priv->title)
-	free(priv->title);
-    if (priv->author)
-	free(priv->author);
-    if (priv->copyright)
-	free(priv->copyright);
-    if (priv->producer)
-	free(priv->producer);
-    if (priv)
+ 
+    if (priv) {
+	if (priv->title)
+	    free(priv->title);
+        if (priv->author)
+	    free(priv->author);
+	if (priv->copyright)
+	    free(priv->copyright);
+	if (priv->producer)
+	   free(priv->producer);
 	free(priv);
-
+    }
     return;
 }
