@@ -225,52 +225,43 @@ void mplMsgHandle( int msg,float param )
   {
 // --- user events
    case evExit:
-//        IZE("evExit");
         wsDoExit();  // sets wsTrue=False;
         exit_player( "Exit" );
         break;
-   case evIconify:
-        switch ( (int)param )
-         {
-          case 0: wsIconify( appMPlayer.mainWindow ); break;
-          case 1: wsIconify( appMPlayer.subWindow ); break;
-         }
-        break;
-   case evFullScreen:
-        IZE("evFullS");
-        for ( j=0;j<appMPlayer.NumberOfItems + 1;j++ )
-         {
-          if ( appMPlayer.Items[j].msg == evFullScreen )
-           {
-            appMPlayer.Items[j].tmp=!appMPlayer.Items[j].tmp;
-            appMPlayer.Items[j].pressed=appMPlayer.Items[j].tmp;
-           }
-         }
-        mplMainRender=1;
-        mplFullScreen();
-        break;
 
-   case evPlaySwitchToPause:
-        IZE("evPlay->Pause");
-        if ( Filename )
-         {
-          btnModify( evPlaySwitchToPause,btnDisabled );
-          btnModify( evPauseSwitchToPlay,btnReleased );
-         }
-        if ( mplShMem->Playing == 1 ) goto NoPause;
+   case evPlayDVD:
+        mplShMem->StreamType=STREAMTYPE_DVD;
+	
    case evPlay:
-        IZE("evPlay");
+   case evPlaySwitchToPause:
+        btnModify( evPlaySwitchToPause,btnDisabled );
+        btnModify( evPauseSwitchToPlay,btnReleased );
+        if ( ( msg == evPlaySwitchToPause )&( mplShMem->Playing == 1 ) ) goto NoPause;
         mplMainRender=1;
+	
+        switch ( mplShMem->StreamType )
+         {
+//          case STREAMTYPE_FILE:   strcat( trbuf,"f" ); break;
+//          case STREAMTYPE_STREAM: strcat( trbuf,"u" ); break;
+//          case STREAMTYPE_VCD:    strcat( trbuf,"v" ); break;
+          case STREAMTYPE_DVD:    
+	       dvd_title=1; 
+	       dvd_chapter=1; 
+	       dvd_angle=1; 
+	       strcpy( mplShMem->Filename,"/dev/dvd" );
+	       break;
+         }
         mplPlay();
         break;
+	
+//        break;
 
+   case evPause:
    case evPauseSwitchToPlay:
-        IZE("evPause->Play");
+Pause:
         btnModify( evPlaySwitchToPause,btnReleased );
         btnModify( evPauseSwitchToPlay,btnDisabled );
-   case evPause:
 NoPause:
-        IZE("evPause");
         mplMainRender=1;
         mplPause();
         break;
@@ -284,10 +275,8 @@ NoPause:
         break;
 
    case evLoadPlay:
-        IZE("evLoadPlay");
         mplMainAutoPlay=1;
    case evLoad:
-        IZE("evLoad");
         mplMainRender=1;
         gtkSendMessage( evLoad );
         break;
@@ -341,6 +330,13 @@ NoPause:
    case evSetBalance: mplShMem->VolumeChanged=1; break;
 
 
+   case evIconify:
+        switch ( (int)param )
+         {
+          case 0: wsIconify( appMPlayer.mainWindow ); break;
+          case 1: wsIconify( appMPlayer.subWindow ); break;
+         }
+        break;
    case evNormalSize:
         if ( mplShMem->Playing )
          {
@@ -363,6 +359,19 @@ NoPause:
           mplResize( appMPlayer.subWindow.X,appMPlayer.subWindow.Y,moviewidth,movieheight );
          }
         break;
+   case evFullScreen:
+        IZE("evFullS");
+        for ( j=0;j<appMPlayer.NumberOfItems + 1;j++ )
+         {
+          if ( appMPlayer.Items[j].msg == evFullScreen )
+           {
+            appMPlayer.Items[j].tmp=!appMPlayer.Items[j].tmp;
+            appMPlayer.Items[j].pressed=appMPlayer.Items[j].tmp;
+           }
+         }
+        mplMainRender=1;
+        mplFullScreen();
+        break;
 
 // --- timer events
    case evHideMouseCursor:
@@ -382,13 +391,11 @@ NoPause:
           mplMainRender=1;
           mplMainAutoPlay=0;
           mplPlay();
-	  break;
          }
 	if ( mplMiddleMenu )
 	 {
 	  mplMiddleMenu=0;
 	  mplMsgHandle( gtkShMem->popupmenu,0 );
-	  break;
 	 }
         break;
 // --- system events
