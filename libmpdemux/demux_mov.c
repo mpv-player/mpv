@@ -229,11 +229,13 @@ int mov_check_file(demuxer_t* demuxer){
 #endif
 	    skipped += 8;
 	}
+#if 0
 	else if (len == 0) /* deleted chunk */
 	{
 	    /* XXX: CJB! is this right? - alex */
 	    goto skip_chunk;
 	}
+#endif
 	else if(len<8) break; // invalid chunk
 
 	switch(id){
