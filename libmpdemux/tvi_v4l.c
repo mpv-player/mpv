@@ -63,6 +63,7 @@ typedef struct {
     struct video_mmap		*buf;
     int				nbuf;
     int				queue;
+	int				currentframe;
 
     /* audio */
     int				audio_id;
@@ -163,7 +164,7 @@ tvi_handle_t *tvi_init_v4l(char *device)
 
     /* set video device name */
     if (!device)
-	priv->video_device = strdup("/dev/video0");
+	priv->video_device = strdup("/dev/video");
     else
 	priv->video_device = strdup(device);
 
@@ -174,7 +175,7 @@ tvi_handle_t *tvi_init_v4l(char *device)
     }
 
     /* set audio device name */
-    priv->audio_device = strdup("/dev/dsp");
+    priv->audio_device = "/dev/dsp";
 
     return(h);
 }
@@ -184,6 +185,8 @@ static int init(priv_t *priv)
     int i;
 
     priv->video_fd = open(priv->video_device, O_RDWR);
+    mp_msg(MSGT_TV, MSGL_DBG2, "Video fd: %d, %x\n", priv->video_fd,
+	priv->video_device);
     if (priv->video_fd == -1)
     {
 	mp_msg(MSGT_TV, MSGL_ERR, "unable to open '%s': %s\n",
@@ -331,7 +334,7 @@ static int init(priv_t *priv)
     memset(priv->buf, 0, priv->nbuf * sizeof(struct video_mmap));
     
     /* audio init */
-#if 0
+#if 1
     priv->audio_fd = open(priv->audio_device, O_RDONLY);
     if (priv->audio_fd < 0)
     {
@@ -508,6 +511,7 @@ static int start(priv_t *priv)
 	win.height = priv->height;
 	win.chromakey = -1;
 	win.flags = 0;
+	//win.clipcount = 0;
 	
 	ioctl(priv->video_fd, VIDIOCSWIN, &win);
     }
@@ -537,7 +541,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 	    return(TVI_CONTROL_FALSE);
 	}
 	case TVI_CONTROL_IS_AUDIO:
-	    return(TVI_CONTROL_FALSE);
+//	    return(TVI_CONTROL_FALSE);
 /* also disable audio for as it's not working! */
 	    if (priv->channels[priv->act_channel].flags & VIDEO_VC_AUDIO)
 	    {
@@ -808,6 +812,8 @@ static int grab_video_frame(priv_t *priv, char *buffer, int len)
     int frame = priv->queue % priv->nbuf;
     int nextframe = (priv->queue+1) % priv->nbuf;
 
+	priv->currentframe++;
+
     mp_dbg(MSGT_TV, MSGL_DBG2, "grab_video_frame(priv=%p, buffer=%p, len=%d)\n",
 	priv, buffer, len);
 
@@ -835,7 +841,7 @@ static int grab_video_frame(priv_t *priv, char *buffer, int len)
     /* copy the actual frame */
     memcpy(buffer, priv->mmap+priv->mbuf.offsets[frame], len);
 
-    return(len);
+    return(priv->currentframe);
 }
 
 static int get_video_framesize(priv_t *priv)
@@ -846,11 +852,12 @@ static int get_video_framesize(priv_t *priv)
 static int grab_audio_frame(priv_t *priv, char *buffer, int len)
 {
     int in_len = 0;
+//    int max_tries = 128;
 
-    /* DBG2 !! */
-    mp_dbg(MSGT_TV, MSGL_V, "grab_audio_frame(priv=%p, buffer=%p, len=%d)\n",
+    mp_dbg(MSGT_TV, MSGL_DBG2, "grab_audio_frame(priv=%p, buffer=%p, len=%d)\n",
 	priv, buffer, len);
     
+//    while (--max_tries > 0)
     for (;;)
     {
 	in_len = read(priv->audio_fd, buffer, len);
@@ -865,6 +872,7 @@ static int grab_audio_frame(priv_t *priv, char *buffer, int len)
 	    break;
 	}
     }
+//    printf("tries: %d\n", 128-max_tries);
 
     return(in_len);
 }
