@@ -46,6 +46,8 @@ double		thickness = 1.5;		/* outline thickness */
 char*		font_desc = "font.desc";
 //char*		font_desc = "/dev/stdout";
 
+char		*outdir = ".";
+
 //// constants
 int const	colors = 256;
 int const	maxcolor = 255;
@@ -122,7 +124,7 @@ void write_bitmap(void *buffer, char type) {
     int const max_name = 128;
     char name[max_name];
 
-    snprintf(name, max_name, "%s-%c.raw", encoding_name, type);
+    snprintf(name, max_name, "%s/%s-%c.raw", outdir, encoding_name, type);
     f = fopen(name, "wb");
     if (f==NULL) ERROR("fopen failed.");
     write_header(f);
@@ -228,7 +230,13 @@ void render() {
 
 
     /* create font.desc */
-    f = fopen(font_desc, append_mode ? "a":"w");
+{
+    int const max_name = 128;
+    char name[max_name];
+
+    snprintf(name, max_name, "%s/%s", outdir, font_desc);
+    f = fopen(name, append_mode ? "a":"w");
+}
     if (f==NULL) ERROR("fopen failed.");
 
 
@@ -668,10 +676,11 @@ void alpha() {
 
 
 void usage() {
-    printf("Usage: %s [--append] [--unicode] [--blur b] [--outline o] encoding ppem font\n", command);
+    printf("Usage: %s [--outdir dir] [--append] [--unicode] [--blur b] [--outline o] encoding ppem font\n", command);
     printf("\n"
 	    "  Program creates 3 files: font.desc, <encoding>-a.raw, <encoding>-b.raw.\n"
 	    "\n"
+	    "  --outdir         output directory to place files.\n"
 	    "  --append         append results to existing font.desc, suppress info header.\n"
 	    "  --unicode        use Unicode in font.desc. This will work with -utf8 option of mplayer.\n"
 	    "  --blur b         specify blur radius, float.\n"
@@ -693,6 +702,14 @@ void parse_args(int argc, char **argv) {
     if (command==NULL) command = argv[a];
     else ++command;
     ++a; --argc;
+
+    if (argc>=1 && strcmp(argv[a], "--outdir")==0) {
+	++a; --argc;
+	if (argc==0) usage();
+
+	outdir = strdup(argv[a]);
+	++a; --argc;
+    }
 
     if (argc>=1 && strcmp(argv[a], "--append")==0) {
 	append_mode = 1;
