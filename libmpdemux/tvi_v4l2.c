@@ -785,13 +785,16 @@ static int uninit(priv_t *priv)
     int i, frames, dropped = 0;
 
     priv->shutdown = 1;
+    pthread_join(priv->video_grabber_thread, NULL);
     pthread_mutex_destroy(&priv->video_buffer_mutex);
 
     if (priv->streamon) {
 	struct v4l2_buffer buf;
 
 	/* get performance */
-	frames = 1 + (priv->curr_frame - priv->first_frame) *
+	frames = 1 + (priv->curr_frame - priv->first_frame +
+		      priv->standard.frameperiod.numerator * 500000 /
+		      priv->standard.frameperiod.denominator) *
 	    priv->standard.frameperiod.denominator /
 	    priv->standard.frameperiod.numerator / 1000000;
 	dropped = frames - priv->frames;
