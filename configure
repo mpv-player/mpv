@@ -2670,7 +2670,6 @@ EOF
 fi
 
 if test "$_smbsupport" = yes; then
-    _ld_smb="-lsmbclient"
     _def_smbsupport="#define LIBSMBCLIENT"
     _inputmodules="smb $_inputmodules"
 else
