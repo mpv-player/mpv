@@ -1,4 +1,4 @@
-.\" synced with 1.921
+.\" synced with 1.923
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" Tuto man stránku napsali/pí¹í Gabucino, Diego Biurrun, Jonas Jermann
 .\" Pøeklad (translation): Jiøí Heryán
@@ -2364,7 +2364,7 @@ Pou¾ije roz¹íøení XVideo z XFree86 4.x umo¾òující hardwarovì akcelerované
 pøehrávání.
 Pokud nemù¾ete pou¾ít nativní hardwarové rozhraní, je toto patrnì nejlep¹í
 volba.
-Pro informaci jaký barevný klíè je pou¾itý a jak je to vykreslováno, spus»te
+Pro informaci jaký barevný klíè je pou¾itý a jak je vykreslován, spus»te
 MPlayer s volbou \-v a sledujte øádky zaèínající [xv common].
 .PD 0
 .RSs
@@ -5098,7 +5098,7 @@ Odvodí chybìjící øádky. (Pou¾itý algoritmus nemusí být to pravé oøechové.)
 .IPs 2
 Pøekládá políèka o 1/4 pixelu s lineární interpolací (¾ádné poskakování).
 .IPs 4
-Pøekládá políèka o 1/4 pixelu s 4tap filtrem (vy¹¹í kvalita).
+Pøekládá políèka o 1/4 pixelu s 4tap filtrem (vy¹¹í kvalita). (výchozí)
 .RE
 .PD 1
 .
@@ -5503,7 +5503,7 @@ Nastavuje snímkovou rychlost ve snímcích za sekundu (fps) výstupního
 souboru, která mù¾e být odli¹ná od rychlosti zdroje.
 Volbu musíte nastavit pro soubory s promìnnou snímkovou  rychlostí
 (ASF, nìkteré MOV) a progresivní
-(30000/1001 fps telecined mpeg) soubory.
+(30000/1001 fps telecined MPEG) soubory.
 .
 .TP
 .B \-ovc <jméno kodeku>
@@ -6235,12 +6235,21 @@ Prùmìruje kvantizer v¹emi pøedchozími snímky.
 .
 .TP
 .B vqblur=<0.0\-99.0> (druhý prùchod)
-Gaussovo rozostøení kvantizeru (výchozí: 0.5), vìt¹í hodnoty zpùsobí vìt¹í prùmìrování kvantizeru
+Gaussovo rozostøení kvantizeru (výchozí: 0.5), vìt¹í hodnoty zpùsobí vìt¹í
+prùmìrování kvantizeru
 v èase (pomalej¹í zmìny).
 .
 .TP
-.B vqcomp=<hodnota>
-Komprese kvantizeru, závisí na vrc_eq (prùchod\ 1/\:2) (výchozí: 0.5).
+.B vqcomp=<0.0\-1.0>
+Komprese kvantizeru na ní¾ závisí vrc_eq (prùchod\ 1/\:2) (výchozí: 0,5).
+Napøíklad pøedpokládejme, ¾e je pou¾ita výchozí rovnice pro øízení datového
+toku: Pokud vqcomp=1.0, regulátor datového toku alokuje pro ka¾dý snímek
+tolik bitù, aby mohly být enkódovány pøi stejném QP.
+Pokud vqcomp=0.0, regulátor datového toku alokuje v¹em snímkùm stejnì, èili
+striktní CBR.
+.I POZNÁMKA:
+Toto byla extrémní nastavení, která by nemìla být nikdy pou¾ita.
+Rozumné kvality bývá dosa¾eno nìkde mezi tìmito extrémy.
 .
 .TP
 .B vrc_eq=<rovnice>
@@ -8122,7 +8131,7 @@ MPlayer (C) 2000\-2005 The MPlayer Team
 .PP
 Tuto manuálovou stránku pøevá¾nì pí¹í: Gabucino, Jonas Jermann a Diego Biurrun.
 Spravuje ji: Diego Biurrun
-Prosíme zasílejte pøipomínky k ní do MPlayer-DOCS mailing listu.
+Prosíme zasílejte pøipomínky k ní do konference MPlayer-DOCS.
 Podnìty a pøipomínky k pøekladu posílejte do konference MPlayer-translations.
 .PP
 Pøeklad: Jiøí Heryán
