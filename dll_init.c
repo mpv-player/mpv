@@ -3,7 +3,7 @@
 
 int init_acm_audio_codec(sh_audio_t *sh_audio){
     HRESULT ret;
-    WAVEFORMATEX *in_fmt=&sh_audio->wf;
+    WAVEFORMATEX *in_fmt=sh_audio->wf;
     unsigned long srcsize=0;
 
   if(verbose) printf("======= Win32 (ACM) AUDIO Codec init =======\n");
@@ -110,7 +110,7 @@ int init_video_codec(){
   sh_video->o_bih.biSize = sizeof(BITMAPINFOHEADER);
 
   win32_codec_name = sh_video->codec->dll;
-  sh_video->hic = ICOpen( 0x63646976, sh_video->bih.biCompression, ICMODE_FASTDECOMPRESS);
+  sh_video->hic = ICOpen( 0x63646976, sh_video->bih->biCompression, ICMODE_FASTDECOMPRESS);
 //  sh_video->hic = ICOpen( 0x63646976, sh_video->bih.biCompression, ICMODE_DECOMPRESS);
   if(!sh_video->hic){
     printf("ICOpen failed! unknown codec / wrong parameters?\n");
@@ -119,7 +119,7 @@ int init_video_codec(){
 
 //  sh_video->bih.biBitCount=32;
 
-  ret = ICDecompressGetFormat(sh_video->hic, &sh_video->bih, &sh_video->o_bih);
+  ret = ICDecompressGetFormat(sh_video->hic, sh_video->bih, &sh_video->o_bih);
   if(ret){
     printf("ICDecompressGetFormat failed: Error %d\n", ret);
     return 0;
@@ -185,7 +185,7 @@ int init_video_codec(){
   sh_video->o_bih.biSizeImage = sh_video->o_bih.biWidth * sh_video->o_bih.biHeight * (sh_video->o_bih.biBitCount/8);
 
   if(!(sh_video->codec->outflags[sh_video->outfmtidx]&CODECS_FLAG_FLIP)) {
-      sh_video->o_bih.biHeight=-sh_video->bih.biHeight; // flip image!
+      sh_video->o_bih.biHeight=-sh_video->bih->biHeight; // flip image!
   }
 
   // this looks suspicious :-)
@@ -196,13 +196,13 @@ int init_video_codec(){
 
   if(verbose) {
     printf("Starting decompression, format:\n");
-	printf("  biSize %d\n", sh_video->bih.biSize);
-	printf("  biWidth %d\n", sh_video->bih.biWidth);
-	printf("  biHeight %d\n", sh_video->bih.biHeight);
-	printf("  biPlanes %d\n", sh_video->bih.biPlanes);
-	printf("  biBitCount %d\n", sh_video->bih.biBitCount);
-	printf("  biCompression 0x%x ('%.4s')\n", sh_video->bih.biCompression, &sh_video->bih.biCompression);
-	printf("  biSizeImage %d\n", sh_video->bih.biSizeImage);
+	printf("  biSize %d\n", sh_video->bih->biSize);
+	printf("  biWidth %d\n", sh_video->bih->biWidth);
+	printf("  biHeight %d\n", sh_video->bih->biHeight);
+	printf("  biPlanes %d\n", sh_video->bih->biPlanes);
+	printf("  biBitCount %d\n", sh_video->bih->biBitCount);
+	printf("  biCompression 0x%x ('%.4s')\n", sh_video->bih->biCompression, &sh_video->bih->biCompression);
+	printf("  biSizeImage %d\n", sh_video->bih->biSizeImage);
     printf("Dest fmt:\n");
 	printf("  biSize %d\n", sh_video->o_bih.biSize);
 	printf("  biWidth %d\n", sh_video->o_bih.biWidth);
@@ -213,7 +213,7 @@ int init_video_codec(){
 	printf("  biSizeImage %d\n", sh_video->o_bih.biSizeImage);
   }
 
-  ret = ICDecompressQuery(sh_video->hic, &sh_video->bih, &sh_video->o_bih);
+  ret = ICDecompressQuery(sh_video->hic, sh_video->bih, &sh_video->o_bih);
   if(ret){
     printf("ICDecompressQuery failed: Error %d\n", ret);
     return 0;
@@ -221,7 +221,7 @@ int init_video_codec(){
   if(verbose) printf("ICDecompressQuery OK\n");
 
   
-  ret = ICDecompressBegin(sh_video->hic, &sh_video->bih, &sh_video->o_bih);
+  ret = ICDecompressBegin(sh_video->hic, sh_video->bih, &sh_video->o_bih);
   if(ret){
     printf("ICDecompressBegin failed: Error %d\n", ret);
     return 0;

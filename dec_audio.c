@@ -31,13 +31,13 @@ if(driver==7){
   // Win32 DShow audio codec:
 //  printf("DShow_audio: channs=%d  rate=%d\n",sh_audio->channels,sh_audio->samplerate);
 
-  if(DS_AudioDecoder_Open(sh_audio->codec->dll,&sh_audio->codec->guid,&sh_audio->wf)){
+  if(DS_AudioDecoder_Open(sh_audio->codec->dll,&sh_audio->codec->guid,sh_audio->wf)){
     printf("ERROR: Could not load/initialize Win32/DirctShow AUDIO codec: %s\n",sh_audio->codec->dll);
     driver=0;
   } else {
-    sh_audio->channels=sh_audio->wf.nChannels;
-    sh_audio->samplerate=sh_audio->wf.nSamplesPerSec;
-    sh_audio->audio_in_minsize=2*sh_audio->wf.nBlockAlign;
+    sh_audio->channels=sh_audio->wf->nChannels;
+    sh_audio->samplerate=sh_audio->wf->nSamplesPerSec;
+    sh_audio->audio_in_minsize=2*sh_audio->wf->nBlockAlign;
     if(sh_audio->audio_in_minsize<8192) sh_audio->audio_in_minsize=8192;
     sh_audio->a_in_buffer_size=sh_audio->audio_in_minsize;
     sh_audio->a_in_buffer=malloc(sh_audio->a_in_buffer_size);
@@ -64,7 +64,7 @@ case 4: {
 }
 case 2: {
     // AVI PCM Audio:
-    WAVEFORMATEX *h=&sh_audio->wf;
+    WAVEFORMATEX *h=sh_audio->wf;
     sh_audio->channels=h->nChannels;
     sh_audio->samplerate=h->nSamplesPerSec;
     sh_audio->samplesize=(h->wBitsPerSample+7)/8;
@@ -101,15 +101,15 @@ case 3: {
 case 5: {
   // aLaw audio codec:
   Gen_aLaw_2_Signed(); // init table
-  sh_audio->channels=sh_audio->wf.nChannels;
-  sh_audio->samplerate=sh_audio->wf.nSamplesPerSec;
+  sh_audio->channels=sh_audio->wf->nChannels;
+  sh_audio->samplerate=sh_audio->wf->nSamplesPerSec;
   break;
 }
 case 6: {
   // MS-GSM audio codec:
   GSM_Init();
-  sh_audio->channels=sh_audio->wf.nChannels;
-  sh_audio->samplerate=sh_audio->wf.nSamplesPerSec;
+  sh_audio->channels=sh_audio->wf->nChannels;
+  sh_audio->samplerate=sh_audio->wf->nSamplesPerSec;
   break;
 }
 case 1: {

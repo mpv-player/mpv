@@ -129,8 +129,9 @@ if(verbose){
       switch(*((unsigned int*)&streamh.type)){
       case 0xF8699E40: { // guid_audio_stream
         sh_audio_t* sh_audio=new_sh_audio(streamh.stream_no & 0x7F);
-        memcpy(&sh_audio->wf,buffer,streamh.type_size<64?streamh.type_size:64);
-        if(verbose>=1) print_wave_header((WAVEFORMATEX*)buffer);
+        sh_audio->wf=calloc((streamh.type_size<sizeof(WAVEFORMATEX))?sizeof(WAVEFORMATEX):streamh.type_size,1);
+        memcpy(sh_audio->wf,buffer,streamh.type_size);
+        if(verbose>=1) print_wave_header(sh_audio->wf);
 	if((*((unsigned int*)&streamh.concealment))==0xbfc3cd50){
           stream_read(demuxer->stream,(char*) buffer,streamh.stream_size);
           asf_scrambling_h=buffer[0];
@@ -146,10 +147,13 @@ if(verbose){
         }
       case 0xBC19EFC0: { // guid_video_stream
         sh_video_t* sh_video=new_sh_video(streamh.stream_no & 0x7F);
-        memcpy(&sh_video->bih,&buffer[4+4+1+2],sizeof(BITMAPINFOHEADER));
+        int len=streamh.type_size-(4+4+1+2);
+//        sh_video->bih=malloc(chunksize); memset(sh_video->bih,0,chunksize);
+        sh_video->bih=calloc((len<sizeof(BITMAPINFOHEADER))?sizeof(BITMAPINFOHEADER):len,1);
+        memcpy(sh_video->bih,&buffer[4+4+1+2],len);
         //sh_video->fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
         //sh_video->frametime=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
-        if(verbose>=1) print_video_header((BITMAPINFOHEADER*)&buffer[4+4+1+2]);
+        if(verbose>=1) print_video_header(sh_video->bih);
         //asf_video_id=streamh.stream_no & 0x7F;
 	//if(demuxer->video->id==-1) demuxer->video->id=streamh.stream_no & 0x7F;
         break;

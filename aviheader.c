@@ -56,18 +56,20 @@ while(1){
       break; }
     case ckidSTREAMFORMAT: {      // read 'strf'
       if(last_fccType==streamtypeVIDEO){
-        stream_read(demuxer->stream,(char*) &sh_video->bih,MIN(size2,sizeof(sh_video->bih)));
-        chunksize-=MIN(size2,sizeof(sh_video->bih));
-        sh_video->fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
-        sh_video->frametime=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
+        sh_video->bih=malloc(chunksize); memset(sh_video->bih,0,chunksize);
+        if(verbose>=2) printf("found 'bih', %d bytes of %d\n",chunksize,sizeof(BITMAPINFOHEADER));
+        stream_read(demuxer->stream,(char*) sh_video->bih,chunksize);
+        chunksize=0;
+//        sh_video->fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
+//        sh_video->frametime=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
 //        if(demuxer->video->id==-1) demuxer->video->id=stream_id;
       } else
       if(last_fccType==streamtypeAUDIO){
-        int z=(chunksize<64)?chunksize:64;
+        sh_audio->wf=malloc(chunksize); memset(sh_audio->wf,0,chunksize);
         if(verbose>=2) printf("found 'wf', %d bytes of %d\n",chunksize,sizeof(WAVEFORMATEX));
-        stream_read(demuxer->stream,(char*) &sh_audio->wf,z);
-        chunksize-=z;
-        if(verbose>=1) print_wave_header(&sh_audio->wf);
+        stream_read(demuxer->stream,(char*) sh_audio->wf,chunksize);
+        chunksize=0;
+        if(verbose>=1) print_wave_header(sh_audio->wf);
 //        if(demuxer->audio->id==-1) demuxer->audio->id=stream_id;
       }
       break;

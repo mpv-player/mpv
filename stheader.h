@@ -26,8 +26,8 @@ typedef struct {
   int a_buffer_size;
   // win32 codec stuff:
   AVIStreamHeader audio;
-  WAVEFORMATEX wf;
-  char wf_ext[64];     // in format
+  WAVEFORMATEX *wf;
+//  char wf_ext[64];     // in format
   WAVEFORMATEX o_wf;   // out format
   HACMSTREAM srcstream;  // handle
   int audio_in_minsize;
@@ -52,7 +52,7 @@ typedef struct {
   char *our_out_buffer;
   // win32 codec stuff:
   AVIStreamHeader video;
-  BITMAPINFOHEADER bih;   // in format
+  BITMAPINFOHEADER *bih;   // in format
   BITMAPINFOHEADER o_bih; // out format
   HIC hic;  // handle
 } sh_video_t;
