@@ -1738,19 +1738,11 @@ Vea también \-aspect para el aspecto de la película.
 .B \-nograbpointer
 No capturar el puntero del ratón después de cambiar el VidMode (\-vm), útil
 en una configuración multicabeza.
-
 .TP
 .B \-nokeepaspect
 No mantener la razón de aspecto cuando se redimensionan ventanas X11
 (Funciona actualmente solo con \-vo x11, xv, xmga y xvidix y su administrador
 de ventanas necesita entender los consejos de aspecto de ventana.).
-
-.TP
-.B \-noslices
-Desactiva el dibujado de video por bandas/\:rebanadas de altura de 16-pixels,
-en lugar de dibujar la imagen entera de una pasada.
-Puede ser más rápido o más lento, dependiendo de la cache/\:tarjeta.
-Solo tiene efecto con los codecs libmpeg2 y libavcodec.
 .TP
 .B \-panscan <0.0\-1.0>
 Activa funcionalidad Pan y Scan, p.e.\& para mostrar una película 16:9 en
@@ -2119,6 +2111,12 @@ decodificación solo en escala de grises (un poco más rápida que con color)
 .TP
 .B \-noaspect
 Desactiva la compensación automática de razón de aspecto de la película.
+.TP
+.B \-noslices
+Desactiva el dibujado de video por bandas/\:rebanadas de altura de 16-pixels,
+en lugar de dibujar la imagen entera de una pasada.
+Puede ser más rápido o más lento, dependiendo de la cache/\:tarjeta.
+Solo tiene efecto con los codecs libmpeg2 y libavcodec.
 .TP
 .B \-nosound
 No reproduce/\:codifica sonido.
