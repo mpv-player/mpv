@@ -565,9 +565,13 @@ static void drawTextureDisplay ()
 static void resize(int x,int y){
   printf("[gl2] Resize: %dx%d\n",x,y);
   if( vo_fs )
+  {
+	  aspect(&x, &y, A_ZOOM);
 	  glViewport( (vo_screenwidth-x)/2, (vo_screenheight-y)/2, x, y);
-  else 
+  } else { 
+	  aspect(&x, &y, A_NOZOOM);
 	  glViewport( 0, 0, x, y );
+  }
 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
