@@ -50,7 +50,8 @@ static struct {
         { "midi", DEMUXER_TYPE_XMMS },
         { "vqf", DEMUXER_TYPE_XMMS },
         { "nsv", DEMUXER_TYPE_NSV },
-        { "nsa", DEMUXER_TYPE_NSV }
+        { "nsa", DEMUXER_TYPE_NSV },
+	{ "nut", DEMUXER_TYPE_LAVF }
 };
 
 int demuxer_type_by_filename(char* filename){
