@@ -85,10 +85,9 @@ static int control(int cmd, void *arg)
   switch(cmd) {
   case AOCONTROL_QUERY_FORMAT:
     return CONTROL_TRUE;
+#ifndef WORDS_BIGENDIAN 
   case AOCONTROL_GET_VOLUME:
   case AOCONTROL_SET_VOLUME:
-#ifndef WORDS_BIGENDIAN 
-{ //seems to be a problem on macs?
     {
       ao_control_vol_t *vol = (ao_control_vol_t *)arg;
 
@@ -181,17 +180,9 @@ static int control(int cmd, void *arg)
       snd_mixer_close(handle);
       return CONTROL_OK;
     }
-}// end big-endian
-#endif
-#ifdef WORDS_BIGENDIAN
-{
-  {
-    return (CONTROL_UNKNOWN);
-  }
-}
 #endif
     
-  } //end witch
+  } //end switch
   return(CONTROL_UNKNOWN);
 }
 
@@ -393,7 +384,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 
       default:
 	fprintf(stderr, "%d channels are not supported\n", channels);
-	exit (0);
+	return(0);
       }
 
       alsa_device = devstr;
