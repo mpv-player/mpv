@@ -536,7 +536,7 @@ static uint32_t query_format( uint32_t format )
    case IMGFMT_BGR16:
    case IMGFMT_BGR24:
    case IMGFMT_BGR32:
-   case IMGFMT_YUY2: 
+//   case IMGFMT_YUY2: 
    case IMGFMT_I420:
    case IMGFMT_IYUV:
    case IMGFMT_YV12: return 1;
