@@ -50,9 +50,10 @@ extern int init_video_codec(sh_video_t *sh_video,int ex);
 
 #ifdef USE_LIBAVCODEC
 #include "libavcodec/avcodec.h"
-    AVCodec *lavc_codec=NULL;
-    AVCodecContext lavc_context;
-    AVPicture lavc_picture;
+    static AVCodec *lavc_codec=NULL;
+    static AVCodecContext lavc_context;
+    static AVPicture lavc_picture;
+    int avcodec_inited=0;
 #endif
 
 #ifndef NEW_DECORE
@@ -306,7 +307,6 @@ switch(sh_video->codec->driver){
    mp_msg(MSGT_DECVIDEO,MSGL_ERR,"MPlayer was compiled WITHOUT libavcodec support!\n");
    return 0;
 #else
-   static int avcodec_inited=0;
    mp_msg(MSGT_DECVIDEO,MSGL_V,"FFmpeg's libavcodec video codec\n");
     if(!avcodec_inited){
       avcodec_init();
