@@ -61,15 +61,17 @@ static int init(sh_audio_t *sh_audio)
     lavc_context = avcodec_alloc_context();
     sh_audio->context=lavc_context;
 
-    lavc_context->channels = sh_audio->wf->nChannels;
-    lavc_context->sample_rate = sh_audio->wf->nSamplesPerSec;
-    lavc_context->bit_rate = sh_audio->wf->nAvgBytesPerSec * 8;
+    if(sh_audio->wf){
+	lavc_context->channels = sh_audio->wf->nChannels;
+	lavc_context->sample_rate = sh_audio->wf->nSamplesPerSec;
+	lavc_context->bit_rate = sh_audio->wf->nAvgBytesPerSec * 8;
+	lavc_context->block_align = sh_audio->wf->nBlockAlign;
+    }
     lavc_context->fourcc = sh_audio->format;
-    lavc_context->block_align = sh_audio->wf->nBlockAlign;
-    lavc_context->codec_id = lavc_codec->id;
+    lavc_context->codec_id = lavc_codec->id; // not sure if required, imho not --A'rpi
 
     /* alloc extra data */
-    if (sh_audio->wf->cbSize > 0) {
+    if (sh_audio->wf && sh_audio->wf->cbSize > 0) {
         lavc_context->extradata = malloc(sh_audio->wf->cbSize);
         lavc_context->extradata_size = sh_audio->wf->cbSize;
         memcpy(lavc_context->extradata, (char *)sh_audio->wf + sizeof(WAVEFORMATEX), 
