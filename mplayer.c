@@ -2039,7 +2039,7 @@ if(!sh_video) {
       //
       // convert time to HH:MM:SS.F format
       //
-      long tenths = 10 * sh_audio->delay-audio_out->get_delay();
+      long tenths = 10 * (sh_audio->delay-audio_out->get_delay()*playback_speed);
       int hh = (tenths / 36000) % 100;
       int mm = (tenths / 600) % 60;
       int ss = (tenths /  10) % 60;
