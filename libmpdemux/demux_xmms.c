@@ -1,5 +1,5 @@
-// This is not reentrant (because of global variables shared with demux_xmms_output.c)
-// and the plugins are not reentrant either perhaps 
+// This is not reentrant because of global static variables, but most of
+// the plugins are not reentrant either perhaps 
 #include "config.h"
 
 #include <stdlib.h>
@@ -19,15 +19,15 @@
 #include <dirent.h>
 #include <string.h>
 #include <sys/stat.h>
-//#include <glib.h>
 
 #define XMMS_PACKETSIZE 65536  // some plugins won't play if this is too small
 
 #include "demux_xmms_plugin.h"
-//#include "demux_xmms_pluginenum.h"
-//#include "demux_xmms_input.h"
 
-//extern OutputPlugin xmms_output_plugin;
+typedef struct {
+    uint64_t spos;   // stream position in number of output bytes from 00:00:00
+    InputPlugin* ip;
+}  xmms_priv_t;
 
 static pthread_mutex_t xmms_mutex;
 static int format = 0x1; // Raw PCM
@@ -39,24 +39,32 @@ static int xmms_length;
 static char *xmms_title=NULL;
 static uint32_t xmms_audiopos=0;
 static int xmms_playing=0;
+static xmms_priv_t *xmms_priv=NULL;
+static uint32_t xmms_byterate;
+static int64_t xmms_flushto=-1;
 
-static uint64_t written = 0;
+// =========== mplayer xmms outputplugin stuff  ==============
 
 static void disk_close(void) {}
-static void disk_flush(int time) {}
 static void disk_pause(short p) {}
 static void disk_init(void) {}
+
+static void disk_flush(int time) {
+    if (xmms_priv) xmms_flushto=time*((long long) xmms_byterate)/1000LL;    
+}
 
 static int disk_free(void) { // vqf plugin sends more than it should
     return (XMMS_PACKETSIZE-xmms_audiopos<XMMS_PACKETSIZE/4 ? 0:XMMS_PACKETSIZE-xmms_audiopos-XMMS_PACKETSIZE/4);
 }
 
 static int disk_playing(void) {
-	return 0; //??
+	return 0; //?? maybe plugins wait on exit until oplugin is not playing?
 }
 
 static int disk_get_output_time(void) {
-	return 10;
+    if (xmms_byterate) 
+	return xmms_priv->spos*1000LL/((long long)xmms_byterate);
+    else return 0;
 }
 
 static int disk_open(AFormat fmt, int rate, int nch) {
@@ -96,8 +104,14 @@ static int disk_open(AFormat fmt, int rate, int nch) {
 }
 
 static void disk_write(void *ptr, int length) {
+	if (!xmms_playing) return;
 	pthread_mutex_lock(&xmms_mutex);
-	written += length;
+	if (xmms_flushto!=-1) {
+	    xmms_priv->spos=xmms_flushto;
+	    xmms_flushto=-1;
+	    xmms_audiopos=0;
+	}
+	xmms_priv->spos+= length;
 	memcpy(&xmms_audiobuffer[xmms_audiopos],ptr,length);
 	xmms_audiopos+=length;
 	pthread_mutex_unlock(&xmms_mutex);
@@ -121,27 +135,18 @@ static OutputPlugin xmms_output_plugin =
 	disk_free,
 	disk_playing,
 	disk_get_output_time,
-	disk_get_output_time
+	disk_get_output_time //we pretend that everything written is played at once
 };
 
-
-
-typedef struct {
-    uint32_t spos;
-    InputPlugin* ip;
-}  xmms_priv_t;
+// ==================== mplayer xmms inputplugin helper stuff =================
 
 static InputPlugin* input_plugins[100];
 static int no_plugins=0;
 
 /* Dummy functions  */
 static int input_get_vis_type(){return 0;}
-//static void input_add_vis(int time, unsigned char *s, InputVisType type){}
 static void input_add_vis_pcm(int time, AFormat fmt, int nch, int length, void *ptr){}
-//static void input_update_vis(gint time){}
-//static gchar *input_get_info_text(void){return NULL;}
 static void input_set_info_text(char * text){}
-
 /* Dummy functions  END*/
 
 static void input_set_info(char* title,int length, int rate, int freq, int nch){
@@ -193,7 +198,9 @@ static void cleanup_plugins(){
     }
 }
 
-extern void resync_audio_stream(sh_audio_t *sh_audio);
+// ============================ mplayer demuxer stuff ===============
+
+//extern void resync_audio_stream(sh_audio_t *sh_audio);
 
 int demux_xmms_open(demuxer_t* demuxer) {
   InputPlugin* ip = NULL;
@@ -202,6 +209,7 @@ int demux_xmms_open(demuxer_t* demuxer) {
   xmms_priv_t *priv;
   int i;
 
+  if (xmms_priv) return 0; // as I said, it's not reentrant :)
   init_plugins();
   for(i=0;i<no_plugins;i++){
       if (input_plugins[i]->is_our_file(demuxer->stream->url)){
@@ -212,7 +220,7 @@ int demux_xmms_open(demuxer_t* demuxer) {
   
   pthread_mutex_init(&xmms_mutex,NULL);    
 
-  priv=(xmms_priv_t *)malloc(sizeof(xmms_priv_t));
+  xmms_priv=priv=(xmms_priv_t *)malloc(sizeof(xmms_priv_t));
   memset(priv,0,sizeof(xmms_priv_t));
   priv->ip=ip;
 
@@ -232,9 +240,9 @@ int demux_xmms_open(demuxer_t* demuxer) {
 
   xmms_output_plugin.init();
   ip->output = &xmms_output_plugin;
-  ip->play_file(demuxer->stream->url);
   xmms_playing=1;
-  ip->get_song_info(demuxer->stream->url,&xmms_title,&xmms_length);
+  ip->play_file(demuxer->stream->url);
+  if (ip->get_song_info) ip->get_song_info(demuxer->stream->url,&xmms_title,&xmms_length);
   if (xmms_length<=0) demuxer->seekable=0;
 
   mp_msg(MSGT_DEMUX,MSGL_INFO,"Waiting for the XMMS plugin to start playback of '%s'...\n",demuxer->stream->url);
@@ -256,7 +264,7 @@ int demux_xmms_open(demuxer_t* demuxer) {
   w->wBitsPerSample = sh_audio->samplesize*8;
   w->nChannels = sh_audio->channels = xmms_channels;
   w->nSamplesPerSec = sh_audio->samplerate = xmms_samplerate; 
-  w->nAvgBytesPerSec = xmms_samplerate*sh_audio->channels*sh_audio->samplesize;
+  xmms_byterate = w->nAvgBytesPerSec = xmms_samplerate*sh_audio->channels*sh_audio->samplesize;
   w->nBlockAlign = sh_audio->samplesize*sh_audio->channels;
   w->cbSize = 0;
   
@@ -272,18 +280,16 @@ int demux_xmms_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds) {
   else demuxer->seekable=1;
 
   while (xmms_audiopos<XMMS_PACKETSIZE/2) {
-    if((priv->ip->get_time()<0) || !xmms_playing) {
-	xmms_audiopos=0;  // xmp on exit waits until buffer is freed somewhat
-	return 0;
-    }
+    if((priv->ip->get_time()<0) || !xmms_playing)
+	return 0;	
     usleep(1000);    
   }
 
   pthread_mutex_lock(&xmms_mutex);
   dp = new_demux_packet(XMMS_PACKETSIZE/2);
-  ds->pts = priv->spos / (float)(sh_audio->wf->nAvgBytesPerSec);
+  ds->pts = priv->spos / sh_audio->wf->nAvgBytesPerSec;
   ds->pos = priv->spos;
-  priv->spos+=XMMS_PACKETSIZE/2;
+
   memcpy(dp->buffer,xmms_audiobuffer,XMMS_PACKETSIZE/2);
   memcpy(xmms_audiobuffer,&xmms_audiobuffer[XMMS_PACKETSIZE/2],xmms_audiopos-XMMS_PACKETSIZE/2);
   xmms_audiopos-=XMMS_PACKETSIZE/2;
@@ -298,11 +304,11 @@ void demux_xmms_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
   stream_t* s = demuxer->stream;
   sh_audio_t* sh_audio = demuxer->audio->sh;
   xmms_priv_t *priv=demuxer->priv;
-  float pos;
+  int32_t pos;
 
   if(priv->ip->get_time()<0) return;
   
-  pos = (flags & 1) ? 0 : priv->spos / (float)(sh_audio->wf->nAvgBytesPerSec);
+  pos = (flags & 1) ? 0 : priv->spos / sh_audio->wf->nAvgBytesPerSec;
   if (flags & 2) 
     pos+= rel_seek_secs*xmms_length;
   else 
@@ -311,15 +317,17 @@ void demux_xmms_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
   if (pos<0) pos=0;
   if (pos>=xmms_length) pos=xmms_length-1;
 
-  priv->ip->seek((pos<0)?0:(int)pos);
-  priv->spos=pos * (float)(sh_audio->wf->nAvgBytesPerSec);;
+  priv->ip->seek((pos<0)?0:pos);
+  priv->spos=pos * sh_audio->wf->nAvgBytesPerSec;
+  sh_audio->delay=pos; //priv->spos / sh_audio->wf->nAvgBytesPerSec;
 }
 
 int demux_close_xmms(demuxer_t* demuxer) {
   xmms_priv_t *priv=demuxer->priv;
   xmms_playing=0;
+  xmms_audiopos=0; // xmp on exit waits until buffer is free enough
   priv->ip->stop();
-  free(priv); demuxer->priv=NULL;
+  free(priv); xmms_priv=demuxer->priv=NULL;
   cleanup_plugins();
   return 1;
 }
