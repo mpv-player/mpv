@@ -98,7 +98,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-loop\ <num> ]
 .RB [ \-mixer\ <device> ]
 .RB [ \-master\ yes/no ]
-.RB [ \-tv\ suboptions ]
+.RB [ \-tv\ <suboptions> ]
 .RB [ \-dapsync ]
 .RB [ \-softsleep ]
 .RB [ \-rootwin ]
@@ -107,7 +107,7 @@ mplayer \- Movie Player for Linux
 .SH DESCRIPTION
 .I mplayer
 MPlayer is a movie player for LINUX (runs on many other Unices, and non-x86
-CPUs, see section 6). It plays most MPEG, AVI and ASF/WMV files, supported by
+CPUs, see section 6). It plays most MPEG, AVI, MOV/QT and ASF/WMV files, supported by
 many native and Win32 DLL codecs. You can watch VideoCD, SVCD, DVD, and even
 DivX movies too (and you don't need the avifile library at all!).
 
@@ -164,7 +164,7 @@ matches the given code. For example: -alang hu,en will always try to play
 hungarian or if it's non-existant then english audio streams if there are any.
 .TP
 .B \-slang\ <subtitle\ language>
-See the former, but this option needs a two-letter parameter, a country code.
+See the -sid option, but this one needs a two-letter parameter, a country code.
 Like: -slang hu,en will always select hungarian or if it's non existant then
 english subtitles, if there are any. For the list of available subtitles, use
 with the -v switch and look at the output.
@@ -310,7 +310,7 @@ this option will tell MPlayer to use a different device for mixing than
 Setting this option to "yes" will instruct MPlayer to change the MASTER
 mixer channel when setting the volume, and "no" means the PCM channel.
 .TP
-.B \-tv\ suboptions
+.B \-tv\ <suboptions>
 this option enables the TV grabbing feature of MPlayer. For complete
 documentation, please see documentation.html chapter 2.5
 .TP
@@ -622,7 +622,7 @@ Only valid for the fbdev driver.
 .B \-monitor_vfreq <vertical frequency range>  (FBdev only)
 .TP
 .B \-monitor_dotclock <dotclock\ (or\ pixelclock) range>  (FBdev only)
-Look into etc/example.conf for further information and in DOC/video.html.
+Look into etc/example.conf for further information and in DOCS/video.html.
 .TP
 .B \-subcp\ codepage
 If your system supports iconv(3), you can use this option to
