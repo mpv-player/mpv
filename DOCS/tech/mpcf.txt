@@ -211,7 +211,7 @@ sync_point
 
 file
 	file_id_string
-	while(!eof){
+	while(!eof && next_code != index_startcode){
 		main_header
 		for(i=0; i<stream_count; i++){
 			if(next_packet==video_stream_header)
@@ -230,8 +230,8 @@ file
 				frame
 			}
 		}
-//FIXME index
 	}
+	index
                 
 forward_ptr
 	size of the packet (exactly the distance from the first byte of the
@@ -360,11 +360,6 @@ decode_delay
 fixed_fps
 	1 indicates that the fps is fixed
 
-index_flag
-	1 indicates that this file has an index
-	Note, all files SHOULD have an index at the end except, (realtime) streams 
-	Note, all streams SHOULD have an index
-
 codec_specific_data_type
 	0	none/end
 	1	native
@@ -470,11 +465,11 @@ checksum
 	adler32 checksum
 
 index_timestamp
-	value in time_base precission, relative to the last index_timestamp
+	value of the timetamp in a sync point relative to the last sync-point
 
 index_position
-	position in bytes of the first byte of the keyframe header, relative
-	to the last index_position
+	position in bytes of the first byte of a sync-point, relative to the
+	last sync_point
 
 id
 	the id of the type/name pair, so its more compact
@@ -563,8 +558,7 @@ is wrapped in a structure to facilitate more than one stream or otherwise
 duplicate the role of a container. any such file is to be considered invalid
 
 		Index
-the index can be repeated but there SHOULD be at least one for each stream at
-the end
+every sync-point must be exacty once in the index
 Note: in case of realtime streaming there is no end, so no index there either
 
 		Info packets
