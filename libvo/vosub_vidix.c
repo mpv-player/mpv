@@ -145,11 +145,6 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 		printf("vosub_vidix: Can't configure playback: %s\n",strerror(err));
 		return -1;
 	}
-	if((err=vdlPlaybackOn(vidix_handler))!=0)
-	{
-                printf("vosub_vidix: Can't start playback: %s\n",strerror(err));
-		return -1;
-	}
 
 	next_frame = 0;
 	vidix_mem =vidix_play.dga_addr;
@@ -159,10 +154,35 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 	return 0;  
 }
 
+void vidix_start(void)
+{
+    int err;
+
+    if((err=vdlPlaybackOn(vidix_handler))!=0)
+    {
+	printf("vosub_vidix: Can't start playback: %s\n",strerror(err));
+	return -1;
+    }
+    return 0;
+}
+
+void vidix_stop(void)
+{
+    int err;
+
+    if((err=vdlPlaybackOff(vidix_handler))!=0)
+    {
+	printf("vosub_vidix: Can't stop playback: %s\n",strerror(err));
+	return -1;
+    }
+    return 0;
+}
+
 void vidix_term( void )
 {
   if(verbose > 1) printf("vosub_vidix: vidix_term() was called\n");
-	vdlPlaybackOff(vidix_handler);
+//	vdlPlaybackOff(vidix_handler);
+	vidix_stop();
 	vdlClose(vidix_handler);
 }
 

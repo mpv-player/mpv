@@ -19,6 +19,8 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 		    unsigned dest_x,unsigned dest_y,unsigned dst_width,
 		    unsigned dst_height,unsigned format,unsigned dest_bpp,
 		    unsigned vid_w,unsigned vid_h);
+void	 vidix_start(void);
+void	 vidix_stop(void);
 void     vidix_term( void );
 uint32_t vidix_query_fourcc(unsigned fourcc);
 

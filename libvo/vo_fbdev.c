@@ -1105,7 +1105,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 		    return -1;
 		}
 		else printf(FBDEV "Using VIDIX\n");
-	    
+		vidix_start();
 	}
 	else
 #endif
