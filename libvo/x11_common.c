@@ -303,7 +303,7 @@ int vo_init( void )
 		dispName += 4;
  else if ( strncmp(dispName, "localhost:", 10) == 0)
 		dispName += 9;
- if (*dispName==':') mLocalDisplay=1; else mLocalDisplay=0;
+ if (*dispName==':' && atoi(dispName+1)<10) mLocalDisplay=1; else mLocalDisplay=0;
  mp_msg(MSGT_VO,MSGL_INFO,"vo: X11 running at %dx%d with depth %d and %d bpp (\"%s\" => %s display)\n",
 	vo_screenwidth,vo_screenheight,
 	depth, vo_depthonscreen,
