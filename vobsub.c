@@ -18,7 +18,6 @@
 #include "version.h"
 
 #include "vobsub.h"
-#include "libvo/video_out.h"
 #include "spudec.h"
 #include "mp_msg.h"
 #ifdef USE_UNRARLIB
