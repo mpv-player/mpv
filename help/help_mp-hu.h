@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h 1.156 (2005. 01. 12.)
+// Sync'ed with help_mp-en.h 1.157 (2005. 01. 31.)
 
 // ========================= MPlayer help ===========================
 
@@ -668,6 +668,7 @@ static char help_text[]=
 #define MSGTR_MENU_NextStream "Következõ fájl"
 #define MSGTR_MENU_PrevStream "Elõzõ fájl"
 #define MSGTR_MENU_Size "Méret"
+#define MSGTR_MENU_HalfSize   "Fél méret"
 #define MSGTR_MENU_NormalSize "Normál méret"
 #define MSGTR_MENU_DoubleSize "Dupla méret"
 #define MSGTR_MENU_FullScreen "Teljesképernyõ" 
