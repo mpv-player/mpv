@@ -154,32 +154,44 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
  image_width=width;
  image_format=format;
 
- if ( X_already_started ) return -1;
- if( !vo_init() ) return 0; // Can't open X11
-
- hint.x=0;
- hint.y=0;
- hint.width=image_width;
- hint.height=image_height;
- 
  if( flags&0x03 ) fullscreen = 1;
  if( flags&0x02 ) vm = 1;
  if( flags&0x08 ) Flip_Flag = 1;
 
+printf( "w: %d h: %d\n\n",vo_dwidth,vo_dheight );
+
+ XGetWindowAttributes( mDisplay,DefaultRootWindow( mDisplay ),&attribs );
+ depth=attribs.depth;
+
+ if ( depth != 15 && depth != 16 && depth != 24 && depth != 32 ) depth=24;
+ XMatchVisualInfo( mDisplay,mScreen,depth,TrueColor,&vinfo );
+
+ if ( vo_window != None ) { mywindow=vo_window; mygc=vo_gc; }
+  else
+   {
+    if ( X_already_started ) return -1;
+    if( !vo_init() ) return 0; // Can't open X11
+
+    hint.x=0;
+    hint.y=0;
+    hint.width=image_width;
+    hint.height=image_height;
+ 
+
 #ifdef HAVE_XF86VM
- if (vm) {
-    unsigned int modeline_width, modeline_height, vm_event, vm_error;
-    unsigned int vm_ver, vm_rev;
-    int i,j,have_vm=0,X,Y;
+    if (vm) {
+        unsigned int modeline_width, modeline_height, vm_event, vm_error;
+	unsigned int vm_ver, vm_rev;
+        int i,j,have_vm=0,X,Y;
 
-    int modecount;
+        int modecount;
 
-    if (XF86VidModeQueryExtension(mDisplay, &vm_event, &vm_error)) {
-        XF86VidModeQueryVersion(mDisplay, &vm_ver, &vm_rev);
-        printf("XF86VidMode Extension v%i.%i\n", vm_ver, vm_rev);
-        have_vm=1;
-    } else
-        printf("XF86VidMode Extenstion not available.\n");
+        if (XF86VidModeQueryExtension(mDisplay, &vm_event, &vm_error)) {
+            XF86VidModeQueryVersion(mDisplay, &vm_ver, &vm_rev);
+            printf("XF86VidMode Extension v%i.%i\n", vm_ver, vm_rev);
+            have_vm=1;
+        } else
+            printf("XF86VidMode Extenstion not available.\n");
 
     if (have_vm) {
       if (vidmodes==NULL)
@@ -213,51 +225,44 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
 #endif
 
 
- if ( fullscreen )
-  {
-   hint.width=vo_screenwidth;
-   hint.height=vo_screenheight;
-  }
- vo_dwidth=hint.width;
- vo_dheight=hint.height;
- hint.flags=PPosition | PSize;
+    if ( fullscreen )
+     {
+      hint.width=vo_screenwidth;
+      hint.height=vo_screenheight;
+     }
+    hint.flags=PPosition | PSize;
 
- bg=WhitePixel( mDisplay,mScreen );
- fg=BlackPixel( mDisplay,mScreen );
+    bg=WhitePixel( mDisplay,mScreen );
+    fg=BlackPixel( mDisplay,mScreen );
+    vo_dwidth=hint.width;
+    vo_dheight=hint.height;
 
- XGetWindowAttributes( mDisplay,DefaultRootWindow( mDisplay ),&attribs );
- depth=attribs.depth;
+    theCmap  =XCreateColormap( mDisplay,RootWindow( mDisplay,mScreen ),
+    vinfo.visual,AllocNone );
 
- if ( depth != 15 && depth != 16 && depth != 24 && depth != 32 ) depth=24;
- XMatchVisualInfo( mDisplay,mScreen,depth,TrueColor,&vinfo );
+    xswa.background_pixel=0;
+    xswa.border_pixel=1;
+    xswa.colormap=theCmap;
+    xswamask=CWBackPixel | CWBorderPixel |CWColormap;
 
- theCmap  =XCreateColormap( mDisplay,RootWindow( mDisplay,mScreen ),
- vinfo.visual,AllocNone );
-
- xswa.background_pixel=0;
- xswa.border_pixel=1;
- xswa.colormap=theCmap;
- xswamask=CWBackPixel | CWBorderPixel |CWColormap;
-
- mywindow=XCreateWindow( mDisplay,RootWindow( mDisplay,mScreen ),
+    mywindow=XCreateWindow( mDisplay,RootWindow( mDisplay,mScreen ),
                          hint.x,hint.y,
                          hint.width,hint.height,
                          xswa.border_pixel,depth,CopyFromParent,vinfo.visual,xswamask,&xswa );
- vo_x11_classhint( mDisplay,mywindow,"x11" );
- vo_hidecursor(mDisplay,mywindow);
+    vo_x11_classhint( mDisplay,mywindow,"x11" );
+    vo_hidecursor(mDisplay,mywindow);
+    if ( fullscreen ) vo_x11_decoration( mDisplay,mywindow,0 );
+    XSelectInput( mDisplay,mywindow,StructureNotifyMask );
+    XSetStandardProperties( mDisplay,mywindow,hello,hello,None,NULL,0,&hint );
+    XMapWindow( mDisplay,mywindow );
+    do { XNextEvent( mDisplay,&xev ); } while ( xev.type != MapNotify || xev.xmap.event != mywindow );
+    XSelectInput( mDisplay,mywindow,NoEventMask );
 
- if ( fullscreen ) vo_x11_decoration( mDisplay,mywindow,0 );
- XSelectInput( mDisplay,mywindow,StructureNotifyMask );
- XSetStandardProperties( mDisplay,mywindow,hello,hello,None,NULL,0,&hint );
- XMapWindow( mDisplay,mywindow );
- do { XNextEvent( mDisplay,&xev ); } while ( xev.type != MapNotify || xev.xmap.event != mywindow );
+    XFlush( mDisplay );
+    XSync( mDisplay,False );
 
- XSelectInput( mDisplay,mywindow,NoEventMask );
-
- XFlush( mDisplay );
- XSync( mDisplay,False );
-
- mygc=XCreateGC( mDisplay,mywindow,0L,&xgcv );
+    mygc=XCreateGC( mDisplay,mywindow,0L,&xgcv );
+   }
 
 #ifdef SH_MEM
  if ( mLocalDisplay && XShmQueryExtension( mDisplay ) ) Shmem_Flag=1;
@@ -272,7 +277,7 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
 
  if ( Shmem_Flag )
   {
-   myximage=XShmCreateImage( mDisplay,vinfo.visual,depth,ZPixmap,NULL,&Shminfo[0],width,image_height );
+   myximage=XShmCreateImage( mDisplay,vinfo.visual,depth,ZPixmap,NULL,&Shminfo[0],image_width,image_height );
    if ( myximage == NULL )
     {
      if ( myximage != NULL ) XDestroyImage( myximage );
@@ -365,7 +370,7 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
 
  if( format==IMGFMT_YV12 ) yuv2rgb_init( ( depth == 24 ) ? bpp : depth,mode );
    
- XSelectInput( mDisplay,mywindow,StructureNotifyMask | KeyPressMask );
+ if ( vo_window == None ) XSelectInput( mDisplay,mywindow,StructureNotifyMask | KeyPressMask );
    
  X_already_started++;
 

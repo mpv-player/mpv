@@ -328,6 +328,9 @@ void vo_x11_classhint( Display * display,Window window,char *name ){
    vo_window=w; vo_gc=g;
    vo_xeventhandling=0;
  }
+ void vo_setwindowsize( int w,int h ) {
+    vo_dwidth=w; vo_dheight=h;
+ }
 #endif
 
 int vo_x11_check_events(Display *mydisplay){

@@ -24,6 +24,7 @@ int vo_x11_check_events(Display *mydisplay);
  extern Window    vo_window;
  extern GC        vo_gc;
  extern void vo_setwindow( Window w,GC g );
+ extern void vo_setwindowsize( int w,int h );
  extern int       vo_xeventhandling;
  extern int       vo_expose;
  extern int       vo_resize;
