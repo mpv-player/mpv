@@ -23,6 +23,9 @@
  * - works only on x86 architectures
  *
  * $Log$
+ * Revision 1.35  2001/12/28 20:52:54  alex
+ * use XF86VidMode later in init (at line 1031) only if we've got support (if have_vm==1)
+ *
  * Revision 1.34  2001/12/04 17:24:25  alex
  * do not crash if can't get modelines (dga2.0)
  *
@@ -1024,11 +1027,14 @@ static uint32_t init( uint32_t width,  uint32_t height,
 #else
   
 #ifdef HAVE_XF86VM
+  if (have_vm)
+  {
     XF86VidModeLockModeSwitch(vo_dga_dpy,XDefaultScreen(vo_dga_dpy),0);
     // Two calls are needed to switch modes on my ATI Rage 128. Why?
     // for riva128 one call is enough!
     XF86VidModeSwitchToMode(vo_dga_dpy,XDefaultScreen(vo_dga_dpy),vo_dga_vidmodes[dga_modenum]);
     XF86VidModeSwitchToMode(vo_dga_dpy,XDefaultScreen(vo_dga_dpy),vo_dga_vidmodes[dga_modenum]);
+  }
 #endif
   
   XF86DGAGetViewPortSize(vo_dga_dpy,XDefaultScreen(vo_dga_dpy),
