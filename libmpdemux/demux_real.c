@@ -131,7 +131,7 @@ static void dump_index(demuxer_t *demuxer, int stream_id)
     real_index_table_t *index;
     int i, entries;
 
-    if (verbose<=0)
+    if (verbose<=1)
 	return;
     
     if (stream_id > MAX_STREAMS)
