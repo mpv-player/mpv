@@ -118,9 +118,9 @@ extern int vo_gamma_brightness;
 extern int vo_gamma_saturation;
 extern int vo_gamma_contrast;
 extern int vo_gamma_hue;
-extern int vo_gamma_red_intense;
-extern int vo_gamma_green_intense;
-extern int vo_gamma_blue_intense;
+extern int vo_gamma_red_intensity;
+extern int vo_gamma_green_intensity;
+extern int vo_gamma_blue_intensity;
 
 static void set_gamma_correction( unsigned int xv_port )
 {

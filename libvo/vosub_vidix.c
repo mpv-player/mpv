@@ -166,9 +166,9 @@ extern int vo_gamma_brightness;
 extern int vo_gamma_saturation;
 extern int vo_gamma_contrast;
 extern int vo_gamma_hue;
-extern int vo_gamma_red_intense;
-extern int vo_gamma_green_intense;
-extern int vo_gamma_blue_intense;
+extern int vo_gamma_red_intensity;
+extern int vo_gamma_green_intensity;
+extern int vo_gamma_blue_intensity;
 
 static vidix_video_eq_t vid_eq;
 
@@ -189,26 +189,30 @@ int vidix_start(void)
 	       "vosub_vidix: vo_gamma_saturation=%i\n"
 	       "vosub_vidix: vo_gamma_contrast=%i\n"
 	       "vosub_vidix: vo_gamma_hue=%i\n"
-	       "vosub_vidix: vo_gamma_red_intense=%i\n"
-	       "vosub_vidix: vo_gamma_green_intense=%i\n"
-	       "vosub_vidix: vo_gamma_blue_intense=%i\n"
+	       "vosub_vidix: vo_gamma_red_intensity=%i\n"
+	       "vosub_vidix: vo_gamma_green_intensity=%i\n"
+	       "vosub_vidix: vo_gamma_blue_intensity=%i\n"
 	       ,vo_gamma_brightness
 	       ,vo_gamma_saturation
 	       ,vo_gamma_contrast
 	       ,vo_gamma_hue
-	       ,vo_gamma_red_intense
-	       ,vo_gamma_green_intense
-	       ,vo_gamma_blue_intense);
+	       ,vo_gamma_red_intensity
+	       ,vo_gamma_green_intensity
+	       ,vo_gamma_blue_intensity);
 	}
-	vid_eq.brightness = vo_gamma_brightness;
-	vid_eq.saturation = vo_gamma_saturation;
-	vid_eq.contrast = vo_gamma_contrast;
-	vid_eq.hue = vo_gamma_hue;
-	vid_eq.red_intense = vo_gamma_red_intense;
-	vid_eq.green_intense = vo_gamma_green_intense;
-	vid_eq.blue_intense = vo_gamma_blue_intense;
-	vid_eq.flags = VEQ_FLG_ITU_R_BT_601;
-	vdlPlaybackSetEq(vidix_handler,&vid_eq);
+        /* To use full set of vid_eq.cap */
+	if(vdlPlaybackGetEq(vidix_handler,&vid_eq) == 0)
+	{
+		vid_eq.brightness = vo_gamma_brightness;
+		vid_eq.saturation = vo_gamma_saturation;
+		vid_eq.contrast = vo_gamma_contrast;
+		vid_eq.hue = vo_gamma_hue;
+		vid_eq.red_intensity = vo_gamma_red_intensity;
+		vid_eq.green_intensity = vo_gamma_green_intensity;
+		vid_eq.blue_intensity = vo_gamma_blue_intensity;
+		vid_eq.flags = VEQ_FLG_ITU_R_BT_601;
+		vdlPlaybackSetEq(vidix_handler,&vid_eq);
+	}
     }
     return 0;
 }

@@ -54,9 +54,9 @@ int vo_gamma_brightness=0;
 int vo_gamma_saturation=0;
 int vo_gamma_contrast=0;
 int vo_gamma_hue=0;
-int vo_gamma_red_intense=0;
-int vo_gamma_green_intense=0;
-int vo_gamma_blue_intense=0;
+int vo_gamma_red_intensity=0;
+int vo_gamma_green_intensity=0;
+int vo_gamma_blue_intensity=0;
 //
 // Externally visible list of all vo drivers
 //
