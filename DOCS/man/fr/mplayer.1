@@ -1,4 +1,4 @@
-.\" synced with 1.780
+.\" synced with 1.782
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -1852,6 +1852,9 @@ Active le mode non-bloquant.
 .IPs device=<device>
 Définit le nom de périphérique.
 Remplacez les ',' par '.' et ':' par '=' dans les noms de périphérique ALSA.
+Assurez-vous bien de ne pas activer ceci lorsque vous voulez sortir
+directement hwac3 via S/PDIF, à moins que vous sachiez vraiment comment bien
+le configurer.
 .RE
 .PD 1
 .
@@ -2663,6 +2666,13 @@ Active ou désactive la gestion de l'incrustation OSD via OpenGL
 (par défaut\ : activé).
 Surtout pour des tests, vous devriez utiliser \-osdlevel 0 pour désactiver
 l'incrustation OSD.
+.IPs (no)scaled-osd
+Change le comportement de l'OSD quand la taille de la fenêtre vidéo change
+(par défaut\ : désactivé).
+Lorsqu'il est activé, il se comporte comme les autres pilotes de sortie
+vidéo, ce qui est mieux pour les polices de caractères à taille fixe.
+Avec les polices freetype, le résultat est plus esthétique en le désactivant,
+et en mode plein écran, s'affichera dans les bandes noires.
 .IPs (no)aspect
 Active ou désactive la gestion du redimensionnement du ratio d'aspect et
 le "pan and scan" (par défaut\ : activé).
