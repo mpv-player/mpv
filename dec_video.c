@@ -140,6 +140,26 @@ int set_video_colors(sh_video_t *sh_video,char *item,int value){
     return 0;
 }
 
+int uninit_video(sh_video_t *sh_video){
+    if(!sh_video->inited) return;
+    printf("uninit video: %d  \n",sh_video->codec->driver);
+    switch(sh_video->codec->driver){
+    case VFM_FFMPEG:
+        if (avcodec_close(&lavc_context) < 0)
+    	    mp_msg(MSGT_DECVIDEO,MSGL_ERR, "could not close codec\n");
+	break;
+
+    case VFM_MPEG:
+	mpeg2_free_image_buffers (picture);
+	break;
+    }
+    if(sh_video->our_out_buffer){
+	free(sh_video->our_out_buffer);
+	sh_video->our_out_buffer=NULL;
+    }
+    sh_video->inited=0;
+}
+
 int init_video(sh_video_t *sh_video){
 unsigned int out_fmt=sh_video->codec->outfmt[sh_video->outfmtidx];
 
@@ -280,9 +300,13 @@ switch(sh_video->codec->driver){
    mp_msg(MSGT_DECVIDEO,MSGL_ERR,"MPlayer was compiled WITHOUT libavcodec support!\n");
    return 0;
 #else
+   static int avcodec_inited=0;
    mp_msg(MSGT_DECVIDEO,MSGL_V,"FFmpeg's libavcodec video codec\n");
-    avcodec_init();
-    avcodec_register_all();
+    if(!avcodec_inited){
+      avcodec_init();
+      avcodec_register_all();
+      avcodec_inited=1;
+    }
     lavc_codec = (AVCodec *)avcodec_find_decoder_by_name(sh_video->codec->dll);
     if(!lavc_codec){
 	mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Can't find codec '%s' in libavcodec...\n",sh_video->codec->dll);
@@ -322,7 +346,7 @@ switch(sh_video->codec->driver){
    break;
  }
 }
-
+  sh_video->inited=1;
   return 1;
 }
 

@@ -594,7 +594,12 @@ play_next_file:
   }
 #endif
 
-    demuxer=NULL; stream=NULL;
+    stream=NULL;
+    demuxer=NULL;
+    d_audio=NULL;
+    d_video=NULL;
+    sh_audio=NULL;
+    sh_video=NULL;
     
 #ifdef USE_LIBVO2
     current_module="vo2_new";
@@ -1808,6 +1813,9 @@ if(curr_filename+1<num_filenames){
 goto_next_file:  // don't jump here after ao/vo/getch initialization!
     ++curr_filename;
 if(curr_filename<num_filenames){
+
+  current_module="uninit_vcodec";
+  if(sh_video) uninit_video(sh_video);
 
   current_module="free_demuxer";
   if(demuxer) free_demuxer(demuxer);
