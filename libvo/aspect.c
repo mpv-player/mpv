@@ -60,7 +60,12 @@ void aspect_save_screenres(int scrw, int scrh){
 void aspect(int *srcw, int *srch, int zoom){
   int tmpw;
 
-  if(movie_aspect == 0) return; // the user doesnt want to fix aspect
+  if(!zoom && movie_aspect == 0) {
+#ifdef ASPECT_DEBUG
+    printf("aspect(0) no aspect forced!\n");
+#endif
+    return; // the user doesnt want to fix aspect
+  }
 #ifdef ASPECT_DEBUG
   printf("aspect(0) fitin: %dx%d zoom: %d screenaspect: %.2f\n",aspdat.scrw,aspdat.scrh,
       zoom,monitor_aspect);
