@@ -1084,6 +1084,9 @@ int vixInit( void )
       radeon_ram_size = 8192*1024;
   }
 #endif
+#ifdef WIN32
+  if(radeon_ram_size > 16*1024*1024)radeon_ram_size=16*1024*1024;
+#endif
   if((radeon_mem_base = map_phys_mem(pci_info.base0,radeon_ram_size))==(void *)-1) return ENOMEM;
   memset(&besr,0,sizeof(bes_registers_t));
   radeon_vid_make_default();
