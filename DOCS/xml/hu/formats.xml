@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.15 -->
+<!-- synced with 1.16 -->
 <sect1 id="formats">
 <title>Támogatott formátumok</title>
 
@@ -7,23 +7,23 @@
 Fontos, hogy eloszlassunk egy gyakori tévhitet. A legtöbben ha egy
 <filename>.AVI</filename> kiterjesztésű filmet látnak, rögtön arra következtetnek,
 hogy az nem egy MPEG fájl. Ez nem igaz. Legalábbis nem teljesen. Az átlagos
-véleménnyel ellentétben egy ilyen fájl <emphasis>tartalmazhat</emphasis> MPEG1 videót.
+véleménnyel ellentétben egy ilyen fájl <emphasis>tartalmazhat</emphasis> MPEG-1 videót.
 </para>
 
 <para>
 Mint láthatod, egy <emphasis role="bold">codec</emphasis> nem ugyan az, mint egy
 <emphasis role="bold">fájl formátum</emphasis>.
-Például videó <emphasis role="bold">codec</emphasis>-ek ezek: MPEG1, MPEG2, MPEG4 (DivX), Indeo5, 3ivx.
+Például videó <emphasis role="bold">codec</emphasis>-ek ezek: MPEG-1, MPEG-2, MPEG-4 (DivX), Indeo5, 3ivx.
 De fájl <emphasis role="bold">formátumok</emphasis> ezek: MPG, AVI, ASF.
 </para>
 
 <para>
 Elméletileg egy OpenDivX-es videót és MP3 audiót beletehetsz egy
 <emphasis role="bold">MPG formátumú fájlba</emphasis>. Habár a legtöbb lejátszó
-nem fogja lejátszani, mert MPEG1-es videót és MP2-es audiót várnak (az
+nem fogja lejátszani, mert MPEG-1-es videót és MP2-es audiót várnak (az
 <emphasis role="bold">AVI</emphasis>-val ellentétben az <emphasis role="bold">MPG</emphasis>
 nem rendelkezik a megfelelő mezőkkel a videó és audió folyamainak leírásához).
-Vagy tehetsz MPEG1 videót is AVI fájlba.
+Vagy tehetsz MPEG-1 videót is AVI fájlba.
 Az <ulink url="http://ffmpeg.org/">FFmpeg</ulink> és a
 <link linkend="mencoder"><application>MEncoder</application></link> tud készíteni ilyen fájlokat.
 </para>
@@ -42,7 +42,7 @@ Az MPEG fájlok különböző alakúak lehetnek:
 <itemizedlist>
 <listitem><simpara>
   MPG: Ez a <emphasis role="bold">legalapabb</emphasis> formátum az
-  MPEG fájl formátumok közül. MPEG1 videót és MP2 (MPEG-1 layer 2) vagy
+  MPEG fájl formátumok közül. MPEG-1 videót és MP2 (MPEG-1 layer 2) vagy
   ritkán MP1 audiót tartalmaz.
   </simpara></listitem>
 <listitem><simpara>
@@ -55,7 +55,7 @@ Az MPEG fájlok különböző alakúak lehetnek:
 <listitem><simpara>
   VOB: Ez a <emphasis role="bold">DVD</emphasis>-ken használt MPEG fájl formátum.
   Ugyan az, mint az MPG, plusz tartalmazhat feliratot és nem-MPEG (AC3) hangot.
-  Kódolt MPEG2 videót és általában AC3 audiót tartalmaz, de DTS, MP2 és
+  Kódolt MPEG-2 videót és általában AC3 audiót tartalmaz, de DTS, MP2 és
   tömörítetlen LPCM is megengedett. <emphasis role="bold">Olvasd el a
   <link linkend="dvd">DVD</link> részt</emphasis>!
   </simpara></listitem>
@@ -83,7 +83,7 @@ a fejlécben ilyenkor ez a mező 4:3 arányra van állítva, ezért játszódnak le
 
 <para>
 A Microsoft tervezte, az <emphasis role="bold">AVI (Audio Video Interleaved)</emphasis>
-egy széles körben elterjedt, többcélú formátum, melyet jelenleg leginkább MPEG4 (DivX
+egy széles körben elterjedt, többcélú formátum, melyet jelenleg leginkább MPEG-4 (DivX
 és DivX4) videóknál használnak. Rengeteg ismert hátránya és hiányossága van (például
 stream-elésben). Támogat egy videó folyamot 0-99 audió folyammal, max 2 GB-ig, de
 van egy <emphasis role="bold">OpenDML</emphasis> kiterjesztés, amivel ennél nagyobb
@@ -185,7 +185,7 @@ manapság <filename>.WMA</filename> vagy <filename>.WMV</filename> kiterjesztésűe
 Ezeket a formátumokat az Apple fejlesztette ki, és bármilyen codec-et
 tartalmazhatnak, CBR-t vagy VBR-t. Legtöbbször <filename>.QT</filename> vagy
 <filename>.MOV</filename> kiterjesztésük van. Megjegyzendő, hogy mióta az
-MPEG4 csapat a QuickTime-ot választotta az MPEG4 javasolt fájlformátumának,
+MPEG-4 csapat a QuickTime-ot választotta az MPEG-4 javasolt fájlformátumának,
 a MOV fájlaik <filename>.MPG</filename> vagy <filename>.MP4</filename>
 kiterjesztéssel jönnek (Érdekes módon a videó és audió folyamok ezekben a
 fájlokban igazi MPG és AAC fájlok. Még ki is tudod őket csomagolni a
@@ -263,7 +263,7 @@ olvasni a <filename>.NUV</filename> fájlait (csak NuppelVideo 5.0). Ezek a
 fájlok tartalmazhatnak tömörítetlen YV12, YV12+RTJpeg tömörített,
 YV12 RTJpeg+lzo tömörített és YV12+lzo tömörített képkockákat.
 Az <application>MPlayer</application> dekódolja (és <emphasis role="bold">kódolja</emphasis>
-a <application>MEncoder</application>rel MPEG4-be (DivX)/stb.!) őket. A keresés
+a <application>MEncoder</application>rel MPEG-4-be (DivX)/stb.!) őket. A keresés
 működik.
 </para>
 </sect3>
