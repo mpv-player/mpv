@@ -21,7 +21,21 @@
 #include <errno.h>
 #include <string.h>
 
+#ifndef WIN32
 #include <dlfcn.h> /* GLIBC specific. Exists under cygwin too! */
+#else
+#include <windows.h>
+#define dlsym(h,s) GetProcAddress(h,s)
+#define dlopen(h,s) LoadLibrary(h)
+#define dlclose(h) FreeLibrary(h)
+static char* dlerror(){
+ char errormsg[10];
+ sprintf(errormsg,"%i\n",GetLastError());
+ return errormsg;
+}
+#endif
+
+
 #include <dirent.h>
 
 #if defined(__OpenBSD__) && !defined(__ELF__)
