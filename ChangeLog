@@ -52,7 +52,8 @@ mplayer (1.0)
     * Matroska demuxer
     * demuxer: enabling mpeg4-es autodetection, h264-es support
     * .wav extradata parsing (for truespeech, atrac3 etc)
-    * DVB input driver, mpeg-TS demuxer
+    * MPEG-TS (Transport Stream) and TIVO demuxers
+    * DVB (Digital Video Broadcasting) input driver
     * hwac3: DTS passthru support
     * new filters: down3dright, detc, telecine, tfields, ilpack, ivtc, dsize, tinterlace
     * vf layer: slices support (crop, expand, swscale only)
@@ -73,6 +74,9 @@ mplayer (1.0)
     * mp3lib: sync with mpg123 0.59s-pre
     * mp3lib: final layer-1 support
     * mp3lib: skip trashed first mp3 frame, fixes lot of buggy/misdetected files
+    * imported a working FAAD version
+    * 8BPS (Planar RGB) support
+    * working DVD (libmpdvdkit) support for Cygwin
 
     FFmpeg/libavcodec:
     * libavcodec: static,const,compiler warning cleanup, UINTX -> uintx_t
@@ -85,7 +89,7 @@ mplayer (1.0)
     * msmpeg4 2-pass support
     * H264 video decoding
     * Indeo 3 video decoding
-    * buggy VP3 video decoder (no UMV and inaccurate idct)
+    * VP3 video decoder (buggy somtimes)
     * Sorenson 3 (SVQ3) video decoder (it's actually a h264 variant)
     * 3IV1 (3ivx v1) decoding, ASV1 (ASUS Video v1) decoding
     * Improved SVQ1 decoding (using FFmpeg VLC functions)
@@ -95,6 +99,8 @@ mplayer (1.0)
     * ATI VCR1 and VCR2 decoding
     * full featured SH4 optimizations
     * ARM optimized simple_idct
+    * MPEG2 encoding
+    * PSX MDEC decoder
     
     Drivers:
     * x11_common: fix detection of metacity
@@ -106,8 +112,11 @@ mplayer (1.0)
     * vo_directfb2: triple buffering support,configuration sys changed,fixes
     * OpenGL driver cleanups/fixes (both vo_gl and vo_gl2)
     * vo_fbdev cleanup/partial rewrite, now with real direct rendering
+    * vo_xvmc: new driver featuring XvMC (HW MC/IDCT) acceleration
+    * new TGA output driver
 
     Others:
+    * gcc can now detect badly called mp_msg()s
     * lot of config/cmdline parsing fixes (some of them were at least 100000l bugs)
     * configure: enable vidix for PPC
     * configure: full featured PPC optimizations and rewritten architecture handling
