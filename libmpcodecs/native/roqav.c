@@ -322,7 +322,8 @@ void roq_decode_video(void *context, unsigned char *encoded,
   if ((mpi->width % 16 != 0) || (mpi->height % 16 != 0))
   {
     mp_msg(MSGT_DECVIDEO, MSGL_WARN, 
-      "RoQ video resolution: %d x %d; expected dimensions divisible by 16\n");
+      "RoQ video resolution: %d x %d; expected dimensions divisible by 16\n",
+      mpi->width, mpi->height);
     return;
   }
 
