@@ -1,4 +1,3 @@
-#define HAVE_XVID_VBR
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -37,11 +36,6 @@
 
 //===========================================================================//
 
-#include "divx4_vbr.h"
-#ifdef HAVE_XVID_VBR
-#include "xvid_vbr.h"
-#endif
-
 static int pass;
 extern char* passtmpfile;
 
@@ -55,7 +49,19 @@ extern char* passtmpfile;
 #define ENCORE_MAJOR_VERSION 4000
 #endif
 
+#if ENCORE_MAJOR_VERSION < 5200
+#include "divx4_vbr.h"
+#define HAVE_XVID_VBR
+#ifdef HAVE_XVID_VBR
+#include "xvid_vbr.h"
+#endif
+#endif
+
+#if ENCORE_MAJOR_VERSION >= 5200
+SETTINGS divx4_param;
+#else
 ENC_PARAM divx4_param;
+#endif
 int divx4_crispness;
 #ifdef HAVE_XVID_VBR
 static int vbrpass = -1;
@@ -67,28 +73,96 @@ static int vbrdebug = 0;
 struct config divx4opts_conf[]={
 	{"pass", &pass, CONF_TYPE_INT, CONF_RANGE,0,2, NULL},
 	{"br", &divx4_param.bitrate, CONF_TYPE_INT, CONF_RANGE, 4, 24000000, NULL},
+#if ENCORE_MAJOR_VERSION < 5200
 	{"rc_period", &divx4_param.rc_period, CONF_TYPE_INT, 0,0,0, NULL},
 	{"rc_reaction_period", &divx4_param.rc_reaction_period, CONF_TYPE_INT, 0,0,0, NULL},
 	{"rc_reaction_ratio", &divx4_param.rc_reaction_ratio, CONF_TYPE_INT, 0,0,0, NULL},
 	{"min_quant", &divx4_param.min_quantizer, CONF_TYPE_INT, CONF_RANGE,0,32, NULL},
 	{"max_quant", &divx4_param.max_quantizer, CONF_TYPE_INT, CONF_RANGE,0,32, NULL},
+#endif
 	{"key", &divx4_param.max_key_interval, CONF_TYPE_INT, CONF_MIN,0,0, NULL},
 	{"deinterlace", &divx4_param.deinterlace, CONF_TYPE_FLAG, 0,0,1, NULL},
 	{"q", &divx4_param.quality, CONF_TYPE_INT, CONF_RANGE, 1, 5, NULL},
 	{"crispness", &divx4_crispness, CONF_TYPE_INT, CONF_RANGE,0,100, NULL},
 #if ENCORE_MAJOR_VERSION >= 5010
+#if ENCORE_MAJOR_VERSION >= 5200
+/* rate control modes:
+	0 (VBV 1-pass)
+	1 (1-pass constant quality)
+	2 (VBV multipass 1st-pass)
+	3 (VBV multipass nth-pass)
+	4 (original 1-pass)
+	5 (original 1st pass)
+	6 (original 2nd pass)
+	7 (1-pass constant frame size)
+*/
+        {"vbr", &divx4_param.vbr_mode, CONF_TYPE_INT, CONF_RANGE,0,7, NULL},
+        {"bidirect", &divx4_param.use_bidirect, CONF_TYPE_FLAG, 0,0,1, NULL},
+        {"key_frame_threshold", &divx4_param.key_frame_threshold, CONF_TYPE_INT, CONF_RANGE,1,100, NULL},
+/* default values from the DivX Help Guide:
+	bitrate     size   occupancy
+	 128000    262144    196608   (Handheld)
+	 768000   1048576    786432   (Portable)
+	4000000   3145728   2359296   (Home Theatre)
+	8000000   6291456   4718592   (High Definition)
+Do not mess with these values unless you are absolutely sure of what you are doing!
+*/
+        {"vbv_bitrate", &divx4_param.vbv_bitrate, CONF_TYPE_INT, 0,0,0, NULL},
+        {"vbv_size", &divx4_param.vbv_size, CONF_TYPE_INT, 0,0,0, NULL},
+        {"vbv_occupancy", &divx4_param.vbv_occupancy, CONF_TYPE_INT, 0,0,0, NULL},
+        {"complexity", &divx4_param.complexity_modulation, CONF_TYPE_FLOAT, CONF_RANGE,0.0,1.0, NULL},
+        {"readlog", &divx4_param.log_file_read, CONF_TYPE_STRING, 0,0,1, NULL},
+        {"writelog", &divx4_param.log_file_write, CONF_TYPE_STRING, 0,0,1, NULL},
+        {"mv_file", &divx4_param.mv_file, CONF_TYPE_STRING, 0,0,1, NULL},
+        {"data_partitioning", &divx4_param.data_partitioning, CONF_TYPE_FLAG, 0,0,1, NULL},
+        {"qpel", &divx4_param.quarter_pel, CONF_TYPE_FLAG, 0,0,1, NULL},
+        {"gmc", &divx4_param.use_gmc, CONF_TYPE_FLAG, 0,0,1, NULL},
+        {"pv", &divx4_param.psychovisual, CONF_TYPE_FLAG, 0,0,1, NULL},
+        {"pv_strength_frame", &divx4_param.pv_strength_frame, CONF_TYPE_FLOAT, CONF_RANGE,0.0,1.0, NULL},
+        {"pv_strength_MB", &divx4_param.pv_strength_MB, CONF_TYPE_FLOAT, CONF_RANGE,0.0,1.0, NULL},
+        {"interlace_mode", &divx4_param.interlace_mode, CONF_TYPE_INT, CONF_RANGE,0,3, NULL},
+        {"crop", &divx4_param.enable_crop, CONF_TYPE_FLAG, 0,0,1, NULL},
+        {"resize", &divx4_param.enable_resize, CONF_TYPE_FLAG, 0,0,1, NULL},
+        {"width", &divx4_param.resize_width, CONF_TYPE_INT, 0,0,0, NULL},
+        {"height", &divx4_param.resize_height, CONF_TYPE_INT, 0,0,0, NULL},
+        {"left", &divx4_param.crop_left, CONF_TYPE_INT, 0,0,0, NULL},
+        {"right", &divx4_param.crop_right, CONF_TYPE_INT, 0,0,0, NULL},
+        {"top", &divx4_param.crop_top, CONF_TYPE_INT, 0,0,0, NULL},
+        {"bottom", &divx4_param.crop_bottom, CONF_TYPE_INT, 0,0,0, NULL},
+        {"resize_mode", &divx4_param.resize_mode, CONF_TYPE_FLAG, 0,0,1, NULL},
+        {"temporal", &divx4_param.temporal_enable, CONF_TYPE_FLAG, 0,0,1, NULL},
+        {"spatial", &divx4_param.spatial_passes, CONF_TYPE_INT, CONF_RANGE,0,3, NULL},
+        {"temporal_level", &divx4_param.temporal_level, CONF_TYPE_FLOAT, CONF_RANGE,0.0,1.0, NULL},
+        {"spatial_level", &divx4_param.spatial_level, CONF_TYPE_FLOAT, CONF_RANGE,0.0,1.0, NULL},
+#else
 	{"bidirect", &divx4_param.extensions.use_bidirect, CONF_TYPE_FLAG, 0,0,1, NULL},
 	{"obmc", &divx4_param.extensions.obmc, CONF_TYPE_FLAG, 0,0,1, NULL},
 	{"data_partitioning", &divx4_param.extensions.data_partitioning, CONF_TYPE_FLAG, 0,0,1, NULL},
+//	{"mpeg2", &divx4_param.extensions.mpeg2_quant, CONF_TYPE_FLAG, 0,0,1, NULL},
 	{"qpel", &divx4_param.extensions.quarter_pel, CONF_TYPE_FLAG, 0,0,1, NULL},
 	{"intra_frame_threshold", &divx4_param.extensions.intra_frame_threshold, CONF_TYPE_INT, CONF_RANGE,1,100, NULL},
 	{"psychovisual", &divx4_param.extensions.psychovisual, CONF_TYPE_FLAG, 0,0,1, NULL},
+	{"pv", &divx4_param.extensions.psychovisual, CONF_TYPE_FLAG, 0,0,1, NULL},
+	{"pv_strength_frame", &divx4_param.extensions.pv_strength_frame, CONF_TYPE_FLOAT, CONF_RANGE,0.0,1.0, NULL},
+	{"pv_strength_MB", &divx4_param.extensions.pv_strength_MB, CONF_TYPE_FLOAT, CONF_RANGE,0.0,1.0, NULL},
 	{"testing_param", &divx4_param.extensions.testing_param, CONF_TYPE_FLAG, 0,0,1, NULL},
 	{"gmc", &divx4_param.extensions.use_gmc, CONF_TYPE_FLAG, 0,0,1, NULL},
 	{"interlace_mode", &divx4_param.extensions.interlace_mode, CONF_TYPE_INT, CONF_RANGE,0,2, NULL},
+	{"crop", &divx4_param.extensions.enable_crop, CONF_TYPE_FLAG, 0,0,1, NULL},
+	{"resize", &divx4_param.extensions.enable_resize, CONF_TYPE_FLAG, 0,0,1, NULL},
+	{"width", &divx4_param.extensions.resize_width, CONF_TYPE_INT, 0,0,0, NULL},
+	{"height", &divx4_param.extensions.resize_height, CONF_TYPE_INT, 0,0,0, NULL},
+	{"left", &divx4_param.extensions.crop_left, CONF_TYPE_INT, 0,0,0, NULL},
+	{"right", &divx4_param.extensions.crop_right, CONF_TYPE_INT, 0,0,0, NULL},
+	{"top", &divx4_param.extensions.crop_top, CONF_TYPE_INT, 0,0,0, NULL},
+	{"bottom", &divx4_param.extensions.crop_bottom, CONF_TYPE_INT, 0,0,0, NULL},
+	{"resize_mode", &divx4_param.extensions.resize_mode, CONF_TYPE_FLAG, 0,0,1, NULL},
 	{"temporal", &divx4_param.extensions.temporal_enable, CONF_TYPE_FLAG, 0,0,1, NULL},
-	{"spatial", &divx4_param.extensions.spatial_passes, CONF_TYPE_INT, 0,0,1, NULL},
+	{"spatial", &divx4_param.extensions.spatial_passes, CONF_TYPE_INT, CONF_RANGE,0,3, NULL},
+	{"temporal_level", &divx4_param.extensions.temporal_level, CONF_TYPE_FLOAT, CONF_RANGE,0.0,1.0, NULL},
+	{"spatial_level", &divx4_param.extensions.spatial_level, CONF_TYPE_FLOAT, CONF_RANGE,0.0,1.0, NULL},
 	{"mv_file", &divx4_param.extensions.mv_file, CONF_TYPE_STRING, 0,0,1, NULL},
+#endif
 #endif
 #ifdef HAVE_XVID_VBR
 	{"vbrpass", &vbrpass, CONF_TYPE_INT, CONF_RANGE, 0, 2, NULL},
@@ -114,24 +188,55 @@ static int config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
 
+#if ENCORE_MAJOR_VERSION >= 5200
+    DivXBitmapInfoHeader format;
+    char profile = (char) encore(0, ENC_OPT_PROFILE, 0, 0);
+
+    mp_msg(MSGT_MENCODER, MSGL_INFO, "encoder binary profile: %c\n", profile);
+
+    if((pass <= 1 && (divx4_param.vbr_mode == RCMODE_VBV_MULTIPASS_NTH ||
+                      divx4_param.vbr_mode == RCMODE_502_2PASS_2ND))   ||
+       (pass == 2 && (divx4_param.vbr_mode == RCMODE_VBV_1PASS         ||
+                      divx4_param.vbr_mode == RCMODE_1PASS_CONSTANT_Q  ||
+                      divx4_param.vbr_mode == RCMODE_VBV_MULTIPASS_1ST ||
+                      divx4_param.vbr_mode == RCMODE_502_1PASS         ||
+                      divx4_param.vbr_mode == RCMODE_502_2PASS_1ST     ||
+                      divx4_param.vbr_mode == RCMODE_IMAGE_COMPRESS))) {
+        mp_msg(MSGT_MENCODER, MSGL_ERR, "pass (%i) and rate control mode (%i) doesn't match, please consult encore2.h\n",
+               pass, divx4_param.vbr_mode);
+        abort();
+    }
+#endif
+
     mux_v->bih->biWidth=width;
     mux_v->bih->biHeight=height;
-
-    divx4_param.x_dim=width;
-    divx4_param.y_dim=height;
-    divx4_param.framerate=(float)mux_v->h.dwRate/mux_v->h.dwScale;
-    mux_v->bih->biSizeImage=mux_v->bih->biWidth*mux_v->bih->biHeight*3;
+    mux_v->bih->biSizeImage=width*height*3;
 
     if(!divx4_param.bitrate) divx4_param.bitrate=800000;
     else if(divx4_param.bitrate<=16000) divx4_param.bitrate*=1000;
     if(!divx4_param.quality) divx4_param.quality=5; // the quality of compression ( 1 - fastest, 5 - best )
 
+#if ENCORE_MAJOR_VERSION >= 5200
+    format.biSize=sizeof(DivXBitmapInfoHeader);
+    format.biWidth=width;
+    format.biHeight=height;
+    format.biSizeImage=mux_v->bih->biSizeImage;
+    if(divx4_param.vbv_bitrate > 0) {
+        divx4_param.vbv_bitrate   = ((divx4_param.vbv_bitrate   - 1) /   400 + 1) *   400;
+        divx4_param.vbv_size      = ((divx4_param.vbv_size      - 1) / 16384 + 1) * 16384;
+        divx4_param.vbv_occupancy = ((divx4_param.vbv_occupancy - 1) /    64 + 1) *    64;
+    }
+#else
+    divx4_param.x_dim=width;
+    divx4_param.y_dim=height;
+    divx4_param.framerate=(float)mux_v->h.dwRate/mux_v->h.dwScale;
     // set some usefull defaults:
     if(!divx4_param.min_quantizer) divx4_param.min_quantizer=2;
     if(!divx4_param.max_quantizer) divx4_param.max_quantizer=31;
     if(!divx4_param.rc_period) divx4_param.rc_period=2000;
     if(!divx4_param.rc_reaction_period) divx4_param.rc_reaction_period=10;
     if(!divx4_param.rc_reaction_ratio) divx4_param.rc_reaction_ratio=20;
+#endif
 
 #ifdef HAVE_XVID_VBR
     if (vbrpass >= 0) {
@@ -159,6 +264,54 @@ static int config(struct vf_instance_s* vf,
     }
 #endif
 
+#if ENCORE_MAJOR_VERSION >= 5200
+    switch(outfmt){
+        case IMGFMT_YV12: {
+            format.biCompression=mmioFOURCC('Y','V','1','2');
+            break;
+        }
+        case IMGFMT_IYUV: {
+            format.biCompression=mmioFOURCC('I','Y','U','V');
+            break;
+        }
+        case IMGFMT_I420: {
+            format.biCompression=mmioFOURCC('I','4','2','0');
+            break;
+        }
+        case IMGFMT_YUY2: {
+            format.biCompression=mmioFOURCC('Y','U','Y','2');
+            break;
+        }
+        case IMGFMT_V422: {
+            format.biCompression=mmioFOURCC('V','4','2','2');
+            break;
+        }
+        case IMGFMT_UYVY: {
+            format.biCompression=mmioFOURCC('U','Y','V','Y');
+            break;
+        }
+        case IMGFMT_YVYU: {
+            format.biCompression=mmioFOURCC('Y','V','Y','U');
+            break;
+        }
+        case IMGFMT_BGR24: {
+            format.biCompression=0;
+            format.biBitCount=24;
+            break;
+        }
+        case IMGFMT_BGR32: {
+            format.biCompression=0;
+            format.biBitCount=32;
+            break;
+        }
+        default:
+            mp_msg(MSGT_MENCODER,MSGL_ERR,"divx4: unsupported picture format (%s)!\n",
+                   vo_format_name(outfmt));
+            return 0;
+    }
+
+    encore(&vf->priv->enc_handle, ENC_OPT_INIT, &format, &divx4_param);
+#else
     divx4_param.handle=NULL;
     encore(NULL,ENC_OPT_INIT,&divx4_param,NULL);
     vf->priv->enc_handle=divx4_param.handle;
@@ -195,6 +348,7 @@ static int config(struct vf_instance_s* vf,
 	}
 	break;
     }
+#endif
 
     return 1;
 }
@@ -203,6 +357,11 @@ static int config(struct vf_instance_s* vf,
 static void uninit(struct vf_instance_s* vf){
     if (vbrpass >= 0 && vbrFinish(&vf->priv->vbr_state) == -1)
 	    abort();
+}
+#else
+static void uninit(struct vf_instance_s* vf){
+    encore(vf->priv->enc_handle, ENC_OPT_RELEASE, 0, 0);
+    vf->priv->enc_handle = NULL;
 }
 #endif
 
@@ -232,6 +391,14 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     vf->priv->enc_frame.image=mpi->planes[0];
     vf->priv->enc_frame.bitstream=mux_v->buffer;
     vf->priv->enc_frame.length=mux_v->buffer_size;
+#if ENCORE_MAJOR_VERSION >= 5200
+    vf->priv->enc_frame.produce_empty_frame = 0;
+    encore(vf->priv->enc_handle, ENC_OPT_ENCODE, &vf->priv->enc_frame, &enc_result);
+    if(enc_result.cType == 'I')
+        muxer_write_chunk(mux_v,vf->priv->enc_frame.length,0x10);
+    else
+        muxer_write_chunk(mux_v,vf->priv->enc_frame.length,0);
+#else
     vf->priv->enc_frame.mvs=NULL;
 #ifdef HAVE_XVID_VBR
     if (vbrpass >= 0) {
@@ -277,6 +444,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	}
     }
     muxer_write_chunk(mux_v,vf->priv->enc_frame.length,enc_result.is_key_frame?0x10:0);
+#endif
     return 1;
 }
 
@@ -287,9 +455,9 @@ static int vf_open(vf_instance_t *vf, char* args){
     vf->control=control;
     vf->query_format=query_format;
     vf->put_image=put_image;
-#ifdef HAVE_XVID_VBR
+//#ifdef HAVE_XVID_VBR
     vf->uninit = uninit;
-#endif
+//#endif
     vf->priv=malloc(sizeof(struct vf_priv_s));
     memset(vf->priv,0,sizeof(struct vf_priv_s));
     vf->priv->mux=(muxer_stream_t*)args;

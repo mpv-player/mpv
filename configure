@@ -4607,7 +4607,7 @@ else
 # ld: Warning: type of symbol `dering' changed from 1 to 2 in opendivx/postprocess.o
 cat > $TMPC << EOF
 #include <decore.h>
-int main(void) { (void) decore(0, 0, 0, 0);  return DEC_OPT_MEMORY_REQS; }
+int main(void) { (void) decore(0, 0, 0, 0);  return DEC_OPT_INIT; }
 EOF
 if test "$_divx4linux" != no && cc_check -lm -ldivxdecore -lm ; then
   _opendivx=no

@@ -53,6 +53,14 @@ LIBVD_EXTERN(odivx)
 #include <decore.h>
 #endif
 
+#ifndef DECORE_VERSION
+#define DECORE_VERSION 0
+#endif
+
+#if DECORE_VERSION >= 20021112
+static void* dec_handle = NULL;
+#endif
+
 //**************************************************************************//
 //             The OpenDivX stuff:
 //**************************************************************************//
@@ -85,21 +93,33 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
     switch(cmd){
     case VDCTRL_QUERY_MAX_PP_LEVEL:
 #ifdef NEW_DECORE
-	return 9; // for divx4linux
+#if DECORE_VERSION >= 20021112
+        return 6; // divx4linux >= 5.0.5 -> 0..60
+#else
+        return 10; // divx4linux < 5.0.5 -> 0..100
+#endif
 #else
 	return PP_QUALITY_MAX;  // for opendivx
 #endif
     case VDCTRL_SET_PP_LEVEL: {
-	DEC_SET dec_set;
 	int quality=*((int*)arg);
+#if DECORE_VERSION >= 20021112
+        int32_t iInstruction, iPostproc;
+        if(quality<0 || quality>6) quality=6;
+        iInstruction = DEC_ADJ_POSTPROCESSING | DEC_ADJ_SET;
+        iPostproc = quality*10;
+        decore(dec_handle, DEC_OPT_ADJUST, &iInstruction, &iPostproc);
+#else
+        DEC_SET dec_set;
 #ifdef NEW_DECORE
-	if(quality<0 || quality>9) quality=9;
+	if(quality<0 || quality>10) quality=10;
 	dec_set.postproc_level=quality*10;
 #else
 	if(quality<0 || quality>PP_QUALITY_MAX) quality=PP_QUALITY_MAX;
 	dec_set.postproc_level=getPpModeForQuality(quality);
 #endif
 	decore(0x123,DEC_OPT_SETPP,&dec_set,NULL);
+#endif
 	return CONTROL_OK;
     }
     
@@ -110,6 +130,45 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 
 // init driver
 static int init(sh_video_t *sh){
+#if DECORE_VERSION >= 20021112
+    DEC_INIT dec_init;
+    int iSize=sizeof(DivXBitmapInfoHeader);
+    DivXBitmapInfoHeader* pbi=malloc(iSize);
+    int32_t iInstruction;
+
+    memset(&dec_init, 0, sizeof(dec_init));
+    memset(pbi, 0, iSize);
+
+    switch(sh->format) {
+      case mmioFOURCC('D','I','V','3'):
+        dec_init.codec_version = 311;
+        break;
+      case mmioFOURCC('D','I','V','X'):
+        dec_init.codec_version = 412;
+        break;
+      case mmioFOURCC('D','X','5','0'):
+      default: // Fallback to DivX 5 behaviour
+        dec_init.codec_version = 500;
+    }
+
+    // no smoothing of the CPU load
+    dec_init.smooth_playback = 0;
+
+    pbi->biSize=iSize;
+
+    pbi->biCompression=mmioFOURCC('U','S','E','R');
+
+    pbi->biWidth = sh->disp_w;
+    pbi->biHeight = sh->disp_h;
+
+    decore(&dec_handle, DEC_OPT_INIT, &dec_init, NULL);
+    decore(dec_handle, DEC_OPT_SETOUT, pbi, NULL);
+
+    iInstruction = DEC_ADJ_POSTPROCESSING | DEC_ADJ_SET;
+    decore(dec_handle, DEC_OPT_ADJUST, &iInstruction, &divx_quality);
+
+    free(pbi);
+#else // DECORE_VERSION < 20021112
     DEC_PARAM dec_param;
     DEC_SET dec_set;
 
@@ -152,6 +211,7 @@ static int init(sh_video_t *sh){
 
     dec_set.postproc_level = divx_quality;
     decore(0x123, DEC_OPT_SETPP, &dec_set, NULL);
+#endif // DECORE_VERSION
     
     mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: OpenDivX video codec init OK!\n");
 
@@ -160,7 +220,12 @@ static int init(sh_video_t *sh){
 
 // uninit driver
 static void uninit(sh_video_t *sh){
+#if DECORE_VERSION >= 20021112
+    decore(dec_handle, DEC_OPT_RELEASE, NULL, NULL);
+    dec_handle = NULL;
+#else
     decore(0x123,DEC_OPT_RELEASE,NULL,NULL);
+#endif
 }
 
 //mp_image_t* mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag, int w, int h);
@@ -170,7 +235,11 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     mp_image_t* mpi;
     DEC_FRAME dec_frame;
 #ifdef NEW_DECORE
+#if DECORE_VERSION >= 20021112
+    DEC_FRAME_INFO dec_pic;
+#else
     DEC_PICTURE dec_pic;
+#endif
 #endif
 
     if(len<=0) return NULL; // skipped frame
@@ -180,12 +249,17 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     dec_frame.render_flag = (flags&3)?0:1;
 
 #ifdef NEW_DECORE
+#if DECORE_VERSION >= 20021112
+    dec_frame.stride=sh->disp_w;
+    decore(dec_handle, DEC_OPT_FRAME, &dec_frame, &dec_pic);
+#else
     dec_frame.bmp=&dec_pic;
     dec_pic.y=dec_pic.u=dec_pic.v=NULL;
 #ifndef DEC_OPT_FRAME_311
     decore(0x123, DEC_OPT_FRAME, &dec_frame, NULL);
 #else
     decore(0x123, (sh->format==mmioFOURCC('D','I','V','3'))?DEC_OPT_FRAME_311:DEC_OPT_FRAME, &dec_frame, NULL);
+#endif
 #endif
 #else
     // opendivx:
