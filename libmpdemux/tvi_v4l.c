@@ -943,6 +943,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 	    return(TVI_CONTROL_FALSE);
 	}
 	case TVI_CONTROL_IS_AUDIO:
+	    if (tv_param_force_audio) return(TVI_CONTROL_TRUE);
 	    if (priv->channels[priv->act_channel].flags & VIDEO_VC_AUDIO)
 	    {
 		return(TVI_CONTROL_TRUE);
