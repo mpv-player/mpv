@@ -151,7 +151,7 @@ typedef int             INT;
 typedef unsigned int    UINT;
 typedef unsigned short  WORD;
 typedef unsigned int    DWORD;
-typedef unsigned int    ULONG;
+typedef unsigned long   ULONG;
 typedef unsigned char   BYTE;
 typedef long            LONG;
 typedef short           SHORT;
