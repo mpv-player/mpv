@@ -424,8 +424,8 @@ compiled <application>MPlayer</application> binaries for Mac OS X from the
 </para>
 </sect1>
 
-<sect1 id="hpux">
-<title>HP UX</title>
+<sect1 id="hp-ux">
+<title>HP-UX</title>
 <para>
 Martin Gansser maintains a valuable 
 <ulink url="http://cloud.prohosting.com/patos/docs/mplayer_on_hpux11.htm">HOWTO</ulink>
