@@ -10,7 +10,7 @@
 #define N_UNKNOWN "" 
 #define N_UNKNOWNEXT ""
 
-#define M_UNKNOWN { \
+#define F_UNKNOWN { \
 N_UNKNOWN, \
 N_UNKNOWN, \
 N_UNKNOWN, \
@@ -29,30 +29,10 @@ N_UNKNOWN, \
 N_UNKNOWN \
 }
 
-#define F_UNKNOWN { \
-M_UNKNOWN, \
-M_UNKNOWN, \
-M_UNKNOWN, \
-M_UNKNOWN, \
-M_UNKNOWN, \
-M_UNKNOWN, \
-M_UNKNOWN, \
-M_UNKNOWN, \
-M_UNKNOWN, \
-M_UNKNOWN, \
-M_UNKNOWN, \
-M_UNKNOWN, \
-M_UNKNOWN, \
-M_UNKNOWN, \
-M_UNKNOWN, \
-M_UNKNOWN \
-}
-
-static const char cpuname
+static const char *cpuname
 		/* Vendor */ [MAX_VENDORS]
 			/* Family */ [16]
 				/* Model  */ [16]
-					/* Name   */ [128]
 	={
 		/* Intel Corporation, "GenuineIntel" */ {
 			/* 0 */ F_UNKNOWN, 
@@ -476,7 +456,6 @@ static const char cpuname
 
 #undef N_UNKNOWNEXT
 #undef N_UNKNOWN
-#undef M_UNKNOWN
 #undef F_UNKNOWN
 
 static const struct {
