@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <math.h>
+#include <assert.h>
 
 #include "config.h"
 #ifdef USE_LIBA52
@@ -13,17 +14,28 @@
 
 #include "cpudetect.h"
 
+#include "../libaf/af_format.h"
+
 #include "../liba52/a52.h"
 #include "../liba52/mm_accel.h"
 
 static sample_t * a52_samples;
 static a52_state_t a52_state;
 static uint32_t a52_flags=0;
+/** Used by a52_resample_float, it defines the mapping between liba52
+ * channels and output channels.  The ith nibble from the right in the
+ * hex representation of channel_map is the index of the source
+ * channel corresponding to the ith output channel.  Source channels are
+ * indexed 1-6.  Silent output channels are marked by 0xf. */
+static uint32_t channel_map;
 
 #define DRC_NO_ACTION      0
 #define DRC_NO_COMPRESSION 1
 #define DRC_CALLBACK       2
 
+/** The output is multiplied by this var.  Used for volume control */
+static sample_t a52_level = 1;
+/** The value of the -a52drc switch. */
 float a52_drc_level = 1.0;
 static int a52_drc_action = DRC_NO_ACTION;
 
@@ -67,7 +79,7 @@ while(1){
     mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"a52: len=%d  flags=0x%X  %d Hz %d bit/s\n",length,flags,sample_rate,bit_rate);
     sh_audio->samplerate=sample_rate;
     sh_audio->i_bps=bit_rate/8;
-    sh_audio->samplesize=2;
+    sh_audio->samplesize=sh_audio->sample_format==AF_FORMAT_FLOAT_NE ? 4 : 2;
     demux_read_data(sh_audio->ds,sh_audio->a_in_buffer+8,length-8);
     if(sh_audio->format!=0x2000)
 	swab(sh_audio->a_in_buffer+8,sh_audio->a_in_buffer+8,length-8);
@@ -114,15 +126,40 @@ static int preinit(sh_audio_t *sh)
 {
   /* Dolby AC3 audio: */
   /* however many channels, 2 bytes in a word, 256 samples in a block, 6 blocks in a frame */
-  sh->audio_out_minsize=audio_output_channels*2*256*6;
+  sh->audio_out_minsize=audio_output_channels*sh->samplesize*256*6;
   sh->audio_in_minsize=3840;
+  a52_level = 1.0;
   return 1;
+}
+
+/**
+ * \brief Function to convert the "planar" float format used by liba52
+ * into the interleaved float format used by libaf/libao2.
+ * \param in the input buffer containing the planar samples.
+ * \param out the output buffer where the interleaved result is stored.
+ */
+static int a52_resample_float(float *in, int16_t *out)
+{
+    unsigned long i;
+    float *p = (float*) out;
+    for (i = 0; i != 256; i++) {
+	unsigned long map = channel_map;
+	do {
+	    unsigned long ch = map & 15;
+	    if (ch == 15)
+		*p = 0;
+	    else
+		*p = in[i + ((ch-1)<<8)];
+	    p++;
+	} while ((map >>= 4));
+    }
+    return (int16_t*) p - out;
 }
 
 static int init(sh_audio_t *sh_audio)
 {
   uint32_t a52_accel=0;
-  sample_t level=1, bias=384;
+  sample_t level=a52_level, bias=384;
   int flags=0;
   /* Dolby AC3 audio:*/
   if(gCpuCaps.hasSSE) a52_accel|=MM_ACCEL_X86_SSE;
@@ -178,6 +215,36 @@ while(sh_audio->channels>0){
   }
   mp_msg(MSGT_DECAUDIO,MSGL_V,"A52 flags after a52_frame: 0x%X\n",flags);
   /* frame decoded, let's init resampler:*/
+  channel_map = 0;
+  if (sh_audio->sample_format == AF_FORMAT_FLOAT_NE) {
+      if (!(flags & A52_LFE)) {
+	  switch ((flags<<3) | sh_audio->channels) {
+	    case (A52_MONO    << 3) | 1: channel_map = 0x1; break;
+	    case (A52_CHANNEL << 3) | 2:
+	    case (A52_STEREO  << 3) | 2:
+	    case (A52_DOLBY   << 3) | 2: channel_map =    0x21; break;
+	    case (A52_2F1R    << 3) | 3: channel_map =   0x321; break;
+	    case (A52_2F2R    << 3) | 4: channel_map =  0x4321; break;
+	    case (A52_3F      << 3) | 5: channel_map = 0x2ff31; break;
+	    case (A52_3F2R    << 3) | 5: channel_map = 0x25431; break;
+	  }
+      } else if (sh_audio->channels == 6) {
+	  switch (flags & ~A52_LFE) {
+	    case A52_MONO   : channel_map = 0x12ffff; break;
+	    case A52_CHANNEL:
+	    case A52_STEREO :
+	    case A52_DOLBY  : channel_map = 0x1fff32; break;
+	    case A52_3F     : channel_map = 0x13ff42; break;
+	    case A52_2F1R   : channel_map = 0x1f4432; break;
+	    case A52_2F2R   : channel_map = 0x1f5432; break;
+	    case A52_3F2R   : channel_map = 0x136542; break;
+	  }
+      }
+      if (channel_map) {
+	  a52_resample = a52_resample_float;
+	  break;
+      }
+  } else
   if(a52_resample_init(a52_accel,flags,sh_audio->channels)) break;
   --sh_audio->channels; /* try to decrease no. of channels*/
 }
@@ -199,15 +266,28 @@ static int control(sh_audio_t *sh,int cmd,void* arg, ...)
       case ADCTRL_SKIP_FRAME:
 	  a52_fillbuff(sh); break; // skip AC3 frame
 	  return CONTROL_TRUE;
+      case ADCTRL_SET_VOLUME: {
+	  float vol = *(float*)arg;
+	  if (vol > 60.0) vol = 60.0;
+	  a52_level = vol <= -200.0 ? 0 : pow(10.0,vol/20.0);
+	  return CONTROL_TRUE;
+      }
+      case ADCTRL_QUERY_FORMAT:
+	  if (*(int*)arg == AF_FORMAT_S16_NE ||
+	      *(int*)arg == AF_FORMAT_FLOAT_NE)
+	      return CONTROL_TRUE;
+	  return CONTROL_FALSE;
     }
   return CONTROL_UNKNOWN;
 }
 
 static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen)
 {
-    sample_t level=1, bias=384;
+    sample_t level=a52_level, bias=384;
     int flags=a52_flags|A52_ADJUST_LEVEL;
     int i,len=-1;
+	if (sh_audio->sample_format == AF_FORMAT_FLOAT_NE)
+	    bias = 0;
 	if(!sh_audio->a_in_buffer_len) 
 	    if(a52_fillbuff(sh_audio)<0) return len; /* EOF */
 	sh_audio->a_in_buffer_len=0;
@@ -232,6 +312,7 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
 	    }
 	    len+=2*a52_resample(a52_samples,(int16_t *)&buf[len]);
 	}
+	assert(len <= maxlen);
   return len;
 }
 #endif
