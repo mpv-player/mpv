@@ -64,6 +64,15 @@ static int ignore_cache = 0;
 static int update_cache = 0;
 static int olw_cor = 0, olh_cor = 0,olx_cor = 0, oly_cor = 0;
 static int ol_osd = 0;
+static int ck_rmin = 0x40;
+static int ck_rmax = 0xFF;
+static int ck_r = 0xFF;
+static int ck_gmin = 0x00;
+static int ck_gmax = 0x20;
+static int ck_g = 0;
+static int ck_bmin = 0x40;
+static int ck_bmax = 0xFF;
+static int ck_b = 0xFF;
 
 
 config_t dxr2_opts[] = {
@@ -106,6 +115,17 @@ config_t dxr2_opts[] = {
 
   { "ol-osd", &ol_osd, CONF_TYPE_FLAG, 0, 0, 1, NULL},
   { "nool-osd", &ol_osd, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+
+  { "ck-rmin", &ck_rmin, CONF_TYPE_INT, CONF_RANGE, 0, 0xFF, NULL},
+  { "ck-rmax", &ck_rmax, CONF_TYPE_INT, CONF_RANGE, 0, 0xFF, NULL},
+  { "ck-r", &ck_r, CONF_TYPE_INT, CONF_RANGE, 0, 0xFF, NULL},
+  { "ck-gmin", &ck_gmin, CONF_TYPE_INT, CONF_RANGE, 0, 0xFF, NULL},
+  { "ck-gmax", &ck_gmax, CONF_TYPE_INT, CONF_RANGE, 0, 0xFF, NULL},
+  { "ck-g", &ck_g, CONF_TYPE_INT, CONF_RANGE, 0, 0xFF, NULL},
+  { "ck-bmin", &ck_bmin, CONF_TYPE_INT, CONF_RANGE, 0, 0xFF, NULL},
+  { "ck-bmax", &ck_bmax, CONF_TYPE_INT, CONF_RANGE, 0, 0xFF, NULL},
+  { "ck-b", &ck_b, CONF_TYPE_INT, CONF_RANGE, 0, 0xFF, NULL},
+
   { NULL,NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -419,7 +439,7 @@ static int dxr2_set_vga_params(dxr2_vgaParams_t* vga,int detect) {
   win.arg2 = vo_screenheight;
   ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_DIMENSION,&win);
 
-  om.arg = 3;
+  om.arg = 0;
   ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_IN_DELAY,&om);
 
   if(detect) {
@@ -747,7 +767,7 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t width, uint
 
   movie_w = width;
   movie_h = height;
-  vo_fs = flags & VOFLAG_FULLSCREEN ? 1 : 0;
+  //vo_fs = flags & VOFLAG_FULLSCREEN ? 1 : 0;
   // Overlay
   while(use_ol) {
     dxr2_twoArg_t win;
@@ -787,21 +807,21 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t width, uint
       sub_config_count++;
 
       // Feel free to try some other other color and report your results
-      oc.arg1 = 0x40;
-      oc.arg2 = 0xff;
-      oc.arg3 = 0x00;
-      oc.arg4 = 0x20;
-      oc.arg5 = 0x40;
-      oc.arg6 = 0xff;
+      oc.arg1 = ck_rmin;
+      oc.arg2 = ck_rmax;
+      oc.arg3 = ck_gmin;
+      oc.arg4 = ck_gmax;
+      oc.arg5 = ck_bmin;
+      oc.arg6 = ck_bmax;
       ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_COLOUR, &oc);
       
       om.arg = DXR2_OVERLAY_WINDOW_COLOUR_KEY;
       ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_MODE,&om);
       sub_img = malloc(width*height*3);
       for(i = 0 ; i < width*height*3 ; i += 3) {
-	sub_img[i] = 255;
-	sub_img[i+1] = 0;
-	sub_img[i+2] = 255;
+	sub_img[i] = ck_b;
+	sub_img[i+1] = ck_g;
+	sub_img[i+2] = ck_r;
       }
       aspect = ((1<<16)*width + height/2)/height;
       sub_w = sub_h = 0;
@@ -810,6 +830,7 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t width, uint
     }
     vo_config_count = cc;
     if(!sub_vo) { // Fallback on non windowed overlay
+      vo_fs = flags & VOFLAG_FULLSCREEN ? 1 : 0;
       om.arg = DXR2_OVERLAY_WINDOW_KEY;
       ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_MODE,&om);
       win.arg1 = flags & VOFLAG_FULLSCREEN ? vo_screenwidth : width;
@@ -862,7 +883,7 @@ static uint32_t draw_frame(uint8_t * src[])
 
 static void flip_page (void)
 {
-  if(sub_vo && ol_osd)
+  if(sub_vo && ol_osd && vo_osd_changed_flag)
     sub_vo->flip_page();
 }
 
@@ -956,8 +977,16 @@ static uint32_t preinit(const char *arg) {
       mp_msg(MSGT_VO,MSGL_WARN,"VO: [dxr2] Sub vo %s preinit failed => no overlay\n",arg);
       sub_vo = NULL;
       use_ol = 0;
-    } else
+    } else {
+      uint32_t fmt = IMGFMT_BGR24;
       mp_msg(MSGT_VO,MSGL_V,"VO: [dxr2] Sub vo %s inited\n",arg);
+      if(sub_vo->control(VOCTRL_QUERY_FORMAT,&fmt) <= 0) {
+	mp_msg(MSGT_VO,MSGL_WARN,"VO: [dxr2] Sub vo %s doesn't support BGR24 => no overlay\n",arg);
+	sub_vo->uninit();
+	sub_vo = NULL;
+	use_ol = 0;
+      }
+    }
   }
 
   dxr2_fd = open( "/dev/dxr2", O_WRONLY);
