@@ -67,6 +67,7 @@ static char help_text[]=
 #define MSGTR_InvalidVOdriver "Nieprawid³owa nazwa sterownika video: %s\nU¿yj '-vo help' aby dostaæ listê dostêpnych sterowników video.\n"
 #define MSGTR_InvalidAOdriver "Nieprawid³owa nazwa sterownika audio: %s\nU¿yj '-ao help' aby dostaæ listê dostêpnych sterowników audio.\n"
 #define MSGTR_CopyCodecsConf "(skopiuj/zlinkuj etc/codecs.conf do ~/.mplayer/codecs.conf)\n"
+#define MSGTR_BuiltinCodecsConf "U¿ywam domy¶lnego (wkompilowanego) codecs.conf\n"
 #define MSGTR_CantLoadFont "Nie mogê za³adowaæ fontu: %s\n"
 #define MSGTR_CantLoadSub "Nie mogê za³adowaæ napisów: %s\n"
 #define MSGTR_ErrorDVDkey "B³±d w przetwarzaniu DVD KEY.\n"
