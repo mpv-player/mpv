@@ -229,7 +229,7 @@ endif
 	$(INSTALL) -c -m 644 DOCS/mplayer.1 $(MANDIR)/man1/mplayer.1
 ifeq ($(MENCODER),yes)
 	$(INSTALL) -m 755 -s $(PRG_MENCODER) $(BINDIR)/$(PRG_MENCODER)
-	$(INSTALL) -c -m 644 DOCS/mencoder.1 $(MANDIR)/man1/mencoder.1
+	-ln -sf $(MANDIR)/man1/mplayer.1 $(MANDIR)/man1/mencoder.1
 endif
 	@if test ! -d $(DATADIR) ; then mkdir -p $(DATADIR) ; fi
 	@if test ! -d $(DATADIR)/font ; then mkdir -p $(DATADIR)/font ; fi
