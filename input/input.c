@@ -54,6 +54,7 @@ static mp_cmd_t mp_cmds[] = {
   { MP_CMD_TV_STEP_NORM, "tv_step_norm",0, { {-1,{0}} }  },
   { MP_CMD_TV_STEP_CHANNEL_LIST, "tv_step_chanlist", 0, { {-1,{0}} }  },
 #endif
+  { MP_CMD_VO_FULLSCREEN, "vo_fullscreen", 0, { {-1,{0}} } },
   { 0, NULL, 0, {} }
 };
 
@@ -177,6 +178,7 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { { JOY_BTN2, 0 }, "volume 1"},
   { { JOY_BTN3, 0 }, "volume -1"},
 #endif
+  { { 'f', 0 }, "vo_fullscreen" },
   { { 0 }, NULL }
 };
 
