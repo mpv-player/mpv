@@ -417,11 +417,12 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
    vo_x11_classhint( mDisplay,vo_window,"xv" );
    vo_hidecursor(mDisplay,vo_window);
 
-   if(WinID!=0)
-   XSelectInput(mDisplay, vo_window, StructureNotifyMask | KeyPressMask | PointerMotionMask
+   XSelectInput(mDisplay, vo_window, StructureNotifyMask | KeyPressMask | 
+	((WinID==0) ? 0 : (PointerMotionMask
 #ifdef HAVE_NEW_INPUT
 		| ButtonPressMask | ButtonReleaseMask
 #endif
+	))
    );
    XSetStandardProperties(mDisplay, vo_window, hello, hello, None, NULL, 0, &hint);
    if ( vo_fs ) vo_x11_decoration( mDisplay,vo_window,0 );

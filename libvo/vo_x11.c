@@ -353,6 +353,7 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
 #ifdef HAVE_XINERAMA
    vo_x11_xinerama_move(mDisplay,vo_window);
 #endif
+    if(WinID!=0)
     do { XNextEvent( mDisplay,&xev ); } while ( xev.type != MapNotify || xev.xmap.event != vo_window );
     XSelectInput( mDisplay,vo_window,NoEventMask );
 
@@ -360,7 +361,9 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
     XSync( mDisplay,False );
     vo_gc=XCreateGC( mDisplay,vo_window,0L,&xgcv );
 
-    XSelectInput( mDisplay,vo_window,StructureNotifyMask | KeyPressMask | ButtonPressMask | ButtonReleaseMask | PointerMotionMask);
+    // we cannot grab mouse events on root window :(
+    XSelectInput( mDisplay,vo_window,StructureNotifyMask | KeyPressMask | 
+	((WinID==0)?0:(ButtonPressMask | ButtonReleaseMask | PointerMotionMask)) );
 
 #ifdef HAVE_XF86VM
     if ( vm )
