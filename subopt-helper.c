@@ -234,23 +234,14 @@ static char const * parse_str( char const * const str, strarg_t * const valp )
   char const * match = strchr( str, ':' );
 
   if ( !match )
-  {
-    if ( str[1] != '\0' )
-    {
-      int len = strlen( &str[1] );
-      match = str + 1 + len;
-    }
-    else
-    {
-      return NULL;
-    }
-  }
+    match = &str[strlen(str)];
+
+  // empty string or too long
+  if ((match == str) || (match - str > 255))
+    return NULL;
 
   valp->len = match - str;
   valp->str = str;
-
-  /* if the length is zero, indicate error */
-  if ( valp->len == 0 ) { return NULL; }
 
   return match;
 }
