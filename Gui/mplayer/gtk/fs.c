@@ -41,6 +41,7 @@ int             fsType    = 0;
 
 char * fsVideoFilterNames[][2] =
          { { "MPEG files (*.mpg,*.mpeg,*.m1v)",                         "*.mpg,*.mpeg,*.m1v" },
+	   { "VCD/SVCD Images (*.bin)",					"*.bin" },
            { "VOB files (*.vob)",  				  	"*.vob" },
            { "AVI files (*.avi)",  				  	"*.avi" },
 	   { "DiVX files (*.divx)",					"*.divx" },
@@ -58,7 +59,7 @@ char * fsVideoFilterNames[][2] =
 	   { "WMA files (*.wma)",					"*.wma" },
 	   { "Matroska Audio files (*.mka)",			  	"*.mka" },
 	   { "Audio files",						"*.wav,*.ogg,*.mp2,*.mp3,*.wma,*.mka" },
-	   { "Video files", 						"*.asf,*.avi,*.divx,*.fli,*.flc,*.ogm,*.mpg,*.mpeg,*.m1v,*.mov,*.nuv,*.qt,*.rm,*.vob,*.viv,*.wmv,*.mkv" },
+	   { "Video files", 						"*.asf,*.avi,*.divx,*.fli,*.flc,*.ogm,*.mpg,*.mpeg,*.m1v,*.mov,*.nuv,*.qt,*.rm,*.vob,*.viv,*.wmv,*.mkv,*.bin" },
            { "All files",	      					"*" },
 	   { NULL,NULL }
 	 };
