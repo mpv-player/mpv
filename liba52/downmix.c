@@ -175,7 +175,6 @@ int downmix_init (int input, int flags, sample_t * level,
 	    *level *= 1 / (1 + 3 * LEVEL_3DB);
 	    break;
 	}
-
     return output;
 }
 
@@ -1384,9 +1383,9 @@ static void mix3to2_3dnow (sample_t * samples, sample_t bias)
 	"movq   2048(%0, %%esi), %%mm4	\n\t"
 	"movq   2056(%0, %%esi), %%mm5	\n\t"
 	"pfadd  %%mm0, %%mm2		\n\t"
-	"pfadd  %%mm0, %%mm3		\n\t"
+	"pfadd  %%mm1, %%mm3		\n\t"
 	"pfadd  %%mm0, %%mm4		\n\t"
-	"pfadd  %%mm0, %%mm5		\n\t"
+	"pfadd  %%mm1, %%mm5		\n\t"
 	"movq   %%mm2, (%0, %%esi)	\n\t"
 	"movq   %%mm3, 8(%0, %%esi)	\n\t"
 	"movq   %%mm4, 1024(%0, %%esi)	\n\t"
