@@ -24,6 +24,11 @@
 #ifdef __linux__
 #include <asm/unistd.h>
 #include <asm/ldt.h>
+// 2.5.xx+ calls this user_desc:
+#include <linux/version.h>
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,47)
+#define modify_ldt_ldt_s user_desc
+#endif
 /* prototype it here, so we won't depend on kernel headers */
 #ifdef  __cplusplus
 extern "C" {
