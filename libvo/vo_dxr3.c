@@ -6,6 +6,11 @@
  */
 
 /* ChangeLog added 2002-01-10
+ * 2002-03-16:
+ *  Fixed problems with fame, it gives a better picture than avcodec,
+ *  but is slightly slower. Most notably the wobbling effect is gone
+ *  with fame.
+ *
  * 2002-03-13:
  *  Preliminary fame support added (it breaks after seeking, why?)
  *
@@ -164,11 +169,9 @@ uint32_t control(uint32_t request, void *data, ...)
 			/* Conversion needed | OSD Supported */
 			flag = 0x1 | 0x4;
 			break;
-		default:
-			printf("VO: [dxr3] Format unsupported, mail dholm@iname.com\n");
 #else
 		default:
-			printf("VO: [dxr3] You have disabled libavcodec support (Read DOCS/codecs.html)!\n");
+			printf("VO: [dxr3] You have disabled libavcodec/libfame support (Read DOCS/codecs.html)!\n");
 #endif
 		}
 		if (noprebuf) {
@@ -276,13 +279,37 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		fame_params.quality = 100;
 		fame_params.bitrate = 0;
 		fame_params.slices_per_frame = 1;
-		fame_params.frames_per_sequence = 25;
-		fame_params.frame_rate_num = 25;
-		fame_params.frame_rate_den = 1;
+		fame_params.frames_per_sequence = (int) round(vo_fps);
 		fame_params.shape_quality = 100;
 		fame_params.search_range = 8;
 		fame_params.verbose = 0;
 		fame_params.profile = NULL;
+		
+		if (vo_fps < 24.0) {
+		    fame_params.frame_rate_num = 24000;
+		    fame_params.frame_rate_den = 1001;
+		} else if (vo_fps < 25.0) {
+		    fame_params.frame_rate_num = 24;
+		    fame_params.frame_rate_den = 1;
+		} else if (vo_fps < 29.0) {
+		    fame_params.frame_rate_num = 25;
+		    fame_params.frame_rate_den = 1;
+		} else if (vo_fps < 30.0) {
+		    fame_params.frame_rate_num = 30000;
+		    fame_params.frame_rate_den = 1001;
+		} else if (vo_fps < 50.0) {
+		    fame_params.frame_rate_num = 30;
+		    fame_params.frame_rate_den = 1;
+		} else if (vo_fps < 55.0) {
+		    fame_params.frame_rate_num = 50;
+		    fame_params.frame_rate_den = 1;
+		} else if (vo_fps < 60.0) {
+		    fame_params.frame_rate_num = 60000;
+		    fame_params.frame_rate_den = 1001;
+		} else {
+		    fame_params.frame_rate_num = 60;
+		    fame_params.frame_rate_den = 1;
+		}
 		
 		outbuf = malloc(100000);
 		fame_init(fame_ctx, &fame_params, outbuf, 100000);
@@ -471,13 +498,17 @@ static uint32_t preinit(const char *arg)
 	char devname[80];
 	int fdflags = O_WRONLY;
 
+#ifdef USE_LIBFAME
+	printf("VO: [dxr3] You are using fame, due to a small problem I have to disable prebuffering\n");
+	noprebuf = 1;
+#else
 	/* Open the control interface */
 	if (arg && !strcmp("noprebuf", arg)) {
 		printf("VO: [dxr3] Disabling prebuffering.\n");
 		noprebuf = 1;
 		fdflags |= O_NONBLOCK;
 	}
-	
+#endif	
 	if (arg && !noprebuf) {
 		printf("VO: [dxr3] Forcing use of device %s\n", arg);
 		sprintf(devname, "/dev/em8300-%s", arg);
