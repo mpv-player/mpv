@@ -1003,16 +1003,18 @@ aucun son
 .IPs driver=<valeur>
 disponible: dummy, v4l, v4l2, bsdbt848
 .IPs device=<valeur>
-Spécifier un autre périphérique que celui par défaut /dev/\:video0.
+Spécifie un autre périphérique que celui par défaut /dev/\:video0.
 .IPs input=<valeur>
-Spécifier une autre entrée que celle par défaut 0 (Télévision) (voir 
+Spécifie une autre entrée que celle par défaut 0 (Télévision) (voir
 la sortie pour en obtenir la liste)
 .IPs freq=<valeur>
-Spécifier sur quelle fréquence régler le tuner (par exemple \& 511.250).
+Spécifie sur quelle fréquence régler le tuner (par exemple \& 511.250).
 Non compatible avec le paramètre channels.
 .IPs outfmt=<valeur>
-format de sortie du tuner (yv12, rgb32, rgb24, rgb16, rgb15, uyvy, yuy2,
-i420)
+Spécifie le format de sortie du tuner avec une valeur pré-selectionnée
+supportée par le pilote v4l (yv12, rgb32, rgb24, rgb16, rgb15, uyvy, yuy2,
+i420) ou un format arbitraire donné en valeur héxa.
+Essayez outfmt=help pour avoir la liste des formats disponibles.
 .IPs width=<valeur>
 largeur de la fenêtre
 .IPs height=<valeur>
@@ -2065,6 +2067,15 @@ d: décalage en ms pour les haut-parleurs arrière (0ms à 1000ms) 15ms par défaut.
 Décale la sortie du son.
 Spécifie le décalage séparemment pour chaque canal en millisecondes (nombre à
 virgule entre 0 et 1000).
+.IPs export[=fichier_mmappé[:nsamples]]
+Exporte le signal entrant vers un autre process en utilisant le mappage mémoire
+(nmap()).
+.RSss
+fichier_nmappé: Fichier où mapper les données
+(par défaut:~/.mplayer/mplayer-af_export).
+.br
+nsamples: nombre d'échantillons par canal (par défaut: 512)
+.REss
 .RE
 .
 .TP
