@@ -535,7 +535,11 @@ int gui_no_filename=0;
 if(!parse_codec_cfg(get_path("codecs.conf"))){
   if(!parse_codec_cfg(DATADIR"/codecs.conf")){
     mp_msg(MSGT_CPLAYER,MSGL_HINT,MSGTR_CopyCodecsConf);
-    exit(1);
+//    printf("Exit.\n");
+//    exit(0);  // From unknown reason a hangup occurs here :((((((
+    kill(getpid(),SIGTERM);
+    usleep(20000);
+    kill(getpid(),SIGKILL);
   }
 }
 
