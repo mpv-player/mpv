@@ -72,6 +72,8 @@ mplayer \- Movie Player for Linux
 .RB [ \-skin\ skin ]
 .RB [ \-aspect\ ratio ]
 .RB [ \-monitoraspect\ ratio ]
+.RB [ \-subcp\ codepage ]
+.RB [ \-dumpmpsub ]
 .I - or file or device
 .PP
 .SH DESCRIPTION
@@ -427,6 +429,18 @@ VESA framebuffer doesn't support mode changing.
 .B \-fbmodeconfig\ filename
 Use this config file instead of the default /etc/fb.modes .
 Only valid for the fbdev driver.
+.TP
+.B \-subcp\ codepage
+If your system supports iconv(3), you can use this option to
+specify codepage of the subtitle. Examples:
+
+        -subcp latin2
+        -subcp cp1250
+
+.TP
+.B \-dumpmpsub
+Convert the given subtitle (specified with the -sub switch) to MPlayer's
+subtitle format, MPsub. Dumps a dump.mpsub file to current directory.
 .IP
 .SH "ALPHA/BETA CODE"
 .TP
@@ -523,6 +537,9 @@ mplayer -dvd 1 /dev/dvd2
 .TP
 .B Stream from HTTP
 mplayer http://mplayer.hq/example.avi
+.TP
+.B Convert subtitle to MPsub (to ./dump.mpsub)
+mplayer dummy.avi -sub source.sub -dumpmpsub
 .LP
 .SH BUGS
 Probably. Check the documentation.

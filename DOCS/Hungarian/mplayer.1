@@ -433,6 +433,19 @@ A VESA framebuffer nem támogatja a módváltást.
 .B \-fbmodeconfig\ filenév
 A megadott konfigurációs file használata az /etc/fb.modes helyett.
 Csak az fbdev meghajtóval.
+.TP
+.B \-subcp\ kódlap
+Ha a rendszered támogatja az iconv(3)-ot, ezzel az opcióval megadhatod hogy
+milyen kódlapban van a felirat. Példák:
+
+        -subcp latin2
+        -subcp cp1250
+
+.TP
+.B \-dumpmpsub
+A -sub opcióval megadott felirat file-t átkonvertálja az MPlayer saját
+feliratformátumába, az MPsub-ba. Egy dump.mpsub file-t ír ki a jelenlegi
+könyvtárba.
 .IP
 .SH "ALPHA/BETA ÁLLAPOTÚ FUNKCIÓK"
 .TP
@@ -529,6 +542,9 @@ mplayer -dvd 1 /dev/dvd2
 .TP
 .B HTTP-rõl lejátszás
 mplayer http://mplayer.hq/example.avi
+.TP
+.B Felirat konvertálása MPsub formátumba (./dump.mpsub file-ba)
+mplayer csali.avi -sub forras.sub -dumpmpsub
 .LP
 .SH HIBÁK
 Biztos vannak. Lásd dokumentáció.
