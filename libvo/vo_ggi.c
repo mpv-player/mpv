@@ -390,8 +390,8 @@ static uint32_t query_format(uint32_t format)
 	case IMGFMT_YV12:
 /*	case IMGFMT_I420:
 	case IMGFMT_IYUV:
-*/	case IMGFMT_YUY2:
-/*	case IMGFMT_YVYU:
+	case IMGFMT_YUY2:
+	case IMGFMT_YVYU:
 	case IMGFMT_UYVY:*/
 	    return(1);
 	case IMGFMT_RGB8:
