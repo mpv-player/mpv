@@ -44,8 +44,8 @@ nie jest znany lub rozwi±zany przez nasz± dokumentacjê prosimy zg³osiæ b³±d.
 <para>
 Nie nale¿y wysy³aæ zg³oszeñ do deweloperów. <application>MPlayer</application>
 jest dzie³em du¿ej grupy, wiêc wiêcej osób mo¿e byæ zainteresowanych tym
-problemem. Czasami inni u¿ytkownicy spotkali siê ju¿ z danym problemem i wiedz±
-jak go rozwi±zaæ nawet je¿eli jest to b³±d w kodzie
+problemem. Czasami inni u¿ytkownicy spotkali siê ju¿ z danym problemem i wiedz±,
+jak go rozwi±zaæ, nawet je¿eli jest to b³±d w kodzie
 <application>MPlayera</application>.
 </para>
 
@@ -54,7 +54,7 @@ Prosimy opisywaæ problem tak dok³adnie, jak to tylko mo¿liwe. Nale¿y sprawdziæ w
 jakich dok³adnie okoliczno¶ciach pojawia siê b³±d. Czy wystêpuje on tylko w
 okre¶lonych sytuacjach? Czy ma zwi±zek z konkretnym plikiem lub typem plików?
 Czy dotyczy tylko danego kodeka, czy te¿ jest niezale¿ny od kodeków? Czy mo¿esz
-go odtworzyæ z ka¿dym wyj¶ciem wideo? Im wiêcej informacji dostarczysz, tym
+go powtórzyæ z ka¿dym wyj¶ciem wideo? Im wiêcej informacji dostarczysz, tym
 wiêksze s± szanse na rozwi±zanie zg³oszonego problemu. Nie nale¿y równie¿
 zapominaæ o do³±czeniu warto¶ciowych informacji wymienionych poni¿ej. W
 przeciwnym wypadku nie bêdziemy w stanie prawid³owo zdiagnozowaæ zg³oszonego
@@ -64,8 +64,10 @@ problemu.
 <para>
 Doskona³ym i dobrze napisanym przewodnikiem dotycz±cym zadawania pytañ jest
 dokument <ulink url="http://www.catb.org/~esr/faqs/smart-questions.html">"Jak
-zadawaæ pytania w m±dry sposób"</ulink> napisany przez
-<ulink url="http://www.catb.org/~esr/">Erica S. Raymonda</ulink>. Istnieje
+m±drze zadawaæ pytania"</ulink> napisany przez
+<ulink url="http://www.catb.org/~esr/">Erica S. Raymonda</ulink>
+(Polskie t³umaczenie tego dokumentu mo¿na znale¼æ
++<ulink url="http://rtfm.killfile.pl/">tutaj</ulink> -przyp. t³um.). Istnieje
 tak¿e inny dokumentem tego typu zatytu³owany
 <ulink url="http://www.chiark.greenend.org.uk/~sgtatham/bugs.html">Jak efektywnie zg³aszaæ b³êdy</ulink>
 stworzony przez <ulink url="http://www.chiark.greenend.org.uk/~sgtatham/">Simona Tathama</ulink>
@@ -73,7 +75,7 @@ stworzony przez <ulink url="http://www.chiark.greenend.org.uk/~sgtatham/">Simona
 <ulink url="http://www.chiark.greenend.org.uk/~sgtatham/bugs-pl.html">tutaj</ulink>
 -przyp. t³um.). Je¶li bêdziesz postêpowa³ zgodnie z tymi przewodnikami,
 powiniene¶ uzyskaæ pomoc. Prosimy jednak pamiêtaæ, ¿e ¶ledzimy listê jako
-ochotnicy po¶wiêcaj±c nasz wolny czas. Jeste¶my bardzo zajêci i nie potrafimy
+ochotnicy, po¶wiêcaj±c nasz wolny czas. Jeste¶my bardzo zajêci i nie potrafimy
 zagwarantowaæ, ¿e pomo¿emy rozwi±zaæ zg³oszony problem, ani nawet tego, ¿e
 odpowiemy na Twoje zg³oszenie.
 </para>
@@ -86,7 +88,7 @@ odpowiemy na Twoje zg³oszenie.
 Zapisz siê na listê mplayer-users:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"/>
 i wy¶lij swoje zg³oszenie b³êdu na
-<ulink url="mailto:mplayer-users@mplayerhq.hu"/> gdzie bêdzie mo¿na je omówiæ.
+<ulink url="mailto:mplayer-users@mplayerhq.hu"/>, gdzie bêdzie mo¿na je omówiæ.
 </para>
 <para>
 Je¿eli wolisz, mo¿esz zamiast tego skorzystaæ z naszej nowej
@@ -348,8 +350,8 @@ zg³oszenie b³êdu, aby uzyskaæ lepsz± i szybsz± odpowied¼.
 </para>
 
 <para>
-Wiedz, ¿e je¶li zadasz trywialne pytanie albo odpowied¼ na nie znajduje siê w
-podrêczniku (ang. man), zamiast dostaæ odpowied¼ zostaniesz zignorowany
+Wiedz, ¿e je¶li zadasz trywialne pytanie albo odpowied¼ na nie znajduje siê na
+stronie man, zamiast dostaæ odpowied¼ zostaniesz zignorowany
 albo obrzucony wyzwiskami.
 Dlatego te¿ nie obra¿aj nas i zapisz siê na listê -advusers tylko je¿eli
 naprawdê wiesz co robisz i czujesz siê zaawansowanym u¿ytkownikiem lub
