@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.52 -->
+<!-- synced with 1.53 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -1438,7 +1438,7 @@ bármilyen CD-re. Ellenőrizd, hogy a libmp3lame megfelelően van-e telepítve.
 
 <qandaentry>
 <question><para>
-Nem tudok elkódolni ASF fájlokat AVI/MPEG4 (DivX)-be, mert 1000 fps-t használ?
+Nem tudok elkódolni ASF fájlokat AVI/MPEG-4 (DivX)-be, mert 1000 fps-t használ?
 </para></question>
 <answer><para>
 Mivel az ASF változó képkocka arányokat használ, az AVI pedig fix értéket, kézzel
