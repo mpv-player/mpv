@@ -57,11 +57,11 @@ static int control(int cmd, void *arg)
 		case AOCONTROL_GET_VOLUME:	
 			{
 				ao_control_vol_t *vol = (ao_control_vol_t *)arg;
-				int *l, *r;
+				int l, r;
 				
-				JACK_GetVolume(driver, l, r);
-				vol->left = (float )*l;
-				vol->right = (float )*r;
+				JACK_GetVolume(driver, &l, &r);
+				vol->left = (float )l;
+				vol->right = (float )r;
 				
 				return CONTROL_OK;
 			}
