@@ -135,7 +135,7 @@ static int add_to_format(char *s, unsigned int *fourcc, unsigned int *fourccmap)
 	};
 
 
-static int add_to_out(char *sfmt, char *sflags, unsigned int *outfmt,
+static int add_to_inout(char *sfmt, char *sflags, unsigned int *outfmt,
 		unsigned char *outflags)
 {
 
@@ -500,6 +500,7 @@ int parse_codec_cfg(char *cfgfile)
                         memset(codec,0,sizeof(codecs_t));
 			memset(codec->fourcc, 0xff, sizeof(codec->fourcc));
 			memset(codec->outfmt, 0xff, sizeof(codec->outfmt));
+			memset(codec->infmt, 0xff, sizeof(codec->infmt));
                         
 			if (get_token(1, 1) < 0)
 				goto err_out_parse_error;
@@ -573,8 +574,14 @@ int parse_codec_cfg(char *cfgfile)
 		} else if (!strcmp(token[0], "out")) {
 			if (get_token(1, 2) < 0)
 				goto err_out_parse_error;
-			if (!add_to_out(token[0], token[1], codec->outfmt,
+			if (!add_to_inout(token[0], token[1], codec->outfmt,
 						codec->outflags))
+				goto err_out_print_linenum;
+		} else if (!strcmp(token[0], "in")) {
+			if (get_token(1, 2) < 0)
+				goto err_out_parse_error;
+			if (!add_to_inout(token[0], token[1], codec->infmt,
+						codec->inflags))
 				goto err_out_print_linenum;
 		} else if (!strcmp(token[0], "flags")) {
 			if (get_token(1, 1) < 0)

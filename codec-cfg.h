@@ -2,7 +2,8 @@
 #define __CODEC_CFG_H
 
 #define CODECS_MAX_FOURCC	32
-#define CODECS_MAX_OUTFMT	32
+#define CODECS_MAX_OUTFMT	16
+#define CODECS_MAX_INFMT	16
 
 // Global flags:
 #define CODECS_FLAG_SEEKABLE	(1<<0)
@@ -76,6 +77,8 @@ typedef struct codecs_st {
 	unsigned int fourccmap[CODECS_MAX_FOURCC];
 	unsigned int outfmt[CODECS_MAX_OUTFMT];
 	unsigned char outflags[CODECS_MAX_OUTFMT];
+	unsigned int infmt[CODECS_MAX_INFMT];
+	unsigned char inflags[CODECS_MAX_INFMT];
 	char *name;
 	char *info;
 	char *comment;
