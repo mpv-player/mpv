@@ -176,7 +176,7 @@ static char help_text[]=
 #define MSGTR_NoDShowSupport "MPlayer wurde OHNE DirectShow Unterstützung kompiliert!\n"
 #define MSGTR_NoWfvSupport "Unterstützung für Win32 Codecs ausgeschaltet oder nicht verfügbar auf nicht-x86 Plattformen!\n"
 #define MSGTR_NoDivx4Support "MPlayer wurde OHNE DivX4Linux (libdivxdecore.so) Unterstützung kompiliert!\n"
-#define MSGTR_NoLAVCsupport "MPlayer wurde OHNE ffmpeg/libavcodecUnterstützung kompiliert!\n"
+#define MSGTR_NoLAVCsupport "MPlayer wurde OHNE ffmpeg/libavcodec Unterstützung kompiliert!\n"
 #define MSGTR_NoACMSupport "Win32/ACM Audiocodecs ausgeschaltet oder nicht verfügbar auf nicht-x86 Plattformen -> erzwinge -nosound :(\n"
 #define MSGTR_NoDShowAudio "MPlayer wurde ohne DirectShow Unterstützung kompiliert -> erzwinge -nosound :(\n"
 #define MSGTR_NoOggVorbis "OggVorbis Audiocodec ausgeschaltet -> erzwinge -nosound :(\n"
@@ -195,7 +195,7 @@ static char help_text[]=
 #define MSGTR_NoMemForDecodedImage "nicht genug Speicher für den Puffer der dekodierten Bilder (%ld Bytes)\n"
 
 #define MSGTR_AC3notvalid "AC3 Stream ungültig.\n"
-#define MSGTR_AC3only48k "Nur 48000 Hz Streams sind unterstützt.\n"
+#define MSGTR_AC3only48k "Nur 48000 Hz Streams werden unterstützt.\n"
 #define MSGTR_UnknownAudio "Unbekanntes/fehlendes Audioformat -> kein Ton\n"
 
 // LIRC:
