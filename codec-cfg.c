@@ -229,24 +229,38 @@ int add_to_out(char *sfmt, char *sflags, unsigned int *outfmt,
 	return 1;
 }
 
-short get_driver(char *s)
+short get_driver(char *s,int audioflag)
 {
+	static char *audiodrv[] = {
+		"mp3lib",
+		"pcm",
+		"libac3",
+		"acm",
+		"alaw",
+		"msgsm",
+		"dshow",
+		NULL
+	};
+	static char *videodrv[] = {
+		"libmpeg2",
+		"vfw",
+		"odivx",
+		"dshow",
+		NULL
+	};
+        char **drv=audioflag?audiodrv:videodrv;
+        int i;
+        
+        for(i=0;drv[i];i++) if(!strcmp(s,drv[i])) return i+1;
+
 	return 0;
 }
 
-#define DEBUG
+//#define DEBUG
 
 codecs_t *parse_codec_cfg(char *cfgfile)
 {
 #define PRINT_LINENUM	printf("%s(%d): ", cfgfile, line_num)
-#define GET_MEM\
-	do {\
-		if (!(codecs = (codecs_t *) realloc(codecs,\
-				sizeof(codecs_t) * (nr_codecs + 1)))) {\
-			perror("parse_codec_cfg: can't realloc 'codecs'");\
-			goto err_out;\
-		}\
-	} while (0)
 
 	codecs_t *codecs = NULL;  // array of codecs
 	codecs_t *codec = NULL;   // currect codec
@@ -261,14 +275,13 @@ codecs_t *parse_codec_cfg(char *cfgfile)
 
 	printf("Reading codec config file: %s\n", cfgfile);
 
-	if ((line = (char *) malloc(MAX_LINE_LEN + 1)) == NULL) {
-		perror("parse_codec_cfg: can't get memory for 'line'");
+	if ((fp = fopen(cfgfile, "r")) == NULL) {
+		printf("parse_codec_cfg: can't open '%s': %s\n", cfgfile, strerror(errno));
 		return NULL;
 	}
 
-	if ((fp = fopen(cfgfile, "r")) == NULL) {
-		printf("parse_codec_cfg: can't open '%s': %s\n", cfgfile, strerror(errno));
-		free(line);
+	if ((line = (char *) malloc(MAX_LINE_LEN + 1)) == NULL) {
+		perror("parse_codec_cfg: can't get memory for 'line'");
 		return NULL;
 	}
 	line_pos = 0;
@@ -377,7 +390,7 @@ codecs_t *parse_codec_cfg(char *cfgfile)
 			printf("driver");
 			if (get_token() < 0)
 				goto parse_error_out;
-			if ((codec->driver = get_driver(token)) == -1)
+			if ((codec->driver = get_driver(token,codec->flags&CODECS_FLAG_AUDIO)) == -1)
 				goto err_out;
 			printf(" %s\n", token);
 		} else if (!strcmp(token, "dll")) {
