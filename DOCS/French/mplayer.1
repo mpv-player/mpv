@@ -39,7 +39,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2002-10-19"
+.TH MPlayer 1 "2002-12-31"
 .
 .SH NAME
 mplayer  \- Lecteur Vidéo pour Linux
@@ -186,6 +186,10 @@ mf= type=png:fps=25
 
 .SH "OPTIONS DU LECTEUR (MPLAYER UNIQUEMENT)"
 .TP
+.B \-, \-use-stdin
+Lis les données depuis stdin.
+L'option \-idx ne fonctionne pas en conjonction avec cela.
+.TP
 .B \-autoq <qualité> (utiliser avec \-vop pp)
 Change dynamiquement le niveau de postprocessing en fonction de la charge
 processeur.
@@ -217,24 +221,25 @@ Affiche quelques statistiques sur l'utilisation CPU et les trames sautées
 du codec Video.
 .TP
 .B \-edl <nomfichier>
-Active l'édition de la liste de décision durant la lecture. La vidéo sera
-sautée et le son coupé et remis suivant les entrées du fichier indiqué. 
+Active les actions d'édition de liste de décision (EDL) durant la lecture. 
+La vidéo sera sautée et le son coupé et remis suivant les entrées du fichier 
+indiqué. 
 Voir DOCS/documentation.html#edl pour les détails sur comment l'utiliser.
 .TP
 .B \-edlout <nomfichier>
-Créé un nouveau fichier et écrit les enregistrement d'édition de la liste de 
-décision dans ce fichier. Durant la lecture, quand l'utilisateur tape 'i', une
-entrée à sauter après les deux dernières secondes de la lecture est écrite dans
-ce fichier. Cela fournit un point de départ depuis lequel l'utilisateur peut
-régler plus finement les entrées EDL plus tard. Voir DOCS/documentation.html#edl 
-pour les détails.
+Créé un nouveau fichier et écrit les enregistrements d'édition de la liste de 
+décision (EDL) dans ce fichier. Durant la lecture, quand l'utilisateur tape 'i', 
+une entrée à sauter après les deux dernières secondes de la lecture est écrite 
+dans ce fichier. Cela fournit un point de départ depuis lequel l'utilisateur 
+peut régler plus finement les entrées EDL plus tard. 
+Voir DOCS/documentation.html#edl pour les détails.
 .TP
 .B \-fixed-vo (CODE BETA!)
 force un système de vidéo fixe pour des fichiers multiples (une 
 (dès)initialisation pour pour tous les fichiers).
 Ainsi une seule fenêtre sera ouverte pour tous les fichiers.
-Actuellement les pilotes suivants fonctionnent avec fixed-vo: x11, xv, xvidix, xmga
-et gl2.
+Actuellement les pilotes suivants fonctionnent avec fixed-vo: x11, xv, xvidix, 
+xmga et gl2.
 .TP
 .B \-framedrop (voir aussi \-hardframedrop)
 Saute l'affichage de certaines trames pour maintenir la synchro A/\:V sur les
@@ -250,9 +255,9 @@ Saute les trames de façon plus brutale (casse le décodage).
 Mène à des distortions d'image!
 .TP
 .B \-identify
-Affiche les paramètres du fichier en format facilement analysable. Le script
-TOOLS/midentify supprime le reste de l'affichage et (espérons-le) formate les
-noms de fichiers pour le shell.
+Affiche les paramètres du fichier dans un format facilement analysable. 
+Le script TOOLS/midentify supprime le reste de l'affichage et (espérons-le) 
+formate les noms de fichiers pour le shell.
 .TP
 .B \-input <commandes>
 Cette option peut être utilisée pour configurer certaines parties du 
@@ -270,7 +275,7 @@ Les commandes disponibles sont:
 .IPs conf=<fichier>
 Lit le fichier input.conf.
 Si aucun chemin n'est précisé, ~/\:.mplayer est utilisé.
-.IPs ar\-delay
+.In ar\-delay
 Temps en msec avant de démarrer la répétition automatique d'une touche 
 (0 pour désactiver).
 .IPs ar\-rate
@@ -282,8 +287,8 @@ Afficher toutes les commandes pouvant être attachées.
 .IPs js\-dev
 Spécifier le périphérique joystick à utiliser (/dev/\:input/\:js0 par défaut).
 .IPs fichier
-Lit les commandes depuis un fichier donné. Utile surtout avec une 
-communication fifo.
+Lit les commandes depuis un fichier donné. 
+Utile surtout avec une communication fifo.
 .RE
 .PD 1
 .
@@ -368,8 +373,6 @@ Règle la vitesse de lecture.
 .B \-sstep <sec>
 Spécifie le nombre de secondes entre chaque trame.
 Utile pour les diaporamas.
-.TP
-.B \-use-stdin
 
 
 .SH "OPTIONS DEMUXER/FLUX"
@@ -402,7 +405,8 @@ Indiquez l'ID demuxer comme défini dans demuxers.h.
 Utilisez \-audio\-demuxer 17 pour forcer la détection des .mp3.
 .TP
 .B \-audiofile <nomfichier>
-Joue l'audio depuis un fichier externe ((WAV, MP3 ou Ogg Vorbis).
+Joue l'audio depuis un fichier externe ((WAV, MP3 ou Ogg Vorbis) pendant la 
+visualisation d'un film.
 .TP
 .B \-cdrom\-device <chemin\ périphérique>
 Outrepasse le nom par défaut du lecteur de CDROM /dev/\:cdrom.
@@ -459,16 +463,17 @@ dans ce cas le canal mono est répété sur les deux canaux de sortie).
 Si le nombre de canaux de sortie est plus petit que celui des canaux 
 d'entrée, les résultats dépendront du décodeur audio (\-afm).
 MPlayer demande au décodeur de décoder l'audio dans le nombre requis de canaux.
-Maintenant c'est au décodeur de satisfaire cette demande. Si le décodeur sort
-sur plus de canaux que demandé, les canaux en plus seront tronqués. C'est 
-généralement très important en jouant des vidéos avec de l'audio AC3 (comme 
-les DVDs). Dans ce cas liba52 fait le décodage par défaut et downmixe
+Maintenant c'est au décodeur de satisfaire cette demande. 
+Si le décodeur sort sur plus de canaux que demandé, les canaux en plus seront 
+tronqués. 
+C'est généralement suelement important en jouant des vidéos avec de l'audio AC3 
+(comme les DVDs). Dans ce cas liba52 fait le décodage par défaut et downmixe
 correctement l'audio dans le nombre requis de canaux.
 
 .I NOTE:
 .br
 Cette option est utilisé par les codecs (ac3 uniquement) filtres (surround) 
-et drivers ao (oss au moins).
+et drivers ao (OSS au moins).
 .br
 Les options disponibles sont:
 
@@ -628,9 +633,9 @@ fourcc en héxa
 .
 .TP
 .B \-rtsp-stream-over-tcp
-Les URLs débutant par rtsp://' véront leurs paquets RTP et RTCP transférés
-par TCP (en utilisant la même connection TCP que RTSP). Cette option est
-particulièrement utile si vous avez une connection Internet cassée qui ne
+Utilisé avec 'rtsp://', URLs pour spécifier que les paquets RTP et RTCP entrants 
+seront streamés sur TCP (en utilisant la même connection TCP que RTSP). 
+Cette option peut être utile si vous avez une connection Internet cassée qui ne
 redirige pas les paquets UDP entrants (voir http://www.live.com/mplayer/).
 .TP
 .B \-skipopening
@@ -677,7 +682,7 @@ Les options disponibles sont:
 .
 .RSs
 .IPs on
-utiliser l'entrée TV
+utilise l'entrée TV
 .IPs noaudio
 aucun son
 .IPs driver=<valeur>
@@ -689,6 +694,7 @@ Spécifier une autre entrée que celle par défaut 0 (Télévision) (voir
 la sortie pour en obtenir la liste)
 .IPs freq=<valeur>
 Spécifier sur quelle fréquence régler le tuner (par exemple \& 511.250).
+Non compatible avec le paramètre channels.
 .IPs outfmt=<valeur>
 format de sortie du tuner (yv12, rgb32, rgb24, rgb16, rgb15, uyvy, yuy2,
 i420)
@@ -705,6 +711,16 @@ disponible: PAL, SECAM, NTSC
 Régler le tuner sur le canal <valeur>
 .IPs chanlist=<valeur>
 disponible: europe-east, europe-west, us-bcast, us-cable, etc
+.IPs channels=<channel>-<name>,<channel>-<name>,...
+Défini des noms pour les canaux. Utilisez _ pour les espaces dans les noms 
+(ou jouez avec les quotes ;-).
+Les noms de canaux seront ensuite écrits en utilisant l'OSD, et les commandes 
+tv_step_channel, tv_set_channel et tv_last_channel seront utilisables 
+avec une télécommande (voir. lirc).
+Non compatible avec le paramètre frequency.
+Attention : Le numéro de canal sera sa position dans la liste des 'channels',
+en commençant à 1. C-a-d. utilisez tv://1, tv://2, tv_set_channel 1, 
+tv_set_channel 2, etc.
 .IPs audiorate=<valeur>
 Fixe la fréquence de capture audio
 .IPs forceaudio
@@ -974,7 +990,8 @@ Cette valeur est la position verticale des sous-titres en % de la hauteur
 de l'écran.
 .TP
 .B \-subwidth <10\-100>
-Spécifie la largeur maximum des sous-titres sur l'écran. Utile pour la sortie TV.
+Spécifie la largeur maximum des sous-titres sur l'écran. 
+Utile pour la sortie TV.
 La valeur est la largeur des sous-titres en % de la largeur de l'écran.
 .TP
 .B \-unicode
@@ -1017,8 +1034,8 @@ Si le nombre de canaux de sortie est plus petit que celui des canaux
 d'entrée, les canaux en plus sont tronqués.
 .IPs format[=bps,f]
 Sélectionne le format f et les bits par sample (bps) utilisés pour la sortie
-depuis la couche filtre. L'option bps est un entier et indique les octets par
-sample.
+depuis la couche filtre. 
+L'option bps est un entier et indique les octets par sample.
 Le format f est une chaîne contenant un mix concaténé de:
 .br
 alaw, mulaw ou imaadpcm
@@ -1034,17 +1051,19 @@ Sélectionne le niveau de sortie audio.
 Ce filtre n'est pas ré-entrant et ne peut donc être activé qu'une fois pour
 chaque flux audio.
 .RSss
-v: gain désiré en dB pour tous les canaux du flux. Le gain peut être initialisé
-avec de -200dB à +40dB (où -200dB coupe le son complètement et
-+40dB équivaut à un gain de 1000). Le gain par défaut est -20dB.
+v: gain désiré en dB pour tous les canaux du flux. 
+Le gain peut être initialisé avec de -200dB à +40dB (où -200dB coupe le son 
+complètement et +40dB équivaut à un gain de 1000). 
+Le gain par défaut est -20dB.
 .br
 sc: active la coupure douce.
 .br
-pr: active la détection du volume pour chacun des flux audio. Les volumes
-maximum et instantanés sont détectés. Le volume instantané ne peut être
-consulté depuis l'interface en cours d'utilisation, mais le volume
-maximum est affiché à la fin du film. Cette valeur peut être utilisé pour le
-transcodage des films pour maximiser l'utilisation de l'interval dynamique.
+pr: active la détection du volume pour chacun des flux audio. 
+Les volumes maximum et instantanés sont détectés. 
+Le volume instantané ne peut être consulté depuis l'interface en cours 
+d'utilisation, mais le volume maximum est affiché à la fin du film. 
+Cette valeur peut être utilisé pour le transcodage des films pour maximiser 
+l'utilisation de l'interval dynamique.
 .br
 en: active et désactive le contrôle du volume.
 .REss
@@ -1129,7 +1148,8 @@ Décalage audio en secondes (peut être +/\:\-nombre à virgule).
 .B \-format <0\-8192>
 Selectionne le format utilisé pour la sortie à partir de la couche filtre 
 (suivant les définitions de libao2/afmt.h):
-.
+
+.PD 0
 .RSs
 .IPs 1
 Mu-Law
@@ -1158,6 +1178,7 @@ AC3
 .IPs 8192
 32-bit non signé (Big-Endian)
 .RE
+.PD 1
 .
 .TP
 .B \-mixer <périph.>
@@ -1216,13 +1237,14 @@ Attention: peut corrompre OSD/\:SUB!
 .TP
 .B \-dxr2 <option1:option2:...>
 Cette option est utilisée pour contrôler le pilote dxr2.
-Note: le filtre lavc est maintenant inséré automatiquement si vous essayez
+Note: Le filtre lavc est maintenant inséré automatiquement si vous essayez
 de lire un format non MPEG1/2 donc tous les formats supportés par MPlayer
 devraient être jouables de façon externe (si vous avez la puissance CPU requise
 pour encoder à la volée).
 Le chipset d'overlay utilisé sur la dxr2 est d'assez mauvaise qualité mais les
-réglages par défaut devraient fonctionner pour tout le monde. L'OSD peut être
-utilisable avec l'overlay (pas sur la TV) en le dessinant sur la couleur-clé.
+réglages par défaut devraient fonctionner pour tout le monde. 
+L'OSD peut être utilisable avec l'overlay (pas sur la TV) en le dessinant sur 
+la couleur-clé.
 Avec les réglages de couleur-clé par défaut vous devriez obtenir des résultats
 variables, généralement vous verrez la couleur-clé autour des caractères et
 autres effets amusants. 
@@ -2135,7 +2157,8 @@ D'abord encodez avec pass=1, puis avec les mêmes paramètres encodez avec
 pass=2.
 .IPs vbrpass=<0\-2>
 Outrepasse l'argument \-pass et utilise la librairie VBR XviD au lieu
-du VBR DivX4.  Les options par défaut sont:
+du VBR DivX4.  
+Les options par défaut sont:
 .
 .RSss
 0: encodage une passe (comme en ne mettant pas \-pass en ligne de commande)
@@ -2406,9 +2429,10 @@ Active le mode 2passes interne (par défaut: désactivé):
 .IPs aspect=<x.x/y.y>
 Stocke l'aspect du film en interne, tout comme les fichiers MPEG.
 Bien meilleur solution que le redimensionnement, car la qualité
-n'en est pas diminuée. Seul MPlayer sera capable de relire ces
-fichiers correctement, les autres lecteurs l'afficheront avec
-un mauvais aspect. Exemple:
+n'en est pas diminuée. 
+Seul MPlayer sera capable de relire ces fichiers correctement, les autres 
+lecteurs l'afficheront avec un mauvais aspect. 
+Exemple:
 .RSss
 aspect=16.0/9.0
 .REss
@@ -2769,6 +2793,22 @@ Nombre maximal de trames sautables après une non-sautée
 .TP
 .B \-v, \-\-verbose
 Active le mode verbeux (plus de \-v signifie plus de verbosité).
+
+.PD 0
+.RSs
+.IPs 0
+uniquement quelques sorties informelles (par défaut)
+.IPs 1
+quelques infos basiques de débogage, entête avi, valeurs des fonctions 
+(débogage de l'initialisation)
+.IPs 2
+affiche les indexes avi, entrées de tronquage, plus d'infos de débogage 
+(débogage du lecteur)
+.IPs 3
+affiche tout ce qui est relatif aux parseurs d'entrée (déboguage des parsers)
+.RE
+.PD 1
+.
 .TP
 .B \-vobsubout <nomdebase>
 Spécifie le nomdebase pour les fichiers .idx et .sub de destination.
@@ -2907,6 +2947,8 @@ change de langue de sous-titres
 ajuste le décalage des sous-titres de +/\:\- 0.1 seconde
 .IPs "r et t"
 ajuste la position des sous-titres
+.IPs "i"
+créé une marque EDL
 
 .PP
 (Les touches suivantes ne sont valides qu'en utilisant \-vo xv ou
