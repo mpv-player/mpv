@@ -621,10 +621,10 @@
 #define OV0_FOUR_TAP_COEF_2                    0x04B8
 #define OV0_FOUR_TAP_COEF_3                    0x04BC
 #define OV0_FOUR_TAP_COEF_4                    0x04C0
-#define OV0_FLAG_CNTRL                         0x04DC  
+#define OV0_FLAG_CNTL                          0x04DC  
 #define OV0_COLOUR_CNTL                        0x04E0
-#define OV0_VID_KEY_CLR_LOW                    0x04E4  
-#define OV0_VID_KEY_CLR_HIGH                   0x04E8  
+#define OV0_VID_KEY_CLR                        0x04E4  
+#define OV0_VID_KEY_MSK                        0x04E8  
 #define OV0_GRAPHICS_KEY_CLR                   0x04EC
 #define OV0_GRAPHICS_KEY_MSK                   0x04F0
 #define OV0_KEY_CNTL                           0x04F4  

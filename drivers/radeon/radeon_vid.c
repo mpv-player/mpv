@@ -14,7 +14,7 @@
  * Also here was used code from CVS of GATOS project and X11 trees.
  */
 
-#define RADEON_VID_VERSION "1.0.2"
+#define RADEON_VID_VERSION "1.0.2.1"
 
 /*
   It's entirely possible this major conflicts with something else
@@ -158,6 +158,7 @@ typedef struct bes_registers_s
 
 typedef struct video_registers_s
 {
+  const char * sname;
   uint32_t name;
   uint32_t value;
 }video_registers_t;
@@ -165,39 +166,63 @@ typedef struct video_registers_s
 static bes_registers_t besr;
 static video_registers_t vregs[] = 
 {
-  { OV0_REG_LOAD_CNTL, 0 },
-  { OV0_H_INC, 0 },
-  { OV0_STEP_BY, 0 },
-  { OV0_Y_X_START, 0 },
-  { OV0_Y_X_END, 0 },
-  { OV0_V_INC, 0 },
-  { OV0_P1_BLANK_LINES_AT_TOP, 0 },
-  { OV0_P23_BLANK_LINES_AT_TOP, 0 },
-  { OV0_VID_BUF_PITCH0_VALUE, 0 },
-  { OV0_VID_BUF_PITCH1_VALUE, 0 },
-  { OV0_P1_X_START_END, 0 },
-  { OV0_P2_X_START_END, 0 },
-  { OV0_P3_X_START_END, 0 },
-  { OV0_BASE_ADDR, 0 },
-  { OV0_VID_BUF0_BASE_ADRS, 0 },
-  { OV0_VID_BUF1_BASE_ADRS, 0 },
-  { OV0_VID_BUF2_BASE_ADRS, 0 },
-  { OV0_VID_BUF3_BASE_ADRS, 0 },
-  { OV0_VID_BUF4_BASE_ADRS, 0 },
-  { OV0_VID_BUF5_BASE_ADRS, 0 },
-  { OV0_P1_V_ACCUM_INIT, 0 },
-  { OV0_P1_H_ACCUM_INIT, 0 },
-  { OV0_P23_V_ACCUM_INIT, 0 },
-  { OV0_P23_H_ACCUM_INIT, 0 },
-  { OV0_SCALE_CNTL, 0 },
-  { OV0_EXCLUSIVE_HORZ, 0 },
-  { OV0_AUTO_FLIP_CNTL, 0 },
-  { OV0_FILTER_CNTL, 0 },
-  { OV0_COLOUR_CNTL, 0 },
-  { OV0_GRAPHICS_KEY_CLR, 0 },
-  { OV0_GRAPHICS_KEY_MSK, 0 },
-  { OV0_KEY_CNTL, 0 },
-  { OV0_TEST, 0 }
+  { "OV0_Y_X_START", OV0_Y_X_START, 0 },
+  { "OV0_Y_X_END", OV0_Y_X_END, 0 },
+  { "OV0_PIPELINE_CNTL", OV0_PIPELINE_CNTL, 0 },
+  { "OV0_EXCLUSIVE_HORZ", OV0_EXCLUSIVE_HORZ, 0 },
+  { "OV0_EXCLUSIVE_VERT", OV0_EXCLUSIVE_VERT, 0 },
+  { "OV0_REG_LOAD_CNTL", OV0_REG_LOAD_CNTL, 0 },
+  { "OV0_SCALE_CNTL", OV0_SCALE_CNTL, 0 },
+  { "OV0_V_INC", OV0_V_INC, 0 },
+  { "OV0_P1_V_ACCUM_INIT", OV0_P1_V_ACCUM_INIT, 0 },
+  { "OV0_P23_V_ACCUM_INIT", OV0_P23_V_ACCUM_INIT, 0 },
+  { "OV0_P1_BLANK_LINES_AT_TOP", OV0_P1_BLANK_LINES_AT_TOP, 0 },
+  { "OV0_P23_BLANK_LINES_AT_TOP", OV0_P23_BLANK_LINES_AT_TOP, 0 },
+  { "OV0_BASE_ADDR", OV0_BASE_ADDR, 0 },
+  { "OV0_VID_BUF0_BASE_ADRS", OV0_VID_BUF0_BASE_ADRS, 0 },
+  { "OV0_VID_BUF1_BASE_ADRS", OV0_VID_BUF1_BASE_ADRS, 0 },
+  { "OV0_VID_BUF2_BASE_ADRS", OV0_VID_BUF2_BASE_ADRS, 0 },
+  { "OV0_VID_BUF3_BASE_ADRS", OV0_VID_BUF3_BASE_ADRS, 0 },
+  { "OV0_VID_BUF4_BASE_ADRS", OV0_VID_BUF4_BASE_ADRS, 0 },
+  { "OV0_VID_BUF5_BASE_ADRS", OV0_VID_BUF5_BASE_ADRS, 0 },
+  { "OV0_VID_BUF_PITCH0_VALUE", OV0_VID_BUF_PITCH0_VALUE, 0 },
+  { "OV0_VID_BUF_PITCH1_VALUE", OV0_VID_BUF_PITCH1_VALUE, 0 },
+  { "OV0_AUTO_FLIP_CNTL", OV0_AUTO_FLIP_CNTL, 0 },
+  { "OV0_DEINTERLACE_PATTERN", OV0_DEINTERLACE_PATTERN, 0 },
+  { "OV0_SUBMIT_HISTORY", OV0_SUBMIT_HISTORY, 0 },
+  { "OV0_H_INC", OV0_H_INC, 0 },
+  { "OV0_STEP_BY", OV0_STEP_BY, 0 },
+  { "OV0_P1_H_ACCUM_INIT", OV0_P1_H_ACCUM_INIT, 0 },
+  { "OV0_P23_H_ACCUM_INIT", OV0_P23_H_ACCUM_INIT, 0 },
+  { "OV0_P1_X_START_END", OV0_P1_X_START_END, 0 },
+  { "OV0_P2_X_START_END", OV0_P2_X_START_END, 0 },
+  { "OV0_P3_X_START_END", OV0_P3_X_START_END, 0 },
+  { "OV0_FILTER_CNTL", OV0_FILTER_CNTL, 0 },
+  { "OV0_FOUR_TAP_COEF_0", OV0_FOUR_TAP_COEF_0, 0 },
+  { "OV0_FOUR_TAP_COEF_1", OV0_FOUR_TAP_COEF_1, 0 },
+  { "OV0_FOUR_TAP_COEF_2", OV0_FOUR_TAP_COEF_2, 0 },
+  { "OV0_FOUR_TAP_COEF_3", OV0_FOUR_TAP_COEF_3, 0 },
+  { "OV0_FOUR_TAP_COEF_4", OV0_FOUR_TAP_COEF_4, 0 },
+  { "OV0_FLAG_CNTL", OV0_FLAG_CNTL, 0 },
+  { "OV0_COLOUR_CNTL", OV0_COLOUR_CNTL, 0 },
+  { "OV0_VID_KEY_CLR", OV0_VID_KEY_CLR, 0 },
+  { "OV0_VID_KEY_MSK", OV0_VID_KEY_MSK, 0 },
+  { "OV0_GRAPHICS_KEY_CLR", OV0_GRAPHICS_KEY_CLR, 0 },
+  { "OV0_GRAPHICS_KEY_MSK", OV0_GRAPHICS_KEY_MSK, 0 },
+  { "OV0_KEY_CNTL", OV0_KEY_CNTL, 0 },
+  { "OV0_TEST", OV0_TEST, 0 },
+  { "OV0_LIN_TRANS_A", OV0_LIN_TRANS_A, 0 },
+  { "OV0_LIN_TRANS_B", OV0_LIN_TRANS_B, 0 },
+  { "OV0_LIN_TRANS_C", OV0_LIN_TRANS_C, 0 },
+  { "OV0_LIN_TRANS_D", OV0_LIN_TRANS_D, 0 },
+  { "OV0_LIN_TRANS_E", OV0_LIN_TRANS_E, 0 },
+  { "OV0_LIN_TRANS_F", OV0_LIN_TRANS_F, 0 },
+  { "OV0_GAMMA_0_F", OV0_GAMMA_0_F, 0 },
+  { "OV0_GAMMA_10_1F", OV0_GAMMA_10_1F, 0 },
+  { "OV0_GAMMA_20_3F", OV0_GAMMA_20_3F, 0 },
+  { "OV0_GAMMA_40_7F", OV0_GAMMA_40_7F, 0 },
+  { "OV0_GAMMA_380_3BF", OV0_GAMMA_380_3BF, 0 },
+  { "OV0_GAMMA_3C0_3FF", OV0_GAMMA_3C0_3FF, 0 }
 };
 
 static uint32_t radeon_vid_in_use = 0;
@@ -305,6 +330,17 @@ static void __exit radeon_vid_restore_state( void )
 	OUTREG(vregs[i].name,vregs[i].value);
 }
 
+#ifdef DEBUG
+static void radeon_vid_dump_regs( void )
+{
+  size_t i;
+  printk(RVID_MSG"*** Begin of OV0 registers dump ***\n");
+  for(i=0;i<sizeof(vregs)/sizeof(video_registers_t);i++)
+	printk(RVID_MSG"%s = %08X\n",vregs[i].sname,INREG(vregs[i].name));
+  printk(RVID_MSG"*** End of OV0 registers dump ***\n");
+}
+#endif
+
 static void radeon_vid_stop_video( void )
 {
     OUTREG(OV0_SCALE_CNTL, SCALER_SOFT_RESET);
@@ -318,14 +354,6 @@ static void radeon_vid_stop_video( void )
 static void radeon_vid_display_video( void )
 {
     int bes_flags;
-RTRACE(RVID_MSG"OV0: v_inc=%x h_inc=%x step_by=%x\n",besr.v_inc,besr.h_inc,besr.step_by);
-RTRACE(RVID_MSG"OV0: vid_buf0_base=%x\n",besr.vid_buf0_base_adrs);
-RTRACE(RVID_MSG"OV0: y_x_start=%x y_x_end=%x blank_at_top=%x pitch0_value=%x\n"
-,besr.y_x_start,besr.y_x_end,besr.p1_blank_lines_at_top,besr.vid_buf_pitch0_value);
-RTRACE(RVID_MSG"OV0: p1_x_start_end=%x p2_x_start_end=%x p3_x_start-end=%x\n"
-,besr.p1_x_start_end,besr.p2_x_start_end,besr.p2_x_start_end);
-RTRACE(RVID_MSG"OV0: p1_v_accum_init=%x p1_h_accum_init=%x p23_h_accum_init=%x\n"
-,besr.p1_v_accum_init,besr.p1_h_accum_init,besr.p23_h_accum_init);
     OUTREG(OV0_REG_LOAD_CNTL,		REG_LD_CTL_LOCK);
     while(!(INREG(OV0_REG_LOAD_CNTL)&REG_LD_CTL_LOCK_READBACK));
 
@@ -376,7 +404,7 @@ RTRACE(RVID_MSG"OV0: p1_v_accum_init=%x p1_h_accum_init=%x p23_h_accum_init=%x\n
 
     bes_flags = SCALER_ENABLE |
                 SCALER_SMART_SWITCH |
-                SCALER_HORZ_PICK_NEAREST;
+		SCALER_HORZ_PICK_NEAREST;
     if(besr.double_buff) bes_flags |= SCALER_DOUBLE_BUFFER;
     if(besr.deinterlace_on) bes_flags |= SCALER_ADAPTIVE_DEINT;
 #ifdef RAGE128
@@ -398,15 +426,21 @@ RTRACE(RVID_MSG"OV0: p1_v_accum_init=%x p1_h_accum_init=%x p23_h_accum_init=%x\n
         /* 4:2:0 */
 	case IMGFMT_IYUV:
 	case IMGFMT_I420:
-	case IMGFMT_YV12:  bes_flags |= SCALER_SOURCE_YUV12;  break;
+	case IMGFMT_YV12:  bes_flags |= SCALER_SOURCE_YUV12;
+#ifdef RAGE128
+			   bes_flags |= SCALER_Y2R_TEMP | SCALER_PIX_EXPAND;
+#endif
+			   break;
         /* 4:2:2 */
 	case IMGFMT_UYVY:  bes_flags |= SCALER_SOURCE_YVYU422; break;
 	case IMGFMT_YUY2:
 	default:           bes_flags |= SCALER_SOURCE_VYUY422; break;
     }
-RTRACE(RVID_MSG"OV0: SCALER=%x\n",bes_flags);
     OUTREG(OV0_SCALE_CNTL,		bes_flags);
     OUTREG(OV0_REG_LOAD_CNTL,		0);
+#ifdef DEBUG
+    radeon_vid_dump_regs();
+#endif
 }
 
 void radeon_vid_set_color_key(int ckey_on, uint8_t R, uint8_t G, uint8_t B)
@@ -582,10 +616,6 @@ RTRACE(RVID_MSG"usr_config: version = %x format=%x card=%x ram=%u src(%ux%u) des
     else besr.p23_blank_lines_at_top = 0;
     besr.vid_buf_pitch0_value = pitch;
     besr.vid_buf_pitch1_value = is_420 ? pitch>>1 : pitch;
-RTRACE(RVID_MSG"BES: v_inc=%x h_inc=%x step_by=%x\n",besr.v_inc,besr.h_inc,besr.step_by);
-RTRACE(RVID_MSG"BES: vid_buf0_basey=%x\n",besr.vid_buf0_base_adrs);
-RTRACE(RVID_MSG"BES: y_x_start=%x y_x_end=%x blank_at_top=%x pitch0_value=%x\n"
-,besr.y_x_start,besr.y_x_end,besr.p1_blank_lines_at_top,besr.vid_buf_pitch0_value);
     besr.p1_x_start_end = (src_w+left-1)|(left<<16);
     src_w>>=1;
     besr.p2_x_start_end = (src_w+left-1)|(leftUV<<16);
@@ -645,8 +675,8 @@ static int radeon_vid_ioctl(struct inode *inode, struct file *file, unsigned int
 	switch(cmd)
 	{
 		case MGA_VID_CONFIG:
-			RTRACE( "radeon_mmio_base = %p\n",radeon_mmio_base);
-			RTRACE( "radeon_mem_base = %08x\n",radeon_mem_base);
+			RTRACE(RVID_MSG"radeon_mmio_base = %p\n",radeon_mmio_base);
+			RTRACE(RVID_MSG"radeon_mem_base = %08x\n",radeon_mem_base);
 			RTRACE(RVID_MSG"Received configuration\n");
 
  			if(copy_from_user(&radeon_config,(mga_vid_config_t*) arg,sizeof(mga_vid_config_t)))
@@ -679,7 +709,7 @@ static int radeon_vid_ioctl(struct inode *inode, struct file *file, unsigned int
 			    printk(RVID_MSG"not enough video memory. Need: %u has: %u\n",radeon_config.frame_size*radeon_config.num_frames,radeon_ram_size*0x100000);
 			    return -EFAULT;
 			}
-			RTRACE(RVID_MSG"using video overlay at offset %p\n",radeon_overlay_off);
+			RTRACE(RVID_MSG"using video overlay at offset %08X\n",radeon_overlay_off);
 			if (copy_to_user((mga_vid_config_t *) arg, &radeon_config, sizeof(mga_vid_config_t)))
 			{
 				printk(RVID_MSG"failed copy to userspace\n");
