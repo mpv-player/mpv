@@ -109,6 +109,256 @@ static void pack_nn_MMX(unsigned char *dst, unsigned char *y,
 		);
 	pack_nn_C(dst, y, u, v, (w&7));
 }
+
+static void pack_li_0_MMX(unsigned char *dst, unsigned char *y,
+	unsigned char *u, unsigned char *v, int w, int us, int vs)
+{
+	asm volatile (""
+		"pushl %%ebp \n\t"
+		"movl 4(%%edx), %%ebp \n\t"
+		"movl (%%edx), %%edx \n\t"
+		"pxor %%mm0, %%mm0 \n\t"
+		
+		".balign 16 \n\t"
+		".Lli0: \n\t"
+		"movq (%%esi), %%mm1 \n\t"
+		"movq (%%esi), %%mm2 \n\t"
+		"punpcklbw %%mm0, %%mm1 \n\t"
+		"punpckhbw %%mm0, %%mm2 \n\t"
+		
+		"movq (%%eax,%%edx,2), %%mm4 \n\t"
+		"movq (%%ebx,%%ebp,2), %%mm6 \n\t"
+		"punpcklbw %%mm0, %%mm4 \n\t"
+		"punpcklbw %%mm0, %%mm6 \n\t"
+		"movq (%%eax), %%mm3 \n\t"
+		"movq (%%ebx), %%mm5 \n\t"
+		"punpcklbw %%mm0, %%mm3 \n\t"
+		"punpcklbw %%mm0, %%mm5 \n\t"
+		"paddw %%mm3, %%mm4 \n\t"
+		"paddw %%mm5, %%mm6 \n\t"
+		"paddw %%mm3, %%mm4 \n\t"
+		"paddw %%mm5, %%mm6 \n\t"
+		"paddw %%mm3, %%mm4 \n\t"
+		"paddw %%mm5, %%mm6 \n\t"
+		"paddw %%mm3, %%mm4 \n\t"
+		"paddw %%mm5, %%mm6 \n\t"
+		"paddw %%mm3, %%mm4 \n\t"
+		"paddw %%mm5, %%mm6 \n\t"
+		"paddw %%mm3, %%mm4 \n\t"
+		"paddw %%mm5, %%mm6 \n\t"
+		"paddw %%mm3, %%mm4 \n\t"
+		"paddw %%mm5, %%mm6 \n\t"
+		"psrlw $3, %%mm4 \n\t"
+		"psrlw $3, %%mm6 \n\t"
+		"movq %%mm4, %%mm3 \n\t"
+		"movq %%mm6, %%mm5 \n\t"
+		"punpcklwd %%mm0, %%mm3 \n\t"
+		"punpckhwd %%mm0, %%mm4 \n\t"
+		"punpcklwd %%mm0, %%mm5 \n\t"
+		"punpckhwd %%mm0, %%mm6 \n\t"
+		"pslld $8, %%mm3 \n\t"
+		"pslld $8, %%mm4 \n\t"
+		"pslld $24, %%mm5 \n\t"
+		"pslld $24, %%mm6 \n\t"
+		
+		"por %%mm3, %%mm1 \n\t"
+		"por %%mm4, %%mm2 \n\t"
+		"por %%mm5, %%mm1 \n\t"
+		"por %%mm6, %%mm2 \n\t"
+		
+		"movq %%mm1, (%%edi) \n\t"
+		"movq %%mm2, 8(%%edi) \n\t"
+		
+		"movq 8(%%esi), %%mm1 \n\t"
+		"movq 8(%%esi), %%mm2 \n\t"
+		"punpcklbw %%mm0, %%mm1 \n\t"
+		"punpckhbw %%mm0, %%mm2 \n\t"
+		
+		"movq (%%eax,%%edx,2), %%mm4 \n\t"
+		"movq (%%ebx,%%ebp,2), %%mm6 \n\t"
+		"punpckhbw %%mm0, %%mm4 \n\t"
+		"punpckhbw %%mm0, %%mm6 \n\t"
+		"movq (%%eax), %%mm3 \n\t"
+		"movq (%%ebx), %%mm5 \n\t"
+		"punpckhbw %%mm0, %%mm3 \n\t"
+		"punpckhbw %%mm0, %%mm5 \n\t"
+		"paddw %%mm3, %%mm4 \n\t"
+		"paddw %%mm5, %%mm6 \n\t"
+		"paddw %%mm3, %%mm4 \n\t"
+		"paddw %%mm5, %%mm6 \n\t"
+		"paddw %%mm3, %%mm4 \n\t"
+		"paddw %%mm5, %%mm6 \n\t"
+		"paddw %%mm3, %%mm4 \n\t"
+		"paddw %%mm5, %%mm6 \n\t"
+		"paddw %%mm3, %%mm4 \n\t"
+		"paddw %%mm5, %%mm6 \n\t"
+		"paddw %%mm3, %%mm4 \n\t"
+		"paddw %%mm5, %%mm6 \n\t"
+		"paddw %%mm3, %%mm4 \n\t"
+		"paddw %%mm5, %%mm6 \n\t"
+		"psrlw $3, %%mm4 \n\t"
+		"psrlw $3, %%mm6 \n\t"
+		"movq %%mm4, %%mm3 \n\t"
+		"movq %%mm6, %%mm5 \n\t"
+		"punpcklwd %%mm0, %%mm3 \n\t"
+		"punpckhwd %%mm0, %%mm4 \n\t"
+		"punpcklwd %%mm0, %%mm5 \n\t"
+		"punpckhwd %%mm0, %%mm6 \n\t"
+		"pslld $8, %%mm3 \n\t"
+		"pslld $8, %%mm4 \n\t"
+		"pslld $24, %%mm5 \n\t"
+		"pslld $24, %%mm6 \n\t"
+		
+		"por %%mm3, %%mm1 \n\t"
+		"por %%mm4, %%mm2 \n\t"
+		"por %%mm5, %%mm1 \n\t"
+		"por %%mm6, %%mm2 \n\t"
+		
+		"addl $16, %%esi \n\t"
+		"addl $8, %%eax \n\t"
+		"addl $8, %%ebx \n\t"
+		
+		"movq %%mm1, 16(%%edi) \n\t"
+		"movq %%mm2, 24(%%edi) \n\t"
+		"addl $32, %%edi \n\t"
+		
+		"decl %%ecx \n\t"
+		"jnz .Lli0 \n\t"
+		"emms \n\t"
+		"popl %%ebp \n\t"
+		: 
+		: "S" (y), "D" (dst), "a" (u), "b" (v), "d" (&us), "c" (w/16)
+		: "memory"
+		);
+	pack_li_0_C(dst, y, u, v, (w&15), us, vs);
+}
+
+static void pack_li_1_MMX(unsigned char *dst, unsigned char *y,
+	unsigned char *u, unsigned char *v, int w, int us, int vs)
+{
+	asm volatile (""
+		"pushl %%ebp \n\t"
+		"movl 4(%%edx), %%ebp \n\t"
+		"movl (%%edx), %%edx \n\t"
+		"pxor %%mm0, %%mm0 \n\t"
+		
+		".balign 16 \n\t"
+		".Lli1: \n\t"
+		"movq (%%esi), %%mm1 \n\t"
+		"movq (%%esi), %%mm2 \n\t"
+		"punpcklbw %%mm0, %%mm1 \n\t"
+		"punpckhbw %%mm0, %%mm2 \n\t"
+		
+		"movq (%%eax,%%edx,2), %%mm4 \n\t"
+		"movq (%%ebx,%%ebp,2), %%mm6 \n\t"
+		"punpcklbw %%mm0, %%mm4 \n\t"
+		"punpcklbw %%mm0, %%mm6 \n\t"
+		"movq (%%eax), %%mm3 \n\t"
+		"movq (%%ebx), %%mm5 \n\t"
+		"punpcklbw %%mm0, %%mm3 \n\t"
+		"punpcklbw %%mm0, %%mm5 \n\t"
+		"movq %%mm4, %%mm7 \n\t"
+		"paddw %%mm4, %%mm4 \n\t"
+		"paddw %%mm7, %%mm4 \n\t"
+		"movq %%mm6, %%mm7 \n\t"
+		"paddw %%mm6, %%mm6 \n\t"
+		"paddw %%mm7, %%mm6 \n\t"
+		"paddw %%mm3, %%mm4 \n\t"
+		"paddw %%mm5, %%mm6 \n\t"
+		"paddw %%mm3, %%mm4 \n\t"
+		"paddw %%mm5, %%mm6 \n\t"
+		"paddw %%mm3, %%mm4 \n\t"
+		"paddw %%mm5, %%mm6 \n\t"
+		"paddw %%mm3, %%mm4 \n\t"
+		"paddw %%mm5, %%mm6 \n\t"
+		"paddw %%mm3, %%mm4 \n\t"
+		"paddw %%mm5, %%mm6 \n\t"
+		"psrlw $3, %%mm4 \n\t"
+		"psrlw $3, %%mm6 \n\t"
+		"movq %%mm4, %%mm3 \n\t"
+		"movq %%mm6, %%mm5 \n\t"
+		"punpcklwd %%mm0, %%mm3 \n\t"
+		"punpckhwd %%mm0, %%mm4 \n\t"
+		"punpcklwd %%mm0, %%mm5 \n\t"
+		"punpckhwd %%mm0, %%mm6 \n\t"
+		"pslld $8, %%mm3 \n\t"
+		"pslld $8, %%mm4 \n\t"
+		"pslld $24, %%mm5 \n\t"
+		"pslld $24, %%mm6 \n\t"
+		
+		"por %%mm3, %%mm1 \n\t"
+		"por %%mm4, %%mm2 \n\t"
+		"por %%mm5, %%mm1 \n\t"
+		"por %%mm6, %%mm2 \n\t"
+		
+		"movq %%mm1, (%%edi) \n\t"
+		"movq %%mm2, 8(%%edi) \n\t"
+		
+		"movq 8(%%esi), %%mm1 \n\t"
+		"movq 8(%%esi), %%mm2 \n\t"
+		"punpcklbw %%mm0, %%mm1 \n\t"
+		"punpckhbw %%mm0, %%mm2 \n\t"
+		
+		"movq (%%eax,%%edx,2), %%mm4 \n\t"
+		"movq (%%ebx,%%ebp,2), %%mm6 \n\t"
+		"punpckhbw %%mm0, %%mm4 \n\t"
+		"punpckhbw %%mm0, %%mm6 \n\t"
+		"movq (%%eax), %%mm3 \n\t"
+		"movq (%%ebx), %%mm5 \n\t"
+		"punpckhbw %%mm0, %%mm3 \n\t"
+		"punpckhbw %%mm0, %%mm5 \n\t"
+		"movq %%mm4, %%mm7 \n\t"
+		"paddw %%mm4, %%mm4 \n\t"
+		"paddw %%mm7, %%mm4 \n\t"
+		"movq %%mm6, %%mm7 \n\t"
+		"paddw %%mm6, %%mm6 \n\t"
+		"paddw %%mm7, %%mm6 \n\t"
+		"paddw %%mm3, %%mm4 \n\t"
+		"paddw %%mm5, %%mm6 \n\t"
+		"paddw %%mm3, %%mm4 \n\t"
+		"paddw %%mm5, %%mm6 \n\t"
+		"paddw %%mm3, %%mm4 \n\t"
+		"paddw %%mm5, %%mm6 \n\t"
+		"paddw %%mm3, %%mm4 \n\t"
+		"paddw %%mm5, %%mm6 \n\t"
+		"paddw %%mm3, %%mm4 \n\t"
+		"paddw %%mm5, %%mm6 \n\t"
+		"psrlw $3, %%mm4 \n\t"
+		"psrlw $3, %%mm6 \n\t"
+		"movq %%mm4, %%mm3 \n\t"
+		"movq %%mm6, %%mm5 \n\t"
+		"punpcklwd %%mm0, %%mm3 \n\t"
+		"punpckhwd %%mm0, %%mm4 \n\t"
+		"punpcklwd %%mm0, %%mm5 \n\t"
+		"punpckhwd %%mm0, %%mm6 \n\t"
+		"pslld $8, %%mm3 \n\t"
+		"pslld $8, %%mm4 \n\t"
+		"pslld $24, %%mm5 \n\t"
+		"pslld $24, %%mm6 \n\t"
+		
+		"por %%mm3, %%mm1 \n\t"
+		"por %%mm4, %%mm2 \n\t"
+		"por %%mm5, %%mm1 \n\t"
+		"por %%mm6, %%mm2 \n\t"
+		
+		"addl $16, %%esi \n\t"
+		"addl $8, %%eax \n\t"
+		"addl $8, %%ebx \n\t"
+		
+		"movq %%mm1, 16(%%edi) \n\t"
+		"movq %%mm2, 24(%%edi) \n\t"
+		"addl $32, %%edi \n\t"
+		
+		"decl %%ecx \n\t"
+		"jnz .Lli1 \n\t"
+		"emms \n\t"
+		"popl %%ebp \n\t"
+		: 
+		: "S" (y), "D" (dst), "a" (u), "b" (v), "d" (&us), "c" (w/16)
+		: "memory"
+		);
+	pack_li_1_C(dst, y, u, v, (w&15), us, vs);
+}
 #endif
 
 static pack_func_t *pack_nn;
@@ -199,7 +449,11 @@ static int open(vf_instance_t *vf, char* args)
 	pack_li_0 = pack_li_0_C;
 	pack_li_1 = pack_li_1_C;
 #ifdef HAVE_MMX
-	if(gCpuCaps.hasMMX) pack_nn = (pack_func_t *)pack_nn_MMX;
+	if(gCpuCaps.hasMMX) {
+		pack_nn = (pack_func_t *)pack_nn_MMX;
+		pack_li_0 = pack_li_0_MMX;
+		pack_li_1 = pack_li_1_MMX;
+	}
 #endif
 
 	switch(vf->priv->mode) {
