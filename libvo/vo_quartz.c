@@ -10,7 +10,7 @@
 	MPlayer Mac OSX Quartz video out module.
 	
 	todo:	-screen overlay output
-			-Enable live resize
+			-Add sub-option to select fullscreen resolution
 			-RGB32 lost HW accel in fullscreen
 			-(add sugestion here)
  */
@@ -534,6 +534,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	windowAttrs =   kWindowStandardDocumentAttributes
 					| kWindowStandardHandlerAttribute
 					| kWindowMetalAttribute
+					| kWindowCompositingAttribute
 					| kWindowLiveResizeAttribute;
 					
  	if (theWindow == NULL)
@@ -555,6 +556,9 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		SizeWindow (theWindow, d_width, d_height, 1);
  	}
 	
+	//Show window
+	RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
+	ShowWindow (theWindow);
 	SetPort(GetWindowPort(theWindow));
 	
 	switch (image_format) 
@@ -717,10 +721,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		}
 		break;
 	}
-
-	//Show window
-	RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
-	ShowWindow (theWindow);
 	
 	if(vo_fs)
 		window_fullscreen();
@@ -1071,6 +1071,7 @@ void window_resized()
 	uint32_t d_height;
 	
 	Rect tmpRect;
+	CGRect tmpBounds;
 
 	GetPortBounds( GetWindowPort(theWindow), &winRect );
 
@@ -1091,17 +1092,16 @@ void window_resized()
 	}
 
 	//Clear Background
+	tmpBounds = CGRectMake( 0, border, winRect.right, winRect.bottom);
 	CreateCGContextForPort(GetWindowPort(theWindow),&context);
-	CGRect winBounds = CGRectMake( 0, border, winRect.right, winRect.bottom);
 	CGContextSetRGBFillColor(context, 0.0, 0.0, 0.0, 1.0);
-	CGContextFillRect(context, winBounds);
-	CGContextFlush(context);
+	CGContextFillRect(context, tmpBounds);
 	
 	switch (image_format)
 	{
 		case IMGFMT_RGB32:
 		{
-			bounds = CGRectMake(dstRect.left, dstRect.top, dstRect.right-dstRect.left, dstRect.bottom-dstRect.top);
+			bounds = CGRectMake(dstRect.left, dstRect.top+border, dstRect.right-dstRect.left, dstRect.bottom-dstRect.top);
 			CreateCGContextForPort (GetWindowPort (theWindow), &context);
 			break;
 		}
@@ -1197,5 +1197,4 @@ void window_fullscreen()
  		vo_quartz_fs = 0;
 	}
 	
-	window_resized();
 }
