@@ -86,6 +86,13 @@ ppc() {
   esac
 }
 
+alpha() {
+  case "$host_arch" in
+    alpha) return 0;;
+    *) return 1;;
+  esac
+}
+
 # not boolean test: implement the posix shell "!" operator for a
 # non-posix /bin/sh.
 #   usage:  not {command}
