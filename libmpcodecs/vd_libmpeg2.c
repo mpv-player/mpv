@@ -40,11 +40,6 @@ static picture_t *picture=NULL;	// exported from libmpeg2/decode.c
 
 static int table_init_state=0;
 
-#ifdef MPEG12_POSTPROC
-#include "../postproc/postprocess.h"
-int quant_store[MPEG2_MBR+1][MPEG2_MBC+1]; // [Review]
-#endif
-
 // to set/get/query special features/parameters
 static int control(sh_video_t *sh,int cmd,void* arg,...){
     return CONTROL_UNKNOWN;
@@ -184,6 +179,8 @@ static mp_image_t* parse_chunk (sh_video_t* sh, int code, uint8_t * buffer, int 
 		picture->current_frame->base[1]=mpi->planes[1];
 		picture->current_frame->base[2]=mpi->planes[2];
 		picture->current_frame->mpi=mpi;	// tricky!
+		mpi->qscale=&picture->current_frame->quant_store[1][1];
+		mpi->qstride=(MPEG2_MBC+1);
 		mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"mpeg2: [%c] %p  %s  \n",
 		    (picture->picture_coding_type == B_TYPE) ? 'B':'P',
 		    mpi, (mpi->flags&MP_IMGFLAG_DIRECT)?"DR!":"");

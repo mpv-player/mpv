@@ -56,6 +56,12 @@ typedef struct vo_frame_s {
     void (* copy) (struct vo_frame_s * frame, uint8_t ** src);
     void* vo;
     void* mpi;
+#ifdef MPEG12_POSTPROC
+#define MPEG2_MBC 120
+#define MPEG2_MBR 72
+    int quant_store[MPEG2_MBR+1][MPEG2_MBC+1];
+#endif
+
 //    int slice;
 //    void (* field) (struct vo_frame_s * frame, int flags);
 //    void (* draw) (struct vo_frame_s * frame);
@@ -219,7 +225,3 @@ void mpeg2_allocate_image_buffers(picture_t * picture);
 void mpeg2_free_image_buffers (picture_t * picture);
 
 
-#ifdef MPEG12_POSTPROC
-#define MPEG2_MBC 120
-#define MPEG2_MBR 72
-#endif

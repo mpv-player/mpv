@@ -32,9 +32,9 @@ extern mc_functions_t mc_functions;
 extern void (* idct_block_copy) (int16_t * block, uint8_t * dest, int stride);
 extern void (* idct_block_add) (int16_t * block, uint8_t * dest, int stride);
 
-#ifdef MPEG12_POSTPROC
-extern int quant_store[MPEG2_MBR+1][MPEG2_MBC+1]; // [Review]
-#endif
+//#ifdef MPEG12_POSTPROC
+//extern int quant_store[MPEG2_MBR+1][MPEG2_MBC+1]; // [Review]
+//#endif
 
 #include "vlc.h"
 
@@ -1753,7 +1753,7 @@ int slice_process (picture_t * picture, uint8_t code, uint8_t * buffer)
 	}
 
 #ifdef MPEG12_POSTPROC
-	quant_store[code][(offset>>4)+1] = picture->quantizer_scale;
+	picture->current_frame->quant_store[code][(offset>>4)+1] = picture->quantizer_scale;
 #endif
 	offset += 16;
 	CHECK_DISPLAY;
@@ -1785,7 +1785,7 @@ int slice_process (picture_t * picture, uint8_t code, uint8_t * buffer)
 			MOTION (motion_fi_zero, MACROBLOCK_MOTION_FORWARD);
 
 #ifdef MPEG12_POSTPROC
-	quant_store[code][(offset>>4)+1] = picture->quantizer_scale;
+	picture->current_frame->quant_store[code][(offset>>4)+1] = picture->quantizer_scale;
 #endif
 
 		    offset += 16;
@@ -1801,7 +1801,7 @@ int slice_process (picture_t * picture, uint8_t code, uint8_t * buffer)
 			MOTION (motion_fi_reuse, macroblock_modes);
 
 #ifdef MPEG12_POSTPROC
-	quant_store[code][(offset>>4)+1] = picture->quantizer_scale;
+	picture->current_frame->quant_store[code][(offset>>4)+1] = picture->quantizer_scale;
 #endif
 
 		    offset += 16;
