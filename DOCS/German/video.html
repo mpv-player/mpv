@@ -184,7 +184,7 @@ oder setze die Refreshrate auf n*(fps des Films) Hz.</LI>
 <LI>Radeon VE - zur Zeit hat nur die CVS-Versionen von XFree86 einen Treiber für
 diese Karte, Version 4.1.0 hat keinen. Natürlich kannst du mit <B>MPlayer</B> gut
 eine <B>beschleunigte</B> Anzeige erhalten, mit oder ohne <B>TV Ausgabe</B>. Es
-werden auch keine Bibliotheken oder X benötigt. Lies in der <a href=#2.3.1.15>Vidix</a> 
+werden auch keine Bibliotheken oder X benötigt. Lies in der <A HREF=#2.3.1.15>Vidix</A> 
 Abteilung.</LI>
 
 </P>
@@ -280,7 +280,7 @@ schreiben. Wenn du es auch also Anwender starten willst, installiere bei
 <P><B>!!!! ABER SEIT GEWARNT !!!!</B><BR>
 Dies ist ein <B>GROSSES</B> Sicherheitsrisiko! Mache das nie auf einem Server oder
 einem Computer, der von mehreren Personen verwendet wird, da sie durch das
-Root SUID von <b>MPlayer</B> Root-Rechte erhalten könnten!<BR>
+Root SUID von <B>MPlayer</B> Root-Rechte erhalten könnten!<BR>
 <B>!!!! DU WURDEST ALSO GEWARNT ... !!!!</B></P>
 
 <P>Verwende nun die '-vo dga' Option und es sollte funktionieren! (hoffe es:)
@@ -678,7 +678,7 @@ gibt die gemeinsamen Informationen beider Kontroller zurück, inklusive einer Lis
 verfügbaren Modusse. Wenn eine Anwendungen einen Modus auswählt wird der entsprechende
 Kontroller aktiviert. Alle verbleibenden VBE-Funktionen werden dann auf dem aktuellen Kontroller
 ausgeführt.
-</i></code>
+</I></CODE>
 </P>
 
 <P>
@@ -690,19 +690,19 @@ Also hast du damit gute Chancen deinen TV-OUT mit diesem Treiber zu aktivieren.<
 <B>Was sind die Vorteile:</B><BR>
  - Du hast Chance Videos zu sehen, <B>auch wenn Linux nicht mal weiss</B>, welche Grafikkarte du hast.<BR>
  - Du brauchst dazu auf deinem Linux keine anderen grafikabhängenden Sachen (wie X11 (XFree86),
-fbdev usw.). Dieser Treiber kann vom <b>Textmodus</b> aus betrieben werden.<BR>
- - Du hast Chancen den <b>TV-Out einzuschalten</b>. (Bis jetzt nur von ATI-Karten bekannt).<BR>
- - Dieser Treiber verwendet <b>int 10h</b> Handler, das heisst es ist kein Emulator - es ruft
-<B>echte</B> Befehle des <b>echteb</b> BIOS im <b>Real</b>-Mode aus. (im vm86 Modus).<BR>
- - Am wichtigesten :) Du kannst <b>DVD mit 320x200</b> ansehen ohne einer leistungsfähigen CPU.<BR>
+fbdev usw.). Dieser Treiber kann vom <B>Textmodus</B> aus betrieben werden.<BR>
+ - Du hast Chancen den <B>TV-Out einzuschalten</B>. (Bis jetzt nur von ATI-Karten bekannt).<BR>
+ - Dieser Treiber verwendet <B>int 10h</B> Handler, das heisst es ist kein Emulator - es ruft
+<B>echte</B> Befehle des <B>echten</B> BIOS im <B>Real</B>-Mode aus. (im vm86 Modus).<BR>
+ - Am wichtigesten :) Du kannst <B>DVD mit 320x200</B> ansehen ohne einer leistungsfähigen CPU.<BR>
 </P>
 
 <P>
 <B>Was sind die Nachteile:</B><BR>
  - Es funktioniert nut auf <B>x86 Systemen</B>.<BR>
  - <B>Es ist der langsamste Treiber</B> von allen verfügbaren für MPlayer.<BR>
-   (Aber nur, falls deine Karte keinen <b>DGA Modus</b> unterstützt - Ansonsten ist die Geschwindigkeit
-   dieses Treibers mit denen von <b>-vo dga</b> und <b>-vo fbdev</b> zu vergleichen.<BR>
+   (Aber nur, falls deine Karte keinen <B>DGA Modus</B> unterstützt - Ansonsten ist die Geschwindigkeit
+   dieses Treibers mit denen von <B>-vo dga</B> und <B>-vo fbdev</B> zu vergleichen.<BR>
  - Es kann nur als <B>ROOT</B> verwendet werden.<BR>
  - Zur Zeit ist es nur für <B>Linux</B> verfügbar.<BR>
  - Es <B>verwendet keine Hardwarebeschleunigung</B> (wie YUV-Overlay oder HW-Scaling).<BR>
@@ -715,8 +715,8 @@ fbdev usw.). Dieser Treiber kann vom <b>Textmodus</b> aus betrieben werden.<BR>
 <TD COLSPAN=4><P><B><FONT CLASS="text">Diese Commandline-Parameter sind zur Zeit verfügbar für VESA:</B></P></TD><TR>
 <TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">-vo vesa:opts</TD>
 <TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">
-  erkennt momentan: <b>dga</b> um den DGA-Modus zu erzwingen und <b>nodga</b> um ihn zu deaktivieren. Hinweis: Du kannst diese
-  Parameter auslassen um den DGA-Modus <b>automatisch</b> erkennen zu können. (In Zukunft wirst du Parameter wie Wiederholrate,
+  erkennt momentan: <B>dga</B> um den DGA-Modus zu erzwingen und <B>nodga</B> um ihn zu deaktivieren. Hinweis: Du kannst diese
+  Parameter auslassen um den DGA-Modus <B>automatisch</B> erkennen zu können. (In Zukunft wirst du Parameter wie Wiederholrate,
   Interlacing, Doublescan und so weiter einstellen. Beispiele: i43,  85,  d100)</TD><TR>
 <TD></TD><TD><FONT CLASS="text">-screenw, -screenh, -bpp</TD>
   <TD></TD><TD><FONT CLASS="text">verwendet von Anwender definierte Modie</TD><TR>
@@ -735,20 +735,20 @@ fbdev usw.). Dieser Treiber kann vom <b>Textmodus</b> aus betrieben werden.<BR>
 </P>
   
 <P>
-<b>Bekannte Probleme und Workarounds:</b><br>
- - Wenn die <b>NLS</b> Schrift auf deinem Linux Rechner installiert hast und den VESA-Treiber
-auf einer Textmode-Konsole verwendst wird nach dem Beenden von MPlayer die <b>ROM-Schrift</b>
+<B>Bekannte Probleme und Workarounds:</B><BR>
+ - Wenn die <B>NLS</B> Schrift auf deinem Linux Rechner installiert hast und den VESA-Treiber
+auf einer Textmode-Konsole verwendst wird nach dem Beenden von MPlayer die <B>ROM-Schrift</B>
 erscheinen anstatt der nationalen. Du kannst die nationale Schrift wieder durch das z.B.
-<b><i>setsysfont</i></b>-Tool bei einer Mandrake Distribution laden.<br>
-(<b>Hinweis</b>: Das selbe Tool wird zum Loklisieren von fbdev verwendet).<br>
- - Einige <b>Grafikkartentreiber für Linux</b> aktivieren den <b>BIOS Modus</b> im DOS-Speicher
-nicht. Wenn du solche Probleme hast - verwende den VESA-Treiber im <b>Textmodus</b>. Andernfalls
-wird der Textmodus (#03) einfach aktiviert und du musst deinen Computer neu starten.<br>
- - Oftmals bekommt man nach dem Beenden des VESA-Treiber einen <b>schwarzen Bildschirm</b>. Um
+<B><I>setsysfont</I></B>-Tool bei einer Mandrake Distribution laden.<BR>
+(<B>Hinweis</B>: Das selbe Tool wird zum Loklisieren von fbdev verwendet).<BR>
+ - Einige <B>Grafikkartentreiber für Linux</B> aktivieren den <B>BIOS Modus</B> im DOS-Speicher
+nicht. Wenn du solche Probleme hast - verwende den VESA-Treiber im <B>Textmodus</B>. Andernfalls
+wird der Textmodus (#03) einfach aktiviert und du musst deinen Computer neu starten.<BR>
+ - Oftmals bekommt man nach dem Beenden des VESA-Treiber einen <B>schwarzen Bildschirm</B>. Um
 zurück zum normalen Modues zu kommen - wechlse einfach auf auf eine andere Konsole (durch das
-Drücken von <b>Alt-Fx</b>) und das Anschließende zurückschalten auf die vorherige Konsole auf die
-gleiche Art.<br>
- - Um einen <B>funktionierenden TV-out</b> zu bekommen musst du deine TV vor dem Starten des
+Drücken von <B>Alt-Fx</B>) und das Anschließende zurückschalten auf die vorherige Konsole auf die
+gleiche Art.<BR>
+ - Um einen <B>funktionierenden TV-out</B> zu bekommen musst du deine TV vor dem Starten des
 PCs anschließden, denn das Video-BIOS inizialisiert es während des POST-Vorganges.
 </P>
     
@@ -790,12 +790,12 @@ können keine tiefen pixelclocks verwenden, welche benötigt werden um einen tiefe
 
 <P><B><I>WAS IST VIDIX</I></B></P>
 
-<P>VIDIX ist di abkürzung für <b>VID</b>eo <b>I</b>nterface für
-  *ni<b>X</b>.<BR>
+<P>VIDIX ist di abkürzung für <B>VID</B>eo <B>I</B>nterface für
+  *ni<B>X</B>.<BR>
   VIDIX wurde entworfen und eingeführt als ein Interface für schnelle user-space Treiber,
-  welches <b>DGA</b> überall, wo die Möglichkeit besteht, zur Verfügung stellt.
-  (<b>im Gegensatz zu X11</b>). Ich hoffe, dass diese Treiber genauso portierbar sind, wie X11
-  (<b>nicht nur auf *nix</b>).<BR>
+  welches <B>DGA</B> überall, wo die Möglichkeit besteht, zur Verfügung stellt.
+  (<B>im Gegensatz zu X11</B>). Ich hoffe, dass diese Treiber genauso portierbar sind, wie X11
+  (<B>nicht nur auf *nix</B>).<BR>
   Was ist es:
   <LI>Es ist ein portabler Nachfolger der mga_vid Technologie, welcher jedoch als user-space 
   Treiber angesiedelt ist</LI>
@@ -805,10 +805,10 @@ können keine tiefen pixelclocks verwenden, welche benötigt werden um einen tiefe
 </P>
 
 <P>Ich kann es dir auch in fetten Grossbuchstaben sagen :<BR>
-  <b>VIDIX STELLT EINEN DIREKTEN GRAFIKZUGRIFF ZUM BES YUV MEMORY ZUR VERFÜGUNG.</b>
+  <B>VIDIX STELLT EINEN DIREKTEN GRAFIKZUGRIFF ZUM BES YUV MEMORY ZUR VERFÜGUNG.</B>
 </P>
 
-<P><i>Nun ja (es ist in meinem todo) - implementiert einen DGA zu MPEG2 Dekoder.</i></P>
+<P><I>Nun ja (es ist in meinem todo) - implementiert einen DGA zu MPEG2 Dekoder.</I></P>
 
 <P>Dieses Interface wurde als Versuch entworfen, die existierenden Videobeschleunigungs-Interfaces
   (bekannt als mga_vid, mga_yuv, radeon_vid) in ein festest Schema zu bringen.
@@ -832,13 +832,13 @@ können keine tiefen pixelclocks verwenden, welche benötigt werden um einen tiefe
   <LI>Du kannst das VIDIX dem Vidix unterstellte Gerät (subdevice) verwenden, welches zu vielen 
     Videoausgabe-Treibern hinzugefügt wurde, wie z.B.:<BR>
     <CODE>-vo vesa:vidix</CODE> und <CODE>-vo fbdev:vidix</CODE></LI>
-  Allerdings spielt es keine Rolle, welche Videoausgabe-Treiber mit <b>VIDIX</b> verwendet werden.
+  Allerdings spielt es keine Rolle, welche Videoausgabe-Treiber mit <B>VIDIX</B> verwendet werden.
 </P>
 
 <P><B><I>VORAUSSETZUNGEN</I></B></P>
 
 <P>
-  <LI>Die Videokarte sollte sich im Grafikmodus befinden (Ich schreibe einfach <b>sollte</b>, 
+  <LI>Die Videokarte sollte sich im Grafikmodus befinden (Ich schreibe einfach <B>sollte</B>, 
     weil ich es im Textmodus getestet habe - es läuft, hat aber eine hässliche Ausgabe ;) Benutze
     AAlib für das).<BR>
     <I>Hinweis: Jederman kann dies ausprobieren, indem er den Moduswechsel im vo_vesa Treiber 
@@ -851,9 +851,9 @@ können keine tiefen pixelclocks verwenden, welche benötigt werden um einen tiefe
 
 <P><B><I>GEBRAUCHSMETHODEN</I></B></P>
 
-<P>Wenn VIDIX als ein <b>subdevice</b> (<CODE>-vo vesa:vidix</CODE>) verwendet
+<P>Wenn VIDIX als ein <B>subdevice</B> (<CODE>-vo vesa:vidix</CODE>) verwendet
   wird, dann wird die Videomodus-Konfiguration vom Videoausgabe-Gerät erledigt werden
-  (kurz gesagt: <b>vo_server</b>). Du kannst desshalb in der Kommandozeile von
+  (kurz gesagt: <B>vo_server</B>). Du kannst desshalb in der Kommandozeile von
   <B>MPlayer</B> die gleichen Optionen wie für den vo_server verwenden. Zusätzlich 
   versteht es die Option <CODE>-double</CODE> als einen global sichtbaren Parameter.
   (Ich empfehle diese Option mit VIDIX wenigstens für ATI's Karten zu verwenden).<BR>
@@ -864,14 +864,14 @@ können keine tiefen pixelclocks verwenden, welche benötigt werden um einen tiefe
 <P>Du kannst auch den Treiber von VIDIX direkt als ein drittes Unterargument
 in der Kommandozeile angeben:<BR>
   <BR>
-  &nbsp;&nbsp;<code>mplayer -vo xvidix:mga_vid.so -fs -zoom -double
-    datei.avi</code><BR>
+  &nbsp;&nbsp;<CODE>mplayer -vo xvidix:mga_vid.so -fs -zoom -double
+    datei.avi</CODE><BR>
   oder<BR>
-  &nbsp;&nbsp;<code>mplayer -vo vesa:vidix:radeon_vid.so -fs -zoom -double -bpp
-    32 datei.avi</code><BR>
+  &nbsp;&nbsp;<CODE>mplayer -vo vesa:vidix:radeon_vid.so -fs -zoom -double -bpp
+    32 datei.avi</CODE><BR>
   <BR>
   Aber dies ist gefährlich und du solltest es nicht tun. In diesem Falle wird der gegebene 
-  Treiber erzwungen und das Ergebnis ist unvorhersehbar (es könnte deinen Computer <b>einfrieren</b>). 
+  Treiber erzwungen und das Ergebnis ist unvorhersehbar (es könnte deinen Computer <B>einfrieren</B>). 
   Du solltest dies NUR tun, wenn du absolut sicher bist, dass es funktioniert und <B>MPlayer</B> es nicht
   automatisch tut. Bitte informiere die Entwickler darüber. Der richtige Weg ist, VIDIX ohne 
   irgendwelche Argumente zu verwenden um die automatische Erkennung des Treibers zu aktivieren.
@@ -884,9 +884,9 @@ in der Kommandozeile angeben:<BR>
   die Hoffnung, dass es auf den Systemen laufen wird, auf denen X11 läuft.
 </P>
 
-<P>Und die letzte <b>WARNUNG</b>: (un)glücklicherweise <b>MUST</b> du aufgrund des
-  direkten Hardwarezugriffs <b>ROOT</b> Privilegien besitzen um VIDIX zu benützen. 
-  Setze wenigstens das <b>suid</b> bit auf den <B>MPlayer</B>.
+<P>Und die letzte <B>WARNUNG</B>: (un)glücklicherweise <B>MUST</B> du aufgrund des
+  direkten Hardwarezugriffs <B>ROOT</B> Privilegien besitzen um VIDIX zu benützen. 
+  Setze wenigstens das <B>suid</B> bit auf den <B>MPlayer</B>.
 </P>
 
 <P><B><I>VIDEO EQUALIZER</I></B></P>
@@ -1083,36 +1083,36 @@ es keine Möglichkeit den TV-Out bei ATI-Karten zu aktivieren.</P>
 <LI><B>Radeon VE</B> und <B>Rage PRO LT</B> verwenden <I>ImpacTV2+</I>, welcher unter Linux nicht
 unterstützt wird. 
 <LI>Aber mit <B>MPlayer</B> erhältst du <B>vollständige Hardware-Beschleunigung</B> 
-und <B>TV Ausgabe</B> für Radeon Karten ! Lies die <a href=#2.3.1.12>VESA Treiber</a> und 
+und <B>TV Ausgabe</B> für Radeon Karten ! Lies die <A HREF=#2.3.1.12>VESA Treiber</A> und 
 <A HREF=#2.3.1.14>Radeon Beschleunigung</A> Abschnitte.</P>
 
 <P>
 Glücklicherweise können Benutzer mit genügend schnellen CPUs (Duron, Celeron2 und besser) 
-filme auf ihrem TV durch <a href=#2.3.1.12>VESA Treiber</a> sehen.
+filme auf ihrem TV durch <A HREF=#2.3.1.12>VESA Treiber</A> sehen.
 </P>
 
 <P>
-Ich könnte auch gute Worte zu ATI Inc. sagen:<br>
-<b>Sie produzieren BIOSs von höchster Qualität.</b>
+Ich könnte auch gute Worte zu ATI Inc. sagen:<BR>
+<B>Sie produzieren BIOSs von höchster Qualität.</B>
 </P>
 
 <P>
-<b>VESA Treiber</b> benutzen keine Harware-Beschleunigung, simulieren jedoch <b>DGA</b> 
+<B>VESA Treiber</B> benutzen keine Harware-Beschleunigung, simulieren jedoch <B>DGA</B> 
 durch ein 64K Fenster, das durch 32-bit Modus Funktionen des BIOS konfiguriert wird.
-ATI Karten haben genug <b>schnellen Videospeicher</b> (DIMM oder DDR
+ATI Karten haben genug <B>schnellen Videospeicher</B> (DIMM oder DDR
 Chips mit 64 - 128-bit Zugriff). Es existieren keine Beschränkungen, welcher Videomodus
 auf deinem TV dargestellt werden kann (wie bei anderen Karten). Du kannst also 
-<b>irgendeinen Videomodus</b> auf deinem <b>TV</b> benutzen (von <b>320x200</b> bis zu 
-<b>1024x768</b>).<br>
-Auf der anderen Seite (Es ist mindestens für <b>Radeon</b> Karten bekannt) gibt es einen <b>DGA</b>
+<B>irgendeinen Videomodus</B> auf deinem <B>TV</B> benutzen (von <B>320x200</B> bis zu 
+<B>1024x768</B>).<BR>
+Auf der anderen Seite (Es ist mindestens für <B>Radeon</B> Karten bekannt) gibt es einen <B>DGA</B>
 Modus, welcher automatisch erkannt wird und in diesem Fall vergleichbare Geschwindigkeiten wie
-die <b>-vo dga</b> und <b>-vo fbdev</b> Treiber liefert.<br> 
-Das einzige, was du zu tun hast - <b>hab den TV-Anschluss eingesteckt bevor du deinen PC
-startest</b> denn das Video BIOS initialisiert sich selbst nur einmal während der POST Prozedure.
+die <B>-vo dga</B> und <B>-vo fbdev</B> Treiber liefert.<BR> 
+Das einzige, was du zu tun hast - <B>hab den TV-Anschluss eingesteckt bevor du deinen PC
+startest</B> denn das Video BIOS initialisiert sich selbst nur einmal während der POST Prozedure.
 </P>
 
 <P>
-Lies in der <a href="video.html#2.3.1.12">VESA</a> Sektion dieser Dokumentation um mehr Details zu erhalten.
+Lies in der <A HREF="video.html#2.3.1.12">VESA</A> Sektion dieser Dokumentation um mehr Details zu erhalten.
 </P>
 
 
