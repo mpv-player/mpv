@@ -76,6 +76,11 @@ static IDirectFBDisplayLayer *bes;
 static IDirectFBDisplayLayer *crtc2;
 static IDirectFBDisplayLayer *spic;
 
+static int num_bufs;
+static int current_buf;
+static int current_ip_buf;
+static IDirectFBSurface *bufs[3];
+
 static IDirectFBSurface *frame;
 static IDirectFBSurface *c2frame;
 static IDirectFBSurface *subframe;
@@ -99,6 +104,8 @@ static int use_bes   = 0;
 static int use_crtc2 = 1;
 static int use_spic  = 1;
 
+static int osd_changed;
+
 /******************************
 *	    vo_directfb       *
 ******************************/
@@ -110,14 +117,12 @@ static int use_spic  = 1;
  char *fb_dev_name;
 #endif
 
-static void ( *draw_alpha_p ) ( int w, int h, unsigned char *src,
-                                unsigned char *srca, int stride,
-                                unsigned char *dst, int dstride);
-
 static uint32_t in_width;
 static uint32_t in_height;
 static uint32_t screen_width;
 static uint32_t screen_height;
+static uint32_t sub_width;
+static uint32_t sub_height;
 
 static char *
 pixelformat_name( DFBSurfacePixelFormat format )
@@ -181,8 +186,6 @@ imgfmt_to_pixelformat( uint32_t format )
 static uint32_t
 preinit( const char *arg )
 {
-     DFBSurfaceDescription dsc;
-
      if (vo_subdevice) {
           while (*vo_subdevice != '\0') {
                if (!strncmp(vo_subdevice, "bes", 3)) {
@@ -234,7 +237,7 @@ preinit( const char *arg )
      }
 
      if (dfb->GetInputDevice( dfb, DIDID_KEYBOARD, &keyboard ) != DFB_OK)
-          dfb->Release( dfb );
+          return -1;
      keyboard->CreateEventBuffer( keyboard, &buffer );
      buffer->Reset( buffer );
 
@@ -250,8 +253,6 @@ config( uint32_t width, uint32_t height,
 {
      DFBDisplayLayerConfig      dlc;
      DFBDisplayLayerConfigFlags failed;
-     DFBSurfaceDescription      dsc;
-     DFBResult                  ret;
 
      uint32_t out_width;
      uint32_t out_height;
@@ -283,20 +284,27 @@ config( uint32_t width, uint32_t height,
                                   (1.0f - (float) out_height / 10000.0f) / 2.0f,
                                   (float) out_width  / 10000.0f,
                                   (float) out_height / 10000.0f );
+          bufs[0] = frame;
+          num_bufs = 1;
      } else {
           /* Draw to a temporary surface */
           DFBSurfaceDescription dsc;
 
-          dsc.flags       = DSDESC_CAPS |
-                            DSDESC_WIDTH | DSDESC_HEIGHT |
+          dsc.flags       = DSDESC_WIDTH | DSDESC_HEIGHT |
                             DSDESC_PIXELFORMAT;
-          dsc.caps        = DSCAPS_VIDEOONLY;
           dsc.width       = in_width;
           dsc.height      = in_height;
           dsc.pixelformat = dlc.pixelformat;
 
-          if (dfb->CreateSurface( dfb, &dsc, &frame ) != DFB_OK)
-               return -1;
+          for (num_bufs = 0; num_bufs < 3; num_bufs++) {
+               if (dfb->CreateSurface( dfb, &dsc, &bufs[num_bufs] ) != DFB_OK) {
+                    if (num_bufs == 0)
+                         return -1;
+               }
+          }
+          frame = bufs[0];
+          current_buf = 0;
+          current_ip_buf = 0;
      }
 
      if (use_crtc2) {
@@ -358,8 +366,11 @@ config( uint32_t width, uint32_t height,
           c2frame->Clear( c2frame, 0, 0, 0, 0 );
 
           printf( "vo_dfbmga: CRTC2 surface %dx%d %s\n", dlc.width, dlc.height, pixelformat_name( dlc.pixelformat ) );
-     } else
-          use_spic = 0;
+     } else {
+          screen_width  = in_width;
+          screen_height = in_height;
+          use_spic      = 0;
+     }
 
      frame->GetPixelFormat( frame, &frame_format );
      frame_pixel_size = DFB_BYTES_PER_PIXEL( frame_format );
@@ -406,15 +417,14 @@ config( uint32_t width, uint32_t height,
           subframe = c2frame;
      } else {
           /* Draw OSD to BES surface */
-          subframe            = frame;
-          screen_width        = in_width;
-          screen_height       = in_height;
+          subframe = frame;
      }
 
+     subframe->GetSize( subframe, &sub_width, &sub_height );
      subframe->GetPixelFormat( subframe, &subframe_format );
      subframe_pixel_size = DFB_BYTES_PER_PIXEL( subframe_format );
      printf( "vo_dfbmga: Sub-picture surface %dx%d %s (%s)\n",
-             screen_width, screen_height,
+             sub_width, sub_height,
              pixelformat_name( subframe_format ),
              use_crtc2 ? (use_spic ? "Sub-picture layer" : "CRTC2") : "BES" );
 
@@ -461,19 +471,20 @@ static const vo_info_t *get_info( void )
 	return &vo_info;
 }
 
-static void vo_draw_alpha_lut8( int w, int h,
-                                unsigned char* src,
-                                unsigned char *srca,
-                                int srcstride,
-                                unsigned char* dst,
-                                int dststride )
+static void
+vo_draw_alpha_lut8( int w, int h,
+                    unsigned char* src,
+                    unsigned char *srca,
+                    int srcstride,
+                    unsigned char* dst,
+                    int dststride )
 {
      int x;
 
      while (h--) {
           for (x = 0; x < w; x++) {
                if (srca[x])
-                    dst[x] |= ((255 - srca[x]) & 0xF0) | (src[x] >> 4);
+                    dst[x] = ((255 - srca[x]) & 0xF0) | (src[x] >> 4);
           }
           src  += srcstride;
           srca += srcstride;
@@ -491,7 +502,11 @@ draw_alpha( int x0, int y0,
      void *dst;
      int pitch;
 
-     subframe->Lock( subframe, DSLF_WRITE, &dst, &pitch );
+     if (use_spic && !osd_changed)
+          return;
+
+     if (subframe->Lock( subframe, DSLF_WRITE, &dst, &pitch ) != DFB_OK)
+          return;
 
      switch (subframe_format) {
      case DSPF_LUT8:
@@ -536,6 +551,7 @@ draw_alpha( int x0, int y0,
 			      ((uint8_t *) dst) + pitch * y0 + subframe_pixel_size * x0,
                               pitch );
 	  break;
+     default:
      }
 
      subframe->Unlock( subframe );
@@ -544,77 +560,7 @@ draw_alpha( int x0, int y0,
 static uint32_t
 draw_frame( uint8_t * src[] )
 {
-     void *dst;
-     int pitch;
-
-     frame->Lock( frame, DSLF_WRITE, &dst, &pitch );
-
-     switch (frame_format) {
-     case DSPF_ARGB:
-     case DSPF_RGB32:
-     case DSPF_RGB24:
-     case DSPF_RGB16:
-     case DSPF_RGB15:
-     case DSPF_YUY2:
-     case DSPF_UYVY:
-          {
-               int i;
-               for (i = 0; i < in_height; i++) {
-                    memcpy( dst + i * pitch,
-                            src[0] + i * in_width * frame_pixel_size,
-                            in_width * frame_pixel_size );
-               }
-          }
-          break;
-     case DSPF_YV12:
-          {
-               int i;
-               for (i = 0; i < in_height; i++) {
-                    memcpy( dst + i * pitch,
-                            src[0] + i * in_width,
-                            in_width );
-               }
-               dst += pitch * in_height;
-               for (i = 0; i < in_height / 2; i++) {
-                    memcpy( dst + i * pitch / 2,
-                            src[2] + i * in_width / 2,
-                            in_width / 2 );
-               }
-               dst += pitch * in_height / 4;
-               for (i = 0; i < in_height / 2; i++) {
-                    memcpy( dst + i * pitch / 2,
-                            src[1] + i * in_width / 2,
-                            in_width / 2 );
-               }
-          }
-          break;
-     case DSPF_I420:
-          {
-               int i;
-               for (i = 0; i < in_height; i++) {
-                    memcpy( dst + i * pitch,
-                            src[0] + i * in_width,
-                            in_width );
-               }
-               dst += pitch * in_height;
-               for (i = 0; i < in_height / 2; i++) {
-                    memcpy( dst + i * pitch / 2,
-                            src[1] + i * in_width / 2,
-                            in_width / 2 );
-               }
-               dst += pitch * in_height / 4;
-               for (i = 0; i < in_height / 2; i++) {
-                    memcpy( dst + i * pitch / 2,
-                            src[2] + i * in_width / 2,
-                            in_width / 2 );
-               }
-          }
-          break;
-     }
-
-     frame->Unlock( frame );
-
-     return 0;
+     return -1;
 }
 
 static uint32_t
@@ -623,140 +569,102 @@ draw_slice( uint8_t * src[], int stride[], int w, int h, int x, int y )
      void *dst;
      int pitch;
 
-     frame->Lock( frame, DSLF_WRITE, &dst, &pitch );
+     if (vo_directrendering)
+          frame->Unlock( frame );
 
-     switch (frame_format) {
-     case DSPF_ARGB:
-     case DSPF_RGB32:
-     case DSPF_RGB24:
-     case DSPF_RGB16:
-     case DSPF_RGB15:
-     case DSPF_YUY2:
-     case DSPF_UYVY:
-          {
-               void *s;
-               int i;
+     if (frame->Lock( frame, DSLF_WRITE, &dst, &pitch ) != DFB_OK)
+          return VO_FALSE;
 
-               dst += y * pitch + x * frame_pixel_size;
-               s = src[0];
-               for (i = 0; i < h; i++) {
-                    memcpy( dst, s, w );
-                    dst += pitch;
-                    s += stride[0];
-               }
-          }
-          break;
-     case DSPF_YV12:
-          {
-               void *d, *s;
-               int i;
-               d = dst + pitch * y + x;
-               s = src[0];
-               for (i = 0; i < h; i++) {
-                    memcpy( d, s, w );
-                    d += pitch;
-                    s += stride[0];
-               }
-               d = dst + pitch * in_height + pitch * y / 4 + x / 2;
-               s = src[2];
-               for (i = 0; i < h / 2; i++) {
-                    memcpy( d, s, w / 2 );
-                    d += pitch / 2;
-                    s += stride[2];
-               }
-               d = dst + pitch * in_height + pitch * in_height / 4 +
-                    pitch * y / 4 + x / 2;
-               s = src[1];
-               for (i = 0; i < h / 2; i++) {
-                    memcpy( d, s, w / 2 );
-                    d += pitch / 2;
-                    s += stride[1];
-               }
-          }
-	  break;
-     case DSPF_I420:
-          {
-               void *d, *s;
-               int i;
-               d = dst + pitch * y + x;
-               s = src[0];
-               for (i = 0; i < h; i++) {
-                    memcpy( d, s, w );
-                    d += pitch;
-                    s += stride[0];
-               }
-               d = dst + pitch * in_height + pitch * y / 4 + x / 2;
-               s = src[1];
-               for (i = 0; i < h / 2; i++) {
-                    memcpy( d, s, w / 2 );
-                    d += pitch / 2;
-                    s += stride[1];
-               }
-               d = dst + pitch * in_height + pitch * in_height / 4 +
-                    pitch * y / 4 + x / 2;
-               s = src[2];
-               for (i = 0; i < h / 2; i++) {
-                    memcpy( d, s, w / 2 );
-                    d += pitch / 2;
-                    s += stride[2];
-               }
-          }
-	  break;
-     }
+     memcpy_pic( dst + pitch * y + x, src[0],
+                 w, h, pitch, stride[0] );
+
+     dst += pitch * in_height;
+
+     x /= 2; y /= 2;
+     w /= 2; h /= 2;
+     pitch /= 2;
+
+     if (frame_format == DSPF_I420 )
+          memcpy_pic( dst + pitch * y + x, src[1],
+                      w, h, pitch, stride[1] );
+     else 
+          memcpy_pic( dst + pitch * y + x, src[2],
+                      w, h, pitch, stride[2] );
+
+     dst += pitch * in_height / 2;
+
+     if (frame_format == DSPF_I420 )
+          memcpy_pic( dst + pitch * y + x, src[2],
+                      w, h, pitch, stride[2] );
+     else
+          memcpy_pic( dst + pitch * y + x, src[1],
+                      w, h, pitch, stride[1] );
 
      frame->Unlock( frame );
 
-     return 0;
+     return VO_TRUE;
 }
 
 static void
 draw_osd( void )
 {
-     if (use_spic)
-          subframe->Clear( subframe, 0, 0, 0, 0 );
-     else if (use_crtc2) {
-          /* Clear black bars around the picture */
-          subframe->SetColor( subframe, 0, 0, 0, 0 );
-          subframe->FillRectangle( subframe,
-                                  0, 0,
-                                  drect.x, drect.y + drect.h );
-          subframe->FillRectangle( subframe,
-                                  0, drect.y + drect.h,
-                                  drect.x + drect.w, drect.y );
-          subframe->FillRectangle( subframe,
-                                  drect.x, 0,
-                                  drect.x + drect.w, drect.y );
-          subframe->FillRectangle( subframe,
-                                  drect.x + drect.w, drect.y,
-                                  drect.x, drect.y + drect.h );
+     if (vo_directrendering)
+          frame->Unlock( frame );
+
+     osd_changed = vo_osd_changed( 0 );
+
+     if (osd_changed) {
+          if (use_spic) {
+               subframe->Clear( subframe, 0, 0, 0, 0 );
+          } else if (use_crtc2) {
+               /* Clear black bars around the picture */
+               subframe->SetColor( subframe, 0, 0, 0, 0 );
+               subframe->FillRectangle( subframe,
+                                        0, 0,
+                                        screen_width, drect.y );
+               subframe->FillRectangle( subframe,
+                                        0, drect.y + drect.h,
+                                        screen_width, drect.y );
+               subframe->FillRectangle( subframe,
+                                        0, drect.y,
+                                        drect.x, drect.h );
+               subframe->FillRectangle( subframe,
+                                        drect.x + drect.w, drect.y,
+                                        drect.x, drect.h );
+          }
      }
 
-     vo_draw_text( screen_width, screen_height, draw_alpha );
+     if (use_crtc2) {
+          /* Flip BES */
+          if (use_bes)
+               frame->Flip( frame, NULL, 0 );
 
-     subframe->Flip( subframe, NULL, DSFLIP_WAITFORSYNC );
+          /* Blit from BES/temp to CRTC2 */
+          c2frame->SetBlittingFlags( c2frame, DSBLIT_NOFX );
+          if (stretch)
+               c2frame->StretchBlit( c2frame, frame, NULL, &drect );
+          else
+               c2frame->Blit( c2frame, frame, NULL, drect.x, drect.y );
+     }
+
+     vo_draw_text( sub_width, sub_height, draw_alpha );
+
+     if (use_spic)
+          subframe->Flip( subframe, NULL, 0 );
 }
 
 static void
 flip_page( void )
 {
-     /* Flip is done by draw_osd() when only BES is used */
-     if (!use_crtc2)
-          return;
-
-     if (use_bes)
+     if (!use_crtc2) {
           /* Flip BES */
-          frame->Flip( frame, NULL, 0 );
-
-     /* Blit from BES/temp to CRTC2 */
-     c2frame->SetBlittingFlags( c2frame, DSBLIT_NOFX );
-     if (stretch)
-          c2frame->StretchBlit( c2frame, frame, NULL, &drect );
-     else
-          c2frame->Blit( c2frame, frame, NULL, drect.x, drect.y );
-
-     if (use_spic)
+          frame->Flip( frame, NULL, vo_vsync ? DSFLIP_WAITFORSYNC : 0 );
+     } else {
           /* Flip CRTC2 */
-          c2frame->Flip( c2frame, NULL, DSFLIP_WAITFORSYNC );
+          c2frame->Flip( c2frame, NULL, vo_vsync ? DSFLIP_WAITFORSYNC : 0 );
+     }
+
+     current_buf = 0;
 }
 
 static void
@@ -765,7 +673,10 @@ uninit( void )
      buffer->Release( buffer );
      keyboard->Release( keyboard );
 
-     frame->Release( frame );
+     while (num_bufs--) {
+          frame = bufs[num_bufs];
+          frame->Release( frame );
+     }
      if (use_bes) {
           bes->SetOpacity( bes, 0 );
           bes->Release( bes );
@@ -789,9 +700,101 @@ uninit( void )
       */
 }
 
-static int
-directfb_set_video_eq( char *data, int value )
+static uint32_t
+get_image( mp_image_t *mpi )
 {
+     void *dst;
+     int pitch;
+
+     if (use_bes &&
+         (mpi->type == MP_IMGTYPE_STATIC ||
+          mpi->flags & MP_IMGFLAG_READABLE))
+          return VO_FALSE;
+
+     if (mpi->flags & MP_IMGFLAG_READABLE &&
+         (mpi->type == MP_IMGTYPE_IPB || mpi->type == MP_IMGTYPE_IP)) {
+          int buf = current_buf;
+
+          if (num_bufs < 2)
+               return VO_FALSE;
+
+          current_ip_buf ^= 1;
+
+          if (mpi->type == MP_IMGTYPE_IPB && num_bufs < 3 && current_ip_buf)
+               return VO_FALSE;
+
+          buf = current_ip_buf;
+
+          if (mpi->type == MP_IMGTYPE_IPB)
+               buf++;
+
+          current_buf = buf;
+          frame = bufs[current_buf];
+     }
+
+     if (frame->Lock( frame, DSLF_WRITE | (mpi->flags & MP_IMGFLAG_READABLE ? DSLF_READ : 0),
+                      &dst, &pitch ) != DFB_OK)
+          return VO_FALSE;
+
+     if ((mpi->width == pitch) ||
+         (mpi->flags & (MP_IMGFLAG_ACCEPT_STRIDE | MP_IMGFLAG_ACCEPT_WIDTH))) {
+
+          mpi->planes[0] = dst;
+          mpi->width     = in_width;
+          mpi->stride[0] = pitch;
+
+          if (mpi->flags & MP_IMGFLAG_PLANAR) {
+               mpi->stride[1] = mpi->stride[2] = pitch / 2;
+
+               if (mpi->flags & MP_IMGFLAG_SWAPPED) {
+                    mpi->planes[1] = dst + in_height * pitch;
+                    mpi->planes[2] = mpi->planes[1] + in_height * pitch / 4;
+               } else {
+                    mpi->planes[2] = dst + in_height * pitch;
+                    mpi->planes[1] = mpi->planes[2] + in_height * pitch / 4;
+               }
+          }
+
+          mpi->flags |= MP_IMGFLAG_DIRECT;
+
+          return VO_TRUE;
+     }
+
+     frame->Unlock( frame );
+
+     return VO_FALSE;
+}
+
+
+
+static uint32_t
+draw_image( mp_image_t *mpi )
+{
+     if (mpi->flags & (MP_IMGFLAG_DIRECT | MP_IMGFLAG_DRAW_CALLBACK))
+          return VO_TRUE;
+
+     if (mpi->flags & MP_IMGFLAG_PLANAR)
+          return draw_slice( mpi->planes, mpi->stride,
+                             mpi->w, mpi->h, 0, 0 );
+     else {
+          void *dst;
+          int pitch;
+
+          if (frame->Lock( frame, DSLF_WRITE, &dst, &pitch ) != DFB_OK)
+               return VO_FALSE;
+          memcpy_pic( dst, mpi->planes[0],
+                      mpi->w * (mpi->bpp / 8), mpi->h,
+                      pitch, mpi->stride[0] );
+          frame->Unlock( frame );
+
+          return VO_TRUE;
+     }
+}
+
+static int
+set_equalizer( char *data, int value )
+{
+     DFBResult res;
      DFBColorAdjustment ca;
      float factor = (float) 0xffff / 200.0;
 
@@ -816,27 +819,32 @@ directfb_set_video_eq( char *data, int value )
 
      /* Prefer CRTC2 over BES */
      if (use_crtc2)
-          crtc2->SetColorAdjustment( crtc2, &ca );
-     else if (use_bes)
-          bes->SetColorAdjustment( bes, &ca );
+          res = crtc2->SetColorAdjustment( crtc2, &ca );
+     else
+          res = bes->SetColorAdjustment( bes, &ca );
 
-     return 0;
+     if (res != DFB_OK)
+          return VO_FALSE;
+
+     return VO_TRUE;
 }
 
 static int
-directfb_get_video_eq( char *data, int *value )
+get_equalizer( char *data, int *value )
 {
+     DFBResult res;
      DFBColorAdjustment ca;
      float factor = 200.0 / (float) 0xffff;
 
      /* Prefer CRTC2 over BES */
      if (use_crtc2)
-          crtc2->GetColorAdjustment( crtc2, &ca );
-     else if (use_bes)
-          bes->GetColorAdjustment( bes, &ca );
+          res = crtc2->GetColorAdjustment( crtc2, &ca );
      else
-          return 0;
+          res = bes->GetColorAdjustment( bes, &ca );
 
+     if (res != DFB_OK)
+          return VO_FALSE;
+     
      if (!strcasecmp( data, "brightness" ) &&
          (ca.flags & DCAF_BRIGHTNESS))
           *value = (ca.brightness - 0x8000) * factor;
@@ -850,7 +858,7 @@ directfb_get_video_eq( char *data, int *value )
          (ca.flags & DCAF_SATURATION))
           *value = (ca.saturation - 0x8000) * factor;
 
-     return 0;
+     return VO_TRUE;
 }
 
 static uint32_t
@@ -859,6 +867,13 @@ control( uint32_t request, void *data, ... )
      switch (request) {
      case VOCTRL_QUERY_FORMAT:
 	  return query_format( *((uint32_t *) data) );
+
+     case VOCTRL_GET_IMAGE:
+          return get_image( data );
+
+     case VOCTRL_DRAW_IMAGE:
+          return draw_image( data );
+
      case VOCTRL_SET_EQUALIZER:
           {
                va_list ap;
@@ -868,10 +883,7 @@ control( uint32_t request, void *data, ... )
                value = va_arg( ap, int );
                va_end( ap );
 
-               if (directfb_set_video_eq( data, value ))
-                    return VO_FALSE;
-
-               return VO_TRUE;
+               return set_equalizer( data, value );
           }
      case VOCTRL_GET_EQUALIZER:
           {
@@ -882,10 +894,7 @@ control( uint32_t request, void *data, ... )
                value = va_arg( ap, int* );
                va_end( ap );
 
-               if (directfb_get_video_eq( data, value ))
-                    return VO_FALSE;
-
-               return VO_TRUE;
+               return get_equalizer( data, value );
           }
      }
 
