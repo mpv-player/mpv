@@ -55,6 +55,8 @@ extern int verbose; // defined in mplayer.c
 
 #define MSGT_TV 24	// TV input subsystem
 
+#define MSGT_OSDEP 25	// OS Dependant parts (linux/ for now)
+
 #define MSGT_MAX 64
 
 void mp_msg_init(int verbose);
