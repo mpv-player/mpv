@@ -3639,7 +3639,7 @@ if(vo_config_count && vo_spudec) {
     }
       if(len<=0 || !packet) break;
       if(timestamp < 0) timestamp = 0;
-      spudec_assemble(vo_spudec,packet,len,timestamp);
+      else spudec_assemble(vo_spudec,packet,len,timestamp);
   }
   
   /* detect wether the sub has changed or not */
