@@ -47,11 +47,23 @@ extern int verbose; // defined in mplayer.c
 void mp_msg_init(int verbose);
 void mp_msg_c( int x, const char *format, ... );
 
-#define mp_msg(mod,lev,...) mp_msg_c((mod<<8)|lev,__VA_ARGS__)
+
+#ifdef __GNUC__
+#define mp_msg(mod,lev, args... ) mp_msg_c((mod<<8)|lev, ## args )
 
 #ifdef MP_DEBUG
-#define mp_dbg(mod,lev,...) mp_msg_c((mod<<8)|lev,__VA_ARGS__)
+#define mp_dbg(mod,lev, args... ) mp_msg_c((mod<<8)|lev, ## args )
 #else
 // these messages are only usefull for developers, disable them
-#define mp_dbg(mod,lev,...) 
+#define mp_dbg(mod,lev, args... ) 
+#endif
+#else // not GNU C
+#define mp_msg(mod,lev, ... ) mp_msg_c((mod<<8)|lev, __VA_ARGS__)
+
+#ifdef MP_DEBUG
+#define mp_dbg(mod,lev, ... ) mp_msg_c((mod<<8)|lev, __VA_ARGS__)
+#else
+// these messages are only usefull for developers, disable them
+#define mp_dbg(mod,lev, ... ) 
+#endif
 #endif
