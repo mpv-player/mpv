@@ -539,6 +539,18 @@ Daniele Forghieri <guru@digitalfantasy.it>
     * TGA output driver
     * framestep & tile filters
 
+MPlayerPL - Polish MPlayer Translation Team (http://mplayerpl.emdej.com)
+Translation from scratch:
+    * 'Boski Cinek'			<boski_cinek(at)o2(dot)pl>
+    * 'Emdej'				<emdej(at)emdej(dot)com>
+    * 'Flex'				<flex(at)tenbit(dot)pl>
+    * Dominik 'Rathann' Mierzejewski	<dominik(at)rangers(dot)eu(dot)org>
+    * Kuba 'Qba' Misiorny		<jim85(at)wp(dot)pl>
+    * Lukasz 'Frogu' Proszek		<frogoo(at)o2(dot)pl>   
+    * Maciek 'paszczi' Paszta		<paszczi(at)go2(dot)pl>
+    * Piotr 'Cobra' Michniewski		<cobra_666(at)poczta(dot)onet(dot)pl>
+    * Waclaw 'Torinthiel' Schiller	<torinthiel(at)wp(dot)pl>
+
 NOTE: If you think you are missing here, feel free to send a patch.
 =====
 
