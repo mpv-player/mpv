@@ -31,9 +31,8 @@ The GCC team disclaimed any link with GCC 2.96 and issued an
 to GCC 2.96. Many developers around the world began having problems with
 GCC 2.96, and started recommending other compilers. Examples are
 <ulink url="http://www.mysql.com/downloads/mysql-3.23.html">MySQL</ulink>,
-<ulink url="http://avifile.sourceforge.net/news-old1.htm">avifile</ulink>
 and
-<ulink url="http://www.winehq.com/news/?view=92#RH 7.1 gcc fixes compiler bug">Wine</ulink>.
+<ulink url="http://avifile.sourceforge.net/news-old1.htm">avifile</ulink>.
 Other interesting links are 
 <ulink url="http://www.atnf.csiro.au/people/rgooch/linux/docs/kernel-newsflash.html">
 Linux kernel news flash about kernel 2.4.17</ulink>
@@ -48,8 +47,6 @@ may imply a performance penalty.
 </formalpara>
 
 <para>
-You can read about the other side of the story
-<ulink url="http://www.bero.org/gcc296.html">at this site</ulink>.
 GCC 2.96 does not allow <literal>|</literal> (pipe) characters in assembler
 comments because it supports Intel as well as AT&amp;T Syntax and the
 <literal>|</literal> character is a symbol in the Intel variant. The
@@ -77,7 +74,7 @@ wars over GCC 2.96. Please let the matter rest.
 If you have problems with GCC 2.96, you can get 2.96-85 packages from the
 Red Hat <ulink url="ftp://updates.redhat.com">ftp server</ulink>, or just
 go for the 3.0.4 packages offered for version 7.2 and later. You can also
-get <ulink url="ftp://people.redhat.com/jakub/gcc/3.2-10/">gcc-3.2-10 packages</ulink>
+get <ulink url="ftp://people.redhat.com/jakub/gcc/3.2.3-11/">gcc-3.2.3-11 packages</ulink>
 (unofficial, but working fine)
 and you can install them along the gcc-2.96 you already have. MPlayer will
 detect it and use 3.2 instead of 2.96. If you do not want to or cannot use
@@ -138,9 +135,9 @@ see fit.
 <para>
 Another impediment to binary redistribution was compiletime optimizations
 for CPU architecture. <application>MPlayer</application> now supports
-runtime CPU detection (specify the
-<option>--enable-runtime-cpudetection</option> option when compiling). It
-is disabled by default because it implies a small speed sacrifice, it is
+runtime CPU detection (pass the
+<option>--enable-runtime-cpudetection</option> to <command>configure</command>).
+It is disabled by default because it implies a small speed sacrifice, but it is
 now possible to create binaries that run on different members of the Intel
 CPU family.
 </para>
@@ -157,8 +154,6 @@ We have had many reports on
 <ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>
 about problems related to these closed-source drivers
 and their poor quality, instability and poor user and expert support.
-Here is an example from the
-<ulink url="http://www.nvnews.net/forum/showthread.php?s=fda5725bc2151e29453b2da3bd5d2930&amp;threadid=14306">nVidia Linux Forum</ulink>.
 Many of these problems/issues keep appearing repeatedly.
 We have been contacted by nVidia lately, and they said these bugs do not
 exist, instability is caused by bad AGP chips, and they received no reports
@@ -176,19 +171,16 @@ because we have little power to help in this matter.
 <title>Joe Barr</title>
 
 <para>
-Joe Barr became infamous by writing a less than favorable
-<ulink url="http://www.linuxworld.com/site-stories/2001/1214.mplayer.html">
-<application>MPlayer</application> review</ulink>.
-He found <application>MPlayer</application> hard to install, but then
-again he is not very fond of
-<ulink
-url="http://www.linuxworld.com/linuxworld/lw-2000-06/lw-06-exam.html">reading documentation</ulink>.
-He also concluded that the developers were unfriendly and the documentation
-incomplete and insulting. You be the judge.
-He went on to mention <application>MPlayer</application> negatively in his
-<ulink url="http://www.linuxworld.com/site-stories/2001/1227.predictions.html">10 Linux predictions for 2002</ulink>.
-In a followup
-<ulink url="http://www.linuxworld.com/site-stories/2002/0125.xine.html">review of xine</ulink>
+Joe Barr became infamous in december 2001 by writing a less than favorable
+<application>MPlayer</application> review called
+<ulink url="http://www.linuxworld.com/story/32880.htm">MPlayer: The project from hell</ulink>.
+He found <application>MPlayer</application> hard to install, and concluded
+that the developers were unfriendly and the documentation
+incomplete and insulting. You be the judge of that.
+He went on to mention Arpi negatively in his
+<ulink url="http://www.linuxworld.com/story/32887.htm">10 Linux predictions for 2002</ulink>.
+In a followup review of xine called
+<ulink url="http://www.linuxworld.com/story/32716.htm">A streaming media player for the rest of us</ulink>
 he continued stirring up controversy. Ironically at the end of that article
 he quotes his exchange with Günter Bartsch, the original author of <application>xine</application>,
 that perfectly summarizes the whole situation:
@@ -198,47 +190,35 @@ However, he also went on to say that he was "surprised" by my column about
 <application>MPlayer</application> and thought it was unfair, reminding me that it is
 a free software project. "If you don't like it," Bartsch said, "you're free not to use it."
 </para></blockquote>
-</para>
 
-<para>
-He does not reply to our mails. His editor does not reply to our mails.
-Here are some quotes from different people about Joe Barr, so you can form
-your own opinion:
-</para>
-
-<para>
-Marc Rassbach has
-<ulink url="http://daily.daemonnews.org/view_story.php3?story_id=2102">something to say</ulink>
-about the man.
+Almost two years later in october 2003 he wrote another review called
+<ulink url="http://www.newsforge.com/article.pl?sid=03/10/02/0343200">Mplayer revisited</ulink>.
+In it he came to the following conclusion:
+He had the following to say about MPlayer:
 
 <blockquote><para>
-You may all remember the LinuxWorld 2000, when he claimed that Linus T said
-that 'FreeBSD is just a handful of programmers'. Linus said NOTHING of the
-sort. When Joe was called on this, his reaction was to call BSD supporters
-assholes and jerks.
+I would have to say that there have been improvements in the number of
+features, in performance, and in documentation. It's still not the
+easiest install in the world, especially for newbies, but it's a
+little better than it used to be.
 </para></blockquote>
-</para>
 
-<para>
-A <ulink url="http://www.mplayerhq.hu/pipermail/mplayer-users/2001-December/009118.html">quote</ulink>
-from Robert Munro on the
-<ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>
-mailing list:
+and
 
-<blockquote>
-<para>
-He's interesting, but not good at avoiding, um... controversy.  Joe Barr
-used to be one of the regulars on Will Zachmann's Canopus forum on
-Compuserve, years ago.  He was an OS/2 advocate then (I was an OS/2 fan
-too).
-</para>
+<blockquote><para>
+But more importantly, I didn't notice any recent comments about user
+abuse. I think I deserve some of the credit for that, even if I do say
+so myself. Arpi and the rest of the project team must feel that way
+too, because they have taken care to remember me in a special section
+of the documentation included in the tarball. Like I said at the
+start, some things haven't changed at all.
+</para></blockquote>
 
-<para>
-He used to go over-the-top, flaming people, and I suspect he had some hard
-times, then. He's mellowed some, judging by his columns recently.
-Moderately subtle humor was not his mode in those earlier days, not at all.
-</para>
-</blockquote>
+We could not have summarized our feelings towards Joe Barr better:
+&quot;It's still not the fairest or best researched article in the world,
+but it's better than it used to be.&quot; Hopefully the next time around
+we will meet each other's expectations. However, the credit for maturity
+goes to our increasing age only, and maybe to being weary of flame wars.
 </para>
 
 </sect1>
