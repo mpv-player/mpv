@@ -78,6 +78,15 @@ static complex_t __attribute__((aligned(16))) buf[128];
 static float __attribute__((aligned(16))) sseSinCos1a[256];
 static float __attribute__((aligned(16))) sseSinCos1b[256];
 static float __attribute__((aligned(16))) ps111_1[4]={1,1,1,-1};
+//static float __attribute__((aligned(16))) sseW0[4];
+static float __attribute__((aligned(16))) sseW1[8];
+static float __attribute__((aligned(16))) sseW2[16];
+static float __attribute__((aligned(16))) sseW3[32];
+static float __attribute__((aligned(16))) sseW4[64];
+static float __attribute__((aligned(16))) sseW5[128];
+static float __attribute__((aligned(16))) sseW6[256];
+static float __attribute__((aligned(16))) *sseW[7]=
+	{NULL /*sseW0*/,sseW1,sseW2,sseW3,sseW4,sseW5,sseW6};
 #else
 static complex_t buf[128];
 #endif
@@ -300,25 +309,68 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 		:: "g" (buf), "r" (buf + 128)
 		: "%esi"
 	);
-	
-	m=2;
-	two_m = 4;
-
-	for(k = 0; k < two_m; k++) {
+/* C code for the next asm loop 
+	for(k = 0; k < 4; k++) {
 	    for(i = 0; i < 128; i += 8) {
 		p = k + i;
-		q = p + two_m;
+		q = p + 4;
 		tmp_a_r = buf[p].real;
 		tmp_a_i = buf[p].imag;
-		tmp_b_r = buf[q].real * w[m][k].real - buf[q].imag * w[m][k].imag;
-		tmp_b_i = buf[q].imag * w[m][k].real + buf[q].real * w[m][k].imag;
+		tmp_b_r = buf[q].real * w[2][k].real - buf[q].imag * w[2][k].imag;
+		tmp_b_i = buf[q].imag * w[2][k].real + buf[q].real * w[2][k].imag;
 		buf[p].real = tmp_a_r + tmp_b_r;
 		buf[p].imag =  tmp_a_i + tmp_b_i;
 		buf[q].real = tmp_a_r - tmp_b_r;
 		buf[q].imag =  tmp_a_i - tmp_b_i;
 	    }
 	}
+*/
+/*
+ Note sseW2+0={1,1,sqrt(2),sqrt(2))
+ Note sseW2+16={0,0,sqrt(2),-sqrt(2))
+ Note sseW2+32={0,0,-sqrt(2),-sqrt(2))
+ Note sseW2+48={1,-1,sqrt(2),-sqrt(2))
+*/
+	asm volatile(
+		"movaps sseW2, %%xmm6		\n\t" 
+		"movaps 16+sseW2, %%xmm7	\n\t" 
+		"xorps %%xmm5, %%xmm5		\n\t"
+		"xorps %%xmm2, %%xmm2		\n\t"
+		"movl %0, %%esi			\n\t"
+		".balign 16			\n\t"
+		"1:				\n\t"
+		"movhps 40(%%esi), %%xmm2	\n\t" //r4,i4,r5,i5
+		"movaps 48(%%esi), %%xmm3	\n\t" //r6,i6,r7,i7
+		"movaps 32(%%esi), %%xmm4	\n\t" //r4,i4,r5,i5
+		"movhps 56(%%esi), %%xmm5	\n\t" //r6,i6,r7,i7
+		"shufps $0xB1, %%xmm2, %%xmm2	\n\t" //i4,r4,i5,r5
+		"shufps $0xB1, %%xmm3, %%xmm3	\n\t" //i6,r6,i7,r7
+		"mulps %%xmm6, %%xmm4		\n\t"
+		"mulps 32+sseW2, %%xmm5		\n\t"
+		"mulps %%xmm7, %%xmm2		\n\t"
+		"mulps 48+sseW2, %%xmm3		\n\t"
+		"movaps (%%esi), %%xmm0		\n\t" //r0,i0,r1,i1
+		"movaps 16(%%esi), %%xmm1	\n\t" //r2,i2,r3,i3
+		"addps %%xmm4, %%xmm2		\n\t"
+		"addps %%xmm5, %%xmm3		\n\t"
+		"movaps %%xmm2, %%xmm4		\n\t"
+		"movaps %%xmm3, %%xmm5		\n\t"
+		"addps %%xmm0, %%xmm2		\n\t"
+		"addps %%xmm1, %%xmm3		\n\t"
+		"subps %%xmm4, %%xmm0		\n\t"
+		"subps %%xmm5, %%xmm1		\n\t"
+		"movaps %%xmm2, (%%esi)		\n\t" 
+		"movaps %%xmm3, 16(%%esi)	\n\t" 
+		"movaps %%xmm0, 32(%%esi)	\n\t" 
+		"movaps %%xmm1, 48(%%esi)	\n\t" 
+		"addl $64, %%esi	\n\t"
+		"cmpl %1, %%esi		\n\t"
+		" jb 1b			\n\t"
+		:: "g" (buf), "r" (buf + 128)
+		: "%esi"
+	);
 
+    
     for (m=3; m < 7; m++) {
 	two_m = (1 << m);
 
@@ -572,6 +624,37 @@ void imdct_init (uint32_t mm_accel)
 		w[i][k].imag = sin (-M_PI * k / j);
 	    }
 	}
+#ifdef HAVE_SSE
+	for (i = 1; i < 7; i++) {
+	    j = 1 << i;
+	    for (k = 0; k < j; k+=2) {
+	    
+	    	sseW[i][4*k + 0] = w[i][k+0].real;
+	    	sseW[i][4*k + 1] = w[i][k+0].real;
+	    	sseW[i][4*k + 2] = w[i][k+1].real;
+	    	sseW[i][4*k + 3] = w[i][k+1].real;
+
+	    	sseW[i][4*k + 4] = -w[i][k+0].imag;
+	    	sseW[i][4*k + 5] = w[i][k+0].imag;
+	    	sseW[i][4*k + 6] = -w[i][k+1].imag;
+	    	sseW[i][4*k + 7] = w[i][k+1].imag;	    
+	    	
+	//we multiply more or less uninitalized numbers so we need to use exactly 0.0
+		if(k==0)
+		{
+//			sseW[i][4*k + 0]= sseW[i][4*k + 1]= 1.0;
+			sseW[i][4*k + 4]= sseW[i][4*k + 5]= 0.0;
+		}
+		
+		if(2*k == j)
+		{
+			sseW[i][4*k + 0]= sseW[i][4*k + 1]= 0.0;
+//			sseW[i][4*k + 4]= -(sseW[i][4*k + 5]= -1.0);
+		}
+	    }
+	}
+#endif
+	
 	imdct_512 = imdct_do_512;
 	imdct_256 = imdct_do_256;
     }
