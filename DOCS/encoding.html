@@ -157,6 +157,16 @@
 
 <P>Command: <CODE>mencoder -idx input.avi -ovc copy -oac copy -o output.avi</CODE></P>
 
+<H2><A NAME="appending">7.5.1 Appending multiple AVI files</A></H2>
+
+<P>As a side-effect of fixing broken AVi files, it can be used to fix the
+result of appending 2 (or more) AVI files:</P>
+
+<P>Command: <CODE>cat 1.avi 2.avi | mencoder -noidx -ovc copy -oac copy -o output.avi -</CODE></P>
+
+<P>NOTE: It expects 1.avi and 2.avi use the same codecs, resolution, stream
+rate etc, and at least 1.avi be non-broken. You may need to fix your input
+AVI files first, as described above at 7.5</P>
 
 <H2><A NAME="libavcodec">7.6 Encoding with the libavcodec codec family</A></H2>
 
@@ -221,6 +231,8 @@ Explanation of the process:
 <P><I>Creating an uncompressed file from all the PNG files in the current dir:</I><BR>
   &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25:type=png -ovc rawrgb
   -o output.avi \*.png</CODE></P>
+
+<P><B>NOTE:</B> Width must be integer multiple of 4, it's a limitation of the RAW RGB AVI format.</P>
 
 <P><I>Creating a Motion PNG (MPNG) file from all the PNG files in the current dir:</I><BR>
   &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25:type=png -ovc copy
