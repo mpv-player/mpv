@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced to 1.74 -->
+<!-- synced to 1.75 -->
 <sect1 id="video">
 <title>Videó kimeneti eszközök</title>
 
@@ -1827,7 +1827,7 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </formalpara>
 
 <para>
-  A <command>scan</command> és <command>szap/tzap/czap</command> programoknak
+  A <command>scan</command> és <command>szap/tzap/czap/azap</command> programoknak
   telepítve kell lenniük; mind benne vannak a drivers csomagban.
 </para>
 
@@ -1839,16 +1839,17 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 
 <para>
   Most már fordíthatsz egy <filename>~/.mplayer/channels.conf</filename>
-  fájlt, a <command>szap/tzap/czap</command> által elfogadott szintaktikával, vagy
+  fájlt, a <command>szap/tzap/czap/azap</command> által elfogadott szintaktikával, vagy
   engeded a <command>scan</command>nek, hogy elkészítse neked.
 </para>
 
 <para>
-  Ha több típusú kártyád van (pl. műholdas, földi és kábel), a csatorna fájlokat
-  elmentheted
+  Ha több típusú kártyád van (pl. műholdas, földi, kábel és ATSC), a csatorna
+  fájlokat elmentheted
   <filename>~/.mplayer/channels.conf.sat</filename>,
-  <filename>~/.mplayer/channels.conf.ter</filename>
-  és <filename>~/.mplayer/channels.conf.cbl</filename> néven,
+  <filename>~/.mplayer/channels.conf.ter</filename>,
+  <filename>~/.mplayer/channels.conf.cbl</filename>,
+  és <filename>~/.mplayer/channels.conf.atsc</filename> néven,
   így az <application>MPlayer</application>nek implicit javaslod ezen
   fájlok használatát a <filename>~/.mplayer/channels.conf</filename> helyett
   és csak azt kell megadnod, hogy melyik kártyát akarod használni.
