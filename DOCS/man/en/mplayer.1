@@ -1160,8 +1160,6 @@ fonts: ~/\:.mplayer/\:font/\:font.desc, default for FreeType fonts:
 .I NOTE:
 With FreeType, this option determines path to the text font file.
 .br
-The \-subfont-* options are available only with FreeType support compiled in.
-.br
 With Fontconfig, this option determines the fontconfig font name.
 
 .I EXAMPLE:
@@ -1343,7 +1341,7 @@ Can be negative.
 Currently useless.
 Same as \-audiofile, but for subtitle streams (OggDS?).
 .TP
-.B \-subfont-autoscale <0\-3>
+.B \-subfont-autoscale <0\-3> (FreeType only)
 Sets the autoscale mode.
 .br
 .I NOTE:
@@ -1365,21 +1363,21 @@ proportional to movie diagonal (default)
 .PD 1
 .
 .TP
-.B \-subfont-blur <0\-8>
+.B \-subfont-blur <0\-8> (FreeType only)
 Sets the font blur radius (default: 2).
 .TP
-.B \-subfont-encoding <value>
+.B \-subfont-encoding <value> (FreeType only)
 Sets the font encoding.
 When set to 'unicode', all the glyphs from the font file will be rendered and
 unicode will be used (default: unicode).
 .TP
-.B \-subfont-osd-scale <0\-100>
+.B \-subfont-osd-scale <0\-100> (FreeType only)
 Sets the osd elements autoscale coefficient (default: 6).
 .TP
-.B \-subfont-outline <0\-8>
+.B \-subfont-outline <0\-8> (FreeType only)
 Sets the font outline thickness (default: 2).
 .TP
-.B \-subfont-text-scale <0\-100>
+.B \-subfont-text-scale <0\-100> (FreeType only)
 Sets the subtitle text autoscale coefficient (percentage of the
 screen size) (default: 5).
 .TP
@@ -2068,7 +2066,7 @@ It's autodetected on MPEG files, but can't be autodetected on most AVI files.
 .
 .TP
 .B \-codecs-file <filename>
-Use the specified file instead of system wide installed or build in codecs.conf.
+Use the specified file instead of system wide installed or builtin codecs.conf.
 See also \-afm, \-ac, \-vfm and \-vc.
 .TP
 .B \-flip \ 
@@ -2415,7 +2413,6 @@ Setup a chain of video filters, to be applied in
 .B reverse
 order.
 Deprecated in favor of \-vf.
-.RE
 .PP
 The parameters are optional and if omitted, some of them are set to default
 values.
@@ -3264,28 +3261,29 @@ the right x,y,w,h parameters.
 .B zrmjpeg[=options]
 Software YV12 to MJPEG encoder for use with the zr2 video
 output device.
-Multiple options can be specified separated by ':'.
 .RSs
 .IPs maxheight=h|maxwidth=w
 These options set the maximum width and height the zr card
-can handle. (the MPlayer filter layer currently can't query those)
+can handle (the MPlayer filter layer currently cannot query those).
 .IPs {dc10+,dc10,buz,lml33}-{PAL|NTSC}
 Use these options to set maxwidth and maxheight automatically to the 
-values known for card/mode combo. For example, valid options are:
-dc10-PAL and buz-NTSC. The default is dc10+PAL.
+values known for card/mode combo.
+For example, valid options are: dc10-PAL and buz-NTSC (default: dc10+PAL)
 .IPs color|bw
-Select color or black and white encoding. Black and white encoding is 
-faster. Color is the default.
+Select color or black and white encoding.
+Black and white encoding is faster.
+Color is the default.
 .IPs hdec={1,2,4}
 Horizontal decimation 1, 2 or 4.
 .IPs vdec={1,2,4}
 Vertical decimation 1, 2 or 4.
 .IPs quality=1-20
-Set JPEG compression quality [BEST] 1 - 20 [VERY BAD]
+Set JPEG compression quality [BEST] 1 - 20 [VERY BAD].
 .IPs fd|nofd
 By default, decimation is only performed if the zoran hardware
-can upscale the resulting MJPEG images to the original size. The option
-fd instructs the filter to always perform the requested decimation (ugly).
+can upscale the resulting MJPEG images to the original size.
+The option fd instructs the filter to always perform the requested
+decimation (ugly).
 .RE
 .
 .
