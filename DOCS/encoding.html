@@ -78,28 +78,6 @@
   &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc
     -lavcopts vcodec=mpeg4:vpass=2:more_options -oac copy -o movie.avi</CODE></P>
 
-<P><U><B>2 or 3-pass encoding using internal libavcodec controller:</B></U>
-  Optionally you can use libavcodec's internal 2 or 3-pass mode, it may give
-  you better final rate accuracy than using the external, DivX4-inspired 2-pass
-  rate controler with libavcodec.</P>
-
-<UL>
-  <LI><B>2-pass encoding:</B><BR>
-    <CODE>
-    mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 (audio-options) -o
-      movie.avi<BR>
-    mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 (audio-options) -o
-      movie.avi</CODE></LI>
-  <LI><B>3-pass encoding:</B><BR>
-    <CODE>rm -f frameno.avi<BR>
-    mencoder -dvd 2 -ovc frameno (audio-options) -o frameno.avi<BR>
-    mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o
-      movie.avi<BR>
-    mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o
-      movie.avi</CODE></LI>
-</UL>
-
-
 <H3><A NAME="rescaling">2.4.2 Rescaling movies</A></H3>
 
 <P>Often the need to resize movie images' size emerges. Its reasons can be
@@ -202,27 +180,27 @@ Explanation of the process:
 
 <P><I>Creating a DivX4 file from all the JPEG files in the current dir:</I><BR>
   &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc divx4
-  -oac copy -o output.avi</CODE></P>
+  -o output.avi</CODE></P>
 
 <P><I>Creating a DivX4 file from some JPEG files in the current dir:</I><BR>
   &nbsp;&nbsp;<CODE>mencoder frame001.jpg,frame002.jpg -mf on:w=800:h=600:fps=25
-  -ovc divx4 -oac copy -o output.avi</CODE></P>
+  -ovc divx4 -o output.avi</CODE></P>
 
 <P><I>Creating a Motion JPEG (MJPEG) file from all the JPEG files in the current dir:</I><BR>
   &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc copy
-  -oac copy -o output.avi</CODE></P>
+  -o output.avi</CODE></P>
 
 <P><I>Creating an uncompressed file from all the PNG files in the current dir:</I><BR>
   &nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc raw
-  -oac copy -o output.avi</CODE></P>
+  -o output.avi</CODE></P>
 
 <P><I>Creating a Motion PNG (MPNG) file from all the PNG files in the current dir:</I><BR>
   &nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc copy
-  -oac copy -o output.avi</CODE></P>
+  -o output.avi</CODE></P>
 
 <P><I>Creating a Motion TGA (MTGA) file from all the TGA files in the current dir:</I><BR>
   &nbsp;&nbsp;<CODE>mencoder \*.tga -mf on:w=800:h=600:fps=25:type=tga -ovc copy
-  -oac copy -o output.avi</CODE></P>
+  -o output.avi</CODE></P>
 
 
 <H3><A NAME="vobsub">2.4.7 Extracting DVD subtitles to a Vobsub file</A></H3>
