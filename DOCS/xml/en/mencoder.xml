@@ -14,8 +14,8 @@ for a wealth of discussions about all aspects of and problems related to
 encoding with <application>MEncoder</application>.
 </para>
 
-<sect1 id="menc-feat-divx4">
-<title>Encoding 2 or 3-pass MPEG-4 (&quot;DivX&quot;)</title>
+<sect1 id="menc-feat-mpeg4">
+<title>Encoding 2 or 3-pass MPEG4 (&quot;DivX&quot;)</title>
 
 <formalpara>
 <title>2-pass encoding</title>
@@ -32,7 +32,7 @@ Net.
 </formalpara>
 
 <para>
-This example shows how to encode a DVD to a 2-pass MPEG-4 (&quot;DivX&quot;) AVI.
+This example shows how to encode a DVD to a 2-pass MPEG4 (&quot;DivX&quot;) AVI.
 Just two commands are needed:
 <screen>rm frameno.avi</screen>
 remove this file, which can come from a previous 3-pass encoding (it interferes
@@ -262,13 +262,13 @@ You can encode to the following codecs (more or less up to date):
   H263 Plus
   </entry></row>
 <row><entry>mpeg4</entry><entry>
-  ISO standard MPEG-4 (DivX 5, XVID compatible)
+  ISO standard MPEG4 (DivX 5, XVID compatible)
   </entry></row>
 <row><entry>msmpeg4</entry><entry>
-  pre-standard MPEG-4 variant by MS, v3 (aka DivX3)
+  pre-standard MPEG4 variant by MS, v3 (aka DivX3)
   </entry></row>
 <row><entry>msmpeg4v2</entry><entry>
-  pre-standard MPEG-4 by MS, v2 (used in old asf files)
+  pre-standard MPEG4 by MS, v2 (used in old asf files)
   </entry></row>
 <row><entry>wmv1</entry><entry>
   Windows Media Video, version 1 (aka WMV7)
@@ -450,8 +450,8 @@ before starting.
 <screen>
 rm subtitles.idx subtitles.sub
 mencoder dvd://1 -vobsubout subtitles -vobsuboutindex 0 -sid 2 -o frameno.avi -ovc frameno
-mencoder dvd://1 -oac copy -ovc divx4 -pass 1
-mencoder dvd://1 -oac copy -ovc divx4 -pass 2 -vobsubout subtitles -vobsuboutindex 1 -sid 5<!--
+mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=1
+mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -vobsubout subtitles -vobsuboutindex 1 -sid 5<!--
 --></screen>
 </example>
 
@@ -639,13 +639,13 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   There are three ways to avoid this. You can try encoding again using
   <option>vqscale=4</option> and see if both the resulting file size
   and picture quality are acceptable. You can also use
-  <link linkend="menc-feat-divx4">2 pass encoding</link>.
+  <link linkend="menc-feat-mpeg4">2 pass encoding</link>.
   As you will be copying the audio track as is and hence know its
   bitrate, and you know the running time of the movie, you can
   compute the required video bitrate to give to the
   <option>-lavcopts vbitrate=<replaceable>bitrate</replaceable></option>
   option without using
-  <link linkend="menc-feat-divx4">3 pass encoding</link>.
+  <link linkend="menc-feat-mpeg4">3 pass encoding</link>.
 </para>
 
 <para>
