@@ -60,7 +60,6 @@ typedef struct {
     int do_slices;
     int do_dr1;
     int vo_inited;
-    int convert;
     int best_csp;
     int b_age;
     int ip_age[2];
