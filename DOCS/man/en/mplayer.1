@@ -6525,15 +6525,15 @@ par_height.
 .RE
 .PD 1
 .br
-.I NOTE\ :
+.I NOTE:
 In general, setting aspect and autoaspect options is enough.
 .
 .TP
-.B par_width=<1..255> (par=ext only)
+.B par_width=<1\-255> (par=ext only)
 Specifies the width of the custom pixel aspect ratio.
 .
 .TP
-.B par_height=<1...255> (par=ext only)
+.B par_height=<1\-255> (par=ext only)
 Specifies the height of the custom pixel aspect ratio.
 .
 .TP
@@ -6594,7 +6594,7 @@ number of B-Frames between I- and P-Frames (default: 0)
 Use deblocking filter (default: on).
 .
 .TP
-.B deblockalpha=<-6-6>
+.B deblockalpha=<-6\-6>
 AlphaC0 parameter of deblocking filter (default: 0).
 This adjusts thresholds for the H.264 deblocking filter.
 First, this parameter adjusts the maximum amount of change that the filter is
@@ -6604,7 +6604,7 @@ edge being filtered.
 A positive value reduces blocking artifacts more, but will also smear details.
 .
 .TP
-.B deblockbeta=<-6-6>
+.B deblockbeta=<-6\-6>
 Beta parameter of deblocking filter (default: 0).
 Affects the maximum allowed gradient within two adjacent blocks.
 .
@@ -6630,9 +6630,9 @@ directly affect distortion.
 .REss
 .
 .TP
-.B qp_constant=<2-51>
+.B qp_constant=<2\-51>
 This selects the quantizer to use.
-20-40 is a useful range (default: 26).
+20\-40 is a useful range (default: 26).
 Lower values result in better fidelity, but higher bitrates.
 Note that quantization in H.264 works differently from MPEG[124].
 H.264's quantizer parameter (QP) is on a logarithmic scale.
@@ -6641,11 +6641,11 @@ is about a factor of 10.
 Useful quantizers in H.264 tend to be very large compared to MPEG[124].
 .
 .TP
-.B qp_min=<2-51> (CBR only)
-Minimum quantizer, 15-35 seems to be a useful range (default: 10).
+.B qp_min=<2\-51> (CBR only)
+Minimum quantizer, 15\-35 seems to be a useful range (default: 10).
 .
 .TP
-.B qp_max=<2-51>  (CBR only)
+.B qp_max=<2\-51>  (CBR only)
 maximum quantizer (default: 51)
 .
 .TP
@@ -6663,12 +6663,12 @@ specified)
 Set the initial ratecontrol buffer (default: 1/4 of rc_buffer_size)
 .
 .TP
-.B rc_sens=<0-100>
+.B rc_sens=<0\-100>
 ratecontrol sensitivity (default: 4)
 .
 .TP
 .B ip_factor=<value>
-quantizer factor between I amd P frames (default: 2.0)
+quantizer factor between I and P frames (default: 2.0)
 .
 .TP
 .B pb_factor=<value>
@@ -6680,14 +6680,14 @@ Enable 2-pass mode.
 The first pass saves statistics.
 .
 .TP
-.B qcompress=<0-1>
+.B qcompress=<0\-1>
 quantizer compression (default: 0.6).
 This affects the ratecontrol: a lower value makes the
 bitrate more constant, while a higher value makes the quantization parameter
 more constant.
 .
 .TP
-.B qblur=<0-99>
+.B qblur=<0\-99>
 Temporal blur of the quantization parameter (default: 0.5).
 Lower values allow the quantizer value to jump around more,
 higher values force it to vary more smoothly.
@@ -6698,7 +6698,7 @@ Use all available interframe analysis methods (i4x4, psub8x8, psub16x16)
 (default: 4x4, psub16x16).
 .
 .TP
-.B log=<-1-3>
+.B log=<-1\-3>
 Adjust the amount of logging info printed to the screen.
 .RSs
 -1: none
