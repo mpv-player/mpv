@@ -1078,7 +1078,7 @@ if(!sh_video){
 
 #ifdef USE_DVDREAD
 current_module="spudec";
-vo_spudec=spudec_new_scaled(stream->priv?((dvd_priv_t *)(stream->priv))->cur_pgc->palette:NULL,
+vo_spudec=spudec_new_scaled(stream->type==STREAMTYPE_DVD?((dvd_priv_t *)(stream->priv))->cur_pgc->palette:NULL,
 			    sh_video->disp_w, sh_video->disp_h);
 if (vo_spudec!=NULL)
   inited_flags|=INITED_SPUDEC;
