@@ -203,20 +203,6 @@ vo_functions_t* video_out_drivers[] =
 #ifdef HAVE_BL
 	&video_out_bl,
 #endif
-
-#ifdef HAVE_PNG
-	&video_out_png,
-#endif	
-#ifdef HAVE_JPEG
-	&video_out_jpeg,
-#endif
-#ifdef HAVE_GIF
-	&video_out_gif89a,
-#endif
-        &video_out_null,
-//        &video_out_odivx,
-	&video_out_mpegpes,
-	&video_out_yuv4mpeg,
 #ifdef HAVE_VESA
 	&video_out_vesa,
 #endif
@@ -234,6 +220,19 @@ vo_functions_t* video_out_drivers[] =
     &video_out_winvidix,
 #endif
     &video_out_cvidix,
+#endif
+        &video_out_null,
+	// should not be auto-selected
+	&video_out_mpegpes,
+	&video_out_yuv4mpeg,
+#ifdef HAVE_PNG
+	&video_out_png,
+#endif	
+#ifdef HAVE_JPEG
+	&video_out_jpeg,
+#endif
+#ifdef HAVE_GIF
+	&video_out_gif89a,
 #endif
 #ifdef HAVE_TGA
         &video_out_tga,
