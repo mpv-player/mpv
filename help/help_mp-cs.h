@@ -68,6 +68,7 @@ static char help_text[]=
 #define MSGTR_InvalidVOdriver "Neplatné jméno výstupního video ovladaèe: %s\nPou¾ijte '-vo help' pro seznam dostupných ovladaèù.\n"
 #define MSGTR_InvalidAOdriver "Neplatné jméno výstupního audio ovladaèe: %s\nPou¾ijte '-ao help' pro seznam dostupných ovladaèù.\n"
 #define MSGTR_CopyCodecsConf "(copy/ln etc/codecs.conf (ze zdrojových kódù MPlayeru) do ~/.mplayer/codecs.conf)\n"
+#define MSGTR_BuiltinCodecsConf "Pou¾ívám výchozí (zabudovaný) codecs.conf\n"
 #define MSGTR_CantLoadFont "Nemohu naèíst font: %s\n"
 #define MSGTR_CantLoadSub "Nemohu naèíst titulky: %s\n"
 #define MSGTR_ErrorDVDkey "Chyba pøi zpracování klíèe DVD.\n"
@@ -134,6 +135,24 @@ static char help_text[]=
 #define MSGTR_NotInitializeVOPorVO "\nKritická chyba: Nemohu inicializovat video filtry (-vop) nebo video ovladaè (-vo) !\n"
 #define MSGTR_Paused "\n------ MÁM PAUZU :-P -------\r"
 #define MSGTR_PlaylistLoadUnable "\nNemohu naèíst seznam souborù pro pøehrání %s\n"
+#define MSGTR_Exit_SIGILL_RTCpuSel \
+"- MPlayer havaroval kvùli 'Illegal Instruction'.\n"\
+"  To mù¾e být chyba v kódu pro rozpoznání CPU za bìhu...\n"\
+"  Prosím, pøeètìte si DOCS/bugreports.html.\n"
+#define MSGTR_Exit_SIGILL \
+"- MPlayer havaroval kvùli 'Illegal Instruction'.\n"\
+"  To se obvykle stává, kdy¾ se ho pokusíte spustit na CPU odli¹ném, ne¾ pro který\n"\
+"  byl pøelo¾en/optimalizován.\n  Ovìøte to!\n"
+#define MSGTR_Exit_SIGSEGV_SIGFPE \
+"- MPlayer havaroval kvùli ¹patnému pou¾ití CPU/FPU/RAM.\n"\
+"  Pøelo¾te MPlayer s volbou --enable-debug , proveïte 'gdb' backtrace\n"\
+"  a disassembly. Pro detaily se podívejte do DOCS/bugreports.html#crash.b.\n"
+#define MSGTR_Exit_SIGCRASH \
+"- MPlayer havaroval. To by se nemìlo stát.\n"\
+"  Mù¾e to být chyba v kódu MPlayeru _nebo_ ve va¹ich ovladaèích _nebo_ ve verzi\n"\
+"  va¹eho gcc. Pokud si myslíte, ¾e je to chyba MPlayeru, pøeètìte si, prosím, DOCS/bugreports.html\n"\
+"  a pokraèujte dle tam uvedeného návodu. My vám nemù¾eme pomoci, pokud informace, zji¹tìné\n"\
+"  dle návodu, neuvedete pøi ohla¹ování mo¾né chyby.\n"
 
 // mencoder.c:
 
@@ -158,6 +177,56 @@ static char help_text[]=
 #define MSGTR_RecommendedVideoBitrate "Doporuèený datový tok videa pro %s CD: %d\n"
 #define MSGTR_VideoStreamResult "\nVideo proud: %8.3f kbit/s  (%d bps)  velikost: %d bajtù  %5.3f sekund  %d snímkù\n"
 #define MSGTR_AudioStreamResult "\nAudio proud: %8.3f kbit/s  (%d bps)  velikost: %d bajtù  %5.3f sekund\n"
+
+// cfg-mencoder.h:
+
+#define MSGTR_MEncoderMP3LameHelp "\n\n"\
+" vbr=<0-4>     metoda promìnného bitového toku\n"\
+"                0: cbr\n"\
+"                1: mt\n"\
+"                2: rh(výchozí)\n"\
+"                3: abr\n"\
+"                4: mtrh\n"\
+"\n"\
+" abr           prùmìrný bitový tok\n"\
+"\n"\
+" cbr           konstantní bitový tok\n"\
+"               Vynutí také metodu CBR pro následné pøednastavené ABR mody\n"\
+"\n"\
+" br=<0-1024>   urèení bitového toku v kBit (pouze CBR a ABR)\n"\
+"\n"\
+" q=<0-9>       kvalita (0-nejvy¹¹í, 9-nejni¾¹í) (pouze pro VBR)\n"\
+"\n"\
+" aq=<0-9>      algorimus pro kvalitu (0-nejlep¹í/nejpomalej¹í, 9-nejhor¹í/nejpomalej¹í)\n"\
+"\n"\
+" ratio=<1-100> kompresní pomìr\n"\
+"\n"\
+" vol=<0-10>    zesílení zvuku\n"\
+"\n"\
+" mode=<0-3>    (výhozí: auto)\n"\
+"                0: stereo\n"\
+"                1: joint-stereo\n"\
+"                2: dualchannel\n"\
+"                3: mono\n"\
+"\n"\
+" padding=<0-2>\n"\
+"                0: ne\n"\
+"                1: v¹e\n"\
+"                2: upravit\n"\
+"\n"\
+" fast          zapnout rychlej¹í kódování pro následné pøednastavené VBR módy.\n"\
+"               O nìco ni¾¹í kvalita a vy¹¹í bitvý tok.\n"\
+"\n"\
+" preset=<value> pøenastavené profily poskytující maximání kvalitu.\n"\
+"                 medium: kódování metodou VBR, dobrá kvalita\n"\
+"                 (bitový tok 150-180 kbps)\n"\
+"                 standard: kódování metodou VBR, vysoká kvalita\n"\
+"                 (bitový tok 170-210 kbps)\n"\
+"                 extreme: kódování metodou VBR, velmi vysoká kvalita\n"\
+"                 (bitový tok 200-240 kbps)\n"\
+"                 insane: kódování metodou CBR, nevy¹¹í pøednastavená kvalita\n"\
+"                 (bitový tok 320 kbps)\n"\
+"                 <8-320>: hodnota bitového toku pro metodu ABR.\n\n"
 
 
 // open.c, stream.c:
@@ -231,6 +300,9 @@ static char help_text[]=
 #define MSGTR_DemuxerInfoAlreadyPresent "Informace o demuxeru %s ji¾ pøítomno\n!"
 #define MSGTR_ClipInfo "Informace o klipu: \n"
 
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: Detekována progresivní sekvence, opou¹tím mód 3:2 TELECINE\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: Detekováno 3:2 TELECINE, aktivuji inverzní telecine fx. FPS zmìnìnno na %5.3f!\n"
+
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "nemohu otevøít kodek\n"
 #define MSGTR_CantCloseCodec "nemohu uzavøít kodek\n"
@@ -301,6 +373,7 @@ static char help_text[]=
 #define MSGTR_Preferences "Nastavení" // Pøedvolby?
 #define MSGTR_FontSelect "Vybrat font ..."
 #define MSGTR_OSSPreferences "Konfigurace ovladaèe OSS"
+#define MSGTR_SDLPreferences "Konfigurace ovladaèe SDL"
 #define MSGTR_NoMediaOpened "nic není otevøeno"
 #define MSGTR_VCDTrack "VCD stopa %d"
 #define MSGTR_NoChapter "¾ádná kapitola" //bez kapitoly?
@@ -327,6 +400,7 @@ static char help_text[]=
 #define MSGTR_SKIN_ERRORMESSAGE "[témata] chyba v konfiguraèním soubory témat %d: %s"
 #define MSGTR_SKIN_WARNING1 "[témata] v konfiguraèním soubory témat na øádce %d: widget nalezen ale pøed  \"section\" nenalezen ( %s )"
 #define MSGTR_SKIN_WARNING2 "[témata] v konfiguraèním soubory témat na øádce %d: widget nalezen ale pøed \"subsection\" nenalezen (%s)"
+#define MSGTR_SKIN_WARNING3 "[témata] v konfiguraèním soubory témat na øádce %d: widget (%s) nepodporuje tuto subsekci"
 #define MSGTR_SKIN_BITMAP_16bit  "bitmapa s hloubkou 16 bitová a ménì nepodporována ( %s ).\n"
 #define MSGTR_SKIN_BITMAP_FileNotFound  "soubor nenalezen ( %s )\n"
 #define MSGTR_SKIN_BITMAP_BMPReadError "chyba ètení bmp ( %s )\n"
@@ -429,6 +503,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Video "Video"
 #define MSGTR_PREFERENCES_OSDTimer "Èas a ostatní ukazatele"
 #define MSGTR_PREFERENCES_OSDProgress "Pouze ukazatel pozice" // progressbar
+#define MSGTR_PREFERENCES_OSDTimerPercentageTotalTime "Èas, procenta a celkový èas"
 #define MSGTR_PREFERENCES_Subtitle "Titulky:"
 #define MSGTR_PREFERENCES_SUB_Delay "Zpo¾dìní: "
 #define MSGTR_PREFERENCES_SUB_FPS "FPS:"
@@ -437,7 +512,9 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SUB_Unicode "Titulky v UNICODE"
 #define MSGTR_PREFERENCES_SUB_MPSUB "Pøevést dané titulky do vlastního formátu titulkù MPlayeru"
 #define MSGTR_PREFERENCES_SUB_SRT "Pøevést dané titulky do èasovì orientovaného formátu SubViewer (SRT)"
+#define MSGTR_PREFERENCES_SUB_Overlap "Zapnout \"pøekrývání\" titulkù"
 #define MSGTR_PREFERENCES_Font "Font:"
+#define MSGTR_PREFERENCES_Codecs "Kodeky & demuxer"
 #define MSGTR_PREFERENCES_FontFactor "Font faktor:" //????
 #define MSGTR_PREFERENCES_PostProcess "Aktivovat postprocessing"
 #define MSGTR_PREFERENCES_AutoQuality "Automatická kontrola kvality:"
@@ -452,6 +529,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Kodek & demuxer"
 #define MSGTR_PREFERENCES_OSS_Device "Zaøízení:"
 #define MSGTR_PREFERENCES_OSS_Mixer "Mixer:"
+#define MSGTR_PREFERENCES_SDL_Driver "Ovladaè:"
 #define MSGTR_PREFERENCES_Message "Pozor, nìkterá nastavení potøebují pro svou funkci restartovat pøehrávání."
 #define MSGTR_PREFERENCES_DXR3_VENC "Video enkoder:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Pou¾ít LAVC (ffmpeg)"
@@ -489,13 +567,17 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SubtitleOSD "Titulky & OSD"
 #define MSGTR_PREFERENCES_FRAME_Cache "Vyrovnávací pamì»"
 #define MSGTR_PREFERENCES_FRAME_Misc "Ostatní"
-#define MSGTR_PREFERENCES_Cache "Vyrovnávací pamì» zap/vyp"
+#define MSGTR_PREFERENCES_Cache "Zapnout vyrovnávací pamì»"
 #define MSGTR_PREFERENCES_LoadFullscreen "Startovat pøes celou obrazovku"
 #define MSGTR_PREFERENCES_CacheSize "Velikost vyrovnávací pamìti: "
 #define MSGTR_PREFERENCES_XSCREENSAVER "Zastavit XScreenSaver"
-#define MSGTR_PREFERENCES_AutoSync "Automatická synchronizace zap/vyp"
+#define MSGTR_PREFERENCES_PlayBar "Aktivovat playbar"
+#define MSGTR_PREFERENCES_AutoSync "Zapnout automatickou synchronizaci"
 #define MSGTR_PREFERENCES_AutoSyncValue "Automatická synchronizace: "
 #define MSGTR_PREFERENCES_Misc "Ostatní"
+#define MSGTR_PREFERENCES_CDROMDevice "Zaøízení CD-ROM:"
+#define MSGTR_PREFERENCES_DVDDevice "Zaøízení DVD:"
+#define MSGTR_PREFERENCES_FPS "Snímková rychlost (FPS):"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Kritická chyba ..."
