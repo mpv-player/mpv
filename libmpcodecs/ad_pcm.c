@@ -26,6 +26,7 @@ static int init(sh_audio_t *sh_audio)
   sh_audio->samplesize=(h->wBitsPerSample+7)/8;
   sh_audio->sample_format=AFMT_S16_LE; // default
   switch(sh_audio->format){ /* hardware formats: */
+    case 0x0:
     case 0x1: // Microsoft PCM
        switch (sh_audio->samplesize) {
          case 1: sh_audio->sample_format=AFMT_U8; break;
