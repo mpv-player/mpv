@@ -292,6 +292,15 @@ static int mga_uninit(){
 
 static uint32_t preinit(const char *arg)
 {
+  char *devname=vo_subdevice?vo_subdevice:"/dev/mga_vid";
+
+	f = open(devname,O_RDWR);
+	if(f == -1)
+	{
+		perror("open");
+		printf("Couldn't open %s\n",devname); 
+		return(-1);
+	}
   return 0;
 }
 

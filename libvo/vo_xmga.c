@@ -202,16 +202,6 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
  XGCValues              xgcv;
  unsigned long          xswamask;
 
-  char *devname=vo_subdevice?vo_subdevice:"/dev/mga_vid";
-
-	f = open(devname,O_RDWR);
-	if(f == -1)
-	{
-		perror("open");
-		printf("Couldn't open %s\n",devname); 
-		return(-1);
-	}
-
  width+=width&1;
 
  switch(format)

@@ -60,9 +60,8 @@ static vo_info_t vo_info =
 static uint32_t
 config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format,const vo_tune_info_t *info)
 {
-char *devname=vo_subdevice?vo_subdevice:"/dev/mga_vid";
 
-	if (f >= 0) mga_uninit();
+//	if (f >= 0) mga_uninit();
 	if(!vo_screenwidth || !vo_screenheight) {
 		int fd;
 		struct fb_var_screeninfo fbinfo;
@@ -92,13 +91,6 @@ char *devname=vo_subdevice?vo_subdevice:"/dev/mga_vid";
 		printf("vo_mga aspect(): resized to %dx%d\n",d_width,d_height);
 	}
 
-
-	f = open(devname,O_RDWR);
-	if(f == -1)
-	{
-		printf("Couldn't open %s\n",devname); 
-		return(-1);
-	}
 
         switch(format){
         case IMGFMT_YV12:
