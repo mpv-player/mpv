@@ -2920,11 +2920,11 @@ Change la fréquence d'échantionnage du flux audio à un entier srate (Hz).
 Il ne permet que le format 16 bit little endian.
 .IPs channels[=nch]
 Change le nombre de canaux à nch canaux de sortie.
-Si le nombre de canaux de sortie est plus grand que le nombre de canaux d'entrée
-des canaux vides sont insérés (exepté pour le mixage de mono vers stéréo, où le
-canal audio est répété sur chacun des canaux de sortie).
-Si le nombre de canaux de sortie est plus petit que le nombre de canaux d'entrée
-les canaux en trop seront tronqués.
+Si le nombre de canaux de sortie est plus grand que le nombre de canaux
+d'entrée des canaux vides sont insérés (exepté pour le mixage de mono vers
+stéréo, où le canal audio est répété sur chacun des canaux de sortie).
+Si le nombre de canaux de sortie est plus petit que le nombre de canaux
+d'entrée les canaux en trop seront tronqués.
 .IPs format[=bps:f]
 Sélectionne le format f et octets par échantillon bps utilisés pour la sortie
 depuis la couche filtre.
@@ -3033,7 +3033,6 @@ Autodétecté dans les fichiers MPEG, mais ne peut l'être dans la plupart
 des fichiers AVI.
 .sp 1
 .I EXEMPLE:
-.\" -- Les options décrites ci-dessous ne sont plus garanties d'être à jour --
 .PD 0
 .RSs
 \-aspect 4:3  ou \-aspect 1.3333
@@ -3043,50 +3042,48 @@ des fichiers AVI.
 .PD 1
 .
 .TP
-.B \-codecs-file <nom>
-Utilise le fichier spécifique au lieu de celui du système ou celui du
-codecs.conf intégré.
-Voir aussi  \-afm, \-ac, \-vfm et \-vc.
+.B \-noaspect
+Désactive la compensation automatique du rapport hauteur/\:largeur.
 .
 .TP
-.B \-flip
-Inverse l'image de haut en bas.
+.B \-flip \ 
+Renverse l'image de haut en bas.
 .
 .TP
 .B \-lavdopts <option1:option2:...> (CODE DE DÉBOGUAGE)
 Si vous décodez avec libavcodec, vous pouvez spécifier ses paramètres ici.
-
+.sp 1
 .I EXEMPLE:
 .PD 0
 .RSs
 \-lavdopts bug=1
 .RE
 .PD 1
-
+.sp 1
 .RS
 .I NOTE:
 Ajoutez juste les valeurs des choses que vous voulez activer.
-.br
+.sp 1
 Les options disponibles sont:
 .RE
 .
 .RSs
 .IPs ec
-annulation des erreurs:
+cacher les erreurs\ :
 .RSss
-1: utilise un filtre de déblocage fort pour les MBs endommagés
+1: utilise un filtre de déblocage fort pour les macro-blocs endommagés
 .br
-2: recherche MV itérative (lente)
+2: recherche du vecteur de mouvement itérative (lente)
 .br
 3: toutes (par défaut)
 .REss
 .IPs er=<valeur>
-résiliation des erreurs:
+résilience aux erreurs\ :
 .RSss
 .br
 0: désactivé
 .br
-1: prudente (devrait fonctionner avec les encodeurs endommagés)
+1: prudente (devrait fonctionner avec les encodeurs cassés)
 .br
 2: normale (par défaut) (fonctionne avec les encodeurs conformes)
 .br
@@ -3103,25 +3100,25 @@ débogage:
 .br
 1: info image
 .br
-2: contrôle du débit
+2: contrôle du débit (rate control)
 .br
-4: bitstream
+4: flux (bitstream)
 .br
-8: type MB
+8: type de macro-bloc
 .br
-16: QP
+16: quantificateur (QP)
 .br
-32: Vecteur de mouvement
+32: Vecteur de mouvement (MV)
 .br
-0x0040: Visualisation de vecteur de mouvement (utilisez -noslices)
+0x0040: Visualisation du vecteur de mouvement (utilisez -noslices)
 .br
-0x0080: saut MB
+0x0080: saut macro-bloc
 .br
 0x0100: startcode
 .br
 0x0200: PTS
 .br
-0x0400: error resilience
+0x0400: résilience aux erreurs
 .br
 0x0800: opérations de contrôle de gestion de la mémoire (H264)
 .br
@@ -3140,7 +3137,7 @@ vismv:
 4: visualise les MVs prédits en arrière des trames B
 .REss
 .IPs bug=<valeur>
-contourne manuellement les bogues des encodeurs:
+contourne manuellement les bogues des encodeurs\ :
 .RSss
 0: rien
 .br
@@ -3170,24 +3167,27 @@ d'autodétection)
 .IPs "idct=<0\-99> (voir \-lavcopts)"
 Pour obtenir la meilleur qualité d'encodage utilisez le même algorithme idct
 pour le décodage et l'encodage.
-.IPs gray
+.IPs gray\ 
 décodage en niveaux de gris uniquement (un peu plus rapide qu'en couleur)
+.IPs "sb=<valeur> (MPEG2 uniquement)"
+Saute <valeur> lignes de macro-blocs au bas de l'image.
+.IPs "st=<valeur> (MPEG2 uniquement)"
+Saute <valeur> lignes de macro-blocs en haut de l'image.
+.IPs vstats
+Affiche quelques statistiques et les écrit dans ./vstats_*.log.
 .RE
-.
-.TP
-.B \-noaspect
-Désactive la compensation automatique du rapport hauteur/\:largeur.
 .
 .TP
 .B \-noslices
 Désactive l'affichage de la vidéo par tranches/\:bandes de 16 pixels, affiche
-la trame entière d'un seul coup.
+plutôt la trame entière d'un seul coup.
 Peut être plus rapide ou plus lent, en fonction de la carte/\:du cache.
 Cette option n'a d'effet que sur les codecs libmpeg2 et libavcodec.
 .
 .TP
 .B \-nosound
 Ne pas jouer/\:encoder le son.
+Utile pour les mesures de performances (benchmarking).
 .
 .TP
 .B \-novideo
@@ -3195,26 +3195,28 @@ Ne pas jouer/\:encoder la vidéo.
 .
 .TP
 .B \-oldpp <qualité> (OpenDivX uniquement) (OBSOLÈTE)
-Utilise le code de postprocessing d'opendivx au lieu de l'interne.
+Utilise le code de post-traitement d'opendivx au lieu de l'interne.
 À ne plus utiliser au profit de \-pp, car le postprocessing interne offre
-une meilleur qualité et de meilleurs performances.
+une meilleur qualité visuelle et de meilleurs performances.
 .
-L'intervalle valide des valeurs de \-oldpp varie suivant le codec, la plupart du
-temps 0\-6, où 0=désactive 6=plus lent/\:meilleur.
+L'intervalle valide des valeurs de \-oldpp varie suivant le codec, la plupart
+du temps 0\-6, où 0=désactive 6=plus lent/\:meilleur.
 .
 .TP
 .B \-pp <qualité> (voir aussi \-vf pp)
-Initialise le niveau de postprocess de la DLL.
-Cette option N'EST PLUS UTILISABLE avec le filtre de postprocess de MPlayer,
-mais uniquement avec les DLLs DirectShow Win32 qui ont des routines de
-postprocessing interne.
+Initialise le niveau de post-traitement de la DLL.
+Cette option N'EST PLUS UTILISABLE avec le filtre de post-traitement de
+MPlayer, mais uniquement avec les DLLs DirectShow Win32 qui ont des routines
+de post-traitement interne.
 .
-L'intervalle valide de la valeur \-pp pour les filtres de pp varient suivant les
-codecs, généralement 0\-6, où 0=désactivé 6=plus lent/\:meilleur.
+L'intervalle valide de la valeur \-pp pour les filtres de pp varient suivant
+les codecs, généralement 0\-6, où 0=désactivé 6=plus lent/\:meilleur.
 .
 .TP
 .B \-pphelp (voir aussi \-vf pp)
-Affiche un aperçu des filtres de postprocess disponibles et de leur utilisation.
+Affiche un aperçu des filtres de post-traitement disponibles et de leur
+utilisation.
+.\" -- Les options décrites ci-dessous ne sont plus garanties d'être à jour --
 .
 .TP
 .B \-ssf <mode>
