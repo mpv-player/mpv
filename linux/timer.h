@@ -1,6 +1,6 @@
 
 void InitTimer();
-int GetTimer();
+unsigned int GetTimer();
 //int uGetTimer();
 float GetRelativeTime();
 

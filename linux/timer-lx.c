@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <sys/time.h>
 
-// Returns current time in seconds
+// Returns current time in microseconds
 unsigned int GetTimer(){
   struct timeval tv;
   struct timezone tz;
@@ -11,14 +11,6 @@ unsigned int GetTimer(){
   gettimeofday(&tv,&tz);
 //  s=tv.tv_usec;s*=0.000001;s+=tv.tv_sec;
   return (tv.tv_sec*1000000+tv.tv_usec);
-}  
-
-// Returns current time in microseconds
-int uGetTimer(){
-  struct timeval tv;
-  struct timezone tz;
-  gettimeofday(&tv,&tz);
-  return (int)(tv.tv_usec+1000000*tv.tv_sec);
 }  
 
 static unsigned int RelativeTime=0;
