@@ -1,13 +1,16 @@
 Notes for Solaris users
 =======================
 
-1. To build the package you will need GNU make (gmake, /opt/sfw/gmake), 
-native Solaris make will not work.
+1. It *only* works on Solaris x86.  It can't work on SPARC systems due to
+   the use of win32 codecs.
 
-2. For DVD support you must have the patched libcss installed. Patch:
+2. To build the package you will need GNU make (gmake, /opt/sfw/gmake), 
+   native Solaris make will not work.
+
+3. For DVD support you must have the patched libcss installed. Patch:
    http://www.tools.de/solaris/mplayer/
 
-3. Due to two bugs in solaris 8 x86,  you cannot reliably play DVDs using a
+4. Due to two bugs in solaris 8 x86,  you cannot reliably play DVDs using a
    capacity >4GB: 
 
    - The sd(7D) driver on solaris 8 x86 driver has bug when accessing a

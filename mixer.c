@@ -6,18 +6,17 @@
 #include <unistd.h>
 
 #include "config.h"
-
-#ifdef USE_OSS_AUDIO
-#include <sys/soundcard.h>
-#endif
-
-#ifdef USE_SUN_AUDIO
-#include <sys/audioio.h>
-#endif
-
 #include "mixer.h"
 
+
 #if	defined(USE_OSS_AUDIO)
+
+/*
+ * Mixer interface using OSS style soundcard commands.
+ */
+
+#include <sys/soundcard.h>
+
 
 char * mixer_device=DEV_MIXER;
 int    mixer_usemaster=0;
@@ -66,7 +65,15 @@ void mixer_setvolume( float l,float r )
    close( fd );
   }
 }
+
 #elif	defined(USE_SUN_AUDIO)
+
+/*
+ * Mixer interface using Sun style soundcard commands.
+ */
+
+#include <sys/audioio.h>
+
 
 char * mixer_device="/dev/audioctl";
 int    mixer_usemaster=0;
@@ -101,6 +108,23 @@ void mixer_setvolume( float l,float r )
    close( fd );
   }
 }
+
+#else
+
+/*
+ * No usable Mixer interface selected.
+ * Just some stub routines.
+ */
+
+char * mixer_device=NULL;
+int    mixer_usemaster=0;
+
+void mixer_getvolume( float *l,float *r ){
+ *l = *r = 50.0;
+}
+void mixer_setvolume( float l,float r ){
+}
+
 #endif
 
 

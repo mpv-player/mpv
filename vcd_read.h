@@ -175,7 +175,7 @@ static int sun_vcd_read(int fd, int *offset)
 		      (error_field << 1);
   cdb.cdb_opaque[10] = sub_channel;
 
-  sc.uscsi_cdb = &cdb;
+  sc.uscsi_cdb = (caddr_t)&cdb;
   sc.uscsi_cdblen = 12;
   sc.uscsi_bufaddr = vcd_buf;
   sc.uscsi_buflen = 2336;
