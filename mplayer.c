@@ -230,15 +230,7 @@ static int play_n_frames_mf=-1;
 char* video_driver=NULL; //"mga"; // default
 char* audio_driver=NULL;
 
-// libvo opts: (defiend at libmpcodecs/vd.c)
-extern int opt_screen_size_x;
-extern int opt_screen_size_y;
-extern int screen_size_xy;
-extern float movie_aspect;
-extern int fullscreen;
-extern int vidmode;
-extern int softzoom;
-extern int flip;
+// codec outfmt flags (defined in libmpcodecs/vd.c)
 extern int vo_flags;
 
 // sub:

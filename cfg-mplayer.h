@@ -59,6 +59,11 @@ extern int vo_gamma_saturation;
 extern int vo_gamma_contrast;
 extern int vo_gamma_hue;
 
+extern int opt_screen_size_x;
+extern int opt_screen_size_y;
+extern int fullscreen;
+extern int vidmode;
+
 #ifdef USE_OSD
 extern int osd_level;
 #endif

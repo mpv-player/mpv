@@ -90,13 +90,6 @@ char *video_codec=NULL; // override video codec
 char* audio_fm=NULL;     // override audio codec family 
 char* video_fm=NULL;     // override video codec family 
 
-// libvo opts: (defiend at libmpcodecs/vd.c)
-extern int screen_size_xy;
-extern float movie_aspect;
-extern int softzoom;
-extern int flip;
-
-
 int out_audio_codec=-1;
 int out_video_codec=-1;
 
@@ -209,7 +202,7 @@ static char *seek_to_sec=NULL;
 static off_t seek_to_byte=0;
 
 static int parse_end_at(struct config *conf, const char* param);
-static uint8_t* flip_upside_down(uint8_t* dst, const uint8_t* src, int width, int height);
+//static uint8_t* flip_upside_down(uint8_t* dst, const uint8_t* src, int width, int height);
 
 #include "get_path.c"
 
@@ -1304,6 +1297,7 @@ static int parse_end_at(struct config *conf, const char* param)
     return 1;
 }
 
+#if 0
 /* Flip the image in src and store the result in dst. src and dst may overlap.
    width is the size of each line in bytes. */
 static uint8_t* flip_upside_down(uint8_t* dst, const uint8_t* src, int width,
@@ -1321,4 +1315,4 @@ static uint8_t* flip_upside_down(uint8_t* dst, const uint8_t* src, int width,
     free(tmp);
     return dst;
 }
-
+#endif

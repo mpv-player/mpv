@@ -179,6 +179,12 @@
 
 #include "config.h"
 
+// codec/filter opts: (defiend at libmpcodecs/vd.c)
+extern int screen_size_xy;
+extern float movie_aspect;
+extern int softzoom;
+extern int flip;
+
 #ifdef STREAMING
 /* defined in network.c */
 extern char *network_username;
