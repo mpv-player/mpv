@@ -42,13 +42,14 @@ v
 		data				u(7)
 		value= 128*value + data
 	}while(more_data)
- 
-sz (zero terminated string)
-	for(i=0; next_byte != 0; i++){
-		string[i]			u(8)
-	}
-	zero_byte				f(8)
 
+b (binary data or string)
+	length					v
+	for(i=0; i<length; i++){
+		data[i]				u(8)
+	}
+
+        
 f(x)	n fixed bits
 u(x)	unsigned number encoded in x bits in MSB first order
 
@@ -81,7 +82,7 @@ stream_header:
 	stream_startcode			f(64)
 	stream_id				v
 	stream_class				v
-	fourcc					v
+	fourcc					b
 	average_bitrate				v
 	language_code				v
 	time_base_nom				v
@@ -153,24 +154,46 @@ info_packet: (optional)
 	info_startcode				f(64)
 	start_time				v
 	end_time				v
-	entry_count				v
-	for(i=0; i<entry_count; i++){
-		name				sz
-		value				sz
-        }
+	for(;;){
+		type				b
+		if(type=="") break;
+		name				b
+		value				b
+	}
 	reserved_bytes
         checksum				u(32)
-
+        
 stuffing_packet: (optional)
 	packet_header
 	stuffing_startcode			f(64)
 	for(i=0; i<forward_ptr - length_of_non_reserved; i++)
 		stuffing			f(8)
 
+                
 forward_ptr
 backward_ptr
 	pointer to the next / previous packet
+	pointers are relative and backward pointer is implicitelly negative
 	Note: a frame with 0 bytes means that its skiped
+	Note: the forward pointer is equal to the size of this packet including
+              the header
+              the backward pointer is equal to the size of the previous packet
+	Example: 
+                0
+                size1 (size of frame1 including header)
+                frame1
+
+                size1
+                size2
+                frame2
+
+                size2
+                size3
+                frame3
+
+
+*_startcode
+	the first bit is allways set
 
 version
 	0 for now
@@ -196,7 +219,7 @@ stream_class
 
 fourcc
 	identification for the codec
-	example: 'h'<<24 + '2'<<16 + '6'<<8 + '4'
+	example: "H264"
         
 language_code 
 	something like 'u'<<24 + 's'<<16 + 'e'<<8 + 'n' (US english), can be 0
@@ -300,10 +323,15 @@ index_position
 start_time, stop_time
 	the time range in msecs to which the info applies
 	Note: can be used to mark chapters
-        
+
+type
+	the fourcc of the type
+	for example: "STR " -> String or "JPEG" -> jpeg image
+	0 length means end
+
 name
 	the name of the info entry, valid names are
-	"Author","Description","Copyright","Encoder","Title"
+	"Author","Description","Copyright","Encoder","Title","CDCover"
 	Note: if someone needs some others, please tell us about them, so we can
 	      add them to the official standard (if they are sane)
 
