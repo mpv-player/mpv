@@ -114,7 +114,7 @@
 #endif // CAN_COMPILE_X86_ASM
 
 
-inline void * fast_memcpy(void * to, const void * from, size_t len)
+void * fast_memcpy(void * to, const void * from, size_t len)
 {
 #ifdef RUNTIME_CPUDETECT
 #ifdef CAN_COMPILE_X86_ASM
@@ -147,7 +147,7 @@ inline void * fast_memcpy(void * to, const void * from, size_t len)
 	return to;
 }
 
-inline void * mem2agpcpy(void * to, const void * from, size_t len)
+void * mem2agpcpy(void * to, const void * from, size_t len)
 {
 #ifdef RUNTIME_CPUDETECT
 #ifdef CAN_COMPILE_X86_ASM

@@ -133,7 +133,7 @@ __asm__ __volatile__(\
 #define MIN_LEN 0x40  /* 64-byte blocks */
 #endif
 
-static inline void * RENAME(fast_memcpy)(void * to, const void * from, size_t len)
+static void * RENAME(fast_memcpy)(void * to, const void * from, size_t len)
 {
 	void *retval;
 	size_t i;
@@ -363,7 +363,7 @@ static inline void * RENAME(fast_memcpy)(void * to, const void * from, size_t le
 /**
  * special copy routine for mem -> agp/pci copy (based upon fast_memcpy)
  */
-static inline void * RENAME(mem2agpcpy)(void * to, const void * from, size_t len)
+static void * RENAME(mem2agpcpy)(void * to, const void * from, size_t len)
 {
 	void *retval;
 	size_t i;
