@@ -57,7 +57,7 @@ MISC_LIBS += -Llibdha -ldha -Lvidix -lvidix
 endif
 CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader $(VO_INC) $(EXTRA_INC) $(CDPARANOIA_INC)# -Wall
 
-PARTS = libfame libmpdemux libmpcodecs mp3lib liba52 libmp1e libmpeg2 libavcodec libao2 drivers drivers/syncfb linux postproc input libmpdvdkit
+PARTS = libfame libmpdemux libmpcodecs mp3lib liba52 libmp1e libmpeg2 libavcodec libao2 drivers linux postproc input libmpdvdkit
 ifeq ($(VIDIX),yes)
 PARTS += libdha vidix
 endif
