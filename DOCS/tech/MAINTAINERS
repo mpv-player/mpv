@@ -64,6 +64,7 @@ MPlayer code:
     * DVB support: Nico Sabbi
     * GUI: Zoltan Ponekker
     * GUI skins: Diego Biurrun
+    * filers: Richard Felker, Michael Niedermayer
 
 Imported libs/projects:
     * libavcodec, libavformat: Michael Niedermayer
@@ -74,6 +75,14 @@ Imported libs/projects:
     * libmpeg2: None
     * libmpdvdkit2: None
     * libfaad2: Alex Beregszaszi
+
+demuxers:
+    * demux_mkv.c - Moritz Bunkus
+    * demux_nsv.c - Reza Jelveh, Roberto Togni
+    * demux_ogg.c - Moritz Bunkus
+
+filters:
+    *	vf_filmdint.c	- Zoltan Hidvegi
 
 libvo drivers:
     * vo_3dfx.c - OBSOLETED, use xv or tdfxfb
