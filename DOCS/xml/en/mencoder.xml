@@ -411,7 +411,7 @@ mencoder -mf on:w=800:h=600:fps=25:type=tga -ovc copy -o output.avi \*.tga<!--
 
 <para>
 <application>MEncoder</application> is capable of extracting subtitles from
-a DVD into Vobsub fomat files. They consist of a pair of files ending in
+a DVD into Vobsub formatted files. They consist of a pair of files ending in
 <filename>.idx</filename> and <filename>.sub</filename> and are usually
 packaged in a single <filename>.rar</filename> archive.
 <application>MPlayer</application> can play these with the

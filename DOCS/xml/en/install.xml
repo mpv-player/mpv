@@ -466,7 +466,7 @@ Debian users can build a .deb package for themselves, it's very simple.
 Just exec
 <screen>fakeroot debian/rules binary</screen>
 in <application>MPlayer</application>'s root directory. See
-<link linkend="debian">Debian packaging</link> for detailled instructions.
+<link linkend="debian">Debian packaging</link> for detailed instructions.
 </para>
 
 <para>
@@ -499,7 +499,7 @@ and OSD</link> section for details.
 <para>
 The GUI needs GTK 1.2.x (it isn't fully GTK, but the panels are). The skins
 are stored in PNG format, so GTK, <systemitem class="library">libpng</systemitem>
-(and their devel stuff, usualy called <systemitem class="library">gtk-dev</systemitem>
+(and their devel stuff, usually called <systemitem class="library">gtk-dev</systemitem>
 and <systemitem class="library">libpng-dev</systemitem>) has to be installed.
 You can build it by specifying <option>--enable-gui</option> during
 <filename>./configure</filename>. Then, to turn on GUI mode, you have to

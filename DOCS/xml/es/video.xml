@@ -1544,7 +1544,7 @@ con otros.
   wmv7, wmv8</systemitem> y algunos otros. Por favor tenga en cuenta que esto
   es solo algo temporal. La sintaxis de uso es la siguiente:
   <screen>
-    mplayer -vf formay=uyvy -vc divxds archivodivx3.avi
+    mplayer -vf format=uyvy -vc divxds archivodivx3.avi
   </screen>
   </para></listitem>
 </itemizedlist>
@@ -1555,7 +1555,7 @@ con otros.
   - sin framebuffer o X magic ni nada. Para conseguir esto, se ha de usar la
   salida de video <option>cvidix</option>, como muestra el siguiente ejemplo:
   <screen>
-    mplayer -vf formay=uyvy -vc divxds -vo cvidix ejemplo.avi
+    mplayer -vf format=uyvy -vc divxds -vo cvidix ejemplo.avi
   </screen>
 </para>
 

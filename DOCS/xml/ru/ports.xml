@@ -156,7 +156,7 @@ Sun'овский ассемблер <filename>/usr/ccs/bin/as</filename> не может
 <para>Скрипт <filename>configure</filename> пытается обнаружить, какой ассемблер
 используется Вашей командой &quot;gcc&quot; (в том случае, если автоопределение
 не сработает, используйте опцию
-<option>--as=/whereever/you/have/installed/gnu-as</option>, чтобы сообщить
+<option>--as=/wherever/you/have/installed/gnu-as</option>, чтобы сообщить
 скрипту <filename>configure</filename>, где можно обнаружить GNU "as" на Вашей
 системе).
 </para>

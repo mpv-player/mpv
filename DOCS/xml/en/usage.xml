@@ -435,9 +435,9 @@ Remote streams allow you to access most <application>MPlayer</application>
 stream type from a remote host. The main purpose of this feature is to make
 it possible to directly use the CD or DVD drive of another computer on the
 network (provided you have the required bandwidth). On the downside some
-stream type (currently TV and MF) are not useable remotely because they are
+stream type (currently TV and MF) are not usable remotely because they are
 implemented at the demuxer level. It's sad for MF but TV stream would anyway
-require an insane amount of bandwith.
+require an insane amount of bandwidth.
 </para>
 
 <sect2 id="compile_mpst_server">
@@ -466,14 +466,14 @@ You can also access files on this server :
 <screen>
 mplayer -cache 5000 mpst://servername//usr/local/movies/lol.avi
 </screen>
-Note that paths wich aren't starting with a / will be relative to
+Note that paths which aren't starting with a / will be relative to
 the directory where the server is running. The <option>-cache</option> option is not
 needed but highly recommended.
 </para>
 
 <para>
 Be aware that currently the server is not secure at all. So don't complain
-about the numerous exploits wich are possible through this. Instead send
+about the numerous exploits which are possible through this. Instead send
 some (good) patch to make it better or start writing your own server.
 </para>
 

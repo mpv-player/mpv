@@ -1485,7 +1485,7 @@ Il y a un relativement nouveau pilote nVidia, il fonctionne avec les chipsets Ri
   et quelques autres. Veuillez noter que ce n'est qu'un inconfort provisoire.
   La syntaxe est la suivante:
   <screen>
-    mplayer -vf formay=uyvy -vc divxds fichierdivx3.avi
+    mplayer -vf format=uyvy -vc divxds fichierdivx3.avi
   </screen>
   </para></listitem>
 </itemizedlist>
@@ -1496,7 +1496,7 @@ Il y a un relativement nouveau pilote nVidia, il fonctionne avec les chipsets Ri
   - avec aucun framebuffer ou X. Pour ce faire, nous aurons besoin d'utiliser
   la sortie <option>cvidix</option>, comme le montre l'exemple suivant:
   <screen>
-    mplayer -vf formay=uyvy -vc divxds -vo cvidix exemple.avi
+    mplayer -vf format=uyvy -vc divxds -vo cvidix exemple.avi
   </screen>
 </para>
 

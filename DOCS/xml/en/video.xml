@@ -1511,7 +1511,7 @@ There's a relatively new nVidia driver out there, it's known to work on Riva
   wmv7, wmv8</systemitem> and some others. Please note that this is only
   a temporal inconvenience. The usage syntax is as follows:
   <screen>
-    mplayer -vf formay=uyvy -vc divxds divx3file.avi
+    mplayer -vf format=uyvy -vc divxds divx3file.avi
   </screen>
   </para></listitem>
 </itemizedlist>
@@ -1522,7 +1522,7 @@ There's a relatively new nVidia driver out there, it's known to work on Riva
   framebuffer or X magic whatsoever. For this purpose, we'll have to use the
   <option>cvidix</option> video output, as the following example shows:
   <screen>
-    mplayer -vf formay=uyvy -vc divxds -vo cvidix example.avi
+    mplayer -vf format=uyvy -vc divxds -vo cvidix example.avi
   </screen>
 </para>
 

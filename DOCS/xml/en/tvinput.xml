@@ -186,7 +186,7 @@ LAME codec. This setup is suitable for capturing movies.
 <para>
 This will additionally rescale the image to 384x288 and compresses the
 video with the bitrate of 350kbps in high quality mode. The vqmax option
-looses the quantizer and allows the video compressor to actualy reach so
+looses the quantizer and allows the video compressor to actually reach so
 low bitrate even at the expense of the quality. This can be used for
 capturing long TV series, where the video quality isn't so important.
 <screen>

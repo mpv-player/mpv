@@ -119,7 +119,7 @@ On Linux, a 2.4.x kernel is highly recommended. Kernel 2.2 is not tested.
 
 <para>
 Linux sound drivers are primarily provided by the free version of OSS.
-These drivers have been superceded by <ulink url="http://www.alsa-project.org">ALSA</ulink>
+These drivers have been superseded by <ulink url="http://www.alsa-project.org">ALSA</ulink>
 (Advanced Linux Sound Architecture) in the 2.5 development series. If
 your distribution does not already use ALSA you may wish to try their
 drivers if you experience sound problems. ALSA drivers are generally

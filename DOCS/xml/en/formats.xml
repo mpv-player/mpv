@@ -355,7 +355,7 @@ frame's delay in centiseconds.
 
 <para>
 Standard GIF files contain 24-bit RGB frames with at most an 8-bit indexed
-pallete. These frames are usually LZW-compressed, although some GIF encoders
+palette. These frames are usually LZW-compressed, although some GIF encoders
 produce uncompressed frames to avoid patent issues with LZW compression.
 </para>
 

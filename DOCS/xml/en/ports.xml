@@ -148,7 +148,7 @@ using Sun's assembler <filename>/usr/ccs/bin/as</filename>.
 
 <para>The <filename>configure</filename> script tries to find out, which
 assembler program is used by your &quot;gcc&quot; command (in case the autodetection
-fails, use the <option>--as=/whereever/you/have/installed/gnu-as</option>
+fails, use the <option>--as=/wherever/you/have/installed/gnu-as</option>
 option to tell the <filename>configure</filename> script where it can find GNU
 "as" on your system).
 </para>

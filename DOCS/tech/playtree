@@ -56,8 +56,8 @@ arg is true it will also free the childs.
 When your tree is ready you can then use play_tree_cleanup to remove all unuseful
 entries.
 
-If you want to load a playlist you can use parse_playtree wich take a stream_t
-as argument or parse_playlist_file wich take a filename as argument.
+If you want to load a playlist you can use parse_playtree which take a stream_t
+as argument or parse_playlist_file which take a filename as argument.
 Both function will return NULL in case of failure or a new (cleaned) tree that
 you can add somewhere in your tree.
 
@@ -74,8 +74,8 @@ My playtree is ready now, what with this play_tree_iter ?
 This is an iterator used to go trough the tree. It handle itself
 loop of list and setting mplayer config according to the params
 of each entry.
-It's created with play_tree_iter_new wich take as argument a play_tree_t
-and an m_config_t wich is then used to set/unset the params of each entry.
+It's created with play_tree_iter_new which take as argument a play_tree_t
+and an m_config_t which is then used to set/unset the params of each entry.
 After creation the iter point to nothing, you should init with a first step.
 To go to another entry in the list you should use play_tree_iter_step. The
 second argument is the direction of the step : positive value go frontward,
@@ -90,7 +90,7 @@ PLAY_TREE_ITER_END : we are now at end
 (( Note : I must add a PLAY_TREE_ITER_BEGINING for the begining. Don't know
 what it will return in a such case.  PLAY_TREE_ITER_ERROR ? ))
 
-There is also play_tree_iter_up_step wich can be used to break a loop or skip
+There is also play_tree_iter_up_step which can be used to break a loop or skip
 the current list. The argument are the same than play_tree_iter_step. The
 difference is that it go back to parent of the current list, and then step according
 to the arguments.
@@ -99,7 +99,7 @@ Then when your iter returned PLAY_TREE_ITER_ENTRY you can use
 play_tree_iter_get_file to get the file. If you call it more than one time
 it will return the next file for this entry or loop trough the list if no more
 file are available. You can now how many files are available using
-iter->num_files and wich one it returned using iter->file.
+iter->num_files and which one it returned using iter->file.
 In case the entry is a DVD, VCD or TV channel the returned string is not a filename
 but "DVD title x", "VCD track x" or "TV channel x".
 To distinc those case from a normal file you can check iter->tree->entry_type.
@@ -116,7 +116,7 @@ Then when you have finish with the iter free it with play_tree_iter_free.
 Ok, that's all for now. To have some exemples look into mplayer.c ;)
 First just after config parsing, the iterator is created there. Also
 after stream opening, in case the stream is a playlist it replace the
-entry wich contained the playlist by the result of the parsing.
+entry which contained the playlist by the result of the parsing.
 In the event handeling it check if a step can be done, etc. And finnaly
 at the end it go the next entry.
 
