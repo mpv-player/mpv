@@ -408,7 +408,7 @@ Available plugins are:
  palette            RGB/BGR 8 \-> 15/16/24/32 bpp
  format[=fourcc]    restrict colorspace
  pp[=flags]         postprocessing (see \-pp)
- lavc               YV12\->MPEG1 (libavcodec)
+ lavc[=quality:fps] YV12\->MPEG1 (libavcodec)
  fame               YV12\->MPEG1 (libfame)
 
 .I parameters:
@@ -848,11 +848,11 @@ Available options:
   crispness=<0\-100>  specify crispness/smoothness
 .TP
 .B \-endpos <time|byte\ position>
-Stop encoding at given time or byte position. Can be specified in many was :
+Stop encoding at given time or byte position. Can be specified in many ways :
 
     -endpos 56       encode only 56 seconds
     -endpos 01:10:00 encode only 1 hours
-    -endpos 100 mb   encode only 100 mbytes
+    -endpos 100mb    encode only 100 mbytes
 
 Can be used in conjuction with -ss or -sb!
 .br
