@@ -528,7 +528,7 @@ OSD и субтитры. Рекомендуемый метод - установка TTF шрифта и указание MPlyer'у
 <listitem><para>SSA</para></listitem>
 <listitem><para>MPsub</para></listitem>
 <listitem><para>AQTitle</para></listitem>
-<listitem><para>JACOsub</para></listitem>
+<listitem><para><ulink url="http://unicorn.us.com/jacosub/">JACOsub</ulink></para></listitem>
 </itemizedlist>
 </para>
 

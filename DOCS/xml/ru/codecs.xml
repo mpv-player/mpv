@@ -456,10 +456,6 @@ OpenDivX кодека. Это произошло, когда ProjectMayo сделал исходный код OpenDivX
   может их проигрывать)
   </simpara></listitem>
 <listitem><simpara>
-  Вы должны выбрать между поддержкой DivX4 <emphasis role="bold">или</emphasis>
-  XviD во время компиляции
-  </simpara></listitem>
-<listitem><simpara>
   разработка продолжается и в настоящий момент
   </simpara></listitem>
 </itemizedlist>
@@ -534,15 +530,13 @@ Apple, которые распространяют его с <application>QuickTime Player</application>.
 <note><para>в настоящий момент поддерживаются только 32битные Intel'евские
 платформы.</para></note>
 <step><para>скачайте MPlayer'овский CVS</para></step>
-<step><para>скомпилируйте MPlayer с:
-<screen>$ ./configure --enable-qtx</screen>
-</para></step>
 <step><para>скачайте пакет QuickTime DLL с
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/"/>
 </para></step>
 <step><para>распакуйте пакет QuickTime DLL в Ваш каталог Win32 кодеков
 (по умолчанию: <filename class="directory">/usr/local/lib/codecs</filename>)
 </para></step>
+<step><para>скомпилируйте MPlayer</para></step>
 </procedure>
 
 </sect3>
