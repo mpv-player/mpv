@@ -271,7 +271,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		trak->chunkmap_size=len;
 		trak->chunkmap=malloc(sizeof(mov_chunkmap_t)*len);
 		for(i=0;i<len;i++){
-		    trak->chunkmap[i].first=stream_read_dword(demuxer->stream);
+		    trak->chunkmap[i].first=stream_read_dword(demuxer->stream)-1;
 		    trak->chunkmap[i].spc=stream_read_dword(demuxer->stream);
 		    trak->chunkmap[i].sdid=stream_read_dword(demuxer->stream);
 		}
