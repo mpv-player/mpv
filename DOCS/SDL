@@ -17,7 +17,7 @@ KNOWN BUGS:
   It's bug in SDL, I can't change it (tested with SDL 1.2.1).
 
 Please report problems or bugs with sdl out to the MPlayer-users
-mailinglist or directly to Felix Buenemann <atmosfear@users.sf.net>
+mailinglist.
 
 -- 
-Felix Bünemann, 2001-06-11
+Felix Bünemann, 2001-06-24
