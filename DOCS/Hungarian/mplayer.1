@@ -110,6 +110,13 @@ mplayer \- Filmlejátszó Linuxra
 .RB [ \-rootwin ]
 .RB [ \-font\ <útvonal\ a\ font.desc\ file-hoz> ]
 .RB [ \-conf\ <útvonal\ az\ input.conf\ file-hoz> ]
+.RB [ \-input\ <parancsok> ]
+.RB [ \-nojoystick ]
+.RB [ \-nolirc ]
+.RB [ \-demuxer\ <szám> ]
+.RB [ \-audio-demuxer\ <szám> ]
+.RB [ \-sub-demuxer\ <szám> ]
+.RB [ \-hr-mp3-seek ]
 .I < - | file | URL | eszköz >
 .PP
 .SH LEÍRÁS
@@ -640,6 +647,38 @@ hasznos. Alapállapotban kikapcsolva.
 .B \-softsleep
 pontos szoftveres idõzítõ használata. Van olyan hatékony mint az RTC, nem kell
 hozzá root jogosultság, viszont több CPU az igen.
+.TP
+.B \-input <parancsok>
+ezzel az opcioval az input rendszer bizonyos részeit lehet konfigurálni.
+        conf=<file> alternatív input.conf file
+                    használata
+        ar-delay    késleltetés mennyisége (msec)
+                    autorepeatig
+        ar-rate     hány lenyomás/másodperc
+                    legyen autorepeat-ben
+        keylist     kiírja az összes bindelhetõ input eszközt
+        cmdlist     kiírja az összes bindelhetõ parancsot
+.TP
+.I MEGJEGYZÉS
+Az autorepeat-et jelenleg csak joystick támogatja.
+.TP
+.B \-nojoystick
+joystick támogatás kikapcsolása. Alapállapot: bekapcsolva, ha be van fordítva.
+.TP
+.B \-nolirc
+LIRC támogatás kikapcsolása.
+.TP
+.B \-demuxer <szám>
+demuxer tipusának kényszerítése. A demuxers.h file-ban megadott ID kell,
+mint paraméter.
+.TP
+.B \-audio-demuxer <szám>
+audio demuxer tipusának kényszerítése. A demuxers.h file-ban megadott ID kell,
+mint paraméter.
+.TP
+.B \-hr-mp3-seek
+pontos MP3 seekelés. Alapállapotban be van kapcsolva, MP3 lejátszásnál.
+Pontosan oda seekel ahova kell, de lassú lehet - fõleg visszafelé tekerésnél.
 .IP
 .SH "ALPHA/BETA ÁLLAPOTÚ FUNKCIÓK"
 .TP
@@ -654,6 +693,13 @@ video stream kiírása a ./stream.dump file-ba (csak MPEG-PS-nél)
 .TP
 .B \-dapsync
 alternatív A/V szinkron rutin használata. Mire jó?
+.TP
+.B \-subfile <filenév>
+jelenleg használhatatlan. Ugyanaz mint az -audiofile, csak felirat
+streamekre. (OggDS?)
+.TP
+.B \-sub-demuxer <szám>
+felirat demuxer tipusának kényszerítése, a -subfile opcióhoz.
 .IP
 .SH IRÁNYÍTÁS A BILLENTYÛZETRÕL
 .TP

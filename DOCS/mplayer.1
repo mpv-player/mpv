@@ -17,6 +17,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-sb\ <byte\ position> ]
 .RB [ \-nosound ]
 .RB [ \-audiofile\ <filename> ]
+.RB [ \-subfile\ <filename> ]
 .RB [ \-abs\ <bytes> ]
 .RB [ \-delay\ <secs> ]
 .RB [ \-nobps ]
@@ -111,6 +112,13 @@ mplayer \- Movie Player for Linux
 .RB [ \-rootwin ]
 .RB [ \-font\ <path\ to\ font.desc\ file> ]
 .RB [ \-conf\ <path\ to\ input.conf\ file> ]
+.RB [ \-input\ <commands> ]
+.RB [ \-nojoystick ]
+.RB [ \-nolirc ]
+.RB [ \-demuxer\ <number> ]
+.RB [ \-audio-demuxer\ <number> ]
+.RB [ \-sub-demuxer\ <number> ]
+.RB [ \-hr-mp3-seek ]
 .I < - | file | URL | device >
 .PP
 .SH DESCRIPTION
@@ -702,6 +710,42 @@ Especially useful on slow media. Default is off.
 .B \-softsleep
 uses high quality software timers. Efficient as the RTC, doesn't need root,
 but requires more CPU.
+.TP
+.B \-input <commands>
+this option can be used to configure certain parts of the input system.
+        conf=<file> read alternative input.conf.
+                    If given without pathname,
+                    $HOME/.mplayer is assumed.
+        ar-delay    delay in msec before we start
+                    to autorepeat a key
+                    (0 to disable)
+        ar-rate     how many keypress/second when
+                    we autorepeat
+        keylist     prints all keys that can be
+                    bound to
+        cmdlist     prints all commands that can
+                    be bound
+.TP
+.I NOTE
+Autorepeat is currently only supported by joysticks.
+.TP
+.B \-nojoystick
+turns off joystick support. Default is on, if compiled in.
+.TP
+.B \-nolirc
+turns off lirc support.
+.TP
+.B \-demuxer <number>
+force demuxer type. Give the demuxer ID as defined in demuxers.h .
+.TP
+.B \-audio-demuxer <number>
+force audio demuxer type for -audiofile. Give the demuxer ID as defined in
+demuxers.h .
+.TP
+.B \-hr-mp3-seek
+hi-res mp3 seeking. Default is: enable for MP3 playing. It seek exactly where
+it should but can be slow especially when seeking backwards - it has to
+rewind to the beginning to find the exact frame.
 .IP
 .SH "ALPHA/BETA CODE"
 .TP
@@ -715,6 +759,12 @@ dump video stream to ./stream.dump (only with MPEG-PS) (not very usable)
 .TP
 .B \-dapsync
 use alternative A/V sync method. Where is it useful?
+.TP
+.B \-subfile <filename>
+currently unuseful. Same as -audiofile, but for subtitle streams. (OggDS?)
+.TP
+.B \-sub-demuxer <number>
+force subtitle demuxer type for -subfile.
 .IP
 .SH KEYBOARD CONTROL
 .TP
