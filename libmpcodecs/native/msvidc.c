@@ -6,7 +6,7 @@
     The description of the algorithm you can read here:
       http://www.pcisys.net/~melanson/codecs/
 
-    32bpp support (c) alex
+    32bpp support by Alex Beregszaszi
 */
 
 #include "config.h"

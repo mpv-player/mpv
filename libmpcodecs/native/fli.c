@@ -3,7 +3,7 @@
     
     (C) 2001 Mike Melanson
     
-    32bpp support (c) alex
+    32bpp support by Alex Beregszaszi
 
     Additional code and bug fixes by Roberto Togni
 
