@@ -49,7 +49,7 @@ the DAT files can't be played nor copied from VCDs. You have to use the
 <CODE>-vcd</CODE> option to play the VideoCD.</LI>
 <LI>VOB : this is the MPEG file format on <B>DVD</B>s. The same as MPG, plus
 capability to contain subtitles, or non-MPEG (AC3) audio. Contains encoded MPEG2
-video, and usually AC3 audio, but MP2 is allowed too.<BR>
+video, and usually AC3 audio, but DTS, MP2 and uncompressed LPCM are allowed too.<BR>
 <B>Read the <A HREF="cd-dvd.html#4.2">DVD section</A> !</B></LI>
 </P>
 
@@ -61,7 +61,7 @@ standard file-tools (like dd, cut), and it remains completely functional.</P>
 the aspect ratio of the video stream within. For example SVCDs have
 480x480 resolution video, and in the header that field is set to 4:3, so
 it's played at 640x480. AVI files don't have this field, so one has to
-rescale it during encoding.</P>
+rescale it during encoding or use option -aspect at playback.</P>
 
 
 <P><B><A NAME=2.1.1.2>2.1.1.2. AVI files</A></B></P>
@@ -69,7 +69,7 @@ rescale it during encoding.</P>
 <P>Designed by Micro$oft, the <B>AVI (Audio Video Interleaved)</B> is a
 widespread multipurpose format, currently used mostly for DivX and DivX4
 videos. Has many known drawbacks, and inabilities (for example in streaming).
-Has support for one video stream, and 99 audio streams. Can be as big as
+Has support for one video stream, and 0 to 99 audio streams. Can be as big as
 2Gb. There exists an extension for it to be bigger, called <B>OpenDMS</B>.
 M$ currently strongly discourages its use and propagates ASF/WMV. Not if
 anybody cares.<BR>
@@ -180,8 +180,10 @@ DivX/etc!) them all. Seeking is under implementation.</P>
 <P><B><A NAME=2.1.1.9>2.1.1.9. yuv4mpeg files</A></B></P>
 
 <P><A HREF="http://mjpeg.sourceforge.net">yuv4mpeg / yuv4mpeg2</A> is
-also a fileformat for TV grabbing, or so :) I know only one thing about it:
-we support it.</P>
+a fileformat used by <A HREF="http://mjpeg.sf.net">mjpegtools programs</A>.
+You can grab, produce, filter or encode video in this format using these.
+The file is really a sequence of uncompressed YUV 4:2:0 images.
+</P>
 
 
 <P><B><A NAME=2.1.1.10>2.1.1.10. FILM files</A></B></P>
