@@ -20,7 +20,6 @@ SRCS += rtp.c
 endif
 endif
 
-DVBIN = yes
 ifeq ($(DVBIN),yes)
 SRCS += dvbin.c
 SRCS += dvb_tune.c
