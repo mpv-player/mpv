@@ -6,6 +6,9 @@
  */
 
 /* ChangeLog added 2002-01-10
+ * 2002-10-28:
+ *  Fixed multicard bug on athlons
+ *
  * 2002-07-18:
  *  Disabled spuenc support, this is still not stable enough =(
  *
@@ -541,7 +544,7 @@ static uint32_t preinit(const char *arg)
 	}
 
 	/* Open the video interface */
-	if (arg && !noprebuf) {
+	if (arg && arg[0]) {
 		sprintf(devname, "/dev/em8300_mv-%s", arg);
 	} else {
 		/* Try new naming scheme by default */
@@ -565,7 +568,7 @@ static uint32_t preinit(const char *arg)
 	
 	/* Open the subpicture interface */
 	fdflags |= O_NONBLOCK;
-	if (arg && !noprebuf) {
+	if (arg && arg[0]) {
 		sprintf(devname, "/dev/em8300_sp-%s", arg);
 	} else {
 		/* Try new naming scheme by default */
