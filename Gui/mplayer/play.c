@@ -56,10 +56,10 @@ void mplFullScreen( void )
   }
   else
    {
-     mplx=appMPlayer.subWindow.OldX;
-     mply=appMPlayer.subWindow.OldY;
-     mplwidth=appMPlayer.subWindow.OldWidth;
-     mplheight=appMPlayer.subWindow.OldHeight;
+     mplx=appMPlayer.subWindow.X;
+     mply=appMPlayer.subWindow.Y;
+     mplwidth=appMPlayer.subWindow.Width;
+     mplheight=appMPlayer.subWindow.Height;
    }
  wsFullScreen( &appMPlayer.subWindow );
 // wsMoveTopWindow( &appMPlayer.subWindow );
