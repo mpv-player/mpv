@@ -18,6 +18,8 @@
 
 #include "bswap.h"
 
+#include "qtpalette.h"
+
 #ifdef HAVE_ZLIB
 #include <zlib.h>
 #endif
@@ -600,18 +602,33 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		  end = BE_16(&trak->stdata[hdr_ptr]);
 		  hdr_ptr += 2;
 		  palette_map = (unsigned char *)sh->bih + 40;
-		  for (i = start; i <= end; i++)
+
+		  // load default palette
+		  if (flag & 0x08)
 		  {
-		    entry = BE_16(&trak->stdata[hdr_ptr]);
-		    hdr_ptr += 2;
-		    // apparently, if count_flag is set, entry is same as i
-		    if (count_flag & 0x8000)
-		      entry = i;
-		    // only care about top 8 bits of 16-bit R, G, or B value
-		    palette_map[entry * 4 + 0] = trak->stdata[hdr_ptr + 0];
-		    palette_map[entry * 4 + 1] = trak->stdata[hdr_ptr + 2];
-		    palette_map[entry * 4 + 2] = trak->stdata[hdr_ptr + 4];
-		    hdr_ptr += 6;
+		    if (palette_count == 4)
+		      memcpy(palette_map, qt_default_palette_4, 4 * 4);
+		    else if (palette_count == 16)
+		      memcpy(palette_map, qt_default_palette_16, 16 * 4);
+		    if (palette_count == 256)
+		      memcpy(palette_map, qt_default_palette_256, 256 * 4);
+		  }
+		  // load palette from file
+		  else
+		  {
+		    for (i = start; i <= end; i++)
+		    {
+		      entry = BE_16(&trak->stdata[hdr_ptr]);
+		      hdr_ptr += 2;
+		      // apparently, if count_flag is set, entry is same as i
+		      if (count_flag & 0x8000)
+		        entry = i;
+		      // only care about top 8 bits of 16-bit R, G, or B value
+		      palette_map[entry * 4 + 0] = trak->stdata[hdr_ptr + 0];
+		      palette_map[entry * 4 + 1] = trak->stdata[hdr_ptr + 2];
+		      palette_map[entry * 4 + 2] = trak->stdata[hdr_ptr + 4];
+		      hdr_ptr += 6;
+		    }
 		  }
 		}
 		else
