@@ -403,7 +403,7 @@ When I start playing, I get this message but everything seems fine:
 </para></question>
 <answer><para>
 You need root privileges or a specially set up kernel to use the new timing
-code. For details see the <link linkend="rtc">RTC section</link> of the documentation.
+code. For details see the <link linkend="rtc">RTC</link> section of the documentation.
 </para></answer>
 </qandaentry>
 
@@ -555,7 +555,7 @@ You use a vo driver with single buffering (x11,xv). With xv, use the
 What exactly is this libavcodec thing?
 </para></question>
 <answer><para>
-See the <link linkend="ffmpeg">libavcodec section</link>.
+See the <link linkend="ffmpeg">libavcodec</link> section.
 </para></answer>
 </qandaentry>
 
@@ -565,7 +565,7 @@ But configure tells me &quot;Checking for libavcodec ... no&quot;!
 </para></question>
 <answer><para>
 You need to get libavcodec from FFmpeg's CVS. Read the instructions in the
-<link linkend="ffmpeg">libavcodec section</link>.
+<link linkend="ffmpeg">libavcodec</link> section.
 </para></answer>
 </qandaentry>
 

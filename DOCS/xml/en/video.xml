@@ -167,7 +167,7 @@ version 4.2.0 or greater, it works OK with YV12 and YUY2. Previous
 versions, including 4.1.0, <emphasis role="bold">crashes with YV12</emphasis>.
 If you experience strange effects using <option>-vo xv</option>, try SDL
 (it has XVideo, too) and see if it helps. Check the
-<link linkend="sdl">SDL section</link> for details.
+<link linkend="sdl">SDL</link> section for details.
 </para>
 
 <para>
@@ -1337,7 +1337,7 @@ main goal of this interface is to maximize the speed of video playback.
   you'll just mess up the screen), and you'll have a similar effect as with
   <option>-vo mga</option> or <option>-vo fbdev</option>. nVidia cards however
   are able to output truly graphical video on a real text console. See the
-  <link linkend="vidix-nvidia">nvidia_vid section</link> for more information.
+  <link linkend="vidix-nvidia">nvidia_vid</link> section for more information.
   </simpara></listitem>
 <listitem><simpara>
   You can use VIDIX subdevice which was applied to several video output
@@ -1576,7 +1576,7 @@ be done by the subdevice method, e.g.: <option>-vo directfb:2</option>
 <sect4 id="dfbmga">
 <title>DirectFB/Matrox (dfbmga)</title>
 <para>
-Please read the <link linkend="directfb">main DirectFB section</link> or general
+Please read the <link linkend="directfb">main DirectFB</link> section or general
 informations.
 </para>
 
@@ -1587,7 +1587,7 @@ of the first head.
 
 <para>
 Instructions on how to make it work can be found in the
-<ulink url="../../tech/directfb.txt">tech section</ulink>
+<ulink url="../../tech/directfb.txt">tech</ulink> section
 or directly on Ville Syrjala's
 <ulink url="http://www.sci.fi/~syrjala/directfb/Matrox_TV-out_README.txt">home page</ulink>.
 </para>
