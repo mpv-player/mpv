@@ -718,14 +718,19 @@ files. An open source decoder called FAAD is available from
 <ulink url="http://www.audiocoding.com"/>. You can download the second
 generation codec FAAD2 at their <ulink url="http://www.audiocoding.com/download.php">
 download page</ulink>. Unfortunately FAAD2 1.1 does not compile under Linux, so you
-will have to use the CVS version. Here's how:
+will have to use the CVS version:
 <screen>
 cvs -d:pserver:anonymous@cvs.audiocoding.com:/cvsroot/faac login
 cvs -z3 -d:pserver:anonymous@cvs.audiocoding.com:/cvsroot/faac co faad2
+</screen>
+You do not need all of faad2 to decode AAC files, libfaad is enough. Build
+it like this:
+<screen>
 cd faad2/
 chmod +x bootstrap
 ./bootstrap
 ./configure
+cd libfaad
 make
 make install
 </screen>

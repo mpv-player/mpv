@@ -459,15 +459,22 @@ MPlayer supports decoding nearly all versions of RealAudio:
   You can download the second generation codec FAAD2 at their
   <A HREF="http://www.audiocoding.com/download.php">download page</A>.
   Unfortunately FAAD2 1.1 does not compile under Linux, so you will have to use
-  the CVS version. Here's how:</P>
+  the CVS version:</P>
 
 <OL>
   <LI>cvs -d:pserver:anonymous@cvs.audiocoding.com:/cvsroot/faac login</LI>
   <LI>cvs -z3 -d:pserver:anonymous@cvs.audiocoding.com:/cvsroot/faac co faad2</LI>
+</OL>
+
+<P>You do not need all of faad2 to decode AAC files, libfaad is enough. Build
+  it like this:</P>
+
+<OL>
   <LI>cd faad2/</LI>
   <LI>chmod +x bootstrap</LI>
   <LI>./bootstrap</LI>
   <LI>./configure</LI>
+  <LI>cd libfaad</LI>
   <LI>make</LI>
   <LI>make install</LI>
 </OL>
