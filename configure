@@ -3855,7 +3855,7 @@ fi
 if test "$_win32" != no ; then
   _def_win32_loader='#undef WIN32_LOADER'
   echocheck "Win32 loader support"
-  if ! cygwin ; then
+  if not cygwin ; then
     _ld_win32='loader/libloader.a'
     _dep_win32='loader/libloader.a'
     _codecmodules="win32 $_codecmodules"
