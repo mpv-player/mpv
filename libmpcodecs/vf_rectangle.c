@@ -66,19 +66,26 @@ control(struct vf_instance_s* vf, int request, void *data)
 static int
 put_image(struct vf_instance_s* vf, mp_image_t* mpi){
     mp_image_t* dmpi;
-    unsigned int bpp;
+    unsigned int bpp = mpi->bpp / 8;
     unsigned int x, y, w, h;
     dmpi = vf_get_image(vf->next, mpi->imgfmt, MP_IMGTYPE_TEMP,
 			MP_IMGFLAG_ACCEPT_STRIDE | MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
 			mpi->w, mpi->h);
-    bpp = dmpi->bpp / 8;
-    memcpy(dmpi->planes[0], mpi->planes[0], dmpi->stride[0] * bpp * mpi->height);
-    memcpy(dmpi->planes[1], mpi->planes[1], dmpi->stride[1] * mpi->chroma_height);
-    memcpy(dmpi->planes[2], mpi->planes[2], dmpi->stride[2] * mpi->chroma_height);
+
+    memcpy_pic(dmpi->planes[0],mpi->planes[0],mpi->w*bpp, mpi->h,
+	       dmpi->stride[0],mpi->stride[0]);    
+    if(mpi->flags&MP_IMGFLAG_PLANAR && mpi->flags&MP_IMGFLAG_YUV){
+	memcpy_pic(dmpi->planes[1],mpi->planes[1],
+		   mpi->w>>mpi->chroma_x_shift, mpi->h>>mpi->chroma_y_shift,
+	           dmpi->stride[1],mpi->stride[1]);
+	memcpy_pic(dmpi->planes[2],mpi->planes[2],
+		   mpi->w>>mpi->chroma_x_shift, mpi->h>>mpi->chroma_y_shift,
+	           dmpi->stride[2],mpi->stride[2]);
+    }
 
     /* Draw the rectangle */
 
-    mp_msg(MSGT_VFILTER,MSGL_INFO, "rectangle: -vop crop=%d:%d:%d:%d \n", vf->priv->w, vf->priv->h, vf->priv->x, vf->priv->y);
+    mp_msg(MSGT_VFILTER,MSGL_INFO, "rectangle: -vop rectangle=%d:%d:%d:%d \n", vf->priv->w, vf->priv->h, vf->priv->x, vf->priv->y);
 
     if (vf->priv->x < 0)
 	x = 0;
