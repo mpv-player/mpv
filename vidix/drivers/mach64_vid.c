@@ -147,20 +147,18 @@ static __inline__ uint32_t INPLL(uint32_t addr)
     uint32_t res;
     uint32_t in;
     
-    /* preserve unknown bits */
-    in= INREG8(CLOCK_CNTL + 1);
-    if(__verbose>0)printf("[mach64] pll: %X\n", in);
-    in &= ~((PLL_WR_EN | PLL_ADDR)>>8); //clean some stuff
+    in= INREG(CLOCK_CNTL);
+    in &= ~((PLL_WR_EN | PLL_ADDR)); //clean some stuff
+    OUTREG(CLOCK_CNTL, in | (addr<<10));
     
-    /* write addr byte */
-    OUTREG8(CLOCK_CNTL + 1, in | (addr << 2));
     /* read the register value */
-    res = INREG8(CLOCK_CNTL + 2);
+    res = (INREG(CLOCK_CNTL)>>16)&0xFF;
     return res;
 }
 
 static __inline__ void OUTPLL(uint32_t addr,uint32_t val)
 {
+//FIXME buggy but its not used
     /* write addr byte */
     OUTREG8(CLOCK_CNTL + 1, (addr << 2) | PLL_WR_EN);
     /* write the register value */
@@ -737,6 +735,14 @@ static int mach64_vid_init_video( vidix_playback_t *config )
     dest_h = config->dest.h;
     besr.fourcc = config->fourcc;
     ecp = (INPLL(PLL_VCLK_CNTL) & PLL_ECP_DIV) >> 4;
+#if 0
+{
+int i;
+for(i=0; i<32; i++){
+    printf("%X ", INPLL(i));
+}
+}
+#endif
     if(__verbose>0) printf("[mach64] ecp: %d\n", ecp);
     v_inc = src_h * mach64_get_vert_stretch();
     
