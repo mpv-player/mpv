@@ -216,9 +216,10 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
 	  int l;
 	  char* end;
 	  l = (i+1<argc) ? strtol(argv[i+1],&end,0) : 0;
-	  if(!end)
+	  if(*end != '\0') {
+	    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "The loop option must be an integer: %s\n",argv[i+1]);
 	    tmp = ERR_OUT_OF_RANGE;
-	  else {
+	  } else {
 	    play_tree_t* pt = last_entry ? last_entry : last_parent;
 	    l = l <= 0 ? -1 : l;
 	    pt->loop = l;
