@@ -195,7 +195,7 @@ xv support, but the card itself is very slow, so you better sell it.
 <para>
 It's currently unclear which Savage models lack YV12 support, and convert by
 driver (slow). If you suspect your card, get a newer driver, or ask politely
-on the mplayer-users mailing list for an MMX/3DNow enabled driver.
+on the mplayer-users mailing list for an MMX/3DNow! enabled driver.
 </para>
 </note>
 </sect5>
@@ -1093,7 +1093,7 @@ important:</title>
 The rendering is very CPU intensive, especially when using AA-on-X
 (using aalib on X), and it's least CPU intensive on standard,
 non-framebuffer console. Use SVGATextMode to set up a big textmode,
-then enjoy! (secondary head Hercules cards rock :)) (but imho you
+then enjoy! (secondary head Hercules cards rock :)) (but IMHO you
 can use <option>-vf 1bpp</option> option to get graphics on hgafb:)
 </para>
 </note>
@@ -1116,7 +1116,7 @@ tuning issues.
 
 
 <sect4 id="caca">
-<title><systemitem class="library">libcaca</systemitem> - Colour AsCii Art library</title>
+<title><systemitem class="library">libcaca</systemitem> - Color ASCII Art library</title>
 
 <para>
 The <ulink url="http://sam.zoy.org/projects/libcaca/"><systemitem class="library">libcaca</systemitem></ulink>
@@ -1140,7 +1140,7 @@ will be built.
 <title>The differences with <systemitem class="library">AAlib</systemitem> are
   the following:</title>
 <listitem><simpara>
-   16 available colours for character output (256 colour pairs)
+   16 available colors for character output (256 color pairs)
   </simpara></listitem>
 <listitem><simpara>
    color image dithering
@@ -1273,7 +1273,7 @@ at least.)
 <listitem><simpara>
   If you have VESA VBE 3.0+, and you had specified
   <option>monitor-hfreq, monitor-vfreq, monitor-dotclock</option> somewhere
-  (config file, or commandline) you will get the highest possible refresh rate.
+  (config file, or command line) you will get the highest possible refresh rate.
   (Using General Timing Formula). To enable this feature you have to specify
   <emphasis role="bold">all</emphasis> your monitor options.
   </simpara></listitem>
@@ -1355,7 +1355,7 @@ Avoid if possible. Outputs to X11 (uses shared memory extension), with no
 hardware acceleration at all. Supports (MMX/3DNow/SSE accelerated, but
 still slow) software scaling, use the options <option>-fs -zoom</option>.
 Most cards have hardware scaling support, use the <option>-vo xv</option>
-output for them, or <option>-vo xmga</option> for Matroxes.
+output for them, or <option>-vo xmga</option> for Matrox cards.
 </para>
 
 <para>
@@ -1411,9 +1411,9 @@ portable.
 <para>
 This interface was designed as an attempt to fit existing video
 acceleration interfaces (known as mga_vid, rage128_vid, radeon_vid,
-pm3_vid) into a fixed scheme. It provides highlevel interface to chips
+pm3_vid) into a fixed scheme. It provides a high level interface to chips
 which are known as BES (BackEnd scalers) or OV (Video Overlays). It doesn't
-provide lowlevel interface to things which are known as graphics servers.
+provide low level interface to things which are known as graphics servers.
 (I don't want to compete with X11 team in graphics mode switching). I.e.
 main goal of this interface is to maximize the speed of video playback.
 </para>
@@ -1523,7 +1523,7 @@ Alternatively, you can use a special kernel module, like this:
   directory if you've downloaded the source from the svgalib site) and insmod it.
   </para></step>
 <step><para>
-  To create the neccessary devices in the <filename class="directory">/dev</filename>
+  To create the necessary devices in the <filename class="directory">/dev</filename>
   directory, do a <screen>make device</screen> in the <filename class="directory">svgalib_helper</filename>
   dir, as root.
   </para></step>
@@ -1871,7 +1871,7 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 
 <para>
   If you have more than one card you also need to specify the number of the card 
-  where the channel is visibile (e.g. 2) with the syntax:
+  where the channel is visible (e.g. 2) with the syntax:
 </para>
 
 <screen>
@@ -2016,7 +2016,7 @@ With prebuffering video playback is <emphasis role="bold">much</emphasis>
 less sensitive to other programs hogging the CPU, it will not drop frames unless
 applications hog the CPU for a long time.
 When running without prebuffering the em8300 is much more sensitive to CPU load,
-so it is highly suggested that you turn on <application>MPlayer's</application>
+so it is highly suggested that you turn on <application>MPlayer</application>'s
 <option>-framedrop</option> option to avoid further loss of sync.
 <option>sync</option> will turn on the new sync-engine. This is currently an
 experimental feature. With the sync feature turned on the em8300's internal clock
@@ -2093,7 +2093,7 @@ OSD onto the picture (that's what the "1" at the end does).
 <listitem><para>
 The em8300 supports playing back AC3 audio (surround sound) through the
 digital audio output of the card. See the <option>-ao oss</option> option above,
-it must be used to specify the DXR3's output instead of a soundcard.
+it must be used to specify the DXR3's output instead of a sound card.
 </para></listitem>
 </varlistentry>
 </variablelist>
@@ -2143,7 +2143,7 @@ that you have a movie with a resolution of 512x272 and you want to view it
 fullscreen on your DC10+. There are three main possibilities, you may scale
 the movie to a width of 768, 384 or 192. For performance and quality reasons,
 I would choose to scale the movie to 384x204 using the fast bilinear software
-scaler. The commandline is
+scaler. The command line is
 <screen>
 mplayer -vo zr -sws 0 -vf scale=384:204 <replaceable>movie.avi</replaceable>
 </screen>
@@ -2229,8 +2229,8 @@ for Matrox G450/G550 TV-out instructions, please see the next section!
 <varlistentry>
   <term>XFree86</term>
   <listitem><para>
-    Using the driver and the HAL module, available from <ulink
-    url="http://www.matrox.com">Matrox's site</ulink>. This will give you X
+    Using the driver and the HAL module, available from the <ulink
+    url="http://www.matrox.com">Matrox site</ulink>. This will give you X
     on the TV.
     </para><para>
     <emphasis role="bold">This method doesn't give you accelerated playback</emphasis>
@@ -2375,7 +2375,7 @@ recommended for G400, see the section above.
 </para>
 
 <para>
-The necessary kernel patch and the detailed howto is downloadable from
+The necessary kernel patch and the detailed HOWTO is downloadable from
 <ulink url="http://www.bglug.ca/matrox_tvout/"/>
 </para>
 </sect4>
@@ -2396,11 +2396,11 @@ because of their licensed Macrovision technology.
 <title>ATI CARDS TV-OUT STATUS ON LINUX</title>
 <listitem><simpara>
   <emphasis role="bold">ATI Mach64</emphasis>:
-  supported by <ulink url="http://gatos.sf.net">gatos</ulink>.
+  supported by <ulink url="http://gatos.sf.net">GATOS</ulink>.
   </simpara></listitem>
 <listitem><simpara>
   <emphasis role="bold">ASIC Radeon VIVO</emphasis>:
-  supported by <ulink url="http://gatos.sf.net">gatos</ulink>.
+  supported by <ulink url="http://gatos.sf.net">GATOS</ulink>.
   </simpara></listitem>
 <listitem><simpara>
   <emphasis role="bold">Radeon</emphasis> and <emphasis role="bold">Rage128</emphasis>:

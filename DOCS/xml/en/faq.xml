@@ -1038,7 +1038,7 @@ other users can gain root privileges through SUID root <application>MPlayer</app
 
 <qandaentry>
 <question><para>
-When using Xvideo, my Voodoo 3/Banshee says:
+When using XVideo, my Voodoo 3/Banshee says:
 <screen>
 X Error of failed request: BadAccess (attempt to access private resource denied)
    Major opcode of failed request: 147 (MIT-SHM)
