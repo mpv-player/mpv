@@ -318,7 +318,7 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 <para>Sascha Sommer releases official Windows binaries from time to time,
   Joey Parrish makes unofficial Windows packages complete with installer.
   Look for these in the Windows section of
-  <ulink url="http://www.mplayerhq.hu/homepage/projects.html">our projects page</ulink>.</para>
+  <ulink url="http://www.mplayerhq.hu/homepage/projects.html#windows">our projects page</ulink>.</para>
 
 <sect2 id="cygwin">
 <title><application>Cygwin</application></title>
