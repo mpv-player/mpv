@@ -551,7 +551,7 @@ static int32_t rounder5[] ATTR_ALIGN(8) =
 
 
 #define declare_idct(idct,table,idct_row_head,idct_row,idct_row_tail,idct_row_mid)	\
-static inline void idct (int16_t * block)				\
+inline void idct (int16_t * block)					\
 {									\
     static int16_t table04[] ATTR_ALIGN(16) =				\
 	table (22725, 21407, 19266, 16384, 12873,  8867, 4520);		\
