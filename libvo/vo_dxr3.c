@@ -118,6 +118,7 @@ static AVCodecContext *avc_context = NULL;
 static AVPicture avc_picture;
 int avc_outbuf_size = 100000;
 extern int avcodec_inited;
+extern int motion_estimation_method;
 #endif
 
 char *picture_data[] = { NULL, NULL, NULL };
@@ -401,16 +402,13 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 			avc_context->width = s_width;
 			avc_context->height = s_height;
 			ioctl(fd_control, EM8300_IOCTL_GET_VIDEOMODE, &ioval);
-			if (ioval == EM8300_VIDEOMODE_NTSC) {
-				avc_context->gop_size = 18;
-			} else {
-				avc_context->gop_size = 15;
-			}
+			avc_context->gop_size = 7;
 			avc_context->frame_rate = (int) (vo_fps * FRAME_RATE_BASE);
-			avc_context->bit_rate = 6e6;
+			avc_context->bit_rate = 0;
 			avc_context->flags = CODEC_FLAG_QSCALE;
 			avc_context->quality = 2;
 			avc_context->pix_fmt = PIX_FMT_YUV420P;
+			motion_estimation_method = ME_EPZS;
 			if (avcodec_open(avc_context, avc_codec) < 0) {
 				printf("VO: [dxr3] Unable to open codec\n");
 				uninit();
