@@ -1507,32 +1507,34 @@ echo "Extra headers : $_extraincdir"
 if [ $_gui = yes ]; then
 # --------------- GUI begin -------------------
 
-echo -en "\nChecking for gtk version ... "
+echo
+echo $_echo_n "Checking for gtk version ... $_echo_c"
 _gtk=`gtk-config --version 2>&1`
 [ -z "$_gtk" ] && { echo 'gtk not found.'; exit 1; }
 echo "$_gtk"
 
-echo -n "Checking for gtk includes ... "
+echo $_echo_n "Checking for gtk includes ... $_echo_c"
 _gtkinc=`gtk-config --cflags 2>&1`
 [ -z "$_gtkinc" ] && { echo 'gtk not found.'; exit 1; }
 echo "done"
 
-echo -n "Checking for gtk libs ... "
+echo $_echo_n "Checking for gtk libs ... $_echo_c"
 _gtklib=`gtk-config --libs 2>&1`
 [ -z "$_gtklib" ] && { echo 'gtk not found.'; exit 1; }
 echo "done"
 
-echo -en "\nChecking for glib version ... "
+echo
+echo $_echo_n "Checking for glib version ... $_echo_c"
 _glib=`glib-config --version 2>&1`
 [ -z "$_glib" ] && { echo 'glib not found.'; exit 1; }
 echo "$_glib"
 
-echo -n "Checking for glib includes ... "
+echo $_echo_n "Checking for glib includes ... $_echo_c"
 _glibinc=`glib-config --cflags 2>&1`
 [ -z "$_glibinc" ] && { echo 'glib not found.'; exit 1; }
 echo "done"
 
-echo -n "Checking for glib libs ... "
+echo $_echo_n "Checking for glib libs ... $_echo_c"
 _gliblib=`glib-config --libs 2>&1`
 [ -z "$_gliblib" ] && { echo 'glib not found.'; exit 1; }
 echo "done"
@@ -1853,12 +1855,12 @@ fi
 
 
 if [ $_mlib = yes ]; then
- _mlib='#define HAVE_MLIB'
+ _mlibdef='#define HAVE_MLIB'
  _mlibinc="-I$_mlibdir/include"
  _mliblib="-L$_mlibdir/lib -R$_mlibdir/lib -lmlib"
  _vosrc=$_vosrc' yuv2rgb_mlib.c'
 else
- _mlib='#undef HAVE_MLIB'
+ _mlibdef='#undef HAVE_MLIB'
  _mlibinc= _mliblib=
 fi
 
@@ -2046,6 +2048,8 @@ TARGET_SSE=$_cfg_sse
 
 BINUTILS=$_binutils
 
+HAVE_MLIB=$_mlib
+
 # --- GUI stuff ---
 GTKLIB=$_gtklib
 GLIBLIB=$_gliblib
@@ -2208,7 +2212,6 @@ $_png
 $_streamingdef
 
 /* Extension defines */
-$_mlib     // available only on solaris
 $_3dnowm   // only define if you have 3DNOW (AMD k6-2, AMD Athlon, iDT WinChip, etc.)
 $_3dnowexm // only define if you have 3DNOWEX (AMD Athlon, etc.)
 $_mmx      // only define if you have MMX (newer x86 chips, not P54C/PPro)
@@ -2218,6 +2221,8 @@ $_ssem     // only define if you have SSE (Intel Pentium III/4 or Celeron II)
 #ifdef HAVE_MMX
 #define USE_MMX_IDCT
 #endif
+
+$_mlibdef  // Sun mediaLib, available only on solaris
 
 /* libmpeg2 uses a different feature test macro for mediaLib */
 #ifdef HAVE_MLIB
