@@ -417,13 +417,24 @@ demuxer_t* demux_open_avi(demuxer_t* demuxer){
   priv->idx_pos=0;
   priv->idx_pos_a=0;
   priv->idx_pos_v=0;
-  if(priv->idx_size>0){
+  if(priv->idx_size>1){
     // decide index format:
+#if 1
+    if(((AVIINDEXENTRY *)priv->idx)[0].dwChunkOffset<demuxer->movi_start ||
+       ((AVIINDEXENTRY *)priv->idx)[1].dwChunkOffset<demuxer->movi_start)
+      priv->idx_offset=demuxer->movi_start-4;
+    else
+      priv->idx_offset=0;
+#else
     if(((AVIINDEXENTRY *)priv->idx)[0].dwChunkOffset<demuxer->movi_start)
       priv->idx_offset=demuxer->movi_start-4;
     else
       priv->idx_offset=0;
-    mp_msg(MSGT_DEMUX,MSGL_V,"AVI index offset: %d\n",priv->idx_offset);
+#endif
+    mp_msg(MSGT_DEMUX,MSGL_V,"AVI index offset: 0x%X (movi=0x%X idx0=0x%X idx1=0x%X)\n",
+	    (int)priv->idx_offset,(int)demuxer->movi_start,
+	    (int)((AVIINDEXENTRY *)priv->idx)[0].dwChunkOffset,
+	    (int)((AVIINDEXENTRY *)priv->idx)[1].dwChunkOffset);
   }
 //  demuxer->endpos=avi_header.movi_end;
   
