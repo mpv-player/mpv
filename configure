@@ -580,14 +580,17 @@ if x86 || ppc; then
   echocheck "CPU type"
   echores "$pname"
 
+  # just leaving this here becouse the non-x86 optims
   if test "$_runtime_cpudetection" = yes ; then
-    _mmx=yes
-    _3dnow=yes
-    _3dnowex=yes
-    _mmx2=yes
-    _sse=yes
-    _sse2=yes
-    _mtrr=yes
+    if x86; then
+      _mmx=yes
+      _3dnow=yes
+      _3dnowex=yes
+      _mmx2=yes
+      _sse=yes
+      _sse2=yes
+      _mtrr=yes
+    fi
     _optimizing="Runtime CPU-Detection enabled"
   fi
 
