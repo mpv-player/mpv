@@ -3,7 +3,7 @@ Status of codecs support:
 =========================
 
 If you have sample files for untested codecs, or want a new codec to be
-added, contact us! (for new codecs we need the DLL/AX file and a sample AVI)
+added, contact us! See bellow (after the codecs listing) the details!
 
 Video codecs:
 ~~~~~~~~~~~~~
@@ -89,6 +89,8 @@ Fully functional Win32 ACM/DShow codecs:
   msadp32.acm: works
 - MPEG layer 3:  (0x55)
   l3codeca.acm: works  (or you can use the built-in 3dnow-optimized codec)
+- VoxWare Metasound: (0x75)
+  voxmsdec.ax: works
 
 Problems:
 
@@ -96,8 +98,6 @@ Problems:
   imaadp32.acm: segfault
 - MS-GSM: (0x31,0x32)
   msgsm32.acm: segfault  (use built-in codec)
-- VoxWare Metasound: (0x75)
-  voxmsdec.ax: segfault
 
 Not tested:
 
@@ -105,6 +105,7 @@ Not tested:
   acelpdec.ax: not tested (no sample file)
 - IMC:  (0x401)
   imc32.acm: not tested (no sample file)
+
 
 Extracting codecs from Win32
 ============================
@@ -127,9 +128,10 @@ with the MSACM prefix :
 	msacm.l3acm=L3codeca.acm
 This is the MP3 codec.
 
-So, now we have all the info needed (fourcc, codec file, sample AVI), submit a
-bugreport, and upload the files to thot.banki.hu/incoming/MPlayer
-(also see DOCS/README !!!) .
+So, now we have all the info needed (fourcc, codec file, sample AVI), submit
+your codec support request in mail, and upload these files to the FTP:
+    ftp://thot.banki.hu/incoming/MPlayer/<codecname>/
+
 
 2. DirectShow
 ~~~~~~~~~~~~~
@@ -151,16 +153,15 @@ when Media Player is playing that file, by checking File/Properties/Advanced.
 If not, bad luck ;) Try guessing.
    (for ex. search for : TrueMotion)
  - if found (in registry), there should be a FriendlyName field, and a CLSID
-field. Write down that 16 byte of CLSID.
+field. Write down that 16 byte of CLSID, this is the GUID required by us.
 
 NOTE : if searching fails, try to enable all the checkboxes.. you may have
        false hits, but maybe you'll have the right, too...
 NOTE : dump that M$ shit.
 
 So, now we have all the info needed (fourcc, GUID, codec file, sample AVI),
-submit a bugreport, and upload the files to thot.banki.hu/incoming/MPlayer
-(also see DOCS/README !!!) .
-
+submit your codec support request in mail, and upload these files to the FTP:
+    ftp://thot.banki.hu/incoming/MPlayer/<codecname>/
 
 
 	Gabucino & A'rpi
