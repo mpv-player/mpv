@@ -501,8 +501,11 @@ static demux_packet_t* getBuffer(demuxer_t* demuxer, demux_stream_t* ds,
   scheduler.doEventLoop(&bufferQueue->blockingFlag);
 
   // Set the "ptsBehind" result parameter:
-  if (bufferQueue->prevPacketPTS != 0.0 && *(bufferQueue->otherQueue) != NULL
-      && (*(bufferQueue->otherQueue))->prevPacketPTS != 0.0) {
+  if (bufferQueue->prevPacketPTS != 0.0
+      && bufferQueue->prevPacketWasSynchronized
+      && *(bufferQueue->otherQueue) != NULL
+      && (*(bufferQueue->otherQueue))->prevPacketPTS != 0.0
+      && (*(bufferQueue->otherQueue))->prevPacketWasSynchronized) {
     ptsBehind = (*(bufferQueue->otherQueue))->prevPacketPTS
 		 - bufferQueue->prevPacketPTS;
   } else {
