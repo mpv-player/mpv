@@ -58,7 +58,6 @@ static char help_text[]=
 // mplayer.c: 
 
 #define MSGTR_Exiting "\nВиходимо... (%s)\n"
-#define MSGTR_Exit_frames "Запитана к╕льк╕сть кадр╕в програна"
 #define MSGTR_Exit_quit "Вих╕д"
 #define MSGTR_Exit_eof "К╕нець файлу"
 #define MSGTR_Exit_error "Фатальна помилка"
@@ -78,19 +77,14 @@ static char help_text[]=
 #define MSGTR_CantOpenDumpfile "Не можу в╕дкрити файл дампу!!!\n"
 #define MSGTR_CoreDumped "core dumped :)\n"
 #define MSGTR_FPSnotspecified "К╕льк╕сть кадр╕в на секунду не вказано (або неприпустиме значення) у заголовку! Використовуйте ключ -fps!\n"
-#define MSGTR_NoVideoStream "В╕део пот╕к не знайдений... це поки що не програ╓ться\n"
 #define MSGTR_TryForceAudioFmt "Спроба примусово використати с╕мейство ауд╕о кодек╕в %d ...\n"
 #define MSGTR_CantFindAfmtFallback "Не можу знайти ауд╕о кодек для вказаного с╕мейства, перех╕д на ╕нш╕ драйвери.\n"
 #define MSGTR_CantFindAudioCodec "Не можу знайти кодек для ауд╕о формату 0x%X !\n"
 #define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Спробуйте оновити %s з etc/codecs.conf\n*** Якщо не допомогло - читайте DOCS/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "Не зм╕г ╕н╕ц╕ал╕зувати ауд╕о кодек! -> граю без звуку\n"
 #define MSGTR_TryForceVideoFmt "Спроба примусово використати с╕мейство в╕део кодек╕в %d ...\n"
-#define MSGTR_CantFindVfmtFallback "Не можу знайти в╕део кодек для вказаного с╕мейства, перех╕д на ╕нш╕ драйвери.\n"
 #define MSGTR_CantFindVideoCodec "Не можу знайти кодек для в╕део формату 0x%X !\n"
 #define MSGTR_VOincompCodec "Вибачте, обраний video_out пристр╕й не сум╕сний з цим кодеком.\n"
-#define MSGTR_CouldntInitVideoCodec "FATAL: Не зм╕г ╕н╕ц╕ал╕зувати в╕део кодек :(\n"
-#define MSGTR_EncodeFileExists "Файл вже ╕сну╓: %s (не перезаписуйте ваш улюблений AVI!)\n"
-#define MSGTR_CantCreateEncodeFile "Не можу створити файл для кодування\n"
 #define MSGTR_CannotInitVO "FATAL: Не можу ╕н╕ц╕ал╕зувати в╕део драйвер!\n"
 #define MSGTR_CannotInitAO "не можу в╕дкрити/╕н╕ц╕ал╕зувати ауд╕о пристр╕й -> ГРАЮ БЕЗ ЗВУКУ\n"
 #define MSGTR_StartPlaying "Початок програвання...\n"
@@ -150,7 +144,6 @@ static char help_text[]=
 #define MSGTR_DetectedMPEGPSfile "Знайдений MPEG-PS формат файлу!\n"
 #define MSGTR_DetectedMPEGESfile "Знайдений MPEG-ES формат файлу!\n"
 #define MSGTR_DetectedQTMOVfile "Знайдений QuickTime/MOV формат файлу!\n"
-#define MSGTR_MissingMpegVideo "MPEG в╕део пот╕к загублений!? Зв'яж╕ться з автором, це мабуть помилка :(\n"
 #define MSGTR_InvalidMPEGES "Неприпустимий MPEG-ES пот╕к??? Зв'яж╕ться з автором, це мабуть помилка :(\n"
 #define MSGTR_FormatNotRecognized "========= Вибачте, формат цього файлу не розп╕знаний чи не п╕дтриму╓ться ===========\n"\
 				  "===== Якщо це AVI, ASF або MPEG пот╕к, будь ласка зв'яж╕ться з автором! ======\n"
@@ -175,7 +168,6 @@ static char help_text[]=
 #define MSGTR_MOVcomprhdr "MOV: Стиснут╕ заголовки (поки що) не п╕дтримуються!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Попередження! Знайдено перем╕нний FOURCC!?\n"
 #define MSGTR_MOVtooManyTrk "MOV: Попередження! надто багато трек╕в!"
-#define MSGTR_MOVnotyetsupp "\n****** Формат Quicktime MOV поки не п╕дтриму╓ться!!!!!!! *******\n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Не зм╕г в╕дкрити кодек\n"
@@ -185,18 +177,6 @@ static char help_text[]=
 #define MSGTR_ACMiniterror "Не зм╕г завантажити чи ╕н╕ц╕ал╕зувати Win32/ACM AUDIO кодек (загублений DLL файл?)\n"
 #define MSGTR_MissingLAVCcodec "Не можу знайти кодек \"%s\" у libavcodec...\n"
 
-#define MSGTR_NoDShowSupport "MPlayer був скомп╕льований БЕЗ п╕дтримки directshow!\n"
-#define MSGTR_NoWfvSupport "П╕дтримка для win32 кодек╕в заборонена або недоступна на не-x86 платформах!\n"
-#define MSGTR_NoDivx4Support "MPlayer був скомп╕льований БЕЗ п╕дтримки DivX4Linux (libdivxdecore.so)!\n"
-#define MSGTR_NoLAVCsupport "MPlayer був скомп╕льований БЕЗ п╕дтримки ffmpeg/libavcodec!\n"
-#define MSGTR_NoACMSupport "Win32/ACM ауд╕о кодек заборонений, або недоступний на не-x86 ЦП -> заблокуйте звук :(\n"
-#define MSGTR_NoDShowAudio "MPlayer був скомп╕льований без п╕дтримки DirectShow -> заблокуйте звук :(\n"
-#define MSGTR_NoOggVorbis "OggVorbis ауд╕о кодек заборонений -> заблокуйте звук :(\n"
-#define MSGTR_NoXAnimSupport "MPlayer був скомп╕льований БЕЗ п╕дтримки XAnim!\n"
-
-#define MSGTR_MpegPPhint "ПОПЕРЕДЖЕННЯ! Ви запитали ф╕льтрування для MPEG 1/2 в╕део,\n" \
-			 "         але скомп╕лювали MPlayer без п╕дтримки ф╕льтр╕в для MPEG 1/2!\n" \
-			 "         #define MPEG12_POSTPROC у config.h, ╕ перекомп╕люйте libmpeg2!\n"
 #define MSGTR_MpegNoSequHdr "MPEG: FATAL: К╤НЕЦЬ ФАЙЛУ при пошуку посл╕довност╕ заголовк╕в\n"
 #define MSGTR_CannotReadMpegSequHdr "FATAL: Не можу читати посл╕довн╕сть заголовк╕в!\n"
 #define MSGTR_CannotReadMpegSequHdrEx "FATAL: Не мочу читати розширення посл╕довност╕ заголовк╕в!\n"
@@ -205,17 +185,13 @@ static char help_text[]=
 
 #define MSGTR_ShMemAllocFail "Не можу захопити загальну пам'ять\n"
 #define MSGTR_CantAllocAudioBuf "Не можу захопити вих╕дний буфер ауд╕о\n"
-#define MSGTR_NoMemForDecodedImage "Не досить пам'ят╕ для буфера декодування картинки (%ld байт)\n"
 
-#define MSGTR_AC3notvalid "Не припустимий AC3 пот╕к.\n"
-#define MSGTR_AC3only48k "П╕дтриму╓ться лише пот╕к з частотою 48000 Hz.\n"
 #define MSGTR_UnknownAudio "Нев╕домий чи загублений ауд╕о формат, програю без звуку\n"
 
 // LIRC:
 #define MSGTR_SettingUpLIRC "Встановлення п╕дтримки lirc...\n"
 #define MSGTR_LIRCdisabled "Ви не зможете використовувати ваше в╕ддалене керування\n"
 #define MSGTR_LIRCopenfailed "Невдале в╕дкриття п╕дтримки lirc!\n"
-#define MSGTR_LIRCsocketerr "Щось негаразд з гн╕здом lirc: %s\n"
 #define MSGTR_LIRCcfgerr "Невдале читання файлу конф╕гурац╕╖ LIRC %s !\n"
 
 
@@ -228,7 +204,6 @@ static char help_text[]=
 #define MSGTR_FileSelect "Вибрати файл ..."
 #define MSGTR_SubtitleSelect "Вибрати субтитри ..."
 #define MSGTR_OtherSelect "Виб╕р ..."
-#define MSGTR_MessageBox "Пов╕домлення"
 #define MSGTR_PlayList "Список програвання"
 #define MSGTR_SkinBrowser "Переглядач жупан╕в"
 
@@ -241,7 +216,6 @@ static char help_text[]=
 // --- error messages ---
 #define MSGTR_NEMDB "Вибачте, не вистача╓ пам'ят╕ для в╕дмальовування буферу."
 #define MSGTR_NEMFMR "Вибачте, не вистача╓ пам'ят╕ для в╕дображення меню."
-#define MSGTR_NEMFMM "Вибачте, не вистача╓ пам'ят╕ для маски форми головного в╕кна."
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[жупан] помилка у файл╕ конф╕гурац╕╖ жупана, рядок %d  : %s" 

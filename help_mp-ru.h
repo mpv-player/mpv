@@ -58,7 +58,6 @@ static char help_text[]=
 // mplayer.c: 
 
 #define MSGTR_Exiting "\nВыходим... (%s)\n"
-#define MSGTR_Exit_frames "Запрошенное количество кадров проиграно"
 #define MSGTR_Exit_quit "Выход"
 #define MSGTR_Exit_eof "Конец файла"
 #define MSGTR_Exit_error "Фатальная ошибка"
@@ -78,19 +77,14 @@ static char help_text[]=
 #define MSGTR_CantOpenDumpfile "Не могу открыть файл дампа!!!\n"
 #define MSGTR_CoreDumped "core dumped :)\n"
 #define MSGTR_FPSnotspecified "Кадр/сек не указаны (или недопустимые) в заголовке! Используйте -fps опцию!\n"
-#define MSGTR_NoVideoStream "Видео поток не найден... это невоспроизводимо пока\n"
 #define MSGTR_TryForceAudioFmt "Попытка форсировать семейство аудио кодеков %d ...\n"
 #define MSGTR_CantFindAfmtFallback "Не могу найти аудио кодек для форсированного семейства, переход на другие драйвера.\n"
 #define MSGTR_CantFindAudioCodec "Не могу найти кодек для аудио формата 0x%X !\n"
 #define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Попытайтесь обновить %s из etc/codecs.conf\n*** Если не помогло - читайте DOCS/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "Не смог проинициализировать аудио кодек! -> без звука\n"
 #define MSGTR_TryForceVideoFmt "Попытка форсировать семество видео кодеков %d ...\n"
-#define MSGTR_CantFindVfmtFallback "Не могу найти видео кодек для форсированного семейства, переход на другие драйвера.\n"
 #define MSGTR_CantFindVideoCodec "Не могу найти кодек для видео формата 0x%X !\n"
 #define MSGTR_VOincompCodec "Sorry, выбранное video_out устройство не совместимо с этим кодеком.\n"
-#define MSGTR_CouldntInitVideoCodec "FATAL: Не смог проинициализировать видео кодек :(\n"
-#define MSGTR_EncodeFileExists "Файл уже существует: %s (не переписывайте Ваш любимый AVI!)\n"
-#define MSGTR_CantCreateEncodeFile "Не могу создать файл для кодирования\n"
 #define MSGTR_CannotInitVO "FATAL: Не могу проинициализировать видео драйвер!\n"
 #define MSGTR_CannotInitAO "не могу открыть/проинициализировать аудио устройство -> БЕЗ ЗВУКА\n"
 #define MSGTR_StartPlaying "Начало воcпроизведения...\n"
@@ -150,7 +144,6 @@ static char help_text[]=
 #define MSGTR_DetectedMPEGPSfile "Обнаружен MPEG-PS формат файла!\n"
 #define MSGTR_DetectedMPEGESfile "Обнаружен MPEG-ES формат файла!\n"
 #define MSGTR_DetectedQTMOVfile "Обнаружен QuickTime/MOV формат файла!\n"
-#define MSGTR_MissingMpegVideo "MPEG видео поток потерян!? свяжитесь с автором, это может быть багом :(\n"
 #define MSGTR_InvalidMPEGES "Недопустимый MPEG-ES поток??? свяжитесь с автором, это может быть багом :(\n"
 #define MSGTR_FormatNotRecognized "========= Sorry, формат этого файла не распознан/не поддерживается ===========\n"\
 				  "===== Если это AVI, ASF или MPEG поток, пожалуйста свяжитесь с автором! ======\n"
@@ -175,7 +168,6 @@ static char help_text[]=
 #define MSGTR_MOVcomprhdr "MOV: Сжатые заголовки (пока) не поддерживаются!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Предупреждение! Обнаружен переменный FOURCC!?\n"
 #define MSGTR_MOVtooManyTrk "MOV: Предупреждение! слишком много треков!"
-#define MSGTR_MOVnotyetsupp "\n****** Quicktime MOV формат пока не поддерживается!!!!!!! *******\n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Не смог открыть кодек\n"
@@ -185,18 +177,6 @@ static char help_text[]=
 #define MSGTR_ACMiniterror "Не смог загрузить/проинициализировать Win32/ACM AUDIO кодек (потерян DLL файл?)\n"
 #define MSGTR_MissingLAVCcodec "Не могу найти кодек '%s' в libavcodec...\n"
 
-#define MSGTR_NoDShowSupport "MPlayer был скомпилен БЕЗ поддержки directshow!\n"
-#define MSGTR_NoWfvSupport "Поддержка для win32 кодеков запрещена или недоступна на не-x86 платформах!\n"
-#define MSGTR_NoDivx4Support "MPlayer был скомпилен БЕЗ поддержки DivX4Linux (libdivxdecore.so)!\n"
-#define MSGTR_NoLAVCsupport "MPlayer был скомпилен БЕЗ поддержки ffmpeg/libavcodec!\n"
-#define MSGTR_NoACMSupport "Win32/ACM аудио кодек запрещен, или недоступен на не-x86 ЦПУ -> блокируйте звук :(\n"
-#define MSGTR_NoDShowAudio "Скомпилен без поддержки DirectShow -> блокируйте звук :(\n"
-#define MSGTR_NoOggVorbis "OggVorbis аудио кодек запрещен -> блокируйте звук :(\n"
-#define MSGTR_NoXAnimSupport "MPlayer был скомпилен БЕЗ поддержки XAnim!\n"
-
-#define MSGTR_MpegPPhint "ПРЕДУПРЕЖДЕНИЕ! Вы запросили постпроцессинг для MPEG 1/2 видео,\n" \
-			 "         но скомпилили MPlayer без поддержки MPEG 1/2 постпроцессинга!\n" \
-			 "         #define MPEG12_POSTPROC в config.h, и перекомпилите libmpeg2!\n"
 #define MSGTR_MpegNoSequHdr "MPEG: FATAL: КОНЕЦ ФАЙЛА при поиске последовательности заголовков\n"
 #define MSGTR_CannotReadMpegSequHdr "FATAL: Не могу читать последовательность заголовков!\n"
 #define MSGTR_CannotReadMpegSequHdrEx "FATAL: Не мочу читать расширение последовательности заголовов!\n"
@@ -205,17 +185,13 @@ static char help_text[]=
 
 #define MSGTR_ShMemAllocFail "Не могу захватить общую память\n"
 #define MSGTR_CantAllocAudioBuf "Не могу захватить выходной буффер аудио\n"
-#define MSGTR_NoMemForDecodedImage "Не достаточно памяти для буффера декодирования картинки (%ld байт)\n"
 
-#define MSGTR_AC3notvalid "Не допустимый AC3 поток.\n"
-#define MSGTR_AC3only48k "Поддерживается только 48000 Hz потоки.\n"
 #define MSGTR_UnknownAudio "Неизвестный/потерянный аудио формат, отказ от звука\n"
 
 // LIRC:
 #define MSGTR_SettingUpLIRC "Установка поддержки lirc...\n"
 #define MSGTR_LIRCdisabled "Вы не сможете использовать Ваше удаленное управление\n"
 #define MSGTR_LIRCopenfailed "Неудачное открытие поддержки lirc!\n"
-#define MSGTR_LIRCsocketerr "Что-то неправильно с сокетом lirc: %s\n"
 #define MSGTR_LIRCcfgerr "Неудачное чтение файла конфигурации LIRC %s !\n"
 
 
@@ -228,7 +204,6 @@ static char help_text[]=
 #define MSGTR_FileSelect "Выбрать файл ..."
 #define MSGTR_SubtitleSelect "Выбрать субтитры ..."
 #define MSGTR_OtherSelect "Выбор ..."
-#define MSGTR_MessageBox "Сообщение"
 #define MSGTR_PlayList "PlayList"
 #define MSGTR_SkinBrowser "Просмоторщик скинов"
 
@@ -241,7 +216,6 @@ static char help_text[]=
 // --- error messages ---
 #define MSGTR_NEMDB "Sorry, не хватает памяти для отрисовки буффера."
 #define MSGTR_NEMFMR "Sorry, не хватает памяти для отображения меню."
-#define MSGTR_NEMFMM "Sorry, не хватает памяти для маски формы главного окна."
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[skin] ошибка в файле конфигурации скина на линии %d: %s" 

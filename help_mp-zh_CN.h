@@ -55,8 +55,6 @@ static char help_text[]=
 // mplayer.c: 
 
 #define MSGTR_Exiting "\n正在退出... (%s)\n"
-#define MSGTR_Exit_frames "已播放了指定的帧数"
-#define MSGTR_Exit_quit "退出"
 #define MSGTR_Exit_eof "文件结束"
 #define MSGTR_Exit_error "致命错误"
 #define MSGTR_IntBySignal "\nMPlayer被 %s 模块中的 %d 信号中断\n"
@@ -75,19 +73,14 @@ static char help_text[]=
 #define MSGTR_CantOpenDumpfile "无法打开dump文件!!!\n"
 #define MSGTR_CoreDumped "core dumped :)\n"
 #define MSGTR_FPSnotspecified "FPS在文件头中没有指定(或者是无效数据)! 用-fps选项!\n"
-#define MSGTR_NoVideoStream "抱歉, 没有视频流... 目前无法播放\n"
 #define MSGTR_TryForceAudioFmtStr "尝试指定音频codec驱动族 %d ...\n"
 #define MSGTR_CantFindAfmtFallback "找不到指定驱动族的音频codec, 只能使用其他驱动.\n"
 #define MSGTR_CantFindAudioCodec "找不到音频格式 0x%X 的codec!\n"
 #define MSGTR_TryUpgradeCodecsConfOrRTFM "*** 尝试用 etc/codecs.conf 升级 %s \n*** 如果这样还不行, 查看DOCS/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "无法初始化音频codec! -> nosound\n"
 #define MSGTR_TryForceVideoFmtStr "尝试指定视频codec驱动族 %d ...\n"
-#define MSGTR_CantFindVfmtFallback "找不到指定驱动族的视频codec, 只能使用其他驱动.\n"
 #define MSGTR_CantFindVideoCodec "找不到适合所选的-vo和视频格式 0x%X 的codec!\n"
 #define MSGTR_VOincompCodec "抱歉, 所选的视频输出设备与这个codec不兼容.\n"
-#define MSGTR_CouldntInitVideoCodec "致命错误: 无法初始化视频codec :(\n"
-#define MSGTR_EncodeFileExists "文件已经存在: %s (不要覆盖了你最喜欢的AVI!)\n"
-#define MSGTR_CantCreateEncodeFile "无法创建用于编码的文件\n"
 #define MSGTR_CannotInitVO "致命错误: 无法初始化视频驱动!\n"
 #define MSGTR_CannotInitAO "无法打开/初始化音频设备 -> NOSOUND\n"
 #define MSGTR_StartPlaying "开始播放...\n"
@@ -228,7 +221,6 @@ static char help_text[]=
 #define MSGTR_MOVcomprhdr "MOV: 压缩的文件头(目前)不支持!\n"
 #define MSGTR_MOVvariableFourCC "MOV: 警告! 检测到可变的FOURCC!?\n"
 #define MSGTR_MOVtooManyTrk "MOV: 警告! 太多轨道!"
-#define MSGTR_MOVnotyetsupp "\n****** Quicktime MOV 目前不支持!!!!!!! *******\n"
 #define MSGTR_FoundAudioStream "==> 找到音频流: %d\n"
 #define MSGTR_FoundVideoStream "==> 找到视频流: %d\n"
 #define MSGTR_DetectedTV "检测到TV! ;-)\n"
@@ -250,18 +242,6 @@ static char help_text[]=
 #define MSGTR_ACMiniterror "无法加载/初始化Win32/ACM音频codec (缺少DLL文件?)\n"
 #define MSGTR_MissingLAVCcodec "在libavcodec中找不到codec '%s'...\n"
 
-#define MSGTR_NoDShowSupport "Mplayer没有编译directshow的支持!\n"
-#define MSGTR_NoWfvSupport "win32 codecs的支持被禁用, 或者在非x86平台上无法使用!\n"
-#define MSGTR_NoDivx4Support "Mplayer没有编译DivX4Linux(libdivxdecore.so)的支持!\n"
-#define MSGTR_NoLAVCsupport "Mplayer没有编译ffmpeg/libavcodec的支持!\n"
-#define MSGTR_NoACMSupport "Win32/ACM音频codec被禁用, 或者在非x86CPU上无法使用-> 强制 nosound :(\n"
-#define MSGTR_NoDShowAudio "没有编译DirectShow的支持 -> 强制 nosound :(\n"
-#define MSGTR_NoOggVorbis "OggVorbis音频codec被禁用 -> 强制 nosound :(\n"
-#define MSGTR_NoXAnimSupport "Mplayer没有编译XAnim的支持!\n"
-
-#define MSGTR_MpegPPhint "警告! 你要求对一个MPEG 1/2 视频做图像后期处理,\n" \
-			 "         但编译MPlayer是没有编译MPEG 1/2后期处理支持!\n" \
-			 "         在config.h里添加#define MPEG12_POSTPROC, 然后重新编译 libmpeg2!\n"
 #define MSGTR_MpegNoSequHdr "MPEG: 致命错误: 搜索序列头时遇到EOF\n"
 #define MSGTR_CannotReadMpegSequHdr "致命错误: 无法读取序列头!\n"
 #define MSGTR_CannotReadMpegSequHdrEx "致命错误: 无法读取序列头扩展!\n"
@@ -270,10 +250,7 @@ static char help_text[]=
 
 #define MSGTR_ShMemAllocFail "无法分配共享内存\n"
 #define MSGTR_CantAllocAudioBuf "无法分配音频输出buffer\n"
-#define MSGTR_NoMemForDecodedImage "没有足够的内存用于图像解码buffer(%ld bytes)\n"
 
-#define MSGTR_AC3notvalid "无效AC3流.\n"
-#define MSGTR_AC3only48k "只支持48000 Hz流.\n"
 #define MSGTR_UnknownAudio "未知或缺少音频格式, 使用nosound\n"
 
 #define MSGTR_UsingExternalPP "[PP] 使用外部的后处理插件, max q = %d\n"
@@ -295,7 +272,6 @@ static char help_text[]=
 #define MSGTR_SettingUpLIRC "起动红外遥控支持...\n"
 #define MSGTR_LIRCdisabled "你将无法使用你的遥控器\n"
 #define MSGTR_LIRCopenfailed "红外遥控支持起动失败!\n"
-#define MSGTR_LIRCsocketerr "lirc socket: %s 中存在错误\n"
 #define MSGTR_LIRCcfgerr "读取LIRC配置文件 %s 失败!\n"
 
 // vf.c
@@ -322,7 +298,6 @@ static char help_text[]=
 #define MSGTR_OtherSelect "选择..."
 #define MSGTR_AudioFileSelect "选择外部音频轨道..."
 #define MSGTR_FontSelect "选择字体..."
-#define MSGTR_MessageBox "消息框"
 #define MSGTR_PlayList "播放列表"
 #define MSGTR_Equalizer "均衡器"
 #define MSGTR_SkinBrowser "Skin浏览器"
@@ -348,7 +323,6 @@ static char help_text[]=
 // --- error messages ---
 #define MSGTR_NEMDB "抱歉, 没有足够的内存用于绘制缓冲."
 #define MSGTR_NEMFMR "抱歉, 没有足够的内存用于菜单渲染."
-#define MSGTR_NEMFMM "抱歉, 没有足够的内存用于主窗口外形蒙板."
 #define MSGTR_IDFGCVD "抱歉, 无法找到gui兼容的视频输出驱动."
 #define MSGTR_NEEDLAVCFAME "抱歉, 你不能用你的DXR3/H+设备不经过重新编码而播放非mpeg的文件.\n请在DXR3/H+配置中开启lavc或者fame."
 
@@ -443,7 +417,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Coefficient "参数:"
 #define MSGTR_PREFERENCES_AudioDelay "音频延迟"
 #define MSGTR_PREFERENCES_Audio "音频"
-#define MSGTR_PREFERENCES_VideoEqu "开启视频均衡器"
 #define MSGTR_PREFERENCES_DoubleBuffer "开启双重缓冲"
 #define MSGTR_PREFERENCES_DirectRender "开启直接渲染"
 #define MSGTR_PREFERENCES_FrameDrop "开启掉帧选项"
