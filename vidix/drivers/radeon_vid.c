@@ -858,6 +858,13 @@ static unsigned short ati_card_ids[] =
  DEVICE_ATI_RADEON_R250_LE,
  DEVICE_ATI_RADEON_R250_LF,
  DEVICE_ATI_RADEON_R250_LG,
+ DEVICE_ATI_RV250_5C61_RADEON,
+ DEVICE_ATI_RV250_5C63_RADEON,
+ DEVICE_ATI_RV280_RADEON_9200,
+ DEVICE_ATI_RV280_RADEON_92002,
+ DEVICE_ATI_RV280_RADEON_92003,
+ DEVICE_ATI_RV280_RADEON_92004,
+ DEVICE_ATI_RV280_RADEON_92005,
  DEVICE_ATI_RADEON_R300_ND,
  DEVICE_ATI_RADEON_R300_NE,
  DEVICE_ATI_RADEON_R300_NF,
@@ -987,9 +994,20 @@ int vixProbe( int verbose,int force )
             case DEVICE_ATI_RADEON_R250_LE:
             case DEVICE_ATI_RADEON_R250_LF:
             case DEVICE_ATI_RADEON_R250_LG:
+            case DEVICE_ATI_RV250_5C61_RADEON:
+            case DEVICE_ATI_RV250_5C63_RADEON:
               RadeonFamily = 250;
               break;
               
+            /* Radeon 9200 */
+            case DEVICE_ATI_RV280_RADEON_9200:
+            case DEVICE_ATI_RV280_RADEON_92002:
+            case DEVICE_ATI_RV280_RADEON_92003:
+            case DEVICE_ATI_RV280_RADEON_92004:
+            case DEVICE_ATI_RV280_RADEON_92005:
+              RadeonFamily = 280;
+              break;
+
             /* Radeon 9700 */
             case DEVICE_ATI_RADEON_R300_ND:
             case DEVICE_ATI_RADEON_R300_NE:
