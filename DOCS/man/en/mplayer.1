@@ -568,13 +568,13 @@ several 'echo "seek 10" > mp_pipe' and the pipe will stay valid.
 .TP
 .B \-key-fifo-size <2\-65000>
 Specify the size of the FIFO that buffers key events (default: 10).
-A FIFO of size n can buffer (n - 1) events.
-If it is too small some events may be lost (leading to e.g. "stuck mouse
-button").
-If it is too big, MPlayer may seem to hang while it processes the buffered
-events.
-To get the same behaviour as before this option was introduced, set it to
-2 for linux or 1024 for windows.
+A FIFO of size n can buffer (n-1) events.
+If it is too small some events may be lost
+(leading to "stuck mouse buttons" and similar effects).
+If it is too big, MPlayer may seem to hang while it
+processes the buffered events.
+To get the same behaviour as before this option was introduced,
+set it to 2 for Linux or 1024 for Windows.
 .
 .TP
 .B \-lircconf <filename> (LIRC only)
@@ -693,8 +693,8 @@ Slow down or speed up playback by the factor given as parameter.
 .B \-sstep <sec>
 Display one frame every <sec> seconds.
 Useful for slideshows.
-This uses normal seeking, and thus is just as inexact (i.e. with most formats
-you will get one frame between every <sec> and <sec> + 120 seconds).
+This uses normal seeking, and thus is just as inexact (i.e.\& with most formats
+you will get one frame between every <sec> and <sec>+120 seconds).
 .
 .
 .
@@ -2202,12 +2202,10 @@ Set the aspect ratio of your monitor or TV screen.
 .
 .TP
 .B \-nodouble
-Disables double buffering.
+Disables double buffering, mostly for debugging purposes.
 Double buffering fixes flicker by storing two frames in memory, and
 displaying one while decoding another.
 It can affect OSD negatively, but often removes OSD flickering.
-It needs twice the memory of a single buffer and thus will not
-work on cards with very little video memory.
 .
 .TP
 .B \-nograbpointer
