@@ -27,7 +27,6 @@ main()
     void *dispatcher;
 
     Setup_LDT_Keeper();
-    Setup_FS_Segment();
     
     handler = expLoadLibraryA("/usr/lib/win32/qtx/test.qtx");
     dispatcher = GetProcAddress(handler, "CDComponentDispatch");
@@ -36,19 +35,20 @@ main()
     {
 	ComponentResult ret;
 	int (*dispatcher_func)(void *, void *);
-	struct ComponentParameters params;
+	struct ComponentParameters *params;
 	void *globals;
+	
+	dispatcher_func = dispatcher;
 	
 	globals = malloc(sizeof(long));
 	(long)*(void **)globals = 0x2001;
 
-	params.flags = 0;
-	params.paramSize = sizeof(params);
-	params.what = 2; /* probarly register :p */
-	params.params[0] = -1;
-	params.params[1] = -1;
-	memset(&params.params[0], 0x77, sizeof(params.params)*2);
-//	params.params[1] = 0x1000100f;
+	params = malloc(sizeof(struct ComponentParameters));
+
+	params->flags = 0;
+	params->paramSize = sizeof(params);
+	params->what = 0x3f; /* probarly register :p */
+	params->params[0] = 0x1984;
 	/* 0x1000100f will load QuickTime.qts */
 	/* 0x10001014 will use SendMessageA */
 	/* 0x10001019 returns 0 */
@@ -57,21 +57,14 @@ main()
 	/* 0x1000102d is a dialog */
 	/* 0x10001032 returns 20001 => CDVersion */
 	/* 0x10001069 returns 8a */
-//	params.params[0] = 0x1984;
-//	params.params[1] = 0x1337;
-//	params.params[1] = ComponentDummy;
 	printf("params: flags: %d, paramSize: %d, what: %d\n",
-	    params.flags, params.paramSize, params.what);
-	printf("params[0] = %x, params[1] = %x\n", params.params[0],
-	    params.params[1]);
+	    params->flags, params->paramSize, params->what);
+	printf("params[0] = %x\n", params->params[0]);
 	ret = dispatcher_func(&params, globals);
 	printf("CDComponentDispatch(%p, %p) => %x\n",
 	    &params, globals, ret);
 	free(globals);
-	printf("params: flags: %d, paramSize: %d, what: %d\n",
-	    params.flags, params.paramSize, params.what);
-	printf("params[0] = %x, params[1] = %x\n", params.params[0],
-	    params.params[1]);
+	free(params);
     }
     
     Restore_LDT_Keeper();
