@@ -57,7 +57,7 @@ printf("%%%%%% STOP  \n");
 
 void mplPlay( void )
 {
- if ( !Filename ) return;
+ if ( !strlen( mplShMem->Filename ) ) return;
  if ( mplShMem->Playing ) mplStop();
 // ---
 printf("%%%%%% PLAY  \n");
@@ -76,11 +76,8 @@ printf("%%%%%% PAUSE  \n");
 
 void mplResize( unsigned int X,unsigned int Y,unsigned int width,unsigned int height )
 {
-
-printf("mplResize(%d,%d,%d,%d)  \n",X,Y,width,height);
-	vo_setwindowsize( width,height );
-        vo_resize=1;
-
+ vo_setwindowsize( width,height );
+ vo_resize=1;
 }
 
 void mplMPlayerInit( int argc,char* argv[], char *envp[] )
