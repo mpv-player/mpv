@@ -1,4 +1,4 @@
-.\" synced with 1.653
+.\" synced with 1.657
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -237,7 +237,7 @@ zmniejsza/\:zwiêksza zakres panscan
 .IPs o\ \ \ \ 
 prze³±cza tryby OSD: ¿aden / czas / czas+timer
 .IPs d\ \ \ \ 
-prze³±cza tryby gubienia klatek:  ¿aden / omiñ wy¶wietlanie / omiñ dekodowanie
+prze³±cza tryby gubienia klatek: ¿aden / omiñ wy¶wietlanie / omiñ dekodowanie
 (zobacz \-framedrop i \-hardframedrop)
 .IPs v\ \ \ \ 
 prze³±cza wy¶wietlanie napisów
@@ -1492,7 +1492,7 @@ Okre¶la ID napisów VOBsub.
 .SH "OPCJE WYJ¦CIA AUDIO (TYLKO MPLAYER)"
 .TP
 .B \-abs <warto¶æ> (PRZESTARZA£E)
-Zmienia wykryt± wielko¶æ bufora sterownika audio/\:karty, tylko \-ao oss
+Zmienia wykryt± wielko¶æ bufora sterownika audio/\:karty, tylko \-ao oss.
 .TP
 .B \-aofile <nazwa\ zbioru>
 Nazwa zbioru dla \-ao pcm.
@@ -1505,19 +1505,19 @@ Dostêpne s± opcje:
 .RSs
 .IPs list=[wtyczki]
 oddzielona przecinkami lista wtyczek (resample, surround, format, volume,
-extrastereo, volnorm)
+extrastereo, volnorm, delay)
 .IPs delay=<sek>
-przyk³adowa wtyczka, nie u¿ywaj jej.
+przyk³adowa wtyczka, nie u¿ywaj jej (tylko wtyczka delay)
 .IPs format=<format>
-format danych wyj¶ciowych (tylko wtyczka formatu)
+format danych wyj¶ciowych (tylko wtyczka format)
 .IPs fout=<Hz>
-czêstotliwo¶æ danych wyj¶ciowych (tylko wtyczka przepróbkowywania - resample)
+czêstotliwo¶æ danych wyj¶ciowych (tylko wtyczka resample)
 .IPs volume=<0\-255>
-g³o¶no¶æ (tylko wtyczka g³o¶no¶ci)
+g³o¶no¶æ (tylko wtyczka volume)
 .IPs mul=<warto¶æ>
 wspó³czynnik stereo, domy¶lnie: 2.5 (tylko wtyczka extrastereo)
 .IPs softclip
-w³±cza kompresjê / "miêkkie obcinanie (soft-clipping)" (tylko wtyczka g³o¶no¶ci)
+w³±cza kompresjê / "miêkkie obcinanie (soft-clipping)" (tylko wtyczka volume)
 .RE
 .
 .TP
@@ -1541,21 +1541,21 @@ Ima-ADPCM
 .IPs 16
 8-bit bez znaku
 .IPs 32
-16-bit (Little-Endian) bez znaku
+16-bit (little-endian) bez znaku
 .IPs 64
-16-bit (Big-Endian) bez znaku
+16-bit (big-endian) bez znaku
 .IPs 128
-16-bit (Little-Endian) ze znakiem
+16-bit (little-endian) ze znakiem
 .IPs 256
-16-bit (Big-Endian) ze znakiem
+16-bit (big-endian) ze znakiem
 .IPs 512
 MPEG (2) Audio
 .IPs 1024
 AC3
 .IPs 4096
-32-bit (Little-Endian) ze znakiem
+32-bit (little-endian) ze znakiem
 .IPs 8192
-32-bit (Big-Endian) ze znakiem
+32-bit (big-endian) ze znakiem
 .RE
 .PD 1
 .
@@ -1743,8 +1743,9 @@ bêdzie dzia³aæ na kartach z bardzo ma³± pamiêci± video.
 .B \-dr \ \ \ 
 W³±cz bezpo¶rednie renderowanie (obs³ugiwane nie przez wszystkie kodeki i
 wyj¶cia video)
-(domy¶lnie jest wy³±czone).
-Ostrze¿enie: mo¿e powodowaæ popsucie OSD/\:SUB!
+.br
+.I UWAGA:
+Mo¿e powodowaæ popsucie OSD/\:SUB!
 .TP
 .B \-dxr2 <opcja1:opcja2:...>
 Ta opcja jest u¿ywana do kontroli sterownika dxr2.
@@ -2780,8 +2781,14 @@ rêczne omijanie b³êdów kodera:
 ¯eby osi±gn±æ najlepsz± jako¶æ dekodowania, u¿ywaj tego samego algorytmu
 idct do kodowania i dekodowania.
 Mo¿e to jednak zmniejszyæ dok³adno¶æ.
-.IPs gray
+.IPs gray\ 
 Dekodowanie tylko w skali szaro¶ci (trochê szybsze ni¿ w kolorze)
+.IPs "sb=<number> (tylko MPEG2)"
+Przeskakuje podan± ilo¶æ wierszy makrobloków na dole.
+.IPs "st=<number> (tylko MPEG2)"
+Przeskakuje podan± ilo¶æ wierszy makrobloków na górze.
+.IPs vstats
+Wy¶wietla pewne statystyki i zapisuje je w zbiorze ./vstats_*.log.
 .RE
 .
 .TP
@@ -3340,8 +3347,8 @@ i programowe wyliczanie skalowania osi Y tak, by zachowaæ proporcje.
 U¿yteczne tylko w po³±czeniu z expand+scale
 (\-vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1,lavc).
 .RSs
-.IPs aspekt
-kontroluje proporcje, wyliczane przez wzór DVB_HEIGHT*ASPECTRATIO (domy¶lnie:
+.IPs aspect
+Kontroluje proporcje, wyliczane przez wzór DVB_HEIGHT*ASPECTRATIO (domy¶lnie:
 576*4/3=768), ustaw na 576*(16/9)=1024 dla TV 16:9.
 .RE
 .TP
@@ -4007,7 +4014,7 @@ wymiary obrazu/obszaru
 .IPs "xpoz, ypoz"
 start blittingu w punkcie o wspó³rzêdnych X/Y
 .IPs alfa
-ustawia ró¿nicê alfa
+Ustawia ró¿nicê alfa.
 Je¿eli ustawisz na -255, mo¿esz pó¼niej wysy³aæ sekwencjê komend ALPHA,
 aby zmieniæ warto¶æ na -225, -200, -175 itd.\& \- uzyskasz ciekawy efekt
 przenikania ! ;)
@@ -4610,14 +4617,14 @@ równy lub mniejszy ni¿ vqmin (domy¶lnie: 2.0).
 .RE
 .TP
 .B lmax=<0.01\-255.0>
-Maksymalny mno¿nik lagrange dla kontroli tempa (domy¶lnie: 31.0).
+maksymalny mno¿nik lagrange dla kontroli tempa (domy¶lnie: 31.0)
 .RE
 .TP
 .B vqscale=<1\-31>
 Sta³y kwantyzator /\: sta³a jako¶æ kodowania (w³±cza tryb sta³ego kwantyzatora).
 Ni¿sza warto¶æ oznacza lepsz± jako¶æ ale wiêkszy plik wynikowy
 (domy¶lnie: 0 (wy³±czony)).
-1 nie jest zalecan± warto¶ci± (sprawd¼ \-vqmin a uzyskasz wiêcej informacji).
+1 nie jest zalecan± warto¶ci± (sprawd¼ vqmin a uzyskasz wiêcej informacji).
 .TP
 .B vqmax=<1\-31>
 maksymalny kwantyzator (przej¶cie\ 1/\:2) 10\-31 jest rozs±dnym zakresem
@@ -4748,9 +4755,9 @@ huffyuv:
 .RE
 .PD 0
 .RSs
-.IPs pass 1
+.IPs "pierwsze przej¶cie"
 zachowuje statystyki
-.IPs pass 2
+.IPs "drugie przej¶cie"
 koduje z optymaln± tablic± Huffmana opart± o wyniki pierwszego przej¶cia.
 .RE
 .PD 1
@@ -4793,6 +4800,9 @@ przybli¿ona tolerancja rozmiaru pliku w kBit.
 1000\-100000 jest rozs±dnym zakresem.
 (uwaga: 1kBit = 1000 Bitów)
 (domy¶lnie: 8000)
+.I INFORMACJA:
+Warto¶æ vratetol nie powinna byæ zbyt du¿a podczas drugiego przej¶cia, inaczej
+mog± wyst±piæ problemy, je¿eli wykorzystane bêdzie vrc_(min|max)rate.
 .TP
 .B vrc_maxrate=<warto¶æ>
 maksymalny bitrate w kbit/\:sek (przej¶cie\ 1/\:2)
@@ -4804,9 +4814,6 @@ minimalny bitrate w kbit/\:sek (przej¶cie\ 1/\:2)
 rozmiar bufora w kbit (przej¶cie\ 1/\:2).
 Dla MPEG1/2 okre¶la to równie¿ rozmiar bufora vbv, u¿yj 327 dla VCD,
 917 dla SVCD i 1835 dla DVD.
-.I INFORMACJA:
-Warto¶æ vratetol nie powinna byæ zbyt du¿a podczas drugiego przej¶cia, inaczej
-mog± wyst±piæ problemy, je¿eli wykorzystane bêdzie vrc_(min|max)rate.
 .TP
 .B vrc_buf_aggressivity
 obecnie bezu¿yteczne
@@ -4959,7 +4966,7 @@ u¿ywa przyjemnej, ró¿niczkowalnej funkcji (domy¶lnie)
 .PD 1
 .TP
 .B vlelim=<-1000\-1000>
-próg eliminowania pojedynczych wspó³czynników jasno¶ci.
+Ustawia próg eliminowania pojedynczych wspó³czynników jasno¶ci.
 Warto¶ci ujemne bêd± bra³y pod uwagê tak¿e wspó³czynnik dc (powinny byæ równe
 co najmniej -4 lub ni¿ej dla kodowania z quant=1):
 .PD 0
@@ -4972,7 +4979,7 @@ wy³±czony (domy¶lnie)
 .PD 1
 .TP
 .B vcelim=<-1000\-1000>
-próg eliminowania pojedynczych wspó³czynników barwy.
+Ustawia próg eliminowania pojedynczych wspó³czynników barwy.
 Warto¶ci ujemne bêd± bra³y pod uwagê tak¿e wspó³czynnik dc (powinny byæ równe
 co najmniej -4 lub ni¿ej dla kodowania z quant=1):
 .PD 0
@@ -5088,9 +5095,13 @@ sh4
 .PD 1
 .TP
 .B lumi_mask=<0.0\-1.0>
-Maskowanie jasno¶ci.
-Uwaga: B±d¼ ostro¿ny, zbyt du¿e warto¶ci mog± spowodowaæ okropne rzeczy.
-Uwaga2: Du¿e warto¶ci mog± wygl±daæ dobrze na niektórych monitorach,
+maskowanie jasno¶ci
+.br
+.I UWAGA:
+B±d¼ ostro¿ny, zbyt du¿e warto¶ci mog± spowodowaæ okropne rzeczy.
+.br
+.I UWAGA:
+Du¿e warto¶ci mog± wygl±daæ dobrze na niektórych monitorach,
 a na innych nie:
 .RSs
 .IPs 0.0
@@ -5100,9 +5111,13 @@ rozs±dny zakres
 .RE
 .TP
 .B dark_mask=<0.0\-1.0>
-Maskowanie ciemno¶ci.
-Uwaga: B±d¼ ostro¿ny, zbyt du¿e warto¶ci mog± spowodowaæ okropne rzeczy.
-Uwaga2: Du¿e warto¶ci mog± wygl±daæ dobrze na niektórych monitorach, a na
+maskowanie ciemno¶ci
+.br
+.I UWAGA:
+B±d¼ ostro¿ny, zbyt du¿e warto¶ci mog± spowodowaæ okropne rzeczy.
+.br
+.I UWAGA:
+Du¿e warto¶ci mog± wygl±daæ dobrze na niektórych monitorach, a na
 innych / TV / TFT nie:
 .RSs
 .IPs 0.0
@@ -5115,10 +5130,12 @@ rozs±dny zakres
 maskowanie z³o¿ono¶ci czasowej (domy¶lnie: 0.0 (wy³±czone))
 .TP
 .B scplx_mask=<0.0\-1.0>
-maskowanie z³o¿ono¶ci przestrzennej.
+Maskowanie z³o¿ono¶ci przestrzennej.
 Wiêksze warto¶ci pomagaj± przy blokowaniu, je¿eli ¿adne filtr odblokowania nie
 jest stosowany prze dekodowaniu.
-Wskazówka: Usuñ wszystkie czarne krawêdzie, jako ¿e zmniejszaj± one jako¶æ
+.br
+.I WSKAZÓWKA:
+Usuñ wszystkie czarne krawêdzie, jako ¿e zmniejszaj± one jako¶æ
 makrobloków (aktualne nawet bez scplx_mask).
 .RSs
 .IPs 0.0
@@ -5330,13 +5347,13 @@ suma kwadratów b³êdów kwantyzacji
 .PD 1
 .TP
 .B cbp\ \ \ \ 
-zakodowany wzór bloku optymalny pod wzglêdem zniekszta³ceñ tempa
-znajdzie taki wzór, który zminimalizuje zniekszta³cenia + tempo+lambda
-opcja ta mo¿e byæ u¿ywana tylko w po³±czeniu z kwantyzacja kratow±
+Zakodowany wzór bloku optymalny pod wzglêdem zniekszta³ceñ tempa.
+Znajdzie taki wzór, który zminimalizuje zniekszta³cenia + tempo+lambda.
+Opcja ta mo¿e byæ u¿ywana tylko w po³±czeniu z kwantyzacja kratow±.
 .TP
 .B mv0\ \ \ \ 
-spróbuje zakodowaæ ka¿dy MB z MV=<0,0> i wybierze lepszy
-nie ma to znaczenia je¿eli mbd=0
+Spróbuje zakodowaæ ka¿dy MB z MV=<0,0> i wybierze lepszy.
+Nie ma to znaczenia je¿eli mbd=0.
 .TP
 .B qprd\ \ \ 
 QP optymalne pod wzglêdem zniekszta³ceñ tempa dla lambda podanej dla ka¿dego
@@ -5380,7 +5397,6 @@ Zwracane warto¶ci s± w dB (decybelach), im wy¿sze tym lepsze.
 .TP
 .B mpeg_quant
 Wykorzystuje kwantyzatory MPEG zamiast H.263.
-(tzn.\& wykorzystuje kwantyzatory H.263)
 .TP
 .B aic\ \ \ \ 
 przewidywanie ac (=zaawansowane przewidywanie intra dla H.263+)
@@ -5403,9 +5419,9 @@ domy¶lny kwantyzator w stylu H.263: 0
 .br
 .I INFORMACJA:
 Kwantyzator MMX H.263 nie umie obs³u¿yæ dodatnich warto¶ci bias (ustaw
-vfdct=1lub2),
+vfdct=1 lub 2),
 kwantyzator MMX MPEG nie umie obs³u¿yæ ujemnych warto¶ci bias (ustaw
-vfdct=1lub2).
+vfdct=1 lub 2).
 .TP
 .B pbias=<-256\-256>
 bias kwantyzatora inter (256 == 1.0)
@@ -5416,9 +5432,9 @@ domy¶lny kwantyzator w stylu H.263: -64
 .br
 .I INFORMACJA:
 Kwantyzator MMX H.263 nie umie obs³u¿yæ dodatnich warto¶ci bias (ustaw
-vfdct=1lub2),
+vfdct=1 lub 2),
 kwantyzator MMX MPEG nie umie obs³u¿yæ ujemnych warto¶ci bias (ustaw
-vfdct=1lub2).
+vfdct=1 lub 2).
 .br
 Wskazówka: wiêksza warto¶æ bias (-32 \- -16 zamiast -64) wydaje siê polepszaæ PSNR
 .TP
@@ -5426,8 +5442,8 @@ Wskazówka: wiêksza warto¶æ bias (-32 \- -16 zamiast -64) wydaje siê polepszaæ PS
 redukcja szumów, 0 oznacza wy³±czon±
 .TP
 .B qns=<0\-3>
-kszta³towanie szumu kwantyzatora, ogranicza d¼wiêcz±ce pozosta³o¶ci, wiêksze
-warto¶ci s± wolniejsze, ale nie koniecznie wp³yn± na polepszenie jako¶ci
+Kszta³towanie szumu kwantyzatora, ogranicza d¼wiêcz±ce pozosta³o¶ci, wiêksze
+warto¶ci s± wolniejsze, ale nie koniecznie wp³yn± na polepszenie jako¶ci.
 Opcja mo¿e i powinna byæ u¿ywana razem z kwantyzacj± kratow±, w takim przypadku
 kwantyzacja kratowa (optymalna dla sta³ej wagi) bêdzie wykorzystana jako
 punkt startowy dla przeszukiwania iteracyjnego.
@@ -5465,15 +5481,6 @@ Je¿eli podasz vcodec=mpeg2video, mo¿e przyj±æ warto¶ci 8, 9, 10 lub 11.
 .B cgop\ \ \ 
 Zamyka wszystkie GOPy.
 Obecnie nie dzia³a (jeszcze).
-.TP
-.B sb=<number>
-Przeskakuje podan± ilo¶æ wierszy makrobloków na dole (tylko MPEG2).
-.TP
-.B st=<number>
-Przeskakuje podan± ilo¶æ wierszy makrobloków na dole (tylko MPEG2).
-.TP
-.B vstats\ 
-Wy¶wietla pewne statystyki i zapisuje je w zbiorze ./vstats_*.log.
 .
 .SS nuv (\-nuvopts)
 .
@@ -5631,7 +5638,7 @@ dekodery ISO-MPEG4 poza DivX/libavcodec/XviD.
 .br
 .I UWAGA:
 Zapisuje to tak¿e fa³szyw± wersjê DivX do pliku,
-tak¿e autodedetekcja b³êdów niektórych dekoderów mo¿e siê gubiæ.
+wiêc autodedetekcja b³êdów niektórych dekoderów mo¿e siê gubiæ.
 .TP
 .B divx5bvop
 wygeneruje kompatybilne z DivX5 klatki B (domy¶lnie: w³±czone)
