@@ -102,6 +102,8 @@ extern vo_functions_t video_out_dfbmga;
 #endif
 #ifdef CONFIG_VIDIX
 extern vo_functions_t video_out_xvidix;
+extern vo_functions_t video_out_winvidix;
+extern vo_functions_t video_out_consolevidix;
 #endif
 #ifdef HAVE_TDFX_VID
 extern vo_functions_t video_out_tdfx_vid;
@@ -206,8 +208,14 @@ vo_functions_t* video_out_drivers[] =
         &video_out_dfbmga,
 #endif
 #endif
-#if defined(CONFIG_VIDIX) && defined(HAVE_X11) 
+#ifdef CONFIG_VIDIX
+#ifdef HAVE_X11
 	&video_out_xvidix,
+#endif
+#ifdef WIN32
+    &video_out_winvidix,
+#endif
+    &video_out_consolevidix,
 #endif
 #ifdef HAVE_TGA
         &video_out_tga,

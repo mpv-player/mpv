@@ -5418,6 +5418,18 @@ linux && _def_linux='#define TARGET_LINUX 1'
 # TODO cleanup the VIDIX stuff here
 _def_vidix='#define CONFIG_VIDIX 1'
 test "$_vidix" = no && _def_vidix='#undef CONFIG_VIDIX'
+if test "$_vidix" = yes; then
+  _vosrc="$_vosrc vo_consolevidix.c"
+  _vomodules="consolevidix $_vomodules"
+else
+  _novomodules="consolevidix $_novomodules"
+fi
+if test "$_vidix" = yes && (cygwin || mingw32); then
+  _vosrc="$_vosrc vo_winvidix.c"
+  _vomodules="winvidix $_vomodules"
+else
+  _novomodules="winvidix $_novomodules"
+fi
 if test "$_vidix" = yes && test "$_x11" = yes; then
   _vosrc="$_vosrc vo_xvidix.c"
   _vomodules="xvidix $_vomodules"
