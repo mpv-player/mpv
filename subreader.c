@@ -923,7 +923,6 @@ void	subcp_open (void)
 	if (sub_cp){
 		if ((icdsc = iconv_open (tocp, sub_cp)) != (iconv_t)(-1)){
 			mp_msg(MSGT_SUBREADER,MSGL_V,"SUB: opened iconv descriptor.\n");
-			sub_utf8_prev=sub_utf8;
 			sub_utf8 = 2;
 		} else
 			mp_msg(MSGT_SUBREADER,MSGL_ERR,"SUB: error opening iconv descriptor.\n");
@@ -935,7 +934,6 @@ void	subcp_close (void)
 	if (icdsc != (iconv_t)(-1)){
 		(void) iconv_close (icdsc);
 		icdsc = (iconv_t)(-1);
-		sub_utf8=sub_utf8_prev;
 	   	mp_msg(MSGT_SUBREADER,MSGL_V,"SUB: closed iconv descriptor.\n");
 	}
 }
@@ -1100,6 +1098,7 @@ subtitle* sub_read_file (char *filename, float fps) {
     rewind (fd);
 
 #ifdef USE_ICONV
+    sub_utf8_prev=sub_utf8;
     subcp_open();
 #endif
 
@@ -1131,6 +1130,7 @@ subtitle* sub_read_file (char *filename, float fps) {
 	 {
 #ifdef USE_ICONV
           subcp_close();
+          sub_utf8=sub_utf8_prev;
 #endif
     	  if ( first ) free(first);
 	  return NULL; 
