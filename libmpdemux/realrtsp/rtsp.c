@@ -632,7 +632,7 @@ rtsp_t *rtsp_connect(int fd, char* mrl, char *path, char *host, int port, char *
   s->server_state=0;
   s->server_caps=0;
   
-  s->cseq=0;
+  s->cseq=1;
   s->session=NULL;
   
   if (user_agent)
