@@ -4001,7 +4001,7 @@ if ((user_muted | edl_muted) != mixer.muted) mixer_mute(&mixer);
   
 #ifdef USE_SUB
   // find sub
-  if(subdata && sh_video->pts>0){
+  if(subdata &&  sh_video && sh_video->pts>0){
       float pts=sh_video->pts;
       if(sub_fps==0) sub_fps=sh_video->fps;
       current_module="find_sub";
