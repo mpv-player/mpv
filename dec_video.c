@@ -150,7 +150,7 @@ int uninit_video(sh_video_t *sh_video){
     	    mp_msg(MSGT_DECVIDEO,MSGL_ERR, "could not close codec\n");
 	break;
 #endif
-#ifndef USE_DIRECTSHOW
+#ifdef USE_DIRECTSHOW
     case VFM_DSHOW: // Win32/DirectShow
 	DS_VideoDecoder_Close();
 	break;
