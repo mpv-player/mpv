@@ -5006,6 +5006,7 @@ $_live_libs_def
 STREAMING = $_streaming
 STREAMING_LIVE_DOT_COM = $_live
 STREAMING_LIB = $_ld_streaming $_ld_live
+DVBIN = $_dvb
 VIDIX = $_vidix
 SHARED_PP = $_shared_pp
 CONFIG_PP = yes
