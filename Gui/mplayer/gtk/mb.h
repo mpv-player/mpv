@@ -6,7 +6,14 @@ GtkWidget * gtkMessageBoxText;
 
 void on_MessageBox_destroy( GtkObject * object,gpointer user_data  )
 {
- gtk_widget_hide( MessageBox  );
+/*
+ switch( (int)user_data )
+  {
+   case GTK_MB_ERROR: gtk_widget_hide( ErrorMessageBox  ); break;
+   case GTK_MB_WARNING: gtk_widget_hide( WarningMessageBox  ); break;
+  }
+*/  
+ gtk_widget_hide( MessageBox  ); 
  gtkVisibleMessageBox=0;
 }
 
@@ -100,16 +107,25 @@ GtkWidget * create_MessageBox( int type )
  gtk_box_pack_start (GTK_BOX (vbox1), hbox1, TRUE, TRUE, 0);
 
  pixmapstyle=gtk_widget_get_style( MessageBox );
- pixmapwid=gdk_pixmap_colormap_create_from_xpm_d( MessageBox->window,gdk_colormap_get_system(),&mask,&pixmapstyle->bg[GTK_STATE_NORMAL],(gchar ** )error_xpm );
- pixmap1=gtk_pixmap_new( pixmapwid,mask );
  
- gtk_widget_set_name (pixmap1, "pixmap1");
- gtk_widget_ref (pixmap1);
- gtk_object_set_data_full (GTK_OBJECT (MessageBox), "pixmap1", pixmap1,
-                            (GtkDestroyNotify) gtk_widget_unref);
- gtk_widget_show (pixmap1);
- gtk_box_pack_start (GTK_BOX (hbox1), pixmap1, FALSE, FALSE, 0);
- gtk_widget_set_usize (pixmap1, 55, -2);
+ pixmapwid=gdk_pixmap_colormap_create_from_xpm_d( MessageBox->window,gdk_colormap_get_system(),&mask,&pixmapstyle->bg[GTK_STATE_NORMAL],(gchar ** )warning_xpm );
+ WarningPixmap=gtk_pixmap_new( pixmapwid,mask );
+ pixmapwid=gdk_pixmap_colormap_create_from_xpm_d( MessageBox->window,gdk_colormap_get_system(),&mask,&pixmapstyle->bg[GTK_STATE_NORMAL],(gchar ** )error_xpm );
+ ErrorPixmap=gtk_pixmap_new( pixmapwid,mask );
+ 
+ gtk_widget_set_name (WarningPixmap, "pixmap1");
+ gtk_widget_ref (WarningPixmap);
+ gtk_object_set_data_full (GTK_OBJECT (MessageBox), "pixmap1", WarningPixmap,(GtkDestroyNotify)gtk_widget_unref);
+ gtk_widget_hide (WarningPixmap);
+ gtk_box_pack_start (GTK_BOX (hbox1), WarningPixmap, FALSE, FALSE, 0);
+ gtk_widget_set_usize (WarningPixmap, 55, -2);
+
+ gtk_widget_set_name (ErrorPixmap, "pixmap1");
+ gtk_widget_ref (ErrorPixmap);
+ gtk_object_set_data_full (GTK_OBJECT (MessageBox), "pixmap1", ErrorPixmap,(GtkDestroyNotify)gtk_widget_unref);
+ gtk_widget_hide (ErrorPixmap);
+ gtk_box_pack_start (GTK_BOX (hbox1), ErrorPixmap, FALSE, FALSE, 0);
+ gtk_widget_set_usize (ErrorPixmap, 55, -2);
 
  gtkMessageBoxText = gtk_label_new ( "Text jol. Ha ezt megerted, akkor neked nagyon jo a magyar tudasod, te.");
  gtk_widget_set_name (gtkMessageBoxText, "gtkMessageBoxText");

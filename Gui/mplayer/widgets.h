@@ -59,9 +59,13 @@ extern gtkCommStruct * gtkShMem;
 extern GtkWidget     * SkinBrowser;
 extern GtkWidget     * PlayList;
 extern GtkWidget     * FileSelect;
-extern GtkWidget     * MessageBox;
 extern GtkWidget     * AboutBox;
 extern GtkWidget     * Options;
+
+extern GtkWidget     * MessageBox;
+
+extern GtkWidget     * WarningPixmap;
+extern GtkWidget     * ErrorPixmap;
 
 extern GtkWidget     * SkinList;
 extern GtkWidget     * gtkMessageBoxText;

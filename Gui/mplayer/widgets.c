@@ -25,18 +25,20 @@
 #include "pixmaps/up.xpm"
 #include "pixmaps/dir.xpm"
 #include "pixmaps/file.xpm"
-#include "pixmaps/logo.xpm"
 #include "pixmaps/about.xpm"
-#include "pixmaps/stop.xpm"
 #include "pixmaps/error.xpm"
 #include "pixmaps/warning.xpm"
 
 GtkWidget     * SkinBrowser;
 GtkWidget     * PlayList;
 GtkWidget     * FileSelect;
-GtkWidget     * MessageBox;
 GtkWidget     * AboutBox;
 GtkWidget     * Options;
+
+GtkWidget     * MessageBox;
+
+GtkWidget     * WarningPixmap;
+GtkWidget     * ErrorPixmap;
 
 int             gtkVisibleSkinBrowser = 0;
 int             gtkVisiblePlayList = 0;
