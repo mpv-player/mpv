@@ -397,8 +397,17 @@ lucho <lucho@haemimont.bg>
 Per Wigren <wigren@home.se>
     * bmovl - Bitmap Overlay video filter
 
+Nicolas Tourmentine <n@tourmentine.com>
+    * French documentation translation
 
-NOTE: If you feel you were missed here, feel free to send a patch.
+hephooey@fastmail.fm
+    * Chinese documentation translation
+
+András Mohari <mayday@varoshaza.nagyatad.hu>
+    * skin documentation
+    * various docs updates and fixes
+
+NOTE: If you think you are missing here, feel free to send a patch.
 =====
 
 ____________
