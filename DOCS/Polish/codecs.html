@@ -4,333 +4,352 @@
 
 <FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 
-<P><B><A NAME=2.2>2.2.  Supported codecs</A></B></P>
+<P><B><A NAME=2.2>2.2. Wspierane kodeki</A></B></P>
 
 
-<P><B><A NAME=2.2.1>2.2.1. Video codecs</A></B></P>
+<P><B><A NAME=2.2.1>2.2.1. Kodeki Video</A></B></P>
 
-<P>See <A HREF="http://www.mplayerhq.hu/DOCS/codecs-status.html">http://www.mplayerhq.hu/DOCS/codecs-status.html</A> for the complete,
-daily generated list!!!</P>
+<P>Zobacz:
+<A HREF="http://www.mplayerhq.hu/DOCS/codecs-status.html">
+http://www.mplayerhq.hu/DOCS/codecs-status.html</A>. Znajdziesz tam kompletn±,
+codziennie tworzon± listê!!!</P>
 
-<P>The most important ones above all:<BR>
+<P>Najwa¿niejsze kodeki video:<BR>
 <UL>
-<LI>MPEG1 (VCD) and MPEG2 (DVD) video</LI>
-<LI>DivX ;-), OpenDivX (DivX4), 3ivx and other MPEG4 variants</LI>
-<LI>Windows Media Video 7 (WMV1) and 8 (WMV2) used in .wmv files</LI>
-<LI>Intel Indeo codecs (3.1,3.2,4.1,5.0)</LI>
-<LI>MJPEG, ASV2 and other hardware formats</LI>
-<LI>XAnim codecs</LI>
+<LI>MPEG1 (VCD) i MPEG2 (DVD) video</LI>
+<LI>DivX ;-), OpenDivX (DivX4), 3ivx i inne warianty MPEG4</LI>
+<LI>Windows Media Video 7 (WMV1) i 8 (WMV2) wykorzystywany w plikach .wmv</LI>
+<LI>Kodeki Intel Indeo (3.1,3.2,4.1,5.0)</LI>
+<LI>MJPEG, ASV2 i inne formaty sprzêtowe</LI>
+<LI>Kodeki XAnim</LI>
 <LI>VIVO</LI>
 <LI>FLI</LI>
 </UL></P>
 
-<P>If you have a Win32 codec not listed here, and not supported yet, just read the <A
-HREF="#2.2.3">codec importing</A> to get info about how to help us adding support
-for it!</P>
+<P>Je¶li masz kodeka Win32 nie wymienionego tutaj, oraz jeszcze nie
+obs³ugiwanego, przeczytaj <A HREF="#2.2.3">importowanie kodeków</A>, by uzyskaæ
+informacje o tym, jak pomóc nam w dodaniu wsparcia dla niego!</P>
 
 <P><B><A NAME=2.2.1.1>2.2.1.1. DivX4</A></B></P>
 
-<P>This section contains information about the DivX4 codec of
-<A HREF="http://www.projectmayo.com">ProjectMayo</A>. Their first available alpha version was the OpenDivX 4.0
-alpha 47 and 48. Support for this was/is included in <B>MPlayer</B>, and built by
-default. We used to use its postprocessing code to optionally enhance visual
-quality of MPEG1/2 movies. Now we use our own.</P>
+<P>Ta sekcja zawiera informacje o kodekach DivX4 z <A
+HREF="http://www.projectmayo.com">ProjectMayo</A>. Ich pierwsz± dostêpn± wersj±
+alfa by³ OpenDivX 4.0 alfa 47 oraz 48. Wsparcie dla nich zosta³o do³±czone w
+<B>MPlayerze</B>, i jest kompilowane standardowo. Dawniej u¿ywali¶my kodu
+postprocessing z tych kodeków do opcjonalnego zwiêkszenia jako¶ci filmów
+MPEG1/2. Teraz ju¿ stosujemy w³asny.</P>
 
-<P>The new generation of this codec can even decode movies made with the
-infamous DivX codec! And it's not everything, it's MUCH faster than the
-traditional Win32 DivX DLL's. See below for configuration. The only
-disadvantage of this codec is that it's currently closed-source. :(</P>
+<P>Nowa generacja tych kodeków potrafi nawet dekodowaæ filmy zrobione z u¿yciem
+nies³awnych kodeków DivX! Ale to jeszcze nie wszystko! S± one DU¯O szybsze, ni¿
+tradycyjne DLLe Win32 DivX. Zobacz poni¿ej opis konfiguracji. Jedyn± wad± tych
+kodeków jest fakt, ¿e aktualnie s± one closed-source. :(</P>
 
-<P>The codec can be downloaded from the following URL:</P>
+<P>Kodeki mo¿na ¶ci±gn±æ z nastêpuj±cego URL:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://download2.projectmayo.com/dnload/divx4linux/divx4linux-20010718.zip">http://download2.projectmayo.com/dnload/divx4linux/divx4linux-20010718.zip</A></P>
 
-<P>Unpack it, and run <CODE>./install.sh</CODE> as root.</P>
+<P>Rozpakuj je i uruchom, jako root, polecenie: <CODE>./install.sh</CODE> .</P>
 
-<P>Note: do NOT forget to add /usr/local/lib to your /etc/ld.so.conf !</P>
+<P>Uwaga: NIE zapomnij dodaæ /usr/local/lib do /etc/ld.so.conf !</P>
 
-<P><B>MPlayer</B> autodetects if DivX4 is (properly) installed, just compile
-as usual. If it doesn't detect it, you didn't install it exactly as above,
-and/or has fucked up config (see last question of 5.1 section).</P>
+<P><B>MPlayer</B> automatycznie wykrywa czy DivX4 jest (w³a¶ciwie)
+zainstalowany, wystarczy go, tak jak zawsze, skompilowaæ. Je¶li mplayer nie
+wykrywa DivX4, oznacza to, ¿e nie zainstalowa³e¶ go w taki sposób jak powy¿ej
+podano, i/lub popsu³e¶ konfiguracjê (zobacz ostatnie pytanie w sekcji 5.1).</P>
 
-<P>Using it is a bit tricky. As it conflicts with the old OpenDivX (it's API is
-very similar to OpenDivX's), OpenDivX code is disabled, and the OpenDivX
-driver calls this library too.</P>
+<P>U¿ywanie tego kodeka jest trochê skomplikowane. Poniewa¿ powstaje konflikt
+ze starym  OpenDivX (jego API jest bardzo podobne do do tego z OpenDivX), kod
+OpenDivX jest wy³±czony, równie¿ sterownik OpenDivX wywo³uje t± bibliotekê.</P>
 
-<P>Generally we can pinpoint this issue to that you have two options to use
-this codec:</P>
+<P>Ogólnie mo¿emy sprowadziæ to zagadnienie do faktu, ¿e masz dwie opcje do
+zastosowania tego kodeka:</P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-vc&nbsp;odivx</TD><TD>&nbsp;&nbsp;</TD>
-<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>using divx4 codec as a new version of OpenDivX.
-in this case it produces YV12 image in its own buffer,
-and <B>MPlayer</B> (libvo) does colorspace conversion. (<B>RECOMMENDED!</B>)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-vc&nbsp;divx4</TD><TD></TD>
-<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>using divx4 codec's colorspace conversion.
-in this mode, you can use YUY2/UYVY too.</TD></TR>
+<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
+sans-serif" size=2>-vc&nbsp;odivx</TD><TD>&nbsp;&nbsp;</TD> <TD><FONT
+face="Verdana, Arial, Helvetica, sans-serif" size=2>u¿ycie kodeka divx4 jako
+nowej wersji OpenDivX.  W tym przypadku produkuje on we w³asnym buforze obrazy
+YV12 oraz <B>MPlayer</B> (libvo) dokonuje konwersji przestrzeni kolorów.
+(<B>REKOMENDOWANE!</B>)</TD><TR> <TD></TD><TD VALIGN=top><FONT face="Verdana,
+Arial, Helvetica, sans-serif" size=2>-vc&nbsp;divx4</TD><TD></TD> <TD><FONT
+face="Verdana, Arial, Helvetica, sans-serif" size=2>u¿ycie konwersji
+przestrzeni kolorów z kodeka divx4. W tym trybie mo¿na u¿yæ równie¿
+YUY2/UYVY.</TD></TR>
 </TABLE></P>
 
-<P>The 'odivx' method is usually faster, due to the fact that it transfers
-image data in YV12 (planar YUV 4:2:0) format, thus requiring much less
-bandwidth on the bus. For packed YUV modes (YUY2, UYVY) use the 'divx4'
-method. For RGB modes you can choose freely, their speed is same, maybe
-differ according to the current bpp.</P>
+<P>Metoda 'odivx' jest zazwyczaj szybsza, ze wzglêdu na fakt, ¿e przenosi ona
+dane obrazu do formatu YV12 (planar YUV 4:2:0), a to wymaga du¿o mniejszego
+pasma przenoszenia na szynie. W trybie spakowanego YUV (YUY2, UYVY) stosuj
+metodê 'divx4'. W trybie RGB mo¿esz dowolnie wybieraæ, poniewa¿ prêdko¶ci ich
+s± takie same, ró¿ni± siê byæ mo¿e tylko w odniesieniu do aktualnego bpp.</P>
 
-<P>Note: it supports postprocessing too, but range of values is strange: (TODO UPDATE)</P>
+<P>Uwaga: ten kodek wspiera równie¿ postprocessing, ale zakres warto¶ci jest
+dziwny: (UAKTUALNIÆ)</P>
 
 <P><TABLE BORDER=0>
 <TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>0</TD><TD>&nbsp;&nbsp;</TD>
-<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>no postproc</TD><TR>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>bez postproc</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>10 .. 20</TD>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>postprocessing, normal (like level 2 with divxds)</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>postprocessing, normalny (jak na poziomie 2 z divxd)</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>30 .. 60</TD>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>hard prostprocessing, eats many CPU (like level 4 with divxds</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mocny prostprocessing, obci±¿a mocno CPU (podobnie jak poziom 4 z divxd</TD><TR>
 </TABLE></P>
 
-<P><B><A NAME=2.2.1.2>2.2.1.2. ffmpeg's DivX/libavcodec</A></B></P>
+<P><B><A NAME=2.2.1.2>2.2.1.2. DivX/libavcodec z ffmpeg</A></B></P>
 
-<P>Beginning with version 0.4.2 , <A HREF="http://ffmpeg.sourceforge.net">ffmpeg</A> contains an <B>opensource</B> DivX codec,
-which is compatible with the traditional DivX. <B>MPlayer</B> supports this codec,
-and this makes it possible to <B>watch DivX/DivX4 movies on non-x86 platforms</B>,
-and gain much faster <B>DivX/DivX4</B> decoding speed than the Win32 codecs and
-the original DivX4 library has!<BR>
-It was removed from <B>MPlayer</B>'s cvs tree, you have to download it
-manually directly from <B>FFmpeg</B>'s tree:</P>
+<P>Poczynaj±c od wersji 0.4.2, <A
+HREF="http://ffmpeg.sourceforge.net">ffmpeg</A> zawiera kodek DivX
+<B>opensource</B>, który jest kompatybilny z tradycyjnym DivX. <B>MPlayer</B>
+wspiera ten kodek i dziêki temu mo¿liwe staje siê <B>ogl±danie filmów
+DivX/DivX4 na platformach innych ni¿ x86</B> oraz osi±ganie du¿o szybszej
+prêdko¶ci dekodowania <B>DivX/DivX4</B>, ni¿ za pomoc± kodeków Win32 i
+oryginalnych bibliotek DivX4<BR>. Poniewa¿ zosta³o to usuniête z drzewa cvs
+<B>MPlayera</B>, musisz ¶ci±gn±æ to rêcznie bezpo¶rednio z drzewa cvs
+<B>FFmpeg</B></P>.
 
 <P><CODE>
   cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg login<BR>
   cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg co ffmpeg
 </CODE></P>
 
-<P>Note: <I>if you copy with CVS subdirs, next time it's enough to do
-'cvs update'.</I></P>
+<P>UWAGA: <I>Je¶li kopiujesz z podkatalogami CVS, nastêpnym razem wystarczy
+zrobiæ 'cvs update'.</I></P>
 
-<P>Now, move the newly downloaded ffmpeg source's <B>libavcodec</B> directory,
-(with all it's subdirectories) to <B>MPlayer</B>'s tree, so it will look
-like this:</P>
+<P>Teraz przenie¶ nowo ¶ci±gniête ¼ród³a ffmpeg: katalog <B>libavcodec</B>, (ze
+wszystkimi jego podkatalogami) do drzewa katalogowego <B>MPlayera</B>, tak, aby
+to wygl±da³o w taki sposób:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>main/libavcodec</CODE></P>
 
-<P>Symlinking is NOT enough, you have to copy/move it!!!</P>
+<P>Linkowanie symboliczne NIE jest wystarczaj±ce. Musisz to skopiowaæ b±d¼
+przenie¶æ!!!</P>
 
-<P>Then compile. configure detects if it's alright, and can be compiled. The
-codec also <B>supports postprocessing!</B></P>
+<P>Nastêpnie skompiluj. configure wykrywa czy wszystko jest w porz±dku i mo¿e
+byæ skompilowane. Ten kodek równie¿ <B>wspiera postprocessing!</B></P>
 
-<P>In order to use it, refresh your codecs.conf file, and do as the manpage,
-or the example.conf says (the -vfm option).</P>
+<P>W celu u¿ycia go, od¶wie¿ swój plik codecs.conf, zgodnie z tym, co mówi±
+strony podrêcznika lub  example.conf (opcja -vfm).</P>
 
-<P>To achieve the <B>greatest speed</B> on my K6, I remove the
-<CODE>ffmpeg12</CODE> section from codecs.conf (this codec isn't optimized, and
-libmpeg2 is twice as fast), and place <CODE>vfm=5</CODE> in my config file.
-Then <B>MPlayer</B> always uses <B>ffdivx/ffodivx</B> to decode
-<B>DivX/DivX4</B> files, and libmpeg2 for MPEG1/2 . With this and my Matrox G400, I can view even the
-highest resolution DivX/DivX4 movies on my K6/2 500, without framedrop.</P>
+<P>Aby osi±gn±æ <B>najwiêksz± prêdko¶æ</B> na moim K6, usuwam sekcjê
+<CODE>ffmpeg12</CODE> z codecs.conf (ten kodek nie jest zoptymalizowany a
+libmpeg2 jest dwa razy szybszy), i wpisujê <CODE>vfm=5</CODE> w moim pliku
+konfiguracyjnym. Po czym <B>MPlayer</B> zawsze ju¿ u¿ywa <B>ffdivx/ffodivx</B>
+do dekodowania plików <B>DivX/DivX4</B> oraz libmpeg2 do plików MPEG1/2. Przy
+takiej konfiguracji na moim K6/2 500 z Matrox G400 mogê ogl±daæ filmy
+DivX/DivX4 w najwy¿szej rozdzielczo¶ci, bez straty klatek (framedrop).</P>
 
+<P><B><A NAME=2.2.1.3>2.2.1.3. Kodeki XAnim</A></B></P>
 
-<P><B><A NAME=2.2.1.3>2.2.1.3.  XAnim codecs</A></B></P>
+<P>U¿ywanie (niektórych) kodeków XAnim z innym programem ni¿ XAnim, jest
+<B><I>NIELEGALNE</I></B>. <B>TWOIM</B> obowi±zkiem jest przeczytanie
+licencji i zastosowanie siê do niej. Autorzy <B>MPlayera</B> nie mog± zostaæ
+poci±gniêci do odpowiedzialno¶ci za jakiekolwiek, sprzeczne z prawem,
+zachowania u¿ytkowników.</P>
 
-<P>Foreword: using (some) XAnim codecs with other program than XAnim, is
-<B><I>ILLEGAL</I></B>. It is <B>YOUR</B> responsibility to read its license,
-and do accordingly. The authors of <B>MPlayer</B> can't be held responsible for
-any unlawful act of the user.</P>
-
-<P>So yes, <B>MPlayer</B> can use XAnim's codecs for decoding. It's very
-easy to enable them:</P>
+<P>A wiêc: tak, <B>MPlayer</B> potrafi u¿ywaæ do dekodowania kodeków XAnim.
+W³±czenie ich jest bardzo proste:</P>
 
 <P>
 <UL>
-  <LI>download the codecs you wish to use from the
-  <A HREF="http://xanim.va.pubnix.com">XAnim site</A>. The <B>3ivx</B> codec
-  isn't there, so download it from the <A HREF="http://www.3ivx.com">3ivx site</A>.</LI>
+  <LI>¦ci±gnij kodeki, których chcesz u¿ywaæ ze 
+<A HREF="http://xanim.va.pubnix.com">strony XAnim</A>. Nie ma tam kodeka
+<B>3ivx</B> , wiêc ¶ci±gnij go ze <A HREF="http://www.3ivx.com">strony
+3ivx</A>.</LI>
 
-  <LI>use the <CODE>--with-xanimlibdir</CODE> option to tell configure where
-  it can find the xanim codecs. By default, it checks them at <CODE>/</CODE> (...) .</LI>
+  <LI>U¿yj opcji <CODE>--with-xanimlibdir</CODE>, aby podaæ dla configure,
+gdzie znajduj± siê kodeki xanim. Domy¶lnie s± one szukane w katalogu
+<CODE>/</CODE> (...) .</LI>
 
-  <LI>rename the filenames by cutting out the architecture stuff, so they will
-  have filenames like these : <CODE>vid_cvid.xa, vid_h263.xa, vid_iv50.xa</CODE>
+  <LI>Zmieñ nazwy plików, obcinaj±c czê¶æ dotycz±c± architektury tak, aby
+wygl±da³y one nastêpuj±co: <CODE>vid_cvid.xa, vid_h263.xa, vid_iv50.xa</CODE>
 
 </UL>
 </P>
 
-<P>They are video codec family number 10, so you may want to use <CODE>-vfm 10</CODE>
-option to tell <B>MPlayer</B> to use them if possible.</P>
+<P>Jest to rodzina kodeków video o numerze 10, przydatne wiêc bêdzie u¿ycie
+opcji <CODE>-vfm 10</CODE> i poinformowanie <B>MPlayera</B>, by ich u¿y³ je¶li
+to mo¿liwe.</P>
 
-<P>Tested codecs are: <B>Indeo 3.2</B>, <B>4.1</B>, <B>5.0</B>, <B>CVID</B>, <B>3ivX</B>, <B>h263</B>.</P>
-
-
-<P><B><A NAME=2.2.1.4>2.2.1.4.  VIVO video</A></B></P>
-
-<P><B>MPlayer</B> can play Vivo (1.0 and 2.0) videos. The most suitable codec
-for 1.0 files is FFmpeg's H263 decoder, you can use it with the <CODE>-vc
-ffh263</CODE> option (default) (you'll need the newest libavcodec !). For 2.0 files, use
-the <CODE>ivvideo.dll</CODE> Win32 DLL file (from <A
-HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/ivvideo.dll">here</A>),
-and install it under <CODE>/usr/lib/win32</CODE> or wherever you store the
-Win32 codecs. This latter codec doesn't support YV12 nor YUY2 only BGR modes,
-thus usable only with the X11 and OpenGL outputs. Hopefully ffh263 will support
-VIVO 2.0 files in the future.</P>
+<P>Testowane kodeki: <B>Indeo 3.2</B>, <B>4.1</B>, <B>5.0</B>, <B>CVID</B>, <B>3ivX</B>, <B>h263</B>.</P>
 
 
-<P><B><A NAME=2.2.1.5>2.2.1.5.  MPEG 1/2 video</A></B></P>
+<P><B><A NAME=2.2.1.4>2.2.1.4. Obraz VIVO</A></B></P>
 
-<P>MPEG1 and MPEG2 are decoded with the native library <B>libmpeg2</B>.
-Its source code is included in <B>MPlayer</B>, and of course is multiplatform.
-We handle buggy MPEG1/2 video files by checking for what signature does
-libmpeg2 return, and when it gives sig11 (segmentation fault), we quickly
-reinitialize the codec, and continue exactly from where the failure did occur.
-No speed decrease is measurable.</P>
-
-
-<P><B><A NAME=2.2.1.6>2.2.1.6.  MS Video1</A></B></P>
-
-<P>This is a very old and very bad codec of Microsoft. In the past it was
-decoded with the <CODE>msvidc32.dll</CODE> Win32 codec, now we have our own
-open-source implementation (by <A HREF="mailto:melanson@pcisys.net">Mike
-Melanson</A>).</P>
+<P><B>MPlayer</B> potrafi odgrywaæ obrazy Vivo (1.0 i 2.0). Najbardziej
+odpowiedni kodek do plików 1.0, to dekoder FFmpeg's H263, Mo¿esz go u¿yæ za
+pomoc± opcji <CODE>-vc ffh263</CODE> (domy¶lnie) (bêdziesz potrzebowa³
+najnowszego libavcodec!). Do plików 2.0 u¿yj <CODE>ivvideo.dll</CODE> pliku DLL
+Win32 (do sci±gniêcia <A
+HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/ivvideo.dll">tutaj</A>),
+zainstaluj go w <CODE>/usr/lib/win32</CODE>, b±d¼ w innym miejscu, w którym
+przechowujesz kodeki Win32. Ten pó¼niejszy kodek nie obs³uguje trybów YV12 ani
+YUY2, a tylko BGR i jest u¿yteczny wy³±cznie z wyj¶ciami X11 i OpenGL. Miejmy
+nadziejê, ¿e ffh263 bêdzie wspiera³ pliki VIVO 2.0 w przysz³o¶ci.</P>
 
 
-<P><B><A NAME=2.2.1.7>2.2.1.7.  Cinepak CVID</A></B></P>
+<P><B><A NAME=2.2.1.5>2.2.1.5. Obraz MPEG 1/2</A></B></P>
 
-<P>The best way to view Cinepak videos with <B>MPlayer</B>, is using
-the XAnim codec <CODE>vid_cvid.xa</CODE>, because it supports YV12, YUY2
-outputs, in contrary to the Win32 codec which supports only RGB.</P>
+<P>MPEG1 i MPEG2 s± dekodowane za pomoc± biblioteki w³asnej <B>libmpeg2</B>.
+Jej kod ¼ród³owy jest zawarty w <B>MPlayerze</B> i oczywi¶cie jest
+wieloplatformowy. Obs³ugujemy pliki video MPEG1/2 z b³êdami przez sprawdzanie,
+jak± sygnaturê zwraca libmpeg2, i kiedy jest to sig11 (segmentation fault),
+szybko inicjalizujemy ponownie kodek, i kontynuujemy dok³adnie z tego miejsca,
+w którym pojawi³ siê b³±d. Nie ma tu zauwa¿alnej straty prêdko¶ci.</P>
 
 
-<P><B><A NAME=2.2.2>2.2.2.  Audio codecs</A></B></P>
+<P><B><A NAME=2.2.1.6>2.2.1.6. MS Video1</A></B></P>
 
-<P>The most important audio codecs above all :<BR>
+<P>Jest bardzo stary i bardzo z³y kodek Microsoftu. W przesz³o¶ci by³ on
+dekodowany z kodekiem Win32 <CODE>msvidc32.dll</CODE>, teraz mamy w³asn±
+implementacjê open-source wykonan± przez <A
+HREF="mailto:melanson@pcisys.net">Mike'a Melansona</A>).</P>
+
+
+<P><B><A NAME=2.2.1.7>2.2.1.7. Cinepak CVID</A></B></P>
+
+<P>Najlepszym sposobem, aby ogl±daæ obrazy Cinepak za pomoc± <B>MPlayera</B>
+jest u¿ycie kodeka XAnim <CODE>vid_cvid.xa</CODE>, poniewa¿ obs³uguje on wyj¶cia
+YV12, YUY2, w przeciwieñstwie do kodeka Win32, który wspiera wy³±cznie RGB.</P>
+
+
+<P><B><A NAME=2.2.2>2.2.2. Kodeki d¼wiêku</A></B></P>
+
+<P>Najwa¿niejsze kodeki d¼wiêku, to:<BR>
 <UL>
-<LI>MPEG layer 2, and layer 3 (MP3) audio (<B>native</B> code, with MMX/SSE/3DNow! optimization)</LI>
-<LI>MPEG layer 1 audio (<B>native</B> code, with libavcodec)</LI>
-<LI>AC3 Dolby audio (<B>native</B> code, with SSE/3DNow! optimization)</LI>
-<LI>Ogg Vorbis audio codec (<B>native</B> lib)</LI>
-<LI>Voxware audio (using DirectShow DLL)</LI>
-<LI>alaw, msgsm, pcm and other simple old audio formats</LI>
+<LI>MPEG layer 2 oraz layer 3 (MP3) audio(<B>w³asny</B> kod, z optymalizacj± MMX/SSE/3DNow!)</LI>
+<LI>MPEG layer 1 audio(<B>w³asny</B> kod, z libavcodec)</LI>
+<LI>AC3 Dolby audio (<B>w³asny</B> kod, z optymalizacj± SSE/3DNow!)</LI>
+<LI>Ogg Vorbis kodek audio (<B>w³asna</B> biblioteka)</LI>
+<LI>Voxware audio (u¿ycie DirectShow DLL)</LI>
+<LI>alaw, msgsm, pcm i inne proste stare formaty d¼wiêkowe</LI>
 <LI>VIVO audio (g723, Vivo Siren)</LI>
 </UL></P>
 
 
-<P><B><A NAME=2.2.2.1>2.2.2.1.  Software AC3 decoding</A></B></P>
+<P><B><A NAME=2.2.2.1>2.2.2.1. Programowe dekodowanie AC3</A></B></P>
 
-<P>This is the default decoder used for files with AC3 audio.</P>
+<P>Domy¶lny dekoder, u¿ywany do plików z d¼wiêkiem AC3.</P>
 
-<P>The AC3 decoder can create output audio mixes for 2, 4, or 6
-speakers.  When configured for 6 speakers, this decoder provides
-separate output of all the AC3 channels to the soundcard driver,
-allowing the full "surround sound" experience without the external AC3
-decoder required to use the hwac3 codec.</P>
+<P>Dekoder AC3 mo¿e tworzyæ mieszanki wyj¶ciowego d¼wiêku dla 2, 4 lub 6
+g³o¶ników. Skonfigurowany dla 6 g³o¶ników, dekoder ten dostarcza oddzielne
+wyj¶cia dla wszystkich kana³ów AC3 do sterownika karty d¼wiêkowej, umo¿liwiaj±c
+do¶wiadczenie wra¿enia pe³nego "d¼wiêku otaczaj±cego", bez wymagania od
+zewnêtrznego dekodera AC3 u¿ycia kodeka hwac3.</P>
 
-<P>Use the <CODE>-channels</CODE> option to select the number of output channels.
-Use <CODE>-channels 2</CODE> for a stereo downmix.  For a 4 channel downmix (Left
-Front, Right Front, Left Surround and Right Surround outputs), use
-<CODE>-channels 4</CODE>.  In this case, any Centre channel will be mixed
-equally to the front channels.  Lastly, "-channels 6" will output all the AC3
-channels as they are encoded - in the order Left, Right, Left Surround, Right
-Surround, Centre and LFE.</P>
+<P>U¿yj opcji <CODE>-channels</CODE>, aby wybraæ ilo¶æ kana³ów wyj¶ciowych.
+U¿yj opcji <CODE>-channels 2</CODE> dla stereo downmix. Dla czterokana³owego
+downmix (wyj¶cia lewo-przód, prawo-przód, lewo-ty³, prawo-ty³), u¿yj opcji
+<CODE>-channels 4</CODE>. W tym przypadku jakikolwiek centralny kana³ bêdzie
+miksowany odpowiednio do przednich kana³ów. Ostatecznie, "-channels 6" bêdzie
+wyprowadza³o wszystkie kana³y AC3 tak, jak s± zakodowane - w kolejno¶ci lewy,
+prawy, lewy-tylny, prawy-tylny, centralny oraz LFE.</P>
 
-<P>The default number of output channels is 2.</P>
+<P>Domy¶lna liczba kana³ów wyj¶ciowych wynosi 2.</P>
 
-<P>To use more than 2 output channels, you'll need to be using OSS,
-and to have a soundcard driver that supports the appropriate number of
-output channels via the SNDCTL_DSP_CHANNELS ioctl.  For example, a
-version of the emu10k1 driver (used with the SB Live cards) newer than
-August 2001 should be suitable.</P>
+<P>Aby korzystaæ z wiêcej ni¿ dwóch kana³ów wyj¶ciowych, musisz u¿yæ OSS, i
+posiadaæ sterownik dla karty d¼wiêkowej, który obs³uguje odpowiedni± liczbê
+kana³ów wyj¶ciowych przez SNDCTL_DSP_CHANNELS ioctl. Na przyk³ad wersja
+sterownika emu10k1 (u¿ywanego z kartami SB Live), nowsza ni¿ z sierpnia 2001,
+powinna byæ odpowiednia.</P>
 
-<P>Output mixes of more than 2 channels should be considered
-experimental.</P>
+<P>Miksowanie na wyj¶ciu wiêcej ni¿ dwóch kana³ów powinno byæ traktowane jako
+eksperymentalne.</P>
 
+<P><B><A NAME=2.2.2.2>2.2.2.2. Sprzêtowe dekodowanie AC3</A></B></P>
 
-<P><B><A NAME=2.2.2.2>2.2.2.2.  Hardware AC3 decoding</A></B></P>
-
-<P>You'll need an AC3 capable soundcard, with digital out (SP/DIF). The
-card's driver must support the AFMT_AC3 format (like SB Live! does).
-Connect your AC3 decoder to the SP/DIF output, and use the '-ac hwac3'
-option. It may or may not work (experimental). (probably won't...)</P>
-
-
-<P><B><A NAME=2.2.2.3>2.2.2.3.  libmad support</A></B></P>
-
-<P><A HREF="http://mad.sourceforge.net">libmad</A> is a multiplatform MPEG audio
-decoding library. If you don't know why is it good, you probably don't need it.</P>
-
-<P>To enable support, compile with the <CODE>--enable-mad</CODE> configure
-option.</P>
+<P>Potrzebna ci bêdzie karta d¼wiêkowa, zdolna do obs³ugi AC3, z cyfrowym
+wyj¶ciem (SP/DIF). Sterownik karty d¼wiêkowej musi obs³ugiwaæ format AFMT_AC3
+(tak, jak to jest w SB Live!). Po³±cz swój dekoder AC3 do wyj¶cia SP/DIF oraz
+u¿yj opcji '-ac hwac3'. To mo¿e zadzia³aæ, b±d¼ nie (status eksperymentalny -
+najprawdopodobniej nie zadzia³a).</P>
 
 
-<P><B><A NAME=2.2.2.4>2.2.2.4.  VIVO audio</A></B></P>
+<P><B><A NAME=2.2.2.3>2.2.2.3. Obs³uga libmad</A></B></P>
 
-<P>The audio codec used in VIVO files depends on whether it's a VIVO/1.0 or
-VIVO/2.0 file. VIVO/1.0 files have <B>g.723</B> audio, and VIVO/2.0 files
-have <B>Vivo Siren</B>. Both is <U>supported</U>. You can grab the g.723/Siren
-Win32 DLL from
-<A HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/vivog723.acm">here</A>,
-then copy it into the <CODE>/usr/lib/win32</CODE> directory, or respectively.</P>
+<P><A HREF="http://mad.sourceforge.net">libmad</A> jest wieloplatformow±
+bibliotek± dekodowania d¼wiêku MPEG. Je¶li nie wiesz dlaczego to jest dobre,
+prawdopodobnie nie potrzebujesz tego. </P>
+
+<P>Aby w³±czyæ obs³ugê, skompiluj ¼ród³a z opcj± <CODE>--enable-mad</CODE>.
+</P>
 
 
-<P><B><A NAME=2.2.3>2.2.3. Win32 codec importing howto</A></B></P>
+<P><B><A NAME=2.2.2.4>2.2.2.4. D¼wiêk VIVO</A></B></P>
 
-<P><B><A NAME=2.2.3.1>2.2.3.1. VFW codecs</A></B></P>
+<P>Kodek d¼wiêku stosowany  do plików VIVO zale¿y od tego, czy jest to plik
+VIVO/1.0, czy VIVO/2.0. Pliki VIVO/1.0 zawieraj± d¼wiêk <B>g.723</B>, za¶ pliki
+VIVO/2.0 maj± <B>Vivo Siren</B>. Oba formaty s± <U>obs³ugiwane</U>.
+Mo¿esz ¶ci±gn±æ kodek g.723/Siren Win32 DLL z 
+<A HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/vivog723.acm">tej
+strony</A>, a nastêpnie skopiowaæ go do katalogu <CODE>/usr/lib/win32</CODE>
+lub innego odpowiedniego.</P>
 
-<P>VfW (Video for Windows) is the old Video API for Windows. Its codecs have
-the .DLL or (rarely) .DRV extension.
-If <B>MPlayer</B> fails with your AVI:</P>
+
+<P><B><A NAME=2.2.3>2.2.3. Importowanie kodeków Win32</A></B></P>
+
+<P><B><A NAME=2.2.3.1>2.2.3.1. Kodeki VFW</A></B></P>
+
+<P>VfW (Video for Windows), jest to stare Video API dla Windows. Jego kodeki
+maj± rozszerzenia .DLL lub (rzadziej) .DRV.
+Je¶li <B>MPlayer</B> nie dzia³a z twoim AVI:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>UNKNOWN video codec: HFYU (0x55594648)</CODE></P>
 
-<P>It means your AVI is encoded with a codec which has the HFYU fourcc (HFYU =
-HuffYUV codec, DIV3 = DivX Low Motion, etc...). Now that we know this, we'll
-have to find out which DLL Windows loads in order to play this file. In our
-case, the system.ini contains this (with many others):</P>
+<P>To oznacza, ¿e twój AVI jest zakodowany za pomoc± kodeka, który ma HFYU
+fourcc (HFYU = kodek HuffYUV, DIV3 = DivX Low Motion, itd....). Teraz, gdy ju¿
+to wiemy, bêdziemy musieli dowiedzieæ siê, któr± bibliotekê DLL z Windows
+za³adowaæ, aby móc odtworzyæ ten plik. W naszym przypadku system.ini zawiera to
+(oraz wiele innych):</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>VIDC.HFYU=huffyuv.dll</CODE></P>
 
-<P>So we'll need the huffyuv.dll file. Note that the audio codecs are specified
-with the MSACM prefix:</P>
+<P>Tak wiêc bêdziemy potrzebowaæ pliku huffyuv.dll. Zauwa¿, ¿e kodeki d¼wiêku s± wyró¿nione za pomoc± prefiksu MSACM:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>msacm.l3acm=L3codeca.acm</CODE></P>
 
 
-<P>This is the MP3 codec.
-So, now we have all the info needed (fourcc, codec file, sample AVI), submit
-your codec support request in mail, and upload these files to the FTP:</P>
+<P>To jest kodek MP3. Maj±c ju¿ wszystkie potrzebne informacje (fourcc,
+plik z kodekiem, próbka AVI), wy¶lij ¿±danie wsparcia dla twojego kodeka mailem
+i za³aduj te pliki przez FTP:</P>
 
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>ftp://ftp.mplayerhq.hu/MPlayer/incoming/[codecname]/</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>ftp://ftp.mplayerhq.hu/MPlayer/incoming/[nazwa_kodeka]/</CODE></P>
 
 
-<P><B><A NAME=2.2.3.2>2.2.3.2. DirectShow codecs</A></B></P>
+<P><B><A NAME=2.2.3.2>2.2.3.2. Kodeki DirectShow</A></B></P>
 
-<P>DirectShow is the newer Video API, which is even worse than its predecessor.
-Things are harder with DirectShow, since
-<UL>
-<LI>system.ini doesn't contain the needed information, instead it's stored in
-the registry :(
-<LI>we'll need the GUID of the codec.
+<P>DirectShow to najnowsze Video API, które jest nawet gorsze, ni¿ jego
+poprzednik. Sprawy siê bardziej komplikuj±, odk±d: 
+<UL> 
+<LI>system.ini nie zawiera potrzebnych informacji, a w zamian za to jest przechowywany w rejestrze :(
+<LI>bêdzie potrzebny nam GUID kodeka.
 </UL></P>
 
-<P>So let's search that goddamn registry..
+<P>Wiêc znajd¼my ten przeklêty rejestr ...
 <UL>
-<LI>Start 'regedit'
-<LI>press ctrl-f, disable the first two checkbox, and enable the third. Type
-the fourcc of the codec. (for ex.: TM20)
-<LI>you should see a field which contains the path and filename
-(for ex. : C:\WINDOWS\SYSTEM\TM20DEC.AX)
-<LI>now that we have the file, we'll need the GUID. Try searching again, but
-now we'll search for the codec's name, not the fourcc. Its name can be acquired
-when Media Player is playing that file, by checking File/Properties/Advanced.
-If not, bad luck ;) Try guessing.
-(for ex. search for : TrueMotion)
-<LI>if found (in registry), there should be a FriendlyName field, and a CLSID
-field. Write down that 16 byte of CLSID, this is the GUID required by us.
+<LI>Uruchom 'regedit'.
+<LI>Wci¶nij ctrl-f, odznacz pierwsze dwie opcje i zaznacz trzeci±. Wpisz
+fourcc kodeka (np.: TM20).
+<LI>Powinno siê pokazaæ pole ze ¶cie¿k± i nazw± pliku (np. :
+C:\WINDOWS\SYSTEM\TM20DEC.AX).
+<LI>Skoro mamy ju¿ plik, potrzebne nam jeszcze GUID. Spróbuj jeszcze raz
+poszukaæ, ale tym razem nazwy kodeka, nie fourcc. Jego nazwê mo¿na odczytaæ w
+File/Properties/Advanced, podczas odtwarzania tego pliku przez Media Player.
+Je¶li siê nie da, to pech ;) Spróbuj zgadn±æ (np. szukaj: TrueMotion).
+<LI>Je¶li znalaz³e¶ (w rejestrze), powinno byæ tam pole FriendlyName oraz pole
+CLSID. Zapisz, ¿e 16 bajtów CLSID, to potrzebne nam GUID.
 </UL></P>
 
-<P>NOTE: if searching fails, try to enable all the checkboxes.. you may have
-false hits, but maybe you'll have the right, too...</P>
-<P>NOTE: dump that M$ shit.</P>
+<P>UWAGA:Poszukuj±c plików, staraj siê w³±czyæ wszystkie pola wyboru ...
+Mo¿esz dostaæ wiele nieprzydatnych odpowiedzi, ale byæ mo¿e dostaniesz te
+w³a¶ciwe przy okazji ...  </P>
+
+<P>UWAGA: W razie niepowodzenia zrzuæ wszystko na M$.</P>
 
 
-<P>So, now we have all the info needed (fourcc, GUID, codec file, sample AVI),
-submit your codec support request in mail, and upload these files to the FTP:<BR>
-ftp://ftp.mplayerhq.hu/MPlayer/incoming/[codecname]/</P>
+<P>Maj±c ju¿ wszystkie potrzebne informacje (fourcc, GUID, plik z kodekiem,
+próbka AVI), wy¶lij zg³oszenie wsparcia dla swojego kodeka mailem, i prze¶lij
+te pliki na adres FTP:<BR>
+ftp://ftp.mplayerhq.hu/MPlayer/incoming/[nazwa_kodeka]/</P>
 
 </BODY>
 </HTML>

@@ -1,108 +1,125 @@
 <HTML>
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-2">
 <BODY BGCOLOR=WHITE>
 <FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 
 <P>
-<B>Question:</B> What is GCC 2.96 ? I can't find it at GNU site.
+<B>Pytanie:</B> Co to jest GCC 2.96 ? Nie mogę tego znaleźć na stronie GNU.
 </P>
 
 <P>
-<B>Answer:</B> Read the <A HREF="http://gcc.gnu.org/gcc-2.96.html">official answer from GNU GCC team.</A>
+<B>Odpowiedź:</B> Przeczytaj <A
+HREF="http://gcc.gnu.org/gcc-2.96.html">oficjalną odpowiedź zespołu GNU
+GCC.</A>
 </P>
 
 <P>
-<B>Question:</B> What is the problem with GCC 2.96 ? And with 3.x ?
+<B>Pytanie:</B> Jaki jest problem z GCC 2.96 ? I z X-ami 3.x ?
 </P>
 
 <P>
-<B>Answer:</B>
+<B>Odpowiedź:</B>
 </P>
 
 <P>
-And for the people, who periodically asks what are the exact problems with
-gcc 2.96, my answer: <I>we don't know exactly.</I> 
-There were various problems and new problems / bugs come up periodically.
-It is <I>not a single bug/problem</I>. We just see various bugreports, mostly
-gcc internal bugs, compiler syntax errors in source or bad code compiled. They
-all are solved using different version of gcc. I understand that gcc 2.96
-has different default optimization flags and they conflicts with our inline
-asm code, but we can't fix them, and we really don't want to fix them as they
-work with other compilers or gcc versions, and the fix may cause speed loss.
+A dla ludzi, którzy regularnie pytają, jakie są dokładnie problemy z gcc 2.96,
+moja odpowiedź brzmi: <I>nie wiemy dokładnie.</I> Są różne problemy i coraz
+nowe problemy i błędy pojawiają się okresowo.  Nie ma <I>jednego
+błędu/problemu</I>. Dostajemy różne raporty o błędach, w większości są to
+wewnętrzne błędy gcc, błędy składniowe kompilatora w źródłach bądź w źle
+skompilowanym kodzie. Wszystkie one są rozwiązywane z użyciem innej wersji gcc.
+Rozumiem, że gcc 2.96 ma inne domyślne flagi optymalizacji, które są w
+konflikcie z naszym kodem asemblerowym inlline, ale my nie możemy tego zmienić,
+a nawet nie chcemy poprawiać ich, skoro działają dobrze z innymi kompilatorami
+lub innymi wersjami gcc, a poprawka mogłaby spowodować utratę szybkości
+działania programu.
 </P>
 
 <P>
-I think that the gcc 2.96 should be fixed to be option-compatible with other
-releases, but redhat guys refused to do it. If someone interested - ask
-Eugene K., avifile author, he has a long mailing with them, because they had
-the same problems with avifile. Finally he changed avifile source to
-<I>workaround</I> gcc 2.96 bugs...
-We simply has no interest and time to do it.
+Myślę, żę gcc 2.96 powinien być poprawiony, tak by miał opcję zgodności z
+innymi wydaniami, ale faceci z redhata odmówili zrobienia tego. Jeśli ktoś jest
+zainteresowany - niech zapyta Eugene K., autora avifile, on wiele z nimi na ten
+temat korespondował, ponieważ ten sam problem jest z avifile.  Ostatecznie
+zmienił on źródła avifile tak, aby <I>obchodziły</I> błędy gcc 2.96...  My po
+prostu nie mamy czsu ani nie jesteśmy zainteresowani robieniem tego.
 </P>
 
 <P>
-Ah, and about the pipe-in-comment bug: it wasn't really our bug.
-I've talked one of gcc maintainers, and he told me that gcc 2.96 and 3.x
-supports intel asm syntax, and it caused the pipe bug. But it <I>is</I> a bug,
-because gcc <I>silently</I>, without any warning, ignored the whole asm block!
+A jeśli chodzi o błąd pipe-in-comment: to tak naprawdę nie jest nasz
+błąd. Rozmawialiśmy z jednym z maintainerów gcc i on powiedział, że gcc 2.96 i
+3.x wspierają składnię asemblera intela i to powoduje błąd pipe. Ale to
+<I>jest</I> błąd, ponieważ gcc <I>po cichu</I>, bez żadnych ostrzeżeń,
+ignorowało cały blok asemblerowych instrukcji!
+</P>
+
+<P> Inne problemy gcc 3.x pochodzą z błędnej instalacji nagłówków libstdc++ lub
+glibc (std_*.h).  To nie jest nasza wina. MPlayer kompiluje się i pracuje
+poprawnie z wersjami gcc 3.x. <B>Tylko 2.96 jest zepsute</B>, ale to zależy od
+wielu elementów środowiska , włączając numer wydania gcc 2.96, włączone opcje
+mplayera, itp.
+<I>Jeśli wszystko działa u was, używających gcc 2.96, to nie znaczy, że będzie
+działało u wszystkich.</I>
+</P>
+
+<P><B>Odpowiedź 2:</B></P>
+
+<P>
+Przeczytaj także <A HREF="users_against_developers.html">ten</A> tekst !!!</P>
+
+<P>
+<B>Pytanie:</B> Nie! Mylicie się! wszystko działa dobrze z gcc 2.96 <I>za
+wyjątkiem</I> MPlayera.
 </P>
 
 <P>
-Other gcc 3.x problems comes from broken libstdc++ or glibc header (std_*.h)
-installation. They are not our fault. MPlayer compiles and works well with
-gcc 3.x versions. <B>Only 2.96 is broken</B>, but it depends on many environment
-elements, including gcc 2.96 release number, enabled mplayer features, etc.
-<I>If it works for you using gcc 2.96, it doesn't mean it will work for everyone.</I>
-</P>
-
-<P><B>Answer 2:</B></P>
-
-<P>
-Also read <A HREF="users_against_developers.html">this</A> text !!!</P>
-
-<P>
-<B>Question:</B> No! You are wrong! Everything works with gcc 2.96 <I>but</I> MPlayer
+<B>Odpowiedź:</B>
 </P>
 
 <P>
-<B>Answer:</B>
+Nie. To ty jesteś w błędzie!
+Kilka projektów (przeważnie tych, które zawierają wysoko zoptymalizowany kod
+inline asemblera) ma problemy z gcc 2.96. Na przykład: avifile, MESA / DRI,
+Wine, ffmpeg, lame.  Ale inne projekty już opracowały sposoby radzenia sobie z
+błędami gcc (zmieniając kod, który wywoływał błędy kompilatora), więc teraz
+działają dobrze.
 </P>
 
 <P>
-No. You are wrong!
-Several projects (mainly which source contains high optimized inline asm code)
-had problems with gcc 2.96. For example: avifile, MESA / DRI, Wine, ffmpeg, lame.
-But other projects already workarounded gcc bugs (changed code which
-triggered compiler bugs) so they work for now.
+<B>Pytanie:</B> Nie! Mylicie się! Wszystko świetnie działa z gcc 2.96
+<I>włącznie z</I> MPlayerem.
 </P>
 
 <P>
-<B>Question:</B> No! You are wrong! Everything works with gcc 2.96 <I>including</I> MPlayer
+<B>Odpowiedź:</B>
+</P>
+
+Dobrze. Ciesz się. Ale musisz wiedzieć, że to jest uzaleznione od wielu
+elementów środowiska, włącznie z numerem wydania gcc 2.96, włączonymi opcjami
+mplayera, itp.
+<I>Jeśli wszystko działa u cieibe, używającego gcc 2.96, to nie znaczy, że
+będzie działało u wszystkich.</I>
+To tylko oznacza, że masz szczęście, do chwili, gdzy znajdziesz problem. Ale
+nie zapomnij:
+<B>Zasada nr 1 użytkowników gcc 2.96: NIGDY NIE ZGŁASZAJ BŁĘDÓW, JEŚLI UŻYWASZ
+GCC 2.96</B>
+
+<P>
+<B>Pytanie:</B> Ok. Zrozumiałem. Ale chcę spróbować i dowiedzieć się ... jak
+skompilować mplayera z gcc 2.96?
 </P>
 
 <P>
-<B>Answer:</B>
-</P>
-
-Good. Be happy. But you must know, it depends on many environment
-elements, including gcc 2.96 release number, enabled mplayer features, etc.
-<I>If it works for you using gcc 2.96, it doesn't mean it will work for everyone!</I>
-It only means that you are lucky, until you find a problem. But don't forget the
-<B>No.1 rule of gcc 2.96 users: NEVER REPORT BUGS OR PROBLEMS IF YOU ARE USING GCC 2.96</B>
-
-<P>
-<B>Question:</B> Ok. Understood. But I want to give it a try... how to compile with gcc 2.96?
+<B>Odpowiedź:</B> Naprawdę? Jesteś pewien? Ok. Wiesz ... jest pewien sposób:
+./configure --disable-gcc-checking
 </P>
 
 <P>
-<B>Answer:</B> Really? Are you sure? Ok. You know... here is it: ./configure --disable-gcc-checking
+<B>Pytanie:</B> Nie! Nie zgadzam się z wami, ponieważ ...
 </P>
 
 <P>
-<B>Question:</B> No! I don't agree with you, because ...
-</P>
-
-<P>
-<B>Answer:</B> It doesn't matter. Keep your commets for yourself. We're not interested in gcc 2.96 stories.
+<B>Odpowiedź:</B> To nie ma znaczenia. Zachowaj dla siebie swoje uwagi. Nie
+jesteśmy zainteresowani opowieściami o gcc 2.96.
 </P>
 
 
