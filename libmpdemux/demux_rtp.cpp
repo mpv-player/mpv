@@ -390,7 +390,9 @@ extern "C" void demux_close_rtp(demuxer_t* demuxer) {
     // >= the largest conceivable frame composed from one or more RTP packets
 
 static void afterReading(void* clientData, unsigned frameSize,
-			 struct timeval presentationTime) {
+			 unsigned /*numTruncatedBytes*/,
+			 struct timeval presentationTime,
+			 unsigned /*durationInMicroseconds*/) {
   if (frameSize >= MAX_RTP_FRAME_SIZE) {
     fprintf(stderr, "Saw an input frame too large (>=%d).  Increase MAX_RTP_FRAME_SIZE in \"demux_rtp.cpp\".\n",
 	    MAX_RTP_FRAME_SIZE);
