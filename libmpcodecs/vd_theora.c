@@ -23,6 +23,8 @@ LIBVD_EXTERN(theora)
 
 #include <theora/theora.h>
 
+#define THEORA_NUM_HEADER_PACKETS 3
+
 // to set/get/query special features/parameters
 static int control(sh_video_t *sh,int cmd,void* arg,...){
     return CONTROL_UNKNOWN;
@@ -30,6 +32,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 
 typedef struct theora_struct_st {
     theora_state st;
+    theora_comment cc;
     theora_info inf;
 } theora_struct_t;
 
@@ -41,7 +44,7 @@ static int init(sh_video_t *sh){
     int failed = 1;
     int errorCode = 0;
     ogg_packet op;
-//    theora_comment tc;
+    int i;
 
     /* check whether video output format is supported */
     switch(sh->codec->outfmt[sh->outfmtidx])
@@ -60,35 +63,23 @@ static int init(sh_video_t *sh){
        sh->context = context;
        if (!context)
 	  break;
+
+       theora_info_init(&context->inf);
+       theora_comment_init(&context->cc);
        
-       /* read initial header */
-       op.bytes = ds_get_packet (sh->ds,&op.packet);
-       op.b_o_s  = 1;
-       if((errorCode = theora_decode_header (&context->inf, &op))) {
-	  mp_msg(MSGT_DECAUDIO,MSGL_ERR, 
-		 "Broken Theora header; erroroCode=%i!\n", errorCode);
-	  break;
+       /* Read all header packets, pass them to theora_decode_header. */
+       for (i = 0; i < THEORA_NUM_HEADER_PACKETS; i++)
+       {
+          op.bytes = ds_get_packet (sh->ds, &op.packet);
+          op.b_o_s = 1;
+          if ( (errorCode = theora_decode_header (&context->inf, &context->cc, &op)) )
+          {
+            mp_msg(MSGT_DECAUDIO, MSGL_ERR, "Broken Theora header; errorCode=%i!\n", errorCode);
+            break;
+          }
        }
-
-       /* decode comment packet */
-       op.bytes = ds_get_packet (sh->ds,&op.packet);
-       op.b_o_s  = 1;
-#if 0
-       if((errorCode = theora_decode_comment (&tc, &op))) {
-	  mp_msg(MSGT_DECVIDEO,MSGL_ERR, 
-		 "Broken Theora comment; erroroCode=%i!\n", errorCode);
-	  break;
-       }
-#endif
-
-       /* decode tables packet */
-       op.bytes = ds_get_packet (sh->ds,&op.packet);
-       op.b_o_s  = 1;
-       if((errorCode = theora_decode_tables (&context->inf, &op))) {
-	  mp_msg(MSGT_DECVIDEO,MSGL_ERR, 
-		 "Broken Theora comment; erroroCode=%i!\n", errorCode);
-	  break;
-       }
+       if (errorCode)
+          break;
 
        /* now init codec */
        errorCode = theora_decode_init (&context->st, &context->inf);

@@ -50,6 +50,7 @@ typedef struct ov_struct_st {
 #ifdef HAVE_OGGTHEORA
 typedef struct theora_struct_st {
     theora_state st;
+    theora_comment cc;
     theora_info inf;
 } theora_struct_t;
 #endif
@@ -633,7 +634,12 @@ int demux_ogg_open(demuxer_t* demuxer) {
     } else if (pack.bytes >= 7 && !strncmp (&pack.packet[1], "theora", 6)) {
 	int errorCode = 0;
 	theora_info inf;
-	errorCode = theora_decode_header (&inf, &pack);
+	theora_comment cc;
+	
+	theora_info_init (&inf);
+	theora_comment_init (&cc);
+	
+	errorCode = theora_decode_header (&inf, &cc, &pack);
 	if (errorCode)
 	    mp_msg(MSGT_DEMUX,MSGL_ERR,"Theora header parsing failed: %i \n",
 		   errorCode);

@@ -4162,14 +4162,48 @@ else
   _def_tremor='#undef TREMOR'
   _nocodecmodules="libvorbis $_nocodecmodules"
 fi
-echores "$_vorbis"
+if test "$_vorbis" = yes -a "$_tremor" = yes ; then
+  echores "$_vorbis (Tremor)"
+else
+  echores "$_vorbis"
+fi
 
-echocheck "OggTheora support"
+echocheck "OggTheora support (only the CVS version!)"
 if test "$_theora" = auto ; then
   _theora=no
   cat > $TMPC << EOF
 #include <theora/theora.h>
-int main(void) { theora_version_number (); return 0; }
+#include <string.h>
+int main(void) 
+{ 
+  /* theora is in flux, make sure that all interface routines and 
+   * datatypes exist and work the way we expect it, so we don't break
+   * mplayer */
+  ogg_packet op;
+  theora_comment tc;
+  theora_info inf;
+  theora_state st;
+  yuv_buffer yuv;
+  int r;
+  double t;
+
+  theora_info_init (&inf);
+  theora_comment_init (&tc);
+ 
+  return 0;
+
+  /* we don't want to execute this kind of nonsense; just for making sure
+   * that compilation works... */
+  memset(&op, 0, sizeof(op));
+  r = theora_decode_header (&inf, &tc, &op);
+  r = theora_decode_init (&st, &inf);
+  t = theora_granule_time (&st, op.granulepos);
+  r = theora_decode_packetin (&st, &op);
+  r = theora_decode_YUVout (&st, &yuv);
+  theora_clear (&st);
+
+  return 0;
+}
 EOF
   cc_check -ltheora -logg -lm && _theora=yes
 fi
