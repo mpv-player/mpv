@@ -2330,6 +2330,7 @@ if test "$_gif" = auto ; then
 cat > $TMPC << EOF
 #include <gif_lib.h>
 int main(void) {
+  EGifPutExtensionFirst(NULL,0xFF, 11, NULL);
   return 0;
 }
 EOF
