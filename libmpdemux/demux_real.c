@@ -6,6 +6,9 @@
     Based on FFmpeg's libav/rm.c.
     
     $Log$
+    Revision 1.7  2002/01/18 11:02:52  alex
+    fix dnet support
+
     Revision 1.6  2002/01/04 19:32:58  alex
     updated/extended some parts, based on RMFF (also initial ATRAC3 hackings and notes)
 
@@ -14,7 +17,7 @@ Audio codecs: (supported by RealPlayer8 for Linux)
     ATRC - RealAudio 8 (ATRAC3) - www.minidisc.org/atrac3_article.pdf,
            ACM decoder uploaded, needs some fine-tuning to work
     COOK/COKR - RealAudio G2
-    DNET - RealAudio 3.0
+    DNET - RealAudio 3.0, really it's AC3 in swapped-byteorder
     SIPR - SiproLab's audio codec, ACELP decoder working with MPlayer,
 	   needs fine-tuning too :)
 
@@ -191,6 +194,7 @@ int demux_real_fill_buffer(demuxer_t *demuxer)
 {
     real_priv_t *priv = demuxer->priv;
     demux_stream_t *ds = NULL;
+    sh_audio_t *sh_audio = NULL;
     int len;
     int timestamp;
     int stream_id;
@@ -238,6 +242,7 @@ loop:
 	{
 //	    printf("packet is audio (id: %d)\n", stream_id);
 	    ds = demuxer->audio; /* FIXME */
+	    sh_audio = ds->sh;
 	    break;
 	}
     }
@@ -261,8 +266,34 @@ loop:
     }
 
     demuxer->filepos = stream_tell(demuxer->stream);
+#if 0
     ds_read_packet(ds, demuxer->stream, len, timestamp/90000.0f,
 	demuxer->filepos, (flags & 0x2) ? 0x10 : 0);
+#else
+    {
+	demux_packet_t *dp = new_demux_packet(len);
+	
+	stream_read(demuxer->stream, dp->buffer, len);
+	/* if DNET, swap bytes! */
+	if (sh_audio != NULL)
+	    if (sh_audio->format == 0x2000)
+	    {
+		char *ptr = dp->buffer;
+
+		for (i = 0; i < len; i += 2)
+		{
+		    const char tmp = ptr[0];
+		    ptr[0] = ptr[1];
+		    ptr[1] = tmp;
+		    ptr += 2;
+		}
+	    }
+	dp->pts = timestamp/90000.0f;
+	dp->pos = demuxer->filepos;
+	dp->flags = (flags & 0x2) ? 0x10 : 0;
+	ds_add_packet(ds, dp);
+    }
+#endif
 
     return 1;
 }
@@ -498,8 +529,11 @@ void demux_open_real(demuxer_t* demuxer)
 			    tmp = 0;
 			    break;
 			case MKTAG('a', 't', 'r', 'c'):
-			    printf("Audio: ATRAC3 (RealAudio 8?) (unsupported)\n");
+			    printf("Audio: Sony ATRAC3 (RealAudio 8?) (unsupported)\n");
 			    sh->format = 0x270;
+
+			    sh->wf->nAvgBytesPerSec = 8268;
+			    sh->wf->nBlockAlign = 192;
 			    break;
 			default:
 			    printf("Audio: Unknown (%s)\n", buf);
