@@ -1,4 +1,4 @@
-		MPlayer container format draft 0.01
+		nut format draft 0.02
 
 
                 
@@ -91,7 +91,8 @@ stream_header:
 	lsb_timestamp_length			v
 	fixed_fps				u(1)
 	codec_specific_header_flag		u(1)
-	reserved				u(6)
+	index_flag				u(1)
+	reserved				u(5)
 
 video_stream_header:
 	stream_header
@@ -155,6 +156,8 @@ info_packet: (optional)
 	info_startcode				f(64)
 	start_time				v
 	end_time				v
+	start_stream_id				v
+	end_stream_id				v
 	for(;;){
 		type				b
 		if(type=="") break;
@@ -204,6 +207,10 @@ file_size
 
 length_in_msec
 	length of the file in milli seconds (can be 0 if realtime or such)
+ 
+index_flag
+	1 indicates that this file has an index
+	Note, all files MUST have an index at the end except, (realtime) streams 
 
 stream_id
 	Note: streams with a lower relative class MUST have a lower relative id
@@ -330,14 +337,25 @@ start_time, stop_time
 	the time range in msecs to which the info applies
 	Note: can be used to mark chapters
 
+start_stream_id / end_stream_id
+	the stream(s) to which the info packet applies
+        
 type
 	the fourcc of the type
-	for example: "STR " -> String or "JPEG" -> jpeg image
+	for example: "UTF8" -> String or "JPEG" -> jpeg image
 	0 length means end
 
 name
 	the name of the info entry, valid names are
-	"Author","Description","Copyright","Encoder","Title","CDCover"
+	"Author"
+	"Description"
+	"Copyright"
+	"Encoder"	the name& version of the software used for encoding
+	"Title"
+	"CDCover"	an image of he cd cover (preferable PNG or JPEG)
+	"Source"	"DVD", "VCD", "CD", "MD", "FM radio", "VHS", "PAL-TV", 
+			"NTSC-TV", "LD"
+	"CaptureDevice"	"BT878", "BT848", ... (more exact names are fine too)
 	Note: if someone needs some others, please tell us about them, so we can
 	      add them to the official standard (if they are sane)
 
