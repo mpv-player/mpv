@@ -2896,6 +2896,25 @@ The optional argument selects the sampling mode.
 By default, linear interpolation (mode 1) is used.
 Mode 0 uses nearest-neighbor sampling, which is fast but incorrect.
 .TP
+.B harddup
+Only useful with MEncoder.
+If harddup is used when encoding, it will force duplicate frames to be
+encoded in the output.
+This uses slightly more space, but is necessary for output to MPEG
+files or if you plan to demux and remux the video stream after
+encoding.
+Should be placed at or near the end of the filter chain unless you
+have a good reason to do otherwise.
+.TP
+.B softskip
+Only useful with MEncoder.
+Softskip moves the frame skipping (dropping) step of encoding from
+before the filter chain to some point during the filter chain.
+This allows filters which need to see all frames (inverse telecine,
+temporal denoising, etc.) to function properly.
+Should be placed after the filters which need to see all frames and
+before any subsequent filters that are cpu-intensive.
+.TP
 .B decimate[=max:hi:lo:frac]
 Drops frames that don't differ greatly from the previous frame in
 order to reduce framerate.
