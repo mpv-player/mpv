@@ -364,12 +364,29 @@ will not be displayed.
 Particularly useful on slow terminals or broken ones that do not properly
 handle carriage return (i.e. \\r).
 .TP
+.B \-useaviaspect
+With this option MPlayer and MEncoder will read and write the aspect
+setting from the OpenDML AVI Video Property Header.
+
+This is a different method than the "aspect=..." option of
+libavcodec or XviD, and is prioritized over it during playback,
+because this header is processed first.
+
+Generally, encoding AVIs with square pixels is still the best
+choice, so aspect headers should be avoided.
+Some players can understand it, while they may not understand the
+aspect headers produced by the codec.
+
+.I EXAMPLE:
+.PD 0
+.RSs
+.IPs "\-aspect 16:9 \-useaviaspect"
+will add a header specifying 16:9 aspect ratio.
+.RE
+.PD 1
+.TP
 .B \-v, \-verbose
 Increment verbose level (more \-v means more verbosity).
-.TP
-.B \-useaviaspect
-With this option MPlayer and MEncoder will read and write the aspect setting
-from the OpenDML Video Property Header.
 .
 .PD 0
 .RSs
@@ -3744,31 +3761,6 @@ CBR only, VBR ignores this as it puts each packet in a new chunk.
 .TP
 .B \-audio-preload <0.0\-2.0>
 Sets up audio buffering time interval (default: 0.5s).
-.TP
-.B \-aviaspect <w:h>
-Encode an additional AVI header with aspect ratio.
-This is a different method than the "aspect=..." option of
-libavcodec or XviD, and is prioritized over it during playback,
-because this header is processed first.
-
-This option is included for completeness.
-Some players can understand it, while they do not understand the
-aspect headers produced by the codec.
-If you wish to target such a player, use this option.
-Generally, encoding AVIs with square pixels is still the best
-choice, so aspect headers should be avoided.
-Only use this option if you know what you are doing.
-Avoid using it together with the aspect option of the codec, as it
-could give unpredictable results.
-
-.I EXAMPLE:
-.PD 0
-.RSs
-.IPs "\-aviaspect 16:9"
-will add a header specifying 16:9 aspect ratio.
-.RE
-.PD 1
-.
 .TP
 .B \-endpos <[[hh:]mm:]ss[.ms]|size[b|kb|mb]> (see \-ss and \-sb option too)
 Stop encoding at given time or byte position.
