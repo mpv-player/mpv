@@ -17,7 +17,8 @@
 extern "C" {
 #endif
 
-void SetCodecPath(const char* path);
+extern char* win32_codec_name;  // must be set before calling DrvOpen() !!!
+
 unsigned int _GetPrivateProfileIntA(const char* appname, const char* keyname, int default_value, const char* filename);
 int _GetPrivateProfileStringA(const char* appname, const char* keyname,
 	const char* def_val, char* dest, unsigned int len, const char* filename);
