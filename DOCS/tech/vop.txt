@@ -173,3 +173,14 @@ Current plugins:
     given on the command line, and the eq filter is controllable
     interactively just like with normal hardware equalizer controls.
 
+-vop unsharp=l|cWxH:amount[:l|cWxH:amount]
+    unsharp mask / gaussian blur.
+        l   apply effect on luma component
+        c   apply effect on chroma components
+      WxH   width and height of the matrix, odd sized in both directions
+            min = 3x3, max = 13x11 or 11x13
+            usually you will use somthing between 3x3 and 7x7
+    amount  relative amount of sharpness / blur to add to the image
+            amount < 0 = blur, amount > 0 = sharpen
+            usually you will use something between -1.5 and 1.5
+    MPI: DR (if possible) or TEMP, accepts stride
