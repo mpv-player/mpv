@@ -427,7 +427,7 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
 //   return -1;
   }
   
-  if(mode==MODE_BGR)
+  if((mode==MODE_BGR) == (myximage->byte_order == LSBFirst) )
   {
     printf("hmm, arpi said that isnt used, contact the developers, thats weird\n" );
     return -1;
