@@ -133,8 +133,9 @@ static void draw_alpha_15(int x0,int y0, int w,int h, unsigned char* src, unsign
 static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
 }
 
-static unsigned int scale_xinc=0;
-static unsigned int scale_yinc=0;
+static unsigned int scale_srcW=0;
+static unsigned int scale_srcH=0;
+
 
 static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d_height,uint32_t flags,char *title,uint32_t format )
 {
@@ -179,8 +180,8 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
          image_width=d_width&(~7);
          image_height=d_height;
      }
-     scale_xinc=(width << 16) / image_width - 2;  // needed for proper rounding
-     scale_yinc=(height << 16) / image_height +2;
+     scale_srcW=width;
+     scale_srcH=height;
      SwScale_Init();
  }
 
@@ -481,11 +482,11 @@ static void flip_page( void ){
 static uint32_t draw_slice( uint8_t *src[],int stride[],int w,int h,int x,int y )
 {
 
-if(scale_xinc){
+if(scale_srcW){
  uint8_t *dst[3] = {ImageData, NULL, NULL};
  SwScale_YV12slice(src,stride,y,h,
-                         dst, image_width*((bpp+7)/8), image_width, ( depth == 24 ) ? bpp : depth,
-			 scale_xinc, scale_yinc);
+                         dst, image_width*((bpp+7)/8), ( depth == 24 ) ? bpp : depth,
+			 scale_srcW, scale_srcH, image_width, image_height);
 } else {
  uint8_t *dst=ImageData + ( image_width * y + x ) * ( bpp/8 );
  yuv2rgb( dst,src[0],src[1],src[2],w,h,image_width*( bpp/8 ),stride[0],stride[1] );

@@ -76,8 +76,8 @@ struct win_frame
 static void (*cpy_blk_fnc)(unsigned long,uint8_t *,unsigned long) = NULL;
 
 static int vesa_zoom=0; /* software scaling */
-static unsigned int scale_xinc=0;
-static unsigned int scale_yinc=0;
+static unsigned int scale_srcW=0;
+static unsigned int scale_srcH=0;
 
 static uint32_t image_bpp,image_width, image_height; /* source image dimension */
 static int32_t x_offset,y_offset; /* to center image on screen */
@@ -253,8 +253,9 @@ static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int
 	 if(HAS_DGA()) dst[0] += y_offset*SCREEN_LINE_SIZE(PIXEL_SIZE())+x_offset*PIXEL_SIZE();
 	 dst_stride = PIXEL_SIZE()*(HAS_DGA()?video_mode_info.XResolution:image_width);
 	 SwScale_YV12slice(image,stride,y,h,dst,dst_stride,
-			     image_width, video_mode_info.BitsPerPixel,
-	    		     scale_xinc, scale_yinc);
+			     video_mode_info.BitsPerPixel,
+			     scale_srcW, scale_srcH, image_width, image_height);
+
     }
     else
     {
@@ -722,8 +723,8 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 			image_height = video_mode_info.YResolution;
 			vesa_zoom = 1;
 		      }
-		      scale_xinc=(width << 16) / image_width - 2;  /* needed for proper rounding */
-	    	      scale_yinc=(height << 16) / image_height + 2;
+		      scale_srcW=width;
+	    	      scale_srcH=height;
 		      if(!lvo_name) SwScale_Init();
 		      if(verbose) printf("vo_vesa: Using SCALE\n");
 		  }      
