@@ -140,6 +140,12 @@ static mp_key_name_t key_names[] = {
 // This is the default binding we use when no config file is here
 
 static mp_cmd_bind_t def_cmd_binds[] = {
+
+  { {  MOUSE_BTN3, 0 }, "seek 10" },
+  { {  MOUSE_BTN4, 0 }, "seek -10" },
+  { {  MOUSE_BTN5, 0 }, "volume 1" },
+  { {  MOUSE_BTN6, 0 }, "volume -1" },
+  
   { { KEY_RIGHT, 0 }, "seek 10" },
   { {  KEY_LEFT, 0 }, "seek -10" },
   { {  KEY_UP, 0 }, "seek 60" },

@@ -459,9 +459,12 @@ int vo_x11_check_events(Display *mydisplay){
   {
    XNextEvent( mydisplay,&Event );
    #ifdef HAVE_NEW_GUI
-    if ( use_gui ) guiGetEvent( 0,(char*)&Event );
+    if ( use_gui ) 
+     {
+      guiGetEvent( 0,(char*)&Event );
+      if ( vo_window != Event.xany.window ) continue;
+     }
    #endif
-   //if ( vo_window == Event.xany.window ) // removed because it does not work with DGA ::atmos
     switch( Event.type )
      {
       case Expose:
@@ -503,11 +506,14 @@ int vo_x11_check_events(Display *mydisplay){
 #ifdef HAVE_NEW_INPUT
       case ButtonPress:
            // Ignore mouse whell press event
-           if(Event.xbutton.button == 4 || Event.xbutton.button == 5)
-            break;
+           if(Event.xbutton.button == 4 || Event.xbutton.button == 5) break;
+	   // Ignor mouse button 1 - 3 under gui 
+	   if ( use_gui && ( Event.xbutton.button >= 1 )&&( Event.xbutton.button <= 3 ) ) break;
            mplayer_put_key((MOUSE_BTN0+Event.xbutton.button-1)|MP_KEY_DOWN);
            break;
       case ButtonRelease:
+	   // Ignor mouse button 1 - 3 under gui 
+	   if ( use_gui && ( Event.xbutton.button >= 1 )&&( Event.xbutton.button <= 3 ) ) break;
            mplayer_put_key(MOUSE_BTN0+Event.xbutton.button-1);
            break;
 #endif
@@ -532,11 +538,11 @@ void vo_x11_fullscreen( void )
   {
    vo_fs=VO_TRUE;
    vo_old_x=vo_dx; vo_old_y=vo_dy; vo_old_width=vo_dwidth;   vo_old_height=vo_dheight;
-   {
-    Window root; int foo, foo2;
+//   {
+//    Window root; int foo, foo2;
 //    XGetGeometry( mDisplay,vo_window,&root,&vo_old_x,&vo_old_y,&vo_old_width,vo_old_height,&foo,&foo2 );
 //    XTranslateCoordinates( mDisplay,vo_window,root,0,0,&vo_old_x,&vo_old_y,(Window *)&foo);
-   }
+//   }
    vo_dx=0;        vo_dy=0;        vo_dwidth=vo_screenwidth; vo_dheight=vo_screenheight;
    vo_x11_decoration( mDisplay,vo_window,0 );
   }
