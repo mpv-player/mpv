@@ -67,6 +67,7 @@ typedef struct {
   off_t pos;                 // position in the input stream (file)
   off_t dpos;                // position in the demuxed stream
   int pack_no;		   // serial number of packet
+  int block_no;            // number of <=block_size length blocks (for VBR mp3)
   int flags;               // flags of current packet (keyframe etc)
 //---------------
   int packs;              // number of packets in buffer
@@ -81,6 +82,8 @@ typedef struct {
   int asf_seq;
 // ---- mov -----
   unsigned int ss_mul,ss_div;
+// ---- avi -----
+  unsigned int block_size;
 // ---- stream header ----
   void* sh;
 } demux_stream_t;

@@ -35,6 +35,7 @@ demux_stream_t* new_demuxer_stream(struct demuxer_st *demuxer,int id){
   ds->pos=0;
   ds->dpos=0;
   ds->pack_no=0;
+  ds->block_no=0;
 //---------------
   ds->packs=0;
   ds->bytes=0;
@@ -46,6 +47,7 @@ demux_stream_t* new_demuxer_stream(struct demuxer_st *demuxer,int id){
   ds->asf_packet=NULL;
 //----------------
   ds->ss_mul=ds->ss_div=1;
+  ds->block_size=1;
 //----------------
   ds->sh=NULL;
   return ds;
@@ -320,6 +322,7 @@ int ds_fill_buffer(demux_stream_t *ds){
       ds->pos=p->pos;
       ds->dpos+=p->len; // !!!
       ++ds->pack_no;
+      ds->block_no+=(p->len+ds->block_size-1)/ds->block_size;
       if(p->pts){
         ds->pts=p->pts;
         ds->pts_bytes=0;

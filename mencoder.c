@@ -1071,7 +1071,7 @@ if(sh_audio && !demuxer2){
     if(pts_from_bps){
         unsigned int samples=(sh_audio->audio.dwSampleSize)?
           ((ds_tell(d_audio)-sh_audio->a_in_buffer_len)/sh_audio->audio.dwSampleSize) :
-          (d_audio->pack_no); // <- used for VBR audio
+          (d_audio->block_no); // <- used for VBR audio
 //	printf("samples=%d  \n",samples);
         a_pts=samples*(float)sh_audio->audio.dwScale/(float)sh_audio->audio.dwRate;
       delay_corrected=1;
@@ -1119,7 +1119,7 @@ if(sh_audio && !demuxer2){
 	float len=(demuxer->movi_end-demuxer->movi_start);
 	float p=len>1000 ? (float)(demuxer->filepos-demuxer->movi_start) / len : 0;
 	if(!len && sh_audio && sh_audio->audio.dwLength>100){
-	    p=(sh_audio->audio.dwSampleSize? ds_tell(sh_audio->ds)/sh_audio->audio.dwSampleSize : sh_audio->ds->pack_no)
+	    p=(sh_audio->audio.dwSampleSize? ds_tell(sh_audio->ds)/sh_audio->audio.dwSampleSize : sh_audio->ds->block_no)
 	     / (float)(sh_audio->audio.dwLength);
 	}
 #if 0

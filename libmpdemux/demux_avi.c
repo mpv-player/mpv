@@ -33,6 +33,8 @@ demux_stream_t* demux_avi_select_stream(demuxer_t *demux,unsigned int id){
       if(!demux->audio->sh){
         demux->audio->sh=demux->a_streams[stream_id];
         mp_msg(MSGT_DEMUX,MSGL_V,"Auto-selected AVI audio ID = %d\n",demux->audio->id);
+	demux->audio->block_size=((sh_audio_t*)(demux->audio->sh))->wf->nBlockAlign;
+	//printf("&&&&& setting blocksize to %d &&&&&\n",demux->audio->block_size);
       }
       return demux->audio;
   }
@@ -602,6 +604,7 @@ void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags){
 // ------------ STEP 2: seek audio, find the right chunk & pos ------------
 
       d_audio->pack_no=0;
+      d_audio->block_no=0;
       d_audio->dpos=0;
 
       if(sh_audio){
@@ -636,6 +639,7 @@ void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags){
             if(avi_stream_id(id)==d_audio->id){
                 len=((AVIINDEXENTRY *)priv->idx)[i].dwChunkLength;
                 ++d_audio->pack_no;
+		d_audio->block_no+=(len+d_audio->block_size-1)/d_audio->block_size;
                 if(d_audio->dpos<=curr_audio_pos && curr_audio_pos<(d_audio->dpos+len)){
                   break;
                 }
@@ -662,10 +666,12 @@ void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags){
 		  skip_audio_bytes+=len;
 		} else {
 		  ++d_audio->pack_no;
+		  d_audio->block_no+=(len+d_audio->block_size-1)/d_audio->block_size;
                   d_audio->dpos+=len;
 		  audio_chunk_pos=i;
 		}
-		--chunks;
+//		--chunks;
+		chunks-=(len+d_audio->block_size-1)/d_audio->block_size;
             }
           }
 	  //if(audio_chunk_pos>chunk_max) audio_chunk_pos=chunk_max;
