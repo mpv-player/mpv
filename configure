@@ -2511,7 +2511,7 @@ if test "$_faad" = auto ; then
   _faad=no
   cat > $TMPC << EOF
 #include <faad.h>
-int main(void) { return 0; }
+int main(void) { faacDecHandle testhand; testhand = faacDecOpen(); return 0; }
 EOF
   cc_check -lfaad -lm && _faad=yes
 fi
