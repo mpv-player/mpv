@@ -216,3 +216,7 @@ A: No.
 Q: And if MPEG is sufficient?
 A: Maybe. But you better look for already existant MPEG players on that
    platform.
+
+Q: MPlayer dies with "MPlayer interrupted by signal 4 in module: decode_video".
+A: Try running MPlayer on the machine you compiled on. Or recompile. Don't
+   use MPlayer on different CPU that it was compiled on.
