@@ -509,7 +509,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Audio "Audio"
 #define MSGTR_PREFERENCES_Video "Vídeo"
 #define MSGTR_PREFERENCES_SubtitleOSD "Legenda & OSD"
-+#define MSGTR_PREFERENCES_Codecs "Codecs & demuxer"
+#define MSGTR_PREFERENCES_Codecs "Codecs & demuxer"
 #define MSGTR_PREFERENCES_Misc "Misc"
 
 #define MSGTR_PREFERENCES_None "Nenhum"
@@ -574,8 +574,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding12 "Celta (ISO-8859-14)"
 #define MSGTR_PREFERENCES_FontEncoding13 "Caracteres Hebraicos (ISO-8859-8)"
 #define MSGTR_PREFERENCES_FontEncoding14 "Russo (KOI8-R)"
-#define MSGTR_PREFERENCES_FontEncoding15 "Ucraniano,
-Ukrainian, Belarusian (KOI8-U/RU)"
+#define MSGTR_PREFERENCES_FontEncoding15 "Ucraniano, Bielo-Russo (KOI8-U/RU)"
 #define MSGTR_PREFERENCES_FontEncoding16 "Caracteres Chineses Simplificados (CP936)"
 #define MSGTR_PREFERENCES_FontEncoding17 "Caracteres Chineses Tradicionais (BIG5)"
 #define MSGTR_PREFERENCES_FontEncoding18 "Caracteres Japoneses (SHIFT-JIS)"
