@@ -4,7 +4,9 @@ mplayer (1.0)
 
     DOCS:
     * Support for building incomplete XML documentation
-    * HTML documentation got obsolete
+    * HTML documentation obsoleted
+    * English and French HTML documentation removed
+    * Spanish documentation translation finished
 
     Codecs and demuxers:
     * improved FLAC configure detection
@@ -13,7 +15,7 @@ mplayer (1.0)
     * some fixes in the delogo filter 
     
     FFmpeg/libavcodec:
-    * langrange multipliers instead qscale, improved the encoding quality alot
+    * Lagrange multipliers instead of qscale, encoding quality much improved
     
     Drivers:
     * VIDIX equalizer support in fbdev
@@ -21,6 +23,7 @@ mplayer (1.0)
     
     Others:
     * swscaler fixed on mlib
+
 
   pre2:
 
@@ -166,11 +169,12 @@ mplayer (1.0)
     * MPEG-TS (Transport Stream) and TIVO demuxers
     * DVB (Digital Video Broadcasting) input driver
     * hwac3: DTS passthru support
-    * new filters: down3dright, detc, telecine, tfields, ilpack, ivtc, dsize, tinterlace,
-      pullup (mmx optimized!), framestep, tile
+    * new filters: down3dright, detc, telecine, tfields, ilpack, ivtc, dsize,
+      tinterlace, pullup (MMX optimized!), framestep, tile
     * vf layer: slices support (crop, expand, swscale only)
     * vf scale aspect fixes
-    * swscaler: cleanup & API change, yv12 -> yuy2 in alpha asm, -fPIC compileable
+    * swscaler: cleanup & API change, yv12 -> yuy2 in alpha asm,
+      -fPIC compileable
     * swscaler: brightness/cont/sat. and different YUV matrices support
     * NUV encoding
     * SGI image files decoding (-mf)
@@ -185,7 +189,7 @@ mplayer (1.0)
     * mp3lib: moved the assembly sources into gcc inline assembly (c)
     * mp3lib: sync with mpg123 0.59s-pre
     * mp3lib: final layer-1 support
-    * mp3lib: skip trashed first mp3 frame, fixes lot of buggy/misdetected files
+    * mp3lib: skip trashed first mp3 frame, fixes many buggy/misdetected files
     * imported a working FAAD version
     * 8BPS (Planar RGB) support
     * working DVD (libmpdvdkit) support for Cygwin/MinGW
