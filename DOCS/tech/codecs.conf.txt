@@ -62,36 +62,45 @@ videocodec indeo5ds
 
 This is a particularly full-featured video codec. The "videocodec" keyword
 identifies the fact that this is the start of a new video
-codec. "indeo5ds" is MPlayer's unique name for the codec.
+codec. "indeo5ds" is MPlayer's unique name for the codec. You have to use
+this name with the -vd/-ad option.
 
 The next line has the keyword "info" which specifies a human-readable
-comment accompanies this codec.
+comment accompanies this codec. This is printed by -vd help / -ad help.
 
 The "status" keyword carries information about the codec's functional
 status. MPlayer currently recognizes 4 status levels: working, buggy,
-crashing, and untested.
+crashing, and untested. When it gets to codec auto-selection, it tries
+untested first (to force the users to test it for us and report result :)),
+then working and finally buggy ones. Codecs marked crashing won't be tried,
+unless explicitly (-vd/-ad) selected.
 
 The next line lists 4-character codes (FOURCCs) that are associated with
 this codec. There can be more than one FOURCC specified on a fourcc line
 as long as they're separated with a comma. There can also be multiple
-fourcc lines in the codec.
+fourcc lines in the codec. There also can be a second fourcc given, separated
+with a space. MPlayer will replace the original fourcc in the headers with
+this one before opening the codec. It's useful for win32 codecs checking for
+the fourccs.
 
 The "driver" keyword associates this codec with an internal MPlayer
 decoder module. MPlayer has a module named "dshow" that handles data
-encoded by the codec.
+encoded by the codec. See -vfm help / -afm help for the available module list.
 
-The "dll" keyword specifies which Win32 or XAnim binary module needs to be
+The "dll" keyword specifies which Win32/XAnim/Real binary module needs to be
 loaded in order to handle the specific media type. This keyword is usually
-only used in conjunction with the dshow, vfw, acm, and xanim drivers since
+only used in conjunction with the dshow, vfw, acm, xanim and real drivers since
 they all manage communication with binary-only modules.
 
 The "guid" keyword identifies a 16-byte Microsoft GUID that some media
-files use to identify codecs.
+files use to identify codecs. Used only for win32 dshow codecs.
 
 The "out" keyword identifies which output format that the decoder is known
 to output. Just like the fourcc line, there can be multiple out lines or
 multiple comma-separated output formats on the same line. The output
 formats should be listed in order of preference.
+The outfmt values can be followed by one or more flags, like flip, noflip,
+static, querty. TODO: describe tehse in detail.
 
 Audio Codecs
 ------------
