@@ -4,7 +4,7 @@ LIBNAME = libDMO_Filter.a
 include ../../config.mak
 
 # DS_AudioDec.c 
-SRCS	= DMO_VideoDecoder.c  buffer.c  dmo.c  dmo_guids.c
+SRCS	= DMO_AudioDecoder.c DMO_VideoDecoder.c  buffer.c  dmo.c  dmo_guids.c
 OBJS = $(SRCS:.c=.o)
 
 INCLUDE = -I. -I../dshow -I.. $(EXTRA_INC)
