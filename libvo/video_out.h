@@ -16,8 +16,6 @@
 //#include "font_load.h"
 #include "img_format.h"
 #include "../vidix/vidix.h"
-/* All video drivers will want this */
-#include "geometry.h"
 
 #define VO_EVENT_EXPOSE 1
 #define VO_EVENT_RESIZE 2
