@@ -29,6 +29,7 @@ Player features:
 - verify valid range of numeric options (like '-xy 0')
 - DirectShow support
 - OSD
+- add FULL OpenDivX encoding capability (audio+video)
 
 Requested codecs:
 - WMV (failing to load)
