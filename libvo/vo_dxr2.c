@@ -18,9 +18,15 @@
 #include "mp_msg.h"
 #include "cfgparser.h"
 
+#ifdef X11_FULLSCREEN
+#include "x11_common.h"
+#endif
+
 #include <dxr2ioctl.h>
 
 LIBVO_EXTERN (dxr2)
+
+extern char *get_path(char *filename);
 
 extern float monitor_aspect;
 extern float movie_aspect;
@@ -28,15 +34,20 @@ extern float movie_aspect;
 int dxr2_fd = -1;
 
 static int movie_w,movie_h;
-static int fs = 0;
 static int playing = 0;
 static int last_freq_id = -1;
 
 // vo device used to blank the screen for the overlay init
 static  vo_functions_t* sub_vo = NULL;
 
+static uint8_t* sub_img = NULL;
+static int sub_x,sub_y,sub_w,sub_h;
+static int sub_x_off,sub_y_off;
+static int sub_config_count;
+static int aspect;
 
 static int use_ol = 1;
+static int ol_ratio = 1000;
 static char *norm = NULL;
 static char *ucode = NULL;
 static int ar_mode = DXR2_ASPECTRATIOMODE_LETTERBOX;
@@ -47,10 +58,13 @@ static int interlaced_mode = DXR2_INTERLACED_ON;
 static int pixel_mode = DXR2_PIXEL_CCIR601;
 static int iec958_mode = DXR2_IEC958_DECODED;
 static int mute_mode = DXR2_AUDIO_MUTE_OFF;
+static int ignore_cache = 0;
+static int update_cache = 0;
 
 static config_t dxr2_opts[] = {
   { "overlay", &use_ol, CONF_TYPE_FLAG, 0, 0, 1, NULL},
   { "nooverlay", &use_ol, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+  { "overlay-ratio", &ol_ratio, CONF_TYPE_INT, CONF_RANGE, 1, 2500, NULL },
   { "ucode", &ucode, CONF_TYPE_STRING,0, 0, 0, NULL},
 
   { "norm", &norm, CONF_TYPE_STRING,0, 0, 0, NULL},
@@ -76,6 +90,9 @@ static config_t dxr2_opts[] = {
 
   { "mute", &mute_mode,CONF_TYPE_FLAG, 0, 1, 0, NULL},
   { "nomute",&mute_mode,CONF_TYPE_FLAG, 0, 0, 1, NULL},
+
+  { "ignore-cache",&ignore_cache,CONF_TYPE_FLAG, 0, 0, 1, NULL},
+  { "update-cache",&update_cache,CONF_TYPE_FLAG, 0, 0, 1, NULL},
   { NULL,NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -366,6 +383,206 @@ void dxr2_send_sub_packet(unsigned char* data,int len,int id,unsigned int timest
   }
 }
 
+static int dxr2_set_vga_params(dxr2_vgaParams_t* vga,int detect) {
+  // Init the overlay, don't ask me how it work ;-)
+  dxr2_sixArg_t oc;
+  dxr2_oneArg_t om;
+  dxr2_twoArg_t win;
+  dxr2_fourArg_t crop;
+
+  crop.arg1=0;
+  crop.arg2=0;
+  crop.arg3=55;
+  crop.arg4=300;
+  ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_CROPPING, &crop);
+  
+  oc.arg1 = 0x40;
+  oc.arg2 = 0xff;
+  oc.arg3 = 0x40;
+  oc.arg4 = 0xff;
+  oc.arg5 = 0x40;
+  oc.arg6 = 0xff;
+  ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_COLOUR, &oc);
+
+  om.arg = ol_ratio;
+  ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_RATIO,&om);
+
+  win.arg1 = 100;
+  win.arg2 = 3;
+  ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_POSITION,&win);
+
+  win.arg1 = vo_screenwidth;
+  win.arg2 = vo_screenheight;
+  ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_DIMENSION,&win);
+
+  om.arg = 3;
+  ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_IN_DELAY,&om);
+
+  if(detect) {
+    // First we need a white screen
+    uint8_t* img = malloc(vo_screenwidth*vo_screenheight*3);
+    uint8_t* src[] = { img, NULL, NULL };
+    int cc = vo_config_count;
+   
+    memset(img,255,vo_screenwidth*vo_screenheight*3);
+    vo_config_count = sub_config_count;
+    if(sub_vo->config(vo_screenwidth,vo_screenheight,vo_screenwidth,vo_screenheight,
+		    VOFLAG_FULLSCREEN ,"DXR2 sub vo",IMGFMT_BGR24,NULL) != 0) {
+      mp_msg(MSGT_VO,MSGL_WARN,"VO: [dxr2] sub vo config failed => No overlay\n");
+      sub_vo->uninit();
+      sub_vo = NULL;
+      use_ol = 0;
+      vo_config_count = cc;
+      return 0;
+    }
+    sub_vo->draw_frame(src);
+    sub_vo->flip_page();
+    free(img);
+    sub_config_count++;
+    vo_config_count = cc;
+    
+    om.arg = DXR2_OVERLAY_WINDOW_COLOUR_KEY;
+    ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_MODE,&om);
+    
+    vga->xScreen = vo_screenwidth;
+    vga->yScreen = vo_screenheight;
+    vga->hOffWinKey = 100;
+    vga->vOffWinKey = 3;
+    ioctl(dxr2_fd, DXR2_IOC_CALCULATE_VGA_PARAMETERS, vga);
+  }
+  ioctl(dxr2_fd, DXR2_IOC_SET_VGA_PARAMETERS,vga);
+
+  return 1;
+}
+
+static int dxr2_save_vga_params(dxr2_vgaParams_t* vga,char* name) {
+  struct stat s;
+  char* p = get_path("dxr2_cache");
+  int p_len = strlen(p), name_len = strlen(name);
+  char cache_path[p_len + name_len + 2];
+  int ret;
+  FILE* fd;
+
+  if(stat(p,&s) !=0) {
+    mp_msg(MSGT_VO,MSGL_WARN,"VO: [dxr2] No vga cache dir found (%s)\n",strerror(errno));
+    if(errno == EACCES) {
+      free(p);
+      return 0;
+    }
+    // Try to create the dir
+    if(mkdir(p,S_IRWXU) != 0) {
+      mp_msg(MSGT_VO,MSGL_ERR,"VO: [dxr2] Unable to create vga cache dir %s (%s)\n",p,strerror(errno));
+      free(p);
+      return 0;
+    }
+  }
+  sprintf(cache_path,"%s/%s",p,name);
+  free(p);
+  fd = fopen(cache_path,"w");
+  if(fd == NULL) {
+    mp_msg(MSGT_VO,MSGL_ERR,"VO: [dxr2] Unable to open cache file %s for writing (%s)\n",cache_path,strerror(errno));
+    return 0;
+  }
+
+  ret = fprintf(fd,"%d %d %d %d %d %d %d %d %d %d %d\n",
+		vga->hOffWinKey,
+		vga->vOffWinKey,
+		vga->xScreen,
+		vga->yScreen,
+		vga->hsyncPol,
+		vga->vsyncPol,
+		vga->blankStart,
+		vga->blankWidth,
+		vga->hOffset,
+		vga->vOffset,
+		vga->ratio);
+
+  fclose(fd);
+  return ret == 11 ? 1 : 0;
+}
+
+static int dxr2_load_vga_params(dxr2_vgaParams_t* vga,char* name) {
+  char* p = get_path("dxr2_cache");
+  int p_len = strlen(p), name_len = strlen(name);
+  char cache_path[p_len + name_len + 2];
+  int ret;
+  FILE* fd;
+
+  sprintf(cache_path,"%s/%s",p,name);
+  free(p);
+
+  fd = fopen(cache_path,"r");
+  if(fd == NULL) {
+    mp_msg(MSGT_VO,MSGL_ERR,"VO: [dxr2] Unable to open cache file %s for reading (%s)\n",cache_path,strerror(errno));
+    return 0;
+  }
+  ret = fscanf(fd, "%d %d %d %d %d %d %d %d %d %d %d\n",
+	       &vga->hOffWinKey,
+	       &vga->vOffWinKey,
+	       &vga->xScreen,
+	       &vga->yScreen,
+	       &vga->hsyncPol,
+	       &vga->vsyncPol,
+	       &vga->blankStart,
+	       &vga->blankWidth,
+	       &vga->hOffset,
+	       &vga->vOffset,
+	       &vga->ratio);
+
+  fclose(fd);
+  return ret == 11 ? 1 : 0;
+}
+
+static int dxr2_setup_vga_params(void) {
+  const vo_info_t* vi = sub_vo->get_info();
+  dxr2_vgaParams_t vga;
+
+  int loaded = dxr2_load_vga_params(&vga,(char*)vi->short_name);
+  if(!dxr2_set_vga_params(&vga,(update_cache || ignore_cache) ? 1 : !loaded ))
+    return 0;
+  if(!loaded || update_cache)
+    dxr2_save_vga_params(&vga,(char*)vi->short_name);
+  return 1;
+}
+
+static void dxr2_set_overlay_window(void) {
+  uint8_t* src[] = { sub_img, NULL, NULL };
+  dxr2_twoArg_t win;
+  int redisp = 0;
+  int cc = vo_config_count;
+  vo_config_count = sub_config_count;
+  sub_vo->draw_frame(src);
+  sub_vo->flip_page();
+  vo_config_count = cc;
+
+  if(sub_w != vo_dwidth || sub_h != vo_dheight) {
+    int new_aspect = ((1<<16)*vo_dwidth + vo_dheight/2)/vo_dheight;
+    sub_w = vo_dwidth;
+    sub_h = vo_dheight;
+    if(new_aspect > aspect)
+      sub_w = (sub_h*aspect + (1<<15))>>16;
+    else
+      sub_h = ((sub_w<<16) + (aspect>>1)) /aspect;
+    sub_x_off = (vo_dwidth-sub_w) / 2;
+    sub_y_off = (vo_dheight-sub_h) / 2;
+    sub_x = -vo_dx; // Be sure to also replace the overlay
+    win.arg1 = sub_w;
+    win.arg2 = sub_h;
+    mp_msg(MSGT_VO,MSGL_V,"VO: [dxr2] set win size w=%d h=%d and offset x=%d y=%d \n",win.arg1,win.arg2,sub_x_off,sub_y_off);
+    ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_DIMENSION, &win);
+  }
+  
+  if(vo_dx != sub_x || vo_dy != sub_y) {
+    sub_x = vo_dx;
+    sub_y = vo_dy;
+    win.arg1 = (sub_x > 0 ? sub_x : 0) + sub_x_off;
+    win.arg2 = (sub_y > 0 ? sub_y : 0) + sub_y_off;
+    mp_msg(MSGT_VO,MSGL_V,"VO: [dxr2] set pos x=%d y=%d \n",win.arg1,win.arg2);
+    ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_POSITION,&win);
+  }
+
+}
+
 static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t width, uint32_t height, uint32_t flags, char *title, uint32_t format, const vo_tune_info_t *info)
 {
   int arg;
@@ -392,8 +609,8 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t width, uint
   if (vo_fps > 28)
     arg3.arg1 = DXR2_SRC_VIDEO_FREQ_30;
   else arg3.arg1 = DXR2_SRC_VIDEO_FREQ_25;
-  arg3.arg2 = 0;
-  arg3.arg3 = 0;
+  arg3.arg2 = s_width;
+  arg3.arg3 = s_height;
   ioctl(dxr2_fd, DXR2_IOC_SET_SOURCE_VIDEO_FORMAT, &arg3);
   arg = DXR2_BITSTREAM_TYPE_MPEG_VOB;
   ioctl(dxr2_fd, DXR2_IOC_SET_BITSTREAM_TYPE, &arg);
@@ -496,16 +713,71 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t width, uint
   ioctl(dxr2_fd, DXR2_IOC_AUDIO_MUTE, &arg);
 
   // Overlay
-  if(use_ol) {
+  while(use_ol) {
     dxr2_twoArg_t win;
-    win.arg1 = flags & VOFLAG_FULLSCREEN ? vo_screenwidth : width;
-    win.arg2 = flags & VOFLAG_FULLSCREEN ? vo_screenheight : height;
-    ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_DIMENSION, &win);
-    win.arg1 = (vo_screenwidth - win.arg1) / 2;
-    win.arg2 = (vo_screenheight - win.arg2) / 2;
-    ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_POSITION,&win);
+    dxr2_oneArg_t om;
+    int cc = vo_config_count;
+    vo_config_count = sub_config_count;
+    if(!dxr2_setup_vga_params()) {
+      sub_vo->uninit();
+      sub_vo = NULL;
+      vo_config_count = cc;
+      break;
+    }
+    if(strcmp(sub_vo->get_info()->short_name,"x11") != 0) {
+      sub_vo->uninit();
+      vo_config_count = cc;
+      sub_vo = NULL;
+    } 
+ 
+    while(sub_vo) {
+      dxr2_sixArg_t oc;
+      int i,sub_flags = VOFLAG_SWSCALE | (flags & VOFLAG_FULLSCREEN);
+      if(sub_vo->config(width,height,width,height,sub_flags,
+			"MPlayer DXR2 render",IMGFMT_BGR24,NULL) != 0) {
+	mp_msg(MSGT_VO,MSGL_WARN,"VO: [dxr2] sub vo config failed => No X11 window\n");
+	sub_vo->uninit();
+	sub_vo = NULL;
+	break;
+      }
+      sub_config_count++;
+
+      // Feel free to try some other other color and report your results
+      oc.arg1 = 0x40;
+      oc.arg2 = 0xff;
+      oc.arg3 = 0x00;
+      oc.arg4 = 0x10;
+      oc.arg5 = 0x40;
+      oc.arg6 = 0xff;
+      ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_COLOUR, &oc);
+      
+      om.arg = DXR2_OVERLAY_WINDOW_COLOUR_KEY;
+      ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_MODE,&om);
+      sub_img = malloc(width*height*3);
+      for(i = 0 ; i < width*height*3 ; i += 3) {
+	sub_img[i] = 255;
+	sub_img[i+1] = 0;
+	sub_img[i+2] = 255;
+      }
+      aspect = ((1<<16)*width + height/2)/height;
+      sub_w = sub_h = 0;
+      dxr2_set_overlay_window();
+      break;
+    }
+    vo_config_count = cc;
+    if(!sub_vo) { // Fallback on non windowed overlay
+      om.arg = DXR2_OVERLAY_WINDOW_KEY;
+      ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_MODE,&om);
+      win.arg1 = flags & VOFLAG_FULLSCREEN ? vo_screenwidth : width;
+      win.arg2 = flags & VOFLAG_FULLSCREEN ? vo_screenheight : height;
+      ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_DIMENSION, &win);
+      win.arg1 = (vo_screenwidth - win.arg1) / 2;
+      win.arg2 = (vo_screenheight - win.arg2) / 2;
+      ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_POSITION,&win);
+    }
+    break;
   }
-  fs = flags & VOFLAG_FULLSCREEN ? 1 : 0;
+  vo_fs = flags & VOFLAG_FULLSCREEN ? 1 : 0;
   movie_w = width;
   movie_h = height;
 
@@ -571,15 +843,33 @@ static void uninit(void)
     close(dxr2_fd);
     dxr2_fd = -1;
   }
+  if(sub_img) {
+    free(sub_img);
+    sub_img = NULL;
+  }
   if(sub_vo) {
+    int cc = vo_config_count;
+    vo_config_count = sub_config_count;
     sub_vo->uninit();
     sub_vo = NULL;
+    vo_config_count = cc;
   }
 }
 
 
 static void check_events(void)
 {
+  // I'd like to have this done in an x11 independent way
+  // It's because of this that we are limited to vo_x11 for windowed overlay :-(
+#ifdef X11_FULLSCREEN
+  if(sub_vo) {
+    int e=vo_x11_check_events(mDisplay);
+    if ( !(e&VO_EVENT_RESIZE) && !(e&VO_EVENT_EXPOSE) ) return;
+    XSetBackground(mDisplay, vo_gc, 0);
+    XClearWindow(mDisplay, vo_window);
+    dxr2_set_overlay_window();
+  }
+#endif
 }
 
 static uint32_t preinit(const char *arg) {
@@ -590,6 +880,7 @@ static uint32_t preinit(const char *arg) {
   int n=0;
 
   sub_vo = NULL;
+  sub_config_count = 0;
   if(use_ol) {
     if (arg) {
       for(n = 0 ; video_out_drivers[n] != NULL ; n++) {
@@ -670,78 +961,6 @@ static uint32_t preinit(const char *arg) {
     crop.arg3=0;
     crop.arg4=0;
     ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_CROPPING, &crop);
-  } else while(1) {
-    // Init the overlay, don't ask me how it work ;-)
-    dxr2_sixArg_t oc;
-    dxr2_oneArg_t om;
-    dxr2_vgaParams_t vga;
-    dxr2_twoArg_t win;
-
-    // First we need a white screen
-    uint8_t* img = malloc(vo_screenwidth*vo_screenheight*3);
-    uint8_t* src[] = { img, NULL, NULL };
-	  
-    memset(img,255,vo_screenwidth*vo_screenheight*3);
-	  
-    if(sub_vo->config(vo_screenwidth,vo_screenheight,vo_screenwidth,vo_screenheight,
-		      VOFLAG_FULLSCREEN ,"DXR2 sub vo",IMGFMT_BGR24,NULL) != 0) {
-      mp_msg(MSGT_VO,MSGL_WARN,"VO: [dxr2] sub vo config failed => No overlay\n");
-      sub_vo->uninit();
-      sub_vo = NULL;
-      use_ol = 0;
-      break;
-    }
-    sub_vo->draw_frame(src);
-    sub_vo->flip_page();
-    free(img);
-
-    crop.arg1=0;
-    crop.arg2=0;
-    crop.arg3=55;
-    crop.arg4=300;
-    ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_CROPPING, &crop);
-  
-    oc.arg1 = 0x40;
-    oc.arg2 = 0xff;
-    oc.arg3 = 0x40;
-    oc.arg4 = 0xff;
-    oc.arg5 = 0x40;
-    oc.arg6 = 0xff;
-    ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_COLOUR, &oc);
-
-    om.arg = 1000;
-    ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_RATIO,&om);
-
-    win.arg1 = 100;
-    win.arg2 = 3;
-    ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_POSITION,&win);
-
-    win.arg1 = vo_screenwidth;
-    win.arg2 = vo_screenheight;
-    ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_DIMENSION,&win);
-
-    om.arg = 3;
-    ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_IN_DELAY,&om);
-
-    om.arg = DXR2_OVERLAY_WINDOW_COLOUR_KEY;
-    ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_MODE,&om);
-
-    vga.xScreen = vo_screenwidth;
-    vga.yScreen = vo_screenheight;
-    vga.hOffWinKey = 100;
-    vga.vOffWinKey = 3;
-    ioctl(dxr2_fd, DXR2_IOC_CALCULATE_VGA_PARAMETERS, &vga);
-    ioctl(dxr2_fd, DXR2_IOC_SET_VGA_PARAMETERS, &vga);
-
-    // Remove the white screen
-    sub_vo->uninit();
-    vo_uninit(); // x11 need this to fully disapear
-    sub_vo = NULL;
-	  
-    om.arg = DXR2_OVERLAY_WINDOW_KEY;
-    ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_MODE,&om);
-
-    break;
   }
   return 0;
 }
@@ -764,11 +983,13 @@ static uint32_t control(uint32_t request, void *data, ...)
   case VOCTRL_FULLSCREEN:
     if(!use_ol)
       return VO_NOTIMPL;
+    else if(sub_vo) 
+      return sub_vo->control(VOCTRL_FULLSCREEN,0);
     else {
       dxr2_twoArg_t win;
-      fs = !fs;
-      win.arg1 = fs ? vo_screenwidth : movie_w;
-      win.arg2 = fs ? vo_screenheight : movie_h;
+      vo_fs = !vo_fs;
+      win.arg1 = vo_fs ? vo_screenwidth : movie_w;
+      win.arg2 = vo_fs ? vo_screenheight : movie_h;
       ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_DIMENSION, &win);
       win.arg1 = (vo_screenwidth - win.arg1) / 2;
       win.arg2 = (vo_screenheight - win.arg2) / 2;
