@@ -305,7 +305,20 @@ static char help_text[]=
 #define MSGTR_LIRCsocketerr "Something's wrong with the lirc socket: %s\n"
 #define MSGTR_LIRCcfgerr "Failed to read LIRC config file %s !\n"
 
+// vf.c
+#define MSGTR_CouldNotFindVideoFilter "Couldn't find video filter '%s'\n"
+#define MSGTR_CouldNotOpenVideoFilter "Couldn't open video filter '%s'\n"
+#define MSGTR_OpeningVideoFilter "Opening video filter: [%s=%s]\n"
+#define MSGTR_OpeningVideoFilter2 "Opening video filter: [%s]\n"
+#define MSGTR_CannotFindColorspace "Cannot find common colorspace, even by inserting 'scale' :(\n"
 
+// vd.c
+#define MSGTR_CodecDidNotSet "VDec: codec didn't set sh->disp_w and sh->disp_h, trying to workaround!\n"
+#define MSGTR_VoConfigRequest "VDec: vo config request - %d x %d (preferred csp: %s)\n"
+#define MSGTR_CouldNotFindColorspace "Couldn't find matching colorspace - retrying with -vop scale...\n"
+#define MSGTR_MovieAspectIsSet "Movie-Aspect is %.2f:1 - prescaling to correct movie aspect.\n"
+#define MSGTR_MovieAspectUndefined "Movie-Aspect is undefined - no prescaling applied.\n"
+			 
 // ====================== GUI messages/buttons ========================
 
 #ifdef HAVE_NEW_GUI

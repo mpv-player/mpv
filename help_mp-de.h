@@ -304,6 +304,20 @@ static char help_text[]=
 #define MSGTR_LIRCsocketerr "Fehler im LIRC Socket: %s\n"
 #define MSGTR_LIRCcfgerr "Kann LIRC Konfigurationsdatei nicht lesen %s !\n"
 
+// vf.c
+#define MSGTR_CouldNotFindVideoFilter "Konnte Videofilter '%s' nicht finden\n"
+#define MSGTR_CouldNotOpenVideoFilter "Konnte Videofilter '%s' nicht öffnen\n"
+#define MSGTR_OpeningVideoFilter "Öffne Videofilter: [%s=%s]\n"
+#define MSGTR_OpeningVideoFilter2 "Öffne Videofilter: [%s]\n"
+#define MSGTR_CannotFindColorspace "Konnte kein allgemeines Colorspace-Format finden, auch nicht mithilfe von 'scale' :(\n"
+
+// vd.c
+#define MSGTR_CodecDidNotSet "VDec: Codec hat sh->disp_w und sh->disp_h nicht gesetzt, versuche zu umgehen!\n"
+#define MSGTR_VoConfigRequest "VDec: VO wird versucht auf %d x %d (Bevorzugter Colorspace: %s) zu setzen\n"
+#define MSGTR_CouldNotFindColorspace "Kann keinen passenden Colorspace finden - versuche erneut mithilfe von -vop scale...\n"
+#define MSGTR_MovieAspectIsSet "Movie-Aspect ist %.2f:1 - Prescaling zur korrekten Videogröße.\n"
+#define MSGTR_MovieAspectUndefined "Movie-Aspect ist undefiniert - kein Prescaling verwendet.\n"
+			 
 
 // ====================== GUI messages/buttons ========================
 

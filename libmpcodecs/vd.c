@@ -139,8 +139,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outf
 
 #if 1
     if(!(sh->disp_w && sh->disp_h))
-        mp_msg(MSGT_DECVIDEO,MSGL_WARN,
-            "VDec: codec didn't set sh->disp_w and sh->disp_h, trying to workaround!\n");
+        mp_msg(MSGT_DECVIDEO,MSGL_WARN, MSGTR_CodecDidNotSet);
     /* XXX: HACK, if sh->disp_* aren't set,
      * but we have w and h, set them :: atmos */
     if(!sh->disp_w && w)
@@ -149,8 +148,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outf
         sh->disp_h=h;
 #endif
 
-    mp_msg(MSGT_DECVIDEO,MSGL_INFO,"VDec: vo config request - %d x %d (preferred csp: %s)  \n",
-	w,h,vo_format_name(preferred_outfmt));
+    mp_msg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_VoConfigRequest,w,h,vo_format_name(preferred_outfmt));
 
 //    if(!vf) return 1; // temp hack
     
@@ -178,7 +176,7 @@ csp_again:
     if(j<0){
 	// TODO: no match - we should use conversion...
 	if(strcmp(vf->info->name,"scale")){	
-	    mp_msg(MSGT_DECVIDEO,MSGL_INFO,"Couldn't find matching colorspace - retrying with -vop scale...\n");
+	    mp_msg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_CouldNotFindColorspace);
 	    vf=vf_open_filter(vf,"scale",NULL);
 	    goto csp_again;
 	}
@@ -234,8 +232,7 @@ csp_again:
     }
     if(sh->aspect>0.01){
       int w;
-      mp_msg(MSGT_CPLAYER,MSGL_INFO,"Movie-Aspect is %.2f:1 - prescaling to correct movie aspect.\n",
-             sh->aspect);
+      mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_MovieAspectIsSet,sh->aspect);
       w=(int)((float)screen_size_y*sh->aspect); w+=w%2; // round
       // we don't like horizontal downscale || user forced width:
       if(w<screen_size_x || screen_size_xy>8){
@@ -243,7 +240,7 @@ csp_again:
         screen_size_y+=screen_size_y%2; // round
       } else screen_size_x=w; // keep new width
     } else {
-      mp_msg(MSGT_CPLAYER,MSGL_INFO,"Movie-Aspect is undefined - no prescaling applied.\n");
+      mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_MovieAspectUndefined);
     }
   }
 

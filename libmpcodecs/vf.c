@@ -238,7 +238,7 @@ vf_instance_t* vf_open_plugin(vf_info_t** filter_list, vf_instance_t* next, char
     int i;
     for(i=0;;i++){
 	if(!filter_list[i]){
-	    mp_msg(MSGT_VFILTER,MSGL_ERR,"Couldn't find video filter '%s'\n",name);
+	    mp_msg(MSGT_VFILTER,MSGL_ERR,MSGTR_CouldNotFindVideoFilter,name);
 	    return NULL; // no such filter!
 	}
 	if(!strcmp(filter_list[i]->name,name)) break;
@@ -255,15 +255,15 @@ vf_instance_t* vf_open_plugin(vf_info_t** filter_list, vf_instance_t* next, char
     vf->default_reqs=0;
     if(vf->info->open(vf,args)>0) return vf; // Success!
     free(vf);
-    mp_msg(MSGT_VFILTER,MSGL_ERR,"Couldn't open video filter '%s'\n",name);
+    mp_msg(MSGT_VFILTER,MSGL_ERR,MSGTR_CouldNotOpenVideoFilter,name);
     return NULL;
 }
 
 vf_instance_t* vf_open_filter(vf_instance_t* next, char *name, char *args){
     if(strcmp(name,"vo"))
     mp_msg(MSGT_VFILTER,MSGL_INFO,
-	args ? "Opening video filter: [%s=%s]\n"
-	     : "Opening video filter: [%s]\n" ,name,args);
+	args ? MSGTR_OpeningVideoFilter
+	     : MSGTR_OpeningVideoFilter2 ,name,args);
     return vf_open_plugin(filter_list,next,name,args);
 }
 
@@ -315,7 +315,7 @@ int vf_next_config(struct vf_instance_s* vf,
 	vf->next=vf2;
 	flags=vf->next->query_format(vf->next,outfmt);
 	if(!flags){
-	    mp_msg(MSGT_VFILTER,MSGL_ERR,"Cannot find common colorspace, even by inserting 'scale' :(\n");
+	    mp_msg(MSGT_VFILTER,MSGL_ERR,MSGTR_CannotFindColorspace);
 	    return 0; // FAIL
 	}
     }
