@@ -36,6 +36,7 @@ extern int abs_seek_pos;
 void mplFullScreen( void )
 {
  static int sx,sy;
+
  wsVisibleWindow( &appMPlayer.subWindow,wsHideWindow );
  if ( appMPlayer.subWindow.isFullScreen )
   {
@@ -202,8 +203,8 @@ void ChangeSkin( void )
  wsMoveWindow( &appMPlayer.mainWindow,True,appMPlayer.main.x,appMPlayer.main.y );
  wsResizeImage( &appMPlayer.mainWindow,appMPlayer.main.width,appMPlayer.main.height );
  wsSetShape( &appMPlayer.mainWindow,appMPlayer.main.Mask.Image );
- mainVisible=1; mplMainRender=1; wsPostRedisplay( &appMPlayer.mainWindow );
  wsWindowDecoration( &appMPlayer.mainWindow,appMPlayer.mainDecoration );
+ mainVisible=1; mplMainRender=1; wsPostRedisplay( &appMPlayer.mainWindow );
  wsVisibleWindow( &appMPlayer.mainWindow,wsShowWindow );
    
  btnModify( evSetVolume,mplShMem->Volume );
