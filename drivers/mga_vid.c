@@ -1360,13 +1360,15 @@ static void mga_param_buff_fill( void )
     unsigned len;
     len = 0;
     len += sprintf(&mga_param_buff[len],"Interface version: %04X\n",MGA_VID_VERSION);
-    len += sprintf(&mga_param_buff[len],"Memory: %x:%xM\n",mga_mem_base,mga_ram_size);
+    len += sprintf(&mga_param_buff[len],"Memory: %x:%dM\n",mga_mem_base,(unsigned int) mga_ram_size);
     len += sprintf(&mga_param_buff[len],"MMIO: %p\n",mga_mmio_base);
     len += sprintf(&mga_param_buff[len],"Configurable stuff:\n");
     len += sprintf(&mga_param_buff[len],"~~~~~~~~~~~~~~~~~~~\n");
-    len += sprintf(&mga_param_buff[len],PARAM_BRIGHTNESS"%X\n",regs.brightness);
+    len += sprintf(&mga_param_buff[len],PARAM_BRIGHTNESS"%d\n",regs.brightness);
+    len += sprintf(&mga_param_buff[len],PARAM_CONTRAST"%d\n",regs.contrast);
     len += sprintf(&mga_param_buff[len],PARAM_BLACKIE"%s\n",regs.blackie?"on":"off");
     mga_param_buff_len = len;
+    // check boundaries of mga_param_buff before writing to it!!!
 }
 
 
