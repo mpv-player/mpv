@@ -105,8 +105,4 @@ typedef struct vo_functions_s
 // NULL terminated array of all drivers
 extern vo_functions_t* video_out_drivers[];
 
-extern int vo_sub_lines;
-extern unsigned char* vo_sub_text[8];
-extern unsigned char* vo_osd_text;
-extern font_desc_t* vo_font;
 
