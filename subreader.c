@@ -113,13 +113,24 @@ subtitle *sub_read_line_sami(FILE *fd, subtitle *current) {
 	    s = stristr (s, "Start=");
 	    if (s) {
 		current->start = strtol (s + 6, &s, 0) / 10;
+                /* eat '>' */
+                for (; *s != '>' && *s != '\0'; s++);
+                s++;
 		state = 1; continue;
 	    }
 	    break;
  
-	case 1: /* find "<P" */
-	    if ((s = stristr (s, "<P"))) { s += 2; state = 2; continue; }
-	    break;
+	case 1: /* find (optionnal) "<P", skip other TAGs */
+	    for  (; *s == ' ' || *s == '\t'; s++); /* strip blanks, if any */
+	    if (*s == '\0') break;
+	    if (*s != '<') { state = 3; p = text; continue; } /* not a TAG */
+	    s++;
+	    if (*s == 'P' || *s == 'p') { s++; state = 2; continue; } /* found '<P' */
+	    for (; *s != '>' && *s != '\0'; s++); /* skip remains of non-<P> TAG */
+	    if (s == '\0')
+	      break;
+	    s++;
+	    continue;
  
 	case 2: /* find ">" */
 	    if ((s = strchr (s, '>'))) { s++; state = 3; p = text; continue; }
