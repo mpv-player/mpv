@@ -1042,9 +1042,37 @@ static uint32_t preinit(const char *arg)
     return 0;
 }
 
+static uint32_t get_image(mp_image_t *mpi)
+{
+    if ( 
+        !IMGFMT_IS_BGR(mpi->imgfmt) ||
+        (IMGFMT_BGR_DEPTH(mpi->imgfmt) != vo_dga_modes[vo_dga_hw_mode].vdm_mplayer_depth) ||
+        (mpi->type==MP_IMGTYPE_STATIC && vo_dga_nr_video_buffers>1) ||
+	(mpi->type==MP_IMGTYPE_IP && vo_dga_nr_video_buffers<2) ||
+	(mpi->type==MP_IMGTYPE_IPB)
+        )
+    return(VO_FALSE);
+	
+    if( (mpi->flags&MP_IMGFLAG_ACCEPT_STRIDE) ||
+        (mpi->flags&MP_IMGFLAG_ACCEPT_WIDTH &&
+	    ((vo_dga_bytes_per_line+vo_dga_vp_skip)%(mpi->bpp/8))==0 ) ||
+	(mpi->width*(mpi->bpp/8)==(vo_dga_bytes_per_line+vo_dga_vp_skip)) ){
+	
+	mpi->planes[0] = CURRENT_VIDEO_BUFFER.data + vo_dga_vp_offset;
+	mpi->stride[0] = vo_dga_bytes_per_line + vo_dga_vp_skip;
+	mpi->width=(vo_dga_bytes_per_line+vo_dga_vp_skip)/(mpi->bpp/8);
+	mpi->flags |= MP_IMGFLAG_DIRECT;
+	return(VO_TRUE);
+    }
+
+    return(VO_FALSE);
+}
+
 static uint32_t control(uint32_t request, void *data, ...)
 {
   switch (request) {
+  case VOCTRL_GET_IMAGE:
+      return get_image(data);
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
   }
