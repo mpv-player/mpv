@@ -262,8 +262,9 @@ codec-cfg.o: codecs.conf.h
 # run.  This is necessary, because the make rule for version.h removes objects
 # in a recursive "make distclean" and we must wait for this "make distclean" to
 # finish before we can start building new object files.
-$(MPLAYER_DEP): version.h
-$(MENCODER_DEP): version.h
+# help_mp.h is also required by a lot of files, so force generating it early.
+$(MPLAYER_DEP): version.h help_mp.h
+$(MENCODER_DEP): version.h help_mp.h
 
 $(PRG_CFG): version.h codec-cfg.c codec-cfg.h
 	$(HOST_CC) $(CFLAGS) -g codec-cfg.c mp_msg.c -o $(PRG_CFG) -DCODECS2HTML $(EXTRA_LIB) $(I18NLIBS)
@@ -355,7 +356,7 @@ strip:
 
 dep:	depend
 
-depend:
+depend: help_mp.h
 	./version.sh `$(CC) -dumpversion`
 	$(CC) -MM $(CFLAGS) -DCODECS2HTML mplayer.c mencoder.c $(SRCS_MPLAYER) $(SRCS_MENCODER) 1>.depend
 	@for a in $(PARTS); do $(MAKE) -C $$a dep; done
@@ -384,6 +385,17 @@ doxygen:
 
 doxygen_clean:
 	-rm -rf DOCS/tech/doxygen
+
+help_mp.h: help/help_mp-en.h $(HELP_FILE)
+	@echo '// WARNING! This is a generated file. Do NOT edit.' > help_mp.h
+	@echo '// See the help/ subdir for the editable files.' >> help_mp.h
+	@echo '#include "$(HELP_FILE)"' >> help_mp.h
+
+ifneq ($(HELP_FILE),help/help_mp-en.h)
+	@echo "Adding untranslated messages to help_mp.h"
+	@echo '// untranslated messages from the English master file:' >> help_mp.h
+	@help/help_diff.sh $(HELP_FILE) < help/help_mp-en.h >> help_mp.h
+endif
 
 # rebuild at every CVS update or config/makefile change:
 ifeq ($(wildcard .developer),)
