@@ -156,6 +156,7 @@ struct config conf[]={
 	{"divxq", "Option -divxq has been renamed to -pp (postprocessing), use -pp !\n",
             CONF_TYPE_PRINT, 0, 0, 0},
 	{"pp", &divx_quality, CONF_TYPE_INT, CONF_RANGE, 0, 63},
+	{"autoq", &auto_quality, CONF_TYPE_INT, CONF_RANGE, 0, 100},
 	{"br", &encode_bitrate, CONF_TYPE_INT, CONF_RANGE, 10000, 10000000},
 #ifdef HAVE_PNG
 	{"z", &z_compression, CONF_TYPE_INT, CONF_RANGE, 0, 9},

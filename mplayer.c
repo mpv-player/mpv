@@ -229,9 +229,12 @@ extern void avi_fixate();
 #endif
 
 // options:
-int osd_level=2;
+
 int divx_quality=0;
-int auto_quality=-1;
+int auto_quality=0;
+int output_quality=0;
+
+int osd_level=2;
 char *seek_to_sec=NULL;
 off_t seek_to_byte=0;
 int has_audio=1;
@@ -397,6 +400,9 @@ extern int decode_video(vo2_handle_t *video_out,sh_video_t *sh_video,unsigned ch
 #else
 extern int decode_video(vo_functions_t *video_out,sh_video_t *sh_video,unsigned char *start,int in_size,int drop_frame);
 #endif
+
+extern int get_video_quality_max(sh_video_t *sh_video);
+extern void set_video_quality(sh_video_t *sh_video,int quality);
 
 #include "mixer.h"
 #include "cfg-mplayer.h"
@@ -671,9 +677,9 @@ if(vcd_track){
 	 perror("Error: lseek failed to obtain video file size");
        else
 #ifdef _LARGEFILE_SOURCE
-	 fprintf(stderr, "File size is %lld bytes\n", (long long)len);
+	 printf("File size is %lld bytes\n", (long long)len);
 #else
-	 fprintf(stderr, "File size is %u bytes\n", (unsigned int)len);
+	 printf("File size is %u bytes\n", (unsigned int)len);
 #endif
        stream=new_stream(f,STREAMTYPE_FILE);
        stream->end_pos=len;
@@ -896,6 +902,15 @@ if(!init_video(sh_video)){
      exit(1);
 }
 
+if(auto_quality>0){
+    // Auto quality option enabled
+    output_quality=get_video_quality_max(sh_video);
+    if(auto_quality>output_quality) auto_quality=output_quality;
+    else output_quality=auto_quality;
+    printf("AutoQ: setting quality to %d\n",output_quality);
+    set_video_quality(sh_video,output_quality);
+}
+
 // ================== Init output files for encoding ===============
    if(encode_name){
      // encode file!!!
@@ -1013,7 +1028,6 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
 //================== MAIN: ==========================
 {
 
-//float frame_correction=0; // average of A-V timestamp differences
 //int frame_corr_num=0;   //
 //float v_frame=0;    // Video
 float time_frame=0; // Timer
@@ -1024,6 +1038,11 @@ int grab_frames=0;
 char osd_text_buffer[64];
 int drop_frame=0;
 int drop_frame_cnt=0;
+// for auto-quality:
+float frame_correction=0; // average of A-V timestamp differences
+double cvideo_base_vtime;
+double cvideo_base_vframe;
+double vdecode_time;
 
 #ifdef HAVE_LIRC
  #ifdef HAVE_GUI
@@ -1145,6 +1164,8 @@ InitTimer();
 total_time_usage_start=GetTimer();
 
 while(!eof){
+    unsigned int aq_total_time=GetTimer();
+    float aq_sleep_time=0;
 
     if(play_n_frames>=0){
       --play_n_frames;
@@ -1207,6 +1228,9 @@ while(sh_audio){
 
 /*========================== PLAY VIDEO ============================*/
 
+cvideo_base_vframe=sh_video->timer;
+cvideo_base_vtime=video_time_usage;
+
 if(1)
   while(1){
   
@@ -1217,6 +1241,8 @@ if(1)
     current_module="decode_video";
     
   //--------------------  Decode a frame: -----------------------
+
+  vdecode_time=video_time_usage;
 
   if(file_format==DEMUXER_TYPE_MPEG_ES || file_format==DEMUXER_TYPE_MPEG_PS){
         int in_frame=0;
@@ -1286,6 +1312,8 @@ if(1)
     blit_frame=decode_video(video_out,sh_video,start,in_size,drop_frame);
   }
 
+  vdecode_time=video_time_usage-vdecode_time;
+
 //------------------------ frame decoded. --------------------
 
     // Increase video timers:
@@ -1351,10 +1379,13 @@ if(1)
       }
 
 //      if(verbose>1)printf("sleep: %5.3f  a:%6.3f  v:%6.3f  \n",time_frame,sh_audio->timer,sh_video->timer);
+
+      aq_sleep_time+=time_frame;
       
       while(time_frame>0.005){
           if(time_frame<=0.020)
-             usec_sleep(10000); // sleeps 1 clock tick (10ms)!
+//             usec_sleep(10000); // sleeps 1 clock tick (10ms)!
+             usec_sleep(0); // sleeps 1 clock tick (10ms)!
           else
              usec_sleep(1000000*(time_frame-0.002));
           time_frame-=GetRelativeTime();
@@ -1384,6 +1415,7 @@ if(1)
 
 #if 1
 /*================ A-V TIMESTAMP CORRECTION: =========================*/
+  frame_correction=0;
   if(sh_audio){
     float a_pts=0;
     float v_pts=0;
@@ -1420,7 +1452,7 @@ if(1)
     if(verbose>1)printf("### A:%8.3f (%8.3f)  V:%8.3f  A-V:%7.4f  \n",a_pts,a_pts-audio_delay-delay,v_pts,(a_pts-delay-audio_delay)-v_pts);
 
       if(delay_corrected){
-        float x=(a_pts-delay-audio_delay)-v_pts;
+        float x=frame_correction=(a_pts-delay-audio_delay)-v_pts;
 //        printf("A:%6.1f  V:%6.1f  A-V:%7.3f",a_pts-audio_delay-delay,v_pts,x);
         printf("A:%6.1f (%6.1f)  V:%6.1f  A-V:%7.3f",a_pts,a_pts-audio_delay-delay,v_pts,x);
         x*=0.1f;
@@ -1431,12 +1463,13 @@ if(1)
         else
           max_pts_correction=sh_video->frametime*0.10; // +-10% of time
         sh_audio->timer+=x; c_total+=x;
-        printf(" ct:%7.3f  %3d  %2d%% %2d%% %4.1f%% %d\r",c_total,
+        printf(" ct:%7.3f  %3d  %2d%% %2d%% %4.1f%% %d %d\r",c_total,
         (int)sh_video->num_frames,
         (sh_video->timer>0.5)?(int)(100.0*video_time_usage/(double)sh_video->timer):0,
         (sh_video->timer>0.5)?(int)(100.0*vout_time_usage/(double)sh_video->timer):0,
         (sh_video->timer>0.5)?(100.0*audio_time_usage/(double)sh_video->timer):0
         ,drop_frame_cnt
+	,output_quality
         );
         fflush(stdout);
       }
@@ -1455,6 +1488,45 @@ if(1)
 
   }
 #endif
+
+/*Output quality adjustments:*/
+if(auto_quality>0){
+#if 0
+  /*If we took a long time decoding this frame, downgrade the quality.*/
+  if(output_quality>0&&
+     (video_time_usage-cvideo_base_vtime)*sh_video->timer>=
+     (0.95*sh_video->timer-(vout_time_usage+audio_time_usage))*
+     (sh_video->timer-cvideo_base_vframe-frame_correction)){
+    output_quality>>=1;
+    printf("Downgrading quality to %i.\n",output_quality);
+    set_video_quality(sh_video,output_quality);
+  } else
+  /*If we had plenty of extra time, upgrade the quality.*/
+  if(output_quality<auto_quality&&
+     vdecode_time<0.5*frame_time&&
+     (video_time_usage-cvideo_base_vtime)*sh_video->timer<
+     (0.67*sh_video->timer-(vout_time_usage+audio_time_usage))*
+     (sh_video->timer-cvideo_base_vframe-frame_correction)){
+    output_quality++;
+    printf("Upgrading quality to %i.\n",output_quality);
+    set_video_quality(sh_video,output_quality);
+  }
+#else
+  float total=0.000001f * (GetTimer()-aq_total_time);
+//  if(output_quality<auto_quality && aq_sleep_time>0.05f*total)
+  if(output_quality<auto_quality && aq_sleep_time>0)
+      ++output_quality;
+  else
+//  if(output_quality>0 && aq_sleep_time<-0.05f*total)
+  if(output_quality>1 && aq_sleep_time<0)
+      --output_quality;
+  else
+  if(output_quality>0 && aq_sleep_time<-0.050f) // 50ms
+      output_quality=0;
+//  printf("total: %8.6f  sleep: %8.6f  q: %d\n",(0.000001f*aq_total_time),aq_sleep_time,output_quality);
+  set_video_quality(sh_video,output_quality);
+#endif
+}
 
 #ifdef USE_OSD
   if(osd_visible){
