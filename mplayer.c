@@ -1799,7 +1799,7 @@ if(time_frame>0.001 && !(vo_flags&256)){
 	AV_delay=(a_pts-delay-audio_delay)-v_pts;
 	if(drop_frame_cnt>50+drop_message*250 && AV_delay>0.5){
 	  ++drop_message;
-	  mp_msg(MSGT_AVSYNC,MSGL_WARN,MSGTR_SystemTooSlow);
+	  mp_msg(MSGT_AVSYNC,MSGL_ERR,MSGTR_SystemTooSlow);
 	}
         x=AV_delay*0.1f;
         if(x<-max_pts_correction) x=-max_pts_correction; else
