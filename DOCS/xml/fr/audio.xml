@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!-- synced with 1.21 -->
-<sect1 id="audio-dev">
+<sect1 id="audio">
 <title>Périphériques de sortie audio</title>
 <sect2 id="sync">
 <title>Synchronisation audio/vidéo</title>

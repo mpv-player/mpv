@@ -412,7 +412,7 @@ code de timing. Pour les détails voir la section <link linkend="rtc">RTC</link> 
 Comment puis-je faire une copie d'écran ?
 </para></question>
 <answer><para>
-Vous devez utiliser un pilote de sortie vidéo qui n'utilise pas d"overlay pour 
+Vous devez utiliser un pilote de sortie vidéo qui n'utilise pas d'overlay pour 
 pouvoir faire une copie d'écran. Sous X11, <option>-vo x11</option> peut le faire,
 sous Windows <option>-vo directx:noaccel</option> fonctionne.
 </para></answer>
@@ -923,7 +923,7 @@ Si c'est un AVI, peut-être qu'il a un mauvais entrelacement. Essayez l'option
 </para></listitem>
 <listitem><para>
 Votre pilote son est boggué, ou vous utilisez ALSA 0.5 avec <option>-ao oss</option>.
-Voir la section <link linkend="audio-dev">cartes son</link>.
+Voir la section <link linkend="audio">cartes son</link>.
 </para></listitem>
 <listitem><para>
 L'AVI a un mauvais entête, essayez l'option <option>-nobps</option>, et/ou <option>-mc 0</option>.

@@ -421,7 +421,7 @@ n'avez pas d'accélération YUV, cette dernière méthode est recommandée. Le change
 <listitem><simpara>
   Les Fonctions des <emphasis role="bold">autres cartes</emphasis> ne sont pas supportées par
   <application>MPlayer</application>. <emphasis role="bold">Il est fortement recommandé de lire
-  la section <link linkend="audio-dev">cartes son</link> !</emphasis>
+  la section <link linkend="audio">cartes son</link> !</emphasis>
   </simpara></listitem>
 </itemizedlist>
 </sect2>
