@@ -4893,123 +4893,161 @@ Wandle Felder mit dem 4tap-Filter zu 1/4 Pixel um (höhere Qualität).
 .RE
 .PD 1
 .
-.\" manpage is synced from top down to this option.
 .TP
 .B "boxblur=Radius:Stärke[:Radius:Stärke]"
-Kastenunschärfe (?)
-.RSss
-Radius: Größe des Filters
-.br
-Stärke: wie oft der Filter angewandt wird
-.REss
-.IPs "sab=Radius:pfilter:cDiff[:rad:pfilter:cDiff]"
-shape adaptive blur
-.RSss
-Radius: Stärke des Glättungsfilters (~0.1\-4.0) (je größer desto langsamer)
-.br
-pfilter: prefilter\-Stärke (~0.1\-2.0)
-.br
-cDiff: wie ungleich Pixel maximal sein dürfen, um noch benutzt zu werden
+Kastenunschärfe
+.PD 0
+.RSs
+.IPs <Radius>
+Stärke des Unschärfefilters
+.IPs <Stärke>
+Anzahl der Anwendungen des Filters
+.RE
+.PD 1
+.
+.TP
+.B sab=Radius:pf:colorDiff[:Radius:pf:colorDiff]
+shape adaptive blur: umrissabhängige Glättung/Unschärfe
+.PD 0
+.RSs
+.IPs <Radius>
+Stärke des Glättungsfilters (~0.1\-4.0) (je größer desto langsamer)
+.IPs <pf>\ 
+Stärke der Vorfilterung (~0.1\-2.0)
+.IPs <colorDiff>
+maximale Differenz zwischen zwei Pixeln, damit diese betrachtet werden
 (~0.1-100.0)
-.REss
-.IPs "smartblur=Radius:Stärke:thresh[:Radius:Stärke:thresh]"
-smart blur
-.RSss
-Radius: Stärke des Glättungsfilters (~0.1\-5.0) (je größer desto langsamer)
-.br
-Stärke: glätten (0.0\-1.0) oder schärfen (-1.0\-0.0)
-.br
-thresh: filtere alles (0), filtere nur gleichförmige Beriche (0\-30) oder
-filtere nur Kanten (-30\-0)
-.REss
-.IPs "perspective=x0:y0:x1:y1:x2:y2:x3:y3:t"
-perspektivische Korrektur
-.RSss
-x0,y0,...: Koordinaten der Ecken links oben, rechts oben, links unten, rechts
-unten
-.br
-t: linear (0) oder cubic resampling (1)
-.REss
-.IPs 2xsai
+.RE
+.PD 1
+.
+.TP
+.B smartblur=Radius:Stärke:Schwellenwert[:Radius:Stärke:Schwellenwert]
+intelligente Glättung
+.PD 0
+.RSs
+.IPs <Radius>
+Stärke des Glättungsfilters (~0.1\-5.0) (je größer desto langsamer)
+.IPs <Stärke>
+glätten (0.0\-1.0) oder schärfen (-1.0\-0.0)
+.IPs <Schwellenwert>
+Filterung von allem (0), nur gleichförmigen Bereichen (0\-30) oder nur Kanten
+(-30\-0)
+.RE
+.PD 1
+.
+.TP
+.B perspective=x0:y0:x1:y1:x2:y2:x3:y3:t
+Korrigiere die Perspektive von Filmen, die nicht lotrecht zum Bildschirm
+gefilmt wurden.
+.PD 0
+.RSs
+.IPs x0,y0,...
+Koordinaten der Ecken links oben, rechts oben, links unten, rechts unten
+.IPs t\ \ \ \ 
+lineares (0) oder kubisches (1) Resampling
+.RE
+.PD 1
+.
+.TP
+.B 2xsai\ \ 
 Benutzt den 2x-Skalier- und Interpolationsalgorithmus für die Skalierung
 und Glättung des Bildes.
-.IPs 1bpp
-Konvertierung von 1bpp\-Bitmaps nach YUV/BGR 8/15/16/32
-.IPs "bmovl=hidden:opaque:<fifo>"
-Liest Bitmaps von einem FIFO und zeigt sie im Fenster an.
 .
-.RSss
-hidden: setzt den Standardwert des 'hidden'-Flag (Boolean)
-.br
-opaque: schaltet zwischen Alphablending (transparent) und opaque (schnell)
-um
-.br
-fifo: Pfad und Dateiname des FIFOs (eine named pipe, die mplayer -vf bmovl
-mit der kontrollierenden Anwendung verknüpft)
-.REss
-
-.RS
-FIFO-Kommandos:
+.TP
+.B 1bpp\ \ \ 
+Konvertierung von 1bpp-Bitmaps nach YUV/\:BGR 8/\:15/\:16/\:32
+.
+.TP
+.B down3dright[=Zeilen]
+Positioniert stereoskopische Bilder neu und ändert deren Größe.
+Extrahiert beide Stereofelder und setzt sie nebeneinander.
+Dabei wird die Größe so geändert, dass das ursprüngliche Größenverhältnis
+beibehalten wird.
+.PD 0
+.RSs
+.IPs Zeilen
+Anzahl der Zeilen, die von der Mitte des Bildes ausgewählt werden sollen
+(Standard: 12)
 .RE
-.RSss
-RGBA32 Breite Höhe xpos ypos alpha clear
-.br
-gefolgt von Breite*Höhe*4 Bytes RGBA32-Daten.
-
-ABGR32 Breite Höhe xpos ypos alpha clear
-.br
-gefolgt von Breite*Höhe*4 Bytes ABGR32-Daten.
-
-RGB24 Breite Höhe xpos ypos alpha clear
-.br
-gefolgt von Breite*Höhe*3 Bytes RGB32-Daten.
-
-BGR24 Breite Höhe xpos ypos alpha clear
-.br
-gefolgt von Breite*Höhe*3 bytes BGR32-Daten.
-
-ALPHA Breite Höhe xpos ypos alpha
-.br
-ändert Alpha für den Bereich
-
-CLEAR Breite Höhe xpos ypos
-.br
-löscht den Bereich
-
-OPAQUE
-.br
-deaktiviert die Alphatransparenz.
-Schicke "ALPHA 0 0 0 0 0", um sie wieder zu aktivieren.
-
-HIDE
-.br
-versteckt die Bitmap
-
-SHOW
-.br
-zeigt die Bitmap an
-.REss
-
-.RS
-Argumente:
+.PD 1
+.
+.TP
+.B bmovl=versteckt:opak:fifo
+Der Bitmap-Overlay-Filter liest Bitmaps von einem FIFO und zeigt sie überhalb
+des Filmfensters an.
+Er erlaubt dabei Transformationen der Bilder.
+Ein kleines Beispielprogramm findest du in TOOLS/\:bmovl-test.c.
+.PD 0
+.RSs
+.IPs <versteckt>
+Setzt den Standardwert des 'hidden'-Flags (0=sichtbar, 1=unsichtbar).
+.IPs <opak>
+Setzt den Standardwert des 'opak'-Flags (0=transparent, 1=opak).
+.IPs <fifo>
+Pfad und Dateiname des FIFOs (eine named pipe, die 'mplayer \-vf bmovl'
+mit der kontrollierenden Anwendung verknüpft).
 .RE
-.RSss
-Breite, Höhe: Größe des Bildes/Bereiches.
-.br
-xpos, ypos: fange an Position X/Y an
-.br
-alpha: setzt die Alphadifferenz. 0 bedeutet gleich wie beim Quellbild,
-255 keine Transparenz, -255 komplett transparent.
+.PD 1
+.sp 1
+.RS
+Die FIFO-Kommandos sind folgende:
+.RE
+.PD 0
+.RSs
+.IPs "RGBA32 Breite Höhe xpos ypos alpha clear"
+gefolgt von Breite*Höhe*4 Bytes raw-RGBA32-Daten.
+.IPs "ABGR32 Breite Höhe xpos ypos alpha clear"
+gefolgt von Breite*Höhe*4 Bytes raw-ABGR32-Daten.
+.IPs "RGB24 Breite Höhe xpos ypos alpha clear"
+gefolgt von Breite*Höhe*3 Bytes raw-RGB32-Daten.
+.IPs "BGR24 Breite Höhe xpos ypos alpha clear"
+gefolgt von Breite*Höhe*3 bytes raw-BGR32-Daten.
+.IPs "ALPHA Breite Höhe xpos ypos alpha"
+Ändert die Alpha-Transparenz für den angegebenen Bereich.
+.IPs "CLEAR Breite Höhe xpos ypos"
+Löscht den Bereich.
+.IPs OPAQUE
+Deaktiviert die Alpha-Transparenz.
+Schicke "ALPHA 0 0 0 0 0" an den FIFO, um sie wieder zu aktivieren.
+.IPs HIDE
+Versteckt die Bitmap.
+.IPs SHOW
+Zeigt die Bitmap an.
+.RE
+.PD 1
+.sp 1
+.RS
+Die Argumente sind folgende:
+.RE
+.PD 0
+.RSs
+.IPs "Breite, Höhe"
+Größe des Bildes/Bereiches.
+.IPs "xpos, ypos"
+Starte bei Position x/y.
+.IPs alpha
+Setzt die Alpha-Differenz.
 Wenn du den Wert auf -255 setzt, dann kannst du mit einer Sequenz von
-ALPHA-Kommandos den Bereich auf -225, -200, -175 etc setzen, um einen netten
-Fade-In-Effekt zu erzielen ;)
+ALPHA-Kommandos den Bereich auf -225, -200, -175 etc.\& setzen, um einen netten
+Fade-In-Effekt zu erzielen! ;)
+.RSss
+\ \ \ 0:    genau wie bei der Vorlage.
 .br
-clear: löscht den Framebuffer vor dem Blitten.
-1 beduetet löschen. Bei 0 wird das Bild einfach auf das vorhandene geschrieben,
-sodass du nicht immer 1,8MB RGBA32-Daten schicken musst, wenn sich nur ein
-kleiner Teil des Bildschirms ändert.
+\ 255:  Bedecke alles.
+.br
+-255: Mache alles transparent.
+.REss
+.IPs clear
+Lösche den Framebuffer vor dem "Blitting".
+.RSss
+0: Das Blitting eines Bildes wird nur über dem vorigen (darunterliegenden)
+angewendet, daher brauchst du nicht jedesmal, wenn ein kleiner Teil des
+Bildschirms aktualisiert wird, 1,8MB an RGBA32-Daten an den FIFO schicken.
+.br
+1: löschen
 .REss
 .RE
+.\" manpage is synced from top down to this option.
 .
 .
 .
