@@ -712,6 +712,8 @@ static int vf_open(vf_instance_t *vf, char* args){
 
     if (!strcasecmp(lavc_param_vcodec, "mpeg1") || !strcasecmp(lavc_param_vcodec, "mpeg1video"))
 	mux_v->bih->biCompression = mmioFOURCC('m', 'p', 'g', '1');
+    else if (!strcasecmp(lavc_param_vcodec, "mpeg2") || !strcasecmp(lavc_param_vcodec, "mpeg2video"))
+	mux_v->bih->biCompression = mmioFOURCC('m', 'p', 'g', '2');
     else if (!strcasecmp(lavc_param_vcodec, "h263") || !strcasecmp(lavc_param_vcodec, "h263p"))
 	mux_v->bih->biCompression = mmioFOURCC('h', '2', '6', '3');
     else if (!strcasecmp(lavc_param_vcodec, "rv10"))
