@@ -666,7 +666,7 @@ codecs_reset_selection(0);
 if(video_codec){
     // forced codec by name:
     mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_ForcedVideoCodec,video_codec);
-    init_video(sh_video,video_codec,-1,-1);
+    init_video(sh_video,video_codec,NULL,-1);
 } else {
     int status;
     // try in stability order: UNTESTED, WORKING, BUGGY, BROKEN
