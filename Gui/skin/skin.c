@@ -132,6 +132,7 @@ int __base( char * in )
    defList->main.width=defList->main.Bitmap.Width;
    defList->main.height=defList->main.Bitmap.Height;
    #ifdef HAVE_XSHAPE
+/*
     defList->main.Mask.Width=defList->main.Bitmap.Width;
     defList->main.Mask.Height=defList->main.Bitmap.Height;
     defList->main.Mask.BPP=1;
@@ -148,7 +149,17 @@ int __base( char * in )
        if ( b++ == 7 ) { defList->main.Mask.Image[c++]=tmp; tmp=b=0; }
       }
      if ( b ) defList->main.Mask.Image[c]=tmp;
-     if ( nothaveshape ) { free( defList->main.Mask.Image ); defList->main.Mask.Image=NULL; }
+//     if ( nothaveshape ) { free( defList->main.Mask.Image ); defList->main.Mask.Image=NULL; }
+    }
+*/
+    Convert32to1( &defList->main.Bitmap,&defList->main.Mask,0x00ff00ff );
+    {
+     if ( defList->main.Mask.Image != NULL )
+      {
+       txSample d;
+       Convert1to32( &defList->main.Mask,&d );
+       tgaWriteTexture( "debug.tga",&d );
+      }
     }
     #ifdef DEBUG
      dbprintf( 3,"[skin]  mask: %dx%d\n",defList->main.Mask.Width,defList->main.Mask.Height );

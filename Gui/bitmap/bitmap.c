@@ -173,3 +173,52 @@ int bpRead( char * fname, txSample * bf )
  Normalize( bf );
  return 0;
 }
+
+void Convert32to1( txSample * in,txSample * out,int adaptivlimit )
+{
+ out->Width=in->Width;
+ out->Height=in->Height;
+ out->BPP=1;
+ out->ImageSize=out->Width * out->Height / 8;
+ dbprintf( 4,"[c1to32] imagesize: %d\n",out->ImageSize );
+ out->Image=(char *)calloc( 1,out->ImageSize );
+ if ( out->Image == NULL ) dbprintf( 4,"nem van ram baze\n" );
+ {
+  int i,b,c=0; unsigned long * buf = NULL; unsigned char tmp = 0; int nothaveshape = 1;
+  buf=(unsigned long *)in->Image;
+  for ( b=0,i=0;i < out->Width * out->Height;i++ )
+   {
+    if ( buf[i] != adaptivlimit ) tmp=( tmp >> 1 )|128;
+     else { tmp=tmp >> 1; buf[i]=nothaveshape=0; }
+    if ( b++ == 7 ) { out->Image[c++]=tmp; tmp=b=0; }
+   }
+  if ( b ) out->Image[c]=tmp;
+  if ( nothaveshape ) { free( out->Image ); out->Image=NULL; }
+ }
+}
+
+void Convert1to32( txSample * in,txSample * out )
+{
+ if ( in->Image == NULL ) return;
+ out->Width=in->Width;
+ out->Height=in->Height;
+ out->BPP=32;
+ out->ImageSize=out->Width * out->Height * 4;
+ out->Image=(char *)calloc( 1,out->ImageSize );
+ dbprintf( 4,"[c32to1] imagesize: %d\n",out->ImageSize );
+ if ( out->Image == NULL ) dbprintf( 4,"nem van ram baze\n" );
+ {
+  int i,b,c=0; unsigned long * buf = NULL; unsigned char tmp = 0;
+  buf=(unsigned long *)out->Image;
+  for ( c=0,i=0;i < in->Width * in->Height / 8;i++ )
+   {
+    tmp=in->Image[i];
+    for ( b=0;b<8;b++ )
+     {
+      buf[c]=0;
+      if ( tmp&0x1 ) buf[c]=0xffffffff;
+      c++; tmp=tmp>>1;
+     }
+   }
+ }
+}
