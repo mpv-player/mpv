@@ -3245,6 +3245,13 @@ HRESULT WINAPI expCoInitialize(
   return 0; //CoInitializeEx(lpReserved, COINIT_APARTMENTTHREADED);
 }
 
+DWORD expSetThreadAffinityMask
+(
+        HANDLE hThread,
+        DWORD dwThreadAffinityMask
+){
+    return 0;
+};
 
 
 struct exports
@@ -3386,6 +3393,7 @@ FF(GetCurrentThread,-1)
 FF(GetOEMCP,-1)
 FF(GetCPInfo,-1)
 FF(DuplicateHandle,-1)
+FF(SetThreadAffinityMask,-1)
 };
 
 struct exports exp_msvcrt[]={
