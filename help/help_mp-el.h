@@ -1,3 +1,4 @@
+// sync'ed with help_mp-en.h 1.115
 // Translated by: Ioannis Panteleakis <pioann@csd.auth.gr>
 // Various corrections and additions by: ironhell3 <ironhell3@hotmail.com>
 
@@ -70,11 +71,12 @@ static char help_text[]=
 #define MSGTR_CantOpenDumpfile "Αδύνατο το άνοιγμα του dump αρχείου!!!\n"
 #define MSGTR_CoreDumped "core dumped :)\n"
 #define MSGTR_FPSnotspecified "Μη ορισμένα FPS (ή λάθος) στην επικεφαλίδα! Χρησιμοποιήστε την επιλογή -fps!\n"
-#define MSGTR_TryForceAudioFmt "Προσπάθεια  επιβολής της οικογένειας του οδηγού του ήχου %d...\n"
+#define MSGTR_TryForceAudioFmtStr "Προσπάθεια  επιβολής της οικογένειας του οδηγού του ήχου %d...\n"
 #define MSGTR_CantFindAfmtFallback "Δεν είναι δυνατή η εύρεση της οικογένειας του οδηγού  του ήχου, χρήση άλλου οδηγού.\n"
 #define MSGTR_CantFindAudioCodec "Δεν είναι δυνατή η εύρεση του format του οδηγού του ήχου 0x%X!\n"
+#define MSGTR_RTFMCodecs "Διαβάστε DOCS/HTML/en/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "Αδύνατη η αρχικοποίηση του οδηγού του ήχου! -> χωρίς-ήχο\n"
-#define MSGTR_TryForceVideoFmt "Προσπάθεια  επιβολής της οικογένειας του οδηγού του βίντεο %d...\n"
+#define MSGTR_TryForceVideoFmtStr "Προσπάθεια  επιβολής της οικογένειας του οδηγού του βίντεο %d...\n"
 #define MSGTR_CantFindVideoCodec "Δεν είναι δυνατή η εύρεση του οδηγού  για τον συγκεκριμένο -vo και το format του βίντεο 0x%X!\n"
 #define MSGTR_VOincompCodec "Λυπάμαι, η επιλεγμένη συσκευή video_out δεν είναι συμβατή με αυτό τον οδηγό.\n"
 #define MSGTR_CannotInitVO "Σφάλμα: Αδύνατη η αρχικοποίηση του οδηγού του βίντεο!\n"
@@ -87,7 +89,7 @@ static char help_text[]=
 "         **************************************************************************\n\n"\
 "Πιθανές αιτίες, προβλήματα, λύσεις: \n"\
 "- Συνήθη αιτία: πρόβλημα με τον οδηγό του ήχου\n"\
-"  - Δοκιμάστε -ao sdl ή χρησιμοποιήστε ALSA 0.5 ή oss προσομοίωση του οδηγού ALSA 0.9. Διαβάστε το DOCS/HTML/en/devices.html#audio-dev για περισσότερες λύσεις!\n"\
+"  - Δοκιμάστε -ao sdl ή χρησιμοποιήστε ALSA 0.5 ή oss προσομοίωση του οδηγού ALSA 0.9.\n"\
 "  - Μπορείτε επίσης να πειραματιστείτε με διάφορες τιμές του -autosync, η τιμή  30 είναι μια καλή αρχή.\n"\
 "- Αργή έξοδος του βίντεο\n"\
 "  - Δοκιμάστε διαφορετικό -vo οδηγό (για λίστα: -vo help) ή δοκιμάστε με -framedrop\n"\
@@ -99,7 +101,7 @@ static char help_text[]=
 "  - Δοκιμάστε -cache 8192\n"\
 "- Μήπως χρησιμοποιείται -cache για την αναπαραγωγή ενός non-interleaved αρχείου;\n"\
 "  - Δοκιμάστε με -nocache\n"\
-"Διαβάστε το DOCS/HTML/en/devices.html#video-dev για ρύθμιση/επιτάχυνση του βίντεο.\n"\
+"Διαβάστε το DOCS/HTML/en/devices.html για ρύθμιση/επιτάχυνση του βίντεο.\n"\
 "Αν κανένα από αυτά δεν βοηθάει, τότε διαβάστε το DOCS/HTML/en/bugreports.html!\n\n"
 
 #define MSGTR_NoGui "Το MPlayer μεταφράστηκε ΧΩΡΙΣ υποστήριξη για GUI!\n"
@@ -127,7 +129,7 @@ static char help_text[]=
 #define MSGTR_AODescription_AOAuthor "AO: Περιγραφή: %s\n AO: Δημιουργός: %s\n"
 #define MSGTR_AOComment "AO: Σχόλιο: %s\n"
 #define MSGTR_Video_NoVideo "Βίντεο: δεν υπάρχει βίντεο!!!\n"
-#define MSGTR_NotInitializeVOPorVO "\n Σφάλμα: Αδύνατη η αρχικοποίηση του φίλτρου βίντεο (-vf) ή της έξοδου βίντεο (-vo)!\n"
+#define MSGTR_NotInitializeVOPorVO "\n Σφάλμα: Αδύνατη η αρχικοποίηση του φίλτρου βίντεο (-vf) ή της εξόδου βίντεο (-vo)!\n"
 #define MSGTR_Paused "\n  =====  ΠΑΥΣΗ  =====\r"
 #define MSGTR_PlaylistLoadUnable "\n Αδύνατη η φόρτωση  της λίστας αναπαραγωγής %s\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
@@ -137,7 +139,8 @@ static char help_text[]=
 #define MSGTR_Exit_SIGILL \
 "- Το MPlayer κατέρρευσε από ένα 'Illegal Instruction'.\n"\
 "  Συνήθως συμβαίνει όταν τρέχετε το πρόγραμμα σε διαφορετικό επεξεργαστή από αυτόν στον οποίο έγινε\n"\
-"  η μεταγλώττιση/βελτιστοποίηση.\n  Ελέγξτε το!\n"
+"  η μεταγλώττιση/βελτιστοποίηση.\n"\
+"  Ελέγξτε το!\n"
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- Το Mplayer κατέρρευσε  από κακή χρήση του επεξεργαστή ή της μνήμης.\n"\
 "  Αναμεταγλωττίστε το MPlayer με --enable-debug και τρέξτε 'gdb' backtrace και\n"\
@@ -213,7 +216,7 @@ static char help_text[]=
 "               ελαφρότερα χαμηλότερη ποιότητα και υψηλότερα bitrates.\n"\
 "\n"\
 " preset=<value> προσφέρει τις υψηλότερες δυνατές επιλογές ποιότητας.\n"\
-"                 μεσέα: VBR  κωδικοποίηση, καλή ποιότητα\n"\
+"                 μεσαία: VBR  κωδικοποίηση, καλή ποιότητα\n"\
 "                 (150-180 kbps εύρος bitrate)\n"\
 "                 στάνταρ:  VBR κωδικοποίηση, υψηλή ποιότητα\n"\
 "                 (170-210 kbps εύρος bitrate)\n"\
@@ -272,9 +275,11 @@ static char help_text[]=
 #define MSGTR_NI_Message "%s NON-INTERLEAVED AVI format αρχείου!\n"
 
 #define MSGTR_UsingNINI "Χρήση ενός NON-INTERLEAVED φθαρμένου αρχείου τύπου AVI!\n"
-#define MSGTR_CouldntDetFNo "Δεν μπόρεσε να διεκρυνιστεί ο αριθμός των frames (για απόλυτη αναζήτηση)  \n"
-#define MSGTR_CantSeekRawAVI "Μη δυνατη αναζήτηση σε raw .AVI κανάλια! (το index είναι απαραίτητο, δοκιμάστε με την επιλογή -idx!)  \n"
+#define MSGTR_CouldntDetFNo "Δεν μπόρεσε να διευκρινιστεί ο αριθμός των frames (για απόλυτη αναζήτηση)  \n"
+#define MSGTR_CantSeekRawAVI "Μη δυνατή αναζήτηση σε raw .AVI κανάλια! (το index είναι απαραίτητο, δοκιμάστε με την επιλογή -idx!)  \n"
 #define MSGTR_CantSeekFile "Αδύνατη η αναζήτηση σε αυτό το αρχείο!  \n"
+
+#define MSGTR_EncryptedVOB "Κωδικοποιημένο αρχείο VOB! Διαβάστε DOCS/HTML/en/dvd.html.\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Συμπιεσμένες επικεφαλίδες δεν υποστηρίζονται (ακόμα)!\n"
 #define MSGTR_MOVvariableFourCC "MOV: ΠΡΟΕΙΔΟΠΟΙΗΣΗ! μεταβλητό FOURCC βρέθηκε!?\n"
@@ -292,6 +297,8 @@ static char help_text[]=
 #define MSGTR_DemuxerInfoAlreadyPresent "Οι πληροφορίες για το demuxer %s υπάρχουν ήδη!\n"
 #define MSGTR_ClipInfo "Πληροφορίες του μέσου: \n"
 
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: βρέθηκε περιεχόμενο 30fps NTSC, αλλαγή του framerate.\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: βρέθηκε περιεχόμενο 24fps progressive NTSC, αλλαγή του framerate.\n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Αδύνατο το άνοιγμα του codec\n"
@@ -315,12 +322,12 @@ static char help_text[]=
 #define MSGTR_UsingExternalPP "[PP] Χρήση εξωτερικού φίλτρου προεπεξεργασίας, μέγιστο q = %d\n"
 #define MSGTR_UsingCodecPP "[PP] Χρήση φίλτρου προεπεξεργασίας για το codec, μέγιστο q = %d\n"
 #define MSGTR_VideoAttributeNotSupportedByVO_VD "Η ιδιότητα για το βίντεο '%s' δεν υποστηρίζεται από το επιλεγμένο vo και vd! \n"
-#define MSGTR_VideoCodecFamilyNotAvailable "Η αίτηση για την οικογένειας του codec βίντεο [%s] (vfm=%d) δεν διατήθεται (ενεργοποιήστε το κατά την μετάφραση του προγράμματος!)\n"
-#define MSGTR_AudioCodecFamilyNotAvailable "Η αίτηση για την οικογένειας του codec ήχου [%s] (afm=%d) δεν διατήθεται (ενεργοποιήστε το κατά την μετάφραση του προγράμματος!)\n"
+#define MSGTR_VideoCodecFamilyNotAvailableStr "Η αίτηση για την οικογένεια του codec βίντεο [%s] (vfm=%d) δεν διατίθεται (ενεργοποιήστε το κατά την μετάφραση του προγράμματος!)\n"
+#define MSGTR_AudioCodecFamilyNotAvailableStr "Η αίτηση για την οικογένεια του codec ήχου [%s] (afm=%d) δεν διατίθεται (ενεργοποιήστε το κατά την μετάφραση του προγράμματος!)\n"
 #define MSGTR_OpeningVideoDecoder "Άνοιγμα αποκωδικοποιητή βίντεο: [%s] %s\n"
 #define MSGTR_OpeningAudioDecoder "Άνοιγμα αποκωδικοποιητή ήχου: [%s] %s\n"
-#define MSGTR_UninitVideo "uninit βίντεο: %d  \n"
-#define MSGTR_UninitAudio "uninit ήχο: %d  \n"
+#define MSGTR_UninitVideoStr "uninit βίντεο: %d  \n"
+#define MSGTR_UninitAudioStr "uninit ήχο: %d  \n"
 #define MSGTR_VDecoderInitFailed "Αποτυχία αρχικοποίησης του VDecoder :(\n"
 #define MSGTR_ADecoderInitFailed "Αποτυχία αρχικοποίησης του ADecoder :(\n"
 #define MSGTR_ADecoderPreinitFailed "Αποτυχία προαρχικοποίησης του ADecoder :(\n"
@@ -341,7 +348,7 @@ static char help_text[]=
 
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: το codec δεν όρισε sh->disp_w και sh->disp_h, προσπάθεια επίλυσης!\n"
-#define MSGTR_VoConfigRequest "VDec: αίτηση για επιλογής vo - %d x %d (προτινόμενο csp: %s)\n"
+#define MSGTR_VoConfigRequest "VDec: αίτηση για επιλογή vo - %d x %d (προτεινόμενο csp: %s)\n"
 #define MSGTR_CouldNotFindColorspace "Δεν βρέθηκε αντίστοιχο colorspace - προσπάθεια με -vf scale...\n"
 #define MSGTR_MovieAspectIsSet "Η αναλογία της ταινίας είναι %.2f:1 - προκλιμάκωση για την διόρθωση της εμφάνισης της ταινίας.\n"
 #define MSGTR_MovieAspectUndefined "Η αναλογία της ταινίας δεν είναι ορισμένη - δεν εφαρμόζεται προκλιμάκωση.\n"
@@ -508,7 +515,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SUB_Delay "Καθυστέρηση: "
 #define MSGTR_PREFERENCES_SUB_FPS "FPS:"
 #define MSGTR_PREFERENCES_SUB_POS "Θέση: "
-#define MSGTR_PREFERENCES_SUB_AutoLoad "Απενεργοποίηση αυτόματου φωρτώματος υποτίτλων"
+#define MSGTR_PREFERENCES_SUB_AutoLoad "Απενεργοποίηση αυτόματου φορτώματος υποτίτλων"
 #define MSGTR_PREFERENCES_SUB_Unicode "Unicode υπότιτλος"
 #define MSGTR_PREFERENCES_SUB_MPSUB "Μετατροπή εισαγόμενου υπότιτλου σε υπότιτλο τύπου MPlayer"
 #define MSGTR_PREFERENCES_SUB_SRT "Μετατροπή εισαγόμενου υπότιτλου σε τύπο SubViewer(SRT) χρόνο-βασιζόμενο"
@@ -529,7 +536,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_Cache "Cache"
 #define MSGTR_PREFERENCES_FRAME_Misc "Διάφορα"
 #define MSGTR_PREFERENCES_OSS_Device "Συσκευή:"
-#define MSGTR_PREFERENCES_OSS_Mixer "Μίκτης:"
+#define MSGTR_PREFERENCES_OSS_Mixer "Μείκτης:"
 #define MSGTR_PREFERENCES_SDL_Driver "Οδηγός:"
 #define MSGTR_PREFERENCES_Message "Προσοχή, μερικές λειτουργίες χρειάζονται επανεκκίνιση αναπαραγωγής."
 #define MSGTR_PREFERENCES_DXR3_VENC "Κωδικοποιητής βίντεο:"
@@ -541,7 +548,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding4 "Slavic/Central European Languages (ISO-8859-2)"
 #define MSGTR_PREFERENCES_FontEncoding5 "Esperanto, Galician, Maltese, Τούρκικα (ISO-8859-3)"
 #define MSGTR_PREFERENCES_FontEncoding6 "Παλιά Βαλτική κωδικοσειρά (ISO-8859-4)"
-#define MSGTR_PREFERENCES_FontEncoding7 "Κυριλλικά (ISO-8859-5)"
+#define MSGTR_PREFERENCES_FontEncoding7 "Κυριλλική (ISO-8859-5)"
 #define MSGTR_PREFERENCES_FontEncoding8 "Αραβικά (ISO-8859-6)"
 #define MSGTR_PREFERENCES_FontEncoding9 "Νέα Ελληνικά (ISO-8859-7)"
 #define MSGTR_PREFERENCES_FontEncoding10 "Τούρκικα (ISO-8859-9)"
@@ -555,7 +562,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding18 "Γιαπωνέζικα (SHIFT-JIS)"
 #define MSGTR_PREFERENCES_FontEncoding19 "Κορεάτικα (CP949)"
 #define MSGTR_PREFERENCES_FontEncoding20 "Ταϊλανδέζικη κωδικοσειρά (CP874)"
-#define MSGTR_PREFERENCES_FontEncoding21 "Κυριλλικά Windows (CP1251)"
+#define MSGTR_PREFERENCES_FontEncoding21 "Κυριλλική Windows (CP1251)"
 #define MSGTR_PREFERENCES_FontEncoding22 "Σλάβικα/Κεντρικά Ευρωπαϊκά Windows (CP1250)"
 #define MSGTR_PREFERENCES_FontNoAutoScale "Όχι αυτόματη κλιμάκωση"
 #define MSGTR_PREFERENCES_FontPropWidth "Αναλογία με το πλάτος της ταινίας"
@@ -569,7 +576,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Cache "Ενεργοποίηση/απενεργοποίηση της cache"
 #define MSGTR_PREFERENCES_CacheSize "Μέγεθος της cache: "
 #define MSGTR_PREFERENCES_LoadFullscreen "Εκκίνηση σε πλήρης οθόνη"
-#define MSGTR_PREFERENCES_SaveWinPos "Αποθύκευση θέσης παραθύρου"
+#define MSGTR_PREFERENCES_SaveWinPos "Αποθήκευση θέσης παραθύρου"
 #define MSGTR_PREFERENCES_XSCREENSAVER "Απενεργοποίηση της προστασίας οθόνης"
 #define MSGTR_PREFERENCES_PlayBar "Ενεργοποίηση της playbar"
 #define MSGTR_PREFERENCES_AutoSync "Ενεργοποίηση/απενεργοποίηση του αυτόματου συγχρονισμού"
