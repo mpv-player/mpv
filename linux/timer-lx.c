@@ -3,6 +3,19 @@
 #include <unistd.h>
 #include <sys/time.h>
 
+int usec_sleep(int usec_delay)
+{
+#if	1
+    struct timespec ts;
+    ts.tv_sec  =  usec_delay / 1000000;
+    ts.tv_nsec = (usec_delay % 1000000) * 1000;
+    return nanosleep(&ts, NULL);
+#else
+    return usleep(usec_delay);
+#endif
+}
+
+
 // Returns current time in microseconds
 unsigned int GetTimer(){
   struct timeval tv;
