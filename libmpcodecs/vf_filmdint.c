@@ -61,6 +61,7 @@ struct vf_priv_s {
     unsigned long crop_x, crop_y, crop_cx, crop_cy;
     unsigned long export_count, merge_count;
     unsigned long num_breaks;
+    unsigned long num_copies;
     long in_inc, out_dec, iosync;
     long num_fields;
     long prev_fields;
@@ -943,11 +944,25 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi)
 
     if (mpi->type == MP_IMGTYPE_TEMP ||
 	(mpi->type == MP_IMGTYPE_IPB && !(mpi->flags & MP_IMGFLAG_READABLE)))
-	planes_idx = 2 + (++p->temp_idx & 1);
+	planes_idx = NUM_STORED/2 + (++p->temp_idx % (NUM_STORED/2));
     else
-	planes_idx = ++p->static_idx & 1;
+	planes_idx = ++p->static_idx % (NUM_STORED/2);
     planes = p->planes[planes_idx];
     mpi->priv = p->planes[NUM_STORED + planes_idx];
+    if (mpi->priv == p->old_planes) {
+	unsigned char **old_planes =
+	    p->planes[NUM_STORED + 2 + (++p->temp_idx & 1)];
+	my_memcpy_pic(old_planes[0], p->old_planes[0],
+		      p->w, p->h, p->stride, p->stride);
+	if (mpi->flags & MP_IMGFLAG_PLANAR) {
+	    my_memcpy_pic(old_planes[1], p->old_planes[1],
+			  p->cw, p->ch, p->chroma_stride, p->chroma_stride);
+	    my_memcpy_pic(old_planes[2], p->old_planes[2],
+			  p->cw, p->ch, p->chroma_stride, p->chroma_stride);
+	}
+	p->old_planes = old_planes;
+	p->num_copies++;
+    }
     mpi->planes[0] = planes[0];
     mpi->stride[0] = p->stride;
     if (mpi->flags & MP_IMGFLAG_PLANAR) {
@@ -1142,7 +1157,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 
     old_planes = p->old_planes;
 
-    if (mpi->flags & MP_IMGFLAG_DIRECT) {
+    if ((mpi->flags & MP_IMGFLAG_DIRECT) && mpi->priv) {
 	planes = mpi->priv;
 	mpi->priv = 0;
     } else {
@@ -1157,6 +1172,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 	    my_memcpy_pic(planes[2],
 			  mpi->planes[2] + p->crop_cx + p->crop_cy * mpi->stride[2],
 			  p->cw, p->ch, p->chroma_stride, mpi->stride[2]);
+	    p->num_copies++;
 	}
     }
 
@@ -1383,8 +1399,8 @@ static void uninit(struct vf_instance_s* vf)
 {
     struct vf_priv_s *p = vf->priv;
     mp_msg(MSGT_VFILTER, MSGL_INFO, "diff_time: %.3f, merge_time: %.3f, "
-	   "export: %lu, merge: %lu\n", p->diff_time, p->merge_time,
-	   p->export_count, p->merge_count);
+	   "export: %lu, merge: %lu, copy: %lu\n", p->diff_time, p->merge_time,
+	   p->export_count, p->merge_count, p->num_copies);
     free(p->memory_allocated);
     free(p);
 }
