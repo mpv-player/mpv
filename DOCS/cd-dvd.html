@@ -79,14 +79,15 @@
 <H4>DVD Navigation support (dvdnav)</H4>
 
 <P>Support for DVD navigation via <CODE>dvdnav</CODE> was being worked on, but
-  it was never finished properly and is therefore not recommended.</P>
+  it was never finished properly and is therefore <B>not recommended</B>!</P>
 
 <H4>Old-style DVD support - OPTIONAL</H4>
 
 <P>Useful if you want to play encoded VOBs from <B>hard disk</B>. Compile and
   install <B>libcss</B> 0.0.1 (not newer) for this (If MPlayer fails to
-  detect it, use the <CODE>-csslib /path/to/libcss.so</CODE> option). You need
-  to be root or use a suid root binary to use it.</P>
+  detect it, use the <CODE>-csslib /path/to/libcss.so</CODE> option). To use it,
+  you need to be root, use a suid root MPlayer binary or let MPlayer call the
+  suid root fibmap_mplayer wrapper program.</P>
 
 <H4>DVD structure</H4>
 
@@ -106,9 +107,9 @@ filesystem and a raw sector-based access to the device. Unfortunately you must
 be root (under Linux) to get the sector address of a file. You got two choices:</P>
 
 <UL>
-  <LI>Force the user to be root or use a suid root mplayer binary like
-    fibmap_mplayer which does the dvd access for the old-style DVD playback
-    over libcss.</LI>
+  <LI>Force the user to be root or use a suid root mplayer binary.</LI>
+  <LI>Let MPlayer call the suid root fibmap_mplayer wrapper program to access
+    the DVD (used in the old-style DVD playback over libcss).</LI>
   <LI>Don't use the kernel's filesystem driver at all and re-implement it in
     userspace. libdvdread 0.9.x and libmpdvdkit does this (New-style DVD
     support). The kernel udf filesystem drivers isn't needed as they already
