@@ -17,6 +17,7 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <inttypes.h>
+#include <string.h>
 #include "mga_vid.h"
 
 mga_vid_config_t config;
