@@ -86,7 +86,7 @@ the binary packages, here is how you can compile GCC 3.x from source:
 <procedure>
 <step><para>
   Go to the
-  <ulink url="http://gcc.gnu.org/mirrors.html">GCC mirrors page</ulink>
+  <ulink url="http://gcc.gnu.org/mirrors.html">GCC mirrors</ulink>
   page and download <filename>gcc-core-XXX.tar.gz</filename> where XXX is
   the version number.  This includes the complete C compiler and is sufficient for
   <application>MPlayer</application>. If you also want C++, Java or some of
