@@ -57,6 +57,10 @@
 #include <asm/mtrr.h>
 #endif
 
+#ifdef CONFIG_DEVFS_FS
+#include <linux/devfs_fs_kernel.h>
+#endif
+
 #include <asm/uaccess.h>
 #include <asm/system.h>
 #include <asm/io.h>
@@ -260,6 +264,10 @@ MODULE_PARM(mga_contrast, "i");
 static struct pci_dev *pci_dev;
 
 static mga_vid_config_t mga_config; 
+
+#ifdef CONFIG_DEVFS_FS
+static devfs_handle_t dev_handle = NULL;
+#endif
 
 static int colkey_saved=0;
 static int colkey_on=0;
@@ -1555,8 +1563,17 @@ static int mga_vid_initialize(void)
 			return -EINVAL;
 		}
 	}
-
+#ifdef CONFIG_DEVFS_FS
+	if ((dev_handle = devfs_register(
+					NULL,
+					"mga_vid", 0, DEVFS_FL_NONE,
+					MGA_VID_MAJOR, 0,
+					S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IFCHR,
+					0, 0,
+					&mga_vid_fops, NULL)) == NULL)
+#else
 	if(register_chrdev(MGA_VID_MAJOR, "mga_vid", &mga_vid_fops))
+#endif		
 	{
 		printk(KERN_ERR "mga_vid: unable to get major: %d\n", MGA_VID_MAJOR);
 		return -EIO;
@@ -1565,7 +1582,11 @@ static int mga_vid_initialize(void)
 	if (!mga_vid_find_card())
 	{
 		printk(KERN_ERR "mga_vid: no supported devices found\n");
+#ifdef CONFIG_DEVFS_FS
+		devfs_unregister(dev_handle);
+#else
 		unregister_chrdev(MGA_VID_MAJOR, "mga_vid");
+#endif
 		return -EINVAL;
 	}
 	mga_param_buff = kmalloc(PARAM_BUFF_SIZE,GFP_KERNEL);
@@ -1594,6 +1615,10 @@ void cleanup_module(void)
 
 	//FIXME turn off BES
 	printk(KERN_INFO "mga_vid: Cleaning up module\n");
+#ifdef CONFIG_DEVFS_FS
+	devfs_unregister(dev_handle);
+#else
 	unregister_chrdev(MGA_VID_MAJOR, "mga_vid");
+#endif
 }
 
