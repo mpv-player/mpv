@@ -146,6 +146,7 @@ static void reset()
 static void audio_pause()
 {
   int ioval;
+  reset();
   fd_control = open( "/dev/em8300", O_WRONLY );
   if( fd_control < 0 )
     printf( "AO: [dxr3] Oops, unable to pause playback\n" );
@@ -184,25 +185,28 @@ static int get_space()
 	return ao_data.outburst;
     }
     space = ao_data.buffersize - space;
+    space /= ao_data.outburst; /* This is a smart way of doing a fast modulo reduction */
+    space *= ao_data.outburst; /* fetched from ao_mpegpes.c */
     return space;
 }
 
 static int play(void* data,int len,int flags)
 {
     if( ioctl( fd_audio, EM8300_IOCTL_AUDIO_SETPTS, &ao_data.pts ) < 0 )
-	printf( "AO: [dxr3] Unable to set pts\n" );
+	printf( "AO: [dxr3] Unable to set PTS\n" );
     return write(fd_audio,data,len);
 }
 
 // return: how many unplayed bytes are in the buffer
 static float get_delay()
 {
-    int r=0;
+/*    int r=0;
     if( ioctl(fd_audio, SNDCTL_DSP_GETODELAY, &r) < 0 )
     {
         printf( "AO: [dxr3] Unable to get unplayed bytes in buffer\n" );
 	return ((float)ao_data.buffersize)/(float)ao_data.bps;
     }
-    return (((float)r)/(float)ao_data.bps);
+    return (((float)r)/(float)ao_data.bps);*/
+    return 0.0;
 }
 

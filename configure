@@ -150,6 +150,7 @@ Audio:
   --disable-alsa         disable alsa sound support [autodetect]
   --disable-sunaudio     disable Sun sound support [autodetect]
   --disable-mad          disable mad audio support [autodetect]
+  --disable-mp1e	 disable mp1e codec support [autodetect]
   --disable-select       disable using select() on OSS audio device [enable]
 
 Miscellaneous options:
@@ -733,6 +734,8 @@ for ac_option do
   --disable-ossaudio)	_ossaudio=no	;;
   --enable-mad)		_mad=yes	;;
   --disable-mad)	_mad=no		;;
+  --enable-mp1e)	_mp1e=yes	;;
+  --disable-mp1e)	_mp1e=no	;;
   --enable-vorbis)	_vorbis=yes	;;
   --disable-vorbis)	_vorbis=no	;;
   --enable-css)		_css=yes	;;
@@ -1453,7 +1456,7 @@ if test "$_x11" = yes && test "$_dga" != no ; then
   cat > $TMPC << EOF
 #include <X11/Xlib.h>
 #include <X11/extensions/xf86dga.h>
-int main (void) { return 0; }
+int main (void) { (void) XDGAQueryExtension(0, 0, 0); return 0; }
 EOF
   _dga=no
   cc_check $_inc_x11 $_ld_x11 -lXxf86dga -lXxf86vm && _dga=yes
@@ -1997,18 +2000,20 @@ echocheck "mp1e rte support"
 if test "$_mp1e" = auto ; then
   _mp1e=no
   cat > $TMPC << EOF
-#include <sys/types.h>
 #include <unistd.h>
+#include <sys/types.h>
 #include <rte.h>
 int main(void) { return 0; }
 EOF
-  cc_check -lrte && _mp1e=yes
+  cc_check -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -lrte && _mp1e=yes
 fi
 if test "$_mp1e" = yes ; then
+  _largefiles=yes
   _def_mp1e='#define USE_MP1E 1'
   _ld_mp1e='-lrte'
 else
   _def_mp1e='#undef USE_MP1E'
+  _ld_mp1e=''
 fi
 echores "$_mp1e"
 
@@ -2459,9 +2464,9 @@ elif bsd ; then
 fi
 
 # 64 bit file offsets?
-if test "$_largefiles" = yes || freebsd ; then
+if test "$_largefiles" = yes || test "$_mp1e" = yes || freebsd ; then
   CFLAGS="$CFLAGS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
-  if test "$_dvdread" = yes ; then
+  if test "$_dvdread" = yes || test "$_mp1e" = yes ; then
     # dvdread support requires this (for off64_t)
     CFLAGS="$CFLAGS -D_LARGEFILE64_SOURCE"
   fi
@@ -2545,7 +2550,6 @@ DS_DEP = $_dep_dshow
 DS_LIB = $_ld_dshow
 AV_DEP = $_dep_libavcodec
 AV_LIB = $_ld_libavcodec
-MP1E_DEP = $_dep_mp1e
 MP1E_LIB = $_ld_mp1e
 ARCH_LIB =  $_ld_arch $_ld_iconv
 DIVX4LINUX = $_divx4linux

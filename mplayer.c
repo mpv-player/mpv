@@ -1241,6 +1241,7 @@ while(!eof){
     }
 
   vo_pts=sh_video->timer*90000.0;
+  vo_fps=sh_video->fps;
 
 /*========================== PLAY AUDIO ============================*/
 while(sh_audio){

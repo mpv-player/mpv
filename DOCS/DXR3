@@ -1,6 +1,12 @@
 DXR3/H+ video/audio output plugins manual by David Holm
 =======================================================
 
+2001-11-28: ffmpeg replaced with mp1e, divx playback
+	    won't get much faster than this, huge thanks
+	    goes out to Ivan Kalvachev for helping me
+	    fix the final mp1e bugs (and contributing
+	    to the libvo2 development)
+	    
 2001-11-27: -ao dxr3 now works, still a few bugs though
             you might have to reload the em8300 modules
 	    after a playback or you might get static the
@@ -45,20 +51,13 @@ These days, you have two uses for this card:
    the CVS version since most of the time I use the latest features
    which are only available through cvs)
 
- * <mplayerdir>/libavcodec from ffmpeg (only required if you intend to
-   play formats other than mpeg-(1/2), highly recommended!) there are
-   two ways of doing this:
-   1. Download and install ffmpeg from ffmpeg.sourceforge.net. 
-      Configure it with --enable-shared
-   2. Download ffmpeg from ffmpeg.sourceforge.net, copy the entire 
-      contents from <ffmpegdir>/libavcodec into <mplayer>/libavcodec 
-      (symlinking won't work!). Then edit <mplayerdir>/libavcodec/utils.c 
-      and move the line containing register_avcodec(&mpeg1video_encoder); 
-      out of the CONFIG_ENCODERS #ifdef block and place it outside, for 
-      instance below register_avcodec(&rawvideo_encoder);
-
+ * Second, if you want DivX playback you need to download and install
+   RTE from zapping.sourceforge.net compile and install it BEFORE
+   running configure in the mplayer dir.
+   
  * Run <mplayerdir>/configure and make sure that DXR3/H+ support =yes
-   and optionally that libavcodec or ffmpeg.so = yes
+   and optionally that mp1e rte = yes, if it's = no, please mail me
+   your configure.log and I'll fix it.
    
  From here on compilation (of at least my code ;) should go without
  problems.
@@ -83,9 +82,8 @@ section will have to specify "-vc mpeg12" if you want to playback
 any of these video types _without_ "-vo dxr3"!
 
 DIVX Notes
-When playing divx's add "-vc odivx", if you get any other divx codec
-to run faster tell me which one because I'll be interested in how it
-could possibly be any faster than OpenDivX4Linux...
+When playing divx's add "-vc odivx"
+I've switched to mp1e from ffmpeg so it should be lightning fast now.
 
 Other codecs:
 Currently they don't work. I'm working on implementing libvo2 which

@@ -44,6 +44,7 @@ int vo_doublebuffering = 0;
 int vo_fsmode = 0;
 
 int vo_pts=0; // for hw decoding
+float vo_fps=0; // for mp1e rte
 
 char *vo_subdevice = NULL;
 

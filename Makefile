@@ -146,14 +146,14 @@ MENCODER_DEP += Gui/libgui.a
 endif
 
 $(PRG):	$(MPLAYER_DEP)
-	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) -Llibmpdemux -lmpdemux $(AV_LIB) $(EXTRA_LIB) $(LIRC_LIB) $(LIB_LOADER) -Llibmpeg2 -lmpeg2 -Llibao2 -lao2 $(A_LIBS) $(VO_LIBS) $(CSS_LIB) $(ARCH_LIB) $(OSDEP_LIBS) $(PP_LIBS) $(XA_LIBS) $(DECORE_LIB) $(TERMCAP_LIB) -lm $(STATIC_LIB) $(GUI_LIBS) $(PNG_LIB) $(Z_LIB)
+	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) -Llibmpdemux -lmpdemux $(EXTRA_LIB) $(LIRC_LIB) $(LIB_LOADER) $(AV_LIB) $(MP1E_LIB) -Llibmpeg2 -lmpeg2 -Llibao2 -lao2 $(A_LIBS) $(VO_LIBS) $(CSS_LIB) $(ARCH_LIB) $(OSDEP_LIBS) $(PP_LIBS) $(XA_LIBS) $(DECORE_LIB) $(TERMCAP_LIB) -lm $(STATIC_LIB) $(GUI_LIBS) $(PNG_LIB) $(Z_LIB)
 
 $(PRG_FIBMAP): fibmap_mplayer.o
 	$(CC) -o $(PRG_FIBMAP) fibmap_mplayer.o
 
 ifeq ($(MENCODER),yes)
 $(PRG_MENCODER): $(MENCODER_DEP)
-	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) -Llibmpeg2 -lmpeg2 -Llibmpdemux -lmpdemux $(X_LIBS) $(LIB_LOADER) $(AV_LIB) -lmp3lame $(A_LIBS) $(CSS_LIB) $(GUI_LIBS) $(PNG_LIB) $(Z_LIB) $(ARCH_LIB) $(OSDEP_LIBS) $(PP_LIBS) $(XA_LIBS) $(DECORE_LIB) $(ENCORE_LIB) $(TERMCAP_LIB) -lm
+	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) -Llibmpeg2 -lmpeg2 -Llibmpdemux -lmpdemux $(X_LIBS) $(LIB_LOADER) $(AV_LIB) $(MP1E_LIB) -lmp3lame $(A_LIBS) $(CSS_LIB) $(GUI_LIBS) $(PNG_LIB) $(Z_LIB) $(ARCH_LIB) $(OSDEP_LIBS) $(PP_LIBS) $(XA_LIBS) $(DECORE_LIB) $(ENCORE_LIB) $(TERMCAP_LIB) -lm
 endif
 
 # $(PRG_HQ):	depfile mplayerHQ.o $(OBJS) loader/libloader.a libmpeg2/libmpeg2.a opendivx/libdecore.a $(COMMONLIBS) encore/libencore.a
