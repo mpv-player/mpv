@@ -197,7 +197,7 @@ Codecs:
   --disable-libdv        disable libdv 0.9.5 en/decoding support [autodetect]
   --disable-mad          disable libmad (mpeg audio) support [autodetect]
   --enable-xmms          build with XMMS inputplugin support [disabled]
-  --enable-externalfaad  use external faad library if available [disabled]
+  --enable-external-faad build with external libfaad [disabled]
   --enable-flac          build with FLAC support [autodetect]
   --enable-external-flac build with external libFLAC [disable]
   
@@ -231,7 +231,7 @@ Video output:
   --enable-zr            build with ZR360[56]7/ZR36060 support [autodetect]
   --enable-bl		 build with Blinkenlights support [disable]
   --enable-tdfxvid       build with tdfx vid support [disable]
-  --disable_tga          disable targa output support [enable]
+  --disable-tga          disable targa output support [enable]
   
 Audio output:
   --disable-ossaudio     disable OSS sound support [autodetect]
@@ -1270,8 +1270,8 @@ for ac_option do
   --disable-matroska)   _matroska=no    ;;
   --enable-faad)	_faad=yes	;;
   --disable-faad)	_faad=no	;;
-  --enable-externalfaad) _faad_local=no ;;
-  --disable-externalfaad) _faad_local=yes ;;
+  --enable-external-faad) _faad_local=no ;;
+  --disable-external-faad) _faad_local=yes ;;
   --enable-xmms)	_xmms=yes	;;
   --enable-flac)	_flac=yes	;;
   --disable-flac)	_flac=no	;;
