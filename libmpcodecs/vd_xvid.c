@@ -12,10 +12,6 @@
 #include <divx4.h>
 #include <xvid.h>
 
-#ifndef XVID_CSP_EXTERN
-#error "You need lastest XviD CVS"
-#endif
-
 static vd_info_t info = 
 {
 	"xvid decoder",
@@ -63,7 +59,11 @@ static int init(sh_video_t *sh){
 
   switch(sh->codec->outfmt[sh->outfmtidx]){
   case IMGFMT_YV12:
+#ifdef XVID_CSP_EXTERN
     cs= do_dr2 ? XVID_CSP_EXTERN : XVID_CSP_USER;
+#else
+    cs= XVID_CSP_USER;
+#endif
     break;
   case IMGFMT_YUY2:
     cs=XVID_CSP_YUY2;
@@ -72,6 +72,7 @@ static int init(sh_video_t *sh){
     cs=XVID_CSP_UYVY;
     break;
   case IMGFMT_I420: 
+  case IMGFMT_IYUV:
     cs=XVID_CSP_I420;
     break;
   case IMGFMT_BGR15: 
@@ -120,9 +121,11 @@ static int init(sh_video_t *sh){
   sh->context = p;
 
   switch(cs) {
+#ifdef XVID_CSP_EXTERN
   case XVID_CSP_EXTERN:
     p->img_type = MP_IMGTYPE_STATIC;
     break;
+#endif
   case XVID_CSP_USER:
     p->img_type = MP_IMGTYPE_EXPORT;
     break;
@@ -165,6 +168,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
   case XVID_CSP_USER:
     dec.image = &d4_pic;
     break;
+#ifdef XVID_CSP_EXTERN
   case XVID_CSP_EXTERN:
     pic.y = mpi->planes[0];
     pic.u = mpi->planes[1];
@@ -174,6 +178,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     pic.stride_v = mpi->stride[2];
     dec.image = &pic;
     break;
+#endif
   default:
     dec.image = mpi->planes[0];
     if(IMGFMT_IS_BGR(mpi->imgfmt) || IMGFMT_IS_RGB(mpi->imgfmt))
