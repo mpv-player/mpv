@@ -66,6 +66,14 @@ static void eqSetBands( int channel )
  gtk_adjustment_set_value( A8000adj,0.0f - gtkEquChannels[channel][8] );
  gtk_adjustment_set_value( A16000adj,0.0f - gtkEquChannels[channel][9] );
 
+ if ( guiIntfStruct.sh_video )
+  {
+   get_video_colors( guiIntfStruct.sh_video,"brightness",&vo_gamma_brightness );
+   get_video_colors( guiIntfStruct.sh_video,"contrast",&vo_gamma_contrast );
+   get_video_colors( guiIntfStruct.sh_video,"hue",&vo_gamma_hue );
+   get_video_colors( guiIntfStruct.sh_video,"saturation",&vo_gamma_saturation );
+  }
+										    
  gtk_adjustment_set_value( VContrastadj,(float)vo_gamma_contrast );
  gtk_adjustment_set_value( VBrightnessadj,(float)vo_gamma_brightness );
  gtk_adjustment_set_value( VHueadj,(float)vo_gamma_hue );
@@ -111,12 +119,7 @@ void ShowEqualizer( void )
 
  eqSetChannelNames();
 
- VContrastadj->value=(float)vo_gamma_contrast;
- VBrightnessadj->value=(float)vo_gamma_brightness;
- VHueadj->value=(float)vo_gamma_hue;
- VSaturationadj->value=(float)vo_gamma_saturation;
-
- if ( !guiIntfStruct.Playing )
+ if ( !guiIntfStruct.Playing || !guiIntfStruct.sh_video )
   {
    gtk_widget_set_sensitive( VContrast,FALSE );
    gtk_widget_set_sensitive( VBrightness,FALSE );
@@ -215,7 +218,6 @@ static void eqButtonReleased( GtkButton * button,gpointer user_data )
 	   gtkSet( gtkSetBrightness,0.0f,NULL );
 	   gtkSet( gtkSetHue,0.0f,NULL );
 	   gtkSet( gtkSetSaturation,0.0f,NULL );
-	   vo_gamma_brightness=vo_gamma_contrast=vo_gamma_hue=vo_gamma_saturation=0;
 	   eqSetBands( Channel );
 	  }
 	break;
@@ -230,6 +232,9 @@ gboolean eqDestroy( GtkWidget * widget,GdkEvent * event,gpointer user_data )
 
 static void eqShow( GtkWidget * widget,gpointer user_data )
 { gtkVEqualizer=(int)user_data; }
+
+static void eqFocus( GtkWindow * window,GtkWidget * widget,gpointer user_data )
+{ eqSetBands( Channel ); }
 
 static void eqSelectChannelsListRow( GtkCList * clist,gint row,gint column,GdkEvent * event,gpointer user_data )
 {
@@ -708,6 +713,8 @@ GtkWidget * create_Equalizer( void )
   gtk_signal_connect( GTK_OBJECT( Equalizer ),"destroy",GTK_SIGNAL_FUNC( eqDestroy ),NULL );
   gtk_signal_connect( GTK_OBJECT( Equalizer ),"show",GTK_SIGNAL_FUNC( eqShow ),(void *)1 );
   gtk_signal_connect( GTK_OBJECT( Equalizer ),"hide",GTK_SIGNAL_FUNC( eqShow ),(void *)0 );
+  gtk_signal_connect( GTK_OBJECT( Equalizer ),"focus_in_event",GTK_SIGNAL_FUNC( eqFocus ),(void *)2 );
+
   gtk_signal_connect( GTK_OBJECT( ChannelsList ),"select_row",GTK_SIGNAL_FUNC( eqSelectChannelsListRow ),NULL );
 
   gtk_signal_connect( GTK_OBJECT( A3125 ),"motion_notify_event",GTK_SIGNAL_FUNC( eqHScaleMotion ),(void*)0 );

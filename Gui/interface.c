@@ -36,6 +36,8 @@
 
 #include "../libmpdemux/stream.h"
 #include "../libmpdemux/demuxer.h"
+#include "../libmpdemux/stheader.h"
+#include "../libmpcodecs/dec_video.h"
 
 guiInterface_t guiIntfStruct;
 
@@ -174,20 +176,6 @@ int guiCMDArray[] =
   evFullScreen,
   evSkinBrowser
  };
-
-typedef struct 
-{
- demux_stream_t *ds;
- unsigned int format;
- struct codecs_st *codec;
- int inited;
- // output format:                                                                                
- float timer;
- float fps;
- float frametime;
- int i_bps;
- int disp_w,disp_h;
-} tmp_sh_video_t;
 
 extern ao_functions_t * audio_out;
 extern vo_functions_t * video_out;
@@ -436,18 +424,11 @@ int guiGetEvent( int type,char * arg )
 	break;
    case guiSetValues:
 // -- video
+	guiIntfStruct.sh_video=arg;
 	if ( arg )
 	 {
-	  tmp_sh_video_t * sh = (tmp_sh_video_t *)arg;
+	  sh_video_t * sh = (sh_video_t *)arg;
 	  guiIntfStruct.FPS=sh->fps;
-	  if ( vo_gamma_brightness == 1000 )
-	   { vo_gamma_brightness=0; get_video_colors( (void *)arg,"brightness",&vo_gamma_brightness ); }
-	  if ( vo_gamma_contrast == 1000 )
-	   { vo_gamma_contrast=0; get_video_colors( (void *)arg,"contrast",&vo_gamma_contrast ); }
-	  if ( vo_gamma_hue == 1000 )
-	   { vo_gamma_hue=0; get_video_colors( (void *)arg,"hue",&vo_gamma_hue ); }
-	  if ( vo_gamma_saturation  == 1000 )
-	   { vo_gamma_saturation=0; get_video_colors( (void *)arg,"saturation",&vo_gamma_saturation ); }
 	 }
 
 	if ( guiIntfStruct.NoWindow ) wsVisibleWindow( &appMPlayer.subWindow,wsHideWindow );
@@ -619,7 +600,6 @@ void list( void )
 
 void * gtkSet( int cmd,float fparam, void * vparam )
 {
- mp_cmd_t    * mp_cmd;
  equalizer_t * eq = (equalizer_t *)vparam;
  plItem      * item = (plItem *)vparam;
  
@@ -775,31 +755,30 @@ void * gtkSet( int cmd,float fparam, void * vparam )
         audio_delay=gtkAODelay=fparam;
 	return NULL;
    case gtkSetPanscan:
-        mp_cmd=(mp_cmd_t *)calloc( 1,sizeof( *mp_cmd ) );
-        mp_cmd->id=MP_CMD_PANSCAN;    mp_cmd->name=strdup( "panscan" );
-	mp_cmd->args[0].v.f=fparam;   mp_cmd->args[1].v.i=1;
-	mp_input_queue_cmd( mp_cmd );
+        {
+	 mp_cmd_t * mp_cmd;
+         mp_cmd=(mp_cmd_t *)calloc( 1,sizeof( *mp_cmd ) );
+         mp_cmd->id=MP_CMD_PANSCAN;    mp_cmd->name=strdup( "panscan" );
+	 mp_cmd->args[0].v.f=fparam;   mp_cmd->args[1].v.i=1;
+	 mp_input_queue_cmd( mp_cmd );
+	}
         return NULL;
    case gtkSetAutoq:
 	auto_quality=(int)fparam;
 	return NULL;
 // --- set equalizers
    case gtkSetContrast:
-        mp_cmd=(mp_cmd_t *)calloc( 1,sizeof( *mp_cmd ) );
-	mp_cmd->id=MP_CMD_CONTRAST;   mp_cmd->name=strdup( "contrast" );
-	break;
+        if ( guiIntfStruct.sh_video ) set_video_colors( guiIntfStruct.sh_video,"contrast",(int)fparam );
+	return NULL;
    case gtkSetBrightness:
-        mp_cmd=(mp_cmd_t *)calloc( 1,sizeof( *mp_cmd ) );
-	mp_cmd->id=MP_CMD_BRIGHTNESS; mp_cmd->name=strdup( "brightness" );
-	break;
+        if ( guiIntfStruct.sh_video ) set_video_colors( guiIntfStruct.sh_video,"brightness",(int)fparam );
+	return NULL;
    case gtkSetHue:
-        mp_cmd=(mp_cmd_t *)calloc( 1,sizeof( *mp_cmd ) );
-	mp_cmd->id=MP_CMD_HUE;        mp_cmd->name=strdup( "hue" );
-	break;
+        if ( guiIntfStruct.sh_video ) set_video_colors( guiIntfStruct.sh_video,"hue",(int)fparam );
+	return NULL;
    case gtkSetSaturation:
-        mp_cmd=(mp_cmd_t *)calloc( 1,sizeof( *mp_cmd ) );
-	mp_cmd->id=MP_CMD_SATURATION; mp_cmd->name=strdup( "saturation" );
-	break;
+        if ( guiIntfStruct.sh_video ) set_video_colors( guiIntfStruct.sh_video,"saturation",(int)fparam );
+	return NULL;
    case gtkSetEqualizer:
         if ( eq )
 	 {
@@ -815,10 +794,6 @@ void * gtkSet( int cmd,float fparam, void * vparam )
 	     { tmp.channel=i; tmp.band=j; audio_plugin_eq.control( AOCONTROL_PLUGIN_EQ_SET_GAIN,(int)&tmp ); }
 	  }
 	return NULL;
-   default: return NULL;
   }
- mp_cmd->args[0].v.i=(int)fparam;
- mp_cmd->args[1].v.i=1;
- mp_input_queue_cmd( mp_cmd );
  return NULL;
 }

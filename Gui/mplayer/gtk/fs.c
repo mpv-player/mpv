@@ -48,6 +48,7 @@ char * fsVideoFilterNames[][2] =
            { "QT files (*.mov)",   				  	"*.mov" },
            { "ASF files (*.asf)",  				  	"*.asf" },
            { "VIVO files (*.viv)", 				  	"*.viv" },
+	   { "RealVideo files (*.rm)",					"*.rm"  },
 	   { "Windows Media Video (*.wmv)",			  	"*.wmv" },
 	   { "MP3 files (*.mp3,mp2)",					"*.mp3,*.mp2" },
 	   { "Wave files (*.wav)",					"*.wav" },

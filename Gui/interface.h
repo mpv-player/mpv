@@ -57,8 +57,10 @@ typedef struct
    guiResizeStruct      resize;
    guiVideoStruct       videodata;
    guiUnknowErrorStruct error;
+   
+   void * sh_video;
 
-   int                  DiskChanged;
+   int    DiskChanged;
 
 #ifdef USE_DVDREAD
    guiDVDStruct         DVD;
