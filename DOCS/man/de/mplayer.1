@@ -554,6 +554,8 @@ Decodieren). Führt zu Bildstörungen!
 .TP
 .B \-identify
 Zeigt Dateiparameter in einem einfach einzulesenden Format an.
+Gibt außerdem detailliertere Informationen über IDs und die Sprachen von
+Untertiteln und Audiospuren.
 Das Script TOOLS/\:midentify unterdrückt die anderen Ausgaben von MPlayer
 und führt (hoffentlich) Shell-Escaping für die Dateinamen aus.
 .
@@ -2022,16 +2024,6 @@ die Anzeige erscheinen soll.
 .PD 1
 .
 .TP
-.B \-double
-Aktiviert Double-Buffering.
-Vermeidet Flimmern dadurch, dass zwei Bilder im Speicher gehalten werden,
-von denen das eine angezeigt wird, während das andere noch decodiert wird.
-Kann das OSD negativ beeinflussen, entfernt aber oft Flimmern des OSD.
-Braucht doppelt so viel Speicher wie Einfachpufferung und wird somit
-nicht mit Grafikkarten funktionieren, die nur über sehr wenig Speicher
-verfügen.
-.
-.TP
 .B \-dr \ \ \ 
 Schaltet direktes Rendern an (wird nicht von allen Codecs und
 Videoausgabetreibern unterstützt).
@@ -2267,6 +2259,17 @@ Siehe auch \-aspect, das das Verhältnis des Films angibt.
 \-monitoraspect 16:9 oder 1.7777
 .RE
 .PD 1
+.
+.TP
+.B \-nodouble
+Deaktiviert Double-Buffering.
+Double-Buffering vermeidet Flimmern dadurch, dass zwei Bilder im Speicher
+gehalten werden, von denen das eine angezeigt wird, während das andere noch
+decodiert wird.
+Es kann das OSD negativ beeinflussen, entfernt aber oft Flimmern des OSD.
+Es braucht doppelt so viel Speicher wie Einfachpufferung und wird somit
+nicht mit Grafikkarten funktionieren, die nur über sehr wenig Speicher
+verfügen.
 .
 .TP
 .B \-nograbpointer
@@ -4405,7 +4408,7 @@ Der Hauptnachteil ist, dass er nicht immer funktioniert.
 Besonders in Kombination mit anderen Filtern kann es zu zufällig gestörten
 Bildern kommen.
 Sei also froh, wenn es funktioniert, beschwere dich aber nicht, falls bei
-deiner Kombination der Filter Fehler auftreten.
+deiner Filterkombination Fehler auftreten.
 .PD 0
 .RSs
 .IPs d
@@ -4417,7 +4420,7 @@ Erneutes Interleave der Felder (kehrt den Effekt von fil=d um).
 .
 .TP
 .B field[=n]
-Extrahiert ein einzelnes Feld eines interlaceten Bildes mit Stride-Arithmetik,
+Extrahiert ein einzelnes Feld eines interlaced Bildes mit Stride-Arithmetik,
 um Verschwendung von CPU-Zeit zu vermeiden.
 Der optionale Parameter n gibt an, ob das gerade oder ungerade Feld extrahiert
 wird (abhängig davon, ob n selber gerade oder ungerade ist).
@@ -4468,7 +4471,7 @@ Schwellenwerte, die in bestimmten Modi verwendet werden.
 .TP
 .B ivtc[=1]
 Experimenteller 'zustandsloser' Inverse-Telecine-Filter.
-Anstatt zu versuchen, ein Muster zu finden, wie es der dect-Filter tut, trifft
+Anstatt zu versuchen, ein Muster zu finden, wie es der detc-Filter tut, trifft
 ivtc seine Entscheidungen unabhängig für jeden Frame.
 Dies liefert wesentlich bessere Resultate für Material, das ausgiebiger
 Editierung unterzogen wurde, nachdem Telecine angewendet wurde.
@@ -4485,9 +4488,9 @@ filmident genauer zu sein scheinen.
 .B pullup[=jl:jr:jo:ju:sb:mp]\
 Pulldown-Umkehrungs- (inverse telecine) Filter der dritten Generation, der
 mixed hard-telecine und Progressive-Material mit 24 und 30 fps handhaben kann.
-Der Pullup-Filer ist wesentlich robuster als detc oder ivtc, da er
+Der Pullup-Filter ist wesentlich robuster als detc oder ivtc, da er
 für Entscheidungen zukünftigen Kontext zurate zieht.
-Wie ivtc auch ist Pullup zustandslos in dem Sinne, dass er nicht nach einem zu
+Wie ivtc auch ist pullup zustandslos in dem Sinne, dass er nicht nach einem zu
 folgenden Muster sucht, sondern stattdessen nach vorne schaut, um Gegenstücke
 zu finden und progressive Frames zusammenzusetzen.
 Der Filter befindet sich noch in der Entwicklung, scheint aber akkurat zu
@@ -4497,31 +4500,111 @@ links, rechts, oben und unten am Bildrand, respektive.
 Links/\:rechts sind in Einheiten von 8 Pixeln anzugeben, oben/\:unten in
 Einheiten von 2 Zeilen.
 Der Standardwert ist 8 Pixel an jeder Seite.
-Setzen der Option sb (strict breaks) auf 1 reduziert die Chancen von Pullup,
+Setzen der Option sb (strict breaks) auf 1 reduziert die Chancen von pullup,
 gelegentlich einen falsch getroffenen Frame zu generieren.
-Es kann jedoch auch dazu führen, dass während schnellbewegten Szenen eine
+Es kann jedoch auch dazu führen, dass während schnellen bewegten Szenen eine
 exzessive Anzahl an Frames ausgelassen wird.
-Im Gegensatz dazu führt ein Setzen auf -1 dazu, dass Pullup Felder leichter
+Im Gegensatz dazu führt ein Setzen auf -1 dazu, dass pullup Felder leichter
 zuordnet.
 Dies kann helfen beim Verarbeiten von Videomaterial, das zwischen Feldern
 leicht verwischt ist, jedoch kann es auch zu interlaced Frames in der Ausgabe
 führen.
 Die Option mp (metric plane) kann auf 1 oder 2 gesetzt werden, um bei den
-Berechnungen von Pullup eine Chrominanzebene anstelle einer Helligkeitsebene
+Berechnungen von pullup eine Chrominanzebene anstelle einer Helligkeitsebene
 zu verwenden.
 Dies kann die Genauigkeit bei sehr sauberem Quellmaterial verbessern,
 vermutlich wird die Qualitätt jedoch verschlechtert, vor allem wenn es sich um
 Videomaterial in Graustufen handelt oder Regenbogeneffekte sichbar sind.
 Der vorwiegende Zweck vom Setzen von mp auf Chrominanzebene ist, die
-CPU-Auslastung zu verringern und Pullup in Realtime oder auf langsamen
+CPU-Auslastung zu verringern und pullup in Echtzeit oder auf langsamen
 Maschinen zu benutzen.
 .br
 .I ANMERKUNG:
-Lasse beim Encodieren auf jede Anwendung von Pullup den Filter softskip folgen.
-Dies stellt sicher, dass Pullup jeden Frame betrachtet.
+Lasse beim Encodieren auf jede Anwendung von pullup den Filter softskip folgen.
+Dies stellt sicher, dass pullup jeden Frame betrachtet.
 Falls dies nicht geschieht, führt dies zu einer unkorrekten Ausgabe und wird
 auf Grund von Designbeschränkungen auf Codec-/\:Filterebene normalerweise
 abbrechen.
+.
+.TP
+.B filmdint[=Optionen]
+Inverse telecine-Filter, ähnlich dem Pullup-Filter oben.
+Er ist konstruiert, jedes Pulldown-Muster zu handhaben, inklusive mixed soft
+und hard telecine sowie begrenzter Unterstützung für Filme, deren
+Framerate für die Wiedergabe auf einem Fernseher verringert oder
+erhöht worden ist.
+Nur die Luminanzebene wird benutzt, um Frameunterbrechungen zu finden.
+Falls es zu einem Feld keinen Treffer gibt, wird das Deinterlacing mit einer
+einfachen linearen Approximation durchgeführt.
+Falls die Quelle aus MPEG-2-Material besteht, muss dieser der erste Filter
+sein, um Zugang zu den Feld-Flags zu erlauben, die vom MPEG-2-Decoder gesetzt
+werden.
+Abhängig von der MPEG-Quelle kannst du diesen Hinweis ignorieren, solange du
+keine Warnungen "Bottom-first field" bekommst.
+Werden keine Optionen angegeben, bewerkstelligt dieser Filter normales inverse
+telecine und sollte zusammen mit mencoder \-fps 29.97 \-ofps 23.976 benutzt
+werden.
+Wird dieser Filter mit mplayer benutzt wird, kommt es zu unregelmäßigen
+Frameraten, aber dies ist im Allgemeinen besser als pp=lb oder gar kein
+Deinterlacing zu benutzen.
+Es können mehrere Optionen getrennt durch / angegeben werden.
+.RSs
+.IPs crop=b:h:x:y
+Genau wie der Filter crop, aber schneller, und er funktioniert auch mit mixed
+hard und soft telecined-Inhalten, wenn y kein Vielfaches von 4 ist.
+Falls x oder y das Abschneiden von nicht-ganzzahligen Pixeln erfordern würde,
+wird die Chrominanzebene erweitert.
+Das bedeutet üblicherweise, dass x und y geradzahlig sein müssen.
+.IPs io=ifps:ofps
+Für alle ifps Eingabeframes wird der Filter ofps Ausgabeframes liefern.
+Das Verhältnis von ifps/\:ofps sollte dem Verhältnis \-fps/\-ofps entsprechen.
+Dies könnte benutzt werden, um Filme zu filtern, die auf einem Fernseher mit
+einer anderen Framerate als der originalen wiedergegeben werden.
+.IPs luma_only=n
+Ist n ungleich 0, wird die Chrominanzebene unverändert kopiert.
+Dies ist nützlich für Fernseher im YV12-Modus, die eine der Chrominanzebenen
+wegfallen lassen.
+.IPs mmx2=n
+Auf der x86-Architektur, falls n=1, benutze MMX2-optimierte Funktionen, falls
+n=2, benutze 3DNow!-optimierte Funktionen, sonst einfach C.
+Wird diese Option nicht angegeben, werden MMX2 und 3DNow! automatisch erkannt.
+Benutze diese Option, um die automatische Erkennung zu übergehen.
+.IPs fast=n
+Bei größeren Werten für n wird dies den Filter auf Kosten der Genauigkeit
+beschleunigen.
+Der Standardwert ist n=3.
+Ist n ungerade, so wird ein Frame, der direkt auf einen mit dem
+REPEAT_FIRST_FIELD-MPEG-Flag markierten Frame folgt, als progressiv angesehen.
+Daher wird sich der Filter keinen soft-telecined MPEG-2-Inhalten widmen.
+Dies ist der einzige Effekt dieses Flags, falls MMX2 oder 3DNow! verfügbar ist.
+Ohne MMX2 und 3DNow! und falls n=0 oder 1, werden dieselben Berechnungen
+durchgeführt wie mit n=2 oder 3.
+Ist n=2 oder 3, so wird die Anzahl der Helligkeitslevels, die benutzt werden,
+um Frameunterbrechungen zu finden, von 256 auf 128 reduziert, was einen
+schnelleren Filter zur Folge hat, ohne dabei an Genauigkeit zu verlieren.
+Ist n=4 oder 5, so wird eine schnellere, aber weniger genauere Metrik benutzt,
+um Frameunterbrechungen zu finden, welche dazu neigt, hohe vertikale Details
+als interlaced-Inhalte fehlzuinterpretieren.
+.IPs verbose=n
+Falls n von null verschieden ist, gibt dies die detaillierteren Metriken für
+jeden Frame aus.
+Nützlich für Debugging.
+.IPs dint_thres=n
+Schwellenwert für Deinterlacing.
+Wird während des Deinterlacing von nichtgetroffenen Frames benutzt.
+Größere Werte bedeuten weniger Deinterlacing; benutze n=256, um Deinterlacing
+komplett abzuschalten.
+Standardwert ist n=8.
+.IPs comb_thres=n
+Schwellenwert für den Vergleich von top fields und bottom fields.
+Standardwert ist 128.
+.IPs diff_thres=n
+Schwellenwert, um die zeitliche Veränderung eines Feldes zu
+erkennen.
+Standardwert ist 128.
+.IPs sad_thres=n
+Summe des "Absolute Difference"-Schwellenwerts, Standardwert ist 64.
+.RE
 .
 .TP
 .B "boxblur=Radius:Stärke[:Radius:Stärke]"
