@@ -2236,7 +2236,7 @@ if(rel_seek_secs || abs_seek_pos){
       c_total=0;
       max_pts_correction=0.1;
       osd_visible=sh_video->fps; // to rewert to PLAY pointer after 1 sec
-//      audio_time_usage=0; video_time_usage=0; vout_time_usage=0;
+      audio_time_usage=0; video_time_usage=0; vout_time_usage=0;
       drop_frame_cnt=0;
       too_slow_frame_cnt=0;
       too_fast_frame_cnt=0;
