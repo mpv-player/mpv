@@ -63,6 +63,7 @@ char * fsVideoFilterNames[][2] =
            { "All files",	      					"*" },
 	   { NULL,NULL }
 	 };
+int fsLastVideoFilterSelected = -1;
 
 char * fsSubtitleFilterNames[][2] =
          { { "UTF (*.utf)",  						   "*.utf" },
@@ -77,6 +78,7 @@ char * fsSubtitleFilterNames[][2] =
            { "All files",	 					   "*" },
 	   { NULL,NULL }
 	 };
+int fsLastSubtitleFilterSelected = -1;
 
 char * fsOtherFilterNames[][2] =
          { 
@@ -95,6 +97,7 @@ char * fsAudioFileNames[][2] =
 	   { "All files",						   "*" },
 	   { NULL, NULL }
 	 };
+int fsLastAudioFilterSelected = -1;
 
 char * fsFontFileNames[][2] =
          {
@@ -108,6 +111,7 @@ char * fsFontFileNames[][2] =
 	   { "All files",						   "*" },
 	   { NULL,NULL }
 	 };
+int fsLastFontFilterSelected = -1;
 
 GtkWidget   * fsFileNamesList;
 GtkWidget   * fsFNameList;
@@ -232,7 +236,7 @@ void fs_PersistantHistory( char *subject ); /* forward declaration */
 
 void ShowFileSelect( int type,int modal )
 {
- int i;
+ int i, k;
  char * tmp = NULL;
 
  if ( fsFileSelect ) gtkActive( fsFileSelect );
@@ -246,9 +250,10 @@ void ShowFileSelect( int type,int modal )
         fsList_items=NULL;
         for( i=0;fsVideoFilterNames[i][0];i++ )
           fsList_items=g_list_append( fsList_items,fsVideoFilterNames[i][0] );
+	k = fsLastVideoFilterSelected;
         gtk_combo_set_popdown_strings( GTK_COMBO( List ),fsList_items );
         g_list_free( fsList_items );
-        gtk_entry_set_text( GTK_ENTRY( fsFilterCombo ),fsVideoFilterNames[i-2][0] );
+        gtk_entry_set_text( GTK_ENTRY( fsFilterCombo ),fsVideoFilterNames[k >= 0 ? k : i-2][0] );
 	tmp=guiIntfStruct.Filename;
         break;
    case fsSubtitleSelector:
@@ -256,9 +261,10 @@ void ShowFileSelect( int type,int modal )
         fsList_items=NULL;
         for( i=0;fsSubtitleFilterNames[i][0];i++ )
           fsList_items=g_list_append( fsList_items,fsSubtitleFilterNames[i][0] );
+	k = fsLastSubtitleFilterSelected;
         gtk_combo_set_popdown_strings( GTK_COMBO( List ),fsList_items );
         g_list_free( fsList_items );
-        gtk_entry_set_text( GTK_ENTRY( fsFilterCombo ),fsSubtitleFilterNames[i-2][0] );
+        gtk_entry_set_text( GTK_ENTRY( fsFilterCombo ),fsSubtitleFilterNames[k >= 0 ? k : i-2][0] );
 	tmp=guiIntfStruct.Subtitlename;
         break;
    case fsOtherSelector:
@@ -276,9 +282,10 @@ void ShowFileSelect( int type,int modal )
 	fsList_items=NULL;
 	for( i=0;fsAudioFileNames[i][0];i++ )
 	  fsList_items=g_list_append( fsList_items,fsAudioFileNames[i][0] );
+	k = fsLastAudioFilterSelected;
 	gtk_combo_set_popdown_strings( GTK_COMBO( List ),fsList_items );
 	g_list_free( fsList_items );
-	gtk_entry_set_text( GTK_ENTRY( fsFilterCombo ),fsAudioFileNames[i-2][0] );
+	gtk_entry_set_text( GTK_ENTRY( fsFilterCombo ),fsAudioFileNames[k >= 0 ? k : i-2][0] );
 	tmp=guiIntfStruct.AudioFile;
 	break;
    case fsFontSelector:
@@ -286,9 +293,10 @@ void ShowFileSelect( int type,int modal )
 	fsList_items=NULL;
 	for( i=0;fsFontFileNames[i][0];i++ )
 	  fsList_items=g_list_append( fsList_items,fsFontFileNames[i][0] );
+	k = fsLastFontFilterSelected;
 	gtk_combo_set_popdown_strings( GTK_COMBO( List ),fsList_items );
 	g_list_free( fsList_items );
-	gtk_entry_set_text( GTK_ENTRY( fsFilterCombo ),fsFontFileNames[i-2][0] );
+	gtk_entry_set_text( GTK_ENTRY( fsFilterCombo ),fsFontFileNames[k >= 0 ? k : i-2][0] );
 	tmp=font_name;
 	break;
   }
@@ -378,12 +386,12 @@ void fs_fsFilterCombo_changed( GtkEditable * editable,gpointer user_data )
    case fsVideoSelector:
           for( i=0;fsVideoFilterNames[i][0];i++ )
            if( !strcmp( str,fsVideoFilterNames[i][0] ) )
-            { fsFilter=fsVideoFilterNames[i][1]; break; }
+            { fsFilter=fsVideoFilterNames[i][1]; fsLastVideoFilterSelected = i;	break; }
           break;
    case fsSubtitleSelector:
           for( i=0;fsSubtitleFilterNames[i][0];i++ )
            if( !strcmp( str,fsSubtitleFilterNames[i][0] ) )
-            { fsFilter=fsSubtitleFilterNames[i][1]; break; }
+            { fsFilter=fsSubtitleFilterNames[i][1]; fsLastSubtitleFilterSelected = i; break; }
           break;
    case fsOtherSelector:
           for( i=0;fsOtherFilterNames[i][0];i++ )
@@ -393,12 +401,12 @@ void fs_fsFilterCombo_changed( GtkEditable * editable,gpointer user_data )
    case fsAudioSelector:
           for( i=0;fsAudioFileNames[i][0];i++ )
            if( !strcmp( str,fsAudioFileNames[i][0] ) )
-            { fsFilter=fsAudioFileNames[i][1]; break; }
+            { fsFilter=fsAudioFileNames[i][1]; fsLastAudioFilterSelected = i; break; }
 	  break;
    case fsFontSelector:
           for( i=0;fsFontFileNames[i][0];i++ )
 	    if( !strcmp( str,fsFontFileNames[i][0] ) )
-	     { fsFilter=fsFontFileNames[i][1]; break; }
+	     { fsFilter=fsFontFileNames[i][1]; fsLastFontFilterSelected = i; break; }
 	  break;
    default: return;
   }
