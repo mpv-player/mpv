@@ -21,6 +21,11 @@ int tv_param_on = 0;
 #include "stream.h"
 #include "demuxer.h"
 #include "stheader.h"
+
+#include "../libao2/afmt.h"
+#include "../libvo/img_format.h"
+#include "../libvo/fastmemcpy.h"
+
 #include "tv.h"
 
 /* some default values */

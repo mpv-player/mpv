@@ -7,6 +7,7 @@
 #ifdef USE_TV
 
 #include <stdio.h>
+#include "../libvo/img_format.h"
 #include "tv.h"
 
 /* information about this file */

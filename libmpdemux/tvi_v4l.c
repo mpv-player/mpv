@@ -23,6 +23,11 @@
 #include <unistd.h>
 #include <sys/mman.h>
 
+#include "mp_msg.h"
+#include "../libao2/afmt.h"
+#include "../libvo/img_format.h"
+#include "../libvo/fastmemcpy.h"
+
 #include "tv.h"
 
 static tvi_info_t info = {
