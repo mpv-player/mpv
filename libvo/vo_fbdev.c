@@ -301,7 +301,7 @@ static int parse_fbmode_cfg(char *cfgfile)
 				mode->vmode = FB_VMODE_INTERLACED;
 			else
 				goto err_out_parse_error;
-		} else if (!strcmp(token[0], "dblscan")) {
+		} else if (!strcmp(token[0], "double")) {
 			if (get_token(1) < 0)
 				goto err_out_parse_error;
 			if (!strcmp(token[0], "false"))
