@@ -58,6 +58,7 @@
 #include <errno.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/time.h>
 #include <fcntl.h>
 #include "mp_image.h"
 #include "vf.h"
