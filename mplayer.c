@@ -1087,6 +1087,8 @@ if(has_audio){
     sh_audio->codec=find_codec(sh_audio->format,NULL,sh_audio->codec,1);
     if(!sh_audio->codec){
       printf("Can't find codec for audio format 0x%X !\n",sh_audio->format);
+      printf("*** Try to upgrade %s from DOCS/codecs.conf\n",get_path("codecs.conf"));
+      printf("*** If it's still not OK, then read DOCS/CODECS!\n");
       has_audio=0;
       break;
     }
@@ -1117,6 +1119,8 @@ while(1){
     sh_video->bih?((unsigned int*) &sh_video->bih->biCompression):NULL,sh_video->codec,0);
   if(!sh_video->codec){
     printf("Can't find codec for video format 0x%X !\n",sh_video->format);
+      printf("*** Try to upgrade %s from DOCS/codecs.conf\n",get_path("codecs.conf"));
+      printf("*** If it's still not OK, then read DOCS/CODECS!\n");
     #ifdef HAVE_GUI
      if ( !nogui )
       {
