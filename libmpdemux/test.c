@@ -19,6 +19,9 @@ void skip_audio_frame(sh_audio_t *sh_audio){
 void resync_audio_stream(sh_audio_t *sh_audio){
 }
 
+// for libmpdvdkit2:
+#include "../get_path.c"
+
 int verbose=5; // must be global!
 
 //---------------
