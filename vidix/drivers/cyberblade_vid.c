@@ -252,6 +252,7 @@ static int is_supported_fourcc(uint32_t fourcc)
 	{
 		case IMGFMT_YUY2:
 		case IMGFMT_YV12:
+		case IMGFMT_I420:
 		case IMGFMT_YVU9:
 		case IMGFMT_BGR16:
 			return 1;
@@ -407,6 +408,7 @@ int vixConfigPlayback(vidix_playback_t *info)
 			layout=0x0; /* packed */
 			break;
 		case IMGFMT_YV12:
+		case IMGFMT_I420:
 			y_pitch = (src_w+15) & ~15;
 			uv_pitch = ((src_w/2)+7) & ~7;
 			YOffs=info->offset.y = 0;
