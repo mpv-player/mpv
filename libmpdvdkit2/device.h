@@ -12,7 +12,7 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -26,13 +26,14 @@
 /*****************************************************************************
  * iovec structure: vectored data entry
  *****************************************************************************/
-#if defined( WIN32 )
+#if defined( WIN32 ) && !defined( SYS_CYGWIN )
 #   include <io.h>                                                 /* read() */
 #else
+#   include <sys/types.h>
 #   include <sys/uio.h>                                      /* struct iovec */
 #endif
 
-#if defined( WIN32 )
+#if defined( WIN32 ) && !defined( SYS_CYGWIN )
 struct iovec
 {
     void *iov_base;     /* Pointer to data. */

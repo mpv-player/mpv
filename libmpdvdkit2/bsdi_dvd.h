@@ -224,6 +224,7 @@ typedef struct {
 #define CDROMEJECT		0x5309 /* Ejects the cdrom media */
 #define CDROMCLOSETRAY          0x5319 /* Reverse of CDROMEJECT */
 #define CDROM_DRIVE_STATUS      0x5326 /* Get tray position, etc. */
+#define CDROM_DISC_STATUS	0x5327 /* Get disc type, etc. */
 #define CDROMREADMODE2		0x530c /* Read CDROM mode 2 data (2336 Bytes) */
 #define CDROMREADMODE1		0x530d /* Read CDROM mode 1 data (2048 Bytes) */
 #define CDROMREADRAW            0x5314 /* read data in raw mode (2352 bytes) */
@@ -244,6 +245,9 @@ typedef struct {
 #define CDROM_LBA 0x01 		/* logical block: first frame is #0 */
 #define CDROM_MSF 0x02 		/* minute-second-frame: binary. not bcd here!*/
 
+/* bit to tell whether track is data or audio (cdrom_tocentry.cdte_ctrl) */
+#define CDROM_DATA_TRACK        0x04
+
 /* The leadout track is always 0xAA, regardless of # of tracks on disc */
 #define CDROM_LEADOUT           0xAA
 
@@ -254,11 +258,22 @@ typedef struct {
 #define CDS_DRIVE_NOT_READY     3
 #define CDS_DISC_OK             4
 
+/*
+ * Return values for CDROM_DISC_STATUS ioctl.
+ * Can also return CDS_NO_INFO and CDS_NO_DISC from above
+*/
+#define	CDS_AUDIO		100
+#define	CDS_DATA_1		101
+#define	CDS_DATA_2		102
+#define	CDS_XA_2_1		103
+#define	CDS_XA_2_2		104
+#define	CDS_MIXED		105
+
 /* For compile compatibility only - we don't support changers */
 #define CDSL_NONE               ((int) (~0U>>1)-1)
 #define CDSL_CURRENT            ((int) (~0U>>1))
 
-struct cdrom_msf 
+struct cdrom_msf
 {
 	__u8	cdmsf_min0;	/* start minute */
 	__u8	cdmsf_sec0;	/* start second */
@@ -268,26 +283,26 @@ struct cdrom_msf
 	__u8	cdmsf_frame1;	/* end frame */
 };
 
-struct	cdrom_tochdr 	
+struct	cdrom_tochdr
 	{
 	__u8	cdth_trk0;	/* start track */
 	__u8	cdth_trk1;	/* end track */
 	};
 
-struct cdrom_msf0		
+struct cdrom_msf0
 {
 	__u8	minute;
 	__u8	second;
 	__u8	frame;
 };
 
-union cdrom_addr		
+union cdrom_addr
 {
 	struct cdrom_msf0	msf;
 	int			lba;
 };
 
-struct cdrom_tocentry 
+struct cdrom_tocentry
 {
 	__u8	cdte_track;
 	__u8	cdte_adr	:4;
@@ -312,4 +327,14 @@ struct modesel_head
 	__u8	block_length_med;
 	__u8	block_length_lo;
 };
+
+typedef	struct
+{
+	int	data;
+	int	audio;
+	int	cdi;
+	int	xa;
+	int	error;
+} tracktype;
+
 #endif /* _DVD_H_ */

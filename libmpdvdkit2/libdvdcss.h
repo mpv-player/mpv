@@ -1,5 +1,5 @@
 /*****************************************************************************
- * private.h: private DVD reading library data
+ * libdvdcss.h: private DVD reading library data
  *****************************************************************************
  * Copyright (C) 1998-2001 VideoLAN
  * $Id$
@@ -11,7 +11,7 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -33,7 +33,7 @@ struct dvdcss_s
     char * psz_device;
     int    i_fd;
     int    i_read_fd;
-    int    i_seekpos;
+    int    i_pos;
 
     /* File handling */
     int ( * pf_seek )  ( dvdcss_t, int );
@@ -46,7 +46,10 @@ struct dvdcss_s
     int          b_ioctls;
     int          b_scrambled;
     dvd_title_t *p_titles;
-    char *	 psz_cache;
+
+    /* Key cache directory and pointer to the filename */
+    char   psz_cachefile[PATH_MAX];
+    char * psz_block;
 
     /* Error management */
     char * psz_error;

@@ -16,7 +16,7 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -61,10 +61,6 @@ typedef struct dvdcss_s* dvdcss_t;
  */
 extern char *        dvdcss_interface_2;
 
-/*
- * Path to CSS key cache. Default == NULL (no cache).
- */
-extern char * dvdcss_cache_dir;
 
 /*
  * Exported prototypes.

@@ -12,7 +12,7 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -34,12 +34,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
+#include <limits.h>
 
-#ifdef HAVE_UNISTD_H
-#   include <unistd.h>
-#endif
-
-#if defined( WIN32 )
+#if defined( WIN32 ) && !defined( SYS_CYGWIN )
 #   include <io.h>                                                 /* read() */
 #else
 #   include <sys/uio.h>                                      /* struct iovec */
@@ -84,11 +82,11 @@ int _dvdcss_use_ioctls( dvdcss_t dvdcss )
     /* FIXME: implement this for Windows */
     if( WIN2K )
     {
-	return 1;	
+        return 1;
     }
     else
     {
-	return 1;	
+        return 1;
     }
 #else
     struct stat fileinfo;
@@ -97,31 +95,31 @@ int _dvdcss_use_ioctls( dvdcss_t dvdcss )
     ret = fstat( dvdcss->i_fd, &fileinfo );
     if( ret < 0 )
     {
-	return 1;  /* What to do?  Be conservative and try to use the ioctls */
+        return 1;  /* What to do?  Be conservative and try to use the ioctls */
     }
-    
-    /* Complete this list and check that we test for the right things 
+
+    /* Complete this list and check that we test for the right things
      * (I've assumed for all OSs that 'r', (raw) device, are char devices
      *  and those that don't contain/use an 'r' in the name are block devices)
      *
      * Linux    needs a block device
      * Solaris  needs a char device
-     * Darwin   needs a char device 
+     * Darwin   needs a char device
      * OpenBSD  needs a char device
      * NetBSD   needs a char device
      * FreeBSD  can use either the block or the char device
      * BSD/OS   can use either the block or the char device
      */
-    
+
     /* Check if this is a block/char device */
-    if( S_ISBLK( fileinfo.st_mode ) || 
-	S_ISCHR( fileinfo.st_mode ) )
+    if( S_ISBLK( fileinfo.st_mode ) ||
+        S_ISCHR( fileinfo.st_mode ) )
     {
-	return 1;
+        return 1;
     }
     else
     {
-	return 0;
+        return 0;
     }
 #endif
 }
@@ -250,6 +248,8 @@ static int libc_open ( dvdcss_t dvdcss, char const *psz_device )
         return -1;
     }
 
+    dvdcss->i_pos = 0;
+
     return 0;
 }
 
@@ -285,6 +285,8 @@ static int win2k_open ( dvdcss_t dvdcss, char const *psz_device )
         return -1;
     }
 
+    dvdcss->i_pos = 0;
+
     return 0;
 }
 
@@ -297,7 +299,7 @@ static int aspi_open( dvdcss_t dvdcss, char const * psz_device )
     long (*lpGetSupport)( void );
     long (*lpSendCommand)( void* );
     char c_drive = psz_device[0];
-     
+
     /* load aspi and init w32_aspidev structure */
     hASPI = LoadLibrary( "wnaspi32.dll" );
     if( hASPI == NULL )
@@ -308,7 +310,7 @@ static int aspi_open( dvdcss_t dvdcss, char const * psz_device )
 
     (FARPROC) lpGetSupport = GetProcAddress( hASPI, "GetASPI32SupportInfo" );
     (FARPROC) lpSendCommand = GetProcAddress( hASPI, "SendASPI32Command" );
- 
+
     if(lpGetSupport == NULL || lpSendCommand == NULL )
     {
         _dvdcss_error( dvdcss, "unable to get aspi function pointers" );
@@ -387,6 +389,7 @@ static int aspi_open( dvdcss_t dvdcss, char const * psz_device )
                 {
                     fd->i_sid = MAKEWORD( i, j );
                     dvdcss->i_fd = (int) fd;
+                    dvdcss->i_pos = 0;
                     return 0;
                 }
                 else
@@ -412,45 +415,59 @@ static int aspi_open( dvdcss_t dvdcss, char const * psz_device )
  *****************************************************************************/
 static int libc_seek( dvdcss_t dvdcss, int i_blocks )
 {
-    off_t   i_read;
+    off_t   i_seek;
 
-    dvdcss->i_seekpos = i_blocks;
-
-    i_read = lseek( dvdcss->i_read_fd,
-                    (off_t)i_blocks * (off_t)DVDCSS_BLOCK_SIZE, SEEK_SET );
-
-    if( i_read < 0 )
+    if( dvdcss->i_pos == i_blocks )
     {
-        _dvdcss_error( dvdcss, "seek error" );
+        /* We are already in position */
+        return i_blocks;
     }
 
-    return i_read / DVDCSS_BLOCK_SIZE;
+    i_seek = lseek( dvdcss->i_read_fd,
+                    (off_t)i_blocks * (off_t)DVDCSS_BLOCK_SIZE, SEEK_SET );
+
+    if( i_seek < 0 )
+    {
+        _dvdcss_error( dvdcss, "seek error" );
+        dvdcss->i_pos = -1;
+        return i_seek;
+    }
+
+    dvdcss->i_pos = i_seek / DVDCSS_BLOCK_SIZE;
+
+    return dvdcss->i_pos;
 }
 
 #if defined( WIN32 )
 static int win2k_seek( dvdcss_t dvdcss, int i_blocks )
 {
-    LARGE_INTEGER li_read;
-
-    dvdcss->i_seekpos = i_blocks;
+    LARGE_INTEGER li_seek;
 
 #ifndef INVALID_SET_FILE_POINTER
 #   define INVALID_SET_FILE_POINTER ((DWORD)-1)
 #endif
 
-    li_read.QuadPart = (LONGLONG)i_blocks * DVDCSS_BLOCK_SIZE;
-
-    li_read.LowPart = SetFilePointer( (HANDLE) dvdcss->i_fd,
-                                      li_read.LowPart,
-                                      &li_read.HighPart, FILE_BEGIN );
-    if( (li_read.LowPart == INVALID_SET_FILE_POINTER)
-        && GetLastError() != NO_ERROR)
+    if( dvdcss->i_pos == i_blocks )
     {
-        li_read.QuadPart = -DVDCSS_BLOCK_SIZE;
+        /* We are already in position */
+        return i_blocks;
     }
 
-    li_read.QuadPart /= DVDCSS_BLOCK_SIZE;
-    return (int)li_read.QuadPart;
+    li_seek.QuadPart = (LONGLONG)i_blocks * DVDCSS_BLOCK_SIZE;
+
+    li_seek.LowPart = SetFilePointer( (HANDLE) dvdcss->i_fd,
+                                      li_seek.LowPart,
+                                      &li_seek.HighPart, FILE_BEGIN );
+    if( (li_seek.LowPart == INVALID_SET_FILE_POINTER)
+        && GetLastError() != NO_ERROR)
+    {
+        dvdcss->i_pos = -1;
+        return -1;
+    }
+
+    dvdcss->i_pos = li_seek.QuadPart / DVDCSS_BLOCK_SIZE;
+
+    return dvdcss->i_pos;
 }
 
 static int aspi_seek( dvdcss_t dvdcss, int i_blocks )
@@ -458,19 +475,28 @@ static int aspi_seek( dvdcss_t dvdcss, int i_blocks )
     int i_old_blocks;
     char sz_buf[ DVDCSS_BLOCK_SIZE ];
     struct w32_aspidev *fd = (struct w32_aspidev *) dvdcss->i_fd;
-    
+
+    if( dvdcss->i_pos == i_blocks )
+    {
+        /* We are already in position */
+        return i_blocks;
+    }
+
     i_old_blocks = fd->i_blocks;
     fd->i_blocks = i_blocks;
 
     if( aspi_read_internal( dvdcss->i_fd, sz_buf, 1 ) == -1 )
     {
         fd->i_blocks = i_old_blocks;
+        dvdcss->i_pos = -1;
         return -1;
     }
 
     (fd->i_blocks)--;
 
-    return fd->i_blocks;
+    dvdcss->i_pos = fd->i_blocks;
+
+    return dvdcss->i_pos;
 }
 #endif
 
@@ -479,17 +505,35 @@ static int aspi_seek( dvdcss_t dvdcss, int i_blocks )
  *****************************************************************************/
 static int libc_read ( dvdcss_t dvdcss, void *p_buffer, int i_blocks )
 {
-    int i_ret;
-    /* TODO: partial reads are wrong,i.e 2200/2048 = 1 
-     * but the location has advanced 2200 bytes (lseek possition that is) */
+    off_t i_ret;
+
     i_ret = read( dvdcss->i_read_fd, p_buffer,
                   (off_t)i_blocks * DVDCSS_BLOCK_SIZE );
+
     if( i_ret < 0 )
     {
         _dvdcss_error( dvdcss, "read error" );
+        dvdcss->i_pos = -1;
         return i_ret;
     }
 
+    /* Handle partial reads */
+    if( i_ret != (off_t)i_blocks * DVDCSS_BLOCK_SIZE )
+    {
+        int i_seek;
+
+        dvdcss->i_pos = -1;
+        i_seek = libc_seek( dvdcss, i_ret / DVDCSS_BLOCK_SIZE );
+        if( i_seek < 0 )
+        {
+            return i_seek;
+        }
+
+        /* We have to return now so that i_pos isn't clobbered */
+        return i_ret / DVDCSS_BLOCK_SIZE;
+    }
+
+    dvdcss->i_pos += i_ret / DVDCSS_BLOCK_SIZE;
     return i_ret / DVDCSS_BLOCK_SIZE;
 }
 
@@ -502,15 +546,26 @@ static int win2k_read ( dvdcss_t dvdcss, void *p_buffer, int i_blocks )
               i_blocks * DVDCSS_BLOCK_SIZE,
               (LPDWORD)&i_bytes, NULL ) )
     {
+        dvdcss->i_pos = -1;
         return -1;
     }
 
+    dvdcss->i_pos += i_bytes / DVDCSS_BLOCK_SIZE;
     return i_bytes / DVDCSS_BLOCK_SIZE;
 }
 
 static int aspi_read ( dvdcss_t dvdcss, void *p_buffer, int i_blocks )
 {
-    return aspi_read_internal( dvdcss->i_fd, p_buffer, i_blocks );
+    int i_read = aspi_read_internal( dvdcss->i_fd, p_buffer, i_blocks );
+
+    if( i_read < 0 )
+    {
+        dvdcss->i_pos = -1;
+        return i_read;
+    }
+
+    dvdcss->i_pos += i_read;
+    return i_read;
 }
 #endif
 
@@ -544,6 +599,7 @@ static int libc_readv ( dvdcss_t dvdcss, struct iovec *p_iovec, int i_blocks )
              * We won't even bother returning the reads that went ok,
              * and as in the posix spec the file postition is left
              * unspecified after a failure */
+            dvdcss->i_pos = -1;
             return -1;
         }
 
@@ -553,14 +609,32 @@ static int libc_readv ( dvdcss_t dvdcss, struct iovec *p_iovec, int i_blocks )
         {
             /* We reached the end of the file or a signal interrupted
              * the read. Return a partial read. */
+            int i_seek;
+
+            dvdcss->i_pos = -1;
+            i_seek = libc_seek( dvdcss, i_total / DVDCSS_BLOCK_SIZE );
+            if( i_seek < 0 )
+            {
+                return i_seek;
+            }
+
+            /* We have to return now so that i_pos isn't clobbered */
             return i_total / DVDCSS_BLOCK_SIZE;
         }
     }
 
+    dvdcss->i_pos += i_total / DVDCSS_BLOCK_SIZE;
     return i_total / DVDCSS_BLOCK_SIZE;
 #else
     int i_read = readv( dvdcss->i_read_fd, p_iovec, i_blocks );
 
+    if( i_read < 0 )
+    {
+        dvdcss->i_pos = -1;
+        return i_read;
+    }
+
+    dvdcss->i_pos += i_read / DVDCSS_BLOCK_SIZE;
     return i_read / DVDCSS_BLOCK_SIZE;
 #endif
 }
@@ -588,13 +662,14 @@ static int win_readv ( dvdcss_t dvdcss, struct iovec *p_iovec, int i_blocks )
         if( !dvdcss->p_readv_buffer )
         {
             _dvdcss_error( dvdcss, " failed (readv)" );
+            dvdcss->i_pos = -1;
             return -1;
         }
     }
 
     for( i_index = i_blocks; i_index; i_index-- )
     {
-        i_blocks_total += p_iovec[i_index-1].iov_len; 
+        i_blocks_total += p_iovec[i_index-1].iov_len;
     }
 
     if( i_blocks_total <= 0 ) return 0;
@@ -610,6 +685,7 @@ static int win_readv ( dvdcss_t dvdcss, struct iovec *p_iovec, int i_blocks )
             /* The read failed... too bad.
              * As in the posix spec the file postition is left
              * unspecified after a failure */
+            dvdcss->i_pos = -1;
             return -1;
         }
         i_blocks_read = i_bytes / DVDCSS_BLOCK_SIZE;
@@ -622,6 +698,7 @@ static int win_readv ( dvdcss_t dvdcss, struct iovec *p_iovec, int i_blocks )
         if( i_blocks_read < 0 )
         {
             /* See above */
+            dvdcss->i_pos = -1;
             return -1;
         }
     }
@@ -639,8 +716,9 @@ static int win_readv ( dvdcss_t dvdcss, struct iovec *p_iovec, int i_blocks )
          * garbage, this isn't an issue as we return the number of
          * blocks actually read */
         i_blocks_total -= ( p_iovec[i_index].iov_len / DVDCSS_BLOCK_SIZE );
-    } 
+    }
 
+    dvdcss->i_pos += i_blocks_read;
     return i_blocks_read;
 }
 
@@ -664,17 +742,17 @@ static int aspi_read_internal( int i_fd, void *p_data, int i_blocks )
     ssc.SRB_HaId        = LOBYTE( fd->i_sid );
     ssc.SRB_Target      = HIBYTE( fd->i_sid );
     ssc.SRB_SenseLen    = SENSE_LEN;
-    
+
     ssc.SRB_PostProc = (LPVOID) hEvent;
     ssc.SRB_BufPointer  = p_data;
     ssc.SRB_CDBLen      = 12;
-    
+
     ssc.CDBByte[0]      = 0xA8; /* RAW */
     ssc.CDBByte[2]      = (UCHAR) (fd->i_blocks >> 24);
     ssc.CDBByte[3]      = (UCHAR) (fd->i_blocks >> 16) & 0xff;
     ssc.CDBByte[4]      = (UCHAR) (fd->i_blocks >> 8) & 0xff;
     ssc.CDBByte[5]      = (UCHAR) (fd->i_blocks) & 0xff;
-    
+
     /* We have to break down the reads into 64kb pieces (ASPI restriction) */
     if( i_blocks > 32 )
     {
@@ -682,14 +760,15 @@ static int aspi_read_internal( int i_fd, void *p_data, int i_blocks )
         ssc.CDBByte[9] = 32;
         fd->i_blocks  += 32;
 
-        /* Initiate transfer */  
+        /* Initiate transfer */
         ResetEvent( hEvent );
         fd->lpSendCommand( (void*) &ssc );
 
         /* transfer the next 64kb (aspi_read_internal is called recursively)
          * We need to check the status of the read on return */
-        if( aspi_read_internal( i_fd, (u8*) p_data + 32 * DVDCSS_BLOCK_SIZE,
-                                 i_blocks - 32) < 0 )
+        if( aspi_read_internal( i_fd,
+                                (uint8_t*) p_data + 32 * DVDCSS_BLOCK_SIZE,
+                                i_blocks - 32) < 0 )
         {
             return -1;
         }
@@ -701,7 +780,7 @@ static int aspi_read_internal( int i_fd, void *p_data, int i_blocks )
         ssc.CDBByte[9]   = (UCHAR) i_blocks;
         fd->i_blocks += i_blocks;
 
-        /* Initiate transfer */  
+        /* Initiate transfer */
         ResetEvent( hEvent );
         fd->lpSendCommand( (void*) &ssc );
 

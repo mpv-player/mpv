@@ -11,7 +11,7 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111, USA.
  */
 
-/** 
+/**
  * \mainpage libdvdcss developer documentation
  *
  * \section intro Introduction
@@ -77,8 +77,17 @@
  *       decrypt a DVD stored on a hard disc, or a DVD with the wrong region
  *       on an RPC2 drive.
  *
- * \li \b DVDCSS_RAW_DEVICE: specify the raw device to use.
- * 
+ * \li \b DVDCSS_RAW_DEVICE: specify the raw device to use. Exact usage will
+ *     depend on your operating system, the Linux utility to set up raw devices
+ *     is \c raw(8) for instance. Please note that on most operating systems,
+ *     using a raw device requires highly aligned buffers: Linux requires a
+ *     2048 bytes alignment (which is the size of a DVD sector).
+ *
+ * \li \b DVDCSS_CACHE: specify a directory in which to store title key
+ *     values. This will speed up descrambling of DVDs which are in the
+ *     cache. The DVDCSS_CACHE directory is created if it does not exist,
+ *     and a subdirectory is created named after the DVD's title or
+ *     manufacturing date.
  */
 
 /*
@@ -92,10 +101,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
-#ifdef HAVE_UNISTD_H
-#   include <unistd.h>
-#endif
+#include <errno.h>
+#include <unistd.h>
+#include <limits.h>
 
 #include "dvdcss.h"
 
@@ -117,8 +125,6 @@
  */
 char * dvdcss_interface_2 = VERSION;
 
-char * dvdcss_cache_dir = NULL;
-
 /**
  * \brief Open a DVD device or directory and return a dvdcss instance.
  *
@@ -139,6 +145,7 @@ extern dvdcss_t dvdcss_open ( char *psz_target )
 
     char *psz_method = getenv( "DVDCSS_METHOD" );
     char *psz_verbose = getenv( "DVDCSS_VERBOSE" );
+    char *psz_cache = getenv( "DVDCSS_CACHE" );
 #ifndef WIN32
     char *psz_raw_device = getenv( "DVDCSS_RAW_DEVICE" );
 #endif
@@ -164,9 +171,9 @@ extern dvdcss_t dvdcss_open ( char *psz_target )
     dvdcss->psz_device = (char *)strdup( psz_target );
     dvdcss->psz_error = "no error";
     dvdcss->i_method = DVDCSS_METHOD_KEY;
+    dvdcss->psz_cachefile[0] = '\0';
     dvdcss->b_debug = 0;
     dvdcss->b_errors = 0;
-    dvdcss->psz_cache = NULL;
 
     /*
      *  Find verbosity from DVDCSS_VERBOSE environment variable
@@ -211,7 +218,23 @@ extern dvdcss_t dvdcss_open ( char *psz_target )
         }
     }
 
-    if(!dvdcss_cache_dir) dvdcss_cache_dir = getenv( "DVDCSS_CACHE" );
+    /*
+     *  Find cache dir from the DVDCSS_CACHE environment variable
+     */
+    if( psz_cache != NULL )
+    {
+        if( psz_cache[0] == '\0' )
+        {
+            psz_cache = NULL;
+        }
+        /* Check that we can add the ID directory and the block filename */
+        else if( strlen( psz_cache ) + 1 + 32 + 1 + 10 + 1 > PATH_MAX )
+        {
+            _dvdcss_error( dvdcss, "cache directory name is too long" );
+            psz_cache = NULL;
+        }
+    }
+    else psz_cache = get_path( "DVDKeys" );
 
     /*
      *  Open device
@@ -223,26 +246,26 @@ extern dvdcss_t dvdcss_open ( char *psz_target )
         free( dvdcss );
         return NULL;
     }
-    
+
     dvdcss->b_scrambled = 1; /* Assume the worst */
     dvdcss->b_ioctls = _dvdcss_use_ioctls( dvdcss );
 
     if( dvdcss->b_ioctls )
     {
         i_ret = _dvdcss_test( dvdcss );
-	if( i_ret < 0 )
-	{
-	    /* Disable the CSS ioctls and hope that it works? */
+        if( i_ret < 0 )
+        {
+            /* Disable the CSS ioctls and hope that it works? */
             _dvdcss_debug( dvdcss,
                            "could not check whether the disc was scrambled" );
-	    dvdcss->b_ioctls = 0;
-	}
-	else
-	{
+            dvdcss->b_ioctls = 0;
+        }
+        else
+        {
             _dvdcss_debug( dvdcss, i_ret ? "disc is scrambled"
                                          : "disc is unscrambled" );
-	    dvdcss->b_scrambled = i_ret;
-	}
+            dvdcss->b_scrambled = i_ret;
+        }
     }
 
     /* If disc is CSS protected and the ioctls work, authenticate the drive */
@@ -266,46 +289,127 @@ extern dvdcss_t dvdcss_open ( char *psz_target )
     }
 #endif
 
-    /* if the CACHE is enabled, extract some unique disc ID */
-    if(dvdcss_cache_dir){
-	char* disc_id=NULL;
-	/*char title_name[64];*/
-	char sector[DVDCSS_BLOCK_SIZE];
-	// 32768+40  -> disc title (32 uppercase chars)
-	// 32768+813 -> disc manufacturing date + serial no (16 digit number)
-	int ret=dvdcss->pf_seek( dvdcss, 32768/DVDCSS_BLOCK_SIZE);
-	//printf("disc_id seek: %d -> %d,  i_fd=%d  i_read_fd=%d\n",32768/DVDCSS_BLOCK_SIZE,ret,dvdcss->i_fd,dvdcss->i_read_fd);
-	if(dvdcss->pf_read( dvdcss, sector, 1) == 1){
-	    // check disc title first:
-	    char* title_name=&sector[40];
-	    int i=0;
-	    while(i<32 && title_name[i]>='0' && title_name[i]<='z') i++;
-	    title_name[i]=0;
-	    if(i>5){
-		disc_id=strdup(title_name);
-	    } else {
-		// use disc date+serial:
-		title_name=&sector[813];
-		title_name[16]=0;
-	        for ( i=0;i<16;i++ )
-		    if ( ( title_name[i] < '0' )||( title_name[i] > '9' ) ){
-		        disc_id=malloc(16+4);
-	                snprintf( disc_id,17,"%.2X%.2X%.2X%.2X%.2X%.2X%.2X%.2X",title_name[0],title_name[1],title_name[2],title_name[3],title_name[4],title_name[5],title_name[6],title_name[7] );
-			break;
-		    }
-		if(!disc_id) disc_id=strdup(title_name);
-	    }
-	    if(disc_id){
-		// yeah, we have a disc name/id, let's set up cache path:
-		/*char* dir;*/
-		dvdcss->psz_cache = malloc(strlen(dvdcss_cache_dir)+strlen(disc_id)+4);
-		sprintf(dvdcss->psz_cache,"%s/%s",dvdcss_cache_dir,disc_id);
-		mkdir( dvdcss->psz_cache,493 );
-		free(disc_id);
-		fprintf(stderr,"Using CSS Key-cache dir: %s\n",dvdcss->psz_cache);
-	    }
-	}
+    /* If the cache is enabled, extract a unique disc ID */
+    if( psz_cache )
+    {
+        uint8_t p_sector[DVDCSS_BLOCK_SIZE];
+        unsigned char   psz_debug[PATH_MAX+30];
+        unsigned char * psz_data;
+        int i;
+
+        /* We read sector 0. If it starts with 0x000001ba (BE), we are
+         * reading a VOB file, and we should not cache anything. */
+
+        i_ret = dvdcss->pf_seek( dvdcss, 0 );
+        if( i_ret != 0 )
+        {
+            goto nocache;
+        }
+
+        i_ret = dvdcss->pf_read( dvdcss, p_sector, 1 );
+        if( i_ret != 1 )
+        {
+            goto nocache;
+        }
+
+        if( p_sector[0] == 0x00 && p_sector[1] == 0x00
+             && p_sector[2] == 0x01 && p_sector[3] == 0xba )
+        {
+            goto nocache;
+        }
+
+        /* The data we are looking for is at sector 16 (32768 bytes):
+         *  - offset 40: disc title (32 uppercase chars)
+         *  - offset 813: manufacturing date + serial no (16 digits) */
+
+        i_ret = dvdcss->pf_seek( dvdcss, 16 );
+        if( i_ret != 16 )
+        {
+            goto nocache;
+        }
+
+        i_ret = dvdcss->pf_read( dvdcss, p_sector, 1 );
+        if( i_ret != 1 )
+        {
+            goto nocache;
+        }
+
+        /* Get the disc title */
+        psz_data = p_sector + 40;
+        psz_data[32] = '\0';
+
+        for( i = 0 ; i < 32 ; i++ )
+        {
+            if( psz_data[i] <= ' ' )
+            {
+                psz_data[i] = '\0';
+                break;
+            }
+            else if( psz_data[i] == '/' || psz_data[i] == '\\' )
+            {
+                psz_data[i] = '-';
+            }
+        }
+
+        /* If it's not long enough, try the date + serial */
+        if( strlen( psz_data ) < 6 )
+        {
+            psz_data = p_sector + 813;
+            psz_data[16] = '\0';
+
+            /* Check that all characters are digits, otherwise convert. */
+            for( i = 0 ; i < 16 ; i++ )
+            {
+                if( psz_data[i] < '0' || psz_data[i] > '9' )
+                {
+                    sprintf( psz_data,
+                             "%.2X%.2X%.2X%.2X%.2X%.2X%.2X%.2X",
+                             psz_data[0], psz_data[1], psz_data[2],
+                             psz_data[3], psz_data[4], psz_data[5],
+                             psz_data[6], psz_data[7] );
+                    break;
+                }
+            }
+        }
+
+        /* We have a disc name or ID, we can create the cache dir */
+        i = sprintf( dvdcss->psz_cachefile, "%s", psz_cache );
+#if !defined( WIN32 ) || defined( SYS_CYGWIN )
+        i_ret = mkdir( dvdcss->psz_cachefile, 0755 );
+#else
+        i_ret = mkdir( dvdcss->psz_cachefile );
+#endif
+        if( i_ret < 0 && errno != EEXIST )
+        {
+            _dvdcss_error( dvdcss, "failed creating cache directory" );
+            dvdcss->psz_cachefile[0] = '\0';
+            goto nocache;
+        }
+
+        i += sprintf( dvdcss->psz_cachefile + i, "/%s/", psz_data );
+#if !defined( WIN32 ) || defined( SYS_CYGWIN )
+        i_ret = mkdir( dvdcss->psz_cachefile, 0755 );
+#else
+        i_ret = mkdir( dvdcss->psz_cachefile );
+#endif
+        if( i_ret < 0 && errno != EEXIST )
+        {
+            _dvdcss_error( dvdcss, "failed creating cache subdirectory" );
+            dvdcss->psz_cachefile[0] = '\0';
+            goto nocache;
+        }
+
+        /* Pointer to the filename we will use. */
+        dvdcss->psz_block = dvdcss->psz_cachefile + i;
+
+        sprintf( psz_debug, "using CSS key cache dir: %s",
+                            dvdcss->psz_cachefile );
+        _dvdcss_debug( dvdcss, psz_debug );
     }
+    nocache:
+
+    /* Seek at the beginning, just for safety. */
+    dvdcss->pf_seek( dvdcss, 0 );
 
     return dvdcss;
 }
@@ -354,11 +458,11 @@ extern int dvdcss_seek ( dvdcss_t dvdcss, int i_blocks, int i_flags )
 {
     /* title cracking method is too slow to be used at each seek */
     if( ( ( i_flags & DVDCSS_SEEK_MPEG )
-             && ( dvdcss->i_method != DVDCSS_METHOD_TITLE ) ) 
+             && ( dvdcss->i_method != DVDCSS_METHOD_TITLE ) )
        || ( i_flags & DVDCSS_SEEK_KEY ) )
     {
         /* check the title key */
-        if( _dvdcss_title( dvdcss, i_blocks ) ) 
+        if( _dvdcss_title( dvdcss, i_blocks ) )
         {
             return -1;
         }
@@ -407,31 +511,31 @@ extern int dvdcss_read ( dvdcss_t dvdcss, void *p_buffer,
 
     if( ! memcmp( dvdcss->css.p_title_key, "\0\0\0\0\0", 5 ) )
     {
-        /* For what we believe is an unencrypted title, 
-	 * check that there are no encrypted blocks */
+        /* For what we believe is an unencrypted title,
+         * check that there are no encrypted blocks */
         for( i_index = i_ret; i_index; i_index-- )
         {
-            if( ((u8*)p_buffer)[0x14] & 0x30 )
+            if( ((uint8_t*)p_buffer)[0x14] & 0x30 )
             {
                 _dvdcss_error( dvdcss, "no key but found encrypted block" );
                 /* Only return the initial range of unscrambled blocks? */
                 /* or fail completely? return 0; */
-		break;
+                break;
             }
-            p_buffer = (void *) ((u8 *)p_buffer + DVDCSS_BLOCK_SIZE);
+            p_buffer = (void *) ((uint8_t *)p_buffer + DVDCSS_BLOCK_SIZE);
         }
     }
-    else 
+    else
     {
         /* Decrypt the blocks we managed to read */
         for( i_index = i_ret; i_index; i_index-- )
-	{
-	    _dvdcss_unscramble( dvdcss->css.p_title_key, p_buffer );
-	    ((u8*)p_buffer)[0x14] &= 0x8f;
-            p_buffer = (void *) ((u8 *)p_buffer + DVDCSS_BLOCK_SIZE);
-	}
+        {
+            _dvdcss_unscramble( dvdcss->css.p_title_key, p_buffer );
+            ((uint8_t*)p_buffer)[0x14] &= 0x8f;
+            p_buffer = (void *) ((uint8_t *)p_buffer + DVDCSS_BLOCK_SIZE);
+        }
     }
-    
+
     return i_ret;
 }
 
@@ -502,9 +606,9 @@ extern int dvdcss_readv ( dvdcss_t dvdcss, void *p_iovec,
         }
 
         _dvdcss_unscramble( dvdcss->css.p_title_key, iov_base );
-        ((u8*)iov_base)[0x14] &= 0x8f;
+        ((uint8_t*)iov_base)[0x14] &= 0x8f;
 
-        iov_base = (void *) ((u8*)iov_base + DVDCSS_BLOCK_SIZE);
+        iov_base = (void *) ((uint8_t*)iov_base + DVDCSS_BLOCK_SIZE);
         iov_len -= DVDCSS_BLOCK_SIZE;
     }
 

@@ -154,7 +154,7 @@ static int initAllCSSKeys( dvd_reader_t *dvd )
  extern char * get_path( char * filename );
 #endif
 
-extern char * dvdcss_cache_dir;
+//extern char * dvdcss_cache_dir;
 
 /**
  * Open a DVD image or block device file.
@@ -164,13 +164,14 @@ static dvd_reader_t *DVDOpenImageFile( const char *location, int have_css )
     dvd_reader_t *dvd;
     dvd_input_t dev;
 
-    /* setup cache dir */
+    /* setup cache dir is no longer needed, it's now implemented in libdvdcss.c
     if(!dvdcss_cache_dir){
 	dvdcss_cache_dir=get_path( "" );
 	if ( dvdcss_cache_dir ) { mkdir( dvdcss_cache_dir,493 ); free( dvdcss_cache_dir ); }
 	dvdcss_cache_dir=get_path( "DVDKeys" );
 	if(dvdcss_cache_dir) mkdir( dvdcss_cache_dir,493 );
     }
+    */
     
     /* open it */
     dev = DVDinput_open( location );

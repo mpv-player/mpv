@@ -49,8 +49,9 @@ typedef	struct	cgc
 static int scsi_cmd(int, cgc_t *);
 static int cdrom_ioctl(int, u_long, void *);
 static int cdrom_tray_move(int, int);
+static void cdrom_count_tracks(int, tracktype *);
 static int dvd_ioctl(int, u_long, void *);
-static	int	debug;
+static	int	debug = 0;
 
 void dvd_cdrom_debug(int flag)
 	{
@@ -72,9 +73,11 @@ int dvd_cdrom_ioctl(int fd, unsigned long cmd, void *arg)
 		case	CDROMREADTOCENTRY:
 		case	CDROMEJECT:
 		case	CDROMREADRAW:
+		case	CDROMREADMODE1:
 		case	CDROMREADMODE2:
 		case	CDROMCLOSETRAY:
 		case	CDROM_DRIVE_STATUS:
+		case	CDROM_DISC_STATUS:
 			return(cdrom_ioctl(fd, cmd, arg));
 		default:
 			return(ioctl(fd, cmd, arg));
@@ -401,7 +404,7 @@ static	u_char scsi_cdblen[8] = {6, 10, 10, 12, 12, 12, 10, 10};
 
 static int scsi_cmd(int fd, cgc_t *cgc)
 	{
-	int	scsistatus, cdblen;
+	int	i, scsistatus, cdblen;
 	unsigned char	*cp;
 	struct	scsi_user_cdb suc;
 
@@ -427,12 +430,14 @@ static int scsi_cmd(int fd, cgc_t *cgc)
 	if	(scsistatus && debug)
 		{
 		cp = suc.suc_sus.sus_sense;
-		fprintf(stderr,"scsistatus = %x cmd = %x\n",
-			scsistatus, cgc->cdb[0]);
-		fprintf(stderr, "sense %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x\n", 
-			cp[0], cp[1], cp[2], cp[3], cp[4], cp[5],
-			cp[6], cp[7], cp[8], cp[9], cp[10], cp[11],
-			cp[12], cp[13], cp[14], cp[15]);
+		fprintf(stderr,"scsistatus = %x cdb =",
+			scsistatus);
+		for	(i = 0; i < cdblen; i++)
+			fprintf(stderr, " %x", cgc->cdb[i]);
+		fprintf(stderr, "\nsense =");
+		for	(i = 0; i < 16; i++)
+			fprintf(stderr, " %x", cp[i]);
+		fprintf(stderr, "\n");
 		}
 	if	(cgc->sus)
 		bcopy(&suc.suc_sus, cgc->sus, sizeof (struct scsi_user_sense));
@@ -456,7 +461,7 @@ static int dvd_ioctl(int fd, u_long cmd, void *arg)
 				errno = ret;
 			return(ret ? -1 : 0);
 		case	DVD_AUTH:
-			ret = dvd_do_auth (fd, (dvd_authinfo *)arg);
+			ret = dvd_do_auth(fd, (dvd_authinfo *)arg);
 			if	(ret)
 				errno = ret;
 			return(ret ? -1 : 0);
@@ -580,9 +585,9 @@ cdrom_ioctl(int fd, u_long cmd, void *arg)
 				tocentry->cdte_addr.msf.frame = buffer[11];
 				}
 			else
-				tocentry->cdte_addr.lba = (((((buffer[8] << 8) 
+				tocentry->cdte_addr.lba = (((((buffer[8] << 8)
 						+ buffer[9]) << 8)
-						+ buffer[10]) << 8) 
+						+ buffer[10]) << 8)
 						+ buffer[11];
 			break;
 			}
@@ -593,14 +598,38 @@ cdrom_ioctl(int fd, u_long cmd, void *arg)
 			ret = cdrom_tray_move(fd, 0);
 			break;
 /*
- * This sucks but emulates the expected behaviour.  Instead of the return 
+ * This sucks but emulates the expected behaviour.  Instead of the return
  * value being the actual status a success/fail indicator should have been
  * returned and the 3rd arg to the ioctl should have been an 'int *' to update
- * with the actual status.
+ * with the actual status.   Both the drive and disc status ioctl calls are
+ * similarily braindamaged.
 */
 		case	CDROM_DRIVE_STATUS:
+			return(CDS_NO_INFO);	/* XXX */
+		case	CDROM_DISC_STATUS:
+			{
+			tracktype tracks;
+			int	cnt;
+
+			cdrom_count_tracks(fd, &tracks);
+			if	(tracks.error)
+				return(tracks.error);
+			if	(tracks.audio > 0)
+				{
+				cnt = tracks.data + tracks.cdi + tracks.xa;
+				if	(cnt == 0)
+					return(CDS_AUDIO);
+				else
+					return(CDS_MIXED);
+				}
+			if	(tracks.cdi)
+				return(CDS_XA_2_2);
+			if	(tracks.xa)
+				return(CDS_XA_2_1);
+			if	(tracks.data)
+				return(CDS_DATA_1);
 			return(CDS_NO_INFO);
-			break;
+			}
 		}
 	errno = ret;
 	return(ret ? -1 : 0);
@@ -657,6 +686,49 @@ static int cdrom_read_block(int fd, cgc_t *cgc,
 			cgc->cdb[9] = 0x10;
 		}
 	return(scsi_cmd(fd, cgc));
+	}
+
+static void cdrom_count_tracks(int fd, tracktype *tracks)
+	{
+	struct	cdrom_tochdr header;
+	struct	cdrom_tocentry entry;
+	int	ret, i;
+
+	bzero(tracks, sizeof (*tracks));
+	ret = cdrom_ioctl(fd, CDROMREADTOCHDR, &header);
+/*
+ * This whole business is a crock anyhow so we don't bother distinguishing
+ * between no media, drive not ready, etc and on any error just say we have
+ * no info.
+*/
+	if	(ret)
+		{
+		tracks->error = CDS_NO_INFO;
+		return;
+		}
+
+	entry.cdte_format = CDROM_MSF;
+	for	(i = header.cdth_trk0; i <= header.cdth_trk1; i++)
+		{
+		entry.cdte_track = i;
+		if	(cdrom_ioctl(fd, CDROMREADTOCENTRY, &entry))
+			{
+			tracks->error = CDS_NO_INFO;
+			return;
+			}
+		if	(entry.cdte_ctrl & CDROM_DATA_TRACK)
+			{
+			if	(entry.cdte_format == 0x10)
+				tracks->cdi++;
+			else if	(entry.cdte_format == 0x20)
+				tracks->xa++;
+			else
+				tracks->data++;
+			}
+		else
+			tracks->audio++;
+		}
+	return;
 	}
 
 static int cdrom_tray_move(int fd, int flag)

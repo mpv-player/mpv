@@ -6,7 +6,7 @@ What the hell is this?
 Nothing special, just a collection of sources and patches and fixes:
 
 - dvdread 0.9.3 + static libdvdcss (removed dlopen code)
-- libdvdcss 1.2.2 + per-disc css key cache patch
+- libdvdcss 1.2.5
 - optimizations enabled, asserts disabled
 everything packed together with _static_ linking to maximize performance.
 

@@ -22,15 +22,17 @@
  *****************************************************************************/
 
 int ioctl_ReadCopyright     ( int, int, int * );
-int ioctl_ReadDiscKey       ( int, int *, u8 * );
-int ioctl_ReadTitleKey      ( int, int *, int, u8 * );
+int ioctl_ReadDiscKey       ( int, int *, uint8_t * );
+int ioctl_ReadTitleKey      ( int, int *, int, uint8_t * );
 int ioctl_ReportAgid        ( int, int * );
-int ioctl_ReportChallenge   ( int, int *, u8 * );
-int ioctl_ReportKey1        ( int, int *, u8 * );
+int ioctl_ReportChallenge   ( int, int *, uint8_t * );
+int ioctl_ReportKey1        ( int, int *, uint8_t * );
 int ioctl_ReportASF         ( int, int *, int * );
 int ioctl_InvalidateAgid    ( int, int * );
-int ioctl_SendChallenge     ( int, int *, u8 * );
-int ioctl_SendKey2          ( int, int *, u8 * );
+int ioctl_SendChallenge     ( int, int *, uint8_t * );
+int ioctl_SendKey2          ( int, int *, uint8_t * );
+int ioctl_ReportRPC         ( int, int *, int *, int * );
+int ioctl_SendRPC           ( int, int );
 
 #define DVD_KEY_SIZE 5
 #define DVD_CHALLENGE_SIZE 10
@@ -42,7 +44,7 @@ int ioctl_SendKey2          ( int, int *, u8 * );
 #if defined( SYS_BEOS )
 #define INIT_RDC( TYPE, SIZE ) \
     raw_device_command rdc; \
-    u8 p_buffer[ (SIZE) ]; \
+    uint8_t p_buffer[ (SIZE)+1 ]; \
     memset( &rdc, 0, sizeof( raw_device_command ) ); \
     rdc.data = (char *)p_buffer; \
     rdc.data_length = (SIZE); \
@@ -55,7 +57,7 @@ int ioctl_SendKey2          ( int, int *, u8 * );
 #if defined( HPUX_SCTL_IO )
 #define INIT_SCTL_IO( TYPE, SIZE ) \
     struct sctl_io sctl_io; \
-    u8 p_buffer[ (SIZE) ]; \
+    uint8_t p_buffer[ (SIZE)+1 ]; \
     memset( &sctl_io, 0, sizeof( sctl_io ) ); \
     sctl_io.data = (void *)p_buffer; \
     sctl_io.data_length = (SIZE); \
@@ -71,10 +73,10 @@ int ioctl_SendKey2          ( int, int *, u8 * );
 #define INIT_USCSI( TYPE, SIZE ) \
     struct uscsi_cmd sc; \
     union scsi_cdb rs_cdb; \
-    u8 p_buffer[ (SIZE) ]; \
+    uint8_t p_buffer[ (SIZE)+1 ]; \
     memset( &sc, 0, sizeof( struct uscsi_cmd ) ); \
     sc.uscsi_cdb = (caddr_t)&rs_cdb; \
-    sc.uscsi_bufaddr = p_buffer; \
+    sc.uscsi_bufaddr = (caddr_t)p_buffer; \
     sc.uscsi_buflen = (SIZE); \
     SolarisInitUSCSI( &sc, (TYPE) );
 #endif
@@ -94,12 +96,26 @@ int ioctl_SendKey2          ( int, int *, u8 * );
 #endif
 
 /*****************************************************************************
- * Common macro, win32 (ASPI) specific
+ * Common macro, win32 specific
  *****************************************************************************/
 #if defined( WIN32 )
+#define INIT_SPTD( TYPE, SIZE ) \
+    DWORD tmp; \
+    SCSI_PASS_THROUGH_DIRECT sptd; \
+    uint8_t p_buffer[ (SIZE) ]; \
+    memset( &sptd, 0, sizeof( SCSI_PASS_THROUGH_DIRECT ) ); \
+    sptd.Length = sizeof( SCSI_PASS_THROUGH_DIRECT ); \
+    sptd.DataBuffer = p_buffer; \
+    sptd.DataTransferLength = (SIZE); \
+    WinInitSPTD( &sptd, (TYPE) );
+#define SEND_SPTD( DEV, SPTD, TMP ) \
+    (DeviceIoControl( (HANDLE)(DEV), IOCTL_SCSI_PASS_THROUGH_DIRECT, \
+                      (SPTD), sizeof( SCSI_PASS_THROUGH_DIRECT ), \
+                      (SPTD), sizeof( SCSI_PASS_THROUGH_DIRECT ), \
+                      (TMP), NULL ) ? 0 : -1)
 #define INIT_SSC( TYPE, SIZE ) \
     struct SRB_ExecSCSICmd ssc; \
-    u8 p_buffer[ (SIZE) ]; \
+    uint8_t p_buffer[ (SIZE)+1 ]; \
     memset( &ssc, 0, sizeof( struct SRB_ExecSCSICmd ) ); \
     ssc.SRB_BufPointer = (char *)p_buffer; \
     ssc.SRB_BufLen = (SIZE); \
@@ -128,7 +144,7 @@ int ioctl_SendKey2          ( int, int *, u8 * );
 #if defined( SYS_OS2 )
 #define INIT_SSC( TYPE, SIZE ) \
     struct OS2_ExecSCSICmd sdc; \
-    u8 p_buffer[ (SIZE) ]; \
+    uint8_t p_buffer[ (SIZE)+1 ]; \
     unsigned long ulParamLen; \
     unsigned long ulDataLen; \
     memset( &sdc, 0, sizeof( OS2_ExecSCSICmd ) ); \
@@ -195,8 +211,8 @@ typedef union dvd_authinfo dvd_authinfo;
 #define DVD_BUS_KEY_LENGTH              (8 + sizeof(DVD_COPY_PROTECT_KEY))
 #define DVD_TITLE_KEY_LENGTH            (8 + sizeof(DVD_COPY_PROTECT_KEY))
 #define DVD_DISK_KEY_LENGTH             (2048 + sizeof(DVD_COPY_PROTECT_KEY))
+#define DVD_RPC_KEY_LENGTH              (sizeof(DVD_RPC_KEY) + sizeof(DVD_COPY_PROTECT_KEY))
 #define DVD_ASF_LENGTH                  (sizeof(DVD_ASF) + sizeof(DVD_COPY_PROTECT_KEY))
-#define DVD_REGION_LENGTH               (sizeof(DVD_REGION))
 
 #define DVD_COPYRIGHT_MASK              0x00000040
 #define DVD_NOT_COPYRIGHTED             0x00000000
@@ -271,12 +287,15 @@ typedef struct _DVD_ASF
     UCHAR Reserved1:7;
 } DVD_ASF, * PDVD_ASF;
 
-typedef struct _DVD_REGION {
-  UCHAR  CopySystem;
-  UCHAR  RegionData;
-  UCHAR  SystemRegion;
-  UCHAR  ResetCount;
-} DVD_REGION, *PDVD_REGION;
+typedef struct _DVD_RPC_KEY
+{
+    UCHAR UserResetsAvailable:3;
+    UCHAR ManufacturerResetsAvailable:3;
+    UCHAR TypeCode:2;
+    UCHAR RegionMask;
+    UCHAR RpcScheme;
+    UCHAR Reserved2[1];
+} DVD_RPC_KEY, * PDVD_RPC_KEY;
 
 typedef struct _SCSI_PASS_THROUGH_DIRECT
 {
