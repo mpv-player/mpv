@@ -4,7 +4,7 @@
 #include "config.h"
 #include "mp_msg.h"
 
-#ifdef HAVE_XVID
+#ifdef HAVE_XVID3
 
 #include "vd_internal.h"
 #include "m_option.h"

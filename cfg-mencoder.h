@@ -52,7 +52,7 @@ extern m_option_t lavcopts_conf[];
 extern m_option_t vfwopts_conf[];
 #endif
 
-#ifdef HAVE_XVID
+#if defined(HAVE_XVID3) || defined(HAVE_XVID4)
 extern m_option_t xvidencopts_conf[];
 #endif
 
@@ -93,7 +93,7 @@ m_option_t ovc_conf[]={
 #ifdef HAVE_LIBDV095
 	"   libdv    - DV encoding using libdv v0.9.5\n"
 #endif
-#ifdef HAVE_XVID
+#if defined(HAVE_XVID3) || defined(HAVE_XVID4)
 	"   xvid     - xvid encoding\n"
 #endif
 	"\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
@@ -216,7 +216,7 @@ m_option_t mencoder_opts[]={
 #ifdef USE_WIN32DLL
 	{"vfwopts", vfwopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif
-#ifdef HAVE_XVID
+#if defined(HAVE_XVID3) || defined(HAVE_XVID4)
 	{"xvidencopts", xvidencopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif
 

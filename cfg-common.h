@@ -200,7 +200,7 @@
 #ifdef USE_LIBAVCODEC
 	{"lavdopts", lavc_decode_opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif
-#ifdef HAVE_XVID
+#if defined(HAVE_XVID3) || defined(HAVE_XVID4)
 	{"xvidopts", xvid_dec_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif
 // ------------------------- subtitles options --------------------
@@ -437,7 +437,7 @@ m_option_t audio_filter_conf[]={
 extern m_option_t lavc_decode_opts_conf[];
 #endif
 
-#ifdef HAVE_XVID
+#if defined(HAVE_XVID3) || defined(HAVE_XVID4)
 extern m_option_t xvid_dec_opts[];
 #endif
 

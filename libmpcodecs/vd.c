@@ -120,7 +120,7 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 #ifdef USE_REALCODECS
 	&mpcodecs_vd_realvid,
 #endif
-#ifdef HAVE_XVID
+#if defined(HAVE_XVID3) || defined(HAVE_XVID4)
 	&mpcodecs_vd_xvid,
 #endif
 #ifdef HAVE_LIBDV095
