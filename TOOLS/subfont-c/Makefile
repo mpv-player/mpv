@@ -8,10 +8,10 @@ encoding=iso-8859-2
 
 fontsize=20
 
+include ../../config.mak
 
 LDLIBS=-lm $(shell freetype-config --libs)
-CFLAGS=-O3 $(shell freetype-config --cflags)
-
+CFLAGS=$(OPTFLAGS) $(shell freetype-config --cflags)
 
 subfont:	subfont.o
 
