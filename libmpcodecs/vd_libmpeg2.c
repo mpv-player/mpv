@@ -179,8 +179,10 @@ static mp_image_t* parse_chunk (sh_video_t* sh, int code, uint8_t * buffer, int 
 		picture->current_frame->base[1]=mpi->planes[1];
 		picture->current_frame->base[2]=mpi->planes[2];
 		picture->current_frame->mpi=mpi;	// tricky!
+#ifdef MPEG12_POSTPROC
 		mpi->qscale=&picture->current_frame->quant_store[1][1];
 		mpi->qstride=(MPEG2_MBC+1);
+#endif
 		mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"mpeg2: [%c] %p  %s  \n",
 		    (picture->picture_coding_type == B_TYPE) ? 'B':'P',
 		    mpi, (mpi->flags&MP_IMGFLAG_DIRECT)?"DR!":"");
