@@ -44,13 +44,14 @@ while(1){
   int id=stream_read_dword_le(demuxer->stream);
   int chunksize,size2;
   static int last_fccType=0;
+  char* hdr=NULL;
   //
   if(stream_eof(demuxer->stream)) break;
   //
   if(id==mmioFOURCC('L','I','S','T')){
     int len=stream_read_dword_le(demuxer->stream)-4; // list size
     id=stream_read_dword_le(demuxer->stream);        // list type
-    mp_dbg(MSGT_HEADER,MSGL_DBG2,"LIST %.4s  len=%d\n",(char *) &id,len);
+    mp_msg(MSGT_HEADER,MSGL_DBG2,"LIST %.4s  len=%d\n",(char *) &id,len);
     if(id==listtypeAVIMOVIE){
       // found MOVI header
       demuxer->movi_start=stream_tell(demuxer->stream);
@@ -63,9 +64,15 @@ while(1){
     continue;
   }
   size2=stream_read_dword_le(demuxer->stream);
-  mp_dbg(MSGT_HEADER,MSGL_DBG2,"CHUNK %.4s  len=%d\n",(char *) &id,size2);
+  mp_msg(MSGT_HEADER,MSGL_DBG2,"CHUNK %.4s  len=%d\n",(char *) &id,size2);
   chunksize=(size2+1)&(~1);
   switch(id){
+    case mmioFOURCC('I','S','F','T'): hdr="Software";break;
+    case mmioFOURCC('I','N','A','M'): hdr="Name";break;
+    case mmioFOURCC('I','S','B','J'): hdr="Subject";break;
+    case mmioFOURCC('I','A','R','T'): hdr="Artist";break;
+    case mmioFOURCC('I','C','O','P'): hdr="Copyright";break;
+    case mmioFOURCC('I','C','M','T'): hdr="Comment";break;
     case ckidAVIMAINHDR:          // read 'avih'
       stream_read(demuxer->stream,(char*) &avih,MIN(size2,sizeof(avih)));
       le2me_MainAVIHeader(&avih); // swap to machine endian
@@ -151,6 +158,14 @@ while(1){
       if(verbose>=2) print_index(priv->idx,priv->idx_size);
       break;
     }
+  }
+  if(hdr){
+      char buf[256];
+      int len=(size2<250)?size2:250;
+      stream_read(demuxer->stream,buf,len);
+      chunksize-=len;
+      buf[len]=0;
+      mp_msg(MSGT_HEADER,MSGL_V,"%-10s: %s\n",hdr,buf);
   }
   if(chunksize>0) stream_skip(demuxer->stream,chunksize); else
   if(chunksize<0) mp_msg(MSGT_HEADER,MSGL_WARN,"chunksize=%d  (id=%.4s)\n",chunksize,(char *) &id);
