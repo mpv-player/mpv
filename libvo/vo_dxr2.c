@@ -854,6 +854,8 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t width, uint
     break;
   }
 
+  if (vo_ontop) vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
+  
   // start playing
   if(ioctl(dxr2_fd, DXR2_IOC_PLAY, NULL) == 0) {
     playing = 1;
@@ -1064,6 +1066,9 @@ static uint32_t control(uint32_t request, void *data, ...)
   case VOCTRL_RESET:
     flush_dxr2();
     ioctl(dxr2_fd, DXR2_IOC_PLAY, NULL);
+    return VO_TRUE;
+  case VOCTRL_ONTOP:
+    vo_x11_ontop();
     return VO_TRUE;
   case VOCTRL_FULLSCREEN:
     if(!use_ol)

@@ -98,6 +98,7 @@ static mp_cmd_t mp_cmds[] = {
   { MP_CMD_DVB_SET_CHANNEL, "dvb_set_channel", 1, { { MP_CMD_ARG_INT, {0}}, {-1,{0}}  }},
 #endif
   { MP_CMD_VO_FULLSCREEN, "vo_fullscreen", 0, { {-1,{0}} } },
+  { MP_CMD_VO_ONTOP, "vo_ontop", 0, { {-1,{0}} } },
   { MP_CMD_SCREENSHOT, "screenshot", 0, { {-1,{0}} } },
   { MP_CMD_PANSCAN, "panscan",1,  { {MP_CMD_ARG_FLOAT,{0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
   { MP_CMD_LOADFILE, "loadfile", 1, { {MP_CMD_ARG_STRING, {0}}, {-1,{0}} } },
@@ -330,6 +331,7 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { { JOY_BTN2, 0 }, "volume 1"},
   { { JOY_BTN3, 0 }, "volume -1"},
 #endif
+  { { 'T', 0 }, "vo_ontop" },
   { { 'f', 0 }, "vo_fullscreen" },
   { { 's', 0 }, "screenshot" },
   { { 'w', 0 }, "panscan -0.1" },

@@ -792,6 +792,8 @@ found_subpic:
 
    mp_msg(MSGT_VO,MSGL_V, "[xvmc] dx: %d dy: %d dw: %d dh: %d\n",drwX,drwY,vo_dwidth,vo_dheight );
 
+   if (vo_ontop) vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
+
    saver_off(mDisplay);  // turning off screen saver
 //end vo_xv
 
@@ -1408,6 +1410,9 @@ static uint32_t control(uint32_t request, void *data, ... )
       //vo_xv
       case VOCTRL_GUISUPPORT:
          return VO_TRUE;
+      case VOCTRL_ONTOP:
+         vo_x11_ontop();
+	 return VO_TRUE;
       case VOCTRL_FULLSCREEN:
          vo_x11_fullscreen();
       case VOCTRL_GET_PANSCAN:

@@ -27,6 +27,7 @@ extern int vo_fs_layer;
 extern int vo_wm_type;
 extern int vo_fs_type;
 extern char** vo_fstype_list;
+extern int vo_ontop;
 
 extern char *mDisplayName;
 extern Display *mDisplay;
@@ -60,6 +61,7 @@ extern Window vo_x11_create_smooth_window( Display *mDisplay, Window mRoot,
 extern void vo_x11_clearwindow_part(Display *mDisplay, Window vo_window,
 	int img_width, int img_height, int use_fs);
 extern void vo_x11_clearwindow( Display *mDisplay, Window vo_window );
+extern void vo_x11_ontop();
 
 #endif
 

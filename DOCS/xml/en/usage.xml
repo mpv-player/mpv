@@ -295,6 +295,11 @@ You can have a full list of known commands by running
   <para>
   Switch fullscreen mode.
   </para></listitem>
+<listitem><para><literal>vo_ontop</literal></para>
+  <para>
+  Toggle stay-on-top. Supported by drivers which use X11, except SDL,
+  as well as directx and gl2 under Windows.
+  </para></listitem>
 <listitem><para><literal>tv_step_channel</literal> (int) dir</para>
   <para>
   Select next/previous tv channel.

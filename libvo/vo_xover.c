@@ -192,6 +192,9 @@ static void set_window(int force_update)
   XSetForeground(mDisplay, vo_gc, colorkey);
   XFillRectangle(mDisplay, vo_window, vo_gc, drwX, drwY, drwWidth,
 		 (vo_fs ? drwHeight - 1 : drwHeight));
+
+  if (vo_ontop) vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
+
   /* flush, update drawable */
   XFlush(mDisplay);
 
@@ -455,6 +458,9 @@ static uint32_t control(uint32_t request, void *data, ...)
     return VO_TRUE;
   case VOCTRL_GET_PANSCAN:
     if ( !vo_config_count || !vo_fs ) return VO_FALSE;
+    return VO_TRUE;
+  case VOCTRL_ONTOP:
+    vo_x11_ontop();
     return VO_TRUE;
   case VOCTRL_FULLSCREEN:
     vo_x11_fullscreen();

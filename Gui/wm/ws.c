@@ -779,6 +779,9 @@ void wsFullScreen( wsTWindow * win )
  vo_x11_decoration( wsDisplay,win->WindowID,decoration );
  vo_x11_sizehint( win->X,win->Y,win->Width,win->Height,0 );
  vo_x11_setlayer( wsDisplay,win->WindowID,win->isFullScreen );
+
+if ((!(win->isFullScreen)) & vo_ontop) vo_x11_setlayer(wsDisplay, win->WindowID,1);
+
  if ( vo_wm_type == 0 && !(vo_fsmode&16) )
   XWithdrawWindow( wsDisplay,win->WindowID,wsScreen );
  XMoveResizeWindow( wsDisplay,win->WindowID,win->X,win->Y,win->Width,win->Height );

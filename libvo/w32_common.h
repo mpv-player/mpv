@@ -6,6 +6,7 @@ extern uint32_t o_dheight;
 extern HDC vo_hdc;
 extern int vo_fs;
 extern int vo_vm;
+extern int vo_ontop;
 
 extern int vo_init(void);
 extern void vo_w32_uninit(void);

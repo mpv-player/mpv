@@ -324,6 +324,9 @@ static uint32_t control(uint32_t request, void *data, ...)
 #endif
 
 #ifdef VO_XMGA
+  case VOCTRL_ONTOP:
+      vo_x11_ontop();
+      return VO_TRUE;
   case VOCTRL_GET_PANSCAN:
       if ( !inited || !vo_fs ) return VO_FALSE;
       return VO_TRUE;

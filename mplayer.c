@@ -736,6 +736,7 @@ int osd_show_vobsub_changed = 0;
 int osd_show_sub_changed = 0;
 int osd_show_percentage = 0;
 int osd_show_tv_channel = 25;
+int osd_show_ontop = 0;
 
 int rtc_fd=-1;
 
@@ -3001,6 +3002,17 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 #endif
 	if(video_out && vo_config_count) video_out->control(VOCTRL_FULLSCREEN, 0);
     } break;
+    case MP_CMD_VO_ONTOP:
+    {
+     if(video_out && vo_config_count) {
+       video_out->control(VOCTRL_ONTOP, 0);
+#ifdef USE_OSD
+       osd_show_ontop=10;
+       vo_osd_changed(OSDTYPE_SUBTITLE);
+#endif
+     }
+
+    } break;
     case MP_CMD_PANSCAN : {
       if ( !video_out ) break;
       if ( video_out->control( VOCTRL_GET_PANSCAN,NULL ) == VO_TRUE )
@@ -3551,6 +3563,9 @@ if(rel_seek_secs || abs_seek_pos){
       if (osd_show_av_delay) {
 	  snprintf(osd_text_tmp, 63, "A-V delay: %d ms", ROUND(audio_delay*1000));
 	  osd_show_av_delay--;
+      } else if (osd_show_ontop) {
+	  snprintf(osd_text_tmp, 63, "Stay on top: %sabled", vo_ontop?"en":"dis");
+	  osd_show_ontop--;
       } else if(osd_level>=2) {
           int len = demuxer_get_time_length(demuxer);
           int percentage = -1;

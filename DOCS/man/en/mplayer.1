@@ -278,6 +278,9 @@ decrease/\:increase volume
 mute sound
 .IPs f\ \ \ \ 
 toggle fullscreen
+.IPs T\ \ \ \ 
+toggle stay-on-top.
+Supported by drivers which use X11, except SDL, as well as directx and gl2 under Windows.
 .IPs "w and e"
 decrease/\:increase panscan range
 .IPs o\ \ \ \ 
@@ -1808,6 +1811,10 @@ window aspect hints.).
 .TP
 .B \-noxv (SDL only)
 Disables XVideo SDL driver.
+.TP
+.B \-ontop 
+Makes the player window stay on top other windows.
+Supported by drivers which use X11, except SDL, as well as directx and gl2 under Windows.
 .TP
 .B \-panscan <0.0\-1.0>
 Enables Pan & Scan functionality, i.e.\& in order to display a 16:9 movie

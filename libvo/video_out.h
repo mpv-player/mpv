@@ -55,6 +55,8 @@
 // ... 21
 #define VOCTRL_START_SLICE 21
 
+#define VOCTRL_ONTOP 25
+
 // Vo can be used by xover
 #define VOCTRL_XOVERLAY_SUPPORT 22
 

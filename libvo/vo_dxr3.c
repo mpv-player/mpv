@@ -285,6 +285,9 @@ static uint32_t control(uint32_t request, void *data, ...)
 		}
 		return VO_TRUE;
 #ifdef HAVE_X11
+	case VOCTRL_ONTOP:
+		vo_x11_ontop();
+		return VO_TRUE;
 	case VOCTRL_FULLSCREEN:
 		if (dxr3_overlay) {
 			vo_x11_fullscreen();
@@ -668,6 +671,9 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		overlay_set_mode(overlay_data, EM8300_OVERLAY_MODE_OVERLAY);
 		overlay_set_mode(overlay_data, EM8300_OVERLAY_MODE_RECTANGLE);
 	}
+
+	if (vo_ontop) vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
+
 #endif
 
 	return 0;

@@ -57,8 +57,12 @@ Each vo driver _has_ to implement these:
 	 VOCTRL_GET_EQUALIZER
 		get the current video equalizer values
 		two arguments are provided: item and value
-		item is a string, the possible values are (currenlty):
+		item is a string, the possible values are (currently):
 		    brightness, contrast, saturation, hue
+	 VOCTRL_ONTOP
+		Makes the player window stay-on-top. Only supported (currently)
+		by drivers which use X11, except SDL, as well as directx and
+		gl2 under Windows.
 
     config():	
       Set up the video system. You get the dimensions and flags.

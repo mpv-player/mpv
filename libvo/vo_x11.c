@@ -435,6 +435,9 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
 #endif  
 
  saver_off(mDisplay);
+
+ if (vo_ontop) vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
+
  return 0;
 }
 
@@ -657,6 +660,9 @@ static uint32_t control(uint32_t request, void *data, ...)
       va_end(ap);
       return vo_x11_get_equalizer(data, value);
     }
+  case VOCTRL_ONTOP:
+      vo_x11_ontop();
+      return VO_TRUE;
   case VOCTRL_FULLSCREEN:
     {
       vo_x11_fullscreen();

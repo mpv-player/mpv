@@ -1050,6 +1050,9 @@ void vo_x11_fullscreen( void )
  vo_x11_decoration( mDisplay,vo_window,(vo_fs) ? 0 : 1 );
  vo_x11_sizehint( x,y,w,h,0 );
  vo_x11_setlayer( mDisplay,vo_window,vo_fs );
+
+ if ((!(vo_fs)) & vo_ontop) vo_x11_setlayer(mDisplay, vo_window,vo_ontop);
+
  if(vo_wm_type==0 && !(vo_fsmode&16))
 //    XUnmapWindow( mDisplay,vo_window );  // required for MWM
       XWithdrawWindow(mDisplay,vo_window,mScreen);
@@ -1060,6 +1063,13 @@ void vo_x11_fullscreen( void )
  XMapRaised( mDisplay,vo_window );
  XRaiseWindow( mDisplay,vo_window );
  XFlush( mDisplay );
+}
+
+void vo_x11_ontop( void )
+{
+ vo_ontop = (!(vo_ontop));
+
+ vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
 }
 
 /*

@@ -43,7 +43,6 @@ static HINSTANCE            hddraw_dll;             //handle to ddraw.dll
 static RECT                 rd;                     //rect of our stretched image
 static RECT                 rs;                     //rect of our source image
 static HWND                 hWnd=NULL;              //handle to the window
-static uint32_t             ontop=0;                //always in foreground
 static uint32_t image_width, image_height;          //image width and height
 static uint32_t d_image_width, d_image_height;      //image width and height zoomed 
 static uint8_t  *image=NULL;                        //image data
@@ -60,6 +59,7 @@ extern void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w
 extern int vo_doublebuffering;                      //tribblebuffering    
 extern int vo_fs;
 extern int vo_directrendering;
+extern int vo_ontop;
 
 /*****************************************************************************
  * DirectDraw GUIDs.
@@ -527,12 +527,12 @@ static uint32_t Directx_ManageDisplay(uint32_t width,uint32_t height)
         dwUpdateFlags = DDOVER_SHOW | DDOVER_DDFX;
         /*if hardware can't do colorkeying set the window on top*/
 		if(capsDrv.dwCKeyCaps & DDCKEYCAPS_DESTOVERLAY) dwUpdateFlags |= DDOVER_KEYDESTOVERRIDE;
-        else ontop = 1;
+        else vo_ontop = 1;
 	}
 	/*calculate window rect with borders*/
 	if(!vo_fs)AdjustWindowRect(&rd_window,WS_OVERLAPPEDWINDOW|WS_SIZEBOX,0);
 
-	if((vo_fs) || (!vo_fs && ontop))hWndafter=HWND_TOPMOST;
+	if((vo_fs) || (!vo_fs && vo_ontop))hWndafter=HWND_TOPMOST;
 	else hWndafter=HWND_NOTOPMOST;
 
 	/*display the window*/
@@ -821,11 +821,6 @@ static uint32_t preinit(const char *arg)
 		{
 			mp_msg(MSGT_VO,MSGL_V,"<vo_directx><INFO>disabled overlay\n");
 		    nooverlay = 1;
-		}
-		if(strstr(arg,"ontop"))
-		{
-			mp_msg(MSGT_VO,MSGL_V,"<vo_directx><INFO>window ontop\n");
-			ontop = 1;
 		}
 	}
 	if (Directx_InitDirectDraw()!= 0)return 1;          //init DirectDraw
@@ -1162,6 +1157,18 @@ static uint32_t control(uint32_t request, void *data, ...)
         return query_format(*((uint32_t*)data));
 	case VOCTRL_DRAW_IMAGE:
         return put_image(data);
+    case VOCTRL_ONTOP:
+	        if(vm)
+			{
+				mp_msg(MSGT_VO, MSGL_ERR,"<vo_directx><ERROR>ontop has no meaning in exclusive mode\n");
+			}
+	        else
+			{
+				if(vo_ontop) vo_ontop = 0;
+				else vo_ontop = 1;
+				Directx_ManageDisplay(0,0);
+			}
+		return VO_TRUE;
     case VOCTRL_FULLSCREEN:
 		{
 	        if(vm)

@@ -1006,6 +1006,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
       return -1;
 #ifndef GL_WIN32
       saver_off(mDisplay);
+      if (vo_ontop) vo_x11_setlayer(mDisplay,vo_window, vo_ontop);
 #endif
 
 	return 0;
@@ -1172,6 +1173,13 @@ static uint32_t control(uint32_t request, void *data, ...)
   case VOCTRL_RESUME: return (int_pause=0);
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
+  case VOCTRL_ONTOP:
+#ifdef GL_WIN32
+    vo_w32_ontop();
+#else
+    vo_x11_ontop();
+#endif 
+    return VO_TRUE;
   case VOCTRL_FULLSCREEN:
 #ifdef GL_WIN32
     vo_w32_fullscreen();

@@ -146,18 +146,20 @@ static void resetMode(void) {
 }
 
 int createRenderingContext(void) {
+    HWND layer = HWND_NOTOPMOST;
     if (wglContext) return 1;
 
+    if (vo_fs || vo_ontop) layer = HWND_TOPMOST;
     if (vo_fs) {
 	changeMode();
-	SetWindowPos(vo_hwnd, HWND_TOPMOST, 0, 0, vo_screenwidth, vo_screenheight, SWP_SHOWWINDOW);
+	SetWindowPos(vo_hwnd, layer, 0, 0, vo_screenwidth, vo_screenheight, SWP_SHOWWINDOW);
 	if (cursor) {
 	    ShowCursor(0);
 	    cursor = 0;
 	}
     } else {
 	resetMode();
-	SetWindowPos(vo_hwnd, HWND_NOTOPMOST, (vo_screenwidth - vo_dwidth) / 2, (vo_screenheight - vo_dheight) / 2, vo_dwidth, vo_dheight, SWP_SHOWWINDOW);
+	SetWindowPos(vo_hwnd, layer, (vo_screenwidth - vo_dwidth) / 2, (vo_screenheight - vo_dheight) / 2, vo_dwidth, vo_dheight, SWP_SHOWWINDOW);
 	if (!cursor) {
 	    ShowCursor(1);
 	    cursor = 1;
@@ -254,6 +256,16 @@ void vo_w32_fullscreen(void) {
 
     destroyRenderingContext();
     createRenderingContext();
+}
+
+void vo_w32_ontop( void )
+{
+    vo_ontop = !vo_ontop;
+    if (!vo_fs) {
+	HWND layer = HWND_NOTOPMOST;
+	if (vo_ontop) layer = HWND_TOPMOST;
+	SetWindowPos(vo_hwnd, layer, (vo_screenwidth - vo_dwidth) / 2, (vo_screenheight - vo_dheight) / 2, vo_dwidth, vo_dheight, SWP_SHOWWINDOW);
+    }
 }
 
 void vo_w32_uninit() {

@@ -86,6 +86,10 @@ vo_fullscreen
 get_vo_fullscreen
     Print out fullscreen status (1 == fullscreened, 0 == windowed).
 
+vo_ontop
+	Toggle stay-on-top. Supported by drivers which use X11, except SDL,
+	as well as directx and gl2 under Windows.
+
 panscan <value> [value2]
     ???
 

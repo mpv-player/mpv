@@ -207,6 +207,8 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 
       saver_off(mDisplay);  // turning off screen saver
 
+      if (vo_ontop) vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
+
 	return 0;
 }
 
@@ -314,6 +316,9 @@ static uint32_t control(uint32_t request, void *data, ...)
   case VOCTRL_RESUME: return (int_pause=0);
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
+  case VOCTRL_ONTOP:
+    vo_x11_ontop();
+    return VO_TRUE;
   case VOCTRL_FULLSCREEN:
     vo_x11_fullscreen();
     return VO_TRUE;
