@@ -93,10 +93,33 @@ draw_frame(uint8_t *src[])
     d+=image_width*image_height/4;
     memcpy(d,src[2],image_width*image_height/4);
     break;
-//    case IMGFMT_YUY2:
-  case IMGFMT_BGR|24:
-    memcpy(d,src[0],image_width*image_height*3);
+  case IMGFMT_YUY2: {
+    uint8_t *dY=image;
+    uint8_t *dU=image+image_width*image_height;
+    uint8_t *dV=dU+image_width*image_height/4;
+    uint8_t *s=src[0];
+    int y;
+    for(y=0;y<image_height;y+=2){
+      uint8_t *e=s+image_width*2;
+      while(s<e){
+	*dY++=s[0];
+	*dU++=s[1];
+	*dY++=s[2];
+	*dV++=s[3];
+	s+=4;
+      }
+      e=s+image_width*2;
+      while(s<e){
+	*dY++=s[0];
+	*dY++=s[2];
+	s+=4;
+      }
+    }
+    
+//  case IMGFMT_BGR|24:
+//    memcpy(d,src[0],image_width*image_height*2);
     break;
+  }
   }
 
   return 0;
@@ -122,7 +145,7 @@ ENC_RESULT enc_result;
 
 if(++frameno<10) return;
 
-enc_frame.bmp=image;
+enc_frame.image=image;
 enc_frame.bitstream=buffer;
 enc_frame.length=0;
 encore(0x123,0,&enc_frame,&enc_result);
@@ -160,8 +183,8 @@ query_format(uint32_t format)
 {
     switch(format){
     case IMGFMT_YV12:
-//    case IMGFMT_YUY2:
-    case IMGFMT_BGR|24:
+    case IMGFMT_YUY2:
+//    case IMGFMT_BGR|24:
         return 1;
     }
     return 0;
@@ -181,11 +204,13 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
     switch(format){
     case IMGFMT_YV12:
         frame_size=width*height+width*height/2;
-        enc_param.flip=2; // 0=RGB  1=flippedRGB  2=planarYUV format
+//        enc_param.flip=2; // 0=RGB  1=flippedRGB  2=planarYUV format
         break;
-    case IMGFMT_BGR|24:
-        enc_param.flip=0; // 0=RGB  1=flippedRGB  2=planarYUV format
-        frame_size=width*height*3;
+    case IMGFMT_YUY2:
+//    case IMGFMT_BGR|24:
+//        enc_param.flip=0; // 0=RGB  1=flippedRGB  2=planarYUV format
+//        frame_size=width*height*2;
+        frame_size=width*height+width*height/2;
         break;
     default: return -1; // invalid format
     }

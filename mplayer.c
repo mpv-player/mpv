@@ -165,7 +165,7 @@ static void ac3_fill_buffer(uint8_t **start,uint8_t **end){
 unsigned char *opendivx_src[3];
 int opendivx_stride[3];
 
-void my_convert_yuv(unsigned char *puc_y, int stride_y,
+void convert_linux(unsigned char *puc_y, int stride_y,
 	unsigned char *puc_u, unsigned char *puc_v, int stride_uv,
 	unsigned char *bmp, int width_y, int height_y){
 
