@@ -10,7 +10,6 @@
 	MPlayer Mac OSX Quartz video out module.
 	
 	todo:	-RGB32 color space support
-			-rootwin
 			-screen overlay output
 			-while mouse button down event mplayer is locked, fix that
 			-(add sugestion here)
@@ -72,6 +71,14 @@ extern int vo_ontop;
 extern int vo_fs; // user want fullscreen
 static int vo_quartz_fs; // we are in fullscreen
 
+static int winLevel = 1;
+int levelList[] =
+{
+    kCGDesktopWindowLevelKey,
+    kCGNormalWindowLevelKey,
+    kCGScreenSaverWindowLevelKey
+};
+
 static int int_pause = 0;
 static float winAlpha = 1;
 
@@ -80,6 +87,7 @@ static int device_height;
 static int device_id;
 
 static WindowRef theWindow = NULL;
+static WindowGroupRef winGroup = NULL;
 
 static Rect imgRect; // size of the original image (unscaled)
 static Rect dstRect; // size of the displayed image (after scaling)
@@ -299,7 +307,10 @@ static void quartz_CreateWindow(uint32_t d_width, uint32_t d_height, WindowAttri
 	SetRect(&dstRect, 0, 0, d_width, d_height);
   
 	CreateNewWindow(kDocumentWindowClass, windowAttrs, &winRect, &theWindow);
-  
+	
+	CreateWindowGroup(0, &winGroup);
+	SetWindowGroup(theWindow, winGroup);
+
 	//Set window title
 	titleKey	= CFSTR("MPlayer - The Movie Player");
 	windowTitle = CFCopyLocalizedString(titleKey, NULL);
@@ -897,10 +908,27 @@ void window_resized()
 
 void window_ontop()
 {
-	if(vo_ontop)
-		SetWindowClass( theWindow, kUtilityWindowClass);
-	else
-		SetWindowClass( theWindow, kDocumentWindowClass);
+	//Cycle between level
+	winLevel++;
+	if(winLevel>2)
+		winLevel = 0;
+		
+	//hide menu bar and mouse cursor if in fullscreen and quiting wallpaper mode
+	if(vo_fs)
+	{
+		if(winLevel != 0)
+		{
+			HideMenuBar();
+			HideCursor();
+		}
+		else
+		{
+			ShowMenuBar();
+			ShowfCursor();
+		}
+	}
+
+	SetWindowGroupLevel(winGroup, CGWindowLevelForKey(levelList[winLevel]));
 }
 
 void window_fullscreen()
@@ -908,14 +936,15 @@ void window_fullscreen()
 	//go fullscreen
 	if(vo_fs)
 	{
-		HideMenuBar();
+		if(winLevel != 0)
+		{
+			HideMenuBar();
+			HideCursor();
+		}
 
 		//save old window size
  		if (!vo_quartz_fs)
 			GetWindowPortBounds(theWindow, &oldWinRect);
-		
-		//hide mouse cursor
-		HideCursor();
 		
 		//go fullscreen
 		//ChangeWindowAttributes(theWindow, 0, kWindowResizableAttribute);
