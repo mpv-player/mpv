@@ -1040,6 +1040,7 @@ _new_conf=yes
 _menu=no
 _qtx_codecs=auto
 _sortsub=yes
+_freetypeconfig='freetype-config'
 
 for ac_option do
   case "$ac_option" in
@@ -3568,7 +3569,6 @@ echores "$_cdparanoia"
 
 echocheck "freetype >= 2.0.9"
 if test "$_freetype" = auto ; then
-    test -z "$_freetypeconfig" && _freetypeconfig='freetype-config'
     if ( $_freetypeconfig --version ) >/dev/null 2>&1 ; then
 	cat > $TMPC << EOF
 #include <stdio.h>
