@@ -12,6 +12,8 @@
 #include <vga.h>
 #include <vgagl.h>
 
+#include <limits.h>
+
 #include "config.h"
 #include "video_out.h"
 #include "video_out_internal.h"
@@ -20,6 +22,7 @@
 #include "mmx.h"
 
 extern void rgb15to16_mmx(char* s0,char* d0,int count);
+extern int vo_dbpp;
 
 LIBVO_EXTERN(svga)
 
@@ -62,23 +65,23 @@ static uint8_t bpp_avail = 0;
 
 static uint8_t checked = 0;
 
-static int add_mode(uint16_t mode, vga_modeinfo minfo) {
+static uint32_t add_mode(uint16_t mode, vga_modeinfo minfo) {
   vga_modelist_t *list;
 
   if (modelist == NULL) {
-    modelist = malloc(sizeof(vga_modelist_t));
-    modelist->modenum = mode;
-    modelist->modeinfo = minfo;
-    modelist->next = NULL;
+    modelist = (vga_modelist_t *) malloc(sizeof(vga_modelist_t));
     if (modelist == NULL) {
       printf("vo_svga: add_mode() failed. Not enough memory for modelist.");
       return(1); // error
     }
+    modelist->modenum = mode;
+    modelist->modeinfo = minfo;
+    modelist->next = NULL;
   } else {
       list = modelist;
       while (list->next != NULL)
         list = list->next;
-      list->next = malloc(sizeof(vga_modelist_t));
+      list->next = (vga_modelist_t *) malloc(sizeof(vga_modelist_t));
       if (list->next == NULL) {
         printf("vo_svga: add_mode() failed. Not enough memory for modelist.");
         return(1); // error
@@ -88,16 +91,18 @@ static int add_mode(uint16_t mode, vga_modeinfo minfo) {
       list->modeinfo = minfo;
       list->next = NULL;
     }  
+  return (0);
 }
 
 static int checksupportedmodes() {
-  uint16_t i;
+  uint16_t i, max;
   vga_modeinfo *minfo;
   
   checked = 1;
   vga_init();
   vga_disabledriverreport();
-  for (i = 1; i < vga_lastmodenumber(); i++)
+  max = vga_lastmodenumber();
+  for (i = 1; i < max; i++)
     if (vga_hasmode(i) > 0) {
       minfo = vga_getmodeinfo(i);
       switch (minfo->colors) {
@@ -111,6 +116,7 @@ static int checksupportedmodes() {
       if (add_mode(i, *minfo))
         return(1);
     }
+  return(0);
 }
 
 static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
@@ -120,16 +126,18 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
   uint32_t req_h = (d_height > 0 ? d_height : height);
   uint16_t vid_mode = 0;
   uint8_t widescreen = (((req_w*1.0)/req_h) > (4.0/3)) ? 1 : 0;
+  uint16_t buf_w = USHRT_MAX, buf_h = USHRT_MAX;
   vga_modelist_t *list = modelist;
   
   if (!checked) {
-    if (checksupportedmodes()) // Looking for available video modes
+    if (checksupportedmodes()) // Looking for available video modes 
       return(1);
   }
 
   bpp_avail = 0;
   while (list != NULL) {
     if ((list->modeinfo.width >= req_w) && (list->modeinfo.height >= req_h)) {
+//	printf("w: %d, h: %d, bpp: %d, colors: %d\n",list->modeinfo.width,list->modeinfo.height,list->modeinfo.bytesperpixel,list->modeinfo.colors);
       switch (list->modeinfo.colors) {
         case 32768: bpp_avail |= BPP_15; break;
         case 65536: bpp_avail |= BPP_16; break;
@@ -149,17 +157,18 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
   if (!vo_dbpp) {
     if (format == IMGFMT_YV12) bpp = 32;
     else bpp = format & 255;
+//    printf("bpp: %d\n",bpp);
     switch (bpp) {
       case 32: if (!(bpp_avail & BPP_32)) {
 	         printf("vo_svga: Haven't found video mode which fit to: %dx%d %dbpp\n",req_w,req_h,bpp);
-		 printf("vo_svga: Maybe you should try -bpp\n");
+                 printf("vo_svga: Maybe you should try -bpp\n");
 		 return(1);
 	       } 
                break;
       case 24: if (!(bpp_avail & BPP_24))
                  if (!(bpp_avail & BPP_32)) {
 	           printf("vo_svga: Haven't found video mode which fit to: %dx%d %dbpp\n",req_w,req_h,bpp);
-		   printf("vo_svga: Maybe you should try -bpp\n");
+                   printf("vo_svga: Maybe you should try -bpp\n");
 		   return(1);
 		 } else {
 		     bpp = 32;
@@ -187,55 +196,82 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
       bpp = vo_dbpp;
       switch (bpp) {
         case 32: if (!(bpp_avail & BPP_32)) {
-	           printf("vo_svga: %dbpp not supported by HW or SVGAlib\n",bpp);
+	           printf("vo_svga: %dbpp not supported in %dx%d (or larger resoltuion) by HW or SVGAlib\n",bpp,req_w,req_h);
 		   return(1);
                  }
+		 break;
         case 24: if (!(bpp_avail & BPP_24)) {
-	           printf("vo_svga: %dbpp not supported by HW or SVGAlib\n",bpp);
+	           printf("vo_svga: %dbpp not supported in %dx%d (or larger resoltuion) by HW or SVGAlib\n",bpp,req_w,req_h);
 		   return(1);
                  }
+		 break;
         case 16: if (!(bpp_avail & BPP_16)) {
-	           printf("vo_svga: %dbpp not supported by HW or SVGAlib\n",bpp);
+	           printf("vo_svga: %dbpp not supported in %dx%d (or larger resoltuion) by HW or SVGAlib\n",bpp,req_w,req_h);
 		   return(1);
                  }
+		 break;
         case 15: if (!(bpp_avail & BPP_15)) {
-	           printf("vo_svga: %dbpp not supported by HW or SVGAlib\n",bpp);
+	           printf("vo_svga: %dbpp not supported in %dx%d (or larger resoltuion) by HW or SVGAlib\n",bpp,req_w,req_h);
 		   return(1);
                  }
+		 break;
       }
     }
 
   list = modelist;
-  while ((list != NULL) && (!vid_mode)) {
+//  printf("req_w: %d, req_h: %d\n",req_w,req_h);
+  while (list != NULL) {
     if ((list->modeinfo.width >= req_w) && (list->modeinfo.height >= req_h)) {
+//      printf("w: %d, h: %d, bpp: %d, colors: %d, req_bpp: %d\n",list->modeinfo.width,list->modeinfo.height,list->modeinfo.bytesperpixel,list->modeinfo.colors,bpp);
       switch (bpp) {
         case 32: if (list->modeinfo.bytesperpixel == 4)
-	           vid_mode = list->modenum;
+                   if ((list->modeinfo.width < buf_w) || (list->modeinfo.height < buf_h)) {
+                     vid_mode = list->modenum;
+                     buf_w = list->modeinfo.width;
+                     buf_h = list->modeinfo.height;
+		   }
+		 break;
         case 24: if (list->modeinfo.bytesperpixel == 3)
-	           vid_mode = list->modenum;
+                   if ((list->modeinfo.width < buf_w) || (list->modeinfo.height < buf_h)) {
+                     vid_mode = list->modenum;
+                     buf_w = list->modeinfo.width;
+                     buf_h = list->modeinfo.height;
+		   }
+		 break;
         case 16: if (list->modeinfo.colors == 65536)
-	           vid_mode = list->modenum;
+                   if ((list->modeinfo.width < buf_w) || (list->modeinfo.height < buf_h)) {
+                     vid_mode = list->modenum;
+                     buf_w = list->modeinfo.width;
+                     buf_h = list->modeinfo.height;
+		   }
+		 break;
         case 15: if (list->modeinfo.colors == 32768)
-	           vid_mode = list->modenum;
+                   if ((list->modeinfo.width < buf_w) || (list->modeinfo.height < buf_h)) {
+                     vid_mode = list->modenum;
+                     buf_w = list->modeinfo.width;
+                     buf_h = list->modeinfo.height;
+		   }
+		 break;
       }
     }
     list = list->next;
   }
-  
+
+//  printf("vid_mode: %d\n",vid_mode);
   vga_setlinearaddressing();
-  if (vga_setmode(vid_mode) == -1){
+  if (vga_setmode(vid_mode) == -1) {
     printf("vo_svga: vga_setmode(%d) failed.\n",vid_mode);
     uninit();
     return(1); // error
-  }
-  if (gl_setcontextvga(vid_mode)){
+  } 
+  if (gl_setcontextvga(vid_mode)) {
     printf("vo_svga: gl_setcontextvga(%d) failed.\n",vid_mode);
     uninit();
     return(1); // error
   }
   screen = gl_allocatecontext();
   gl_getcontext(screen);
-  if (gl_setcontextvgavirtual(vid_mode)){
+  if (gl_setcontextvgavirtual(vid_mode)) {
     printf("vo_svga: gl_setcontextvgavirtual(%d) failed.\n",vid_mode);
     uninit();
     return(1); // error
@@ -245,12 +281,13 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
   gl_setcontext(virt);
   gl_clearscreen(0);
   
-  if (bpp_conv)
+  if (bpp_conv) {
     bppbuf = malloc(maxw * maxh * BYTESPERPIXEL);
-  if (bppbuf == NULL) {
-    printf("vo_svga: Not enough memory for buffering!\n");
-    uninit();
-    return (1);
+    if (bppbuf == NULL) {
+      printf("vo_svga: bppbuf -> Not enough memory for buffering!\n");
+      uninit();
+      return (1);
+    }  
   }
 
   orig_w = width;
@@ -262,7 +299,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
       maxw = (uint32_t) (orig_w * scaling);
       scalebuf = malloc(maxw * maxh * BYTESPERPIXEL);
       if (scalebuf == NULL) {
-        printf("vo_svga: Not enough memory for buffering!\n");
+        printf("vo_svga: scalebuf -> Not enough memory for buffering!\n");
 	uninit();
 	return (1);
       }
@@ -272,7 +309,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
         maxh = (uint32_t) (orig_h * scaling);
         scalebuf = malloc(maxw * maxh * BYTESPERPIXEL);
         if (scalebuf == NULL) {
-          printf("vo_svga: Not enough memory for buffering!\n");
+          printf("vo_svga: scalebuf -> Not enough memory for buffering!\n");
 	  uninit();
 	  return (1);
         }
@@ -288,12 +325,13 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
     yuv2rgb_init(bpp, MODE_RGB);
     yuvbuf = malloc(maxw * maxh * BYTESPERPIXEL);
     if (yuvbuf == NULL) {
-      printf("vo_svga: Not enough memory for buffering!\n");
+      printf("vo_svga: yuvbuf -> Not enough memory for buffering!\n");
       uninit();
       return (1);
     }
   }
 
+//  printf("bpp_conv: %d\n",bpp_conv);
   printf("SVGAlib resolution: %dx%d %dbpp - ", WIDTH, HEIGHT, bpp);
   if (maxw != orig_w || maxh != orig_h) printf("Video scaled to: %dx%d\n",maxw,maxh);
   else printf("No video scaling\n");
@@ -302,41 +340,51 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 }
 
 static uint32_t query_format(uint32_t format) {
-  uint8_t res = 0;
+  uint32_t res = 0;
 
   if (!checked) {
     if (checksupportedmodes()) // Looking for available video modes
       return(0);
   }
-  switch (format) {
-    case IMGFMT_RGB32: 
-    case IMGFMT_BGR|32: {
-      return ((bpp_avail & BPP_32) ? 1 : 0);
+
+  // if (vo_dbpp) => There is NO conversion!!!
+  if (vo_dbpp) {
+    switch (vo_dbpp) {
+      case 32: if ((format == IMGFMT_RGB32) || (format == IMGFMT_BGR|32))
+                 return ((bpp_avail & BPP_32) ? 1 : 0);
+	       break;
+      case 24: if ((format == IMGFMT_RGB24) || (format == IMGFMT_BGR|24))
+                 return ((bpp_avail & BPP_24) ? 1 : 0);
+	       break;
+      case 16: if ((format == IMGFMT_RGB16) || (format == IMGFMT_BGR|16))
+                 return ((bpp_avail & BPP_16) ? 1 : 0);
+	       break;
+      case 15: if ((format == IMGFMT_RGB15) || (format == IMGFMT_BGR|15))
+                 return ((bpp_avail & BPP_15) ? 1 : 0);
+	       break;
     }
-    case IMGFMT_RGB24: 
-    case IMGFMT_BGR|24: {
-      res = (bpp_avail & BPP_24) ? 1 : 0;
-      if (!res) {
-        res = (bpp_avail & BPP_32) ? 1 : 0;
-	bpp_conv = 1;
+  } else
+      switch (format) {
+        case IMGFMT_RGB32: 
+        case IMGFMT_BGR|32: return ((bpp_avail & BPP_32) ? 1 : 0); break;
+        case IMGFMT_RGB24: 
+        case IMGFMT_BGR|24: {
+          res = (bpp_avail & BPP_24) ? 1 : 0;
+          if (!res)
+            res = (bpp_avail & BPP_32) ? 1 : 0;
+          return (res);
+        } break;
+        case IMGFMT_RGB16: 
+        case IMGFMT_BGR|16: return ((bpp_avail & BPP_16) ? 1 : 0); break;
+        case IMGFMT_RGB15: 
+        case IMGFMT_BGR|15: {
+          res = (bpp_avail & BPP_15) ? 1 : 0;
+          if (!res)
+            res = (bpp_avail & BPP_16) ? 1 : 0;
+          return (res);
+        } break;
+        case IMGFMT_YV12: return (1); break;
       }
-      return (res);
-    }
-    case IMGFMT_RGB16: 
-    case IMGFMT_BGR|16: {
-      return ((bpp_avail & BPP_16) ? 1 : 0);
-    }
-    case IMGFMT_RGB15: 
-    case IMGFMT_BGR|15: {
-      res = (bpp_avail & BPP_15) ? 1 : 0;
-      if (!res) {
-        res = (bpp_avail & BPP_16) ? 1 : 0;
-        bpp_conv = 1;
-      }
-      return (res);
-    }
-    case IMGFMT_YV12: return (1);
-  }
   return (0);
 }
 
@@ -372,32 +420,34 @@ static uint32_t draw_frame(uint8_t *src[]) {
     src[0] = scalebuf;
   }
   if (bpp_conv) {
-    uint16_t *src = (uint16_t *) src[0];
+    uint16_t *source = (uint16_t *) src[0];
     uint16_t *dest = (uint16_t *) bppbuf;
     uint16_t *end;
     
     switch(bpp) {
-      case 32:
-	end = src + (maxw * maxh * 2);
-        while (src < end) {
-	  *dest++ = *src++;
-	  (uint8_t *)dest = (uint8_t *)src;
+      case 32: {
+	end = source + (maxw * maxh * 2);
+        while (source < end) {
+	  *dest++ = *source++;
+	  (uint8_t *)dest = (uint8_t *)source;
 	  *(((uint8_t *)dest)+1) = 0;
 	  dest++;
-	  src++;
+	  source++;
 	}
-      case 16:
+      } break;
+      case 16: {
 #ifdef HAVE_MMX
         rgb15to16_mmx(src[0],bppbuf,maxw * maxh * 2);
 #else
 	register uint16_t srcdata;
 	
-	end = src + (maxw * maxh);
-	while (src < end) {
-	  srcdata = *src++;
+	end = source + (maxw * maxh);
+	while (source < end) {
+	  srcdata = *source++;
 	  *dest++ = (srcdata & 0x1f) | ((srcdata & 0x7fe0) << 1);
 	}
 #endif
+      } break;
     }
     src[0] = bppbuf;
   }
@@ -428,7 +478,7 @@ static void flip_page(void) {
       gl_fillbox(0, 0, x_pos, HEIGHT, 0);
       gl_fillbox(WIDTH - x_pos, 0, x_pos, HEIGHT, 0);
     }
-  vo_draw_text(WIDTH, HEIGHT, draw_alpha);
+//  vo_draw_text(WIDTH, HEIGHT, draw_alpha);
   gl_copyscreen(screen);
 }
 
