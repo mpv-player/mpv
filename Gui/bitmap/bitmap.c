@@ -30,9 +30,16 @@ int conv24to32( txSample * bf )
    memset( bf->Image,0,bf->ImageSize );
    for ( c=0,i=0;i < (int)(bf->Width * bf->Height * 3); )
     {
-     bf->Image[c++]=tmpImage[i++];
-     bf->Image[c++]=tmpImage[i++];
-     bf->Image[c++]=tmpImage[i++]; c++;
+#ifndef WORDS_BIGENDIAN
+     bf->Image[c++]=tmpImage[i++];	//red
+     bf->Image[c++]=tmpImage[i++];	//green
+     bf->Image[c++]=tmpImage[i++]; c++;	//blue
+#else
+     unsigned char t=tmpImage[i++];
+     bf->Image[c++]=tmpImage[i++];	//green
+     bf->Image[c++]=t;             c++;	//red
+     bf->Image[c++]=tmpImage[i++]; 	//blue
+#endif
     }
    free( tmpImage );
   }
@@ -55,7 +62,11 @@ void bgr2rgb( txSample * bf )
 void Normalize( txSample * bf )
 {
  int           i;
+#ifndef WORDS_BIGENDIAN 
  for ( i=0;i < (int)bf->ImageSize;i+=4 ) bf->Image[i+3]=0;
+#else
+ for ( i=0;i < (int)bf->ImageSize;i+=4 ) bf->Image[i]=0; 
+#endif
 }
 
 unsigned char tmp[512];
