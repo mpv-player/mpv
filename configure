@@ -2087,7 +2087,7 @@ EOF
 fi
 if test "$_x11" = yes ; then
   _def_x11='#define HAVE_X11 1'
-  _vosrc="$_vosrc vo_x11.c"
+  _vosrc="$_vosrc x11_common.c vo_x11.c"
   _vomodules="x11 $_vomodules"
 else
   _def_x11='#undef HAVE_X11'

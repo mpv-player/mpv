@@ -3,7 +3,7 @@ include config.mak
 
 LIBNAME = libvo.a
 
-SRCS=aspect.c aclib.c osd.c font_load.c spuenc.c video_out.c vo_null.c vo_pgm.c vo_md5.c vo_mpegpes.c x11_common.c vo_yuv4mpeg.c $(OPTIONAL_SRCS) sub.c
+SRCS=aspect.c aclib.c osd.c font_load.c spuenc.c video_out.c vo_null.c vo_pgm.c vo_md5.c vo_mpegpes.c vo_yuv4mpeg.c $(OPTIONAL_SRCS) sub.c
 OBJS=$(SRCS:.c=.o)
 
 ifeq ($(VIDIX),yes)
