@@ -29,7 +29,7 @@ Gábor Lénárt (LGB): <lgb@lgb.hu>
 - testing and some improvements in mpeg player's user interface (options)
 - ./configure script improvements
 - Makefile improvements
-- preliminary DVD support
+- prelimenary DVD support
 
 Gábor Bérczi (Gabucino):  <gabucino@k2.jozsef.kando.hu>
 - documentation maintainer, hun-eng translator
@@ -73,6 +73,10 @@ Michael Graffam: <mgraffam@idsi.net>
 Jens Hoffmann: <hoffmajs@gmx.de>
 - Additional YUV formats support
 - found the big BITMAPINFOHEADER problem -> solved ASV2 pixelization
+
+Nick Kurshev: <nickols_k@mail.ru>
+- memcpy optimizations for AMD K7 and Intel Pentium III
+- CDROM tune info
 
 Main testers:
   Tibor Balázs (Tibcu)
