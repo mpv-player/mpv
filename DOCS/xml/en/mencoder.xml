@@ -612,7 +612,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   to use a higher quantizer on a macroblock without sacrificing visual
   quality. Why waste the bits on an unnecessarily low quantizer? Your
   CPU has as many cycles as there is time, but there's only so many bits
-  on your harddisk.
+  on your hard disk.
 </para>
 
 <para>
@@ -693,7 +693,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   <application>MEncoder</application> offers an option for <systemitem
   class="library">libavcodec</systemitem> called <option>autoaspect</option>
   that will do this for you. Absolutely do not scale this video in order to
-  square the pixels unless you like to waste your harddisk space. Scaling
+  square the pixels unless you like to waste your hard disk space. Scaling
   should be done on playback, and the player will use the aspect stored in
   the AVI to determine the correct resolution.
 </para>
