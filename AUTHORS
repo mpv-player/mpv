@@ -286,6 +286,9 @@ Roberto Togni <rtogni@freemail.it>
     * Open source QT RPZA decoder
     * Open source HuffYUV decoder
     * Open source MSZH/ZLIB decoder
+    * mp_help-it.h updates
+    * Realaudio (ra) demuxer, 14_4 and 28_8 codec support
+    * Misc bugfixes and enhancements
 
 Wojtek Kaniewski <wojtekka@bydg.pdi.net>
     * Mouse wheel support
