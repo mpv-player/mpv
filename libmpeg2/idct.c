@@ -250,11 +250,14 @@ void mpeg2_idct_init (uint32_t accel)
 #endif
 #endif
 #ifdef ARCH_ALPHA
+#ifdef CAN_COMPILE_ALPHA_MVI
     if (accel & MPEG2_ACCEL_ALPHA_MVI) {
 	mpeg2_idct_copy = mpeg2_idct_copy_mvi;
 	mpeg2_idct_add = mpeg2_idct_add_mvi;
 	mpeg2_idct_alpha_init (0);
-    } else if (accel & MPEG2_ACCEL_ALPHA) {
+    } else
+#endif
+    if (accel & MPEG2_ACCEL_ALPHA) {
 	mpeg2_idct_copy = mpeg2_idct_copy_alpha;
 	mpeg2_idct_add = mpeg2_idct_add_alpha;
 	mpeg2_idct_alpha_init (1);

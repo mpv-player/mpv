@@ -919,6 +919,15 @@ EOF
     fi
     _mcpu="-mcpu=$proc"
     echores "$proc"
+
+    echocheck "MVI instruction support in GCC"
+    if test "$_cc_major" -ge "3"; then
+    	_def_gcc_mvi_support="#define CAN_COMPILE_ALPHA_MVI 1"
+	echores "yes"
+    else
+	_def_gcc_mvi_support="#undef CAN_COMPILE_ALPHA_MVI"
+	echores "no"
+    fi
     ;;
 
   mips)
@@ -5787,6 +5796,9 @@ $_def_arch
 #ifdef ARCH_ARMV4L
 #define ARCH_ARM 1
 #endif
+
+/* only gcc3 can compile mvi instructions */
+$_def_gcc_mvi_support
 
 /* Define this for Cygwin build for win32 */
 $_def_confwin32
