@@ -107,7 +107,7 @@ void appInit( int argc,char* argv[], char *envp[] )
  if ( ( skinMPlayerDir=(char *)calloc( 1,strlen( appMPlayerDir ) + 5 ) ) != NULL )
   { strcpy( skinMPlayerDir,appMPlayerDir ); strcat( skinMPlayerDir,"/Skin" ); }
 
- initDebug();
+ initDebug(NULL);
 
  cfgDefaults();
  cfgRead();
