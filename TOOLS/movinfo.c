@@ -74,8 +74,8 @@ void *video_stream_info(FILE *f, int len)
   for (i=0; i<len; i++)
 	fread(&data[i], 1, 1, f);
 
-  strncpy(codec, &data[43], len-43);
-  printf("  [codec: %s]\n", &codec);
+//  strncpy(codec, &data[43], len-43);
+//  printf("  [codec: %s]\n", &codec);
   fseek(f,orig_pos,SEEK_SET);
 }
 
@@ -307,6 +307,7 @@ void lschunks(FILE *f,int level,unsigned int endpos){
   case 0x7A737473: // stsz  Sample size table
   case 0x746f6e70: // pnot
   case 0x54434950: // PICT
+  case 0x70797466:
       break;
   default: lschunks(f,level+1,pos+atom_size);
   }
