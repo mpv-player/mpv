@@ -94,6 +94,11 @@ When asked for a password, you can just hit enter. A directory named 'ffmpeg'
 with a subdirectory named 'libavcodec' inside will be created. Copy (symbolic
 linking does NOT suffice) this subdirectory into the MPlayer source tree.
 
+In order to force automatic updates of libavcodec when you update MPlayer, add
+the following line to main/CVS/Entries:
+
+D/libavcodec////
+
 FFmpeg also contains libavformat, a library to decode container formats that
 can optionally be used to extend MPlayer's container format support. Get it
 from FFmpeg CVS by the same steps outlined above for libavcodec, just
