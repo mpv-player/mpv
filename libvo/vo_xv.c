@@ -248,6 +248,20 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
 
      current_buf=0;
 
+     #ifdef HAVE_NEW_GUI
+      if ( vo_window != None )
+       {
+        mFullscreen=0;
+        dwidth=mdwidth; dheight=mdheight;
+        if ( ( vo_dwidth == vo_screenwidth )&&( vo_dheight == vo_screenheight ) )
+         {
+          mFullscreen=1;
+          dwidth=vo_screenwidth;
+          dheight=vo_screenwidth * mdheight / mdwidth;
+         }
+       }
+     #endif
+
      XGetGeometry( mDisplay,mywindow,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
      drwX=0; drwY=0;
      XTranslateCoordinates( mDisplay,mywindow,mRoot,0,0,&drwcX,&drwcY,&mRoot );
@@ -266,7 +280,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
 #ifdef HAVE_NEW_GUI
      if ( vo_window == None )
 #endif
-     saver_off(mDisplay);  // turning off screen saver
+      saver_off(mDisplay);  // turning off screen saver
      return 0;
     }
   }
@@ -323,7 +337,7 @@ static void check_events(void)
      {
       mFullscreen=0;
       dwidth=mdwidth; dheight=mdheight;
-      if ( ( drwWidth == vo_screenwidth )&&( drwHeight == vo_screenheight ) )
+      if ( ( vo_dwidth == vo_screenwidth )&&( vo_dheight == vo_screenheight ) )
        {
         mFullscreen=1;
         dwidth=vo_screenwidth;
