@@ -5,6 +5,14 @@ TODO:
 FOR THE RELEASE:
 ~~~~~~~~~~~~~~~~
 
+URGENT:
+- fix -tv subconfig bug
+- fix mpeg PES/PS detection (VDR vs. BIN)
+- fix suid root
+- check wmv8 with gcc 3.0x
+- fix cvid on ppc
+
+
 demuxer:
 - prebuffering to cache2 (req. for MMS) - URGENT!
 
