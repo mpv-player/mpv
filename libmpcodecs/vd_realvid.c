@@ -14,11 +14,15 @@
 #include "vd_internal.h"
 #include "wine/windef.h"
 
+#ifdef USE_MACSHLB
+#include <CoreServices/CoreServices.h>
+#endif
+
 static vd_info_t info = {
 	"RealVideo decoder",
 	"realvid",
-	"Florian Schneider & A'rpi", // win32 dlls support by alex
-	"using original closed source codecs for Linux",
+	"Alex Beregszaszi",
+	"Florian Schneider, Arpad Gereoffy, Alex Beregszaszi, Donnie Smith",
 	"binary real video codecs"
 };
 
@@ -61,7 +65,7 @@ static unsigned long WINAPI (*wrvyuv_transform)(char*, char*,transform_in_t*,uns
 #endif
 
 static void *rv_handle=NULL;
-static int inited;
+static int inited=0;
 #ifdef USE_WIN32DLL
 static int dll_type = 0; /* 0 = unix dlopen, 1 = win32 dll */
 #endif
@@ -177,6 +181,64 @@ static int load_syms_windows(char *path) {
 }
 #endif
 
+#ifdef USE_MACSHLB
+void *load_one_sym_mac(char *symbolName, CFragConnectionID *connID);
+
+static int load_syms_mac(char *path) {
+    Ptr mainAddr;
+    OSStatus status;
+    FSRef fsref;
+    FSSpec fsspec;
+    OSErr err;
+    Str255 errMessage;
+    CFragConnectionID *connID;
+
+    mp_msg(MSGT_DECVIDEO,MSGL_INFO, "opening mac shlb '%s'\n", path);
+
+    if ( (connID = (CFragConnectionID *)NewPtr( sizeof( CFragConnectionID ))) == nil ) {
+        mp_msg(MSGT_DECVIDEO,MSGL_WARN,"NewPtr() failed.\n" );
+        return 0;
+    }
+
+    if ( (status = FSPathMakeRef( path, &fsref, NULL )) != noErr ) {
+        mp_msg(MSGT_DECVIDEO,MSGL_WARN,"FSPathMakeRef() failed with error %d.\n", status );
+        return 0;
+    }
+
+    if ( (status = FSGetCatalogInfo( &fsref, kFSCatInfoNone, NULL, NULL, &fsspec, NULL )) != noErr ) {
+        mp_msg(MSGT_DECVIDEO,MSGL_WARN,"FSGetCatalogInfo() failed with error %d.\n", status );
+        return 0;
+    }
+
+    if ( (err = GetDiskFragment( &fsspec, 0, kCFragGoesToEOF, NULL, kPrivateCFragCopy, connID, &mainAddr, errMessage )) != noErr ) {
+        p2cstrcpy( errMessage, errMessage );
+        mp_msg(MSGT_DECVIDEO,MSGL_WARN,"GetDiskFragment() failed with error %d: %s\n", err, errMessage );
+        return 0;
+    }
+
+    rvyuv_custom_message = load_one_sym_mac("RV20toYUV420CustomMessage", connID);
+    rvyuv_free = load_one_sym_mac("RV20toYUV420Free", connID);
+    rvyuv_hive_message = load_one_sym_mac("RV20toYUV420HiveMessage", connID);
+    rvyuv_init = load_one_sym_mac("RV20toYUV420Init", connID);
+    rvyuv_transform = load_one_sym_mac("RV20toYUV420Transform", connID);
+
+    if(rvyuv_custom_message &&
+       rvyuv_free &&
+       rvyuv_hive_message &&
+       rvyuv_init &&
+       rvyuv_transform)
+    {
+	rv_handle = connID;
+	return 1;
+    }
+
+    mp_msg(MSGT_DECVIDEO,MSGL_WARN,"Error resolving symbols! (version incompatibility?)\n");
+    (void)CloseConnection(connID);
+    return 0; // error
+}
+#endif
+
+
 /* we need exact positions */
 struct rv_init_t {
 	short unk1;
@@ -208,6 +270,9 @@ static int init(sh_video_t *sh){
 
 	/* first try to load linux dlls, if failed and we're supporting win32 dlls,
 	   then try to load the windows ones */
+#ifdef USE_MACSHLB
+	if (strstr(sh->codec->dll, ".shlb") && !load_syms_mac(path))
+#endif
 #ifdef HAVE_LIBDL       
 	if(strstr(sh->codec->dll,".dll") || !load_syms_linux(path))
 #endif
@@ -225,7 +290,6 @@ static int init(sh_video_t *sh){
 //	if((sh->format!=0x30335652) && !mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_I420)) return 0;
 	// init codec:
 	sh->context=NULL;
-	inited=0;
 #ifdef USE_WIN32DLL
 	if (dll_type == 1)
 	    result=(*wrvyuv_init)(&init_data, &sh->context);
@@ -270,6 +334,17 @@ static void uninit(sh_video_t *sh){
 #endif
 #ifdef HAVE_LIBDL
 	if(rv_handle) dlclose(rv_handle);
+#endif
+#ifdef USE_MACSHLB
+	if (rv_handle){
+	    (void)CloseConnection(rv_handle);
+	    DisposePtr((Ptr)rv_handle);
+	}
+	if (rvyuv_custom_message) DisposePtr((Ptr)rvyuv_custom_message);
+	if (rvyuv_free) DisposePtr((Ptr)rvyuv_free);
+	if (rvyuv_hive_message) DisposePtr((Ptr)rvyuv_hive_message);
+	if (rvyuv_init) DisposePtr((Ptr)rvyuv_init);
+	if (rvyuv_transform) DisposePtr((Ptr)rvyuv_transform);
 #endif
 	rv_handle=NULL;
 }
