@@ -1,11 +1,14 @@
 #!/bin/bash
 
 #unicode="--unicode"
-font=arial.ttf
+#font=arial.ttf
+#font=mints-mild.pcf
+#font=/home/alex/artwiz-mints-mild-latin2.hex
+font=$1
 #font=verdana.ttf
 encoding=iso-8859-2
-fontsize=24
-symbolssize=35
+fontsize=$2
+symbolssize=$3
 blur=2
 outline=1.5
 

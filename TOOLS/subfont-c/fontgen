@@ -32,7 +32,7 @@ outline=1.5
 
 if [ ! -x $subfont_exec ]; then
     echo "fontgen: 'subfont' not found or not executable!"
-    echo "fontgen: trying to make sources"
+    echo "fontgen: trying to compile"
     
     make || exit
     
