@@ -2,23 +2,23 @@ In general
 ==========
 
 There are planar and packed modes.
-- Planar mode means: you have 3 separated image, one for each component,
+- Planar mode means: You have 3 separate images, one for each component,
 each image 8 bits/pixel. To get the real colored pixel, you have to
 mix the components from all planes. The resolution of planes may differ!
 - Packed mode means: you have all components mixed/interleaved together,
 so you have small "packs" of components in a single, big image.
 
 There are RGB and YUV colorspaces.
-- RGB: Read, Green and Blue components. Used by analog VGA monitors.
+- RGB: Red, Green and Blue components. Used by analog VGA monitors.
 - YUV: Luminance (Y) and Chrominance (U,V) components. Used by some
-  video systems, like PAL. Also most m(j)peg/dct based codecs use this.
+  video systems, like PAL. Also most M(J)PEG/DCT based codecs use this.
 
 With YUV, they used to reduce the resolution of U,V planes:
 The most common YUV formats:
-fourcc:    bpp: IEEE:      plane sizes: (w=width h=height of original image)
+FOURCC:    bpp: IEEE:      plane sizes: (w=width h=height of original image)
 444P       24   YUV 4:4:4  Y: w * h  U,V: w * h
 YUY2,UYVY  16   YUV 4:2:2  Y: w * h  U,V: (w/2) * h      [MJPEG]
-YV12,I420  12   YUV 4:2:0  Y: w * h  U,V: (w/2) * (h/2)  [MPEG, h263]
+YV12,I420  12   YUV 4:2:0  Y: w * h  U,V: (w/2) * (h/2)  [MPEG, H.263]
 411P       12   YUV 4:1:1  Y: w * h  U,V: (w/4) * h      [DV-NTSC, CYUV]
 YVU9,IF09   9   YUV 4:1:0  Y: w * h  U,V: (w/4) * (h/4)  [Sorenson, Indeo]
 
@@ -41,8 +41,8 @@ the [0-255] range. Rumour has it that the valid range is actually a subset
 of [0-255] (I've seen an RGB range of [16-235] mentioned) but clamping the
 values into [0-255] seems to produce acceptable results to me.
 
-Julien (sorry, I can't call back his surname) suggests that there are
-problems with the above formula and suggests the following instead: 
+Julien (sorry, I can't recall his surname) suggests that there are
+problems with the above formula and proposes the following instead:
     Y  = 0.299R + 0.587G + 0.114B
     Cb = U'= (B-Y)*0.565
     Cr = V'= (R-Y)*0.713
@@ -50,7 +50,7 @@ with reciprocal versions:
     R = Y + 1.403V'
     G = Y - 0.344U' - 0.714V'
     B = Y + 1.770U'
-note: this formula doesn't contain the +128 offsets of U,V values!
+Note: This formula doesn't contain the +128 offsets of U,V values!
 
 Conclusion:
 Y = luminance, the weighted average of R G B components. (0=black 255=white)
@@ -64,17 +64,17 @@ Huh. The planar YUV modes.
 The most misunderstood thingie...
 
 In MPlayer, we usually have 3 pointers to the Y, U and V planes, so it
-doesn't matter what is the order of the planes in the memory:
+doesn't matter what the order of the planes in the memory is:
     for mp_image_t and libvo's draw_slice():
 	planes[0] = Y = luminance
 	planes[1] = U = Cb = blue
 	planes[2] = V = Cr = red
-    Note: planes[1] is ALWAYS U, and planes[2] is V, the fourcc
-    (YV12 vs. I420) doesn't matter here! So, every codecs using 3 pointers
-    (not only the first one) normally supports YV12 and I420 (=IYUV) too!
+    Note: planes[1] is ALWAYS U, and planes[2] is V, the FOURCC
+    (YV12 vs. I420) doesn't matter here! So, every codec using 3 pointers
+    (not only the first one) normally supports YV12 and I420 (=IYUV), too!
 
-But there are some codecs (vfw, dshow) and vo drivers (xv) ignoring the 2nd
-and 3rd pointer, and use only a single pointer to the planar yuv image. In
+But there are some codecs (VfW, dshow) and vo drivers (xv) ignoring the 2nd
+and 3rd pointer that use only a single pointer to the planar YUV image. In
 this case we must know the right order and alignment of planes in the memory!
 
 from the webartz fourcc list:
@@ -89,7 +89,7 @@ Huh 2. RGB vs. BGR ?
 The 2nd most misunderstood thingie...
 
 You know, there are Intel and Motorola, and they use different byteorder.
-There are also others, like MIPS or Alpha, they all follow either Intel
+There are also others, like MIPS or Alpha, but all follow either Intel
 or Motorola byteorder.
 Unfortunately, the packed colorspaces depend on CPU byteorder. So, RGB
 on Intel and Motorola means different order of bytes.
@@ -100,8 +100,8 @@ byteorder, so they are incompatible. We had to find a stable base, so long
 time ago I've chosen OpenGL, as it's a wide-spreaded standard, and it well
 defines what RGB is and what BGR is. So, MPlayer's RGB is compatible with
 OpenGL's GL_RGB on all platforms, and the same goes for BGR - GL_BGR.
-Unfortunately, most of the x86 codecs call our BGR to RGB, so it sometimes
-confuse developers.
+Unfortunately, most of the x86 codecs call our BGR RGB, so it sometimes
+confuses developers.
 
 memory order:           name
 lowest address .. highest address
@@ -123,7 +123,7 @@ most significant .. least significant bit
 
 The following are palettized formats, the palette is in the second plane.
 When they come out of the swscaler (this can be different when they
-come from a codec!), their palette is organized in such a way,
+come from a codec!), their palette is organized in such a way
 that you actually get:
 
 3R3G2B                  IMGFMT_BGR8
@@ -133,5 +133,5 @@ that you actually get:
 1R2G1B1R2G1B            IMGFMT_BGR4
 1B2G1R1B2G1R            IMGFMT_RGB4
 
-depending upon if the cpu is little or big endian, different 'in memory' and 
+Depending upon the CPU being little- or big-endian, different 'in memory' and
 'in register' formats will be equal (LE -> BGRA == BGR32 / BE -> ARGB == BGR32)
