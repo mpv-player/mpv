@@ -847,13 +847,13 @@ int vixSetGrKeys( const vidix_grkey_t * grkey){
   {
     info->use_colorkey = 0;
     printf("[nvidia_vid] colorkeying disabled\n");
-    return 0;
   }
-
+  else {
   info->use_colorkey = 1;
   info->vidixcolorkey = ((grkey->ckey.red<<16)|(grkey->ckey.green<<8)|grkey->ckey.blue);
   printf("[nvidia_vid] set colorkey 0x%x\n",info->vidixcolorkey);
-  rivatv_overlay_colorkey(info,info->vidixcolorkey);
+  }
+  rivatv_overlay_start(info,0);
   return 0;
 }
 
