@@ -367,10 +367,10 @@ stream_id_plus1[frame_code]
 	if its 0 then the stream_id is coded in the frame
 
 data_size_mul[frame_code]
-	must be <250
+	must be <16384
 
 data_size_lsb[frame_code]
-	must be <250
+	must be <16384
 
 data_size       
 	data_size= data_size_lsb + data_size_msb*data_size_mul;
