@@ -286,7 +286,6 @@ int mov_check_file(demuxer_t* demuxer){
     mp_msg(MSGT_DEMUX,MSGL_V,"Checking for MOV\n");
     
     memset(priv,0,sizeof(mov_priv_t));
-    demuxer->priv=priv;
     
     while(1){
 	int skipped=8;
@@ -374,7 +373,7 @@ int mov_check_file(demuxer_t* demuxer){
 	  /* dunno what, but we shoudl ignore it */
 	  break;
 	default:
-	  if(no==0) return 0; // first chunk is bad!
+	  if(no==0){ free(priv); return 0;} // first chunk is bad!
 	  id = be2me_32(id);
 	  mp_msg(MSGT_DEMUX,MSGL_V,"MOV: unknown chunk: %.4s %d\n",&id,(int)len);
 	}
@@ -382,13 +381,19 @@ skip_chunk:
 	if(!stream_skip(demuxer->stream,len-skipped)) break;
 	++no;
     }
-    
+
+    if(flags==3){
+	demuxer->priv=priv;
+	return 1;
+    }
+    free(priv);
+
     if(flags==1)
 	mp_msg(MSGT_DEMUX,MSGL_WARN,"MOV: missing data (mdat) chunk! Maybe broken file...\n");
     else if(flags==2)
 	mp_msg(MSGT_DEMUX,MSGL_WARN,"MOV: missing header (moov/cmov) chunk! Maybe broken file...\n");
 
-return (flags==3);
+    return 0;
 }
 
 static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak){
