@@ -1,4 +1,4 @@
-.\" synced with 1.629
+.\" synced with 1.634
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -662,6 +662,13 @@ Ta opcja okre¶la ile pamiêci (w kBajtach) ma byæ u¿yte do wstêpnego
 buforowania zbioru/\:URL.
 Szczególnie przydatne przy powolnych no¶nikach (domy¶lnie \-nocache).
 .TP
+.B \-cache-min <procent>
+Odtwarzanie rozpocznie siê gdy bufor zostanie wype³niony w podanym stopniu.
+.TP
+.B \-cache-prefil <procent> (jeszcze nie zaimplementowane)
+Je¶li bufor zostanie opró¿niony MPlayer zatrzyma siê i wznowi odtwarzanie gdy
+bufor osi±gnie zadany poziom wype³nienia.
+.TP
 .B \-cdda <opcja1:opcja2> <tylko z CDDA)
 Dostosowuje mo¿liwo¶æ czytania CD Audio MPlayera.
 
@@ -892,6 +899,7 @@ Je¶li siê nie da, automatycznie przestawia na IPv4.
 .B \-rawaudio <opcja1:opcja2:...>
 Pozwala na odtwarzanie surowych zbiorów audio.
 Mo¿e te¿ byæ u¿yta ¿eby odtworzyæ CD z d¼wiêkiem innym ni¿ 44KHz 16bit stereo.
+Do odtwarzania surowych strumieni AC3 u¿yj -rawaudio on:format=0x2000.
 
 Dostêpne s± opcje:
 
@@ -1578,7 +1586,7 @@ Aby uzyskac listê wkompilowanych sterowników podaj opcjê  \-ao help.
 .IPs "\-ao alsa,oss,"
 Spróbuje u¿yæ sterownika ALSA, pó¼niej OSS a potem pozosta³e.
 .br
-.IPs "\-ao alsa:mmap:noblock:device=hw#0.3"
+.IPs "\-ao alsa:mmap:noblock:device=hw=0.3"
 Ustawia tryb noblock, tryb mmap-mode i nazwê urz±dzenia jako pierwsza karta, czwarte urz±dzenie
 .RE
 .PD 1
@@ -1599,7 +1607,7 @@ Ustawia eksperymentalny tryb mmap (mmap-mode) (nie dzia³a dla wiêcej ni¿ 2 kana³
 Ustawia tryb noblock (noblock-mode).
 .IPs device=<urz±dzenie>
 Ustawia nazwê urz±dzenia.
-Zamiast "," w nazwie urz±dzenia ALSA wstaw ".", a zamiast ":" wstaw "#".
+Zamiast "," w nazwie urz±dzenia ALSA wstaw ".", a zamiast ":" wstaw "=".
 .RE
 .PD 1
 .TP
@@ -1963,7 +1971,7 @@ ustawieñ wieloekranowych.
 .B \-nokeepaspect
 Nie utrzymuje proporcji, gdy zmieniany jest rozmiar okna (dzia³a 
 obecnie tylko z \-vo x11, xv, xmga, xvidix oraz directx
-i Twój meneger okien X11 musi rozumieæ zalecenia proporcji okna).
+i Twój manager okien X11 musi rozumieæ zalecenia proporcji okna).
 .TP
 .B \-noxv (tylko SDL)
 Wy³±cza sterownik SDL XVideo.
@@ -2104,7 +2112,7 @@ Wykoszysta sterownik DirectX z wy³±czonymi funkcjami przyspieszaj±cymi.
 
 FIXME: W dokumentacji uwzglêdniæ podopcje dla x11, xover, dga, sdl, vidix, xvidix, fbdev,
 fbdev2, vesa, svga, null, aa, bl, ggi, mga, xmga, syncfb, 3dfx, tdfx_vid,
-dxr2, dxr3, mpegpes, zr, zr2, md5, yuv4mpeg, gif89a, jpeg, pgm, png, tga.
+dxr2, dxr3, mpegpes, zr, zr2, yuv4mpeg, gif89a, jpeg, pgm, png, tga.
 
 Dostêpne sterowniki wyj¶ciowe:
 .
@@ -2350,7 +2358,7 @@ na ilo¶æ klatek na sekundê filmu.
 .PD 1
 .TP
 .B mga (tylko Linux)
-Sterownik przystosowny do kart Matrox, wykorzystuj±cy koñcowy
+Sterownik przystosowany do kart Matrox, wykorzystuj±cy koñcowy
 system skaluj±cy YUV na kartach z serii Gxxx poprzez modu³ j±dra.
 Je¿eli posiadasz tak± kartê, jest to wybór oferuj±cy najwiêksz± szybko¶æ.
 .TP
@@ -2427,8 +2435,14 @@ Sterownik drugiej generacji przeznaczony dla wielu kart przechwytuj±cych/odtwarz
 Zwróæ równie¿ uwagê na filtr video zrmjpeg.
 .TP
 .B md5\ \ \ \ 
-Zapisuje sumê md5 dla ka¿dej ramki do pliku nazwanego "md5" w bie¿±cym katalogu.
+Generuje dla ka¿dej ramki obraz przy pomocy \-vo pgm i zapisuje ich sumy MD5 do zbioru.
 Przydatne przy debugowaniu.
+.PD 0
+.RSs
+.IPs filename
+Pozwala podaæ nazwê zbioru wyj¶ciowego (domy¶lnie ./md5)
+.RE
+.PD 1
 .TP
 .B yuv4mpeg
 Zmienia strumieñ video na nieskompresowan± sekwencjê obrazów YUV 4:2:0
@@ -3603,7 +3617,7 @@ ominiêcia wielu ramek podczas scen z du¿± ilo¶ci± ruchu.
 Zawsze stosuj filtr softskip po pullup przy kodowaniu, aby mieæ pewno¶æ,
 ¿e ten drugi bêdzie mia³ dostêp do wszystkich klatek. Je¿eli tego nie zrobisz,
 doprowadzi to do b³êdów w wyj¶ciu i zakoñczeniu programu na skutek ograniczeñ
-w warstwiw kodeku/filtru.
+w warstwie kodeku/filtru.
 .TP
 .B filmdint[=options]
 Filtr odwracania telecine, podobny do opisanego wy¿ej filtra pullup.
@@ -3816,8 +3830,8 @@ pozostaje niezmieniona
 opuszcza klatki nieparzyste, na wyj¶cie przekazuje tylko parzyste, wysoko¶æ
 pozostaje niezmieniona
 .IPs 3
-poszerza ka¿d± klatkê do pe³nej wysoko¶ci i wype³nia pozosta³e linie na czarno
-czarno, szybko¶æ klatek pozostaje niezmieniona
+poszerza ka¿d± klatkê do pe³nej wysoko¶ci i wype³nia pozosta³e linie na czarno,
+szybko¶æ klatek pozostaje niezmieniona
 .RE
 .PD 1
 .TP
@@ -4004,7 +4018,7 @@ Je¿eli podasz tylko "i", wtedy nic siê nie dzieje z klatkami, tylko "I!" bêdzie
 drukowane.
 .TP
 .B tile=xtile:ytile:output:start:delta
-£±czy szerego obrazów w jeden wiêkszy.
+£±czy szereg obrazów w jeden wiêkszy.
 Je¿eli ominiesz parametr lub podasz warto¶æ mniejsz± ni¿ 0, domy¶lna
 warto¶æ bêdzie u¿yta.
 Mo¿esz równie¿ przestaæ podawaæ opcje w ka¿dej chwili
@@ -4154,7 +4168,7 @@ informacja o prawach autorskich pliku
 .IPs srcform=<warto¶æ>
 oryginalna forma cyfrowego materia³u
 .IPs comment=<warto¶æ>
-ogólna uwaga na temat pliku lub pliku
+ogólna uwaga na temat pliku
 .RE
 .
 .TP
@@ -4268,7 +4282,7 @@ Gdzie <codec> to: lavc, xvidenc, divx4 lub lame
 .
 .
 .SS divx4 (\-divx4opts)
-DivX4 jest uwa¿any za przestarza³y i wspierany tylko dla kompletno¶ci.
+DivX4 jest uwa¿any za przestarza³y i obs³ugiwany tylko dla kompletno¶ci.
 Aby uzyskaæ szczegó³owe informacje o opcjach DivX4, przeczytaj ¼ród³a, wiêkszo¶æ opcji
 nie jest tu opisana.
 .TP
@@ -5026,7 +5040,7 @@ sh4
 .B lumi_mask=<0.0\-1.0>
 Maskowanie jasno¶ci.
 Uwaga: B±d¼ ostro¿ny, zbyt du¿e warto¶ci mog± spowodowaæ okropne rzeczy.
-Uwaga2: Du¿e warto¶ci mog± wygl±daæ dobrze na niektórych monitorach, a na innych nie:
+Uwaga2: Du¿e warto¶ci mog± wygl±daæ dobrze na niektórych monitorach, a na innych nie / TV / TFT nie:
 .RSs
 .IPs 0.0
 wy³±czone (domy¶lnie)
@@ -5321,7 +5335,7 @@ vqmin powinno byæ równe 8 lub wiêksze dla AIC H263+.
 alternatywne inter vlc dla H.263+
 .TP
 .B umv\ \ \ \ 
-niograniczona liczba MV (tylko H.263+)
+nieograniczona liczba MV (tylko H.263+)
 Zezwala na kodowanie z dowolnie d³ugimi MV.
 .TP
 .B ibias=<-256\-256>
