@@ -738,7 +738,7 @@ static uint32_t get_image(mp_image_t *mpi){
 	   mpi->stride[1]=mpi->stride[2]=image_width/2;
        } else {
            mpi->planes[0]=xvimage[current_buf]->data;
-	   mpi->stride[0]=image_width;
+	   mpi->stride[0]=image_width*(mpi->bpp>>3);
        }
        mpi->flags|=MP_IMGFLAG_DIRECT;
 //	printf("mga: get_image() SUCCESS -> Direct Rendering ENABLED\n");
