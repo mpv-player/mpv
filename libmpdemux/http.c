@@ -9,6 +9,7 @@
 #include <string.h>
 
 #include "http.h"
+#include "url.h"
 
 HTTP_header_t *
 http_new_header() {
@@ -146,6 +147,7 @@ http_response_parse( HTTP_header_t *http_hdr ) {
 		ptr = hdr_ptr;
 		while( *ptr!='\r' && *ptr!='\n' ) ptr++;
 		len = ptr-hdr_ptr;
+		if( len==0 ) break;
 		field = (char*)realloc(field, len+1);
 		if( field==NULL ) {
 			printf("Memory allocation failed\n");
@@ -256,7 +258,6 @@ http_get_field( HTTP_header_t *http_hdr, const char *field_name ) {
 char *
 http_get_next_field( HTTP_header_t *http_hdr ) {
 	char *ptr;
-	int i;
 	HTTP_field_t *field;
 	if( http_hdr==NULL ) return NULL;
 
