@@ -33,6 +33,26 @@ What?
 - gcc and ld version:
   gcc -v
   ld -v
+- binutils version:
+  as --version
+
+1.1. Please print us coredump (if it was created).
+Howto:
+please create following command file:
+
+disass $eip $eip+15
+printf "eax=%08lX\n",$eax
+printf "ebx=%08lX\n",$ebx
+printf "ecx=%08lX\n",$ecx
+printf "edx=%08lX\n",$edx
+printf "esp=%08lX\n",$esp
+printf "ebp=%08lX\n",$ebp
+printf "edi=%08lX\n",$edi
+printf "esi=%08lX\n",$esi
+
+Then simply execute following command line:
+gdb mplayer --core=core -batch --command=command_file >mplayer.bug
+
 
 2. Hardware & drivers:
 - CPU info:
