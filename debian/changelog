@@ -1,3 +1,9 @@
+mplayer (0.17a-1) unstable; urgency=low
+
+  * Version change, debian scripts update (rm), temporary(?) new maintainer;)
+
+ -- Dariush Pietrzak <eyck@incubus.ar.lublin.pl>  Thu, 17 May 2001 13:25:12 +0200
+
 mplayer (0.11pre-1) unstable; urgency=low
 
   * Initial release.

@@ -6,8 +6,7 @@ package=mplayer
 
 build:
 	$(checkdir)
-	./setup.sh
-	./configure --prefix=/usr `cat setup.s` 
+	./configure --prefix=/usr
 	make dep
 	make
 	touch build
