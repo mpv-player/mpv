@@ -102,6 +102,12 @@ static int init(sh_video_t *sh){
        return 0;
     }
 
+    if(sh->aspect==0.0 && context->inf.aspect_denominator!=0)
+    {
+       sh->aspect = (float)(context->inf.aspect_numerator * context->inf.width)/
+          (context->inf.aspect_denominator * context->inf.height);
+    }
+    
     mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: Theora video init ok!\n");
 
     return mpcodecs_config_vo (sh,sh->disp_w,sh->disp_h,IMGFMT_YV12);
