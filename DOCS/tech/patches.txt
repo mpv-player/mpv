@@ -1,33 +1,33 @@
 Sending patches:
 ~~~~~~~~~~~~~~~~
-Note: We know these rules are hard, but it's hard to maintain such
+Note: We know these rules are hard, but it's hard to maintain such a
 big and complex project, so you should accept our rules. We have no
 time for fixing buggy, broken or old patches!
 
-1. Always make patch for the CVS version.
+1. Always make patches for the CVS version.
    We do not accept patches for old versions or releases.
 
-2. Make unified diffs ('diff -Naur' or 'cvs diff -u')
+2. Make unified diffs ('diff -Naur' or 'cvs diff -u').
 
-3. Test functionality of your patch. We'll *refuse* it if it breaks
+3. Test the functionality of your patch. We'll *refuse* it if it breaks
    something, even if it extends other features!
 
-4. Read your patch. We'll *refuse* it if it changes indent of the
-   code or it does tab/space or other cosmetical changes!
+4. Read your patch. We'll *refuse* it if it changes indentation of the
+   code or if it does tab/space conversion or other cosmetical changes!
 
-5. Comment parts what really needs it (has tricky side-effects etc).
-   Commenting trivial code not requires. Comments must be english!
+5. Comment parts that really need it (tricky side-effects etc).
+   Commenting trivial code not required. Comments must be English!
    
 6. Do not ask for CVS write access at first time. If you contributed
    1 or more nice, acceptable patches and they need maintaining or
-   you want to be mplayer developer, you'll get CVS write access.
+   you want to be an mplayer developer, you'll get CVS write access.
    
 7. Subscribe to the mplayer-dev-eng list (don't worry, it's low traffic)
    and send your patch there as base64-encoded attachment (use gzip or
    bzip2 *only* if it's really big or if you know that your mailer messes
-   up (re-format) text attachments).
+   up (reformats) text attachments).
    Subject line should be: '[PATCH] very short description of the patch'.
-   In the mail, describe in a few sentences what (and why) are the changes.
+   In the mail, describe in a few sentences what you change and why.
    If you made independent changes, try to send them as separate patches.
 
 Thank you!
