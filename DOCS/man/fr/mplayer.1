@@ -1,4 +1,4 @@
-.\" synced with 1.793
+.\" synced with 1.794
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "22 Octobre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "27 Octobre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -3174,6 +3174,27 @@ Les filtres disponibles sont:
 Change la fréquence d'échantillonnage du flux audio à un entier srate en Hz.
 Il ne permet que le format 16 bit little endian.
 Avec MEncoder, vous devez aussi utiliser \-srate <srate>.
+.IPs lavcresample[=srate[:longueur[:linéaire[:count[:cutoff]]]]]
+Change le taux d'échantillonnage du flux audio en un entier srate en Hz.
+Ne gère que le format 16-bit little-endian.
+Avec MEncoder, vous devez aussi utiliser \-srate <srate>.
+.RSss
+srate: le taux d'échantillonnage de sortie
+.br
+longueur: longueur du filtre par rapport au taux d'échantillonnage le plus
+faible (par défaut\ : 16)
+.br
+linéaire: si à 1 alors les filtres seront interpolés linéairement entre les
+entrées polyphase
+.br
+count: le log2 du nombre d'entrées polyphase
+(..., 10->1024, 11->2048, 12->4096, ...) (par défaut\ : 10->1024)
+.br
+cutoff: fréquence de coupure (0.0-1.0) (par défaut\ : initialisé en fonction
+de la longueur du filtre)
+.REss
+.IPs sweep[=speed]
+balayage sinus
 .IPs channels[=nch]
 Change le nombre de canaux à nch canaux de sortie.
 Si le nombre de canaux de sortie est plus grand que le nombre de canaux
