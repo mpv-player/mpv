@@ -470,7 +470,7 @@ int tv_step_channel(tvi_handle_t *tvh, int direction)
 
     if (direction == TV_CHANNEL_HIGHER)
     {
-	if (tvh->channel+1 <= chanlists[tvh->chanlist].count)
+	if (tvh->channel+1 < chanlists[tvh->chanlist].count)
 	{
 	    cl = tvh->chanlist_s[tvh->channel++];
 	    mp_msg(MSGT_TV, MSGL_INFO, "Selected channel: %s (freq: %.3f)\n",
