@@ -47,16 +47,21 @@ static int config(struct vf_instance_s* vf,
 
 static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     fame_yuv_t yuv;
+    fame_frame_statistics_t stats;
     mp_image_t *dmpi;
     int out_size;
 
     yuv.w=mpi->width;
     yuv.h=mpi->height;
+    yuv.p=mpi->stride[0];
     yuv.y=mpi->planes[0];
     yuv.u=mpi->planes[1];
     yuv.v=mpi->planes[2];
 
-    out_size = fame_encode_frame(vf->priv->ctx, &yuv, NULL);
+//    out_size = fame_encode_frame(vf->priv->ctx, &yuv, NULL);
+    fame_start_frame(vf->priv->ctx, &yuv, NULL);
+    out_size = fame_encode_slice(vf->priv->ctx);
+    fame_end_frame(vf->priv->ctx, &stats);
     
     if(out_size<=0) return;
 
@@ -81,7 +86,8 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     case IMGFMT_YV12:
     case IMGFMT_I420:
     case IMGFMT_IYUV:
-	return (vf_next_query_format(vf,IMGFMT_MPEGPES) & (~(VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_ACCEPT_STRIDE)));
+//	return (vf_next_query_format(vf,IMGFMT_MPEGPES) & (~(VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_ACCEPT_STRIDE)));
+	return (vf_next_query_format(vf,IMGFMT_MPEGPES) & (~(VFCAP_CSP_SUPPORTED_BY_HW)));
     }
     return 0;
 }
@@ -111,7 +117,7 @@ static int open(vf_instance_t *vf, char* args){
     vf->priv->params.shape_quality=100;
     vf->priv->params.search_range=8; // for "IPPP" only
     vf->priv->params.verbose=0;
-    vf->priv->params.profile=NULL; // TODO
+    vf->priv->params.profile="mpeg1"; // TODO
 
     return 1;
 }
