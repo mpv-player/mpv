@@ -241,7 +241,10 @@ static int get_space(){
 #ifdef SNDCTL_DSP_GETOSPACE
   if(ioctl(audio_fd, SNDCTL_DSP_GETOSPACE, &zz)!=-1){
       // calculate exact buffer space:
-      return zz.fragments*zz.fragsize;
+      playsize = zz.fragments*zz.fragsize;
+      if (playsize > MAX_OUTBURST)
+	playsize = (MAX_OUTBURST / zz.fragsize) * zz.fragsize;
+      return playsize;
   }
 #endif
 
