@@ -688,6 +688,11 @@ Disable drawing video by 16-pixel height slices/bands, instead draws the
 while frame in a single run. May be faster or slower, depending on card/cache.
 It has effect only with libmpeg2 and libavcodec codecs.
 .TP
+.B \-panscan
+Enables Pan & Scan functionality, i.e. in order to display a 16:9 movie
+on a 4:3 display, sides of the movie are cropped, so we get a 4:3 image
+which fits perfectly. This function works only with xv, (x)mga, and vidix.
+.TP
 .B \-red_intensity <\-1000\ \-\ 1000>
 Adjust intensity of red component of video signal (default 0).
 .TP
