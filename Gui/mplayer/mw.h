@@ -435,7 +435,6 @@ void mplMainMouseHandle( int Button,int X,int Y,int RX,int RY )
                        mplMainRender=1;
                        SelectedButton=i;
                        boxMoved=0;
-                       if ( ( item->msg == evSetVolume )||( item->msg == evSetBalance ) ) mplShMem->VolumeChanged=1;
                        msButton=itPotmeter;
                        itemtype=itPotmeter;
                       }
@@ -450,7 +449,6 @@ void mplMainMouseHandle( int Button,int X,int Y,int RX,int RY )
                        mplMainRender=1;
                        SelectedButton=i;
                        boxMoved=0;
-                       if ( ( item->msg == evSetVolume )||( item->msg == evSetBalance ) ) mplShMem->VolumeChanged=1;
                        msButton=itHPotmeter;
                        itemtype=itHPotmeter;
                       }
@@ -478,7 +476,11 @@ void mplMainMouseHandle( int Button,int X,int Y,int RX,int RY )
 potihandled:
 		 if ( item->value > 100.0f ) item->value=100.0f;
 		 if ( item->value < 0.0f ) item->value=0.0f;
-//                 if ( ( item->msg == evSetVolume )||( item->msg == evSetBalance ) ) 
+                 if ( ( item->msg == evSetVolume )||( item->msg == evSetBalance ) ) 
+		  {
+		   mplShMem->VolumeChanged=1;
+		   mplShMem->Volume=item->value;
+		  }
 		 mplMsgHandle( item->msg,item->value );
                  mplMainRender=1; wsPostRedisplay( &appMPlayer.mainWindow );
                  break;
@@ -500,6 +502,11 @@ potihandled:
             case itHPotmeter:
 		 item->used=0;
                  btnModify( item->msg,(float)( X - item->x ) / item->width * 100.0f );
+                 if ( ( item->msg == evSetVolume )||( item->msg == evSetBalance ) ) 
+		  {
+		   mplShMem->VolumeChanged=1;
+		   mplShMem->Volume=item->value;
+		  }
 		 value=item->value;
                  break;
            }

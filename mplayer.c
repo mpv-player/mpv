@@ -1792,6 +1792,16 @@ if(rel_seek_secs || abs_seek_pos){
 //	printf("mplShMem->Playing=%d  \n",mplShMem->Playing);
 	if(mplShMem->Playing==0) break; // STOP
 	if(mplShMem->Playing==2) osd_function=OSD_PAUSE;
+#ifdef USE_OSD
+        if ( ( osd_level )&&( mplShMem->VolumeChanged ) )
+	 {
+          osd_visible=sh_video->fps; // 1 sec
+          vo_osd_progbar_type=OSD_VOLUME;
+          vo_osd_progbar_value=((mplShMem->Volume )*256.0)/100.0;
+         }
+#endif
+	mixer_setvolume( mplShMem->Volume,mplShMem->Volume );
+	mplShMem->VolumeChanged=0;
       }
 #endif
 
