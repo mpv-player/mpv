@@ -1,7 +1,7 @@
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
 
-void read_avi_header(int no_index){
+void read_avi_header(int index_mode){
 sh_audio_t *sh_audio=NULL;
 sh_video_t *sh_video=NULL;
 int stream_id=-1;
@@ -76,7 +76,7 @@ while(1){
       }
       break;
     }
-    case ckidAVINEWINDEX: if(!no_index){
+    case ckidAVINEWINDEX: if(index_mode){
       avi_header.idx_size=size2>>4;
       if(verbose>=1) printf("Reading INDEX block, %d chunks for %d frames\n",
         avi_header.idx_size,avi_header.avih.dwTotalFrames);
@@ -90,6 +90,44 @@ while(1){
   if(chunksize>0) stream_skip(demuxer->stream,chunksize); else
   if(chunksize<0) printf("WARNING!!! chunksize=%d  (id=%.4s)\n",chunksize,&id);
   
+}
+
+if(avi_header.idx_size==0 && index_mode==1){
+  // build index for file:
+  stream_reset(demuxer->stream);
+  stream_seek(demuxer->stream,avi_header.movi_start);
+  
+  avi_header.idx_pos=0;
+  avi_header.idx=NULL;
+
+  while(1){
+    int id,len,skip;
+    AVIINDEXENTRY* idx;
+    demuxer->filepos=stream_tell(demuxer->stream);
+    if(demuxer->filepos>=avi_header.movi_end) break;
+    id=stream_read_dword_le(demuxer->stream);
+    len=stream_read_dword_le(demuxer->stream);
+    if(id==mmioFOURCC('L','I','S','T')){
+      id=stream_read_dword_le(demuxer->stream);      // list type
+      continue;
+    }
+    if(stream_eof(demuxer->stream)) break;
+    if(avi_header.idx_pos<=avi_header.idx_size){
+      avi_header.idx_size+=32;
+      avi_header.idx=realloc(avi_header.idx,avi_header.idx_size*sizeof(AVIINDEXENTRY));
+      if(!avi_header.idx){avi_header.idx_pos=0; break;} // error!
+    }
+    idx=&avi_header.idx[avi_header.idx_pos++];
+    idx->ckid=id;
+    idx->dwFlags=AVIIF_KEYFRAME; // FIXME
+    idx->dwChunkOffset=demuxer->filepos;
+    idx->dwChunkLength=len;
+    if(verbose>=2) printf("0x%08X  0x%08X %.4s\n",demuxer->filepos,id,&id);
+    skip=(len+1)&(~1); // total bytes in this chunk
+    stream_skip(demuxer->stream,skip);
+  }
+  avi_header.idx_size=avi_header.idx_pos;
+  printf("AVI: Generated index table for %d chunks!\n",avi_header.idx_size);
 }
 
 }

@@ -475,7 +475,7 @@ int vcd_track=0;
 #ifdef VCD_CACHE
 int vcd_cache_size=128;
 #endif
-int no_index=0;
+int index_mode=-1;  // -1=untouched  0=don't use index  1=use (geneate) index
 #ifdef AVI_SYNC_BPS
 int pts_from_bps=1;
 #else
@@ -720,7 +720,7 @@ d_dvdsub=demuxer->sub;
 switch(file_format){
  case DEMUXER_TYPE_AVI: {
   //---- AVI header:
-  read_avi_header(no_index);
+  read_avi_header(index_mode);
   stream_reset(demuxer->stream);
   stream_seek(demuxer->stream,avi_header.movi_start);
   avi_header.idx_pos=0;
