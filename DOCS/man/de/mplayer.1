@@ -5589,6 +5589,27 @@ Für Menschen mit einem sehr guten Gehör und entsprechender HiFi-Ausstattung.
 .PD 1
 .
 .
+.SS toolame (\-toolameopts)
+.
+.TP
+.B br=<0\-384> (nur bei CBR)
+Bitrate in kBit/s
+.TP
+.B mode=<stereo  |  jstereo  |  mono  |  dual>
+(Standard: mono bei 1-Kanal-Audio, sonst stereo)
+.TP
+.B psy=<0\-3>
+psychoakustisches Modell (Standard: 2)
+.TP
+.B errprot=<0 | 1>
+Füge Fehlerkorrektur hinzu.
+.TP
+.B debug=<0\-10>
+Debugging-Level
+.RE
+.PD 1
+.
+.
 .\" manpage is synced from top down to this option.
 .TP
 .B \-xvidencopts <option1:option2:...>
