@@ -964,7 +964,7 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
     es = mkv_d->es;
     
     // Find the EbmlHead element. Must be the first one.
-    l0 = es->FindNextID(EbmlHead::ClassInfos, 0xFFFFFFFFFFFFFFFFL);
+    l0 = es->FindNextID(EbmlHead::ClassInfos, 0xFFFFFFFFFFFFFFFFULL);
     if (l0 == NULL) {
       mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] no head found\n");
       free_mkv_demuxer(mkv_d);
@@ -976,7 +976,7 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
     mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] Found the head...\n");
     
     // Next element must be a segment
-    l0 = es->FindNextID(KaxSegment::ClassInfos, 0xFFFFFFFFFFFFFFFFL);
+    l0 = es->FindNextID(KaxSegment::ClassInfos, 0xFFFFFFFFFFFFFFFFULL);
     if (l0 == NULL) {
       mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] but no segment :(\n");
       free_mkv_demuxer(mkv_d);
