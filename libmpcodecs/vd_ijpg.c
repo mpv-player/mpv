@@ -5,11 +5,7 @@
 #include "config.h"
 #include "mp_msg.h"
 
-#include <jconfig.h>
-#include <jmorecfg.h>
 #include <jpeglib.h>
-#include <jpegint.h>
-#include <jerror.h>
 
 #include <setjmp.h>
 
