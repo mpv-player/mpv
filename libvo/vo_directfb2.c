@@ -241,7 +241,7 @@ static uint32_t preinit(const char *arg)
 	       
           if (show_help) {
                mp_msg( MSGT_VO, MSGL_ERR,
-                       "\nvo_dfbmga command line help:\n"
+                       "\n-vo directfb command line help:\n"
                        "Example: mplayer -vo directfb:layer=1:buffermode=single\n"
                        "\nOptions (use 'no' prefix to disable):\n"
                        "  input  Use DirectFB for keyboard input\n"
