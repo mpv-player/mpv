@@ -27,7 +27,10 @@ void HideSkinBrowser( void )
  gtkVisibleSkinBrowser=0;
  gtkShMem->vs.window=evSkinBrowser;
  gtkSendMessage( evHideWindow );
+ gtkSendMessage( evSkinBrowser );
 }
+
+char gtkOldSkin[128];
 
 int gtkFillSkinList( gchar * mdir )
 {
@@ -37,6 +40,7 @@ int gtkFillSkinList( gchar * mdir )
  glob_t          gg;
  struct stat     fs;
 
+ strcpy( gtkOldSkin,gtkShMem->sb.name );
  if ( ( str[0]=(char *)calloc( 1,7 ) ) == NULL )
   {
    gtkMessageBox( sbNotEnoughMemory );
@@ -69,6 +73,12 @@ int gtkFillSkinList( gchar * mdir )
 void on_SkinBrowser_destroy( GtkObject * object,gpointer user_data )
 { HideSkinBrowser(); }
 
+void on_SkinBrowser_Cancel( GtkObject * object,gpointer user_data )
+{ 
+ strcpy( gtkShMem->sb.name,gtkOldSkin );
+ HideSkinBrowser(); 
+}
+
 void on_SkinList_select_row( GtkCList * clist,gint row,gint column,GdkEvent * bevent,gpointer user_data )
 {
  gtk_clist_get_text( clist,row,0,&sbSelectedSkin );
@@ -85,6 +95,8 @@ gboolean on_SkinBrowser_key_release_event( GtkWidget * widget,GdkEventKey * even
  switch ( event->keyval )
   {
    case GDK_Escape:
+        if ( !sbShift ) on_SkinBrowser_Cancel( NULL,0 );
+        break;
    case GDK_Return:
         if ( !sbShift ) HideSkinBrowser();
         break;
@@ -293,7 +305,7 @@ GtkWidget * create_SkinBrowser( void )
                      GTK_SIGNAL_FUNC( on_SkinBrowser_destroy ),
                      NULL );
  gtk_signal_connect( GTK_OBJECT( Cancel ),"released",
-                     GTK_SIGNAL_FUNC( on_SkinBrowser_destroy ),
+                     GTK_SIGNAL_FUNC( on_SkinBrowser_Cancel ),
                      NULL );
 
  if ( ( sbMPlayerDirInHome=(char *)calloc( 1,strlen( skinDirInHome ) + 4 ) ) != NULL )
