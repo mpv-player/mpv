@@ -38,10 +38,15 @@ inline static void vo_draw_text_progbar(int dxs,int dys,void (*draw_alpha)(int x
         int y=(dys-vo_font->height)/2;
         int x;
         int c,font;
-        int width=(dxs*2/3-vo_font->width[0x10]-vo_font->width[0x12]);
-        int elems=width/vo_font->width[0x11];
+        int charw=vo_font->width[OSD_PB_0]+vo_font->charspace;
+        int delimw=vo_font->width[OSD_PB_START]
+		      +vo_font->width[OSD_PB_END]
+		      +vo_font->charspace;
+        int width=(2*dxs-3*delimw)/3;
+        int elems=width/charw;
         int mark=(vo_osd_progbar_value*(elems+1))>>8;
-        x=(dxs-width)/2;
+        x=(dxs-elems*charw-delimw)/2;
+
 //        printf("osd.progbar  width=%d  xpos=%d\n",width,x);
 
         c=vo_osd_progbar_type;
@@ -61,7 +66,7 @@ inline static void vo_draw_text_progbar(int dxs,int dys,void (*draw_alpha)(int x
               vo_font->pic_b[font]->bmp+vo_font->start[c],
               vo_font->pic_a[font]->bmp+vo_font->start[c],
               vo_font->pic_a[font]->w);
-        x+=vo_font->width[c];
+        x+=vo_font->width[c]+vo_font->charspace;
 
    	c=OSD_PB_0;
    	if ((font=vo_font->font[c])>=0)
@@ -72,7 +77,7 @@ inline static void vo_draw_text_progbar(int dxs,int dys,void (*draw_alpha)(int x
 			  vo_font->pic_b[font]->bmp+vo_font->start[c],
 			  vo_font->pic_a[font]->bmp+vo_font->start[c],
 			  vo_font->pic_a[font]->w);
-	       x+=vo_font->width[c];
+	       x+=charw;
 	   }
 
    	c=OSD_PB_1;
@@ -84,7 +89,7 @@ inline static void vo_draw_text_progbar(int dxs,int dys,void (*draw_alpha)(int x
 			  vo_font->pic_b[font]->bmp+vo_font->start[c],
 			  vo_font->pic_a[font]->bmp+vo_font->start[c],
 			  vo_font->pic_a[font]->w);
-	       x+=vo_font->width[c];
+	       x+=charw;
 	   }
 
         c=OSD_PB_END;
@@ -95,7 +100,7 @@ inline static void vo_draw_text_progbar(int dxs,int dys,void (*draw_alpha)(int x
               vo_font->pic_b[font]->bmp+vo_font->start[c],
               vo_font->pic_a[font]->bmp+vo_font->start[c],
               vo_font->pic_a[font]->w);
-//        x+=vo_font->width[c];
+//        x+=vo_font->width[c]+vo_font->charspace;
 
 
 //        vo_osd_progbar_value=(vo_osd_progbar_value+1)&0xFF;
