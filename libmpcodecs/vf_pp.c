@@ -19,7 +19,8 @@ struct vf_priv_s {
 
 static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
     if(vf->priv->pp&0xFFFF) return; // non-local filters enabled
-    if(vf->priv->pp && mpi->flags&MP_IMGFLAG_PRESERVE) return; // don't change
+    if((mpi->type==MP_IMGTYPE_IPB || vf->priv->pp) && 
+	mpi->flags&MP_IMGFLAG_PRESERVE) return; // don't change
     // ok, we can do pp in-place (or pp disabled):
     vf->priv->dmpi=vf_get_image(vf->next,mpi->imgfmt,
         mpi->type, mpi->flags, mpi->w, mpi->h);
