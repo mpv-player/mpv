@@ -133,7 +133,7 @@ m_option_t xvidencopts_conf[] =
 	{"trellis", &xvidenc_trellis, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"packed", &xvidenc_packed, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"closed_gop", &xvidenc_closed_gop, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"interlaced", &xvidenc_interlaced, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"interlacing", &xvidenc_interlaced, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"cartoon", &xvidenc_cartoon, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"hq_ac", &xvidenc_hqacpred, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"frame_drop_ratio", &xvidenc_frame_drop_ratio, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
@@ -153,9 +153,9 @@ m_option_t xvidencopts_conf[] =
 	{"quant_inter_matrix", &xvidenc_inter_matrix_file, CONF_TYPE_STRING, 0, 0, 100, NULL},
 
 	/* section [cbr] */
-	{"cbr_reaction_delay_factor", &xvidenc_cbr_reaction_delay_factor, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
-	{"cbr_averaging_period", &xvidenc_cbr_averaging_period, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
-	{"cbr_buffer", &xvidenc_cbr_buffer, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
+	{"rc_reaction_delay_factor", &xvidenc_cbr_reaction_delay_factor, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
+	{"rc_averaging_period", &xvidenc_cbr_averaging_period, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
+	{"rc_buffer", &xvidenc_cbr_buffer, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
 
 	/* section [vbr] */
 	{"keyframe_boost", &xvidenc_vbr_keyframe_boost, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
