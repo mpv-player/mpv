@@ -797,7 +797,7 @@ void skiphtml(FILE *f1){
 
 int main(void)
 {
-	codecs_t **codecs, *cl;
+	codecs_t *cl;
         FILE *f1;
         FILE *f2;
         int c,d,i;
@@ -808,12 +808,8 @@ int main(void)
         int dshow=-1;
         int win32ex=-1;
 
-	if (!(codecs = parse_codec_cfg("etc/codecs.conf")))
+	if (!(nr_codecs = parse_codec_cfg("etc/codecs.conf")))
 		return 0;
-	if (!codecs[0])
-		printf("no videoconfig.\n");
-	if (!codecs[1])
-		printf("no audioconfig.\n");
 
         f1=fopen("DOCS/codecs-in.html","rb"); if(!f1) exit(1);
         f2=fopen("DOCS/codecs-status.html","wb"); if(!f2) exit(1);
@@ -830,12 +826,12 @@ int main(void)
                 printf("BEGIN %d\n",section);
                 if(section>=5){
                     // audio
-		    cl = codecs[1];
+		    cl = audio_codecs;
 		    nr_codecs = nr_acodecs;
                     dshow=7;win32=4;
                 } else {
                     // video
-		    cl = codecs[0];
+		    cl = video_codecs;
 		    nr_codecs = nr_vcodecs;
                     dshow=4;win32=2;win32ex=6;
                 }
