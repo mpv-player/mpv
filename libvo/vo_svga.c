@@ -22,6 +22,7 @@
 #include "mmx.h"
 
 #include "sub.h"
+#include "osd.h"
 
 extern void rgb15to16_mmx(char* s0,char* d0,int count);
 extern int vo_dbpp;
@@ -178,8 +179,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 		 } else {
 		     bpp = 32;
 		     bpp_conv = 1;
-		     if (verbose)
-		       printf("vo_svga: BPP conversion 24->32\n");
+                     printf("vo_svga: BPP conversion 24->32\n");
 		   }     
                break;
       case 16: if (!(bpp_avail & BPP_16)) {
@@ -196,8 +196,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 		 } else {
 		     bpp = 16;
 		     bpp_conv = 1;
-		     if (verbose)
-		       printf("vo_svga: BPP conversion 15->16\n");
+                     printf("vo_svga: BPP conversion 15->16\n");
 		   }
                break;
     }
@@ -420,8 +419,6 @@ static const vo_info_t* get_info(void) {
   return (&vo_info);
 }
 
-#include "osd.h"
-
 static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
                        unsigned char *srca, int stride) {
   switch (bpp) {
@@ -485,7 +482,8 @@ static uint32_t draw_frame(uint8_t *src[]) {
     src[0] = bppbuf;
   }
   gl_putbox(x_pos, y_pos, maxw, maxh, src[0]);
-  return 0;
+  
+  return (0);
 }
 
 static uint32_t draw_slice(uint8_t *image[], int stride[], 
@@ -502,7 +500,8 @@ static uint32_t draw_slice(uint8_t *image[], int stride[],
     src = scalebuf;
   }
   gl_putbox((int)(x * scaling) + x_pos, (int)(y * scaling) + y_pos, sw, sh, src);
-  return 0;
+
+  return (0);
 }
 
 static void flip_page(void) {
