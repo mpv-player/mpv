@@ -264,6 +264,7 @@
       <LI><A HREF="#6.5">6.5 SGI/Irix</A></LI>
       <LI><A HREF="#6.6">6.6 QNX</A></LI>
       <LI><A HREF="#6.7">6.7 OpenBSD</A></LI>
+      <LI><A HREF="#6.8">6.8 Cygwin</A></LI>
     </UL>
   </LI>
   <LI><A HREF="#A">A. Authors</A>
@@ -1734,6 +1735,14 @@ kernel with "<CODE>option USER_LDT</CODE>".</P>
 
 <P>The not so hardcore hackers amongst us might want to use the ports
 version (/usr/ports/x11/mplayer).</P>
+
+<P><A NAME="6.8"></A><B>6.8. Cygwin</B><BR>
+</P>
+ 
+<P>You will have to go to the <B>MPlayer</B> directory, and copy or symlink
+<CODE>etc/cygwin_inttypes.h</CODE> to <CODE>/usr/include</CODE> to make
+<B>MPlayer</B> compile. Otherwise it will complain about missing
+<CODE>intypes.h</CODE>.</P>
 
 <P><B><A NAME=A>Appendix A - Authors</A></B></P>
 
