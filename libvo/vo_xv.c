@@ -342,7 +342,9 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 #endif
 
  mFullscreen=flags&1;
+#ifdef HAVE_XF86VM
  if( flags&0x02 ) vm = 1;
+#endif
  flip_flag=flags&8;
  num_buffers=vo_doublebuffering?NUM_BUFFERS:1;
  
