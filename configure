@@ -121,9 +121,7 @@ Optional features:
   --disable-tv           disable TV Interface (tv/dvb grabbers) [enable]
   --disable-tv-v4l       disable Video 4 Linux TV Interface support [autodetect]
   --disable-win32        disable Win32 DLL support [autodetect]
-  --disable-dshow        disable DirectShow support (if no C++ compiler and
-                         libs are available or find the dshow codecs slower
-                         than the old VfW ones) [autodetect]
+  --disable-dshow        disable DirectShow support [autodetect]
   --disable-xanim        disable XAnim DLL support [autodetect]
   --enable-vorbis        build with OggVorbis support [autodetect]
   --disable-iconv        do not use iconv(3) function [autodetect]
