@@ -689,6 +689,14 @@ Specify which chapter to start playing at.
 Optionally specify which chapter to end playing at (default: 1).
 Examples can be found below.
 .TP
+.B \-cookies
+Send cookies when making HTTP requests.
+.TP
+.B \-cookies-file <filename>
+Read HTTP cookies from this file. The file is assumed to be in Netscape format.
+If you give this option, MPlayer will not look for cookies in "~/.netscape/"
+and "~/.mozilla/".
+.TP
 .B \-csslib <filename>
 (old-style DVD option) This option is used to override the default location of
 libcss.so.

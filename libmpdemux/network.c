@@ -29,6 +29,7 @@
 
 #include "network.h"
 #include "http.h"
+#include "cookies.h"
 #include "url.h"
 #include "asf.h"
 #ifndef STREAMING_LIVE_DOT_COM
@@ -47,11 +48,13 @@ extern int mp_input_check_interrupt(int time);
 int asf_streaming_start( stream_t *stream, int *demuxer_type );
 int rtsp_streaming_start( stream_t *stream );
 
-/* Variables for the command line option -user, -passwd, -bandwidth 
-   and -user-agent */
+/* Variables for the command line option -user, -passwd, -bandwidth,
+   -user-agent and -nocookies */
+
 char *network_username=NULL;
 char *network_password=NULL;
 int   network_bandwidth=0;
+int   network_cookies_enabled = 0;
 char *network_useragent=NULL;
 
 /* IPv6 options */
@@ -452,6 +455,9 @@ http_send_request( URL_t *url ) {
 	}
 	else
 	    http_set_field( http_hdr, "User-Agent: MPlayer/"VERSION);
+	    
+	if (network_cookies_enabled) cookies_set( http_hdr, server_url->hostname, server_url->url );
+	
 	http_set_field( http_hdr, "Connection: closed");
 	http_add_basic_authentication( http_hdr, url->username, url->password );
 	if( http_build_request( http_hdr )==NULL ) {
