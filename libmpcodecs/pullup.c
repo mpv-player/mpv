@@ -61,7 +61,7 @@ static int licomb_y_mmx(unsigned char *a, unsigned char *b, int s)
 {
 	int ret;
 	asm volatile (
-		"movl $8, %%ecx \n\t"
+		"movl $4, %%ecx \n\t"
 		"pxor %%mm6, %%mm6 \n\t"
 		"pxor %%mm7, %%mm7 \n\t"
 		"subl %%eax, %%edi \n\t"
@@ -163,7 +163,7 @@ static int diff_y(unsigned char *a, unsigned char *b, int s)
 static int licomb_y(unsigned char *a, unsigned char *b, int s)
 {
 	int i, j, diff=0;
-	for (i=8; i; i--) {
+	for (i=4; i; i--) {
 		for (j=0; j<8; j++)
 			diff += ABS((a[j]<<1) - b[j-s] - b[j])
 				+ ABS((b[j]<<1) - a[j] - a[j+s]);
