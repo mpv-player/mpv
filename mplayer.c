@@ -749,6 +749,7 @@ int osd_show_sub_changed = 0;
 int osd_show_percentage = 0;
 int osd_show_tv_channel = 25;
 int osd_show_ontop = 0;
+int osd_show_rootwin = 0;
 int osd_show_framedropping = 0;
 
 int rtc_fd=-1;
@@ -3043,6 +3044,17 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
      }
 
     } break;
+    case MP_CMD_VO_ROOTWIN:
+    {
+     if(video_out && vo_config_count) {
+       video_out->control(VOCTRL_ROOTWIN, 0);
+#ifdef USE_OSD
+       osd_show_rootwin=10;
+       vo_osd_changed(OSDTYPE_SUBTITLE);
+#endif
+     }
+
+    } break;
     case MP_CMD_PANSCAN : {
       if ( !video_out ) break;
       if ( video_out->control( VOCTRL_GET_PANSCAN,NULL ) == VO_TRUE )
@@ -3640,6 +3652,9 @@ if(rel_seek_secs || abs_seek_pos){
       } else if (osd_show_ontop) {
 	  snprintf(osd_text_tmp, 63, "Stay on top: %sabled", vo_ontop?"en":"dis");
 	  osd_show_ontop--;
+      } else if (osd_show_rootwin) {
+	  snprintf(osd_text_tmp, 63, "Rootwin: %sabled", vo_rootwin?"en":"dis");
+	  osd_show_rootwin--;
       } else if (osd_show_framedropping) {
 	  snprintf(osd_text_tmp, 63, "Framedropping: %s",
 	     (frame_dropping == 1 ? "on" :

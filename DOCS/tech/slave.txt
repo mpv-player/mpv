@@ -95,6 +95,10 @@ vo_ontop
 	Toggle stay-on-top. Supported by drivers which use X11, except SDL,
 	as well as directx and gl2 under Windows.
 
+vo_rootwin
+	Toggle playback on the root window. This runtime toggle is only
+	supported by the directx driver at the moment.
+
 panscan <value> [value2]
     ???
 

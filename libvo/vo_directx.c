@@ -1260,6 +1260,18 @@ static uint32_t control(uint32_t request, void *data, ...)
 				Directx_ManageDisplay();
 			}
 		return VO_TRUE;
+    case VOCTRL_ROOTWIN:
+	        if(vidmode)
+			{
+				mp_msg(MSGT_VO, MSGL_ERR,"<vo_directx><ERROR>rootwin has no meaning in exclusive mode\n");
+			}
+	        else
+			{
+				if(vo_rootwin) vo_rootwin = 0;
+				else vo_rootwin = 1;
+				Directx_ManageDisplay();
+			}
+		return VO_TRUE;
     case VOCTRL_FULLSCREEN:
 		{
 	        if(vidmode)
