@@ -528,6 +528,9 @@ int demux_real_fill_buffer(demuxer_t *demuxer)
 	demuxer->filepos = stream_tell(demuxer->stream);
         version = stream_read_word(demuxer->stream); /* version */
 	len = stream_read_word(demuxer->stream);	
+    } else if ((version == 0x494e) && (len == 0x4458)) {
+        mp_msg(MSGT_DEMUX,MSGL_V,"demux_real: Found INDX chunk. EOF.\n");
+        return 0;
     }
 
     
