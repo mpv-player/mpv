@@ -3,7 +3,7 @@ LIBNAME = libmpdemux.a
 
 include ../config.mak
 
-SRCS = mp3_hdr.c video.c mpeg_hdr.c cache2.c asfheader.c aviheader.c aviprint.c aviwrite.c demux_asf.c demux_avi.c demux_mov.c parse_mp4.c demux_mpg.c demux_viv.c demuxer.c dvdauth.c open.c parse_es.c stream.c tv.c tvi_dummy.c tvi_v4l.c tvi_bsdbt848.c frequencies.c demux_fli.c demux_real.c demux_y4m.c yuv4mpeg.c yuv4mpeg_ratio.c demux_nuv.c demux_film.c demux_roq.c mf.c demux_mf.c demux_audio.c demux_demuxers.c opt-reg.c mpdemux.c demux_ogg.c demux_bmp.c
+SRCS = mp3_hdr.c video.c mpeg_hdr.c cache2.c asfheader.c aviheader.c aviprint.c aviwrite.c demux_asf.c demux_avi.c demux_mov.c parse_mp4.c demux_mpg.c demux_viv.c demuxer.c dvdauth.c dvdnav_stream.c open.c parse_es.c stream.c tv.c tvi_dummy.c tvi_v4l.c tvi_bsdbt848.c frequencies.c demux_fli.c demux_real.c demux_y4m.c yuv4mpeg.c yuv4mpeg_ratio.c demux_nuv.c demux_film.c demux_roq.c mf.c demux_mf.c demux_audio.c demux_demuxers.c opt-reg.c mpdemux.c demux_ogg.c demux_bmp.c
 ifeq ($(STREAMING),yes)
 SRCS += asf_streaming.c url.c http.c network.c rtp.c
 endif
