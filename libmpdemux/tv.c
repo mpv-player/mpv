@@ -159,6 +159,14 @@ static int open_tv(tvi_handle_t *tvh)
 	tvh->norm = TV_NORM_NTSC;
     else if (!strcasecmp(tv_param_norm, "secam"))
 	tvh->norm = TV_NORM_SECAM;
+    else if (!strcasecmp(tv_param_norm, "palnc"))
+	tvh->norm = TV_NORM_PALNC;
+    else if (!strcasecmp(tv_param_norm, "palm"))
+	tvh->norm = TV_NORM_PALM;
+    else if (!strcasecmp(tv_param_norm, "paln"))
+	tvh->norm = TV_NORM_PALN;
+    else if (!strcasecmp(tv_param_norm, "ntscjp"))
+	tvh->norm = TV_NORM_NTSCJP;
     else {
 	mp_msg(MSGT_TV, MSGL_V, "Bogus norm parameter, setting PAL.\n");
 	tvh->norm = TV_NORM_PAL;
