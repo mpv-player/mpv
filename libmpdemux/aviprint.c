@@ -37,10 +37,11 @@ void print_avih(MainAVIHeader *h){
   printf("streams: %ld\n",h->dwStreams);
   printf("Suggested BufferSize: %ld\n",h->dwSuggestedBufferSize);
   printf("Size:  %ld x %ld\n",h->dwWidth,h->dwHeight);
+  printf("==========================\n");
 }
 
 void print_strh(AVIStreamHeader *h){
-  printf("======= STREAM Header =======\n");
+  printf("====== STREAM Header =====\n");
   printf("Type: %.4s   FCC: %.4s (%X)\n",(char *)&h->fccType,(char *)&h->fccHandler,(unsigned int)h->fccHandler);
   printf("Flags: %ld\n",h->dwFlags);
   printf("Priority: %d   Language: %d\n",h->wPriority,h->wLanguage);
@@ -50,6 +51,7 @@ void print_strh(AVIStreamHeader *h){
   printf("Suggested BufferSize: %ld\n",h->dwSuggestedBufferSize);
   printf("Quality %ld\n",h->dwQuality);
   printf("Sample size: %ld\n",h->dwSampleSize);
+  printf("==========================\n");
 }
 
 void print_wave_header(WAVEFORMATEX *h){
@@ -78,6 +80,7 @@ void print_wave_header(WAVEFORMATEX *h){
 	printf("[%x] ", *(p+i));
     printf("\n");
   }
+  printf("===========================\n");
 }
 
 
@@ -90,6 +93,15 @@ void print_video_header(BITMAPINFOHEADER *h){
 	printf("  biBitCount %d\n", h->biBitCount);
 	printf("  biCompression %d='%.4s'\n", h->biCompression, (char *)&h->biCompression);
 	printf("  biSizeImage %d\n", h->biSizeImage);
+  if (h->biSize > sizeof(BITMAPINFOHEADER))
+  {
+    int i;
+    uint8_t* p = ((uint8_t*)h) + sizeof(BITMAPINFOHEADER);
+    printf("Unknown extra header dump: ");
+    for (i = 0; i < h->biSize-sizeof(BITMAPINFOHEADER); i++)
+	printf("[%x] ", *(p+i));
+    printf("\n");
+  }
   printf("===========================\n");
 }
 
