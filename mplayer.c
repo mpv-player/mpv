@@ -923,9 +923,10 @@ static void print_status(float a_pos, float a_v, float corr)
  */
 static int build_afilter_chain(sh_audio_t *sh_audio, ao_data_t *ao_data)
 {
-  int new_srate = sh_audio->samplerate * playback_speed;
+  int new_srate;
   if (!sh_audio)
     return 0;
+  new_srate = sh_audio->samplerate * playback_speed;
   if (new_srate != ao_data->samplerate) {
     // limits are taken from libaf/af_resample.c
     if (new_srate < 8000)
