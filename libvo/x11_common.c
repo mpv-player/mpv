@@ -40,14 +40,6 @@
 #include "../mplayer.h"
 #endif
 
-/*
- * If SCAN_VISUALS is defined, vo_init() scans all available TrueColor
- * visuals for the 'best' visual for MPlayer video display.  Note that
- * the 'best' visual might be different from the default visual that
- * is in use on the root window of the display/screen.
- */
-#define	SCAN_VISUALS
-
 #define vo_wm_Unknown     0
 #define vo_wm_NetWM       1
 #define vo_wm_KDE         2
@@ -107,55 +99,6 @@ void vo_showcursor( Display *disp, Window win )
  if ( WinID==0 ) return;
  XDefineCursor( disp,win,0 ); 
 }
-
-#ifdef	SCAN_VISUALS
-/*
- * Scan the available visuals on this Display/Screen.  Try to find
- * the 'best' available TrueColor visual that has a decent color
- * depth (at least 15bit).  If there are multiple visuals with depth
- * >= 15bit, we prefer visuals with a smaller color depth.
- */
-int vo_find_depth_from_visuals(Display *dpy, int screen, Visual **visual_return)
-{
-  XVisualInfo visual_tmpl;
-  XVisualInfo *visuals;
-  int nvisuals, i;
-  int bestvisual = -1;
-  int bestvisual_depth = -1;
-
-  visual_tmpl.screen = screen;
-  visual_tmpl.class = TrueColor;
-  visuals = XGetVisualInfo(dpy,
-			   VisualScreenMask | VisualClassMask, &visual_tmpl,
-			   &nvisuals);
-  if (visuals != NULL) {
-    for (i = 0; i < nvisuals; i++) {
-      mp_msg(MSGT_VO,MSGL_V,"vo: X11 truecolor visual %#x, depth %d, R:%lX G:%lX B:%lX\n",
-	       visuals[i].visualid, visuals[i].depth,
-	       visuals[i].red_mask, visuals[i].green_mask,
-	       visuals[i].blue_mask);
-      /*
-       * save the visual index and it's depth, if this is the first
-       * truecolor visul, or a visual that is 'preferred' over the
-       * previous 'best' visual
-       */
-      if (bestvisual_depth == -1
-	  || (visuals[i].depth >= 15 
-	      && (   visuals[i].depth < bestvisual_depth
-		  || bestvisual_depth < 15))) {
-	bestvisual = i;
-	bestvisual_depth = visuals[i].depth;
-      }
-    }
-
-    if (bestvisual != -1 && visual_return != NULL)
-      *visual_return = visuals[bestvisual].visual;
-
-    XFree(visuals);
-  }
-  return bestvisual_depth;
-}
-#endif
 
 static int x11_errorhandler(Display *display, XErrorEvent *event)
 {
@@ -313,7 +256,6 @@ int vo_init( void )
  XGetWindowAttributes(mDisplay, mRootWin, &attribs);
  depth=attribs.depth;
 
-#ifdef	SCAN_VISUALS
  if (depth != 15 && depth != 16 && depth != 24 && depth != 32) {
    Visual *visual;
 
@@ -322,8 +264,7 @@ int vo_init( void )
      mXImage=XCreateImage(mDisplay, visual, depth, ZPixmap,
 			  0, NULL, 1, 1, 8, 1);
  } else
-#endif
- mXImage=XGetImage( mDisplay,mRootWin,0,0,1,1,AllPlanes,ZPixmap );
+   mXImage=XGetImage( mDisplay,mRootWin,0,0,1,1,AllPlanes,ZPixmap );
 
  vo_depthonscreen = depth;	// display depth on screen
 
@@ -953,4 +894,53 @@ void vo_vm_close(Display *dpy)
 }
 #endif
 
-#endif
+#endif	/* X11_FULLSCREEN */
+
+
+/*
+ * Scan the available visuals on this Display/Screen.  Try to find
+ * the 'best' available TrueColor visual that has a decent color
+ * depth (at least 15bit).  If there are multiple visuals with depth
+ * >= 15bit, we prefer visuals with a smaller color depth.
+ */
+int vo_find_depth_from_visuals(Display *dpy, int screen, Visual **visual_return)
+{
+  XVisualInfo visual_tmpl;
+  XVisualInfo *visuals;
+  int nvisuals, i;
+  int bestvisual = -1;
+  int bestvisual_depth = -1;
+
+  visual_tmpl.screen = screen;
+  visual_tmpl.class = TrueColor;
+  visuals = XGetVisualInfo(dpy,
+			   VisualScreenMask | VisualClassMask, &visual_tmpl,
+			   &nvisuals);
+  if (visuals != NULL) {
+    for (i = 0; i < nvisuals; i++) {
+      mp_msg(MSGT_VO,MSGL_V,"vo: X11 truecolor visual %#x, depth %d, R:%lX G:%lX B:%lX\n",
+	       visuals[i].visualid, visuals[i].depth,
+	       visuals[i].red_mask, visuals[i].green_mask,
+	       visuals[i].blue_mask);
+      /*
+       * save the visual index and it's depth, if this is the first
+       * truecolor visul, or a visual that is 'preferred' over the
+       * previous 'best' visual
+       */
+      if (bestvisual_depth == -1
+	  || (visuals[i].depth >= 15 
+	      && (   visuals[i].depth < bestvisual_depth
+		  || bestvisual_depth < 15))) {
+	bestvisual = i;
+	bestvisual_depth = visuals[i].depth;
+      }
+    }
+
+    if (bestvisual != -1 && visual_return != NULL)
+      *visual_return = visuals[bestvisual].visual;
+
+    XFree(visuals);
+  }
+  return bestvisual_depth;
+}
+

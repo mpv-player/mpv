@@ -61,3 +61,5 @@ void vo_vm_close(Display*);
 #endif
 
 #endif
+
+int vo_find_depth_from_visuals(Display *dpy, int screen, Visual **visual_return);

@@ -272,7 +272,10 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
  XGetWindowAttributes( mDisplay,mRootWin,&attribs );
  depth=attribs.depth;
 
- if ( depth != 8 && depth != 15 && depth != 16 && depth != 24 && depth != 32 ) depth=24;
+ if ( depth != 15 && depth != 16 && depth != 24 && depth != 32 ) {
+   Visual *visual;
+   depth = vo_find_depth_from_visuals(mDisplay, mScreen, &visual);
+ }
  XMatchVisualInfo( mDisplay,mScreen,depth,TrueColor,&vinfo );
 
  /* set image size (which is indeed neither the input nor output size), 
