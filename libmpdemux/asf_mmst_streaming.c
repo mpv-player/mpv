@@ -413,7 +413,7 @@ while(CheckOuterData)
 	    			if ( (pre_header[7] != 0xb0) || (pre_header[6] != 0x0b) || (pre_header[5] != 0xfa) || (pre_header[4] != 0xce) ) 
 				{
       					printf ("missing signature\n");
-      					exit (1);
+      					return -1;
 	    			}
     				command = get_32 (data, 24) & 0xFFFF;
 	
@@ -426,10 +426,16 @@ while(CheckOuterData)
       					printf ("everything done. Thank you for downloading a media file containing proprietary and patentend technology.\n");
       					return 0;
 	    			} 
+				else if (command == 0x21 )
+				{
+					// Looks like it's new in WMS9
+					// Unknown command, but ignoring it seems to work.
+					return 0;
+				}
 				else if (command != 0x05) 
 				{
       					printf ("unknown command %02x\n", command);
-      					exit (1);
+      					return -1;
 	    			}
   			}
 		}
@@ -482,7 +488,8 @@ asf_mmst_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *strea
 
 	  if( ret<0 ) {
 
-		  printf("nop_streaming_read error : %s\n",strerror(errno));
+		  printf("get_media_packet error : %s\n",strerror(errno));
+		  return -1;
 
 	  }
 
