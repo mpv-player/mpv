@@ -5,21 +5,21 @@ mplayer (0.90)
 
   rc4:
     DOCS:
-    * some clarification and updates in english DOCS
-    * many translation and help-files updates
+    * some clarification and updates in the English DOCS
+    * many translation and help-file updates
 
     Fixes:    
     * -ac hwac3 fixed (was broken in rc3)
     * vo_svga: 4bp & 8bpp fixes
     * various GUI fixes
-    * rage128 vidix PPC fixes
+    * rage128 VIDIX PPC fixes
     * libmenu: one crash fixed, some cleanup
     * fixed ./configure --cc="ccache gcc"
     * -loop fixes, now -loop 2 plays it twice :)
     * the volume symbol of OSD fixed (|\ -> /|)
     * 32bpp QT-RLE support
-    * Altivec on non-darwin systems support
-    * QuickTime reference files support fixes
+    * Altivec on non-Darwin systems support
+    * QuickTime reference file support fixes
     * mp3lib: layer-2 decoding fixes
     * updates to extension->demuxer mapping table
     * libavcodec: DivX 5.03 decoding fix
@@ -32,7 +32,7 @@ mplayer (0.90)
     * vorbis decoding fixed (outer loop cleanup)
     * swscaler: 4bpp depth 1 pixel/byte format support for -vo svga
     * various GUI fixes
-    * missing error message in commandline parser for missing parameters
+    * missing error message in command line parser for missing parameters
     
     Features:
     * raw video support (-rawvideo, similar to -rawaudio)
@@ -48,14 +48,14 @@ mplayer (0.90)
   rc3:  "BugfixCounter"
   
     DOCS:
-    * english man page & HTML docs updates
+    * English man page & HTML docs updates
     * audio filter documentation
     * help_diff.sh doesn't depend on BASH any more
     * Hungarian, French, Italian, German, Polish(?) docs synced
     
     Important fixes:
     * X11 fullscreen switching (yes, again...) rewritten, some x11 code cleanup
-    * Voxware and Quicktime DLLs finally work (was broken in some contexts)
+    * Voxware and QuickTime DLLs finally work (was broken in some contexts)
     * VIDIX Radeon support cleanup, should really solve the pink screen bugs
     * Cygwin: -vo directx crashes and garbled picture with some files fixed
     * OGM/Ogg seeking (broken frames) fixed, subtitle fixes, XCD support
