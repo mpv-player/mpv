@@ -290,8 +290,7 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
  aspect= ((1<<16)*d_width + d_height/2)/d_height;
 
 #ifdef HAVE_NEW_GUI
- if ( vo_window != None ) { vo_window=vo_window; vo_gc=vo_gc; }
-  else
+ if ( vo_window == None )
 #endif   
    {
     if( !vo_init() ) return 0; // Can't open X11
@@ -376,6 +375,8 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
     XSync( mDisplay,False );
     vo_gc=XCreateGC( mDisplay,vo_window,0L,&xgcv );
 
+    XSelectInput( mDisplay,vo_window,StructureNotifyMask | KeyPressMask | ButtonPressMask | ButtonReleaseMask );
+
 #ifdef HAVE_XF86VM
     if ( vm )
      {
@@ -431,16 +432,6 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
     return -1;
   }
 
-#ifdef HAVE_NEW_GUI  
- if ( vo_window == None ) 
-#endif 
-  {
-   XSelectInput( mDisplay,vo_window,StructureNotifyMask | KeyPressMask 
-#ifdef HAVE_NEW_INPUT
-		 | ButtonPressMask | ButtonReleaseMask
-#endif
-    );
-  }
  saver_off(mDisplay);
  return 0;
 }

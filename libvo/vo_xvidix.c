@@ -46,11 +46,9 @@ static vo_info_t vo_info =
 #define UNUSED(x) ((void)(x)) /* Removes warning about unused arguments */
 
 /* X11 related variables */
-static Window mWindow;
 static int X_already_started = 0;
 
 /* Colorkey handling */
-static GC mGC;
 static XGCValues mGCV;
 static uint32_t	fgColor;
 static vidix_grkey_t gr_key;
@@ -94,10 +92,10 @@ static void set_window(int force_update,const vo_tune_info_t *info)
     }
 #endif
 
-    XGetGeometry(mDisplay, mWindow, &mRoot, &drwX, &drwY, &drwWidth,
+    XGetGeometry(mDisplay, vo_window, &mRoot, &drwX, &drwY, &drwWidth,
 	&drwHeight, &drwBorderWidth, &drwDepth);
     drwX = drwY = 0;
-    XTranslateCoordinates(mDisplay, mWindow, mRoot, 0, 0,
+    XTranslateCoordinates(mDisplay, vo_window, mRoot, 0, 0,
 	&drwcX, &drwcY, &mRoot);
 
     if (!mFullscreen)
@@ -173,10 +171,10 @@ static void set_window(int force_update,const vo_tune_info_t *info)
     /* mDrawColorKey: */
 
     /* fill drawable with specified color */
-    XSetBackground( mDisplay,mGC,0 );
-    XClearWindow( mDisplay,mWindow );
-    XSetForeground(mDisplay, mGC, fgColor);
-    XFillRectangle(mDisplay, mWindow, mGC, drwX, drwY, drwWidth,
+    XSetBackground( mDisplay,vo_gc,0 );
+    XClearWindow( mDisplay,vo_window );
+    XSetForeground(mDisplay, vo_gc, fgColor);
+    XFillRectangle(mDisplay, vo_window, vo_gc, drwX, drwY, drwWidth,
 	(mFullscreen ? drwHeight - 1 : drwHeight));
     /* flush, update drawable */
     XFlush(mDisplay);
@@ -310,48 +308,43 @@ if (vo_window == None)
 
     if (WinID >= 0)
     {
-	mWindow = WinID ? ((Window)WinID) : RootWindow(mDisplay, mScreen);
-	XUnmapWindow(mDisplay, mWindow);
-	XChangeWindowAttributes(mDisplay, mWindow, xswamask, &xswa);
+	vo_window = WinID ? ((Window)WinID) : RootWindow(mDisplay, mScreen);
+	XUnmapWindow(mDisplay, vo_window);
+	XChangeWindowAttributes(mDisplay, vo_window, xswamask, &xswa);
     }
     else
-	mWindow = XCreateWindow(mDisplay, RootWindow(mDisplay, mScreen),
+	vo_window = XCreateWindow(mDisplay, RootWindow(mDisplay, mScreen),
 	    window_x, window_y, window_width, window_height, xswa.border_pixel,
 	    vinfo.depth, InputOutput, vinfo.visual, xswamask, &xswa);
 
-    vo_x11_classhint(mDisplay, mWindow, "xvidix");
-    vo_hidecursor(mDisplay, mWindow);
+    vo_x11_classhint(mDisplay, vo_window, "xvidix");
+    vo_hidecursor(mDisplay, vo_window);
 
 #ifdef X11_FULLSCREEN
     if (mFullscreen) /* fullscreen */
-	vo_x11_decoration(mDisplay, mWindow, 0);
+	vo_x11_decoration(mDisplay, vo_window, 0);
 #endif
 
-    XGetNormalHints(mDisplay, mWindow, &hint);
+    XGetNormalHints(mDisplay, vo_window, &hint);
     hint.x = window_x;
     hint.y = window_y;
     hint.base_width = hint.width = window_width;
     hint.base_height = hint.height = window_height;
     hint.flags = USPosition | USSize;
-    XSetNormalHints(mDisplay, mWindow, &hint);
+    XSetNormalHints(mDisplay, vo_window, &hint);
 
-    XStoreName(mDisplay, mWindow, title);
+    XStoreName(mDisplay, vo_window, title);
     /* Map window. */
 
-    XMapWindow(mDisplay, mWindow);
+    XMapWindow(mDisplay, vo_window);
 #ifdef HAVE_XINERAMA
-    vo_x11_xinerama_move(mDisplay, mWindow);
+    vo_x11_xinerama_move(mDisplay, vo_window);
 #endif
 
-    mGC = XCreateGC(mDisplay, mWindow, GCForeground, &mGCV);
+    vo_gc = XCreateGC(mDisplay, vo_window, GCForeground, &mGCV);
 
+    XSelectInput( mDisplay,vo_window,StructureNotifyMask | KeyPressMask | ButtonPressMask | ButtonReleaseMask );
 #ifdef HAVE_NEW_GUI
-}
-else
-{
-    /* window was created by GUI */
-    mWindow = vo_window;
-    mGC = vo_gc;
 }
 #endif
 
@@ -372,13 +365,8 @@ else
     set_window(1,info);
     if(info) memcpy(&vtune,info,sizeof(vo_tune_info_t));
     else     memset(&vtune,0,sizeof(vo_tune_info_t));
-#ifdef HAVE_NEW_GUI
-    if (vo_window == None)
-#endif
-    {
-	XFlush(mDisplay);
-	XSync(mDisplay, False);
-    }
+    XFlush(mDisplay);
+    XSync(mDisplay, False);
 
     saver_off(mDisplay); /* turning off screen saver */
 
@@ -444,7 +432,7 @@ static void uninit(void)
     vidix_term();
 
     saver_on(mDisplay); /* screen saver back on */
-    vo_x11_uninit(mDisplay, mWindow);
+    vo_x11_uninit(mDisplay, vo_window);
 }
 
 static uint32_t preinit(const char *arg)
