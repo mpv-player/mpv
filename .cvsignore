@@ -2,3 +2,4 @@ config.h
 config.mak
 mplayer
 .depend
+version.h
