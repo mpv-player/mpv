@@ -41,7 +41,12 @@
 #define NDEBUG
 //#undef NDEBUG
 
-#undef TEXTUREFORMAT_ALWAYS_RGB24
+#undef TEXTUREFORMAT_ALWAYS
+#undef TEXTUREFORMAT_ALWAYS_S
+#ifdef SYS_DARWIN
+#define TEXTUREFORMAT_ALWAYS GL_RGB8
+#define TEXTUREFORMAT_ALWAYS_S "GL_RGB8"
+#endif
 
 static vo_info_t info = 
 {
@@ -662,7 +667,7 @@ static int choose_glx_visual(Display *dpy, int scr, XVisualInfo *res_vi)
 	return (best_weight < 1000000) ? 0 : -1;
 }
 
-static uint32_t config_glx(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format) {
+static int config_glx(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format) {
 	XSizeHints hint;
 	XVisualInfo *vinfo, vinfo_buf;
 	XEvent xev;
@@ -740,7 +745,6 @@ static uint32_t config_glx(uint32_t width, uint32_t height, uint32_t d_width, ui
 
         glXMakeCurrent( mDisplay,vo_window,wsGLXContext );
 
-	XFlush(mDisplay);
 	XSync(mDisplay, False);
 
 	//XSelectInput(mDisplay, vo_window, StructureNotifyMask); // !!!!
@@ -761,7 +765,7 @@ static uint32_t config_glx(uint32_t width, uint32_t height, uint32_t d_width, ui
 }
 
 #ifdef HAVE_NEW_GUI
-static uint32_t config_glx_gui(uint32_t d_width, uint32_t d_height) {
+static int config_glx_gui(uint32_t d_width, uint32_t d_height) {
   XWindowAttributes xw_attr;
   XVisualInfo *vinfo, vinfo_template;
   int tmp;
@@ -780,7 +784,6 @@ static uint32_t config_glx_gui(uint32_t d_width, uint32_t d_height) {
     return -1;
   }
   glXMakeCurrent( mDisplay,vo_window,wsGLXContext );
-  XFlush(mDisplay);
   XSync(mDisplay, False);
 
   if (glXGetConfig(mDisplay,vinfo,GLX_RED_SIZE, &r_sz) != 0) r_sz = 0;
@@ -941,9 +944,9 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	  gl_internal_format_s="GL_RGB";
   }
 
-#ifdef TEXTUREFORMAT_ALWAYS_RGB24
-  gl_internal_format=GL_RGB8;
-  gl_internal_format_s="GL_RGB8";
+#ifdef TEXTUREFORMAT_ALWAYS
+  gl_internal_format=TEXTURE_FORMAT_ALWAYS;
+  gl_internal_format_s=TEXTURE_FORMAT_ALWAYS_S;
 #endif
 
   if (IMGFMT_IS_BGR(format))
@@ -1156,10 +1159,14 @@ static uint32_t
 query_format(uint32_t format)
 {
     switch(format){
+#ifdef SYS_DARWIN
+    case IMGFMT_RGB32:
+#else
     case IMGFMT_RGB24:
     case IMGFMT_BGR24:
 //    case IMGFMT_RGB32:
 //    case IMGFMT_BGR32:
+#endif
         return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_OSD;
     }
     return 0;
