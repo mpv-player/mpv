@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.45 -->
+<!-- synced with 1.46 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -36,7 +36,7 @@ i czcionek już przez jakiś czas, możesz je pobrać (apt-get) z jego
 <para>
 Dominik Mierzejewski tworzy i opiekuje się oficjalnymi pakietami 
 <application>MPlayera</application> dla Red Hata. Są one dostępne na jego
-<ulink url="http://www.piorunek.pl/~dominik/linux/pkgs/mplayer/">stronie domowej</ulink>.
+<ulink url="http://greysector.rangers.eu.org/mplayer.html">homepage</ulink>.
 </para>
 
 <para>
