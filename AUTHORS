@@ -301,7 +301,7 @@ Anders Johansson <ajh@atri.curtin.edu.au>
     * old audio plugin system, some effect plugins
     * new libaf interface design, implementation, plugins
 
-Roberto Togni <r_togni@tiscali.it>
+Roberto Togni (rxt) <r_togni@tiscali.it>
     * open source QT RPZA decoder
     * open source HuffYUV decoder
     * open source MSZH/ZLIB decoder
@@ -584,7 +584,7 @@ Translation from scratch:
 Florian Dietrich <flodt8@yahoo.de>
     * mingw networking support
     
-Nehal Mistry <nehalmistry@gmx.net>
+Nehal Mistry (Nehal) <nehalmistry@gmx.net>
     * various audio driver fixes
     
 Reimar Döffinger (reimar) <reimar.doeffinger@stud.uni-karlsruhe.de>
