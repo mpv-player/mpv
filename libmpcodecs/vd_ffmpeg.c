@@ -101,6 +101,8 @@ static int lavc_param_vstats=0;
 static int lavc_param_idct_algo=0;
 static int lavc_param_debug=0;
 static int lavc_param_vismv=0;
+static int lavc_param_skip_top=0;
+static int lavc_param_skip_bottom=0;
 
 m_option_t lavc_decode_opts_conf[]={
 	{"bug", &lavc_param_workaround_bugs, CONF_TYPE_INT, CONF_RANGE, -1, 999999, NULL},
@@ -111,6 +113,8 @@ m_option_t lavc_decode_opts_conf[]={
 	{"vstats", &lavc_param_vstats, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"debug", &lavc_param_debug, CONF_TYPE_INT, CONF_RANGE, 0, 9999999, NULL},
 	{"vismv", &lavc_param_vismv, CONF_TYPE_INT, CONF_RANGE, 0, 9999999, NULL},
+	{"st", &lavc_param_skip_top, CONF_TYPE_INT, CONF_RANGE, 0, 999, NULL},
+	{"sb", &lavc_param_skip_bottom, CONF_TYPE_INT, CONF_RANGE, 0, 999, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -240,6 +244,10 @@ static int init(sh_video_t *sh){
 #endif    
 #if LIBAVCODEC_BUILD >= 4698
     avctx->debug_mv= lavc_param_vismv;
+#endif    
+#if LIBAVCODEC_BUILD >= 4717
+    avctx->skip_top   = lavc_param_skip_top;
+    avctx->skip_bottom= lavc_param_skip_bottom;
 #endif    
     mp_dbg(MSGT_DECVIDEO,MSGL_DBG2,"libavcodec.size: %d x %d\n",avctx->width,avctx->height);
     /* AVRn stores huffman table in AVI header */
