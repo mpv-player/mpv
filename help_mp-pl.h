@@ -110,7 +110,8 @@ static char help_text[]=
 "- Wolny procesor. Nie odtwarzaj du¿ych dvd/divx na wolnych procesorach!\n"\
 "  Spróbuj z opcj± -hardframedrop\n"\
 "- Uszkodzony plik. Spróbuj ró¿nych kombinacji: -nobps -ni -mc 0 -forceidx\n"\
-"- Je¶li nic z powy¿szego nie pomaga, przeczytaj DOCS/bugreports.html !\n\n"
+"- U¿ywasz -cache do odtwarzania plikow non-interleaved? Spróbuj z -nocache\n"\
+"Je¶li nic z powy¿szego nie pomaga, przeczytaj DOCS/bugreports.html !\n\n"
 
 #define MSGTR_NoGui "MPlayer zosta³ skompilowany BEZ obs³ugi GUI!\n"
 #define MSGTR_GuiNeedsX "GUI MPlayera wymaga X11!\n"
@@ -143,7 +144,8 @@ static char help_text[]=
 #define MSGTR_VideoStreamRedefined "Uwaga! Nag³ówek strumienia video %d przedefiniowany!\n"
 #define MSGTR_TooManyAudioInBuffer "\nDEMUXER: Zbyt wiele (%d w %d bajtach) pakietów audio w buforze!\n"
 #define MSGTR_TooManyVideoInBuffer "\nDEMUXER: Zbyt wiele (%d w %d bajtach) pakietów video w buforze!\n"
-#define MSGTR_MaybeNI "(mo¿e odtwarzasz strumieñ/plik non-interleaved lub kodek nie zadzia³a³)\n"
+#define MSGTR_MaybeNI "(mo¿e odtwarzasz strumieñ/plik non-interleaved lub kodek nie zadzia³a³)\n"\
+		      "Dla plików .AVI spróbuj wymusiæ tryb non-interleaved poprzez opcje -ni\n"
 #define MSGTR_DetectedFILMfile "Wykryto format FILM!\n"
 #define MSGTR_DetectedFLIfile "Wykryto format FLI!\n"
 #define MSGTR_DetectedROQfile "Wykryto format RoQ!\n"
