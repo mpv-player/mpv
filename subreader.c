@@ -300,6 +300,7 @@ char * sub_filename( char * fname )
  return NULL;
 }
 
+#if 0
 int main(int argc, char **argv) {  // for testing
 
     int i,j;
@@ -334,3 +335,4 @@ int main(int argc, char **argv) {  // for testing
     printf ("Read %i subtitles, %i errors.\n", sub_num, sub_errs);
     return 0;
 }
+#endif
