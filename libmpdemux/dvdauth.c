@@ -40,6 +40,8 @@
 #  include <linux/cdrom.h>
 #elif defined(__sun)
 #  include <sun/dvdio.h>
+#elif defined(hpux)
+#  include <sun/scsi.h>
 #elif defined(__bsdi__)
 #  include <dvd.h>
 #else

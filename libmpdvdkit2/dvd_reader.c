@@ -37,6 +37,8 @@
 
 #if defined(__sun)
 #include <sys/mnttab.h>
+#elif defined(hpux)
+#include </usr/conf/h/mnttab.h>
 #elif defined(SYS_BSD)
 #include <fstab.h>
 #elif defined(__linux__)

@@ -3106,7 +3106,7 @@ fi
 echocheck "DVD support (libmpdvdkit)"
 if test "$_dvdkit" = auto ; then
  _dvdkit=no
- if linux || freebsd || netbsd || darwin || cygwin || openbsd || sunos; then
+ if linux || freebsd || netbsd || darwin || cygwin || openbsd || sunos || hpux; then
   test -f "./libmpdvdkit2/Makefile" && _dvdkit=yes
   test -f "./libmpdvdkit/Makefile" && _dvdkit=yes
  fi
@@ -4711,7 +4711,7 @@ $_def_vcd
 #define	DEFAULT_CDROM_DEVICE	"/vol/dev/aliases/cdrom0"
 #define DEFAULT_DVD_DEVICE	DEFAULT_CDROM_DEVICE
 #elif defined(HPUX)
-#define DEFAULT_CDROM_DEVICE    "/dev/cdrom:"
+#define DEFAULT_CDROM_DEVICE    "/dev/cdrom"
 #define DEFAULT_DVD_DEVICE     "/dev/dvd"
 #elif defined(WIN32)
 #define DEFAULT_CDROM_DEVICE    "D:"
