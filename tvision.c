@@ -45,8 +45,14 @@ int i;
 int fd=-1;
 char* frame=NULL;
 int count=0;
+unsigned char* tmpframe=NULL;
+unsigned char* tmpframe2=NULL;
+unsigned char* planes[3];
+unsigned int stride[3];
+unsigned char* planes2[3];
+unsigned int stride2[3];
 
-  if(argc>1) video_driver=argv[1];
+//  if(argc>1) video_driver=argv[1];
 
 // check video_out driver name:
   if(!video_driver)
@@ -91,19 +97,36 @@ int count=0;
     }
 
     /* prepare for grabbing */
-    gb1.format = VIDEO_PALETTE_YUV422;
+    gb1.format = (argc>1) ? atoi(argv[1]) : VIDEO_PALETTE_YUV422;
+//    gb1.format = VIDEO_PALETTE_YUV420;
 //    gb1.format = VIDEO_PALETTE_RGB24;
     gb1.frame  = 0;
-    gb1.width  = 352;//720;//640;//320;
-    gb1.height = 288;//576;//480;//240;
+    gb1.width  = 704;//640;//320;
+    gb1.height = 576;//480;//240;
 
     gb2.format = gb1.format;
     gb2.frame  = 1;
     gb2.width  = gb1.width;
     gb2.height = gb1.height;
 
-    video_out->init(gb1.width,gb1.height,1024,768,0,0,IMGFMT_YUY2);
+    video_out->init(gb1.width,gb1.height,1024,768,0,0,IMGFMT_YV12);
+//    video_out->init(gb1.width,gb1.height,1024,768,0,0,IMGFMT_UYVY);
+//    video_out->init(gb1.width,gb1.height,1024,768,0,0,IMGFMT_YUY2);
 //    video_out->init(gb1.width,gb1.height,1024,768,0,0,IMGFMT_RGB|24);
+
+    tmpframe=malloc(gb1.width*gb1.height*3/2);
+    stride[0]=(gb1.width+15)&(~15);
+    stride[1]=stride[2]=stride[0]/2;
+    planes[0]=tmpframe;
+    planes[1]=planes[0]+stride[0]*gb1.height;
+    planes[2]=planes[1]+stride[0]*gb1.height/4;
+
+    tmpframe2=malloc(gb1.width*gb1.height*3/2);
+    stride2[0]=(gb1.width+15)&(~15);
+    stride2[1]=stride2[2]=stride2[0]/2;
+    planes2[0]=tmpframe2;
+    planes2[1]=planes2[0]+stride2[0]*gb1.height;
+    planes2[2]=planes2[1]+stride2[0]*gb1.height/4;
 
     if (-1 == ioctl(fd,VIDIOCMCAPTURE,&gb1)) {
 	if (errno == EAGAIN)
@@ -128,7 +151,23 @@ int count=0;
 	    exit(1);
 	}
         frame=map + gb_buffers.offsets[(count%2) ? 0 : 1];
+#if 0
         video_out->draw_frame((unsigned char**)&frame);
+#else
+	{ 
+	  uyvytoyv12(frame,planes[0],planes[1],planes[2],
+	  gb1.width,gb1.height,
+	  stride[0],stride[1],gb1.width*2);
+	  
+
+	  postprocess(planes,stride[0],
+	              planes2,stride2[0],
+		      gb1.width,gb1.height,
+		      planes[0],0, 0x20000);
+	  
+          video_out->draw_slice(planes2,stride2,gb1.width,gb1.height,0,0);
+	}
+#endif
         video_out->flip_page();
         
         count++;
