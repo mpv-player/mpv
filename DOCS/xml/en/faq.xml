@@ -1219,6 +1219,19 @@ enabling DMA for the DVD drive with the <command>hdparm</command> tool (describe
 in the <link linkend="drives">CD chapter</link>).
 </para></answer>
 </qandaentry>
+
+<qandaentry>
+<question><para>
+I copied a DVD using vobcopy. How do I play/encode it from my hard disk?
+</para></question>
+<answer><para>
+Use the <option>-dvd-device</option> option to refer to the directory
+that contains the files:
+<screen>
+mplayer dvd://1 -dvd-device /path/to/directory
+</screen>
+</para></answer>
+</qandaentry>
 </qandadiv>
 
 <qandadiv id="faq-features">
