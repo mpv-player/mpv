@@ -4,6 +4,10 @@
 // Set this value, if autodetection fails! (video ram size in megabytes)
 //#define MGA_MEMORY_SIZE 32
 
+//#define MGA_ALLOW_IRQ
+
+#define MGA_VSYNC_POS 2
+
 /*
  *
  * mga_vid.c
@@ -233,6 +237,11 @@ static void mga_vid_frame_sel(int frame)
 	//one register (and it doesn't seem to be double buffered)
 	regs.besctl = (regs.besctl & ~0x07000000) + (frame << 25);
 	writel( regs.besctl, mga_mmio_base + BESCTL ); 
+
+//	writel( regs.besglobctl + ((readl(mga_mmio_base + VCOUNT)+2)<<16),
+	writel( regs.besglobctl + (MGA_VSYNC_POS<<16),
+			mga_mmio_base + BESGLOBCTL);
+
     }
 }
 
@@ -479,6 +488,8 @@ if(config->format==MGA_VID_FORMAT_YV12){
 	return 0;
 }
 
+#ifdef MGA_ALLOW_IRQ
+
 static void enable_irq(){
 	long int cc;
 
@@ -507,6 +518,8 @@ void mga_handle_irq(int irq, void *dev_id, struct pt_regs *pregs) {
 	static int counter=0;
 	long int cc;
 //	if ( ! mga_enabled_flag ) return;
+
+//	printk(KERN_DEBUG "vcount = %d\n",readl(mga_mmio_base + VCOUNT));
 
 	//printk("mga_interrupt #%d\n", irq);
 
@@ -565,7 +578,7 @@ void mga_handle_irq(int irq, void *dev_id, struct pt_regs *pregs) {
 
 }
 
-
+#endif
 
 static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigned long arg)
 {
@@ -575,7 +588,7 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 	{
 		case MGA_VID_CONFIG:
 			//FIXME remove
-			printk(KERN_DEBUG "vcount = %d\n",readl(mga_mmio_base + VCOUNT));
+//			printk(KERN_DEBUG "vcount = %d\n",readl(mga_mmio_base + VCOUNT));
 			printk(KERN_DEBUG "mga_mmio_base = %p\n",mga_mmio_base);
 			printk(KERN_DEBUG "mga_mem_base = %08lx\n",mga_mem_base);
 			//FIXME remove
@@ -633,14 +646,18 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 				regs.besctl |= 1;
 				mga_vid_write_regs();
 			}
+#ifdef MGA_ALLOW_IRQ
 			if ( mga_irq != -1 ) enable_irq();
+#endif
 			mga_next_frame=0;
 		break;
 
 		case MGA_VID_OFF:
 			printk(KERN_DEBUG "mga_vid: Video OFF\n");
 			vid_src_ready = 0;   
+#ifdef MGA_ALLOW_IRQ
 			if ( mga_irq != -1 ) disable_irq();
+#endif
 			regs.besctl &= ~1;
 			mga_vid_write_regs();
 		break;
@@ -747,6 +764,7 @@ static int mga_vid_find_card(void)
 	printk(KERN_INFO "mga_vid: detected RAMSIZE is %d MB\n", (unsigned int) mga_ram_size);
 #endif
 
+#ifdef MGA_ALLOW_IRQ
 	if ( mga_irq != -1 ) {
 		int tmp = request_irq(mga_irq, mga_handle_irq, SA_INTERRUPT | SA_SHIRQ, "Syncfb Time Base", &mga_irq);
 		if ( tmp ) {
@@ -759,8 +777,11 @@ static int mga_vid_find_card(void)
 		printk(KERN_INFO "syncfb (mga): No valid irq was found\n");
 		mga_irq=-1;
 	}
+#else
+		printk(KERN_INFO "syncfb (mga): IRQ disabled in mga_vid.c\n");
+		mga_irq=-1;
+#endif
 
-	
 	return TRUE;
 }
 
@@ -885,8 +906,10 @@ int init_module(void)
 void cleanup_module(void)
 {
 
+#ifdef MGA_ALLOW_IRQ
 	if ( mga_irq != -1)
 		free_irq(mga_irq, &mga_irq);
+#endif
 
 	if(mga_mmio_base)
 		iounmap(mga_mmio_base);
