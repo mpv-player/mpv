@@ -475,7 +475,7 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 	req_spid = param->spid;
 
 	has_tables = 0;
-	bzero(pes_priv1, sizeof(pes_priv1));
+	memset(pes_priv1, 0, sizeof(pes_priv1));
 	init_pos = stream_tell(demuxer->stream);
 	mp_msg(MSGT_DEMUXER, MSGL_INFO, "PROBING UP TO %llu, PROG: %d\n", (uint64_t) param->probe, param->prog);
 	while((pos <= init_pos + param->probe) && (! demuxer->stream->eof))
@@ -1065,7 +1065,7 @@ static int pes_parse2(unsigned char *buf, uint16_t packet_len, ES_stream_t *es, 
 		uint32_t hdr, l = 0;
 
 		hdr = (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
-		if((hdr & 0xfff00000) == 0xfff00000)
+		if(pes_is_aligned && ((hdr & 0xfff00000) == 0xfff00000))
 		{
 			// ADTS AAC shows with MPA layer 4 (00 in the layer bitstream)
 			l = 4 - ((hdr & 0x00060000) >> 17);
@@ -1079,8 +1079,7 @@ static int pes_parse2(unsigned char *buf, uint16_t packet_len, ES_stream_t *es, 
 		es->size    = packet_len;
 
 
-		//if((type_from_pmt == 0x0f) || (l == 4)) //see in parse_pmt()
-		if(l==4)
+		if((type_from_pmt == AUDIO_AAC) || (l == 4)) //see in parse_pmt()
 			es->type    = AUDIO_AAC;
 		else
 			es->type    = AUDIO_MP2;
@@ -1574,19 +1573,11 @@ static int parse_pmt(ts_priv_t * priv, uint16_t progid, uint16_t pid, int is_sta
 			case 0x10:
 				pmt->es[idx].type = VIDEO_MPEG4;
 				break;
+			case 0x0f:
 			case 0x11:
 				parse_descriptors(&pmt->es[idx], &es_base[5]);
 				pmt->es[idx].type = AUDIO_AAC;
 				break;
-
-			/*	seems to indicate an AAC in a certain broadcaster's tables, but
-				it's deceiving, so it's commented out
-			case 0x0f:
-				parse_descriptors(&pmt->es[idx], &es_base[5]);
-				pmt->es[idx].type = 0x0f;
-				break;
-			*/
-
 			case 0x1b:
 				pmt->es[idx].type = VIDEO_H264;
 				break;
