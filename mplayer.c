@@ -1221,12 +1221,14 @@ switch(sh_video->codec->driver){
      DEC_SET dec_set;
 #ifdef NEW_DECORE
      DEC_MEM_REQS dec_mem;
+        dec_param.output_format=DEC_USER;
+#else
+        dec_param.color_depth = 32;
+#endif
 	dec_param.x_dim = sh_video->bih->biWidth;
 	dec_param.y_dim = sh_video->bih->biHeight;
-        dec_param.output_format=DEC_USER;
-#endif
 #ifdef NEW_DECORE
-        // 0.50-CVS
+        // 0.50-CVS new malloc scheme
         decore(0x123, DEC_OPT_MEMORY_REQS, &dec_param, &dec_mem);
         dec_param.buffers.mp4_edged_ref_buffers=malloc(dec_mem.mp4_edged_ref_buffers_size);
         dec_param.buffers.mp4_edged_for_buffers=malloc(dec_mem.mp4_edged_for_buffers_size);
@@ -1234,10 +1236,9 @@ switch(sh_video->codec->driver){
         dec_param.buffers.mp4_state=malloc(dec_mem.mp4_state_size);
         dec_param.buffers.mp4_tables=malloc(dec_mem.mp4_tables_size);
         dec_param.buffers.mp4_stream=malloc(dec_mem.mp4_stream_size);
-#else
-        dec_param.color_depth = 32;
 #endif
 	decore(0x123, DEC_OPT_INIT, &dec_param, NULL);
+
 	dec_set.postproc_level = divx_quality;
 	decore(0x123, DEC_OPT_SETPP, &dec_set, NULL);
 
@@ -1788,7 +1789,10 @@ switch(sh_video->codec->driver){
     
     if(in_size){
       sh_video->bih->biSizeImage = in_size;
-//      ret = ICDecompress(avi_header.hic, ICDECOMPRESS_NOTKEYFRAME|(ICDECOMPRESS_HURRYUP|ICDECOMPRESS_PREROL), 
+
+      sh_video->bih->biWidth = 1280;
+      sh_video->o_bih.biWidth = 1280;
+	    //      ret = ICDecompress(avi_header.hic, ICDECOMPRESS_NOTKEYFRAME|(ICDECOMPRESS_HURRYUP|ICDECOMPRESS_PREROL), 
       ret = ICDecompress(sh_video->hic, ICDECOMPRESS_NOTKEYFRAME |
                         ( (drop_frame==2)?(ICDECOMPRESS_HURRYUP|ICDECOMPRESS_PREROL):0 ) , 
                          sh_video->bih,   start,
