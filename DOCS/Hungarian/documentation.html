@@ -65,7 +65,7 @@
       <UL>
         <LI><A HREF="formats.html#mp3">2.1.2.1 MP3 file-ok</A></LI>
         <LI><A HREF="formats.html#wav">2.1.2.2 WAV file-ok</A></LI>    
-        <LI><A HREF="formats.html#ogg_vorbis">2.1.2.3 OGG file-ok (Vorbis)</A></LI>
+        <LI><A HREF="formats.html#ogg_vorbis">2.1.2.3 OGG/OGM file-ok (Vorbis)</A></LI>
         <LI><A HREF="formats.html#wma">2.1.2.4 WMA/ASF file-ok</A></LI>     
         <LI><A HREF="formats.html#mp4">2.1.2.5 MP4 file-ok</A></LI>
       </UL>
@@ -220,13 +220,16 @@
   <LI><A HREF="#ports">6. Különféle operációs rendszerek</A></LI>
     <UL>
       <LI><A HREF="#debian">6.1 Debian csomagolás</A></LI>
-      <LI><A HREF="#freebsd">6.2 FreeBSD</A></LI>
+      <LI><A HREF="#bsd">6.2 *BSD</A></LI>
+        <UL>
+	  <LI><A HREF="#freebsd">6.2.1 FreeBSD</A></LI>
+	  <LI><A HREF="#openbsd">6.2.2 OpenBSD</A></LI>
+	</UL>
       <LI><A HREF="#solaris">6.3 Solaris</A></LI>
       <LI><A HREF="#strongarm">6.4 StrongARM</A></LI>
       <LI><A HREF="#sgi">6.5 SGI/Irix</A></LI>
       <LI><A HREF="#qnx">6.6 QNX</A></LI>
-      <LI><A HREF="#openbsd">6.7 OpenBSD</A></LI>
-      <LI><A HREF="#cygwin">6.8 Cygwin</A></LI>
+      <LI><A HREF="#cygwin">6.7 Cygwin</A></LI>
     </UL>
   <LI><A HREF="#mailing_lists">A függelék - Levelezési listák</A></LI>
   <LI><A HREF="bugreports.html">B függelék - Hogyan jelents be hibát</A></LI>
@@ -413,7 +416,8 @@
 
 <UL>
 <LI><B>libavcodec</B>: ha ezt a
-  H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1-et
+  H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1 video és WMA
+  (Windows Media Audio) v1/v2 audio-t
   (is) dekódolni tudó
   codecet akarod használni, tekintsd meg a
   <A HREF="codecs.html#libavcodec">2.2.1.2</A>-es fejezetet még fordítás
@@ -441,6 +445,8 @@
     <LI><B>WMV8</B> filmek lejátszásához is szükséges. Régebbi ASF-ek
       lejátszásához nem, bár ezek között gyakori a VoxWare audio-val
       ellátott file - amihez viszont szükség van a Win32 codecekre.</LI>
+    <LI>Nem szükséges WMA (Windows Media Audio) használatához, a libavcodec-nek
+      van rá opensource dekódere.</LI>
   </UL>
 </LI>
 
@@ -1203,35 +1209,42 @@ end
 	Setting up mplayer (0.18-1) ...</PRE></P>
 
 
-<H2><A NAME=freebsd>6.2 FreeBSD</A></H2>
+<H2><A NAME=bsd>6.2 *BSD</A></H2>
 
-<P>A fordításhoz szükséged lesz GNU make-re (gmake, /usr/ports/devel/gmake),
-  natív BSD make nem jó.</P>
+<P>Az MPlayer fut FreeBSD, OpenBSD, NetBSD, BSD/OS és Darwin rendszereken.
+  A fordításhoz szükséged lesz GNU make-re (gmake, /usr/ports/devel/gmake),
+  és a binutils egy friss verziójára.</P>
 
-<P>Az <B>MPlayer</B> futtatásához fordítsd újra a kernelt
-  "options USER_LDT"-vel, kivéve ha -CURRENT-et használsz, ahol ez az
-  alapállapot). Ha van SSE-t támogató CPU-d, használd az "options
-  CPU_ENABLE_SSE"-t is. FreeBSD-STABLE kell, vagy kernel patch-ek.</P>
+<P>Ha az MPlayer nem találja a <CODE>/dev/cdrom</CODE>-ot vagy a
+  <CODE>/dev/dvd</CODE>-t, csinálj egy symlink-et:
+  <CODE>ln -s /dev/(cdrom_egység) /dev/cdrom</CODE>.</P>
 
-<P>Ha az <B>MPlayer</B> azt mondja hogy "CD-ROM Device '/dev/cdrom' not found!",
-  csinálj egy linket: <CODE>ln -s /dev/(meghajtó) /dev/cdrom</CODE></P>
+<P>A Win32 DLL-ek használatához fordítsd újra a kernelt
+  "options USER_LDT"-vel, kivéve ha FreeBSD-CURRENT-et használsz, ahol ez az
+  alapállapot).</P>
 
-<P>Egyelõre nincs DVD támogatás FreeBSD-hez.</P>
+
+<H3><A NAME="freebsd">6.2.1 FreeBSD</A></H3>
+
+<P>Ha van SSE-t támogató CPU-d, használd az "options CPU_ENABLE_SSE"-t is.
+  FreeBSD-STABLE kell, vagy kernel patch-ek.</P>
+
+
+<H3><A NAME="openbsd">6.2.2 OpenBSD</A></H3>
+
+<P>A <I>gas</I> különbözõ verzióinak hiányosságai miatt (relokáció vs mms),
+  két lépésben kell fordítani: elõször legyen a nem-natív verzió a PATH-ban
+  és add ki a <CODE>gmake -k</CODE> parancsot, aztán a natív verzióval
+  <CODE>gmake</CODE>.</P>
 
 <H2><A NAME=solaris>6.3 Solaris</A></H2>
 
-<P>Az AVI file-ok lejátszása legjobban Solarix x86-on mûködik, mert itt
-  megteheted hogy win32-es codec-eket használsz, az x86-os platform miatt.
-  Solaris SPARC-on jónéhány AVI file lesz ami nem fog mûködni, mert csak
-  win32-es codec van hozzá. <B>DivX/OpenDivX</B> filmek menni fognak,
-  ha libavcodec-et használsz.</P>
-
 <P>Az <B>MPlayer</B> kihasználja az <B>UltraSPARC</B> gépek <B>VIS</B>
-utasításkészletét (az MMX sparc-os megfelelõje), bár jelenleg csak a
-<I>libmpeg2</I>-ben, <I>libavcodec</I>-ben, és a <I>libvo</I>-ban, mp3lib-ben nem.
-Egy 400Mhz-es CPU elég hogy megnézz egy VOB file-t. Szükséged lesz egy
-felinstallált <A HREF="http://www.sun.com/sparc/vis/mediaLib.html">mLib</A>-re
-is.</P>
+  utasításkészletét (az MMX sparc-os megfelelõje), bár jelenleg csak a
+  <I>libmpeg2</I>-ben, <I>libavcodec</I>-ben, és a <I>libvo</I>-ban, mp3lib-ben nem.
+  Egy 400Mhz-es CPU elég hogy megnézz egy VOB file-t. Szükséged lesz egy
+  felinstallált <A HREF="http://www.sun.com/sparc/vis/mediaLib.html">mLib</A>-re
+  is.</P>
 
 <P>A fordításhoz GNU make-re lesz szükséged (gmake, /opt/sfw/gmake), natív
   Solaris make nem jo. Egy tipikus hiba ha mégis azzal próbálkozol:</P>
@@ -1323,31 +1336,54 @@ Közelebbi információ valakinél?</P>
   SDL-t.</P>
 
 
-<H2><A NAME=openbsd>6.7. OpenBSD</A></H2>
+<H2><A NAME=cygwin>6.7. Cygwin</A></H2>
 
-<P>A forditáshoz GNU make szükséges (gmake, /usr/ports/devel/gmake), a natív
-  BSD make nem jó. Szükséges továbbá egy friss binutils (objcopy-val).</P>
+<P>A Cygwin port még mindig gyerekcipõben jár, és szívesen fogad
+  <A HREF="../tech/patches.txt">patcheket</A>. Van
+  <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">levelezési listája</A>
+  is.</P>
 
-<P>A <I>gas</I> különbözõ verzióinak hiányosságai miatt (relokáció vs mms),
-  két lépésben kell fordítani: elõször legyen a nem-natív verzió a PATH-ban
-  és add ki a <CODE>gmake -k</CODE> parancsot, aztán a natív verzióval
-  <CODE>gmake</CODE>.</P>
-
-<P>Win32 DLL-ek használatához a kernelt <CODE>option USER_LDT</CODE>-vel kell
-  fordítani.</P>
-
-<P>Ha az <B>MPlayer</B> a <CODE>/dev/cdrom</CODE> vagy <CODE>/dev/dvd</CODE>
-  hiányára panaszkodik, csinálj egy szimbolikus linket:<BR>
-  <CODE>ln -s /dev/(cdrom egység) /dev/cdrom</CODE></P>
-
-
-<H2><A NAME=cygwin>6.8. Cygwin</A></H2>
+<P>Natív DirectX video (<CODE>-vo directx</CODE>) használatához installáld
+  a <A HREF="http://www.videolan.org/vlc/dx7headers.tgz">DirectX 7 header
+  file-okat</A>, és fordítsd le az MPlayer-t. Ez, és az <CODE>-ao win32</CODE>
+  opció használata adja a legjobb eredményt.</P>
 
 <P>Be kell lépned az <B>MPlayer</B> könyvtárába és át kell másolnod az
   <CODE>etc/cygwin_inttypes.h</CODE> file-t az
   <CODE>/usr/include/inttypes.h</CODE> file helyére hogy az <B>MPlayer</B>
   leforduljon. Máskülönben a fordításkor panaszkodni fog az inttypes.h
   hiányára.</P>
+
+<P>Mivel Win32 alatt nem támogatottak a Win32 DLLek és az OpenGL, mpdvdkit
+  nem mûködik/fordul, ezeket fordításnál ki kell kapcsolni, a
+  <CODE>./configure --disable-win32 --disable-gl --disable-mpdvdkit</CODE>
+  paranccsal.</P>
+
+<P>Az SDL is mûködik, bár egy kicsit rugdosni kell:<BR>
+  A <CODE>./configure</CODE> lefuttatása után a következõképpen kell
+  átírni a <CODE>config.mak</CODE> file-t:</P>
+
+<PRE>
+  SDL_LIB = -L/usr/local/lib -lmingw32 -lSDLmain -lSDL -mwindows -mno-cygwin
+</PRE>
+
+<P>erre:</P>
+
+<PRE>
+  SDL_LIB = -L/usr/local/lib -lSDL -mcygwin
+</PRE>
+
+<P>és ezt:</P>
+
+<PRE>
+  SDL_INC = -I/usr/local/include -I/usr/local/include/SDL -Dmain=SDL_main -I/u
+</PRE>
+
+<P>erre:</P>
+
+<PRE>
+  SDL_INC = -I/usr/local/include -I/usr/local/include/SDL -Uunix -mcygwin
+</PRE>
 
 
 <H1><A NAME="mailing_lists">A függelék - Levelezési listák</A></H1>
