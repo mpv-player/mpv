@@ -37,7 +37,7 @@
 
 #include "loader.h"
 #include "wine/avifmt.h"
-//#include "libvo/video_out.h"      // included from mpeg2.h
+//#include "libvo/x11_common.h"      // included from mpeg2.h
 
 #include "opendivx/decore.h"
 
@@ -49,6 +49,7 @@ XMM xmm;
 XMM_PluginSound *pSound=NULL;
 #endif
 
+extern int vo_screenwidth;
 
 extern char* win32_codec_name;  // must be set before calling DrvOpen() !!!
 
@@ -1681,7 +1682,9 @@ switch(has_video){
 #ifdef HAVE_LIRC
           lirc_mp_getinput()<=0 &&
 #endif
-          getch2(20)<=0 && mplayer_get_key()<=0){}
+          getch2(20)<=0 && mplayer_get_key()<=0){
+	  video_out->check_events();
+      }
       break;
   }
   if(rel_seek_secs)
