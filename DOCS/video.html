@@ -87,8 +87,8 @@
   framebuffer (works!)</TD><TR>
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
   size=2><A HREF=#2.3.1.16>zr</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>Displaying on some hardware MJPEG capture/playback
-  boards (DC10, DC10+, LML33)</TD><TR>
+  Helvetica, sans-serif" size=2>Displaying on ZR360[56]7 based 
+  MJPEG boards (DC10(+), LML33, Buz)</TD><TR>
 
 <TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif"
   size=2>Special:</B></P></TD><TR>
@@ -1003,7 +1003,7 @@ to improve something then simply send me your patches.
 <P><B><A NAME=2.3.1.16>2.3.1.16. Zr</A></B></P>
 
 <P>This is a display-driver (<CODE>-vo zr</CODE>) for a number of MJPEG
-capture/playback cards (tested for DC10+ and buz, and it should work for the
+capture/playback cards (tested for DC10+ and Buz, and it should work for the
 LML33, the DC10). The driver works by encoding the frame to jpeg and then
 sending it to the card. For the jpeg encoding <B>libavcodec</B> is
 used, and required.</P>
@@ -1015,14 +1015,21 @@ you must get it working first. Then recompile <B>MPlayer</B> with
 
 <P>Some remarks:
 <UL>
-  <LI>don't use xawtv on the same device <B>MPlayer</B> uses, it will crash
-    your computer.</LI>
+  <LI>don't start or stop XawTV on the playback device during playback, 
+    it will crash your computer. It is, however, fine to <B>FIRST</B> start 
+    XawTV, <B>THEN</B> start <B>MPlayer</B>, wait for <B>MPlayer</B> to finish 
+    and <B>THEN</B> stop XawTV.</LI>
   <LI>this driver adds <CODE>-zr*</CODE> commandline options. The explanation
     of these options can be viewed with <CODE>-zrhelp</CODE>. It is possible to
     crop the input frame (cut borders to make it fit or to enhance performace)
     and to do other things.</LI>
-  <LI>the driver only takes data in YV12 format (libmpeg2, libavcodec for
-    example).</LI>
+  <LI>the driver takes data in YV12 and YUY2 format, this means that some 
+    codecs won't work. Some old VfW (Video for Windows) codecs, for example,
+    are incompatible with this driver. The errormessage that you will see is: 
+    <CODE>Sorry, selected video_out device is incompatible with this codec.
+    </CODE></LI>
+  <LI>OSD is currently not supported, so you won't see
+    subtitles.</LI>
 </UL>
 </P>
 
