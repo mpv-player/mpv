@@ -17,6 +17,7 @@ extern "C" {
 
 #include "../subreader.h"
 #include "../libvo/sub.h"
+
 }
 
 #include <vector>
@@ -168,6 +169,10 @@ typedef struct mkv_track {
   int rm_seqnum, rv_kf_base, rv_kf_pts;
   float rv_pts;                 // previous video timestamp
   float ra_pts;                 // previous audio timestamp
+
+  // Stuff for QuickTime
+  bool fix_i_bps;
+  float qt_last_a_pts;
 } mkv_track_t;
 
 typedef struct mkv_demuxer {
@@ -276,6 +281,30 @@ typedef struct {
   uint32_t genr;                // "genr"
   uint32_t fourcc3;             // fourcc
 } real_audio_v5_props_t;
+
+// I have to (re)define this struct here because g++ will not compile
+// components.h from the qtsdk if I include it.
+typedef struct {
+  uint32_t id_size;
+  uint32_t codec_type;
+  uint32_t reserved1;
+  uint16_t reserved2;
+  uint16_t data_reference_index;
+  uint16_t version;
+  uint16_t revision;
+  uint32_t vendor;
+  uint32_t temporal_quality;
+  uint32_t spatial_quality;
+  uint16_t width;
+  uint16_t height;
+  uint32_t horizontal_resolution; // 32bit fixed-point number
+  uint32_t vertical_resolution; // 32bit fixed-point number
+  uint32_t data_size;
+  uint16_t frame_count;
+  char compressor_name[32];
+  uint16_t depth;
+  uint16_t color_table_id;
+} qt_image_description_t;
 
 #if __GNUC__ == 2
 #pragma pack()
@@ -623,7 +652,8 @@ static int check_track_information(mkv_demuxer_t *d) {
           else if (!strcmp(t->codec_id, MKV_A_DTS))
             // uses same format tag as AC3, only supported with -hwac3
             t->a_formattag = 0x2000;
-          else if (!strcmp(t->codec_id, MKV_A_PCM))
+          else if (!strcmp(t->codec_id, MKV_A_PCM) ||
+                   !strcmp(t->codec_id, MKV_A_PCM_BE))
             t->a_formattag = 0x0001;
           else if (!strcmp(t->codec_id, MKV_A_AAC_2MAIN) ||
                    !strcmp(t->codec_id, MKV_A_AAC_2LC) ||
@@ -686,6 +716,9 @@ static int check_track_information(mkv_demuxer_t *d) {
               t->a_formattag = mmioFOURCC('d', 'n', 'e', 't');
             else if (!strcmp(t->codec_id, MKV_A_REALSIPR))
               t->a_formattag = mmioFOURCC('s', 'i', 'p', 'r');
+          } else if (!strcmp(t->codec_id, MKV_A_QDMC) ||
+                     !strcmp(t->codec_id, MKV_A_QDMC2)) {
+            ;
           } else {
             mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Unknown/unsupported audio "
                    "codec ID '%s' for track %u or missing/faulty private "
@@ -702,12 +735,6 @@ static int check_track_information(mkv_demuxer_t *d) {
 
         if (t->a_channels == 0) {
           mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] The number of channels was not "
-                 "set for track %u.\n", t->tnum);
-          continue;
-        }
-
-        if (t->a_formattag == 0) {
-          mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] The audio format tag was not "
                  "set for track %u.\n", t->tnum);
           continue;
         }
@@ -1049,6 +1076,7 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
   vector<uint64_t> seekheads_to_parse;
   vector<uint64_t> cues_to_parse;
   int64_t current_pos;
+  qt_image_description_t *idesc;
 
 #ifdef USE_ICONV
   subcp_open();
@@ -1470,6 +1498,7 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
   if (track) {
     BITMAPINFOHEADER *bih;
 
+    idesc = NULL;
     bih = (BITMAPINFOHEADER *)calloc(1, track->private_size);
     if (bih == NULL) {
       free_mkv_demuxer(mkv_d);
@@ -1534,6 +1563,31 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
           memset(&dst[8], 0, 4);
         track->realmedia = true;
 
+#if defined(USE_QTX_CODECS)
+      } else if ((track->private_size >= sizeof(qt_image_description_t)) &&
+                 (!strcmp(track->codec_id, MKV_V_QUICKTIME))) {
+        idesc = (qt_image_description_t *)track->private_data;
+        idesc->id_size = get_uint32_be(&idesc->id_size);
+        idesc->codec_type = get_uint32(&idesc->codec_type);
+        idesc->version = get_uint16_be(&idesc->version);
+        idesc->revision = get_uint16_be(&idesc->revision);
+        idesc->vendor = get_uint32_be(&idesc->vendor);
+        idesc->temporal_quality = get_uint32_be(&idesc->temporal_quality);
+        idesc->spatial_quality = get_uint32_be(&idesc->spatial_quality);
+        idesc->width = get_uint16_be(&idesc->width);
+        idesc->height = get_uint16_be(&idesc->height);
+        idesc->horizontal_resolution =
+          get_uint32_be(&idesc->horizontal_resolution);
+        idesc->vertical_resolution =
+          get_uint32_be(&idesc->vertical_resolution);
+        idesc->data_size = get_uint32_be(&idesc->data_size);
+        idesc->frame_count = get_uint16_be(&idesc->frame_count);
+        idesc->depth = get_uint16_be(&idesc->depth);
+        idesc->color_table_id = get_uint16_be(&idesc->color_table_id);
+        bih->biPlanes = 1;
+        bih->biCompression = idesc->codec_type;
+#endif // defined(USE_QTX_CODECS)
+
       } else {
         mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Unknown/unsupported CodecID "
                "(%s) or missing/bad CodecPrivate data (track %u).\n",
@@ -1556,6 +1610,8 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
       sh_v->disp_w = track->v_width;
       sh_v->disp_h = track->v_height;
       sh_v->aspect = (float)track->v_dwidth / (float)track->v_dheight;
+      if (idesc != NULL)
+        sh_v->ImageDesc = idesc;
       mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] Aspect: %f\n", sh_v->aspect);
 
       demuxer->video->id = track->tnum;
@@ -1642,10 +1698,30 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
       sh_a->wf->wBitsPerSample = 0;
       sh_a->samplesize = 0;
 
-    } else if (!strcmp(track->codec_id, MKV_A_PCM)) {
+    } else if (!strcmp(track->codec_id, MKV_A_PCM) ||
+               !strcmp(track->codec_id, MKV_A_PCM_BE)) {
       sh_a->wf->nAvgBytesPerSec = sh_a->channels * sh_a->samplerate * 2;
       sh_a->wf->nBlockAlign = sh_a->wf->nAvgBytesPerSec;
       sh_a->wf->wBitsPerSample = track->a_bps;
+      if (!strcmp(track->codec_id, MKV_A_PCM_BE))
+        sh_a->format = mmioFOURCC('t', 'w', 'o', 's');
+
+    } else if (!strcmp(track->codec_id, MKV_A_QDMC) ||
+               !strcmp(track->codec_id, MKV_A_QDMC2)) {
+      sh_a->wf->wBitsPerSample = track->a_bps;
+      sh_a->wf->nAvgBytesPerSec = 16000;
+      sh_a->wf->nBlockAlign = 1486;
+      track->fix_i_bps = true;
+      track->qt_last_a_pts = 0.0;
+      if (track->private_data != NULL) {
+        sh_a->codecdata = (unsigned char *)calloc(track->private_size, 1);
+        memcpy(sh_a->codecdata, track->private_data, track->private_size);
+        sh_a->codecdata_len = track->private_size;
+      }
+      if (!strcmp(track->codec_id, MKV_A_QDMC))
+        sh_a->format = mmioFOURCC('Q', 'D', 'M', 'C');
+      else
+        sh_a->format = mmioFOURCC('Q', 'D', 'M', '2');
 
     } else if (track->a_formattag == mmioFOURCC('M', 'P', '4', 'A')) {
       int profile, srate_idx;
@@ -2040,6 +2116,31 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
                 
                 else if (mkv_d->v_skip_to_keyframe)
                   use_this_block = false;
+
+                if (mkv_d->audio->fix_i_bps && use_this_block) {
+                  uint32_t i, sum;
+                  sh_audio_t *sh;
+
+                  for (i = 0, sum = 0; i < kblock->NumberFrames(); i++) {
+                    DataBuffer &data = kblock->GetBuffer(i);
+                    sum += data.Size();
+                  }
+                  sh = (sh_audio_t *)ds->sh;
+                  if (block_duration != -1) {
+                    sh->i_bps = sum * 1000 / block_duration;
+                    mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] Changed i_bps to %d.\n",
+                           sh->i_bps);
+                    mkv_d->audio->fix_i_bps = false;
+                  } else if (mkv_d->audio->qt_last_a_pts == 0.0)
+                    mkv_d->audio->qt_last_a_pts = current_pts;
+                  else if (mkv_d->audio->qt_last_a_pts != current_pts) {
+                    sh->i_bps = (int)(sum / (current_pts -
+                                             mkv_d->audio->qt_last_a_pts));
+                    mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] Changed i_bps to %d.\n",
+                           sh->i_bps);
+                    mkv_d->audio->fix_i_bps = false;
+                  }
+                }
 
               } else if ((current_pts * 1000) < mkv_d->skip_to_timecode)
                 use_this_block = false;
