@@ -40,6 +40,7 @@
 #include <CoreAudio/AudioHardware.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <inttypes.h>
 #include <pthread.h>
 
@@ -314,7 +315,7 @@ static int init(int rate,int channels,int format,int flags)
 	// unsigned int
 	ao->outputStreamBasicDescription.mFormatFlags=kAudioFormatFlagIsPacked;
     }
-    if(format&AF_FORMAT_BE)
+    if((format&AF_FORMAT_END_MASK)==AF_FORMAT_BE)
 	ao->outputStreamBasicDescription.mFormatFlags|=kAudioFormatFlagIsBigEndian;
 
     ao->outputStreamBasicDescription.mBytesPerPacket=
