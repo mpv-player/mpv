@@ -10,8 +10,13 @@
 #include "mp_image.h"
 #include "vf.h"
 
-struct vf_priv_s {
+#include "m_option.h"
+#include "m_struct.h"
+
+static struct vf_priv_s {
     unsigned int fmt;
+} vf_priv_dflt = {
+  IMGFMT_YUY2
 };
 
 //===========================================================================//
@@ -25,8 +30,10 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
 static int open(vf_instance_t *vf, char* args){
     vf->query_format=query_format;
     vf->default_caps=0;
-    vf->priv=malloc(sizeof(struct vf_priv_s));
-
+    if(!vf->priv) {
+      vf->priv=malloc(sizeof(struct vf_priv_s));
+      vf->priv->fmt=IMGFMT_YUY2;
+    }
     if(args){
 	if(!strcasecmp(args,"444p")) vf->priv->fmt=IMGFMT_444P; else
 	if(!strcasecmp(args,"422p")) vf->priv->fmt=IMGFMT_422P; else
@@ -55,11 +62,24 @@ static int open(vf_instance_t *vf, char* args){
 	if(!strcasecmp(args,"rg4b")) vf->priv->fmt=IMGFMT_RG4B; else
 	if(!strcasecmp(args,"rgb1")) vf->priv->fmt=IMGFMT_RGB1; else
 	{ printf("Unknown format name: '%s'\n",args);return 0;}
-    } else
-        vf->priv->fmt=IMGFMT_YUY2;
+    }
+        
 
     return 1;
 }
+
+#define ST_OFF(f) M_ST_OFF(struct vf_priv_s,f)
+static m_option_t vf_opts_fields[] = {
+  {"fmt", ST_OFF(fmt), CONF_TYPE_IMGFMT, 0,0 ,0, NULL},
+  { NULL, NULL, 0, 0, 0, 0,  NULL }
+};
+
+static m_struct_t vf_opts = {
+  "format",
+  sizeof(struct vf_priv_s),
+  &vf_priv_dflt,
+  vf_opts_fields
+};
 
 vf_info_t vf_info_format = {
     "force output format",
@@ -67,7 +87,7 @@ vf_info_t vf_info_format = {
     "A'rpi",
     "FIXME! get_image()/put_image()",
     open,
-    NULL
+    &vf_opts
 };
 
 //===========================================================================//
