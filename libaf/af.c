@@ -366,41 +366,46 @@ af_data_t* af_play(af_stream_t* s, af_data_t* data)
 }
 
 /* Helper function used to calculate the exact buffer length needed
-   when buffers are resized */
-inline int af_lencalc(frac_t mul, int len){
-  register int q = len*mul.n;
-  return q/mul.d + q%mul.d;
+   when buffers are resized. The returned length is >= than what is
+   needed */
+inline int af_lencalc(frac_t mul, af_data_t* d){
+  register int t = d->bps*d->nch;
+  return t*(((d->len/t)*mul.n + 1)/mul.d);
 }
 
 /* Calculate how long the output from the filters will be given the
-   input length "len" */
+   input length "len". The calculated length is >= the actual
+   length. */
 int af_outputlen(af_stream_t* s, int len)
 {
+  int t = s->input.bps*s->input.nch;
   af_instance_t* af=s->first; 
-  frac_t mul = {1,1};
+  register frac_t mul = {1,1};
   // Iterate through all filters 
   do{
     mul.n *= af->mul.n;
     mul.d *= af->mul.d;
     af=af->next;
   }while(af);
-  return af_lencalc(mul,len);
+  return t * (((len/t)*mul.n + 1)/mul.d);
 }
 
 /* Calculate how long the input to the filters should be to produce a
    certain output length, i.e. the return value of this function is
-   the input length required to produce the output length "len". */
+   the input length required to produce the output length "len". The
+   calculated length is <= the actual length */
 int af_inputlen(af_stream_t* s, int len)
 {
+  int t = s->input.bps*s->input.nch;
   af_instance_t* af=s->first; 
-  frac_t mul = {1,1};
+  register frac_t mul = {1,1};
   // Iterate through all filters 
   do{
-    mul.d *= af->mul.n;
-    mul.n *= af->mul.d;
+    mul.n *= af->mul.n;
+    mul.d *= af->mul.d;
     af=af->next;
   }while(af);
-  return af_lencalc(mul,len);
+  return t * (((len/t) * mul.d - 1)/mul.n);
 }
 
 /* Helper function called by the macro with the same name this
@@ -408,8 +413,7 @@ int af_inputlen(af_stream_t* s, int len)
 inline int af_resize_local_buffer(af_instance_t* af, af_data_t* data)
 {
   // Calculate new length
-  register int len = af_lencalc(af->mul,data->len/(data->nch*data->bps)) * 
-    data->nch * data->bps;
+  register int len = af_lencalc(af->mul,data);
   mp_msg(MSGT_AFILTER,MSGL_V,"Reallocating memory in module %s, old len = %i, new len = %i\n",af->info->name,af->data->len,len);
   // If there is a buffer free it
   if(af->data->audio) 

@@ -122,7 +122,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
 
   // Reset unused channels if nch in < nch out
   if(af->mul.n > af->mul.d)
-    memset(l->audio,0,af_lencalc(af->mul, c->len));
+    memset(l->audio,0,af_lencalc(af->mul, c));
   
   // Special case always output L & R
   if(c->nch == 1){
@@ -143,7 +143,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
   
   // Set output data
   c->audio = l->audio;
-  c->len   = af_lencalc(af->mul, c->len);
+  c->len   = af_lencalc(af->mul, c);
   c->nch   = l->nch;
 
   return c;

@@ -138,11 +138,13 @@ void af_uninit(af_stream_t* s);
 // Filter data chunk through the filters in the list
 af_data_t* af_play(af_stream_t* s, af_data_t* data);
 /* Calculate how long the output from the filters will be given the
-   input length "len" */
+   input length "len". The calculated length is >= the actual
+   length */
 int af_outputlen(af_stream_t* s, int len);
 /* Calculate how long the input to the filters should be to produce a
    certain output length, i.e. the return value of this function is
-   the input length required to produce the output length "len". */
+   the input length required to produce the output length "len". The
+   calculated length is <= the actual length */
 int af_inputlen(af_stream_t* s, int len);
 
 
@@ -154,14 +156,15 @@ int af_inputlen(af_stream_t* s, int len);
 int af_resize_local_buffer(af_instance_t* af, af_data_t* data);
 
 /* Helper function used to calculate the exact buffer length needed
-   when buffers are resized */
-int af_lencalc(frac_t mul, int len);
+   when buffers are resized. The returned length is >= than what is
+   needed */
+int af_lencalc(frac_t mul, af_data_t* data);
 
 /* Memory reallocation macro: if a local buffer is used (i.e. if the
    filter doesn't operate on the incoming buffer this macro must be
    called to ensure the buffer is big enough. */
 #define RESIZE_LOCAL_BUFFER(a,d)\
-((af->data->len < af_lencalc(af->mul,data->len))?af_resize_local_buffer(af,data):AF_OK)
+((af->data->len < af_lencalc(af->mul,data))?af_resize_local_buffer(af,data):AF_OK)
 
 #ifndef min
 #define min(a,b)(((a)>(b))?(b):(a))
