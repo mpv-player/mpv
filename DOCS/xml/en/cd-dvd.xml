@@ -29,7 +29,7 @@ Many CD-ROM drives are annoyingly loud, a lower speed may reduce the noise.
 
 <para>
 You can reduce the speed of IDE CD-ROM drives with <command>hdparm</command> or a
-program called <command>setcd</command>.  It works like this:
+program called <command>setcd</command>. It works like this:
 <screen>hdparm -E <replaceable>[speed]</replaceable> <replaceable>[cdrom device]</replaceable></screen>
 <screen>setcd -x <replaceable>[speed]</replaceable> <replaceable>[cdrom device]</replaceable></screen>
 </para>
@@ -259,7 +259,7 @@ with the <option>-cdrom-device</option> option.
 
 <note><para>
 At least Plextor and some Toshiba SCSI CD-ROM drives have horrible performance
-reading VCDs. This is because the the CDROMREADRAW <systemitem>ioctl</systemitem>
+reading VCDs. This is because the CDROMREADRAW <systemitem>ioctl</systemitem>
 is not fully implemented for these drives. If you have some knowledge of SCSI
 programming, please <ulink url="../../tech/patches.txt">help us</ulink>
 implement generic SCSI support for VCDs.
