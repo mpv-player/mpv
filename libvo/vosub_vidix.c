@@ -86,7 +86,7 @@ int vidix_preinit(const char *drvname,void *server)
 		printf("vosub_vidix: Couldn't get capability: %s\n",strerror(err));
 		return -1;
 	}
-	printf("vosub_vidix: Using: %s\n",vidix_cap.name);
+	printf("vosub_vidix: Using: %s by %s\n",vidix_cap.name,vidix_cap.author);
 	/* we are able to tune up this stuff depend on fourcc format */
 	((vo_functions_t *)server)->draw_slice=vidix_draw_slice;
 	((vo_functions_t *)server)->draw_frame=vidix_draw_frame;
@@ -133,20 +133,24 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 	  case 16:err = ((vidix_fourcc.depth & VID_DEPTH_16BPP) != VID_DEPTH_16BPP); break;
 	  case 24:err = ((vidix_fourcc.depth & VID_DEPTH_24BPP) != VID_DEPTH_24BPP); break;
 	  case 32:err = ((vidix_fourcc.depth & VID_DEPTH_32BPP) != VID_DEPTH_32BPP); break;
+	  default: err = 1; break;
 	}
 	if(err)
 	{
-	  printf("vosub_vidix: video server has unsupported color depth by vidix\n");
+	  printf("vosub_vidix: video server has unsupported color depth by vidix (%d)\n",
+	    vidix_fourcc.depth);
 	  return -1;
 	}
 	if((dst_width > src_width || dst_height > src_height) && (vidix_cap.flags & FLAG_UPSCALER) != FLAG_UPSCALER)
 	{
-	  printf("vosub_vidix: vidix driver can't upscale image\n");
+	  printf("vosub_vidix: vidix driver can't upscale image (%dx%d -> %dx%d)\n",
+	    src_width, src_height, dst_width, dst_height);
 	  return -1;
 	}
 	if((dst_width > src_width || dst_height > src_height) && (vidix_cap.flags & FLAG_DOWNSCALER) != FLAG_DOWNSCALER)
 	{
-	  printf("vosub_vidix: vidix driver can't downscale image\n");
+	  printf("vosub_vidix: vidix driver can't downscale image (%dx%d -> %dx%d)\n",
+	    src_width, src_height, dst_width, dst_height);
 	  return -1;
 	}
 	image_width = src_width;
@@ -438,9 +442,7 @@ uint32_t vidix_draw_frame(uint8_t *image[])
 /* Note it's very strange but sometime for YUY2 draw_frame is called */
     if(src_format == IMGFMT_YV12 || src_format == IMGFMT_I420 || src_format == IMGFMT_IYUV)
     {
-	printf("vosub_vidix: draw_frame for YUV420 called\nExiting...\n");
-	vidix_term();
-	exit( EXIT_FAILURE );
+	printf("vosub_vidix: draw_frame for YUV420 called, frame cannot be written\n");
     }
     else
     if(src_format == IMGFMT_RGB32 || src_format == IMGFMT_BGR32)
