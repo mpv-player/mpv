@@ -766,7 +766,7 @@ void add_subtitles(char *filename, float fps, int silent)
       mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_FILE_SUB_FILENAME=%s\n", filename);
     }
     ++set_of_sub_size;
-    mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_AddedSubtitleFile, set_of_sub_size, filename);
+    mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AddedSubtitleFile, set_of_sub_size, filename);
 }
 
 // FIXME: if/when the GUI calls this, global sub numbering gets (potentially) broken.
