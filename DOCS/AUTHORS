@@ -35,6 +35,10 @@ Gabucino:  <gabucino@k2.jozsef.kando.hu>
 BERECZ Szabolcs: <szabi@inf.elte.hu>
 - config file and command line parser (coming soon)
 - mga_vid fixes, module option stc.
+- fbdev support in libvo
+
+Megyer Laszlo (Lez, Laaz): <lez@sch.bme.hu>
+- SUB reader
 
 Andreas Ackermann:  <asackerm@stud.informatik.uni-erlangen.de>
 - LIRC support (see DOCS/LIRC)
@@ -50,9 +54,6 @@ TeLeNiEkO: <telenieko@telenieko.com>
 Michael Graffam: <mgraffam@idsi.net>
 - XF86VidMode support to vo_x11
 - Video mode switching code to vo_dga
-
-Megyer Laszlo (Lez, Laaz): <lez@sch.bme.hu>
-- SUB reader
 
 Main testers:
   Balazs Tibor (Tibcu)
