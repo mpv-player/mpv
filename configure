@@ -166,7 +166,7 @@ Optional features:
   --enable-largefiles    enable support for files >2^32 bytes long [disable]
   --enable-termcap       use termcap database for key codes [disable]
   --enable-xmmp          use XMMP audio drivers [disable]
-  --enable-lirc          enable LIRC (remote control) support [disable]
+  --enable-lirc          enable LIRC (remote control) support [autodetect]
   --enable-gui           enable GUI [disable]
   --enable-tv            enable TV Interface (tv/dvb grabbers) [disable]
   --disable-win32        disable Win32 DLL support [autodetect]
@@ -687,6 +687,10 @@ fi
 
 if test -c /dev/ost/video ; then
  _dvb=yes
+fi
+
+if test -c /dev/lirc ; then
+ _lirc=yes
 fi
 
 cat > $TMPC << EOF
@@ -1385,6 +1389,9 @@ for ac_option do
   --enable-fbdev)
   	_fbdev=yes
 	;;
+  --enable-dvb)
+        _dvb=yes
+        ;;
   --enable-dxr3)
 	_dxr3=yes
 	;;
@@ -1510,11 +1517,11 @@ for ac_option do
   --disable-dxr3)
 	_dxr3=no
 	;;
-  --enable-dvb)
-        _dvb=yes
-        ;;
   --disable-dvb)
         _dvb=no
+        ;;
+  --disable-lirc)
+        _lirc=no
         ;;
   --disable-iconv)
   	_iconv=no
@@ -1799,6 +1806,7 @@ echo "Checking for ESD Audio ... $_esd"
 echo "Checking for Sun Audio ... $_sun_audio"
 echo "Checking for Sun mediaLib ... $_mlib"
 echo "Checking for SGI Audio ... $_sgi_audio"
+echo "Checking for LIRC ... $_lirc"
 echo "Checking for DeCSS support ... $_css"
 echo "Checking for DVDread support ... $_dvdread"
 echo "Checking for PNG support ... $_png"
