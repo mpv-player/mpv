@@ -577,6 +577,8 @@ Ponekker, Zoltán (Pontscho/fresh!mindworkz) <pontscho@makacs.poliod.hu>
 van Poorten, Ivo (ivop) <ivop@euronet.nl>
     * multiple directory support for vo_jpeg
     * vo_jpeg suboptions parser
+    * vo_pnm video output driver
+    * vo_md5sum video output driver
 
 Ran, Lu <hephooey@fastmail.fm>
     * Chinese documentation translation
