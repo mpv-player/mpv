@@ -120,29 +120,14 @@ vo_mga_flip_page(void)
 
 }
 
-
-static void
-write_frame_yuy2(uint8_t *y)
-{
-        int len=2*mga_vid_config.src_width;
-	uint32_t bespitch = (mga_vid_config.src_width + 31) & ~31;
-
-	mem2agpcpy_pic(vid_data, y, len, mga_vid_config.src_height, 2*bespitch, len);
-}
-
 static uint32_t
 draw_frame(uint8_t *src[])
 {
-    switch(mga_vid_config.format){
-    case MGA_VID_FORMAT_YUY2:
-    case MGA_VID_FORMAT_UYVY:
-        write_frame_yuy2(src[0]);break;
-    }
+    printf("!!! mga::draw_frame() called !!!\n");
     return 0;
 }
 
-static uint32_t
-get_image(mp_image_t *mpi){
+static uint32_t get_image(mp_image_t *mpi){
     uint32_t bespitch = (mga_vid_config.src_width + 31) & ~31;
     uint32_t bespitch2 = bespitch/2;
 //    printf("mga: get_image() called\n");
@@ -177,6 +162,25 @@ get_image(mp_image_t *mpi){
 }
 
 static uint32_t
+draw_image(mp_image_t *mpi){
+    uint32_t bespitch = (mga_vid_config.src_width + 31) & ~31;
+
+    // if -dr or -slices then do nothing:
+    if(mpi->flags&(MP_IMGFLAG_DIRECT|MP_IMGFLAG_DRAW_CALLBACK)) return VO_TRUE;
+
+    if(mpi->flags&MP_IMGFLAG_PLANAR){
+	// copy planar:
+        draw_slice(mpi->planes,mpi->stride,mpi->w,mpi->h,mpi->x,mpi->y);
+    } else {
+	// copy packed:
+	mem2agpcpy_pic(vid_data, mpi->planes[0],	// dst,src
+		    mpi->w*(mpi->bpp/8), mpi->h,	// w,h
+		    bespitch*2, mpi->stride[0]);	// dstride,sstride
+    }
+    return VO_TRUE;
+}
+
+static uint32_t
 query_format(uint32_t format)
 {
     switch(format){
@@ -185,8 +189,6 @@ query_format(uint32_t format)
     case IMGFMT_IYUV:
     case IMGFMT_YUY2:
     case IMGFMT_UYVY:
-//    case IMGFMT_RGB|24:
-//    case IMGFMT_BGR|24:
         return 3 | VFCAP_OSD|VFCAP_HWSCALE_UP|VFCAP_HWSCALE_DOWN;
     }
     return 0;
@@ -219,6 +221,8 @@ static uint32_t control(uint32_t request, void *data, ...)
     return query_format(*((uint32_t*)data));
   case VOCTRL_GET_IMAGE:
     return get_image(data);
+  case VOCTRL_DRAW_IMAGE:
+    return draw_image(data);
   case VOCTRL_SET_EQUALIZER:
     {
      va_list ap;
@@ -379,7 +383,6 @@ static int mga_init(int width,int height,unsigned int format){
 	ioctl(f,MGA_VID_ON,0);
 
   return 0;
-
 }
 
 static int mga_uninit(){
