@@ -1490,7 +1490,7 @@ display_tracks (mkv_demuxer_t *mkv_d)
           sprintf (str, "-aid %u, -alang %.5s",aid++,mkv_d->tracks[i]->language);
           break;
         case MATROSKA_TRACK_SUBTITLE:
-          type = "sutitles";
+          type = "subtitles";
           sprintf (str, "-sid %u, -slang %.5s",sid++,mkv_d->tracks[i]->language);
           break;
         }
