@@ -57,9 +57,6 @@ int XShmGetEventBase(Display*);
 static unsigned char *ImageData;
 
 /* X11 related variables */
-//static Display *mydisplay;
-static Window mywindow;
-static GC mygc;
 static XImage *myximage;
 static int depth, bpp, mode;
 static XWindowAttributes attribs;
@@ -405,50 +402,44 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
    xswamask = CWBackPixel | CWBorderPixel;
 
     if ( WinID>=0 ){
-      mywindow = WinID ? ((Window)WinID) : RootWindow(mDisplay,mScreen);
-      XUnmapWindow( mDisplay,mywindow );
-      XChangeWindowAttributes( mDisplay,mywindow,xswamask,&xswa );
+      vo_window = WinID ? ((Window)WinID) : RootWindow(mDisplay,mScreen);
+      XUnmapWindow( mDisplay,vo_window );
+      XChangeWindowAttributes( mDisplay,vo_window,xswamask,&xswa );
     } else 
 
-   mywindow = XCreateWindow(mDisplay, RootWindow(mDisplay,mScreen),
+   vo_window = XCreateWindow(mDisplay, RootWindow(mDisplay,mScreen),
        hint.x, hint.y, hint.width, hint.height,
        0, depth,CopyFromParent,vinfo.visual,xswamask,&xswa);
 
-   vo_x11_classhint( mDisplay,mywindow,"xv" );
-   vo_hidecursor(mDisplay,mywindow);
+   vo_x11_classhint( mDisplay,vo_window,"xv" );
+   vo_hidecursor(mDisplay,vo_window);
 
-   XSelectInput(mDisplay, mywindow, StructureNotifyMask | KeyPressMask 
+   XSelectInput(mDisplay, vo_window, StructureNotifyMask | KeyPressMask 
 #ifdef HAVE_NEW_INPUT
 		| ButtonPressMask | ButtonReleaseMask
 #endif
    );
-   XSetStandardProperties(mDisplay, mywindow, hello, hello, None, NULL, 0, &hint);
-   if ( mFullscreen ) vo_x11_decoration( mDisplay,mywindow,0 );
-   XMapWindow(mDisplay, mywindow);
+   XSetStandardProperties(mDisplay, vo_window, hello, hello, None, NULL, 0, &hint);
+   if ( mFullscreen ) vo_x11_decoration( mDisplay,vo_window,0 );
+   XMapWindow(mDisplay, vo_window);
 #ifdef HAVE_XINERAMA
-   vo_x11_xinerama_move(mDisplay,mywindow);
+   vo_x11_xinerama_move(mDisplay,vo_window);
 #endif
-   mygc = XCreateGC(mDisplay, mywindow, 0L, &xgcv);
+   vo_gc = XCreateGC(mDisplay, vo_window, 0L, &xgcv);
    XFlush(mDisplay);
    XSync(mDisplay, False);
 #ifdef HAVE_XF86VM
     if ( vm )
      {
       /* Grab the mouse pointer in our window */
-      XGrabPointer(mDisplay, mywindow, True, 0,
+      XGrabPointer(mDisplay, vo_window, True, 0,
                    GrabModeAsync, GrabModeAsync,
-                   mywindow, None, CurrentTime);
-      XSetInputFocus(mDisplay, mywindow, RevertToNone, CurrentTime);
+                   vo_window, None, CurrentTime);
+      XSetInputFocus(mDisplay, vo_window, RevertToNone, CurrentTime);
      }
 #endif
-
 #ifdef HAVE_NEW_GUI
   }
-  else
-    {
-     mywindow=vo_window;
-     mygc=vo_gc;
-    }
 #endif
 
  xv_port = 0;
@@ -519,9 +510,9 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 #endif
      set_gamma_correction();
 
-     XGetGeometry( mDisplay,mywindow,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
+     XGetGeometry( mDisplay,vo_window,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
      drwX=0; drwY=0;
-     XTranslateCoordinates( mDisplay,mywindow,mRoot,0,0,&drwcX,&drwcY,&mRoot );
+     XTranslateCoordinates( mDisplay,vo_window,mRoot,0,0,&drwcX,&drwcY,&mRoot );
      printf( "[xv] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
 
      aspect(&dwidth,&dheight,A_NOZOOM);
@@ -583,9 +574,9 @@ static void check_events(void)
  int e=vo_x11_check_events(mDisplay);
  if(e&VO_EVENT_RESIZE)
   {
-   XGetGeometry( mDisplay,mywindow,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
+   XGetGeometry( mDisplay,vo_window,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
    drwX=0; drwY=0;
-   XTranslateCoordinates( mDisplay,mywindow,mRoot,0,0,&drwcX,&drwcY,&mRoot );
+   XTranslateCoordinates( mDisplay,vo_window,mRoot,0,0,&drwcX,&drwcY,&mRoot );
    printf( "[xv] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
 
    #ifdef HAVE_NEW_GUI
@@ -617,8 +608,8 @@ static void check_events(void)
   }
  if ( e & VO_EVENT_EXPOSE )
   {
-   XvShmPutImage(mDisplay, xv_port, mywindow, mygc, xvimage[current_buf], 0, 0,  image_width, image_height, drwX, drwY, 1, 1, False);
-   XvShmPutImage(mDisplay, xv_port, mywindow, mygc, xvimage[current_buf], 0, 0,  image_width, image_height, drwX,drwY,drwWidth,(mFullscreen?drwHeight - 1:drwHeight), False);
+   XvShmPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf], 0, 0,  image_width, image_height, drwX, drwY, 1, 1, False);
+   XvShmPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf], 0, 0,  image_width, image_height, drwX,drwY,drwWidth,(mFullscreen?drwHeight - 1:drwHeight), False);
   }
 }
 
@@ -627,7 +618,7 @@ static void draw_osd(void)
 
 static void flip_page(void)
 {
- XvShmPutImage(mDisplay, xv_port, mywindow, mygc, xvimage[current_buf],
+ XvShmPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf],
          0, 0,  image_width, image_height,
          drwX,drwY,drwWidth,(mFullscreen?drwHeight - 1:drwHeight),
          False);
@@ -778,7 +769,7 @@ static void uninit(void)
  if ( vo_window == None )
 #endif
  {
-  XDestroyWindow( mDisplay,mywindow );
+  XDestroyWindow( mDisplay,vo_window );
  }
  for( i=0;i<num_buffers;i++ ) deallocate_xvimage( i );
 #ifdef HAVE_XF86VM

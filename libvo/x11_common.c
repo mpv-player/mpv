@@ -392,19 +392,12 @@ void vo_x11_classhint( Display * display,Window window,char *name ){
 	    XSetClassHint(display,window,&wmClass);
 }
 
-#ifdef HAVE_NEW_GUI
- Window    vo_window = None;
- GC        vo_gc;
- int       vo_xeventhandling = 1;
- int       vo_resize = 0;
- int       vo_expose = 0;
+Window    vo_window = None;
+GC        vo_gc;
 
+#ifdef HAVE_NEW_GUI
  void vo_setwindow( Window w,GC g ) {
    vo_window=w; vo_gc=g;
-   vo_xeventhandling=0;
- }
- void vo_setwindowsize( int w,int h ) {
-    vo_dwidth=w; vo_dheight=h;
  }
 #endif
 
@@ -433,57 +426,41 @@ int vo_x11_check_events(Display *mydisplay){
  static XComposeStatus stat;
 // unsigned long  vo_KeyTable[512];
 
-#ifdef HAVE_NEW_GUI
- if ( vo_xeventhandling )
-   {
-#endif
-    while ( XPending( mydisplay ) )
-      {
-       XNextEvent( mydisplay,&Event );
-       switch( Event.type )
-         {
-          case Expose:
-               ret|=VO_EVENT_EXPOSE;
-               break;
-          case ConfigureNotify:
-               vo_dwidth=Event.xconfigure.width;
-               vo_dheight=Event.xconfigure.height;
-	       ret|=VO_EVENT_RESIZE;
-               break;
-          case KeyPress:
-               XLookupString( &Event.xkey,buf,sizeof(buf),&keySym,&stat );
-               vo_x11_putkey( ( (keySym&0xff00) != 0?( (keySym&0x00ff) + 256 ):( keySym ) ) );
-	       ret|=VO_EVENT_KEYPRESS;
-               break;
-#ifdef HAVE_NEW_INPUT
-          case ButtonPress:
-               // Ignore mouse whell press event
-               if(Event.xbutton.button == 4 || Event.xbutton.button == 5)
-                    break;
-               mplayer_put_key((MOUSE_BTN0+Event.xbutton.button-1)|MP_KEY_DOWN);
-               break;
-          case ButtonRelease:
-               mplayer_put_key(MOUSE_BTN0+Event.xbutton.button-1);
-               break;
-#endif
-         }
-      }
-#ifdef HAVE_NEW_GUI
-    }
-    else
+ while ( XPending( mydisplay ) )
+  {
+   XNextEvent( mydisplay,&Event );
+//   #ifdef HAVE_NEW_GUI
+//    if ( use_gui ) gEvent( 0,(char*)&Event );
+//   #endif
+   if ( vo_window == Event.xany.window )
+    switch( Event.type )
      {
-      if ( vo_resize )
-       {
-        vo_resize=0;
-        ret|=VO_EVENT_RESIZE;
-       }
-      if ( vo_expose )
-       {
-        vo_expose=0;
-        ret|=VO_EVENT_EXPOSE;
-       }
-     }
+      case Expose:
+           ret|=VO_EVENT_EXPOSE;
+           break;
+      case ConfigureNotify:
+           vo_dwidth=Event.xconfigure.width;
+           vo_dheight=Event.xconfigure.height;
+           ret|=VO_EVENT_RESIZE;
+           break;
+      case KeyPress:
+           XLookupString( &Event.xkey,buf,sizeof(buf),&keySym,&stat );
+           vo_x11_putkey( ( (keySym&0xff00) != 0?( (keySym&0x00ff) + 256 ):( keySym ) ) );
+           ret|=VO_EVENT_KEYPRESS;
+           break;
+#ifdef HAVE_NEW_INPUT
+      case ButtonPress:
+           // Ignore mouse whell press event
+           if(Event.xbutton.button == 4 || Event.xbutton.button == 5)
+            break;
+           mplayer_put_key((MOUSE_BTN0+Event.xbutton.button-1)|MP_KEY_DOWN);
+           break;
+      case ButtonRelease:
+           mplayer_put_key(MOUSE_BTN0+Event.xbutton.button-1);
+           break;
 #endif
+     }
+  }
 
   return ret;
 }

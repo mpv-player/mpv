@@ -68,8 +68,6 @@ static vo_info_t vo_info =
 };
 
 //static Display              * mDisplay;
-static Window                 mWindow;
-static GC                     mGC;
 static XGCValues              wGCV;
 
 static XImage               * myximage;
@@ -102,11 +100,10 @@ static XSetWindowAttributes   xWAttribs;
 
 static void mDrawColorKey( void )
 {
- XSetBackground( mDisplay,mGC,0 );
-// XFillRectangle( mDisplay,mWindow,mGC,0,0,drwWidth,drwHeight );
- XClearWindow( mDisplay,mWindow );
- XSetForeground( mDisplay,mGC,fgColor );
- XFillRectangle( mDisplay,mWindow,mGC,drwX,drwY,drwWidth,(mFullscreen?drwHeight - 1:drwHeight) );
+ XSetBackground( mDisplay,vo_gc,0 );
+ XClearWindow( mDisplay,vo_window );
+ XSetForeground( mDisplay,vo_gc,fgColor );
+ XFillRectangle( mDisplay,vo_window,vo_gc,drwX,drwY,drwWidth,(mFullscreen?drwHeight - 1:drwHeight) );
  XFlush( mDisplay );
 }
 
@@ -126,9 +123,9 @@ static void set_window(){
            }
          #endif
 
-         XGetGeometry( mDisplay,mWindow,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
+         XGetGeometry( mDisplay,vo_window,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
          drwX=0; drwY=0; // drwWidth=wndWidth; drwHeight=wndHeight;
-         XTranslateCoordinates( mDisplay,mWindow,mRoot,0,0,&drwcX,&drwcY,&mRoot );
+         XTranslateCoordinates( mDisplay,vo_window,mRoot,0,0,&drwcX,&drwcY,&mRoot );
          fprintf( stderr,"[xmga] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
 
          aspect(&dwidth,&dheight,A_NOZOOM);
@@ -265,10 +262,6 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
 
  wndX=0; wndY=0;
  wndWidth=d_width; wndHeight=d_height;
- #ifdef HAVE_NEW_GUI
-//  mdwidth=d_width; mdheight=d_height;
-  mdwidth=width; mdheight=height;
- #endif
  mFullscreen=fullscreen&1;
 
  switch ( vo_depthonscreen )
@@ -282,6 +275,7 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
 
   aspect(&d_width,&d_height,A_NOZOOM);
 #ifdef HAVE_NEW_GUI
+ mdwidth=width; mdheight=height;
  if ( vo_window == None )
   {
 #endif
@@ -306,49 +300,37 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
    xswamask=CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
 
     if ( WinID>=0 ){
-      mWindow = WinID ? ((Window)WinID) : RootWindow(mDisplay,mScreen);
-      XUnmapWindow( mDisplay,mWindow );
-      XChangeWindowAttributes( mDisplay,mWindow,xswamask,&xWAttribs);
+      vo_window = WinID ? ((Window)WinID) : RootWindow(mDisplay,mScreen);
+      XUnmapWindow( mDisplay,vo_window );
+      XChangeWindowAttributes( mDisplay,vo_window,xswamask,&xWAttribs);
     } else 
-   mWindow=XCreateWindow( mDisplay,RootWindow( mDisplay,mScreen ),
+   vo_window=XCreateWindow( mDisplay,RootWindow( mDisplay,mScreen ),
      wndX,wndY,
      wndWidth,wndHeight,
      xWAttribs.border_pixel,
      mDepth,
      InputOutput,
      vinfo.visual,xswamask,&xWAttribs );
-   vo_x11_classhint( mDisplay,mWindow,"xmga" );
-   vo_hidecursor(mDisplay,mWindow);
+   vo_x11_classhint( mDisplay,vo_window,"xmga" );
+   vo_hidecursor(mDisplay,vo_window);
 
-   if ( mFullscreen ) vo_x11_decoration( mDisplay,mWindow,0 );
+   if ( mFullscreen ) vo_x11_decoration( mDisplay,vo_window,0 );
 
-   XGetNormalHints( mDisplay,mWindow,&hint );
+   XGetNormalHints( mDisplay,vo_window,&hint );
    hint.x=wndX; hint.y=wndY;
    hint.width=wndWidth; hint.height=wndHeight;
    hint.base_width=wndWidth; hint.base_height=wndHeight;
    hint.flags=USPosition | USSize;
-   XSetNormalHints( mDisplay,mWindow,&hint );
-   XStoreName( mDisplay,mWindow,mTitle );
-   XMapWindow( mDisplay,mWindow );
+   XSetNormalHints( mDisplay,vo_window,&hint );
+   XStoreName( mDisplay,vo_window,mTitle );
+   XMapWindow( mDisplay,vo_window );
 		   
 #ifdef HAVE_XINERAMA
-   vo_x11_xinerama_move(mDisplay,mWindow);
+   vo_x11_xinerama_move(mDisplay,vo_window);
 #endif
-   mGC=XCreateGC( mDisplay,mWindow,GCForeground,&wGCV );
+   vo_gc=XCreateGC( mDisplay,vo_window,GCForeground,&wGCV );
 #ifdef HAVE_NEW_GUI
   }
-  else
-    {
-     mWindow=vo_window;
-//     fprintf( stderr,"[xmga] width: %d height: %d d_width: %d d_height: %d\n",width,height,d_width,d_height );
-//     if ( vo_screenwidth != d_width )
-//      {
-//       XMoveWindow( mDisplay,mWindow,( vo_screenwidth - d_width ) / 2,( vo_screenheight - d_height ) / 2 );
-//       XResizeWindow( mDisplay,mWindow,d_width,d_height );
-//      }
-//      else mFullscreen=1;
-      mGC=vo_gc; //XCreateGC( mDisplay,mWindow,GCForeground,&wGCV );
-    }
 #endif
 
  set_window();
@@ -365,13 +347,8 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
  
  set_window();
 
-#ifdef HAVE_NEW_GUI
- if ( vo_window == None )
-#endif
- {
-   XFlush( mDisplay );
-   XSync( mDisplay,False );
- }
+ XFlush( mDisplay );
+ XSync( mDisplay,False );
 
  saver_off(mDisplay);
 
@@ -390,7 +367,7 @@ uninit(void)
  if ( vo_window == None )
 #endif
  {
-  XDestroyWindow( mDisplay,mWindow );
+  XDestroyWindow( mDisplay,vo_window );
  }
  mga_uninit();
  printf("vo: uninit!\n");
