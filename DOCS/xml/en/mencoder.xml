@@ -965,7 +965,7 @@ Notes:
 <title>Mixed progressive and interlaced</title>
 <para>
   In &quot;mixed progressive and interlaced&quot; content, progressive
-  and interlaced video have been have been spliced together.
+  and interlaced video have been spliced together.
 </para>
 
 <para>
@@ -1050,12 +1050,12 @@ Notes:
 <listitem><para>  
   Use a deinterlacing filter before encoding. There are several of
   these filters available to choose from, each with its own advantages
-  and disadvantages.  Consult <option>mplayer -pphelp</option> to see
+  and disadvantages. Consult <option>mplayer -pphelp</option> to see
   what's available (grep for &quot;deint&quot;), and search the
   <ulink url="http://www.mplayerhq.hu/homepage/design6/info.html#mailing_lists">
   MPlayer mailing lists</ulink> to find many discussions about the
   various filters. Again, the framerate is not changing, so no
-  <option>-ofps</option>.  Also, deinterlacing should be done after
+  <option>-ofps</option>. Also, deinterlacing should be done after
   cropping <link linkend="menc-feat-telecine-footnotes">[1]</link> and
   before scaling.
 
@@ -1080,7 +1080,7 @@ Notes:
   use this method, then Reference the manual, and chose whichever
   option looks best for your material. Note that when using
   <option>tfields</option> you
-   <emphasis role="bold">have to </emphasis> specify both
+   <emphasis role="bold">have to</emphasis> specify both
   <option>-fps</option> and <option>-ofps</option> to be twice the
   framerate of your original source.
 
@@ -1091,7 +1091,7 @@ Notes:
   only one of the two fields. Of course, you'll lose half the vertical
   resolution, but if you plan on downscaling to at most 1/2 of the
   original, the loss won't matter much. The result will be a
-  progressive 29.97 frames per second file.  The procedure is to use
+  progressive 29.97 frames per second file. The procedure is to use
   <option>-vf field</option>, then crop
   <link linkend="menc-feat-telecine-footnotes">[1]</link> and scale
   appropriately. Remember that you'll have to adjust the scale to
@@ -1116,7 +1116,7 @@ Notes:
   Currently the most reliable method to deal with this type of video
   is to, rather than inverse-telecine the telecined parts, telecine
   the non-telecined parts and then inverse-telecine the whole
-  video. Sound confusing?  softpulldown is a filter that goes through
+  video. Sound confusing? softpulldown is a filter that goes through
   a video and makes the entire file telecined. If we follow
   softpulldown with either <option>detc</option> or
   <option>ivtc</option>, the final result will be entirely
@@ -1139,7 +1139,7 @@ Notes:
   <application>MEncoder's</application> behavior of dropping frames to
   maintain synchronization between the audio and video: it drops
   frames before sending them through the filter chain, rather than
-  after.  As a result, <option>pullup</option> is sometimes deprived
+  after. As a result, <option>pullup</option> is sometimes deprived
   of the data it needs.
   </para>
 
@@ -1255,7 +1255,7 @@ Notes:
   <para>
   When you are dealing with interlaced YUV 4:2:0, the situation is a
   bit more complicated. Instead of every four luma pixels in the
-  <emphasis>frame </emphasis> sharing a chroma pixel, every four luma
+  <emphasis>frame</emphasis> sharing a chroma pixel, every four luma
   pixels in each <emphasis> field</emphasis> share a chroma
   pixel. When fields are interlaced to form a frame, each scanline is
   one pixel high. Now, instead of all four luma pixels being in a
