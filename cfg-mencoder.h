@@ -34,6 +34,9 @@ struct config lameopts_conf[]={
 #if HAVE_MP3LAME >= 392
 	{"fast", &lame_param_fast, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"preset", &lame_param_preset, CONF_TYPE_STRING, 0, 0, 0, NULL},
+#else
+	{"fast", "MPlayer was built without -lameopts fast support (requires libmp3lame >=3.92)!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+	{"preset", "MPlayer was built without -lameopts preset support (requires libmp3lame >=3.92)!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
 	{"help", "TODO: lameopts help!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
