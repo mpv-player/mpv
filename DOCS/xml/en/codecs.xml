@@ -450,10 +450,6 @@ then started XviD. So both projects have the same origin.
   can play them)
   </simpara></listitem>
 <listitem><simpara>
-  you have to choose between DivX4 <emphasis role="bold">or</emphasis> XviD
-  support at compiletime
-  </simpara></listitem>
-<listitem><simpara>
   under development
   </simpara></listitem>
 </itemizedlist>
@@ -527,15 +523,13 @@ decoders:
 <title>COMPILING MPLAYER WITH QUICKTIME LIBRARIES SUPPORT</title>
 <note><para>currently only 32bit Intel platforms are supported.</para></note>
 <step><para>download MPlayer CVS</para></step>
-<step><para>compile MPlayer with:
-<screen>$ ./configure --enable-qtx</screen>
-</para></step>
 <step><para>download QuickTime DLL pack from
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/"/>
 </para></step>
 <step><para>extract QuickTime DLL pack to your Win32 codecs directory
 (default: <filename class="directory">/usr/local/lib/codecs/</filename>)
 </para></step>
+<step><para>compile MPlayer</para></step>
 </procedure>
 
 </sect3>
