@@ -8,6 +8,7 @@
 
 #include "config.h"
 #include "bswap.h"
+#include <stdio.h>
 
 #define LE_16(x) (le2me_16(*(unsigned short *)(x)))
 #define LE_32(x) (le2me_32(*(unsigned int *)(x)))
