@@ -897,7 +897,6 @@ mips)
     ;;
 esac
 
-
 # ---
 
 # Checking for localization ...
