@@ -594,7 +594,7 @@ void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags){
       // find nearest video keyframe chunk pos:
       if(rel_seek_frames>0){
         // seek forward
-        while(video_chunk_pos<priv->idx_size){
+        while(video_chunk_pos<priv->idx_size-1){
           int id=((AVIINDEXENTRY *)priv->idx)[video_chunk_pos].ckid;
           if(avi_stream_id(id)==d_video->id){  // video frame
             if((--rel_seek_frames)<0 && ((AVIINDEXENTRY *)priv->idx)[video_chunk_pos].dwFlags&AVIIF_KEYFRAME) break;
