@@ -660,13 +660,11 @@ int vixProbe( int verbose,int force )
 	{
 	    printf(RADEON_MSG" Driver was forced. Was found %sknown chip\n",idx == -1 ? "un" : "");
 	    if(idx == -1)
-		printf(RADEON_MSG" Assuming it as %s\n",
 #ifdef RAGE128
-		"Rage128"
+		printf(RADEON_MSG" Assuming it as Rage128\n");
 #else
-		"Radeon1"
+		printf(RADEON_MSG" Assuming it as Radeon1\n");
 #endif
-		);
 	}
 	def_cap.device_id = lst[i].device;
 	err = 0;
