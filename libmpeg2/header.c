@@ -203,7 +203,7 @@ static int header_process_picture_coding_extension (picture_t * picture, uint8_t
     picture->repeat_first_field = (buffer[3] >> 1) & 1;
     picture->progressive_frame = buffer[4] >> 7;
 
-#if 0
+#if 1
     // repeat_first implementation by A'rpi/ESP-team, based on libmpeg3:
     picture->display_time=100;
     if(picture->repeat_first_field){
