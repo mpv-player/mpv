@@ -7,7 +7,6 @@
 include config.mak
 
 PRG = mplayer
-PRG_FIBMAP = fibmap_mplayer
 PRG_CFG = codec-cfg
 PRG_MENCODER = mencoder
 
@@ -36,7 +35,7 @@ OBJS_MPLAYER = $(SRCS_MPLAYER:.c=.o)
 VO_LIBS = $(AA_LIB) $(X_LIB) $(SDL_LIB) $(GGI_LIB) $(MP1E_LIB) $(MLIB_LIB) $(SVGA_LIB) $(DIRECTFB_LIB) 
 AO_LIBS = $(ARTS_LIB) $(ESD_LIB) $(NAS_LIB) $(SGIAUDIO_LIB)
 CODEC_LIBS = $(AV_LIB) $(FAME_LIB) $(MAD_LIB) $(VORBIS_LIB) $(THEORA_LIB) $(FAAD_LIB) $(LIBLZO_LIB) $(DECORE_LIB) $(XVID_LIB) $(PNG_LIB) $(Z_LIB) $(JPEG_LIB) $(ALSA_LIB) $(XMMS_LIB) $(MATROSKA_LIB) 
-COMMON_LIBS = libmpcodecs/libmpcodecs.a mp3lib/libMP3.a liba52/liba52.a libmpeg2/libmpeg2.a $(W32_LIB) $(DS_LIB) libaf/libaf.a libmpdemux/libmpdemux.a input/libinput.a postproc/libswscale.a osdep/libosdep.a $(CSS_LIB) $(CODEC_LIBS) $(FREETYPE_LIB) $(TERMCAP_LIB) $(CDPARANOIA_LIB) $(MPLAYER_NETWORK_LIB) $(WIN32_LIB) $(GIF_LIB) $(MACOSX_FRAMEWORKS) $(SMBSUPPORT_LIB) $(FRIBIDI_LIB) $(FLAC_LIB) $(FONTCONFIG_LIB)
+COMMON_LIBS = libmpcodecs/libmpcodecs.a mp3lib/libMP3.a liba52/liba52.a libmpeg2/libmpeg2.a $(W32_LIB) $(DS_LIB) libaf/libaf.a libmpdemux/libmpdemux.a input/libinput.a postproc/libswscale.a osdep/libosdep.a $(DVDREAD_LIB) $(CODEC_LIBS) $(FREETYPE_LIB) $(TERMCAP_LIB) $(CDPARANOIA_LIB) $(MPLAYER_NETWORK_LIB) $(WIN32_LIB) $(GIF_LIB) $(MACOSX_FRAMEWORKS) $(SMBSUPPORT_LIB) $(FRIBIDI_LIB) $(FLAC_LIB) $(FONTCONFIG_LIB)
 
 CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader -Ilibvo $(FREETYPE_INC) $(EXTRA_INC) $(CDPARANOIA_INC) $(SDL_INC) $(X11_INC) $(FRIBIDI_INC) $(DVB_INC) $(XVID_INC) $(FONTCONFIG_INC) # -Wall
 
@@ -74,9 +73,6 @@ endif
 ALL_PRG = $(PRG)
 ifeq ($(MENCODER),yes)
 ALL_PRG += $(PRG_MENCODER)
-endif
-ifeq ($(CSS_USE),yes)
-ALL_PRG += $(PRG_FIBMAP)
 endif
 
 COMMON_DEPS = $(W32_DEP) $(DS_DEP) $(MP1E_DEP) $(AV_DEP) libmpdemux/libmpdemux.a libmpcodecs/libmpcodecs.a libao2/libao2.a liba52/liba52.a mp3lib/libMP3.a libmpeg2/libmpeg2.a osdep/libosdep.a postproc/libswscale.a input/libinput.a libvo/libvo.a libaf/libaf.a
@@ -230,9 +226,6 @@ mplayer_wine.so:	$(MPLAYER_DEP)
 	./darwinfixlib.sh $(MPLAYER_DEP)
 	$(CC) $(CFLAGS) -shared -Wl,-Bsymbolic -o mplayer_wine.so mplayer_wine.spec.c $(OBJS_MPLAYER) libvo/libvo.a libao2/libao2.a $(MENU_LIBS) $(VIDIX_LIBS) $(GUI_LIBS) $(COMMON_LIBS) $(GTK_LIBS) $(VO_LIBS) $(AO_LIBS) $(EXTRA_LIB) $(LIRC_LIB) $(LIRCC_LIB) $(STATIC_LIB) -lwine $(ARCH_LIB) -lm
 
-$(PRG_FIBMAP): fibmap_mplayer.o mp_msg.o
-	$(CC) -o $(PRG_FIBMAP) fibmap_mplayer.o mp_msg.o
-
 ifeq ($(MENCODER),yes)
 $(PRG_MENCODER): $(MENCODER_DEP)
 	./darwinfixlib.sh $(MENCODER_DEP) libmpcodecs/libmpencoders.a
@@ -307,17 +300,9 @@ ifeq ($(DVDKIT),yes)
 endif
 endif
 endif
-ifeq ($(CSS_USE),yes)
-	@echo "The following task requires root privileges. If it fails don't panic,"
-	@echo "however it means you can't use fibmap_mplayer."
-	@echo "Without this (or without running mplayer as root) you won't be"
-	@echo "able to play encrypted DVDs."
-	-$(INSTALL) -o 0 -g 0 -m 4755 $(INSTALLSTRIP) $(PRG_FIBMAP) $(BINDIR)/$(PRG_FIBMAP)
-endif
 
 uninstall:
 	-rm -f $(BINDIR)/$(PRG) $(BINDIR)/gmplayer $(MANDIR)/man1/mplayer.1
-	-rm -f $(BINDIR)/$(PRG_FIBMAP)
 	-rm -f  $(BINDIR)/$(PRG_MENCODER) $(MANDIR)/man1/mencoder.1
 	@echo "Uninstall completed"
 
@@ -325,7 +310,7 @@ clean:
 	-rm -f *.o *~ $(OBJS) codecs.conf.h
 
 distclean:
-	-rm -f *~ $(PRG) $(PRG_FIBMAP) $(PRG_MENCODER) $(PRG_CFG) $(OBJS)
+	-rm -f *~ $(PRG) $(PRG_MENCODER) $(PRG_CFG) $(OBJS)
 	-rm -f *.o *.a .depend configure.log codecs.conf.h
 	@for a in $(PARTS); do $(MAKE) -C $$a distclean; done
 	-$(MAKE) -C libavcodec distclean LIBPREF=lib LIBSUF=.a

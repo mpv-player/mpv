@@ -21,9 +21,6 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<trackno>   play VCD (Video CD) track from device instead of plain file\n"
 #endif
-#ifdef HAVE_LIBCSS
-" -dvdauth <dev>   specify DVD device for authentication (for encrypted discs)\n"
-#endif
 #ifdef USE_DVDREAD
 " dvd://<titleno>   play DVD title from device instead of plain file\n"
 " -alang/-slang    select DVD audio/subtitle language (by 2-char country code)\n"

@@ -63,10 +63,6 @@
 #include <lame/lame.h>
 #endif
 
-#ifdef HAVE_LIBCSS
-#include "libmpdemux/dvdauth.h"
-#endif
-
 #include <inttypes.h>
 
 #include "libvo/fastmemcpy.h"
@@ -485,25 +481,6 @@ if(stream->type==STREAMTYPE_DVD){
 #endif
 
   stream->start_pos+=seek_to_byte;
-
-#ifdef HAVE_LIBCSS
-//  current_module="libcss";
-  if (dvdimportkey) {
-    if (dvd_import_key(dvdimportkey)) {
-      mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_ErrorDVDkey);
-      mencoder_exit(1,NULL);
-    }
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_CmdlineDVDkey);
-  }
-  if (dvd_auth_device) {
-    //  if (dvd_auth(dvd_auth_device,f)) {
-    if (dvd_auth(dvd_auth_device,filename)) {
-      mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_ErrorDVDAuth);
-      mencoder_exit(1,NULL);
-    }
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_DVDauthOk);
-  }
-#endif
 
   if(stream_cache_size>0) stream_enable_cache(stream,stream_cache_size*1024,0,0);
 

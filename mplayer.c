@@ -57,10 +57,6 @@ extern int mp_input_win32_slave_cmd_func(int fd,char* dest,int size);
 
 #include "codec-cfg.h"
 
-#ifdef HAVE_LIBCSS
-#include "libmpdemux/dvdauth.h"
-#endif
-
 #ifdef USE_DVDNAV
 #include <dvdnav.h>
 #endif
@@ -1316,24 +1312,6 @@ if(!use_stdin && !slave_mode){
     goto goto_next_file;
   }
   stream->start_pos+=seek_to_byte;
-
-#ifdef HAVE_LIBCSS
-  current_module="libcss";
-  if (dvdimportkey) {
-    if (dvd_import_key(dvdimportkey)) {
-	mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_ErrorDVDkey);
-	exit_player(MSGTR_Exit_error);
-    }
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_CmdlineDVDkey);
-  }
-  if (dvd_auth_device) {
-    if (dvd_auth(dvd_auth_device,filename)) {
-	mp_msg(MSGT_CPLAYER,MSGL_FATAL,"Error in DVD auth...\n");
-	exit_player(MSGTR_Exit_error);
-      } 
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_DVDauthOk);
-  }
-#endif
 
 if(stream_dump_type==5){
   unsigned char buf[4096];

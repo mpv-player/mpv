@@ -14,8 +14,6 @@
 #include "stheader.h"
 #include "mp3_hdr.h"
 
-#include "dvdauth.h"
-
 //#define MAX_PS_PACKETSIZE 2048
 #define MAX_PS_PACKETSIZE (224*1024)
 
@@ -38,9 +36,6 @@ static unsigned int read_mpeg_timestamp(stream_t *s,int c){
 static int demux_mpg_read_packet(demuxer_t *demux,int id){
   int d;
   int len;
-#ifdef HAVE_LIBCSS
-  int css=0;
-#endif
   unsigned char c=0;
   unsigned int pts=0;
   unsigned int dts=0;
@@ -96,11 +91,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
     int hdrlen;
     // System-2 (.VOB) stream:
     if((c>>4)&3) {
-#ifdef HAVE_LIBCSS
-        css=1;
-#else
         mp_msg(MSGT_DEMUX,MSGL_WARN,MSGTR_EncryptedVOB);
-#endif
     }
     c=stream_read_char(demux->stream); pts_flags=c>>6;
     c=stream_read_char(demux->stream); hdrlen=c;
@@ -230,12 +221,6 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
   if(ds){
     mp_dbg(MSGT_DEMUX,MSGL_DBG2,"DEMUX_MPG: Read %d data bytes from packet %04X\n",len,id);
 //    printf("packet start = 0x%X  \n",stream_tell(demux->stream)-packet_start_pos);
-#ifdef HAVE_LIBCSS
-    if (css) {
-	    if (descrambling) dvd_css_descramble(demux->stream->buffer,key_title); else
-		    mp_msg(MSGT_DEMUX,MSGL_WARN,MSGTR_EncryptedVOBauth);
-    }
-#endif
     ds_read_packet(ds,demux->stream,len,pts/90000.0f,demux->filepos,0);
 //    if(ds==demux->sub) parse_dvdsub(ds->last->buffer,ds->last->len);
     return 1;

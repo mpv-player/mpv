@@ -172,7 +172,6 @@ Optional features:
   --enable-live          enable LIVE.COM Streaming Media support [disable]
   --disable-dvdread      Disable libdvdread support [autodetect]
   --disable-mpdvdkit     Disable mpdvdkit/mpdvdkit2 support [autodetect]
-  --disable-css          Disable old-style libcss DVD support [autodetect]
   --disable-cdparanoia   Disable cdparanoia support [autodetect]
   --disable-freetype     Disable freetype2 font rendering support [autodetect]
   --disable-fontconfig   Disable fontconfig font lookup support [autodetect]
@@ -296,13 +295,12 @@ Hazardous options a.k.a. "DO NOT REPORT ANY BUGS!"
   --disable-gcc-checking   disable gcc version checking [enable]
 
 Use these options if autodetection fails:
-  --with-extraincdir=DIR   extra headers (png, mad, sdl, css, ...) in DIR
-  --with-extralibdir=DIR   extra library files (png, SDL, ...) in DIR
+  --with-extraincdir=DIR   extra headers (png, mad, sdl, ...) in DIR
+  --with-extralibdir=DIR   extra library files (png, mad, sdl, ...) in DIR
   --with-x11incdir=DIR     X headers in DIR
   --with-x11libdir=DIR     X library files in DIR
   --with-dxr2incdir=DIR    DXR2 headers in DIR
   --with-dvbincdir=DIR     DVB headers in DIR
-  --with-csslibdir=DIR     libcss in DIR
   --with-madlibdir=DIR     libmad (libmad shared library) in DIR
   --with-mlibdir=DIR       libmlib (MLIB support) in DIR (Solaris only)
   --with-codecsdir=DIR     Binary codec files in DIR
@@ -1128,7 +1126,6 @@ _faad_external=auto
 _xmms=no
 _flac=auto
 _external_flac=auto
-_css=auto
 # dvdnav disabled, it does not work
 #_dvdnav=no
 _dvdread=auto
@@ -1299,8 +1296,6 @@ for ac_option do
   --disable-flac)	_flac=no	;;
   --enable-external-flac)	_external_flac=yes	;;
   --disable-external-flac)	_external_flac=no	;;
-  --enable-css)		_css=yes	;;
-  --disable-css)	_css=no		;;
   --enable-dvdread)	_dvdread=yes	;;
   --disable-dvdread)	_dvdread=no	;;
   --enable-mpdvdkit)	_dvdkit=yes	;;
@@ -1466,10 +1461,6 @@ for ac_option do
   --with-livelibdir=*)
     _livelibdir=`echo $ac_option | cut -d '=' -f 2`
     _live=yes
-    ;;
-  --with-csslibdir=*)
-    _csslibdir=`echo $ac_option | cut -d '=' -f 2`
-    _css=yes
     ;;
   --with-mlibdir=*)
     _mlibdir=`echo $ac_option | cut -d '=' -f 2`
@@ -4088,29 +4079,7 @@ else
   echores "no"
 fi  
 
-echocheck "DVD support (libcss - old style)"
-if test "$_css" = auto ; then
-  cat > $TMPC <<EOF
-#include <sys/types.h>
-#include <css.h>
-int main(void) { (void) CSSisEncrypted(0); return 0; }
-EOF
-  _css=no
-  cc_check -lcss $_ld_dl && _css=yes
-fi
-if test "$_css" = yes ; then
-  _def_css='#define HAVE_LIBCSS 1'
-  test "$_csslibdir" && _ld_css="-L${_csslibdir} $_ld_css"
-  _inputmodules="dvdcss $_inputmodules"
-  _largefiles=yes
-  echores "yes"
-else
-  _def_css='#undef HAVE_LIBCSS'
-  _noinputmodules="dvdcss $_noinputmodules"
-  echores "no"
-fi
-
-echocheck "DVD support (libdvdread - new style)"
+echocheck "DVD support (libdvdread)"
 if test "$_dvdread" = auto ; then
   cat > $TMPC << EOF
 #include <inttypes.h>
@@ -4132,7 +4101,7 @@ case "$_dvdread" in
   yes)
 	_largefiles=yes
 	_def_dvdread='#define USE_DVDREAD 1'
-	_ld_css='-ldvdread'
+	_ld_dvdread='-ldvdread'
 	_inputmodules="dvdread $_inputmodules"
 	echores "yes"
 	;;
@@ -4144,7 +4113,7 @@ case "$_dvdread" in
   libmpdvdkit)
 	_largefiles=yes
 	_def_dvdread='#define USE_DVDREAD 1'
-	_ld_css='-Llibmpdvdkit -lmpdvdkit'
+	_ld_dvdread='-Llibmpdvdkit -lmpdvdkit'
 	_noinputmodules="dvdread $_noinputmodules"
 	_def_mpdvdkit="#define USE_MPDVDKIT 1"
 	echores "disabled by libmpdvdkit"
@@ -4152,7 +4121,7 @@ case "$_dvdread" in
   libmpdvdkit2)
 	_largefiles=yes
 	_def_dvdread='#define USE_DVDREAD 1'
-	_ld_css='-Llibmpdvdkit2 -lmpdvdkit'
+	_ld_dvdread='-Llibmpdvdkit2 -lmpdvdkit'
 	_noinputmodules="dvdread $_noinputmodules"
 	_def_mpdvdkit="#define USE_MPDVDKIT 2"
 	echores "disabled by libmpdvdkit2"
@@ -5896,8 +5865,7 @@ SGIAUDIO_LIB = $_ld_sgiaudio
 TERMCAP_LIB = $_ld_termcap
 LIRC_LIB = $_ld_lirc
 LIRCC_LIB = $_ld_lircc
-CSS_USE = $_css
-CSS_LIB = $_ld_css
+DVDREAD_LIB = $_ld_dvdread
 DVDKIT = $_dvdkit
 DVDKIT2 = $_dvdkit2
 DVDKIT_SHARED = no
@@ -6176,9 +6144,6 @@ $_def_lircc
  */
 $_def_flac
 $_def_mpflac
-
-/* DeCSS support using libcss */
-$_def_css
 
 /* DVD navigation support using libdvdnav */
 $_def_dvdnav

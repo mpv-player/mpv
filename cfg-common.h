@@ -27,15 +27,9 @@
 #endif
 	{"slang", &dvdsub_lang, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
-#ifdef HAVE_LIBCSS
-        {"dvdauth", &dvd_auth_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
-        {"dvdkey", &dvdimportkey, CONF_TYPE_STRING, 0, 0, 0, NULL},
-	{"csslib", &css_so, CONF_TYPE_STRING, 0, 0, 0, NULL},
-#else
-        {"dvdauth", "MPlayer was compiled WITHOUT libcss support!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-        {"dvdkey", "MPlayer was compiled WITHOUT libcss support!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-	{"csslib", "MPlayer was compiled WITHOUT libcss support!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-#endif
+        {"dvdauth", "libcss support is OBSOLETED! RTFM!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+        {"dvdkey", "libcss support is OBSOLETED! RTFM!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+	{"csslib", "libcss support is OBSOLETED! RTFM!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 
 #ifdef MPLAYER_NETWORK
 	{"user", &network_username, CONF_TYPE_STRING, 0, 0, 0, NULL},
