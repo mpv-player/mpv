@@ -510,6 +510,8 @@ void outline(
     int x, y;
     for (y = 0; y<height; ++y) {
 	for (x = 0; x<width; ++x, ++s, ++t) {
+	  //if(s[0]>=192) printf("%d\n",s[0]);
+	  if(s[0]!=255){
 	    unsigned max = 0;
 	    unsigned *mrow = m + r;
 	    unsigned char *srow = s -r*width;
@@ -527,7 +529,10 @@ void outline(
 		    if (v>max) max = v;
 		}
 	    }
+//	    if(!max) *t = 0; else
 	    *t = (max + base/2) / base;
+	  } else 
+	    *t = 255;
 	}
     }
 }
@@ -634,6 +639,7 @@ unsigned gmatrix(unsigned *m, int r, int w, double const A) {
 
 
 void alpha() {
+    unsigned int ttime;
     int const g_r = ceil(radius);
     int const o_r = ceil(thickness);
     int const g_w = 2*g_r+1;		// matrix size
@@ -669,14 +675,19 @@ void alpha() {
     if (DEBUG) eprintf("\n");
 
 
+    ttime=GetTimer();
     if(thickness==1.0)
       outline1(bbuffer, abuffer, width, height);	// FAST solid 1 pixel outline
     else
       outline(bbuffer, abuffer, width, height, om, o_r, o_w);	// solid outline
-
     //outline(bbuffer, abuffer, width, height, gm, g_r, g_w);	// Gaussian outline
+    ttime=GetTimer()-ttime;
+    printf("outline: %7d us\n",ttime);
 
+    ttime=GetTimer();
     blur(abuffer, bbuffer, width, height, g, g_r, g_w, volume);
+    ttime=GetTimer()-ttime;
+    printf("gauss:   %7d us\n",ttime);
 
     free(g);
     free(om);
@@ -771,13 +782,21 @@ void parse_args(int argc, char **argv) {
 
 
 int main(int argc, char **argv) {
+    unsigned int ttime;
     parse_args(argc, argv);
 
     padding = ceil(radius) + ceil(thickness);
 
+    ttime=GetTimer();
     prepare_charset();
+    ttime=GetTimer()-ttime;
+    printf("charset: %7d us\n",ttime);
 
+    ttime=GetTimer();
     render();
+    ttime=GetTimer()-ttime;
+    printf("render:  %7d us\n",ttime);
+
     write_bitmap(bbuffer, 'b');
 
     abuffer = (unsigned char*)malloc(width*height);

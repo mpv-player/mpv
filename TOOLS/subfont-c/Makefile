@@ -1,6 +1,6 @@
 include ../../config.mak
 
-LDLIBS=-lm $(shell freetype-config --libs)
+LDLIBS=-lm ../../linux/timer-lx.o $(shell freetype-config --libs)
 CFLAGS=$(OPTFLAGS) $(shell freetype-config --cflags)
 
 #CFLAGS+=-O0			# for RedHat's gcc-2.96-95
