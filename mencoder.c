@@ -8,6 +8,7 @@
 #include <string.h>
 #include <signal.h>
 
+#include "config.h"
 #include "mp_msg.h"
 #include "help_mp.h"
 
@@ -28,94 +29,7 @@
 
 #include "get_path.c"
 
-//--------------------------
-
-static int tabsel_123[2][3][16] = {
-   { {0,32,64,96,128,160,192,224,256,288,320,352,384,416,448,},
-     {0,32,48,56, 64, 80, 96,112,128,160,192,224,256,320,384,},
-     {0,32,40,48, 56, 64, 80, 96,112,128,160,192,224,256,320,} },
-
-   { {0,32,48,56,64,80,96,112,128,144,160,176,192,224,256,},
-     {0,8,16,24,32,40,48,56,64,80,96,112,128,144,160,},
-     {0,8,16,24,32,40,48,56,64,80,96,112,128,144,160,} }
-};
-static long freqs[9] = { 44100, 48000, 32000, 22050, 24000, 16000 , 11025 , 12000 , 8000 };
-
-/*
- * decode a header and write the information
- * into the frame structure
- */
-static int decode_header(unsigned char* hbuf){
-    int stereo,ssize,crc,lsf,mpeg25,framesize,padding,bitrate_index,sampling_frequency;
-    unsigned long newhead = 
-      hbuf[0] << 24 |
-      hbuf[1] << 16 |
-      hbuf[2] <<  8 |
-      hbuf[3];
-
-//    printf("head=0x%08X\n",newhead);
-
-#if 1
-    // head_check:
-    if( (newhead & 0xffe00000) != 0xffe00000 ||  
-        (newhead & 0x0000fc00) == 0x0000fc00){
-	printf("head_check failed\n");
-	return -1;
-    }
-#endif
-
-    if((4-((newhead>>17)&3))!=3){ printf("not layer-3\n"); return -1;}
-
-    if( newhead & ((long)1<<20) ) {
-      lsf = (newhead & ((long)1<<19)) ? 0x0 : 0x1;
-      mpeg25 = 0;
-    } else {
-      lsf = 1;
-      mpeg25 = 1;
-    }
-
-    if(mpeg25)
-      sampling_frequency = 6 + ((newhead>>10)&0x3);
-    else
-      sampling_frequency = ((newhead>>10)&0x3) + (lsf*3);
-
-    if(sampling_frequency>8){
-	printf("invalid sampling_frequency\n");
-	return -1;  // valid: 0..8
-    }
-
-    crc = ((newhead>>16)&0x1)^0x1;
-    bitrate_index = ((newhead>>12)&0xf);
-    padding   = ((newhead>>9)&0x1);
-//    fr->extension = ((newhead>>8)&0x1);
-//    fr->mode      = ((newhead>>6)&0x3);
-//    fr->mode_ext  = ((newhead>>4)&0x3);
-//    fr->copyright = ((newhead>>3)&0x1);
-//    fr->original  = ((newhead>>2)&0x1);
-//    fr->emphasis  = newhead & 0x3;
-
-    stereo    = ( (((newhead>>6)&0x3)) == 3) ? 1 : 2;
-
-    if(!bitrate_index){
-      fprintf(stderr,"Free format not supported.\n");
-      return -1;
-    }
-
-    if(lsf)
-      ssize = (stereo == 1) ? 9 : 17;
-    else
-      ssize = (stereo == 1) ? 17 : 32;
-    if(crc) ssize += 2;
-
-    framesize  = (long) tabsel_123[lsf][2][bitrate_index] * 144000;
-    framesize /= freqs[sampling_frequency]<<lsf;
-    framesize += padding;
-
-//    if(framesize<=0 || framesize>MAXFRAMESIZE) return FALSE;
-
-    return framesize;
-}
-
+#include <lame/lame.h>
 
 //--------------------------
 
@@ -150,8 +64,12 @@ static int benchmark=0;
 
 int force_fps=0;
 
-#include "libmpeg2/mpeg2.h"
-#include "libmpeg2/mpeg2_internal.h"
+//#include "libmpeg2/mpeg2.h"
+//#include "libmpeg2/mpeg2_internal.h"
+
+//---------------------------------------------------------------------------
+
+// mini dummy libvo:
 
 static unsigned char* vo_image=NULL;
 static unsigned char* vo_image_ptr=NULL;
@@ -192,7 +110,32 @@ static uint32_t draw_frame(uint8_t *src[]){
 
 vo_functions_t video_out;
 
-//---------------
+//---------------------------------------------------------------------------
+
+int dec_audio(sh_audio_t *sh_audio,unsigned char* buffer,int total){
+    int size=0;
+    int eof=0;
+    while(size<total && !eof){
+	int len=total-size;
+		if(len>MAX_OUTBURST) len=MAX_OUTBURST;
+		if(len>sh_audio->a_buffer_size) len=sh_audio->a_buffer_size;
+		if(len>sh_audio->a_buffer_len){
+		    int ret=decode_audio(sh_audio,
+			&sh_audio->a_buffer[sh_audio->a_buffer_len],
+    			len-sh_audio->a_buffer_len,
+			sh_audio->a_buffer_size-sh_audio->a_buffer_len);
+		    if(ret>0) sh_audio->a_buffer_len+=ret; else eof=1;
+		}
+		if(len>sh_audio->a_buffer_len) len=sh_audio->a_buffer_len;
+		memcpy(buffer+size,sh_audio->a_buffer,len);
+		sh_audio->a_buffer_len-=len; size+=len;
+		if(sh_audio->a_buffer_len>0)
+		    memcpy(sh_audio->a_buffer,&sh_audio->a_buffer[len],sh_audio->a_buffer_len);
+    }
+    return size;
+}
+
+//---------------------------------------------------------------------------
 
 static int eof=0;
 
@@ -223,7 +166,7 @@ ENC_FRAME enc_frame;
 ENC_RESULT enc_result;
 void* enc_handle=NULL;
 
-//lame_global_flags *lame;
+lame_global_flags *lame;
 
 float audio_preload=0.3;
 
@@ -241,7 +184,8 @@ float audio_preload=0.3;
   if(argc>1)
     stream=open_stream(argv[1],0,&file_format);
   else
-    stream=open_stream("/3d/abcug/Weird AL - Amish Paradise (MUSIC VIDEO).mpeg",0,&file_format);
+    stream=open_stream("/1/!ize/dinosaur.dvdrip.svcd-emb.mpg",0,&file_format);
+//    stream=open_stream("/3d/abcug/Weird AL - Amish Paradise (MUSIC VIDEO).mpeg",0,&file_format);
 //    stream=open_stream("/3d/divx/405divx_sm_v2[1].avi",0,&file_format);
 //    stream=open_stream("/dev/cdrom",2,&file_format); // VCD track 2
 
@@ -417,7 +361,8 @@ mux_a->buffer=malloc(mux_a->buffer_size);
 
 mux_a->source=sh_audio;
 
-mux_a->codec=ACODEC_PCM; // 0=streamcopy
+//mux_a->codec=ACODEC_PCM; // 0=streamcopy
+mux_a->codec=ACODEC_VBRMP3; // 0=streamcopy
 
 switch(mux_a->codec){
 case 0:
@@ -442,7 +387,7 @@ case ACODEC_PCM:
     break;
 case ACODEC_VBRMP3:
     mux_a->h.dwSampleSize=0; // VBR
-    mux_a->h.dwScale=4608;
+    mux_a->h.dwScale=4608/4;
     mux_a->h.dwRate=sh_audio->samplerate;
     mux_a->wf=malloc(sizeof(WAVEFORMATEX));
     mux_a->wf->wFormatTag=0x55; // MP3
@@ -484,13 +429,13 @@ case VCODEC_DIVX4:
     break;
 }
 
-#if 0
+#if 1
 switch(mux_a->codec){
 case ACODEC_VBRMP3:
 
 lame=lame_init();
 
-//lame_set_bWriteVbrTag(lame,0);
+lame_set_bWriteVbrTag(lame,0);
 lame_set_in_samplerate(lame,sh_audio->samplerate);
 lame_set_num_channels(lame,mux_a->wf->nChannels);
 lame_set_out_samplerate(lame,mux_a->h.dwRate);
@@ -541,70 +486,45 @@ if(sh_audio){
 	    case ACODEC_PCM:
 //		printf("Decode!\n");
 		len=mux_a->h.dwSampleSize*(mux_a->h.dwRate/2);
-		if(len>sh_audio->a_buffer_size) len=sh_audio->a_buffer_size;
-		if(len>sh_audio->a_buffer_len){
-		    int ret=decode_audio(sh_audio,
-			&sh_audio->a_buffer[sh_audio->a_buffer_len],
-    			len-sh_audio->a_buffer_len,
-			sh_audio->a_buffer_size-sh_audio->a_buffer_len);
-		    if(ret>0) sh_audio->a_buffer_len+=ret;
-//		    printf("ret=%d  \n",ret);
-		}
-		if(len>sh_audio->a_buffer_len) len=sh_audio->a_buffer_len;
-		memcpy(mux_a->buffer,sh_audio->a_buffer,len);
-		sh_audio->a_buffer_len-=len;
-		if(sh_audio->a_buffer_len>0)
-		    memcpy(sh_audio->a_buffer,&sh_audio->a_buffer[len],sh_audio->a_buffer_len);
+		len=dec_audio(sh_audio,mux_a->buffer,len);
 		break;
-#if 0
-	    case ACODEC_VBRMP3:
-
-		while(mux_a->buffer_len<4){
-		  len=2304;
-		  if(sh_audio->a_buffer_len<len){
-		    int ret=decode_audio(sh_audio,
-			&sh_audio->a_buffer[sh_audio->a_buffer_len],
-    			len-sh_audio->a_buffer_len,
-			sh_audio->a_buffer_size-sh_audio->a_buffer_len);
-		    if(ret>0) sh_audio->a_buffer_len+=ret; else break;
-		  }
-		  if(len<
-		  mux_a->buffer_len+=lame_encode_buffer_interleaved(lame,
-		          sh_audio->a_buffer,mux_a->buffer)
-		}
-
-
-		    int len=fread(buffer,1,buff_size,f);
-	if(len<=0) break;
-	outbuf_len+=lame_encode_buffer_interleaved(lame,buffer,len/4,outbuf+outbuf_len,outbuf_size-outbuf_len);
-    }
-    len=decode_header(outbuf);
-    if(len<=0){
-	printf("ERROR!\n");
-	len=1; // skip 1 byte
-	outbuf_len-=len; memcpy(outbuf,outbuf+len,outbuf_len);
-	continue;
-    }
-    printf("len=%4d  %02X %02X %02X %02X\n",len,outbuf[0],outbuf[1],outbuf[2],outbuf[3]);
-    while(outbuf_len<len){
-	int len=fread(buffer,1,buff_size,f);
-	if(len<=0) break;
-	outbuf_len+=lame_encode_buffer_interleaved(lame,buffer,len/4,outbuf+outbuf_len,outbuf_size-outbuf_len);
-    }
-    fwrite(outbuf,len,1,f2);
-    outbuf_len-=len; memcpy(outbuf,outbuf+len,outbuf_len);
-#endif
-		
 	    }
 	    
 //	    printf("%d -> ",len);
 //	    printf("%d  \n",len);
 	} else {
 	    // VBR
-	    printf("not yet implemented!\n");
+//	    printf("not yet implemented!\n");
+		while(mux_a->buffer_len<4){
+		  unsigned char tmp[2304];
+		  int len=dec_audio(sh_audio,tmp,2304);
+		  if(len<=0) break; // eof
+		  len=lame_encode_buffer_interleaved(lame,
+		      tmp,len/4,
+		      mux_a->buffer+mux_a->buffer_len,mux_a->buffer_size-mux_a->buffer_len);
+		  if(len<0) break; // error
+		  mux_a->buffer_len+=len;
+		}
+		if(mux_a->buffer_len<4) break;
+		len=mp_decode_mp3_header(mux_a->buffer);
+		if(len<=0) break; // bad frame!
+		while(mux_a->buffer_len<len){
+		  unsigned char tmp[2304];
+		  int len=dec_audio(sh_audio,tmp,2304);
+		  if(len<=0) break; // eof
+		  len=lame_encode_buffer_interleaved(lame,
+		      tmp,len/4,
+		      mux_a->buffer+mux_a->buffer_len,mux_a->buffer_size-mux_a->buffer_len);
+		  if(len<0) break; // error
+		  mux_a->buffer_len+=len;
+		}
 	}
 	if(len<=0) break; // EOF?
 	aviwrite_write_chunk(muxer,mux_a,muxer_f,len,0);
+	if(mux_a->buffer_len>=len){
+	    mux_a->buffer_len-=len;
+	    memcpy(mux_a->buffer,mux_a->buffer+len,mux_a->buffer_len);
+	}
     }
 }
 
