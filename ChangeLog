@@ -2,6 +2,12 @@
 mplayer (0.90)
 
   pre9:
+    Docs:
+    * manpage rewritten again :)))
+    * manpage updated to latest options, including lavc opts.
+    * Chinese docs translation added
+    * Hungarian translation is (was? :)) uptodate again
+    
     Cleanup:
     * divx4_vbr.c is now really GPL - with the permission of DivX.com guys!
     * cyuv decoder restructuring, now supports planar YUV formats too
@@ -10,9 +16,11 @@ mplayer (0.90)
     * the obsolete 0x1ff eof hack removed from mpeg-es demuxer and decoders
     * stheaders.h cleanup, removed unneeded wine includes from mplayer core
     * tons of compiler warning fixes, including some 10l one
+    * mga/xmga vo shared code, vesa and svga drivers cleanup
+    * major vo drivers are now -fixed-vo compliant: x11, xv, xvidix, xmga, gl2
     
     Fixes:
-    * Some fullscreen switching fixes, including metacity vs. kde 3.1
+    * Some fullscreen switching fixes, including Metacity vs. KDE 3.1
     * Some GUI bugfixes
     * -vo DGA fixes, cleanup
     * -dvdkey sig11 fixed
@@ -22,6 +30,14 @@ mplayer (0.90)
     * mencoder: demuxer/codec uninit order fixed (solves some sig11)
     * various v4l and alsa capturing fixes
     * demux_mov: fixed crash with mpeg4 on SPARC, decoding on bigendian
+    * various NAS ao fixes
+    * libvo: optional stride support for packed yuv / rgb formats
+    * mencoder: set keyframe flags on audio packet, fixes windows seeking probs
+    * loader: fixed 2 10l bugs, ATI VCR2 dll now working. using newstyle CS code.
+    * demux_avi: always use block counter, even if dwSampleSize!=0, fixes some files
+    * SPU decoder (DVD/VOB subs): fixed 2 major bugs, causing subtitles lost
+    * various memleak fixes (valgrind rulez :)
+    * fixed RealAudio SIPR(O) codec (the wrapper didn't find the dspr.so.6)
 
     Features:
     * new audio filter layer (libaf) - automatic samplerate conversion
@@ -32,6 +48,10 @@ mplayer (0.90)
     * -ao/-vo accepts list of drivers, and can fallback too (just like -ac/-vc)
     * audio/video codec selection (-ac/-afm) rewritten, now uses codec/fm list
     * get_delay() smoothing (-autosync) - should help buggy sound drivers
+    * smb:// url support (disabled by default, ./configure part not yet done!)
+    * support for 1/4/8bpp raw video (requires -vop palette / -vop 1bpp)
+    * support for quicktime alaw/agsm audio codecs, 3IV2, 3VID video codecs
+    * swscale now can output in YUY2 format, upscaled (default) or unscaled (-sws 0)
     
     Libavcodec:
     * RV10 codec cleanup (2nd level demuxer moved to demuxer layer)
@@ -39,7 +59,14 @@ mplayer (0.90)
     * luma masking support (encoding)
     * runtime selectable IDCT algo
     * faster mpeg 1/2 decoder
-    * DV decoding
+    * DV decoding (both PAL and NTSC)
+    * mpeg1 2-pass encoding support
+    * better/cleaner error resilience (done in a 2nd pass after decoding)
+    * h263/mpeg4 out of order slice decoding
+    * -lavdopts bug= reworked, now uses flags, autodetects most of them
+    * data partitioning, packetizing support at encoding (mpeg4)
+    * complete mpeg4 GMC decoding support
+    
 
   pre8:
     Docs:
