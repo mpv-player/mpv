@@ -52,6 +52,88 @@ static unsigned char *in_buffer, uiclip[1024], *uiclp = NULL;
 
 
 /* ---------------------------------------------------------------------- */
+static inline void read_codebook_yuy2(cvid_codebook *c, int mode)
+{
+
+	if(mode)		/* black and white */
+		{
+		c->y0 = get_byte();
+		c->y1 = get_byte();
+		c->y2 = get_byte();
+		c->y3 = get_byte();
+		c->u = c->v = 128;
+		}
+	else			/* colour */
+		{
+		c->y0 = get_byte();  /* luma */
+		c->y1 = get_byte();
+		c->y2 = get_byte();
+		c->y3 = get_byte();
+		c->u = 128+get_byte(); /* chroma */
+		c->v = 128+get_byte();
+		}
+}
+
+//#define PACK_YUV(cb,y0,y1,u,v) ((cb->y0<<24)|(((unsigned char)cb->u)<<16)|(cb->y1<<8)|(((unsigned char)cb->v)))
+#define PACK_YUV(cb,y0,y1,u,v) ((((unsigned char)cb->v)<<24)|(cb->y1<<16)|(((unsigned char)cb->u)<<8)|(cb->y0))
+
+#define TO_YUY2_U0(cb) PACK_YUV(cb,y0,y0,u,v)
+#define TO_YUY2_U1(cb) PACK_YUV(cb,y1,y1,u,v)
+#define TO_YUY2_L0(cb) PACK_YUV(cb,y2,y2,u,v)
+#define TO_YUY2_L1(cb) PACK_YUV(cb,y3,y3,u,v)
+
+#define TO_YUY2_U(cb) PACK_YUV(cb,y0,y1,u,v)
+#define TO_YUY2_L(cb) PACK_YUV(cb,y2,y3,u,v)
+
+/* ------------------------------------------------------------------------ */
+inline void cvid_v1_yuy2(unsigned char *frm, unsigned char *end, int stride, cvid_codebook *cb)
+{
+unsigned long *vptr = (unsigned long *)frm, rgb;
+int row_inc = stride/4;
+
+	vptr[0] = TO_YUY2_U0(cb);
+	vptr[1] = TO_YUY2_U1(cb);
+	vptr += row_inc; if(vptr > (unsigned long *)end) return;
+
+	vptr[0] = TO_YUY2_U0(cb);
+	vptr[1] = TO_YUY2_U1(cb);
+	vptr += row_inc; if(vptr > (unsigned long *)end) return;
+
+	vptr[0] = TO_YUY2_L0(cb);
+	vptr[1] = TO_YUY2_L1(cb);
+	vptr += row_inc; if(vptr > (unsigned long *)end) return;
+
+	vptr[0] = TO_YUY2_L0(cb);
+	vptr[1] = TO_YUY2_L1(cb);
+}
+
+
+/* ------------------------------------------------------------------------ */
+inline void cvid_v4_yuy2(unsigned char *frm, unsigned char *end, int stride, cvid_codebook *cb0,
+	cvid_codebook *cb1, cvid_codebook *cb2, cvid_codebook *cb3)
+{
+unsigned long *vptr = (unsigned long *)frm;
+int row_inc = stride/4;
+
+	vptr[0] = TO_YUY2_U(cb0);
+	vptr[1] = TO_YUY2_U(cb1);
+	vptr += row_inc; if(vptr > (unsigned long *)end) return;
+
+	vptr[0] = TO_YUY2_L(cb0);
+	vptr[1] = TO_YUY2_L(cb1);
+	vptr += row_inc; if(vptr > (unsigned long *)end) return;
+
+	vptr[0] = TO_YUY2_U(cb2);
+	vptr[1] = TO_YUY2_U(cb3);
+	vptr += row_inc; if(vptr > (unsigned long *)end) return;
+
+	vptr[0] = TO_YUY2_L(cb2);
+	vptr[1] = TO_YUY2_L(cb3);
+
+}
+
+
+/* ---------------------------------------------------------------------- */
 static inline void read_codebook_32(cvid_codebook *c, int mode)
 {
 int uvr, uvg, uvb;
@@ -137,6 +219,7 @@ int row_inc = stride/4;
 	vptr[2] = cb3->rgb2;
 	vptr[3] = cb3->rgb3;
 }
+
 
 
 /* ---------------------------------------------------------------------- */
@@ -294,6 +377,12 @@ void (*cvid_v4)(unsigned char *frm, unsigned char *end, int stride, cvid_codeboo
 
 	switch(bit_per_pixel)
 		{
+		case 16:
+			bpp = 2;
+			read_codebook = read_codebook_yuy2;
+			cvid_v1 = cvid_v1_yuy2;
+			cvid_v4 = cvid_v4_yuy2;
+			break;
 		case 24:
 			bpp = 3;
 			read_codebook = read_codebook_24;

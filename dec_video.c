@@ -564,7 +564,7 @@ unsigned int t2;
 switch(sh_video->codec->driver){
  case VFM_CINEPAK:
    decode_cinepak(sh_video->context, start, in_size, sh_video->our_out_buffer,
-      sh_video->disp_w, sh_video->disp_h, out_fmt&255);
+      sh_video->disp_w, sh_video->disp_h, (out_fmt==IMGFMT_YUY2)?16:(out_fmt&255));
    blit_frame = 3;
    break;
 #ifdef USE_XANIM
