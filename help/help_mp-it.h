@@ -1,7 +1,7 @@
 // Translated by: Fabio Olimpieri <fabio.olimpieri@tin.it>
 // Updated by: Roberto Togni <see AUTHORS for email address>
 
-// Updated to help_mp-en.h v1.121
+// Updated to help_mp-en.h v1.123
 
 // ========================= MPlayer help ===========================
 
@@ -355,7 +355,8 @@ static char help_text[]=
 // x11_common.c
 #define MSGTR_EwmhFullscreenStateFailed "\nX11: Impossibile inviare l'evento schermo pieno EWMH!\n"
 
-#define MSGTR_NeedAfVolume "Mixer: questo driver audio richiede \"-af volume\" per regolare il volume.\n"
+#define MSGTR_InsertingAfVolume "[Mixer] Nessun mixer hardware, filtro volume inserito automaticamente.\n"
+#define MSGTR_NoVolume "[Mixer] Nessuna regolazione di volume disponibile.\n"
 
 // ====================== GUI messages/buttons ========================
 
@@ -373,8 +374,7 @@ static char help_text[]=
 #define MSGTR_SkinBrowser "Gestore Skin"
 #define MSGTR_Network "Flusso dati dalla rete..."
 #define MSGTR_Preferences "Preferenze"
-#define MSGTR_OSSPreferences "Configurazione driver OSS"
-#define MSGTR_SDLPreferences "Configurazione driver SDL"
+#define MSGTR_AudioPreferences "Configurazione driver audio"
 #define MSGTR_NoMediaOpened "nessun media aperto"
 #define MSGTR_VCDTrack "Traccia VCD %d"
 #define MSGTR_NoChapter "nessun capitolo"
@@ -494,6 +494,7 @@ static char help_text[]=
 // --- preferences
 #define MSGTR_PREFERENCES_Misc "Varie"
 #define MSGTR_PREFERENCES_None "Nessuno"
+#define MSGTR_PREFERENCES_DriverDefault "Driver predefinito"
 #define MSGTR_PREFERENCES_AvailableDrivers "Driver disponibili:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Non riprodurre l'audio"
 #define MSGTR_PREFERENCES_NormalizeSound "Normalizza l'audio"
@@ -537,9 +538,9 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec e demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "Cache"
 #define MSGTR_PREFERENCES_FRAME_Misc "Varie"
-#define MSGTR_PREFERENCES_OSS_Device "Dispositivo:"
-#define MSGTR_PREFERENCES_OSS_Mixer "Mixer:"
-#define MSGTR_PREFERENCES_SDL_Driver "Driver:"
+#define MSGTR_PREFERENCES_Audio_Device "Dispositivo:"
+#define MSGTR_PREFERENCES_Audio_Mixer "Mixer:"
+#define MSGTR_PREFERENCES_Audio_MixerChannel "Canale mixer:"
 #define MSGTR_PREFERENCES_Message "Ricorda che devi riavviare la riproduzione affinché alcune opzioni abbiano effetto!"
 #define MSGTR_PREFERENCES_DXR3_VENC "Video encoder:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Usa LAVC (FFmpeg)"
