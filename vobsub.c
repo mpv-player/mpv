@@ -1267,6 +1267,22 @@ vobsub_get_next_packet(void *vobhandle, void** data, int* timestamp)
   return -1;
 }
 
+void vobsub_seek(void * vobhandle, float pts)
+{
+  vobsub_t * vob = (vobsub_t *)vobhandle;
+  packet_queue_t * queue;
+  int seek_pts100 = (int)pts * 90000;
+
+  if (vob->spu_streams && 0 <= vobsub_id && (unsigned) vobsub_id < vob->spu_streams_size) {
+    queue = vob->spu_streams + vobsub_id;
+    queue->current_index = 0;
+    while ((queue->packets + queue->current_index)->pts100 < seek_pts100)
+      ++queue->current_index;
+    if (queue->current_index > 0);
+      --queue->current_index;
+  }
+}
+
 void
 vobsub_reset(void *vobhandle)
 {

@@ -3398,7 +3398,8 @@ if(rel_seek_secs || abs_seek_pos){
       /* FIXME there should be real seeking for vobsub */
       if(sh_video) sh_video->pts=d_video->pts;
       if (vo_vobsub)
-	vobsub_reset(vo_vobsub);
+	//vobsub_reset(vo_vobsub);
+	vobsub_seek(vo_vobsub,sh_video->pts);
 #if 0
       if(sh_video && d_video->packs == 0)
 	ds_fill_buffer(d_video);
