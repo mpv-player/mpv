@@ -224,7 +224,7 @@ typedef CONTEXT86 CONTEXT;
 #endif  /* __i386__ */
 
 /* Alpha context definitions */
-#ifdef _ALPHA_
+#if defined(_ALPHA_) || defined(__alpha__)
 
 #define CONTEXT_ALPHA   0x00020000
  
