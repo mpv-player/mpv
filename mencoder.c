@@ -40,10 +40,6 @@ extern int cache_fill_status;
 #define cache_fill_status 0
 #endif
 
-// AVI demuxer params:
-static float c_total=0;
-int delay_corrected=1;
-
 char *audio_codec=NULL; // override audio codec
 char *video_codec=NULL; // override video codec
 int audio_family=-1;     // override audio codec family 
@@ -61,6 +57,12 @@ double vout_time_usage=0;
 static double audio_time_usage=0;
 static int total_time_usage_start=0;
 static int benchmark=0;
+
+// A-V sync:
+int delay_corrected=1;
+static float default_max_pts_correction=-1;//0.01f;
+static float max_pts_correction=0;//default_max_pts_correction;
+static float c_total=0;
 
 int force_fps=0;
 
@@ -170,6 +172,8 @@ lame_global_flags *lame;
 
 float audio_preload=0.3;
 
+float v_timer_corr=0;
+
 //int out_buffer_size=0x200000;
 //unsigned char* out_buffer=malloc(out_buffer_size);
 
@@ -181,13 +185,13 @@ float audio_preload=0.3;
     exit(0);  // From unknown reason a hangup occurs here :((((((
   }
 
-  dvd_title=2;
+//  dvd_title=2;
 
   if(argc>1)
     stream=open_stream(argv[1],0,&file_format);
   else
-    stream=open_stream("/1/!ize/dinosaur.dvdrip.svcd-emb.mpg",0,&file_format);
-//    stream=open_stream("/3d/abcug/Weird AL - Amish Paradise (MUSIC VIDEO).mpeg",0,&file_format);
+//    stream=open_stream("/1/!ize/dinosaur.dvdrip.svcd-emb.mpg",0,&file_format);
+    stream=open_stream("/3d/abcug/Weird AL - Amish Paradise (MUSIC VIDEO).mpeg",0,&file_format);
 //    stream=open_stream("/3d/divx/405divx_sm_v2[1].avi",0,&file_format);
 //    stream=open_stream("/dev/cdrom",2,&file_format); // VCD track 2
 
@@ -414,7 +418,7 @@ case VCODEC_DIVX4:
     enc_param.x_dim=sh_video->disp_w;
     enc_param.y_dim=sh_video->disp_h;
     enc_param.framerate=sh_video->fps;
-    enc_param.bitrate=1800000;
+    enc_param.bitrate=800000;
     enc_param.rc_period=0;
     enc_param.rc_reaction_period=0;
     enc_param.rc_reaction_ratio=0;
@@ -475,10 +479,9 @@ while(!eof){
 if(sh_audio){
     // get audio:
     while(mux_a->timer-audio_preload<mux_v->timer){
-	// copy 0.5 sec of audio
 	int len;
 	if(mux_a->h.dwSampleSize){
-	    // CBR
+	    // CBR - copy 0.5 sec of audio
 	    switch(mux_a->codec){
 	    case 0: // copy
 		len=sh_audio->i_bps/2;
@@ -487,17 +490,17 @@ if(sh_audio){
 		len=demux_read_data(sh_audio->ds,mux_a->buffer,len);
 		break;
 	    case ACODEC_PCM:
-//		printf("Decode!\n");
 		len=mux_a->h.dwSampleSize*(mux_a->h.dwRate/2);
 		len=dec_audio(sh_audio,mux_a->buffer,len);
 		break;
 	    }
-	    
-//	    printf("%d -> ",len);
-//	    printf("%d  \n",len);
 	} else {
-	    // VBR
-//	    printf("not yet implemented!\n");
+	    // VBR - encode/copy an audio frame
+	    switch(mux_a->codec){
+	    case 0: // copy
+		printf("not yet implemented!\n");
+		break;
+	    case ACODEC_VBRMP3:
 		while(mux_a->buffer_len<4){
 		  unsigned char tmp[2304];
 		  int len=dec_audio(sh_audio,tmp,2304);
@@ -521,6 +524,8 @@ if(sh_audio){
 		  if(len<0) break; // error
 		  mux_a->buffer_len+=len;
 		}
+		break;
+	    }
 	}
 	if(len<=0) break; // EOF?
 	aviwrite_write_chunk(muxer,mux_a,muxer_f,len,0);
@@ -534,39 +539,12 @@ if(sh_audio){
     // get video frame!
     in_size=video_read_frame(sh_video,&frame_time,&start,force_fps);
     if(in_size<0){ eof=1; break; }
-
     sh_video->timer+=frame_time;
-
-if(sh_audio){
-    if(pts_from_bps){
-        unsigned int samples=(sh_audio->audio.dwSampleSize)?
-          ((ds_tell(d_audio)-sh_audio->a_in_buffer_len)/sh_audio->audio.dwSampleSize) :
-          (d_audio->pack_no); // <- used for VBR audio
-        a_pts=samples*(float)sh_audio->audio.dwScale/(float)sh_audio->audio.dwRate;
-      delay_corrected=1;
-    } else {
-      // PTS = (last timestamp) + (bytes after last timestamp)/(bytes per sec)
-      a_pts=d_audio->pts;
-      if(!delay_corrected) if(a_pts) delay_corrected=1;
-      //printf("*** %5.3f ***\n",a_pts);
-      a_pts+=(ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
-    }
-    v_pts=d_video->pts;
-
-}
-
-    mp_msg(MSGT_AVSYNC,MSGL_STATUS,"A:%6.1f V:%6.1f A-V:%7.3f ct:%7.3f  %3d/%3d  %2d%% %2d%% %4.1f%%  %d%%\r",
-	  a_pts,v_pts,a_pts-v_pts,c_total,
-          (int)sh_video->num_frames,(int)sh_video->num_frames_decoded,
-          (sh_video->timer>0.5)?(int)(100.0*video_time_usage/(double)sh_video->timer):0,
-          (sh_video->timer>0.5)?(int)(100.0*vout_time_usage/(double)sh_video->timer):0,
-          (sh_video->timer>0.5)?(100.0*audio_time_usage/(double)sh_video->timer):0
-	  ,cache_fill_status
-        );
-        fflush(stdout);
 
 //    if(!blit_frame) continue;
 
+if(v_timer_corr<2*sh_video->frametime){
+// don't have to skip frame.
 switch(mux_v->codec){
 case 0:
     mux_v->buffer=start;
@@ -601,6 +579,72 @@ case VCODEC_DIVX4:
     aviwrite_write_chunk(muxer,mux_v,muxer_f,enc_frame.length,enc_result.is_key_frame?0x10:0);
     break;
 }
+if(v_timer_corr<-2*sh_video->frametime){
+    // duplicate frame
+    printf("\nduplicate frame!!!    \n");
+    aviwrite_write_chunk(muxer,mux_v,muxer_f,0,0);
+    v_timer_corr+=(float)mux_v->h.dwScale/mux_v->h.dwRate;
+//    v_timer_corr=0;
+}
+
+} else {
+    // skip frame
+    printf("\nskip frame!!!    \n");
+    v_timer_corr-=(float)mux_v->h.dwScale/mux_v->h.dwRate;
+//    v_timer_corr=0;
+}
+
+if(sh_audio){
+    float AV_delay,x;
+    // A-V sync!
+    if(pts_from_bps){
+        unsigned int samples=(sh_audio->audio.dwSampleSize)?
+          ((ds_tell(d_audio)-sh_audio->a_in_buffer_len)/sh_audio->audio.dwSampleSize) :
+          (d_audio->pack_no); // <- used for VBR audio
+        a_pts=samples*(float)sh_audio->audio.dwScale/(float)sh_audio->audio.dwRate;
+      delay_corrected=1;
+    } else {
+      // PTS = (last timestamp) + (bytes after last timestamp)/(bytes per sec)
+      a_pts=d_audio->pts;
+      if(!delay_corrected) if(a_pts) delay_corrected=1;
+      //printf("*** %5.3f ***\n",a_pts);
+      a_pts+=(ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
+    }
+    v_pts=d_video->pts;
+    // av = compensated (with out buffering delay) A-V diff
+    AV_delay=(a_pts-v_pts); AV_delay-=mux_a->timer-(mux_v->timer-v_timer_corr);
+	// compensate input video timer by av:
+        x=AV_delay*0.1f;
+        if(x<-max_pts_correction) x=-max_pts_correction; else
+        if(x> max_pts_correction) x= max_pts_correction;
+        if(default_max_pts_correction>=0)
+          max_pts_correction=default_max_pts_correction;
+        else
+          max_pts_correction=sh_video->frametime*0.10; // +-10% of time
+	// sh_video->timer-=x;
+	c_total+=x;
+	v_timer_corr+=x;
+
+    printf("A:%6.1f V:%6.1f A-V:%7.3f oAV:%7.3f diff:%7.3f ct:%7.3f vtc:%7.3f   \r",
+	a_pts,v_pts,a_pts-v_pts,
+	(float)(mux_a->timer-mux_v->timer),
+	AV_delay, c_total, v_timer_corr );
+
+}
+
+#if 0
+    mp_msg(MSGT_AVSYNC,MSGL_STATUS,"A:%6.1f V:%6.1f A-V:%7.3f ct:%7.3f  %3d/%3d  %2d%% %2d%% %4.1f%%  %d%%\r",
+	  a_pts,v_pts,a_pts-v_pts,c_total,
+          (int)sh_video->num_frames,(int)sh_video->num_frames_decoded,
+          (sh_video->timer>0.5)?(int)(100.0*video_time_usage/(double)sh_video->timer):0,
+          (sh_video->timer>0.5)?(int)(100.0*vout_time_usage/(double)sh_video->timer):0,
+          (sh_video->timer>0.5)?(100.0*audio_time_usage/(double)sh_video->timer):0
+	  ,cache_fill_status
+        );
+#endif
+
+        fflush(stdout);
+
 
 
 } // while(!eof)
