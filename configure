@@ -1283,7 +1283,7 @@ if [ "$_kernelextcheck" = "yes" ];then
 if extcheck $_mmx "mmx" "emms" ; then _mmx=no ; fi
 if extcheck $_3dnow "3dnow" "femms" ; then _3dnow=no ; fi
 if extcheck $_3dnowex "3dnowex" "pswapd %%mm0, %%mm0" ; then _3dnowex=no ; fi
-if extcheck $_mmx2 "mmx2" "movntq %%mm0, (%%eax)" ; then _mmx2=no ; fi
+if extcheck $_mmx2 "mmx2" "sfence" ; then _mmx2=no ; fi
 if extcheck $_sse "sse" "xorps %%xmm0, %%xmm0" ; then _sse=no ; fi
 #if extcheck $_sse2 "sse2" "xorpd %%xmm0, %%xmm0" ; then _sse2=no ; fi
 rm -f $TMPS $TMPO $TMPC
