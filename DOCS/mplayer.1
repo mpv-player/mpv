@@ -74,6 +74,9 @@ mplayer \- Movie Player for Linux
 .RB [ \-monitoraspect\ ratio ]
 .RB [ \-subcp\ codepage ]
 .RB [ \-dumpmpsub ]
+.RB [ \-screenw\ pixels ]
+.RB [ \-screenh\ pixels ]
+.RB [ \-cache\ kbytes ]
 .I - or file or device
 .PP
 .SH DESCRIPTION
@@ -441,6 +444,19 @@ specify codepage of the subtitle. Examples:
 .B \-dumpmpsub
 Convert the given subtitle (specified with the -sub switch) to MPlayer's
 subtitle format, MPsub. Dumps a dump.mpsub file to current directory.
+.TP
+.B \-screenw\ pixels
+This is for TV-out users! Here you should set the horizontal resolution of your
+Matrox framebuffer. Needed for fullscreen playing on '-vo mga' and '-vo vesa'
+ONLY !
+.TP
+.B \-screenh\ pixels
+This is for TV-out users! Here you should set the vertical resolution of your
+Matrox framebuffer. Needed for fullscreen playing on '-vo mga' and '-vo vesa'
+ONLY !
+.TP
+.B \-cache\ kbytes
+See it below, in the ALPHA/BETA CODE section.
 .IP
 .SH "ALPHA/BETA CODE"
 .TP
@@ -467,6 +483,10 @@ dump video stream to ./stream.dump (only with MPEG-PS) (not very usable)
 .TP
 .B \-sid
 specify DVD subtitle (?) (IT _WILL NOT_ DISPLAY! RTFM!)
+.TP
+.B \-cache\ kbytes
+_If you compiled with cache support_ , use this option to enable using it.
+Also specify the amount of memory to use, in kbytes.
 .IP
 .SH KEYBOARD CONTROL
 .TP
