@@ -3495,17 +3495,17 @@ It only supports the 16-bit little-endian format.
 With MEncoder, you need to also use \-srate <srate>.
 .PD 0
 .RSs
-.IPs srate
+.IPs <srate>
 the output sample rate
-.IPs length
+.IPs <length>
 length of the filter with respect to the lower sampling rate (default: 16)
-.IPs linear
+.IPs <linear>
 if 1 then filters will be linearly interpolated between polyphase entries
-.IPs count
+.IPs <count>
 log2 of the number of polyphase entries
 (..., 10->1024, 11->2048, 12->4096, ...)
 (default: 10->1024)
-.IPs cutoff
+.IPs <cutoff>
 cutoff frequency (0.0-1.0), default set depending upon filter length
 .RE
 .PD 1
@@ -3521,7 +3521,7 @@ Head-related transfer function: Converts multichannel audio to
 .
 .TP
 .B channels[=nch]
-Change the number of channels to nch output channels.
+Change the number of channels to <nch> output channels.
 If the number of output channels is bigger than the number of input channels
 empty channels are inserted (except when mixing from mono to stereo, then
 the mono channel is repeated in both of the output channels).
@@ -3533,13 +3533,13 @@ the exceeding channels are truncated.
 Change the current sample format.
 .PD 0
 .RSs
-.IPs format
+.IPs <format>
 Sets the desired format.
-The general form is 'sbe', where s denotes the sign (either s for signed or u
-for unsigned), b denotes the number of bits per sample (16, 24 or 32) and e
-denotes the endianness (le equals to little-endian, be to big-endian and ne to
-the endianness that's native to the computer MPlayer is running on).
-Valid values (amongst others) are: s16le, u32be and u24ne.
+The general form is 'sbe', where 's' denotes the sign (either 's' for signed
+or 'u' for unsigned), 'b' denotes the number of bits per sample (16, 24 or 32)
+and 'e' denotes the endianness ('le' means little-endian, 'be' big-endian
+and 'ne' the endianness of the computer MPlayer is running on).
+Valid values (amongst others) are: 's16le', 'u32be' and 'u24ne'.
 Exceptions to this rule are: u8, s8, floatle, floatbe, floatne, mulaw, alaw,
 mpeg2, ac3 and imaadpcm.
 .RE
@@ -3553,11 +3553,11 @@ This filter is not reentrant and can therefore only be enabled once for every
 audio stream.
 .PD 0
 .RSs
-.IPs v
+.IPs <v>\ \ 
 Sets the desired gain in dB for all channels in the stream
 from -200dB to +60dB (where -200dB mutes the sound
 completely and +60dB equals a gain of 1000).
-.IPs sc
+.IPs <sc>\ 
 Enable soft clipping.
 .RE
 .PD 1
@@ -3566,12 +3566,12 @@ Enable soft clipping.
 .B pan[=n:l01:l02:...l10:l11:l12:...ln0:ln1:ln2:...]
 Mixes channels arbitrarily, see DOCS/\:HTML/\:en/\:audio.html for details.
 An example how to downmix a six-channel file to two channels with this
-filter can be found in the examples section near the end of the manpage.
+filter can be found in the examples section near the end of the man page.
 .PD 0
 .RSs
-.IPs n
+.IPs <n>\ \ 
 number of input channels (1\-6)
-.IPs lij
+.IPs <lij>
 How much of input channel j is mixed into output channel i.
 .RE
 .PD 1
@@ -3581,19 +3581,19 @@ How much of input channel j is mixed into output channel i.
 Add subwoofer channel.
 .PD 0
 .RSs
-.IPs fc
+.IPs <fc>\ 
 cutoff frequency for low-pass filter (20Hz to 300Hz) (default: 60Hz)
-.IPs ch
+.IPs <ch>\ 
 channel number for the sub-channel
 .RE
 .PD 1
 .
 .TP
-.B surround[=d]
+.B surround[=delay]
 Decoder for matrix encoded surround sound, works on many 2 channel files.
 .PD 0
 .RSs
-.IPs d
+.IPs <delay>
 delay time in ms for the rear speakers (0ms to 1000ms) (default: 15ms)
 .RE
 .PD 1
@@ -3609,9 +3609,9 @@ number between 0 and 1000).
 Exports the incoming signal to other processes using memory mapping (mmap()).
 .PD 0
 .RSs
-.IPs mmapped_file
+.IPs <mmapped_file>
 file to map data to (default: ~/.mplayer/\:mplayer-af_export)
-.IPs nsamples
+.IPs <nsamples>
 number of samples per channel (default: 512)
 .RE
 .PD 1
@@ -3622,7 +3622,7 @@ Increases the difference between left and right channels to add some
 sort of "live" effect to playback.
 .PD 0
 .RSs
-.IPs mul\ \ 
+.IPs <mul>
 difference coefficient (default: 2.5)
 .RE
 .PD 1
@@ -3637,16 +3637,16 @@ Load a LADSPA (Linux Audio Developer's Simple Plugin API) plugin.
 This filter is reentrant, so multiple LADSPA plugins can be used at once.
 .PD 0
 .RSs
-.IPs file\ 
+.IPs <file>
 Specifies the LADSPA plugin library file.
 If LADSPA_PATH is set, it searches for the specified file.
 If it is not set, you must supply a fully specified pathname.
-.IPs label
+.IPs <label>
 Specifies the filter within the library.
 Some libraries contain only one filter, but others contain many of them.
 Entering 'help' here, will list all available filters within the specified
 library, which eliminates the use of 'listplugins' from the LADSPA SDK.
-.IPs controls
+.IPs <controls>
 Controls are zero or more floating point values that determine the
 behaviour of the loaded plugin (for example delay, threshold or gain).
 In verbose mode (add \-v to the MPlayer command line), all available controls
@@ -7526,11 +7526,11 @@ In the above, "all candidates" doesn't exactly mean all enabled types:
 .
 .TP
 .B level_idc=<10\-51>
-Set the bitstream's Level as defined by Annex A of the H.264 standard.
+Set the bitstream's Level as defined by Annex A of the H.264 standard
+(default: 40 - Level 4.0).
 This is used for telling the decoder what capabilities it needs to
 support. Use this parameter only if you know what it means, and you
 have a need to set it.
-Default: 40 (Level 4.0)
 .
 .TP
 .B log=<-1\-3>
