@@ -17,9 +17,9 @@
 extern int verbose; // defined in mplayer.c
 
 #ifdef __FreeBSD__
-#include "vcd_read_fbsd.c" 
+#include "vcd_read_fbsd.h" 
 #else
-#include "vcd_read.c"
+#include "vcd_read.h"
 #endif
 
 #ifdef USE_DVDREAD

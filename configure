@@ -1734,7 +1734,7 @@ fi
 
 _streamingdef='#undef STREAMING'
 if test "$_streaming" = yes ; then
-   _streamingsrcs='asf_streaming.c network.c url.c http.c'
+#   _streamingsrcs='asf_streaming.c network.c url.c http.c'
    _streamingdef='#define STREAMING'
 fi
 
@@ -2271,7 +2271,7 @@ AV_LIB = $_lavclib
 ALSA_LIB = $_alsalib
 ESD_LIB = $_esdlib
 ARCH_LIBS = $_archlibs $_iconvlib
-STREAM_SRCS = $_streamingsrcs
+STREAMING=$_streaming
 DECORE_LIBS = $_decorelibs
 DIVX4LINUX=$_divx4linux
 MLIB_INC = $_mlibinc

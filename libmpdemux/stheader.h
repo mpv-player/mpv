@@ -28,7 +28,7 @@ typedef struct {
 typedef struct {
   demux_stream_t *ds;
   unsigned int format;
-  codecs_t *codec;
+  struct codecs_st *codec;
   int inited;
   // output format:
   float timer;		   // value of old a_frame
@@ -66,7 +66,7 @@ typedef struct {
 typedef struct {
   demux_stream_t *ds;
   unsigned int format;
-  codecs_t *codec;
+  struct codecs_st *codec;
   int inited;
   // output format:
   float timer;		   // value of old v_frame

@@ -16,13 +16,13 @@ PRG_CFG = codec-cfg
 #prefix = /usr/local
 BINDIR = ${prefix}/bin
 # BINDIR = /usr/local/bin
-SRCS = cpudetect.c postproc/swscale.c postproc/postprocess.c mp_msg.c open.c parse_es.c ac3-iec958.c find_sub.c aviprint.c dec_audio.c dec_video.c aviwrite.c aviheader.c asfheader.c demux_avi.c demux_asf.c demux_mpg.c demux_mov.c demuxer.c stream.c codec-cfg.c subreader.c linux/getch2.c linux/timer-lx.c linux/shmem.c xa/xa_gsm.c xa/rle8.c lirc_mp.c cfgparser.c mixer.c dvdauth.c spudec.c $(STREAM_SRCS)
+SRCS = cpudetect.c postproc/swscale.c postproc/postprocess.c mp_msg.c ac3-iec958.c find_sub.c dec_audio.c dec_video.c codec-cfg.c subreader.c linux/getch2.c linux/timer-lx.c linux/shmem.c xa/xa_gsm.c xa/rle8.c lirc_mp.c cfgparser.c mixer.c spudec.c
 OBJS = $(SRCS:.c=.o)
-CFLAGS = $(OPTFLAGS) -Iloader -Ilibvo $(CSS_INC) $(EXTRA_INC) # -Wall
+CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader -Ilibvo $(CSS_INC) $(EXTRA_INC) # -Wall
 A_LIBS = -Lmp3lib -lMP3 -Llibac3 -lac3 $(ALSA_LIB) $(ESD_LIB)
 VO_LIBS = -Llibvo -lvo $(MLIB_LIB) $(X_LIBS)
 
-PARTS = mp3lib libac3 libmpeg2 opendivx libavcodec encore libvo libao2 drivers drivers/syncfb
+PARTS = libmpdemux mp3lib libac3 libmpeg2 opendivx libavcodec encore libvo libao2 drivers drivers/syncfb
 ifeq ($(GUI),yes)
 PARTS += Gui
 endif
@@ -50,10 +50,13 @@ all:	$(ALL_PRG)
 .c.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-COMMONLIBS = libvo/libvo.a libao2/libao2.a libac3/libac3.a mp3lib/libMP3.a libmpeg2/libmpeg2.a opendivx/libdecore.a encore/libencore.a
+COMMONLIBS = libmpdemux/libmpdemux.a libvo/libvo.a libao2/libao2.a libac3/libac3.a mp3lib/libMP3.a libmpeg2/libmpeg2.a opendivx/libdecore.a encore/libencore.a
 
 loader/libloader.a:
 	$(MAKE) -C loader
+
+libmpdemux/libmpdemux.a:
+	$(MAKE) -C libmpdemux
 
 loader/DirectShow/libDS_Filter.a:
 	$(MAKE) -C loader/DirectShow
@@ -93,7 +96,7 @@ mplayerwithoutlink: $(MPLAYER_DEP)
 	@for a in $(PARTS); do $(MAKE) -C $$a all ; done
 
 $(PRG):	$(MPLAYER_DEP)
-	$(CC) $(CFLAGS) -o $(PRG) mplayer.o $(OBJS) $(XMM_LIBS) $(LIRC_LIBS) $(A_LIBS) -lm $(TERMCAP_LIB) $(LIB_LOADER) $(AV_LIB) -Llibmpeg2 -lmpeg2 -Llibao2 -lao2 $(VO_LIBS) $(CSS_LIB) -Lencore -lencore $(DECORE_LIBS) $(GUI_LIBS) $(ARCH_LIBS)
+	$(CC) $(CFLAGS) -o $(PRG) mplayer.o -Llibmpdemux -lmpdemux $(OBJS) $(XMM_LIBS) $(LIRC_LIBS) $(A_LIBS) -lm $(TERMCAP_LIB) $(LIB_LOADER) $(AV_LIB) -Llibmpeg2 -lmpeg2 -Llibao2 -lao2 $(VO_LIBS) $(CSS_LIB) -Lencore -lencore $(DECORE_LIBS) $(GUI_LIBS) $(ARCH_LIBS)
 
 $(PRG_FIBMAP): fibmap_mplayer.o
 	$(CC) -o $(PRG_FIBMAP) fibmap_mplayer.o
