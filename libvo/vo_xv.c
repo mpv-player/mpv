@@ -114,15 +114,7 @@ static void draw_alpha_uyvy(int x0,int y0, int w,int h, unsigned char* src, unsi
 static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
 }
 
-extern int vo_gamma_brightness;
-extern int vo_gamma_saturation;
-extern int vo_gamma_contrast;
-extern int vo_gamma_hue;
-extern int vo_gamma_red_intensity;
-extern int vo_gamma_green_intensity;
-extern int vo_gamma_blue_intensity;
-
-static void set_gamma_correction( unsigned int xv_port )
+static int __xv_set_video_eq( const vidix_video_eq_t *info,int use_reset)
 {
  XvAttribute *attributes;
  int howmany, xv_min,xv_max,xv_atomka;
@@ -130,9 +122,10 @@ static void set_gamma_correction( unsigned int xv_port )
 /* get available attributes */
      attributes = XvQueryPortAttributes(mDisplay, xv_port, &howmany);
      /* first pass try reset */
-     if(!was_reset)
-     for (i = 0; i < howmany && attributes; i++)
+     if(use_reset)
      {
+	for (i = 0; i < howmany && attributes; i++)
+        {
             if (attributes[i].flags & XvSettable && !strcmp(attributes[i].name,"XV_SET_DEFAULTS"
 ))
             {
@@ -141,9 +134,10 @@ static void set_gamma_correction( unsigned int xv_port )
                 xv_atomka = XInternAtom(mDisplay, attributes[i].name, True);
                 XvSetPortAttribute(mDisplay, xv_port, xv_atomka, attributes[i].max_value);
 	    }
+        }
+	/* for safety purposes */
+	if(!was_reset) return ENOSYS;
      }
-     /* for safety purposes */
-     if(!was_reset) return;
      for (i = 0; i < howmany && attributes; i++)
      {
             if (attributes[i].flags & XvSettable)
@@ -156,27 +150,34 @@ static void set_gamma_correction( unsigned int xv_port )
                 if (xv_atomka != None)
                 {
 		    int port_value,port_min,port_max,port_mid;
-		    if(strcmp(attributes[i].name,"XV_BRIGHTNESS") == 0)
-				port_value = vo_gamma_brightness;
+		    if(strcmp(attributes[i].name,"XV_BRIGHTNESS") == 0
+			      && (info->cap & VEQ_CAP_BRIGHTNESS))
+				port_value = info->brightness;
 		    else
-		    if(strcmp(attributes[i].name,"XV_SATURATION") == 0)
-				port_value = vo_gamma_saturation;
+		    if(strcmp(attributes[i].name,"XV_SATURATION") == 0
+			      && (info->cap & VEQ_CAP_SATURATION))
+				port_value = info->saturation;
 		    else
-		    if(strcmp(attributes[i].name,"XV_CONTRAST") == 0)
-				port_value = vo_gamma_contrast;
+		    if(strcmp(attributes[i].name,"XV_CONTRAST") == 0
+			      && (info->cap & VEQ_CAP_CONTRAST))
+				port_value = info->contrast;
 		    else
-		    if(strcmp(attributes[i].name,"XV_HUE") == 0)
-				port_value = vo_gamma_hue;
+		    if(strcmp(attributes[i].name,"XV_HUE") == 0
+			      && (info->cap & VEQ_CAP_HUE))
+				port_value = info->hue;
 		    else
                     /* Note: since 22.01.2002 GATOS supports these attrs for radeons (NK) */
-		    if(strcmp(attributes[i].name,"XV_RED_INTENSITY") == 0)
-				port_value = vo_gamma_red_intensity;
+		    if(strcmp(attributes[i].name,"XV_RED_INTENSITY") == 0
+			      && (info->cap & VEQ_CAP_RGB_INTENSITY))
+				port_value = info->red_intensity;
 		    else
-		    if(strcmp(attributes[i].name,"XV_GREEN_INTENSITY") == 0)
-				port_value = vo_gamma_green_intensity;
+		    if(strcmp(attributes[i].name,"XV_GREEN_INTENSITY") == 0
+			      && (info->cap & VEQ_CAP_RGB_INTENSITY))
+				port_value = info->green_intensity;
 		    else
-		    if(strcmp(attributes[i].name,"XV_BLUE_INTENSITY") == 0)
-				port_value = vo_gamma_blue_intensity;
+		    if(strcmp(attributes[i].name,"XV_BLUE_INTENSITY") == 0
+			      && (info->cap & VEQ_CAP_RGB_INTENSITY))
+				port_value = info->blue_intensity;
 		    else continue;
 		    /* means that user has untouched this parameter since
 		       NVidia driver has default == min for XV_HUE but not mid */
@@ -191,6 +192,117 @@ static void set_gamma_correction( unsigned int xv_port )
                 }
         }
     }
+    return 0;
+}
+
+
+static int xv_set_video_eq( const vidix_video_eq_t *info)
+{
+    return __xv_set_video_eq(info,0);
+}
+
+static int xv_get_video_eq( vidix_video_eq_t *info)
+{
+ XvAttribute *attributes;
+ int howmany, xv_min,xv_max,xv_atomka;
+/* get available attributes */
+     memset(info,0,sizeof(vidix_video_eq_t));
+     attributes = XvQueryPortAttributes(mDisplay, xv_port, &howmany);
+     for (i = 0; i < howmany && attributes; i++)
+     {
+            if (attributes[i].flags & XvGettable)
+            {
+                xv_min = attributes[i].min_value;
+                xv_max = attributes[i].max_value;
+                xv_atomka = XInternAtom(mDisplay, attributes[i].name, True);
+/* since we have SET_DEFAULTS first in our list, we can check if it's available
+   then trigger it if it's ok so that the other values are at default upon query */
+                if (xv_atomka != None)
+                {
+		    int port_value,port_min,port_max,port_mid;
+                    XvGetPortAttribute(mDisplay, xv_port, xv_atomka, &port_value);
+		    if(verbose>1) printf("vo_xv: get: %s = %i\n",attributes[i].name,port_value);
+
+		    port_min = xv_min;
+		    port_max = xv_max;
+		    port_mid = (port_min + port_max) / 2;		    
+		    port_value = ((port_value - port_mid)*2000)/(port_max-port_min);
+		    
+		    if(verbose>1) printf("vo_xv: assume: %s = %i\n",attributes[i].name,port_value);
+		    
+		    if(strcmp(attributes[i].name,"XV_BRIGHTNESS") == 0)
+		    {
+			info->cap |= VEQ_CAP_BRIGHTNESS;
+			info->brightness = port_value;
+		    }
+		    else
+		    if(strcmp(attributes[i].name,"XV_SATURATION") == 0)
+		    {
+			info->cap |= VEQ_CAP_SATURATION;
+			info->saturation = port_value;
+		    }
+		    else
+		    if(strcmp(attributes[i].name,"XV_CONTRAST") == 0)
+		    {
+			info->cap |= VEQ_CAP_CONTRAST;
+			info->contrast = port_value;
+		    }
+		    else
+		    if(strcmp(attributes[i].name,"XV_HUE") == 0)
+		    {
+			info->cap |= VEQ_CAP_HUE;
+			info->hue = port_value;
+		    }
+		    else
+                    /* Note: since 22.01.2002 GATOS supports these attrs for radeons (NK) */
+		    if(strcmp(attributes[i].name,"XV_RED_INTENSITY") == 0)
+		    {
+			info->cap |= VEQ_CAP_RGB_INTENSITY;
+			info->red_intensity = port_value;
+		    }
+		    else
+		    if(strcmp(attributes[i].name,"XV_GREEN_INTENSITY") == 0)
+		    {
+			info->cap |= VEQ_CAP_RGB_INTENSITY;
+			info->green_intensity = port_value;
+		    }
+		    else
+		    if(strcmp(attributes[i].name,"XV_BLUE_INTENSITY") == 0)
+		    {
+			info->cap |= VEQ_CAP_RGB_INTENSITY;
+			info->blue_intensity = port_value;
+		    }
+		    else continue;
+                }
+        }
+    }
+    return 0;
+}
+
+extern int vo_gamma_brightness;
+extern int vo_gamma_saturation;
+extern int vo_gamma_contrast;
+extern int vo_gamma_hue;
+extern int vo_gamma_red_intensity;
+extern int vo_gamma_green_intensity;
+extern int vo_gamma_blue_intensity;
+
+static void set_gamma_correction( void )
+{
+  vidix_video_eq_t info;
+  /* try all */
+  info.cap = VEQ_CAP_BRIGHTNESS | VEQ_CAP_CONTRAST | VEQ_CAP_SATURATION |
+	     VEQ_CAP_HUE | VEQ_CAP_RGB_INTENSITY;
+  info.flags = 0; /* doesn't matter for xv */
+  info.brightness = vo_gamma_brightness;
+  info.contrast = vo_gamma_contrast;
+  info.saturation = vo_gamma_saturation;
+  info.hue = vo_gamma_hue;
+  info.red_intensity = vo_gamma_red_intensity;
+  info.green_intensity = vo_gamma_green_intensity;
+  info.blue_intensity = vo_gamma_blue_intensity;
+  /* reset with XV_SET_DEFAULTS only once */
+  __xv_set_video_eq(&info,1);
 }
 
 /*
@@ -356,7 +468,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
 
      current_buf=0;
 
-     #ifdef HAVE_NEW_GUI
+#ifdef HAVE_NEW_GUI
       if ( vo_window != None )
        {
         mFullscreen=0;
@@ -368,8 +480,8 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
           dheight=vo_screenwidth * mdheight / mdwidth;
          }
        }
-     #endif
-     set_gamma_correction(xv_port);
+#endif
+     set_gamma_correction();
 
      XGetGeometry( mDisplay,mywindow,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
      drwX=0; drwY=0;
@@ -619,4 +731,6 @@ static uint32_t preinit(const char *arg)
 static void query_vaa(vo_vaa_t *vaa)
 {
   memset(vaa,0,sizeof(vo_vaa_t));
+  vaa->get_video_eq = xv_get_video_eq;
+  vaa->set_video_eq = xv_set_video_eq;
 }
