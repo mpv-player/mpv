@@ -72,6 +72,13 @@ mplayer \- Filmlejátszó Linuxra
 .RB [ \-skin\ skin ]
 .RB [ \-aspect\ ratio ]
 .RB [ \-monitoraspect ratio ]
+.RB [ \-subcp\ kódlap ]
+.RB [ \-dumpmpsub ]
+.RB [ \-screenw\ pixel ]
+.RB [ \-screenh\ pixel ]
+.RB [ \-cache\ kbyte ]
+.RB [ \-bpp\ mélység ]
+.RB [ \-flip ]
 .I - vagy file vagy eszköz
 .PP
 .SH LEÍRÁS
@@ -145,7 +152,12 @@ tesz köré)
 az XF86VidMode kiterjesztés használata, felbontásváltásra
 .TP
 .B \-zoom
-szoftveres nagyítás használata, ahol rendelkezésre áll (-nofs kell)
+szoftveres nagyítás használata, ahol rendelkezésre áll (-nofs kell). svga, x11,
+vesa kimenetek támogatják.
+.TP
+.B \-flip
+kép megfordítása (hasznos például a régi Indeo codec-eknél). Csak(?) az
+'sdl' és 'x11' kimenetek támogatják.
 .TP
 .B \-x\ x
 kép nagyítása x pixel szélességûre [ha a meghajtó támogatja!]
@@ -263,7 +275,7 @@ például :
     -ac ffmp3      ffmpeg MP3 decoder (lassú)
 
 Teljes listát az -ac help ad !
-.TP
+
 .B \-vfm <1-5>
 megadott video codec CSALÁD használata, ha nem található benne megfelelõ
 dekóder, akkor vissza az automatikus detektálásra. Példák :
@@ -274,6 +286,7 @@ dekóder, akkor vissza az automatikus detektálásra. Példák :
     -vfm 4         DirectShow (Win32) codec-ek
     -vfm 5         libavcodec codec-ek
     -vfm 7         DivX4 codec (YUY2)
+    -vfm 10        XAnim codec-ek
 
 Teljes listát a -vc help ad !
 
@@ -304,6 +317,10 @@ lejátszás kezdése a megadott idõponttól. Például:
     -ss 56
     -ss 01:10:00
 
+.TP
+.B \-bpp\ mélység
+a megadott színmélység használata, a detektált érték helyett. Nem minden
+-vo meghajtó támogatja (fbdev, dga2, svga, vesa).
 .TP
 .B \-abs\ byte
 hangkártya audio bufferének mérete (byte-okban, alap: mérés)
@@ -445,6 +462,19 @@ milyen kódlapban van a felirat. Példák:
 A -sub opcióval megadott felirat file-t átkonvertálja az MPlayer saját
 feliratformátumába, az MPsub-ba. Egy dump.mpsub file-t ír ki a jelenlegi
 könyvtárba.
+.TP
+.B \-screenw\ pixel
+Ha olyan kimeneti meghajtót használsz ami nem tudja megállapítani a
+képernyõ méreteit (mga/fbdev/x11 és/vagy TV kimenet), itt adhatod meg a
+szélességet.
+.TP
+.B \-screenh\ pixel
+Ha olyan kimeneti meghajtót használsz ami nem tudja megállapítani a
+képernyõ méreteit (mga/fbdev/x11 és/vagy TV kimenet), itt adhatod meg a
+magasságot.
+.TP
+.B \-cache\ kbyte
+Lásd lent.
 .IP
 .SH "ALPHA/BETA ÁLLAPOTÚ FUNKCIÓK"
 .TP
@@ -470,6 +500,10 @@ video stream kiírása a ./stream.dump file-ba (csak MPEG-PS-nél)
 .TP
 .B \-sid
 DVD felirat megadása (?) (_NEM FOGJA_ MEGJELENÍTENI! RTFM!)
+.TP
+.B \-cache\ kbyte
+_HA_ cache támogatással fordítottál, ezzel az opcióval kapcsolhatod be.
+Add meg a használni kívánt memória mennyiségét is, kbyte-ban.
 .IP
 .SH IRÁNYÍTÁS A BILLENTYÛZETRÕL
 .TP

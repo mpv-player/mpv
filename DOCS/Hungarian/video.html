@@ -674,6 +674,31 @@ Here are some important:</P></B></TD><TR>
   Nem lehet hogy NTSC TV-d van? Vagy csak nem futtattad le a TV-*
   scriptet.</P>
 
+
+<P><B><A NAME=2.2.1.A.1a>2.2.1.A.1a. Matrox kártyák - második módszer (Az XFree Megközelítés)</A></B></P>
+
+<P>A fent ismertetett módszer nem túl megfelelõ az X-et használók számára,
+ugyanis vagy le kell állítaniuk, vagy az egész teljesen zavaros lesz. Ez
+a fejezet nekik íródott.</P>
+
+<P>
+<LI>fordítsd modulba a matroxfb-t</LI>
+<LI>töltsd be a modulokat a <CODE>./modules</CODE> scripttel</LI>
+<LI>kapcsold be a megjelenítõ klónozását a <CODE>./cloning</CODE> scripttel</LI>
+<LI>indítsd el a <CODE>./TV-640x512</CODE> scriptet, vagy amilyen felbontást
+akarsz használni</LI>
+</P>
+
+<P>Most a TV-n tiszta képnek kell lennie, és talán a konzolon egy kicsit
+furcsának. De a konzol nem számít, indíts X-et! A TV-rõl eltûnik a kép,
+de a monitor/X jó!<BR>
+Így, amikor csak TV-n akarsz nézni valamit, csak indítsd az <B>MPlayer</B>-t
+X alatt a <CODE>-vo mga -screenw XXX -screenh XXX</CODE> opciókkal
+(az XXX-ek helyére a framebuffered horizontális és vertikális felbontását írd,
+ilyen sorrendben), válts tty1-re (ctrl-alt-f1-gyel), és kapcsold ki a monitort.
+</P>
+
+
 <P><B><A NAME=2.2.1.A.2>2.2.1.A.2. ATI kártyák</A></B></P>
 
 <P>

@@ -709,16 +709,13 @@ wish to use</LI>
 <P>Now you should have a clean picture on the TV, and maybe a somewhat strange
 picture on the monitor. But monitor doesn't matter, start X. Your TV
 goes black or have strange stripes, but monitor/X is fine !<BR>
-Next, edit your config file, to contain the <CODE>screenw</CODE> and
-<CODE>screenh</CODE> options (the first should be set to the horizontal
-resolution of the framebuffer, and the latter to the vertical. See
-<CODE>example.conf</CODE>). This is required for fullscreen playing, and for
-the aspect code to work.</P>
 
 <P>
 So, anytime you want to start watching something on TV, just start
-<B>MPlayer</B> in X with the <CODE>-vo mga</CODE> option, change to tty1 (with
-ctrl-alt-f1), and turn off the monitor.
+<B>MPlayer</B> in X with the <CODE>-vo mga -screenw XXX -screenh XXX</CODE>
+(write the horizontal and vertical resolution of your framebuffer to the XXX's,
+respectively) options, change to tty1 (with ctrl-alt-f1), and turn off the
+monitor.
 </P>
 
 <P><B><A NAME=2.2.1.A.2>2.2.1.A.2. ATI cards</A></B></P>
