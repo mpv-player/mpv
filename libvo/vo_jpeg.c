@@ -72,7 +72,7 @@ int jpeg_progressive_mode = 0;
 int jpeg_optimize = 100;
 int jpeg_smooth = 0;
 int jpeg_quality = 75;
-char *jpeg_outdir = ".";
+char *jpeg_outdir = NULL;
 char *jpeg_subdirs = NULL;
 int jpeg_maxfiles = 1000;
 
@@ -280,6 +280,14 @@ static uint32_t query_format(uint32_t format)
 
 static void uninit(void)
 {
+    if (jpeg_subdirs) {
+        free(jpeg_subdirs);
+        jpeg_subdirs = NULL;
+    }
+    if (jpeg_outdir) {
+        free(jpeg_outdir);
+        jpeg_outdir = NULL;
+    }
 }
 
 /* ------------------------------------------------------------------------- */
@@ -290,10 +298,25 @@ static void check_events(void)
 
 /* ------------------------------------------------------------------------- */
 
+/** \brief Memory allocation failed.
+ *
+ * This function can be called if memory allocations failed. It prints a
+ * message and exits the player.
+ *
+ * \return none     It never returns.
+ */
+
+void jpeg_malloc_failed(void) {
+    mp_msg(MSGT_VO, MSGL_ERR, "%s: %s\n", info.short_name,
+            MSGTR_MemAllocFailed);
+    exit_player(MSGTR_Exit_error);
+}
+
+/* ------------------------------------------------------------------------- */
+
 static uint32_t preinit(const char *arg)
 {
     char *buf;      /* buf is used to store parsed string values */
-    int length;     /* length is used when calculating the length of buf */
     int value;      /* storage for parsed integer values */
 
     mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
@@ -403,18 +426,13 @@ static uint32_t preinit(const char *arg)
             } else if (!strncmp(arg, "outdir=", 7)) {
                 arg += 7;
                 buf = malloc(strlen(arg)+1); /* maximum length possible */
-                if (!buf) {
-                    mp_msg(MSGT_VO, MSGL_ERR, "%s: %s\n", info.short_name,
-                            MSGTR_MemAllocFailed);
-                    exit_player(MSGTR_Exit_error);
-                }
+                if (!buf) jpeg_malloc_failed(); /* print msg and exit */
                 if (sscanf(arg, "%[^:]", buf) == 1) {
                     mp_msg(MSGT_VO, MSGL_INFO, "%s: %s --> %s\n",
                             info.short_name, "outdir", buf);
-                    length = strlen(buf);
-                    arg += length;
-                    jpeg_outdir = malloc(length+1);
-                    strncpy(jpeg_outdir, buf, length+1);
+                    arg += strlen(buf);
+                    jpeg_outdir = strdup(buf);
+                    if (!jpeg_outdir) jpeg_malloc_failed();
                     free(buf);
                 } else {
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n",
@@ -425,18 +443,13 @@ static uint32_t preinit(const char *arg)
             } else if (!strncmp(arg, "subdirs=", 8)) {
                 arg += 8;
                 buf = malloc(strlen(arg)+1); /* maximum length possible */
-                if (!buf) {
-                    mp_msg(MSGT_VO, MSGL_ERR, "%s: %s\n", info.short_name,
-                            MSGTR_MemAllocFailed);
-                    exit_player(MSGTR_Exit_error);
-                }
+                if (!buf) jpeg_malloc_failed();
                 if (sscanf(arg, "%[^:]", buf) == 1) {
                     mp_msg(MSGT_VO, MSGL_INFO, "%s: %s --> %s\n",
                             info.short_name, "subdirs", buf);
-                    length = strlen(buf);
-                    arg += length;
-                    jpeg_subdirs = malloc(length+1);
-                    strncpy(jpeg_subdirs, buf, length+1);
+                    arg += strlen(buf);
+                    jpeg_subdirs = strdup(buf);
+                    if (!jpeg_subdirs) jpeg_malloc_failed();
                     free(buf);
                 } else {
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n",
@@ -477,6 +490,11 @@ static uint32_t preinit(const char *arg)
         } /* end while */
     } /* endif */
     
+    /* If jpeg_outdir is not set by an option, resort to default of "." */
+    if (!jpeg_outdir) {
+        jpeg_outdir = strdup(".");
+    }
+
     mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
                                             MSGTR_VO_SuboptionsParsedOK);
     return 0;
