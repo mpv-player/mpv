@@ -1,4 +1,4 @@
-.\" synced with 1.726
+.\" synced with 1.731
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "20 Septembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "21 Septembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -2919,7 +2919,7 @@ Nomme explicitement le fichier de sortie (par défaut: ./md5).
 .PD 1
 .
 .TP
-.B md5sum\ \ \ \ 
+.B md5sum\ 
 Calcule le somme de contrôle MD5 de chaque trame et l'écrit dans un fichier.
 Gère les espaces de couleurs RGB24 et YV12.
 Utile pour le débogage.
@@ -3014,11 +3014,16 @@ l'option subdirs est définie.
 .PD 1
 .
 .TP
-.B pnm (voir aussi les pages de man de pnm, pgm et ppm)
+.B pnm
 Écrit, dans le répertoire courant, chaque trame dans un fichier PNM.
 Le nom de chaque fichier contient le numéro de trame, précédé au besoin par
 des zéros.
 Gère les fichiers PPM, PGM et PGMYUB, en mode brut ou ASCII.
+Voir aussi les pages de manuel
+.BR pnm (5),
+.BR ppm (5)
+et
+.BR pgm (5)
 .PD 0
 .RSs
 .IPs ppm
@@ -5608,7 +5613,7 @@ comme le fait le mode "turbo".
 .br
 En mode deux passes, la seconde passe (vpass=2) se base sur le fichier de
 stats pour allouer le bon nombre de bits aux trames (ratecontrol).
-.b
+.br
 En mode trois passes, la seconde passe (vpass=3, non ce n'est pas une
 erreur ;-) ) fait les deux\ : elle lit le fichier de stats, puis ré-écrit
 par dessus.
@@ -6242,11 +6247,25 @@ poids NSSE, de plus grandes valeurs produiront plus de bruit,
 .
 .TP
 .B predia=<-99\-6>
-Type et taille de diamant pour la pré-passe d'estimation de mouvement
+Type et taille de diamant pour la pré-passe d'estimation de mouvement.
 .
 .TP
 .B dia=<-99\-6>
 Type et taille de diamant pour l'estimation de mouvement.
+La recherche de mouvement est un processus itératif.
+L'utilisation de diamants plus petits ne limitent pas la recherche à
+de petits vecteurs de mouvement.
+En revanche, la recherche risque de se terminer avant d'avoir trouvé
+celui serait vraiment meilleur, surtout en présence de bruit.
+De plus grands diamants permettent un recherche plus étendue du meilleur
+vecteur de mouvement, et sont par conséquent plus lents mais améliorent la
+qualité.
+.br
+Les gros diamants normaux améliorent plus la qualité de leur équivalent à
+dimension adaptative.
+.br
+Les diamants à dimensions adaptatives sont un bon compromis vitesse/\:qualité.
+.br
 .I NOTE:
 Les tailles des diamants normales et celles de ceux à dimensions adaptatives
 n'ont pas la même signification
@@ -6256,7 +6275,7 @@ dimension adaptative de taille 3 (rapide)
 .IPs -2
 dimension adaptative de taille 2 (rapide)
 .IPs -1
-expérimental
+un peu particulier\ : Peut être plus lent et/\:ou plus lent que dia=-2.
 .IPs 1
 diamant normal de taille=1 (par défaut) = type de diamant EPZS
 .nf
