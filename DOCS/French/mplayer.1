@@ -244,7 +244,7 @@ force un système de vidéo fixe pour des fichiers multiples (une
 (dès)initialisation pour pour tous les fichiers).
 Ainsi une seule fenêtre sera ouverte pour tous les fichiers.
 Actuellement les pilotes suivants fonctionnent avec fixed-vo: x11, xv, xvidix, 
-xmga et gl2.
+xmga, gl2 et svga.
 .TP
 .B \-framedrop (voir aussi \-hardframedrop)
 Saute l'affichage de certaines trames pour maintenir la synchro A/\:V sur les
@@ -1478,7 +1478,7 @@ Essayez cette option si vous avez encode des problème en plein écran.
 Ajuste la position d'origine sur l'écran de la sortie.
 Les variables x et y sont en pixels mesurés à partir du coin supérieur droit de 
 l'écran jusqu'au coin supérieur droit de la vidéo affichée, cependant si un 
-signe pourcentage est indiqué après la variable, cette valeur est alors 
+signe pourcentage est indiqué après la variable, cette valeur est alors
 considérée comme le pourcentage de la taille de l'écran dans cette direction. 
 Il supporte également le format d'option standard pour l'option X standard 
 \-geometry.
@@ -1532,8 +1532,25 @@ Menu (par défaut)
 .B \-jpeg <option1:option2:...> (\-vo jpeg uniquement)
 Spécifie les option de la sortie JPEG.
 .br
-Les options disponibles sont: [no]progressive, [no]baseline, optimize, smooth,
-quality et outdir.
+Les options disponibles sont:
+
+.PD 0
+.RSs
+.IPs [no]progressive
+Fichiers JPEG standards ou progressifs.
+.IPs [no]baseline
+Uutilisation de la baseline ou pas.
+.IPs optimize=<valeur>
+Facteur d'optimisation [0-100]
+.IPs smooth=<valeur>
+Facteur de douceur [0-100]
+.IPs quality=<valeur>
+Facteur de qualité [0-100]
+.IPs outdir=<valeur>
+Répertoire où sauver les fichiers JPEG
+.RE
+.PD 1
+.
 .TP
 .B \-monitor_dotclock <dotclock\ (ou\ pixelclock) range> (fbdev et vesa
 uniquement)
@@ -2132,25 +2149,29 @@ time:	force temporelle (par défaut = 6)
 .IPs eq[=lumi:cont]
 Active l'égaliseur logiciel avec contrôles interactifs comme les ég. matériels.
 Les valeurs peuvent aller de -100 à 100.
-.IPs eq2[=gamma:cont:lumi]
+.IPs eq2[=gamma:contraste:luminosité:saturation:rg:gg:bg]
 Égaliseur logiciel alternatif qui utilise des tables de lookup (très lent),
-authorisant une correction du gamma en plus d'un simple ajustement de luminosité
-et de contraste. 
-Les paramètres sont donnés en nombres à virgule. 
-Les valeurs par défaut sont gamma=1.0, contraste=1.0, et luminosité=0.0.
-Les intervalles de valeur sont 0.1\-10 pour le gamma, -2\-2 pour le contraste
-(les valeurs négatives provoquent une image négative) et -1\-1 pour la 
-luminosité.
+autorisant une correction du gamma en plus d'un simple ajustement de luminosité,
+de contraste et de saturation. Notez que cela utilise le même code MMX optimisé
+que -vo eq si toutes les valeurs gama sont 1.0!
+Les paramètres sont donnés en nombres à virgule.
+Les valeurs par défaut sont gamma=1.0, contraste=1.0, et luminosité=0.0 et
+saturation=1.0.
+Les paramètres rg, gg, bg sont les valeurs gamma indépendantes pour les
+composants Rouge, Vert et Bleu, toutes égales à 1.0 par défaut.
+Les intervalles de valeur sont 0.1\-10 pour les gamma, -2\-2 pour le contraste
+(les valeurs négatives provoquent une image négative) et -1\-1 pour la
+luminosité et 0\-3 pour la saturation.
 .IPs halfpack[=f]
 Convertit le planar YUV 4:2:0 en 4:2:2 demi-hauteur, en downsamplant le luma
 mais en gardant les samples chroma.
 Utile quand la sortie est un périphérique à basse résolution quand la diminution
-est de mauvais qualité ou n'est pas disponible. 
-Peut également être utilisé comme désentrelaceur primitif pour luma uniquement 
+est de mauvais qualité ou n'est pas disponible.
+Peut également être utilisé comme désentrelaceur primitif pour luma uniquement
 avec une utilisation CPU très basse.
 Par défaut, halfpack fait une moyenne des paires de lignes pendant le
-downsampling. 
-Le paramètre optionnel f peut valoir 0 pour n'utiliser que les lignes paires, 
+downsampling.
+Le paramètre optionnel f peut valoir 0 pour n'utiliser que les lignes paires,
 ou 1 pour n'utiliser que les lignes impaires.
 Tout autre valeur de f renvoie au comportement par défaut (moyenne).
 .IPs dint[=sense:level]
