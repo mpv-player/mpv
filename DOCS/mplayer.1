@@ -2090,6 +2090,11 @@ i: interleave
 .br
 s: swap fields (exchange even & odd lines)
 .REss
+.IPs "field[=n]"
+Extracts a single field from interlaced image using stride arithmetic
+to avoid wasting cpu time. The optional argument n specifies whether
+to extract the even or the odd field (depending on whether n is even
+or odd).
 .IPs "boxblur=radius:power[:radius:power]"
 box blur
 .RSss
