@@ -125,15 +125,16 @@ Current plugins:
     (using some kind of heuristics) the black borders/bands of the image,
     and prints the optimal -vop crop= parameters to the stdout/console.
     MPI: EXPORT
-    
+
 -vop test[=first frame number]
     generate various test patterns
     MPI: TEMP, accepts stride
 
--vop noise[=lumaNoise[u][t]]:chromaNoise[u][t]]
+-vop noise[=lumaNoise[u][t][h]:chromaNoise[u][t][h]
     add noise
     0<= lumaNoise, chromaNoise <=100
     u uniform noise (gaussian otherwise)
     t temporal noise (noise pattern changes between frames)
-    MPI: TEMP, accepts stride
+    h high quality (slightly better looking, slightly slower)
+    MPI: DR (if possible) or TEMP, accepts stride
 
