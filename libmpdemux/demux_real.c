@@ -515,6 +515,7 @@ int demux_real_fill_buffer(demuxer_t *demuxer)
     int flags;
     int version;
     int reserved;
+    demux_packet_t *dp;
 
   while(1){
 
@@ -601,7 +602,7 @@ got_audio:
 		free(sub_packet_lengths);
 		return 1;
 	    }
-            demux_packet_t *dp = new_demux_packet(len);
+            dp = new_demux_packet(len);
 	    stream_read(demuxer->stream, dp->buffer, len);
 #ifdef CRACK_MATRIX
 	    mp_msg(MSGT_DEMUX, MSGL_V,"*** audio block len=%d\n",len);
