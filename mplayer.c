@@ -256,6 +256,7 @@ int   sub_auto = 1;
 char *vobsub_name=NULL;
 /*DSP!!char *dsp=NULL;*/
 int   subcc_enabled=0;
+int suboverlap_enabled = 1;
 #ifdef USE_SUB
 subtitle* subtitles=NULL;
 float sub_last_pts = -303;

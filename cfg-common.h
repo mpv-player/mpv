@@ -180,6 +180,7 @@
 	{"ifo", &spudec_ifo, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	// enable Closed Captioning display
 	{"subcc", &subcc_enabled, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"nooverlapsub", &suboverlap_enabled, CONF_TYPE_FLAG, 0, 0, 0, NULL},
 #endif
 #ifdef USE_OSD
 	{"font", &font_name, CONF_TYPE_STRING, 0, 0, 0, NULL},

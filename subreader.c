@@ -1048,7 +1048,7 @@ subtitle* sub_read_file (char *filename, float fps) {
     }
 
     adjust_subs_time(first, 6.0, fps, 0);	/* ~6 secs AST */
-
+if(suboverlap_enabled){
 // here we manage overlapping subtitles
     sub_orig = sub_num;
     n_first = sub_num;
@@ -1057,7 +1057,7 @@ subtitle* sub_read_file (char *filename, float fps) {
     second = NULL;
 // for each subtitle in first[]
     for (sub_first = 0; sub_first < n_first; ++sub_first) {
-	while (first[sub_first].start <= first[sub_first].end) {
+	while (first[sub_first].start < first[sub_first].end) {
 	    unsigned long end_time = first[sub_first].end;
 	    int lines_to_add = 0, sub_to_add, event, ls, lf;
 
@@ -1144,6 +1144,11 @@ subtitle* sub_read_file (char *filename, float fps) {
     }
 
     return second;
+} else { //if(suboverlap_enabled)
+    adjust_subs_time(first, 6.0, fps, 1);	/* ~6 secs AST */
+
+    return first;
+}
 }
 
 #if 0

@@ -351,7 +351,20 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 		 lastk=k;
 		 lastStripPosition=j;
 		 lastxsize=xsize;
-	      } else if ((font=vo_font->font[c])>=0){
+ 	      } else if ((!suboverlap_enabled) && ((font = vo_font->font[c]) >= 0)) {
+ 		/*
+ 		   With overlapping subtitles, we need to comment this out,
+ 		   beacuse that part of the code creates subtitles with the
+ 		   last line blank (" "): in this case previous 'if' statement
+ 		   is false an following 'if' is not executed. When, instead,
+ 		   a subtitle with a non-blank last line arrives, the following
+ 		   code is executed, and the result is a small 'jump' of the
+ 		   subtiles. We can not simply delete the following, unless
+ 		   having the last subtitle line partly drawn outside the
+ 		   screen, so, some lines forward, we introduce an increment
+ 		   which affects both blank and non-blank lines.
+ 		   *sfalco*
+ 		 */
 		  if (vo_font->pic_a[font]->h > h){
 		     h=vo_font->pic_a[font]->h;
 		  }
@@ -396,6 +409,13 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 	  }
       }
 
+    /*
+       Here is the little increment we talked about before. '40' is the
+       ASCII code for '(', which, hopefully, is the highest char of the
+       font.
+       *sfalco*
+     */
+    if(suboverlap_enabled) obj->y -= vo_font->pic_a[vo_font->font[40]]->h - vo_font->height;
     if (obj->y >= (dys * sub_pos / 100)){
 	int old=obj->y;
 	obj->y = dys * sub_pos /100;
