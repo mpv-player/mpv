@@ -121,60 +121,55 @@ Installation directories:
                          [PREFIX/bin]
   --datadir=DIR          use this prefix for installing machine independent
                          data files (fonts, skins) [PREFIX/share/mplayer]
-  --mandir=DIR           use this prefix for installing manpages
-                         [PREFIX/man]
+  --mandir=DIR           use this prefix for installing manpages [PREFIX/man]
   --confdir=DIR          use this prefix for installing configuration files
                          [same as datadir]
-  --libdir=DIR           use this prefix for object code libraries
-                         [PREFIX/lib]
+  --libdir=DIR           use this prefix for object code libraries [PREFIX/lib]
 
 Optional features:
-  --disable-mencoder     disable mencoder [autodetect]
-  --enable-largefiles    enable support for files > 2^32 Bytes [disable]
+  --disable-mencoder     disable mencoder (a/v encoder) compilation [enable]
+  --enable-gui           enable gmplayer compilation (gtk-1.2 GUI) [disable]
+  --enable-largefiles    enable support for files > 2 GBytes [disable]
   --enable-linux-devfs   set default devices to devfs ones [disable]
   --enable-termcap       use termcap database for key codes [autodetect]
+  --disable-iconv        do not use iconv(3) function [autodetect]
+  --disable-setlocale    disable setlocale using in mplayer [autodetect]
   --enable-lirc          enable LIRC (remote control) support [autodetect]
-  --enable-gui           enable GUI [disable]
-  --enable-png		 enable png support [autodetect]
-  --enable-jpeg		 enable jpeg support [autodetect]
-  --enable-gif		 enable gif89a support [autodetect]
+  --enable-joystick      enable joystick support [disable]
   --disable-tv           disable TV Interface (tv/dvb grabbers) [enable]
-  --disable-tv-v4l       disable Video 4 Linux TV Interface support [autodetect]
+  --disable-tv-v4l       disable Video4Linux TV Interface support [autodetect]
   --disable-tv-bsdbt848  disable BSD BT848 Interface support [autodetect]
+  --disable-rtc          disable RTC (/dev/rtc) on Linux [autodetect]
+  --disable-streaming    disable network streaming support
+                         (support for: http/mms/rtp) [enable]
+  --enable-live          enable LIVE.COM Streaming Media support [disable]
+  --disable-dvdnav       Disable dvdnav support [autodetect]
+  --disable-dvdread      Disable libdvdread support [autodetect]
+  --disable-mpdvdkit     Disable mpdvdkit/mpdvdkit2 support [autodetect]
+  --disable-css          Disable old-style libcss DVD support [autodetect]
+  --disable-cdparanoia   Disable cdparanoia support [autodetect]
+  --enable-freetype      Enable freetype2 font rendering support [disabled]
+
+Codecs:
+  --enable-gif		 enable gif89a output support [autodetect]
+  --enable-png		 enable png input/output support [autodetect]
+  --enable-jpeg		 enable jpeg input/output support [autodetect]
   --disable-win32        disable Win32 DLL support [autodetect]
-  --disable-dshow        disable DirectShow support [autodetect]
+  --disable-dshow        disable Win32/DirectShow support [autodetect]
   --disable-xanim        disable XAnim DLL support [autodetect]
   --disable-real         disable RealPlayer DLL support [autodetect]
   --disable-xvid         disable XviD codec [autodetect]
-  --disable-divx4linux   disable DivX4linux codec [autodetect]
+  --disable-divx4linux   disable DivX4linux/Divx5linux codec [autodetect]
   --enable-opendivx      enable _old_ OpenDivx codec [disable]
   --disable-libavcodec   disable libavcodec [autodetect]
   --enable-libfame       enable libfame realtime encoder [autodetect]
   --enable-vorbis        build with OggVorbis support [autodetect]
-  --enable-faad          build with FAAD (AAC) support [autodetect]
-  --disable-iconv        do not use iconv(3) function [autodetect]
-  --disable-rtc          disable RTC (/dev/rtc) on Linux [autodetect]
-  --enable-mp1e          enable libmp1e support [disable]
-  --disable-libdv        disable libdv 0.9.5 support [autodetect]
-  --disable-streaming    disable network streaming support
-                         (support for: http/mms/rtp) [enable]
-  --disable-live         disable LIVE.COM Streaming Media support [disable]
-  --disable-vidix        disable VIDIX stuff [enable on x86 *nix]
-  --disable-new-input    disable new input system [enable]
-  --enable-joystick      enable joystick support in new input [disable]
-  --enable-i18n          GNU internationalisation [disable]
-  --disable-setlocale    disable setlocale using in mplayer [autodetect]
-  --enable-runtime-cpudetection    Enable runtime CPU detection [disable]
-  --disable-dvdnav       Disable dvdnav support [autodetect]
-  --disable-dvdread      Disable libdvdread support [autodetect]
-  --disable-mpdvdkit     Disable mpdvdkit support [autodetect]
-  --disable-css          Disable oldstyle libcss DVD support [autodetect]
-  --disable-cdparanoia   Disable cdparanoia support [autodetect]
-  --disable-big-endian   Force byte order to little endian [autodetect]
-  --enable-big-endian    Force byte order to big endian [autodetect]
-  --enable-freetype      Enable freetype support [disabled]
+  --enable-faad          build with FAAD2 (MP4/AAC) support [autodetect]
+  --disable-libdv        disable libdv 0.9.5 en/decoding support [autodetect]
+  --disable-mad          disable libmad (mpeg audio) support [autodetect]
   
-Video:
+Video output:
+  --disable-vidix        disable VIDIX stuff [enable on x86 *nix]
   --enable-gl            build with OpenGL render support [autodetect]
   --enable-dga[=n]       build with DGA [n in {1, 2} ] support [autodetect]
   --enable-vesa          build with VESA support [autodetect]
@@ -185,7 +180,7 @@ Video:
   --enable-dxr2          build with DXR2 render support [autodetect]
   --enable-dxr3          build with DXR3/H+ render support [autodetect]
   --enable-dvb           build with support for output via DVB-Card [autodetect]
-  --enable-mga           build with mga_vid support
+  --enable-mga           build with mga_vid (for Matrox G200/G4x0/G550) support
                          (check for /dev/mga_vid) [autodetect]
   --enable-xmga          build with mga_vid X Window support
                          (check for X & /dev/mga_vid) [autodetect]
@@ -196,26 +191,26 @@ Video:
   --enable-fbdev         build with FBDev render support [autodetect]
   --enable-fbdev=nocopy  yuv12 converts directly into framebuffer
   --enable-mlib          build with MLIB support (Solaris only) [autodetect]
-  --enable-3dfx          build with 3dfx support [disable]
-  --enable-tdfxfb        build with tdfxfb support [disable]
+  --enable-3dfx          build with obsolete /dev/3dfx support [disable]
+  --enable-tdfxfb        build with tdfxfb (Voodoo 3/banshee) support [disable]
   --enable-directfb      build with DirectFB support [autodetect]
   --enable-zr            build with ZR360[56]7/ZR36060 support [autodetect]
   --enable-bl		 build with Blinkenlights support [disable]
 
-Audio:
+Audio output:
   --disable-ossaudio     disable OSS sound support [autodetect]
   --disable-arts         disable aRts sound support [autodetect]
   --disable-alsa         disable alsa sound support [autodetect]
   --disable-sunaudio     disable Sun sound support [autodetect]
-  --disable-mad          disable mad audio support [autodetect]
   --disable-select       disable using select() on audio device [enable]
 
 Miscellaneous options:
+  --enable-runtime-cpudetection    Enable runtime CPU detection [disable]
   --cc=COMPILER          use this C compiler to build MPlayer [gcc]
   --target=PLATFORM      target platform (i386-linux, arm-linux, etc)
   --enable-static        build a statically linked binary. Set further linking
                          options with --enable-static="-lslang -lncurses"
-  --language=xx          select a language [en]
+  --language=xx          select a language (for translated messages/gui) [en]
                          (Available: $LANGUAGES)
 
 Advanced options:
@@ -226,9 +221,12 @@ Advanced options:
   --enable-sse           build with sse support [autodetect]
   --enable-sse2          build with sse2 support [autodetect]
   --disable-fastmemcpy   disable 3dnow/sse/mmx optimized memcpy() [enable]
+  --disable-big-endian   Force byte order to little endian [autodetect]
+  --enable-big-endian    Force byte order to big endian [autodetect]
   --enable-debug[=1-3]   compile debugging information into mplayer [disable]
   --enable-profile       compile profiling information into mplayer [disable]
   --disable-sighandler   disable sighandler for crashes [enable]
+  --enable-i18n          _experimental_ gnu gettext() support [disable]
 
 Hazardous options a.k.a. "DO NOT REPORT ANY BUGS!"
   --disable-gcc-checking   disable gcc version checking [enable]
@@ -3260,15 +3258,15 @@ else
 fi
 echores "$_cdparanoia"
 
-echocheck "freetype >= 2.1"
+echocheck "freetype >= 2.0.9"
 if test "$_freetype" = yes ; then
     test -z "$_freetypeconfig" && _freetypeconfig='freetype-config'
     if ( $_freetypeconfig --version ) >/dev/null 2>&1 ; then
 	cat > $TMPC << EOF
 #include <stdio.h>
 #include <freetype/freetype.h>
-#if !((FREETYPE_MAJOR >= 2) && (FREETYPE_MINOR >= 1))
-#error "Need FreeType 2.1 or newer"
+#if ((FREETYPE_MAJOR < 2) || ((FREETYPE_MINOR == 0) && (FREETYPE_PATCH < 9)))
+#error "Need FreeType 2.0.9 or newer"
 #endif
 int main()
 {
