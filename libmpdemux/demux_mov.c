@@ -257,6 +257,9 @@ void mov_build_index(mov_track_t* trak,int timescale){
 	    }
 	    el->frames=sample-el->start_sample;
 	    frame+=el->frames;
+	    mp_msg(MSGT_DEMUX,MSGL_V,"EL#%d: pts=%d  1st_sample=%d  frames=%d (%5.3fs)  pts_offs=%d\n",i,
+		el->pos,el->start_sample, el->frames,
+		(float)(el->dur)/(float)timescale, el->pts_offset);
 	}
     }
 
