@@ -53,7 +53,8 @@ struct config lavcopts_conf[]={
 	{"vcodec", &lavc_param_vcodec, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"vbitrate", &lavc_param_vbitrate, CONF_TYPE_INT, CONF_RANGE, 4, 24000000, NULL},
 	{"vhq", &lavc_param_vhq, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"vme", &lavc_param_vme, CONF_TYPE_FLAG, CONF_RANGE, 0, 3, NULL},
+	{"vme", &lavc_param_vme, CONF_TYPE_INT, CONF_RANGE, 0, 3, NULL},
+	{"vqscale", &lavc_param_vqscale, CONF_TYPE_INT, CONF_RANGE, 1, 31, NULL},
 	{"keyint", &lavc_param_keyint, CONF_TYPE_INT, 0, 0, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };

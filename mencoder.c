@@ -72,6 +72,7 @@ char *lavc_param_vcodec = NULL;
 int lavc_param_vbitrate = -1;
 int lavc_param_vhq = 0; /* default is realtime encoding */
 int lavc_param_vme = 3;
+int lavc_param_vqscale = 0;
 int lavc_param_keyint = -1;
 #endif
 
@@ -988,11 +989,13 @@ case VCODEC_LIBAVCODEC:
        encoder context - FIXME */
     motion_estimation_method = lavc_param_vme;
 
-#if 0
     /* fixed qscale :p */
-    lavc_venc_context.flags |= CODEC_FLAG_QSCALE;
-    lavc_venc_context.quality = 1;
-#endif
+    if (lavc_param_vqscale)
+    {
+	printf("Using constant qscale = %d (VBR)\n", lavc_param_vqscale);
+	lavc_venc_context.flags |= CODEC_FLAG_QSCALE;
+	lavc_venc_context.quality = lavc_param_vqscale;
+    }
 
     if (avcodec_open(&lavc_venc_context, lavc_venc_codec) != 0)
     {
