@@ -53,7 +53,8 @@ static int control(int cmd,int arg){
 // return: 1=success 0=fail
 static int init(int rate,int channels,int format,int flags){
 
-  printf("ao2: %d Hz  %d chans  0x%X\n",rate,channels,format);
+  printf("ao2: %d Hz  %d chans  %s\n",rate,channels,
+    audio_out_format_name(format));
 
   audio_fd=open(dsp, O_WRONLY);
   if(audio_fd<0){
@@ -63,7 +64,8 @@ static int init(int rate,int channels,int format,int flags){
 
   ao_format=format;
   ioctl (audio_fd, SNDCTL_DSP_SETFMT, &ao_format);
-  printf("audio_setup: sample format: 0x%X  (requested: 0x%X)\n",ao_format,format);
+  printf("audio_setup: sample format: %s (requested: %s)\n",
+    audio_out_format_name(ao_format), audio_out_format_name(format));
   
   ao_channels=channels-1;
   ioctl (audio_fd, SNDCTL_DSP_STEREO, &ao_channels);
