@@ -45,10 +45,10 @@
        egy video csomag, egy audio csomag, egy video, stb...). Ez
        a leggyorsabb módszer, és elég 1 olvasó részt indítani. Ajánlott,
        és széleskörben használt.
-    2. non-interleaved: itt szimplán vannak összefûzve, azaz egy nagy
-       video blokk, és utána az audio blokk. 2 processzt kell indítani hogy
-       be lehessen olvasni, vagy egyet, de akkor a tekerés lehetõsége
-       elveszik. Ez rettenetesen rossz például hálózaton vagy CDROM-on.
+    2. non-interleaved: itt szimplán vannak összefûzve, azaz egy nagy video
+       blokk, és utána az audio blokk. 2 olvasó processzt kell indítani, vagy
+       egyet, de akkor rengeteget fog tekerészni. Ez rettenetesen rossz például
+       hálózaton vagy CDROM-on.
     3. rosszul interleave-lt fileok: MPlayer induláskor detektálja az
        interleave jelenlétét vagy hiányát, és ez alapján dönti el hogy
        bekapcsolja-e a -ni opciót. Sajnos néhány program rossz interleave-t
