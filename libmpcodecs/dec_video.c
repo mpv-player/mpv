@@ -123,9 +123,11 @@ int init_video(sh_video_t *sh_video,char* codecname,int vfm,int status){
       sh_video->codec,0) )){
 	// ok we found one codec
 	int i;
+	if(sh_video->codec->flags&CODECS_FLAG_SELECTED) continue; // already tried & failed
 	if(codecname && strcmp(sh_video->codec->name,codecname)) continue; // -vc
 	if(vfm>=0 && sh_video->codec->driver!=vfm) continue; // vfm doesn't match
 	if(sh_video->codec->status<status) continue; // too unstable
+	sh_video->codec->flags|=CODECS_FLAG_SELECTED; // tagging it
 	// ok, it matches all rules, let's find the driver!
 	for (i=0; mpcodecs_vd_drivers[i] != NULL; i++)
 	    if(mpcodecs_vd_drivers[i]->info->id==sh_video->codec->driver) break;
