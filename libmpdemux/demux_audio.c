@@ -133,6 +133,8 @@ int demux_audio_open(demuxer_t* demuxer) {
     }
     break;
   case WAV: {
+    unsigned int chunk_type;
+    unsigned int chunk_size;
     WAVEFORMATEX* w;
     int l;
     sh_audio->wf = w = (WAVEFORMATEX*)malloc(sizeof(WAVEFORMATEX));
@@ -152,6 +154,13 @@ int demux_audio_open(demuxer_t* demuxer) {
     l -= 16;
     if(l)
       stream_skip(s,l);
+    do
+    {
+      chunk_type = stream_read_fourcc(demuxer->stream);
+      chunk_size = stream_read_dword_le(demuxer->stream);
+      if (chunk_type != mmioFOURCC('d', 'a', 't', 'a'))
+        stream_skip(demuxer->stream, chunk_size);
+    } while (chunk_type != mmioFOURCC('d', 'a', 't', 'a'));
     demuxer->movi_start = stream_tell(s);
     demuxer->movi_end = s->end_pos;
   } break;
@@ -219,7 +228,7 @@ int demux_audio_fill_buffer(demux_stream_t *ds) {
     return 1;
   }
   default:
-    printf("Audio demuxer : unknow format %d\n",priv->frmt);
+    printf("Audio demuxer : unknown format %d\n",priv->frmt);
   }
 
 
