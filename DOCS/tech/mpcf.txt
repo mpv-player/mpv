@@ -121,7 +121,6 @@ stream_header:
 	time_base_denom				v
 	msb_timestamp_shift			v
 	initial_timestamp_predictor		v(3)
-	initial_data_size_predictor		v(2)
 	fixed_fps				u(1)
 	index_flag				u(1)
 	reserved				u(6)
@@ -157,14 +156,10 @@ frame
 	if(stream_id_plus1[frame_code]==0){
 		stream_id			v
 	}
-	if(flags[frame_code]&4){
-		if(flags[frame_code]&1){
-			timestamp		v
-		}else{
-			lsb_timestamp		v
-		}
+	if((flags[frame_code]&3)==3){
+		coded_timestamp			v
 	}
-	if(flags[frame_code]&8){
+	if(flags[frame_code]&4){
 		data_size_msb			v
 	}
 	data
@@ -295,7 +290,7 @@ time_base_nom / time_base_denom = time_base
 		      timestamps need fewer bits
 
 msb_timestamp_shift
-	amount of bits msb_timestamp is shifted left before adding lsb_timestamp
+	amount of bits in lsb_timestamp
 	MUST be <16
 
 fixed_fps
@@ -325,26 +320,29 @@ frame_code
 	different from the first byte of any startcode
 
 flags[frame_code]
-	the bits of the flags from MSB to LSB are KDTTT
-	TTT is the timestamp_code, 000,001,010 use the last timestamp + the
-		first, second and third last unique timestamp difference, so if
-		the timestamp differences, are +3,+1,+2,+2,+1 then last diff is
-		+1, second is +2 and third is +3
-		100,101 mean that the lsb or full timestamp is coded
-		if TTT is 100, then the timestamp is calculated by
-		mask = (1<<msb_timestamp_shift)-1;
-		delta= last_timestamp - mask/2
-		timestamp= ((timestamp_lsb-delta)&mask) + delta
-		TTT must be 101 if the packet_type is not 0
-		the last timestamp differences are reset to the 
+	the bits of the flags from MSB to LSB are KDTT
+	TT is the timestamp_code
+		00,01,10 predicted delta timestamps
+		11 timestamp coded, either lsb or full timestamp
+		
+		predicted delta timestamp use the last timestamp from the
+		current stream + the first, second and third last unique
+		timestamp difference, so if the timestamp differences, where
+		+3,+1,+2,+2,+1 then last difference is +1, second is +2 and
+		third is +3
+		predicted delta timestamps MUST NOT be used in type > 0 frames
+		or in type 0 frames if there was no full timestamp in the 
+		current stream after the last type > 0 frame
+
+		the least recent used delta timestamps are reset to the 
 		initial_timestamp_predictor values from the stream header if a
 		packet of type not 0 in encountered
-	if D is 1 then data_size_msb is coded, otherwise its 0
+	if D is 1 then data_size_msb is coded, otherwise data_size_msb is 0
 	K is the keyframe_type 
 		0-> no keyframe, 
 		1-> keyframe, 
-	flags=7 can be used to mark illegal frame_code bytes
-	frame_code=78 must have flags=7
+	flags=16 can be used to mark illegal frame_code bytes
+	frame_code=78 must have flags=16
 
 frame_type
 	if the first byte of a frame is 'N' then the frame_type is 2 otherwise 
@@ -369,18 +367,19 @@ data_size_lsb[frame_code]
 	must be <250
 
 data_size       
-	if(data_size_lsb == data_size_mul)
-		data_size= last;
-	else if(data_size_lsb == data_size_mul+1)
-		data_size= next_last;
-	else if(data_size_lsb < data_size_mul)
-		data_size= data_size_lsb + data_size_msb*data_size_mul;
-	else reserved
-	next_last is the second last unique data_size, for example:
-	previous data_size: 123,500,312,500,500    last=500, next_last=312
-	last and next_last are reset to the initial_data_size_predictor values
-	stored in the stream header if an frame with type > 0 is encountered
+	data_size= data_size_lsb + data_size_msb*data_size_mul;
 
+coded_timestamp
+	if coded_timestamp < (1<<msb_timestamp_shift) then its a
+	lsb timestamp, otherwise its a full timestamp + (1<<msb_timestamp_shift)
+	lsb timestamps are converted to full timesamps by:
+	mask = (1<<msb_timestamp_shift)-1;
+	delta= last_timestamp - mask/2
+	timestamp= ((timestamp_lsb-delta)&mask) + delta
+	a full timestamp must be used if the packet_type is not 0 or there is no
+	reference timestamp available after the last not 0 frame with the 
+	current stream_id
+        
 lsb_timestamp
 	least significant bits of the timestamp in time_base precission
         Example: IBBP display order
