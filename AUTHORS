@@ -492,7 +492,7 @@ Attila Kinali <attila@kinali.ch>
     * various small fixes in the x11 code
     * xinerama support
     * documentation
-    * patch application monkey
+    * patch application monkey, mailer daemon
 
 Andoni Zubimendi <andoni@lpsat.net>.
     * Spanish documentation translation
