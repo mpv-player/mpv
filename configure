@@ -4783,6 +4783,7 @@ STREAMING_LIB = $_ld_streaming $_ld_live
 VIDIX = $_vidix
 PP_LIB = $_ld_pp
 SHARED_PP = $_shared_pp
+CONFIG_RISKY = yes
 LIBMENU = $_menu
 
 OPENDIVX = $_opendivx
@@ -5094,6 +5095,9 @@ $_def_dshow
 /* ffmpeg's libavcodec support (requires libavcodec source) */
 $_def_libavcodec
 $_def_libavcodecso
+
+/* risky codecs */
+#define CONFIG_RISKY 1
 
 /* Use libavcodec's decoders */
 #define CONFIG_DECODERS 1
