@@ -29,8 +29,6 @@ int fakemono=0;
 int audio_output_channels = 2;
 af_cfg_t af_cfg; // Configuration for audio filters
 
-static ad_functions_t* mpadec;
-
 void afm_help(){
     int i;
     mp_msg(MSGT_DECAUDIO,MSGL_INFO,MSGTR_AvailableAudioFm);
@@ -51,13 +49,13 @@ int init_audio_codec(sh_audio_t *sh_audio)
 {
   if ((af_cfg.force & AF_INIT_FORMAT_MASK) == AF_INIT_FLOAT) {
       int fmt = AF_FORMAT_FLOAT_NE;
-      if (mpadec->control(sh_audio, ADCTRL_QUERY_FORMAT,
+      if (sh_audio->ad_driver->control(sh_audio, ADCTRL_QUERY_FORMAT,
 				       &fmt) == CONTROL_TRUE) {
 	  sh_audio->sample_format = fmt;
 	  sh_audio->samplesize = 4;
       }
   }
-  if(!mpadec->preinit(sh_audio))
+  if(!sh_audio->ad_driver->preinit(sh_audio))
   {
       mp_msg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_ADecoderPreinitFailed);
       return 0;
@@ -87,7 +85,7 @@ int init_audio_codec(sh_audio_t *sh_audio)
   memset(sh_audio->a_buffer,0,sh_audio->a_buffer_size);
   sh_audio->a_buffer_len=0;
 
-  if(!mpadec->init(sh_audio)){
+  if(!sh_audio->ad_driver->init(sh_audio)){
       mp_msg(MSGT_DECAUDIO,MSGL_WARN,MSGTR_ADecoderInitFailed);
       uninit_audio(sh_audio); // free buffers
       return 0;
@@ -121,7 +119,9 @@ int init_audio(sh_audio_t *sh_audio,char* codecname,char* afm,int status){
     unsigned int orig_fourcc=sh_audio->wf?sh_audio->wf->wFormatTag:0;
     sh_audio->codec=NULL;
     while(1){
+	ad_functions_t* mpadec;
 	int i;
+	sh_audio->ad_driver = 0;
 	// restore original fourcc:
 	if(sh_audio->wf) sh_audio->wf->wFormatTag=i=orig_fourcc;
 	if(!(sh_audio->codec=find_codec(sh_audio->format,
@@ -178,6 +178,7 @@ int init_audio(sh_audio_t *sh_audio,char* codecname,char* afm,int status){
 	// it's available, let's try to init!
 	// init()
 	mp_msg(MSGT_DECAUDIO,MSGL_INFO,MSGTR_OpeningAudioDecoder,mpadec->info->short_name,mpadec->info->name);
+	sh_audio->ad_driver = mpadec;
 	if(!init_audio_codec(sh_audio)){
 	    mp_msg(MSGT_DECAUDIO,MSGL_INFO,MSGTR_ADecoderInitFailed);
 	    continue; // try next...
@@ -248,7 +249,7 @@ void uninit_audio(sh_audio_t *sh_audio)
     }
     if(sh_audio->inited){
 	mp_msg(MSGT_DECAUDIO,MSGL_V,MSGTR_UninitAudioStr,sh_audio->codec->drv);
-	mpadec->uninit(sh_audio);
+	sh_audio->ad_driver->uninit(sh_audio);
 #ifdef DYNAMIC_PLUGINS
 	if (sh_audio->dec_handle)
 	    dlclose(sh_audio->dec_handle);
@@ -363,6 +364,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen)
   int declen;
   af_data_t  afd;  // filter input
   af_data_t* pafd; // filter output
+  ad_functions_t* mpadec = sh_audio->ad_driver;
 
   if(!sh_audio->inited) return -1; // no codec
   if(!sh_audio->afilter){
@@ -443,13 +445,13 @@ void resync_audio_stream(sh_audio_t *sh_audio)
 {
   sh_audio->a_in_buffer_len=0;        // clear audio input buffer
   if(!sh_audio->inited) return;
-  mpadec->control(sh_audio,ADCTRL_RESYNC_STREAM,NULL);
+  sh_audio->ad_driver->control(sh_audio,ADCTRL_RESYNC_STREAM,NULL);
 }
 
 void skip_audio_frame(sh_audio_t *sh_audio)
 {
   if(!sh_audio->inited) return;
-  if(mpadec->control(sh_audio,ADCTRL_SKIP_FRAME,NULL)==CONTROL_TRUE) return;
+  if(sh_audio->ad_driver->control(sh_audio,ADCTRL_SKIP_FRAME,NULL)==CONTROL_TRUE) return;
   // default skip code:
   ds_fill_buffer(sh_audio->ds);  // skip block
 }

@@ -35,6 +35,7 @@ typedef struct {
   int a_out_buffer_size;
 //  void* audio_out;        // the audio_out handle, used for this audio stream
   void* afilter;          // the audio filter stream
+  struct ad_functions_s* ad_driver;
 #ifdef DYNAMIC_PLUGINS
   void *dec_handle;
 #endif
