@@ -16,16 +16,16 @@
 <H1><A NAME=5>5. FAQ (Gyakran Feltett Kérdések)</A></H1>
 
 <UL>
-  <LI><A HREF="#5.1">5.1 Fordítás</A></LI>
-  <LI><A HREF="#5.2">5.2 Általános kérdések</A></LI>
-  <LI><A HREF="#5.3">5.3 File lejátszással kapcsolatos problémák</A></LI>
-  <LI><A HREF="#5.4">5.4 Video/audio meghajtó problémák (vo/ao)</A></LI>
-  <LI><A HREF="#5.5">5.5 DVD lejátszás</A></LI>
-  <LI><A HREF="#5.6">5.6 Feature kérések</A></LI>
-  <LI><A HREF="#5.7">5.7 Enkódolás</A></LI>
+  <LI><A HREF="#compilation">5.1 Fordítás</A></LI>
+  <LI><A HREF="#general">5.2 Általános kérdések</A></LI>
+  <LI><A HREF="#playback">5.3 File lejátszással kapcsolatos problémák</A></LI>
+  <LI><A HREF="#driver">5.4 Video/audio meghajtó problémák (vo/ao)</A></LI>
+  <LI><A HREF="#dvd">5.5 DVD lejátszás</A></LI>
+  <LI><A HREF="#features">5.6 Feature kérések</A></LI>
+  <LI><A HREF="#encoding">5.7 Enkódolás</A></LI>
 </UL>
 
-<H2><A NAME=5.1>5.1 Fordítás</A></H2>
+<H2><A NAME=compilation>5.1 Fordítás</A></H2>
 
 <DL>
 
@@ -165,9 +165,26 @@ marhaság van), frissíts MPlayer CVS-bõl, vagy valami.</DD>
 
 </DL>
 
-<H2><A NAME=5.2>5.2.  Általános kérdések</A></H2>
+<H2><A NAME=general>5.2.  Általános kérdések</A></H2>
 
 <DL>
+
+  <DT>Q: Hogyan csináljak megfelelõ patchet az MPlayerhez?</DT>
+  <DD>A: Elkészítettünk egy <A HREF="../tech/patches.txt">rövid írást</A>
+    ami tartalmazza amit tudnod kell.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Hogyan támogathatom az MPlayer fejlesztését?</DT>
+  <DD>A: Boldogan elfogadunk bármilyen hardvert vagy szoftvert, a listát
+    lásd <A HREF="http://www.mplayerhq.hu/homepage/donations.html">itt</A>.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Hogyan lehetek MPlayer fejlesztõ?</DT>
+  <DD>A: Szívesen vesszük coder-ek és dokumentáció írók jelentkezését. Olvasd
+    el a <A HREF="../tech">technikai dokumentációt</A>, és iratkozz fel az
+    <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</A>
+    listára, és kezdj kódolni.</DD>
+  <DD>&nbsp:</DD>
 
   <DT>Q: Futtathatok egyszerre többet az <B>MPlayerbõl</B>?</DT>
   <DD>A: Igen. Amire figyelni kell az az, hogy néhány video meghajtóból
@@ -263,12 +280,12 @@ az SDL DGA-ja is mûködik, használd azt, az MÉG gyorsabb!</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: Pontosan mi is ez a libavcodec?</DT>
-  <DD>A: Lásd a <A HREF="codecs.html#2.1.2.2">2.1.2.2-es fejezetet</A>.</DD>
+  <DD>A: Lásd a <A HREF="codecs.html#wav">2.1.2.2-es fejezetet</A>.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q:  De a configure azt mondja hogy "Checking for libavcodec ... no" !</DT>
   <DD>A:  Le kell töltened a libavcodec-et az FFmpeg CVS-bõl. Lásd a
-     <A HREF="codecs.html#2.1.2.2">2.1.2.2</A>-es fejezetet.</DD>
+     <A HREF="codecs.html#wav">2.1.2.2</A>-es fejezetet.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q:  Icewm-et használok, és a tálca mindig látható!</DT>
@@ -289,7 +306,7 @@ az SDL DGA-ja is mûködik, használd azt, az MÉG gyorsabb!</DD>
 
 </DL>
 
-<H2><A NAME=5.3>5.3.  File lejátszással kapcsolatos problémák</A></H2>
+<H2><A NAME=playback>5.3.  File lejátszással kapcsolatos problémák</A></H2>
 
 <DL>
 
@@ -392,7 +409,7 @@ ki a YUY2-t az alapértelmezett YV12 helyett (lásd TV bemenet dokumentáció).</DD>
 
   <DT>Q: Mûködik a lejátszás, de az MPlayer ezt írja ki :
 <CODE>Linux RTC init: ioctl (rtc_pie_on): Permission denied</CODE></DT>
-  <DD>A: Olvasd el az <A HREF="documentation.html#1.3">Installálás</A> fejezetet. Azt
+  <DD>A: Olvasd el az <A HREF="documentation.html#installation">Installálás</A> fejezetet. Azt
 a részt ami az új A/V szinkron kódrol szól.</DD>
   <DD>&nbsp;</DD>
 
@@ -406,7 +423,9 @@ a "resample" audio plugint (lásd dokumentáció).</DD>
   <DT>Q: Nagyon furcsa (magas) processzorhasználati értékeket ír ki az MPlayer. Notebookon
 használom.</DT>
   <DD>A: Ez a notebookod power managementjének hatása. <B>Mielõtt</B> bekapcsolod a gépet,
-dugd bele a külsõ áramkábelt.</DD>
+    dugd bele a külsõ áramkábelt. Kipróbálhatod a
+    <A HREF="http://www.brodo.de/cpufreq">cpufreq</A> programot (egy SpeedStep
+    interface Linux-hoz) is, hátha segít.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: Az audio/video szinkron teljesen rossz amikor root-ként játszok le
@@ -423,7 +442,7 @@ a <CODE>-ao sdl</CODE> opciót (SDL meghajtó).</DD>
 
 </DL>
 
-<H2><A NAME=5.4>5.4.  Video/audio meghajtó problémák (vo/ao)</A></H2>
+<H2><A NAME=driver>5.4.  Video/audio meghajtó problémák (vo/ao)</A></H2>
 
 <DL>
 
@@ -491,7 +510,7 @@ igenis használ xv-t, ha támogatva van. Nem kell külön írni semmit hozzá..</DD>
 
 </DL>
 
-<H2><A NAME=5.5>5.5.  DVD lejátszás</A></H2>
+<H2><A NAME=dvd>5.5.  DVD lejátszás</A></H2>
 
 <DL>
 
@@ -540,7 +559,7 @@ bekapcsolni a DMA-t a DVD meghajtón.</DD>
 
 </DL>
 
-<H2><A NAME=5.6>5.6.  Feature kérések</A></H2>
+<H2><A NAME=features>5.6.  Feature kérések</A></H2>
 
 <DL>
 
@@ -556,7 +575,7 @@ bekapcsolni a DMA-t a DVD meghajtón.</DD>
 
 </DL>
 
-<B><A NAME=5.7>5.7. Enkódolás</A></B>
+<B><A NAME=encoding>5.7. Enkódolás</A></B>
 
 <DL>
 

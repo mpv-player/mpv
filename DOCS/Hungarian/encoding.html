@@ -11,8 +11,6 @@
 
 <H2><A NAME=2.4>2.4 Enkódolás a MEncoderrel</A></H2>
 
-<H3><A NAME=2.4.1>2.4.1 Bevezetõ</A></H3>
-
 <P>A <B>MEncoder</B> (<B>MPlayer</B>'s Movie Encoder) egy egyszerû film
   enkóder, az MPlayer által lejátszható formátumok
   (<B>AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</B>) más - MPlayerrel
@@ -23,7 +21,7 @@
   másoló, és video átméretezõ képességgel.</P>
 
 
-<H3><A NAME=2.4.2>2.4.2 Fordítás</A></H3>
+<H3><A NAME=compilation>2.4.1 Fordítás</A></H3>
 
 <P>
   <UL>
@@ -31,11 +29,11 @@
     <LI><B>OPCIONÁLIS (CSAK LINUX)</B> - töltsd le a legújabb <B>DivX4linux</B> könyvtárat például
       <A HREF="http://avifile.sourceforge.net/download.htm">innen</A>, és
       installáld HELYESEN. Ez szükséges a DivX4 (1/2 menetes) enkódoláshoz.</LI>
-    <LI><B>OPCIONÁLIS</B> - <A HREF="codecs.html#2.2.1.9">töltsd le és
+    <LI><B>OPCIONÁLIS</B> - <A HREF="codecs.html#xvid">töltsd le és
       installáld az <B>XViD</B>-et</A>. Nem túl hasznos, a libavcodec
       <I>mpeg4</I> codec-e sokkal gyorsabban és jobb minõségben kódol.</LI>
     <LI><B>OPCIONÁLIS</B> - ha a libavcodec codec-ekkel is akarsz enkódolni,
-      installáld a libavcodec-et, ahogyan az a <A HREF="codecs.html#2.2.1.2">libavcodec
+      installáld a libavcodec-et, ahogyan az a <A HREF="codecs.html#libavcodec">libavcodec
       fejezetben</A> le van írva.</LI>
     <LI><B>OPCIONÁLIS</B> - töltsd és fordítsd le a <B>libmp3lame-t</B> (a lame 3.89bétából vagy
       CVS-bõl).<BR>
@@ -50,7 +48,7 @@
       valószínû hogy hallod a különbséget. Jaigen, ha a fordítód nem tudja
       a tesztet lefuttatni.. Nos, töröld már le azt a nyavajás <B>GCC 2.96</B>-ot.</LI>
     <LI><B>OPCIONÁLIS</B> - <CODE>libjpeg</CODE> és <CODE>libpng</CODE> -
-      lásd az <A HREF="documentation.html#1.3">Installálás</A> 
+      lásd az <A HREF="documentation.html#installation">Installálás</A> 
       fejezetet</LI>
   </UL>
 </P>
@@ -58,7 +56,7 @@
 <P>Kész. Mint minden bizonnyal tudod, más enkódolóknak szükségük van az
   <I>avifile</I> könyvtárra. A <B>MEncoder</B>-nek egyáltalán nincs.</P>
 
-<H3><A NAME=2.4.3>2.4.3 MEncoder funkciók</A></H3>
+<H3><A NAME=features>2.4.2 MEncoder funkciók</A></H3>
 
 <P>
   <UL>
@@ -96,7 +94,7 @@
   <LI>audio enkódolása v4l-rõl (BSD-n már kész?)</LI>
 </UL>
 
-<H4><A NAME=2.4.3.1>2.4.3.1 2, 3 menetes DivX4 enkódolása</A></H4>
+<H4><A NAME=2pass>2.4.2.1 2, 3 menetes DivX4 enkódolása</A></H4>
 
 <P><U><B>2 menetes enkódolás:</B></U> az elnevezés onnan jön, hogy ezzel a
   módszerrel a file <I>kétszer</I> lesz enkódolva. Az elsõ menet néhány pár
@@ -183,7 +181,7 @@
 </UL>
 
 
-<H4><A NAME=2.4.3.2>2.4.3.2 Átméretezés</A></H4>
+<H4><A NAME=rescaling>2.4.2.2 Átméretezés</A></H4>
 
 <P>Gyakran elõjön a filmek átméretezésének igénye. Ennek oka sokféle lehet,
   például a fileméret csökkentése, vagy SVCD-bõl DivX-be kódolás. A rippelt
@@ -203,7 +201,7 @@
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder sample-svcd.mpg -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=1300 -vop
   scale=640:480 -oac copy -o output.avi</CODE></P
 
-<H4><A NAME=2.4.3.3>2.4.3.3 Stream másolása</A></H4>
+<H4><A NAME=copying>2.4.2.3 Stream másolása</A></H4>
 
 <P>A <B>MEncoder</B> kétféleképpen tudja a bemeneti stream-eket kezelni:
   <B>enkódolja</B> vagy csak <B>átmásolja</B> õket. Ez a rész a <B>másolásról</B>
@@ -224,7 +222,7 @@
     használni.</LI>
 </UL>
 
-<H4><A NAME=2.4.3.4>2.4.3.4 Hibás index-szel rendelkezõ AVI-k rendbehozása</A></H4>
+<H4><A NAME=fixing>2.4.2.4 Hibás index-szel rendelkezõ AVI-k rendbehozása</A></H4>
 
 <P>A legkönnyebb dolog a világon. Egyszerûen átmásoljuk a video és audio
   streameket, és közben a <B>MEncoder</B> létrehozza a megfelelõ indexet is.
@@ -234,9 +232,9 @@
 <P>A parancs: <CODE>mencoder -idx input.avi -ovc copy -oac copy -o output.avi</CODE></P>
 
 
-<H4><A NAME=2.4.3.5>2.4.3.5 Enkódolás a <I>libavcodec</I> codec-ekkel</A></H4>
+<H4><A NAME=libavcodec>2.4.2.5 Enkódolás a <I>libavcodec</I> codec-ekkel</A></H4>
 
-<P>A <A HREF="codecs.html#2.2.1.2">libavcodec</A>-kel egyszerûen lehet kódolni
+<P>A <A HREF="codecs.html#libavcodec">libavcodec</A>-kel egyszerûen lehet kódolni
   jónéhány érdekes video és audio formátumba (jelenleg az audio codec-ek nem
   támogatottak). A következõ codec-ekkel lehet enkódolni:</P>
 
@@ -259,7 +257,7 @@
     -lavcopts vcodec=mjpeg -oac copy</CODE></P>
 
 
-<H4><A NAME=2.4.3.6>2.4.3.6 Enkódolás több bemeneti file-ból (JPEG, PNG)</A></H4>
+<H4><A NAME=image_files>2.4.2.6 Enkódolás több bemeneti file-ból (JPEG, PNG)</A></H4>
 
 <P>A <B>MEncoder</B> képes több JPEG vagy PNG file-ból filmet létrehozni.
   Egyszerû framecopy használatával pedig MJPEG (Motion JPEG) vagy MPNG
@@ -280,7 +278,7 @@
 <P><B><I>Példák</I></B></P>
 
 <P>Az <CODE>-mf</CODE> opció magyarázata a lenti összefoglaló
-  <A HREF=#2.4.5>Opciók</A> fejezetben, illetve a manpage-ben található.</P>
+  <A HREF=#2.4.3>Opciók</A> fejezetben, illetve a manpage-ben található.</P>
 
 <P><I>DivX4 film létrehozása az aktuális könyvtárban található összes JPEG fileból:</I><BR>
   &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc divx4 -oac copy -o
@@ -303,7 +301,7 @@
   -o kimenet.avi</CODE></P>
 
 
-<H4><A NAME=2.4.3.7>2.4.3.7  DVD feliratok VOBsub formátumúvá alakítása</A></H4>
+<H4><A NAME=vobsub>2.4.2.7  DVD feliratok VOBsub formátumúvá alakítása</A></H4>
 
 <P>A <B>MEncoder</B> képes DVD-rõl kivonni a feliratot, és átalakítani
   Vobsub formátumú felirattá. Ezek egy <CODE>.idx</CODE> és egy
@@ -341,7 +339,7 @@
   &nbsp;&nbsp;<CODE>mencoder movie.mpg -ifo movie.ifo -vobsubout subtitles
     -vobsuboutindex 0 -vobsuboutid fr -sid 1</CODE></P>
 
-<H3><A NAME="2.4.4">2.4.4 Opciók</A></H3>
+<H3><A NAME=options>2.4.3 Opciók</A></H3>
 
 <P>A rendelkezésre álló összes opció listája példákkal együtt a manpage-ben
   található.</P>

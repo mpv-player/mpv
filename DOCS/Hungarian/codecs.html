@@ -12,7 +12,7 @@
 <H2><A NAME=2.2>2.2  Támogatott codec-ek</H3>
 
 
-<H3><A NAME=2.2.1>2.2.1  Video codec-ek</A></H3>
+<H3><A NAME=video_codecs>2.2.1  Video codec-ek</A></H3>
 
 <P>Lásd <A HREF="http://www.mplayerhq.hu/DOCS/codecs-status.html">a codec
   státusz lapot</A> a teljes, naponta generált listához.</P>
@@ -37,11 +37,11 @@
 </UL>
 
 <P>Ha van olyan Win32 codeced, ami nincs felsorolva vagy támogatva, olvasd el a
-  <A HREF="codecs.html#2.2.3">codec importálás</A> fejezetet, amiben le van
+  <A HREF="codecs.html#importing">codec importálás</A> fejezetet, amiben le van
   írva mit kell tenned, hogy támogassuk a codeced!</P>
 
 
-<H4><A NAME=2.2.1.1>2.2.1.1  DivX4/DivX5</A></H4>
+<H4><A NAME=divx>2.2.1.1  DivX4/DivX5</A></H4>
 
 <P>Ez a fejezet a <A HREF="http://www.projectmayo.com">ProjectMayo</A> DivX4 és
   DivX5 codec-eirõl tartalmaz információkat. Az elsõ hozzáférhetõ alfa verzió
@@ -95,7 +95,7 @@
   gyorsabb lehet!</P>
 
 
-<H4><A NAME=2.2.1.2>2.2.1.2  ffmpeg DivX/libavcodec</A></H4>
+<H4><A NAME=libavcodec>2.2.1.2  ffmpeg DivX/libavcodec</A></H4>
 
 <P>Az <A HREF="http://ffmpeg.sourceforge.net">ffmpeg</A> tartalmaz egy
   <B>nyitott forráskódú</B> codec csomagot, amely képes
@@ -130,7 +130,7 @@
   meg lehet nézni képkockavesztés nélkül, egy régi K6/2 500-ason.</P>
 
 
-<H4><A NAME=2.2.1.3>2.2.1.3  XAnim codec-ek</B></P>
+<H4><A NAME=xanim>2.2.1.3  XAnim codec-ek</B></P>
 
 <P>Elõszó:<BR>
   A bináris XAnim codec-ek mellé van csomagolva egy-egy kis szöveges file
@@ -164,7 +164,7 @@ lehetséges.</P>
 <P>Az eddig tesztelt codec-ek a következõk: <B>Indeo 3.2</B>, <B>4.1</B>, <B>5.0</B>, <B>CVID</B>, <B>3ivX</B>, <B>h263</B>.</P>
 
 
-<H4><A NAME=2.2.1.4>2.2.1.4  VIVO video</A></H4>
+<H4><A NAME=vivo_video>2.2.1.4  VIVO video</A></H4>
 
 <P>Az <B>MPlayer</B> képes lejátszani Vivo (1.0 és 2.0) file-okat. Az 1.0-ás
   fileokra a legmegfelelõbb az FFmpeg-beli H263 codec, amit a <CODE>-vc
@@ -175,7 +175,7 @@ lehetséges.</P>
   Win32-es codeceket.</P>
 
 
-<H4><A NAME=2.2.1.5>2.2.1.5  MPEG 1/2 video</A></H4>
+<H4><A NAME=mpeg>2.2.1.5  MPEG 1/2 video</A></H4>
 
 <P>Az MPEG1 és MPEG2 a natív <B>libmpeg2</B>-vel dekódoljuk. A forrása benne
   van az <B>MPlayer</B>-ben, és természetesen több platformon is használható. 
@@ -184,7 +184,7 @@ lehetséges.</P>
   ahol a hiba volt. Nincs sebességvesztés.</P>
 
 
-<H4><A NAME=2.2.1.6>2.2.1.6  MS Video1</A></H4>
+<H4><A NAME=ms_video1>2.2.1.6  MS Video1</A></H4>
 
 <P>Ez egy nagyon régi és nagyon rossz codec a Microsoft-tól. Régebben ennek
   dekódolásához az <CODE>msvidc32.dll</CODE> nevû Win32-es codecet használtuk,
@@ -192,7 +192,7 @@ lehetséges.</P>
   <A HREF="mailto:melanson@pcisys.net">Mike Melanson</A>-tól.</P>
 
 
-<H4><A NAME=2.2.1.7>2.2.1.7  Cinepak CVID</A></H4>
+<H4><A NAME=cinepak>2.2.1.7  Cinepak CVID</A></H4>
 
 <P>Az <B>MPlayer</B> a saját nyílt forrású, többplatformos Cinepak dekóderét
   használja Cinepak filmekhez. Ez a dekóder támogatja a YUV kimenetet, így a
@@ -200,7 +200,7 @@ lehetséges.</P>
   azt.</P>
 
 
-<H4><A NAME=2.2.1.8>2.2.1.8  RealVideo</A></H4>
+<H4><A NAME=realvideo>2.2.1.8  RealVideo</A></H4>
 
 Az <B>MPlayer</B> a RealVideo összes verziójának dekódolását támogatja:
 <UL>
@@ -222,7 +222,7 @@ Az <B>MPlayer</B> a RealVideo összes verziójának dekódolását támogatja:
   mivel a licenszük megtiltja.</P>
 
 
-<H4><A NAME=2.2.1.9>2.2.1.9  XViD</A></H4>
+<H4><A NAME=xvid>2.2.1.9  XViD</A></H4>
 
 <P>Az <B>XViD</B> az OpenDivX kód továbbfejlesztése. 2001 áprilisában
   az OpenDivX-et fejlesztõ ProjectMayo úgy döntött hogy zárt forrásúvá
@@ -266,7 +266,7 @@ Az <B>MPlayer</B> a RealVideo összes verziójának dekódolását támogatja:
 </OL>
 
 
-<H4><A NAME=2.2.1.10>2.2.1.10  Sorenson</A></H4>
+<H4><A NAME=sorenson>2.2.1.10  Sorenson</A></H4>
 
 <P>A <B>Sorenson</B> egy, az Apple által kifejlesztett video codec. Jelenleg
   az elsõ verzióját (SVQ1) tudjuk dekódolni, egy natív dekóderrel.</P>
@@ -284,7 +284,7 @@ Az <B>MPlayer</B> a RealVideo összes verziójának dekódolását támogatja:
 <P><B>Installálás:</B> alapállapotban lefordul.</P>
 
 
-<H3><A NAME=2.2.2>2.2.2  Audio codec-ek</A></H3>
+<H3><A NAME=audio_codecs>2.2.2  Audio codec-ek</A></H3>
 
 <P>A legfontosabb audio codecek:<BR></P>
 <UL>
@@ -301,7 +301,7 @@ Az <B>MPlayer</B> a RealVideo összes verziójának dekódolását támogatja:
 </UL>
 
 
-<H4><A NAME=2.2.2.1>2.2.2.1  Szoftveres AC3 dekódolás</B></P>
+<H4><A NAME=software_ac3>2.2.2.1  Szoftveres AC3 dekódolás</B></P>
 
 <P>Ez az alapértelmezett AC3 audio dekóder.</P>
 
@@ -327,7 +327,7 @@ Az <B>MPlayer</B> a RealVideo összes verziójának dekódolását támogatja:
   legújabb ALSA CVS-ben is van hozzá támogatás).</P>
 
 
-<H4><A NAME=2.2.2.2>2.2.2.2  Hardveres AC3 dekódolás</B></P>
+<H4><A NAME=hardware_ac3>2.2.2.2  Hardveres AC3 dekódolás</B></P>
 
 <P>Kell egy AC3 képes hangkártya, digitális kimenettel (SP/DIF). A kártya
   meghajtójának megfelelõen támogatnia kell az AFMT_AC3 formátumot (ilyenek
@@ -336,7 +336,7 @@ Az <B>MPlayer</B> a RealVideo összes verziójának dekódolását támogatja:
   C-Media, SB Live! (csak ALSA-val), és DXR3/Hollywood+ kártyákkal mûködik!</P>
 
 
-<H4><A NAME=2.2.2.3>2.2.2.3  libmad támogatás</A></H4>
+<H4><A NAME=libmad>2.2.2.3  libmad támogatás</A></H4>
 
 <P>A <A HREF="http://mad.sourceforge.net">libmad</A> egy többplatformos MPEG
   audio dekóder. Ha nem tudod miért lenne szükséged rá, nincs szükséged rá.</P>
@@ -347,7 +347,7 @@ Az <B>MPlayer</B> a RealVideo összes verziójának dekódolását támogatja:
   bekapcsolni.</P>
 
 
-<H4><A NAME=2.2.2.4>2.2.2.4. VIVO audio</A></H4>
+<H4><A NAME=vivo_audio>2.2.2.4. VIVO audio</A></H4>
 
 <P>A VIVO file-okban használt audio codec milyensége attól függ hogy VIVO/1.0
   avagy VIVO/2.0 fileról beszélünk. Az 1.0-ás fileokban <B>g.723</B> audio van,
@@ -356,7 +356,7 @@ Az <B>MPlayer</B> a RealVideo összes verziójának dekódolását támogatja:
   <A HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/vivog723.acm">innen</A> letölthetõ.</P>
 
 
-<H4><A NAME=2.2.2.5>2.2.2.5. RealAudio</A></H4>
+<H4><A NAME=realaudio>2.2.2.5. RealAudio</A></H4>
 
 <P>Az <B>MPlayer</B> majdnem az összes RealAudio codec-et támogatja:
 <UL>
@@ -366,12 +366,12 @@ Az <B>MPlayer</B> a RealVideo összes verziójának dekódolását támogatja:
 </UL>
 
 <P>Az installálási procedúra leírásához lásd a
-  <A HREF="formats.html#2.1.1.7">RealMedia file formátum</A> fejezetet.</P>
+  <A HREF="formats.html#real">RealMedia file formátum</A> fejezetet.</P>
 
 
-<H3><A NAME=2.2.3>2.2.3  Hogyan használj ismeretlen Win32 codec-et</A></H3>
+<H3><A NAME=importing>2.2.3  Hogyan használj ismeretlen Win32 codec-et</A></H3>
 
-<H4><A NAME=2.2.3.1>2.2.3.1  VfW</A></H4>
+<H4><A NAME=importing_vfw>2.2.3.1  VfW</A></H4>
 
 <P>VfW (Video for Windows) a régi Video API Windowshoz. A codec-jei .DLL vagy
   (ritkábban) .DRV kiterjesztést kapnak. Ha az <B>MPlayer</B> ezt írja ki az
@@ -403,7 +403,7 @@ Az <B>MPlayer</B> a RealVideo összes verziójának dekódolását támogatja:
   "VIDC.HFYU". Hogy megtudd ez hogy lehetséges, olvasd el a régi fajta
   DirectShow keresést itt lent.</P>
 
-<H4><A NAME=2.2.3.2>2.2.3.2  DirectShow</A></H4>
+<H4><A NAME=importing_directshow>2.2.3.2  DirectShow</A></H4>
 
 <P>DirectShow az újabb Video API, ami történetesen sokkal rosszabb, mint az
   elõdje. Nehezebb dolgod lesz a DirectShow-val, mivel</P>

@@ -9,7 +9,7 @@
 <BODY>
 
 
-<P><B><A NAME=4.1>4.1.  CD-ROM meghajtók</A></B></P>
+<P><B><A NAME=drives>4.1.  CD-ROM meghajtók</A></B></P>
 
 <P>A Linux dokumentációjából:</P>
 
@@ -47,7 +47,12 @@
 
 <P>Kísérletezz a <CODE>/proc/ide/[meghajtó]/settings</CODE> file-lal további tuning céljából.</P>
 
-<P><B><A NAME=4.2>4.2.  DVD lejátszás</A></B></P>
+<P>FreeBSD:</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;Speed: <CODE>cdcontrol [-f meghajtó] speed [sebesség]</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;DMA: <CODE>sysctl hw.ata.atapi_dma=1</CODE></P>
+
+<P><B><A NAME=dvd>4.2.  DVD lejátszás</A></B></P>
 
 <P>Az <B>MPlayer</B> a <CODE>libdvdread</CODE> és <CODE>libdvdcss</CODE>
   néven ismert könyvtárakat használja a DVD dekódolásához és lejátszásához.

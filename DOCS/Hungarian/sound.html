@@ -51,7 +51,7 @@ a következõ meghajtókat tartalmazza :</P>
   kell használni, az <I>-ao sun</I> opcióval, különben lõttek mind a video,
   mind az audio lejátszásnak.</P>
 
-<H4><A NAME=2.3.2.1>2.3.2.1.  Ajánlott beállítások különféle hangkártyákhoz</A></H4>
+<H4><A NAME=experiences>2.3.2.1.  Ajánlott beállítások különféle hangkártyákhoz</A></H4>
 
 <TABLE BORDER=0 WIDTH=100%>
 <TD COLSPAN=3><B>VIA alaplapi chipset (via82cxxx) 48Khz-ra limitált</B></TD><TR>
@@ -126,13 +126,13 @@ a következõ meghajtókat tartalmazza :</P>
        unmasking-ot !
        például "hdparm -u1 /dev/cdrom" (lásd "man hdparm" !!!)
        Ez amúgy is ajánlott... (for XMMS, etc...)
-       Olvasd el a <A HREF="cd-dvd.html#4.1">4.1</A>-es fejezetet.</LI>
+       Olvasd el a <A HREF="cd-dvd.html#drives">4.1</A>-es fejezetet.</LI>
   <LI>ne foglald le a hangkártyád másik programmal (pl. XMMS) !
        Ha ESD-t használsz, indítsd MPlayer-t az '-ao sdl:esd' opcióval!</LI>
   <LI>Írd meg nekünk, hogy mûködik együtt az MPlayer és a kartyád!</LI>
 </UL>
 
-<H4><A NAME=2.3.2.2>2.3.2.2.  Audio pluginek</A></H4>
+<H4><A NAME=plugins>2.3.2.2.  Audio pluginek</A></H4>
 
 <P>Az <B>MPlayer</B> tartalmaz néhány audio plugint. Ezek a hang
   tulajdonságainak megváltoztatására használhatóak. A használatuk az
@@ -165,7 +165,7 @@ a következõ meghajtókat tartalmazza :</P>
 <P>Currently audio plugins can not be used in <B>MEncoder</B>.</P>
 
 
-<H5><A NAME=2.3.2.2.1>2.3.2.2.1.  Up/Downsampling</A></H5>
+<H5><A NAME=resample>2.3.2.2.1.  Up/Downsampling</A></H5>
 
 <P>Az <B>MPlayer</B> képes az audio stream frekvenciáját növelni illetve
 csökkenteni. Ennek szükségessége nincs autodetektálva, így külön meg kell adni
@@ -177,7 +177,7 @@ lejátszani. Valamint: ez a funkció még nem mûködik a <B>MEncoder</B>-ben.</P>
   frekvencia Hz-ben, pl 44100&gt;</CODE></P>
 
 
-<H5><A NAME=2.3.2.2.2>2.3.2.2.2.  Térhatású hangok dekódolása</A></H5>
+<H5><A NAME=surround_decoding>2.3.2.2.2.  Térhatású hangok dekódolása</A></H5>
 
 <P>Az <B>MPlayer</B>-nek van egy audio pluginje ami a mátrix-kódolt hangok
 dekódolására szolgál (ilyen például a Dolby Surround).</P>
@@ -192,7 +192,7 @@ hangkártyára+meghajtóra van szükség.</P>
 &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=surround</CODE></P>
 
 
-<H5><A NAME=2.3.2.2.3>2.3.2.2.3. Sample formátum konvertáló</A></H5>
+<H5><A NAME=format>2.3.2.2.3. Sample formátum konvertáló</A></H5>
 
 <P>Ha a hangkártyád nem támogatja a signed 16bit int formátumot, ezzel
   a pluginnel átalakíthatod a kimeneti hangot olyanba amit visz.
@@ -206,11 +206,11 @@ hangkártyára+meghajtóra van szükség.</P>
 </P>
 
 
-<H5><A NAME=2.3.2.2.4>2.3.2.2.4. Delay</A></H5>
+<H5><A NAME=delay>2.3.2.2.4. Delay</A></H5>
 
 <P>Példa plugin, csak developereknek. Lásd angol dox.</P>
 
-<H5><A NAME=2.3.2.2.5>2.3.2.2.5. Szoftveres hangerõszabályzás</A></H5>
+<H5><A NAME=volume>2.3.2.2.5. Szoftveres hangerõszabályzás</A></H5>
 
 <P>Ez a plugin szoftveres hangerõállításra képes, ezáltal olyan gépeken
   is használható, ahol a hardveres mixer eszköz nem mûködik. Használható
@@ -242,7 +242,7 @@ hangkártyára+meghajtóra van szükség.</P>
 </P>
 
 
-<H5><A NAME=2.3.2.2.6>2.3.2.2.6. Extrastereo</A></H5>
+<H5><A NAME=extrastereo>2.3.2.2.6. Extrastereo</A></H5>
 
 <P>Ez a plugin lineárisan növeli a bal és jobb hangcsatorna közti különbséget
   (mint az XMMS extrastereo plugin) ezáltal "életszerûbb" effektust
@@ -257,7 +257,7 @@ hangkártyára+meghajtóra van szükség.</P>
   0.0-ra írod át, mono hangot kapsz.</P>
 
 
-<H5><A NAME=2.3.2.2.7>2.3.2.2.7. Volume Normalizer</A></H5>
+<H5><A NAME=normalizer>2.3.2.2.7. Volume Normalizer</A></H5>
 
 <P>Ez a plugin beállítja a hangerõt arra a maximális erõsségre, ahol
   még nem lép fel torzítás.

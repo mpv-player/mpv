@@ -33,10 +33,10 @@
   <A HREF="encoding.html">MEncoder</A> tud ilyen fileokat létrehozni.</P>
 
 
-<H3><A NAME=2.1.1>2.1.1. Video formátumok</A></H3>
+<H3><A NAME=video_formats>2.1.1. Video formátumok</A></H3>
 
 
-<H4><A NAME=2.1.1.1>2.1.1.1. MPEG file-ok</A></H4>
+<H4><A NAME=mpeg>2.1.1.1. MPEG file-ok</A></H4>
 
 <UL>
   <LI>MPG : ez a <B>legelterjedtebb</B> formája az MPEG fileoknak. MPEG1-es
@@ -49,7 +49,7 @@
     AC3 hangot tartalmaz (ritkábban MP2-t, DTS-t, tömörítetlen LPCM-et).</LI>
 </UL>
 
-<B>Olvasd el a <A HREF="cd-dvd.html#4.2">DVD fejezetet</A> !</B></LI>
+<B>Olvasd el a <A HREF="cd-dvd.html#dvd">DVD fejezetet</A> !</B></LI>
 
 <P>Az MPEG fileokban néhány frame-bõl álló csoportok vannak, melyek
   teljesen függetlenek egymástól. Ez annyit tesz hogy akár egy normális
@@ -65,7 +65,7 @@
   használni lejátszásnál.</P>
 
 
-<H4><A NAME=2.1.1.2>2.1.1.2. AVI file-ok</A></H4>
+<H4><A NAME=avi>2.1.1.2. AVI file-ok</A></H4>
 
 <P>A Micro$oft <B>AVI (Audio Video Interleaved)</B> formátuma egy széles körben
   elterjedt és használt formátum, jelenleg többnyire DivX és DivX4 codec-kel
@@ -117,7 +117,7 @@
   <A HREF="encoding.html">MEncoder</A>.</P>
 
 
-<H4><A NAME=2.1.1.3>2.1.1.3. ASF/WMV file-ok</A></H4>
+<H4><A NAME=asf>2.1.1.3. ASF/WMV file-ok</A></H4>
 
 <P>ASF (active streaming format) a Microsofttól jön. Az ASF két variánsát
   fejlesztették ki, v1.0 és v2.0. A v1.0-át a média szerkesztõik (windows media
@@ -129,7 +129,7 @@
   jönnek.</P>
 
 
-<H4><A NAME=2.1.1.4>2.1.1.4. QuickTime/MOV file-ok</A></H4>
+<H4><A NAME=mov>2.1.1.4. QuickTime/MOV file-ok</A></H4>
 
 <P>Ezek Macintosh-ról származnak. Általában .QT vagy .MOV kiterjesztésûek,
   valamint mivel az MPEG4 Group a QuickTime-t választotta ajánlott
@@ -140,11 +140,11 @@
 
 <P><B>Codec-ek</B> : bármilyen codec engedélyezett, mind CBR vagy VBR. A
   legtöbb új MOV file <B>Sorenson</B> videoval és QDesign Music Audioval van
-  ellátva. Lásd a <A HREF="codecs.html#2.2.1.10">Sorenson</A> fejezetet.
+  ellátva. Lásd a <A HREF="codecs.html#sorenson">Sorenson</A> fejezetet.
   A QDesign Music Audio jelenleg nem támogatott.</P>
 
 
-<H4><A NAME=2.1.1.5>2.1.1.5. VIVO file-ok</A></H4>
+<H4><A NAME=vivo>2.1.1.5. VIVO file-ok</A></H4>
 
 <P>Az <B>MPlayer</B> teljesen természetesen játszik VIVO fileokat. A formátum
   nagy hátránya hogy nincs benne index blokk, se fix csomagméret vagy sync
@@ -160,7 +160,7 @@
   útmutatóhoz.</P>
 
 
-<H4><A NAME=2.1.1.6>2.1.1.6. FLI file-ok</A></H4>
+<H4><A NAME=fli>2.1.1.6. FLI file-ok</A></H4>
 
 <P>A <B>FLI</B> egy - az Autodesk Animator által használt - nagyon régi
   fileformátum, de a Neten igen elterjedt. Az <B>MPlayer</B> teljeskörûen
@@ -169,16 +169,16 @@
   után a kép rövid ideig zavaros lesz.</P>
 
 
-<H4><A NAME=2.1.1.7>2.1.1.7. RealMedia file-ok</A></H4>
+<H4><A NAME=real>2.1.1.7. RealMedia file-ok</A></H4>
 
 <P>Igen, az <B>MPlayer</B> képes RealMedia (.rm) file-ok beolvasására (demux).
   Lehet seekelni, ha megadod a <CODE>-forceidx</CODE> opciót.
   Itt található a támogatott
-  <A HREF="codecs.html#2.2.1.8">RealVideo</A> és
-  <A HREF="codecs.html#2.2.2.5">RealAudio</A> codec-ek listája.</P>
+  <A HREF="codecs.html#realvideo">RealVideo</A> és
+  <A HREF="codecs.html#realaudio">RealAudio</A> codec-ek listája.</P>
 
 
-<H4><A NAME=2.1.1.8>2.1.1.8. NuppelVideo file-ok</A></H4>
+<H4><A NAME=nuppelvideo>2.1.1.8. NuppelVideo file-ok</A></H4>
 
 <P>A <A HREF="http://mars.tuwien.ac.at/~roman/nuppelvideo">NuppelVideo</A> egy
   TV grabber program (ha minden igaz:). Az <B>MPlayer</B> képes a létrehozott
@@ -189,7 +189,7 @@
   (vagy bármibe) tömörítése. A seekelés mûködik.</P>
 
 
-<H4><A NAME=2.1.1.9>2.1.1.9. yuv4mpeg file-ok</A></H4>
+<H4><A NAME=yuv4mpeg>2.1.1.9. yuv4mpeg file-ok</A></H4>
 
 <P>A <A HREF="http://mjpeg.sourceforge.net">yuv4mpeg / yuv4mpeg2</A> is egy
   formátum amit például az <A HREF="http://mjpeg.sf.net">mjpegtools
@@ -197,18 +197,18 @@
   sorozataiból állnak.</P>
 
 
-<H4><A NAME=2.1.1.10>2.1.1.10. FILM file-ok</A></H4>
+<H4><A NAME=film>2.1.1.10. FILM file-ok</A></H4>
 
 <P>Ez a formátum a régi Sega Saturn CD-s játékoknál elterjedt.</P>
 
 
-<H4><A NAME=2.1.1.11>2.1.1.11. RoQ file-ok</A></H4>
+<H4><A NAME=roq>2.1.1.11. RoQ file-ok</A></H4>
 
 <P>A RoQ formátumot néhány ID játék használja, pl a Quake III és a Return to
   Castle Wolfenstein.</P>
 
 
-<H4><A NAME=2.1.1.12>2.1.1.12. OGG file-ok</A></H4>
+<H4><A NAME=ogg_vorbis>2.1.1.12. OGG file-ok</A></H4>
 
 <P>Ez egy, a Xiphophorus által kifejlesztett új formátum, melynek legfõbb célja
   a Vorbis audio formátum megfelelõ támogatása. Használatához
@@ -216,7 +216,7 @@
   <CODE>libvorbis</CODE> könyvtárakat, majd újrafordítani az
   <B>MPlayer</B>-t.</P>
 
-<H3><A NAME=2.1.2>2.1.2. Audio formátumok</A></H3>
+<H3><A NAME=audio_formats>2.1.2. Audio formátumok</A></H3>
 
 <P>Az <B>MPlayer</B> egy <B>Movie</B> (film) és nem
   <B>Média</B> lejátszó, bár le tud játszani néhány audio fileformátumot
@@ -225,7 +225,7 @@
   <A HREF="http://www.xmms.org">xmms-t</A> ajánljuk erre a célra.</P>
 
 
-<H4><A NAME=2.1.2.1>2.1.2.1. MP3 file-ok</A></H4>
+<H4><A NAME=mp3>2.1.2.1. MP3 file-ok</A></H4>
 
 <P>Bizonyos MP3-aknál elõfordulhat hogy az <B>MPlayer</B> MPEG file-nak
   detektálja õket, és ennek következtében hibásan vagy sehogy se játszik le.
@@ -235,19 +235,19 @@
   segíthet.</P>
 
 
-<H4><A NAME=2.1.2.2>2.1.2.2. WAV file-ok</A></H4>
+<H4><A NAME=wav>2.1.2.2. WAV file-ok</A></H4>
 
 
-<H4><A NAME=2.1.2.3>2.1.2.3. OGG file-ok</A></H4>
+<H4><A NAME=ogg_vorbis>2.1.2.3. OGG file-ok</A></H4>
 
 <P>Megfelelõen felinstallált <CODE>libogg</CODE> valamint
   <CODE>libvorbis</CODE> szükséges.</P>
 
 
-<H4><A NAME=2.1.2.4>2.1.2.4. WMA/ASF file-ok</A></H4>
+<H4><A NAME=wma>2.1.2.4. WMA/ASF file-ok</A></H4>
 
 
-<H4><A NAME=2.1.2.5>2.1.2.5. MP4 file-ok</A></H4>
+<H4><A NAME=mp4>2.1.2.5. MP4 file-ok</A></H4>
 
 </BODY>
 </HTML>
