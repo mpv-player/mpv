@@ -2860,12 +2860,12 @@ if test "$_termios" = auto ; then
 #include <sys/termios.h>
 int main(void) { return 0; }
 EOF
-  _termios=no
+  _termios=auto
   cc_check && _termios=yes
   _def_termios_h_name='sys/termios.h'
 fi
 # second test:
-if test "$_termios" = no ; then
+if test "$_termios" = auto ; then
   cat > $TMPC <<EOF
 #include <termios.h>
 int main(void) { return 0; }
