@@ -8,6 +8,9 @@
     TODO: fix the whole syncing mechanism
     
     $Log$
+    Revision 1.23  2002/08/24 23:07:34  arpi
+    10l - fixed chunktab size calculation
+
     Revision 1.22  2002/08/24 22:39:27  arpi
     - changed re-muxed packet structure (see struct dp_hdr_t)
       now the packets can be encapsulated into avi or other file formats
@@ -676,7 +679,7 @@ loop:
 		    }
 		}
 		// create new packet!
-		dp = new_demux_packet(sizeof(dp_hdr_t)+vpkg_length+2*(1+(vpkg_header&0x3F)));
+		dp = new_demux_packet(sizeof(dp_hdr_t)+vpkg_length+8*(1+2*(vpkg_header&0x3F)));
 	    	// the timestamp seems to be in milliseconds
 		dp->pts = 0; // timestamp/1000.0f; //timestamp=0;
                 dp->pos = demuxer->filepos;
@@ -1099,6 +1102,7 @@ void demux_open_real(demuxer_t* demuxer)
 			    break;
 			case 0x20001000:
 			case 0x20100001:
+			case 0x20200002:
 			    /* codec id: rv20 */
 			    break;
 			case 0x30202002:
