@@ -177,12 +177,7 @@ extern int dvd_angle;
 typedef struct {
  int id; // 0 - 31 mpeg; 128 - 159 ac3; 160 - 191 pcm
  int language; 
-} audio_stream_t;
-
-typedef struct {
- int id; // 0 - 31
- int language;
-} subtitle_t;
+} stream_language_t;
 
 typedef struct {
   dvd_reader_t *dvd;
@@ -202,10 +197,10 @@ typedef struct {
   int angle_seek;
 // audio datas
   int nr_of_channels;
-  audio_stream_t audio_streams[8];
+  stream_language_t audio_streams[32];
 // subtitles
   int nr_of_subtitles;
-  subtitle_t subtitles[32];
+  stream_language_t subtitles[32];
 } dvd_priv_t;
 
 #endif

@@ -44,9 +44,9 @@ typedef struct
  int current_title;
  int current_angle;
  int nr_of_audio_channels;
- audio_stream_t audio_streams[8];
+ stream_language_t audio_streams[32];
  int nr_of_subtitles;
- subtitle_t subtitles[32]; 
+ stream_language_t subtitles[32]; 
 } mplDVDStruct;
 #endif
 
