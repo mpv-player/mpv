@@ -2725,6 +2725,7 @@ if test "$_macosx" = auto ; then
 	_macosx=no
 	_def_macosx='#undef MACOSX'
 	_noaomodules="macosx $_noaomodules"
+	_novomodules="quartz $_novomodules"
     fi
 fi
 if test "$_macosx" = yes ; then
@@ -2744,10 +2745,13 @@ EOF
     _def_macosx='#define MACOSX 1'
     _aosrc="$_aosrc ao_macosx.c"
     _aomodules="macosx $_aomodules"
+    _vosrc="$_vosrc vo_quartz.c"
+    _vomodules="quartz $_vomodules"
   else
     _macosx=no
     _def_macosx='#undef MACOSX'
     _noaomodules="macosx $_noaomodules"
+    _novomodules="quartz $_novomodules"
   fi
 fi
 echores "$_macosx"

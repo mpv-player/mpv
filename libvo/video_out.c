@@ -118,6 +118,9 @@ extern vo_functions_t video_out_tdfx_vid;
 #ifdef HAVE_TGA
 extern vo_functions_t video_out_tga;
 #endif
+#ifdef MACOSX
+extern vo_functions_t video_out_quartz;
+#endif
 
 vo_functions_t* video_out_drivers[] =
 {
@@ -227,6 +230,9 @@ vo_functions_t* video_out_drivers[] =
 #endif
 #ifdef HAVE_TGA
         &video_out_tga,
+#endif
+#ifdef MACOSX
+	&video_out_quartz,
 #endif
         NULL
 };
