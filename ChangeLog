@@ -18,7 +18,7 @@ mplayer (0.90)
     * libaf: big (audio filter layer) updates, floating point support, speedup
     * ffwma2 fixed (better error resilience)
     * SPU queueing - fixes missing or early disappearing DVD subtitles
-    * the misterious DVD audio delay (150-300ms) fixed
+    * the mysterious DVD audio delay (150-300ms) fixed
     * extension-based fileformat detection fixed the .mp3 vs. mpeg-ps conflict
     * cache2 keeps buffer for non-seekable media, fixes quicktime streaming
 
@@ -55,8 +55,8 @@ mplayer (0.90)
     * Xanim & RealPlayer binary Codecs working on PPC
     * Radeon 9000 support in VIDIX, colorkey restoring for all Radeons
     * Initial PPC (Big-Endian) support in VIDIX Rage128 driver
-    * PNM:// streaming support (ported from Xine)
-    * Muxer layer: mencoder now can write to MPEG-PS format too (EXPERIMENTAL!)
+    * PNM:// streaming support (ported from xine)
+    * Muxer layer: mencoder can now write MPEG-PS format, too (EXPERIMENTAL!)
     * libavcodec: wmv2 decoder (buggy/untested)
     * DVB "HEAD" (aka. NEWSTRUCT) drivers support
     * Subtitles background bounding-box support (optional grey-level & opacity)
@@ -69,10 +69,10 @@ mplayer (0.90)
     * libavcodec: motion estimation pre pass, qpel encoding, trellis quantization
     * libavcodec, liba52, mp3lib: Altivec optimizations
     * keep window's aspect ratio at resizing (x11, xv), requires WM support
-    * -geometry option, accepts X11 syntax too
+    * -geometry option, also accepts X11 syntax
     * real .bin+.cue (S)VCD images support (-vcd 2 -cuefile xxx.cue)
     * postprocess: YUV 411/422/444 support, stride fixes
-    * overlapping sub's umping fixed, sorting is automatical, iconv fixes
+    * overlapping sub's pumping fixed, sorting is automatical, iconv fixes
     * mpeg2 telecine detection and automatic inverse telecine (mplayer only)
 
     Gui:
