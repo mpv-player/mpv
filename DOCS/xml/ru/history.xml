@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="KOI8-R"?>
+<!-- FIXME: history really should be in the appendix -->
+<sect1 id="history">
+<title>История</title>
+ 
+<para>
+Это началось около года назад...
+Я (A'rpi) попробовал множество плейеров под linux (mtv,xmps,dvdview,livid/oms,
+videolan,xine,xanim,avifile,xmmp) но у них у всех были какие-нибудь проблемы.
+По большей части со специальными файлами или аудио.видео синхронизацией.
+Большинство из них было не способно проигрывать как MPEG1, MPEG2, так и AVI
+(DivX) файлы. У многих плейеров были проблемы с качеством изображения или
+со скоростью. Поэтому я решил написать/модифицировать свой...
+
+<itemizedlist>
+<listitem><para>
+  <emphasis role="bold">mpg12play v0.1-v0.3:</emphasis> Sep 22-25, 2000</para>
+  <para>Первая попытка, вскрыто вместе за полчаса!
+  Использовалась libmpeg3 с www.heroinewarrior.com до версии 0.3,
+  но там были проблемы с качеством изображения и скоростью.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">mpg12play v0.5-v0.87:</emphasis> Sep 28-Oct 20, 2000</para>
+  <para>
+  Mpeg кодек заменен на DVDview от Dirk Farin, это был превосходный код,
+  но он был медленный и был написан на C++ (Я ненавижу C++!!!)
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">mpg12play v0.9-v0.95pre5:</emphasis> Oct 21-Nov 2, 2000</para>
+  <para>
+  Mpeg кодек был libmpeg2 (mpeg2dec) от Aaron Holtzman &amp; Michel Lespinasse.
+  Это превосходный, оптимизированный очень быстрый C код с совершенным качеством
+  изображения и 100% совместимостью с MPEG стандартом.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer v0.01:</emphasis> Nov 11, 2000</para>
+  <para>
+Первый MPlayer.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer v0.3-v0.9:</emphasis> Nov 18-Dec 4, 2000</para>
+  <para>
+Это был набор двух программ: mpg12playv0.95pre6 и моего нового простого AVI
+плейера 'avip' базирующимся на avifile загрузчике Win32 DLL.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer v0.10:</emphasis> Jan 1, 2001</para>
+  <para>
+MPEG и AVI плейер в одном бинарнике!
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer v0.11pre series:</emphasis></para>
+  <para>
+Присоединились некоторые новые разработчики и с версии 0.11 проект mplayer
+это работа команды! Добавлена поддержка .ASF файлов, и OpenDivX
+(см. www.projectmayo.com) кодер/декодер
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer v0.17a "The IdegCounter"</emphasis> Apr 27, 2001</para>
+  <para>
+Релиз пре-версии 0.11pre после 4 месяцев напряженной разработки!
+Попробуйте это и изумитесь! Добавлены тысячи новых особенностей... и конечно
+старый код был также улучшен, исправлены ошибки и т.д.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer 0.18 "The BugCounter"</emphasis> Jul 9, 2001</para>
+  <para>
+2 месяца с 0.17 и здесь новый релиз.. Завершена поддержка ASF,
+больше форматов субтитров, представлена libao (подобно libvo но для аудио),
+даже более стабилен чем раньше, и так далее. Это ТРЕБОВАНИЕ!
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer 0.50 "The Faszom(C)ounter"</emphasis> Oct 8, 2001</para>
+  <para>
+Хмм. Снова релиз. Тонны новых возможностей, бета версия GUI, исправлены
+ошибки, новые vo и ao драйвера, порты во многие системы, включая DivX
+кодек с открытыми исходниками и много других. Попробуйте его!
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer 0.60 "The RTFMCounter"</emphasis> Jan 3, 2002</para>
+  <para>
+Поддержка MOV/VIVO/RM/FLI/NUV форматов файлов, "родные" CRAM, Cinepak,
+ADPCM кодеки, и поддержка для XAnim'овских двоичных кодеков; поддержка
+DVD субтитров, первый релиз MEncoder, TV захват, кэш, liba52, бесчисленные
+исправления.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer 0.90pre10 "The BirthdayCounter"</emphasis> Nov 11, 2002</para>
+  <para>
+Хотя это не релиз, Я собираюсь отметить это, поскольку прошло 2 года
+после MPlayer v0.01. С днем рождения MPlayer!
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer 0.90rc1 "The CodecCounter"</emphasis> Dec 7, 2002</para>
+  <para>
+Снова не релиз, но после добавления поддержки Sorenson 3 (QuickTime) и
+Windows Media 9, MPlayer - это первый в мире плейер, поддерживающий все
+известные видео форматы!
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer 0.90 "?"</emphasis> Дата еще не известна
+  </para></listitem>
+</itemizedlist>
+</para>
+</sect1>

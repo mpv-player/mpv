@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="koi8-r"?>
+<chapter id="features">
+<title>Возможности</title>
+
+&formats.xml;
+&codecs.xml;
+
+<sect1 id="devices">
+<title>Устройства вывода</title>
+&video.xml;
+&audio.xml;
+</sect1>
+
+&tvinput.xml;
+&edl.xml;
+
+</chapter>

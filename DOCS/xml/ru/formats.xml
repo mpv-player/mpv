@@ -1,0 +1,474 @@
+<?xml version="1.0" encoding="koi8-r"?>
+<sect1 id="formats">
+<title>Поддерживаемые форматы</title>
+
+<para>
+Важно разъяснить одну общую ошибку. Когда люди видят файл с расширением
+<filename>.AVI</filename>, они немедленно заключают, что это - не MPEG файл.
+Это не так. Во всяком случае не полностью. Супротив популярному мнению
+такой файл <emphasis>может</emphasis> содержать MPEG видео.
+</para>
+
+<para>
+Как видите, <emphasis role="bold">кодек</emphasis> не совпадает с
+<emphasis role="bold">форматом файла</emphasis>.
+Примеры видео <emphasis role="bold">кодеков</emphasis>: MPEG1, MPEG2, DivX, Indeo5, 3ivx.
+Примеры видео <emphasis role="bold">форматов</emphasis>: MPG, AVI, ASF.
+</para>
+
+<para>
+В теории, Вы можете поместить OpenDivX видео и MP3 аудио 
+в <emphasis role="bold">файл MPG формата</emphasis>. Хотя, большинство
+плейеров не будут это проигрывать, поскольку они ожидают MPEG1 видео и 
+MP2 аудио (в отличие от 
+<emphasis role="bold">AVI</emphasis>, в <emphasis role="bold">MPG</emphasis>
+нет нужных полей для описания его видео и аудио потоков).
+Или Вы будете вынуждены поместить MPEG1 видео в AVI файл.
+<ulink url="http://ffmpeg.sourceforge.net/">FFmpeg</ulink> и
+<link linkend="mencoder">MEncoder</link> могут создавать эти файлы.
+</para>
+
+
+<sect2 id="video-formats">
+<title>Видео форматы</title>
+
+<sect3 id="mpg-vob-dat">
+<title>MPEG файлы</title>
+
+<para>
+MPEG файлы бывают различных разновидностей:
+</para>
+
+<itemizedlist>
+<listitem><simpara>
+  MPG: Это наиболее <emphasis role="bold">основная</emphasis> форма файлов
+  формата MPEG. Она содержит MPEG1 видео, и MP2 (MPEG-1 layer 2) или реже
+  MP1 аудио.
+  </simpara></listitem>
+<listitem><simpara>
+  DAT: Это почти такой же формат, как MPG, только с другим расширением. Он
+  используется на <emphasis role="bold">Video CD</emphasis>. Из-за метода,
+  которым создаются VCD и дизайна Linux'а, DAT файлы не могут проигрываться и
+  копироваться с VCD, как обычные файлы. Вы должны использовать опцию
+  <option>-vcd</option> для проигрывания Video CD.
+  </simpara></listitem>
+<listitem><simpara>
+  VOB: Это формат MPEG фалов на <emphasis role="bold">DVD'шниках</emphasis>.
+  Это такой же формат, как и MPG, плюс возможность содержать субтитры и
+  не-MPEG (AC3) аудио. Он содержит кодированное MPEG2 видео и обычно AC3
+  аудио, но DTS, MP2 и не запакованный LPCM тоже возможны. <emphasis role="bold">
+  Читайте <link linkend="dvd">секцию DVD</link></emphasis>!
+  </simpara></listitem>
+</itemizedlist>
+
+<para>
+Серии кадров независимо группируются в MPEG файлах. Это значит, что Вы можете
+разрезать/соединять MPEG фалы стандартными файловыми средствами (такими, как
+<command>dd</command>, <command>cut</command>), и он остается полностью функциональным.
+</para>
+
+<para>
+Одно из основных преимуществ MPG'ов это то, что в них есть поле,
+описывающее соотношение сторон видео потока. Например, на SVCD содержится
+видео разрешением 480x480, и заголовок установил его(поле) в 4:3, поэтому это
+будет проигрываться на 640x480. В AVI файлах такого поля нет, поэтому они должны
+быть смасштабированы при кодировании или проигрываться с опцией
+<option>-aspect</option>.
+</para>
+</sect3>
+
+
+<sect3 id="avi">
+<title>AVI файлы</title>
+
+<para>
+Разработанный Microsoft'ом <emphasis role="bold">AVI (Audio Video Interleaved
+[Аудио Видео 'Слоеные'])</emphasis> - это широко распространенный многоцелевой
+формат, в настоящий момент чаще всего применяемый для DivX и DivX4 видео.
+У него много известных недостатков и дефектов (например в потоках). Он
+поддерживает 1 видео поток и от 0 до 99 аудио потоков и может быть не более
+2 Гб, хотя существует расширение<emphasis role="bold">OpenDML</emphasis>,
+допускающее большие файлы. В настоящий момент Microsoft сильно отговаривает от
+его применения и советует использовать ASF/WMV. Никого это не волнует.
+</para>
+
+<para>
+Существует хак[hack], позволяющий AVI файлам содержать Ogg Vorbis аудио
+потоки, но делает их несовместимыми со стандартными AVI.
+<application>MPlayer</application> поддерживает воспроизведение таких файлов.
+Перемещение также осуществлено, но затруднено плохо закодированными файлами
+с запутанными заголовками. К сожалению, эта проблема проявляется у
+единственного кодировщика, способного создавать такие файлы -
+<application>NanDub</application>.
+</para>
+
+<note>
+<para>
+DV камеры создают сырые DV потоки, которые средства DV захвата превращают
+в AVI файлы двух типов. AVI'шники либо будут содержать разделенные аудио и видео
+потоки, которые <application>MPlayer</application> может воспроизводить, или
+сырой DV поток, поддержка которого находится в стадии разработки.
+</para>
+</note>
+
+<para>
+Существует два класса AVI файлов:
+<itemizedlist>
+<listitem><simpara>
+  <emphasis role="bold">'Слоеные'[Interleaved]:</emphasis> Аудио и видео
+  содержимое 'переплетается'. Это стандартное применение. Рекомендовано и
+  используется чаще всего. некоторые программы создают слоеные AVI'шники
+  с плохой синхронизацией. <application>MPlayer</application>
+  определяет это как слоеный файл, и затем теряет A/V синхронизацию,
+  вероятно при перемещении по файлу. Такие файлы должны проигрываться как
+  не слоеные (с опцией <option>-ni</option>).
+  </simpara></listitem>
+<listitem><simpara>
+  <emphasis role="bold">Не слоеные:</emphasis> Сначала идет весь видео поток,
+  затем весь аудио поток. Это требует огромного количества перемещений по файлу,
+  что делает проигрывание таких файлов по сети или с CD-ROM затруднительным.
+  </simpara></listitem>
+</itemizedlist>
+</para>
+
+<para>
+<application>MPlayer</application> поддерживает два типа синхронизации для
+AVI файлов:
+<itemizedlist>
+<listitem><simpara>
+  <emphasis role="bold">основанный на bps[битпотоке]:</emphasis> Он основан на
+  битпотоке/потоке сэмплов для видео/аудио потоков. Этот метод применяется
+  большинством плейеров, включая
+  <ulink url="http://avifile.sourceforge.net">avifile</ulink> и
+  <application>Windows Media Player</application>. Файлы со сломанными
+  заголовками и файлы созданные с VBR аудио в не VBR-совместимом кодировщике
+  приведут к A/V десинхронизации при использовании этого метода (по большей
+  части при перемещении по фильму).
+  </simpara></listitem>
+<listitem><simpara>
+  <emphasis role="bold">основанный на слоености:</emphasis> Он не использует
+  значение битпотока из заголовка, вместо этого используется относительная
+  позиция слоеных кусков аудио и видео, что делает плохо закодированные
+  проигрываемыми файлы с VBR аудио.
+  </simpara></listitem>
+</itemizedlist>
+</para>
+
+<para>
+Допустимы любые аудио и видео кодеки, но заметьте, что VBR аудио не очень
+хорошо поддерживается большинством плейеров. Формат файла делает возможным
+использование VBR аудио, но многие плейеры ожидают CBR, поэтому они
+выходят из строя с VBR. VBR редко встречается и Microsoft'овские AVI
+спецификации описывают только CBR аудио. Я также заметил, что большинство
+кодировщиков создают плохие файлы при использовании VBR аудио. Известно
+только два исключения:
+<application>NanDub</application> и <link linkend="mencoder">MEncoder</link>.
+</para>
+</sect3>
+
+
+<sect3 id="asf-wmv">
+<title>ASF/WMV файлы</title>
+<para>
+ASF (Active Streaming Format) исходит от Microsoft. Они разработали два варианта
+ASF, v1.0 и v2.0. v1.0 используется их медиа средствами (<application>Windows
+Media Player</application> и <application>Windows Media Encoder</application>)
+и сильно засекречены. v2.0 опубликована и запатентована :). Конечно они
+различаются, совсем нет никакой совместимости (это просто другая правовая игра).
+<application>MPlayer</application> поддерживает только v1.0, поскольку никто
+никогда не видел v2.0 файлов :). Заметьте, что ASF файлы теперь появляются
+с расширениями <filename>.WMA</filename> или <filename>.WMV</filename>.
+</para>
+</sect3>
+
+
+<sect3 id="qt-mov">
+<title>QuickTime/MOV файлы</title>
+
+<para>
+Эти форматы файлов были разработаны в Apple и могут содержать любой кодек,
+CBR или VBR. Обычно у них расширение <filename>.QT</filename> или
+<filename>.MOV</filename>. Заметьте, что поскольку MPEG4 группы выбрала
+QuickTime в качестве рекомендованного формата для MPEG4, из MOV файлы
+идут с расширением <filename>.MPG</filename> или <filename>.MP4</filename>
+(Интересно, что видео и аудио потоки в этих файлах - настоящие
+MPG и AAC файлы. Вы даже можете извлечь их, используя опции
+<option>-dumpvideo</option> b <option>-dumpaudio</option>.).
+</para>
+
+<note>
+<para>
+Большинство новых QuickTime файлов использует
+<emphasis role="bold">Sorenson</emphasis> видео и QDesign Music аудио. См.
+секцию, посвященную <link linkend="sorenson">Sorenson</link> кодеку.
+</para>
+</note>
+</sect3>
+
+
+<sect3 id="vivo">
+<title>VIVO файлы</title>
+
+<para>
+<application>MPlayer</application> успешно демультиплексирует VIVO форматы
+файлов. Огромный недостаток этого формата заключается в том, что в нем нет
+ни индексных блоков, ни фиксированного размера пакетов или байтов синхронизации
+и в большинстве файлов нет даже основных кадров[keyframes], так что забудьте
+о перемещении по файлу!
+</para>
+
+<para>
+Видео кодек в VIVO/1.0 файлах - это стандартный <emphasis role="bold">h.263</emphasis>.
+Видео кодек в VIVO/2.0 файлах - это модифицированный, нестандартный
+<emphasis role="bold">h.263v2</emphasis>. Аудио одинаковое, это может быть
+<emphasis role="bold">g.723 (стандарт)</emphasis>, или
+<emphasis role="bold">Vivo Siren</emphasis>.
+</para>
+
+<para>
+См. секции
+<link linkend="vivo-video">VIVO видео кодек</link> и
+<link linkend="vivo-audio">VIVO аудио кодек</link>
+для инструкций по установке.
+</para>
+</sect3>
+
+
+<sect3 id="fli">
+<title>FLI файлы</title>
+<para>
+<emphasis role="bold">FLI</emphasis> это очень старый формат, используемый
+Autodesk Animator, но это типичный формат для коротких операций в сети.
+<application>MPlayer</application> демультиплексирует и декодирует FLI фильмы
+и даже способен перемещаться в этих файлах (полезно при цикличном проигрывании
+с опцией <option>-loop</option>). Во FLI файлах нет основных кадров[keyframes],
+поэтому некоторое время после перемещения картинка будет "грязной".
+</para>
+</sect3>
+
+
+<sect3 id="realmedia">
+<title>RealMedia (RM) файлы</title>
+
+<para>
+Да, <application>MPlayer</application> может читать (демультиплексировать)
+RealMedia (<filename>.rm</filename>) файлы. Перемещение работает, но Вы должны
+специально указать опцию <option>-forceidx</option> (формат поддерживает
+основные кадры[keyframes]. Здесь есть списки поддерживаемых <link
+linkend="realvideo">RealVideo</link> и <link
+linkend="realaudio">RealAudio</link> кодеков.
+</para>
+</sect3>
+
+
+<sect3 id="nuppelvideo">
+<title>NuppelVideo файлы</title>
+<para>
+<ulink url="http://mars.tuwien.ac.at/~roman/nuppelvideo">NuppelVideo</ulink> -
+это средство захвата с ТВ (AFAIK:). <application>MPlayer</application> может
+читать его <filename>.NUV</filename> файлы (только NuppelVideo 5.0). Эти файлы
+могут содержать несжатые YV12, YV12+RTJpeg сжатые, YV12 RTJpeg+lzo сжатые и
+YV12+lzo сжатые кадры. <application>MPlayer</application> декодирует (и также
+<emphasis role="bold">кодирует</emphasis> их <application>MEncoder
+</application>'ом в DivX/и т. д.!) все это. Перемещение работает.
+</para>
+</sect3>
+
+
+<sect3 id="yuv4mpeg">
+<title>yuv4mpeg файлы</title>
+<para>
+<ulink url="http://mjpeg.sourceforge.net">yuv4mpeg / yuv4mpeg2</ulink>
+это формат файлов, используемых в 
+<ulink url="http://mjpeg.sf.net">программах mjpegtools</ulink>.
+Вы можете захватывать, изготовлять, отфильтровывать или кодировать видео в этот
+формат, используя эти средства. В действительности формат файла -
+последовательность несжатых YUV 4:2:0 кадров.
+</para>
+</sect3>
+
+
+<sect3 id="film">
+<title>FILM фильмы</title>
+<para>
+Этот формат используется в старых Sega Saturn CD-ROM играх.
+</para>
+</sect3>
+
+
+<sect3 id="roq">
+<title>RoQ файлы</title>
+<para>
+RoQ файлы - это мультимедийные файлы используемые в некоторых ID играх,
+например Quake III и Return to Castle Wolfenstein.
+</para>
+</sect3>
+
+
+<sect3 id="ogg">
+<title>OGG/OGM файлы</title>
+<para>
+Это новый формат файлов от <ulink url="http://www.xiph.org">Xiphophorus</ulink>.
+Он может содержать любой видео или аудио кодек, CBR или VBR. Вам понадобятся
+установленные <systemitem class="library">libogg</systemitem> и
+<systemitem class="library">libvorbis</systemitem> до компиляции 
+<application>MPlayer</application>'а, чтобы проигрывать эти файлы.
+</para>
+</sect3>
+
+
+<sect3 id="sdp">
+<title>SDP файлы</title>
+<para>
+<ulink url="ftp://ftp.rfc-editor.org/in-notes/rfc2327.txt">SDP</ulink> - это
+IETF стандартный формат для описания видео и аудио RTP потоков.
+(требуются &quot;<ulink url="http://www.live.com/mplayer/">LIVE.COM Streaming Media</ulink>&quot;.)
+</para>
+</sect3>
+
+
+<sect3 id="pva">
+<title>PVA файлы</title>
+<para>
+PVA - это похожий на MPEG формат, используемый в программах DVB TV карт (например:
+<application>MultiDec</application>, <application>WinTV</application> под Windows.
+</para>
+
+<para>
+Спецификации PVA могут быть скачены по следующему адресу:
+<ulink url="http://www.technotrend.de/download/av_format_v1.pdf"/>
+</para>
+</sect3>
+
+
+<sect3 id="gif">
+<title>GIF файлы</title>
+<para>
+<emphasis role="bold">GIF</emphasis> формат - это типичный формат для сетевой
+графики. Существуют 2 версии спецификаций GIF, GIF87a и GIF89a. Основная
+разница заключается в том, что GIF89a допускает анимацию. MPlayer поддерживает
+оба формата, используя <systemitem class="library">libungif</systemitem> или
+другую libgif-совместимую библиотеку. Не анимированные GIF'ы будут показываться
+как однокадровое видео. (Используйте опции <option>-loop</option> и
+<option>-fixed-vo</option>, чтобы показать их подольше.)
+</para>
+
+<para>
+В настоящий момент <application>MPlayer</application> не поддерживает
+перемещение внутри GIF файлов. У GIF файлов не обязательно фиксированный размер
+кадра или фиксированная частота кадров. Наоборот, у каждого кадра свой
+собственный размер и должен выводиться в некотором поле фиксированного размера.
+Частота кадров контролируется дополнительным блоком перед каждым кадром,
+который определяет задержку перед следующим кадром в сотых долях секунды.
+</para>
+
+<para>
+Стандартные GIF файлы содержат 24-битные RGB кадры с как максимум 8-битовой
+индексированной палитрой. Кадры обычно сжаты по LZW алгоритму, хотя некоторые
+GIF кодировщики создают несжатые кадры, чтобы избежать проблем с патентом на
+LZW сжатие.
+</para>
+
+<para>
+Если в Вашем дистрибутиве нет <systemitem class="library">libungif</systemitem>,
+скачайте копию на
+<ulink url="http://prtr-13.ucsc.edu/~badger/software/libungif/index.shtml">
+домашней странице libungif</ulink>. Технические подробности см. в 
+<ulink url="http://www.w3.org/Graphics/GIF/spec-gif89a.txt">GIF89a
+спецификациях</ulink>.
+</para>
+</sect3>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="audio-formats">
+<title>Аудио форматы</title>
+
+<para>
+<application>MPlayer</application> - это проигрыватель
+<emphasis role="bold">фильмов</emphasis>, а не
+<emphasis role="bold">медиа</emphasis> плейер, хотя он может проигрывать
+некоторые форматы аудио файлов (они перечислены ниже). Это не рекомендуемое
+применение <application>MPlayer</application>, Вам лучше использовать <ulink
+url="http://www.xmms.org">XMMS</ulink>.
+</para>
+
+<sect3 id="mp3">
+<title>MP3 файлы</title>
+<para>
+У Вас могут возникнуть проблемы при проигрывании некоторых MP3 файлов, которые
+<application>MPlayer</application> будет неверно определять, как MPEG'и и
+проигрывать неправильно или вообще никак. Это не может быть исправлено без
+потери поддержки некоторых плохих MPEG файлов и поэтому все останется как есть
+обозримом будущем. Опция <option>-demuxer</option>, описанная на man странице
+может Вам помочь в этом случае.
+</para>
+</sect3>
+
+<sect3 id="wav">
+<title>WAV файлы</title>
+<para>
+</para>
+</sect3>
+
+<sect3 id="ogg-vorbis">
+<title>OGG/OGM файлы (Vorbis)</title>
+<para>
+Требуются правильно установленные 
+<systemitem class="library">libogg</systemitem> и
+<systemitem class="library">libvorbis</systemitem>.
+</para>
+</sect3>
+
+<sect3 id="wma-asf">
+<title>WMA/ASF файлы</title>
+<para>
+</para>
+</sect3>
+
+<sect3 id="mp4">
+<title>MP4 файлы</title>
+<para></para>
+</sect3>
+
+<sect3 id="cdda">
+<title>CD аудио</title>
+<para>
+<application>MPlayer</application> может использовать <application>cdparanoia
+</application>(библиотеку) для проигрывания CDDA (Audio CD[Аудио CD]).
+В задачи этого раздела не входит описание возможностей библиотеки
+<application>cdparanoia</application>.
+</para>
+
+<para>
+См. на man странице описание опции <option>-cdda</option>, которая может
+использоваться для передачи параметров в библиотеку 
+<application>cdparanoia</application>.
+</para>
+</sect3>
+
+<sect3 id="xmms">
+<title>XMMS</title>
+<para>
+<application>MPlayer</application> может использовать
+<application>XMMS</application>
+расширения для ввода<!-- звучит жутко, но это - перевод из XMMS :) -->, чтобы
+проигрывать множество форматов файлов. Существуют расширения для проигрывания
+мелодий из SNES игр, SID мелодий (из Commodore 64), множества Amiga форматов,
+.xm, .it, VQF, musepack, Bonk, shorten и множества других. Все это Вы можете
+отыскать на <ulink url="http://www.xmms.org/plugins_input.html">странице
+расширений XMMS для ввода</ulink>.
+</para>
+
+<para>
+Для использования этих возможностей Вам нужно установить <application>XMMS
+</application> и скомпилировать <application>MPlayer</application> с опцией
+<filename>./configure --enable-xmms</filename>. Если это не работает, Вам
+может понадобиться настроить пути к библиотеке и расширениям непосредственно,
+используя опции <option>--with-xmmsplugindir</option> и <option>
+--with-xmmslibdir</option>.
+</para>
+</sect3>
+</sect2>
+</sect1>
