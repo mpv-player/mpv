@@ -3,12 +3,17 @@
 //#define MAX_PS_PACKETSIZE 2048
 #define MAX_PS_PACKETSIZE (224*1024)
 
+static int mpeg_pts_error=0;
+
 static unsigned int read_mpeg_timestamp(stream_t *s,int c){
   int d,e;
   unsigned int pts;
   d=stream_read_word(s);
   e=stream_read_word(s);
-  if( ((c&1)!=1) || ((d&1)!=1) || ((e&1)!=1) ) return 0; // invalid pts
+  if( ((c&1)!=1) || ((d&1)!=1) || ((e&1)!=1) ){
+    ++mpeg_pts_error;
+    return 0; // invalid pts
+  }
   pts=(((c>>1)&7)<<30)|((d>>1)<<15)|(e>>1);
   if(verbose>=3) printf("{%d}",pts);
   return pts;
@@ -48,6 +53,8 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
     if(verbose>=2) printf("Invalid PS packet len: %d\n",len);
     return -2;  // invalid packet !!!!!!
   }
+
+  mpeg_pts_error=0;
 
   while(len>0){   // Skip stuFFing bytes
     c=stream_read_char(demux->stream);--len;
@@ -146,6 +153,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
       return -1;  // invalid packet !!!!!!
     }
   }
+  if(mpeg_pts_error) printf("  {PTS_err:%d}  \n",mpeg_pts_error);
   if(verbose>=3) printf(" => len=%d\n",len);
 
 //  if(len<=0 || len>MAX_PS_PACKETSIZE) return -1;  // Invalid packet size
@@ -215,8 +223,10 @@ int ret=0;
 do{
   demux->filepos=stream_tell(demux->stream);
   head=stream_read_dword(demux->stream);
-  demux->filepos-=skipped;
-  while(1){
+  if((head&0xFFFFFF00)!=0x100){
+   // sync...
+   demux->filepos-=skipped;
+   while(1){
     int c=stream_read_char(demux->stream);
     if(c<0) break; //EOF
     head<<=8;
@@ -227,8 +237,9 @@ do{
     }
     head|=c;
     break;
+   }
+   demux->filepos+=skipped;
   }
-  demux->filepos+=skipped;
   if(stream_eof(demux->stream)) break;
   // sure: head=0x000001XX
   if(verbose>=4) printf("*** head=0x%X\n",head);
