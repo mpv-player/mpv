@@ -41,6 +41,9 @@ static snd_pcm_sw_params_t *alsa_swparams;
 static char *alsa_device;
 #define ALSA_DEVICE_SIZE 48
 
+static int alsa_fragsize = 8192; /* 4096 */
+static int alsa_fragcount = 8;
+
 /* to set/get/query special features/parameters */
 static int control(int cmd, int arg)
 {
@@ -55,7 +58,13 @@ static int control(int cmd, int arg)
     return(CONTROL_UNKNOWN);
 }
 
-#define start
+#undef start
+#define buffersize
+#undef buffertime
+#define set_period
+#undef sw_params
+#undef set_start_mode
+
 /*
     open & setup audio device
     return: 1=success 0=fail
@@ -81,10 +90,10 @@ static int init(int rate_hz, int channels, int format, int flags)
 	return(0);
     }
 
-    ao_format = format;
-    ao_channels = channels - 1;
     ao_samplerate = rate_hz;
-    ao_bps = ao_samplerate*(ao_channels+1);
+    ao_bps = channels; /* really this is bytes per frame so bad varname */
+    ao_format = format;
+    ao_channels = channels;
     ao_outburst = OUTBURST;
     ao_buffersize = 16384;
 
@@ -126,7 +135,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	default:
 	    break;
     }
-
+    
     if ((err = snd_pcm_info_malloc(&alsa_info)) < 0)
     {
 	printf("alsa-init: memory allocation error: %s\n", snd_strerror(err));
@@ -189,21 +198,30 @@ static int init(int rate_hz, int channels, int format, int flags)
 	return(0);
     }
 
-    if ((err = snd_pcm_hw_params_set_rate(alsa_handler, alsa_hwparams,
+    if ((err = snd_pcm_hw_params_set_rate_near(alsa_handler, alsa_hwparams,
 	ao_samplerate, 0)) < 0)
     {
-	printf("alsa-init: unable to set channels: %s\n",
+	printf("alsa-init: unable to set samplerate: %s\n",
 	    snd_strerror(err));
 	return(0);
     }
 
+#ifdef set_period
     {
-	int fragment_size = 4096;
-	int fragment_count = 8;
-	snd_pcm_hw_params_set_period_size(alsa_handler, alsa_hwparams, fragment_size / 4, 0);
-	snd_pcm_hw_params_set_periods(alsa_handler, alsa_hwparams, fragment_count, 0);
+	if ((err = snd_pcm_hw_params_set_period_size(alsa_handler, alsa_hwparams, alsa_fragsize / 4, 0)) < 0)
+	{
+	    printf("alsa-init: unable to set periodsize: %s\n",
+		snd_strerror(err));
+	    return(0);
+	}
+	if ((err = snd_pcm_hw_params_set_periods(alsa_handler, alsa_hwparams, alsa_fragcount, 0)) < 0)
+	{
+	    printf("alsa-init: unable to set periods: %s\n",
+		snd_strerror(err));
+	    return(0);
+	}
     }
-
+#endif
 #ifdef buffersize
     if ((err = snd_pcm_hw_params_get_buffer_size(alsa_hwparams)) < 0)
     {
@@ -211,7 +229,10 @@ static int init(int rate_hz, int channels, int format, int flags)
 	    snd_strerror(err));
 	return(0);
     } else
+    {
+        printf("alsa-init: got buffersize %i\n", err);
 	ao_buffersize = err;
+    }
 #endif
 
 #ifdef buffertime
@@ -234,6 +255,8 @@ static int init(int rate_hz, int channels, int format, int flags)
 		snd_strerror(err));
 	    return(0);
 	}
+	printf("alsa-init: buffer_time: %d, period_time :%d\n",
+	    alsa_buffer_time, err);
     }
 #endif
 
@@ -243,7 +266,8 @@ static int init(int rate_hz, int channels, int format, int flags)
 	    snd_strerror(err));
 	return(0);
     }
-    
+
+#ifdef sw_params
     if ((err = snd_pcm_sw_params_current(alsa_handler, alsa_swparams)) < 0)
     {
 	printf("alsa-init: unable to get parameters: %s\n",
@@ -251,6 +275,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	return(0);
     }    
 
+#ifdef set_start_mode
     if ((err = snd_pcm_sw_params_set_start_mode(alsa_handler, alsa_swparams,
 	SND_PCM_START_DATA)) < 0)
     {
@@ -258,6 +283,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	    snd_strerror(err));
 	return(0);
     }
+#endif
 
     if ((err = snd_pcm_sw_params(alsa_handler, alsa_swparams)) < 0)
     {
@@ -266,8 +292,8 @@ static int init(int rate_hz, int channels, int format, int flags)
 	return(0);
     }
 
-    snd_pcm_sw_params_default(alsa_handler, alsa_swparams);
-
+//    snd_pcm_sw_params_default(alsa_handler, alsa_swparams);
+#endif
     if ((err = snd_pcm_prepare(alsa_handler)) < 0)
     {
 	printf("alsa-init: pcm prepare error: %s\n", snd_strerror(err));
@@ -287,8 +313,8 @@ static int init(int rate_hz, int channels, int format, int flags)
 	}
     }
 #endif
-    printf("AUDIO: %d Hz/%d channels/%d bps/%d bytes buffer/%s\n",
-	ao_samplerate, ao_channels+1, ao_bps, ao_buffersize,
+    printf("AUDIO: %d Hz/%d channels/%d bpf/%d bytes buffer/%s\n",
+	ao_samplerate, ao_channels, ao_bps, ao_buffersize,
 	snd_pcm_format_description(alsa_format));
     return(1);
 }
@@ -395,25 +421,24 @@ static int play(void* data, int len, int flags)
 {
     int got_len;
 
-    if ((got_len = snd_pcm_writei(alsa_handler, data, len/4)) != len/4)
+    if ((got_len = snd_pcm_writei(alsa_handler, data, (len/ao_bps))) != (len/ao_bps))
     {
 	if (got_len == -EPIPE) /* underrun? */
 	{
 	    printf("alsa-play: alsa underrun, resetting stream\n");
-	    if ((len = snd_pcm_prepare(alsa_handler)) < 0)
+	    if ((got_len = snd_pcm_prepare(alsa_handler)) < 0)
 	    {
-		printf("alsa-play: playback prepare error: %s\n", snd_strerror(len));
+		printf("alsa-play: playback prepare error: %s\n", snd_strerror(got_len));
 		return(0);
 	    }
-	    if ((len = snd_pcm_writei(alsa_handler, data, len)) != len)
+	    if ((got_len = snd_pcm_writei(alsa_handler, data, (len/ao_bps))) != (len/ao_bps))
 	    {
 		printf("alsa-play: write error after reset: %s - giving up\n",
-		    snd_strerror(len));
+		    snd_strerror(got_len));
 		return(0);
 	    }
 	    return(len); /* 2nd write was ok */
 	}
-	printf("alsa-play: output error: %s\n", snd_strerror(len));
     }
     return(len);
 }
@@ -483,3 +508,4 @@ static int get_delay()
     snd_pcm_status_free(status);
     return(ret);
 }
+
