@@ -1,6 +1,6 @@
 MPlayer (1.0)
 
-  pre6:
+  pre6: December 23, 2004
 
     DOCS:
     * finally all options are documented
@@ -11,7 +11,7 @@ MPlayer (1.0)
     * XviD documentation completed
     * French man page in sync again
     * German man page updated
-    * new Czech and Swedish man page translations
+    * new Czech (complete) and Swedish man page translations
     * fixes and updates in various places
 
     Ports:
@@ -23,63 +23,70 @@ MPlayer (1.0)
     * VCD support for Darwin (Mac OS X)
     * Mac OS X Finder startup argument support
     * fix for stdin input and slave mode on MinGW
-    * support for -rootwin in the DirectX video output driver
+    * support for -rootwin, -colorkey, -wid in the DirectX video output driver
     * improved monitor selection in the DirectX video output driver
     * new DirectSound audio output driver
-    * support for ZetaOS (mostly working)
     * mouse support in Windows
+    * support for ZetaOS (mostly working)
 
     Drivers:
-    * fixes in the VESA and GGI video output driver
-    * JPEG video output driver suboptions
-    * improvements for Blinkenlights ;-)
-    * JACK audio output driver updated to bio2jack API changes
-    * OpenGL video output driver colorformat fixes (with :manyfmts)
+    * fixes in the VESA and GGI video output drivers
+    * -jpeg removed in favor of -vo jpeg suboptions
+    * jpeg video output driver now supports output to multiple directories
+    * improvements for the Blinkenlights video output driver ;-)
+    * OpenGL video output driver colorformat fixes (with manyfmts suboption)
     * aspect, panscan, Hardware OSD support in the OpenGL video output driver
     * new pnm and md5sum video output drivers, replacing pgm and md5
+    * yuv4mpeg video output now has a file= suboption, can be used with
+      -fixed-vo to concatenate files having same width, height and fps
+    * JACK audio output driver updated to bio2jack API changes
     * alsa9 and alsa1x replaced by alsa audio output driver
     * ALSA audio output driver always uses specified device, even for hwac3
     * support for mixer channel selection in the ALSA audio output driver
-    * jpeg video output driver now supports output to multiple directories
     * audio output driver for the polypaudio sound server
-    * yuv4mpeg video output now has a file= suboption, can now be used with
-      -fixed-vo to concatenate files having same width, height and fps
+    * VIDIX Cyberblade TV-out fixed
+    * VIDIX I420 support for Cyberblade and mga
+    * VIDIX Radeon support on big-endian systems, other Radeon fixes
+    * VIDIX Radeon R200 QM (Radeon 9100) support
+    * CLE266 VIDIX driver
+    * experimental SAVAGE VIDIX driver
 
     Decoders:
     * "experimental" support for 20 and 24 bit LPCM (DVD-Audio)
     * libmpeg2 updated to 0.4.0b
     * libfaad2 updated to 2.1beta CVS snapshot
-    * DTS decoding via lavc
+    * DTS decoding via libavcodec
     * Windows Media Audio 9 Voice support via binary DLL
     * Windows Media Video 9 Advanced support via binary DLL
     * Windows Media Screen Codec 2 support via binary DLL
     * Windows Media Image Codec support via binary DLL
     * Windows Media Image 2 Codec support via binary DLL
     * VDOWave video support via binary DLL
-    * Miro VideoXL video support via lavc
-    * Creative ADPCM audio support via lavc or binary DLL
-    * IBM Ultimotion video support via lavc
+    * Miro VideoXL video support via libavcodec
+    * Creative ADPCM audio support via libavcodec or binary DLL
+    * IBM Ultimotion video support via libavcodec
     * Micronas Speech codec support via binary DLL
-    * H.261 video codec support via lavc
-    * TechSmith Camtasia video codec support via lavc
-    * sonic audio codec support via lavc
-    * snow video codec support via lavc
-    * QuickDraw video support via lavc
+    * H.261 video codec support via libavcodec
+    * TechSmith Camtasia video codec support via libavcodec
+    * sonic audio codec support via libavcodec
+    * snow video codec support via libavcodec
+    * QuickDraw video support via libavcodec
     * Cinepak, CYUV and RoQ audio/video moved to FFmpeg
     * Vianet Lsvx video support via binary DLL
 
     Demuxers:
     * fix -nosound and -novideo for NSV
     * subtitle switching and language code displaying for Matroska
-    * support .vp5 file format (AVI variant)
-    * seeking for audio-only ASF files fixed
+    * support for the .vp5 file format (AVI variant)
+    * seeking in audio-only ASF files fixed
     * improved MP3 detection
-    * AVC in .mp4 files
-    * raw H.261 files via lavf
+    * support for AVC in .mp4 files
+    * support for raw H.261 files via libavformat
     * improved seeking precision in MPEG files
     * better subtitle language code handling for MKV files
     * support DVHS files and H.264 over MPEG-TS
     * display length and position (in the seekbar) for MOV files
+    * raw video in MOV files playback improved
 
     Streaming:
     * -cache-min and -cache-prefill options added
@@ -134,10 +141,11 @@ MPlayer (1.0)
     * as usual, lots of bug fixes and optimizations
 
     Filters:
-    * software volume control when no hardware support, can be controlled
-      with the -softvol and -softvol-max parameters
+    * software volume control when no hardware support available, can be
+      controlled with the -softvol and -softvol-max parameters
     * high-quality audio resampling with -af lavcresample
     * cropdetect rounding parameter
+    * MPlayer -af help
     * missing audio plugins (extrastereo, volnorm) converted to audio filters
     * sine sweep generator audio filter
     * hrtf audio filter to convert multichannel audio to 2 channel output
@@ -146,33 +154,32 @@ MPlayer (1.0)
     * yuv2rgb Altivec optimization fixes
     * support for LADSPA plugins
 
+    GUI:
+    * unified audio options dialog, also for ALSA
+    * redrawing limited, decreases CPU usage in audio-only case
+    * icons for the context menu
+    * speedup especially for audio only case
+    * doublesize bug fixed
+    * slowdown after opening the preferences panel bug fixed
+    * remaining messages moved to help file for translation
+
+    Encoding:
+    * x264 encoder support
+    * support for MP2 encoding with libtoolame
+    * libavcodec "turbo mode" to speed up 2-pass encoding
+    * support for 3-pass encode for libavcodec and x264
+    * XviD encoder and decoder modules updated to API-4.1 (XviD-1.1.x)
+    * flush remaining frames at end of encoding process
+
     Others:
     * -loop and -shuffle now work together
-    * GUI unified audio options dialog, also for ALSA
-    * GUI redrawing limited, decreases CPU usage in audio-only case
-    * GUI icons for the context menu
-    * GUI speedup especially for audio only case
-    * GUI doublesize bug fixed
-    * x264 encoder support
     * better EDL support
     * some --disable configure options finally work (mp3lib, liba52, libmpeg2)
     * framestepping
-    * changeable playback speed
+    * change playback speed during playback
     * some crashes with binary codecs fixed
     * subtitle alignment support for SAMI files
-    * MEncoder can encode MP2 with libtoolame
-    * MPlayer -af help
     * also support Windows path separator '\'
-    * lavc "turbo mode" to speed up 2-pass encoding
-    * support for 3-pass encode for lavc and x264
-    * XviD encoder and decoder modules updated to API-4.1 (XviD-1.1.x)
-    * flush remaining frames at end of encoding process
-    * VIDIX Cyberblade TV-out fixed
-    * VIDIX I420 support for Cyberblade and mga
-    * VIDIX Radeon support on big-endian systems, other Radeon fixes
-    * CLE266 VIDIX driver
-    * experimental SAVAGE VIDIX driver
-    * -jpeg removed in favor of -vo jpeg suboptions
     * FriBiDi fixes for comma handling in Hebrew subtitles
     * -crash-debug option to attach gdb automatically after crashes
     * gcc 4 compilation fixes
@@ -316,7 +323,7 @@ MPlayer (1.0)
     * -rtc-device option for specifying the RTC device
     * desktop/menu icon added
     * miscellaneous bug fixes and cleanups
-    * multi-threaded encoding with lavc
+    * multi-threaded encoding with libavcodec
     * fixed a bug with Real files introduced in pre4
     * -use-stdin renamed to -noconsolecontrols
 
