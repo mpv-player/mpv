@@ -111,7 +111,7 @@ static __inline int util_frametype(vbr_control_t *state)
 
 		if(state->cur_frame >= state->credits_end_begin &&
 		   state->cur_frame < state->credits_end_end)
-			return(FRAME_TYPE_STARTING_CREDITS);
+			return(FRAME_TYPE_ENDING_CREDITS);
 
 	}
 
@@ -601,7 +601,7 @@ static int vbr_finish_2pass1(void *sstate)
 	/* Goto to the file beginning */
 	fseek(state->pass1_file, 0, SEEK_SET);
 
-	/* Skip the version line  and the empty line */
+	/* Skip the version line and the empty line */
 	c = i = 0;
 	do {
 		c = fgetc(state->pass1_file);
@@ -610,6 +610,9 @@ static int vbr_finish_2pass1(void *sstate)
 		if(c == '\n') i++;
 
 	}while(i < 2);
+
+	/* Prepare to write to the stream */
+	fseek( state->pass1_file, ftell( state->pass1_file ), SEEK_SET );
 
 	/* Overwrite the frame field - safe as we have written extra spaces */
 	fprintf(state->pass1_file, "# frames    : %.10d\n", state->nb_frames);
