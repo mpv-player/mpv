@@ -315,7 +315,7 @@ nVidia TV-выход</link>, если Вы хотите использовать TV.
 </sect3>
 
 
-<sect3 id="non-yuv-cards" xreflabel="Non-YUV cards">
+<sect3 id="non-yuv-cards" xreflabel="Не-YUV карты">
 <title>Не-YUV карты</title>
 
 <para>
@@ -344,7 +344,7 @@ nVidia TV-выход</link>, если Вы хотите использовать TV.
 </sect3>
 
 <!-- FIXME: find a more logical organization for this section -->
-<sect3 id="cirrus-logic-cards" xreflabel="Cirrus-Logic cards">
+<sect3 id="cirrus-logic-cards" xreflabel="Cirrus-Logic карты">
 <title>Cirrus Logic карты</title>
 <itemizedlist>
 <listitem><para>
