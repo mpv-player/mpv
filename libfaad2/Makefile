@@ -8,6 +8,10 @@ OBJS	= $(SRCS:.c=.o)
 
 CFLAGS  = -I. $(OPTFLAGS) 
 
+# Uncomment this to use the FIXED_POINT implementation of FAAD2.
+# This should improve performance, especially for SBR files.
+#CFLAGS  = -I. $(OPTFLAGS) -DFIXED_POINT
+
 .SUFFIXES: .c .o
 
 # .PHONY: all clean
