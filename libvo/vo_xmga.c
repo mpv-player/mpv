@@ -47,7 +47,7 @@ LIBVO_EXTERN( xmga )
 
 #include "x11_common.h"
 
-#ifdef SHOW_TIME    
+#ifdef SHOW_TIME
 #include "../linux/timer.h"
 static unsigned int timer=0;
 static unsigned int timerd=0;
@@ -89,8 +89,6 @@ static uint32_t               drwcX,drwcY,dwidth,dheight,mFullscreen;
 static XSetWindowAttributes   xWAttribs;
 
 #include "mga_common.c"
-
-
 
 static void mDrawColorKey( void )
 {
@@ -145,13 +143,13 @@ static void check_events(void)
 }
 
 static void flip_page(void){
-#ifdef SHOW_TIME    
+#ifdef SHOW_TIME
     unsigned int t;
     t=GetTimer();
     printf("  [timer: %08X  diff: %6d  dd: %6d ]  \n",t,t-timer,(t-timer)-timerd);
     timerd=t-timer;
     timer=t;
-#endif    
+#endif
 
     check_events();
     vo_mga_flip_page();
@@ -181,13 +179,13 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
 
  switch(format)
   {
-   case IMGFMT_YV12: 
+   case IMGFMT_YV12:
         mga_vid_config.format=MGA_VID_FORMAT_YV12;
-	mga_vid_config.frame_size=( ( width + 31 ) & ~31 ) * height + ( ( ( width + 31 ) & ~31 ) * height ) / 2;
+        mga_vid_config.frame_size=( ( width + 31 ) & ~31 ) * height + ( ( ( width + 31 ) & ~31 ) * height ) / 2;
         break;
    case IMGFMT_YUY2:
         mga_vid_config.format=MGA_VID_FORMAT_YUY2;
-	mga_vid_config.frame_size=( ( width + 31 ) & ~31 ) * height * 2;
+        mga_vid_config.frame_size=( ( width + 31 ) & ~31 ) * height * 2;
         break;
    default:          fprintf(stderr,"mga: invalid output format %0X\n",format); return (-1);
   }
@@ -258,7 +256,7 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
  mGC=XCreateGC( mDisplay,mWindow,GCForeground,&wGCV );
 
  XMapWindow( mDisplay,mWindow );
- 
+
  set_window();
 
  mga_vid_config.src_width=width;
