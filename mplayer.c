@@ -3551,7 +3551,8 @@ if(vo_config_count && vo_spudec) {
       // DVD sub
       len = ds_get_packet_sub(d_dvdsub,(unsigned char**)&packet);
       if(len > 0) {
-	if (fabs(d_dvdsub->pts - sh_video->pts) < 10) // prevent missing subs on pts reset
+	float x = d_dvdsub->pts - sh_video->pts;
+	if (x < -10 || x > 10) // prevent missing subs on pts reset
 	  timestamp = 90000*(sh_video->timer + d_dvdsub->pts + sub_delay - sh_video->pts);
 	else timestamp = 90000*(sh_video->timer + sub_delay);
 	mp_dbg(MSGT_CPLAYER,MSGL_V,"\rDVD sub: len=%d  v_pts=%5.3f  s_pts=%5.3f  ts=%d \n",len,sh_video->pts,d_dvdsub->pts,timestamp);
