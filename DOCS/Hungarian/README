@@ -37,7 +37,7 @@ a képminõséggel, vagy a sebességgel is. Elhatároztam, hogy (át)írok egyet...
   (mpeg2dec). Nagyon jó, optimalizált, gyors C kód, tökéletes képminõség és
   100%-os megfelelés a szabványnak.
 - MPlayer v0.3-v0.9:
-  Egyvelege két programnak: mpg123play v0.95pre6 és az új, egyszerû AVI
+  Egyvelege két programnak: mpg12play v0.95pre6 és az új, egyszerû AVI
   lejátszómnak ('avip'), ami az avifile Win32 DLL loaderén alapul.
 - MPlayer v0.10:
   Az MPEG és AVI lejátszó egyetlen programban!

@@ -8,7 +8,7 @@ NOTE: Do NOT send bugreports, help & feature requests directly to the authors!
 
 Árpád Gereöffy (A'rpi/ESP-team):  <arpi@thot.banki.hu>
 - player code (mpeg stream demultiplexer and avi/asf parser, A-V sync, seek...)
-- mp3lib, based on mpg123 sources  [MP3 audio decoder]
+- mp3lib, based on mpglib sources  [MP3 audio decoder]
 - getch2  [keyboard handler]
 - some changes in libmpeg2 code (progressive frames, bitrate & fps support)
 - libvo improvements: adding OpenGL support, bugfix in mga driver...
@@ -123,7 +123,7 @@ Project Mayo:  [http://www.projectmayo.com]
 - the OpenDivX codec authors
 
 Michael Hipp:
-- mpg123 author   [free mpeg audio player, isn't used directly but in mp3lib]
+- mpglib author   [isn't used directly but in mp3lib]
 
 Mark Podlipec:
 - xanim author    [I'm using its aLaw+uLaw audio decoder]
