@@ -508,9 +508,10 @@ uninit(void)
 {
 #ifdef USE_LIBFAME
   if(picture_buf){ // YV12 only:
+    fame_close(ctx); ctx=NULL;
     free(outbuf);
     free(picture_buf);
-    fame_close(ctx); ctx=NULL;
+    picture_buf=NULL;
   }
 #endif
     if(vo_mpegpes_fd>=0){ close(vo_mpegpes_fd);vo_mpegpes_fd=-1;}
