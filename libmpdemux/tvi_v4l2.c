@@ -785,7 +785,6 @@ static int uninit(priv_t *priv)
     int i, frames, dropped = 0;
 
     priv->shutdown = 1;
-    pthread_join(priv->audio_grabber_thread, NULL);
     pthread_mutex_destroy(&priv->video_buffer_mutex);
 
     if (priv->streamon) {
