@@ -95,7 +95,7 @@ static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
     if(f<0) {
       mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_FileNotFound,p->filename);
       m_struct_free(&stream_opts,opts);
-      return -1;
+      return STREAM_ERROR;
     }
   }
 
