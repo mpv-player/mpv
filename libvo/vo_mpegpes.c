@@ -84,6 +84,7 @@ config(uint32_t s_width, uint32_t s_height, uint32_t width, uint32_t height, uin
 
 static uint32_t preinit(const char *arg){
 #ifdef HAVE_DVB
+    if(!arg){
     //|O_NONBLOCK
 	if((vo_mpegpes_fd = open("/dev/ost/video",O_RDWR)) < 0){
 		perror("DVB VIDEO DEVICE: ");
@@ -120,22 +121,24 @@ static uint32_t preinit(const char *arg){
 		perror("DVB VIDEO PLAY: ");
 		return -1;
 	}
-	if ( (ioctl(vo_mpegpes_fd2,AUDIO_SET_AV_SYNC, true) < 0)){
+	if ( (ioctl(vo_mpegpes_fd2,AUDIO_SET_AV_SYNC, false) < 0)){
 		perror("DVB AUDIO SET AV SYNC: ");
 		return -1;
 	}
-	if ( (ioctl(vo_mpegpes_fd2,AUDIO_SET_MUTE, false) < 0)){
+//	if ( (ioctl(vo_mpegpes_fd2,AUDIO_SET_MUTE, false) < 0)){
+	if ( (ioctl(vo_mpegpes_fd2,AUDIO_SET_MUTE, true) < 0)){
 		perror("DVB AUDIO SET MUTE: ");
 		return -1;
 	}
-
-#else
-    vo_mpegpes_fd=open("grab.mpg",O_WRONLY|O_CREAT,0666);
+	return 0;
+    }
+#endif
+    vo_mpegpes_fd=open(arg ? arg : "grab.mpg",O_WRONLY|O_CREAT,0666);
     if(vo_mpegpes_fd<0){	
 	perror("vo_mpegpes");
 	return -1;
     }
-#endif
+    vo_mpegpes_fd2=vo_mpegpes_fd;
     return 0;
 }
 
@@ -248,8 +251,11 @@ void send_lpcm_packet(unsigned char* data,int len,int id,unsigned int timestamp,
 	      pes_header[5]=(payload_size+3+ptslen+7)&255;
 
 	      // stuffing:
+	      // TTCCxxxx  CC=css TT=type: 1=STD 0=mpeg1 2=vob
 	      pes_header[6]=0x81;
-	      pes_header[7]=0x80;
+	      
+	      // FFxxxxxx   FF=pts flags=2 vs 0
+	      pes_header[7]=ptslen ? 0x80 : 0;
 
 	      // hdrlen:
 	      pes_header[8]=ptslen;
@@ -332,8 +338,9 @@ query_format(uint32_t format)
 static void
 uninit(void)
 {
+    if(vo_mpegpes_fd2>=0 && vo_mpegpes_fd2!=vo_mpegpes_fd) close(vo_mpegpes_fd2);
+    vo_mpegpes_fd2=-1;
     if(vo_mpegpes_fd>=0){ close(vo_mpegpes_fd);vo_mpegpes_fd=-1;}
-    if(vo_mpegpes_fd2>=0){ close(vo_mpegpes_fd2);vo_mpegpes_fd2=-1;}
 }
 
 
