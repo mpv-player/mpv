@@ -6764,8 +6764,8 @@ EOF
 else
   cat <<EOF
 NOTE: Win32 codec DLLs are not supported on your CPU ($host_arch) or your
-operating system ($system_name). You may encounter a few AVI files that
-cannot be played due to missing Open Source video/audio codec support.
+operating system ($system_name). You may encounter a few files that cannot
+be played due to missing open source video/audio codec support.
 
 EOF
 fi
