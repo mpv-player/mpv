@@ -2096,7 +2096,7 @@ cDiff: how different the pixels are allowed to be to be considered
 (~0.1-100.0)
 .REss
 .IPs "smartblur=rad:strength:thresh[:rad:strength:thresh]"
-smart blur
+smart elmosás
 .RSss
 rad: elmosó szûrõ ereje (~0.1\-5.0) (nagyobb szám esetén lassabb)
 .br
@@ -2112,125 +2112,120 @@ x0,y0,...: a bal felsõ, jobb felsõ, bal alsó, jobb alsó sarkok
 t: lineáris (0) vagy cubic resampling (1)
 .REss
 .IPs 2xsai
-Use the 2x scale and interpolate algorithm for scaling and smoothing images.
+A "2x scale and interpolate" (kétszeres nagyítás és interpolálás) algoritmus
+használata.
 .IPs 1bpp
-1bpp bitmap to YUV/BGR 8/15/16/32 conversion
+1bpp-s bitmap-et YUV/BGR 8/15/16/32-re konvertáló szûrõ
 .IPs "bmovl=hidden:opaque:<fifo>"
-Read bitmaps from a FIFO and display them in window.
+FIFO-ból beolvasott bitmap-ek megjelenítése.
 .
 .RSss
-hidden: sets the default value of the 'hidden' flag (boolean)
+hidden: a képek elrejtése alapállapotban (boolean)
 .br
-opaque: flag switching between alphablended (transparent) and opaque (fast)
-mode
+opaque: vált az alphablend-elt (átlátszó) vagy opaque (gyors) módok
+között
 .br
-fifo: path/filename for the FIFO (named pipe connecting mplayer -vf bmovl
-to the controlling application)
+fifo: itt kell megadni a FIFO file nevét
 .REss
 
 .RS
-FIFO commands are:
+A FIFO parancsok a következõk:
 .RE
 .RSss
-RGBA32 width height xpos ypos alpha clear
+RGBA32 szélesség magasság xpos ypos alpha clear
 .br
-followed by width*height*4 bytes of raw RGBA32 data.
+ezt szélesség*magasság*4 byte-nyi RGBA32 adatnak kell követnie.
 
-ABGR32 width height xpos ypos alpha clear
+ABGR32 szélesség magasság xpos ypos alpha clear
 .br
-followed by width*height*4 bytes of raw ABGR32 data.
+ezt szélesség*magasság*4 byte-nyi ABGR32 adatnak kell követnie.
 
-RGB24 width height xpos ypos alpha clear
+RGB24 szélesség magasság xpos ypos alpha clear
 .br
-followed by width*height*3 bytes of raw RGB32 data.
+ezt szélesség*magasság*4 byte-nyi RGB24 adatnak kell követnie.
 
-BGR24 width height xpos ypos alpha clear
+BGR24 szélesség magasság xpos ypos alpha clear
 .br
-followed by width*height*3 bytes of raw BGR32 data.
+ezt szélesség*magasság*4 byte-nyi BGR24 adatnak kell követnie.
 
-ALPHA width height xpos ypos alpha
+ALPHA szélesség magasság xpos ypos alpha
 .br
-change alpha for area
+A megadott terület alpha-jának megváltoztatása
 
-CLEAR width height xpos ypos
+CLEAR szélesség magasság xpos ypos
 .br
-clear area
+A megadott terület törlése
 
 OPAQUE
 .br
-disable all alpha transparency.
-Send "ALPHA 0 0 0 0 0" to enable it again.
+kikapcsol minden alpha átlátszóságot.
+Újra bekapcsolása az "ALPHA 0 0 0 0 0" paranccsal történik.
 
 HIDE
 .br
-hide bitmap
+bitmap elrejtése
 
 SHOW
 .br
-show bitmap
+bitmap megjelenítése
 .REss
 
 .RS
-Arguments are:
+Az opciók magyarázatai:
 .RE
 .RSss
-width, height: size of image/area
+szélesség, magasság: a kép/terület mérete
 .br
-xpos, ypos: start blitting at X/Y position   
+xpos, ypos: az a pozíció ahol a rajzolás megkezdõdik
 .br
-alpha: set alpha difference.
-0 means same as original, 255 makes everything
-opaque, -255 makes everything transparent.
-If you set this to -255 you can then send a sequence of ALPHA-commands to set
-the area to -225, -200, -175 etc for a nice fade-in-effect! ;)
+alpha: alpha különbség beállítása
+A 0 jelenti az eredetit, a 255 mindent átlátszatlanná tesz, a -255 pedig
+mindent átlátszóvá.
+Ha ezt -255-re állítod, majd egy sorozat ALPHA parancsot küldesz -225,
+-200, -175 stb paraméterekkel, az egy szép fade-in effektust eredményez! ;)
 .br
-clear: clear the framebuffer before blitting.
-1 means clear, if 0, the image will just be blitted on top of the old one, so
-you don't need to send 1,8MB of RGBA32 data everytime a small part of the
-screen is updated.
+clear: a framebuffer rajzolás elõtti törlése
+Az 1 jelenti a törlést, a 0-nál a kép csak rá lesz illesztve a régire,
+így nem kell minden esetben 1,8MB RGBA32 képet elküldeni amikor tulajdonképpen
+a képernyõnek csak egy része frissül.
 .REss
 .RE
 .
 .TP
-.B \-vfm <driver1,driver2,...>
-Specify a priority list of video drivers to be used, according to their driver
-name in codecs.conf.
-It falls back to default if none is ok.
+.B \-vfm <meghajtó1,meghajtó2,...>
+Megadható egy prioritási lista a használandó video codec-ekrõl, a codecs.conf
+file-ban szereplõ nevük alapján.
+Ha egyik megadott codec sem használható, az alapértelmezett sorrend lép
+életbe.
 
-.I NOTE:
 .br
-If libdivxdecore support was compiled in, then odivx and divx4 now contains
-just the same DivX4 codec, but different APIs to reach it.
-For difference between them and when to use which, check the DivX4 section in
-the documentation.
-.br
-See \-vfm help for a full list of available drivers.
+A teljes listához lásd a \-vfm help opciót.
 
-.I EXAMPLE:
+.I PÉLDA:
 .PD 0
 .RSs
 .IPs "\-vfm ffmpeg,dshow,vfw"
-try the libavcodec, then Directshow, then VFW codecs and fallback to the
-others, if still none is ok
+elõször a libavcodec, majd a DirectShow, végül a VFW codec-ek használata,
+hiba esetén alapértelmezés
 .IPs "\-vfm xanim"
-try XAnim codecs first
+elõször XAnim codec-ek használata
 .RE
 .PD 1
 .
 .TP
-.B \-x <x> (MPLAYER only)
-Scale image to x width (if sw/\:hw scaling available).
-Disables aspect calculations.
+.B \-x <x> (csak MPLAYER)
+Kép nagyítása x szélességûre (ha van sw/\:hw nagyítás).
+Kikapcsolja a képarány kiszámolását.
 .TP
-.B \-xvidopts <option1:option2:...>
-Specify additional parameters when decoding with XviD.
+.B \-xvidopts <opció1:opció2:...>
+XviD-del történõ dekódolásnál annak paramétereit itt lehet átállítani.
 
 .PD 0
 .RSs
 .IPs dr2\ \ 
-Activate direct rendering method 2.
+2-es Direct Rendering bekapcsolása.
 .IPs nodr2
-Deactivate direct rendering method 2.
+2-es Direct Rendering kikapcsolása.
 .RE
 .PD 1
 .
@@ -2239,28 +2234,28 @@ Deactivate direct rendering method 2.
 .PD 0
 .RSs
 .IPs "x<=8"
-Scale image by factor <x>.
+Kép nagyítása <x>-szeresre.
 .IPs "x>8\ "
-Set width to <x> and calculate height to keep correct aspect ratio.
+Szélesség beállítása <x>-re, majd a képarány kiszámítása.
 .RE
 .PD 1
 .
 .TP
-.B \-y <y> (MPLAYER only)
-Scale image to y height (if sw/\:hw scaling available).
-Disables aspect calculations.
+.B \-y <y> (csak MPLAYER)
+Kép nagyítása y magasságra (ha van sw/\:hw nagyítás).
+Kikapcsolja a képarány kiszámítását.
 .TP
 .B \-zoom \ 
-Allow software scaling, where available.
-Could be used to force scaling with \-vf scale.
+Szoftveres nagyítás használata, ha rendelkezésre áll.
+Használható a nagyítás kikényszerítésére \-vf scale szûrõ használatával.
 
-.I NOTE:
+.I MEGJEGYZÉS:
 .br
-\-vf scale will IGNORE options \-x / \-y / \-xy / \-fs / \-aspect without
-\-zoom.
+A \-vf scale figyelmen kívül hagyja az \-x / \-y / \-xy / \-fs / \-aspect
+opciókat a \-zoom opció megadása nélkül.
 
 
-.SH "ENCODING OPTIONS (MENCODER ONLY)"
+.SH "AZ ENKÓDOLÁS OPCIÓI (CSAK MENCODER)"
 .TP
 .B \-audio-density <1\-50>
 Number of audio chunks per second (default is 2 for 0.5s long audio chunks).
