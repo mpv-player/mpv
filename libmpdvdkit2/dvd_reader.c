@@ -872,7 +872,7 @@ ssize_t DVDReadBlocks( dvd_file_t *dvd_file, int offset,
     return (ssize_t)ret;
 }
 
-int32_t DVDFileSeek( dvd_file_t *dvd_file, int32_t offset )
+int DVDFileSeek( dvd_file_t *dvd_file, int offset )
 {
    if( offset > dvd_file->filesize * DVD_VIDEO_LB_LEN ) {
        return -1;
