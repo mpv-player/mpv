@@ -853,7 +853,11 @@ static HANDLE WINAPI expCreateMutexA(void *pSecAttr,
     else
 	dbgprintf("CreateMutexA(0x%x, %d, NULL) => 0x%x\n",
 	    pSecAttr, bInitialOwner, mlist);
+#ifndef QTX
+    /* 10l to QTX, if CreateMutex returns a real mutex, WaitForSingleObject
+       waits for ever, else it works ;) */
     return mlist;
+#endif
 }
 
 static int WINAPI expReleaseMutex(HANDLE hMutex)
