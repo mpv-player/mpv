@@ -26,6 +26,27 @@ static int config(struct vf_instance_s* vf,
     if(vf->priv->crop_h<=0 || vf->priv->crop_h>height) vf->priv->crop_h=height;
     if(vf->priv->crop_x<0) vf->priv->crop_x=(width-vf->priv->crop_w)/2;
     if(vf->priv->crop_y<0) vf->priv->crop_y=(height-vf->priv->crop_h)/2;
+    // rounding:
+    if(!IMGFMT_IS_RGB(outfmt) && !IMGFMT_IS_BGR(outfmt)){
+	switch(outfmt){
+	case IMGFMT_444P:
+	case IMGFMT_Y800:
+	case IMGFMT_Y8:
+	    break;
+	case IMGFMT_YVU9:
+	case IMGFMT_IF09:
+	    vf->priv->crop_y&=~3;
+	case IMGFMT_411P:
+	    vf->priv->crop_x&=~3;
+	    break;
+	case IMGFMT_YV12:
+	case IMGFMT_I420:
+	case IMGFMT_IYUV:
+	    vf->priv->crop_y&=~1;
+	default:
+	    vf->priv->crop_x&=~1;
+	}
+    }
     // check:
     if(vf->priv->crop_w+vf->priv->crop_x>width ||
        vf->priv->crop_h+vf->priv->crop_y>height){
@@ -47,9 +68,9 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	dmpi->planes[0]=mpi->planes[0]+
 	    vf->priv->crop_y*mpi->stride[0]+vf->priv->crop_x;
 	dmpi->planes[1]=mpi->planes[1]+
-	    (vf->priv->crop_y>>1)*mpi->stride[1]+(vf->priv->crop_x>>1);
+	    (vf->priv->crop_y>>mpi->chroma_y_shift)*mpi->stride[1]+(vf->priv->crop_x>>mpi->chroma_x_shift);
 	dmpi->planes[2]=mpi->planes[2]+
-	    (vf->priv->crop_y>>1)*mpi->stride[2]+(vf->priv->crop_x>>1);
+	    (vf->priv->crop_y>>mpi->chroma_y_shift)*mpi->stride[2]+(vf->priv->crop_x>>mpi->chroma_x_shift);
 	dmpi->stride[1]=mpi->stride[1];
 	dmpi->stride[2]=mpi->stride[2];
     } else {
