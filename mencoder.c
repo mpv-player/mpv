@@ -41,7 +41,9 @@ static char* banner_text=
 #include <encore2.h>
 #include "divx4_vbr.h"
 
+#ifdef HAVE_MP3LAME
 #include <lame/lame.h>
+#endif
 
 #include <inttypes.h>
 #include "../postproc/swscale.h"
@@ -66,7 +68,12 @@ char *video_codec=NULL; // override video codec
 int audio_family=-1;     // override audio codec family 
 int video_family=-1;     // override video codec family 
 
+#ifdef HAVE_MP3LAME
 int out_audio_codec=ACODEC_VBRMP3;
+#else
+int out_audio_codec=ACODEC_PCM;
+#endif
+
 int out_video_codec=VCODEC_DIVX4;
 
 // audio stream skip/resync functions requires only for seeking.
@@ -111,12 +118,14 @@ static int play_n_frames=-1;
 ENC_PARAM divx4_param;
 int divx4_crispness=100;
 
+#ifdef HAVE_MP3LAME
 int lame_param_quality=0; // best
 int lame_param_vbr=vbr_default;
 int lame_param_mode=-1; // unset
 int lame_param_padding=-1; // unset
 int lame_param_br=-1; // unset
 int lame_param_ratio=-1; // unset
+#endif
 
 static int scale_srcW=0;
 static int scale_srcH=0;
@@ -266,7 +275,9 @@ ENC_FRAME enc_frame;
 ENC_RESULT enc_result;
 void* enc_handle=NULL;
 
+#ifdef HAVE_MP3LAME
 lame_global_flags *lame;
+#endif
 
 float audio_preload=0.5;
 
@@ -602,9 +613,9 @@ case VCODEC_DIVX4:
     break;
 }
 
-#if 1
 if(sh_audio)
 switch(mux_a->codec){
+#ifdef HAVE_MP3LAME
 case ACODEC_VBRMP3:
 
 lame=lame_init();
@@ -627,9 +638,10 @@ if(verbose){
     lame_print_config(lame);
     lame_print_internals(lame);
 }
+break;
+#endif
     
 }
-#endif
 
 signal(SIGINT,exit_sighandler);  // Interrupt from keyboard
 signal(SIGQUIT,exit_sighandler); // Quit from keyboard
@@ -674,6 +686,7 @@ if(sh_audio){
 	    case 0: // copy
 		printf("not yet implemented!\n");
 		break;
+#ifdef HAVE_MP3LAME
 	    case ACODEC_VBRMP3:
 		while(mux_a->buffer_len<4){
 		  unsigned char tmp[2304];
@@ -700,6 +713,7 @@ if(sh_audio){
 		  mux_a->buffer_len+=len;
 		}
 		break;
+#endif
 	    }
 	}
 	if(len<=0) break; // EOF?
@@ -856,7 +870,8 @@ if(sh_audio){
 
 } // while(!eof)
 
-// fixup CBR audio header:
+#ifdef HAVE_MP3LAME
+// fixup CBR mp3 audio header:
 if(sh_audio && mux_a->codec==ACODEC_VBRMP3 && !lame_param_vbr){
     mux_a->h.dwSampleSize=1;
     mux_a->h.dwRate=mux_a->wf->nAvgBytesPerSec;
@@ -864,6 +879,7 @@ if(sh_audio && mux_a->codec==ACODEC_VBRMP3 && !lame_param_vbr){
     printf("\n\nCBR audio effective bitrate: %8.3f kbit/s  (%d bytes/sec)\n",
 	    mux_a->h.dwRate*8.0f/1000.0f,mux_a->h.dwRate);
 }
+#endif
 
 printf("\nWriting AVI index...\n");
 aviwrite_write_index(muxer,muxer_f);

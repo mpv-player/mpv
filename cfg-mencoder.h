@@ -28,10 +28,12 @@ struct config divx4opts_conf[]={
 	{NULL, NULL, 0, 0, 0, 0}
 };
 
+#ifdef HAVE_MP3LAME
 struct config lameopts_conf[]={
 	{"q", &lame_param_quality, CONF_TYPE_INT, CONF_RANGE, 0, 9},
 	{"vbr", &lame_param_vbr, CONF_TYPE_INT, CONF_RANGE, 0, vbr_max_indicator},
 	{"cbr", &lame_param_vbr, CONF_TYPE_FLAG, 0, 0, 0},
+	{"abr", &lame_param_vbr, CONF_TYPE_FLAG, 0, 0, vbr_abr},
 	{"mode", &lame_param_mode, CONF_TYPE_INT, CONF_RANGE, 0, MAX_INDICATOR},
 	{"padding", &lame_param_padding, CONF_TYPE_INT, CONF_RANGE, 0, PAD_MAX_INDICATOR},
 	{"br", &lame_param_br, CONF_TYPE_INT, CONF_RANGE, 0, 1024},
@@ -39,6 +41,7 @@ struct config lameopts_conf[]={
 	{"help", "TODO: lameopts help!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
 	{NULL, NULL, 0, 0, 0, 0}
 };
+#endif
 
 struct config ovc_conf[]={
 	{"copy", &out_video_codec, CONF_TYPE_FLAG, 0, 0, 0},
@@ -50,8 +53,13 @@ struct config ovc_conf[]={
 struct config oac_conf[]={
 	{"copy", &out_audio_codec, CONF_TYPE_FLAG, 0, 0, 0},
 	{"pcm", &out_audio_codec, CONF_TYPE_FLAG, 0, 0, ACODEC_PCM},
+#ifdef HAVE_MP3LAME
 	{"mp3lame", &out_audio_codec, CONF_TYPE_FLAG, 0, 0, ACODEC_VBRMP3},
 	{"help", "\nAvailable codecs:\n   copy\n   pcm\n   mp3lame\n\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
+#else
+	{"mp3lame", "MPlayer was compiled without libmp3lame support!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
+	{"help", "\nAvailable codecs:\n   copy\n   pcm\n\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
+#endif
 	{NULL, NULL, 0, 0, 0, 0}
 };
 
@@ -76,7 +84,9 @@ struct config conf[]={
 	{"pass", &pass, CONF_TYPE_INT, CONF_RANGE,0,2},
 	
 	{"divx4opts", divx4opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0},
+#ifdef HAVE_MP3LAME
 	{"lameopts", lameopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0},
+#endif
 
 #define MAIN_CONF
 #include "cfg-common.h"
