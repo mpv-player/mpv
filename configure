@@ -246,7 +246,7 @@ Video output:
   --enable-directfb      build with DirectFB support [autodetect]
   --enable-zr            build with ZR360[56]7/ZR36060 support [autodetect]
   --enable-bl		 build with Blinkenlights support [disable]
-  --enable-tdfxvid       build with tdfx vid support [disable]
+  --enable-tdfxvid       build with tdfx_vid support [disable]
   --disable-tga          disable targa output support [enable]
   
 Audio output:
