@@ -1,4 +1,4 @@
-.\" synced with 1.725
+.\" synced with 1.726
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "19 Septembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "20 Septembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -2919,6 +2919,18 @@ Nomme explicitement le fichier de sortie (par défaut: ./md5).
 .PD 1
 .
 .TP
+.B md5sum\ \ \ \ 
+Calcule le somme de contrôle MD5 de chaque trame et l'écrit dans un fichier.
+Gère les espaces de couleurs RGB24 et YV12.
+Utile pour le débogage.
+.PD 0
+.RSs
+.IPs outfile=<nom_fichier>
+Définit le nom de fichier de sortie (par défaut\ : ./md5sums).
+.RE
+.PD 1
+.
+.TP
 .B yuv4mpeg
 Transforme le flux vidéo en une séquence d'images YUV 4:2:0 non compressées
 et les stocke dans un fichier nommé 'stream.yuv' dans le répertoire courant.
@@ -2998,6 +3010,37 @@ seront écrits dans le même répertoire.
 Nombre maximum de fichier JPEG à créer par sous-répertoire dans le cas où
 l'option subdirs est définie.
 <valeur> doit être plus grand ou égal à 1 (par défaut\ : 1000).
+.RE
+.PD 1
+.
+.TP
+.B pnm (voir aussi pnm, pgm et ppm)
+Écrit, dans le répertoire courant, chaque trame dans un fichier PNM.
+Le nom de chaque fichier contient le numéro de trame, précédé au besoin par
+des zéros.
+Gère les fichiers PPM, PGM et PGMYUB, en mode brut ou ASCII.
+.PD 0
+.RSs
+.IPs ppm
+Écrit des fichiers PPM (par défaut).
+.IPs pgm
+Écrit des fichiers PGM.
+.IPs pgmyuv
+Écrit des fichiers PGMYUV.
+PGMYUV est similaire à PGM, mais contient en plus les plans U et V, rajoutés
+en bas de l'image.
+.IPs raw
+Écrit les fichiers PNM en mode brut (par défaut).
+.IPs ascii
+Écrit les fichiers PNM en mode ASCII (par défaut).
+.IPs outdir= <nom_répertoire>
+Définit le répertoire où écrire les fichiers PNM.
+.IPs subdirs=<valeur>
+Crée des sous-répertoires numérotés avec le préfixe donné
+Par défaut, aucun sous-répertoire n'est créé et tous les fichiers PNM
+sont écrits dans le même répertoire.
+.IPs maxfiles=<1..> (subdir uniquement)
+Nombre de fichiers PNM maximum à écrire par sous-répertoire 
 .RE
 .PD 1
 .
