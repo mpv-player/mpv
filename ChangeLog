@@ -1,23 +1,24 @@
 mplayer (1.0)
 
-  pre4: "Niu ririsu"
+  pre4: "Niu ririsu" Apr 26, 2004
 
     Security:
     * HTTP parser remote heap overflow vulnerability fixed
-    * Real RTSP boundary checks
-    * Matroska possible buffer overflow
-    * Malicious CD TOC oveerflow in CDDB code
+    * Real RTSP remote buffer overflow vulnerability fixed
+    * buffer overflow in the Matroska demuxer
+    * potentially exploitable buffer overflow in CDDB TOC code
 
     DOCS:
     * new Copyright file covers files from other projects and their licenses
     * new DOCS/tech/translations.txt explains how to properly translate MPlayer
     * new Japanese console message translation
-    * Polish translation almost finished
+    * Polish translation finished
     * Italian man page translation
     * DVD ripping guide
+    * telecine/interlacing guide
     * video out driver section added to the man page
     * XML build system rewritten - now supports building individual languages
-    * Miscellaneous updates all over the place
+    * miscellaneous updates all over the place
 
     Ports:
     * better PA-RISC detection
@@ -28,9 +29,9 @@ mplayer (1.0)
     * support for ELF only OpenBSD
     * optimizing for PPC 970 (aka G5)
     * SDL support fixed on MinGW
-    * VIDIX working under Windows XP (native dhahelper)
+    * VIDIX working under Windows XP/2000 (native dhahelper)
     * builds out of the box under GNU Hurd
-    * enable SSE optimizations under MinGW
+    * SSE optimizations enabled under MinGW
     * SSE support under OpenBSD
     * Altivec support under NetBSD
     * GCC 3.4 support (due to changed behaviour in ASM code snippets)
@@ -49,8 +50,8 @@ mplayer (1.0)
     * support for AAC inside Real
     * MPEG Aspect code 4 fixed
     * support for seeking in HTTP streams
-    * support for selecting subtilte streams with -slang inside Ogg
-    * wrapper demuxer for using FFMpeg's libavformat (Nut is playable through that)
+    * support for selecting subtitle streams with -slang inside Ogg
+    * wrapper demuxer for FFMpeg's libavformat (Nut is playable this way)
     * Nullsoft video (NSV) demuxer
     * updated LIVE.COM streaming code
     * much improved seeking in Ogg
@@ -66,7 +67,6 @@ mplayer (1.0)
     * support for Alparysoft lossless video codec (through DLLs)
     * HE-AAC working through libfaad
     * removed libmpflac in favor of FFmpeg's FLAC implementation
-    * support for libcaca
     * liba52 dynamic range compression support
 
     Filters:
@@ -82,7 +82,7 @@ mplayer (1.0)
     * vf_noformat: the same as vf_format but with reversed meaning
     * Altivec optimized SWScaler
     * vf_phase: phase shift fields
-    * vf_divtc: removing duplicate frames from deinterlaced telecined video
+    * vf_divtc: duplicate frame removal from deinterlaced telecined video
 
     Drivers:
     * ao/esd behaves better over network now
@@ -93,6 +93,7 @@ mplayer (1.0)
     * better multibuffer support in VIDIX nVidia driver
     * pan & scan support in VIDIX nVidia driver
     * support for more cards in VIDIX nVidia driver
+    * vo_libcaca: color ASCII art output driver
     * vo_quartz: MacOS X/Quartz video output
     * support for VIDIX when ATI FireGLX drivers are used
 
@@ -120,7 +121,7 @@ mplayer (1.0)
     * better SVCD compliance (encoder side)
     * MMX and MMX2 optimized interlaced DCT decision
     * various cleanup, memleak and segfault fixes
-    * slightly optimized (2x faster) the MPEG layer 3 decoder
+    * optimized (2x faster) the MPEG layer 3 decoder
     * grayscale coded MJPEG decoding support
     * avimszh and avizlib decoders
     * "packed" XviD decoding
@@ -132,10 +133,10 @@ mplayer (1.0)
     * QT RLE decoder
     * OBMC fixes
     * FLAC decoder
-    * better support for Divx5
+    * better support for DivX5
     * MMX and SSE2 optimized VP3/Theora decoding
     * support for Theora alpha3
-    * lot of H.264 improvements
+    * many H264 improvements
     * more robust MJPEG startcode search mechanism
     * better WMV8 decoding
     * native SPARC VIS optimizations
@@ -148,9 +149,9 @@ mplayer (1.0)
     * Swedish and Polish yes/no options in config files
     * support binding F11 and F12 keys
     * TOOLS/divx2svcd updated
-    * more strict threads code in win32 loader (so it works under NetBSD)
+    * stricter thread code in Win32 loader (works under NetBSD)
     * PJS subtitle support (was: dunnowhat)
-    * TOOLS/avifix: simple tool to fix chunk sizes in a AVI file
+    * TOOLS/avifix: simple tool to fix chunk sizes in AVI files
     * proper extraheader handling when libavcodec is used in MEncoder
     * AVI OpenDML read and write support
     * AVI VPRP (video property) read and write support
