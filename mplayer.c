@@ -475,7 +475,7 @@ char* video_driver=NULL; //"mga"; // default
 int fullscreen=0;
 int vidmode=0;
 int softzoom=0;
-int flip=0;
+int flip=-1;
 int screen_size_x=0;//SCREEN_SIZE_X;
 int screen_size_y=0;//SCREEN_SIZE_Y;
 int screen_size_xy=0;
@@ -751,6 +751,9 @@ d_dvdsub=demuxer->sub;
 //sh_audio=d_audio->sh;sh_audio->ds=d_audio;
 //sh_video=d_video->sh;sh_video->ds=d_video;
 
+sh_audio=NULL;
+sh_video=NULL;
+
 switch(file_format){
  case DEMUXER_TYPE_AVI: {
   //---- AVI header:
@@ -795,7 +798,7 @@ switch(file_format){
       }
       if(a_pos==-1){
         printf("AVI_NI: No audio stream found -> nosound\n");
-        has_audio=0;
+        has_audio=0;sh_audio=NULL;
       } else {
         if(force_ni || abs(a_pos-v_pos)>0x100000){  // distance > 1MB
           printf("Detected NON-INTERLEAVED AVI file-format!\n");
@@ -823,8 +826,7 @@ switch(file_format){
     if(verbose) printf("AVI: Searching for audio stream (id:%d)\n",d_audio->id);
     if(!ds_fill_buffer(d_audio)){
       printf("AVI: No Audio stream found...  ->nosound\n");
-      has_audio=0;
-      sh_audio=NULL;
+      has_audio=0;sh_audio=NULL;
     } else {
       sh_audio=d_audio->sh;sh_audio->ds=d_audio;
       sh_audio->format=sh_audio->wf->wFormatTag;
@@ -856,28 +858,30 @@ switch(file_format){
   demuxer->idx_pos=0;
 //  demuxer->endpos=avi_header.movi_end;
   if(!ds_fill_buffer(d_video)){
-    printf("ASF: missing video stream!? contact the author, it may be a bug :(\n");
-    GUI_MSG( mplASFErrorMissingVideoStream )
-    exit(1);
+    printf("ASF: no video stream found!\n");
+    sh_video=NULL;
+    //printf("ASF: missing video stream!? contact the author, it may be a bug :(\n");
+    //GUI_MSG( mplASFErrorMissingVideoStream )
+    //exit(1);
+  } else {
+    sh_video=d_video->sh;sh_video->ds=d_video;
+    sh_video->fps=1000.0f; sh_video->frametime=0.001f; // 1ms
+    printf("VIDEO:  [%.4s]  %ldx%ld  %dbpp\n",
+      (char *)&sh_video->bih->biCompression,
+      sh_video->bih->biWidth,
+      sh_video->bih->biHeight,
+      sh_video->bih->biBitCount);
   }
-  sh_video=d_video->sh;sh_video->ds=d_video;
   if(has_audio){
     if(verbose) printf("ASF: Searching for audio stream (id:%d)\n",d_audio->id);
     if(!ds_fill_buffer(d_audio)){
       printf("ASF: No Audio stream found...  ->nosound\n");
-      has_audio=0;
-      sh_audio=NULL;
+      has_audio=0;sh_audio=NULL;
     } else {
       sh_audio=d_audio->sh;sh_audio->ds=d_audio;
       sh_audio->format=sh_audio->wf->wFormatTag;
     }
   }
-  sh_video->fps=1000.0f; sh_video->frametime=0.001f; // 1ms
-  printf("VIDEO:  [%.4s]  %ldx%ld  %dbpp\n",
-    (char *)&sh_video->bih->biCompression,
-    sh_video->bih->biWidth,
-    sh_video->bih->biHeight,
-    sh_video->bih->biBitCount);
   break;
  }
  case DEMUXER_TYPE_MPEG_ES: {
@@ -898,7 +902,7 @@ switch(file_format){
       case 1: sh_audio->format=0x50;break; // mpeg
       case 2: sh_audio->format=0x10001;break;  // dvd pcm
       case 3: sh_audio->format=0x2000;break; // ac3
-      default: has_audio=0; // unknown type
+      default: has_audio=0;sh_audio=NULL; // unknown type
     }
   }
   }
@@ -911,9 +915,11 @@ switch(file_format){
  case DEMUXER_TYPE_AVI:
  case DEMUXER_TYPE_ASF: {
   // display info:
-  sh_video->format=sh_video->bih->biCompression;
-  sh_video->disp_w=sh_video->bih->biWidth;
-  sh_video->disp_h=abs(sh_video->bih->biHeight);
+  if(sh_video){
+    sh_video->format=sh_video->bih->biCompression;
+    sh_video->disp_w=sh_video->bih->biWidth;
+    sh_video->disp_h=abs(sh_video->bih->biHeight);
+  }
   break;
  }
  case DEMUXER_TYPE_MPEG_ES:
@@ -985,6 +991,7 @@ switch(file_format){
 
 //if(verbose) printf("file successfully opened  (has_audio=%d)\n",has_audio);
 
+if(sh_video)
 printf("[V] filefmt:%d  fourcc:0x%X  size:%dx%d  fps:%5.2f  ftime:=%6.4f\n",
    file_format,sh_video->format,sh_video->disp_w,sh_video->disp_h,
    sh_video->fps,sh_video->frametime
@@ -995,9 +1002,22 @@ fflush(stdout);
 if(stream_dump_type){
   FILE *f;
   int len;
-  demux_stream_t *ds=(stream_dump_type==1)?d_audio:d_video;
-  demux_stream_t *ds2=(stream_dump_type!=1)?d_audio:d_video;
-  ds_free_packs(ds2); ds2->id=-2; // ignore this stream!
+  demux_stream_t *ds=NULL;
+  // select stream to dump
+  switch(stream_dump_type){
+  case 1: ds=d_audio;break;
+  case 2: ds=d_video;break;
+  case 3: ds=d_dvdsub;break;
+  }
+  if(!ds){        
+      printf("dump: FATAL: selected stream missing!\n");
+      exit(1);
+  }
+  // disable other streams:
+  if(d_audio && d_audio!=ds) {ds_free_packs(d_audio); d_audio->id=-2; }
+  if(d_video && d_video!=ds) {ds_free_packs(d_video); d_video->id=-2; }
+  if(d_dvdsub && d_dvdsub!=ds) {ds_free_packs(d_dvdsub); d_dvdsub->id=-2; }
+  // let's dump it!
   f=fopen(stream_dump_name?stream_dump_name:"stream.dump","wb");
   if(!f){ printf("Can't open dump file!!!\n");exit(1); }
   while(!ds->eof){
@@ -1008,6 +1028,11 @@ if(stream_dump_type){
   fclose(f);
   printf("core dumped :)\n");
   exit(1);
+}
+
+if(!sh_video){
+    printf("Sorry, no video stream... it's unplayable yet\n");
+    exit(1);
 }
 
 //================== Init AUDIO (codec) ==========================
@@ -1079,6 +1104,14 @@ if(i>=CODECS_MAX_OUTFMT){
     exit(1);
 }
 sh_video->outfmtidx=i;
+
+if(flip==-1){
+    // autodetect flipping
+    flip=0;
+    if(sh_video->codec->outflags[i]&CODECS_FLAG_FLIP)
+      if(!(sh_video->codec->outflags[i]&CODECS_FLAG_NOFLIP))
+         flip=1;
+}
 
 if(verbose) printf("vo_debug1: out_fmt=0x%08X\n",out_fmt);
 
@@ -1230,7 +1263,7 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
          fullscreen?"fs ":"",
          vidmode?"vm ":"",
          softzoom?"zoom ":"",
-         flip?"flip ":""
+         (flip==1)?"flip ":""
 //         fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3)
      );
      if((out_fmt&IMGFMT_BGR_MASK)==IMGFMT_BGR)
@@ -1445,17 +1478,21 @@ if(!has_audio){
   if(sh_audio) if(sh_audio->a_buffer) free(sh_audio->a_buffer);
   alsa=1;
   // fake, required for timer:
+#if 1
+  sh_audio=NULL;
+#else
   sh_audio=new_sh_audio(255); // FIXME!!!!!!!!!!
   sh_audio->samplerate=76800;
   sh_audio->samplesize=sh_audio->channels=2;
   sh_audio->o_bps=sh_audio->channels*sh_audio->samplerate*sh_audio->samplesize;
+#endif
 }
 
   current_module=NULL;
 
 //==================== START PLAYING =======================
 
-if(file_format==DEMUXER_TYPE_AVI){
+if(file_format==DEMUXER_TYPE_AVI && has_audio){
   a_pts=d_audio->pts;
   audio_delay-=(float)(sh_audio->audio.dwInitialFrames-sh_video->video.dwInitialFrames)*sh_video->frametime;
 //  audio_delay-=(float)(sh_audio->audio.dwInitialFrames-sh_video->video.dwInitialFrames)/default_fps;
@@ -1480,13 +1517,12 @@ InitTimer();
 while(!eof){
 
 /*========================== PLAY AUDIO ============================*/
-if(!has_audio){
-  int playsize=512;
-  a_frame+=playsize/(float)(sh_audio->o_bps);
-  a_pts+=playsize/(float)(sh_audio->o_bps);
+//if(!has_audio){
+//  int playsize=512;
+//  a_frame+=playsize/(float)(sh_audio->o_bps);
+//  a_pts+=playsize/(float)(sh_audio->o_bps);
   //time_frame+=playsize/(float)(sh_audio->o_bps);
-
-} else
+//} else
 while(has_audio){
   unsigned int t;
   int playsize=outburst;
@@ -2009,11 +2045,11 @@ switch(sh_video->codec->driver){
     float skip_audio_secs=0;
 
     // clear demux buffers:
-    if(has_audio) ds_free_packs(d_audio);
+    if(has_audio){ ds_free_packs(d_audio);sh_audio->a_buffer_len=0;}
     ds_free_packs(d_video);
     
 //    printf("sh_audio->a_buffer_len=%d  \n",sh_audio->a_buffer_len);
-    sh_audio->a_buffer_len=0;
+    
 
 switch(file_format){
 
