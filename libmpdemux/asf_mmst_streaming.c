@@ -12,6 +12,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <inttypes.h>
 
 #include "config.h"
 
@@ -22,15 +23,7 @@
 
 #include "network.h"
 
-int data_length = 0;
-int packet_length1;
-int media_padding;
-int to_skip = 0;
-
-#include <inttypes.h>
-
 #define BUF_SIZE 102400
-int checknum =1;
 
 typedef struct 
 {
@@ -39,60 +32,11 @@ typedef struct
 
 } command_t;
 
-int seq_num;
-int num_stream_ids;
-int stream_ids[20];
-int output_fh;
+static int seq_num;
+static int num_stream_ids;
+static int stream_ids[20];
 
 static int get_data (int s, char *buf, size_t count);
-int store_data(int s, int size, char *buffer)
-{
-//	printf("data_length %d, media_padding %d, size %d \n", data_length, media_padding, size );
-	if(data_length >= size)
-	{   
-		if (!get_data (s, buffer, size)) 
-		{
-			printf ("media data read failed\n");
-			return 0;
-		}
-		data_length -= size;
-		return size;
-	}
-	else 
-	{
-		int temp_size, media_temp_padding;
-		if(data_length)	
-		{
-			if (!get_data (s, buffer, data_length)) 
-			{
-				printf ("media data read failed\n");
-				return 0;
-			}
-		}
-		if(media_padding)
-		{
-			if(media_padding > size - data_length)
-			{
-				memset(buffer+data_length,0,(size - data_length));
-				media_padding -= (size - data_length);
-				data_length = 0;
-				return size;
-			}
-			else
-			{
-				memset(buffer+data_length,0,media_padding);
-				media_temp_padding = media_padding;
-				media_padding = 0;
-				temp_size =data_length;
-				data_length = 0;
-				return (temp_size + media_temp_padding);
-			}
-		}
-		temp_size = data_length;
-		data_length = 0;
-		return temp_size;
-	}
-}
 
 static void put_32 (command_t *cmd, uint32_t value) 
 {
@@ -256,7 +200,7 @@ static int get_header (int s, uint8_t *header, streaming_ctrl_t *streaming_ctrl)
 
     } else {
 
-      char packet_len;
+      int packet_len;
       int command;
       char data[BUF_SIZE];
 
@@ -287,7 +231,7 @@ static int get_header (int s, uint8_t *header, streaming_ctrl_t *streaming_ctrl)
   }
 }
 
-int interp_header (uint8_t *header, int header_len) 
+static int interp_header (uint8_t *header, int header_len) 
 {
   int i;
   int packet_length=-1;
@@ -358,117 +302,103 @@ int interp_header (uint8_t *header, int header_len)
 }
 
 
-static int get_media_packet (int s, int padding, char *buffer, int size) 
-{
+static int get_media_packet (int s, int padding, streaming_ctrl_t *stream_ctrl) {
   unsigned char  pre_header[8];
+  int            i;
   char           data[BUF_SIZE];
-  int 		 CheckInnerData = 1;
-  int 		 CheckOuterData = 1;
 
+  if (!get_data (s, pre_header, 8)) {
+    printf ("pre-header read failed\n");
+    return 0;
+  }
 
-while(CheckOuterData)
-{
-	int a;
-	if(media_padding ==0 && data_length == 0)
-	{
-		while(CheckInnerData)
-		{
-			if (!get_data (s, pre_header, 8)) {
-			    printf ("pre-header read failed\n");
-			    return 0;
-  			}
+//  for (i=0; i<8; i++)
+//    printf ("pre_header[%d] = %02x (%d)\n",
+//	    i, pre_header[i], pre_header[i]);
 
-	 		if (pre_header[4] == 0x04) 
-			{
-    				data_length = (pre_header[7] << 8 | pre_header[6]) - 8;
-				media_padding = packet_length1 - data_length;
-				if(to_skip)
-				{
-					a =  store_data(s, size - to_skip, buffer + to_skip);
-					to_skip = 0;
-				}
-				else
-				{
-					a = store_data(s, size, buffer);	
-				}
-//				printf("a inner  %d  \n", size);
-				return size;
-  			} 
-	  		else 
-			{
-    				int command;
-				char packet_len;
-    				if (!get_data (s, &packet_len, 4)) 
-				{
-      					printf ("packet_len read failed\n");
-      					return 0;
-    				}
-	    			packet_len = get_32 (&packet_len, 0) + 4;
-	
-    				if (!get_data (s, data, packet_len)) 
-				{
-      					printf ("command data read failed\n");
-      					return 0;
-    				}
-	    			if ( (pre_header[7] != 0xb0) || (pre_header[6] != 0x0b) || (pre_header[5] != 0xfa) || (pre_header[4] != 0xce) ) 
-				{
-      					printf ("missing signature\n");
-      					return -1;
-	    			}
-    				command = get_32 (data, 24) & 0xFFFF;
-	
-				if (command == 0x1b)
-    				{ 
-      					send_command (s, 0x1b, 0, 0, 0, data);
-	    			}
-    				else if (command == 0x1e) 
-				{
-      					printf ("everything done. Thank you for downloading a media file containing proprietary and patentend technology.\n");
-      					return 0;
-	    			} 
-				else if (command == 0x21 )
-				{
-					// Looks like it's new in WMS9
-					// Unknown command, but ignoring it seems to work.
-					return 0;
-				}
-				else if (command != 0x05) 
-				{
-      					printf ("unknown command %02x\n", command);
-      					return -1;
-	    			}
-  			}
-		}
-	}
-	if(to_skip)
-	{
-		a =  store_data(s, size - to_skip,  buffer+to_skip );
-		to_skip = 0;
-	}
-	else
-	{
-		a =  store_data(s, size,  buffer);
-	}
-		
-	if(a == size)
-	{
-//		printf("a outer %d", a );	
-		return a;
-	}
-	else
-		to_skip = a;
-			
+  if (pre_header[4] == 0x04) {
+
+    int packet_len;
+
+    packet_len = (pre_header[7] << 8 | pre_header[6]) - 8;
+
+//    printf ("asf media packet detected, len=%d\n", packet_len);
+
+    if (!get_data (s, data, packet_len)) {
+      printf ("media data read failed\n");
+      return 0;
+    }
+
+    streaming_bufferize(stream_ctrl, data, padding);
+
+  } else {
+
+    int packet_len, command;
+
+    if (!get_data (s, &packet_len, 4)) {
+      printf ("packet_len read failed\n");
+      return 0;
+    }
+
+    packet_len = get_32 (&packet_len, 0) + 4;
+
+    if (!get_data (s, data, packet_len)) {
+      printf ("command data read failed\n");
+      return 0;
+    }
+
+    if ( (pre_header[7] != 0xb0) || (pre_header[6] != 0x0b)
+	 || (pre_header[5] != 0xfa) || (pre_header[4] != 0xce) ) {
+
+      printf ("missing signature\n");
+      return -1;
+    }
+
+    command = get_32 (data, 24) & 0xFFFF;
+
+    printf ("\ncommand packet detected, len=%d  cmd=0x%X\n", packet_len, command);
+
+    if (command == 0x1b) 
+      send_command (s, 0x1b, 0, 0, 0, data);
+    else if (command == 0x1e) {
+      printf ("everything done. Thank you for downloading a media file containing proprietary and patentend technology.\n");
+      return 0;
+    }
+    else if (command == 0x21 ) {
+	// Looks like it's new in WMS9
+	// Unknown command, but ignoring it seems to work.
+	return 0;
+    }
+    else if (command != 0x05) {
+      printf ("unknown command %02x\n", command);
+      return -1;
+    }
+  }
+
+//  printf ("get media packet succ\n");
+
+  return 1;
 }
-return 0; // is this ok?
-}
+
+
+static int packet_length1;
 
 int
 asf_mmst_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *stream_ctrl ) 
 {
-  int len = 0;
-  if( stream_ctrl->buffer_size!=0 ) {
-	  int buffer_len = stream_ctrl->buffer_size-stream_ctrl->buffer_pos;
-	  len = (size<buffer_len)?size:buffer_len;
+  int len;
+  
+  while( stream_ctrl->buffer_size==0 ) {
+          // buffer is empty - fill it!
+	  int ret = get_media_packet( fd, packet_length1, stream_ctrl);
+	  if( ret<0 ) {
+		  printf("get_media_packet error : %s\n",strerror(errno));
+		  return -1;
+	  }
+  }
+  
+	  len = stream_ctrl->buffer_size-stream_ctrl->buffer_pos;
+	  if(len>size) len=size;
 	  memcpy( buffer, (stream_ctrl->buffer)+(stream_ctrl->buffer_pos), len );
 	  stream_ctrl->buffer_pos += len;
 	  if( stream_ctrl->buffer_pos>=stream_ctrl->buffer_size ) {
@@ -477,29 +407,8 @@ asf_mmst_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *strea
 		  stream_ctrl->buffer_size = 0;
 		  stream_ctrl->buffer_pos = 0;
 	  }
+	  return len;
 
-  }
-
-  if( len<size ) {
-
-	  int ret;
-
-	  ret = get_media_packet( fd, size - len, buffer+len, size-len );
-
-	  if( ret<0 ) {
-
-		  printf("get_media_packet error : %s\n",strerror(errno));
-		  return -1;
-
-	  }
-
-	  len += ret;
-
-	  //printf("read %d bytes from network\n", len );
-
-	 }			      
-
-  return len;
 }
 
 int
@@ -515,10 +424,9 @@ int asf_mmst_streaming_start(stream_t *stream)
   uint8_t              asf_header[8192];
   int                  asf_header_len;
   int                  len, i, packet_length;
-  char                 host[256];
   char                *path;
   URL_t *url1 = stream->streaming_ctrl->url;
-  int s = stream->fd;
+  int s;
 
   if( s>0 ) {
 	  close( stream->fd );
@@ -534,6 +442,8 @@ int asf_mmst_streaming_start(stream_t *stream)
 	  return s;
   }
   printf ("connected\n");
+  
+  seq_num=0;
 
   /*
   * Send the initial connect info including player version no. Client GUID (random) and the host address being connected to. 
@@ -541,7 +451,7 @@ int asf_mmst_streaming_start(stream_t *stream)
   * cmd 1 0x01 
   * */
 
-  sprintf (str, "\034\003NSPlayer/7.0.0.1956; {33715801-BAB3-9D85-24E9-03B90328270A}; Host: %s", host);
+  sprintf (str, "\034\003NSPlayer/7.0.0.1956; {33715801-BAB3-9D85-24E9-03B90328270A}; Host: %s", url1->hostname);
   string_utf16 (data, str, strlen(str)+2);
 // send_command(s, commandno ....)
   send_command (s, 1, 0, 0x0004000b, strlen(str) * 2+8, data);
@@ -628,16 +538,14 @@ int asf_mmst_streaming_start(stream_t *stream)
 
   send_command (s, 0x07, 1, 0xFFFF | stream_ids[0] << 16, 24, data);
 
+  stream->fd = s;
+  stream->streaming_ctrl->streaming_read = asf_mmst_streaming_read;
+  stream->streaming_ctrl->streaming_seek = asf_mmst_streaming_seek;
+  stream->streaming_ctrl->buffering = 1;
+  stream->streaming_ctrl->status = streaming_playing_e;
 
-	stream->fd = s;
-		stream->streaming_ctrl->streaming_read = asf_mmst_streaming_read;
-		stream->streaming_ctrl->streaming_seek = asf_mmst_streaming_seek;
-		stream->streaming_ctrl->buffering = 1;
-
-	stream->streaming_ctrl->status = streaming_playing_e;
-	stream->streaming_ctrl->buffering = 1;
-
-      	packet_length1 = packet_length;
+  packet_length1 = packet_length;
+  printf("mmst packet_length = %d\n",packet_length);
 
   return 0;
 }
