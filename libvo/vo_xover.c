@@ -40,7 +40,7 @@
 
 static vo_info_t info = 
 {
-    "General X11 driver for overlay capable vo's",
+    "General X11 driver for overlay capable video output drivers",
     "xover",
     "Albeu",
     ""

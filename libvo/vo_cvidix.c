@@ -27,7 +27,7 @@
 
 
 static vo_info_t info = {
-    "VIDIX",
+    "console VIDIX",
     "cvidix",
     "Sascha Sommer",
     ""
