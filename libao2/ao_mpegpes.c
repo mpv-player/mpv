@@ -17,9 +17,9 @@
 #ifdef HAVE_DVB
 #include <ost/audio.h>
 audioMixer_t dvb_mixer={255,255};
+#endif
 extern int vo_mpegpes_fd;
 extern int vo_mpegpes_fd2;
-#endif
 
 #include <errno.h>
 

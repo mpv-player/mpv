@@ -25,9 +25,6 @@ extern ao_functions_t audio_out_null;
 #ifdef HAVE_ALSA9
  extern ao_functions_t audio_out_alsa9;
 #endif
-#ifdef HAVE_ESD
- extern ao_functions_t audio_out_esd;
-#endif
 #ifdef HAVE_NAS
 extern ao_functions_t audio_out_nas;
 #endif
@@ -50,30 +47,30 @@ extern ao_functions_t audio_out_plugin;
 
 ao_functions_t* audio_out_drivers[] =
 {
-#ifdef USE_OSS_AUDIO
-        &audio_out_oss,
-#endif
-#ifdef USE_ARTS
-        &audio_out_arts,
-#endif
-#ifdef USE_SUN_AUDIO
-        &audio_out_sun,
-#endif
-#ifdef USE_SGI_AUDIO
-        &audio_out_sgi,
-#endif
+// vo-related:   will fail unless you also do -vo mpegpes/dxr2
+	&audio_out_mpegpes,
 #ifdef HAVE_DXR2
         &audio_out_dxr2,
 #endif
-        &audio_out_null,
-#ifdef HAVE_ALSA5
-	&audio_out_alsa5,
+// native:
+#ifdef USE_OSS_AUDIO
+        &audio_out_oss,
 #endif
 #ifdef HAVE_ALSA9
 	&audio_out_alsa9,
 #endif
-#ifdef HAVE_ESD
-	&audio_out_esd,
+#ifdef HAVE_ALSA5
+	&audio_out_alsa5,
+#endif
+#ifdef USE_SGI_AUDIO
+        &audio_out_sgi,
+#endif
+#ifdef USE_SUN_AUDIO
+        &audio_out_sun,
+#endif
+// wrappers:
+#ifdef USE_ARTS
+        &audio_out_arts,
 #endif
 #ifdef HAVE_NAS
 	&audio_out_nas,
@@ -81,10 +78,10 @@ ao_functions_t* audio_out_drivers[] =
 #ifdef HAVE_SDL
         &audio_out_sdl,
 #endif
-	&audio_out_mpegpes,
+        &audio_out_null,
+// should not be auto-selected:
 	&audio_out_pcm,
 	&audio_out_plugin,
-//	&audio_out_pss,
 	NULL
 };
 
