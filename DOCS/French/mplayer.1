@@ -39,7 +39,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2003-01-19"
+.TH MPlayer 1 "2003-01-26"
 .
 .SH NAME
 mplayer  \- Lecteur Vidéo pour Linux
@@ -652,6 +652,33 @@ fourcc en héxa
 .PD 1
 .
 .TP
+.B \-rawvideo <option1:option2:...>
+Cette option vous permet de lire des fichiers vidéo bruts.
+.br
+Les options disponibles sont:
+
+.PD 0
+.RSs
+.IPs on
+utilise le demuxer vidéo brut
+.IPs fps=<valeur>
+débit en trames par seconde, par défaut 25.0
+.IPs sqcif|qcif|cif|4cif|pal|ntsc
+définie la taille d'image standard
+.IPs w=<valeur>
+largeur de l'image en pixels
+.IPs h=<valeur>
+hauteur de l'image en pixels
+.IPs y420|yv12|yuy2|y8
+définie l'espace de couleurs
+.IPs format=<valeur>
+espace de couleur (fourcc) en héxa
+.IPs size=<valeur>
+taille de trame en octets
+.RE
+.PD 1
+.
+.TP
 .B \-rtsp-stream-over-tcp
 Utilisé avec 'rtsp://', URLs pour spécifier que les paquets RTP et RTCP entrants 
 seront streamés sur TCP (en utilisant la même connection TCP que RTSP). 
@@ -1060,6 +1087,36 @@ Indiquez le chemin complet sans extensions, c'est-à-dire sans '.idx',
 .TP
 .B \-vobsubid <0-31>
 Spécifie le numéro de sous-titre du fichier VobSub.
+.TP
+.B \-spualign <-1\-2>
+Spécifie comment les sous-titres spu (DVD/VobSub) devraient être alignés.
+Les valeurs sont les mêmes que pour -subpos, avec le choix supplémentaire -1
+pour la position d'origine.
+.TP
+.B \-spuaa <mode>
+Mode d'antialiasing/zoom pour DVD/VobSub. Une valeur de 16 peut être ajoutée au
+mode de façon à forcer le zoom même si les trames d'origine et zoomée 
+correspondent déjà, par exemple pour lisser les sous-titres avec le flou 
+gaussien. Les modes disponibles sont:
+.PD 0
+.RSs
+.IPs 0
+aucun (le plus rapide, très sale)
+.IPs 1
+approximatif (cassé ?)
+.IPs 2
+plein (lent)
+.IPs 3
+bilinéaire (par défaut, rapide et pas trop mauvais)
+.IPs 4
+utilise le flou gaussien de swscaler (très bons résultats)
+.RE
+.PD 1
+.
+.TP
+.B \-spugauss <0.0\-3.0>
+Paramètre de Variance du gaussien utilisé par -spuaa 4. Plus grand signifie plus
+flou. La valeur par défaut est 1.0.
 
 
 .SH "OPTIONS DE SORTIE AUDIO (MPLAYER UNIQUEMENT)"
@@ -1954,10 +2011,12 @@ spécifiées sur l'image (utilisé pour testé le découpage).
 (par défaut:  w/\:h maximum, position x/\:y supérieure gauche)
 .IPs expand[=w:h:x:y:o]
 Étends (ne zoom pas) la résolution du film aux valeurs fournies et place
-l'original non redimmensionné aux coordonnées x y.
+l'original non redimmensionné aux coordonnées x y. Des valeurs négatives pour
+w et h sont traitées en tant qu'offsets par rapport à la taille originale. Par
+exemple, expand=0:-50:0:0 ajoute un bord de 50 pixels en bas de l'image.
 Peut être utilisé pour placer les sous-titres /\:l'OSD dans les bandes noires
 restantes (par défaut: w/\:h original, x/\:y centré).
-Le dernier paramètre dés)active le rendu OSD (par défaut: 0).
+Le dernier paramètre dés)active le rendu OSD (par défaut: 0=désactivé).
 .IPs flip
 Inverse l'image de haut en bas.
 Voir également l'option \-flip.
@@ -2111,8 +2170,12 @@ d: désentrelace
 .br
 i: entrelace
 .br
-s: échange les champs (échange même les lignes impaires & paires)
+s: échange les champs (échange les lignes paires & impaires)
 .REss
+.IPs "field[=n]"
+Extrait un seul champs de l'image entralacée en utilisant un calcul large
+pour éviter de gaspiller le temps CPU. L'argument optionnel n spécifie si
+l'on doit extraire un champs pair ou impair (selon que n soit pair ou impair).
 .IPs "boxblur=rayon:puissance[:rayon:puissance]"
 flou boite
 .RSss
