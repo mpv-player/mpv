@@ -102,7 +102,7 @@ static char help_text[]=
 "- Wolny procesor. Nie odtwarzaj du¿ych dvd/divx na wolnych procesorach!\n"\
 "  Spróbuj z opcj± -hardframedrop\n"\
 "- Uszkodzony plik. Spróbuj ró¿nych kombinacji: -nobps -ni -mc 0 -forceidx\n"\
-"- Odtwarzaj±c z wolnego ¼ród³a (zamontowane partycje nfs/smb, dvd, vcd itp)\n"
+"- Odtwarzaj±c z wolnego ¼ród³a (zamontowane partycje nfs/smb, dvd, vcd itp)\n"\
 "  spróbuj z opcj± -cache 8192\n"\
 "- U¿ywasz -cache do odtwarzania plikow non-interleaved? Spróbuj z -nocache\n"\
 "Je¶li nic z powy¿szego nie pomaga, przeczytaj DOCS/bugreports.html !\n\n"
