@@ -10,6 +10,7 @@
  */
 
 #include <stdio.h>
+#include <jack/jack.h>
 
 #include "audio_out.h"
 #include "audio_out_internal.h"
@@ -20,6 +21,8 @@
 //#include "bio2jack.h"
 
 static int driver = 0;
+long latency = 0;
+long approx_bytes_in_jackd = 0;
 
 //bio2jack stuff:
 #define ERR_SUCCESS						0
@@ -34,6 +37,7 @@ void JACK_Reset(int deviceID); /* free all buffered data and reset several value
 long JACK_Write(int deviceID, char *data, unsigned long bytes); /* returns the number of bytes written */
 long JACK_GetJackLatency(int deviceID); /* return the latency in milliseconds of jack */
 int  JACK_SetState(int deviceID, enum status_enum state); /* playing, paused, stopped */
+int  JACK_SetAllVolume(int deviceID, unsigned int volume);
 int  JACK_SetVolumeForChannel(int deviceID, unsigned int channel, unsigned int volume);
 void JACK_GetVolumeForChannel(int deviceID, unsigned int channel, unsigned int *volume);
 //
@@ -71,17 +75,46 @@ static int control(int cmd, void *arg)
 				ao_control_vol_t *vol = (ao_control_vol_t *)arg;
 				unsigned int l = (int )vol->left,
 					r = (int )vol->right,
+					avg_vol = (l + r) / 2,
 					err = 0;
 
-				if((err = JACK_SetVolumeForChannel(driver, 0, l))) {
+				switch (ao_data.channels) {
+				case 6:
+					if((err = JACK_SetVolumeForChannel(driver, 5, avg_vol))) {
 					mp_msg(MSGT_AO, MSGL_ERR, 
-						"AO: [Jack] Setting left volume failed, error %d\n",err);
+						"AO: [Jack] Setting lfe volume failed, error %d\n",err);
+						return CONTROL_ERROR;
+					}
+				case 5:
+					if((err = JACK_SetVolumeForChannel(driver, 4, avg_vol))) {
+						mp_msg(MSGT_AO, MSGL_ERR, 
+						"AO: [Jack] Setting center volume failed, error %d\n",err);
+						return CONTROL_ERROR;
+					}
+				case 4:
+					if((err = JACK_SetVolumeForChannel(driver, 3, r))) {
+						mp_msg(MSGT_AO, MSGL_ERR,
+						"AO: [Jack] Setting rear right volume failed, error %d\n",err);
 					return CONTROL_ERROR;
 				}
+				case 3:
+					if((err = JACK_SetVolumeForChannel(driver, 2, l))) {
+						mp_msg(MSGT_AO, MSGL_ERR,
+						"AO: [Jack] Setting rear left volume failed, error %d\n",err);
+						return CONTROL_ERROR;
+					}
+				case 2:
 				if((err = JACK_SetVolumeForChannel(driver, 1, r))) {
 					mp_msg(MSGT_AO, MSGL_ERR, 
 						"AO: [Jack] Setting right volume failed, error %d\n",err);
 					return CONTROL_ERROR;
+				}
+				case 1:
+					if((err = JACK_SetVolumeForChannel(driver, 0, l))) {
+						mp_msg(MSGT_AO, MSGL_ERR,
+						"AO: [Jack] Setting left volume failed, error %d\n",err);
+						return CONTROL_ERROR;
+					}
 				}
 
 				return CONTROL_OK;
@@ -98,8 +131,19 @@ static int init(int rate_hz, int channels, int format, int flags)
 	unsigned long rate;
 	unsigned int bits_per_sample;
 	
+	unsigned long jack_port_flags=JackPortIsPhysical;
+	unsigned int jack_port_name_count=0;
+	const char *jack_port_name=NULL;
+
 	mp_msg(MSGT_AO, MSGL_INFO, "AO: [Jack] Initialising library.\n");
 	JACK_Init();
+
+	if (ao_subdevice) {
+		jack_port_flags = 0;
+		jack_port_name_count = 1;
+		jack_port_name = ao_subdevice;
+		mp_msg(MSGT_AO, MSGL_INFO, "AO: [Jack] Trying to use jack device:%s.\n", ao_subdevice);
+	}
 
 	switch (format) {
 		case AFMT_U8:
@@ -117,7 +161,8 @@ static int init(int rate_hz, int channels, int format, int flags)
 
 	rate = rate_hz;
 	
-	err = JACK_Open(&driver, bits_per_sample, &rate, channels);
+	err = JACK_OpenEx(&driver, bits_per_sample, &rate, channels, channels,
+			&jack_port_name, jack_port_name_count, jack_port_flags);
 	
 	/* if sample rates doesn't match try to open device with jack's rate and
 	 * let mplayer convert it (rate now contains that which jackd use) */
@@ -125,7 +170,8 @@ static int init(int rate_hz, int channels, int format, int flags)
 		mp_msg(MSGT_AO, MSGL_INFO, 
 				"AO: [Jack] Sample rate mismatch, trying to resample.\n");
 		
-		err = JACK_Open(&driver, bits_per_sample, &rate, channels);
+		err = JACK_OpenEx(&driver, bits_per_sample, &rate, channels, channels,
+				&jack_port_name, jack_port_name_count, jack_port_flags);
 	}
 	
 	/* any other error */
@@ -135,11 +181,23 @@ static int init(int rate_hz, int channels, int format, int flags)
 		return 0;
 	}
 	
+	err = JACK_SetAllVolume(driver, 100);
+	if(err != ERR_SUCCESS) {
+		// This is not fatal, but would be peculiar...
+		mp_msg(MSGT_AO, MSGL_ERR,
+			"AO: [Jack] JACK_SetAllVolume() failed, error %d\n", err);
+	}
+
+	latency = JACK_GetJackLatency(driver);
+
 	ao_data.format = format;
 	ao_data.channels = channels;
 	ao_data.samplerate = rate;
 	ao_data.bps = ( rate * channels * m );
 
+	// Rather rough way to find out the rough number of bytes buffered
+	approx_bytes_in_jackd = JACK_GetJackBufferedBytes(driver) * 2;
+	
 	mp_msg(MSGT_AO, MSGL_INFO, 
 			"AO: [Jack] OK. I'm ready to go (%d Hz/%d channels/%d bit)\n",
 			ao_data.samplerate, ao_data.channels, bits_per_sample);
@@ -151,8 +209,6 @@ static int init(int rate_hz, int channels, int format, int flags)
 static void uninit(int immed)
 {
 	int errval = 0;
-	
-	JACK_Reset(driver);
 	
 	if((errval = JACK_Close(driver)))
 		mp_msg(MSGT_AO, MSGL_ERR, 
@@ -181,6 +237,9 @@ static void audio_resume()
 static void reset()
 {
 	JACK_Reset(driver);
+	latency = JACK_GetJackLatency(driver);
+	// Rather rough way to find out the rough number of bytes buffered
+	approx_bytes_in_jackd = JACK_GetJackBufferedBytes(driver) * 2;
 }
 
 
@@ -192,6 +251,8 @@ static int get_space()
 
 static float get_delay()
 {
-	return (float )JACK_GetJackLatency(driver);
+	float ret = 0;
+	ret = (JACK_GetBytesStored(driver) + approx_bytes_in_jackd + latency) / (float)ao_data.bps;
+	return ret;
 }
 
