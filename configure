@@ -2496,8 +2496,12 @@ else
 fi
 if test "$_ld_pthread" != '' ; then
   echores "yes (using $_ld_pthread)"
+  _pthreads='yes'
+  _def_pthreads='#define HAVE_PTHREADS 1'
 else
   echores "no"
+  _pthreads=''
+  _def_pthreads='#undef HAVE_PTHREADS'
 fi
 
 
@@ -6134,6 +6138,7 @@ HAVE_MLIB = $_mlib
 WIN32_LIB = $_ld_win32libs
 STATIC_LIB = $_ld_static
 ENCA_LIB = $_ld_enca
+HAVE_PTHREADS = $_pthreads
 
 X11_INC = $_inc_x11
 X11DIR = $_ld_x11
@@ -6477,6 +6482,9 @@ $_def_gettimeofday
 
 /* Define this if your system has glob */
 $_def_glob
+
+/* Define this if your system has pthreads */
+$_def_pthreads
 
 /* LIRC (remote control, see www.lirc.org) support: */
 $_def_lirc

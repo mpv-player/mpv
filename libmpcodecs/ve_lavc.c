@@ -150,6 +150,7 @@ static int lavc_param_top= -1;
 static int lavc_param_alt= 0;
 static int lavc_param_ilme= 0;
 static int lavc_param_nssew= 8;
+static int lavc_param_threads= 1;
 
 
 char *lavc_param_acodec = "mp2";
@@ -292,6 +293,7 @@ m_option_t lavcopts_conf[]={
 	{"top", &lavc_param_top, CONF_TYPE_INT, CONF_RANGE, -1, 1, NULL},
         {"qns", &lavc_param_qns, CONF_TYPE_INT, CONF_RANGE, 0, 1000000, NULL},
         {"nssew", &lavc_param_nssew, CONF_TYPE_INT, CONF_RANGE, 0, 1000000, NULL},
+	{"threads", &lavc_param_threads, CONF_TYPE_INT, CONF_RANGE, 1, 8, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 #endif
@@ -661,6 +663,11 @@ static int config(struct vf_instance_s* vf,
 #endif
 	vf->priv->pic->quality = (int)(FF_QP2LAMBDA * lavc_param_vqscale + 0.5);
     }
+    
+#if LIBAVCODEC_BUILD >= 4716
+    if(lavc_param_threads > 1)
+	avcodec_thread_init(lavc_venc_context, lavc_param_threads);
+#endif
 
     if (avcodec_open(lavc_venc_context, vf->priv->codec) != 0) {
 	mp_msg(MSGT_MENCODER,MSGL_ERR,MSGTR_CantOpenCodec);
