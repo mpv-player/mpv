@@ -12,6 +12,7 @@ Special system/cpu-specific bugs/problems:
   MPEG files on SMP machine:
   Problem: bug(?) in MMX YV12->RGB16 converter code
   Workaround: ./configure --disable-mmx
+  SOLVED: bug of gcc-2.96  -  you should use 2.95.2 or 2.95.3
 
 3. SIGILL or other fault at loading l3codeca.acm:
   Problem: shared libs are loaded to 0x00xxxxxx instead of 0x40xxxxxx
@@ -30,8 +31,10 @@ Various A-V sync and other audio problems:
 General audio delay or jerky sound (exists with all or many files):
 - bad select() in audio driver (including ALSA's OSS emulation)
   Workaround: ./configure --disable-select
+  SOLVED: using ioctls instead of select in the new audio code
 - audio buffer problems
   Workaround:  mplayer -abs option
+  SOLVED: using ioctls in the new audio code
 - slow machine (cpu or vga)
   try with -vo null, if it plays well, then you have slow VGA card/driver:
   Workaround: buy a faster card or read DOCS/VIDEOCARDS about how to speed up
@@ -41,7 +44,8 @@ Audio delay specific to one or a few files:
   Workaround: -ni or -bps option
               -delay option or +/- keys at runtime to adjust delay
 - your soundcard doesn't support 48Khz playback
-  Workaround: buy a better soundcard...
+  Workaround: buy a better soundcard... 
+              or try to decrease fps by 10% (-fps 27 option for a 30fps movie)
 - file has VBR mp3 audio
   Workaround: mplayer -mc 0
 
@@ -52,6 +56,7 @@ After many > or ^ (fast forward) audio vs. video is going out of sync (ASF/AVI)
 Signal 11 in decode_audio:
 - mp3lib doesn't handle (yet) well bad/broken audio streams
   Workaround: -afm 4
+  SOLVED: fixed mp3lib, it must be rock solid now!
 - if it's still bad, try with -nosound  [and report the bug, see BUGREPORTS]
 
 No sound at all:
@@ -62,7 +67,7 @@ Video-out problems:
 ~~~~~~~~~~~~~~~~~~~
 First note: options -fs -vm and -zoom are just recommendations, not (yet)
 supported by all drivers. So it isn't a bug if it doesn't work.
-Only a few driver supports scaling/zooming, don't except this from x11 or dga.
+Only a few driver supports scaling/zooming, doesn't except this from x11 or dga.
 
 [TODO: known libvo bugs]
 
