@@ -1,7 +1,7 @@
 // Translated by:  Kuba "Qba" Misiorny <jim85@wp.pl>
 // Wszelkie uwagi i poprawki mile widziane :)
 //
-// Synced with help_mp-en.h 1.117
+// Synced with help_mp-en.h 1.121
 
 // ========================= MPlayer help ===========================
 
@@ -346,7 +346,7 @@ static char help_text[]=
 #define MSGTR_CouldNotFindVideoFilter "Nie mogê znale¼æ filtra video '%s'.\n"
 #define MSGTR_CouldNotOpenVideoFilter "Nie mogê otworzyæ filtra video '%s'.\n"
 #define MSGTR_OpeningVideoFilter "Otwieram filtr video: "
-#define MSGTR_CannotFindColorspace "Nie mogê znale¼æ wspólnej przestrzenie koloru (colorspace), nawet poprzez wstawienie 'scale' :(\n"
+#define MSGTR_CannotFindColorspace "Nie mogê znale¼æ odpowiedniej przestrzenii kolorów (colorspace), nawet poprzez wstawienie 'scale' :(\n"
 
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: Kodek nie ustawi³ sh->disp_w i sh->disp_h, próbujê to rozwi±zaæ.\n"
@@ -355,8 +355,16 @@ static char help_text[]=
 #define MSGTR_MovieAspectIsSet "Proporcje filmu (obrazu) to %.2f:1 - skalujê do prawid³owych proporcji.\n"
 #define MSGTR_MovieAspectUndefined "Proporcje filmu (obrazu) nie s± zdefiniowane - nie skalujê.\n"
 
+// vd_dshow.c, vd_dmo.c
+#define MSGTR_DownloadCodecPackage "Musisz zainstalowaæ/zaktualizowaæ pakiet binarnych kodeków.\nId¼ do http://mplayerhq.hu/homepage/dload.html\n"
+#define MSGTR_DShowInitOK "INFORMACJA: Inicjalizacja kodeka video Win32/DShow przebieg³a pomy¶lnie.\n"
+#define MSGTR_DMOInitOK "INFORMACJA: Inicjalizacja kodeka video Win32/DMO przebieg³a pomy¶lnie.\n"
+
 // x11_common.c
-#define MSGTR_EwmhFullscreenStateFailed "\nX11: Nie mogê wys³aæ zdarzenia pe³nego ekranu EWMH!\n"
+#define MSGTR_EwmhFullscreenStateFailed "\nX11: Nie mog³em wys³aæ zdarzenia pe³nego ekranu EWMH!\n"
+
+#define MSGTR_NeedAfVolume "Mikser: To wyj¶cie audio wymaga \"-af volume\", aby zmieniaæ g³o¶no¶æ.\n"
+
 
 // ====================== GUI messages/buttons ========================
 
@@ -400,9 +408,9 @@ static char help_text[]=
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[skin] b³±d w pliku konfiguracyjnym skórki, w linii %d: %s"
-#define MSGTR_SKIN_WARNING1 "[skin] ostrze¿enie w pliku konfiguracyjnym skórki w linii %d: kontrolka znaleziona, ale nie znaleziono przed ni± \"section\" (%s)"
-#define MSGTR_SKIN_WARNING2 "[skin] ostrze¿enie w pliku konfiguracyjnym skórki w linii %d: kontrolka znaleziona, ale nie znaleziono przed ni± \"subsection\" (%s)"
-#define MSGTR_SKIN_WARNING3 "[skin] ostrze¿enie w pliku konfiguracyjnym skórki w linii %d: kontrolka (%s) nie obs³uguje tej podsekcji"
+#define MSGTR_SKIN_WARNING1 "[skin] ostrze¿enie w pliku konfiguracyjnym w linii %d:\nznaleziono znacznik widget (%s) ale nie ma przed nim \"section\""
+#define MSGTR_SKIN_WARNING2 "[skin] ostrze¿enie w pliku konfiguracyjnym w linii %d:\nznaleziono znacznik widget (%s) ale nie ma przednim found \"subsection\""
+#define MSGTR_SKIN_WARNING3 "[skin] ostrze¿enie w pliku konfiguracyjnym w linii %d::\nta podsekcja nie jest obs³ugiwana this subsection przed widget (%s)"
 #define MSGTR_SKIN_BITMAP_16bit  "Bitmapy 16 bitowe lub mniejsze nie s± obs³ugiwane (%s).\n"
 #define MSGTR_SKIN_BITMAP_FileNotFound  "nie znaleziono pliku (%s)\n"
 #define MSGTR_SKIN_BITMAP_BMPReadError "b³±d odczytu bmp (%s)\n"
