@@ -1751,7 +1751,11 @@ if test "$_xmga" = "autodetect" ; then
 fi
 
 if test "$_xanim" = yes && test "$_libdl" = no ; then
+ if freebsd ; then
+  _xanim=yes
+ else
   _xanim=no
+ fi
 fi
 
 # to screen.
