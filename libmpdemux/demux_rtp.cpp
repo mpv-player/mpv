@@ -407,7 +407,7 @@ extern "C" void demux_close_rtp(demuxer_t* demuxer) {
   delete rtpState->sdpDescription;
   delete rtpState;
 
-  delete env; delete scheduler;
+  env->reclaim(); delete scheduler;
 }
 
 ////////// Extra routines that help implement the above interface functions:
