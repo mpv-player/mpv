@@ -40,6 +40,7 @@ static char help_text[]=
 " -pp <quality>   wybór filtra wyg³adzaj±cego (0-4 dla DivX, 0-63 dla mpeg)\n"
 " -nobps          inna metoda synchronizacji A-V dla plików AVI (mo¿e pomóc!)\n"
 " -framedrop      gubienie klatek (dla wolnych maszyn)\n"
+" -wid <window id>u¿yj istniej±cgo okna dla wyj¶cia video (np. dla pluggera!)\n"
 "\n"
 "Klawisze:\n"
 " Right,Up,PgUp   skok naprzód o 10 sekund, 1 minutê, 10 minut\n"
