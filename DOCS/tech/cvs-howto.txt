@@ -100,6 +100,11 @@ II. POLICY / RULES:
    (without messing up changelog) if they are bad.
    If you think your bugfix or other change was bad and unneeded,
    ask me to reverse it instead of commiting previous version!
+
+9. You won't have write access to DOCS/. (you have to its subdirs).
+   It was changed to avoid breaking docs or getting translations
+   or homepage desynced. Send your DOCS patch to Gabucino, he'll
+   review, and commit.
    
 I think our rules aren't too hard. If you have comments, contact me.
 
