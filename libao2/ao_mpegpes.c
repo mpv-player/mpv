@@ -7,13 +7,20 @@
 
 #include "afmt.h"
 
+#ifdef HAVE_DVB
+#include <ost/audio.h>
 audioMixer_t dvb_mixer={255,255};
 extern int vo_mpegpes_fd;
 extern int vo_mpegpes_fd2;
+#endif
 
 static ao_info_t info = 
 {
-	"mpeg-pes audio output",
+#ifdef HAVE_DVB
+	"DVB audio output",
+#else
+	"Mpeg-PES audio output",
+#endif
 	"mpegpes",
 	"A'rpi",
 	""
@@ -24,18 +31,16 @@ LIBAO_EXTERN(mpegpes)
 
 // to set/get/query special features/parameters
 static int control(int cmd,int arg){
+#ifdef HAVE_DVB
     switch(cmd){
 	case AOCONTROL_GET_VOLUME:
-	{
 	  if(vo_mpegpes_fd2>=0){
 	    ((ao_control_vol_t*)(arg))->left=dvb_mixer.volume_left/2.56;
 	    ((ao_control_vol_t*)(arg))->right=dvb_mixer.volume_right/2.56;
 	    return CONTROL_OK;
 	  }
 	  return CONTROL_ERROR;
-	}
 	case AOCONTROL_SET_VOLUME:
-	{
 	  if(vo_mpegpes_fd2>=0){
 	    dvb_mixer.volume_left=((ao_control_vol_t)(arg)).left*2.56;
 	    dvb_mixer.volume_right=((ao_control_vol_t)(arg)).right*2.56;
@@ -49,8 +54,8 @@ static int control(int cmd,int arg){
 	    return CONTROL_OK;
 	  }
 	  return CONTROL_ERROR;
-	}
     }
+#endif
     return CONTROL_UNKNOWN;
 }
 
