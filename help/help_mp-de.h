@@ -405,6 +405,11 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "Verzeichnisbaum"
 
 // --- preferences
+#define MSGTR_PREFERENCES_Audio "Audio"
+#define MSGTR_PREFERENCES_Video "Video"
+#define MSGTR_PREFERENCES_SubtitleOSD "Untertitel & OSD"
+#define MSGTR_PREFERENCES_Misc "Sonstiges"
+
 #define MSGTR_PREFERENCES_None "Nichts"
 #define MSGTR_PREFERENCES_AvailableDrivers "Verfügbare Treiber:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Spiele keinen Ton"
@@ -413,14 +418,12 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_ExtraStereo "Extra Stereo verwenden"
 #define MSGTR_PREFERENCES_Coefficient "Koeffizient:"
 #define MSGTR_PREFERENCES_AudioDelay "Audio-Verzögerung"
-#define MSGTR_PREFERENCES_Audio "Audio"
 #define MSGTR_PREFERENCES_DoubleBuffer "Double-Buffering verwenden"
 #define MSGTR_PREFERENCES_DirectRender "Direct-Rendering verwenden"
 #define MSGTR_PREFERENCES_FrameDrop "Frame-Dropping verwenden"
 #define MSGTR_PREFERENCES_HFrameDrop "HARD Frame-Dropping verwenden ( gefährlich )"
 #define MSGTR_PREFERENCES_Flip "Bild spiegeln"
 #define MSGTR_PREFERENCES_Panscan "Panscan: "
-#define MSGTR_PREFERENCES_Video "Video"
 #define MSGTR_PREFERENCES_OSDTimer "Zeit und Indikatoren"
 #define MSGTR_PREFERENCES_OSDProgress "nur Progressbar"
 #define MSGTR_PREFERENCES_Subtitle "Untertitel:"
@@ -482,9 +485,9 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontOutLine "Outline:"
 #define MSGTR_PREFERENCES_FontTextScale "Text Scaling:"
 #define MSGTR_PREFERENCES_FontOSDScale "OSD Scaling:"
-#define MSGTR_PREFERENCES_SubtitleOSD "Untertitel & OSD"
 #define MSGTR_PREFERENCES_Cache "Cache ein/aus"
 #define MSGTR_PREFERENCES_LoadFullscreen "Gestartet als Vollbild"
+#define MSGTR_PREFERENCES_CacheSize "Cache Größe: "
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Fataler Fehler ..."
