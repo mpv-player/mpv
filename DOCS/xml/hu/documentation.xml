@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.17 -->
+<!-- synced with 1.18 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - The Movie Player</title>
@@ -85,7 +85,8 @@ Még az index chunk nélküli AVI-k is lejátszhatók, sőt az indexet ideiglenesen
 fel is lehet építeni az <option>-idx</option> opcióval (vagy véglegesen a
 <application>MEncoder</application>rel), így tekerni is lehet bennük! Amint
 az látszik, a stabilitás és a minőség a legfontosabb szempontok, de a sebesség
-terén sem szenved hátrányt.
+terén sem szenved hátrányt. Valamint rendelkezik egy szűrő rendszerrel is a
+videó-audió szerkesztéshez.
 </para>
 
 <para>
@@ -97,8 +98,7 @@ más, az <application>MPlayer</application>rel is lejátszható formátumokba való
 átalakításra. Sokféle codec-kel tud enkódolni, például <emphasis role="bold">DivX4</emphasis>-gyel
 (1 vagy 2 menetes), a <systemitem class="library">libavcodec</systemitem>-et
 alkotó codec-ekkel, audiót tekintve pedig
-<emphasis role="bold">PCM/MP3/VBR MP3</emphasis> a választék. Rendelkezik
-továbbá egy roppant jó plugin rendszerrel a videók szerkesztéséhez.
+<emphasis role="bold">PCM/MP3/VBR MP3</emphasis> a választék.
 </para>
 
 
@@ -144,7 +144,7 @@ továbbá egy roppant jó plugin rendszerrel a videók szerkesztéséhez.
   VOB-ot kódolsz 24fps-es AVI-ba)
   </simpara></listitem>
 <listitem><simpara>
-  A video filter réteg használata (crop, expand, flip, postprocess, rotate, scale,
+  Roppant jó szűrő rendszer használata (crop, expand, flip, postprocess, rotate, scale,
   RGB/YUV konverzió)
   </simpara></listitem>
 <listitem><simpara>

@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h 1.147
+// Sync'ed with help_mp-en.h 1.149 (2004. 10. 21.)
 
 // ========================= MPlayer help ===========================
 
@@ -428,6 +428,25 @@ static char help_text[]=
 #define MSGTR_AudioVideoCodecTotals "%d audió & %d videó codec\n"
 #define MSGTR_CodecDefinitionIncorrect "A codec nincs megfelelõen definiálva."
 #define MSGTR_OutdatedCodecsConf "Ez a codecs.conf túl régi és nem kompatibilis az MPlayer ezen kiadásával!"
+
+// divx4_vbr.c:
+#define MSGTR_OutOfMemory "elfogyott a memória"
+#define MSGTR_OverridingTooLowBitrate "A megadott bitráta túl alacsony ehhez a klipphez.\n"\
+"A minimális lehetséges bitráta ehhez a klipphez %.0f kbps. A felhasználói\n"\
+"érték felülbírálva.\n"
+
+// fifo.c
+#define MSGTR_CannotMakePipe "Nem hozható létre PIPE!\n"
+
+// m_config.c
+#define MSGTR_SaveSlotTooOld "Túl régi mentési slotot találtam az %d lvl-bõl: %d !!!\n"
+#define MSGTR_InvalidCfgfileOption "A(z) %s kapcsoló nem használható a konfigurációs fájlból\n"
+#define MSGTR_InvalidCmdlineOption "A(z) %s kapcsoló nem használható parancssorból\n"
+#define MSGTR_InvalidSuboption "Hiba: '%s' kapcsolónak nincs '%s' alkapcsolója\n"
+#define MSGTR_MissingSuboptionParameter "Hiba: a(z) '%s' '%s' alkapcsolójához paraméter kell!\n"
+#define MSGTR_MissingOptionParameter "Hiba: a(z) '%s' kapcsolóhoz kell egy paraméter!\n"
+#define MSGTR_OptionListHeader "\n Név                  Típus           Min        Max      Globál  CL    Cfg\n\n"
+#define MSGTR_TotalOptions "\nÖsszesen: %d kapcsoló\n"
 
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "A CD-ROM meghajtó (%s) nem található!\n"
