@@ -161,8 +161,23 @@ unsigned char huff_decompress(unsigned int* in, unsigned int *pos,
 
 
 // to set/get/query special features/parameters
-static int control(sh_video_t *sh,int cmd,void* arg,...){
-    return CONTROL_UNKNOWN;
+static int control(sh_video_t *sh,int cmd,void* arg,...)
+{
+	switch(cmd) {
+		case VDCTRL_QUERY_FORMAT:
+			if  (((huffyuv_context_t *)(sh->context))->bitmaptype == BMPTYPE_YUV) {
+				if (*((int*)arg) == IMGFMT_YUY2)
+					return CONTROL_TRUE;
+				else
+					return CONTROL_FALSE;
+			} else {
+				if ((*((int*)arg) == IMGFMT_BGR32) || (*((int*)arg) == IMGFMT_BGR24))
+					return CONTROL_TRUE;
+				else
+					return CONTROL_FALSE;
+			}
+	}
+	return CONTROL_UNKNOWN;
 }
 
 
