@@ -36,6 +36,7 @@ extern int ao_format;
 extern int ao_bps;
 extern int ao_outburst;
 extern int ao_buffersize;
+extern char *ao_subdevice;
 
 #define CONTROL_OK 1
 #define CONTROL_TRUE 1

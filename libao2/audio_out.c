@@ -12,6 +12,7 @@ int ao_format=0;
 int ao_bps=0;
 int ao_outburst=OUTBURST; // config.h default
 int ao_buffersize=-1;
+char *ao_subdevice = NULL;
 
 #ifdef USE_OSS_AUDIO
 extern ao_functions_t audio_out_oss;
@@ -34,6 +35,7 @@ extern ao_functions_t audio_out_sdl;
 extern ao_functions_t audio_out_sun;
 #endif
 extern ao_functions_t audio_out_pcm;
+extern ao_functions_t audio_out_pss;
 
 ao_functions_t* audio_out_drivers[] =
 {
@@ -57,6 +59,7 @@ ao_functions_t* audio_out_drivers[] =
         &audio_out_sun,
 #endif
 	&audio_out_pcm,
+//	&audio_out_pss,
 	NULL
 };
 
