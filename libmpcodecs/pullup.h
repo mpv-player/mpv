@@ -35,7 +35,7 @@ struct pullup_frame
 	int lock;
 	int length;
 	int parity;
-	struct pullup_buffer **fields;
+	struct pullup_buffer **ifields, *ofields[2];
 	struct pullup_buffer *buffer;
 };
 

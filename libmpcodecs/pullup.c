@@ -215,6 +215,7 @@ static void alloc_buffer(struct pullup_context *c, struct pullup_buffer *b)
 
 struct pullup_buffer *pullup_lock_buffer(struct pullup_buffer *b, int parity)
 {
+	if (!b) return 0;
 	if (parity+1 & 1) b->lock[0]++;
 	if (parity+1 & 2) b->lock[1]++;
 	return b;
@@ -222,6 +223,7 @@ struct pullup_buffer *pullup_lock_buffer(struct pullup_buffer *b, int parity)
 
 void pullup_release_buffer(struct pullup_buffer *b, int parity)
 {
+	if (!b) return;
 	if (parity+1 & 1) b->lock[0]--;
 	if (parity+1 & 2) b->lock[1]--;
 }
@@ -476,40 +478,38 @@ static void foo(struct pullup_context *c)
 
 static int decide_frame_length(struct pullup_context *c)
 {
-	int n;
 	struct pullup_field *f0 = c->first;
 	struct pullup_field *f1 = f0->next;
 	struct pullup_field *f2 = f1->next;
 	struct pullup_field *f3 = f2->next;
-	struct pullup_field *f4 = f3->next;
-	struct pullup_field *f5 = f4->next;
 	
 	if (queue_length(c->first, c->last) < 6) return 0;
 	foo(c);
 
-	n = find_first_break(f0, 3);
-
 	if (f0->affinity == -1) return 1;
 
-	switch (n) {
+	switch (find_first_break(f0, 3)) {
 	case 1:
 		return 1;
 	case 2:
 		if (f1->affinity == 1) return 1;
 		else return 2;
 	case 3:
-		if (f1->affinity == -1) return 2;
-		else if (f1->affinity == 1) return 1;
+		if (f1->affinity == 1) {
+			if (f0->affinity == 1 && f2->affinity == -1) return 3;
+			else return 1;
+		}
+		else if (f2->affinity == 1) return 2;
 		else return 3;
 	default:
-		if (f1->affinity == 1) return 1;
-		else if (f1->affinity == -1) return 2;
-		else if (f2->affinity == 1) return 2;
-		else if (f0->affinity == 1 && f2->affinity == -1) return 3;
-		else if (f2->affinity == -1) return 1;
-		else if (f0->affinity == 1) return 2;
-		else if (f2->affinity == 0 && f3->affinity == 1) return 3;
-		else return 2;
+		/* 9 possibilities covered before switch */
+		if (f1->affinity == 1) return 1; /* covers 6 */
+		else if (f1->affinity == -1) return 2; /* covers 6 */
+		else if (f2->affinity == -1) { /* covers 2 */
+			if (f0->affinity == 1) return 3;
+			else return 1;
+		}
+		else return 2; /* the remaining 6 */
 	}
 }
 
@@ -543,6 +543,7 @@ struct pullup_frame *pullup_get_frame(struct pullup_context *c)
 	int i;
 	struct pullup_frame *fr = c->frame;
 	int n = decide_frame_length(c);
+	int aff = c->first->next->affinity;
 
 	if (!n) return 0;
 	if (fr->lock) return 0;
@@ -558,24 +559,31 @@ struct pullup_frame *pullup_get_frame(struct pullup_context *c)
 	fr->buffer = 0;
 	for (i = 0; i < n; i++) {
 		/* We cheat and steal the buffer without release+relock */
-		fr->fields[i] = c->first->buffer;
+		fr->ifields[i] = c->first->buffer;
 		c->first->buffer = 0;
 		c->first = c->first->next;
 	}
-	/* Export the entire frame as one buffer, if possible! */
-	if (n == 2 && fr->fields[0] == fr->fields[1]) {
-		fr->buffer = fr->fields[0];
+	
+	if (n == 1) {
+		fr->ofields[fr->parity] = fr->ifields[0];
+		fr->ofields[fr->parity^1] = 0;
+	} else if (n == 2) {
+		fr->ofields[fr->parity] = fr->ifields[0];
+		fr->ofields[fr->parity^1] = fr->ifields[1];
+	} else if (n == 3) {
+		if (aff == 0)
+			aff = (fr->ifields[0] == fr->ifields[1]) ? -1 : 1;
+		/* else if (c->verbose) printf("forced aff: %d    \n", aff); */
+		fr->ofields[fr->parity] = fr->ifields[1+aff];
+		fr->ofields[fr->parity^1] = fr->ifields[1];
+	}
+	pullup_lock_buffer(fr->ofields[0], 0);
+	pullup_lock_buffer(fr->ofields[1], 1);
+	
+	if (fr->ofields[0] == fr->ofields[1]) {
+		fr->buffer = fr->ofields[0];
 		pullup_lock_buffer(fr->buffer, 2);
 		return fr;
-	}
-	/* (loop is in case we ever support frames longer than 3 fields) */
-	for (i = 1; i < n-1; i++) {
-		if (fr->fields[i] == fr->fields[i-1]
-		    || fr->fields[i] == fr->fields[i+1]) {
-			fr->buffer = fr->fields[i];
-			pullup_lock_buffer(fr->buffer, 2);
-			break;
-		}
 	}
 	return fr;
 }
@@ -602,24 +610,26 @@ void pullup_pack_frame(struct pullup_context *c, struct pullup_frame *fr)
 	int par = fr->parity;
 	if (fr->buffer) return;
 	if (fr->length < 2) return; /* FIXME: deal with this */
-	for (i = 0; i < fr->length; i++)
+	for (i = 0; i < 2; i++)
 	{
-		if (fr->fields[i]->lock[par ^ (i&1) ^ 1]) continue;
-		fr->buffer = fr->fields[i];
+		if (fr->ofields[i]->lock[i^1]) continue;
+		fr->buffer = fr->ofields[i];
 		pullup_lock_buffer(fr->buffer, 2);
-		copy_field(c, fr->buffer, fr->fields[i+(i>0?-1:1)], par^(i&1)^1);
+		copy_field(c, fr->buffer, fr->ofields[i^1], i^1);
 		return;
 	}
 	fr->buffer = pullup_get_buffer(c, 2);
-	copy_field(c, fr->buffer, fr->fields[0], par);
-	copy_field(c, fr->buffer, fr->fields[1], par^1);
+	copy_field(c, fr->buffer, fr->ofields[0], 0);
+	copy_field(c, fr->buffer, fr->ofields[1], 1);
 }
 
 void pullup_release_frame(struct pullup_frame *fr)
 {
 	int i;
 	for (i = 0; i < fr->length; i++)
-		pullup_release_buffer(fr->fields[i], fr->parity ^ (i&1));
+		pullup_release_buffer(fr->ifields[i], fr->parity ^ (i&1));
+	pullup_release_buffer(fr->ofields[0], 0);
+	pullup_release_buffer(fr->ofields[1], 1);
 	if (fr->buffer) pullup_release_buffer(fr->buffer, 2);
 	fr->lock--;
 }
@@ -661,7 +671,7 @@ void pullup_init_context(struct pullup_context *c)
 	c->head = make_field_queue(c, 8);
 
 	c->frame = calloc(1, sizeof (struct pullup_frame));
-	c->frame->fields = calloc(3, sizeof (struct pullup_buffer *));
+	c->frame->ifields = calloc(3, sizeof (struct pullup_buffer *));
 
 	switch(c->format) {
 	case PULLUP_FMT_Y:

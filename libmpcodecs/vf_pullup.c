@@ -56,7 +56,7 @@ static void init_pullup(struct vf_instance_s* vf, mp_image_t *mpi)
 
 	c->junk_left = c->junk_right = 1;
 	c->junk_top = c->junk_bottom = 4;
-	c->verbose = 0;
+	c->verbose = verbose;
 
 	if (gCpuCaps.hasMMX) c->cpu |= PULLUP_CPU_MMX;
 	if (gCpuCaps.hasMMX2) c->cpu |= PULLUP_CPU_MMX2;
@@ -166,25 +166,24 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 			break;
 		}
 		/* Direct render fields into output buffer */
-		p = f->parity;
-		my_memcpy_pic(dmpi->planes[0], f->fields[p]->planes[0],
+		my_memcpy_pic(dmpi->planes[0], f->ofields[0]->planes[0],
 			mpi->w, mpi->h/2, dmpi->stride[0]*2, c->stride[0]*2);
 		my_memcpy_pic(dmpi->planes[0] + dmpi->stride[0],
-			f->fields[p^1]->planes[0] + c->stride[0],
+			f->ofields[1]->planes[0] + c->stride[0],
 			mpi->w, mpi->h/2, dmpi->stride[0]*2, c->stride[0]*2);
 		if (mpi->flags & MP_IMGFLAG_PLANAR) {
-			my_memcpy_pic(dmpi->planes[1], f->fields[p]->planes[1],
+			my_memcpy_pic(dmpi->planes[1], f->ofields[0]->planes[1],
 				mpi->chroma_width, mpi->chroma_height/2,
 				dmpi->stride[1]*2, c->stride[1]*2);
 			my_memcpy_pic(dmpi->planes[1] + dmpi->stride[1],
-				f->fields[p^1]->planes[1] + c->stride[1],
+				f->ofields[1]->planes[1] + c->stride[1],
 				mpi->chroma_width, mpi->chroma_height/2,
 				dmpi->stride[1]*2, c->stride[1]*2);
-			my_memcpy_pic(dmpi->planes[2], f->fields[p]->planes[2],
+			my_memcpy_pic(dmpi->planes[2], f->ofields[0]->planes[2],
 				mpi->chroma_width, mpi->chroma_height/2,
 				dmpi->stride[2]*2, c->stride[2]*2);
 			my_memcpy_pic(dmpi->planes[2] + dmpi->stride[2],
-				f->fields[p^1]->planes[2] + c->stride[2],
+				f->ofields[1]->planes[2] + c->stride[2],
 				mpi->chroma_width, mpi->chroma_height/2,
 				dmpi->stride[2]*2, c->stride[2]*2);
 		}
