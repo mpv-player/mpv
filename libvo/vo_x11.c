@@ -132,6 +132,9 @@ static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsi
 static SwsContext *swsContext=NULL;
 static int useSws=0; 
 extern int sws_flags;
+/*needed so we can output the correct supported formats in query_format()
+  should perhaps be passed as argument to query_format() */
+extern int softzoom; 
 
 static XVisualInfo vinfo;
 
@@ -274,7 +277,8 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
  if ( depth != 15 && depth != 16 && depth != 24 && depth != 32 ) depth=24;
  XMatchVisualInfo( mDisplay,mScreen,depth,TrueColor,&vinfo );
 
- if( flags&0x04 && (format==IMGFMT_YV12 || format==IMGFMT_I420 || format==IMGFMT_IYUV)) {
+ if( flags&0x04 && (   format==IMGFMT_YV12 || format==IMGFMT_I420  || format==IMGFMT_IYUV 
+                    || format==IMGFMT_YUY2 || format==IMGFMT_BGR24 || format==IMGFMT_BGR32)) {
      // software scale
      if(fullscreen){
          image_width=vo_screenwidth;
@@ -508,6 +512,16 @@ static uint32_t draw_frame( uint8_t *src[] ){
     char *s=src[0];
     //printf( "sbpp=%d  dbpp=%d  depth=%d  bpp=%d\n",sbpp,dbpp,depth,bpp );
 
+    if(swsContext)
+    {
+      int stride[3]= {0,0,0};
+      if     (swsContext->srcFormat==IMGFMT_YUY2)  stride[0]=swsContext->srcW*2;
+      else if(swsContext->srcFormat==IMGFMT_BGR24) stride[0]=swsContext->srcW*3;
+      else if(swsContext->srcFormat==IMGFMT_BGR32) stride[0]=swsContext->srcW*4;
+      
+      return draw_slice(src, stride, swsContext->srcW, swsContext->srcH, 0, 0);
+    }
+    
   if( Flip_Flag ){
     // flipped BGR
     int i;
@@ -572,6 +586,11 @@ static uint32_t query_format( uint32_t format )
 
  switch( format )
   {
+   case IMGFMT_BGR24:
+   case IMGFMT_BGR32:
+   case IMGFMT_YUY2: 
+   	if(softzoom) return 1;
+	else	     return 0;
    case IMGFMT_I420:
    case IMGFMT_IYUV:
    case IMGFMT_YV12: return 1;

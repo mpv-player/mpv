@@ -254,7 +254,7 @@ char* video_driver=NULL; //"mga"; // default
 char* audio_driver=NULL;
 static int fullscreen=0;
 static int vidmode=0;
-static int softzoom=0;
+int softzoom=0;
 static int flip=-1;
 // We need this opt_* because the values are then calculated so the options use the opt_*
 // and before each file we reset the calculated value using this opt_* values
