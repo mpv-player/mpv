@@ -136,7 +136,33 @@ void vo_x11_putkey(int key){
 
 // ----- Motif header: -------
 
-#define MWM_HINTS_DECORATIONS   2
+#define MWM_HINTS_FUNCTIONS     (1L << 0)
+#define MWM_HINTS_DECORATIONS   (1L << 1)
+#define MWM_HINTS_INPUT_MODE    (1L << 2)
+#define MWM_HINTS_STATUS        (1L << 3)
+
+#define MWM_FUNC_ALL            (1L << 0)
+#define MWM_FUNC_RESIZE         (1L << 1)
+#define MWM_FUNC_MOVE           (1L << 2)
+#define MWM_FUNC_MINIMIZE       (1L << 3)
+#define MWM_FUNC_MAXIMIZE       (1L << 4)
+#define MWM_FUNC_CLOSE          (1L << 5)
+
+#define MWM_DECOR_ALL           (1L << 0)
+#define MWM_DECOR_BORDER        (1L << 1)
+#define MWM_DECOR_RESIZEH       (1L << 2)
+#define MWM_DECOR_TITLE         (1L << 3)
+#define MWM_DECOR_MENU          (1L << 4)
+#define MWM_DECOR_MINIMIZE      (1L << 5)
+#define MWM_DECOR_MAXIMIZE      (1L << 6)
+
+#define MWM_INPUT_MODELESS 0
+#define MWM_INPUT_PRIMARY_APPLICATION_MODAL 1
+#define MWM_INPUT_SYSTEM_MODAL 2
+#define MWM_INPUT_FULL_APPLICATION_MODAL 3
+#define MWM_INPUT_APPLICATION_MODAL MWM_INPUT_PRIMARY_APPLICATION_MODAL
+
+#define MWM_TEAROFF_WINDOW      (1L<<0)
 
 typedef struct
 {
@@ -144,6 +170,7 @@ typedef struct
   long functions;
   long decorations;
   long input_mode;
+  long state;
 } MotifWmHints;
 
 extern MotifWmHints vo_MotifWmHints;
@@ -157,21 +184,16 @@ static Atom           vo_MotifHints  = None;
 
 void vo_x11_decoration( Display * vo_Display,Window w,int d )
 {
-
-#if 1
-    XSetWindowAttributes attr;
-    attr.override_redirect = True;
-    XChangeWindowAttributes(vo_Display, w, CWOverrideRedirect, &attr);
-//    XMapWindow(vo_Display], w);
-#endif
-
  vo_MotifHints=XInternAtom( vo_Display,"_MOTIF_WM_HINTS",0 );
  if ( vo_MotifHints != None )
   {
-   vo_MotifWmHints.flags=2;
-   vo_MotifWmHints.decorations=d;
+   memset( &vo_MotifWmHints,0,sizeof( MotifWmHints ) );
+   vo_MotifWmHints.flags=MWM_HINTS_FUNCTIONS | MWM_HINTS_DECORATIONS;
+   vo_MotifWmHints.functions=MWM_FUNC_MOVE | MWM_FUNC_CLOSE | MWM_FUNC_MINIMIZE | MWM_FUNC_MAXIMIZE;
+   if ( d ) d=MWM_DECOR_ALL;
+   vo_MotifWmHints.decorations=d | MWM_DECOR_MENU;
    XChangeProperty( vo_Display,w,vo_MotifHints,vo_MotifHints,32,
-                    PropModeReplace,(unsigned char *)&vo_MotifWmHints,4 );
+                    PropModeReplace,(unsigned char *)&vo_MotifWmHints,5 );
   }
 }
 
