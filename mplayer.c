@@ -557,7 +557,7 @@ void parse_cfgfiles( m_config_t* conf )
 char *conffile;
 int conffile_fd;
 if (m_config_parse_config_file(conf, MPLAYER_CONFDIR "/mplayer.conf") < 0)
-  exit(1);
+  exit_player(NULL);
 if ((conffile = get_path("")) == NULL) {
   mp_msg(MSGT_CPLAYER,MSGL_WARN,MSGTR_NoHomeDir);
 } else {
@@ -576,7 +576,7 @@ if ((conffile = get_path("")) == NULL) {
       close(conffile_fd);
     }
     if (m_config_parse_config_file(conf, conffile) < 0)
-      exit(1);
+      exit_player(NULL);
     free(conffile);
   }
 }
@@ -874,7 +874,7 @@ int gui_no_filename=0;
 
     playtree = m_config_parse_mp_command_line(mconfig, argc, argv);
     if(playtree == NULL)
-      exit(1);
+      exit_player(NULL);
 
     playtree = play_tree_cleanup(playtree);
     if(playtree) {
@@ -917,12 +917,12 @@ int gui_no_filename=0;
 
     if(video_driver_list && strcmp(video_driver_list[0],"help")==0){
       list_video_out();
-      exit(0);
+      exit_player_with_rc(NULL, 0);
     }
 
     if(audio_driver_list && strcmp(audio_driver_list[0],"help")==0){
       list_audio_out();
-      exit(0);
+      exit_player_with_rc(NULL, 0);
     }
 
 // check codec.conf
@@ -931,7 +931,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
     if(!parse_codec_cfg(MPLAYER_CONFDIR "/codecs.conf")){
       if(!parse_codec_cfg(NULL)){
 	mp_msg(MSGT_CPLAYER,MSGL_HINT,MSGTR_CopyCodecsConf);
-	exit(0);
+        exit_player_with_rc(NULL, 0);
       }
       mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_BuiltinCodecsConf);
     }
@@ -951,34 +951,34 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
       mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AvailableAudioCodecs);
       list_codecs(1);
       printf("\n");
-      exit(0);
+      exit_player_with_rc(NULL, 0);
     }
     if(video_codec_list && strcmp(video_codec_list[0],"help")==0){
       mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AvailableVideoCodecs);
       list_codecs(0);
       printf("\n");
-      exit(0);
+      exit_player_with_rc(NULL, 0);
     }
     if(video_fm_list && strcmp(video_fm_list[0],"help")==0){
       vfm_help();
       printf("\n");
-      exit(0);
+      exit_player_with_rc(NULL, 0);
     }
     if(audio_fm_list && strcmp(audio_fm_list[0],"help")==0){
       afm_help();
       printf("\n");
-      exit(0);
+      exit_player_with_rc(NULL, 0);
     }
     if(af_cfg.list && strcmp(af_cfg.list[0],"help")==0){
       af_help();
       printf("\n");
-      exit(0);
+      exit_player_with_rc(NULL, 0);
     }
 #ifdef HAVE_X11
     if(vo_fstype_list && strcmp(vo_fstype_list[0],"help")==0){
       fstype_help();
       printf("\n");
-      exit(0);
+      exit_player_with_rc(NULL, 0);
     }
 #endif
 
@@ -1028,7 +1028,7 @@ if (edl_check_mode() == EDL_ERROR && edl_filename)
       if(!use_gui){
 	// no file/vcd/dvd -> show HELP:
 	mp_msg(MSGT_CPLAYER, MSGL_INFO, help_text);
-	exit(0);
+        exit_player_with_rc(NULL, 0);
       } else gui_no_filename=1;
     }
 
