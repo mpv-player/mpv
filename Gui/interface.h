@@ -139,6 +139,7 @@ extern void guiDone( void );
 extern int  guiGetEvent( int type,char * arg );
 extern void guiEventHandling( void );
 extern void guiLoadFont( void );
+extern void guiLoadSubtitle( char * name );
 
 typedef struct _plItem 
 {

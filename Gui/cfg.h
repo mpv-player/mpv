@@ -16,6 +16,7 @@ extern int    gtkAOExtraStereo;
 extern float  gtkAOExtraStereoMul;
 extern char * gtkAOOSSMixer;
 extern char * gtkAOOSSDevice;
+extern char * gtkDXR3Device;
 
 extern int    gtkSubDumpMPSub;
 extern int    gtkSubDumpSrt;

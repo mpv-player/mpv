@@ -36,6 +36,10 @@ float  gtkAOExtraStereoMul = 1.0;
 char * gtkAOOSSMixer;
 char * gtkAOOSSDevice;
 
+#ifdef HAVE_DXR3
+ char * gtkDXR3Device;
+#endif
+
 int    gtkSubDumpMPSub = 0;
 int    gtkSubDumpSrt = 0;
 
@@ -56,6 +60,9 @@ static config_t gui_opts[] =
  { "vo_panscan",&vo_panscan,CONF_TYPE_FLOAT,CONF_RANGE,0.0,1.0,NULL },
  { "vo_doublebuffering",&vo_doublebuffering,CONF_TYPE_FLAG,0,0,1,NULL },
  { "vo_direct_render",&vo_directrendering,CONF_TYPE_FLAG,0,0,1,NULL },
+#ifdef HAVE_DXR3
+ { "vo_dxr3_device",&gtkDXR3Device,CONF_TYPE_STRING,0,0,0,NULL },
+#endif
 
  { "v_framedrop",&frame_dropping,CONF_TYPE_INT,CONF_RANGE,0,2,NULL },
  { "v_flip",&flip,CONF_TYPE_INT,CONF_RANGE,-1,1,NULL },
@@ -221,7 +228,7 @@ int cfg_write( void )
 	    }
        case CONF_TYPE_STRING_LIST:
             {
-	     char ** tmp = *( (char **)gui_opts[i].p );
+	     char ** tmp = *( (char ***)gui_opts[i].p );
 	     if ( tmp && tmp[0] && tmp[0][0] ) fprintf( f,"%s = \"%s\"\n",gui_opts[i].name,tmp[0] );
 	     break;
 	    }

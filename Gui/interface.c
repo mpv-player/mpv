@@ -155,14 +155,13 @@ void guiInit( void )
  guiIntfStruct.StreamType=-1;
 
  memset( &gtkEquChannels,0,sizeof( gtkEquChannels ) );
- gtkAOOSSMixer=strdup( PATH_DEV_MIXER );
- gtkAOOSSDevice=strdup( PATH_DEV_DSP );
+ if ( !gtkAOOSSMixer ) gtkAOOSSMixer=strdup( PATH_DEV_MIXER );
+ if ( !gtkAOOSSDevice ) gtkAOOSSDevice=strdup( PATH_DEV_DSP );
+ if ( !gtkDXR3Device ) gtkDXR3Device=strdup( "/dev/em8300-0" );
  fullscreen=gtkLoadFullscreen;       
    
  gtkInit();
  wsXInit( (void *)mDisplay );
-     
-// cfg_read(); 
  appInit( (void*)mDisplay );
 
  if ( plCurrent && !filename ) mplSetFileName( plCurrent->path,plCurrent->name,STREAMTYPE_FILE );

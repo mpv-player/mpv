@@ -173,14 +173,20 @@ void ShowPreferences( void )
    {
     const ao_info_t *info = audio_out_drivers[i++]->info;
     if ( !strcmp( info->short_name,"plugin" ) ) continue;
-    if ( audio_driver_list && !gstrcmp( audio_driver_list[0],(char *)info->short_name ) ) old_audio_driver=i - 1;
+    if ( audio_driver_list )
+     {
+      char * name = gstrdup( audio_driver_list[0] );
+      char * sep = strchr( audio_driver_list[0],':' );
+      if ( sep ) *sep=0;
+      if ( !gstrcmp( name,(char *)info->short_name ) ) old_audio_driver=i - 1;
+     }
     tmp[0]=(char *)info->short_name; tmp[1]=(char *)info->name; gtk_clist_append( GTK_CLIST( CLADrivers ),tmp );
    }
   gtk_clist_select_row( GTK_CLIST( CLADrivers ),old_audio_driver,0 );
   gtk_clist_get_text( GTK_CLIST( CLADrivers ),old_audio_driver,0,(char **)&ao_driver );
   gtk_widget_set_sensitive( AConfig,FALSE );
 #ifdef USE_OSS_AUDIO
-  if ( !gstrcmp( ao_driver[0],"oss" ) ) gtk_widget_set_sensitive( AConfig,TRUE );
+  if ( !strncmp( ao_driver[0],"oss",3 ) ) gtk_widget_set_sensitive( AConfig,TRUE );
 #endif
  }
 
@@ -493,7 +499,7 @@ void prButton( GtkButton * button,gpointer user_data )
    case bAConfig:
         gtk_widget_set_sensitive( AConfig,FALSE );
 #ifdef USE_OSS_AUDIO
-        if ( !strcmp( ao_driver[0],"oss" ) ) { ShowOSSConfig(); gtk_widget_set_sensitive( AConfig,TRUE ); }
+        if ( !strncmp( ao_driver[0],"oss",3 ) ) { ShowOSSConfig(); gtk_widget_set_sensitive( AConfig,TRUE ); }
 #endif
 	break;
    case bVconfig:
@@ -591,7 +597,7 @@ static void prCListRow( GtkCList * clist,gint row,gint column,GdkEvent * event,g
 	gtk_clist_get_text( GTK_CLIST( CLADrivers ),row,0,(char **)&ao_driver ); 
 	gtk_widget_set_sensitive( AConfig,FALSE );
 #ifdef USE_OSS_AUDIO
-	if ( !strcmp( ao_driver[0],"oss" ) ) gtk_widget_set_sensitive( AConfig,TRUE );
+	if ( !strncmp( ao_driver[0],"oss",3 ) ) gtk_widget_set_sensitive( AConfig,TRUE );
 #endif
 	break;
    case 1: // video driver 
@@ -1936,10 +1942,8 @@ void ShowOSSConfig( void )
  if ( gtkVOSSConfig ) gtkActive( OSSConfig );
    else OSSConfig=create_OSSConfig();
 
- if ( gtkAOOSSMixer ) gtk_entry_set_text( GTK_ENTRY( CEOssMixer ),gtkAOOSSMixer );
-   else gtk_entry_set_text( GTK_ENTRY( CEOssMixer ),PATH_DEV_MIXER );
- if ( gtkAOOSSDevice ) gtk_entry_set_text( GTK_ENTRY( CEOssDevice ),gtkAOOSSDevice );
-   else gtk_entry_set_text( GTK_ENTRY( CEOssDevice ),PATH_DEV_DSP );
+ gtk_entry_set_text( GTK_ENTRY( CEOssMixer ),gtkAOOSSMixer );
+ gtk_entry_set_text( GTK_ENTRY( CEOssDevice ),gtkAOOSSDevice );
 
  gtk_widget_show( OSSConfig );
  gtkSetLayer( OSSConfig );
@@ -1965,8 +1969,8 @@ static void ossButton( GtkButton * button,gpointer user_data )
  switch( (int)user_data )
   {
    case 1:
-        if ( gtkAOOSSMixer ) free( gtkAOOSSMixer );   gtkAOOSSMixer=strdup( gtk_entry_get_text( GTK_ENTRY( CEOssMixer ) ) );
-        if ( gtkAOOSSDevice ) free( gtkAOOSSDevice ); gtkAOOSSDevice=strdup( gtk_entry_get_text( GTK_ENTRY( CEOssDevice ) ) );
+        gfree( (void **)&gtkAOOSSMixer );  gtkAOOSSMixer=strdup( gtk_entry_get_text( GTK_ENTRY( CEOssMixer ) ) );
+        gfree( (void **)&gtkAOOSSDevice ); gtkAOOSSDevice=strdup( gtk_entry_get_text( GTK_ENTRY( CEOssDevice ) ) );
    case 0:
 	HideOSSConfig();
 	break;
@@ -2080,6 +2084,13 @@ GtkWidget * create_OSSConfig( void )
   CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/dsp1" );
   CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/dsp2" );
   CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/dsp3" );
+#ifdef HAVE_DXR3
+  CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/em8300_ma" );
+  CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/em8300_ma-0" );
+  CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/em8300_ma-1" );
+  CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/em8300_ma-2" );
+  CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/em8300_ma-3" );
+#endif
   gtk_combo_set_popdown_strings( GTK_COMBO( CBOssDevice ),CBOssDevice_items );
   g_list_free( CBOssDevice_items );
 
@@ -2088,7 +2099,6 @@ GtkWidget * create_OSSConfig( void )
   gtk_widget_ref( CEOssDevice );
   gtk_object_set_data_full( GTK_OBJECT( OSSConfig ),"CEOssDevice",CEOssDevice,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( CEOssDevice );
-//  gtk_entry_set_text( GTK_ENTRY( CEOssDevice ),"/dev/dsp" );
 
   CBOssMixer=gtk_combo_new();
   gtk_widget_set_name( CBOssMixer,"CBOssMixer" );
@@ -2109,7 +2119,6 @@ GtkWidget * create_OSSConfig( void )
   gtk_widget_ref( CEOssMixer );
   gtk_object_set_data_full( GTK_OBJECT( OSSConfig ),"CEOssMixer",CEOssMixer,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( CEOssMixer );
-//  gtk_entry_set_text( GTK_ENTRY( CEOssMixer ),"/dev/mixer" );
 
   hseparator3=gtk_hseparator_new();
   gtk_widget_set_name( hseparator3,"hseparator3" );
@@ -2184,6 +2193,8 @@ void ShowDXR3Config( void )
  if ( gtkVDXR3Config ) gtkActive( DXR3Config );
   else DXR3Config=create_DXR3Config();
 
+ gtk_entry_set_text( GTK_ENTRY( CEDXR3Device ),gtkDXR3Device );
+
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( RBVNone ),TRUE );
  if ( gtkVopLAVC ) gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( RBVLavc ),TRUE );
  if ( gtkVopFAME ) gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( RBVFame ),TRUE );
@@ -2206,6 +2217,7 @@ static void dxr3Button( GtkButton * button,gpointer user_data )
  switch ( (int)user_data )
  {
   case 0: // Ok
+       gfree( (void **)&gtkDXR3Device ); gtkDXR3Device=strdup( gtk_entry_get_text( GTK_ENTRY( CEDXR3Device ) ) );
        gtkVopLAVC=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBVLavc ) );
        gtkVopFAME=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBVFame ) );
   case 2: // Destroy
@@ -2326,6 +2338,10 @@ GtkWidget * create_DXR3Config( void )
  gtk_widget_show( CBDevice );
  gtk_box_pack_start( GTK_BOX( hbox1 ),CBDevice,TRUE,TRUE,0 );
  CBDevice_items=g_list_append( CBDevice_items,( gpointer ) "/dev/em8300" );
+ CBDevice_items=g_list_append( CBDevice_items,( gpointer ) "/dev/em8300-0" );
+ CBDevice_items=g_list_append( CBDevice_items,( gpointer ) "/dev/em8300-1" );
+ CBDevice_items=g_list_append( CBDevice_items,( gpointer ) "/dev/em8300-2" );
+ CBDevice_items=g_list_append( CBDevice_items,( gpointer ) "/dev/em8300-3" );
  gtk_combo_set_popdown_strings( GTK_COMBO( CBDevice ),CBDevice_items );
  g_list_free( CBDevice_items );
 

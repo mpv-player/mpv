@@ -93,8 +93,8 @@ inline int wsSearch( Window win );
 
 typedef void(*wsTConvFunc)( const unsigned char * in_pixels, unsigned char * out_pixels, unsigned num_pixels );
 wsTConvFunc wsConvFunc = NULL;
-																															
-void rgb32torgb32( const unsigned char * src, unsigned char * dst,int src_size )
+										
+void rgb32torgb32( const unsigned char * src, unsigned char * dst,unsigned int src_size )																					
 { memcpy( dst,src,src_size ); }
 
 // ---
@@ -776,7 +776,7 @@ void wsSetLayer( Display * wsDisplay, Window win, int layer )
  Atom            type;
  int             format;
  unsigned long   nitems, bytesafter;
- Atom          * args = NULL;
+ unsigned char * args = NULL;
 
  if ( wsWMType == wsWMIceWM )
   {

@@ -539,7 +539,6 @@ GtkWidget * create_FileSelect( void )
  GtkWidget     * hseparator2;
  GtkWidget     * hseparator3;
  GtkWidget     * hbuttonbox3;
- int             i;
 
  GtkWidget     * uppixmapwid;
  GdkPixmap     * uppixmap;
