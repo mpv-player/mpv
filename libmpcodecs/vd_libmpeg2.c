@@ -103,6 +103,11 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     mp_image_t* mpi=NULL;
     int drop_frame, framedrop=flags&3;
 
+    //MPlayer registers its own draw_slice callback, prevent libmpeg2 from freeing the context
+    mpeg2dec->decoder.convert=NULL;
+    mpeg2dec->decoder.convert_id=NULL;
+   
+    
     if(len<=0) return NULL; // skipped null frame
     
     // append extra 'end of frame' code:
