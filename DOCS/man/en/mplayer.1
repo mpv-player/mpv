@@ -1115,15 +1115,13 @@ Useful for playback from CD-ROM images or VOB files with junk at the beginning.
 .
 .TP
 .B \-srate <Hz>
-Selects the sample rate to be used by the sound card
+Selects the output sample rate to be used
 (of course sound cards have limits on this).
-If the sample frequency of your sound card is different from that
-of the current media, the resample audio filter will be inserted
+If the sample frequency selected is different from that
+of the current media, the resample or lavcresample audio filter will be inserted
 into the audio filter layer to compensate for the difference.
 The type of resampling can be controlled by the \-af-adv option.
 The default is fast resampling that may cause distortion.
-.br
-MEncoder passes this value to LAME for resampling.
 .
 .TP
 .B \-ss <time> (also see \-sb)
