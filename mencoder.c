@@ -344,6 +344,8 @@ char* frameno_filename="frameno.avi";
 int decoded_frameno=0;
 int next_frameno=-1;
 
+unsigned int timer_start;
+
 //int out_buffer_size=0x200000;
 //unsigned char* out_buffer=malloc(out_buffer_size);
 
@@ -1105,6 +1107,8 @@ signal(SIGINT,exit_sighandler);  // Interrupt from keyboard
 signal(SIGQUIT,exit_sighandler); // Quit from keyboard
 signal(SIGTERM,exit_sighandler); // kill
 
+timer_start=GetTimerMS();
+
 while(!eof){
 
     float frame_time=0;
@@ -1388,15 +1392,13 @@ if(sh_audio && !demuxer2){
 	// sh_video->timer-=x;
 	c_total+=x;
 	v_pts_corr+=x;
-
-    printf("A:%6.1f V:%6.1f A-V:%7.3f oAV:%7.3f diff:%7.3f ct:%7.3f vpc:%7.3f   \r",
-	a_pts,v_pts,a_pts-v_pts,
-	(float)(mux_a->timer-mux_v->timer),
-	AV_delay, c_total, v_pts_corr );
-
 }
-else
-    printf("V:%6.1f \r", d_video->pts );
+
+//    printf("A:%6.1f V:%6.1f A-V:%7.3f oAV:%7.3f diff:%7.3f ct:%7.3f vpc:%7.3f   \r",
+//	a_pts,v_pts,a_pts-v_pts,
+//	(float)(mux_a->timer-mux_v->timer),
+//	AV_delay, c_total, v_pts_corr );
+//    printf("V:%6.1f \r", d_video->pts );
 
 #if 0
     mp_msg(MSGT_AVSYNC,MSGL_STATUS,"A:%6.1f V:%6.1f A-V:%7.3f ct:%7.3f  %3d/%3d  %2d%% %2d%% %4.1f%%  %d%%\r",
@@ -1408,6 +1410,18 @@ else
 	  ,cache_fill_status
         );
 #endif
+
+    {	float t=(GetTimerMS()-timer_start)*0.001f;
+	float len=(demuxer->movi_end-demuxer->movi_start);
+	float p=len>1000 ? (float)(demuxer->filepos-demuxer->movi_start) / len : 0;
+	mp_msg(MSGT_AVSYNC,MSGL_STATUS,"Pos:%6.1fs %6df (%2d%%) %3dfps  ETA:%4dmin/%3dmb  A-V:%5.3f  \r",
+	    mux_v->timer, decoded_frameno, (int)(p*100),
+	    (t>1) ? (int)(decoded_frameno/t) : 0,
+	    (p>0.001) ? (int)(t/p/60) : 0, 
+	    (p>0.001) ? (int)(ftell(muxer_f)/p/1024/1024) : 0,
+	    v_pts_corr
+	);
+    }
 
         fflush(stdout);
 
