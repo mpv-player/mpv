@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.15 -->
+<!-- synced with 1.16 -->
 <chapter id="usage">
 <title>Uso</title>
 
@@ -16,7 +16,7 @@ primeras, por ejemplo
 y las opciones escritas después de los nombres de archivos, que se
 aplican solamente al nombre de archivo/URL/lo que sea, por ejemplo:
 
-<screen>mplayer -vfm 5 movie1.avi <replaceable>movie2.avi</replaceable> -vfm 4</screen>
+<screen>mplayer -vfm 5 <replaceable>pelicula1.avi</replaceable> <replaceable>pelicula2.avi</replaceable> -vfm 4</screen>
 </para>
 
 <para>

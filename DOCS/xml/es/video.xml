@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.44 -->
+<!-- synced with 1.45 -->
 <sect2 id="video-dev">
 <title>Dispositivos de salida de video</title>
 
@@ -156,7 +156,7 @@ screen #0
 <listitem><para>
   Y finalmente, compruebe si <application>MPlayer</application> fue
   compilado con soporte 'xv'.
-  Haga <command>mplayer -vo help | grep "xv"</command>. Si fue compilado
+  Haga <command>mplayer -vo help | grep xv</command>. Si fue compilado
   con soporte 'xv', aparecerá una línea similar a:
   <screen>
   xv    X11/Xv<!--
