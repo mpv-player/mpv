@@ -1547,6 +1547,11 @@ Used for RAW PCM.
 You can get a list and an explanation of available options executing
 .I mplayer \-aahelp
 .TP
+.B \-adapter <value> (\-vo directx only)
+Set the graphics card that will receive the image.
+Needs the \-vm option to work.
+You can get a list of available cards when you run this option with \-v.
+.TP
 .B \-bpp <depth>
 Use different color depth than autodetect.
 Not all \-vo drivers support it (fbdev, dga2, svga, vesa).
@@ -1847,6 +1852,10 @@ This function works only with the xv, xmga, mga and xvidix video out drivers.
 .br
 The range controls how much of the image is cropped.
 .TP
+.B \-refreshrate <Hz>
+Set the monitor refreshrate in Hz.
+Currently only supported by \-vo directx combined with the \-vm option.
+.TP
 .B \-rootwin
 Play movie in the root window (desktop background) instead of opening
 a new one.
@@ -1856,7 +1865,7 @@ Works only with x11, xv, xmga and xvidix drivers.
 Adjust saturation of video output (default: 0).
 You can get grayscale output with this option.
 .TP
-.B \-screenw <pixels> \-screenh <pixels>
+.B \-screenh <pixels> \-screenw <pixels>
 If you use an output driver which can't know the resolution of the screen
 (fbdev/\:x11 and/\:or TVout) this is where you can specify the horizontal and
 vertical resolution.
@@ -1867,6 +1876,9 @@ Turns off xscreensaver at startup and turns it on again on exit.
 .B \-vm \ \ \ 
 Try to change to a better video mode.
 dga, x11/\:xv (XF86VidMode) and sdl output drivers support it.
+If it is used with the directx video output driver the \-screenw,
+\-screenh, \-bpp and \-refreshrate options can be used to set
+the new display mode.
 .TP
 .B \-vsync \ \ 
 Enables VBI for vesa.
