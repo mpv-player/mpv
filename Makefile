@@ -232,7 +232,7 @@ $(PRG_MENCODER): $(MENCODER_DEP)
 	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) libmpcodecs/libmpencoders.a $(ENCORE_LIB) $(COMMON_LIBS) $(EXTRA_LIB) $(MLIB_LIB) $(LIRC_LIB) $(LIRCC_LIB) $(ARCH_LIB) $(I18NLIBS) -lm 
 endif
 
-codecs.conf.h: $(PRG_CFG)
+codecs.conf.h: $(PRG_CFG) etc/codecs.conf
 	./$(PRG_CFG) ./etc/codecs.conf > $@
 
 codec-cfg.o: codecs.conf.h
