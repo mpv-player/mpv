@@ -873,6 +873,7 @@ static unsigned short ati_card_ids[] =
  DEVICE_ATI_RADEON_R200_QJ,
  DEVICE_ATI_RADEON_R200_QK,
  DEVICE_ATI_RADEON_R200_QL,
+ DEVICE_ATI_RADEON_R200_QM,
  DEVICE_ATI_RADEON_R200_QH2,
  DEVICE_ATI_RADEON_R200_QI2,
  DEVICE_ATI_RADEON_R200_QJ2,
@@ -1045,6 +1046,7 @@ int vixProbe( int verbose,int force )
             case DEVICE_ATI_RADEON_R200_QJ:
             case DEVICE_ATI_RADEON_R200_QK:
             case DEVICE_ATI_RADEON_R200_QL:
+            case DEVICE_ATI_RADEON_R200_QM:
             case DEVICE_ATI_RADEON_R200_QH2:
             case DEVICE_ATI_RADEON_R200_QI2:
             case DEVICE_ATI_RADEON_R200_QJ2:
