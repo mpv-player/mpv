@@ -2,13 +2,18 @@ So, I'll describe how this stuff works.
 
 The main modules:
 
-1. streamer.c: this is the input layer, this reads the file or the VCD or
-   stdin.  what it has to know: appropriate buffering by sector, seek, skip
-   functions, reading by bytes, or blocks with any size.  The stream_t
-   structure describes the input stream, file/device.
+1. stream.c: this is the input layer, this reads the input media (file, stdin,
+   vcd, dvd, network etc).  what it has to know: appropriate buffering by
+   sector, seek, skip functions, reading by bytes, or blocks with any size.
+   The stream_t (stream.h) structure describes the input stream, file/device.
 
-2. demuxer.c: this does the demultiplexing of the input to audio and video
-   channels, and their reading by buffered packages.
+   There is a stream cache layer (cache2.c), it's a wrapper for the stream
+   API. It does fork(), then emulates stream driver in the parent process,
+   and stream user in the child process, while proxying between them using
+   preallocated big memory chunk for FIFO buffer.
+
+2. demuxer.c: this does the demultiplexing (separating) of the input to
+   audio, video or dvdsub channels, and their reading by buffered packages.
 	 The demuxer.c is basically a framework, which is the same for all the
 	 input formats, and there are parsers for each of them (mpeg-es,
 	 mpeg-ps, avi, avi-ni, asf), these are in the demux_*.c files.
@@ -16,11 +21,11 @@ The main modules:
 
 2.a. demux_packet_t, that is DP.
    Contains one chunk (avi) or packet (asf,mpg). They are stored in memory as
-	 in chained list, cause of their different size.
+	 in linked list, cause of their different size.
 
 2.b. demuxer stream, that is DS.
    Struct: demux_stream_t
-   Every channel (a/v) has one. This contains the packets for the stream
+   Every channel (a/v/s) has one. This contains the packets for the stream
          (see 2.a). For now, there can be 3 for each demuxer :
 	 - audio (d_audio)
 	 - video (d_video)
@@ -68,7 +73,24 @@ The main modules:
 		 DEMUXER: Too many (%d in %d bytes) audio packets in the buffer
 		 error shows up.
 
-So everything is ok 'till now, I want to move them to a separate lib.
+2.d. video.c: this file/function handle the reading and assembling of the
+     video frames. each call to video_read_frame() should read and return a
+     single video frame, and it's duration in seconds (float).
+     The implementation is splitted to 2 big parts - reading from mpeg-like
+     streams and reading from one-frame-per-chunk files (avi, asf, mov).
+     Then it calculates duration, either from fixed FPS value, or from the
+     PTS difference between and after reading the frame.
+
+2.e. other utility functions: there are some usefull code there, like
+    AVI muxer, or mp3 header parser, but leave them for now.
+
+So everything is ok 'till now. It can be found in libmpdemux/ library.
+It should compile outside of mplayer tree, you just have to implement few
+simple functions, like mp_msg() to print messages, etc.
+See libmpdemux/test.c for example.
+
+See also formats.txt, for description of common media file formats and their
+implementation details in libmpdemux.
 
 Now, go on:
 
@@ -86,7 +108,7 @@ Now, go on:
              sleep  (wait until a_frame>=v_frame)
              display the frame
              apply A-V PTS correction to a_frame
-             check for keys -> pause,seek,...
+             handle events (keys,lirc etc) -> pause,seek,...
          }
 
 	 When playing (a/v), it increases the variables by the duration of the
@@ -173,101 +195,25 @@ Now, go on:
 	   Also, doesn't/badly works with some drivers.
 	   Only used if none of the above works.
 	 
-4. Codecs. They are separate libs.
-   For example libac3, libmpeg2, xa/*, alaw.c, opendivx/*, loader, mp3lib.
+4. Codecs. Consists of libmpcodecs/* and separate files or libs,
+   for example liba52, libmpeg2, xa/*, alaw.c, opendivx/*, loader, mp3lib.
 
-   mplayer.c doesn't call the directly, but through the dec_audio.c and
+   mplayer.c doesn't call them directly, but through the dec_audio.c and
    dec_video.c files, so the mplayer.c doesn't have to know anything about
-   the codec.
+   the codecs.
+   
+   libmpcodecs contains wrapper for every codecs, some of them include the
+   codec function implementation, some calls functions from other files
+   included with mplayer, some calls optional external libraries.
+   file naming convention in libmpcodecs:
+   ad_*.c - audio decoder (called through dec_audio.c)
+   vd_*.c - video decoder (called through dec_video.c)
+   ve_*.c - video encoder (used by mencoder)
+   vf_*.c - video filter  (see option -vop)
 
 5. libvo: this displays the frame.
-   The constants for different pixelformats are defined in img_format.h,
-	 their usage is mandatory.
 
-   Each vo driver _has_ to implement these:
-
-   IMPORTANT: it's mandatorial that every vo driver support the YV12 format,
-	 and one (or both) of BGR15 and BGR24, with conversion, if needed.
-	 If these aren't supported, not every codec will work! The mpeg codecs
-	 can output only YV12, and the older win32 DLLs only 15 and 24bpp.
-	 There is a fast MMX-optimized 15->16bpp converter, so it's not a
-	 significant speed-decrease!
-
-    The BPP table, if the driver can't change bpp:
-	 current bpp		has to accept these
-	     15				15
-	     16				15,16
-	     24				24
-	     24,32			24,32
-
-    If it can change bpp (for example DGA 2, fbdev, svgalib), then if possible
-	 we have to change to the desired bpp. If the hardware doesn't support,
-	 we have to change to the one closest to it, and do conversion!
-
-    preinit():
-	init the video system (to support querying for supported formats)
-	THIS IS CALLED ONLY ONCE
-
-    control():
-      Current controls:
-	 VOCTRL_QUERY_FORMAT  -  queries if a given pixelformat is supported.
-		return value:   flags:
-		    0x1	 -  supported
-		    0x2  -  supported without conversion (define 0x1 too!)
-		    0x4  -  sub/osd supported (has draw_alpha)
-		    0x8  -  hardware handles subpics
-		    0x100  -  driver/hardware handles timing (blocking)		
-	 VOCTRL_GET_IMAGE
-		libmpcodecs Direct Rendering interface
-		You need to set mpi (mp_image.h) structure, for example,
-		look at vo_x11, vo_sdl, vo_xv or mga_common.
-	 VOCTRL_RESET  -  reset the video device
-		This is sent on seeking and similar and is useful if you are
-		using a device which prebuffers frames that need to flush them
-		before refilling audio/video buffers.
-	 VOCTRL_PAUSE
-	 VOCTRL_RESUME
-	 VOCTRL_GUISUPPORT
-		return true only if driver supports co-operation with
-		MPlayer's GUI (not yet used by GUI)
-	 VOCTRL_QUERY_VAA  -  this is used by the vidix extension
-		this is used by the vidix extension to fill a vo_vaa_t struct,
-		I do not know how this works since I'm not the author of this
-		      
-    config():	
-      Set up the video system. You get the dimensions and flags.
-      Flags:
-        0x01	- fullscreen (-fs)
-	0x02	- mode switching (-vm)
-	0x04	- software scaling (-zoom)
-	0x08	- flipping (-flip) -- REQUIRED to support this
-      Also these flags you can get from vo_flags too and they're
-      defined as VOFLAG_* (see libvo/video_out.h)
-
-    uninit():
-      Uninit the whole system, this is on the same "level" as preinit.
-
-    draw_slice(): this displays YV12 pictures (3 planes, one full sized that
-	 contains brightness (Y), and 2 quarter-sized which the colour-info
-	 (U,V). MPEG codecs (libmpeg2, opendivx) use this. This doesn't have
-	 to display the whole frame, only update small parts of it.
-
-    draw_frame(): this is the older interface, this displays only complete
-	 frames, and can do only packed format (YUY2, RGB/BGR).
-	 Win32 codecs use this (DivX, Indeo, etc).
-
-    draw_alpha(): this displays subtitles and OSD.
-	 It's a bit tricky to use it, since it's not a part of libvo API,
-	 but a callback-style stuff. The flip_page() has to call
-	 vo_draw_text(), so that it passes the size of the screen and the
-	 corresponding draw_alpha() implementation for the pixelformat
-	 (function pointer). The vo_draw_text() checks the characters to draw,
-	 and calls draw_alpha() for each.
-	 As a help, osd.c contains draw_alpha for each pixelformats, use this
-	 if possible!
-
-    flip_page(): this is called after each frame, this diplays the buffer for
-	 real. This is 'swapbuffers' when double-buffering.
+   for details on this, read libvo.txt
 
 6. libao2: this control audio playing
 

@@ -47,7 +47,6 @@ videocodec indeo5ds
   out YV12
   out YUY2
   out BGR32,BGR24,BGR16,BGR15
-  cpuflags mmx
 
 This is a particularly full-featured video codec. The "videocodec" keyword
 identifies the fact that this is the start of a new video
@@ -81,11 +80,6 @@ The "out" keyword identifies which output format that the decoder is known
 to output. Just like the fourcc line, there can be multiple out lines or
 multiple comma-separated output formats on the same line. The output
 formats should be listed in order of preference.
-
-The "cpuflags" identifies special operating parameters that this codec
-requires. For example, this video codec is known to use MMX
-instructions. Currently, valid strings for this keyword include mmx, sse,
-and 3dnow.
 
 Audio Codecs
 ------------

@@ -1,0 +1,100 @@
+libvo --- the library to handle video output    by A'rpi, 2002.04
+============================================
+
+Note: before start on this, read colorspaces.txt !
+
+The constants for different pixelformats are defined in img_format.h,
+their usage is mandatory.
+
+Each vo driver _has_ to implement these:
+
+    preinit():
+	init the video system (to support querying for supported formats)
+
+    uninit():
+      Uninit the whole system, this is on the same "level" as preinit.
+
+    control():
+      Current controls:
+	 VOCTRL_QUERY_FORMAT  -  queries if a given pixelformat is supported.
+	        It also returns various flags decsirbing the capabilities
+		of the driver with teh given mode. for the flags, see
+		file vfcaps.h !
+		the most important flags, every driver must properly report
+		these:
+		    0x1	 -  supported (with or without conversion)
+		    0x2  -  supported without conversion (define 0x1 too!)
+		    0x100  -  driver/hardware handles timing (blocking)
+		also SET sw/hw scaling and osd support flags, and flip,
+		and accept_stride if you implement put_image (see vfcaps.h)
+		NOTE: VOCTRL_QUERY_FORMAT may be called _before_ first config()
+		but is always called between preinit() and uninit()
+	 VOCTRL_GET_IMAGE
+		libmpcodecs Direct Rendering interface
+		You need to update mpi (mp_image.h) structure, for example,
+		look at vo_x11, vo_sdl, vo_xv or mga_common.
+	 VOCTRL_PUT_IMAGE
+		replacement for the current draw_slice/draw_frame way of
+		passing video frames. by implementing SET_IMAGE, you'll get
+		image in mp_image struct instead of by calling draw_*.
+		unless you return VO_TRUE for VOCTRL_PUT_IMAGE call, the
+		old-style draw_* functils will be called!
+		Note: draw_slice is still mandatory, for per-slice rendering!
+	 VOCTRL_RESET  -  reset the video device
+		This is sent on seeking and similar and is useful if you are
+		using a device which prebuffers frames that need to flush them
+		before refilling audio/video buffers.
+	 VOCTRL_PAUSE
+	 VOCTRL_RESUME
+	 VOCTRL_GUISUPPORT
+		return true only if driver supports co-operation with
+		MPlayer's GUI (not yet used by GUI)
+	 VOCTRL_QUERY_VAA  -  this is used by the vidix extension
+		this is used by the vidix extension to fill a vo_vaa_t struct,
+		I do not know how this works since I'm not the author of this
+
+    config():	
+      Set up the video system. You get the dimensions and flags.
+      width, height: size of the source image
+      d_width, d_height: wanted scaled/display size (it's a hint)
+      Flags:
+        0x01	- force fullscreen (-fs)
+	0x02	- allow mode switching (-vm)
+	0x04	- allow software scaling (-zoom)
+	0x08	- flipping (-flip)
+      They're defined as VOFLAG_* (see libvo/video_out.h)
+      
+      IMPORTAMT NOTE: config() may be called 0 (zero), 1 or more (2,3...)
+      times between preinit() and uninit() calls. You MUST handle it, and
+      you shouldn't crash at second config() call or at uninit() without
+      any config() call! To make your life easier, vo_config_count is
+      set to the number of previous config() call, counted from preinit().
+      It's set by the caller (vf_vo.c), you don't have to increase it!
+      So, you can check for vo_config_count>0 in uninit() when freeing
+      resources allocated in config() to avoid crash!
+
+    draw_slice(): this displays YV12 pictures (3 planes, one full sized that
+	 contains brightness (Y), and 2 quarter-sized which the colour-info
+	 (U,V). MPEG codecs (libmpeg2, opendivx) use this. This doesn't have
+	 to display the whole frame, only update small parts of it.
+
+    draw_frame(): this is the older interface, this displays only complete
+	 frames, and can do only packed format (YUY2, RGB/BGR).
+	 Win32 codecs use this (DivX, Indeo, etc).
+	 If you implement VOCTRL_PUT_IMAGE, you can left draw_frame.
+
+    draw_osd(): this displays subtitles and OSD.
+	 It's a bit tricky to use it, since it's a callback-style stuff.
+	 It should call vo_draw_text() with screen dimension and your
+	 draw_alpha implementation for the pixelformat (function pointer).
+	 The vo_draw_text() checks the characters to draw, and calls
+	 draw_alpha() for each. As a help, osd.c contains draw_alpha for
+	 each pixelformats, use this if possible!
+	 
+	 NOTE: this one will be obsolete soon! But it's still usefull when
+	 you want to do tricks, like rendering osd _after_ hardware scaling
+	 (tdfxfb) or render subtitles under of the image (vo_mpegpes, sdl)
+
+    flip_page(): this is called after each frame, this diplays the buffer for
+	 real. This is 'swapbuffers' when double-buffering.
+
