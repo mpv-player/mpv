@@ -103,8 +103,6 @@ static char help_text[]=
 			    "- -cache est utilisé avec un fichier mal multiplexé => essayer avec -nocache\n"\
 			    "Si rien de tout cela ne résout le problème, lire DOCS/bugreports.html !\n\n"
 
-
-
 #define MSGTR_NoGui "MPlayer a été compilé SANS support GUI!\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI a besoin de X11!\n"
 #define MSGTR_Playing "Joue %s\n"
@@ -183,22 +181,7 @@ static char help_text[]=
 #define MSGTR_MaybeNI "Peut-être jouez-vous un flux/fichier mal multiplexé, ou le codec n'est pas là...\n"\
                       "Pour les fichier .AVI, essayez l'option -ni."
 #define MSGTR_SwitchToNi "\nFichier .AVI mal multiplexé - passage en mode -ni!\n"
-#define MSGTR_DetectedFILMfile "Fichier de type FILM détecté!\n"
-#define MSGTR_DetectedFLIfile "Fichier de type FLI détecté!\n"
-#define MSGTR_DetectedROQfile "Fichier de type RoQ détecté!\n"
-#define MSGTR_DetectedREALfile "Fichier de type REAL détecté!\n"
-#define MSGTR_DetectedAVIfile "Fichier de type AVI détecté!\n"
-#define MSGTR_DetectedASFfile "Fichier de type ASF détecté!\n"
-#define MSGTR_DetectedMPEGPESfile "Fichier de type MPEG-PES détecté!\n"
-#define MSGTR_DetectedMPEGPSfile "Fichier de type MPEG-PS détecté!\n"
-#define MSGTR_DetectedMPEGESfile "Fichier de type MPEG-ES détecté!\n"
-#define MSGTR_DetectedQTMOVfile "Fichier de type QuickTime/MOV détecté!\n"
-#define MSGTR_DetectedYUV4MPEG2file "Fichier de type YUV4MPEG2 détecté!\n"
-#define MSGTR_DetectedNuppelVideofile "Fichier de type NuppelVideo détecté!\n"
-#define MSGTR_DetectedVIVOfile "Fichier de type VIVO détecté!\n"
-#define MSGTR_DetectedBMPfile "Fichier de type BMP détecté!\n"
-#define MSGTR_DetectedOGGfile "Fichier de type OGG détecté!\n"
-#define MSGTR_DetectedRAWDVfile "Fichier de type RAWDV détecté!\n"
+#define MSGTR_Detected_XXX_FileFormat "Fichier de type %s détecté!\n"
 #define MSGTR_DetectedAudiofile "Fichier audio détecté!\n"
 #define MSGTR_NotSystemStream "Pas un flux de type MPEG System... (peut-être un flux de transport?)\n"
 #define MSGTR_InvalidMPEGES "Flux MPEG-ES invalide??? Contactez l'auteur, c'est peut-être un bug :(\n"

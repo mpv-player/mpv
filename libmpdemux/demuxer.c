@@ -594,7 +594,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AVI){
       stream_read_dword_le(demuxer->stream); //filesize
       id=stream_read_dword_le(demuxer->stream); // "AVI "
       if(id==formtypeAVI){ 
-        mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedAVIfile);
+        mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"AVI");
         file_format=DEMUXER_TYPE_AVI;
       } else {
         free_demuxer(demuxer);
@@ -607,7 +607,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AVI){
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_Y4M){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_Y4M,audio_id,video_id,dvdsub_id);
   if(y4m_check_file(demuxer)){
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedYUV4MPEG2file);
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"YUV4MPEG2");
       file_format=DEMUXER_TYPE_Y4M;
   } else {
       free_demuxer(demuxer);
@@ -618,7 +618,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_Y4M){
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_ASF){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_ASF,audio_id,video_id,dvdsub_id);
   if(asf_check_header(demuxer)){
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedASFfile);
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"ASF");
       file_format=DEMUXER_TYPE_ASF;
   } else {
       free_demuxer(demuxer);
@@ -629,7 +629,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_ASF){
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_NUV){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_NUV,audio_id,video_id,dvdsub_id);
   if(nuv_check_file(demuxer)){
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedNuppelVideofile);
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"NuppelVideo");
       file_format=DEMUXER_TYPE_NUV;
   } else {
       free_demuxer(demuxer);
@@ -640,7 +640,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_NUV){
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MOV){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_MOV,audio_id,video_id,dvdsub_id);
   if(mov_check_file(demuxer)){
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedQTMOVfile);
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"QuickTime/MOV");
       file_format=DEMUXER_TYPE_MOV;
   } else {
       free_demuxer(demuxer);
@@ -651,7 +651,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MOV){
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_VIVO){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_VIVO,audio_id,video_id,dvdsub_id);
   if(vivo_check_file(demuxer)){
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedVIVOfile);
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat, "VIVO");
       file_format=DEMUXER_TYPE_VIVO;
   } else {
     free_demuxer(demuxer);
@@ -662,7 +662,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_VIVO){
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_REAL){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_REAL,audio_id,video_id,dvdsub_id);
   if(real_check_file(demuxer)){
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedREALfile);
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"REAL");
       file_format=DEMUXER_TYPE_REAL;
   } else {
       free_demuxer(demuxer);
@@ -678,7 +678,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_FLI){
     id=stream_read_word_le(demuxer->stream);
     // check for the FLI file magic number
     if((id==0xAF11) || (id==0xAF12)){ 
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedFLIfile);
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"FLI");
       file_format=DEMUXER_TYPE_FLI;
     } else {
       free_demuxer(demuxer);
@@ -693,7 +693,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_FILM){
     int signature=stream_read_fourcc(demuxer->stream);
     // check for the FLI file magic number
     if(signature==mmioFOURCC('F', 'I', 'L', 'M')){ 
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedFILMfile);
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"FILM");
       file_format=DEMUXER_TYPE_FILM;
     } else {
       free_demuxer(demuxer);
@@ -705,7 +705,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_FILM){
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_ROQ){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_ROQ,audio_id,video_id,dvdsub_id);
   if(roq_check_file(demuxer)){
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedROQfile);
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"ROQ");
       file_format=DEMUXER_TYPE_ROQ;
   } else {
       free_demuxer(demuxer);
@@ -716,7 +716,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_ROQ){
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_BMP){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_BMP,audio_id,video_id,dvdsub_id);
   if(bmp_check_file(demuxer)){
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedBMPfile);
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"BMP");
       file_format=DEMUXER_TYPE_BMP;
   } else {
       free_demuxer(demuxer);
@@ -727,7 +727,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_BMP){
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_SMJPEG){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_SMJPEG,audio_id,video_id,dvdsub_id);
   if(smjpeg_check_file(demuxer)){
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected SMJPEG file!\n");
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"SMJPEG");
       file_format=DEMUXER_TYPE_SMJPEG;
   } else {
       free_demuxer(demuxer);
@@ -739,7 +739,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_SMJPEG){
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_OGG){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_OGG,audio_id,video_id,dvdsub_id);
   if(demux_ogg_open(demuxer)){
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedOGGfile);
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"OGG");
       file_format=DEMUXER_TYPE_OGG;
   } else {
       free_demuxer(demuxer);
@@ -751,7 +751,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_OGG){
 if(file_format == DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_PVA){
 	demuxer=new_demuxer(stream,DEMUXER_TYPE_PVA,audio_id,video_id,dvdsub_id);
 	if(pva_check_file(demuxer)) {
-		mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected PVA file...\n");
+		mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"PVA");
 		file_format=DEMUXER_TYPE_PVA;
 	} else {
 		free_demuxer(demuxer);
@@ -785,9 +785,9 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
 
   if(ds_fill_buffer(demuxer->video)){
     if(!pes)
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedMPEGPESfile);
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"MPEG-PES");
     else
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedMPEGPSfile);
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"MPEG-PS");
     file_format=DEMUXER_TYPE_MPEG_PS;
   } else {
     mp_msg(MSGT_DEMUX,MSGL_V,"MPEG packet stats: p100: %d  p101: %d  PES: %d  MP3: %d \n",
@@ -824,7 +824,7 @@ if(file_format==DEMUXER_TYPE_MPEG_ES){ // little hack, see above!
     free_demuxer(demuxer);
     demuxer = NULL;
   } else {
-    mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedMPEGESfile);
+    mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"MPEG-ES");
   }
 }
 #ifdef HAVE_LIBDV095
@@ -834,7 +834,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_RAWDV)
    demuxer=new_demuxer(stream,DEMUXER_TYPE_RAWDV,audio_id,video_id,dvdsub_id);
    if(check_file_rawdv(demuxer))
    {
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedRAWDVfile);
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"RAWDV");
       file_format=DEMUXER_TYPE_RAWDV;
    }
    else
