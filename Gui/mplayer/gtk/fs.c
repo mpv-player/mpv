@@ -308,7 +308,16 @@ void ShowFileSelect( int type,int modal )
   }
  
  if ( fsTopList_items ) g_list_free( fsTopList_items ); fsTopList_items=NULL;
- fsTopList_items=g_list_append( fsTopList_items,(gchar *)get_current_dir_name() );
+ {
+  char hist[fsPersistant_MaxPath + 1];
+  
+  bzero( hist,fsPersistant_MaxPath + 1 );
+  if ( fs_PersistantHistory( 0,hist,0 ) == 0 )
+   { 
+    fsTopList_items=g_list_append( fsTopList_items,hist );
+    chdir( hist );
+   } else fsTopList_items=g_list_append( fsTopList_items,(gchar *)get_current_dir_name() );
+ }
  if ( getenv( "HOME" ) ) fsTopList_items=g_list_append( fsTopList_items,getenv( "HOME" ) );
  fsTopList_items=g_list_append( fsTopList_items,"/home" );
  fsTopList_items=g_list_append( fsTopList_items,"/mnt" );
@@ -327,6 +336,63 @@ void HideFileSelect( void )
  gtk_widget_destroy( fsFileSelect );
  fsFileSelect=NULL;
 }
+
+//----------------------------------------------------
+
+/*
+ * int fs_PersistantHistory(int rw_command, char *subject)
+ *
+ * is used to read/write in the $HOME/.mplayer/persistant_history file
+ * parameters:  rw_command = (0,1) <=> (read,write)
+ *              subject - for i/o
+ *              pos - position in history file (line)
+ * return:      0 = ok
+ *
+ */
+	 
+ int fs_PersistantHistory(int rw_command, char *subject, int pos)
+ {
+  FILE *pfile;
+  
+  char path[fsPersistant_MaxPath+1];
+  int fdata,fpos = 0;
+  char *subpath = NULL;
+  const char *ph_filename = fsPersistant_FilePath;
+  
+  if (!subject) return -1;
+  if (pos < 0 || pos > fsPersistant_MaxPos) return -2;
+  bzero(path,fsPersistant_MaxPath+1);
+  
+  subpath = getenv("HOME");
+  if (!subpath) return -3;
+  if (strlen(subpath)+strlen(fsPersistant_FilePath) > fsPersistant_MaxPath) return -4;
+  memcpy(path, subpath, strlen(subpath));
+  memcpy(path+strlen(subpath), ph_filename, strlen(ph_filename));
+
+  if (rw_command == 0)
+  {
+   pfile = fopen(path,"r");
+   if (!pfile) return -5;
+   while ((fdata = fgetc(pfile)) != EOF)
+   {
+    if (fpos > fsPersistant_MaxPath) { fclose(pfile);return -6; }
+    subject[fpos++] = fdata;
+   }
+   fclose(pfile);
+   return 0;
+  }
+
+  if (rw_command == 1)
+  {
+   pfile = fopen(path,"w+");
+   if (!pfile) return -6;
+   fprintf(pfile,"%s",subject);
+   fclose(pfile);
+   return 0;
+  }
+  else return -10;
+}
+//-----------------------------------------------
 
 void fs_fsFilterCombo_activate( GtkEditable * editable,gpointer user_data )
 {
@@ -421,6 +487,7 @@ void fs_Ok_released( GtkButton * button,gpointer user_data )
    fsSelectedFile=fsThatDir;
    CheckDir( fsFNameList,get_current_dir_name() );
    gtk_entry_set_text( GTK_ENTRY( fsPathCombo ),(unsigned char *)get_current_dir_name() );
+   fs_PersistantHistory(1,get_current_dir_name(),0);      //totem, write into history
    return;
   }
 
@@ -489,7 +556,10 @@ void fs_Ok_released( GtkButton * button,gpointer user_data )
 }
 
 void fs_Cancel_released( GtkButton * button,gpointer user_data )
-{ HideFileSelect(); }
+{
+ HideFileSelect();
+ fs_PersistantHistory(1,get_current_dir_name(),0);      //totem, write into history file
+}
 
 void fs_fsFNameList_select_row( GtkWidget * widget,gint row,gint column,GdkEventButton *bevent,gpointer user_data )
 {
@@ -536,6 +606,7 @@ GtkWidget * create_FileSelect( void )
  GdkPixmap     * uppixmap;
  GdkBitmap     * upmask;
  GtkStyle      * upstyle;
+
 
  fsFileSelect=gtk_window_new( GTK_WINDOW_TOPLEVEL );
  gtk_widget_set_name( fsFileSelect,"fsFileSelect" );
