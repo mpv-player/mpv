@@ -64,7 +64,6 @@ static char help_text[]=
 // mplayer.c:
 
 #define MSGTR_Exiting "\nΈξοδος... (%s)\n"
-#define MSGTR_Exit_frames "Ο επιλεγμένος αριθμός των frames έχουν αναπαραγωγεί"
 #define MSGTR_Exit_quit "Κλείσιμο"
 #define MSGTR_Exit_eof "Τέλος του αρχείου"
 #define MSGTR_Exit_error "Κρίσιμο σφάλμα"
@@ -84,19 +83,14 @@ static char help_text[]=
 #define MSGTR_CantOpenDumpfile "Αδύνατο το άνοιγμα του dump αρχείου!!!\n"
 #define MSGTR_CoreDumped "core dumped :)\n"
 #define MSGTR_FPSnotspecified "Μη ορισμένα FPS (ή λάθος) στο header! Χρησιμοποιήστε την επιλογή -fps!\n"
-#define MSGTR_NoVideoStream "Λυπάμαι, δεν υπάρχει κανάλι βίντεο... δεν μπορεί να αναπαραγωγεί ακόμα\n"
 #define MSGTR_TryForceAudioFmt "Προσπάθεια να επιβολής της οικογένειας του οδηγού του codec του ήχου %d ...\n"
 #define MSGTR_CantFindAfmtFallback "Δεν είναι δυνατή η εύρεση της οικογένειας του οδηγού του codec του ήχου, χρήση άλλου οδηγού.\n"
 #define MSGTR_CantFindAudioCodec "Δεν είναι δυνατή η εύρεση του format του codec του ήχου 0x%X !\n"
 #define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Δοκιμάστε να αναβαθμίσεται το %s από το etc/codecs.conf\n*** Αν ακόμα υπάρχει πρόβήμα, διαβάστε DOCS/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "Αδύνατη η αρχικοποίηση του codec του ήχου! -> χωρίς-ήχο\n"
 #define MSGTR_TryForceVideoFmt "Προσπάθεια να επιβολής της οικογένειας του οδηγού του codec του βίντεο %d ...\n"
-#define MSGTR_CantFindVfmtFallback "Δεν είναι δυνατή η εύρεση της οικογένειας του οδηγού του codec του βίντεο, χρήση άλλου οδηγού.\n"
 #define MSGTR_CantFindVideoCodec "Δεν είναι δυνατή η εύρεση του codec για τον συγκεκριμένο -vo και το format του βίντεο 0x%X !\n"
 #define MSGTR_VOincompCodec "Λυπάμαι, η επιλεγμένη συσκευή video_out είναι ασύμβατη με αθτό το codec.\n"
-#define MSGTR_CouldntInitVideoCodec "ΚΡΙΣΙΜΟ: Αδύνατη η αρχικοποίηση του codec του βίντεο :(\n"
-#define MSGTR_EncodeFileExists "Το αρχείο υπάρχει ήδη: %s (μην διαγράψετε το αγαπημένο σας AVI!)\n"
-#define MSGTR_CantCreateEncodeFile "Αδύνατη η δημιουργία του αρχείου για κωδικοποίηση\n"
 #define MSGTR_CannotInitVO "ΚΡΙΣΙΜΟ: Αδύνατη η αρχικοποίηση του οδηγού του βίντεο!\n"
 #define MSGTR_CannotInitAO "αδύνατο το άνοιγμα/αρχικοποίηση του οδηγού του ήχου -> ΧΩΡΙΣ-ΗΧΟ\n"
 #define MSGTR_StartPlaying "Εκκίνιση αναπαραγωγής...\n"
@@ -212,7 +206,6 @@ static char help_text[]=
 #define MSGTR_DetectedRAWDVfile "Αναγνωρίστηκε αρχείο τύπου RAWDV!\n"
 #define MSGTR_DetectedAudiofile "Αναγνωρίστηκε αρχείο ήχου!\n"
 #define MSGTR_NotSystemStream "Μη Αναγνωρίσμιμο MPEG System Stream format... (μήπως είναι Transport Stream?)\n"
-#define MSGTR_MissingMpegVideo "Λείπει το κανάλι βίντεο MPEG!? Επικοινώνησε με τον author, μπορεί να είναι ένα bug :(\n"
 #define MSGTR_InvalidMPEGES "Μη Αναγνωρίσιμο κανάλι MPEG-ES??? Επικοινώνησε με τον author, μπορεί να είναι ένα bug :(\n"
 #define MSGTR_FormatNotRecognized "============= Λυπάμαι, αυτό το είδος αρχείου δεν αναγνωρίζεται/υποστηρίζεται ===============\n"\
 				  "=== Αν το αρχείο είναι ένα AVI, ASF ή MPEG κανάλι, παρακαλώ επικοινωνήστε με τον δημιουργό! ===\n"
@@ -237,7 +230,6 @@ static char help_text[]=
 #define MSGTR_MOVcomprhdr "MOV: Συμπιεσμένα headers δεν υποστηρίζονται (ακόμα)!\n"
 #define MSGTR_MOVvariableFourCC "MOV: ΠΡΟΕΙΔΟΠΟΙΗΣΗ! μεταβλητό FOURCC βρέθηκε!?\n"
 #define MSGTR_MOVtooManyTrk "MOV: Προειδοποίηση! βρέθηκαν πολλά tracks!"
-#define MSGTR_MOVnotyetsupp "\n****** Το Quicktime MOV format δεν υποστηρίζεται ακόμα!!!!!!! *******\n"
 #define MSGTR_FoundAudioStream "==> Βρέθηκε κανάλι ήχου: %d\n"
 #define MSGTR_FoundVideoStream "==> Βρέθηκε κανάλι βίντεο: %d\n"
 #define MSGTR_DetectedTV "Βρέθηκε TV! ;-)\n"
@@ -259,18 +251,6 @@ static char help_text[]=
 #define MSGTR_ACMiniterror "Δεν είναι δυνατό να φορτωθεί/αρχικοποιηθεί το Win32/ACM codec ήχου (λείπει το DLL αρχείο?)\n"
 #define MSGTR_MissingLAVCcodec "Δεν είναι δυνατό να βρεθεί το '%s' στο libavcodec...\n"
 
-#define MSGTR_NoDShowSupport "Το MPlayer μεταφράστηκε ΧΩΡΙΣ υποστήριξη για directshow!\n"
-#define MSGTR_NoWfvSupport "Απενεργοποιημένη η υποστήριξη για τα win32 codecs, ή μη διαθέσιμα για μη-x86 πλατφόρμες!\n"
-#define MSGTR_NoDivx4Support "Το MPlayer μεταφράστηκε ΧΩΡΙΣ υποστήριξη για DivX4Linux (libdivxdecore.so)!\n"
-#define MSGTR_NoLAVCsupport "Το MPlayer μεταφράστηκε ΧΩΡΙΣ υποστήριξη για ffmpeg/libavcodec!\n"
-#define MSGTR_NoACMSupport "Απενεργοποιημένη η υποστήριξη για Win32/ACM codec ήχου, ή μη διαθέσιμα για μη-x86 πλατφόρμες -> χωρίς-ήχο :(\n"
-#define MSGTR_NoDShowAudio "Το MPlayer μεταφράστηκε ΧΩΡΙΣ υποστήριξη για DirectShow -> χωρίς-ήχο :(\n"
-#define MSGTR_NoOggVorbis "Το OggVorbis codec ήχου είναι απενεργοποιημένο -> χωρίς-ήχο :(\n"
-#define MSGTR_NoXAnimSupport "Το MPlayer μεταφράστηκε ΧΩΡΙΣ υποστήριξη για XAnim!\n"
-
-#define MSGTR_MpegPPhint "ΠΡΟΕΙΔΟΠΟΙΗΣΗ! Ζητήθηκε postprocessing εικόνας για MPEG 1/2 βίντεο,\n" \
-			 "         αλλά το MPlayer μεταφράστηκε ΧΩΡΙΣ υποστήριξη για MPEG 1/2 postprocessing!\n" \
-			 "         αλλάξτε τη γραμμή #define MPEG12_POSTPROC στο config.h, και μεταφράστε το libmpeg2!\n"
 #define MSGTR_MpegNoSequHdr "MPEG: ΚΡΙΣΙΜΟ: βρέθηκε EOF στην αναζήτηση για ακολουθία της επικεφαλίδας\n"
 #define MSGTR_CannotReadMpegSequHdr "ΚΡΙΣΙΜΟ: Δεν είναι δυνατό να διαβαστεί η ακολουθία της επικεφαλίδας!\n"
 #define MSGTR_CannotReadMpegSequHdrEx "ΚΡΙΣΙΜΟ: Δεν είναι δυνατό να διαβαστεί η ακολουθία της επέκτασης της επικεφαλίδας!\n"
@@ -279,10 +259,7 @@ static char help_text[]=
 
 #define MSGTR_ShMemAllocFail "Δεν μπορεί να προσδιοριστεί διαμοιραζόμενη μνήμη\n"
 #define MSGTR_CantAllocAudioBuf "Δεν μπορεί να προσδιοριστεί buffer για έξοδο ήχου\n"
-#define MSGTR_NoMemForDecodedImage "Δεν υπάρχει αρκετή μνήμη για την αποκωδικοποιημένη εικόνα στον buffer (%ld bytes)\n"
 
-#define MSGTR_AC3notvalid "Το κανάλι AC3 δεν είναι έγκυρο.\n"
-#define MSGTR_AC3only48k "Υποστηριζόμενα είναι μόνο τα κανάλια των 48000 Hz.\n"
 #define MSGTR_UnknownAudio "Άγνωστο/απών format ήχου, χρήση του χωρίς-ήχο\n"
 
 #define MSGTR_UsingExternalPP "[PP] Χρήση εξωτερικού φίλτρου προεπεξεργασίας, μέγιστο q = %d\n"
@@ -304,7 +281,6 @@ static char help_text[]=
 #define MSGTR_SettingUpLIRC "Αρχικοποίηση υποστήριξης του lirc...\n"
 #define MSGTR_LIRCdisabled "Απενεργοποίηση της δυνατότητας χρήσης τηλεκοντρόλ\n"
 #define MSGTR_LIRCopenfailed "Αποτυχία στην αρχικοποίηση της υποστήριξης του lirc!\n"
-#define MSGTR_LIRCsocketerr "Υπάρχει πρόβλημα με το lirc socket: %s\n"
 #define MSGTR_LIRCcfgerr "Αποτυχία κατά το διάβασμα του LIRC config αρχείου %s !\n"
 
 // vf.c
@@ -331,7 +307,6 @@ static char help_text[]=
 #define MSGTR_OtherSelect "Επιλογή ..."
 #define MSGTR_AudioFileSelect "Επιλογή εξωτερικού αρχείου ήχου ..."
 #define MSGTR_FontSelect "Επιλογή γραμματοσειράς ..."
-#define MSGTR_MessageBox "Μήνυμα"
 #define MSGTR_PlayList "PlayList"
 #define MSGTR_Equalizer "Equalizer"
 #define MSGTR_SkinBrowser "Λίστα για τα skins"
@@ -357,7 +332,6 @@ static char help_text[]=
 // --- error messages ---
 #define MSGTR_NEMDB "Λυπάμαι, δεν υπάρχει αρκετή μνήμη για γράψημο στον buffer."
 #define MSGTR_NEMFMR "Λυπάμαι, δεν υπάρχει αρκετή μνήμη για την εμφάνιση του μενού."
-#define MSGTR_NEMFMM "Λυπάμαι, δεν υπάρχει αρκετή μνήμη για σχεδιασμό της μάσκας του κυρίου παραθύρου."
 #define MSGTR_IDFGCVD "Λυπάμαι, δεν βρέθηκε οδηγός εξόδου βίντεο που να είναι συμβατός με το GUI."
 #define MSGTR_NEEDLAVCFAME "Λυπάμαι, δεν μπορείτε να αναπαράγετε αρχεία που δεν είναι mpeg με τη συσκευή DXR3/H+ χωρίς επανακωδικοποίηση.\nΠαρακαλώ ενεργοποιήστε lavc ή fame στο DXR3/H+ κουτί-διαλόγου."
 
@@ -452,7 +426,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Coefficient "Coefficient:"
 #define MSGTR_PREFERENCES_AudioDelay "Καθυστέριση ήχου"
 #define MSGTR_PREFERENCES_Audio "Ήχος"
-#define MSGTR_PREFERENCES_VideoEqu "Ενεργοποίηση του βίντεο equalizer"
 #define MSGTR_PREFERENCES_DoubleBuffer "Ενεργοποίηση double buffering"
 #define MSGTR_PREFERENCES_DirectRender "Ενεργοποίηση direct rendering"
 #define MSGTR_PREFERENCES_FrameDrop "Ενεργοποίηση πετάματος καρέ"

@@ -56,7 +56,6 @@ static char help_text[]=
 // mplayer.c: 
 
 #define MSGTR_Exiting "\nKilépek... (%s)\n"
-#define MSGTR_Exit_frames "Kért számú képkocka lejátszásra került"
 #define MSGTR_Exit_quit "Kilépés"
 #define MSGTR_Exit_eof "Vége a file-nak"
 #define MSGTR_Exit_error "Végzetes hiba"
@@ -76,19 +75,14 @@ static char help_text[]=
 #define MSGTR_CantOpenDumpfile "Nem tudom megnyitni a dump file-t!\n"
 #define MSGTR_CoreDumped "Kinyomattam a cuccost, jól.\n"
 #define MSGTR_FPSnotspecified "Az FPS (képkocka/mp) érték nincs megadva, vagy hibás! Használd az -fps opciót!\n"
-#define MSGTR_NoVideoStream "Ebben nincs video stream... egyelõre lejátszhatatlan\n"
 #define MSGTR_TryForceAudioFmt "Megpróbálom a(z) %d audio codec-családot használni ...\n"
 #define MSGTR_CantFindAfmtFallback "A megadott audio codec-családban nem találtam idevaló meghajtót, próbálkozok más meghajtóval.\n"
 #define MSGTR_CantFindAudioCodec "Nem találok codecet a(z) 0x%X audio-formátumhoz !\n"
 #define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Frissítsd a %s-t az etc/codecs.conf-ból\n*** Ha még mindig nem jó, olvasd el a DOCS/CODECS-et!\n"
 #define MSGTR_CouldntInitAudioCodec "Nem tudom indítani az audio codecet! -> nincshang ;)\n"
 #define MSGTR_TryForceVideoFmt "Megpróbálom a(z) %d video codec-családot használni ...\n"
-#define MSGTR_CantFindVfmtFallback "A megadott video codec-családban nem találtam idevaló meghajtót, próbálkozok más meghajtóval.\n"
 #define MSGTR_CantFindVideoCodec "Nem találok codec-et ami megfelel a kivalasztott vo-hoz es 0x%X video-formátumhoz !\n"
 #define MSGTR_VOincompCodec "A kiválasztott video_out meghajtó inkompatibilis ezzel a codec-kel.\n"
-#define MSGTR_CouldntInitVideoCodec "VÉGZETES HIBA: Nem sikerült a video codecet elindítani :(\n"
-#define MSGTR_EncodeFileExists "A %s file már létezik (nehogy letöröld a kedvenc AVI-dat!)\n"
-#define MSGTR_CantCreateEncodeFile "Nem tudom enkódolás céljából létrehozni a filet\n"
 #define MSGTR_CannotInitVO "VÉGZETES HIBA: Nem tudom elindítani a video-meghajtót!\n"
 #define MSGTR_CannotInitAO "nem tudom megnyitni az audio-egységet -> NOSOUND\n"
 #define MSGTR_StartPlaying "Lejátszás indítása...\n"
@@ -151,7 +145,6 @@ static char help_text[]=
 #define MSGTR_DetectedMPEGPSfile "Ez egy MPEG-PS formátumú file!\n"
 #define MSGTR_DetectedMPEGESfile "Ez egy MPEG-ES formátumú file!\n"
 #define MSGTR_DetectedQTMOVfile "Ez egy QuickTime/MOV formátumú file! (ez még nem támogatott)\n"
-#define MSGTR_MissingMpegVideo "Nincs MPEG video-folyam? Lépj kapcsolatba a készítõkkel, lehet, hogy hiba!\n"
 #define MSGTR_InvalidMPEGES "Hibás MPEG-ES-folyam? Lépj kapcsolatba a készítõkkel, lehet, hogy hiba!\n"
 #define MSGTR_FormatNotRecognized "========= Sajnos ez a fileformátum ismeretlen vagy nem támogatott ===========\n"\
 				  "= Ha ez egy AVI, ASF vagy MPEG file, lépj kapcsolatba a készítõkkel (hiba)! =\n"
@@ -176,7 +169,6 @@ static char help_text[]=
 #define MSGTR_MOVcomprhdr "MOV: Tömörített fejlécek (még) nincsenek támogatva!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Vigyázat! változó FOURCC detektálva!?\n"
 #define MSGTR_MOVtooManyTrk "MOV: Vigyázat! túl sok sáv!"
-#define MSGTR_MOVnotyetsupp "\n****** Quicktime MOV formátum még nincs támogatva!!!!!! *******\n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "nem tudom megnyitni a kodeket\n"
@@ -186,18 +178,6 @@ static char help_text[]=
 #define MSGTR_ACMiniterror "Nem tudom betölteni/inicializálni a Win32/ACM kodeket (hiányzó DLL file?)\n"
 #define MSGTR_MissingLAVCcodec "Nem találom a(z) '%s' nevû kodeket a libavcodec-ben...\n"
 
-#define MSGTR_NoDShowSupport "Az MPlayer DirectShow támogatás NÉLKÜL lett fordítva!\n"
-#define MSGTR_NoWfvSupport "A win32-es kodekek támogatása ki van kapcsolva, vagy nem létezik nem-x86-on!\n"
-#define MSGTR_NoDivx4Support "Az MPlayer DivX4Linux támogatás (libdivxdecore.so) NÉLKÜL lett fordítva!\n"
-#define MSGTR_NoLAVCsupport "Az MPlayer ffmpeg/libavcodec támogatás NÉLKÜL lett fordítva!\n"
-#define MSGTR_NoACMSupport "Win32/ACM hang kodek támogatás ki van kapcsolva, vagy nem létezik nem-x86 CPU-n -> hang kikapcsolva :(\n"
-#define MSGTR_NoDShowAudio "DirectShow támogatás nincs lefordítva -> hang kikapcsolva :(\n"
-#define MSGTR_NoOggVorbis "OggVorbis hang kodek kikapcsolva -> hang kikapcsolva :(\n"
-#define MSGTR_NoXAnimSupport "Az MPlayer-t XAnim codec-ek támogatása NÉLKÜL fordítottad!\n"
-
-#define MSGTR_MpegPPhint "FIGYELEM! Képjavítást kértél egy MPEG1/2 filmre, de az MPlayer-t\n" \
-                         "          MPEG1/2 javítási támogatás nélkül fordítottad!\n" \
-                         "          #define MPEG12_POSTPROC a config.h-ba, és fordítsd újra libmpeg2-t!\n"
 #define MSGTR_MpegNoSequHdr "MPEG: VÉGZETES: vége lett a filenak miközben a szekvencia fejlécet kerestem\n"
 #define MSGTR_CannotReadMpegSequHdr "VÉGZETES: Nem tudom olvasni a szekvencia fejlécet!\n"
 #define MSGTR_CannotReadMpegSequHdrEx "VÉGZETES: Nem tudom olvasni a szekvencia fejléc kiterjesztését!\n"
@@ -206,17 +186,13 @@ static char help_text[]=
 
 #define MSGTR_ShMemAllocFail "Nem tudok megosztott memóriát lefoglalni\n"
 #define MSGTR_CantAllocAudioBuf "Nem tudok kimeneti hangbuffer lefoglalni\n"
-#define MSGTR_NoMemForDecodedImage "nincs elég memória a dekódolt képhez (%ld bájt)\n"
 
-#define MSGTR_AC3notvalid "AC3 folyam hibás.\n"
-#define MSGTR_AC3only48k "Csak 48000 Hz-es folyamok vannak támogatva.\n"
 #define MSGTR_UnknownAudio "Ismeretlen/hiányzó hangformátum, hang kikapcsolva\n"
 
 // LIRC:
 #define MSGTR_SettingUpLIRC "lirc támogatás indítása...\n"
 #define MSGTR_LIRCdisabled "Nem fogod tudni használni a távirányítót\n"
 #define MSGTR_LIRCopenfailed "Nem tudtam megnyitni a lirc támogatást!\n"
-#define MSGTR_LIRCsocketerr "Valami baj van a lirc socket-tel: %s\n"
 #define MSGTR_LIRCcfgerr "Nem tudom olvasni a LIRC konfigurációs file-t : %s \n"
 
 //  ====================== GUI messages/buttons ========================
@@ -229,7 +205,6 @@ static char help_text[]=
 #define MSGTR_SubtitleSelect "Felirat kiválasztása ..."
 #define MSGTR_OtherSelect "File kiválasztása ..."
 #define MSGTR_AudioFileSelect "Külsõ audio csatorna választása ..."
-#define MSGTR_MessageBox "Üzenetablak"
 #define MSGTR_Equalizer "Equalizer"
 #define MSGTR_PlayList "Lejátszási lista"
 #define MSGTR_SkinBrowser "Skin böngészõ"
@@ -255,7 +230,6 @@ static char help_text[]=
 // --- error messages ---
 #define MSGTR_NEMDB "Nincs elég memória a buffer kirajzolásához."
 #define MSGTR_NEMFMR "Nincs elég memória a menü rendereléséhez."
-#define MSGTR_NEMFMM "Nincs elég memória a fõablak alakjának maszkolásához."
 #define MSGTR_IDFGCVD "Nem talaltam gui kompatibilis video drivert."
 
 // --- skin loader error messages
@@ -349,7 +323,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Coefficient "Együttható:"
 #define MSGTR_PREFERENCES_AudioDelay "Hang késleltetés"
 #define MSGTR_PREFERENCES_Audio "Audio"
-#define MSGTR_PREFERENCES_VideoEqu "Video equalizer"
 #define MSGTR_PREFERENCES_DoubleBuffer "Dupla bufferelés"
 #define MSGTR_PREFERENCES_DirectRender "Direct rendering"
 #define MSGTR_PREFERENCES_FrameDrop "Kép eldobás"

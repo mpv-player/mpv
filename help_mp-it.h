@@ -61,7 +61,6 @@ static char help_text[]=
 // mplayer.c:
 
 #define MSGTR_Exiting "\nIn uscita... (%s)\n"
-#define MSGTR_Exit_frames "Numero di fotogrammi riprodotti richiesti"
 #define MSGTR_Exit_quit "Uscita"
 #define MSGTR_Exit_eof "Fine del file"
 #define MSGTR_Exit_error "Errore fatale"
@@ -81,19 +80,14 @@ static char help_text[]=
 #define MSGTR_CantOpenDumpfile "Impossibile aprire il file di dump!!!\n"
 #define MSGTR_CoreDumped "core dumped :)\n"
 #define MSGTR_FPSnotspecified "FPS non specificato (o non valido) nell\'intestazione! Usa l\'opzione -fps !\n"
-#define MSGTR_NoVideoStream "Mi dispiace, niente flusso video... Non si può ancora riprodurre\n"
 #define MSGTR_TryForceAudioFmt "Cerco di forzare l\'uso della famiglia dei driver dei codec audio %d ...\n"
 #define MSGTR_CantFindAfmtFallback "Impossibile trovare i codec audio per la famiglia dei driver richiesta, torno agli altri driver.\n"
 #define MSGTR_CantFindAudioCodec "Impossibile trovare il codec per il formato audio 0x%X !\n"
 #define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Prova ad aggiornare %s da etc/codecs.conf\n*** Se non va ancora bene, allora leggi DOCS/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "Impossibile inizializzare il codec audio! -> nessun suono\n"
 #define MSGTR_TryForceVideoFmt "Cerco di forzare l\'uso della famiglia dei driver dei codec video %d ...\n"
-#define MSGTR_CantFindVfmtFallback "Impossibile trovare i codec video per la famiglia dei driver richiesta, torno agli altri driver.\n"
 #define MSGTR_CantFindVideoCodec "Impossibile trovare il codec per il formato video 0x%X !\n"
 #define MSGTR_VOincompCodec "Mi dispiace, il dispositivo di video_out selezionato è incompatibile con questo codec.\n"
-#define MSGTR_CouldntInitVideoCodec "FATAL: Impossibile inizializzare il codec video :(\n"
-#define MSGTR_EncodeFileExists "Il file già esiste: %s (non sovrascrivere il tuo AVI preferito!)\n"
-#define MSGTR_CantCreateEncodeFile "Impossibile creare il file per la codifica\n"
 #define MSGTR_CannotInitVO "FATAL: Impossibile inizializzare il driver video!\n"
 #define MSGTR_CannotInitAO "Impossibile aprire/inizializzare il dispositivo audio -> NESSUN SUONO\n"
 #define MSGTR_StartPlaying "Inizio la riproduzione...\n"
@@ -153,7 +147,6 @@ static char help_text[]=
 #define MSGTR_DetectedMPEGPSfile "Rilevato formato file MPEG-PS !\n"
 #define MSGTR_DetectedMPEGESfile "Rilevato formato file MPEG-ES !\n"
 #define MSGTR_DetectedQTMOVfile "Rilevato formato file QuickTime/MOV !\n"
-#define MSGTR_MissingMpegVideo "Manca il flusso video MPEG!? Contatta l\'autore, può essere un baco :(\n"
 #define MSGTR_InvalidMPEGES "Flusso MPEG-ES non valido??? Contatta l\'autore, può essere un baco :(\n"
 #define MSGTR_FormatNotRecognized "===== Mi dispiace, questo formato file non è riconosciuto/supportato ======\n"\
 				  "=== Se questo è un file AVI, ASF o MPEG, per favore contatta l\'autore! ===\n"
@@ -178,7 +171,6 @@ static char help_text[]=
 #define MSGTR_MOVcomprhdr "MOV: Intestazioni compresse non (ancora) supportate!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Avvertimento! Rilevata variabile FOURCC !?\n"
 #define MSGTR_MOVtooManyTrk "MOV: Avvertimento! troppe tracce!"
-#define MSGTR_MOVnotyetsupp "\n****** Formato Quicktime MOV non ancora supportato!!!!!!! *******\n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "impossibile aprire il codec\n"
@@ -188,18 +180,6 @@ static char help_text[]=
 #define MSGTR_ACMiniterror "Impossibile caricare/inizializzare il codec audio Win32/ACM (manca il file DLL ?)\n"
 #define MSGTR_MissingLAVCcodec "Impossibile trovare il codec '%s' in libavcodec...\n"
 
-#define MSGTR_NoDShowSupport "MPlayer è stato compilato SENZA il supporto per Directshow!\n"
-#define MSGTR_NoWfvSupport "Supporto per i codec win32 disabilitato o non disponibile sulle piattaforme non-x86 !\n"
-#define MSGTR_NoDivx4Support "MPlayer è stato compilato SENZA il supporto per DivX4Linux (libdivxdecore.so) !\n"
-#define MSGTR_NoLAVCsupport "MPlayer è stato compilato SENZA il supporto per ffmpeg/libavcodec \n"
-#define MSGTR_NoACMSupport "Audio codec Win32/ACM disabilitato o non disponibile sulle CPU non-x86 -> forzo a no audio :(\n"
-#define MSGTR_NoDShowAudio "Compilato senza il supporto per DirectShow -> forzo a no audio :(\n"
-#define MSGTR_NoOggVorbis "Audio codec OggVorbis disabilitato -> forzo a no audio :(\n"
-#define MSGTR_NoXAnimSupport "MPlayer è stato compilato SENZA il supporto per XAnim !\n"
-
-#define MSGTR_MpegPPhint "AVVERTIMENTO! Hai richiesto la postelaborazione dell\'immagine per un video MPEG 1/2, ma\n" \
-			 "              MPlayer è stato compilato senza il supporto per la postelaborazione MPEG 1/2 !\n" \
-			 "              #define MPEG12_POSTPROC in config.h, e ricompila libmpeg2!\n"
 #define MSGTR_MpegNoSequHdr "MPEG: FATAL: EOF mentre cercavo la sequenza di intestazione\n"
 #define MSGTR_CannotReadMpegSequHdr "FATAL: Impossibile leggere la sequenza di intestazione!\n"
 #define MSGTR_CannotReadMpegSequHdrEx "FATAL: Impossibile leggere l\'estensione della sequenza di intestazione!\n"
@@ -208,17 +188,13 @@ static char help_text[]=
 
 #define MSGTR_ShMemAllocFail "Impossibile allocare la memoria condivisa\n"
 #define MSGTR_CantAllocAudioBuf "Impossibile allocare il buffer di uscita dell\'audio\n"
-#define MSGTR_NoMemForDecodedImage "memoria insufficiente per il buffer di decodifica dell\'immagine (%ld byte)\n"
 
-#define MSGTR_AC3notvalid "Flusso AC3 non valido.\n"
-#define MSGTR_AC3only48k "Supportati solo flussi a 48000 Hz.\n"
 #define MSGTR_UnknownAudio "Formato audio sconosciuto/mancante, non uso l\'audio\n"
 
 // LIRC:
 #define MSGTR_SettingUpLIRC "Configurazione del supporto per lirc...\n"
 #define MSGTR_LIRCdisabled "Non potrai usare il tuo telecomando\n"
 #define MSGTR_LIRCopenfailed "Apertura del supporto per lirc fallita!\n"
-#define MSGTR_LIRCsocketerr "C'è qualcosa che non va nel socket di lirc: %s\n"
 #define MSGTR_LIRCcfgerr "Fallimento nella lettura del file di configurazione di LIRC %s !\n"
 
 
@@ -232,7 +208,6 @@ static char help_text[]=
 #define MSGTR_SubtitleSelect "Seleziona il sottotitolo ..."
 #define MSGTR_OtherSelect "Seleziona ..."
 #define MSGTR_AudioFileSelect "Seleziona canale audio esterno ..."
-#define MSGTR_MessageBox "Finestra dei messaggi"
 #define MSGTR_PlayList "PlayList"
 #define MSGTR_Equalizer "Equalizzatore"			 
 #define MSGTR_SkinBrowser "Gestore Skin"
@@ -249,7 +224,6 @@ static char help_text[]=
 // --- error messages ---
 #define MSGTR_NEMDB "Mi dispiace, non c'è sufficiente memoria per il buffer di disegno."
 #define MSGTR_NEMFMR "Mi dispiace, non c'è sufficiente memoria per visualizzare il menu."
-#define MSGTR_NEMFMM "Mi dispiace, non c'è sufficiente memoria per la maschera della finestra principale."
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[skin] errore nel file di configurazione della skin nella riga %d: %s"
