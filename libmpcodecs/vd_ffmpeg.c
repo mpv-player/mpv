@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <time.h>
 
 #include "config.h"
 #include "mp_msg.h"
@@ -62,6 +63,7 @@ static void get_buffer(struct AVCodecContext *avctx, int width, int height, int 
 static int lavc_param_workaround_bugs=0;
 static int lavc_param_error_resilience=0;
 static int lavc_param_gray=0;
+static int lavc_param_vstats=0;
 
 struct config lavc_decode_opts_conf[]={
 #if LIBAVCODEC_BUILD >= 4611
@@ -71,6 +73,7 @@ struct config lavc_decode_opts_conf[]={
 #if LIBAVCODEC_BUILD >= 4614
 	{"gray", &lavc_param_gray, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_PART, NULL},
 #endif
+	{"vstats", &lavc_param_vstats, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_PART, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -381,6 +384,44 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     ret = avcodec_decode_video(avctx, &lavc_picture,
 	     &got_picture, data, len);
     if(ret<0) mp_msg(MSGT_DECVIDEO,MSGL_WARN, "Error while decoding frame!\n");
+
+//-- vstats generation
+    while(lavc_param_vstats){ // always one time loop
+        static FILE *fvstats=NULL;
+        char filename[20];
+        static int all_len=0;
+        static int frame_number=0;
+        static double all_frametime=0.0;
+
+        if(!fvstats) {
+            time_t today2;
+            struct tm *today;
+            today2 = time(NULL);
+            today = localtime(&today2);
+            sprintf(filename, "vstats_%02d%02d%02d.log", today->tm_hour,
+                today->tm_min, today->tm_sec);
+            fvstats = fopen(filename,"w");
+            if(!fvstats) {
+                perror("fopen");
+                lavc_param_vstats=0; // disable block
+                break;
+                /*exit(1);*/
+            }
+        }
+
+        all_len+=len;
+        all_frametime+=sh->frametime;
+        fprintf(fvstats, "frame= %5d q= %2d f_size= %6d s_size= %8.0fkB ",
+            ++frame_number, avctx->quality, len, (double)all_len/1024);
+        fprintf(fvstats, "time= %0.3f br= %7.1fkbit/s avg_br= %7.1fkbit/s\n",
+           all_frametime, (double)(len*8)/sh->frametime/1000.0,
+           (double)(all_len*8)/all_frametime/1000.0);
+        // FIXME key_frame isn't set by lavc on decoding! ::atmos
+        //fprintf(fvstats, "type= %c\n", avctx->key_frame == 1 ? 'I' : 'P');
+        break;
+    }
+//--
+
     if(!got_picture) return NULL;	// skipped image
 
     if(init_vo(sh)<0) return NULL;
