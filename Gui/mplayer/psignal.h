@@ -39,15 +39,16 @@
 #define mplIncAudioBufferDelay                   28
 #define mplDecAudioBufferDelay                   29
 
-#ifdef	__bsdi__
-#define	_NSIG NSIG
-#endif
-
-#ifdef	__SVR4
+#ifndef SIGTYPE
+#ifdef SIGUSR2
 #define	SIGTYPE SIGUSR2
 #warning should we use SIGUSR1 or SIGUSR2 on linux, bsd, ... too?
 #else
+#ifdef	__bsdi__
+#define	_NSIG NSIG
+#endif
 #define SIGTYPE _NSIG - 1
+#endif
 #endif
 
 extern int gtkIsOk;
