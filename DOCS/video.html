@@ -134,9 +134,8 @@ usable with <B>MPlayer</B>.</P>
 
 <P>Older 3dfx drivers were known to have problems with XVideo acceleration,
 it didn't support either YUY2 or YV12, and so. Verify that you have
-XFree86 version 4.1.0 or greater, it works ok with YUY2, but <B>crashes
-with YV12</B>! Thus, either wait for 4.2.0 or use the
-<A HREF="http://dri.sourceforge.net">DRI</A> cvs.
+XFree86 version 4.2.0 or greater, it works ok with YV12 and YUY2. Previous
+versions, including 4.1.0 <B>crashes with YV12</B>!
 If you experience strange effects using -vo xv, try SDL (it has XVideo too)
 and see if it helps. Check the <A HREF="#2.3.1.4">SDL section</A> for details.</P>
 
@@ -996,9 +995,11 @@ you must get it working first. Then recompile <B>MPlayer</B> with
 
 <P><B><A NAME=2.3.1.A>2.3.1.A. TV-out support</A></B></P>
 
-<P><B><A NAME=2.3.1.A.1>2.3.1.A.1. Matrox cards</A></B></P>
+<P><B><A NAME=2.3.1.A.1>2.3.1.A.1. Matrox G400 cards</A></B></P>
 
-<P>Under Linux you have 2 methods to get TV out working :</P>
+<P>Under Linux you have 2 methods to get G400 TV out working :</P>
+
+<P><B>IMPORTANT:</B> Only Matrox G400DH/G400MAX has TV-out support under Linux, others (G450, G550) has <B>NOT!</B></P>
 
 <P>
 <UL>
