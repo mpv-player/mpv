@@ -17,6 +17,7 @@ PRG_MENCODER = mencoder
 #prefix = /usr/local
 BINDIR = ${prefix}/bin
 # BINDIR = /usr/local/bin
+MANDIR = ${prefix}/man
 
 # a BSD compatible 'install' program
 INSTALL = install
@@ -189,11 +190,11 @@ install: $(ALL_PRG)
 ifeq ($(GUI),yes)
 	-ln -sf $(BINDIR)/$(PRG) $(BINDIR)/gmplayer
 endif
-	if test ! -d $(prefix)/man/man1 ; then mkdir -p $(prefix)/man/man1; fi
-	$(INSTALL) -c -m 644 DOCS/mplayer.1 $(prefix)/man/man1/mplayer.1
+	if test ! -d $(MANDIR)/man1 ; then mkdir -p $(MANDIR)/man1; fi
+	$(INSTALL) -c -m 644 DOCS/mplayer.1 $(MANDIR)/man1/mplayer.1
 ifeq ($(MENCODER),yes)
 	$(INSTALL) -m 755 -s $(PRG_MENCODER) $(BINDIR)/$(PRG_MENCODER)
-	$(INSTALL) -c -m 644 DOCS/mencoder.1 $(prefix)/man/man1/mencoder.1
+	$(INSTALL) -c -m 644 DOCS/mencoder.1 $(MANDIR)/man1/mencoder.1
 endif
 
 ifeq ($(CSS_USE),yes)
@@ -205,9 +206,9 @@ ifeq ($(CSS_USE),yes)
 endif
 
 uninstall:
-	-rm -f $(BINDIR)/$(PRG) $(BINDIR)/gmplayer $(prefix)/man/man1/mplayer.1
+	-rm -f $(BINDIR)/$(PRG) $(BINDIR)/gmplayer $(MANDIR)/man1/mplayer.1
 	-rm -f $(BINDIR)/$(PRG_FIBMAP)
-	-rm -f  $(BINDIR)/$(PRG_MENCODER) $(prefix)/man/man1/mencoder.1
+	-rm -f  $(BINDIR)/$(PRG_MENCODER) $(MANDIR)/man1/mencoder.1
 	@echo "Uninstall completed"
 
 clean:
