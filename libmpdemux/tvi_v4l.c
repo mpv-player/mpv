@@ -562,10 +562,12 @@ static int uninit(priv_t *priv)
     pthread_join(priv->video_grabber_thread, NULL);
     mp_msg(MSGT_TV, MSGL_V, "done\n");
 
-    priv->audio[priv->audio_id].volume = 0;
-    priv->audio[priv->audio_id].flags |= VIDEO_AUDIO_MUTE;
-    ioctl(priv->video_fd, VIDIOCSAUDIO, &priv->audio[priv->audio_id]);
-
+    if (priv->capability.audios) {
+	priv->audio[priv->audio_id].volume = 0;
+	priv->audio[priv->audio_id].flags |= VIDEO_AUDIO_MUTE;
+	ioctl(priv->video_fd, VIDIOCSAUDIO, &priv->audio[priv->audio_id]);
+    }
+    
     close(priv->video_fd);
 
     audio_in_uninit(&priv->audio_in);
@@ -941,6 +943,12 @@ static int control(priv_t *priv, int cmd, void *arg)
 	    /* argument is in MHz ! */
 	    unsigned long freq = (unsigned long)*(void **)arg;
 	    
+	    if (priv->capability.audios) {
+		priv->audio[priv->audio_id].volume = 0;
+		priv->audio[priv->audio_id].flags |= VIDEO_AUDIO_MUTE;
+		ioctl(priv->video_fd, VIDIOCSAUDIO, &priv->audio[priv->audio_id]);
+	    }
+
 	    mp_msg(MSGT_TV, MSGL_V, "requested frequency: %.3f\n", (float)freq/16);
 	    
 	    /* tuner uses khz not mhz ! */
@@ -953,6 +961,13 @@ static int control(priv_t *priv, int cmd, void *arg)
 		return(TVI_CONTROL_FALSE);
 	    }
 	    usleep(100000); // wait to supress noise during switching
+
+	    if (priv->capability.audios) {
+		priv->audio[priv->audio_id].volume = tv_param_volume;
+		priv->audio[priv->audio_id].flags &= ~VIDEO_AUDIO_MUTE;
+		ioctl(priv->video_fd, VIDIOCSAUDIO, &priv->audio[priv->audio_id]);
+	    }
+
 	    return(TVI_CONTROL_TRUE);
 	}
 	case TVI_CONTROL_TUN_GET_TUNER:
