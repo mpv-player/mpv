@@ -16,7 +16,7 @@ all:
 	   make -C jpeg/jpeg-6b libjpeg.a )
 #	 ( make -C jpeg/jpeg-6b libjpeg.a && mv jpeg/jpeg-6b/libjpeg.a "$(JPEGLIB)" ) )
 	$(MAKE) $(OBJS)
-	ar rc libbitmap.a $(OBJS) jpeg/jpeg-6b/*.o
+	$(AR) rc libbitmap.a $(OBJS) jpeg/jpeg-6b/*.o
 	ranlib libbitmap.a
 	mv libbitmap.a ../libs
 

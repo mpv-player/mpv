@@ -184,7 +184,7 @@ Audio:
   --disable-alsa         disable alsa sound support [autodetect]
   --disable-sunaudio     disable Sun sound support [autodetect]
   --disable-mad          disable mad audio support [autodetect]
-  --disable-select       disable using select() on OSS audio device [enable]
+  --disable-select       disable using select() on audio device [enable]
 
 Miscellaneous options:
   --cc=COMPILER          use this C compiler to build MPlayer [gcc]
@@ -3526,8 +3526,10 @@ test "$_xanim" = yes && _ld_dl_dynamic='-rdynamic'
 
 _ld_arch="$_ld_arch $_ld_pthread $_ld_dl $_ld_dl_dynamic"
 bsdos && _ld_arch="$_ld_arch -ldvd"
-netbsd && _ld_arch="$_ld_arch -li386 -lossaudio"
-openbsd && _ld_arch="$_ld_arch -li386 -lossaudio"
+if netbsd || openbsd ; then
+  _ld_arch="$_ld_arch -lossaudio"
+  x86 && _ld_arch="$_ld_arch -li386"
+fi
 
 _def_debug='#undef MP_DEBUG'
 test "$_debug" && _def_debug='#define MP_DEBUG 1'
@@ -3598,7 +3600,7 @@ prefix = $_prefix
 DATADIR = $_datadir
 CONFDIR = $_confdir
 LIBDIR = $_libdir
-AR = ar
+#AR = ar
 CC = $_cc
 AWK = $_awk
 # OPTFLAGS = -O4 $_profile $_debug $_march $_mcpu -pipe -fomit-frame-pointer -ffast-math

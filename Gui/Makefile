@@ -28,7 +28,7 @@ CFLAGS = $(OPTIMIZE) $(INCDIR) $(DEBUG)
 $(LIB):	.depend	$(OBJS)
 	$(MAKE) -C mplayer
 	rm -f $(LIB)
-	ar rc $(LIB) $(OBJS) $(MPLAYEROBJS)
+	$(AR) rc $(LIB) $(OBJS) $(MPLAYEROBJS)
 
 all:	$(LIB)
 
