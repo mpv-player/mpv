@@ -1,4 +1,4 @@
-.\" synced with 1.732
+.\" synced with 1.734
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "21 Septembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "22 Septembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -3038,7 +3038,7 @@ en bas de l'image.
 Écrit les fichiers PNM en mode brut (par défaut).
 .IPs ascii
 Écrit les fichiers PNM en mode ASCII (par défaut).
-.IPs outdir= <nom_répertoire>
+.IPs outdir=<nom_répertoire>
 Définit le répertoire où écrire les fichiers PNM.
 .IPs subdirs=<valeur>
 Crée des sous-répertoires numérotés avec le préfixe donné
@@ -7121,7 +7121,7 @@ Active le mode 2-passes.
 La première passe est celle qui récolte des statistiques sur le vidéo.
 .
 .TP
-.B qcompress=<0\-1>
+.B qcomp=<0\-1>
 compression des quantificateurs (par défaut\ : 0.6)
 Cela affecte le ratecontrol\ : une faible valeur rend le débit binaire plus
 contant, alors qu'une valeur importante rend les quantificateurs plus contants.
@@ -7157,6 +7157,26 @@ l'encodage se termine (par défaut)
  3: PSNR, paramètres de quantificateurs, type de trame, taille, et autres
 statistiques sur chaque trame.
 .REss
+.
+ .TP
+.B subq=<0\-5>
+Ajuste la qualité d'affinement de subpel.
+Ce paramètre contrôle le compromis qualité/\:vitesse liées aux décisions du
+processus d'estimation du mouvement.
+.RSs
+0: halfpel uniquement (précision d'un demi-pixel)
+.br
+1: 1 itération qpel sur le candidant vainqueur (default)
+.br
+2: 2 itérations qpel sur le candidant vainqueur
+.br
+3: halfpel sur tous les types de macro-blocs, qpel sur le vainqueur
+.br
+4: qpel partout
+.br
+5: plus d'itétations qpel
+.REss
+.
 .TP
 .B psnr\ \ \ 
 Affiche les statistiques de rapport signal/bruit.
