@@ -1913,7 +1913,7 @@ if test "$_libavcodec" = yes ; then
    _lavclib='-Llibavcodec -lavcodec'
    _lavcdep='libavcodec/libavcodec.a'
    _libavcodec='#define USE_LIBAVCODEC'
-   _libavcodecso='#undef USE_LIBAVCODEC'
+   _libavcodecso='#undef USE_LIBAVCODEC_SO'
 else
    if test "$_libavcodec_so" = yes ; then
       _lavclib='-lffmpeg'
