@@ -105,6 +105,8 @@ params:
                                 C++ compiler&libs, or you've found dshow codecs
                                 slower than old VfW ones)
 
+	--disable-fastmemcpy    disable 3dnow/sse/mmx optimized memcpy()
+
         --with-x11libdir=DIR    X library files are in DIR
         --with-win32libdir=DIR  windows codec files
         --with-csslibdir=DIR    directory contains libcss.so shared library
@@ -212,6 +214,7 @@ _fbdev=yes
 _lirc=no
 _css=no
 _dshow=yes
+_fastmemcpy=yes
 
 _x=1
 _y=1
@@ -612,6 +615,9 @@ do
   --disable-dshow)
         _dshow=no
 	;;
+  --disable-fastmemcpy)
+        _fastmemcpy=no
+	;;
   --with-win32libdir=*)
         _win32libdir=`echo $ac_option | cut -d '=' -f 2`
 	_win32libdirnotify=no
@@ -669,6 +675,7 @@ echo "Checking for FBDev ... $_fbdev"
 echo "Checking for DeCSS support ... $_css"
 echo "Checking for PNG support ... $_png"
 echo "Checking for DirectShow ... $_dshow"
+echo "Checking for fastmemcpy ... $_fastmemcpy"
 # write conf files.
 
 if [ $_gl = yes ]; then
@@ -701,6 +708,12 @@ else
    _dshowlib=''
    _dshowdep=''
    _dshow='#undef USE_DIRECTSHOW'
+fi
+
+if [ $_fastmemcpy = yes ]; then
+   _fastmemcpy='#define USE_FASTMEMCPY'
+else
+   _fastmemcpy='#undef USE_FASTMEMCPY'
 fi
 
 if [ $_x11 = yes ]; then
@@ -974,6 +987,9 @@ $_css
 
 /* DirectShow support */
 $_dshow
+
+/* Use 3dnow/mmxext/sse/mmx optimized fast memcpy() [maybe buggy... signal 4]*/
+$_fastmemcpy
 
 /* Define if your processor stores words with the most significant
    byte first (like Motorola and SPARC, unlike Intel and VAX).  */
