@@ -30,12 +30,20 @@ inline static void vo_draw_text_osd(int dxs,int dys,void (*draw_alpha)(int x0,in
 }
 
 int vo_osd_progbar_type=-1;
-int vo_osd_progbar_value=100;   // 0..255
+int vo_osd_progbar_value=100;   // 0..256
+
+// if we have n=256 bars then OSD progbar looks like below
+// 
+// 0   1    2    3 ...   256  <= vo_osd_progbar_value
+// |   |    |    |       |
+// [ ===  ===  === ... === ]
+// 
+//  the above schema is rescalled to n=elems bars
 
 inline static void vo_draw_text_progbar(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
    	unsigned char *s;
    	unsigned char *sa;
-        int i,w,h,st;
+        int i,w,h,st,mark;
         int y=(dys-vo_font->height)/2;
         int c,font;
         int delimw=vo_font->width[OSD_PB_START]
@@ -45,8 +53,15 @@ inline static void vo_draw_text_progbar(int dxs,int dys,void (*draw_alpha)(int x
    	int charw=vo_font->width[OSD_PB_0]+vo_font->charspace;
         int elems=width/charw;
    	int x=(dxs-elems*charw-delimw)/2;
-        int mark=(vo_osd_progbar_value*(elems+1))>>8;
 
+	if (vo_osd_progbar_value<=0)
+     	   mark=0;
+	else {
+	   int mm=vo_osd_progbar_value*elems;
+	   mark=mm>>8;
+	   if (mm & 0x00FF) mark++;
+	   if (mark>elems) mark=elems;
+	}
 //        printf("osd.progbar  width=%d  xpos=%d\n",width,x);
 
         c=vo_osd_progbar_type;
@@ -254,3 +269,4 @@ void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h,
     }
 
 }
+         

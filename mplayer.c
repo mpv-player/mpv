@@ -1612,8 +1612,8 @@ if(auto_quality>0){
         if(osd_level){
           osd_visible=sh_video->fps; // 1 sec
           vo_osd_progbar_type=OSD_VOLUME;
-          vo_osd_progbar_value=(mixer_l+mixer_r)*255/200;
-          //printf("volume: %d\n",vo_osd_progbar_value);
+          vo_osd_progbar_value=((mixer_l+mixer_r)*256.0)/200.0;
+          // printf("volume: %d\n",vo_osd_progbar_value);
         }
 #endif
       }
@@ -1649,7 +1649,7 @@ if(auto_quality>0){
     		if(osd_level){
             	    osd_visible=sh_video->fps; // 1 sec
 	    	    vo_osd_progbar_type=OSD_CONTRAST;
-            	    vo_osd_progbar_value=(v_cont)*255/100;
+            	    vo_osd_progbar_value=((v_cont)<<8)/100;
 		}
 #endif
 	}
@@ -1668,7 +1668,7 @@ if(auto_quality>0){
     		if(osd_level){
             	    osd_visible=sh_video->fps; // 1 sec
 	    	    vo_osd_progbar_type=OSD_BRIGHTNESS;
-            	    vo_osd_progbar_value=(v_bright)*255/100;
+            	    vo_osd_progbar_value=((v_bright)<<8)/100;
 		}
 #endif
 	}
@@ -1687,7 +1687,7 @@ if(auto_quality>0){
     		if(osd_level){
             	    osd_visible=sh_video->fps; // 1 sec
 	    	    vo_osd_progbar_type=OSD_HUE;
-            	    vo_osd_progbar_value=(v_hue)*255/100;
+            	    vo_osd_progbar_value=((v_hue)<<8)/100;
 		}
 #endif
 	}
@@ -1706,7 +1706,7 @@ if(auto_quality>0){
     		if(osd_level){
             	    osd_visible=sh_video->fps; // 1 sec
 	    	    vo_osd_progbar_type=OSD_SATURATION;
-            	    vo_osd_progbar_value=(v_saturation)*255/100;
+            	    vo_osd_progbar_value=((v_saturation)<<8)/100;
 		}
 #endif
 	}
@@ -1763,10 +1763,6 @@ if(rel_seek_secs || abs_seek_pos){
           osd_visible=sh_video->fps; // 1 sec
           vo_osd_progbar_type=0;
 	  vo_osd_progbar_value=(demuxer->filepos-demuxer->movi_start)/len;
-	  if (vo_osd_progbar_value<0)
-	     vo_osd_progbar_value=0;
-	  else if (vo_osd_progbar_value>255)
-	     vo_osd_progbar_value=255;
         }
       }
 #endif
