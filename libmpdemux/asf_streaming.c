@@ -299,10 +299,10 @@ asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) {
   pos = find_asf_guid(buffer, asf_stream_group_guid, start, size);
   if (pos >= 0) {
     // stream bitrate properties object
-	mp_msg(MSGT_NETWORK, MSGL_V, "Stream bitrate properties object\n");
 	int stream_count;
 	char *ptr = &buffer[pos];
 	
+	mp_msg(MSGT_NETWORK, MSGL_V, "Stream bitrate properties object\n");
 		stream_count = le2me_16(*(uint16_t*)ptr);
 		ptr += sizeof(uint16_t);
 		if (ptr > &buffer[size]) goto len_err_out;
