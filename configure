@@ -153,8 +153,7 @@ Optional features:
   --disable-tv-bsdbt848  disable BSD BT848 Interface support [autodetect]
   --disable-edl          disable EDL (edit decision list) support [enable]
   --disable-rtc          disable RTC (/dev/rtc) on Linux [autodetect]
-  --disable-streaming    disable network streaming support
-                         (support for: http/mms/rtp) [enable]
+  --disable-network      disable network support (for: http/mms/rtp) [enable]
   --enable-smb           enable Samba (SMB) input support [autodetect]
   --enable-live          enable LIVE.COM Streaming Media support [disable]
   --enable-dvdnav        enable dvdnav support [disable]
@@ -1056,7 +1055,7 @@ _tv=yes
 _tv_v4l=auto
 _tv_bsdbt848=auto
 _edl=yes
-_streaming=yes
+_network=yes
 _smbsupport=auto
 _vidix=auto
 _joystick=no
@@ -1229,8 +1228,8 @@ for ac_option do
   --disable-tv-v4l)	_tv_v4l=no	;;
   --enable-fastmemcpy)	_fastmemcpy=yes	;;
   --disable-fastmemcpy)	_fastmemcpy=no	;;
-  --enable-streaming)	_streaming=yes	;;
-  --disable-streaming)	_streaming=no	;;
+  --enable-network)	_network=yes	;;
+  --disable-network)	_network=no	;;
   --enable-smb)		_smbsupport=yes	;;
   --disable-smb)	_smbsupport=no	;;
   --enable-vidix)	_vidix=yes	;;
@@ -1848,8 +1847,8 @@ EOF
     echores "yes (using $_ld_sock)"
   else
     _use_aton=no
-    _streaming=no
-    echores "no (=> streaming support disabled)"
+    _network=no
+    echores "no (=> network support disabled)"
   fi
 fi
 
@@ -4342,14 +4341,14 @@ if test -z "$_livelibdir" ; then
 fi
 
 echocheck "LIVE.COM Streaming Media libraries"
-if test "$_live" = auto  && test "$_streaming" = yes ; then
+if test "$_live" = auto  && test "$_network" = yes ; then
   _live=yes
   test "$_livelibdir" || _live=no
   # TODO: deeper, more reliable test of libs, and version!
   # (users may have empty live/ dir or something different there, for
   # example 'live config files', or they may have old, incompatibel version)
 fi
-if test "$_live" = yes && test "$_streaming" = yes ; then
+if test "$_live" = yes && test "$_network" = yes ; then
   echores "yes (using $_livelibdir)"
   _def_live='#define STREAMING_LIVE_DOT_COM 1'
   _live_libs_def="# LIVE.COM Streaming Media libraries:
@@ -4787,17 +4786,17 @@ fi
 echores "$_select"
 
 
-echocheck "streaming"
-# FIXME streaming check
-if test "$_streaming" != no ; then
-  _def_streaming='#define STREAMING 1'
-  _ld_streaming="$_ld_sock"
-  _inputmodules="streaming $_inputmodules"
+echocheck "network"
+# FIXME network check
+if test "$_network" != no ; then
+  _def_network='#define MPLAYER_NETWORK 1'
+  _ld_network="$_ld_sock"
+  _inputmodules="network $_inputmodules"
 else
-  _noinputmodules="streaming $_noinputmodules"
-  _def_streaming='#undef STREAMING'
+  _noinputmodules="network $_noinputmodules"
+  _def_network='#undef MPLAYER_NETWORK'
 fi
-echores "$_streaming"
+echores "$_network"
 
 # endian testing
 echocheck "byte order"
@@ -5214,9 +5213,9 @@ STRIPBINARIES = $_stripbinaries
 
 $_live_libs_def
 
-STREAMING = $_streaming
+MPLAYER_NETWORK = $_network
 STREAMING_LIVE_DOT_COM = $_live
-STREAMING_LIB = $_ld_streaming $_ld_live
+MPLAYER_NETWORK_LIB = $_ld_network $_ld_live
 DVBIN = $_dvbin
 VIDIX = $_vidix
 SHARED_PP = $_shared_pp
@@ -5733,8 +5732,8 @@ $_def_matroska_gcc2
 $_def_faad
 $_def_faad_version
 
-/* enable streaming */
-$_def_streaming
+/* enable network */
+$_def_network
 
 /* define this to use inet_aton() instead of inet_pton() */
 $_def_use_aton

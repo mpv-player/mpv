@@ -47,7 +47,7 @@ extern stream_info_t stream_info_vcd;
 #ifdef HAVE_CDDA
 extern stream_info_t stream_info_cdda;
 #endif
-#ifdef STREAMING
+#ifdef MPLAYER_NETWORK
 extern stream_info_t stream_info_netstream;
 #endif
 extern stream_info_t stream_info_null;
@@ -60,7 +60,7 @@ stream_info_t* auto_open_streams[] = {
 #ifdef HAVE_CDDA
   &stream_info_cdda,
 #endif
-#ifdef STREAMING
+#ifdef MPLAYER_NETWORK
   &stream_info_netstream,
 #endif
   &stream_info_null,
@@ -167,7 +167,7 @@ int stream_fill_buffer(stream_t *s){
     break;
 #endif    
   case STREAMTYPE_STREAM:
-#ifdef STREAMING
+#ifdef MPLAYER_NETWORK
     if( s->streaming_ctrl!=NULL ) {
 	    len=s->streaming_ctrl->streaming_read(s->fd,s->buffer,STREAM_BUFFER_SIZE, s->streaming_ctrl);break;
     } else {
@@ -299,7 +299,7 @@ if(newpos==0 || newpos!=s->pos){
     // Some streaming protocol allow to seek backward and forward
     // A function call that return -1 can tell that the protocol
     // doesn't support seeking.
-#ifdef STREAMING
+#ifdef MPLAYER_NETWORK
     if( s->streaming_ctrl!=NULL && s->streaming_ctrl->streaming_seek ) {
       if( s->streaming_ctrl->streaming_seek( s->fd, pos, s->streaming_ctrl )<0 ) {
         mp_msg(MSGT_STREAM,MSGL_INFO,"Stream not seekable!\n");

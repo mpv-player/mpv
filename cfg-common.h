@@ -36,7 +36,7 @@
 	{"csslib", "MPlayer was compiled WITHOUT libcss support!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
 
-#ifdef STREAMING
+#ifdef MPLAYER_NETWORK
 	{"user", &network_username, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"passwd", &network_password, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"bandwidth", &network_bandwidth, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
@@ -245,7 +245,7 @@ extern int flip;
 /* from dec_audio, currently used for ac3surround decoder only */
 extern int audio_output_channels;
 
-#ifdef STREAMING
+#ifdef MPLAYER_NETWORK
 /* defined in network.c */
 extern char *network_username;
 extern char *network_password;

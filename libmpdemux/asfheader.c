@@ -327,7 +327,7 @@ while(!stream_eof(demuxer->stream)){
 
 if(streams) {
   uint32_t vr = 0, ar = 0,i;
-#ifdef STREAMING
+#ifdef MPLAYER_NETWORK
   if( demuxer->stream->streaming_ctrl!=NULL ) {
 	  if( demuxer->stream->streaming_ctrl->bandwidth!=0 && demuxer->stream->streaming_ctrl->data!=NULL ) {
 		  best_audio = ((asf_http_streaming_ctrl_t*)demuxer->stream->streaming_ctrl->data)->audio_id;

@@ -14,7 +14,7 @@
 
 #include "config.h"
 
-#if defined(HAVE_CDDA) && defined(STREAMING)
+#if defined(HAVE_CDDA) && defined(MPLAYER_NETWORK)
 
 #include <stdio.h>
 #include <stdlib.h>

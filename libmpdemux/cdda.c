@@ -101,7 +101,7 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
     return STREAM_UNSUPORTED;
   }
 
-#ifdef STREAMING
+#ifdef MPLAYER_NETWORK
   if(strncmp(st->url,"cddb",4) == 0) {
     i = cddb_resolve(p->device, &xmcd_file);
     if(i == 0) {
@@ -209,7 +209,7 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
   paranoia_seek(priv->cdp,priv->start_sector,SEEK_SET);
   priv->sector = priv->start_sector;
 
-#ifdef STREAMING
+#ifdef MPLAYER_NETWORK
   if(cddb_info) {
     cd_info_free(cd_info);
     priv->cd_info = cddb_info;

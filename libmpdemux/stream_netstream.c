@@ -36,7 +36,7 @@
 
 #include "config.h"
 
-#ifdef STREAMING
+#ifdef MPLAYER_NETWORK
 
 #include <sys/types.h>
 #include <sys/stat.h>

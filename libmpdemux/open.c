@@ -20,7 +20,7 @@
 #include "demuxer.h"
 #include "mf.h"
 
-#ifdef STREAMING
+#ifdef MPLAYER_NETWORK
 #include "url.h"
 #include "network.h"
 extern int streaming_start( stream_t *stream, int *demuxer_type, URL_t *url);
@@ -466,7 +466,7 @@ if(strncmp("dvbin://",filename,8) == 0)
 }
 #endif
 
-#ifdef STREAMING
+#ifdef MPLAYER_NETWORK
 #ifdef STREAMING_LIVE_DOT_COM
   // Check for a SDP file:
   if (strncmp("sdp://",filename,6) == 0) {

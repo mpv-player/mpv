@@ -7,7 +7,7 @@ SRCS = mp3_hdr.c video.c mpeg_hdr.c cache2.c asfheader.c aviheader.c aviprint.c 
 ifeq ($(XMMS_PLUGINS),yes)
 SRCS += demux_xmms.c
 endif 
-ifeq ($(STREAMING),yes)
+ifeq ($(MPLAYER_NETWORK),yes)
 SRCS += asf_streaming.c url.c http.c network.c asf_mmst_streaming.c pnm.c
 SRCS += realrtsp/asmrp.c realrtsp/real.c realrtsp/rmff.c realrtsp/rtsp.c realrtsp/rtsp_session.c realrtsp/sdpplin.c realrtsp/xbuffer.c
 ifeq ($(STREAMING_LIVE_DOT_COM),yes)

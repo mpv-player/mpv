@@ -47,7 +47,7 @@
 
 #define STREAM_CTRL_RESET 0
 
-#ifdef STREAMING
+#ifdef MPLAYER_NETWORK
 #include "network.h"
 #endif
 
@@ -93,7 +93,7 @@ typedef struct stream_st {
   void* cache_data;
   void* priv; // used for DVD, TV, RTSP etc
   char* url;  // strdup() of filename/url
-#ifdef STREAMING
+#ifdef MPLAYER_NETWORK
   streaming_ctrl_t *streaming_ctrl;
 #endif
   unsigned char buffer[STREAM_BUFFER_SIZE>VCD_SECTOR_SIZE?STREAM_BUFFER_SIZE:VCD_SECTOR_SIZE];
