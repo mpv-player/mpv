@@ -773,17 +773,17 @@ play_next_file:
 
     
 
-  current_module="spudec";
-  vo_spudec=spudec_new();
-  if (vo_spudec!=NULL)
-    inited_flags|=INITED_SPUDEC;
-  current_module=NULL;
-
   current_module="open_stream";
   stream=open_stream(filename,vcd_track,&file_format);
   if(!stream) goto goto_next_file;//  exit_player(MSGTR_Exit_error); // error...
   inited_flags|=INITED_STREAM;
   stream->start_pos+=seek_to_byte;
+
+  current_module="spudec";
+  vo_spudec=spudec_new(stream->priv);
+  if (vo_spudec!=NULL)
+    inited_flags|=INITED_SPUDEC;
+  current_module=NULL;
 
   if(stream_cache_size) stream_enable_cache(stream,stream_cache_size*1024);
 

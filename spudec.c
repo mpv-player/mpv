@@ -5,7 +5,7 @@
 
    Kim Minh Kaplan
    implement fragments reassembly, RLE decoding.
-   image rendering needs to be corrected (see mkcolor & mkalpha).
+   read brightness from the IFO.
 
    For information on SPU format see <URL:http://sam.zoy.org/doc/dvd/subtitles/>
 
@@ -17,6 +17,7 @@
 #include "spudec.h"
 
 typedef struct {
+  dvd_priv_t *dvd_info;		/* Info from libmpdemux */
   unsigned char* packet;
   size_t packet_reserve;	/* size of the memory pointed to by packet */
   int packet_offset;		/* end of the currently assembled fragment */
@@ -74,50 +75,34 @@ static inline unsigned char get_nibble(spudec_handle_t *this)
 
 static inline int mkalpha(int i)
 {
-  /* for VO 0 is transparent
-     127 is quite dark, but still...
-     255 is transparent with color 0, and hum... funny with other colors...
-
-     FIXME, I can't seem to get a good alpha value!
-
-     i is the value read from SPU, from 0 to 15.  The function should
-     return the corresponding alpha value suitable for libvo's
-     draw_alpha.  */
-#if 0
-  return (0xf - (i & 0xf)) << 4;
-#else
-  return (i < 8) ? 127 : 0;
-#endif
-}
-
-static inline int mkcolor(int i)
-{
-  /* FIXME, have to get the colormap's RGB values from the IFO */
-#if 0
+  /* In mplayer's alpha planes, 0 is transparent, then 1 is nearly
+     opaque upto 255 which is transparent */
   switch (i) {
-  case 15: return 0;
-  default: return i << 4;
+  case 0xf:
+    return 1;
+  case 0:
+    return 0;
+  default:
+    return (0xf - i) << 4;
   }
-#else
-  return i << 4;
-#endif
 }
 
 static void spudec_process_data(spudec_handle_t *this)
 {
-  int alpha[4] = {
-    mkalpha(this->alpha[0]),
-    mkalpha(this->alpha[1]),
-    mkalpha(this->alpha[2]),
-    mkalpha(this->alpha[3])
-  };
-  int cmap[4] = {
-    mkcolor(this->palette[0]),
-    mkcolor(this->palette[1]),
-    mkcolor(this->palette[2]),
-    mkcolor(this->palette[3])
-  };
+  int cmap[4], alpha[4];
+  int i;
   int y = 0, x = 0;
+
+  for (i = 0; i < 4; ++i) {
+    alpha[i] = mkalpha(this->alpha[i]);
+    if (alpha[i] == 0)
+      cmap[i] = 0;
+    else {
+      cmap[i] = ((this->dvd_info->vts_file->vts_pgcit->pgci_srp[0].pgc->palette[this->palette[i]] >> 16) & 0xff) - alpha[i];
+      if (cmap[i] < 0)
+	cmap[i] = 0;
+    }
+  }
 
   if (this->image_size < this->width * this->height) {
     if (this->image != NULL)
@@ -130,7 +115,8 @@ static void spudec_process_data(spudec_handle_t *this)
   }
   if (this->image == NULL)
     return;
-  while (this->current_nibble[0] / 2 < this->control_start
+  i = this->current_nibble[1];
+  while (this->current_nibble[0] < i
 	 && this->current_nibble[1] / 2 < this->control_start
 	 && y < this->height) {
     int len, color;
@@ -147,17 +133,13 @@ static void spudec_process_data(spudec_handle_t *this)
 	}
       }
     }
-    color = rle & 0x3;
+    color = 3 - (rle & 0x3);
     len = rle >> 2;
     if (len > this->width - x)
       len = this->width - x;
     /* FIXME have to use palette and alpha map*/
     memset(this->image + y * this->width + x, cmap[color], len);
-    if (alpha[color] < cmap[color]) {
-      memset(this->aimage + y * this->width + x, 1, len);
-    } else {
-      memset(this->aimage + y * this->width + x, alpha[color] - cmap[color], len);
-    }
+    memset(this->aimage + y * this->width + x, alpha[color], len);
     x += len;
     if (x >= this->width) {
       next_line(this);
@@ -229,7 +211,7 @@ static void spudec_process_control(spudec_handle_t *this)
 	this->width = this->end_col - this->start_col + 1;
 	this->start_row = b >> 12;
 	this->end_row = b & 0xfff;
-	this->height = this->end_row - this->start_row + 1;
+	this->height = this->end_row - this->start_row /* + 1 */;
 	printf("Coords  col: %d - %d  row: %d - %d  (%dx%d)\n",
 	       this->start_col, this->end_col, this->start_row, this->end_row,
 	       this->width, this->height);
@@ -313,11 +295,11 @@ void spudec_draw(void *this, void (*draw_alpha)(int x0,int y0, int w,int h, unsi
 		   spu->image, spu->aimage, spu->width);
 }
 
-void *spudec_new()
+void *spudec_new(dvd_priv_t *dvd_info)
 {
   spudec_handle_t *this = calloc(1, sizeof(spudec_handle_t));
   if (this) {
-    ;
+    this->dvd_info = dvd_info;
   }
   else
     perror("FATAL: spudec_init: calloc");
