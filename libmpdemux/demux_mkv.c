@@ -1237,7 +1237,8 @@ demux_mkv_read_seekhead (demuxer_t *demuxer)
       length -= l + il;
 
       if (seek_id == 0 || seek_id == MATROSKA_ID_CLUSTER
-          || seek_pos == EBML_UINT_INVALID)
+          || seek_pos == EBML_UINT_INVALID ||
+          ((mkv_d->segment_start + seek_pos) >= (uint64_t)demuxer->movi_end))
         continue;
 
       saved_pos = stream_tell (s);
