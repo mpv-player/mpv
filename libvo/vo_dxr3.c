@@ -105,15 +105,6 @@ init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, u
 	return -1;
     }
     
-    /*for( i = 0; i < 64; i+= 4 )
-    {
-	tmp = palette[i];
-	palette[i] = palette[i+3];
-	palette[i+3] = tmp;
-	tmp = palette[i+1];
-	palette[i+1] = palette[i+2];
-	palette[i+2] = tmp;
-    }*/
     if( ioctl( fd_spu, EM8300_IOCTL_SPU_SETPALETTE, palette ) < 0 )
     {
 	printf( "VO: [dxr3] Unable to set subpicture palette!\n" );
@@ -121,7 +112,7 @@ init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, u
     }
 
     ioval = EM8300_PLAYMODE_PLAY;
-    if( ioctl( fd_control, EM8300_IOCTL_SET_PLAYMODE, &ioval ) < 0)
+    if( ioctl( fd_control, EM8300_IOCTL_SET_PLAYMODE, &ioval ) < 0 )
 	printf( "VO: [dxr3] Unable to set playmode!\n" );
     
     close( fd_control );
@@ -138,7 +129,7 @@ init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, u
 
 	int size;
 
-	printf("Format: YV12\n");
+	printf("VO: [dxr3] Format: YV12\n");
 
         if(!avcodec_inited){
 	  avcodec_init();
@@ -148,8 +139,9 @@ init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, u
     
         /* find the mpeg1 video encoder */
         codec = avcodec_find_encoder(CODEC_ID_MPEG1VIDEO);
-        if (!codec) {
-            fprintf(stderr, "mpeg1 codec not found\nRead DOCS/DXR3!\n");
+        if (!codec) 
+	{
+            printf( "VO: [dxr3] mpeg1 codec not found! Read DOCS/DXR3!\n");
             return -1;
         }
             
@@ -197,11 +189,12 @@ init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, u
           osd_h=codec_context.height;
         } else s_pos_y=0;
     
-        printf("[vo] position mapping: %d;%d => %d;%d\n",s_pos_x,s_pos_y,d_pos_x,d_pos_y);
+        printf("VO: [dxr3] position mapping: %d;%d => %d;%d\n",s_pos_x,s_pos_y,d_pos_x,d_pos_y);
     
         /* open it */
-        if (avcodec_open(&codec_context, codec) < 0) {
-            fprintf(stderr, "could not open codec\n");
+        if (avcodec_open(&codec_context, codec) < 0) 
+	{
+            printf( "VO: [dxr3] Could not open codec\n");
             return -1;
         }
         
@@ -226,7 +219,7 @@ init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, u
     {
 #ifdef USE_LIBAVCODEC
 	int size = 0;
-	printf("Format: BGR24\n");
+	printf("VO: [dxr3] Format: BGR24\n");
 
         if(!avcodec_inited)
 	{
@@ -239,7 +232,7 @@ init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, u
         codec = avcodec_find_encoder(CODEC_ID_MPEG1VIDEO);
         if (!codec) 
 	{
-            fprintf(stderr, "mpeg1 codec not found\nRead DOCS/DXR3!\n");
+            printf( "VO: [dxr3] mpeg1 codec not found! Read DOCS/DXR3!\n");
             return -1;
         }
             
@@ -254,7 +247,7 @@ init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, u
         codec_context.quality=1;
 	codec_context.pix_fmt = PIX_FMT_YUV420P;
 
-        /*if(width<=352 && height<=288){
+        if(width<=352 && height<=288){
           codec_context.width=352;
           codec_context.height=288;
         } else
@@ -272,10 +265,10 @@ init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, u
         } else {
           codec_context.width=704;
           codec_context.height=576;
-        }*/
-	s_width = codec_context.width = width;
+        }
+/*	s_width = codec_context.width = width;
 	s_height = codec_context.height = height;
-
+*/
         osd_w=scr_width;
         d_pos_x=(codec_context.width-(int)scr_width)/2;
         if(d_pos_x<0){
@@ -290,11 +283,12 @@ init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, u
           osd_h=codec_context.height;
         } else s_pos_y=0;
     
-        printf("[vo] position mapping: %d;%d => %d;%d\n",s_pos_x,s_pos_y,d_pos_x,d_pos_y);
+        printf("VO: [dxr3] position mapping: %d;%d => %d;%d\n",s_pos_x,s_pos_y,d_pos_x,d_pos_y);
     
         /* open it */
-        if (avcodec_open(&codec_context, codec) < 0) {
-            fprintf(stderr, "could not open codec\n");
+        if (avcodec_open(&codec_context, codec) < 0) 
+	{
+            printf( "VO: [dxr3] could not open codec\n");
             return -1;
         }
 
@@ -315,7 +309,7 @@ init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, u
     {
 #ifdef USE_LIBAVCODEC
 	int size = 0;
-	printf("Format: YUY2\n");
+	printf("VO: [dxr3] Format: YUY2\n");
 
         if(!avcodec_inited)
 	{
@@ -328,7 +322,7 @@ init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, u
         codec = avcodec_find_encoder(CODEC_ID_MPEG1VIDEO);
         if (!codec) 
 	{
-            fprintf(stderr, "mpeg1 codec not found\nRead DOCS/DXR3!\n");
+            printf( "VO: [dxr3] mpeg1 codec not found! Read DOCS/DXR3!\n");
 	    return -1;
         }
             
@@ -385,8 +379,9 @@ init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, u
         printf("VO: [dxr3] position mapping: %d;%d => %d;%d\n",s_pos_x,s_pos_y,d_pos_x,d_pos_y);
     
         /* open it */
-        if (avcodec_open(&codec_context, codec) < 0) {
-            fprintf(stderr, "could not open codec\n");
+        if (avcodec_open(&codec_context, codec) < 0) 
+	{
+            printf(stderr, "VO: [dxr3] Could not open codec\n");
             return -1;
         }
 
@@ -409,7 +404,7 @@ init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, u
 	return 0;
     }
 
-    printf( "Format: Unsupported\n" );
+    printf( "VO: [dxr3] Format: Unsupported\n" );
     return -1;
 }
 
@@ -420,51 +415,26 @@ static const vo_info_t* get_info(void)
 
 static void draw_alpha(int x0, int y0, int w, int h, unsigned char* src, unsigned char *srca, int srcstride)
 {
-    int x,y,index=0;
-    int n_rles=0, prev_nibbled=0, nibbled=0;
-    char prevcolor=0;
-    unsigned char *dst = spubuf;
-    unsigned short *subpic_size, *cs_table;
-    subpic_size = dst+=2;
-    cs_table = dst+=2;
-    prevcolor = src[0];
-    for( y = 0; y <= (h-1); y+=2 )
-    {
-	for( x = 0; x < w; x++ )
-	{
-	    if( prevcolor == src[x+(y*w)] ) index++;
-	    else
-	    {
-		if( prevcolor < 64 )
-		    prevcolor = 0x00;
-		else if( prevcolor < 128 )
-		    prevcolor = 0x01;
-		else if( prevcolor < 192 )
-		    prevcolor = 0x02;
-		else
-		    prevcolor = 0x03;
-	    }
-	}
-    }
-    
-    ioctl( fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts );
-    write( fd_spu, spubuf, (dst-spubuf) );
 }
 
 static void draw_osd(void)
 {
-    vo_draw_text(osd_w,osd_h,draw_alpha);
+//    vo_draw_text(osd_w,osd_h,draw_alpha);
 }
 
 static uint32_t draw_frame(uint8_t * src[])
 {
+    int pts = 0;
     if( img_format == IMGFMT_MPEGPES )
     {
         int data_left;
 	vo_mpegpes_t *p=(vo_mpegpes_t *)src[0];
-    
+	unsigned char *data = p->data;
+
 	data_left = p->size;
-	ioctl( fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts );	
+	pts = p->timestamp;
+	if( ioctl( fd_video, EM8300_IOCTL_VIDEO_SETPTS, &pts ) < 0 )
+	    printf( "VO: [dxr3] Unable to set PTS in draw_frame\n" );
 	while( data_left )
 	    data_left -= write( fd_video, &((unsigned char*)p->data)[p->size-data_left], data_left );
 
@@ -473,7 +443,7 @@ static uint32_t draw_frame(uint8_t * src[])
 #ifdef USE_LIBAVCODEC
     else if( img_format == IMGFMT_YV12 )
     {
-	printf("ERROR: Uninplemented\n");
+	printf("VO: [dxr3] ERROR: Uninplemented\n");
     }
     else if( img_format == IMGFMT_BGR24 )
     {
@@ -546,6 +516,9 @@ static uint32_t draw_frame(uint8_t * src[])
 #undef ONE_HALF
 #undef FIX(x)
 	//End of ffmpeg code, see ffmpeg.sourceforge.net for terms of license
+	pts = vo_pts;
+	if( ioctl( fd_video, EM8300_IOCTL_VIDEO_SETPTS, &pts ) < 0 )
+	    printf( "VO: [dxr3] Unable to set PTS in draw_frame\n" );
         tmp_size = out_size = avcodec_encode_video(&codec_context, outbuf, outbuf_size, &picture);
 	while( out_size )
 		out_size -= write( fd_video, &outbuf[tmp_size-out_size], out_size );
@@ -562,7 +535,9 @@ static uint32_t draw_frame(uint8_t * src[])
 	    {
 	    }
 	}
-	
+	pts = vo_pts;
+	if( ioctl( fd_video, EM8300_IOCTL_VIDEO_SETPTS, &pts ) < 0 )
+	    printf( "VO: [dxr3] Unable to set PTS in draw_frame\n" );
         tmp_size = out_size = avcodec_encode_video(&codec_context, outbuf, outbuf_size, &picture);
         while( out_size )
 		out_size -= write( fd_video, &outbuf[tmp_size-out_size], out_size );
@@ -571,7 +546,7 @@ static uint32_t draw_frame(uint8_t * src[])
     }
 #endif
     
-    printf( "Error in draw_frame(...)\n" );
+    printf( "VO: [dxr3] Error in draw_frame(...)\n" );
     return -1;
 }
 
@@ -581,7 +556,7 @@ static void flip_page (void)
 
 static uint32_t draw_slice( uint8_t *srcimg[], int stride[], int w, int h, int x0, int y0 )
 {
-    int y;
+    int y, pts;
     unsigned char* s;
     unsigned char* d;
     int data_left;
@@ -627,25 +602,18 @@ static uint32_t draw_slice( uint8_t *srcimg[], int stride[], int w, int h, int x
 	    s+=stride[2];
 	    d+=picture.linesize[2];
 	}
+	pts = vo_pts;
 	
+	if( ioctl( fd_video, EM8300_IOCTL_VIDEO_SETPTS, &pts ) < 0 )
+	    printf( "VO: [dxr3] Unable to set PTS in draw_slice\n" );
         tmp_size = out_size = avcodec_encode_video(&codec_context, outbuf, outbuf_size, &picture);
         while( out_size )
 		out_size -= write( fd_video, &outbuf[tmp_size-out_size], out_size );
 
 	return 0;
 #endif
+	printf( "VO: [dxr3] You need to install ffmpeg.so or libavcodec, read DOCS/DXR3\n" );
 	return -1;
-    }
-    else if( img_format == IMGFMT_BGR24 )
-    {
-	return -1;
-    }
-    else if( img_format == IMGFMT_MPEGPES )
-    {
-        data_left = p->size;
-        while( data_left )
-		data_left -= write( fd_video, &((unsigned char*)p->data)[p->size-data_left], data_left );
-	return 0;
     }
 
     return -1;
@@ -655,15 +623,15 @@ static uint32_t draw_slice( uint8_t *srcimg[], int stride[], int w, int h, int x
 static uint32_t
 query_format(uint32_t format)
 {
-    if(format==IMGFMT_MPEGPES) return 0x2|0x4;
+    if(format==IMGFMT_MPEGPES) return 1;
 #ifdef USE_LIBAVCODEC
-    if(format==IMGFMT_YV12) return 0x1|0x4;
+    if(format==IMGFMT_YV12) return 1;
 //    if(format==IMGFMT_YUY2) return 0x1|0x4;
-    if(format==IMGFMT_BGR24) return 0x1|0x4;
+    if(format==IMGFMT_BGR24) return 1;
 #else
-    if(format==IMGFMT_YV12) {printf("You need to compile with libavcodec or ffmpeg.so to play this file!\n" ); return 0;}
-    if(format==IMGFMT_YUY2) {printf("You need to compile with libavcodec or ffmpeg.so to play this file!\n" ); return 0;}
-    if(format==IMGFMT_BGR24) {printf("You need to compile with libavcodec or ffmpeg.so to play this file!\n" ); return 0;}
+    if(format==IMGFMT_YV12) {printf("VO: [dxr3] You need to compile with libavcodec or ffmpeg.so to play this file!\n" ); return 0;}
+    if(format==IMGFMT_YUY2) {printf("VO: [dxr3] You need to compile with libavcodec or ffmpeg.so to play this file!\n" ); return 0;}
+    if(format==IMGFMT_BGR24) {printf("VO: [dxr3] You need to compile with libavcodec or ffmpeg.so to play this file!\n" ); return 0;}
 #endif    
     return 0;
 }
@@ -671,6 +639,7 @@ query_format(uint32_t format)
 static void
 uninit(void)
 {
+    printf( "VO: [dxr3] Uninitializing\n" );
     free(outbuf);
     free(picture_buf);
     free(spubuf);

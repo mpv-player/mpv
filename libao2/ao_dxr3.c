@@ -63,50 +63,59 @@ static int init(int rate,int channels,int format,int flags)
   fd_audio = open( "/dev/em8300_ma", O_WRONLY );  
   if( fd_audio < 0 )
   {
-    printf("Can't open audio device /dev/em8300_ma  -> nosound\n");
+    printf("AO: [dxr3] Can't open audio device /dev/em8300_ma  -> nosound\n");
     return 0;
   }
   
   fd_control = open( "/dev/em8300", O_WRONLY );
   if( fd_control < 0 )
   {
-    printf("Can't open em8300 control /dev/em8300\n");
+    printf("AO: [dxr3] Can't open em8300 control /dev/em8300\n");
     return 0;
   }
   
   ao_format = format;
-  ioctl (fd_audio, SNDCTL_DSP_SETFMT, &ao_format);
+  if( ioctl (fd_audio, SNDCTL_DSP_SETFMT, &ao_format) < 0 )
+    printf( "AO: [dxr3] Unable to set audio format\n" );
   if(format == AFMT_AC3 && ao_format != AFMT_AC3) 
   {
-      printf("Can't set audio device /dev/em8300_ma to AC3 output\n");
+      printf("AO: [dxr3] Can't set audio device /dev/em8300_ma to AC3 output\n");
       return 0;
   }
-  printf("audio_setup: sample format: %s (requested: %s)\n",
+  printf("AO: [dxr3] Sample format: %s (requested: %s)\n",
     audio_out_format_name(ao_format), audio_out_format_name(format));
   
   if(format != AFMT_AC3) 
   {
 	ao_channels=channels-1;
-        ioctl (fd_audio, SNDCTL_DSP_STEREO, &ao_channels);
+        if( ioctl (fd_audio, SNDCTL_DSP_STEREO, &ao_channels) < 0 )
+	    printf( "AO: [dxr3] Unable to set number of channels\n" );
   
 	// set rate
 	ao_samplerate=rate;
-	ioctl (fd_audio, SNDCTL_DSP_SPEED, &ao_samplerate);
-	printf("audio_setup: using %d Hz samplerate (requested: %d)\n",ao_samplerate,rate);
+	if( ioctl (fd_audio, SNDCTL_DSP_SPEED, &ao_samplerate) < 0 )
+	    printf( "AO: [dxr3] Unable to set samplerate\n" );
+	printf("AO: [dxr3] Using %d Hz samplerate (requested: %d)\n",ao_samplerate,rate);
   }
 
-  if(ioctl(fd_audio, SNDCTL_DSP_GETOSPACE, &dxr3_buf_info)==-1){
+  if( ioctl(fd_audio, SNDCTL_DSP_GETOSPACE, &dxr3_buf_info)==-1 )
+  {
       int r=0;
-      printf("audio_setup: driver doesn't support SNDCTL_DSP_GETOSPACE :-(\n");
-      if(ioctl(fd_audio, SNDCTL_DSP_GETBLKSIZE, &r)==-1){
-          printf("audio_setup: %d bytes/frag (config.h)\n",ao_outburst);
-      } else { 
+      printf("AO: [dxr3] Driver doesn't support SNDCTL_DSP_GETOSPACE :-(\n");
+      if( ioctl( fd_audio, SNDCTL_DSP_GETBLKSIZE, &r) ==-1 )
+      {
+          printf( "AO: [dxr3] %d bytes/frag (config.h)\n", ao_outburst );
+      } 
+      else 
+      { 
           ao_outburst=r;
-          printf("audio_setup: %d bytes/frag (GETBLKSIZE)\n",ao_outburst);
+          printf( "AO: [dxr3] %d bytes/frag (GETBLKSIZE)\n",ao_outburst);
       }
-  } else {
-      printf("audio_setup: frags: %3d/%d  (%d bytes/frag)  free: %6d\n",
-          dxr3_buf_info.fragments, dxr3_buf_info.fragstotal, dxr3_buf_info.fragsize, dxr3_buf_info.bytes);
+  } 
+  else 
+  {
+      printf("AO: [dxr3] frags: %3d/%d  (%d bytes/frag)  free: %6d\n",
+          dxr3_buf_info.fragments+1, dxr3_buf_info.fragstotal, dxr3_buf_info.fragsize, dxr3_buf_info.bytes);
       if(ao_buffersize==-1) ao_buffersize=dxr3_buf_info.bytes;
       ao_outburst=dxr3_buf_info.fragsize;
   }
@@ -128,7 +137,7 @@ static int init(int rate,int channels,int format,int flags)
     }
     free(data);
     if(ao_buffersize==0){
-        printf("\n   ***  Your audio driver DOES NOT support select()  ***\n");
+        printf("\nAO: [dxr3]   ***  Your audio driver DOES NOT support select()  ***\n");
           printf("Recompile mplayer with #undef HAVE_AUDIO_SELECT in config.h !\n\n");
         return 0;
     }
@@ -136,7 +145,8 @@ static int init(int rate,int channels,int format,int flags)
   }
 
   ioval = EM8300_PLAYMODE_PLAY;
-  ioctl( fd_control, EM8300_IOCTL_SET_PLAYMODE, &ioval );
+  if( ioctl( fd_control, EM8300_IOCTL_SET_PLAYMODE, &ioval ) < 0 )
+    printf( "AO: [dxr3] Unable to set playmode\n" );
   close( fd_control );
 
   return 1;
@@ -145,60 +155,82 @@ static int init(int rate,int channels,int format,int flags)
 // close audio device
 static void uninit()
 {
-    ioctl(fd_audio, SNDCTL_DSP_RESET, NULL);
+    printf( "AO: [dxr3] Uninitializing\n" );
+    if( ioctl(fd_audio, SNDCTL_DSP_RESET, NULL) < 0 )
+	printf( "AO: [dxr3] Unable to reset device\n" );
     close( fd_audio );
 }
 
 // stop playing and empty buffers (for seeking/pause)
 static void reset()
 {
-    uninit();
-    if(fd_audio<0)
-    {
-	printf("\nFatal error: *** CANNOT RE-OPEN / RESET AUDIO DEVICE ***\n");
-	return;
-    }
-
-  ioctl (fd_audio, SNDCTL_DSP_SETFMT, &ao_format);
-  if(ao_format != AFMT_AC3) 
-  {
-    ioctl (fd_audio, SNDCTL_DSP_STEREO, &ao_channels);
-    ioctl (fd_audio, SNDCTL_DSP_SPEED, &ao_samplerate);
-  }
+    if( ioctl(fd_audio, SNDCTL_DSP_RESET, NULL) < 0 )
+	printf( "AO: [dxr3] Unable to reset device\n" );
 }
 
 // stop playing, keep buffers (for pause)
 static void audio_pause()
 {
     // for now, just call reset();
-    reset();
+//  reset();
+  int ioval;
+  fd_control = open( "/dev/em8300", O_WRONLY );
+  if( fd_control < 0 )
+    printf( "AO: [dxr3] Oops, unable to pause playback\n" );
+  else
+  {
+    ioval = EM8300_PLAYMODE_PAUSED;
+    if( ioctl( fd_control, EM8300_IOCTL_SET_PLAYMODE, &ioval ) < 0 )
+	printf( "AO: [dxr3] Unable to pause playback\n" );
+    close( fd_control );
+  }
 }
 
 // resume playing, after audio_pause()
 static void audio_resume()
 {
+  int ioval;
+  fd_control = open( "/dev/em8300", O_WRONLY );
+  if( fd_control < 0 )
+    printf( "AO: [dxr3] Oops, unable to resume playback\n" );
+  else
+  {
+    ioval = EM8300_PLAYMODE_PLAY;
+    if( ioctl( fd_control, EM8300_IOCTL_SET_PLAYMODE, &ioval ) < 0 )
+	printf( "AO: [dxr3] Unable to resume playback\n" );
+    close( fd_control );
+  }
 }
 
 
 // return: how many bytes can be played without blocking
 static int get_space()
 {
-  if(ioctl(fd_audio, SNDCTL_DSP_GETOSPACE, &dxr3_buf_info)!=-1)
-        return (dxr3_buf_info.fragments*dxr3_buf_info.fragsize);
-  return 0;
+    int space = 0;
+    if( ioctl(fd_audio, SNDCTL_DSP_GETOSPACE, &dxr3_buf_info) < 0 )
+    {
+	printf( "AO: [dxr3] Unable to get free space in buffer\n" );
+	return 0;
+    }
+    
+    space = dxr3_buf_info.fragments*dxr3_buf_info.fragsize;
+    return space;
 }
 
 static int play(void* data,int len,int flags)
 {
-    ioctl( fd_audio, EM8300_IOCTL_AUDIO_SETPTS, &ao_pts );
+    int pts = ao_pts;
+    if( ioctl( fd_audio, EM8300_IOCTL_AUDIO_SETPTS, &pts ) < 0 )
+	printf( "AO: [dxr3] Unable to set pts\n" );
     return write(fd_audio,data,len);
 }
 
 // return: how many unplayed bytes are in the buffer
 static int get_delay()
 {
-      int r=0;
-     ioctl(fd_audio, SNDCTL_DSP_GETODELAY, &r);
+     int r=0;
+     if( ioctl(fd_audio, SNDCTL_DSP_GETODELAY, &r) < 0 )
+        printf( "AO: [dxr3] Unable to get unplayed bytes in buffer\n" );
      return r;
 }
 
