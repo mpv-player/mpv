@@ -1,7 +1,7 @@
 // Translated by: Fabio Olimpieri <fabio.olimpieri@tin.it>
 // Updated by: Roberto Togni <see AUTHORS for email address>
 
-// Updated to help_mp-en.h v1.77
+// Updated to help_mp-en.h v1.83
 
 // Translated files should be uploaded to ftp://mplayerhq.hu/MPlayer/incoming
 // and send a notify message to mplayer-dev-eng maillist.
@@ -303,6 +303,9 @@ static char help_text[]=
 #define MSGTR_DemuxerInfoAlreadyPresent "Demuxer info %s already present!\n"
 #define MSGTR_ClipInfo "Informazioni sulla clip: \n"
 
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: rilevata sequenza progressiva,uscita dal modo TELECINE 3:2\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: rilevato TELECINE 3:2, abilito telecine inverso. FPS ora è %5.3f\n"
+
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "impossibile aprire il codec\n"
 #define MSGTR_CantCloseCodec "impossibile chiudere il codec\n"
@@ -400,6 +403,7 @@ static char help_text[]=
 #define MSGTR_SKIN_ERRORMESSAGE "[skin] errore nel file di configurazione della skin nella riga %d: %s"
 #define MSGTR_SKIN_WARNING1 "[skin] avvertimento nel file di configurazione della skin nella riga %d: widget trovato ma non trovato prima di \"section\" ( %s )"
 #define MSGTR_SKIN_WARNING2 "[skin] avvertimento nel file di configurazione della skin nella riga %d: widget trovato ma non trovato prima di \"subsection\" (%s)"
+#define MSGTR_SKIN_WARNING3 "[skin] avvertimento nel file di configurazione della skin nella riga %d: questa sottosezione non è supportata da questo widget (%s)"
 #define MSGTR_SKIN_BITMAP_16bit  "bitmap con profondità di 16 bit o inferiore non supportata ( %s ).\n"
 #define MSGTR_SKIN_BITMAP_FileNotFound  "file non trovato ( %s )\n"
 #define MSGTR_SKIN_BITMAP_BMPReadError "bmp, errore di lettura ( %s )\n"
@@ -514,6 +518,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SUB_SRT "Converti i sottotitoli nel formato SubViewer (SRT) basato sul tempo"
 #define MSGTR_PREFERENCES_SUB_Overlap "Attiva/Disattiva sovrapposizione sottotitoli"
 #define MSGTR_PREFERENCES_Font "Carattere:"
+#define MSGTR_PREFERENCES_Codecs "Codec e demuxer"
 #define MSGTR_PREFERENCES_FontFactor "Font factor:"
 #define MSGTR_PREFERENCES_PostProcess "Abilita postprocessing"
 #define MSGTR_PREFERENCES_AutoQuality "Qualità automatica: "
@@ -570,8 +575,11 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_LoadFullscreen "Avvia a pieno schermo"
 #define MSGTR_PREFERENCES_CacheSize "Dimensione cache: "
 #define MSGTR_PREFERENCES_XSCREENSAVER "Arresta XScreenSaver"
+#define MSGTR_PREFERENCES_PlayBar "Attiva playbar"
 #define MSGTR_PREFERENCES_AutoSync "AutoSync on/off"
 #define MSGTR_PREFERENCES_AutoSyncValue "Autosync: "
+#define MSGTR_PREFERENCES_CDROMDevice "Dispositivo CD-ROM:"
+#define MSGTR_PREFERENCES_DVDDevice "Dispositivo DVD:"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Errore fatale!"
