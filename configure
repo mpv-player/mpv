@@ -84,6 +84,16 @@ ppc() {
   esac
 }
 
+# not boolean test: implement the posix shell "!" operator for a
+# non-posix /bin/sh.
+#   usage:  not {command}
+# returns exit status "success" when the execution of "command"
+# fails.
+not() {
+  eval "$@"
+  test $? -ne 0
+}
+
 # Use this before starting a check
 echocheck() {
   echo "============ Checking for $@ ============" >> "$TMPLOG"
@@ -707,7 +717,7 @@ EOF
       cc_check -march=$proc -mcpu=$proc  || proc=k6
     fi
     if test "$proc" = "k6"; then
-      if ! cc_check -march=$proc -mcpu=$proc; then
+      if not cc_check -march=$proc -mcpu=$proc; then
         if cc_check -march=i586 -mcpu=i686; then
           proc=i586-i686
         else 
@@ -5406,7 +5416,7 @@ Use --enable-sdl to force usage of libSDL.
 EOF
 fi
 
-if x86 && ! cygwin; then
+if x86 && not cygwin; then
   if test "$_win32" = no ; then
     if test "$_win32libdir" ; then
       cat <<EOF
