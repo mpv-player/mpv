@@ -2070,10 +2070,10 @@ read_input:
              lirc_mp_getinput()<=0 &&
 #endif
              (use_stdin || getch2(20)<=0) && mplayer_get_key()<=0){
-#endif 
+#endif /* HAVE_NEW_INPUT */
 #ifndef USE_LIBVO2
 	     if(sh_video && video_out) video_out->check_events();
-#endif /* HAVE_NEW_INPUT */
+#endif 
 #ifdef HAVE_NEW_GUI
              if(use_gui){
 		guiEventHandling();
@@ -2634,11 +2634,11 @@ if(step_sec>0) {
       if (tv_param_on == 1)
 	tv_step_chanlist(tv_handler);
     } break;
+#endif
     case MP_CMD_VO_FULLSCREEN:
     {
 	video_out->control(VOCTRL_FULLSCREEN, 0);
     } break;
-#endif
     default :
       printf("Received unknow cmd %s\n",cmd->name);
     }
