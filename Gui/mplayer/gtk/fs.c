@@ -370,7 +370,7 @@ void fs_fsFilterCombo_changed( GtkEditable * editable,gpointer user_data )
    case fsFontSelector:
           for( i=0;fsFontFileNames[i][0];i++ )
 	    if( !strcmp( str,fsFontFileNames[i][0] ) )
-	     { fsFilter,fsFontFileNames[i][1]; break; }
+	     { fsFilter=fsFontFileNames[i][1]; break; }
 	  break;
    default: return;
   }
