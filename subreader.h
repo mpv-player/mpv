@@ -17,6 +17,7 @@ extern int sub_num;         // number of subtitle structs
 #define SUB_DUNNOWHAT 7		// FIXME what format is it ?
 #define SUB_MPSUB     8
 #define SUB_AQTITLE   9
+#define SUB_SUBVIEWER2 10
 
 // One of the SUB_* constant above
 extern int sub_format;

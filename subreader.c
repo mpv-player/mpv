@@ -252,6 +252,39 @@ subtitle *sub_read_line_subviewer(FILE *fd,subtitle *current) {
     return current;
 }
 
+subtitle *sub_read_line_subviewer2(FILE *fd,subtitle *current) {
+    char line[LINE_LEN+1];
+    int a1,a2,a3,a4;
+    char *p=NULL;
+    int i,len;
+   
+    while (!current->text[0]) {
+        if (!fgets (line, LINE_LEN, fd)) return NULL;
+	if (line[0]!='{')
+	    continue;
+        if ((len=sscanf (line, "{T %d:%d:%d:%d",&a1,&a2,&a3,&a4)) < 4)
+            continue;
+        current->start = a1*360000+a2*6000+a3*100+a4/10;
+        for (i=0; i<SUB_MAX_TEXT;) {
+            if (!fgets (line, LINE_LEN, fd)) break;
+            if (line[0]=='}') break;
+            len=0;
+            for (p=line; *p!='\n' && *p!='\r' && *p; ++p,++len);
+            if (len) {
+                current->text[i]=(char *)malloc (len+1);
+                if (!current->text[i]) return ERR;
+                strncpy (current->text[i], line, len); current->text[i][len]='\0';
+                ++i;
+            } else {
+                break;
+            }
+        }
+        current->lines=i;
+    }
+    return current;
+}
+
+
 subtitle *sub_read_line_vplayer(FILE *fd,subtitle *current) {
 	char line[LINE_LEN+1];
 	int a1,a2,a3;
@@ -491,6 +524,8 @@ int sub_autodetect (FILE *fd) {
 		{sub_uses_time=1;return SUB_SUBRIP;}
 	if (sscanf (line, "%d:%d:%d,%d --> %d:%d:%d,%d", &i, &i, &i, &i, &i, &i, &i, &i)==8)
 		{sub_uses_time=1;return SUB_SUBVIEWER;}
+	if (sscanf (line, "{T %d:%d:%d:%d",&i, &i, &i, &i))
+		{sub_uses_time=1;return SUB_SUBVIEWER2;}
 	if (strstr (line, "<SAMI>"))
 		{sub_uses_time=1; return SUB_SAMI;}
 	if (sscanf (line, "%d:%d:%d:",     &i, &i, &i )==3)
@@ -626,7 +661,7 @@ subtitle* sub_read_file (char *filename, float fps) {
     int n_max;
     subtitle *first;
     char *fmtname[] = { "microdvd", "subrip", "subviewer", "sami", "vplayer",
-		        "rt", "ssa", "dunnowhat", "mpsub", "aqt" };
+		        "rt", "ssa", "dunnowhat", "mpsub", "aqt", "subviewer 2.0" };
     subtitle * (*func[])(FILE *fd,subtitle *dest)=
     {
 	    sub_read_line_microdvd,
@@ -638,7 +673,8 @@ subtitle* sub_read_file (char *filename, float fps) {
 	    sub_read_line_ssa,
 	    sub_read_line_dunnowhat,
 	    sub_read_line_mpsub,
-	    sub_read_line_aqt
+	    sub_read_line_aqt,
+	    sub_read_line_subviewer2
 
     };
     if(filename==NULL) return NULL; //qnx segfault
