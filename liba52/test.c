@@ -148,7 +148,7 @@ int accel=0;
 int sample_rate=0;
 int bit_rate=0;
 #ifdef TIMING
-long long t, sum=0;
+long long t, sum=0, min=256*256*256*64;
 #endif
 
     samples = a52_init (accel);
@@ -209,14 +209,17 @@ ENDTIMING
 	}
 	s16+=2*i;
     }
+#ifdef TIMING
+if(sum<min) min=sum;
+sum=0;
+#endif
     fwrite(out_buf,6*256*2*2,1,stdout);
 
 }
 
 eof:
-
 #ifdef TIMING
-fprintf(stderr, "%4.4fm cycles\n",sum/1000000.0);
+fprintf(stderr, "%4.4fk cycles ",min/1000.0);
+sum=0;
 #endif
-
 }
