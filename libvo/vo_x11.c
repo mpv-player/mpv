@@ -11,6 +11,7 @@
  * Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
  *
  * 15 & 16 bpp support added by Franck Sicard <Franck.Sicard@solsoft.fr>
+ * use swScaler instead of lots of tricky converters by Michael Niedermayer <michaelni@gmx.at>
  *
  */
 
@@ -103,8 +104,9 @@ static void DeInstallXErrorHandler()
 
 static uint32_t image_width;
 static uint32_t image_height;
-static uint32_t image_format;
+static uint32_t in_format;
 static uint32_t out_format=0;
+static int aspect; // 1<<16 based fixed point aspect, so that the aspect stays correct during resizing
 
 static void check_events(){
   vo_x11_check_events(mDisplay);
@@ -130,11 +132,7 @@ static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsi
 }
 
 static SwsContext *swsContext=NULL;
-static int useSws=0; 
 extern int sws_flags;
-/*needed so we can output the correct supported formats in query_format()
-  should perhaps be passed as argument to query_format() */
-extern int softzoom; 
 
 static XVisualInfo vinfo;
 
@@ -261,10 +259,8 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
  static uint32_t vm_height;
 #endif
 
- image_height=height;
- image_width=width;
- image_format=format;
-
+ in_format=format;
+ 
  if( flags&0x03 ) fullscreen = 1;
  if( flags&0x02 ) vm = 1;
  if( flags&0x08 ) Flip_Flag = 1;
@@ -277,19 +273,14 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
  if ( depth != 15 && depth != 16 && depth != 24 && depth != 32 ) depth=24;
  XMatchVisualInfo( mDisplay,mScreen,depth,TrueColor,&vinfo );
 
- if( flags&0x04 && (   format==IMGFMT_YV12 || format==IMGFMT_I420  || format==IMGFMT_IYUV 
-                    || format==IMGFMT_YUY2 
-		    || format==IMGFMT_BGR15|| format==IMGFMT_BGR16 || format==IMGFMT_BGR24 || format==IMGFMT_BGR32)) {
-     // software scale
-     if(fullscreen){
+ if(fullscreen){
          image_width=vo_screenwidth;
          image_height=vo_screenheight;
-     } else {
+ } else {
          image_width=d_width;
          image_height=d_height;
-     }
-     useSws=1; // we cannot initialize the swScaler here because we dont know the bpp (or do we?)
  }
+ aspect= ((1<<16)*d_width + d_height/2)/d_height;
 
 #ifdef HAVE_NEW_GUI
  if ( vo_window != None ) { mywindow=vo_window; mygc=vo_gc; }
@@ -403,7 +394,7 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
    	default:  draw_alpha_fnc=draw_alpha_null;
   }
 
-  if(useSws) swsContext= getSwsContextFromCmdLine(width, height, format, image_width, image_height, out_format );
+  swsContext= getSwsContextFromCmdLine(width, height, in_format, image_width, image_height, out_format );
 
 //  printf( "X11 color mask:  R:%lX  G:%lX  B:%lX\n",myximage->red_mask,myximage->green_mask,myximage->blue_mask );
 
@@ -419,10 +410,13 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
 //   printf( "No support for non-native XImage byte order!\n" );
 //   return -1;
   }
-
- if((format == IMGFMT_YV12) || (format == IMGFMT_I420) || (format == IMGFMT_IYUV))
-    yuv2rgb_init( ( depth == 24 ) ? bpp : depth,mode );
   
+  if(mode==MODE_BGR)
+  {
+    printf("hmm, arpi said that isnt used, contact the developers, thats weird\n" );
+    return -1;
+  }
+
 #ifdef HAVE_NEW_GUI  
  if ( vo_window == None ) 
 #endif 
@@ -439,23 +433,21 @@ static const vo_info_t* get_info( void )
 static void Display_Image( XImage *myximage,uint8_t *ImageData )
 {
 #ifdef DISP
-  //  myximage->width is the stride and not the width if the sw scaler is used
-  int dstW= (swsContext) ? swsContext->dstW : myximage->width; 
 #ifdef HAVE_SHM
  if ( Shmem_Flag )
   {
    XShmPutImage( mDisplay,mywindow,mygc,myximage,
                  0,0,
-                 ( vo_dwidth - dstW ) / 2,( vo_dheight - myximage->height ) / 2,
-                 dstW,myximage->height,True );
+                 ( vo_dwidth - swsContext->dstW ) / 2,( vo_dheight - myximage->height ) / 2,
+                 swsContext->dstW,myximage->height,True );
   }
   else
 #endif
    {
     XPutImage( mDisplay,mywindow,mygc,myximage,
                0,0,
-               ( vo_dwidth - dstW ) / 2,( vo_dheight - myximage->height ) / 2,
-               dstW,myximage->height );
+               ( vo_dwidth - swsContext->dstW ) / 2,( vo_dheight - myximage->height ) / 2,
+               swsContext->dstW,myximage->height);
   }
 #endif
 }
@@ -470,19 +462,27 @@ static void flip_page( void ){
 
 static uint32_t draw_slice( uint8_t *src[],int stride[],int w,int h,int x,int y )
 {
-if(swsContext){
   uint8_t *dst[3];
   int dstStride[3];
-  int newW= vo_dwidth&(~1);  // the swscaler should be able to handle odd sizes but something else doesnt seem to like it
-  int newH= vo_dheight&(~1);
-    
-  if(sws_flags==0) newW&= (~31); // not needed but, if the user wants the FAST_BILINEAR SCALER, then its needed
+  static int old_vo_dwidth=-1;
+  static int old_vo_dheight=-1;
   
-  if(swsContext->dstW!=newW || image_height!=newH)
+  if((old_vo_dwidth != vo_dwidth || old_vo_dheight != vo_dheight) && y==0)
   {
+    int newW= vo_dwidth;
+    int newH= vo_dheight;
+    int newAspect= (newW*(1<<16) + (newH>>1))/newH;
     SwsContext *oldContext= swsContext;
     
-    swsContext= getSwsContextFromCmdLine(oldContext->srcW, oldContext->srcH, oldContext->srcFormat, 
+    if(newAspect>aspect) newW= (newH*aspect + (1<<15))>>16;
+    else                 newH= (newW*(1<<16) + (1<<15)) /aspect;
+
+    old_vo_dwidth=  vo_dwidth;
+    old_vo_dheight= vo_dheight;
+
+    if(sws_flags==0) newW&= (~31); // not needed but, if the user wants the FAST_BILINEAR SCALER, then its needed
+
+    swsContext= getSwsContextFromCmdLine(oldContext->srcW, oldContext->srcH, in_format, 
     					 newW, newH, out_format);
     if(swsContext)
     {
@@ -498,104 +498,41 @@ if(swsContext){
 	swsContext= oldContext;
     }
   }
-  dstStride[0]=image_width*((bpp+7)/8);
   dstStride[1]=
-  dstStride[2]=(image_width*((bpp+7)/8)+1)>>1;
-  dst[0]=ImageData;
+  dstStride[2]=0;
   dst[1]=
   dst[2]=NULL;
 
-  swsContext->swScale(swsContext,src,stride,y,h,dst, dstStride);
-} else {
- uint8_t *dst=ImageData + ( image_width * y + x ) * ( bpp/8 );
- if(image_format==IMGFMT_YV12)
-   yuv2rgb( dst,src[0],src[1],src[2],w,h,image_width*( bpp/8 ),stride[0],stride[1] );
- else /* I420 & IYUV */
-   yuv2rgb( dst,src[0],src[2],src[1],w,h,image_width*( bpp/8 ),stride[0],stride[1] );
-}
- return 0;
+  if(Flip_Flag)
+  {
+	dstStride[0]= -image_width*((bpp+7)/8);
+	dst[0]=ImageData - dstStride[0]*(image_height-1);
+	swsContext->swScale(swsContext,src,stride,y,h,dst, dstStride);
+  }
+  else
+  {
+	dstStride[0]=image_width*((bpp+7)/8);
+	dst[0]=ImageData;
+	swsContext->swScale(swsContext,src,stride,y,h,dst, dstStride);
+  }
+  return 0;
 }
 
 static uint32_t draw_frame( uint8_t *src[] ){
-    int sbpp=( ( image_format&0xFF )+7 )/8;
-    int dbpp=( bpp+7 )/8;
-    char *d=ImageData;
-    char *s=src[0];
-    //printf( "sbpp=%d  dbpp=%d  depth=%d  bpp=%d\n",sbpp,dbpp,depth,bpp );
-
-    if(swsContext)
-    {
       int stride[3]= {0,0,0};
-      if     (swsContext->srcFormat==IMGFMT_YUY2)  stride[0]=swsContext->srcW*2;
-      else if(swsContext->srcFormat==IMGFMT_BGR15) stride[0]=swsContext->srcW*2;
-      else if(swsContext->srcFormat==IMGFMT_BGR16) stride[0]=swsContext->srcW*2;
-      else if(swsContext->srcFormat==IMGFMT_BGR24) stride[0]=swsContext->srcW*3;
-      else if(swsContext->srcFormat==IMGFMT_BGR32) stride[0]=swsContext->srcW*4;
+      
+      if     (in_format==IMGFMT_YUY2)  stride[0]=swsContext->srcW*2;
+      else if(in_format==IMGFMT_BGR15) stride[0]=swsContext->srcW*2;
+      else if(in_format==IMGFMT_BGR16) stride[0]=swsContext->srcW*2;
+      else if(in_format==IMGFMT_BGR24) stride[0]=swsContext->srcW*3;
+      else if(in_format==IMGFMT_BGR32) stride[0]=swsContext->srcW*4;
       
       return draw_slice(src, stride, swsContext->srcW, swsContext->srcH, 0, 0);
-    }
-    
-  if( Flip_Flag ){
-    // flipped BGR
-    int i;
-    //printf( "Rendering flipped BGR frame  bpp=%d  src=%d  dst=%d\n",bpp,sbpp,dbpp );
-    s+=sbpp*image_width*image_height;
-    for( i=0;i<image_height;i++ ) {
-      s-=sbpp*image_width;
-      if( sbpp==dbpp ) {
-        if( depth==16 && image_format==( IMGFMT_BGR|15 ) )
-	  rgb15to16(s,d,2*image_width );
-        else
-          memcpy( d,s,sbpp*image_width );
-      } else {
-         // sbpp!=dbpp
-         char *s2=s;
-         char *d2=d;
-         char *e=s2+sbpp*image_width;
-         while( s2<e ) {
-           d2[0]=s2[0];
-           d2[1]=s2[1];
-           d2[2]=s2[2];
-           s2+=sbpp;d2+=dbpp;
-         }
-      }
-      d+=dbpp*image_width;
-    }
-  } else {
-    if( sbpp==dbpp ) {
-      if( depth==16 && image_format==( IMGFMT_BGR|15 ) )
-        rgb15to16( s,d,2*image_width*image_height );
-      else
-        memcpy( d,s,sbpp*image_width*image_height );
-    } else {
-        // sbpp!=dbpp
-#if 0
-      char *e=s+sbpp*image_width*image_height;
-      //printf( "libvo: using C 24->32bpp conversion\n" );
-      while( s<e ){
-        d[0]=s[0];
-        d[1]=s[1];
-        d[2]=s[2];
-        s+=sbpp;d+=dbpp;
-      }
-#else
-      rgb24to32(s, d, sbpp*image_width*image_height);
-#endif
-    }
-  }
-  return 0;
 }
 
 static uint32_t query_format( uint32_t format )
 {
  if( !vo_init() ) return 0; // Can't open X11
-
- if( ( format&IMGFMT_BGR_MASK )==IMGFMT_BGR ){
-   int bpp=format&0xFF;
-   if( bpp==vo_depthonscreen ) return 1;
-   if( bpp==15 && vo_depthonscreen==16) return 1; // built-in conversion
-   if( bpp==24 && vo_depthonscreen==32) return 1; // built-in conversion
- }
 
  switch( format )
   {
@@ -604,8 +541,6 @@ static uint32_t query_format( uint32_t format )
    case IMGFMT_BGR24:
    case IMGFMT_BGR32:
    case IMGFMT_YUY2: 
-   	if(softzoom) return 1;
-	else	     return 0;
    case IMGFMT_I420:
    case IMGFMT_IYUV:
    case IMGFMT_YV12: return 1;
