@@ -57,6 +57,7 @@
 #include "help_mp.h"
 #include "../m_option.h"
 #include "../m_struct.h"
+#include "../bswap.h"
 
 #include "netstream.h"
 
@@ -158,7 +159,7 @@ static mp_net_stream_packet_t* send_net_stream_cmd(stream_t *s,uint16_t cmd,char
 }
 
 static int fill_buffer(stream_t *s, char* buffer, int max_len){
-  uint16_t len = max_len;
+  uint16_t len = le2me_16(max_len);
   mp_net_stream_packet_t* pack;
 
   pack = send_net_stream_cmd(s,NET_STREAM_FILL_BUFFER,(char*)&len,2);
@@ -179,7 +180,7 @@ static int fill_buffer(stream_t *s, char* buffer, int max_len){
 
 
 static int seek(stream_t *s,off_t newpos) {
-  uint64_t pos = (uint64_t)newpos;
+  uint64_t pos = le2me_64((uint64_t)newpos);
   mp_net_stream_packet_t* pack;
   
   pack = send_net_stream_cmd(s,NET_STREAM_SEEK,(char*)&pos,8);
@@ -259,6 +260,8 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   }
   
   opened = (mp_net_stream_opened_t*)pack->data;
+  net_stream_opened_2_me(opened);
+
   *file_format = opened->file_format;
   stream->flags = opened->flags;
   stream->sector_size = opened->sector_size;

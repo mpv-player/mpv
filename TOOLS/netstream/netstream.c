@@ -36,6 +36,7 @@
 
 #include <libmpdemux/stream.h>
 #include <mp_msg.h>
+#include <bswap.h>
 
 /// Netstream packets def and some helpers
 #include <libmpdemux/netstream.h>
@@ -79,6 +80,7 @@ static int net_stream_open(client_t* cl,char* url) {
   ret.sector_size = cl->stream->sector_size;
   ret.start_pos = cl->stream->start_pos;
   ret.end_pos = cl->stream->end_pos;
+  net_stream_opened_2_me(&ret);
 
   if(!write_packet(cl->fd,NET_STREAM_OK,(char*)&ret,sizeof(mp_net_stream_opened_t)))
     return 0;
@@ -102,8 +104,8 @@ static int net_stream_fill_buffer(client_t* cl,uint16_t max_len) {
   pack = malloc(max_len + sizeof(mp_net_stream_packet_t));
   pack->cmd = NET_STREAM_OK;
   r = stream_read(cl->stream,pack->data,max_len);
-  pack->len = r + sizeof(mp_net_stream_packet_t);
-  if(!net_write(cl->fd,(char*)pack,pack->len)) {
+  pack->len = le2me_16(r + sizeof(mp_net_stream_packet_t));
+  if(!net_write(cl->fd,(char*)pack,le2me_16(pack->len))) {
     free(pack);
     return 0;
   }
@@ -173,13 +175,13 @@ int handle_client(client_t* cl,mp_net_stream_packet_t* pack) {
       mp_msg(MSGT_NETST,MSGL_WARN,"Got invalid fill buffer packet\n");
       return 0;
     }
-    return net_stream_fill_buffer(cl,*((uint16_t*)pack->data));
+    return net_stream_fill_buffer(cl,le2me_16(*((uint16_t*)pack->data)));
   case NET_STREAM_SEEK:
     if(pack->len != sizeof(mp_net_stream_packet_t) + 8) {
       mp_msg(MSGT_NETST,MSGL_WARN,"Got invalid fill buffer packet\n");
       return 0;
     }
-    return net_stream_seek(cl,*((uint64_t*)pack->data));
+    return net_stream_seek(cl,le2me_64(*((uint64_t*)pack->data)));
   case NET_STREAM_RESET:
     return net_stream_reset(cl);
   case NET_STREAM_CLOSE:

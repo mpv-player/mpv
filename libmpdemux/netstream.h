@@ -3,6 +3,8 @@
  * Common stuff for netstream
  * Packets and so on are defined here along with a few helpers
  * wich are used by both the client and the server
+ *
+ * Data is always low endian
  */
 
 typedef struct mp_net_stream_packet_st {
@@ -64,7 +66,8 @@ static mp_net_stream_packet_t* read_packet(int fd) {
     free(pack);
     return NULL;
   }
-  
+  pack->len = le2me_16(pack->len);
+
   if(pack->len < sizeof(mp_net_stream_packet_t)) {
     mp_msg(MSGT_NETST,MSGL_WARN,"Got invalid packet (too small: %d)\n",pack->len);
     free(pack);
@@ -113,10 +116,19 @@ static int write_packet(int fd, uint8_t cmd,char* data,int len) {
   pack->cmd = cmd;
   
   //  printf("Write packet %d %d (%p) %d\n",fd,cmd,data,len);
+  pack->len = le2me_16(pack->len);
   if(net_write(fd,(char*)pack,pack->len)) {
     free(pack);
     return 1;
   }
   free(pack);
   return 0;
+}
+
+static void net_stream_opened_2_me(mp_net_stream_opened_t* o) {
+  o->file_format = le2me_32(o->file_format);
+  o->flags = le2me_32(o->flags);
+  o->sector_size = le2me_32(o->sector_size);
+  o->start_pos = le2me_64(o->start_pos);
+  o->end_pos = le2me_64(o->end_pos);
 }
