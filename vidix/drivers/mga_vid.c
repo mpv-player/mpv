@@ -1246,7 +1246,7 @@ card_found:
 int vixInit(void)
 {
     unsigned int card_option = 0;
-
+    int err;
     printf("[mga] init\n");
 
     mga_vid_in_use = 0;
@@ -1341,7 +1341,8 @@ int vixInit(void)
 
     printf("[mga] MMIO at %p, IRQ: %d, framebuffer: %p\n",
         mga_mmio_base, mga_irq, mga_mem_base);
-
+    err = mtrr_set_type(pci_info.base0,mga_ram_size*1024*1024,MTRR_TYPE_WRCOMB);
+    if(!err) printf("[mga] Set write-combining type of video memory\n");
 #ifdef MGA_ALLOW_IRQ
     if (mga_irq != -1)
     {
