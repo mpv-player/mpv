@@ -100,7 +100,7 @@ typedef   void (*wsTReSize)( unsigned int X,unsigned int Y,unsigned int width,un
 typedef   void (*wsTIdle)( void );
 typedef   void (*wsTKeyHandler)( int KeyCode,int Type,int Key );
 typedef   void (*wsTMouseHandler)( int Button,int X,int Y,int RX,int RY  );
-typedef   void (*wsRemoteHandler)( char * str );
+typedef   void (*wsTDNDHandler)( int num,char ** str );
 
 typedef struct
 {
@@ -128,7 +128,7 @@ typedef struct
  wsTIdle              Idle;
  wsTKeyHandler        KeyHandler;
  wsTMouseHandler      MouseHandler;
- wsRemoteHandler      RemoteHandler;
+ wsTDNDHandler        DandDHandler;
 
  int                  Alt;
  int                  Shift;

@@ -3,6 +3,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <inttypes.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "./mplayer.h"
 #include "../events.h"
@@ -14,6 +17,7 @@
 #include "../wm/ws.h"
 #include "../wm/wskeys.h"
 #include "../wm/widget.h"
+#include "../wm/wsxdnd.h"
 #include "../bitmap/bitmap.h"
 
 #include "../../config.h"
@@ -71,6 +75,7 @@ void mplInit( void * disp )
 
  wsDestroyImage( &appMPlayer.subWindow );
  wsCreateImage( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Width,appMPlayer.sub.Bitmap.Height );
+ wsXDNDMakeAwareness(&appMPlayer.subWindow);
 
  vo_setwindow( appMPlayer.subWindow.WindowID, appMPlayer.subWindow.wGC );
 
@@ -82,6 +87,7 @@ void mplInit( void * disp )
   wsNoBorder,wsShowMouseCursor|wsHandleMouseButton|wsHandleMouseMove,i,"MPlayer" ); //wsMinSize|
 
  wsSetShape( &appMPlayer.mainWindow,appMPlayer.main.Mask.Image );
+ wsXDNDMakeAwareness(&appMPlayer.mainWindow);
 
  mplMenuInit();
 
@@ -94,10 +100,12 @@ void mplInit( void * disp )
  appMPlayer.mainWindow.ReDraw=mplMainDraw;
  appMPlayer.mainWindow.MouseHandler=mplMainMouseHandle;
  appMPlayer.mainWindow.KeyHandler=mplMainKeyHandle;
+ appMPlayer.mainWindow.DandDHandler=mplDandDHandler;
 
  appMPlayer.subWindow.ReDraw=mplSubDraw;
  appMPlayer.subWindow.MouseHandler=mplSubMouseHandle;
  appMPlayer.subWindow.KeyHandler=mplMainKeyHandle;
+ appMPlayer.subWindow.DandDHandler=mplDandDHandler;
 
  wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
  wsClearWindow( appMPlayer.subWindow );

@@ -21,6 +21,7 @@
 #include "../../config.h"
 #include "ws.h"
 #include "wsconv.h"
+#include "wsxdnd.h"
 #include "../../postproc/rgb2rgb.h"
 #include "../../mp_msg.h"
 #include "../../mplayer.h"
@@ -227,6 +228,9 @@ if(mDisplay){
   }
 }
 
+/* enable DND atoms */
+wsXDNDInitialize();
+ 
 { /* on remote display XShm will be disabled - LGB */
  char *dispname=DisplayString(wsDisplay);
  int localdisp=1;
@@ -557,7 +561,10 @@ Bool wsEvents( Display * display,XEvent * Event,XPointer arg )
            { i=wsWindowFocusIn;  wsWindowList[l]->Focused=wsFocused; goto expose; }
           if ( Event->xclient.data.l[0] == wsWindowList[l]->AtomRolle )
            { mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[ws] rolled.\n" ); }
-         }
+         } else {
+	   /* try to process DND events */
+	   wsXDNDProcessClientMessage(wsWindowList[l],&Event->xclient);
+	 }
         break;
 
    case MapNotify:   i=wsWindowMapped;   wsWindowList[l]->Mapped=wsMapped;   goto expose;
@@ -681,6 +688,10 @@ buttonreleased:
 	}
         break;
 
+   case SelectionNotify:
+     /* Handle DandD */
+     wsXDNDProcessSelection(wsWindowList[l],Event);
+     break;
   }
  XFlush( wsDisplay );
  XSync( wsDisplay,False );

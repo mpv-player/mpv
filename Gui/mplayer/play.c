@@ -246,8 +246,11 @@ void ChangeSkin( char * name )
 
 void mplSetFileName( char * dir,char * name )
 {
- if ( !name || !dir ) return;
- guiSetDF( guiIntfStruct.Filename,dir,name );
+ if ( !name ) return;
+ 
+ if ( !dir ) guiSetFilename( guiIntfStruct.Filename,name )
+  else guiSetDF( guiIntfStruct.Filename,dir,name )
+
  guiIntfStruct.StreamType=STREAMTYPE_FILE;
  guiIntfStruct.FilenameChanged=1;
  gfree( (void **)&guiIntfStruct.AudioFile );

@@ -650,3 +650,45 @@ void mplMainKeyHandle( int KeyCode,int Type,int Key )
    }
  if ( msg != evNone ) mplEventHandling( msg,0 );
 }
+
+/* this will be used to handle Drag&Drop files */
+void mplDandDHandler(int num,const char** files)
+{
+  struct stat buf;
+  int f = 0;
+
+  if (num <= 0)
+    return;
+
+  /* clear playlist */
+  gtkSet(gtkDelPl,0,NULL);
+
+  /* now fill it with new items */
+  for(f=0; f < num; f++){
+    char* str = files[f];
+    plItem* item;
+    if(stat(str,&buf) == 0 && S_ISDIR(buf.st_mode) == 0) {
+      /* this is not a directory so try to play it */
+      printf("Received D&D %s\n",str);
+      item = calloc(1,sizeof(plItem));
+      /* FIXME: decompose file name ? */
+      /* yes -- Pontscho */
+      if ( strrchr( str,'/' ) )
+       {
+        char * t = strdup( str );
+	char * s = strrchr( t,'/' ); *s=0; s++;
+        item->name = gstrdup( s );
+        item->path = gstrdup( t );
+	free( t );
+       } else { item->name = strdup(str); item->path = strdup(""); }
+      gtkSet(gtkAddPlItem,0,(void*)item);
+    } else {
+      printf("Received not a file: %s !\n",str);
+    }
+  }
+
+  mplSetFileName( NULL,files[0] );
+  if ( guiIntfStruct.Playing == 1 ) mplEventHandling( evStop,0 );
+  mplEventHandling( evPlay,0 );
+
+}
