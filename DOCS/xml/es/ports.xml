@@ -287,7 +287,7 @@ solo tiene <emphasis>emulación</emphasis> de X que es MUY lenta. Use SDL.
   <ulink url="http://www.videolan.org/vlc/dx7headers.tgz">los archivos de cabecera de DirectX 7</ulink>
   para compilar el controlador de salida de video de DirectX.</para>
 
-<para>Las DLLs de QuickTime y Real también funcionan. Compile con
+<para>Las DLLs de QuickTime y Real Win32 (Real Linux no) también funcionan. Compile con
   <option>--enable-qtx</option> y <option>--enable-real</option> y ponga los codecs en
   el sitio de las DLL de Windows por defecto,
   <filename class="directory">C:\WINNT\system32</filename> o
