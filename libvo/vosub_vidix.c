@@ -761,8 +761,9 @@ uint32_t vidix_control(uint32_t request, void *data, ...)
 	*(uint32_t *)data = vidix_play.num_frames;
 	return VO_TRUE;
   }
+  return VO_NOTIMPL;
   // WARNING: we drop extra parameters (...) here!
-  return server_control(request,data); //VO_NOTIMPL;
+//  return server_control(request,data); //VO_NOTIMPL;
 }
 
 int vidix_preinit(const char *drvname,void *server)

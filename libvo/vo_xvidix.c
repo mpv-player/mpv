@@ -236,6 +236,14 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	case IMGFMT_YUY2:
 	    image_depth = 16;
 	    break;
+	case IMGFMT_YVU9:
+	case IMGFMT_IF09:
+	    image_depth = 9;
+	    break;
+	case IMGFMT_Y800:
+	case IMGFMT_Y8:
+	    image_depth = 8;
+	    break;
 	default:
 	    image_depth = 16;
 	    mp_msg(MSGT_VO, MSGL_FATAL, "Unknown image format: %s\n",
@@ -478,5 +486,6 @@ static uint32_t control(uint32_t request, void *data, ...)
         }
       return VO_TRUE;
   }
-  return VO_NOTIMPL;
+  vidix_control(request, data);
+//  return VO_NOTIMPL;
 }
