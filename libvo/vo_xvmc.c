@@ -189,7 +189,6 @@ static void deallocate_xvimage()
    }
    XFree(xvimage);
 
-   XFlush( mDisplay );
    XSync(mDisplay, False);
    return;
 }
@@ -762,7 +761,6 @@ found_subpic:
 
       if ( vo_gc != None ) XFreeGC( mDisplay,vo_gc );
       vo_gc = XCreateGC(mDisplay, vo_window, GCForeground, &xgcv);
-      XFlush(mDisplay);
       XSync(mDisplay, False);
 #ifdef HAVE_XF86VM
       if ( vm )

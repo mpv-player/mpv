@@ -204,7 +204,6 @@ create_window(Display *display, char *title)
 
 	XSelectInput(display, mywindow, NoEventMask);
 
-	XFlush(display);
 	XSync(display, False);
 
 	return 0;

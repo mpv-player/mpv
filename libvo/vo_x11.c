@@ -425,7 +425,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
                                   vo_dwidth, vo_dheight);
         }
 
-        XFlush(mDisplay);
         XSync(mDisplay, False);
 
         // we cannot grab mouse events on root window :(

@@ -348,7 +348,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
         if (vo_gc != None)
             XFreeGC(mDisplay, vo_gc);
         vo_gc = XCreateGC(mDisplay, vo_window, 0L, &xgcv);
-        XFlush(mDisplay);
         XSync(mDisplay, False);
 #ifdef HAVE_XF86VM
         if (vm)
@@ -512,7 +511,6 @@ static void deallocate_xvimage(int foo)
     }
     XFree(xvimage[foo]);
 
-    XFlush(mDisplay);
     XSync(mDisplay, False);
     return;
 }

@@ -275,7 +275,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     if (vo_ontop)
         vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
 
-    XFlush(mDisplay);
     XSync(mDisplay, False);
 
     ioctl(f, MGA_VID_ON, 0);
