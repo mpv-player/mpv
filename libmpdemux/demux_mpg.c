@@ -366,7 +366,7 @@ void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,int flags){
 	newpos+=(demuxer->movi_end-demuxer->movi_start)*rel_seek_secs;
     } else {
 	// time seek (secs)
-        if(!sh_video->i_bps) // unspecified or VBR
+        if(!sh_video || !sh_video->i_bps) // unspecified or VBR
           newpos+=2324*75*rel_seek_secs; // 174.3 kbyte/sec
         else
           newpos+=sh_video->i_bps*rel_seek_secs;
