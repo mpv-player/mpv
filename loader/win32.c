@@ -726,6 +726,22 @@ void WINAPI expGetSystemInfo(SYSTEM_INFO* si)
 	cachedsi.dwAllocationGranularity	= 0x10000;
 	cachedsi.wProcessorLevel		= 5; /* pentium */
 	cachedsi.wProcessorRevision		= 0x0101;
+        cachedsi.dwNumberOfProcessors		= 1;
+
+#if 1
+	/* mplayer's way to detect PF's */
+	{
+	    #include "../cpudetect.h"
+	    extern CpuCaps gCpuCaps;
+	    
+	    if (gCpuCaps.hasMMX)
+		PF[PF_MMX_INSTRUCTIONS_AVAILABLE] = TRUE;
+	    if (gCpuCaps.hasSSE)
+		PF[PF_XMMI_INSTRUCTIONS_AVAILABLE] = TRUE;
+	    if (gCpuCaps.has3DNow)
+		PF[PF_AMD3D_INSTRUCTIONS_AVAILABLE] = TRUE;
+	}
+#endif
 	
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__svr4__)
 	do_cpuid(1, regs);
@@ -751,6 +767,10 @@ void WINAPI expGetSystemInfo(SYSTEM_INFO* si)
 	  PF[PF_COMPARE_EXCHANGE_DOUBLE] = TRUE;
 	if (regs[3] & (1 << 23))
           PF[PF_MMX_INSTRUCTIONS_AVAILABLE] = TRUE;
+	if (regs[3] & (1 << 25))
+	  PF[PF_XMMI_INSTRUCTIONS_AVAILABLE] = TRUE;
+	if (regs[3] & (1 << 31))
+	  PF[PF_AMD3D_INSTRUCTIONS_AVAILABLE] = TRUE;
         cachedsi.dwNumberOfProcessors=1;
 #else
 	{
@@ -864,7 +884,12 @@ void WINAPI expGetSystemInfo(SYSTEM_INFO* si)
 				PF[PF_COMPARE_EXCHANGE_DOUBLE] = TRUE;
 			if (strstr(value,"mmx"))
 				PF[PF_MMX_INSTRUCTIONS_AVAILABLE] = TRUE;
-
+			if (strstr(value,"tsc"))
+				PF[PF_RDTSC_INSTRUCTION_AVAILABLE] = TRUE;
+			if (strstr(value,"xmm"))
+				PF[PF_XMMI_INSTRUCTIONS_AVAILABLE] = TRUE;
+			if (strstr(value,"3dnow"))
+				PF[PF_AMD3D_INSTRUCTIONS_AVAILABLE] = TRUE;
 		}
 	}
 	fclose (f);
