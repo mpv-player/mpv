@@ -1488,6 +1488,7 @@ if (dvd_nav && stream->type==STREAMTYPE_DVDNAV) {
 
 total_time_usage_start=GetTimer();
 audio_time_usage=0; video_time_usage=0; vout_time_usage=0;
+total_frame_cnt=0; drop_frame_cnt=0; // fix for multifile fps benchmark
 while(!eof){
     float aq_sleep_time=0;
 
