@@ -45,7 +45,7 @@ Directory:  libmpdvdkit2
 License:    GNU General Public License
 
 Name:       libmpeg2
-Version:    0.3.1 + patches
+Version:    0.4.0b + patches
 Homepage:   http://libmpeg2.sourceforge.net/
 Directory:  libmpeg2
 License:    GNU General Public License
@@ -86,15 +86,9 @@ Homepage:   http://id3edit.sourceforge.net/
 Directory:  libmpdemux/genres.h
 License:    GNU General Public License
 
-Name:       fbset
-Version:    2.1
-Homepage:   http://home.tvd.be/cr26864/Linux/fbdev/
-Directory:  TVout/fbset
-License:    GNU General Public License
-
 Name:       matroxset
 Version:    0.3
 Homepage:   ftp://platan.vc.cvut.cz/pub/linux/matrox-latest/
-Directory:  TVout/matroxset
+Directory:  TOOLS/TVout/matroxset
 License:    GNU General Public License
 
