@@ -57,7 +57,7 @@ static XvMCMacroBlockArray mv_blocks;
 #define MAX_SURFACES 8
 static int number_of_surfaces=0;
 static XvMCSurface surface_array[MAX_SURFACES];
-static xvmc_render_state_t surface_render[MAX_SURFACES];//these one are used in mpi->priv
+static xvmc_render_state_t * surface_render;
 
 static xvmc_render_state_t * p_render_surface_to_show=NULL;
 static xvmc_render_state_t * p_render_surface_visible=NULL;
@@ -113,13 +113,13 @@ int attrib_count,i;
 //from vo_xmga
 static void mDrawColorKey(uint32_t x,uint32_t  y, uint32_t w, uint32_t h)
 {
-   if( (keycolor_handling != 2) || (keycolor_handling != 3) ) 
+   if( (keycolor_handling != 2) && (keycolor_handling != 3) ) 
       return ;//unknow method
 
    XSetBackground( mDisplay,vo_gc,0 );
    XClearWindow( mDisplay,vo_window );
  
-   if(keycolor_handling == 2){
+   if(keycolor_handling == 3){
       XSetForeground( mDisplay,vo_gc,keycolor );
       XFillRectangle( mDisplay,vo_window,vo_gc,x,y,w,h);
    }
@@ -255,8 +255,9 @@ int mc_ver,mc_rev;
    }
    xv_port = 0;
    number_of_surfaces = 0;
-   keycolor_handling = 1;
-
+   keycolor_handling = 1;//!!fixme
+   surface_render=NULL;
+   
    return 0;
 }
 
@@ -326,6 +327,9 @@ static uint32_t vm_height;
    }
    printf("vo_xvmc: mv_blocks allocated\n");
 
+   if(surface_render==NULL)
+      surface_render=malloc(MAX_SURFACES*sizeof(xvmc_render_state_t));//easy mem debug
+   
    for(i=0; i<MAX_SURFACES; i++){
       rez=XvMCCreateSurface(mDisplay,&ctx,&surface_array[i]);
       if( rez != Success )
@@ -336,6 +340,7 @@ static uint32_t vm_height;
       surface_render[i].mv_blocks = mv_blocks.macro_blocks;
       surface_render[i].total_number_of_mv_blocks = numblocks;
       surface_render[i].total_number_of_data_blocks = numblocks*blocks_per_macroblock;;
+      surface_render[i].mc_type = surface_info.mc_type & (~XVMC_IDCT);
       surface_render[i].idct = (surface_info.mc_type & XVMC_IDCT) == XVMC_IDCT;
       surface_render[i].chroma_format = surface_info.chroma_format;
       surface_render[i].unsigned_intra = (surface_info.flags & XVMC_INTRA_UNSIGNED) == XVMC_INTRA_UNSIGNED;
@@ -476,7 +481,7 @@ static uint32_t vm_height;
 //    vo_x11_sizehint( hint.x, hint.y, hint.width, hint.height,0 );   
     
       if ( vo_gc != None ) XFreeGC( mDisplay,vo_gc );
-      vo_gc = XCreateGC(mDisplay, vo_window, 0L, &xgcv);
+      vo_gc = XCreateGC(mDisplay, vo_window, GCForeground, &xgcv);
       XFlush(mDisplay);
       XSync(mDisplay, False);
 #ifdef HAVE_XF86VM
@@ -525,6 +530,24 @@ assert(0 && srcp==NULL);//silense unused srcp warning
 static void draw_osd(void){
 }
 
+static void xvmc_sync_surface(XvMCSurface * srf){
+int status,rez;
+   rez = XvMCGetSurfaceStatus(mDisplay,srf,&status);
+   assert(rez==Success);
+   if( status & XVMC_RENDERING )
+      XvMCSyncSurface(mDisplay, srf);
+/*
+   rez = XvMCFlushSurface(mDisplay, srf);
+   assert(rez==Success);
+
+   do {
+   usleep(1);
+   printf("waiting...\n");
+   XvMCGetSurfaceStatus(mDisplay,srf,&status);
+   } while (status & XVMC_RENDERING);       
+*/
+}
+
 static void flip_page(void){
 int rez;
 int clipX,clipY,clipW,clipH;
@@ -539,14 +562,16 @@ int clipX,clipY,clipW,clipH;
 
    if(p_render_surface_to_show == NULL) return;
    assert( p_render_surface_to_show->magic == MP_XVMC_RENDER_MAGIC );
-  
+//fixme   assert( p_render_surface_to_show != p_render_surface_visible);
+   
 // make sure the rendering is done
-   XvMCSyncSurface(mDisplay,p_render_surface_to_show->p_surface);//!!
+   xvmc_sync_surface(p_render_surface_to_show->p_surface);
+
 //the visible surface won't be displayed anymore, mark it as free
    if( p_render_surface_visible!=NULL ) 
       p_render_surface_visible->state &= ~MP_XVMC_STATE_DISPLAY_PENDING;
 
-   assert(p_render_surface_to_show->state & MP_XVMC_STATE_DISPLAY_PENDING);
+//!!fixme   assert(p_render_surface_to_show->state & MP_XVMC_STATE_DISPLAY_PENDING);
 
 // show it
 // if(benchmark)
@@ -617,6 +642,8 @@ int i;
             printf("vo_xvmc::uninit surface_render[%d].status=%d\n",i,
                     surface_render[i].state); 
       }
+      
+      free(surface_render);surface_render=NULL;
 
       XvMCDestroyContext(mDisplay,&ctx);
       if( verbose > 3) printf("vo_xvmc: Context sucessfuly freed\n");
@@ -660,19 +687,6 @@ int mode_id;
    return flags;
 }
 
-static void xvmc_sync_surface(XvMCSurface * srf){
-int status,rez;
-   rez = XvMCGetSurfaceStatus(mDisplay,srf,&status);
-   assert(rez==Success);
-   if( status & XVMC_RENDERING )
-      XvMCSyncSurface(mDisplay, srf);
-/*
-   do {
-   unsleep(10);
-   XvMCGetSurfaceStatus(mDisplay,&surface_array[srf],&status);
-   } while (status & XVMC_RENDERING)       
-*/
-}
 
 static uint32_t draw_slice(uint8_t *image[], int stride[],
 			   int w, int h, int x, int y){
@@ -685,11 +699,6 @@ int rez;
    rndr = (xvmc_render_state_t*)image[2];//this is copy of priv-ate
    assert( rndr != NULL );
    assert( rndr->magic == MP_XVMC_RENDER_MAGIC );
-   //!!todo make check for beggining of frame/field
-   if(rndr->p_past_surface!=NULL)
-      xvmc_sync_surface(rndr->p_past_surface);
-   if(rndr->p_future_surface!=NULL)
-      xvmc_sync_surface(rndr->p_future_surface);   
 
    rez = XvMCRenderSurface(mDisplay,&ctx,rndr->picture_structure,
              		   rndr->p_surface,
@@ -728,6 +737,7 @@ int rez;
    }
 #endif
    assert(rez==Success);
+   if(verbose > 3 ) printf("vo_xvmc: flush surface\n");
    rez = XvMCFlushSurface(mDisplay, rndr->p_surface);
    assert(rez==Success);
 
@@ -781,6 +791,10 @@ int getsrf;
          printf("vo_xvmc: surface[%d].state=%d\n",i,surface_render[i].state);
       return VO_FALSE;
    }
+
+assert(surface_render[getsrf].start_mv_blocks_num == 0);
+assert(surface_render[getsrf].filled_mv_blocks_num == 0);
+assert(surface_render[getsrf].next_free_data_block_num == 0);
 
    mpi->flags |= MP_IMGFLAG_DIRECT;
 //keep strides 0 to avoid field manipulations

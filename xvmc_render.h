@@ -21,10 +21,11 @@ typedef   struct{
   XvMCMacroBlock * mv_blocks;
   int total_number_of_mv_blocks;
   int total_number_of_data_blocks;
+  int mc_type;//XVMC_MPEG1/2/4,XVMC_H263 without XVMC_IDCT
   int idct;//does we use IDCT acceleration?
   int chroma_format;//420,422,444
   int unsigned_intra;//+-128 for intra pictures after clip
-  int reserved1[14];//future extenstions (e.g. gmc,qpel)
+  int reserved1[13];//future extenstions (e.g. gmc,qpel)
   XvMCSurface* p_surface;//pointer to rendered surface, never changed
 
 //these are changed by decoder
