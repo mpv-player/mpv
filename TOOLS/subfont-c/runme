@@ -1,6 +1,7 @@
 #!/bin/bash
 
 font=arial.ttf
+#font=verdana.ttf
 encoding=iso-8859-2
 fontsize=24
 symbolssize=35
@@ -9,18 +10,15 @@ outline=1.5
 
 make || exit
 
-./subfont --blur $blur --outline $outline "$encoding" $fontsize "$font" &>log
-status=$?
-cat log
-[ $status == 0 ] || exit
-
+./subfont --blur $blur --outline $outline "$encoding" $fontsize "$font" || exit
 ./subfont --append --blur $blur --outline $outline encodings/osd-mplayer $symbolssize osd/osd.pfb || exit
 
 #cp font.desc *.raw ~/.mplayer/font/
 
 exit
 
-SIZE=`awk '/^bitmap size/ {print $NF}' log`+800
+# display *.raw files
+SIZE=`awk '/bitmap size:/ {print $NF; exit}' font.desc`+800
 display -size $SIZE gray:$encoding-a.raw &
 display -size $SIZE gray:$encoding-b.raw &
 #convert -size $SIZE gray:$encoding-a.raw $encoding-a.png

@@ -2,10 +2,11 @@ Usage:
 ~~~~~~
 1. Make sure you have FreeType 2 installed.
 2. Get a TrueType or Type 1 font.
-3. Modify `runme' script for your encoding and font path.
-4. Type: ./runme
-5. Copy *.raw and font.desc files to ~/.mplayer/font/
-6. Run subfont alone to see more options.
+3. Run ./configure from mplayer's root directory.
+4. Modify `runme' script for your encoding and font path.
+5. Type: ./runme
+6. Copy *.raw and font.desc files to ~/.mplayer/font/
+7. Run subfont alone to see more options.
 
 
 About:
@@ -28,7 +29,7 @@ I found on http://rpmfind.net/ and euc-kr encoding.  Custom encoding file
 for euc-kr was generated from charmap I found in /usr/share/i18n/charmaps/EUC-KR.gz
 (glibc package).  This should work with -unicode switch for mplayer
 (though it is not Unicode encoding).
-It took about 14 seconds to render over 8000 characters on P3 @ 600MHz.
+It took about 10 seconds to render over 8000 characters on P3 @ 600MHz.
 
 
 Custom encodings:
@@ -43,6 +44,34 @@ Example: to render a single letter `aogonek' (Unicode 0x0105) and encode
 it using iso-8859-2 encoding (0xB1), your custom encoding file will consist
 of a sigle line:
 0105 B1
+
+
+New font.desc format (proposal):
+~~~~~~~~~~~~~~~~~~~~~==========~
+Subfont will generate new font.desc format when compiled with NEW_DESC macro defined
+(uncomment appropriate line in Makefile).
+
+These changes are to make bitmaps smaller and processing faster.
+
+Changes to [info] section:
+ There is no `spacewidth'. It will not be useful.
+ `height` is the distance from one baseline to the next.
+ `ascender' is the distance from the baseline to the highest grid coordinate used to place the outline point.
+ `descender' is the distance from the baseline to the lowest grid coordinate used to place the outline point.
+Note: upwards direction is positive.
+Read more: freetype-2.*/docs/glyphs/glyphs-3.html
+
+Changes to [characters] section:
+ Bitmap start and bitmap end are replaced with:
+  bitmap start,
+  bitmap width,
+  bitmap height,
+  left bearing -- the horizontal distance from the current pen position to the bitmaps's left edge,
+  top bearing -- the vertical distance from the baseline to the bitmaps's top edge,
+  advance -- the horizontal distance the pen position must be incremented by after each glyph is rendered.
+
+To anderstand this you must think in verctorial coordinates.
+Necessarily read freetype-2.*/docs/glyphs/glyphs-7.html about vectorial coordinates!
 
 
 Notes:
