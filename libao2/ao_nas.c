@@ -10,6 +10,20 @@
  * largely rewritten and used for this
  * plugin by Tobias Diedrich
  *
+ * Theory of operation:
+ *
+ * The NAS consists of two parts, a server daemon and a client.
+ * We setup the server to use a buffer of size NAS_BUFFER_SIZE
+ * with a low watermark of NAS_BUFFER_SIZE - NAS_FRAG_SIZE.
+ * Upon starting the flow the server will generate a buffer underrun
+ * event and the event handler will fill the buffer for the first time.
+ * Now the server will generate a lowwater event when the server buffer
+ * falls below the low watermark value. The event handler gets called
+ * again and refills the buffer by the number of bytes requested by the
+ * server (usually a multiple of 4096). To prevent stuttering on
+ * startup (start of playing, seeks, unpausing) the client buffer should
+ * be bigger than the server buffer. (For debugging we also do some
+ * accounting of what we think how much of the server buffer is filled)
  */
 
 #include <stdio.h>
@@ -106,6 +120,7 @@ struct ao_nas_data {
 
 	int flow_stopped;
 	int flow_paused;
+	int expect_underrun;
 
 	void *client_buffer;
 	void *server_buffer;
@@ -193,8 +208,6 @@ static void nas_writeBuffer(struct ao_nas_data *nas_data, void *data, int len)
 	nas_data->client_buffer_used += len;
 
 	pthread_mutex_unlock(&nas_data->buffer_mutex);
-	if (nas_data->server_buffer_used < nas_data->server_buffer_size)
-		nas_readBuffer(nas_data, nas_data->server_buffer_size - nas_data->server_buffer_used);
 }
 
 static int nas_empty_event_queue(struct ao_nas_data *nas_data)
@@ -247,12 +260,13 @@ static AuBool nas_event_handler(AuServer *aud, AuEvent *ev, AuEventHandlerRec *h
 
 	switch (ev->type) {
 	case AuEventTypeElementNotify:
-		DPRINTF("ao_nas: event_handler(): kind %s state %s->%s reason %s numbytes %d\n",
+		DPRINTF("ao_nas: event_handler(): kind %s state %s->%s reason %s numbytes %d expect_underrun %d\n",
 			nas_elementnotify_kind(event->kind),
 			nas_state(event->prev_state),
 			nas_state(event->cur_state),
 			nas_reason(event->reason),
-			event->num_bytes);
+			event->num_bytes,
+			nas_data->expect_underrun);
 
 		nas_data->server_buffer_used -= event->num_bytes;
 		if (nas_data->server_buffer_used < 0)
@@ -267,8 +281,15 @@ static AuBool nas_event_handler(AuServer *aud, AuEvent *ev, AuEventHandlerRec *h
 				switch (event->reason) {
 				case AuReasonUnderrun:
 					// buffer underrun -> refill buffer
+					if (nas_data->expect_underrun)
+						nas_data->expect_underrun = 0;
+					else
+						fprintf(stderr, "ao_nas: Buffer underrun.\n"
+							"Possible reasons are network congestion or your NAS server is too slow.\n"
+							"Try renicing your nasd to e.g. -15.\n");
 					nas_data->server_buffer_used = 0;
-					nas_readBuffer(nas_data, nas_data->server_buffer_size - nas_data->server_buffer_used);
+					if (nas_readBuffer(nas_data, nas_data->server_buffer_size - nas_data->server_buffer_used) == 0)
+						nas_data->flow_stopped = 1;
 					break;
 				default:
 					break;
@@ -345,14 +366,15 @@ static int init(int rate,int channels,int format,int flags)
 		return 0;
 	}
 
-	nas_data->client_buffer_size = NAS_BUFFER_SIZE;
+	nas_data->client_buffer_size = NAS_BUFFER_SIZE*2;
 	nas_data->client_buffer = malloc(nas_data->client_buffer_size);
 	nas_data->server_buffer_size = NAS_BUFFER_SIZE;
 	nas_data->server_buffer = malloc(nas_data->server_buffer_size);
 
 	ao_data.samplerate = rate;
 	ao_data.channels = channels;
-	ao_data.buffersize = NAS_BUFFER_SIZE * 2;
+	ao_data.buffersize = nas_data->client_buffer_size +
+			     nas_data->server_buffer_size;
 	ao_data.outburst = NAS_FRAG_SIZE;
 	ao_data.bps = rate * bytes_per_sample;
 
@@ -398,6 +420,7 @@ static int init(int rate,int channels,int format,int flags)
 				nas_event_handler, (AuPointer) nas_data);
 	AuSetErrorHandler(nas_data->aud, nas_error_handler);
 	nas_data->flow_stopped=1;
+	nas_data->expect_underrun=0;
 
 	pthread_mutex_init(&nas_data->buffer_mutex, NULL);
 	pthread_create(&nas_data->event_thread, NULL, &nas_event_thread_start, nas_data);
@@ -408,6 +431,8 @@ static int init(int rate,int channels,int format,int flags)
 // close audio device
 static void uninit(){
 	AuStatus as;
+
+	DPRINTF("ao_nas: uninit()\n");
 
 	nas_data->stop_thread = 1;
 	pthread_join(nas_data->event_thread, NULL);
@@ -426,6 +451,8 @@ static void uninit(){
 static void reset(){
 	AuStatus as;
 
+	DPRINTF("ao_nas: reset()\n");
+
 	pthread_mutex_lock(&nas_data->buffer_mutex);
 	nas_data->client_buffer_used = 0;
 	if (!nas_data->flow_stopped) {
@@ -435,6 +462,7 @@ static void reset(){
 		nas_data->flow_stopped = 1;
 	}
 	nas_data->server_buffer_used = 0;
+	AuSync(nas_data->aud, AuTrue);
 	pthread_mutex_unlock(&nas_data->buffer_mutex);
 }
 
@@ -458,6 +486,7 @@ static void audio_resume()
 
 	nas_data->flow_stopped = 0;
 	nas_data->flow_paused = 0;
+	nas_data->expect_underrun = 1;
 	AuStartFlow(nas_data->aud, nas_data->flow, &as);
 	if (as != AuSuccess)
 		nas_print_error(nas_data->aud, "play(): AuStartFlow", as);
@@ -488,21 +517,6 @@ static int play(void* data,int len,int flags)
 
 	DPRINTF("ao_nas: play()\n");
 
-	if (nas_data->flow_stopped) {
-		AuEvent ev;
-
-		AuStartFlow(nas_data->aud, nas_data->flow, &as);
-		if (as != AuSuccess)
-			nas_print_error(nas_data->aud, "play(): AuStartFlow", as);
-		nas_data->flow_stopped = 0;
-		/*
-		 * Do not continue to wait if there is nothing in the server
-		 * buffer.  (The event never happens and mplayer can freeze.)
-		 */
-		while (nas_data->server_buffer_used > 0 &&
-		       !nas_empty_event_queue(nas_data)); // wait for first buffer underrun event
-	}
-
 	pthread_mutex_lock(&nas_data->buffer_mutex);
 	maxbursts = (nas_data->client_buffer_size -
 		     nas_data->client_buffer_used) / ao_data.outburst;
@@ -512,6 +526,17 @@ static int play(void* data,int len,int flags)
 	pthread_mutex_unlock(&nas_data->buffer_mutex);
 
 	nas_writeBuffer(nas_data, data, writelen);
+
+	if (nas_data->flow_stopped) {
+		AuEvent ev;
+
+		nas_data->expect_underrun = 1;
+		AuStartFlow(nas_data->aud, nas_data->flow, &as);
+		if (as != AuSuccess)
+			nas_print_error(nas_data->aud, "play(): AuStartFlow", as);
+		nas_data->flow_stopped = 0;
+	}
+
 	return writelen;
 }
 
