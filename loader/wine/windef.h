@@ -129,9 +129,9 @@ extern "C" {
 #define _pascal     __stdcall
 #if !defined(__CYGWIN__)
 #define _stdcall    __stdcall
-#endif
 #define _fastcall   __stdcall
 #define __fastcall  __stdcall
+#endif
 #define __export    __stdcall
 #define CDECL       __cdecl
 #define _CDECL      __cdecl
