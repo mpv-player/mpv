@@ -483,9 +483,15 @@ static int init_vo(sh_video_t *sh, enum PixelFormat pix_fmt){
 	sh->disp_h = avctx->height;
 	ctx->vo_inited=1;
 	switch(pix_fmt){
+	// YUVJ are YUV formats that use the full Y range and not just
+	// 16 - 235 (see colorspaces.txt).
+	// Currently they are all treated the same way.
 	case PIX_FMT_YUV410P: ctx->best_csp=IMGFMT_YVU9;break; //svq1
+	case PIX_FMT_YUVJ420P:
 	case PIX_FMT_YUV420P: ctx->best_csp=IMGFMT_YV12;break; //mpegs
+	case PIX_FMT_YUVJ422P:
 	case PIX_FMT_YUV422P: ctx->best_csp=IMGFMT_422P;break; //mjpeg / huffyuv
+	case PIX_FMT_YUVJ444P:
 	case PIX_FMT_YUV444P: ctx->best_csp=IMGFMT_444P;break; //photo jpeg
 	case PIX_FMT_YUV411P: ctx->best_csp=IMGFMT_411P;break; //dv ntsc
 	case PIX_FMT_YUV422:  ctx->best_csp=IMGFMT_YUY2;break; //huffyuv perhaps in the future
