@@ -537,6 +537,10 @@ if(gCpuCaps.has3DNow){
 case AFM_A52: {
   // Dolby AC3 audio:
   int accel=0; // should contain mmx/sse/etc flags
+  if(gCpuCaps.hasSSE) accel|=MM_ACCEL_X86_SSE;
+  if(gCpuCaps.hasMMX) accel|=MM_ACCEL_X86_MMX;
+  if(gCpuCaps.hasMMX2) accel|=MM_ACCEL_X86_MMXEXT;
+  if(gCpuCaps.has3DNow) accel|=MM_ACCEL_X86_3DNOW;
   a52_samples=a52_init (accel);
   if (a52_samples == NULL) {
 	mp_msg(MSGT_DECAUDIO,MSGL_ERR,"A52 init failed\n");
