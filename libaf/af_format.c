@@ -130,7 +130,7 @@ char* fmt2str(int format, char* str, size_t size)
 // Helper functions to check sanity for input arguments
 
 // Sanity check for bytes per sample
-int check_bps(int bps)
+static int check_bps(int bps)
 {
   if(bps != 4 && bps != 3 && bps != 2 && bps != 1){
     af_msg(AF_MSG_ERROR,"[format] The number of bytes per sample" 
@@ -141,7 +141,7 @@ int check_bps(int bps)
 }
 
 // Check for unsupported formats
-int check_format(int format)
+static int check_format(int format)
 {
   char buf[256];
   switch(format & AF_FORMAT_SPECIAL_MASK){
