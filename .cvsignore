@@ -5,7 +5,5 @@ config.mak
 configure.log
 help_mp.h
 mencoder
-mencoderxp
 mplayer
-mplayerxp
 version.h
