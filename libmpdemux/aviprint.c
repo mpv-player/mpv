@@ -52,7 +52,6 @@ void print_strh(AVIStreamHeader *h){
 }
 
 void print_wave_header(WAVEFORMATEX *h){
-
   printf("======= WAVE Format =======\n");
   printf("Format Tag: %d (0x%X)\n",h->wFormatTag,h->wFormatTag);
   printf("Channels: %d\n",h->nChannels);
@@ -61,6 +60,14 @@ void print_wave_header(WAVEFORMATEX *h){
   printf("Block align: %d\n",h->nBlockAlign);
   printf("bits/sample: %d\n",h->wBitsPerSample);
   printf("cbSize: %d\n",h->cbSize);
+  if(h->wFormatTag=0x55 && h->cbSize>=12){
+      MPEGLAYER3WAVEFORMAT* h2=h;
+      printf("mp3.wID=%d\n",h2->wID);
+      printf("mp3.fdwFlags=0x%X\n",h2->fdwFlags);
+      printf("mp3.nBlockSize=%d\n",h2->nBlockSize);
+      printf("mp3.nFramesPerBlock=%d\n",h2->nFramesPerBlock);
+      printf("mp3.nCodecDelay=%d\n",h2->nCodecDelay);
+  }
 }
 
 
