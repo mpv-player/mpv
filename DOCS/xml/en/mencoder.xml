@@ -124,7 +124,7 @@ them. This section is about <emphasis role="bold">copying</emphasis>.
 <listitem><para>
   <emphasis role="bold">Video stream</emphasis> (option <option>-ovc copy</option>):
   nice stuff can be done :) Like, putting (not converting!) FLI or VIVO or
-  MPEG1 video into an AVI file!  Of course only
+  MPEG1 video into an AVI file! Of course only
   <application>MPlayer</application> can play such files :) And it probably
   has no real life value at all. Rationally: video stream copying can be
   useful for example when only the audio stream has to be encoded (like,
@@ -132,7 +132,7 @@ them. This section is about <emphasis role="bold">copying</emphasis>.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">Audio stream</emphasis> (option <option>-oac copy</option>):
-  straightforward.  It is possible to take an external audio file (MP3,
+  straightforward. It is possible to take an external audio file (MP3,
   WAV) and mux it into the output stream. Use the
   <option>-audiofile <replaceable>filename</replaceable></option> option
   for this.
@@ -267,7 +267,7 @@ An example, with MJPEG compression:
 
 <para>
 <application>MEncoder</application> is capable of creating movies from one
-or more JPEG, PNG or TGA files.  With simple framecopy it can create MJPEG
+or more JPEG, PNG or TGA files. With simple framecopy it can create MJPEG
 (Motion JPEG), MPNG (Motion PNG) or MTGA (Motion TGA) files.
 </para>
 
@@ -523,186 +523,420 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <title>Making a high quality MPEG4 (&quot;DivX&quot;) rip of a DVD movie</title>
 
 <para>
-  Ripping a DVD title into a maximally high quality MPEG4 (DivX) file
-  involves many considerations. Below is an example of the process when
-  there is no file size goal (other than perhaps fitting the result into 2GB).
-  <systemitem class="library">libavcodec</systemitem>
-  will be used for the video,
-  and the audio will be copied as is without any changes.
+  One frequently asked question is "How do I make the highest quality DVD
+  rip possible?  I don't care about file size, I just want the best
+  quality."
 </para>
+
+<para>
+  This question is perhaps at least somewhat wrongly posed. After all, if
+  you don't care about file size, why not simply copy the MPEG2 video
+  stream from the DVD whole? Sure, your AVI will end up being 5GB, give
+  or take, but if you want the best quality and don't care about size,
+  this is certainly your best option.
+</para>
+
+<para>
+  In fact, the reason you want to transcode a DVD into MPEG4 is
+  specifically because you <emphasis role="bold">do</emphasis> care about
+  file size.
+</para>
+
+<para>
+  It's difficult to offer a cookbook recipe on how to create a very high
+  quality DVD rip. There are several factors to consider, and you should
+  understand these details or else you're likely to end up disappointed
+  with your results. Below we'll investigate some of these issues, and
+  then have a look at an example. We assume you're using
+  <systemitem class="library">libavcodec</systemitem> to encode the video,
+  although the theory applies to other codecs as well.
+</para>
+
+<para>
+  The main assumption of this guide is that you have no specific file size
+  constraints and have no problem giving up bits in exchange for quality.
+  While much of the information presented here is useful in any case, some
+  of it may work against you if you have a file size goal, such as fitting a
+  video on a CD.
+</para>
+
+<sect2 id="menc-feat-dvd-mpeg4-2pass">
+<title>Constant Quantizer vs. 2-pass</title>
+
+<para>
+  There are three approaches to encoding the video: constant bitrate
+  (CBR), constant quantizer, and two-pass (ABR, or average bitrate).
+</para>
+
+<para>
+  In each of these modes, <systemitem class="library">libavcodec</systemitem>
+  breaks the video frame into 16x16 pixel macroblocks and then applies a
+  quantizer to each macroblock. The lower the quantizer, the better the
+  quality and higher the bitrate. The method
+  <systemitem class="library">libavcodec</systemitem> uses to determine
+  which quantizer to use for a given macroblock varies and is highly
+  tunable. (This is an extreme over-simplification of the actual
+  process, but the basic concept is useful to understand.)
+</para>
+
+<para>
+  When you specify a constant bitrate, <systemitem
+  class="library">libavcodec</systemitem> will encode the video, discarding
+  detail as much as necessary and as little as possible in order to remain
+  lower than the given bitrate. If you truly don't care about file size,
+  you could as well use CBR and specify a bitrate of infinity. (In
+  practice, this means a value high enough so that it poses no limit, like
+  10000Kbit.) With no real restriction on bitrate, the result is that
+  <systemitem class="library">libavcodec</systemitem> will use the lowest
+  possible quantizer for each macroblock (as specified by
+  <option>vqmin</option>, which is 2 by default). As soon as you specify a
+  low enough bitrate that <systemitem class="library">libavcodec</systemitem>
+  is forced to use a higher quantizer, then you're almost certainly ruining
+  the quality of your video. In general, you should avoid CBR altogether if
+  you care about quality.
+</para>
+
+<para>
+  With constant quantizer, <systemitem
+  class="library">libavcodec</systemitem> uses the same quantizer, as
+  specified by the <option>vqscale</option> option, on every macroblock. If
+  you want the highest quality rip possible, again ignoring bitrate, you can
+  use <option>vqscale=2</option>. This will yield the same bitrate and PSNR
+  (peak signal-to-noise ratio) as CBR with
+  <option>vbitrate</option>=infinity and the default <option>vqmin</option>
+  of 2.
+</para>
+
+<para>
+  The problem with constant quantizing is that it uses the given quantizer
+  whether the macroblock needs it or not. That is, it might be possible
+  to use a higher quantizer on a macroblock without sacrificing visual
+  quality. Why waste the bits on an unnecessarily low quantizer? Your
+  CPU has as many cycles as there is time, but there's only so many bits
+  on your harddisk.
+</para>
+
+<para>
+  With a two-pass encode, the first pass will rip the movie as though it
+  were CBR, but it will keep a log of properties for each frame. This
+  data is then used during the second pass in order to make intelligent
+  decisions about which quantizers to use. During fast action or low
+  detail scenes, higher quantizers will likely be used, and during
+  slow moving or high detail scenes, lower quantizers will be used.
+</para>
+
+<para>
+  If you use <option>vqscale=2</option>, then you're wasting bits. If you
+  use <option>vqscale=3</option>, then you're not getting the highest
+  quality rip. Suppose you rip a DVD at <option>vqscale=3</option>, and
+  the result is 1800Kbit. If you do a two-pass encode with
+  <option>vbitrate=1800</option>, the resulting video will have <emphasis
+  role="bold">higher quality</emphasis> for the <emphasis role="bold">same
+  bitrate</emphasis>.
+</para>
+
+<para>
+  Since you're now convinced that two-pass is the way to go, the real
+  question now is what bitrate to use? The answer is that there's no
+  single answer. Ideally you want to choose a bitrate that yields the
+  best balance between quality and file size. This is going to vary
+  depending on the source video.
+</para>
+
+<para>
+  A good starting point for a very high quality rip is about 2000Kbit plus
+  or minus 200Kbit. For fast action or high detail source video, or if
+  you just have a very critical eye, you might decide on 2400 or 2600.
+  For some DVDs, you might not notice a difference at 1400Kbit. It's a
+  good idea to experiment with scenes at different bitrates to get a feel.
+</para>
+
+</sect2>
 
 <sect2 id="menc-feat-dvd-mpeg4-crop">
-<title>Cropping</title>
+<title>Cropping and Scaling</title>
+
 <para>
-  Play the DVD and run the crop detection filter
-  (<option>-vf cropdetect</option>) on it. This gives you a crop rectangle
-  to use for encoding. The reason for cropping is that many movies are
-  not shot in a standard DVD aspect ratio (16/9 or 4/3), or, for whatever
-  reason, the picture does not properly fill the frame. So you want to crop
-  out the pointless black bars when you rip. It also improves the quality
-  of the rip since the sharp edge of the black bars wastes a lot of bits.
-  A common aspect is 2.35, which is cinescope. Most big blockbuster
-  movies have this aspect ratio.
+  Native DVD resolution is 720x480 for NTSC, and 720x576 for PAL, but
+  there's an aspect flag that specifies whether it's full-screen (4:3) or
+  wide-screen (16:9). Many (if not most) widescreen DVDs are not strictly
+  16:9, and will be either 1.85:1 or 2.35:1 (cinescope). This means that
+  there will be black bands in the video that will need to be cropped out.
 </para>
+
+<para>
+  <application>MPlayer</application> provides a crop detection filter that
+  will determine the crop rectangle (<option>-vf cropdetect</option>).
+  Because MPEG4 uses 16x16 macroblocks, you'll want to make sure that each
+  dimension of the video you're encoding is a multiple of 16 or else you
+  will be degrading quality, especially at lower bitrates. You can do this
+  by rounding the width and height of the crop rectangle down to the nearest
+  multiple of 16. When cropping, you'll want to increase the y-offset by
+  half the difference of the old and the new height so that the resulting
+  video is taken from the center of the frame. And because of the way DVD
+  video is sampled, make sure the offset is an even number. (In fact, as a
+  rule, never use odd values for any parameter when you're cropping and
+  scaling video.) If you're not comfortable throwing a few extra pixels
+  away, you might prefer instead to scale the video instead. We'll look
+  at this in our example below.
+</para>
+
+<para>
+  Also, be careful about "half black" pixels at the edges. Make sure you
+  crop these out too, or else you'll be wasting bits there that
+  are better spent elsewhere.
+</para>
+
+<para>
+  After all is said and done, you'll probably end up with video whose pixels
+  aren't quite 1.85:1 or 2.35:1, but rather something close to that. You
+  could calculate the new aspect ratio manually, but
+  <application>MEncoder</application> offers an option for <systemitem
+  class="library">libavcodec</systemitem> called <option>autoaspect</option>
+  that will do this for you. Absolutely do not scale this video in order to
+  square the pixels unless you like to waste your harddisk space. Scaling
+  should be done on playback, and the player will use the aspect stored in
+  the AVI to determine the correct resolution.
+</para>
+
 </sect2>
 
-<sect2 id="menc-feat-dvd-mpeg4-quality">
-<title>Quality level</title>
+<sect2 id="menc-feat-dvd-mpeg4-audio">
+<title>Audio</title>
+
 <para>
-  Next you need to choose the desired quality level. When there is no
-  need to fit the resulting file on CDs or the like, using constant
-  quantizing AKA constant quality is a good choice. That way each frame
-  is given as much bits as its needs to keep the quality at the desired
-  level, but multiple encoding passes are not needed. With
-  <systemitem class="library">libavcodec</systemitem>,
-  you get constant quality by using
-  <option>-lavcopts vqscale=<replaceable>N</replaceable></option>.
-  <option>vqscale=3</option> should give you a file below 2GB in size,
-  depending mainly on the movie length and video noisiness (the more
-  noise, the harder it is to compress).
-</para></sect2>
-
-<sect2 id="menc-feat-dvd-mpeg4-2gb">
-<title>Files over 2GB</title>
-<para>
-  If the file resulting from constant quality encoding is over 2GB big,
-  you will have to create an index to be able to view it properly.
-  Either
-
-<itemizedlist>
-<listitem><para>
-  play the file with <option>-forceidx</option> to create an index
-  on the fly or
-  </para></listitem>
-<listitem><para>
-  use <option>-saveidx</option> to write an index to a file once and
-  <option>-loadidx</option> to use it when playing the file.
-  </para></listitem>
-</itemizedlist>
-
-  If this bothers you, you may want to keep the file size below 2GB.
+  Audio is a much simpler problem to solve: just leave it as is. Even AC3
+  5.1 streams are at most 448Kbit/s, and they're worth every bit. You
+  might be tempted to transcode the audio to high quality Ogg Vorbis, but
+  just because you don't have an A/V receiver for AC3 pass-through today
+  doesn't mean you won't have one tomorrow. Future-proof your DVD rips by
+  preserving the AC3 stream.
 </para>
 
-<para>
-  There are three ways to avoid this. You can try encoding again using
-  <option>vqscale=4</option> and see if both the resulting file size
-  and picture quality are acceptable. You can also use
-  <link linkend="menc-feat-mpeg4">2 pass encoding</link>.
-  As you will be copying the audio track as is and hence know its
-  bitrate, and you know the running time of the movie, you can
-  compute the required video bitrate to give to the
-  <option>-lavcopts vbitrate=<replaceable>bitrate</replaceable></option>
-  option without using
-  <link linkend="menc-feat-mpeg4">3 pass encoding</link>.
-</para>
 
-<para>
-  The third and possibly the best option may be to slightly scale down
-  the resolution. The uniform slight softening and loss of detail is
-  visually more appealing than the blockiness and other artifacts
-  caused by MPEG compression. Scaling down also effectively reduces the
-  noise of the picture, which is good, as noise is hard to compress.
-</para></sect2>
-
-<sect2 id="menc-feat-dvd-mpeg4-deinterlacing">
-<title>Deinterlacing</title>
-<para>
-  If the movie is interlaced, you may want to deinterlace it as part of
-  the ripping. It is debatable whether deinterlacing should be done at
-  this stage. The benefit is that deinterlacing when converting to
-  MPEG4 makes compression better, and viewing easier and less CPU
-  intensive on computer monitors as no deinterlacing is required at
-  that stage.
-</para>
-
-<para>
-  If deinterlacing at the ripping stage is a good idea depends on
-  the DVD. If the DVD is made from film, which was shot at 24 fps, you
-  can as well deinterlace while ripping. If, however, the original was
-  50/60 fps video, converting into deinterlaced 23.976/25 fps video
-  will lose information. If you do decide to deinterlace, you can further
-  experiment with different deinterlacing filters. See
-  <ulink url="http://www.wieser-web.de/MPlayer/">http://www.wieser-web.de/MPlayer/</ulink>
-  for examples. A good starting point is <option>-vf pp=fd</option>.
-</para>
-
-<para>
-  If you are both cropping and deinterlacing, deinterlace
-  <emphasis>before</emphasis> cropping. Actually, this is not necessary
-  if the crop offset is vertically a multiple of 2 pixels. However with
-  some other filters, like dering, you should always crop last, so it's a
-  good habit to put the crop filter last.
-</para></sect2>
-
-<sect2 id="menc-feat-dvd-mpeg4-telecine">
-<title>Inverse telecine</title>
-<para>
-  If you are ripping a PAL DVD, which is 25 fps, you do not need to
-  think about the fps. Just use 25 fps. NTSC DVDs on the other hand are
-  29.97 fps (often rounded to 30 fps, but that is not what they are).
-  If the movie was shot for TV, you again do not need to touch the fps.
-  But if the movie was shot on film, and hence at (exactly) 24 fps,
-  it has been converted to 29.97 fps when making the DVD. That
-  conversion where 12 fields are added to each 24 frames of film is
-  called telecine. For more info about telecine, see a
-  <ulink url="http://www.google.com/search?q=telecine+field+23.976">
-  Google search for &quot;telecine field 23.976&quot;</ulink>.
-</para>
-
-<para>
-  In case you have such a telecined DVD, you will want to do inverse
-  telecine, that is convert the movie to 23.976 fps (29.97*4/5).
-  Otherwise camera panning will look jerky and awful. You can use
-  <option>-ofps 23.976</option> for this. Anything that is shown in
-  theatres is shot on film and needs inverse telecine, TV shows do not.
-</para></sect2>
-
-<sect2 id="menc-feat-dvd-mpeg4-scaling">
-<title>Scaling and aspect ratio</title>
-<para>
-  For best quality, do not scale the movie while ripping. Scaling down
-  obviously loses detail, and scaling up causes artifacts and obviously
-  makes the file larger. Pixels in DVD movies
-  are not square, so DVD movies include info about the correct aspect
-  ratio. It is possible to store the aspect ratio in the MPEG4 header
-  of the output file. Most video players ignore this info, but
-  <application>MPlayer</application> honors it. So if you are only
-  going to use <application>MPlayer</application> for viewing the
-  ripped file, you do not need to scale the movie, just pass
-  <option>-lavcopts autoaspect</option> to
-  <application>MEncoder</application> and things will
-  automagically work right. If you must scale the movie, be
-  careful about getting the size right especially if you do cropping.
-</para>
 </sect2>
 
-<sect2 id="menc-feat-dvd-mpeg4-summary">
-<title>Summing it up</title>
+<sect2 id="menc-feat-dvd-mpeg4-interlacing">
+<title>Interlacing and Telecine</title>
+
 <para>
-  With all of the above mentioned in mind, a suitable encoding command
-  might be
-
-  <screen>
-mencoder dvd://1 -aid 128 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vqscale=3:vhq:v4mv:trell:autoaspect \
-  -ofps 23.976 -vf crop=720:364:0:56 -o Harry_Potter_2.avi
-  </screen>
-
-  Here <option>dvd://1</option> gives the DVD title to rip. Option
-  <option>-aid 128</option> says to use audio track 128, and
-  <option>-oac copy</option> to copy it as is. You'll have to use
-  <application>MPlayer</application> to find out the right values for
-  these options.
+  Almost all movies are shot at 24 fps. Because NTSC is 29.97 fps, some
+  processing must be done to this 24 fps video to make it run at the correct
+  NTSC framerate. The process is called 3:2 pulldown, commonly referred to
+  as telecine (because pulldown is often applied during the telecine
+  process), and, naively described, it works by slowing the film down to
+  23.976 fps, and repeating every fourth frame.
 </para>
 
 <para>
-  Options <option>vhq:v4mv:trell</option> for
-  <option>-lavcopts</option> improve quality versus bitrate, but make
-  encoding take longer. Especially <option>trell</option> slows
-  encoding down but also increases quality visibly. If you want to
-  deinterlace, add a <option>pp</option> filter to
-  <option>-vf</option>, for example
-  <option>-vf pp=fd,crop=720:364:0:56</option> (in that order). If you don't need
-  inverse telecine, leave out the <option>-ofps 23.976</option>.
+  No special processing, however, is done to the video for PAL DVDs, which
+  run at 25 fps. (Technically, PAL can be telecined, called 2:2 pulldown,
+  but this doesn't become an issue in practice.) The 24 fps film is simply
+  played back at 25 fps. The result is that the movie runs slightly faster,
+  but unless you're an alien, you probably won't notice the difference.
+  Most PAL DVDs have pitch-corrected audio, so when they're played back at
+  25 fps things will sound right, even though the audio track (and hence the
+  whole movie) has a running time that's 4% less than NTSC DVDs.
+</para>
+
+<para>
+  Because the video in a PAL DVD hasn't been altered, you needn't worry
+  much about frame rate. The source is 25 fps, and your rip will be 25
+  fps. However, if you're ripping an NTSC DVD movie, you may need to
+  apply inverse telecine.
+</para>
+
+<para>
+  For movies shot at 24 fps, the video on the NTSC DVD is either telecined
+  29.97 fps, or else it is progressive 24 fps and intended to be telecined
+  on-the-fly by a DVD player. On the other hand, TV series are usually
+  only interlaced, not telecined. This is not a hard rule: some TV series
+  are interlaced (such as Buffy the Vampire Slayer) whereas some are a
+  mixture of progressive and interlaced (such as Angel, or 24).
+</para>
+
+<para>
+  It's highly recommended that you read the section on <link
+  linkend="menc-feat-telecine">How to deal with telecine and interlacing
+  in NTSC DVDs</link> to learn how to handle the different possibilities.
+</para>
+
+<para>
+  However, if you're mostly just ripping movies, likely you're either
+  dealing with 24 fps progressive or telecined video, in which case you can
+  use the <option>pullup</option> filter <option>-vf
+  pullup,softskip</option>.
+</para>
+
+</sect2>
+
+
+<sect2 id="menc-feat-dvd-mpeg4-filtering">
+<title>Filtering</title>
+
+<para>
+  In general, you want to do as little filtering as possible to the movie
+  in order to remain close to the original DVD source. Cropping is often
+  necessary (as described above), but do not scale the video. Although
+  scaling down is sometimes preferred to using higher quantizers, we want
+  to avoid both these things: remember that we decided from the start to
+  trade bits for quality.
+</para>
+
+<para>
+  Also, do not adjust gamma, contrast, brightness, etc. What looks good
+  on your display may not look good on others. These adjustments should
+  be done on playback only.
+</para>
+
+<para>
+  One thing you might want to do, however, is pass the video through a
+  very light denoise filter, such as <option>-vf hqdn3d=2:1:2</option>.
+  Again, it's a matter of putting those bits to better use: why waste them
+  encoding noise when you can just add that noise back in during playback?
+  Increasing the parameters for <option>hqdn3d</option> will further
+  improve compressibility, but if you increase the values too much, you
+  risk degrading the image visibily. The suggested values above
+  (<option>2:1:2</option>) are quite conservative; you should feel free to
+  experiment with higher values and observe the results for yourself.
+</para>
+
+</sect2>
+
+
+<sect2 id="menc-feat-dvd-mpeg4-example">
+<title>Example</title>
+
+<para>
+  So, you've just bought your shiny new copy of Harry Potter and the Chamber
+  of Secrets (widescreen edition, of course), and you want to rip this DVD
+  so that you can add it to your Home Theatre PC. This is a region 1 DVD,
+  so it's NTSC. The example below will still apply to PAL, except you'll
+  omit <option>-ofps 23.976</option> (because the output framerate is the
+  same as the input framerate), and of course the crop dimensions will be
+  different.
+</para>
+
+<para>
+  After running <option>mplayer dvd://1</option>, we follow the process
+  detailed in the section <link linkend="menc-feat-telecine">How to deal
+  with telecine and interlacing in NTSC DVDs</link> and discover that it's
+  24 fps progressive video, which means that we needn't use an inverse
+  telecine filter, such as <option>pullup</option> or
+  <option>filmdint</option>.
+</para>
+
+<para>
+  Next, we want to determine the appropriate crop rectangle, so we use the
+  cropdetect filter:
+
+  <screen>mplayer dvd://1 -vf cropdetect</screen>
+
+  Make sure you seek to a fully filled frame (such as a bright scene), and
+  you'll see in <application>MPlayer</application>'s console output:
+
+  <screen>crop area: X: 0..719  Y: 57..419  (-vf crop=720:362:0:58)</screen>
+
+  We then play the movie back with this filter to test its correctness:
+
+  <screen>mplayer dvd://1 -vf crop=720:362:0:58</screen>
+
+  And we see that it looks perfectly fine. Next, we ensure the width and
+  height are a multiple of 16. The width is fine, however the height is
+  not. Since we didn't fail 7th grade math, we know that the nearest
+  multiple of 16 lower than 362 is 352.
+</para>
+
+<para>
+  We could just use <option>crop=720:352:0:58</option>, but it'd be nice
+  to take a little off the top and a little off the bottom so that we
+  retain the center. We've shrunk the height by 10 pixels, but we don't
+  want to increase the y-offset by 5-pixels since that's an odd number and
+  will adversely affect quality. Instead, we'll increase the y-offset by
+  4 pixels:
+
+  <screen>mplayer dvd://1 -vf crop=720:352:0:62</screen>
+
+  Another reason to shave pixels from both the top and the bottom is that we
+  ensure we've eliminated any half-black pixels if they exist. Note that if
+  your video is telecined, make sure the <option>pullup</option> filter (or
+  whichever inverse telecine filter you decide to use) appears in the filter
+  chain before you crop. If it is interlaced, deinterlace before cropping.
+  (If you choose to preserve the interlaced video, then make sure your
+  vertical crop offset is a multiple of 4.)
+</para>
+
+<para>
+  If you're really concerned about losing those 10 pixels, you might
+  prefer instead to scale the dimensions down to the nearest multiple of 16.
+  The filter chain would look like:
+
+  <screen>-vf crop=720:362:0:58,scale=720:352</screen>
+
+  Scaling the video down like this will mean that some small amount of
+  detail is lost, though it probably won't be perceptible. Scaling up will
+  result in lower quality (unless you increase the bitrate). Cropping
+  discards those pixels altogether. It's a tradeoff that you'll want to
+  consider for each circumstance. For example, if the DVD video was made
+  for television, you might want to avoid vertical scaling, since the line
+  sampling corresponds to the way the content was originally recorded.
+</para>
+
+<para>
+  On inspection, we see that our movie has a fair bit of action and high
+  amounts of detail, so we pick 2400Kbit for our bitrate.
+</para>
+
+<para>
+  We're now ready to do the 2-pass encode. Pass 1:
+
+  <screen>mencoder dvd://1 -ofps 23.976 -oac copy -vf crop=720:352:0:62,hqdn3d=2:1:2 -ovc lavc \
+-lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:mbcmp=3:autoaspect:vpass=1 \
+-o Harry_Potter_2.avi</screen>
+
+  And pass 2 is the same, except that we specify <option>vpass=2</option>:
+
+  <screen>mencoder dvd://1 -ofps 23.976 -oac copy -vf crop=720:352:0:62,hqdn3d=2:1:2 -ovc lavc \
+-lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:mbcmp=3:autoaspect:vpass=2 \
+-o Harry_Potter_2.avi</screen>
+</para>
+
+<para>
+  The options <option>v4mv:mbd=2:trell</option> will greatly increase the
+  quality at the expense of encoding time. There's little reason to leave
+  these options out when the primary goal is quality. The options
+  <option>cmp=3:subcmp=3:mbcmp=3</option> select a comparison function that
+  yields higher quality than the defaults. You might try experimenting with
+  this parameter (refer to the man page for the possible values) as
+  different functions can have a large impact on quality depending on the
+  source material. For example, if you find
+  <systemitem class="library">libavcodec</systemitem> produces too much
+  blocky artifacting, you could try selecting the experimental NSSE as
+  comparison function via <option>*cmp=10</option>.
+</para>
+
+<para>
+  For this movie, the resulting AVI will be 138 minutes long and nearly
+  3GB. And because you said that file size doesn't matter, this is a
+  perfectly acceptable size. However, if you had wanted it smaller, you
+  could try a lower bitrate. Increasing bitrates have diminishing
+  returns, so while we might clearly see an improvement from 1800Kbit to
+  2000Kbit, it might not be so noticeable above 2000Kbit. Feel
+  free to experiment until you're happy.
+</para>
+
+<para>
+  Because we passed the source video through a denoise filter, you may want
+  to add some of it back during playback. This, along with the
+  <option>spp</option> post-processing filter, drastically improves the
+  perception of quality and helps eliminate blocky artifacts in the video.
+  With <application>MPlayer</application>'s <option>autoq</option> option,
+  you can vary the amount of post-processing done by the spp filter
+  depending on available CPU. Also, at this point, you may want to apply
+  gamma and/or color correction to best suit your display. For example:
+
+  <screen>mplayer Harry_Potter_2.avi -vf spp,noise=9ah:5ah,eq2=1.2 -autoq 3</screen>
+
 </para>
 </sect2>
 
@@ -775,7 +1009,7 @@ Notes:
   quality is not within the scope of this document.
   </para></listitem>
 <listitem><para>
-  There are a couple footnotes specific to this guide, linked like this: 
+  There are a couple footnotes specific to this guide, linked like this:
   <link linkend="menc-feat-telecine-footnotes">[1]</link>
   </para></listitem>
 </itemizedlist>
@@ -994,7 +1228,7 @@ Notes:
 
   <screen>mencoder dvd://1 -nosound -ovc lavc -lavcopts ildct:ilme:mbd=2</screen>
   </para></listitem>
-<listitem><para>  
+<listitem><para>
   Use a deinterlacing filter before encoding. There are several of
   these filters available to choose from, each with its own advantages
   and disadvantages. Consult <option>mplayer -pphelp</option> to see
@@ -1027,13 +1261,13 @@ Notes:
   use this method, then Reference the manual, and chose whichever
   option looks best for your material. Note that when using
   <option>tfields</option> you
-   <emphasis role="bold">have to</emphasis> specify both
+  <emphasis role="bold">have to</emphasis> specify both
   <option>-fps</option> and <option>-ofps</option> to be twice the
   framerate of your original source.
 
   <screen>mencoder dvd://1 -nosound -vf tfields=2 -ovc lavc -fps 59.94 -ofps 59.94</screen>
   </para></listitem>
-<listitem><para>   
+<listitem><para>
   If you plan on downscaling dramatically, you can excise and encode
   only one of the two fields. Of course, you'll lose half the vertical
   resolution, but if you plan on downscaling to at most 1/2 of the
@@ -1159,7 +1393,7 @@ Notes:
   59.94 fields per second, so the duplicate frames don't stand out as
   much.
   </para>
-  
+
   <para>
   Either way, it's best to consider your content and how you intend to
   display it. If your video is 90% progressive and you never intend to
@@ -1168,7 +1402,7 @@ Notes:
   interlaced.
   </para>
   </listitem>
-  
+
 <listitem><para>
   Treat it as interlaced. Some frames of the progressive parts will
   need to be duplicated, resulting in uneven jumpiness. Again,
