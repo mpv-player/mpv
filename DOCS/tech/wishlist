@@ -40,6 +40,8 @@ Small improvements:
 
  * real mute support, not just setting volume 0
 
+ * option to force a codec even if not configured as decoder in codecs.conf
+
 
 
 Cleanup:
