@@ -3,6 +3,7 @@
 #define __GUI_PLAY_H
 
 #include "./psignal.h"
+#include "./mplayer.h"
 #include "../wm/ws.h"
 #include "../app.h"
 
