@@ -23,6 +23,9 @@
  * - works only on x86 architectures
  *
  * $Log$
+ * Revision 1.43  2002/02/15 01:00:26  michael
+ * use mem2agpcpy_pic()
+ *
  * Revision 1.42  2002/02/12 23:19:37  michael
  * use mem2agpcpy() instead of fast_memcpy()
  *
@@ -476,26 +479,12 @@ static uint32_t draw_frame( uint8_t *src[] ){
   switch(SRC_MODE.vdm_conversion_func){
   case VDM_CONV_NATIVE:
 
-#if defined(HAVE_MMX) || !defined(ARCH_X86)
-    // use the code from fastmemcpy.h on x86,
-    // or ordinary memcpy on non-x86 cpus.
-    if(vo_dga_vp_skip){
-      // use some stride ...
-      int i;
-      for(i=0; i< vo_dga_lines; i++){
-        mem2agpcpy(d, s, vo_dga_bytes_per_line);
-	d+=vo_dga_vp_skip;
-	d+=vo_dga_bytes_per_line;
-	s+=vo_dga_bytes_per_line;
-      }
-    }else{
-      // no stride, cool + fast ...
-      mem2agpcpy(d,s, vo_dga_bytes_per_line * vo_dga_lines);
-    }	  
-#else /* ARCH_X86 and NO_MMX */
-    // use some homebrewn assembly code ...
-    rep_movsl(d, s, lpl, vo_dga_vp_skip, numlines );
-#endif
+    mem2agpcpy_pic(
+    	d, s, 
+	vo_dga_bytes_per_line, 
+	numlines,
+	vo_dga_bytes_per_line+vo_dga_vp_skip, 
+	vo_dga_bytes_per_line);
 	  
   // DBG-COde
 
