@@ -49,7 +49,7 @@ typedef struct
     unsigned char   bpp;
     unsigned char   origin; /* 0 = lower left, 1 = upper left */
     unsigned short  start_row;
-    unsigned short  increment;
+    short           increment;
 } TGAInfo;
 
 static unsigned int out_fmt = 0;
