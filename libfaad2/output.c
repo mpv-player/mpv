@@ -573,10 +573,10 @@ void* output_to_PCM(NeAACDecHandle hDecoder,
         for(i = 0; i < frame_len; i++)
         {
 	    int32_t tmp;
-	    tmp = (ch1[i] + ((ch0[i]+ch3[i])<<1) + (ch0[i]+ch3[i]) + (1<<(REAL_BITS+2))) >> (REAL_BITS+3);
+	    tmp = ((ch1[i]<<2) + ((ch0[i]+ch3[i])<<1) + (ch0[i]+ch3[i]) + (1<<(REAL_BITS+2))) >> (REAL_BITS+3);
 	    if ((tmp+0x8000) & ~0xffff) tmp = ~(tmp>>31)-0x8000;
             short_sample_buffer[0] = tmp;
-	    tmp = (ch2[i] + ((ch0[i]+ch4[i])<<1) + (ch0[i]+ch4[i]) + (1<<(REAL_BITS+2))) >> (REAL_BITS+3);
+	    tmp = ((ch2[i]<<2) + ((ch0[i]+ch4[i])<<1) + (ch0[i]+ch4[i]) + (1<<(REAL_BITS+2))) >> (REAL_BITS+3);
 	    if ((tmp+0x8000) & ~0xffff) tmp = ~(tmp>>31)-0x8000;
             short_sample_buffer[1] = tmp;
 	    short_sample_buffer += channels;
