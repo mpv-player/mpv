@@ -1409,7 +1409,11 @@ if(1)
         if(blit_frame) vo2_flip(video_out,0);
 #else
 	video_out->check_events();
-        if(blit_frame) video_out->flip_page();
+        if(blit_frame){
+	   unsigned int t2=GetTimer();
+	   video_out->flip_page();
+	   t2=GetTimer()-t2;vout_time_usage+=t2*0.000001f;
+	}
 #endif
 //        usec_sleep(50000); // test only!
 
