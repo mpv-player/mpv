@@ -191,26 +191,16 @@
 
 <H4>Összeomlás (Michael Douglas) esetén</H4>
 
-<P>Ha keletkezett coredump, akkor lásd a következõ bekezdést, máskülönben
-  hagyd ki.</P>
-
 <H4>Hogyan nyerjünk ki értelmes tartalmat a coredump-ból</H4>
 
 <P>Hozd létre a következõ parancs file-t:</P>
 
 <P><CODE>disass $eip-32 $eip+32<BR>
-  printf "eax=%08lX\n",$eax<BR>
-  printf "ebx=%08lX\n",$ebx<BR>
-  printf "ecx=%08lX\n",$ecx<BR>
-  printf "edx=%08lX\n",$edx<BR>
-  printf "esp=%08lX\n",$esp<BR>
-  printf "ebp=%08lX\n",$ebp<BR>
-  printf "edi=%08lX\n",$edi<BR>
-  printf "esi=%08lX\n",$esi<BR></CODE></P>
+  info all-registers<BR></CODE></P>
 
 <P>Aztán írd be a következõt:</P>
 
-<P>&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=parancs_file &gt;mplayer.bug</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=parancs_file_neve &gt;mplayer.bug</CODE></P>
 
 <H4>Hogyan nyerj ki információt egy reprodukálható összeomlásból</H4>
 
@@ -231,7 +221,8 @@ Most a gdb-n belül vagy. Írd be a következõket:
 a következõket kell beírnod
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;bt<BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;disass $eip-32 $eip+32</CODE></P>
+  &nbsp;&nbsp;&nbsp;&nbsp;disass $eip-32 $eip+32<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;info all-registers</CODE></P>
 
 és a kimenetet elküldeni nekünk.
 
