@@ -31,20 +31,21 @@ int geometry(int *xpos, int *ypos, int *widw, int *widh, int scrw, int scrh)
 		  RESET_GEOMETRY
 		  if(sscanf(vo_geometry, "+%i+%i", &xoff, &yoff) != 2)
 		  {
+		   char percent[2];
 		   RESET_GEOMETRY
-		   if(sscanf(vo_geometry, "%i:%i", &xoff, &yoff) != 2)
+		   if(sscanf(vo_geometry, "%i%%:%i%1[%]", &xper, &yper, &percent) != 3)
 		   {
 		    RESET_GEOMETRY
-		    if(sscanf(vo_geometry, "%i:%i%%", &xper, &yper) != 2)
+		    if(sscanf(vo_geometry, "%i:%i%1[%]", &xoff, &yper, &percent) != 3)
 		    {
 		     RESET_GEOMETRY
-		     if(sscanf(vo_geometry, "%i%%:%i", &xper, &yper) != 2)
+		     if(sscanf(vo_geometry, "%i%%:%i", &xper, &yoff) != 2)
 		     {
 		     RESET_GEOMETRY
-		     if(sscanf(vo_geometry, "%i%%:%i%%", &xper, &yper) != 2)
+		     if(sscanf(vo_geometry, "%i:%i", &xoff, &yoff) != 2)
 		     {
 		      RESET_GEOMETRY
-		      if(sscanf(vo_geometry, "%i%%", &xper) != 1)
+		      if(sscanf(vo_geometry, "%i%1[%]", &xper, &percent) != 2)
 		      {
 			mp_msg(MSGT_VO, MSGL_ERR,
 			    "-geometry must be in [WxH][+X+Y] | [X[%%]:[Y[%%]]] format, incorrect (%s)\n", vo_geometry);
