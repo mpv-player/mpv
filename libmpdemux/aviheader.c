@@ -225,6 +225,9 @@ while(1){
       DWORD i;
       unsigned msize = 0;
       avisuperindex_chunk *s;
+      // FIXME: do not use odml index for files that don't need it.
+      // apparently the odml code is buggy!
+      if (demuxer->movi_end < 0x7fffffff) break;
       priv->suidx_size++;
       priv->suidx = realloc(priv->suidx, priv->suidx_size * sizeof (avisuperindex_chunk));
       s = &priv->suidx[priv->suidx_size-1];
