@@ -26,12 +26,11 @@ mencoder:
 - add some kind of "-ss" option, to start at e.g. 1:0:0 at the video
 - add a endpoint for encoding, like above
 - finish 3-pass encoding (audio, video1, video2)
-- add ffmpeg encoders support
 - add win32 encoders support
-- check/fix frame copy
 - implement VBR audio copy
 - Estimated Size and Time
 - image cut/crop/extend filter
+- add Divx4Linux encore detection to configure (#define DIVX4ENCORE)
 
 other:
 - fix DVB a-v sync problems, switch to mp1e
@@ -42,6 +41,7 @@ runtime:
 - runtime cpu detection in: 
      vo_dga.c (asm stuff may be removed and replaced by fastmemcpy?)
      libac3 (should be ported to liba52)
+- test(fix?) mp3lib cpu detection code
      
 
 FUTURE:
