@@ -1,3 +1,9 @@
+/*
+    AVIzlib decoder
+    
+    http://www.pcisys.net/~melanson/codecs/lcl.txt
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -14,8 +20,8 @@ static vd_info_t info = {
 	"AVIzlib decoder",
 	"zlib",
 	"Alex",
-	"based on vd_ijpg.c",
-	"uses zlib, supports only BGR24 (as AVIzlib)"
+	"Alex",
+	"based on vd_ijpg.c, uses zlib, supports only BGR24 (as AVIzlib)"
 };
 
 LIBVD_EXTERN(zlib)
@@ -23,9 +29,20 @@ LIBVD_EXTERN(zlib)
 typedef struct {
     int width;
     int height;
-    int depth;
+    int imgformat;
+    int decompsize;
     z_stream zstrm;
 } vd_zlib_ctx;
+
+/* BITMAPINFOHEADER LCL Extension */
+typedef struct {
+    unsigned char filler[sizeof(BITMAPINFOHEADER)];
+    unsigned char unknown[4];
+    unsigned char imgtype;
+    unsigned char compression;
+    unsigned char flags;
+    unsigned char codec;
+} bih_lcl_ext;
 
 // to set/get/query special features/parameters
 static int control(sh_video_t *sh, int cmd, void *arg, ...)
@@ -35,7 +52,7 @@ static int control(sh_video_t *sh, int cmd, void *arg, ...)
     {
 	case VDCTRL_QUERY_FORMAT:
 	{
-	    if (*((int*)arg) == (IMGFMT_BGR|ctx->depth))
+	    if (*((int*)arg) == (ctx->imgformat))
 		return(CONTROL_TRUE);
 	    else
 		return(CONTROL_FALSE);
@@ -49,6 +66,7 @@ static int init(sh_video_t *sh)
 {
     int zret;
     vd_zlib_ctx *ctx;
+    bih_lcl_ext *ext;
     
     ctx = sh->context = malloc(sizeof(vd_zlib_ctx));
     if (!ctx)
@@ -57,7 +75,39 @@ static int init(sh_video_t *sh)
 
     ctx->width = sh->bih->biWidth;
     ctx->height = sh->bih->biHeight;
-    ctx->depth = sh->bih->biBitCount;
+    ctx->imgformat = IMGFMT_BGR24;
+    ctx->decompsize = ctx->width*ctx->height*((24+7)/8);
+    
+    if (sh->bih->biSize > sizeof(BITMAPINFOHEADER))
+    {
+	ext = sh->bih;
+	if (ext->codec != 3) /* 1 == MSZH, 3 == ZLIB */
+	    return(0);
+	switch(ext->imgtype)
+	{
+	    case 2: /* RGB24 */
+		ctx->imgformat = IMGFMT_BGR24;
+		ctx->decompsize = ctx->width*ctx->height*((24+7)/8);
+		break;
+	    case 0: /* YUV411 */
+//		ctx->imgformat = IMGFMT_YVU9;
+//		ctx->decompsize = ctx->width*(ctx->height+2)/8*9;
+//		break;
+	    case 1: /* YUV422 */
+//		ctx->imgformat = IMGFMT_YUY2;
+//		ctx->decompsize = ctx->width*(ctx->height+2)/8*16;
+//		break;
+	    case 5: /* YUV420 */
+//		ctx->imgformat = IMGFMT_YV12;
+//		ctx->decompsize = ctx->width*(ctx->height+2)/8*12;
+//		break;
+	    case 3: /* YUV411 */
+	    case 4: /* YUV211 */
+	    default:
+		printf("Unknown imgtype\n");
+		return(0);
+	}
+    }
 
     ctx->zstrm.zalloc = (alloc_func)NULL;
     ctx->zstrm.zfree = (free_func)NULL;
@@ -71,7 +121,7 @@ static int init(sh_video_t *sh)
 	return(NULL);
     }
 
-    if (!mpcodecs_config_vo(sh, ctx->width, ctx->height, IMGFMT_BGR|ctx->depth))
+    if (!mpcodecs_config_vo(sh, ctx->width, ctx->height, ctx->imgformat))
 	return(NULL);
 
 
@@ -96,7 +146,6 @@ static mp_image_t* decode(sh_video_t *sh, void* data, int len, int flags)
     mp_image_t *mpi;
     vd_zlib_ctx *ctx = sh->context;
     int zret;
-    int decomp_size = ctx->width*ctx->height*((ctx->depth+7)/8);
     z_stream *zstrm = &ctx->zstrm;
 
     if (len <= 0)
@@ -108,7 +157,7 @@ static mp_image_t* decode(sh_video_t *sh, void* data, int len, int flags)
     zstrm->next_in = data;
     zstrm->avail_in = len;
     zstrm->next_out = mpi->planes[0];
-    zstrm->avail_out = decomp_size;
+    zstrm->avail_out = ctx->decompsize;
 
     mp_dbg(MSGT_DECVIDEO, MSGL_DBG2, "[vd_zlib] input: %p (%d bytes), output: %p (%d bytes)\n",
 	zstrm->next_in, zstrm->avail_in, zstrm->next_out, zstrm->avail_out);
@@ -121,10 +170,10 @@ static mp_image_t* decode(sh_video_t *sh, void* data, int len, int flags)
 	return(NULL);
     }
     
-    if (decomp_size != (int)zstrm->total_out)
+    if (ctx->decompsize != (int)zstrm->total_out)
     {
 	mp_msg(MSGT_DECVIDEO, MSGL_WARN, "[vd_zlib] decoded size differs (%d != %d)\n",
-	    decomp_size, zstrm->total_out);
+	    ctx->decompsize, zstrm->total_out);
 	return(NULL);
     }
 
