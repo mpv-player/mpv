@@ -19,7 +19,7 @@ int rtsp_streaming_start(stream_t* stream);
 
 // Open a RTP demuxer (which was initiated either from a SDP file,
 // or from a RTSP URL):
-void demux_open_rtp(demuxer_t* demuxer);
+demuxer_t* demux_open_rtp(demuxer_t* demuxer);
 
 // Test whether a RTP demuxer is for a MPEG stream:
 int demux_is_mpeg_rtp_stream(demuxer_t* demuxer);
