@@ -2,10 +2,10 @@
 OpenDivX support in MPlayer
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-See http://www.projectmayo.com for details on Open DivX codecs.
-It's an opensource DivX-like video codec written for windows.
-I did a fast hack to get it compile under linux (it has some
-dependency on windows header files and some visualc extensions).
+See http://www.projectmayo.com for details on the OpenDivX codec.
+It's the opensource successor of the DivX codec, already available
+on most platforms. We use an MMX-optimized Decore.
+OpenDivX version supported in MPlayer : 4.0alpha48
 
 Decoder:
 ~~~~~~~~
@@ -22,9 +22,11 @@ You can adjust Quality level using the -divxq option. Valid values:
 
 Note: last level (Chroma deringing) sometimes crashes.
 
+Note: also check the manpage.
+
 Encoder:
 ~~~~~~~~
 There is a very alpha hack to convert mpeg video into OpenDivX .avi files.
-You should disable audio, and select 'odivx' video device as output:
-  mplayer input.mpg -nosound -vo odivx -encode output.avi
+Audio is automatically disabled. Select 'odivx' video device as output:
+  mplayer input.mpg -vo odivx -encode output.avi
 Yes, I know that it's unusable now, it's only for testing purposes.

@@ -3,7 +3,7 @@ Setting up MTRR for X11 or mga_vid:
 
 1. find the base address
 ~~~~~~~~~~~~~~~~~~~~~~~~
-You have 3 cases to find it:
+You have 3 ways to find it:
 
 - from X11 startup messages, for example:
 (--) SVGA: PCI: Matrox MGA G400 AGP rev 4, Memory @ 0xd8000000, 0xd4000000
@@ -18,7 +18,7 @@ mga_mem_base = d8000000
 
 2. find memory size
 ~~~~~~~~~~~~~~~~~~~
-This is much easier, just convert video ram size to hexadecimal, or
+This is very easy, just convert video ram size to hexadecimal, or
 use this table:
    1 MB    0x100000
    2 MB    0x200000
@@ -35,5 +35,5 @@ You know base address and memory size, let's setup mtrr registers!
   ram (size=0x2000000) just execute:
 echo "base=0xd8000000 size=0x2000000 type=write-combining" >| /proc/mtrr
 
-- Older K6-2's [around 266Mhz, stepping 0] may not support MTRR.
-- K6-2 with 'stepping 12' (do a cat /proc/cpuinfo) supports MTRR.
+ - Older K6-2's [around 266Mhz, stepping 0] doesn't support MTRR.
+ - K6-2 with 'stepping 12' (do a cat /proc/cpuinfo) supports MTRR.
