@@ -107,6 +107,8 @@ OSD/SUB OPTIONS
     created because of its size.
 AUDIO OUTPUT OPTIONS (MPLAYER ONLY)
     Audio output layer (ao) option descriptions (MPlayer only).
+AUDIO OUTPUT DRIVERS (MPLAYER ONLY)
+    Audio output driver description (ao)
 VIDEO OUTPUT OPTIONS (MPLAYER ONLY)
     Video output layer (vo) option descriptions (MPlayer only).
 DECODING/FILTERING OPTIONS
