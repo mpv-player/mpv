@@ -4,7 +4,7 @@
 
 <para>
 В этой главе я постараюсь провести Вас через процесс компиляции и конфигурации
-<application>MPlayer'а</application>. Это не просто, но это не обязательно будет сложно. Если Вы заметите
+<application>MPlayer</application>'а. Это не просто, но это не обязательно будет сложно. Если Вы заметите
 какие-то отклонения, от того, что я объясняю, пожалуйста, поищите в этой
 документации и Вы найдете ответ. Если Вы увидите ссылку, пожалуйста, проследуйте
 по ней и внимательно прочитайте ее содержимое. Это займет некоторое время,
@@ -43,7 +43,7 @@ libstdc++, это может потребоваться для других программ) или вообще ничего
   <xref linkend="faq"/>.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">XFree86</emphasis> - рекомендуемая версия - это <emphasis role="bold">всегда новейшая (4.2.1)</emphasis>.
+  <emphasis role="bold">XFree86</emphasis> - рекомендуемая версия - это <emphasis role="bold">всегда новейшая (4.3.0)</emphasis>.
 Обычно, все этого хотят, поскольку начиная с 4.0.2, XFree86 содержат
 <link linkend="xv">XVideo</link> расширение (кое-где упоминаемое, как
 <emphasis role="bold">Xv</emphasis>) которое требуется для включения аппаратной YUV акселерации (быстрый
@@ -166,10 +166,11 @@ QDesign аудио потоков. Инструкции по установке могут быть найдены в секции
 <link linkend="sorenson">Sorenson видео кодек</link>.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">DivX4/DivX5</emphasis>: информация об этом кодеке расположена в секции
-<link linkend="divx4-5">DivX4/DivX5</link>. Вам, вероятно, не потребуется этот кодек,
-поскольку <emphasis role="bold">libavcodec</emphasis> (см. выше) гораздо быстрее и выше качеством, чем этот,
-как для кодирования, так и для декодирования. Особенности:
+  <emphasis role="bold">DivX4/DivX5</emphasis>: информация об этом кодеке расположена в 
+<link linkend="divx4-5">секцииDivX4/DivX5</link>. Вам, вероятно, не потребуется
+этот кодек, поскольку <emphasis role="bold">libavcodec</emphasis> (см. выше)
+гораздо быстрее и выше качеством, чем этот кодек, как для кодирования, так и для
+декодирования. Особенности:
 <itemizedlist>
 <listitem><simpara>
   кодирование в 1 или 2 прохода с<link linkend="mencoder">MEncoder'ом</link>
@@ -752,6 +753,11 @@ class="directory">$PREFIX/share/mplayer</filename>. Затем переименуйте,
 
 <screen>ln -s ~/.mplayer/arial-24 ~/.mplayer/font</screen>).
 Теперь Вы должны увидеть таймер в левом верхнем углу фильма (выключите его кнопкой <keycap>o</keycap>).
+</para>
+
+<para>
+(субтитры <emphasis>всегда включены</emphasis>, чтобы узнать, как их отключить,
+читайте страницу man)
 </para>
 
 <para>
