@@ -56,7 +56,7 @@ typedef struct __attribute__((packed)) {
   uint64_t end_timestamp; //Timestamp of the end position UINT64 8
   uint64_t duration;  //Duration of the playback UINT64 8
   uint32_t start_timestamp; //Timestamp of the start position UINT32 4
-  uint32_t unk1; //Unknown, maybe reserved ( usually contains 0 ) UINT32 4
+  uint32_t preroll; //Time to bufferize before playing UINT32 4
   uint32_t flags; //Unknown, maybe flags ( usually contains 2 ) UINT32 4
   uint32_t packetsize; //Size of packet, in bytes UINT32 4
   uint32_t packetsize2; //Size of packet ( confirm ) UINT32 4
@@ -196,7 +196,7 @@ typedef enum {
 int asf_http_streaming_start( stream_t *stream );
 int asf_http_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *streaming_ctrl );
 
-int asf_streaming(char *data, int length, int *drop_packet );
+int asf_streaming(ASF_stream_chunck_t *stream_chunck, int *drop_packet );
 #endif
 
 #endif
