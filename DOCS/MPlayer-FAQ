@@ -72,7 +72,7 @@ A: your opengl driver doesn't support dynamic texture changes (glTexSubImage)
 Q: I have G200/G400, how to compile/use mga_vid driver?
 A: read VIDEOCARDS, INSTALL, README
 
-Q: What's XMMP? (it's XMMS or XMPS but mispelled?)
+Q: What's XMMP? (is it XMMS or XMPS but mispelled?)
 A: It's a new project, see http://frozenproductions.com for details
 
 Q: There are error messages about file not found /usr/lib/win32/....
