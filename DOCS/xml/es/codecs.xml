@@ -218,6 +218,7 @@ de código abierto. Es incluso más rápido que el original.
 Para una lista completa de los codecs soportados visite la página de FFmpeg.
 Codecs soportados de <ulink url="http://www.ffmpeg.org/ffmpeg-doc.html#SEC19">video</ulink>
 y de <ulink url="http://www.ffmpeg.org/ffmpeg-doc.html#SEC20">audio</ulink>.
+</para>
 
 <para>
 Si usa una liberación de <application>MPlayer</application> que tiene libavcodec

@@ -1546,7 +1546,7 @@ con otros.
   <screen>
     mplayer -vf formay=uyvy -vc divxds archivodivx3.avi
   </screen>
-  <para></listitem>
+  </para></listitem>
 </itemizedlist>
 
 <para>
