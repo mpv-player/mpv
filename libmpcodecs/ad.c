@@ -27,7 +27,6 @@ extern ad_functions_t mpcodecs_ad_imaadpcm;
 extern ad_functions_t mpcodecs_ad_msadpcm;
 extern ad_functions_t mpcodecs_ad_dk3adpcm;
 extern ad_functions_t mpcodecs_ad_dk4adpcm;
-extern ad_functions_t mpcodecs_ad_roqaudio;
 extern ad_functions_t mpcodecs_ad_dshow;
 extern ad_functions_t mpcodecs_ad_dmo;
 extern ad_functions_t mpcodecs_ad_acm;
@@ -59,7 +58,6 @@ ad_functions_t* mpcodecs_ad_drivers[] =
   &mpcodecs_ad_imaadpcm,
   &mpcodecs_ad_msadpcm,
   &mpcodecs_ad_dk3adpcm,
-  &mpcodecs_ad_roqaudio,
   &mpcodecs_ad_msgsm,
 #ifdef USE_WIN32DLL
 #ifdef USE_DIRECTSHOW

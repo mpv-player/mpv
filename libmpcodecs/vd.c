@@ -28,7 +28,6 @@
 //#include "vd_internal.h"
 
 extern vd_functions_t mpcodecs_vd_null;
-extern vd_functions_t mpcodecs_vd_cinepak;
 extern vd_functions_t mpcodecs_vd_ffmpeg;
 extern vd_functions_t mpcodecs_vd_theora;
 extern vd_functions_t mpcodecs_vd_dshow;
@@ -40,8 +39,6 @@ extern vd_functions_t mpcodecs_vd_divx4;
 extern vd_functions_t mpcodecs_vd_raw;
 extern vd_functions_t mpcodecs_vd_hmblck;
 extern vd_functions_t mpcodecs_vd_xanim;
-extern vd_functions_t mpcodecs_vd_roqvideo;
-extern vd_functions_t mpcodecs_vd_cyuv;
 extern vd_functions_t mpcodecs_vd_nuv;
 extern vd_functions_t mpcodecs_vd_mpng;
 extern vd_functions_t mpcodecs_vd_ijpg;
@@ -58,7 +55,6 @@ extern vd_functions_t mpcodecs_vd_qtvideo;
 
 vd_functions_t* mpcodecs_vd_drivers[] = {
         &mpcodecs_vd_null,
-        &mpcodecs_vd_cinepak,
 #ifdef USE_LIBAVCODEC
         &mpcodecs_vd_ffmpeg,
 #endif
@@ -82,8 +78,6 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
         &mpcodecs_vd_lzo,
         &mpcodecs_vd_raw,
         &mpcodecs_vd_hmblck,
-        &mpcodecs_vd_roqvideo,
-        &mpcodecs_vd_cyuv,
         &mpcodecs_vd_nuv,
 #ifdef USE_XANIM
         &mpcodecs_vd_xanim,
