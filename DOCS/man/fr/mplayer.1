@@ -2218,19 +2218,19 @@ La syntaxe est:
 .B \-vo <pilote1[:option],pilote2,...[,]>
 Spécifie une liste des priorités pour les pilotes de sortie à utiliser. 
 .PP
-Si la liste ce termine par ';'   les autres pilotes seront essayés en cas
+Si la liste ce termine par ','   les autres pilotes seront essayés en cas
 d'échec.
 Les sous-options sont optionnelles et peuvent être omises pour la plupart.
 .br
 .I NOTE:
-Voir \-vo help pour la liste des pilotes de sortie vidéo incorporés.
-
+Voir \-vo help pour la liste des pilotes de sortie vidéo compilés dans votre
+version de MPlayer.
+.sp 1
 .I EXEMPLE:
 .PD 0
 .RSs
 .IPs "\-vo xmga,xv,"
-Essaie le pilote noyau Matrox, puis le pilote Xv, puis les autres.
-.br
+Essaie le pilote Matrox X11, puis le pilote Xv, puis les autres.
 .IPs "\-vo directx:noaccel"
 Utilise le pilote DirectX en désactivant les fonctions d'accélération.
 .RE
@@ -2252,7 +2252,7 @@ ceci est probablement la meilleur option.
 .PD 0
 .RSs
 .IPs port=<nombre>
-Sélectionne un port XVideo spécifique. 
+Sélectionne un port XVideo particulier. 
 .RE
 .PD 1
 .TP
@@ -2265,17 +2265,37 @@ Ajoute la gestion de X11 à tous les pilotes de sortie vidéo basés sur
 l'overlay.
 Actuellement uniquement utilisé par tdfx_vid.
 .TP
-.B xvmc (X11 uniquement)
+.B xvmc (X11, \-vc ffmpeg12mc uniquement)
 Ce pilote emploie l'extension XvMC (X Video Motion Compensation) de 
-XFree86 4.x.
+XFree86 4.x pour accélérer les lectures de médias MPEG1/\:2 et VCR2.
+.PD 0
+.RSs
+.IPs benchmark
+Désactive l'affichage de toute image.
+Nécessaire pour évaluer les performances (benchmarking) des pilotes qui
+mettent à jour leurs tampons d'affichage uniquement lors du rafraîchissement
+de l'écran (nVidia).
+.IPs queue
+Met plusieurs trames dans queue d'affichage pour permettre aux circuits
+matériel de les traiter en parallèle.
+Peut ajouter une faible (imperceptible) et constante désynchronisation A/\:V.
+.IPs sleep
+Utilise la fonction sleep() lorsque MPlayer attend la fin de l'affichage de
+l'image (déconseillé sous Linux).
+.IPs wait\ 
+N'utilise pas la fonction sleep() lorsque MPlayer attend la fin de l'affichage
+de l'image (par défaut).
+.RE
+.PD 1
 .TP
 .B dga (X11 uniquement)
-Joue la vidéo par l'intermédiaire de l'extension Direct Graphics Access de XFree86.
+Joue la vidéo par l'intermédiaire de l'extension Direct Graphics Access de
+XFree86.
 Considéré comme obsolète.
 .TP
-.B sdl\ \ \ \ 
-Pilote de sortie de la librairie multi-plateforme SDL (Simple Directmedia 
-Layer).
+.B sdl (SDL uniquement)
+Pilote de sortie vidéo de la librairie multi-plateforme SDL (Simple
+Directmedia Layer).
 .TP
 .B vidix\ \ 
 VIDIX (VIDeo Interface for *niX) est une interface pour les fonctionnalités
@@ -2295,10 +2315,17 @@ rage128_vid et sis_vid.
 VIDIX tournant sous X11.
 .TP
 .B cvidix\ 
-VIDIX tournant dans une console.
+Interface à VIDIX générique et indépendante de la plateforme et pouvant
+tourner dans une console avec une carte graphique nVidia.
+.PD 0
+.RSs
+.IPs <sous-périphérique>
+Comme pour vidix
+.RE
+.PD 1
 .TP
 .B winvidix (Windows uniquement)
-Version Windows du pilote VIDIX.
+VIDIX tournant sous Windows.
 .TP
 .B directx (Windows uniquement)
 Pilote de sortie vidéo utilisant l'interface DirectX.
@@ -2312,7 +2339,7 @@ Essayez cette option si vous avez des problèmes d'affichage.
 .TP
 .B quartz (Mac OS X uniquement)
 Pilote de sortie vidéo Quartz pour Mac OS X.
-Dans certain cas, il est préférable de forcer le format YUV
+Dans certain cas, il est préférable de forcer le format de sortie packed YUV ,
 avec par ex.\& \-vf format=yuy2
 .PD 0
 .RSs
@@ -2363,7 +2390,6 @@ Ne fonctionne qu'avec \-double.
 Cela a le même effet que l'option \-vsync.
 .IPs sq\ \ \ 
 Essaye d'utiliser un mode vidéo aux pixels carrés.
-Try to select a video mode with square pixels.
 .IPs vidix
 Utilise svga avec VIDIX.
 .RE
@@ -2413,18 +2439,73 @@ Pilote de sortie vidéo pour le système graphique GGI.
 Joue la vidéo en utilisant la librairie DirectFB.
 .PD 0
 .RSs
-.IPs number
-Selectionne une couche.
+.IPs (no)input
+Utilise les codes de touches de DirectFB au lieu de ceux de MPlayer
+(par défaut\ : activé).
+.IPs buffermode=single|double|triple
+Le tamponnage (buffering) double ou triple donnent les meilleurs résultats si vous voulez éviter les effets de distortions.
+Le triple tamponnage est plus efficace que le double puisqu'ill ne bloque
+pas MPlayer lorsqu'il attend le rafraîchissement vertical.
+Le tamponnage simple devrait être évité (par défaut\ : single).
+.IPs fieldparity=top|bottom
+Contrôle l'ordre d'affichage des trames entrelacées (défaut\ : désactivé).
+Les paramètres valides sont top = les champs du haut en premier,
+bottom = les champs du bas en premier.
+Cette options n'a aucun effet sur les vidéo non entrelacées, ce qui représente
+la majorité des vidéos MPEG.
+Vous devriez activer cette option si vous observez des distortions ou des
+mouvements saccadés lorsque vous regardez une vidéo entrelacée.
+.IPs layer=N
+Forcera l'utilisation de la couche dont l'id est N pour la lecture
+(par défaut\ : -1 - auto).
 .RE
 .PD 1
-.TP
-.B directfb2
-Joue la vidéo en utilisant la librairie DirectFB, seconde génération.
 .TP
 .B dfbmga\ 
 Pilote de sortie vidéo spécifique aux Matrox G400/\:G450/\:G550 utilisant
 la librairie DirectFB pour exploiter des fonctions câblées spéciales.
-Active CRTC2 (bi-écran), affichant la vidéo indépendemment dé l'autre écran. 
+Active CRTC2 (bi-écran), affichant la vidéo indépendemment de l'autre écran. 
+.PD 0
+.RSs
+.IPs (no)bes
+Active l'utilisation du Matrox BES (backend scaler\ : fonctions de changement
+de taille) (par défaut\ : désactivé).
+Donne de très bons résultats en matière de rapidité de traitement et de
+qualité visuelle, puisque le traitement des vidéos entrelacées est réalisé par
+des circuits matériels spécialisés.
+Ne fonctionne que sur la sortie vidéo primaire.
+.IPs (no)spic
+Utilise la couche de sous-image Matrox (sub picture layer) pour afficher l'OSD
+(par défaut\ : activé).
+.IPs (no)crtc2
+Active la sortie TV de la deuxième sortie vidéo (par défaut\ : activé).
+La qualité de l'image y est époustouflante puisque toutes les spécificités
+et limitations de l'affichage sur une TV sont géré (image entrelacée, synchro,
+etc ...)
+.IPs (no)input
+Utilise les codes de touches de DirectFB au lieu de ceux de MPlayer
+(par défaut\ : activé).
+.IPs buffermode=single|double|triple
+Le tamponnage (buffering) double ou triple donnent les meilleurs résultats si vous voulez éviter les effets de distortions.
+Le triple tamponnage est plus efficace que le double puisqu'ill ne bloque
+pas MPlayer lorsqu'il attend le rafraîchissement vertical.
+Le tamponnage simple devrait être évité (par défaut\ : triple).
+.IPs fieldparity=top|bottom
+Contrôle l'ordre d'affichage des trames entrelacées (par défaut\ : désactivé).
+Les paramètres valides sont top = les champs du haut en premier,
+bottom = les champs du bas en premier.
+Cette options n'a aucun effet sur les vidéo non entrelacées, ce qui représente
+la majorité des vidéos MPEG.
+Vous devriez activer cette option si vous observez des distortions ou des
+mouvements saccadés lorsque vous regardez une vidéo entrelacée.
+.IPs tvnorm=pal|ntsc|auto
+Défini la norme TV de la carte Matrox sans avoir besoin de modifier
+/etc/\:directfbrc (par défaut\ : désactivé).
+Les normes valides sont pal = PAL, ntsc = NTSC.
+La norme auto est particulière (auto-ajustement PAL/\:NTSC) puisqu'elle choisi
+la norme à utiliser en fonction du nombre de trames par secondes du fim.
+.RE
+.PD 1
 .TP
 .B mga (Linux uniquement)
 Pilote de sortie vidéo spécifique aux cartes Matrox utilisant le mécanisme
@@ -2455,9 +2536,8 @@ Pilote de sortie vidéo spécifique aux cartes 3Dfx.
 Fonctionne en conjonction avec un module noyau.
 FIXME: Quelle difference y a-t-il entre 3dfx, tdfxfb et tdfx_vid?
 .TP
-.B dxr2\ \ \ 
+.B dxr2 (voir aussi \-dxr2) (DXR2 uniquement)
 Pilote de sortie vidéo spécifique aux cartes Creative DXR2.
-Voir aussi l'option -dxr2.
 .PD 0
 .RSs
 .IPs x11
@@ -2467,7 +2547,7 @@ Active l'overlay.
 .RE
 .PD 1
 .TP
-.B dxr3\ \ \ 
+.B dxr3 (DXR3 uniquement)
 Pilote de sortie vidéo spécifique pour le chipset de décodage MPEG
 Sigma Designs em8300 (Creative DXR3, Sigma Designs Hollywood Plus).
 Voir aussi le filtre vidéo lavc.
@@ -2484,9 +2564,9 @@ Spécifie la norme TV.
 .RSss
 0: Ne change pas la norme actuelle (par défaut).
 .br
-1: Ajuste automatiquement en utilisant PAL/\:NTSC.
+1: Ajuste automatiquement entre PAL/\:NTSC.
 .br
-2: Ajuste automatiquement en utilisant PAL/\:PAL-60.
+2: Ajuste automatiquement entre PAL/\:PAL-60.
 .br
 3: PAL
 .br
@@ -2495,18 +2575,24 @@ Spécifie la norme TV.
 5: NTSC
 .REss
 .IPs device=<nombre>
-Spécifie le numéro de périphérique à utiliser si vous avez plus d'une carte
+Définit le numéro de périphérique à utiliser si vous avez plus d'une carte
 em8300.
 .RE
 .PD 1
 .TP
-.B mpegpes
+.B mpegpes (DVB uniquement)
 Pilote de sortie vidéo spécifique DVB. 
+PD 0
+.RSs
+.IPs card=<1\-4>
+Définit le numéro de périphérique à utiliser si vous avez plus d'une carte
+DVB (API V3 uniquement, comme la série de pilotes 1.x.y).
+.RE
+.PD 1
 .TP
-.B zr\ \ \ \ \ 
+.B zr (voir aussi \-zr* et \-zrhelp)
 Pilote de sortie vidéo pour un certain nombre de cartes de capture/\:lecture
 MJPEG.
-Voir également les options -zr* et -zrhelp.
 .TP
 .B zr2\ \ \ \ 
 Pilote de sortie vidéo pour un certain nombre de cartes de capture/\:lecture
@@ -2514,10 +2600,15 @@ MJPEG, seconde génération.
 Voir aussi le filtre vidéo zrmjpeg.
 .TP
 .B md5\ \ \ \ 
-Ecrit la somme md5 (md5sums) de chaque trame dans un fichier nommé 'md5'
-dans le répertoire courant.
+Ecrit dans un fichier la somme de contrôle md5 (md5sums) de chaque trame en
+activant l'option \-vo pgm.
 Utile pour débogage. 
-Useful for debugging.
+.PD 0
+.RSs
+.IPs nom_fichier
+Nomme explicitement le fichier de sortie (par défaut: ./md5).
+.RE
+.PD 1
 .TP
 .B yuv4mpeg
 Transforme le flux vidéo en une séquence d'images YUV 4:2:0 non compressées
@@ -2526,35 +2617,35 @@ Ce format est identique à celui employé par la suite mjpegtools, ce qui peut
 vous être utile pour retraiter cette vidéo avec cette suite.
 .TP
 .B gif89a\ 
-sépare chaque trame dans un fichier GIF du réperoire courant.
-Le nom de chaque fichier contient le numéro de trame, précédé au besoin par des 
-zéros.
+Sépare chaque trame dans un fichier GIF du réperoire courant.
+Le nom de chaque fichier contient le numéro de trame, précédé au besoin par
+des zéros.
 .TP
 .B jpeg\ \ \ 
 sépare chaque trame dans un fichier JPEG du réperoire courant.
-Le nom de chaque fichier contient le numéro de trame, précédé au besoin par des 
-zéros.
+Le nom de chaque fichier contient le numéro de trame, précédé au besoin par
+des zéros.
 .TP
 .B pgm\ \ \ \
 sépare chaque trame dans un fichier PGM du réperoire courant.
-Le nom de chaque fichier contient le numéro de trame, précédé au besoin par des 
-zéros. 
+Le nom de chaque fichier contient le numéro de trame, précédé au besoin par
+des zéros. 
 .TP
 .B png\ \ \ \ 
 sépare chaque trame dans un fichier PNG du réperoire courant.
-Le nom de chaque fichier contient le numéro de trame, précédé au besoin par des 
-zéros.
+Le nom de chaque fichier contient le numéro de trame, précédé au besoin par
+des zéros.
 .TP
 .B tga\ \ \ \ 
 sépare chaque trame dans un fichier Targa du réperoire courant.
-Le nom de chaque fichier contient le numéro de trame, précédé au besoin par des 
-zéros.
+Le nom de chaque fichier contient le numéro de trame, précédé au besoin par
+des zéros.
 .
 .
 .SH "OPTIONS DE DÉCODAGE/\:FILTRAGE"
 .TP
 .B \-ac <[-]codec1,[-]codec2,...[,]>
-Spécifie la liste de priorité des codecs audio à utiliser, à partir de leur
+Défini une liste de priorité des codecs audio à utiliser, à partir de leur
 nom de codec dans codecs.conf.
 Utilisez un '-' avant le nom d'un codec pour l'omettre.
 .br
