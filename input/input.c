@@ -1247,7 +1247,7 @@ mp_input_parse_config(char *file) {
       }
     }
     // Empty buffer : return
-    if(eof || (bs <= 0)) {
+    if(bs <= 1) {
       mp_msg(MSGT_INPUT,MSGL_INFO,"Input config file %s parsed : %d binds\n",file,n_binds);
       if(binds)
 	cmd_binds = binds;
@@ -1351,7 +1351,7 @@ mp_input_parse_config(char *file) {
 	char cmd[end-iter+1];
 	strncpy(cmd,iter,end-iter);
 	cmd[end-iter] = '\0';
-	//printf("Set bind %d => %s\n",code,cmd);
+	//printf("Set bind %d => %s\n",keys[0],cmd);
 	mp_input_bind_keys(keys,cmd);
 	n_binds++;
       }
