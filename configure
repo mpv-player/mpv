@@ -422,6 +422,7 @@ if x86 ; then
   _mmx2=no
   _sse=no
   _sse2=no
+  _mtrr=no
 
   for i in $pparam ; do
     case "$i" in
@@ -2024,6 +2025,7 @@ if test "$_dvdread" = yes ; then
 elif test "$_css" = yes ; then
   _def_dvdread='#undef USE_DVDREAD'
   _def_css='#define HAVE_LIBCSS 1'
+  _ld_css='-lcss'
   test "$_csslibdir" && _ld_css="-L${_csslibdir} $_ld_css"
   _inputmodules="dvdcss $_inputmodules"
   echores "libcss"
