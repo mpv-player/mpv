@@ -43,6 +43,7 @@ typedef struct eq2_param_t {
   double        c;
   double        b;
   double        g;
+  double        w;
 } eq2_param_t;
 
 typedef struct vf_priv_s {
@@ -53,6 +54,7 @@ typedef struct vf_priv_s {
   double        saturation;
 
   double        gamma;
+  double        gamma_weight;
   double        rgamma;
   double        ggamma;
   double        bgamma;
@@ -68,8 +70,11 @@ void create_lut (eq2_param_t *par)
 {
   unsigned i;
   double   g, v;
+  double   lw, gw;
 
   g = par->g;
+  gw = par->w;
+  lw = 1.0 - gw;
 
   if ((g < 0.001) || (g > 1000.0)) {
     g = 1.0;
@@ -85,7 +90,7 @@ void create_lut (eq2_param_t *par)
       par->lut[i] = 0;
     }
     else {
-      v = pow (v, g);
+      v = v*lw + pow(v, g)*gw;
 
       if (v >= 1.0) {
         par->lut[i] = 255;
@@ -320,6 +325,7 @@ void set_gamma (vf_eq2_t *eq2, double g)
   eq2->param[0].g = eq2->gamma * eq2->ggamma;
   eq2->param[1].g = sqrt (eq2->bgamma / eq2->ggamma);
   eq2->param[2].g = sqrt (eq2->rgamma / eq2->ggamma);
+  eq2->param[0].w = eq2->param[1].w = eq2->param[2].w = eq2->gamma_weight;
 
   eq2->param[0].lut_clean = 0;
   eq2->param[1].lut_clean = 0;
@@ -434,7 +440,7 @@ int open (vf_instance_t *vf, char *args)
 {
   unsigned i;
   vf_eq2_t *eq2;
-  double   par[7];
+  double   par[8];
 
   vf->control = control;
   vf->query_format = query_format;
@@ -461,6 +467,7 @@ int open (vf_instance_t *vf, char *args)
   eq2->saturation = 1.0;
 
   eq2->gamma = 1.0;
+  eq2->gamma_weight = 1.0;
   eq2->rgamma = 1.0;
   eq2->ggamma = 1.0;
   eq2->bgamma = 1.0;
@@ -473,11 +480,12 @@ int open (vf_instance_t *vf, char *args)
     par[4] = 1.0;
     par[5] = 1.0;
     par[6] = 1.0;
+    par[7] = 1.0;
 #ifdef USE_SETLOCALE
     setlocale (LC_NUMERIC, "C");
 #endif
-    sscanf (args, "%lf:%lf:%lf:%lf:%lf:%lf:%lf",
-      par, par + 1, par + 2, par + 3, par + 4, par + 5, par + 6
+    sscanf (args, "%lf:%lf:%lf:%lf:%lf:%lf:%lf:%lf",
+      par, par + 1, par + 2, par + 3, par + 4, par + 5, par + 6, par + 7
     );
 #ifdef USE_SETLOCALE
     setlocale (LC_NUMERIC, "");
@@ -486,6 +494,7 @@ int open (vf_instance_t *vf, char *args)
     eq2->rgamma = par[4];
     eq2->ggamma = par[5];
     eq2->bgamma = par[6];
+    eq2->gamma_weight = par[7];
 
     set_gamma (eq2, par[0]);
     set_contrast (eq2, par[1]);
