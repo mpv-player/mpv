@@ -30,6 +30,8 @@
 #include "libvo/img_format.h"
 #include "xacodec.h"
 
+#ifdef HAVE_LIBDL
+
 #if 0 
 typedef char xaBYTE;
 typedef short xaSHORT;
@@ -744,3 +746,25 @@ void *XA_YUV221111_Func(unsigned int image_type)
 }
 
 /* *** EOF XANIM *** */
+
+#else /* HAVE_LIBDL */
+
+int xacodec_init_video(void)
+{
+    mp_msg(MSGT_DEMUX, MSGL_FATAL, "xacodec needs libdl to work!\n");
+    return 0;
+}
+
+void xacodec_decode_frame(void)
+{
+    mp_msg(MSGT_DEMUX, MSGL_FATAL, "xacodec needs libdl to work!\n");
+    return NULL;
+}
+
+void xacodec_exit(void)
+{
+    mp_msg(MSGT_DEMUX, MSGL_FATAL, "xacodec needs libdl to work!\n");
+    return;
+}
+
+#endif /* HAVE_LIBDL */
