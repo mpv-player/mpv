@@ -22,9 +22,6 @@ extern char *fb_mode_name;
 extern char *dfb_params;
 #endif
 #endif
-#ifdef HAVE_PNG
-extern int z_compression;
-#endif
 #ifdef HAVE_SDL
 //extern char *sdl_driver;
 extern int sdl_noxv;
