@@ -58,7 +58,7 @@ static void deint(unsigned char *dest, int ds, unsigned char *src, int ss, int w
 }
 
 #ifdef HAVE_3DNOW
-static void qpel_3DNOW(unsigned char *d, unsigned char *s, int w, int h, int ds, int ss, int up)
+static void qpel_li_3DNOW(unsigned char *d, unsigned char *s, int w, int h, int ds, int ss, int up)
 {
 	int i, j, ssd=ss;
 	int crap1, crap2;
@@ -69,8 +69,7 @@ static void qpel_3DNOW(unsigned char *d, unsigned char *s, int w, int h, int ds,
 		s += ss;
 	}
 	for (i=h-1; i; i--) {
-		asm(
-			"pxor %%mm7, %%mm7 \n\t"
+		asm volatile(
 			"1: \n\t"
 			"movq (%%esi), %%mm0 \n\t"
 			"movq (%%esi,%%eax), %%mm1 \n\t"
@@ -84,7 +83,7 @@ static void qpel_3DNOW(unsigned char *d, unsigned char *s, int w, int h, int ds,
 			: "=S"(crap1), "=D"(crap2)
 			: "c"(w>>3), "S"(s), "D"(d), "a"(ssd)
 		);
-		for (j=(w&7); j<w; j++)
+		for (j=w-(w&7); j<w; j++)
 			d[j] = (s[j+ssd] + 3*s[j])>>2;
 		d += ds;
 		s += ss;
@@ -95,7 +94,7 @@ static void qpel_3DNOW(unsigned char *d, unsigned char *s, int w, int h, int ds,
 #endif
 
 #ifdef HAVE_MMX2
-static void qpel_MMX2(unsigned char *d, unsigned char *s, int w, int h, int ds, int ss, int up)
+static void qpel_li_MMX2(unsigned char *d, unsigned char *s, int w, int h, int ds, int ss, int up)
 {
 	int i, j, ssd=ss;
 	int crap1, crap2;
@@ -106,9 +105,9 @@ static void qpel_MMX2(unsigned char *d, unsigned char *s, int w, int h, int ds, 
 		s += ss;
 	}
 	for (i=h-1; i; i--) {
-		asm(
+		asm volatile(
 			"pxor %%mm7, %%mm7 \n\t"
-			"1: \n\t"
+			"2: \n\t"
 			"movq (%%esi), %%mm0 \n\t"
 			"movq (%%esi,%%eax), %%mm1 \n\t"
 			"pavgb %%mm0, %%mm1 \n\t"
@@ -117,11 +116,11 @@ static void qpel_MMX2(unsigned char *d, unsigned char *s, int w, int h, int ds, 
 			"movq %%mm1, (%%edi) \n\t"
 			"addl $8, %%edi \n\t"
 			"decl %%ecx \n\t"
-			"jnz 1b \n\t"
+			"jnz 2b \n\t"
 			: "=S"(crap1), "=D"(crap2)
 			: "c"(w>>3), "S"(s), "D"(d), "a"(ssd)
 		);
-		for (j=(w&7); j<w; j++)
+		for (j=w-(w&7); j<w; j++)
 			d[j] = (s[j+ssd] + 3*s[j])>>2;
 		d += ds;
 		s += ss;
@@ -132,7 +131,7 @@ static void qpel_MMX2(unsigned char *d, unsigned char *s, int w, int h, int ds, 
 #endif
 
 #ifdef HAVE_MMX
-static void qpel_MMX(unsigned char *d, unsigned char *s, int w, int h, int ds, int ss, int up)
+static void qpel_li_MMX(unsigned char *d, unsigned char *s, int w, int h, int ds, int ss, int up)
 {
 	int i, j, ssd=ss;
 	int crap1, crap2;
@@ -143,9 +142,9 @@ static void qpel_MMX(unsigned char *d, unsigned char *s, int w, int h, int ds, i
 		s += ss;
 	}
 	for (i=h-1; i; i--) {
-		asm(
+		asm volatile(
 			"pxor %%mm7, %%mm7 \n\t"
-			"1: \n\t"
+			"3: \n\t"
 			"movq (%%esi), %%mm0 \n\t"
 			"movq (%%esi), %%mm1 \n\t"
 			"movq (%%esi,%%eax), %%mm2 \n\t"
@@ -167,11 +166,11 @@ static void qpel_MMX(unsigned char *d, unsigned char *s, int w, int h, int ds, i
 			"movq %%mm2, (%%edi) \n\t"
 			"addl $8, %%edi \n\t"
 			"decl %%ecx \n\t"
-			"jnz 1b \n\t"
+			"jnz 3b \n\t"
 			: "=S"(crap1), "=D"(crap2)
 			: "c"(w>>3), "S"(s), "D"(d), "a"(ssd)
 		);
-		for (j=(w&7); j<w; j++)
+		for (j=w-(w&7); j<w; j++)
 			d[j] = (s[j+ssd] + 3*s[j])>>2;
 		d += ds;
 		s += ss;
@@ -179,9 +178,96 @@ static void qpel_MMX(unsigned char *d, unsigned char *s, int w, int h, int ds, i
 	if (!up) memcpy(d, s, w);
 	asm volatile("emms \n\t" : : : "memory");
 }
+
+static void qpel_4tap_MMX(unsigned char *d, unsigned char *s, int w, int h, int ds, int ss, int up)
+{
+	int i, j, ssd=ss;
+	static const short filter[] = {
+		29, 29, 29, 29, 110, 110, 110, 110,
+		9, 9, 9, 9, 3, 3, 3, 3,
+		64, 64, 64, 64 };
+	int crap1, crap2;
+	if (up) {
+		ssd = -ss;
+		memcpy(d, s, w);
+		d += ds; s += ss;
+	}
+	for (j=0; j<w; j++)
+		d[j] = (s[j+ssd] + 3*s[j])>>2;
+	d += ds; s += ss;
+	for (i=h-3; i; i--) {
+		asm volatile(
+			"pxor %%mm0, %%mm0 \n\t"
+			"movq (%%edx), %%mm4 \n\t"
+			"movq 8(%%edx), %%mm5 \n\t"
+			"movq 16(%%edx), %%mm6 \n\t"
+			"movq 24(%%edx), %%mm7 \n\t"
+			"4: \n\t"
+
+			"movq (%%esi,%%eax), %%mm1 \n\t"
+			"movq (%%esi), %%mm2 \n\t"
+			"movq (%%esi,%%ebx), %%mm3 \n\t"
+			"punpcklbw %%mm0, %%mm1 \n\t"
+			"punpcklbw %%mm0, %%mm2 \n\t"
+			"pmullw %%mm4, %%mm1 \n\t"
+			"punpcklbw %%mm0, %%mm3 \n\t"
+			"pmullw %%mm5, %%mm2 \n\t"
+			"paddusw %%mm2, %%mm1 \n\t"
+			"pmullw %%mm6, %%mm3 \n\t"
+			"movq (%%esi,%%eax,2), %%mm2 \n\t"
+			"psubusw %%mm3, %%mm1 \n\t"
+			"punpcklbw %%mm0, %%mm2 \n\t"	
+			"pmullw %%mm7, %%mm2 \n\t"
+			"psubusw %%mm2, %%mm1 \n\t"
+			"psrlw $7, %%mm1 \n\t"
+
+			"movq (%%esi,%%eax), %%mm2 \n\t"
+			"movq (%%esi), %%mm3 \n\t"
+			"punpckhbw %%mm0, %%mm2 \n\t"
+			"punpckhbw %%mm0, %%mm3 \n\t"
+			"pmullw %%mm4, %%mm2 \n\t"
+			"pmullw %%mm5, %%mm3 \n\t"
+			"paddusw %%mm3, %%mm2 \n\t"
+			"movq (%%esi,%%ebx), %%mm3 \n\t"
+			"punpckhbw %%mm0, %%mm3 \n\t"
+			"pmullw %%mm6, %%mm3 \n\t"
+			"psubusw %%mm3, %%mm2 \n\t"
+			"movq (%%esi,%%eax,2), %%mm3 \n\t"
+			"punpckhbw %%mm0, %%mm3 \n\t"	
+			"addl $8, %%esi \n\t"
+			"pmullw %%mm7, %%mm3 \n\t"
+			"psubusw %%mm3, %%mm2 \n\t"
+			"psrlw $7, %%mm2 \n\t"
+			
+			"packuswb %%mm2, %%mm1 \n\t"
+			"movq %%mm1, (%%edi) \n\t"
+			"addl $8, %%edi \n\t"
+			"decl %%ecx \n\t"
+			"jnz 4b \n\t"
+			: "=S"(crap1), "=D"(crap2)
+			: "c"(w>>3), "S"(s), "D"(d), "a"(ssd), "b"(-ssd), "d"(filter)
+		);
+		for (j=w-(w&7); j<w; j++)
+			d[j] = (-9*s[j-ssd] + 111*s[j] + 29*s[j+ssd] - 3*s[j+ssd+ssd])>>7;
+		d += ds;
+		s += ss;
+	}
+	for (j=0; j<w; j++)
+		d[j] = (s[j+ssd] + 3*s[j])>>2;
+	d += ds; s += ss;
+	if (!up) memcpy(d, s, w);
+	asm volatile("emms \n\t" : : : "memory");
+}
 #endif
 
-static void qpel_C(unsigned char *d, unsigned char *s, int w, int h, int ds, int ss, int up)
+static inline int clamp(int a)
+{
+	// If a<512, this is equivalent to:
+	// return (a<0) ? 0 : ( (a>255) ? 255 : a);
+	return (~(a>>31)) & (a | ((a<<23)>>31));
+}
+
+static void qpel_li_C(unsigned char *d, unsigned char *s, int w, int h, int ds, int ss, int up)
 {
 	int i, j, ssd=ss;
 	if (up) {
@@ -199,12 +285,49 @@ static void qpel_C(unsigned char *d, unsigned char *s, int w, int h, int ds, int
 	if (!up) memcpy(d, s, w);
 }
 
-static void (*qpel)(unsigned char *d, unsigned char *s, int w, int h, int ds, int ss, int up);
+static void qpel_4tap_C(unsigned char *d, unsigned char *s, int w, int h, int ds, int ss, int up)
+{
+	int i, j, ssd=ss;
+	if (up) {
+		ssd = -ss;
+		memcpy(d, s, w);
+		d += ds; s += ss;
+	}
+	for (j=0; j<w; j++)
+		d[j] = (s[j+ssd] + 3*s[j] + 2)>>2;
+	d += ds; s += ss;
+	for (i=h-3; i; i--) {
+		for (j=0; j<w; j++)
+			d[j] = clamp((-9*s[j-ssd] + 111*s[j] + 29*s[j+ssd] - 3*s[j+ssd+ssd] + 64)>>7);
+		d += ds; s += ss;
+	}
+	for (j=0; j<w; j++)
+		d[j] = (s[j+ssd] + 3*s[j] + 2)>>2;
+	d += ds; s += ss;
+	if (!up) memcpy(d, s, w);
+}
+
+static void (*qpel_li)(unsigned char *d, unsigned char *s, int w, int h, int ds, int ss, int up);
+static void (*qpel_4tap)(unsigned char *d, unsigned char *s, int w, int h, int ds, int ss, int up);
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 {
 	int ret;
 	mp_image_t *dmpi;
+	void (*qpel)(unsigned char *, unsigned char *, int, int, int, int, int);
+
+	switch (vf->priv->mode) {
+	case 2:
+		qpel = qpel_li;
+		break;
+	case 3:
+		// TODO: add 3tap filter
+		qpel = qpel_4tap;
+		break;
+	case 4:
+		qpel = qpel_4tap;
+		break;
+	}
 
 	switch (vf->priv->mode) {
 	case 0:
@@ -272,6 +395,8 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 		}
 		return vf_next_put_image(vf, dmpi) || ret;
 	case 2:
+	case 3:
+	case 4:
 		dmpi = vf_get_image(vf->next, mpi->imgfmt,
 			MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
 			mpi->width, mpi->height/2);
@@ -321,6 +446,8 @@ static int config(struct vf_instance_s* vf,
 	switch (vf->priv->mode) {
 	case 0:
 	case 2:
+	case 3:
+	case 4:
 		return vf_next_config(vf,width,height/2,d_width,d_height,flags,outfmt);
 	case 1:
 		return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
@@ -344,15 +471,17 @@ static int open(vf_instance_t *vf, char* args)
 	vf->priv = p = calloc(1, sizeof(struct vf_priv_s));
 	vf->priv->mode = 0;
 	if (args) sscanf(args, "%d", &vf->priv->mode);
-	qpel = qpel_C;
+	qpel_li = qpel_li_C;
+	qpel_4tap = qpel_4tap_C;
 #ifdef HAVE_MMX
-	if(gCpuCaps.hasMMX) qpel = qpel_MMX;
+	if(gCpuCaps.hasMMX) qpel_li = qpel_li_MMX;
+	if(gCpuCaps.hasMMX) qpel_4tap = qpel_4tap_MMX;
 #endif
 #ifdef HAVE_MMX2
-	if(gCpuCaps.hasMMX2) qpel = qpel_MMX2;
+	if(gCpuCaps.hasMMX2) qpel_li = qpel_li_MMX2;
 #endif
 #ifdef HAVE_3DNOW
-	if(gCpuCaps.has3DNow) qpel = qpel_3DNOW;
+	if(gCpuCaps.has3DNow) qpel_li = qpel_li_3DNOW;
 #endif
 	return 1;
 }
