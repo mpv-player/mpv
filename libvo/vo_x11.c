@@ -166,8 +166,10 @@ printf( "w: %d h: %d\n\n",vo_dwidth,vo_dheight );
  if ( depth != 15 && depth != 16 && depth != 24 && depth != 32 ) depth=24;
  XMatchVisualInfo( mDisplay,mScreen,depth,TrueColor,&vinfo );
 
+#ifdef HAVE_NEW_GUI
  if ( vo_window != None ) { mywindow=vo_window; mygc=vo_gc; }
   else
+#endif   
    {
     if ( X_already_started ) return -1;
     if( !vo_init() ) return 0; // Can't open X11
