@@ -425,7 +425,7 @@ subtitle *sub_read_line_ssa(FILE *fd,subtitle *current) {
 	
 	char line[LINE_LEN+1],
 	     line3[LINE_LEN+1],
-	     *line2;
+	     *line2,*so,*de;
 	char *tmp;
 
 	do {
@@ -448,6 +448,21 @@ subtitle *sub_read_line_ssa(FILE *fd,subtitle *current) {
           }
 
         if(comma < max_comma)max_comma = comma;
+	/* eliminate the trailing comma */
+	if(*line2 == ',') line2++;
+	/* eliminate any text enclosed with {}, they are font and color settings */
+	so=de=line2;
+	while (*so) {
+		if(*so == '{') {
+			for (; *so && *so!='}'; *so++);
+			if(*so) so++;
+		}
+		if(*so) {
+			*de=*so;
+			so++; de++;
+		}
+	}
+	*de=*so;
 
 	current->lines=0;num=0;
 	current->start = 360000*hour1 + 6000*min1 + 100*sec1 + hunsec1;
