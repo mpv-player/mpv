@@ -1536,10 +1536,12 @@ Disable automatic movie aspect ratio compensation.
 .B \-nosound
 Do not play/\:encode sound.
 .TP
-.B \-vop pp=<option1,option2,...>
+.B \-vop pp=<option1/option2/...>
 This option enables usage of MPlayer's internal postprocessing filter,
 and also gives an interface where you can pass options to the named filter.
 
+.br
+Note that each sub-filter must be separated with a / sign.
 .br
 Each filter defaults to 'c' (chrominance).
 .br
@@ -1560,13 +1562,13 @@ y: Do not do chrominance filtering (only luminance filtering).
 .RE
 .PD 0
 .RSs
-.IPs "\-vop pp=hb,vb,dr,al,lb"
-.IPs "\-vop pp=hb,vb,dr,al"
-.IPs "\-vop pp=de,\-al"
+.IPs "\-vop pp=hb/vb/dr/al/lb"
+.IPs "\-vop pp=hb/vb/dr/al"
+.IPs "\-vop pp=de/\-al"
 default filters without brightness/\:contrast correction
-.IPs "\-vop pp=de,tn:1:2:3"
+.IPs "\-vop pp=de/tn:1:2:3"
 Enable default filters & temporal denoiser.
-.IPs "\-vop pp=hb:y,vb:a \-autoq 6"
+.IPs "\-vop pp=hb:y/vb:a \-autoq 6"
 Deblock horizontal only luminance and switch vertical deblocking on or
 off automatically depending on available CPU time.
 .RE
