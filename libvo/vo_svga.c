@@ -62,6 +62,9 @@ static uint32_t pformat;
 #define BPP_16 2
 #define BPP_24 4
 #define BPP_32 8
+#define BPP_8 16
+#define BPP_4 32
+#define BPP_2 64
 static uint8_t bpp_avail = 0;
 
 static uint8_t checked = 0;
@@ -126,6 +129,9 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
       switch (list->modeinfo.colors) {
         case 32768: bpp_avail |= BPP_15; break;
         case 65536: bpp_avail |= BPP_16; break;
+        case 256  : bpp_avail |= BPP_8; break;
+        case 16   : bpp_avail |= BPP_4; break;
+        case 2    : bpp_avail |= BPP_2; break;
       }
       switch (list->modeinfo.bytesperpixel) {
         case 3: bpp_avail |= BPP_24; break;
@@ -181,6 +187,12 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 		   }
 	       }
                break;
+      case 8: if (!(bpp_avail & BPP_8)) {
+	           printf("vo_svga: Haven't found video mode which fit to: %dx%d %dbpp\n",req_w,req_h,bpp);
+		   printf("vo_svga: Maybe you should try -bpp\n");
+		   return(1);
+	       }
+               break;
     }
   } else {
       bpp = vo_dbpp;
@@ -207,6 +219,11 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 		   return(1);
                  }
 		 break;
+        case 8: if (!(bpp_avail & BPP_8)) {
+	           printf("vo_svga: %dbpp not supported in %dx%d (or larger resoltuion) by HW or SVGAlib\n",bpp,req_w,req_h);
+		   return(1);
+                 }
+		 break;
       }
     }
 
@@ -219,6 +236,9 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     if ((list->modeinfo.width >= req_w) && (list->modeinfo.height >= req_h)) {
       if (verbose) {
         switch (list->modeinfo.colors) {
+          case 256  : printf("vo_svga: vid_mode: %d, %dx%d 8bpp\n",
+                             list->modenum,list->modeinfo.width,list->modeinfo.height);
+	              break;
           case 32768: printf("vo_svga: vid_mode: %d, %dx%d 15bpp\n",
                              list->modenum,list->modeinfo.width,list->modeinfo.height);
 	              break;
@@ -268,11 +288,19 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 		     res_widescr = (((buf_w*1.0)/buf_h) > (4.0/3)) ? 1 : 0;
 		   }
 		 break;
+        case 8: if (list->modeinfo.colors == 256)
+                   if ((list->modeinfo.width < buf_w) || (list->modeinfo.height < buf_h)) {
+                     vid_mode = list->modenum;
+                     buf_w = list->modeinfo.width;
+                     buf_h = list->modeinfo.height;
+		     res_widescr = (((buf_w*1.0)/buf_h) > (4.0/3)) ? 1 : 0;
+		   }
+		 break;
       }
     }
     list = list->next;
   }
-  
+
   if((vo_subdevice) && (strlen(vo_subdevice)>2)) {
      if(!strncmp(vo_subdevice,"old",3)) {
         oldmethod=1;
@@ -291,6 +319,10 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
              buf_h = list->modeinfo.height;
 	     res_widescr = (((buf_w*1.0)/buf_h) > (4.0/3)) ? 1 : 0;
              switch(list->modeinfo.colors) {
+                 case 256:
+                     bpp=8;
+                     bpp_conv=0;
+                     break;
                  case 32768:
                      bpp=16;
                      bpp_conv=1;
@@ -321,7 +353,14 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     printf("vo_svga: vga_setmode(%d) failed.\n",vid_mode);
     uninit();
     return(1); // error
-  } 
+  }
+  
+  /* set 332 palette for 8 bpp */
+  if(bpp==8){
+    int i;
+    for(i=0; i<256; i++)
+      vga_setpalette(i, (i>>2)&0x38, (i<<1)&0x38, (i<<4)&0x30);
+  }
 
   WIDTH=vga_getxdim();
   HEIGHT=vga_getydim();
@@ -524,6 +563,7 @@ static int checksupportedmodes() {
     if (vga_hasmode(i) > 0) {
       minfo = vga_getmodeinfo(i);
       switch (minfo->colors) {
+        case 256  : bpp_avail |= BPP_8 ; break;
         case 32768: bpp_avail |= BPP_15; break;
         case 65536: bpp_avail |= BPP_16; break;
       }
@@ -564,21 +604,24 @@ static uint32_t query_format(uint32_t format) {
       case 15: if ((format == IMGFMT_RGB15) || (format == IMGFMT_BGR15))
                  return ((bpp_avail & BPP_15) ? 1 : 0);
 	       break;
+      case 8 : if ((format == IMGFMT_RGB8 ) || (format == IMGFMT_BGR8))
+                 return ((bpp_avail & BPP_8 ) ? 1 : 0);
+	       break;
     }
   } else {
       switch (format) {
-        case IMGFMT_RGB32: 
+        case IMGFMT_RGB32:
         case IMGFMT_BGR32: return ((bpp_avail & BPP_32) ? 1 : 0); break;
-        case IMGFMT_RGB24: 
+        case IMGFMT_RGB24:
         case IMGFMT_BGR24: {
           res = (bpp_avail & BPP_24) ? 1 : 0;
           if (!res)
             res = (bpp_avail & BPP_32) ? 1 : 0;
           return (res);
         } break;
-        case IMGFMT_RGB16: 
+        case IMGFMT_RGB16:
         case IMGFMT_BGR16: return ((bpp_avail & BPP_16) ? 1 : 0); break;
-        case IMGFMT_RGB15: 
+        case IMGFMT_RGB15:
         case IMGFMT_BGR15: {
           res = (bpp_avail & BPP_15) ? 1 : 0;
           if (!res)
@@ -586,6 +629,8 @@ static uint32_t query_format(uint32_t format) {
           return (res);
         } break;
         case IMGFMT_YV12: return (1); break;
+        case IMGFMT_RGB8:
+        case IMGFMT_BGR8: return ((bpp_avail & BPP_8) ? 1 : 0); break;
       }
     }
   return (0);
@@ -599,7 +644,7 @@ static void putbox(int x, int y, int w, int h, uint8_t *buf, int prog) {
         while( (h--) > 0 ) {
             memcpy(buffer+x*BYTESPERPIXEL+(y++)*LINEWIDTH, buf, wid);
             buf+=add;
-        }    
+        }
     } else {
         wid=w*BYTESPERPIXEL;
         add=wid*prog;
