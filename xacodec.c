@@ -260,6 +260,9 @@ int xacodec_init_video(sh_video_t *vidinfo, int out_format)
     for (i=0; i < XA_CLOSE_FUNCS; i++)
 	xacodec_driver->close_func[i] = NULL;
 
+    if (getenv("XANIM_MOD_DIR"))
+	xacodec_def_path = getenv("XANIM_MOD_DIR");
+
     snprintf(dll, 1024, "%s/%s", xacodec_def_path, vidinfo->codec->dll);
     if (xacodec_init(dll, xacodec_driver) == 0)
 	return(0);
