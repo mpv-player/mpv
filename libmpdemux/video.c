@@ -46,7 +46,7 @@ enum {
 
 if((d_video->demuxer->file_format == DEMUXER_TYPE_PVA) ||
    (d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_ES) ||
-   (d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_PS) ||
+   (d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_PS && ((! sh_video->format) || (sh_video->format==0x10000001) || (sh_video->format==0x10000002))) ||
    (d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_TY) ||
    (d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_TS && ((sh_video->format==0x10000001) || (sh_video->format==0x10000002)))
 #ifdef STREAMING_LIVE_DOT_COM
@@ -55,11 +55,13 @@ if((d_video->demuxer->file_format == DEMUXER_TYPE_PVA) ||
   )
     video_codec = VIDEO_MPEG12;
   else if((d_video->demuxer->file_format == DEMUXER_TYPE_MPEG4_ES) ||
-    ((d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_TS) && (sh_video->format==0x10000004))
+    ((d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_TS) && (sh_video->format==0x10000004)) ||
+    ((d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_PS) && (sh_video->format==0x10000004))
   )
     video_codec = VIDEO_MPEG4;
   else if((d_video->demuxer->file_format == DEMUXER_TYPE_H264_ES) ||
-    ((d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_TS) && (sh_video->format==0x10000005))
+    ((d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_TS) && (sh_video->format==0x10000005)) ||
+    ((d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_PS) && (sh_video->format==0x10000005))
   )
     video_codec = VIDEO_H264;
   else
@@ -400,7 +402,8 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
     
     *start=NULL;
 
-  if(demuxer->file_format==DEMUXER_TYPE_MPEG_ES || demuxer->file_format==DEMUXER_TYPE_MPEG_PS
+  if(demuxer->file_format==DEMUXER_TYPE_MPEG_ES || 
+  	(demuxer->file_format==DEMUXER_TYPE_MPEG_PS && ((! sh_video->format) || (sh_video->format==0x10000001) || (sh_video->format==0x10000002)))
 		  || demuxer->file_format==DEMUXER_TYPE_PVA || 
 		  ((demuxer->file_format==DEMUXER_TYPE_MPEG_TS) && ((sh_video->format==0x10000001) || (sh_video->format==0x10000002)))
 		  || demuxer->file_format==DEMUXER_TYPE_MPEG_TY
@@ -493,17 +496,22 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
 	    telecine=1;
 	}
 
-  } else if((demuxer->file_format==DEMUXER_TYPE_MPEG4_ES) || ((demuxer->file_format==DEMUXER_TYPE_MPEG_TS) && (sh_video->format==0x10000004))){
+  } else if((demuxer->file_format==DEMUXER_TYPE_MPEG4_ES) || ((demuxer->file_format==DEMUXER_TYPE_MPEG_TS) && (sh_video->format==0x10000004)) ||
+            ((demuxer->file_format==DEMUXER_TYPE_MPEG_PS) && (sh_video->format==0x10000004))
+  ){
       //
         while(videobuf_len<VIDEOBUFFER_SIZE-MAX_VIDEO_PACKET_SIZE){
           int i=sync_video_packet(d_video);
+          if(!i) return -1;
           if(!read_video_packet(d_video)) return -1; // EOF
 	  if(i==0x1B6) break;
         }
 	*start=videobuffer; in_size=videobuf_len;
 	videobuf_len=0;
 
-  } else if(demuxer->file_format==DEMUXER_TYPE_H264_ES || ((demuxer->file_format==DEMUXER_TYPE_MPEG_TS) && (sh_video->format==0x10000005))){
+  } else if(demuxer->file_format==DEMUXER_TYPE_H264_ES || ((demuxer->file_format==DEMUXER_TYPE_MPEG_TS) && (sh_video->format==0x10000005)) ||
+            ((demuxer->file_format==DEMUXER_TYPE_MPEG_PS) && (sh_video->format==0x10000005))
+  ){
       //
         while(videobuf_len<VIDEOBUFFER_SIZE-MAX_VIDEO_PACKET_SIZE){
           int i=sync_video_packet(d_video);
