@@ -4,6 +4,10 @@
 #include <math.h>
 #include <time.h>
 
+#if !defined(INFINITY) && defined(HUGE_VAL)
+#define INFINITY HUGE_VAL
+#endif
+
 #include "../config.h"
 
 #ifdef USE_LIBAVCODEC
