@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.6 -->
+<!-- synced with 1.9 -->
 <sect1 id="tv-input" xreflabel="TV input">
 <title>Entrée TV</title>
 
@@ -177,7 +177,7 @@ combinaison est adaptée pour capturer des films.
      mencoder -tv driver=v4l:width=768:height=576 \
      -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=900 \
      -oac mp3lame -lameopts cbr:br=64 \
-     -vf crop=720:544:24:16,pp=lb -o sorite.avi tv://
+     -vf crop=720:544:24:16,pp=lb -o <replaceable>sortie.avi</replaceable> tv://
 </screen>
 </para>
 </informalexample>
@@ -193,7 +193,7 @@ très importante.
      mencoder -tv driver=v4l:width=768:height=576 \
      -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=350:vhq:vqmax=31:keyint=300 \
      -oac mp3lame -lameopts cbr:br=48 \
-     -vf crop=720:540:24:18,pp=tn/lb,scale=384:288 -sws 1 -o sortie.avi tv://
+     -vf crop=720:540:24:18,pp=tn/lb,scale=384:288 -sws 1 -o <replaceable>sortie.avi</replaceable> tv://
 </screen>
 Il est également possible de spécifier des dimensions d'image plus petites
 dans l'option <option>-tv</option> et d'omettre le zoom logiciel mais cette approche

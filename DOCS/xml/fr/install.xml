@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.29 -->
+<!-- synced with 1.33 -->
 <sect1 id="install">
 <title>Installation</title>
 
@@ -553,6 +553,7 @@ sont supportés:
 <listitem><para>VPlayer</para></listitem>
 <listitem><para>RT</para></listitem>
 <listitem><para>SSA</para></listitem>
+<listitem><para>Inconnu</para></listitem>
 <listitem><para><link linkend="mpsub">MPsub</link></para></listitem>
 <listitem><para>AQTitle</para></listitem>
 <listitem><para><ulink url="http://unicorn.us.com/jacosub/">JACOsub</ulink></para></listitem>
@@ -585,13 +586,15 @@ Les options en ligne de commande diffèrent légèrement suivant les différents for
 <para>
 Les sous-titres VobSub consistent en un gros (plusieurs méga-octets) fichier <filename>.SUB</filename>,
 et d'éventuels fichiers <filename>.IDX</filename> et/ou <filename>.IFO</filename>.
-Si vous avez des fichiers tels que <filename>sample.sub</filename>,
-<filename>sample.ifo</filename> (optional), <filename>sample.idx</filename> -
+Si vous avez des fichiers tels que
+<filename><replaceable>sample.sub</replaceable></filename>,
+<filename><replaceable>sample.ifo</replaceable></filename> (optionnel),
+<filename><replaceable>sample.idx</replaceable></filename> -
 vous devrez passer à <application>MPlayer</application> l'option
-<option>-vobsub sample [-vobsubid <replaceable>id</replaceable>]</option> 
+<option>-vobsub sample [-vobsubid <replaceable>id</replaceable>]</option>
 (éventuellement avec le chemin complet). L'option <option>-vobsubid</option> est comme l'option
 <option>-sid</option> pour les DVDs, vous pouvez choisir les pistes de sous-titres (langues) avec. 
-Au cas où <option>-vobsubid</option> est omis, <application>MPLayer</application> essaiera 
+Au cas où <option>-vobsubid</option> est omis, <application>MPLayer</application> essaiera
 d'utiliser les langues indiqués par l'option <option>-slang</option> et se rabattra sur l'objet 
 <systemitem>langidx</systemitem> du fichier <filename>.IDX</filename> pour définir la langue 
 de sous-titres. Si cela échoue, il n'y aura pas de sous-titres.
@@ -603,7 +606,7 @@ de sous-titres. Si cela échoue, il n'y aura pas de sous-titres.
 <para>
 Les autres formats consistent en un seul fichier texte contenant le timing,
   l'emplacement et autres infos du texte. Utilisation: si vous avez un fichier tel que
-<filename>exemple.txt</filename>, vous devrez passer l'option <option>-sub
+<filename><replaceable>exemple.txt</replaceable></filename>, vous devrez passer l'option <option>-sub
 exemple.txt</option> (éventuellement avec le chemin complet).
 </para>
 </formalpara>
@@ -730,7 +733,7 @@ les fonctions d'OSD/SUB. Il y a plusieurs manières de les obtenir :
   fontconfig et sinon utilise la police sans-serif par défaut. Pour obtenir une liste
   des polices connues de <systemitem class="library">fontconfig</systemitem>,
   utilisez <command>fc-list</command>.
-  Exemple: <option>-font 'Bitstream Vera Sans'</option>
+  Exemple: <option>-font <replaceable>'Bitstream Vera Sans'</replaceable></option>
   </para></listitem>
 <listitem><para>
   Télécharger des paquetages de polices prêtes à l'emploi depuis le site de MPlayer.
@@ -781,7 +784,7 @@ Si vous avez choisi des polices non-TTF, dézippez le fichier vers <filename clas
 ou <filename class="directory">$PREFIX/share/mplayer</filename>. Ensuite renommez
 ou faites un lien symbolique de l'un d'eux sur <filename class="directory">font</filename>, par exemple:
 
-<screen>ln -s ~/.mplayer/arial-24 ~/.mplayer/font</screen>
+<screen>ln -s <replaceable>~/.mplayer/arial-24</replaceable> <replaceable>~/.mplayer/font</replaceable></screen>
 
 Vous pouvez maintenant voir un compteur dans le coin supérieur gauche du film. (Faites les apparaître/disparaître 
 avec la touche <keycap>o</keycap>).
@@ -849,7 +852,7 @@ Le menu des préférences n'est PAS IMPLÉMENTÉ pour l'instant !
   </simpara></listitem>
 <listitem><para>
   lancez <application>MPlayer</application> avec par exemple:
-  <screen>$ mplayer -menu fichier.avi</screen>
+  <screen>$ mplayer -menu <replaceable>fichier.avi</replaceable></screen>
   </para></listitem>
 <listitem><simpara>
   pressez n'importe laquelle des touches menu que vous avez défini

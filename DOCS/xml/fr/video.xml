@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.42 -->
+<!-- synced with 1.43 -->
 <sect2 id="video-dev">
 <title>Sorties vidéo</title>
 
@@ -386,9 +386,9 @@ pour écrire directement dans la mémoire vidéo. Si vous voulez rester en utilisat
 installez <application>MPlayer</application> SUID root:
 
 <screen>
-chown root /usr/local/bin/mplayer
-chmod 750 /usr/local/bin/mplayer
-chmod +s /usr/local/bin/mplayer
+chown root <replaceable>/usr/local/bin/mplayer</replaceable>
+chmod 750 <replaceable>/usr/local/bin/mplayer</replaceable>
+chmod +s <replaceable>/usr/local/bin/mplayer</replaceable>
 </screen>
 
 Maintenant cela fonctionne aussi avec les droits d'un simple utilisateur.
@@ -1360,9 +1360,9 @@ Vous pouvez aussi spécifier le pilote VIDIX directement en troisième sous-argume
 en ligne de commande:
 
 
-<screen>mplayer -vo xvidix:mga_vid.so -fs -zoom -double fichier.avi</screen>
+<screen>mplayer -vo xvidix:mga_vid.so -fs -zoom -double <replaceable>fichier.avi</replaceable></screen>
 ou
-<screen>mplayer -vo vesa:vidix:radeon_vid.so -fs -zoom -double -bpp 32 fichier.avi</screen>
+<screen>mplayer -vo vesa:vidix:radeon_vid.so -fs -zoom -double -bpp 32 <replaceable>fichier.avi</replaceable></screen>
 
 
 Mais c'est dangereux, et vous ne devriez pas faire ça. Dans ce cas le pilote indiqué
@@ -1491,7 +1491,7 @@ Il y a un relativement nouveau pilote nVidia, il fonctionne avec les chipsets Ri
   et quelques autres. Veuillez noter que ce n'est qu'un inconfort provisoire.
   La syntaxe est la suivante:
   <screen>
-    mplayer -vf format=uyvy -vc divxds fichierdivx3.avi
+    mplayer -vf format=uyvy -vc divxds <replaceable>fichierdivx3.avi</replaceable>
   </screen>
   </para></listitem>
 </itemizedlist>
@@ -1502,7 +1502,7 @@ Il y a un relativement nouveau pilote nVidia, il fonctionne avec les chipsets Ri
   - avec aucun framebuffer ou X. Pour ce faire, nous aurons besoin d'utiliser
   la sortie <option>cvidix</option>, comme le montre l'exemple suivant:
   <screen>
-    mplayer -vf format=uyvy -vc divxds -vo cvidix exemple.avi
+    mplayer -vf format=uyvy -vc divxds -vo cvidix <replaceable>exemple.avi</replaceable>
   </screen>
 </para>
 
@@ -1617,15 +1617,17 @@ commande:
 </para>
 </formalpara>
 
-<para><screen>mplayer -ao mpegpes -vo mpegpes fichier.mpg|vob</screen></para>
+<para>
+<screen>mplayer -ao mpegpes -vo mpegpes <replaceable>fichier.mpg|vob</replaceable></screen>
+</para>
 
 <para>
 Le décodage logiciel ou le transcodage de différents formats en MPEG1 peut être obtenu
 en utilisant une commande comme celle-ci:
 </para>
 <para><screen>
-mplayer -ao mpegpes -vo mpegpes votrefichier.ext
-mplayer -ao mpegpes -vo mpegpes -vf expand votrefichier.ext
+mplayer -ao mpegpes -vo mpegpes <replaceable>votrefichier.ext</replaceable>
+mplayer -ao mpegpes -vo mpegpes -vf expand <replaceable>votrefichier.ext</replaceable>
 </screen></para>
 
 <para>
@@ -1646,19 +1648,22 @@ complète, vous pouvez utiliser le filtre <option>expand=l:h</option> pour ajoute
 bandes noires. Pour voir un DivX en 640x384, essayez:
 </para>
 
-<para><screen>mplayer -ao mpegpes -vo mpegpes -vf expand=640:576 fichier.avi
-</screen></para>
+<para>
+<screen>mplayer -ao mpegpes -vo mpegpes -vf expand=640:576 <replaceable>fichier.avi</replaceable></screen>
+</para>
 
 <para>Si votre CPU est trop lent pour un DivX en taille complète 720x576, essayez de
 diminuer la taille:</para>
 
-<para><screen>mplayer -ao mpegpes -vo mpegpes -vf scale=352:576 fichier.avi
-</screen></para>
+<para>
+<screen>mplayer -ao mpegpes -vo mpegpes -vf scale=352:576 <replaceable>fichier.avi</replaceable></screen>
+</para>
 
 <para>Si la vitesse ne s'améliore pas, essayez également la diminution verticale:</para>
 
-<para><screen>mplayer -ao mpegpes -vo mpegpes -vf scale=352:288 fichier.avi
-</screen></para>
+<para>
+<screen>mplayer -ao mpegpes -vo mpegpes -vf scale=352:288 <replaceable>fichier.avi</replaceable></screen>
+</para>
 
 <para>
 Pour l'OSD et les sous-titres utilisez la fonction expand du plugin OSD. Donc, au lieu
@@ -2006,7 +2011,7 @@ sur votre DC10+. Il y a trois possibilités principales, vous pouvez redimmension
 film à une largeur de 768, 384 ou 192. Pour des raisons de performances et de qualité,
 vous pouvez choisir de redimmensionner le film en 384x204 en utilisant le zoom logiciel
 bilinéaire rapide. La ligne de commande est
-<screen>mplayer -vo zr -sws 0 -vf scale=384:204 film.avi</screen>
+<screen>mplayer -vo zr -sws 0 -vf scale=384:204 <replaceable>film.avi</replaceable></screen>
 </para>
 
 <para>
@@ -2014,12 +2019,12 @@ Le découpage peut être fait avec le filtre <option>crop</option> et par ce
 pilote lui-même. Supposons qu'un film soit trop large pour s'afficher sur votre Buz et
 que vous vouliez utiliser <option>-zrcrop</option> pour rendre le film moins large,
 alors vous taperez la commande suivante
-<screen>mplayer -vo zr -zrcrop 720x320+80+0 benhur.avi</screen>
+<screen>mplayer -vo zr -zrcrop 720x320+80+0 <replaceable>benhur.avi</replaceable></screen>
 </para>
 
 <para>
 Si vous voulez utiliser le filtre <option>crop</option>, vous feriez
-<screen>mplayer -vo zr -vf crop=720:320:80:0 benhur.avi</screen>
+<screen>mplayer -vo zr -vf crop=720:320:80:0 <replaceable>benhur.avi</replaceable></screen>
 </para>
 
 <para>
@@ -2033,7 +2038,7 @@ de droite en noir et blanc et que le moniteur de gauche ait des trames jpeg de q
 10, alors vous taperez la commande suivante
 <screen>
 mplayer -vo zr -zrdev /dev/video0 -zrcrop 352x288+352+0 -zrxdoff 0 -zrbw \
-        -zrcrop 352x288+0+0 -zrdev /dev/video1 -zrquality 10 film.avi
+        -zrcrop 352x288+0+0 -zrdev /dev/video1 -zrquality 10 <replaceable>film.avi</replaceable>
 </screen>
 </para>
 

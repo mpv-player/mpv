@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.5 -->
+<!-- synced with 1.7 -->
 <appendix id="skin">
 <title>Format de skins MPlayer</title>
 <para>
@@ -73,8 +73,8 @@ serveur X possède l'extension XShape.
 <title>Composants d'une skin</title>
 <para>
 Les skins sont d'un format plutôt libre (contrairement aux formats fixes de
-Winamp/XMMS, par exemple), donc il ne tient qu'a vous de créer quelque chose de
-bien.
+<application>Winamp</application>/<application>XMMS</application>, par exemple),
+donc il ne tient qu'a vous de créer quelque chose de bien.
 </para>
 
 <para>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.11 -->
+<!-- synced with 1.12 -->
 <sect2 id="audio-dev">
 <title>Périphériques de sortie audio</title>
 <sect3 id="sync">
@@ -343,7 +343,7 @@ Les retours sur ce document sont les bienvenus. Merci de nous faire savoir comme
 
 <para>
 Exemple:
-<screen>mplayer -af resample,pan film.avi</screen>
+<screen>mplayer -af resample,pan <replaceable>film.avi</replaceable></screen>
 ferait passer le son au travers du filtre de resampling suivi du filtre panoramique.
 Remarquez que la liste ne doit contenir aucun espace, sinon cela échouera.
 </para>
@@ -353,7 +353,7 @@ Les filtres ont souvent des options changeant leur comportement. Ces options son
 expliquées en détail dans les sections ci-dessous. Un filtre sera exécuté en utilisant
 ses paramètres par défaut si ses options sont omises. Voici un exemple de comment
 utiliser les filtres en conjonction avec des options spécifiques à un filtre:
-<screen>mplayer -af resample=11025,pan=1:0.5:0.5 -channels 1 -srate 11025 media.avi</screen>
+<screen>mplayer -af resample=11025,pan=1:0.5:0.5 -channels 1 -srate 11025 <replaceable>media.avi</replaceable></screen>
 définirait la fréquence de sortie du filtre resample à 11025Hz et downmixerait l'audio
 dans 1 canal en utilisant le filtre pan.
 </para>
@@ -585,7 +585,7 @@ Le nombre d'option est dynamique:
 
 <para>
 Exemple 1:
-<screen>mplayer -af channels=4:4:0:1:1:0:2:2:3:3 media.avi</screen>
+<screen>mplayer -af channels=4:4:0:1:1:0:2:2:3:3 <replaceable>media.avi</replaceable></screen>
 changerait le nombre de canaux à 4 et définirait 4 routes qui échangent le canal 0 et
 le canal 1 et laissent les canaux 2 et 3 intacts. Remarquez que si le médium qui
 contient deux canaux était joué en arrière, les canaux 2 et 3 contiendraient du silence
@@ -594,7 +594,7 @@ mais les 0 et 1 seraient tout de même inversés.
 
 <para>
 Exemple 2:
-<screen>mplayer -af channels=6:4:0:0:0:1:0:2:0:3 media.avi</screen>
+<screen>mplayer -af channels=6:4:0:0:0:1:0:2:0:3 <replaceable>media.avi</replaceable></screen>
 changerait le nombre de canaux à 6 et définirait 4 routes copiant le canal 0 dans les
 canaux 0 à 3. Les canaux 4 et 5 contiendront du silence.
 </para>
@@ -631,7 +631,7 @@ sample. Il est automatiquement activé si requis par la carte son ou un autre fil
 
 <para>
 Exemple:
-<screen>mplayer -af format=4:float media.avi</screen>
+<screen>mplayer -af format=4:float <replaceable>media.avi</replaceable></screen>
 initialiserait le format de sortie en données à virgule de 4 octets par sample.
 </para>
 </sect4>
@@ -678,7 +678,7 @@ Les décalages requis (en ms) sont calculés avec
 
 <para>
 Exemple:
-<screen>mplayer -af delay=10.5:10.5:0:0:7:0 media.avi</screen>
+<screen>mplayer -af delay=10.5:10.5:0:0:7:0 <replaceable>media.avi</replaceable></screen>
 décalerait les canaux avant gauche et droite de 10.5ms, les deux canaux arrière et le
 caisson de 0ms et le canal central de 7ms.
 </para>
@@ -723,7 +723,7 @@ Ce filtre a deux options:
 
 <para>
 Exemple:
-<screen>mplayer -af volume=10.1:0 media.avi</screen>
+<screen>mplayer -af volume=10.1:0 <replaceable>media.avi</replaceable></screen>
 amplifierait le son de 10.1dB et bloque le volume si il est trop haut.
 </para>
 
@@ -789,7 +789,7 @@ représentant le gain en dB pour chaque bande de fréquence.
 
 <para>
 Exemple:
-<screen>mplayer -af equalizer=11:11:10:5:0:-12:0:5:12:12 media.avi</screen>
+<screen>mplayer -af equalizer=11:11:10:5:0:-12:0:5:12:12 <replaceable>media.avi</replaceable></screen>
 amplifierait le son sur les fréquences les plus hautes et les plus basses tout en les
 annulant presque complètement autour de 1kHz.
 </para>
@@ -839,13 +839,13 @@ nombre i de canaux de sortie.
 
 <para>
 Exemple 1:
-<screen>mplayer -af pan=1:0.5:0.5 -channels 1 media.avi</screen>
+<screen>mplayer -af pan=1:0.5:0.5 -channels 1 <replaceable>media.avi</replaceable></screen>
 down-mixerait de stéréo vers mono.
 </para>
 
 <para>
 Exemple 2:
-<screen>mplayer -af pan=3:1:0:1:0.5:0.5 -channels 3 media.avi</screen>
+<screen>mplayer -af pan=3:1:0:1:0.5:0.5 -channels 3 <replaceable>media.avi</replaceable></screen>
 produirait une sortie à trois canaux en laissant les canaux 0 et 1 intacts, et
 mixerait les canaux 0 et 1 dans le canal 2 (qui pourrait être envoyé à un sub-woofer
 par exemple).
@@ -888,7 +888,7 @@ paramètres:
 
 <para>
 Exemple:
-<screen>mplayer -af sub=100:4 -channels 5 media.avi</screen>
+<screen>mplayer -af sub=100:4 -channels 5 <replaceable>media.avi</replaceable></screen>
 ajouterait un canal sub-woofer avec une fréquence de cut-off de 100Hz au canal de sortie 4.
 </para>
 </sect4>
@@ -919,7 +919,7 @@ haut-parleurs de derrière, alors le décalage d peut être fixé à 15ms si d1 &lt;=
 
 <para>
 Exemple:
-<screen>mplayer -af surround=15 -channels 4 media.avi</screen>
+<screen>mplayer -af surround=15 -channels 4 <replaceable>media.avi</replaceable></screen>
 ajouterait un décodage de son surround avec un décalage de 15ms pour le son des
 haut-parleurs arrière.
 </para>
@@ -963,7 +963,7 @@ Nombre d'échantillons par canal. La valeur par défaut est <literal>512</literal>
 
 <para>
 Exemple:
-<screen>mplayer -af export=/tmp/mplayer-af_export:1024 media.avi</screen>
+<screen>mplayer -af export=/tmp/mplayer-af_export:1024 <replaceable>media.avi</replaceable></screen>
 exporterait 1024 échantillons par canal dans <filename>/tmp/mplayer-af_export</filename>.
 </para>
 </sect4>
@@ -983,7 +983,7 @@ qui accepte l'argument <option>list=plugin1,plugin2,...</option>. L'argument
 <option>list</option> est requis et détermine quels plugins devraient être utilisés et
 dans quel ordre ils devraient être exécutés. Exemple:
 
-<screen>mplayer media.avi -aop list=resample,format</screen>
+<screen>mplayer <replaceable>media.avi</replaceable> -aop list=resample,format</screen>
 
 passerait le son au travers du plugin resampling suivi du plugin format.
 </para>

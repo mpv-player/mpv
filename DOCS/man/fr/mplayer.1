@@ -1,5 +1,5 @@
-.\" synced with 1.509
-.\" MPlayer (C) 2000-2003 MPlayer Team
+.\" synced with 1.514
+.\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas@legaillart.com >
 .
@@ -34,7 +34,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "28 Décembre 2003"
+.TH MPlayer 1 "3 Janvier 2004"
 .
 .SH NAME
 mplayer  \- Lecteur Vidéo pour Linux
@@ -1207,6 +1207,9 @@ Avec Fontconfig, cette option détermine le nom de police fontconfig.
 .PD 1
 .
 .TP
+.B \-fontconfig
+Active l'utilisation des polices gérées par fontconfig.
+.TP
 .B \-forcedsubsonly
 N'affiche que les sous-titres forcés pour le flux de sous-titres DVD sélectionné
 par (par ex.) \-slang.
@@ -2210,6 +2213,18 @@ débogage:
 .br
 0x1000: bogues
 .REss
+.IPs vismv=<valeur>
+vismv:
+.RSss
+.br
+0: désactivé
+.br
+1: visualise les MVs prédits en avant des trames P
+.br
+2: visualise les MVs prédits en avant des trames B
+.br
+4: visualise les MVs prédits en arrière des trames B
+.REss
 .IPs bug=<valeur>
 contourne manuellement les bogues des encodeurs:
 .RSss
@@ -2552,7 +2567,7 @@ Tourne et (éventuellement) inverse l'image de +/\:- 90 degrés. Pour les
 paramètres entre 4\-7 la rotation n'est faite que si la géométrie du film
 est en mode portrait et non en paysage.
 .TP
-.B scale[=l:h[:c[:p]]]
+.B scale[=l:h[:i[:c[:p]]]]
 Redimensionne l'image avec le zoom logiciel (lent) et applique une conversion
 de palette YUV<\->RGB (voir également l'option \-sws).
 .RSs
@@ -2573,6 +2588,8 @@ redimensionné.
 .br
 -3: Calcule l/\:h en utilisant l'autre dimension et l'aspect ratio original.
 .REss
+.IPs i
+flag d'entrelacement
 .IPs c
 saut de chroma
 .RSss
@@ -2760,11 +2777,11 @@ On peut lui donner de 0 à 3 paramètres. Si vous omettez un paramètre, une valeur
 raisonnable sera insérée.
 .PD 0
 .RSs
-.IPs luma
+.IPs luma\
 force spatiale du luma (par défaut = 4)
 .IPs chroma
 force spatiale du chroma (par défaut = 3)
-.IPs time
+.IPs time\
 force temporelle (par défaut = 6)
 .RE
 .PD 1
@@ -3951,6 +3968,13 @@ Pour une conformité stricte MPEG1/\:2/\:4 cela devrait être <=132.
 (par défaut: 250 ou une trame-clé toutes les dix secondes dans un
 film à 25fps)
 .TP
+.B sc_threshold=<-1000000\-1000000>
+Seuil pour la détection des changements de scène.
+Libavcodec ajoute une trame-clé quand elle détecte un changement de scène.
+Vous pouvez spécifier la sensibilité de la détection avec cette option.
+-1000000 signifie qu'il y aura un changement détecté à chaque trame, 1000000
+signifie qu'aucun changement de scène ne sera détecté (0 par défaut).
+.TP
 .B vb_strategy=<0\-1>
 stratégie à choisir entre les trames I/\:P/\:B (passe\ 2):
 .RSs
@@ -4359,15 +4383,21 @@ intervalle sensé
 .B p_mask=<0.0\-1.0>
 masquage inter-MB (par défaut: 0.0 (désactivé))
 .TP
-.B naq
+.B naq\ \ \ \
 Normalise la quantisation adaptive (expérimental).
 En utilisant la quantisation adaptive (*_mask), le quantizer moyen par Mo
 peut ne pas correspondre au quantizer niveau-trame demandé.
 Naq essaiera de s'ajuster aux quantizers par Mo pour maintenir une moyenne
 correcte.
 .TP
-.B ildct
+.B ildct\ \
 utilise un dct entrelacé
+.TP
+.B ilme\ \ \
+utilise l'estimation de mouvement entrelacé
+.TP
+.B alt\ \ \ \
+utilise une autre table de scan
 .TP
 .B top=<-1\-1>\ \ \
 .RSs

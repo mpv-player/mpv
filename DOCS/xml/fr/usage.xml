@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.11 -->
+<!-- synced with 1.15 -->
 <chapter id="usage">
 <title>Utilisation</title>
 
@@ -15,7 +15,7 @@ Il consiste en les options globales écrites en premier, par exemple
 et les options écrites après les noms de fichier, qui s'appliquent
 uniquement au nom de fichier/URL/autre donné, par exemple
 
-<screen>mplayer -vfm 5 film1.avi film2.avi -vfm 4</screen>
+<screen>mplayer -vfm 5 <replaceable>film1.avi</replaceable> <replaceable>film2.avi</replaceable> -vfm 4</screen>
 </para>
 
 <para>
@@ -86,11 +86,11 @@ Lecture à partir de RTSP:
 <para>
 Exemples:
 <screen>
-mplayer -vo x11 /mnt/Films/Contact/contact2.mpg
-mplayer vcd://2 -cd-rom-device /dev/hdc
-mplayer -afm 3 /mnt/DVDtrailers/alien4.vob
-mplayer dvd://1 -dvd-device /dev/hdc
-mplayer -abs 65536 -delay -0.4 -nobps ~/films/test.avi<!--
+mplayer -vo x11 <replaceable>/mnt/Films/Contact/contact2.mpg</replaceable>
+mplayer vcd://<replaceable>2</replaceable> -cd-rom-device <replaceable>/dev/hdc</replaceable>
+mplayer -afm 3 <replaceable>/mnt/DVDtrailers/alien4.vob</replaceable>
+mplayer dvd://<replaceable>1</replaceable> -dvd-device <replaceable>/dev/hdc</replaceable>
+mplayer -abs 65536 -delay -0.4 -nobps <replaceable>~/films/test.avi</replaceable><!--
 --></screen>
 </para>
 </sect1>
@@ -411,19 +411,19 @@ La lecture se fait juste en ajoutant l'URL à la ligne de commande.
 <application>MPlayer</application> utilise également la variable d'environnement
 <envar>http_proxy</envar>, et utilise le proxy si disponible. L'utilisation du Proxy
 peut aussi être forcé:
-<screen>mplayer http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</screen>
+<screen>mplayer <replaceable>http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</replaceable></screen>
 </para>
 
 <para>
 <application>MPlayer</application> peut lire depuis stdin
 (<emphasis>pas</emphasis> depuis les pipes nommés). Cela peut être utilisé par
 exemple pour lire depuis le FTP:
-<screen>wget ftp://micorsops.com/quelquechose.avi -O - | mplayer -</screen>
+<screen>wget <replaceable>ftp://micorsops.com/quelquechose.avi</replaceable> -O - | mplayer -</screen>
 </para>
 
 <note><para>
 Il est également recommandé d'activer <option>-cache</option> pour une lecture depuis le réseau:
-<screen>wget ftp://micorsops.com/quelquechose.avi -O - | mplayer -cache 8192 -</screen>
+<screen>wget <replaceable>ftp://micorsops.com/quelquechose.avi</replaceable> -O - | mplayer -cache 8192 -</screen>
 </para></note>
 </sect1>
 
@@ -460,12 +460,12 @@ accéder à distance. Actuellement le serveur est très basique et n'accepte aucun
 argument en ligne de commande, donc tapez juste <filename>netstream</filename>.
 Maintenant vous pouvez par exemple jouer la seconde piste d'un VCD sur le serveur avec:
 <screen>
-mplayer -cache 5000 mpst://serveur/vcd://2
+mplayer -cache 5000 <replaceable>mpst://serveur/vcd://2</replaceable>
 </screen>
 Vous pouvez aussi accéder aux fichiers de ce serveur:
 
 <screen>
-mplayer -cache 5000 mpst://serveur//usr/local/films/lol.avi
+mplayer -cache 5000 <replaceable>mpst://serveur//usr/local/films/lol.avi</replaceable>
 </screen>
 Veuillez noter que les chemins qui ne commencent pas par un / seront relatifs
 au répertoire dans lequel le serveur fonctionne. L'option <option>-cache</option>

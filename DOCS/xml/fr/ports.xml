@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.33 -->
+<!-- synced with 1.34 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Ports</title>
 
@@ -287,8 +287,8 @@ X qui est TRÈS lente. Utilisez SDL.
 <para>Vous pouvez utiliser les codecs Win32 et les codecs Real Win32 (pas les
   codecs Real Linux) si vous le désirez. Placez les codecs quelque part dans
   votre path ou passez
-  <option>--with-codecsdir=c:/chemin/de/vos/codecs</option> (éventuellement
-  <option>--with-codecsdir=/chemin/de/vos/codecs</option> uniquement sous Cygwin) à
+  <option>--with-codecsdir=<replaceable>c:/chemin/de/vos/codecs</replaceable></option> (éventuellement
+  <option>--with-codecsdir=<replaceable>/chemin/de/vos/codecs</replaceable></option> uniquement sous Cygwin) à
   <filename>configure</filename>. Nous avons eu quelques retours indiquant que
   les DLLs Real doivent être accessibles en écriture pour l'utilisateur, mais
   seulement sur certains systèmes. Essayez de les rendre accessibles en écriture
@@ -329,9 +329,9 @@ dans <filename class="directory">/usr/include/</filename> pour que
   que Windows fait apparaître sur les VCDs. Cela fonctionne comme ça (changez la
   lettre de votre lecteur CD-ROM):</para>
 
-<screen>mplayer d:/mpegav/avseq01.dat</screen>
+<screen>mplayer <replaceable>d:/mpegav/avseq01.dat</replaceable></screen>
 
-<screen>mplayer /cygdrive/d/MPEG2/AVSEQ01.MPG</screen>
+<screen>mplayer <replaceable>/cygdrive/d/MPEG2/AVSEQ01.MPG</replaceable></screen>
 
 <para>Les DVDs fonctionnent également, indiquez la lettre de votre périphérique
   CDROM à <option>-dvd-device</option>:</para>
@@ -361,11 +361,11 @@ dans <filename class="directory">/usr/include/</filename> pour que
 <para>Les VCDs et DVDs fonctionnent comme avec Cygwin (ajustez la lettre de votre
   lecteur de CD-ROM/DVD-ROM):</para>
 
-<screen>mplayer d:/mpegav/avseq01.dat</screen>
+<screen>mplayer <replaceable>d:/mpegav/avseq01.dat</replaceable></screen>
 
-<screen>mplayer /d/MPEG2/AVSEQ01.MPG</screen>
+<screen>mplayer <replaceable>/d/MPEG2/AVSEQ01.MPG</replaceable></screen>
 
-<screen>mplayer dvd://&lt;titre&gt; -dvd-device /d/</screen>
+<screen>mplayer dvd://<replaceable>&lt;titre&gt;</replaceable> -dvd-device /d/</screen>
 
 </sect2>
 
