@@ -2638,7 +2638,9 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
  if( next_edl_record ) { // Are we (still?) doing EDL?
   if ( !sh_video ) {
     mp_msg( MSGT_CPLAYER, MSGL_ERR, MSGTR_EdlNOsh_video );
-    next_edl_record->next = NULL;
+    free(edl_records);
+    next_edl_record = NULL; 
+    edl_records = NULL;
   } else {
    if( sh_video->pts >= next_edl_record->start_sec ) {
      if( next_edl_record->action == EDL_SKIP ) {
