@@ -162,6 +162,18 @@ int init_video(sh_video_t *sh_video,char* codecname,int vfm,int status){
 	    continue;
 	}
 	// it's available, let's try to init!
+	if(sh_video->codec->flags & CODECS_FLAG_ALIGN16){
+	    // align width/height to n*16
+	    // FIXME: save orig w/h, and restore if codec init failed!
+	    if(sh_video->bih){
+		sh_video->disp_w=sh_video->bih->biWidth=(sh_video->bih->biWidth+15)&(~15);
+		sh_video->disp_h=sh_video->bih->biHeight=(sh_video->bih->biHeight+15)&(~15);
+	    } else {
+		sh_video->disp_w=(sh_video->disp_w+15)&(~15);
+		sh_video->disp_h=(sh_video->disp_h+15)&(~15);
+	    }
+	}
+	// init()
 	mp_msg(MSGT_DECVIDEO,MSGL_INFO,"Opening video decoder: [%s] %s\n",mpvdec->info->short_name,mpvdec->info->name);
 	if(!mpvdec->init(sh_video)){
 	    mp_msg(MSGT_DECVIDEO,MSGL_INFO,"VDecoder init failed :(\n");
