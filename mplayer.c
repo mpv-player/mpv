@@ -1113,6 +1113,7 @@ double vout_time_usage=0;
 double audio_time_usage=0;
 int grab_frames=0;
 char osd_text_buffer[64];
+int osd_level=2;
 int osd_visible=100;
 int osd_function=OSD_PLAY;
 
@@ -1705,6 +1706,19 @@ switch(has_video){
     --osd_visible;
     if(!osd_visible) vo_osd_progbar_type=-1; // disable
   }
+
+  if(osd_function==OSD_PAUSE){
+      printf("\n------ PAUSED -------\r");fflush(stdout);
+      while(
+#ifdef HAVE_LIRC
+          lirc_mp_getinput()<=0 &&
+#endif
+          getch2(20)<=0 && mplayer_get_key()<=0){
+	  video_out->check_events();
+      }
+      osd_function=OSD_PLAY;
+  }
+
   } //  while(v_frame<a_frame || force_redraw)
 
 
@@ -1754,6 +1768,7 @@ switch(has_video){
     case 'p':
     case ' ':
       osd_function=OSD_PAUSE;
+#if 0
       printf("\n------ PAUSED -------\r");fflush(stdout);
       while(
 #ifdef HAVE_LIRC
@@ -1763,6 +1778,10 @@ switch(has_video){
 	  video_out->check_events();
       }
       osd_function=OSD_PLAY;
+#endif
+      break;
+    case 'o':  // toggle OSD
+      osd_level=(osd_level+1)%3;
       break;
   }
   if(rel_seek_secs)
@@ -1929,11 +1948,13 @@ switch(file_format){
         skip_video_frames,skip_audio_bytes,skip_audio_secs);
 
         // Set OSD:
-      osd_visible=default_fps;
-      vo_osd_progbar_type=0;
-      vo_osd_progbar_value=(demuxer->filepos)/((avi_header.movi_end-avi_header.movi_start)>>8);
-      printf("avi filepos = %d  \n",vo_osd_progbar_value);
-//      printf("avi filepos = %d  (len=%d)  \n",demuxer->filepos,(avi_header.movi_end-avi_header.movi_start));
+      if(osd_level){
+        osd_visible=default_fps;
+        vo_osd_progbar_type=0;
+        vo_osd_progbar_value=(demuxer->filepos)/((avi_header.movi_end-avi_header.movi_start)>>8);
+        //printf("avi filepos = %d  \n",vo_osd_progbar_value);
+  //      printf("avi filepos = %d  (len=%d)  \n",demuxer->filepos,(avi_header.movi_end-avi_header.movi_start));
+      }
 
   }
   break;
@@ -2045,9 +2066,14 @@ switch(file_format){
 
 //================= Update OSD ====================
 { int i;
-  sprintf(osd_text_buffer,"%c %02d:%02d:%02d",osd_function,(int)v_pts/3600,((int)v_pts/60)%60,((int)v_pts)%60);
+  if(osd_level>=2){
+      vo_osd_text=osd_text_buffer;
+      sprintf(vo_osd_text,"%c %02d:%02d:%02d",osd_function,(int)v_pts/3600,((int)v_pts/60)%60,((int)v_pts)%60);
+  } else {
+      vo_osd_text=NULL;
+  }
 //  for(i=1;i<=11;i++) osd_text_buffer[10+i]=i;osd_text_buffer[10+i]=0;
-  vo_osd_text=osd_text_buffer;
+//  vo_osd_text=osd_text_buffer;
   
   // find sub
   if(subtitles){
