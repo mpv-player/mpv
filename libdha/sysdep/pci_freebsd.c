@@ -5,7 +5,10 @@
 */
 #include <errno.h>
 #include <sys/file.h>
-#include <machine/console.h>
+/* machine/console.h seems to be outdated by recent FreeBSD *
+ * however pcvt_ioctl.h seems to exist for very long time   */
+/* #include <machine/console.h>*/
+#include <machine/pcvt_ioctl.h>
 #ifndef GCCUSESGAS
 #define GCCUSESGAS
 #endif
