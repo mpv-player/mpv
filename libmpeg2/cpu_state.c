@@ -1,6 +1,6 @@
 /*
  * cpu_state.c
- * Copyright (C) 2000-2002 Michel Lespinasse <walken@zoy.org>
+ * Copyright (C) 2000-2003 Michel Lespinasse <walken@zoy.org>
  * Copyright (C) 1999-2000 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
  *
  * This file is part of mpeg2dec, a free MPEG-2 video stream decoder.
@@ -44,62 +44,72 @@ static void state_restore_mmx (cpu_state_t * state)
 #endif
 
 #ifdef ARCH_PPC
+#ifdef HAVE_ALTIVEC_H	/* gnu */
+#define LI(a,b) "li " #a "," #b "\n\t"
+#define STVX0(a,b,c) "stvx " #a ",0," #c "\n\t"
+#define STVX(a,b,c) "stvx " #a "," #b "," #c "\n\t"
+#define LVX0(a,b,c) "lvx " #a ",0," #c "\n\t"
+#define LVX(a,b,c) "lvx " #a "," #b "," #c "\n\t"
+#else			/* apple */
+#define LI(a,b) "li r" #a "," #b "\n\t"
+#define STVX0(a,b,c) "stvx v" #a ",0,r" #c "\n\t"
+#define STVX(a,b,c) "stvx v" #a ",r" #b ",r" #c "\n\t"
+#define LVX0(a,b,c) "lvx v" #a ",0,r" #c "\n\t"
+#define LVX(a,b,c) "lvx v" #a ",r" #b ",r" #c "\n\t"
+#endif
+
 static void state_save_altivec (cpu_state_t * state)
 {
-    asm ("						\n"
-	"	li		%r9,  16		\n"
-	"	stvx		%v20, 0,    %r3		\n"
-	"	li		%r11, 32		\n"
-	"	stvx		%v21, %r9,  %r3		\n"
-	"	li		%r9,  48		\n"
-	"	stvx		%v22, %r11, %r3		\n"
-	"	li		%r11, 64		\n"
-	"	stvx		%v23, %r9,  %r3		\n"
-	"	li		%r9,  80		\n"
-	"	stvx		%v24, %r11, %r3		\n"
-	"	li		%r11, 96		\n"
-	"	stvx		%v25, %r9,  %r3		\n"
-	"	li		%r9,  112		\n"
-	"	stvx		%v26, %r11, %r3		\n"
-	"	li		%r11, 128		\n"
-	"	stvx		%v27, %r9,  %r3		\n"
-	"	li		%r9,  144		\n"
-	"	stvx		%v28, %r11, %r3		\n"
-	"	li		%r11, 160		\n"
-	"	stvx		%v29, %r9,  %r3		\n"
-	"	li		%r9,  176		\n"
-	"	stvx		%v30, %r11, %r3		\n"
-	"	stvx		%v31, %r9,  %r3		\n"
-	 );
+    asm (LI (9, 16)
+	 STVX0 (20, 0, 3)
+	 LI (11, 32)
+	 STVX (21, 9, 3)
+	 LI (9, 48)
+	 STVX (22, 11, 3)
+	 LI (11, 64)
+	 STVX (23, 9, 3)
+	 LI (9, 80)
+	 STVX (24, 11, 3)
+	 LI (11, 96)
+	 STVX (25, 9, 3)
+	 LI (9, 112)
+	 STVX (26, 11, 3)
+	 LI (11, 128)
+	 STVX (27, 9, 3)
+	 LI (9, 144)
+	 STVX (28, 11, 3)
+	 LI (11, 160)
+	 STVX (29, 9, 3)
+	 LI (9, 176)
+	 STVX (30, 11, 3)
+	 STVX (31, 9, 3));
 }
 
 static void state_restore_altivec (cpu_state_t * state)
 {
-    asm ("						\n"
-	"	li		%r9,  16		\n"
-	"	lvx		%v20, 0,    %r3		\n"
-	"	li		%r11, 32		\n"
-	"	lvx		%v21, %r9,  %r3		\n"
-	"	li		%r9,  48		\n"
-	"	lvx		%v22, %r11, %r3		\n"
-	"	li		%r11, 64		\n"
-	"	lvx		%v23, %r9,  %r3		\n"
-	"	li		%r9,  80		\n"
-	"	lvx		%v24, %r11, %r3		\n"
-	"	li		%r11, 96		\n"
-	"	lvx		%v25, %r9,  %r3		\n"
-	"	li		%r9,  112		\n"
-	"	lvx		%v26, %r11, %r3		\n"
-	"	li		%r11, 128		\n"
-	"	lvx		%v27, %r9,  %r3		\n"
-	"	li		%r9,  144		\n"
-	"	lvx		%v28, %r11, %r3		\n"
-	"	li		%r11, 160		\n"
-	"	lvx		%v29, %r9,  %r3		\n"
-	"	li		%r9,  176		\n"
-	"	lvx		%v30, %r11, %r3		\n"
-	"	lvx		%v31, %r9,  %r3		\n"
-	 );
+    asm (LI (9, 16)
+	 LVX0 (20, 0, 3)
+	 LI (11, 32)
+	 LVX (21, 9, 3)
+	 LI (9, 48)
+	 LVX (22, 11, 3)
+	 LI (11, 64)
+	 LVX (23, 9, 3)
+	 LI (9, 80)
+	 LVX (24, 11, 3)
+	 LI (11, 96)
+	 LVX (25, 9, 3)
+	 LI (9, 112)
+	 LVX (26, 11, 3)
+	 LI (11, 128)
+	 LVX (27, 9, 3)
+	 LI (9, 144)
+	 LVX (28, 11, 3)
+	 LI (11, 160)
+	 LVX (29, 9, 3)
+	 LI (9, 176)
+	 LVX (30, 11, 3)
+	 LVX (31, 9, 3));
 }
 #endif
 
