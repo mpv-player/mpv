@@ -79,6 +79,11 @@ static int init(int rate,int channels,int format,int flags)
 	return 0;
     }
 
+    ioval = (format==AFMT_AC3)?EM8300_AUDIOMODE_DIGITALAC3:
+	  EM8300_AUDIOMODE_ANALOG;
+    if( ioctl( fd_control, EM8300_IOCTL_SET_AUDIOMODE, &ioval ) < 0 )
+    printf( "AO: [dxr3] Unable to set audiomode\n" );
+	  
     ioctl(fd_audio, SNDCTL_DSP_RESET, NULL);
     
     ao_data.format = format;
@@ -94,19 +99,25 @@ static int init(int rate,int channels,int format,int flags)
   
     ao_data.channels=channels;
     if(format != AFMT_AC3)
+    {
 	if(channels>2)
+	{
 	    if( ioctl (fd_audio, SNDCTL_DSP_CHANNELS, &ao_data.channels) < 0 )
 		printf( "AO: [dxr3] Unable to set number of channels\n" );
-    else
-    {
-	int c = channels-1;
+	}
+        else
+        {
+        int c = channels-1;
 	if( ioctl(fd_audio,SNDCTL_DSP_STEREO,&c) < 0)
 	    printf( "AO: [dxr3] Unable to set number of channels for AC3\n" );
+        }
     }
  
     ao_data.bps = channels*rate;
     if(format != AFMT_U8 && format != AFMT_S8)
 	ao_data.bps*=2;
+    if(format == AFMT_AC3)
+	    ao_data.bps*=2;
     ao_data.samplerate=rate;
     if( ioctl (fd_audio, SNDCTL_DSP_SPEED, &ao_data.samplerate) < 0 )
     {
@@ -137,8 +148,8 @@ static int init(int rate,int channels,int format,int flags)
   else 
   {
       printf("AO: [dxr3] frags: %3d/%d  (%d bytes/frag)  free: %6d\n",
-          dxr3_buf_info.fragments+1, dxr3_buf_info.fragstotal, dxr3_buf_info.fragsize, dxr3_buf_info.bytes);
-      ao_data.buffersize=(dxr3_buf_info.bytes/2);
+          dxr3_buf_info.fragments, dxr3_buf_info.fragstotal, dxr3_buf_info.fragsize, dxr3_buf_info.bytes);
+      ao_data.buffersize=dxr3_buf_info.bytes;
       ao_data.outburst=dxr3_buf_info.fragsize;
   }
 
@@ -160,6 +171,8 @@ static int init(int rate,int channels,int format,int flags)
 	audio_plugin_resample.control(AOCONTROL_PLUGIN_SET_LEN,0);
     }
   }
+
+
   ioval = EM8300_PLAYMODE_PLAY;
   if( ioctl( fd_control, EM8300_IOCTL_SET_PLAYMODE, &ioval ) < 0 )
     printf( "AO: [dxr3] Unable to set playmode\n" );
@@ -226,14 +239,13 @@ static void audio_resume()
 static int get_space()
 {
     int space = 0;
-    if( ioctl(fd_audio, SNDCTL_DSP_GETODELAY, &space) < 0 )
+    if( ioctl(fd_audio, SNDCTL_DSP_GETOSPACE, &dxr3_buf_info)==-1 )
     {
-        printf( "AO: [dxr3] Unable to get unplayed bytes in buffer\n" );
-	return ao_data.outburst;
+	    printf( "AO: [dxr3] Unable to get unplayed bytes in buffer\n" );
+	    return ao_data.outburst;
     }
-    space = ao_data.buffersize - space;
-    space /= ao_data.outburst; /* This is a smart way of doing a fast modulo reduction */
-    space *= ao_data.outburst; /* fetched from ao_mpegpes.c */
+    space=dxr3_buf_info.fragments*dxr3_buf_info.fragsize;
+
     return space;
 }
 
@@ -248,6 +260,8 @@ static int play(void* data,int len,int flags)
     ao_plugin_data.len = size;
     if(need_conversion & 0x1) audio_plugin_format.play();
     if(need_conversion & 0x2) audio_plugin_resample.play();
+    if( ioctl(fd_audio, EM8300_IOCTL_AUDIO_SETPTS, &ao_data.pts) < 0 )
+	printf( "AO: [dxr3] Unable to set pts\n" );
     write(fd_audio,ao_plugin_data.data,ao_plugin_data.len);
     return size;
 }
@@ -255,12 +269,6 @@ static int play(void* data,int len,int flags)
 // return: delay in seconds between first and last sample in buffer
 static float get_delay()
 {
-    int r=0;
-    if( ioctl(fd_audio, SNDCTL_DSP_GETODELAY, &r) < 0 )
-    {
-        printf( "AO: [dxr3] Unable to get unplayed bytes in buffer\n" );
-	return ((float)ao_data.buffersize)/(float)ao_data.bps;
-    }
-    return (((float)r)/(float)ao_data.bps);
+    return 0.0;
 }
 
