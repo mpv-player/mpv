@@ -402,6 +402,11 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "目录树"
 
 // --- preferences
+#define MSGTR_PREFERENCES_Audio "音频"
+#define MSGTR_PREFERENCES_Video "视频"
+#define MSGTR_PREFERENCES_SubtitleOSD "字幕和OSD"
+#define MSGTR_PREFERENCES_Misc "其他"
+
 #define MSGTR_PREFERENCES_None "None"
 #define MSGTR_PREFERENCES_AvailableDrivers "可用驱动:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "不播放声音"
@@ -410,14 +415,12 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_ExtraStereo "开启立体声加强"
 #define MSGTR_PREFERENCES_Coefficient "参数:"
 #define MSGTR_PREFERENCES_AudioDelay "音频延迟"
-#define MSGTR_PREFERENCES_Audio "音频"
 #define MSGTR_PREFERENCES_DoubleBuffer "开启双重缓冲"
 #define MSGTR_PREFERENCES_DirectRender "开启直接渲染"
 #define MSGTR_PREFERENCES_FrameDrop "开启掉帧选项"
 #define MSGTR_PREFERENCES_HFrameDrop "开启HARD掉帧选项(危险)"
 #define MSGTR_PREFERENCES_Flip "上下翻转图像"
 #define MSGTR_PREFERENCES_Panscan "图像切割: "
-#define MSGTR_PREFERENCES_Video "视频"
 #define MSGTR_PREFERENCES_OSDTimer "显示计时器和指示器"
 #define MSGTR_PREFERENCES_OSDProgress "只显示进度条"
 #define MSGTR_PREFERENCES_Subtitle "字幕:"
@@ -479,9 +482,9 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontOutLine "轮廓:"
 #define MSGTR_PREFERENCES_FontTextScale "文字缩放:"
 #define MSGTR_PREFERENCES_FontOSDScale "OSD缩放:"
-#define MSGTR_PREFERENCES_SubtitleOSD "字幕和OSD"
 #define MSGTR_PREFERENCES_Cache "打开/关闭缓存"
 #define MSGTR_PREFERENCES_LoadFullscreen "以全屏方式开始"
+#define MSGTR_PREFERENCES_CacheSize "缓存大小: "
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "致命错误 ..."
