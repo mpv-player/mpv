@@ -479,6 +479,9 @@ Default is on, if compiled in.
 .B \-nolirc
 Turns off LIRC support.
 .TP
+.B \-nomouseinput
+Disable any mousebutton press/release input (mozplayerxp's context menu relies on this option) 
+.TP
 .B \-nortc \ \ 
 Turns off usage of the Linux RTC (real-time clock \- /dev/\:rtc) as timing
 mechanism.
@@ -542,9 +545,7 @@ in a playlist or intend to read from stdin later on via the openfile or
 openlist commands you
 .B need
 this option.
-.TP
-.B \-nomouseinput
-Disable any mousebutton press/release input (mozplayerxp's context menu relies on this option) 
+
 
 .SH "DEMUXER/STREAM OPTIONS"
 .TP
