@@ -14,6 +14,7 @@
 
 struct vf_priv_s {
 	int mode;
+	int parity;
 };
 
 static inline void *my_memcpy_pic(void * dst, void * src, int bytesPerLine, int height, int dstStride, int srcStride)
@@ -312,12 +313,21 @@ static void (*qpel_4tap)(unsigned char *d, unsigned char *s, int w, int h, int d
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 {
-	int ret;
+	int i;
+	int ret=0;
 	mp_image_t *dmpi;
 	void (*qpel)(unsigned char *, unsigned char *, int, int, int, int, int);
 	int bpp=1;
+	int tff;
 
 	if (!(mpi->flags & MP_IMGFLAG_PLANAR)) bpp = mpi->bpp/8;
+	if (vf->priv->parity < 0) {
+		if (mpi->fields & MP_IMGFIELD_ORDERED)
+			tff = mpi->fields & MP_IMGFIELD_TOP_FIRST;
+		else
+			tff = 1;
+	}
+	else tff = (vf->priv->parity&1)^1;
 
 	switch (vf->priv->mode) {
 	case 2:
@@ -334,103 +344,74 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 
 	switch (vf->priv->mode) {
 	case 0:
-		dmpi = vf_get_image(vf->next, mpi->imgfmt,
-			MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
-			mpi->width, mpi->height/2);
-		memcpy_pic(dmpi->planes[0], mpi->planes[0], mpi->w*bpp, mpi->h/2,
-			dmpi->stride[0], mpi->stride[0]*2);
-		if (mpi->flags & MP_IMGFLAG_PLANAR) {
-			memcpy_pic(dmpi->planes[1], mpi->planes[1],
-				mpi->chroma_width, mpi->chroma_height/2,
-				dmpi->stride[1], mpi->stride[1]*2);
-			memcpy_pic(dmpi->planes[2], mpi->planes[2],
-				mpi->chroma_width, mpi->chroma_height/2,
-				dmpi->stride[2], mpi->stride[2]*2);
+		for (i=0; i<2; i++) {
+			dmpi = vf_get_image(vf->next, mpi->imgfmt,
+				MP_IMGTYPE_EXPORT, MP_IMGFLAG_ACCEPT_STRIDE,
+				mpi->width, mpi->height/2);
+			dmpi->planes[0] = mpi->planes[0] + (i^!tff)*mpi->stride[0];
+			dmpi->stride[0] = 2*mpi->stride[0];
+			if (mpi->flags & MP_IMGFLAG_PLANAR) {
+				dmpi->planes[1] = mpi->planes[1] + (i^!tff)*mpi->stride[1];
+				dmpi->planes[2] = mpi->planes[2] + (i^!tff)*mpi->stride[2];
+				dmpi->stride[1] = 2*mpi->stride[1];
+				dmpi->stride[2] = 2*mpi->stride[2];
+			}
+			ret |= vf_next_put_image(vf, dmpi);
+			if (!i) vf_next_control(vf, VFCTRL_FLIP_PAGE, NULL);
 		}
-		ret = vf_next_put_image(vf, dmpi);
-		vf_next_control(vf, VFCTRL_FLIP_PAGE, NULL);
-		
-		memcpy_pic(dmpi->planes[0], mpi->planes[0] + mpi->stride[0],
-			mpi->w*bpp, mpi->h/2, dmpi->stride[0], mpi->stride[0]*2);
-		if (mpi->flags & MP_IMGFLAG_PLANAR) {
-			memcpy_pic(dmpi->planes[1], mpi->planes[1] + mpi->stride[1],
-				mpi->chroma_width, mpi->chroma_height/2,
-				dmpi->stride[1], mpi->stride[1]*2);
-			memcpy_pic(dmpi->planes[2], mpi->planes[2] + mpi->stride[2],
-				mpi->chroma_width, mpi->chroma_height/2,
-				dmpi->stride[2], mpi->stride[2]*2);
-		}
-		return vf_next_put_image(vf, dmpi) || ret;
+		break;
 	case 1:
-		dmpi = vf_get_image(vf->next, mpi->imgfmt,
-			MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
-			mpi->width, mpi->height);
-		my_memcpy_pic(dmpi->planes[0], mpi->planes[0], mpi->w*bpp, mpi->h/2,
-			dmpi->stride[0]*2, mpi->stride[0]*2);
-		deint(dmpi->planes[0], dmpi->stride[0], mpi->planes[0], mpi->stride[0], mpi->w, mpi->h, 0);
-		if (mpi->flags & MP_IMGFLAG_PLANAR) {
-			my_memcpy_pic(dmpi->planes[1], mpi->planes[1],
-				mpi->chroma_width, mpi->chroma_height/2,
-				dmpi->stride[1]*2, mpi->stride[1]*2);
-			my_memcpy_pic(dmpi->planes[2], mpi->planes[2],
-				mpi->chroma_width, mpi->chroma_height/2,
-				dmpi->stride[2]*2, mpi->stride[2]*2);
-			deint(dmpi->planes[1], dmpi->stride[1], mpi->planes[1], mpi->stride[1],
-				mpi->chroma_width, mpi->chroma_height, 0);
-			deint(dmpi->planes[2], dmpi->stride[2], mpi->planes[2], mpi->stride[2],
-				mpi->chroma_width, mpi->chroma_height, 0);
+		for (i=0; i<2; i++) {
+			dmpi = vf_get_image(vf->next, mpi->imgfmt,
+				MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
+				mpi->width, mpi->height);
+			my_memcpy_pic(dmpi->planes[0] + (i^!tff)*dmpi->stride[0],
+				mpi->planes[0] + (i^!tff)*mpi->stride[0],
+				mpi->w*bpp, mpi->h/2, dmpi->stride[0]*2, mpi->stride[0]*2);
+			deint(dmpi->planes[0], dmpi->stride[0], mpi->planes[0], mpi->stride[0], mpi->w, mpi->h, (i^!tff));
+			if (mpi->flags & MP_IMGFLAG_PLANAR) {
+				my_memcpy_pic(dmpi->planes[1] + (i^!tff)*dmpi->stride[1],
+					mpi->planes[1] + (i^!tff)*mpi->stride[1],
+					mpi->chroma_width, mpi->chroma_height/2,
+					dmpi->stride[1]*2, mpi->stride[1]*2);
+				my_memcpy_pic(dmpi->planes[2] + (i^!tff)*dmpi->stride[2],
+					mpi->planes[2] + (i^!tff)*mpi->stride[2],
+					mpi->chroma_width, mpi->chroma_height/2,
+					dmpi->stride[2]*2, mpi->stride[2]*2);
+				deint(dmpi->planes[1], dmpi->stride[1], mpi->planes[1], mpi->stride[1],
+					mpi->chroma_width, mpi->chroma_height, (i^!tff));
+				deint(dmpi->planes[2], dmpi->stride[2], mpi->planes[2], mpi->stride[2],
+					mpi->chroma_width, mpi->chroma_height, (i^!tff));
+			}
+			ret |= vf_next_put_image(vf, dmpi);
+			if (!i) vf_next_control(vf, VFCTRL_FLIP_PAGE, NULL);
 		}
-		ret = vf_next_put_image(vf, dmpi);
-		vf_next_control(vf, VFCTRL_FLIP_PAGE, NULL);
-		
-		my_memcpy_pic(dmpi->planes[0] + dmpi->stride[0], mpi->planes[0] + mpi->stride[0],
-			mpi->w*bpp, mpi->h/2, dmpi->stride[0]*2, mpi->stride[0]*2);
-		deint(dmpi->planes[0], dmpi->stride[0], mpi->planes[0], mpi->stride[0], mpi->w, mpi->h, 1);
-		if (mpi->flags & MP_IMGFLAG_PLANAR) {
-			my_memcpy_pic(dmpi->planes[1] + dmpi->stride[1], mpi->planes[1] + mpi->stride[1],
-				mpi->chroma_width, mpi->chroma_height/2,
-				dmpi->stride[1]*2, mpi->stride[1]*2);
-			my_memcpy_pic(dmpi->planes[2] + dmpi->stride[2], mpi->planes[2] + mpi->stride[2],
-				mpi->chroma_width, mpi->chroma_height/2,
-				dmpi->stride[2]*2, mpi->stride[2]*2);
-			deint(dmpi->planes[1], dmpi->stride[1], mpi->planes[1], mpi->stride[1],
-				mpi->chroma_width, mpi->chroma_height, 1);
-			deint(dmpi->planes[2], dmpi->stride[2], mpi->planes[2], mpi->stride[2],
-				mpi->chroma_width, mpi->chroma_height, 1);
-		}
-		return vf_next_put_image(vf, dmpi) || ret;
+		break;
 	case 2:
 	case 3:
 	case 4:
-		dmpi = vf_get_image(vf->next, mpi->imgfmt,
-			MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
-			mpi->width, mpi->height/2);
-		qpel(dmpi->planes[0], mpi->planes[0], mpi->w*bpp, mpi->h/2,
-			dmpi->stride[0], mpi->stride[0]*2, 0);
-		if (mpi->flags & MP_IMGFLAG_PLANAR) {
-			qpel(dmpi->planes[1], mpi->planes[1],
-				mpi->chroma_width, mpi->chroma_height/2,
-				dmpi->stride[1], mpi->stride[1]*2, 0);
-			qpel(dmpi->planes[2], mpi->planes[2],
-				mpi->chroma_width, mpi->chroma_height/2,
-				dmpi->stride[2], mpi->stride[2]*2, 0);
+		for (i=0; i<2; i++) {
+			dmpi = vf_get_image(vf->next, mpi->imgfmt,
+				MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
+				mpi->width, mpi->height/2);
+			qpel(dmpi->planes[0], mpi->planes[0] + (i^!tff)*mpi->stride[0],
+				mpi->w*bpp, mpi->h/2, dmpi->stride[0], mpi->stride[0]*2, 0);
+			if (mpi->flags & MP_IMGFLAG_PLANAR) {
+				qpel(dmpi->planes[1],
+					mpi->planes[1] + (i^!tff)*mpi->stride[1],
+					mpi->chroma_width, mpi->chroma_height/2,
+					dmpi->stride[1], mpi->stride[1]*2, 0);
+				qpel(dmpi->planes[2],
+					mpi->planes[2] + (i^!tff)*mpi->stride[2],
+					mpi->chroma_width, mpi->chroma_height/2,
+					dmpi->stride[2], mpi->stride[2]*2, 0);
+			}
+			ret |= vf_next_put_image(vf, dmpi);
+			if (!i) vf_next_control(vf, VFCTRL_FLIP_PAGE, NULL);
 		}
-		ret = vf_next_put_image(vf, dmpi);
-		vf_next_control(vf, VFCTRL_FLIP_PAGE, NULL);
-		
-		qpel(dmpi->planes[0], mpi->planes[0] + mpi->stride[0],
-			mpi->w*bpp, mpi->h/2, dmpi->stride[0], mpi->stride[0]*2, 1);
-		if (mpi->flags & MP_IMGFLAG_PLANAR) {
-			qpel(dmpi->planes[1], mpi->planes[1] + mpi->stride[1],
-				mpi->chroma_width, mpi->chroma_height/2,
-				dmpi->stride[1], mpi->stride[1]*2, 1);
-			qpel(dmpi->planes[2], mpi->planes[2] + mpi->stride[2],
-				mpi->chroma_width, mpi->chroma_height/2,
-				dmpi->stride[2], mpi->stride[2]*2, 1);
-		}
-		return vf_next_put_image(vf, dmpi) || ret;
+		break;
 	}
-	return 0;
+	return ret;
 }
 
 static int query_format(struct vf_instance_s* vf, unsigned int fmt)
@@ -476,7 +457,8 @@ static int open(vf_instance_t *vf, char* args)
 	vf->default_reqs = VFCAP_ACCEPT_STRIDE;
 	vf->priv = p = calloc(1, sizeof(struct vf_priv_s));
 	vf->priv->mode = 0;
-	if (args) sscanf(args, "%d", &vf->priv->mode);
+	vf->priv->parity = -1;
+	if (args) sscanf(args, "%d:%d", &vf->priv->mode, &vf->priv->parity);
 	qpel_li = qpel_li_C;
 	qpel_4tap = qpel_4tap_C;
 #ifdef HAVE_MMX
