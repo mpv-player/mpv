@@ -30,6 +30,7 @@ mencoder \- Movie Encoder for Linux
 .RB [ \-pass\ <1/2> ]
 .RB [ \-ofps\ <fps> ]
 .RB [ \-o\ <filename> ]
+.RB [ \-frames\ <number> ]
 .I - or file or device
 .PP
 .SH DESCRIPTION
@@ -83,7 +84,6 @@ stream.
 .B \-vfm <video family>
 (useful?) (yes!)
 .TP
-.TP
 .B \-afm <audio family>
 (useful?) (yes!)
 .TP
@@ -127,14 +127,14 @@ Available options:
     help         get help (TODO!)
     br=XXX       specify bitrate in
                  kbit <0-1024>
+    q=XXX        Quality
+                 (0-highest, 9-fastest)
     vbr=XXX      variable bitrate method
                    0=cbr
                    1=mt
                    2=rh(default)
                    3=abr
                    4=mtrh
-    q=XXX        VBR quality
-                 (0-highest, 9-fastest)
     cbr          constant bitrate
     mode=XXX     0=stereo
                  1=joint-stereo
@@ -147,12 +147,30 @@ Available options:
     ratio=XXX    compression ratio <1-100>
 
 .TP
+.B \-pass <1/2>
+With this you can encode 2pass DivX4 files. First encode with -pass 1, then
+with the same parameters, encode with -pass 2.
+.TP
+.B \-ofps <fps>
+The output file will have different frame/sec than the source.
+.TP
+.B \-frames <number>
+Encode only given number of frames.
+.TP
 .B \-OTHERS
 TODO
 .IP
 .SH FILES AND DIRECTORIES
 .IP
 .SH "EXAMPLES"
+.B Encoding DVD title #2
+mencoder -dvd 2 -o title2.avi
+.TP
+.B Encoding from HTTP
+mencoder http://mplayer.hq/example.avi -o example.avi
+.TP
+.B Encoding from pipe
+rar p test-SVCD.rar | mencoder -divx4opts br=800 -ofps 24 -pass 1 -- -
 .IP
 .SH BUGS
 Probably. Check the documentation.

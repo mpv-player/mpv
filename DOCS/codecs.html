@@ -180,10 +180,8 @@ easy to enable them:</P>
   <A HREF="http://xanim.va.pubnix.com">XAnim site</A>. The <B>3ivx</B> codec
   isn't there, so download it from the <A HREF="http://www.3ivx.com">3ivx site</A>.</LI>
 
-  <LI>copy the codecs, or make symlinks for them to <CODE>/usr/lib/xanim/mods</CODE> .
-  Accordingly :<BR><CODE>ln -s vid_cvid_2.1_linuxELFx86c6.xa vid_cvid.xa</CODE>
-  for all of them.<BR>You can define another search path in xacodec.c:
-  <CODE>#define XACODEC_PATH "/usr/lib/xanim/mods"</CODE>.</LI>
+  <LI>use the <CODE>--with-xanimlibdir</CODE> option to tell configure where
+  it can find the xanim codecs. By default, it checks them at <CODE>/usr/lib/xanim/mods</CODE> .</LI>
 </UL>
 </P>
 

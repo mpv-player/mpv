@@ -180,10 +180,9 @@ Nagyon könnyû bekapcsolni õket:</P>
   A <B>3ivx</B> codec-et nem találod meg ott, így azt töltsd le a
   <A HREF="http://www.3ivx.com">3ivx honlapjáról</A>.</LI>
 
-  <LI>a codeceket másold, vagy symlink-eld a <CODE>/usr/lib/xanim/mods</CODE>
-  könyvtárba a következõképp:<BR><CODE>ln -s vid_cvid_2.1_linuxELFx86c6.xa vid_cvid.xa</CODE>
-  mindegyikre.<BR>Megadhatsz másik keresési útvonalat, csak írd át az xacodec.c
-  file-t: <CODE>#define XACODEC_PATH "/usr/lib/xanim/mods"</CODE>.</LI>
+  <LI>a <CODE>--with-xanimlibdir</CODE> opcióval mondd meg a configure-nak hogy
+  hol vannak az xanim codec-ek. Alapállapotban az <CODE>/usr/lib/xanim/mods</CODE>
+  könyvtárban keresi õket.</LI>
 </UL>
 </P>
 
