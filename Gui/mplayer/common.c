@@ -252,7 +252,8 @@ void Render( wsTWindow * window,wItem * Items,int nrItems,char * db,int size )
           {
            char * t = Translate( item->label );
            int    l = fntTextWidth( item->fontid,t );
-           image=fntRender( item,(GetTimerMS() / 20)%(l?l:item->width),"%s",t );
+           l=(l?l:item->width);
+           image=fntRender( item,l-(GetTimerMS() / 20)%l,"%s",t );
 	  }
           if ( image ) PutImage( image,item->x,item->y,1,0 );
           break;
