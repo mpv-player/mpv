@@ -633,7 +633,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 #ifdef SET_CHUNKSIZE
       {
 	//set chunksize
-	if ((err = snd_pcm_hw_params_set_period_size(alsa_handler, alsa_hwparams, chunk_size, 0)) < 0)
+	if ((err = snd_pcm_hw_params_set_period_size_near(alsa_handler, alsa_hwparams, chunk_size, 0)) < 0)
 	  {
 	    printf("alsa-init: unable to set periodsize: %s\n", snd_strerror(err));
 	    return(0);
@@ -650,7 +650,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	if (verbose>0)
 	  printf("alsa-init: current val=%i, fragcount=%i\n", period_val, alsa_fragcount);
 
-	if ((err = snd_pcm_hw_params_set_periods(alsa_handler, alsa_hwparams, alsa_fragcount, 0)) < 0) {
+	if ((err = snd_pcm_hw_params_set_periods_near(alsa_handler, alsa_hwparams, alsa_fragcount, 0)) < 0) {
 	  printf("alsa-init: unable to set periods: %s\n", snd_strerror(err));
 	}
       }
