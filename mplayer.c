@@ -2549,16 +2549,12 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
        osd_function = OSD_FFW;
        abs_seek_pos = 0;
        rel_seek_secs = next_edl_record->length_sec;
-#ifdef DEBUG_EDL
-       mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_EDLSKIPStartStopLength, next_edl_record->start_sec, next_edl_record->stop_sec, next_edl_record->length_sec );
-#endif
+       mp_msg(MSGT_CPLAYER, MSGL_DBG4, "EDL_SKIP: start [%f], stop [%f], length [%f]\n", next_edl_record->start_sec, next_edl_record->stop_sec, next_edl_record->length_sec );
        edl_decision = 1;
      } else if( next_edl_record->action == EDL_MUTE ) {
        mixer_mute(&mixer);
        edl_mute_count++; // new EDL seek behavior needs this
-#ifdef DEBUG_EDL
-       mp_msg(MSGT_FIXME, MSGL_FIXME, "\nEDL_MUTE: [%f]\n", next_edl_record->start_sec );
-#endif
+       mp_msg(MSGT_CPLAYER, MSGL_DBG4, "EDL_MUTE: [%f]\n", next_edl_record->start_sec );
        edl_decision = 1;
      }
      next_edl_record=next_edl_record->next;
