@@ -7,7 +7,7 @@ in subdirectories of the 'HTML' and 'HTML-single' directories.
 IMPORTANT: Do NOT place sensitive files under 'HTML' or 'HTML-single'!
 	   It is for generated documentation only.
 	   The whole directory tree is wiped out by the Makefile
-	   when running 'make distclean' or 'make clean-html'.
+	   when running 'make distclean' or 'make clean'.
 	   Also, subdirectories are wiped out one by one before
 	   creating the HTML files.
 
