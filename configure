@@ -902,6 +902,13 @@ EOF
     		*) ;;
     	    esac
 	fi
+	# gcc 3.2 and up supports 970
+	if test "$_cc_major" -ge "3" && test "$_cc_minor" -ge "3"; then
+	    case "$proc" in
+		970*) _march='-mcpu=970' _mcpu='-mtune=970' ;;
+    		*) ;;
+    	    esac
+	fi
     fi
 
     if test -n "$_mcpu"; then
