@@ -257,8 +257,10 @@ scplx_mask	(0.0-1.0) spatial complexity masking
         Tip: crop any black borders completly away as they will reduce the quality
         of the MBs there, this is true if scplx_mask isnt used at all too
 
-naq	normalize adaptive quantization
-	experimental
+naq	normalize adaptive quantization (experimental)
+	when using adaptive quantization (*_mask), the average per-MB quantizer
+	may no longer match the requested frame-level quantizer. using naq will
+	attempt to adjust the per-MB quantizers to maintain the proper average.
  
 ildct	use interlaced dct
 
@@ -374,6 +376,7 @@ MC	Motion compensation
 RC	Rate control
 DCT	Discrete Cosine Transform
 IDCT	Inverse Discrete Cosine Transform
+DC	The coefficient of the constant term in the DCT (avg value of block)
 JVT	Joint Video Team Standard -- http://www.itu.int/ITU-T/news/jvtpro.html
 
 Examples:
