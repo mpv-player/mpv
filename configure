@@ -940,7 +940,8 @@ if x86 && linux ; then
     echores "$kernel_version, fail"
     echo "WARNING! If you want to run mplayer on this system, get prepared for problems!"
     echo "2.2.x has a limited SSE support. Upgrade kernel or use --disable-sse"
-    echo "Older kernel won't work correctly with mplayer"
+    echo "Older kernel won't work correctly with mplayer using SSE optimization."
+    die "old kernel for this cpu"
   else
     echores "$kernel_version, ok"
   fi
