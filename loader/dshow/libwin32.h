@@ -26,17 +26,28 @@
 #else
 // code for mplayer team
 
-#define FATAL(a)  // you don't need exception - if you want - just fill more code
+//#define FATAL(a)  // you don't need exception - if you want - just fill more code
+#define FATAL(X...) FatalError(__MODULE__,__FILE__,__LINE__,X)
 #include <wine/mmreg.h>
 #include <wine/winreg.h>
 #include <wine/vfw.h>
 #include <com.h>
+#include <stdarg.h>
 #include <string>
+#include <stdio.h>
 
 typedef unsigned int fourcc_t;
+
 struct FatalError
 {
-    FatalError();
+    FatalError(const char* mod, const char* f, int l, const char* desc,...)
+    {
+	printf("FATAL: module: %s  source: %s line %d ", mod, f, l);
+	va_list va;
+	va_start(va, desc);
+	vprintf(desc, va);
+	va_end(va);
+    }
     void PrintAll() {}
 };
 
@@ -277,10 +288,15 @@ struct IVideoDecoder
 
     }
     virtual ~IVideoDecoder(){};
-    virtual void StartInternal()=0;
-    virtual void StopInternal()=0;
+    // use this one
+    int Decode(void* src, size_t size, int is_keyframe, CImage* pImage)
+    { return DecodeInternal(src, size, is_keyframe, pImage); }
     void Stop(){ StopInternal();  m_State = STOP;}
     void Start(){StartInternal(); m_State = START;}
+    protected:
+    virtual int DecodeInternal(void* src, size_t size, int is_keyframe, CImage* pImage) = 0;
+    virtual void StartInternal()=0;
+    virtual void StopInternal()=0;
 
     const CodecInfo& record;
     DecodingMode m_Mode;	// should we do precaching (or even change Quality on the fly)
