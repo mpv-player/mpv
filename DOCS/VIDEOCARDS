@@ -12,6 +12,7 @@ II.  OpenGL drivers with glTexSubImage() support (currently the Utah-GLX
      drivers)
 III. Native card-specific drivers, using special abilities of some cards
 IV.  DGA - direct graphic access. no YUV & scaling, but faster than raw X11
+V.   Not really acceleration, but...
 
 Now, let's see them in details:
 
@@ -114,9 +115,12 @@ using the DGA driver:
 
 1. Make sure X loads the DGA extension:
 	(II) Loading extension XFree86-DGA
+   (you see, XFree86 4.0.x or greater is VERY RECOMMENDED!)
 2. MPlayer's DGA driver is autodetected on ./configure, or you can force it
    with --enable-dga.
-3. Be sure to use 24/32bpp mode, since there is no converter right now.. :(
+3. If the driver couldn't switch to a smaller resolution, experiment with
+   switches -vm (only with X 3.0.x), -fs, -bpp, -zoom to find a video mode that
+   the movie fits in. There is no converter right now.. :(
 4. Install MPlayer SUID root.
    'chown root /usr/local/bin/mplayer'
    'chmod 750 /usr/local/bin/mplayer' 
@@ -127,12 +131,37 @@ using the DGA driver:
    can be accessed by more people than only you because they can gain root
    privilegies through suid root mplayer.
    !!!! SO YOU HAVE BEEN WARNED ... !!!!
-
 5. Use '-vo dga' option, and there you go! (hope so:)
 
 If you have fast enough CPU (P3 800 for example) you can try fsdga for
 fullscreen mpeg playing (using software YUV->RGB scaling):
 mplayer -vo fsdga ...
+
+
+V. Not really acceleration, but...
+
+a, If you don't have X...
+  ...use the SVGAlib target! Be sure not to use the -fs switch, since it
+  toggles the usage of the software scaler, and it's SLOOOW now, unless you
+  have a real fast CPU (and/or MTRR?). :(
+
+  Of course you'll have to install svgalib and its development package in
+  order for MPlayer build its SVGAlib driver (autodetected, but can be
+  forced), and don't forget to edit /etc/vga/libvga.config to suit your
+  card & monitor.
+
+
+b, You want to use framebuffer...
+  ... Use --enable-fbdev switch of ./configure and the FBdev target will be
+  built (don't forget to 'make distclean' first!). Yet another "don't forget" :
+  read the framebuffer documentation in the kernel sources
+  (Documentation/fb/*) !
+
+  ... but don't your card doesn't support VBE 2.0 standard (older ISA/PCI
+  cards, such as S3 Trio64) :
+  Well, VESAfb is still available, but you'll have to load SciTech Display
+  Doctor (formerly UniVBE) before booting Linux.  Use a DOS boot disk or
+  whatever.  And don't forget to register your UniVBE ;))
 
 
 
