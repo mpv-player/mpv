@@ -6,6 +6,8 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 
+#ifdef USE_DIRECTSHOW
+
 #include "ad_internal.h"
 
 static ad_info_t info = 
@@ -97,3 +99,4 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
 //        len=size_out;
   return size_out;
 }
+#endif

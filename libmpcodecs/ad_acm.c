@@ -6,19 +6,21 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 
+#ifdef USE_WIN32DLL
+
 #include "ad_internal.h"
 
 static ad_info_t info = 
 {
 	"Win32 ACM audio decoder",
-	"msacm",
+	"acm",
 	AFM_ACM,
 	"Nick Kurshev",
 	"avifile.sf.net",
 	""
 };
 
-LIBAD_EXTERN(msacm)
+LIBAD_EXTERN(acm)
 
 #include "dll_init.h"
 
@@ -74,3 +76,4 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
 {
   return acm_decode_audio(sh_audio,buf,minlen,maxlen);
 }
+#endif

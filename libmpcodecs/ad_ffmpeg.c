@@ -6,6 +6,8 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 
+#ifdef USE_LIBAVCODEC
+
 #include "ad_internal.h"
 
 #include "bswap.h"
@@ -104,3 +106,5 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
     }
   return len;
 }
+
+#endif

@@ -29,7 +29,7 @@ static ad_info_t info =
 	""
 };
 
-LIBAD_EXTERN(a52)
+LIBAD_EXTERN(liba52)
 
 extern int audio_output_channels;
 

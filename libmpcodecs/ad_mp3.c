@@ -15,7 +15,7 @@ static ad_info_t info =
 	"Optimized to MMX/SSE/3Dnow!"
 };
 
-LIBAD_EXTERN(mp3)
+LIBAD_EXTERN(mp3lib)
 
 #include "../mp3lib/mp3.h"
 
