@@ -148,4 +148,4 @@ inline static void * fast_memcpy(void * to, const void * from, unsigned len)
 
 #endif
 
-
+#endif
