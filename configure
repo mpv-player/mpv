@@ -937,7 +937,7 @@ main()
 
 EOF
 _iconv=yes
-if test "$system_name" = "FreeBSD" ; then
+if test "$system_name" = "FreeBSD" || test "$system_name" = "BSD/OS"; then
 $_cc $_extraincdir $TMPC -o $TMPO $_extralibdir -lm -liconv > /dev/null 2>&1 || \
  { _iconv=no ; echo "iconv(3) function not detected!" ;}
 else
@@ -1999,8 +1999,10 @@ if test "$system_name" = "Linux" || test "$system_name" =  "FreeBSD" ; then
 CFLAGS="$CFLAGS -D_THREAD_SAFE"
 fi
 
-if test "$system_name" = "FreeBSD" && test "$_iconv" = "#define USE_ICONV" ; then
-_iconvlib="-liconv"
+if test "$system_name" = "FreeBSD" || test "$system_name" = "BSD/OS" ; then
+  if test "$_iconv" = "#define USE_ICONV" ; then
+    _iconvlib="-liconv"
+  fi
 fi
 
 
