@@ -883,6 +883,12 @@ if(!use_stdin && !slave_mode){
 //==================== Init Video Out ============================
     
 // check video_out driver name:
+{
+    char* vo = video_driver ? strdup(video_driver) : NULL;
+    if(vo_subdevice) {
+      free(vo_subdevice);
+      vo_subdevice = NULL;
+    }
     if (video_driver)
 	if ((i = strcspn(video_driver, ":")) > 0)
 	{
@@ -893,7 +899,7 @@ if(!use_stdin && !slave_mode){
 		vo_subdevice = malloc(i2-i);
 		if (vo_subdevice != NULL)
 		    strncpy(vo_subdevice, (char *)(video_driver+i+1), i2-i);
-		video_driver[i] = '\0';
+		vo[i] = '\0';
 	    }
 //	    printf("video_driver: %s, subdevice: %s\n", video_driver, vo_subdevice);
 	}
@@ -902,19 +908,28 @@ if(!use_stdin && !slave_mode){
   else
   for (i=0; video_out_drivers[i] != NULL; i++){
     const vo_info_t *info = video_out_drivers[i]->get_info ();
-    if(strcmp(info->short_name,video_driver) == 0){
+    if(strcmp(info->short_name,vo) == 0){
       video_out = video_out_drivers[i];break;
     }
   }
 
   if(!video_out){
-    mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_InvalidVOdriver,video_driver?video_driver:"?");
+    mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_InvalidVOdriver,vo?vo:"?");
     exit_player(MSGTR_Exit_error);
   }
+  if(vo)
+    free(vo);
+}
 
 //==================== Init Audio Out ============================
 
 // check audio_out driver name:
+{
+    char* ao = audio_driver ? strdup(audio_driver) : NULL;
+    if(ao_subdevice) {
+      free(ao_subdevice);
+      ao_subdevice = NULL;
+    }
     if (audio_driver)
 	if ((i = strcspn(audio_driver, ":")) > 0)
 	{
@@ -925,7 +940,7 @@ if(!use_stdin && !slave_mode){
 		ao_subdevice = malloc(i2-i);
 		if (ao_subdevice != NULL)
 		    strncpy(ao_subdevice, (char *)(audio_driver+i+1), i2-i);
-		audio_driver[i] = '\0';
+		ao[i] = '\0';
 	    }
 //	    printf("audio_driver: %s, subdevice: %s\n", audio_driver, ao_subdevice);
 	}
@@ -934,14 +949,16 @@ if(!use_stdin && !slave_mode){
   else
   for (i=0; audio_out_drivers[i] != NULL; i++){
     const ao_info_t *info = audio_out_drivers[i]->info;
-    if(strcmp(info->short_name,audio_driver) == 0){
+    if(strcmp(info->short_name,ao) == 0){
       audio_out = audio_out_drivers[i];break;
     }
   }
   if (!audio_out){
-    mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_InvalidAOdriver,audio_driver);
+    mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_InvalidAOdriver,ao?ao:"?");
     exit_player(MSGTR_Exit_error);
   }
+  if(ao)
+    free(ao);
   /* Initailize audio plugin interface if used */
   if(ao_plugin_cfg.plugin_list){
     for (i=0; audio_out_drivers[i] != NULL; i++){
@@ -953,7 +970,7 @@ if(!use_stdin && !slave_mode){
       }
     }
   }
-
+}
 //============ Open & Sync STREAM --- fork cache2 ====================
 
   stream=NULL;
