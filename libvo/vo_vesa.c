@@ -251,8 +251,8 @@ static uint32_t query_format(uint32_t format)
   uint32_t retval;
 	switch(format)
 	{
-#if 0
 		case IMGFMT_YV12:
+#if 0 /* Should be tested better */
 		case IMGFMT_I420:
 		case IMGFMT_IYUV:
 #endif
@@ -355,8 +355,8 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
                 case IMGFMT_RGB15: bpp = 15; break;
 		case IMGFMT_YV12:
 		case IMGFMT_I420:
-		case IMGFMT_IYUV:
-			yuv2rgb_init(video_mode_info.BitsPerPixel, MODE_RGB);
+		case IMGFMT_IYUV: bpp=16;
+			yuv2rgb_init(bpp, MODE_RGB);
 		default:
 		case IMGFMT_BGR16:
 		case IMGFMT_RGB16: bpp = 16; break;
