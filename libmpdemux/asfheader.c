@@ -213,7 +213,7 @@ while(!stream_eof(demuxer->stream)){
 //  case ASF_GUID_PREFIX_index_chunk: return "guid_index_chunk";
 
     case ASF_GUID_PREFIX_content_desc: // Content description
-      if(verbose){
+    {
         char *string=NULL;
         stream_read(demuxer->stream,(char*) &contenth,sizeof(contenth));
 	le2me_ASF_content_description_t(&contenth);
@@ -222,37 +222,53 @@ while(!stream_eof(demuxer->stream)){
         if( contenth.title_size!=0 ) {
           string=(char*)malloc(contenth.title_size);
           stream_read(demuxer->stream, string, contenth.title_size);
-          print_asf_string(" Title: ", string, contenth.title_size);
+          if(verbose)
+            print_asf_string(" Title: ", string, contenth.title_size);
+	  else
+	    pack_asf_string(string, contenth.title_size);
+	  demux_info_add(demuxer, "name", string);
         }
         // extract the author 
         if( contenth.author_size!=0 ) {
           string=(char*)realloc((void*)string, contenth.author_size);
           stream_read(demuxer->stream, string, contenth.author_size);
-          print_asf_string(" Author: ", string, contenth.author_size);
+          if(verbose)
+            print_asf_string(" Author: ", string, contenth.author_size);
+	  else
+	    pack_asf_string(string, contenth.author_size);
+	  demux_info_add(demuxer, "author", string);
         }
         // extract the copyright
         if( contenth.copyright_size!=0 ) {
           string=(char*)realloc((void*)string, contenth.copyright_size);
           stream_read(demuxer->stream, string, contenth.copyright_size);
-          print_asf_string(" Copyright: ", string, contenth.copyright_size);
+          if(verbose)
+            print_asf_string(" Copyright: ", string, contenth.copyright_size);
+	  else
+	    pack_asf_string(string, contenth.copyright_size);
+	  demux_info_add(demuxer, "copyright", string);
         }
         // extract the comment
         if( contenth.comment_size!=0 ) {
           string=(char*)realloc((void*)string, contenth.comment_size);
           stream_read(demuxer->stream, string, contenth.comment_size);
-          print_asf_string(" Comment: ", string, contenth.comment_size);
+          if(verbose)
+            print_asf_string(" Comment: ", string, contenth.comment_size);
+	  else
+	    pack_asf_string(string, contenth.comment_size);
+	  demux_info_add(demuxer, "comments", string);
         }
         // extract the rating
         if( contenth.rating_size!=0 ) {
           string=(char*)realloc((void*)string, contenth.rating_size);
           stream_read(demuxer->stream, string, contenth.rating_size);
-          print_asf_string(" Rating: ", string, contenth.rating_size);
+          if(verbose)
+            print_asf_string(" Rating: ", string, contenth.rating_size);
         }
 	mp_msg(MSGT_HEADER,MSGL_V,"\n");
         free(string);
-      }
       break;
-
+    }
   } // switch GUID
 
   if(ASF_LOAD_GUID_PREFIX(objh.guid)==ASF_GUID_PREFIX_data_chunk) break; // movi chunk
