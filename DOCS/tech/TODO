@@ -5,8 +5,8 @@ TODO:
 FOR THE LAST RC-RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~~~
 - fix iconv issues:
-   - ogm subtitles crash if compiled with libiconv
-   - -subcp crash / no effect
+   - ogm subtitles crash if compiled with libiconv - FIXED?
+   - -subcp crash / no effect - FIXED?
 - fix the broken -geometry option changes (fbdev, xv etc) - FIXED?
 - fix vo_svga  (unusably broken. On my Cirrus, and Geforce2, confirmed)
    - Dec 28: Re: [Mplayer-cvslog] CVS: main/libvo vo_svga.c,1.55,1.56
@@ -15,15 +15,13 @@ FOR THE LAST RC-RELEASE:
 - fix locale problems (add common float parser / mp_sscanf())
 - check files at FTP/incoming/!to_be_fixed/*
 - fix Gabucino's bugs:
-   - new-conf prints meaningless error messages of bad options (actually none)
-     (see also: Dec 17: [BUG] mencoder prints meaningless message) - FIXED?
    - supporting Noir.rm? Garbled image now. Maybe codec scales?
    - Nov 13: [BUG] sig11 while moving xmga window in Xinerama mode - FIXED?
    - Nov 23: [BUG] panscan doesn't work properly with -fixed-vo (Xv)
      UPDATE: Actually -fixed-vo -vo xv doesn't work at all with 'f'...
      no matter if panscan is used or not...
    - Dec 19: [BUG] mencoder+mp3lame creates desynced AVI (<=22Khz support missing)
-   - Dec 28: [BUG] nice little bug somewhere (config/playtree)
+   - Dec 28: [BUG] nice little bug somewhere (config/playtree) - FIXED?
      (It's in new-conf. I can provide shell access...:)
 
 FOR THE v0.90 RELEASE:
