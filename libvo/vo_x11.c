@@ -76,9 +76,7 @@ static int X_already_started=0;
 
 static int Flip_Flag;
 
-#define SH_MEM
-
-#ifdef SH_MEM
+#ifdef HAVE_SHM
 
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -314,7 +312,7 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
 #endif
    }
 
-#ifdef SH_MEM
+#ifdef HAVE_SHM
  if ( mLocalDisplay && XShmQueryExtension( mDisplay ) ) Shmem_Flag=1;
   else
    {
@@ -385,7 +383,7 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
    myximage=XGetImage( mDisplay,mywindow,0,0,
    image_width,image_height,AllPlanes,ZPixmap );
    ImageData=myximage->data;
-#ifdef SH_MEM
+#ifdef HAVE_SHM
   }
 
   DeInstallXErrorHandler();
@@ -437,7 +435,7 @@ static const vo_info_t* get_info( void )
 static void Terminate_Display_Process( void )
 {
  getchar();      /* wait for enter to remove window */
-#ifdef SH_MEM
+#ifdef HAVE_SHM
  if ( Shmem_Flag )
   {
    XShmDetach( mDisplay,&Shminfo[0] );
@@ -453,7 +451,7 @@ static void Terminate_Display_Process( void )
 static void Display_Image( XImage *myximage,uint8_t *ImageData )
 {
 #ifdef DISP
-#ifdef SH_MEM
+#ifdef HAVE_SHM
  if ( Shmem_Flag )
   {
    XShmPutImage( mDisplay,mywindow,mygc,myximage,
