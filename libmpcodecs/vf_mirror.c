@@ -15,33 +15,29 @@
 
 
 static void mirror(unsigned char* dst,unsigned char* src,int dststride,int srcstride,int w,int h,int bpp){
-    int x;
-
-    // 
-    for(x=0;x<h;x++){
-	int y;
+    int y;
+    for(y=0;y<h;y++){
+	int x;
 	switch(bpp){
 	case 1:
-	    for(y=0;y<w;y++) dst[y]=src[w-y-1+x*srcstride];
+	    for(x=0;x<w;x++) dst[x]=src[w-x-1];
 	    break;
 	case 2:
-	    for(y=0;y<w;y++) *((short*)(dst+y*2))=*((short*)(src+w-y*2-1+x*srcstride));
+	    for(x=0;x<w;x++) *((short*)(dst+x*2))=*((short*)(src+(w-x-1)*2));
 	    break;
 	case 3:
-	    for(y=0;y<w;y++){
-		dst[y*3+0]=src[0+w-y*3-1+x*srcstride];
-		dst[y*3+1]=src[1+w-y*3-1+x*srcstride];
-		dst[y*3+2]=src[2+w-y*3-1+x*srcstride];
+	    for(x=0;x<w;x++){
+		dst[x*3+0]=src[0+(w-x-1)*3];
+		dst[x*3+1]=src[1+(w-x-1)*3];
+		dst[x*3+2]=src[2+(w-x-1)*3];
 	    }
 	    break;
 	case 4:
-	    for(y=0;y<w;y++) *((int*)(dst+y*4))=*((int*)(src+w-y*4-1+x*srcstride));
+	    for(x=0;x<w;x++) *((int*)(dst+x*4))=*((int*)(src+(w-x-1)*4));
 	}
+	src+=srcstride;
 	dst+=dststride;
     }
-
-    //
-
 }
 
 //===========================================================================//
@@ -53,7 +49,6 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     dmpi=vf_get_image(vf->next,mpi->imgfmt,
 	MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
 	mpi->w, mpi->h);
-	//mpi->h, mpi->w);
 
     if(mpi->flags&MP_IMGFLAG_PLANAR){
 	       mirror(dmpi->planes[0],mpi->planes[0],
@@ -83,7 +78,7 @@ static int open(vf_instance_t *vf, char* args){
 }
 
 vf_info_t vf_info_mirror = {
-    "mirror",
+    "horizontal mirror",
     "mirror",
     "Eyck",
     "",
