@@ -1,0 +1,227 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+
+<HEAD>
+  <TITLE>Developer Cries - MPlayer - The Movie Player for Linux</TITLE>
+  <LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+</HEAD>
+
+<BODY>
+
+
+<H1>Anhang E - Aufschrei der Entwickler</H1>
+
+<P>Es gibt zwei Themen, die immer zu gro&szlig;en Streitereien und Beschimpfungen
+auf der <A HREF="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</A>
+Mailingliste f&uuml;hren. Das erste Thema dreht sich um den...</P>
+
+
+<H2><A NAME="gcc">GCC 2.96</A></H2>
+
+<P><B>Zum Hintergrund:</B> Die Serie <B>2.95</B> des GCC ist der offiziell 
+GNU-Release, und Version 2.95.3 ist die stabilste und fehlerfreieste aus 
+dieser Serie. Wir haban niemals Probleme beobachten k&ouml;nnen, die auf den 
+GCC 2.95.3 zur&uuml;ckzuf&uuml;hren waren. Beginnend mit RedHat Linux 7.0 
+begann <B>Red Hat</B> damit, eine stark ver&auml;nderte CVS-Version des GCC 
+mitzuliefern. Diese Version nannten sie <B>2.96</B>. Red Hat hat diese 
+Version aufgenommen, weil sie einen Compiler brauchten, der auf all ihren 
+unterst&uuml;tzten Plattformen lief (welche auch IA64 und s390 einschloss), 
+und weil der offizielle GCC 3.0 zu diesem Zeitpunkt noch nicht fertiggestellt 
+war. Der Linuxdistributor <B>Mandrake</B> folgte bald darauf Red Hats Beispiel
+und lieferte ab Linux-Mandrake 8.0 ebenfalls den GCC 2.96 aus.</P>
+
+<P><B>Die Aussagen zu dem Thema:</B> Das GCC-Team hat jegliche Verbindung zu 
+der Version 2.96 bestritten und dazu eine <A HREF="http://gcc.gnu.org/gcc-
+2.96.html">offizielle Stellungnahme</A> abgegeben. Viele Entwickler auf der 
+ganzen Welt trafen auf Probleme mit dem GCC 2.96 und empfahlen deswegen 
+andere Compilerversionen. Beispiele daf&uuml;r sind <A 
+HREF="http://www.mysql.com/downloads/mysql-3.23.html">MySQL</A>, <A 
+HREF="http://avifile.sourceforge.net/news-old1.htm">avifile</A> und <A 
+HREF="http://www.winehq.com/news/?view=92#RH%207.1%20gcc%20fixes%20compiler%2
+0bug">Wine</A>. Andere interessante Links sind der
+<A HREF="http://www.atnf.csiro.au/people/rgooch/linux/docs/kernel-newsflash.html">
+Linux kernel news flash &uuml;ber den Kernel 2.4.17</A> und das
+<A HREF="http://www.voy.com/3516/572.html">Voy-Forum</A>.
+<B>MPlayer</B> war ebenfalls von vorr&uuml;bergehenden Problemen betroffen,
+die sich alle l&ouml;sten, sobald eine andere Version des GCC benutzt wurde.
+Viele Projekte begannen daraufhin damit, um einige der Probleme mit dem GCC 2.96
+herumzuarbeiten, aber wir lehnten es ab, die Probleme zu beheben, die andere
+Leute durch vorschnelles Handeln verursacht hatten. Dazu kommt, dass einige
+dieser Workarounds zu Performanceeinbu&szlig;en f&uuml;hrten.</P>
+
+<P>Du kannst dir auch die andere Seite der Geschichte auf <A 
+HREF="http://web.archive.org/web/20011024212120/http://www.bero.org/gcc296.ht
+ml"> dieser Seite</A> durchlesen. GCC 2.96 erlaubt keine | (Pipezeichen) in 
+Assemblerkommentaren, weil er sowohl die Intel- als auch die AT&amp;T-
+Assemblersyntax unterst&uuml;tzt und das |-Zeichen ein Symbol in der 
+Intelvariante darstellt. Das Problem lag nun darin, dass der GCC 
+<B>kommentarlos</B> den kompletten Assemblerblock ignoriert hat. Dieser 
+Fehler wurde inzwischen angeblich behoben. GCC gibt eine Warnung aus, anstatt 
+den kompletten Block einfach unter den Tisch fallen zu lassen.</P>
+
+<P><B>Die Gegenwart:</B> Red Hat behauptet, dass GCC Version 2.96-85 und 
+neuer keine Fehler mehr enthalten. Das Verhalten dieser Version hat sich 
+tats&auml;chlich deutlich verbessert. Nichts desto trotz werden auf unseren 
+Mailinglisten noch immer Probleme berichtet, die verschwinden, sobald ein 
+anderer Compiler verwendet wird. Sei wie es ist, es ist inzwischen einfach 
+nicht mehr wichtig. Hoffentlich l&ouml;st eine gereifter GCC 3.x all dieses 
+Problem ein f&uuml;r alle mal. Wenn du wirklich mit dem GCC 2.96 compilieren 
+m&ouml;chtest, dann benutze die Option <CODE>--disable-gcc-checking</CODE> 
+bei <CODE>configure</CODE>. Denk aber daran, dass du dann auf dich allein 
+gestellt bist. <B>Schick keine Fehlerberichte!</B> Solltest du das doch tun, 
+so wirst du nur von der Mailingliste verbannt, weil wir wirklich mehr 
+Flamewars wegen des GCC 2.96 erlebt haben als n&ouml;tig w&auml;r. Lass 
+dieses Thema bitte ruhen.</P>
+
+<P>Wenn du Probleme mit dem GCC 2.96 hast, so kannst du Pakete f&uuml;r die 
+Version 2.96-85 auf <A HREF="ftp://updates.redhat.com/">Red Hats FTP-
+Server</A> finden. Andererseits kannst du auch einfach die Pakete f&uuml;r 
+die Version 3.0.4 benutzen, die Red Hat f&uuml;r Red Hat Linux 7.2 und neuer 
+anbietet. Eine weitere M&ouml;glichkeit besteht darin, Pakete f&uuml;r A 
+HREF="ftp://people.redhat.com/jakub/gcc/3.2-10/">gcc-3.2-10</A> 
+herunterzuladen (inoffiziell, aber sie funktionieren trotzdem einwandfrei). 
+Sie lassen sich neben dem GCC 2.96 installieren, den du bereits hast. 
+<B>MPlayer</B> wird automatisch Version 3.2-10 finden und diesesn GCC 
+anstelle der Version 2.96 benutzen. Wenn du aus irgendeinem Grund die 
+bin&auml;ren Pakete f&uuml;r den GCC nicht benutzen kannst oder willst, dann 
+folgt hier eine kleine Anleitung, wie du den neuesten GCC compilieren 
+kannst:</P>
+
+<OL>
+  <LI>Lade dir <CODE>gcc-core-XXX.tar.gz</CODE> von einem der <A 
+    HREF="http://gcc.gnu.org/mirrors.html">GCC-Mirrorseiten</A> herunter, 
+    wobei <CODE>XXX</CODE> die Versionsnummer darstellt. Dieses Paket 
+    beinhaltet den kompletten C-Compiler und reicht f&uuml;r <B>MPlayer</B> 
+    aus. Wenn du dar&uuml;ber hinaus Unterst&uuml;tzung f&uuml;r C++, Java 
+    oder andere Features des GCC ben&ouml;tigst, dann ist <CODE>gcc-
+    XXX.tar.gz</CODE> besser f&uuml;r dich geeignet.</LI>
+  <LI>Entpacke das Archiv:<BR>
+    <CODE>tar -xvzf gcc-core-XXX.tar.gz</CODE></LI>
+  <LI>Anders als die meisten Programme wird der GCC nicht innerhalb des
+    Quelltextverzeichnisses gebaut, sondern er ben&ouml;tigt daf&uuml;r ein
+    spezielles Buildverzeichnis au&szlig;erhalb des Quelltextbaumes.
+    Erstell solch ein Verzeichnis mit<BR>
+    <CODE>mkdir gcc-build</CODE></LI>
+  <LI>Jetzt kannst du den GCC im Buildverzeichnis konfigurieren lassen -
+    aber das <CODE>configure</CODE>-Script liegt nat&uuml;rlich im 
+    Quelltextverzeichnis:<BR>
+    <CODE>cd gcc-build<BR>
+    ../gcc-XXX/configure</CODE></LI>
+  <LI>Compiliere GCC mit dem folgenden Kommando im Buildverzeichnis:<BR>
+    <CODE>make bootstrap</CODE></LI>
+  <LI>Jetzt kannst du (wenn du root bist) den GCC mit diesem Kommando
+    installieren:<BR>
+    <CODE>make install</CODE></LI>
+</OL>
+
+<H2><A NAME="binary">Vorcompilierte (bin&auml;re) Pakete</A></H2>
+
+<P>Fr&uuml;her enthielt <B>MPlayer</B> Teile des Quelltextes des OpenDivX-
+Projektes, welches es verbietet, vorcompilierte Pakete zu verteilen. Diese 
+Codeabschnitte wurden aber in Version 0.90pre1 entfernt, und die letzte noch 
+verbleibende Datei <CODE>divx_vbr.c</CODE>, die noch auf den OpenDivX-Quellen 
+aufbaut, wurden von den Authoren unter die GPL gestellt (Version 0.90pre9). 
+Du darfst jetzt also nach Herzenslust bin&auml;re Pakete bauen und 
+verteilen.</P>
+
+<P>Ein weiteres Hindernis f&uuml;r Bin&auml;rpakete waren die bei der 
+Compilierung automatisch erkannten Optimierungsm&ouml;glichkeiten seitens der 
+CPU-Architektur (MMX, 3DNOW etc.). <B>MPlayer</B> unterst&uuml;tzt inzwischen 
+aber auch die Erkennung der CPU-Features beim Starten von <B>MPlayer</B>, 
+wenn <CODE>configure</CODE> mit der Option <CODE>--enable-runtime-
+cpudetection</CODE> aufgerufen wurde. Diese Option ist 
+standardm&auml;&szlig;ig deaktiviert, weil sie eine kleine negative 
+Auswirkung auf die Geschwindigkeit mitbringt. Andererseits ist es mit ihr nun 
+m&ouml;glich, Bin&auml;rpakete zu erstellen, die auf verschiedenen 
+Mitgliedern der Intel-CPU-Familie beschleunigt laufen.</P>
+
+
+<H2><A NAME="nvidia">nVidia</A></H2>
+
+<P>Uns misf&auml;llt die Tatsache, dass <A 
+HREF="http://www.nvidia.com">nVidia</A> nur bin&auml;re Treiber f&uuml;r 
+XFree86 zur Verf&uuml;gung stellt, die oft genug auch noch einige Fehler 
+enthalten. Auf <A HREF="http://mplayerhq.hu/pipermail/mplayer-
+users/">mplayer-users</A> sehen wir viele Fehlermeldungen, die mit diesen 
+Closed-Source-Treibern zusammenh&auml;ngen: &uuml;ber die allgemein schlechte 
+Qualit&auml;t der Treiber, &uuml;ber Instabilit&auml;ten und &uuml;ber den 
+schlechten Support der Endbenutzer durch nVidia. Einige Beispiele daf&uuml;r 
+kannst du im <A 
+HREF="http://www.nvnews.net/vbulletin/forumdisplay.php?s=6d83dc289805c37caef4 
+9b77857a0b7e&daysprune=&forumid=27"> nVidia-Linux-Forum</A> finden. Viele 
+dieser F&auml;lle sind wiederkehrende Probleme. nVidia hat letztens Kontakt 
+mit uns aufgenommen und behauptet, dass ihre Treiber keine Fehler enthielten, 
+sondern dass die Instabilit&auml;ten von schlechten AGP-Chips verursacht 
+w&uuml;rden, und dass sie keinerlei Fehlerberichte von Nutzern erhalten 
+h&auml;tten (wie z.B. die lila Linien). Wenn du also ein Problem mit deiner 
+nVidia-Karte hast, dann solltest du auf jeden Fall die neuesten nVidia-
+Treiber ausprobieren und/oder ein neues Motherboard kaufen oder aber nVidia 
+darum bitten, dass sie OpenSource-Treiber ver&ouml;ffentlichen. Wie dem auch 
+sei - wenn du die bin&auml;ren nVidia-Treiber benutzt und Treiberprobleme 
+auftreten, dann sei gewarnt, dass du von uns nur sehr wenig Hilfe erhalten 
+wirst, weil wir da einfach nichts tun k&ouml;nnen, um dir zu helfen.</P>
+
+
+<H2><A NAME="barr">Joe Barr</A></H2>
+
+<P>Joe Barr wurde dadurch ber&uuml;chtigt, dass er einen mehr als schlechten 
+<A HREF="http://www.linuxworld.com/site-stories/2001/1214.mplayer.html"> 
+Bericht &uuml;ber MPlayer</A> ver&ouml;ffentlichte. Er war der Meinung, 
+<B>MPlayer</B> sei schwierig zu installieren, aber andererseits mag er auch 
+<A HREF="http://www.linuxworld.com/linuxworld/lw-2000-06/lw-06-exam.html"> 
+keine Dokumentation lesen</A>. Er schlo&szlig; auch damit, dass die 
+<B>MPlayer</B>-Entwickler unfreundlich und die Dokumentation 
+unvollst&auml;ndig seien. Entscheide selber, wie es damit steht. Er schreib
+weiter negativ &uuml;ber <B>MPlayer</B> in seinen
+<A HREF="http://www.linuxworld.com/site-stories/2001/1227.predictions.html">10
+Vorhersagungen zu Linux f&uuml;r 2002</A>. In einem folgenden
+<A HREF="http://www.linuxworld.com/site-stories/2002/0125.xine.html">Bericht
+&uuml;ber xine</A> hat er weiter versucht, Rivalit&auml;t zu sch&uuml;hren.
+Ironischerweise zitiert er am Ende dieses Artikels seine Konversation mit
+G&uuml;nter Bartsch, dem Author von xine, der die ganze Situation perfekt
+zusammengefasst hat:</P>
+
+<BLOCKQUOTE>
+  Er sagte auch noch, dass er von meiner Kolumne &uuml;ber MPlayer
+  "&uuml;berrascht"  war und dachte, dass sie unfair sei. Er erinnerte mich
+  daran, dass es sich dabei um freie Software handele. "Wenn du sie nicht
+  magst", sagte Bartsch, "dann hast du die Freiheit, sie nicht zu benutzen."
+</BLOCKQUOTE>
+
+<P>Er antwortet auch nicht auf unsere Mails. Sein Editor antwortet ebenfalls 
+nicht auf unsere Mails. Hier sind ein paar Zitate von verschiedenen Personen 
+&uuml;ber Joa Barr, sodass du dir deine eigene Meinung bilden kannst:</P>
+
+<P>Marc Rassbach hat etwas <A 
+HREF="http://daily.daemonnews.org/view_story.php3?story_id=2102">&uuml;ber 
+den Kerl zu sagen</A>:</P>
+
+<BLOCKQUOTE>
+  Vielleicht erinnert ihr euch an die LinuxWorld 2000, bei der er behauptete,
+  Linus T. habe gesagt: 'FreeBSD besteht nur aus einer Handvoll Programmierer.'
+  Linus hat NICHTS dergleichen gesagt. Als Joe dazu zur Rede gestellt wurde,
+  bestand seine Reaktion darin, die BSD-Unterst&uuml;tzer Arschl&ouml;cher
+  und Idioten zu nennen.
+</BLOCKQUOTE>
+
+<P>Ein <A HREF="http://www.mplayerhq.hu/pipermail/mplayer-users/2001-
+December/009118.html">Zitat</A> von Robert Munro von der <A 
+HREF="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</A> 
+Mailingliste:</P>
+
+<BLOCKQUOTE>
+  <P>Er ist interessant aber nicht besonders gut darin... hmm... Konflikte zu
+  vermeiden. Joe Barr war vor Jahren ein regelm&auml;&szlig;iger Besucher von
+  Will Zachmanns Canopus-Forum bei Compuserve. Er war damals ein
+  OS/2-Bf&uuml;rworter (ich war damals ebenfalls ein OS/2-Fan).</P>
+
+  <P>Damals hat er st&auml;ndig &uuml;berreagiert, Leute beschimpft, und ich
+  vermute, dass es f&uuml;r ihn damals ziemlich hart gewesen sein musste.
+  Er hat sich seitdem ein wenig beruhigt, wenn man sich seine letzten
+  Kolumnen durchliest. Subtiler Humor war aber auch damals schon nicht sein
+  Fall - ganz und gar nicht.</P>
+</BLOCKQUOTE>
+
+</BODY>
+</HTML>
