@@ -118,5 +118,6 @@ int a52_frame (a52_state_t * state, uint8_t * buf, int * flags,
 void a52_dynrng (a52_state_t * state,
 		 sample_t (* call) (sample_t, void *), void * data);
 int a52_block (a52_state_t * state, sample_t * samples);
+extern int (* a52_resample) (float * _f, int16_t * s16);
 
 #endif /* A52_H */

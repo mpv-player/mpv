@@ -16,10 +16,14 @@
 */
 
 #include <inttypes.h>
+#include <stdio.h>
 #include "a52.h"
 #include "../config.h"
+#include "../cpudetect.h"
 
-#ifdef HAVE_MMX
+int (* a52_resample) (float * _f, int16_t * s16)=NULL;
+
+#ifdef ARCH_X86
 static uint64_t __attribute__((aligned(8))) magicF2W= 0x43c0000043c00000LL;
 static uint64_t __attribute__((aligned(8))) wm1010= 0xFFFF0000FFFF0000LL;
 static uint64_t __attribute__((aligned(8))) wm0101= 0x0000FFFF0000FFFFLL;
@@ -39,19 +43,109 @@ static inline int16_t convert (int32_t i)
 static int chans=2;
 static int flags=0;
 
-void a52_resample_init(int _flags,int _chans){
-    chans=_chans;
-    flags=_flags;
-}
-
-int a52_resample(float * _f, int16_t * s16)
+int a52_resample_C(float * _f, int16_t * s16)
 {
     int i;
     int32_t * f = (int32_t *) _f;
 
     switch (flags) {
     case A52_MONO:
-#ifdef HAVE_MMX
+	for (i = 0; i < 256; i++) {
+	    s16[5*i] = s16[5*i+1] = s16[5*i+2] = s16[5*i+3] = 0;
+	    s16[5*i+4] = convert (f[i]);
+	}
+	break;
+    case A52_CHANNEL:
+    case A52_STEREO:
+    case A52_DOLBY:
+	for (i = 0; i < 256; i++) {
+	    s16[2*i] = convert (f[i]);
+	    s16[2*i+1] = convert (f[i+256]);
+	}
+	break;
+    case A52_3F:
+	for (i = 0; i < 256; i++) {
+	    s16[5*i] = convert (f[i]);
+	    s16[5*i+1] = convert (f[i+512]);
+	    s16[5*i+2] = s16[5*i+3] = 0;
+	    s16[5*i+4] = convert (f[i+256]);
+	}
+	break;
+    case A52_2F2R:
+	for (i = 0; i < 256; i++) {
+	    s16[4*i] = convert (f[i]);
+	    s16[4*i+1] = convert (f[i+256]);
+	    s16[4*i+2] = convert (f[i+512]);
+	    s16[4*i+3] = convert (f[i+768]);
+	}
+	break;
+    case A52_3F2R:
+	for (i = 0; i < 256; i++) {
+	    s16[5*i] = convert (f[i]);
+	    s16[5*i+1] = convert (f[i+512]);
+	    s16[5*i+2] = convert (f[i+768]);
+	    s16[5*i+3] = convert (f[i+1024]);
+	    s16[5*i+4] = convert (f[i+256]);
+	}
+	break;
+    case A52_MONO | A52_LFE:
+	for (i = 0; i < 256; i++) {
+	    s16[6*i] = s16[6*i+1] = s16[6*i+2] = s16[6*i+3] = 0;
+	    s16[6*i+4] = convert (f[i+256]);
+	    s16[6*i+5] = convert (f[i]);
+	}
+	break;
+    case A52_CHANNEL | A52_LFE:
+    case A52_STEREO | A52_LFE:
+    case A52_DOLBY | A52_LFE:
+	for (i = 0; i < 256; i++) {
+	    s16[6*i] = convert (f[i+256]);
+	    s16[6*i+1] = convert (f[i+512]);
+	    s16[6*i+2] = s16[6*i+3] = s16[6*i+4] = 0;
+	    s16[6*i+5] = convert (f[i]);
+	}
+	break;
+    case A52_3F | A52_LFE:
+	for (i = 0; i < 256; i++) {
+	    s16[6*i] = convert (f[i+256]);
+	    s16[6*i+1] = convert (f[i+768]);
+	    s16[6*i+2] = s16[6*i+3] = 0;
+	    s16[6*i+4] = convert (f[i+512]);
+	    s16[6*i+5] = convert (f[i]);
+	}
+	break;
+    case A52_2F2R | A52_LFE:
+	for (i = 0; i < 256; i++) {
+	    s16[6*i] = convert (f[i+256]);
+	    s16[6*i+1] = convert (f[i+512]);
+	    s16[6*i+2] = convert (f[i+768]);
+	    s16[6*i+3] = convert (f[i+1024]);
+	    s16[6*i+4] = 0;
+	    s16[6*i+5] = convert (f[i]);
+	}
+	break;
+    case A52_3F2R | A52_LFE:
+	for (i = 0; i < 256; i++) {
+	    s16[6*i] = convert (f[i+256]);
+	    s16[6*i+1] = convert (f[i+768]);
+	    s16[6*i+2] = convert (f[i+1024]);
+	    s16[6*i+3] = convert (f[i+1280]);
+	    s16[6*i+4] = convert (f[i+512]);
+	    s16[6*i+5] = convert (f[i]);
+	}
+	break;
+    }
+    return chans*256;
+}
+
+#ifdef ARCH_X86
+int a52_resample_MMX(float * _f, int16_t * s16)
+{
+    int i;
+    int32_t * f = (int32_t *) _f;
+
+    switch (flags) {
+    case A52_MONO:
 	asm volatile(
 		"movl $-512, %%esi		\n\t"
 		"movq magicF2W, %%mm7		\n\t"
@@ -84,12 +178,6 @@ int a52_resample(float * _f, int16_t * s16)
 		:: "r" (s16+1280), "r" (f+256)
 		:"%esi", "%edi", "memory"
 	);
-#else
-	for (i = 0; i < 256; i++) {
-	    s16[5*i] = s16[5*i+1] = s16[5*i+2] = s16[5*i+3] = 0;
-	    s16[5*i+4] = convert (f[i]);
-	}
-#endif
 	break;
     case A52_CHANNEL:
     case A52_STEREO:
@@ -112,7 +200,6 @@ int a52_resample(float * _f, int16_t * s16)
 		:: "r" (s16+512), "r" (f+256)
 		:"%esi", "memory"
 	);*/
-#ifdef HAVE_MMX
 	asm volatile(
 		"movl $-1024, %%esi		\n\t"
 		"movq magicF2W, %%mm7		\n\t"
@@ -138,14 +225,8 @@ int a52_resample(float * _f, int16_t * s16)
 		:: "r" (s16+512), "r" (f+256)
 		:"%esi", "memory"
 	);
-#else
-	for (i = 0; i < 256; i++) {
-	    s16[2*i] = convert (f[i]);
-	    s16[2*i+1] = convert (f[i+256]);
-	}
-#endif
 	break;
-    case A52_3F:
+    case A52_3F: //FIXME Optimize
 	for (i = 0; i < 256; i++) {
 	    s16[5*i] = convert (f[i]);
 	    s16[5*i+1] = convert (f[i+512]);
@@ -154,7 +235,6 @@ int a52_resample(float * _f, int16_t * s16)
 	}
 	break;
     case A52_2F2R:
-#ifdef HAVE_MMX
 	asm volatile(
 		"movl $-1024, %%esi		\n\t"
 		"movq magicF2W, %%mm7		\n\t"
@@ -201,16 +281,8 @@ int a52_resample(float * _f, int16_t * s16)
 		:: "r" (s16+1024), "r" (f+256)
 		:"%esi", "memory"
 	);
-#else
-	for (i = 0; i < 256; i++) {
-	    s16[4*i] = convert (f[i]);
-	    s16[4*i+1] = convert (f[i+256]);
-	    s16[4*i+2] = convert (f[i+512]);
-	    s16[4*i+3] = convert (f[i+768]);
-	}
-#endif	
 	break;
-    case A52_3F2R:
+    case A52_3F2R: //FIXME optimitze
 	for (i = 0; i < 256; i++) {
 	    s16[5*i] = convert (f[i]);
 	    s16[5*i+1] = convert (f[i+512]);
@@ -220,7 +292,6 @@ int a52_resample(float * _f, int16_t * s16)
 	}
 	break;
     case A52_MONO | A52_LFE:
-#ifdef HAVE_MMX
 	asm volatile(
 		"movl $-1024, %%esi		\n\t"
 		"movq magicF2W, %%mm7		\n\t"
@@ -256,18 +327,10 @@ int a52_resample(float * _f, int16_t * s16)
 		:: "r" (s16+1536), "r" (f+256)
 		:"%esi", "%edi", "memory"
 	);
-#else
-	for (i = 0; i < 256; i++) {
-	    s16[6*i] = s16[6*i+1] = s16[6*i+2] = s16[6*i+3] = 0;
-	    s16[6*i+4] = convert (f[i+256]);
-	    s16[6*i+5] = convert (f[i]);
-	}
-#endif
 	break;
     case A52_CHANNEL | A52_LFE:
     case A52_STEREO | A52_LFE:
     case A52_DOLBY | A52_LFE:
-#ifdef HAVE_MMX
 	asm volatile(
 		"movl $-1024, %%esi		\n\t"
 		"movq magicF2W, %%mm7		\n\t"
@@ -301,17 +364,8 @@ int a52_resample(float * _f, int16_t * s16)
 		:: "r" (s16+1536), "r" (f+256)
 		:"%esi", "%edi", "memory"
 	);
-#else
-	for (i = 0; i < 256; i++) {
-	    s16[6*i] = convert (f[i+256]);
-	    s16[6*i+1] = convert (f[i+512]);
-	    s16[6*i+2] = s16[6*i+3] = s16[6*i+4] = 0;
-	    s16[6*i+5] = convert (f[i]);
-	}
-#endif
 	break;
     case A52_3F | A52_LFE:
-#ifdef HAVE_MMX
 	asm volatile(
 		"movl $-1024, %%esi		\n\t"
 		"movq magicF2W, %%mm7		\n\t"
@@ -347,18 +401,8 @@ int a52_resample(float * _f, int16_t * s16)
 		:: "r" (s16+1536), "r" (f+256)
 		:"%esi", "%edi", "memory"
 	);
-#else
-	for (i = 0; i < 256; i++) {
-	    s16[6*i] = convert (f[i+256]);
-	    s16[6*i+1] = convert (f[i+768]);
-	    s16[6*i+2] = s16[6*i+3] = 0;
-	    s16[6*i+4] = convert (f[i+512]);
-	    s16[6*i+5] = convert (f[i]);
-	}
-#endif	
 	break;
     case A52_2F2R | A52_LFE:
-#ifdef HAVE_MMX
 	asm volatile(
 		"movl $-1024, %%esi		\n\t"
 		"movq magicF2W, %%mm7		\n\t"
@@ -400,19 +444,8 @@ int a52_resample(float * _f, int16_t * s16)
 		:: "r" (s16+1536), "r" (f+256)
 		:"%esi", "%edi", "memory"
 	);
-#else
-	for (i = 0; i < 256; i++) {
-	    s16[6*i] = convert (f[i+256]);
-	    s16[6*i+1] = convert (f[i+512]);
-	    s16[6*i+2] = convert (f[i+768]);
-	    s16[6*i+3] = convert (f[i+1024]);
-	    s16[6*i+4] = 0;
-	    s16[6*i+5] = convert (f[i]);
-	}
-#endif
 	break;
     case A52_3F2R | A52_LFE:
-#ifdef HAVE_MMX
 	asm volatile(
 		"movl $-1024, %%esi		\n\t"
 		"movq magicF2W, %%mm7		\n\t"
@@ -456,18 +489,27 @@ int a52_resample(float * _f, int16_t * s16)
 		:: "r" (s16+1536), "r" (f+256)
 		:"%esi", "%edi", "memory"
 	);
-#else
-	for (i = 0; i < 256; i++) {
-	    s16[6*i] = convert (f[i+256]);
-	    s16[6*i+1] = convert (f[i+768]);
-	    s16[6*i+2] = convert (f[i+1024]);
-	    s16[6*i+3] = convert (f[i+1280]);
-	    s16[6*i+4] = convert (f[i+512]);
-	    s16[6*i+5] = convert (f[i]);
-	}
-#endif	
 	break;
     }
     return chans*256;
+}
+#endif //arch_x86
+
+void a52_resample_init(int _flags,int _chans){
+    chans=_chans;
+    flags=_flags;
+
+    if(a52_resample==NULL) // only once please ;)
+    {
+	    if(gCpuCaps.hasMMX) fprintf(stderr, "Using MMX optimized resampler\n");
+	    else		fprintf(stderr, "No accelerated resampler found\n");
+    }
+    
+#ifdef ARCH_X86
+    if(gCpuCaps.hasMMX) a52_resample= a52_resample_MMX;
+#else
+    if(0);
+#endif
+    else		a52_resample= a52_resample_C;
 }
 
