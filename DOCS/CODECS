@@ -1,0 +1,85 @@
+
+Status of codecs support:
+=========================
+
+If you have sample files for untested codecs, or want a new codec to be
+added, contact us! (for new codecs we need the DLL/AX file and a sample AVI)
+
+Video codecs:
+~~~~~~~~~~~~~
+Built-in native codecs:
+
+- MPEG 1/2 (no fourcc)
+  libmpeg2: works, YUV (YV12) supported, with optional postprocessing!!!
+- OpenDivX (DIV1,DIVX)
+  decore:  works, YUV (YV12) supported, postprocessing supported
+
+Fully functional Win32 VfW/DShow codecs:
+
+- M$ MPEG4 v1, v2 (MPG4,MP42):
+  mpg4c32.dll: works, YUV supported.
+- M$ MPEG4 v3 / DivX ;-)  (MP43,DIV3,DIV4,DIV5,DIV6)
+  divxc32.dll: works, YUV supported.
+  divx_c32.ax: works, YUV and postprocessing supported.
+- Indeo Video 5.0:  (IV50)
+  ir50_32.dll: works, YUV supported.
+- Cinepak:  (CVID)
+  iccvid.dll: works, YUV supported.
+- Microsoft Video v1.0 (CRAM)
+  msvidc32.dll: works, no YUV
+- ATI VCR2:  (VCR2)
+  ativcr2.dll: works, YUV supported
+- Motion JPEG (MJPG)
+  m3jpeg32.dll: can't load (segfault)
+  mcmjpg32.dll: works, YUV supported
+- Windows Media Video 1 (WMV1)
+  wmvds32.ax: works, YUV supported
+
+Problems:
+
+- Indeo Video 4.1:  (IV41)
+  ir41_32.dll: works, no YUV, image upside-down
+- Indeo Video 3.2:  (IV32)
+  ir32_32.dll: works, no YUV, image upside-down
+- ASUS ASV1: (ASV1)
+  asusasvd.dll: ??? not tested
+- ASUS ASV2: (ASV2)
+  asusasv2.dll: loads, image upside-down and very pixelized (no YUY2, but YVYU)
+- I263:  (I263)
+  i263_32.drv: not tested (no sample file)
+- ATI VCR1:  (VCR1)
+  ativcr1.dll: can't load (16-bit DLL)
+
+Audio codecs:
+~~~~~~~~~~~~~
+Built-in native codecs:
+
+- Uncompressed PCM (0)
+- MPEG layer 2 and 3:  (0x50, 0x55)
+  mp3lib, based on mpg123  (sometimes segfaults, then use ACM, see bellow)
+- AC3:  (0x2000)
+  libac3
+- aLaw audio: (6)
+  aLaw codec from xanim sources
+- MS-GSM: (0x31,0x32)
+  xa_gsm from avifile sources
+
+Fully functional Win32 ACM/DShow codecs:
+
+- DivX audio (0x160, 0x161)
+  divxa32.acm: works
+- MS ADPCM (0x2)
+  msadp32.acm: works
+- MPEG layer 3:  (0x55)
+  l3codeca.acm: works  (you can use built-in 3dnow-optimized codec too)
+
+Problems:
+
+- IMA ADPCM (0x11)
+  imaadp32.acm: segfault
+- MS-GSM: (0x31,0x32)
+  msgsm32.acm: segfault  (use built-in codec)
+- VoxWare: (0x75)
+  voxmsdec.ax: segfault
+
+
