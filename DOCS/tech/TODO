@@ -52,7 +52,7 @@ demuxer:
 - implement forward seeking in indexed avi streams
 - implement brute-force broken avi fixer
 - demux_mpg: support for VDR's index files for more accurate seeking
-- implement seeking for YUV4MPEG(2), NuppelVideo and Real
+- implement seeking for YUV4MPEG_2_, NuppelVideo and Real
 
 decoders:
 - check and import videodecoding.de stuff
