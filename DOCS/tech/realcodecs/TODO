@@ -1,11 +1,6 @@
 TODO:
 
 - more docs are coming as I find the time to write them down
-- the frame rate is incorrect - WHY?? need sample, can't reproduce
-  -> see still_stil_still.ram. it needs the value six bytes
-  behind the frame rate. I have activated this for RV[23]0.
-  The sample plays at 12fps (without this patch), realplay
-  play it correctly with 15fps. - possibly DONE
 - use RV20toYUV420Free()
 - audio support - nearly DONE (look below)
 - internet streaming support
@@ -16,9 +11,14 @@ TODO:
   it asks for decoded audio data, but the buffer in the audio
   demuxer packets are empty/missing. It seems that the necessary
   audio packets haven't been decoded completely (incomplete interleaving)
-  the audio stream packets may get mixed with video stream packet
+  the audio stream packets may get mixed with video stream packet - DONE ???
 - put variables for audio streaming inside real_priv_t
 - audio support for other formats than COOK - use a switch
-  (like -forcereal) to activate it
-
+  (like -forcereal) to activate it - no switch needed, win32 codecs
+  doens't work (it was a nonworking attempt)
+- postprocessing support (see rp8 preferences->performance->cpu usage,
+  also statistics->streams->video->POST FILTER: ON
+  (i've found that custommessage calls differ wiht pp on/off, but adding
+  these calls to mplayer didn't make a pixel difference between outputs)
+  
 
