@@ -4,20 +4,26 @@ TODO:
 
 FOR THE RELEASE:
 ~~~~~~~~~~~~~~~~
+remove all non-GPL code...
+(move them out from 'main' tree to some 'obsoleted' tree in cvs)
 
-AVI demuxer:
+demuxer:
 - fix AVI index offset base position handling ('no video stream found' bug)
 - implement hardcore bruteforce avi re-sync for broken files (-forceidx)
 - fix for growing avi files (movi_end pos > stream->end_pos)
 - implement forward seeking in avi streams with no index
+- implement seeking to Ogg demuxer
+- fix .asf demuxer bugs
+- forward seeking from stdin ?
+- fix the whole syncing mechanism of Real demuxer
+- implement mpeg-TS demuxer
 
 URGENT:
 - finish mencoder -ovc vfw (bitrate setting, codec selection etc)
-- mencoder: image cut/crop/extend filter, colorspace conversion
 - codec priority option
-- implement software scaling to vo_mpegpes
-- move encoders from mencoder.c to libvo
-- implement/commit Ogg demuxer
+- mencoder: move encoders from mencoder.c to libmpcodecs
+- mencoder: migrate to muxer layer
+- move realtime mpeg1 encoders (lavc, fame, rte) to libmpcodecs/vf
 
 
 FUTURE:
@@ -25,12 +31,10 @@ FUTURE:
 
 decoders:
 - getting mss1 (Windows Screen Video) DLL codec working... - kabi
-- fix seeking with libmad audio codec (codec lost sync and can't resync?)
 
 demuxer:
 - demux_mpg: support for VDR's index files for more accurate seeking
 - implement seeking for YUV4MPEG_2_, NuppelVideo and Real
-- fix the whole syncing mechanism of Real demuxer
 
 decoders:
 - qtx support?
@@ -38,8 +42,6 @@ decoders:
 mencoder:
 - add ogg/vorbis audio encoder
 - stop/resume
-- make a better encoder api
-- add muxer api
 
 gui:
 - playlist ?
@@ -50,5 +52,3 @@ other:
 - mga_vid crtc2 fix
 - make nvidia_vid ;)
 - display OSD and subtitles using DVB card's OSD
-
-  
