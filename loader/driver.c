@@ -191,6 +191,6 @@ HDRVR DrvOpen(LPARAM lParam2)
     hDriver->dwDriverID = SendDriverMessage((HDRVR)hDriver, DRV_OPEN, (LPARAM) unknown, lParam2);
     TRACE("DRV_OPEN Ok!(%X)\n", hDriver->dwDriverID);
 
-    printf("Loaded DLL driver %s\n", filename);
+    printf("Loaded DLL driver %s at %x\n", filename, hDriver->hDriverModule);
     return (HDRVR)hDriver;
 }
