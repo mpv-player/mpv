@@ -147,7 +147,7 @@ void outputaudio(void *unused, Uint8 *stream, int len) {
 static int init(int rate,int channels,int format,int flags){
 
 	/* SDL Audio Specifications */
-	SDL_AudioSpec aspec;
+	SDL_AudioSpec aspec, obtained;
 	
 	int i;
 	/* Allocate ring-buffer memory */
@@ -216,13 +216,41 @@ void callback(void *userdata, Uint8 *stream, int len); userdata is the pointer s
         }
 
 	/* Open the audio device and start playing sound! */
-	if(SDL_OpenAudio(&aspec, NULL) < 0) {
+	if(SDL_OpenAudio(&aspec, &obtained) < 0) {
         	printf("SDL: Unable to open audio: %s\n", SDL_GetError());
         	return(0);
 	} 
-	
-	if(verbose) printf("SDL: buf size = %d\n",aspec.size);
-	if(ao_data.buffersize==-1) ao_data.buffersize=aspec.size;
+
+	/* did we got what we wanted ? */
+	ao_data.channels=obtained.channels;
+	ao_data.samplerate=obtained.freq;
+
+	switch(obtained.format) {
+	    case AUDIO_U8 :
+		ao_data.format = AFMT_U8;
+	    break;
+	    case AUDIO_S16LSB :
+		ao_data.format = AFMT_S16_LE;
+	    break;
+	    case AUDIO_S16MSB :
+		ao_data.format = AFMT_S16_BE;
+	    break;
+	    case AUDIO_S8 :
+		ao_data.format = AFMT_S8;
+	    break;
+	    case AUDIO_U16LSB :
+		ao_data.format = AFMT_U16_LE;
+	    break;
+	    case AUDIO_U16MSB :
+		ao_data.format = AFMT_U16_BE;
+	    break;
+	    default:
+                printf("SDL: Unsupported SDL audio format: 0x%x.\n", obtained.format);
+                return 0;
+	}
+
+	if(verbose) printf("SDL: buf size = %d\n",obtained.size);
+	ao_data.buffersize=obtained.size;
 	
 	/* unsilence audio, if callback is ready */
 	SDL_PauseAudio(0);
