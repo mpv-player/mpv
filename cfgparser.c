@@ -141,7 +141,7 @@ static int read_option(char *opt, char *param)
 		case CONF_TYPE_FLOAT:
 			if (param == NULL)
 				goto err_missing_param;
-			if (!isdigit(*param)) {
+			if (!isdigit(*param) && *param != '-' && *param != '.') {
 				printf("parameter must be a floating point number:\n");
 				ret = ERR_MISSING_PARAM;
 				goto out;
