@@ -1,12 +1,30 @@
-libdha - Library of Direct Hardware Access.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-This library was designed for direct hardware access under different
-OS and architectures. It's not linux specific only (like harddrake
-and other).
+lidbha - Direct Hardware Access library
+=======================================
 
-This library is based on gfxdump utility from GATOS project.
-Full list of supported OS'es see in libdha.h
+This library was designed for providing direct hardware access under different
+OS'es and architectures, so it's platform- and os-independent.
 
-Note: This library requires ROOT privileges or SUID'ed executable
-file (same as XServer).
-(Or use newly developed libdha kernel helper. Look at kernelhelper/dhahelper.c)
+The main project on tthe top of libdha is Vidix. It provides userspace
+video drivers (Matrox, Ati, 3Dlabs, Trident).
+
+For the full list of supported OS'es read the sources, but here's a reported
+as working list (these platforms are used daily):
+ Linux/x86
+ FreeBSD/x86
+ NetBSD/x86
+ Linux/PPC
+
+There are different ways to access the hardware, normally only ROOT can do that.
+With root privileges libdha will finely run, but there are some others ways
+to use it as a normal user:
+1, set the SUID bit on the binary (in this was it runs with root priviliges)
+2, use svgalib kernel helper
+3, use dhahelper (not yet finished)
+
+The library is based on XFree86 and gfxdump (a utility from GATOS project)
+sources.
+
+Original import and design by Nick Kurshev and Alex Beregszaszi.
+Current maintenance and dhahelper by Alex Beregszaszi.
+Svgalib kernelhelper support by Matan Ziv-Av.
+(for the e-mail addresses see the AUTHORS file in MPlayer)
