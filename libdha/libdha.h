@@ -58,6 +58,14 @@ extern void          OUTPORT32(unsigned idx,unsigned val);
 extern void *  map_phys_mem(unsigned base, unsigned size);
 extern void    unmap_phys_mem(void *ptr, unsigned size);
 
+/*  These are the region types  */
+#define MTRR_TYPE_UNCACHABLE 0
+#define MTRR_TYPE_WRCOMB     1
+#define MTRR_TYPE_WRTHROUGH  4
+#define MTRR_TYPE_WRPROT     5
+#define MTRR_TYPE_WRBACK     6
+extern int	mtrr_set_type(unsigned base,unsigned size,int type);
+
 #ifdef __cplusplus
 }
 #endif
