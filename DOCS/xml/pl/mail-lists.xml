@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.7 -->
+<!-- synced with 1.8 -->
 <appendix id="mailinglists">
 <title>Listy mailingowe</title>
 <para>
@@ -119,7 +119,7 @@ Lista poświęcona dyskusjom o <application>MPlayer</application> Weekly News.
 </itemizedlist>
 <note><para>
 Wyszukiwanie w archiwach list jest dostępne pod adresem
-<ulink url="http://www.mplayerhq.hu/cgi-bin/htsearch"/>.
+<ulink url="http://www.mplayerhq.hu/cgi-bin/s-arch.cgi"/>.
 </para></note>
 </para>
 </appendix>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.9 -->
+<!-- synced with 1.11 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - Odtwarzacz filmów dla LINUKSA</title>
@@ -44,7 +44,7 @@ treści</link> i w nim poszukaj odpowiedniego tematu, przeczytaj
 <xref linkend="faq"/> albo spróbuj przegrepować zbiory. Odpowiedź na większość
 pytań powinna być zawarta w niniejszej dokumentacji, a pozostałe prawdopodobnie zostały
 już zadane na naszych <link linkend="mailinglists">listach mailingowych</link>.
-Sprawdź <ulink url="http://www.mplayerhq.hu/cgi-bin/htsearch">archiwa</ulink>,
+Sprawdź <ulink url="http://www.mplayerhq.hu/cgi-bin/s-arch.cgi">archiwa</ulink>,
 można tam znaleźć wiele interesujących informacji.
 </para>
 </preface>
@@ -98,8 +98,9 @@ zaprojektowany do kodowania odczytywalnych przez
 (<emphasis role="bold">AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</emphasis>)
 na inne odczytywalne formaty (patrz niżej). Może kodować rozmaitymi kodekami
 video, takimi jak <emphasis role="bold">DivX4</emphasis> (1 i 2 przebiegowy),
-libavcodec oraz audio <emphasis role="bold">PCM/MP3/VBR MP3</emphasis>. Ma też
-potężny system wtyczek do manipulacji obrazem.
+<systemitem class="library">libavcodec</systemitem> oraz audio 
+<emphasis role="bold">PCM/MP3/VBR MP3</emphasis>. Ma też potężny system wtyczek
+do manipulacji obrazem.
 </para>
 
 
@@ -110,7 +111,8 @@ potężny system wtyczek do manipulacji obrazem.
   <application>MPlayer</application>
   </simpara></listitem>
 <listitem><simpara>
-  Kodowanie na wszystkie kodeki <link linkend="ffmpeg">libavcodec</link>
+  Kodowanie na wszystkie kodeki
+  <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
   z ffmpeg.
   </simpara></listitem>
 <listitem><simpara>
