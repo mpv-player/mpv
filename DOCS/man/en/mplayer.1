@@ -1564,7 +1564,7 @@ Used for raw PCM.
 .
 .
 .SH "AUDIO OUTPUT DRIVERS (MPLAYER ONLY)"
-Audio output drivers are interfaces to different output facilities.
+Audio output drivers are interfaces to different audio output facilities.
 The syntax is:
 .TP
 .B \-ao <driver1[:suboption1[=value]:...],driver2,...[,]>
@@ -2009,7 +2009,7 @@ Turns off xscreensaver at startup and turns it on again on exit.
 .TP
 .B \-vm \ \ \ 
 Try to change to a different video mode.
-Supported by the dga, x11/\:xv (XF86VidMode) and sdl video output drivers.
+Supported by the dga, x11, xv, sdl and directx video output drivers.
 If used with the directx video output driver the \-screenw,
 \-screenh, \-bpp and \-refreshrate options can be used to set
 the new display mode.
@@ -2082,7 +2082,7 @@ offset from the upper-left corner of the TV screen (default: centered).
 .
 .
 .SH "VIDEO OUTPUT DRIVERS (MPLAYER ONLY)"
-Video output drivers are interfaces to different output facilities.
+Video output drivers are interfaces to different video output facilities.
 The syntax is:
 .TP
 .B \-vo <driver1[:suboption1[=value]:...],driver2,...[,]>
@@ -2285,7 +2285,7 @@ Video playback using the Blinkenlights UDP protocol.
 This driver is highly hardware specific.
 .TP
 .B ggi\ \ \ \ 
-Video output driver for the GGI graphics system.
+GGI graphics system video output driver
 .TP
 .B directfb
 Play video using the DirectFB library.
