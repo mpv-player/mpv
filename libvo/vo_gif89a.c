@@ -58,7 +58,7 @@
 #include "../postproc/rgb2rgb.h"
 
 #define MPLAYER_VERSION 0.90
-#define VO_GIF_REVISION 3
+#define VO_GIF_REVISION 4
 
 static vo_info_t info = {
 	"animated GIF output",
@@ -94,7 +94,9 @@ static float frame_adj;
 static uint32_t img_width;
 static uint32_t img_height;
 // image data for slice rendering
-static uint8_t *img_data = NULL;
+static uint8_t *slice_data = NULL;
+// pointer for whole frame rendering
+static uint8_t *frame_data = NULL;
 // reduced image data for flip_page
 static uint8_t *reduce_data = NULL;
 // reduced color map for flip_page
@@ -191,7 +193,7 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 			printf("GIF89a: Reconfigure attempted.\n");
 		return 0;
 	}
-	// but it need not be a fatal error, so return 0.
+	// reconfigure need not be a fatal error, so return 0.
 	// multiple configs without uninit will result in two
 	// movies concatenated in one gif file.  the output
 	// gif will have the dimensions of the first movie.
@@ -200,8 +202,8 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 		case IMGFMT_RGB24: break;     
 		case IMGFMT_YV12:
 			yuv2rgb_init(24, MODE_BGR);
-			img_data = malloc(img_width * img_height * 3);
-			if (img_data == NULL) {
+			slice_data = malloc(img_width * img_height * 3);
+			if (slice_data == NULL) {
 				printf("GIF89a: malloc failed.\n");
 				return 1;
 			}
@@ -293,11 +295,22 @@ static void flip_page(void)
 	char CB[4]; // control block
 	int delay = 0;
 	int ret;
+	uint8_t *img_data;
 
 	cycle_pos++;
 	if (cycle_pos < frame_cycle - frame_adj)
 		return; // we are skipping this frame
 
+	// slice_data is used for per slice rendering,
+	// and frame_data is used for per frame rendering.
+	// i seperated these two because slice_data is
+	// ram i allocate, and frame_data is not.
+	// using one pointer for both can lead to
+	// either segfault (freeing ram that i'm not supposed
+	// to) or memory leaks (not freeing any ram at all)
+	if (slice_data != NULL) img_data = slice_data;
+	else img_data = frame_data;
+	
 	// quantize the image
 	ret = gif_reduce(img_width, img_height, img_data, reduce_data, reduce_cmap->Colors);
 	if (ret == GIF_ERROR) {
@@ -329,17 +342,15 @@ static void flip_page(void)
 
 static uint32_t draw_frame(uint8_t *src[])
 {
-	img_data = src[0];
+	frame_data = src[0];
 	return 0;
 }
 
 static uint32_t draw_slice(uint8_t *src[], int stride[], int w, int h, int x, int y)
 {
 	uint8_t *dst;
-	
-	dst = img_data + (img_width * y + x) * 3;
+	dst = slice_data + (img_width * y + x) * 3;
 	yuv2rgb(dst, src[0], src[1], src[2], w, h, img_width * 3, stride[0], stride[1]);
-
 	return 0;
 }
 
@@ -379,17 +390,16 @@ static void uninit(void)
 	
 	// free our allocated ram
 	if (gif_filename != NULL) free(gif_filename);
-	if (img_data != NULL) free(img_data);
+	if (slice_data != NULL) free(slice_data);
 	if (reduce_data != NULL) free(reduce_data);
 	if (reduce_cmap != NULL) FreeMapObject(reduce_cmap);
 	
 	// set the pointers back to null.
 	new_gif = NULL;
 	gif_filename = NULL;
-	img_data = NULL;
+	frame_data = NULL;
+	slice_data = NULL;
 	reduce_data = NULL;
 	reduce_cmap = NULL;
 }
-
-
 
