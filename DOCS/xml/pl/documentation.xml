@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.17 -->
+<!-- synced with 1.18 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - Odtwarzacz filmów</title>
@@ -66,11 +66,11 @@ RealPlayer, i Win32 DLL. Możesz w nim także oglądać filmy
 Theora</emphasis> i <emphasis role="bold">DivX</emphasis>
 Inną wielką zaletą MPlayera jest
 szeroki zakres obsługiwanych sterowników wyjściowych. Działa on z X11, Xv, DGA,
-OpenGL, SVGAlib, fbdev, AAlib, libcaca, DirectFB, ale możesz też używać GGI i SDL (i
-dzięki temu wszystkich ich sterowników) i niektórych specyficznych dla kart
-graficznych sterowników niskiego poziomu (dla Matroxa, 3Dfxa, Radeona, Mach64,
-Permedia3)! Większość z nich obsługuje skalowanie sprzętowe lub programowe,
-więc filmy można oglądać na pełnym ekranie.
+OpenGL, SVGAlib, fbdev, AAlib, libcaca, DirectFB, ale możesz też używać GGI
+i SDL (i dzięki temu wszystkich ich sterowników) i niektórych specyficznych dla
+kart graficznych sterowników niskiego poziomu (dla Matroxa, 3Dfxa, Radeona,
+Mach64, Permedia3)! Większość z nich obsługuje skalowanie sprzętowe lub
+programowe, więc filmy można oglądać na pełnym ekranie.
 <application>MPlayer</application> obsługuje wyświetlanie przy użyciu
 niektórych sprzętowych dekoderów MPEG, takich jak
 <link linkend="dvb">DVB</link> i <link linkend="dxr3">DXR3/Hollywood+</link>.
@@ -88,7 +88,8 @@ Windows. Nawet zbiory AVI bez bloku indeksowego można odtworzyć i można
 zrekonstruować ich indeks tymczasowo, używając opcji <option>-idx</option>, albo
 trwale dzięki <application>MEncoderowi</application>, w ten sposób umożliwiając
 sobie przeszukiwanie! Jak widać najważniejsza jest tu stabilność i jakość, ale
-szybkość również jest zadziwiająca.
+szybkość również jest zadziwiająca. Ma też potężny system wtyczek do
+manipulacji obrazem i dźwiękiem.
 </para>
 
 <para>
@@ -100,8 +101,7 @@ zaprojektowany do kodowania odczytywalnych przez
 na inne odczytywalne formaty (patrz niżej). Może kodować rozmaitymi kodekami
 video, takimi jak <emphasis role="bold">DivX4</emphasis> (1 i 2 przebiegowy),
 <systemitem class="library">libavcodec</systemitem> oraz audio 
-<emphasis role="bold">PCM/MP3/VBR MP3</emphasis>. Ma też potężny system wtyczek
-do manipulacji obrazem.
+<emphasis role="bold">PCM/MP3/VBR MP3</emphasis>.
 </para>
 
 
@@ -150,7 +150,7 @@ do manipulacji obrazem.
   29.97 fps VOB na 24 fps AVI)
   </simpara></listitem>
 <listitem><simpara>
-  Możliwość zastosowania naszego potężnego systemu wtyczek (kadrowanie,
+  Możliwość zastosowania naszego potężnego systemu filtrów (kadrowanie,
   powiększanie, obracanie, postproces, skalowanie, konwersja rgb/yuv)
   </simpara></listitem>
 <listitem><simpara>
