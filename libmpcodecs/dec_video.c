@@ -41,7 +41,7 @@ extern vo_vaa_t vo_vaa;
 
 int divx_quality=0;
 
-static vd_functions_t* mpvdec=NULL;
+vd_functions_t* mpvdec=NULL;
 
 int get_video_quality_max(sh_video_t *sh_video){
   if(mpvdec){
