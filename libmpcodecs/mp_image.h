@@ -3,7 +3,7 @@
 
 // set if buffer content shouldn't be modified:
 #define MP_IMGFLAG_PRESERVE 0x01
-// set if buffer content will be READED for next frame's MC: (I/P mpeg frames)
+// set if buffer content will be READ for next frame's MC: (I/P mpeg frames)
 #define MP_IMGFLAG_READABLE 0x02
 // set if buffer is allocated (used in destination images):
 #define MP_IMGFLAG_ALLOCATED 0x04
@@ -41,6 +41,8 @@
 // I+P+B type, requires 2+ independent static R/W and 1+ temp WO buffers
 #define MP_IMGTYPE_IPB 4
 
+#define MP_MAX_PLANES	4
+
 typedef struct mp_image_s {
     unsigned short flags;
     unsigned char type;
@@ -48,16 +50,27 @@ typedef struct mp_image_s {
     unsigned int imgfmt;
     int width,height;  // stored dimensions
     int x,y,w,h;  // visible dimensions
-    unsigned char* planes[3];
-    unsigned int stride[3];
+    unsigned char* planes[MP_MAX_PLANES];
+    unsigned int stride[MP_MAX_PLANES];
     int* qscale;
     int qstride;
+    int num_planes;
+    /* these are only used by planar formats Y,U(Cb),V(Cr) */
+    int chroma_width;
+    int chroma_height;
+    int chroma_h_shift;
+    int chroma_v_shift;
 } mp_image_t;
 
 #ifdef IMGFMT_YUY2
 static inline void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
     mpi->flags&=~(MP_IMGFLAG_PLANAR|MP_IMGFLAG_YUV|MP_IMGFLAG_SWAPPED);
     mpi->imgfmt=out_fmt;
+    if(out_fmt == IMGFMT_MPEGPES){
+	mpi->bpp=0;
+	return;
+    }
+    mpi->num_planes=1;
     if( (out_fmt&IMGFMT_RGB_MASK) == IMGFMT_RGB ){
 	mpi->bpp=((out_fmt&255)+7)&(~7);
 	return;
@@ -68,6 +81,7 @@ static inline void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
 	return;
     }
     mpi->flags|=MP_IMGFLAG_YUV;
+    mpi->num_planes=3;
     switch(out_fmt){
     case IMGFMT_I420:
     case IMGFMT_IYUV:
@@ -75,19 +89,33 @@ static inline void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
     case IMGFMT_YV12:
 	mpi->flags|=MP_IMGFLAG_PLANAR;
 	mpi->bpp=12;
+	mpi->chroma_width=(mpi->width>>1);
+	mpi->chroma_height=(mpi->height>>1);
+	mpi->chroma_h_shift=1;
+	mpi->chroma_v_shift=1;
 	return;
     case IMGFMT_IF09:
+	mpi->num_planes=4;
     case IMGFMT_YVU9:
 	mpi->flags|=MP_IMGFLAG_PLANAR;
 	mpi->bpp=9;
+	mpi->chroma_width=(mpi->width>>2);
+	mpi->chroma_height=(mpi->height>>2);
+	mpi->chroma_h_shift=2;
+	mpi->chroma_v_shift=2;
+	return;
+    case IMGFMT_Y800:
+    case IMGFMT_Y8:
+	/* they're planar ones, but for easier handling use them as packed */
+//	mpi->flags|=MP_IMGFLAG_PLANAR;
+	mpi->bpp=8;
+	mpi->num_planes=1;
 	return;
     case IMGFMT_UYVY:
 	mpi->flags|=MP_IMGFLAG_SWAPPED;
     case IMGFMT_YUY2:
 	mpi->bpp=16;
-	return;
-    case IMGFMT_MPEGPES:
-	mpi->bpp=0;
+	mpi->num_planes=1;
 	return;
     }
     printf("mp_image: Unknown out_fmt: 0x%X\n",out_fmt);
@@ -107,6 +135,7 @@ static inline mp_image_t* new_mp_image(int w,int h){
 static inline void free_mp_image(mp_image_t* mpi){
     if(!mpi) return;
     if(mpi->flags&MP_IMGFLAG_ALLOCATED){
+	/* becouse we allocate the whole image in once */
 	if(mpi->planes[0]) free(mpi->planes[0]);
     }
     free(mpi);
