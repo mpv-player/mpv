@@ -2215,16 +2215,11 @@ if(rel_seek_secs || abs_seek_pos){
   // DVD sub:
   if(vo_spudec){
     unsigned char* packet=NULL;
-    int len=ds_get_packet_sub(d_dvdsub,&packet);
+    int len;
     current_module="spudec";
-    if(len>=2){
-      int len2;
-      len2=(packet[0]<<8)+packet[1];
-      mp_msg(MSGT_CPLAYER,MSGL_V,"\rDVD sub: %d / %d   v_pts=%5.3f  s_pts=%5.3f  \n",len,len2,d_video->pts,d_dvdsub->pts);
+    while((len=ds_get_packet_sub(d_dvdsub,&packet))>0){
+      mp_msg(MSGT_CPLAYER,MSGL_V,"\rDVD sub: len=%d  v_pts=%5.3f  s_pts=%5.3f  \n",len,d_video->pts,d_dvdsub->pts);
       spudec_assemble(vo_spudec,packet,len,100*d_dvdsub->pts);
-    } else {
-      if(len>=0)
-	mp_msg(MSGT_CPLAYER,MSGL_V,"invalid dvd sub\n");
     }
     spudec_heartbeat(vo_spudec,100*d_video->pts);
     current_module=NULL;
