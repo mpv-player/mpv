@@ -331,8 +331,8 @@ read_next:
 	if(next>=0){
 	    d->cur_cell=next;
 
-    if( d->cur_pgc->cell_playback[d->cur_cell].block_type 
-	== BLOCK_TYPE_ANGLE_BLOCK ) d->cur_cell+=dvd_angle;
+//    if( d->cur_pgc->cell_playback[d->cur_cell].block_type 
+//	== BLOCK_TYPE_ANGLE_BLOCK ) d->cur_cell+=dvd_angle;
     d->cur_pack = d->cur_pgc->cell_playback[ d->cur_cell ].first_sector;
     d->cell_last_pack=d->cur_pgc->cell_playback[ d->cur_cell ].last_sector;
     mp_msg(MSGT_DVD,MSGL_V, "DVD next cell: %d  pack: 0x%X-0x%X  \n",d->cur_cell,d->cur_pack,d->cell_last_pack);
