@@ -110,11 +110,10 @@ Current plugins:
     plugins format list.
     MPI: passthru
 
--vop pp[=flags]
+-vop pp=[<filterName>[:<option>[:<option>...]][/[-]<filterName>[:<option>...]]...]
     Postprocessing filter.  (usefull for codecs without built-in
     postprocessing, like libmpeg12 or libavcodec)
-    Flags is a bitmask set of enabled filters (see manpage for -pp details),
-    defaults to the value of divx_quality (set by -pp commandline option)
+    see `mplayer -vop pp=help`
     MPI: DR (if possible) or TEMP
     Special: dec_video autoloads it if -pp option used but codec can't do pp.
 
