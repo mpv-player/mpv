@@ -93,7 +93,8 @@ demuxer_t* demux_open_mf(demuxer_t* demuxer){
   // video_read_properties() will choke
   sh_video->ds = demuxer->video;
 
-  if ( !strcmp( mf_type,"jpg" ) ) sh_video->format = mmioFOURCC('M', 'J', 'P', 'G');
+  if ( !strcasecmp( mf_type,"jpg" ) ||
+	!(strcasecmp(mf_type, "jpeg"))) sh_video->format = mmioFOURCC('M', 'J', 'P', 'G');
    else { mp_msg(MSGT_DEMUX, MSGL_INFO, "[demux_mf] unknow input file type.\n" ); free( dmf ); return NULL; }
 
   sh_video->disp_w = mf_w;
