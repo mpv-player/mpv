@@ -155,6 +155,7 @@ Codecs:
   --enable-gif		 enable gif89a output support [autodetect]
   --enable-png		 enable png input/output support [autodetect]
   --enable-jpeg		 enable jpeg input/output support [autodetect]
+  --enable-lzo		 enable lzo input support [autodetect]
   --disable-win32        disable Win32 DLL support [autodetect]
   --disable-dshow        disable Win32/DirectShow support [autodetect]
   --disable-xanim        disable XAnim DLL support [autodetect]
@@ -949,6 +950,7 @@ _iconv=auto
 _rtc=auto
 _ossaudio=auto
 _arts=auto
+_lzo=auto
 _mad=auto
 _vorbis=auto
 _faad=auto
@@ -1073,6 +1075,8 @@ for ac_option do
   --disable-arts)	_arts=no	;;
   --enable-mad)		_mad=yes	;;
   --disable-mad)	_mad=no		;;
+  --enable-lzo)		_lzo=yes	;;
+  --disable-lzo)	_lzo=no		;;
   --enable-vorbis)	_vorbis=yes	;;
   --disable-vorbis)	_vorbis=no	;;
   --enable-faad)	_faad=yes	;;
@@ -3395,6 +3399,28 @@ else
 fi
 
 
+echocheck "lzo support"
+if test "$_lzo" = auto ; then
+  _lzo=no
+  cat > $TMPC << EOF
+#include <lzo1x.h>
+int main(void) { lzo_init();return 0; }
+EOF
+  cc_check -llzo && _lzo=yes
+fi
+if test "$_lzo" = yes ; then
+  _def_lzo='#define USE_LZO 1'
+  _ld_lzo='-llzo'
+  _codecmodules="lzo $_codecmodules"
+  _mkf_lzo="yes"
+else
+  _def_lzo='#undef USE_LZO'
+  _nocodecmodules="lzo $_nocodecmodules"
+  _mkf_lzo="no"
+fi
+echores "$_lzo"
+
+
 echocheck "mad support"
 if test "$_mad" = auto ; then
   _mad=no
@@ -4455,6 +4481,8 @@ CDPARANOIA_INC = $_inc_cdparanoia
 CDPARANOIA_LIB = $_ld_cdparanoia
 FREETYPE_INC = $_inc_freetype
 FREETYPE_LIB = $_ld_freetype
+LZO= $_mkf_lzo
+LZO_LIB= $_ld_lzo
 
 # --- Some stuff for autoconfigure ----
 $_target_arch
@@ -4796,6 +4824,9 @@ $_def_gif_4
 
 /* enable FreeType support */
 $_def_freetype
+
+/* liblzo support */
+$_def_lzo
 
 /* libmad support */
 $_def_mad

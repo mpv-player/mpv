@@ -55,6 +55,7 @@ extern vd_functions_t mpcodecs_vd_svq1;
 extern vd_functions_t mpcodecs_vd_xvid;
 extern vd_functions_t mpcodecs_vd_libdv;
 extern vd_functions_t mpcodecs_vd_lcl;
+extern vd_functions_t mpcodecs_vd_lzo;
 
 vd_functions_t* mpcodecs_vd_drivers[] = {
         &mpcodecs_vd_null,
@@ -75,6 +76,9 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 #ifdef NEW_DECORE
         &mpcodecs_vd_divx4,
 #endif
+#endif
+#ifdef USE_LZO
+        &mpcodecs_vd_lzo,
 #endif
         &mpcodecs_vd_raw,
         &mpcodecs_vd_msrle,
