@@ -45,8 +45,8 @@ V_LIBS = $(X_LIB) $(MP1E_LIB) $(GGI_LIB) $(MLIB_LIB) $(SDL_LIB) $(SVGA_LIB) $(AA
 AO_LIBS = libao2/libao2.a
 A_LIBS = $(ALSA_LIB) $(ARTS_LIB) $(NAS_LIB) $(MAD_LIB) $(VORBIS_LIB) $(FAAD_LIB) $(SGIAUDIO_LIB)
 
-CODEC_LIBS = libmpcodecs/libmpcodecs.a mp3lib/libMP3.a liba52/liba52.a libmpeg2/libmpeg2.a $(AV_LIB) $(FAME_LIB) $(XVID_LIB)
-COMMON_LIBS = $(CODEC_LIBS) libmpdemux/libmpdemux.a  input/libinput.a $(LIB_LOADER) $(A_LIBS) $(CSS_LIB) $(ARCH_LIB) postproc/libpostproc.a $(DECORE_LIB) linux/libosdep.a $(TERMCAP_LIB)  $(STREAMING_LIB) $(Z_LIB) $(GTK_LIBS) $(PNG_LIB) $(JPEG_LIB) $(GIF_LIB) $(CDPARANOIA_LIB) $(FREETYPE_LIB) -lm
+CODEC_LIBS = libmpcodecs/libmpcodecs.a mp3lib/libMP3.a liba52/liba52.a libmpeg2/libmpeg2.a $(AV_LIB) $(FAME_LIB)
+COMMON_LIBS = $(CODEC_LIBS) libmpdemux/libmpdemux.a input/libinput.a postproc/libpostproc.a linux/libosdep.a $(LIB_LOADER) $(FREETYPE_LIB) $(A_LIBS) $(CSS_LIB) $(XVID_LIB) $(DECORE_LIB) $(TERMCAP_LIB)  $(STREAMING_LIB) $(Z_LIB) $(GTK_LIBS) $(PNG_LIB) $(JPEG_LIB) $(GIF_LIB) $(CDPARANOIA_LIB) $(ARCH_LIB) -lm
 ifeq ($(VIDIX),yes)
 MISC_LIBS += -Llibdha -ldha vidix/libvidix.a
 endif
