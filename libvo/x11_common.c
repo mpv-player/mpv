@@ -344,6 +344,11 @@ void vo_x11_putkey(int key){
    case wsSpace:     mplayer_put_key(' '); break;
    case wsEscape:    mplayer_put_key(KEY_ESC); break;
    case wsEnter:     mplayer_put_key(KEY_ENTER); break;
+   case wsBackSpace: mplayer_put_key(KEY_BS); break;
+   case wsDelete:    mplayer_put_key(KEY_DELETE); break;
+   case wsInsert:    mplayer_put_key(KEY_INSERT); break;
+   case wsHome:      mplayer_put_key(KEY_HOME); break;
+   case wsEnd:       mplayer_put_key(KEY_END); break;
    case wsPageUp:    mplayer_put_key(KEY_PAGE_UP); break;
    case wsPageDown:  mplayer_put_key(KEY_PAGE_DOWN); break;
    case wsq:
