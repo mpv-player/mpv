@@ -14,6 +14,7 @@
 - scripts in the TVout directory (allows using TVout on Matrox G400 DH on fb)
 - hacking DivX/Mpeg4 VfW codecs to get YUV output
 - opendivx decoder speed optimizations (see opendivx/ChangeLog)
+- OSD & SUB display code
 
 Zoltán Ponekker (Pontscho/Fresh!):  <pontscho@makacs.poliod.hu> 
 - configure script and Makefiles for easy compile
@@ -39,6 +40,9 @@ Szabolcs Berecz: <szabi@inf.elte.hu>
 
 László Megyer (Lez, Laaz): <lez@sch.bme.hu>
 - SUB reader
+
+Chass: (?)
+- fonts
 
 Andreas Ackermann:  <asackerm@stud.informatik.uni-erlangen.de>
 - LIRC support (see DOCS/LIRC)

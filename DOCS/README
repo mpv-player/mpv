@@ -91,13 +91,14 @@ Supported video output devices:
 - pgm:	PGM file output (for testing purposes)
 - md5:	MD5sum output (for mpeg conformance tests)
 
-NOTE: not all are available for AVI files
+NOTE: check DOCS/VIDEOCARDS !
+NOTE: maybe not all are available for AVI files
 
 Supported audio output devices:                                              
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - OSS driver
-- ALSA driver with OSS emulation
-- ESD with the esddsp utility
+- ALSA driver with OSS emulation (NOT recommended, causes annoying delays)
+- ESD with the esddsp utility (not tested)
 
 NOTE: check DOCS/SOUNDCARDS !
 
@@ -220,12 +221,13 @@ Troubleshooting:
    untested and/or unfinished.
 
 6. If you have speed problems (too slow playing), then please first check that:
-   - you don't use OpenGL driver while have software-only opengl (DRI disabled,
-     or not yet installed, conflicting libs installed, or your hardware not
-     supported etc...)
+   - you don't use OpenGL driver while have software-only opengl (Utah-GLX
+     disabled, or not yet installed, conflicting libs installed, or your
+     hardware not supported etc...)
    - you have set up MTRR registers properly (many new cards are really
      slow without setting up MTRR registers. it's NOT done by X 3.3.x! Also,
      there are older K6-2's, which lack MTRR support /stepping=0/).
+     Check DOCS/MTRR !
    - you have a fast machine (don't report that your 386 can't play DivX)
    - try with Null output (-vo null) and check CPU usage (first % value)
 
@@ -241,12 +243,10 @@ Troubleshooting:
    - to play AVI files with VBR MP3 audio use the  -mc 0  option!
    - no sound at all: check that you have working OSS driver (/dev/dsp),
      and it isn't used by another program (for example esd, xmms etc.)
+   - use OSS. If the problem persists, use ALSA ;)
 
 8. unsupported codecs (AVI files):
-   We may add support for your movie, but we need the following things:
-   - the codec DLL file: find it in your WINDOWS directory. In the SYSTEM.INI
-     there will be a listing of the installed codecs (vids.<codecname>=DLLfile)
-   - a sample file encoded with that codec.
+   Check DOCS/CODECS
 
 Contact information:
 ~~~~~~~~~~~~~~~~~~~~

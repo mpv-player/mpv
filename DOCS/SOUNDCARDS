@@ -16,7 +16,7 @@ SB Live!:
 
 Gravis UltraSound ACE:
 			OSS     : OK
-			ALSA    : if video lags, use OSS or mplayerHQ
+			ALSA    : if video lags, use OSS
 			Max kHz : 48
 
 Gravis UltraSound MAX:
@@ -24,7 +24,7 @@ Gravis UltraSound MAX:
 			ALSA    : OK (should be)
 			Max kHz : 48
 
-ESS 688 and probably all old SB's:
+ESS 688 and probably all old SB's (without buffers):
 			OSS     : OK
 			ALSA    : OK
 			Max kHz : 44.1
