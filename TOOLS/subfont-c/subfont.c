@@ -16,53 +16,72 @@
 #include <iconv.h>
 #include <math.h>
 #include <string.h>
+#include <libgen.h>
 
-#if 0			/* freetype 2.0.1 */
-#include <freetype/freetype.h>
-#else			/* freetype 2.0.3 */
+
+#ifndef OLD_FREETYPE2
+
 #include <ft2build.h>	
 #include FT_FREETYPE_H
-#endif
-
 #include FT_GLYPH_H
 
+#else			/* freetype 2.0.1 */
+
+#include <freetype/freetype.h>
+#include <freetype/ftglyph.h>
+
+#endif
+
+#ifndef DEBUG
+#define DEBUG	0
+#endif
 
 
-#define f266toInt(x)	(((x)+32)>>6)		/* round fractional fixed point number to integer */
-						/* coordinates are in 26.6 pixels (i.e. 1/64th of pixels) */
-
-
-int const	test = 1;
-
-/* default values */
+//// default values
 char		*encoding = "iso-8859-1";	/* target encoding */
-/* gcc 2.1.3 doesn't support ucs-4le, but supports ucs-4 (==ucs-4be) */
-char		*charmap = "ucs-4";		/* ucs-4le font charmap encoding */
-int		ppem = 20;			/* font size in pixels */
+char		*charmap = "ucs-4";		/* font charmap encoding, I hope ucs-4 is always big endian */
+						/* gcc 2.1.3 doesn't support ucs-4le, but supports ucs-4 (==ucs-4be) */
+int		ppem = 22;			/* font size in pixels */
 
+double		radius = 2;			/* blur radius */
+double		thickness = 1.5;		/* outline thickness */
+int		padding;
+
+char*		font_desc = "font.desc";
+//char*		font_desc = "/dev/stdout";
+
+//// constants
 int const	colors = 256;
 int const	maxcolor = 255;
-int		radius = 2;			/* blur radius */
-double		minalpha = 1.0;			/* good value for minalpha is 0.5 */
-double		alpha_factor = 1.0;
+unsigned const	base = 256;
+unsigned const	first_char = 33;
+#define max_charset_size	60000
+//int const	max_charset_size = 256;
+unsigned	charset_size = 0;
 
-int const	first_char = 33;
-int const	charset_size = 256;
-
+////
 char		*command;
-char		*font_path = NULL;
-/*char		*font_metrics = NULL;*/
+char		*font_path;
+//char		*font_metrics;
+int		append_mode = 0;
 
-
-unsigned char	*buffer;
-unsigned char	*ebuffer; // temporary buffer for alphamap creation (edges)
-unsigned char	*abuffer;
+unsigned char	*buffer, *abuffer;
 int		width, height;
-static FT_ULong	ustring[256];
+static FT_ULong	charset[max_charset_size];		/* characters we want to render; Unicode */
+static FT_ULong	charcodes[max_charset_size];	/* character codes in 'encoding' */
+iconv_t cd;					// iconv conversion descriptor
+
+
 
 #define eprintf(...)		fprintf(stderr, __VA_ARGS__)
-#define ERROR(msg, ...)		(eprintf("%s: error: " msg "\n", command, ##__VA_ARGS__), exit(1))
-#define WARNING(msg, ...)	eprintf("%s: warning: " msg "\n", command, ##__VA_ARGS__)
+#define ERROR_(msg, ...)	(eprintf("%s: error: " msg "\n", command, __VA_ARGS__), exit(1))
+#define WARNING_(msg, ...)	eprintf("%s: warning: " msg "\n", command, __VA_ARGS__)
+#define ERROR(...)		ERROR_(__VA_ARGS__, NULL)
+#define WARNING(...)		WARNING_(__VA_ARGS__, NULL)
+
+#define f266toInt(x)	(((x)+32)>>6)		// round fractional fixed point number to integer
+						// coordinates are in 26.6 pixels (i.e. 1/64th of pixels)
+#define ALIGN(x)	(((x)+7)&~7)		// 8 byte align
 
 
 
@@ -80,6 +99,7 @@ void paste_bitmap(FT_Bitmap *bitmap, int x, int y) {
 		    buffer[drow+dp] = bitmap->buffer[srow+sp];
 }
 
+
 void write_header(FILE *f) {
     static unsigned char   header[800] = "mhwanh";
     int i;
@@ -91,6 +111,7 @@ void write_header(FILE *f) {
     fwrite(header, 1, 800, f);
 }
 
+
 void write_bitmap() {
     FILE *f;
     int const max_name = 128;
@@ -98,38 +119,40 @@ void write_bitmap() {
 
     snprintf(name, max_name, "%s-b.raw", encoding);
     f = fopen(name, "wb");
-    if (f==NULL) ERROR("fopen failed.",NULL);
+    if (f==NULL) ERROR("fopen failed.");
     write_header(f);
     fwrite(buffer, 1, width*height, f);
     fclose(f);
 
     snprintf(name, max_name, "%s-a.raw", encoding);
     f = fopen(name, "wb");
-    if (f==NULL) ERROR("fopen failed.",NULL);
+    if (f==NULL) ERROR("fopen failed.");
     write_header(f);
     fwrite(abuffer, 1, width*height, f);
     fclose(f);
 }
+
 
 void render() {
     FT_Library	library;
     FT_Face	face;
     FT_Error	error;
     FT_GlyphSlot	slot;
-    FT_ULong	glyph_index;
-    FT_Glyph	glyphs[charset_size];
+    FT_ULong	glyph_index, character, code;
+    //FT_Glyph	glyphs[max_charset_size];
+    FT_Glyph	glyph;
     FILE	*f;
     int	const	load_flags = FT_LOAD_DEFAULT | FT_LOAD_NO_HINTING;
     int		pen_x, pen_xa, pen_y, ymin, ymax;
-    int		i, c;
+    int		i, uni_charmap = 1;
     int		baseline, space_advance = 20;
 
 
     /* initialize freetype */
     error = FT_Init_FreeType(&library);
-    if (error) ERROR("Init_FreeType failed.",NULL);
+    if (error) ERROR("Init_FreeType failed.");
     error = FT_New_Face(library, font_path, 0, &face);
-    if (error) ERROR("New_Face failed.",NULL);
+    if (error) ERROR("New_Face failed.");
 
     /*
     if (font_metrics) {
@@ -139,8 +162,39 @@ void render() {
     */
 
 
-    if (face->charmap->encoding!=ft_encoding_unicode)
-	WARNING("Selected font has no unicode charmap. Very bad!",NULL);
+#if 0
+    /************************************************************/
+    eprintf("Font encodings:\n");
+    for (i = 0; i<face->num_charmaps; ++i)
+	eprintf("'%.4s'\n", (char*)&face->charmaps[i]->encoding);
+
+    //error = FT_Select_Charmap(face, ft_encoding_unicode);
+    //error = FT_Select_Charmap(face, ft_encoding_adobe_standard);
+    //error = FT_Select_Charmap(face, ft_encoding_adobe_custom);
+    //error = FT_Set_Charmap(face, face->charmaps[1]);
+    //if (error) WARNING("Select_Charmap failed.");
+#endif
+#if 0
+    /************************************************************/
+    if (FT_HAS_GLYPH_NAMES(face)) {
+	int const max_gname = 128;
+	char gname[max_gname];
+	for (i = 0; i<face->num_glyphs; ++i) {
+	    FT_Get_Glyph_Name(face, i, gname, max_gname);
+	    eprintf("%02x `%s'\n", i, gname);
+	}
+
+    }
+#endif
+
+
+    if (face->charmap==NULL || face->charmap->encoding!=ft_encoding_unicode) {
+	WARNING("Unicode charmap not available for this font. Very bad!");
+	uni_charmap = 0;
+	error = FT_Set_Charmap(face, face->charmaps[0]);
+	if (error) WARNING("No charmaps! Strange.");
+    }
+
 
 
     /* set size */
@@ -156,38 +210,46 @@ void render() {
 		jppem = face->available_sizes[i].height;
 	    }
 	}
-	WARNING("Selected font is not scalable. Using ppem=%i", face->available_sizes[j].height);
+	WARNING("Selected font is not scalable. Using ppem=%i.", face->available_sizes[j].height);
 	error = FT_Set_Pixel_Sizes(face, face->available_sizes[j].width, face->available_sizes[j].height);
     }
-    if (error) WARNING("Set_Pixel_Sizes failed.",NULL);
+    if (error) WARNING("Set_Pixel_Sizes failed.");
 
 
     if (FT_IS_FIXED_WIDTH(face))
-	WARNING("Selected font is fixed-width.",NULL);
+	WARNING("Selected font is fixed-width.");
 
 
     /* compute space advance */
     error = FT_Load_Char(face, ' ', load_flags);
-    if (error) WARNING("spacewidth set to default.",NULL);
-    else space_advance = f266toInt(face->glyph->advance.x);	/* +32 is for rounding */
+    if (error) WARNING("spacewidth set to default.");
+    else space_advance = f266toInt(face->glyph->advance.x);
 
 
     /* create font.desc */
-    f = fopen("font.desc", "w");
-    if (f==NULL) ERROR("fopen failed.",NULL);
+    f = fopen(font_desc, append_mode ? "a":"w");
+    if (f==NULL) ERROR("fopen failed.");
 
     /* print font.desc header */
-    fprintf(f, "[info]\n");
-    fprintf(f, "name 'File generated for %s encoding using `%s%s%s' face (%s), ppem=%i'\n",
-	    encoding,
-	    face->family_name,
-	    face->style_name ? " ":"", face->style_name ? face->style_name:"",
-	    font_path,
-	    ppem);
-    fprintf(f, "descversion 1\n");
-    fprintf(f, "spacewidth %i\n",	2*radius + space_advance);
-    fprintf(f, "charspace %i\n",	-2*radius);
-    fprintf(f, "height %i\n",	f266toInt(face->size->metrics.height));
+    if (append_mode) {
+	fprintf(f, "\n\n# Subtitle font for %s encoding, face \"%s%s%s\", ppem=%i\n",
+		encoding,
+		face->family_name,
+		face->style_name ? " ":"", face->style_name ? face->style_name:"",
+		ppem);
+    } else {
+	fprintf(f, "# This file was generated with subfont for Mplayer.\n# Subfont by Artur Zaprzala <zybi@fanthom.irc.pl>.\n\n");
+	fprintf(f, "[info]\n");
+	fprintf(f, "name 'Subtitle font for %s encoding, face \"%s%s%s\", ppem=%i'\n",
+		encoding,
+		face->family_name,
+		face->style_name ? " ":"", face->style_name ? face->style_name:"",
+		ppem);
+	fprintf(f, "descversion 1\n");
+	fprintf(f, "spacewidth %i\n",	2*padding + space_advance);
+	fprintf(f, "charspace %i\n",	-2*padding);
+	fprintf(f, "height %i\n",		f266toInt(face->size->metrics.height));
+    }
     fprintf(f, "\n[files]\n");
     fprintf(f, "alpha %s-a.raw\n",	encoding);
     fprintf(f, "bitmap %s-b.raw\n",	encoding);
@@ -199,288 +261,429 @@ void render() {
     pen_y = 0;
     ymin = INT_MAX;
     ymax = INT_MIN;
-    for (c= first_char, i= 0; c<charset_size; ++c, ++i) {
+    for (i= 0; i<charset_size; ++i) {
 	FT_UInt	glyph_index;
 	FT_BBox	bbox;
+	character = charset[i];
+	code = charcodes[i];
 
-	glyph_index = FT_Get_Char_Index(face, ustring[i]);
-	if (glyph_index<=0) {
-	    WARNING("Glyph for char %3i|%2X|U%04X not found.", c, c, ustring[i]);
-	    continue;
+	if (character==0)
+	    glyph_index = 0;
+	else {
+	    glyph_index = FT_Get_Char_Index(face, uni_charmap ? character:code);
+	    if (glyph_index==0) {
+		WARNING("Glyph for char 0x%02x|U+%04X|%c not found.", code, character,
+			 code<' '||code>255 ? '.':code);
+		continue;
+	    }
 	}
 
 	error = FT_Load_Glyph(face, glyph_index, load_flags);
 	if (error) {
-	    WARNING("Load_Glyph %3u|%2X (char %3i|%2X|U%04X) failed.", glyph_index, glyph_index, c, c, ustring[i]);
+	    WARNING("Load_Glyph 0x%02x (char 0x%02x|U+%04X) failed.", glyph_index, code, character);
 	    continue;
 	}
 
 	slot = face->glyph;
-	error = FT_Get_Glyph(slot, &glyphs[i]);
+	error = FT_Get_Glyph(slot, &glyph);
 
 
-	FT_Glyph_Get_CBox(glyphs[i], ft_glyph_bbox_pixels, &bbox);
+	FT_Glyph_Get_CBox(glyph, ft_glyph_bbox_pixels, &bbox);
 	if (pen_y+bbox.yMax>ymax) {
 	    ymax = pen_y+bbox.yMax;
-	    /* eprintf("%3i: ymax %i (%c)\n", c, ymax, c); */
+	    // eprintf("%3i: ymax %i (%c)\n", code, ymax, code);
 	}
 	if (pen_y+bbox.yMin<ymin) {
 	    ymin = pen_y+bbox.yMin;
-	    /* eprintf("%3i: ymin %i (%c)\n", c, ymin, c); */
+	    // eprintf("%3i: ymin %i (%c)\n", code, ymin, code);
 	}
 
 	/* advance pen */
-	pen_xa = pen_x + f266toInt(slot->advance.x) + 2*radius;
-	/* pen_y += f266toInt(slot->advance.y);		// for vertical layout */
+	pen_xa = pen_x + f266toInt(slot->advance.x) + 2*padding;
+	// pen_y += f266toInt(slot->advance.y);		// for vertical layout
 
 	/* font.desc */
-	if (c=='\'')
-	    fprintf(f, "\"%c\" %i %i\n", c, pen_x,  pen_xa-1);
-	else
-	    fprintf(f, "'%c' %i %i\n", c, pen_x, pen_xa-1);
-	pen_x = (pen_xa+7)&~7;				/* 8 byte align */
+	fprintf(f, "0x%02x %i %i;\tU+%04X|%c\n", code, pen_x,  pen_xa-1, character, code<' '||code>255 ? '.':code);
+	pen_x = ALIGN(pen_xa);
 
     }
 
     fclose(f);
 
-    if (ymax<=ymin) ERROR("Something went wrong.",NULL);
+    if (ymax<=ymin) ERROR("Something went wrong. Use the source!");
 
 
     width = pen_x;
-    height = ymax - ymin + 2*radius;
-    baseline = ymax + radius;
+    height = ymax - ymin + 2*padding;
+    baseline = ymax + padding;
     eprintf("bitmap size: %ix%i\n", width, height);
 
     buffer = (unsigned char*)malloc(width*height);
-    ebuffer = (unsigned char*)malloc(width*height);
     abuffer = (unsigned char*)malloc(width*height);
-    if (buffer==NULL || abuffer==NULL) ERROR("malloc failed.",NULL);
+    if (buffer==NULL || abuffer==NULL) ERROR("malloc failed.");
+
+    memset(buffer, 0, width*height);
 
 
     /* render glyphs */
     pen_x = 0;
     pen_y = baseline;
-    for (c= first_char, i= 0; c<charset_size; ++c, ++i) {
+    for (i= 0; i<charset_size; ++i) {
 	FT_UInt	glyph_index;
+	character = charset[i];
+	code = charcodes[i];
 
-	glyph_index = FT_Get_Char_Index(face, ustring[i]);
-	if (glyph_index==0) continue;
+	if (character==0)
+	    glyph_index = 0;
+	else {
+	    glyph_index = FT_Get_Char_Index(face, uni_charmap ? character:code);
+	    if (glyph_index==0)
+		continue;
+	}
+
 	error = FT_Load_Glyph(face, glyph_index, load_flags);
 	if (error) {
-	    /* WARNING("Load_Glyph failed"); */
+	    // WARNING("Load_Glyph failed.");
 	    continue;
 	}
 
 	error = FT_Render_Glyph(face->glyph, ft_render_mode_normal);
-	if (error) WARNING("Render_Glyph %3i|%2X (char %3i|%2X|U%04X) failed.", glyph_index, glyph_index, c, c, ustring[i]);
+	if (error) WARNING("Render_Glyph 0x%02x (char 0x%02x|U+%04X) failed.", glyph_index, code, character);
 
 	slot = face->glyph;
 
 	paste_bitmap(&slot->bitmap,
-	    pen_x + radius + slot->bitmap_left,
+	    pen_x + padding + slot->bitmap_left,
 	    pen_y - slot->bitmap_top );
 
 	/* advance pen */
-	pen_x += f266toInt(slot->advance.x) + 2*radius;
-	/* pen_y += f266toInt(slot->advance.y);	// for vertical layout */
-	pen_x = (pen_x+7)&~7;			/* 8 byte align */
+	pen_x += f266toInt(slot->advance.x) + 2*padding;
+	// pen_y += f266toInt(slot->advance.y);	// for vertical layout
+	pen_x = ALIGN(pen_x);
     }
 
 
     error = FT_Done_FreeType(library);
-    if (error) ERROR("Done_FreeType failed.",NULL);
+    if (error) ERROR("Done_FreeType failed.");
 }
+
+
+/* decode from 'encoding' to unicode */
+FT_ULong decode_char(char c) {
+    FT_ULong o;
+    char *inbuf = &c;
+    char *outbuf = (char*)&o;
+    int inbytesleft = 1;
+    int outbytesleft = sizeof(FT_ULong);
+
+    size_t count = iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
+    if (count==-1) o = 0;
+
+    /* convert unicode BE -> LE */
+    o = ((o>>24)&0xff)
+      | ((o>>8)&0xff00)
+      | ((o&0xff00)<<8)
+      | ((o&0xff)<<24);
+
+    /* we don't want control characters */
+    if (o>=0x7f && o<0xa0) o = 0;
+    return o;
+}
+
 
 void prepare_charset() {
-    iconv_t cd;
-    unsigned char text[charset_size];
-    char *inbuf = text;
-    char *outbuf = (char*) ustring;
-    int inbuf_left = charset_size;
-    int outbuf_left = 4*charset_size;
-    int i;
-    size_t count;
+    FILE *f;
+    FT_ULong i;
 
-    for (i = first_char; i<charset_size; ++i) text[i-first_char] = i;
+    f = fopen(encoding, "r");		// try to read custom encoding
+    if (f==NULL) {
+	int count = 0;
+	// check if ucs-4 is available
+	cd = iconv_open(charmap, charmap);
+	if (cd==(iconv_t)-1) ERROR("iconv doesn't know %s encoding. Use the source!", charmap);
+	iconv_close(cd);
 
-    /* check if ucs-4le is available */
-    cd = iconv_open(charmap, charmap);
-    if (cd==(iconv_t)-1) ERROR("iconv doesn't know %s encoding. Use the source!", charmap);
-    iconv_close(cd);
+	cd = iconv_open(charmap, encoding);
+	if (cd==(iconv_t)-1) ERROR("Unsupported encoding `%s', use iconv --list to list character sets known on your system.", encoding);
 
-    cd = iconv_open(charmap, encoding);
-    if (cd==(iconv_t)-1) ERROR("Unsupported encoding, use iconv -l to list character sets known on your system.",NULL);
-    while (1) {
-	count = iconv(cd, &inbuf, &inbuf_left, &outbuf, &outbuf_left);
-    	if (inbuf_left==0) break;
-	/* skip undefined characters */
-	inbuf+= 1;
-	inbuf_left-= 1;
-	*(FT_ULong*)outbuf = 0;
-	outbuf+=sizeof(FT_ULong);
+	charset_size = 256 - first_char;
+	for (i = 0; i<charset_size; ++i) {
+	    charcodes[count] = i+first_char;
+	    charset[count] = decode_char(i+first_char);
+	    //eprintf("%04X U%04X\n", charcodes[count], charset[count]);
+	    if (charset[count]!=0) ++count;
+	}
+	charcodes[count] = charset[count] = 0; ++count;
+	charset_size = count;
+
+	iconv_close(cd);
+    } else {
+	unsigned int character, code;
+	int count;
+
+	eprintf("Reading custom encoding from file '%s'.\n", encoding);
+
+       	while ((count = fscanf(f, "%x%*[ \t]%x", &character, &code)) != EOF) {
+	    if (charset_size==max_charset_size) {
+		WARNING("There is no place for  more than %i characters. Use the source!", max_charset_size);
+		break;
+	    }
+	    if (count==0) ERROR("Unable to parse custom encoding file.");
+	    if (character<32) continue;	// skip control characters
+	    charset[charset_size] = character;
+	    charcodes[charset_size] = count==2 ? code : character;
+	    ++charset_size;
+	}
+	fclose(f);
+	encoding = basename(encoding);
     }
-    iconv_close(cd);
-
-    /* converting unicodes BE -> LE */
-    for (i = 0; i<256; ++i){
-	FT_ULong x=ustring[i];
-	x=  ((x>>24)&255)
-	 | (((x>>16)&255)<<8)
-	 | (((x>> 8)&255)<<16)
-	 | ((x&255)<<24);
-	ustring[i]=x;
-    }
-
+    if (charset_size==0) ERROR("No characters to render!");
 }
 
-void blur() {
-    int const r = radius;
-    int const w = 2*r+1;	/* matrix size */
-    double const A = log(1.0/maxcolor)/((r+1)*(r+1));
-    double const B = maxcolor;
-    int sum=0;
 
-    int i, x, y, mx, my;
-    unsigned char *m = (unsigned char*)malloc(w*w);
+// general outline
+void outline(
+	unsigned char *s,
+	unsigned char *t,
+	int width,
+	int height,
+	int *m,
+	int r,
+	int mwidth) {
 
-    if (m==NULL) ERROR("malloc failed",NULL);
+    int x, y, mx, my;
+    for (y = 0; y<height; ++y) {
+	for (x = 0; x<width; ++x, ++s, ++t) {
+	    unsigned max = 0;
+	    unsigned *mrow = m + r;
+	    unsigned char *srow = s -r*width;
+
+	    for (my = -r; my<=r; ++my, srow+= width, mrow+= mwidth) {
+		if (y+my < 0) continue;
+		if (y+my >= height) break;
+
+		for (mx = -r; mx<=r; ++mx) {
+		    unsigned v;
+		    if (x+mx < 0) continue;
+		    if (x+mx >= width) break;
+
+		    v = srow[mx] * mrow[mx];
+		    if (v>max) max = v;
+		}
+	    }
+	    *t = (max + base/2) / base;
+	}
+    }
+}
+
+
+// 1 pixel outline
+void outline1(
+	unsigned char *s,
+	unsigned char *t,
+	int width,
+	int height) {
+
+    int x, y, mx, my;
+
+    for (x = 0; x<width; ++x, ++s, ++t) *t = *s;
+    for (y = 1; y<height-1; ++y) {
+	*t++ = *s++;
+	for (x = 1; x<width-1; ++x, ++s, ++t) {
+	    unsigned v = (
+		    s[-1-width]+
+		    s[-1+width]+
+		    s[+1-width]+
+		    s[+1+width]
+		)/2 + (
+		    s[-1]+
+		    s[+1]+
+		    s[-width]+
+		    s[+width]+
+		    s[0]
+		);
+	    *t = v>maxcolor ? maxcolor : v;
+	}
+	*t++ = *s++;
+    }
+    for (x = 0; x<width; ++x, ++s, ++t) *t = *s;
+}
+
+
+// brute-force gaussian blur
+void blur(
+	unsigned char *s,
+	unsigned char *t,
+	int width,
+	int height,
+	int *m,
+	int r,
+	int mwidth,
+	unsigned volume) {
+
+    int x, y, mx, my;
+
+    for (y = 0; y<height; ++y) {
+	for (x = 0; x<width; ++x, ++s, ++t) {
+	    unsigned sum = 0;
+	    unsigned *mrow = m + r;
+	    unsigned char *srow = s -r*width;
+
+	    for (my = -r; my<=r; ++my, srow+= width, mrow+= mwidth) {
+		if (y+my < 0) continue;
+		if (y+my >= height) break;
+
+		for (mx = -r; mx<=r; ++mx) {
+		    if (x+mx < 0) continue;
+		    if (x+mx >= width) break;
+
+		    sum+= srow[mx] * mrow[mx];
+		}
+	    }
+	    *t = (sum + volume/2) / volume;
+	}
+    }
+}
+
+
+void alpha() {
+    int const g_r = ceil(radius);
+    int const o_r = ceil(thickness);
+    int const g_w = 2*g_r+1;		// matrix size
+    int const o_w = 2*o_r+1;		// matrix size
+    double const A = log(1.0/base)/(radius*radius*2);
+
+    int mx, my;
+    unsigned volume = 0;		// volume under Gaussian area is exactly -pi*base/A
+
+    unsigned *gm = (unsigned*)malloc(g_w*g_w * sizeof(unsigned));
+    unsigned *om = (unsigned*)malloc(o_w*o_w * sizeof(unsigned));
+    unsigned char *tbuffer = (unsigned char*)malloc(width*height);
+    if (gm==NULL || om==NULL || tbuffer==NULL) ERROR("malloc failed.");
 
 
     /* Gaussian matrix */
-    for (my = 0; my<w; ++my) {
-	for (mx = 0; mx<w; ++mx) {
-	    m[mx+my*w] = (int)(exp(A * ((mx-r)*(mx-r)+(my-r)*(my-r))) * B + .5);
-	    sum+=m[mx+my*w];
-	    if (test) eprintf("%3i ", m[mx+my*w]);
+    for (my = 0; my<g_w; ++my) {
+	for (mx = 0; mx<g_w; ++mx) {
+	    gm[mx+my*g_w] = (unsigned)(exp(A * ((mx-g_r)*(mx-g_r)+(my-g_r)*(my-g_r))) * base + .5);
+	    volume+= gm[mx+my*g_w];
+	    if (DEBUG) eprintf("%3i ", gm[mx+my*g_w]);
 	}
-	if (test) eprintf("\n");
+	if (DEBUG) eprintf("\n");
     }
-    printf("gauss sum = %d\n",sum);
-
-    /* This is not a gaussian blur! */
-    /* And is very slow */
-    
-    // PASS-1 : build edge mask:
-    memset(ebuffer,0,width*height); // clear
-    for (y = 1; y<height-1; ++y){
-	int ay=y*width;
-	int ax;
-	for (ax = 1; ax<width-1; ++ax) {
-			    int p =
-
-			  ( (buffer[ax-1+ay-width]) +
-			    (buffer[ax-1+ay+width]) +
-			    (buffer[ax+1+ay-width]) +
-			    (buffer[ax+1+ay+width]) )/2 +
-
-			  ( (buffer[ax-1+ay]) +
-			    (buffer[ax+1+ay]) +
-			    (buffer[ax+ay-width]) +
-			    (buffer[ax+ay+width]) +
-
-			    (buffer[ax+ay]) ) ;
-			    
-			    ebuffer[ax+ay]=(p>255)?255:p;
-	}
-//	printf("\n");
+    if (DEBUG) {
+	eprintf("A= %f\n", A);
+	eprintf("volume: %i; exact: %.0f; volume/exact: %.6f\n\n", volume, -M_PI*base/A, volume/(-M_PI*base/A));
     }
 
-    // PASS-2 : blur
-    for (y = 0; y<height; ++y){
-	for (x = 0; x<width; ++x) {
-	    float max = 0;
-	    for (my = -r; my<=r; ++my){
-		int ay=y+my;
-		if(ay>0 && ay<height){
-		    int by=r+(my+r)*w;
-		    ay*=width;
-		    for (mx = -r; mx<=r; ++mx)
-			if(x+mx>0 && x+mx<width)
-			    max+=ebuffer[x+mx+ay]*m[mx+by];
-		}
-	    }
-	    max*=alpha_factor/(float)sum;
-//	    printf("%5.3f ",max);
-	    if(max>255) max=255;
-	    abuffer[x+y*width] = max;
-	}
-//	printf("\n");
-    }
 
-    free(m);
+    /* outline matrix */
+    for (my = 0; my<o_w; ++my) {
+	for (mx = 0; mx<o_w; ++mx) {
+	    // antialiased circle would be perfect here, but this one is good enough
+	    double d = thickness + 1 - sqrt((mx-o_r)*(mx-o_r)+(my-o_r)*(my-o_r));
+	    om[mx+my*o_w] = d>=1 ? base : d<=0 ? 0 : (d*base + .5);
+	    if (DEBUG) eprintf("%3i ", om[mx+my*o_w]);
+	}
+	if (DEBUG) eprintf("\n");
+    }
+    if (DEBUG) eprintf("\n");
+
+
+    outline(buffer, tbuffer, width, height, om, o_r, o_w);	// solid outline
+    //outline(buffer, tbuffer, width, height, gm, g_r, g_w);	// Gaussian outline
+    //outline1(buffer, tbuffer, width, height);	// solid 1 pixel outline
+
+    blur(tbuffer, abuffer, width, height, gm, g_r, g_w, volume);
+
+    free(gm);
+    free(om);
+    free(tbuffer);
 }
 
+
 void usage() {
-    printf("Usage: %s encoding ppem font [alphaFactor [minAlpha [radius]]]\n", command);
-    printf(
+    printf("Usage: %s [--append] [--blur b] [--outline o] encoding ppem font\n", command);
+    printf("\n"
 	    "  Program creates 3 files: font.desc, <encoding>-a.raw, <encoding>-b.raw.\n"
-	    "  You should append font.desc.tail (desc for OSD characters by a'rpi & chass) to font.desc,\n"
-	    "  and copy font.desc and all *.raw files to ~/.mplayer/font/ directory.\n"
 	    "\n"
-	    "  encoding     must be 8 bit encoding, like iso-8859-2.\n"
-	    "               To list encodings available on your system use iconv -l.\n"
-	    "  ppem         Font size in pixels (e.g. 24).\n"
-	    "  font         Font file path. Any format supported by freetype library (*.ttf, *.pf?, *).\n"
-	    "  alphaFactor  Alpha map scaling factor (default is 1.0), float.\n"
-	    "  minAlpha     Alpha map minimum value (default is 1.0, max is 255), float.\n"
-	    "  radius       Alpha map blur radius (default is 6 pixels), integer.\n"
+	    "  --append         append results to existing font.desc.\n"
+	    "  --blur b         specify blur radius, float.\n"
+	    "  --outline o      specify outline thickness, float.\n"
+	    "  encoding         must be an 8 bit encoding, like iso-8859-2, or path to custom encoding file (see README).\n"
+	    "                   To list encodings available on your system use iconv --list.\n"
+	    "  ppem             Font size in pixels (e.g. 24).\n"
+	    "  font             Font file path. Any format supported by the freetype library (*.ttf, *.pfb, ...).\n"
 	    );
     exit(1);
 }
 
+
 void parse_args(int argc, char **argv) {
-    int i;
+    int i, a = 0;
     double d;
 
-    command = strrchr(argv[0], '/');
-    if (command==NULL) command = argv[0];
+    command = strrchr(argv[a], '/');
+    if (command==NULL) command = argv[a];
     else ++command;
+    ++a; --argc;
 
-    if (argc<4) usage();
+    if (argc==0) usage();
+    if (strcmp(argv[a], "--append")==0) {
+	append_mode = 1;
+	++a; --argc;
+    }
 
-    encoding = argv[1];
 
-    i = atoi(argv[2]);
+    if (argc==0) usage();
+    if (strcmp(argv[a], "--blur")==0) {
+	++a; --argc;
+	if (argc==0) usage();
+
+	d = atof(argv[a]);
+	if (d>=0 && d<20) radius = d;
+	else WARNING("using default blur radius.");
+	++a; --argc;
+    }
+
+    if (argc==0) usage();
+    if (strcmp(argv[a], "--outline")==0) {
+	++a; --argc;
+	if (argc==0) usage();
+
+	d = atof(argv[a]);
+	if (d>=0 && d<20) thickness = d;
+	else WARNING("using default outline thickness.");
+	++a; --argc;
+    }
+
+    if (argc<3) usage();
+
+    if (argv[a][0]!=0)
+	encoding = argv[a];
+    ++a; --argc;
+
+    i = atoi(argv[a]);
     if (i>1) ppem = i;
+    ++a; --argc;
 
-    font_path = argv[3];
-
-    if (argc>4) {
-	d = atof(argv[4]);
-	if (d>0.001 && d<1000.) alpha_factor = d;
-	else WARNING("alphaFactor set to default.",NULL);
-    }
-    if (argc>5) {
-	d = atof(argv[5]);
-	if (d>0.1 && d<=maxcolor) minalpha = d;
-	else WARNING("minAlpha set to default.",NULL);
-    }
-    if (argc>6) {
-	i = atoi(argv[6]);
-	if (i>=0 && i<20) radius = i;
-	else WARNING("radius set to default.",NULL);
-    }
+    font_path = argv[a];
+    ++a; --argc;
 }
+
 
 int main(int argc, char **argv) {
     parse_args(argc, argv);
+    padding = ceil(radius) + ceil(thickness);
 
     prepare_charset();
     render();
-    blur();
+    alpha();
     write_bitmap();
 
     free(buffer);
     free(abuffer);
 
-    puts(
-	    "\n"
-	    "*****************************************\n"
-	    "*  Remember to run:                     *\n"
-	    "*  cat font.desc.tail >> font.desc      *\n"
-	    "*****************************************"
-	    );
-
+//    fflush(stderr);
     return 0;
 }

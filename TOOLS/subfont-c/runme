@@ -1,0 +1,24 @@
+#!/bin/bash
+
+font=arial.ttf
+encoding=iso-8859-2
+fontsize=24
+symbolssize=35
+blur=2
+outline=1.5
+
+make || exit
+
+./subfont --blur $blur --outline $outline "$encoding" $fontsize "$font" &>log || exit
+cat log
+./subfont --append --blur $blur --outline $outline encodings/osd-mplayer $symbolssize osd/osd.pfb
+
+#cp font.desc *.raw ~/.mplayer/font/
+
+exit
+
+SIZE=`awk '/^bitmap size/ {print $NF}' log`+800
+display -size $SIZE gray:$encoding-a.raw &
+display -size $SIZE gray:$encoding-b.raw &
+#convert -size $SIZE gray:$encoding-a.raw $encoding-a.png
+#convert -size $SIZE gray:$encoding-b.raw $encoding-b.png

@@ -1,0 +1,589 @@
+%!PS-AdobeFont-1.0: OSD 1.00
+%%CreationDate: Sun Jul 22 12:38:28 2001
+%
+%%EndComments
+12 dict begin
+/FontInfo 9 dict dup begin
+/version (Version 1.00) readonly def
+/Notice () readonly def
+/FullName (OSD) readonly def
+/FamilyName (OSD) readonly def
+/Weight (Regular) readonly def
+/ItalicAngle 0.000000 def
+/isFixedPitch false def
+/UnderlinePosition -133 def
+/UnderlineThickness 49 def
+end readonly def
+/FontName /OSD def
+/PaintType 0 def
+/StrokeWidth 0 def
+/FontMatrix [0.001 0 0 0.001 0 0] def
+/FontBBox {0 -10 1000 800} readonly def
+/Encoding 256 array
+dup 0 /.notdef put
+dup 1 /uniE001 put
+dup 2 /uniE002 put
+dup 3 /uniE003 put
+dup 4 /uniE004 put
+dup 5 /uniE005 put
+dup 6 /uniE006 put
+dup 7 /uniE007 put
+dup 8 /uniE008 put
+dup 9 /uniE009 put
+dup 10 /uniE00A put
+dup 11 /uniE00B put
+dup 12 /.notdef put
+dup 13 /.notdef put
+dup 14 /.notdef put
+dup 15 /.notdef put
+dup 16 /uniE010 put
+dup 17 /uniE011 put
+dup 18 /uniE012 put
+dup 19 /uniE013 put
+dup 20 /.notdef put
+dup 21 /.notdef put
+dup 22 /.notdef put
+dup 23 /.notdef put
+dup 24 /.notdef put
+dup 25 /.notdef put
+dup 26 /.notdef put
+dup 27 /.notdef put
+dup 28 /.notdef put
+dup 29 /.notdef put
+dup 30 /.notdef put
+dup 31 /.notdef put
+dup 32 /.notdef put
+dup 33 /.notdef put
+dup 34 /.notdef put
+dup 35 /.notdef put
+dup 36 /.notdef put
+dup 37 /.notdef put
+dup 38 /.notdef put
+dup 39 /.notdef put
+dup 40 /.notdef put
+dup 41 /.notdef put
+dup 42 /.notdef put
+dup 43 /.notdef put
+dup 44 /.notdef put
+dup 45 /.notdef put
+dup 46 /.notdef put
+dup 47 /.notdef put
+dup 48 /.notdef put
+dup 49 /.notdef put
+dup 50 /.notdef put
+dup 51 /.notdef put
+dup 52 /.notdef put
+dup 53 /.notdef put
+dup 54 /.notdef put
+dup 55 /.notdef put
+dup 56 /.notdef put
+dup 57 /.notdef put
+dup 58 /.notdef put
+dup 59 /.notdef put
+dup 60 /.notdef put
+dup 61 /.notdef put
+dup 62 /.notdef put
+dup 63 /.notdef put
+dup 64 /.notdef put
+dup 65 /.notdef put
+dup 66 /.notdef put
+dup 67 /.notdef put
+dup 68 /.notdef put
+dup 69 /.notdef put
+dup 70 /.notdef put
+dup 71 /.notdef put
+dup 72 /.notdef put
+dup 73 /.notdef put
+dup 74 /.notdef put
+dup 75 /.notdef put
+dup 76 /.notdef put
+dup 77 /.notdef put
+dup 78 /.notdef put
+dup 79 /.notdef put
+dup 80 /.notdef put
+dup 81 /.notdef put
+dup 82 /.notdef put
+dup 83 /.notdef put
+dup 84 /.notdef put
+dup 85 /.notdef put
+dup 86 /.notdef put
+dup 87 /.notdef put
+dup 88 /.notdef put
+dup 89 /.notdef put
+dup 90 /.notdef put
+dup 91 /.notdef put
+dup 92 /.notdef put
+dup 93 /.notdef put
+dup 94 /.notdef put
+dup 95 /.notdef put
+dup 96 /.notdef put
+dup 97 /.notdef put
+dup 98 /.notdef put
+dup 99 /.notdef put
+dup 100 /.notdef put
+dup 101 /.notdef put
+dup 102 /.notdef put
+dup 103 /.notdef put
+dup 104 /.notdef put
+dup 105 /.notdef put
+dup 106 /.notdef put
+dup 107 /.notdef put
+dup 108 /.notdef put
+dup 109 /.notdef put
+dup 110 /.notdef put
+dup 111 /.notdef put
+dup 112 /.notdef put
+dup 113 /.notdef put
+dup 114 /.notdef put
+dup 115 /.notdef put
+dup 116 /.notdef put
+dup 117 /.notdef put
+dup 118 /.notdef put
+dup 119 /.notdef put
+dup 120 /.notdef put
+dup 121 /.notdef put
+dup 122 /.notdef put
+dup 123 /.notdef put
+dup 124 /.notdef put
+dup 125 /.notdef put
+dup 126 /.notdef put
+dup 127 /.notdef put
+dup 128 /.notdef put
+dup 129 /.notdef put
+dup 130 /.notdef put
+dup 131 /.notdef put
+dup 132 /.notdef put
+dup 133 /.notdef put
+dup 134 /.notdef put
+dup 135 /.notdef put
+dup 136 /.notdef put
+dup 137 /.notdef put
+dup 138 /.notdef put
+dup 139 /.notdef put
+dup 140 /.notdef put
+dup 141 /.notdef put
+dup 142 /.notdef put
+dup 143 /.notdef put
+dup 144 /.notdef put
+dup 145 /.notdef put
+dup 146 /.notdef put
+dup 147 /.notdef put
+dup 148 /.notdef put
+dup 149 /.notdef put
+dup 150 /.notdef put
+dup 151 /.notdef put
+dup 152 /.notdef put
+dup 153 /.notdef put
+dup 154 /.notdef put
+dup 155 /.notdef put
+dup 156 /.notdef put
+dup 157 /.notdef put
+dup 158 /.notdef put
+dup 159 /.notdef put
+dup 160 /.notdef put
+dup 161 /.notdef put
+dup 162 /.notdef put
+dup 163 /.notdef put
+dup 164 /.notdef put
+dup 165 /.notdef put
+dup 166 /.notdef put
+dup 167 /.notdef put
+dup 168 /.notdef put
+dup 169 /.notdef put
+dup 170 /.notdef put
+dup 171 /.notdef put
+dup 172 /.notdef put
+dup 173 /.notdef put
+dup 174 /.notdef put
+dup 175 /.notdef put
+dup 176 /.notdef put
+dup 177 /.notdef put
+dup 178 /.notdef put
+dup 179 /.notdef put
+dup 180 /.notdef put
+dup 181 /.notdef put
+dup 182 /.notdef put
+dup 183 /.notdef put
+dup 184 /.notdef put
+dup 185 /.notdef put
+dup 186 /.notdef put
+dup 187 /.notdef put
+dup 188 /.notdef put
+dup 189 /.notdef put
+dup 190 /.notdef put
+dup 191 /.notdef put
+dup 192 /.notdef put
+dup 193 /.notdef put
+dup 194 /.notdef put
+dup 195 /.notdef put
+dup 196 /.notdef put
+dup 197 /.notdef put
+dup 198 /.notdef put
+dup 199 /.notdef put
+dup 200 /.notdef put
+dup 201 /.notdef put
+dup 202 /.notdef put
+dup 203 /.notdef put
+dup 204 /.notdef put
+dup 205 /.notdef put
+dup 206 /.notdef put
+dup 207 /.notdef put
+dup 208 /.notdef put
+dup 209 /.notdef put
+dup 210 /.notdef put
+dup 211 /.notdef put
+dup 212 /.notdef put
+dup 213 /.notdef put
+dup 214 /.notdef put
+dup 215 /.notdef put
+dup 216 /.notdef put
+dup 217 /.notdef put
+dup 218 /.notdef put
+dup 219 /.notdef put
+dup 220 /.notdef put
+dup 221 /.notdef put
+dup 222 /.notdef put
+dup 223 /.notdef put
+dup 224 /.notdef put
+dup 225 /.notdef put
+dup 226 /.notdef put
+dup 227 /.notdef put
+dup 228 /.notdef put
+dup 229 /.notdef put
+dup 230 /.notdef put
+dup 231 /.notdef put
+dup 232 /.notdef put
+dup 233 /.notdef put
+dup 234 /.notdef put
+dup 235 /.notdef put
+dup 236 /.notdef put
+dup 237 /.notdef put
+dup 238 /.notdef put
+dup 239 /.notdef put
+dup 240 /.notdef put
+dup 241 /.notdef put
+dup 242 /.notdef put
+dup 243 /.notdef put
+dup 244 /.notdef put
+dup 245 /.notdef put
+dup 246 /.notdef put
+dup 247 /.notdef put
+dup 248 /.notdef put
+dup 249 /.notdef put
+dup 250 /.notdef put
+dup 251 /.notdef put
+dup 252 /.notdef put
+dup 253 /.notdef put
+dup 254 /.notdef put
+dup 255 /.notdef put
+readonly def
+currentdict end
+currentfile eexec
+dup /Private 15 dict dup begin
+/RD{string currentfile exch readstring pop}executeonly def
+/ND{noaccess def}executeonly def
+/NP{noaccess put}executeonly def
+/ForceBold false def
+/BlueValues [ -15 0 717 734 693 708 630 649 593 611 658 679 780 800 ] def
+/OtherBlues [ -112 -93 -200 -178 -45 -26 -134 -116 -71 -51 ] def
+/StdHW [ 7 ] def
+/StdVW [ 8 ] def
+/StemSnapH [ 4 7 10 13 18 22 27 30 33 38 61 65 ] def
+/StemSnapV [ 5 8 11 15 18 21 25 30 33 36 52 64 ] def
+/MinFeature {16 16} def
+/password 5839 def
+/Subrs 1 array
+dup 0 {
+	return
+	} NP
+ ND
+2 index
+/CharStrings 16 dict dup begin
+/.notdef {
+	0 400 hsbw
+	endchar
+} ND
+/uniE001 { % play
+	200 880 hsbw
+	0 hmoveto
+	375 400 rlineto
+	-375 400 rlineto
+	closepath
+	endchar
+} ND
+/uniE002 { % pause
+	200 880 hsbw
+	0 hmoveto
+	150 hlineto
+	800 vlineto
+	-150 hlineto
+	closepath
+	300 -800 rmoveto
+	150 hlineto
+	800 vlineto
+	-150 hlineto
+	closepath
+	endchar
+} ND
+/uniE003 { % stop
+	200 880 hsbw
+	0 hmoveto
+	665 hlineto
+	720 vlineto
+	-665 hlineto
+	closepath
+	endchar
+} ND
+/uniE004 { % rewind
+	100 880 hsbw
+	765 hmoveto
+	800 vlineto
+	-375 -400 rlineto
+	closepath
+	-15 -400 rmoveto
+	800 vlineto
+	-375 -400 rlineto
+	closepath
+	endchar
+} ND
+/uniE005 { % fast forward
+	100 880 hsbw
+	0 hmoveto
+	375 400 rlineto
+	-375 400 rlineto
+	closepath
+	390 -800 rmoveto
+	375 400 rlineto
+	-375 400 rlineto
+	closepath
+	endchar
+} ND
+/uniE006 { % clock
+	30 880 hsbw
+	400 -10 rmoveto
+	226 0 184 184 0 226 rrcurveto
+	0 226 -184 184 -226 0 rrcurveto
+	-226 0 -184 -184 0 -226 rrcurveto
+	0 -226 184 -184 226 0 rrcurveto
+	closepath
+	-33 377 rmoveto
+	65 vlineto
+	65 hlineto
+	-65 vlineto
+	closepath
+	173 66 rmoveto
+	195 hlineto
+	-65 vlineto
+	-195 hlineto
+	closepath
+	-238 238 rmoveto
+	195 vlineto
+	65 hlineto
+	-195 vlineto
+	closepath
+	-238 -237 rmoveto
+	-195 hlineto
+	65 vlineto
+	195 hlineto
+	closepath
+	237 -238 rmoveto
+	-195 vlineto
+	-65 hlineto
+	195 vlineto
+	closepath
+	10 194 rmoveto
+	-88 180 rlineto
+	45 22 rlineto
+	88 -180 rlineto
+	closepath
+	-36 4 rmoveto
+	268 241 rlineto
+	27 -30 rlineto
+	-268 -241 rlineto
+	closepath
+	endchar
+} ND
+/uniE007 { % contrast
+	30 880 hsbw
+	400 -10 rmoveto
+	226 0 184 184 0 226 rrcurveto
+	0 226 -184 184 -226 0 rrcurveto
+	-226 0 -184 -184 0 -226 rrcurveto
+	0 -226 184 -184 226 0 rrcurveto
+	closepath
+	80 vmoveto
+	-182 0 -148 148 0 182 rrcurveto
+	0 182 148 148 182 0 rrcurveto
+	closepath
+	endchar
+} ND
+/uniE008 { % saturation
+	30 880 hsbw
+	400 -10 rmoveto
+	226 0 184 184 0 226 rrcurveto
+	0 226 -184 184 -226 0 rrcurveto
+	-226 0 -184 -184 0 -226 rrcurveto
+	0 -226 184 -184 226 0 rrcurveto
+	closepath
+	80 vmoveto
+	-182 0 -148 148 0 182 rrcurveto
+	0 182 148 148 182 0 rrcurveto
+	182 0 148 -148 0 -182 rrcurveto
+	0 -182 -148 -148 -182 0 rrcurveto
+	closepath
+	410 vmoveto
+	44 0 36 36 0 44 rrcurveto
+	0 44 -36 36 -44 0 rrcurveto
+	-44 0 -36 -36 0 -44 rrcurveto
+	0 -44 36 -36 44 0 rrcurveto
+	closepath
+	-139 -240 rmoveto
+	44 0 36 36 0 44 rrcurveto
+	0 44 -36 36 -44 0 rrcurveto
+	-44 0 -36 -36 0 -44 rrcurveto
+	0 -44 36 -36 44 0 rrcurveto
+	closepath
+	277 hmoveto
+	44 0 36 36 0 44 rrcurveto
+	0 44 -36 36 -44 0 rrcurveto
+	-44 0 -36 -36 0 -44 rrcurveto
+	0 -44 36 -36 44 0 rrcurveto
+	closepath
+	endchar
+} ND
+/uniE009 { % volume
+	0 1000 hsbw
+	0 hmoveto
+	1000 hlineto
+	-1000 500 rlineto
+	closepath
+	endchar
+} ND
+/uniE00A { % brightness
+	30 880 hsbw
+	400 250 rmoveto
+	83 0 67 67 0 83 rrcurveto
+	0 83 -67 67 -83 0 rrcurveto
+	-83 0 -67 -67 0 -83 rrcurveto
+	0 -83 67 -67 83 0 rrcurveto
+	closepath
+	50 vmoveto
+	-55 0 -45 45 0 55 rrcurveto
+	0 55 45 45 55 0 rrcurveto
+	55 0 45 -45 0 -55 rrcurveto
+	0 -55 -45 -45 -55 0 rrcurveto
+	closepath
+	140 75 rmoveto
+	235 hlineto
+	50 vlineto
+	-235 hlineto
+	closepath
+	-23 56 rmoveto
+	166 166 rlineto
+	-35 35 rlineto
+	-166 -166 rlineto
+	closepath
+	-56 23 rmoveto
+	235 vlineto
+	-50 hlineto
+	-235 vlineto
+	closepath
+	-56 -23 rmoveto
+	-166 166 rlineto
+	-35 -35 rlineto
+	166 -166 rlineto
+	closepath
+	-23 -56 rmoveto
+	-235 hlineto
+	-50 vlineto
+	235 hlineto
+	closepath
+	23 -56 rmoveto
+	-166 -166 rlineto
+	35 -35 rlineto
+	166 166 rlineto
+	closepath
+	56 -23 rmoveto
+	-235 vlineto
+	50 hlineto
+	235 vlineto
+	closepath
+	56 23 rmoveto
+	166 -166 rlineto
+	35 35 rlineto
+	-166 166 rlineto
+	closepath
+	endchar
+} ND
+/uniE00B { % hue
+	30 880 hsbw
+	400 -10 rmoveto
+	226 0 184 184 0 226 rrcurveto
+	0 226 -184 184 -226 0 rrcurveto
+	-226 0 -184 -184 0 -226 rrcurveto
+	0 -226 184 -184 226 0 rrcurveto
+	closepath
+	244 vmoveto
+	-178 0 -144 74 0 92 rrcurveto
+	0 92 144 74 178 0 rrcurveto
+	178 0 144 -74 0 -92 rrcurveto
+	0 -92 -144 -74 -178 0 rrcurveto
+	closepath
+	386 vmoveto
+	-33 0 -27 27 0 33 rrcurveto
+	0 33 27 27 33 0 rrcurveto
+	33 0 27 -27 0 -33 rrcurveto
+	0 -33 -27 -27 -33 0 rrcurveto
+	closepath
+	endchar
+} ND
+/uniE010 { % progress [
+	76 334 hsbw
+	0 hmoveto
+	182 hlineto
+	90 vlineto
+	-37 hlineto
+	460 vlineto
+	37 hlineto
+	90 vlineto
+	-182 hlineto
+	closepath
+	endchar
+} ND
+/uniE011 { % progress |
+	84 334 hsbw
+	0 hmoveto
+	166 hlineto
+	640 vlineto
+	-166 hlineto
+	closepath
+	endchar
+} ND
+/uniE012 { % progress ]
+	76 334 hsbw
+	0 hmoveto
+	182 hlineto
+	640 vlineto
+	-182 hlineto
+	-90 vlineto
+	37 hlineto
+	-460 vlineto
+	-37 hlineto
+	closepath
+	endchar
+} ND
+/uniE013 { % progress .
+	102 334 hsbw
+	255 vmoveto
+	130 hlineto
+	130 vlineto
+	-130 hlineto
+	closepath
+	endchar
+} ND
+end
+end
+readonly put
+noaccess put
+dup/FontName get exch definefont pop
+mark currentfile closefile

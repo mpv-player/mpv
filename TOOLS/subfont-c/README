@@ -1,41 +1,62 @@
-About:
-~~~~~~
-`subfont' program renders antialiased fonts for mplayer using freetype library.
-Should work with TrueType, Type1 and any other font supported by libfreetype.
-
-Goals:
- - internationalization: supports any 8 bit encoding (uses iconv).
- - nice look: creates glyph `shadows' using algorithm derived from gaussian blur (slow!).
-
-
-Note:
-~~~~~
-Starting x position of each char and the bitmap width is aligned to multiple of 8
-(required for under-development MMX renderer).
-
-
 Usage:
 ~~~~~~
-Usage: subfont encoding ppem font [alphaFactor [minAlpha [radius]]]
-  Program creates 3 files: font.desc, <encoding>-a.raw, <encoding>-b.raw.
-  You should append font.desc.tail (desc for OSD characters by a'rpi & chass) to font.desc,
-  and copy font.desc and all *.raw files to ~/.mplayer/font/ directory.
-
-  encoding     must be 8 bit encoding, like iso-8859-2.
-               To list encodings available on your system use iconv -l.
-  ppem         Font size in pixels (e.g. 24).
-  font         Font file path. Any format supported by freetype library (*.ttf, *.pf?, *).
-  alphaFactor  Alpha map scaling factor (default is 1.0), float.
-  minAlpha     Alpha map minimum value (default is 1.0, max is 255), float.
-  radius       Alpha map blur radius (default is 6 pixels), integer.
+1. Make sure you have FreeType 2 installed.
+2. Get a TrueType or Type 1 font.
+3. Modify `runme' script for your encoding and font path.
+4. Type: ./runme
+5. Copy *.raw and font.desc files to ~/.mplayer/font/
+6. Run subfont alone to see more options.
 
 
-Example:
-~~~~~~~~
-make
-./subfont iso-8859-2 20 verdana.ttf
-cat font.desc.tail >> font.desc
-cp font.desc *.raw ~/.mplayer/font/
+About:
+~~~~~~
+`subfont' program renders antialiased OSD and subtitle fonts for mplayer.
+
+What you get are bitmap and alpha *.raw files and a font.desc.
+What you need is TrueType, Type 1 or any other font supported by FreeType.
+
+Alpha channel is created using outline and Gaussian blur filters.
+
+ANY encoding is now supported! That is, all 8-bit encodings known by libc
+and user-supplied encodings (also multibyte) through custom encoding files.
+
+I prepared also Type 1 font `osd.pfb' for OSD characters based on bitmaps
+created by chass.
+
+Subfont was tested with Korean fonts from truetype-fonts-ko-2.0-1k.noarch.rpm
+I found on http://rpmfind.net/ and euc-kr encoding.  Custom encoding file
+for euc-kr was generated from charmap I found in /usr/share/i18n/charmaps/EUC-KR.gz
+(glibc package).  This should work with -unicode switch for mplayer
+(though it is not Unicode encoding).
+It took about 14 seconds to render over 8000 characters on P3 @ 600MHz.
+
+
+Custom encodings:
+~~~~~~~~~~~~~~~~~
+For each character you want to render write the line consisting of:
+ hexadecimal Unicode character code,
+ followed by whitespace,
+ followed by hexadecimal number representing your encoding,
+ followed by new line character.
+
+Example: to render a single letter `aogonek' (Unicode 0x0105) and encode
+it using iso-8859-2 encoding (0xB1), your custom encoding file will consist
+of a sigle line:
+0105 B1
+
+
+Notes:
+~~~~~~
+  + Starting x position of each character and the bitmap width is aligned
+to multiple of 8 (required by mplayer).
+
+  + Currently subfont won't work on big-endian systems.
+
+  + My development platform is RedHat 7.1.  FreeType versions tested are
+2.0.1 through 2.0.4.
+
+  + FreeType library has a bug that makes subfont display some warning message
+about Unicode charmap for osd.pfb.
 
 
 Author:

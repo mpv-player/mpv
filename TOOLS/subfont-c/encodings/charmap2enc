@@ -1,0 +1,11 @@
+#!/usr/bin/awk -f
+# only for mostly 2-byte encodings like euc-kr
+
+$2~"^/x..$" {
+	c = substr($2, 3, 2)
+	if (c<"80")
+	    print substr($1, 3, 4) "\t" c
+}
+$2~"^/x../x..$" {
+	print substr($1, 3, 4) "\t" substr($2, 3, 2) substr($2, 7, 2)
+}

@@ -1,0 +1,1 @@
+gunzip -c /usr/share/i18n/charmaps/EUC-KR.gz | ./charmap2enc > euc-kr
