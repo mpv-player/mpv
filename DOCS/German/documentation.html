@@ -36,8 +36,8 @@
 	    <UL><LI><A HREF="codecs.html#2.1.4.1">2.1.4.1 VFW Codecs</A></LI>
 	    <LI><A HREF="codecs.html#2.1.4.2">2.1.4.2 DirectShow Codecs</A></LI>
 	    </UL>
-	</LI></UL>
-    </LI><LI><A HREF="video.html">2.2 Video & Audio Ausgabe-Geräte</A>
+	</UL>
+    <LI><A HREF="video.html">2.2 Video & Audio Ausgabe-Geräte</A>
 	<UL><LI><A HREF="video.html#2.2.1">2.2.1 Video Ausgabe-Geräte</A>
 	    <UL><LI><A HREF="video.html#2.2.1.1">2.2.1.1 MTRR</A></LI>
 	    </LI><A HREF="video.html#2.2.1.2">2.2.1.2 Xv</A>
@@ -65,13 +65,12 @@
 	    <LI><A HREF="video.html#2.2.1.6">2.2.1.6 Framebuffer Ausgabe (FBdev)</A></LI>
 	    <LI><A HREF="video.html#2.2.1.7">2.2.1.7 Matrox Framebuffer (mga_vid)</A></LI>
 	    <LI><A HREF="video.html#2.2.1.8">2.2.1.8 SiS 6326 Framebuffer (sis_vid)</A></LI>
-	    <LI><A HREF="video.html#2.2.1.9">2.2.1.9 3dfx YUV Unterstützung</A></LI>
+	    <LI><A HREF="video.html#2.2.1.9">2.2.1.9 3dfx YUV Unterstützung (zdfxfb)</A></LI>
 	    <LI><A HREF="video.html#2.2.1.10">2.2.1.10 OpenGL Ausgabe</A></LI>
 	    <LI><A HREF="video.html#2.2.1.11">2.2.1.11 AAlib - Textmodus-Anzeige</A></LI>
 	    <LI><A HREF="video.html#2.2.1.A">2.2.1.A TVout</A>
-		<UL><LI><A HREF="video.html#2.2.1.A.1">2.2.1.A.1 Matrox Karten</A></LI>
+		<UL><LI><A HREF="video.html#2.2.1.A.1">2.2.1.A.1 Matrox Dualhead</A>
 		</UL>
-	    </LI>
 	</LI><LI><A HREF="sound.html#2.2.2">2.2.2 Audio Ausgabe-Geräte</A>
 	    <UL><LI><A HREF="sound.html#2.2.2.1">2.2.2.1 Soundkarten Erfahrungen, Empfehlungen</A></LI>
 	    </UL>
@@ -120,19 +119,20 @@
 
 <P><B>MPlayer</B> ist einen Video-Player für LINUX, welcher auch auf manchen
 anderen Unix-Systemen und <B>nicht-x86</B> CPU läuft, siehe <A HREF="#6">Sektion
-6</A>. Er spielt die meisten MPEG, AVI und ASF files, unterstützt von einigen
+6</A>. Er spielt die meisten MPEG, AVI und ASF/WMF Dateien, unterstützt von einigen
 eingebauten und einigen Win32 DLL Codecs. Du kannst <B>VideoCD</B>, <B>SVCD</B>,
-<B>DVD</B> und auch <B>DivX</B> Filme sehen. Ein anderes großes Feature von
+<B>DVD</B> und auch <B>DivX</B> Filme sehen (und die braust die avifile Libraty nicht!).
+Ein anderes großes Feature von
 <B>MPlayer</B> ist die große Weite von unterstützten Ausgabetreibern. Es
 funktioniert mit X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, aber du kannst SDL
-verwenden (und dadurch alle SDL-Treiber) und einigen Low-Level
+verwenden (und dadurch alle SDL-Treiber) und auch einigen Low-Level
 grafikkartenabhängige Treiber (für Matrox). Die meinsten von ihnen unterstützen
 Software oder Hardware-Scaling, also kannst du die Videos in Vollbild geniesen.
 Und was meinst du über die großen, antialiase schattierten Untertitel (7
 unterstützte Typen!!!) mit ungarischen, englischen, cyrillischen, tschechischen,
 koreanischen Schriften und OSD?</P>
 
-<P>MPlayer kann unter den Bedienungen der <A HREF="http://www.gnu.org/licenses/gpl.html">GNU GPL</A> verbreitet werden.</P>
+<P>MPlayer kann unter den Bedienungen der <A HREF="http://www.gnu.org/licenses/gpl.html">GNU GPL</A> verbreitet werden, AUSSER dem OpenDivX Code.</P>
 
 <P>Ich schreibe keine Codecs, nur einen Player. Stattdessen verbringe ich eine
 menge Zeit mit dem Finden des besten Weges um zerstörte Input-Files (beides MPEG
@@ -178,7 +178,7 @@ So beschloss ich einen zu schreiben/zu modifizieren...</P>
     Die Release-Version nach 0.11pre nach 4 Monaten schwerer Entwicklung!
     Probiere es, und sei überrascht! Tausende von neuen Features hinzugefügt ...
     und natürlich wurde auch der alte Code verbessert, Bugs entfernt usw.
-<LI><B>MPlayer 0.18 "The BugCounter"</B><BR>
+<LI><B>MPlayer 0.XX "The BugCounter"</B><BR>
     2 Monate seit 0.17 und hier ist die neue Release.. Komplette ASF-Unterstützung,
     mehr Untertitel-Formate, libao wurde eingeführt (wie libvo, aber für Audio),
     stabiler den je, und so weiter. Es ist ein MUSS !
@@ -198,6 +198,8 @@ erleben willst:<BR>
       Normalerweise will das jeder. Wenn du auch nicht weisst warum, du <B>brauchst</B> es.</LI>
     <LI><B>make</B> - vorgeschlagene Version ist <B>immer die neueste</B> (mindestens 3.79)
       Dies ist normalerweise nicht so wichtig.</LI>
+    <LI><B>SDL</B> - es ist nicht vorgeschrieben, aber es ist hilfreich in vielen
+      Fällen. Verwende immer das aktuelleste (beginnend bei 1.2.x).</LI>
 </UL></P>
 	  
 <P>Lese das folgende, bevor du versuchst <B>MPlayer</B> zu kompilieren:</P>
@@ -210,7 +212,7 @@ hat ein ähnliches Codecs-Paket, aber es unterscheidet sich von unserem. Also
 wenn du alle unterstützten Codecs verwenden willst, verwende unser Paket! Wie
 auch immer, du kannst auch unserer Paket für avifile nutzen.</LI>
 
-<LI>Wenn du eine Matrox G200/G400/G450 Karte verwenstest, bitte schau auf die
+<LI>Wenn du eine Matrox G200/G400/G450/G550 Karte verwendest, bitte schau auf die
 <A HREF="video.html#2.2.1.7">Sektion 2.2.1.7</A> um einen großen Geschwindigkeitsvorteil zu erhalten.
 Es ist wichtig, dass du diese Schritte <I>vor</I> dem Kompilieren von <B>MPlayer</B>
 machst, ansonsten wird die Matrox-spezifische Unterstützung nicht eingebaut.</LI>
@@ -243,7 +245,8 @@ Dateien ansehen.</P>
 
 <P>Wenn auch unwichtig sollten trotzdem die Schiften installiert werden um das OSD und die
 Untertitel-Unterstützung zu ermöglichen. Lade dir mp_font3.zip und optionale (fall
-sie existieren) Sprachupdates.</P>
+sie existieren) Sprachupdates. Es ist SEHR ZU EMPFEHLEN die <A HREF=#1.5>Sektion 1.5</A>
+für Details zu lesen.</P>
 
 <PRE>    mkdir ~/.mplayer/font
     cd ~/.mplayer/font
@@ -255,11 +258,7 @@ sie existieren) Sprachupdates.</P>
 
 <P><B><A NAME=1.4>1.4. Was ist mit dem GUI?</A></B></P>
 
-<P>Ich bin kein GUI Programmierer. Ich hasse GUIs, ich liebe rein schwarze 80x25
-Konsolen. Darum hat der Player z.Z. nur Keyboard-Kontrolle von der Konsole/xterm.
-Es gibt eine GUI-Entwicklung für den Player, koordiniert von Pontscho/Fresh!
-Es ist noch unter Entwicklung, aber es wird bald released. Er benötigt noch
-einige nette Skins, also wenn du ein guter Grafiker bist, melde die bei ihm!!!</P>
+<P>TODO<P>
   
 <P><B><A NAME=1.5>1.5. Untertitel und OSD</A></B></P>
 
@@ -277,14 +276,9 @@ anzuzeigen.</P>
 verwenden kannt. Es gibt mehrere Möglichkeiten um eines zu bekommen:
 <UL>
 
-<LI>verwende das Schrift-Erzeugungs-Tool, du kann es finden unter TOOLS/subfont-c .
-Es ist ein komplettes Tool um TTF/Type1/usw. Schrifen zu einem <B>MPlayer</B>-Schriftpaket
-zu konvertieren (lese TOOLS/subfont-c/README für Details)
-
 <LI>downloade die fertigen Schiftpaketen von der <B>MPlayer</B> Seite.
 Hinweis: die aktuell verfügbaren Schiften sind beschränkt auf ISO 8859-1/2-Unterstützung,
 und es gibt noch einige spezielle Versionen für koreanische, russische und andere Codepages.
-Am besten baust du dir aber die Schiften selbst mit dem oben genannten Tool.
 Die Schiften sollte eine passende font.desc-Datei haben, welche die Unicode-Schrift
 an die aktuelle Codepage und den Untertitel-Text anzupasst. Eine andere Lösung
 ist, dass man die Untertitel im UTF8 Format enkodiert und die -utf8 Option verwendet
@@ -293,12 +287,20 @@ verschiedenen Codepages zu UTF8 kann mit dem konwert (debian) oder iconv (RedHat
 Programm gemacht werden.<BR>
 Einige URLs:
 <UL>
-  <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/">ftp://ftp.mplayerhq.hu/MPlayer/releases</A> - ISO-Schiften, VERALTET!
+  <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/">ftp://ftp.mplayerhq.hu/MPlayer/releases</A> - ISO-Schiften
   <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/">ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts</A> - verschiedene Schriften von Anwendern
   <LI><A HREF="http://realtime.ssu.ac.kr/~lethean/mplayer">http://realtime.ssu.ac.kr/~lethean/mplayer</A> - koreanische Schrift und RAW-Plugin
 </UL>
-</P>
+
+<LI>verwende das Schrift-Erzeugungs-Tool, du kann es finden unter TOOLS/subfont-c .
+Es ist ein komplettes Tool um TTF/Type1/usw. Schrifen zu einem <B>MPlayer</B>-Schriftpaket
+zu konvertieren (lese TOOLS/subfont-c/README für Details)
+
+<LI>verwende das Schrift-Erzeugungs GIMP-Plugin unter TOOLS/subfont-GIMP
+(Hinweis: Du musst den HSI RAW Plugin auch haben, siehe URL unten)
 </UL>
+</P>
+
 <P>Nach den Download entpacke die Dateien nach ~/.mplayer/font/ .
 Nun musst du die Zeit im oberen, linken Eck des Films sehen (kann
 man mit 'o' ausschalten).</P>
@@ -322,10 +324,10 @@ in der Konfigurationsdatei einstellen.</P>
 <P><B><A NAME=3>3. Verwendung</A></P></B>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD>Datei</TD><TD>&nbsp;&nbsp;</TD><TD><CODE>mplayer [Optionen] [Pfad/]Dateiname</CODE></TD><TR>
-<TD></TD><TD>VCD</TD><TD></TD><TD><CODE>mplayer [Optionen] -vcd Tracknr /dev/cdrom</CODE></TD><TR>
-<TD></TD><TD>CVD</TD><TD></TD><TD><CODE>mplayer [Optionen] -dvdauth /dev/dvd filename.VOB</CODE></TD><TR>
-<TD></TD><TD>Netz</TD><TD></TD><TD><CODE>mplayer [Optionen] http://site.com/datei.[mpg|avi]</CODE></TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"Datei</TD><TD>&nbsp;&nbsp;</TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif"mplayer [Optionen] [Pfad/]Dateiname</CODE></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"VCD</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif"mplayer [Optionen] -vcd Tracknr /dev/cdrom</CODE></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"DVD</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif"mplayer [Optionen] -dvd Titelnr [/dev/dvd]</CODE></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"Netz</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif"mplayer [Optionen] http://site.com/datei.[mpg|avi]</CODE></TD><TR>
 </TABLE></P>
 
 <P><PRE>  mplayer -vo x11 /mnt/Filme/Contact/contact2.mpg
@@ -430,8 +432,7 @@ anzugeben.</P>
 
 <P><B><A NAME=3.3>3.3. Streaming von Netzwerk oder Pipes</A></B></P>
 
-<P><B>MPlayer</B> kann Videos über Netzwerke, unter Verwendung des HTTP Protokolls
-abspielen und auch Beta ASF-Streaming (VON Netzwerk) ist verfügbar.
+<P><B>MPlayer</B> kann Videos über Netzwerke, unter Verwendung des HTTP Protokoll.
 Die Konfigurierung ist einfach, kompiliere <B>MPlayer</B> neu mit</P>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;./configure --enable-streaming</CODE></P>
@@ -485,7 +486,7 @@ verwenden (FreeBSD-STABLE erforderlich, oder verwende Kernel-Patches).</P>
 <P>Wenn <B>MPlayer</B> meldet "CD-ROM Device '/dev/cdrom' not found!" musst du einen
 symbolischen Link setzen: <CODE>ln -s /dev/<CD-ROM-LW> /dev/cdrom</CODE></P>
 
-<P>Es gibt bis jetzte keine DVD-Unterstützung unter FreeBSD. (??? libdvdread?)</P>
+<P>Es gibt bis jetzte keine DVD-Unterstützung unter FreeBSD.</P>
 
 <P><B><A NAME=6.3>6.3. Solaris</A></B></P>
 
@@ -865,6 +866,7 @@ other technical help from:</P>
 <P>libvo Treiber:
 <UL>
   <LI><B>vo_3dfx.c</B>   - VERALTET, verwende xv
+  <LI><B>vo_tdfxfb.c</B> - <A HREF="mailto:zsteva@ptt.yu">Zeljko Stevanovic</A>
   <LI><B>vo_aa.c</B>     - Folke Ashberg
   <LI><B>vo_dga.c</B>    - Acki
   <LI><B>vo_fbdev.c</B>  - Szabi
@@ -933,7 +935,7 @@ Diese Liste sollte wenig verwendet werden.</P>
     <LI>sende hier Anwenderfragen (nach lesen der ganzen DOCs)</LI>
 </UL></P>
 
-</LI><LI>MPlayer &amp; Matrox G200/G400/G450 Anwender:<BR>
+</LI><LI>MPlayer &amp; Matrox G200/G400/G450/G550 Anwender:<BR>
 <A HREF="http://lists.sourceforge.net/lists/listinfo/mplayer-matrox">http://lists.sourceforge.net/lists/listinfo/mplayer-matrox</A>
 <P>Sende hierher Matrox-betreffende Fragen<UL>
     <LI>Sachen über mga_vid</LI>
