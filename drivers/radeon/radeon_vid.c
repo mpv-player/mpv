@@ -174,7 +174,9 @@ typedef struct video_registers_s
 }video_registers_t;
 
 static bes_registers_t besr;
-
+#ifndef RAGE128
+static int IsR200=0;
+#endif
 #ifdef DEBUG
 #define DECLARE_VREG(name) { #name, name, 0 }
 #else
@@ -452,6 +454,84 @@ static void radeon_vid_dump_regs( void )
   for(i=0;i<sizeof(vregs)/sizeof(video_registers_t);i++)
 	printk(RVID_MSG"%s = %08X\n",vregs[i].sname,INREG(vregs[i].name));
   printk(RVID_MSG"*** End of OV0 registers dump ***\n");
+}
+#endif
+
+#ifndef RAGE128
+/* Gamma curve definition */
+typedef struct 
+{
+	unsigned int gammaReg;
+	unsigned int gammaSlope;
+	unsigned int gammaOffset;
+}GAMMA_SETTINGS;
+
+/* Recommended gamma curve parameters */
+GAMMA_SETTINGS r200_def_gamma[18] = 
+{
+	{OV0_GAMMA_0_F, 0x100, 0x0000},
+	{OV0_GAMMA_10_1F, 0x100, 0x0020},
+	{OV0_GAMMA_20_3F, 0x100, 0x0040},
+	{OV0_GAMMA_40_7F, 0x100, 0x0080},
+	{OV0_GAMMA_80_BF, 0x100, 0x0100},
+	{OV0_GAMMA_C0_FF, 0x100, 0x0100},
+	{OV0_GAMMA_100_13F, 0x100, 0x0200},
+	{OV0_GAMMA_140_17F, 0x100, 0x0200},
+	{OV0_GAMMA_180_1BF, 0x100, 0x0300},
+	{OV0_GAMMA_1C0_1FF, 0x100, 0x0300},
+	{OV0_GAMMA_200_23F, 0x100, 0x0400},
+	{OV0_GAMMA_240_27F, 0x100, 0x0400},
+	{OV0_GAMMA_280_2BF, 0x100, 0x0500},
+	{OV0_GAMMA_2C0_2FF, 0x100, 0x0500},
+	{OV0_GAMMA_300_33F, 0x100, 0x0600},
+	{OV0_GAMMA_340_37F, 0x100, 0x0600},
+	{OV0_GAMMA_380_3BF, 0x100, 0x0700},
+	{OV0_GAMMA_3C0_3FF, 0x100, 0x0700}
+};
+
+GAMMA_SETTINGS r100_def_gamma[6] = 
+{
+	{OV0_GAMMA_0_F, 0x100, 0x0000},
+	{OV0_GAMMA_10_1F, 0x100, 0x0020},
+	{OV0_GAMMA_20_3F, 0x100, 0x0040},
+	{OV0_GAMMA_40_7F, 0x100, 0x0080},
+	{OV0_GAMMA_380_3BF, 0x100, 0x0100},
+	{OV0_GAMMA_3C0_3FF, 0x100, 0x0100}
+};
+
+static void make_default_gamma_correction( void )
+{
+    size_t i;
+    if(!IsR200){
+	OUTREG(OV0_LIN_TRANS_A, 0x12A00000);
+	OUTREG(OV0_LIN_TRANS_B, 0x199018FE);
+	OUTREG(OV0_LIN_TRANS_C, 0x12A0F9B0);
+	OUTREG(OV0_LIN_TRANS_D, 0xF2F0043B);
+	OUTREG(OV0_LIN_TRANS_E, 0x12A02050);
+	OUTREG(OV0_LIN_TRANS_F, 0x0000174E);
+	for(i=0; i<6; i++){
+		OUTREG(r100_def_gamma[i].gammaReg,
+		       (r100_def_gamma[i].gammaSlope<<16) |
+		        r100_def_gamma[i].gammaOffset);
+	}
+    }
+    else{
+	OUTREG(OV0_LIN_TRANS_A, 0x12a00000);
+	OUTREG(OV0_LIN_TRANS_B, 0x1990190e);
+	OUTREG(OV0_LIN_TRANS_C, 0x12a0f9c0);
+	OUTREG(OV0_LIN_TRANS_D, 0xf3000442);
+	OUTREG(OV0_LIN_TRANS_E, 0x12a02040);
+	OUTREG(OV0_LIN_TRANS_F, 0x175f);
+
+	/* Default Gamma,
+	   Of 18 segments for gamma cure, all segments in R200 are programmable,
+	   while only lower 4 and upper 2 segments are programmable in Radeon*/
+	for(i=0; i<18; i++){
+		OUTREG(r200_def_gamma[i].gammaReg,
+		       (r200_def_gamma[i].gammaSlope<<16) |
+		        r200_def_gamma[i].gammaOffset);
+	}
+    }
 }
 #endif
 
@@ -764,6 +844,8 @@ static void radeon_vid_make_default(void)
 {
 #ifdef RAGE128
   OUTREG(OV0_COLOUR_CNTL,0x00101000UL); /* Default brihgtness and saturation for Rage128 */
+#else
+  make_default_gamma_correction();
 #endif
   besr.deinterlace_pattern = 0x900AAAAA;
   OUTREG(OV0_DEINTERLACE_PATTERN,besr.deinterlace_pattern);
@@ -982,7 +1064,10 @@ static int __init radeon_vid_config_card(void)
 	radeon_ram_size /= 0x100000;
 	detected_chip = i;
 	printk(RVID_MSG"Found %s (%uMb memory)\n",ati_card_ids[i].name,radeon_ram_size);
-
+#ifndef RAGE128	
+	if(ati_card_ids[i].id == PCI_DEVICE_ID_R200_QL || 
+	   ati_card_ids[i].id == PCI_DEVICE_ID_RV200_QW) IsR200 = 1;
+#endif
 	return TRUE;
 }
 
