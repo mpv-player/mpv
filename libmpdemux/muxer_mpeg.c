@@ -1821,6 +1821,7 @@ static int soft_telecine(muxer_headers_t *vpriv, uint8_t *fps_ptr, uint8_t *se_p
 			return 0;
 		}
 		*fps_ptr = (*fps_ptr & 0xf0) | (fps + 3);
+		vpriv->nom_delta_pts = parse_fps((fps + 3) == FRAMERATE_2997 ? 299700 : 300000);
 	}
 	
 	//in pce_ptr starting from bit 0 bit 24 is tff, bit 30 is rff, 
@@ -1831,6 +1832,8 @@ static int soft_telecine(muxer_headers_t *vpriv, uint8_t *fps_ptr, uint8_t *se_p
 		return 0;
 	}
 
+	vpriv->picture.progressive_sequence = 0;
+	vpriv->picture.progressive_frame = 1;
 	if(se_ptr)
 		se_ptr[1] &= 0xf7;
 	
@@ -1936,27 +1939,6 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 			temp_ref = (s->buffer[ptr+4]<<2)+(s->buffer[ptr+5]>>6);
 			if(!spriv->vframes)
 				spriv->last_tr = spriv->max_tr = temp_ref;
-			mp_msg(MSGT_MUXER, MSGL_V, "Video frame type: %c, TR: %d\n", FTYPE(pt), temp_ref);
-			if(spriv->picture.mpeg1 == 0) 
-			{
-				size_t tmp = ptr;
-			
-				while (ptr < len-5 && 
-					(s->buffer[ptr] != 0 || s->buffer[ptr+1] != 0 || s->buffer[ptr+2] != 1 || s->buffer[ptr+3] != 0xb5)) 
-						ptr++;
-				if(ptr < len-5) 
-				{
-					pce_ptr = &(s->buffer[ptr+4]);
-					mp_header_process_extension(&(spriv->picture), &(s->buffer[ptr+4]));
-					if(spriv->picture.display_time >= 50 && spriv->picture.display_time <= 300) 
-						spriv->delta_pts = (spriv->nom_delta_pts * spriv->picture.display_time) / 100;
-				}
-				else 
-					spriv->delta_pts = spriv->nom_delta_pts;
-			
-				ptr = tmp;
-			}
-			
 			d1 = temp_ref - spriv->last_tr;
 			if(d1 < -6)	//there's a wraparound
 				frames_diff = spriv->max_tr + 1 + temp_ref - spriv->last_tr;
@@ -1972,6 +1954,28 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 				spriv->max_tr = temp_ref;
 			
 			spriv->last_tr = temp_ref;
+			mp_msg(MSGT_MUXER, MSGL_V, "Video frame type: %c, TR: %d\n", FTYPE(pt), temp_ref);
+			if(spriv->picture.mpeg1 == 0) 
+			{
+				size_t tmp = ptr;
+			
+				while (ptr < len-5 && 
+					(s->buffer[ptr] != 0 || s->buffer[ptr+1] != 0 || s->buffer[ptr+2] != 1 || s->buffer[ptr+3] != 0xb5)) 
+						ptr++;
+				if(ptr < len-5) 
+				{
+					pce_ptr = &(s->buffer[ptr+4]);
+					if(spriv->telecine)
+						soft_telecine(spriv, fps_ptr, se_ptr, pce_ptr, frames_diff);
+					mp_header_process_extension(&(spriv->picture), &(s->buffer[ptr+4]));
+					if(spriv->picture.display_time >= 50 && spriv->picture.display_time <= 300) 
+						spriv->delta_pts = (spriv->nom_delta_pts * spriv->picture.display_time) / 100;
+				}
+				else 
+					spriv->delta_pts = spriv->nom_delta_pts;
+			
+				ptr = tmp;
+			}
 		}
 		
 		switch (pt) {
@@ -1996,9 +2000,6 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 			default: // intra-coded
 			  sz = len; // no extra buffer for it...
 		}
-
-		if(spriv->telecine)
-			soft_telecine(spriv, fps_ptr, se_ptr, pce_ptr, frames_diff);
 
 		spriv->vframes++;
 		reorder_frame(spriv, s->buffer, len, pt, temp_ref, spriv->delta_pts);
