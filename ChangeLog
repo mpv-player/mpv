@@ -21,8 +21,9 @@ MPlayer (1.0)
     * full x86_64 support
     * -rootwin, -panscan support in the quartz video output driver
     * key repetition and aspect fixed in the quartz video output driver
-    * right-click menu for quartz video output driver added with zoom options
-    * VCD support for Darwin
+    * new "Movie" menu for quartz video output driver added with zoom options & preset
+    * fs_res sub option let you choose the fullscreen resolution for the quartz video output driver
+    * VCD support for Darwin (Mac OS X)
     * fix for stdin input and slave mode on MinGW
     * support for -rootwin in the DirectX video output driver
     * improved monitor selection in the DirectX video output driver
