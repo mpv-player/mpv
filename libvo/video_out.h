@@ -9,19 +9,7 @@
 #include <inttypes.h>
 
 #include "font_load.h"
-
-#define IMGFMT_YV12 0x32315659
-//#define IMGFMT_YUY2 (('Y'<<24)|('U'<<16)|('Y'<<8)|'2')
-#define IMGFMT_YUY2 (('2'<<24)|('Y'<<16)|('U'<<8)|'Y')
-
-#define IMGFMT_RGB_MASK 0xFFFFFF00
-#define IMGFMT_RGB (('R'<<24)|('G'<<16)|('B'<<8))
-#define IMGFMT_BGR_MASK 0xFFFFFF00
-#define IMGFMT_BGR (('B'<<24)|('G'<<16)|('R'<<8))
-#define IMGFMT_RGB15 (IMGFMT_RGB|15)
-#define IMGFMT_RGB16 (IMGFMT_RGB|16)
-#define IMGFMT_RGB24 (IMGFMT_RGB|24)
-#define IMGFMT_RGB32 (IMGFMT_RGB|32)
+#include "img_format.h"
 
 #define VO_EVENT_EXPOSE 1
 #define VO_EVENT_RESIZE 2

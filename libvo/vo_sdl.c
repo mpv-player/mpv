@@ -146,14 +146,21 @@ static struct sdl_priv_s {
 //void vo_draw_alpha_yuy2(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride);
 
 static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
-    struct sdl_priv_s *priv = &sdl_priv;
-    int x,y;
+	struct sdl_priv_s *priv = &sdl_priv;
+	int x,y;
 	
-  if (priv->format==IMGFMT_YV12)
-    vo_draw_alpha_yv12(w,h,src,srca,stride,((uint8_t *) *(priv->overlay->pixels))+priv->width*y0+x0,priv->width);
-  else
-    vo_draw_alpha_yuy2(w,h,src,srca,stride,((uint8_t *) *(priv->overlay->pixels))+2*(priv->width*y0+x0),2*priv->width);
-
+	switch(priv->format) {
+		case IMGFMT_YV12:  
+		case IMGFMT_I420:
+        	case IMGFMT_IYUV:
+    			vo_draw_alpha_yv12(w,h,src,srca,stride,((uint8_t *) *(priv->overlay->pixels))+priv->width*y0+x0,priv->width);
+		break;
+		case IMGFMT_YUY2:
+        	case IMGFMT_UYVY:
+        	case IMGFMT_YVYU:		
+    			vo_draw_alpha_yuy2(w,h,src,srca,stride,((uint8_t *) *(priv->overlay->pixels))+2*(priv->width*y0+x0),2*priv->width);
+		break;	
+  	}	
 }
 
 
@@ -380,6 +387,10 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	  	sdl_format=SDL_YUY2_OVERLAY;
 		printf("SDL: Using YUY2 image format\n");
 	  break;
+          case IMGFMT_UYVY:
+	  	sdl_format=SDL_UYVY_OVERLAY;
+		printf("SDL: Using UYVY image format\n");
+	  break;
           default:
             printf("SDL: Unsupported image format (0x%X)\n",format);
             return -1;
@@ -472,6 +483,8 @@ static uint32_t draw_frame(uint8_t *src[])
 
         switch(priv->format){
         case IMGFMT_YV12:
+        case IMGFMT_I420:
+        case IMGFMT_IYUV:
 	    dst = (uint8_t *) *(priv->overlay->pixels);
 	    memcpy (dst, src[0], priv->framePlaneY);
 	    dst += priv->framePlaneY;
@@ -479,14 +492,16 @@ static uint32_t draw_frame(uint8_t *src[])
 	    dst += priv->framePlaneUV;
 	    memcpy (dst, src[1], priv->framePlaneUV);
             break;
+
         case IMGFMT_YUY2:
+        case IMGFMT_UYVY:
+        case IMGFMT_YVYU:
 	    dst = (uint8_t *) *(priv->overlay->pixels);
 	    memcpy (dst, src[0], priv->width*priv->height*2);
             break;
         }
         	
 	SDL_UnlockYUVOverlay (priv->overlay);
-
 	return 0;
 }
 
@@ -711,7 +726,11 @@ query_format(uint32_t format)
 {
     switch(format){
     case IMGFMT_YV12:
+    case IMGFMT_I420:
+    case IMGFMT_IYUV:
     case IMGFMT_YUY2:
+    case IMGFMT_UYVY:
+    case IMGFMT_YVYU:
 //    case IMGFMT_RGB|24:
 //    case IMGFMT_BGR|24:
         return 1;

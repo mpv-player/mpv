@@ -138,23 +138,61 @@ int init_video_codec(){
 //  sh_video->o_bih.biPlanes=3;
 //  sh_video->o_bih.biBitCount=16;
 
-  if(outfmt==IMGFMT_YUY2)
-    sh_video->o_bih.biBitCount=16;
-  else
-    sh_video->o_bih.biBitCount=outfmt&0xFF;//   //24;
 
-  if(sh_video->o_bih.biBitCount==15) ++sh_video->o_bih.biBitCount;
+  switch (outfmt) {
 
-  sh_video->o_bih.biSizeImage=sh_video->o_bih.biWidth*sh_video->o_bih.biHeight*(sh_video->o_bih.biBitCount/8);
+/* planar format */
+  case IMGFMT_YV12:
+  case IMGFMT_I420:
+  case IMGFMT_IYUV:
+      sh_video->o_bih.biBitCount=12;
 
-  if(!(sh_video->codec->outflags[sh_video->outfmtidx]&CODECS_FLAG_FLIP))
-    sh_video->o_bih.biHeight=-sh_video->bih.biHeight; // flip image!
+/* packed format */
+  case IMGFMT_YUY2:
+  case IMGFMT_UYVY:
+  case IMGFMT_YVYU:
+      sh_video->o_bih.biBitCount=16;
+      break;
 
-  if(outfmt==IMGFMT_YUY2 && !(sh_video->codec->outflags[sh_video->outfmtidx]&CODECS_FLAG_YUVHACK))
-    sh_video->o_bih.biCompression = mmioFOURCC('Y','U','Y','2');
+/* rgb/bgr format */
+  case IMGFMT_RGB8:
+  case IMGFMT_BGR8:
+      sh_video->o_bih.biBitCount=8;
+      break;
 
-//  sh_video->o_bih.biCompression = mmioFOURCC('U','Y','V','Y');
+  case IMGFMT_RGB15:
+  case IMGFMT_RGB16:
+  case IMGFMT_BGR15:
+  case IMGFMT_BGR16:
+      sh_video->o_bih.biBitCount=16;
+      break;
 
+  case IMGFMT_RGB24:
+  case IMGFMT_BGR24:
+      sh_video->o_bih.biBitCount=24;
+      break;
+
+  case IMGFMT_RGB32:
+  case IMGFMT_BGR32:
+      sh_video->o_bih.biBitCount=32;
+      break;
+
+  default:
+      printf("unsupported image format: 0x%x\n", outfmt);
+      return 0;
+  }
+
+  sh_video->o_bih.biSizeImage = sh_video->o_bih.biWidth * sh_video->o_bih.biHeight * (sh_video->o_bih.biBitCount/8);
+
+  if(!(sh_video->codec->outflags[sh_video->outfmtidx]&CODECS_FLAG_FLIP)) {
+      sh_video->o_bih.biHeight=-sh_video->bih.biHeight; // flip image!
+  }
+
+  // this looks suspicious :-)
+  if(!(outfmt == IMGFMT_YUY2 && (sh_video->codec->outflags[sh_video->outfmtidx] & CODECS_FLAG_YUVHACK))
+     && (outfmt & IMGFMT_RGB_MASK) != IMGFMT_RGB  && (outfmt & IMGFMT_BGR_MASK ) != IMGFMT_BGR) {
+	 sh_video->o_bih.biCompression = outfmt;
+  }
 
   if(verbose) {
     printf("Starting decompression, format:\n");
@@ -163,7 +201,7 @@ int init_video_codec(){
 	printf("  biHeight %d\n", sh_video->bih.biHeight);
 	printf("  biPlanes %d\n", sh_video->bih.biPlanes);
 	printf("  biBitCount %d\n", sh_video->bih.biBitCount);
-	printf("  biCompression %d='%.4s'\n", sh_video->bih.biCompression, &sh_video->bih.biCompression);
+	printf("  biCompression 0x%x ('%.4s')\n", sh_video->bih.biCompression, &sh_video->bih.biCompression);
 	printf("  biSizeImage %d\n", sh_video->bih.biSizeImage);
     printf("Dest fmt:\n");
 	printf("  biSize %d\n", sh_video->o_bih.biSize);
@@ -171,7 +209,7 @@ int init_video_codec(){
 	printf("  biHeight %d\n", sh_video->o_bih.biHeight);
 	printf("  biPlanes %d\n", sh_video->o_bih.biPlanes);
 	printf("  biBitCount %d\n", sh_video->o_bih.biBitCount);
-	printf("  biCompression %d='%.4s'\n", sh_video->o_bih.biCompression, &sh_video->o_bih.biCompression);
+	printf("  biCompression 0x%x ('%.4s')\n", sh_video->o_bih.biCompression, &sh_video->o_bih.biCompression);
 	printf("  biSizeImage %d\n", sh_video->o_bih.biSizeImage);
   }
 

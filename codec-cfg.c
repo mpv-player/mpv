@@ -15,7 +15,7 @@
 #include <assert.h>
 #include <string.h>
 
-#include "libvo/video_out.h"
+#include "libvo/img_format.h"
 #include "codec-cfg.h"
 
 #define PRINT_LINENUM printf(" at line %d\n", line_num)
@@ -99,38 +99,35 @@ static int add_to_format(char *s, unsigned int *fourcc, unsigned int *fourccmap)
 	return 1;
 }
 
+
 static int add_to_out(char *sfmt, char *sflags, unsigned int *outfmt,
 		unsigned char *outflags)
 {
-	static char *fmtstr[] = {
-		"YUY2",
-		"YV12",
-		"RGB8",
-		"RGB15",
-		"RGB16",
-		"RGB24",
-		"RGB32",
-		"BGR8",
-		"BGR15",
-		"BGR16",
-		"BGR24",
-		"BGR32",
-		NULL
+        static struct {
+	        const char *name;
+	        const unsigned int num;
+	} fmt_table[] = {
+		"YV12",  IMGFMT_YV12,
+		"I420",  IMGFMT_I420,
+		"IYUV",  IMGFMT_IYUV,
+
+		"YUY2",  IMGFMT_YUY2,
+		"UYVY",  IMGFMT_UYVY,
+		"YVYU",  IMGFMT_YVYU,
+
+	        "RGB8",  IMGFMT_RGB|8,
+		"RGB15", IMGFMT_RGB|15, 
+		"RGB16", IMGFMT_RGB|16,
+		"RGB24", IMGFMT_RGB|24,
+		"RGB32", IMGFMT_RGB|32,
+		"BGR8",  IMGFMT_BGR|8,
+		"BGR15", IMGFMT_BGR|15,
+		"BGR16", IMGFMT_BGR|16,
+		"BGR24", IMGFMT_BGR|24,
+		"BGR32", IMGFMT_BGR|32,
+		NULL,    0
 	};
-	static unsigned int fmtnum[] = {
-		IMGFMT_YUY2,
-		IMGFMT_YV12,
-		IMGFMT_RGB|8,
-		IMGFMT_RGB|15,
-		IMGFMT_RGB|16,
-		IMGFMT_RGB|24,
-		IMGFMT_RGB|32,
-		IMGFMT_BGR|8,
-		IMGFMT_BGR|15,
-		IMGFMT_BGR|16,
-		IMGFMT_BGR|24,
-		IMGFMT_BGR|32
-	};
+
 	static char *flagstr[] = {
 		"flip",
 		"noflip",
@@ -165,15 +162,15 @@ static int add_to_out(char *sfmt, char *sflags, unsigned int *outfmt,
 	}
 
 	do {
-		for (j = 0; fmtstr[j] != NULL; j++)
-			if (!strncmp(sfmt, fmtstr[j], strlen(fmtstr[j])))
+		for (j = 0; fmt_table[j].name != NULL; j++)
+			if (!strncmp(sfmt, fmt_table[j].name, strlen(fmt_table[j].name)))
 				break;
-		if (fmtstr[j] == NULL)
+		if (fmt_table[j].name == NULL)
 			goto err_out_parse_error;
-		outfmt[i] = fmtnum[j];
+		outfmt[i] = fmt_table[j].num;
 		outflags[i] = flags;
                 ++i;
-		sfmt+=strlen(fmtstr[j]);
+		sfmt+=strlen(fmt_table[j].name);
 	} while ((*(sfmt++) == ',') && --freeslots);
 
 	if (!freeslots)

@@ -265,10 +265,18 @@ static void check_events(void)
 static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
     int x,y;
 
-  if (xv_format==IMGFMT_YV12)
-    vo_draw_alpha_yv12(w,h,src,srca,stride,xvimage[0]->data+image_width*y0+x0,image_width);
-  else
-    vo_draw_alpha_yuy2(w,h,src,srca,stride,xvimage[0]->data+2*(image_width*y0+x0),2*image_width);
+  switch (xv_format) {
+	case IMGFMT_YV12:  
+	case IMGFMT_I420:
+        case IMGFMT_IYUV:
+    		vo_draw_alpha_yv12(w,h,src,srca,stride,xvimage[0]->data+image_width*y0+x0,image_width);
+	break;
+	case IMGFMT_YUY2:
+        case IMGFMT_UYVY:
+        case IMGFMT_YVYU:	
+    		vo_draw_alpha_yuy2(w,h,src,srca,stride,xvimage[0]->data+2*(image_width*y0+x0),2*image_width);
+	break;
+  }		
 
 }
 
@@ -332,43 +340,55 @@ static uint32_t draw_frame(uint8_t *src[])
 {
  int foo;
 
- if(xv_format==IMGFMT_YUY2)
-  {
-   // YUY2 packed, flipped
+ switch (xv_format) {
+ case IMGFMT_YUY2:
+ case IMGFMT_UYVY:
+ case IMGFMT_YVYU:
+
+     // YUY2 packed, flipped
 #if 0
-   int i;
-   unsigned short *s=(unsigned short *)src[0];
-   unsigned short *d=(unsigned short *)xvimage[0]->data;
-   s+=image_width*image_height;
-   for(i=0;i<image_height;i++)
-    {
-     s-=image_width;
-     memcpy(d,s,image_width*2);
-     d+=image_width;
-    }
+     int i;
+     unsigned short *s=(unsigned short *)src[0];
+     unsigned short *d=(unsigned short *)xvimage[0]->data;
+     s+=image_width*image_height;
+     for(i=0;i<image_height;i++) {
+	 s-=image_width;
+	 memcpy(d,s,image_width*2);
+	 d+=image_width;
+     }
 #else
-   memcpy(xvimage[0]->data,src[0],image_width*image_height*2);
+     memcpy(xvimage[0]->data,src[0],image_width*image_height*2);
 #endif
-  }
-   else
-    {
+     break;
+
+ case IMGFMT_YV12:
+ case IMGFMT_I420:
+ case IMGFMT_IYUV:
+
      // YV12 planar
      memcpy(xvimage[0]->data,src[0],image_width*image_height);
      memcpy(xvimage[0]->data+image_width*image_height,src[2],image_width*image_height/4);
      memcpy(xvimage[0]->data+image_width*image_height*5/4,src[1],image_width*image_height/4);
-    }
+     break;
+ }
 
   return 0;
 }
 
 static uint32_t query_format(uint32_t format)
 {
+
+// umm, this is a kludge, we need to ask the server.. (see init function above)
+    return 1;
+/*
  switch(format)
   {
    case IMGFMT_YV12:
-   case IMGFMT_YUY2: return 1;
+   case IMGFMT_YUY2: 
+       return 1;
   }
  return 0;
+*/
 }
 
 static void uninit(void) {

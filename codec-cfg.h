@@ -1,15 +1,6 @@
 #ifndef __CODEC_CFG_H
 #define __CODEC_CFG_H
 
-#ifndef IMGFMT_YV12
-#define IMGFMT_YV12 0x32315659
-#define IMGFMT_YUY2 (('2'<<24)|('Y'<<16)|('U'<<8)|'Y')
-#define IMGFMT_RGB_MASK 0xFFFFFF00
-#define IMGFMT_RGB (('R'<<24)|('G'<<16)|('B'<<8))
-#define IMGFMT_BGR_MASK 0xFFFFFF00
-#define IMGFMT_BGR (('B'<<24)|('G'<<16)|('R'<<8))
-#endif
-
 #define CODECS_MAX_FOURCC	16
 #define CODECS_MAX_OUTFMT	16
 
