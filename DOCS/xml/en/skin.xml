@@ -71,7 +71,8 @@ that you can even have shaped windows if your X server has the XShape extension.
 <sect2 id="skin-overview-components">
 <title>Skin components</title>
 <para>
-Skins are quite free-format (unlike the fixed-format skins of Winamp/XMMS,
+Skins are quite free-format (unlike the fixed-format skins of
+<application>Winamp</application>/<application>XMMS</application>,
 for example), so it is up to you to create something great.
 </para>
 
