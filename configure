@@ -4374,7 +4374,7 @@ fi
 echores "$_theora"
 
 
-echocheck "Matroska support (0.5.0 or later)"
+echocheck "Matroska support (0.6.0 or later)"
 if test "$_matroska" != no ; then
   _matroska=no
   _TMPC=$TMPC
@@ -4383,11 +4383,11 @@ if test "$_matroska" != no ; then
 #include <ebml/EbmlVersion.h>
 #include <matroska/KaxVersion.h>
 
-#if LIBEBML_VERSION < 000500
+#if LIBEBML_VERSION < 000600
 #error libebml is too old
 #endif
 
-#if LIBMATROSKA_VERSION < 000500
+#if LIBMATROSKA_VERSION < 000600
 #error libmatroska is too old
 #endif
 
@@ -4402,6 +4402,7 @@ EOF
       _inc_extra=$_saved_inc_extra
     fi
   fi
+  rm ${TMPC} > /dev/null 2> /dev/null
   TMPC=$_TMPC
 fi
 if test "$_matroska" = yes ; then
