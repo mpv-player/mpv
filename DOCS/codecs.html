@@ -242,7 +242,7 @@ MPlayer supports decoding all versions of RealVideo:
 
 <UL>
   <LI>currently it does not properly <B>decode</B> all DivX/DivX4 files (no problem as libavcodec can play them)</LI>
-  <LI>you have to choose between DivX4 <B>OR</B> XViD support at
+  <LI>you have to choose between DivX4 <B>or</B> XViD support at
     compiletime</LI>
   <LI>under development</LI>
 </UL>
@@ -254,11 +254,14 @@ MPlayer supports decoding all versions of RealVideo:
   <LI><CODE>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid login</CODE></LI>
   <LI><CODE>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid co xvidcore</CODE></LI>
   <LI><CODE>cd xvidcore/build/generic</CODE></LI>
-  <LI>Edit <CODE>Makefile.linux</CODE> to fit your needs.</LI>
-  <LI><CODE>make -f Makefile.linux</CODE></LI>
+  <LI>Edit the Makefile for your architecture (probably
+    <CODE>Makefile.linuxx86</CODE>) to fit your needs.</LI>
+  <LI><CODE>make -f Makefile.linuxx86</CODE></LI>
+  <LI>Copy the <CODE>divx4.h</CODE> and <CODE>xvid.h</CODE> header files from
+    <CODE>xvidcore/src/</CODE> to <CODE>/usr/local/include/</CODE>.</LI>
   <LI>Get <CODE>encore2.h</CODE> and <CODE>decore.h</CODE> from the DivX4Linux
     package, and copy them to <CODE>/usr/local/include/</CODE>.</LI>
-  <LI>Recompile MPlayer with <CODE>--with-xvidcore=/path/to/libcore.a</CODE>.</LI>
+  <LI>Recompile MPlayer with <CODE>--with-xvidcore=/path/to/libxvidcore.a</CODE>.</LI>
 </OL>
 
 
