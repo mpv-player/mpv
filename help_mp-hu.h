@@ -228,7 +228,7 @@ static char help_text[]=
 #ifdef HAVE_NEW_GUI
 
 // --- labels ---
-#define MSGTR_About "A GUI-ról"
+#define MSGTR_About "Az MPlayer - röl"
 #define MSGTR_FileSelect "File kiválasztása ..."
 #define MSGTR_SubtitleSelect "Felirat kiválasztása ..."
 #define MSGTR_OtherSelect "File kiválasztása ..."
@@ -240,6 +240,11 @@ static char help_text[]=
 #define MSGTR_Network "Lejátszás WEB - röl ..."
 #define MSGTR_Preferences "Beállítások"
 #define MSGTR_OSSPreferences "OSS driver beállítások"
+#define MSGTR_NoMediaOpened "nincs megnyitva semmi"
+#define MSGTR_VCDTrack "%d. VCD track"
+#define MSGTR_NoChapter "nincs megnyitott fejezet"
+#define MSGTR_Chapter "%d. fejezet"
+#define MSGTR_NoFileLoaded "nincs file betöltve"
 
 // --- buttons ---
 #define MSGTR_Ok "Ok"
@@ -305,10 +310,10 @@ static char help_text[]=
 #define MSGTR_MENU_PlayDisc "Lemez megnyitása ..."
 #define MSGTR_MENU_ShowDVDMenu "DVD menû"
 #define MSGTR_MENU_Titles "Sávok"
-#define MSGTR_MENU_Title "Sáv %2d"
+#define MSGTR_MENU_Title "%2d. sáv"
 #define MSGTR_MENU_None "(nincs)"
 #define MSGTR_MENU_Chapters "Fejezetek"
-#define MSGTR_MENU_Chapter "Fejezet %2d"
+#define MSGTR_MENU_Chapter "%2d. fejezet"
 #define MSGTR_MENU_AudioLanguages "Szinkron nyelvei"
 #define MSGTR_MENU_SubtitleLanguages "Feliratok nyelvei"
 #define MSGTR_MENU_PlayList "Playlist"

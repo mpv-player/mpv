@@ -2,6 +2,9 @@
 #ifndef __MPLAYER_MAIN
 #define __MPLAYER_MAIN
 
+#include "libvo/sub.h"
+#include "subreader.h"
+
 extern int use_gui;
 extern char* current_module;
 extern int fullscreen;
@@ -25,6 +28,8 @@ extern float  sub_fps;
 extern int    sub_auto;
 extern int    sub_pos;
 extern int    sub_unicode;
+extern subtitle* subtitles;
+extern subtitle* vo_sub;
 
 extern char * filename;
 

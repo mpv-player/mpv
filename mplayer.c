@@ -251,6 +251,10 @@ int   sub_auto = 1;
 char *vobsub_name=NULL;
 /*DSP!!char *dsp=NULL;*/
 int   subcc_enabled=0;
+#ifdef USE_SUB
+subtitle* subtitles=NULL;
+float sub_last_pts = -303;
+#endif
 
 extern char *vo_subdevice;
 extern char *ao_subdevice;
@@ -467,10 +471,6 @@ static int libmpdemux_was_interrupted(int eof) {
 
 int main(int argc,char* argv[], char *envp[]){
 
-#ifdef USE_SUB
-static subtitle* subtitles=NULL;
-float sub_last_pts = -303;
-#endif
 
 static demux_stream_t *d_audio=NULL;
 static demux_stream_t *d_video=NULL;
@@ -2803,6 +2803,7 @@ if(use_gui || playtree_iter != NULL){
   if ( subtitles ) 
    {
     sub_free( subtitles );
+    if ( sub_name ) free( sub_name );
     sub_name=NULL;
     vo_sub=NULL;
     subtitles=NULL;

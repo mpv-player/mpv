@@ -86,6 +86,7 @@ typedef struct
    int    LengthInSec;
    int    FrameDrop;
    int    FileFormat;
+   float  FPS;
 
    char * Filename;
    int    FilenameChanged;

@@ -431,10 +431,12 @@ void fs_Ok_released( GtkButton * button,gpointer user_data )
 	  gfree( (void **)&guiIntfStruct.AudioFile );
 	  gfree( (void **)&guiIntfStruct.Subtitlename );
           break;
+#ifdef USE_SUB
    case fsSubtitleSelector:
           guiSetDF( guiIntfStruct.Subtitlename,fsSelectedDirectory,fsSelectedFile );
-          guiIntfStruct.SubtitleChanged=1;
+	  guiLoadSubtitle( guiIntfStruct.Subtitlename );
           break;
+#endif
    case fsOtherSelector:
           guiSetDF( guiIntfStruct.Othername,fsSelectedDirectory,fsSelectedFile );
           break;

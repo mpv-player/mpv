@@ -33,20 +33,20 @@ inline void TranslateFilename( int c,char * tmp )
 	     else strcpy( tmp,guiIntfStruct.Filename );
             if ( tmp[strlen( tmp ) - 4] == '.' ) tmp[strlen( tmp ) - 4]=0;
             if ( tmp[strlen( tmp ) - 5] == '.' ) tmp[strlen( tmp ) - 5]=0;
-           } else strcpy( tmp,"no file loaded" );
+           } else strcpy( tmp,MSGTR_NoFileLoaded );
           break;
 #ifdef USE_DVDREAD
    case STREAMTYPE_DVD:
-          if ( guiIntfStruct.DVD.current_chapter ) sprintf( tmp,"chapter %d",guiIntfStruct.DVD.current_chapter );
-            else strcat( tmp,"no chapter" );
+          if ( guiIntfStruct.DVD.current_chapter ) sprintf( tmp,MSGTR_Chapter,guiIntfStruct.DVD.current_chapter );
+            else strcat( tmp,MSGTR_NoChapter );
           break;
 #endif
 #ifdef HAVE_VCD
    case STREAMTYPE_VCD:
-        sprintf( tmp,"VCD track %d",guiIntfStruct.Track );
+        sprintf( tmp,MSGTR_VCDTrack,guiIntfStruct.Track );
 	break;
 #endif
-   default: strcpy( tmp,"no media opened" );
+   default: strcpy( tmp,MSGTR_NoMediaOpened );
   }
  if ( c )
   {

@@ -336,6 +336,11 @@ static char help_text[]=
 #define MSGTR_Network "Network streaming ..."
 #define MSGTR_Preferences "Preferences"
 #define MSGTR_OSSPreferences "OSS driver configuration"
+#define MSGTR_NoMediaOpened "no media opened"
+#define MSGTR_VCDTrack "VCD track %d"
+#define MSGTR_NoChapter "no chapter"
+#define MSGTR_Chapter "chapter %d"
+#define MSGTR_NoFileLoaded "no file loaded"
 
 // --- buttons ---
 #define MSGTR_Ok "Ok"

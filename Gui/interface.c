@@ -238,6 +238,27 @@ void guiLoadFont( void )
 }
 #endif
 
+#ifdef USE_SUB
+void guiLoadSubtitle( char * name )
+{
+ if ( guiIntfStruct.Playing == 0 )
+  {
+   guiIntfStruct.SubtitleChanged=1;
+   return;
+  }
+ if ( subtitles )
+  {
+   sub_free( subtitles );
+   if ( sub_name ) free( sub_name );
+   sub_name=NULL;
+   vo_sub=NULL;
+   subtitles=NULL;
+  }
+ sub_name=gstrdup( name );
+ subtitles=sub_read_file( sub_name,guiIntfStruct.FPS );
+}
+#endif
+
 static void add_vop( char * str )
 {
  mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[gui] add video filter: %s\n",str );
@@ -337,9 +358,11 @@ int guiGetEvent( int type,char * arg )
 	guiIntfStruct.StreamType=stream->type;
 	switch( stream->type )
 	 {
+#ifdef USE_DVDREAD
 	  case STREAMTYPE_DVD: 
 	       guiGetEvent( guiSetDVD,(char *)stream->priv );
 	       break;
+#endif
 #ifdef HAVE_VCD
 	  case STREAMTYPE_VCD: 
 	       {
@@ -353,6 +376,7 @@ int guiGetEvent( int type,char * arg )
 	        break;
 	       }
 #endif
+	  default: break;
 	 }
 	break;
    case guiIEvent:
@@ -391,6 +415,8 @@ int guiGetEvent( int type,char * arg )
 // -- video
 	if ( arg )
 	 {
+	  tmp_sh_video_t * sh = (tmp_sh_video_t *)arg;
+	  guiIntfStruct.FPS=sh->fps;
 	  if ( vo_gamma_brightness == 1000 )
 	   { vo_gamma_brightness=0; get_video_colors( (void *)arg,"brightness",&vo_gamma_brightness ); }
 	  if ( vo_gamma_contrast == 1000 )
