@@ -78,6 +78,14 @@ extern float monitor_aspect;
 /* from dec_audio, currently used for ac3surround decoder only */
 extern int audio_output_channels;
 
+/* Options related to audio out plugins */
+struct config ao_plugin_conf[]={
+	{"list", &ao_plugin_cfg.plugin_list, CONF_TYPE_STRING, 0, 0, 0},
+	{"delay", &ao_plugin_cfg.pl_delay_len, CONF_TYPE_INT, CONF_MIN, 0, 0},
+	{"format", &ao_plugin_cfg.pl_format_type, CONF_TYPE_INT, CONF_MIN, 0, 0},
+	{NULL, NULL, 0, 0, 0, 0}
+};
+
 extern int sws_flags;
 
 /*
@@ -101,10 +109,8 @@ struct config conf[]={
 	{"o", "Option -o has been renamed to -vo (video-out), use -vo !\n",
             CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
 	{"vo", &video_driver, CONF_TYPE_STRING, 0, 0, 0},
-	// -----options related to audio and audio plugins-------
 	{"ao", &audio_driver, CONF_TYPE_STRING, 0, 0, 0},
-	{"aop", &ao_plugin_cfg.plugin_list, CONF_TYPE_STRING, 0, 0, 0},
-	{"aop_delay", &ao_plugin_cfg.pl_delay_len, CONF_TYPE_INT, CONF_MIN, 0, 0},
+	{"aop", ao_plugin_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0},
 //	{"dsp", &dsp, CONF_TYPE_STRING, CONF_NOCFG, 0, 0},
 	{"dsp", "Use -ao oss:dsp_path!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
         {"mixer", &mixer_device, CONF_TYPE_STRING, 0, 0, 0},

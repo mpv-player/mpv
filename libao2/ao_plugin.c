@@ -197,7 +197,7 @@ static int play(void* data,int len,int flags){
   len=driver()->play(ao_plugin_data.data,ao_plugin_data.len,flags);
 
   if(len!=ao_plugin_data.len)
-    printf("Buffer over flow in sound plugin ");
+    fprintf(stderr,"[ao_plugin] Warning under or over flow in sound plugin");
   
   return ret_len;
 }
@@ -209,5 +209,7 @@ static float get_delay(){
   delay+=ao_plugin_data.delay_fix;
   return delay;
 }
+
+
 
 
