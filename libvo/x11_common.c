@@ -676,7 +676,8 @@ void vo_x11_setlayer( int layer )
    xev.window=vo_window;
    xev.format=32;
    xev.data.l[0]=layer;
-   xev.data.l[1]=XInternAtom( mDisplay,"_NET_WM_STATE_ABOVE",False );
+//   xev.data.l[1]=XInternAtom( mDisplay,"_NET_WM_STATE_ABOVE",False );
+   xev.data.l[1]=XInternAtom( mDisplay,"_NET_WM_STATE_STAYS_ON_TOP",False );
    XSendEvent( mDisplay,mRootWin,False,SubstructureRedirectMask,(XEvent*)&xev );
    XFree( args );
    return;
