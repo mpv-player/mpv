@@ -159,7 +159,8 @@ Q: When using Xvideo, my Voodoo 3/Banshee says:
     Minor opcode of failed request:  1 (X_ShmAttach)
     Serial number of failed request:  26
     Current serial number in output stream:27 
-A: Your driver is old, update it.
+A: Your driver is old, update it. Either download (at least) DRI version 0.6
+   from http://dri.sourceforge.net , or use the DRI cvs.
 
 Q: When using Xvideo, I can't play DivX avis with my Voodoo 3/Banshee !
    It says:
@@ -167,8 +168,7 @@ Q: When using Xvideo, I can't play DivX avis with my Voodoo 3/Banshee !
     Xvideo image format: 0x32315659 (YV12) planar
     Xvideo image format: 0x30323449 (I420) planar
     ...
-A: Your driver is old, update it. The new driver also supports YUY2 required
-   for DivX.
+A: See the previous answer.
 
 Q: I've downloaded an ASF with asfrecorder, but MPlayer can't play it !
 A: asfrecorder, and the ASF format itself is a big crap.

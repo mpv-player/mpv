@@ -166,7 +166,8 @@ Q: Mikor XVideo-t akarok hasznalni, a Voodoo 3/Banshee-m azt mondja:
     Minor opcode of failed request:  1 (X_ShmAttach)
     Serial number of failed request:  26
     Current serial number in output stream:27 
-A: Regi a drivered, frissitsd.
+A: Regi a drivered, frissitsd. Vagy a DRI (legalabb) 0.6-os verziojat hasznald
+   (http://dri.sourceforge.net), vagy a DRI cvs-t forditsd le.
 
 Q: Mikor XVideo-t hasznalok, nem tudok lejatszani DivX avi-kat a
    Voodoo 3/Banshee-mmel !
@@ -175,8 +176,7 @@ Q: Mikor XVideo-t hasznalok, nem tudok lejatszani DivX avi-kat a
     Xvideo image format: 0x32315659 (YV12) planar
     Xvideo image format: 0x30323449 (I420) planar
     ...
-A: Regi a drivered, frissitsd. Az uj driver tamogatja a YUY2-t, ami kell a
-   DivX-hez.
+A: Lasd az elozo valaszt.
 
 Q: Letoltottem egy ASF-et az asfrecorderrel, de az MPlayer nem tudja
    lejatszani !
