@@ -5232,7 +5232,7 @@ void* LookupExternal(const char* library, int ordinal)
 
 #ifndef LOADLIB_TRY_NATIVE
   /* hack for truespeech and vssh264*/
-  if (!strcmp(library, "tsd32.dll") || !strcmp(library,"vssh264dec.dll") || !strcmp(library,"LCMW2.dll"))
+  if (!strcmp(library, "tsd32.dll") || !strcmp(library,"vssh264dec.dll") || !strcmp(library,"LCMW2.dll") || !strcmp(library,"VDODEC32.dll"))
 #endif
     /* ok, this is a hack, and a big memory leak. should be fixed. - alex */
     {
