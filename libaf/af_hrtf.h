@@ -31,6 +31,8 @@
    application."
 
    URL: http://sound.media.mit.edu/KEMAR.html
+
+   Distributed under GPL with authors' permission
 */
 
 /* EQUALIZED KEMAR HRIR

@@ -340,15 +340,6 @@ static int open(af_instance_t* af)
     af_hrtf_t *s;
     float fc;
 
-    af_msg(AF_MSG_INFO,
-	   "[hrtf] Head related impulse response (HRIR) derived from KEMAR measurement\n"
-	   "[hrtf] data by Bill Gardner <billg@media.mit.edu>\n"
-	   "[hrtf] and Keith Martin <kdm@media.mit.edu>.\n"
-	   "[hrtf] This data is Copyright 1994 by the MIT Media Laboratory.  It is\n"
-	   "[hrtf] provided free with no restrictions on use, provided the authors are\n"
-	   "[hrtf] cited when the data is used in any research or commercial application.\n"
-	   "[hrtf] URL: http://sound.media.mit.edu/KEMAR.html\n");
-
     af->control = control;
     af->uninit = uninit;
     af->play = play;
