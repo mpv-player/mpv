@@ -147,16 +147,20 @@ echo "Please wait while ./configure discovers your software and hardware environ
 
 TMPC="mplayer-conf-${RANDOM}-$$-${RANDOM}.c"
 TMPO="mplayer-conf-${RANDOM}-$$-${RANDOM}.o"
+TMPS="mplayer-conf-${RANDOM}-$$-${RANDOM}.S"
 
 if [ ! -z $TMPDIR ]; then
 	TMPC="${TMPDIR}/${TMPC}"
 	TMPO="${TMPDIR}/${TMPO}"
+	TMPS="${TMPDIR}/${TMPS}"
 elif [ ! -z $TEMPDIR ]; then
 	TMPC="${TEMPDIR}/${TMPC}"
 	TMPO="${TEMPDIR}/${TMPO}"
+	TMPS="${TEMPDIR}/${TMPS}"
 else
 	TMPC="/tmp/${TMPC}"
 	TMPO="/tmp/${TMPO}"
+	TMPS="/tmp/${TMPS}"
 fi
 
 # ---
@@ -813,39 +817,38 @@ echo -n "Checking assembler (as) ... "
 # as astest.S -o astest.o &> /dev/null || as_verc_fail=yes
 
 if [ $_mmx = 'yes' ]; then
-cat > astest.S <<EOF
+cat > $TMPS <<EOF
 emms
 EOF
-as astest.S -o astest.o &> /dev/null || as_verc_fail=yes
+as $TMPS -o $TMPO &> /dev/null || as_verc_fail=yes
 fi
 
 if [ $_3dnow = 'yes' ]; then
-cat >> astest.S <<EOF
+cat >> $TMPS <<EOF
 femms
 EOF
-as astest.S -o astest.o &> /dev/null || as_verc_fail=yes
+as $TMPS -o $TMPO &> /dev/null || as_verc_fail=yes
 fi
 
 if [ $_3dnowex = 'yes' ]; then
-cat >> astest.S <<EOF
+cat >> $TMPS <<EOF
 pswapd %mm0, %mm0
 EOF
-as astest.S -o astest.o &> /dev/null || as_verc_fail=yes
+as $TMPS -o $TMPO &> /dev/null || as_verc_fail=yes
 fi
 
 if [ $_mmx2 = 'yes' ]; then
-cat >> astest.S <<EOF
+cat >> $TMPS <<EOF
 movntq	%mm0, (%eax)
 EOF
-as astest.S -o astest.o &> /dev/null || as_verc_fail=yes
+as $TMPS -o $TMPO &> /dev/null || as_verc_fail=yes
 fi
 
 if [ $_sse = 'yes' ]; then
-cat >> astest.S <<EOF
+cat >> $TMPS <<EOF
 xorps %xmm0, %xmm0
 EOF
-as astest.S -o astest.o &> /dev/null || as_verc_fail=yes
-rm -f astest.S astest.o
+as $TMPS -o $TMPO &> /dev/null || as_verc_fail=yes
 fi
 
 if test "$as_verc_fail" != "yes"; then
