@@ -677,23 +677,11 @@ static uint32_t config_glx(uint32_t width, uint32_t height, uint32_t d_width, ui
 	XVisualInfo *vinfo, vinfo_buf;
 	XEvent xev;
 
-        if( flags&0x01 )
-        {
-	        vo_fs = VO_TRUE;
-                aspect(&d_width,&d_height,A_ZOOM);
-		hint.x = 0;
-		hint.y = 0;
-		hint.width = vo_screenwidth;
-		hint.height = vo_screenheight;
-		hint.flags = PPosition | PSize;
-        } else {
-		vo_fs = VO_FALSE;
 		hint.x = 0;
 		hint.y = 0;
 		hint.width = d_width;
 		hint.height = d_height;
 		hint.flags = PPosition | PSize;
-        }
 
 	/* Make the window */
 
@@ -709,9 +697,9 @@ static uint32_t config_glx(uint32_t width, uint32_t height, uint32_t d_width, ui
 
   if ( vo_window == None ) 
    {
+    vo_fs = VO_FALSE;
     vo_window = vo_x11_create_smooth_window(mDisplay, RootWindow(mDisplay,mScreen), 
 		                            vinfo->visual, hint.x, hint.y, hint.width, hint.height, vinfo->depth, vo_x11_create_colormap(vinfo));
-  if ( flags&0x01 ) vo_x11_decoration( mDisplay,vo_window,0 );
 
 	XSelectInput(mDisplay, vo_window, StructureNotifyMask);
 
@@ -733,14 +721,25 @@ static uint32_t config_glx(uint32_t width, uint32_t height, uint32_t d_width, ui
 		XNextEvent(mDisplay, &xev);
 	}
 	while (xev.type != MapNotify || xev.xmap.event != vo_window);
-
-	XSelectInput(mDisplay, vo_window, NoEventMask);
-
    }
    else {
    	vo_x11_sizehint( hint.x, hint.y, hint.width, hint.height,0 );
-   	if ( !(flags&1) ) XMoveResizeWindow( mDisplay,vo_window,hint.x,hint.y,hint.width,hint.height );
+   	// for changing from fullscreen to fullscreen we do fullscreen to
+   	// window and back to fullscreen, so that vo_x11_fullscreen saves
+   	// the correct size for _this_ video (and doesn't take the values from
+   	// the previous one)
+   	if (vo_fs)
+   	 vo_x11_fullscreen ();
+   	XMoveResizeWindow( mDisplay,vo_window,hint.x,hint.y,hint.width,hint.height );
    }
+
+  // these would normally be set by the event handler, but here we have to
+  // do it manually
+  vo_dwidth = d_width;
+  vo_dheight = d_height;
+
+  if (flags & VOFLAG_FULLSCREEN)
+   vo_x11_fullscreen();
 
   vo_x11_classhint( mDisplay,vo_window,"gl2" );
   vo_hidecursor(mDisplay,vo_window);
@@ -837,8 +836,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 
 	image_height = height;
 	image_width = width;
-    vo_dwidth = d_width;
-    vo_dheight = d_height;
 	image_format = format;
 
 	int_pause = 0;
