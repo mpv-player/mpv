@@ -9,7 +9,6 @@
     Brightness/contrast support by Nick Kurshev/Dariush Pietrzak (eyck) and me
 
     TODO:
-	* fix doublebuffering for vidix
 	* fix memory size detection (current reading pci userconfig isn't
 	    working as requested - returns the max avail. ram on arch?)
 	* translate all non-english comments to english
@@ -36,7 +35,7 @@
 //#define CRTC2
 
 // Set this value, if autodetection fails! (video ram size in megabytes)
-// #define MGA_MEMORY_SIZE 16
+//#define MGA_MEMORY_SIZE 16
 
 /* No irq support in userspace implemented yet, do not enable this! */
 /* disable irq */
@@ -46,7 +45,7 @@
 
 #undef MGA_PCICONFIG_MEMDETECT
 
-#define MGA_DEFAULT_FRAMES 1
+#define MGA_DEFAULT_FRAMES 4
 
 #include <errno.h>
 #include <stdio.h>
@@ -109,12 +108,12 @@ static int mga_next_frame = 0;
 
 static vidix_capability_t mga_cap =
 {
-    "Matrox MGA G200/G400 YUV Video",
+    "Matrox MGA G200/G4x0/G5x0 YUV Video",
     "Aaron Holtzman, Arpad Gereoffy, Alex Beregszaszi, Nick Kurshev",
     TYPE_OUTPUT,
     { 0, 0, 0, 0 },
-    1600, /* 2048x2048 is supported if Pontscho is right */
-    1200,
+    2048,
+    2048,
     4,
     4,
     -1,
@@ -342,25 +341,22 @@ case 3:
 
 int vixPlaybackFrameSelect(unsigned int frame)
 {
-    printf("[mga] frameselect: %d\n", frame);
+    mga_next_frame = frame;
+    if (mga_verbose>1) printf("[mga] frameselect: %d\n", mga_next_frame);
 #if MGA_ALLOW_IRQ
-    if (mga_irq != -1)
-    {
-	mga_next_frame = frame;
-    }
-    else
+    if (mga_irq == -1)
 #endif
     {
 	//we don't need the vcount protection as we're only hitting
 	//one register (and it doesn't seem to be double buffered)
-	regs.besctl = (regs.besctl & ~0x07000000) + (frame << 25);
+	regs.besctl = (regs.besctl & ~0x07000000) + (mga_next_frame << 25);
 	writel( regs.besctl, mga_mmio_base + BESCTL ); 
 
 //	writel( regs.besglobctl + ((readl(mga_mmio_base + VCOUNT)+2)<<16),
 	writel( regs.besglobctl + (MGA_VSYNC_POS<<16),
 			mga_mmio_base + BESGLOBCTL);
 #ifdef CRTC2
-	crtc2_frame_sel(frame);
+	crtc2_frame_sel(mga_next_frame);
 #endif
     }
 
@@ -537,15 +533,16 @@ if(!restore){
 	writel( regs.besglobctl + ((readl(mga_mmio_base + VCOUNT)+2)<<16),
 			mga_mmio_base + BESGLOBCTL);
 
-#if 0
-	printf("[mga] wrote BES registers\n");
-	printf("[mga] BESCTL = 0x%08x\n",
+	if (mga_verbose > 1)
+	{
+	    printf("[mga] wrote BES registers\n");
+	    printf("[mga] BESCTL = 0x%08x\n",
 			readl(mga_mmio_base + BESCTL));
-	printf("[mga] BESGLOBCTL = 0x%08x\n",
+	    printf("[mga] BESGLOBCTL = 0x%08x\n",
 			readl(mga_mmio_base + BESGLOBCTL));
-	printf("[mga] BESSTATUS= 0x%08x\n",
+	    printf("[mga] BESSTATUS= 0x%08x\n",
 			readl(mga_mmio_base + BESSTATUS));
-#endif
+	}
 #ifdef CRTC2
 //	printf("c2ctl:0x%08x c2datactl:0x%08x\n",readl(mga_mmio_base + C2CTL),readl(mga_mmio_base + C2DATACTL));
 //	printf("c2misc:0x%08x\n",readl(mga_mmio_base + C2MISC));
@@ -569,7 +566,7 @@ if(!restore){
 //	writel(cregs.c2vsync, mga_mmio_base + C2VSYNC);
 	writel(cregs.c2misc, mga_mmio_base + C2MISC);
 
-	printf("c2offset = %d\n",cregs.c2offset);
+	if (mga_verbose > 1) printf("[mga] c2offset = %d\n",cregs.c2offset);
 
 	writel(cregs.c2offset, mga_mmio_base + C2OFFSET);
 	writel(cregs.c2startadd0, mga_mmio_base + C2STARTADD0);
@@ -603,7 +600,7 @@ static void enable_irq(){
 	writeb(0x10, mga_mmio_base + CRTCD );  /* clear = 1 */
 	
 	writel( regs.besglobctl , mga_mmio_base + BESGLOBCTL);
-	
+    	
 	return;
 }
 
@@ -688,6 +685,7 @@ void mga_handle_irq(int irq, void *dev_id/*, struct pt_regs *pregs*/) {
 
 int vixConfigPlayback(vidix_playback_t *config)
 {
+	int i;
 	int x, y, sw, sh, dw, dh;
 	int besleft, bestop, ifactor, ofsleft, ofstop, baseadrofs, weight, weights;
 #ifdef CRTC2
@@ -713,7 +711,6 @@ int vixConfigPlayback(vidix_playback_t *config)
 	printf("[mga] illegal num_frames: %d, setting to %d\n",
 	    config->num_frames, MGA_DEFAULT_FRAMES);
 	config->num_frames = MGA_DEFAULT_FRAMES;
-//        return(EINVAL);
     }
 
     x = config->dest.x;
@@ -726,7 +723,7 @@ int vixConfigPlayback(vidix_playback_t *config)
     config->dest.pitch.y=32;
     config->dest.pitch.u=config->dest.pitch.v=16;
 
-    printf("[mga] Setting up a %dx%d-%dx%d video window (src %dx%d) format %X\n",
+    if (mga_verbose) printf("[mga] Setting up a %dx%d-%dx%d video window (src %dx%d) format %X\n",
            dw, dh, x, y, sw, sh, config->fourcc);
 
     if ((sw < 4) || (sh < 4) || (dw < 4) || (dh < 4))
@@ -738,21 +735,14 @@ int vixConfigPlayback(vidix_playback_t *config)
     //FIXME check that window is valid and inside desktop
 
 //    printf("[mga] vcount = %d\n", readl(mga_mmio_base + VCOUNT));
-    
-    config->offsets[0] = 0;
-    config->offsets[1] = config->frame_size;
-    config->offsets[2] = 2*config->frame_size;
-    config->offsets[3] = 3*config->frame_size;
-    
-    config->offset.y=0;
-    config->offset.v=((sw + 31) & ~31) * sh;
-    config->offset.u=config->offset.v+((sw + 31) & ~31) * sh /4;
 
+    sw+=sw&1;
     switch(config->fourcc)
     {
 	case IMGFMT_I420:
 	case IMGFMT_IYUV:
 	case IMGFMT_YV12:
+	    sh+=sh&1;
 	    config->frame_size = ((sw + 31) & ~31) * sh + (((sw + 31) & ~31) * sh) / 2;
 	    break;
 	case IMGFMT_YUY2:
@@ -764,7 +754,16 @@ int vixConfigPlayback(vidix_playback_t *config)
 	    return(ENOTSUP);
     }
 
-//    config->frame_size = config->src.h*config->src.w+(config->src.w*config->src.h)/2;
+    config->offsets[0] = 0;
+//    config->offsets[1] = config->frame_size;
+//    config->offsets[2] = 2*config->frame_size;
+//    config->offsets[3] = 3*config->frame_size;
+    for (i = 1; i < config->num_frames+1; i++)
+	config->offsets[i] = i*config->frame_size;
+
+    config->offset.y=0;
+    config->offset.v=((sw + 31) & ~31) * sh;
+    config->offset.u=config->offset.v+((sw + 31) & ~31) * sh /4;
 
     //FIXME figure out a better way to allocate memory on card
     //allocate 2 megs
@@ -778,7 +777,7 @@ int vixConfigPlayback(vidix_playback_t *config)
     	return(EFAULT);
     }
     mga_src_base &= (~0xFFFF); /* 64k boundary */
-    printf("[mga] YUV buffer base: %p\n", mga_src_base);
+    if (mga_verbose > 1) printf("[mga] YUV buffer base: %p\n", mga_src_base);
 
     config->dga_addr = mga_mem_base + mga_src_base;
 
@@ -1135,7 +1134,7 @@ switch(config->fourcc){
 
 int vixPlaybackOn(void)
 {
-    printf("[mga] playback on\n");
+    if (mga_verbose) printf("[mga] playback on\n");
 
     vid_src_ready = 1;
     if(vid_overlay_on)
@@ -1154,7 +1153,7 @@ int vixPlaybackOn(void)
 
 int vixPlaybackOff(void)
 {
-    printf("[mga] playback off\n");
+    if (mga_verbose) printf("[mga] playback off\n");
 
     vid_src_ready = 0;   
 #ifdef MGA_ALLOW_IRQ
@@ -1174,7 +1173,7 @@ int vixProbe(int verbose,int force)
 	unsigned int i, num_pci;
 	int err;
 
-	printf("[mga] probe\n");
+	if (verbose) printf("[mga] probe\n");
 
 	mga_verbose = verbose;
 
@@ -1187,12 +1186,12 @@ int vixProbe(int verbose,int force)
 	    return(err);
 	}
 
-	if (mga_verbose > 1)
+	if (mga_verbose)
 	    printf("[mga] found %d pci devices\n", num_pci);
 	
 	for (i = 0; i < num_pci; i++)
 	{
-	    if (mga_verbose > 2)
+	    if (mga_verbose > 1)
 		printf("[mga] pci[%d] vendor: %d device: %d\n",
 		    i, lst[i].vendor, lst[i].device);
 	    if (lst[i].vendor == VENDOR_MATROX)
@@ -1238,11 +1237,15 @@ int vixInit(void)
 {
     unsigned int card_option = 0;
     int err;
-    printf("[mga] init\n");
+    
+    if (mga_verbose) printf("[mga] init\n");
 
     mga_vid_in_use = 0;
 
     printf("Matrox MGA G200/G400/G450 YUV Video interface v2.01 (c) Aaron Holtzman & A'rpi\n");
+#ifdef CRCT2
+    printf("Driver compiled with TV-out (second-head) support\n");
+#endif
 
     if (!probed)
     {
@@ -1253,11 +1256,9 @@ int vixInit(void)
 #ifdef MGA_PCICONFIG_MEMDETECT
     pci_config_read(pci_info.bus, pci_info.card, pci_info.func,
         0x40, 4, &card_option);
-    printf("[mga] OPTION word: 0x%08X  mem: 0x%02X  %s\n", card_option,
+    if (mga_verbose > 1) printf("[mga] OPTION word: 0x%08X  mem: 0x%02X  %s\n", card_option,
     	(card_option>>10)&0x17, ((card_option>>14)&1)?"SGRAM":"SDRAM");
 #endif
-
-//    temp = (card_option >> 10) & 0x17;
 
     if (mga_ram_size)
     {
@@ -1324,13 +1325,13 @@ int vixInit(void)
 	}
     }
 
-    printf("[mga] hardware addresses: mmio: %p, framebuffer: %p\n",
+    if (mga_verbose > 1) printf("[mga] hardware addresses: mmio: %p, framebuffer: %p\n",
         pci_info.base1, pci_info.base0);
 
     mga_mmio_base = map_phys_mem(pci_info.base1,0x4000);
     mga_mem_base = map_phys_mem(pci_info.base0,mga_ram_size*1024*1024);
 
-    printf("[mga] MMIO at %p, IRQ: %d, framebuffer: %p\n",
+    if (mga_verbose > 1) printf("[mga] MMIO at %p, IRQ: %d, framebuffer: %p\n",
         mga_mmio_base, mga_irq, mga_mem_base);
     err = mtrr_set_type(pci_info.base0,mga_ram_size*1024*1024,MTRR_TYPE_WRCOMB);
     if(!err) printf("[mga] Set write-combining type of video memory\n");
@@ -1363,8 +1364,9 @@ int vixInit(void)
 
 void vixDestroy(void)
 {
-    printf("[mga] destroy\n");
+    if (mga_verbose) printf("[mga] destroy\n");
 
+    /* FIXME turn off BES */
     vid_src_ready = 0;   
     regs.besctl &= ~1;
     regs.besglobctl &= ~(1<<6);  // UYVY format selected
@@ -1381,15 +1383,12 @@ void vixDestroy(void)
         unmap_phys_mem(mga_mmio_base, 0x4000);
     if (mga_mem_base)
         unmap_phys_mem(mga_mem_base, mga_ram_size);
-
-    /* FIXME turn off BES */
-
     return;
 }
 
 int vixQueryFourcc(vidix_fourcc_t *to)
 {
-    printf("[mga] query fourcc (%x)\n", to->fourcc);
+    if (mga_verbose) printf("[mga] query fourcc (%x)\n", to->fourcc);
 
     switch(to->fourcc)
     {
@@ -1442,8 +1441,7 @@ int vixPlaybackSetEq( const vidix_video_eq_t * eq)
     /* contrast and brightness control isn't supported on G200 - alex */
     if (!is_g400)
     {
-	if (mga_verbose > 1)
-		printf("[mga] equalizer isn't supported with G200\n");
+	if (mga_verbose) printf("[mga] equalizer isn't supported with G200\n");
 	return(ENOTSUP);
     }
     
@@ -1466,8 +1464,7 @@ int vixPlaybackGetEq( vidix_video_eq_t * eq)
     /* contrast and brightness control isn't supported on G200 - alex */
     if (!is_g400)
     {
-	if (mga_verbose > 1)
-		printf("[mga] equalizer isn't supported with G200\n");
+	if (mga_verbose) printf("[mga] equalizer isn't supported with G200\n");
 	return(ENOTSUP);
     }
 
