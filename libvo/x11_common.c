@@ -636,7 +636,7 @@ void vo_x11_uninit()
     saver_on(mDisplay);
     if(vo_window!=None) vo_showcursor( mDisplay,vo_window );
     
-    if (f_gc) XFreeGC(mDisplay, f_gc);
+    if (f_gc) { XFreeGC(mDisplay, f_gc); f_gc = NULL; }
 
 #ifdef HAVE_NEW_GUI
     /* destroy window only if it's not controlled by GUI */
