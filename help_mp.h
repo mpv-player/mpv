@@ -33,6 +33,9 @@ static char* help_text=
 #ifdef X11_FULLSCREEN
 "    -fs             fullscreen playing (only gl, xmga and xv drivers)\n"
 #endif
+#ifdef HAVE_XF86VM
+"    -vm             Use XF86VidMode for psuedo-scaling with x11 driver\n                     (requires -fs)\n"
+#endif
 "    -x <x> -y <y>   scale image to <x> * <y> resolution [if scalable!]\n"
 "\n"
 "  Keys:\n"

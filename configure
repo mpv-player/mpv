@@ -6,6 +6,9 @@
 #
 # Changes in reversed order:
 #
+# 2001/03/24 by Mike Graffam:
+#  - added autodetect code for XF86VidMode, along with explicit --enable-vm
+#
 # 2001/03/22 by Bivanbi:
 #  - new option: --cc  (to specify C compiler path+name)
 #
@@ -77,6 +80,7 @@ params:
 	--enable-xmga           build with mga_vid X Window support [autodetect,
 				if both /dev/mga_vid and x11 are available]
         --enable-xv             build with Xv render support for X 4.x [autodetect]
+	--enable-vm		build with XF86VidMode support for x11 driver
         --enable-x11            build with X11 render support [autodetect]
 	--enable-mlib		build with MLIB support ( only Solaris )
 
@@ -154,6 +158,7 @@ _mga=no
 _gl=no
 _sdl=no
 _xv=no
+_vm=no
 _x11=no
 _3dfx=no
 _syncfb=no
@@ -350,6 +355,7 @@ fi
 # check GL & X11 & Xext & Xv & SDL & termcap libs
 
 $_cc $TMPC -o $TMPO $_x11libdir/ -lGL &> /dev/null && _gl=yes
+$_cc $TMPC -o $TMPO $_x11libdir/ -lXxf86vm &> /dev/null && _vm=yes
 $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext &> /dev/null && _x11=yes
 $_cc $TMPC -o $TMPO $_x11libdir -lXv &> /dev/null && _xv=yes
 $_cc $TMPC -o $TMPO $_x11libdir -L/usr/local/lib/ -lpthread &> /dev/null || \
@@ -439,6 +445,9 @@ do
   --enable-xv)
         _xv=yes
         ;;
+  --enable-vm)
+        _vm=yes
+        ;;
   --enable-x11)
         _x11=yes
         ;;
@@ -486,6 +495,9 @@ do
         ;;
   --disable-xv)
         _xv=no
+        ;;
+  --disable-vm)
+        _vm=no
         ;;
   --disable-x11)
         _x11=no
@@ -535,7 +547,7 @@ echo "Checking for OpenGL ... $_gl"
 echo "Checking for Xv ... $_xv"
 echo "Checking for X11 ... $_x11"
 echo "Checking for DGA ... $_dga"
-
+echo "Checking for Xf86VM ... $_vm"
 # write conf files.
 
 if [ $_gl = yes ]; then
@@ -558,6 +570,9 @@ if [ $_dga = yes ]; then
   _dgalib='-lXxf86dga'
 fi
 
+if [ $_vm = yes ]; then
+  _vmlib='-lXxf86vm'
+fi
 
 if [ "$_termcap" = "yes" ]; then
  _termcap='#define USE_TERMCAP'
@@ -594,7 +609,7 @@ CC=$_cc
 # OPTFLAGS=-O4 -march=$proc -mcpu=$proc -pipe -fomit-frame-pointer -ffast-math
 OPTFLAGS=-O4 -march=$proc -mcpu=$proc -pipe -ffast-math
 # LIBS=-L/usr/lib -L/usr/local/lib $_x11libdir $_gllib $_sdllib $_dgalib $_x11lib $_xvlib
-X_LIBS=$_x11libdir $_gllib $_sdllib $_dgalib $_x11lib $_xvlib
+X_LIBS=$_x11libdir $_gllib $_sdllib $_dgalib $_x11lib $_xvlib $_vmlib
 TERMCAP_LIB=$_libtermcap
 XMM_LIBS = $_xmmplibs
 LIRC_LIBS = $_lirclibs
@@ -662,6 +677,12 @@ if [ $_xv = yes ]; then
  _vosrc=$_vosrc' vo_xv.c'
 else
  _xv='#undef HAVE_XV'
+fi
+
+if [ $_vm = yes ]; then
+ _vm='#define HAVE_XF86VM'
+else
+ _vm='#undef HAVE_XF86VM'
 fi
 
 # ---
@@ -767,6 +788,7 @@ $_ssem     // only define if you have SSE (Intel Pentium III or Celeron II)
 #define SCREEN_SIZE_Y $_y
 $_x11
 $_xv
+$_vm
 $_gl
 $_dga
 $_sdldef
