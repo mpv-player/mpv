@@ -54,13 +54,15 @@ s
 	else       value=  (temp>>1)
 
 b (binary data or string)
-	length					v
 	for(i=0; i<length; i++){
 		data[i]				u(8)
 	}
 	Note: strings MUST be encoded in utf8
 
-        
+vb
+	length					v
+	value					b
+
 f(x)	n fixed bits in big endian order
 u(x)	unsigned number encoded in x bits in MSB first order
 
@@ -113,9 +115,9 @@ stream_header:
 	packet_header
 	stream_id				v
 	stream_class				v
-	fourcc					b
+	fourcc					v
 	average_bitrate				v
-	language_code				b
+	language_code				v
 	time_base_nom				v
 	time_base_denom				v
 	msb_timestamp_shift			v
@@ -127,8 +129,7 @@ stream_header:
 	for(;;){
 		codec_specific_data_type	v
 		if(codec_specific_data_type==0) break;
-		codec_specific_data_size	v
-		codec_specific_data		b
+		codec_specific_data		vb
 	}
 
 video_stream_header:
@@ -195,15 +196,13 @@ info_packet: (optional)
 		name= info_table[id][0]
 		type= info_table[id][1]
 		if(type==NULL)
-			type			b
+			type			vb
 		if(name==NULL)
-			name			b
+			name			vb
 		if(type=="v")
 			value			v
-		else if(type=="s")
-			value			s
 		else
-			value			b
+			value			vb
 	}
 	reserved_bytes
         checksum				u(32)
