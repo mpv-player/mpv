@@ -1441,12 +1441,17 @@ int vixSetGrKeys(const vidix_grkey_t *grkey)
 }
 
 #ifdef MGA_EQUALIZER
-static vidix_video_eq_t equal = { 0, 0, 0, 0, 0, 0, 0, 0 };
+static vidix_video_eq_t equal =
+{
+ VEQ_CAP_BRIGHTNESS | VEQ_CAP_CONTRAST,
+ 0, 0, 0, 0, 0, 0, 0, 0 };
 int 	vixPlaybackSetEq( const vidix_video_eq_t * eq)
 {
    uint32_t beslumactl;
    int brightness,contrast;
-	memcpy(&equal,eq,sizeof(vidix_video_eq_t));
+    if(eq->cap & VEQ_CAP_BRIGHTNESS) equal.brightness = eq->brightness;
+    if(eq->cap & VEQ_CAP_CONTRAST)   equal.contrast   = eq->contrast;
+    equal.flags = eq->flags;
 	//Enable contrast and brightness control
 	writel(readl(mga_mmio_base + BESGLOBCTL) & ~((1<<5) + (1<<7)),mga_mmio_base + BESGLOBCTL);
 	brightness = (equal.brightness * 128) / 1000;
@@ -1460,7 +1465,8 @@ int 	vixPlaybackSetEq( const vidix_video_eq_t * eq)
     if (is_g400)
 	writel(beslumactl,mga_mmio_base + BESLUMACTL);
     else
-	printf("[mga] equalizer isn't supported with G200\n");
+	if (mga_verbose > 1)
+		printf("[mga] equalizer isn't supported with G200\n");
     return 0;
 }
 

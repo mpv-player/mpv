@@ -183,14 +183,22 @@ extern int 	vixSetGrKeys( const vidix_grkey_t * );
 
 typedef struct vidix_video_eq_s
 {
+#define VEQ_CAP_NONE			0x00000000UL
+#define VEQ_CAP_BRIGHTNESS		0x00000001UL
+#define VEQ_CAP_CONTRAST		0x00000002UL
+#define VEQ_CAP_SATURATION		0x00000004UL
+#define VEQ_CAP_HUE			0x00000008UL
+#define VEQ_CAP_RGB_INTENSITY		0x00000010UL
+	int		cap;		/* on get_eq should contain capability of equalizer
+					   on set_eq should contain using fields */
 /* end-user app can have presets like: cold-normal-hot picture and so on */
 	int		brightness;	/* -1000 : +1000 */
 	int		contrast;	/* -1000 : +1000 */
 	int		saturation;	/* -1000 : +1000 */
 	int		hue;		/* -1000 : +1000 */
-	int		red_intense;	/* -1000 : +1000 */
-	int		green_intense;  /* -1000 : +1000 */
-	int		blue_intense;   /* -1000 : +1000 */
+	int		red_intensity;	/* -1000 : +1000 */
+	int		green_intensity;/* -1000 : +1000 */
+	int		blue_intensity; /* -1000 : +1000 */
 #define VEQ_FLG_ITU_R_BT_601	0x00000000 /* ITU-R BT.601 colour space (default) */
 #define VEQ_FLG_ITU_R_BT_709	0x00000001 /* ITU-R BT.709 colour space */
 #define VEQ_FLG_ITU_MASK	0x0000000f
