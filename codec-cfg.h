@@ -17,6 +17,11 @@
 
 #define CODECS_FLAG_AUDIO	(1<<0)
 
+#define CODECS_FLAG_FLIP	(1<<0)
+#define CODECS_FLAG_NOFLIP	(1<<1)
+#define CODECS_FLAG_YUVHACK	(1<<2)
+
+
 #warning nem kellene ket typedef GUID-nak...
 typedef struct {
 	long f1;

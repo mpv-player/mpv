@@ -138,12 +138,24 @@ int add_to_format(char *s, unsigned int *format)
 	return 1;
 }
 
+/*
 short get_flags(char *s)
 {
+	static char *flagstr[] = {
+		"flip",
+		"noflip",
+		"yuvhack",
+		NULL
+	};
+        int j;
+
+        printf("flags='%s'\n",s);
+
 	if (!s)
 		return 0;
 	return 1;
 }
+*/
 
 int add_to_out(char *sfmt, char *sflags, unsigned int *outfmt,
 		unsigned char *outflags)
@@ -177,6 +189,13 @@ int add_to_out(char *sfmt, char *sflags, unsigned int *outfmt,
 		IMGFMT_BGR|24,
 		IMGFMT_BGR|32
 	};
+	static char *flagstr[] = {
+		"flip",
+		"noflip",
+		"yuvhack",
+		NULL
+	};
+
 	int i, j;
 	unsigned char flags;
 
@@ -187,20 +206,30 @@ int add_to_out(char *sfmt, char *sflags, unsigned int *outfmt,
 		return 0;
 	}
 
-	flags = get_flags(sflags);
+	flags = 0; //get_flags(sflags);
+	if(sflags) do {
+		for (j = 0; flagstr[j] != NULL; j++)
+			if (!strncmp(sflags, flagstr[j], strlen(flagstr[j])))
+				break;
+		if (flagstr[j] == NULL) return 0; // error!
+		flags|=(1<<j);
+		sflags+=strlen(flagstr[j]);
+	} while (*(sflags++) == ',');
+        
 
 	do {
-		for (j = 0; fmtstr[i] != NULL; j++)
+		for (j = 0; fmtstr[j] != NULL; j++)
 			if (!strncmp(sfmt, fmtstr[j], strlen(fmtstr[j])))
 				break;
 		if (fmtstr[j] == NULL)
 			return 0;
 		outfmt[i] = fmtnum[j];
 		outflags[i] = flags;
+                ++i;
 		sfmt+=strlen(fmtstr[j]);
 	} while (*(sfmt++) == ',');
-	if (*(--sfmt) != '\0')
-		return 0;
+	if (*(--sfmt) != '\0') return 0;
+        
 	return 1;
 }
 
@@ -458,6 +487,11 @@ int main(void)
             for(j=0;j<CODECS_MAX_FOURCC;j++){
               if(c->fourcc[j]!=0xFFFFFFFF){
                   printf("fourcc %02d:  %08X (%.4s) ===> %08X (%.4s)\n",j,c->fourcc[j],&c->fourcc[j],c->fourccmap[j],&c->fourccmap[j]);
+              }
+            }
+            for(j=0;j<CODECS_MAX_OUTFMT;j++){
+              if(c->outfmt[j]!=0xFFFFFFFF){
+                  printf("outfmt %02d:  %08X (%.4s)  flags: %d\n",j,c->outfmt[j],&c->outfmt[j],c->outflags[j]);
               }
             }
         }
