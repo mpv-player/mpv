@@ -1019,9 +1019,14 @@ _gawk_ver=`echo '' | awk --version 2>&1 | sed -n 's/^.*wk \([^A-Za-z ]*[0-9.]*\)
       _gawk_ver="$_gawk_ver, ok"
       ;;
   esac
-echo Checking for gawk ... $_gawk_ver
+echo Checking for awk ... $_gawk_ver
 if test "$_gawk_verc_fail" ; then
-echo Gawk was not found or has wrong version. gawk-3.0.x is required
+echo Awk was not found or has wrong version.
+echo If you have no such one then it can be downloaded from:
+echo ftp://ftp.gnu.org/gnu/gawk/
+echo Also check - maybe you already have gawk, mawk or nawk.
+echo If test is succesful then make awk symlink. Example ln -sf gawk awk
+echo Or rerun configure with --disable-vidix option.
 exit
 fi
 fi
