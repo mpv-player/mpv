@@ -200,6 +200,7 @@ Video:
   --enable-tdfxfb        build with tdfxfb support [disable]
   --enable-directfb      build with DirectFB support [autodetect]
   --enable-zr            build with ZR360[56]7/ZR36060 support [autodetect]
+  --enable-bl		 build with Blinkenlights support [disable]
 
 Audio:
   --disable-ossaudio     disable OSS sound support [autodetect]
@@ -975,6 +976,7 @@ _3dfx=no
 _tdfxfb=no
 _directfb=auto
 _zr=auto
+_bl=no
 _largefiles=no
 _language=en
 _shm=auto
@@ -1130,6 +1132,8 @@ for ac_option do
   --disable-directfb)	_directfb=no	;;
   --enable-zr)		_zr=yes		;;
   --disable-zr)		_zr=no		;;
+  --enable-bl)		_bl=yes		;;
+  --disable-bl)		_bl=no		;;
   --enable-mtrr)	_mtrr=yes	;;
   --disable-mtrr)	_mtrr=no	;;
   --enable-largefiles)	_largefiles=yes	;;
@@ -3743,6 +3747,17 @@ else
   echores "$_zr"
 fi
 
+echocheck "bl"
+if test "$_bl" = yes ; then
+  _def_bl='#define HAVE_BL 1'
+  _vosrc="$_vosrc vo_bl.c"
+  _vomodules="bl $_vomodules"
+else
+  _def_bl='#undef HAVE_BL'
+  _novomodules="bl $_novomodules"
+fi
+echores "$_bl"
+
 echocheck "XviD"
 cat > $TMPC << EOF
 #include <xvid.h>
@@ -4765,6 +4780,7 @@ $_def_tdfxfb
 $_def_directfb
 $_def_directfb_version
 $_def_zr
+$_def_bl
 $_def_mga
 $_def_xmga
 $_def_syncfb
