@@ -5321,20 +5321,23 @@ telecined MPEG) encodiert wird.
 .TP
 .B \-ovc <Codecname>
 Encodiere Video mit dem angegebenen Codec.
+.br
+.I ANMERKUNG:
 Mit \-ovc help erhälst du eine Liste verfügbarer Codecs (kein Standardwert
 vorhanden).
-
+.sp 1
 .I BEISPIEL:
 .PD 0
 .RSs
 .IPs "\-ovc copy"
-kein Encodieren, sondern nur Kopie des Streams
+kein Encodieren, sondern nur eine Kopie des Videostreams
 .IPs "\-ovc divx4"
-encodiere mit DivX4/\:DivX5
-.IPs "\-ovc rawrgb"
-encodiere zu unkomprimierten RGB24\-Bildern
+Encodiere zu DivX4/\:DivX5.
+.IPs "\-ovc raw"
+Encodiere zu einem frei wählbaren Format (benutze '\-vf format', um dieses
+auszuwählen).
 .IPs "\-ovc lavc"
-encodiere mit einem Codec aus der libavcodec
+Encodiere mit einem libavcodec Codec.
 .RE
 .PD 1
 .
@@ -5343,40 +5346,27 @@ encodiere mit einem Codec aus der libavcodec
 Wenn mit zwei Durchgängen encodiert wird, dann schreibt MEncoder die
 Informationen des ersten Durchgangs in die angegebene Datei und nicht 
 nach divx2pass.log.
+.
 .TP
 .B \-skiplimit <Wert>
 Maximale Anzahl ausgelassener Bilder nach einem nicht ausgelassenen
 (mit \-noskiplimit gibt es ein solches Limit nicht).
-.TP
-.B \-v, \-\-verbose
-Aktiviert die ausführliche Ausgabe (mehrere \-v bedeuten mehr Meldungen).
-
-.PD 0
-.RSs
-.IPs 0
-nur einige Informationen (Standard)
-.IPs 1
-grundlegende Debuginformationen, AVI-Header, Funktionswerte (init debug)
-.IPs 2
-Ausgabe von AVI\-Indizes, gelesenen Blöcken, mehr Debuginformationen
-(player debug)
-.IPs 3
-Gibt alles, was mit Eingabeparsersn zu tun hat aus (parser debug)
-.RE
-.PD 1
 .
 .TP
 .B \-vobsubout <Basisname>
-Gibt den Basisnamen für die Ausgabe der .idx und .sub\-Dateien.
+Gibt den Basisnamen für die Ausgabe der .idx- und .sub-Dateien an.
 Damit wird das Rendern der Untertitel im encodierten Film deaktiviert, und
-die Untertitel werden stattdessen in eine VOBsub\-Datei umgeleitet.
+die Untertitel werden statt dessen in eine VOBsub-Datei umgeleitet.
+.
+.TP
+.B \-vobsuboutid <Sprach-ID>
+Gibt den zweibuchstabigen Sprachcode der Untertitel an.
+Dieser Wert überschreibt, was von der DVD oder der .ifo-Datei gelesen wurde.
+.
 .TP
 .B \-vobsuboutindex <Index>
-Gibt den Index der ausgegebenen VOBsub\-Untertitel an (Standardwert: 0).
-.TP
-.B \-vobsuboutid <Sprach\-ID>
-Gibt den zweibuchstabigen Sprachcode der Untertitel an. Dieser Wert
-überschreibt, was von der DVD oder der .ifo\-Datei gelesen wurde.
+Gibt den Index der ausgegebenen VOBsub-Untertitel an (Standardwert: 0).
+.
 .TP
 .B \-xvidencopts <option1:option2:...>
 Wenn mit XviD encodiert wird, können hier die Parameter dafür angegeben werden.
