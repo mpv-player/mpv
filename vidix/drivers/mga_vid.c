@@ -5,13 +5,10 @@
 
     YUY2 support (see config.format) added by A'rpi/ESP-team
     double buffering added by A'rpi/ESP-team
-
-
-    DONT USE THIS! IT'S UNDER DEVELOPEMENT! USE MGA_VID KERNELDRIVER!
 */
 
 /*
- * Original comment:
+ * Original copyright:
  *
  * mga_vid.c
  *
@@ -28,18 +25,16 @@
  * license. See http://www.gnu.org/copyleft/gpl.html for details.
  */
 
-
 //#define CRTC2
 
 // Set this value, if autodetection fails! (video ram size in megabytes)
 // #define MGA_MEMORY_SIZE 16
 
-//#define MGA_VIDMEM_SIZE mga_ram_size
-
-//#define MGA_ALLOW_IRQ
+/* disable irq */
 #undef MGA_ALLOW_IRQ
 
 #define MGA_VSYNC_POS 2
+
 
 #include <errno.h>
 #include <stdio.h>
@@ -48,39 +43,14 @@
 #include <math.h>
 #include <inttypes.h>
 
-#include "../../libdha/pci_ids.h"
-#include "../../libdha/pci_names.h"
-
 #include "../vidix.h"
 #include "../fourcc.h"
 #include "../../libdha/libdha.h"
-#include "mga_vid.h"
+#include "../../libdha/pci_ids.h"
+#include "../../libdha/pci_names.h"
 
 #if    !defined(ENOTSUP) && defined(EOPNOTSUPP)
 #define ENOTSUP EOPNOTSUPP
-#endif
-
-#define TRUE 1
-#define FALSE 0
-
-#ifndef PCI_VENDOR_ID_MATROX
-#define PCI_VENDOR_ID_MATROX 0x102b
-#endif
-
-#ifndef PCI_DEVICE_ID_MATROX_G200_PCI 
-#define PCI_DEVICE_ID_MATROX_G200_PCI 0x0520
-#endif
-
-#ifndef PCI_DEVICE_ID_MATROX_G200_AGP 
-#define PCI_DEVICE_ID_MATROX_G200_AGP 0x0521
-#endif
-
-#ifndef PCI_DEVICE_ID_MATROX_G400 
-#define PCI_DEVICE_ID_MATROX_G400 0x0525
-#endif
-
-#ifndef PCI_DEVICE_ID_MATROX_G550 
-#define PCI_DEVICE_ID_MATROX_G550 0x2527
 #endif
 
 /* from radeon_vid */
@@ -92,11 +62,56 @@
 #define readl(addr)		GETREG(uint32_t,(uint32_t)(addr),0)
 #define writel(val,addr)	SETREG(uint32_t,(uint32_t)(addr),0,val)
 
-static pciinfo_t pci_info;
+int mga_verbose = 0;
+
+/* for device detection */
 static int probed = 0;
+static pciinfo_t pci_info;
 
-static vidix_ckey_t colorkey;
+/* internal booleans */
+static uint32_t mga_vid_in_use = 0;
+static uint32_t is_g400 = 0;
+static uint32_t vid_src_ready = 0;
+static uint32_t vid_overlay_on = 0;
 
+/* mapped physical addresses */
+static uint8_t *mga_mmio_base = 0;
+static uint32_t mga_mem_base = 0; 
+
+static int mga_src_base = 0; /* YUV buffer position in video memory */
+
+static uint32_t mga_ram_size = 0; /* how much megabytes videoram we have */
+
+/* Graphic keys */
+static vidix_grkey_t mga_grkey;
+
+static int colkey_saved=0;
+static int colkey_on=0;
+static unsigned char colkey_color[4];
+static unsigned char colkey_mask[4];
+
+/* for IRQ */
+static int mga_irq = -1;
+
+static int mga_next_frame = 0;
+
+static vidix_capability_t mga_cap =
+{
+    "Matrox MGA G200/G400 YUV Video",
+    TYPE_OUTPUT,
+    { 0, 0, 0, 0 },
+    1024, /* 2048x2048 is supported if Pontscho is right */
+    768,
+    4,
+    4,
+    -1,
+    FLAG_UPSCALER | FLAG_DOWNSCALER,
+    VENDOR_MATROX,
+    0,
+    { 0, 0, 0, 0}
+};
+
+/* MATROX BES registers */
 typedef struct bes_registers_s
 {
 	//BES Control
@@ -190,46 +205,6 @@ typedef struct crtc2_registers_s
 static crtc2_registers_t cregs;
 #endif
 
-static uint32_t mga_vid_in_use = 0;
-static uint32_t is_g400 = 0;
-static uint32_t vid_src_ready = 0;
-static uint32_t vid_overlay_on = 0;
-
-static uint8_t *mga_mmio_base = 0;
-static uint32_t mga_mem_base = 0; 
-
-static int mga_src_base = 0;	// YUV buffer position in video memory
-
-static uint32_t mga_ram_size = 0;	// how much megabytes videoram we have
-
-//static int mga_force_memsize = 0;
-
-int mga_verbose = 0;
-
-static mga_vid_config_t mga_config; 
-
-static int colkey_saved=0;
-static int colkey_on=0;
-static unsigned char colkey_color[4];
-static unsigned char colkey_mask[4];
-
-static int mga_irq = -1;
-
-static vidix_capability_t mga_cap =
-{
-    "Matrox MGA G200/G400 YUV Video",
-    TYPE_OUTPUT,
-    { 0, 0, 0, 0 },
-    1024,
-    768,
-    4,
-    4,
-    -1,
-    FLAG_UPSCALER | FLAG_DOWNSCALER,
-    VENDOR_MATROX,
-    0,
-    { 0, 0, 0, 0}
-};
 
 //All register offsets are converted to word aligned offsets (32 bit)
 //because we want all our register accesses to be 32 bits
@@ -323,7 +298,6 @@ static vidix_capability_t mga_cap =
 #define ICLEAR	    0x1e18
 #define STATUS      0x1e14
 
-static int mga_next_frame=0;
 
 #ifdef CRTC2
 static void crtc2_frame_sel(int frame)
@@ -358,10 +332,14 @@ case 3:
 
 int vixPlaybackFrameSelect(unsigned int frame)
 {
-    if ( mga_irq != -1 ) {
-	mga_next_frame=frame;
-    } else {
-
+#if MGA_ALLOW_IRQ
+    if (mga_irq != -1)
+    {
+	mga_next_frame = frame;
+    }
+    else
+#endif
+    {
 	//we don't need the vcount protection as we're only hitting
 	//one register (and it doesn't seem to be double buffered)
 	regs.besctl = (regs.besctl & ~0x07000000) + (frame << 25);
@@ -373,7 +351,6 @@ int vixPlaybackFrameSelect(unsigned int frame)
 #ifdef CRTC2
 	crtc2_frame_sel(frame);
 #endif
-
     }
 
     return(0);
@@ -449,8 +426,8 @@ static void mga_vid_write_regs(int restore)
 	
 if(!restore){
 	writeb( XKEYOPMODE, mga_mmio_base + PALWTADD);
-	writeb( mga_config.colkey_on, mga_mmio_base + X_DATAREG);
-	if ( mga_config.colkey_on ) 
+	writeb( mga_grkey.ckey.op == CKEY_TRUE, mga_mmio_base + X_DATAREG);
+	if ( mga_grkey.ckey.op == CKEY_TRUE )
 	{
 		uint32_t r=0, g=0, b=0;
 
@@ -463,23 +440,23 @@ if(!restore){
 			break;
 
 			case BPP_15:
-				r = mga_config.colkey_red   >> 3;
-				g = mga_config.colkey_green >> 3;
-				b = mga_config.colkey_blue  >> 3;
+				r = mga_grkey.ckey.red   >> 3;
+				g = mga_grkey.ckey.green >> 3;
+				b = mga_grkey.ckey.blue  >> 3;
 			break;
 
 			case BPP_16:
-				r = mga_config.colkey_red   >> 3;
-				g = mga_config.colkey_green >> 2;
-				b = mga_config.colkey_blue  >> 3;
+				r = mga_grkey.ckey.red   >> 3;
+				g = mga_grkey.ckey.green >> 2;
+				b = mga_grkey.ckey.blue  >> 3;
 			break;
 
 			case BPP_24:
 			case BPP_32_DIR:
 			case BPP_32_PAL:
-				r = mga_config.colkey_red;
-				g = mga_config.colkey_green;
-				b = mga_config.colkey_blue;
+				r = mga_grkey.ckey.red;
+				g = mga_grkey.ckey.green;
+				b = mga_grkey.ckey.blue;
 			break;
 		}
 
@@ -602,7 +579,6 @@ if(!restore){
 }
 
 #ifdef MGA_ALLOW_IRQ
-
 static void enable_irq(){
 	long int cc;
 
@@ -616,14 +592,16 @@ static void enable_irq(){
 	writeb(0x10, mga_mmio_base + CRTCD );  /* clear = 1 */
 	
 	writel( regs.besglobctl , mga_mmio_base + BESGLOBCTL);
-
+	
+	return;
 }
 
-static void disable_irq(){
-
+static void disable_irq()
+{
 	writeb( 0x11, mga_mmio_base + CRTCX);
 	writeb(0x20, mga_mmio_base + CRTCD );  /* clear 0, enable off */
 
+	return;
 }
 
 void mga_handle_irq(int irq, void *dev_id/*, struct pt_regs *pregs*/) {
@@ -695,14 +673,13 @@ void mga_handle_irq(int irq, void *dev_id/*, struct pt_regs *pregs*/) {
 	return;
 
 }
-
-#endif
+#endif /* MGA_ALLOW_IRQ */
 
 int vixConfigPlayback(vidix_playback_t *config)
 {
 	int x, y, sw, sh, dw, dh;
 	int besleft, bestop, ifactor, ofsleft, ofstop, baseadrofs, weight, weights;
-	int frame_size=config->frame_size;
+	int frame_size;
 #ifdef CRTC2
 #define right_margin 0
 #define left_margin 18
@@ -722,30 +699,6 @@ int vixConfigPlayback(vidix_playback_t *config)
 #endif 
     int frame;
 
-#if 0	
-    switch(config->fourcc)
-    {
-        case IMGFMT_YV12:
-	    mga_config.format = MGA_VID_FORMAT_YV12;
-    	    break;
-        case IMGFMT_IYUV:
-	    mga_config.format = MGA_VID_FORMAT_IYUV;
-	    break;
-	case IMGFMT_I420:
-	    mga_config.format = MGA_VID_FORMAT_I420;
-	    break;
-	case IMGFMT_YUY2:
-	    mga_config.format = MGA_VID_FORMAT_YUY2;
-	    break;
-	case IMGFMT_UYVY:
-	    mga_config.format = MGA_VID_FORMAT_UYVY;
-	    break;
-	default:
-	    printf("[mga] unsupported video format: %x\n",
-	        config->fourcc);
-	    return(ENOTSUP);
-    }
-#endif
     if ((config->num_frames < 1) || (config->num_frames > 4))
     {
 	printf("[mga] illegal num_frames: %d, setting to 2\n", config->num_frames);
@@ -819,13 +772,6 @@ int vixConfigPlayback(vidix_playback_t *config)
 //    config->offset.y = config->dga_addr;
 //    config->offset.u = config->offset.y+config->frame_size;
 //    config->offset.v = config->offset.u+2*config->frame_size;
-	
-    if (is_g400) 
-      mga_config.card_type = MGA_G400;
-    else
-      mga_config.card_type = MGA_G200;
-		       
-    mga_config.ram_size = mga_ram_size;
 	
     //FIXME figure out a better way to allocate memory on card
     //allocate 2 megs
@@ -1482,8 +1428,10 @@ int vixQueryFourcc(vidix_fourcc_t *to)
 	    return(ENOTSUP);
     }
     
-    to->depth = VID_DEPTH_12BPP | VID_DEPTH_16BPP | VID_DEPTH_32BPP;
-    to->flags = VID_CAP_EXPAND | VID_CAP_SHRINK;
+    to->depth = VID_DEPTH_12BPP |
+		VID_DEPTH_15BPP | VID_DEPTH_16BPP |
+		VID_DEPTH_24BPP | VID_DEPTH_32BPP;
+    to->flags = VID_CAP_EXPAND | VID_CAP_SHRINK | VID_CAP_COLORKEY;
     return(0);
 }
 
@@ -1498,3 +1446,14 @@ int vixGetCapability(vidix_capability_t *to)
     return(0);
 }
 
+int vixGetGrKeys(vidix_grkey_t *grkey)
+{
+    memcpy(grkey, &mga_grkey, sizeof(vidix_grkey_t));
+    return(0);
+}
+
+int vixSetGrKeys(const vidix_grkey_t *grkey)
+{
+    memcpy(&mga_grkey, grkey, sizeof(vidix_grkey_t));
+    return(0);
+}
