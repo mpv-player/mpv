@@ -321,7 +321,7 @@ static void compute_breaks(struct pullup_context *c, struct pullup_field *f0)
 		if (-l > max_r) max_r = -l;
 	}
 	/* Don't get tripped up when differences are mostly quant error */
-	if (max_l + max_r < 64) return;
+	if (max_l + max_r < 256) return;
 	if (max_l > 4*max_r) f1->breaks |= BREAK_LEFT;
 	if (max_r > 4*max_l) f2->breaks |= BREAK_RIGHT;
 	//printf("max_l=%d max_r=%d\n", max_l, max_r);
@@ -330,7 +330,7 @@ static void compute_breaks(struct pullup_context *c, struct pullup_field *f0)
 static void compute_affinity(struct pullup_context *c, struct pullup_field *f)
 {
 	int i;
-	int max_l=0, max_r=0, l;
+	int max_l=0, max_r=0, l, t;
 	if (f->flags & F_HAVE_AFFINITY) return;
 	f->flags |= F_HAVE_AFFINITY;
 	for (i = 0; i < c->metric_len; i++) {
@@ -338,16 +338,25 @@ static void compute_affinity(struct pullup_context *c, struct pullup_field *f)
 		if (l > max_l) max_l = l;
 		if (-l > max_r) max_r = -l;
 	}
-	if (max_l + max_r < 64) return;
+	if (max_l + max_r < 256) return;
 	if (max_r > 3*max_l) f->affinity = -1;
 	else if (max_l > 3*max_r) f->affinity = 1;
+	else if (max_l + max_r > 2048) {
+		for (i = 0; i < c->metric_len; i++) {
+			l += f->licomb[i] - f->next->licomb[i];
+			t += ABS(f->licomb[i] - f->next->licomb[i]);
+		}
+		if (-l*4 > t) f->affinity = -1;
+		else if (l*4 > t) f->affinity = 1;
+		//printf("affinity from avg: %d\n", f->affinity);
+	}
 }
 
 static void foo(struct pullup_context *c)
 {
 	struct pullup_field *f = c->first;
 	int i, n = queue_length(f, c->last);
-	for (i = 0; i < n; i++) {
+	for (i = 0; i < n-1; i++) {
 		if (i < n-3) compute_breaks(c, f);
 		compute_affinity(c, f);
 		f = f->next;
@@ -369,19 +378,24 @@ static int decide_frame_length(struct pullup_context *c)
 
 	n = find_first_break(f0, 3);
 
+	if (f0->affinity == -1) return 1;
+
 	switch (n) {
 	case 1:
 		return 1;
 	case 2:
-		if (f0->affinity == -1 || f1->affinity == 1) return 1;
+		if (f1->affinity == 1) return 1;
 		else return 2;
 	case 3:
-		if (f1->affinity == -1 && f2->affinity != -1) return 2;
-		else if (f1->affinity == 1 && f0->affinity != 1) return 1;
+		if (f1->affinity == -1) return 2;
+		else if (f1->affinity == 1) return 1;
 		else return 3;
 	default:
-		if (f0->affinity == -1 && f1->affinity != -1) return 1;
-		else if (f1->affinity == 1 && f2->affinity == -1) return 1;
+		if (f1->affinity == 1) return 1;
+		else if (f1->affinity == -1) return 2;
+		else if (f2->affinity == 1) return 2;
+		else if (f0->affinity == 1 && f2->affinity == -1) return 3;
+		else if (f2->affinity == 0 && f3->affinity == 1) return 3;
 		else return 2;
 	}
 }
