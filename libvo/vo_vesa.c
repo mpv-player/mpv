@@ -26,8 +26,7 @@
 
 #include "fastmemcpy.h"
 #include "yuv2rgb.h"
-
-#include "linux/lrmi.h"
+#include "sub.h"
 #include "linux/vbelib.h"
 #include "bswap.h"
 
@@ -82,6 +81,7 @@ static uint8_t *yuv_buffer = NULL; /* for yuv2rgb and sw_scaling */
 static unsigned video_mode; /* selected video mode for playback */
 static struct VesaModeInfoBlock video_mode_info;
 static int flip_trigger = 0;
+static void (*draw_alpha_fnc)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride);
 
 #define MOVIE_MODE (MODE_ATTR_COLOR | MODE_ATTR_GRAPHICS)
 #define FRAME_MODE (MODE_WIN_RELOCATABLE | MODE_WIN_READABLE | MODE_WIN_WRITEABLE)
@@ -113,7 +113,7 @@ static void vesa_term( void )
   int err;
   if((err=vbeRestoreState(init_state)) != VBE_OK) PRINT_VBE_ERR("vbeRestoreState",err);
   if((err=vbeSetMode(init_mode,NULL)) != VBE_OK) PRINT_VBE_ERR("vbeSetMode",err);
-  free(yuv_buffer);
+  if(yuv_buffer) free(yuv_buffer);
   vbeDestroy();
 }
 
@@ -258,9 +258,29 @@ static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int
     return 0;
 }
 
+static void draw_alpha_32(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
+   vo_draw_alpha_rgb32(w,h,src,srca,stride,yuv_buffer+4*(y0*image_width+x0),4*image_width);
+}
+
+static void draw_alpha_24(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
+   vo_draw_alpha_rgb24(w,h,src,srca,stride,yuv_buffer+3*(y0*image_width+x0),3*image_width);
+}
+
+static void draw_alpha_16(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
+   vo_draw_alpha_rgb16(w,h,src,srca,stride,yuv_buffer+2*(y0*image_width+x0),2*image_width);
+}
+
+static void draw_alpha_15(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
+   vo_draw_alpha_rgb15(w,h,src,srca,stride,yuv_buffer+2*(y0*image_width+x0),2*image_width);
+}
+
+static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
+}
+
+
 static void draw_osd(void)
 {
-/* nothing to do for now */
+ if(yuv_buffer) vo_draw_text(image_width,image_height,draw_alpha_fnc);
 }
 
 static void flip_page(void)
@@ -354,7 +374,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
   uint32_t w,h;
   unsigned short *mode_ptr,win_seg;
   unsigned bpp,best_x = UINT_MAX,best_y=UINT_MAX,best_mode_idx = UINT_MAX;
-  int err,fs_mode;
+  int err,fs_mode,yuv_fmt;
 	image_width = width;
 	image_height = height;
 	fs_mode = 0;
@@ -401,11 +421,11 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	num_modes = 0;
 	mode_ptr = vib.VideoModePtr;
 	while(*mode_ptr++ != 0xffff) num_modes++;
+	yuv_fmt = format == IMGFMT_YV12 || format == IMGFMT_I420 || format == IMGFMT_IYUV;
 	if(vo_dbpp)
 	{
 	  bpp = vo_dbpp;
-	  if(format == IMGFMT_YV12 || format == IMGFMT_I420 || format == IMGFMT_IYUV)
-			yuv2rgb_init(bpp, MODE_RGB);
+	  if(yuv_fmt)	yuv2rgb_init(bpp, MODE_RGB);
 	}
 	else
 	switch(format)
@@ -425,6 +445,14 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		case IMGFMT_RGB24: bpp = 24; break;
 		case IMGFMT_BGR32:
 		case IMGFMT_RGB32: bpp = 32; break;
+	}
+	switch(bpp)
+	{
+	  case 15: draw_alpha_fnc = draw_alpha_15; break;
+	  case 16: draw_alpha_fnc = draw_alpha_16; break;
+	  case 24: draw_alpha_fnc = draw_alpha_24; break;
+	  case 32: draw_alpha_fnc = draw_alpha_32; break;
+	  default: draw_alpha_fnc = draw_alpha_null; break;
 	}
 	if(verbose)
 	{
@@ -557,23 +585,24 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 			,image_width,image_height
 			,video_mode_info.XResolution,video_mode_info.YResolution
 			,x_offset,y_offset);
-		if(!(yuv_buffer = malloc(image_width*image_height*bpp)))
-		{
-		  printf("vo_vesa: Can't allocate temporary buffer\n");
-		  return -1;
-		}
+		if(yuv_fmt)
+		  if(!(yuv_buffer = malloc(image_width*image_height*bpp)))
+		  {
+		    printf("vo_vesa: Can't allocate temporary buffer\n");
+		    return -1;
+		  }
 		if((err=vbeSaveState(&init_state)) != VBE_OK)
 		{
 			PRINT_VBE_ERR("vbeSaveState",err);
 			return -1;
 		}
-/* Below 'return -1' is impossible */
 		if((err=vbeSetMode(video_mode,NULL)) != VBE_OK)
 		{
 			PRINT_VBE_ERR("vbeSetMode",err);
 			return -1;
 		}
 		/* Now we are in video mode!!!*/
+		/* Below 'return -1' is impossible */
 		if(verbose)
 		{
 		  printf("vo_vesa: Graphics mode was activated\n");
