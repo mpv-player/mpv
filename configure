@@ -5817,8 +5817,11 @@ To do so, execute 'CFLAGS= ./configure <options>'
 EOF
 fi
 if darwin ; then
-  # use gnu style cpp on Darwin
-  CFLAGS="$CFLAGS -no-cpp-precomp -DSYS_DARWIN -Wl,-bind_at_load"
+  CFLAGS="$CFLAGS -DSYS_DARWIN"
+  if [ "$_cc_major" = 3 ] && [ "$_cc_minor" -lt 1 ]; then
+    CFLAGS="$CFLAGS -no-cpp-precomp"
+  fi
+
   # libavcodec (from ffmpeg) requires CONFIG_DARWIN to enable AltiVec on Darwin/MacOSX
   test "$_altivec" = yes && CFLAGS="$CFLAGS -DCONFIG_DARWIN"
 fi
