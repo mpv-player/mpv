@@ -6,7 +6,8 @@
 #include <unistd.h>
 #include <string.h>
 
-#include "../cfgparser.h"
+#include "../m_option.h"
+#include "../m_config.h"
 
 #include "stream.h"
 #include "demuxer.h"
@@ -65,8 +66,8 @@ int demux_rawaudio_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds) {
     return 0;
 
   dp = new_demux_packet(l);
-  ds->pts = spos / (float)(sh_audio->wf->nAvgBytesPerSec);
-  ds->pos = spos;
+  dp->pts = (spos - demuxer->movi_start)  / (float)(sh_audio->wf->nAvgBytesPerSec);
+  dp->pos = (spos - demuxer->movi_start);
 
   stream_read(demuxer->stream,dp->buffer,l);
   ds_add_packet(ds,dp);
@@ -87,7 +88,7 @@ void demux_rawaudio_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
 
   pos -= (pos % (sh_audio->channels * sh_audio->samplesize) );
   stream_seek(s,pos);
-  sh_audio->delay=pos / (float)(sh_audio->wf->nAvgBytesPerSec);
+  //sh_audio->delay=pos / (float)(sh_audio->wf->nAvgBytesPerSec);
   resync_audio_stream(sh_audio);
 //  printf("demux_rawaudio: streamtell=%d\n",(int)stream_tell(demuxer->stream));
 }
