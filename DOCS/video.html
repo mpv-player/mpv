@@ -33,6 +33,7 @@
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>syncfb</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Matrox G400 YUV support on framebuffer (obsoleted, use mga/xmga)</TD><TR>
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>3dfx</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Voodoo2/3 hardware YUV (/dev/3dfx) support (not yet tested, maybe
 broken)</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>tdfxfb</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Voodoo2/3 hardware YUV support on tdfx framebuffer (works!)</TD><TR>
 
 <TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Special:</B></P></TD><TR>
 
@@ -166,6 +167,8 @@ XFree86 version 4.1.0 or greater, it works ok. Alternatively, you can use
 If you experience strange effects using -vo xv, try SDL (it has XVideo too)
 and see if it helps. Check the <A HREF="#2.2.1.4">SDL section</A> for details.</P>
 
+<P><B>OR</B>, try the NEW -vo tdfxfb driver! See the <A HREF=#2.2.1.9>2.2.1.9</A>
+section!</P>
 
 <P><B><A NAME=2.2.1.2.2>2.2.1.2.2. S3 cards</A></B></P>
 
@@ -502,7 +505,7 @@ and don't ask for it, since it's not an <B>MPlayer</B> limitation.</P>
 
 <P><B><A NAME=2.2.1.7>2.2.1.7. Matrox framebuffer (mga_vid)</A></B></P>
 
-<P>This section is about the Matrox G200/G400/G450 BES (Back-End Scaler)
+<P>This section is about the Matrox G200/G400/G450/G550 BES (Back-End Scaler)
 support, the mga_vid kernel driver.  It's active developed by me (A'rpi), and
 it has hardware VSYNC support with triple buffering. It works on both
 framebuffer console and under X.</P>
@@ -552,12 +555,11 @@ driver, so avoid using both. If you messed up Xv with mga, try running
 updated after the mga_vid changes, so it's outdated now.  Volunteers
 needed to test it and bring the code up-to-date.</P>
 
-<P><B><A NAME=2.2.1.9>2.2.1.9. 3dfx YUV support</A></B></P>
+<P><B><A NAME=2.2.1.9>2.2.1.9. 3dfx YUV support (tdfxfb)</A></B></P>
 
-<P>3dfx has native YUV+scaler support, using /dev/3dfx (tdfx.o driver?)
-The /dev/3dfx kernel driver exists only for 2.2.x kernels, for use with
-Glide 2.x Linux ports. It's not tested with <B>MPlayer</B>, and so no more
-supported. Volunteers needed to test it and bring the code up-to-date.</P>
+<P>This driver uses the kernel's tdfx framebuffer driver to play movies with
+YUV acceleration. You'll need a kernel with tdfxfb support, and recompile with
+<CODE>./configure --enable-tdfxfb</CODE></P>
 
 <P><B><A NAME=2.2.1.10>2.2.1.10. OpenGL output</A></B></P>
 
@@ -628,7 +630,7 @@ on my tv. I love this feature and was wondering how hard it would be to add
 such a feature to mplayer.</I></P>
 
 <P>It's a driver limitation. BES (Back-End Scaler, it's the overlay generator
-and YUV scaling engine of G200/G400/G450 cards) works only with CRTC1.
+and YUV scaling engine of G200/G400/G450/G550 cards) works only with CRTC1.
 Normally, CRTC1 (textmode, every bpp gfx and BES) is routed to HEAD1,
 and CRTC2 (only 16/32bpp gfx) is routed to HEAD2 (TV-out).</P>
 

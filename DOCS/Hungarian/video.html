@@ -33,6 +33,7 @@
 (<I>(Xv emuláció 3.3.x-es X-szel!)</I>)</TD><TR>
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>syncfb</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Matrox G400 YUV támogatás framebufferen (régi, használj mga/xmga-t)</TD><TR>
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>3dfx</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Voodoo2/3 hardware YUV (/dev/3dfx) támogatás (nincs tesztelve!)</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>tdfxfb</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Voodoo2/3 hardware YUV támogatás tdfx framebufferen (mûködik!)</TD><TR>
 
 <TD COLSPAN=4><P><B>Egyéb:</B></P></TD><TR>
 
@@ -165,6 +166,8 @@ megkeresni. Erre van 3 módszer :</P>
   (annak is van XVideo támogatása), az segíthet. Nézd meg a <A HREF="#2.2.1.4">2.2.1.4-es</A>
   fejezetet a részletekhez.</P>
 
+<P><B>VAGY</B> inkább használd az ÚJ -vo tdfxfb meghajtót! Lásd <A
+HREF=#2.2.1.9>2.2.1.9-es</A> fejezet.</P>
 
 <P><B><A NAME=2.2.1.2.2>2.2.1.2.2.  S3 kártyák</A></B></P>
 
@@ -488,7 +491,7 @@ esd, arts)</TD><TR>
 
 <P><B><A NAME=2.2.1.7>2.2.1.7.  Matrox framebuffer (mga_vid)</A></B></P>
 
-<P>Ez a rész a Matrox G200/G400/G450 BES (Back-End Scaler) támogatásról szól,
+<P>Ez a rész a Matrox G200/G400/G450/G550 BES (Back-End Scaler) támogatásról szól,
   azaz az mga_vid kernel meghajtóról. Hardveres VSYNC támogatást tartalmaz,
   tripla buffereléssel. Framebufferes konzolon is, és X alatt is mûködik.</P>
 
@@ -540,10 +543,9 @@ esd, arts)</TD><TR>
 
 <P><B><A NAME=2.2.1.9>2.2.1.9.  3dfx YUV támogatás</A></B></P>
 
-<P>3dfx (mely kártyák?) YUV+scaler támogatás, a /dev/3dfx-el (tdfx.o driver?)
-  A /dev/3dfx kernel driver csak a 2.2.x kernelekhez létezik, és a Glide-dal
-  használatos. Nincs letesztelve <B>MPlayer</B>-rel, ezért nem támogatott.
-  Jelentkezõk kellenek tesztelésre, javításra.</P>
+<P>Ez a meghajtó a kernel tdfx framebufferét használva jelenít meg filmeket
+hardveres gyorsítással. tdfxfb kell a kernelbe, és a következõképp kell
+újrafordítani az <B>MPlayer</B>-t : <CODE>./configure --enable-tdfxfb</CODE></P>
 
 <P><B><A NAME=2.2.1.10>2.2.1.10.  OpenGL kimenet</A></B></P>
 
@@ -613,7 +615,7 @@ Here are some important:</P></B></TD><TR>
    nehéz lenne ezt beépíteni mplayer-be.</I></P>
 
 <P.Ez a driver korlátja. BES (Back-End Scaler, ez az overlay generator, és YUV
-  scaler a G200/G400/G450 kártyákon) csak a CRTC1-en mûködik. Normális esetben,
+  scaler a G200/G400/G450/G550 kártyákon) csak a CRTC1-en mûködik. Normális esetben,
   CRTC1 (szöveges mód, minden bpp, BES) az 1-es head-re kerül, és CRTC2
   (csak 16/32bpp, csak grafika) a 2-esre (TV-kimenet).</P>
 
