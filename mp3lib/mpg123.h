@@ -5,10 +5,14 @@
 
 #include "../config.h"
 
-# define M_PI       3.14159265358979323846
-# define M_SQRT2        1.41421356237309504880
-# define REAL_IS_FLOAT
-# define NEW_DCT9
+#ifndef M_PI
+#define M_PI		3.141592653589793238462
+#endif
+#ifndef M_SQRT2
+#define M_SQRT2		1.414213562373095048802
+#endif
+#define REAL_IS_FLOAT
+#define NEW_DCT9
 
 #undef MPG123_REMOTE           /* Get rid of this stuff for Win32 */
 
