@@ -1215,7 +1215,7 @@ if(sh_video) {
   }
   if(subtitles && stream_dump_type==3) list_sub_file(subtitles);
   if(subtitles && stream_dump_type==4) dump_mpsub(subtitles, sh_video->fps);
-  if(subtitles && stream_dump_type==6) dump_srt(subtitles);
+  if(subtitles && stream_dump_type==6) dump_srt(subtitles, sh_video->fps);
 }
 #endif
 
