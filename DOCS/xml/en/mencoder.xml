@@ -315,7 +315,7 @@ An example, with MJPEG compression:
 
 
 <sect1 id="menc-feat-enc-images">
-<title>Encoding from multiple input image files (JPEGs,PNGs or TGAs)</title>
+<title>Encoding from multiple input image files (JPEG, PNG, TGA, SGI)</title>
 
 <para>
 <application>MEncoder</application> is capable of creating movies from one
@@ -332,50 +332,49 @@ or more JPEG, PNG or TGA files.  With simple framecopy it can create MJPEG
   </para></listitem>
 <listitem><para>
   <application>MEncoder</application> then feeds the decoded image to the
-  chosen video compressor (DivX4, Xvid, ffmpeg msmpeg4, etc.).
+  chosen video compressor (DivX4, XviD, FFmpeg msmpeg4, etc.).
   </para></listitem>
 </orderedlist>
 
 <formalpara>
 <title>Examples</title>
 <para>
-The explanation of the <option>-mf</option> option can be found below in
-the man page.
+The explanation of the <option>-mf</option> option is in the man page.
 
 <informalexample>
 <para>
-Creating a DivX4 file from all the JPEG files in the current dir:
+Creating an MPEG4 file from all the JPEG files in the current directory:
 <screen>
-mencoder -mf on:w=800:h=600:fps=25 -ovc divx4 -o <replaceable>output.avi</replaceable> \*.jpg<!--
---></screen>
+mencoder mf://*.jpg -mf type=jpg:w=800:h=600:fps=25 -ovc lavc -lavcopts vcodec=mpeg4 -oac copy -o <replaceable>output.avi</replaceable>
+</screen>
 </para>
 </informalexample>
 
 <informalexample>
 <para>
-Creating a DivX4 file from some JPEG files in the current dir:
+Creating an MPEG4 file from some JPEG files in the current directory:
 <screen>
-mencoder -mf on:w=800:h=600:fps=25 -ovc divx4 -o <replaceable>output.avi</replaceable> <replaceable>frame001.jpg,frame002.jpg</replaceable> <!--
---></screen>
+mencoder mf://<replaceable>frame001.jpg,frame002.jpg</replaceable> -mf type=jpg:w=800:h=600:fps=25 -ovc lavc -lavcopts vcodec=mpeg4 -oac copy -o <replaceable>output.avi</replaceable>
+</screen>
 </para>
 </informalexample>
 
 <informalexample>
 <para>
 Creating a Motion JPEG (MJPEG) file from all the JPEG files in the current
-dir:
+directory:
 <screen>
-mencoder -mf on:w=800:h=600:fps=25 -ovc copy -o <replaceable>output.avi</replaceable> \*.jpg<!--
---></screen>
+mencoder mf://*.jpg -mf type=jpg:w=800:h=600:fps=25 -ovc copy -oac copy -o <replaceable>output.avi</replaceable>
+</screen>
 </para>
 </informalexample>
 
 <informalexample>
 <para>
-Creating an uncompressed file from all the PNG files in the current dir:
+Creating an uncompressed file from all the PNG files in the current directory:
 <screen>
-mencoder -mf on:w=800:h=600:fps=25:type=png -ovc raw -o <replaceable>output.avi</replaceable> \*.png<!--
---></screen>
+mencoder mf:// -mf w=800:h=600:fps=25:type=png -ovc raw -oac copy -o <replaceable>output.avi</replaceable>
+</screen>
 </para>
 </informalexample>
 
@@ -386,9 +385,9 @@ Width must be integer multiple of 4, it's a limitation of the RAW RGB AVI format
 <informalexample>
 <para>
 Creating a Motion PNG (MPNG) file from all the PNG files in the current
-dir:
+directory:
 <screen>
-mencoder -mf on:w=800:h=600:fps=25:type=png -ovc copy -o <replaceable>output.avi</replaceable> \*.png<!--
+mencoder mf://*.jpg -mf w=800:h=600:fps=25:type=png -ovc copy -oac copy -o <replaceable>output.avi</replaceable> <!--
 --></screen>
 </para>
 </informalexample>
@@ -396,9 +395,9 @@ mencoder -mf on:w=800:h=600:fps=25:type=png -ovc copy -o <replaceable>output.avi
 <informalexample>
 <para>
 Creating a Motion TGA (MTGA) file from all the TGA files in the current
-dir:
+directory:
 <screen>
-mencoder -mf on:w=800:h=600:fps=25:type=tga -ovc copy -o <replaceable>output.avi</replaceable> \*.tga<!--
+mencoder mf://*.tga -mf w=800:h=600:fps=25:type=tga -ovc copy -oac copy -o <replaceable>output.avi</replaceable><!--
 --></screen>
 </para>
 </informalexample>
