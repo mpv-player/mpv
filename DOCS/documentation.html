@@ -123,10 +123,11 @@ and ASF/WMV files, supported by many native and Win32 DLL codecs. You can watch
 you don't need the avifile library at all!). The another big feature of mplayer
 is the wide range of supported output drivers. It works with X11, Xv, DGA,
 OpenGL, SVGAlib, fbdev, AAlib, but you can use SDL (and this way all drivers of
-SDL) and some lowlevel card-specific drivers (for Matrox) too! Most of them
-supports software or hardware scaling, so you can enjoy movies in fullscreen.
-And what about the nice big antialiased shaded subtitles (7 supported types!!!)
-with hungarian, english, cyrillic, czech, korean fonts, and OSD?</P>
+SDL) and some lowlevel card-specific drivers (for Matrox, 3Dfx and Radeon) too!
+Most of them supports software or hardware scaling, so you can enjoy movies in
+fullscreen. And what about the nice big antialiased shaded subtitles (7
+supported types!!!) with hungarian, english, cyrillic, czech, korean fonts, and
+OSD?</P>
 
 <P>MPlayer <I>would be</I> distributable under the terms of the <A
 HREF="http://www.gnu.org/licenses/gpl.html">GNU GPL</A>, but distributing
@@ -214,10 +215,15 @@ Note: the avifile project has similar codecs package, but it differs
 from ours, so if you want to use all supported codecs, then use
 our package! However, you can use our codecs package with avifile.</LI>
 
-<LI>If you own a Matrox G200/G400/G450/G550 card, then please see the <A HREF="video.html#2.2.1.7">2.2.1.7</A>
+<LI>If you own a Matrox G200/G400/G450/G550 or card, then please see the <A HREF="video.html#2.2.1.7">2.2.1.7</A>
 section in order to gain big speedup. It is important to do these steps
 <I>before</I> compiling <B>MPlayer</B>, otherwise no Matrox-specific support will be
 built.</LI>
+
+<LI>If you own a 3Dfx card (which models?), then please see the <A
+HREF="video.html#2.2.1.9">2.2.1.9</A> section in order to gain big speedup. It
+is important to do these steps <I>before</I> compiling <B>MPlayer</B>,
+otherwise no 3Dfx support will be built.</LI>
 
 <LI>If you plan to use the ProjectMayo's <B>DivX4</B> codec, check the
 <A HREF="codecs.html#2.1.2.1">2.1.2.1</A> section before compiling.
