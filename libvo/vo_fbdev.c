@@ -559,7 +559,6 @@ static void (*draw_alpha_p)(int w, int h, unsigned char *src,
 		unsigned char *srca, int stride, unsigned char *dst,
 		int dstride);
 
-static uint8_t *next_frame;
 static int in_width;
 static int in_height;
 static int out_width;
@@ -950,7 +949,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	fb_line_len = fb_finfo.line_length;
 	fb_size = fb_finfo.smem_len;
 	frame_buffer = NULL;
-	next_frame = NULL;
 #ifdef CONFIG_VIDIX
 	if(vidix_name)
 	{
@@ -1002,10 +1000,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	    mp_msg(MSGT_VO, MSGL_DBG2, "center @ %p\n", center);
 	    mp_msg(MSGT_VO, MSGL_V, "pixel per line: %d\n", fb_line_len / fb_pixel_size);
 
-	    if (!(next_frame = (uint8_t *) malloc(in_width * in_height * fb_pixel_size))) {
-		mp_msg(MSGT_VO, MSGL_ERR, "Can't malloc next_frame: %s\n", strerror(errno));
-		return 1;
-	    }
 	    if (fs || vm)
 		memset(frame_buffer, '\0', fb_line_len * fb_yres);
 	}
@@ -1045,12 +1039,10 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
 		unsigned char *srca, int stride)
 {
 	unsigned char *dst;
-	int dstride;
 
-	dst = next_frame + (in_width * y0 + x0) * fb_pixel_size;
-	dstride = in_width * fb_pixel_size;
+	dst = center + (fb_line_len * y0 + x0) * fb_pixel_size;
 
-	(*draw_alpha_p)(w, h, src, srca, stride, dst, dstride);
+	(*draw_alpha_p)(w, h, src, srca, stride, dst, fb_line_len);
 }
 
 static uint32_t draw_frame(uint8_t *src[]) { return 1; }
@@ -1060,15 +1052,13 @@ static uint32_t draw_slice(uint8_t *src[], int stride[], int w, int h, int x,
 {
 	uint8_t *d;
 	uint8_t *s;
-	int next;
 
-	d = next_frame + (in_width * y + x) * fb_pixel_size;
-	next = in_width * fb_pixel_size;
+	d = center + (fb_line_len * y + x) * fb_pixel_size;
 
 	s = src[0];
 	while (h) {
 		memcpy(d, s, w * fb_pixel_size);
-		d += next;
+		d += fb_line_len;
 		s += stride[0];
 		h--;
 	}
@@ -1082,14 +1072,6 @@ static void check_events(void)
 
 static void flip_page(void)
 {
-	int i, out_offset = 0, in_offset = 0;
-
-	for (i = 0; i < in_height; i++) {
-		memcpy(center + out_offset, next_frame + in_offset,
-				in_width * fb_pixel_size);
-		out_offset += fb_line_len;
-		in_offset += in_width * fb_pixel_size;
-	}
 }
 
 static void draw_osd(void)
@@ -1104,7 +1086,6 @@ static void uninit(void)
 			mp_msg(MSGT_VO, MSGL_WARN, "Can't restore original cmap\n");
 		fb_cmap_changed = 0;
 	}
-	if(next_frame) free(next_frame);
 	if (ioctl(fb_dev_fd, FBIOGET_VSCREENINFO, &fb_vinfo))
 		mp_msg(MSGT_VO, MSGL_WARN, "ioctl FBIOGET_VSCREENINFO: %s\n", strerror(errno));
 	fb_orig_vinfo.xoffset = fb_vinfo.xoffset;
@@ -1120,7 +1101,7 @@ static void uninit(void)
         close(fb_tty_fd);
 	close(fb_dev_fd);
 	if(frame_buffer) munmap(frame_buffer, fb_size);
-	frame_buffer = next_frame = NULL;
+	frame_buffer = NULL;
 #ifdef CONFIG_VIDIX
 	if(vidix_name) vidix_term();
 #endif
