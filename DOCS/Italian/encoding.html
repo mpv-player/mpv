@@ -15,8 +15,8 @@
 studiato per codificare i filmati leggibili da MPlayer
 (<B>AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET</B>) in altri formati leggibili da MPlayer
 (vedi sotto). Può usare vari codec, come <B>DivX4</B> (1 o
-2 passaggi), libavcodec, audio <B>PCM</B>/<B>MP3</B>/<B>VBRMP3</B>. Ha anche la
-capacità di copiare da stream e di ridimensionare i video.</P>
+2 passaggi), libavcodec, audio <B>PCM</B>/<B>MP3</B>/<B>VBRMP3</B>. Ha anche un
+potente sistema di plugin per la manipolazione video.</P>
 
 <P><B><A NAME=2.4.2>2.4.2.  Compilazione</B></P>
 
@@ -28,13 +28,14 @@ capacità di copiare da stream e di ridimensionare i video.</P>
       e installale CORRETTAMENTE. Ti servono se vuoi codificare in DivX4
       (1/2 passaggi).</LI>
     <LI><B>OPTIONAL</B> - <A HREF="codecs.html#2.2.1.9">scarica e installa
-      <B>XViD</B></A>. Molto utile su sistemi non-Linux, e/o se hai bisogno
+      <B>XViD</B></A>. Non molto utile, il codec <I>mpeg4</I> di libavcodec
+      può codificare più velocemente e con una migliore qualità di XViD o DivX4/5.</LI>
       di una codifica più veloce del DivX4, con approssimativamente la stessa qualità.</LI>
     <LI><B>OPZIONALE</B> - per il supporto libavcodec, installa libavcodec come
       descritto nella <A HREF="codecs.html#2.2.1.2">sezione libavcodec</A>.</LI>
     <LI><B>OPZIONALE</B> - scarica e compila <B>libmp3lame</B> (da lame 3.89beta o lame CVS).<BR>
-      <B>ATTENZIONE : NON COMPILARE LAME CON <U>GCC 2.96</U> ! Non funzionerà
-      propriamente !</B><BR>
+      <B>ATTENZIONE : NON COMPILARE LAME &lt; 3.90 CON <U>GCC 2.96</U> ! Non funzionerà
+      correttamente !</B><BR>
       Questo
       è necessario per la possibilità di codificare audio CBR/VBR MP3. Nota che il singolo binario di
       <CODE>lame</CODE> non è sufficiente. Comunque: meno ottimizzazione usi
@@ -43,7 +44,7 @@ capacità di copiare da stream e di ridimensionare i video.</P>
       lame. Il numero risultante dovrebbe essere minore di <B>30</B>. Non ti spaventare
       se è <B>400</B> o comunque alto, non dovresti sentire una diminuzione di
       qualità. Oh, e se il tuo compilatore non esegue nemmeno <CODE>make test</CODE> ...
-      Bhe, cancella quel <B>GCC 2.96</B>.</LI>
+      Bhe, cancella quel <B>GCC 2.96</B> o aggiorna lame almeno all versione <B>3.90</B>.</LI>
       <LI><B>OPZIONALE</B> - <CODE>libjpeg</CODE> e <CODE>libpng</CODE> -
       come descritto nella sezione <A HREF="documentation.html#1.3">Installazione</A>
       </LI>
@@ -75,6 +76,7 @@ la libreria <I>avifile</I>. <B>MEncoder</B> non ne ha per niente bisogno.</P>
     <LI>usa il nostro potente sistema a plugin (taglia, espandi, capovolgi, post-processa,
       ruota, ridimensiona, conversione rgb/yuv)</LI>
     <LI>può codificare DVD/VOBsub <B>E</B> il testo dei sottotitoli nel file di output</LI>
+    <LI>può catturare i sottotitoli dei DVD in formato Vobsub</LI>
   </UL>
 </P>
 
@@ -300,6 +302,34 @@ supportati). Puoi codificare i seguenti codec :</P>
   &nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc copy
   -o output.avi</CODE></P>
 
+<P><B><A NAME=2.4.3.7>2.4.3.7.  Estrarre i sottotitoli dei DVD in un file Vobsub</A></B></P>
+
+<P><B>MEncoder</B> è in grado di estrarre i sottotitoli dei DVD e codificarli nel formato file Vobsub.  
+Questi consistono in un paio di file con estensione .idx  e .sub e sono generalmente impacchettati in un unico archivio .rar. MPlayer può leggerli usando le opzioni <I>-vobsub</I> e <I>-vobsubid</I>.</P>
+
+<P>Devi specificare il nome di base (cioè senza le estensioni .idx o .sub) dei file di output con
+<I>-vobsubout</I> e l'indice per questo sottotitolo nei file risultanti con <I>-vobsuboutindex</I>.</P>
+
+<P>Se l'input non viene da un DVD dovresti usare <I>-ifo</I> per indicare il file .ifo necessario per 
+costruire il file .idx risultante.</P>
+
+<P>Se l'input non viene da un DVD e non hai il file .ifo devi usare l'opzione <I>-vobsubid</I> per fargli 
+sapere quale identificativo di lingua mettere nel file .idx.</P>
+
+<P>Ogni esecuzione aggiungerà l'attuale sottotitolo ai file .idx e .sub se questi esistono già.
+Quindi dovresti rimuoverli prima di ogni nuova esecuzione.</P>
+
+<P><B>Esempi</B></P>
+
+<P><I>Copiare due sottotitoli da un DVD usando la codifica a tre passaggi</I><BR>   
+&nbsp;&nbsp;<CODE>rm sottotitoli.idx sottotitoli.sub</CODE><BR>    
+&nbsp;&nbsp;<CODE>mencoder -dvd 1 -vobsubout sottotitoli -vobsuboutindex 0 -sid 2 -o frameno.avi -ovc frameno</CODE>   
+&nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -pass 1</CODE><BR>
+&nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -pass 2 -vobsubout sottotitoli -vobsuboutindex 1 -sid 5</CODE></P>
+
+<P><I>Copiare un sottotitolo francese da un file MPEG</I><BR>
+&nbsp;&nbsp;<CODE>rm sottotitoli.idx sottotitoli.sub</CODE><BR>
+&nbsp;&nbsp;<CODE>mencoder movie.mpg -ifo movie.ifo -vobsubout subtitles -vobsuboutindex 0 -vobsuboutid fr -sid 1</CODE></P>
 
 <P><B><A NAME=2.4.4>2.4.4.  Sintassi</B></P>
 
@@ -427,6 +457,19 @@ supportati). Puoi codificare i seguenti codec :</P>
     &nbsp;&nbsp;<B>q</B>=&lt;valore&gt; - qualità (0-alta, 9-veloce - predefinito 0) (solo per <B>VBR</B>!)<BR>
     &nbsp;&nbsp;<B>vbr</B>=&lt;valore&gt; - sotto-modalità VBR (3-ABR, migliore qualità/velocità) (solo per <B>VBR</B>!)<BR>
   </TD>
+</TR>
+<TR>
+ <TD>    <I>-vobsubout</I> nome base</TD>
+ <TD>    Specifica il nome di base per i file .idx e .sub di output. Questo disabilita il rendering dei sottotitoli del filmato codificato.</TD>
+</TR>
+<TR>
+ <TD>    <I>-vobsuboutindex</I> indice</TD>
+ <TD>    Specifica l'indice di questi sottotitoli nei file di output. Il valore di default è 0</TD>
+</TR>
+<TR>
+ <TD>    <I>-vobsuboutid</I> langid</TD>
+ <TD>    Specifica il codice di due lettere della lingua per questo sottotitolo. Questo scavalca quello che è letto dal DVD
+ o dal file .ifo.</TD>
 </TR>
 </TABLE>
 

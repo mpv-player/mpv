@@ -18,12 +18,13 @@ questi driver :</P>
 
 <TR><TD COLSPAN=4><P><B>Generale:</B></P></TD></TR>
 
-<TR><TD>&nbsp;&nbsp;</TD><TD VALIGN=top>oss</TD><TD>&nbsp;&nbsp;</TD><TD>driver OSS (ioctl)</TD></TR>
+<TR><TD>&nbsp;&nbsp;</TD><TD VALIGN=top>oss</TD><TD>&nbsp;&nbsp;</TD><TD>driver OSS (ioctl)(supporta il passaggio hardware AC3)</TD></TR>
 <TR><TD></TD><TD VALIGN=top>sdl</TD><TD></TD><TD>driver SDL (supporta sopra/sottocampionamento, <B>ESD</B>, <B>ARTS</B> ecc)</TD></TR>
 <TR><TD></TD><TD VALIGN=top>nas</TD><TD></TD><TD>driver NAS (Network Audio System, sistema audio per la rete, ndt)</TD></TR>
 <TR><TD></TD><TD VALIGN=top>alsa5</TD><TD></TD><TD>driver nativo ALSA 0.5</TD></TR>
-<TR><TD></TD><TD VALIGN=top>alsa9</TD><TD></TD><TD>driver nativo ALSA 0.9 (funziona, ma ha dei problemi -> usa OSS)</TD></TR>
+<TR><TD></TD><TD VALIGN=top>alsa9</TD><TD></TD><TD>driver nativo ALSA 0.9 (supporta il passaggio hardware AC3)</TD></TR>
 <TR><TD></TD><TD VALIGN=top>sun</TD><TD></TD><TD>driver audio SUN (/dev/audio) per utenti BSD e Solaris8</TD></TR>
+<TR><TD></TD><TD VALIGN=top>arts</TD><TD></TD><TD>driver ARTS nativo (principalmente per utenti KDE)</TD></TR>
 
 </TABLE>
 
@@ -42,7 +43,7 @@ un messaggio come questo:<BR>
   <CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE></UL>
 </LI>
 <LI>se hai ALSA versione 0.9, usa <I>-ao oss</I> o <I>-ao sdl</I> come vuoi.
-Puoi anche usare <I>-ao alsa9</I> dato che ora funziona, comunque ha molti
+Puoi anche usare <I>-ao alsa9</I> dato che ora funziona, comunque può avere dei
 problemi (perde la sincronia, l'audio scompare, ecc).</LI>
 </UL></P>
 

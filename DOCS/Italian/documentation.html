@@ -74,6 +74,7 @@
         <LI><A HREF="codecs.html#2.2.1.7">2.2.1.7 Cinepak CVID</A></LI>
         <LI><A HREF="codecs.html#2.2.1.8">2.2.1.8 RealVideo</A></LI>
 	<LI><A HREF="codecs.html#2.2.1.9">2.2.1.9 XViD</A></LI>
+	<LI><A HREF="codecs.html#2.2.1.10">2.2.1.10 Sorenson</A></LI>
       </UL>
       <LI><A HREF="codecs.html#2.2.2">2.2.2 Audio</A></LI>
       <UL>
@@ -127,9 +128,10 @@
 	<LI><A HREF="video.html#2.3.1.11">2.3.1.11 AAlib - visione in modalità testo</A></LI>
 	<LI><A HREF="video.html#2.3.1.12">2.3.1.12 VESA - output col BIOS VESA</A></LI>
 	<LI><A HREF="video.html#2.3.1.13">2.3.1.13 X11</A></LI>
-	<LI><A HREF="video.html#2.3.1.14">2.3.1.14 Livello video Rage128 / Radeon(OBSOLETO - usa Vidix!)</A></LI>
-	<LI><A HREF="video.html#2.3.1.15">2.3.1.15 Vidix</A></LI>
-	<LI><A HREF="video.html#2.3.1.16">2.3.1.16 Zr (per alcune schede di cattura/visualizzazione MJPEG)</A></LI>
+	<LI><A HREF="video.html#2.3.1.14">2.3.1.14 Vidix</A></LI>
+	<LI><A HREF="video.html#2.3.1.15">2.3.1.15 Zr</A></LI>
+	<LI><A HREF="video.html#2.3.1.16">2.3.1.16 DVB</A></LI>
+	<LI><A HREF="video.html#2.3.1.17">2.3.1.17 DXR3</A></LI>
 	<LI><A HREF="video.html#2.3.1.A">2.3.1.A TVout</A></LI>
 	<UL>
 	  <LI><A HREF="video.html#2.3.1.A.1">2.3.1.A.1 Matrox G400</A></LI>
@@ -184,17 +186,17 @@
     <UL>
       <LI><A HREF=#2.6.1>2.6.1 Generale</A></LI>
       <LI><A HREF=#2.6.2>2.6.2 Utilizzo</A></LI>
-      <LI><A HREF=#2.6.3>2.6.3 Taglia</A></LI>
-      <LI><A HREF=#2.6.4>2.6.4 Espandi</A></LI>
+      <LI><A HREF=#2.6.3>2.6.3 Crop</A></LI>
+      <LI><A HREF=#2.6.4>2.6.4 Expand</A></LI>
       <LI><A HREF=#2.6.5>2.6.5 Fame/Lavc</A></LI>
-      <LI><A HREF=#2.6.6>2.6.6 Capovolgi</A></LI>
-      <LI><A HREF=#2.6.7>2.6.7 Formato</A></LI>
-      <LI><A HREF=#2.6.8>2.6.8 Post-processa</A></LI>
+      <LI><A HREF=#2.6.6>2.6.6 Flip</A></LI>
+      <LI><A HREF=#2.6.7>2.6.7 Format</A></LI>
+      <LI><A HREF=#2.6.8>2.6.8 Postprocess</A></LI>
       <LI><A HREF=#2.6.9>2.6.9 RGB2BGR</A></LI>
-      <LI><A HREF=#2.6.10>2.6.10 Ruota</A></LI>
-      <LI><A HREF=#2.6.11>2.6.11 Ridimensiona</A></LI>
+      <LI><A HREF=#2.6.10>2.6.10 Rotate</A></LI>
+      <LI><A HREF=#2.6.11>2.6.11 Scale</A></LI>
       <LI><A HREF=#2.6.12>2.6.12 YUY2</A></LI>
-      <LI><A HREF=#2.6.13>2.6.13 Speculare</A></LI>
+      <LI><A HREF=#2.6.13>2.6.13 Mirror</A></LI>
       <LI><A HREF=#2.6.14>2.6.14 DVBscale</A></LI>
       <LI><A HREF=#2.6.15>2.6.15 Cropdetect</A></LI>
     </UL>
@@ -240,6 +242,7 @@
       <LI><A HREF="#6.5">6.5 SGI/Irix</A></LI>
       <LI><A HREF="#6.6">6.6 QNX</A></LI>
       <LI><A HREF="#6.7">6.7 OpenBSD</A></LI>
+      <LI><A HREF="#6.8">6.8 Cygwin</A></LI>
     </UL>
   <LI><A HREF="#A">A. Autori</A></LI>
   <UL>
@@ -291,13 +294,13 @@ Lamentele degli sviluppatori
 <P><B>MPlayer</B> è un lettore di filmati per LINUX (funziona su molti altri Unix, e CPU
 <B>non-x86</B>, vedi la <A HREF="#6">sezione 6</A>). Legge la maggior parte dei file MPEG, VOB,
 AVI, OGG, VIVO, ASF/WMV, QT/MOV, FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ,
-con l'aiuto di molti codec nativi, di XAnim e
+con l'aiuto di molti codec nativi, di XAnim, di RealPlayer e
 di Win32. Si possono guardare <B>VideoCD</B>, <B>SVCD</B>, <B>DVD</B>,
-<B>3ivx</B>, e perfino film in <B>DivX</B> (e non necessita assolutamente la libreria di avifile
+<B>3ivx</B>, <B>RealMedia</B>, e film in <B>DivX</B> (e non necessita assolutamente la libreria di avifile
 !). L'altra importante caratteristica di mplayer è l'ampia scelta di driver supportati per l'output.
 Funziona con X11, Xv, DGA, OpenGL, SVGAlib, fbdev,
 AAlib, DirectFB, ma puoi usare GGI e SDL (e così tutti i loro driver)
-e anche alcuni driver di basso livello specifici di alcune schede (Matrox, 3Dfx e Radeon)!
+e anche alcuni driver di basso livello specifici di alcune schede (Matrox, 3Dfx e Radeon, Mach64, Permedia3)!
 La maggior parte di queste supporta il ridimensionamento software o hardware, così puoi goderti i film
 a pieno schermo. <B>MPlayer</B> supporta la visualizzazione con alcune schede di decodifica MPEG
 , come la <B><A HREF="DVB">DVB</A></B> e la <B> <A
@@ -307,7 +310,7 @@ HREF="DXR3">DXR3/Hollywood+</A></B> ! E che dire dei magnifici sottotitoli ombre
 
 <P><B>MPlayer</B> è distribuito sotto licenza GPL v2.</P>
 
-<P>Il mio lettore è stabile con file MPEG danneggiati (utile per alcuni VCD),
+<P>Il lettore è stabile con file MPEG danneggiati (utile per alcuni VCD),
 e legge file AVI corrotti che sono illeggibili col famoso
 windows media player. Perfino file AVI senza la sezione dell'indice sono leggibili, e
 e si può ricostruire il loro indice con l'opzione -idx o permanentemente con <B>MEncoder</B>, abilitando così la ricerca!
@@ -379,14 +382,14 @@ del tempo, ma ne vale sicuramente la pena.</P>
 <UL>
   <LI><B>binutils</B> - la versione suggerita è la <B>2.11.x</B> . Questo programma
     si occupa di generare le istruzioni MMX/3DNow!/ecc, quindi è molto importante.</LI>
-  <LI><B>gcc</B> - le versioni suggerite sono quelle dalla <B>2.95.3</B> alla <B>2.95.4</B>.
-    Non usate <B>MAI</B> la 2.96 o la 3.x.x !!! Generano del codice errato. Se decidete
-    di cambiare il vostro gcc 2.96, allora non decidete in favore del 3.0 solo perchè
+  <LI><B>gcc</B> - le versioni suggerite sono la <B>2.95.3</B>, la <B>2.95.4</B> e la <B>3.1</B>.
+    Non usate <B>MAI</B> la 2.96 o le 3.0.x !!! Generano del codice errato. Se decidete
+    di cambiare il vostro gcc 2.96, allora non decidete in favore del 3.0.x solo perchè
     è più recente! Per certi versi è perfino peggiore del 2.96. Quindi tornate al
     2.95.x (cambiate anche libstdc++!) o non aggiornate per niente (ma in
     questo caso, preparatevi a problemi di runtime).
     Se voti per il 3.x, prova ad usare l'ultima versione, le prime versioni avevano
-    vari bug, quindi assicurati di usare almeno la 3.0.3 o la 3.1.
+    vari bug, quindi assicurati di usare almeno la 3.1.
     Informazioni dettagliate sui bug del gcc 2.96 (che NON sono stati ancora corretti, sono
     stati AGGIRATI in <B>MPlayer</B>!) si possono trovare
     <A HREF="users_against_developers.html"><B><I>qui</I></B></A> e nelle
@@ -409,6 +412,8 @@ del tempo, ma ne vale sicuramente la pena.</P>
     Utile sia per <B>MPlayer</B> che per <B>MEncoder</B> se hai intenzione di lavorare con file jpeg.</LI>
   <LI><B>libpng</B> - decodificatore (M)PNG raccomandato e usato di default. Necessario per la GUI.
     Utile sia per <B>MPlayer</B> che per <B>MEncoder</B>.</LI>
+  <LI><B>lame</B> - racommandato, necessario per codificare audio MP3 con MEncoder,
+    la versione suggerita è <B>sempre la più recente</B> (almeno 3.90).</LI>
   <LI><B>libogg</B> - opzionale, necessario per leggere il formato file OGG.</LI>
   <LI><B>libvorbis</B> - opzionale, necessario per leggere i file audio OGG Vorbis.</LI>
 </UL>
@@ -436,7 +441,9 @@ pacchetto! Comunque, potete usare i nostri codec con avifile. Caratteristiche:<B
 <UL>
   <LI>ne avete bisogno se volete vedere o codificare ad esempio filmati registrati
    con vari compressori hardware, come schede tv, macchine fotografiche digitali (esempio: DV, ATI VCR, MJPEG)</LI>
-  <LI>ne avete bisogno se volete vedere <B>filmati WMV</B> o i più vecchi (MP41/MP42) ASF</LI>
+  <LI>necessario per vedere <B>filmati WMV8</B>. Non necessario per i vecchi
+  ASF con video MP41 o MP42 (anche se l'audio VoxWare si trova frequentemente in questi
+  file - è decodificato dal codec Win32), o WMV7.</LI>
 </UL>
 </LI>
 
@@ -473,7 +480,7 @@ vengono letti meglio dal codec Cinepak proprio di <B>MPlayer</B> !</LI>
   (questa è una tarball del CVS di vorbis aggiornata ogni notte).</LI>
 
 <LI><B>MPlayer</B> può usare le librerie di RealPlayer 8 o RealONE per riprodurre file
-  <B>RealVideo 2.0 and 3.0</B>. Vedi la sezione
+  con video <B>RealVideo 2.0 and 3.0</B>, e audio Sipro/Cook. Vedi la sezione
   <A HREF="formats.html#2.1.1.7">Formato file RealMedia</A> per le istruzioni
   sull'installazione e maggiori informazioni!</LI>
 
@@ -958,7 +965,7 @@ compatibile con V4L</B>.</P>
 <A NAME=2.5.4><P><B><I>2.5.4.  Controllo da tastiera</I></B></P>
 
 <TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD>h  o  l</TD><TD>&nbsp;&nbsp;</TD><TD>seleziona il precedente/prossimo canale</TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD>h / k</TD><TD>&nbsp;&nbsp;</TD><TD>seleziona il precedente/prossimo canale</TD><TR>
 <TD></TD><TD>n</TD><TD></TD><TD> cambia norm</TD><TR>
 <TD></TD><TD>b</TD><TD></TD><TD> cambia la lista dei canali</TD><TR>
 </TABLE>
@@ -973,6 +980,12 @@ Input da standard V4L<BR>
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv</CODE><BR>
 </P>
 
+<P>
+<B>Nota:</B><BR>   Se hai una scheda TV con un dispositivo audio esterno e ottieni solo uno schermo nero,
+sebbene l'input funzioni con xawtv o simili, prova ad usare l'opzione <CODE>-noaudio</CODE>.
+Seguendo l'esempio sopra risulterà:<BR>
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:noaudio:driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv</CODE>
+</P>
 
 <A NAME=2.6><P><B><I>2.6.  Filtri video</I></B></P>
 
@@ -989,7 +1002,7 @@ Input da standard V4L<BR>
 <P>Con questo livello di filtro è possibile fare veloci conversioni del formato immagine
   tra i vari RGB e YUV quando necessario. Questo permette per esempio
   la riproduzione di dati RGB con output <CODE>xv</CODE> e <CODE>xmga</CODE>, tra gli
-  altri. (vedi il filtro <A HREF=#2.6.11>Ridimensiona</A>)</P>
+  altri. (vedi il filtro <A HREF=#2.6.11>Scale</A>)</P>
 
 <P>Il livello usa anche il <B>Direct Rendering</B> tra i plugin, per
   massimizzare la velocità.
@@ -1015,7 +1028,7 @@ Input da standard V4L<BR>
   "<CODE>mplayer -vop help</CODE>".</P>
 
 
-<A NAME=2.6.3><P><B><I>2.6.3.  Taglia</I></B></P>
+<A NAME=2.6.3><P><B><I>2.6.3.  Crop</I></B></P>
 
 <P><B><U>Descrizione</U></B>:</P>
 
@@ -1027,7 +1040,7 @@ Input da standard V4L<BR>
 <P><CODE>&nbsp;&nbsp;-vop crop[=largh:alt:x:y]</CODE></P>
 
 
-<A NAME=2.6.4><P><B><I>2.6.4.  Espandi</I></B></P>
+<A NAME=2.6.4><P><B><I>2.6.4.  Expand</I></B></P>
 
 <P><B><U>Descrizione</U></B>:</P>
 
@@ -1055,7 +1068,7 @@ Input da standard V4L<BR>
 
 <P><CODE>&nbsp;&nbsp;-vop lavc</CODE></P>
 
-<A NAME=2.6.6><P><B><I>2.6.6.  Capovolgi</I></B></P>
+<A NAME=2.6.6><P><B><I>2.6.6.  Flip</I></B></P>
 
 <P><B><U>Descrizione</U></B>:</P>
 
@@ -1067,7 +1080,7 @@ Input da standard V4L<BR>
 <P><CODE>&nbsp;&nbsp;-vop flip</CODE></P>
 
 
-<A NAME=2.6.7><P><B><I>2.6.7.  Formato</I></B></P>
+<A NAME=2.6.7><P><B><I>2.6.7.  Format</I></B></P>
 
 <P><B><U>Descrizione</U></B>:</P>
 
@@ -1077,11 +1090,11 @@ Input da standard V4L<BR>
 
 <P><B><U>Utilizzo</U></B>:</P>
 
-<P><CODE>&nbsp;&nbsp;-vop format[=formato]</CODE> (where
+<P><CODE>&nbsp;&nbsp;-vop format[=formato]</CODE> (dove
   <CODE>formato</CODE> può essere per esempio: rgb32, yuy2, ecc...)</P>
 
 
-<A NAME=2.6.8><P><B><I>2.6.8.  Post-processa</I></B></P>
+<A NAME=2.6.8><P><B><I>2.6.8.  Postprocess</I></B></P>
 
 <P><B><U>Descrizione</U></B>:</P>
 
@@ -1106,7 +1119,7 @@ Input da standard V4L<BR>
 
 <P><CODE>&nbsp;&nbsp;-vop rgb2bgr[=swap]</CODE></P>
 
-<A NAME=2.6.10><P><B><I>2.6.10.  Ruota</I></B></P>
+<A NAME=2.6.10><P><B><I>2.6.10.  Rotate</I></B></P>
 
 <P><B><U>Descrizione</U></B>:</P>
 
@@ -1118,7 +1131,7 @@ Input da standard V4L<BR>
 <P><CODE>&nbsp;&nbsp;-vop rotate[=x]</CODE></P>
 
 
-<A NAME=2.6.11><P><B><I>2.6.11.  Ridimensiona</I></B></P>
+<A NAME=2.6.11><P><B><I>2.6.11.  Scale</I></B></P>
 
 <P><B><U>Descrizione</U></B>:</P>
 
@@ -1147,7 +1160,7 @@ Input da standard V4L<BR>
 
 <P><CODE>&nbsp;&nbsp;-vop yuy2</CODE></P>
 
-<A NAME=2.6.13><P><B><I>2.6.13.  Speculare</I></B></P>
+<A NAME=2.6.13><P><B><I>2.6.13.  Mirror</I></B></P>
 
 <P><B><U>Descrizione</U></B>:</P>
 
@@ -1233,7 +1246,6 @@ di controllare <B>MPlayer</B> usando la tastiera, il mouse, il joystick o un tel
 <TR><TD></TD><TD>o</TD><TD></TD><TD>cambia l'OSD: nessuno / ricerca / ricerca+timer</TD></TR>
 <TR><TD></TD><TD>z o x</TD><TD></TD><TD>regola il ritardo dei sottotitoli di +/- 0.1 secondi</TD></TR>
 <TR><TD></TD><TD>r o t</TD><TD></TD><TD>regola la posizione dei sottotitoli</TD></TR>
-<TR><TD></TD><TD>&gt; o &lt;</TD><TD></TD><TD>vai alla prossima/precedente voce lista dei file</TD></TR>
 <TR><TD></TD><TD>HOME o END</TD><TD></TD><TD>vai alla prossima/precedente voce lista superiore dei file</TD></TR>
 <TR><TD></TD><TD>INSERT o DELETE</TD><TD></TD><TD>vai alla prossima/precedente sorgente alternativa (disponibile solo nella playlist asx)</TD></TR>
 
@@ -1678,6 +1690,14 @@ kernel con "<CODE>option USER_LDT</CODE>".</P>
 
 <P>Quelli tra di voi che non si sentono così "hardcore hacker" possono usare la versione
 ports (/usr/ports/x11/mplayer).</P>
+
+<P><A NAME="6.8"></A><B>6.8. Cygwin</B><BR>
+</P>
+ 
+<P>Devi andare nella directory di <B>MPlayer</B>, e copiare o creare un link simbolico
+<CODE>etc/cygwin_inttypes.h</CODE> a <CODE>/usr/include/inttypes.h</CODE> per
+far compilare <B>MPlayer</B>. Altrimenti si lamenterà del
+<CODE>intypes.h</CODE> mancante.</P>
 
 <P><B><A NAME=A>Appendice A - Autori</A></B></P>
 

@@ -59,24 +59,28 @@ abbiamo avuto già abbastanza flame sul GCC 2.96.</P>
 
 <P>Se hai problemi col GCC 2.96, puoi prendere i pacchetti 2.96-85 dal
 <A HREF="ftp://updates.redhat.com">server ftp</A> della RedHat, usa i pacchetti
-3.04 offerti per la versione 7.2 e successive. Se no vuoi o non puoi usare
-i pacchetti binari, ecco come compilare il GCC 3.0.4 dai sorgenti:</P>
+3.04 offerti per la versione 7.2 e successive. Puoi anche prendere i pacchetti del gcc-3.1
+(non ufficiali, ma funzionano bene)
+<A HREF="ftp://people.redhat.com/jakub/gcc3/3.1-1/">qui</A> e puoi
+installarli insieme al gcc-2.96 che già hai. MPlayer lo riconoscerà e userà
+il 3.1 invece del 2.96. Se non vuoi o non puoi usare
+i pacchetti binari, ecco come compilare il GCC 3.1 dai sorgenti:</P>
 
 <UL>
   <LI>Vai alla pagina dei<A HREF="http://gcc.gnu.org/mirrors.html">mirror di GCC</A>
-    e scarica <CODE>gcc-core-3.0.4.tar.gz</CODE>.  Questo include il completo
+    e scarica <CODE>gcc-core-3.1.tar.gz</CODE>.  Questo include il completo
     compilatore C ed è sufficente per <B>MPlayer</B>. Se vuoi anche
     C++, Java o altre caratteristiche avanzate di GCC
-    <CODE>gcc-3.0.4.tar.gz</CODE> potrebbe soddisfare meglio le tue esigenze.</LI>
+    <CODE>gcc-3.1.tar.gz</CODE> potrebbe soddisfare meglio le tue esigenze.</LI>
   <LI>Estrai l'archivio con<BR>
-    <CODE>tar -xvzf gcc-core-3.0.4.tar.gz</CODE></LI>
+    <CODE>tar -xvzf gcc-core-3.1.tar.gz</CODE></LI>
   <LI>GCC non viene compilato all'interno della directory dei sorgenti come la maggior parte dei programmi,
     ma necessita una directory esterna.  Quindi bisogna crearla con<BR>
     <CODE>mkdir gcc-build</CODE></LI>
   <LI>Quindi si può procedere a configurare gcc in questa directory, ma devi usare il
     configure dei sorgenti:<BR>
     <CODE>cd gcc-build<BR>
-    ../gcc-3.0.4/configure</CODE></LI>
+    ../gcc-3.1/configure</CODE></LI>
   <LI>Compila GCC passando questo comando:<BR>
     <CODE>make bootstrap</CODE></LI>
   <LI>Ora puoi installare GCC (da root) facendo<BR>
@@ -92,11 +96,11 @@ che non permetteva la ridistribuzione binaria. Questo codice è stato rimosso e o
 puoi creare pacchetti binari se vuoi.</P>
 
 <P>Un altro impedimento alla distribuzione binaria erano le ottimizzazioni di compilazione
-per l'architettura della CPU.  <B>MPlayer</B> ora supporta il riconoscimento della CPU a runtime.
-Sebbene questo implichi un piccolo sacrificio per la velocità, è ora possibile creare binari
-che si possono eseguire su diversi membri della famiglia di CPU di Intel. Per migliori
-prestazioni puoi disabilitare il riconoscimento della CPU a runtime prima di compilare
-(<CODE>configure --disable-runtime-cpudetection</CODE>).</P>
+per l'architettura della CPU.  <B>MPlayer</B> ora supporta il riconoscimento della CPU a runtime
+(specifica l'opzione <CODE>--enable-runtime-cpudetection</CODE> al momento della compilazione).
+E' disabilitato di default perchè implica un piccolo sacrificio di velocità,
+ora è possibile creare file binari che possono essere eseguiti su diversi membri
+della famiglia di CPU della Intel.</P>
 
 <A NAME=nvidia><P><B><I>NVidia</I></B></P>
 
