@@ -1715,6 +1715,9 @@ if(force_fps && sh_video){
 
 //==================== START PLAYING =======================
 
+if(loop_times>1) loop_times--; else
+if(loop_times==1) loop_times = -1;
+
 mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_StartPlaying);fflush(stdout);
 
 InitTimer();
