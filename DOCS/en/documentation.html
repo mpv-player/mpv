@@ -1899,16 +1899,13 @@ end
 <H3><A NAME="mingw">6.6.2 MinGW</A></H3>
 
 <P>Installing a version of MinGW that could compile MPlayer used to be quite
-  tricky, but only consists of three simple steps now and should work out of
-  the box soon.</P>
+  tricky, but works out of the box now. Just install MinGW 3.1.0 or later
+  and MSYS 1.0.9 or later and tell the MSYS postinstall that MinGW is
+  installed.</P>
 
-<OL>
-  <LI>Install MinGW 3.0.0 or later.</LI>
-  <LI>Install MSYS 1.0.9 or later and tell the MSYS postinstall that
-    MinGW is installed.</LI>
-  <LI>Replace <CODE>/mingw/include/sys/types.h</CODE> with this
-    <A HREF="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/types.h"><CODE>types.h</CODE></A>.</LI>
-</OL>
+<P>If you use a version of MinGW before 3.1.0, you need to replace
+  <CODE>/mingw/include/sys/types.h</CODE> with this
+  <A HREF="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/types.h"><CODE>types.h</CODE></A>.
 
 <P>Extract DirectX header files to <CODE>/mingw/include/</CODE>.</P>
 
