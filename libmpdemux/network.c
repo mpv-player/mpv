@@ -67,9 +67,9 @@ static struct {
 	// MP3 streaming, some MP3 streaming server answer with audio/mpeg
 	{ "audio/mpeg", DEMUXER_TYPE_AUDIO },
 	// MPEG streaming
-	{ "video/mpeg", DEMUXER_TYPE_MPEG_PS },
-	{ "video/x-mpeg", DEMUXER_TYPE_MPEG_PS },
-	{ "video/x-mpeg2", DEMUXER_TYPE_MPEG_PS },
+	{ "video/mpeg", DEMUXER_TYPE_UNKNOWN },
+	{ "video/x-mpeg", DEMUXER_TYPE_UNKNOWN },
+	{ "video/x-mpeg2", DEMUXER_TYPE_UNKNOWN },
 	// AVI ??? => video/x-msvideo
 	{ "video/x-msvideo", DEMUXER_TYPE_AVI },
 	// MOV => video/quicktime
