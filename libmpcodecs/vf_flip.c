@@ -43,9 +43,8 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	return; // we've used DR, so we're ready...
     }
 
-    // hope we'll get DR buffer:
     vf->priv->dmpi=vf_get_image(vf->next,mpi->imgfmt,
-	MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
+	MP_IMGTYPE_EXPORT, MP_IMGFLAG_ACCEPT_STRIDE,
 	mpi->width, mpi->height);
     
     // set up mpi as a upside-down image of dmpi:
