@@ -219,6 +219,7 @@ static short get_driver(char *s,int audioflag)
 		"liba52",
 		"g72x",
 		"imaadpcm",
+		"fox61adpcm",
 		"fox62adpcm",
 		NULL
 	};

@@ -298,6 +298,68 @@ int ms_adpcm_decode_block(unsigned short *output, unsigned char *input,
   return (block_size - (MS_ADPCM_PREAMBLE_SIZE * channels)) * 2;
 }
 
+// note: This decoder assumes the format 0x61 data always comes in
+// mono flavor
+int fox61_adpcm_decode_block(unsigned short *output, unsigned char *input)
+{
+  int i;
+  int out_ptr = 0;
+
+  int predictor;
+  int index;
+  int nibble;
+  int sign;
+  int delta;
+  int diff;
+  int step;	
+
+  predictor = output[out_ptr++] = LE_16(&input[0]);
+  index = input[2];
+
+  // iterate through and decode the rest of the bytes
+  for (i = 4; i < FOX61_ADPCM_BLOCK_SIZE; i++)
+  {
+    nibble = (input[i] >> 4) & 0x0F;
+
+    step = adpcm_step[index];
+    sign = nibble & 8;
+    delta = nibble & 7;
+    diff = step >> 3;
+    if (delta & 4) diff += step;
+    if (delta & 2) diff += step >> 1;
+    if (delta & 1) diff += step >> 2;
+    if (sign)
+      predictor -= diff;
+    else
+      predictor += diff;
+    CLAMP_S16(predictor);
+    output[out_ptr++] = predictor;
+    index += adpcm_index[nibble];
+    CLAMP_0_TO_88(index);
+
+    nibble = input[i] & 0x0F;
+
+    step = adpcm_step[index];
+    sign = nibble & 8;
+    delta = nibble & 7;
+    diff = step >> 3;
+    if (delta & 4) diff += step;
+    if (delta & 2) diff += step >> 1;
+    if (delta & 1) diff += step >> 2;
+    if (sign)
+      predictor -= diff;
+    else
+      predictor += diff;
+    CLAMP_S16(predictor);
+    output[out_ptr++] = predictor;
+    index += adpcm_index[nibble];
+    CLAMP_0_TO_88(index);
+  }
+
+  return FOX61_ADPCM_SAMPLES_PER_BLOCK;
+}
+
+
 // note: This decoder assumes the format 0x62 data always comes in
 // stereo flavor
 int fox62_adpcm_decode_block(unsigned short *output, unsigned char *input,
