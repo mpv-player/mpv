@@ -112,6 +112,206 @@ Short description of video path:
    Leaf filters are now: vf_vo.c (wrapper over libvo) and ve_XXX.c (video
    encoders used by mencoder).
    
+The VIDEO FILTER API:
+=====================
+filename: vf_FILTERNAME.c
+
+vf_info_t* info;
+    pointer to the filter description structure:
+
+    const char *info;	// description of the filter
+    const char *name;   // short name of the filter, must be FILTERNAME
+    const char *author; // name and email/url of the author(s)
+    const char *comment;// comment, url to papers describing algo etc.
+    int (*open)(struct vf_instance_s* vf,char* args);
+			// pointer to the open() function:
+
+The open() function:
+
+    open() is called when the filter is appended/inserted to the filter chain.
+    it'll receive the handler (vf) and the optional filter parameters as
+    char* string. Note, that encoders (ve_*) and vo wrapper (vf_vo.c) have
+    non-string arg, but it's specially handled by mplayer/mencoder.
+    
+    The open() function should fill the vf_instance_t structure, with the
+    implemented functions' pointers (see bellow).
+    It can optinally allocate memory for its internal data (vf_priv_t) and
+    store the pointer in vf->priv.
+    
+    The open() func should parse (or at least check syntax) of parameters,
+    and fail (return 0) if error.
+
+Sample:
+
+static int open(vf_instance_t *vf, char* args){
+    vf->query_format=query_format;
+    vf->config=config;
+    vf->put_image=put_image;
+    // allocate local storage:
+    vf->priv=malloc(sizeof(struct vf_priv_s));
+    vf->priv->w=
+    vf->priv->h=-1;
+    if(args)   // parse args:
+	if(sscanf(args, "%d:%d", &vf->priv->w, &vf->priv->h)!=2) return 0;
+    return 1;
+}
+
+Functions in vf_instance_s:
+
+NOTE: All these are optional, their func pointer is either NULL or points to
+a default implementation. If you implement them, don't forget to set
+vf->FUNCNAME in your open() !
+
+    int (*query_format)(struct vf_instance_s* vf,
+        unsigned int fmt);
+
+The query_format() func. is called one or more times before the config(),
+to find out the capabilities and/or support status of a given colorspace (fmt).
+For the return values, see vfcap.h!
+Normally, a filter should return at least VFCAP_CSP_SUPPORTED for all supported
+colorspaces, and 0 for the unsupported ones. If your filter does linear
+conversion, it should query the next filter, and pass its capability flags.
+
+Sample:
+
+static int query_format(struct vf_instance_s* vf, unsigned int fmt){
+    switch(fmt){
+    case IMGFMT_YV12:
+    case IMGFMT_I420:
+    case IMGFMT_IYUV:
+    case IMGFMT_422P:
+	return vf_next_query_format(vf,IMGFMT_YUY2) & (~VFCAP_CSP_SUPPORTED_BY_HW);
+    }
+    return 0;
+}
+
+
+    int (*config)(struct vf_instance_s* vf,
+        int width, int height, int d_width, int d_height,
+	unsigned int flags, unsigned int outfmt);
+
+The config() is called to initialize/confugre the filter before using it.
+Its parameters are already well-known from libvo:
+    width, height:     size of the coded image
+    d_width, d_height: wanted display size (usually aspect corrected w/h)
+    flags:	       the "good" old flags set of libvo:
+        0x01	- force fullscreen (-fs)
+	0x02	- allow mode switching (-vm)
+	0x04	- allow software scaling (-zoom)
+	0x08	- flipping (-flip)
+    (Usually you don't have to worry about flags, just pass it to next config.)
+    outfmt: the selected colorspace/pixelformat. You'll receive images in this
+    format.
+
+Sample:
+
+static int config(struct vf_instance_s* vf,
+        int width, int height, int d_width, int d_height,
+	unsigned int flags, unsigned int outfmt){
+    // use d_width/d_height if not set by user:
+    if(vf->priv->w==-1) vf->priv->w=d_width;
+    if(vf->priv->h==-1) vf->priv->h=d_width;
+    // initialize your filter code
+    ...
+    // ok now config the rest of the filter chain, with our output parameters:
+    return vf_next_config(vf,vf->priv->w,vf->priv->h,d_width,d_height,flags,outfmt);
+}
+
+    void (*uninit)(struct vf_instance_s* vf);
+
+Okey, uninit() is the simplest, it's called at the end. You can free your
+private buffers etc here.
+
+    int (*put_image)(struct vf_instance_s* vf,
+        mp_image_t *mpi);
+
+Ah, put_image(). This is the main filter function it should convert/filter/
+transform the image data from one format/size/color/whatever to another.
+Its input parameter is an mpi (mplayer image) structure, see mp_image.h.
+Your filter has to request a new image buffer for the output, using the
+vf_get_image() function. NOTE: even if you don't want to modify the image,
+just pass it to the next filter, you have to either
+- do not implement put_image() at all - then it will be skipped
+- request a new image with type==EXPORT and copy the pointers
+NEVER pass the mpi as-is, it's local to filters and may cause trouble.
+
+If you completely copy/transform the image, then you probably want this:
+
+    dmpi=vf_get_image(vf->next,mpi->imgfmt,
+	MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
+	vf->priv->w, vf->priv->h);
+
+It will allocate a new image, and return an mp_image structure filled by
+buffer pointers and stride (bytes per line) values, in size of vf->priv->w
+times vf->priv->h. If your filter cannot handle stride, then left out
+MP_IMGFLAG_ACCEPT_STRIDE. Note, that you can do this, but it isn't recommended,
+the whole video path is designed to use strides to get optimal throughput.
+If your filter allocates output image buffers, then use MP_IMGTYPE_EXPORT,
+and fill the returned dmpi's planes[], stride[] with your buffer parameters.
+Note, it is not recommended (no direct rendering), so if you can, use 
+vf_get_image() for buffer allocation!
+For other image types and flags see mp_image.h, it has comments.
+If you are unsure, feel free to ask on the -dev-eng maillist. Please
+describe the behaviour of your filter, an dits limitations, so we can
+suggest the optimal buffer type + flags for your code.
+
+Now, that you have the input (mpi) and output (dmpi) buffers, you can do
+the conversion. If you didn't notice yet, mp_image has some useful info
+fields, may help you a lot creating if() or for() structures:
+    flags: MP_IMGFLAG_PLANAR, MP_IMGFLAG_YUV, MP_IMGFLAG_SWAPPED
+	helps you to handle various pixel formats in single code.
+    bpp: bits per pixel 
+	WARNING! It's number of bits _allocated_ to store a pixel,
+	it is not the number of bits actually used to keep colors!
+	So, it's 16 for both 15 and 16bit color depth, and is 32 for
+	32bpp (actually 24bit color depth) mode!
+	It's 1 for 1bpp, 9 for YVU9, and is 12 for YV12 mode. Get it?
+    For planar formats, you also have chroma_width, chroma_height and
+    chroma_x_shift, chroma_y_shift too.
+
+If you're done, call the rest of the filter chain to process your output
+image:
+    return vf_next_put_image(vf,dmpi);
+    
+
+Ok, the rest is for advanced functionality only:
+
+    int (*control)(struct vf_instance_s* vf,
+        int request, void* data);
+
+You can control the filter in runtime from mplayer/mencoder/dec_video:
+#define VFCTRL_QUERY_MAX_PP_LEVEL 4 /* test for postprocessing support (max level) */
+#define VFCTRL_SET_PP_LEVEL 5 /* set postprocessing level */
+#define VFCTRL_SET_EQUALIZER 6 /* set color options (brightness,contrast etc) */
+#define VFCTRL_GET_EQUALIZER 8 /* gset color options (brightness,contrast etc) */
+#define VFCTRL_DRAW_OSD 7
+#define VFCTRL_CHANGE_RECTANGLE 9 /* Change the rectangle boundaries */
+
+    void (*get_image)(struct vf_instance_s* vf,
+        mp_image_t *mpi);
+	
+This is for direct rendering support, works the same way as in libvo drivers.
+It makes in-place pixel modifications possible.
+If you implement it (vf->get_image!=NULL) then it will be called to do the
+buffer allocation. You SHOULD check the buffer restrictions (stride, type,
+readability etc) and if all OK, then allocate the requested buffer using
+the vf_get_image() func and copying the buffer pointers.
+
+    void (*draw_slice)(struct vf_instance_s* vf,
+        unsigned char** src, int* stride, int w,int h, int x, int y);
+
+It's the good old draw_slice callback, already known from libvo.
+If you filter can operate on partial images, you can implement this one
+to improve performance (cache utilization).
+
+Ah, and there is 2 set of capability/requirement flags (vfcap.h type)
+in vf_instance_t, used by default query_format() implementation, and by
+the automatic colorspace/stride matching code (vf_next_config()).
+
+    // caps:
+    unsigned int default_caps; // used by default query_format()
+    unsigned int default_reqs; // used by default config()
+
 
 The AUDIO path:
 ===============
