@@ -43,7 +43,7 @@ void mp_msg_c( int x, const char *format, ... ){
     char tmp[2048];
     
     if((x&255)>mp_msg_levels[x>>8]) return; // do not display
-    va_start(va, mp_gettext(format));
+    va_start(va, format);
     vsnprintf(tmp, 2048, mp_gettext(format), va);
     tmp[2047] = 0;
 
