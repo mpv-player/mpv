@@ -354,7 +354,7 @@ static int sdl_open (void *plugin, void *name)
 	priv->bpp = 0;
 
 	/* initialize the SDL Video system */
-	if (SDL_Init (SDL_INIT_VIDEO/*|SDL_INIT_NOPARACHUTE*/)) {
+	if (SDL_Init (SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE)) {
 		printf("SDL: Initializing of SDL failed: %s.\n", SDL_GetError());
 		return -1;
 	}
