@@ -73,6 +73,8 @@ if(gCpuCaps.has3DNow)
 
     picture->pp_options=divx_quality;
     
+    memset(frames,0,3*sizeof(vo_frame_t));
+    
     picture->forward_reference_frame=&frames[0];
     picture->backward_reference_frame=&frames[1];
     picture->temp_frame=&frames[2];
@@ -154,7 +156,9 @@ static mp_image_t* parse_chunk (sh_video_t* sh, int code, uint8_t * buffer, int 
 		mp_image_t* mpi;
 		int flags;
 		if (picture->picture_coding_type == B_TYPE){
-		    flags=(!framedrop && vd_use_slices)?MP_IMGFLAG_DRAW_CALLBACK:0;
+		    flags=(!framedrop && vd_use_slices && 
+			picture->picture_structure==FRAME_PICTURE) ?
+			    MP_IMGFLAG_DRAW_CALLBACK:0;
 		    picture->display_frame=
 		    picture->current_frame = picture->temp_frame;
 		} else {
@@ -179,6 +183,20 @@ static mp_image_t* parse_chunk (sh_video_t* sh, int code, uint8_t * buffer, int 
 		picture->current_frame->base[1]=mpi->planes[1];
 		picture->current_frame->base[2]=mpi->planes[2];
 		picture->current_frame->mpi=mpi;	// tricky!
+#if 1
+		if(!picture->forward_reference_frame->base[0]){
+		    // workaround for sig11
+		    picture->forward_reference_frame->base[0]=mpi->planes[0];
+		    picture->forward_reference_frame->base[1]=mpi->planes[1];
+		    picture->forward_reference_frame->base[2]=mpi->planes[2];
+		}
+		if(!picture->backward_reference_frame->base[0]){
+		    // workaround for sig11
+		    picture->backward_reference_frame->base[0]=mpi->planes[0];
+		    picture->backward_reference_frame->base[1]=mpi->planes[1];
+		    picture->backward_reference_frame->base[2]=mpi->planes[2];
+		}
+#endif
 #ifdef MPEG12_POSTPROC
 		mpi->qscale=&picture->current_frame->quant_store[1][1];
 		mpi->qstride=(MPEG2_MBC+1);
