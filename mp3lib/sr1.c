@@ -386,7 +386,6 @@ int _has_mmx = 0;  // used by layer2.c, layer3.c to pre-scale coeffs
 extern void dct64_MMX(real *, real *, real *);
 extern void dct64_MMX_3dnow(real *, real *, real *);
 extern void dct64_MMX_3dnowex(real *, real *, real *);
-extern void dct64_MMX_sse(real *, real *, real *);
 void (*dct64_MMX_func)(real *, real *, real *);
 
 #include "../cpudetect.h"
@@ -415,15 +414,6 @@ void MP3_Init(){
 	synth_func = synth_1to1_MMX;
     }
 
-#if 0
-    if(gCpuCaps.hasSSE)
-    {
-	/* SSE version is buggy */
-	dct64_MMX_func = dct64_MMX_sse;
-	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using SSE optimized decore!\n");
-    }
-    else
-#endif
     if (gCpuCaps.has3DNowExt)
     {
 	dct36_func=dct36_3dnowex;

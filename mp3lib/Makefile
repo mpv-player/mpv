@@ -13,10 +13,6 @@ SRCS += decode_i586.c
 OBJS += decode_i586.o
 SRCS += decode_MMX.c dct64_MMX.c tabinit_MMX.c
 OBJS += decode_MMX.o dct64_MMX.o tabinit_MMX.o
-#ifeq ($(TARGET_SSE),yes)
-#SRCS += dct64_sse.s
-#OBJS += dct64_sse.o
-#endif
 SRCS += dct36_3dnow.c dct64_3dnow.c
 OBJS += dct36_3dnow.o dct64_3dnow.o
 SRCS += dct36_k7.c dct64_k7.c
@@ -67,7 +63,7 @@ test2:	libMP3.a test2.c
 	$(CC) $(CFLAGS) test2.c ../libvo/aclib.c -o test2 -I.. ./libMP3.a ../mp_msg-mencoder.o ../cpudetect.o -lm
 
 clean:
-	rm -f *~ *.o *.a
+	rm -f *~ *.o *.a test1 test2
 
 distclean:
 	rm -f *~ *.o *.a Makefile.bak .depend
