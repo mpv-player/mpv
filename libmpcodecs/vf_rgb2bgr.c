@@ -52,7 +52,7 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
 	mpi->w, mpi->h);
 
-    if(mpi->stride[0]!=dmpi->stride[0]){
+    if(mpi->stride[0]!=dmpi->stride[0] || mpi->stride[0]!=mpi->w*(mpi->bpp/8)){
 	int y;
 	unsigned char* src=mpi->planes[0];
 	unsigned char* dst=dmpi->planes[0];
