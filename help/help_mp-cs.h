@@ -103,6 +103,8 @@ static char help_text[]=
 "  Zkuste volbu -hardframedrop\n"\
 "- Po¹kozený soubor. Zkuste rùzné kombinace tìchto voleb:\n"\
 "  -nobps  -ni  -mc 0  -forceidx\n"\
+"- Pøi pøehrávání z pomalých médií (nfs/smb, dvd, vcd etc) zkuste -cache 8192\n"\
+"- Pou¾íváte -cache pro neprokládaní AVI soubory? Zkuste -nocache.\n"\
 "Pokud nic z toho není pravda, pøeètìte si DOCS/bugreports.html!\n\n"
 
 #define MSGTR_NoGui "MPlayer byl pøelo¾en BEZ podpory GUI!\n"
@@ -125,6 +127,7 @@ static char help_text[]=
 #define MSGTR_InitializingAudioCodec "Inicializuji audio kodek...\n"
 #define MSGTR_ErrorInitializingVODevice "Chyba pøí otvírání/inicializaci vybraného video_out (-vo) zaøízení!\n"
 #define MSGTR_ForcedVideoCodec "Vynucen video kodek: %s\n"
+#define MSGTR_ForcedAudioCodec "Vynucen audio kodek: %s\n"
 #define MSGTR_AODescription_AOAuthor "AO: Popis: %s\nAO: Autor: %s\n"
 #define MSGTR_AOComment "AO: Poznámka: %s\n"
 #define MSGTR_Video_NoVideo "Video: ¾ádné video!!!\n"
@@ -164,6 +167,10 @@ static char help_text[]=
 #define MSGTR_UnableOpenURL "Nelze otevøít URL: %s\n"
 #define MSGTR_ConnToServer "Pøipojen k serveru: %s\n"
 #define MSGTR_FileNotFound "Soubor nenalezen: '%s'\n"
+
+#define MSGTR_SMBInitError "Nemohu inicializovat knihovnu libsmbclient: %d\n"
+#define MSGTR_SMBFileNotFound "Nemohu otevøít soubor ze sítì: '%s'\n"
+#define MSGTR_SMBNotCompiled "MPlayer nebyl pøelo¾en s podporou SMB\n"
 
 #define MSGTR_CantOpenDVD "Nelze otevøít DVD zaøízení: %s\n"
 #define MSGTR_DVDwait "Ètu strukturu disku, prosím èekejte...\n"
@@ -375,6 +382,9 @@ static char help_text[]=
 #define MSGTR_MENU_SkinBrowser "Prohli¾eè témat"
 #define MSGTR_MENU_Preferences "Pøedvolby"
 #define MSGTR_MENU_Exit "Konec ..."
+#define MSGTR_MENU_Mute "Ztlumit"
+#define MSGTR_MENU_Original "Pùvodní"
+#define MSGTR_MENU_AspectRatio "Pomìr stran"
 
 // --- equalizer
 #define MSGTR_EQU_Audio "Zvuk"
@@ -474,6 +484,10 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontTextScale "Velikost textu:"
 #define MSGTR_PREFERENCES_FontOSDScale "Velikost OSD:"
 #define MSGTR_PREFERENCES_SubtitleOSD "Titulky & OSD"
+#define MSGTR_PREFERENCES_FRAME_Cache "Vyrovnávací pamì»"
+#define MSGTR_PREFERENCES_FRAME_Misc "Ostatní"
+#define MSGTR_PREFERENCES_Cache "Vyrovnávací pamì» zap/vyp"
+#define MSGTR_PREFERENCES_LoadFullscreen "Startovat pøes celou obrazovku"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Kritická chyba ..."
