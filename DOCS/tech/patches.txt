@@ -59,7 +59,8 @@ that your patch will be included.
     for unapplied patches, so please use it.
     Do not compress your patch unless it is larger than 80k or if you know
     that your mailer messes up (reformats) text attachments. It only makes
-    handling the patch more difficult.
+    handling the patch more difficult. If you have to compress your patch,
+    use bzip2 or gzip to compress it, not another non-standard format.
     You have to subscribe to mplayer-dev-eng since we blocked postings from
     non-subscribers after spam problems and because patches get reviewed by
     the developers on the list. We want you to be available for discussing
