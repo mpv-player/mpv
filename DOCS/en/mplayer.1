@@ -479,11 +479,11 @@ Loops movie playback <number> times.
 .B \-menu (BETA CODE)
 Turn on OSD menu support.
 .TP
-.B \-menu-root <value> (BETA CODE)
-Specify the main menu.
-.TP
 .B \-menu-cfg <file> (BETA CODE)
 Use an alternative menu.conf.
+.TP
+.B \-menu-root <value> (BETA CODE)
+Specify the main menu.
 .TP
 .B \-nojoystick
 Turns off joystick support.
@@ -860,12 +860,12 @@ packets be streamed over TCP (using the same TCP connection as RTSP).
 This option may be useful if you have a broken Internet connection that does
 not pass incoming UDP packets (see http://www.live.com/mplayer/).
 .TP
-.B \-skipopening
-Skip DVD opening (dvdnav only).
-.TP
 .B \-sb <byte\ position> (see \-ss option too)
 Seek to byte position.
 Useful for playback from CDROM images / .VOB files with junk at the beginning.
+.TP
+.B \-skipopening
+Skip DVD opening (dvdnav only).
 .TP
 .B \-srate <Hz>
 Forces the given audio playback rate, changing video speed to keep a-v sync.
@@ -1027,6 +1027,11 @@ Force audio parameters for the .vivo demuxer (for debugging purposes).
 .br
 See \-vf expand too.
 .TP
+.B \-dumpjacosub (MPLAYER only)
+Convert the given subtitle (specified with the \-sub option) to the time-based
+JACOsub subtitle format.
+Creates a dumpsub.js file in the current directory.
+.TP
 .B \-dumpmicrodvdsub (MPLAYER only)
 Convert the given subtitle (specified with the \-sub option) to the
 MicroDVD subtitle format.
@@ -1037,28 +1042,19 @@ Convert the given subtitle (specified with the \-sub option) to MPlayer's
 subtitle format, MPsub.
 Creates a dump.mpsub file in the current directory.
 .TP
-.B \-dumpsrtsub (MPLAYER only)
-Convert the given subtitle (specified with the \-sub option) to the time-based
-SubViewer (SRT) subtitle format.
-Creates a dumpsub.srt file in the current directory.
-.TP
-.B \-dumpjacosub (MPLAYER only)
-Convert the given subtitle (specified with the \-sub option) to the time-based
-JACOsub subtitle format.
-Creates a dumpsub.js file in the current directory.
-.TP
 .B \-dumpsami (MPLAYER only)
 Convert the given subtitle (specified with the \-sub option) to the time-based
 SAMI subtitle format.
 Creates a dumpsub.smi file in the current directory.
 .TP
+.B \-dumpsrtsub (MPLAYER only)
+Convert the given subtitle (specified with the \-sub option) to the time-based
+SubViewer (SRT) subtitle format.
+Creates a dumpsub.srt file in the current directory.
+.TP
 .B \-dumpsub (MPLAYER only) (BETA CODE)
 Dumps the subtitle substream from VOB streams.
 See -dump*sub and -vobsubout* options too.
-.TP
-.B \-ifo <vobsub\ ifo\ file>
-Indicate the file that will be used to load palette and frame size for VOBSUB
-subtitles.
 .TP
 .B \-ffactor <number>
 Resample alphamap of the font.
@@ -1099,11 +1095,12 @@ The \-subfont-* options are available only with FreeType support compiled in.
 .PD 1
 .
 .TP
+.B \-ifo <vobsub\ ifo\ file>
+Indicate the file that will be used to load palette and frame size for VOBSUB
+subtitles.
+.TP
 .B \-noautosub
 Turns off automatic loading of subtitle files.
-.TP
-.B \-overlapsub
-Enables time wise overlapping subtitles support for all subtitles formats.
 .TP
 .B \-nooverlapsub
 Disables time wise overlapping subtitles support for all subtitles formats 
@@ -1125,6 +1122,9 @@ volume + seek + timer + percentage + total time
 .RE
 .PD 1
 .
+.TP
+.B \-overlapsub
+Enables time wise overlapping subtitles support for all subtitles formats.
 .TP
 .B \-sid <id> (also see \-slang option)
 Turns on DVD subtitle displaying.
@@ -1150,6 +1150,38 @@ Selects Hungarian and falls back to English if Hungarian is not available.
 .PD 1
 .
 .TP
+.B \-spuaa <mode>
+Antialiasing/scaling mode for DVD/VobSub.
+A value of 16 may be added to mode in order to force scaling even
+when original and scaled frame size already match, for example to
+smooth subtitles with the gaussian blur.
+The available modes are:
+.PD 0
+.RSs
+.IPs 0
+none (fastest, very ugly)
+.IPs 1
+approximate (broken?)
+.IPs 2
+full (slow)
+.IPs 3
+bilinear (default, fast and not too bad)
+.IPs 4
+uses swscaler gaussian blur (looks very good)
+.RE
+.PD 1
+.
+.TP
+.B \-spualign <-1\-2>
+Specify how spu (DVD/VobSub) subtitles should be aligned.
+Values are the same as for -subalign, with the extra choice -1 for original
+position.
+.TP
+.B \-spugauss <0.0\-3.0>
+Variance parameter of gaussian used by -spuaa 4.
+Higher means more blur.
+The default is 1.0.
+.TP
 .B \-sub <subtitle\-file1,subtitle\-file2,...>
 Use/\:display these subtitle files.
 Only one file can be displayed at the same time and the files can be
@@ -1165,6 +1197,32 @@ Specify the color value for subtitles and OSD backgrounds.
 Currently subtitles are grayscale so this value is equivalente to the
 intensity of the color.
 The 255 value means white and 0 black.
+.TP
+.B \-sub\-demuxer <number> (BETA CODE)
+Force subtitle demuxer type for \-subfile.
+.TP
+.B \-sub-fuzziness
+Adjust matching fuzziness when searching for subtitles:
+.PD 0
+.RSs
+.IPs 0
+exact match
+.IPs 1
+load all subs containing movie name
+.IPs 2
+load all subs in the current directory
+.RE
+.PD 1
+.
+.TP
+.B \-sub-no-text-pp
+Disables any kind of text post processing done after loading the subtitles.
+Used for debug purposes.
+.TP
+.B \-subalign <0\-2>
+Specify how subtitles should be aligned with subpos.
+0 means align at top (original/default behavior), 1 means align at center, and
+2 means align at bottom.
 .TP
 .B \-subcc \ 
 Display DVD Closed Caption (CC) subtitles.
@@ -1186,12 +1244,13 @@ specify codepage of the subtitle.
 .PD 1
 .
 .TP
-.B \-sub\-demuxer <number> (BETA CODE)
-Force subtitle demuxer type for \-subfile.
-.TP
 .B \-subdelay <sec>
 Delays subtitles by <sec> seconds.
 Can be negative.
+.TP
+.B \-subfile <filename> (BETA CODE)
+Currently useless.
+Same as \-audiofile, but for subtitle streams (OggDS?).
 .TP
 .B \-subfont-autoscale <0\-3>
 Sets the autoscale mode.
@@ -1242,18 +1301,9 @@ default: the same fps as the movie.
 .br
 ONLY for frame\-based SUB files, i.e.\& NOT MicroDVD format.
 .TP
-.B \-subfile <filename> (BETA CODE)
-Currently useless.
-Same as \-audiofile, but for subtitle streams (OggDS?).
-.TP
 .B \-subpos <0\-100> (useful with \-vf expand)
 Specify the position of subtitles on the screen.
 The value is the vertical position of the subtitle in % of the screen height.
-.TP
-.B \-subalign <0\-2>
-Specify how subtitles should be aligned with subpos.
-0 means align at top (original/default behavior), 1 means align at center, and
-2 means align at bottom.
 .TP
 .B \-subwidth <10\-100>
 Specify the maximum width of subtitles on the screen.
@@ -1266,24 +1316,6 @@ Tells MPlayer to handle the subtitle file as UNICODE.
 .B \-utf8 \ \ 
 Tells MPlayer to handle the subtitle file as UTF8.
 .TP
-.B \-sub-no-text-pp
-Disables any kind of text post processing done after loading the subtitles.
-Used for debug purposes.
-.TP
-.B \-sub-fuzziness
-Adjust matching fuzziness when searching for subtitles:
-.PD 0
-.RSs
-.IPs 0
-exact match
-.IPs 1
-load all subs containing movie name
-.IPs 2
-load all subs in the current directory
-.RE
-.PD 1
-.
-.TP
 .B \-vobsub <vobsub\ file\ without\ extension>
 Specify the VobSub files that are to be used for subtitle.
 This is the full pathname without extensions, i.e.\& without
@@ -1291,38 +1323,6 @@ the '.idx', '.ifo' or '.sub'.
 .TP
 .B \-vobsubid <0-31>
 Specify the VobSub subtitle id.
-.TP
-.B \-spualign <-1\-2>
-Specify how spu (DVD/VobSub) subtitles should be aligned.
-Values are the same as for -subalign, with the extra choice -1 for original
-position.
-.TP
-.B \-spuaa <mode>
-Antialiasing/scaling mode for DVD/VobSub.
-A value of 16 may be added to mode in order to force scaling even
-when original and scaled frame size already match, for example to
-smooth subtitles with the gaussian blur.
-The available modes are:
-.PD 0
-.RSs
-.IPs 0
-none (fastest, very ugly)
-.IPs 1
-approximate (broken?)
-.IPs 2
-full (slow)
-.IPs 3
-bilinear (default, fast and not too bad)
-.IPs 4
-uses swscaler gaussian blur (looks very good)
-.RE
-.PD 1
-.
-.TP
-.B \-spugauss <0.0\-3.0>
-Variance parameter of gaussian used by -spuaa 4.
-Higher means more blur.
-The default is 1.0.
 
 
 .SH "AUDIO OUTPUT OPTIONS (MPLAYER ONLY)"
@@ -2891,18 +2891,18 @@ send 1,8MB of RGBA32 data everytime a small part of the screen is updated.
 
 .SH "GENERAL ENCODING OPTIONS (MENCODER ONLY)"
 .TP
+.B \-audio-delay <0.0\-...>
+Sets the audio delay field in the header.
+Default is 0.0, negative values do not work.
+This does not delay the audio while encoding, but the player will see the
+default audio delay, sparing you the use of the \-delay option.
+.TP
 .B \-audio-density <1\-50>
 Number of audio chunks per second (default is 2 for 0.5s long audio chunks).
 
 .I NOTE:
 .br
 CBR only, VBR ignores this as it puts each packet in a new chunk.
-.TP
-.B \-audio-delay <0.0\-...>
-Sets the audio delay field in the header.
-Default is 0.0, negative values do not work.
-This does not delay the audio while encoding, but the player will see the
-default audio delay, sparing you the use of the \-delay option.
 .TP
 .B \-audio-preload <0.0\-2.0>
 Sets up audio buffering time interval (default: 0.5s).
@@ -3063,13 +3063,13 @@ Specify the basename for the output .idx and .sub files.
 This turns off subtitle rendering in the encoded movie and diverts it to
 Vobsub subtitle files.
 .TP
-.B \-vobsuboutindex <index>
-Specify the index of the subtitles in the output files.
-(default: 0)
-.TP
 .B \-vobsuboutid <langid>
 Specify the language two letter code for the subtitles.
 This overrides what is read from the DVD or the .ifo file.
+.TP
+.B \-vobsuboutindex <index>
+Specify the index of the subtitles in the output files.
+(default: 0)
 
 
 .SH "CODEC SPECIFIC ENCODING OPTIONS (MENCODER ONLY)"
