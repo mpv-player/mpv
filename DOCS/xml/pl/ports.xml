@@ -19,7 +19,7 @@ Zg³aszaj problemy do ich opiekunów, a nie do nas.
 Aby zbudowaæ pakiet dla Debiana, wywo³aj poni¿sz± komendê w katalogu ze ¼ród³ami 
 MPlayera:
 <screen>fakeroot debian/rules binary</screen>
-Jako superu¿ytkownik mo¿esz zainstalowaæ pakiet <filename>.deb</filename> tak, jak zwykle:
+Jako superu¿ytkownik mo¿esz zainstalowaæ pakiet <filename>.deb</filename> tak jak zwykle:
 <screen>dpkg -i ../mplayer_<replaceable>wersja</replaceable>.deb</screen>
 </para>
 
@@ -364,7 +364,7 @@ wolna. U¿ywaj SDL.
 
 <para>Rozpakuj pliki nag³ówkowe DirectX do <filename class="directory">/mingw/include/</filename>.</para>
 
-<para>VCD i DVD dzia³aj± prawie tak, jak w Cygwinie (dopasuj literê dysku do Twojego  
+<para>VCD i DVD dzia³aj± prawie tak jak w Cygwinie (dopasuj literê dysku do Twojego  
    CD-ROMu/DVD-ROMu):</para>
 
 <screen>mplayer d:/mpegav/avseq01.dat</screen>
