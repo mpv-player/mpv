@@ -153,7 +153,6 @@ if(strncmp("cue://",filename,6) == 0){
   stream=new_stream(f,STREAMTYPE_VCDBINCUE);
   stream->start_pos=ret;
   stream->end_pos=ret2;
-  printf ("start:%d end:%d\n", ret, ret2);
   return stream;
 }
 
