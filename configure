@@ -683,6 +683,9 @@ $_xmmpaudio
 /* LIRC (remote control, see www.lirc.org) support: */
 $_lircdefs
 
+/* Define this to enable MPEG 1/2 image postprocessing (requires FAST cpu!) */
+#define MPEG12_POSTPROC
+
 /* Define if your processor stores words with the most significant
    byte first (like Motorola and SPARC, unlike Intel and VAX).  */
 /* #define WORDS_BIGENDIAN */

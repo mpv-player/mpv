@@ -51,7 +51,7 @@ mpeg2_config_t config;
 static int drop_flag = 0;
 static int drop_frame = 0;
 
-#ifdef POSTPROC
+#ifdef MPEG12_POSTPROC
 int quant_store[MBR+1][MBC+1]; // [Review]
 #endif
 
@@ -86,7 +86,7 @@ void mpeg2_init (void)
     motion_comp_init ();
 }
 
-static vo_frame_t frames[3];
+static vo_frame_t frames[4];
 
 void mpeg2_allocate_image_buffers (picture_t * picture)
 {
@@ -100,7 +100,11 @@ void mpeg2_allocate_image_buffers (picture_t * picture)
         buff_size = frame_size + (frame_size/4)*2; // 4Y + 1U + 1V
 
 	// allocate images in YV12 format
+#ifdef MPEG12_POSTPROC
+	for(i=0;i<4;i++){
+#else
 	for(i=0;i<3;i++){
+#endif
             base = shmem_alloc(buff_size);
 	    frames[i].base[0] = base;
 	    frames[i].base[1] = base + frame_size * 5 / 4;
@@ -113,13 +117,6 @@ void mpeg2_allocate_image_buffers (picture_t * picture)
 	picture->forward_reference_frame=&frames[0];
 	picture->backward_reference_frame=&frames[1];
 	picture->current_frame=&frames[2];
-
-#ifdef POSTPROC
-        base = shmem_alloc(buff_size);
-	picture->pp_frame[0] = base;
-	picture->pp_frame[1] = base + frame_size * 5 / 4;
-	picture->pp_frame[2] = base + frame_size;
-#endif
 
 }
 
@@ -157,6 +154,23 @@ static int parse_chunk (vo_functions_t * output, int code, uint8_t * buffer)
 	if (((picture->picture_structure == FRAME_PICTURE) ||
 		 (picture->second_field))
            ) {
+#ifdef MPEG12_POSTPROC
+	       if(picture->pp_options){
+                    // apply OpenDivX postprocess filter
+            	    int stride[3];
+            	    stride[0]=picture->coded_picture_width;
+            	    stride[1]=stride[2]=stride[0]/2;
+                    postprocess((picture->picture_coding_type == B_TYPE) ?
+			    picture->current_frame->base :
+			    picture->forward_reference_frame->base,
+			stride[0], frames[3].base, stride[0],
+                        picture->coded_picture_width, picture->coded_picture_height,
+                        &quant_store[1][1], (MBC+1), picture->pp_options);
+		    output->draw_slice (frames[3].base, stride, 
+                        picture->display_picture_width,
+                        picture->display_picture_height, 0, 0);
+	       } else
+#endif
 #if 1
 		if (picture->picture_coding_type != B_TYPE) {
             	    int stride[3];
@@ -215,6 +229,10 @@ static int parse_chunk (vo_functions_t * output, int code, uint8_t * buffer)
 	    } else {
 		if (picture->picture_coding_type == B_TYPE){
 		    picture->current_frame = &frames[2];
+#ifdef MPEG12_POSTPROC
+	            if(picture->pp_options)
+			picture->current_frame->copy=NULL; else
+#endif
 		    picture->current_frame->copy=copy_slice;
 		} else {
 		    picture->current_frame = picture->forward_reference_frame;

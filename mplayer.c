@@ -337,7 +337,11 @@ int force_ni=0;
 
 for(i=1;i<argc;i++){
   if(strcmp(argv[i],"-o")==0){
-    printf("Option -o has been changed to -vo (video-out), use -vo !\n");
+    printf("Option -o has been renamed to -vo (video-out), use -vo !\n");
+    exit(1);
+  } else
+  if(strcmp(argv[i],"-divxq")==0){
+    printf("Option -divxq has been renamed to -pp (postprocessing), use -pp !\n");
     exit(1);
   } else
   if(strcmp(argv[i],"-vo")==0)  video_driver=argv[++i]; else
@@ -368,7 +372,7 @@ for(i=1;i<argc;i++){
   if(strcmp(argv[i],"-fps")==0) force_fps=strtod(argv[++i],NULL); else
   if(strcmp(argv[i],"-afm")==0) audio_format=strtol(argv[++i],NULL,0); else
   if(strcmp(argv[i],"-vcd")==0) vcd_track=strtol(argv[++i],NULL,0); else
-  if(strcmp(argv[i],"-divxq")==0) divx_quality=strtol(argv[++i],NULL,0); else
+  if(strcmp(argv[i],"-pp")==0) divx_quality=strtol(argv[++i],NULL,0); else
   if(strcmp(argv[i],"-br")==0) encode_bitrate=strtol(argv[++i],NULL,0); else
   if(strcmp(argv[i],"-x")==0) screen_size_x=strtol(argv[++i],NULL,0); else
   if(strcmp(argv[i],"-y")==0) screen_size_y=strtol(argv[++i],NULL,0); else
@@ -847,7 +851,15 @@ switch(has_video){
    if(!videobuffer){ printf("Cannot allocate shared memory\n");exit(0);}
    // init libmpeg2:
    mpeg2_init();
+#ifdef MPEG12_POSTPROC
    picture->pp_options=divx_quality;
+#else
+   if(divx_quality){
+       printf("WARNING! You requested image postprocessing for an MPEG 1/2 video,\n");
+       printf("         but compiled MPlayer without MPEG 1/2 postprocessing support!\n");
+       printf("         #define MPEG12_POSTPROC in config.h, and recompile libmpeg2!\n");
+   }
+#endif
    if(verbose)  printf("mpeg2_init() ok\n");
    // ========= Read & process sequence header & extension ============
    videobuf_len=0;

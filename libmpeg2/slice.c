@@ -1488,7 +1488,7 @@ do {									\
 	    dest[1] += 4 * stride;					\
 	    dest[2] += 4 * stride;					\
 	} while (0);							\
-	offset = 0;							\
+	offset = 0; ++code;						\
     }									\
 } while (0)
 
@@ -1739,6 +1739,9 @@ int slice_process (picture_t * picture, uint8_t code, uint8_t * buffer)
 		picture->dc_dct_pred[2] = 1 << (picture->intra_dc_precision+7);
 	}
 
+#ifdef MPEG12_POSTPROC
+	quant_store[code][(offset>>4)+1] = picture->quantizer_scale;
+#endif
 	offset += 16;
 	CHECK_DISPLAY;
 
@@ -1769,6 +1772,10 @@ int slice_process (picture_t * picture, uint8_t code, uint8_t * buffer)
 		    else
 			MOTION (motion_fi_zero, MACROBLOCK_MOTION_FORWARD);
 
+#ifdef MPEG12_POSTPROC
+	quant_store[code][(offset>>4)+1] = picture->quantizer_scale;
+#endif
+
 		    offset += 16;
 		    CHECK_DISPLAY;
 		} while (--mba_inc);
@@ -1780,6 +1787,10 @@ int slice_process (picture_t * picture, uint8_t code, uint8_t * buffer)
 			MOTION (motion_fr_reuse, macroblock_modes);
 		    else
 			MOTION (motion_fi_reuse, macroblock_modes);
+
+#ifdef MPEG12_POSTPROC
+	quant_store[code][(offset>>4)+1] = picture->quantizer_scale;
+#endif
 
 		    offset += 16;
 		    CHECK_DISPLAY;
