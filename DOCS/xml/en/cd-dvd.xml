@@ -111,15 +111,6 @@ library incompatibilities and slower speed.
 </para>
 
 <formalpara>
-<title>DVD Navigation support (dvdnav)</title>
-<para>
-Support for DVD navigation via <systemitem>dvdnav</systemitem> was being worked
-on, but it was never finished properly and it is currently unmaintained. Who
-knows, it might even compile.
-</para>
-</formalpara>
-
-<formalpara>
 <title>Old-style DVD support - OPTIONAL</title>
 <para>
 Useful if you want to play encoded VOBs from <emphasis role="bold">hard disk</emphasis>.
