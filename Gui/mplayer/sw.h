@@ -6,7 +6,8 @@ int             mplSubMoved = 0;
 
 void mplSubDraw( wsParamDisplay )
 {
- if ( !appMPlayer.subWindow.Visible || mplShMem->Playing ) return;
+ if ( !appMPlayer.subWindow.Visible ) return;
+ if ( mplShMem->Playing ) { vo_expose=1; return; }
 
  if ( mplSubRender )
   {
@@ -44,7 +45,7 @@ void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )
            {
             case wsPLMouseButton:
                    mplSubMoved=1;
-                   wsMoveWindow( &appMPlayer.subWindow,RX - sx,RY - sy );
+                   if ( !appMPlayer.subWindow.isFullScreen ) wsMoveWindow( &appMPlayer.subWindow,RX - sx,RY - sy );
                    break;
             case wsPRMouseButton:
                    mplMenuMouseHandle( X,Y,RX,RY );
@@ -53,7 +54,10 @@ void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )
            }
           break;
    case wsRLMouseButton:
-          if ( !mplSubMoved ) wsMoveTopWindow( &appMPlayer.mainWindow );
+          if ( !mplSubMoved )
+	   {
+	    wsMoveTopWindow( &appMPlayer.mainWindow );
+	   }
           msButton=0;
           mplSubMoved=0;
           break;
