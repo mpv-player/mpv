@@ -2,9 +2,10 @@
   ao_alsa9 - ALSA-0.9.x output plugin for MPlayer
 
   (C) Alex Beregszaszi <alex@naxine.org>
-
+  
   modified for better alsa-0.9.0beta8a-support by Joy Winter <joy@pingfm.org>
-
+  additional AC3 passthrough support by Andy Lo A Foe <andy@alsaplayer.org>
+  
   This driver is still at alpha stage. 
   If you want stable sound-support use the OSS emulation instead.
   
@@ -52,6 +53,124 @@ static int alsa_fragcount = 8;
 
 static int chunk_size = -1;
 static int start_delay = 1;
+
+snd_pcm_t *
+spdif_init(int acard, int adevice)
+{
+	//char *pcm_name = "hw:0,2"; /* first card second device */
+	char pcm_name[255];
+	static snd_aes_iec958_t spdif;
+	snd_pcm_info_t 	*info;
+	snd_pcm_t *handler;
+	snd_pcm_format_t format = SND_PCM_FORMAT_S16_LE;
+	unsigned int channels = 2;
+	unsigned int rate = 48000;
+	int err, c;
+
+	if (err = snprintf(&pcm_name[0], 11, "hw:%1d,%1d", acard, adevice) <= 0)
+	{
+		return NULL;
+	}
+
+	if ((err = snd_pcm_open(&handler, pcm_name, SND_PCM_STREAM_PLAYBACK, 0)) < 0)
+	{
+		fprintf(stderr, "open: %s\n", snd_strerror(err));
+		return NULL;
+	}
+
+	snd_pcm_info_alloca(&info);
+
+	if ((err = snd_pcm_info(handler, info)) < 0) {
+		fprintf(stderr, "info: %s\n", snd_strerror(err));
+		snd_pcm_close(handler);
+		return NULL;
+	}
+        printf("device: %d, subdevice: %d\n", snd_pcm_info_get_device(info),
+                snd_pcm_info_get_subdevice(info));                              
+	{
+        snd_ctl_elem_value_t *ctl;
+        snd_ctl_t *ctl_handler;
+        char ctl_name[12];
+        int ctl_card;
+
+	spdif.status[0] = IEC958_AES0_NONAUDIO |
+			  IEC958_AES0_CON_EMPHASIS_NONE;
+	spdif.status[1] = IEC958_AES1_CON_ORIGINAL |
+			  IEC958_AES1_CON_PCM_CODER;
+	spdif.status[2] = 0;
+	spdif.status[3] = IEC958_AES3_CON_FS_48000;
+
+        snd_ctl_elem_value_alloca(&ctl);
+        snd_ctl_elem_value_set_interface(ctl, SND_CTL_ELEM_IFACE_PCM);
+        snd_ctl_elem_value_set_device(ctl, snd_pcm_info_get_device(info));
+        snd_ctl_elem_value_set_subdevice(ctl, snd_pcm_info_get_subdevice(info));
+        snd_ctl_elem_value_set_name(ctl, SND_CTL_NAME_IEC958("", PLAYBACK,PCM_STREAM));
+        snd_ctl_elem_value_set_iec958(ctl, &spdif);
+        ctl_card = snd_pcm_info_get_card(info);
+        if (ctl_card < 0) {
+           fprintf(stderr, "Unable to setup the IEC958 (S/PDIF) interface - PCM has no assigned card");
+           goto __diga_end;
+        }
+       sprintf(ctl_name, "hw:%d", ctl_card);
+       printf("hw:%d\n", ctl_card);
+       if ((err = snd_ctl_open(&ctl_handler, ctl_name, 0)) < 0) {
+          fprintf(stderr, "Unable to open the control interface '%s': %s", ctl_name, snd_strerror(err));                                                    
+          goto __diga_end;
+       }
+       if ((err = snd_ctl_elem_write(ctl_handler, ctl)) < 0) {
+          fprintf(stderr, "Unable to update the IEC958 control: %s", snd_strerror(err));
+          goto __diga_end;
+       }
+      snd_ctl_close(ctl_handler);
+      __diga_end:                                                       
+
+      }
+
+	{
+	  snd_pcm_hw_params_t *params;
+	  snd_pcm_sw_params_t *swparams;
+	  
+	  snd_pcm_hw_params_alloca(&params);
+	  snd_pcm_sw_params_alloca(&swparams);
+
+          err = snd_pcm_hw_params_any(handler, params);
+          if (err < 0) {
+             fprintf(stderr, "Broken configuration for this PCM: no configurations available");                                                                        
+	     return NULL;
+	  }
+	  err = snd_pcm_hw_params_set_access(handler, params,
+	  				    SND_PCM_ACCESS_RW_INTERLEAVED);
+	  if (err < 0) {
+	    fprintf(stderr, "Access tyep not available");
+	    return NULL;
+	  }
+	  err = snd_pcm_hw_params_set_format(handler, params, format);
+
+	  if (err < 0) {
+	    fprintf(stderr, "Sample format non available");
+	    return NULL;
+	  }
+
+	  err = snd_pcm_hw_params_set_channels(handler, params, channels);
+
+	  if (err < 0) {
+	    fprintf(stderr, "Channels count non avaible");
+	    return NULL;
+	  }
+
+          err = snd_pcm_hw_params_set_rate_near(handler, params, rate, 0);        assert(err >= 0);
+
+	  err = snd_pcm_hw_params(handler, params);
+
+	  if (err < 0) {
+	    fprintf(stderr, "Cannot set buffer size\n");
+	    return NULL;
+	  }
+	  snd_pcm_sw_params_current(handler, swparams);
+	}  
+	return handler;
+}
+
 
 /* to set/get/query special features/parameters */
 static int control(int cmd, int arg)
@@ -190,15 +309,21 @@ static int init(int rate_hz, int channels, int format, int flags)
     printf("alsa-init: %d soundcard%s found, using: %s\n", cards+1,
 	(cards >= 0) ? "" : "s", alsa_device);
 
-    if ((err = snd_pcm_open(&alsa_handler, alsa_device, SND_PCM_STREAM_PLAYBACK,
-	0)) < 0)
-    {
-	printf("alsa-init: playback open error: %s\n", snd_strerror(err));
-	return(0);
-    }
+    if (format == AFMT_AC3) {
+	    // Try to initialize the SPDIF interface
+	    alsa_handler = spdif_init(0, 2);
+    }	    
+   
+    if (!alsa_handler) {
+	    if ((err = snd_pcm_open(&alsa_handler, alsa_device, SND_PCM_STREAM_PLAYBACK,
+					    0)) < 0)
+	    {
+		    printf("alsa-init: playback open error: %s\n", snd_strerror(err));
+		    return(0);
+	    }
+    }	    
 
     snd_pcm_hw_params_malloc(&alsa_hwparams);
-    //snd_pcm_sw_params_malloc(&alsa_swparams);
     snd_pcm_sw_params_alloca(&alsa_swparams);
     if ((err = snd_pcm_hw_params_any(alsa_handler, alsa_hwparams)) < 0)
     {
@@ -388,7 +513,6 @@ static void uninit()
 	free(alsa_device);
 
     snd_pcm_hw_params_free(alsa_hwparams);
-    snd_pcm_sw_params_free(alsa_swparams);
 
     if ((err = snd_pcm_drain(alsa_handler)) < 0)
     {
@@ -487,10 +611,11 @@ static void reset()
     plays 'len' bytes of 'data'
     returns: number of bytes played
 */
+
 static int play(void* data, int len, int flags)
 {
     int got_len;
-
+	
     got_len = snd_pcm_writei(alsa_handler, data, len / 4);
     
     //if ((got_len = snd_pcm_writei(alsa_handler, data, (len/ao_data.bps))) != (len/ao_data.bps)) {     
