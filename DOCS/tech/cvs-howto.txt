@@ -102,3 +102,131 @@ II. POLICY / RULES:
    ask me to reverse it instead of commiting previous version!
    
 I think our rules aren't too hard. If you have comments, contact me.
+
+III. Beginners Guide	by David Holm
+====================
+When I first got CVS write access I got banned after only a few hours
+because I didn't fully understand this documentation. This part is for
+those of you who have just got cvs write access and want to avoid the
+most common pitfalls leading to cvs ban.
+I will introduce a step-by-step guide explaining how I'm making sure
+that my cvs commits are proper and won't get me banned.
+
+1. You should set up two dirs for mplayer, one which contains the stable
+   version and has the :ext: option instead of :pserver: in CVS/Root.
+   The other should be your development dir and have the CVS/Root set to
+   :pserver: instead of :ext:, that way you can't commit development code
+   by accident (since only :ext: allows writes).
+   This is my setup:
+   ~/mplayer
+	    /main
+	    /main.dev
+    NOTE: I'll use these dir names from hereon in the guide, what you want
+    to call your dirs are entirely up to you. This is _only_ an example.
+
+2. When you are satisfied with the changes in "main.dev" and think you are
+   ready to commit the changes to CVS start by doing the following in the
+   "~/mplayer" dir":
+   diff -Nur -x "CVS" -x ".*" main main.dev > dev2stable
+   dev2stable is the filename for the patchfile, it doesn't matter what you
+   call it.
+   
+3. Now comes one of the tricky parts, editing the patch.
+   I prefer using mcedit (comes with Midnight Commander) since it does syntax
+   highlighting in patches (= it uses colors to identify lines =), But most
+   ascii editors should do (meaning don't use staroffice and save it as a
+   star office document for instance ;)
+   I will try to explain this as good as I can.
+	Read throught the patch and remove all occurances of:
+	    * diff -Nur.... that are affecting files YOU have NOT modified
+	      these occur when either main or main.dev are different version
+	      (not checked out at the same time)
+	      EVERYTHING from the diff -Nur... line until the next diff -Nur...
+	      line are changes to the file specified after the diff options,
+	      and ONLY that file.
+	      
+	    * Lines containing "Binary files..." if you add the 'a' switch to
+	      -N(a)ur binary files will be added to the patch as well, making it
+	      huge and puts alot of unnecessary data in it (since you seldom
+	      commit any binaries).
+	      
+	    * If you find changes within a diff block that you don't want to
+	      commit you can delete them if they are the only changes ranging
+	      from the @@ -x,y +x,y @@ until the line before the next
+	      @@ -x,y +x,y @@. You _cannot_ remove single lines after a 
+	      @@ -x,y +x,y @@ because that will break the patch!.
+	        example:
+		...
+		@@ -15,34 +15,6 @@
+		- old_option;
+		+ new_option;
+		@@ -65,13 +65,3 @@
+		...
+		
+		Ok:
+		...
+		@@ -65,13 +65,3 @@
+		...
+		
+		Will break patch:
+		...
+		@@ -15,34 +15,6 @@
+		  old_option;
+		@@ -65,13 +65,3 @@
+		...
+	    
+	      When I end up in situation where I have to remove just smoe lines from
+	      a block I leave it alone, remember (write down) which file it is in and
+	      then edit the file in "main" after I've applied the patch.
+	      
+	    * Now it's time for applying the patch to the "main" (stable) dir. This
+	      should be done in two steps:
+	        1. enter "main" and run "patch -p1 --dry-run < ../dev2stable"
+		    -p1 means that you are one level deep (that you have entered
+		    the "main" directory and that should be stripped when patching,
+		    if you run it from "~/mplayer" you would use -p0).
+		    --dry-run means that patch does everything it normally does
+		    but without modifying ANY files, this is a great way of testing
+		    whether your patch works or not.
+		    "../dev2stable" is your patchfile. (don't forget the '<')
+		    If the dry run fails check the line it failed on and figure out
+		    why it failed, make a new patch, and try again.
+		2. Ok, you finally have a working patch, remove --dry-run and patch
+		   "main" and you are done with the patching part =).
+
+4. It's almost time for the final step, commiting the changes. But first you MUST make
+   sure your changes compiles without breaking anything and that it follows the Policy 
+   mentioned in section 2. (Read it until your eyes are bleeding if you want to keep CVS 
+   access!)
+   Don't worry about object files etc that will be created in your "main" dir, they won't
+   be sent to CVS on commit, you must use the add command to add new files (discuss it on
+   the list before adding new files!).
+   Now to make sure your additions follow policy do the following on every file you will
+   commit:
+    "cvs -z3 diff -u <filename> > <filename.d> of course the output file (<filename.d>) can
+    have any name you want. This will create a file showing the differences between the
+    file on cvs and your updated local file.
+   I will explain some of the policy rules I had a hard time understanding:
+    5. This means that if for instance you have lines in <filename.d> that look
+       something like this:
+       -
+       +
+       That means that you have either added or removed a tab or spaces on that line.
+       That qualifies as cosmetical changes and is disallowed. Edit the file and put
+       back/remove the added/removed tab/spaces.
+       Do a new diff on the file and make sure it fixed the cosmetics.
+    6. Make sure you read and understand this properly before commiting anything. Commit
+       one file at a time!
+
+5. Ok, you have a working patch following the cvs policy, excellent work. Now for the
+   final step, commiting. This is real simple. Just run the following command in "main"
+   for each file you want to commit:
+    "cvs -z3 commit -m "<comment (changes)>" <filename>" or
+    "cvs -z3 commit <filename>"
+   The latter will bring up your default text editor for writing comments (I prefer this
+   method).
+   
+You are done, congratulations. If you are certain you have followed all the policies you
+shouldn't have any troubles with CVS maintainers at all.
+At first I thought the policy was too strict, I discussed it with Arpi and he made some
+very good points, so don't complain.
