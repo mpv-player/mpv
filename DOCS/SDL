@@ -1,0 +1,19 @@
+Here are some last minute notes about SDL out in IdegCounter
+release of mplayer.
+
+There are several commandline switches for sdl:
+-sdl <name>	specifies sdl driver to use (ie. aalib,
+		dga, x11)
+-noxv		disables Xvideo hardware acceleration
+-forcexv	tries to force Xvideo acceleration
+
+SDL Keys:
+F toggles fullscreen/windowed mode
+C cycles available fullscreen modes
+W/S mappings for * and / (mixer control)
+
+Please report problems or bugs with sdl out to
+Felix Buenemann <atmosfear@users.sourceforge.net>
+
+-- 
+Felix Bünemann, 2001-04-26
