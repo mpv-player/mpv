@@ -110,6 +110,7 @@ static char help_text[]=
 "  oder versuche es mit -framedrop ! Lese DOCS/video.html für Tipps.\n"\
 "- Langsame CPU. Keine DVD/DIVX auf einer langsamen CPU. Versuche -hardframedrop\n"\
 "- Defekte Datei. Versuche verschiede Kombinationen: -nobps  -ni  -mc 0  -forceidx\n"\
+"- Wird -cache verwendet, um eine nicht-interleaved Datei abzuspielen? Versuche -nocache\n"\
 "Wenn nichts davon hilft, lies DOCS/bugreports.html !\n\n"
 
 #define MSGTR_NoGui "MPlayer wurde OHNE GUI-Unterstützung kompiliert!\n"
@@ -143,7 +144,8 @@ static char help_text[]=
 #define MSGTR_VideoStreamRedefined "Warnung! Videostreamheader %d redefiniert!\n"
 #define MSGTR_TooManyAudioInBuffer "\nDEMUXER: Zu viele (%d in %d bytes) Audiopakete im Puffer!\n"
 #define MSGTR_TooManyVideoInBuffer "\nDEMUXER: Zu viele (%d in %d bytes) Videopakete im Puffer!\n"
-#define MSGTR_MaybeNI "Vielleicht spielst du einen non-interleaved Stream/Datei oder der Codec funktioniert nicht.\n"
+#define MSGTR_MaybeNI "Vielleicht spielst du einen non-interleaved Stream/Datei oder der Codec funktioniert nicht.\n" \
+                     "Versuche für .AVI Dateien den nicht-interleaved Modus mit der Option -ni zu erzwingen\n"
 #define MSGTR_DetectedFILMfile "FILM Dateiformat erkannt!\n"
 #define MSGTR_DetectedFLIfile "FLI Dateiformat erkannt!\n"
 #define MSGTR_DetectedROQfile "RoQ Dateiformat erkannt!\n"
