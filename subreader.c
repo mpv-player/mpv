@@ -1674,6 +1674,9 @@ char** sub_filenames(char* path, char *fname)
     subcnt = 0;
     
     tmp = strrchr(fname,'/');
+#ifdef WIN32
+    if(!tmp)tmp = strrchr(fname,'\\');
+#endif
     
     // extract filename & dirname from fname
     if (tmp) {
