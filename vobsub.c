@@ -639,9 +639,9 @@ static int
 vobsub_parse_custom(vobsub_t *vob, const char *line)
 {
     //custom colors: OFF/ON(0/1)
-    if ((strncmp("ON", line + 15, 2) == 0)||strncmp("1", line + 15, 1))
+    if ((strncmp("ON", line + 15, 2) == 0)||strncmp("1", line + 15, 1) == 0)
         vob->custom=1;
-    else if ((strncmp("OFF", line + 15, 3) == 0)||strncmp("0", line + 15, 1))
+    else if ((strncmp("OFF", line + 15, 3) == 0)||strncmp("0", line + 15, 1) == 0)
         vob->custom=0;
     else
         return -1;
