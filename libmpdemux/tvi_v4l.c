@@ -460,7 +460,7 @@ static int init(priv_t *priv)
         if (ioctl(priv->video_fd, MJPIOC_G_PARAMS, &bparm) < 0)
         {
            mp_msg(MSGT_TV, MSGL_ERR, 
-              "  MJP: Error getting video parameters: %s\n", sys_errlist[errno]);
+              "  MJP: Error getting video parameters: %s\n", strerror(errno));
            goto err;
         }
 
@@ -489,14 +489,14 @@ static int init(priv_t *priv)
         if (ioctl(priv->video_fd, MJPIOC_S_PARAMS, &bparm) < 0)
          {
             mp_msg(MSGT_TV, MSGL_ERR,
-               "  MJP: Error setting video parameters: %s\n", sys_errlist[errno]);
+               "  MJP: Error setting video parameters: %s\n", strerror(errno));
             goto err;
          }
 
         if (ioctl(priv->video_fd, MJPIOC_G_PARAMS, &bparm) < 0)
         {
            mp_msg(MSGT_TV, MSGL_ERR, 
-              "  MJP: Error getting video parameters: %s\n", sys_errlist[errno]);
+              "  MJP: Error getting video parameters: %s\n", strerror(errno));
            goto err;
         }
 
@@ -521,7 +521,7 @@ static int init(priv_t *priv)
         if (ioctl(priv->video_fd, MJPIOC_REQBUFS,&(breq)) < 0)
         {
            mp_msg (MSGT_TV, MSGL_ERR,
-              "  MJP: Error requesting video buffers: %s\n", sys_errlist[errno]);
+              "  MJP: Error requesting video buffers: %s\n", strerror(errno));
            goto err;
         }
         mp_msg(MSGT_TV, MSGL_INFO,
@@ -533,7 +533,7 @@ static int init(priv_t *priv)
         if (priv -> mmap == MAP_FAILED)
         {
            mp_msg(MSGT_TV, MSGL_INFO,
-              "  MJP: Error mapping video buffers: %s\n", sys_errlist[errno]);
+              "  MJP: Error mapping video buffers: %s\n", strerror(errno));
            goto err;
         }
       }
