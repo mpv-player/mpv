@@ -18,6 +18,9 @@ that your patch will be included.
 
  2. Make unified diffs ('diff -Naur' or 'cvs diff -u'). Unified diffs can be
     applied easily with 'patch'. This is much harder with other diff types.
+    Create the diff from the root of the MPlayer source tree, this makes the
+    diff easier to apply as it saves the step of changing to the correct
+    directory.
 
  3. Test the functionality of your patch. We'll *refuse* it if it breaks
     something, even if it extends other features!
@@ -44,14 +47,15 @@ that your patch will be included.
     translations as well.
 
  7. Send your patch to the mplayer-dev-eng mailing list as a base64-encoded
-    attachment (use gzip or bzip2 *only* if it's bigger than 80k or if you
-    know that your mailer messes up (reformats) text attachments) with the
-    subject line: '[PATCH] very short description of the patch'.
+    attachment with the subject line:
+    '[PATCH] very short description of the patch'.
     In the mail, describe in a few sentences what you change and why.
-    If you made independent changes, try to send them as separate patches.
     The subject line is very important if you do not want your patch to get
     lost in the noise. We need the uppercase [PATCH] to be able to search
     for unapplied patches, so please use it.
+    Do not compress your patch unless it is larger than 80k or if you know
+    that your mailer messes up (reformats) text attachments. It only makes
+    handling the patch more difficult.
     You have to subscribe to mplayer-dev-eng since we blocked postings from
     non-subscribers after spam problems and because patches get reviewed by
     the developers on the list. We want you to be available for discussing
@@ -64,7 +68,7 @@ that your patch will be included.
     related or from our day to day lives. If your patch seems to be ignored,
     please resend it and mention that you got ignored. We are interested in
     your work and will eventually either accept it or reject it with an
-    explanation what and why we disliked about your patch.
+    explanation of what we disliked about your patch.
 
  9. Do not immediately ask for CVS write access. If you contributed one or
     more nice, acceptable patches and they need maintaining or you want to
@@ -75,7 +79,6 @@ that your patch will be included.
 11. If you made a nontrivial contribution and wish to be mentioned in the
     AUTHORS file, include that in your patch.
 
-12. Do not compress your patch unless it is very large. It only makes handling
-    the patch more difficult.
+12. If you made independent changes, try to send them as separate patches.
 
 Thank you!
