@@ -356,6 +356,7 @@ static int fb_screen_width;
 
 char *fb_mode_cfgfile = "/etc/fb.modes";
 char *fb_mode_name = NULL;
+int fb_mode_depth = 0;
 static fb_mode_t *fb_mode = NULL;
 static int fb_switch_mode = 0;
 
@@ -450,6 +451,14 @@ static int fb_init(void)
 			return 1;
 		}
 		fb_switch_mode = 1;
+	} else if (fb_mode_depth) {
+		printf("fb_init: Do _not_ use the 'fbdepth' parameter! "
+				"this parameter will be removed\n");
+		if (fb_mode_depth != 15 || fb_mode_depth != 16 ||
+				fb_mode_depth != 24 || fb_mode_depth != 32) {
+			printf("fb_init: can't switch to %d bpp\n", fb_mode_depth);
+			return 1;
+		}
 	}
 
 	if (!fb_dev_name && !(fb_dev_name = getenv("FRAMEBUFFER")))
@@ -515,6 +524,41 @@ static int fb_init(void)
 		fb_vinfo.vsync_len = fb_mode->vslen;
 		fb_vinfo.sync = fb_mode->sync;
 		fb_vinfo.vmode = fb_mode->vmode;
+	} else if (fb_mode_depth) {
+		fb_vinfo.bits_per_pixel = fb_mode_depth;
+		switch (fb_mode_depth) {
+			case 32:
+			case 24:
+				fb_vinfo.red.offset = 16;
+				fb_vinfo.red.length = 8;
+				fb_vinfo.red.msb_right = 0;
+				fb_vinfo.green.offset = 8;
+				fb_vinfo.green.length = 8;
+				fb_vinfo.green.msb_right = 0;
+				fb_vinfo.blue.offset = 0;
+				fb_vinfo.blue.length = 8;
+				fb_vinfo.blue.msb_right = 0;
+			case 16:
+				fb_vinfo.red.offset = 11;
+				fb_vinfo.red.length = 5;
+				fb_vinfo.red.msb_right = 0;
+				fb_vinfo.green.offset = 5;
+				fb_vinfo.green.length = 6;
+				fb_vinfo.green.msb_right = 0;
+				fb_vinfo.blue.offset = 0;
+				fb_vinfo.blue.length = 5;
+				fb_vinfo.blue.msb_right = 0;
+			case 15:
+				fb_vinfo.red.offset = 10;
+				fb_vinfo.red.length = 5;
+				fb_vinfo.red.msb_right = 0;
+				fb_vinfo.green.offset = 5;
+				fb_vinfo.green.length = 5;
+				fb_vinfo.green.msb_right = 0;
+				fb_vinfo.blue.offset = 0;
+				fb_vinfo.blue.length = 5;
+				fb_vinfo.blue.msb_right = 0;
+		}
 	}
 	fb_vinfo.xres_virtual = fb_vinfo.xres;
 	fb_vinfo.yres_virtual = fb_vinfo.yres;

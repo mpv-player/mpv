@@ -13,6 +13,7 @@ struct config conf[]={
 	{"fb", &fb_dev_name, CONF_TYPE_STRING, 0, 0, 0},
 	{"fbmode", &fb_mode_name, CONF_TYPE_STRING, 0, 0, 0},
 	{"fbmodeconfig", &fb_mode_cfgfile, CONF_TYPE_STRING, 0, 0, 0},
+	{"fbdepth", &fb_mode_depth, CONF_TYPE_INT, CONF_RANGE, 15, 32},
 #endif
 	{"encode", &encode_name, CONF_TYPE_STRING, 0, 0, 0},
 	{"sub", &sub_name, CONF_TYPE_STRING, 0, 0, 0},
