@@ -150,6 +150,8 @@ int verbose=0; // must be global!
 
 double video_time_usage=0;
 double vout_time_usage=0;
+double max_video_time_usage=0;
+double max_vout_time_usage=0;
 static double audio_time_usage=0;
 static int total_time_usage_start=0;
 static int benchmark=0;

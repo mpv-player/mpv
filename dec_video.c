@@ -40,6 +40,8 @@ extern int verbose; // defined in mplayer.c
 
 extern double video_time_usage;
 extern double vout_time_usage;
+extern double max_video_time_usage;
+extern double max_vout_time_usage;
 extern vo_vaa_t vo_vaa;
 
 extern int frameratecode2framerate[16];
@@ -819,6 +821,7 @@ static int double_buff_num = 0;
 
 unsigned int t=GetTimer();
 unsigned int t2;
+double tt;
 
   painted = 0;
 #ifdef USE_MP_IMAGE
@@ -1211,7 +1214,10 @@ else if(gCpuCaps.hasMMX){
 }
 #endif
 
-t2=GetTimer();t=t2-t;video_time_usage+=t*0.000001f;
+t2=GetTimer();t=t2-t;
+tt = t*0.000001f;
+video_time_usage+=tt;
+if(tt > max_video_time_usage) max_video_time_usage=tt;
 if(painted) return 1;
 switch(blit_frame){
 case 3:
@@ -1268,7 +1274,10 @@ case 2:
     else
         video_out->draw_frame(mpi->planes);
 #endif
-    t2=GetTimer()-t2;vout_time_usage+=t2*0.000001f;
+    t2=GetTimer()-t2;
+    tt=t2*0.000001f;
+    vout_time_usage+=tt;
+    if(tt > max_vout_time_usage) max_vout_time_usage = tt;
     blit_frame=1;
     break;
 }

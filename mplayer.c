@@ -176,7 +176,10 @@ ao_functions_t *audio_out=NULL;
 // benchmark:
 double video_time_usage=0;
 double vout_time_usage=0;
+double max_video_time_usage=0;
+double max_vout_time_usage=0;
 static double audio_time_usage=0;
+static double max_audio_time_usage=0;
 static int total_time_usage_start=0;
 static int benchmark=0;
 
@@ -249,6 +252,7 @@ static float force_fps=0;
 static int force_srate=0;
 static int frame_dropping=0; // option  0=no drop  1= drop vo  2= drop decode
 static int play_n_frames=-1;
+static int our_n_frames;
 
 // screen info:
 char* video_driver=NULL; //"mga"; // default
@@ -1560,7 +1564,8 @@ InitTimer();
 
 total_time_usage_start=GetTimer();
 audio_time_usage=0; video_time_usage=0; vout_time_usage=0;
-
+max_audio_time_usage=0; max_video_time_usage=0; max_vout_time_usage=0;
+our_n_frames=play_n_frames;
 while(!eof){
 //    unsigned int aq_total_time=GetTimer();
     float aq_sleep_time=0;
@@ -1573,6 +1578,7 @@ while(!eof){
 /*========================== PLAY AUDIO ============================*/
 while(sh_audio){
   unsigned int t;
+  double tt;
   int playsize;
   
   ao_data.pts=sh_audio->timer*90000.0;
@@ -1602,7 +1608,10 @@ while(sh_audio){
     }
   }
   current_module=NULL;   // Leave AUDIO decoder module
-  t=GetTimer()-t;audio_time_usage+=t*0.000001;
+  t=GetTimer()-t;
+  tt = t*0.000001f;
+  audio_time_usage+=tt;
+  if(tt > max_audio_time_usage) max_audio_time_usage = tt;
   
   if(playsize>sh_audio->a_buffer_len) playsize=sh_audio->a_buffer_len;
   
@@ -2840,18 +2849,33 @@ goto_next_file:  // don't jump here after ao/vo/getch initialization!
 if(benchmark){
   double tot=video_time_usage+vout_time_usage+audio_time_usage;
   double total_time_usage;
+  max_video_time_usage *= our_n_frames;
+  max_vout_time_usage *= our_n_frames;
+  max_audio_time_usage *= our_n_frames;
   total_time_usage_start=GetTimer()-total_time_usage_start;
   total_time_usage = (float)total_time_usage_start*0.000001;
-  mp_msg(MSGT_CPLAYER,MSGL_INFO,"\nBENCHMARKs: V:%8.3fs VO:%8.3fs A:%8.3fs Sys:%8.3fs = %8.3fs\n",
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"\nAVE BENCHMARKs: V:%8.3fs VO:%8.3fs A:%8.3fs Sys:%8.3fs = %8.3fs\n",
 	 video_time_usage,vout_time_usage,audio_time_usage,
 	 total_time_usage-tot,total_time_usage);
   if(total_time_usage>0.0)
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,"BENCHMARK%%: V:%8.4f%% VO:%8.4f%% A:%8.4f%% Sys:%8.4f%% = %8.4f%%\n",
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"AVE BENCHMARK%%: V:%8.4f%% VO:%8.4f%% A:%8.4f%% Sys:%8.4f%% = %8.4f%%\n",
 	   100.0*video_time_usage/total_time_usage,
 	   100.0*vout_time_usage/total_time_usage,
 	   100.0*audio_time_usage/total_time_usage,
 	   100.0*(total_time_usage-tot)/total_time_usage,
 	   100.0);
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"\nMAX BENCHMARKs: V:%8.3fs VO:%8.3fs A:%8.3fs\n",
+	 max_video_time_usage,max_vout_time_usage,
+	 max_audio_time_usage);
+  if(total_time_usage>0.0)
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"MAX BENCHMARK%%: V:%8.4f%% VO:%8.4f%% A:%8.4f%% = %8.4f%%\n",
+	   100.0*max_video_time_usage/total_time_usage,
+	   100.0*max_vout_time_usage/total_time_usage,
+	   100.0*max_audio_time_usage/total_time_usage,
+	   100.0*max_video_time_usage/total_time_usage+
+	   100.0*max_vout_time_usage/total_time_usage+
+	   100.0*max_audio_time_usage/total_time_usage
+	   );
 }
 
 if(eof == PT_NEXT_ENTRY || eof == PT_PREV_ENTRY) {
