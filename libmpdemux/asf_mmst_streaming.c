@@ -424,7 +424,7 @@ asf_mmst_streaming_seek( int fd, off_t pos, streaming_ctrl_t *streaming_ctrl )
 int asf_mmst_streaming_start(stream_t *stream)
 {
   char                 str[1024];
-  char                 data[1024];
+  char                 data[BUF_SIZE];
   uint8_t              asf_header[8192];
   int                  asf_header_len;
   int                  len, i, packet_length;
@@ -455,7 +455,7 @@ int asf_mmst_streaming_start(stream_t *stream)
   * cmd 1 0x01 
   * */
 
-  sprintf (str, "\034\003NSPlayer/7.0.0.1956; {33715801-BAB3-9D85-24E9-03B90328270A}; Host: %s", url1->hostname);
+  snprintf (str, 1023, "\034\003NSPlayer/7.0.0.1956; {33715801-BAB3-9D85-24E9-03B90328270A}; Host: %s", url1->hostname);
   string_utf16 (data, str, strlen(str)+2);
 // send_command(s, commandno ....)
   send_command (s, 1, 0, 0x0004000b, strlen(str) * 2+8, data);
