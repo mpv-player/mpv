@@ -39,7 +39,7 @@ void *init_fli_decoder(int width, int height)
 {
   memset(palette, 0, PALETTE_SIZE);
 
-  return malloc(width * height * sizeof (unsigned int));
+  return malloc(width * height * sizeof (unsigned char));
 }
 
 void decode_fli_frame(
@@ -55,6 +55,8 @@ void decode_fli_frame(
   int pixel_ptr;
   int palette_ptr1;
   int palette_ptr2;
+  unsigned char palette_idx1;
+  unsigned char palette_idx2;
 
   unsigned int frame_size;
   int num_chunks;
@@ -77,7 +79,7 @@ void decode_fli_frame(
   signed char byte_run;
   int pixel_skip;
   int update_whole_frame = 0; // Palette change flag
-  unsigned int *fli_ghost_image = (unsigned int *)context;
+  unsigned char *fli_ghost_image = (unsigned char *)context;
   int ghost_pixel_ptr;
   int ghost_y_ptr;
 	
@@ -164,18 +166,18 @@ void decode_fli_frame(
             if (byte_run < 0)
             {
               byte_run = -byte_run;
-              palette_ptr1 = encoded[stream_ptr++] * 4;
-              palette_ptr2 = encoded[stream_ptr++] * 4;
+              palette_ptr1 = (palette_idx1 = encoded[stream_ptr++]) * 4;
+              palette_ptr2 = (palette_idx2 = encoded[stream_ptr++]) * 4;
               for (j = 0; j < byte_run; j++)
               {
-                fli_ghost_image[ghost_pixel_ptr++] = palette_ptr1;
+                fli_ghost_image[ghost_pixel_ptr++] = palette_idx1;
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 0];
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 1];
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 2];
 		if (bytes_per_pixel == 4) /* 32bpp */
 		    pixel_ptr++;
 
-                fli_ghost_image[ghost_pixel_ptr++] = palette_ptr2;
+                fli_ghost_image[ghost_pixel_ptr++] = palette_idx2;
                 decoded[pixel_ptr++] = palette[palette_ptr2 + 0];
                 decoded[pixel_ptr++] = palette[palette_ptr2 + 1];
                 decoded[pixel_ptr++] = palette[palette_ptr2 + 2];
@@ -187,8 +189,8 @@ void decode_fli_frame(
             {
               for (j = 0; j < byte_run * 2; j++)
               {
-                palette_ptr1 = encoded[stream_ptr++] * 4;
-                fli_ghost_image[ghost_pixel_ptr++] = palette_ptr1;
+                palette_ptr1 = (palette_idx1 = encoded[stream_ptr++]) * 4;
+                fli_ghost_image[ghost_pixel_ptr++] = palette_idx1;
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 0];
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 1];
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 2];
@@ -231,8 +233,8 @@ void decode_fli_frame(
             {
               for (j = 0; j < byte_run; j++)
               {
-                palette_ptr1 = encoded[stream_ptr++] * 4;
-                fli_ghost_image[ghost_pixel_ptr++] = palette_ptr1;
+                palette_ptr1 = (palette_idx1 = encoded[stream_ptr++]) * 4;
+                fli_ghost_image[ghost_pixel_ptr++] = palette_idx1;
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 0];
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 1];
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 2];
@@ -243,10 +245,10 @@ void decode_fli_frame(
             else
             {
               byte_run = -byte_run;
-              palette_ptr1 = encoded[stream_ptr++] * 4;
+              palette_ptr1 = (palette_idx1 = encoded[stream_ptr++]) * 4;
               for (j = 0; j < byte_run; j++)
               {
-                fli_ghost_image[ghost_pixel_ptr++] = palette_ptr1;
+                fli_ghost_image[ghost_pixel_ptr++] = palette_idx1;
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 0];
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 1];
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 2];
@@ -266,7 +268,7 @@ void decode_fli_frame(
     case FLI_BLACK:
       // set the whole frame to color 0 (which is usually black) by
       // clearing the ghost image and trigger a full frame update
-      memset(fli_ghost_image, 0, width * height * sizeof(unsigned int));
+      memset(fli_ghost_image, 0, width * height * sizeof(unsigned char));
       update_whole_frame = 1;
       break;
 
@@ -284,10 +286,10 @@ void decode_fli_frame(
           byte_run = encoded[stream_ptr++];
           if (byte_run > 0)
           {
-            palette_ptr1 = encoded[stream_ptr++] * 4;
+            palette_ptr1 = (palette_idx1 = encoded[stream_ptr++]) * 4;
             for (j = 0; j < byte_run; j++)
             {
-              fli_ghost_image[ghost_pixel_ptr++] = palette_ptr1;
+              fli_ghost_image[ghost_pixel_ptr++] = palette_idx1;
               decoded[pixel_ptr++] = palette[palette_ptr1 + 0];
               decoded[pixel_ptr++] = palette[palette_ptr1 + 1];
               decoded[pixel_ptr++] = palette[palette_ptr1 + 2];
@@ -300,8 +302,8 @@ void decode_fli_frame(
             byte_run = -byte_run;
             for (j = 0; j < byte_run; j++)
             {
-              palette_ptr1 = encoded[stream_ptr++] * 4;
-              fli_ghost_image[ghost_pixel_ptr++] = palette_ptr1;
+              palette_ptr1 = (palette_idx1 = encoded[stream_ptr++]) * 4;
+              fli_ghost_image[ghost_pixel_ptr++] = palette_idx1;
               decoded[pixel_ptr++] = palette[palette_ptr1 + 0];
               decoded[pixel_ptr++] = palette[palette_ptr1 + 1];
               decoded[pixel_ptr++] = palette[palette_ptr1 + 2];
@@ -319,7 +321,16 @@ void decode_fli_frame(
     case FLI_COPY:
       // copy the chunk (uncompressed frame) to the ghost image and
       // schedule the whole frame to be updated
-      memcpy(fli_ghost_image, &encoded[stream_ptr], chunk_size - 6);
+      if (chunk_size - 6 > width * height)
+      {
+        mp_msg(MSGT_DECVIDEO, MSGL_WARN,
+         "FLI: in chunk FLI_COPY : source data (%d bytes) bigger than image," \
+         " skipping chunk\n",
+         chunk_size - 6);
+         break;
+      }
+      else
+        memcpy(fli_ghost_image, &encoded[stream_ptr], chunk_size - 6);
       stream_ptr += chunk_size - 6;
       update_whole_frame = 1;
       break;
@@ -330,7 +341,8 @@ void decode_fli_frame(
       break;
 
     default:
-      printf ("FLI: Unrecognized chunk type: %d\n", chunk_type);
+      mp_msg (MSGT_DECVIDEO, MSGL_WARN,
+       "FLI: Unrecognized chunk type: %d\n", chunk_type);
       break;
     }
 
@@ -343,7 +355,7 @@ void decode_fli_frame(
     pixel_ptr = ghost_pixel_ptr = 0;
     while (pixel_ptr < (width * height * bytes_per_pixel))
     {
-      palette_ptr1 = fli_ghost_image[ghost_pixel_ptr++];
+      palette_ptr1 = fli_ghost_image[ghost_pixel_ptr++] * 4;
       decoded[pixel_ptr++] = palette[palette_ptr1 + 0];
       decoded[pixel_ptr++] = palette[palette_ptr1 + 1];
       decoded[pixel_ptr++] = palette[palette_ptr1 + 2];
