@@ -139,9 +139,10 @@
               <LI><A HREF="video.html#2.3.1.11">2.3.1.11 AAlib - text mode displaying</A></LI>
               <LI><A HREF="video.html#2.3.1.12">2.3.1.12 VESA - output to VESA BIOS</A></LI>
               <LI><A HREF="video.html#2.3.1.13">2.3.1.13 X11</A></LI>
-              <LI><A HREF="video.html#2.3.1.14">2.3.1.14 (deleted section)</A></LI>
-              <LI><A HREF="video.html#2.3.1.15">2.3.1.15 Vidix</A></LI>
-              <LI><A HREF="video.html#2.3.1.16">2.3.1.16 Zr</A></LI>
+              <LI><A HREF="video.html#2.3.1.14">2.3.1.14 Vidix</A></LI>
+              <LI><A HREF="video.html#2.3.1.15">2.3.1.15 Zr</A></LI>
+              <LI><A HREF="video.html#2.3.1.16">2.3.1.16 DVB</A></LI>
+              <LI><A HREF="video.html#2.3.1.17">2.3.1.17 DXR3</A></LI>
               <LI><A HREF="video.html#2.3.1.A">2.3.1.A TV-out support</A>
                 <UL>
                   <LI><A HREF="video.html#2.3.1.A.1">2.3.1.A.1 Matrox G400 cards</A></LI>
@@ -723,17 +724,18 @@ left from old MPlayer versions, and remove it!</P>
 simple. Just exec <CODE>fakeroot debian/rules binary</CODE> in <B>MPlayer</B>'s
 root dir. Detailed instructions can be found <A HREF="documentation.html#6.1">here</A>.</P>
 
-<P><B>ALWAYS browse the output of ./configure</B>, and the
-<CODE>configure.log</CODE> file, they contain info about what will be built,
-and what won't. You may also want to view config.h and config.mak files.<BR>
-If you have some libs installed, but not detected by ./configure, then check
-if you also have the proper header files (usually the -dev packages) and
-their version matches. The configure.log usually tells you what is missing.
-</P>
+<P><B>ALWAYS browse the output of <CODE>./configure</CODE></B>, and the
+<CODE>configure.log</CODE> file, they contain information about what will be
+built, and what will not. You may also want to view <CODE>config.h</CODE> and
+<CODE>config.mak</CODE> files.<BR>
+If you have some libraries installed, but not detected by <CODE>./configure</CODE>,
+then check if you also have the proper header files (usually the -dev packages)
+and their version matches. The <CODE>configure.log</CODE> file usually tells
+you what is missing.</P>
 
 <P>Though not mandatory, the fonts should be installed in order to gain
-OSD, and subtitle functionality. Download mp-arial-iso-8859-*.zip and/or optional
-(if exists) language updates. It's VERY RECOMMENDED to check
+OSD, and subtitle functionality. Download <CODE>mp-arial-iso-8859-*.zip</CODE>
+and/or optional (if exists) language updates. It's VERY RECOMMENDED to check
 <A HREF="#1.5">section 1.5</A> for details.</P>
 
 <PRE>
@@ -748,8 +750,8 @@ OSD, and subtitle functionality. Download mp-arial-iso-8859-*.zip and/or optiona
 
 <P>The GUI needs GTK (it isn't GTK, but the panels are). The skins are stored
 in PNG format, so gtk, libpng (and their devel stuff) has to be installed.
-You can build it by specifying <CODE>--enable-gui</CODE> during ./configure .
-Then, to turn on GUI mode, you either</P>
+You can build it by specifying <CODE>--enable-gui</CODE> during
+<CODE>./configure</CODE>. Then, to turn on GUI mode, you either</P>
 <UL>
   <LI>use the <CODE>-gui</CODE> option</LI>
   <LI>specify <CODE>gui=yes</CODE> in your config file</LI>
@@ -949,20 +951,20 @@ TV tuner</B>.</P>
 <TABLE BORDER=0>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><CODE>on</I></TD>
+  <TD><CODE>on</CODE></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD>use TV
   input</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><CODE>noaudio</I></TD>
+  <TD><CODE>noaudio</CODE></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD>thanks, no sound</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><CODE>driver</I></TD>
+  <TD><CODE>driver</CODE></TD>
   <TD></TD>
   <TD>    <B>dummy</B> - NULL TV input :) Used for testing only, generates dummy
     input.<BR>
@@ -971,14 +973,14 @@ TV tuner</B>.</P>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><CODE>device</I></TD>
+  <TD><CODE>device</CODE></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD>specify other
   device than the default <CODE>/dev/video0</CODE></TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><CODE>input</I></TD>
+  <TD><CODE>input</CODE></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD>give from which
   input of the TV tuner you wish to grab from (e.g. <B>television</B>,
@@ -987,14 +989,14 @@ TV tuner</B>.</P>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><CODE>freq</I></TD>
+  <TD><CODE>freq</CODE></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD>specify the
   frequency to set the tuner (e.g. <B>511.250</B>)</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><CODE>outfmt</I></TD>
+  <TD><CODE>outfmt</CODE></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD>in which output
   format should the tuner transport images to us (<B>rgb32</B>, <B>rgb24</B>, <B>yv12</B>,
@@ -1003,31 +1005,31 @@ TV tuner</B>.</P>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><CODE>width</I></TD>
+  <TD><CODE>width</CODE></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD>  the width of the output window, in pixels</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><CODE>height</I></TD>
+  <TD><CODE>height</CODE></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD>  the height of the output window, in pixels</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><CODE>norm</I></TD>
+  <TD><CODE>norm</CODE></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD>  available: PAL, SECAM, NTSC</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><CODE>channel</I></TD>
+  <TD><CODE>channel</CODE></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD>  set the tuner to the given channel</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><CODE>chanlist</I></TD>
+  <TD><CODE>chanlist</CODE></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD>  available: <CODE>us-bcast, us-cable, europe-west, europe-east, etc</CODE></TD>
 </TR>
@@ -1844,7 +1846,7 @@ make <B>MPlayer</B> compile. Otherwise it will complain about missing
 
 <LI><B><A HREF="mailto:lgb@lgb.hu">Gábor Lénárt (LGB)</A></B>
 <UL>
-  <LI>./configure script improvements</LI>
+  <LI>configure script improvements</LI>
   <LI>Makefile improvements</LI>
   <LI>preliminary DVD support</LI>
   <LI>various X11 cleanups and fixes</LI>
@@ -2077,7 +2079,7 @@ make <B>MPlayer</B> compile. Otherwise it will complain about missing
 
 <LI><B><A HREF="mailto:p_l@gmx.fr">pl</A></B>
 <UL>
-  <LI>new ./configure script</LI>
+  <LI>new configure script</LI>
   <LI>general code maintaining, fixes, patch committing</LI>
 </UL>
 </LI>
@@ -2473,7 +2475,7 @@ achieved on the following addresses:</P>
 <LI>MPlayer developers list:<BR>
 <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng</A>
 <P>This list is about mplayer development! Talking about interface/API changes,
-new libraries, code optimization, ./configure changes, and send patches here.
+new libraries, code optimization, configure changes, and send patches here.
 Do NOT send bugreports, user questions, feature requests, flame here!
 This list should be kept low-traffic.</P>
 </LI>
@@ -2531,13 +2533,13 @@ otherwise.  Please do not send messages using other language!</P>
 <LI>SIGILL (signal 4) on P3 using 2.2.x kernels:<BR>
   Problem: kernel 2.2.x doesn't have proper (working) SSE support<BR>
   Solution: upgrade kernel to 2.4.x<BR>
-  Workaround: ./configure --disable-sse</LI>
+  Workaround: <CODE>./configure --disable-sse</CODE></LI>
 
 <LI>General SIGILL (signal 4):<BR>
   Problem: you compiled and run mplayer in different machines
   (for example compiled on P3 and running on Celeron)<BR>
   Solution: compile MPlayer on the same machine where you will use it!<BR>
-  Workaround: ./configure --disable-sse etc. options</LI>
+  Workaround: <CODE>./configure --disable-sse</CODE> etc. options</LI>
 
 <LI>"Internal buffer inconsistency" during MEncoder run:<BR>
   Problem: known problem when lame &lt; 3.90 was compiled with gcc 2.96 or 3.x.<BR>
