@@ -111,7 +111,6 @@ void mpeg2_allocate_image_buffers (picture_t * picture)
 	    frames[i].base[2] = base + frame_size;
 	    frames[i].copy = NULL;
 	    frames[i].vo = NULL;
-	    frames[i].slice=0;
 	}
 	
 	picture->forward_reference_frame=&frames[0];
@@ -123,18 +122,27 @@ void mpeg2_allocate_image_buffers (picture_t * picture)
 static void copy_slice (vo_frame_t * frame, uint8_t ** src){
     vo_functions_t * output = frame->vo;
     int stride[3];
-    int y=frame->slice*16;
+    int y=picture->slice<<4;
+    uint8_t* src_tmp[3];
 
     stride[0]=picture->coded_picture_width;
     stride[1]=stride[2]=stride[0]/2;
-
-    output->draw_slice (src, stride, 
-                picture->display_picture_width,
+    
+    if(frame!=picture->display_frame){
+	uint8_t** base=picture->display_frame->base;
+	src_tmp[0]=base[0]+stride[0]*y;
+	src_tmp[1]=base[1]+stride[1]*(y>>1);
+	src_tmp[2]=base[2]+stride[2]*(y>>1);
+	src=src_tmp;
+    }
+    
+    output->draw_slice (src,
+		stride, picture->display_picture_width,
 		(y+16<=picture->display_picture_height) ? 16 :
 		    picture->display_picture_height-y,
 		0, y);
 
-    ++frame->slice;
+    ++picture->slice;
 }
 
 static int in_slice_flag=0;
@@ -169,9 +177,9 @@ static int parse_chunk (vo_functions_t * output, int code, uint8_t * buffer)
 		    output->draw_slice (frames[3].base, stride, 
                         picture->display_picture_width,
                         picture->display_picture_height, 0, 0);
-	       } else
+	       }// else
 #endif
-#if 1
+#if 0
 		if (picture->picture_coding_type != B_TYPE) {
             	    int stride[3];
             	    stride[0]=picture->coded_picture_width;
@@ -228,22 +236,28 @@ static int parse_chunk (vo_functions_t * output, int code, uint8_t * buffer)
 //		vo_field (picture->current_frame, picture->picture_structure);
 	    } else {
 		if (picture->picture_coding_type == B_TYPE){
+		    picture->display_frame=
 		    picture->current_frame = &frames[2];
+//		    picture->current_frame->copy=copy_slice;
+		} else {
+		    picture->current_frame = picture->forward_reference_frame;
+		    picture->display_frame=
+		    picture->forward_reference_frame = picture->backward_reference_frame;
+		    picture->backward_reference_frame = picture->current_frame;
+//		    picture->current_frame->copy=NULL;
+		}
+	    }
+
+#if 1
 #ifdef MPEG12_POSTPROC
 	            if(picture->pp_options)
 			picture->current_frame->copy=NULL; else
 #endif
 		    picture->current_frame->copy=copy_slice;
-		} else {
-		    picture->current_frame = picture->forward_reference_frame;
-		    picture->forward_reference_frame = picture->backward_reference_frame;
-		    picture->backward_reference_frame = picture->current_frame;
-		    picture->current_frame->copy=NULL;
-		}
-	    }
+#endif
 	    
 	    picture->current_frame->vo=output;
-	    picture->current_frame->slice=0;
+	    picture->slice=0;
 
 	}
 

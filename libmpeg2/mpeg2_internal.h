@@ -55,7 +55,7 @@ typedef struct vo_frame_s {
     uint8_t * base[3];	/* pointer to 3 planes */
     void (* copy) (struct vo_frame_s * frame, uint8_t ** src);
     void* vo;
-    int slice;
+//    int slice;
 //    void (* field) (struct vo_frame_s * frame, int flags);
 //    void (* draw) (struct vo_frame_s * frame);
 //    vo_instance_t * instance;
@@ -147,6 +147,10 @@ typedef struct picture_s {
     int display_picture_height;
     int pp_options;
     int repeat_count;
+
+    struct vo_frame_s * display_frame;
+    int slice;
+
 } picture_t;
 
 typedef struct mpeg2_config_s {
