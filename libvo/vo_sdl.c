@@ -114,6 +114,7 @@
 #include "fastmemcpy.h"
 #include "sub.h"
 #include "aspect.h"
+#include "../mp_image.h"
 
 #ifdef HAVE_X11
 #include <X11/Xlib.h>
@@ -263,7 +264,7 @@ static struct sdl_priv_s {
     int osd_has_changed;
     
 	/* source image format (YUV/RGB/...) */
-        int format;
+    uint32_t format;
 
     /* dirty_off_frame[0] contains a bounding box around the osd contents drawn above the image
        dirty_off_frame[1] is the corresponding thing for OSD contents drawn below the image
@@ -1655,10 +1656,51 @@ static uint32_t preinit(const char *arg)
   return 0;
 }
 
+static uint32_t get_image(mp_image_t *mpi)
+{
+	struct sdl_priv_s *priv = &sdl_priv;
+
+    if(priv->format != mpi->imgfmt) return VO_FALSE;
+    if(mpi->type == MP_IMGTYPE_STATIC || mpi->type == MP_IMGTYPE_TEMP) {
+        if(priv->format == IMGFMT_YV12 || priv->format == SDL_IYUV_OVERLAY) {
+            mpi->planes[0] = priv->overlay->pixels[0] + priv->y*priv->overlay->pitches[0];
+            mpi->planes[1] = priv->overlay->pixels[1] + priv->y*priv->overlay->pitches[1]/2;
+            mpi->planes[2] = priv->overlay->pixels[2] + priv->y*priv->overlay->pitches[2]/2;
+            mpi->stride[0] = priv->overlay->pitches[0];
+            mpi->stride[1] = priv->overlay->pitches[1];
+            mpi->stride[2] = priv->overlay->pitches[2];
+        }
+        else if(IMGFMT_IS_RGB(priv->format) || IMGFMT_IS_BGR(priv->format)) {
+            if(priv->dblit) {
+                if(mpi->type == MP_IMGTYPE_STATIC && (priv->surface->flags & SDL_DOUBLEBUF))
+                    return VO_FALSE;
+                
+                mpi->planes[0] = priv->surface->pixels + priv->y*priv->surface->pitch;
+                mpi->stride[0] = priv->surface->pitch;
+            }
+            else {
+                mpi->planes[0] = priv->rgbsurface->pixels + priv->y*priv->rgbsurface->pitch;
+                mpi->stride[0] = priv->rgbsurface->pitch;
+            }
+        }
+        else {
+            mpi->planes[0] = priv->overlay->pixels[0] + priv->y*priv->overlay->pitches[0];
+            mpi->stride[0] = priv->overlay->pitches[0];
+        }
+
+        mpi->flags|=MP_IMGFLAG_DIRECT;
+        return VO_TRUE;
+    }
+
+    return VO_FALSE;
+}
+
 static uint32_t control(uint32_t request, void *data, ...)
 {
   struct sdl_priv_s *priv = &sdl_priv;
   switch (request) {
+  case VOCTRL_GET_IMAGE:
+      return get_image(data);
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
   case VOCTRL_FULLSCREEN:
