@@ -218,10 +218,16 @@ static uint32_t SAVED_OV0_GRAPHICS_KEY_MSK = 0;
 static uint32_t SAVED_OV0_VID_KEY_CLR = 0;
 static uint32_t SAVED_OV0_VID_KEY_MSK = 0;
 static uint32_t SAVED_OV0_KEY_CNTL = 0;
-#if defined(RAGE128) && (WORDS_BIGENDIAN)
+#ifdef WORDS_BIGENDIAN
 static uint32_t SAVED_CONFIG_CNTL = 0;
+#if defined(RAGE128)
 #define APER_0_BIG_ENDIAN_16BPP_SWAP (1<<0)
 #define APER_0_BIG_ENDIAN_32BPP_SWAP (2<<0)
+#else
+#define RADEON_SURFACE_CNTL                 0x0b00
+#define RADEON_NONSURF_AP0_SWP_16BPP (1 << 20)
+#define RADEON_NONSURF_AP0_SWP_32BPP (1 << 21)
+#endif
 #endif
 
 #define GETREG(TYPE,PTR,OFFZ)		(*((volatile TYPE*)((PTR)+(OFFZ))))
@@ -1172,7 +1178,8 @@ int vixInit( void )
 #endif
 
 /* XXX: hack, but it works for me (tm) */
-#if defined(RAGE128) && (WORDS_BIGENDIAN)
+#ifdef WORDS_BIGENDIAN
+#if defined(RAGE128) 
     /* code from gatos */
     {
 	SAVED_CONFIG_CNTL = INREG(CONFIG_CNTL);
@@ -1182,6 +1189,22 @@ int vixInit( void )
 //	printf("saved: %x, current: %x\n", SAVED_CONFIG_CNTL,
 //	    INREG(CONFIG_CNTL));
     }
+#else
+    /*code from radeon_video.c*/
+    {
+    	SAVED_CONFIG_CNTL = INREG(RADEON_SURFACE_CNTL);
+/*	OUTREG(RADEON_SURFACE_CNTL, (SAVED_CONFIG_CNTL |
+		RADEON_NONSURF_AP0_SWP_32BPP) & ~RADEON_NONSURF_AP0_SWP_16BPP);
+*/
+	OUTREG(RADEON_SURFACE_CNTL, SAVED_CONFIG_CNTL & ~(RADEON_NONSURF_AP0_SWP_32BPP
+						   | RADEON_NONSURF_AP0_SWP_16BPP));
+
+/*
+	OUTREG(RADEON_SURFACE_CNTL, (SAVED_CONFIG_CNTL | RADEON_NONSURF_AP0_SWP_32BPP)
+				    & ~RADEON_NONSURF_AP0_SWP_16BPP);
+*/
+    }
+#endif
 #endif
 
   if(__verbose > 1) radeon_vid_dump_regs();
@@ -1199,10 +1222,14 @@ void vixDestroy( void )
   OUTREG(OV0_KEY_CNTL, SAVED_OV0_KEY_CNTL);
   printf(RADEON_MSG" Restored overlay colorkey settings\n");
 
-#if defined(RAGE128) && (WORDS_BIGENDIAN)
+#ifdef WORDS_BIGENDIAN
+#if defined(RAGE128)
     OUTREG(CONFIG_CNTL, SAVED_CONFIG_CNTL);
 //    printf("saved: %x, restored: %x\n", SAVED_CONFIG_CNTL,
 //	INREG(CONFIG_CNTL));
+#else
+    OUTREG(RADEON_SURFACE_CNTL, SAVED_CONFIG_CNTL);
+#endif
 #endif
 
   unmap_phys_mem(radeon_mem_base,radeon_ram_size);
