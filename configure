@@ -391,7 +391,18 @@ case $cc_version in
 esac
 echo "$cc_version"
 if [ ! -z "$cc_verc_fail" ] ; then
-echo "Please downgrade(upgrade) gcc compiler to gcc-2.95.2+ or gcc-3.0+ version"
+cat <<EOF
+Please downgrade(upgrade) gcc compiler to gcc-2.95.2+ or gcc-3.0+ version!
+
+Note: gcc 2.96 is RedHat's UNOFFICIAL (it can be found only on RedHat sites, or
+in RedHat-based distributions) and BUGGY gcc release. gcc 2.96 is TOTALLY
+unsupported by us, because it simply SKIPS or badly compiles some MMX codes!
+Important: this is NOT an MPlayer-specific problem, numerous other projects
+(DRI, avifile, etc..) have problems with this shit too. DO NOT USE gcc 2.96 !!!
+If you don't want to downgrade, use the --disable-gcc-checking option to avoid
+this check, but DO NOT SEND BUGREPORTS OR COMPLAIN, it's *YOUR* fault!
+Get ready for misterious crashes, no-picture bugs, strange noises... REALLY!
+EOF
 exit
 fi
 else
