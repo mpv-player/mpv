@@ -2024,7 +2024,11 @@ fi
 
 if test "$_directfb" = yes ; then
   _def_directfb='#define HAVE_DIRECTFB 1'
-  _vosrc="$_vosrc vo_directfb.c"
+  if test "$_directfb_version" -ge 913; then
+    _vosrc="$_vosrc vo_directfb2.c"
+  else
+    _vosrc="$_vosrc vo_directfb.c"
+  fi
   _vomodules="directfb $_vomodules"
   _ld_directfb='-ldirectfb'
 else

@@ -487,7 +487,7 @@ if (verbose) printf("DirectFB: Preinit entered\n");
     DFBCardCapabilities caps;    
     DFBCHECK (dfb->GetCardCapabilities(dfb,&caps));
     if (caps.acceleration_mask & DFXL_STRETCHBLIT) hwstretchblit=1; else hwstretchblit=0;
-    if (verbose) printf("DirectFB: Card supports hw stretch blit\n");
+    if (verbose && hwstretchblit) printf("DirectFB: Card supports hw stretch blit\n");
     }
 
 // just look at RGB things for main layer
