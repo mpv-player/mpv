@@ -22,9 +22,9 @@
 
 #ifdef HAVE_DIVX4ENCORE
 #include "divx4_vbr.h"
-extern char* passtmpfile;
 #endif
 
+extern char* passtmpfile;
 extern int pass;
 
 //===========================================================================//
