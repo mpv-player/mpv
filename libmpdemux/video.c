@@ -299,6 +299,9 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
         // FILM (CPK) files have no fixed FPS - just frame durations!
 	frame_time=d_video->pts-pts1;
     } else
+    if(demuxer->file_format==DEMUXER_TYPE_ROQ && !force_fps){
+	frame_time=d_video->pts-pts1;
+    } else
     if(demuxer->file_format==DEMUXER_TYPE_VIVO && !force_fps){
         // .VIVO files has no fixed FPS - just frame durations!
 	if(d_video->pts-pts1>0)

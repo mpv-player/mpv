@@ -26,6 +26,15 @@
 #define CHUNK_TYPE_AUDIO 0
 #define CHUNK_TYPE_VIDEO 1
 
+// Pick a number, any number (but not 1); make it large enough (any number
+// over, say, 50, should work well). I don't know why this works, but it
+// does. For some reason, setting a frame's PTS value to
+//   (frame number) / (fps)
+// when fps is small (20-30) doesn't work. But multiplying the PTS by
+//   n / n
+// where n is some non-small number works PTS miracles.
+#define RANDOM_FPS_MULTIPLIER 162
+
 typedef struct roq_chunk_t
 {
   int chunk_type;
@@ -79,7 +88,8 @@ int demux_roq_fill_buffer(demuxer_t *demuxer)
 
   if (roq_chunk.chunk_type == CHUNK_TYPE_AUDIO)
     ds_read_packet(demuxer->audio, demuxer->stream, roq_chunk.chunk_size,
-      roq_chunk.running_audio_sample_count / 22050,
+//      roq_chunk.running_audio_sample_count / 22050,
+      0,
       roq_chunk.chunk_offset, 0);
   else
     ds_read_packet(demuxer->video, demuxer->stream, roq_chunk.chunk_size,
@@ -144,7 +154,7 @@ demuxer_t* demux_open_roq(demuxer_t* demuxer)
         sh_video->format = mmioFOURCC('R', 'o', 'Q', 'V');
 
         // constant frame rate
-        sh_video->fps = fps;
+        sh_video->fps = fps * RANDOM_FPS_MULTIPLIER;
         sh_video->frametime = 1 / sh_video->fps;
       }
     }
@@ -173,7 +183,7 @@ demuxer_t* demux_open_roq(demuxer_t* demuxer)
           sh_audio->wf->nChannels = 1;
         // always 22KHz, 16-bit
         sh_audio->wf->nSamplesPerSec = 22050;
-        sh_audio->wf->wBitsPerSample = 2;
+        sh_audio->wf->wBitsPerSample = 16;
       }
 
       // index the chunk
@@ -207,7 +217,7 @@ demuxer_t* demux_open_roq(demuxer_t* demuxer)
         stream_tell(demuxer->stream) - 8;
       roq_data->chunks[roq_data->total_chunks].chunk_size = chunk_size + 8;
       roq_data->chunks[roq_data->total_chunks].video_chunk_number = 
-        roq_data->total_video_chunks++;
+        roq_data->total_video_chunks++ * RANDOM_FPS_MULTIPLIER;
 
       stream_skip(demuxer->stream, chunk_size);
       roq_data->total_chunks++;
