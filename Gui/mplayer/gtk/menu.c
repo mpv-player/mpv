@@ -341,6 +341,7 @@ GtkWidget * create_PopUpMenu( void )
      if ( guiIntfStruct.DVD.nr_of_subtitles )
       {
        char tmp[64]; int i;
+       AddMenuItem( DVDSubtitleLanguageMenu,"None",( (unsigned short)-1 << 16 ) + evSetDVDSubtitle );
        for ( i=0;i < guiIntfStruct.DVD.nr_of_subtitles;i++ )
         {
          strcpy( tmp,GetLanguage( guiIntfStruct.DVD.subtitles[i].language ) );
