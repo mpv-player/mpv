@@ -27,9 +27,6 @@
 #ifdef HAVE_XSHAPE
 #include <X11/extensions/shape.h>
 #endif
-#ifdef HAVE_DGA2
-#include <X11/extensions/xf86dga.h>
-#endif
 
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -71,7 +68,6 @@ int                  wsWLCount = 0;
 unsigned long        wsKeyTable[512];
 
 int                  wsUseXShm = 1;
-int                  wsUseDGA = 1;
 int                  wsUseXShape = 1;
 
 int XShmGetEventBase( Display* );
@@ -215,15 +211,6 @@ if(mDisplay){
    fprintf( stderr,"[ws] sorry, your system is not supported X shared memory extension.\n" );
    wsUseXShm=0;
   }
-#ifdef HAVE_DGA2
- if ( !XDGAQueryExtension( wsDisplay,&eventbase,&errorbase ) )
-  {
-   fprintf( stderr,"[ws] sorry, your system is not supported DGA extension.\n" );
-   wsUseDGA=0;
-  }
-#else
-   wsUseDGA=0;
-#endif
 #ifdef HAVE_XSHAPE
   if ( !XShapeQueryExtension( wsDisplay,&eventbase,&errorbase ) )
    {
@@ -255,11 +242,6 @@ if(mDisplay){
      XShmQueryVersion( wsDisplay,&major,&minor,&shp );
      fprintf( stderr,"[ws] XShm version is %d.%d\n",major,minor );
     }
-//   if ( wsUseDGA )
-//    {
-//     XDGAQueryVersion( wsDisplay,&major,&minor );
-//     fprintf( stderr,"[ws] DGA version is %d.%d\n",major,minor );
-//    }
    #ifdef HAVE_XSHAPE
     if ( wsUseXShape )
      {
@@ -1064,8 +1046,6 @@ int wsGetDepthOnScreen( void )
 
 void wsXDone( void )
 {
-// if ( wsSwitchedAnotherVideoMode ) wsChangeVideoMode( wsOldXResolution,wsOldYResolution );
-// if ( wsUseDGA ) XF86DGADirectVideo( wsDisplay,wsScreen,0 );
  XCloseDisplay( wsDisplay );
 }
 
