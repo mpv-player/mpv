@@ -913,7 +913,7 @@ static char help_text[]=
 #define MSGTR_VO_YUV4MPEG_InterlacedInputNotRGB "Wej¶cie nie jest w formacie RGB, nie mogê oddzieliæ jasno¶ci przez pola."
 #define MSGTR_VO_YUV4MPEG_WidthDivisibleBy2 "Szeroko¶æ obrazka musi byæ podzielna przez 2."
 #define MSGTR_VO_YUV4MPEG_NoMemRGBFrameBuf "Za ma³o pamiêci aby zaalokowaæ bufor ramek RGB."
-#define MSGTR_VO_YUV4MPEG_OutFileOpenError "Nie mogê dostaæ pamiêci lub pliku aby zapisaæ \%s\"!"
+#define MSGTR_VO_YUV4MPEG_OutFileOpenError "Nie mogê dostaæ pamiêci lub pliku aby zapisaæ \"%s\"!"
 #define MSGTR_VO_YUV4MPEG_OutFileWriteError "B³±d przy zapisie pliku do wyj¶cia!"
 #define MSGTR_VO_YUV4MPEG_UnknownSubDev "Nieznane podurz±dzenie: %s"
 #define MSGTR_VO_YUV4MPEG_InterlacedTFFMode "U¿ywam wyj¶cia w trybie przeplotu, najwy¿sze pola najpierw."
