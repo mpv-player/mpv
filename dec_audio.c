@@ -246,6 +246,10 @@ while(1){
     sh_audio->samplerate=sample_rate;
     sh_audio->i_bps=bit_rate/8;
     demux_read_data(sh_audio->ds,sh_audio->a_in_buffer+7,length-7);
+    
+    if(crc16_block(sh_audio->a_in_buffer+2,length-2)!=0)
+	mp_msg(MSGT_DECAUDIO,MSGL_STATUS,"a52: CRC check failed!  \n");
+    
     return length;
 }
 
