@@ -245,7 +245,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outf
 // Note: buffer allocation may be moved to mpcodecs_config_vo() later...
 mp_image_t* mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag, int w, int h){
   mp_image_t* mpi=NULL;
-  int w2=(mp_imgflag&MP_IMGFLAG_ACCEPT_STRIDE)?((w+15)&(~15)):w;
+  int w2=w; //(mp_imgflag&MP_IMGFLAG_ACCEPT_STRIDE)?((w+15)&(~15)):w;
   // Note: we should call libvo first to check if it supports direct rendering
   // and if not, then fallback to software buffers:
   switch(mp_imgtype){
@@ -301,8 +301,15 @@ mp_image_t* mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag, i
 	      // YV12/I420. feel free to add other planar formats here...
 	      if(!mpi->stride[0]) mpi->stride[0]=mpi->width;
 	      if(!mpi->stride[1]) mpi->stride[1]=mpi->stride[2]=mpi->width/2;
-	      mpi->planes[1]=mpi->planes[0]+mpi->width*mpi->height;
-	      mpi->planes[2]=mpi->planes[1]+mpi->width*mpi->height/4;
+	      if(mpi->flags&MP_IMGFLAG_SWAPPED){
+	          // I420/IYUV  (Y,U,V)
+	          mpi->planes[1]=mpi->planes[0]+mpi->width*mpi->height;
+	          mpi->planes[2]=mpi->planes[1]+(mpi->width>>1)*(mpi->height>>1);
+	      } else {
+	          // YV12,YVU9  (Y,V,U)
+	          mpi->planes[2]=mpi->planes[0]+mpi->width*mpi->height;
+	          mpi->planes[1]=mpi->planes[2]+(mpi->width>>1)*(mpi->height>>1);
+	      }
 	  } else {
 	      if(!mpi->stride[0]) mpi->stride[0]=mpi->width*mpi->bpp/8;
 	  }
