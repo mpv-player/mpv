@@ -930,7 +930,7 @@ if(sh_audio){
 	    }
 	}
 	if(len<=0) break; // EOF?
-	aviwrite_write_chunk(muxer,mux_a,muxer_f,len,0);
+	aviwrite_write_chunk(muxer,mux_a,muxer_f,len,0x10);
 	if(!mux_a->h.dwSampleSize && mux_a->timer>0)
 	    mux_a->wf->nAvgBytesPerSec=0.5f+(double)mux_a->size/mux_a->timer; // avg bps (VBR)
 	if(mux_a->buffer_len>=len){
