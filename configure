@@ -65,6 +65,7 @@ bsdos()   { issystem "BSD/OS"  ; return "$?" ; }
 openbsd() { issystem "OpenBSD" ; return "$?" ; }
 bsd()     { freebsd || netbsd || bsdos || openbsd ; return "$?" ; }
 qnx()     { issystem "QNX"     ; return "$?" ; }
+darwin()  { issystem "Darwin"  ; return "$?" ; }
 
 # arch test boolean functions
 x86() {
@@ -280,7 +281,7 @@ if test -z "$_target" ; then
   # OS name
   system_name=`( uname -s ) 2>&1`
   case "$system_name" in
-  Linux|FreeBSD|NetBSD|BSD/OS|OpenBSD|SunOS|QNX)
+  Linux|FreeBSD|NetBSD|BSD/OS|OpenBSD|SunOS|QNX|Darwin)
     ;;
   IRIX*)
     system_name=IRIX
@@ -299,7 +300,9 @@ if test -z "$_target" ; then
    case "$host_arch" in
    i386|sparc|ppc|alpha|arm|mips)
      ;;
-
+   powerpc) # Darwin returns 'powerpc'
+     host_arch=ppc
+     ;;
    *) # uname -p on Linux returns 'unknown' for the processor type,
       # OpenBSD returns 'Intel Pentium/MMX ("Genuine Intel" 586-class)'
 
@@ -363,9 +366,8 @@ fi
 # Checking CC version...
 # gcc-3.0 merges optimizations coming from egcs, pgcc, agcc, ...
 if test "$_skip_cc_check" != yes ; then
+ for _cc in $_cc gcc3 cc; do
   echocheck "$_cc version"
-  # also check for name (the version checking is only for _gcc_ up for now)
-  # FIXME implement this in ver. check.
   cc_name=`$_cc -v 2>&1 | tail -1 | cut -d ' ' -f 1`
   cc_version=`$_cc -v 2>&1 | sed -n 's/^.*version \([aegcygnustp-]*[0-9.]*\).*$/\1/p'`
   case $cc_version in
@@ -383,28 +385,8 @@ if test "$_skip_cc_check" != yes ; then
       ;;
   esac
   echores "$cc_version"
-  # If gcc version is crappy RH one, then check if the user has installed the optional
-  # (at least in Rh7.2) gcc3 packages to save them some pain - malc@tmbg.co.uk
-  if test "$cc_verc_fail" = yes ; then
-    echocheck "gcc3 version"
-    _cc=gcc3
-    cc_version=`$_cc -v 2>&1 | sed -n 's/^.*version \([aegcygnustp-]*[0-9.]*\).*$/\1/p'`
-    case $cc_version in
-      '')
-        cc_version="v. ?.??, bad"
-	cc_verc_fail=yes
-	;;
-      2.95.[2-9]|2.95.[2-9].[0-9]|3.[0-9]|3.[0-9].[0-9])
-        cc_version="$cc_version, ok"
-        cc_verc_fail=no
-        ;;
-      *)
-        cc_version="$cc_version, bad"
-        cc_verc_fail=yes
-        ;;
-    esac
-    echores "$cc_version"
-  fi
+  (test "$cc_verc_fail" = "no") && break
+ done 
   if test "$cc_verc_fail" = yes ; then
     cat <<EOF
 
@@ -3481,7 +3463,10 @@ To do so, execute 'CFLAGS= ./configure <options>'
 
 EOF
 fi
-
+if darwin ; then
+  # use gnu style cpp on Darwin
+  CFLAGS="$CFLAGS -no-cpp-precomp"
+fi
 # Thread support
 if linux ; then
   CFLAGS="$CFLAGS -D_REENTRANT"
