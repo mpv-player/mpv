@@ -32,8 +32,7 @@ typedef struct vdl_stream_s
 	void *  handle;
 	int	(*get_caps)(vidix_capability_t *);
 	int	(*query_fourcc)(vidix_fourcc_t *);
-	int	(*config_playback)(const vidix_playback_t *);
-	int	(*map_playback)(vidix_dga_t *);
+	int	(*config_playback)(vidix_playback_t *);
 	int 	(*playback_on)( void );
 	int 	(*playback_off)( void );
         /* Functions below can be missed in driver ;) */
@@ -59,7 +58,6 @@ static int vdl_fill_driver(VDL_HANDLE stream)
   t_vdl(stream)->get_caps	= dlsym(t_vdl(stream)->handle,"vixGetCapability");
   t_vdl(stream)->query_fourcc	= dlsym(t_vdl(stream)->handle,"vixQueryFourcc");
   t_vdl(stream)->config_playback= dlsym(t_vdl(stream)->handle,"vixConfigPlayback");
-  t_vdl(stream)->map_playback	= dlsym(t_vdl(stream)->handle,"vixMapPlayback");
   t_vdl(stream)->playback_on	= dlsym(t_vdl(stream)->handle,"vixPlaybackOn");
   t_vdl(stream)->playback_off	= dlsym(t_vdl(stream)->handle,"vixPlaybackOff");
   t_vdl(stream)->frame_sel	= dlsym(t_vdl(stream)->handle,"vixPlaybackFrameSelect");
@@ -67,18 +65,19 @@ static int vdl_fill_driver(VDL_HANDLE stream)
   t_vdl(stream)->set_eq	= dlsym(t_vdl(stream)->handle,"vixPlaybackSetEq");
   t_vdl(stream)->copy_frame	= dlsym(t_vdl(stream)->handle,"vixPlaybackCopyFrame");
   /* check driver viability */
-  if(!( t_vdl(stream)->get_caps && t_vdl(stream)->query_fourcc && t_vdl(stream)->config_playback &&
-	t_vdl(stream)->map_playback && t_vdl(stream)->playback_on && t_vdl(stream)->playback_off))
+  if(!( t_vdl(stream)->get_caps && t_vdl(stream)->query_fourcc &&
+	t_vdl(stream)->config_playback && t_vdl(stream)->playback_on &&
+	t_vdl(stream)->playback_off))
 			return 0;
   return 1;
 }
 
-static int vdl_probe_driver(VDL_HANDLE stream,const char *path,const char *name,unsigned cap)
+static int vdl_probe_driver(VDL_HANDLE stream,const char *path,const char *name,unsigned cap,int verbose)
 {
   char drv_name[FILENAME_MAX];
   vidix_capability_t vid_cap;
   unsigned (*_ver)(void);
-  int      (*_probe)(void);
+  int      (*_probe)(int);
   int      (*_cap)(vidix_capability_t*);
   strcpy(drv_name,path);
   strcat(drv_name,name);
@@ -88,7 +87,7 @@ static int vdl_probe_driver(VDL_HANDLE stream,const char *path,const char *name,
   _cap = dlsym(t_vdl(stream)->handle,"vixGetCapability");
   if(_ver) { if((*_ver)() != VIDIX_VERSION) { err: dlclose(t_vdl(stream)->handle); t_vdl(stream)->handle = 0; return 0; } }
   else goto err;
-  if(_probe) { if((*_probe)() != 0) goto err; }
+  if(_probe) { if((*_probe)(verbose) != 0) goto err; }
   else goto err;
   if(_cap) { if((*_cap)(&vid_cap) != 0) goto err; }
   else goto err;
@@ -96,7 +95,7 @@ static int vdl_probe_driver(VDL_HANDLE stream,const char *path,const char *name,
   return 1;
 }
 
-static int vdl_find_driver(VDL_HANDLE stream,const char *path,unsigned cap)
+static int vdl_find_driver(VDL_HANDLE stream,const char *path,unsigned cap,int verbose)
 {
   DIR *dstream;
   struct dirent *name;
@@ -105,14 +104,14 @@ static int vdl_find_driver(VDL_HANDLE stream,const char *path,unsigned cap)
   while(!done)
   {
     name = readdir(dstream);
-    if(name) { if(vdl_probe_driver(stream,path,name->d_name,cap)) break; }
+    if(name) { if(vdl_probe_driver(stream,path,name->d_name,cap,verbose)) break; }
     else done = 1;
   }
   closedir(dstream);
   return done?0:1;
 }
 
-VDL_HANDLE vdlOpen(const char *path,const char *name,unsigned cap)
+VDL_HANDLE vdlOpen(const char *path,const char *name,unsigned cap,int verbose)
 {
   vdl_stream_t *stream;
   char drv_name[FILENAME_MAX];
@@ -121,6 +120,7 @@ VDL_HANDLE vdlOpen(const char *path,const char *name,unsigned cap)
   if(name)
   {
     unsigned (*ver)(void);
+    int (*probe)(int);
     unsigned version = 0;
     strcpy(drv_name,path);
     strcat(drv_name,name);
@@ -138,13 +138,16 @@ VDL_HANDLE vdlOpen(const char *path,const char *name,unsigned cap)
       if(t_vdl(stream)->handle) dlclose(t_vdl(stream)->handle);
       goto err;
     }
+    probe = dlsym(t_vdl(stream)->handle,"vixProbe");
+    if(probe) { if((*probe)(verbose)!=0) goto drv_err; }
+    else goto drv_err;
     fill:
     if(!vdl_fill_driver(stream)) goto drv_err;
   }
   else
-    if(vdl_find_driver(stream,path,cap))	goto fill;
-    else					goto err;
-  if(t_vdl(stream)->init) t_vdl(stream)->init();
+    if(vdl_find_driver(stream,path,cap,verbose))	goto fill;
+    else						goto err;
+  if(t_vdl(stream)->init) if(t_vdl(stream)->init())	goto drv_err;
   return stream;
 }
 
@@ -166,14 +169,9 @@ int  vdlQueryFourcc(VDL_HANDLE handle,vidix_fourcc_t *f)
   return t_vdl(handle)->query_fourcc(f);
 }
 
-int  vdlConfigPlayback(VDL_HANDLE handle,const vidix_playback_t *p)
+int  vdlConfigPlayback(VDL_HANDLE handle,vidix_playback_t *p)
 {
   return t_vdl(handle)->config_playback(p);
-}
-
-int  vdlMapPlayback(VDL_HANDLE handle,vidix_dga_t *m)
-{
-  return t_vdl(handle)->map_playback(m);
 }
 
 int  vdlPlaybackOn(VDL_HANDLE handle)

@@ -38,14 +38,14 @@ extern int  pci_scan(pciinfo_t *pci_list,unsigned *num_card);
 
 
 
-extern unsigned char  INREG8(unsigned idx);
-extern unsigned short INREG16(unsigned idx);
-extern unsigned       INREG32(unsigned idx);
-#define INREG(idx) INREG32(idx)
-extern void          OUTREG8(unsigned idx,unsigned char val);
-extern void          OUTREG16(unsigned idx,unsigned short val);
-extern void          OUTREG32(unsigned idx,unsigned val);
-#define OUTREG(idx,val) OUTREG32(idx,val)
+extern unsigned char  INPORT8(unsigned idx);
+extern unsigned short INPORT16(unsigned idx);
+extern unsigned       INPORT32(unsigned idx);
+#define INPORT(idx) INPORT32(idx)
+extern void          OUTPORT8(unsigned idx,unsigned char val);
+extern void          OUTPORT16(unsigned idx,unsigned short val);
+extern void          OUTPORT32(unsigned idx,unsigned val);
+#define OUTPORT(idx,val) OUTPORT32(idx,val)
 
 extern void *  map_phys_mem(unsigned base, unsigned size);
 extern void    unmap_phys_mem(void *ptr, unsigned size);

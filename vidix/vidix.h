@@ -26,7 +26,7 @@ extern "C" {
 extern unsigned vixGetVersion( void );
 
 			/* Probes video hw. Returns 0 if ok else errno */
-extern int	vixProbe( void );
+extern int	vixProbe( int verbose );
 			/* Initializes driver. Returns 0 if ok else errno */
 extern int	vixInit( void );
 			/* Destroys driver */
@@ -144,23 +144,17 @@ typedef struct vidix_playback_s
 #define KEYS_OR		2
 #define KEYS_XOR	3
 	unsigned	key_op;		/* app -> driver: keys operations */
-}vidix_playback_t;
-
-			/* Returns 0 if ok else errno */
-extern int	vixConfigPlayback(const vidix_playback_t *);
-
-typedef struct vidix_dga_s
-{
+	/* memory model */
 	unsigned	frame_size;		/* app -> driver */
 	unsigned	num_frames;		/* app -> driver; after call: driver -> app */
 #define LVO_MAXFRAMES 32
 	unsigned	offsets[LVO_MAXFRAMES];	/* driver -> app */
 	vidix_yuv_t	offset;			/* driver -> app: relative offsets within frame for yuv planes */
 	void*		dga_addr;		/* driver -> app: linear address */
-}vidix_dga_t;
+}vidix_playback_t;
 
 			/* Returns 0 if ok else errno */
-extern int	vixMapPlayback(vidix_dga_t *);
+extern int	vixConfigPlayback(vidix_playback_t *);
 
 			/* Returns 0 if ok else errno */
 extern int 	vixPlaybackOn( void );

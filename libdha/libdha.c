@@ -117,32 +117,32 @@ void unmap_phys_mem(void *ptr, unsigned size)
 }
 #endif
 
-unsigned char  INREG8(unsigned idx)
+unsigned char  INPORT8(unsigned idx)
 {
   return inb(idx);
 }
 
-unsigned short INREG16(unsigned idx)
+unsigned short INPORT16(unsigned idx)
 {
   return inw(idx);
 }
 
-unsigned       INREG32(unsigned idx)
+unsigned       INPORT32(unsigned idx)
 {
   return inl(idx);
 }
 
-void          OUTREG8(unsigned idx,unsigned char val)
+void          OUTPORT8(unsigned idx,unsigned char val)
 {
   outb(idx,val);
 }
 
-void          OUTREG16(unsigned idx,unsigned short val)
+void          OUTPORT16(unsigned idx,unsigned short val)
 {
   outw(idx,val);
 }
 
-void          OUTREG32(unsigned idx,unsigned val)
+void          OUTPORT32(unsigned idx,unsigned val)
 {
   outl(idx,val);
 }

@@ -35,9 +35,10 @@ extern unsigned   vdlGetVersion( void );
 			   path - specifies path where drivers are located.
 			   name - specifies prefered driver name (can be NULL).
 			   cap  - specifies driver capability (TYPE_* constants).
+			   verbose - specifies verbose level
 			   returns !0 if ok else NULL.
 			   */
-extern VDL_HANDLE vdlOpen(const char *path,const char *name,unsigned cap);
+extern VDL_HANDLE vdlOpen(const char *path,const char *name,unsigned cap,int verbose);
 			/* Closes stream and corresponded driver. */
 extern void	  vdlClose(VDL_HANDLE stream);
 
@@ -48,10 +49,7 @@ extern int	  vdlGetCapability(VDL_HANDLE, vidix_capability_t *);
 extern int	  vdlQueryFourcc(VDL_HANDLE,vidix_fourcc_t *);
 
 			/* Returns 0 if ok else errno */
-extern int	  vdlConfigPlayback(VDL_HANDLE,const vidix_playback_t *);
-
-			/* Returns 0 if ok else errno */
-extern int	  vdlMapPlayback(VDL_HANDLE,vidix_dga_t *);
+extern int	  vdlConfigPlayback(VDL_HANDLE, vidix_playback_t *);
 
 			/* Returns 0 if ok else errno */
 extern int 	  vdlPlaybackOn(VDL_HANDLE);
