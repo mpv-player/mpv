@@ -818,9 +818,9 @@ die Standardeinstellungen:
 .IPs card=<1\-4>
 Benute Karte 1\-4 (Standard: 1).
 .IPs file=<Datei>
-Weist MPlayer an, die Liste der Kanäle aus <Datei> zu lesen.
-Standard ist ~/.mplayer/channels.conf.{sat,ter,cbl} (basierend auf dem Kartentyp)
-oder ~/.mplayer/channels.conf als letzte Möglichkeit.
+Weist MPlayer an, die Liste der Kanäle aus <Datei> zu lesen (Standard:
+~/.mplayer/channels.conf.{sat,ter,cbl} (je nach Kartentyp)
+oder ~/.mplayer/channels.conf als letzte Möglichkeit).
 .RE
 .PD 1
 .
@@ -1640,7 +1640,7 @@ Eine Liste der eincompilierten Audiotreiber erhälst du mit \-ao help.
 .RSs
 .IPs "\-ao alsa,oss,"
 Probiere den ALSA-Treiber, dann den OSS-Treiber, dann andere.
-.IPS "\-ao alsa:mmap:noblock:device=hw=0.3"
+.IPs "\-ao alsa:mmap:noblock:device=hw=0.3"
 Setzt den noblock-Modus, mmap-Modus und den Gerätenamen auf erste Karte,
 viertes Gerät.
 .RE
@@ -3071,8 +3071,9 @@ Echtzeit\-MPEG1\-Encoder für DVB/\:DXR3 (libavcodec)
 .IPs fame
 Echtzeit\-MPEG1\-Encoder für DVB/\:DXR3 (fame)
 .IPs dvbscale[=Verhältnis]
-Wählt die optimale Skalierung für DVB\-Karten (Verhältnis =
+Wählt die optimale Skalierung (Verhältnis =
 DVB_HEIGHT*HÖHEN-/\:BREITENVERHÄLTNIS, Standard: 768)
+für DVB\-Karten aus.
 .IPs "noise[=luma[u][t|a][h][p]:chroma[u][t|a][h][p]]"
 Fügt Rauschen hinzu
 .RSss
