@@ -128,6 +128,7 @@ extern int index_mode;
 
 static subtitle ogg_sub;
 extern subtitle* vo_sub;
+static float clear_sub;
 //FILE* subout;
 
 static
@@ -188,10 +189,11 @@ void demux_ogg_init_sub () {
   }
 }
 
-void demux_ogg_add_sub (char* packet) {
+void demux_ogg_add_sub (ogg_stream_t* os,ogg_packet* pack) {
   int lcv;
   int line_pos = 0;
   int ignoring = 0;
+  char *packet = pack->packet;
 
   mp_msg(MSGT_DEMUX,MSGL_DBG2,"\ndemux_ogg_add_sub %02X %02X %02X '%s'\n",
       (unsigned char)packet[0],
@@ -201,7 +203,22 @@ void demux_ogg_add_sub (char* packet) {
 
   ogg_sub.lines = 0;
   if (((unsigned char)packet[0]) == 0x88) { // some subtitle text
-    lcv = 3;
+    // Find data start
+    int32_t duration = 0;
+    int16_t hdrlen = (*packet & PACKET_LEN_BITS01)>>6, i;
+    hdrlen |= (*packet & PACKET_LEN_BITS2) <<1;
+    lcv = 1 + hdrlen;
+    for (i = hdrlen; i > 0; i--) {
+      duration <<= 8;
+      duration |= (unsigned char)packet[i];
+    }
+    if ((hdrlen > 0) && (duration > 0)) {
+      float pts;
+      if(pack->granulepos == -1)
+        pack->granulepos = os->lastpos + os->lastsize;
+      pts = (float)pack->granulepos/(float)os->samplerate;
+      clear_sub = pts + (float)duration/1000.0;
+    }
     while (1) {
       int c = packet[lcv++];
       if(c=='\n' || c==0 || line_pos >= OGG_SUB_MAX_LINE-1){
@@ -319,7 +336,7 @@ static int demux_ogg_add_packet(demux_stream_t* ds,ogg_stream_t* os,ogg_packet* 
   int flags = 0;
 
   if (ds == d->sub) { // don't want to add subtitles to the demuxer for now
-    demux_ogg_add_sub(pack->packet);
+    demux_ogg_add_sub(os,pack);
     return 0;
   }
   // If packet is an header we jump it except for vorbis
@@ -334,7 +351,13 @@ static int demux_ogg_add_packet(demux_stream_t* ds,ogg_stream_t* os,ogg_packet* 
   else
     data = demux_ogg_read_packet(os,pack,NULL,&pts,&flags);
 
-
+  /// Clear subtitles if necessary (for broken files)
+  if ((clear_sub > 0) && (pts >= clear_sub)) {
+    ogg_sub.lines = 0;
+    vo_sub = &ogg_sub;
+    vo_osd_changed(OSDTYPE_SUBTITLE);
+    clear_sub = -1;
+  }
   /// Send the packet
   dp = new_demux_packet(pack->bytes-(data-pack->packet));
   memcpy(dp->buffer,data,pack->bytes-(data-pack->packet));
@@ -472,6 +495,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
   subcp_open();
 #endif
 
+  clear_sub = -1;
   s = demuxer->stream;
 
   ogg_d = (ogg_demuxer_t*)calloc(1,sizeof(ogg_demuxer_t));
@@ -640,6 +664,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
       } else if (strncmp(st->streamtype, "text", 4) == 0) {
           mp_msg(MSGT_DEMUX, MSGL_V, "OGG stream %d is text\n", ogg_d->num_sub);
           if(demuxer->sub->id==-1) demuxer->sub->id = ogg_d->num_sub;
+	  ogg_d->subs[ogg_d->num_sub].samplerate= get_uint64(&st->time_unit)/10;
           n_text++;
           demux_ogg_init_sub();
 	//// Unknow header type
@@ -1002,6 +1027,10 @@ void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
       
       if( ((*op.packet & PACKET_IS_SYNCPOINT)  || os->vorbis )  &&
 	  (!ogg_d->syncpoints || op.granulepos >= gp) ) {
+        ogg_sub.lines = 0;
+        vo_sub = &ogg_sub;
+        vo_osd_changed(OSDTYPE_SUBTITLE);
+        clear_sub = -1;
 	demux_ogg_add_packet(ds,os,&op);
 	if(sh_audio)
 	  resync_audio_stream(sh_audio); 
