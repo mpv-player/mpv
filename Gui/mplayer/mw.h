@@ -147,6 +147,8 @@ void mplMainDraw( wsParamDisplay )
  txSample * image = NULL;
  int        i;
 
+ if ( appMPlayer.mainWindow.State == wsWindowClosed ) exit_player( MSGTR_Exit_quit );
+ 
  if ( appMPlayer.mainWindow.Visible == wsWindowNotVisible ||
       !mainVisible ) return;
 //      !appMPlayer.mainWindow.Mapped ) return;

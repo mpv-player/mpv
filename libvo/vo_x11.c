@@ -249,7 +249,6 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
  static uint32_t vm_height;
 #endif
 
-
  vo_mouse_autohide=1;
  old_vo_dwidth=-1;
  old_vo_dheight=-1;
@@ -261,6 +260,7 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
  if(in_format==IMGFMT_I420 || in_format==IMGFMT_IYUV) in_format=IMGFMT_YV12;
  srcW= width;
  srcH= height;
+ vo_dx=( vo_screenwidth - d_width ) / 2; vo_dy=( vo_screenheight - d_height ) / 2;
  vo_dwidth=width; vo_dheight=height;
  
  if( flags&0x03 ) fullscreen = 1;
@@ -290,15 +290,10 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
   else
 #endif   
    {
-    hint.x=0;
-    hint.y=0;
-//    if(zoomFlag){
-//	hint.width=d_width;
-//	hint.height=d_height;
-//    }else{
-	hint.width=width;
-	hint.height=height;
-//    }
+    hint.x=vo_dx;
+    hint.y=vo_dy;
+    hint.width=width;
+    hint.height=height;
  
 #ifdef HAVE_XF86VM
     if ( vm )
@@ -313,13 +308,7 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
 	hint.width=modeline_width;
 	hint.height=modeline_height;
    }
-//    else
 #endif
-//    if ( fullscreen )
-//     {
-//      hint.width=vo_screenwidth;
-//      hint.height=vo_screenheight;
-//     }
     hint.flags=PPosition | PSize;
 
     bg=WhitePixel( mDisplay,mScreen );
@@ -344,24 +333,36 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
 #endif
  
     if ( WinID>=0 ){
-      vo_window = WinID ? ((Window)WinID) : RootWindow( mDisplay,mScreen );
-      XUnmapWindow( mDisplay,vo_window );
-      XChangeWindowAttributes( mDisplay,vo_window,xswamask,&xswa );
+      vo_window = WinID ? ((Window)WinID) : mRootWin;
+      if ( WinID )
+       {
+        XUnmapWindow( mDisplay,vo_window );
+        XChangeWindowAttributes( mDisplay,vo_window,xswamask,&xswa );
+	XSelectInput( mDisplay,vo_window,StructureNotifyMask | KeyPressMask | PropertyChangeMask | PointerMotionMask | ButtonPressMask | ButtonReleaseMask | ExposureMask );
+       } else XSelectInput( mDisplay,vo_window,ExposureMask );
     }
     else
-      vo_window=XCreateWindow( mDisplay,RootWindow( mDisplay,mScreen ),
+     {
+      vo_window=XCreateWindow( mDisplay,mRootWin,
                          hint.x,hint.y,
                          hint.width,hint.height,
                          xswa.border_pixel,depth,CopyFromParent,vinfo.visual,xswamask,&xswa );
 
-    vo_x11_classhint( mDisplay,vo_window,"x11" );
-    vo_hidecursor(mDisplay,vo_window);
-    XSelectInput( mDisplay,vo_window,StructureNotifyMask );
-    XSetStandardProperties( mDisplay,vo_window,title,title,None,NULL,0,&hint );
-    XMapWindow( mDisplay,vo_window );
-    if(WinID!=0)
-    do { XNextEvent( mDisplay,&xev ); } while ( xev.type != MapNotify || xev.xmap.event != vo_window );
-    XSelectInput( mDisplay,vo_window,NoEventMask );
+      vo_x11_classhint( mDisplay,vo_window,"x11" );
+      vo_hidecursor(mDisplay,vo_window);
+      XSelectInput( mDisplay,vo_window,StructureNotifyMask );
+      XSetStandardProperties( mDisplay,vo_window,title,title,None,NULL,0,&hint );
+      XMapWindow( mDisplay,vo_window );
+      if(WinID!=0)
+         do { XNextEvent( mDisplay,&xev ); } while ( xev.type != MapNotify || xev.xmap.event != vo_window );
+      XSelectInput( mDisplay,vo_window,NoEventMask );
+
+      if ( fullscreen ) vo_x11_fullscreen();
+#ifdef HAVE_XINERAMA
+      vo_x11_xinerama_move(mDisplay,vo_window);
+#endif
+     }
+
     XFlush( mDisplay );
     XSync( mDisplay,False );
 
@@ -381,13 +382,11 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
 #endif
    }
 
-   if ( fullscreen ) vo_x11_fullscreen();
-#ifdef HAVE_XINERAMA
-   vo_x11_xinerama_move(mDisplay,vo_window);
-#endif
-
-   vo_gc=XCreateGC( mDisplay,vo_window,0L,&xgcv );
-   getMyXImage();
+  vo_gc=XCreateGC( mDisplay,vo_window,0L,&xgcv );
+  getMyXImage();
+  
+  if ( !WinID )
+   { vo_dwidth=vo_screenwidth; vo_dheight=vo_screenheight; }
 
   switch ((bpp=myximage->bits_per_pixel)){
          case 24: draw_alpha_fnc=draw_alpha_24; 

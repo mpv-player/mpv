@@ -79,9 +79,6 @@ static uint32_t               mDepth, bpp, mode;
 static XWindowAttributes      attribs;
 static uint32_t               X_already_started=0;
 
-static uint32_t               wndX;
-static uint32_t               wndY;
-
 static uint32_t               fgColor;
 
 static uint32_t               mvHeight;
@@ -108,11 +105,15 @@ static void mDrawColorKey( void )
 
 static void set_window(){
 
-         XGetGeometry( mDisplay,vo_window,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
-         fprintf( stderr,"[xmga] x: %d y: %d w: %d h: %d\n",drwX,drwY,drwWidth,drwHeight );
-         drwX=0; drwY=0;
-         XTranslateCoordinates( mDisplay,vo_window,mRoot,0,0,&drwcX,&drwcY,&mRoot );
-         fprintf( stderr,"[xmga] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
+	 if ( WinID )
+	  {
+           XGetGeometry( mDisplay,vo_window,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
+           fprintf( stderr,"[xmga] x: %d y: %d w: %d h: %d\n",drwX,drwY,drwWidth,drwHeight );
+           drwX=0; drwY=0;
+           XTranslateCoordinates( mDisplay,vo_window,mRoot,0,0,&drwcX,&drwcY,&mRoot );
+           fprintf( stderr,"[xmga] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
+	  }
+	  else { drwX=drwcX=vo_dx; drwY=drwcY=vo_dy; drwWidth=vo_dwidth; drwHeight=vo_dheight; }
 
          aspect(&dwidth,&dheight,A_NOZOOM);
          if ( vo_fs )
@@ -166,9 +167,8 @@ static void check_events(void)
  int e=vo_x11_check_events(mDisplay);
  if ( !(e&VO_EVENT_RESIZE) && !(e&VO_EVENT_EXPOSE) ) return;
  set_window();
- if(e&VO_EVENT_EXPOSE) mDrawColorKey();
- if ( ioctl( f,MGA_VID_CONFIG,&mga_vid_config ) )
-   printf( "Error in mga_vid_config ioctl (wrong mga_vid.o version?)" );
+ mDrawColorKey();
+ if ( ioctl( f,MGA_VID_CONFIG,&mga_vid_config ) ) printf( "Error in mga_vid_config ioctl (wrong mga_vid.o version?)" );
 }
 
 static void draw_osd(void)
@@ -188,7 +188,7 @@ static void flip_page(void){
 
 static int inited=0;
 
-static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format,const vo_tune_info_t* info)
+static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format,const vo_tune_info_t* info)
 {
  char                 * mTitle=(title == NULL) ? "XMGA render" : title;
  XVisualInfo            vinfo;
@@ -230,7 +230,7 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
 
  mvWidth=width; mvHeight=height;
 
- wndX=0; wndY=0;
+ vo_dx=( vo_screenwidth - d_width ) / 2; vo_dy=( vo_screenheight - d_height ) / 2;
  vo_dwidth=d_width; vo_dheight=d_height;
  vo_mouse_autohide=1;
 
@@ -254,46 +254,58 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
 #endif
   {
 #ifdef X11_FULLSCREEN
-   if ( fullscreen&1 ) aspect(&dwidth,&dheight,A_ZOOM);
+   if ( flags&1 ) aspect(&dwidth,&dheight,A_ZOOM);
 #endif
 
-   XGetWindowAttributes( mDisplay,DefaultRootWindow( mDisplay ),&attribs );
+   XGetWindowAttributes( mDisplay,mRootWin,&attribs );
    mDepth=attribs.depth;
    if ( mDepth != 15 && mDepth != 16 && mDepth != 24 && mDepth != 32 ) mDepth=24;
    XMatchVisualInfo( mDisplay,mScreen,mDepth,TrueColor,&vinfo );
-   xWAttribs.colormap=XCreateColormap( mDisplay,RootWindow( mDisplay,mScreen ),vinfo.visual,AllocNone );
+   xWAttribs.colormap=XCreateColormap( mDisplay,mRootWin,vinfo.visual,AllocNone );
    xWAttribs.background_pixel=0;
    xWAttribs.border_pixel=0;
-   xWAttribs.event_mask=StructureNotifyMask | ExposureMask | KeyPressMask | PropertyChangeMask |
-       ((WinID==0)?0:(ButtonPressMask | ButtonReleaseMask | PointerMotionMask));
+   xWAttribs.event_mask=StructureNotifyMask | ExposureMask | KeyPressMask |
+       ((WinID==0)?0:(ButtonPressMask | ButtonReleaseMask | PointerMotionMask | PropertyChangeMask));
    xswamask=CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
 
     if ( WinID>=0 ){
-      vo_window = WinID ? ((Window)WinID) : RootWindow(mDisplay,mScreen);
-      XUnmapWindow( mDisplay,vo_window );
-      XChangeWindowAttributes( mDisplay,vo_window,xswamask,&xWAttribs);
+    
+      vo_window = WinID ? ((Window)WinID) : mRootWin;
+      if ( WinID )
+       {
+        XUnmapWindow( mDisplay,vo_window );
+        XChangeWindowAttributes( mDisplay,vo_window,xswamask,&xWAttribs);
+        XSelectInput( mDisplay,vo_window,StructureNotifyMask | KeyPressMask | PropertyChangeMask | PointerMotionMask | ButtonPressMask | ButtonReleaseMask | ExposureMask );
+       } else XSelectInput( mDisplay,vo_window,ExposureMask );
+       
     } else 
-   vo_window=XCreateWindow( mDisplay,mRootWin,
-     wndX,wndY,
-     vo_dwidth,vo_dheight,
-     xWAttribs.border_pixel,
-     mDepth,
-     InputOutput,
-     vinfo.visual,xswamask,&xWAttribs );
-   vo_x11_classhint( mDisplay,vo_window,"xmga" );
-   vo_hidecursor(mDisplay,vo_window);
+     {
+      vo_window=XCreateWindow( mDisplay,mRootWin,
+         vo_dx,vo_dy,
+         vo_dwidth,vo_dheight,
+         xWAttribs.border_pixel,
+         mDepth,
+         InputOutput,
+         vinfo.visual,xswamask,&xWAttribs );
+     
+      vo_x11_classhint( mDisplay,vo_window,"xmga" );
+      vo_hidecursor(mDisplay,vo_window);
+      vo_x11_sizehint( vo_dx,vo_dy,vo_dwidth,vo_dheight,0 );
 
-   XStoreName( mDisplay,vo_window,mTitle );
-   XMapWindow( mDisplay,vo_window );
+      XStoreName( mDisplay,vo_window,mTitle );
+      XMapWindow( mDisplay,vo_window );
+ 
+      if ( flags&1 ) vo_x11_fullscreen();
 
-   if ( fullscreen&1 ) vo_x11_fullscreen();
-		   
 #ifdef HAVE_XINERAMA
-   vo_x11_xinerama_move(mDisplay,vo_window);
+      vo_x11_xinerama_move(mDisplay,vo_window);
 #endif
-   vo_gc=XCreateGC( mDisplay,vo_window,GCForeground,&wGCV );
+     }
+    vo_gc=XCreateGC( mDisplay,vo_window,GCForeground,&wGCV );
   }
 
+ if ( ( flags&1 )&&( !WinID ) ) { vo_dx=0; vo_dy=0; vo_dwidth=vo_screenwidth; vo_dheight=vo_screenheight; vo_fs=1; }
+ 
  set_window();
 
  mga_vid_config.src_width=width;
@@ -306,8 +318,6 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
 
  if(mga_init()) return -1;
  
- set_window();
-
  XFlush( mDisplay );
  XSync( mDisplay,False );
 

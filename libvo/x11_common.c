@@ -185,12 +185,16 @@ int vo_wm_detect( void )
  int             format;
  unsigned long   nitems, bytesafter;
  unsigned char * args = NULL;
+ char          * name = NULL;
+ 
+ if ( WinID >= 0 ) return vo_wm_Unknown;
+ 
 #if 1
 // --- netwm 
  type=XInternAtom( mDisplay,"_NET_SUPPORTED",False );
  if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,65536 / sizeof( long ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
   {
-   mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is NetWM.\n" );
+   mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is of class NetWM.\n" );
    XFree( args );
    return vo_wm_NetWM;
   }
@@ -207,7 +211,7 @@ int vo_wm_detect( void )
 
    if ( xev.type == PropertyNotify )
     {
-     char * name = XGetAtomName( mDisplay,xev.xproperty.atom );
+     name=XGetAtomName( mDisplay,xev.xproperty.atom );
      if ( !name ) break;
 
      if ( !strncmp( name,"_ICEWM_TRAY",11 ) )
@@ -218,9 +222,10 @@ int vo_wm_detect( void )
       { mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is WindowMaker style.\n" ); wm=vo_wm_WMakerStyle; break; }
 //     fprintf(stderr,"[ws] PropertyNotify ( 0x%x ) %s ( 0x%x )\n",win,name,xev.xproperty.atom );
 
-     XFree( name );
+     XFree( name ); name=NULL;
     }
  } while( c++ < 25 );
+ if ( name ) XFree( name );
  XDestroyWindow( mDisplay,win );
 #ifdef MP_DEBUG
  if ( wm == vo_wm_Unknown ) mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Unknown wm type...\n" );
@@ -677,6 +682,7 @@ void vo_x11_setlayer( int layer )
  
  if ( vo_wm_type == vo_wm_IceWM )
   {
+   mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] IceWM style stay on top ( layer %d ).\n",layer );
    switch ( layer )
     {
      case -1: layer=2; break; // WinLayerBelow
@@ -684,7 +690,7 @@ void vo_x11_setlayer( int layer )
      case  1: layer=8; break; // WinLayerOnTop
     }
    XChangeProperty( mDisplay,vo_window,
-   XInternAtom( mDisplay,"_WIN_LAYER",False ),XA_CARDINAL,32,PropModeReplace,(unsigned char *)&layer,1 );
+     XInternAtom( mDisplay,"_WIN_LAYER",False ),XA_CARDINAL,32,PropModeReplace,(unsigned char *)&layer,1 );
    return;
   }
 
@@ -750,8 +756,8 @@ void vo_x11_fullscreen( void )
   { vo_fs=VO_FALSE; x=vo_old_x; y=vo_old_y; w=vo_old_width; h=vo_old_height; }
    else { vo_fs=VO_TRUE; vo_old_x=vo_dx; vo_old_y=vo_dy; vo_old_width=vo_dwidth;   vo_old_height=vo_dheight; }
 
- vo_x11_sizehint( x,y,w,h,0 );
  vo_x11_decoration( mDisplay,vo_window,(vo_fs) ? 0 : 1 );
+ vo_x11_sizehint( x,y,w,h,0 );
  vo_x11_setlayer( vo_fs );
  XMoveResizeWindow( mDisplay,vo_window,x,y,w,h );
  XMapRaised( mDisplay,vo_window );

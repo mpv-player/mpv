@@ -337,10 +337,8 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
  
  vo_mouse_autohide=1;
 
+ vo_dx=( vo_screenwidth - d_width ) / 2; vo_dy=( vo_screenheight - d_height ) / 2;
  vo_dwidth=d_width; vo_dheight=d_height;
-// vo_fs=flags&1;
-// if ( vo_fs )
-//  { vo_old_width=d_width; vo_old_height=d_height; }
      
 #ifdef HAVE_XF86VM
  if( flags&0x02 ) vm = 1;
@@ -366,8 +364,8 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
   else
 #endif
   {
-   hint.x = 0;
-   hint.y = 0;
+   hint.x = vo_dx;
+   hint.y = vo_dy;
    hint.width = d_width;
    hint.height = d_height;
    aspect(&d_width,&d_height,A_NOZOOM);
@@ -388,8 +386,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 #endif
    if ( vo_fs )
     {
-//     hint.width=vo_screenwidth;
-//     hint.height=vo_screenheight;
 #ifdef X11_FULLSCREEN
      /* this code replaces X11_FULLSCREEN hack in mplayer.c
       * aspect() is available through aspect.h for all vos.
@@ -416,35 +412,39 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
    xswamask = CWBackPixel | CWBorderPixel;
 
     if ( WinID>=0 ){
-      vo_window = WinID ? ((Window)WinID) : RootWindow(mDisplay,mScreen);
-      XUnmapWindow( mDisplay,vo_window );
-      XChangeWindowAttributes( mDisplay,vo_window,xswamask,&xswa );
+      vo_window = WinID ? ((Window)WinID) : mRootWin;
+      if ( WinID ) 
+       {
+        XUnmapWindow( mDisplay,vo_window );
+        XChangeWindowAttributes( mDisplay,vo_window,xswamask,&xswa );
+	XSelectInput( mDisplay,vo_window,StructureNotifyMask | KeyPressMask | PropertyChangeMask | PointerMotionMask | ButtonPressMask | ButtonReleaseMask | ExposureMask );
+       } else { drwX=vo_dx; drwY=vo_dy; }
     } else 
+       {
+        vo_window = XCreateWindow(mDisplay, mRootWin,
+          hint.x, hint.y, hint.width, hint.height,
+          0, depth,CopyFromParent,vinfo.visual,xswamask,&xswa);
 
-   vo_window = XCreateWindow(mDisplay, RootWindow(mDisplay,mScreen),
-       hint.x, hint.y, hint.width, hint.height,
-       0, depth,CopyFromParent,vinfo.visual,xswamask,&xswa);
+        vo_x11_classhint( mDisplay,vo_window,"xv" );
+        vo_hidecursor(mDisplay,vo_window);
 
-   vo_x11_classhint( mDisplay,vo_window,"xv" );
-   vo_hidecursor(mDisplay,vo_window);
-
-   XSelectInput(mDisplay, vo_window, StructureNotifyMask | KeyPressMask | PropertyChangeMask |
+        XSelectInput(mDisplay, vo_window, StructureNotifyMask | KeyPressMask | PropertyChangeMask |
 	((WinID==0) ? 0 : (PointerMotionMask
 #ifdef HAVE_NEW_INPUT
 		| ButtonPressMask | ButtonReleaseMask
 #endif
-	))
-   );
-   XSetStandardProperties(mDisplay, vo_window, hello, hello, None, NULL, 0, &hint);
-   XSetWMNormalHints( mDisplay,vo_window,&hint );
-   XMapWindow(mDisplay, vo_window);
-   if ( flags&1 ) vo_x11_fullscreen();
+	  )));
+        XSetStandardProperties(mDisplay, vo_window, hello, hello, None, NULL, 0, &hint);
+        XSetWMNormalHints( mDisplay,vo_window,&hint );
+	XMapWindow(mDisplay, vo_window);
+	if ( flags&1 ) vo_x11_fullscreen();
 #ifdef HAVE_XINERAMA
-   vo_x11_xinerama_move(mDisplay,vo_window);
+	vo_x11_xinerama_move(mDisplay,vo_window);
 #endif
-   vo_gc = XCreateGC(mDisplay, vo_window, 0L, &xgcv);
-   XFlush(mDisplay);
-   XSync(mDisplay, False);
+       }
+    vo_gc = XCreateGC(mDisplay, vo_window, 0L, &xgcv);
+    XFlush(mDisplay);
+    XSync(mDisplay, False);
 #ifdef HAVE_XF86VM
     if ( vm )
      {
@@ -477,7 +477,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
      set_gamma_correction();
 
      aspect(&vo_dwidth,&vo_dheight,A_NOZOOM);
-     if ( vo_fs )
+     if ( ( flags&1 )&&( !WinID ) )
       {
        aspect(&vo_dwidth,&vo_dheight,A_ZOOM);
        drwX=( vo_screenwidth - (vo_dwidth > vo_screenwidth?vo_screenwidth:vo_dwidth) ) / 2;
@@ -486,7 +486,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
        vo_dheight=(vo_dheight > vo_screenheight?vo_screenheight:vo_dheight);
        mp_msg(MSGT_VO,MSGL_V, "[xv-fs] dx: %d dy: %d dw: %d dh: %d\n",drwX,drwY,vo_dwidth,vo_dheight );
       }
-
+     
      mp_msg(MSGT_VO,MSGL_V, "[xv] dx: %d dy: %d dw: %d dh: %d\n",drwX,drwY,vo_dwidth,vo_dheight );
 
      saver_off(mDisplay);  // turning off screen saver
