@@ -1,4 +1,4 @@
-.\" synced with 1.765
+.\" synced with 1.767
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "07 Octobre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "08 Octobre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -200,7 +200,7 @@ rotation, redimensionnement, bruit, conversion rgb/\:yuv) et bien plus.
 est l'interface graphique de MPlayer.
 Il possède les mêmes options que MPlayer.
 .PP
-Des exemples d'usages pour vous familiariser rapidement dont disponibles
+Des exemples d'usage pour vous familiariser rapidement dont disponibles
 à la fin de cette page de manuel.
 .PP
 .B Regardez également la documentation HTML !
@@ -616,7 +616,7 @@ Désactive la gestion de LIRC.
 .TP
 .B \-nomouseinput (X11 uniquement)
 Désactive l'interprétation des boutons de la souris (le menu contextuel
-de mozplayerxp dépends de cette option).
+de mozplayerxp dépend de cette option).
 .
 .TP
 .B \-nortc (RTC uniquement)
@@ -819,8 +819,8 @@ MPlayer demande au décodeur de décoder l'audio sur le nombre requis de canaux.
 Maintenant c'est au décodeur de satisfaire cette demande.
 Si le décodeur sort sur plus de canaux que demandé, les canaux en plus seront
 tronqués.
-C'est généralement seulement important en jouant des vidéos avec de l'audio
-AC3 (comme les DVDs).
+Généralement, c'est important seulement pour la lecture des vidéos avec de
+l'audio AC3 (comme les DVDs).
 Dans ce cas liba52 fait le décodage par défaut et fusionne
 correctement l'audio dans le nombre requis de canaux.
 .br
@@ -938,16 +938,16 @@ Joue/\:convertit uniquement les <nombre> premières trames, puis sort.
 .B \-hr-mp3-seek (MP3 uniquement)
 Déplacement haute résolution dans mp3.
 Par défaut, activé quand un fichier MP3 externe est lu, car nous devons nous
-placer à la très exacte position pour garder la synchro A/\:V. Cela peut être
+y positionner très précisément pour garder la synchro A/\:V. Cela peut être
 lent,surtout en allant en arrière, puisqu'il faut revenir au début pour
 trouver la trame exacte.
 .
 .TP
 .B \-idx (voir aussi \-forceidx)
 Reconstruit l'index du fichier vidéo si aucun index n'est trouvé,
-permet ainsi de ce déplacer.
+permet ainsi de se déplacer.
 Utile avec les téléchargements cassés/\:incomplets, les vidéos en cours
-de/\:ou mal générée.
+de/\:ou mal générées.
 .br
 .I NOTES:
 Vous ne pouvez utiliser cette option que si le media en question permet les
@@ -960,7 +960,7 @@ Il sera toujours utilisé pour les connections IPv4.
 .
 .TP
 .B \-loadidx <nomfichier>
-Lit l'index depuis <nomfichier>, tel que sauvées par \-saveidx.
+Lit l'index depuis <nomfichier>, tel que sauvé par \-saveidx.
 Cet index aura priorité, (pour le déplacement par ex.\&) sur l'index de
 la vidéo jouée
 Attention, MPlayer ne vous empêchera pas de charger l'index
@@ -1099,8 +1099,8 @@ Cette option est obsolète maintenant que MPlayer gère OpenDML.
 .TP
 .B \-sb <position\ octet> (voir aussi \-ss)
 Se place à la position donnée en octets.
-Utile pour la lecture d'images CDROM ou fichiers VOB avec des saletés au
-début.
+Utile pour la lecture d'images CDROM ou fichiers VOB avec des informations
+erronées au début.
 .
 .TP
 .B \-srate <Hz>
@@ -1251,7 +1251,7 @@ choisit la sortie audio de la carte de capture, si elle en a plus qu'une.
 Ces options règlent les paramètres du mixeur de la carte de capture vidéo.
 Elles n'auront aucun effet si votre carte ne dispose pas d'un mixeur.
 Pour v4l1, 0\-65535 est un intervalle valide.
-Pour v4l2, l'intervalle valide est 0 à 100, et 50 corresponds à la valeur par
+Pour v4l2, l'intervalle valide est 0 à 100, et 50 correspond à la valeur par
 défaut du contrôle, tel que reporté par le pilote.
 .IPs immediatemode=<bool>
 Un valeur de 0 signifie capturer et mettre en cache l'audio et la vidéo
@@ -1280,7 +1280,7 @@ choisit la taille de l'image qui sera compressée matériellement\ :
     176x120    NTSC
 .REss
 .IPs quality=<0\-100>
-choisis la qualité de la compression jpeg
+choisit la qualité de la compression jpeg
 .br
 (quality < 60 recommandé pour la pleine résolution)
 .RE
@@ -1991,7 +1991,7 @@ Définit une liste de paramètres pour le pilote de sortie vidéo directfb.
 .TP
 .B \-display <nom> (X11 uniquement)
 Spécifier le nom d'hôte et le numéro d'affichage du serveur X sur lequel vous
-désirer afficher la vidéo.
+désirez afficher la vidéo.
 .sp 1
 .I EXEMPLE:
 .PD 0
@@ -2135,7 +2135,7 @@ Essayez cette option si vous avez encore des problèmes en plein écran.
 .
 .TP
 .B \-fstype <type1,type2,...> (X11 uniquement)
-Définit une liste de classée par ordre de priorité des modes plein-écran
+Définit une liste classée par ordre de priorité des modes plein-écran
 à utiliser.
 Vous pouvez inverser les modes en les préfixant par '\-'.
 Si vous avez des problèmes d'affichage, comme votre vidéo en plein écran est
@@ -2350,7 +2350,7 @@ Pour des performances optimales, cette option '\-lavdopts gray'.
 .
 .TP
 .B \-zrcrop <[width]x[height]+[x offset]+[y offset]> (\-vo zr uniquement)
-Sélectionne une une partie de l'image pour affichage, de multiples occurrences
+Sélectionne une partie de l'image pour affichage, de multiples occurrences
 de cette option activent le mode cinérama.
 En mode cinérama le film est réparti sur plusieurs TV (ou moniteurs) pour
 créer un écran plus large.
@@ -2640,18 +2640,22 @@ Utilise svga avec VIDIX.
 .TP
 .B gl\ \ \ \ \ 
 Pilote de sortie vidéo OpenGL.
-Version très dépouillée, sans gestion de l'OSD et nécessitant que la taille
-de la vidéo soit plus petite que la taille maximale d'un texture permise par
-votre implémentation d'OpenGL.
+Version assez dépouillée, nécessitant que la taille de la vidéo soit
+plus petite que la taille maximale d'un texture permise par votre
+implémentation d'OpenGL.
 Faite pour fonctionner même avec l'implémentation la plus simple l'OpenGL.
 .PD 0
 .RSs
 .IPs (no)manyfmts
 Active la gestion de plus de formats de couleurs (RGB and BGR).
-Nécessite une version d'OpenGL >= 1.2, ne FONCTIONNE PAS encore correctement.
+Nécessite une version d'OpenGL >= 1.2.
 .IPs slice-height=<0\-...>
 Nombre de lignes de texture à copier à la fois (par défaut\ : 4).
 0 pour l'image entière.
+.IPs (no)osd
+Active ou désactive la gestion de l'incrustation OSD via OpenGL.
+Surtout pour des test, vous devriez utiliser \-osdlevel 0 pour désactiver
+l'incrustation OSD (par défaut\ : activé).
 .RE
 .PD 1
 .
@@ -5736,10 +5740,12 @@ se produire des problèmes si vrc_(min|max)rate est utilisé.
 .TP
 .B vrc_maxrate=<valeur>
 bitrate maximum en kbit/\:sec (passe\ 1/\:2)
+(par défaut\ : 0, illimité)
 .
 .TP
 .B vrc_minrate=<valeur>
 bitrate minimum en kbit/\:sec (passe\ 1/\:2)
+(par défaut\ : 0, illimité)
 .
 .TP
 .B vrc_buf_size=<valeur>
@@ -6257,25 +6263,9 @@ Utilise la compensation de mouvement d'une précision d'un quart de pixel.
 Astuce\ : Cela ne semble utile que pour les encodages à haut débit.
 .
 .TP
-.B ildctcmp=<0\-2000>
-fonction de comparaison pour la décision dct entrelacé
-.
-.TP
-.B precmp=<0\-2000>
-fonction de comparaison pour la pré-passe de l'estimation de mouvement
-.
-.TP
-.B cmp=<0\-2000>
-fonction de comparaison pour l'estimation de mouvement full pel
-.
-.TP
-.B subcmp=<0\-2000>
-fonction de comparaison pour l'estimation de mouvement sub pel
-.
-.TP
 .B mbcmp=<0\-2000>
-fonction de comparaison pour la décision du macroblock, utilisé uniquement
-si mbd=0
+Choisit la fonction de comparaison pour décider du meilleur du macroblock
+à coder, utilisé uniquement si mbd=0
 .PD 0
 .RSs
 .IPs "0 (SAD)"
@@ -6305,6 +6295,27 @@ utilise également chroma, ne fonctionne pas (correctement) avec les trames B
 actuellement
 .RE
 .PD 1
+.
+.TP
+.B ildctcmp=<0\-2000>
+Choisit la fonction de comparaison pour la décision dct entrelacé
+(voir mpcmp pour les fonctions de comparaison disponibles).
+.
+.TP
+.B precmp=<0\-2000>
+Choisit la fonction de comparaison pour la pré-passe de l'estimation de
+mouvement
+(voir mpcmp pour les fonctions de comparaison disponibles).
+.
+.TP
+.B cmp=<0\-2000>
+Choisit la fonction de comparaison pour l'estimation de mouvement full pel
+(voir mpcmp pour les fonctions de comparaison disponibles).
+.
+.TP
+.B subcmp=<0\-2000>
+Choisit la fonction de comparaison pour l'estimation de mouvement sub pel
+(voir mpcmp pour les fonctions de comparaison disponibles).
 .
 .TP
 .B nssew=<0\-100>
@@ -7057,6 +7068,24 @@ Ainsi, les trames-I ne permettent pas nécessairement une navigation précise
 dans le film.
 Les trames-IDR empêchent les trames-P qui les suivent d'être prédites à partir
 de trames précédant mes trames-IDR.
+.
+.TP
+.B scenecut=<-1\-100>
+Contrôle avec quelle insistance on insère les trames-I en plus, par exemple
+lors des changements de scène.
+(par défaut\ 40).
+Avec une valeur de scenecut faible, le codec aura tendance à ne mettre des
+trames-I que toutes les keyint trames.
+Une bonne valeur de scenecut est celle qui place une trame-I de façon la
+plus optimale.
+Avec une valeur trop grande, il sera choisi plus de trames-I, ce qui
+gâche des bits.
+-1 désactive la détection des changements de scène, ainsi les trames-I ne
+seront insérées que toutes les keyint trames, même en cas de changement
+de scène.
+Cela n'est guère recommandé et gâche des bits puisque les changements de
+scène encodés par des trames-P sont aussi volumineuses que les trames-I,
+mais ne remet pas à zéro le "compteur keyint".
 .
 .TP
 .B frameref=<1\-15>
