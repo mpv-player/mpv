@@ -3162,6 +3162,24 @@ Note: vqmin should be 8 or larger.
 .IPs umv
 unlimited MVs (H.263+ only)
 Allow encoding of abritarily long MVs.
+.IPs ibias=<\-256\-256>
+intra quantizer bias (256 == 1.0)
+.br
+mpeg style quantizer default: 96
+.br
+h263 style quantizer default: 0
+.br
+Note: the h263 MMX quantizer cannot handle positive biases (set vfdct=1or2)
+      the mpeg MMX quantizer cannot handle negative biases (set vfdct=1or2)
+.IPs pbias=<\-256\-256>
+inter quantizer bias (256 == 1.0)
+.br
+mpeg style quantizer default: 0
+.br
+h263 style quantizer default: -64
+.br
+Note: the h263 MMX quantizer cannot handle positive biases (set vfdct=1or2)
+      the mpeg MMX quantizer cannot handle negative biases (set vfdct=1or2)
 .RE
 .
 .TP

@@ -120,6 +120,10 @@ static int lavc_param_last_pred= 0;
 static int lavc_param_pre_me= 1;
 static int lavc_param_me_subpel_quality= 8;
 static int lavc_param_me_range= 0;
+#if LIBAVCODEC_BUILD >= 4663
+static int lavc_param_ibias= FF_DEFAULT_QUANT_BIAS;
+static int lavc_param_pbias= FF_DEFAULT_QUANT_BIAS;
+#endif
 
 #include "cfgparser.h"
 
@@ -200,6 +204,10 @@ struct config lavcopts_conf[]={
 #ifdef CODEC_FLAG_H263P_AIC
 	{"aic", &lavc_param_aic, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_H263P_AIC, NULL},
 	{"umv", &lavc_param_umv, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_H263P_UMV, NULL},
+#endif
+#if LIBAVCODEC_BUILD >= 4663
+	{"ibias", &lavc_param_ibias, CONF_TYPE_INT, CONF_RANGE, -512, 512, NULL},
+	{"pbias", &lavc_param_pbias, CONF_TYPE_INT, CONF_RANGE, -512, 512, NULL},
 #endif
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
@@ -294,6 +302,10 @@ static int config(struct vf_instance_s* vf,
 #endif
 #if LIBAVCODEC_BUILD >= 4659
     lavc_venc_context->me_range= lavc_param_me_range;
+#endif
+#if LIBAVCODEC_BUILD >= 4663
+    lavc_venc_context->intra_quant_bias= lavc_param_ibias;
+    lavc_venc_context->inter_quant_bias= lavc_param_pbias;
 #endif
 
     p= lavc_param_rc_override_string;
@@ -556,7 +568,6 @@ static void uninit(struct vf_instance_s* vf){
 #if LIBAVCODEC_BUILD >= 4643
     if(lavc_param_psnr){
         double f= lavc_venc_context->width*lavc_venc_context->height*255.0*255.0;
-        
         f*= lavc_venc_context->coded_frame->coded_picture_number;
         
         printf("PSNR: Y:%2.2f, Cb:%2.2f, Cr:%2.2f, All:%2.2f\n",
