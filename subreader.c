@@ -574,7 +574,7 @@ subtitle *sub_read_line_aqt(FILE *fd,subtitle *current) {
     current->end = current->start; // will be corrected by next subtitle
 
     if (!fgets (line, LINE_LEN, fd))
-	return current;;
+	return current;
 
     next = line,i=1;
     while ((next =sub_readtext (next, &(current->text[i])))) {
@@ -1306,8 +1306,8 @@ char * sub_filename(char* path,  char * fname )
     ".SSA",
     ".aqt",
     ".AQT",
-    ".js",
-    ".JS" };
+    ".jss",
+    ".JSS" };
 
 
  if ( fname == NULL ) return NULL;
@@ -1356,13 +1356,13 @@ void list_sub_file(subtitle* subs){
 
     for(j=0;j<sub_num;j++){
 	subtitle* egysub=&subs[j];
-        printf ("%i line%c (%li-%li) ",
+        printf ("%i line%c (%li-%li)\n",
 		    egysub->lines,
 		    (1==egysub->lines)?' ':'s',
 		    egysub->start,
 		    egysub->end);
 	for (i=0; i<egysub->lines; i++) {
-	    printf ("%s%s",egysub->text[i], i==egysub->lines-1?"":" <BREAK> ");
+	    printf ("\t\t%d: %s%s", i,egysub->text[i], i==egysub->lines-1?"":" \n ");
 	}
 	printf ("\n");
     }
@@ -1510,7 +1510,7 @@ void dump_jacosub(subtitle* subs, float fps) {
 
     if (!sub_uses_time && sub_fps == 0)
 	sub_fps = fps;
-    fd=fopen("dumpsub.js","w");
+    fd=fopen("dumpsub.jss","w");
     if(!fd)
     { 
 	perror("dump_jacosub: fopen");
