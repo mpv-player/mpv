@@ -9,43 +9,30 @@ AVI demuxer:
 - fix AVI index offset base position handling ('no video steram found' bug)
 - implement hardcore bruteforce avi re-sync for broken files (-forceidx)
 - fix for growing avi files (movi_end pos > stream->end_pos)
-- implement forward seeking in indexed avi streams
+- implement forward seeking in avi streams with no index
 
 URGENT:
 - finish mencoder -ovc vfw (bitrate setting, codec selection etc)
 - mencoder: image cut/crop/extend filter, colorspace conversion
 - codec priority option
 - implement software scaling to vo_mpegpes
-- ./configure support for XviD
+- move encoders from mencoder.c to libvo
+- implement/commit Ogg demuxer
 
-runtime:
-- add --enable-runtime or something (should change VERSION header and enable
-  runtime cpu detect and print banner telling users to recompile for speed)
-- runtime cpu detection in: 
-     vo_dga.c (asm stuff may be removed and replaced by fastmemcpy?)
-     libac3 (should be ported to liba52)
-- test(fix?) mp3lib cpu detection code
 
 FUTURE:
 ~~~~~~~
 
 decoders:
-- fix cvid on ppc
 - getting mss1 (Windows Screen Video) DLL codec working... - kabi
-- getting PIM1 codec (DLL) working... - kabi
 - fix seeking with libmad audio codec (codec lost sync and can't resync?)
 
 demuxer:
 - demux_mpg: support for VDR's index files for more accurate seeking
 - implement seeking for YUV4MPEG_2_, NuppelVideo and Real
-- implement Ogg demuxer
 
 decoders:
 - qtx support?
-- define some common api for native audio and video codecs
-  and move them to seperated place (hopefully will allow adding new
-  codecs without having to modify mplayer core code, also would speed
-  up by limiting number of select statements)
 
 mencoder:
 - add ogg/vorbis audio encoder
@@ -57,11 +44,8 @@ gui:
 
 other:
 - dvd server
-- sub database
 - mga_vid crtc2 fix
-- make mach64_vid
 - make nvidia_vid ;)
-- libvo2
 - display OSD and subtitles using DVB card's OSD
 
   
