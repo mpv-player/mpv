@@ -123,6 +123,8 @@ Optional features:
   --disable-win32        disable Win32 DLL support [autodetect]
   --disable-dshow        disable DirectShow support [autodetect]
   --disable-xanim        disable XAnim DLL support [autodetect]
+  --disable-divx4linux   disable Divx4Linux codec [enable]
+  --disable-opendivx     disable OpenDivx codec [enable]
   --enable-vorbis        build with OggVorbis support [autodetect]
   --disable-iconv        do not use iconv(3) function [autodetect]
   --disable-rtc          disable RTC (/dev/rtc) on Linux [autodetect]
@@ -742,6 +744,7 @@ _tv_v4l=auto
 _streaming=yes
 _vidix=yes
 _divx4linux=auto
+_opendivx=yes
 _lirc=auto
 _gui=no
 _termcap=auto
@@ -843,6 +846,8 @@ for ac_option do
   --disable-vidix)	_vidix=no	;;
   --enable-divx4linux)	_divx4linux=yes	;;
   --disable-divx4linux)	_divx4linux=no	;;
+  --enable-opendivx)	_opendivx=yes	;;
+  --disable-opendivx)	_opendivx=no	;;
   --enable-lirc)	_lirc=yes	;;
   --disable-lirc)	_lirc=no	;;
   --enable-gui)		_gui=yes	;;
@@ -2549,13 +2554,25 @@ EOF
   test "$_divx4linux_decore" = yes && _divx4linux=yes
 fi
 if test "$_divx4linux_decore" = yes ; then
+  _opendivx='no'
   _def_decore='#define NEW_DECORE 1'
   _ld_decore='-ldivxdecore opendivx/postprocess.o'
+  _def_divx='#define USE_DIVX'
+  _def_odivx_postprocess='#define HAVE_ODIVX_POSTPROCESS 1'
   _codecmodules="divx4linux $_codecmodules"
 else
-  _ld_decore='-Lopendivx -ldecore'
-  _def_decore='#undef NEW_DECORE'
-  _codecmodules="opendivx $_codecmodules"
+  if test "$_opendivx" = yes ; then
+    _ld_decore='-Lopendivx -ldecore'
+    _def_decore='#undef NEW_DECORE'
+    _def_divx='#define USE_DIVX'
+    _def_odivx_postprocess='#define HAVE_ODIVX_POSTPROCESS 1'
+    _codecmodules="opendivx $_codecmodules"
+  else
+    _ld_decore=''
+    _def_decore='#undef NEW_DECORE'
+    _def_divx='#undef USE_DIVX'
+    _def_odivx_postprocess='#undef HAVE_ODIVX_POSTPROCESS'
+  fi
 fi
 
 # mencoder requires (optional) those libs: libmp3lame and divx4linux encore
@@ -2874,6 +2891,8 @@ STREAMING = $_streaming
 STREAMING_LIB = $_ld_streaming
 VIDIX = $_vidix
 
+OPENDIVX = $_opendivx
+
 VO2 = $_vo2
 
 EXTRA_LIB = $_ld_extra
@@ -2972,6 +2991,9 @@ $_def_dvdread
    -cache <kilobytes> */
 #define USE_STREAM_CACHE 1
 
+/* Define to include support for OpenDivx/Divx4Linux */
+$_def_divx
+
 /* Define for using new DivX4Linux library, instead of open-source OpenDivX */
 /* You have to change DECORE_LIBS in config.mak too! */
 $_def_decore
@@ -3064,7 +3086,8 @@ $_def_css
 /* Define this to enable image postprocessing in libavcodec (requires FAST cpu!) */
 $_def_ffpostprocess
 
-#define HAVE_ODIVX_POSTPROCESS 1
+/* Define to include support for OpenDivx postprocessing */
+$_def_odivx_postprocess
 
 /* Win32 DLL support */
 $_def_win32

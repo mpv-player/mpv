@@ -53,7 +53,10 @@ MISC_LIBS += -Llibdha -ldha -Lvidix -lvidix
 endif
 CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader $(VO_INC) $(EXTRA_INC) # -Wall
 
-PARTS = g72x libmpdemux mp3lib libac3 liba52 libmp1e libmpeg2 opendivx libavcodec libao2 drivers drivers/syncfb linux postproc xa input
+PARTS = g72x libmpdemux mp3lib libac3 liba52 libmp1e libmpeg2 libavcodec libao2 drivers drivers/syncfb linux postproc xa input
+ifeq ($(OPENDIVX),yes)
+PARTS += opendivx
+endif
 ifeq ($(VIDIX),yes)
 PARTS += libdha vidix
 endif
@@ -95,8 +98,11 @@ all:	$(ALL_PRG)
 .c.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-COMMON_DEPS = g72x/libg72x.a libmpdemux/libmpdemux.a libao2/libao2.a libac3/libac3.a liba52/liba52.a mp3lib/libMP3.a libmpeg2/libmpeg2.a opendivx/libdecore.a linux/libosdep.a postproc/libpostproc.a xa/libxa.a
+COMMON_DEPS = g72x/libg72x.a libmpdemux/libmpdemux.a libao2/libao2.a libac3/libac3.a liba52/liba52.a mp3lib/libMP3.a libmpeg2/libmpeg2.a linux/libosdep.a postproc/libpostproc.a xa/libxa.a
 
+ifeq ($(OPENDIVX),yes)
+COMMON_DEPS += opendivx/libdecore.a
+endif
 ifeq ($(VIDIX),yes)
 COMMON_DEPS += libdha/libdha.so vidix/libvidix.a
 endif

@@ -80,10 +80,12 @@ static DS_VideoDecoder* ds_vdec=NULL;
     unsigned int lavc_pp=0;
 #endif
 
+#ifdef USE_DIVX
 #ifndef NEW_DECORE
 #include "opendivx/decore.h"
 #else
 #include <decore.h>
+#endif
 #endif
 
 #ifdef USE_XANIM
@@ -223,12 +225,14 @@ int get_video_quality_max(sh_video_t *sh_video){
   case VFM_FFMPEG:
       return GET_PP_QUALITY_MAX;
 #endif
+#ifdef USE_DIVX
   case VFM_DIVX4:
   case VFM_ODIVX:
 #ifdef NEW_DECORE
       return 9; // for divx4linux
 #else
       return GET_PP_QUALITY_MAX;  // for opendivx
+#endif
 #endif
  }
  return 0;
@@ -262,6 +266,7 @@ void set_video_quality(sh_video_t *sh_video,int quality){
     lavc_pp=getPpModeForQuality(quality);
     break;
 #endif
+#ifdef USE_DIVX
   case VFM_DIVX4:
   case VFM_ODIVX: {
    DEC_SET dec_set;
@@ -274,6 +279,7 @@ void set_video_quality(sh_video_t *sh_video,int quality){
 #endif
    decore(0x123,DEC_OPT_SETPP,&dec_set,NULL);
   }
+#endif
   break;
  }
 }
@@ -403,10 +409,12 @@ void uninit_video(sh_video_t *sh_video){
 	xacodec_exit();
 	break;
 #endif
+#ifdef USE_DIVX
     case VFM_DIVX4:
     case VFM_ODIVX:
       decore(0x123,DEC_OPT_RELEASE,NULL,NULL);
       break;
+#endif
     }
     if(sh_video->our_out_buffer){
 	free(sh_video->our_out_buffer);
@@ -533,6 +541,10 @@ switch(sh_video->codec->driver){
    return 0;
 #endif	/* !USE_WIN32DLL */
  case VFM_ODIVX: {  // OpenDivX
+#ifndef USE_DIVX
+   mp_msg(MSGT_DECVIDEO,MSGL_ERR,"MPlayer was compiled WITHOUT OpenDivx support!\n");
+   return 0;
+#else
    mp_msg(MSGT_DECVIDEO,MSGL_V,"OpenDivX video codec\n");
    { DEC_PARAM dec_param;
      DEC_SET dec_set;
@@ -550,6 +562,7 @@ switch(sh_video->codec->driver){
    }
    mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: OpenDivX video codec init OK!\n");
    break;
+#endif
  }
  case VFM_DIVX4: {  // DivX4Linux
 #ifndef NEW_DECORE
@@ -813,6 +826,7 @@ switch(sh_video->codec->driver){
     break;
   }
 #endif
+#ifdef USE_DIVX
   case VFM_ODIVX: {
     // OpenDivX
     DEC_FRAME dec_frame;
@@ -861,6 +875,7 @@ switch(sh_video->codec->driver){
 
     break;
   }
+#endif
 #ifdef NEW_DECORE
   case VFM_DIVX4: {
     // DivX4Linux
