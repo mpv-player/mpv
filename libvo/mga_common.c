@@ -189,7 +189,7 @@ get_image(mp_image_t *mpi){
     uint32_t bespitch = (mga_vid_config.src_width + 31) & ~31;
     uint32_t bespitch2 = bespitch/2;
 //    printf("mga: get_image() called\n");
-    if(mpi->type==MP_IMGTYPE_STATIC) return VO_FALSE; // it is not static
+    if(mpi->type==MP_IMGTYPE_STATIC && mga_vid_config.num_frames>1) return VO_FALSE; // it is not static
     if(mpi->flags&MP_IMGFLAG_READABLE) return VO_FALSE; // slow video ram
 //    printf("width=%d vs. bespitch=%d, flags=0x%X  \n",mpi->width,bespitch,mpi->flags);
     if((mpi->width==bespitch) ||
