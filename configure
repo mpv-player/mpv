@@ -343,7 +343,7 @@ fi
 _extralibdir=-L/usr/local/lib
 _extraincdir=-I/usr/local/include
 
-if [ "$system_name" = "FreeBSD" ]; then
+if [ x"$_sdlconfig" = x"" -a "$system_name" = "FreeBSD" ]; then
 _sdlconfig='sdl11-config'
 else
 _sdlconfig='sdl-config'
