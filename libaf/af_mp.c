@@ -32,6 +32,8 @@ int af_format_decode(int ifmt)
     ofmt = AF_FORMAT_MPEG2; break;
   case(AFMT_AC3):
     ofmt = AF_FORMAT_AC3; break;
+  case(AFMT_FLOAT):
+    ofmt = AF_FORMAT_F; break;
   default: 
     //This can not happen .... 
     af_msg(AF_MSG_FATAL,"Unrecognized input audio format %i\n",ifmt);
