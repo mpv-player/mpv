@@ -147,7 +147,7 @@ núcleo 2.4.x es recomendado.
   <application>MPlayer</application> en arquitecturas x86, probablemente las
   necesite. Descargue los codecs de Win32 desde nuestra
   <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">página de codecs</ulink>
-  e instalelos en <filename class="directory">/usr/lib/win32</filename>
+  e instalelos en <filename class="directory">/usr/lib/codecs</filename>
   <emphasis role="bold">ANTES</emphasis> de compilar <application>MPlayer</application>,
   de otra forma no se compilará soporte para Win32.
   <note><para>El proyecto avifile tiene una página similar de codecs, pero
