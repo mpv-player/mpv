@@ -2763,7 +2763,7 @@ Clamps YUV color values to the CCIR 601 range without doing real conversion.
 RGB 24/\:32 <\-> BGR 24/\:32 colorspace conversion.
 .PD 0
 .RSs
-.IPs swap
+.IPs swap\ 
 Also perform  R <\-> B swapping.
 .RE
 .PD 1
@@ -3010,7 +3010,7 @@ before the filter chain to some point during the filter chain.
 This allows filters which need to see all frames (inverse telecine,
 temporal denoising, etc.) to function properly.
 Should be placed after the filters which need to see all frames and
-before any subsequent filters that are cpu-intensive.
+before any subsequent filters that are CPU-intensive.
 .TP
 .B decimate[=max:hi:lo:frac]
 Drops frames that don't differ greatly from the previous frame in
