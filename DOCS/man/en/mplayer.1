@@ -3439,8 +3439,8 @@ Disables aspect calculations.
 Specify additional parameters when decoding with XviD.
 .br
 .I NOTE:
-As decoding with XviD tends to be slower than with libavcodec
-you might want to use libavcodec instead.
+Since libavcodec is faster than XviD you might want to use the libavcodec
+postprocessing filter (\-vf pp) and decoder (\-vfm ffmpeg) instead.
 .sp 1
 XviD's internal postprocessing filters:
 .PD 0
