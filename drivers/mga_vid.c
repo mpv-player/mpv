@@ -715,11 +715,22 @@ static int mga_vid_find_card(void)
 
 #else
 	if (is_g400){
-		mga_ram_size = 16;
+		switch((card_option>>10)&7){
+		    case 0:  mga_ram_size = ((card_option>>14)&1)? 32:16; break;
+		    case 1:
+		    case 2:  mga_ram_size = 16; break;	// SGRAM
+		    case 3:
+		    case 5:  mga_ram_size = 64; break;	// SDRAM
+		    case 4:  mga_ram_size = 32; break;	// SGRAM
+		    default: mga_ram_size = 16;
+		}
 	}else{
-		mga_ram_size = 8;
+		switch((card_option>>11)&3){
+		    case 0:  mga_ram_size = 8; break;
+		    default: mga_ram_size = 16;
+		}
 	}
-
+#if 0
 //	printk("List resources -----------\n");
 	for(temp=0;temp<DEVICE_COUNT_RESOURCE;temp++){
 	    struct resource *res=&pci_dev->resource[temp];
@@ -731,6 +742,7 @@ static int mga_vid_find_card(void)
 	      }
 	    }
 	}
+#endif
 
 	printk(KERN_INFO "mga_vid: detected RAMSIZE is %d MB\n", (unsigned int) mga_ram_size);
 #endif
