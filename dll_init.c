@@ -245,6 +245,8 @@ int init_video_codec(sh_video_t *sh_video){
 
   if(yuv && !(sh_video->codec->outflags[sh_video->outfmtidx] & CODECS_FLAG_YUVHACK))
 	 sh_video->o_bih.biCompression = outfmt;
+  else
+         sh_video->o_bih.biCompression = 0;
 
   if(verbose) {
     printf("Starting decompression, format:\n");
