@@ -83,8 +83,9 @@ You have stumbled over a bug in <application>gcc</application>. Please
 <ulink url="http://gcc.gnu.org/bugs.html">report it to the gcc team</ulink>
 but not to us. For some reason <application>MPlayer</application> seems to
 trigger compiler bugs frequently. Nevertheless we cannot fix them and do not
-add workarounds for compiler bugs to our sources. Upgrading your compiler
-often makes the problem go away.
+add workarounds for compiler bugs to our sources. To avoid this problem,
+either stick with a compiler version that is known to be reliable and
+stable, or upgrade frequently.
 </para></answer>
 </qandaentry>
 
