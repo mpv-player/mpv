@@ -16,10 +16,6 @@ extern char *monitor_dotclock_str;
 extern char *fb_dev_name;
 extern char *fb_mode_cfgfile;
 extern char *fb_mode_name;
-#else
-#ifdef HAVE_DIRECTFB
-extern char *fb_dev_name;
-#endif
 #endif
 #ifdef HAVE_DIRECTFB
 #if DIRECTFBVERSION > 912
