@@ -53,6 +53,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-config\ file ]
 .RB [ \-display\ name ]
 .RB [ \-unicode ]
+.RB [ \-fsmode\ mode ]
 .I - or file
 .PP
 .SH DESCRIPTION
@@ -278,7 +279,15 @@ tells MPlayer to handle the subtitle file (with -sub option) as UNICODE.
 Contrary: -nounicode
 .TP
 .B \-lircconf\ configfile
-specifies a configfile for LIRC (see http://www.lirc.org) if you don't like the default ~/.lircrc 
+specifies a configfile for LIRC (see http://www.lirc.org) if you don't like the default ~/.lircrc
+.TP
+.B \-fsmode\ mode
+This option workarounds some problems when using specific windowmanagers and
+fullscreen mode. If you experience fullscreen problems, try changing this
+value between 0 and 7.
+        -fsmode 0      ICCCWM patch (patched) (default)
+        -fsmode 1      ICCCWM patch
+        -fsmode 2      nothing in particular
 .IP
 .SH "ALPHA/BETA CODE"
 .TP
