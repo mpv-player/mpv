@@ -940,7 +940,13 @@ switch(has_video){
    //if(verbose) printf("AVI out_fmt=%X\n",out_fmt);
    if(verbose) if(out_fmt==IMGFMT_YUY2) printf("Using YUV/YUY2 video output format!\n");
    avi_header.our_out_buffer=NULL;
-   DS_VideoDecoder_Open(avi_header.video_codec,avi_header.vids_guid, &avi_header.bih, 0, &avi_header.our_out_buffer);
+   if(DS_VideoDecoder_Open(avi_header.video_codec,avi_header.vids_guid, &avi_header.bih, 0, &avi_header.our_out_buffer)){
+        printf("ERROR: Couldn't open required DirectShow codec: %s\n",avi_header.video_codec);
+        printf("Maybe you forget to upgrade your win32 codecs?? It's time to download the new\n");
+        printf("package from:  ftp://thot.banki.hu/esp-team/linux/MPlayer/w32codec.zip  !\n");
+        printf("Or you should disable DShow support: make distclean;make -f Makefile.No-DS\n");
+        exit(1);
+   }
    
    if(out_fmt==IMGFMT_YUY2)
      DS_VideoDecoder_SetDestFmt(16,mmioFOURCC('Y', 'U', 'Y', '2'));
@@ -1279,11 +1285,12 @@ if(has_audio==7){
     a_in_buffer_len=0;
 
   } else {
-    printf("Could not load/initialize Win32/DirctShow AUDIO codec (missing .AX file?)\n");
+    printf("ERROR: Could not load/initialize Win32/DirctShow AUDIO codec: %s\n",avi_header.audio_codec);
     if((in_fmt->wFormatTag)==0x55){
       printf("Audio format is MP3 -> fallback to internal mp3lib/mpg123\n");
       has_audio=1;  // fallback to mp3lib
     } else
+      printf("Audio disabled! Try to upgrade your w32codec.zip package!!!\n");
       has_audio=0;  // nosound
   }
 #endif
