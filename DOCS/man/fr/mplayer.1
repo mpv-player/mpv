@@ -1,4 +1,4 @@
-.\" synced with 1.846
+.\" synced with 1.848
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "07 Janvier 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "11 Janvier 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -7661,19 +7661,35 @@ qu'un petit objet en mouvement sera mieux codé par des petits blocs.
 Ajuste la qualité d'affinement de subpel.
 Ce paramètre contrôle le compromis qualité/\:vitesse lié aux décisions du
 processus d'estimation du mouvement.
-Utilisé correctement, cela peut améliorer la qualité de façon significative.
+subq=5 peut augmenter jusqu'à 10% le taux de compression par rapport à subq=1.
 .RSs
-1: fullpixel mode decision, 1 itération qpel sur le candidat vainqueur
-(rapide)
+1: Effectue une recherche de mouvement d'une précision fullpixel (c-à-d qu'elle
+capture les mouvements d'une trame à la suivante avec une précision d'un pixel)
+sur tous les types de macro-blocs candidats.
+Sélectionne ensuite le meilleur type.
+Puis affine rapidement avec une précision qu'un quart de pixel le mouvement de
+ce type. (rapide)
 .br
-2: fullpixel mode decision, 2 itérations qpel sur le candidat vainqueur
+Comme 1, mais effectue une recherche de mouvement fullpixel un peu plus lente
+et un affinage au quart de pixel un peu plus lente.
 .br
-3: halfpel mode decision, qpel sur le vainqueur
+3: Effectue une recherche de mouvement d'une précision demi pixel sur tous les
+types de macro-blocs candidats.
+Sélectionne ensuite le meilleur type.
+Puis affine rapidement avec une précision qu'un quart de pixel le mouvement de
+ce type.
 .br
-4: qpel mode decision
+4: Effectue une rapide recherche de mouvement d'une précision d'un quart de
+pixel (quarterpixel) sur tous les types de macro-blocs candidats.
+Puis termine l'affinement quarterpixel pour ce type
 .br
-5: qpel mode decision, plus d'itérations (meilleur, par défaut)
+5: Effectue la recherche de mouvement de la meilleure qualité sur tous les
+types de macro-blocs candidats, avant de choisir le meilleur type.
+(meilleur, par défaut)
 .REss
+Ci-dessus, le terme "tous les candidats" ne signifie pas forcément tous les
+types possibles\ : 4x4, 4x8 et 8x4 ne sont essayés que si 8x8 est meilleur que
+16x16.
 .
 .TP
 .B log=<-1\-3>
