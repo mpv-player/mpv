@@ -1166,16 +1166,16 @@ if(1)
               videobuffer[videobuf_len+3]=0xFF;
               videobuf_len+=4;
 #endif
-              if(!i) eof=1; // EOF
+              if(!i) eof=2; // EOF
               break;
             }
           } else {
             //if(i==0x100) in_frame=1; // picture startcode
             if(i>=0x101 && i<0x1B0) in_frame=1; // picture startcode
-            else if(!i){ eof=1; break;} // EOF
+            else if(!i){ eof=3; break;} // EOF
           }
 	  if(grab_frames==2 && (i==0x1B3 || i==0x1B8)) grab_frames=1;
-          if(!read_video_packet(d_video)){ eof=1; break;} // EOF
+          if(!read_video_packet(d_video)){ eof=4; break;} // EOF
           //printf("read packet 0x%X, len=%d\n",i,videobuf_len);
 	  if(sh_video->codec->driver!=VFM_MPEG){
 	    // if not libmpeg2:
@@ -1212,7 +1212,7 @@ if(1)
       // frame-based file formats: (AVI,ASF,MOV)
     unsigned char* start=NULL;
     int in_size=ds_get_packet(d_video,&start);
-    if(in_size<0){ eof=1;break;}
+    if(in_size<0){ eof=5;break;}
     if(in_size>max_framesize) max_framesize=in_size;
     blit_frame=decode_video(video_out,sh_video,start,in_size,drop_frame);
   }
@@ -1545,7 +1545,7 @@ if(1)
   rel_seek_secs=0;
   
 //================= Update OSD ====================
-{ if(osd_level>=2){
+  if(osd_level>=2){
       int pts=d_video->pts;
       if(pts==osd_last_pts-1) ++pts; else osd_last_pts=pts;
       vo_osd_text=osd_text_buffer;
@@ -1581,9 +1581,9 @@ if(1)
     }
   }
   
-}
-
 } // while(!eof)
+
+if(verbose) printf("EOF code: %d  \n",eof);
 
 exit_player("End of file");
 }

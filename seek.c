@@ -51,6 +51,8 @@ if(demuxer->file_format==DEMUXER_TYPE_AVI && demuxer->idx_size<=0){
     if(sh_audio){ ds_free_packs(d_audio);sh_audio->a_buffer_len=0;}
     ds_free_packs(d_video);
     
+    demuxer->stream->eof=0; // clear eof flag
+    
 //    printf("sh_audio->a_buffer_len=%d  \n",sh_audio->a_buffer_len);
     
 

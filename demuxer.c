@@ -180,7 +180,10 @@ int ds_fill_buffer(demux_stream_t *ds){
       printf("(maybe you play a non-interleaved stream/file or video codec failed)\n");
       break;
     }
-    if(!demux_fill_buffer(demux,ds)) break; // EOF
+    if(!demux_fill_buffer(demux,ds)){
+       if(verbose) printf("ds_fill_buffer()->demux_fill_buffer() failed\n");
+       break; // EOF
+    }
   }
   ds->buffer_pos=ds->buffer_size=0;
   ds->buffer=NULL;

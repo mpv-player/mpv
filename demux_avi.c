@@ -126,12 +126,14 @@ int ret=0;
 do{
   int flags=0;
   AVIINDEXENTRY *idx=NULL;
+#if 0
   demux->filepos=stream_tell(demux->stream);
   if(demux->filepos>=demux->movi_end){
           demux->stream->eof=1;
           return 0;
   }
   if(stream_eof(demux->stream)) return 0;
+#endif
   if(demux->idx_size>0 && demux->idx_pos<demux->idx_size){
     unsigned int pos;
     
@@ -155,7 +157,7 @@ do{
 
     pos=idx->dwChunkOffset+demux->idx_offset;
     if(pos<demux->movi_start || pos>=demux->movi_end){
-      printf("ChunkOffset out of range!  current=0x%X  idx=0x%X  \n",demux->filepos,pos);
+      printf("ChunkOffset out of range!   idx=0x%X  \n",pos);
       continue;
     }
 #if 0
@@ -164,7 +166,10 @@ do{
     }
 #endif
     stream_seek(demux->stream,pos);
+    demux->filepos=stream_tell(demux->stream);
     id=stream_read_dword_le(demux->stream);
+    if(stream_eof(demux->stream)) return 0; // EOF!
+    
     if(id!=idx->ckid){
       printf("ChunkID mismatch! raw=%.4s idx=%.4s  \n",(char *)&id,(char *)&idx->ckid);
       continue;
@@ -178,8 +183,15 @@ do{
     }
     if(idx->dwFlags&AVIIF_KEYFRAME) flags=1;
   } else {
+    demux->filepos=stream_tell(demux->stream);
+    if(demux->filepos>=demux->movi_end){
+          demux->stream->eof=1;
+          return 0;
+    }
     id=stream_read_dword_le(demux->stream);
     len=stream_read_dword_le(demux->stream);
+    if(stream_eof(demux->stream)) return 0; // EOF!
+    
     if(id==mmioFOURCC('L','I','S','T')){
       id=stream_read_dword_le(demux->stream);      // list type
       continue;
