@@ -61,6 +61,7 @@ typedef struct demuxer_info_st {
   char *author;
   char *encoder;
   char *comments;
+  char *copyright;
 } demuxer_info_t;
 
 typedef struct demuxer_st {
@@ -166,6 +167,5 @@ extern int index_mode;  // -1=untouched  0=don't use index  1=use (geneate) inde
 extern int force_ni;
 extern int pts_from_bps;
 
-
-
-
+int demux_info_add(demuxer_t *demuxer, char *opt, char *param);
+int demux_info_print(demuxer_t *demuxer);

@@ -143,6 +143,7 @@ void mov_build_index(mov_track_t* trak){
 #define MOV_TRAK_AUDIO 2
 #define MOV_TRAK_FLASH 3
 #define MOV_TRAK_GENERIC 4
+#define MOV_TRAK_CODE 5
 
 typedef struct {
     off_t moov_start;
@@ -154,7 +155,11 @@ typedef struct {
 } mov_priv_t;
 
 #warning "FIXME - mov support is only working perfectly on Little Endian systems?!"
+//#ifdef WORDS_BIGENDIAN
+//#define MOV_FOURCC(a,b,c,d) ((d)|(c<<8)|(b<<16)|(a<<24))
+//#else
 #define MOV_FOURCC(a,b,c,d) ((a<<24)|(b<<16)|(c<<8)|(d))
+//#endif
 
 int mov_check_file(demuxer_t* demuxer){
     int flags=0;
@@ -227,6 +232,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	//
 	if(trak){
 	  switch(id){
+	    case MOV_FOURCC('f','r','e','e'):
 	    case MOV_FOURCC('u','d','t','a'):
 		/* here not supported :p */
 		break;
@@ -441,7 +447,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	    }
 	    case MOV_FOURCC('c','o','d','e'):
 	    {
-#warning Implement atom 'code' for FLASH
+#warning "Implement atom 'code' for FLASH support"
 	    }
 	    default:
 		id = bswap_32(id);
@@ -525,7 +531,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	    case MOV_TRAK_GENERIC:
 		mp_msg(MSGT_DEMUX, MSGL_INFO, "Generic track - not completly understood! (id: %d)\n",
 		    trak->id);
-#warning Also this contains the FLASH data
+#warning "Also this contains the FLASH data"
 #if 0
 		mp_msg(MSGT_DEMUX, MSGL_INFO, "Extracting samples to files (possibly this is an flash anim)\n");
 	    {
@@ -692,9 +698,11 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 			switch(udta_id)
 			{
 			    case MOV_FOURCC(0xa9,'a','u','t'):
+				demux_info_add(demuxer, "author", &text[2]);
 				mp_msg(MSGT_DEMUX, MSGL_INFO, " Author: %s\n", &text[2]);
 				break;
 			    case MOV_FOURCC(0xa9,'c','p','y'):
+				demux_info_add(demuxer, "copyright", &text[2]);
 				mp_msg(MSGT_DEMUX, MSGL_INFO, " Copyright: %s\n", &text[2]);
 				break;
 			    case MOV_FOURCC(0xa9,'i','n','f'):
@@ -702,6 +710,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 				break;
 			    case MOV_FOURCC('n','a','m','e'):
 			    case MOV_FOURCC(0xa9,'n','a','m'):
+				demux_info_add(demuxer, "name", &text[2]);
 				mp_msg(MSGT_DEMUX, MSGL_INFO, " Name: %s\n", &text[2]);
 				break;
 			    case MOV_FOURCC(0xa9,'A','R','T'):
@@ -711,12 +720,14 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 				mp_msg(MSGT_DEMUX, MSGL_INFO, " Director: %s\n", &text[2]);
 				break;
 			    case MOV_FOURCC(0xa9,'c','m','t'):
+				demux_info_add(demuxer, "comments", &text[2]);
 				mp_msg(MSGT_DEMUX, MSGL_INFO, " Comment: %s\n", &text[2]);
 				break;
 			    case MOV_FOURCC(0xa9,'r','e','q'):
 				mp_msg(MSGT_DEMUX, MSGL_INFO, " Requirements: %s\n", &text[2]);
 				break;
 			    case MOV_FOURCC(0xa9,'s','w','r'):
+				demux_info_add(demuxer, "encoder", &text[2]);
 				mp_msg(MSGT_DEMUX, MSGL_INFO, " Software: %s\n", &text[2]);
 				break;
 			    case MOV_FOURCC(0xa9,'d','a','y'):
@@ -799,9 +810,15 @@ if(trak->samplesize){
     if(trak->pos>=trak->chunks_size) return 0; // EOF
     stream_seek(demuxer->stream,trak->chunks[trak->pos].pos);
     pts=(float)(trak->chunks[trak->pos].sample*trak->duration)/(float)trak->timescale;
-    x=trak->chunks[trak->pos].size;
-//    x=trak->chunks[trak->pos].size*trak->samplesize;
-    if(trak->samplesize!=1) printf("WARNING! Samplesize=%d   \n",trak->samplesize);
+    if(trak->samplesize!=1)
+    {
+	mp_msg(MSGT_DEMUX, MSGL_WARN, "WARNING! Samplesize(%d) != 1\n",
+	    trak->samplesize);
+	x=trak->chunks[trak->pos].size*trak->samplesize;
+    }
+    else
+	x=trak->chunks[trak->pos].size;
+    printf("X = %d\n", x);
     if(trak->stdata_len>=36){
 	// extended stsd header - works for CBR MP3:
 	x/=(trak->stdata[30]<<8)+trak->stdata[31];  // samples/packet

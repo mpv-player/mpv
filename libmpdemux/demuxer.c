@@ -652,7 +652,7 @@ int demux_info_add(demuxer_t *demuxer, char *opt, char *param)
 	return(1);
     }
 
-    if (!strcasecmp(opt, "encoder"))
+    if (!strcasecmp(opt, "encoder") || !strcasecmp(opt, "software"))
     {
 	if (info->encoder)
 	{
@@ -664,7 +664,7 @@ int demux_info_add(demuxer_t *demuxer, char *opt, char *param)
 	return(1);
     }
 
-    if (!strcasecmp(opt, "comments"))
+    if (!strcasecmp(opt, "comment") || !strcasecmp(opt, "comments"))
     {
 	if (info->comments)
 	{
@@ -676,7 +676,19 @@ int demux_info_add(demuxer_t *demuxer, char *opt, char *param)
 	return(1);
     }
 
-    mp_msg(MSGT_DEMUX, MSGL_WARN, "Unknown demuxer info->%s (=%s)!\n",
+    if (!strcasecmp(opt, "copyright"))
+    {
+	if (info->copyright)
+	{
+	    mp_msg(MSGT_DEMUX, MSGL_WARN, "Demuxer info->copyright already present\n!");
+	    return(0);
+	}
+	info->copyright = malloc(strlen(param));
+	strcpy(info->copyright, param);
+	return(1);
+    }
+
+    mp_msg(MSGT_DEMUX, MSGL_DBG2, "Unknown demuxer info->%s (=%s)!\n",
 	opt, param);
     return(1);
 }
@@ -685,16 +697,18 @@ int demux_info_print(demuxer_t *demuxer)
 {
     demuxer_info_t *info = &demuxer->info;
 
-    if (info->name || info->author || info->encoder || info->comments)
+    if (info->name || info->author || info->encoder || info->comments || info->copyright)
     {
 	mp_msg(MSGT_DEMUX, MSGL_INFO, "Clip info: \n");
 	if (info->name)
 	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Name: %s\n", info->name);
 	if (info->author)
 	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Author: %s\n", info->author);
-	if (info->encoder)
-	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Encoder: %s\n", info->encoder);
+	if (info->comments)
+	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Copyright: %s\n", info->comments);
 	if (info->comments)
 	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Comments: %s\n", info->comments);
+	if (info->encoder)
+	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Encoder: %s\n", info->encoder);
     }
 }

@@ -170,6 +170,7 @@ while(1){
       chunksize-=len;
       buf[len]=0;
       mp_msg(MSGT_HEADER,MSGL_V,"%-10s: %s\n",hdr,buf);
+      demux_info_add(demuxer, hdr, buf);
   }
   if(chunksize>0) stream_skip(demuxer->stream,chunksize); else
   if(chunksize<0) mp_msg(MSGT_HEADER,MSGL_WARN,"chunksize=%d  (id=%.4s)\n",chunksize,(char *) &id);
