@@ -1,27 +1,19 @@
 TO DO:
 ~~~~~~
-Urgent:
-- support for more codecs  (sample .avi files and .dll needed!) - HELP!
-- make a release!
-- change to libxmm
-- audio playback rate setting [Jelmer Feenstra]
-- further optimizations
 
-They Have Been Around For A Long Time:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 High Priority:
 - finish ASF seeking (find next keyframe)
-- asterix.avi audio delays after 5-10 mins (bps mode only)
-- fix mp3lib to avoid segfault with some damaged .avi files (DONE!?)
+- audio playback rate setting [Jelmer Feenstra]
+- asterix.avi audio delays after 5-10 mins (bps mode only) - DONE?
+- fix x11 driver to work without SHM (for remote playing etc)
+- further optimizations
 
 Medium Priority:
-- seeking support for broken avi files without index chunk (DONE!)
-- fix x11 driver to work without SHM (for remote playing etc)
 - show current frame number [Gabucino]
 - seek_to_frame and seek_to_index options
 - audio copy/encoding capability
 
 Low Priority:
-- fix X4.0.x/DRI OpenGL (doesn't really work, at least mga & tdfx & nvidia)
+- fix X4.0.x/DRI OpenGL - DONE?  mga works with 4.0.3
 - support for MPEG TS (transport streams) - I need sample files!
-- integrating the gui?
+- integrating the gui? - DONE?

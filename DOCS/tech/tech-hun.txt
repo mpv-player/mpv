@@ -1,22 +1,14 @@
-[yes, this is hungarian. maybe someone will translate this to russian or
-something else...]
-
 Nos, akkor leirom, hogyan is mûködik ez az egész.
-
-Az ékezetekkel majd lesz valami, nem nagyon vagyok hozzászokva az
-ékezetes gépeléshez...
-
-A program felépítése alapjaiban logikus, de eleg gányul van megirva :)
 
 A fõ modulok:
 
-1. streamer.c: ez az input, azaz ez olvassa a filet vagy VCD-t.
+1. streamer.c: ez az input layer, azaz ez olvassa a filet, VCD-t vagy stdin-t.
    amit tudnia kell: megfelelõ sectoronkenti bufferelés, seek, skip funkciók,
 	 byte-onkénti ill. tetszõleges méretû blockonkénti olvasás.
 	 Egy stream (input device/file) leírására a stream_t struktura szolgál.
 	 
 2. demuxer.c: ez végzi az input szétszedését audio és video csatornákra,
-   és a kiválasztott csatornák bufferelt package-nkénti olvasását.
+   és a kiválasztott csatornák bufferelt package-enkénti olvasását.
 	 A demuxer.c inkább csak egy framework, ami közös minden input
 	 formátumra, és az egyes formátumokhoz (mpeg-es,mpeg-ps, avi, avi-ni, asf)
 	 külön parser van, ezek a demux_*.c fileokban vannak.
@@ -26,10 +18,14 @@ A fõ modulok:
    ez egy darab chunk-ot (avi) vagy packet-et (asf,mpg) tartalmaz.
 	 memoriaban ezek lancolt listaban vannak, mivel kulonbozo meretuek.
 
-2.b. demuxer stream, azaz ds. struct: demux_stream_t
+2.b. demuxer stream, azaz ds.
+   struct: demux_stream_t
    minden egyes csatornahoz (a/v) tartozik egy ilyen.
 	 ez tartalmazza a stream-hez tartozo packeteket (lasd. 2.a.)
-	 egyelore demuxer-enkent 2 ilyen lehet, egy a hanghoz es egy a kephez.
+	 egyelore demuxer-enkent 3 ilyen lehet:
+	 - hang (d_audio)
+	 - kep  (d_video)
+	 - DVD felirat (d_dvdsub)
 
 2.c. stream header. 2 fele van (egyelore): sh_audio_t es sh_video_t
    ez tartalmaz minden, a dekodolashoz szukseges parametert, igy az input
@@ -47,7 +43,8 @@ A fõ modulok:
    
    Pelda: van egy .asf fileunk, abban 6 db stream, ebbol 1 audio es 5 video.
    A header beolvasasakor letre fog jonni 6 db sh struct, 1 audio es 5 video.
-   Amikor elkezdi olvasni a packeteket, az elso talalt audio es video streamet
+   Amikor elkezdi olvasni a packeteket, az elso talalt audio es video
+   packethez tartozo streamet
    kivalasztja, es ezekre allitja be a d_audio es d_video sh pointereit.
    Igy kesobbiekben mar csak ezeket a streameket olvassa, a tobbit nem.
    Persze ha az user masik streameket szeretne kivalasztani, akkor
@@ -60,15 +57,15 @@ A fõ modulok:
 	 - meghivodik a demuxer.c/demux_read_data(), megkapja melyik ds-bol
 	   (audio vagy video), mennyi byteot es hova (memoriacim) szeretnenk 
 		 beolvasni. ezt hivogatjak gyakorlatilag a codec-ek.
-	 - ez megenzi,hogy az adott ds bufferében van-e valami, ha igen akkor 
+	 - ez megnezi,hogy az adott ds bufferében van-e valami, ha igen akkor 
 	   onnan olvas amennyit kell. ha nincs/nincs eleg, akkor meghivja
 		 a ds_fill_buffer()-t ami:
 	 - megnezi hogy az adott ds-ben vannak-e bufferelve csomagok (dp-k)
 	   ha igen, akkor a legregebbit atrakja a bufferbe es olvas tovabb.
 		 ha ures a lancolt lista, akkor meghivja a demux_fill_buffer()-t:
-	 - ez az input formatumnak megfelelo parset meghivja ami olvassa
+	 - ez az input formatumnak megfelelo parser-t meghivja ami olvassa
 	   tovabb a filet, es a talalt csomagokat rakja be a megfelelo bufferbe.
-		 na ha mondjuk audio csomagot szeretennk, de csak egy rakat video csomag
+		 na ha mondjuk audio csomagot szeretnenk, de csak egy rakat video csomag
 		 van, akkor jon elobb-utobb a DEMUXER: Too many (%d in %d bytes) audio 
 		 packets in the buffer... hibauzenet.
 
@@ -79,14 +76,30 @@ na nezzuk tovabb:
 3. mplayer.c - igen, o a fonok :)
    az idozites eleg erdekesen van megoldva, foleg azert mert minden
 	 fileformatumnal maskepp kell/celszeru, es neha tobbfele keppen is lehet.
+
 	 van egy a_frame es egy v_frame nevu float valtozo, ez tarolja az epp
 	 lathato/hallhato a/v poziciojat masodpercben.
-	 akkor jelenit meg ujabb video frame-t, ha v_frame<a_frame, es akkor
-	 dekodol tovabb hangot ha a_frame<v_frame.
+	 
+	 A lejatszo ciklus felepitese:
+	 while(not EOF) {
+	     fill audio buffer (read & decode audio) + increase a_frame
+	     read & decode a single video frame + increase v_frame
+	     sleep  (wait until a_frame>=v_frame)
+	     display the frame
+	     apply A-V PTS correction to a_frame
+	     check for keys -> pause,seek,...
+	 }
+	 
 	 amikor lejatszik (hang/kep) akkor a lejatszott valami idotartamaval
-	 noveli a megfelelo valtozot. videonal ez altalaban 1.0/fps, persze
-	 meg kell jegyeznem hogy videonal nem igazna szamit az fps, asf-nel
-	 pl. nincs is olyan, ahelyett duration van es framenkent valtozhat.
+	 noveli a megfelelo valtozot:
+	 - audional ez a lejatszott byteok / sh_audio->o_bps
+	 megj: i_bps = tomoritett byteok szama egy masodpercnyi hanghoz
+	       o_bps = tomoritetlen byteok szama egy masodpercnyi hanghoz
+	           (ez utobbi == bps*samplerate*channels)
+	 - videonal ez altalaban az sh_video->frametime.
+	 Ez altalaban == 1.0/fps, persze meg kell jegyeznem hogy videonal nem
+	 igazan szamit az fps, asf-nel pl. nincs is olyan, ahelyett duration
+	 van es framenkent valtozhat.
 	 mpeg2-nel pedig repeat_count van ami 1-2.5 idotartamban elnyujtja
 	 a framet... avi-nal van talan egyedul fix fps, meg mpeg1-nel.
 
@@ -102,14 +115,20 @@ na nezzuk tovabb:
 	 
 	 persze ez meg nem minden szinkron ugyben, van meg nemi gaz.
 	 pl. az hogy a hangkartya eleg rendesen kesleltet, ezt az mplayernek
-	 korrigalnia kell: ezert kell neki az audio buffer merete. amit a
-	 select()-e tud lemerni amit viszont nem tud minden kartya...
-	 ilyenkor kell a -abs opcioval megadni.
+	 korrigalnia kell! Az osszes audio kesleltetes masodpercben ezek osszege:
+	 - az utolso timestamp (PTS) ota beolvasott byteok:
+	   t1 = d_audio->pts_bytes/sh_audio->i_bps
+	 - Win32/ACM eseten az audio input bufferben tarolt byteok:
+	   t2 = a_in_buffer_len/sh_audio->i_bps
+	 - az audio out bufferben tarolt tomoritetlen byteok:
+	   t3 = a_buffer_len/sh_audio->o_bps
+	 - a hangkartya buffereben (vagy DMA bufferben) tarolt, meg nem
+	   lejatszott byteok:
+	   t4 = get_audio_delay()/sh_audio->o_bps
 	 
-	 aztan van olyan gond is, hogy pl. mpegnel nem framenkent van PTS
-	 hanem szektoronkent, ami tartalmazhat 10 framet is de 0.1-et is.
-	 hogy ez ne csessze el az idozitest, atlagoljuk 5 framenkent a 
-	 PTS-t es ezt az atlag erteket vesszuk figyelembe korrekcional.
+	 Ezekbol kiszamolhato egeszen pontosan, hogy az epp hallhato hanghoz 
+	 milyen PTS tartozik, majd ezt osszevetve a video-hoz tartozo PTS-el
+	 meg is kapjuk az A-V eltereset!
 	 
 	 avi-nal sem egyszeru az elet. ott a 'hivatalos' idozitesi mod a
 	 BPS-alapu, azaz a headerben le van tarolva hany tomoritett audio
@@ -125,7 +144,28 @@ na nezzuk tovabb:
 	 ilyen persze 2 is van, az egyik a headerben le is van irva, es
 	 nem nagyon hasznlajak :) a masik sehol nincs leirva de hasznaljak, ezt
 	 csak merni lehet...
-	 
+
+3.a. audio playback:
+	 par szo az audio lejatszasrol:
+	 az egeszben nem maga a lejatszas a nehez, hanem:
+	 1. hogy tudjuk mikor lehet irni a bufferbe, blocking nelkul
+	 2. hogy tudjuk, mennyit jatszott mar le abbol amit a bufferbe irtunk
+	 Az 1. az audio dekodolashoz kell, valamint hogy a buffert mindig teli
+	 allapotban tudjuk tartani (igy sose fog megakadni a hang).
+	 A 2. pedig a korrekt idoziteshez szukseges, ugyanis nemely hangkartya
+	 akar 3-7 masodpercet is kesleltet, ami azert nem elhanyagolhato!
+	 Ezek megvalositasara az OSS tobbfele lehetoseget is kinal:
+	 - ioctl(SNDCTL_DSP_GETODELAY): megmondja hany lejatszatlan byte
+	   varakozik a hangkartya bufferjeben -> idoziteshez kivallo,
+	   de nem minden driver tamogatja :(
+	 - ioctl(SNDCTL_DSP_GETOSPACE): megmondja mennyit irhatunk a kartya
+	   bufferebe blocking nelkul. ha a driver nem tudja a GETODELAY-t,
+	   akkor ezt hasznalhatjuk arra is, hogy megtudjuk a kesleltetest.
+	 - select(): meg kene mondja, hogy irhatunk-e a kartya bufferebe
+	   blocking nelkul. azt, hogy emnnyit irhatunk, nem mondja meg :(
+	   valamint sok driverrel egyaltalan nem, vagy rosszul mukodik :((
+	   csak akkor hasznalom, ha egyik fenti ioctl() sem mukodik.
+
 4. codecek. ezek kulonbozo lib-ek szanaszet mindenfelol.
    mint pl. libac3, libmpeg2, xa/*, alaw.c, opendivx/*, loader, mp3lib.
 	 az mplayer.c hivogatja oket amikor egy egy darab hangot vagy framet
@@ -173,6 +213,11 @@ na nezzuk tovabb:
 
   init() - ez hivodik meg a legelso frame kirakasa elott - bufferek foglalasa
            stb a celja.
+	   van egy flags parameter is (regen fullscreen volt a neve):
+	   0x01 - fullscreen (-fs)
+	   0x02 - vidmode switch (-vm)
+	   0x04 - scaling enabled (-zoom)
+	   0x08 - flip image (upside-down)
 
   draw_slice(): ez planar YV12 kepet rak ki (3 db plane, egy teljes
 	 meretu ami a fenyerot (Y) tartalmazza, es 2 negyedakkora, ami a

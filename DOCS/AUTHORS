@@ -3,6 +3,9 @@
 
 ====================== The MPlayer project: ===========================
 
+NOTE: Do NOT send bugreports, help & feature requests directly to the authors!
+===== Read DOCS/BUGREPORTS and subscribe to mplayer-users mailing lists.
+
 Árpád Gereöffy (A'rpi/ESP-team):  <arpi@thot.banki.hu>
 - player code (mpeg stream demultiplexer and avi/asf parser, A-V sync, seek...)
 - mp3lib, based on mpg123 sources  [MP3 audio decoder]
@@ -14,7 +17,6 @@
 - hacking DivX/Mpeg4 VfW codecs to get YUV output
 - opendivx decoder speed optimizations (see opendivx/ChangeLog)
 - OSD & SUB display code
-- everything that isn't listed elsewhere
 
 Zoltán Ponekker (Pontscho/Fresh!):  <pontscho@makacs.poliod.hu> 
 - configure script and Makefiles for easy compile
@@ -32,14 +34,15 @@ Gábor Lénárt (LGB): <lgb@lgb.hu>
 - another GUI code (is that so..?)
 
 Gábor Bérczi (Gabucino):  <gabucino@k2.jozsef.kando.hu>
-- documentation maintainer, hun-eng translator
+- documentation maintainer
 - documentation hungarian translation
 - webpage maintainer
 - testing, codecs quality & speed comparsions
 - IRC channel #MPlayer operator
 
 Szabolcs Berecz: <szabi@inf.elte.hu>
-- codecs.conf file, config file and command line parser
+- codecs.conf file parser
+- config file and command line parser
 - mga_vid fixes, module option stc.
 - fbdev support in libvo
 
@@ -79,7 +82,7 @@ Jens Hoffmann: <hoffmajs@gmx.de>
 Nick Kurshev: <nickols_k@mail.ru>
 - memcpy optimizations for AMD K7 and Intel Pentium III  (fastmemcpy.h)
 - CDROM tune info
-- further 3DNow! optimizations into mp3lib
+- further 3DNow! optimizations into mp3lib and libac3
 - russian DOCS translation
 
 German Gomez Garcia: <german@piraos.com>
@@ -123,7 +126,7 @@ Michael Hipp:
 - mpg123 author   [free mpeg audio player, isn't used directly but in mp3lib]
 
 Mark Podlipec:
-- xanim author    [I'm using its aLaw audio decoder]
+- xanim author    [I'm using its aLaw+uLaw audio decoder]
 
 Jutta Degener and Carsten Bormann:
 - xa_gsm.c authors  [MS-GSM audio codec]
