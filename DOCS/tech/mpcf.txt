@@ -329,7 +329,7 @@ flags[frame_code]
 		mask = (1<<msb_timestamp_shift)-1;
 		delta= last_timestamp - mask/2
 		timestamp= ((timestamp_lsb-delta)&mask) + delta
-		TTT must be 100 or 101 if the packet_type is not 0
+		TTT must be 101 if the packet_type is not 0
 		the last timestamp differences are reset to the 
 		initial_timestamp_predictor values from the stream header if a
 		packet of type not 0 in encountered
