@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef DVB_HEAD
+#define HAVE_DVB 1
+#endif
+
 #ifdef HAVE_DVB
 #include <sys/ioctl.h>
 #endif
@@ -15,8 +19,13 @@
 #include "../mp_msg.h"
 
 #ifdef HAVE_DVB
+#ifndef HAVE_DVB_HEAD
 #include <ost/audio.h>
 audioMixer_t dvb_mixer={255,255};
+#else
+#include </linux/dvb/audio.h>
+audio_mixer_t dvb_mixer={255,255};
+#endif
 #endif
 extern int vo_mpegpes_fd;
 extern int vo_mpegpes_fd2;

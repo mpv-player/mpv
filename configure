@@ -970,6 +970,7 @@ _vesa=auto
 _fbdev=auto
 _fbdev_nocopy=no
 _dvb=auto
+_dvbhead=auto
 _dxr2=auto
 _dxr3=auto
 _iconv=auto
@@ -1098,6 +1099,8 @@ for ac_option do
   --disable-fbdev)	_fbdev=no	;;
   --enable-dvb)		_dvb=yes	;;
   --disable-dvb)        _dvb=no		;;
+  --enable-dvbhead)	_dvbhead=yes	;;
+  --disable-dvbhead)    _dvbhead=no	;;
   --enable-dxr2)	_dxr2=yes	;;
   --disable-dxr2)	_dxr2=no	;;
   --enable-dxr3)	_dxr3=yes	;;
@@ -2745,10 +2748,53 @@ if test "$_dvb" = yes ; then
   _def_dvb='#define HAVE_DVB 1'
   _aomodules="mpegpes(dvb) $_aomodules"
   _vomodules="mpegpes(dvb) $_vomodules"
-else
+fi
+if test "$_dvbhead" != no ; then
+  echocheck "DVB HEAD"
+  if test "$_dvbhead" != no ; then
+    _dvbhead=no
+    test -c /dev/dvb/adapter0/video0 && _dvbhead=yes
+
+cat >$TMPC << EOF
+#include <sys/poll.h>
+#include <sys/ioctl.h>
+#include <stdio.h>
+#include <time.h>
+#include <unistd.h>
+
+#include <linux/dvb/dmx.h>
+#include <linux/dvb/frontend.h>
+#include <linux/dvb/video.h>
+#include <linux/dvb/audio.h>
+int main(void) {return 0;}
+EOF
+    if cc_check ; then
+      _dvbhead=yes
+      echores "yes"
+    else
+      for I in "-I/usr/src/DVB/include" "$_inc_extra/include/linux" ; do
+        if cc_check "$I" ; then
+          _dvbhead=yes
+          _inc_dvb="$I"
+          echores "yes (using $_inc_dvb)"
+          break
+        fi
+      done
+      test "$_dvbhead" = no && echores "no (specify path to DVB/include (HEAD Version) with --with-extraincdir=DIR)"
+    fi
+  else
+    echores "no"
+  fi
+  if test "$_dvbhead" = yes ; then
+    _def_dvb='#define HAVE_DVB_HEAD 1'
+    _aomodules="mpegpes(dvb) $_aomodules"
+    _vomodules="mpegpes(dvb) $_vomodules"
+  fi
+fi
+if test "$_dvbhead" = no && test "$_dvb" = no ; then
   _def_dvb='#undef HAVE_DVB'
   _aomodules="mpegpes(file) $_aomodules"
-  _vomodules="mpegpes(file) $_vomodules"  
+  _vomodules="mpegpes(file) $_vomodules"
 fi
 
 

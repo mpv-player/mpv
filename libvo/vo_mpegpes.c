@@ -26,9 +26,11 @@
 #include <unistd.h>
 
 #include "mp_msg.h"
-
+#ifdef HAVE_DVB_HEAD
+#define HAVE_DVB 1
+#endif
 #ifdef HAVE_DVB
-
+#ifndef HAVE_DVB_HEAD
 #include <sys/poll.h>
 
 #include <sys/ioctl.h>
@@ -41,6 +43,20 @@
 #include <ost/video.h>
 #include <ost/audio.h>
 
+#else
+#define true 1
+#define false 0
+#include <sys/poll.h>
+
+#include <sys/ioctl.h>
+#include <stdio.h>
+#include <time.h>
+
+#include <linux/dvb/dmx.h>
+#include <linux/dvb/frontend.h>
+#include <linux/dvb/video.h>
+#include <linux/dvb/audio.h>
+#endif
 #endif
 
 #include "config.h"
@@ -86,6 +102,7 @@ static uint32_t preinit(const char *arg){
 #ifdef HAVE_DVB
     if(!arg){
     //|O_NONBLOCK
+#ifndef HAVE_DVB_HEAD
 	if((vo_mpegpes_fd = open("/dev/ost/video",O_RDWR)) < 0){
 		perror("DVB VIDEO DEVICE: ");
 		return -1;
@@ -94,6 +111,16 @@ static uint32_t preinit(const char *arg){
 		perror("DVB AUDIO DEVICE: ");
 		return -1;
 	}
+#else
+	if((vo_mpegpes_fd = open("/dev/dvb/adapter0/video0",O_RDWR)) < 0){
+        	perror("DVB VIDEO DEVICE: ");
+        	return -1;
+	}
+	if((vo_mpegpes_fd2 = open("/dev/dvb/adapter0/audio0",O_RDWR|O_NONBLOCK)) < 0){
+        	perror("DVB AUDIO DEVICE: ");
+        	return -1;
+	}
+#endif
 	if ( (ioctl(vo_mpegpes_fd,VIDEO_SET_BLANK, false) < 0)){
 		perror("DVB VIDEO SET BLANK: ");
 		return -1;
