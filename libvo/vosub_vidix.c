@@ -43,6 +43,8 @@ static vidix_capability_t vidix_cap;
 static vidix_playback_t   vidix_play;
 static vidix_fourcc_t	  vidix_fourcc;
 static vo_functions_t *   vo_server;
+static uint32_t (*server_control)(uint32_t request, void *data, ...);
+
 
 static int  vidix_get_bes_da(bes_da_t *);
 static int  vidix_get_video_eq(vidix_video_eq_t *info);
@@ -635,6 +637,8 @@ uint32_t vidix_control(uint32_t request, void *data, ...)
     return VO_TRUE;
   case VOCTRL_QUERY_FORMAT:
     return vidix_query_fourcc(*((uint32_t*)data));
+  case VOCTRL_SCREENSHOT:
+    return (*server_control)(request,data);
   }
   return VO_NOTIMPL;
 }
@@ -668,6 +672,7 @@ int vidix_preinit(const char *drvname,void *server)
 	((vo_functions_t *)server)->draw_frame=vidix_draw_frame;
 	((vo_functions_t *)server)->flip_page=vidix_flip_page;
 	((vo_functions_t *)server)->draw_osd=vidix_draw_osd;
+	server_control = ((vo_functions_t *)server)->control;
 	((vo_functions_t *)server)->control=vidix_control;
 	vo_server = server;
 	return 0;
