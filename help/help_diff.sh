@@ -11,7 +11,7 @@ curr=""
 while read -r line; do
 	if echo "$line" | grep '^#define' > /dev/null 2>&1; then
 		curr=`echo "$line" | cut -d ' ' -f 2`
-		if grep "^#define $curr" $1 > /dev/null 2>&1; then
+		if grep "^#define $curr[	 ]" $1 > /dev/null 2>&1; then
 			curr=""
 		fi
 	else
