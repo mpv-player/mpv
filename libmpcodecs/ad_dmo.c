@@ -12,7 +12,7 @@
 
 static ad_info_t info = 
 {
-	"Win32/DirectShow decoders",
+	"Win32/DMO decoders",
 	"dmo",
 	"A'rpi",
 	"avifile.sf.net",
