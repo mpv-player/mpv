@@ -1,7 +1,3 @@
-/* Comment this line out so you can watch a move and work on the console at the
- * same time */
-#define BLANK_SCREEN
-
 /* Copyright (C) Mark Zealey, 2002, <mark@zealos.org>. Released under the terms
  * and conditions of the GPL.
  *
@@ -16,6 +12,9 @@
  * faster.
  * 11/04/02: Added a compile option so you can watch the film with the console
  * as the background, or not.
+ * 13/04/02: Fix rough OSD stuff by rendering it straight onto the output
+ * buffer. Added double-buffering, as such had to remove the non-blanking
+ * console mode. Supports hardware zoom/reduce zoom modes.
  *
  * Hints and tricks:
  * - Use -dr to get direct rendering
@@ -67,8 +66,8 @@ static struct fb_fix_screeninfo fb_finfo;
 static struct fb_var_screeninfo fb_vinfo;
 static uint32_t in_width, in_height, in_format, in_depth, in_voodoo_format,
 	screenwidth, screenheight, screendepth, vidwidth, vidheight, vidx, vidy,
-	vid_voodoo_format, *vidpage, *inpage, vidpageoffset,
-	inpageoffset, *memBase0, *memBase1, fs;
+	vid_voodoo_format, *vidpage, *hidpage, *inpage, vidpageoffset,
+	hidpageoffset, inpageoffset, *memBase0, *memBase1, fs, r_width, r_height;
 static volatile voodoo_io_reg *reg_IO;
 static voodoo_2d_reg *reg_2d;
 static voodoo_yuv_reg *reg_YUV;
@@ -153,17 +152,15 @@ static void uninit(void)
 
 static void clear_screen()
 {
-#ifdef BLANK_SCREEN
 	memset(vidpage, 0, screenwidth * screenheight * screendepth);
-#endif /* BLANK_SCREEN */
+	memset(hidpage, 0, screenwidth * screenheight * screendepth);
 }
 
 /* Setup output screen dimensions etc */
 static uint32_t setup_screen(uint32_t full)
 {
-	double ratio = (double)in_width / in_height;
-
-	if(full) {				/* Full screen */
+	if(full) {					/* Full screen */
+		double ratio = (double)in_width / in_height;
 		vidwidth = screenwidth;
 		vidheight = screenheight;
 
@@ -175,13 +172,13 @@ static uint32_t setup_screen(uint32_t full)
 		vidx = (screenwidth - vidwidth) / 2;
 		vidy = (screenheight - vidheight) / 2;
 	} else {					/* Reset to normal size */
-		if (in_width > screenwidth || in_height > screenheight) {
+		if(r_width > screenwidth || r_height > screenheight) {
 			printf("tdfxfb: your resolution is too small to play the movie...\n");
 			return -1;
 		}
 
-		vidwidth = in_width;
-		vidheight = in_height;
+		vidwidth = r_width;
+		vidheight = r_height;
 		vidx = 0;
 		vidy = 0;
 	}
@@ -194,7 +191,7 @@ static uint32_t setup_screen(uint32_t full)
 }
 
 static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height,
-		uint32_t fullscreen, char *title, uint32_t format,const vo_tune_info_t *info)
+		uint32_t flags, char *title, uint32_t format,const vo_tune_info_t *info)
 {
 	screenwidth = fb_vinfo.xres;
 	screenheight = fb_vinfo.yres;
@@ -203,21 +200,27 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	in_height = height;
 	in_format = format;
 
+	r_width = d_width;
+	r_height = d_height;
+
 	/* Setup the screen for rendering to */
 	switch(fb_vinfo.bits_per_pixel) {
 	case 16:
 		screendepth = 2;
 		vid_voodoo_format = VOODOO_BLT_FORMAT_16;
+		alpha_func = vo_draw_alpha_rgb16;
 		break;
 
 	case 24:
 		screendepth = 3;
 		vid_voodoo_format = VOODOO_BLT_FORMAT_24;
+		alpha_func = vo_draw_alpha_rgb24;
 		break;
 
 	case 32:
 		screendepth = 4;
 		vid_voodoo_format = VOODOO_BLT_FORMAT_32;
+		alpha_func = vo_draw_alpha_rgb32;
 		break;
 
 	default:
@@ -229,7 +232,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 
 	/* Some defaults here */
 	in_voodoo_format = VOODOO_BLT_FORMAT_YUYV;
-	alpha_func = vo_draw_alpha_yuy2;
 	in_depth = 2;
 
 	switch(in_format) {
@@ -241,19 +243,16 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 
 	case IMGFMT_BGR16:
 		in_voodoo_format = VOODOO_BLT_FORMAT_16;
-		alpha_func = vo_draw_alpha_rgb16;
 		break;
 
 	case IMGFMT_BGR24:
 		in_depth = 3;
 		in_voodoo_format = VOODOO_BLT_FORMAT_24;
-		alpha_func = vo_draw_alpha_rgb24;
 		break;
 
 	case IMGFMT_BGR32:
 		in_depth = 4;
 		in_voodoo_format = VOODOO_BLT_FORMAT_32;
-		alpha_func = vo_draw_alpha_rgb32;
 		break;
 
 	default:
@@ -264,12 +263,9 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	in_voodoo_format |= in_width * in_depth;
 
 	/* Linux lives in the first frame */
-#ifdef BLANK_SCREEN
 	vidpageoffset = screenwidth * screenheight * screendepth;
-#else /* BLANK_SCREEN */
-	vidpageoffset = 0;
-#endif /* BLANK_SCREEN */
-	inpageoffset = vidpageoffset + screenwidth * screenheight * screendepth;
+	hidpageoffset = vidpageoffset + screenwidth * screenheight * screendepth;
+	inpageoffset = hidpageoffset + screenwidth * screenheight * screendepth;
 
 	if(inpageoffset + in_width * in_depth * in_height > fb_finfo.smem_len) {
 		printf("tdfxfb: Not enough video memory to play this movie. Try at a lower resolution\n");
@@ -277,19 +273,27 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	}
 
 	vidpage = (void *)memBase1 + (unsigned long)vidpageoffset;
+	hidpage = (void *)memBase1 + (unsigned long)hidpageoffset;
 	inpage = (void *)memBase1 + (unsigned long)inpageoffset;
 
-	if(setup_screen(fullscreen) == -1)
+	if(setup_screen(flags & VOFLAG_FULLSCREEN) == -1)
 		return -1;
 
 	memset(inpage, 0, in_width * in_height * in_depth);
 
-	printf("tdfxfb: screen is %dx%d at %d bpp, in is %dx%d at %d bpp (%p/%p)\n",
+	printf("tdfxfb: screen is %dx%d at %d bpp, in is %dx%d at %d bpp, norm is %dx%d\n",
 			screenwidth, screenheight, screendepth * 8,
 			in_width, in_height, in_depth * 8,
-			memBase0, memBase1);
+			d_width, d_height);
 
 	return 0;
+}
+
+static void draw_alpha(int x, int y, int w, int h, unsigned char *src,
+		unsigned char *srca, int stride)
+{
+	char *dst = (char *)vidpage + ((y + vidy) * screenwidth + x + vidx) * screendepth;
+	alpha_func(w, h, src, srca, stride, dst, screenwidth * screendepth);
 }
 
 /* Render onto the screen */
@@ -297,6 +301,15 @@ static void flip_page(void)
 {
 	voodoo_2d_reg regs = *reg_2d;		/* Copy the regs */
 	int i = 0;
+
+	/* Flip to an offscreen buffer for rendering */
+	uint32_t t = vidpageoffset;
+	void *j = vidpage;
+
+	vidpage = hidpage;
+	hidpage = j;
+	vidpageoffset = hidpageoffset;
+	hidpageoffset = t;
 
 	reg_2d->commandExtra = 0;
 	reg_2d->clip0Min = 0;
@@ -324,9 +337,6 @@ static void flip_page(void)
 		if(!(reg_IO->status & STATUS_BUSY))
 			i++;
 
-	/* Reset the card to point at the video page if it got knocked off it */
-	reg_IO->vidDesktopStartAddr = vidpageoffset;
-
 	/* Restore the old regs now */
 	reg_2d->commandExtra = regs.commandExtra;
 	reg_2d->clip0Min = regs.clip0Min;
@@ -343,6 +353,12 @@ static void flip_page(void)
 	reg_2d->dstSize = regs.dstSize;
 
 	reg_2d->command = 0;
+
+	/* Render any text onto this buffer */
+	vo_draw_text(vidwidth, vidheight, draw_alpha);
+
+	/* And flip to the new buffer! */
+	reg_IO->vidDesktopStartAddr = vidpageoffset;
 }
 
 static uint32_t draw_frame(uint8_t *src[])
@@ -366,18 +382,6 @@ static uint32_t draw_slice(uint8_t *i[], int s[], int w, int h, int x, int y)
 	mem2agpcpy_pic(YUV->V, i[2], s[2], h / 2, YUV_STRIDE, s[2]);
 
 	return 0;
-}
-
-static void draw_alpha(int x, int y, int w, int h, unsigned char *src,
-		unsigned char *srca, int stride)
-{
-	char *dst = (char *)inpage + (y * in_width + x) * in_depth;
-	alpha_func(w, h, src, srca, stride, dst, in_width * in_depth);
-}
-
-static void draw_osd(void)
-{
-	vo_draw_text(in_width, in_height, draw_alpha);
 }
 
 /* Attempt to start doing DR (Copied mostly from mga_common.c) */
@@ -445,7 +449,8 @@ static uint32_t control(uint32_t request, void *data, ...)
 		case IMGFMT_BGR16:
 		case IMGFMT_BGR24:
 		case IMGFMT_BGR32:
-			return 7;	/* Supported without conversion, supports OSD */
+			return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW |
+				VFCAP_OSD | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN;
 		}
 
 		return 0;		/* Not supported */
@@ -459,5 +464,5 @@ static uint32_t control(uint32_t request, void *data, ...)
 
 /* Dummy funcs */
 static void check_events(void) { }
+static void draw_osd(void) {}
 static const vo_info_t* get_info(void) { return &vo_info; }
-
