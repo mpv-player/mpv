@@ -47,7 +47,6 @@ static int config(struct vf_instance_s* vf,
 
 static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     fame_yuv_t yuv;
-    fame_frame_statistics_t stats;
     mp_image_t *dmpi;
     int out_size;
 
@@ -61,7 +60,7 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 //    out_size = fame_encode_frame(vf->priv->ctx, &yuv, NULL);
     fame_start_frame(vf->priv->ctx, &yuv, NULL);
     out_size = fame_encode_slice(vf->priv->ctx);
-    fame_end_frame(vf->priv->ctx, &stats);
+    fame_end_frame(vf->priv->ctx, NULL);
     
     if(out_size<=0) return;
 
@@ -93,11 +92,13 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
 }
 
 static int open(vf_instance_t *vf, char* args){
+    int p_quality=0;
+    float p_fps=0;
+
     vf->config=config;
     vf->put_image=put_image;
     vf->query_format=query_format;
     vf->priv=malloc(sizeof(struct vf_priv_s));
-    vf->default_caps=0;
     memset(vf->priv,0,sizeof(struct vf_priv_s));
 
     vf->priv->ctx=fame_open();
@@ -107,13 +108,30 @@ static int open(vf_instance_t *vf, char* args){
     }
 
     // TODO: parse args ->
+    if(args) sscanf(args, "%d:%f", &p_quality, &p_fps);
+
+    if(p_quality<=100){
+	// fixed quality
+	vf->priv->params.quality=p_quality?p_quality:QUALITY;
+	vf->priv->params.bitrate=0;
+    } else {
+	// fixed bitrate (in kbits)
+	vf->priv->params.quality=QUALITY;
+	vf->priv->params.bitrate=1000*p_quality;
+    }
+
+    if(p_fps<1) p_fps=25.0;
+    if(p_fps == ((int)p_fps)){
+	vf->priv->params.frame_rate_num=p_fps;
+	vf->priv->params.frame_rate_den=1;
+    } else {
+	vf->priv->params.frame_rate_num=p_fps*1001;
+	vf->priv->params.frame_rate_den=1001;
+    }
+
     vf->priv->params.coding="I";
-    vf->priv->params.quality=QUALITY;
-    vf->priv->params.bitrate=0;
     vf->priv->params.slices_per_frame=1;
-    vf->priv->params.frames_per_sequence=25; //0xffffffff;
-    vf->priv->params.frame_rate_num=25;
-    vf->priv->params.frame_rate_den=1;
+    vf->priv->params.frames_per_sequence=(int)p_fps;
     vf->priv->params.shape_quality=100;
     vf->priv->params.search_range=8; // for "IPPP" only
     vf->priv->params.verbose=0;
