@@ -105,11 +105,14 @@ A: It's a damaged file with bad mp3 audio stream. Try it with  -afm 4
 Q: Are there rpm/deb/... packages of MPlayer?
 A: You can make a .deb package for yourself, check DOCS/DEBIAN .
    There are .rpm packages at
-	ftp://ftp.pld.org.pl/test/i{3,5,6}86/
-		and/or
-	ftp://ftp.pld.org.pl/PLD-1.0/i{3,5,6}86/PLD/RPMS/
-   NOTE: i{3,5,6} stand for i386, i586, i686 . If you have i686 CPU, use
-         i686, etc.
+	ftp://ftp.pld.org.pl/test/i386/
+	ftp://ftp.pld.org.pl/test/i586/
+	ftp://ftp.pld.org.pl/test/i686/
+
+   NOTE : it's _STRONGLY_ discouraged to make and distribute binary packages
+	of MPlayer, since it (currently) _highly_ depends on compile-time
+	options and optimizations!
+
    NOTE: MANUAL COMPILATION _ALWAYS_ GIVES BETTER PERFORMANCE AND SPEED !
 
 Q: Are there any mailing lists on MPlayer?

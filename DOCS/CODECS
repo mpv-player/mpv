@@ -58,6 +58,8 @@ Problems:
 - MSZH
   avimszh.dll: RGB only (no YUV), Called unk_RegEnumValueA -> endless loop
 - MWV1: calls many unk_ functions and then segfaults.
+- HuffYUV:  (HFYU)
+  huffyuv.dll: YUY2 _or_ 24/32bpp only (depending on file encoding)
 
 Not tested:
 
