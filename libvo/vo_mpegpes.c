@@ -1,4 +1,4 @@
-#define HAVE_DVB
+#undef HAVE_DVB
 #define PES_MAX_SIZE 2048
 /* 
  * Based on:
