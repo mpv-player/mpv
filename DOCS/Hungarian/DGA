@@ -68,23 +68,70 @@ Tartalom
 5. A DGA driver képességei
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A DGA driver meghivasa a -vo dga parancssori opcio megadasaval tortenik.
-Az alapertelmezett magatartas szerint a video meretehez legkozelebb eso
-felbontasba valt. Figyelmen kivul hagyja a -vm es -fs kapcsolokat
-(felbontasvaltas es teljeskepernyo) - mindig az adot felbontas leheto legjobb
-kihasznalasara torekszik, igy egy arva CPU ciklusnak sem kell forditodnia a kep
-nagyitasara.
-Ha nem tetszik a mod amit kivalasztott, megadhatod hogy az -x es -y altal
-kijelolt merethez valasszon felbontast.
-A -v opcio megadasaval a DGA driver tobbek kozott kiirja az XF86Config
-filed altal elerheto felbontasokat.
-DGA2-vel megadhatod a hasznalando szinmelyseget is, a -bpp opcioval.
-Hasznalhato: 15, 16, 24 es 32. A hardware-edtol fugg, hogy ezek kozul melyeket
-hasznalhatod, valamint hogy (lassu) konverzio lehetseges-e.
+A DGA driver meghívása a -vo dga parancssori opció megadásával történik.
+Az alapértelmezett magatartás szerint a video méretéhez legközelebb esõ
+felbontásba vált. Figyelmen kívul hagyja a -vm es -fs kapcsolókat
+(felbontásváltás és teljesképernyõ) - mindig az adott felbontás lehetõ legjobb
+kihasználására törekszik, így egy árva CPU ciklusnak sem kell fordítódnia a
+kép nagyítására.
+Ha nem tetszik a mód amit kiválasztott, megadhatod hogy az -x es -y által
+kijelölt mérethez válasszon felbontást.
+A -v opció megadásaval a DGA driver többek között kiírja az XF86Config
+file-d által elérhetõ felbontásokat.
+DGA2-vel megadhatod a használandó színmélységet is, a -bpp opcióval.
+Használható: 15, 16, 24 es 32. A hardware-edtõl függ, hogy ezek közül melyeket
+használhatod, valamint hogy (lassú) konverzió lehetséges-e.
 
-Ha szerencsed van es van meg eleg memoriad hogy a kep megegyszer elferjen,
+Ha szerencséd van és van még elég memóriád hogy a kép mégegyszer elférjen,
 akkor a DGA driver doublebuffering-et fog alkalmazni, ami sokkal folyamatosabb
-lejatszast eredmenyez.
+lejátszást eredményez.
+
+
+6. Sebesség
+~~~~~~~~~~~
+ A DGA framebuffer használatával legalább olyan gyors képet kapunk mint X11-el,
+ plusz teljeskepérnyõs mód. A százalékos CPU használati értekeket amiket
+ MPlayer kiír óvatosan kezeljuk, mert pl az X11 drivernél nem tartalmazzák
+ az X szerver által a megjelenítéshez használt idõt. Kapcsolj egy terminalt
+ a soros portodra es indíts egy top-ot hogy lásd valójában mi történik.
+
+ Általánosan szólva a DGA sebességnövekedése az X11-hez képest erõsen függ
+ a videokártyádtól, és annak driverétõl.
+
+ Ha lassú a rendszered, jobb ha 15 vagy 16bpp-s színmélységet használsz,
+ mivel ezek a 32bites mód memóriaigényének csak a felét követelik.
+
+ A 24bites mélység használata akkor jó, ha a kártyád csak 32bites módot
+ támogat, mivel így 25%-al kevesebb adatnak kell átjutnia, a 32/32bites
+ módhoz képest.
+
+ Már láttam AVI fileokat lejátszódni Pentium MMX 266-on. AMD K6/2 CPU-k
+ 400Mhz-en vagy afölött már jók.
+
+7. Ismert hibák
+~~~~~~~~~~~~~~~
+
+ Nos, néhány XFree fejlesztõ szerint a DGA nagy szörnyûség. Szerintük nem
+ érdemes használni. Az implementációja nem minden driverben tökeletes.
+
+ o XFree 4.0.3-mal es nv.o driverrel van egy bug ami furcsa szineket eredményez
+ o az ATI driverrel egynél többször kell módot váltani miután a DGA használat
+   befejezõdott
+ o némely driverek egyszerûen nem tudnak visszaváltani a normális felbontásba
+   (használd a Ctrl-Alt-Keypad +, - billentyûket)
+ o néhány driver furcsa szineket jelenít meg
+ o mások hazudnak arról hogy mennyi memoriát map-elnek be, így vo_dga
+   nem fog doublebuffering-et használni (SIS?)
+ o megint mások nem adnak vissza egyetlen videomódot se. Ebben az esetben
+   a DGA driver leáll, valami nonszensz üzenettel mint pl 100000x100000 vagy
+   ilyesmi ...
+ o az OSD csak doublebuffering-el mûködik
+
+8. Beépítendõ dolgok
+~~~~~~~~~~~~~~~~~~~~
+
+ o az új X11 render interface használata OSD-hez
+ o hol van a TODO listám ???? :-((((
 
 
 A. Néhány modeline
