@@ -13,7 +13,6 @@ extern void mplFullScreen( void );
 extern void mplPlay( void );
 extern void mplPause( void );
 extern void mplState( void );
-extern void mplResize( unsigned int X,unsigned int Y,unsigned int width,unsigned int height );
 extern void mplResizeToMovieSize( unsigned int width,unsigned int height );
 
 extern void mplIncAudioBufDelay( void );

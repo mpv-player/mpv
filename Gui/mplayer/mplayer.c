@@ -97,7 +97,6 @@ void mplInit( int argc,char* argv[], char *envp[], void* disp )
  appMPlayer.subWindow.ReDraw=mplSubDraw;
  appMPlayer.subWindow.MouseHandler=mplSubMouseHandle;
  appMPlayer.subWindow.KeyHandler=mplMainKeyHandle;
- appMPlayer.subWindow.ReSize=mplResize;
 
  wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
  wsClearWindow( appMPlayer.subWindow );
@@ -109,6 +108,12 @@ void mplInit( int argc,char* argv[], char *envp[], void* disp )
  btnModify( evSetVolume,guiIntfStruct.Volume );
  btnModify( evSetBalance,guiIntfStruct.Balance );
  btnModify( evSetMoviePosition,guiIntfStruct.Position );
+ 
+ if ( fullscreen )
+  {
+   btnModify( evFullScreen,btnPressed );
+   mplFullScreen();
+  }
 
  guiIntfStruct.Playing=0;
 

@@ -2070,7 +2070,7 @@ read_input:
              usleep(20000);
 #ifdef HAVE_NEW_INPUT
          }
-      if ( cmd ) mp_cmd_free(cmd);
+      mp_cmd_free(cmd);
 #else
              if(use_stdin) usec_sleep(1000); // do not eat the CPU
          }

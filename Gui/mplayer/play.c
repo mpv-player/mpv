@@ -55,7 +55,6 @@ void mplFullScreen( void )
  fullscreen=appMPlayer.subWindow.isFullScreen;
  if ( guiIntfStruct.Playing ) wsSetBackgroundRGB( &appMPlayer.subWindow,0,0,0 );
   else wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
-// mplResize( 0,0,appMPlayer.subWindow.Width,appMPlayer.subWindow.Height );
 }
 
 extern int mplSubRender;
@@ -119,10 +118,6 @@ void mplState( void )
     btnModify( evPlaySwitchToPause,btnDisabled );
     btnModify( evPauseSwitchToPlay,btnReleased );
    }
-}
-
-void mplResize( unsigned int X,unsigned int Y,unsigned int width,unsigned int height )
-{
 }
 
 void mplMPlayerInit( int argc,char* argv[], char *envp[] )

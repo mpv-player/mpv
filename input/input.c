@@ -860,9 +860,10 @@ mp_input_get_cmd(int time, int paused) {
 void
 mp_cmd_free(mp_cmd_t* cmd) {
   int i;
-#ifdef MP_DEBUG
-  assert(cmd != NULL);
-#endif
+//#ifdef MP_DEBUG
+//  assert(cmd != NULL);
+//#endif
+  if ( !cmd ) return;
 
   if(cmd->name)
     free(cmd->name);
