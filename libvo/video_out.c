@@ -102,6 +102,9 @@ extern vo_functions_t video_out_xvidix;
 
 vo_functions_t* video_out_drivers[] =
 {
+#ifdef HAVE_DIRECTX
+        &video_out_directx,
+#endif
 #ifdef HAVE_XMGA
         &video_out_xmga,
 #endif
@@ -133,9 +136,6 @@ vo_functions_t* video_out_drivers[] =
 #endif
 #ifdef HAVE_SDL
         &video_out_sdl,
-#endif
-#ifdef HAVE_DIRECTX
-        &video_out_directx,
 #endif
 #ifdef HAVE_GGI
 	&video_out_ggi,

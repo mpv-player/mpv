@@ -60,6 +60,9 @@ ao_functions_t* audio_out_drivers[] =
         &audio_out_dxr2,
 #endif
 // native:
+#ifdef HAVE_WIN32WAVEOUT
+        &audio_out_win32,
+#endif
 #ifdef USE_OSS_AUDIO
         &audio_out_oss,
 #endif
@@ -74,9 +77,6 @@ ao_functions_t* audio_out_drivers[] =
 #endif
 #ifdef USE_SUN_AUDIO
         &audio_out_sun,
-#endif
-#ifdef HAVE_WIN32WAVEOUT
-        &audio_out_win32,
 #endif
 // wrappers:
 #ifdef USE_ARTS
