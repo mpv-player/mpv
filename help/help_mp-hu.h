@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h 1.158 (2005. 02. 15.)
+// Sync'ed with help_mp-en.h 1.162 (2005. 03. 01.)
 
 // ========================= MPlayer help ===========================
 
@@ -214,6 +214,9 @@ static char help_text[]=
 #define MSGTR_WritingAVIHeader "AVI fejléc írása...\n"
 #define MSGTR_DuplicateFrames "\n%d darab képkocka duplázása!!!\n"
 #define MSGTR_SkipFrame "\nképkocka átugrása!!!\n"
+#define MSGTR_ResolutionDoesntMatch "\nAz új videó fájl felbontása különbözik az elõzõétõl.\n"
+#define MSGTR_FrameCopyFileMismatch "\nAz összes videó fájlnak azonos fps-sel, felbontással, és codec-kel kell rendelkeznie az -ovc copy-hoz.\n"
+#define MSGTR_AudioCopyFileMismatch "\nAz összes fájlnak azonos audió codec-kel és formátummal kell rendelkeznie az -oac copy-hoz.\n"
 #define MSGTR_ErrorWritingFile "%s: hiba a fájl írásánál.\n"
 #define MSGTR_WritingAVIIndex "\nAVI index írása...\n"
 #define MSGTR_FixupAVIHeader "AVI fejléc javítása...\n"
@@ -336,6 +339,10 @@ static char help_text[]=
 "mw-us => 40kbps/mono        voice => 56kbps/mono\n"\
 "fm/radio/tape => 112kbps    hifi => 160kbps\n"\
 "cd => 192kbps               studio => 256kbps"
+#define MSGTR_LameCantInit "A Lame opciók nem állíthatóak be, ellenõrizd a"\
+"bitrátát/mintavételi rátát, néhány nagyon alacsony bitrátához (<32) alacsonyabb"\
+"mintavételi ráta kell (pl. -srate 8000)."\
+"Ha minden más sikertelen, próbálj ki egy preset-et."
 #define MSGTR_ConfigfileError "konfigurációs fájl hibája"
 #define MSGTR_ErrorParsingCommandLine "hiba a parancssor értelmezésekor"
 #define MSGTR_VideoStreamRequired "Video stream szükséges!\n"
@@ -933,7 +940,7 @@ static char help_text[]=
 #define MSGTR_AO_OSS_ChanNotFound "[AO OSS] audio_setup: A hangkártya keverõjének nincs '%s' csatornája, az alapértelmezettet használom.\n"
 #define MSGTR_AO_OSS_CantOpenDev "[AO OSS] audio_setup: A(z) %s audio eszközt nem tudom megnyitni: %s\n"
 #define MSGTR_AO_OSS_CantMakeFd "[AO OSS] audio_setup: Nem lehet fájl leíró blokkolást végezni: %s\n"
-#define MSGTR_AO_OSS_CantSetAC3 "[AO OSS] A(z) %s audio eszköz nem állítható be AC3 kimenetre, S16-ot próbálok...\n"
+#define MSGTR_AO_OSS_CantSet "[AO OSS] A(z) %s audio eszköz nem állítható be %s kimenetre, %s-t próbálok...\n"
 #define MSGTR_AO_OSS_CantSetChans "[AO OSS] audio_setup: Nem sikerült az audio eszközt %d csatornára állítani.\n"
 #define MSGTR_AO_OSS_CantUseGetospace "[AO OSS] audio_setup: a vezérlõ nem támogatja a SNDCTL_DSP_GETOSPACE-t :-(\n"
 #define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   ***  Az audio vezérlõd NEM támogatja a select() -et ***\n Fordítsd újra az MPlayer-t az #undef HAVE_AUDIO_SELECT sorral a config.h-ban!\n\n"
