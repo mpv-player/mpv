@@ -78,6 +78,7 @@ typedef struct bes_registers_s
   int ckey_on;
   uint32_t graphics_key_clr;
   uint32_t graphics_key_msk;
+  uint32_t ckey_cntl;
   
   int deinterlace_on;
   uint32_t deinterlace_pattern;
@@ -657,6 +658,10 @@ static void radeon_vid_make_default(void)
   OUTREG(OV0_DEINTERLACE_PATTERN,besr.deinterlace_pattern);
   besr.deinterlace_on=1;
   besr.double_buff=1;
+  besr.ckey_on=0;
+  besr.graphics_key_msk=0;
+  besr.graphics_key_clr=0;
+  besr.ckey_cntl = GRAPHIC_KEY_FN_NE;
 }
 
 
@@ -885,7 +890,7 @@ int vixQueryFourcc(vidix_fourcc_t *to)
 		    VID_DEPTH_12BPP| VID_DEPTH_15BPP|
 		    VID_DEPTH_16BPP| VID_DEPTH_24BPP|
 		    VID_DEPTH_32BPP;
-	to->flags = VID_CAP_EXPAND | VID_CAP_SHRINK;
+	to->flags = VID_CAP_EXPAND | VID_CAP_SHRINK | VID_CAP_COLORKEY;
 	return 0;
     }
     else  to->depth = to->flags = 0;
@@ -943,18 +948,9 @@ static void radeon_vid_display_video( void )
 			    (besr.saturation << 16));
 #endif
     radeon_fifo_wait(2);
-    if(besr.ckey_on)
-    {
-	OUTREG(OV0_GRAPHICS_KEY_MSK, besr.graphics_key_msk);
-	OUTREG(OV0_GRAPHICS_KEY_CLR, besr.graphics_key_clr);
-	OUTREG(OV0_KEY_CNTL,GRAPHIC_KEY_FN_EQ|VIDEO_KEY_FN_FALSE|CMP_MIX_OR);
-    }
-    else
-    {
-	OUTREG(OV0_GRAPHICS_KEY_MSK, 0ULL);
-	OUTREG(OV0_GRAPHICS_KEY_CLR, 0ULL);
-	OUTREG(OV0_KEY_CNTL,GRAPHIC_KEY_FN_NE);
-    }
+    OUTREG(OV0_GRAPHICS_KEY_MSK, besr.graphics_key_msk);
+    OUTREG(OV0_GRAPHICS_KEY_CLR, besr.graphics_key_clr);
+    OUTREG(OV0_KEY_CNTL,besr.ckey_cntl);
 
     OUTREG(OV0_H_INC,			besr.h_inc);
     OUTREG(OV0_STEP_BY,			besr.step_by);
@@ -1223,6 +1219,8 @@ static int radeon_vid_init_video( vidix_playback_t *config )
     src_w>>=1;
     besr.p2_x_start_end = (src_w+left-1)|(leftUV<<16);
     besr.p3_x_start_end = besr.p2_x_start_end;
+    
+
     return 0;
 }
 
@@ -1438,4 +1436,73 @@ int 	vixPlaybackGetDeint( vidix_deinterlace_t * info)
     info->deinterlace_pattern = besr.deinterlace_pattern;
   }
   return 0;
+}
+
+
+/* Graphic keys */
+static vidix_grkey_t radeon_grkey;
+
+static void set_gr_key( void )
+{
+    if(radeon_grkey.ckey.op == CKEY_TRUE)
+    {
+	besr.ckey_on=1;
+
+	switch(radeon_vid_get_dbpp())
+	{
+	case 15:
+		besr.graphics_key_clr=
+			  ((radeon_grkey.ckey.blue &0xF8)>>3)
+			| ((radeon_grkey.ckey.green&0xF8)<<2)
+			| ((radeon_grkey.ckey.red  &0xF8)<<7);
+		break;
+	case 16:
+		besr.graphics_key_clr=
+			  ((radeon_grkey.ckey.blue &0xF8)>>3)
+			| ((radeon_grkey.ckey.green&0xFC)<<3)
+			| ((radeon_grkey.ckey.red  &0xF8)<<8);
+		break;
+	case 24:
+		besr.graphics_key_clr=
+			  ((radeon_grkey.ckey.blue &0xFF))
+			| ((radeon_grkey.ckey.green&0xFF)<<8)
+			| ((radeon_grkey.ckey.red  &0xFF)<<16);
+		break;
+	case 32:
+		besr.graphics_key_clr=
+			  ((radeon_grkey.ckey.blue &0xFF))
+			| ((radeon_grkey.ckey.green&0xFF)<<8)
+			| ((radeon_grkey.ckey.red  &0xFF)<<16);
+		break;
+	default:
+		besr.ckey_on=0;
+		besr.graphics_key_msk=0;
+		besr.graphics_key_clr=0;
+	}
+	besr.graphics_key_msk = 0xFF000000|besr.graphics_key_clr;
+	besr.ckey_cntl = 0x20;
+    }
+    else
+    {
+	besr.ckey_on=0;
+	besr.graphics_key_msk=0;
+	besr.graphics_key_clr=0;
+	besr.ckey_cntl = GRAPHIC_KEY_FN_NE;
+    }
+    OUTREG(OV0_GRAPHICS_KEY_MSK, besr.graphics_key_msk);
+    OUTREG(OV0_GRAPHICS_KEY_CLR, besr.graphics_key_clr);
+    OUTREG(OV0_KEY_CNTL,besr.ckey_cntl);
+}
+
+int vixGetGrKeys(vidix_grkey_t *grkey)
+{
+    memcpy(grkey, &radeon_grkey, sizeof(vidix_grkey_t));
+    return(0);
+}
+
+int vixSetGrKeys(const vidix_grkey_t *grkey)
+{
+    memcpy(&radeon_grkey, grkey, sizeof(vidix_grkey_t));
+    set_gr_key();
+    return(0);
 }
