@@ -154,7 +154,7 @@ Bunkus, Moritz (Mosu) <moritz@bunkus.org>
 
 Christiansen, Dan Villiom Podlaski (danchr) <danchr@daimi.au.dk>
     * timer-darwin.c
-    * ao_macosx (unmaintained and broken)
+    * ao_macosx
     * build system cleanups for Darwin
 
 Comstedt, Marcus <marcus@idonex.se>
