@@ -64,7 +64,9 @@ szimbolikus linket kell létrehozni, vagy megadni az eszközt a parancssorban!
 <P>Örüljetek népek, itt az igazi DVD támogatás. Már nem kell egyesével
 lejátszani a VOB file-okat a video_ts könyvtárból, nem kell aggódni amiatt
 hogy a lemez kódolt-e vagy se (régebben kellett ilyenkor a '-dvdauth /dev/dvd'
-opció is), és még csak fel se kell mountolni a lemezt!</P>
+opció is), és még csak fel se kell mountolni a lemezt (bár a mountolás
+azzal a tagadhatatlan elõnnyel jár hogy a Linux a feltört CSS kulcsokat
+cache-be rakja, így a következõ lejátszásnál már nem kell a törésre várni).</P>
 
 <P>FONTOS: NE kérj semmit a DVD lejátszással kapcsolatban. Most elõször van
 mûködõ támogatás <B>MPlayer</B>-ben, és jelenleg a hibák kijavításán, és
@@ -97,6 +99,14 @@ címrõl (klikkelj a 'download'-ra a bal oldali menûben).</I></P>
 <LI><P><B>Fordítsd le és installáld a libdvdcss-t és AZUTÁN a libdvdread-et.</B></P>
 
 <P><I>Olvasd el ezen csomagok dokumentációját, ha segítségre van szükséged.</I></P></LI>
+
+<LI><P><B>Régi DVD támogatás - <I>OPCIONÁLIS</I></B></P>
+
+<P><I>Ez akkor hasznos ha pl merevlemezrõl akarsz kódolt VOB-ot lejátszani.
+  Fordítsd le a <B>libcss</B> 0.0.1-et (és ne újabbat) és installáld a
+  <CODE>/usr/local/lib</CODE> könyvtárba (az rpm/deb csomagok valószínûleg
+  <CODE>/usr/lib</CODE>-be pakolnak, de erre való a <CODE>-csslib
+  /usr/lib/libcss.so</CODE> opció)</P></LI>
 
 <LI><P><B>Fordítsd újra az MPlayer-t.</B></P>
 
@@ -138,14 +148,32 @@ nem kell újrafordítanod õket minden alkalommal mikor az <B>MPlayer</B>-t.</P>
   A megadott <CODE>id</CODE>-vel rendelkezõ feliratot (nyelvet) jeleníti meg.
   Hasznos például hibás DVD-nél ahol az országkód nem a megfelelõ feliratot
   jelenti.</TD><TR>
+<TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-csslib &lt;útvonal/filenév&gt;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  (régi DVD lejátszó kóddal) Ezzel az opcióval definiálható felül az
+  alapértelmezett <CODE>/usr/local/lib/libcss.so</CODE>
+  </TD><TR>
+<TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-dvdauth &lt;DVD egység&gt;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  (régi DVD lejátszó kóddal) A megadott DVD egységgel történõ autentikálás
+  megadása.
+  </TD><TR>
+<TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-dvdkey &lt;CSS kulcs&gt;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  (régi DVD lejátszó kóddal) Mikor nem DVD-rõl történik a kódolt MPEG2
+  lejátszása, ezzel az opcióval adható meg a dekódoláshoz szükséges CSS
+  kulcs. Ezt a kulcsot a DVD-vel történõ autentikálásnál írja ki az <B>MPlayer</B>.
+  </TD><TR>
 </TABLE>
 
 <P>Az egység alapbeállítás szerint <CODE>/dev/dvd</CODE>, ezt a config.h-ban
 változtathatod meg (fordításkor), van megadhatod filenévnek:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 /dev/dvd</CODE></P>
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -sid 5 /dev/dvd</CODE></P>
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 2 -chapter 5 -dvdangle 2</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -slang hu /dev/dvd</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 2 -alang hu -chapter 5 -dvdangle 2</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvdauth /dev/dvd /mnt/cd/video_ts/vts_03_1.vob</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvdkey C005D4A16D vts_03_1.vob</CODE></P>
 
 <P><B><A NAME=4.3>4.3.  DVD FAQ</A></B></P>
 
@@ -174,22 +202,6 @@ a készítõi...
 Igen, lásd fent, a DVD fejezetet.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-Nincs hang / rossz (spanyol hang, vagy ilyesmi).
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-Az <B>MPlayer</B> egyelõre nem használ fel minden IFO információt.
-Manuálisan kiválaszthatsz egy DVD audio stream-et pl az '-aid 128' kapcsolóval,
-ahol 128 az audio stream száma. Próbáld a 128,129,stb számokat...
-Természetesen ezt hamarosan megoldjuk.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-Furcsa effektek vannak (úgy néz ki mint ha váltottsoros lenne), különösen
-gyorsan mozgó tárgyaknál.
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-Ismert probléma, nemsokára megoldjuk (libvo2 után).
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
 <TD>&nbsp;&nbsp;</TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
  Hogy állíthatom be a DVD régiókódját ? Nincs windowsom!
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
@@ -202,15 +214,14 @@ Ismert probléma, nemsokára megoldjuk (libvo2 után).
      Bûnösek vagytok a következõ vádpontokban : XYZ#$--
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Anyád. Nincs DeCSS kód az MPlayer-ben. libdvdcss-hez linkeli magát.<BR>
-<B>UPDATE</B> : a DeCSS szabad.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Muszáj rendszergazdai jogosultságokkal rendelkeznem hogy le tudjak
 játszani egy DVD-t?
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-Nem, ez már a múlté. De persze kellenek megfelelõ jogosultságok a DVD
-egységhez (pl /dev/dvd).
+Csak a régi fajta DVD támogatáshoz. Ezenkívül persze kellenek megfelelõ
+jogosultságok a DVD egységhez (pl /dev/dvd).
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>

@@ -69,8 +69,9 @@ manually from disk thinking of the purpose of a file in the video_ts
 directory, you don't need worry it it's an encrypted disk or not (in old
 <B>MPlayer</B> you had to put '-dvdauth /dev/dvd' into the command line in case
 of encrypted discs), and you don't need even mount your disk to be able to
-play :)</P>
-  
+play (but mounting it makes Linux cache the cracked CSS keys, so the playing
+will initialize much faster second time).</P>
+
 <P>IMPORTANT NOTE: please _DO_NOT_ require further features for DVD playback.
 This is the first version of some real DVD support inside <B>MPlayer</B> and
 we're busy with hunting bugs and implementing basic DVD player features.</P>
@@ -103,7 +104,15 @@ For
 <LI><P><B>Compile and install libdvdcss THEN libdvdread.</B></P>
     
 <P><I>Read documentation of these packages to do this step easily.</I></P></LI>
-  
+
+<LI><P><B>Old-style DVD support - <I>OPTIONAL</I></B></P>
+
+<P><I>Useful if you want to play encoded VOB's from hard disk. Compile
+  <B>libcss</B> 0.0.1 (not newer) and install it to <CODE>/usr/local/lib</CODE>
+  (rpm/deb packages will put it to <CODE>/usr/lib</CODE>, but you can use the
+  <CODE>-csslib
+  /usr/lib/libcss.so</CODE> option)</P></LI>
+
 <LI><P><B>Recompile MPlayer.</B></P>
   
 <P><I>Run <CODE>./configure</CODE>. If you install libdvdread correctly, ./configure
@@ -148,7 +157,22 @@ machine.</P>
 <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
   Displays a subtitle channel with the given <CODE>id</CODE> (values can be
   0-31). Useful for example with badly mastered DVDs where country code
-  selects the wrong channel.
+  selects the wrong channel.</TD></TR>
+<TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-csslib &lt;path/filename&gt;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  (old-style DVD option) This option is used to override the default location
+  of <CODE>/usr/local/lib/libcss.so</CODE>
+  </TD></TR>
+<TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-dvdauth &lt;DVD device&gt;&nbsp;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  (old-style DVD option) Turns on DVD authentication using the given device.
+  </TD></TR>
+<TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-dvdkey &lt;CSS key&gt;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  (old-style DVD option) When decoding from non-DVD, this option gives the
+  CSS key needed to crack the DVD (the key is printed when authenticating
+  with DVD).
+  </TD></TR>
 </TABLE>
 
 <P>Default device is <CODE>/dev/dvd</CODE>, you can change it in config.h
@@ -156,8 +180,10 @@ machine.</P>
 </P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 /dev/dvd</CODE></P>
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -sid 5 /dev/dvd</CODE></P>
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 2 -chapter 5 -dvdangle 2</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -slang en /dev/dvd</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 2 -alang sp -chapter 5 -dvdangle 2</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvdauth /dev/dvd /mnt/cd/video_ts/vts_03_1.vob</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvdkey C005D4A16D vts_03_1.vob</CODE></P>
 
 <P><B><A NAME=4.3>4.3. DVD playback FAQ</A></B></P>
 
@@ -186,23 +212,6 @@ Yes! See above in the DVD chapter.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-I've got no sound / bad sound (Spanish audio and other ugly things).
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-<B>MPlayer</B> currently does not use all of information of IFO blocks from DVD.
-You can adjust the right DVD audio stream with: '-aid 128' command line
-option, where 128 is the stream id of requested audio stream. You can
-experience with numbers of 128,129,... and so on. Of course this problem
-will be solved in the future.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-There is some strange effect (interlace like thing) especially when fast
-moving objects are shown in the movie.
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-Known problem, we try to fix it later (when we switch to libvo2).
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 How can I set the region code of my DVD-Drive ? I don't have windows!
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Use the 'regionset' tool:
@@ -215,13 +224,12 @@ under the XYZ#$ paragraph of the--
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Get back asshole, there is no DeCSS code in <B>MPlayer</B>. <B>MPlayer</B> uses libdvdread
 by linking against it, and libdvdread uses libdvdcss by dynamic loading it.<BR>
-<B>UPDATE</B> : DeCSS is free.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Do I need to be (setuid) root/setuid fibmap_mplayer to be able to play DVD?
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-No, you don't. This is the past :) However of course you must have got
+No, you don't. Only for old-style DVD support. However of course you must have
 the proper rights to the DVD device driver entry (in /dev).
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
