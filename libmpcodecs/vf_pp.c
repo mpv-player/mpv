@@ -129,7 +129,11 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 		    (mpi->w+7)&(~7),mpi->h,
 		    mpi->qscale, mpi->qstride,
 		    vf->priv->ppMode[ vf->priv->pp ], vf->priv->context,
+#ifdef PP_PICT_TYPE_QP2
 		    mpi->pict_type | (mpi->qscale_type ? PP_PICT_TYPE_QP2 : 0));
+#else
+		    mpi->pict_type);
+#endif
     }
     return vf_next_put_image(vf,vf->priv->dmpi);
 }

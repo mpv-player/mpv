@@ -662,7 +662,9 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     mpi->qscale =pic->qscale_table;
     mpi->qstride=pic->qstride;
     mpi->pict_type=pic->pict_type;
+#if LIBAVCODEC_BUILD >= 4664
     mpi->qscale_type= pic->qscale_type;
+#endif
     
     return mpi;
 }
