@@ -281,7 +281,7 @@ int init_video_codec(sh_video_t *sh_video,int ex){
     return 0;
   }
 
-  sh_video->our_out_buffer = shmem_alloc(sh_video->o_bih.biSizeImage);
+  sh_video->our_out_buffer = memalign(64,sh_video->o_bih.biSizeImage);
   if(!sh_video->our_out_buffer){
     mp_msg(MSGT_WIN32,MSGL_ERR,"not enough memory for decoded picture buffer (%ld bytes)\n", sh_video->o_bih.biSizeImage);
     return 0;

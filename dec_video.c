@@ -202,7 +202,7 @@ switch(sh_video->codec->driver){
      DS_VideoDecoder_SetDestFmt(out_fmt&255,0);           // RGB/BGR
    }
 
-   sh_video->our_out_buffer = shmem_alloc(sh_video->disp_w*sh_video->disp_h*bpp/8); // FIXME!!!
+   sh_video->our_out_buffer = memalign(64,sh_video->disp_w*sh_video->disp_h*bpp/8); // FIXME!!!
 
    DS_VideoDecoder_Start();
 
@@ -268,7 +268,7 @@ switch(sh_video->codec->driver){
 	decore(0x123, DEC_OPT_INIT, &dec_param, NULL);
 	dec_set.postproc_level = divx_quality;
 	decore(0x123, DEC_OPT_SETPP, &dec_set, NULL);
-	sh_video->our_out_buffer = shmem_alloc(((bits*dec_param.x_dim+7)/8)*dec_param.y_dim);
+	sh_video->our_out_buffer = memalign(64,((bits*dec_param.x_dim+7)/8)*dec_param.y_dim);
 //	sh_video->our_out_buffer = shmem_alloc(dec_param.x_dim*dec_param.y_dim*5);
    }
    mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: OpenDivX video codec init OK!\n");
@@ -444,7 +444,7 @@ if(verbose>1){
 	    int y;
 	    // temporary hack - FIXME
 	    if(!sh_video->our_out_buffer)
-		sh_video->our_out_buffer = shmem_alloc(sh_video->disp_w*sh_video->disp_h*2);
+		sh_video->our_out_buffer = memalign(64,sh_video->disp_w*sh_video->disp_h*2);
 	    for(y=0;y<sh_video->disp_h;y++){
 	      unsigned char *s0=lavc_picture.data[0]+lavc_picture.linesize[0]*y;
 	      unsigned char *s1=lavc_picture.data[1]+lavc_picture.linesize[1]*y;
@@ -582,7 +582,7 @@ switch(d_video->demuxer->file_format){
 //   sh_video=d_video->sh;sh_video->ds=d_video;
    mpeg2_init();
    // ========= Read & process sequence header & extension ============
-   videobuffer=shmem_alloc(VIDEOBUFFER_SIZE);
+   videobuffer=memalign(8,VIDEOBUFFER_SIZE);
    if(!videobuffer){ 
      mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Cannot allocate shared memory\n");
      return 0;
