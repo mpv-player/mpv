@@ -29,6 +29,9 @@ time for fixing buggy, broken or old patches!
    Subject line should be: '[PATCH] very short description of the patch'.
    In the mail, describe in a few sentences what you change and why.
    If you made independent changes, try to send them as separate patches.
+   The subject line is very important if you do not want your patch to get
+   lost in the noise. We need the uppercase [PATCH] to be able to search
+   for unapplied patches, so please use it.
 
 Thank you!
 
