@@ -1136,11 +1136,14 @@ echores "$_termcap"
 
 
 echocheck "shm"
-cat > $TMPC << EOF
+if test "$_shm" = auto ; then
+  _shm=no
+  cat > $TMPC << EOF
 #include <sys/shm.h>
 int main(void) { shmget(0, 0, 0); shmat(0, 0, 0); shmctl(0, 0, 0); return 0; }
 EOF
-cc_check && _shm=yes
+  cc_check && _shm=yes
+fi
 if test "$_shm" = yes ; then
   _def_shm='#define HAVE_SHM 1'
 else
