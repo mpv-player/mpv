@@ -17,7 +17,7 @@ char * Translate( char * str )
  static char   trbuf[512];
         char   tmp[128];
         int    i,c;
-        int    t,h,m,s;
+        int    t;
  memset( trbuf,0,512 );
  memset( tmp,0,128 );
  for ( c=0,i=0;i < strlen( str );i++ )

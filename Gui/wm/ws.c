@@ -613,8 +613,10 @@ buttonreleased:
         break;
 
    case PropertyNotify:
-	break;
-        fprintf(stderr,"[ws] PropertyNotify %s\n",XGetAtomName( wsDisplay,Event->xproperty.atom ) );
+//	break;
+//	#ifdef DEBUG
+//         fprintf(stderr,"[ws] PropertyNotify ( 0x%x ) %s ( 0x%x )\n",wsWindowList[l]->WindowID,XGetAtomName( wsDisplay,Event->xproperty.atom ),Event->xproperty.atom );
+//	#endif
         if ( Event->xproperty.atom == wsWindowList[l]->AtomRemote )
          {
           Atom            type;
@@ -634,6 +636,9 @@ buttonreleased:
            {
             args[strlen( args ) - 1]=0;
             wsWindowList[l]->RemoteHandler( args );
+	    #ifdef DEBUG
+ 	     fprintf( stderr,"[ws]   args: '%s'\n",args );
+	    #endif
             args[strlen( args ) - 1]=1;
             XFree( args );
            }
@@ -856,8 +861,10 @@ void wsIconify( wsTWindow win )
 //    Move top the window.
 // ----------------------------------------------------------------------------------------------
 void wsMoveTopWindow( wsTWindow * win )
-{ XRaiseWindow( wsDisplay,win->WindowID ); }
-//{ XUnmapWindow( wsDisplay,win->WindowID ); XMapWindow( wsDisplay,win->WindowID ); }
+{ 
+// XUnmapWindow( wsDisplay,win->WindowID ); XMapWindow( wsDisplay,win->WindowID ); 
+ XRaiseWindow( wsDisplay,win->WindowID ); 
+}
 
 // ----------------------------------------------------------------------------------------------
 //    Set window background to 'color'.
@@ -897,7 +904,6 @@ void wsSetForegroundRGB( wsTWindow * win,int r,int g,int b )
    case wsBGR15: PACK_RGB15( b,g,r,color ); break;
   }
  XSetForeground( wsDisplay,win->wGC,color );
-// XSetWindowBackground( wsDisplay,win->WindowID,color );
 }
 
 // ----------------------------------------------------------------------------------------------

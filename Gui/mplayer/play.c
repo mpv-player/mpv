@@ -52,6 +52,8 @@ void mplFullScreen( void )
     wsWindowDecoration( &appMPlayer.subWindow,0 );
     appMPlayer.subWindow.isFullScreen=1;
    }
+ if ( mplShMem->Playing ) wsSetBackgroundRGB( &appMPlayer.subWindow,0,0,0 );
+  else wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
  wsVisibleWindow( &appMPlayer.subWindow,wsShowWindow );
  mplResize( 0,0,appMPlayer.subWindow.Width,appMPlayer.subWindow.Height );
 }
@@ -71,8 +73,8 @@ void mplStop()
    wsMoveWindow( &appMPlayer.subWindow,appMPlayer.sub.x,appMPlayer.sub.y );
   }
  mplSubRender=1;
- wsClearWindow( appMPlayer.subWindow );
  wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
+ wsClearWindow( appMPlayer.subWindow );
  wsPostRedisplay( &appMPlayer.subWindow );
 }
 
