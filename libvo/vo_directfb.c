@@ -267,6 +267,13 @@ static uint32_t preinit()
         if (!fb_dev_name && !(fb_dev_name = getenv("FRAMEBUFFER"))) fb_dev_name = "/dev/fb0";
         DFBCHECK (DirectFBSetOption ("fbdev",fb_dev_name));
 
+//	uncomment this if you do not wish to create a new vt for DirectFB
+//       DFBCHECK (DirectFBSetOption ("no-vt-switch",fb_dev_name));
+
+//	uncomment this if you want to allow vt switching
+//       DFBCHECK (DirectFBSetOption ("vt-switching",fb_dev_name));
+        DFBCHECK (DirectFBSetOption ("bg-color","00000000"));
+
         DFBCHECK (DirectFBCreate (&dfb));
         DFBCHECK (dfb->SetCooperativeLevel (dfb, DFSCL_FULLSCREEN));
 
@@ -563,26 +570,6 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
    * Create an input buffer for the keyboard.
    */
   DFBCHECK (keyboard->CreateInputBuffer (keyboard, &buffer));
-
-    // clear the screen
-
-  if (no_yuy2) {DFBCHECK (primary->FillRectangle (primary, 0, 0, screen_width, screen_height));
-}
-  else {
-     // create temporary surface and clean
-     DFBSurfaceDescription dsc;
-     DFBResult             ret;
-     IDirectFBSurface *primary = NULL;
-     int sh,sw;
-     
-     dsc.flags = DSDESC_CAPS;
-     dsc.caps  = DSCAPS_PRIMARY | DSCAPS_VIDEOONLY;//| DSCAPS_FLIPPING;
-     DFBCHECK (dfb->CreateSurface( dfb, &dsc, &primary));
-     DFBCHECK (primary->GetSize (primary, &sw, &sh));
-     DFBCHECK (primary->FillRectangle (primary, 0, 0, sw, sh));
-     primary->Release(primary);
-  
-  }
 
 // yuv2rgb transform init
 
@@ -885,7 +872,9 @@ static void uninit(void)
 // we will not release dfb and layer because there could be a new film
 
 //  printf("Release primary\n");
-//  primary->Release (primary);
+  primary->Release (primary);
+//  switch off BES
+  if (videolayer) videolayer->SetOpacity(videolayer,0);
 //  printf("Release videolayer\n");
 //  if (videolayer) videolayer->Release(videolayer);
 //  printf("Release dfb\n");
