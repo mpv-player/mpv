@@ -67,42 +67,34 @@
   <B>Q: What about DGA driver? I can't find it!!!
   </B>A: ./configure autodetects your DGA driver. If -vo help doesn't show
      DGA, then there's a problem with your X installation.
-     Try ./configure --enable-dga (and read VIDEOCARDS)
+     Try ./configure --enable-dga (and RTFM)
      Alternatively, try SDL's DGA driver with '-vo sdl:dga' options.
 
   <B>Q: I can't compile SVGAlib.. I'm using 2.3/2.4 kernel.
   </B>A: You have to edit SVGAlib's Makefile.cfg and comment "BACKGROUND = y" out.
 
   <B>Q: I compiled <B>MPlayer</B> with libcss/libdivxdecore support, but when
-	I try to start it, it says :
+    I try to start it, it says :
 	  > error while loading shared libraries: libcss.so.0: cannot load
 	  > shared object file: No such file or directory
-	I checked up on the file and it IS there in /usr/local/lib.
+    I checked up on the file and it IS there in /usr/local/lib.
   </B>A: What are you doing on Linux? Can't you install a library? Why do
     we get these questions? It's not <B>MPlayer</B> specific at all! Add
     /usr/local/lib to <B>/etc/ld.so.conf</B> and run <B>ldconfig</B> .
     Or install it to /usr/lib , because if you can't solve the /usr/local
     problem, you are careless enough to do such things.
 
-  <B>Q: I have gcc 3.0 . I have to compile mplayer with --disable-dshow,
-    else it prints
-
-  /usr/local/objdir/gcc-3.0/lib//libstdc++.so.3: undefined symbol: __dso_handle
-
-  </B>A: All you have to do is create a symbolic link from libstdc++.so to
-    libstdc++.so.3
-
 
   <A NAME=5.2>5.2.  General questions
 
-  <B>Q: What about DVD playback?
-  </B>A: Read files 'DVD' and 'DVD-FAQ'.
+  <B>Q: What about DVD playing ?
+  </B>A: Read the CD/DVD section .
 
   <B>Q: -xy option doesn't work with x11 driver (-vo x11)
   </B>A: x11 driver doesn't support scaling, but XF86VidMode support is now
      used: you must specify the -vm and the -fs switch, and you're done.
      Make sure you have the right Modelines in your XF86Config file, and
-     try if the DGA driver (and SDL's DGA driver, see VIDEOCARDS) works for you.
+     try if the DGA driver (and SDL's DGA driver, see RTFM) works for you.
      It's much faster. If SDL's DGA works too, use that, it'll be EVEN
      faster!
 
@@ -133,7 +125,7 @@
      (avifile's codec package has different DLL set)
 
   <B>Q: Are there any mailing lists on <B>MPlayer</B>?
-  </B>A: Yes! See README on how to subscribe them!
+  </B>A: Yes! See RTFM on how to subscribe them!
 
   <B>Q: I've found a nasty bug when I tried to play my favourite video!!
      Who should I inform?
@@ -159,15 +151,14 @@
      #define FAST_OSD . Then recompile.
 
   <B>Q: The OSD is flickering!
-  </B>A: You use a vo driver with single buffering (x11,xv). With xv you can change
-     the number of buffers in libvo/vo_xv.c :
-     Increase #define NUM_BUFFERS 1
+  </B>A: You use a vo driver with single buffering (x11,xv). With xv,
+     use -double option.
 
   <B>Q: What exactly is this libavcodec?
   </B>A: It's from Gerard Lantau's ffmpeg package (http://ffmpeg.sourceforge.net).
-     It has C language DivX ;-) and OpenDivX codec.  Some benchmarks
+     It has C language DivX ;-) and OpenDivX alpha 47 codec.  Some benchmarks
      showed that its DivX seems to be even faster than DirectShow codec without
-     preprocessing, and only a few percent slower than ProjectMayo's OpenDivX
+     preprocessing, and only a few percent slower than ProjectMayo's DivX4
      decoder.  It uses YV12 pixel format, so old Voodoo users can use it for YUV.
      Also, open the possibility to play DivX on virtually every computer that
      has a C compiler. Kinda great stuff, isn't it?
@@ -219,6 +210,7 @@
      sound too slow. When I use -nosound switch, everything is ok (but quiet).
   </B>A: Those files probably have 48Khz audio, and your soundcard/driver can't play
      it correctly. Audio downsampling isn't implemented in <B>MPlayer</B> (yet).
+     Maybe use the SDL driver, with <B>-ao:sdl</B> 
  
   <B>Q: <B>MPlayer</B> dies with "<B>MPlayer</B> interrupted by signal 4 in module: decode_video".
   </B>A: Try running <B>MPlayer</B> on the machine you compiled on. Or recompile. Don't
@@ -286,7 +278,7 @@
       Xvideo image format: 0x30323449 (I420) planar
       ...
   </B>A1: See the previous answer.
-  A2: Since 0.18pre4 we include libavcodec from the ffmpeg package. It contains
+  A2: Since 0.18pre4 we support libavcodec from the ffmpeg package. It contains
       a C language DivX and OpenDivX decoder. The DivX decoder uses YV12 format
       for output, thus it should work for you. Compile in libavcodec support.
 

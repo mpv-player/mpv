@@ -1,0 +1,547 @@
+<HTML>
+
+<BODY>
+
+<P>
+<CENTER>MPlayer - Movie Player for LINUX (C) 2000-2001 Arpad Gereoffy (A'rpi/ESP-team)<BR>
+<BR>
+<A HREF="http://www.mplayerhq.hu">http://www.mplayerhq.hu</A></CENTER><BR>
+</P>
+
+<P><HR></P>
+
+<P>
+Tartalomjegyzék
+</P>
+
+<P><HR></P>
+
+<PRE>
+<P>
+  <A HREF="#1">1. Bevezetés</A>
+</P>
+<P>
+     <A HREF="#1.1">1.1 Röviden</A>
+     <A HREF="#1.2">1.2 Történelem</A>
+     <A HREF="#1.3">1.3 Telepítés</A>
+     <A HREF="#1.4">1.4 És a grafikus felület?</A>
+</P>
+<P>
+  <A HREF="#2">2. Funkciók</A>
+</P>
+<P>
+     <A HREF="codecs.html">2.1 Video formátumok, audio és video codec-ek</A>
+	<A HREF="codecs.html#2.1.1">2.1.1 Támogatott input formátumok</A>
+        <A HREF="codecs.html#2.1.2">2.1.2 Támogatott audio és video codec-ek</A>
+	     <A HREF="codecs.html#2.1.2.1">2.1.2.1 DivX4</A>
+	     <A HREF="codecs.html#2.1.2.2">2.1.2.2 ffmpeg DivX/libavcodec</A>
+	<A HREF="codecs.html#2.1.4">2.1.4 Hogyan használj ismeretlen Win32 codec-et</A>
+	     <A HREF="codecs.html#2.1.4.1">2.1.4.1 VFW</A>
+	     <A HREF="codecs.html#2.1.4.2">2.1.4.2 DirectShow</A>
+</P>
+<P>
+     <A HREF="video.html">2.2 Video és audio kimeneti eszközök</A>
+	<A HREF="video.html#2.2.1">2.2.1 Video kimenetek</A>
+	     <A HREF="video.html#2.2.1.1">2.2.1.1 MTRR</A>
+	     <A HREF="video.html#2.2.1.2">2.2.1.2 Xv</A>
+		    <A HREF="video.html#2.2.1.2.1">2.2.1.2.1 3dfx kártyák</A>
+		    <A HREF="video.html#2.2.1.2.2">2.2.1.2.2 S3 kártyák</A>
+		    <A HREF="video.html#2.2.1.2.3">2.2.1.2.3 nVidia kártyák</A>
+		    <A HREF="video.html#2.2.1.2.4">2.2.1.2.4 ATI kártyák</A>
+	     <A HREF="video.html#2.2.1.3">2.2.3.2 DGA</A>
+		    <A HREF="video.html#2.2.1.3.1">2.2.1.3.1 Elõszó</A>
+		    <A HREF="video.html#2.2.1.3.2">2.2.1.3.2 Mi az a DGA</A>
+		    <A HREF="video.html#2.2.1.3.3">2.2.1.3.3 DGA támogatás telepítése MPlayer-be</A>
+		    <A HREF="video.html#2.2.1.3.4">2.2.1.3.4 Felbontásváltás</A>
+		    <A HREF="video.html#2.2.1.3.5">2.2.1.3.5 DGA és MPlayer</A>
+		    <A HREF="video.html#2.2.1.3.6">2.2.1.3.6 A DGA driver képességei</A>
+		    <A HREF="video.html#2.2.1.3.7">2.2.1.3.7 Sebesség</A>
+		    <A HREF="video.html#2.2.1.3.8">2.2.1.3.8 Ismert hibák</A>
+		    <A HREF="video.html#2.2.1.3.9">2.2.1.3.9 Beépítendõ dolgok</A>
+		    <A HREF="video.html#2.2.1.3.A">2.2.1.3.A Néhány modeline</A>
+		    <A HREF="video.html#2.2.1.3.B">2.2.1.3.B Hibabejelentés</A>
+	     <A HREF="video.html#2.2.1.4">2.2.1.4 SDL</A>
+	     <A HREF="video.html#2.2.1.5">2.2.1.5 SVGAlib</A>
+	     <A HREF="video.html#2.2.1.6">2.2.1.6 Framebuffer kimenet (FBdev)</A>
+	     <A HREF="video.html#2.2.1.7">2.2.1.7 Matrox framebuffer (mga_vid)</A>
+	     <A HREF="video.html#2.2.1.8">2.2.1.8 SiS 6326 framebuffer (sis_vid)</A>
+	     <A HREF="video.html#2.2.1.9">2.2.1.9 3dfx YUV támogatás</A>
+	     <A HREF="video.html#2.2.1.10">2.2.1.10 OpenGL kimenet</A>
+	     <A HREF="video.html#2.2.1.11">2.2.1.11 AAlib - szöveges módú megjelenítés</A>
+	     <A HREF="video.html#2.2.1.A">2.2.1.A TV kimenet</A>
+		     <A HREF="video.html#2.2.1.A.1">2.2.1.A.1 Matrox kártyák</A>
+	<A HREF="sound.html#2.2.2">2.2.2 Audio kimenetek</A>
+	     <A HREF="sound.html#2.2.2.1">2.2.2.1 Ajánlott beállítások különféle hangkártyákhoz</A>
+</P>
+<P>
+  <A HREF="#3">3. Használat</A>
+</P>
+<P>
+     <A HREF="#3.1">3.1 Irányítás billentyûzetrõl</A>
+     <A HREF="#3.2">3.2 Irányítás LIRC-cel (Linux Infrared Remote Control)</A>
+     <A HREF="#3.3">3.3 Lejátszás hálózatról, vagy pipe-on keresztül</A>
+</P>
+<P>
+  <A HREF="dvd.html#4">4. CD/DVD fejezet</A>
+</P>
+<P>
+     <A HREF="dvd.html#4.1">4.1 CD  meghajtók</A>
+     <A HREF="dvd.html#4.2">4.2 DVD meghajtók</A>
+     <A HREF="dvd.html#4.3">4.3 DVD FAQ</A>
+</P>
+<P>
+  <A HREF="faq.html">5. FAQ fejezet</A>
+</P>
+<P>
+     <A HREF="faq.html#5.1">5.1 Fordítás</A>
+     <A HREF="faq.html#5.2">5.2 Általános kérdések</A>
+     <A HREF="faq.html#5.3">5.3 File lejátszással kapcsolatos problémák</A>
+     <A HREF="faq.html#5.4">5.4 Video/audio meghajtókkal kapcsolatos problémák</A>
+     <A HREF="faq.html#5.5">5.5 Feature kérések</A>
+</P>
+<P>
+  <A HREF="#6">6. Különféle operációs rendszerek</A>
+</P>
+<P>
+     <A HREF="#6.1">6.1 Debian csomagolás</A>
+     <A HREF="#6.2">6.2 FreeBSD</A>
+     <A HREF="#6.3">6.3 Solaris 8</A>
+     <A HREF="#6.4">6.4 StrongARM</A>
+</P>
+<P>
+  <A HREF="../documentation.html#A">A. Készítõk</A>
+</P>
+<P>
+  <A HREF="#B">B. Levelezési listák</A>
+</P>
+<P>
+  <A HREF="bugreports.html">C. Hogyan jelents be hibát</A>
+</P>
+</PRE>
+<P><HR></P>
+
+<P><PRE>
+  <A NAME=1>1.  Bevezetés
+
+
+  <A NAME=1.1>1.1.  Röviden
+
+  Az <B>MPlayer</B> egy LINUXON mûködõ videolejátszó. Le tudja játszani a legtöbb
+  MPEG, AVI és ASF file-t, valamint felsorakoztat jónéhány nativ és Win32
+  codecet.  Nézhetsz vele VCD-t, DVD-t, és még DivX-et is. A másik óriási
+  tulajdonsága az MPlayernek a megjelenítési módok széles választéka. Mûködik
+  X11, Xv, DGA, OpenGL, SVGAlib, fbdev, aalib, sõt SDL-lel is (beleértve
+  ezáltal az SDL drivereit is), és néhány alacsonyszintû kártyaspecifikus
+  driver (Matrox/3dfx/SiS) is használható! Legtöbbjük támogat software vagy
+  hardware scaling-et, így a teljesképernyõs mód is elérhetõ. És még nem is
+  szóltam a szép, élsímított, árnyékolt feliratozásról (7 támogatott típus!),
+  ami támogat magyar, angol, cirill, cseh és koreai fontokat, valamint OSD-t!
+
+  Nem codeceket írtam, csak néhány lejátszót. Sok idõt töltöttem azzal is, hogy
+  megtaláljam a megfelelõ módszert a hibás file-ok beolvasására (mind MPEG,
+  AVI), valamint a tökéletes A-V szinkronra, akár seekkel is.  A lejátszó
+  sziklaszilárdan játszik le hibás MPEG file-okat (hasznos néhány VCD-nél), és
+  lejátszik minden olyan hibás AVI-t, amit a csodás windows media player nem.
+  Még az index chunk nélküli AVI-k is lejátszhatók, sõt az indexet fel is lehet
+  építeni a '-idx' opcióval, így seekelni is lehet bennük! Amint az látszik, a
+  stabilitás és a minõség a legfontosabbak a számomra, de a sebesség se semmi.
+
+
+  <A NAME=1.2>1.2.  Történelem
+
+  Egy éve kezdõdött...
+  Nagyon sok lejátszót kipróbáltam Linux alatt (mtv,xmps,dvdview,livid/oms,
+  VideoLAN,xine,xanim,avifile,xmmp), de mindnek ugyanazok a problémái.
+  Többnyire a különleges file-okkal, vagy a hang/kép szinkronnal. Legtöbbjük
+  képtelen mind MPEG1, MPEG2 ÉS AVI (DivX) lejátszásra. Sokuknak gondjuk van 
+  a képminõséggel, vagy a sebességgel is. Elhatároztam, hogy (át)írok egyet...
+
+  - mpg12play v0.1-v0.3:
+    Az elsõ próbálkozás, fél óra alatt összegányolva!
+    A libmpeg3-at hasznaltam a www.heroinewarrior.com-ról egészen a 0.3-as
+    verzióig, de minõségi és sebességi problémák voltak vele.
+  - mpg12play v0.5-v0.87:
+    Az MPEG codec helyére a DVDview-et (Dirk Farin) tettem, nagyszerû dolog
+    volt, de lassú, és C++-ban készült (utálom a C++-t!!!)
+  - mpg12play v0.9-v0.95pre5:
+    Az MPEG codec itt az Aaron Holtzman és Michel Lespinasse készítette libmpeg2
+    (mpeg2dec). Nagyon jó, optimalizált, gyors C kód, tökéletes képminõség és   
+    100%-os megfelelés a szabványnak.
+  - <B>MPlayer</B> v0.3-v0.9:
+    Egyvelege két programnak: mpg12play v0.95pre6 és az új, egyszerû AVI
+    lejátszómnak ('avip'), ami az avifile Win32 DLL loaderén alapul.
+  - <B>MPlayer</B> v0.10:
+    Az MPEG és AVI lejátszó egyetlen programban!
+  - <B>MPlayer</B> v0.11:
+    Néhány új fejlesztõvel gyarapodtunk, és innentõl az mplayer project
+    csapatmunkán alapul!
+    ASF támogatás hozzáadása, és OpenDivX (lásd www.projectmayo.com)
+    en/dekódolás.
+  - <B>MPlayer</B> v0.17 "The IdegCounter"
+    A 0.11pre sorozat végsõ verziója, 4 hónapnyi kõkemény fejlesztés után!
+    Próbáld ki és ess ámulatba! Ezernyi új dolog... és persze a régi kód
+    feljavítva, bugok eltávolítva stb.
+  - <B>MPlayer</B> 0.18
+    2 hónap telt el a 0.17 óta, és itt az újabb release... Teljes ASF támogatás,
+    még több subtitle formátum, libao (mint libvo, csak ez audio-ra), és még
+    stabilabb, mint eddig! KÖTELEZÕ !
+
+
+  <A NAME=1.3>1.3.  Installálás
+
+  Ha az <B>MPlayer</B>-t x86-os gépen fogod használni, valószínûleg használni
+  akarod a Win32 codec-eket. Töltsd le és tömörítsd ki a w32codecs.zip-et az
+  /usr/lib/win32 könyvtárba . Megj.: az avifile project hasonló csomagot
+  használ, de különbözik a miénktõl, ígyhát ezt használd! A mi csomagunk
+  egyébként használható az avifile-vel.
+
+  Ha egy Matrox G200/G400/G450 kártya boldog tulajdonosa vagy, nézd meg a
+  <A HREF="video.html#2.2.1.7">2.2.1.7</A>-es fejezetet, és nagy gyorsulást érhetsz el. Ezeket a lépéseket
+  fordítás _elõtt_ kell megcsinálni, különben nem épül be Matrox támogatás az
+  <B>MPlayer</B>-be.
+
+  Ha tervezed a ProjectMayo <B>DivX4</B> codec-ének használatát, nézd meg a
+  <A HREF="codecs.html#2.1.2.1">2.1.2.1</A>-es fejezetet még fordítás elõtt.
+
+  Ezután fordítsd le az <B>MPlayer</B>-t :
+
+
+	./configure
+	make
+	make install
+
+
+  Ajánlott átnézni a ./configure kimenetét, fontos információkat tartalmaz
+  arra vonatkozóan hogy mi lesz belefordítva és mi nem. Megnézheted továbbá
+  a config.h és config.mak file-okat.
+
+  Bár nem kötelezõ, jobb ha felteszed a fontokat is, mert így kapsz OSD-t, és
+  feliratok megjelenítésének képességét. Töltsd le az mp_font3.zip-et
+  (és opcionálisan nyelvi kiegészítõket)
+
+
+	mkdir ~/.mplayer/font
+	cd ~/.mplayer/font
+	unzip mp_font3.zip
+	unzip mp_font3_hu.zip
+
+
+  <A NAME=1.4>1.4.  És a grafikus felület ?
+
+  Én nem vagyok GUI (grafikus felület) fejlesztõ. Nem szeretem ezeket,
+  szívesebben használom az egyszerû fekete 80x25-ös konzolt.  Ezért a lejátszó
+  most még csak billentyûzetrõl vezérelhetõ.  Pontscho/Fresh! már dolgozik a
+  grafikus felületen, ami még fejlesztési stádiumban van ugyan, de hamarosan
+  elkészül és beépítjük. Ha már itt tartunk, kellene neki néhány skin, ha jó
+  grafikus vagy, írj neki!!!
+
+
+  <A NAME=2>2.  Funkciók
+
+
+  <A NAME=2.1>2.1.  <A HREF="codecs.html">Video formátumok, audio és video codec-ek</A>
+
+
+  <A NAME=2.2>2.2.  <A HREF="video.html">Video</A> és <A HREF="sound.html">audio</A> kimeneti eszközök
+
+
+  <A NAME=3>3.  Használat
+
+  file:  mplayer [opciók] [útvonal/]filenév
+  VCD:   mplayer [opciók] -vcd trackszám /dev/cdrom
+  DVD:   mplayer [opciók] -dvdauth /dev/dvd filenév.VOB
+  net:   mplayer [opciók] http://site.com/file.[mpg|avi]
+
+
+  <A NAME=3.1>3.1.  Irányítás billentyûzetrõl
+
+
+    <-  és  ->          hátra/elõre seek, 10 másodpercnyi
+    up or down          hátra/elõre seek, 1 percnyi
+    p or SPACE          pillanatállj, bármely billentyûre tovább
+    q  or  ^C           lejátszás leállítasa, kilépés
+    o                   OSD funkciók : nincs / seek / seek+idõ
+    /  and *            hangerõ csökkentése/növelése
+    m                   master/pcm csatorna használata hangerõhöz
+    f                   teljes képernyõs mód ki/be (csak SDL!)   
+
+    <-  és  ->          hátra/elõre seek, 10 másodpercnyi
+    up or down          hátra/elõre seek, 1 percnyi
+    p or SPACE          pillanatállj, bármely billentyûre tovább
+    q  or  ^C           lejátszás leállítasa, kilépés
+    + or -              audio késleltetése +/- 0.1 másodperccel
+    / or *              hangerõ csökkentése/növelése
+    o                   toggle OSD: none / seek / seek+timer
+    m                   master/pcm csatorna használata hangerõhöz
+    z or x              adjust subtitle delay by +/- 0.1 second
+
+  (a következõk csak a DirectShow DivX codecre érvényesek)
+
+    1 vagy 2            kontraszt
+    3 vagy 4            fényerõ
+    5 vagy 6            ?
+    7 vagy 8            szaturáció
+
+
+  <A NAME=3.2>3.2.  Irányítás LIRC-cel
+
+  Linux Infrared Remote Control - használj egy otthon is könnyen elkészíthetõ
+  infravörös távirányítót, hogy irányítsd vele a géped!
+  Részletek a www.lirc.org címen.
+
+  Ha felinstalláltad a lirc csomagot, így fordítsd az <B>MPlayer</B>-t :
+  ./configure --enable-lirc
+
+  Ha sikerült, az <B>MPlayer</B> ezt fogja kiírni induláskor:
+    LIRC init was successful.
+  Ha hibát talál, azt is kiírja. Ha semmi LIRC-szerût nem mond, akkor
+  nincs belefordítva.
+
+  A megadandó programnév - mily' csoda - mplayer_lirc.
+  A következõ parancsokat érti:
+
+  PAUSE  - lejátszás megállítása. Bármely másik billentyû újraindítja.
+  QUIT   - kilépés
+  RWND   - 10 másodperccel vissza 
+  FRWND  - 60 másodperccel vissza
+  FWD    - 10 másodperccel elõre
+  FFWD   - 60 másodperccel elõre
+  INCVOL - hangerõ növelése 1 százalékkal
+  DECVOL - hangerõ csökkentése 1 százalékkal
+  MASTER - 'master' mixer csatorna használata
+  PCM    - 'pcm' mixer csatorna használata
+
+  Ne felejtsd bekapcsolni a repeat flag-et a RWND/FWD-hez a .lircrc-ben.
+  Itt egy példa az enyémbõl:
+
+  begin
+   remote = CU-SX070
+   prog = mplayer_lirc
+   button = Tape_Play
+   repeat = 1
+   config = FFWD
+  end
+
+  begin
+   remote = CU-SX070
+   prog = mplayer_lirc
+   button = Tape_Stop
+   config = QUIT
+  end
+
+  Ha nem felel meg a lirc-config file eredeti helye (~/.lircrc), használd
+  a -lircconf [file-név] kapcsolót.
+
+
+  <A NAME=3.3>3.3.  Streaming from network or pipes
+
+  Az <B>MPlayer</B> a HTTP protokolllal tud lejátszani hálózaton keresztül,
+  és béta állapotú ASF streaming támogatással is rendelkezik.
+  A konfigurálása egyszerû, csak fordítsd újra az <B>MPlayer</B>-t így :
+
+
+	./configure --enable-streaming
+
+
+  <B>MPlayer</B> tud a standard bemenetrõl (NEM named pipe-okról) beolvasni.
+  Itt egy példa az FTP-n keresztüli lejátszásra ennek segítségével :
+
+
+        wget ftp://micorsops.com/something.avi -O - | mplayer -
+
+
+  <A NAME=4>4.  <A HREF="faq.html">FAQ fejezet</A>
+
+
+  <A NAME=5>5.  <A HREF="dvd.html">CD/DVD fejezet</A>
+
+
+  <A NAME=6>6.  Különbözõ operációs rendszerek
+
+
+  <A NAME=6.1>6.1.  Debian csomagolás
+
+  A csomag felépítéséhez töltsd le a cvs verziót vagy .tgz-t, tömörítsd ki,
+  majd lépj bele :
+
+
+		cd main
+		fakeroot debian/rules binary
+
+
+  (... mplayer detektálja a hardware-t/software-t, lefordul, és..)
+  dpkg-deb: building package `mplayer' in `../mplayer_0.18-1_i386.deb'.
+
+  Most root-ként add ki a következõ parancsot :
+
+
+		dpkg -i ../mplayer_0.18-1_i386.deb
+
+
+  Valahogy így kell kinéznie:
+
+	eyck@incubus:/src/main$ sudo dpkg -i ../mplayer_0.18-1_i386.deb 
+	Password:
+	(Reading database ... 26946 files and directories currently installed.)
+	Preparing to replace mplayer 0.17a-1 (using ../mplayer_0.18-1_i386.deb)
+	Unpacking replacement mplayer ...
+	Setting up mplayer (0.18-1) ...
+
+
+  <A NAME=6.2>6.2.  FreeBSD
+
+  A fordításhoz szükséged lesz GNU make-re (gmake, /usr/ports/devel/gmake),
+  natív BSD make nem jó.
+
+  Az <B>MPlayer</B> futtatásához fordítsd újra a kernelt
+  "options USER_LDT"-vel, kivéve ha -CURRENT-et használsz, ahol ez az
+  alapállapot). Ha van SSE-t támogató CPU-d, használd az "options
+  CPU_ENABLE_SSE"-t is. FreeBSD-STABLE kell, vagy kernel patch-ek.
+
+  Ha az <B>MPlayer</B> azt mondja hogy "CD-ROM Device '/dev/cdrom' not found!",
+  csinálj egy linket : ln -s /dev/(meghajtó) /dev/cdrom
+
+  Egyenlõre nincs DVD támogatás FreeBSD-hez.
+  Nyugodtan csinálj egyet :-)
+
+
+  <A NAME=6.3>6.3.  Solaris 8
+
+  Az AVI file-ok lejátszása legjobban Solarix x86-on mûködik, mert itt
+  megteheted hogy win32-es codec-eket használsz, az x86-os platform miatt.
+  Solaris SPARC-on jónéhány AVI file lesz ami nem fog mûködni, mert csak
+  win32-es codec van hozzá. <B>DivX/OpenDivX</B> filmek menni fognak,
+  ha libavcodec-et használsz.
+
+  A fordításhoz GNU make-re lesz szükséged (gmake, /opt/sfw/gmake), natív
+  Solaris make nem jo. Egy tipikus hiba ha mégis azzal próbálkozol :
+
+
+   % /usr/ccs/bin/make
+   make: Fatal error in reader: Makefile, line 25: Unexpected end of line seen
+
+
+  Solaris SPARC-on GNU C/C++ fordító is kell; az nem számít ha assemblerrel
+  vagy nélküle van.
+
+  Solaris x86-on kell a GNU assembler is és a GNU C/C++ fordító is,
+  aminek támogatnia kell a GNU assemblert! Az MPlayer igencsak támaszkodik
+  az MMX, SSE és 3DNOW! utasításokra, amiket a Solaris standard assemblere
+  (/usr/ccs/bin/as) nem támogat.
+
+  A configure script megpróbálja megkeresni hogy a "gcc" parancsod
+  melyik assemblert indítja (ha nem sikerül neki, használd a
+  "--as=/ahova/installáltad/gnu-as" parancsot).
+
+  GNU assembler nélküli GCC ilyet ír ki Solaris x86-on :
+
+   % configure
+   ...
+   Checking assembler (/usr/ccs/bin/as) ... , failed
+   Please upgrade(downgrade) binutils to 2.10.1...
+
+  (Megoldás: "--with-as=gas"-al fordított GCC használata)
+
+  Tipikus hiba GNU as nem-használatára:
+
+   % gmake
+   ...
+   gcc -c -Iloader -Ilibvo -O4 -march=i686 -mcpu=i686 -pipe -ffast-math 
+	-fomit-frame-pointer  -I/usr/local/include   -o mplayer.o mplayer.c
+   Assembler: mplayer.c
+   "(stdin)", line 3567 : Illegal mnemonic
+   "(stdin)", line 3567 : Syntax error
+   ... more "Illegal mnemonic" and "Syntax error" errors ...
+
+
+  DVD támogatáshoz patchelt libcss szükséges. Patch :
+  <A HREF="http://www.tools.de/solaris/mplayer/">http://www.tools.de/solaris/mplayer/</A>
+
+
+  2 hiba miatt nem tudsz megbízhatóan DVD-t lejátszani Solaris 8 x86-on,
+  ha annak kapacitása nagyobb mint 4 GB :
+
+   - The sd(7D) driver on solaris 8 x86 driver has bug when accessing a
+     disk block >4GB on a device using a logical blocksize != DEV_BSIZE
+     (i.e. CDROM and DVD media).  Due to a 32bit int overflow, a disk
+     address modulo 4GB is accessed.
+     (http://groups.yahoo.com/group/solarisonintel/message/22516)
+
+   - The similar bug is present in the hsfs(7FS) filesystem code (aka
+     ISO9660), hsfs currently does not support partitions/disks >4GB,
+     all data is accessed modulo 4GB
+     (http://groups.yahoo.com/group/solarisonintel/message/22592)
+
+
+  <A NAME=6.4>6.4.  StrongARM
+
+  Az <B>MPlayer</B> állítólag lefordul StrongARM-on. A következõ opciókat
+  használd :
+
+
+  ./configure --target=arm-linux --disable-css --with-x11libdir=/usr/arm/lib
+	      --with-x11incdir=/usr/arm/lib --disable-gcc-checking
+
+
+  <A NAME=A>Appendix A - Authors
+
+
+  <A NAME=B>Appendix B - Mailing lists
+
+  Jónéhány <B>MPlayer</B> lista van. A következõ címeken lehet feliratkozni:
+
+  - <B>MPlayer</B> belsõ/magyar fejlesztõk listája:
+	<A HREF="http://mp.dev.hu/mailman/listinfo/mplayer-devel">http://mp.dev.hu/mailman/listinfo/mplayer-devel</A>
+
+        Nemtom, talán magyar nyelvû FLAME lista :)
+        Továbbá a core csapattagok magánügyei, pl. mplayer parti, szponzorok,
+        stb.
+
+  - <B>MPlayer</B> fejlesztõk listája:
+	<A HREF="http://lists.sourceforge.net/lists/listinfo/mplayer-dev-eng">http://lists.sourceforge.net/lists/listinfo/mplayer-dev-eng</A>
+
+        Ez az MPlayer fejlesztõi lista! Témák: interface/API változások, új
+        library-k, optimalizáció, ./configure, és IDE kell küldeni patch-eket.
+        NE küldj ide bugreportot, kérdést!
+        Ne növeljük a lista forgalmát.
+
+  - <B>MPlayer</B> felhasználók listája:
+	<A HREF="http://lists.sourceforge.net/lists/listinfo/mplayer-users">http://lists.sourceforge.net/lists/listinfo/mplayer-users</A>
+
+        - ide küldj bugreport-ot (miután elolvastad Appendix <A HREF="bugreports.html">C</A>-t)
+        - feature kérést (miután elolvastad DOCS/TODO)
+        - felhasználói kérdéseket (miután elolvastad ezt az egész
+          dokumentációt.)
+
+  - <B>MPlayer</B> & Matrox G200/G400/G450 felhasználók:
+	<A HREF="http://lists.sourceforge.net/lists/listinfo/mplayer-matrox">http://lists.sourceforge.net/lists/listinfo/mplayer-matrox</A>
+
+        Matrox-szal kapcsolatos kérdések helye,
+        - mga_vid
+        - matrox hivatalos driver-ei (4-es X)
+        - matroxfb-TVout
+
+  - <B>MPlayer</B> bejelentések:
+	<A HREF="http://lists.sourceforge.net/lists/listinfo/mplayer-announce">http://lists.sourceforge.net/lists/listinfo/mplayer-announce</A>
+
+        Alacsony forgalmú lista :)
+        És read-only. Ide írok vmit, ha kész az új verzió.
+
+  - <B>MPlayer</B> CVS-log:     
+	<A HREF="http://mp.dev.hu/mailman/listinfo/mplayer-cvslog">http://mp.dev.hu/mailman/listinfo/mplayer-cvslog</A>
+
+        CVS-beli változásokról kérdéseket ide küldj.
+        (ha nem érted, mire kell egy változtatás, vagy jobb fixet tudsz)
+        Bizonyosodj meg róla, hogy a kívánt fejlesztõ is olvassa a listát!
+
+  Megj.: a fenti listák nyelve ANGOL, kivéve ahol más van feltüntetve.
+       Más nyelven ne küldj üzenetet!
+
+
+  <A NAME=C><A HREF="bugreports.html">Appendix C</A> - How to report bugs
+
+</PRE>
+
+</BODY>
+
+</HTML>

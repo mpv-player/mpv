@@ -1,0 +1,321 @@
+<HTML>
+
+<BODY>
+
+<PRE>
+
+  <A NAME=5>5. FAQ (Gyakran Feltett Kérdések)
+
+
+  <A NAME=5.1>5.1.  Fordítás
+
+  <B>Q: Mi a fene van azzal a 2.96-os gcc-vel ?
+  </B>A: gcc 2.96 a RedHat NEM HIVATALOS (csak a RedHat-nél, vagy RedHat
+     disztribúciókban található meg) és HIBÁS gcc-je. A gcc 2.96 TELJESEN
+     használhatatlan az MPlayer-rel, mert egyszerûen ÁTUGORJA az MMX
+     utasításokat, nem fordítja le õket. Fontos: ez NEM MPlayer-specifikus   
+     probléma, számos más project (DRI, avifile, stb..) szenved ebbõl fakadó
+     problémáktól.
+     ** NE HASZNÁLD a gcc 2.96-ot !!! **
+
+  <B>Q: Az jó, nekem 3.0.1-es gcc-m van a RedHat/Mandrake-tõl--
+  </B>A: Nem :) Az õ 3.0.1-es gcc-jük 2.96-ossal lett fordítva, úgyhogy
+     az is hibás.
+
+  <B>Q: Hm. És akkor mit használjak?
+  </B>A: A 2.95-ös sorozat bármelyikét.
+
+  <B>Q: Az SDL output nem mûködik/fordul. A baj ....
+  </B>A: A legújabb SDL-lel tesztelünk (valószínûleg fut 1.1.7-en vagy újabb
+     verziókon is). NEM FUT 1.1.6, 1.1.5, 1.1.4, 1.1.3, 1.0.4-en stb, ne is
+     kérdezd.
+
+  <B>Q: Még mindig van valami bajom az SDL támogatással. gcc gagyog valami
+     "undefined reference to DL_EnableKeyRepet'"-rõl. Most mi van?
+  </B>A: Hova installáltad az SDL-t? Ha /usr/local-ba (alapbeállítás), akkor
+     szerkesztd át a config.mak file-t, és írd az "X_LIBS=" után, hogy
+     "-L/usr/local/lib ". Most írd be, hogy 'make'. Ennyi!
+
+  <B>Q: Nem fordul, hiányol valami uint64_t inttypes.h és hasonló dolgokat...
+  </B>A: Másold a DOCS/inttypes.h-t az MPlayer könyvtárába (cp DOCS/inttypes.h .)
+     Próbáld újra... ha nem megy, írj!
+
+  <B>Q: Pentium III-am van, de a ./configure nem veszi észre az SSE-t.
+  </B>A: Csak a 2.4.x kernelek támogatják az SSE-t (vagy próbáld ki a 2.2.19-et,
+     vagy újabbat, viszont biztos hogy gondok lesznek)
+
+  <B>Q: G200/G400-am van, hogy fordítsam/használjam az mga_vid drivert?
+  </B>A: Olvass el mindent.
+
+  <B>Q: Vannak rpm/deb/... csomagok az MPlayer-bõl?
+  </B>A: Csinálhatsz magadnak .deb csomagot, lásd DOCS/DEBIAN .
+     _ROPPANTUL_ ellene vagyunk az elõrefordított MPlayer csomagok
+     használatának, mivel (jelenleg) _erõsen_ függ a fordításkor
+     használt opcióktól és optimalizációktól!
+     Elõrefordított csomagokhoz az MPlayer team SEMMILYEN támogatást nem nyújt!
+
+  <B>Q: 'make' közben MPlayer az X11 file-jaira panaszkodik. Nem értem miért,
+     hiszen nálam fent van az X !?
+  </B>A: ...igen, de nincs fent az X fejlesztõi csomag. Vagy nem helyesen.
+     RedHat alatt XFree86-devel* a neve, Debian alatt xlib6g-dev . Nézd meg,
+     hogy az /usr/X11 symlink létezik-e (Mandrake rendszereken lehet probléma).
+     Létrehozása a következõ paranccsal történik:
+          $ ln -sf /usr/X11R6 /usr/X11
+     Nézd meg, hogy megvan-e az /usr/include/X11 link :
+          $ ln -sf /usr/X11R6/include/X11 /usr/include/X11
+     Elképzelhetõ, hogy a disztribúciód eltér a Linux Filesystem Standard-tõl.
+
+  <B>Q: És mi lesz a DGA driverrel? Nem találom!!!
+  </B>A: ./configure automatikusan detektálja hogy van-e DGA-d. Ha a '-vo help'
+     opció nem mutat DGA-t, akkor nincs jól felinstallálva az X-ed.
+     Próbáld így: ./configure --enable-dga (RTFM)
+     Esetleg próbáld az SDL DGA driverét, a '-vo sdl:dga' opciókkal!
+
+  <B>Q: Nem tudom lefordítani az SVGAlib-et... 2.3/2.4-es kernelt használok.
+  </B>A: Szerkesztd át az SVGAlib Makefile.cfg-jét, és vedd ki a "BACKGROUND = y"-t.
+
+  <B>Q: libcss/libdivxdecore támogatással fordítottam az MPlayer-t, de amikor
+     el akarom indítani, ezt írja ki :
+	  > error while loading shared libraries: libcss.so.0: cannot load
+	  > shared object file: No such file or directory
+     Megnéztem a file-t, és ott van az /usr/local/lib-ben.
+  </B>A: Mit keresel te Linuxon? Nem tudsz feltenni egy könyvtárat? Miért
+     kapunk ilyen kérdéseket? Egyáltalán nem <B>MPlayer</B> specifikus!
+     Add hozzá az /usr/local/lib-et a <B>/etc/ld.so.conf</B>-hoz, és
+     futtasd az <B>ldconfig</B>-ot . Vagy installálj /usr/lib-be, mert
+     ha nem tudod magadtól megoldani ezt a problémát, biztos hajlamos vagy
+     más ilyen ostobaságokra is.
+
+
+  <A NAME=5.2>5.2.  Általános kérdések
+
+  <B>Q: És mi lesz a DVD lejátszással?
+  </B>A: Olvasd el a CD/DVD fejezetet.
+
+  <B>Q: Az -xy opció nem mûkodik az x11 outputtal (-vo x11)
+  </B>A: Az x11 output nem támogatja a scalinget, de már van hozzá XF86VidMode
+     támogatás: használd a -vm és a -fs opciókat, és már meg is vagy!
+     Bizonyosodj meg róla, hogy a megfelelõ Modeline-ok benne vannak az
+     XF86Config file-ban, és próbáld ki, hátha a DGA driver (és az SDL 
+     DGA drivere, lásd RTFM) mûködik nálad. Sokkal gyorsabb. Ha  
+     az SDL DGA-ja is mûködik, használd azt, az MÉG gyorsabb!
+
+  <B>Q: Mit jelentenek azok a számok a status sorban?
+  </B>A: lássuk:
+       A:   2.1  V:   2.2  A-V: -0.167  ct:  0.042   57  41%   0%  2.6% 0
+     - A: audio pozíció másodpercben
+     - V: video pozíció másodpercben
+     - A-V: audio-video eltérés másodpercben (késés)
+     - ct: eddigi A-V javítások száma
+     - eddig lejátszott képkockák (legutóbbi seek óta)
+     - video codec cpu használat százalékban (mpeg-nél a video output is
+       benne van!)
+     - video output cpu használat AVI-nál, MPEG-nél 0 (lásd fent)
+     - audio codec cpu használat százalékban
+     - kihagyandó képkockák száma, hogy A-V szinkron megmaradjon
+     Legtöbbjük hibakeresési célokat szolgál, és hamarosan megszûnik.
+
+  <B>Q: A video output CPU használata miért 0% MPEG file-oknál?
+  </B>A: Nem nulla, de bele van építve a codecbe, így nem mérhetõ külön. Próbáld
+     ki, hogy -vo null játszod le a file-t, és nézed a kettõ különbségét... 
+
+  <B>Q: Mi az az XMMP? (nem lehet hogy XMMS vagy XMPS csak rosszul írva?)
+  </B>A: Új project, lásd http://frozenproductions.com .
+
+  <B>Q: Valami hibaüzenet van, hogy nem találja a /usr/lib/win32/... file-t.
+  </B>A: A *mi* FTP-nkrõl töltsd le a w32codec.zip csomagot.
+     (az avifile csomagja különbözik)
+
+  <B>Q: Vannak MPlayer levelezési listák?
+  </B>A: Igen! Lásd dokumentáció.
+
+  <B>Q: Találtam egy durva hibát, amikor a kedvenc filmemet néztem!!
+      Kinek írjak?
+  </B>A: Lásd <A HREF="bugreports.html">C</A> függelék.
+
+  <B>Q: Problémáim vannak a(z) ... codeckel. Használhatom?
+  </B>A: Nézd meg itt: http://mplayer.sourceforge.net/DOCS/codecs.html ,
+     és ha nincs benne a te codeced, olvasd el a
+     <A HREF="codecs.html#2.1.4">2.1.4</A>-es fejezetet, és írj nekünk!
+
+  <B>Q: Ööö, mi az az "IdegCounter" ?
+  </B>A: Az "Ideg" magyar szó, és a "Counter" (számláló) angol szó keveréke.
+     Elõször A'rpi idegességét volt hivatott mérni, miután egy kis CVS kód
+     (ööö) "rejtélyesen" eltûnt ;)
+
+  <B>Q: A LIRC nem mûködik, mert ...
+  </B>A: Biztos "mplayer_lirc"-et használsz "mplayer" helyett ?
+
+  <B>Q: Szépek a feliratok, a legszebbek, amiket valaha lattam, viszont lelassítják
+     a lejátszást! Tudom, hogy ez valószínûtlen, de...
+  </B>A: Miután ./configure lefutott, szerkesztd át a config.h-t, és #undef FAST_OSD
+     helyett írd be : #define FAST_OSD . Fordítsd újra!
+
+  <B>Q: Az OSD villog!
+  </B>A: Olyan vo drivert használsz, ami egyszeres bufferelést használ (x11,xv).
+     Xv esetén használd a -double opciót.
+
+  <B>Q: Pontosan mi is ez a libavcodec?
+  </B>A: Gerard Lantau ffmpeg programjábol van (http://ffmpeg.sourceforge.net).
+     C nyelvû DivX ;-) és OpenDivX codec-et tartalmaz. A tesztek szerint gyorsabb
+     mint a DirectShow codec (preprocessing nélkül), és csak pár százalékkal
+     lassabb mint a ProjectMayo OpenDivX dekódere. YV12-es pixelformátumot   
+     használ, így a régi Voodoo tulajdonosok is használhatják YUV-ra. Továbbá
+     lehetõséget ad arra hogy minden gépen amin van C compiler, lehessen DivX-et
+     lejátszani. Egész jó kis cucc, nem?
+
+  <B>Q: De a configure azt mondja hogy "Checking for libavcodec ... no" !
+  </B>A: Le kell töltened a libavcodec-et az FFmpeg CVS-bõl. Lásd a
+     <A HREF="codecs.html#2.1.2.2">2.1.2.2</A>-es fejezetet.
+
+
+  <A NAME=5.3>5.3.  File lejátszással kapcsolatos problémák
+
+  <B>Q: ...... mûködik avifile/aviplay-jel, de nem az MPlayer-rel!
+  </B>A: MPlayer != avifile
+     Az egyetlen közös dolog a kettõben az a Win32 DLL loader. A codec
+     csomag, szinkronizáció, demultiplexelés, stb. teljesen különbözik és
+     nem összehasonlítható.
+     Ha valami mûködik aviplay-jel az nem jelenti azt, hogy <B>MPlayer</B>-rel is
+     kellene, és fordítva.
+
+  <B>Q: A hang nincs szinkronban egy .avi file lejátszásakor
+  </B>A: Probáld a -bps vagy -nobps opciókat.                
+     Ha még mindig nem megy, küldd el nekem (FTP-re) a file-t, megnézem!
+
+  <B>Q: Indeo 3.x/4.x filmek fejjel lefele vannak!!!?
+  </B>A: Ismert hiba (tulajdonképp a codec hibája/korlátja) Próbáld ki hogy a
+     -vo drivered támogatja-e a -flip opciót.
+
+  <B>Q: Indeo 3.x/4.x filmek nem mûködnek 32bpp felbontásokban (16,24bpp rendben)
+  </B>A: Ismert hiba (tulajdonképp a codec hibája/korlátja)
+
+  <B>Q: Azt írja ki, hogy 'MPlayer interrupted by signal 11'
+  </B>A: Igen valószínûtlen, mióta újraírtuk az mp3lib-et. Írj nekünk, egy bug
+     lehet. Valószínûleg hibás a file, próbáld a '-afm 4' opciót.
+
+  <B>Q: MPlayer valami hibaüzenettel lép ki, amikor l3codeca.acm-et használok.
+  </B>A: Nézd meg, hogy mit ír ki az 'ldd /usr/local/bin/mplayer' . Ha ilyet   
+     tartalmaz:
+        libc.so.6 => /lib/libc.so.6 (0x4???????)
+     ahol "?" bármilyen szám, akkor rendben, a hiba nem itt van. De ha ez:
+        libc.so.6 => /lib/libc.so.6 (0x00??????)
+     Akkor a baj a kerneledben/libc-dben van. Valószínûleg valamilyen
+     biztonsági patch-et használsz (például Solar Designer's OpenWall), ami
+     alacsony címekre tölti be a file-t.
+     Mivel az l3codeca.acm egy "non-relocatable" DLL, muszáj
+     0x00400000-ra tölteni, ezen nem tudunk változtatni. Ne használj
+     patchelt kernelt, vagy próbáld '-afm 1' opcióval, hogy kikapcsold az
+     l3codeca.acm-et!
+
+  <B>Q: A gépem ~640x300-as felbontású M$ DivX AVI-kat, amiknek stereo mp3-juk
+     van, lassan játssza le. Ha -nosound opcióval próbálom, minden ok (csak
+     néma).
+  </B>A: Ezeknek a file-oknak valószínûleg 48Khz-es hangjuk van, és a
+     hangkártyád/drivered ezt nem támogatja rendesen. Az audio downsampling
+     (még) nincs benne MPlayer-ben. Talán az SDL driver segít, <B>-ao:sdl</B>
+ 
+  <B>Q: Az MPlayer "MPlayer interrupted by signal 4 in module: decode_video"
+     üzenettel leáll.
+  </B>A: Azon a gépen futtasd az MPlayer-t, amin lefordítottad! Vagy fordítsd újra!
+     Semmiképp se használd másik processzoron, mint amin lefordítottad!
+
+  <B>Q: Gondjaim vannak a kedvenc ablakkezelõm esetén a teljesképernyõs xv/xmga/..
+     móddal..
+  </B>A: Használd az -fsmode opciót. Bõvebben: lásd example.conf vagy a manpage-t.
+
+  <B>Q: Dehát aviplay-jel mûködik !
+  </B>A: És?
+
+  <B>Q: Akkor az aviplay sokkal jobb !
+  </B>A: Használd azt, úgyis van szép GUI-ja, meg amúgy is jó kis C++ :)
+
+  <B>Q: MPEG file-ok lejátszásánál ezt kapom: Can't find codec for video format
+     0x10000001
+  </B>A: Régi a codecs.conf-od az ~/.mplayer könyvtárban. Frissítsd a DOCS-ból!
+
+  <B>Q: Miután elindítom a lejátszást KDE(1/2) alatt, csak sötét képet kapok, és
+     egy perc múlva elindul a lejátszás.
+  </B>A: A KDE arts sound daemon lefoglalja a hangkártyát, vagy kivárod ezt az idõt,
+     vagy kikapcsolod az arts-daemon-t a control centerben.
+     Ha arts-on keresztüli hangot akarsz, akkor használd az SDL audio drivert,
+     -ao sdl , és bizonyosodj meg arról hogy az SDL-ed tud arts-ot kezelni.
+     Vagy indítsd az mplayer-t artsdsp-vel.
+
+  <B>Q: Van egy AVI file-om ami -vc odivx-szel szürke képernyõt ad, -vc
+     divx4-gyel pedig zöldet.
+  </B>A: Az nem DivX file, hanem M$ MPEG4v3 . Frissítsd a codecs.conf-odat.
+
+
+  <A NAME=5.4>5.4.  Video/audio driver problems (vo/ao)
+
+  <B>Q: Oké, -vo help mutatja a DGA drivert, de valami "permissions"-rõl beszél!
+     Segíts!
+  </B>A: Csak akkor mûködik, ha root jogaid vannak! Ez egy DGA korlátozás.
+     Legyél root (su -), és próbáld újra.
+
+     Másik megoldás, hogy az mplayer-t SUID root állítod be, de ELLENJAVALLT!
+        'chown root /usr/local/bin/mplayer'
+        'chmod 750 /usr/local/bin/mplayer' 
+        'chmod +s /usr/local/bin/mplayer'  
+     Így most menni fog user-ként is.
+  				 !!!! JÓL FIGYELJ !!!!
+     Ez egy ÓRIÁSI biztonsági lyuk! Soha ne csináld ezt egy szerveren, vagy
+     egy olyan gépen, amit több ember is elér, mert így root jogokat szerezhetnek
+     a suid MPlayer-en keresztül.
+			   !!!! ÉN FIGYELMEZTETTELEK ... !!!!
+
+  <B>Q: Mikor XVideo-t akarok használni, a Voodoo 3/Banshee-m azt mondja:
+     X Error of failed request:  BadAccess (attempt to access private resource
+     denied)
+      Major opcode of failed request:  147 (MIT-SHM)
+      Minor opcode of failed request:  1 (X_ShmAttach)
+      Serial number of failed request:  26
+      Current serial number in output stream:27
+  </B>A: Régi a drivered, frissítsd! Vagy a DRI (legalább) 0.6-os verzióját használd
+     (http://dri.sourceforge.net), vagy a DRI cvs-t fordítsd le!
+
+  <B>Q: Mikor XVideo-t használok, nem tudok lejátszani DivX avi-kat a
+     Voodoo 3/Banshee-mmel !
+     Azt mondja:
+      ...
+      Xvideo image format: 0x32315659 (YV12) planar
+      Xvideo image format: 0x30323449 (I420) planar 
+      ...
+  </B>A1: Lásd az elõzõ választ.
+  A2: A 0.18pre4 verzió óta az MPlayer támogatja a libavcodec-et az ffmpeg
+      programból. Ez magában foglal egy C nyelvû DivX és OpenDivX dekódert.
+      A DivX dekóder YV12-es formátumot használ, szóval mûködni fog nálad.
+      Fordítsd be a libavcodec supportot.
+
+  <B>Q: Az OpenGL (-vo gl) output nem mûködik.
+  </B>A: Az OpenGL drivered nem támogatja a dinamikus textúraváltást
+     (glTexSubImage).
+     Ismert, hogy nem mûködik az nVidia bináris szarjaival.
+     Ismert, hogy mûködik Utah-GLX/DRI és Matrox G400-zal, valamint DRI és
+     Radeon-nal is. DRI-vel ezen a kettõn kívül mással nem megy.
+     Nem fog mûködni 3dfx kártyákkal, mivel ezeknek maximum 256x256-os
+     textúráik lehetnek.
+
+  <B>Q: nVidia TNT/TNT2 kártyám van, és egy furcsa színekkel teli sáv van a
+     film alatt! Kinek a hibája ez?
+  </B>A: Az nVidia driver-é. Ezek a hibák CSAK TNT/TNT2 kártyákkal jönnek elõ, és
+     nem tehetünk róla, a hiba az Ön készülékében van.
+
+
+  <A NAME=5.5>5.5.  Feature kérések
+
+  <B>Q: Hogyan játszhatok le QuickTime és RealMedia file-okat MPlayer-rel?
+  </B>A: Nem lehetséges. A legjobb az lenne ha lángok nyelnék el ezeket a
+     formátumokat. Elméletileg visszafejthetõk a Linuxos Real codec-ek
+     (.so file-ként tárolódnak), de gyakorlatban ez nagyon nehéz feladat, még
+     akkor is az, ha tudnád hogy miként lett fordítva. A régebbi QuickTime
+     formátumok lejátszhatóak, és hamarosan az MPlayer-ben is lesz ilyen funkció,
+     de az újabb filmek Sorenson-nal vannak tömörítve és ez a codec mélyen bele
+     van ágyazva a QT programba, ergo lehetetlen felhasználni.
+
+</PRE>
+
+</BODY>
+
+</HTML>

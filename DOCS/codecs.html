@@ -44,9 +44,9 @@
   to get info about its status and about how to help us adding support for it!
 
 
-  <A NAME=2.1.2.1>2.1.2.1.  OpenDivX
+  <A NAME=2.1.2.1>2.1.2.1.  DivX4
 
-  This section contains information about the DivX/OpenDivX codecs of
+  This section contains information about the DivX4 codec of
   <A HREF="http://www.projectmayo.com">ProjectMayo</A>. Their first available alpha version was the OpenDivX 4.0
   alpha 47 and 48. Support for this was/is included in <B>MPlayer</B>, and built by
   default. We even used its postprocessing code to optionally enhance visual
@@ -74,9 +74,9 @@
   cp decore.h /usr/local/include/
 
 
-  <B>MPlayer</B> autodetects if OpenDivX is (properly) installed, just compile
+  <B>MPlayer</B> autodetects if DivX4 is (properly) installed, just compile
   as usual. If it doesn't detect it, you didn't install it exactly as above,
-  and/or has fucked up config (see last question of 6.1 section).
+  and/or has fucked up config (see last question of 5.1 section).
 
   Using it is a bit tricky. As it conflicts with the old OpenDivX (it's API is
   very similar to OpenDivX's), OpenDivX code is disabled, and the OpenDivX
@@ -111,11 +111,10 @@
   <A NAME=2.1.2.2>2.1.2.2.  ffmpeg's DivX/libavcodec
 
   Beginning with version 0.4.2 , <A HREF="http://ffmpeg.sourceforge.net">ffmpeg</A> contains an <B>opensource</B> DivX codec,
-  which is compatible with the traditional DivX. <B>MPlayer</B> contains this codec,
+  which is compatible with the traditional DivX. <B>MPlayer</B> supports this codec,
   and this makes it possible to <B>watch DivX movies on non-x86 platforms!</B>
-  To get it compile, you'll need nasm, bison, and flex, above the other
-  devel tools. It was removed from <B>MPlayer</B>'s cvs tree, you have
-  to download it manually directly from <B>FFmpeg</B>'s tree :
+  It was removed from <B>MPlayer</B>'s cvs tree, you have to download it
+  manually directly from <B>FFmpeg</B>'s tree :
 
 
   cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg login
@@ -144,6 +143,7 @@
 
   Note: libavcodec contains other codecs as well, but at the moment we mostly
         focus on ffdivx, and it's unlikely that this will change.
+
 
   <A NAME=2.1.4>2.1.4.  Codec importing howto
 

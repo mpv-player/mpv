@@ -33,11 +33,11 @@ Table of Contents
      <A HREF="codecs.html">2.1 Video Formats, Audio & Video Codecs</A>
 	<A HREF="codecs.html#2.1.1">2.1.1 Supported input formats</A>
         <A HREF="codecs.html#2.1.2">2.1.2 Supported audio & video codecs</A>
-	     <A HREF="codecs.html#2.1.2.1">2.1.2.1 OpenDivX</A>
+	     <A HREF="codecs.html#2.1.2.1">2.1.2.1 DivX4</A>
 	     <A HREF="codecs.html#2.1.2.2">2.1.2.2 ffmpeg's DivX/libavcodec</A>
 	<A HREF="codecs.html#2.1.4">2.1.4 Codec importing howto</A>
-	<A HREF="codecs.html#2.1.4.1">2.1.4.1 VFW codecs</A>
-	<A HREF="codecs.html#2.1.4.2">2.1.4.2 DirectShow codecs</A>
+	     <A HREF="codecs.html#2.1.4.1">2.1.4.1 VFW codecs</A>
+	     <A HREF="codecs.html#2.1.4.2">2.1.4.2 DirectShow codecs</A>
 </P>
 <P>
      <A HREF="video.html">2.2 Video & Audio output devices</A>
@@ -198,7 +198,7 @@ Table of Contents
   _before_ compiling <B>MPlayer</B>, otherwise no Matrox-specific support will be
   built.
 
-  If you plan to use the ProjectMayo's <B>OpenDivX</B> codec, check the
+  If you plan to use the ProjectMayo's <B>DivX4</B> codec, check the
   <A HREF="codecs.html#2.1.2.1">2.1.2.1</A> section before compiling.
 
   Then build <B>MPlayer</B>:
@@ -214,8 +214,8 @@ Table of Contents
   config.h and config.mak files.
 
   Though not mandatory, the fonts should be installed in order to gain
-  OSD, and subtitle functionality. Download mp_font3.zip (and optional
-  language updates) and optional (if exists) language updates.
+  OSD, and subtitle functionality. Download mp_font3.zip and optional
+  (if exists) language updates.
 
 
 	mkdir ~/.mplayer/font
@@ -259,15 +259,24 @@ Table of Contents
   <A NAME=3.1>3.1.  Control from keyboard
 
 
-    l/r arrows		seek backward/forward 10 seconds
-    up or down		seek backward/forward 1 minute  
-    p or SPACE		pause movie (press any key to continue)
-    q  or  ^C		stop playing and quit program
-    o			toggle OSD : none / seek / seek+timer
-    /  and *		decrease/increase volume
-    m			toggle using master/pcm channel for volume setting
-    f			toggle fullscreen (only with -vo sdl)
+    <-  or  ->          seek backward/forward  10 seconds
+    up or down          seek backward/forward   1 minute
+    pgup/pgdown         seek backward/forward  10 minutes
+    p or SPACE          pause movie (press any key)
+    q or ESC            stop playing and quit program
+    + or -              adjust audio delay by +/- 0.1 second
+    / or *              decrease/increase volume
+    o                   toggle OSD: none / seek / seek+timer
+    m                   toggle using master/pcm volume
+    z or x              adjust subtitle delay by +/- 0.1 second
 
+  (the following keys are valid only when using DirectShow DivX codec)
+
+    1 or 2              adjust contrast
+    3 or 4              adjust brightness
+    5 or 6              adjust ?
+    7 or 8              adjust saturation   
+   
 
   <A NAME=3.2>3.2.  Control from LIRC
 
@@ -467,7 +476,7 @@ Table of Contents
 
   <A NAME=6.4>6.4.  StrongARM
 
-  MPlayer is reported to compile on StrongARM. Use the following command line:
+  <B>MPlayer</B> is reported to compile on StrongARM. Use the following command line:
 
 
   ./configure --target=arm-linux --disable-css --with-x11libdir=/usr/arm/lib
@@ -481,7 +490,7 @@ NOTE: Do *NOT* send bugreports, help & feature requests directly to the authors!
 
 ========================== The <B>MPlayer</B> project: ===============================
 
-Árpád Gereöffy (A'rpi/ESP-team):  <arpi@thot.banki.hu>
+Árpád Gereöffy (A'rpi/ESP-team):  [arpi@thot.banki.hu]
 - player code (mpeg stream demultiplexer and avi/asf parser, A-V sync, seek...)
 - mp3lib, based on mpglib sources  [MP3 audio decoder]
 - getch2  [keyboard handler]
@@ -495,7 +504,7 @@ NOTE: Do *NOT* send bugreports, help & feature requests directly to the authors!
 - ffmpeg/libavcodec integration
 - DivX4Linux (ProjectMayo) support (see documentation)
 
-Zoltán Ponekker (Pontscho/Fresh!):  <pontscho@makacs.poliod.hu> 
+Zoltán Ponekker (Pontscho/Fresh!):  [pontscho@makacs.poliod.hu] 
 - configure script and Makefiles for easy compile
 - GUI system (near complete!?)
 - 3DNow! support into mp3lib
@@ -504,14 +513,14 @@ Zoltán Ponekker (Pontscho/Fresh!):  <pontscho@makacs.poliod.hu>
 - libvo: adding xmga driver, and fullscreen support to xv
 - audio mixer (volume) support
 
-Gábor Lénárt (LGB): <lgb@lgb.hu>
+Gábor Lénárt (LGB): [lgb@lgb.hu]
 - ./configure script improvements
 - Makefile improvements
 - prelimenary DVD support
 - another GUI code (is that so..?)
 - various X11 cleanups and fixes
 
-Gábor Bérczi (Gabucino):  <gabucino@k2.jozsef.kando.hu>
+Gábor Bérczi (Gabucino):  [gabucino@k2.jozsef.kando.hu]
 - documentation maintainer
 - hungarian translation of documentation
 - second webpage design&gfx
@@ -521,33 +530,33 @@ Gábor Bérczi (Gabucino):  <gabucino@k2.jozsef.kando.hu>
   (devel channel, users earn kickban)
 - experimental MINIX port
 
-Szabolcs Berecz (Szabi): <szabi@inf.elte.hu>
+Szabolcs Berecz (Szabi): [szabi@inf.elte.hu]
 - codecs.conf file parser
 - config file and command line parser
 - mga_vid fixes, module option etc.
 - fbdev support in libvo
 - type #7 subtitle support
 
-László Megyer (Lez, Laaz): <lez@sch.bme.hu>
+László Megyer (Lez, Laaz): [lez@sch.bme.hu]
 - SUB reader
 - screensaver+DPMS disable for libvo
 
-Gyula László (Chass, Tégla): <chass-@freemail.hu>
+Gyula László (Chass, Tégla): [chass-@freemail.hu]
 - first fonts (mp_font1.zip)
 - third (current) homepage design&gfx
 
-Zoltán Márk Vicián (Se7en): <se7en@sch.bme.hu>
+Zoltán Márk Vicián (Se7en): [se7en@sch.bme.hu]
 - SVGAlib support in libvo
 
-Alex Beregszaszi (Al3x): <alex@naxine.org>
+Alex Beregszaszi (Al3x): [alex@naxine.org]
 - ALSA output driver in libao2
 - vo_ggi output driver in libvo (www.ggi-project.org)
 
-Andreas Ackermann (Acki):  <asackerm@stud.informatik.uni-erlangen.de>
+Andreas Ackermann (Acki):  [asackerm@stud.informatik.uni-erlangen.de]
 - LIRC support (see documentation)
 - DGA support in libvo
 
-Felix Bünemann (Atmos): <atmosfear@users.sourceforge.net>
+Felix Bünemann (Atmos): [atmosfear@users.sourceforge.net]
 - SDL driver maintainer
 - Additional YUV formats fixes
 - New font (mp_font2.zip)
@@ -556,45 +565,45 @@ Felix Bünemann (Atmos): <atmosfear@users.sourceforge.net>
 - SDL audio driver in libao2
 - RAW PCM/WAVE file writer for libao2
 
-TeLeNiEkO: <telenieko@telenieko.com>
+TeLeNiEkO: [telenieko@telenieko.com]
 - spanish translation of documentation
 
-Michael Graffam: <mgraffam@idsi.net>
+Michael Graffam: [mgraffam@idsi.net]
 - XF86VidMode support to vo_x11 and vo_dga
 - Video mode switching code to vo_dga
 
-Jens Hoffmann: <hoffmajs@gmx.de>
+Jens Hoffmann: [hoffmajs@gmx.de]
 - Additional YUV formats support
 - found the big BITMAPINFOHEADER problem -> solved ASV2 pixelization
 
-Nick Kurshev: <nickols_k@mail.ru>
+Nick Kurshev: [nickols_k@mail.ru]
 - memcpy optimizations for AMD K7 and Intel Pentium III  (fastmemcpy.h)
 - CDROM tune info
 - further 3DNow! optimizations into mp3lib and libac3 and ffmpeg
 - russian translation of documentation
 
-German Gomez Garcia: <german@piraos.com>
+German Gomez Garcia: [german@piraos.com]
 - DVD .ifo parser and chapter selection [not yet in the main trunk]
 - SPDIF AC3 output for SBLive!
 
-Dariush Pietrzak (Eyck): <eyck@incubus.ar.lublin.pl>
+Dariush Pietrzak (Eyck): [eyck@incubus.ar.lublin.pl]
 - debian packaging support (see debian/* and this documentation)
 - support for vplayer subtitle format
 - prelimenary support for .RT subtitle format
 
-Marcus Comstedt: <marcus@idonex.se>
+Marcus Comstedt: [marcus@idonex.se]
 - initial solaris8-x86 support
 
-Jürgen Keil and Marcus Comstedt: <jk@tools.de> <marcus@idonex.se>
+Jürgen Keil and Marcus Comstedt: [jk@tools.de] [marcus@idonex.se]
 - patched <B>MPlayer</B> to work on Solaris 8 x86
 - configure fixes
 - various fixes (win32, configure, etc)
 - SUN audio driver in libao2
 
-Vladimir Kushnir: <vkushnir@Alfacom.net>
+Vladimir Kushnir: [vkushnir@Alfacom.net]
 - patched <B>MPlayer</B> to work on FreeBSD x86
 
-Bertrand BAUDET: <bertrand_baudet@yahoo.com>
+Bertrand BAUDET: [bertrand_baudet@yahoo.com]
 - network streaming support
 
 Artur Zaprzala: <zybi@fanthom.irc.pl>
@@ -603,11 +612,11 @@ Artur Zaprzala: <zybi@fanthom.irc.pl>
 lanzz@lanzz.org:
 - GIMP font generator plugin (TOOLS/subfont-gimp)
 
-Adam Tla/lka: <atlka@pg.gda.pl>
+Adam Tla/lka: [atlka@pg.gda.pl]
 - osd/sub review, fixes, optimization, utf8 support
 - various fixes
 
-Folke Ashberg: <folke@ashberg.de>
+Folke Ashberg: [folke@ashberg.de]
 - native AAlib driver (-vo aa)
 
 Main testers:
@@ -619,24 +628,24 @@ Main testers:
 
 ========================== The codecs, libs: =================================
 
-Aaron Holtzman:  <aholtzma@engr.uvic.ca>
+Aaron Holtzman:  [aholtzma@engr.uvic.ca]
 - ac3dec (and libac3) author  [AC3 audio decoder]
 - mga_vid driver  [Matrox G200/G400 YUV Back-end Scaler]
 - mpeg2dec        [Fast MPEG1/MPEG2 video decoder, currently used in player]
 
-Michel Lespinasse:  <walken@zoy.org>
+Michel Lespinasse:  [walken@zoy.org]
 - did large libmpeg2 changes for better speed and mpeg conformance
 
-Eugene Kuznetsov:  <divx@euro.ru>
+Eugene Kuznetsov:  [divx@euro.ru]
 - avifile author  [AVI player library for linux, using Win32 VfW/ACM codecs]
 - technical help about AVI and ASF formats, and how to get YUV using VfW...
 - divx4linux techical support
 
-Zdenek Kabelac:  <kabi@informatics.muni.cz>
+Zdenek Kabelac:  [kabi@informatics.muni.cz]
 - current avifile maintainer(?)
 - some technical help about the win32 stuff and timers
 
-Gerard Lantau: <glantau@yahoo.fr>
+Gerard Lantau: [glantau@yahoo.fr]
 - ffmpeg/libavcodec author,maintainer (opensource mpeg, mjpeg, divx en/decoder)
 
 Project Mayo:  [http://www.projectmayo.com]
@@ -655,26 +664,26 @@ other technical help from:
 John F. McGowan   http://www.jmcgowan.com/
 - AVI FAQ author/collector. [site with many useful docs on codecs and avi fmt]
 
-Dirk Farin:      <farin@ti.uni-mannheim.de>
+Dirk Farin:      [farin@ti.uni-mannheim.de]
 - dvdview author  [MPEG1/MPEG2 video decoder, used in v0.5-v0.8]
 
-Adam Williams:   <broadcast@earthling.net>
+Adam Williams:   [broadcast@earthling.net]
 - libmpeg3 (and xmovie) author  [MPEG1/MPEG2 video decoder, used in v0.1-v0.4]
 
 
   <A NAME=B>Appendix B - Mailing lists
 
-There are some public mailing lists on <B>MPlayer</B>. Subscribing can be achieved on
-the following addresses:
+  There are some public mailing lists on <B>MPlayer</B>. Subscribing can be
+  achieved on the following addresses:
 
-- <B>MPlayer</B> core/hungarian developers list:
+  - <B>MPlayer</B> core/hungarian developers list:
 	http://mp.dev.hu/mailman/listinfo/mplayer-devel
 
 	I dunno, it is the FLAME list in hungarian language :)
 	Also some talking about mplayer core team internals, like mplayer
 	party, sponsors etc can be here.
 
-- <B>MPlayer</B> developers list:
+  - <B>MPlayer</B> developers list:
 	http://lists.sourceforge.net/lists/listinfo/mplayer-dev-eng
 
 	This list is about mplayer development! Talking about interface/API changes,
@@ -682,14 +691,14 @@ the following addresses:
 	Do NOT send bugreports, user questions, feature requests here!
 	This list should be kept low-traffic.
 
-- <B>MPlayer</B> users list:  
+  - <B>MPlayer</B> users list:  
 	http://lists.sourceforge.net/lists/listinfo/mplayer-users
 
 	- send bugreports here (after reading DOCS/BUGS, Appendix <A HREF="#C">C</A>)
 	- send feature requests here (after reading DOCS/TODO)
 	- send user questions here (after reading all this documentation)
 
-- <B>MPlayer</B> & Matrox G200/G400/G450 users:
+  - <B>MPlayer</B> & Matrox G200/G400/G450 users:
 	http://lists.sourceforge.net/lists/listinfo/mplayer-matrox
 
 	Send matrox-related questions here,
@@ -697,29 +706,29 @@ the following addresses:
 	- matrox's official beta drivers (for X 4.x.x)
 	- and about matroxfb-TVout stuff.
 
-- mpg12play-portable developers:
+  - mpg12play-portable developers:
 	http://lists.sourceforge.net/lists/listinfo/mplayer-mpg12play
 
 	This list is for talking about mplayer ports to non-x86 platforms
 	(IRIX, Solaris-SPARC, Alpha, Commodore64, Sharp Calculator,
 	Teapot etc...)
 
-- <B>MPlayer</B> announce:    
+  - <B>MPlayer</B> announce:    
 	http://lists.sourceforge.net/lists/listinfo/mplayer-announce
 
 	Very low traffic list :)
 	And it's read-only. I'll post something shit there if a new release
 	is done.
 
-- <B>MPlayer</B> CVS-log:     
+  - <B>MPlayer</B> CVS-log:     
 	http://mp.dev.hu/mailman/listinfo/mplayer-cvslog
 
 	Send only questions about CVS changes here.
 	(if you don't understand why a change is required or you've better fix)
 	Be sure in that your target developer reads this list!
 
-NOTE: language of above lists are ENGLISH, unless explicitly stated otherwise.
-      Please do not send messages using other language!
+  NOTE: language of above lists are ENGLISH, unless explicitly stated
+        otherwise.  Please do not send messages using other language!
 
 
   <A NAME=C><A HREF="bugreports.html">Appendix C</A> - How to report bugs

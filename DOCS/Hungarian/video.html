@@ -4,64 +4,61 @@
 
 <PRE>
 
-  <A NAME=2.2.1>2.2.1.  Video output devices   
+  <A NAME=2.2.1>2.2.1.  Video kimeneti eszközök
 
-  General:
-  - x11:  X11 with optional SHM extension
-  - xv:   X11 using overlays with the Xvideo extension (hardware YUV & scaling)
-  - gl:   OpenGL renderer, so far works only with :
-          - all cards with Utah-GLX
-          - Matrox cards with X/DRI >=4.0.3
-          - Radeon with X/DRI CVS
-  - dga:  X11 DGA extension
-  - fbdev:Output to general framebuffers
-  - svga: Output to SVGAlib
-  - sdl:  1.1.7 : supports software scaling
-          1.1.8 : supports Xvideo (hardware scaling/fullscreen)
-          1.2.0 : supports AAlib (-vo aa is very recommended, see below!)
-  - ggi: similar to SDL
-  - aa:  textmode rendering with AAlib
+  Általános:
+  - x11:  X11, opcionálisan az SHM kiterjesztéssel
+  - xv:   X11 az XVideo kiterjesztés overlay-eivel (hardware támogatás)
+  - gl:   OpenGL renderelõ, egyelõre csak ezekkel megy:
+          - bármely kártyával, Utah-GLX-szel
+          - Matrox kártyák + X/DRI >=4.0.3  
+          - Radeon + X/DRI CVS
+  - dga:  X11 a DGA kiterjesztéssel
+  - fbdev:Megjelenítés általános framebuffereken
+  - svga: Megjelenítés SVGAlib-bel
+  - sdl:  1.1.7 : software scaling
+          1.1.8 : támogatja a hardware-es gyorsítást XVideo-n keresztül
+          1.2.0 : aalib támogatás (használd inkább a -vo aa opciót!)
+  - ggi:  SDL-hez hasonló
+  - aa:   szöveges módú megjelenítés AAlib-bel
 
-  Card specific:
-  - mga:  Matrox G200/G400 hardware YUV overlay via the mga_vid device
-  - xmga: Matrox G200/G400 overlay (mga_vid) in X11 window
-          (Xv emulation on X 3.3.x !)
-  - syncfb: Matrox G400 YUV support on framebuffer (obsoleted, use mga/xmga)
-  - 3dfx: Voodoo2/3 hardware YUV (/dev/3dfx) support (not yet tested, maybe
-          broken)
+  Kártyaspecifikus:
+  - mga:  Matrox G200/G400 hardware-es YUV overlay az mga_vid-en keresztül
+  - xmga: Matrox G200/G400 overlay (mga_vid) X11 ablakban
+          (Xv emuláció 3.3.x-es X-szel!)
+  - syncfb: Matrox G400 YUV támogatás framebufferen (régi, használj mga/xmga-t)
+  - 3dfx: Voodoo2/3 hardware YUV (/dev/3dfx) támogatás (nincs tesztelve!)
 
-  Special:
-  - png:  PNG files output (use -z switch to set compression)
-  - pgm:  PGM files output (for testing purposes or ffmpeg encoding)
-  - md5:  MD5sum output (for MPEG conformance tests)
-  - odivx:OpenDivX AVI File writer (use -br to set encoding bitrate)
-  - null: Null output (for speed tests/benchmarking)
-
-  NOTE: check the following subsections for details and requirements!
+  Egyéb:
+  - png:  output PNG file-okba (-z kapcsoló a tömörítés mértékét állítja)
+  - pgm:  output PGM file-okba (tesztelésre, vagy ffmpeg enkódoláshoz)
+  - md5:  MD5sum támogatás (MPEG konformancia tesztekhez)
+  - odivx:OpenDivX AVI file output (-br a bitrate-et állítja)
+  - null: output a nagy semmibe (sebességtesztekhez)
 
 
   <A NAME=2.2.1.1>2.2.1.1.  MTRR
 
-  It is VERY recommended to set MTRR registers up properly, because they can
-  give a big performance boost. First you have to find the base address.
-  You have 3 ways to find it:
+  Nagyon ajánlott az MTRR helyes beállítása, mert minden esetben
+  sebességnövekedést eredményez. Elõször a báziscímet kell megkeresni.
+  Erre van 3 módszer :
 
-  - from X11 startup messages, for example:
+  - az X11 induló üzeneteibõl, például :
 
   (--) SVGA: PCI: Matrox MGA G400 AGP rev 4, Memory @ 0xd8000000, 0xd4000000
   (--) SVGA: Linear framebuffer at 0xD8000000
 
-  - from /proc/pci (use lspci -v command):
+  - a /proc/pci-bõl (használd az lspci -v parancsot):
 
   01:00.0 VGA compatible controller: Matrox Graphics, Inc.: Unknown device 0525
           Memory at d8000000 (32-bit, prefetchable)
-        
-  - from mga_vid kernel driver messages (use dmesg):
+
+  - az mga_vid kernel meghajtó üzeneteibõl (dmesg parancs):
 
   mga_mem_base = d8000000
 
-  Then let's find the memory size. This is very easy, just convert video ram
-  size to hexadecimal, or use this table:
+  Ezután kell a memória mérete is. Csak át kell konvertálni a video ram
+  méretét hexadecimálisba, pl így :
 
 
 		1 MB    0x100000
@@ -72,42 +69,42 @@
 		32 MB   0x2000000
 
 
-  You know base address and memory size, let's setup mtrr registers!
-  For example, for the Matrox card above (base=0xd8000000) with 32MB
-  ram (size=0x2000000) just execute:
+  Már tudjuk a címet és a méretet, már csak a beállítás hiányzik!
+  Például a fenti Matrox kártyához (base=0xd8000000), 32mega memóriával
+  (size=0x2000000) ezt kell beírni:
 
 
       echo "base=0xd8000000 size=0x2000000 type=write-combining" >| /proc/mtrr
 
 
-  Not all CPUs support MTRRs. For example older K6-2's [around 266Mhz,
-  stepping 0] doesn't support MTRR, but stepping 12's do ('cat /proc/cpuinfo'
-  to check it).
+  Nem minden CPU támogatja az MTRR-eket. Például régebbi K6/2-k (266Mhz
+  körül, stepping 0) nem, de stepping 12-esek igen (cat /proc/cpuinfo
+  megadja a stepping értékét).
 
 
   <A NAME=2.2.1.2>2.2.1.2.  Xv
 
-  Under XFree86 4.0.2 or newer, you can use your card's hardware YUV routines
-  using the XVideo extension. This is what the option '-vo xv' uses.
-  In order to make this work, be sure to check the following:
-   - You have to use XFree86 4.0.2 or newer (former versions don't have XVideo)
-   - Your card actually supports harware acceleration (modern cards do)
-   - X loads the XVideo extension, it's something like this:
+  XFree86 4.0.2 vagy újabb alatt használhatod a kártyád hardware-es YUV
+  rutinjait, az XVideo kiterjesztéssel. Ezt használja a '-vo xv' opció.
+  Hogy mûködjön, a következõ feltételeknek kell teljesülniük :
+   - XFree86 4.0.2 vagy újabb kell (elõzõ verziókban nincs XVideo)
+   - A kártyádnak tudnia kell hardware-es gyorsítást (a mai kártyák tudják)
+   - Az X-nek be kell töltenie az XVideo kiterjesztést, valahogy így néz ki:
 
 
 	(II) Loading extension XVideo
 
 
-     in /var/log/XFree86.0.log
+     a /var/log/XFree86.0.log file-ban.
 
 
-     NOTE : this loads only the XFree86's extension. In a good install, this is
-            always loaded, and doesn't mean that the _card's_ XVideo support is
-            loaded!
+     MEGJ : ez csak az XFree86 kiterjesztését tölti be. Egy rendes installban
+	    ez az alap, és nem azt jelenti, hogy a _kártyád_ XVideo támogatása
+	    töltõdött be!
 
-   - Your card has Xv support under Linux. To check, try 'xvinfo', it is the
-     part of the XFree86 distribution. It should display a long text, similar
-     to this:
+   - A kártyád Linuxos drivere támogatja-e az Xv-t. Ezt az 'xvinfo'-val lehet
+     megnezni, ez pedig az XFree86 disztribúció része. Egy hosszú szöveget
+     kell hogy kiírjon, hasonlót ehhez:
 
 
 	X-Video Extension version 2.2
@@ -135,94 +132,94 @@
 	(...etc...)
 
 
-     It must support YUY2 packed, and YV12 planar pixel formats to be
-     usable with <B>MPlayer</B>.
+     Támogatnia kell a YUY2 packed, YV12 planar pixelformátumokat, hogy
+     használható legyen az <B>MPlayer</B>-rel.
 
-   - And finally, check if <B>MPlayer</B> was compiled with 'xv' support.
-     ./configure prints this.
-
-
-  <A NAME=2.2.1.2.1>2.2.1.2.1.  3dfx cards
-
-  Older 3dfx drivers were known to have problems with XVideo acceleration,
-  it didn't support either YUY2 or YV12, and so. Verify that you have
-  XFree86 version 4.1.0 or greater, it works ok. Alternatively, you can use
-  <A HREF="http://dri.sourceforge.net">DRI</A> cvs.
-  If you experience strange effects using -vo xv, try SDL (it has XVideo too)
-  and see if it helps. Check the <A HREF="#2.2.1.4">SDL section</A> for details.
+   - És végül, hogy az <B>MPlayer</B> tartalmazza-e az 'xv' támogatást.
+     ./configure kiírja.
 
 
-  <A NAME=2.2.1.2.2>2.2.1.2.2.  S3 cards
+  <A NAME=2.2.1.2.1>2.2.1.2.1.  3dfx kártyák
 
-  S3 Savage3D's should work fine, but for Savage4, use XFree86 version 4.0.3
-  or greater. As for S3 Virge.. sell it.
-
-
-  <A NAME=2.2.1.2.3>2.2.1.2.3.  nVidia cards
-
-  nVidia isn't a very good choice under Linux.. You'll have to use the
-  binary nVidia driver, available at nVidia's website. The standard X
-  driver doesn't support XVideo for these cards, due to nVidia's closed
-  sources/specifications.
-
-   - Riva128 cards don't have XVideo support even with the nvidia driver :(
-     Complain to NVidia.
+  Régebbi 3dfx meghajtóknak problémái vannak az XVideo gyorsítással,
+  nem támogatták a YUY2-t vagy YV12-t, ésígytovább. Ellenõrizd hogy az
+  XFree86-od verziója 4.1.0 vagy újabb-e, azok már jók.
+  Ha furcsa effekteket észlelsz -vo xv-vel, próbáld ki az SDL meghajtót
+  (annak is van XVideo támogatása), az segíthet. Nézd meg a <A HREF="#2.2.1.4">2.2.1.4-es</A>
+  fejezetet a részletekhez.
 
 
-  <A NAME=2.2.1.2.4>2.2.1.2.4.  ATI cards
+  <A NAME=2.2.1.2.2>2.2.1.2.2.  S3 kártyák
 
-  The GATOS driver has VSYNC enabled by default. It means that decoding speed
-  (!) is synced to the monitor's refresh rate. If playing seems to be slow, try
-  disabling VSYNC somehow, or set refresh rate to n*(fps of the movie) Hz.
+  S3 Savage3D-knek mûködniük kell, de Savage4-hez 4.0.3-as de inkább újabb
+  XFree86 kell. S3 Virge-re vonatkozólag.. add el.
+
+
+  <A NAME=2.2.1.2.3>2.2.1.2.3.  nVidia kártyák
+
+  nVidia nem túl jó választás Linux alá.. A bináris nVidia meghajtót kell
+  használnod, ami az nVidia honlapjáról tölthetõ le. A szabvány X
+  meghajtó nem tartalmaz XVideo támogatást ezekhez a kártyákhoz, mivel
+  az nVidia nem adja ki a specifikációikat.
+
+   - Riva128-as kártyáknak még az nVidia meghajtóval se lesz XVideo-juk :(
+     Panaszkodj az nVidiának.
+
+
+  <A NAME=2.2.1.2.4>2.2.1.2.4.  ATI kártyák
+
+  A GATOS meghajtó alapállapotban bekapcsolt VSYNC-et tartalmaz. Ez azt
+  jelenti, hogy a dekódolási sebesség (!) hozzá van szinkronizálva a monitor
+  frissítési frekvenciájához. Ha a lejátszás lassúnak tûnik, próbáld meg
+  valahogy kikapcsolni a VSYNC-et, vagy állítsd a képfrissítést n*(a film
+  fps-e) Hz-re.
 
 
   <A NAME=2.2.1.3>2.2.1.3.  DGA
 
-  <A NAME=2.2.1.3.1>2.2.1.3.1.  Summary
+  <A NAME=2.2.1.3.1>2.2.1.3.1.  Elõszó
 
-  This document tries to explain in some words what DGA is in general and
-  what the DGA video output driver for mplayer can do (and what it can't).
-
-
-  <A NAME=2.2.1.3.2>2.2.1.3.2.  What is DGA
-
-  DGA is short for Direct Graphics Access and is a means for a program to
-  bypass the X-Server and directly modifying the framebuffer memory. 
-  Technically spoken this happens by mapping the framebuffer memory into
-  the memory range of your process. This is allowed by the kernel only
-  if you have superuser privileges. You can get these either by logging in 
-  as root or by setting the suid bit on the mplayer excecutable (NOT
-  recommended!).
-
-  There are two versions of DGA: DGA1 is used by XFree 3.x.x and DGA2 was 
-  introduced with XFree 4.0.1.
-
-  DGA1 provides only direct framebuffer access as described above. For 
-  switching the resolution of the video signal you have to rely on the 
-  XVidMode extension.
-
-  DGA2 incorporates the features of XVidMode extension and also allows
-  switching the depth of the display. So you may, although basically 
-  running a 32 bit depth XServer, switch to a depth of 15 bits and vice 
-  versa. 
-
-  However DGA has some drawbacks. It seems it is somewhat dependent on the
-  graphics chip you use and on the implementation of the XServer's video 
-  driver that controls this chip. So it does not work on every system ...
+  Ez a dokumentum néhány szóban elmagyarázza, hogy általában véve mi is az a
+  DGA, és mit tud az MPlayerben (és mit nem).
 
 
-<A NAME=2.2.1.3.3>2.2.1.3.3.  Installing DGA support for <B>MPlayer</B>
+  <A NAME=2.2.1.3.2>2.2.1.3.2.  Mi az a DGA ?
 
-  First make sure X loads the DGA extension, see in /var/log/XFree86.0.log :
+  A DGA szó a Direct Graphics Access rövidítése, és egy olyan módszert takar,
+  amivel a program az X szerver kikerülésével közvetlenül írhat a framebuffer
+  memóriába. Szaknyelven szólva ez a framebuffer memóriának a processz
+  területére történõ lapozásával történik. Ezt a kernel csak root jogosultsággal
+  engedi. Ez történhet root-ként történõ bejelentkezéssel, vagy a suid bit
+  beállításával az mplayer programon (NEM ajánlott!).
+
+  A DGA-nak két verziója van: a DGA1-et az XFree 3.X.X használja, a DGA2
+  pedig az XFree 4.0.1 óta létezik.
+
+  A DGA1 csak a fent leírt közvetlen hozzáférést nyújtja. A felbontásváltáshoz
+  itt szükség van az XVidMode kiterjesztésre.
+
+  A DGA2 tartalmazza az XVidMode tudását, továbbá engedélyezi a színmélység  
+  megváltoztatását. Így lehetséges, hogy egy 32 bites mélységû X szervert
+  átváltsunk 15 bitesbe, vagy fordítva.
+
+  A DGA-nak van néhány hátránya. Valamelyest függ a grafikus chiptõl és ennek
+  X-es driverétõl, ezért nem minden rendszeren mûködik ...
+
+
+<A NAME=2.2.1.3.3>2.2.1.3.3.  DGA támogatás telepítése <B>MPlayer</B>-be
+
+  Elõször bizonyosodj meg arról, hogy az X betölti-e a DGA kiterjesztést, lásd
+  /var/log/XFree86.0.log :
 
 
 		(II) Loading extension XFree86-DGA
 
 
-  See, XFree86 4.0.x or greater is VERY RECOMMENDED!
-  <B>MPlayer</B>'s DGA driver is autodetected on ./configure, or you can force it
-  with --enable-dga.
+  Amint látod, XFree86 4.0.x vagy újabb, NAGYON AJÁNLOTT!
+  Az <B>MPlayer</B> DGA meghajtója ./configure közben automatikusan
+  detektálódik, de az --enable-dga opcióval megerõsítheted.
 
+  Ha a meghajtó
   If the driver couldn't switch to a smaller resolution, experiment with
   switches -vm (only with X 3.3.x), -fs, -bpp, -zoom to find a video mode that
   the movie fits in. There is no converter right now.. :(

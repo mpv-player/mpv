@@ -1,3 +1,11 @@
+<HTML>
+
+<BODY>
+
+<PRE>
+
+  <A NAME=C>C függelék - Hogyan küldj bugreportot?
+
 Hogyan küldj bugreportot?
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 Elõször is olvasd el a DOCS/BUGS file-t és amit még találsz. Ha a
@@ -11,13 +19,13 @@ Iratkozz fel az mplayer-users levelezési listára:
 és küldd a bugreportot a
    mplayer-users@lists.sourceforge.net
 címre.
-
-		( ! A LISTA NYELVE AZ *ANGOL* ! )
+      
+                ( ! A LISTA NYELVE AZ *ANGOL* ! )
 
 Nem fogunk CC-zni, szóval légy szíves feliratkozni!!!
 
 Ne küldj bugreportot egyenesen valamelyik készítõnek!!!
-Együtt dolgozunk a kódon, ezért mindenkit érdekelhet.
+Együtt dolgozunk a kódon, ezért mindenkit érdekelhet.  
 Elõfordulhat, hogy más felhasználók már tudják a megoldást
 (konfigurációs probléma, rossz driver stb.), még ha mi azt hinnénk is,
 hogy a kód bugos.
@@ -31,8 +39,8 @@ Mit?
 1. Mindenképp küldj infót a rendszeredrõl:
 - disztribúció
   például:
-	RedHat 7.1
-	Slackware 7.0 + csomagok 7.1-bõl ...
+        RedHat 7.1
+        Slackware 7.0 + csomagok 7.1-bõl ...
 - kernel verzió
   uname -a
 - libc verzió:
@@ -41,7 +49,7 @@ Mit?
   X -version
 - gcc és ld verzió:
   gcc -v
-  ld -v
+  ld -v 
 - binutils verzió:
   as --version
 
@@ -58,7 +66,7 @@ Mit?
     X beépített drivere
     nvidia 0.9.623
     Utah-GLX CVS 2001-02-17
-    DRI a 4.0.3-as X-bõl
+    DRI a 4.0.3-as X-bõl   
 - hangkártya típus és driver
   például:
     Creative SBLive! Gold az oss.creative.com-ról való driverrel
@@ -80,11 +88,11 @@ Fordítási problémákhoz/hibákhoz:
 Lejátszási problémákhoz:
 ~~~~~~~~~~~~~~~~~~~~~~~~
 3. Az MPlayer outputot 1-es debug szinten (-v)
-  mplayer -v [options] filenév &> mplayer.log
+  mplayer -v [options] filenév &> mplayer.log 
 
 4. Ha a probléma csak egy vagy néhány file-nál jelentkezik,
   töltsd fel a file-t ide:
-    ftp://thot.banki.hu/MPlayer/incoming/
+    ftp://mplayerhq.hu/MPlayer/incoming/ 
   Általában az elsõ 1-5 Mb elég, hogy reprodulkáljuk a
   problémát, de elõször probáld ki:
     dd if=a_file of=kis_file bs=1k count=1024
@@ -96,7 +104,6 @@ Lejátszási problémákhoz:
   Ha a file a neten hozzaférhetõ, akkor a _pontos_ URL elküldése
   is elég!
 
-
 5. Segfault, SIGILL, signal 4, stb esetén:
 
 Ha keletkezett coredump, akkor lásd 5.a pont, máskülönben 5.b:
@@ -105,7 +112,7 @@ Ha keletkezett coredump, akkor lásd 5.a pont, máskülönben 5.b:
 Hogyan:
 Hozd létre a következõ parancs file-t:
 
-disass $eip $eip+15
+disass $eip-32 $eip+32
 printf "eax=%08lX\n",$eax
 printf "ebx=%08lX\n",$ebx
 printf "ecx=%08lX\n",$ecx
@@ -118,12 +125,12 @@ printf "esi=%08lX\n",$esi
 Aztán írd be a következõt:
 gdb mplayer --core=core -batch --command=parancs_file >mplayer.bug
 
-5.b.: futtasd MPlayert gdb-n keresztül:
+5.b.: futtasd <B>MPlayert</B> gdb-n keresztül:
 [a promptnál:]
   # gdb mplayer
 [a gdb promptnál:]
   > run -v [mplayer opciói] filenév
-  ... (várj amíg össze nem omlik)
+  ... (várj amíg össze nem omlik)  
   > bt
   > disass $eip-32 $eip+32
 A fenti parancsok teljes kimenetét küldd el nekünk!
@@ -133,3 +140,8 @@ A fenti parancsok teljes kimenetét küldd el nekünk!
   Ha valami nagy (log-ok stb.), akkor jobb ha FTP-re töltöd (gzip-pel),
   és csak a file nevét írod le a bugreportban!
 
+</PRE>
+
+</BODY>
+
+</HTML>
