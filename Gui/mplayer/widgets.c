@@ -127,6 +127,12 @@ void gtkMessageBox( int type,gchar * str )
  if ( !gtkInited ) return;
  ShowMessageBox( str );
  gtk_label_set_text( GTK_LABEL( gtkMessageBoxText ),str );
+ /* enable linewrapping by alex */
+// GTK_LABEL(gtkMessageBoxText)->max_width = 80;
+ if (strlen(str) > 80)
+    gtk_label_set_line_wrap(GTK_LABEL(gtkMessageBoxText), TRUE);
+ else
+    gtk_label_set_line_wrap(GTK_LABEL(gtkMessageBoxText), FALSE);
  switch( type)
   {
     case GTK_MB_FATAL:
