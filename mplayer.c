@@ -523,7 +523,7 @@ stream=new_stream(f,stream_type);
 
 //============ Open & Sync stream and detect file format ===============
 
-if(has_audio==0) audio_id=-2; // do NOT read audio packets...
+if(!has_audio) audio_id=-2; // do NOT read audio packets...
 
 //=============== Try to open as AVI file: =================
 stream_reset(stream);
@@ -796,7 +796,7 @@ switch(file_format){
  }
 } // switch(file_format)
 
-if(verbose) printf("file successfully opened  (has_audio=%d)\n",has_audio);
+//if(verbose) printf("file successfully opened  (has_audio=%d)\n",has_audio);
 
 printf("[V] filefmt:%d  fourcc:0x%X  size:%dx%d  fps:%5.2f  ftime:=%6.4f\n",
    file_format,sh_video->format,sh_video->disp_w,sh_video->disp_h,
@@ -814,7 +814,7 @@ if(has_audio){
     has_audio=0;
   } else {
     printf("Found audio codec: [%s] drv:%d (%s)\n",sh_audio->codec->name,sh_audio->codec->driver,sh_audio->codec->info);
-    has_audio=sh_audio->codec->driver;
+    //has_audio=sh_audio->codec->driver;
   }
 }
 
@@ -840,17 +840,9 @@ has_video=sh_video->codec->driver;
 
 printf("Found video codec: [%s] drv:%d (%s)\n",sh_video->codec->name,sh_video->codec->driver,sh_video->codec->info);
 
-//if(user_bpp)printf("Trying user defined depth of %dbpp\n", user_bpp);
-
 for(i=0;i<CODECS_MAX_OUTFMT;i++){
     out_fmt=sh_video->codec->outfmt[i];
-//    if(vo_dbpp){
-//        if( ((out_fmt & IMGFMT_BGR_MASK) == IMGFMT_BGR) && ((out_fmt & 0xff) == vo_dbpp) || (out_fmt & IMGFMT_BGR_MASK) != IMGFMT_BGR){
-//	     if(video_out->query_format(out_fmt)) break;
-//	}
-//    }else{
-  	  if(video_out->query_format(out_fmt)) break;
-//    }
+    if(video_out->query_format(out_fmt)) break;
 }
 if(i>=CODECS_MAX_OUTFMT){
     printf("Sorry, selected video_out device is incompatible with this codec.\n");
