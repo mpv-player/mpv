@@ -7,30 +7,31 @@ Videocards with hardware acceleration:
   "Hardware acceleration" usually means hardware YUV conversion, scaling,
 bilinear filtering. Under Linux, there are several ways to access it:
 
-I.   the Xv (XVideo) extension of XFree86-4.0.x
-II.  opengl drivers with glTexSubImage() support (currently the Utah-GLX drivers)
-III. native card-specific drivers, using special abilities of some cards
-IV.  DGA - direct graphic access. no yuv & scaling, but faster than raw X11
+I.   The Xv (XVideo) extension of XFree86 4.0.x
+II.  OpenGL drivers with glTexSubImage() support (currently the Utah-GLX
+     drivers)
+III. Native card-specific drivers, using special abilities of some cards
+IV.  DGA - direct graphic access. no YUV & scaling, but faster than raw X11
 
-Now, see them in details:
+Now, let's see them in details:
 
-I. under XFree86 v4.0.x, using the XVideo extension:
+I. Under XFree86 4.0.2 or newer, using the XVideo extension:
    this is what the option '-vo xv' uses.
 
 In order to make this work, be sure to check the following:
 
-1. you use XFree86 4.0.2 or newer (former versions don't have XVideo)
+1. You use XFree86 4.0.2 or newer (former versions don't have XVideo)
 
-2. your card actually supports harware acceleration (modern cards does)
+2. Your card actually supports harware acceleration (modern cards do)
 
 3. X loads the XVideo extension, it's something like this:
    (II) Loading extension XVideo
    in /var/log/XFree86.0.log
-   NOTE : this loads only the XFree86 support. In a good install, this is
+   NOTE : this loads only the XFree86's extension. In a good install, this is
           always loaded, and doesn't mean that the _card's_ XVideo support is
           loaded!
 
-4. your card has Xv support under linux. To check, try 'xvinfo', it is the
+4. Your card has Xv support under Linux. To check, try 'xvinfo', it is the
    part of the XFree86 distribution. It should display a long text, similar
    to this:
 
@@ -44,6 +45,18 @@ In order to make this work, be sure to check the following:
 	      depth 16, visualID 0x22
 	      depth 16, visualID 0x23
 	    number of attributes: 5
+	(...)
+	    Number of image formats: 7
+	      id: 0x32595559 (YUY2)
+	        guid: 59555932-0000-0010-8000-00aa00389b71
+	        bits per pixel: 16
+	        number of planes: 1
+	        type: YUV (packed)
+	      id: 0x32315659 (YV12)
+	        guid: 59563132-0000-0010-8000-00aa00389b71
+	        bits per pixel: 12
+	        number of planes: 3
+	        type: YUV (planar)
 	(...etc...)
 
    It must support YUY2 packed, and YV12 planar pixel formats to be
@@ -63,9 +76,9 @@ II. OpenGL drivers with *working* *fast* glTexSubImage() support.
 
    The new X4/DRI and nVidia's binary drivers has no usable glTexSubImage :(
 
-III. native card-specific drivers
+III. Native card-specific drivers
 
-There is 3 native drivers for linux:
+There is 3 native drivers for Linux:
 1. Matrox G200/G400/G450 BES (Back-End Scaler) support -> mga_vid kernel drv.
   It's active developed by me (A'rpi), and it has hardware VSYNC support
   with triple buffering. It works on both framebuffer console and under X.
@@ -92,7 +105,7 @@ There is 3 native drivers for linux:
 
 3. 3dfx (which ones?) YUV+scaler support, using /dev/3dfx (tdfx.o driver?)
   The /dev/3dfx kernel driver exists only for 2.2.x kernels, for use with
-  Glide 2.x linux ports. It's not tested with MPlayer, and so no more
+  Glide 2.x Linux ports. It's not tested with MPlayer, and so no more
   supported. Volunteers needed to test it and bring the code up-to-date.
 
 
@@ -105,7 +118,16 @@ using the DGA driver:
    with --enable-dga.
 3. Be sure to use 24/32bpp mode, since there is no converter right now.. :(
 4. Install MPlayer SUID root.
-   (see the FAQ on how to do this, and... heed the warning!)
+   'chown root /usr/local/bin/mplayer'
+   'chmod 750 /usr/local/bin/mplayer' 
+   'chmod +s /usr/local/bin/mplayer' 
+   Now it works as a simple user, too.
+   !!!! BUT STAY TUNED !!!!
+   This is a BIG security risk! Never do this on a server or on a computer
+   can be accessed by more people than only you because they can gain root
+   privilegies through suid root mplayer.
+   !!!! SO YOU HAVE BEEN WARNED ... !!!!
+
 5. Use '-vo dga' option, and there you go! (hope so:)
 
 If you have fast enough CPU (P3 800 for example) you can try fsdga for
