@@ -69,6 +69,9 @@ int WinID=-1;
 int vo_mouse_autohide = 0;
 int vo_wm_type = -1;
 
+/* if equal to 1 means that WM is a metacity (broken as hell) */
+int metacity_hack = 0;
+
 #define SUPPORT_NONE 0
 #define SUPPORT_FULLSCREEN 1
 #define SUPPORT_ABOVE 2
@@ -176,7 +179,6 @@ int vo_wm_detect( void )
  int             wm = vo_wm_Unknown;
  unsigned long   nitems;
  Atom          * args = NULL;
- int             metacity_hack = 0;
  
  if ( WinID >= 0 ) return vo_wm_Unknown;
  
@@ -186,18 +188,23 @@ int vo_wm_detect( void )
    mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm supports layers.\n" );
    for (i = 0; i < nitems; i++)
    {
-     if ( args[i] == XA_WIN_LAYER)
+     if ( args[i] == XA_WIN_LAYER) {
        wm = vo_wm_Layered;
+       metacity_hack |= 1;
+     }
      if ( args[i] == XA_WIN_HINTS)
        // metacity is the only manager which supports _WIN_LAYER but not _WIN_HINTS
        // what's more is has broken _WIN_LAYER support
-       metacity_hack = 1;
+       metacity_hack |= 2;
    }
    XFree( args );
-   if (wm && metacity_hack)
+   if (wm && metacity_hack == 3)
      return wm;
   }
 
+  if (metacity_hack == 1)
+   mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Using workaround for Metacity bugs.\n" );
+  
 // --- netwm 
   if (x11_get_property(XA_NET_SUPPORTED, &args, &nitems))
   {
@@ -717,7 +724,7 @@ void vo_x11_setlayer( int layer )
   case vo_wm_NetWM:
   {
    XClientMessageEvent  xev;
-   mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] NET style stay on top ( layer %d ).\n",layer );
+   char *state;
 
    memset( &xev,0,sizeof( xev ) );
    xev.type=ClientMessage;
@@ -727,9 +734,9 @@ void vo_x11_setlayer( int layer )
    xev.format=32;
    xev.data.l[0]=layer;
    
-   if (net_wm_support & SUPPORT_FULLSCREEN)
+   if (net_wm_support & SUPPORT_ABOVE)
    {
-     xev.data.l[1]=XA_NET_WM_STATE_FULLSCREEN;
+     xev.data.l[1]=XA_NET_WM_STATE_ABOVE;
      XSendEvent( mDisplay,mRootWin,False,SubstructureRedirectMask,(XEvent*)&xev );
    } else
    if (net_wm_support & SUPPORT_STAYS_ON_TOP)
@@ -737,11 +744,14 @@ void vo_x11_setlayer( int layer )
      xev.data.l[1]=XA_NET_WM_STATE_STAYS_ON_TOP;
      XSendEvent( mDisplay,mRootWin,False,SubstructureRedirectMask,(XEvent*)&xev );
    } else
-   if (net_wm_support & SUPPORT_ABOVE)
+   if (net_wm_support & SUPPORT_FULLSCREEN)
    {
-     xev.data.l[1]=XA_NET_WM_STATE_ABOVE;
+     xev.data.l[1]=XA_NET_WM_STATE_FULLSCREEN;
      XSendEvent( mDisplay,mRootWin,False,SubstructureRedirectMask,(XEvent*)&xev );
    }
+   state = XGetAtomName (mDisplay, xev.data.l[1]);
+   mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] NET style stay on top ( layer %d ). Using state %s.\n",layer,state );
+   XFree (state);
   }
  }
 }
@@ -769,13 +779,13 @@ void vo_x11_fullscreen( void )
    vo_old_x=vo_dx; vo_old_y=vo_dy; vo_old_width=vo_dwidth; vo_old_height=vo_dheight;
    x=0; y=0; w=vo_screenwidth; h=vo_screenheight;
  }
- if (! (net_wm_support & SUPPORT_FULLSCREEN))
+ if (net_wm_support!=SUPPORT_FULLSCREEN || metacity_hack==1)
  {
    vo_x11_decoration( mDisplay,vo_window,(vo_fs) ? 0 : 1 );
    vo_x11_sizehint( x,y,w,h,0 );
  }
  vo_x11_setlayer( vo_fs );
- if (! (net_wm_support & SUPPORT_FULLSCREEN))
+ if (net_wm_support!=SUPPORT_FULLSCREEN || metacity_hack==1)
  {
    if(vo_wm_type==vo_wm_Unknown && !(vo_fsmode&16))
   //     XUnmapWindow( mDisplay,vo_window );  // required for MWM
