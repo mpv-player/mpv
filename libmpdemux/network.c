@@ -912,8 +912,15 @@ realrtsp_streaming_start( stream_t *stream ) {
 	rtsp_session_t *rtsp;
 	char *mrl;
 	int port;
+	int redirected, temp;
 	char aport[10];
 	if( stream==NULL ) return -1;
+	
+	temp = 5; // counter so we don't get caught in infinite redirections (you never know)
+	
+	do {
+	
+	redirected = 0;
 
 	fd = connect2Server( stream->streaming_ctrl->url->hostname,
 		port = (stream->streaming_ctrl->url->port ? stream->streaming_ctrl->url->port : 554) );
@@ -925,9 +932,20 @@ realrtsp_streaming_start( stream_t *stream ) {
 	strcpy(mrl,stream->streaming_ctrl->url->url);
 	strcat(mrl,":");
 	strcat(mrl,aport);
-	rtsp = rtsp_session_start(fd,mrl, stream->streaming_ctrl->url->file,
-		stream->streaming_ctrl->url->hostname, port);
+	rtsp = rtsp_session_start(fd,&mrl, stream->streaming_ctrl->url->file,
+		stream->streaming_ctrl->url->hostname, port, &redirected);
+
+	if ( redirected == 1 ) {
+		url_free(stream->streaming_ctrl->url);
+		stream->streaming_ctrl->url = url_new(mrl);
+		close(fd);
+	}
+
 	free(mrl);
+	temp--;
+
+	} while( (redirected != 0) && (temp > 0) );	
+
 	if(!rtsp) return -1;
 
 	stream->fd=fd;

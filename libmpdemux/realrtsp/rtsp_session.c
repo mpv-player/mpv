@@ -65,7 +65,7 @@ struct rtsp_session_s {
 };
 
 //rtsp_session_t *rtsp_session_start(char *mrl) {
-rtsp_session_t *rtsp_session_start(int fd, char *mrl, char *path, char *host, int port) {
+rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host, int port, int *redir) {
 
   rtsp_session_t *rtsp_session=malloc(sizeof(rtsp_session_t));
   char *server;
@@ -73,10 +73,11 @@ rtsp_session_t *rtsp_session_start(int fd, char *mrl, char *path, char *host, in
   rmff_header_t *h;
   uint32_t bandwidth=10485800;
 
-connect:
+//connect:
+  *redir = 0;
 
   /* connect to server */
-  rtsp_session->s=rtsp_connect(fd,mrl,path,host,port,NULL);
+  rtsp_session->s=rtsp_connect(fd,*mrl,path,host,port,NULL);
   if (!rtsp_session->s)
   {
     printf("rtsp_session: failed to connect to server %s\n", path);
@@ -107,8 +108,13 @@ connect:
         printf("rtsp_session: redirected to %s\n", mrl_line);
 	rtsp_close(rtsp_session->s);
 	free(server);
-  /* FIXME: this won't work in MPlayer, connection opened by caller */
-	goto connect; /* *shudder* i made a design mistake somewhere */
+        free(*mrl);
+        free(rtsp_session);
+        /* tell the caller to redirect, return url to redirect to in mrl */
+        *mrl = mrl_line;
+        *redir = 1;
+        return NULL;
+//	goto connect; /* *shudder* i made a design mistake somewhere */
       } else
       {
         printf("rtsp_session: session can not be established.\n");
