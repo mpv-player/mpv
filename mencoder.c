@@ -96,6 +96,7 @@ static uint32_t lavc_find_atag(char *codec);
 int vo_doublebuffering=0;
 int vo_directrendering=0;
 int vo_config_count=0;
+int forced_subs_only=0;
 
 //--------------------------
 
@@ -611,6 +612,8 @@ vo_spudec=spudec_new_scaled(stream->type==STREAMTYPE_DVD?((dvd_priv_t *)(stream-
   }
 #endif	
 
+// Apply current settings for forced subs
+spudec_set_forced_subs_only(vo_spudec,forced_subs_only);
 
 // set up output file:
 muxer_f=fopen(out_filename,"wb");
