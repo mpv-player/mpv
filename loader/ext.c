@@ -534,8 +534,8 @@ LPVOID WINAPI VirtualAlloc(LPVOID address, DWORD size, DWORD type,  DWORD protec
     }
     if(answer==(void*)-1)
     {
-	printf(" VirtualAlloc(...) mmap(0x%08X, %u, ...) failed with errno=%d (\"%s\")\n",
-	       (unsigned)address, size, errno, sys_errlist[errno]);
+	/*printf(" VirtualAlloc(...) mmap(0x%08X, %u, ...) failed with errno=%d (\"%s\")\n",
+	       (unsigned)address, size, errno, strerror(errno));*/
 	return NULL;
     }
     else
