@@ -20,6 +20,7 @@
 #include <sys/poll.h>
 
 #include "config.h"
+#include "subopt-helper.h"
 #include "mixer.h"
 #include "mp_msg.h"
 
@@ -214,10 +215,11 @@ static int control(int cmd, void *arg)
   return(CONTROL_UNKNOWN);
 }
 
-static void parse_device (char *dest, char *src, int len)
+static void parse_device (char *dest, const char *src, int len)
 {
   char *tmp;
-  strncpy (dest, src, len);
+  memmove(dest, src, len);
+  dest[len] = 0;
   while ((tmp = strrchr(dest, '.')))
     tmp[0] = ',';
   while ((tmp = strrchr(dest, '=')))
@@ -239,6 +241,12 @@ static void print_help ()
            "    Sets device (change , to . and : to =)\n");
 }
 
+static int str_maxlen(strarg_t *str) {
+  if (str->len > ALSA_DEVICE_SIZE)
+    return 0;
+  return 1;
+}
+
 /*
     open & setup audio device
     return: 1=success 0=fail
@@ -249,9 +257,17 @@ static int init(int rate_hz, int channels, int format, int flags)
     int cards = -1;
     snd_pcm_info_t *alsa_info;
     char *str_block_mode;
-    int device_set = 0;
     int dir = 0;
+    int block;
+    strarg_t device;
     snd_pcm_uframes_t bufsize;
+    opt_t subopts[] = {
+      {"mmap", OPT_ARG_BOOL, &ao_mmap, NULL},
+      {"block", OPT_ARG_BOOL, &block, NULL},
+      {"device", OPT_ARG_STR, &device, (opt_test_f)str_maxlen},
+      {NULL}
+    };
+
     char alsa_device[ALSA_DEVICE_SIZE + 1];
     // make sure alsa_device is null-terminated even when using strncpy etc.
     memset(alsa_device, 0, ALSA_DEVICE_SIZE + 1);
@@ -343,68 +359,9 @@ static int init(int rate_hz, int channels, int format, int flags)
       }
 
     //subdevice parsing
-    if (ao_subdevice) {
-      int parse_err = 0;
-      char *parse_pos = &ao_subdevice[0];
-      while (parse_pos[0] && !parse_err) {
-        if (strncmp (parse_pos, "mmap", 4) == 0) {
-          parse_pos = &parse_pos[4];
-          ao_mmap = 1;
-        } else if (strncmp (parse_pos, "noblock", 7) == 0) {
-          parse_pos = &parse_pos[7];
-          ao_noblock = 1;
-        } else if (strncmp (parse_pos, "device=", 7) == 0) {
-          int name_len;
-          parse_pos = &parse_pos[7];
-          name_len = strcspn (parse_pos, ":");
-          if (name_len < 0 || name_len > ALSA_DEVICE_SIZE) {
-            parse_err = 1;
-            break;
-          }
-          parse_device (alsa_device, parse_pos, name_len);
-          parse_pos = &parse_pos[name_len];
-          device_set = 1;
-        }
-        if (parse_pos[0] == ':') parse_pos = &parse_pos[1];
-        else if (parse_pos[0]) parse_err = 1;
-      }
-      if (parse_err) {
-        print_help();
-        return 0;
-      }
-    } else { //end parsing ao_subdevice
-
-        /* in any case for multichannel playback we should select
-         * appropriate device
-         */
-        switch (channels) {
-	case 1:
-	case 2:
-	  mp_msg(MSGT_AO,MSGL_V,"alsa-init: setup for 1/2 channel(s)\n");
-	  break;
-	case 4:
-	  if (alsa_format == SND_PCM_FORMAT_FLOAT_LE)
-	    // hack - use the converter plugin
-	    strncpy(alsa_device, "plug:surround40", ALSA_DEVICE_SIZE);
-	  else
-	    strncpy(alsa_device, "surround40", ALSA_DEVICE_SIZE);
-	  device_set = 1;
-	  mp_msg(MSGT_AO,MSGL_V,"alsa-init: device set to surround40\n");
-	  break;
-	case 6:
-	  if (alsa_format == SND_PCM_FORMAT_FLOAT_LE)
-	    strncpy(alsa_device, "plug:surround51", ALSA_DEVICE_SIZE);
-	  else
-	    strncpy(alsa_device, "surround51", ALSA_DEVICE_SIZE);
-	  device_set = 1;
-	  mp_msg(MSGT_AO,MSGL_V,"alsa-init: device set to surround51\n");
-	  break;
-	default:
-	  mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: %d channels are not supported\n",channels);
-        }
-    }
-
-  if (!device_set) {
+    // set defaults
+    ao_mmap = 0;
+    block = 1;
     /* switch for spdif
      * sets opening sequence for SPDIF
      * sets also the playback and other switches 'on the fly'
@@ -413,10 +370,6 @@ static int init(int rate_hz, int channels, int format, int flags)
      */
     if (format == AF_FORMAT_AC3) {
       unsigned char s[4];
-
-      switch (channels) {
-      case 1:
-      case 2:
 
 	s[0] = IEC958_AES0_NONAUDIO | 
 	  IEC958_AES0_CON_EMPHASIS_NONE;
@@ -428,53 +381,48 @@ static int init(int rate_hz, int channels, int format, int flags)
 	snprintf(alsa_device, ALSA_DEVICE_SIZE,
 		"iec958:AES0=0x%x,AES1=0x%x,AES2=0x%x,AES3=0x%x", 
  		s[0], s[1], s[2], s[3]);
+	device.str = alsa_device;
 
 	mp_msg(MSGT_AO,MSGL_V,"alsa-spdif-init: playing AC3, %i channels\n", channels);
-	break;
-      case 4:
-	strncpy(alsa_device, "surround40", ALSA_DEVICE_SIZE);
-	break;
-    
-      case 6:
-	strncpy(alsa_device, "surround51", ALSA_DEVICE_SIZE);
-	break;
-
-      default:
-	mp_msg(MSGT_AO,MSGL_ERR,"alsa-spdif-init: %d channels are not supported\n", channels);
-      }
     }
   else
-
-      {
-	int tmp_device, tmp_subdevice, err;
-
-	snd_pcm_info_alloca(&alsa_info);
-	
-	if ((tmp_device = snd_pcm_info_get_device(alsa_info)) < 0)
-	  {
-	    mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: can't get device\n");
-	  }
-
-	if ((tmp_subdevice = snd_pcm_info_get_subdevice(alsa_info)) < 0)
-	  {
-	    mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: can't get subdevice\n");
-	  }
-	
-	mp_msg(MSGT_AO,MSGL_INFO,"alsa-init: got device=%i, subdevice=%i\n", 
-	       tmp_device, tmp_subdevice);
-
-	//we are setting here device to default cause it could be configured by the user
-	//if its not set by the user, it defaults to hw:0,0
-	if ((err = snprintf(alsa_device, ALSA_DEVICE_SIZE, "default")) <= 0)
-	  {
-	    mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: can't write device-id\n");
-	  }
+        /* in any case for multichannel playback we should select
+         * appropriate device
+         */
+        switch (channels) {
+	case 1:
+	case 2:
+	  device.str = "default";
+	  mp_msg(MSGT_AO,MSGL_V,"alsa-init: setup for 1/2 channel(s)\n");
+	  break;
+	case 4:
+	  if (alsa_format == SND_PCM_FORMAT_FLOAT_LE)
+	    // hack - use the converter plugin
+	    device.str = "plug:surround40";
+	  else
+	    device.str = "surround40";
+	  mp_msg(MSGT_AO,MSGL_V,"alsa-init: device set to surround40\n");
+	  break;
+	case 6:
+	  if (alsa_format == SND_PCM_FORMAT_FLOAT_LE)
+	    device.str = "plug:surround51";
+	  else
+	    device.str = "surround51";
+	  mp_msg(MSGT_AO,MSGL_V,"alsa-init: device set to surround51\n");
+	  break;
+	default:
+	  device.str = "default";
+	  mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: %d channels are not supported\n",channels);
+        }
+    device.len = strlen(device.str);
+    if (subopt_parse(ao_subdevice, subopts) != 0) {
+        print_help();
+        return 0;
+    }
+    ao_noblock = !block;
+    parse_device(alsa_device, device.str, device.len);
 
 	mp_msg(MSGT_AO,MSGL_INFO,"alsa-init: %d soundcard%s found, using: %s\n", cards+1,(cards >= 0) ? "" : "s", alsa_device);
-      }
-      } else {
-		mp_msg(MSGT_AO,MSGL_INFO,"alsa-init: soundcard set to %s\n", alsa_device);
-      }
 
     //setting modes for block or nonblock-mode
     if (ao_noblock) {
