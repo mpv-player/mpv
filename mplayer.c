@@ -2020,6 +2020,8 @@ switch(file_format){
           }
         }
 
+        RESET_AUDIO(audio_fd);
+
         current_module=NULL;
 
         c_total=0; // kell ez?
@@ -2037,8 +2039,6 @@ switch(file_format){
       v_frame=0; // !!!!!!
       audio_time_usage=0; video_time_usage=0; vout_time_usage=0;
 //      num_frames=real_num_frames=0;
-
-      RESET_AUDIO(audio_fd);
 
   }
 } // keyboard event handler
