@@ -18,8 +18,8 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include "a52.h"
+#include "mm_accel.h"
 #include "../config.h"
-#include "../cpudetect.h"
 
 int (* a52_resample) (float * _f, int16_t * s16)=NULL;
 
@@ -592,12 +592,12 @@ void a52_resample_init(uint32_t mm_accel,int _flags,int _chans){
 
     if(a52_resample==NULL) // only once please ;)
     {
-	    if(gCpuCaps.hasMMX) fprintf(stderr, "Using MMX optimized resampler\n");
-	    else		fprintf(stderr, "No accelerated resampler found\n");
+	    if(mm_accel & MM_ACCEL_X86_MMX) 	fprintf(stderr, "Using MMX optimized resampler\n");
+	    else				fprintf(stderr, "No accelerated resampler found\n");
     }
     
 #ifdef ARCH_X86
-    if(gCpuCaps.hasMMX) a52_resample= a52_resample_MMX;
+    if(mm_accel & MM_ACCEL_X86_MMX) a52_resample= a52_resample_MMX;
 #else
     if(0);
 #endif

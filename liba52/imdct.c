@@ -26,7 +26,6 @@
  */
 
 #include "config.h"
-#include "../cpudetect.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -1107,9 +1106,9 @@ void imdct_init (uint32_t mm_accel)
     {
 	int i, j, k;
 
-	if(gCpuCaps.hasSSE) 		fprintf (stderr, "Using SSE optimized IMDCT transform\n");
-	else if(gCpuCaps.has3DNow) 	fprintf (stderr, "Using experimental 3DNow optimized IMDCT transform\n");
-	else		    		fprintf (stderr, "No accelerated IMDCT transform found\n");
+	if(mm_accel & MM_ACCEL_X86_SSE) 	fprintf (stderr, "Using SSE optimized IMDCT transform\n");
+	else if(mm_accel & MM_ACCEL_X86_3DNOW) 	fprintf (stderr, "Using 3DNow optimized IMDCT transform\n");
+	else		    			fprintf (stderr, "No accelerated IMDCT transform found\n");
 
 	/* Twiddle factors to turn IFFT into IMDCT */
 	for (i = 0; i < 128; i++) {
@@ -1185,8 +1184,8 @@ void imdct_init (uint32_t mm_accel)
 
 	imdct_512 = imdct_do_512;
 #ifdef ARCH_X86
-	if(gCpuCaps.hasSSE)		imdct_512 = imdct_do_512_sse;
-	else if(gCpuCaps.has3DNow)	imdct_512 = imdct_do_512_3dnow;
+	if(mm_accel & MM_ACCEL_X86_SSE)		imdct_512 = imdct_do_512_sse;
+	else if(mm_accel & MM_ACCEL_X86_3DNOW)	imdct_512 = imdct_do_512_3dnow;
 #endif // arch_x86
 	imdct_256 = imdct_do_256;
     }

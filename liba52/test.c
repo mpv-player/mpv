@@ -11,6 +11,7 @@
 #include <inttypes.h>
 
 #include "a52.h"
+#include "mm_accel.h"
 #include "../cpudetect.h"
 
 static sample_t * samples;
@@ -51,6 +52,13 @@ long long t, sum=0, min=256*256*256*64;
     stdout= stderr; //EVIL HACK FIXME
     GetCpuCaps(&gCpuCaps);
     stdout= temp;
+//    gCpuCaps.hasMMX=0;
+//    gCpuCaps.hasSSE=0;
+    if(gCpuCaps.hasMMX) 	accel |= MM_ACCEL_X86_MMX;
+    if(gCpuCaps.hasMMX2) 	accel |= MM_ACCEL_X86_MMXEXT;
+    if(gCpuCaps.hasSSE) 	accel |= MM_ACCEL_X86_SSE;
+    if(gCpuCaps.has3DNow) 	accel |= MM_ACCEL_X86_3DNOW;
+//    if(gCpuCaps.has3DNowExt) 	accel |= MM_ACCEL_X86_3DNOWEXT;
     
     samples = a52_init (accel);
     if (samples == NULL) {
@@ -87,7 +95,7 @@ ENDTIMING
     buf_size=0;
 
     // decode:
-    flags=A52_STEREO; //A52_STEREO; // A52_DOLBY // A52_2F2R // A52_3F2R | A52_LFE
+    flags=A52_STEREO; //A52_STEREO; //A52_DOLBY; //A52_STEREO; // A52_DOLBY // A52_2F2R // A52_3F2R | A52_LFE
     channels=2;
     
     flags |= A52_ADJUST_LEVEL;
@@ -99,7 +107,7 @@ ENDTIMING
     // a52_dynrng (&state, NULL, NULL); // disable dynamic range compensation
 
 STARTTIMING
-    a52_resample_init(flags,channels);
+    a52_resample_init(accel,flags,channels);
     s16 = out_buf;
     for (i = 0; i < 6; i++) {
 	if (a52_block (&state, samples))
@@ -112,7 +120,7 @@ ENDTIMING
 if(sum<min) min=sum;
 sum=0;
 #endif
-    fwrite(out_buf,6*256*2*2,1,stdout);
+    fwrite(out_buf,6*256*2*channels,1,stdout);
 
 }
 
