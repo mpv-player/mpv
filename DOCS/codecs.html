@@ -164,8 +164,6 @@ and install it under <CODE>/usr/lib/win32</CODE> or wherever you store the
 Win32 codecs. This latter codec doesn't support YV12 nor YUY2 only BGR modes,
 thus usable only with the X11 and OpenGL outputs. Discouraged.</P>
 
-<P>Be sure to read the <A HREF=#2.2.2.3>VIVO audio codec</A> section too!</P>
-
 
 <P><B><A NAME=2.2.1.5>2.2.1.5.  MPEG 1/2 video</A></B></P>
 
@@ -217,8 +215,10 @@ option.</P>
 
 <P><B><A NAME=2.2.2.3>2.2.2.3.  VIVO audio</A></B></P>
 
-<P>AKA VivoSiren. Currently this isn't supported, but when it will, it will use
-the <CODE>vivog723.acm</CODE> file. Download from
+<P>The audio codec used in VIVO files depends on whether it's a VIVO/1.0 or
+VIVO/2.0 file. VIVO/1.0 files have <B>g.723</B> audio, and VIVO/2.0 files
+have <B>Vivo Siren</B>. Currently none of them is supported, but you can
+grab the g.723 codec from
 <A HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/vivog723.acm">here</A>,
 then copy it into the <CODE>/usr/lib/win32</CODE> directory, or respectively.</P>
 

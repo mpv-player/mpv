@@ -29,7 +29,7 @@ faces, then tell them to RTFM.</P>
 
 <P>You see, a <B>codec</B> isn't equal to a <B>file format</B>.<BR>
 Video <B>codecs</B> are: MPEG1, MPEG2, DivX, Indeo5, 3ivx.<BR>
-Video <B>formats</B> are: MPG, VOB, AVI, ASF.<BR>
+Video <B>formats</B> are: MPG, AVI, ASF.<BR>
 </P>
 
 <P>In theory, you can happily put an OpenDivX video and MP3 audio
@@ -45,25 +45,30 @@ create these files.</P>
 <P><B><A NAME=2.1.1>2.1.1. Video formats</A></B></P>
 
 
-<P><B><A NAME=2.1.1.1>2.1.1.1. MPG, VOB, DAT files</A></B></P>
+<P><B><A NAME=2.1.1.1>2.1.1.1. MPEG files</A></B></P>
 
 <P>
 <LI>MPG : this is the most <B>basic</B> form of MPEG file formats. Contains
-MPEG1 video, and MP2 audio.</LI>
-<LI>VOB : this is the MPEG file format on <B>DVD</B>s. Contains optionally
-encoded MPEG2 video, and usually AC3 audio.<BR>
-<B>Read the <A HREF="cd-dvd.html#4.2">DVD section</A> !</B></LI>
-<LI>DAT : this is the MPEG file format on <B>Video CD</B>s. It's the same
-as the MPG, but due to the nature VCDs are created and Linux is designed,
+MPEG1 video, and MP2 (MPEG-1 layer 2) audio, or rarely MP1.</LI>
+<LI>DAT : this is the very same format as MPG, just different extension. Used
+on <B>Video CD</B>s. Due to the nature VCDs are created and Linux is designed,
 the DAT files can't be played nor copied from VCDs. You have to use the
 <CODE>-vcd</CODE> option to play the VideoCD.</LI>
+<LI>VOB : this is the MPEG file format on <B>DVD</B>s. The same as MPG, plus
+capability to contain subtitles, or non-MPEG (AC3) audio. Contains encoded MPEG2
+video, and usually AC3 audio, but MP2 is allowed too.<BR>
+<B>Read the <A HREF="cd-dvd.html#4.2">DVD section</A> !</B></LI>
 </P>
+
+<P>In MPEG files, series of frames are grouped together, and are independent
+from the other groups. What this means is you can cut/join an MPEG file with
+standard file-tools (like dd, cut), and it remains completely functional.</P>
 
 <P>One important feature for MPGs is that they have a field to describe
 the aspect ratio of the video stream within. For example SVCDs have
 480x480 resolution video, and in the header that field is set to 4:3, so
 it's played at 640x480. AVI files don't have this field, so one has to
-scale it during encoding.</P>
+rescale it during encoding.</P>
 
 
 <P><B><A NAME=2.1.1.2>2.1.1.2. AVI files</A></B></P>
@@ -78,26 +83,74 @@ anybody cares.<BR>
 <B>NOTE</B> : DV cameras can create two types of AVI format, one is the usual and
 playable, the other is neither.</P>
 
+<P>There are two kinds of AVI files:
+<UL>
+  <LI><B>Interleaved</B> : audio and video content is interleaved. This is the
+    standard usage. Recommended and mostly used. Some tools create interleaved
+    AVIs with bad sync. <B>MPlayer</B> detects these as interleaved, and this
+    climaxes in loss of A/V sync, probably at seeking. These files should be
+    played as non-interleaved (with the <CODE>-ni</CODE> option).</LI>
+  <LI><B>Non-interleaved</B> : bad. First come the whole video stream, then the whole
+    audio stream, thus needs a lot of seeking. It's very bad when playing from
+    network or CDROM.</LI>
+</UL>
+</P>
+
+<P>MPlayer supports 2 kind of timing for AVI files:
+<UL>
+  <LI><B>bps-based</B> : it is based on bitrate/samplerate of video/audio stream. This
+    method is used by most players, including avifile and windows media player.
+    Files with broken headers, and files created with VBR audio but not
+    VBR-compliant encoder will result in A/V desync with this method (mostly at
+    seeking).</LI>
+  <LI><B>interleaving-based</B> : it doesn't use bitrate value of the header, instead
+    it uses the relative position of interleaved audio and video chunks. Makes
+    some badly encoded file with VBR audio playable.</LI>
+</UL>
+</P>
+
+<P>Any audio and video codec is allowed, but note that VBR audio isn't well
+supported by most of the players. The file format makes it possible to use VBR
+audio, but most players expect CBR audio, thus they fail with VBR. VBR is
+unusual, and Microsoft's AVI specs only describe CBR audio. I also note, that
+most AVI encoders/multiplexers create bad files if using VBR audio. only 2
+exception (known by me): NaNDub and <A HREF="encoding.html">MEncoder</A>.</P>
+
 
 <P><B><A NAME=2.1.1.3>2.1.1.3. ASF/WMV files</A></B></P>
 
-<P>ASF is a new very undocumented fileformat from M$, and WMV is its
-successor. They are very commercial, and anyone who writes an opensource
-parser for them, soon meets certain doom. While creating the parser, it
-was obvious to see how bulky, shit, and unusable they are. Not if anybody
-would expect something else from M$.
+<P>ASF (active streaming format) comes from Microsoft. They developed two
+variants of ASF, v1.0 and v2.0. v1.0 is used by their media tools (windows
+media player and windows media encoder) and is very secret. v2.0 is published
+and patented :). Of course they differ, there is no compatibility at all (it's
+just another legal game). <B>MPlayer</B> supports only v1.0, as nobody has ever seen
+v2.0 files :) . Note, that .ASF files nowdays come with the extension .WMA or
+.WMV.</P>
 
 
-<P><B><A NAME=2.1.1.4>2.1.1.4. QT/MOV files</A></B></P>
+<P><B><A NAME=2.1.1.4>2.1.1.4. QuickTime/MOV files</A></B></P>
 
-<P>They are Apple's formats. Not much to say, basically well designed,
-multipurpose, streamable, many features etc. Kinda hard to find documentation,
-but we think the parser is perfect.
+<P>These are from Macintosh. Usually have extensions of .QT or .MOV . Note
+that since the MPEG4 Group chose QuickTime as the recommended file format
+for MPEG4, their .MOV files come with .MPG or .MP4 extension.</P>
+
+<P><B>Codecs</B>: any codecs allowed, both CBR and VBR. Note: most new mov files use
+<B>Sorenson</B> video and QDesign Music audio. These formats are completely
+secret, and only Apple's quicktime player is able to play these files (on
+win/mac only).</P>
+
 
 <P><B><A NAME=2.1.1.5>2.1.1.5. VIV files</A></B></P>
 
-<P><B>MPlayer</B> happily demuxes VIVO file formats. This code is new, and
-is possibly buggy, no seeking yet. See the <A HREF=codecs.html#2.2.1.4>VIVO video codec</A>
+<P><B>MPlayer</B> happily demuxes VIVO file formats. The format's big
+disadvantage is that it has no index block, nor fixed packetsize or sync bytes,
+and most files lack even keyframes, so forget seeking!</P>
+
+<P>VIVO/1.0 files' video codec is standard <B>h.263</B> . The VIVO/2.0 files'
+video codec is a modified, nonstandard <B>h.263</B> . Audio is the same,
+it may be <B>g.723</B> (standard), or <B>Vivo Siren</B> .</P>
+
+<P>See the <A HREF=codecs.html#2.2.1.4>VIVO video codec</A>
 and <A HREF=codecs.html#2.2.2.3>VIVO audio codec</A> sections for installation
 instructions.</P>
 

@@ -59,8 +59,8 @@
     Headers: AVI files has a mandatory header at the begin of the file,
     describing video parameters (resolution, fps) and codecs. Optionally
     they have an INDEX block at the end of the file. It's optional, but
-    most files has such block, because it REQUIRES for seeking.
-    Btw usually it can be rebuild from file content, mplayer does it with
+    most files has such block, because it's REQUIRED for seeking.
+    Btw usually it can be rebuilt from file content, mplayer does it with
     the -idx switch. Mplayer can recreate broken index blocks using -forceidx.
     As AVI files needs index for random access, broken files with no index
     are usually unplayable.
@@ -97,7 +97,7 @@
 
   - QuickTime / MOV files:
     They come from Mac users, usually with .mov or .qt extension, but as
-    MPEG Group choose quicktime as recommended file format for MPEG4,
+    MPEG Group chose quicktime as recommended file format for MPEG4,
     sometimes you meet quicktime files with .mpg or .mp4 extension.
   
     At first look, it's a mixture of ASF and AVI.

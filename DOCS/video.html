@@ -170,10 +170,17 @@ and see if it helps. Check the <A HREF="#2.3.1.4">SDL section</A> for details.</
 <P><B>OR</B>, try the NEW -vo tdfxfb driver! See the <A HREF=#2.3.1.9>2.3.1.9</A>
 section!</P>
 
+
 <P><B><A NAME=2.3.1.2.2>2.3.1.2.2. S3 cards</A></B></P>
 
 <P>S3 Savage3D's should work fine, but for Savage4, use XFree86 version 4.0.3
 or greater (in case of image problems, try 16bpp). As for S3 Virge.. sell it.</P>
+
+<P><B>NOTE</B>: Savage4 has a slow YV12 image displaying capability (it
+needs to do all kind of conversions, possibly a driver issue). So when
+this documentation says at some point "this has YV12 output use this, it's
+faster", you shouldn't. Stick to YUY2.</P>
+
 
 <P><B><A NAME=2.3.1.2.3>2.3.1.2.3. nVidia cards</A></B></P>
 
