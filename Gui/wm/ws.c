@@ -729,6 +729,19 @@ void wsSetLayer( Display * wsDisplay, Window win, int layer )
  unsigned long   nitems, bytesafter;
  unsigned char * args = NULL;
 
+ if ( wsWMType == wsWMIceWM )
+  {
+   switch ( layer )
+    {
+     case -1: layer=2; break; // WinLayerBelow
+     case  0: layer=4; break; // WinLayerNormal
+     case  1: layer=8; break; // WinLayerOnTop
+    }
+  XChangeProperty( wsDisplay,win,
+    XInternAtom( wsDisplay,"_WIN_LAYER",False ),XA_CARDINAL,32,PropModeReplace,(unsigned char *)&layer,1 );
+  return;
+ }
+					
  type=XInternAtom( wsDisplay,"_NET_SUPPORTED",False );
  if ( Success == XGetWindowProperty( wsDisplay,wsRootWin,type,0,65536 / sizeof( long ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
   {
@@ -814,7 +827,7 @@ void wsFullScreen( wsTWindow * win )
  win->SizeHint.flags=PPosition | PSize | PWinGravity;// | PBaseSize;
  win->SizeHint.x=win->X;              win->SizeHint.y=win->Y;
  win->SizeHint.width=win->Width;      win->SizeHint.height=win->Height;
- win->SizeHint.base_width=win->Width; win->SizeHint.base_height=win->Height;
+// win->SizeHint.base_width=win->Width; win->SizeHint.base_height=win->Height;
  
  win->SizeHint.win_gravity=StaticGravity;
  if ( win->Property & wsMaxSize )

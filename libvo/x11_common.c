@@ -673,7 +673,20 @@ void vo_x11_setlayer( int layer )
  unsigned long   nitems, bytesafter;
  unsigned char * args = NULL;
 
- if ( vo_wm_type == vo_wm_IceWM ) return;
+ if ( WinID >= 0 ) return;
+ 
+ if ( vo_wm_type == vo_wm_IceWM )
+  {
+   switch ( layer )
+    {
+     case -1: layer=2; break; // WinLayerBelow
+     case  0: layer=4; break; // WinLayerNormal
+     case  1: layer=8; break; // WinLayerOnTop
+    }
+   XChangeProperty( mDisplay,vo_window,
+   XInternAtom( mDisplay,"_WIN_LAYER",False ),XA_CARDINAL,32,PropModeReplace,(unsigned char *)&layer,1 );
+   return;
+  }
 
  type=XInternAtom( mDisplay,"_NET_SUPPORTED",False );
  if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,65536 / sizeof( long ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
@@ -681,6 +694,7 @@ void vo_x11_setlayer( int layer )
    XEvent e;
    
    mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] NET style stay on top ( layer %d ).\n",layer );
+   memset( &e,0,sizeof( e ) );
    e.xclient.type=ClientMessage;
    e.xclient.message_type=XInternAtom( mDisplay,"_NET_WM_STATE",False );
    e.xclient.display=mDisplay;
@@ -688,9 +702,6 @@ void vo_x11_setlayer( int layer )
    e.xclient.format=32;
    e.xclient.data.l[0]=layer;
    e.xclient.data.l[1]=XInternAtom( mDisplay,"_NET_WM_STATE_STAYS_ON_TOP",False );
-   e.xclient.data.l[2]=0l;
-   e.xclient.data.l[3]=0l;
-   e.xclient.data.l[4]=0l;
    XSendEvent( mDisplay,mRootWin,False,SubstructureRedirectMask,&e );
 								   
    XFree( args );
@@ -725,14 +736,13 @@ void vo_x11_fullscreen( void )
 {
  int x=0,y=0,w=vo_screenwidth,h=vo_screenheight;
 
+ if ( WinID >= 0 ) return;
+
  switch ( vo_wm_type )
   {
    case vo_wm_Unknown:
 	  vo_x11_decoration( mDisplay,vo_window,(vo_fs) ? 1 : 0 );
 	  XUnmapWindow( mDisplay,vo_window );
-	  break;
-   case vo_wm_IceWM:
-	  if ( !vo_fs ) XUnmapWindow( mDisplay,vo_window );
 	  break;
   }
 
