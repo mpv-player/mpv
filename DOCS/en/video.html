@@ -3,7 +3,7 @@
 
 <HEAD>
   <TITLE>Video - MPlayer - The Movie Player for Linux</TITLE>
-  <LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
+  <LINK REL="stylesheet" TYPE="text/css" HREF="../default.css">
   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
 </HEAD>
 
@@ -1032,8 +1032,8 @@ Indeed it doesn't matter which video output driver is used with <B>VIDIX</B>.
   using a command like this:</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop lavc yourfile.ext
-  mplayer -ao mpegpes -vo mpegpes -vop fame,expand yourfile.ext
+  mplayer -ao mpegpes -vo mpegpes yourfile.ext
+  mplayer -ao mpegpes -vo mpegpes -vop expand yourfile.ext
 </PRE>
 
 <P>Note that DVB cards only support heights 288 and 576 for PAL or 240 and 480
@@ -1045,7 +1045,7 @@ Indeed it doesn't matter which video output driver is used with <B>VIDIX</B>.
   4:3) DivX try:</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=512:576
+  mplayer -ao mpegpes -vo mpegpes -vop scale=512:576
 </PRE>
 
 <P>If you have a widescreen movie and you do not want to scale it to full height,
@@ -1053,19 +1053,19 @@ Indeed it doesn't matter which video output driver is used with <B>VIDIX</B>.
   640x384 DivX, try:</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop lavc,expand=640:576 file.avi
+  mplayer -ao mpegpes -vo mpegpes -vop expand=640:576 file.avi
 </PRE>
 
 <P>If your CPU is too slow for a full size 720x576 DivX, try downscaling:</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=352:576 file.avi
+  mplayer -ao mpegpes -vo mpegpes -vop scale=352:576 file.avi
 </PRE>
 
 <P>If speed does not improve, try vertical downscaling, too:</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=352:288 file.avi
+  mplayer -ao mpegpes -vo mpegpes -vop scale=352:288 file.avi
 </PRE>
 
 <P>For OSD and subtitles use the OSD feature of the expand filter. So, instead
@@ -1084,8 +1084,8 @@ Indeed it doesn't matter which video output driver is used with <B>VIDIX</B>.
   right aspect ratio), use the new dvbscale filter:</P>
 
 <PRE>
-for  3:4 TV: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale
-for 16:9 TV: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
+for  3:4 TV: -vop expand=-1:576:-1:-1:1,scale=-1:0,dvbscale
+for 16:9 TV: -vop expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
 </PRE>
 
 <H4>FUTURE</H4>
@@ -1103,7 +1103,31 @@ for 16:9 TV: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
 
 <H4><A NAME="dxr2">2.3.1.3.2 DXR2</A></H4>
 
-<P>TODO: somebody please fill this section with information.</P>
+<P>MPlayer supports hardware accelerated playback with the Creative DXR2
+  card.</P>
+
+<P>First of all you will need properly installed DXR2 drivers. You can find
+  the drivers and installation instructions at the
+  <A HREF="http://dxr2.sourceforge.net/">DXR2 Resource Center</A> site.</P>
+
+<H4>USAGE</H4>
+<DL>
+  <DT><CODE>-vo dxr2</CODE></DT>
+  <DD>enable TV output</DD>
+  <DT><CODE>-vo dxr2:x11</CODE> or <CODE>-vo dxr2:xv</CODE></DT>
+  <DD>enable Overlay output in X11</DD>
+  <DT><CODE>-dxr2 &lt;option1:option2:...&gt;</CODE></DT>
+  <DD>This  option  is used to control the DXR2 driver.</DD>
+</DL>
+
+<P>The overlay chipset used on the DXR2 is of pretty bad quality but the
+  default settings should work for everybody. The OSD may be usable with the
+  overlay (not on TV) by drawing it in the colorkey. With the default colorkey
+  settings you may get variable results, usually you will see the colorkey
+  around the characters or some other funny effect. But if you properly adjust
+  the colorkey settings you should be able to get acceptable results.</P>
+
+<P>Please see the manpage for available options.</P>
 
 
 <H4><A NAME="dxr3">2.3.1.3.3 DXR3/Hollywood+</A></H4>
@@ -1175,7 +1199,7 @@ for 16:9 TV: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
     on. This does not work with digital audio output (<CODE>-ac hwac3</CODE>).</DD>
 
   <DT><CODE>-vop lavc/fame</CODE></DT>
-  <DD>To watch non-MPEG content on the em8300 (i.e. DivX or RealVideo) you have
+  <DD><B>(AUTO-INSERTED)</B> To watch non-MPEG content on the em8300 (i.e. DivX or RealVideo) you have
     to specify an MPEG1 video filter such as libavcodec (lavc) or libfame
     (fame). At the moment lavc is both faster and gives better image quality, it
     is suggested that you use that unless you have problems with it. See the man
@@ -1189,7 +1213,7 @@ for 16:9 TV: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
     27 the picture becomes stable. For now all we can do is accept this for a
     fact.</DD>
 
-  <DT><CODE>-vop lavc,expand=-1:-1:-1:-1:1</CODE></DT>
+  <DT><CODE>-vop expand=-1:-1:-1:-1:1</CODE></DT>
   <DD>Altough the DXR3 driver can put some OSD onto the MPEG1/2/4 video,
     it has much lower quality than MPlayer's traditional OSD, and has several
     refresh problems as well. The command line above will firstly convert the
