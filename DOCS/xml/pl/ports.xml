@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.43 -->
+<!-- synced with 1.44 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -433,8 +433,8 @@ jego skompilowanymi binariami dla Mac OS X ze strony projektu
 </para>
 </sect1>
 
-<sect1 id="hpux">
-<title>HP UX</title>
+<sect1 id="hp-ux">
+<title>HP-UX</title>
 <para>
 Martin Gansser opiekuje się cennym
 <ulink url="http://cloud.prohosting.com/patos/docs/mplayer_on_hpux11.htm">
