@@ -184,38 +184,24 @@ typedef struct {
   int idx_pos_a;
   int idx_pos_v;
   int idx_offset;  // ennyit kell hozzaadni az index offset ertekekhez
-//  int a_idx;
-//  int v_idx;
   // video:
-  AVIStreamHeader video;
-  char *video_codec;
-  BITMAPINFOHEADER bih;   // in format
-  BITMAPINFOHEADER o_bih; // out format
-  HIC hic;
-  char *our_out_buffer;
   unsigned int bitrate;
-  // video format flags:  (filled by codecs.c)
+  // video codec info:  (filled by codecs.c)
+  char *video_codec;
   char yuv_supported;   // 1 if codec support YUY2 output format
   char yuv_hack_needed; // requires for divx & mpeg4
   char no_32bpp_support; // requires for INDEO 3.x, 4.x
   char flipped;         // image is upside-down
   GUID* vids_guid;
-  // audio:
-  AVIStreamHeader audio;
+  // audio codec info:  (filled by codecs.c)
   char *audio_codec;
   int audio_seekable;
   GUID* auds_guid;
-  char wf_ext[64];     // in format
-  WAVEFORMATEX wf;     // out format
-  HACMSTREAM srcstream;
-  int audio_in_minsize;
-  int audio_out_minsize;
 } avi_header_t;
 
 avi_header_t avi_header;
 
 #include "aviprint.c"
-#include "codecs.c"
 
 extern picture_t *picture;
 
@@ -229,12 +215,20 @@ int encode_bitrate=0;
 
 #include "stream.c"
 #include "demuxer.c"
+
+#include "stheader.h"
+
 #include "demux_avi.c"
 #include "demux_mpg.c"
 
 demuxer_t *demuxer=NULL;
 demux_stream_t *d_audio=NULL;
 demux_stream_t *d_video=NULL;
+
+sh_audio_t sh_audio_i; // FIXME later!
+sh_video_t sh_video_i;
+sh_audio_t *sh_audio=&sh_audio_i;
+sh_video_t *sh_video=&sh_video_i;
 
 // MPEG video stream parser:
 #include "parse_es.c"
@@ -244,6 +238,8 @@ static const int frameratecode2framerate[16] = {
   60*10000, 0,0,0,0,0,0,0
 };
 
+#include "codecs.c"
+
 //**************************************************************************//
 //             Audio codecs:
 //**************************************************************************//
@@ -251,12 +247,12 @@ static const int frameratecode2framerate[16] = {
 //int mp3_read(char *buf,int size){
 int mplayer_audio_read(char *buf,int size){
   int len;
-  len=demux_read_data(d_audio,buf,size);
+  len=demux_read_data(sh_audio->ds,buf,size);
   return len;
 }
 
 static void ac3_fill_buffer(uint8_t **start,uint8_t **end){
-    int len=ds_get_packet(d_audio,(char**)start);
+    int len=ds_get_packet(sh_audio->ds,(char**)start);
     //printf("<ac3:%d>\n",len);
     if(len<0)
           *start = *end = NULL;
@@ -267,6 +263,8 @@ static void ac3_fill_buffer(uint8_t **start,uint8_t **end){
 #include "alaw.c"
 
 #include "xa/xa_gsm.h"
+
+#include "dec_audio.c"
 
 //**************************************************************************//
 //             The OpenDivX stuff:
@@ -649,6 +647,8 @@ if(file_format==DEMUXER_TYPE_UNKNOWN){
 //====== File format recognized, set up these for compatibility: =========
 d_audio=demuxer->audio;
 d_video=demuxer->video;
+d_audio->sh=sh_audio; sh_audio->ds=d_audio;
+d_video->sh=sh_video; sh_video->ds=d_video;
 
 switch(file_format){
  case DEMUXER_TYPE_AVI: {
@@ -723,7 +723,7 @@ switch(file_format){
   if(audio_format)
     has_audio=audio_format; // override type
   else if(has_audio)
-    switch(((WAVEFORMATEX *)&avi_header.wf_ext)->wFormatTag){
+    switch(sh_audio->wf.wFormatTag){
       case 0:
         has_audio=0;break; // disable/no audio
       case 6:
@@ -750,7 +750,7 @@ switch(file_format){
     }
   if(verbose) printf("detected AVI audio format: %d\n",has_audio);
   if(has_audio==4){
-    if(!avi_header.audio_codec) avi_header.audio_codec=get_auds_codec_name();
+    if(!avi_header.audio_codec) avi_header.audio_codec=get_auds_codec_name(sh_audio);
     if(avi_header.auds_guid) has_audio=7; // force DShow
     if(!avi_header.audio_codec) has_audio=0; // unknown win32 codec
     if(verbose) printf("win32 audio codec: '%s'\n",avi_header.audio_codec);
@@ -762,7 +762,7 @@ switch(file_format){
       has_audio=0;
     }
   }
-  default_fps=(float)avi_header.video.dwRate/(float)avi_header.video.dwScale;
+  default_fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
   break;
  }
  case DEMUXER_TYPE_ASF: {
@@ -791,7 +791,7 @@ switch(file_format){
   if(audio_format)
     has_audio=audio_format; // override type
   else if(has_audio)
-    switch(((WAVEFORMATEX *)&avi_header.wf_ext)->wFormatTag){
+    switch(sh_audio->wf.wFormatTag){
       case 0:
         has_audio=0;break; // disable/no audio
       case 6:
@@ -818,7 +818,7 @@ switch(file_format){
     }
   if(verbose) printf("detected ASF audio format: %d\n",has_audio);
   if(has_audio==4){
-    if(!avi_header.audio_codec) avi_header.audio_codec=get_auds_codec_name();
+    if(!avi_header.audio_codec) avi_header.audio_codec=get_auds_codec_name(sh_audio);
     if(avi_header.auds_guid) has_audio=7; // force DShow
     if(!avi_header.audio_codec) has_audio=0; // unknown win32 codec
     if(verbose) printf("win32 audio codec: '%s'\n",avi_header.audio_codec);
@@ -859,15 +859,15 @@ fflush(stdout);
 //================== Init VIDEO (codec & libvo) ==========================
 
 if(has_video==2){
-  if(avi_header.video.fccHandler==mmioFOURCC('d', 'v', 'x', '1')) has_video=3;
-  if(avi_header.video.fccHandler==mmioFOURCC('d', 'i', 'v', 'x')) has_video=3;
-  if(avi_header.bih.biCompression==mmioFOURCC('d', 'v', 'x', '1')) has_video=3;
-  if(avi_header.bih.biCompression==mmioFOURCC('d', 'i', 'v', 'x')) has_video=3;
-//  if(avi_header.bih.biCompression==mmioFOURCC('D', 'I', 'V', 'X')) has_video=3; // Gabucino
+  if(sh_video->video.fccHandler==mmioFOURCC('d', 'v', 'x', '1')) has_video=3;
+  if(sh_video->video.fccHandler==mmioFOURCC('d', 'i', 'v', 'x')) has_video=3;
+  if(sh_video->bih.biCompression==mmioFOURCC('d', 'v', 'x', '1')) has_video=3;
+  if(sh_video->bih.biCompression==mmioFOURCC('d', 'i', 'v', 'x')) has_video=3;
+//  if(sh_video->bih.biCompression==mmioFOURCC('D', 'I', 'V', 'X')) has_video=3; // Gabucino
 }
 
 if(has_video==2){
-   if(!avi_header.video_codec) avi_header.video_codec=get_vids_codec_name();
+   if(!avi_header.video_codec) avi_header.video_codec=get_vids_codec_name(sh_video);
    if(verbose)
      printf("win32 video codec: '%s' %s%s%s\n",avi_header.video_codec,
        avi_header.yuv_supported?"[YUV]":"",
@@ -905,23 +905,23 @@ switch(has_video){
    
    // calculating video bitrate:
    avi_header.bitrate=avi_header.movi_end-avi_header.movi_start-avi_header.idx_size*8;
-   if(avi_header.audio.fccType) avi_header.bitrate-=avi_header.audio.dwLength;
+   if(sh_audio->audio.fccType) avi_header.bitrate-=sh_audio->audio.dwLength;
    if(verbose) printf("AVI video length=%d\n",avi_header.bitrate);
-   avi_header.bitrate=((float)avi_header.bitrate/(float)avi_header.video.dwLength)
-                     *((float)avi_header.video.dwRate/(float)avi_header.video.dwScale);
-//   default_fps=(float)avi_header.video.dwRate/(float)avi_header.video.dwScale;
+   avi_header.bitrate=((float)avi_header.bitrate/(float)sh_video->video.dwLength)
+                     *((float)sh_video->video.dwRate/(float)sh_video->video.dwScale);
+//   default_fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
    printf("VIDEO:  [%.4s]  %dx%d  %dbpp  %4.2f fps  %5.1f kbps (%4.1f kbyte/s)\n",
-    &avi_header.bih.biCompression,
-    avi_header.bih.biWidth,
-    avi_header.bih.biHeight,
-    avi_header.bih.biBitCount,
+    &sh_video->bih.biCompression,
+    sh_video->bih.biWidth,
+    sh_video->bih.biHeight,
+    sh_video->bih.biBitCount,
     default_fps,
     avi_header.bitrate*0.008f,
     avi_header.bitrate/1024.0f );
 
    // display info:
-   movie_size_x=avi_header.o_bih.biWidth;
-   movie_size_y=abs(avi_header.o_bih.biHeight);
+   movie_size_x=sh_video->o_bih.biWidth;
+   movie_size_y=abs(sh_video->o_bih.biHeight);
    break;
  }
 #ifdef USE_DIRECTSHOW
@@ -939,8 +939,8 @@ switch(has_video){
    }
    //if(verbose) printf("AVI out_fmt=%X\n",out_fmt);
    if(verbose) if(out_fmt==IMGFMT_YUY2) printf("Using YUV/YUY2 video output format!\n");
-   avi_header.our_out_buffer=NULL;
-   if(DS_VideoDecoder_Open(avi_header.video_codec,avi_header.vids_guid, &avi_header.bih, 0, &avi_header.our_out_buffer)){
+   sh_video->our_out_buffer=NULL;
+   if(DS_VideoDecoder_Open(avi_header.video_codec,avi_header.vids_guid, &sh_video->bih, 0, &sh_video->our_out_buffer)){
         printf("ERROR: Couldn't open required DirectShow codec: %s\n",avi_header.video_codec);
         printf("Maybe you forget to upgrade your win32 codecs?? It's time to download the new\n");
         printf("package from:  ftp://thot.banki.hu/esp-team/linux/MPlayer/w32codec.zip  !\n");
@@ -963,23 +963,23 @@ switch(has_video){
    
    // calculating video bitrate:
    avi_header.bitrate=avi_header.movi_end-avi_header.movi_start-avi_header.idx_size*8;
-   if(avi_header.audio.fccType) avi_header.bitrate-=avi_header.audio.dwLength;
+   if(sh_audio->audio.fccType) avi_header.bitrate-=sh_audio->audio.dwLength;
    if(verbose) printf("AVI video length=%d\n",avi_header.bitrate);
-   avi_header.bitrate=((float)avi_header.bitrate/(float)avi_header.video.dwLength)
-                     *((float)avi_header.video.dwRate/(float)avi_header.video.dwScale);
-//   default_fps=(float)avi_header.video.dwRate/(float)avi_header.video.dwScale;
+   avi_header.bitrate=((float)avi_header.bitrate/(float)sh_video->video.dwLength)
+                     *((float)sh_video->video.dwRate/(float)sh_video->video.dwScale);
+//   default_fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
    printf("VIDEO:  [%.4s]  %dx%d  %dbpp  %4.2f fps  %5.1f kbps (%4.1f kbyte/s)\n",
-    &avi_header.bih.biCompression,
-    avi_header.bih.biWidth,
-    avi_header.bih.biHeight,
-    avi_header.bih.biBitCount,
+    &sh_video->bih.biCompression,
+    sh_video->bih.biWidth,
+    sh_video->bih.biHeight,
+    sh_video->bih.biBitCount,
     default_fps,
     avi_header.bitrate*0.008f,
     avi_header.bitrate/1024.0f );
 
    // display info:
-   movie_size_x=avi_header.bih.biWidth;
-   movie_size_y=abs(avi_header.bih.biHeight);
+   movie_size_x=sh_video->bih.biWidth;
+   movie_size_y=abs(sh_video->bih.biHeight);
    break;
  }
 #endif
@@ -993,8 +993,8 @@ switch(has_video){
    if(verbose) printf("OpenDivX video codec\n");
    { DEC_PARAM dec_param;
      DEC_SET dec_set;
-	dec_param.x_dim = avi_header.bih.biWidth;
-	dec_param.y_dim = avi_header.bih.biHeight;
+	dec_param.x_dim = sh_video->bih.biWidth;
+	dec_param.y_dim = sh_video->bih.biHeight;
 	dec_param.color_depth = 32;
 	decore(0x123, DEC_OPT_INIT, &dec_param, NULL);
 	dec_set.postproc_level = divx_quality;
@@ -1004,24 +1004,24 @@ switch(has_video){
    
    // calculating video bitrate:
    avi_header.bitrate=avi_header.movi_end-avi_header.movi_start-avi_header.idx_size*8;
-   if(avi_header.audio.fccType) avi_header.bitrate-=avi_header.audio.dwLength;
+   if(sh_audio->audio.fccType) avi_header.bitrate-=sh_audio->audio.dwLength;
    if(verbose) printf("AVI video length=%d\n",avi_header.bitrate);
-   avi_header.bitrate=((float)avi_header.bitrate/(float)avi_header.video.dwLength)
-                     *((float)avi_header.video.dwRate/(float)avi_header.video.dwScale);
-//   default_fps=(float)avi_header.video.dwRate/(float)avi_header.video.dwScale;
+   avi_header.bitrate=((float)avi_header.bitrate/(float)sh_video->video.dwLength)
+                     *((float)sh_video->video.dwRate/(float)sh_video->video.dwScale);
+//   default_fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
    printf("VIDEO:  [%.4s]  %dx%d  %dbpp  %4.2f fps  %5.1f kbps (%4.1f kbyte/s)\n",
-    &avi_header.bih.biCompression,
-    avi_header.bih.biWidth,
-    avi_header.bih.biHeight,
-    avi_header.bih.biBitCount,
+    &sh_video->bih.biCompression,
+    sh_video->bih.biWidth,
+    sh_video->bih.biHeight,
+    sh_video->bih.biBitCount,
     default_fps,
     avi_header.bitrate*0.008f,
     avi_header.bitrate/1024.0f );
 
    // display info:
-//   movie_size_x=avi_header.bih.biWidth+(divx_quality?0:64);
-   movie_size_x=avi_header.bih.biWidth;
-   movie_size_y=abs(avi_header.bih.biHeight);
+//   movie_size_x=sh_video->bih.biWidth+(divx_quality?0:64);
+   movie_size_x=sh_video->bih.biWidth;
+   movie_size_y=abs(sh_video->bih.biHeight);
    break;
  }
  case 1: {
@@ -1185,7 +1185,6 @@ char* a_buffer=NULL;
 int a_buffer_len=0;
 int a_buffer_size=0;
 int audio_fd=-1;
-int pcm_bswap=0;
 float buffer_delay=0;
 float frame_correction=0; // A-V timestamp kulonbseg atlagolas
 int frame_corr_num=0;   //
@@ -1198,7 +1197,6 @@ float c_total=0;
 float max_pts_correction=default_max_pts_correction;
 int eof=0;
 int force_redraw=0;
-ac3_frame_t *ac3_frame=NULL;
 float num_frames=0;      // number of frames played
 //int real_num_frames=0;   // number of frames readed
 double video_time_usage=0;
@@ -1239,19 +1237,19 @@ if(has_audio){
   if(verbose) printf("Initializing audio codec...\n");
 
 MP3_bps=2;
-pcm_bswap=0;
+sh_audio->pcm_bswap=0;
 a_buffer_size=16384;        // default size, maybe not enough for Win32/ACM
 
 if(has_audio==4){
   // Win32 ACM audio codec:
-  if(init_audio_codec()){
-    MP3_channels=avi_header.wf.nChannels;
-    MP3_samplerate=avi_header.wf.nSamplesPerSec;
-    if(a_buffer_size<avi_header.audio_out_minsize+OUTBURST)
-        a_buffer_size=avi_header.audio_out_minsize+OUTBURST;
+  if(init_audio_codec(sh_audio)){
+    MP3_channels=sh_audio->o_wf.nChannels;
+    MP3_samplerate=sh_audio->o_wf.nSamplesPerSec;
+    if(a_buffer_size<sh_audio->audio_out_minsize+OUTBURST)
+        a_buffer_size=sh_audio->audio_out_minsize+OUTBURST;
   } else {
     printf("Could not load/initialize Win32/ACM AUDIO codec (missing DLL file?)\n");
-    if((((WAVEFORMATEX *)&avi_header.wf_ext)->wFormatTag)==0x55){
+    if((sh_audio->wf.wFormatTag)==0x55){
       printf("Audio format is MP3 -> fallback to internal mp3lib/mpg123\n");
       has_audio=1;  // fallback to mp3lib
     } else
@@ -1265,24 +1263,24 @@ if(has_audio==7){
   has_audio=0;
 #else
   // Win32 DShow audio codec:
-    WAVEFORMATEX *in_fmt=(WAVEFORMATEX*)&avi_header.wf_ext;
-    avi_header.wf.nChannels=in_fmt->nChannels;
-    avi_header.wf.nSamplesPerSec=in_fmt->nSamplesPerSec;
-    avi_header.wf.nAvgBytesPerSec=2*avi_header.wf.nSamplesPerSec*avi_header.wf.nChannels;
-    avi_header.wf.wFormatTag=WAVE_FORMAT_PCM;
-    avi_header.wf.nBlockAlign=2*in_fmt->nChannels;
-    avi_header.wf.wBitsPerSample=16;
-    avi_header.wf.cbSize=0;
+    WAVEFORMATEX *in_fmt=&sh_audio->wf;
+    sh_audio->o_wf.nChannels=in_fmt->nChannels;
+    sh_audio->o_wf.nSamplesPerSec=in_fmt->nSamplesPerSec;
+    sh_audio->o_wf.nAvgBytesPerSec=2*sh_audio->o_wf.nSamplesPerSec*sh_audio->o_wf.nChannels;
+    sh_audio->o_wf.wFormatTag=WAVE_FORMAT_PCM;
+    sh_audio->o_wf.nBlockAlign=2*in_fmt->nChannels;
+    sh_audio->o_wf.wBitsPerSample=16;
+    sh_audio->o_wf.cbSize=0;
 
   if(!DS_AudioDecoder_Open(avi_header.audio_codec,avi_header.auds_guid,in_fmt)){
-    MP3_channels=avi_header.wf.nChannels;
-    MP3_samplerate=avi_header.wf.nSamplesPerSec;
+    MP3_channels=sh_audio->o_wf.nChannels;
+    MP3_samplerate=sh_audio->o_wf.nSamplesPerSec;
 
-    avi_header.audio_in_minsize=2*avi_header.wf.nBlockAlign;
-    if(avi_header.audio_in_minsize<8192) avi_header.audio_in_minsize=8192;
-    a_in_buffer_size=avi_header.audio_in_minsize;
-    a_in_buffer=malloc(a_in_buffer_size);
-    a_in_buffer_len=0;
+    sh_audio->audio_in_minsize=2*sh_audio->o_wf.nBlockAlign;
+    if(sh_audio->audio_in_minsize<8192) sh_audio->audio_in_minsize=8192;
+    sh_audio->a_in_buffer_size=sh_audio->audio_in_minsize;
+    sh_audio->a_in_buffer=malloc(sh_audio->a_in_buffer_size);
+    sh_audio->a_in_buffer_len=0;
 
   } else {
     printf("ERROR: Could not load/initialize Win32/DirctShow AUDIO codec: %s\n",avi_header.audio_codec);
@@ -1303,7 +1301,7 @@ memset(a_buffer,0,a_buffer_size);
 a_buffer_len=0;
 
 if(has_audio==4){
-    int ret=acm_decode_audio(a_buffer,a_buffer_size);
+    int ret=acm_decode_audio(sh_audio,a_buffer,a_buffer_size);
     if(ret<0){
         printf("ACM error %d -> switching to nosound...\n",ret);
         has_audio=0;
@@ -1316,7 +1314,7 @@ if(has_audio==4){
 if(has_audio==2){
   if(file_format==DEMUXER_TYPE_AVI){
     // AVI PCM Audio:
-    WAVEFORMATEX *h=(WAVEFORMATEX*)&avi_header.wf_ext;
+    WAVEFORMATEX *h=&sh_audio->wf;
     MP3_channels=h->nChannels;
     MP3_samplerate=h->nSamplesPerSec;
     MP3_bps=(h->wBitsPerSample+7)/8;
@@ -1324,7 +1322,7 @@ if(has_audio==2){
     // DVD PCM audio:
     MP3_channels=2;
     MP3_samplerate=48000;
-    pcm_bswap=1;
+    sh_audio->pcm_bswap=1;
   }
 } else
 if(has_audio==3){
@@ -1339,23 +1337,23 @@ if(has_audio==3){
   ac3_config.flags |= AC3_3DNOW_ENABLE;
 #endif
   ac3_init();
-  ac3_frame = ac3_decode_frame();
-  if(ac3_frame){
-    MP3_samplerate=ac3_frame->sampling_rate;
+  sh_audio->ac3_frame = ac3_decode_frame();
+  if(sh_audio->ac3_frame){
+    MP3_samplerate=sh_audio->ac3_frame->sampling_rate;
     MP3_channels=2;
   } else has_audio=0; // bad frame -> disable audio
 } else
 if(has_audio==5){
   // aLaw audio codec:
   Gen_aLaw_2_Signed(); // init table
-  MP3_channels=((WAVEFORMATEX*)&avi_header.wf_ext)->nChannels;
-  MP3_samplerate=((WAVEFORMATEX*)&avi_header.wf_ext)->nSamplesPerSec;
+  MP3_channels=sh_audio->wf.nChannels;
+  MP3_samplerate=sh_audio->wf.nSamplesPerSec;
 } else
 if(has_audio==6){
   // MS-GSM audio codec:
   GSM_Init();
-  MP3_channels=((WAVEFORMATEX*)&avi_header.wf_ext)->nChannels;
-  MP3_samplerate=((WAVEFORMATEX*)&avi_header.wf_ext)->nSamplesPerSec;
+  MP3_channels=sh_audio->wf.nChannels;
+  MP3_samplerate=sh_audio->wf.nSamplesPerSec;
 }
 // must be here for Win32->mp3lib fallbacks
 if(has_audio==1){
@@ -1465,9 +1463,9 @@ if(has_audio){
 
 if(file_format==DEMUXER_TYPE_AVI){
   a_pts=d_audio->pts-(buffer_delay+audio_delay);
-  audio_delay-=(float)(avi_header.audio.dwInitialFrames-avi_header.video.dwInitialFrames)/default_fps;
-//  audio_delay-=(float)(avi_header.audio.dwInitialFrames-avi_header.video.dwInitialFrames)/default_fps;
-  printf("AVI Initial frame delay: %5.3f\n",(float)(avi_header.audio.dwInitialFrames-avi_header.video.dwInitialFrames)/default_fps);
+  audio_delay-=(float)(sh_audio->audio.dwInitialFrames-sh_video->video.dwInitialFrames)/default_fps;
+//  audio_delay-=(float)(sh_audio->audio.dwInitialFrames-sh_video->video.dwInitialFrames)/default_fps;
+  printf("AVI Initial frame delay: %5.3f\n",(float)(sh_audio->audio.dwInitialFrames-sh_video->video.dwInitialFrames)/default_fps);
   printf("v: audio_delay=%5.3f  buffer_delay=%5.3f  a_pts=%5.3f  a_frame=%5.3f\n",
            audio_delay,buffer_delay,a_pts,a_frame);
   printf("START:  a_pts=%5.3f  v_pts=%5.3f  \n",d_audio->pts,d_video->pts);
@@ -1494,102 +1492,20 @@ while(!eof){
 /*========================== PLAY AUDIO ============================*/
 
 while(has_audio){
+
+  // Update buffer if needed
   unsigned int t=GetTimer();
   current_module="decode_audio";   // Enter AUDIO decoder module
-  // Update buffer if needed
+  sh_audio->codec.driver=has_audio; // FIXME!
   while(a_buffer_len<OUTBURST && !d_audio->eof){
-    switch(has_audio){
-      case 1: // MPEG layer 2 or 3
-        a_buffer_len+=MP3_DecodeFrame(&a_buffer[a_buffer_len],-1);
-        MP3_channels=2; // hack
-        break;
-      case 2: // PCM
-      { int i=demux_read_data(d_audio,&a_buffer[a_buffer_len],OUTBURST);
-        if(pcm_bswap){
-          int j;
-          if(i&3){ printf("Warning! pcm_audio_size&3 !=0  (%d)\n",i);i&=~3; }
-          for(j=0;j<i;j+=2){
-            char x=a_buffer[a_buffer_len+j];
-            a_buffer[a_buffer_len+j]=a_buffer[a_buffer_len+j+1];
-            a_buffer[a_buffer_len+j+1]=x;
-          }
-        }
-        a_buffer_len+=i;
-        break;
-      }
-      case 5:  // aLaw decoder
-      { int l=demux_read_data(d_audio,&a_buffer[a_buffer_len],OUTBURST/2);
-        unsigned short *d=(unsigned short *) &a_buffer[a_buffer_len];
-        unsigned char *s=&a_buffer[a_buffer_len];
-        a_buffer_len+=2*l;
-        while(l>0){
-          --l;
-          d[l]=xa_alaw_2_sign[s[l]];
-        }
-        break;
-      }
-      case 6:  // MS-GSM decoder
-      { unsigned char buf[65]; // 65 bytes / frame
-            while(a_buffer_len<OUTBURST){
-                if(demux_read_data(d_audio,buf,65)!=65) break; // EOF
-                XA_MSGSM_Decoder(buf,(unsigned short *) &a_buffer[a_buffer_len]); // decodes 65 byte -> 320 short
-//  		XA_GSM_Decoder(buf,(unsigned short *) &a_buffer[a_buffer_len]); // decodes 33 byte -> 160 short
-                a_buffer_len+=2*320;
-            }
-        break;
-      }
-      case 3: // AC3 decoder
-        //printf("{1:%d}",avi_header.idx_pos);fflush(stdout);
-        if(!ac3_frame) ac3_frame=ac3_decode_frame();
-        //printf("{2:%d}",avi_header.idx_pos);fflush(stdout);
-        if(ac3_frame){
-          memcpy(&a_buffer[a_buffer_len],ac3_frame->audio_data,256 * 6 *MP3_channels*MP3_bps);
-          a_buffer_len+=256 * 6 *MP3_channels*MP3_bps;
-          ac3_frame=NULL;
-        }
-        //printf("{3:%d}",avi_header.idx_pos);fflush(stdout);
-        break;
-      case 4:
-      { int ret=acm_decode_audio(&a_buffer[a_buffer_len],a_buffer_size-a_buffer_len);
-        if(ret>0) a_buffer_len+=ret;
-        break;
-      }
-#ifdef USE_DIRECTSHOW
-      case 7: // DirectShow
-      { int ret;
-        int len=a_buffer_size-a_buffer_len;
-        int size_in=0;
-        int size_out=0;
-        int srcsize=DS_AudioDecoder_GetSrcSize(len);
-        if(verbose>2)printf("DShow says: srcsize=%d  (buffsize=%d)  out_size=%d\n",srcsize,a_in_buffer_size,len);
-        if(srcsize>a_in_buffer_size) srcsize=a_in_buffer_size; // !!!!!!
-        if(a_in_buffer_len<srcsize){
-          a_in_buffer_len+=
-            demux_read_data(d_audio,&a_in_buffer[a_in_buffer_len],
-            srcsize-a_in_buffer_len);
-        }
-        DS_AudioDecoder_Convert(a_in_buffer,a_in_buffer_len,
-            &a_buffer[a_buffer_len],len, &size_in,&size_out);
-        if(verbose>2)printf("DShow: audio %d -> %d converted  (in_buf_len=%d of %d)\n",size_in,size_out,a_in_buffer_len,a_in_buffer_size);
-        if(size_in>=a_in_buffer_len){
-          a_in_buffer_len=0;
-        } else {
-          a_in_buffer_len-=size_in;
-          memcpy(a_in_buffer,&a_in_buffer[size_in],a_in_buffer_len);
-        }
-        a_buffer_len+=size_out;
-        
-        break;
-      }
-#endif
-    }
+    int ret=decode_audio(sh_audio,&a_buffer[a_buffer_len],a_buffer_size-a_buffer_len);
+    if(ret>0) a_buffer_len+=ret; else break;
   }
   current_module=NULL;   // Leave AUDIO decoder module
-  t=GetTimer()-t;
-  audio_time_usage+=t*0.000001;
+  t=GetTimer()-t;audio_time_usage+=t*0.000001;
+
 
   // Play sound from the buffer:
-
   if(a_buffer_len>=OUTBURST){ // if not EOF
 #ifdef USE_XMMP_AUDIO
     pSound->Write( pSound, a_buffer, OUTBURST );
@@ -1696,7 +1612,7 @@ switch(has_video){
       t2=GetTimer()-t2;vout_time_usage+=t2*0.000001f;
 
       ++num_frames;
-      v_frame+=1.0f/default_fps; //(float)avi_header.video.dwScale/(float)avi_header.video.dwRate;
+      v_frame+=1.0f/default_fps; //(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
     
     break;
   }
@@ -1716,7 +1632,7 @@ switch(has_video){
     DS_VideoDecoder_DecodeFrame(start, in_size, 0, 1);
 
       t2=GetTimer();t=t2-t;video_time_usage+=t*0.000001f;
-        video_out->draw_frame((uint8_t **)&avi_header.our_out_buffer);
+        video_out->draw_frame((uint8_t **)&sh_video->our_out_buffer);
 //        video_out->flip_page();
       t2=GetTimer()-t2;vout_time_usage+=t2*0.000001f;
 
@@ -1726,8 +1642,8 @@ switch(has_video){
         float d=pts2-pts1;
         if(d>0 && d<0.2) v_frame+=d;
       } else
-        v_frame+=1.0f/default_fps; //(float)avi_header.video.dwScale/(float)avi_header.video.dwRate;
-      //v_pts+=1.0f/default_fps;   //(float)avi_header.video.dwScale/(float)avi_header.video.dwRate;
+        v_frame+=1.0f/default_fps; //(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
+      //v_pts+=1.0f/default_fps;   //(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
 
     break;
   }
@@ -1746,16 +1662,16 @@ switch(has_video){
 //    printf("frame len = %5.4f\n",pts2-pts1);
 
 //if(in_size>0){
-      avi_header.bih.biSizeImage = in_size;
-      ret = ICDecompress(avi_header.hic, ICDECOMPRESS_NOTKEYFRAME, 
+      sh_video->bih.biSizeImage = in_size;
+      ret = ICDecompress(sh_video->hic, ICDECOMPRESS_NOTKEYFRAME, 
 //      ret = ICDecompress(avi_header.hic, ICDECOMPRESS_NOTKEYFRAME|(ICDECOMPRESS_HURRYUP|ICDECOMPRESS_PREROL), 
-                        &avi_header.bih,   start,
-                        &avi_header.o_bih, avi_header.our_out_buffer);
+                        &sh_video->bih,   start,
+                        &sh_video->o_bih, sh_video->our_out_buffer);
       if(ret){ printf("Error decompressing frame, err=%d\n",ret);break; }
 //}
 
       t2=GetTimer();t=t2-t;video_time_usage+=t*0.000001f;
-        video_out->draw_frame((uint8_t **)&avi_header.our_out_buffer);
+        video_out->draw_frame((uint8_t **)&sh_video->our_out_buffer);
 //        video_out->flip_page();
       t2=GetTimer()-t2;vout_time_usage+=t2*0.000001f;
 
@@ -1765,8 +1681,8 @@ switch(has_video){
         float d=pts2-pts1;
         if(d>0 && d<0.2) v_frame+=d;
       } else
-        v_frame+=1.0f/default_fps; //(float)avi_header.video.dwScale/(float)avi_header.video.dwRate;
-      //v_pts+=1.0f/default_fps;   //(float)avi_header.video.dwScale/(float)avi_header.video.dwRate;
+        v_frame+=1.0f/default_fps; //(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
+      //v_pts+=1.0f/default_fps;   //(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
 
     break;
   }
@@ -1944,8 +1860,8 @@ switch(has_video){
 /*================ A-V TIMESTAMP CORRECTION: =========================*/
   if(has_audio){
     if(pts_from_bps && (file_format==DEMUXER_TYPE_AVI)){
-//      a_pts=(float)ds_tell(d_audio)/((WAVEFORMATEX*)avi_header.wf_ext)->nAvgBytesPerSec-(buffer_delay+audio_delay);
-      a_pts=(float)ds_tell(d_audio)/((WAVEFORMATEX*)avi_header.wf_ext)->nAvgBytesPerSec-(buffer_delay);
+//      a_pts=(float)ds_tell(d_audio)/sh_audio->wf.nAvgBytesPerSec-(buffer_delay+audio_delay);
+      a_pts=(float)ds_tell(d_audio)/sh_audio->wf.nAvgBytesPerSec-(buffer_delay);
       delay_corrected=1; // hack
     } else
     if(d_audio->pts){
@@ -2125,7 +2041,7 @@ switch(file_format){
 //          if(LOWORD(id)==aviTWOCC('0','0')){ // video frame
           if(avi_stream_id(id)==d_video->id){  // video frame
             if((--rel_seek_frames)<0 && avi_header.idx[video_chunk_pos].dwFlags&AVIIF_KEYFRAME) break;
-            v_pts+=(float)avi_header.video.dwScale/(float)avi_header.video.dwRate;
+            v_pts+=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
             ++skip_audio_bytes;
           }
           ++video_chunk_pos;
@@ -2137,7 +2053,7 @@ switch(file_format){
 //          if(LOWORD(id)==aviTWOCC('0','0')){ // video frame
           if(avi_stream_id(id)==d_video->id){  // video frame
             if((++rel_seek_frames)>0 && avi_header.idx[video_chunk_pos].dwFlags&AVIIF_KEYFRAME) break;
-            v_pts-=(float)avi_header.video.dwScale/(float)avi_header.video.dwRate;
+            v_pts-=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
             --skip_audio_bytes;
           }
           --video_chunk_pos;
@@ -2154,7 +2070,7 @@ switch(file_format){
           int id=avi_header.idx[i].ckid;
 //          if(LOWORD(id)==aviTWOCC('0','0')){ // video frame
           if(avi_stream_id(id)==d_video->id){  // video frame
-            avi_video_pts+=(float)avi_header.video.dwScale/(float)avi_header.video.dwRate;
+            avi_video_pts+=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
           }
       }
       //printf("v-pts recalc! %5.3f -> %5.3f  \n",v_pts,avi_video_pts);
@@ -2172,13 +2088,13 @@ switch(file_format){
         int len=0;
 
         // calc new audio position in audio stream: (using avg.bps value)
-        curr_audio_pos=(avi_video_pts) * ((WAVEFORMATEX*)avi_header.wf_ext)->nAvgBytesPerSec;
+        curr_audio_pos=(avi_video_pts) * sh_audio->wf.nAvgBytesPerSec;
         if(curr_audio_pos<0)curr_audio_pos=0;
 #if 1
         curr_audio_pos&=~15; // requires for PCM formats!!!
 #else
-        curr_audio_pos/=((WAVEFORMATEX*)avi_header.wf_ext)->nBlockAlign;
-        curr_audio_pos*=((WAVEFORMATEX*)avi_header.wf_ext)->nBlockAlign;
+        curr_audio_pos/=sh_audio->wf.nBlockAlign;
+        curr_audio_pos*=sh_audio->wf.nBlockAlign;
         avi_header.audio_seekable=1;
 #endif
 
@@ -2214,14 +2130,14 @@ switch(file_format){
           if(!avi_header.audio_seekable){
 #if 0
 //             curr_audio_pos=apos; // selected audio codec can't seek in chunk
-             skip_audio_secs=(float)skip_audio_bytes/(float)((WAVEFORMATEX*)avi_header.wf_ext)->nAvgBytesPerSec;
+             skip_audio_secs=(float)skip_audio_bytes/(float)sh_audio->wf.nAvgBytesPerSec;
              //printf("Seek_AUDIO: %d bytes --> %5.3f secs\n",skip_audio_bytes,skip_audio_secs);
              skip_audio_bytes=0;
 #else
-             int d=skip_audio_bytes % ((WAVEFORMATEX*)avi_header.wf_ext)->nBlockAlign;
+             int d=skip_audio_bytes % sh_audio->wf.nBlockAlign;
              skip_audio_bytes-=d;
 //             curr_audio_pos-=d;
-             skip_audio_secs=(float)d/(float)((WAVEFORMATEX*)avi_header.wf_ext)->nAvgBytesPerSec;
+             skip_audio_secs=(float)d/(float)sh_audio->wf.nAvgBytesPerSec;
              //printf("Seek_AUDIO: %d bytes --> %5.3f secs\n",d,skip_audio_secs);
 #endif
           }
@@ -2238,7 +2154,7 @@ switch(file_format){
             if(avi_stream_id(id)==d_video->id){  // video frame
               ++skip_video_frames;
               // requires for correct audio pts calculation (demuxer):
-              avi_video_pts-=(float)avi_header.video.dwScale/(float)avi_header.video.dwRate;
+              avi_video_pts-=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
             }
             ++i;
           }
@@ -2319,11 +2235,12 @@ switch(file_format){
         case 3:
           ac3_bitstream_reset();    // reset AC3 bitstream buffer
     //      if(verbose){ printf("Resyncing AC3 audio...");fflush(stdout);}
-          ac3_frame=ac3_decode_frame(); // resync
+          sh_audio->ac3_frame=ac3_decode_frame(); // resync
     //      if(verbose) printf(" OK!\n");
           break;
         case 4:
-          a_in_buffer_len=0;        // reset ACM audio buffer
+        case 7:
+          sh_audio->a_in_buffer_len=0;        // reset ACM/DShow audio buffer
           break;
         }
 
@@ -2336,7 +2253,7 @@ switch(file_format){
             while(d_video->pts > d_audio->pts){
               switch(has_audio){
                 case 1: MP3_DecodeFrame(NULL,-2);break; // skip MPEG frame
-                case 3: ac3_frame=ac3_decode_frame();break; // skip AC3 frame
+                case 3: sh_audio->ac3_frame=ac3_decode_frame();break; // skip AC3 frame
                 default: ds_fill_buffer(d_audio);  // skip PCM frame
               }
             }

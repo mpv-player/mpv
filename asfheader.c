@@ -125,8 +125,9 @@ while(!stream_eof(demuxer->stream)){
       // type-specific data:
       stream_read(demuxer->stream,(char*) buffer,streamh.type_size);
       switch(*((unsigned int*)&streamh.type)){
-      case 0xF8699E40:  // guid_audio_stream
-        memcpy(avi_header.wf_ext,buffer,streamh.type_size<64?streamh.type_size:64);
+      case 0xF8699E40: { // guid_audio_stream
+        sh_audio_t *sh_audio=&sh_audio_i; // FIXME!
+        memcpy(&sh_audio->wf,buffer,streamh.type_size<64?streamh.type_size:64);
         if(verbose>=1) print_wave_header((WAVEFORMATEX*)buffer);
 	if((*((unsigned int*)&streamh.concealment))==0xbfc3cd50){
           stream_read(demuxer->stream,(char*) buffer,streamh.stream_size);
@@ -140,12 +141,17 @@ while(!stream_eof(demuxer->stream)){
 	printf("ASF audio scrambling: %d x %d x %d\n",asf_scrambling_h,asf_scrambling_w,asf_scrambling_b);
 	if(demuxer->audio->id==-1) demuxer->audio->id=streamh.stream_no & 0x7F;
         break;
-      case 0xBC19EFC0:  // guid_video_stream
-        memcpy(&avi_header.bih,&buffer[4+4+1+2],sizeof(BITMAPINFOHEADER));
+        }
+      case 0xBC19EFC0: { // guid_video_stream
+        sh_video_t *sh_video=&sh_video_i; // FIXME!
+        memcpy(&sh_video->bih,&buffer[4+4+1+2],sizeof(BITMAPINFOHEADER));
+        sh_video->fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
+        sh_video->frametime=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
         if(verbose>=1) print_video_header((BITMAPINFOHEADER*)&buffer[4+4+1+2]);
         //asf_video_id=streamh.stream_no & 0x7F;
-		if(demuxer->video->id==-1) demuxer->video->id=streamh.stream_no & 0x7F;
+	if(demuxer->video->id==-1) demuxer->video->id=streamh.stream_no & 0x7F;
         break;
+        }
       }
       // stream-specific data:
       // stream_read(demuxer->stream,(char*) buffer,streamh.stream_size);

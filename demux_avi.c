@@ -48,7 +48,9 @@ static int demux_avi_read_packet(demuxer_t *demux,unsigned int id,unsigned int l
      }
      // ezt a 2 sort lehet hogy fell kell majd cserelni:
      //avi_video_pts+=avi_pts_frametime;
-     avi_video_pts+=(float)avi_header.video.dwScale/(float)avi_header.video.dwRate;
+     //avi_video_pts+=(float)avi_header.video.dwScale/(float)avi_header.video.dwRate;
+     //avi_video_pts+=((sh_video_t*)ds->sh)->frametime;
+     avi_video_pts+=(float)((sh_video_t*)(demux->video->sh))->video.dwScale/(float)((sh_video_t*)(demux->video->sh))->video.dwRate;
      avi_audio_pts=avi_video_pts;
   }
   

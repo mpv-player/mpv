@@ -21,9 +21,9 @@ static    GUID CLSID_TM20DecompressorCF={0x4cb63e61, 0xc611, 0x11D0,
     { 0x83, 0xaa, 0x00, 0x00, 0x92, 0x90, 0x01, 0x84}};
 
 
-char* get_vids_codec_name(){
+char* get_vids_codec_name(sh_video_t *sh){
 //  unsigned long fccHandler=avi_header.video.fccHandler;
-  unsigned long fccHandler=avi_header.bih.biCompression;
+  unsigned long fccHandler=sh->bih.biCompression;
   avi_header.yuv_supported=0;
   avi_header.yuv_hack_needed=0;
   avi_header.flipped=0;
@@ -47,7 +47,7 @@ char* get_vids_codec_name(){
 	case mmioFOURCC('M', 'P', '4', '3'):
 	case mmioFOURCC('m', 'p', '4', '3'):
 	  printf("Video in MPEG-4 v3 (really DivX) format\n");
-          avi_header.bih.biCompression=mmioFOURCC('d', 'i', 'v', '3'); // hack
+          sh->bih.biCompression=mmioFOURCC('d', 'i', 'v', '3'); // hack
           avi_header.yuv_supported=1;
 #ifdef USE_DIRECTSHOW
           avi_header.vids_guid=&CLSID_DivxDecompressorCF;
@@ -69,7 +69,7 @@ char* get_vids_codec_name(){
         case mmioFOURCC('d', 'i', 'v', '5'):
 	case mmioFOURCC('D', 'I', 'V', '6'):
         case mmioFOURCC('d', 'i', 'v', '6'):
-          avi_header.bih.biCompression-=0x02000000; // div5->div3, div6->div4
+          sh->bih.biCompression-=0x02000000; // div5->div3, div6->div4
 	case mmioFOURCC('D', 'I', 'V', '3'):
 	case mmioFOURCC('d', 'i', 'v', '3'):
 	case mmioFOURCC('D', 'I', 'V', '4'):
@@ -195,8 +195,8 @@ char* get_vids_codec_name(){
   return NULL;
 }
 
-char* get_auds_codec_name(){
-  int id=((WAVEFORMATEX*)avi_header.wf_ext)->wFormatTag;
+char* get_auds_codec_name(sh_audio_t *sh){
+  int id=sh->wf.wFormatTag;
   avi_header.auds_guid=NULL;
   switch (id){
     	case 0x161://DivX audio

@@ -41,28 +41,28 @@ while(1){
       AVIStreamHeader h;
       stream_read(demuxer->stream,(char*) &h,MIN(size2,sizeof(h)));
       chunksize-=MIN(size2,sizeof(h));
-      if(h.fccType==streamtypeVIDEO) memcpy(&avi_header.video,&h,sizeof(h));else
-      if(h.fccType==streamtypeAUDIO) memcpy(&avi_header.audio,&h,sizeof(h));
+      if(h.fccType==streamtypeVIDEO) memcpy(&sh_video_i.video,&h,sizeof(h));else
+      if(h.fccType==streamtypeAUDIO) memcpy(&sh_audio_i.audio,&h,sizeof(h));
       last_fccType=h.fccType;
       if(verbose>=1) print_strh(&h);
 	  ++stream_id;
       break; }
     case ckidSTREAMFORMAT: {      // read 'strf'
       if(last_fccType==streamtypeVIDEO){
-        stream_read(demuxer->stream,(char*) &avi_header.bih,MIN(size2,sizeof(avi_header.bih)));
-        chunksize-=MIN(size2,sizeof(avi_header.bih));
-//        init_video_codec();
-//        init_video_out();
+        sh_video_t *sh_video=&sh_video_i; // FIXME!
+        stream_read(demuxer->stream,(char*) &sh_video->bih,MIN(size2,sizeof(sh_video->bih)));
+        chunksize-=MIN(size2,sizeof(sh_video->bih));
+        sh_video->fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
+        sh_video->frametime=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
         if(demuxer->video->id==-1) demuxer->video->id=stream_id;
       } else
       if(last_fccType==streamtypeAUDIO){
+        sh_audio_t *sh_audio=&sh_audio_i; // FIXME!
         int z=(chunksize<64)?chunksize:64;
         if(verbose>=2) printf("found 'wf', %d bytes of %d\n",chunksize,sizeof(WAVEFORMATEX));
-        stream_read(demuxer->stream,(char*) &avi_header.wf_ext,z);
+        stream_read(demuxer->stream,(char*) &sh_audio->wf,z);
         chunksize-=z;
-        if(verbose>=1) print_wave_header((WAVEFORMATEX*)&avi_header.wf_ext);
-//        init_audio_codec();
-//        init_audio_out();
+        if(verbose>=1) print_wave_header(&sh_audio->wf);
         if(demuxer->audio->id==-1) demuxer->audio->id=stream_id;
       }
       break;

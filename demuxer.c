@@ -45,6 +45,8 @@ typedef struct {
 // ---- asf -----
   demux_packet_t *asf_packet;  // read asf fragments here
   int asf_seq;
+// ---- stream header ----
+  void* sh;
 } demux_stream_t;
 
 demux_stream_t* new_demuxer_stream(struct demuxer_st *demuxer,int id){
@@ -65,6 +67,8 @@ demux_stream_t* new_demuxer_stream(struct demuxer_st *demuxer,int id){
 //----------------
   ds->asf_seq=-1;
   ds->asf_packet=NULL;
+//----------------
+  ds->sh=NULL;
   return ds;
 }
 
