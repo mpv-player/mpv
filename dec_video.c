@@ -535,6 +535,9 @@ switch(sh_video->codec->driver){
    break;
  }
  case VFM_RAW: {
+   if (sh_video->format != 0x0)
+    /* set out_fmt */
+	sh_video->codec->outfmt[sh_video->outfmtidx] = sh_video->format;
    break;
  }
  case VFM_RLE: {
