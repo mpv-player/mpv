@@ -90,8 +90,8 @@ from the FFmpeg CVS server.
 To get the FFmpeg sources, use the following commands in a suitable directory
 outside the MPlayer source directory:
 
-cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/ffmpeg login
-cvs -z3 -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/ffmpeg co ffmpeg/libavcodec
+cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg login
+cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg co ffmpeg/libavcodec
 
 When asked for a password, you can just hit enter. A directory named 'ffmpeg'
 with a subdirectory named 'libavcodec' inside will be created. Copy (symbolic
