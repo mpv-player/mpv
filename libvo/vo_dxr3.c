@@ -121,20 +121,20 @@ int picture_linesize[] = { 0, 0, 0 };
 #endif
 
 LIBVO_EXTERN (dxr3)
+
 /* codec control */
-enum MpegCodec
-{
-  MPG_CODEC_NON,
-  MPG_CODEC_AVCODEC,
-  MPG_CODEC_FAME
+enum MpegCodec {
+	MPG_CODEC_NON,
+	MPG_CODEC_AVCODEC,
+	MPG_CODEC_FAME
 };
 
-#if defined(USE_LIBFAME)
-static int mpeg_codec = MPG_CODEC_FAME;
-#elif defined(USE_LIBAVCODEC)
+#if defined(USE_LIBAVCODEC)
 static int mpeg_codec = MPG_CODEC_AVCODEC;
+#elif defined(USE_LIBFAME)
+static int mpeg_codec = MPG_CODEC_FAME;
 #else
-statuc int mpeg_codec = MPG_CODEC_NONE;
+static int mpeg_codec = MPG_CODEC_NONE;
 #endif
 
 /* Resolutions and positions */
@@ -304,107 +304,110 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		picture_linesize[0] = s_width;
 		picture_linesize[1] = s_width / 2;
 		picture_linesize[2] = s_width / 2;
-		switch(mpeg_codec)
-		{
+		switch (mpeg_codec) {
 #ifdef USE_LIBFAME
 		case MPG_CODEC_FAME:
-		  printf("VO: [dxr3] Using FAME\n");
-		fame_ctx = fame_open();
-		if (!fame_ctx) {
-			printf("VO: [dxr3] Cannot open libFAME!\n");
-			return -1;
-		}
+			printf("VO: [dxr3] Using FAME\n");
+			fame_ctx = fame_open();
+			if (!fame_ctx) {
+				printf("VO: [dxr3] Cannot open libFAME!\n");
+				return -1;
+			}
 
-		fame_obj = fame_get_object(fame_ctx, "motion/pmvfast");
-		fame_register(fame_ctx, "motion", fame_obj);
+			fame_obj = fame_get_object(fame_ctx, "motion/pmvfast");
+			fame_register(fame_ctx, "motion", fame_obj);
+			
+			memset(&fame_params, 0, sizeof(fame_parameters_t));
+			fame_params.width = s_width;
+			fame_params.height = s_height;
+			fame_params.coding = "IPPPPPPP";
+			fame_params.quality = 90;
+			fame_params.bitrate = 0;
+			fame_params.slices_per_frame = 1;
+			fame_params.frames_per_sequence = (int) (vo_fps + 0.5);
+			fame_params.shape_quality = 100;
+			fame_params.search_range = (int) (vo_fps + 0.5);
+			fame_params.verbose = 0;
+			fame_params.profile = NULL;
 		
-		fame_params.width = s_width;
-		fame_params.height = s_height;
-		fame_params.coding = "IPPPPPPP";
-		fame_params.quality = 90;
-		fame_params.bitrate = 0;
-		fame_params.slices_per_frame = 1;
-		fame_params.frames_per_sequence = (int) (vo_fps + 0.5);
-		fame_params.shape_quality = 100;
-		fame_params.search_range = (int) (vo_fps + 0.5);
-		fame_params.verbose = 0;
-		fame_params.profile = NULL;
-		
-		if (vo_fps < 24.0) {
-		    fame_params.frame_rate_num = 24000;
-		    fame_params.frame_rate_den = 1001;
-		} else if (vo_fps < 25.0) {
-		    fame_params.frame_rate_num = 24;
-		    fame_params.frame_rate_den = 1;
-		} else if (vo_fps < 29.0) {
-		    fame_params.frame_rate_num = 25;
-		    fame_params.frame_rate_den = 1;
-		} else if (vo_fps < 30.0) {
-		    fame_params.frame_rate_num = 30000;
-		    fame_params.frame_rate_den = 1001;
-		} else if (vo_fps < 50.0) {
-		    fame_params.frame_rate_num = 30;
-		    fame_params.frame_rate_den = 1;
-		} else if (vo_fps < 55.0) {
-		    fame_params.frame_rate_num = 50;
-		    fame_params.frame_rate_den = 1;
-		} else if (vo_fps < 60.0) {
-		    fame_params.frame_rate_num = 60000;
-		    fame_params.frame_rate_den = 1001;
-		} else {
-		    fame_params.frame_rate_num = 60;
-		    fame_params.frame_rate_den = 1;
-		}
-		
-		outbuf = malloc(100000);
-		fame_init(fame_ctx, &fame_params, outbuf, 100000);
+			if (vo_fps < 24.0) {
+				fame_params.frame_rate_num = 24000;
+				fame_params.frame_rate_den = 1001;
+			} else if (vo_fps < 25.0) {
+				fame_params.frame_rate_num = 24;
+				fame_params.frame_rate_den = 1;
+			} else if (vo_fps < 29.0) {
+				fame_params.frame_rate_num = 25;
+				fame_params.frame_rate_den = 1;
+			} else if (vo_fps < 30.0) {
+				fame_params.frame_rate_num = 30000;
+				fame_params.frame_rate_den = 1001;
+			} else if (vo_fps < 50.0) {
+				fame_params.frame_rate_num = 30;
+				fame_params.frame_rate_den = 1;
+			} else if (vo_fps < 55.0) {
+				fame_params.frame_rate_num = 50;
+				fame_params.frame_rate_den = 1;
+			} else if (vo_fps < 60.0) {
+				fame_params.frame_rate_num = 60000;
+				fame_params.frame_rate_den = 1001;
+			} else {
+				fame_params.frame_rate_num = 60;
+				fame_params.frame_rate_den = 1;
+			}
+			
+			outbuf = malloc(100000);
+			fame_init(fame_ctx, &fame_params, outbuf, 100000);
 
-		fame_yuv.w = s_width;
-		fame_yuv.h = s_height;
-		fame_yuv.y = picture_data[0];
-		fame_yuv.u = picture_data[1];
-		fame_yuv.v = picture_data[2];
-		break;
+			fame_yuv.w = s_width;
+			fame_yuv.h = s_height;
+			fame_yuv.y = picture_data[0];
+			fame_yuv.u = picture_data[1];
+			fame_yuv.v = picture_data[2];
+			break;
 #endif
 #ifdef USE_LIBAVCODEC
 		case MPG_CODEC_AVCODEC:
-		  printf("VO: [dxr3] Using AVCODEC\n");
-		avc_codec = avcodec_find_encoder(CODEC_ID_MPEG1VIDEO);
-		if (!avc_codec) {
-			printf("VO: [dxr3] Unable to find mpeg1video codec\n");
-			uninit();
-			return -1;
-		}
-		avc_context = malloc(sizeof(AVCodecContext));
-		memset(avc_context, 0, sizeof(AVCodecContext));
-		avc_context->width = s_width;
-		avc_context->height = s_height;
-		ioctl(fd_control, EM8300_IOCTL_GET_VIDEOMODE, &ioval);
-		if (ioval == EM8300_VIDEOMODE_NTSC) {
-			avc_context->gop_size = 18;
-		} else {
-			avc_context->gop_size = 15;
-		}
-		avc_context->frame_rate = (int) (vo_fps * FRAME_RATE_BASE);
-		avc_context->bit_rate = 6e6;
-		avc_context->flags = CODEC_FLAG_HQ | CODEC_FLAG_QSCALE;
-		avc_context->quality = 2;
-		avc_context->pix_fmt = PIX_FMT_YUV420P;
-		if (avcodec_open(avc_context, avc_codec) < 0) {
-			printf("VO: [dxr3] Unable to open codec\n");
-			uninit();
-			return -1;
-		}
-		/* Create a pixel buffer and set up pointers for color components */
-		memset(&avc_picture, 0, sizeof(avc_picture));
-		avc_picture.linesize[0] = picture_linesize[0];
-		avc_picture.linesize[1] = picture_linesize[1];
-		avc_picture.linesize[2] = picture_linesize[2];
+			printf("VO: [dxr3] Using AVCODEC\n");
+			avc_codec = avcodec_find_encoder(CODEC_ID_MPEG1VIDEO);
+			if (!avc_codec) {
+				printf("VO: [dxr3] Unable to find mpeg1video codec\n");
+				uninit();
+				return -1;
+			}
+			if (avc_context) {
+				free(avc_context);
+			}
+			avc_context = malloc(sizeof(AVCodecContext));
+			memset(avc_context, 0, sizeof(AVCodecContext));
+			avc_context->width = s_width;
+			avc_context->height = s_height;
+			ioctl(fd_control, EM8300_IOCTL_GET_VIDEOMODE, &ioval);
+			if (ioval == EM8300_VIDEOMODE_NTSC) {
+				avc_context->gop_size = 18;
+			} else {
+				avc_context->gop_size = 15;
+			}
+			avc_context->frame_rate = (int) (vo_fps * FRAME_RATE_BASE);
+			avc_context->bit_rate = 6e6;
+			avc_context->flags = CODEC_FLAG_HQ | CODEC_FLAG_QSCALE;
+			avc_context->quality = 2;
+			avc_context->pix_fmt = PIX_FMT_YUV420P;
+			if (avcodec_open(avc_context, avc_codec) < 0) {
+				printf("VO: [dxr3] Unable to open codec\n");
+				uninit();
+				return -1;
+			}
+			/* Create a pixel buffer and set up pointers for color components */
+			memset(&avc_picture, 0, sizeof(avc_picture));
+			avc_picture.linesize[0] = picture_linesize[0];
+			avc_picture.linesize[1] = picture_linesize[1];
+			avc_picture.linesize[2] = picture_linesize[2];
 		
-		avc_picture.data[0] = picture_data[0];
-		avc_picture.data[1] = picture_data[1];
-		avc_picture.data[2] = picture_data[2];
-		break;
+			avc_picture.data[0] = picture_data[0];
+			avc_picture.data[1] = picture_data[1];
+			avc_picture.data[2] = picture_data[2];
+			break;
 #endif
 		}
 
@@ -472,19 +475,18 @@ static uint32_t draw_frame(uint8_t * src[])
 		int size, srcStride = (img_format == IMGFMT_YUY2) ? (v_width * 2) : (v_width * 3);
 		sws->swScale(sws, src, &srcStride, 0, v_height, picture_data, picture_linesize);
 		draw_osd();
-		switch(mpeg_codec)
-		{
+		switch (mpeg_codec) {
 #ifdef USE_LIBFAME
 		case MPG_CODEC_FAME:
-		size = fame_encode_frame(fame_ctx, &fame_yuv, NULL);
-		write(fd_video, outbuf, size);
-		break;
+			size = fame_encode_frame(fame_ctx, &fame_yuv, NULL);
+			write(fd_video, outbuf, size);
+			break;
 #endif
 #ifdef USE_LIBAVCODEC
 		case MPG_CODEC_AVCODEC:
-		size = avcodec_encode_video(avc_context, picture_data[0], avc_outbuf_size, &avc_picture);
-		write(fd_video, picture_data[0], size);
-		break;
+			size = avcodec_encode_video(avc_context, picture_data[0], avc_outbuf_size, &avc_picture);
+			write(fd_video, picture_data[0], size);
+			break;
 #endif
 		}
 		return 0;
@@ -494,27 +496,26 @@ static uint32_t draw_frame(uint8_t * src[])
 
 static void flip_page(void)
 {
-  int size;
+	int size;
 	if (!noprebuf) {
 		ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts);
 	}
 	if (img_format == IMGFMT_YV12) {
-		switch(mpeg_codec)
-		{
+		switch (mpeg_codec) {
 #ifdef USE_LIBFAME
 		case MPG_CODEC_FAME:
-		size = fame_encode_frame(fame_ctx, &fame_yuv, NULL);
-		write(fd_video, outbuf, size);
-		break;
+			size = fame_encode_frame(fame_ctx, &fame_yuv, NULL);
+			write(fd_video, outbuf, size);
+			break;
 #endif
 #ifdef USE_LIBAVCODEC
 		case MPG_CODEC_AVCODEC:
-		size = avcodec_encode_video(avc_context, picture_data[0], avc_outbuf_size, &avc_picture);
-		if (!noprebuf) {
-			ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts);
-		}
-		write(fd_video, picture_data[0], size);
-		break;
+			size = avcodec_encode_video(avc_context, picture_data[0], avc_outbuf_size, &avc_picture);
+			if (!noprebuf) {
+				ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts);
+			}
+			write(fd_video, picture_data[0], size);
+			break;
 #endif
 		}
 	}
@@ -536,21 +537,20 @@ static void uninit(void)
 		freeSwsContext(sws);
 	}
 
-	switch(mpeg_codec)
-	{
+	switch (mpeg_codec) {
 #ifdef USE_LIBFAME
 	case MPG_CODEC_FAME:
-	if (fame_ctx) {
-		fame_close(fame_ctx);
-	}
-	break;
+		if (fame_ctx) {
+			fame_close(fame_ctx);
+		}
+		break;
 #endif
 #ifdef USE_LIBAVCODEC
 	case MPG_CODEC_AVCODEC:
-	if (avc_context) {
-		avcodec_close(avc_context);
-	}
-	break;
+		if (avc_context) {
+			avcodec_close(avc_context);
+		}
+		break;
 #endif
 	}
 	if (picture_data[0]) {
@@ -579,35 +579,40 @@ static uint32_t preinit(const char *arg)
 
 	GetCpuCaps(&cpucaps);
 	/* Open the control interface */
-	if (arg && !strncmp("noprebuf", arg,8)) {
+	if (arg && !strncmp("noprebuf", arg, 8)) {
 		printf("VO: [dxr3] Disabling prebuffering.\n");
 		noprebuf = 1;
 		fdflags |= O_NONBLOCK;
-		arg=strchr(arg,':');
-		if(arg) arg++;
+		arg = strchr(arg, ':');
+		if (arg) {
+			arg++;
+		}
 	}
 
-	if(cpucaps.has3DNowExt)
-	{
-		printf("VO: [dxr3] fast AMD special disabling prebuffering.\n");
+	if (cpucaps.has3DNowExt) {
+		printf("VO: [dxr3] Fast AMD special disabling prebuffering.\n");
 		noprebuf = 1;
 		fdflags |= O_NONBLOCK;
 	}
 
 #if defined(USE_LIBFAME)
 	printf("VO: [dxr3] FAME supported\n");
-	if (arg && !strncmp("fame",arg,4)) {
-	  mpeg_codec=MPG_CODEC_FAME;
-	  arg=strchr(arg,':');
-	  if(arg) arg++;
+	if (arg && !strncmp("fame", arg, 4)) {
+		mpeg_codec = MPG_CODEC_FAME;
+		arg = strchr(arg, ':');
+		if (arg) {
+			arg++;
+		}
 	}
 #endif
 #if defined(USE_LIBAVCODEC)
 	printf("VO: [dxr3] AVCODEC supported\n");
-	if (arg && !strncmp("avcodec",arg,7)) {
-	  mpeg_codec=MPG_CODEC_AVCODEC;
-	  arg=strchr(arg,':');
-	  if(arg) arg++;
+	if (arg && !strncmp("avcodec", arg, 7)) {
+		mpeg_codec = MPG_CODEC_AVCODEC;
+		arg = strchr(arg, ':');
+		if (arg) {
+			arg++;
+		}
 	}
 #endif
 
@@ -673,11 +678,12 @@ static uint32_t preinit(const char *arg)
 		}
 	}
 
-	if(mpeg_codec==MPG_CODEC_AVCODEC)
-	{
+#if defined(USE_LIBAVCODEC)
+	if (mpeg_codec == MPG_CODEC_AVCODEC && !avc_context) {
 		avcodec_init();
 		avcodec_register_all();
 	}
+#endif
 	
 	return 0;
 }
