@@ -14,11 +14,13 @@ void get_screen_size(){
 }
 
 static HANDLE stdin;
+static int getch2_status=0;
 
 int getch2(int time){
 	INPUT_RECORD eventbuffer[128];
     DWORD retval;
    	int i=0;
+    if(!getch2_status)return -1;    
     /*check if there are input events*/
 	if(!GetNumberOfConsoleInputEvents(stdin,&retval))
 	{
@@ -95,11 +97,16 @@ int getch2(int time){
 	return -1;
 }
 
-static int getch2_status=0;
 
 void getch2_enable(){
-	stdin = GetStdHandle(STD_INPUT_HANDLE);
-    getch2_status=1;
+	int retval;
+    stdin = GetStdHandle(STD_INPUT_HANDLE);
+   	if(!GetNumberOfConsoleInputEvents(stdin,&retval))
+	{
+		printf("getch2: %i can't get number of input events  [disabling console input]\n",GetLastError());
+		getch2_status = 0;
+	}
+    else getch2_status=1;
 }
 
 void getch2_disable(){
