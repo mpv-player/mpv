@@ -14,7 +14,7 @@
 #include <dirent.h>
 
 #include "cookies.h"
-#include "http.c"
+#include "http.h"
 #include "mp_msg.h"
 
 #define MAX_COOKIES 20
