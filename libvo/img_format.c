@@ -1,5 +1,4 @@
-#include "config.h"
-#include "video_out.h"
+#include "img_format.h"
 
 char *vo_format_name(int format)
 {
@@ -21,11 +20,16 @@ char *vo_format_name(int format)
 	case IMGFMT_I420: return("Planar I420");
 	case IMGFMT_IYUV: return("Planar IYUV");
 	case IMGFMT_CLPL: return("Planar CLPL");
+	case IMGFMT_Y800: return("Planar Y800");
+	case IMGFMT_Y8: return("Planar Y8");
+	case IMGFMT_IUYV: return("Packed IUYV");
+	case IMGFMT_IY41: return("Packed IY41");
 	case IMGFMT_IYU1: return("Packed IYU1");
 	case IMGFMT_IYU2: return("Packed IYU2");
 	case IMGFMT_UYVY: return("Packed UYVY");
 	case IMGFMT_UYNV: return("Packed UYNV");
 	case IMGFMT_cyuv: return("Packed CYUV");
+	case IMGFMT_Y422: return("Packed Y422");
 	case IMGFMT_YUY2: return("Packed YUY2");
 	case IMGFMT_YUNV: return("Packed YUNV");
 	case IMGFMT_YVYU: return("Packed YVYU");
