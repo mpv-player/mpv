@@ -47,7 +47,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
     image_width = width;
     image=malloc(width*height*3/2);
 
-    sprintf (header, "P5\n\n%d %d\n255\n", width, height*3/2);
+    snprintf (header, 1024, "P5\n\n%d %d\n255\n", width, height*3/2);
 
     return 0;
 }
@@ -63,7 +63,7 @@ static void flip_page (void)
     FILE * f;
     int i;
 
-    sprintf (vo_pgm_filename, "%08d.pgm", framenum++);
+    snprintf (vo_pgm_filename, 24, "%08d.pgm", framenum++);
 
     f = fopen (vo_pgm_filename, "wb");  if (f == NULL) return;
     fwrite (header, strlen (header), 1, f);
