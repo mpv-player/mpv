@@ -113,7 +113,7 @@ subtitle *sub_read_line_microdvd(FILE *fd,subtitle *current) {
     while ((next =sub_readtext (next, &(current->text[i])))) {
         if (current->text[i]==ERR) {return ERR;}
 	i++;
-	if (i>SUB_MAX_TEXT) { printf ("Too many lines in a subtitle\n");current->lines=i;return;}
+	if (i>=SUB_MAX_TEXT) { printf ("Too many lines in a subtitle\n");current->lines=i;return;}
     }
     current->lines=i+1;
 
