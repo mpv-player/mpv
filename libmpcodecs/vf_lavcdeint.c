@@ -25,9 +25,6 @@ extern int avcodec_inited;
 
 struct vf_priv_s 
 {
-  AVPicture pic;
-  UINT8     *outbuf;
-  int       outbuf_size;
   int       width, height;
   int       pix_fmt;
 };
@@ -61,6 +58,7 @@ imgfmt_to_pixfmt (int imgfmt)
       return PIX_FMT_YUV420P;
       break;
 
+#if 0
       /* 4:2:2 */
     case IMGFMT_UYVY:
     case IMGFMT_UYNV:
@@ -73,6 +71,7 @@ imgfmt_to_pixfmt (int imgfmt)
     case IMGFMT_V655:
       return PIX_FMT_YUV422P;
       break;
+#endif
 
       /* Are there any _planar_ YUV 4:4:4 formats? */
 
@@ -102,37 +101,18 @@ config (struct vf_instance_s* vf,
   priv->width  = width;
   priv->height = height;
 
-    
-  if(priv->outbuf) 
-    av_free(priv->outbuf);
-
-  priv->outbuf_size = 
-    avpicture_get_size(priv->pix_fmt, priv->width, priv->height);
-
-  priv->outbuf = av_malloc(priv->outbuf_size); 
-  avpicture_fill(&priv->pic, priv->outbuf, priv->pix_fmt, 
-		 priv->width, priv->height);
-  
   return vf_next_config(vf,
 			width, height,
 			d_width, d_height,
 			flags, outfmt);
 }
 
-
-static void
-uninit (struct vf_instance_s *vf)
-{
-  if(vf->priv->outbuf)
-    av_free(vf->priv->outbuf);
-}
-
-
 static void 
 put_image (struct vf_instance_s* vf, mp_image_t *mpi)
 {
   struct vf_priv_s *priv = vf->priv;
   mp_image_t* dmpi;
+  AVPicture pic;
   AVPicture lavc_picture;
   
   lavc_picture.data[0]     = mpi->planes[0];
@@ -142,26 +122,23 @@ put_image (struct vf_instance_s* vf, mp_image_t *mpi)
   lavc_picture.linesize[1] = mpi->stride[1];
   lavc_picture.linesize[2] = mpi->stride[2];
   
-
   dmpi = vf_get_image(vf->next, mpi->imgfmt,
-		      MP_IMGTYPE_EXPORT, 0,
-		      mpi->w, mpi->h);
+		      MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
+		      priv->width, priv->height);
 
-  
-  if (avpicture_deinterlace(&priv->pic, &lavc_picture, 
+  pic.data[0]     = dmpi->planes[0];
+  pic.data[1]     = dmpi->planes[1];
+  pic.data[2]     = dmpi->planes[2];
+  pic.linesize[0] = dmpi->stride[0];
+  pic.linesize[1] = dmpi->stride[1];
+  pic.linesize[2] = dmpi->stride[2];
+
+  if (avpicture_deinterlace(&pic, &lavc_picture, 
 			    priv->pix_fmt, priv->width, priv->height) < 0)
     {
       /* This should not happen -- see config() */
       return;
     }
-
-  
-  dmpi->planes[0] = priv->pic.data[0];
-  dmpi->planes[1] = priv->pic.data[1];
-  dmpi->planes[2] = priv->pic.data[2];
-  dmpi->stride[0] = priv->pic.linesize[0];
-  dmpi->stride[1] = priv->pic.linesize[1];
-  dmpi->stride[2] = priv->pic.linesize[2];
   
   vf_next_put_image(vf, dmpi);
 }
@@ -186,7 +163,6 @@ open (vf_instance_t *vf, char* args)
   vf->config       = config;
   vf->put_image    = put_image;
   vf->query_format = query_format;
-  vf->uninit       = uninit;
   vf->priv         = malloc(sizeof(struct vf_priv_s));
   memset(vf->priv,0,sizeof(struct vf_priv_s));
 
