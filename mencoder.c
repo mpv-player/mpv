@@ -873,7 +873,10 @@ case ACODEC_VBRMP3:
     mux_a->wf->nChannels= (lame_param_mode<0) ? sh_audio->channels :
 	((lame_param_mode==3) ? 1 : 2);
     mux_a->wf->nSamplesPerSec=mux_a->h.dwRate;
-    mux_a->wf->nAvgBytesPerSec=192000/8; // FIXME!
+    if(! lame_param_vbr)
+        mux_a->wf->nAvgBytesPerSec=lame_param_br * 125;
+    else
+        mux_a->wf->nAvgBytesPerSec=192000/8; // FIXME!
     mux_a->wf->nBlockAlign=(mux_a->h.dwRate<32000)?576:1152; // required for l3codeca.acm + WMP 6.4
     mux_a->wf->wBitsPerSample=0; //16;
     // from NaNdub:  (requires for l3codeca.acm)
