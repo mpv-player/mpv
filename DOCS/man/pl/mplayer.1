@@ -1,4 +1,4 @@
-.\" synced with 1.803
+.\" synced with 1.808
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -37,7 +37,7 @@
 .\" Tytu³
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2004-11-07" "Projekt MPlayer" "Odtwarzacz filmów"
+.TH MPlayer 1 "2004-11-17" "Projekt MPlayer" "Odtwarzacz filmów"
 .
 .SH NAZWA
 mplayer  \- odtwarzacz filmów
@@ -188,8 +188,8 @@ i napisów DVD (strumienie SPU, VOBSub i Closed Captions).
 (Koder Filmów MPlayera) jest to prosty koder (kompresor) filmów, zaprojektowany
 do kodowania filmów otwieralnych MPlayerem (patrz wy¿ej) do innych obs³ugiwanych
 formatów (patrz ni¿ej).
-Potrafi kodowaæ do DivX4, XviD, kodeków libavcodec, a d¼wiêk do
-PCM/\:MP3/\:VBRMP3 w 1, 2 lub 3-przej¶ciach.
+Potrafi kodowaæ do MPEG4 (DivX4/XviD), kodeków libavcodec, a d¼wiêk do
+PCM/\:MP3/\:VBRMP3 w 1, 2 lub 3-przebiegach.
 Potrafi równie¿ kopiowaæ strumieniowo, posiada potê¿ny system filtrów
 (kadrowanie, powiêkszanie, odwracanie, postprocesing, obracanie, skalowanie,
 szum, konwersja rgb/\:yuv) i inne.
@@ -236,8 +236,8 @@ Skacze w przód/\:w ty³ na li¶cie odtwarzania.
 nastêpna/\:poprzednia pozycja drzewa odtwarzania z listy wy¿szego poziomu.
 .IPs "INS i DEL"
 nastêpne/\:poprzednie alternatywne ¼ród³o (tylko lista odtwarzania ASX)
-.IPs "p / SPACE"
-Zatrzymuje odtwarzanie (dowolny klawisz wznawia odtwarzanie).
+.IPs "p / SPACJA"
+Zatrzymuje odtwarzanie (naci¶niêcie jeszcze raz wznawia).
 .IPs .\ \ \ \ 
 Krok do przodu.
 Jednokrotne naci¶niêcie zatrzyma odtwarzane, ka¿de nastêpne przesunie o jedn±
@@ -1177,10 +1177,13 @@ czêstotliwo¶æ przechwytywania video (ile klatek na sekundê przechwytywaæ)
 .IPs buffersize=<warto¶æ>
 maksymalny rozmiar bufora przechwytywania w megabajtach (domy¶lnie: dynamiczny)
 .IPs norm=<warto¶æ>
-dostêpne: PAL, SECAM, NTSC.
-Przy v4l2 u¿yj poni¿szej opcji normid.
+bsdbt848 i v4l dopuszczaj± PAL, SECAM i NTSC.
+Przy v4l2 lista dostêpnych norm jest wy¶wietlana na konsoli.
+Przeczytaj te¿ poni¿sz± opcjê normid.
 .IPs "normid=<warto¶æ> (tylko v4l2)"
-Lista norm TV jest wypisywana przez MPlayera.
+Ustawia normê z podanym numerycznym ID.
+Zale¿y od karty przechwytywania.
+Lista norm TV jest wypisywana przez MPlayera na konsoli.
 .IPs channel=<warto¶æ>
 Ustawia tuner na kana³ <warto¶æ>.
 .IPs chanlist=<warto¶æ>
@@ -1759,6 +1762,18 @@ Dla ALSA mo¿esz u¿yæ nazw, które, na przyk³ad, pokazuje alsamixer, jak
 Nazwy kana³ów miksera ALSA z do³±czonym numerem musz± byæ zapisane w formacie
 <nazwa, numer>, np.\& kana³ nazwany 'PCM 1' w alsamixer musi byæ zamieniony na
 .BR PCM,1 .
+.
+.TP
+.B \-softvol
+Wymusza u¿ycie programowego miksera, zamiast tego w karcie d¼wiêkowej.
+.
+.TP
+.B \-softvol-max <10.0\-10000.0>
+Ustawia maksymalny poziom wzmocnienia w procentach (domy¶lnie: 110).
+Warto¶æ 200 pozwoli na podniesienie g³o¶no¶ci do maksimum dwukrotno¶ci
+aktualnego poziomu.
+Przy warto¶ciach poni¿ej 100 pocz±tkowa g³o¶no¶æ (wynosz±ca 100%)
+bêdzie powy¿ej maksimum, czego np.\& OSD nie potrafi prawid³owo wy¶wietliæ.
 .
 .TP
 .B \-nowaveheader (tylko \-ao pcm)
@@ -3744,9 +3759,19 @@ Tworzy lustrzane odbicie wzglêdem osi Y.
 .
 .TP
 .B rotate[=<0\-7>]
-Obraca obraz o +/\:- 90 stopni.
-Dla parametrów pomiêdzy 4\-7 obracanie wykona siê tylko je¿eli geometria filmu
-jest portretem a nie krajobrazem.
+Obraca obraz o 90 stopni i ewentualnie go odbija.
+Dla warto¶ci pomiêdzy 4\-7 obracanie wykona siê tylko je¿eli obraz
+jest wy¿szy ni¿ szerszy.
+.RSs
+.IPs 0
+Obraca o 90 stopni w prawo i odbija.
+.IPs 1
+Obraca o 90 stopni w prawo.
+.IPs 2
+Obraca o 90 stopni w lewo.
+.IPs 3
+Obraca o 90 stopni w lewo i odbija.
+.RE
 .
 .TP
 .B scale[=w:h[:przeplot[:pom_kol[:parametr[:parametr2[:presize]]]]]]
@@ -4073,6 +4098,14 @@ i kontrastu.
 Wykorzystuje to ten sam kod optymalizowany dla MMX co \-vf eq
 je¶li wszystkie warto¶ci gamma s± 1.0.
 Parametry s± podane jako liczby rzeczywiste.
+.RSs
+.IPs rg
+warto¶æ gamma dla czerwonej sk³adowej
+.IPs gg
+warto¶æ gamma dla zielonej sk³adowej
+.IPs bg
+warto¶æ gamma dla niebieskiej sk³adowej
+.RE
 Parametry rg, gg, bg s± niezale¿ne warto¶ciami gamma dla czerwonej (rg),
 zielonej (gg) i niebieskiej (bg) sk³adowej obrazu.
 Parametr wagi mo¿e byæ u¿yty do zmniejszenia efektu wysokiej warto¶ci gamma na
@@ -4209,7 +4242,7 @@ Zamienia p³aszczyzny U i V.
 .
 .TP
 .B il=[d|i][s][:[d|i][s]]
-Usuwa/wstawia przeplot w obrazy.
+Usuwa/wstawia przeplot w obrazie.
 Celem tego filtra jest dodanie mo¿liwo¶ci przetwarzania przeplatanych obrazów
 pojedynczymi obrazami bez usuwania przeplotu.
 Mo¿esz filtrowaæ swoje DVD z przeplotem i odtwarzaæ na telewizorze nie psuj±c
@@ -4441,17 +4474,17 @@ pliku wej¶ciowego (23.976 je¿eli wej¶cie jest 29.97fps).
 Dostêpne opcje:
 .RSs
 .IPs pass=1|2
-U¿ywa trybu dwuprzej¶ciowego (two-pass).
+U¿ywa trybu dwuprzebiegowego (two-pass).
 Efektem jest lepsza jako¶æ.
 Przej¶cie 1 analizuje film i zapisuje informacje do pliku informacyjnego.
 Przej¶cie 2 czyta ten plik i wykorzystuje go przy w³a¶ciwej obróbce.
-Te przej¶cia NIE odpowiadaj± przej¶ciom 1 i 2 w procesie kodowania.
-Aby wykorzystaæ tryb dwuprzej¶ciowy divtc z dwuprzej¶ciowym kodowaniem, musisz
-wykonaæ nastêpuj±ce trzy kroki: 1 przej¶cie divtc i kodera, pó¼niej 2 przej¶cie
-divtc i 1 kodera, na koñcu 2 przej¶cie divtc i kodera.
+Te przebiegi NIE odpowiadaj± przebiegom 1 i 2 w procesie kodowania.
+Aby wykorzystaæ tryb dwuprzebiegowy divtc z dwuprzebiegowym kodowaniem, musisz
+wykonaæ nastêpuj±ce trzy kroki: 1 przebieg divtc i kodera, pó¼niej 2 przebieg
+divtc i 1 kodera, na koñcu 2 przebieg divtc i kodera.
 .IPs file=nazwa\ pliku
-Ustawia nazwê dla pliku informacyjnego kodowania 2-przebiegowego (domy¶lnie:
-"framediff.log").
+Ustawia nazwê dla pliku informacyjnego kodowania 2-przebiegowego
+(domy¶lnie: "framediff.log").
 .IPs threshold=warto¶æ
 Ustawia minimaln± si³ê, któr± musi mieæ wzorzec telecine, aby filtr w niego
 uwierzy³ (domy¶lnie: 0.5).
@@ -4462,20 +4495,20 @@ Ustawia ilo¶æ poprzednich ramek, które bêd± przeszukiwane pod k±tem
 odnalezienia wzorca (domy¶lnie: 30).
 Wiêksza ilo¶æ zapewnia wiêksz± wiarygodno¶æ w przeszukiwaniu wzorca, jednak
 krótsza przerwa skraca czas reakcji do zmian w telecine.
-Ma to tylko wp³yw na tryb jednoprzej¶ciowy.
-Obecnie tryb dwuprzej¶ciowy u¿ywa ¶ci¶le okre¶lonej warto¶ci, która obejmuje
+Ma to tylko wp³yw na tryb jednoprzebiegowy.
+Obecnie tryb dwuprzebiegowy u¿ywa ¶ci¶le okre¶lonej warto¶ci, która obejmuje
 zarówno poprzednie jak i nastêpne klatki.
 .IPs phase=0|1|2|3|4
-Ustawia pocz±tkow± fazê telecine dla trybu jednoprzej¶ciowego (domy¶lnie: 0).
-Tryb dwuprzej¶ciowy mo¿e "wygl±daæ w przysz³o¶æ", dlatego korzysta z w³a¶ciwej
-fazy ju¿ od samego pocz±tku, podczas gry tryb jednoprzej¶ciowy musi zgadywaæ.
+Ustawia pocz±tkow± fazê telecine dla trybu jednoprzebiegowego (domy¶lnie: 0).
+Tryb dwuprzebiegowy mo¿e "wygl±daæ w przysz³o¶æ", dlatego korzysta z w³a¶ciwej
+fazy ju¿ od samego pocz±tku, podczas gdy tryb jednoprzebiegowy musi zgadywaæ.
 Kiedy ju¿ j± odnajdzie, zaczyna z niej korzystaæ, ale ta opcja pozwala na
 pozbycie siê szumu na pocz±tku.
-Poza tym, pierwsze przej¶cie trybu dwuprzej¶ciowego te¿ korzysta z tej opcji,
+Poza tym, pierwszy przebieg trybu dwuprzebiegowego te¿ korzysta z tej opcji,
 wiêc je¿eli zachowasz wyj¶cie to otrzymasz w efekcie sta³a fazê.
 .IPs deghost=warto¶æ
-Ustawia próg deghostingu (0\-255 dla trybu jednoprzej¶ciowego, -255\-255 dla
-trybu dwuprzej¶ciowego, domy¶lnie 0).
+Ustawia próg deghostingu (0\-255 dla trybu jednoprzebiegowego, -255\-255 dla
+trybu dwuprzebiegowego, domy¶lnie 0).
 Je¿eli warto¶æ jest ró¿na od 0, tryb deghostingu jest w³±czony.
 Opcja przeznaczona jest dla filmów, z których usuniêto przeplot poprzez
 zmieszanie pól, zamiast opuszczania jednego z nich.
@@ -4483,11 +4516,11 @@ Proces deghostingu wzmacnia wszystkie pozosta³o¶ci po kompresji w zmieszanych
 klatkach, wtedy parametr warto¶æ okre¶la granicê wy³±czenia tych pikseli
 z deghostingu, które ró¿ni± siê od poprzedniej klatki o mniej ni¿ wyznaczony
 kres.
-Je¿eli u¿ywany jest tryb dwuprzej¶ciowy, warto¶æ ujemna mo¿e byæ u¿yta, aby
-zmusiæ filtr do przeanalizowania ca³ego video na pocz±tku drugiego przej¶cia
+Je¿eli u¿ywany jest tryb dwuprzebiegowy, mo¿e byæ u¿yta warto¶æ ujemna, aby
+zmusiæ filtr do przeanalizowania ca³ego video na pocz±tku drugiego przebiegu
 w celu okre¶lenia czy zastosowanie filtru jest konieczne i wybranie albo 0,
 albo warto¶ci bezwzglêdnej parametru.
-Podaj tê opcjê dla trybu dwuprzej¶ciowego, przy jednoprzej¶ciowym nie ma
+Podaj tê opcjê dla trybu dwuprzebiegowego, przy jednoprzebiegowym nie ma
 to ¿adnego efektu.
 .RE
 .
@@ -5015,7 +5048,7 @@ U¿yj \-ovc help, aby otrzymaæ listê dostêpnych kodeków.
 .IPs "\-ovc copy"
 Nie koduje, tylko kopiuje strumieñ.
 .IPs "\-ovc divx4"
-Kduje do DivX4/\:DivX5.
+Koduje do DivX4/\:DivX5.
 .IPs "\-ovc raw"
 Koduje do nieskompesowanego formatu (u¿yj \-vf format, aby wybraæ).
 .IPs "\-ovc lavc"
@@ -5025,7 +5058,7 @@ Koduje z kodekiem libavcodec.
 .
 .TP
 .B \-passlogfile <nazwa\ pliku>
-W dwuprzebiegowym kodowaniu, zrzuca informacje o pierwszym przej¶ciu do
+W dwuprzebiegowym kodowaniu, zrzuca informacje o pierwszym przebiegu do
 <nazwa pliku> zamiast domy¶lnego divx2pass.log.
 .
 .TP
@@ -5118,7 +5151,7 @@ okre¶la chropowato¶æ/\:g³adko¶æ
 .
 .TP
 .B pass=<1\-2>
-Z t± opcj± mo¿esz kodowaæ dwuprzej¶ciowo pliki DivX4.
+Z t± opcj± mo¿esz kodowaæ dwuprzebiegowo pliki DivX4.
 Najpierw koduj z pass=1,
 pó¼niej koduj jeszcze raz z tymi samymi parametrami i pass=2.
 .
@@ -5128,12 +5161,12 @@ Nadpisuje argument pass i wykorzystuje bibliotekê XviD VBR zamiast DivX4 VBR.
 Dostêpne s± nastêpuj±ce opcje:
 .RSs
 .IPs 0
-kodowanie jednoprzej¶ciowe (tak jak przy pominiêciu pass linii poleceñ)
+kodowanie jednoprzebiegowe (tak jakby pomin±æ przebieg w wierszu poleceñ)
 .IPs 1
-Analizuje (pierwsze) przej¶cie dwuprzej¶ciowego kodowania.
+Analityczny (pierwszy) przebieg dwuprzebiegowego kodowania.
 Wynikowy plik AVI mo¿e byæ przekierowany do /dev/\:null.
 .IPs 2
-Ostateczne (drugie) przej¶cie dwuprzej¶ciowego kodowania.
+Ostateczny (drugi) przebieg dwuprzebiegowego kodowania.
 .RE
 .
 .
@@ -5359,7 +5392,7 @@ H.263
 .IPs h263p
 H.263 Plus
 .IPs mpeg4
-DivX 4/\:5
+MPEG4 (DivX 4/5)
 .IPs msmpeg4
 DivX 3
 .IPs msmpeg4v2
@@ -5387,7 +5420,7 @@ bezstratny kodek video FFmpeg
 .
 .TP
 .B vqmin=<1\-31>
-minimalny kwantyzator (quantizer) (przej¶cie\ 1/\:2)
+minimalny kwantyzator (quantizer) (przebieg\ 1/\:2)
 .RSs
 .IPs 1
 Nie zalecane (bardzo du¿y plik, ma³a ró¿nica w jako¶ci i dziwne efekty uboczne:
@@ -5423,21 +5456,21 @@ Ni¿sza warto¶æ oznacza lepsz± jako¶æ ale wiêkszy plik wynikowy
 .
 .TP
 .B vqmax=<1\-31>
-maksymalny kwantyzator (przej¶cie\ 1/\:2), 10\-31 jest rozs±dnym zakresem
+maksymalny kwantyzator (przebieg\ 1/\:2), 10\-31 jest rozs±dnym zakresem
 (domy¶lnie: 31)
 .
 .TP
 .B mbqmin=<1\-31>
-minimalny kwantyzator makrobloku (przej¶cie\ 1/\:2) (domy¶lnie: 2)
+przestarza³e, u¿ywaj vqmin
 .
 .TP
 .B mbqmax=<1\-31>
-maksymalny kwantyzator makrobloku (przej¶cie\ 1/\:2) (domy¶lnie: 31)
+przestarza³e, u¿ywaj vqmax
 .
 .TP
 .B vqdiff=<1\-31>
-maksymalna ró¿nica kwantyzatora miêdzy ramkami I a P (przej¶cie\ 1/\:2)
-(domy¶lnie: 3)
+maksymalna ró¿nica kwantyzatora miêdzy s±siednimi ramkami I a P
+(przebieg\ 1/\:2) (domy¶lnie: 3)
 .
 .TP
 .B vmax_b_frames=<0\-4>
@@ -5528,10 +5561,11 @@ Na razie nie robi kompletnie nic.
 .B keyint=<0\-300>
 maksymalna przerwa miêdzy ramkami kluczowymi w ramkach
 (domy¶lnie: 250 albo jedna klatka kluczowa co dziesiêæ sekund w filmie 25fps)
-Klatki kluczowe s± potrzebne przy przeszukiwaniu, jako ¿e przeszukiwane s±
-tylko klatki kluczowe, potrzebuj± jednak one trochê wiêcej miejsca ni¿ zwyk³e
-klatki, wiêc wiêksze warto¶ci dadz± w rezultacie mniejszy plik, ale mniej
-precyzyjne przeszukiwanie, 0 oznacza brak klatek kluczowych.
+Ramki kluczowe s± potrzebne przy przeszukiwaniu, jako ¿e przeszukiwane s±
+tylko ramki kluczowe, potrzebuj± jednak one trochê wiêcej miejsca ni¿ zwyk³e
+ramki, wiêc wiêksze warto¶ci dadz± w rezultacie mniejszy plik, ale mniej
+precyzyjne przeszukiwanie.
+0 jest równowa¿ne 1, czyli ka¿da ramka jest ramk± kluczow±.
 Warto¶ci >300 nie s± zalecane, poniewa¿ jako¶æ mo¿e byæ z³a w zale¿no¶ci od
 dekodera, kodera i szczê¶cia.
 Dla utrzymania pe³nej zgodno¶ci z MPEG1/\:2/\:4 warto¶ci powinny byæ <=132.
@@ -5546,49 +5580,48 @@ oznacza, ¿e ¿adne zmiany nie bêd± wykryte (domy¶lnie 0).
 .
 .TP
 .B vb_strategy=<0\-1>
-strategia wyboru miêdzy ramkami I/\:P/\:B (przej¶cie\ 2):
+strategia wyboru miêdzy ramkami I/\:P/\:B (przebieg\ 1):
 .PD 0
 .RSs
 .IPs 0
 Zawsze u¿ywa maksymalnej ilo¶ci klatek B (domy¶lnie).
 .IPs 1
-Unika klatek B w scenach z du¿± ilo¶ci± ruchu
-Sprawi to, ¿e bitrate mo¿e byæ ¼le przewidziany.
+Unika ramek B w scenach z du¿± ilo¶ci± ruchu.
 .RE
 .PD 1
 .
 .TP
 .B vpass=<1\-3>
-W³±cza wewnêtrzny tryb dwu- lub trójprzej¶ciowy, podawaj tylko, je¿eli chcesz
-korzystaæ z kodowania dwu- lub trójprzej¶ciowego (domy¶lnie: wy³±czony).
+W³±cza wewnêtrzny tryb dwu- lub trójprzebiegowy, podawaj tylko, je¿eli chcesz
+korzystaæ z kodowania dwu- lub trójprzebiegowego (domy¶lnie: wy³±czony).
 .PD 0
 .RSs
 .IPs 1
-pierwsze przej¶cie (sprawd¼ te¿ opcjê turbo)
+pierwszy przebieg (sprawd¼ te¿ opcjê turbo)
 .IPs 2
-drugie przej¶cie
+drugi przebieg
 .IPs 3
-n-te przej¶cie (drugie i trzecie przej¶cie kodowania trójprzej¶ciowego)
+n-ty przebieg (drugi i trzeci przebieg kodowania trójprzebiegowego)
 .RE
 .RS
 Jak to dzia³a i jak tego u¿ywaæ:
 .br
-Pierwsze przej¶cie (vpass=1) zapisuje plik ze statystykami.
+Pierwszy przebieg (vpass=1) zapisuje plik ze statystykami.
 Mo¿e bêdziesz chcia³ wy³±czyæ niektóre opcje znacznie obci±¿aj±ce procesor,
 podobnie jak robi to tryb "turbo".
 .br
-W trybie dwuprzej¶ciowym drugie przej¶cie (vpass=2) czyta plik ze statystykami
+W trybie dwuprzebiegowym drugi przebieg (vpass=2) czyta plik ze statystykami
 i opiera decyzje o kontroli tempa na nim.
 .br
-W trybie trójprzej¶ciowym drugie przej¶cie (vpass=3, to nie b³±d)
+W trybie trójprzebiegowym drugi przebieg (vpass=3, to nie b³±d)
 robi obie rzeczy: Najpierw czyta statystyki z pliku, pó¼niej je nadpisuje.
 Mo¿e bêdziesz chcia³ zachowaæ kopiê pliku divx2pass.log zanim to siê stanie,
 je¶li istnieje mo¿liwo¶æ, ¿e bêdiesz musia³ przerwaæ dzia³anie MEncodera.
 Mo¿esz u¿ywaæ wszystkich opcji kodowania, poza tymi obci±¿aj±cymi procesor
 w znacznym stopniu (jak "qns").
 .br
-Trzecie przej¶cie (vpass=3) jest takie samo jak drugie, poza tym ¿e korzysta
-z statystyk zebranych podczas drugiego przej¶cia.
+Trzeci przebieg (vpass=3) jest taki sam jak drugi, poza tym ¿e korzysta
+ze statystyk zebranych podczas drugiego przebiegu.
 Mo¿esz u¿ywaæ wszystkich opcji kodowania, nawet tych bardzo obci±¿aj±cych
 procesor.
 .RE
@@ -5599,19 +5632,19 @@ huffyuv:
 .RE
 .PD 0
 .RSs
-.IPs "pierwsze przej¶cie"
+.IPs "pierwszy przebieg"
 Zachowuje statystyki.
-.IPs "drugie przej¶cie"
-Koduje z optymaln± tablic± Huffmana opart± o wyniki pierwszego przej¶cia.
+.IPs "drugi przebieg"
+Koduje z optymaln± tablic± Huffmana opart± o wyniki pierwszego przebiegu.
 .RE
 .PD 1
 .
 .TP
-.B turbo (tylko tryb dwuprzej¶ciowy)
-Znacznie zwiêksza szybko¶æ pierwszego przej¶cia u¿ywaj±c szybszych algorytmów
+.B turbo (tylko tryb dwuprzebiegowy)
+Znacznie zwiêksza szybko¶æ pierwszego przebiegu u¿ywaj±c szybszych algorytmów
 i wy³±czaj±c opcje obci±¿aj±ce w znacznym stopniu procesor.
-Prawdopodobnie zmniejszy to trochê globalny wspó³czynnik PSNR (o oko³o 0.01dB)
-i zmieni typy pojedynczych klatek i trochê PSNR (do 0.03dB).
+Prawdopodobnie zmniejszy to trochê globalny wspó³czynnik PSNR (o oko³o 0.01dB),
+zmieni typy pojedynczych klatek i trochê PSNR (do 0.03dB).
 .
 .TP
 .B aspect=<x/\:y>
@@ -5639,7 +5672,7 @@ Nie powoduje spadku wydajno¶ci, wiêc mo¿esz j± mieæ spokojnie zawsze w³±czon±.
 .
 .TP
 .B vbitrate=<warto¶æ>
-Okre¶la bitrate (przej¶cie\ 1/\:2) (domy¶lnie: 800).
+Okre¶la bitrate (przebieg\ 1/\:2) (domy¶lnie: 800).
 .br
 .I UWAGA:
 1kBit = 1000 Bitów
@@ -5660,22 +5693,22 @@ przybli¿ona tolerancja rozmiaru pliku w kBit.
 (domy¶lnie: 8000)
 .br
 .I INFORMACJA:
-Warto¶æ vratetol nie powinna byæ zbyt du¿a podczas drugiego przej¶cia, inaczej
+Warto¶æ vratetol nie powinna byæ zbyt du¿a podczas drugiego przebiegu, inaczej
 mog± wyst±piæ problemy, je¿eli wykorzystane bêdzie vrc_(min|max)rate.
 .
 .TP
 .B vrc_maxrate=<warto¶æ>
-maksymalny bitrate w kbit/\:sek (przej¶cie\ 1/\:2)
+maksymalny bitrate w kbit/\:sek (przebieg\ 1/\:2)
 (domy¶lnie: 0, nieograniczony)
 .
 .TP
 .B vrc_minrate=<warto¶æ>
-minimalny bitrate w kbit/\:sek (przej¶cie\ 1/\:2)
+minimalny bitrate w kbit/\:sek (przebieg\ 1/\:2)
 (domy¶lnie: 0, nieograniczony)
 .
 .TP
 .B vrc_buf_size=<warto¶æ>
-rozmiar bufora w kbit (przej¶cie\ 1/\:2).
+rozmiar bufora w kbit (przebieg\ 1/\:2).
 Dla MPEG1/\:2 okre¶la to równie¿ rozmiar bufora vbv, u¿yj 327 dla VCD,
 917 dla SVCD i 1835 dla DVD.
 .
@@ -5689,22 +5722,22 @@ Zarezerwowane na przysz³o¶æ.
 .
 .TP
 .B vb_qfactor=<-31.0\-31.0>
-wspó³czynnik kwantyzatora pomiêdzy ramkami B a innymi ni¿ B (przej¶cie\ 1/\:2)
+wspó³czynnik kwantyzatora pomiêdzy ramkami B a innymi ni¿ B (przebieg\ 1/\:2)
 (domy¶lnie: 1.25)
 .
 .TP
 .B vi_qfactor=<-31.0\-31.0>
-wspó³czynnik kwantyzatora pomiêdzy ramkami I a innymi ni¿ I (przej¶cie\ 1/\:2)
+wspó³czynnik kwantyzatora pomiêdzy ramkami I a innymi ni¿ I (przebieg\ 1/\:2)
 (domy¶lnie: 0.8)
 .
 .TP
 .B vb_qoffset=<-31.0\-31.0>
-offset kwantyzatora pomiêdzy ramkami B a innymi ni¿ B (przej¶cie\ 1/\:2)
+offset kwantyzatora pomiêdzy ramkami B a innymi ni¿ B (przebieg\ 1/\:2)
 (domy¶lnie: 1.25)
 .
 .TP
 .B vi_qoffset=<-31.0\-31.0>
-(przej¶cie\ 1/\:2) (domy¶lnie: 0.0)
+(przebieg\ 1/\:2) (domy¶lnie: 0.0)
 .br
 je¿eli v{b|i}_qfactor > 0
 .br
@@ -5722,7 +5755,7 @@ dla klatek I/\:P i B, mo¿esz wykorzystaæ poni¿szy wzór:
 lmin= <ip_quant>:lmax= <ip_quant>:vb_qfactor= <b_quant/\:ip_quant>
 .
 .TP
-.B vqblur=<0.0\-1.0> (przej¶cie 1)
+.B vqblur=<0.0\-1.0> (przebieg 1)
 Rozmycie kwantyzatora (domy¶lnie: 0.5),
 wiêksze warto¶ci u¶redni± kwantyzator w czasie (wolniejsze zmiany).
 .PD 0
@@ -5735,17 +5768,17 @@ U¶rednia kwantyzator ze wszystkich poprzednich klatek.
 .PD 1
 .
 .TP
-.B vqblur=<0.0\-99.0> (przej¶cie 2)
+.B vqblur=<0.0\-99.0> (przebieg 2)
 Rozmycie gaussowe kwantyzatora (domy¶lnie: 0.5),
 wiêksze warto¶ci u¶redni± kwantyzator w czasie (wolniejsze zmiany).
 .
 .TP
 .B vqcomp=<warto¶æ>
-Kompresja kwantyzatora, zale¿y od vrc_eq (przej¶cie\ 1/\:2) (domy¶lnie: 0.5).
+Kompresja kwantyzatora, zale¿y od vrc_eq (przebieg\ 1/\:2) (domy¶lnie: 0.5).
 .
 .TP
 .B vrc_eq=<equation>
-g³ówne równanie kontroli tempa (przej¶cie\ 1/\:2)
+g³ówne równanie kontroli tempa (przebieg\ 1/\:2)
 .RE
 .RSs
 .IPs 1\ \ \ \ 
@@ -5819,7 +5852,7 @@ wynosi 1 je¿eli a==b, inaczej 0
 .TP
 .B vrc_override=<opcje>
 Okre¶lona przez u¿ytkownika jako¶æ poszczególnych czê¶ci (zakoñczenie,
-lista p³ac, ...) (przej¶cie\ 1/\:2).
+lista p³ac, ...) (przebieg\ 1/\:2).
 Opcje to <klatka-pocz±tkowa>, <klatka-koñcowa>, <jako¶æ>[/\:<klatka-pocz±tkowa>,
 <klatka-koñcowa>, <jako¶æ>[/\:...]]:
 .PD 0
@@ -5833,11 +5866,11 @@ korekcja jako¶ci w %
 .
 .TP
 .B vrc_init_cplx=<0\-1000>
-pocz±tkowa z³o¿ono¶æ (przej¶cie\ 1)
+pocz±tkowa z³o¿ono¶æ (przebieg\ 1)
 .
 .TP
 .B vqsquish=<0,1>
-Okre¶la jak ma siê zachowywaæ kwantyzator miêdzy qmin a qmax (przej¶cie\ 1/\:2).
+Okre¶la jak ma siê zachowywaæ kwantyzator miêdzy qmin a qmax (przebieg\ 1/\:2).
 .PD 0
 .RSs
 .IPs 0
@@ -6243,7 +6276,7 @@ Ustawia funkcjê porównawcz± przy podejmowaniu decyzji dla przeplatanego DCT
 .
 .TP
 .B precmp=<0\-2000>
-Ustawia funkcjê porównawcz± dla wstêpnego przej¶cia przewidywania ruchu
+Ustawia funkcjê porównawcz± dla wstêpnego przebiegu przewidywania ruchu
 (lista dostêpnych funkcji porównawczych jest taka sama jak w opcji mbcmp)
 (domy¶lnie: 0).
 .
@@ -6269,7 +6302,7 @@ ni¿ przefiltrowaæ je przed kodowaniem.
 .
 .TP
 .B predia=<-99\-6>
-typ i rozmiar diamentu dla wstêpnego przej¶cia przewidywania ruchu
+typ i rozmiar diamentu dla wstêpnego przebiegu przewidywania ruchu
 .
 .TP
 .B dia=<-99\-6>
@@ -6367,7 +6400,7 @@ ruchu z poprzedniej klatki.
 .
 .TP
 .B preme=<0\-2>
-wstêpne przej¶cie przewidywania ruchu
+wstêpny przebieg przewidywania ruchu
 .PD 0
 .RSs
 .IPs 0
@@ -6496,7 +6529,7 @@ Obecnie nie dzia³a.
 .
 Video Nuppel jest oparte na RTJPEG i LZO.
 Domy¶lnie najpierw ramki s± kodowane przez RTJPEG, potem kompresowane przez LZO,
-jednak mo¿na wy³±czyæ którekolwiek lub oba przej¶cia.
+jednak mo¿na wy³±czyæ którykolwiek lub oba przebiegi.
 W rezultacie mo¿esz stworzyæ wyj¶cie w formacie raw i420, spakowane przez
 LZO i420, RTJPEG, lub domy¶lne spakowane przez LZO RTJPEG.
 .br
@@ -6536,11 +6569,11 @@ W³±cza kodowanie RTJPEG (domy¶lnie).
 .SS xvidenc (\-xvidencopts)
 .
 Dostêpne s± trzy tryby: sta³y bitrate (CBR), ustalony kwantyzator
-i dwuprzej¶ciowy.
+i dwuprzebiegowy.
 .
 .TP
 .B pass=<1|2>
-Okre¶la przej¶cie w trybie dwuprzej¶ciowym.
+Okre¶la przebieg w trybie dwuprzebiegowym.
 .
 .TP
 .B bitrate=<warto¶æ>
@@ -6548,7 +6581,7 @@ Ustawia ¿±dany bitrate w kbit/\:sekundê je¿eli <16000
 lub w bit/\:sekundê je¿eli >16000.
 Je¶li <warto¶æ> jest ujemna, XviD u¿yje jej warto¶ci bezwzglêdnej jako
 docelowej wielko¶ci zbioru (w kilobajtach) i automatycznie wyliczy bitrate.
-(CBR lub tryb dwuprzej¶ciowy, domy¶lnie: 687 kbits/\:s)
+(CBR lub tryb dwuprzebiegowy, domy¶lnie: 687 kbits/\:s)
 .
 .TP
 .B fixed_quant=<1\-31>
@@ -6606,7 +6639,7 @@ rozmiar bufora kontroli tempa
 .B quant_range=<1\-31>\-<1\-31>[/\:<1\-31>\-<1\-31>]
 Tryb CBR: min.\& i maks.\& kwantyzator dla wszystkich klatek (domy¶lnie: 2\-31)
 .br
-Tryb dwuprzej¶ciowy: min.\& i maks.\& kwantyzator dla klatek typu I/P
+Tryb dwuprzebiegowy: min.\& i maks.\& kwantyzator dla klatek typu I/P
 (domy¶lnie: 2\-31/\:2\-31)
 .br
 .I UWAGA:
@@ -6616,7 +6649,7 @@ opcje [min|max]_[i|p|b]quant.
 .TP
 .B min_key_interval=<warto¶æ>
 minimalna przerwa miêdzy klatkami kluczowymi
-(domy¶lnie: 0, tylko tryb dwuprzej¶ciowy)
+(domy¶lnie: 0, tylko tryb dwuprzebiegowy)
 .
 .TP
 .B max_key_interval=<warto¶æ>
@@ -6638,12 +6671,12 @@ Pocz±wszy od XviD-1.0.x opcja ta jest zast±piona przez opcjê quant_type.
 .TP
 .B mod_quant
 Decyduje czy wykorzystywaæ kwantyzatory MPEG czy H.263 na podstawia badania
-klatka po klatce (tylko tryb dwuprzej¶ciowy).
+klatka po klatce (tylko tryb dwuprzebiegowy).
 .br
 .I UWAGA:
 Wygeneruje to nieprawid³owy stumieñ bitów, którego prawdopodobnie nie jest w
 stanie zdekodowaæ ¿aden dekoder MPEG4 poza libavcodec albo XviD.
-(tylko tryb dwuprzej¶ciowy)
+(tylko tryb dwuprzebiegowy)
 .br
 .I UWAGA:
 Pocz±wszy od XviD-1.0.x opcja ta nie jest dostêpna.
@@ -6652,11 +6685,11 @@ Pocz±wszy od XviD-1.0.x opcja ta nie jest dostêpna.
 .B keyframe_boost=<0\-1000>
 Przesuwa kilka bitów z ramek innego rodzaju do klatek intra,
 polepszaj±c przez to jako¶æ klatek kluczowych.
-(domy¶lnie: 0, tylko tryb dwuprzej¶ciowy)
+(domy¶lnie: 0, tylko tryb dwuprzebiegowy)
 .
 .TP
 .B kfthreshold=<warto¶æ>
-(domy¶lnie: 10, tylko tryb dwuprzej¶ciowy)
+(domy¶lnie: 10, tylko tryb dwuprzebiegowy)
 .
 .TP
 .B kfreduction=<0\-100>
@@ -6665,7 +6698,7 @@ kluczowych, których po³o¿enie uwa¿asz za zbyt bliskie do pierwszej (w rzêdzie).
 kfthreshold ustawia zakres, w którym klatki kluczowe s± redukowane, a
 kfreduction okre¶la ich redukcjê bitrate'ow±.
 Ostatnia ramka I jest traktowana normalnie.
-(domy¶lnie: 30, tylko tryb dwuprzej¶ciowy)
+(domy¶lnie: 30, tylko tryb dwuprzebiegowy)
 .
 .TP
 .B divx5bvop
@@ -6685,7 +6718,7 @@ danych kolorów w ostatniej fazie kodowania.
 .TP
 .B debug\ \ 
 Zapisuje statystyki ka¿dej ramki w ./xvid.dbg.
-(To nie jest plik kontroli trybu dwuprzej¶ciowego).
+(To nie jest plik kontroli trybu dwuprzebiegowego).
 .RE
 .
 .PP
@@ -6757,7 +6790,7 @@ Odtwarzanie z tym parametrem mo¿e spowodowaæ, ¿e film bêdzie poszarpany, wiêc
 u¿ywaj go na swoj± w³asn± odpowiedzialno¶æ!
 .
 .TP
-.B (no)qpel\ 
+.B (no)qpel
 MPEG4 domy¶lnie u¿ywa precyzji co do po³owy piksela przy wyszukiwaniu ruchu.
 Standard proponuje tryb, w którym kodery mog± korzystaæ z precyzji quarter
 pixel (co do æwieræ piskela).
@@ -6768,7 +6801,7 @@ Najlepiej jest sprawdziæ rezultat z i bez tej opcji, i samemu zdecydowaæ czy
 jest warta w³±czenia.
 .
 .TP
-.B (no)gmc\ 
+.B (no)gmc
 W³±cza Globaln± Kompensacjê Ruchu, która sprawia, ¿e XviD generuje specjalne
 ramki (ramki GMC), które s± dobrze przystosowane do
 przesuwania/\:przybli¿onia/\:obracania obrazów.
@@ -7124,7 +7157,7 @@ oko³o 10.
 Przydatne kwantyzatory w H.264 s± wiêksze ni¿ w MPEG[124].
 .
 .TP
-.B qp_min=<1\-51> (CBR lub tryb dwuprzej¶ciowy)
+.B qp_min=<1\-51> (CBR lub tryb dwuprzebiegowy)
 Minimalny kwantyzator, 15\-35 to u¿yteczny zakres (domy¶lnie: 10).
 .
 .TP
@@ -7150,50 +7183,50 @@ czu³o¶æ kontroli tempa (domy¶lnie: 4)
 .
 .TP
 .B ip_factor=<warto¶æ>
-wspó³czynnik kwantyzatora miêdzy ramkami I a P (domy¶lnie: 2.0)
+wspó³czynnik kwantyzatora miêdzy ramkami I a P (domy¶lnie: 1.4)
 .
 .TP
 .B pb_factor=<warto¶æ>
-wspó³czynnik kwantyzatora miêdzy ramkami P a B (domy¶lnie: 2.0)
+wspó³czynnik kwantyzatora miêdzy ramkami P a B (domy¶lnie: 1.4)
 .
 .TP
 .B pass=<1\-3>
-Uruchamia tryb dwu- lub trójprzej¶ciowy.
-Zaleca siê kodowanie zawsze w trybie dwu- lub trójprzej¶ciowym z uwagi na
+Uruchamia tryb dwu- lub trójprzebiegowy.
+Zaleca siê kodowanie zawsze w trybie dwu- lub trójprzebiegowym z uwagi na
 lepsz± dystrybucjê bitów i poprawê ogólnej jako¶ci.
 .PD 0
 .RSs
 .IPs 1
-pierwsze przej¶cie
+pierwszy przebieg
 .IPs 2
-drugie przej¶cie
+drugi przebieg
 .IPs 3
-N-te przej¶cie (drugie i trzecie w trybie trójprzej¶ciowym)
+N-ty przebieg (drugi i trzeci w trybie trójprzebiegowym)
 .RE
 .RS
 A teraz jak to dzia³a i jak tego u¿ywaæ:
 .br
-Pierwsze przej¶cie (pass=1) zbiera statystyki video i zapisuje je do pliku.
+Pierwszy przebieg (pass=1) zbiera statystyki video i zapisuje je do pliku.
 Mo¿e bêdziesz chcia³ wy³±czyæ opcje wymagaj±ce du¿ej mocy obliczeniowej
 poza tymi domy¶lnymi.
 .br
-W trybie dwuprzej¶ciowym, drugie przej¶cie (pass=2) czyta plik ze statystykami
+W trybie dwuprzebiegowym, drugi przebieg (pass=2) czyta plik ze statystykami
 i opiera na tym decyzje kontroli tempa.
 .br
-W trybie trójprzej¶ciowym, drugie przej¶cie (pass=3, to nie pomy³ka) robi
+W trybie trójprzebiegowym, drugi przebieg (pass=3, to nie pomy³ka) robi
 obie rzeczy: Najpierw czyta statystyki i nadpisuje je.
 Mo¿e bêdziesz chcia³ zrobiæ kopiê pliku divx2pass.log zanim to siê stanie,
 je¿eli istnieje szansa, ¿e przerwiesz dzia³anie MEncodera.
 Mo¿esz u¿yæ wszelkich opcji kodowania, poza tymi szczególnie wymagaj±cymi
 du¿ej mocy obliczeniowej.
 .br
-Trzecie przej¶cie (pass=3) dzia³a tak samo jak drugie przej¶cie, poza tym ¿e
-korzysta ze statystyk drugiego przej¶cia.
+Trzeci przebieg (pass=3) dzia³a tak samo jak drugi przebieg, poza tym ¿e
+korzysta ze statystyk drugiego przebiegu.
 Mo¿esz u¿yæ wszelkich opcji kodowania, nawet te wymagaj±ce
 du¿ej mocy obliczeniowej.
 .br
 .I INFORMACJA:
-Obs³uga trybu trójprzej¶ciowego x264 jest ca³kiem nowa w MEncoderze, mile
+Obs³uga trybu trójprzebiegowego x264 jest ca³kiem nowa w MEncoderze, mile
 widziane s± wszelkie informacje o dobrych kombinacjach opcji x264,
 które s± i szybkie i daj± dobr± jako¶æ.
 .REss
@@ -7206,19 +7239,30 @@ jest bardziej sta³y, podczas gdy wy¿sza, sprawia, ¿e parametr kwantyzacji
 jest bardziej sta³y.
 .
 .TP
+.B cplx_blur=<0\-999>
+Rozmycie w czasie szacowanej z³o¿ono¶ci klatki, przed kompresj± krzywej
+(domy¶lnie: 20).
+Mniejsze warto¶ci pozwalaj± na wiêksze zmiany kwantyzatora,
+a wiêksze wymuszaj± jego ³agodniejsze zmiany.
+cplx_blur zapewnia, ¿e ka¿da ramka I bêdzie mia³a jako¶æ podobn± do
+nastêpuj±cych po niej ramek P, ¿e ¿e naprzemienne ramki o wysokiej i niskiej
+z³o¿ono¶ci (n.p.\& animacja z niewielkim fps) nie bêd± marnowa³y bitów na
+zmiany kwantyzatora.
+.
+.TP
 .B qblur=<0\-99>
-Tymczasowe rozmazanie parametru kwantyzacji (domy¶lnie: 0.5).
+Rozmycie w czasie parametru kwantyzacji, po kompresji krzywej (domy¶lnie: 0.5).
 Ni¿sze warto¶ci pozwalaj± na wiêksze skoki warto¶ci kwantyzatora,
 wy¿sze zmuszaj± go do delikatniejszych zmian.
 .
 .TP
-.B (no)fullinter
+.B (no)4x4mv
 Wykorzystuje wszystkie dostêpne makrobloki inter-klatek
-(i16x16, i4x4, p16x16, p16x8, p8x16, p8x8, p8x4, p4x8, p4x4, pskip).
-Idea polega na tym, aby odnale¼æ typ i rozmiar, który najlepiej opisuje
+(i16x16, i4x4, p16x16, p16x8, p8x16, p8x8, p8x4, p4x8, p4x4, skip).
+Pomys³ polega na tym, aby odnale¼æ typ i rozmiar, który najlepiej opisuje
 okre¶lony obszar obrazu, np.\& daje to bardzo dobre rezultaty dla Anime, które
 zazwyczaj zawieraj± du¿e obszary tego samego koloru
-(domy¶lnie: i16x16, i2x4, p16x16-8x8).
+(domy¶lnie: i16x16, i2x4, p16x16-8x8, skip).
 Zale¿nie od materia³u ¼ród³owego, parametr ten mo¿e zwiêkszyæ lub
 zmniejszyæ jako¶æ, u¿ywaj go ostro¿nie.
 .
