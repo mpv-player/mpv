@@ -2393,7 +2393,31 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     case MP_CMD_MUTE: {
      mixer_mute();
     }
-    case MP_CMD_MIXER_USEMASTER :  {
+    case MP_CMD_LOADFILE : {
+      play_tree_t* e = play_tree_new();
+      play_tree_add_file(e,cmd->args[0].v.s);
+
+      // Go back to the start point
+      while(play_tree_iter_up_step(playtree_iter,0,1) != PLAY_TREE_ITER_END)
+	/* NOP */;
+      play_tree_free_list(playtree->child,1);
+      play_tree_set_child(playtree,e);
+      play_tree_iter_step(playtree_iter,0,0);
+      eof = PT_NEXT_SRC;
+    } break;
+    case MP_CMD_LOADLIST : {
+      play_tree_t* e = parse_playlist_file(cmd->args[0].v.s);
+      if(!e)
+	mp_msg(MSGT_CPLAYER,MSGL_ERR,"\nUnable to load playlist %s\n",cmd->args[0].v.s);
+      else {
+	// Go back to the start point
+	while(play_tree_iter_up_step(playtree_iter,0,1) != PLAY_TREE_ITER_END)
+	  /* NOP */;
+	play_tree_free_list(playtree->child,1);
+	play_tree_set_child(playtree,e);
+	play_tree_iter_step(playtree_iter,0,0);
+	eof = PT_NEXT_SRC;	
+      }
     } break;
     case MP_CMD_BRIGHTNESS :  {
       int v = cmd->args[0].v.i, abs = cmd->args[1].v.i;

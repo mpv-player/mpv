@@ -28,6 +28,8 @@
 #define MP_CMD_SCREENSHOT 23
 #define MP_CMD_PANSCAN 24
 #define MP_CMD_MUTE 25
+#define MP_CMD_LOADFILE 26
+#define MP_CMD_LOADLIST 27
 
 #define MP_CMD_GUI_EVENTS       5000
 #define MP_CMD_GUI_LOADFILE     5001
