@@ -1190,6 +1190,9 @@ static void *video_grabber(void *data)
 	    if (priv->immediate_mode) {
 		while ((priv->video_tail+1) % priv->video_buffer_size == priv->video_head) {
 		    usleep(10000);
+                    if (priv->shutdown) {
+                      return NULL;
+                    }
 		}
 	    }
 		
