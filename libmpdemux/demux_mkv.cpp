@@ -964,6 +964,8 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
         // General info about this Matroska file
         mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |+ segment information...\n");
         
+        mkv_d->tc_scale = MKVD_TIMECODESCALE;
+
         l2 = es->FindNextElement(l1->Generic().Context, upper_lvl_el,
                                  0xFFFFFFFFL, true, 1);
         while (l2 != NULL) {
@@ -994,9 +996,6 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
           l2 = es->FindNextElement(l1->Generic().Context, upper_lvl_el,
                                    0xFFFFFFFFL, true, 1);
         }
-
-        if (mkv_d->tc_scale == 0)
-          mkv_d->tc_scale = MKVD_TIMECODESCALE;
 
       } else if (EbmlId(*l1) == KaxTracks::ClassInfos.GlobalId) {
         // Yep, we've found our KaxTracks element. Now find all tracks
@@ -1665,8 +1664,8 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
 
               if (EbmlId(*l3) == KaxBlock::ClassInfos.GlobalId) {
                 block = static_cast<KaxBlock *>(l3);
-                block->SetParent(*mkv_d->cluster);
                 block->ReadData(es->I_O());
+                block->SetParent(*mkv_d->cluster);
                 delete_element = 0;
                 elements_found |= 1;
 
