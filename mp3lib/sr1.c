@@ -196,6 +196,8 @@ LOCAL int decode_header(struct frame *fr,unsigned long newhead){
     else
       fr->sampling_frequency = ((newhead>>10)&0x3) + (fr->lsf*3);
 
+    if(fr->sampling_frequency>8) return FALSE;  // valid: 0..8
+
     fr->error_protection = ((newhead>>16)&0x1)^0x1;
     fr->bitrate_index = ((newhead>>12)&0xf);
     fr->padding   = ((newhead>>9)&0x1);
