@@ -1,0 +1,26 @@
+# If included in the main MPlayer Makefile, this file causes make to
+# recurse into subdirectories whenever any .c or .h files in those
+# directories have changed. Then the Makefile in that directory will
+# take over for detailed dependencies.
+
+libmpdvdkit/libmpdvdkit.a libmpdvdkit/libmpdvdkit.so: $(wildcard libmpdvdkit/*.[ch])
+libmpdvdkit2/libmpdvdkit.a libmpdvdkit2/libmpdvdkit.so: $(wildcard libmpdvdkit2/*.[ch])
+loader/libloader.a: $(wildcard loader/*.[ch])
+libfame/libfame.a: $(wildcard libfame/*.[ch])
+libmpdemux/libmpdemux.a: $(wildcard libmpdemux/*.[ch])
+libmpcodecs/libmpcodecs.a: $(wildcard libmpcodecs/*.[ch])
+loader/dshow/libDS_Filter.a: $(wildcard loader/dshow/*.[ch])
+libmp1e/libmp1e.a: $(wildcard libmp1e/*.[ch])
+libavcodec/libavcodec.a: $(wildcard libavcodec/*.[ch])
+libmpeg2/libmpeg2.a: $(wildcard libmpeg2/*.[ch])
+libvo/libvo.a: $(wildcard libvo/*.[ch])
+libao2/libao2.a: $(wildcard libao2/*.[ch])
+liba52/liba52.a: $(wildcard liba52/*.[ch])
+mp3lib/libMP3.a: $(wildcard mp3lib/*.[ch])
+libdha/libdha.so: $(wildcard libdha/*.[ch])
+vidix/libvidix.a: $(wildcard vidix/*.[ch])
+Gui/libgui.a: $(wildcard Gui/*.[ch])
+linux/libosdep.a: $(wildcard linux/*.[ch])
+postproc/libpostproc.a: $(wildcard postproc/*.[ch])
+input/libinput.a: $(wildcard input/*.[ch])
+
