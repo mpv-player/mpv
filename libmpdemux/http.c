@@ -70,10 +70,10 @@ int
 http_is_header_entire( HTTP_header_t *http_hdr ) {
 	if( http_hdr==NULL ) return -1;
 
-	if( strstr(http_hdr->buffer, "\r\n\r\n")==NULL ) {
-		if( strstr(http_hdr->buffer, "\n\n")==NULL ) return 0;
+	if( strstr(http_hdr->buffer, "\r\n\r\n")==NULL &&
+	    strstr(http_hdr->buffer, "\n\n")==NULL ) return 0;
 	}
-	else return 1;
+	return 1;
 }
 
 int
