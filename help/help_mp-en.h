@@ -98,11 +98,13 @@ static char help_text[]=
 "!!! Possible reasons, problems, workarounds: \n"\
 "- Most common: broken/buggy _audio_ driver. Workaround: Try -ao sdl or use\n"\
 "  ALSA 0.5 or OSS emulation of ALSA 0.9. Read DOCS/sound.html for more tips!\n"\
+"  You can also experiment with -autosync 30 or other values.\n"\
 "- Slow video output. Try a different -vo driver (for list: -vo help) or try\n"\
 "  with -framedrop!  Read DOCS/video.html for video tuning/speedup tips.\n"\
 "- Slow CPU. Don't try to play a big DVD/divx on a slow CPU! Try -hardframedrop.\n"\
 "- Broken file. Try various combinations of these: -nobps  -ni  -mc 0  -forceidx\n"\
-"- Are you using -cache to play a non-interleaved file? Try with -nocache.\n"\
+"- For playback from slow media (nfs/smb mounts, dvd, vcd etc) try -cache 8192\n"\
+"- Are you using -cache to play a non-interleaved AVI file? Try with -nocache.\n"\
 "If none of these apply, read DOCS/bugreports.html!\n\n"
 
 #define MSGTR_NoGui "MPlayer was compiled WITHOUT GUI support!\n"
