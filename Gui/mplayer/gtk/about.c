@@ -135,6 +135,8 @@ GtkWidget * create_About( void )
   gtk_widget_show( AboutText );
   gtk_container_add( GTK_CONTAINER( scrolledwindow1 ),AboutText );
   gtk_text_insert( GTK_TEXT( AboutText ),NULL,NULL,NULL,
+  	"\n" \
+  	"development sponzored by UHU Linux.\n" \
 	"\n" \
 	"   MPlayer core team:\n" \
 	"\n" \
