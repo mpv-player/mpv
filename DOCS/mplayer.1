@@ -394,7 +394,12 @@ May be negative.
 .
 .TP
 .B \-channels <number>
-Select number of audio output channels to be used.
+Change the number of playback channels.
+If the number of output channels is bigger than the number of input channels
+empty channels are inserted (except mixing from mono to stereo, then the mono
+channel is repeated in both of the output channels).
+If the number of output channels is smaller than the number of input channels
+the exceeding channels are truncated.
 
 .I NOTE:
 .br
@@ -883,6 +888,69 @@ Specify the VobSub subtitle id.
 .B \-abs <value> (OBSOLETE)
 Override audio driver/\:card buffer size detection, \-ao oss only
 .TP
+.B \-af <plugin1,plugin2,plugin3[=options],...>
+Activate a comma separated list of audio filters and their options.
+.br
+Available filters are:
+.
+.RSs
+.IPs resample[=srate[:sloppy][:fast]]
+Changes the sample rate of the audio stream to an integer srate (Hz).
+It only supports the 16 bit little endian format.
+.IPs channels[=nch]
+Change the number of channels to nch output channels.
+If the number of output channels is bigger than the number of input channels
+empty channels are inserted (except mixing from mono to stereo, then the mono
+channel is repeated in both of the output channels).
+If the number of output channels is smaller than the number of input channels
+the exceeding channels are truncated.
+.IPs format[=f,bps]
+Select the format f used for output from the filter layer.
+The format is selected according to the defines in libao2/afmt.h.
+The option bps is an integer and denotes bytes per sample and has to conform
+to the chosen format.
+.IPs "volume[=v0:v1:v2:v3:v4:v5:sc:pr:en]"
+Select the output volume level.
+This filter is not reentrant and can therefore only be enabled once for every
+audio stream.
+.RSss
+v0 to v5: desired gain in dB for each channel in the stream.
+The gain can be set from -60dB to +20dB (where -60dB equals a gain of 1/1000
+and +20dB equals a gain of 10).
+.br
+sc: enable soft clipping.
+.br
+pr: enable probing of the audio stream instantaneous.
+The maximal volume is probed on a per channel basis and can only be accessed
+through the runtime interface of the filter.
+.br
+en: enable and disable the volume control.
+.REss
+.IPs delay[=d] (DEBUG CODE)
+Delay sound output by d seconds (floating point number).
+.RE
+.
+.TP
+.B \-af-adv <force=(0\-3):list=(filters)> (see -af option too)
+Specify advanced audio filter options:
+.
+.RSs
+.IPs force=<0-3>
+Forces the insertion of audio filters to one of the following:
+.RSss
+0: Completely automatic insertion of filters (default)
+.br
+1: Optimize for speed
+.br
+2: Optimize for accuracy
+.br
+3: Turn off auto
+.REss
+.IPs list=<filters>
+Same as -af (see -af option).
+.RE
+.
+.TP
 .B \-ao <driver1[:device],driver2,...[,]>
 Specify a priority list of audio output drivers (optionally with device) to be
 used.
@@ -1090,12 +1158,14 @@ See also \-zoom.
 Try this option if you still experience fullscreen problems.
 .TP
 .B \-geometry x[%][:y[%]]
-Adjust where the output is on the screen initially. The x and y specifications
-are in pixels measured from the top-right of the screen to the top-right of the
-image being displayed, however if a percentage sign is given after the argument
-it turns the value into a percentage of the screen size in that direction. The
-values given must be integers. Examples:
+Adjust where the output is on the screen initially.
+The x and y specifications are in pixels measured from the top-right of the
+screen to the top-right of the image being displayed, however if a percentage
+sign is given after the argument it turns the value into a percentage of the
+screen size in that direction.
+The values given must be integers.
 
+.I EXAMPLE:
 .PD 0
 .RSs
 .IPs 50:40
@@ -1637,8 +1707,9 @@ try XAnim codecs first
 .PD 1
 .
 .TP
-.B \-vop <...,plugin3[=options],plugin2,plugin1>
-Activate a comma separated list of video filters in reverse order.
+.B \-vop <...,filter3[=options],filter2,filter1>
+Activate a comma separated list of video filters and their options in reverse
+order.
 
 .I NOTE:
 .br
@@ -1650,7 +1721,7 @@ from the upper left corner of the bigger image.
 .br
 To get a full list of available plugins, see \-vop help.
 .br
-Available plugins are:
+Available filters are:
 .
 .RSs
 .IPs crop[=w:h:x:y]
@@ -1672,8 +1743,9 @@ See also option \-flip.
 .IPs mirror
 Flips the image on Y axis.
 .IPs rotate[=<0-7>]
-Rotates and flips (optional) the image +/\:\- 90 degrees. For parameters between 
-4-7 rotation is only done if the movie's geometry is portrait and not landscape. 
+Rotates and flips (optional) the image +/\:\- 90 degrees.
+For parameters between 4-7 rotation is only done if the movie's geometry is
+portrait and not landscape.
 .IPs scale[=w:h[:c[:p]]]
 Scales the image with the software scaler (slow) and performs a YUV<\->RGB
 colorspace conversion (see \-sws option too).
@@ -1739,6 +1811,49 @@ Detects and drops first of interlaced frames in video stream.
 Values can be from 0.0 to 1.0 - first (default 0.1) is relative difference
 between neighbor pixels, second (default 0.15) is what part of image have to
 be detected as interlaced to drop the frame.
+.IPs "unsharp=l|cWxH:amount[:l|cWxH:amount]"
+Unsharp mask / gaussian blur.
+.RSss
+l: apply effect on luma component
+.br
+c: apply effect on chroma components
+.br
+WxH: width and height of the matrix, odd sized in both directions
+(min = 3x3, max = 13x11 or 11x13, usually something between 3x3 and 7x7)
+.br
+amount: relative amount of sharpness / blur to add to the image
+(amount < 0 = blur, amount > 0 = sharpen, usually something between -1.5 and
+1.5)
+.REss
+.IPs swapuv
+Swap U & V plane.
+.IPs "il=[d|i][s][:[d|i][s]]"
+(de)interleaves lines.
+.RSss
+d: deinterleave
+.br
+i: interleave
+.br
+s: swap fields (exchange even & odd lines)
+.REss
+.IPs "boxblur=radius:power[:radius:power]"
+.RSss
+radius: size of the filter
+.br
+power: how often the filter should be applied
+.REss
+
+
+
+!!! .IPs 1bpp
+!!! .IPs 2xsai
+!!! .IPs eq2
+!!! .IPs yvu9
+!!! more (IMHO all of -vop help should be documented),
+!!! especially bmovl (see .c file), add vo/test?
+
+
+
 .RE
 .
 .TP
