@@ -6,6 +6,9 @@
  */
 
 /* ChangeLog added 2002-01-10
+ * 2003-01-02:
+ *  Added patch that makes vo_dxr3 return to previous TV norm after quiting.
+ *
  * 2002-12-24: (Hohoho)
  *  Added patch from Thomas Jarosch <tomj@simonv.com> which adds support
  *   for setting the TV norm by movie framerate.
@@ -181,6 +184,7 @@ static encodedata *spubuf;
 static int ioval = 0;
 static int prev_pts = 0;
 static int pts_offset = 0;
+static int old_vmode = -1;
 
 
 /* Begin overlay.h */
@@ -450,9 +454,13 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 
 	/* Set monitor_aspect to avoid jitter */
 	monitor_aspect = (float) width / (float) height;
+
+	if (ioctl(fd_control, EM8300_IOCTL_GET_VIDEOMODE, &old_vmode) < 0) {
+		printf("VO: [dxr3] Unable to get TV norm!\n");
+		old_vmode = -1;
+	}
 	
 	/* adjust TV norm */
-#ifdef EM8300_IOCTL_SET_VIDEOMODE
 	if (dxr3_norm != 0) {
 	    if (dxr3_norm == 5) {
 			ioval = EM8300_VIDEOMODE_NTSC;
@@ -470,7 +478,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 			printf("VO: [dxr3] Auto-selected TV norm by frame rate: ");
 			ioval == EM8300_VIDEOMODE_PAL60 ? printf("PAL-60") : printf("PAL");
 			printf("\n"); 
-		} else if (dxr3_norm == 1) {
+		} else {
 			if (vo_fps > 28) {
 			    ioval = EM8300_VIDEOMODE_NTSC;
 			} else {
@@ -482,17 +490,17 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 			printf("\n"); 
 	    }
 	
-	    if (ioctl(fd_control, EM8300_IOCTL_SET_VIDEOMODE, &ioval) < 0) {
-			printf("VO: [dxr3] Unable to set TV norm!\n");
-	    }
+		if (old_vmode != ioval) {
+	    	if (ioctl(fd_control, EM8300_IOCTL_SET_VIDEOMODE, &ioval) < 0) {
+				printf("VO: [dxr3] Unable to set TV norm!\n");
+	    	}
+		}
 	}
-#endif
 	
 	
 	/* libavcodec requires a width and height that is x|16 */
 	aspect_save_orig(width, height);
 	aspect_save_prescale(d_width, d_height);
-#ifdef EM8300_IOCTL_GET_VIDEOMODE
 	ioctl(fd_control, EM8300_IOCTL_GET_VIDEOMODE, &ioval);
 	if (ioval == EM8300_VIDEOMODE_NTSC) {
 		printf("VO: [dxr3] Setting up for NTSC.\n");
@@ -501,7 +509,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		printf("VO: [dxr3] Setting up for PAL/SECAM.\n");
 		aspect_save_screenres(352, 288);
 	}
-#endif
 	aspect(&s_width, &s_height, A_ZOOM);
 	s_width -= s_width % 16;
 	s_height -= s_height % 16;
@@ -807,6 +814,12 @@ static void uninit(void)
 #endif
 	}
 #endif
+	if (old_vmode != -1) {
+		if (ioctl(fd_control, EM8300_IOCTL_SET_VIDEOMODE, &old_vmode) < 0) {
+			printf("VO: [dxr3] Failed restoring TV norm!\n");
+		}
+	}
+	
 	if (fd_video) {
 		close(fd_video);
 	}
