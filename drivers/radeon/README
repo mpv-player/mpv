@@ -33,6 +33,8 @@ Installation:
 Simply type two commands in this directory:
 make
 make install
+If you install it first time then type also:
+make nodes
 
 Using with mplayer:
 ~~~~~~~~~~~~~~~~~~~
@@ -41,6 +43,18 @@ Currently there is only way to use ATI's drivers:
 mplayer -vo vesa:lvo:/dev/radeon_vid -<your options> filename
 or
 mplayer -vo vesa:lvo:/dev/rage128_vid -<your options> filename
+
+Configuring:
+~~~~~~~~~~~~
+
+You can tune up some parameters with using following trick:
+echo "parameter=value">/dev/radeon_vid
+Example:
+echo "double_buff=on">/dev/radeon_vid
+
+To know more about these parameters - try read /dev/radeon_vid file ;)
+Note: don't use 'cat' since it cab catch EOF during reading such files.
+(I use midnight commander for that ;)
 
 Note:
 ~~~~~

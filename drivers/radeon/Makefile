@@ -38,6 +38,11 @@ install:
 	cp radeon_vid.o $(MOD_PATH)
 	cp rage128_vid.o $(MOD_PATH)
 	depmod -a
+nodes:
 	mknod /dev/radeon_vid c 178 0
 	mknod /dev/rage128_vid c 178 0
-
+# Stuff below is for me only ;)
+vid:
+	make install
+	rmmod radeon_vid
+	modprobe radeon_vid
