@@ -5844,14 +5844,14 @@ echores "$_ftp"
 echocheck "byte order"
 if test "$_big_endian" = auto ; then
   cat > $TMPC <<EOF
-#include <inttypes.h>
-int main(void) { 
-    volatile uint32_t i=0x01234567;
-    return (*((uint8_t*)(&i))) == 0x67;
-}
+short asci_name[] = { (('M'<<8)|'P'),(('l'<<8)|'a'),(('y'<<8)|'e'),(('r'<<8)|0)};
+int main(){
+  char* s = (char*)asci_name;
+  return 0;
+} 
 EOF
   if cc_check ; then 
-    if $TMPO ; then 
+    if test `grep -l MPlayer $TMPO` ; then 
       _big_endian=yes
     else
       _big_endian=no
