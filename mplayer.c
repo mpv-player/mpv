@@ -423,6 +423,7 @@ int out_fmt=0;
 int osd_visible=100;
 int osd_function=OSD_PLAY;
 int osd_last_pts=-303;
+int osd_show_av_delay = 0;
 int osd_show_sub_delay = 0;
 
 int v_bright=50;
@@ -1874,10 +1875,12 @@ if(step_sec>0) {
     // delay correction:
     case '+':
       audio_delay+=0.1;  // increase audio buffer delay
+      osd_show_av_delay = 9; // show the A-V delay in OSD
       if(sh_audio) sh_audio->timer-=0.1;
       break;
     case '-':
       audio_delay-=0.1;  // decrease audio buffer delay
+      osd_show_av_delay = 9; // show the A-V delay in OSD
       if(sh_audio) sh_audio->timer+=0.1;
       break;
     // quit
@@ -2179,6 +2182,10 @@ if(rel_seek_secs || abs_seek_pos){
       if (osd_show_sub_delay) {
 	  sprintf(vo_osd_text, "Sub delay: %d ms",(int)(sub_delay*1000));
 	  osd_show_sub_delay--;
+      } else
+      if (osd_show_av_delay) {
+	  sprintf(vo_osd_text, "A-V delay: %d ms",(int)(audio_delay*1000));
+	  osd_show_av_delay--;
       } else
           sprintf(vo_osd_text,"%c %02d:%02d:%02d",osd_function,pts/3600,(pts/60)%60,pts%60);
   } else {
