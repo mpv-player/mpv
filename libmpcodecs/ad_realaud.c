@@ -162,7 +162,7 @@ void* WINAPI LoadLibraryA(char* name);
 void* WINAPI GetProcAddress(void* handle,char *func);
 int WINAPI FreeLibrary(void *handle);
 
-static int load_sysm_windows(char *path)
+static int load_syms_windows(char *path)
 {
     void *handle;
     
@@ -223,7 +223,7 @@ static int preinit(sh_audio_t *sh){
     if (strstr(sh->codec->dll,".dll") || !load_syms_linux(path))
 #endif
 #ifdef USE_WIN32DLL
-	if (!load_sysm_windows(sh->codec->dll))
+	if (!load_syms_windows(sh->codec->dll))
 #endif
     {
 	mp_msg(MSGT_DECVIDEO, MSGL_ERR, MSGTR_MissingDLLcodec, sh->codec->dll);
