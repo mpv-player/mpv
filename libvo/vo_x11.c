@@ -618,10 +618,12 @@ static uint32_t control(uint32_t request, void *data, ...)
 	int foo;
 	Window root;
 
+        vo_x11_decoration( mDisplay,mywindow,0 );
 	XGetGeometry(mDisplay, mywindow, &root, &foo, &foo,
-	    &vo_fs_oldwidth, &vo_fs_oldheight, &foo, &foo);
-	XTranslateCoordinates(mDisplay, mywindow, root, 0, 0,
-	    &vo_fs_oldx, &vo_fs_oldy, &foo);
+		     &vo_fs_oldwidth, &vo_fs_oldheight, &foo, &foo);
+	    
+        XTranslateCoordinates(mDisplay, mywindow, root, 0, 0,
+				  &vo_fs_oldx, &vo_fs_oldy,(Window *) &foo);
 
 	mp_msg(MSGT_VO,MSGL_V,"X11 Fullscreen: saved old place: %dx%d-%dx%d\n",
 	    vo_fs_oldx, vo_fs_oldy, vo_fs_oldwidth, vo_fs_oldheight);
@@ -631,12 +633,13 @@ static uint32_t control(uint32_t request, void *data, ...)
 	vo_dheight = vo_screenheight;
 	XMoveResizeWindow(mDisplay, mywindow, 0, 0,
 	    vo_screenwidth, vo_screenheight);
-	vo_x11_decoration( mDisplay,mywindow,0 );
+	XSync(mDisplay, False);
     }
     else
     {
 	XMoveResizeWindow(mDisplay, mywindow, vo_fs_oldx, vo_fs_oldy, 
 	    vo_fs_oldwidth, vo_fs_oldheight);
+	vo_x11_decoration( mDisplay,mywindow,1 );
 
 	/* restore */
 	vo_dwidth = vo_fs_oldwidth;
@@ -645,6 +648,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 	/* clean */
 	vo_fs_oldwidth = -1;
 	vo_fs_oldheight = -1;
+	XSync(mDisplay, False);
     }
   }
   return VO_NOTIMPL;
