@@ -83,7 +83,7 @@ static void convert_matrix(MpegEncContext *s, int (*qmat)[64],
         int i;
 	if (s->fdct == ff_jpeg_fdct_islow) {
 		for (i = 0; i < 64; i++) {
-			const int j = block_permute_op(i);
+			const int j = s->idct_permutation[i];
 			/* 16    <= qscale * quant_matrix[i] <= 7905 
 			 * 19952 <= aanscales[i] *  \
 			 * 	        qscale * quant_matrix[i]     <= 205026 
@@ -96,7 +96,7 @@ static void convert_matrix(MpegEncContext *s, int (*qmat)[64],
 		}
 	} else if (s->fdct == fdct_ifast) {
             for(i=0;i<64;i++) {
-                const int j= block_permute_op(i);
+                const int j = s->idct_permutation[i];
                 /* 16 <= qscale * quant_matrix[i] <= 7905 */
                 /* 19952         <= aanscales[i] * qscale * quant_matrix[i]           <= 249205026 */
                 /* (1<<36)/19952 >= (1<<36)/(aanscales[i] * qscale * quant_matrix[i]) >= (1<<36)/249205026 */
@@ -107,13 +107,14 @@ static void convert_matrix(MpegEncContext *s, int (*qmat)[64],
             }
         } else {
             for(i=0;i<64;i++) {
+		const int j = s->idct_permutation[i];
                 /* We can safely suppose that 16 <= quant_matrix[i] <= 255
                    So 16           <= qscale * quant_matrix[i]             <= 7905
                    so (1<<19) / 16 >= (1<<19) / (qscale * quant_matrix[i]) >= (1<<19) / 7905
                    so 32768        >= (1<<19) / (qscale * quant_matrix[i]) >= 67
                 */
                 qmat  [qscale][i] = (1 << QMAT_SHIFT_MMX) / (qscale * quant_matrix[i]);
-                qmat16[qscale][i] = (1 << QMAT_SHIFT_MMX) / (qscale * quant_matrix[block_permute_op(i)]);
+                qmat16[qscale][i] = (1 << QMAT_SHIFT_MMX) / (qscale * quant_matrix[j]);
 
                 if(qmat16[qscale][i]==0 || qmat16[qscale][i]==128*256) qmat16[qscale][i]=128*256-1;
 
@@ -178,7 +179,7 @@ static void encode_block(MpegEncContext *s, DCTELEM *block, int n)
     run = 0;
     last_index = s->block_last_index[n];
     for(i=1;i<=last_index;i++) {
-        j = zigzag_direct[i];
+        j = s->intra_scantable.permutated[i];
         val = block[j];
         if (val == 0) {
             run++;
@@ -220,7 +221,7 @@ static inline void clip_coeffs(MpegEncContext *s, DCTELEM *block, int last_index
     const int minlevel= s->min_qcoeff;
 
     for(i=0; i<=last_index; i++){
-        const int j = zigzag_direct[i];
+        const int j = s->intra_scantable.permutated[i];
         int level = block[j];
        
         if     (level>maxlevel) level=maxlevel;
@@ -362,8 +363,8 @@ jpeg_enc_t *jpeg_enc_init(int w, int h, int y_psize, int y_rsize,
 
 	j->s->intra_matrix[0] = ff_mpeg1_default_intra_matrix[0];
 	for (i = 1; i < 64; i++) 
-		j->s->intra_matrix[i] = 
-			(ff_mpeg1_default_intra_matrix[i]*j->s->qscale) >> 3;
+		j->s->intra_matrix[i] = CLAMP_TO_8BIT(
+			(ff_mpeg1_default_intra_matrix[i]*j->s->qscale) >> 3);
 	convert_matrix(j->s, j->s->q_intra_matrix, j->s->q_intra_matrix16, 
 			j->s->q_intra_matrix16_bias, 
 			j->s->intra_matrix, j->s->intra_quant_bias);
