@@ -109,6 +109,8 @@ int stream_open_tv(stream_t *stream, tvi_handle_t *tvh)
 
     if (!strcasecmp(tv_param_outfmt, "yv12"))
 	picture_format = IMGFMT_YV12;
+    else if (!strcasecmp(tv_param_outfmt, "i420"))
+	picture_format = IMGFMT_I420;
     else if (!strcasecmp(tv_param_outfmt, "uyvy"))
 	picture_format = IMGFMT_UYVY;
     else if (!strcasecmp(tv_param_outfmt, "rgb32"))

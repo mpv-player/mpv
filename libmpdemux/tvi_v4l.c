@@ -128,6 +128,7 @@ static int format2palette(int format)
 	case IMGFMT_RGB32:
 	    return(VIDEO_PALETTE_RGB32);
 	case IMGFMT_YV12:
+	case IMGFMT_I420:
 	    return(VIDEO_PALETTE_YUV420P);
 	case IMGFMT_UYVY:
 	    return(VIDEO_PALETTE_YUV422);
