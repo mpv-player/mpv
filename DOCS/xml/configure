@@ -1,0 +1,220 @@
+#!/bin/sh
+
+# Script to check for catalogs, stylesheets, XSL processors and all
+# the other stuff necessary to convert the XML documentation.
+
+_xsltwrapper="xsltproc.sh"
+_xmllintwrapper="xmllint.sh"
+
+for _try_catalog in /etc/sgml/catalog /usr/share/sgml/docbook/xml-dtd-4.1.2/xmlcatalog /usr/share/apps/ksgmltools2/customization/en/catalog /usr/share/sgml/catalog /usr/local/share/sgml/catalog /usr/lib/sgml/catalog /usr/local/lib/sgml/catalog
+do
+  if test -f "$_try_catalog"
+  then
+    _catalog=$_try_catalog
+    break
+  fi
+done
+
+if test -n "$_catalog"
+then
+  echo "Found SGML catalog at $_catalog"
+  _sgmlcatalog="export SGML_CATALOG_FILES=$_catalog"
+else
+  echo "No SGML catalog found."
+fi
+
+
+
+echo "Searching for stylesheet..."
+for _try_chunk_xsl in /usr/share/sgml/docbook/stylesheet/xsl/nwalsh/html/chunk.xsl /usr/share/sgml/docbook/yelp/docbook/html/chunk.xsl /usr/local/share/sgml/docbook/stylesheet/xsl/nwalsh/html/chunk.xsl /usr/local/share/sgml/docbook/yelp/docbook/html/chunk.xsl
+do
+  if test -f "$_try_chunk_xsl"
+  then
+    _chunk_xsl=$_try_chunk_xsl
+    break
+  fi
+done
+
+if test -z "$_chunk_xsl"
+then
+  echo "Not found."
+  _chunk_xsl=/usr/share/sgml/docbook/stylesheet/xsl/nwalsh/html/chunk.xsl
+else
+  echo "Found chunk.xsl at $_chunk_xsl"
+fi
+
+cat > html.xsl << EOF
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!-- **************************************************
+     This file is generated automatically. DO NOT EDIT.
+     ************************************************** -->
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                version="1.0">
+
+  <xsl:import href="$_chunk_xsl"/>
+  <xsl:include href="html-common.xsl"/>
+
+</xsl:stylesheet>
+EOF
+
+
+
+echo "Looking for a valid XSLT processor..."
+# Checks for xsltproc, then checks for the Saxon processor (it needs Java).
+# Also checks for Jade/OpenJade.
+#FIXME: Add support for the xalan/xalan2 XSLT processors.
+
+if xsltproc --version &> /dev/null
+then
+  if test -n "$_chunk_xsl"
+  then
+    echo "Found xsltproc. If it works, it's probably the best choice."
+    if test -n "$_catalog"
+    then
+      _xsltcommand="xsltproc --catalogs -o \$1 \$2 \$3"
+    else
+      _xsltcommand="xsltproc -o \$1 \$2 \$3"
+    fi
+  else
+    echo "Found xsltproc but no stylesheets on your system."
+    echo "xsltproc is unusable without stylesheets."
+  fi
+fi
+
+# xsltproc not found.
+# Now try to find a good Java virtual machine.
+# FIXME: We need more checks for Java virtual machines.
+if test -z "$_xsltcommand"
+then
+  for _try_java in java gij-3.3 gij-3.2 gij-3.1 gij-3.0 gij
+  do
+    if $_try_java --version > /dev/null 2>&1 || $_try_java -version > /dev/null 2>&1
+    then
+      _java=$_try_java
+      break
+    fi
+  done
+  if test -z "$_java"
+  then
+    echo "Java VM not found."
+  else
+    # Try to find the right jar files for classpath.
+    # This must not trigger on something like saxon-fop-6.4.4.jar.
+    for _try_saxon_jar in /usr/share/java/saxon.jar /usr/local/share/java/saxon.jar /usr/share/java/saxon-[0-9]*.jar /usr/local/share/java/saxon-[0-9]*.jar
+    do
+      if test -f "$_try_saxon_jar"
+      then
+        _saxon_jar=$_try_saxon_jar
+        #Don't break to find the _latest_ saxon.jar.
+      fi
+    done
+    if test -n "$_saxon_jar"
+    then
+      if test -n "$_chunk_xsl"
+      then
+        _xsltcommand="cd \$1 && if test \"\`dirname \$2 | head -c 1\`\" = \".\" ; then $_java  -classpath $_saxon_jar com.icl.saxon.StyleSheet \$_IN_DIR/\$3 \$_IN_DIR/\$2 ; else $_java  -classpath $_saxon_jar com.icl.saxon.StyleSheet \$_IN_DIR/\$3 \$2 ;fi"
+        echo "Found the Saxon XSLT Processor ($_saxon_jar), using Java VM '$_java'."
+      else
+        echo "Found the Saxon XSLT processor but no stylesheets on your system."
+        echo "Saxon is unusable without stylesheets."
+      fi
+    fi
+  fi
+fi
+
+if test -z "$_xsltcommand"
+then
+  # Java not found.
+  # now try openjade/jade.
+  for _try_jade in jade openjade
+  do
+    if command -v $_try_jade > /dev/null
+    then
+      _jade=$_try_jade
+      break
+    fi
+  done
+  if test -n "$_jade"
+  then
+    echo "xsltproc and Saxon XSLT processors not found."
+    echo "I will try to use OpenJade or Jade (using '$_jade')."
+    echo "They aren't (currently) fully supported, however."
+    for _try_docbook_dsl in /usr/share/sgml/docbook/stylesheet/dsssl/modular/html/docbook.dsl /usr/local/share/sgml/docbook/stylesheet/dsssl/modular/html/docbook.dsl 
+    do
+      if test -f "$_try_docbook_dsl"
+      then
+        _docbook_dsl=$_try_docbook_dsl
+        break
+      fi
+    done
+    for _try_xml_dcl in /usr/share/sgml/declaration/xml.dcl /usr/local/share/sgml/declaration/xml.dcl
+    do
+      if test -f "$_try_xml_dcl"
+      then
+        _xml_dcl=$_try_xml_dcl
+        break
+      fi
+    done
+      if test "x$_docbook_dsl" = "x" -o "x$_xml_dcl" = "x"
+      then
+  	echo "One of the files docbook.dsl and xml.dcl or both of them weren't found."
+  	echo "Bailing out."
+  	exit 1
+      fi
+    _xsltcommand="cd \$1 && $_jade -t xml -d $_docbook_dsl $_xml_dcl \$_IN_DIR/\$3 ; mv book1.html index.html"
+  else
+    echo "No valid XSLT processor found."
+    echo "Bailing out."
+    exit 1
+  fi
+fi
+
+
+
+cat > $_xsltwrapper << EOF
+#!/bin/sh
+# **************************************************
+# This file is generated automatically. DO NOT EDIT.
+# **************************************************
+# This is a small wrapper script around many ways to call the XSLT processor.
+# It accepts 3 arguments: <output_dir> <stylesheet_name> <main XML file name>
+_IN_DIR=\`pwd\`
+
+$_sgmlcatalog
+$_xsltcommand
+EOF
+
+chmod +x $_xsltwrapper
+
+
+
+for _try_xmllint in xmllint
+do
+  if command -v $_try_xmllint
+  then
+    if test -n "$_catalog"
+    then
+      _xmllint_command="$_try_xmllint --noout --noent --postvalid --catalogs \$*"
+    else
+      _xmllint_command="$_try_xmllint --noout --noent --postvalid \$*"
+    fi
+    break
+  fi
+done
+
+if test -z "$_xmllint_command"
+then
+  _xmllint_command=true
+fi
+
+cat > $_xmllintwrapper << EOF
+#!/bin/sh
+# **************************************************
+# This file is generated automatically. DO NOT EDIT.
+# **************************************************
+# This is a small wrapper for XML lintian programs.
+$_sgmlcatalog
+$_xmllint_command
+EOF
+
+chmod +x $_xmllintwrapper
