@@ -1,4 +1,5 @@
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,6 +14,7 @@
 #include <sys/cdrio.h>
 #endif
 
+#include "../cfgparser.h"
 #include "stream.h"
 #include "demuxer.h"
 
@@ -419,6 +421,38 @@ tv_err:
        stream->end_pos=len;
        return stream;
 
+}
+
+int dvd_parse_chapter_range(struct config *conf, const char *range){
+  char *s, *t;
+  dvd_chapter = 1;
+  dvd_last_chapter = 0;
+  if (*range && isdigit(*range)) {
+    dvd_chapter = strtol(range, &s, 10);
+    if (range == s) {
+      mp_msg(MSGT_OPEN, MSGL_ERR, "Invalid chapter range specification %s\n", range);
+      return -1;
+    }
+  }
+  if (*s == 0)
+    return 0;
+  else if (*s != '-') {
+    mp_msg(MSGT_OPEN, MSGL_ERR, "Invalid chapter range specification %s\n", range);
+    return -1;
+  }
+  ++s;
+  if (*s == 0)
+      return 0;
+  if (! isdigit(*s)) {
+    mp_msg(MSGT_OPEN, MSGL_ERR, "Invalid chapter range specification %s\n", range);
+    return -1;
+  }
+  dvd_last_chapter = strtol(s, &t, 10);
+  if (s == t || *t)  {
+    mp_msg(MSGT_OPEN, MSGL_ERR, "Invalid chapter range specification %s\n", range);
+    return -1;
+  }
+  return 0;
 }
 
 #ifdef USE_DVDREAD

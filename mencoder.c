@@ -27,6 +27,7 @@ static char* banner_text=
 #include "cpudetect.h"
 
 #include "codec-cfg.h"
+#include "cfgparser.h"
 
 #include "stream.h"
 #include "demuxer.h"
@@ -170,8 +171,6 @@ static int scale_srcW=0;
 static int scale_srcH=0;
 static int vo_w=0, vo_h=0;
 //-------------------------- config stuff:
-
-#include "cfgparser.h"
 
 m_config_t* mconfig;
 
