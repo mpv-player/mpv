@@ -183,7 +183,6 @@ done
 
 # ---
 
-TAB=`echo -n -e "\t"`
 pname=`cat /proc/cpuinfo | grep 'model name' | cut -d ':' -f 2`
 pparam=`cat /proc/cpuinfo | grep 'features' | cut -d ':' -f 2`
 if [ -z "$pparam" ]; then
@@ -191,7 +190,7 @@ if [ -z "$pparam" ]; then
 fi
 pvendor=`cat /proc/cpuinfo | grep 'vendor_id' | cut -d ':' -f 2  | cut -d ' ' -f 2`
 pfamily=`cat /proc/cpuinfo | grep 'cpu family' | cut -d ':' -f 2 | cut -d ' ' -f 2`
-pmodel=`cat /proc/cpuinfo | grep "model$TAB" | cut -d ':' -f 2 | cut -d ' ' -f 2`
+pmodel=`cat /proc/cpuinfo |grep -v 'model name'| grep "model" | cut -d ':' -f 2 | cut -d ' ' -f 2`
 pstepping=`cat /proc/cpuinfo | grep 'stepping' | cut -d ':' -f 2 | cut -d ' ' -f 2`
 
 _mmx=no
