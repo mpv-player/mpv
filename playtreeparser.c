@@ -35,11 +35,13 @@ static void
 strstrip(char* str) {
   char* i;
 
+  if (str==NULL)
+    return;
   for(i = str ; i[0] != '\0' && strchr(WHITES,i[0]) != NULL; i++)
     /* NOTHING */;
   if(i[0] != '\0') {
-    memmove(str,i,strlen(i));
-    for(i = str + strlen(str) ; strchr(WHITES,i[0]) != NULL; i--)
+    memmove(str,i,strlen(i) + 1);
+    for(i = str + strlen(str) - 1 ; strchr(WHITES,i[0]) != NULL; i--)
       /* NOTHING */;
     i[1] = '\0';
   } else
