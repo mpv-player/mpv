@@ -136,44 +136,24 @@ static void draw_alpha_uyvy(int x0,int y0, int w,int h, unsigned char* src, unsi
 static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
 }
 
-static int xv_set_eq(char *name, int value, int use_reset)
+static int xv_set_eq(char *name, int value)
 {
     XvAttribute *attributes;
-    int howmany, xv_min, xv_max, xv_atom;
-    static int was_reset = 0;
+    int howmany, xv_atom;
 
-    mp_dbg(MSGT_VO, MSGL_V, "xv_set_eq called! (%s, %d, %d)\n", name, value, use_reset);
+    mp_dbg(MSGT_VO, MSGL_V, "xv_set_eq called! (%s, %d)\n", name, value);
 
-     /* get available attributes */
-     attributes = XvQueryPortAttributes(mDisplay, xv_port, &howmany);
-     /* first pass try reset */
-     if(use_reset)
-     {
-	for (i = 0; i < howmany && attributes; i++)
-        {
-            if (attributes[i].flags & XvSettable && !strcmp(attributes[i].name,"XV_SET_DEFAULTS"))
-            {
-		was_reset = 1;
-		mp_msg(MSGT_VO,MSGL_V,"vo_xv: reset gamma correction\n");
-                xv_atom = XInternAtom(mDisplay, attributes[i].name, True);
-                XvSetPortAttribute(mDisplay, xv_port, xv_atom, attributes[i].max_value);
-	    }
-        }
-	/* for safety purposes */
-	if(!was_reset) return(VO_FALSE);
-     }
-     for (i = 0; i < howmany && attributes; i++)
-     {
+    /* get available attributes */
+    attributes = XvQueryPortAttributes(mDisplay, xv_port, &howmany);
+    for (i = 0; i < howmany && attributes; i++)
             if (attributes[i].flags & XvSettable)
             {
-                xv_min = attributes[i].min_value;
-                xv_max = attributes[i].max_value;
                 xv_atom = XInternAtom(mDisplay, attributes[i].name, True);
 /* since we have SET_DEFAULTS first in our list, we can check if it's available
    then trigger it if it's ok so that the other values are at default upon query */
                 if (xv_atom != None)
                 {
-		    int hue = 0,port_value,port_min,port_max,port_mid;
+		    int hue = 0,port_value,port_min,port_max;
 
 		    if(!strcmp(attributes[i].name,"XV_BRIGHTNESS") &&
 			(!strcasecmp(name, "brightness")))
@@ -204,58 +184,48 @@ static int xv_set_eq(char *name, int value, int use_reset)
 			(!strcasecmp(name, "blue_intensity")))
 				port_value = value;
 		    else continue;
-		    /* means that user has untouched this parameter since
-		       NVidia driver has default == min for XV_HUE but not mid */
-		    if(!port_value && use_reset) continue;
-		    port_min = xv_min;
-		    port_max = xv_max;
-		    port_mid = (port_min + port_max) / 2;
+
+		    port_min = attributes[i].min_value;
+		    port_max = attributes[i].max_value;
 
 		    /* nvidia hue workaround */
-		    if ( hue && port_min == 0 && port_max == 360 )
-		     {
-		      port_value=( port_value * port_mid ) / 1000;
-		      if ( port_value < 0 ) port_value+=port_max - 1;
-		     } else port_value = port_mid + (port_value * (port_max - port_min)) / 2000;
-		     
+		    if ( hue && port_min == 0 && port_max == 360 ){
+			port_value = (port_value>=0) ? (port_value-100) : (port_value+100);
+		    }
+
+		    // -100 -> min
+		    //   0  -> (max+min)/2
+		    // +100 -> max
+		    port_value = (port_value+100)*(port_max-port_min)/200+port_min;
                     XvSetPortAttribute(mDisplay, xv_port, xv_atom, port_value);
 		    return(VO_TRUE);
                 }
-        }
-    }
+	    }
     return(VO_FALSE);
 }
 
 static int xv_get_eq(char *name, int *value)
 {
     XvAttribute *attributes;
-    int howmany, xv_min, xv_max, xv_atom;
-    static int was_reset = 0;
+    int howmany, xv_atom;
 
-    *value = 0;
-
-     /* get available attributes */
-     attributes = XvQueryPortAttributes(mDisplay, xv_port, &howmany);
-     for (i = 0; i < howmany && attributes; i++)
-     {
+    /* get available attributes */
+    attributes = XvQueryPortAttributes(mDisplay, xv_port, &howmany);
+    for (i = 0; i < howmany && attributes; i++)
             if (attributes[i].flags & XvGettable)
             {
-                xv_min = attributes[i].min_value;
-                xv_max = attributes[i].max_value;
                 xv_atom = XInternAtom(mDisplay, attributes[i].name, True);
 /* since we have SET_DEFAULTS first in our list, we can check if it's available
    then trigger it if it's ok so that the other values are at default upon query */
                 if (xv_atom != None)
                 {
-		    int val, port_value, port_min, port_max, port_mid;
+		    int val, port_value=0, port_min, port_max, port_mid;
 
 		    XvGetPortAttribute(mDisplay, xv_port, xv_atom, &port_value);
 
-		    port_min = xv_min;
-		    port_max = xv_max;
-		    port_mid = (port_min + port_max) / 2;
-		    
-		    val = ((port_value - port_mid)*2000)/(port_max-port_min);
+		    port_min = attributes[i].min_value;
+		    port_max = attributes[i].max_value;
+		    val=(port_value-port_min)*200/(port_max-port_min)-100;
 		    
 		    if(!strcmp(attributes[i].name,"XV_BRIGHTNESS") &&
 			(!strcasecmp(name, "brightness")))
@@ -270,19 +240,13 @@ static int xv_get_eq(char *name, int *value)
 				*value = val;
 		    else
 		    if(!strcmp(attributes[i].name,"XV_HUE") &&
-			(!strcasecmp(name, "hue")))
+			(!strcasecmp(name, "hue"))){
 			/* nasty nvidia detect */
-			{
 			if (port_min == 0 && port_max == 360)
-			{
-			    if (port_value > port_mid-1)
-				val = (port_value - port_max + 1) * 1000 / port_mid;
-			    else
-				val = port_value * 1000 / port_mid;
-			}
+			    *value = (val>=0) ? (val-100) : (val+100);
+			else
 			    *value = val;
-			}
-		    else
+		    } else
                     /* Note: since 22.01.2002 GATOS supports these attrs for radeons (NK) */
 		    if(!strcmp(attributes[i].name,"XV_RED_INTENSITY") &&
 			(!strcasecmp(name, "red_intensity")))
@@ -300,8 +264,7 @@ static int xv_get_eq(char *name, int *value)
 		    mp_dbg(MSGT_VO, MSGL_V, "xv_get_eq called! (%s, %d)\n", name, *value);
 		    return(VO_TRUE);
                 }
-        }
-    }
+	    }
     return(VO_FALSE);
 }
 
@@ -906,7 +869,7 @@ static uint32_t control(uint32_t request, void *data, ...)
     value = va_arg(ap, int);
     va_end(ap);
     
-    return(xv_set_eq(data, value, 0));
+    return(xv_set_eq(data, value));
   }
   case VOCTRL_GET_EQUALIZER:
   {
@@ -914,7 +877,7 @@ static uint32_t control(uint32_t request, void *data, ...)
     int *value;
     
     va_start(ap, data);
-    value = va_arg(ap, int);
+    value = va_arg(ap, int*);
     va_end(ap);
     
     return(xv_get_eq(data, value));
