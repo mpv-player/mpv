@@ -164,7 +164,7 @@ void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,in
             for(k=previousStrip;k<lastStripPosition;k++){
               int c=text[k];
 	      int font;
-              if (sub_unicode && (c>=0x80)) c=(c<<8)+text[++j];
+              if (sub_unicode && (c>=0x80)) c=(c<<8)+text[++k];
               font=vo_font->font[c];
               if(x>=0 && x+vo_font->width[c]<dxs)
                 if(font>=0)
