@@ -2,7 +2,7 @@
 
 #include <stdlib.h>
 #include "pullup.h"
-
+#include "config.h"
 
 
 
@@ -10,7 +10,7 @@
 static int diff_y_mmx(unsigned char *a, unsigned char *b, int s)
 {
 	int ret;
-	asm (
+	asm volatile (
 		"movl $4, %%ecx \n\t"
 		"pxor %%mm4, %%mm4 \n\t"
 		"pxor %%mm7, %%mm7 \n\t"
@@ -37,22 +37,20 @@ static int diff_y_mmx(unsigned char *a, unsigned char *b, int s)
 		"paddw %%mm3, %%mm4 \n\t"
 		
 		"decl %%ecx \n\t"
-		"jnz fb \n\t"
-		
+		"jnz 1b \n\t"
+
 		"movq %%mm4, %%mm3 \n\t"
-		"punpcklwl %%mm7, %%mm4 \n\t"
-		"punpckhwl %%mm7, %%mm3 \n\t"
-		"paddl %%mm4, %%mm3 \n\t"
-		"movq %%mm3, %%mm2 \n\t"
-		"punpckllq %%mm7, %%mm3 \n\t"
-		"punpckhlq %%mm7, %%mm2 \n\t"
-		"paddl %%mm3, %%mm2 \n\t"
-		"movl %%mm2, %eax"
+		"punpcklwd %%mm7, %%mm4 \n\t"
+		"punpckhwd %%mm7, %%mm3 \n\t"
+		"paddd %%mm4, %%mm3 \n\t"
+		"movd %%mm3, %%eax \n\t"
+		"psrlq $32, %%mm3 \n\t"
+		"movd %%mm3, %%ebx \n\t"
+		"addl %%ebx, %%eax \n\t"
 		
 		"emms \n\t"
 		: "=a" (ret)
 		: "S" (a), "D" (b), "a" (s)
-		:
 		);
 	return ret;
 }
