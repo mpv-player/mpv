@@ -1104,7 +1104,7 @@ static int get_space()
     }
 
     if (snd_pcm_status_get_state(status) != SND_PCM_STATE_RUNNING)
-      mp_msg(MSGT_AO,MSGL_V,"alsa-space: free space = %i, status=%i, %s --\n", ret, status, str_status);
+      mp_msg(MSGT_AO,MSGL_V,"alsa-space: free space = %i, %s --\n", ret, str_status);
     
     if (ret < 0) {
       mp_msg(MSGT_AO,MSGL_ERR,"negative value!!\n");
