@@ -334,14 +334,6 @@ unsigned int timer_start;
   mp_msg_set_level(MSGL_STATUS);
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s",banner_text);
 
-// check codec.conf
-if(!parse_codec_cfg(get_path("codecs.conf"))){
-  if(!parse_codec_cfg(CONFDIR"/codecs.conf")){
-    mp_msg(MSGT_MENCODER,MSGL_HINT,MSGTR_CopyCodecsConf);
-    mencoder_exit(1,NULL);
-  }
-}
-
   /* Test for cpu capabilities (and corresponding OS support) for optimizing */
 #ifdef ARCH_X86
   GetCpuCaps(&gCpuCaps);
@@ -350,6 +342,14 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
       gCpuCaps.has3DNow, gCpuCaps.has3DNowExt,
       gCpuCaps.hasSSE, gCpuCaps.hasSSE2);
 #endif
+
+// check codec.conf
+if(!parse_codec_cfg(get_path("codecs.conf"))){
+  if(!parse_codec_cfg(CONFDIR"/codecs.conf")){
+    mp_msg(MSGT_MENCODER,MSGL_HINT,MSGTR_CopyCodecsConf);
+    mencoder_exit(1,NULL);
+  }
+}
 
 // check font
 #ifdef USE_OSD
