@@ -1312,7 +1312,7 @@ if (edl_check_mode() == EDL_ERROR && edl_filename)
 // Init input system
 current_module = "init_input";
 mp_input_init();
-#ifndef HAVE_NO_POSIX_SELECT
+#if 0
 make_pipe(&keyb_fifo_get,&keyb_fifo_put);
 
 if(keyb_fifo_get > 0)
