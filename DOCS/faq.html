@@ -673,6 +673,240 @@ implement it, and send a patch. Don't ask for it.
   want to go to jail.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
+
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+What card you may suggest me to buy?</font></font></b></td>
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A0:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+It's for your opinion only but our issues are:</font></font>
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A1:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Speed:</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>This
+parameter can be computed very easy:</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>a)</b>
+which movies do you plan to watch:</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>-
+MPEG1:</b> 320x200@32=256000</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>so
+you need only 256*25fps=6.4Mb/sec bandwidth (This format can be played
+in real-time on any PC since P-100 + S3Virge)</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>-
+MPEG4:</b> 640x480@32=1228800</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>you
+need videobandwidth 1.2*25fps=30Mb/sec To watch such movie in real-time
+you need enough power PC: (Celeron-450+DIMM based video card)</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>-
+MPEG2 (aka DVD or SDTV):</b> 1024x768@32=3145728</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>you
+need videobandwidth 3*30fps=90Mb/sec In extremal cases (if your video card
+supports IDCT decoding) this can be played on the same PC as for MPEG4</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>-
+HDTV (HighData TeleVision):</b> 2000x2000@32=16000000</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>i.e.
+videobandwidth = 16*30fps=480Mb/sec (This means also that you need at least
+32Mb of video memory to watch this stream: 16Mb for RGB area and 16Mb for
+YUV area)</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>b)</b>
+Bandwidth of PCI slot is: 33Mhz*32bit=132Mb/sec And PCI2.1 has 66MHz*32bit=265Mb/sec
+that is far enough for any movie playback (except HDTV streams which really
+require AGP bus).</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>c)</b>
+What memory type should be installed on video card:</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>SIMM</b>
+- avoid that</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>DIMM</b>
+- good if your video card has 128-bit memory access.</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>DDR</b>
+- is far enough for all types.</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>Note:
+By DGA comparision - there is no any visible difference between video cards
+which have installed the same type of video memory.</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>Resume:</b>
+If you have enough power CPU (Celeron-450 or K6-2-500) it would be enough
+to buy any video card which has at least 8Mb of DIMM or DDR memory.</font></font>
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A2:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Quality:</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>This
+question was investigated in depth at:</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><a href="http://www.anandtech.com">http://www.anadtech.com</a>
+AnandTech - Video Card Roundup - DVD Quality, Features &amp; Performance
+(October 2000)</font></font>
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A3:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+WORKING features under Linux:</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>If
+you are win32 user then probably you have support (from driver and DirectX8
+side) for any feature which was introduced in your chip.</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>But
+for <b>linux </b>users:</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>Currently
+I know only several vendors which have more or less advanced support under
+Linux:</font></font>
+<br>&nbsp;
+<table BORDER COLS=5 WIDTH="100%" NOSAVE >
+<tr>
+<td>&nbsp;</td>
+
+<td>
+<center>Matrox</center>
+</td>
+
+<td>
+<center>ATI</center>
+</td>
+
+<td>
+<center>NVidia</center>
+</td>
+
+<td>
+<center>S4 Savage</center>
+</td>
+</tr>
+
+<tr>
+<td>Driver's provider</td>
+
+<td>enthusiasts</td>
+
+<td>enthusiasts</td>
+
+<td>OEM + enthusiasts</td>
+
+<td>enthusiasts</td>
+</tr>
+
+<tr>
+<td>Driver's quality</td>
+
+<td>Best(X11,kernel)</td>
+
+<td>Best(X11,GATOS,kernel)</td>
+
+<td>Buggy(X11 only)</td>
+
+<td>Best(X11 only)</td>
+</tr>
+
+<tr>
+<td>VIDEO OVERLAY</td>
+
+<td></td>
+
+<td></td>
+
+<td></td>
+
+<td></td>
+</tr>
+
+<tr>
+<td>BES and YV2RGB</td>
+
+<td>YES</td>
+
+<td>YES</td>
+
+<td>YES</td>
+
+<td>YES</td>
+</tr>
+
+<tr>
+<td>scaling filters</td>
+
+<td>N/A</td>
+
+<td>YES</td>
+
+<td>N/A</td>
+
+<td>N/A</td>
+</tr>
+
+<tr>
+<td>adaptive deinterlace</td>
+
+<td>NO</td>
+
+<td>YES</td>
+
+<td>N/A</td>
+
+<td>N/A</td>
+</tr>
+
+<tr>
+<td>Video equalizer (hue, contrast, saturation, color correction)</td>
+
+<td>N/A</td>
+
+<td>PARTLY&nbsp;(under devel)</td>
+
+<td>N/A</td>
+
+<td>N/A</td>
+</tr>
+
+<tr>
+<td>Alpha blending, color and video keys</td>
+
+<td>PARTLY</td>
+
+<td>PARTLY&nbsp;(under devel)</td>
+
+<td>N/A</td>
+
+<td>N/A</td>
+</tr>
+
+<tr>
+<td>Video capture</td>
+
+<td>N/A</td>
+
+<td>YES(GATOS)</td>
+
+<td>N/A</td>
+
+<td>N/A</td>
+</tr>
+
+<tr>
+<td>TV-out</td>
+
+<td>YES</td>
+
+<td>YES</td>
+
+<td>N/A</td>
+
+<td>N/A</td>
+</tr>
+</table>
+
+<p><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>Well
+- it's very rude observing of video card. Indeed we should pay our attention
+for models of video card:</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>For
+example if MatroxG400(G450) drivers support TV-out then G550 has no such
+support.</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>Other
+sample: Adaptive deinterlacing exists only since Rage128 chip and isn't
+present on Mach64+ ones. Same as 3D features are far different from Mach64
+to Radeon2 8500 with trueform possibilities.</font></font>
+<p><b><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>ANYWAY
+- MPLAYER'S TEAM DOESN'T ACCEPT ANY CLAIMS IF YOU AFTER</font></font></b>
+<br><b><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>READING
+OF THIS MATERIAL WILL BUY CARD WHICH IS UNSUCCESSFUL FOR YOU!!!</font></font></b>
+<br><b><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>THIS
+MATERIAL IS ONLY OUR VISION.</font></font></b>
+<p><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>Q:</b>
+If PCI slot is far enough for most types of movies then why S3 Virge</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>is
+too slow for them?</font></font>
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>A:</b>
+Due to its SIMM memory.</font></font>
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
 <TD COLSPAN=3>
 <B><A NAME=5.6><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>5.6. Encoding</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
