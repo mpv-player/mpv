@@ -2758,13 +2758,16 @@ The optional parameter f can be 0 to only use even lines, or 1 to only use
 odd lines.
 Any other value for f gives the default (averaging) behavior.
 .TP
-.B ilpack\ 
+.B ilpack[=mode]\ 
 When interlaced video is stored in YUV 4:2:0 formats, chroma
 interlacing does not line up properly due to vertical downsampling of
 the chroma channels.
 This filter packs the planar 4:2:0 data into YUY2 (4:2:2) format with
 the chroma lines in their proper locations, so that in any given
 scanline, the luma and chroma data both come from the same field.
+The optional argument selects the sampling mode.
+By default, linear interpolation (mode 1) is used.
+Mode 0 uses nearest-neighbor sampling, which is fast but incorrect.
 .TP
 .B decimate[=max:hi:lo:frac]
 Drops frames that don't differ greatly from the previous frame in
