@@ -469,6 +469,7 @@ asf_http_request(streaming_ctrl_t *streaming_ctrl) {
 	http_hdr = http_new_header();
 	http_set_field( http_hdr, "Accept: */*" );
 	http_set_field( http_hdr, "User-Agent: NSPlayer/4.1.0.3856" );
+	http_add_basic_authentication( http_hdr, url->username, url->password );
 
 	// Check if we are using a proxy
 	if( !strcasecmp( url->protocol, "http_proxy" ) ) {
