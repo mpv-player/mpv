@@ -54,7 +54,7 @@ asf_streaming_start( stream_t *stream ) {
 	strncpy( proto_s, stream->streaming_ctrl->url->protocol, 10 );
 
 	if( 	!strncasecmp( proto_s, "http", 4) || 
-		!strncasecmp( proto_s, "mms", 3)  ||
+		(!strncasecmp( proto_s, "mms", 3) && strncasecmp( proto_s, "mmst", 4)) || 
 		!strncasecmp( proto_s, "http_proxy", 10)
 		) {
 		mp_msg(MSGT_NETWORK,MSGL_V,"Trying ASF/HTTP...\n");
@@ -416,10 +416,7 @@ asf_http_streaming_type(char *content_type, char *features, HTTP_header_t *http_
 		!strcasecmp(content_type, "application/vnd.ms.wms-hdr.asfv1") ||        // New in Corona, first request
 		!strcasecmp(content_type, "application/x-mms-framed") ) {               // New in Corana, second request
 
-		if( features==NULL ) {
-			mp_msg(MSGT_NETWORK,MSGL_V,"=====> ASF Prerecorded\n");
-			return ASF_Prerecorded_e;
-		} else if( strstr(features, "broadcast")) {
+		if( strstr(features, "broadcast") ) {
 			mp_msg(MSGT_NETWORK,MSGL_V,"=====> ASF Live stream\n");
 			return ASF_Live_e;
 		} else {
@@ -435,6 +432,9 @@ asf_http_streaming_type(char *content_type, char *features, HTTP_header_t *http_
 			if( asf_header_check( http_hdr )==0 ) {
 				mp_msg(MSGT_NETWORK,MSGL_V,"=====> ASF Plain text\n");
 				return ASF_PlainText_e;
+			} else if( (!strcasecmp(content_type, "text/html")) ) {
+				mp_msg(MSGT_NETWORK,MSGL_V,"=====> HTML, mplayer is not a browser...yet!\n");
+				return ASF_Unknown_e;
 			} else {
 				mp_msg(MSGT_NETWORK,MSGL_V,"=====> ASF Redirector\n");
 				return ASF_Redirector_e;
