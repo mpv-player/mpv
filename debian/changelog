@@ -1,3 +1,9 @@
+mplayer (0.18-1) unstable; urgency=low
+
+  * lots of changes in mplayer 
+
+ -- Dariush Pietrzak <eyck@incubus.ar.lublin.pl>  Mon, 25 Jun 2001 15:59:18 +0200
+
 mplayer (0.17a-2) unstable; urgency=low
 
   * mplayer.conf file, automatic menu files update 
