@@ -705,7 +705,7 @@ if(sh_audio){
 	if(len<=0) break; // EOF?
 	aviwrite_write_chunk(muxer,mux_a,muxer_f,len,0);
 	if(!mux_a->h.dwSampleSize && mux_a->timer>0)
-	    mux_a->wf->nAvgBytesPerSec=mux_a->size/mux_a->timer; // avg bps (VBR)
+	    mux_a->wf->nAvgBytesPerSec=0.5f+(double)mux_a->size/mux_a->timer; // avg bps (VBR)
 	if(mux_a->buffer_len>=len){
 	    mux_a->buffer_len-=len;
 	    memcpy(mux_a->buffer,mux_a->buffer+len,mux_a->buffer_len);
@@ -855,6 +855,15 @@ if(sh_audio){
 
 
 } // while(!eof)
+
+// fixup CBR audio header:
+if(sh_audio && mux_a->codec==ACODEC_VBRMP3 && !lame_param_vbr){
+    mux_a->h.dwSampleSize=1;
+    mux_a->h.dwRate=mux_a->wf->nAvgBytesPerSec;
+    mux_a->h.dwScale=1;
+    printf("\n\nCBR audio effective bitrate: %8.3f kbit/s  (%d bytes/sec)\n",
+	    mux_a->h.dwRate*8.0f/1000.0f,mux_a->h.dwRate);
+}
 
 printf("\nWriting AVI index...\n");
 aviwrite_write_index(muxer,muxer_f);
