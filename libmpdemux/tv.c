@@ -245,15 +245,18 @@ static int open_tv(tvi_handle_t *tvh)
 
 	while (*tv_param_channels) {
 		char* tmp = *(tv_param_channels++);
+		char* sep = strchr(tmp,'-');
 		int i;
 		struct CHANLIST cl;
 
-		strcpy(tv_channel_current->name, strchr(tmp, '-') + 1);
-		strchr(tmp, '-')[0] = '\0';
+		if (!sep) continue; // Wrong syntax, but mplayer should not crash
+
+		strcpy(tv_channel_current->name, sep + 1);
+		sep[0] = '\0';
 		strncpy(tv_channel_current->number, tmp, 5);
 
-		while (strchr(tv_channel_current->name, '_'))
-			strchr(tv_channel_current->name, '_')[0] = ' ';
+		while ((sep=strchr(tv_channel_current->name, '_')))
+		    sep[0] = ' ';
 
 		tv_channel_current->freq = 0;
 		for (i = 0; i < chanlists[tvh->chanlist].count; i++) {
@@ -277,8 +280,8 @@ static int open_tv(tvi_handle_t *tvh)
 		tv_channel_current->next->next = NULL;
 		tv_channel_current = tv_channel_current->next;
 	}
-
-	tv_channel_current->prev->next = NULL;
+	if (tv_channel_current->prev)
+  	  tv_channel_current->prev->next = NULL;
 	free(tv_channel_current);
     } else 
 	    tv_channel_last_real = malloc(sizeof(char)*5);
