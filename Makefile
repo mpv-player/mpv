@@ -121,7 +121,7 @@ install: $(PRG) $(PRG_FIBMAP)
 	@echo "however it means you can't use fibmap_mplayer."
 	@echo "Without this (or without running mplayer as root) you won't be"
 	@echo "able to play encrypted DVDs."
-	install -o root -g root -m 4755 -s $(PRG_FIBMAP) $(BINDIR)/$(PRG_FIBMAP)
+	install -o 0 -g 0 -m 4755 -s $(PRG_FIBMAP) $(BINDIR)/$(PRG_FIBMAP)
 
 clean:
 	rm -f *.o *~ $(OBJS)
