@@ -392,9 +392,12 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
         for(x=0;x<w;x++){
 //            dst[x]=(dst[x]*srca[x]+src[x]*(srca[x]^255))>>8;
             if(srca[x]){
-                dst[0]=(dst[0]*(srca[x]^255)+src[x]*(srca[x]))>>8;
-                dst[1]=(dst[1]*(srca[x]^255)+src[x]*(srca[x]))>>8;
-                dst[2]=(dst[2]*(srca[x]^255)+src[x]*(srca[x]))>>8;
+		dst[0]=((dst[0]*srca[x])>>8)+src[x];
+		dst[1]=((dst[1]*srca[x])>>8)+src[x];
+		dst[2]=((dst[2]*srca[x])>>8)+src[x];
+                //dst[0]=(dst[0]*(srca[x]^255)+src[x]*(srca[x]))>>8;
+                //dst[1]=(dst[1]*(srca[x]^255)+src[x]*(srca[x]))>>8;
+                //dst[2]=(dst[2]*(srca[x]^255)+src[x]*(srca[x]))>>8;
             }
             dst+=dbpp;
         }

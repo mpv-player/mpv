@@ -199,7 +199,8 @@ for(i=0;i<=fontdb;i++){
         printf("font: Missing bitmap(s) for sub-font #%d\n",i);
         return NULL;
     }
-    if(factor!=1.0f){
+    //if(factor!=1.0f)
+    {
         // re-sample alpha
         int f=factor*256.0f;
         int size=desc->pic_a[i]->w*desc->pic_a[i]->h;
@@ -208,12 +209,21 @@ for(i=0;i<=fontdb;i++){
         for(j=0;j<size;j++){
             int x=desc->pic_a[i]->bmp[j];
             int y=desc->pic_b[i]->bmp[j];
-            
-            x=((x*f*(255-y))>>16)+y;
+
+	    x=((x*f)>>8); // scale
+	    if(x<0) x=0; else if(x>255) x=255;
+	    x^=255; // invert
+	    
+	    if(x+y>255) x=255-y; // to avoid overflows
+	    
+	    //x=0;            
+            //x=((x*f*(255-y))>>16);
+            //x=((x*f*(255-y))>>16)+y;
             //x=(x*f)>>8;if(x<y) x=y;
             
-            if(x<0) x=0; else
-            if(x>255) x=255;
+            if(x<1) x=1; else
+            if(x>=252) x=0;
+	    
             desc->pic_a[i]->bmp[j]=x;
         }
         printf("DONE!\n");

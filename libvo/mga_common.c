@@ -18,7 +18,8 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
         for(x=0;x<w;x++){
 //            dst[x]=(dst[x]*srca[x]+src[x]*(srca[x]^255))>>8;
             if(srca[x])
-            dst[x]=(dst[x]*(srca[x]^255)+src[x]*(srca[x]))>>8;
+	    dst[x]=((dst[x]*srca[x])>>8)+src[x];
+            //dst[x]=(dst[x]*(srca[x]^255)+src[x]*(srca[x]))>>8;
         }
         src+=stride;
         srca+=stride;
@@ -31,7 +32,8 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
         for(x=0;x<w;x++){
 //            dst[x]=(dst[x]*srca[x]+src[x]*(srca[x]^255))>>8;
             if(srca[x])
-            dst[2*x]=(dst[2*x]*(srca[x]^255)+src[x]*(srca[x]))>>8;
+	    dst[2*x]=((dst[2*x]*srca[x])>>8)+src[x];
+            //dst[2*x]=(dst[2*x]*(srca[x]^255)+src[x]*(srca[x]))>>8;
         }
         src+=stride;
         srca+=stride;
