@@ -67,8 +67,9 @@
 
 MODULE_AUTHOR("Nick Kurshev <nickols_k@mail.ru>");
 MODULE_DESCRIPTION("Accelerated YUV BES driver for Radeons. Version: "RADEON_VID_VERSION);
+#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-
+#endif
 
 typedef struct bes_registers_s
 {
@@ -223,14 +224,14 @@ RTRACE("radeon_vid: OV0: p1_v_accum_init=%x p1_h_accum_init=%x p23_h_accum_init=
 ,besr.p1_v_accum_init,besr.p1_h_accum_init,besr.p23_h_accum_init);
     OUTREG(OV0_REG_LOAD_CNTL,		REG_LD_CTL_LOCK);
     while(!(INREG(OV0_REG_LOAD_CNTL)&REG_LD_CTL_LOCK_READBACK));
-/*
+
     OUTREG(OV0_AUTO_FLIP_CNTL,OV0_AUTO_FLIP_CNTL_SOFT_BUF_ODD);
 
     OUTREG(OV0_DEINTERLACE_PATTERN,0xAAAAAAAA);
    
     OUTREG(OV0_AUTO_FLIP_CNTL,(INREG(OV0_AUTO_FLIP_CNTL)^OV0_AUTO_FLIP_CNTL_SOFT_EOF_TOGGLE));
     OUTREG(OV0_AUTO_FLIP_CNTL,(INREG(OV0_AUTO_FLIP_CNTL)^OV0_AUTO_FLIP_CNTL_SOFT_EOF_TOGGLE));
-*/
+
     OUTREG(OV0_H_INC,			besr.h_inc);
     OUTREG(OV0_STEP_BY,			besr.step_by);
     OUTREG(OV0_Y_X_START,		besr.y_x_start);
@@ -254,7 +255,7 @@ RTRACE("radeon_vid: OV0: p1_v_accum_init=%x p1_h_accum_init=%x p23_h_accum_init=
 
     bes_flags = SCALER_ENABLE |
                 SCALER_DOUBLE_BUFFER |
-//                SCALER_ADAPTIVE_DEINT |
+                SCALER_ADAPTIVE_DEINT |
                 SCALER_SMART_SWITCH |
                 SCALER_HORZ_PICK_NEAREST;
     switch(besr.fourcc)
