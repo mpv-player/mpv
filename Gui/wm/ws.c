@@ -801,7 +801,8 @@ void wsSetLayer( Display * wsDisplay, Window win, int layer )
    e.xclient.window=win;
    e.xclient.format=32;
    e.xclient.data.l[0]=layer;
-   e.xclient.data.l[1]=XInternAtom( wsDisplay,"_NET_WM_STATE_STAYS_ON_TOP",False );
+//   e.xclient.data.l[1]=XInternAtom( wsDisplay,"_NET_WM_STATE_STAYS_ON_TOP",False );
+   e.xclient.data.l[1]=XInternAtom( wsDisplay,"_NET_WM_STATE_FULLSCREEN",False );
    e.xclient.data.l[2]=0l;
    e.xclient.data.l[3]=0l;
    e.xclient.data.l[4]=0l;
@@ -844,7 +845,8 @@ void wsFullScreen( wsTWindow * win )
  switch ( wsWMType )
    {
     case wsWMUnknown:
-           XUnmapWindow( wsDisplay,win->WindowID );
+//           XUnmapWindow( wsDisplay,win->WindowID );
+	   XWithdrawWindow( wsDisplay,win->WindowID,wsScreen );
 	   break;
     case wsWMIceWM:
            if ( !win->isFullScreen ) XUnmapWindow( wsDisplay,win->WindowID );
