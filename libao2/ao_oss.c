@@ -121,6 +121,10 @@ static int init(int rate,int channels,int format,int flags){
    return 0;
   }  
 #endif
+
+#if defined(FD_CLOEXEC) && defined(F_SETFD)
+  fcntl(audio_fd, F_SETFD, FD_CLOEXEC);
+#endif
   
   ao_data.bps=channels;
   if(format != AFMT_U8 && format != AFMT_S8)
