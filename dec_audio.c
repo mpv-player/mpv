@@ -22,6 +22,8 @@ extern int verbose; // defined in mplayer.c
 #include "alaw.c"
 #include "xa/xa_gsm.h"
 
+#include "loader/DirectShow/DS_AudioDec.h"
+
 static sh_audio_t* ac3_audio_sh=NULL;
 
 // AC3 decoder buffer callback:
@@ -38,6 +40,9 @@ static void ac3_fill_buffer(uint8_t **start,uint8_t **end){
 int init_audio(sh_audio_t *sh_audio){
 
 int driver=sh_audio->codec->driver;
+
+extern int init_acm_audio_codec(sh_audio_t *sh_audio);
+extern int acm_decode_audio(sh_audio_t *sh_audio, void* a_buffer,int len);
 
 sh_audio->samplesize=2;
 sh_audio->samplerate=0;
