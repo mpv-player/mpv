@@ -183,10 +183,6 @@ könyvtárba, vagy a file mellé.
 
 .SH "LEJÁTSZÁSI OPCIÓK (CSAK MPLAYER)"
 .TP
-.B \-, \-use-stdin
-Adat olvasása a stdin-rõl.
-Az \-idx opció nem használható ilyenkor.
-.TP
 .B \-autoq <minõség> (használd a \-vf pp mellett)
 Dinamikusan változtatja a postprocessing értékét a maradék CPU idõ
 függvényében. A megadott szám lesz a maximálisan használandó érték. Általában
@@ -362,7 +358,10 @@ Lejátszási sebesség beállítása.
 .B \-sstep <sec>
 Másodpercek a képkockák megjelenítése között.
 Slideshow-oknál hatásos.
-
+.TP
+.B \-, \-use-stdin
+Adat olvasása a stdin-rõl.
+Az \-idx opció nem használható ilyenkor.
 
 .SH "DEMUXER/STREAM OPCIÓK"
 .TP
@@ -3008,7 +3007,7 @@ alapban a divx2pass.log file-ba írja, itt ez a filenév megváltoztatható.
 Egy nem átugrott képkocka utáni átugorható képkockák száma
 (a -noskiplimit opció = végtelen).
 .TP
-.B \-v, \-\-verbose
+.B \-v, \-verbose
 Bõbeszédûség szintjének növelése (a több \-v több információt jelent).
 
 .PD 0
