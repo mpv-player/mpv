@@ -180,6 +180,8 @@ static int cfg_include(struct config *conf, char *filename){
 	return m_config_parse_config_file(mconfig, filename);
 }
 
+static int parse_end_at(struct config *conf, const char* param);
+
 #include "get_path.c"
 
 #include "cfg-mplayer-def.h"
@@ -304,6 +306,10 @@ int dec_audio(sh_audio_t *sh_audio,unsigned char* buffer,int total){
 
 static int eof=0;
 static int interrupted=0;
+
+enum end_at_type_t {END_AT_NONE, END_AT_TIME, END_AT_SIZE};
+static enum end_at_type_t end_at_type = END_AT_NONE;
+static int end_at;
 
 static void exit_sighandler(int x){
     eof=1;
@@ -1057,6 +1063,10 @@ while(!eof){
     int in_size;
     int skip_flag=0; // 1=skip  -1=duplicate
 
+    if((end_at_type == END_AT_SIZE && end_at <= ftell(muxer_f))  ||
+       (end_at_type == END_AT_TIME && end_at < sh_video->timer))
+        break;
+
     if(play_n_frames>=0){
       --play_n_frames;
       if(play_n_frames<0) break;
@@ -1356,4 +1366,54 @@ printf("\nAudio stream: %8.3f kbit/s  (%d bps)  size: %d bytes  %5.3f secs\n",
 if(stream) free_stream(stream); // kill cache thread
 
 return interrupted;
+}
+
+static int parse_end_at(struct config *conf, const char* param)
+{
+    int i;
+
+    end_at_type = END_AT_NONE;
+    
+    /* End at size parsing */
+    {
+        char unit[4];
+        
+        end_at_type = END_AT_SIZE;
+
+        if(sscanf(param, "%d%3s", &end_at, unit) == 2) {
+            if(!strcasecmp(unit, "b"))
+                ;
+            else if(!strcasecmp(unit, "kb"))
+                end_at *= 1024;
+            else if(!strcasecmp(unit, "mb"))
+                end_at *= 1024*1024;
+            else
+                end_at_type = END_AT_NONE;
+        }
+        else
+            end_at_type = END_AT_NONE;
+    }
+
+    /* End at time parsing. This has to be last because of
+     * sscanf("%f", ...) below */
+    if(end_at_type == END_AT_NONE)
+    {
+        int a,b; float d;
+
+        end_at_type = END_AT_TIME;
+        
+        if (sscanf(param, "%d:%d:%f", &a, &b, &d) == 3)
+            end_at = 3600*a + 60*b + d;
+        else if (sscanf(param, "%d:%f", &a, &d) == 2)
+            end_at = 60*a + d;
+        else if (sscanf(param, "%f", &d) == 1)
+            end_at = d;
+        else
+            end_at_type = END_AT_NONE;
+    }
+
+    if(end_at_type == END_AT_NONE)
+        return ERR_FUNC_ERR;
+
+    return 1;
 }

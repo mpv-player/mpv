@@ -89,6 +89,8 @@ static config_t mplayer_opts[]={
 	/* name, pointer, type, flags, min, max */
 	{"include", cfg_include, CONF_TYPE_FUNC_PARAM, CONF_NOSAVE, 0, 0, NULL}, /* this must be the first!!! */
 
+	{"endpos", parse_end_at, CONF_TYPE_FUNC_PARAM, 0, 0, 0, NULL},
+	
 	{"ofps", &force_ofps, CONF_TYPE_FLOAT, CONF_MIN, 0, 0, NULL},
 	{"o", &out_filename, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
