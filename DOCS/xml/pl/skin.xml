@@ -408,12 +408,12 @@ Jego parametry to:
     (musi posiadaæ trzy czê¶ci jedna pod drug± tak, jak w przypadku
     <link linkend="skin-button">przycisku</link>)
     </para></listitem>
-    <listitem><para><literal>szer_przycisku</literal>, <literal>wys_przycisku</literal> - wielko¶æ przycisku
+    <listitem><para><literal>szer_przycisku</literal>,<literal>wys_przycisku</literal> - wielko¶æ przycisku
     </para></listitem>
    <listitem><para><literal>fazy</literal> - obrazek u¿ywany do okre¶lenie faz
    dla hpotmeter. Warto¶æ specjalna <literal>NULL</literal> mo¿e byæ u¿yta,
    je¶li nie chcesz ¿adnego obrazka. Obrazek musi byæ podzielony w pionie
-   na <literal>fragmenty poszczególnych faz</literal> tak, jak poni¿ej:
+   na fragmenty <literal>poszczególnych faz</literal> tak, jak poni¿ej:
     </para>
 <informalfigure>
 <screen>
@@ -435,9 +435,9 @@ Jego parametry to:
     <listitem><para><literal>domy¶lny</literal> - domy¶lne ustawienie dla hpotmeter
     (zakres od <literal>0</literal> do <literal>100</literal>)
     </para></listitem>
-    <listitem><para><literal>X</literal>, <literal>Y</literal> - pozycja dla hpotmeter
+    <listitem><para><literal>X</literal>,<literal>Y</literal> - pozycja dla hpotmeter
     </para></listitem>
-    <listitem><para><literal>szeroko¶æ</literal>, <literal>wysoko¶æ</literal> - szeroko¶æ i wysoko¶æ dla
+    <listitem><para><literal>szeroko¶æ</literal>,<literal>wysoko¶æ</literal> - szeroko¶æ i wysoko¶æ dla
   <literal>hpotmeter</literal>
     </para></listitem>
     <listitem><para><literal>sygna³</literal> - sygna³ generowany podczas zmiany warto¶ci <literal>hpotmeter</literal>
