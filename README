@@ -171,6 +171,20 @@ NOTE: If you run Debian you can configure, compile and build a proper Debian
 
   fakeroot debian/rules binary
 
+If you want to pass custom options to configure, you can set up the
+DEB_BUILD_OPTIONS environment variable. For instance, if you want GUI
+and OSD menu support you would use:
+
+  DEB_BUILD_OPTIONS="--enable-gui --enable-menu" fakeroot debian/rules binary
+
+You can also pass some variables to the Makefile. For example, if you want
+to compile with gcc 3.4 even if it's not the default compiler:
+
+  CC=gcc-3.4 DEB_BUILD_OPTIONS="--enable-gui" fakeroot debian/rules clean
+
+To clean up the source tree run the following command:
+
+  fakeroot debian/rules clean
 
 ____________________________________________
 STEP5: Installing the onscreen display fonts
