@@ -262,8 +262,13 @@ DFBSurfacePixelFormat convformat(uint32_t format)
 	    case IMGFMT_BGR24: return  DSPF_RGB24; break;
             case IMGFMT_RGB16: return  DSPF_RGB16; break;
             case IMGFMT_BGR16: return  DSPF_RGB16; break;
+#if DIRECTFBVERSION > 915
+            case IMGFMT_RGB15: return  DSPF_ARGB1555; break;
+            case IMGFMT_BGR15: return  DSPF_ARGB1555; break;
+#else
             case IMGFMT_RGB15: return  DSPF_RGB15; break;
             case IMGFMT_BGR15: return  DSPF_RGB15; break;
+#endif
             case IMGFMT_YUY2:  return  DSPF_YUY2; break;
             case IMGFMT_UYVY:  return  DSPF_UYVY; break;
     	    case IMGFMT_YV12:  return  DSPF_YV12; break;
@@ -1209,8 +1214,11 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
                 case DSPF_RGB16:
                         vo_draw_alpha_rgb16(w,h,src,srca,stride,((uint8_t *) dst)+pitch*y0 + 2*x0,pitch);
                         break;
-
+#if DIRECTFBVERSION > 915
+                case DSPF_ARGB1555:
+#else
                 case DSPF_RGB15:
+#endif
                         vo_draw_alpha_rgb15(w,h,src,srca,stride,((uint8_t *) dst)+pitch*y0 + 2*x0,pitch);
                         break;
 

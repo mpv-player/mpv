@@ -138,8 +138,13 @@ pixelformat_name( DFBSurfacePixelFormat format )
 	  return "RGB24";
      case DSPF_RGB16:
 	  return "RGB16";
+#if DIRECTFBVERSION > 915
+     case DSPF_ARGB1555:
+	  return "ARGB1555";
+#else
      case DSPF_RGB15:
 	  return "RGB15";
+#endif
      case DSPF_YUY2:
 	  return "YUY2";
      case DSPF_UYVY:
@@ -170,7 +175,11 @@ imgfmt_to_pixelformat( uint32_t format )
 	  return DSPF_RGB16;
      case IMGFMT_RGB15:
      case IMGFMT_BGR15:
+#if DIRECTFBVERSION > 915
+	  return DSPF_ARGB1555;
+#else
 	  return DSPF_RGB15;
+#endif
      case IMGFMT_YUY2:
 	  return DSPF_YUY2;
      case IMGFMT_UYVY:
@@ -539,7 +548,11 @@ draw_alpha( int x0, int y0,
 			       ((uint8_t *) dst) + pitch * y0 + subframe_pixel_size * x0,
                                pitch );
 	  break;
+#if DIRECTFBVERSION > 915
+     case DSPF_ARGB1555:
+#else
      case DSPF_RGB15:
+#endif
 	  vo_draw_alpha_rgb15( w, h, src, srca, stride,
 			       ((uint8_t *) dst) + pitch * y0 + subframe_pixel_size * x0,
                                pitch );
