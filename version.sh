@@ -2,6 +2,9 @@
 
 OS=`uname -s`
 case "$OS" in
+     CYGWIN*)
+	last_cvs_update=`date -r CVS/Entries +%y%m%d-%H:%M 2>/dev/null`
+	;;
      Linux)
 	last_cvs_update=`date -r CVS/Entries +%y%m%d-%H:%M 2>/dev/null`
 	;;
