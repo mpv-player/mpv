@@ -167,7 +167,7 @@ int lmlm4_check_file(demuxer_t* demuxer)
     
     if(getFrame(demuxer, &frameInfo)!=1){
 	stream_skip(demuxer->stream,-8);
-        mp_msg(MSGT_DEMUX, MSGL_INFO, "LMLM4 Stream Format not found\n");
+        mp_msg(MSGT_DEMUX, MSGL_V, "LMLM4 Stream Format not found\n");
         return 0;
     }
     first=stream_read_dword(demuxer->stream);
