@@ -412,32 +412,6 @@ int get_sws_cpuflags(){
 	| (gCpuCaps.has3DNow ? SWS_CPU_CAPS_3DNOW : 0);
 }
 
-// old global scaler, dont use for new code
-// will use sws_flags from the command line
-void SwScale_YV12slice(unsigned char* src[], int srcStride[], int srcSliceY ,
-			     int srcSliceH, uint8_t* dst[], int dstStride, int dstbpp,
-			     int srcW, int srcH, int dstW, int dstH){
-
-	static struct SwsContext *context=NULL;
-	int dstFormat;
-	int dstStride3[3]= {dstStride, dstStride>>1, dstStride>>1};
-
-	switch(dstbpp)
-	{
-		case 8 : dstFormat= IMGFMT_Y8;		break;
-		case 12: dstFormat= IMGFMT_YV12;	break;
-		case 15: dstFormat= IMGFMT_BGR15;	break;
-		case 16: dstFormat= IMGFMT_BGR16;	break;
-		case 24: dstFormat= IMGFMT_BGR24;	break;
-		case 32: dstFormat= IMGFMT_BGR32;	break;
-		default: return;
-	}
-
-	if(!context) context=sws_getContextFromCmdLine(srcW, srcH, IMGFMT_YV12, dstW, dstH, dstFormat);
-
-	sws_scale(context, src, srcStride, srcSliceY, srcSliceH, dst, dstStride3);
-}
-
 void sws_getFlagsAndFilterFromCmdLine(int *flags, SwsFilter **srcFilterParam, SwsFilter **dstFilterParam)
 {
 	static int firstTime=1;
