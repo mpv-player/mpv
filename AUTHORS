@@ -289,6 +289,7 @@ Roberto Togni <rtogni@freemail.it>
     * Open source QT RPZA decoder
     * Open source HuffYUV decoder
     * Open source MSZH/ZLIB decoder
+    * Open source QT 8BPS decoder
     * mp_help-it.h updates
     * Realaudio (ra) demuxer, 14_4 and 28_8 codec support
     * Misc bugfixes and enhancements
@@ -504,6 +505,9 @@ Dmitry Baryshkov <mitya@school.ioffe.ru>
     * Russian documentation translation
     * FLAC decoding support
     * XML build system
+
+rgselk <rgselknospam@yahoo.com>
+    * Real rtsp Range support
 
 
 NOTE: If you think you are missing here, feel free to send a patch.
