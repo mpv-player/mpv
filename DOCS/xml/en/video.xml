@@ -1605,7 +1605,7 @@ is underway.
 <title>MPEG decoders</title>
 
 <sect4 id="dvb">
-<title>DVB</title>
+<title>DVB output and input</title>
 <para>
 <application>MPlayer</application> supports cards with the Siemens DVB chipset
 from vendors like Siemens, Technotrend, Galaxis or Hauppauge. The latest DVB
@@ -1632,6 +1632,7 @@ Configure should detect your DVB card. If it did not, force detection with
 Hardware decoding (playing standard MPEG1/2 files) can be done with this command:
 </para>
 </formalpara>
+
 <para><screen>mplayer -ao mpegpes -vo mpegpes file.mpg|vob</screen></para>
 
 <para>
@@ -1698,6 +1699,92 @@ while keeping the right aspect ratio), use the new dvbscale filter:
 for a  4:3 TV: -vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1
 for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </screen></para>
+
+<formalpara>
+<title>Using your DVB card for watching Digital TV (DVB input module)</title>
+<para>
+  First you need to pass the <literal>dvb_shutdown_timeout=0</literal>
+  parameter to the kernel module <filename>dvb-core</filename>, or MPlayer
+  will die after 10 seconds.
+</para>
+</formalpara>
+
+<para>
+  You should also have the programs <command>scan</command> and
+  <command>szap/tzap/czap</command> installed; they are all included in
+  the drivers package.
+</para>
+
+<para>
+  Verify that your drivers are working properly with a program such as
+  <ulink url="http://www.sf.net/projects/dvbtools/"><command>dvbstream</command></ulink>
+  (that is the base of the DVB input module).
+</para>
+
+<para>
+  Now you should compile a <filename>~/.mplayer/channels.conf</filename>
+  file, with the syntax accepted by <command>szap/tzap/czap</command>, or
+  have <command>scan</command> compile it for you.
+</para>
+
+<para>
+  Make sure that you have have <emphasis>only</emphasis> Free to Air
+  channels in your <filename>channels.conf</filename> file, or MPlayer
+  will hang on the others.
+</para>
+
+<para>
+  To show the first of the channels present in your list, run
+</para>
+
+<screen>
+  mplayer dvb://
+</screen>
+
+<para>
+  If you want to watch a specific channel, such as R1, run
+</para>
+
+<screen>
+  mplayer dvb://R1
+</screen>
+
+<para>
+  To change channels press the <keycap>h</keycap> (next) and
+  <keycap>k</keycap> (previous) keys, or use the OSD menu (requires
+  a working <link linkend="subosd">OSD subsystem</link>).
+</para>
+
+<para>
+  If your <filename>~/.mplayer/menu.conf</filename> contains a
+  <literal>&lt;dvbsel&gt;</literal> entry, such as the one in the example
+  file <filename>etc/dvb-menu.conf</filename> (that you can use to overwrite
+  <filename>~/.mplayer/menu.conf</filename>), the main menu will show a
+  sub-menu entry that will permit you to choose one of the channels present
+  in your <filename>channels.conf</filename>.
+</para>
+
+<para>
+  If you want to save a program to disk you can use
+</para>
+
+<screen>
+  mplayer -dumpfile r1.ts -dumpstream dvb://R1
+</screen>
+
+<para>
+  If you want to record it in a different format (re-encoding it) instead
+  you can run a command such as
+</para>
+
+<screen>
+  mencoder -o r1.avi -ovc xvid -xvidenctopts bitrate=800 -oac mp3lame -lameopts cbr:br=128 -vf ci dvb://R1
+</screen>
+
+<para>
+  Read the man page for a list of options that you can pass to the
+  DVB input module.
+</para>
 
 <formalpara>
 <title>FUTURE</title>
