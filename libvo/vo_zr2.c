@@ -170,17 +170,17 @@ static const char *normstring(int norm) {
 	return "undefined";
 }
 
-static int get_norm(strarg_t *n) {
-	if (!strncmp(n->str, "PAL", n->len)) return VIDEO_MODE_PAL;
-	if (!strncmp(n->str, "NTSC", n->len)) return VIDEO_MODE_NTSC;
-	if (!strncmp(n->str, "SECAM", n->len)) return VIDEO_MODE_SECAM;
-	if (!strncmp(n->str, "auto", n->len)) return VIDEO_MODE_AUTO;
+static int get_norm(const char *n) {
+	if (!strcmp(n, "PAL")) return VIDEO_MODE_PAL;
+	if (!strcmp(n, "NTSC")) return VIDEO_MODE_NTSC;
+	if (!strcmp(n, "SECAM")) return VIDEO_MODE_SECAM;
+	if (!strcmp(n, "auto")) return VIDEO_MODE_AUTO;
 	return -1; /* invalid */
 }
 
-static int nc(strarg_t *norm) {
-	if (get_norm(norm) == -1) {
-		ERROR("norm \"%.*s\" is not supported, choose from PAL, NTSC, SECAM and auto\n", norm->len, norm->str);
+static int nc(const char **norm) {
+	if (get_norm(*norm) == -1) {
+		ERROR("norm \"%s\" is not supported, choose from PAL, NTSC, SECAM and auto\n", *norm);
 		return 0;
 	} else return 1;
 }
@@ -191,16 +191,15 @@ static int pbc(int *prebuf) {
 }
 
 static uint32_t preinit(const char *arg) {
-	strarg_t dev_arg = { 0, NULL }, norm_arg = { 0, NULL };
 	vo_zr2_priv_t *p = &priv;
 	const char *dev = NULL;
-	char dev_arg_str[256];
+	char *dev_arg = NULL, *norm_arg = NULL;
 	int norm = VIDEO_MODE_AUTO, prebuf = 0;
 	opt_t subopts[] = { /* don't want warnings with -Wall... */
-		{ "dev",    OPT_ARG_STR,  &dev_arg,   NULL, 	       0 },
-		{ "prebuf", OPT_ARG_BOOL, &prebuf,    (opt_test_f)pbc, 0 },
-		{ "norm",   OPT_ARG_STR,  &norm_arg,  (opt_test_f)nc,  0 },
-		{ NULL,     0, 		  NULL,	      NULL, 	       0 }
+		{ "dev",    OPT_ARG_MSTRZ, &dev_arg,   NULL, 	        0 },
+		{ "prebuf", OPT_ARG_BOOL,  &prebuf,    (opt_test_f)pbc, 0 },
+		{ "norm",   OPT_ARG_MSTRZ, &norm_arg,  (opt_test_f)nc,  0 },
+		{ NULL,     0, 		   NULL,       NULL, 	        0 }
 	};
 
 	VERBOSE("preinit() called with arg: %s\n", arg);
@@ -222,15 +221,16 @@ static uint32_t preinit(const char *arg) {
 	}
 				
 	/* interpret the strings we got from subopt_parse */
-	if (norm_arg.len) norm = get_norm(&norm_arg);
-	if (dev_arg.len) {  /* produce a proper ASCIIZ from dev_arg */
-		memcpy(dev_arg_str, dev_arg.str, dev_arg.len);
-		dev_arg_str[dev_arg.len] = '\0';
-		dev = dev_arg_str;
+	if (norm_arg) {
+		norm = get_norm(norm_arg);
+		free(norm_arg);
 	}
+
+	if (dev_arg) dev = dev_arg;
 
 	dev = guess_device(dev, 1);
 	if (!dev) {
+		free(dev_arg);
 		uninit();
 		return 1;
 	}
@@ -238,10 +238,13 @@ static uint32_t preinit(const char *arg) {
 	p->vdes = open(dev, O_RDWR);
 	if (p->vdes < 0) {
 		ERROR("error opening %s: %s\n", dev, strerror(errno));
+		free(dev_arg);
 		uninit();
 		return 1;
 	}
 	
+	free(dev_arg);
+
 	/* check if we really are dealing with a zoran card */
 	if (ioctl(p->vdes, MJPIOC_G_PARAMS, &p->zp) < 0) {
 		ERROR("%s probably is not a DC10(+)/buz/lml33\n", dev);
