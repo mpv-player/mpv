@@ -1,4 +1,8 @@
 //#define ANGELPOTION
+//#define USE_DIRECTSHOW
+
+static GUID CLSID_DivxDecompressorCF={0x82CCd3E0, 0xF71A, 0x11D0,
+    { 0x9f, 0xe5, 0x00, 0x60, 0x97, 0x78, 0xaa, 0xaa}};
 
 char* get_vids_codec_name(){
 //  unsigned long fccHandler=avi_header.video.fccHandler;
@@ -6,6 +10,8 @@ char* get_vids_codec_name(){
   avi_header.yuv_supported=0;
   avi_header.yuv_hack_needed=0;
   avi_header.flipped=0;
+  avi_header.vids_guid=NULL;
+
   switch(fccHandler){
 	case mmioFOURCC('M', 'P', 'G', '4'):
 	case mmioFOURCC('m', 'p', 'g', '4'):
@@ -49,11 +55,17 @@ char* get_vids_codec_name(){
 	case mmioFOURCC('m', 'p', '4', '1'):
 	  printf("Video in DivX ;-) format\n");
           avi_header.yuv_supported=1;
+#ifdef USE_DIRECTSHOW
+          avi_header.vids_guid=&CLSID_DivxDecompressorCF;
+          return "divx_c32.ax";
+#else
           avi_header.yuv_hack_needed=1;
 #ifdef ANGELPOTION
           return "APmpg4v1.dll";
-#endif
+#else
           return "divxc32.dll";
+#endif
+#endif
 
 	case mmioFOURCC('I', 'V', '5', '0'):	    
 	case mmioFOURCC('i', 'v', '5', '0'):	 
@@ -131,6 +143,7 @@ char* get_vids_codec_name(){
 
 char* get_auds_codec_name(){
   int id=((WAVEFORMATEX*)avi_header.wf_ext)->wFormatTag;
+  avi_header.auds_guid=NULL;
   switch (id){
     	case 0x161://DivX audio
 //            ((WAVEFORMATEX*)avi_header.wf_ext)->wFormatTag=0x160; //hack

@@ -48,6 +48,18 @@
 #include "loader.h"
 #include "wine/avifmt.h"
 
+typedef struct
+{
+    long f1;
+    short f2;
+    short f3;
+    char f4[8];
+} GUID;
+
+#ifdef USE_DIRECTSHOW
+#include "DirectShow/DS_VideoDec.h"
+#endif
+
 #include "opendivx/decore.h"
 
 
@@ -116,17 +128,19 @@ typedef struct {
   BITMAPINFOHEADER bih;   // in format
   BITMAPINFOHEADER o_bih; // out format
   HIC hic;
-  void *our_out_buffer;
+  char *our_out_buffer;
   unsigned int bitrate;
   // video format flags:  (filled by codecs.c)
   char yuv_supported;   // 1 if codec support YUY2 output format
   char yuv_hack_needed; // requires for divx & mpeg4
   char no_32bpp_support; // requires for INDEO 3.x, 4.x
   char flipped;         // image is upside-down
+  GUID* vids_guid;
   // audio:
   AVIStreamHeader audio;
   char *audio_codec;
   int audio_seekable;
+  GUID* auds_guid;
   char wf_ext[64];     // in format
   WAVEFORMATEX wf;     // out format
   HACMSTREAM srcstream;
@@ -331,8 +345,8 @@ int f; // filedes
 int stream_type;
 stream_t* stream=NULL;
 int file_format=DEMUXER_TYPE_UNKNOWN;
-int has_audio=1; // audio format  0=none  1=mpeg 2=pcm 3=ac3 4=win32 5=alaw 6=msgsm
-int has_video=0; // video format  0=none  1=mpeg 2=win32 3=OpenDivX
+int has_audio=1; // audio format 0=no 1=mpeg 2=pcm 3=ac3 4=win32 5=alaw 6=msgsm
+int has_video=0; // video format 0=no 1=mpeg 2=win32/VfW 3=OpenDivX 4=w32/DShow
 //
 int audio_format=0; // override
 #ifdef ALSA_TIMER
@@ -750,8 +764,7 @@ if(has_video==2){
 //  if(avi_header.bih.biCompression==mmioFOURCC('D', 'I', 'V', 'X')) has_video=3; // Gabucino
 }
 
-switch(has_video){
- case 2: {
+if(has_video==2){
    if(!avi_header.video_codec) avi_header.video_codec=get_vids_codec_name();
    if(verbose)
      printf("win32 video codec: '%s' %s%s%s\n",avi_header.video_codec,
@@ -760,6 +773,17 @@ switch(has_video){
        avi_header.flipped?"[FLIP]":""
      );
    if(!avi_header.video_codec) exit(1); // unknown video codec
+   if(avi_header.vids_guid){
+#ifdef USE_DIRECTSHOW
+       has_video=4; // switching to DirectShow
+#else
+        printf("MPlayer was compiled without DirectShow support!\n");exit(1);
+#endif
+   }
+}
+
+switch(has_video){
+ case 2: {
    if(avi_header.yuv_supported && video_out->query_format(IMGFMT_YUY2)) out_fmt=IMGFMT_YUY2; else
    if(avi_header.no_32bpp_support && video_out->query_format(IMGFMT_BGR|32)) out_fmt=IMGFMT_BGR|24; else
    if(video_out->query_format(IMGFMT_BGR|15)) out_fmt=IMGFMT_BGR|16; else
@@ -798,6 +822,59 @@ switch(has_video){
    movie_size_y=abs(avi_header.o_bih.biHeight);
    break;
  }
+#ifdef USE_DIRECTSHOW
+ case 4: { // Win32/DirectShow
+   if(avi_header.yuv_supported && video_out->query_format(IMGFMT_YUY2)) out_fmt=IMGFMT_YUY2; else
+//   if(avi_header.no_32bpp_support && video_out->query_format(IMGFMT_BGR|32)) out_fmt=IMGFMT_BGR|24; else
+   if(video_out->query_format(IMGFMT_BGR|15)) out_fmt=IMGFMT_BGR|15; else
+   if(video_out->query_format(IMGFMT_BGR|16)) out_fmt=IMGFMT_BGR|16; else
+   if(video_out->query_format(IMGFMT_BGR|24)) out_fmt=IMGFMT_BGR|24; else
+   if(video_out->query_format(IMGFMT_BGR|32)) out_fmt=IMGFMT_BGR|32; else {
+     printf("Sorry, selected video_out device is incompatible with this codec.\n");
+     printf("(It can't show 24bpp or 32bpp RGB images. Try to run X at 24/32bpp!)\n");
+//     printf("(cannot convert between YUY2, YV12 and RGB colorspace formats)\n");
+     exit(1);
+   }
+   //if(verbose) printf("AVI out_fmt=%X\n",out_fmt);
+   if(verbose) if(out_fmt==IMGFMT_YUY2) printf("Using YUV/YUY2 video output format!\n");
+   avi_header.our_out_buffer=NULL;
+   DS_VideoDecoder_Open(avi_header.video_codec,avi_header.vids_guid, &avi_header.bih, 0, &avi_header.our_out_buffer);
+   
+   if(out_fmt==IMGFMT_YUY2)
+     DS_VideoDecoder_SetDestFmt(16,mmioFOURCC('Y', 'U', 'Y', '2'));
+//     DS_VideoDecoder_SetDestFmt(16,mmioFOURCC('Y', 'V', '1', '2'));
+   else
+     DS_VideoDecoder_SetDestFmt(out_fmt&255,0);
+
+   DS_VideoDecoder_Start();
+
+   printf("DivX setting result = %d\n", DS_SetAttr_DivX("Quality",divx_quality) );
+//   printf("DivX setting result = %d\n", DS_SetValue_DivX("Brightness",60) );
+   
+   if(verbose) printf("INFO: Win32/DShow video codec init OK!\n");
+   
+   // calculating video bitrate:
+   avi_header.bitrate=avi_header.movi_end-avi_header.movi_start-avi_header.idx_size*8;
+   if(avi_header.audio.fccType) avi_header.bitrate-=avi_header.audio.dwLength;
+   if(verbose) printf("AVI video length=%d\n",avi_header.bitrate);
+   avi_header.bitrate=((float)avi_header.bitrate/(float)avi_header.video.dwLength)
+                     *((float)avi_header.video.dwRate/(float)avi_header.video.dwScale);
+//   default_fps=(float)avi_header.video.dwRate/(float)avi_header.video.dwScale;
+   printf("VIDEO:  [%.4s]  %dx%d  %dbpp  %4.2f fps  %5.1f kbps (%4.1f kbyte/s)\n",
+    &avi_header.bih.biCompression,
+    avi_header.bih.biWidth,
+    avi_header.bih.biHeight,
+    avi_header.bih.biBitCount,
+    default_fps,
+    avi_header.bitrate*0.008f,
+    avi_header.bitrate/1024.0f );
+
+   // display info:
+   movie_size_x=avi_header.bih.biWidth;
+   movie_size_y=abs(avi_header.bih.biHeight);
+   break;
+ }
+#endif
  case 3: {  // OpenDivX
    out_fmt=IMGFMT_YV12;
    if(!video_out->query_format(out_fmt)) {
@@ -1439,6 +1516,38 @@ switch(has_video){
     
     break;
   }
+#ifdef USE_DIRECTSHOW
+  case 4: {        // W32/DirectShow
+    char* start=NULL;
+    unsigned int t=GetTimer();
+    unsigned int t2;
+    float pts1=d_video->pts;
+    int in_size=ds_get_packet(d_video,&start);
+    float pts2=d_video->pts;
+    if(in_size<0){ eof=1;break;}
+    if(in_size>max_framesize) max_framesize=in_size;
+
+//    printf("frame len = %5.4f\n",pts2-pts1);
+
+    DS_VideoDecoder_DecodeFrame(start, in_size, 0, 1);
+
+      t2=GetTimer();t=t2-t;video_time_usage+=t*0.000001f;
+        video_out->draw_frame((uint8_t **)&avi_header.our_out_buffer);
+//        video_out->flip_page();
+      t2=GetTimer()-t2;vout_time_usage+=t2*0.000001f;
+
+      ++num_frames;
+      
+      if(file_format==DEMUXER_TYPE_ASF){
+        float d=pts2-pts1;
+        if(d>0 && d<0.2) v_frame+=d;
+      } else
+        v_frame+=1.0f/default_fps; //(float)avi_header.video.dwScale/(float)avi_header.video.dwRate;
+      //v_pts+=1.0f/default_fps;   //(float)avi_header.video.dwScale/(float)avi_header.video.dwRate;
+
+    break;
+  }
+#endif
   case 2: {
     HRESULT ret;
     char* start=NULL;
