@@ -824,9 +824,14 @@ if( !(mpi->flags&MP_IMGFLAG_ALLOCATED) && !(mpi->flags&MP_IMGFLAG_DIRECT) ){
   //--------------------  Decode a frame: -----------------------
 switch(sh_video->codec->driver){
  case VFM_CINEPAK:
-   decode_cinepak(sh_video->context, start, in_size, sh_video->our_out_buffer,
-      sh_video->disp_w, sh_video->disp_h, (out_fmt==IMGFMT_YUY2)?16:(out_fmt&255));
-   blit_frame = 3;
+   if (in_size == 0)
+     blit_frame = 0;
+   else
+   {
+     decode_cinepak(sh_video->context, start, in_size, sh_video->our_out_buffer,
+       sh_video->disp_w, sh_video->disp_h, (out_fmt==IMGFMT_YUY2)?16:(out_fmt&255));
+     blit_frame = 3;
+   }
    break;
 #ifdef USE_XANIM
   case VFM_XANIM: {

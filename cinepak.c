@@ -36,7 +36,7 @@ typedef struct
 typedef struct {
 	cvid_codebook *v4_codebook[MAX_STRIPS];
 	cvid_codebook *v1_codebook[MAX_STRIPS];
-	int strip_num;
+	unsigned long strip_num;
 } cinepak_info;
 
 
@@ -392,6 +392,7 @@ unsigned long x, y, y_bottom, frame_flags, strips, cv_width, cv_height, cnum,
 long len, top_size, chunk_size;
 unsigned char *frm_ptr, *frm_end;
 int i, cur_strip, d0, d1, d2, d3, frm_stride, bpp = 3;
+int modulo;
 void (*read_codebook)(cvid_codebook *c, int mode) = read_codebook_24;
 void (*cvid_v1)(unsigned char *frm, unsigned char *end, int stride, cvid_codebook *cb) = cvid_v1_24;
 void (*cvid_v4)(unsigned char *frm, unsigned char *end, int stride, cvid_codebook *cb0,
@@ -498,7 +499,7 @@ void (*cvid_v4)(unsigned char *frm, unsigned char *end, int stride, cvid_codeboo
 		x = 0;
 		if(x1 != width) 
 			printf("CVID: Warning x1 (%ld) != width (%d)\n", x1, width);
-
+x1 = width;
 #if DBUG
 	printf("   %d) %04lx %04ld <%ld,%ld> <%ld,%ld> yt %ld  %d\n",
 		cur_strip, strip_id, top_size, x0, y0, x1, y1, y_bottom);
@@ -520,9 +521,12 @@ void (*cvid_v4)(unsigned char *frm, unsigned char *end, int stride, cvid_codeboo
 					/* -------------------- Codebook Entries -------------------- */
 				case 0x2000:
 				case 0x2200:
+					modulo = chunk_size % 6;
 					codebook = (chunk_id == 0x2200 ? v1_codebook : v4_codebook);
-					cnum = chunk_size/6;
+					cnum = (chunk_size - modulo) / 6;
 					for(i = 0; i < cnum; i++) read_codebook(codebook+i, 0);
+					while (modulo--)
+						get_byte();
 					break;
 
 				case 0x2400:
@@ -537,7 +541,7 @@ void (*cvid_v4)(unsigned char *frm, unsigned char *end, int stride, cvid_codeboo
 					codebook = (chunk_id == 0x2300 ? v1_codebook : v4_codebook);
 
 					ci = 0;
-					while(chunk_size > 0)
+					while(chunk_size > 3)
 						{
 						flag = get_long();
 						chunk_size -= 4;
