@@ -143,7 +143,7 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
 	int len2=0;
 	int x=ds_get_packet(sh_audio->ds,&start);
 	if(x<=0) break; // error
-	y=avcodec_decode_audio(sh_audio->context,(INT16*)buf,&len2,start,x);
+	y=avcodec_decode_audio(sh_audio->context,(int16_t*)buf,&len2,start,x);
 //printf("return:%d samples_out:%d bitstream_in:%d sample_sum:%d\n", y, len2, x, len); fflush(stdout);
 	if(y<0){ mp_msg(MSGT_DECAUDIO,MSGL_V,"lavc_audio: error\n");break; }
 	if(y<x) sh_audio->ds->buffer_pos+=y-x;  // put back data (HACK!)
