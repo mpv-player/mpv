@@ -119,6 +119,7 @@ Optional features:
   --disable-xanim        disable XAnim DLL support [autodetect]
   --enable-vorbis        build with OggVorbis support [autodetect]
   --disable-iconv        do not use iconv(3) function [autodetect]
+  --disable-rtc          disable RTC (/dev/rtc) on Linux [autodetect]
 
 Video:
   --enable-gl            build with OpenGL render support [autodetect]
@@ -147,6 +148,7 @@ Audio:
   --disable-alsa         disable alsa sound support [autodetect]
   --disable-sunaudio     disable Sun sound support [autodetect]
   --disable-mad          disable mad audio support [autodetect]
+  --disable-select       disable using select() on OSS audio device [enable]
 
 Miscellaneous options:
   --cc=COMPILER          use this C compiler to build MPlayer [gcc]
@@ -155,8 +157,6 @@ Miscellaneous options:
                          options needed : --enable-static="-lslang -lncurses"
   --language=xx          select a language [en]
                          (Available: $LANGUAGES)
-  --disable-select       disable audio select() support (for example, required
-                         for ALSA or Vortex2 driver) [enable]
 
 Advanced options:
   --enable-mmx           build with mmx support [autodetect]
@@ -642,6 +642,7 @@ _fbdev=no
 _dvb=auto
 _dxr3=auto
 _iconv=auto
+_rtc=auto
 _ossaudio=auto
 _mad=auto
 _vorbis=auto
@@ -717,6 +718,8 @@ for ac_option do
   --disable-dxr3)	_dxr3=no	;;
   --enable-iconv)	_iconv=yes	;;
   --disable-iconv)	_iconv=no	;;
+  --enable-rtc)	        _rtc=yes	;;
+  --disable-rtc)	_rtc=no	        ;;
   --enable-ossaudio)	_ossaudio=yes	;;
   --disable-ossaudio)	_ossaudio=no	;;
   --enable-mad)		_mad=yes	;;
@@ -1862,6 +1865,28 @@ fi
 echores "$_zlib"
 
 
+echocheck "RTC"
+if linux ; then
+  if test "$_rtc" = auto ; then
+    cat > $TMPC << EOF
+#include <sys/ioctl.h>
+#include <linux/rtc.h>
+int main(void) { return RTC_IRQP_READ; }
+EOF
+    _rtc=no
+    cc_check && _rtc=yes
+  fi
+  echores "$_rtc"
+else
+  _rtc=no
+  echores "no (linux-specific)"
+fi
+if test "$_rtc" = yes ; then
+  _def_rtc='#define HAVE_RTC 1'
+else
+  _def_rtc='#undef HAVE_RTC'
+fi
+
 echocheck "mad support"
 if test "$_mad" = auto ; then
   _mad=no
@@ -2448,6 +2473,9 @@ $_def_select
 
 /* define this to use iconv(3) function to codepage conversions */
 $_def_iconv
+
+/* define this to use RTC (/dev/rtc) for video timers (LINUX only) */
+$_def_rtc
 
 /* set up max. outburst. use 65536 for ALSA 0.5, for others 16384 is enough */
 #define MAX_OUTBURST 65536

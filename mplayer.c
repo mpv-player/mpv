@@ -75,7 +75,7 @@ int quiet=0;
 
 #define ABS(x) (((x)>=0)?(x):(-(x)))
 
-#ifdef TARGET_LINUX
+#ifdef HAVE_RTC
 #include <linux/rtc.h>
 #endif
 
@@ -601,7 +601,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
   inited_flags|=INITED_LIRC;
 #endif
 
-#ifdef TARGET_LINUX
+#ifdef HAVE_RTC
     if ((rtc_fd = open("/dev/rtc", O_RDONLY)) < 0)
 	perror ("Linux RTC init: open");
     else {
@@ -1400,7 +1400,7 @@ if(!dapsync){
 
 if(!(vo_flags&256)){ // flag 256 means: libvo driver does its timing (dvb card)
 
-#ifdef TARGET_LINUX
+#ifdef HAVE_RTC
     if(rtc_fd>=0){
 	// -------- RTC -----------
         while (time_frame > 0.000) {
