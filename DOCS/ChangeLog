@@ -2,10 +2,10 @@
 ChangeLog:
 ~~~~~~~~~~
 
-v0.12 "IdegCounter" :
+v0.17 "IdegCounter" :
   - TODO, A'rpi
 
-* v0.11 skipped, renamed to 0.12 *
+* jumped to 0.17 *
 
 v0.11-pre27-CVS:
   - updated libmpeg2 source to libmpeg2-0.2.1-CVS version

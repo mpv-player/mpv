@@ -5,8 +5,8 @@ a big hack :)
 
 The main modules:
 
-1. streamer.c: this is the input, this reads the file or the VCD.
-   what it has to know: appropriate buffering, seek, skip functions,
+1. streamer.c: this is the input, this reads the file or the VCD.  what it has
+   to know: appropriate buffering by sector, seek, skip functions,
 	 reading by bytes, or blocks with any size.
 	 The stream_t structure describes the input stream, file/device.
 
@@ -17,16 +17,39 @@ The main modules:
 	 mpeg-ps, avi, avi-ni, asf), these are in the demux_*.c files.
 	 The structure is the demuxer_t. There is only one demuxer.
 
-2.a. demuxer stream, that is DS. Its struct is demux_stream_t
-   Every channel (a/v) has one.
-	 For now, there can be 2 for each demuxer, one for the audio and one
-	 for the video.
+2.a. demux_packet_t, that is DP.
+   Contains one chunk (avi) or packet (asf,mpg). They are stored in memory as
+	 in chained list, cause of their different size.
 
-2.b. demux_packet_t, that is DP.
-   This contains one chunk (avi) or packet (asf,mpg).
-	 In the memory they are stored as chained lists, since they are of
-	 different sizes.
-	 
+2.b. demuxer stream, that is DS. Struct: demux_stream_t
+   Every channel (a/v) has one. This contains the packets for the stream (see
+	 2.a). For now, there can be 2 for each demuxer, one for the audio and
+	 one for the video.
+
+2.c. stream header. There are 2 types (for now): sh_audio_t and sh_video_t
+   This contains every parameter essential for decoding, such as input/output
+	 buffers, chosen codec, fps, etc. There are each for every stream in
+	 the file. At least one for video, if sound is present then another,
+	 but if there are more, then there'll be one structure for each.
+	 These are filled according to the header (avi/asf), or demux_mpg.c
+	 does it (mpg) if it founds a new stream. If a new stream is found,
+	 the ====> Found audio/video stream: <id>  messages is displayed.
+
+	 The chosen stream header and its demuxer are connected together
+	 (ds->sh and sh->ds) to simplify the usage. So it's enough to pass the
+	 ds or the sh, depending on the function.
+
+	 For example: we have an asf file, 6 streams inside it, 1 audio, 5
+	 video. During the reading of the header, 6 sh structs are created,
+	 1 audio and 5 video. When it starts reading the packet, it chooses
+	 the first found audio & video stream, and sets the sh pointers of
+	 d_audio and d_video according to them. So later it reads only these
+	 streams. Of course the user can force choosing a specific stream with
+	 -vid and -aid switches.
+	 A good example for this is the DVD, where the english stream is not
+	 always the first, so every VOB has different language :)
+	 That's when we have to use for example the -aid 128 switch.
+
   Now, how this reading works?
 	 - demuxer.c/demux_read_data() is called, it gets how many bytes,
 	   and where (memory address), would we like to read, and from which
@@ -105,13 +128,66 @@ Now, go on:
 	 (see the beginning of 3.)
 	 And they call the appropriate demuxer, to get the compressed data.
 	 (see 2.)
+	 We have to pass the appropriate stream header as parameter (sh_audio/
+	 sh_video), this should contain all the needed info for decoding
+	 (the demuxer too: sh->ds).
+   The codecs' seprating is underway, the audio is already done, the video is
+	 work-in-progress. The aim is that mplayer.c won't have to know
+	 which are the codecs and how to use 'em, instead it should call
+	 an init/decode audio/video function.
 
-5. libvo: this displays the frame. There are 2 different output routines in it:
+5. libvo: this displays the frame.
+   The constants for different pixelformats are defined in img_format.h,
+	 their usage is mandatory.
 
-5.a draw_slice(): this displays YV12 pictures (3 frames, a full sized which
-	 contains brightness, and 2 with 1/4 sizes, which contain the colour
-	 info). MPEG codecs (libmpeg2, opendivx) use this. This doesn't have
+   Each vo driver _has_ to implement these:
+
+   query_format()  -  queries if a given pixelformat is supported.
+		      return value:   flags:
+			0x1  -  supported (by hardware or conversion)
+			0x2  -  supported (by hardware, without conversion)
+			0x4  -  sub/osd supported (has draw_alpha)
+   IMPORTANT: it's mandatorial that every vo driver support the YV12 format,
+	 and one (or both) of BGR15 and BGR24, with conversion, if needed.
+	 If these aren't supported, not every codec will work! The mpeg codecs
+	 can output only YV12, and the older win32 DLLs only 15 and 24bpp.
+	 There is a fast MMX-using 15->16bpp converter, so it's not a
+	 significant speed-decrease!
+
+    The BPP table, if the driver can't change bpp:
+	 current bpp		has to accept these
+	     15				15
+	     16				15,16
+	     24				24
+	     24,32			24,32
+
+    If it can change bpp (for example DGA 2, fbdev, svgalib), then if possible
+	 we have to change to the desired bpp. If the hardware doesn't support,
+	 we have to change to the one closest to it, and do conversion!
+
+    init()  -  this is called before displaying of the first frame -
+	 initializing buffers, etc.
+
+    draw_slice(): this displays YV12 pictures (3 planes, one full sized that
+	 contains brightness (Y), and 2 quarter-sized which the colour-info
+	 (U,V). MPEG codecs (libmpeg2, opendivx) use this. This doesn't have
 	 to display the whole frame, only update small parts of it.
-5.b draw_frame(): this is the older interface, this displays only complete
+
+    draw_frame(): this is the older interface, this displays only complete
 	 frames, and can do only packed format (YUY2, RGB/BGR).
 	 Win32 codecs use this (DivX, Indeo, etc).
+
+    draw_alpha(): this displays subtitles and OSD.
+	 It's a bit tricky to use it, since it's not a part of libvo API,
+	 but a callback-style stuff. The flip_page() has to call
+	 vo_draw_text(), so that it passes the size of the screen and the
+	 corresponding draw_alpha() implementation for the pixelformat
+	 (function pointer). The vo_draw_text() checks the characters to draw,
+	 and calls draw_alpha() for each.
+	 As a help, osd.c contains draw_alpha for each pixelformats, use this
+	 if possible!
+
+    flip_page(): this is called after each frame, this diplays the buffer for
+	 real. This is 'swapbuffers' when double-buffering.
+
+
