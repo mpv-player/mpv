@@ -872,6 +872,11 @@ EOF
 	_march='-mcpu=750'
 	_mcpu='-mtune=750'
     fi
+    if linux ; then
+	if test -n "`$_cpuinfo | grep altivec`"; then
+	    _altivec=yes
+	fi
+    fi
     if darwin ; then
 	if [ `sysctl -n hw.vectorunit` -eq 1 ]; then
 	    _altivec=yes
