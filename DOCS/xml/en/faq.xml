@@ -792,6 +792,17 @@ connector in <emphasis role="bold">before</emphasis> you power on your notebook
 or use the <option>-nortc</option> option.
 </para></answer>
 </qandaentry>
+<qandaentry> 
+<question><para>
+While playing a movie it suddenly gets jerky and I get     
+the following message:
+<screen>Badly interleaved AVI file detected - switching to -ni mode...</screen>
+</para></question>
+<answer><para>
+Badly interleaved files and <option>-cache</option> don't work well together.       
+Try <option>-nocache</option>.
+</para></answer>
+</qandaentry>
 </qandadiv>
 
 <qandadiv id="faq-driver">

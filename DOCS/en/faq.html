@@ -213,6 +213,7 @@
   
     <DT>Q: I'd like to compile MPlayer on Minix!</DT>
     <DD>A: Me too. :)</DD>
+  <DD>&nbsp;</DD>
 
 </DL>
 
@@ -381,6 +382,7 @@
 
   <DT>Q: How can I run MPlayer in the background?</DT>
   <DD>A: Use: <CODE>mplayer &lt;options&gt; &lt;filename&gt; &lt; /dev/null &amp;</CODE></DD>
+  <DD>&nbsp;</DD>
 
 </DL>
 
@@ -539,6 +541,7 @@
   <DD>A: This is again a power management effect (see above). Plug the external
     power connector in <B>before</B> you power on your notebook or use the
     <CODE>-nortc</CODE> option.</DD>
+  <DD>&nbsp;</DD>
 
 </DL>
 
@@ -641,6 +644,7 @@
     enlightenment: SDL's <CODE>x11</CODE> target uses xv when available, you
     don't have to worry about it ... Note: you can force/disable Xv via SDL
     using <CODE>-forcexv</CODE> and <CODE>-noxv</CODE></DD>
+  <DD>&nbsp;</DD>
 
 </DL>
 
@@ -704,6 +708,15 @@
   <DD>A: Use the <CODE>-cache</CODE> option (described in the man page)
     and try enabling DMA for the DVD drive with the hdparm tool (described in
     the <A HREF="cd-dvd.html#cd">CD chapter</A> of the documentation).</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: While playing a movie it suddenly gets jerky and I get
+    the following message:<BR>
+    <CODE>Badly interleaved AVI file detected - switching to -ni
+    mode...</CODE>
+  <DD>A: Badly interleaved files and <CODE>-cache</CODE> don't work well
+    together. Try <CODE>-nocache</CODE>.</DD>
+  <DD>&nbsp;</DD>
 
 </DL>
 
