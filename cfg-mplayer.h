@@ -73,6 +73,10 @@ extern char * skinName;
 extern int use_old_pp;
 #endif
 
+#ifdef HAVE_XINERAMA
+extern int xinerama_screen;
+#endif
+
 /* from libvo/aspect.c */
 extern float monitor_aspect;
 
@@ -259,6 +263,10 @@ struct config conf[]={
 #ifdef HAVE_X11
 	{"wid", &WinID, CONF_TYPE_INT, 0, 0, 0},
 	{"rootwin", &WinID, CONF_TYPE_FLAG, 0, -1, 0},
+#endif
+
+#ifdef HAVE_XINERAMA
+	{"xineramascreen", &xinerama_screen, CONF_TYPE_INT, CONF_RANGE, 0, 32},
 #endif
 
 #define MAIN_CONF

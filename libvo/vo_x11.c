@@ -298,6 +298,9 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
     XSelectInput( mDisplay,mywindow,StructureNotifyMask );
     XSetStandardProperties( mDisplay,mywindow,hello,hello,None,NULL,0,&hint );
     XMapWindow( mDisplay,mywindow );
+#ifdef HAVE_XINERAMA
+   vo_x11_xinerama_move(mDisplay,mywindow);
+#endif
     do { XNextEvent( mDisplay,&xev ); } while ( xev.type != MapNotify || xev.xmap.event != mywindow );
     XSelectInput( mDisplay,mywindow,NoEventMask );
 

@@ -45,6 +45,10 @@ LIBVO_EXTERN( xmga )
 #include <X11/Xutil.h>
 #include <errno.h>
 
+#ifdef HAVE_XINERAMA
+#include <X11/extensions/Xinerama.h>
+#endif
+
 #include "x11_common.h"
 #include "sub.h"
 #include "aspect.h"
@@ -139,6 +143,31 @@ static void set_window(){
 
          mDrawColorKey();
 
+#ifdef HAVE_XINERAMA
+		 if(XineramaIsActive(mDisplay))
+		 {
+		 	XineramaScreenInfo *screens;
+		 	int num_screens;
+		 	int i;
+
+		 	screens = XineramaQueryScreens(mDisplay,&num_screens);
+
+		 	/* find the screen we are on */
+		 	i = 0;
+		 	while(!(screens[i].x_org <= drwcX && screens[i].y_org <= drwcY &&
+		 	       screens[i].x_org + screens[i].width >= drwcX &&
+		 	       screens[i].y_org + screens[i].height >= drwcY ))
+		 	{
+		 		i++;
+		 	}
+
+		 	/* set drwcX and drwcY to the right values */
+		 	drwcX = drwcX - screens[i].x_org;
+		 	drwcY = drwcY - screens[i].y_org;
+		 	XFree(screens);
+		 }
+
+#endif
          mga_vid_config.x_org=drwcX;
          mga_vid_config.y_org=drwcY;
          mga_vid_config.dest_width=drwWidth;

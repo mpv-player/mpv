@@ -48,6 +48,12 @@ int mLocalDisplay;
 /* output window id */
 int WinID=-1;
 
+#ifdef HAVE_XINERAMA
+int xinerama_screen = 0;
+int xinerama_x = 0;
+int xinerama_y = 0;
+#endif
+
 void vo_hidecursor ( Display *disp , Window win )
 {
 	Cursor no_ptr;
@@ -149,13 +155,15 @@ int vo_init( void )
   XineramaScreenInfo *screens;
   int num_screens;
 
-  mScreen = 0;
-
   screens = XineramaQueryScreens(mDisplay, &num_screens);
+  if(xinerama_screen >= num_screens) xinerama_screen = 0;
   if (! vo_screenwidth)
-    vo_screenwidth=screens[mScreen].width;
+    vo_screenwidth=screens[xinerama_screen].width;
   if (! vo_screenheight)
-    vo_screenheight=screens[mScreen].height;
+    vo_screenheight=screens[xinerama_screen].height;
+  xinerama_x = screens[xinerama_screen].x_org;
+  xinerama_y = screens[xinerama_screen].y_org;
+
   XFree(screens);
   }
  else
@@ -482,15 +490,10 @@ void saver_off(Display *mDisplay) {
 #ifdef HAVE_XINERAMA
 void vo_x11_xinerama_move(Display *dsp, Window w)
 {
-	XineramaScreenInfo *screens;
-	int num_screens;
-
 	if(XineramaIsActive(dsp))
 	{
-		screens = XineramaQueryScreens(dsp,&num_screens);
-		/* printf("XXXX Xinerama screen: x: %hd y: %hd\n",screens[mScreen].x_org,screens[mScreen].y_org); */
-		XMoveWindow(dsp,w,screens[mScreen].x_org,screens[mScreen].y_org);
-		XFree(screens);
+		 /* printf("XXXX Xinerama screen: x: %hd y: %hd\n",xinerama_x,xinerama_y); */
+		XMoveWindow(dsp,w,xinerama_x,xinerama_y);
 	}
 }
 #endif

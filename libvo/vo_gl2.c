@@ -691,6 +691,9 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	/* Map window. */
 
 	XMapWindow(mDisplay, mywindow);
+#ifdef HAVE_XINERAMA
+	vo_x11_xinerama_move(mDisplay,mywindow);
+#endif
         XClearWindow(mDisplay,mywindow);
 
 	/* Wait for map. */
