@@ -3148,6 +3148,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	    osd_show_vobsub_changed = sh_video->fps;
 	vobsub_id = new_id;
     }
+#ifdef USE_DVDREAD
     if (vo_spudec && stream->type == STREAMTYPE_DVD)
     {
 	int new_id = dvdsub_id + 1;
@@ -3160,6 +3161,8 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	d_dvdsub->id = dvdsub_id = new_id;
 	spudec_reset(vo_spudec);
     }
+#endif
+#ifdef HAVE_OGGVORBIS
     if (d_dvdsub && demuxer->type == DEMUXER_TYPE_OGG)
     {
 	int new_id = dvdsub_id + 1;
@@ -3172,6 +3175,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	dvdsub_id = new_id;
 	d_dvdsub->id = demux_ogg_sub_id(new_id);
     }
+#endif
         break;
     case MP_CMD_SUB_FORCED_ONLY:
       if (vo_spudec) {
