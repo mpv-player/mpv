@@ -16,10 +16,6 @@
 #include "ad_internal.h"
 #include "wine/windef.h"
 
-#ifdef USE_MACSHLB
-#include <CoreServices/CoreServices.h>
-#endif
-
 static ad_info_t info =  {
 	"RealAudio decoder",
 	"realaud",
@@ -212,112 +208,6 @@ static int load_syms_windows(char *path)
 #endif
 
 
-#ifdef USE_MACSHLB
-/*
- Helper function to create a function pointer (from a null terminated (!)
- pascal string) like GetProcAddress(). Some assembler is required due
- to different calling conventions, for further details, see 
- http://developer.apple.com/ samplecode/CFM_MachO_CFM/listing1.html .
-
- Caller is expected to DisposePtr(mfp).
- N.B.: Code is used by vd_realaud.c as well.
-*/
-void *load_one_sym_mac(char *symbolName, CFragConnectionID *connID) {
-    OSErr err;
-    Ptr symbolAddr;
-    CFragSymbolClass symbolClass;
-    UInt32  *mfp;
-    char realname[255];
-    
-    if (strlen(symbolName) > 255)
-    {
-	mp_msg(MSGT_DECVIDEO, MSGL_V, "FindSymbol symbolname overflow\n");
-	return NULL;
-    }
-    
-    snprintf(realname, 255, "%c%s", strlen(symbolName), symbolName);
-
-    if ( (err = FindSymbol( *connID, realname, 
-                            &symbolAddr, &symbolClass )) != noErr ) {
-        mp_msg(MSGT_DECVIDEO,MSGL_V,"FindSymbol( \"%s\" ) failed with error code %d.\n", symbolName + 1, err );
-        return NULL;
-    }
-
-    if ( (mfp = (UInt32 *)NewPtr( 6 * sizeof(UInt32) )) == nil )
-        return NULL;
-
-    mfp[0] = 0x3D800000 | ((UInt32)symbolAddr >> 16);
-    mfp[1] = 0x618C0000 | ((UInt32)symbolAddr & 0xFFFF);
-    mfp[2] = 0x800C0000;
-    mfp[3] = 0x804C0004;
-    mfp[4] = 0x7C0903A6;
-    mfp[5] = 0x4E800420;
-    MakeDataExecutable( mfp, 6 * sizeof(UInt32) );
-
-    return( mfp );
-}
-
-static int load_syms_mac(char *path)
-{
-    Ptr mainAddr;
-    OSStatus status;
-    FSRef fsref;
-    FSSpec fsspec;
-    OSErr err;
-    Str255 errMessage;
-    CFragConnectionID *connID;
-
-    mp_msg(MSGT_DECVIDEO, MSGL_INFO, "opening mac shlb '%s'\n", path);
-
-    if ( (connID = (CFragConnectionID *)NewPtr( sizeof( CFragConnectionID ))) == nil ) {
-        mp_msg(MSGT_DECVIDEO,MSGL_WARN,"NewPtr() failed.\n" );
-        return 0;
-    }
-
-    if ( (status = FSPathMakeRef( path, &fsref, NULL )) != noErr ) {
-        mp_msg(MSGT_DECVIDEO,MSGL_WARN,"FSPathMakeRef() failed with error %d.\n", status );
-        return 0;
-    }
-
-    if ( (status = FSGetCatalogInfo( &fsref, kFSCatInfoNone, NULL, NULL, &fsspec, NULL )) != noErr ) {
-        mp_msg(MSGT_DECVIDEO,MSGL_WARN,"FSGetCatalogInfo() failed with error %d.\n", status );
-        return 0;
-    }
-
-    if ( (err = GetDiskFragment( &fsspec, 0, kCFragGoesToEOF, NULL, kPrivateCFragCopy, connID, &mainAddr, errMessage )) != noErr ) {
-
-        p2cstrcpy( errMessage, errMessage );
-        mp_msg(MSGT_DECVIDEO,MSGL_WARN,"GetDiskFragment() failed with error %d: %s\n", err, errMessage );
-        return 0;
-    }
-
-    raCloseCodec = load_one_sym_mac( "RACloseCodec", connID);
-    raDecode = load_one_sym_mac("RADecode", connID);
-    raFlush = load_one_sym_mac("RAFlush", connID);
-    raFreeDecoder = load_one_sym_mac("RAFreeDecoder", connID);
-    raGetFlavorProperty = load_one_sym_mac("RAGetFlavorProperty", connID);
-    raOpenCodec = load_one_sym_mac("RAOpenCodec", connID);
-    raOpenCodec2 = load_one_sym_mac("RAOpenCodec2", connID);
-    raInitDecoder = load_one_sym_mac("RAInitDecoder", connID);
-    raSetFlavor = load_one_sym_mac("RASetFlavor", connID);
-    raSetDLLAccessPath = load_one_sym_mac("SetDLLAccessPath", connID);
-    raSetPwd = load_one_sym_mac("RASetPwd", connID); // optional, used by SIPR
-
-    if (raCloseCodec && raDecode && /*raFlush && */raFreeDecoder &&
-    raGetFlavorProperty && (raOpenCodec || raOpenCodec2) && raSetFlavor &&
-    /*raSetDLLAccessPath &&*/ raInitDecoder)
-    {
-    rv_handle = connID;
-    return 1;
-    }
-
-    mp_msg(MSGT_DECAUDIO,MSGL_WARN,"Cannot resolve symbols - incompatible shlb: %s\n",path);
-    (void)CloseConnection(connID);
-    return 0;
-}
-
-#endif
-
 static int preinit(sh_audio_t *sh){
   // let's check if the driver is available, return 0 if not.
   // (you should do that if you use external lib(s) which is optional)
@@ -333,9 +223,6 @@ static int preinit(sh_audio_t *sh){
     /* first try to load linux dlls, if failed and we're supporting win32 dlls,
        then try to load the windows ones */
       
-#ifdef USE_MACSHLB
-    if (strstr(sh->codec->dll,".shlb") && !load_syms_mac(path))
-#endif
 #ifdef HAVE_LIBDL       
     if (strstr(sh->codec->dll,".dll") || !load_syms_linux(path))
 #endif
@@ -409,7 +296,7 @@ static int preinit(sh_audio_t *sh){
 	((short*)(sh->wf+1))[4], // codec data length
 	((char*)(sh->wf+1))+10 // extras
     };
-#if defined(USE_WIN32DLL) || defined(USE_MACSHLB)
+#ifdef USE_WIN32DLL
     wra_init_t winit_data={
 	sh->wf->nSamplesPerSec,
 	sh->wf->wBitsPerSample,
@@ -421,16 +308,13 @@ static int preinit(sh_audio_t *sh){
 	((char*)(sh->wf+1))+10 // extras
     };
 #endif
-#ifdef USE_MACSHLB
-	result=raInitDecoder(sh->context,&winit_data);
-#else
 #ifdef USE_WIN32DLL
     if (dll_type == 1)
 	result=wraInitDecoder(sh->context,&winit_data);
     else
 #endif
     result=raInitDecoder(sh->context,&init_data);
-#endif
+
     if(result){
       mp_msg(MSGT_DECAUDIO,MSGL_WARN,"Decoder init failed, error code: 0x%X\n",result);
       return 0;
@@ -517,20 +401,6 @@ static void uninit(sh_audio_t *sh){
     if (raFreeDecoder) raFreeDecoder(sh->context);
     if (raCloseCodec) raCloseCodec(sh->context);
 
-#ifdef USE_MACSHLB
-    if (rv_handle){
-      (void)CloseConnection(rv_handle);
-      DisposePtr((Ptr)rv_handle);
-    }
-    if (raCloseCodec) DisposePtr((Ptr)raCloseCodec);
-    if (raDecode) DisposePtr((Ptr)raDecode);
-    if (raFlush) DisposePtr((Ptr)raFlush);
-    if (raFreeDecoder) DisposePtr((Ptr)raFreeDecoder);
-    if (raGetFlavorProperty) DisposePtr((Ptr)raGetFlavorProperty);
-    if (raOpenCodec) DisposePtr((Ptr)raOpenCodec);
-    if (raOpenCodec2) DisposePtr((Ptr)raOpenCodec2);
-    if (raInitDecoder) DisposePtr((Ptr)raInitDecoder);
-#endif
 
 #ifdef USE_WIN32DLL
     if (dll_type == 1)

@@ -193,7 +193,6 @@ Codecs:
   --enable-jpeg		 enable jpeg input/output support [autodetect]
   --enable-liblzo	 enable external liblzo support [autodetect]
   --disable-win32        disable Win32 DLL support [autodetect]
-  --disable-macshlb      disable Mac OS X SHLB support [autodetect]
   --disable-dshow        disable Win32/DirectShow support [autodetect]
   --disable-qtx          disable Quicktime codecs [autodetect]
   --disable-xanim        disable XAnim DLL support [autodetect]
@@ -1319,7 +1318,6 @@ _sunaudio=auto
 _alsa=auto
 _fastmemcpy=yes
 _unrarlib=yes
-_macshlb=auto
 _win32=auto
 _dshow=yes
 _select=yes
@@ -1729,8 +1727,6 @@ for ac_option do
   --disable-mmx) # 3Dnow! and MMX2 require MMX
         _3dnow=no _3dnowex=no _mmx=no _mmx2=no ;;
 
-  --enable-macshlb) _macshlb=yes ;;
-  --disable-macshlb) _macshlb=no ;;
   --enable-win32) _win32=yes ;;
   --disable-win32) _win32=no _dshow=no ;;
   --enable-dshow) _win32=yes _dshow=yes ;;
@@ -5224,21 +5220,6 @@ else
   _ld_faad=
 fi
 
-echocheck "MacOS X SHLB (shared lib) support"
-if test "$_macshlb" = auto ; then
-  if test "$_macosx" = yes ; then
-    _macshlb=yes
-  else
-    _macshlb=no
-  fi
-fi
-echores "$_macshlb"
-if test "$_macshlb" = yes ; then
-  _def_macshlb='#define USE_MACSHLB 1'
-else
-  _def_macshlb='#undef USE_MACSHLB'
-fi
-
 if test "$_win32" = auto ; then
   if x86 ; then
     qnx && _win32=no
@@ -5382,7 +5363,7 @@ fi
 echocheck "RealPlayer DLL"
 if test "$_real" = auto ; then
   _real=no
-  if test "$_dl" = yes || test "$_win32" = yes || test "$_macshlb" = yes ; then
+  if test "$_dl" = yes || test "$_win32" = yes ; then
 #  if test "$_dl" = yes  ; then
     if linux || freebsd || netbsd || win32 || darwin ; then
       _real=yes
@@ -6845,9 +6826,6 @@ $_def_dshow
 
 /* Mac OS X specific features */
 $_def_macosx
-
-/* Mac OS X SHLB support */
-$_def_macshlb
 
 /* Build our Win32-loader */
 $_def_win32_loader
