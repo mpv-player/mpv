@@ -55,11 +55,13 @@
 #define vo_wm_WMakerStyle 4
 
 int ice_layer=12;
+int stop_xscreensaver=0;
 
 extern int verbose;
 
 static int dpms_disabled=0;
 static int timeout_save=0;
+static int xscreensaver_was_running=0;
 
 char* mDisplayName=NULL;
 Display* mDisplay=NULL;
@@ -798,6 +800,9 @@ void saver_on(Display *mDisplay) {
 	XGetScreenSaver(mDisplay, &timeout_save, &interval, &prefer_blank, &allow_exp);
     }
 
+    if (xscreensaver_was_running && stop_xscreensaver)
+       system("xscreensaver -no-splash &");
+
 }
 
 void saver_off(Display *mDisplay) {
@@ -824,6 +829,7 @@ void saver_off(Display *mDisplay) {
     XGetScreenSaver(mDisplay, &timeout_save, &interval, &prefer_blank, &allow_exp);
     if (timeout_save)
 	XSetScreenSaver(mDisplay, 0, interval, prefer_blank, allow_exp);
+    xscreensaver_was_running = stop_xscreensaver && ! system("xscreensaver-command -exit");
 		    // turning off screensaver
 }
 
