@@ -440,7 +440,7 @@ static int rtsp_get_answers(rtsp_t *s) {
       } else
       {
 #ifdef LOG
-        printf("rtsp: setting session id to: %s\n", s->buf);
+        printf("rtsp: setting session id to: %s\n", buf);
 #endif
         s->session=strdup(buf);
       }
