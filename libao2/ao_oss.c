@@ -283,20 +283,15 @@ ac3_retry:
   if (oss_format == -1) {
 #ifdef WORDS_BIGENDIAN
     oss_format=AFMT_S16_BE;
-    format=AF_FORMAT_S16_BE;
 #else
     oss_format=AFMT_S16_LE;
-    format=AF_FORMAT_S16_LE;
 #endif
+    format=AF_FORMAT_S16_NE;
   }
   if( ioctl(audio_fd, SNDCTL_DSP_SETFMT, &oss_format)<0 ||
       oss_format != format2oss(format)) if(format == AF_FORMAT_AC3){
     mp_msg(MSGT_AO,MSGL_WARN, MSGTR_AO_OSS_CantSetAC3, dsp);
-#ifdef WORDS_BIGENDIAN
-    format=AF_FORMAT_S16_BE;
-#else
-    format=AF_FORMAT_S16_LE;
-#endif
+    format=AF_FORMAT_S16_NE;
     goto ac3_retry;
   }
 #if 0
