@@ -577,7 +577,12 @@ static void mach64_vid_display_video( void )
     mach64_fifo_wait(3);
     OUTREG(OVERLAY_GRAPHICS_KEY_MSK, besr.graphics_key_msk);
     OUTREG(OVERLAY_GRAPHICS_KEY_CLR, besr.graphics_key_clr);
-    OUTREG(OVERLAY_KEY_CNTL,0x50);
+//    OUTREG(OVERLAY_VIDEO_KEY_MSK, 0x80);
+//    OUTREG(OVERLAY_VIDEO_KEY_CLR, 0x80);
+    if(besr.ckey_on)
+    	OUTREG(OVERLAY_KEY_CNTL,VIDEO_KEY_FN_TRUE|GRAPHIC_KEY_FN_EQ|CMP_MIX_AND);
+    else
+    	OUTREG(OVERLAY_KEY_CNTL,VIDEO_KEY_FN_TRUE|GRAPHIC_KEY_FN_TRUE|CMP_MIX_AND);
 
     mach64_wait_for_idle();
     vf = INREG(VIDEO_FORMAT);

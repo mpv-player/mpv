@@ -1559,6 +1559,19 @@ This means that this sources don't support ISA and VLB cards */
 #define OVERLAY_GRAPHICS_KEY_CLR BlockIOTag(0x104u)
 #define OVERLAY_GRAPHICS_KEY_MSK BlockIOTag(0x105u)
 #define OVERLAY_KEY_CNTL	BlockIOTag(0x106u)
+#	define VIDEO_KEY_FN_MASK		0x00000007L
+#	define VIDEO_KEY_FN_FALSE		0x00000000L
+#	define VIDEO_KEY_FN_TRUE		0x00000001L
+#	define VIDEO_KEY_FN_NE			0x00000004L
+#	define VIDEO_KEY_FN_EQ			0x00000005L // EQ and NE are exchanged relative to radeon
+#	define GRAPHIC_KEY_FN_MASK		0x00000070L
+#	define GRAPHIC_KEY_FN_FALSE		0x00000000L
+#	define GRAPHIC_KEY_FN_TRUE		0x00000010L
+#	define GRAPHIC_KEY_FN_NE		0x00000040L
+#	define GRAPHIC_KEY_FN_EQ		0x00000050L // EQ and NE are exchanged relative to radeon
+#	define CMP_MIX_MASK			0x00000100L
+#	define CMP_MIX_OR			0x00000000L
+#	define CMP_MIX_AND			0x00000100L   
 /*	?			BlockIOTag(0x107u) */
 #define OVERLAY_SCALE_INC	BlockIOTag(0x108u)
 #define OVERLAY_SCALE_CNTL	BlockIOTag(0x109u)
