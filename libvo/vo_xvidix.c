@@ -286,7 +286,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
                    "Sorry, this (%d) color depth is not supported\n",
                    vo_depthonscreen);
     }
-    mp_msg(MSGT_VO, MSGL_INFO, "Using colorkey: %x\n", colorkey);
+    mp_msg(MSGT_VO, MSGL_V, "Using colorkey: %x\n", colorkey);
 
     aspect(&d_width, &d_height, A_NOZOOM);
 

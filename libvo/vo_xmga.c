@@ -165,7 +165,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
                    vo_depthonscreen);
             return -1;
     }
-    mp_msg(MSGT_VO, MSGL_INFO, "Using colorkey: %x\n", colorkey);
+    mp_msg(MSGT_VO, MSGL_V, "Using colorkey: %x\n", colorkey);
 
     inited = 1;
 

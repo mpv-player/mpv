@@ -462,7 +462,7 @@ void MP3_Init(){
 
     init_layer2();
     init_layer3(fr.down_sample_sblimit);
-    mp_msg(MSGT_DECAUDIO,MSGL_INFO,"MP3lib: init layer2&3 finished, tables done\n");
+    mp_msg(MSGT_DECAUDIO,MSGL_V,"MP3lib: init layer2&3 finished, tables done\n");
 }
 
 #if 0

@@ -94,7 +94,7 @@ sh_audio_t* new_sh_audio(demuxer_t *demuxer,int id){
 }
 
 void free_sh_audio(sh_audio_t* sh){
-    mp_msg(MSGT_DEMUXER,MSGL_V,"DEMUXER: freeing sh_audio at %p  \n",sh);
+    mp_msg(MSGT_DEMUXER,MSGL_DBG2,"DEMUXER: freeing sh_audio at %p\n",sh);
     if(sh->wf) free(sh->wf);
     free(sh);
 }
@@ -117,7 +117,7 @@ sh_video_t* new_sh_video(demuxer_t *demuxer,int id){
 }
 
 void free_sh_video(sh_video_t* sh){
-    mp_msg(MSGT_DEMUXER,MSGL_V,"DEMUXER: freeing sh_video at %p  \n",sh);
+    mp_msg(MSGT_DEMUXER,MSGL_DBG2,"DEMUXER: freeing sh_video at %p\n",sh);
     if(sh->bih) free(sh->bih);
     free(sh);
 }
@@ -164,7 +164,7 @@ extern void demux_close_tv(demuxer_t *demuxer);
 
 void free_demuxer(demuxer_t *demuxer){
     int i;
-    mp_msg(MSGT_DEMUXER,MSGL_V,"DEMUXER: freeing demuxer at %p  \n",demuxer);
+    mp_msg(MSGT_DEMUXER,MSGL_DBG2,"DEMUXER: freeing demuxer at %p\n",demuxer);
     switch(demuxer->type) {
     case DEMUXER_TYPE_PVA:
       demux_close_pva(demuxer); break;

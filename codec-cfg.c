@@ -503,10 +503,10 @@ int parse_codec_cfg(char *cfgfile)
 #endif
 	}
 	
-	mp_msg(MSGT_CODECCFG,MSGL_INFO,MSGTR_ReadingFile, cfgfile);
+	mp_msg(MSGT_CODECCFG,MSGL_V,MSGTR_ReadingFile, cfgfile);
 
 	if ((fp = fopen(cfgfile, "r")) == NULL) {
-		mp_msg(MSGT_CODECCFG,MSGL_ERR,MSGTR_CantOpenFileError, cfgfile, strerror(errno));
+		mp_msg(MSGT_CODECCFG,MSGL_V,MSGTR_CantOpenFileError, cfgfile, strerror(errno));
 		return 0;
 	}
 

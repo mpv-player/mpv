@@ -973,7 +973,7 @@ int gui_no_filename=0;
   mp_msg_init();
   mp_msg_set_level(MSGL_STATUS);
 
-  mp_msg(MSGT_CPLAYER,MSGL_INFO, "MPlayer " VERSION " (C) 2000-2004 MPlayer Team\n\n");
+  mp_msg(MSGT_CPLAYER,MSGL_INFO, "MPlayer " VERSION " (C) 2000-2004 MPlayer Team\n");
   /* Test for cpu capabilities (and corresponding OS support) for optimizing */
   GetCpuCaps(&gCpuCaps);
 #ifdef ARCH_X86
@@ -1119,7 +1119,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 	mp_msg(MSGT_CPLAYER,MSGL_HINT,MSGTR_CopyCodecsConf);
         exit_player_with_rc(NULL, 0);
       }
-      mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_BuiltinCodecsConf);
+      mp_msg(MSGT_CPLAYER,MSGL_V,MSGTR_BuiltinCodecsConf);
     }
   }
   free( mem_ptr ); // release the buffer created by get_path()
@@ -1275,7 +1275,7 @@ if (edl_check_mode() == EDL_ERROR && edl_filename)
     	    close (rtc_fd);
 	    rtc_fd = -1;
 	} else
-	    mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_UsingRTCTiming, irqp);
+	    mp_msg(MSGT_CPLAYER, MSGL_V, MSGTR_UsingRTCTiming, irqp);
     }
   }
 #ifdef HAVE_NEW_GUI
@@ -1285,7 +1285,7 @@ if (edl_check_mode() == EDL_ERROR && edl_filename)
 #endif
     if(rtc_fd<0)
 #endif
-      mp_msg(MSGT_CPLAYER, MSGL_INFO, "Using %s timing\n",
+      mp_msg(MSGT_CPLAYER, MSGL_V, "Using %s timing\n",
 	     softsleep?"software":timer_name);
 
 #ifdef USE_TERMCAP
@@ -1439,7 +1439,6 @@ if(!noconsolecontrols && !slave_mode){
 #endif
 //---------------------------------------------------------------------------
 
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,"\n");
     if(filename) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_Playing, filename);
 
 //==================== Open VOB-Sub ============================

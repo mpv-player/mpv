@@ -230,6 +230,7 @@ void fstype_help(void)
            "use _NETWM_STATE_STAYS_ON_TOP hint if available");
     mp_msg(MSGT_VO, MSGL_INFO,
            "You can also negate the settings with simply putting '-' in the beginning");
+    mp_msg(MSGT_VO, MSGL_INFO, "\n\n");
 }
 
 static void fstype_dump(int fstype)
@@ -1646,7 +1647,7 @@ void saver_on(Display * mDisplay)
                 DPMSInfo(mDisplay, &state, &onoff);
                 if (onoff)
                 {
-                    mp_msg(MSGT_VO, MSGL_INFO,
+                    mp_msg(MSGT_VO, MSGL_V,
                            "Successfully enabled DPMS\n");
                 } else
                 {
@@ -1701,7 +1702,7 @@ void saver_off(Display * mDisplay)
         {
             Status stat;
 
-            mp_msg(MSGT_VO, MSGL_INFO, "Disabling DPMS\n");
+            mp_msg(MSGT_VO, MSGL_V, "Disabling DPMS\n");
             dpms_disabled = 1;
             stat = DPMSDisable(mDisplay);       // monitor powersave off
             mp_msg(MSGT_VO, MSGL_V, "DPMSDisable stat: %d\n", stat);

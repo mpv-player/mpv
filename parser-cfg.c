@@ -42,7 +42,7 @@ int m_config_parse_config_file(m_config_t* config, char *conffile)
 	assert(config != NULL);
 	//	assert(conf_list != NULL);
 #endif
-	mp_msg(MSGT_CFGPARSER,MSGL_INFO,"Reading config file %s", conffile);
+	mp_msg(MSGT_CFGPARSER,MSGL_V,"Reading config file %s", conffile);
 
 	if (recursion_depth > MAX_RECURSION_DEPTH) {
 		mp_msg(MSGT_CFGPARSER,MSGL_ERR,": too deep 'include'. check your configfiles\n");
@@ -59,7 +59,7 @@ int m_config_parse_config_file(m_config_t* config, char *conffile)
 	}
 
 	if ((fp = fopen(conffile, "r")) == NULL) {
-	  mp_msg(MSGT_CFGPARSER,MSGL_ERR,": %s\n", strerror(errno));
+	  mp_msg(MSGT_CFGPARSER,MSGL_V,": %s\n", strerror(errno));
 		free(line);
 		ret = 0;
 		goto out;

@@ -1352,7 +1352,7 @@ mp_input_parse_config(char *file) {
   fd = open(file,O_RDONLY);
 
   if(fd < 0) {
-    mp_msg(MSGT_INPUT,MSGL_ERR,"Can't open input config file %s: %s\n",file,strerror(errno));
+    mp_msg(MSGT_INPUT,MSGL_V,"Can't open input config file %s: %s\n",file,strerror(errno));
     return 0;
   }
 
@@ -1378,7 +1378,7 @@ mp_input_parse_config(char *file) {
     }
     // Empty buffer : return
     if(bs <= 1) {
-      mp_msg(MSGT_INPUT,MSGL_INFO,"Input config file %s parsed: %d binds\n",file,n_binds);
+      mp_msg(MSGT_INPUT,MSGL_V,"Input config file %s parsed: %d binds\n",file,n_binds);
       if(binds)
 	cmd_binds = binds;
       close(fd);
@@ -1519,7 +1519,7 @@ mp_input_init(void) {
     // Try global conf dir
     file = MPLAYER_CONFDIR "/input.conf";
     if(! mp_input_parse_config(file))
-      mp_msg(MSGT_INPUT,MSGL_WARN,"Falling back on default (hardcoded) input config\n");
+      mp_msg(MSGT_INPUT,MSGL_V,"Falling back on default (hardcoded) input config\n");
   }
   else
   {
