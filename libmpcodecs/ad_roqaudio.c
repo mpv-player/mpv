@@ -5,7 +5,6 @@
 #include "config.h"
 #include "ad_internal.h"
 #include "../roqav.h"
-//#include "../adpcm.h"
 
 static ad_info_t info = 
 {
@@ -13,30 +12,36 @@ static ad_info_t info =
 	"roqaudio",
 	AFM_ROQAUDIO,
 	"Nick Kurshev",
-	"Mike Melanson ???"
+	"Mike Melanson"
 	"RoQA is an internal MPlayer FOURCC"
 };
 
 LIBAD_EXTERN(roqaudio)
+
+static int preinit(sh_audio_t *sh_audio)
+{
+  // minsize was stored in wf->nBlockAlign by the RoQ demuxer
+  sh_audio->audio_out_minsize=sh_audio->wf->nBlockAlign;
+  sh_audio->context = roq_decode_audio_init();
+  return 1;
+}
 
 static int init(sh_audio_t *sh_audio)
 {
   sh_audio->channels=sh_audio->wf->nChannels;
   sh_audio->samplerate=sh_audio->wf->nSamplesPerSec;
   sh_audio->i_bps = (sh_audio->channels * 22050) / 2;
+
+  if ((sh_audio->a_in_buffer =
+    (unsigned char *)malloc(sh_audio->audio_out_minsize / 2)) == NULL)
+    return 0;
+
   return 1;
 }
 
-static int preinit(sh_audio_t *sh_audio)
+static void uninit(sh_audio_t *sh_audio)
 {
-  /* minsize was stored in wf->nBlockAlign by the RoQ demuxer */
-  sh_audio->audio_out_minsize=sh_audio->wf->nBlockAlign;
-  sh_audio->context = roq_decode_audio_init();
-  return 1;
-}
-
-static void uninit(sh_audio_t *sh)
-{
+  free(sh_audio->a_in_buffer);
 }
 
 static int control(sh_audio_t *sh,int cmd,void* arg, ...)
@@ -47,19 +52,16 @@ static int control(sh_audio_t *sh,int cmd,void* arg, ...)
 
 static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen)
 {
-  static unsigned char *ibuf = NULL;
   unsigned char header_data[6];
   int read_len;
 
-// TODO!! FIXME!!!
-  if (!ibuf) ibuf = (unsigned char *)malloc(sh_audio->audio_out_minsize / 2);
-  
   /* figure out how much data to read */
   if (demux_read_data(sh_audio->ds, header_data, 6) != 6) return -1; /* EOF */
   read_len = (header_data[5] << 24) | (header_data[4] << 16) |
 	     (header_data[3] << 8) | header_data[2];
   read_len += 2;  /* 16-bit arguments */
-  if (demux_read_data(sh_audio->ds, ibuf, read_len) != read_len) return -1;
-  return 2 * roq_decode_audio((unsigned short *)buf, ibuf,
-			     read_len, sh_audio->channels, sh_audio->context);          
+  if (demux_read_data(sh_audio->ds, sh_audio->a_in_buffer, read_len) !=
+    read_len) return -1;
+  return 2 * roq_decode_audio((unsigned short *)buf, sh_audio->a_in_buffer,
+    read_len, sh_audio->channels, sh_audio->context);
 }
