@@ -80,14 +80,20 @@ mp_image_t* mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag, i
       if(!(mpi->flags&(MP_IMGFLAG_ALLOCATED|MP_IMGFLAG_DIRECT)) 
          && mpi->type>MP_IMGTYPE_EXPORT){
           // non-direct and not yet allocaed image. allocate it!
-	  printf("*** Allocating mp_image_t, %d bytes\n",mpi->bpp*mpi->width*mpi->height/8);
+	  printf("*** Allocating mp_image_t, %dx%dx%dbpp %s %s, %d bytes\n",
+	          mpi->width,mpi->height,mpi->bpp,
+		  (mpi->flags&MP_IMGFLAG_YUV)?"YUV":"RGB",
+		  (mpi->flags&MP_IMGFLAG_PLANAR)?"planar":"packed",
+	          mpi->bpp*mpi->width*mpi->height/8);
 	  mpi->planes[0]=memalign(64, mpi->bpp*mpi->width*mpi->height/8);
-	  if(!mpi->stride[0]) mpi->stride[0]=mpi->width;
 	  if(mpi->flags&MP_IMGFLAG_PLANAR){
 	      // YV12/I420. feel free to add other planar formats here...
+	      if(!mpi->stride[0]) mpi->stride[0]=mpi->width;
 	      if(!mpi->stride[1]) mpi->stride[1]=mpi->stride[2]=mpi->width/2;
 	      mpi->planes[1]=mpi->planes[0]+mpi->width*mpi->height;
 	      mpi->planes[2]=mpi->planes[1]+mpi->width*mpi->height/4;
+	  } else {
+	      if(!mpi->stride[0]) mpi->stride[0]=mpi->width*mpi->bpp/8;
 	  }
 	  mpi->flags|=MP_IMGFLAG_ALLOCATED;
       }
