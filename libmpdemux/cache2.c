@@ -205,7 +205,7 @@ int stream_enable_cache(stream_t *stream,int size,int min,int prefill){
   
   if((stream->cache_pid=fork())){
     // wait until cache is filled at least prefill_init %
-    printf("CACHE_PRE_INIT: %d [%d] %d  pre:%d  eof:%d  \n",
+    mp_msg(MSGT_CACHE,MSGL_V,"CACHE_PRE_INIT: %d [%d] %d  pre:%d  eof:%d  \n",
 	s->min_filepos,s->read_filepos,s->max_filepos,min,s->eof);
     while(s->read_filepos<s->min_filepos || s->max_filepos-s->read_filepos<min){
 	mp_msg(MSGT_CACHE,MSGL_STATUS,"\rCache fill: %5.2f%% (%d bytes)    ",
