@@ -57,7 +57,7 @@ static int init(sh_video_t *sh){
         mp_msg(MSGT_DECVIDEO,MSGL_HINT,"package from:  ftp://mplayerhq.hu/MPlayer/releases/w32codec.zip  !\n");
 	return 0;
     }
-    mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YUY2);
+    if(!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YUY2)) return 0;
     out_fmt=sh->codec->outfmt[sh->outfmtidx];
     switch(out_fmt){
     case IMGFMT_YUY2:

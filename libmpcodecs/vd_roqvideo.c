@@ -27,8 +27,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 // init driver
 static int init(sh_video_t *sh){
     sh->context = roq_decode_video_init();
-    mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YV12);
-    return 1;
+    return mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YV12);
 }
 
 // uninit driver

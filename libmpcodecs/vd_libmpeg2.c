@@ -38,8 +38,7 @@ static int init(sh_video_t *sh){
     // send seq header to the decoder:  *** HACK ***
     mpeg2_decode_data(NULL,videobuffer,videobuffer+videobuf_len,0);
     mpeg2_allocate_image_buffers (picture);
-    mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YV12);
-    return 1;
+    return mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YV12);
 }
 
 // uninit driver

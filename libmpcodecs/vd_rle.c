@@ -24,7 +24,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 
 // init driver
 static int init(sh_video_t *sh){
-    mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_BGR24);
+    if(!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_BGR24)) return 0;
     if( (((sh->codec->outfmt[sh->outfmtidx]&255)+7)/8)==2 ){
      unsigned int* pal=(unsigned int*)(((char*)sh->bih)+40);
      int cols=(sh->bih->biSize-40)/4;

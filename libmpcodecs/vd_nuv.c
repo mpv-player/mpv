@@ -24,8 +24,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 
 // init driver
 static int init(sh_video_t *sh){
-    mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_I420);
-    return 1;
+    return mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_I420);
 }
 
 // uninit driver

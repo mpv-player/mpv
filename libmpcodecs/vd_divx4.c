@@ -74,9 +74,10 @@ static int init(sh_video_t *sh){
     DEC_PARAM dec_param;
     DEC_SET dec_set;
     int bits=16;
-    memset(&dec_param,0,sizeof(dec_param));
 
-    mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YUY2);
+    if(!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YUY2)) return 0;
+
+    memset(&dec_param,0,sizeof(dec_param));
 
     switch(sh->codec->outfmt[sh->outfmtidx]){
 	case IMGFMT_YV12: dec_param.output_format=DEC_YV12;bits=12;break;

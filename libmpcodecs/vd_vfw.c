@@ -54,9 +54,7 @@ static int init(sh_video_t *sh){
     unsigned int out_fmt;
     if(!init_vfw_video_codec(sh,(sh->codec->driver==VFM_VFWEX))) return 0;
     mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: Win32 video codec init OK!\n");
-    mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YUY2);
-//    out_fmt=sh->codec->outfmt[sh->outfmtidx];
-    return 1;
+    return mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YUY2);
 }
 
 // uninit driver

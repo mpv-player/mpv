@@ -22,12 +22,9 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
     return CONTROL_UNKNOWN;
 }
 
-//int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outfmt);
-
 // init driver
 static int init(sh_video_t *sh){
-    mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_BGR16);
-    return 1;
+    return mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_BGR16);
 }
 
 // uninit driver

@@ -22,14 +22,12 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
     return CONTROL_UNKNOWN;
 }
 
-//int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outfmt);
 void *decode_cinepak_init(void);
 
 // init driver
 static int init(sh_video_t *sh){
     sh->context = decode_cinepak_init();
-    mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YUY2);
-    return 1;
+    return mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YUY2);
 }
 
 // uninit driver

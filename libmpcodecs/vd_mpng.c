@@ -109,7 +109,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
  if(last_w!=png_width || last_h!=png_height || last_c!=out_fmt){
     last_w=png_width; last_h=png_height; last_c=out_fmt;
     if(!out_fmt) return NULL;
-    mpcodecs_config_vo(sh,png_width,png_height,out_fmt);
+    if(!mpcodecs_config_vo(sh,png_width,png_height,out_fmt)) return NULL;
  }
 
 #if 0

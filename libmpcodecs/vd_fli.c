@@ -35,7 +35,7 @@ void decode_fli_frame(
 
 // init driver
 static int init(sh_video_t *sh){
-    mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_BGR24);
+    if(!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_BGR24)) return 0;
     sh->context = init_fli_decoder(sh->disp_w, sh->disp_h);
     return 1;
 }

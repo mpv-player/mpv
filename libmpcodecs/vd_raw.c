@@ -40,8 +40,7 @@ static int init(sh_video_t *sh){
 	    mp_msg(MSGT_DECVIDEO,MSGL_WARN,"RAW: depth %d not supported\n",sh->bih->biBitCount);
 	}
     }
-    mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,sh->format);
-    return 1;
+    return mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,sh->format);
 }
 
 // uninit driver

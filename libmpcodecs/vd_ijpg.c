@@ -159,7 +159,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
   {
    last_w=width; last_h=height; last_c=out_fmt;
    if ( !out_fmt ) return NULL;
-   mpcodecs_config_vo( sh,width,height,out_fmt );
+   if(!mpcodecs_config_vo( sh,width,height,out_fmt )) return NULL;
   }
 
  mpi=mpcodecs_get_image( sh,MP_IMGTYPE_TEMP,MP_IMGFLAG_ACCEPT_STRIDE,width,height );
