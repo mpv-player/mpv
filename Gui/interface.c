@@ -157,7 +157,9 @@ void guiInit( void )
  memset( &gtkEquChannels,0,sizeof( gtkEquChannels ) );
  if ( !gtkAOOSSMixer ) gtkAOOSSMixer=strdup( PATH_DEV_MIXER );
  if ( !gtkAOOSSDevice ) gtkAOOSSDevice=strdup( PATH_DEV_DSP );
+#ifdef HAVE_DXR3
  if ( !gtkDXR3Device ) gtkDXR3Device=strdup( "/dev/em8300-0" );
+#endif
  fullscreen=gtkLoadFullscreen;       
    
  gtkInit();
