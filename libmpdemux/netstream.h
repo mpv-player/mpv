@@ -53,6 +53,7 @@ static int net_read(int fd, char* buf, int len) {
       return 0;
     }
     len -= r;
+    buf += r;
   }
   return 1;
 }
@@ -103,6 +104,7 @@ static int net_write(int fd, char* buf, int len) {
       return 0;
     }
     len -= w;
+    buf += w;
   }
   return 1;
 }
