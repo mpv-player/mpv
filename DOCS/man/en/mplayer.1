@@ -2738,8 +2738,8 @@ The weight parameter can be used to reduce the effect of a high gamma value on
 bright image areas, e.g. keep them from getting overamplified and just plain
 white. A value of 0.0 turns the gamma correction all the way down while 1.0 
 leaves it at its full strength.
-Defaults are contrast=1.0, brightness=0.0, gammas=1.0, saturation=1.0, weight=1.0.
-Value ranges are 0.1\-10 for gammas, -2\-2 for contrast (negative values result
+Defaults are gamma=1.0, contrast=1.0, brightness=0.0, saturation=1.0, weight=1.0.
+Value ranges are 0.1\-10 for gamma, -2\-2 for contrast (negative values result
 in a negative image), -1\-1 for brightness, 0\-3 for saturation and 0\-1 for weight.
 .TP
 .B hue[=hue:saturation]
@@ -3850,8 +3850,8 @@ Tip: To do constant quantizer encoding with different quantizers for
 I/P and B frames you can use:
 vqmin= <ip_quant>:vqmax= <ip_quant>:vb_qfactor= <b_quant/ip_quant>
 .TP
-.B vqblur=<0.0\-1.0>
-quantizer blur (pass1) Larger values will average the quantizer more over
+.B vqblur=<0.0\-1.0> (pass 1)
+Quantizer blur, larger values will average the quantizer more over
 time (slower change).
 .RSs
 .IPs 0.0
@@ -3862,9 +3862,9 @@ qblur disabled
 average the quantizer over all previous frames
 .RE
 .TP
-.B vqblur=<0.0\-99.0>
-quantizer gaussian blur (pass2) Larger values will average the quantizer more
-over time (slower change) (default: 0.5)
+.B vqblur=<0.0\-99.0> (pass 2)
+Quantizer gaussian blur, larger values will average the quantizer more
+over time (slower change) (default: 0.5).
 .TP
 .B vqcomp=<value>
 quantizer compression, depends upon vrc_eq (pass\ 1/\:2) (default: 0.5)
