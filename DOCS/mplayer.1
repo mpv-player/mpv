@@ -641,6 +641,12 @@ list of available subtitles, use with the \-v switch and look at the output.
 .B \-sub <subtitle\ file>
 Use/display this subtitle file.
 .TP
+.B \-subcc
+Display DVD Closed Caption (CC) subtitles. These are NOT the VOB subtitles,
+these are special ASCII subtitles for the hearing impaired encoded in the VOB
+userdata stream on most region 1 DVDs. CC subtitles have not been spotted on
+DVDs from other regions so far.
+.TP
 .B \-subcp <codepage>
 If your system supports iconv(3), you can use this option to
 specify codepage of the subtitle.
