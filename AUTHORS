@@ -264,7 +264,7 @@ Gereöffy, Árpád (A'rpi/ESP-team) <arpi@thot.banki.hu>
     * getch2 [keyboard handler]
     * some changes in libmpeg2 code (progressive frames, bitrate & fps support)
     * libvo improvements: adding OpenGL support, bug fix in mga driver...
-    * triple buffering & YUY2 support (for DivX/MPEG4) into mga_vid driver
+    * triple buffering & YUY2 support (for DivX/MPEG-4) into mga_vid driver
     * OSD & subtitle display code
     * FFmpeg/libavcodec integration
     * DivX4Linux (Project Mayo) support (see documentation)
@@ -370,7 +370,7 @@ Kalinski, Filip (filon) <filon@pld.org.pl>
     * X11 fulscreen switching fixes/cleanup
 
 Kalvachev, Ivan (iive) <iive@yahoo.com>
-    * interlaced MPEG2 support (libmpeg2)
+    * interlaced MPEG-2 support (libmpeg2)
     * libvo2 draft
     * configfile parser fixes
     * SRT subtitle dump support
@@ -746,7 +746,7 @@ Bellard, Fabrice <fabrice.bellard@free.fr>
       DivX, WMA, DV etc audio/video en/decoder)
 
 Chappelier, Vivien and Vincent, Damien
-    * libFAME authors [fast MPEG1 encoder, used by -vo mpegpes/-vo dxr3]
+    * libFAME authors [fast MPEG-1 encoder, used by -vo mpegpes/-vo dxr3]
 
 Hipp, Michael
     * mpglib author [not used directly but some parts are in mp3lib]
@@ -754,7 +754,7 @@ Hipp, Michael
 Holtzman, Aaron <aholtzma@engr.uvic.ca>
     * ac3dec (and libac3) author [old AC3 audio decoder]
     * the original mga_vid driver [Matrox G200/G400 YUV backend scaler]
-    * mpeg2dec [Fast MPEG1/MPEG2 video decoder, currently used in player]
+    * mpeg2dec [Fast MPEG-1/MPEG-2 video decoder, currently used in player]
 
 Janovetz, Jake
     * remez.c author [Used to calculate audio filter coefficients]
@@ -786,7 +786,7 @@ but I've got some ideas or other technical help from:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Farin, Dirk <farin@ti.uni-mannheim.de>
-    * dvdview author [MPEG1/MPEG2 video decoder, used in v0.5-v0.8]
+    * dvdview author [MPEG-1/MPEG-2 video decoder, used in v0.5-v0.8]
 
 Lee, Avery <phaeron@virtualdub.org>
     * VirtualDub author, help understanding AVI with VBR audio and
@@ -797,7 +797,7 @@ McGowan, John F. <http://www.jmcgowan.com>
       and AVI format]
 
 Williams, Adam <broadcast@earthling.net>
-    * libmpeg3 (and xmovie) author [MPEG1/MPEG2 video decoder, used in
+    * libmpeg3 (and xmovie) author [MPEG-1/MPEG-2 video decoder, used in
       v0.1-v0.4]
 
 

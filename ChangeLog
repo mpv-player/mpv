@@ -111,7 +111,7 @@ MPlayer (1.0)
     * SSE optimizations for 4x4 compare function
     * epzs motion search enhancements
     * quad tree based motion compensation
-    * MPEG4 qpel MMX2/3DNow! optimizations
+    * MPEG-4 qpel MMX2/3DNow! optimizations
     * H.264: lot of fixes and MMX2/3DNow! optimizations
     * AVC1 (H.264 without sync word in .mp4 files) support
     * H.264 qpel motion compensation
@@ -232,7 +232,7 @@ MPlayer (1.0)
     * "raw" audio in MOV supported
     * Indeo audio (iac25) support via binary codec
     * upgrade libfaad2 to the FAAD 2.0 release
-    * MPEG2 chroma422/444 support
+    * MPEG-2 chroma422/444 support
     * Winnov WINX and WNV1 support via binary codec
 
     Demuxers:
@@ -258,7 +258,7 @@ MPlayer (1.0)
     * vf_spp memory corruption fix on reallocation
 
     FFmpeg/libavcodec:
-    * MPEG2 encoding with 8, 9, 10, 11 bit intra DC precision
+    * MPEG-2 encoding with 8, 9, 10, 11 bit intra DC precision
     * DC clipping fix, intra_dc_precision > 0 support
     * Cinepak fixes and palette support
     * support skipping of MB rows during decoding
@@ -421,13 +421,13 @@ MPlayer (1.0)
     * lots of code cleanup
     * intra & inter dequantization split -> speedup
     * fixed stereo IMA ADPCM encoding
-    * VBV delay setting support (MPEG2 CBR)
+    * VBV delay setting support (MPEG-2 CBR)
     * improved RV20 decoder (most known errors eliminated)
     * interlaced DCT
     * interlaced motion estimation
-    * interlaced MPEG2 encoding
+    * interlaced MPEG-2 encoding
     * 4MV encoding fixes
-    * initial interlaced MPEG4 encoding
+    * initial interlaced MPEG-4 encoding
     * improved visual quality in SVQ3 decoder
     * fixed never-before-tested embedded string decoder in SVQ1
     * optimized quantization (including the trellis way)
@@ -530,7 +530,7 @@ MPlayer (1.0)
     * fixed MPNG when using BGR24 images
     * control functions in Ogg demuxer
     * HTTP cookies support
-    * LML-M4 MPEG4 capture card raw stream format support
+    * LML-M4 MPEG-4 capture card raw stream format support
 
     Filters:
     * some fixes in the delogo filter
@@ -561,7 +561,7 @@ MPlayer (1.0)
     * CRI ADX support
     * XA ADPCM support
     * fixed files with odd dimensions on PPC
-    * optimized MPEG2 bitstream parsing
+    * optimized MPEG-2 bitstream parsing
     * better interlacing framework
     * support for IBM's XLC compiler
     * support for SAR (sample aspect ratio)
@@ -690,12 +690,12 @@ MPlayer (1.0)
     * improved the Alpha optimizations
     * x86 optimizations are threadsafe now
     * settable scene change threshold
-    * better MPEG1/MPEG2 conformance encoder
+    * better MPEG-1/MPEG-2 conformance encoder
     * quality improvement for high bitrate videos with trellis quantization
     * indeo3 decoder fixed
     * new options: mv0, cbp
     * DV video encoder
-    * MPEG1 now works with Trellis quantization
+    * MPEG-1 now works with Trellis quantization
 
     Faad2:
     * synced to latest CVS
@@ -774,7 +774,7 @@ MPlayer (1.0)
     * RealAudio 14_4 and 28_8 codecs support (both binary DLLs and native code)
     * RealMedia rtsp:// support (independent from the live.com RTSP stuff!)
     * Matroska demuxer (C++ version)
-    * demuxer: enabling MPEG4-ES autodetection, H.264-ES support
+    * demuxer: enabling MPEG-4-ES autodetection, H.264-ES support
     * WAV extradata parsing (for truespeech, atrac3, etc)
     * MPEG-TS (Transport Stream) and TIVO demuxers
     * DVB (Digital Video Broadcasting) input driver
@@ -811,7 +811,7 @@ MPlayer (1.0)
     * fixing padding bug autodetection for some rare files
     * DspContext.(i)dct_* bitexact cleanup
     * user settable quantizer bias
-    * MPEG1 slice encoding support
+    * MPEG-1 slice encoding support
     * MSMPEG4 2-pass support
     * H.264 video decoding
     * Indeo 3 video decoding
@@ -826,7 +826,7 @@ MPlayer (1.0)
     * ATI VCR1 and VCR2 decoding
     * full featured SH4 optimizations
     * ARM-optimized simple_idct
-    * MPEG2 encoding
+    * MPEG-2 encoding
     * PSX MDEC decoder
     * user settable quantization matrices
 
@@ -909,7 +909,7 @@ MPlayer (0.90)
 
     Features:
     * raw video support (-rawvideo, similar to -rawaudio)
-    * experimental MPEG4-ES support (enable with -demuxer 27 -fps xxx)
+    * experimental MPEG-4-ES support (enable with -demuxer 27 -fps xxx)
     * new video filter: field (cheap deinterlacer)
     * DVD/VOBsub improvements: positioning, optional gaussian blur scaler
     * vf_bmovl: 400% speedup :)
@@ -996,7 +996,7 @@ MPlayer (0.90)
     * real .bin+.cue (S)VCD images support (-vcd 2 -cuefile xxx.cue)
     * postprocess: YUV 411/422/444 support, stride fixes
     * jumping of overlapping subs fixed, sorting is automatic, iconv fixes
-    * MPEG2 telecine detection and automatic inverse telecine (MPlayer only)
+    * MPEG-2 telecine detection and automatic inverse telecine (MPlayer only)
 
     GUI:
     * correct GTK widget destroy event handler
@@ -1172,7 +1172,7 @@ MPlayer (0.90)
     * RTC setup fixes, more verbose messages, hints
     * MEncoder: demuxer/codec uninit order fixed (solves some sig11)
     * various v4l and ALSA capturing fixes
-    * demux_mov: fixed crash with MPEG4 on SPARC, decoding on big-endian
+    * demux_mov: fixed crash with MPEG-4 on SPARC, decoding on big-endian
     * various NAS ao fixes
     * libvo: optional stride support for packed YUV / RGB formats
     * MEncoder: set keyframe flag on audio packets, fixes Windows seeking
@@ -1204,16 +1204,16 @@ MPlayer (0.90)
 
     Libavcodec:
     * RV10 codec cleanup (2nd level demuxer moved to demuxer layer)
-    * MPEG4 interlaced DCT _en_coding support
+    * MPEG-4 interlaced DCT _en_coding support
     * luma masking support (encoding)
     * runtime selectable IDCT algo
-    * faster MPEG1/2 decoder
+    * faster MPEG-1/2 decoder
     * DV decoding (both PAL and NTSC)
-    * MPEG1 2-pass encoding support
+    * MPEG-1 2-pass encoding support
     * better/cleaner error resilience (done in a 2nd pass after decoding)
-    * H.263/MPEG4 out of order slice decoding
+    * H.263/MPEG-4 out of order slice decoding
     * -lavdopts bug= reworked, now uses flags, autodetects most of them
-    * complete MPEG4 GMC decoding support
+    * complete MPEG-4 GMC decoding support
 
 
   pre8: Sep 18, 2002
@@ -1243,8 +1243,8 @@ MPlayer (0.90)
     Features:
     * new demuxer for .PVA files (file format of TV/DVB apps on Win32)
     * -mf now supports TGA (24/32bpp uncompressed/rle) images
-    * libavcodec: support for interlaced MPEG4 _de_coding
-    * libavcodec: aspect ratio encoding support (MPEG4, MJPEG, H.263?)
+    * libavcodec: support for interlaced MPEG-4 _de_coding
+    * libavcodec: aspect ratio encoding support (MPEG-4, MJPEG, H.263?)
     * Win32 DLL loader merged/synced with avifile CVS
 
 
@@ -1260,7 +1260,7 @@ MPlayer (0.90)
     * vfw/vfwex cleanup, support for runtime csp queries, 8bpp support
     * new native mszh/zlib codec
     * libavcodec: 2-pass control code rewritten, now everything is customizable
-    * libavcodec: MPEG4/XviD en/decoding support improved, rv10 decoding fixes
+    * libavcodec: MPEG-4/XviD en/decoding support improved, rv10 decoding fixes
     * various RealVideo demuxer and video codec fixes, sipr audio support
     * new video filters: soft eq (brightness), halfpack (deinterlacer), film noise
     * OGM subtitles support
@@ -1318,9 +1318,9 @@ MPlayer (0.90)
     * bbox support
     * mmst:// streaming support
     * OGM (Ogg) audio/video stream selection
-    * native Micro$oft MPEG4v1 (MPG4) codec, error concealement for all MPEG4s
+    * native Micro$oft MPEG4v1 (MPG4) codec, error concealement for all MPEG-4s
     * various libavcodec encoding improvements
-    * MPEG1 && -vo x11 crash fixed when movie's height%16!=0
+    * MPEG-1 && -vo x11 crash fixed when movie's height%16!=0
     * raw (uncompressed) video fixed (AVI & MOV)
     * flickering/blocking fixed for old VfW codecs (indeo3, cinepak etc)
     * introduced codecs.conf versioning to avoid problems caused by too old conf
@@ -1382,7 +1382,7 @@ MPlayer (0.90)
     * 'f' (fullscreen switch) fixed for some WMs, still has problems
     * various FreeBSD and OpenBSD portability patches
     * options -xy,-zoom,-flip usable with MEncoder, too, -xy keeps aspect
-    * -vop lavc, using new fast best libavcodec for realtime MPEG1 transcoding
+    * -vop lavc, using new fast best libavcodec for realtime MPEG-1 transcoding
     * fixed GTK GUI crash with --disable-mencoder
     * no more black VOBsub subtitles :)
 
@@ -1396,7 +1396,7 @@ MPlayer (0.90)
     * direct rendering - can't be used with libavcodec yet, sorry
     * display subtitles under the image, on black bands
     * FFmpeg (included) now supports decoding MPEG4v2 (MP42) and DivX 5.0 files
-    * greatly enhanced MPEG4 encoder (libavcodec)
+    * greatly enhanced MPEG-4 encoder (libavcodec)
     * audio-only (WAV/MP3/WMA/Ogg) file playback (console only)
     * playing/encoding audio from separate WAV/MP3 file
     * support for more file formats, including the new and very popular Ogg
@@ -1571,17 +1571,17 @@ fork()  -> 0.12pre1
 
 
 MPlayer v0.11-pre21: Feb 12, 2001
-  MPEG1 pp, stereo fix
+  MPEG-1 pp, stereo fix
   - "Skip chunk xxxx" messages moved from -v to -v -v -v debug level...
     [thanks to Christoph H. Lampert]
-  - DivX postprocess filter works for MPEG1 files, too! (-divxq 1/3/7/31)
+  - DivX postprocess filter works for MPEG-1 files, too! (-divxq 1/3/7/31)
   - MPEG layer-2 audio fixed - it's stereo again!!!
   - audio select() detection: if detected audio buffer size == 0, then
     exit with message "Recompile mplayer with #undef HAVE_AUDIO_SELECT !"...
   - syncfb driver added to the source tree, under drivers/
     (it's very similar to mga_vid, but has syncronization to screen and
      de-interlace features)
-  - draw_slice in syncfb finished for G400 cards (plays MPEG 1/2, opendivx)
+  - draw_slice in syncfb finished for G400 cards (plays MPEG-1/2, OpenDivX)
     (de-interlacing has been disabled, because it's buggy now)
 
 
@@ -1905,7 +1905,7 @@ MPlayer v0.10-pre7: Dec 31, 2000
       => doesn't copy any data -> faster and less memory usage
   - mplayer.c sends code 0x1FF after every frame, so libmpeg2 knows
     when to display it
-  - mplayer.c: in_frame flag fixes, didn't work well with MPEG2 streams
+  - mplayer.c: in_frame flag fixes, didn't work well with MPEG-2 streams
     (because there is a 0x1B2 chunk between 0x100 and 0x101)
   - 'picture' changed from static to shmem-allocated
     -> better picture after codec restart (tested with JapAd.mpg)
@@ -1928,7 +1928,7 @@ MPlayer v0.10-pre7: Dec 31, 2000
   - removed (now unused) allocate/free image buffer code from libvo
   - mplayer: new internal variable for video format: has_video
        0 = none (unused yet)
-       1 = MPEG 1/2 video
+       1 = MPEG-1/2 video
        2 = Win32/VfW video codec
   - config.h has defaults for bps-based AVI sync and ALSA timer code options:
      #undef AVI_SYNC_BPS  => now it's disabled by default!!! use -bps to enable
@@ -2095,7 +2095,7 @@ MPlayer v0.06: Nov 20, 2000
   - AVI audio&video codec selection moved to new codecs.c file,
     loader/driver.c and loader/afl.c modified for this
   - YUV support fixed, codecs.c setup flags to handle YUV properly
-    YUV works fine with DivX, MPEG4, cvid, and upside-down iv50
+    YUV works fine with DivX, MPEG-4, cvid, and upside-down iv50
   - DOCS/INSTALL updated
   - DOCS/SPEED updated, DivX benchmarks added
 

@@ -80,8 +80,8 @@ libavcodec. To verify if you do have libavcodec or not, check if a subdirectory
 named 'libavcodec' exists in the MPlayer source tree.
 
 The FFmpeg project provides libavcodec, a very portable codec collection (among
-the supported formats is MPEG4/DivX) with excellent quality and speed, that is
-the preferred MPEG4/DivX codec of MPlayer. You have to get libavcodec directly
+the supported formats is MPEG-4/DivX) with excellent quality and speed, that is
+the preferred MPEG-4/DivX codec of MPlayer. You have to get libavcodec directly
 from the FFmpeg CVS server.
 
 To get the FFmpeg sources, use the following commands in a suitable directory
