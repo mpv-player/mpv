@@ -34,11 +34,6 @@ LIBAD_EXTERN(ffmpeg)
 
 extern int avcodec_inited;
 
-typedef struct {
-    AVCodec *lavc_codec;
-    AVCodecContext *lavc_context;
-} ad_ffmpeg_ctx;
-
 static int preinit(sh_audio_t *sh)
 {
   sh->audio_out_minsize=AVCODEC_MAX_AUDIO_FRAME_SIZE;
@@ -48,7 +43,8 @@ static int preinit(sh_audio_t *sh)
 static int init(sh_audio_t *sh_audio)
 {
     int x;
-    ad_ffmpeg_ctx *ctx;
+    AVCodecContext *lavc_context;
+    AVCodec *lavc_codec;
 
     mp_msg(MSGT_DECAUDIO,MSGL_V,"FFmpeg's libavcodec audio codec\n");
     if(!avcodec_inited){
@@ -57,22 +53,18 @@ static int init(sh_audio_t *sh_audio)
       avcodec_inited=1;
     }
     
-    ctx = sh_audio->context = malloc(sizeof(ad_ffmpeg_ctx));
-    if (!ctx)
-	return(0);
-    memset(ctx, 0, sizeof(ad_ffmpeg_ctx));
-    
-    ctx->lavc_codec = (AVCodec *)avcodec_find_decoder_by_name(sh_audio->codec->dll);
-    if(!ctx->lavc_codec){
+    lavc_codec = (AVCodec *)avcodec_find_decoder_by_name(sh_audio->codec->dll);
+    if(!lavc_codec){
 	mp_msg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_MissingLAVCcodec,sh_audio->codec->dll);
 	return 0;
     }
     
-    ctx->lavc_context = malloc(sizeof(AVCodecContext));
-    memset(ctx->lavc_context, 0, sizeof(AVCodecContext));
+    lavc_context = malloc(sizeof(AVCodecContext));
+    memset(lavc_context, 0, sizeof(AVCodecContext));
+    sh_audio->context=lavc_context;
     
     /* open it */
-    if (avcodec_open(ctx->lavc_context, ctx->lavc_codec) < 0) {
+    if (avcodec_open(lavc_context, lavc_codec) < 0) {
         mp_msg(MSGT_DECAUDIO,MSGL_ERR, MSGTR_CantOpenCodec);
         return 0;
     }
@@ -83,9 +75,9 @@ static int init(sh_audio_t *sh_audio)
    if(x>0) sh_audio->a_buffer_len=x;
 
 #if 1
-  sh_audio->channels=ctx->lavc_context->channels;
-  sh_audio->samplerate=ctx->lavc_context->sample_rate;
-  sh_audio->i_bps=ctx->lavc_context->bit_rate/8;
+  sh_audio->channels=lavc_context->channels;
+  sh_audio->samplerate=lavc_context->sample_rate;
+  sh_audio->i_bps=lavc_context->bit_rate/8;
 #else
   sh_audio->channels=sh_audio->wf->nChannels;
   sh_audio->samplerate=sh_audio->wf->nSamplesPerSec;
@@ -96,14 +88,9 @@ static int init(sh_audio_t *sh_audio)
 
 static void uninit(sh_audio_t *sh)
 {
-    ad_ffmpeg_ctx *ctx = sh->context;
-    
-    if (avcodec_close(ctx->lavc_context) < 0)
+    if (avcodec_close(sh->context) < 0)
 	mp_msg(MSGT_DECVIDEO, MSGL_ERR, MSGTR_CantCloseCodec);
-    if (ctx->lavc_context)
-	free(ctx->lavc_context);
-    if (ctx)
-	free(ctx);
+    free(sh->context);
 }
 
 static int control(sh_audio_t *sh,int cmd,void* arg, ...)
@@ -114,14 +101,13 @@ static int control(sh_audio_t *sh,int cmd,void* arg, ...)
 
 static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen)
 {
-    ad_ffmpeg_ctx *ctx = sh_audio->context;
     unsigned char *start=NULL;
     int y,len=-1;
     while(len<minlen){
 	int len2=0;
 	int x=ds_get_packet(sh_audio->ds,&start);
 	if(x<=0) break; // error
-	y=avcodec_decode_audio(ctx->lavc_context,(INT16*)buf,&len2,start,x);
+	y=avcodec_decode_audio(sh_audio->context,(INT16*)buf,&len2,start,x);
 	if(y<0){ mp_msg(MSGT_DECAUDIO,MSGL_V,"lavc_audio: error\n");break; }
 	if(y<x) sh_audio->ds->buffer_pos+=y-x;  // put back data (HACK!)
 	if(len2>0){
