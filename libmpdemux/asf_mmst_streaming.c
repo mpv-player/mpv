@@ -513,11 +513,19 @@ int asf_mmst_streaming_start(stream_t *stream)
   URL_t *url1 = stream->streaming_ctrl->url;
   int s = stream->fd;
 
+  if( s>0 ) {
+	  close( stream->fd );
+	  stream->fd = -1;
+  }
+  
   /* parse url */
   path = strchr(url1->file,'/') + 1;
 
   url1->port=1755;
   s = connect2Server( url1->hostname, url1->port );
+  if( s<0 ) {
+	  return s;
+  }
   printf ("connected\n");
 
   /*
