@@ -54,6 +54,7 @@ static char *audio_dev = "/dev/audio";
 static int queued_bursts = 0;
 static int queued_samples = 0;
 static int bytes_per_sample = 0;
+static int convert_u8_s8;
 static int audio_fd = -1;
 static enum {
     RTSC_UNKNOWN = 0,
@@ -230,6 +231,7 @@ static int init(int rate,int channels,int format,int flags){
 
     audio_info_t info;
     int byte_per_sec;
+    int ok;
 
     if (ao_subdevice) audio_dev = ao_subdevice;
 
@@ -257,9 +259,23 @@ static int init(int rate,int channels,int format,int flags){
 	 : AUDIO_PRECISION_8);
     info.play.channels = ao_channels = channels;
     info.play.sample_rate = ao_samplerate = rate;
-    if(ioctl (audio_fd, AUDIO_SETINFO, &info)<0)
+    convert_u8_s8 = 0;
+    ok = ioctl(audio_fd, AUDIO_SETINFO, &info) >= 0;
+    if (!ok && info.play.encoding == AUDIO_ENCODING_LINEAR8) {
+	/* sun audiocs hardware does not support U8 format, try S8... */
+	info.play.encoding = AUDIO_ENCODING_LINEAR;
+	ok = ioctl(audio_fd, AUDIO_SETINFO, &info) >= 0;
+	if (ok) {
+	    /* we must perform software U8 -> S8 conversion */
+	    convert_u8_s8 = 1;
+	}
+    }
+    if (!ok) {
 	printf("audio_setup: your card doesn't support %d channel, %s, %d Hz samplerate\n",
 	       channels, audio_out_format_name(format), rate);
+	return 0;
+    }
+
     bytes_per_sample = channels * info.play.precision / 8;
     byte_per_sec = bytes_per_sample * rate;
     ao_outburst = byte_per_sec > 100000 ? 16384 : 8192;
@@ -424,6 +440,12 @@ static int play(void* data,int len,int flags){
 	}
 	swab(data, swab_buf, len);
 	data = swab_buf;
+    } else if (ao_format == AFMT_U8 && convert_u8_s8) {
+	int i;
+	unsigned char *p = data;
+
+	for (i = 0, p = data; i < len; i++, p++)
+	    *p ^= 0x80;
     }
 
     len = write(audio_fd, data, len);
