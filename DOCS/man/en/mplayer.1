@@ -5492,10 +5492,12 @@ be problems if vrc_(min|max)rate is used.
 .TP
 .B vrc_maxrate=<value>
 maximum bitrate in kbit/\:sec (pass\ 1/\:2)
+(default: 0, unlimited)
 .
 .TP
 .B vrc_minrate=<value>
 minimum bitrate in kbit/\:sec (pass\ 1/\:2)
+(default: 0, unlimited)
 .
 .TP
 .B vrc_buf_size=<value>
@@ -6001,24 +6003,8 @@ Use quarter pel motion compensation (mutually exclusive with ilme).
 Hint: This seems only useful for high bitrate encodings.
 .
 .TP
-.B ildctcmp=<0\-2000>
-comparison function for interlaced dct decision
-.
-.TP
-.B precmp=<0\-2000>
-comparison function for motion estimation pre pass
-.
-.TP
-.B cmp=<0\-2000>
-comparison function for full pel motion estimation
-.
-.TP
-.B subcmp=<0\-2000>
-comparison function for sub pel motion estimation
-.
-.TP
 .B mbcmp=<0\-2000>
-comparison function for the macroblock decision, only used if mbd=0
+Sets the comparison function for the macroblock decision, only used if mbd=0
 .PD 0
 .RSs
 .IPs "0 (SAD)"
@@ -6047,6 +6033,26 @@ noise preserving sum of squared differences
 use chroma too, doesn't work (correctly) with B frames currently
 .RE
 .PD 1
+.
+.TP
+.B ildctcmp=<0\-2000>
+Sets the comparison function for interlaced dct decision
+(see mpcmp for available comparison functions).
+.
+.TP
+.B precmp=<0\-2000>
+Sets the comparison function for motion estimation pre pass
+(see mpcmp for available comparison functions) (default: 0).
+.
+.TP
+.B cmp=<0\-2000>
+Sets the comparison function for full pel motion estimation
+(see mpcmp for available comparison functions) (default: 0).
+.
+.TP
+.B subcmp=<0\-2000>
+Sets the comparison function for sub pel motion estimation
+(see mpcmp for available comparison functions) (default: 0).
 .
 .TP
 .B nssew=<0\-100>
@@ -6789,8 +6795,10 @@ With small values of scenecut, the codec often has to force an I-frame
 when it would exceed keyint.
 Good values of scenecut may find a better location for the I-frame.
 Large values use more I-frames than necessary, thus wasting bits.
--1 disables scene-cut detection, so I-frames are be inserted only every
-other keyint frames, which probably leads to ugly encoding artifacts.
+-1 disables scene-cut detection, so I-frames are being inserted only every
+other keyint frames, even when a scene cut happends.
+This isn't recommended and wastes bitrate as scenecuts encoded as P-frames
+are just as big as I-frames, but don't reset the "keyint counter".
 .
 .TP
 .B frameref=<1\-15>
@@ -6955,7 +6963,8 @@ higher values force it to vary more smoothly.
 .
 .TP
 .B fullinter | nofullinter
-Use all available interframe macroblock types (i16x16, i4x4, p16x16-4x4)
+Use all available interframe macroblock types (i16x16, i4x4, p16x16,
+p16x8, p8x16, p8x8, p8x4, p4x8, p4x4, pskip)
 The idea is to find the type and size that best describe a certain area
 of the picture, i.e.\& very effective for Anime, which usually contains
 large areas of the same color (default: i16x16, i4x4, p16x16-8x8).
