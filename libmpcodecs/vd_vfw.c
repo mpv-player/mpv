@@ -232,9 +232,9 @@ static int init(sh_video_t *sh){
 	set_csp(priv->o_bih,sh->codec->outfmt[sh->outfmtidx]);
 
     mp_msg(MSGT_WIN32, MSGL_V, "Input format:\n");
-    if(verbose) print_video_header(sh->bih);
+    if(verbose>0) print_video_header(sh->bih);
     mp_msg(MSGT_WIN32, MSGL_V, "Output format:\n");
-    if(verbose) print_video_header(priv->o_bih);
+    if(verbose>0) print_video_header(priv->o_bih);
 
     // set postprocessing level in xvid/divx4 .dll
     ICSendMessage(priv->handle, ICM_USER+80, (long)(&divx_quality), 0);

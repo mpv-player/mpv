@@ -20,8 +20,6 @@
 #include "audio_out.h"
 #include "audio_out_internal.h"
 
-extern int verbose;
-
 static ao_info_t info = 
 {
 	"OSS/ioctl audio output",

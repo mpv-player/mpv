@@ -8,6 +8,9 @@
     TODO: fix the whole syncing mechanism
     
     $Log$
+    Revision 1.29  2002/11/01 17:46:43  arpi
+    verbose can be negative
+
     Revision 1.28  2002/10/10 23:24:15  arpi
     stream selection cleanup, fixed -nosound
 
@@ -193,7 +196,7 @@ static void dump_index(demuxer_t *demuxer, int stream_id)
     real_index_table_t *index;
     int i, entries;
 
-    if (!verbose)
+    if (verbose<=0)
 	return;
     
     if (stream_id > MAX_STREAMS)

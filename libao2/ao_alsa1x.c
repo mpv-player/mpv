@@ -212,7 +212,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 
     alsa_handler = NULL;
 
-    if (verbose)
+    if (verbose>0)
 	printf("alsa-init: compiled for ALSA-%s\n", SND_LIB_VERSION_STR);
 
     if ((err = snd_card_next(&cards)) < 0 || cards < 0)
@@ -357,7 +357,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	sprintf(devstr, "iec958:AES0=0x%x,AES1=0x%x,AES2=0x%x,AES3=0x%x", 
 		s[0], s[1], s[2], s[3]);
 
-	if (verbose)
+	if (verbose>0)
 	  printf("alsa-spdif-init: playing AC3, %i channels\n", channels);
 	break;
       case 4:
@@ -404,7 +404,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	    return(0);
 	  }
 	
-	if (verbose)
+	if (verbose>0)
 	  printf("alsa-init: got device=%i, subdevice=%i\n", tmp_device, tmp_subdevice);
 
 	if ((err = snprintf(alsa_device, ALSA_DEVICE_SIZE, "hw:%1d,%1d", tmp_device, tmp_subdevice)) <= 0)
@@ -446,7 +446,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	case 1:
 	  alsa_fragcount = 16;
 	  chunk_size = 512;
-	  if (verbose) {
+	  if (verbose>0) {
 	    printf("alsa-init: buffersize set manually to 8192\n");
 	    printf("alsa-init: chunksize set manually to 512\n");
 	  }
@@ -454,7 +454,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	case 2:
 	  alsa_fragcount = 8;
 	  chunk_size = 1024;
-	  if (verbose) {
+	  if (verbose>0) {
 	    printf("alsa-init: buffersize set manually to 8192\n");
 	    printf("alsa-init: chunksize set manually to 1024\n");
 	  }
@@ -462,7 +462,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	case 3:
 	  alsa_fragcount = 32;
 	  chunk_size = 512;
-	  if (verbose) {
+	  if (verbose>0) {
 	    printf("alsa-init: buffersize set manually to 16384\n");
 	    printf("alsa-init: chunksize set manually to 512\n");
 	  }
@@ -470,7 +470,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	case 4:
 	  alsa_fragcount = 16;
 	  chunk_size = 1024;
-	  if (verbose) {
+	  if (verbose>0) {
 	    printf("alsa-init: buffersize set manually to 16384\n");
 	    printf("alsa-init: chunksize set manually to 1024\n");
 	  }
@@ -507,7 +507,7 @@ static int init(int rate_hz, int channels, int format, int flags)
       if ((err = snd_pcm_nonblock(alsa_handler, set_block_mode)) < 0) {
 	printf("alsa-init: error set block-mode %s\n", snd_strerror(err));
       }
-      else if (verbose) {
+      else if (verbose>0) {
 	printf("alsa-init: pcm opend in %s\n", str_block_mode);
       }
       
@@ -580,7 +580,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 		   snd_strerror(err));
 	    return(0);
 	  }
-	if (verbose)
+	if (verbose>0)
 	  printf("alsa-init: buffer_time: %d, period_time :%d\n",alsa_buffer_time, err);
       }
 #endif
@@ -593,7 +593,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	    printf("alsa-init: unable to set periodsize: %s\n", snd_strerror(err));
 	    return(0);
 	  }
-	else if (verbose) {
+	else if (verbose>0) {
 	  printf("alsa-init: chunksize set to %i\n", chunk_size);
 	}
 
@@ -602,7 +602,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	  alsa_fragcount = period_val;			
 	}
 
-	if (verbose)
+	if (verbose>0)
 	  printf("alsa-init: current val=%i, fragcount=%i\n", period_val, alsa_fragcount);
 
 	if ((err = snd_pcm_hw_params_set_periods(alsa_handler, alsa_hwparams, alsa_fragcount, 0)) < 0) {
@@ -629,7 +629,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	}
       else {
 	ao_data.buffersize = err;
-	if (verbose)
+	if (verbose>0)
 	  printf("alsa-init: got buffersize=%i\n", ao_data.buffersize);
       }
 
@@ -661,7 +661,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	  bits_per_frame = bits_per_sample * channels;
 	  chunk_bytes = chunk_size * bits_per_frame / 8;
 
-	  if (verbose) {
+	  if (verbose>0) {
 	    printf("alsa-init: bits per sample (bps)=%i, bits per frame (bpf)=%i, chunk_bytes=%i\n",bits_per_sample,bits_per_frame,chunk_bytes);}
 
 	}//end swparams
@@ -725,7 +725,7 @@ static void audio_pause()
 	}
     }
     else {
-      if (verbose)
+      if (verbose>0)
 	printf("alsa-pause: paused nonblock\n");
 
       return;
@@ -762,7 +762,7 @@ static void reset()
 	  return;
 	}
     } else {
-      if (verbose)
+      if (verbose>0)
 	printf("alsa-reset: reset nonblocked");
       return;
     }
@@ -1051,7 +1051,7 @@ static int get_space()
 	str_status = "running";
       break;
     case SND_PCM_STATE_PAUSED:
-      if (verbose) printf("alsa-space: paused");
+      if (verbose>0) printf("alsa-space: paused");
       str_status = "paused";
       ret = 0;
       break;
@@ -1069,7 +1069,7 @@ static int get_space()
       }
     }
 
-    if (verbose && str_status != "running")
+    if (verbose>0 && str_status != "running")
       printf("alsa-space: free space = %i, status=%i, %s --\n", ret, status, str_status);
     snd_pcm_status_free(status);
     

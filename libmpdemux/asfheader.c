@@ -151,7 +151,7 @@ while(!stream_eof(demuxer->stream)){
     case ASF_GUID_PREFIX_stream_header:
       stream_read(demuxer->stream,(char*) &streamh,sizeof(streamh));
       le2me_ASF_stream_header_t(&streamh);
-      if(verbose){
+      if(verbose>0){
         mp_msg(MSGT_HEADER,MSGL_V,"stream type: %s\n",asf_chunk_type(streamh.type));
 	mp_msg(MSGT_HEADER,MSGL_V,"stream concealment: %s\n",asf_chunk_type(streamh.concealment));
 	mp_msg(MSGT_HEADER,MSGL_V,"type: %d bytes,  stream: %d bytes  ID: %d\n",(int)streamh.type_size,(int)streamh.stream_size,(int)streamh.stream_no);
@@ -233,7 +233,7 @@ while(!stream_eof(demuxer->stream)){
         if( contenth.title_size!=0 ) {
           string=(char*)malloc(contenth.title_size);
           stream_read(demuxer->stream, string, contenth.title_size);
-          if(verbose)
+          if(verbose>0)
             print_asf_string(" Title: ", string, contenth.title_size);
 	  else
 	    pack_asf_string(string, contenth.title_size);
@@ -243,7 +243,7 @@ while(!stream_eof(demuxer->stream)){
         if( contenth.author_size!=0 ) {
           string=(char*)realloc((void*)string, contenth.author_size);
           stream_read(demuxer->stream, string, contenth.author_size);
-          if(verbose)
+          if(verbose>0)
             print_asf_string(" Author: ", string, contenth.author_size);
 	  else
 	    pack_asf_string(string, contenth.author_size);
@@ -253,7 +253,7 @@ while(!stream_eof(demuxer->stream)){
         if( contenth.copyright_size!=0 ) {
           string=(char*)realloc((void*)string, contenth.copyright_size);
           stream_read(demuxer->stream, string, contenth.copyright_size);
-          if(verbose)
+          if(verbose>0)
             print_asf_string(" Copyright: ", string, contenth.copyright_size);
 	  else
 	    pack_asf_string(string, contenth.copyright_size);
@@ -263,7 +263,7 @@ while(!stream_eof(demuxer->stream)){
         if( contenth.comment_size!=0 ) {
           string=(char*)realloc((void*)string, contenth.comment_size);
           stream_read(demuxer->stream, string, contenth.comment_size);
-          if(verbose)
+          if(verbose>0)
             print_asf_string(" Comment: ", string, contenth.comment_size);
 	  else
 	    pack_asf_string(string, contenth.comment_size);
@@ -273,7 +273,7 @@ while(!stream_eof(demuxer->stream)){
         if( contenth.rating_size!=0 ) {
           string=(char*)realloc((void*)string, contenth.rating_size);
           stream_read(demuxer->stream, string, contenth.rating_size);
-          if(verbose)
+          if(verbose>0)
             print_asf_string(" Rating: ", string, contenth.rating_size);
         }
 	mp_msg(MSGT_HEADER,MSGL_V,"\n");

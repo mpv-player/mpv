@@ -502,7 +502,7 @@ extension=NULL;
 			}
 
 			*fd_out=fd;
-			if( verbose ) {
+			if( verbose>0 ) {
 				http_debug_hdr( http_hdr );
 			}
 			

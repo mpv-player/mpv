@@ -13,6 +13,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "../config.h"
+#include "../mp_msg.h"
+
 #include "audio_out.h"
 #include "audio_out_internal.h"
 #include "afmt.h"
@@ -29,9 +32,6 @@ static ao_info_t info =
 };
 
 LIBAO_EXTERN(sdl)
-
-
-extern int verbose;
 
 // Samplesize used by the SDLlib AudioSpec struct
 #define SAMPLESIZE 1024
@@ -153,11 +153,11 @@ static int init(int rate,int channels,int format,int flags){
 	/* Allocate ring-buffer memory */
 	for(i=0;i<NUM_BUFS;i++) buffer[i]=(unsigned char *) malloc(BUFFSIZE);
 
-	printf("SDL: Samplerate: %iHz Channels: %s Format %s\n", rate, (channels > 1) ? "Stereo" : "Mono", audio_out_format_name(format));
+	mp_msg(MSGT_AO,MSGL_INFO,"SDL: Samplerate: %iHz Channels: %s Format %s\n", rate, (channels > 1) ? "Stereo" : "Mono", audio_out_format_name(format));
 
 	if(ao_subdevice) {
 		setenv("SDL_AUDIODRIVER", ao_subdevice, 1);
-		printf("SDL: using %s audio driver\n", ao_subdevice);
+		mp_msg(MSGT_AO,MSGL_INFO,"SDL: using %s audio driver\n", ao_subdevice);
 	}
 
 	ao_data.channels=channels;
@@ -189,7 +189,7 @@ static int init(int rate,int channels,int format,int flags){
 		aspec.format = AUDIO_U16MSB;
 	    break;
 	    default:
-                printf("SDL: Unsupported audio format: 0x%x.\n", format);
+                mp_msg(MSGT_AO,MSGL_WARN,"SDL: Unsupported audio format: 0x%x.\n", format);
                 return 0;
 	}
 
@@ -211,13 +211,13 @@ void callback(void *userdata, Uint8 *stream, int len); userdata is the pointer s
 
 	/* initialize the SDL Audio system */
         if (SDL_Init (SDL_INIT_AUDIO/*|SDL_INIT_NOPARACHUTE*/)) {
-                printf("SDL: Initializing of SDL Audio failed: %s.\n", SDL_GetError());
+                mp_msg(MSGT_AO,MSGL_ERR,"SDL: Initializing of SDL Audio failed: %s.\n", SDL_GetError());
                 return 0;
         }
 
 	/* Open the audio device and start playing sound! */
 	if(SDL_OpenAudio(&aspec, &obtained) < 0) {
-        	printf("SDL: Unable to open audio: %s\n", SDL_GetError());
+        	mp_msg(MSGT_AO,MSGL_ERR,"SDL: Unable to open audio: %s\n", SDL_GetError());
         	return(0);
 	} 
 
@@ -245,11 +245,11 @@ void callback(void *userdata, Uint8 *stream, int len); userdata is the pointer s
 		ao_data.format = AFMT_U16_BE;
 	    break;
 	    default:
-                printf("SDL: Unsupported SDL audio format: 0x%x.\n", obtained.format);
+                mp_msg(MSGT_AO,MSGL_WARN,"SDL: Unsupported SDL audio format: 0x%x.\n", obtained.format);
                 return 0;
 	}
 
-	if(verbose) printf("SDL: buf size = %d\n",obtained.size);
+	mp_msg(MSGT_AO,MSGL_V,"SDL: buf size = %d\n",obtained.size);
 	ao_data.buffersize=obtained.size;
 	
 	/* unsilence audio, if callback is ready */
@@ -260,7 +260,7 @@ void callback(void *userdata, Uint8 *stream, int len); userdata is the pointer s
 
 // close audio device
 static void uninit(){
-	if(verbose) printf("SDL: Audio Subsystem shutting down!\n");
+	mp_msg(MSGT_AO,MSGL_V,"SDL: Audio Subsystem shutting down!\n");
 	SDL_CloseAudio();
 	SDL_QuitSubSystem(SDL_INIT_AUDIO);
 }

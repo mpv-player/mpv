@@ -71,7 +71,7 @@ static int preinit(sh_audio_t *sh_audio)
 //    priv->o_wf->wBitsPerSample = inf_fmt->wBitsPerSample;
     priv->o_wf->cbSize = 0;
     
-    if (verbose)
+    if (verbose>0)
     {
 	mp_msg(MSGT_DECAUDIO, MSGL_V, "Input format:\n");
 	print_wave_header(in_fmt);
@@ -219,8 +219,7 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
       }
 //      return -1;
     }
-    if(verbose>1)
-      mp_msg(MSGT_WIN32,MSGL_DBG2,"acm converted %d -> %d\n",ash.cbSrcLengthUsed,ash.cbDstLengthUsed);
+    mp_msg(MSGT_WIN32,MSGL_DBG2,"acm converted %d -> %d\n",ash.cbSrcLengthUsed,ash.cbDstLengthUsed);
     if(ash.cbSrcLengthUsed>=sh_audio->a_in_buffer_len){
       sh_audio->a_in_buffer_len=0;
     } else {

@@ -682,7 +682,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
     }
 
     // Many users forget to include command line in bugreports...
-    if(verbose){
+    if(verbose>0){
       mp_msg(MSGT_CPLAYER, MSGL_INFO, "CommandLine:");
       for(i=1;i<argc;i++)printf(" '%s'",argv[i]);
       printf("\n");
@@ -1353,14 +1353,14 @@ if(sh_audio) sh_audio->timer=-audio_delay;
 
 if(!sh_audio){
   mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_NoSound);
-  if(verbose) mp_msg(MSGT_CPLAYER,MSGL_V,"Freeing %d unused audio chunks\n",d_audio->packs);
+  mp_msg(MSGT_CPLAYER,MSGL_V,"Freeing %d unused audio chunks\n",d_audio->packs);
   ds_free_packs(d_audio); // free buffered chunks
   d_audio->id=-2;         // do not read audio chunks
   //uninit_player(INITED_AO); // close device
 }
 if(!sh_video){
    mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_Video_NoVideo);
-   if(verbose) mp_msg(MSGT_CPLAYER,MSGL_V,"Freeing %d unused video chunks\n",d_video->packs);
+   mp_msg(MSGT_CPLAYER,MSGL_V,"Freeing %d unused video chunks\n",d_video->packs);
    ds_free_packs(d_video);
    d_video->id=-2;
    //if(!fixed_vo) uninit_player(INITED_VO);
@@ -2525,7 +2525,7 @@ if(rel_seek_secs || abs_seek_pos){
       if(sh_audio){
 	if(d_audio->packs == 0)
 	  ds_fill_buffer(d_audio);
-	if(verbose){
+	if(verbose>0){
 	    float a_pts=d_audio->pts;
             a_pts+=(ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
 	    mp_msg(MSGT_AVSYNC,MSGL_V,"SEEK: A: %5.3f  V: %5.3f  A-V: %5.3f   \n",a_pts,d_video->pts,a_pts-d_video->pts);

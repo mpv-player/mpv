@@ -14,8 +14,6 @@
 #include "linux/timer.h"
 #include "linux/shmem.h"
 
-extern int verbose; // defined in mplayer.c
-
 #include "stream.h"
 #include "demuxer.h"
 #include "parse_es.h"

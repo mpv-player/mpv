@@ -125,19 +125,19 @@ static int realtime_samplecounter_available(char *dev)
     info.play.encoding = AUDIO_ENCODING_LINEAR;
     info.play.samples = 0;
     if (ioctl(fd, AUDIO_SETINFO, &info)) {
-	if (verbose)
+	if (verbose>0)
 	    printf("rtsc: SETINFO failed\n");
 	goto error;
     }
     
     if (write(fd, silence, len) != len) {
-	if (verbose)
+	if (verbose>0)
 	    printf("rtsc: write failed");
 	goto error;
     }
 
     if (ioctl(fd, AUDIO_GETINFO, &info)) {
-	if (verbose)
+	if (verbose>0)
 	    perror("rtsc: GETINFO1");
 	goto error;
     }
@@ -159,18 +159,18 @@ static int realtime_samplecounter_available(char *dev)
 	    break;
 
 	if (ioctl(fd, AUDIO_GETINFO, &info)) {
-	    if (verbose)
+	    if (verbose>0)
 		perror("rtsc: GETINFO2 failed");
 	    goto error;
 	}
 	if (info.play.samples < last_samplecnt) {
-	    if (verbose)
+	    if (verbose>0)
 		printf("rtsc: %d > %d?\n", last_samplecnt, info.play.samples);
 	    goto error;
 	}
 
 	if ((increment = info.play.samples - last_samplecnt) > 0) {
-	    if (verbose)
+	    if (verbose>0)
 		printf("ao_sun: sample counter increment: %d\n", increment);
 	    if (increment < min_increment) {
 		min_increment = increment;
@@ -193,7 +193,7 @@ static int realtime_samplecounter_available(char *dev)
     if (min_increment < 2000)
 	rtsc_ok = RTSC_ENABLED;
 
-    if (verbose)
+    if (verbose>0)
 	printf("ao_sun: minimum sample counter increment per 10msec interval: %d\n"
 	       "\t%susing sample counter based timing code\n",
 	       min_increment, rtsc_ok == RTSC_ENABLED ? "" : "not ");

@@ -17,8 +17,6 @@
 
 #include "../mp_msg.h"
 
-extern int verbose;
-
 static ao_info_t info = 
 {
     "ALSA-0.5.x audio output",

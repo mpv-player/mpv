@@ -789,7 +789,7 @@ if(lame_param_scale>0) {
     lame_set_scale(lame,lame_param_scale);
 }
 lame_init_params(lame);
-if(verbose){
+if(verbose>0){
     lame_print_config(lame);
     lame_print_internals(lame);
 }
@@ -1113,7 +1113,7 @@ if(sh_audio && !demuxer2){
 	    (int)demuxer->filepos,
 	    (int)demuxer->movi_end);
 #else
-	if(verbose) {
+	if(verbose>0) {
 		mp_msg(MSGT_AVSYNC,MSGL_STATUS,"Pos:%6.1fs %6df (%2d%%) %3dfps Trem:%4dmin %3dmb  A-V:%5.3f [%d:%d] A/Vms %d/%d D/B/S %d/%d/%d \r",
 	    	mux_v->timer, decoded_frameno, (int)(p*100),
 	    	(t>1) ? (int)(decoded_frameno/t+0.5) : 0,

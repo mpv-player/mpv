@@ -235,8 +235,6 @@ static XF86VidModeModeInfo **vo_dga_vidmodes=NULL;
 #endif
 
 
-extern int       verbose;          
-
 static int       vo_dga_src_format;
 static int       vo_dga_width;           // bytes per line in framebuffer
 static int       vo_dga_vp_width;        // visible pixels per line in 

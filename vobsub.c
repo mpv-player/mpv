@@ -30,8 +30,6 @@
 
 extern int vobsub_id;
 
-extern int verbose;
-
 /**********************************************************************
  * RAR stream handling
  * The RAR file must have the same basename as the file to open
@@ -625,8 +623,7 @@ vobsub_add_id(vobsub_t *vob, const char *id, size_t idlen, const unsigned int in
 	memcpy(vob->spu_streams[index].id, id, idlen);
     }
     vob->spu_streams_current = index;
-    if (verbose)
-	mp_msg(MSGT_VOBSUB,MSGL_V,"[vobsub] subtitle (vobsubid): %d language %s\n",
+    mp_msg(MSGT_VOBSUB,MSGL_V,"[vobsub] subtitle (vobsubid): %d language %s\n",
 		index, vob->spu_streams[index].id);
     return 0;
 }
@@ -919,8 +916,7 @@ vobsub_parse_one_line(vobsub_t *vob, rar_stream_t *fd)
 	    //custom colors: ON/OFF, tridx: XXXX, colors: XXXXXX, XXXXXX, XXXXXX,XXXXXX
 	    res = vobsub_parse_cuspal(vob, line) + vobsub_parse_tridx(line) + vobsub_parse_custom(vob, line);
 	else {
-	    if (verbose)
-		mp_msg(MSGT_VOBSUB,MSGL_V, "vobsub: ignoring %s", line);
+	    mp_msg(MSGT_VOBSUB,MSGL_V, "vobsub: ignoring %s", line);
 	    continue;
 	}
 	if (res < 0)

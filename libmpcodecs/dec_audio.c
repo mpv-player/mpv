@@ -6,8 +6,6 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 
-extern int verbose; // defined in mplayer.c
-
 #include "stream.h"
 #include "demuxer.h"
 

@@ -50,8 +50,6 @@
 int ice_layer=12;
 int stop_xscreensaver=0;
 
-extern int verbose;
-
 static int dpms_disabled=0;
 static int timeout_save=0;
 static int xscreensaver_was_running=0;

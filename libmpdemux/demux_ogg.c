@@ -542,7 +542,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	ogg_d->subs[ogg_d->num_sub].samplerate = sh_v->fps;
 	n_video++;
 	mp_msg(MSGT_DEMUX,MSGL_V,"OGG stream %d is video (old hdr)\n",ogg_d->num_sub);
-	if(verbose) print_video_header(sh_v->bih);
+	if(verbose>0) print_video_header(sh_v->bih);
 	// Old audio header
       } else if(get_uint32(pack.packet+96) == 0x05589F81) {
 	unsigned int extra_size;
@@ -563,7 +563,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	ogg_d->subs[ogg_d->num_sub].samplerate = sh_a->samplerate; // * sh_a->channels;
 	n_audio++;
 	mp_msg(MSGT_DEMUX,MSGL_V,"OGG stream %d is audio (old hdr)\n",ogg_d->num_sub);
-	if(verbose) print_wave_header(sh_a->wf);
+	if(verbose>0) print_wave_header(sh_a->wf);
       } else
 	mp_msg(MSGT_DEMUX,MSGL_WARN,"OGG stream %d contain an old header but the header type is unknow\n",ogg_d->num_sub);
 
@@ -591,7 +591,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	ogg_d->subs[ogg_d->num_sub].samplerate= sh_v->fps;
 	n_video++;
 	mp_msg(MSGT_DEMUX,MSGL_V,"OGG stream %d is video (new hdr)\n",ogg_d->num_sub);
-	if(verbose) print_video_header(sh_v->bih);
+	if(verbose>0) print_video_header(sh_v->bih);
 	/// New audio header
       } else if(strncmp(st->streamtype,"audio",5) == 0) {
 	char buffer[5];
@@ -614,7 +614,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	ogg_d->subs[ogg_d->num_sub].samplerate = sh_a->samplerate; // * sh_a->channels;
 	n_audio++;
 	mp_msg(MSGT_DEMUX,MSGL_V,"OGG stream %d is audio (new hdr)\n",ogg_d->num_sub);
-	if(verbose) print_wave_header(sh_a->wf);
+	if(verbose>0) print_wave_header(sh_a->wf);
 
 	/// Check for text (subtitles) header
       } else if (strncmp(st->streamtype, "text", 4) == 0) {
