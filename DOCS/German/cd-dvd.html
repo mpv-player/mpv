@@ -130,13 +130,16 @@ installiert sind.</P>
 <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Wählt das DVD-Kapitel (Standard: wiedergabe von Kapitel 1)</TD><TR>
 <TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-dvdangle &lt;angle_id&gt;&nbsp;</TD>
 <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Zum aus wählen der Kamera-Perspektive (Standard: 1)</TD><TR>
-</TABLE>
+<TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-sid &lt;subtitle_id&gt;&nbsp;</TD></TABLE>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Aktiviert die Anzeige der DVD-Untertitel (mit subtitle_id oder Sprache angegeben) (normalerweise ausgeschaltet)<BR>
+  Für eine Liste der verfügbaren Sprachen verwende die <CODE>-sid 1 -v</CODE> Option und schau die die Ausgabe an.</TD><TR>
 
 <P>Standard-Geräte ist <CODE>/dev/dvd</CODE>, du kannst das in config.h (compile time
 option) ändern, oder du kannst es als Dateinamen für <B>MPlayer</B> angeben:
 </P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 /dev/dvd</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -sid 5 /dev/dvd</CODE></P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 2 -chapter 5 -dvdangle 2</CODE></P>
 
 <P><B><A NAME=4.3>4.3. DVD Wiedergabe FAQ</A></B></P>
@@ -160,11 +163,9 @@ homepage. Wir sind nicht die Autoren von libdvdread.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-Was ist mit den Untertiteln? Kann MPlayer sie dekodieren?
+Was ist mit den Untertiteln? Kann MPlayer sie anzeigen?
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-Ja, das kann es (oder es sollte zumindest so sein) aber es ist keine DVD-Untertitel-Funktion
-bei der Anzeige implementiert in <B>MPlayer</B> (DVD-Untertitel werden als Bilder, nicht als
-Text gespeichert!). Wie auch immer, es ist ein geplantes Feature (in der Zeit von libvo2).
+Ja! Siehe oben im DVD-Kapitel.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
