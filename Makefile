@@ -283,9 +283,6 @@ ifeq ($(GUI),yes)
 	@echo "*** for GUI, and extract to $(DATADIR)/Skin/"
 endif
 	@if test ! -d $(CONFDIR) ; then mkdir -p $(CONFDIR) ; fi
-	@if test -f $(CONFDIR)/codecs.conf.old ; then mv -f $(CONFDIR)/codecs.conf.old $(CONFDIR)/codecs.conf.older ; fi
-	@if test -f $(CONFDIR)/codecs.conf ; then mv -f $(CONFDIR)/codecs.conf $(CONFDIR)/codecs.conf.old ; fi
-	$(INSTALL) -c -m 644 etc/codecs.conf $(CONFDIR)/codecs.conf
 ifeq ($(DVDKIT_SHARED),yes)
 ifeq ($(DVDKIT2),yes)
 	if test ! -d $(LIBDIR) ; then mkdir -p $(LIBDIR) ; fi
