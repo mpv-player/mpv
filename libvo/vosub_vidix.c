@@ -695,26 +695,28 @@ uint32_t vidix_control(uint32_t request, void *data, ...)
     value = va_arg(ap, int);
     va_end(ap);
     
+//    printf("vidix seteq %s -> %d  \n",data,value);
+    
     /* vidix eq ranges are -1000..1000 */
     if (!strcasecmp(data, "brightness"))
     {
 	info.brightness = value*10;
-	info.cap |= VEQ_CAP_BRIGHTNESS;
+	info.cap = VEQ_CAP_BRIGHTNESS;
     }
     else if (!strcasecmp(data, "contrast"))
     {
 	info.contrast = value*10;
-	info.cap |= VEQ_CAP_CONTRAST;
+	info.cap = VEQ_CAP_CONTRAST;
     }
     else if (!strcasecmp(data, "saturation"))
     {
 	info.saturation = value*10;
-	info.cap |= VEQ_CAP_SATURATION;
+	info.cap = VEQ_CAP_SATURATION;
     }
     else if (!strcasecmp(data, "hue"))
     {
 	info.hue = value*10;
-	info.cap |= VEQ_CAP_HUE;
+	info.cap = VEQ_CAP_HUE;
     }
 
     if (vdlPlaybackSetEq(vidix_handler, &info) == 0)
@@ -728,11 +730,11 @@ uint32_t vidix_control(uint32_t request, void *data, ...)
     vidix_video_eq_t info;
 
     if(!video_on) return VO_FALSE;
-    if (vdlPlaybackSetEq(vidix_handler, &info) != 0)
+    if (vdlPlaybackGetEq(vidix_handler, &info) != 0)
 	return VO_FALSE;
 
     va_start(ap, data);
-    value = va_arg(ap, int);
+    value = va_arg(ap, int*);
     va_end(ap);
     
     /* vidix eq ranges are -1000..1000 */
