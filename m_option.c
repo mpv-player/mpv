@@ -1439,6 +1439,7 @@ static int parse_obj_settings_list(m_option_t* opt,char *name,
 
   if(!strcmp(param,"help")) {
     m_obj_list_t* ol = opt->priv;
+    mp_msg(MSGT_VFILTER,MSGL_INFO,"Available video filters:\n");
     for(n = 0 ; ol->list[n] ; n++)
       mp_msg(MSGT_VFILTER,MSGL_INFO,"  %-15s: %s\n",
 	     M_ST_MB(char*,ol->list[n],ol->name_off),
