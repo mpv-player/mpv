@@ -35,6 +35,11 @@ extern vd_functions_t mpcodecs_vd_xanim;
 extern vd_functions_t mpcodecs_vd_rle;
 extern vd_functions_t mpcodecs_vd_msvidc;
 extern vd_functions_t mpcodecs_vd_fli;
+extern vd_functions_t mpcodecs_vd_qtrle;
+extern vd_functions_t mpcodecs_vd_qtsmc;
+extern vd_functions_t mpcodecs_vd_roqvideo;
+extern vd_functions_t mpcodecs_vd_cyuv;
+extern vd_functions_t mpcodecs_vd_nuv;
 
 vd_functions_t* mpcodecs_vd_drivers[] = {
         &mpcodecs_vd_null,
@@ -60,6 +65,11 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
         &mpcodecs_vd_rle,
         &mpcodecs_vd_msvidc,
         &mpcodecs_vd_fli,
+        &mpcodecs_vd_qtrle,
+        &mpcodecs_vd_qtsmc,
+        &mpcodecs_vd_roqvideo,
+        &mpcodecs_vd_cyuv,
+        &mpcodecs_vd_nuv,
 #ifdef USE_XANIM
         &mpcodecs_vd_xanim,
 #endif
