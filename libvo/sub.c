@@ -261,7 +261,7 @@ void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h,
         vo_draw_text_sub(dxs,dys,draw_alpha);
     }
     
-    if(vo_osd_progbar_type>=0){
+    if(vo_osd_progbar_type>=0 && vo_font->font[OSD_PB_0]>=0){
         vo_draw_text_progbar(dxs,dys,draw_alpha);
     }
 
