@@ -113,7 +113,7 @@ extern "C" {
 #  define __RESTORE_ES  __asm__ __volatile__("pushl %ds\n\tpopl %es")
 #  endif
 # else
-#  error You need gcc >= 2.7 to build Wine on a 386
+// #  error You need gcc >= 2.7 to build Wine on a 386
 # endif
 #else 
 # define __stdcall
