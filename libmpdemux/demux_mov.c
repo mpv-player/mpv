@@ -291,6 +291,7 @@ int mov_check_file(demuxer_t* demuxer){
     memset(priv,0,sizeof(mov_priv_t));
     
     while(1){
+	int i;
 	int skipped=8;
 	off_t len=stream_read_dword(demuxer->stream);
 	unsigned int id=stream_read_dword(demuxer->stream);
@@ -317,7 +318,6 @@ int mov_check_file(demuxer_t* demuxer){
 
 	switch(id){
 	case MOV_FOURCC('f','t','y','p'): {
-	  int i;					      
 	  unsigned int tmp;
 	  // File Type Box (ftyp): 
 	  // char[4]  major_brand	   (eg. 'isom')
@@ -352,6 +352,46 @@ int mov_check_file(demuxer_t* demuxer){
 	  priv->moov_end=(off_t)priv->moov_start+len-skipped;
 	  mp_msg(MSGT_DEMUX,MSGL_DBG2,"MOV: Movie header: start: %x end: %x\n",
 	    priv->moov_start, priv->moov_end);
+	  skipped+=8;
+	  i = stream_read_dword(demuxer->stream)-8;
+	  if(stream_read_dword(demuxer->stream)==MOV_FOURCC('r','m','r','a')){
+	      int ref=0;
+	      skipped+=i;
+	      mp_msg(MSGT_DEMUX,MSGL_INFO,"MOV: Reference Media file!!!\n");
+	      while(i>0){
+	          int len=stream_read_dword(demuxer->stream)-8;
+		  int fcc=stream_read_dword(demuxer->stream);
+		  if(len<0) break; // EOF!?
+		  i-=8;
+//		  printf("i=%d  len=%d\n",i,len);
+		  switch(fcc){
+		  case MOV_FOURCC('r','m','d','a'):
+		      continue;
+		  case MOV_FOURCC('r','d','r','f'): {
+		      int tmp=stream_read_dword(demuxer->stream);
+		      int type=stream_read_dword_le(demuxer->stream);
+	              int slen=stream_read_dword(demuxer->stream);
+		      char* s=malloc(slen+1);
+		      stream_read(demuxer->stream,s,slen);
+		      s[slen]=0;
+		      mp_msg(MSGT_DEMUX,MSGL_INFO,"REF: [%.4s] %s\n",&type,s);
+		      len-=12+slen;i-=12+slen; break;
+		    }
+		  case MOV_FOURCC('r','m','d','r'): {
+		      int flags=stream_read_dword(demuxer->stream);
+		      int rate=stream_read_dword(demuxer->stream);
+		      mp_msg(MSGT_DEMUX,MSGL_V,"  min. data rate: %d bits/sec\n",rate);
+		      len-=8; i-=8; break;
+		    }
+		  case MOV_FOURCC('r','m','q','u'): {
+		      int q=stream_read_dword(demuxer->stream);
+		      mp_msg(MSGT_DEMUX,MSGL_V,"  quality index: %d\n",q);
+		      len-=4; i-=4; break;
+		    }
+		  }
+		  i-=len;stream_skip(demuxer->stream,len);
+	      }
+	  }
 	  flags|=1;
 	  break;
 	case MOV_FOURCC('w','i','d','e'):
