@@ -141,6 +141,8 @@ MPlayer (1.0)
     * -loop and -shuffle now work together
     * GUI unified audio options dialog, also for ALSA
     * GUI redrawing limited, decreases CPU usage in audio-only case
+    * GUI icons for the context menu
+    * GUI speedup especially for audio only case
     * x264 encoder support
     * better EDL support
     * some --disable configure options finally work (mp3lib, liba52, libmpeg2)
@@ -164,6 +166,7 @@ MPlayer (1.0)
     * -crash-debug option to attach gdb automatically after crashes
     * gcc 4 compilation fixes
     * compilation fixes for many files in the TOOLS directory
+    * infamous "stuck mouse button" bug fixed
 
 
   pre5: "LinuxTag release" July 15, 2004
