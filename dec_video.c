@@ -1,6 +1,4 @@
 
-//#define NEW_DSHOW
-
 #include "config.h"
 
 #include <stdio.h>
@@ -57,11 +55,8 @@ extern picture_t *picture;	// exported from libmpeg2/decode.c
 int divx_quality=0;
 
 #ifdef USE_DIRECTSHOW
-static void* ds_vdec=NULL;
-#ifdef NEW_DSHOW
-#else
 #include "loader/DirectShow/DS_VideoDec.h"
-#endif
+static void* ds_vdec=NULL;
 #endif
 
 #ifdef USE_LIBAVCODEC
