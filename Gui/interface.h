@@ -102,6 +102,7 @@ extern guiInterface_t guiIntfStruct;
 #define guiSetPause 2
 
 extern void guiInit( int argc,char* argv[], char *envp[] );
+extern void guiDone( void );
 extern void guiGetEvent( int type,char * arg );
 extern void guiEventHandling( void );
 

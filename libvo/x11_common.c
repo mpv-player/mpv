@@ -473,9 +473,16 @@ int vo_x11_check_events(Display *mydisplay){
            ret|=VO_EVENT_RESIZE;
            break;
       case KeyPress:
-           XLookupString( &Event.xkey,buf,sizeof(buf),&keySym,&stat );
-           vo_x11_putkey( ( (keySym&0xff00) != 0?( (keySym&0x00ff) + 256 ):( keySym ) ) );
-           ret|=VO_EVENT_KEYPRESS;
+           { 
+	    int key;
+            XLookupString( &Event.xkey,buf,sizeof(buf),&keySym,&stat );
+	    key=( (keySym&0xff00) != 0?( (keySym&0x00ff) + 256 ):( keySym ) );
+	    #ifdef HAVE_NEW_GUI
+	     if ( ( use_gui )&&( key == wsEnter ) ) break;
+	    #endif
+            vo_x11_putkey( key );
+            ret|=VO_EVENT_KEYPRESS;
+	   }
            break;
 #ifdef HAVE_NEW_INPUT
       case ButtonPress:

@@ -749,7 +749,7 @@ current_module = NULL;
   if(use_gui){
        guiInit( argc,argv,envp );
        inited_flags|=INITED_GUI;
-       guiGetEvent( guiCEvent,(gui_no_filename) ? 0 : 1 );
+       guiGetEvent( guiCEvent,(char *)((gui_no_filename) ? 0 : 1) );
   }
 #endif
 
@@ -769,7 +769,7 @@ if(!use_stdin && !slave_mode){
      if ( guiIntfStruct.DVDChanged ) 
       {
        guiIntfStruct.DVDChanged=0;
-       guiGetEvent( guiCEvent,guiSetPlay );
+       guiGetEvent( guiCEvent,(char *)guiSetPlay );
        filename="/dev/dvd";
        goto play_dvd;
       }
@@ -795,21 +795,12 @@ play_dvd:
        {
         play_tree_t * entry = play_tree_new();
         play_tree_add_file( entry,guiIntfStruct.Filename );
-        if ( playtree )
+        if ( playtree ) play_tree_free_list( playtree->child,1 );
+         else playtree=play_tree_new();
+        play_tree_set_child( playtree,entry );
+        if(playtree)
 	 {
-          play_tree_free_list( playtree->child,1 );
-          play_tree_set_child( playtree,entry );
-	 }
-          else
-           {
-	    fprintf( stderr,"[mplayer] new playtree created.\n" );
-            if ( !playtree ) playtree=play_tree_new();
-            play_tree_set_child( playtree,entry );
-           }
-
-        if(playtree->child)
-	 {
-	  playtree_iter = play_tree_iter_new(playtree->child,mconfig);
+	  playtree_iter = play_tree_iter_new(playtree,mconfig);
 	  if(playtree_iter)
 	   {
 	    if(play_tree_iter_step(playtree_iter,0,0) != PLAY_TREE_ITER_ENTRY)
@@ -820,8 +811,9 @@ play_dvd:
 	    filename = play_tree_iter_get_file(playtree_iter,1);
 	   }
          }
+//	filename=playtree->child->files[0]; 
    	guiIntfStruct.FilenameChanged=0;
-       }
+       } 
     }
 #endif
 
@@ -2034,7 +2026,7 @@ read_input:
 	fflush(stdout);
       }
 #ifdef HAVE_NEW_GUI
-      if(use_gui) guiGetEvent( guiCEvent,guiSetPause );
+      if(use_gui) guiGetEvent( guiCEvent,(char *)guiSetPause );
 #endif
       if (video_out && sh_video)
 	 video_out->control(VOCTRL_PAUSE, NULL);
@@ -2091,7 +2083,7 @@ read_input:
         video_out->control(VOCTRL_RESUME, NULL);	// resume video
       (void)GetRelativeTime();	// keep TF around FT in next cycle
 #ifdef HAVE_NEW_GUI
-      if (use_gui) guiGetEvent( guiCEvent,guiSetPlay );
+      if (use_gui) guiGetEvent( guiCEvent,(char *)guiSetPlay );
 #endif
   }
 
@@ -2903,6 +2895,18 @@ if(benchmark){
 	    ,our_n_frames,bench_dropped_frames);
 }
 
+#ifdef HAVE_NEW_GUI
+ if( use_gui ) 
+  {
+#ifdef USE_DVDREAD
+   if ( !guiIntfStruct.DVDChanged ) 
+#endif
+   mplStop();
+#warning workaround for kiba playtree with gui ... if i dont play the prev/next file, then playtree sig6 (assert)
+   eof=0;
+  }	
+#endif
+
 if(eof == PT_NEXT_ENTRY || eof == PT_PREV_ENTRY) {
   eof = eof == PT_NEXT_ENTRY ? 1 : -1;
   if(play_tree_iter_step(playtree_iter,eof,0) == PLAY_TREE_ITER_ENTRY) {
@@ -2929,16 +2933,6 @@ if(eof == PT_NEXT_ENTRY || eof == PT_PREV_ENTRY) {
 uninit_player(INITED_VO);
 
 if(eof == 0) eof = 1;
-
-#ifdef HAVE_NEW_GUI
-      if(use_gui) 
-       {
-#ifdef USE_DVDREAD
-        if ( !guiIntfStruct.DVDChanged ) 
-#endif
-	mplStop();
-       }	
-#endif
 
 while(playtree_iter != NULL) {
   filename = play_tree_iter_get_file(playtree_iter,eof);

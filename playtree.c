@@ -442,7 +442,6 @@ play_tree_iter_new(play_tree_t* pt,m_config_t* config) {
 void
 play_tree_iter_free(play_tree_iter_t* iter) {
 
-  if ( !iter ) return;  
 #ifdef MP_DEBUG
   assert(iter != NULL);
 #endif
@@ -461,7 +460,6 @@ int
 play_tree_iter_step(play_tree_iter_t* iter, int d,int with_nodes) {
   play_tree_t* pt;
 
-  if ( !iter ) return PLAY_TREE_ITER_ERROR;
 #ifdef MP_DEBUG
   assert(iter != NULL);
   assert(iter->root != NULL);

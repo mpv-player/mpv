@@ -208,7 +208,6 @@ void mplEventHandling( int msg,float param )
   {
 // --- user events
    case evExit:
-        wsDoExit();  // sets wsTrue=False;
         exit_player( "Exit" );
         break;
 
