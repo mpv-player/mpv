@@ -378,7 +378,7 @@ it works with the following drivers:
 </sect2>
 
 
-<sect2 id="sounc-cards">
+<sect2 id="sound-cards">
 <title>Sound cards</title>
 
 <itemizedlist>
@@ -485,17 +485,8 @@ are stored in PNG format, so GTK, <systemitem class="library">libpng</systemitem
 (and their devel stuff, usualy called <systemitem class="library">gtk-dev</systemitem>
 and <systemitem class="library">libpng-dev</systemitem>) has to be installed.
 You can build it by specifying <option>--enable-gui</option> during
-<filename>./configure</filename>. Then, to turn on GUI mode, you either
-<itemizedlist>
-<listitem><para>
-  specify <literal>gui=yes</literal> in your config file
-  </para></listitem>
-<listitem><para>
-  execute
-  <screen>ln -s $PREFIX/bin/mplayer $PREFIX/bin/gmplayer</screen>
-  and call <command>gmplayer</command> instead.
-  </para></listitem>
-</itemizedlist>
+<filename>./configure</filename>. Then, to turn on GUI mode, you have to
+execute the <command>gmplayer</command> binary.
 </para>
 
 <para>
