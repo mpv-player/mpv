@@ -209,29 +209,21 @@ int attrib_count,i;
       attributes = XvQueryPortAttributes(mDisplay, xv_port, &attrib_count);
       if(attributes!=NULL){
          for (i = 0; i < attrib_count; i++){
-            if (!strcmp(attributes[i].name, "XV_AUTOPAINT_COLORKEY"))
+            if (!strcmp(attributes[i].name, "XV_COLORKEY"))
             {
-               xv_atom = XInternAtom(mDisplay, "XV_AUTOPAINT_COLORKEY", False);
+               xv_atom = XInternAtom(mDisplay, "XV_COLORKEY", False);
                if(xv_atom!=None)
                {
-                  rez=XvSetPortAttribute(mDisplay, xv_port, xv_atom, 1);
-                  if(rez == Success) 
-                     keycolor_handling = AUTOPAINT_COLORKEY;
+                  rez=XvGetPortAttribute(mDisplay,xv_port, xv_atom, &colorkey);
+                  if(rez == Success){
+                     keycolor = colorkey;
+                     keycolor_handling = MANUALFILL_COLORKEY;
+                   }
                }
                break;
             }
-	 }
+         }
          XFree(attributes);
-      }
-   }
-
-   xv_atom = XInternAtom(mDisplay, "XV_COLORKEY",False);
-   if(xv_atom == None) return;
-   rez=XvGetPortAttribute(mDisplay,xv_port, xv_atom, &colorkey);
-   if(rez == Success){
-      keycolor = colorkey;
-      if(keycolor_handling == AUTO_COLORKEY){
-         keycolor_handling = MANUALFILL_COLORKEY;
       }
    }
 }
@@ -439,7 +431,7 @@ int mc_ver,mc_rev;
    surface_render = NULL;
    xv_port = 0;
    number_of_surfaces = 0;
-   keycolor_handling = MANUALFILL_COLORKEY;//fixme
+   keycolor_handling = AUTO_COLORKEY;
    subpicture_alloc = 0;
    
    benchmark = 0; //disable PutImageto allow faster display than screen refresh
