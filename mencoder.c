@@ -382,7 +382,7 @@ if(stream->type==STREAMTYPE_DVD){
 }
 #endif
 
-  if(stream_cache_size) stream_enable_cache(stream,stream_cache_size*1024,0,0);
+  stream->start_pos+=seek_to_byte;
 
 #ifdef HAVE_LIBCSS
 //  current_module="libcss";
@@ -402,6 +402,8 @@ if(stream->type==STREAMTYPE_DVD){
     mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_DVDauthOk);
   }
 #endif
+
+  if(stream_cache_size) stream_enable_cache(stream,stream_cache_size*1024,0,0);
 
   if(!has_audio || demuxer2) audio_id=-2; /* do NOT read audio packets... */
 

@@ -38,6 +38,9 @@
 	{"csslib", "MPlayer was compiled WITHOUT libcss support!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
 
+	{"sb", &seek_to_byte, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
+	{"ss", &seek_to_sec, CONF_TYPE_STRING, CONF_MIN, 0, 0, NULL},
+
 // ------------------------- demuxer options --------------------
 
 	{"bps", &pts_from_bps, CONF_TYPE_FLAG, 0, 0, 1, NULL},

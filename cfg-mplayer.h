@@ -189,8 +189,6 @@ static config_t mplayer_opts[]={
 #endif
 //	{"bg", &play_in_bg, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 //	{"nobg", &play_in_bg, CONF_TYPE_FLAG, 0, 1, 0, NULL},
-	{"sb", &seek_to_byte, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
-	{"ss", &seek_to_sec, CONF_TYPE_STRING, CONF_MIN, 0, 0, NULL},
 	{"sstep", &step_sec, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
 	{"noloop", &loop_times, CONF_TYPE_FLAG, 0, 0, -1, NULL},
 	{"loop", &loop_times, CONF_TYPE_INT, CONF_RANGE, -1, 10000, NULL},
