@@ -51,7 +51,7 @@ struct WaveHeader
 static struct WaveHeader wavhdr = {
 	le2me_32(WAV_ID_RIFF),
         /* same conventions than in sox/wav.c/wavwritehdr() */
-	le2me_32(0x7ffff024),
+	0, //le2me_32(0x7ffff024),
 	le2me_32(WAV_ID_WAVE),
 	le2me_32(WAV_ID_FMT),
 	le2me_32(16),
@@ -62,7 +62,7 @@ static struct WaveHeader wavhdr = {
 	le2me_16(4),
 	le2me_16(16),
 	le2me_32(WAV_ID_DATA),
-	le2me_32(0x7ffff000)
+	0, //le2me_32(0x7ffff000)
 };
 
 static FILE *fp = NULL;
