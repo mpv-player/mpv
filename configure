@@ -445,7 +445,7 @@ if test -z "$_target" ; then
       i[3-9]86*|x86|x86pc|k5|k6|k6_2|k6_3|k6-2|k6-3|pentium*|athlon*|i586_i686|i586-i686) host_arch=i386 ;;
       ia64) host_arch=ia64 ;;
       x86_64|amd64) host_arch=x86_64 ;;
-      ppc) host_arch=ppc ;;
+      macppc|ppc) host_arch=ppc ;;
       alpha) host_arch=alpha ;;
       sparc*) host_arch=sparc ;;
       parisc*|hppa*|9000*) host_arch=hppa ;;
@@ -4329,7 +4329,7 @@ echores "$_sgiaudio"
 
 
 echocheck "VCD support"
-if linux || bsdos || freebsd || netbsd || sunos ; then
+if linux || bsdos || freebsd || netbsd || openbsd || sunos ; then
   _inputmodules="vcd $_inputmodules"
   _def_vcd='#define HAVE_VCD 1'
   echores "ok"
@@ -6653,6 +6653,9 @@ $_def_vcd
 #define DEFAULT_DVD_DEVICE	"D:"
 #elif defined(SYS_DARWIN)
 #define DEFAULT_CDROM_DEVICE    "/dev/rdiskN"
+#define DEFAULT_DVD_DEVICE	DEFAULT_CDROM_DEVICE
+#elif defined(__OpenBSD__)
+#define DEFAULT_CDROM_DEVICE	"/dev/rcd0a"
 #define DEFAULT_DVD_DEVICE	DEFAULT_CDROM_DEVICE
 #else
 #define DEFAULT_CDROM_DEVICE    "/dev/cdrom"
