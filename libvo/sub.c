@@ -112,6 +112,7 @@ subtitle* vo_sub=NULL;
 #define MAX_UCS 1600
 #define MAX_UCSLINES 16
 
+
 inline static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
    static int utbl[MAX_UCS+1];
    static int xtbl[MAX_UCSLINES];
@@ -120,37 +121,31 @@ inline static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,in
    static int memy;
    static int memdxs;
    static int memdys;
+   
    unsigned char *t;
-   int i;
-   int j;
-   int k;
-   int l;
-   int x;
-   int y;
-
-   int c;
+   int c,i,j,l,x,y,font;
    int len;
-   int line;
-   int font;
+   int k,lastk;
    int lastStripPosition;
-   int xsize;
-   int lastxsize;
-   int lastk;
+   int xsize,lastxsize;
+   int h,lasth;
    
    if ((memsub!=vo_sub)||(memdxs!=dxs)||(memdys!=dys)){
+      
       memsub=vo_sub;
       memdxs=dxs;
-      memdys=dys;
-      
-      memy=dys;
+      memdys=memy=dys;
       
       // too long lines divide into smaller ones
-      i=k=lines=y=0; l=vo_sub->lines;
+      i=k=lines=lasth=0;
+      h=vo_font->height;
+      xsize=-vo_font->charspace;
+      lastStripPosition=-1;
+      l=vo_sub->lines;
+
       while (l--){
 	  t=vo_sub->text[i++];	  
 	  len=strlen(t)-1;
-	  xsize=lastxsize=-vo_font->charspace;
-	  lastStripPosition=-1;
 
 	  for (j=0;j<=len;j++){
 	      if ((c=t[j])>=0x80){
@@ -166,50 +161,56 @@ inline static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,in
 		    }
 	      }
 	      if (k==MAX_UCS){
-		 utbl[k]=l=0;
-		 break;
-	      } else
-	         utbl[k++]=c;
+		 utbl[k]=l=0; break;
+	      }
+	      utbl[k++]=c;
 	      if (c==' '){
 		 lastk=k;
 		 lastStripPosition=j;
 		 lastxsize=xsize;
-	      } else if (!l && ((font=vo_font->font[c])>=0)){
-		  if (vo_font->pic_a[font]->h > y)
-		     y=vo_font->pic_a[font]->h;
+	      } else if ((font=vo_font->font[c])>=0){
+		  if (vo_font->pic_a[font]->h > h){
+		     h=vo_font->pic_a[font]->h;
+		  }
 	      }
 	      xsize+=vo_font->width[c]+vo_font->charspace;
-	      if (dxs<xsize && lastStripPosition>0){
-		 j=lastStripPosition;
-		 k=lastk;
-		 y=vo_font->height;
-	      } else if (j==len){
-		 lastxsize=xsize;
-	      } else
-	         continue;	       	       	       
+	      if (dxs<xsize){
+		 if (lastStripPosition>0){
+		    j=lastStripPosition;
+		    xsize=lastxsize;
+		    k=lastk;
+		 } else {
+		    xsize -=vo_font->width[c]+vo_font->charspace; // go back
+		    k--; // cut line here
+		    while (t[j] && t[j]!=' ') j++; // jump to the nearest space
+		 }
+	      } else if (j<len)
+		   continue;
+	      if (h>memy){ // out of the screen so end parsing
+		 memy +=vo_font->height-lasth; // correct y position
+		 l=0; break;
+	      }
 	      utbl[k++]=0;
-	      xtbl[lines++]=(dxs-lastxsize)/2;
+	      xtbl[lines++]=(dxs-xsize)/2;
 	      if (lines==MAX_UCSLINES||k>MAX_UCS){
-		 l=0;
-		 break;
-	      } else if(l || j<len){ // not last line or there is no eol
-		 y=0;
-		 xsize=lastxsize=-vo_font->charspace;
-		 memy -=vo_font->height;
-	      } else
-	         memy-=y; // according to max of vo_font->pic_a[font]->h 
-	  }		  // in last line
+		 l=0; break;
+	      } else if(l || j<len){ // not last line or not last char
+		 lastStripPosition=-1;
+		 xsize=-vo_font->charspace;
+		 lasth=h;
+		 h=vo_font->height;
+	      }
+	      memy -=h; // according to max of vo_font->pic_a[font]->h 
+	  }
       }
    }
    
    y = memy;
 
-   k=i=0; l=lines;
+   i=j=0; l=lines;
    while (l--){
-      if (y>=0){
 	 x= xtbl[i++]; 
-	 while ((c=utbl[k++])){
-	    if (x>=0 && x+vo_font->width[c]<=dxs)
+	 while ((c=utbl[j++])){
 	       if ((font=vo_font->font[c])>=0)
 		  draw_alpha(x,y,
 			     vo_font->width[c],
@@ -217,17 +218,11 @@ inline static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,in
 			     vo_font->pic_b[font]->bmp+vo_font->start[c],
 			     vo_font->pic_a[font]->bmp+vo_font->start[c],
 			     vo_font->pic_a[font]->w);
-	    x+=vo_font->width[c]+vo_font->charspace;
+	       x+=vo_font->width[c]+vo_font->charspace;
 	 }
-      } else { 
-	 while (utbl[k++]) ; // skip lines with negative y value
-	 i++;		     // seldom case but who knows ;-)
-      }
-      y+=vo_font->height;
+         y+=vo_font->height;
    }
 }
-
-
 
 static int draw_alpha_init_flag=0;
 
