@@ -57,11 +57,6 @@ static vo_info_t info =
 
 LIBVO_EXTERN(gl2)
 
-/* private prototypes */
-
-#define MODE_BGR 1
-#define MODE_RGB 0
-
 /* local data */
 static unsigned char *ImageData=NULL;
 
