@@ -38,6 +38,9 @@ extern ao_functions_t audio_out_sun;
 #ifdef USE_SGI_AUDIO
 extern ao_functions_t audio_out_sgi;
 #endif
+#ifdef HAVE_WIN32WAVEOUT
+extern ao_functions_t audio_out_win32;
+#endif
 #ifdef HAVE_DXR2
 extern ao_functions_t audio_out_dxr2;
 #endif
@@ -68,6 +71,9 @@ ao_functions_t* audio_out_drivers[] =
 #endif
 #ifdef USE_SUN_AUDIO
         &audio_out_sun,
+#endif
+#ifdef HAVE_WIN32WAVEOUT
+        &audio_out_win32,
 #endif
 // wrappers:
 #ifdef USE_ARTS
