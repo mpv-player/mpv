@@ -87,7 +87,9 @@ static int demux_avi_read_packet(demuxer_t *demux,unsigned int id,unsigned int l
 //          printf("\rYYY-A  A: %5.3f  V: %5.3f  \n",priv->avi_audio_pts,priv->avi_video_pts);
           if(priv->pts_has_video){
 	      // we have video pts now
-	      float delay=(float)priv->pts_corr_bytes/((sh_audio_t*)(ds->sh))->wf->nAvgBytesPerSec;
+	      float delay=0;
+	      if(((sh_audio_t*)(ds->sh))->wf->nAvgBytesPerSec)
+	          delay=(float)priv->pts_corr_bytes/((sh_audio_t*)(ds->sh))->wf->nAvgBytesPerSec;
 	      mp_msg(MSGT_DEMUX,MSGL_V,"XXX initial  v_pts=%5.3f  a_pos=%d (%5.3f) \n",priv->avi_audio_pts,priv->pts_corr_bytes,delay);
 	      //priv->pts_correction=-priv->avi_audio_pts+delay;
 	      priv->pts_correction=delay-priv->avi_audio_pts;
