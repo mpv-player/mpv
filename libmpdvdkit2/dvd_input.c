@@ -2,6 +2,10 @@
  * Copyright (C) 2002 Samuel Hocevar <sam@zoy.org>,
  *                    Håkan Hjort <d95hjort@dtek.chalmers.se>
  *
+ * Modified for use with MPlayer, changes contained in libdvdread_changes.diff.
+ * detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+ * $Id$
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or

@@ -8,6 +8,10 @@
  *   Joey Parrish <joey@nicewarrior.org>.
  *     - updated from libdvdread 0.9.4 and removed udf caching
  *
+ * Modified for use with MPlayer, changes contained in libdvdread_changes.diff.
+ * detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+ * $Id$
+ *
  * dvdudf: parse and read the UDF volume information of a DVD Video
  * Copyright (C) 1999 Christian Wolff for convergence integrated media
  * GmbH The author can be reached at scarabaeus@convergence.de, the

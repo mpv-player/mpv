@@ -1,6 +1,10 @@
 /*
  * Copyright (C) 2000, 2001, 2002 Håkan Hjort <d95hjort@dtek.chalmers.se>
  *
+ * Modified for use with MPlayer, changes contained in libdvdread_changes.diff.
+ * detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+ * $Id$
+ *
  * Much of the contents in this file is based on VOBDUMP.
  *
  * VOBDUMP: a program for examining DVD .VOB filse
