@@ -1162,7 +1162,7 @@ How can I join two video files?
 </para></question>
 <answer><para>
 This has been discussed to no end on mplayer-users. Go search the
-<ulink url="http://mplayerhq.hu/cgi-bin/htsearch?restrict=/mplayer-users/">archives</ulink>
+<ulink url="http://mplayerhq.hu/cgi-bin/s-arch.cgi?&sbm=mplayer-users">archives</ulink>
 for a complete answer. This is a complicated topic and your mileage may vary a
 lot depending on the kind of files you want to merge. MPEGs can be concatenated
 into a single file with luck. For AVIs there are two tools,
