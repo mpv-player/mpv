@@ -243,7 +243,7 @@ static char *bsd_block2char( const char *path )
     char *new_path;
 
     /* If it doesn't start with "/dev/" or does start with "/dev/r" exit */ 
-    if( !strncmp( path, "/dev/",  5 ) || strncmp( path, "/dev/r", 6 ) ) 
+    if( strncmp( path, "/dev/",  5 ) || !strncmp( path, "/dev/r", 6 ) ) 
       return (char *) strdup( path );
 
     /* Replace "/dev/" with "/dev/r" */
