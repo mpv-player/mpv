@@ -826,7 +826,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		  {
 		    printf("vo_vesa: Can't initialize VIDIX driver\n");
 		    vidix_name = NULL;
-		    vidix_term();
+		    vesa_term();
 		    return -1;
 		  }
 		  else printf("vo_vesa: Using VIDIX\n");
