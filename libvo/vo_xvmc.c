@@ -794,7 +794,6 @@ found_subpic:
 
    if (vo_ontop) vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
 
-   saver_off(mDisplay);  // turning off screen saver
 //end vo_xv
 
    /* store image dimesions for displaying */
@@ -1208,7 +1207,6 @@ static void uninit(void){
    if( verbose > 3 ) printf("vo_xvmc: uninit called\n");
    xvmc_free();
  //from vo_xv
-   saver_on(mDisplay);
    vo_vm_close(mDisplay);
    vo_x11_uninit();
 }

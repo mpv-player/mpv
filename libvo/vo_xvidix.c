@@ -419,8 +419,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     if (vo_ontop)
         vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
 
-    saver_off(mDisplay);        /* turning off screen saver */
-
     return (0);
 }
 
@@ -489,7 +487,6 @@ static void uninit(void)
         vidix_name = NULL;
     }
 
-    saver_on(mDisplay);         /* screen saver back on */
     vo_x11_uninit();
 }
 

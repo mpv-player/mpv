@@ -1024,7 +1024,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
   if (initGl(d_width, d_height) == -1)
       return -1;
 #ifndef GL_WIN32
-      saver_off(mDisplay);
       if (vo_ontop) vo_x11_setlayer(mDisplay,vo_window, vo_ontop);
 #endif
 

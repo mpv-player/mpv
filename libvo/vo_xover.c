@@ -352,8 +352,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 
   panscan_calc();
 
-  saver_off(mDisplay); /* turning off screen saver */
-
   return(0);
 }
 
@@ -404,7 +402,6 @@ static void uninit(void)
   if(!vo_config_count) return;
   if(sub_vo) sub_vo->uninit();
   sub_vo = NULL;
-  saver_on(mDisplay); /* screen saver back on */
   vo_x11_uninit();
   // Restore our callbacks
   video_out_xover.draw_frame = draw_frame;

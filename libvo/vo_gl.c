@@ -267,8 +267,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 
 //  printf("OpenGL setup OK!\n");
 
-      saver_off(mDisplay);  // turning off screen saver
-
       if (vo_ontop) vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
 
 	return 0;
@@ -354,7 +352,6 @@ static void
 uninit(void)
 {
   if ( !vo_config_count ) return;
-  saver_on(mDisplay); // screen saver back on
   vo_x11_uninit();
 }
 

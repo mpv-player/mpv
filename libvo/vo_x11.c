@@ -535,8 +535,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     }
 #endif
 
-    saver_off(mDisplay);
-
     if (vo_ontop)
         vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
 
@@ -724,7 +722,6 @@ static void uninit(void)
         return;
 
     freeMyXImage();
-    saver_on(mDisplay);         // screen saver back on
 
 #ifdef HAVE_XF86VM
     vo_vm_close(mDisplay);

@@ -272,8 +272,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 
     set_window();               // set up mga_vid_config.dest_width etc
 
-    saver_off(mDisplay);
-
     if (vo_ontop)
         vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
 
@@ -292,6 +290,5 @@ static void uninit(void)
     if (!inited)
         return;                 // no window?
     inited = 0;
-    saver_on(mDisplay);
     vo_x11_uninit();            // destroy the window
 }

@@ -448,8 +448,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     mp_msg(MSGT_VO, MSGL_V, "[xv] dx: %d dy: %d dw: %d dh: %d\n", drwX,
            drwY, vo_dwidth, vo_dheight);
 
-    saver_off(mDisplay);        // turning off screen saver
-
     if (vo_ontop)
         vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
 
@@ -765,7 +763,6 @@ static void uninit(void)
         return;
     XvFreeAdaptorInfo(ai);
     ai = NULL;
-    saver_on(mDisplay);         // screen saver back on
     for (i = 0; i < num_buffers; i++)
         deallocate_xvimage(i);
 #ifdef HAVE_XF86VM
