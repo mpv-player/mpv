@@ -398,7 +398,7 @@ static char help_text[]=
 #define MSGTR_CantStrdupDLL "Kann strdup nicht ausführen -> 'dll': %s"
 #define MSGTR_AudioVideoCodecTotals "%d Audio- & %d Videocodecs\n"
 #define MSGTR_CodecDefinitionIncorrect "Codec ist nicht korrekt definiert."
-#define MSGTR_OutdatedCodecsConf "Diese codecs.conf ist zu alt und nicht kompatibel mit dieser Version von Mplayer!"
+#define MSGTR_OutdatedCodecsConf "Diese codecs.conf ist zu alt und nicht kompatibel mit dieser Version von MPlayer!"
 
 // divx4_vbr.c:
 #define MSGTR_OutOfMemory "Kein Speicher mehr verfügbar!"
@@ -864,7 +864,7 @@ static char help_text[]=
 #define MSGTR_AO_OSS_CantSetAC3 "[AO OSS] Kann Audiogerät %s nicht auf AC3-Ausgabe setzen, versuche S16...\n"
 #define MSGTR_AO_OSS_CantSetChans "[AO OSS] audio_setup: Audiogerät auf %d Kanäle zu setzen ist fehlgeschlagen.\n"
 #define MSGTR_AO_OSS_CantUseGetospace "[AO OSS] audio_setup: Treiber unterstützt SNDCTL_DSP_GETOSPACE nicht :-(\n"
-#define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   *** Dein Audiotreiber unterstützt select() NICHT ***\nKompiliere Mplayer mit #undef HAVE_AUDIO_SELECT in der Datei config.h !\n\n"
+#define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   *** Dein Audiotreiber unterstützt select() NICHT ***\nKompiliere MPlayer mit #undef HAVE_AUDIO_SELECT in der Datei config.h !\n\n"
 #define MSGTR_AO_OSS_CantReopen "[AO OSS]\nKritischer Fehler: *** KANN AUDIO-GERÄT NICHT ERNEUT ÖFFNEN / ZURÜCKSETZEN *** %s\n"
 
 // ao_arts.c
@@ -922,7 +922,7 @@ static char help_text[]=
 #define MSGTR_AO_SUN_RtscWriteFailed "[AO SUN] rtsc: Schreiben fehlgeschlagen."
 #define MSGTR_AO_SUN_CantOpenAudioDev "[AO SUN] Kann Audiogerät %s nicht öffnen, %s  -> nosound.\n"
 #define MSGTR_AO_SUN_UnsupSampleRate "[AO SUN] audio_setup: Deine Karte unterstützt %d Kanäle nicht, %s, %d Hz Samplerate.\n"
-#define MSGTR_AO_SUN_CantUseSelect "[AO SUN]\n   *** Dein Audiotreiber unterstützt select() NICHT ***\nKompiliere Mplayer mit #undef HAVE_AUDIO_SELECT in der Datei config.h !\n\n"
+#define MSGTR_AO_SUN_CantUseSelect "[AO SUN]\n   *** Dein Audiotreiber unterstützt select() NICHT ***\nKompiliere MPlayer mit #undef HAVE_AUDIO_SELECT in der Datei config.h !\n\n"
 #define MSGTR_AO_SUN_CantReopenReset "[AO SUN]\nKritischer Fehler: *** KANN AUDIO-GERÄT NICHT ERNEUT ÖFFNEN / ZURÜCKSETZEN *** %s\n"
 
 // ao_alsa5.c
