@@ -247,6 +247,10 @@ static int parse_fbmode_cfg(char *cfgfile)
 				goto err_out_parse_error;
 		} else if (!strcmp(token[0], "endmode")) {
 			/* NOTHING for now*/
+		} else if (!strcmp(token[0], "accel")) {
+			if (get_token(1) < 0)
+				goto err_out_parse_error;
+			/* NOTHING for now*/
 		} else if (!strcmp(token[0], "hsync")) {
 			if (get_token(1) < 0)
 				goto err_out_parse_error;
@@ -487,10 +491,10 @@ static int fb_init(void)
 
 	if (fb_mode_name) {
 		if (parse_fbmode_cfg(fb_mode_cfgfile) < 0)
-			return 1;
+			goto err_out;
 		if (!(fb_mode = find_mode_by_name(fb_mode_name))) {
 			printf("fb: can't find requested video mode\n");
-			return 1;
+			goto err_out;
 		}
 		fb_switch_mode = 1;
 	} else if (fb_mode_depth) {
@@ -499,7 +503,7 @@ static int fb_init(void)
 		if (fb_mode_depth != 15 && fb_mode_depth != 16 &&
 				fb_mode_depth != 24 && fb_mode_depth != 32) {
 			printf("fb: can't switch to %d bpp\n", fb_mode_depth);
-			return 1;
+			goto err_out;
 		}
 	}
 
@@ -602,6 +606,9 @@ static int fb_init(void)
 		free(cmap->green);
 		free(cmap->blue);
 		free(cmap);
+		break;
+	case FB_VISUAL_PSEUDOCOLOR:
+		printf("fb: visual is FB_VISUAL_PSEUDOCOLOR. it's not tested!\n");
 		break;
 	default:
 		printf("fb: visual: %d not yet supported\n",
