@@ -1,4 +1,4 @@
-.\" synced with 1.916
+.\" synced with 1.920
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -719,10 +719,6 @@ Tak dok³adne jak RTC, ale nie wymaga specjalnych uprawnieñ.
 Skutkuje wiêkszym obi±¿eniem procesora.
 .
 .TP
-.B \-speed <0.01\-100>
-Zwalnia lub przyspiesza odtwarzanie o wspó³czynnik podany jako parametr.
-.
-.TP
 .B \-sstep <sek>
 Przeskakuje <sek> sekund po ka¿dej klatce.
 Normalna prêdko¶æ odtwarzania klatek jest utrzymana, wiêc odtwarzanie jest
@@ -1140,6 +1136,11 @@ Ta opcja jest przestarza³a, poniewa¿ MPlayer obs³uguje ju¿ OpenDML.
 Przewija do pozycji okre¶lonej w bajtach.
 Przydatne do odtwarzania z obrazów CD-ROM lub zbiorów VOB ze ¶mieciami na
 pocz±tku.
+.
+.TP
+.B \-speed <0.01\-100>
+Zwalnia lub przyspiesza odtwarzanie o wspó³czynnik podany jako parametr.
+Nie jest pewne dzia³anie z \-oac copy.
 .
 .TP
 .B \-srate <Hz>
@@ -4905,14 +4906,15 @@ zak³ócenia wej¶ciowe, np.\& podczas przechwytywania z TV.
 Opcjonalny parametr (ivct=1) ma podobne dzia³anie jak opcja dr=1 dla filtru
 detc i powinien byæ u¿ywany tylko z MEncoderem.
 Jak przy detc, musisz podaæ prawid³ow± wyj¶ciow± ilo¶æ klatek na sekundê
-(\-ofps 23.976) przy u¿ywaniu MEncodera.
+(\-ofps 24000/1001) przy u¿ywaniu MEncodera.
 Dalszy rozwój ivtc jest wstrzymamy, jako ¿e filtry pullup i filmdint
 wydaj± siê byæ dok³adniejsze.
 .
 .TP
 .B pullup[=jl:jr:jt:jb:sb:mp]\ 
 Filtr odwracania telecine trzeciej generacji, zdolny do przetwarzania mieszanki
-twardego telecine (hard-telecine) oraz progresywnej zawarto¶ci 24 i 30 fps.
+twardego telecine (hard-telecine) oraz progresywnej zawarto¶ci 24000/1001
+i 30000/1001 fps.
 Filtr pullup jest zaprojektowany, aby by³ skuteczniejszy ni¿ detc czy ivtc,
 poprzez wykorzystywanie kontekstu przy podejmowaniu decyzji.
 Podobnie jak ivtc, pullup jest bezstanowy w sensie takim, ¿e nie skupia siê na
@@ -4960,7 +4962,7 @@ flag pola ustawionych przez dekoder MPEG-2.
 W zale¿no¶ci od ¼ród³owego MPEG mo¿e uj¶æ na sucho zignorowanie tej porady,
 dopóki nie widzisz licznych ostrze¿eñ "Bottom-field first".
 Bez opcji przeprowadza normalne usuwanie telecine i powinien byæ u¿ywany z
-mencoder \-fps 29.97 \-ofps 23.976.
+mencoder \-fps 30000/1001 \-ofps 24000/1001.
 Je¶li ten filtr jest u¿ywany z mplayerem efektem bêdzie nierówna prêdko¶æ
 odtwarzania, ale i tak jest to generalnie lepsze ni¿ u¿ycie pp=lb albo
 ca³kowity brak usuwania przeplotu.
@@ -5036,7 +5038,7 @@ otrzymamy beznadziejnej jako¶ci film z co czwart± klatk± powtórzon±.
 Ten filtr szuka i opuszcza zduplikowane klatki, i przywraca oryginaln±
 ilo¶æ klatek na sekundê filmu (framerate).
 Korzystaj±c z tego filtru, musisz podaæ warto¶æ \-ofps, które stanowi 4/\:5 fps
-pliku wej¶ciowego (23.976 je¿eli wej¶cie jest 29.97fps).
+pliku wej¶ciowego (24000/1001 je¿eli wej¶cie jest 30000/1001fps).
 Dostêpne opcje:
 .RSs
 .IPs pass=1|2
@@ -5143,7 +5145,7 @@ miêdzy mo¿liwo¶ciami t, b i p.
 .B telecine[=start]
 Zastosuje proces 3:2 "telecine" by zwiêkszyæ ilo¶æ klatek o 20%.
 Najprawdopodobniej nie bêdzie to dzia³a³o poprawnie z MPlayerem, ale mo¿e byæ
-u¿yte z "mencoder \-fps 29.97 \-ofps 29.97 \-vf telecine".
+u¿yte z "mencoder \-fps 30000/1001 \-ofps 30000/1001 \-vf telecine".
 Obie opcje fps s± niezbêdne!
 (Synchronizacja A/\:V bêdzie popsuta, je¿eli bêd± one ¼le podane.)
 Opcjonalny parametr start mówi filtrowi gdzie ma zacz±æ we wzorcu telecine
@@ -5601,8 +5603,8 @@ surowy strumieñ video (bez muksowania \- tylko jeden strumieñ video)
 .B \-ofps <fps>
 Ustawia ilo¶æ klatek na sekundê (fps) w wyj¶ciowym pliku,
 warto¶æ mo¿e byæ ró¿na ni¿ w pliku ¼ród³owym.
-PArametr musi byæ ustawiony dla zmiennego fps (ASF, niektóre MOV) i plików
-progresywnych (29.97fps ztelecinowane MPEG).
+Parametr musi byæ ustawiony dla zmiennego fps (ASF, niektóre MOV) i plików
+progresywnych (30000/1001fps ztelecinowane MPEG).
 .
 .TP
 .B \-ovc <nazwa\ kodeka>
@@ -7757,8 +7759,8 @@ Je¿eli opcja ta jest wy³±czona, u¿yta jest maksymalna liczba klatek B.
 .
 .TP
 .B b_bias=<-100\-100>
-Kontroluje decycy\je podejmowane przez b_adapt.
-Wy¿szy wspó³czynnik b_bias generuje wiêksz± liczbê klatek B. (domy¶lnie: 0)
+Kontroluje decycyzje podejmowane przez b_adapt.
+Wy¿szy wspó³czynnik b_bias generuje wiêksz± liczbê klatek B (domy¶lnie: 0).
 .
 .TP
 .B (no)b_pyramid
@@ -8088,7 +8090,7 @@ Ustawia proporcje filmu MPEG-1/2.
 Ustawia bitrate video w kbit/s dla filmów MPEG-1/2.
 .
 .TP
-.B vframerate=<23.976 | 24 | 25 | 29.97 | 30 | 50 | 59.94 | 60 >
+.B vframerate=<24000/1001 | 24 | 25 | 30000/1001 | 30 | 50 | 60000/1001 | 60 >
 Ustawia ilo¶æ klatek na sekundê dla filmów MPEG-1/2.
 Ta opcja zostanie zignorowana je¶li bêdzie u¿yta razem z opcj± telecine.
 .
