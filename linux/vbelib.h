@@ -16,6 +16,12 @@ typedef struct tagFarPtr
   unsigned short seg;
 }FarPtr;
 
+#define VBE_DAC_8BIT       (1 << 0)
+#define VBE_NONVGA_CRTC    (1 << 1)
+#define VBE_SNOWED_RAMDAC  (1 << 2)
+#define VBE_STEREOSCOPIC   (1 << 3)
+#define VBE_STEREO_EVC     (1 << 4)
+
 struct VbeInfoBlock {
   char          VESASignature[4]; /* 'VESA' 4 byte signature */
   short         VESAVersion;      /* VBE version number */
@@ -23,7 +29,7 @@ struct VbeInfoBlock {
   long          Capabilities;     /* Capabilities of video card */
   unsigned short* VideoModePtr;   /* Pointer to supported modes */
   short         TotalMemory;      /* Number of 64kb memory blocks */
-  /* VBE 3.0 and above */
+  /* VBE 2.0 and above */
   short         OemSoftwareRev;
   char *        OemVendorNamePtr;
   char *        OemProductNamePtr;
@@ -170,7 +176,7 @@ struct VesaProtModeInterface
   void (*SetDisplayStart)(void);
   void (*SetPaletteData)(void);
   unsigned short * iopl_ports;
-}__attribute__ ((packed));
+};
 
 /*
   All functions below return:
@@ -183,8 +189,8 @@ struct VesaProtModeInterface
 #define VBE_VM86_FAIL         -1
 #define VBE_OUT_OF_DOS_MEM    -2
 #define VBE_OUT_OF_MEM        -3
-#define VBE_VESA_ERROR_MASK   0x4f00
-#define VBE_VESA_ERRCODE_MASK 0xff
+#define VBE_VESA_ERROR_MASK   0x004f
+#define VBE_VESA_ERRCODE_MASK 0xff00
 
 extern int vbeInit( void );
 extern int vbeDetroy( void );

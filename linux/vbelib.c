@@ -153,7 +153,7 @@ int vbeSaveState(void **data)
   r.edx = 0x01;
   r.ecx = 0x0f;
   r.es  = VirtToPhysSeg(rm_space);
-  r.edi = VirtToPhysOff(rm_space);
+  r.ebx = VirtToPhysOff(rm_space);
   if(!LRMI_int(0x10,&r))
   {
     LRMI_free_real(rm_space);
@@ -179,7 +179,7 @@ int vbeRestoreState(void *data)
   r.edx = 0x02;
   r.ecx = 0x0f;
   r.es  = VirtToPhysSeg(data);
-  r.edi = VirtToPhysOff(data);
+  r.ebx = VirtToPhysOff(data);
   retval = LRMI_int(0x10,&r);
   LRMI_free_real(data);
   if(!retval) return VBE_VM86_FAIL;
@@ -208,7 +208,6 @@ int vbeGetWindow(unsigned *win_num)
 int vbeSetWindow(unsigned win_num,unsigned win_gran)
 {
   int retval;
-#if 0
   if(vbe_pm_info.SetWindowCall)
   {
      /* 32-bit function call is much better of int 10h */
@@ -217,10 +216,10 @@ int vbeSetWindow(unsigned win_num,unsigned win_gran)
 	"movl	%1, %%ebx\n"
 	::"a"(0x4f05),"S"(win_num & 0x0f),"d"(win_gran):"memory");
     (*vbe_pm_info.SetWindowCall)();
-    __asm __volatile("popl	%%ebx":"=a"(retval)::"memory");
+    __asm __volatile("popl	%%ebx":::"memory");
+    retval = VBE_OK;
   }
   else
-#endif
   {
     struct LRMI_regs r;
     memset(&r,0,sizeof(struct LRMI_regs));
@@ -229,8 +228,8 @@ int vbeSetWindow(unsigned win_num,unsigned win_gran)
     r.edx = win_gran;
     if(!LRMI_int(0x10,&r)) return VBE_VM86_FAIL;
     retval = r.eax & 0xffff;
+    if(retval == 0x4f) retval = VBE_OK;
   }
-  if(retval == 0x4f) retval = VBE_OK;
   return retval;
 }
 
@@ -246,6 +245,7 @@ int vbeGetProtModeInfo(struct VesaProtModeInterface *pm_info)
 {
   struct LRMI_regs r;
   int retval;
+  unsigned info_offset;
   struct realVesaProtModeInterface *rm_info;
   memset(&r,0,sizeof(struct LRMI_regs));
   r.eax = 0x4f0a;
@@ -254,11 +254,12 @@ int vbeGetProtModeInfo(struct VesaProtModeInterface *pm_info)
   retval = r.eax & 0xffff;
   if(retval == 0x4f)
   {
-    rm_info = PhysToVirtSO(r.es,r.edi&0xffff);
-    pm_info->SetWindowCall   = PhysToVirtSO(r.es,rm_info->SetWindowCall);
-    pm_info->SetDisplayStart = PhysToVirtSO(r.es,rm_info->SetDisplayStart);
-    pm_info->SetPaletteData  = PhysToVirtSO(r.es,rm_info->SetPaletteData);
-    pm_info->iopl_ports      = PhysToVirtSO(r.es,rm_info->iopl_ports);
+    info_offset = r.edi&0xffff;
+    rm_info = PhysToVirtSO(r.es,info_offset);
+    pm_info->SetWindowCall   = PhysToVirtSO(r.es,info_offset+rm_info->SetWindowCall);
+    pm_info->SetDisplayStart = PhysToVirtSO(r.es,info_offset+rm_info->SetDisplayStart);
+    pm_info->SetPaletteData  = PhysToVirtSO(r.es,info_offset+rm_info->SetPaletteData);
+    pm_info->iopl_ports      = PhysToVirtSO(r.es,info_offset+rm_info->iopl_ports);
     retval = VBE_OK;
   }
   return retval;
