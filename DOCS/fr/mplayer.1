@@ -2235,9 +2235,28 @@ Extrait un seul champs de l'image entrelacée en utilisant un calcul large
 pour éviter de gaspiller le temps CPU. L'argument optionnel n spécifie si
 l'on doit extraire un champs pair ou impair (selon que n soit pair ou impair).
 .IPs "detc"
-Filtre expérimental pour inverser le processus de telecine de façon à nettoyer
-les trames progressives. Pas encore configurable et son comportement sera
-peut-être changé à l'avenir.
+Essaie d'inverser le processus de "telecine" pour retrouver un flux propre et
+non-entralaçé au débit du film. Ce filtre est toujours expérimental mais semble
+être utilisable. Les arguments suivant (voir leur syntaxe plus bas) peuvent
+êtres utilisés pour contrôler son comportement:
+.RSss
+dr: Définie le mode saut de trames. 0 (par défaut) signifie ne pas sauter
+de trames pour maintenir le débit de sortie. 1 signifie toujours sauter la trame
+si il n'y a pas eu de sauts ou d'assemblage telecine dans les 5 dernières
+trames. 2 signifie toujours maintenir le rapport exact 5:4 entre l'entrée et la
+sortie. (Note: utilisez le mode 1 avec MEncoder!)
+.br
+am: Type d'analyse. Les valeurs disponibles sont 0 (motif fixé avec numéro de
+trame initiale spécifiée par fr=#) et 1 (recherche agressive du motif telecine).
+La valeur par défaut est 1.
+.br
+fr: Définie le numéro de trame initiale de la séquence. 0-2 sont les trois
+trames progressives propre; 3 et 4 sont les deux trames entrelaçées. La valeur
+par défaut, -1, signifie "pas dans la séquence telecine". Le nombre spécifié
+ici est le type de la précédente trame imaginaire avant le début du film.
+.br
+tr0, tr1, tr2, tr3: Valeurs seuil à utiliser dans certains types.
+.REss
 .IPs "telecine[=départ]"
 Applique un processus telecine 3:2 "telecine" pour augmenter le débit de 20%.
 Cela ne fonctionnera surement pas correctement avec MPlayer, mais peut être
