@@ -3016,11 +3016,11 @@ vismv:
 .br
 0: disabled
 .br
-1: visualize forward predicted MVs of P frames
+1: Visualize forward predicted MVs of P frames.
 .br
-2: visualize forward predicted MVs of B frames
+2: Visualize forward predicted MVs of B frames.
 .br
-4: visualize backward predicted MVs of B frames
+4: Visualize backward predicted MVs of B frames.
 .REss
 .IPs vstats
 Prints some statistics and stores them in ./vstats_*.log.
@@ -3709,7 +3709,7 @@ Convert planar YUV 4:2:0 to half-height packed 4:2:2, downsampling luma but
 keeping all chroma samples.
 Useful for output to low-resolution display devices when hardware downscaling
 is poor quality or is not available.
-Can also be used as a primitive luma-only deinterlacer with very low cpu
+Can also be used as a primitive luma-only deinterlacer with very low CPU
 usage.
 By default, halfpack averages pairs of lines when downsampling.
 The optional parameter f can be 0 to only use even lines, or 1 to only use
@@ -3954,7 +3954,7 @@ plane instead of the luma plane for doing pullup's computations.
 This may improve accuracy on very clean source material, but more
 likely will decrease accuracy, especially if there is chroma noise
 (rainbow effect) or any grayscale video.
-The main purpose of setting mp to a chroma plane is to reduce cpu load
+The main purpose of setting mp to a chroma plane is to reduce CPU load
 and make pullup usable in realtime on slow machines.
 .br
 .I NOTE:
