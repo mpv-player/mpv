@@ -1049,7 +1049,7 @@ static int get_obj_param(char* opt_name,char* obj_name, m_struct_t* desc,
   } else {
     if((*nold) >= oldmax) {
       mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: %s has only %d params, so you can't give more than %d unnamed params.\n",
-	     opt_name,obj_name,oldmax);
+	     opt_name,obj_name,oldmax,oldmax);
       return M_OPT_OUT_OF_RANGE;
     }
     opt = &desc->fields[(*nold)];
@@ -1288,7 +1288,7 @@ static int obj_settings_list_del(char *opt_name,char *param,void* dst, int src) 
     char* endptr;
     id = strtol(str_list[r],&endptr,0);
     if(endptr == str_list[r]) {
-      mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: invalid parameter. We need a list of integers wich are the indices of the elements to remove.\n",opt_name);
+      mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: invalid parameter. We need a list of integers which are the indices of the elements to remove.\n",opt_name);
       m_option_free(&list_opt,&str_list);
       return M_OPT_INVALID;
     }
