@@ -80,7 +80,7 @@ static int direct_pred = X264_DIRECT_PRED_TEMPORAL;
 static float ip_factor = 1.4;
 static float pb_factor = 1.3;
 static int rc_buffer_size = -1;
-static int rc_init_buffer = -1;
+static float rc_init_buffer = 0.25;
 static int rc_sens = 4;
 static int qp_min = 10;
 static int qp_max = 51;
@@ -117,11 +117,11 @@ m_option_t x264encopts_conf[] = {
     {"ip_factor", &ip_factor, CONF_TYPE_FLOAT, CONF_RANGE, -10.0, 10.0, NULL},
     {"pb_factor", &pb_factor, CONF_TYPE_FLOAT, CONF_RANGE, -10.0, 10.0, NULL},
     {"rc_buffer_size", &rc_buffer_size, CONF_TYPE_INT, CONF_RANGE, 0, 24000000, NULL},
-    {"rc_init_buffer", &rc_init_buffer, CONF_TYPE_INT, CONF_RANGE, 0, 24000000, NULL},
+    {"rc_init_buffer", &rc_init_buffer, CONF_TYPE_FLOAT, CONF_RANGE, 0, 24000000, NULL},
     {"rc_sens", &rc_sens, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
     {"qp_min", &qp_min, CONF_TYPE_INT, CONF_RANGE, 1, 51, NULL},
     {"qp_max", &qp_max, CONF_TYPE_INT, CONF_RANGE, 1, 51, NULL},
-    {"qp_step", &qp_step, CONF_TYPE_INT, CONF_RANGE, 0, 50, NULL},
+    {"qp_step", &qp_step, CONF_TYPE_INT, CONF_RANGE, 1, 50, NULL},
     {"pass", &pass, CONF_TYPE_INT, CONF_RANGE, 1, 3, NULL},
     {"rc_eq", &rc_eq, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"qcomp", &qcomp, CONF_TYPE_FLOAT, CONF_RANGE, 0, 1, NULL},
@@ -195,12 +195,13 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     if(bitrate > 0) {
         if(rc_buffer_size <= 0)
             rc_buffer_size = bitrate;
-        if(rc_init_buffer < 0)
-            rc_init_buffer = rc_buffer_size/4;
         mod->param.rc.b_cbr = 1;
         mod->param.rc.i_bitrate = bitrate;
         mod->param.rc.i_rc_buffer_size = rc_buffer_size;
-        mod->param.rc.i_rc_init_buffer = rc_init_buffer;
+        if(rc_init_buffer > 1)
+            mod->param.rc.i_rc_init_buffer = rc_init_buffer;
+        else
+            mod->param.rc.i_rc_init_buffer = rc_buffer_size * rc_init_buffer;
         mod->param.rc.i_rc_sens = rc_sens;
     }
     mod->param.rc.f_ip_factor = ip_factor;
