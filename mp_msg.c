@@ -35,27 +35,33 @@ void mp_msg_c( int x, const char *format, ... ){
       switch( x&255 ) {
        case MSGL_FATAL: 
               fprintf( stderr,"%s",tmp );
+	      fflush(stderr);
               gtkMessageBox( GTK_MB_FATAL|GTK_MB_SIMPLE,tmp );
        	   break;
        case MSGL_ERR:
               fprintf( stderr,"%s",tmp );
+	      fflush(stderr);
               gtkMessageBox( GTK_MB_ERROR|GTK_MB_SIMPLE,tmp );
        	   break;
        case MSGL_WARN:
               printf( "%s",tmp );
+	      fflush(stdout);
               gtkMessageBox( GTK_MB_WARNING|GTK_MB_SIMPLE,tmp );
        	   break;
        default:
               printf( "%s",tmp );
+	      fflush(stdout);
       }
     } else
 #endif
     if((x&255)<=MSGL_ERR){
 //    fprintf(stderr,"%%%%%% ");
       vfprintf(stderr,format, va);
+      fflush(stderr);
     } else {
 //	printf("%%%%%% ");
       vprintf(format, va);
+      fflush(stdout);
     }
     va_end(va);
 }
