@@ -32,10 +32,10 @@
 #include "qtpalette.h"
 #include "parse_mp4.h" // .MP4 specific stuff
 
-#include "../loader/qtx/qtxsdk/components.h"
-
 #ifdef MACOSX
 #include <QuickTime/QuickTime.h>
+#else
+#include "../loader/qtx/qtxsdk/components.h"
 #endif
 
 #ifdef HAVE_ZLIB
