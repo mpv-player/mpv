@@ -755,67 +755,43 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 //static int sdl_setup (int width, int height)
 {
 	struct sdl_priv_s *priv = &sdl_priv;
-        unsigned int sdl_format;
 #ifdef HAVE_X11	
 	static Display *XDisplay;
 	static int XScreen;
 #endif
 
-	sdl_format = format;
-        switch(format){
+    switch(format){
+        case IMGFMT_I420:
+            printf("SDL: Mapping I420 to IYUV\n");
+            format = SDL_IYUV_OVERLAY;
 		case IMGFMT_YV12:
-			if(verbose) printf("SDL: Using 0x%X (YV12) image format\n", format); break;
 		case IMGFMT_IYUV:
-			if(verbose) printf("SDL: Using 0x%X (IYUV) image format\n", format); break;
 		case IMGFMT_YUY2:
-			if(verbose) printf("SDL: Using 0x%X (YUY2) image format\n", format); break;
 		case IMGFMT_UYVY:
-			if(verbose) printf("SDL: Using 0x%X (UYVY) image format\n", format); break;
 		case IMGFMT_YVYU:
-			if(verbose) printf("SDL: Using 0x%X (YVYU) image format\n", format); break;
-		case IMGFMT_I420:
-			if(verbose) printf("SDL: Using 0x%X (I420) image format\n", format);
-			printf("SDL: Mapping I420 to IYUV\n");
-			sdl_format = SDL_IYUV_OVERLAY;
             priv->mode = YUV;
-		break;
+            break;
 		case IMGFMT_BGR15:	
-			if(verbose) printf("SDL: Using 0x%X (BGR15) image format\n", format);
-			priv->mode = BGR;
-			break;
-		case IMGFMT_RGB15:	
-			if(verbose) printf("SDL: Using 0x%X (RGB15) image format\n", format);
-			priv->mode = RGB;
-			break;
 		case IMGFMT_BGR16:	
-			if(verbose) printf("SDL: Using 0x%X (BGR16) image format\n", format);
-			priv->mode = BGR;
-			break;
-		case IMGFMT_RGB16:	
-			if(verbose) printf("SDL: Using 0x%X (RGB16) image format\n", format);
-			priv->mode = RGB;
-			break;
 		case IMGFMT_BGR24:	
-			if(verbose) printf("SDL: Using 0x%X (BGR24) image format\n", format);
-			priv->mode = BGR;
-			break;
-		case IMGFMT_RGB24:	
-			if(verbose) printf("SDL: Using 0x%X (RGB24) image format\n", format);
-			priv->mode = RGB;
-			break;
 		case IMGFMT_BGR32:	
-			if(verbose) printf("SDL: Using 0x%X (BGR32) image format\n", format);
 			priv->mode = BGR;
 			break;
+        case IMGFMT_RGB15:	
+        case IMGFMT_RGB16:	
+        case IMGFMT_RGB24:	
 		case IMGFMT_RGB32:	
-			if(verbose) printf("SDL: Using 0x%X (RGB32) image format\n", format);
 			priv->mode = RGB;
 			break;
 		default:
 			printf("SDL: Unsupported image format (0x%X)\n",format);
 			return -1;
 	}
-	if(priv->mode) {
+
+    if(verbose) printf("SDL: Using 0x%X (%s) image format\n", format,
+                       vo_format_name(format));
+    
+    if(priv->mode != YUV) {
 		priv->sdlflags |= SDL_ANYFORMAT;
 		priv->sdlfullflags |= SDL_ANYFORMAT;
 	}
@@ -840,7 +816,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
     priv->overlay = NULL;
     priv->surface = NULL;
     
-    priv->format = sdl_format;
+    priv->format = format;
     
 #ifdef HAVE_X11
 	if(getenv("DISPLAY")) {
