@@ -193,8 +193,16 @@ no libraries or X are needed. Read <A HREF=#2.3.1.15>Vidix</A> section.</LI>
 <P>These cards can be found in many laptops. Unfortunately, the driver in
   X 4.2.0 can't do Xv, but we have a modified, Xv-capable driver for you.
   <A HREF="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/neomagic_drv.o.4.2.0.bz2">Download from here</A>.
-  Driver provided by Atmosfear.</P>
-
+  Driver provided by Stefan Seyfried.</P>
+<P>To allow playback of DVD sized change your XF86Config like this:<BR>
+<BR>
+Section "Device"<BR>
+&nbsp; &nbsp; <I>[...]</I><BR>
+&nbsp; &nbsp; Driver "neomagic"<BR>
+&nbsp; &nbsp; <B>Option "OverlayMem" "829440"</B><BR>
+&nbsp; &nbsp; <I>[...]</I><BR>
+EndSection<BR>
+</P>
 
 <P><B><A NAME=2.3.1.2.6>2.3.1.2.6. Trident cards</A></B></P>
 
