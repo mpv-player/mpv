@@ -1330,12 +1330,13 @@ play_n_frames=play_n_frames_mf;
 if (curfile && end_at_type == END_AT_TIME) end_at += mux_v->timer;
 
 #ifdef USE_EDL
+if (edl_records) free_edl(edl_records);
+next_edl_record = edl_records = NULL;
+edl_muted = 0;
+edl_seeking = 1;
+edl_skip = -1;
 if (edl_filename) {
-    if (edl_records) free_edl(edl_records);
     next_edl_record = edl_records = edl_parse_file();
-    edl_muted = 0;
-    edl_seeking = 1;
-    edl_skip = -1;
 }
 #endif
 
