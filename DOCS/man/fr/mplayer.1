@@ -1,4 +1,4 @@
-.\" synced with 1.476
+.\" synced with 1.483
 .\" MPlayer (C) 2000-2003 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < n@tourmentine.com >
@@ -1081,8 +1081,8 @@ choisis la sortie audio de la carte de capture, si elle à plus
 .IPs [volume|bass|treble|balance]=<0\-100>
 Ces options règlent les paramètres du mixeur de la carte de capture vidéo.
 Elles n'auront aucun effet si votre carte ne dispose pas d'un mixeur.
-Pour v4l1, 0\-65535 est un intervale valide.
-Pour v4l2, l'intervale valide est 0 à 100, et 50 corresponds à la valeur par
+Pour v4l1, 0\-65535 est un intervalle valide.
+Pour v4l2, l'intervalle valide est 0 à 100, et 50 corresponds à la valeur par
 défaut du contrôle, tel que reporté par le pilote.
 .IPs immediatemode=<bool>
 Un valeur de 0 signifie capturer et bufferiser l'audio et la vidéo ensemble
@@ -2169,6 +2169,38 @@ les flux valides)
 .br
 4: très agressive
 .REss
+.IPs debug=<valeur>
+débogage:
+.RSss
+.br
+0: désactivé
+.br
+1: info image
+.br
+2: contrôle du débit
+.br
+4: bitstream
+.br
+8: type MB
+.br
+16: QP
+.br
+32: Vecteur de mouvement
+.br
+0x0040: Visualisation de vecteur de mouvement (utilisez -noslices)
+.br
+0x0080: saut MB
+.br
+0x0100: startcode
+.br
+0x0200: PTS
+.br
+0x0400: error resilience
+.br
+0x0800: opérations de contrôle de gestion de la mémoire (H264)
+.br
+0x1000: bogues
+.REss
 .IPs bug=<valeur>
 contourne manuellement les bogues des encodeurs:
 .RSss
@@ -2176,7 +2208,7 @@ contourne manuellement les bogues des encodeurs:
 .br
 1: autodétecter les bogues (par défaut)
 .br
-2 (msmpeg4v3): certains vieux fichiers msmpeg4v3 générés avec lavc (pas 
+2 (msmpeg4v3): certains vieux fichiers msmpeg4v3 générés avec lavc (pas
 d'autodétection)
 .br
 4 (mpeg4): bogue d'entrelacement de xvid (autodétecté si fourcc==XVIX)
@@ -2226,7 +2258,7 @@ Utilise le code de postprocessing d'opendivx au lieu de l'interne.
 À ne plus utiliser au profit de \-pp, car le postprocessing interne offre
 une meilleur qualité et de meilleurs performances.
 
-L'intervale valide des valeurs de \-oldpp varie suivant le codec, la plupart du
+L'intervalle valide des valeurs de \-oldpp varie suivant le codec, la plupart du
 temps 0\-6, où 0=désactive 6=plus lent/\:meilleur.
 .TP
 .B \-pp <qualité> (voir l'option \-vf pp également!)
@@ -2738,25 +2770,30 @@ contraste de façon matérielle.
 Peut également être utile avec MEncoder, soit pour réparer des films mal
 encodés, soit pour réduire légèrement le contraste pour masquer les artefacts et
 s'accomoder de débits plus bas.
-Les valeurs initiales dans l'intervale -100\- 100 peuvent être fournies en
+Les valeurs initiales dans l'intervalle -100\- 100 peuvent être fournies en
 ligne de commandes.
-.IPs eq2[=gamma:contraste:luminosité:saturation:rg:gg:bg]
+.IPs eq2[=gamma:contraste:luminosité:saturation:rg:vg:bg:poids]
 Égaliseur logiciel alternatif qui utilise des tables de lookup (très lent),
 autorisant une correction du gamma en plus d'un simple ajustement de luminosité
 et de contraste.
 Notez que cela utilise le même code MMX optimisé que -vo eq si toutes les
 valeurs gamma sont 1.0.
 Les paramètres sont donnés en nombres à virgule.
-Les paramètres rg, gg, bg sont les valeurs gamma indépendantes pour les
+Les paramètres rg, vg, bg sont les valeurs gamma indépendantes pour les
 composants Rouge, Vert et Bleu.
-Les valeurs par défaut sont 1.0, luminosité=0.0.
+Le paramètre poids peut être utilisé pour réduire l'effet de hautes valeurs
+de gamma sur les parties claires de l'image, c-a-d les empécher d'être
+sur-amplifiées et de devenir complètement blanches. Une valeur de 0.0 désactive
+complètement la correction gamma tandis que 1.0 lui laisse toute sa force.
+Les valeurs par défaut sont gamma=1.0, contraste=0.0, luminosité=0.0,
+saturation=1.0, poids=1.0.
 Les intervalles de valeur sont 0.1\-10 pour les gamma, -2\-2 pour le contraste
 (les valeurs négatives provoquent une image négative), -1\-1 pour la
-luminosité et 0\-3 pour la saturation.
+luminosité, 0\-3 pour la saturation et 0\-1 pour le poids.
 .TP
 .B hue[=couleur:saturation]
 Les valeur par défaut sont couleur=0.0, saturation=1.0.
-Les intervales sont -180\-180 pour couleur, -2\-2 pour saturation (des valeurs
+Les intervalles sont -180\-180 pour couleur, -2\-2 pour saturation (des valeurs
 négatives impliquent un chroma négatif).
 .TP
 .B halfpack[=f]
@@ -3310,6 +3347,8 @@ pas d'encodage, juste une copie du flux
 encode en PCM non-compressé
 .IPs "\-oac mp3lame"
 encode en MP3 (en utilisant Lame)
+.IPs "\-oac lavc"
+encode avec un des codecs de libavcodec
 .RE
 .PD 1
 .
@@ -3588,7 +3627,8 @@ paramètres pré-sélectionnés.
 
 
 .SS lavc (\-lavcopts)
-
+lavc possède de nombreuses options qui ne sont pas décrites ici.
+Pour avoir tous les détails lisez le source.
 .I EXEMPLE:
 .PD 0
 .RSs
@@ -3597,8 +3637,29 @@ paramètres pré-sélectionnés.
 .PD 1
 
 .TP
+.B acodec=<value>
+Codec audio (par défaut: mp2):
+.PD 0
+.RSs
+.IPs mp2
+MPEG Layer 2
+.IPs mp3
+MPEG Layer 3
+.IPs ac3
+AC3
+.IPs adpcm_ima_wav
+IMA Adaptive PCM (4bits par échantillon, compression 4:1)
+.RE
+.PD 1
+.TP
+.B abitrate=<valeur>
+Débit audio en kBit (224 par défaut).
+.TP
+.B atag=<valeur>
+Utilise le tag Windows audio spécifié (par ex. atag=0x55).
+.TP
 .B vcodec=<valeur>
-utilise le codec indiqué (il n'y en a pas par défaut, vous devez le spécifier):
+utilise le codec indiqué (par défaut: mpeg4):
 .PD 0
 .RSs
 .IPs mjpeg
@@ -3616,9 +3677,9 @@ DivX 3
 .IPs msmpeg4v2
 MS MPEG4v2
 .IPs wmv1
-Windows Media Video 7
+Windows Media Video 7 (alias WMV7)
 .IPs wmv2
-Windows Media Video 8
+Windows Media Video 8 (alias WMV8)
 .IPs rv10
 un ancien codec RealVideo
 .IPs mpeg1video
@@ -3670,7 +3731,7 @@ fichiers (par défaut: 0 (désactivé)).
 1 n'est pas recommandé (voir \-vqmin pour plus de détails).
 .TP
 .B vqmax=<1\-31>
-maximum quantizer (passe\ 1/\:2) 10\-31 devrait être un intervale raisonable
+maximum quantizer (passe\ 1/\:2) 10\-31 devrait être un intervalle raisonable
 (par défaut: 31)
 .TP
 .B mbqmin=<1\-31>
@@ -3715,6 +3776,10 @@ X1 (expérimental)
 .RE
 .PD 1
 .TP
+.B me_range=<0\-9999>
+intervalle de recherche de l'estimation de mouvement, notez que la valeur
+par défaut 0 signifie illimité.
+.TP
 .B mbd=<0\-2>
 Macroblock decision algorithm (mode haute qualité), encode chaque bloc macro
 dans tous les modes et choisi le meilleur.
@@ -3729,6 +3794,9 @@ sélectionne le mode MB qui requiert le moins de bits (=vhq)
 sélectionne le mode MB qui à la meilleure distortion de débit
 .RE
 .PD 1
+.TP
+.B vhq
+Identique à mbd=1, gardé pour raisons de compatibilité.
 .TP
 .B v4mv
 Permet 4 vecteurs de mouvement par macrobloc (qualité légèrement meilleure).
@@ -3816,7 +3884,7 @@ valeur par défaut
 .TP
 .B vratetol=<valeur>
 tolérance approximative de taille du fichier en kbit. 1000\-100000 est un
-interval raisonable.
+intervalle raisonable.
 (Attention: 1kBit = 1000 Bits)
 (par défaut: 8000)
 .TP
@@ -3832,6 +3900,9 @@ Pour MPEG1/2 cela fixe également la taille du tampon vbv, utilisez 327 pour un
 VCD, 917 pour un SVCD et 1835 pour un DVD.
 Note: vratetol ne devrait pas être trop grand durant la seconde passe
 ou il pourrait y avoir des problèmes si vrc_(min|max)rate est utilisé.
+.TP
+.B vrc_strategy
+Inutilisé, réservé pour utilisation future.
 .TP
 .B vb_qfactor=<-31.0\-31.0>
 facteur quantizer entre les trames B et non B (passe\ 1/\:2) (par défaut: 1.25)
@@ -3859,8 +3930,8 @@ Astuce: Pour faire de l'encodage avec quantizer constant avec des quantizers
 différents pour les trames I/P et B vous pouvez utiliser:
 vqmin= <ip_quant>:vqmax= <ip_quant>:vb_qfactor= <b_quant/ip_quant>
 .TP
-.B vqblur=<0.0\-1.0>
-flou quantizer (passe1) Des valeurs plus importantes provoqueront plus de
+.B vqblur=<0.0\-1.0> (passe1)
+Flou quantizer, des valeurs plus importantes provoqueront plus de
 moyennes dans le temps (variations plus basses).
 .RSs
 .IPs 0.0
@@ -3871,8 +3942,8 @@ qblur désactivé
 fais une moyenne du quantizer sur toutes les trames précédentes
 .RE
 .TP
-.B vqblur=<0.0\-99.0>
-flou gaussien quantizer (passe2) De plus grandes valeurs provoqueront plus
+.B vqblur=<0.0\-99.0> (passe2)
+Flou gaussien quantizer, de plus grandes valeurs provoqueront plus
 de moyennes dans le temps (variations plus basses) (par défaut: 0.5)
 .TP
 .B vqcomp=<valeur>
@@ -4144,6 +4215,9 @@ désactivé (par défaut)
 intervalle sensé
 .RE
 .TP
+.B p_mask=<0.0\-1.0>
+masquage inter-MB (par défaut: 0.0 (désactivé))
+.TP
 .B naq
 Normalise la quantisation adaptive (expérimental).
 En utilisant la quantisation adaptive (*_mask), le quantizer moyen par Mo
@@ -4165,7 +4239,7 @@ pour huffyuv, lossless jpeg et ffv1
 .IPs 411P,YVU9
 pour lossless jpeg et ffv1
 .IPs BGR32
-pour lossless jpeg uniquement
+pour lossless jpeg et ffv1
 .RE
 .TP
 .B pred
@@ -4209,6 +4283,17 @@ codage arithmétique (cabac)
 .RE
 .PD 1
 .TP
+.B context
+(pour ffv1)
+.PD 0
+.RSs
+.IPs 0
+petit modèle contextuel
+.IPs 1
+grand modèle contextuel
+.RE
+.PD 1
+.TP
 .B qpel
 utilise la compensation par quarter pel motion
 Astuce: Cela semble utile uniquement pour les encodages à haut débit.
@@ -4220,7 +4305,11 @@ pré-passe pour fonction de comparaison de l'estimation de mouvement
 fonction de comparaison pour estimation pel motion complète
 .TP
 .B subcmp=<0\-2000>
-fonction de comparaison pour sous estimation pel motion
+fonction de comparaison pour sous-estimation pel motion
+.TP
+.B mbcmp=<0\-2000>
+fonction de comparaison pour la décision du macroblock, utilisé uniquement
+si mbd=0
 .PD 0
 .RSs
 .IPs "0 (SAD)"
@@ -4370,6 +4459,9 @@ Note: le quantizer h263 MMX ne peut pas gérer de polarisations positives
 .br
 Astuce: Une polarisation plus positive (-32\- -16 au lieu de -64) semble
 améliorer le PSNR
+.TP
+.B nr=<0\-100000>
+réduction du  bruit, 0 pour désactivé
 .TP
 .B inter_matrix=<matrice séparée par des virgules>
 Utilise une matrice inter personnalisée. Cela requiert une chaine de 64 entiers
