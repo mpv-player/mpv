@@ -104,6 +104,22 @@ url_new(char* url) {
 	return Curl;
 }
 
+URL_t *
+url_copy(URL_t* url) {
+	URL_t *dup_url;
+
+	if( url==NULL ) return NULL;
+	dup_url = (URL_t*)malloc(sizeof(URL_t));
+	if( dup_url==NULL ) {
+		printf("Memory allocation failed!\n");
+		return NULL;
+	}
+	memcpy( dup_url, url, sizeof(URL_t) );
+	
+	return dup_url;
+}
+
+
 void
 url_free(URL_t* url) {
 	if(!url) return;

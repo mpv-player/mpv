@@ -18,6 +18,7 @@ typedef struct {
 } URL_t;
 
 URL_t* url_new(char* url);
+URL_t* url_copy(URL_t* url);
 void   url_free(URL_t* url);
 
 #endif
