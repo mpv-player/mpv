@@ -696,18 +696,52 @@ könyvtárban lévõ skin kerül betöltésre.</P>
 
 <P><B><A NAME=1.5>1.5. Feliratok és OSD</A></B></P>
 
-<P>Igen, az <B>MPlayer</B> sokféle fajta feliratot támogat. A beolvasó kód
-jelenleg 8 fajtát ismer fel. Hogy lásd melyek ezek, nézd meg a subreader.c
-file-t, a 30. sor körül.</P>
+<P>Az <B>MPlayer</B> képes lejátszás közben feliratozás megjelenítésére.
+  Jelenleg a következõ felirattipusok támogatottak:
+  <UL>
+    <LI>VobSub</LI>
+    <LI>Microdvd</LI>
+    <LI>SubRip</LI>
+    <LI>SubViewer</LI>
+    <LI>Sami</LI>
+    <LI>VPlayer</LI>
+    <LI>RT</LI>
+    <LI>SSA</LI>
+    <LI>MPsub</LI>
+    <LI>AQTitle</LI>
+  </UL>
 
-<P>Az <B>MPlayer</B> támogatja a VobSub tipusú feliratokat. Ezek a feliratok
-több fileból állnak: mindig van egy nagy méretû .SUB file, továbbá opcionálisan
-egy .IDX és/vagy .IFO file. Használatuk : például <CODE>sample.sub</CODE>,
+<P>A következõ formátumokra más opciók érvényesek mint egyébként:</P>
+
+<P><B>VobSub feliratok</B><BR>
+Ezek a feliratok több fileból állnak: mindig van egy nagy méretû .SUB file,
+továbbá opcionálisan egy .IDX és/vagy .IFO file.
+Használatuk : például <CODE>sample.sub</CODE>,
 <CODE>sample.ifo</CODE>, <CODE>sample.idx</CODE> file-ok esetén a
-<CODE>-vobsub sample -vobsubid 0</CODE> opciókat kell megadni (opcionálisan
-természetesen az útvonalat is). A <CODE>-vobsubid</CODE> opció a DVD-knél
-használható <CODE>-sid</CODE> opció VobSub-os megfelelõje, azaz a rendelkezésre
-álló nyelvek közül lehet vele választani.</P>
+<CODE>-vobsub sample -vobsubid &lt;id&gt;</CODE> opciókat kell megadni
+(opcionálisan természetesen az útvonalat is). A <CODE>-vobsubid</CODE> opció a
+DVD-knél használható <CODE>-sid</CODE> opció VobSub-os megfelelõje, azaz a
+rendelkezésre álló nyelvek közül lehet vele választani.</P>
+
+<P><B>Egyéb feliratok</B><BR>
+Egy-egy szöveges fileból állnak, melyek idõzítési, szöveghelyezési és
+szöveges információt tartalmaznak.<BR>
+Használatuk: ha van pl. egy <CODE>példa.txt</CODE> nevû feliratod, add meg
+a <CODE>-sub példa.txt</CODE> opciót.</P>
+
+<P><B>Feliratok idõzítésének és elhelyezésének megváltoztatása</B><BR>
+<CODE>-subdelay &lt;mp&gt;</CODE> : feliratok idõzítésének befolyásolása
+  &lt;sec&gt; másodperccel. Lehet negatív szám is.<BR>
+<CODE>-subfps &lt;ráta&gt;</CODE> : feliratok képkocka/másodperc értékének
+  megadása (törtszám)<BR>
+<CODE>-subpos &lt;0 - 100&gt;</CODE> : feliratok pozicionálása.<BR>
+</P>
+
+<P>Ha MicroDVD formátumú felirat file használata esetén növekszik a szinkron
+  eltérése, akkor a felirat és a film FPS értéke különbözik. Mivel ezen
+  formátum abszolut képkockában adja meg az idõzítést, a <CODE>-subfps</CODE>
+  opció hatástalan. Az MPlayer FTP site <CODE>contrib/</CODE> könyvtárában
+  van egy egyszerû perl script az FPS konverzió elvégzéséhez.</P>
 
 <P>A DVD feliratok használatához olvasd el a <A HREF="cd-dvd.html#4.2">DVD
 fejezetet.</A></P>
