@@ -765,6 +765,19 @@ static uint32_t preinit(const char *arg)
 	return -1;
     }
 
+    {
+      int howmany, i;
+      const XvAttribute * const attributes = XvQueryPortAttributes(mDisplay, xv_port, &howmany);
+      
+      for (i = 0; i < howmany && attributes; i++)
+	if (!strcmp(attributes[i].name, "XV_AUTOPAINT_COLORKEY"))
+	  {
+	    const Atom autopaint = XInternAtom(mDisplay, "XV_AUTOPAINT_COLORKEY", False);
+	    XvSetPortAttribute(mDisplay, xv_port, autopaint, 1);
+	    break;
+	  }
+    }
+
     fo = XvListImageFormats(mDisplay, xv_port, (int*)&formats);
 
     return 0;
