@@ -1085,7 +1085,7 @@ if (spudec_ifo) {
   unsigned int palette[16], width, height;
   current_module="spudec_init_vobsub";
   if (vobsub_parse_ifo(NULL,spudec_ifo, palette, &width, &height, 1, -1, NULL) >= 0)
-    vo_spudec=spudec_new_scaled(palette, sh_video->disp_w, sh_video->disp_h);
+    vo_spudec=spudec_new_scaled(palette, width, height);
 }
 
 #ifdef USE_DVDNAV
@@ -2209,6 +2209,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	break;
     }
     case MP_CMD_VOBSUB_LANG:
+    if (vo_vobsub)
     {
 	int new_id = vobsub_id + 1;
 	if (vobsub_id < 0)
@@ -2590,7 +2591,7 @@ if(rel_seek_secs || abs_seek_pos){
       } else
       if (osd_show_vobsub_changed) {
 	  const char *language = "none";
-	  if (vobsub_id >= 0)
+	  if (vo_vobsub && vobsub_id >= 0)
 	      language = vobsub_get_id(vo_vobsub, (unsigned int) vobsub_id);
 	  sprintf(osd_text_tmp, "Subtitles: (%d) %s", vobsub_id, language ? language : "unknown");
 	  osd_show_vobsub_changed--;
