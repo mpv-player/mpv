@@ -228,8 +228,8 @@ int parse_config_file(struct config *conf, char *conffile)
 #define MAX_PARAM_LEN	100
 	FILE *fp;
 	char *line;
-	char opt[MAX_OPT_LEN];
-	char param[MAX_PARAM_LEN];
+	char opt[MAX_OPT_LEN + 1];
+	char param[MAX_PARAM_LEN + 1];
 	char c;		/* for the "" and '' check */
 	int tmp;
 	int line_num = 0;
@@ -243,6 +243,7 @@ int parse_config_file(struct config *conf, char *conffile)
 #endif
 	if (++recursion_depth > MAX_RECURSION_DEPTH) {
 		printf("too deep 'include'. check your configfiles\n");
+		--recursion_depth;
 		return -1;
 	}		
 
@@ -253,7 +254,7 @@ int parse_config_file(struct config *conf, char *conffile)
 		goto out;
 	}
 
-	if ((line = (char *) malloc(MAX_LINE_LEN)) == NULL) {
+	if ((line = (char *) malloc(MAX_LINE_LEN + 1)) == NULL) {
 		perror("parse_config_file: can't get memory for 'line'");
 		ret = -1;
 		goto out;
