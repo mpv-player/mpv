@@ -68,7 +68,7 @@ static void allocate_xvimage(int);
 static unsigned int ver, rel, req, ev, err;
 static unsigned int formats, adaptors, xv_port, xv_format;
 static XvAdaptorInfo *ai = NULL;
-static XvImageFormatValues *fo;
+static XvImageFormatValues *fo=NULL;
 
 static int current_buf = 0;
 static int current_ip_buf = 0;
@@ -761,6 +761,10 @@ static void uninit(void)
         return;
     XvFreeAdaptorInfo(ai);
     ai = NULL;
+    if(fo){
+        XFree(fo);
+        fo=NULL;
+    }
     for (i = 0; i < num_buffers; i++)
         deallocate_xvimage(i);
 #ifdef HAVE_XF86VM
@@ -878,7 +882,7 @@ static uint32_t preinit(const char *arg)
 
     {
         int howmany, i;
-        const XvAttribute *const attributes =
+        XvAttribute * const attributes =
             XvQueryPortAttributes(mDisplay, xv_port, &howmany);
 
         for (i = 0; i < howmany && attributes; i++)
@@ -889,6 +893,7 @@ static uint32_t preinit(const char *arg)
                 XvSetPortAttribute(mDisplay, xv_port, autopaint, 1);
                 break;
             }
+	XFree(attributes);
     }
 
     fo = XvListImageFormats(mDisplay, xv_port, (int *) &formats);

@@ -178,6 +178,7 @@ void vo_hidecursor(Display * disp, Window win)
     XFreeCursor(disp, no_ptr);
     if (bm_no != None)
         XFreePixmap(disp, bm_no);
+    XFreeColors(disp,colormap,&black.pixel,1,0);
 }
 
 void vo_showcursor(Display * disp, Window win)
