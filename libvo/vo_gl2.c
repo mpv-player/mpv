@@ -1115,6 +1115,9 @@ flip_page(void)
 #else
   glXSwapBuffers( mDisplay,vo_window );
 #endif
+
+  if (vo_fs) // Avoid flickering borders in fullscreen mode
+    glClear (GL_COLOR_BUFFER_BIT);
 }
 
 //static inline uint32_t draw_slice_x11(uint8_t *src[], uint32_t slice_num)
