@@ -37,6 +37,9 @@ extern ao_functions_t audio_out_sun;
 #ifdef USE_SGI_AUDIO
 extern ao_functions_t audio_out_sgi;
 #endif
+#ifdef HAVE_DXR3
+extern ao_functions_t audio_out_dxr3;
+#endif
 extern ao_functions_t audio_out_pcm;
 extern ao_functions_t audio_out_pss;
 
@@ -63,6 +66,9 @@ ao_functions_t* audio_out_drivers[] =
 #endif
 #ifdef HAVE_SDL
         &audio_out_sdl,
+#endif
+#ifdef HAVE_DXR3
+	&audio_out_dxr3,
 #endif
 	&audio_out_pcm,
 //	&audio_out_pss,

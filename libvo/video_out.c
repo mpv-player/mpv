@@ -70,6 +70,7 @@ extern vo_functions_t video_out_png;
 extern vo_functions_t video_out_ggi;
 extern vo_functions_t video_out_aa;
 extern vo_functions_t video_out_mpegpes;
+extern vo_functions_t video_out_dxr3;
 #ifdef TARGET_LINUX
 extern vo_functions_t video_out_vesa;
 #endif
@@ -118,6 +119,9 @@ vo_functions_t* video_out_drivers[] =
 #endif
 #ifdef HAVE_AA
 	&video_out_aa,
+#endif
+#ifdef HAVE_DXR3
+	&video_out_dxr3,
 #endif
 
 #ifdef HAVE_PNG
