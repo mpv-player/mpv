@@ -74,8 +74,6 @@ static char help_text[]=
 #define MSGTR_RTFMCodecs "Przeczytaj DOCS/HTML/pl/codecs.html!\n"
 #define MSGTR_TryForceVideoFmtStr "Wymuszam zastosowanie kodeka video z rodziny %s...\n"
 #define MSGTR_CantFindVideoCodec "Nie mogê znale¼æ kodeka pasuj±cego do wybranego -vo i formatu video 0x%X.\n"
-#define MSGTR_VOincompCodec "Wybrane urz±dzenie wyj¶cia_video jest niekompatybilne z kodekiem.\n"
-#define MSGTR_VOincompCodec "Wybrane urz±dzenie wyj¶cia video(video_out) nie jest kompatybilne z tym kodekiem\n"
 #define MSGTR_CannotInitVO "B£¡D KRYTYCZNY: Nie mogê zainicjalizowaæ sterownika video.\n"
 #define MSGTR_CannotInitAO "Nie mogê otworzyæ/zainicjalizowaæ urz±dzenia audio -> brak d¼wiêku.\n"
 #define MSGTR_StartPlaying "Zaczynam odtwarzanie... \n"
@@ -230,13 +228,13 @@ static char help_text[]=
 "co powinno przynosiæ prawie najwy¿sz± osi±galn± w LAME jako¶æ.\n"\
 "\n"\
 "Aby aktywowaæ te ustawienia:\n"\
-\n"\
+"\n"\
 "   Dla trybów VBR (zazwyczaj najlepsza jako¶æ):\n"\
 "\n"\
 "     \"preset=standard\" To ustawienie powinno byæ prze¼roczyste\n"\
 "                             dla wiêkszo¶ci ludzi przy odtwarzaniu muzyki i odrazu\n"\
 "                             jest w niez³ej jako¶ci.\n"\
-\n"\
+"\n"\
 "     \"preset=extreme\" Je¶li masz bardzo dobry s³uch i równie dobry sprzêt,\n"\
 "                             to ustawienie, daje trochê lepsz± jako¶ ni¿ \n"\
 "                             tryb \"standard\".\n"\
@@ -745,7 +743,7 @@ static char help_text[]=
 
 // ======================= VO Video Output drivers ========================
 
-#define MSGTR_VOincompCodec "Wybrane urz±dzenie wyj¶cia_video jest niekompatybilne z tym kodekiem.\n"
+#define MSGTR_VOincompCodec "Wybrane urz±dzenie wyj¶cia video jest niekompatybilne z wybranym kodekiem.\n"
 #define MSGTR_VO_GenericError "Wyst±pi³ b³±d"
 #define MSGTR_VO_UnableToAccess "Brak dostêpu"
 #define MSGTR_VO_ExistsButNoDirectory "ju¿ istnieje, ale nie jest katalogiem."
