@@ -209,8 +209,17 @@ static int config(struct vf_instance_s* vf,
     }
 
     if(!opt_screen_size_x && !opt_screen_size_y){
-	d_width=d_width*vf->priv->w/width;
-	d_height=d_height*vf->priv->h/height;
+	// Compute new d_width and d_height, preserving aspect
+	// while ensuring that both are >= output size in pixels.
+	if (vf->priv->h * d_width > vf->priv->w * d_height) {
+		d_width = vf->priv->h * d_width / d_height;
+		d_height = vf->priv->h;
+	} else {
+		d_height = vf->priv->w * d_height / d_width;
+		d_width = vf->priv->w;
+	}
+	//d_width=d_width*vf->priv->w/width;
+	//d_height=d_height*vf->priv->h/height;
     }
     return vf_next_config(vf,vf->priv->w,vf->priv->h,d_width,d_height,flags,best);
 }
