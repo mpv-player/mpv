@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.13 -->
+<!-- synced with 1.14 -->
 <appendix id="mailinglists">
 <title>Listy dyskusyjne</title>
 <para>
@@ -25,10 +25,11 @@ Wysyłane są na nią ogłoszenia bezpieczeństwa i o nowych wersjach programu.
 <listitem><para>
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"><application>MPlayer</application>-users</ulink>
 </para>
-<para>Ogólna lista pomocy na pytania związane z
-<application>MPlayerem</application> i <application>MEncoderem</application>.
+<para>Ogólna lista pomocy i odpowiedzi na pytania związane z
+<application>MPlayerem</application>.
 Proszę przeczytać <emphasis role="bold">całą dokumentację</emphasis> przed
-wysłaniem tutaj swoich problemów i próśb o możliwości. Zgłoszenia błędów też tu
+wysłaniem tutaj swoich problemów i próśb o możliwości.
+Zgłoszenia błędów w <application>MPlayerze</application> też tu
 należą, ale proszę najpierw przeczytać sekcje <link linkend="bugs">znane
 błędy</link> i <link linkend="bugreports">zgłaszanie błędów</link>.
 </para></listitem>
@@ -50,6 +51,17 @@ XFree86 4.x.x), pytania o matroxfb-TVout.
 </para>
 <para>Sprawy związane ze sprzętowym dekoderem zwanym DVB (nie
 <emphasis role="bold">DXR3</emphasis>!).
+</para></listitem>
+<listitem><para>
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mencoder-users"><application>MEncoder</application>-users</ulink>
+</para>
+<para>Ogólna lista pomocy i odpowiedzi na pytania związane z
+<application>MEncoderem</application>.
+Proszę przeczytać <emphasis role="bold">całą dokumentację</emphasis> przed
+wysłaniem tutaj swoich problemów i próśb o możliwości.
+Zgłoszenia błędów w <application>MEncoderze</application> też tu
+należą, ale proszę najpierw przeczytać sekcje <link linkend="bugs">znane
+błędy</link> i <link linkend="bugreports">zgłaszanie błędów</link>.
 </para></listitem>
 <listitem><para>
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng"><application>MPlayer</application>-dev-eng</ulink>
