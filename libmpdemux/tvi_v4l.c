@@ -709,7 +709,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 
 	    priv->tuner.mode = req_mode;
 	    
-	    if (control(priv->video_fd, TVI_CONTROL_TUN_SET_TUNER, &priv->tuner) != TVI_CONTROL_TRUE)
+	    if (control(priv, TVI_CONTROL_TUN_SET_TUNER, &priv->tuner) != TVI_CONTROL_TRUE)
 		return(TVI_CONTROL_FALSE);
 	    return(TVI_CONTROL_TRUE);
 	}
