@@ -307,9 +307,9 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
   {
    hint.x = vo_dx;
    hint.y = vo_dy;
+   aspect(&d_width,&d_height,A_NOZOOM);
    hint.width = d_width;
    hint.height = d_height;
-   aspect(&d_width,&d_height,A_NOZOOM);
 #ifdef HAVE_XF86VM
     if ( vm )
       {
@@ -379,10 +379,12 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
         XSetWMNormalHints( mDisplay,vo_window,&hint );
 	XMapWindow(mDisplay, vo_window);
 	if ( flags&1 ) vo_x11_fullscreen();
+	else {
 #ifdef HAVE_XINERAMA
-	vo_x11_xinerama_move(mDisplay,vo_window);
+	    vo_x11_xinerama_move(mDisplay,vo_window);
 #endif
-	vo_x11_sizehint( hint.x, hint.y, hint.width, hint.height,0 );
+		vo_x11_sizehint( hint.x, hint.y, hint.width, hint.height,0 );
+	}
     } else  {
 	// vo_fs set means we were already at fullscreen
 	vo_x11_sizehint( hint.x, hint.y, hint.width, hint.height,0 );
