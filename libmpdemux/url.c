@@ -57,6 +57,11 @@ url_new(char* url) {
 
 	// check if a username:password is given
 	ptr2 = strstr(ptr1, "@");
+	ptr3 = strstr(ptr1, "/");
+	if( ptr3!=NULL && ptr3<ptr2 ) {
+		// it isn't really a username but rather a part of the path
+		ptr2 = NULL;
+	}
 	if( ptr2!=NULL ) {
 		// We got something, at least a username...
 		int len = ptr2-ptr1;
