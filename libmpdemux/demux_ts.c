@@ -936,7 +936,10 @@ static int pes_parse2(unsigned char *buf, uint16_t packet_len, ES_stream_t *es, 
 	{
 		es->start   = p;
 		es->size    = packet_len;
-		es->type    = VIDEO_MPEG2;
+		if(type_from_pmt != UNKNOWN)
+		    es->type    = type_from_pmt;
+		else
+		    es->type    = VIDEO_MPEG2;
 		if(es->payload_size)
 			es->payload_size -= packet_len;
 
@@ -1583,12 +1586,12 @@ static int fill_packet(demuxer_t *demuxer, demux_stream_t *ds, demux_packet_t **
 			ret = *dp_offset;
 			resize_demux_packet(*dp, ret);	//shrinked to the right size
 			ds_add_packet(ds, *dp);
-			mp_msg(MSGT_DEMUX, MSGL_V, "ADDED %d  bytes to %s fifo, PTS=%f\n", ret, (ds == demuxer->audio ? "audio" : (ds == demuxer->video ? "video" : "sub")), (*dp)->pts);
+			mp_msg(MSGT_DEMUX, MSGL_DBG2, "ADDED %d  bytes to %s fifo, PTS=%f\n", ret, (ds == demuxer->audio ? "audio" : (ds == demuxer->video ? "video" : "sub")), (*dp)->pts);
 		}
 		else
 		{
 			ret = 0;
-			mp_msg(MSGT_DEMUX, MSGL_V, "BROKEN PES, DISCARDING\n");
+			mp_msg(MSGT_DEMUX, MSGL_DBG2, "BROKEN PES, DISCARDING\n");
 			free_demux_packet(*dp);
 		}
 	}
@@ -1614,11 +1617,12 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 	demux_stream_t *ds = NULL;
 	demux_packet_t **dp = NULL;
 	int *dp_offset = 0, *buffer_size = 0, *broken = NULL;
-	int32_t progid, pid_type;
+	int32_t progid, pid_type, bad, ts_error;
 
 
 	while(! done)
 	{
+		bad = ts_error = 0;
 		ds = (demux_stream_t*) NULL;
 		dp = (demux_packet_t **) NULL;
 		broken = dp_offset = buffer_size = NULL;
@@ -1639,7 +1643,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 
 		if(! ts_sync(stream))
 		{
-			mp_msg(MSGT_DEMUX, MSGL_V, "TS_PARSE: COULDN'T SYNC\n");
+			mp_msg(MSGT_DEMUX, MSGL_DBG2, "TS_PARSE: COULDN'T SYNC\n");
 			return 0;
 		}
 
@@ -1648,7 +1652,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 			return 0;
 
 		if((packet[1]  >> 7) & 0x01)	//transport error
-			continue;
+			ts_error = 1;
 
 		buf_size -= 4;
 
@@ -1673,22 +1677,29 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 
 
 		if(((pid > 1) && (pid < 16)) || (pid == 8191))		//invalid pid
+		{
+			stream_skip(stream, buf_size-1);
 			continue;
+		}
 
 		cc = (packet[3] & 0xf);
 		cc_ok = (tss->last_cc < 0) || ((((tss->last_cc + 1) & 0x0f) == cc));
 		tss->last_cc = cc;
-
-		if(cc_ok)
+		    
+		bad = ts_error || (! cc_ok);
+    
+		if(! bad)
 		{
-			/* skip adaptation field, but only if cc_ok is not corrupt,
-			otherwise we may throw away good data  */
+			// skip adaptation field, but only if cc_ok is not corrupt,
+			//otherwise we may throw away good data  
 			afc = (packet[3] >> 4) & 3;
-			if (afc == 0) /* reserved value */
-				continue;
-			if (afc == 2) /* adaptation field only */
-				continue;
-			if (afc == 3)
+			if(! (afc % 2))	//no payload in this TS packet
+			{
+			    stream_skip(stream, buf_size-1);
+			    continue;
+			}
+			
+			if(afc == 3)
 			{
 				int c;
 				c = stream_read_char(stream);
@@ -1703,7 +1714,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 				afc = c + 1;
 			}
 			else
-				afc = 0;
+				afc = 0;	//payload only
 		}
 		else
 		{
@@ -1711,12 +1722,15 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 			// certain streams play corrupted. Maybe the decoders know
 			// how to deal with it, but at least I consider the packet
 			// as "not initial"
-			mp_msg(MSGT_DEMUX, MSGL_DBG2, "ts_parse: CC Check NOT OK: PID=%d, %d -> %d\n\n", tss->pid, tss->last_cc, cc);
+			mp_msg(MSGT_DEMUX, MSGL_V, "ts_parse: PID=%d, Transport error: %d, CC_OK: %s\n\n", tss->pid, ts_error, (cc_ok ? "yes" : "no"));
 
 			if(priv->keep_broken == 0)
+			{
+				stream_skip(stream, buf_size-1);
 				continue;
-
-			is_start = 0;
+			}
+			
+			is_start = 0;	//queued to the packet data
 		}
 
 		tss->seen++;
@@ -1884,14 +1898,14 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 				tss->type = es->type;
 
 				if((es->pts < tss->last_pts) && es->pts)
-					mp_msg(MSGT_DEMUX, MSGL_V, "BACKWARDS PTS! : NEW: %f -> LAST: %f, PID %d\n", es->pts, tss->last_pts, tss->pid);
+					mp_msg(MSGT_DEMUX, MSGL_DBG2, "BACKWARDS PTS! : NEW: %f -> LAST: %f, PID %d\n", es->pts, tss->last_pts, tss->pid);
 
 				if(es->pts == 0.0f)
 					es->pts = tss->pts = tss->last_pts;
 				else
 					tss->pts = tss->last_pts = es->pts;
 
-				mp_msg(MSGT_DEMUX, MSGL_V, "ts_parse, NEW pid=%d, PSIZE: %u, type=%X, start=%p, len=%d\n",
+				mp_msg(MSGT_DEMUX, MSGL_DBG2, "ts_parse, NEW pid=%d, PSIZE: %u, type=%X, start=%p, len=%d\n",
 					es->pid, es->payload_size, es->type, es->start, es->size);
 
 				tss->payload_size = es->payload_size;
