@@ -63,6 +63,9 @@ int tv_param_balance = -1;
 int tv_param_forcechan = -1;
 int tv_param_force_audio = 0;
 int tv_param_buffer_size = -1;
+int tv_param_mjpeg = 0;
+int tv_param_decimation = 2;
+int tv_param_quality = 90;
 #ifdef HAVE_ALSA9
 int tv_param_alsa = 0;
 #endif
@@ -178,6 +181,27 @@ static int open_tv(tvi_handle_t *tvh)
 	mp_msg(MSGT_TV, MSGL_ERR, "Error: cannot set norm!\n");
 	return 0;
     }
+
+
+#ifdef HAVE_TV_V4L
+    if ( tv_param_mjpeg )
+    {
+      /* set width to expected value */
+      if (tv_param_width == -1)
+        {
+          tv_param_width = 704/tv_param_decimation;
+        }
+      if (tv_param_height == -1)
+        {
+	  if ( tvh->norm != TV_NORM_NTSC )
+            tv_param_height = 576/tv_param_decimation; 
+	  else
+            tv_param_height = 480/tv_param_decimation; 
+        }
+      mp_msg(MSGT_TV, MSGL_INFO, 
+	       "  MJP: width %d height %d\n", tv_param_width, tv_param_height);
+    }
+#endif
 
     /* limits on w&h are norm-dependent -- JM */
     /* set width */

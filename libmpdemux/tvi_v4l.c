@@ -9,6 +9,9 @@
   Multithreading, a/v sync and native ALSA support by
     Jindrich Makovicka <makovick@kmlinux.fjfi.cvut.cz>
 
+  Mjpeg hardware encoding support by 
+    Iván Szántó <szivan@freemail.hu>
+
   CODE IS UNDER DEVELOPMENT, NO FEATURE REQUESTS PLEASE!
 */
 
@@ -37,6 +40,7 @@
 #include "../libao2/afmt.h"
 #include "../libvo/img_format.h"
 #include "../libvo/fastmemcpy.h"
+#include "../libvo/videodev_mjpeg.h"
 
 #include "tv.h"
 
@@ -132,6 +136,7 @@ typedef struct {
     long long                   audio_skew_total;
     long			audio_recv_blocks_total;
     long			audio_sent_blocks_total;
+    long                        mjpeg_bufsize;
     
 } priv_t;
 
@@ -443,8 +448,97 @@ static int init(priv_t *priv)
 	priv->capability.maxwidth, priv->capability.maxheight);
     priv->width = priv->capability.minwidth;
     priv->height = priv->capability.minheight;
-    mp_msg(MSGT_TV, MSGL_INFO, " Inputs: %d\n", priv->capability.channels);
 
+    /* somewhere here could disable tv_param_mjpeg, if it is not a capability */
+
+    /* initialize if necessary */
+    if ( tv_param_mjpeg )
+      {
+        struct mjpeg_params bparm;
+        struct mjpeg_requestbuffers breq;          /* buffer requests */
+
+        if (ioctl(priv->video_fd, MJPIOC_G_PARAMS, &bparm) < 0)
+        {
+           mp_msg(MSGT_TV, MSGL_ERR, 
+              "  MJP: Error getting video parameters: %s\n", sys_errlist[errno]);
+           goto err;
+        }
+
+        mp_msg(MSGT_TV, MSGL_INFO, 
+	       "  MJP: previous params: x: %d, y: %d, w: %d, h: %d, decim: %d, fields: %d,\n",
+	           bparm.img_x, bparm.img_y, bparm.img_width, bparm.img_height,          
+		   bparm.decimation, bparm.field_per_buff);
+
+        mp_msg(MSGT_TV, MSGL_INFO, 
+	       "  MJP: HorDcm: %d, VerDcm: %d, TmpDcm: %d\n",
+	           bparm.HorDcm, bparm.VerDcm, bparm.TmpDcm);
+
+        bparm.input = tv_param_input; /* tv */
+        if (!strcasecmp(tv_param_norm, "pal"))
+	  bparm.norm =  0; /* PAL */
+        else if (!strcasecmp(tv_param_norm, "ntsc"))
+	  bparm.norm =  1; /* NTSC */
+        else if (!strcasecmp(tv_param_norm, "secam"))
+	  bparm.norm =  2; /* SECAM */
+        bparm.quality = tv_param_quality;
+        bparm.decimation = tv_param_decimation;
+
+        mp_msg(MSGT_TV, MSGL_INFO, "  MJP: setting params to decimation: %d, quality: %d\n", 
+	                                 bparm.decimation, bparm.quality);
+
+        if (ioctl(priv->video_fd, MJPIOC_S_PARAMS, &bparm) < 0)
+         {
+            mp_msg(MSGT_TV, MSGL_ERR,
+               "  MJP: Error setting video parameters: %s\n", sys_errlist[errno]);
+            goto err;
+         }
+
+        if (ioctl(priv->video_fd, MJPIOC_G_PARAMS, &bparm) < 0)
+        {
+           mp_msg(MSGT_TV, MSGL_ERR, 
+              "  MJP: Error getting video parameters: %s\n", sys_errlist[errno]);
+           goto err;
+        }
+
+        mp_msg(MSGT_TV, MSGL_INFO, 
+	       "  MJP: current params: x: %d, y: %d, w: %d, h: %d, decim: %d, fields: %d,\n",
+	           bparm.img_x, bparm.img_y, bparm.img_width, bparm.img_height,          
+		   bparm.decimation, bparm.field_per_buff);
+
+        mp_msg(MSGT_TV, MSGL_INFO, 
+	       "  MJP: HorDcm: %d, VerDcm: %d, TmpDcm: %d\n",
+	           bparm.HorDcm, bparm.VerDcm, bparm.TmpDcm);
+
+
+        breq.count = 64;
+	priv -> nbuf = breq.count;
+        priv->mbuf.frames = priv -> nbuf;
+        priv->mjpeg_bufsize = 256*1024;
+        if (tv_param_buffer_size >= 0) {
+          priv->mjpeg_bufsize = tv_param_buffer_size*1024;
+	  }
+        breq.size  = priv -> mjpeg_bufsize;
+        if (ioctl(priv->video_fd, MJPIOC_REQBUFS,&(breq)) < 0)
+        {
+           mp_msg (MSGT_TV, MSGL_ERR,
+              "  MJP: Error requesting video buffers: %s\n", sys_errlist[errno]);
+           goto err;
+        }
+        mp_msg(MSGT_TV, MSGL_INFO,
+           "  MJP: Got %ld buffers of size %ld KB\n", 
+                    breq.count, breq.size/1024);
+
+        priv -> mmap = mmap(0, breq.count * breq.size, 
+           PROT_READ|PROT_WRITE, MAP_SHARED, priv->video_fd, 0);
+        if (priv -> mmap == MAP_FAILED)
+        {
+           mp_msg(MSGT_TV, MSGL_INFO,
+              "  MJP: Error mapping video buffers: %s\n", sys_errlist[errno]);
+           goto err;
+        }
+      }
+
+    mp_msg(MSGT_TV, MSGL_INFO, " Inputs: %d\n", priv->capability.channels);
     priv->channels = (struct video_channel *)malloc(sizeof(struct video_channel)*priv->capability.channels);
     if (!priv->channels)
 	goto malloc_failed;
@@ -474,6 +568,8 @@ static int init(priv_t *priv)
 	goto err;
     }
     
+    if ( !tv_param_mjpeg )
+    {
     /* map grab buffer */
     if (ioctl(priv->video_fd, VIDIOCGMBUF, &priv->mbuf) == -1)
     {
@@ -500,6 +596,7 @@ static int init(priv_t *priv)
     if (!priv->buf)
 	goto malloc_failed;
     memset(priv->buf, 0, priv->nbuf * sizeof(struct video_mmap));
+    }
     
     /* init v4l audio even when we don't capture */
     init_v4l_audio(priv);
@@ -555,6 +652,7 @@ err:
 
 static int uninit(priv_t *priv)
 {
+    unsigned long num;
     priv->shutdown = 1;
 
     mp_msg(MSGT_TV, MSGL_V, "Waiting for threads to finish... ");
@@ -573,6 +671,14 @@ static int uninit(priv_t *priv)
 	ioctl(priv->video_fd, VIDIOCSAUDIO, &priv->audio[priv->audio_id]);
     }
     
+    if ( tv_param_mjpeg )
+      {
+	num = -1;
+        if (ioctl(priv->video_fd, MJPIOC_QBUF_CAPT, &num) < 0)
+          {
+            mp_msg(MSGT_TV, MSGL_ERR, "\n  MJP: ioctl MJPIOC_QBUF_CAPT failed: %s\n", strerror(errno));
+          }
+      }
     close(priv->video_fd);
 
     audio_in_uninit(&priv->audio_in);
@@ -660,6 +766,8 @@ static int start(priv_t *priv)
 	return(0);
     }
 
+    if ( !tv_param_mjpeg )
+    {
     priv->nbuf = priv->mbuf.frames;
     for (i=0; i < priv->nbuf; i++)
     {
@@ -668,6 +776,7 @@ static int start(priv_t *priv)
 	priv->buf[i].width = priv->width;
 	priv->buf[i].height = priv->height;
 	mp_msg(MSGT_TV, MSGL_DBG2, "buffer: %d => %p\n", i, &priv->buf[i]);
+    } 
     } 
 
 #if 0
@@ -853,8 +962,19 @@ static int control(priv_t *priv, int cmd, void *arg)
 	    int output_fmt = -1;
 
 	    output_fmt = priv->format;
+            if ( tv_param_mjpeg )
+	    {
+              mp_msg(MSGT_TV, MSGL_INFO, "  MJP: setting sh_video->format to mjpg\n");
+	      output_fmt = 0x47504a4d;
+	      output_fmt = 0x67706a6d;
+	      (int)*(void **)arg = output_fmt;
+	      mp_msg(MSGT_TV, MSGL_V, "Output format: %s\n", "mjpg");
+	    }
+	    else
+	    {
 	    (int)*(void **)arg = output_fmt;
 	    mp_msg(MSGT_TV, MSGL_V, "Output format: %s\n", vo_format_name(output_fmt));
+	    }
 	    return(TVI_CONTROL_TRUE);
 	}
 	case TVI_CONTROL_VID_SET_FORMAT:
@@ -1263,14 +1383,30 @@ static void *video_grabber(void *data)
     int i;
     int framecount;
     int tolerance;
+    unsigned long num;
 
     /* start the capture process */
 
+    if ( tv_param_mjpeg )
+      {
+        mp_msg(MSGT_TV, MSGL_INFO, "  MJP: gonna capture ! \n");
+        for (i=0; i < priv->nbuf; i++) {
+	num = i;
+        if (ioctl(priv->video_fd, MJPIOC_QBUF_CAPT, &num) < 0)
+          {
+            mp_msg(MSGT_TV, MSGL_ERR, 
+	           "\n  MJP: ioctl MJPIOC_QBUF_CAPT b failed: %s\n", strerror(errno));
+          }
+	  }
+      }
+    else
+      {
     for (i=0; i < priv->nbuf; i++) {
 	if (ioctl(priv->video_fd, VIDIOCMCAPTURE, &priv->buf[i]) == -1)
 	{
 	    mp_msg(MSGT_TV, MSGL_ERR, "\nioctl mcapture failed: %s\n", strerror(errno));
 	}
+      }
     }
 
     gettimeofday(&curtime, NULL);
@@ -1301,8 +1437,17 @@ static void *video_grabber(void *data)
 		
 	    frame = i;
 
+	    if ( tv_param_mjpeg )
+	    {
+	    while (ioctl(priv->video_fd, MJPIOC_SYNC, &priv->buf[frame].frame) < 0 &&
+		   (errno == EAGAIN || errno == EINTR));
+
+	    }
+	    else
+	    {
 	    while (ioctl(priv->video_fd, VIDIOCSYNC, &priv->buf[frame].frame) < 0 &&
 		   (errno == EAGAIN || errno == EINTR));
+	    }
 	    mp_dbg(MSGT_TV, MSGL_DBG3, "\npicture sync failed\n");
 
 	    gettimeofday(&curtime, NULL);
@@ -1405,20 +1550,38 @@ static void *video_grabber(void *data)
 		    priv->video_timebuffer[priv->video_tail] = interval - skew;
 		}
 		
+                if ( tv_param_mjpeg )
+		copy_frame(priv, priv->video_ringbuffer[priv->video_tail], 
+		           priv->mmap+(priv->mjpeg_bufsize)*i);
+		else
 		copy_frame(priv, priv->video_ringbuffer[priv->video_tail], priv->mmap+priv->mbuf.offsets[frame]);
 		priv->video_tail = (priv->video_tail+1)%priv->video_buffer_size_current;
 		priv->video_cnt++;
 	    }
 
+            if ( tv_param_mjpeg )
+            {
+	      num = frame;
+              if (ioctl(priv->video_fd, MJPIOC_QBUF_CAPT, &num) < 0)
+                {
+                  mp_msg(MSGT_TV, MSGL_ERR, "\n  MJP: ioctl MJPIOC_QBUF_CAPT end failed: %s\n", 
+		                                    strerror(errno));
+		  continue;
+                }
+	    }
+	    else
+	    {
 	    if (ioctl(priv->video_fd, VIDIOCMCAPTURE, &priv->buf[frame]) == -1)
 	    {
 		mp_msg(MSGT_TV, MSGL_ERR, "\nioctl mcapture failed: %s\n", strerror(errno));
 		continue;
 	    }
+	    }
 
 	}
 
     }
+    mp_msg(MSGT_TV, MSGL_INFO, "  MJP: returning! \n");
     return NULL;
 }
 

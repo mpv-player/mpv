@@ -787,6 +787,31 @@ A value of 0 means capture and buffer audio and video together
 (default for mencoder).
 A value of 1 (default for mplayer) means to do video capture only and let the
 audio go through a loopback cable from the TV card to the soundcard.
+.IPs mjpeg
+Use hardware mjpeg compression (if the card supports it). 
+When using this option, you do not need to specify the width and height
+of the output window, because mplayer will determine it automatically 
+from the decimation value (see below).
+.IPs decimation=<1,2,4>
+choose the size of the picture that will be compressed by hardware
+mjpeg compression:
+.RSss
+1: full size 
+    704x576    PAL 
+    704x480    NTSC
+.br
+2: medium size 
+    352x288    PAL
+    352x240    NTSC
+.br
+4: small size 
+    176x144    PAL 
+    176x120    NTSC
+.REss
+.IPs quality=<0-100>
+choose the quality of the jpeg compression 
+.br
+(quality < 60 recommended for full size)
 .RE
 .
 .TP

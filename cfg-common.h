@@ -286,6 +286,9 @@ struct config tvopts_conf[]={
 	{"forcechan", &tv_param_forcechan, CONF_TYPE_INT, CONF_RANGE, 1, 2, NULL},
 	{"forceaudio", &tv_param_force_audio, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"buffersize", &tv_param_buffer_size, CONF_TYPE_INT, CONF_RANGE, 16, 1024, NULL},
+	{"mjpeg", &tv_param_mjpeg, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"decimation", &tv_param_decimation, CONF_TYPE_INT, CONF_RANGE, 1, 4, NULL},
+	{"quality", &tv_param_quality, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
 #ifdef HAVE_ALSA9
 	{"alsa", &tv_param_alsa, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #endif

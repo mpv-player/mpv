@@ -34,6 +34,9 @@ extern int tv_param_balance;
 extern int tv_param_forcechan;
 extern int tv_param_force_audio;
 extern int tv_param_buffer_size;
+extern int tv_param_mjpeg;
+extern int tv_param_decimation;
+extern int tv_param_quality;
 #ifdef HAVE_ALSA9
 extern int tv_param_alsa;
 #endif
