@@ -373,12 +373,6 @@ tv_err:
   url = url_new(filename);
   if(url) {
         (*file_format)=autodetectProtocol( url, &f );
-        if( (*file_format)==DEMUXER_TYPE_UNKNOWN ) { 
-          mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_UnableOpenURL, filename);
-          url_free(url);
-          return NULL;
-        }
-        //if(f<0){ mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_UnableOpenURL, url->url); return NULL; }
         mp_msg(MSGT_OPEN,MSGL_INFO,MSGTR_ConnToServer, url->hostname );
         stream=new_stream(f,STREAMTYPE_STREAM);
 	if( streaming_start( stream , url, *file_format )<0){
