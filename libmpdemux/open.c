@@ -75,6 +75,7 @@ int bsize = VCD_SECTOR_SIZE;
 #endif
 
 //============ Open VideoCD track ==============
+#ifdef HAVE_VCD
 if(vcd_track){
   int ret,ret2;
   if(!filename) filename=DEFAULT_CDROM_DEVICE;
@@ -100,6 +101,7 @@ if(vcd_track){
   stream->end_pos=ret2;
   return stream;
 }
+#endif
 
 //============ Open DVD title ==============
 #ifdef USE_DVDREAD

@@ -17,10 +17,14 @@
 
 extern int verbose; // defined in mplayer.c
 
+#ifdef HAVE_VCD
+
 #ifdef __FreeBSD__
 #include "vcd_read_fbsd.h" 
 #else
 #include "vcd_read.h"
+#endif
+
 #endif
 
 #ifdef USE_DVDREAD
@@ -45,11 +49,13 @@ int stream_fill_buffer(stream_t *s){
 #else
     len=read(s->fd,s->buffer,STREAM_BUFFER_SIZE);break;
 #endif
+#ifdef HAVE_VCD
   case STREAMTYPE_VCD:
 #ifdef VCD_CACHE
     len=vcd_cache_read(s->fd,s->buffer);break;
 #else
     len=vcd_read(s->fd,s->buffer);break;
+#endif
 #endif
 #ifdef USE_DVDREAD
   case STREAMTYPE_DVD: {
@@ -117,6 +123,7 @@ if(newpos==0 || newpos!=s->pos){
     s->pos=newpos; // real seek
     if(lseek(s->fd,s->pos,SEEK_SET)<0) s->eof=1;
     break;
+#ifdef HAVE_VCD
   case STREAMTYPE_VCD:
     s->pos=newpos; // real seek
 #ifdef VCD_CACHE
@@ -125,6 +132,7 @@ if(newpos==0 || newpos!=s->pos){
     vcd_set_msf(s->pos/VCD_SECTOR_DATA);
 #endif
     break;
+#endif
 #ifdef USE_DVDREAD
   case STREAMTYPE_DVD:
     s->pos=newpos; // real seek

@@ -254,31 +254,8 @@ int vcd_cache_read(int fd,char* mem){
 }
 #endif
 
-#else /* linux || sun */
+#else /* linux || sun || __bsdi__ */
 
-int vcd_seek_to_track(int fd,int track)
-{
-  return -1;
-}
+#error vcd is not yet supported on this arch...
 
-int vcd_get_track_end(int fd,int track)
-{
-  return -1;
-}
-
-void vcd_read_toc(int fd)
-{
-}
-
-static char vcd_buf[VCD_SECTOR_SIZE];
-
-static int vcd_read(int fd,char *mem)
-{
-  return -1;
-}
-
-static inline void vcd_set_msf(unsigned int sect)
-{
-}
-
-#endif /* !linux && !sun */
+#endif
