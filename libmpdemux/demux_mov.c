@@ -2,6 +2,7 @@
 //  based on TOOLS/movinfo.c by me & Al3x
 //  compressed header support from moov.c of the openquicktime lib.
 //  References: http://openquicktime.sf.net/, http://www.heroinewarrior.com/
+//  http://www.geocities.com/SiliconValley/Lakes/2160/fformats/files/mov.pdf
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -372,7 +373,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		int flags = (temp << 16)|(temp<<8)|temp;
 		int i;
 	
-		mp_msg(MSGT_DEMUX, MSGL_V,"MOV: %*sSample syncing table! (%d entries) (ver:%d,flags:%ld)\n",
+		mp_msg(MSGT_DEMUX, MSGL_V,"MOV: %*sSyncing samples (keyframes) table! (%d entries) (ver:%d,flags:%ld)\n",
 		    level, "",entries, ver, flags);
 #if 0
 		for (i=0;i<entries;i++)
@@ -566,12 +567,19 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		switch (udta_id)
 		{
 		    case MOV_FOURCC(0xa9,'c','p','y'):
+		    case MOV_FOURCC(0xa9,'d','a','y'):
+		    case MOV_FOURCC(0xa9,'d','i','r'):
+		    /* 0xa9,'e','d','1' - '9' : edit timestamps */
+		    case MOV_FOURCC(0xa9,'f','m','t'):
 		    case MOV_FOURCC(0xa9,'i','n','f'):
+		    case MOV_FOURCC(0xa9,'p','r','d'):
+		    case MOV_FOURCC(0xa9,'p','r','f'):
+		    case MOV_FOURCC(0xa9,'r','e','q'):
+		    case MOV_FOURCC(0xa9,'s','r','c'):
+		    case MOV_FOURCC('n','a','m','e'):
 		    case MOV_FOURCC(0xa9,'n','a','m'):
 		    case MOV_FOURCC(0xa9,'A','R','T'):
-		    case MOV_FOURCC(0xa9,'d','i','r'):
 		    case MOV_FOURCC(0xa9,'c','m','t'):
-		    case MOV_FOURCC(0xa9,'r','e','q'):
 		    case MOV_FOURCC(0xa9,'a','u','t'):
 		    case MOV_FOURCC(0xa9,'s','w','r'):
 		    {
@@ -590,6 +598,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 			    case MOV_FOURCC(0xa9,'i','n','f'):
 				mp_msg(MSGT_DEMUX, MSGL_INFO, " Info: %s\n", &text[2]);
 				break;
+			    case MOV_FOURCC('n','a','m','e'):
 			    case MOV_FOURCC(0xa9,'n','a','m'):
 				mp_msg(MSGT_DEMUX, MSGL_INFO, " Name: %s\n", &text[2]);
 				break;
@@ -603,15 +612,39 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 				mp_msg(MSGT_DEMUX, MSGL_INFO, " Comment: %s\n", &text[2]);
 				break;
 			    case MOV_FOURCC(0xa9,'r','e','q'):
-				mp_msg(MSGT_DEMUX, MSGL_INFO, " Requests(codec): %s\n", &text[2]);
+				mp_msg(MSGT_DEMUX, MSGL_INFO, " Requirements: %s\n", &text[2]);
 				break;
 			    case MOV_FOURCC(0xa9,'s','w','r'):
 				mp_msg(MSGT_DEMUX, MSGL_INFO, " Software: %s\n", &text[2]);
+				break;
+			    case MOV_FOURCC(0xa9,'d','a','y'):
+				mp_msg(MSGT_DEMUX, MSGL_INFO, " Creation timestamp: %s\n", &text[2]);
+				break;
+			    case MOV_FOURCC(0xa9,'f','m','t'):
+				mp_msg(MSGT_DEMUX, MSGL_INFO, " Format: %s\n", &text[2]);
+				break;
+			    case MOV_FOURCC(0xa9,'p','r','d'):
+				mp_msg(MSGT_DEMUX, MSGL_INFO, " Producer: %s\n", &text[2]);
+				break;
+			    case MOV_FOURCC(0xa9,'p','r','f'):
+				mp_msg(MSGT_DEMUX, MSGL_INFO, " Performer(s): %s\n", &text[2]);
+				break;
+			    case MOV_FOURCC(0xa9,'s','r','c'):
+				mp_msg(MSGT_DEMUX, MSGL_INFO, " Source providers: %s\n", &text[2]);
 				break;
 			}
 			udta_size -= 4+text_len;
 			break;
 		    }
+		    /* some other shits:    WLOC - window location,
+					    LOOP - looping style,
+					    SelO - play only selected frames
+					    AllF - play all frames
+		    */
+		    case MOV_FOURCC('W','L','O','C'):
+		    case MOV_FOURCC('L','O','O','P'):
+		    case MOV_FOURCC('S','e','l','O'):
+		    case MOV_FOURCC('A','l','l','F'):
 		    default:
 		    {
 			char dump[udta_len-4];
