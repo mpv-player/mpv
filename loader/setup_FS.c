@@ -21,6 +21,9 @@
 #include <sys/sysi86.h>
 /* solaris x86: add missing prototype for sysi86() */
 extern int sysi86(int, void*);
+#ifndef NUMSYSLDTS		/* SunOS 2.5.1 does not define NUMSYSLDTS */
+#define NUMSYSLDTS	6	/* Let's hope the SunOS 5.8 value is OK */
+#endif
 #define       TEB_SEL_IDX     NUMSYSLDTS
 #endif /* __svr4__ */
 

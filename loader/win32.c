@@ -1344,7 +1344,7 @@ static double linux_cpuinfo_freq()
 static double
 solaris_kstat_freq()
 {
-#if	HAVE_LIBKSTAT
+#if	defined(HAVE_LIBKSTAT) && defined(KSTAT_DATA_INT32)
     /*
      * try to extract the CPU speed from the solaris kernel's kstat data
      */
