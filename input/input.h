@@ -55,6 +55,7 @@
 #define MP_CMD_VO_ONTOP 51
 #define MP_CMD_SUB_SELECT 52
 #define MP_CMD_VO_ROOTWIN 53
+#define MP_CMD_SWITCH_VSYNC 54
 
 #define MP_CMD_GUI_EVENTS       5000
 #define MP_CMD_GUI_LOADFILE     5001

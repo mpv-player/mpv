@@ -2980,6 +2980,9 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	tv_step_chanlist((tvi_handle_t*)(demuxer->priv));
     } break;
 #endif
+    case MP_CMD_SWITCH_VSYNC:  {
+      vo_vsync = ( cmd->nargs > 0 )? cmd->args[0].v.i : !vo_vsync;
+    } break;
     case MP_CMD_VO_FULLSCREEN:
     {
 #ifdef HAVE_NEW_GUI
