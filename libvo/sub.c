@@ -89,6 +89,7 @@ void vo_draw_text_progbar(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int 
 }
 
 subtitle* vo_sub=NULL;
+int sub_unicode=0;
 
 void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
     int i;
@@ -105,7 +106,7 @@ void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,in
 
         for(j=0;j<len;j++){
           int c=text[j];
-          int w = vo_font->width[(c<0x80)?c:(c<<8)+text[++j]];
+          int w = vo_font->width[sub_unicode?((c<0x80)?c:(c<<8)+text[++j]):c];
           if(w>100) printf("gazvan: %d (%d=%c)\n",w,c,c);
           xsize+=w+vo_font->charspace;
         }
@@ -118,7 +119,7 @@ void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,in
         for(j=0;j<len;j++){
           int c=text[j];
           int font;
-          if (c>=0x80) c=(c<<8)+text[++j];
+          if (sub_unicode && (c>=0x80)) c=(c<<8)+text[++j];
           font = vo_font->font[c];
           if(x>=0 && x+vo_font->width[c]<dxs)
           if(font>=0)
