@@ -126,7 +126,7 @@ int mp4_parse_esds(unsigned char *data, int datalen, esds_t *esds) {
   }
 
   /* Note: SLConfig is usually constant value 2, size 1Byte */
-  esds->SLConfigLen = len;
+  esds->SLConfigLen = len = mp4_read_descr_len(s);
   esds->SLConfig = malloc(esds->SLConfigLen);
   if (esds->SLConfig) {
     stream_read(s, esds->SLConfig, esds->SLConfigLen);
