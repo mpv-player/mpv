@@ -217,13 +217,21 @@ static void __vbeCopyData(uint8_t *image)
    pixel_size = (video_mode_info.BitsPerPixel+7)/8;
    screen_line_size = video_mode_info.XResolution*pixel_size;
    image_line_size = image_width*pixel_size;
-   x_shift = x_offset*pixel_size;
-   limit = image_height+y_offset;
-   for(j=0,i=y_offset;i<limit;i++,j++)
+   if(image_width == video_mode_info.XResolution)
    {
-     offset = i*screen_line_size+x_shift;
-     image_offset = j*image_line_size;
-     __vbeCopyBlock(offset,&image[image_offset],image_line_size);
+     /* Special case for zooming */
+     __vbeCopyBlock(y_offset*screen_line_size,image,image_line_size*image_height);
+   }
+   else
+   {
+     x_shift = x_offset*pixel_size;
+     limit = image_height+y_offset;
+     for(j=0,i=y_offset;i<limit;i++,j++)
+     {
+       offset = i*screen_line_size+x_shift;
+       image_offset = j*image_line_size;
+       __vbeCopyBlock(offset,&image[image_offset],image_line_size);
+     }
    }
 }
 /* is called for yuv only */
