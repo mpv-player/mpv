@@ -202,6 +202,23 @@ Available options:
                  (specify in frames)
   vhq            very high quality
   vme=XXX        motion estimation method
+  vqmin=XXX      minimum quantizer
+  vqmax=XXX      maximum quantizer
+  vqdiff=XXX     quantizer difference. Limits the
+                 maximum quantizer difference
+                 between frames.
+  vbt=XXX        approximated bitrate tolerance
+  vqcomp=XXX     if the value is set to 1.0, the
+                 quantizer will stay nearly
+                 constant. If it's 0.0, the
+                 quantizer will be changed
+                 to make all frames
+                 approximately equally sized.
+  vqblur=XXX     blurs the quantizer graph over
+                 time.
+                    0.0 : no blur
+                    1.0 : average all past
+                          quantizers
 .TP
 .B \-lameopts
 If encoding to MP3 with libmp3lame, you can specify its parameters here, like:
