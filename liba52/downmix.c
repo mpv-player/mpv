@@ -402,11 +402,32 @@ static void mix3to2 (sample_t * samples, sample_t bias)
     int i;
     sample_t common;
 
+#ifdef HAVE_SSE
+	asm volatile(
+	"movlps %1, %%xmm7		\n\t"
+	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+	"movl $-1024, %%esi		\n\t"
+	"1:				\n\t"
+	"movaps 1024(%0, %%esi), %%xmm0	\n\t" 
+	"addps %%xmm7, %%xmm0		\n\t" //common
+	"movaps (%0, %%esi), %%xmm1	\n\t" 
+	"movaps 2048(%0, %%esi), %%xmm2	\n\t"
+	"addps %%xmm0, %%xmm1		\n\t"
+	"addps %%xmm0, %%xmm2		\n\t"
+	"movaps %%xmm1, (%0, %%esi)	\n\t"
+	"movaps %%xmm2, 1024(%0, %%esi)	\n\t"
+	"addl $16, %%esi		\n\t"
+	" jnz 1b			\n\t"
+	:: "r" (samples+256), "m" (bias)
+	: "%esi"
+	);
+#else
     for (i = 0; i < 256; i++) {
 	common = samples[i + 256] + bias;
 	samples[i] += common;
 	samples[i + 256] = samples[i + 512] + common;
     }
+#endif
 }
 
 static void mix21to2 (sample_t * left, sample_t * right, sample_t bias)
@@ -670,7 +691,7 @@ void downmix (sample_t * samples, int acmod, int output, sample_t bias,
 	break;
 
     case CONVERT (A52_3F2R, A52_2F1R):
-	mix3to2 (samples, bias);
+	mix3to2 (samples, bias); //FIXME possible bug? (output doesnt seem to be used)
 	move2to1 (samples + 768, samples + 512, bias);
 	break;
 
