@@ -7,9 +7,9 @@
 #include "mp_msg.h"
 #include "png.h"
 
-int    pngPointer;
+static int    pngPointer;
 
-void pngReadFN( png_structp pngstr,png_bytep buffer,png_size_t size )
+static void pngReadFN( png_structp pngstr,png_bytep buffer,png_size_t size )
 {
  char * p = pngstr->io_ptr;
  memcpy( buffer,(char *)&p[pngPointer],size );
