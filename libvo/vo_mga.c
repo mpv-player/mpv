@@ -38,6 +38,7 @@ LIBVO_EXTERN(mga)
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/mman.h>
+#include <linux/fb.h>
 
 #include "drivers/mga_vid.h"
 #include "sub.h"
@@ -54,10 +55,29 @@ static vo_info_t vo_info =
 
 #include "mga_common.c"
 
+#define FBDEV	"/dev/fb0"
+
 static uint32_t
 config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format,const vo_tune_info_t *info)
 {
 char *devname=vo_subdevice?vo_subdevice:"/dev/mga_vid";
+
+	if(!vo_screenwidth || !vo_screenheight) {
+		int fd;
+		struct fb_var_screeninfo fbinfo;
+
+		if(-1 != (fd = open(FBDEV, O_RDONLY))) {
+			if(0 == ioctl(fd, FBIOGET_VSCREENINFO, &fbinfo)) {
+				if(!vo_screenwidth)   vo_screenwidth = fbinfo.xres;
+				if(!vo_screenheight) vo_screenheight = fbinfo.yres;
+			} else {
+				perror("FBIOGET_VSCREENINFO");
+			}
+			close(fd);
+		} else {
+			perror(FBDEV);
+		}
+	}
 
 	if(vo_screenwidth && vo_screenheight){
 		aspect_save_orig(width,height);
