@@ -369,8 +369,16 @@ while(1){
       priv->idx=malloc(priv->idx_size<<4);
 //      printf("\nindex to %p !!!!! (priv=%p)\n",priv->idx,priv);
       stream_read(demuxer->stream,(char*)priv->idx,priv->idx_size<<4);
-      for (i = 0; i < priv->idx_size; i++)	// swap index to machine endian
-	le2me_AVIINDEXENTRY((AVIINDEXENTRY*)priv->idx + i);
+      for (i = 0; i < priv->idx_size; i++) {	// swap index to machine endian
+	AVIINDEXENTRY *entry=(AVIINDEXENTRY*)priv->idx + i;
+	le2me_AVIINDEXENTRY(entry);
+	/*
+	 * We (ab)use the upper word for bits 32-47 of the offset, so
+	 * we'll clear them here.
+	 * FIXME: AFAIK no codec uses them, but if one does it will break
+	 */
+	entry->dwFlags&=0xffff;
+      }
       chunksize-=priv->idx_size<<4;
       if(verbose>=2) print_index(priv->idx,priv->idx_size);
     }
