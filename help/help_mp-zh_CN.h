@@ -485,6 +485,9 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Cache "打开/关闭缓存"
 #define MSGTR_PREFERENCES_LoadFullscreen "以全屏方式开始"
 #define MSGTR_PREFERENCES_CacheSize "缓存大小: "
+#define MSGTR_PREFERENCES_XSCREENSAVER "停用XScreenSaver"
+#define MSGTR_PREFERENCES_AutoSync "自同步 打开/关闭"
+#define MSGTR_PREFERENCES_AutoSyncValue "自同步: "
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "致命错误 ..."
