@@ -276,28 +276,72 @@ int abs_seek_pos=0;
 extern char *vo_subdevice;
 extern char *ao_subdevice;
 
+static char* current_module=NULL; // for debugging
+
+static unsigned int inited_flags=0;
+#define INITED_VO 1
+#define INITED_AO 2
+#define INITED_GUI 4
+#define INITED_GETCH2 8
+#define INITED_LIRC 16
+#define INITED_ENCODE 32
+#define INITED_ALL 0xFFFF
+
+void uninit_player(unsigned int mask){
+  mask=inited_flags&mask;
+  if(mask&INITED_VO){
+    inited_flags&=~INITED_VO;
+    current_module="uninit_vo";
+#ifdef USE_LIBVO2
+    vo2_close(video_out);
+#else
+    video_out->uninit();
+#endif
+  }
+
+  if(mask&INITED_AO){
+    inited_flags&=~INITED_AO;
+    current_module="uninit_ao";
+    audio_out->uninit();
+  }
+
+  if(mask&INITED_GETCH2){
+    inited_flags&=~INITED_GETCH2;
+    current_module="uninit_getch2";
+  // restore terminal:
+    getch2_disable();
+  }
+
+#ifdef HAVE_NEW_GUI
+  if(mask&INITED_GUI){
+    inited_flags&=~INITED_GUI;
+    current_module="uninit_gui";
+    mplDone();
+  }
+#endif
+
+  if(mask&INITED_ENCODE){
+    inited_flags&=~INITED_ENCODE;
+    current_module="uninit_encode";
+    avi_fixate();
+  }
+
+#ifdef HAVE_LIRC
+  if(mask&INITED_LIRC){
+    inited_flags&=~INITED_LIRC;
+    current_module="uninit_lirc";
+    lirc_mp_cleanup();
+  }
+#endif
+
+}
+
 void exit_player(char* how){
  total_time_usage_start=GetTimer()-total_time_usage_start;
 
-  // restore terminal:
-   getch2_disable();
+  uninit_player(INITED_ALL);
 
-#ifdef USE_LIBVO2
-  if(video_out) vo2_close(video_out);
-#else
-  if(video_out) video_out->uninit();
-#endif
-
-#ifdef HAVE_NEW_GUI
-  if(use_gui) mplDone();
-#endif
-
-  if(audio_out) audio_out->uninit();
-
-  if(encode_name) avi_fixate();
-#ifdef HAVE_LIRC
-  lirc_mp_cleanup();
-#endif
+  current_module="exit_player";
 
   if(how) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_Exiting,how);
   mp_msg(MSGT_CPLAYER,MSGL_V,"max framesize was %d bytes\n",max_framesize);
@@ -318,8 +362,6 @@ void exit_player(char* how){
 
   exit(1);
 }
-
-static char* current_module=NULL; // for debugging
 
 void exit_sighandler(int x){
   static int sig_count=0;
@@ -543,12 +585,14 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 #ifdef HAVE_NEW_GUI
   if(use_gui){
        appInit( argc,argv,envp,(void*)mDisplay );
+       inited_flags|=INITED_GUI;
        mplShMem->Playing= (gui_no_filename) ? 0 : 1;
   }
 #endif
 
 #ifdef HAVE_LIRC
   lirc_mp_setup();
+  inited_flags|=INITED_LIRC;
 #endif
 
 #ifdef USE_TERMCAP
@@ -920,7 +964,8 @@ if(auto_quality>0){
      if((encode_file=fopen(encode_index_name,"wb")))
        fclose(encode_file);
      else encode_index_name=NULL;
-     sh_audio=d_audio->sh=NULL;
+     sh_audio=d_audio->sh=NULL; // force nosound
+     inited_flags|=INITED_ENCODE;
    }
 
 // ========== Init display (sh_video->disp_w*sh_video->disp_h/out_fmt) ============
@@ -998,6 +1043,7 @@ current_module="init_libvo";
      mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_CannotInitVO);
      goto goto_next_file; // exit_player(MSGTR_Exit_error);
    }
+   inited_flags|=INITED_VO;
    mp_msg(MSGT_CPLAYER,MSGL_V,"INFO: Video OUT driver init OK!\n");
 
    fflush(stdout);
@@ -1044,6 +1090,8 @@ if(sh_audio){
       sh_audio->channels,sh_audio->sample_format,0)){
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CannotInitAO);
     sh_audio=d_audio->sh=NULL;
+  } else {
+    inited_flags|=INITED_AO;
   }
 
 //  printf("Audio buffer size: %d bytes, delay: %5.3fs\n",audio_buffer_size,audio_buffer_delay);
@@ -1065,7 +1113,7 @@ if(!sh_audio){
   if(verbose) mp_msg(MSGT_CPLAYER,MSGL_V,"Freeing %d unused audio chunks\n",d_audio->packs);
   ds_free_packs(d_audio); // free buffered chunks
   d_audio->id=-2;         // do not read audio chunks
-  if(audio_out){ audio_out->uninit(); audio_out=NULL;} // close device
+  if(audio_out) uninit_player(INITED_AO); // close device
 }
 
   current_module=NULL;
@@ -1081,7 +1129,10 @@ if(force_fps){
 
 mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_StartPlaying);fflush(stdout);
 
-if(!use_stdin) getch2_enable();  // prepare stdin for hotkeys...
+if(!use_stdin){
+  getch2_enable();  // prepare stdin for hotkeys...
+  inited_flags|=INITED_GETCH2;
+}
 
 InitTimer();
 
@@ -1857,20 +1908,8 @@ mp_msg(MSGT_GLOBAL,MSGL_V,"EOF code: %d  \n",eof);
 if(curr_filename+1<num_filenames || use_gui){
     // partial uninit:
 
-  // restore terminal:
-   getch2_disable();
+  uninit_player(INITED_ALL-INITED_GUI);
 
-  current_module="uninit_vo";
-
-#ifdef USE_LIBVO2
-  if(video_out) vo2_close(video_out);
-#else
-  if(video_out) video_out->uninit();
-#endif
-
-  current_module="uninit_ao";
-  if(audio_out) audio_out->uninit();
-//  if(encode_name) avi_fixate();
 }
 
 goto_next_file:  // don't jump here after ao/vo/getch initialization!
