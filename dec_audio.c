@@ -34,6 +34,8 @@ extern int verbose; // defined in mplayer.c
 
 #include "ima4.h"
 
+#include "cpudetect.h"
+
 #ifdef USE_FAKE_MONO
 int fakemono=0;
 #endif
@@ -53,7 +55,7 @@ typedef struct ov_struct_st {
 			  stream of packets */
   ogg_page         og; /* one Ogg bitstream page.  Vorbis packets are inside */
   ogg_packet       op; /* one raw packet of data for decode */
-  
+
   vorbis_info      vi; /* struct that stores all the static vorbis bitstream
 			  settings */
   vorbis_comment   vc; /* struct that stores all the bitstream user comments */
@@ -329,12 +331,12 @@ case AFM_AC3: {
   ac3_config.fill_buffer_callback = ac3_fill_buffer;
   ac3_config.num_output_ch = 2;
   ac3_config.flags = 0;
-#ifdef HAVE_MMX
+if(gCpuCaps.hasMMX){
   ac3_config.flags |= AC3_MMX_ENABLE;
-#endif
-#ifdef HAVE_3DNOW
+}
+if(gCpuCaps.has3DNow){
   ac3_config.flags |= AC3_3DNOW_ENABLE;
-#endif
+}
   ac3_init();
   sh_audio->ac3_frame = ac3_decode_frame();
   if(sh_audio->ac3_frame){
