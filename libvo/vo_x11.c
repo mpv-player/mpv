@@ -178,11 +178,11 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
          image_width=vo_screenwidth;
          image_height=vo_screenheight;
      } else {
-         image_width=d_width&(~3);
+         image_width=d_width&(~7);
          image_height=d_height;
      }
-     scale_xinc=(width << 8) / image_width - 1;  // -1 needed for proper rounding
-     scale_yinc=(height << 16) / image_height;
+     scale_xinc=(width << 16) / image_width - 2;  // needed for proper rounding
+     scale_yinc=(height << 16) / image_height +2;
      SwScale_Init();
  }
 
