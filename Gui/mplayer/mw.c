@@ -640,7 +640,7 @@ void mplMainKeyHandle( int KeyCode,int Type,int Key )
    {
     switch ( Key )
      {
-      case wsEnter:     msg=evPlay; break;
+      case wsEnter:            msg=evPlay; break;
       case wsXF86LowerVolume:  msg=evDecVolume; break;
       case wsXF86RaiseVolume:  msg=evIncVolume; break;
       case wsXF86Mute:         msg=evMute; break;
@@ -649,6 +649,14 @@ void mplMainKeyHandle( int KeyCode,int Type,int Key )
       case wsXF86Prev:         msg=evPrev; break;
       case wsXF86Next:         msg=evNext; break;
       case wsXF86Media:        msg=evLoad; break;
+      case wsEscape:
+    	    if ( appMPlayer.subWindow.isFullScreen )
+	     { 
+	      if ( guiIntfStruct.event_struct )
+	       { memset( guiIntfStruct.event_struct,0,sizeof( XEvent ) ); guiIntfStruct.event_struct=NULL; }
+	      mplEventHandling( evNormalSize,0 ); 
+	      break; 
+	     }
 
       default:          vo_x11_putkey( Key ); return;
      }

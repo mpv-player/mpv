@@ -426,6 +426,7 @@ int guiGetEvent( int type,char * arg )
  switch ( type )
   {
    case guiXEvent:
+	guiIntfStruct.event_struct=(void *)arg;
         wsEvents( wsDisplay,(XEvent *)arg,NULL );
         gtkEventHandling();
         break;

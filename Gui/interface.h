@@ -59,6 +59,7 @@ typedef struct
    guiUnknowErrorStruct error;
    
    void * sh_video;
+   void * event_struct;
 
    int    DiskChanged;
 
