@@ -70,7 +70,9 @@ int
 http_is_header_entire( HTTP_header_t *http_hdr ) {
 	if( http_hdr==NULL ) return -1;
 
-	if( strstr(http_hdr->buffer, "\r\n\r\n")==NULL ) return 0;
+	if( strstr(http_hdr->buffer, "\r\n\r\n")==NULL ) {
+		if( strstr(http_hdr->buffer, "\n\n")==NULL ) return 0;
+	}
 	else return 1;
 }
 
@@ -111,7 +113,7 @@ http_response_parse( HTTP_header_t *http_hdr ) {
 	hdr_ptr += 4;
 
 	// Get the reason phrase
-	ptr = strstr( hdr_ptr, "\r\n" );
+	ptr = strstr( hdr_ptr, "\n" );
 	if( hdr_ptr==NULL ) {
 		printf("Malformed answer. Unable to get the reason phrase.\n");
 		return -1;
@@ -128,18 +130,19 @@ http_response_parse( HTTP_header_t *http_hdr ) {
 	// Set the position of the header separator: \r\n\r\n
 	ptr = strstr( http_hdr->buffer, "\r\n\r\n" );
 	if( ptr==NULL ) {
-		printf("Header may be incomplete. No CRLF CRLF found.\n");
-		return -1;
+		ptr = strstr( http_hdr->buffer, "\n\n" );
+		if( ptr==NULL ) {
+			printf("Header may be incomplete. No CRLF CRLF found.\n");
+			return -1;
+		}
 	}
 	pos_hdr_sep = ptr-http_hdr->buffer;
 
-	hdr_ptr = strstr( http_hdr->buffer, "\r\n" )+2;
+	// Point to the first line after the method line.
+	hdr_ptr = strstr( http_hdr->buffer, "\n" )+1;
 	do {
-		ptr = strstr( hdr_ptr, "\r\n");
-		if( ptr==NULL ) {
-			printf("No CRLF found\n");
-			return -1;
-		}
+		ptr = hdr_ptr;
+		while( *ptr!='\r' && *ptr!='\n' ) ptr++;
 		len = ptr-hdr_ptr;
 		field = (char*)realloc(field, len+1);
 		if( field==NULL ) {
@@ -149,7 +152,7 @@ http_response_parse( HTTP_header_t *http_hdr ) {
 		strncpy( field, hdr_ptr, len );
 		field[len]='\0';
 		http_set_field( http_hdr, field );
-		hdr_ptr = ptr+2;
+		hdr_ptr = ptr+((*ptr=='\r')?2:1);
 	} while( hdr_ptr<(http_hdr->buffer+pos_hdr_sep) );
 	
 	if( field!=NULL ) free( field );
