@@ -9,9 +9,14 @@
    * implement direct rendering support - NEEDS TESTING
    * implement non-directbuffer support - NEEDS TESTING
    * check on many devices
-   * implement gamma handling
+   * implement gamma handling (VAA isn't obsoleted?)
+ 
+  BUGS:
+   * fbdev & DR produces two downscaled images
+   * fbdev & FLIP (& DR) produces no image
 
   Thanks to Andreas Beck for his patches.
+
   Many thanks to Atmosfear, he hacked this driver to work with Planar
   formats, and he fixed the RGB handling.
 */
@@ -35,6 +40,7 @@
 #define GGI_FRAMES 4
 
 #undef GGI_GAMMA
+#undef GGI_FLIP
 
 #include "../libmpcodecs/mp_image.h"
 
@@ -63,6 +69,7 @@ static struct ggi_conf_s {
     int srcheight;
     int srcformat;
     int srcdepth;
+    int srcbpp;
     
     /* destination */
     int dstwidth;
@@ -70,6 +77,8 @@ static struct ggi_conf_s {
     
     int async;
     int directbuffer;
+    
+    int voflags;
 } ggi_conf;
 
 static uint32_t draw_frame_directbuffer(uint8_t *src[]);
@@ -77,7 +86,7 @@ static void draw_osd_directbuffer(void);
 static void flip_page_directbuffer(void);
 
 static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
-    uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format,const vo_tune_info_t *info)
+    uint32_t d_height, uint32_t flags, char *title, uint32_t format,const vo_tune_info_t *info)
 {
     ggi_mode mode =
     {
@@ -115,30 +124,13 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	    break;
     }
 
-#if 1
+#if 0
     printf("[ggi] mode: ");
     ggiPrintMode(&mode);
     printf("\n");
 #endif
 
     ggiCheckMode(ggi_conf.vis, &mode);
-    
-    switch(format)
-    {
-	case IMGFMT_YV12:
-    	    mode.graphtype = GT_32BIT;
-    	    if (!ggiSetMode(ggi_conf.vis, &mode))
-    		break;
-	    mode.graphtype = GT_24BIT;
-	    if (!ggiSetMode(ggi_conf.vis, &mode))
-		break;
-	    mode.graphtype = GT_16BIT;
-	    if (!ggiSetMode(ggi_conf.vis, &mode))
-		break;
-	    mode.graphtype = GT_15BIT;
-	    if (!ggiSetMode(ggi_conf.vis, &mode))
-		break;
-    }
 
     if (ggiSetMode(ggi_conf.vis, &mode))
     {
@@ -160,7 +152,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 
     ggi_conf.gmode = mode;
 
-#if 1
+#if 0
     printf("[ggi] mode: ");
     ggiPrintMode(&mode);
     printf("\n");
@@ -178,6 +170,8 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     ggi_conf.srcwidth = width;
     ggi_conf.srcheight = height;
     ggi_conf.srcformat = format;
+    
+    ggi_conf.voflags = flags;
 
     if (IMGFMT_IS_RGB(ggi_conf.srcformat))
     {
@@ -271,6 +265,8 @@ db_ok:
 	video_out_ggi.draw_osd = draw_osd_directbuffer;
 	video_out_ggi.flip_page = flip_page_directbuffer;
     }
+    
+    ggi_conf.srcbpp = (ggi_conf.srcdepth+7)/8;
 
     return(0);
 }
@@ -306,53 +302,52 @@ static uint32_t get_image(mp_image_t *mpi)
 	ggi_conf.currframe = 0;
 	ggi_conf.frames = 1;
     }
-
+    
+    mpi->planes[1] = mpi->planes[2] = NULL;
+    mpi->stride[1] = mpi->stride[2] = 0;
+    
+    mpi->stride[0] = ggi_conf.srcwidth*ggi_conf.srcbpp;
     mpi->planes[0] = ggi_conf.buffer[ggi_conf.currframe]->write;
-    mpi->stride[0] = ggi_conf.srcwidth*((ggi_conf.srcdepth+7)/8);
     mpi->flags |= MP_IMGFLAG_DIRECT;
+
+#ifdef GGI_FLIP
+    if (ggi_conf.voflags & VOFLAG_FLIPPING)
+    {
+	mpi->stride[0] = -mpi->stride[0];
+	mpi->planes[0] -= mpi->stride[0]*(ggi_conf.srcheight-1);
+    }
+#endif
 
     return(VO_TRUE);
 }
 
 static uint32_t draw_frame_directbuffer(uint8_t *src[])
 {
-    int x, y, size;
-    unsigned char *ptr, *ptr2, *spt;
+    unsigned char *dst_ptr;
+    int dst_stride, dst_bpp;
 
     ggiResourceAcquire(ggi_conf.buffer[ggi_conf.currframe]->resource,
 	GGI_ACTYPE_WRITE);
 
     ggiSetWriteFrame(ggi_conf.vis, ggi_conf.currframe);
 
-    spt = src[0];
-    ptr = ggi_conf.buffer[ggi_conf.currframe]->write;
-    size = ggi_conf.buffer[ggi_conf.currframe]->buffer.plb.pixelformat->size/8;
+    dst_ptr = ggi_conf.buffer[ggi_conf.currframe]->write;
+    dst_stride = ggi_conf.buffer[ggi_conf.currframe]->buffer.plb.stride;
+    dst_bpp = (ggi_conf.buffer[ggi_conf.currframe]->buffer.plb.pixelformat->size+7)/8;
 
-#if 0
-    for (y = 0; y < ggi_conf.srcheight; y++)
+#ifdef GGI_FLIP
+    if (ggi_conf.voflags & VOFLAG_FLIPPING)
     {
-	ptr2 = ptr;
-	for (x = 0; x < ggi_conf.srcwidth; x++)
-	{
-	    ptr2[0] = *spt++;
-	    ptr2[1] = *spt++;
-	    ptr2[2] = *spt++;
-	    switch(ggi_conf.srcformat)
-	    {
-		case IMGFMT_BGR32:
-		case IMGFMT_RGB32:
-		    spt++;
-		    break;
-	    }
-	    ptr2 += size;
-	}
-	ptr += ggi_conf.buffer[ggi_conf.currframe]->buffer.plb.stride;
+	dst_stride = -dst_stride;
+	dst_ptr -= dst_stride*(ggi_conf.srcheight-1);
     }
-#else
-    mem2agpcpy_pic(ptr, spt, ggi_conf.srcwidth*size, ggi_conf.srcheight,
-	ggi_conf.buffer[ggi_conf.currframe]->buffer.plb.stride,
-	ggi_conf.srcwidth*ggi_conf.srcdepth/8);
 #endif
+
+    /* memcpy_pic(dst, src, bytes per line, height, dst_stride, src_stride) */
+
+    memcpy_pic(dst_ptr, src[0], ggi_conf.srcwidth*dst_bpp, ggi_conf.srcheight,
+	dst_stride,
+	ggi_conf.srcwidth*ggi_conf.srcbpp);
 
     ggiResourceRelease(ggi_conf.buffer[ggi_conf.currframe]->resource);
 
@@ -471,7 +466,11 @@ static uint32_t query_format(uint32_t format)
 	(IMGFMT_IS_RGB(format) && (IMGFMT_RGB_DEPTH(format) == vo_dbpp)))
     {
 	if (ggi_conf.directbuffer)
+#ifdef GGI_FLIP
+	    return(3|VFCAP_OSD|VFCAP_FLIP);
+#else
 	    return(3|VFCAP_OSD);
+#endif
 	else
 	    return(3);
     }
@@ -479,7 +478,11 @@ static uint32_t query_format(uint32_t format)
     if (IMGFMT_IS_BGR(format) || IMGFMT_IS_RGB(format))
     {
 	if (ggi_conf.directbuffer)
+#ifdef GGI_FLIP
+	    return(1|VFCAP_OSD|VFCAP_FLIP);
+#else
 	    return(1|VFCAP_OSD);
+#endif
 	else
 	    return(1);
     }
@@ -543,11 +546,9 @@ static uint32_t control(uint32_t request, void *data, ...)
 {
     switch(request)
     {
-#ifdef GGI_GAMMA
 	case VOCTRL_QUERY_VAA:
 	    query_vaa((vo_vaa_t*)data);
 	    return VO_TRUE;
-#endif
 	case VOCTRL_QUERY_FORMAT:
 	    return query_format(*((uint32_t*)data));
 	case VOCTRL_GET_IMAGE:
