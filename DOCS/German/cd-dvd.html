@@ -5,6 +5,27 @@
 
 <P><B><A NAME=4.1>4.1. CD-ROM Laufwerke</A></B></P>
 
+<P>Abspielen von Standard Video-CDs:</P>
+
+<P>
+mplayer -vcd <I>tracknummer</I> [Device]<BR><BR>
+Beispiele:<BR>
+mplayer -vcd 1<BR>
+mplayer -fs -vcd 2 /dev/hdc<BR>
+</P>
+
+<P>
+Hinweise:<BR>
+- Mounte die VCD NICHT und spiele die DAT-Dateien nicht direkt ab! Das funktioniert
+vielleicht unter windows, aber wird unter Linux nicht funktionieren. Du musst
+diese direkt, mit der -vcd Option abspielen!<BR>
+- VCDs haben normalerweise 2 Tracks: ein Daten-Track (enthält das Autostart-Windows
+Abspielprogramm, Karaoke-Daten usw.) und einen Mode-2-Track (den Film), also
+versuche zuerst -vcd 2 !<BR>
+- das Standard-Gerät (Device) ist /dev/cdrom. Wenn dein Gerät ein anderes ist,
+musst du einen symbolischen Link setzten oder es mit einer Option angeben!
+</P>
+
 <P>Aus der Linux-Dokumentation:</P>
 
 <P>Einige CDROM-Laufwerke verfügen über die Möglichkeit die Abtastgeschwindigkeit
@@ -150,7 +171,7 @@ Wie kann ich den Reginal-Code meine DVD-Laufwerks einstellen ? I habe kein Win-
 dows!
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
 Verwende das 'regionset'-Tool:
-http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz
+<A HREF="http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz">http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz</A>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
