@@ -61,6 +61,11 @@ extern Window     vo_window;
 extern GC         vo_gc;
 extern XSizeHints vo_hint;
 
+#ifdef HAVE_XV
+extern int vo_xv_set_eq(uint32_t xv_port, char * name, int value);
+extern int vo_xv_get_eq(uint32_t xv_port, char * name, int *value);
+#endif
+
 #ifdef HAVE_NEW_GUI
  extern void vo_setwindow( Window w,GC g );
  extern void vo_x11_putkey(int key);
