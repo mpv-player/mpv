@@ -1,0 +1,275 @@
+MoviePlayer v0.11        (C) 2000-2001. by Arpad Gereoffy  (A'rpi/ESP-team)
+=================           * Lee el archivo AUTHORS para una lista completa! *
+
+Acerca de:
+~~~~~~~~~
+[N.T: Los acentos se omitiran de forma intencionada]
+
+Exacto. Otro reproductor de video para linux.
+Que tiene de especial? Que funciona, almenos para mi :)
+He probado montones de reproductores bajo linux (mtv, xmps, dvdview, livid/oms,
+VideoLAN, xine, xanim, avifile, xmmp); pero todos ellos tenian algun problema.
+Normalmente con tipos concretos de ficheros o con la sincronizacion de audio/video.
+La mayoria de ellos no pueden reproducir mpeg1, mpeg2 y avi (DivX ;-)). Muchos tienen
+problemas de calidad de imagen o de velocidad, tambien. Asi pues, he decidido crear/
+modificar uno...
+
+Breve historai:
+- mpg12play v0.1 ha nacido, usando libmpeg3 de: www.heroinewarrior.com
+- mpg12play 2ª generacion (v0.5-), usando dvdview por: Dirk Farin
+- mpg12play 3ª generacion (v0.9-), usando libmpeg2 (mpeg2dec) por: Aaron Holtzman
+- mplayer ha nacido, conteniendo mpg12play 0.90pre5 y un nuevo, y simple, reprocuctor 
+          avi.
+- mplayer 0.10, reproductor mpeg y avi en un unico binario (ejecutable)
+- mplayer 0.11: añadido soporte para ficheros .asf, y de/codificacion OpenDivX.
+
+Como podeis ver, no he escrito ningun 'codec', solo algunos reproductores. Pero he
+dedicado gran parte del tiempo para tratar los archivos dañados (mpg y avi) y lograr
+una sincronizacion A-V perfecta con posibilidad de desplazamiento (por el video)
+Mi reproductor es duramente solido en la reproducion de archivos mpeg (util para
+algunos VCDs), y reproduce AVIs dañados imposibles de ver con el famoso Windows
+Media Player. Incluso AVIs sin indice son reproducibles!
+Como podeis ver, estabilidad y calidad son los dos factores mas importantes para mi,
+velocidad es menos importante, pero no deja de ser importante.
+
+Que hay respecto a la GUI?
+No soy un programador de GUIs. Las odio, amo la oscura consola de 80x25. Asi pues,
+El reproductor dispone unicamente de control por teclado. Pero se esta desarroyando
+una GUI para el reproductor, cordinado por Pontscho/Fresh! Todavia esta en desarroyo,
+Pero estara junto con el paquete base proximamente. Quizas necesita algunas pieles
+(skins), si tienes 'garbo' con el dibujo ponte en contacto con el!!!
+
+Codecs de Win32?
+Si, estamos usando los codecs de Win32 (Windows) para la decodificacion de AVI/ASF.
+Estos deben ser instalados en el directorio /usr/lib/win32/ (en MINUSCULAS). Puedes
+obtenerlos de nuestra web, o en C:\WINDOWS\SYSTEM de tu windows, mira el archivo
+codecs.c para saber los nombres.
+Algunas personas preguntan porque no usamos los codecs ActiveMovie/DirectShow. El 
+movtivo es sencillo: deberiamos emular toda la arquitectura DirectX y implementar
+la interficie (patentada) COM para usarlos. De todos modos el viejo codec DivX es
+mas rapido que la nueva version .AX, pero no dispone de la opcion de calidad/CPU
+(nombre equivico a la opcion ya que no afecta al reproductor, unicamente aplica un 
+filtro para reducir el bloqueo llevandose por delante la CPU, si se establece, la
+opcion, a 1 o mas).
+
+Formatos de entrada soportados:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- VCD (Video CD) directamente del CD-ROM o desde archivos de imagen .bin del CDRwin's .bin
+- 'Streams' MPEG 1/2  (PS/VOB) y 'Streams' elementales (ES).
+- Formatos de arhivo RIFF AVI 
+- Archivos con formato ASF 1.0
+
+Codecs de audio soportados:
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+- audio PCM (descomprimido) (8/16 bit, mono/stereo)
+- audio MPEG layer 2/3      (usando mp3lib, basado en mpg123)
+- audio AC3                 (usando ac3dec/libac3)
+- codecs de audio Win32 ACM (los archivos *.ACM)  [Solo en los archivos AVI]
+  probado con: audio DivX, MS-ADPCM
+- audio aLaw                (usado el codigo de xanim)
+- audio MS-GSM              (usando el xa_gsm.c modificado de avifile)
+
+Codecs de video soportados:
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+- decodificacion MPEG 1 y MPEG 2 (usando mpeg2dec/libmpeg2, soporta  3DNow! y MMX)
+- codecs Win32 ICM (VfW)         (por ejemplo DivX usando DIVXC32.DLL)
+- OpenDivX de/codificacion       (mira ProjectMayo)
+
+
+Dispositivos de salida de video soportados:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- mga:	Matrox G200/G400 hardware YUV superposivion via el dispositivo mga_vid 
+- xmga:	Matrox G200/G400 superposicion (mga_vid) en ventana X11 
+	(emulacion Xv en X 3.3.x !)
+- x11:	X11 opcional con la extension SHM
+- dga:	extension X11 DGA (solo 24/32bpp)
+- fsdga:extension X11 DGA a pantalla completa escalable  (solo 24/32bpp y MPEG!)
+- xv:	X11 using overlays with the Xvideo extension (hardware YUV & scaling)
+- gl:	renderizacion OpenGL, funciona solo con Utah-GLX! (nada de drivers DRI or nVidia)
+- syncfb:soporte Matrox G400 YUV en 'framebuffer' (no compobado)
+- 3dfx:	hardware Voodoo2/3  YUV (/dev/3dfx) (no comprobado)
+- sdl:	driver SDL >= v1.1.7 (mas lento que 'x11', pero escalable)
+	(NO soportado por nosotros! no nos escribas al respecto)
+- null:	salida Nula  (para pruebas de velodicad/rendimiento)
+- pgm:	PGM file output (for testing purposes)
+- md5:	salida MD5sum  (para pruebas de integridad)
+
+NOTA: no todos estan disponibles para los archivos AVI
+
+Dispositivos de salida de audio:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- driver OSS
+- driver ALSA con emulacion OSS
+- ESD con la utilidad  esddsp 
+
+NOTA: leete DOCS/SOUNDCARDS !
+
+Velocidad:
+~~~~~~~~~
+La mayoria de partes criticas (en terminos de tiempo) estan optimizadas para MMX/
+SSE/3DNow! Puedes mejorar la velocidad de renderizacion configurando los registros
+MTRR, mira el documento MTRR. Algunos informes de rendimiento pueden encontrarse
+en el archivo SPEED.
+
+Uso:
+~~~~~~
+  mplayer [opciones] [-vo dispositivo] [ruta/]archivo
+
+  Opciones:
+    mira mplayer -h       para una lista de las opciones
+    mira mplayer -vo help para una lista de los dispositivos de salida disponibles.
+
+  Teclas:
+    <-  o  ->       avanza/retrocede 10 segundos
+    arriba o abajo  avanza/retrocede 1 minuto
+    p o ESPACIO     pausa la reproduccion (pulsa cualquier tecla para reanudar)
+    q  o   ^C       Detiene la reproduccion y sale del programa
+
+  Ejemplos:
+    mplayer -vo x11 /mnt/Films/Contact/contact2.mpg
+    mplayer -afm 3 /mnt/DVDtrailers/alien4.vob
+    mplayer -vcd 2 /dev/cdrom
+    mplayer -alsa -abs 65536 -delay -0.4 -nobps ~/movies/test.avi
+
+  Nota:  Para usar el dispositivo Matrox YUV (-vo mga o xmga), necesitas cargar 
+ 	 antes el dispositivo: insmod drivers/mga_vid.o
+
+Licencia:                                                                     
+~~~~~~~~~
+Ya que MPlayer incorpora mucho codigo de otros proyectos todavia no se ha
+decidido.
+Estamos considerando GPL, pero sera dificil.
+
+Salida TV:
+~~~~~~~~~~
+Si tienes una tarjeta "Matrox G400 Dual-Head", puedes ver peliculas en TV,
+usando la caracteristica TV-out de la segunda cabeza. Necesitas tener soporte 
+para  matroxfb habilitado en el kernel (2.4.x). No necesitas X11 para esto.
+Nota: Probado unicamente en PAL TV.
+
+  cd TVout
+  ./modules
+  ./cloning or ./independ
+  ./TV-704x528 (or another TV* script)
+
+Enviando avisos de bugs:
+~~~~~~~~~~~~~~~~~~~~~~~
+Ante todo, por favor leete toda la documentacion del paquete. La mayoria
+de problemas estan comentados en algun lugar. Almenos leete la seccion 
+'Troubleshooting'. No nos gusta responder preguntas que ya estan respondidas
+en algun documento.
+Deberias probar la ultima version tambien, quizas tu bug ya se haya corregido
+pero la nueva version no ha sido publicada aun.
+Si no has logrado solucionar el problema, entonces envia el informe via eMail
+a la lista de usuarios MPlayer-users: mplayer-users@lists.sourceforge.net
+
+*NUNCA* adjuntes AVIs, o cualquier archivo grande a la lista! subelos a nuestro
+ftp en: ftp://thot.banki.hu/incoming , y avisa a la lista de la subida.
+
+Por favor incluye lo siguiente:
+- La version de tu kernel ('uname -a')
+- Version de glibc y tu distribucion:  (ejemplo: Slackware 7.1 + glibc 2.1.3)
+- version de gcc y binutils ('gcc -v' y 'as --version')
+- tu version de X11         (ejemplo: X 4.0.2 + DRI snapshot2001jan12)
+- tarjeta de video, fabricante/modelo  (ejemplo: Matrox G400 MAX AGP)
+- CPU, fabricante y modelo     (ejemplo: Intel Celeron2-566 a 850MHz)
+
+Incluye tambien los registros necesarios (adjuntados, pueden estar comprimidos)
+segun el tipo de problema (mira en la seccion de Troubleshooting).
+
+Para registrar la salida a un archivo usa el operador &>. Por ejemplo:
+  ./configure &>configure.log
+  mplayer -v test.avi &>play.log
+
+Si te pedimos un registro tienes dos opciones:
+- subirlo a: ftp://thot.banki.hu/incoming (almenos algunos megas...)
+- enviar la URL exacta del fichero, y lo descargaremos pronto.
+
+Por favor no pidas caracteristicas ya listadas en el archivo TODO.
+
+Troubleshooting:
+~~~~~~~~~~~~~~~~
+1. Por favor, leete la documentacion antes de nada.
+
+2. Si tienes problemas de compilacion:
+   - Si eres un programador experimentado, intenta arreglarlo y envianos el
+     parche
+   - si gcc da algun problema sobre inttypes.h, intenta copiar DOCS/inttypes.h
+     en el directorio donde se dio el error. (o actualiza glibc a 2.1/mas nuevo)
+   - si gcc da algun problema sobre video_out_gl.c, prueba desactivar el soporte
+     OpenGL: ./configure --disable-gl (quizas tengas las cabezeras/librerias rotas)
+   - Si eres un usuario, envianos un informe del bug (mira arriba, incluyendo:
+      - salida de ./configure
+      - salida de make dep y make
+      - config.h y el archivo config.mak
+   Nota: muchos usuarios han informado que SSE no se detectava en los P3.
+   Las versiones estables del kernel 2.2.x NO soportan SSE, asi que no podras usarlo
+   sin parches o usando un kernel 2.4.x. (o prueba el 2.2.19 o superiores)
+
+3. Si tienes algun problema con el reproductor, por favor ejecutalo con la opcion
+   -v y envia la salida con informacion detallada del problema.
+   - No puedo reproducir AVIs: comprueba que el codec (.DLL y .ACM) estan instalados
+     en /usr/lib/win32/ y que estan en minusculas (divxc32.dll en lugar de DivXc32.DLL)
+   
+4. Si tienes un problema concreto de un archivo por favor ejecuta con -v -v -v
+   (nivel de debug 3) y envia la salida completa a la lista. Quizas te pidamos
+   el fichero.
+   - si sale con error de segmento un AVI con audio MP3, prueba con -afm 1 o -afm 4
+   - si sigue sin ir prueba con -nosound
+
+5. If you have problem with display driver, please first check the list above,
+   many of them isn't yet capable to AVI playing, and some of them are
+   untested and/or unfinished.
+
+6. Si tienes problemas de velocidad comprueba primero lo siguiente:
+   - No usas OpenGL basado en software unicamente. (DRI desactivado o no instalado,
+     librerias conflictivas o hardware no soportado, etc...)
+   - Has configurado correctamente los registros MTRR (;uchas de las nuevas tarjetas
+     funcionan realmente lentas sin el MTTR. esto NO lo hacen las X 3.3.x!.
+   - Que tienes una maquina rapida (no digas que no ves un DivX en un 386)
+   - Prueba con la salida Nula (-vo null) y mira el uso de CPU (primer porcentaje)
+
+7. problemas relacionados con el sonido:
+   - Quizas tu tarjeta no soporta audui a 48kHz y la pelicula lo requiere.
+   - prueba con la opcion -noalsa option
+   - Audio retrasado con algun AVI: prueba con -bps -nobps.
+   - Si tienes problemas de audio retrasado prueba con: -delay o -abs.
+     puedes especificar el tamaño del buffer de la tarjeta de sonido en bytes
+     con la opcion -abs, o especificar el retraso de audio (decimal positivo/negativo)
+     con -delay
+     por ejemplo:  mplayer -alsa -delay -0.75 test.avi
+                   mplayer -abs 65536 -delay 0.3 test.mpg
+   - para probar AVI's con audio VBR MP3 usa la opcion -mc 0 !
+   - sin ningun sonido: comprueba que tienes un dispositivo OSS funcionando (/dev/dsp),
+     y que no esta siendo usado por algun otro programa como 'esd' o 'xmms'.
+
+8. Codecs no soportados (Ficheros AVI):
+   Quizas añadamos soporte para tu pelicula pero necesitamos lo siguiente:
+   - el DLL del codec: buscalo en tu directorio WINDOWS. En el archivo SYSTEM.INI
+     debe haber una lista de los codecs instalados (vids.<nombrecodec>=archivoDLL)
+   - Un archivo de muestra creado con ese codec.
+
+Informacion de contacto:
+~~~~~~~~~~~~~~~~~~~~~~~
+Pagina del proyecto:  http://mplayer.sourceforge.net
+
+Listas de correo:
+~~~~~~~~~~~~~~~~
+Hay tres listas de correo publicas en MPlayer. La suscripcion se puede procesar
+en las direcciones siguientes:
+
+- MPlayer-users
+	http://lists.sourceforge.net/lists/listinfo/mplayer-users
+- MPlayer-announce
+	http://lists.sourceforge.net/lists/listinfo/mplayer-announce
+- MPlayer-Matrox-users
+	http://lists.sourceforge.net/mailman/listinfo/mplayer-matrox
+- MPlayer CVS-log:
+	http://lists.sourceforge.net/lists/listinfo/mplayer-cvslog
+
+Aviso estandar:
+~~~~~~~~~~~~~~
+Usa este programa bajo tu propio riesgo. Podria haber problemas o situaciones
+no idoneas que podrian dañar tu sistema, o tus ojos. Procede con cautela, y
+aunque suena grotesco, no somos responsables de ningun daño causado por este 
+programa.
