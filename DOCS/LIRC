@@ -20,7 +20,7 @@ o MPlayer and LIRC
  on startup. If an error occurs it will tell you. If it doens't tell you 
  anything about LIRC there's no support compiled in. That's it :-)
 
- The application name for MPlayer is - oh wonder - mplayer.
+ The application name for MPlayer is - oh wonder - mplayer_lirc.
  It understands the following commands:
 
  PAUSE  - pause playing. Any other keystroke will continue replay.
@@ -39,7 +39,7 @@ o MPlayer and LIRC
 
  begin
   remote = CU-SX070
-  prog = mplayer
+  prog = mplayer_lirc
   button = Tape_Play
   repeat = 1
   config = FFWD
@@ -47,7 +47,7 @@ o MPlayer and LIRC
 
  begin
   remote = CU-SX070
-  prog = mplayer
+  prog = mplayer_lirc
   button = Tape_Stop
   config = QUIT
  end
