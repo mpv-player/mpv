@@ -23,7 +23,8 @@
 
 #include <ggi/ggi.h>
 
-#define GGI_OST
+#undef GGI_OST
+#define GII_BUGGY_KEYCODES
 
 LIBVO_EXTERN (ggi)
 
@@ -60,9 +61,7 @@ static int ggi_setmode(uint32_t d_width, uint32_t d_height, int d_depth, int for
 	GT_AUTO,		/* graphtype */
 	{ GGI_AUTO, GGI_AUTO }	/* dots per pixel */
     };
-#ifdef GGI_OST
     ggi_color pal[256];
-#endif
 
     mode.visible.x = mode.virt.x = d_width;
     mode.visible.y = mode.virt.y = d_height;
@@ -354,7 +353,158 @@ static void uninit(void)
     ggiExit();
 }
 
+#include "../linux/keycodes.h"
 static void check_events(void)
 {
-/* add ggiPollEvent stuff */
+    struct timeval tv = {0, 0};
+    ggi_event event;
+    ggi_event_mask mask;
+
+    if ((mask = ggiEventPoll(ggi_vis, emAll, &tv)))
+    if (ggiEventRead(ggi_vis, &event, emAll) != 0)
+    {
+//	printf("type: %4x, origin: %4x, sym: %4x, label: %4x, button=%4x\n",
+//	    event.any.origin, event.any.type, event.key.sym, event.key.label, event.key.button);
+
+	if ((event.any.type == evKeyPress) ||
+	    (event.any.type == evKeyRepeat) ||
+	    (event.any.type == evKeyRelease))
+	{
+#ifdef GII_BUGGY_KEYCODES
+	    switch(event.key.button)
+	    {
+		case 0x37:
+		    mplayer_put_key('*');
+		    break;
+		case 0x68:
+		    mplayer_put_key('/');
+		    break;
+		case 0x4e:
+		    mplayer_put_key('+');
+		    break;
+		case 0x4a:
+		    mplayer_put_key('-');
+		    break;
+		case 0x18:
+		    mplayer_put_key('o');
+		    break;
+		case 0x22:
+		    mplayer_put_key('g');
+		    break;
+		case 0x15:
+		    mplayer_put_key('z');
+		    break;
+		case 0x2d:
+		    mplayer_put_key('x');
+		    break;
+		case 0x32:
+		    mplayer_put_key('m');
+		    break;
+		case 0x20:
+		    mplayer_put_key('d');
+		    break;
+		case 0x10:
+		    mplayer_put_key('q');
+		    break;
+		case 0x39:
+		    mplayer_put_key('p');
+		    break;
+		case 0x5a:
+		    mplayer_put_key(KEY_UP);
+		    break;
+		case 0x60:
+		    mplayer_put_key(KEY_DOWN);
+		    break;
+		case 0x5c:
+		    mplayer_put_key(KEY_LEFT);
+		    break;
+		case 0x5e:
+		    mplayer_put_key(KEY_RIGHT);
+		    break;
+		case 0x5b:
+		    mplayer_put_key(KEY_PAGE_UP);
+		    break;
+		case 0x61:
+		    mplayer_put_key(KEY_PAGE_DOWN);
+		    break;
+		default:
+		    break;
+	    }
+#else
+	    switch(event.key.button)
+	    {
+		case GIIK_PAsterisk: /* PStar */
+		case GIIUC_Asterisk:
+		    mplayer_put_key('*');
+		    break;
+		case GIIK_PSlash:
+		case GIIUC_Slash:
+		    mplayer_put_key('/');
+		    break;
+		case GIIK_PPlus:
+		case GIIUC_Plus:
+		    mplayer_put_key('+');
+		    break;
+		case GIIK_PMinus:
+		case GIIUC_Minus:
+		    mplayer_put_key('-');
+		    break;
+		case GIIUC_o:
+		case GIIUC_O:
+		    mplayer_put_key('o');
+		    break;
+		case GIIUC_g:
+		case GIIUC_G:
+		    mplayer_put_key('g');
+		    break;
+		case GIIUC_z:
+		case GIIUC_Z:
+		    mplayer_put_key('z');
+		    break;
+		case GIIUC_x:
+		case GIIUC_X:
+		    mplayer_put_key('x');
+		    break;
+		case GIIUC_m:
+		case GIIUC_M:
+		    mplayer_put_key('m');
+		    break;
+		case GIIUC_d:
+		case GIIUC_D:
+		    mplayer_put_key('d');
+		    break;
+		case GIIUC_q:
+		case GIIUC_Q:
+		    mplayer_put_key('q');
+		    break;
+		case GIIUC_Space:
+		case GIIUC_p:
+		case GIIUC_P:
+		    mplayer_put_key('p');
+		    break;
+		case GIIK_Up:
+		    mplayer_put_key(KEY_UP);
+		    break;
+		case GIIK_Down:
+		    mplayer_put_key(KEY_DOWN);
+		    break;
+		case GIIK_Left:
+		    mplayer_put_key(KEY_LEFT);
+		    break;
+		case GIIK_Right:
+		    mplayer_put_key(KEY_RIGHT);
+		    break;
+		case GIIK_PageUp:
+		    mplayer_put_key(KEY_PAGE_UP);
+		    break;
+		case GIIK_PageDown:
+		    mplayer_put_key(KEY_PAGE_DOWN);
+		    break;
+		default:
+		    break;
+	    }
+#endif
+	}
+    }
+    return;
 }
