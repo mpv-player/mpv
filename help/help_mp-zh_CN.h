@@ -1,4 +1,6 @@
-// synced with help_mp-en.h 20030404
+// Translated by Lu Ran <hephooey@fastmail.fm>
+// Synced with help_mp-en.h 20030709
+
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
