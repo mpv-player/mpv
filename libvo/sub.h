@@ -50,7 +50,7 @@ static char * osd_names[]={
     "Contrast",
     "Saturation",
     "Volume",
-    "Brightnes",
+    "Brightness",
     "Hue"
 };
 static char * osd_names_short[] ={ "", "|>", "||", "[]", "<<" , ">>", "", "", "", "", "", ""};
