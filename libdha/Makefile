@@ -17,7 +17,9 @@ OBJS=$(SRCS:.c=.o)
 CFLAGS  = $(OPTFLAGS) -fPIC -I. -I.. -Wall -W
 LIBS = 
 ifeq ($(TARGET_OS),OpenBSD)
+ifeq ($(TARGET_ARCH_X86),yes)
 LIBS += -li386
+endif
 endif
 
 .SUFFIXES: .c .o
