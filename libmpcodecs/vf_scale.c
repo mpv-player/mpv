@@ -129,6 +129,7 @@ static int config(struct vf_instance_s* vf,
     // calculate the missing parameters:
     switch(best) {
     case IMGFMT_YUY2:		/* YUY2 needs w rounded to 2 */
+    case IMGFMT_UYVY:
 	if(vf->priv->w==-3) vf->priv->w=(vf->priv->h*width/height+1)&~1; else
 	if(vf->priv->w==-2) vf->priv->w=(vf->priv->h*d_width/d_height+1)&~1;
 	if(vf->priv->w<0) vf->priv->w=width; else
@@ -137,6 +138,8 @@ static int config(struct vf_instance_s* vf,
 	if(vf->priv->h==-2) vf->priv->h=vf->priv->w*d_height/d_width;
 	break;
     case IMGFMT_YV12:		/* YV12 needs w & h rounded to 2 */
+    case IMGFMT_I420:
+    case IMGFMT_IYUV:
 	if(vf->priv->w==-3) vf->priv->w=(vf->priv->h*width/height+1)&~1; else
 	if(vf->priv->w==-2) vf->priv->w=(vf->priv->h*d_width/d_height+1)&~1;
 	if(vf->priv->w<0) vf->priv->w=width; else
