@@ -1721,15 +1721,10 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 
 <formalpara>
 <title>Using your DVB card for watching Digital TV (DVB input module)</title>
-<para>
-  First you need to pass the <literal>dvb_shutdown_timeout=0</literal>
-  parameter to the kernel module <filename>dvb-core</filename>, or
-  <application>MPlayer</application> will die after 10 seconds.
-</para>
 </formalpara>
 
 <para>
-  You should also have the programs <command>scan</command> and
+  You should have the programs <command>scan</command> and
   <command>szap/tzap/czap</command> installed; they are all included in
   the drivers package.
 </para>
