@@ -37,7 +37,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-sub\ <filename> ]
 .RB [ \-subfps\ <rate> ]
 .RB [ \-subdelay\ <seconds> ]
-.RB [ \-z\ <0-8> ]
+.RB [ \-z\ <0-9> ]
 .RB [ \-idx ]
 .RB [ \-forceidx ]
 .RB [ \-nodshow ]
@@ -507,10 +507,10 @@ of some bad AVI files)
 .B \-include configfile
 specify config file to be parsed after the default
 .TP
-.B \-z\ <0-8>
+.B \-z\ <0-9>
 specifies compression level for PNG output
           0 : no compression
-          8 : max compression
+          9 : max compression
 .TP
 .B \-idx
 rebuilds INDEX of the AVI. Useful with broken downloads, or badly
