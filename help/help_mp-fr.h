@@ -1,4 +1,4 @@
-// sync'ed with help_mp-en.h 1.87
+// sync'ed with help_mp-en.h 1.89
 // Updates & fixes by pl <p_l@gmx.fr> & n.le gaillart <n@tourmentine.com>
 // Original translation by Firebird <firebird@chez.com>
 
@@ -127,6 +127,7 @@ static char help_text[]=
 #define MSGTR_AvailableVideoCodecs "Codecs vidéo disponibles:\n"
 #define MSGTR_AvailableAudioFm "\nFamilles/pilotes de codecs audio disponibles (inclus à la compilation):\n"
 #define MSGTR_AvailableVideoFm "\nFamilles/pilotes de codecs vidéo disponibles (inclus à la compilation):\n"
+#define MSGTR_AvailableFsType "modes plein écran disponibles:\n"
 #define MSGTR_UsingRTCTiming "Utilisation de la synchronisation matérielle par RTC (%ldHz)\n"
 #define MSGTR_CannotReadVideoProperties "Vidéo: ne pas pas lire les propriétés\n"
 #define MSGTR_NoStreamFound "Pas de flux trouvé\n"
