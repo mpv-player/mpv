@@ -130,3 +130,11 @@ A: Check DOCS/TODO , if it doesn't contain your codec, contact us.
 Q: What about DGA driver? I can't find it!!!
 A: You have to run ./configure --enable-dga and then recompile.
    It will be autodetected in the near future.
+
+Q: Ok, -vo help shows DGA driver, but it is babbling about permissions!
+   Help me!
+A: Make the mplayer binary SUID root. Become root and type the following:
+   'chown root /usr/local/bin/mplayer'
+   'chmod 750 /usr/local/bin/mplayer'
+   'chmod +s /usr/local/bin/mplayer'
+   Now it works as a simple user, too.
