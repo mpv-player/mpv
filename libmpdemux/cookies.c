@@ -41,7 +41,6 @@ static char *col_dup(const char *src)
 {
     char *dst;
     int length = 0;
-    char *p, *end;
 
     while (src[length] > 31)
 	length++;
@@ -177,14 +176,18 @@ static struct cookie_list_type *load_cookies()
 	return list;
 
 
-    asprintf(&buf, "%s/.mozilla/default", homedir);
+    buf = malloc(strlen(homedir) + sizeof("/.mozilla/default") + 1);
+    sprintf(buf, "%s/.mozilla/default", homedir);
     dir = opendir(buf);
     free(buf);
 
     if (dir) {
 	while ((ent = readdir(dir)) != NULL) {
 	    if ((ent->d_name)[0] != '.') {
-		asprintf(&buf, "%s/.mozilla/default/%s/cookies.txt",
+		buf = malloc(strlen(getenv("HOME")) + 
+                             sizeof("/.mozilla/default/") + 
+                             strlen(ent->d_name) + sizeof("cookies.txt") + 1);
+		sprintf(buf, "%s/.mozilla/default/%s/cookies.txt",
 			 getenv("HOME"), ent->d_name);
 		list = load_cookies_from(buf, list);
 		free(buf);
@@ -193,7 +196,8 @@ static struct cookie_list_type *load_cookies()
 	closedir(dir);
     }
 
-    asprintf(&buf, "%s/.netscape/cookies.txt", homedir);
+    buf = malloc(strlen(homedir) + sizeof("/.netscape/cookies.txt") + 1);
+    sprintf(buf, "%s/.netscape/cookies.txt", homedir);
     list = load_cookies_from(buf, list);
     free(buf);
 
@@ -250,16 +254,19 @@ cookies_set(HTTP_header_t * http_hdr, const char *domain, const char *url)
     }
 
 
-    asprintf(&buf, "Cookie:");
+    buf = strdup("Cookie:");
 
     for (i = 0; i < found_cookies; i++) {
 	char *nbuf;
 
-	asprintf(&nbuf, "%s %s=%s;", buf, cookies[i]->name,
+	nbuf = malloc(strlen(buf) + strlen(" ") + strlen(cookies[i]->name) +
+		    strlen("=") + strlen(cookies[i]->value) + strlen(";") + 1);
+	sprintf(nbuf, "%s %s=%s;", buf, cookies[i]->name,
 		 cookies[i]->value);
 	free(buf);
 	buf = nbuf;
     }
+
     if (found_cookies)
 	http_set_field(http_hdr, buf);
     else
