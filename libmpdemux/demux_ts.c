@@ -1967,7 +1967,18 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 				}
 				else
 				{
+					uint8_t *lang = NULL;
 					tss->type = es->type;
+					
+					if(is_audio)
+						lang = pid_lang_from_pmt(priv, es->pid);
+					if(lang != NULL)
+					{
+						memcpy(es->lang, lang, 3);
+						es->lang[3] = 0;
+					}
+					else
+						es->lang[0] = 0;
 					return 1;
 				}
 			}
