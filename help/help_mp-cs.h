@@ -35,7 +35,7 @@ static char help_text[]=
 " -fps x -srate y volba pro zmìnu video (x fps) a audio (y Hz) frekvence\n"
 " -pp <quality>   aktivace postprocesing filtru (0-4 pro DivX, 0-63 pro mpegy)\n"
 " -nobps          pou¾ít alternativní A-V synchronizaèní metodu pro Avi soubory\n"
-" -framedrop      povolit zahazování snímkù (pro pomale stroje)\n"
+" -framedrop      povolit zahazování snímkù (pro pomalé stroje)\n"
 " -wid <window id> pou¾ít existující okno pro výstup videa\n"
 "\n"
 "Klávesy:\n"
@@ -45,7 +45,8 @@ static char help_text[]=
 " p nebo mezerník pauza pøi pøehrávání (pokraèování stiskem kterékoliv klávesy)\n"
 " q nebo ESC      konec pøehrávání a ukonèení programu\n"
 " + nebo -        upravit zpo¾dìní zvuku v krocích +/- 0.1 sekundy\n"
-" o               cyklická zmìna re¾imu OSD:  nic / pozice / pozice+èas\n"
+" o               cyklická zmìna re¾imu OSD: nic / pozice / pozice a èas/\n"
+"                                            / pozice, procenta a celková délka\n"
 " * nebo /        pøidat nebo ubrat hlasitost (stiskem 'm' výbìr master/pcm)\n"
 " z nebo x        upravit zpo¾dìní titulkù v krocích +/- 0.1 sekundy\n"
 "\n"
@@ -55,7 +56,7 @@ static char help_text[]=
 
 // ========================= MPlayer messages ===========================
 
-// mplayer.c: 
+// mplayer.c:
 
 #define MSGTR_Exiting "\nKonèím... (%s)\n"
 #define MSGTR_Exit_quit "Konec"
@@ -578,6 +579,11 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_CDROMDevice "Zaøízení CD-ROM:"
 #define MSGTR_PREFERENCES_DVDDevice "Zaøízení DVD:"
 #define MSGTR_PREFERENCES_FPS "Snímková rychlost (FPS):"
+
+#define MSGTR_ABOUT_UHU "Vývoj GUI je sponzorován firmou UHU Linux\n"
+#define MSGTR_ABOUT_CoreTeam "   Hlavní vývojáøi programu MPlayer:\n"
+#define MSGTR_ABOUT_AdditionalCoders "   Dal¹í vývojáøi:\n"
+#define MSGTR_ABOUT_MainTesters "   Hlavní testeøi:\n"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Kritická chyba ..."
