@@ -26,16 +26,43 @@ static const unsigned long long mask24hl  __attribute__((aligned(8))) = 0x0000FF
 
 //Note: we have C, X86-nommx, MMX, MMX2, 3DNOW version therse no 3DNOW+MMX2 one
 //Plain C versions
+#if !defined (HAVE_MMX) || defined (RUNTIME_CPUDETECT)
+#define COMPILE_C
+#endif
+
+#ifdef CAN_COMPILE_X86_ASM
+
+#if (defined (HAVE_MMX) && !defined (HAVE_3DNOW) && !defined (HAVE_MMX2)) || defined (RUNTIME_CPUDETECT)
+#define COMPILE_MMX
+#endif
+
+#if defined (HAVE_MMX2) || defined (RUNTIME_CPUDETECT)
+#define COMPILE_MMX2
+#endif
+
+#if (defined (HAVE_3DNOW) && !defined (HAVE_MMX2)) || defined (RUNTIME_CPUDETECT)
+#define COMPILE_3DNOW
+#endif
+#endif //CAN_COMPILE_X86_ASM
+
+#undef HAVE_MMX
+#undef HAVE_MMX2
+#undef HAVE_3DNOW
+#undef ARCH_X86
+
+#ifdef COMPILE_C
 #undef HAVE_MMX
 #undef HAVE_MMX2
 #undef HAVE_3DNOW
 #undef ARCH_X86
 #define RENAME(a) a ## _C
 #include "osd_template.c"
+#endif
 
 #ifdef CAN_COMPILE_X86_ASM
 
 //X86 noMMX versions
+#ifdef COMPILE_C
 #undef RENAME
 #undef HAVE_MMX
 #undef HAVE_MMX2
@@ -43,8 +70,10 @@ static const unsigned long long mask24hl  __attribute__((aligned(8))) = 0x0000FF
 #define ARCH_X86
 #define RENAME(a) a ## _X86
 #include "osd_template.c"
+#endif
 
 //MMX versions
+#ifdef COMPILE_MMX
 #undef RENAME
 #define HAVE_MMX
 #undef HAVE_MMX2
@@ -52,8 +81,10 @@ static const unsigned long long mask24hl  __attribute__((aligned(8))) = 0x0000FF
 #define ARCH_X86
 #define RENAME(a) a ## _MMX
 #include "osd_template.c"
+#endif
 
 //MMX2 versions
+#ifdef COMPILE_MMX2
 #undef RENAME
 #define HAVE_MMX
 #define HAVE_MMX2
@@ -61,8 +92,10 @@ static const unsigned long long mask24hl  __attribute__((aligned(8))) = 0x0000FF
 #define ARCH_X86
 #define RENAME(a) a ## _MMX2
 #include "osd_template.c"
+#endif
 
 //3DNOW versions
+#ifdef COMPILE_3DNOW
 #undef RENAME
 #define HAVE_MMX
 #undef HAVE_MMX2
@@ -70,10 +103,12 @@ static const unsigned long long mask24hl  __attribute__((aligned(8))) = 0x0000FF
 #define ARCH_X86
 #define RENAME(a) a ## _3DNow
 #include "osd_template.c"
+#endif
 
 #endif //CAN_COMPILE_X86_ASM
 
 void vo_draw_alpha_yv12(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
+#ifdef RUNTIME_CPUDETECT
 #ifdef CAN_COMPILE_X86_ASM
 	// ordered per speed fasterst first
 	if(gCpuCaps.hasMMX2)
@@ -87,9 +122,23 @@ void vo_draw_alpha_yv12(int w,int h, unsigned char* src, unsigned char *srca, in
 #else
 		vo_draw_alpha_yv12_C(w, h, src, srca, srcstride, dstbase, dststride);
 #endif
+#else //RUNTIME_CPUDETECT
+#ifdef HAVE_MMX2
+		vo_draw_alpha_yv12_MMX2(w, h, src, srca, srcstride, dstbase, dststride);
+#elif defined (HAVE_3DNOW)
+		vo_draw_alpha_yv12_3DNow(w, h, src, srca, srcstride, dstbase, dststride);
+#elif defined (HAVE_MMX)
+		vo_draw_alpha_yv12_MMX(w, h, src, srca, srcstride, dstbase, dststride);
+#elif defined (ARCH_X86)
+		vo_draw_alpha_yv12_X86(w, h, src, srca, srcstride, dstbase, dststride);
+#else
+		vo_draw_alpha_yv12_C(w, h, src, srca, srcstride, dstbase, dststride);
+#endif
+#endif //!RUNTIME_CPUDETECT
 }
 
 void vo_draw_alpha_yuy2(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
+#ifdef RUNTIME_CPUDETECT
 #ifdef CAN_COMPILE_X86_ASM
 	// ordered per speed fasterst first
 	if(gCpuCaps.hasMMX2)
@@ -103,9 +152,23 @@ void vo_draw_alpha_yuy2(int w,int h, unsigned char* src, unsigned char *srca, in
 #else
 		vo_draw_alpha_yuy2_C(w, h, src, srca, srcstride, dstbase, dststride);
 #endif
+#else //RUNTIME_CPUDETECT
+#ifdef HAVE_MMX2
+		vo_draw_alpha_yuy2_MMX2(w, h, src, srca, srcstride, dstbase, dststride);
+#elif defined (HAVE_3DNOW)
+		vo_draw_alpha_yuy2_3DNow(w, h, src, srca, srcstride, dstbase, dststride);
+#elif defined (HAVE_MMX)
+		vo_draw_alpha_yuy2_MMX(w, h, src, srca, srcstride, dstbase, dststride);
+#elif defined (ARCH_X86)
+		vo_draw_alpha_yuy2_X86(w, h, src, srca, srcstride, dstbase, dststride);
+#else
+		vo_draw_alpha_yuy2_C(w, h, src, srca, srcstride, dstbase, dststride);
+#endif
+#endif //!RUNTIME_CPUDETECT
 }
 
 void vo_draw_alpha_rgb24(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
+#ifdef RUNTIME_CPUDETECT
 #ifdef CAN_COMPILE_X86_ASM
 	// ordered per speed fasterst first
 	if(gCpuCaps.hasMMX2)
@@ -119,9 +182,23 @@ void vo_draw_alpha_rgb24(int w,int h, unsigned char* src, unsigned char *srca, i
 #else
 		vo_draw_alpha_rgb24_C(w, h, src, srca, srcstride, dstbase, dststride);
 #endif
+#else //RUNTIME_CPUDETECT
+#ifdef HAVE_MMX2
+		vo_draw_alpha_rgb24_MMX2(w, h, src, srca, srcstride, dstbase, dststride);
+#elif defined (HAVE_3DNOW)
+		vo_draw_alpha_rgb24_3DNow(w, h, src, srca, srcstride, dstbase, dststride);
+#elif defined (HAVE_MMX)
+		vo_draw_alpha_rgb24_MMX(w, h, src, srca, srcstride, dstbase, dststride);
+#elif defined (ARCH_X86)
+		vo_draw_alpha_rgb24_X86(w, h, src, srca, srcstride, dstbase, dststride);
+#else
+		vo_draw_alpha_rgb24_C(w, h, src, srca, srcstride, dstbase, dststride);
+#endif
+#endif //!RUNTIME_CPUDETECT
 }
 
 void vo_draw_alpha_rgb32(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
+#ifdef RUNTIME_CPUDETECT
 #ifdef CAN_COMPILE_X86_ASM
 	// ordered per speed fasterst first
 	if(gCpuCaps.hasMMX2)
@@ -135,6 +212,19 @@ void vo_draw_alpha_rgb32(int w,int h, unsigned char* src, unsigned char *srca, i
 #else
 		vo_draw_alpha_rgb32_C(w, h, src, srca, srcstride, dstbase, dststride);
 #endif
+#else //RUNTIME_CPUDETECT
+#ifdef HAVE_MMX2
+		vo_draw_alpha_rgb32_MMX2(w, h, src, srca, srcstride, dstbase, dststride);
+#elif defined (HAVE_3DNOW)
+		vo_draw_alpha_rgb32_3DNow(w, h, src, srca, srcstride, dstbase, dststride);
+#elif defined (HAVE_MMX)
+		vo_draw_alpha_rgb32_MMX(w, h, src, srca, srcstride, dstbase, dststride);
+#elif defined (ARCH_X86)
+		vo_draw_alpha_rgb32_X86(w, h, src, srca, srcstride, dstbase, dststride);
+#else
+		vo_draw_alpha_rgb32_C(w, h, src, srca, srcstride, dstbase, dststride);
+#endif
+#endif //!RUNTIME_CPUDETECT
 }
 
 #ifdef FAST_OSD_TABLE
@@ -153,6 +243,7 @@ void vo_draw_alpha_init(){
 //FIXME the optimized stuff is a lie for 15/16bpp as they arent optimized yet
 	if(verbose)
 	{
+#ifdef RUNTIME_CPUDETECT
 #ifdef CAN_COMPILE_X86_ASM
 		// ordered per speed fasterst first
 		if(gCpuCaps.hasMMX2)
@@ -166,6 +257,19 @@ void vo_draw_alpha_init(){
 #else
 			printf("Using Unoptimized OnScreenDisplay\n");
 #endif
+#else //RUNTIME_CPUDETECT
+#ifdef HAVE_MMX2
+			printf("Using MMX (with tiny bit MMX2) Optimized OnScreenDisplay\n");
+#elif defined (HAVE_3DNOW)
+			printf("Using MMX (with tiny bit 3DNow) Optimized OnScreenDisplay\n");
+#elif defined (HAVE_MMX)
+			printf("Using MMX Optimized OnScreenDisplay\n");
+#elif defined (ARCH_X86)
+			printf("Using X86 Optimized OnScreenDisplay\n");
+#else
+			printf("Using Unoptimized OnScreenDisplay\n");
+#endif
+#endif //!RUNTIME_CPUDETECT
 	}
 }
 
