@@ -1,7 +1,7 @@
 // Translated by:  Jiri Svoboda, jiri.svoboda@seznam.cz
 // Updated by:     Tomas Blaha,  tomas.blaha at kapsa.club.cz
 //                 Jiri Heryan,  technik at domotech.cz
-// Synced to 1.157
+// Synced to 1.162
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -208,6 +208,9 @@ static char help_text[]=
 #define MSGTR_WritingAVIHeader "Zapisuji AVI hlavièku...\n"
 #define MSGTR_DuplicateFrames "\n%d opakujících se snímkù!\n"
 #define MSGTR_SkipFrame "\nPøeskakuji snímek!\n"
+#define MSGTR_ResolutionDoesntMatch "\nNový video soubor má jiné rozli¹ení ne¾ jeho pøedchùdce.\n"
+#define MSGTR_FrameCopyFileMismatch "\nV¹echny videosoubory musí mít shodné fps, rozli¹ení a kodek pro -ovc copy.\n"
+#define MSGTR_AudioCopyFileMismatch "\nV¹echny soubory musí pou¾ívat identický audio kodek a formát pro -oac copy.\n"
 #define MSGTR_ErrorWritingFile "%s: chyba pøi zápisu souboru.\n"
 #define MSGTR_WritingAVIIndex "\nZapisuji AVI index...\n"
 #define MSGTR_FixupAVIHeader "Opravuji AVI hlavièku...\n"
@@ -329,6 +332,9 @@ static char help_text[]=
 "mw-us => 40kbps/mono        voice => 56kbps/mono\n"\
 "fm/radio/tape => 112kbps    hifi => 160kbps\n"\
 "cd => 192kbps               studio => 256kbps"
+#define MSGTR_LameCantInit "Nelze nastavit volby pro LAME, ovìøte datový_tok/vzorkovou_rychlost,"\
+"nìkteré velmi nízké datové toky (<32) vy¾adují ni¾¹í vzorkovou rychlost (napø. -srate 8000)."\
+"Pokud v¹e sel¾e, zkuste pøednastavené."
 #define MSGTR_ConfigfileError "chyba konfiguraèního souboru"
 #define MSGTR_ErrorParsingCommandLine "chyba pøi zpracovávání pøíkazového øádku"
 #define MSGTR_VideoStreamRequired "Videoproud je povinný!\n"
@@ -727,6 +733,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_DoNotPlaySound "Nepøehrávat zvuk"
 #define MSGTR_PREFERENCES_NormalizeSound "Normalizovat zvuk"
 #define MSGTR_PREFERENCES_EnEqualizer "Aktivovat ekvalizér"
+#define MSGTR_PREFERENCES_SoftwareMixer "Aktivovat softwarový smì¹ovaè"
 #define MSGTR_PREFERENCES_ExtraStereo "Aktivovat extra stereo"
 #define MSGTR_PREFERENCES_Coefficient "Koeficient:"
 #define MSGTR_PREFERENCES_AudioDelay "Zpo¾dìní zvuku"
@@ -925,7 +932,7 @@ static char help_text[]=
 #define MSGTR_AO_OSS_ChanNotFound "[AO OSS] audio_setup: Mixer zvukové karty nemá kanál '%s', pou¾ívám výchozí.\n"
 #define MSGTR_AO_OSS_CantOpenDev "[AO OSS] audio_setup: Nelze otevøít zvukové zaøízení %s: %s\n"
 #define MSGTR_AO_OSS_CantMakeFd "[AO OSS] audio_setup: Nelze provést blokování souborového deskriptoru: %s\n"
-#define MSGTR_AO_OSS_CantSetAC3 "[AO OSS] Zvukové zaøízení %s nelze nastavit na výstup AC3, zkou¹ím S16...\n"
+#define MSGTR_AO_OSS_CantSet "[AO OSS] Zvukové zaøízení %s nelze nastavit na výstup %s, zkou¹ím %s...\n"
 #define MSGTR_AO_OSS_CantSetChans "[AO OSS] audio_setup: Selhalo nastavení výstupního zvukového zaøízení na %d kanálù.\n"
 #define MSGTR_AO_OSS_CantUseGetospace "[AO OSS] audio_setup: Ovladaè nepodporuje SNDCTL_DSP_GETOSPACE :-(\n"
 #define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   ***  Ovladaè Va¹í zvukové karty NEPODPORUJE select()  ***\n Pøekompilujte MPlayer s #undef HAVE_AUDIO_SELECT v config.h !\n\n"
