@@ -121,8 +121,6 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	    int type=info->current_picture->flags&PIC_MASK_CODING_TYPE;
 	    mp_image_t* mpi;
 	    
-	    printf("\mlibmpeg2: TYPE=%d\n",type);
-
 	    drop_frame = framedrop && (mpeg2dec->decoder.coding_type == B_TYPE);
             drop_frame |= framedrop>=2; // hard drop
             if (drop_frame) {
