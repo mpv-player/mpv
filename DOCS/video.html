@@ -69,8 +69,9 @@
   stepping 0] doesn't support MTRR, but stepping 12's do ('<CODE>cat
   /proc/cpuinfo</CODE>' to check it').</P>
 
+<H4><A NAME="normal">2.3.1.2 Video outputs for traditional video cards</A></H4>
 
-<H4><A NAME="xv">2.3.1.2 Xv</A></H4>
+<H4><A NAME="xv">2.3.1.2.1 Xv</A></H4>
 
 <P>Under XFree86 4.0.2 or newer, you can use your card's hardware YUV routines
   using the XVideo extension. This is what the option '-vo xv' uses. Also,
@@ -130,7 +131,7 @@
 </UL>
 
 
-<H5><A NAME="xv_3dfx">2.3.1.2.1 3dfx cards</A></H5>
+<H4><A NAME="xv_3dfx">2.3.1.2.1.1 3dfx cards</A></H4>
 
 <P>Older 3dfx drivers were known to have problems with XVideo acceleration, it
   didn't support either YUY2 or YV12, and so. Verify that you have XFree86
@@ -143,7 +144,7 @@
   <A HREF="#tdfxfb">tdfxfb</A> section.</P>
 
 
-<H5><A NAME="xv_s3">2.3.1.2.2 S3 cards</A></H5>
+<H4><A NAME="xv_s3">2.3.1.2.1.2 S3 cards</A></H4>
 
 <P>S3 Savage3D's should work fine, but for Savage4, use XFree86 version 4.0.3
   or greater (in case of image problems, try 16bpp). As for S3 Virge.. there is
@@ -155,7 +156,7 @@
   driver.</P>
 
 
-<H5><A NAME="xv_nvidia">2.3.1.2.3 nVidia cards</A></H5>
+<H4><A NAME="xv_nvidia">2.3.1.2.1.3 nVidia cards</A></H4>
 
 <P>nVidia isn't a very good choice under Linux (according to nVidia, this is
   <A HREF="users_against_developers.html#nvidia">not true</A>).. You'll have to
@@ -170,7 +171,7 @@
   Complain to nVidia.</P>
 
 
-<H5><A NAME="xv_ati">2.3.1.2.4 ATI cards</A></H5>
+<H4><A NAME="xv_ati">2.3.1.2.1.4 ATI cards</A></H4>
 
 <UL>
   <LI>The <A HREF="http://gatos.sourceforge.net">GATOS driver</A> (which you
@@ -185,7 +186,7 @@
 </UL>
 
 
-<H5><A NAME="xv_neomagic">2.3.1.2.5 NeoMagic cards</A></H5>
+<H4><A NAME="xv_neomagic">2.3.1.2.1.5 NeoMagic cards</A></H4>
 
 <P>These cards can be found in many laptops. Unfortunately, the driver in
   X 4.2.0 can't do Xv, but we have a modified, Xv-capable driver for you.
@@ -202,24 +203,24 @@
   EndSection</P>
 
 
-<H5><A NAME="xv_trident">2.3.1.2.6 Trident cards</A></H5>
+<H4><A NAME="xv_trident">2.3.1.2.1.6 Trident cards</A></H4>
 
 <P>If you want to use xv with a trident card, provided that it doesn't work
   with 4.1.0, install XFree 4.2.0. 4.2.0 adds support for fullscreen xv
   support with the Cyberblade XP card.</P>
 
 
-<H4><A NAME="dga">2.3.1.3 DGA</A></H4>
+<H4><A NAME="dga">2.3.1.2.2 DGA</A></H4>
 
 
-<H5><A NAME="dga_summary">2.3.1.3.1 Summary</A></H5>
+<H4><A NAME="dga_summary">2.3.1.2.2.1 Summary</A></H4>
 
 <P>This document tries to explain in some words what DGA is in general and what
   the DGA video output driver for MPlayer can do (and what it
   can't).</P>
 
 
-<H5><A NAME="dga_whatis">2.3.1.3.2 What is DGA</A></H5>
+<H4><A NAME="dga_whatis">2.3.1.2.2.2 What is DGA</A></H4>
 
 <P>DGA is short for Direct Graphics Access and is a means for a program to
   bypass the X-Server and directly modifying the framebuffer memory.
@@ -246,7 +247,7 @@
   driver that controls this chip. So it does not work on every system ...</P>
 
 
-<H5><A NAME="dga_installation">2.3.1.3.3 Installing DGA support for MPlayer</A></H5>
+<H4><A NAME="dga_installation">2.3.1.2.2.3 Installing DGA support for MPlayer</A></H4>
 
 <P>First make sure X loads the DGA extension, see in /var/log/XFree86.0.log:</P>
 
@@ -283,7 +284,7 @@
   much faster.</P>
 
 
-<H5><A NAME="dga_resolution">2.3.1.3.4 Resolution switching</A></H5>
+<H4><A NAME="dga_resolution">2.3.1.2.2.4 Resolution switching</A></H4>
 
 <P>The DGA driver allows for switching the resolution of the output signal. 
   This avoids the need for doing (slow) software scaling and at the same time
@@ -301,7 +302,7 @@
 <P>See appendix A for some sample modeline definitions.</P>
 
 
-<H5><A NAME="dga_mplayer">2.3.1.3.5 DGA &amp; MPlayer</A></H5>
+<H4><A NAME="dga_mplayer">2.3.1.2.2.5 DGA &amp; MPlayer</A></H4>
 
 <P>DGA is used in two places with MPlayer: The SDL driver can be made to
   make use of it (-vo sdl:dga) and within the DGA driver (-vo dga). The above
@@ -309,7 +310,7 @@
   driver for MPlayer works.</P>
 
 
-<H5><A NAME="dga_features">2.3.1.3.6 Features of the DGA driver</A></H5>
+<H4><A NAME="dga_features">2.3.1.2.2.6 Features of the DGA driver</A></H4>
 
 <P>The DGA driver is invoked by specifying -vo dga at the command line.
   The default behavior is to switch to a resolution matching the original
@@ -348,7 +349,7 @@
   CPU time!) depending on the implementation of DGA for your hardware.</P>
 
 
-<H5><A NAME="dga_speed">2.3.1.3.7 Speed issues</A></H5>
+<H4><A NAME="dga_speed">2.3.1.2.2.7 Speed issues</A></H4>
 
 <P>Generally spoken, DGA framebuffer access should be at least as fast as using
   the X11 driver with the additional benefit of getting a fullscreen image. 
@@ -373,7 +374,7 @@
   CPUs might work at 400 MHZ and above.</P>
 
 
-<H5><A NAME="dga_bugs">2.3.1.3.8 Known bugs</A></H5>
+<H4><A NAME="dga_bugs">2.3.1.2.2.8 Known bugs</A></H4>
 
 <P>Well, according to some developers of XFree, DGA is quite a beast. They
   tell you better not to use it. Its implementation is not always flawless
@@ -396,7 +397,7 @@
 </UL>
 
 
-<H5><A NAME="dga_future">2.3.1.3.9 Future work</A></H5>
+<H4><A NAME="dga_future">2.3.1.2.2.9 Future work</A></H4>
 
 <UL>
   <LI>use of the new X11 render interface for OSD</LI>
@@ -404,7 +405,7 @@
 </UL>
 
 
-<H5><A NAME="dga_modelines">2.3.1.3.A Some modelines</A></H5>
+<H4><A NAME="dga_modelines">2.3.1.2.2.A Some modelines</A></H4>
 
 <PRE>
   Section "Modes"
@@ -423,7 +424,7 @@
   module.</P>
 
 
-<H5><A NAME="dga_bug_reports">2.3.1.3.B Bug Reports</A></H5>
+<H4><A NAME="dga_bug_reports">2.3.1.2.2.B Bug Reports</A></H4>
 
 <P>If you experience troubles with the DGA driver please feel free to file
   a bug report to me (e-mail address below). Please start MPlayer with
@@ -437,7 +438,7 @@
 <P><I>Acki (acki@acki-netz.de, www.acki-netz.de)</I></P>
 
 
-<H4><A NAME="sdl">2.3.1.4 SDL</A></H4>
+<H4><A NAME="sdl">2.3.1.2.3 SDL</A></H4>
 
 <P>SDL (Simple Directmedia Layer) is basically a unified video/audio
   interface. Programs that use it know only about SDL, and not about what video
@@ -489,7 +490,7 @@
 </UL>
 
 
-<H4><A NAME="svgalib">2.3.1.5 SVGAlib</A></H4>
+<H4><A NAME="svgalib">2.3.1.2.4 SVGAlib</A></H4>
 
 <H4>Installation</H4>
 
@@ -525,7 +526,7 @@
   &nbsp;&nbsp;<CODE>-noaspect</CODE></P>
 
 
-<H4><A NAME="fbdev">2.3.1.6 Framebuffer output (FBdev)</A></H4>
+<H4><A NAME="fbdev">2.3.1.2.5 Framebuffer output (FBdev)</A></H4>
 
 <P>Whether to build the FBdev target is autodetected during ./configure .
   Read the framebuffer documentation in the kernel sources
@@ -534,8 +535,8 @@
 <P>If your card doesn't support VBE 2.0 standard (older ISA/PCI
   cards, such as S3 Trio64), only VBE 1.2 (or older?):
   Well, VESAfb is still available, but you'll have to load SciTech Display
-  Doctor (formerly UniVBE) before booting Linux.  Use a DOS boot disk or
-  whatever.  And don't forget to register your UniVBE ;))</P>
+  Doctor (formerly UniVBE) before booting Linux. Use a DOS boot disk or
+  whatever. And don't forget to register your UniVBE ;))</P>
 
 <P>The FBdev output takes some additional parameters above the others:</P>
 
@@ -578,10 +579,10 @@
   and don't ask for it, since it's not an MPlayer limitation.</P>
 
 
-<H4><A NAME="mga_vid">2.3.1.7 Matrox framebuffer (mga_vid)</A></H4>
+<H4><A NAME="mga_vid">2.3.1.2.6 Matrox framebuffer (mga_vid)</A></H4>
 
 <P>This section is about the Matrox G200/G400/G450/G550 BES (Back-End Scaler)
-  support, the mga_vid kernel driver.  It's active developed by me (A'rpi), and
+  support, the mga_vid kernel driver. It's active developed by me (A'rpi), and
   it has hardware VSYNC support with triple buffering. It works on both
   framebuffer console and under X.</P>
 
@@ -621,14 +622,14 @@
   change: <CODE>echo "brightness=120" &gt; /dev/mga_vid</CODE></P>
 
 
-<H4><A NAME="tdfxfb">2.3.1.8 3dfx YUV support (tdfxfb)</A></H4>
+<H4><A NAME="tdfxfb">2.3.1.2.7 3dfx YUV support (tdfxfb)</A></H4>
 
 <P>This driver uses the kernel's tdfx framebuffer driver to play movies with
   YUV acceleration. You'll need a kernel with tdfxfb support, and recompile
   with <CODE>./configure --enable-tdfxfb</CODE></P>
 
 
-<H4><A NAME="opengl">2.3.1.9 OpenGL output</A></H4>
+<H4><A NAME="opengl">2.3.1.2.8 OpenGL output</A></H4>
 
 <P>MPlayer supports displaying movies using OpenGL, but if your
   platform/driver supports xv as should be the case on a PC with Linux, use xv
@@ -646,7 +647,7 @@
   for download and installation instructions.</P>
 
 
-<H4><A NAME="aalib">2.3.1.10 AAlib - text mode displaying</A></H4>
+<H4><A NAME="aalib">2.3.1.2.9 AAlib - text mode displaying</A></H4>
 
 <P><B>AAlib</B> is a library for displaying graphics in text mode, using powerful
   ASCII renderer. There are LOTS of programs already supporting it, like Doom,
@@ -704,13 +705,13 @@
 
 <P>Playing on terminal you'll get better speed and quality using the Linux
   driver, not curses (<CODE>-aadriver linux</CODE>). But therefore you need write access on
-  <CODE>/dev/vcsa&lt;terminal&gt;</CODE>.  That isn't autodetected by aalib, but vo_aa tries
-  to find the best mode.  See
+  <CODE>/dev/vcsa&lt;terminal&gt;</CODE>. That isn't autodetected by aalib, but vo_aa tries
+  to find the best mode. See
   <A HREF="http://aa-project.sourceforge.net/tune/">http://aa-project.sourceforge.net/tune/</A>
   for further tuning issues.</P>
 
 
-<H4><A NAME="vesa">2.3.1.11 VESA - output to VESA BIOS</A></H4>
+<H4><A NAME="vesa">2.3.1.2.10 VESA - output to VESA BIOS</A></H4>
 
 <P>This driver was designed and introduced as a <B>generic driver</B> for any
   video card which has VESA VBE 2.0+ compatible BIOS. Another advantage of this
@@ -800,7 +801,7 @@
 </UL>
 
 
-<H4><A NAME="x11">2.3.1.12 X11</A></H4>
+<H4><A NAME="x11">2.3.1.2.11 X11</A></H4>
 
 <P>Avoid if possible. Outputs to X11 (uses shared memory extension), with no
   hardware acceleration at all. Supports (MMX/3DNow/SSE accelerated, but still
@@ -830,7 +831,7 @@
   video modes.</P>
 
 
-<H4><A NAME="vidix">2.3.1.13 VIDIX</A></H4>
+<H4><A NAME="vidix">2.3.1.2.12 VIDIX</A></H4>
 
 <P>VIDIX is the abbreviation for <B>VID</B>eo <B>I</B>nterface for
   *ni<B>X</B>.<BR>
@@ -850,7 +851,7 @@
 
 <UL>
   <LI>You can use standalone video output driver: <CODE>-vo xvidix</CODE><BR>
-    This driver was developed as X11's front end to VIDIX technology.  It
+    This driver was developed as X11's front end to VIDIX technology. It
     requires X server and can work only under X server. Note that, as it
     directly accesses the hardware and circumvents the X driver, pixmaps
     cached in the graphics card's memory may be corrupted. You can prevent
@@ -938,11 +939,11 @@ recognize <CODE>:vidix</CODE> subdevice.
     brightness.</DD>
 
   <DT><CODE>-saturation</CODE></DT>
-  <DD>Adjust <B>SATURATION</B> of video output.  You can get grayscale
+  <DD>Adjust <B>SATURATION</B> of video output. You can get grayscale
     output with this option.</DD>
 
   <DT><CODE>-hue</CODE></DT>
-  <DD>Adjust <B>HUE</B> of video signal.  You can get colored negative
+  <DD>Adjust <B>HUE</B> of video signal. You can get colored negative
     of image with this option.</DD>
 
   <DT><CODE>-red_intensity</CODE></DT>
@@ -970,95 +971,47 @@ recognize <CODE>:vidix</CODE> subdevice.
   filename.vob</CODE></P>
 
 
-<H4><A NAME="zr">2.3.1.14 Zr</A></H4>
+<H4><A NAME="directfb">2.3.1.2.13 DirectFB</A></H4>
 
-<P>This is a display-driver (<CODE>-vo zr</CODE>) for a number of MJPEG
-  capture/playback cards (tested for DC10+ and Buz, and it should work for the
-  LML33 and the original DC10). The driver works by encoding the frame to jpeg 
-  and then sending it to the card. For the jpeg encoding <B>libavcodec</B> is
-  used, and required. With the special <I>cinerama</I> mode, you can watch
-  movies in true wide screen provided that you have two beamers and two
-  MJPEG cards. Depending on resolution and quality settings, this driver
-  may require a lot of CPU power, remember to specify <CODE>-framedrop</CODE>
-  if your machine is too slow. Note: My AMD K6-2 350MHz is (with <CODE>
-  -framedrop</CODE>) quite adequate for watching VCD sized material and
-  downscaled movies.
+<P><I>"DirectFB is a graphics library which was designed with embedded systems in
+  mind. It offers maximum hardware accelerated performance at a minimum of
+  resource usage and overhead."</I> - quoted from
+  <A HREF="http://www.directfb.org">http://www.directfb.org</A>.</P>
 
-<P>This driver talks to the kernel driver available at
-  <A HREF="http://mjpeg.sourceforge.net">http://mjpeg.sourceforge.net</A>, so
-  you must get it working first. The presence of an MJPEG card is autodetected
-  by the configure script, if autodetection fails, force detection with
+<P>I'll exclude DirectFB features from this section.</P>
 
-<PRE>
-  ./configure --enable-zr
-</PRE>
+<P>Though MPlayer is not supported as a "video provider" in DirectFB, this
+  output driver will enable video playback through DirectFB. It will -
+  of course - be accelerated, on my Matrox G400 DirectFB's speed was the
+  same as XVideo.</P>
 
-<P>The output can be controlled by several options, a long description of the
-  options can be found in the man page, a short list of options can be
-  viewed by running
-
-<PRE>
-  mplayer -zrhelp
-</PRE>
-
-<P>Things like scaling and the OSD (on screen display) are not handled by
-  this driver but can be done using the video filters. For example, 
-  suppose that you have a movie with a resolution of <CODE>512x272</CODE> and
-  you want to view it fullscreen on your DC10+. There are three main
-  possibilities, you may scale the movie to a width of <CODE>768</CODE>,
-  <CODE>384</CODE> or <CODE>192</CODE>. For performance and quality reasons,
-  I would choose to scale the movie to <CODE>384x204</CODE> using the fast
-  bilinear software scaler. The commandline is
-
-<PRE>
-  mplayer -vo zr -sws 0 -vop scale=384:204 movie.avi
-</PRE>
-
-<P>Cropping can be done by the <CODE>crop</CODE> filter and by
-  this driver itself. Suppose that a movie is too wide for display on your
-  Buz and that you want to use <CODE>-zrcrop</CODE> to make the movie less
-  wide, the you would issue the following command
-
-<PRE>
-  mplayer -vo zr -zrcrop 720x320+80+0 benhur.avi
-</PRE>
-
-  if you want to use the <CODE>crop</CODE> filter, you would do
-
-<PRE>
-  mplayer -vo zr -vop crop=720:320:80:0 benhur.avi
-</PRE>
-
-<P>Extra occurances of <CODE>-zrcrop</CODE> invoke <I>cinerama</I> mode, i.e.
-  you can distribute the movie over several TV's or beamers to create a larger
-  screen. Suppose you have two beamers. The left one is connected to your Buz
-  at <CODE>/dev/video1</CODE> and the right one is connected to your DC10+ at
-  <CODE>/dev/video0</CODE>. The movie has a resolution of <CODE>704x288</CODE>.
-  Suppose also that you want the right beamer in black and white and that
-  the right beamer should have jpeg frames at quality <CODE>10</CODE>,
-  then you would issue the following command
-
-<PRE>
-  mplayer -vo zr -zrdev /dev/video0 -zrcrop 352x288+352+0 -zrxdoff 0 -zrbw \
-          -zrcrop 352x288+0+0 -zrdev /dev/video1 -zrquality 10 movie.avi
-</PRE>
-
-<P>You see that the options appearing before the second <CODE>-zrcrop</CODE>
-  only apply to the DC10+ and that the options after the second 
-  <CODE>-zrcrop</CODE> apply to the Buz. The maximum number of MJPEG cards
-  participating in <I>cinerama</I> is four, so you can buid a <CODE>2x2</CODE>
-  vidiwall.</P>
-
-<P>Finally an important remark: Do not start or stop XawTV on the playback
-  device during playback, it will crash your computer. It is, however, fine to
-  <B>FIRST</B> start XawTV, <B>THEN</B> start MPlayer, wait for
-  MPlayer to finish and <B>THEN</B> stop XawTV.</P>
+<P>Always try to use the newest version of DirectFB. You can use DirectFB
+  options on the command line, using the <CODE>-dfbopts</CODE> option.
+  Layer selection can be done by the subdevice method, e.g.: <CODE>-vo
+  directfb:2</CODE> (layer -1 is default: autodetect)</P>
 
 
-<H4><A NAME="dvb">2.3.1.15 DVB</A></H4>
+<H4><A NAME="dfbmga">2.3.1.2.14 DirectFB/Matrox (dfbmga)</A></H4>
+
+<P>Please read the <A HREF=#directfb>main DirectFB section</A> for general
+  informations.</P>
+
+<P>This video output driver will enable CRTC2 (on the second head) on the
+  Matrox G400 card, displaying video <B>independently</B> of the first head.</P>
+
+<P>Instructions on how to make it work can be found here:
+  <A HREF="http://www.sci.fi/~syrjala/directfb/readme.txt">http://www.sci.fi/~syrjala/directfb/readme.txt</A></P>
+
+<P>Note: we haven't been able to make this work, but others did. Anyway,
+  porting of the CRTC2 code to <B>mga_vid</B> is underway.</P>
+
+
+<H4><A NAME="mpegdec">2.3.1.3 MPEG decoders</A></H4>
+
+<H4><A NAME="dvb">2.3.1.3.1 DVB</A></H4>
 
 <P>MPlayer supports cards with the Siemens DVB chipset from vendors like
-  Siemens, Technotrend, Galaxis or Hauppauge.  The latest DVB drivers are
+  Siemens, Technotrend, Galaxis or Hauppauge. The latest DVB drivers are
   available from the <A HREF="http://www.linuxtv.org">Linux TV site</A>. If you
   want to do software transcoding you should have at least a 1GHz CPU.</P>
 
@@ -1158,7 +1111,12 @@ for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
   decompression).</P>
 
 
-<H4><A NAME="dxr3">2.3.1.16 DXR3/Hollywood+</A></H4>
+<H4><A NAME="dxr2">2.3.1.3.2 DXR2</A></H4>
+
+<P>TODO: somebody please fill this section with information.</P>
+
+
+<H4><A NAME="dxr3">2.3.1.3.3 DXR3/Hollywood+</A></H4>
 
 <P>MPlayer supports hardware accelerated playback with the Creative DXR3
   and Sigma Designs Hollywood Plus cards. These cards both use the em8300 MPEG
@@ -1233,7 +1191,15 @@ for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
     reason for this is unknown to us. If you set it to somewhere between 25 and
     27 the picture becomes stable. For now all we can do is accept this for a
     fact.</DD>
-  
+
+  <DT><CODE>-vop lavc,expand=-1:-1:-1:-1:1</CODE></DT>
+  <DD>Altough the DXR3 driver can put some OSD onto the MPEG1/2/4 video,
+    it has much lower quality than MPlayer's traditional OSD, and has several
+    refresh problems as well. The command line above will firstly convert the
+    input video to MPEG4 (this is mandatory, sorry), then apply an expand
+    filter which won't expand anything (-1: default), but apply the normal OSD
+    onto the picture (that's what the "1" at the end does).</DD>
+
   <DT><CODE>-ac hwac3</CODE></DT>
   <DD>The em8300 supports playing back AC3 audio (surround sound) through the
     digital audio output of the card. See the <CODE>-ao oss</CODE> option
@@ -1253,10 +1219,103 @@ for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
   that it will need more CPU power, and you might loose some picture quality.</P>
 
 
-<H4><A NAME="tv-out">2.3.1.A TV-out support</A></H4>
+<H4><A NAME="other">2.3.1.4 Other visualization hardware</A></H4>
+
+<H4><A NAME="zr">2.3.1.4.1 Zr</A></H4>
+
+<P>This is a display-driver (<CODE>-vo zr</CODE>) for a number of MJPEG
+  capture/playback cards (tested for DC10+ and Buz, and it should work for the
+  LML33 and the original DC10). The driver works by encoding the frame to jpeg 
+  and then sending it to the card. For the jpeg encoding <B>libavcodec</B> is
+  used, and required. With the special <I>cinerama</I> mode, you can watch
+  movies in true wide screen provided that you have two beamers and two
+  MJPEG cards. Depending on resolution and quality settings, this driver
+  may require a lot of CPU power, remember to specify <CODE>-framedrop</CODE>
+  if your machine is too slow. Note: My AMD K6-2 350MHz is (with <CODE>
+  -framedrop</CODE>) quite adequate for watching VCD sized material and
+  downscaled movies.
+
+<P>This driver talks to the kernel driver available at
+  <A HREF="http://mjpeg.sourceforge.net">http://mjpeg.sourceforge.net</A>, so
+  you must get it working first. The presence of an MJPEG card is autodetected
+  by the configure script, if autodetection fails, force detection with
+
+<PRE>
+  ./configure --enable-zr
+</PRE>
+
+<P>The output can be controlled by several options, a long description of the
+  options can be found in the man page, a short list of options can be
+  viewed by running
+
+<PRE>
+  mplayer -zrhelp
+</PRE>
+
+<P>Things like scaling and the OSD (on screen display) are not handled by
+  this driver but can be done using the video filters. For example, 
+  suppose that you have a movie with a resolution of <CODE>512x272</CODE> and
+  you want to view it fullscreen on your DC10+. There are three main
+  possibilities, you may scale the movie to a width of <CODE>768</CODE>,
+  <CODE>384</CODE> or <CODE>192</CODE>. For performance and quality reasons,
+  I would choose to scale the movie to <CODE>384x204</CODE> using the fast
+  bilinear software scaler. The commandline is
+
+<PRE>
+  mplayer -vo zr -sws 0 -vop scale=384:204 movie.avi
+</PRE>
+
+<P>Cropping can be done by the <CODE>crop</CODE> filter and by
+  this driver itself. Suppose that a movie is too wide for display on your
+  Buz and that you want to use <CODE>-zrcrop</CODE> to make the movie less
+  wide, the you would issue the following command
+
+<PRE>
+  mplayer -vo zr -zrcrop 720x320+80+0 benhur.avi
+</PRE>
+
+  if you want to use the <CODE>crop</CODE> filter, you would do
+
+<PRE>
+  mplayer -vo zr -vop crop=720:320:80:0 benhur.avi
+</PRE>
+
+<P>Extra occurances of <CODE>-zrcrop</CODE> invoke <I>cinerama</I> mode, i.e.
+  you can distribute the movie over several TV's or beamers to create a larger
+  screen. Suppose you have two beamers. The left one is connected to your Buz
+  at <CODE>/dev/video1</CODE> and the right one is connected to your DC10+ at
+  <CODE>/dev/video0</CODE>. The movie has a resolution of <CODE>704x288</CODE>.
+  Suppose also that you want the right beamer in black and white and that
+  the right beamer should have jpeg frames at quality <CODE>10</CODE>,
+  then you would issue the following command
+
+<PRE>
+  mplayer -vo zr -zrdev /dev/video0 -zrcrop 352x288+352+0 -zrxdoff 0 -zrbw \
+          -zrcrop 352x288+0+0 -zrdev /dev/video1 -zrquality 10 movie.avi
+</PRE>
+
+<P>You see that the options appearing before the second <CODE>-zrcrop</CODE>
+  only apply to the DC10+ and that the options after the second 
+  <CODE>-zrcrop</CODE> apply to the Buz. The maximum number of MJPEG cards
+  participating in <I>cinerama</I> is four, so you can buid a <CODE>2x2</CODE>
+  vidiwall.</P>
+
+<P>Finally an important remark: Do not start or stop XawTV on the playback
+  device during playback, it will crash your computer. It is, however, fine to
+  <B>FIRST</B> start XawTV, <B>THEN</B> start MPlayer, wait for
+  MPlayer to finish and <B>THEN</B> stop XawTV.</P>
 
 
-<H5><A NAME="tv-out_matrox">2.3.1.A.1 Matrox G400 cards</A></H5>
+<H4><A NAME="blinken">2.3.1.4.2 Blinkenlights</A></H4>
+
+<P>This driver is capable of playback using the Blinkenlights UPD protocol.
+  If you don't know what Blinkenlights is, you don't need this driver.</P>
+
+
+<H4><A NAME="tv-out">2.3.1.5 TV-out support</A></H4>
+
+
+<H4><A NAME="tv-out_matrox">2.3.1.5.1 Matrox G400 cards</A></H4>
 
 <P>Under Linux you have 2 methods to get G400 TV out working:</P>
 
@@ -1319,8 +1378,17 @@ for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
   </LI>
 </UL>
 
+<H4>Building a Matrox TV-out cable</H4>
 
-<H5><A NAME="tv-out_matrox_g450">2.3.1.A.2 Matrox G450/G550 cards</A></H5>
+<P>This information was contributed by <B>Rácz Balázs</B>. Of course
+  no one takes any responsibility, nor guarantee for any damage caused
+  by this documentation.</P>
+
+<P>The CRTC2 connector's fourth pin is the composite video signal. The ground
+  are the sixth, seventh and eighth pins.</P>
+
+
+<H4><A NAME="tv-out_matrox_g450">2.3.1.5.2 Matrox G450/G550 cards</A></H4>
 
 <P>TV output support for these cards has only been recently introduced, and is
   not yet in the mainstream kernel. Currently the <B>mga_vid</B> module
@@ -1339,7 +1407,7 @@ for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
   <A HREF="http://www3.sympatico.ca/dan.eriksen/matrox_tvout/">http://www3.sympatico.ca/dan.eriksen/matrox_tvout/</A></P>
 
 
-<H5><A NAME="tv-out_ati">2.3.1.A.3 ATI cards</A></H5>
+<H4><A NAME="tv-out_ati">2.3.1.5.3 ATI cards</A></H4>
 
 <H5>PREAMBLE</H5>
 
@@ -1366,7 +1434,7 @@ for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
   POST procedure.</P>
 
 
-<H5><A NAME="tv-out_voodoo">2.3.1.A.4 Voodoo 3</A></H5>
+<H4><A NAME="tv-out_voodoo">2.3.1.5.4 Voodoo 3</A></H4>
 
 <P>Check <A HREF="http://www.iki.fi/too/tvout-voodoo3-3000-xfree">this URL</A>.</P>
 

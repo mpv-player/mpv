@@ -12,6 +12,8 @@
 
 <H3><A NAME="audio">2.3.2 Audio output devices</A></H3>
 
+<H4><A NAME="sync">2.3.2.1 Description of MPlayer's A/V sync method</A></H4>
+
 <P>MPlayer's audio interface is called <I>libao2</I>. It currently
   contains these drivers:</P>
 
@@ -26,8 +28,24 @@
   <TR><TD></TD><TD VALIGN=top>arts</TD><TD></TD><TD>native ARTS driver (mostly for KDE users)</TD></TR>
 </TABLE>
 
-<P>Fact is, Linux sound card drivers have compatibility problems.
-  It <B>may</B> take a while to find your optimal settings.</P>
+<P>Fact is, Linux sound card drivers have compatibility problems. The cause
+  is that MPlayer uses a feature of normally coded audio drivers to maintain
+  audio/video sync. Regrettably, some driver authors don't care of this
+  function: it isn't needed for playing MP3s, or sound effects.</P>
+
+<P>Other media players like aviplay or xine possibly work out-of-the-box with
+  these drivers because they use "simple" methods with internal timing. A note:
+  time showed their methods aren't AS efficient as MPlayer's.</P>
+
+<P>Using MPlayer with a correctly written audio driver won't ever give you A/V
+  desyncs related to the audio, only with very badly created files (check the
+  documentation for workarounds!).</P>
+
+<P>If you happen to have a bad audio driver, try the <CODE>-autosync</CODE>
+  option, it should sort out your problems. See the man page for detailed
+  information.</P>
+
+<P>Some notes:</P>
 
 <UL>
   <LI>If you have an OSS driver, first try <CODE>-ao oss</CODE> (this is the
@@ -40,17 +58,13 @@
     <CODE>-ao alsa5</CODE> , since ALSA 0.5 has buggy OSS emulation code, and
     will <B>crash MPlayer</B> with a message like this:<BR>
     <CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE></LI>
-  <LI>If you have ALSA version 0.9 you may choose between <CODE>-ao oss</CODE>
-    and <CODE>-ao sdl</CODE>. You can also use <CODE>-ao alsa9</CODE>. It
-    works, but there may be problems like lost sync and disappearing
-    audio.</LI>
 </UL>
 
-<P>On <B>Solaris/FreeBSD</B> systems, use the SUN audio driver with the
+<P>On <B>Solaris</B>, use the SUN audio driver with the
   <CODE>-ao sun</CODE> option, otherwise neither video nor audio will work.</P>
 
 
-<H4><A NAME="experiences">2.3.2.1 Sound Card experiences, recommendations</A></H4>
+<H4><A NAME="experiences">2.3.2.2 Sound Card experiences, recommendations</A></H4>
 
 <TABLE BORDER=0 WIDTH="100%">
   <TR><TD COLSPAN=3><B>VIA onboard chipset (via82cxxx) 48kHz only</B></TD></TR>
@@ -136,7 +150,7 @@
   and your sound card(s) worked together.</P>
 
 
-<H4><A NAME="plugins">2.3.2.2 Audio plugins</A></H4>
+<H4><A NAME="plugins">2.3.2.3 Audio plugins</A></H4>
 
 <P>MPlayer has support for audio plugins. Audio plugins can be used for
   changing the properties of the audio data before the sound reaches the sound
@@ -164,7 +178,7 @@
 <P>Currently audio plugins can not be used in MEncoder.</P>
 
 
-<H5><A NAME="resample">2.3.2.2.1 Up/Downsampling</A></H5>
+<H5><A NAME="resample">2.3.2.3.1 Up/Downsampling</A></H5>
 
 <P>MPlayer fully supports up/downsampling of the sound. This plugin can
   be used if you have a fixed frequency sound card or if you are
@@ -184,7 +198,7 @@
   in addition to audio distortion.</P>
 
 
-<H5><A NAME="surround_decoding">2.3.2.2.2 Surround Sound decoding</A></H5>
+<H5><A NAME="surround_decoding">2.3.2.3.2 Surround Sound decoding</A></H5>
 
 <P>MPlayer has an audio plugin that can decode matrix encoded
   surround sound. Dolby Surround is an example of a matrix encoded format.
@@ -195,7 +209,7 @@
   &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=surround</CODE></P>
 
 
-<H5><A NAME="format">2.3.2.2.3 Sample format converter</A></H5>
+<H5><A NAME="format">2.3.2.3.3 Sample format converter</A></H5>
                                                                                
 <P>If your sound card driver does not support signed 16bit <CODE>int</CODE> data type, 
   this plugin can
@@ -210,7 +224,7 @@
   list=format:format=&lt;required output format&gt;</CODE></P>
 
 
-<H5><A NAME="delay">2.3.2.2.4 Delay</A></H5>
+<H5><A NAME="delay">2.3.2.3.4 Delay</A></H5>
 
 <P>This plugin delays the sound and is intended as an example of how to develop
   new plugins. It can not be used for anything useful from a users perspective
@@ -218,7 +232,7 @@
   plugin unless you are a developer.</P>
 
 
-<H5><A NAME="volume">2.3.2.2.5 Software volume control</A></H5>
+<H5><A NAME="volume">2.3.2.3.5 Software volume control</A></H5>
 
 <P>This plugin is a software replacement for the volume control, and
   can be used on machines with a broken mixer device. It can also be
@@ -251,7 +265,7 @@
   list=volume:softclip</CODE></P>
 
 
-<H5><A NAME="extrastereo">2.3.2.2.6 Extrastereo</A></H5>
+<H5><A NAME="extrastereo">2.3.2.3.6 Extrastereo</A></H5>
 
 <P>This plugin (linearly) increases the difference between left and right
   channels (like the XMMS extrastereo plugin) which gives some sort of "live"
@@ -267,7 +281,7 @@
   -1.0, left and right channels will be swapped.</P>
 
 
-<H5><A NAME="normalizer">2.3.2.2.7 Volume normalizer</A></H5>
+<H5><A NAME="normalizer">2.3.2.3.7 Volume normalizer</A></H5>
 
 <P>This plugin maximizes the volume without distorting the sound.</P>
 

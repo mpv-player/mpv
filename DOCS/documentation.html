@@ -63,6 +63,7 @@
               <LI><A HREF="formats.html#roq">2.1.1.11 RoQ files</A></LI>
               <LI><A HREF="formats.html#ogg">2.1.1.12 OGG/OGM files</A></LI>
               <LI><A HREF="formats.html#sdp">2.1.1.13 SDP files</A></LI>
+              <LI><A HREF="formats.html#pva">2.1.1.14 PVA files</A></LI>
             </UL>
           </LI>
           <LI><A HREF="formats.html#audio_formats">2.1.2 Audio formats</A>
@@ -72,6 +73,7 @@
               <LI><A HREF="formats.html#ogg_vorbis">2.1.2.3 OGG/OGM files (Vorbis)</A></LI>
               <LI><A HREF="formats.html#wma">2.1.2.4 WMA/ASF files</A></LI>
               <LI><A HREF="formats.html#mp4">2.1.2.5 MP4 files</A></LI>
+              <LI><A HREF="formats.html#cdda">2.1.2.6 CD audio</A></LI>
             </UL>
           </LI>
         </UL>
@@ -114,65 +116,79 @@
           <LI><A HREF="video.html">2.3.1 Video output devices</A>
             <UL>
               <LI><A HREF="video.html#mtrr">2.3.1.1 Setting up MTRR</A></LI>
-              <LI><A HREF="video.html#xv">2.3.1.2 Xv</A>
+              <LI><A HREF="video.html#normal">2.3.1.2 Video outputs for traditional video cards</A></LI>
+              <UL>
+                <LI><A HREF="video.html#xv">2.3.1.2.1 Xv</A>
+                  <UL>
+                    <LI><A HREF="video.html#xv_3dfx">2.3.1.2.1.1 3dfx cards</A></LI>
+                    <LI><A HREF="video.html#xv_s3">2.3.1.2.1.2 S3 cards</A></LI>
+                    <LI><A HREF="video.html#xv_nvidia">2.3.1.2.1.3 nVidia cards</A></LI>
+                    <LI><A HREF="video.html#xv_ati">2.3.1.2.1.4 ATI cards</A></LI>
+                    <LI><A HREF="video.html#xv_neomagic">2.3.1.2.1.5 NeoMagic cards</A></LI>
+                    <LI><A HREF="video.html#xv_trident">2.3.1.2.1.6 Trident cards</A></LI>
+                  </UL>
+                </LI>
+                <LI><A HREF="video.html#dga">2.3.1.2.2 DGA</A>
+                  <UL>
+                    <LI><A HREF="video.html#dga_summary">2.3.1.2.2.1 Summary</A></LI>
+                    <LI><A HREF="video.html#dga_whatis">2.3.1.2.2.2 What is DGA</A></LI>
+                    <LI><A HREF="video.html#dga_installation">2.3.1.2.2.3 Installing DGA support for MPlayer</A></LI>
+                    <LI><A HREF="video.html#dga_resolution">2.3.1.2.2.4 Resolution switching</A></LI>
+                    <LI><A HREF="video.html#dga_mplayer">2.3.1.2.2.5 DGA &amp; MPlayer</A></LI>
+                    <LI><A HREF="video.html#dga_features">2.3.1.2.2.6 Features of the DGA driver</A></LI>
+                    <LI><A HREF="video.html#dga_speed">2.3.1.2.2.7 Speed issues</A></LI>
+                    <LI><A HREF="video.html#dga_bugs">2.3.1.2.2.8 Known bugs</A></LI>
+                    <LI><A HREF="video.html#dga_future">2.3.1.2.2.9 Future work</A></LI>
+                    <LI><A HREF="video.html#dga_modelines">2.3.1.2.2.A Some modelines</A></LI>
+                    <LI><A HREF="video.html#dga_bug_reports">2.3.1.2.2.B Bug Reports</A></LI>
+                  </UL>
+                </LI>
+                <LI><A HREF="video.html#sdl">2.3.1.2.3 SDL</A></LI>
+                <LI><A HREF="video.html#svgalib">2.3.1.2.4 SVGAlib</A></LI>
+                <LI><A HREF="video.html#fbdev">2.3.1.2.5 Framebuffer output (FBdev)</A></LI>
+                <LI><A HREF="video.html#mga_vid">2.3.1.2.6 Matrox framebuffer (mga_vid)</A></LI>
+                <LI><A HREF="video.html#tdfxfb">2.3.1.2.7 3dfx YUV support (tdfxfb)</A></LI>
+                <LI><A HREF="video.html#opengl">2.3.1.2.8 OpenGL output</A></LI>
+                <LI><A HREF="video.html#aalib">2.3.1.2.9 AAlib - text mode displaying</A></LI>
+                <LI><A HREF="video.html#vesa">2.3.1.2.10 VESA - output to VESA BIOS</A></LI>
+                <LI><A HREF="video.html#x11">2.3.1.2.11 X11</A></LI>
+                <LI><A HREF="video.html#vidix">2.3.1.2.12 VIDIX</A></LI>
+                <LI><A HREF="video.html#directfb">2.3.1.2.13 DirectFB</A></LI>
+                <LI><A HREF="video.html#dfbmga">2.3.1.2.14 DirectFB/Matrox (dfbmga)</A></LI>
+              </UL>
+              <LI><A HREF="video.html#mpegdec">2.3.1.3 MPEG decoders</A></LI>
+              <UL>
+                <LI><A HREF="video.html#dvb">2.3.1.3.1 DVB</A></LI>
+                <LI><A HREF="video.html#dxr2">2.3.1.3.2 DXR2</A></LI>
+                <LI><A HREF="video.html#dxr3">2.3.1.3.3 DXR3/Hollywood+</A></LI>
+              </UL>
+              <LI><A HREF="video.html#other">2.3.1.4 Other visualization hardware</A></LI>
+              <UL>
+                <LI><A HREF="video.html#zr">2.3.1.4.1 Zoran JPEG decoders</A></LI>
+                <LI><A HREF="video.html#blinken">2.3.1.4.2 Blinkenlights</A></LI>
+              </UL>
+              <LI><A HREF="video.html#tv-out">2.3.1.5 TV-out support</A>
                 <UL>
-                  <LI><A HREF="video.html#xv_3dfx">2.3.1.2.1 3dfx cards</A></LI>
-                  <LI><A HREF="video.html#xv_s3">2.3.1.2.2 S3 cards</A></LI>
-                  <LI><A HREF="video.html#xv_nvidia">2.3.1.2.3 nVidia cards</A></LI>
-                  <LI><A HREF="video.html#xv_ati">2.3.1.2.4 ATI cards</A></LI>
-                  <LI><A HREF="video.html#xv_neomagic">2.3.1.2.5 NeoMagic cards</A></LI>
-                  <LI><A HREF="video.html#xv_trident">2.3.1.2.6 Trident cards</A></LI>
-                </UL>
-              </LI>
-              <LI><A HREF="video.html#dga">2.3.1.3 DGA</A>
-                <UL>
-                  <LI><A HREF="video.html#dga_summary">2.3.1.3.1 Summary</A></LI>
-                  <LI><A HREF="video.html#dga_whatis">2.3.1.3.2 What is DGA</A></LI>
-                  <LI><A HREF="video.html#dga_installation">2.3.1.3.3 Installing DGA support for MPlayer</A></LI>
-                  <LI><A HREF="video.html#dga_resolution">2.3.1.3.4 Resolution switching</A></LI>
-                  <LI><A HREF="video.html#dga_mplayer">2.3.1.3.5 DGA &amp; MPlayer</A></LI>
-                  <LI><A HREF="video.html#dga_features">2.3.1.3.6 Features of the DGA driver</A></LI>
-                  <LI><A HREF="video.html#dga_speed">2.3.1.3.7 Speed issues</A></LI>
-                  <LI><A HREF="video.html#dga_bugs">2.3.1.3.8 Known bugs</A></LI>
-                  <LI><A HREF="video.html#dga_future">2.3.1.3.9 Future work</A></LI>
-                  <LI><A HREF="video.html#dga_modelines">2.3.1.3.A Some modelines</A></LI>
-                  <LI><A HREF="video.html#dga_bug_reports">2.3.1.3.B Bug Reports</A></LI>
-                </UL>
-              </LI>
-              <LI><A HREF="video.html#sdl">2.3.1.4 SDL</A></LI>
-              <LI><A HREF="video.html#svgalib">2.3.1.5 SVGAlib</A></LI>
-              <LI><A HREF="video.html#fbdev">2.3.1.6 Framebuffer output (FBdev)</A></LI>
-              <LI><A HREF="video.html#mga_vid">2.3.1.7 Matrox framebuffer (mga_vid)</A></LI>
-              <LI><A HREF="video.html#tdfxfb">2.3.1.8 3dfx YUV support (tdfxfb)</A></LI>
-              <LI><A HREF="video.html#opengl">2.3.1.9 OpenGL output</A></LI>
-              <LI><A HREF="video.html#aalib">2.3.1.10 AAlib - text mode displaying</A></LI>
-              <LI><A HREF="video.html#vesa">2.3.1.11 VESA - output to VESA BIOS</A></LI>
-              <LI><A HREF="video.html#x11">2.3.1.12 X11</A></LI>
-              <LI><A HREF="video.html#vidix">2.3.1.13 VIDIX</A></LI>
-              <LI><A HREF="video.html#zr">2.3.1.14 Zr</A></LI>
-              <LI><A HREF="video.html#dvb">2.3.1.15 DVB</A></LI>
-              <LI><A HREF="video.html#dxr3">2.3.1.16 DXR3/Hollywood+</A></LI>
-              <LI><A HREF="video.html#tv-out">2.3.1.A TV-out support</A>
-                <UL>
-                  <LI><A HREF="video.html#tv-out_matrox">2.3.1.A.1 Matrox G400 cards</A></LI>
-                  <LI><A HREF="video.html#tv-out_matrox_g450">2.3.1.A.2 Matrox G450/G550 cards</A></LI>
-                  <LI><A HREF="video.html#tv-out_ati">2.3.1.A.3 ATI cards</A></LI>
-                  <LI><A HREF="video.html#tv-out_voodoo">2.3.1.A.4 Voodoo 3</A></LI>
+                  <LI><A HREF="video.html#tv-out_matrox">2.3.1.5.1 Matrox G400 cards</A></LI>
+                  <LI><A HREF="video.html#tv-out_matrox_g450">2.3.1.5.2 Matrox G450/G550 cards</A></LI>
+                  <LI><A HREF="video.html#tv-out_ati">2.3.1.5.3 ATI cards</A></LI>
+                  <LI><A HREF="video.html#tv-out_voodoo">2.3.1.5.4 Voodoo 3</A></LI>
                 </UL>
               </LI>
             </UL>
           <LI><A HREF="sound.html">2.3.2 Audio output devices</A>
             <UL>
-              <LI><A HREF="sound.html#experiences">2.3.2.1 Sound card experiences, recommendations</A></LI>
-              <LI><A HREF="sound.html#plugins">2.3.2.2 Audio plugins</A>
+              <LI><A HREF="sound.html#sync">2.3.2.1 Description of MPlayer's A/V sync method</A></LI>
+              <LI><A HREF="sound.html#experiences">2.3.2.2 Sound card experiences, recommendations</A></LI>
+              <LI><A HREF="sound.html#plugins">2.3.2.3 Audio plugins</A>
                 <UL>
-                  <LI><A HREF="sound.html#resample">2.3.2.2.1 Up/Downsampling</A></LI>
-                  <LI><A HREF="sound.html#surround_decoding">2.3.2.2.2 Surround Sound decoding</A></LI>
-                  <LI><A HREF="sound.html#format">2.3.2.2.3 Sample format converter</A></LI>
-                  <LI><A HREF="sound.html#delay">2.3.2.2.4 Delay</A></LI>
-                  <LI><A HREF="sound.html#volume">2.3.2.2.5 Software volume control</A></LI>
-                  <LI><A HREF="sound.html#extrastereo">2.3.2.2.6 Extrastereo</A></LI>
-                  <LI><A HREF="sound.html#normalizer">2.3.2.2.7 Volume Normalizer</A></LI>
+                  <LI><A HREF="sound.html#resample">2.3.2.3.1 Up/Downsampling</A></LI>
+                  <LI><A HREF="sound.html#surround_decoding">2.3.2.3.2 Surround Sound decoding</A></LI>
+                  <LI><A HREF="sound.html#format">2.3.2.3.3 Sample format converter</A></LI>
+                  <LI><A HREF="sound.html#delay">2.3.2.3.4 Delay</A></LI>
+                  <LI><A HREF="sound.html#volume">2.3.2.3.5 Software volume control</A></LI>
+                  <LI><A HREF="sound.html#extrastereo">2.3.2.3.6 Extrastereo</A></LI>
+                  <LI><A HREF="sound.html#normalizer">2.3.2.3.7 Volume Normalizer</A></LI>
                 </UL>
               </LI>
             </UL>
@@ -399,6 +415,8 @@
     Mpeg codec was libmpeg2 (mpeg2dec) by Aaron Holtzman &amp; Michel Lespinasse.
     It's great, optimized very fast C code with perfect image quality and
     100% MPEG standard conformance.</LI>
+  <LI><B>MPlayer v0.01:</B> Nov 11, 2000<BR>
+    TODO: A'rpi, would you say some words here? :)</LI>
   <LI><B>MPlayer v0.3-v0.9:</B> Nov 18-Dec 4, 2000<BR>
     It was a pack of two programs: mpg12play v0.95pre6 and my new simple AVI
     player 'avip' based on avifile's Win32 DLL loader.</LI>
@@ -423,7 +441,10 @@
     MOV/VIVO/RM/FLI/NUV fileformats support, native CRAM, Cinepak, ADPCM codecs,
     and support for XAnim's binary codecs; DVD subtitles support, first
     release of MEncoder, TV grabbing, cache, liba52, countless fixes.</LI>
-  <LI><B>MPlayer 0.90 "?"</B> Aug? ??, 2002</LI>
+  <LI><B>MPlayer 0.90pre10 "The BirthdayCounter"</B> Nov 11, 2002<BR>
+    Although this is not a release, I am going to mention it because it
+    came out 2 years after MPlayer v0.01. Happy birthday, MPlayer!</LI>
+  <LI><B>MPlayer 0.90 "?"</B> Date yet unknown</LI>
 </UL>
 
 
@@ -478,6 +499,11 @@
   <LI><B>libvorbis</B> - optional, needed for playing OGG Vorbis audio.</LI>
   <LI><B><A HREF="http://www.live.com/mplayer/">LIVE.COM Streaming Media</A></B>
     - optional, needed for playing RTSP/RTP streams.</LI>
+  <LI><B>directfb</B> - optional, from
+    <A HREF="http://www.directfb.org">http://www.directfb.org</A></LI>
+  <LI><B>cdparanoia</B> - optional, for CDDA support</LI>
+  <LI><B>libfreetype</B> - optional, for TTF fonts support. At least 2.0.9 is
+    required.</LI>
 </UL>
 
 <H4>Codecs:</H4>
@@ -784,7 +810,16 @@
   <LI>AQTitle</LI>
 </UL>
 
-The command line options differ slightly for the different formats:
+<P>MPlayer can dump the previously listed subtitle formats into the following
+  destination formats, with the given options:</P>
+
+<UL>
+  <LI>MPsub: <CODE>-dumpmpsub</CODE></LI>
+  <LI>SubRip: <CODE>-dumpsrtsub</CODE></LI>
+  <LI>Microdvd: <CODE>-dumpmicrodvdsub</CODE></LI>
+</UL>
+
+<P>The command line options differ slightly for the different formats:</P>
 
 <H4>VobSub subtitles</H4>
 
@@ -892,6 +927,8 @@ The command line options differ slightly for the different formats:
     (read TOOLS/subfont-c/README for details)</LI>
   <LI>use the font generator GIMP plugin at TOOLS/subfont-GIMP
     (note: you must have HSI RAW plugin too, see URL below)</LI>
+  <LI>using a TrueType (TTF) font, by the means of the <B>freetype</B>
+    library. Version 2.0.9 or greater is mandatory! TODO: complete this</LI>
 </UL>
 
 <P>After that, UNZIP the file you downloaded to <CODE>~/.mplayer</CODE> or
