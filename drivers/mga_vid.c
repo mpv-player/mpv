@@ -109,7 +109,7 @@ static uint32_t mga_param_buff_len=0;
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,4,0)
 #include <linux/ctype.h>
 
-unsigned long simple_strtoul(const char *cp,char **endp,unsigned int base)
+static unsigned long simple_strtoul(const char *cp,char **endp,unsigned int base)
 {
         unsigned long result = 0,value;
 
@@ -134,7 +134,7 @@ unsigned long simple_strtoul(const char *cp,char **endp,unsigned int base)
         return result;
 }
 
-long simple_strtol(const char *cp,char **endp,unsigned int base)
+static long simple_strtol(const char *cp,char **endp,unsigned int base)
 {
         if(*cp=='-')
                 return -simple_strtoul(cp+1,endp,base);
@@ -1085,7 +1085,7 @@ static void disable_irq(){
 
 }
 
-void mga_handle_irq(int irq, void *dev_id, struct pt_regs *pregs) {
+static void mga_handle_irq(int irq, void *dev_id, struct pt_regs *pregs) {
 //	static int frame=0;
 //	static int counter=0;
 	long int cc;
