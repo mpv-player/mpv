@@ -238,17 +238,6 @@ int vo_init( void )
  return 1;
 }
 
-int vo_x11_uninit(Display *display, Window window)
-{
-    XUnmapWindow(display, window);
-
-    /* don't destroy window if -wid specified */
-    if (!(WinID > 0))
-	XDestroyWindow(display, window);
-
-    XCloseDisplay(display);
-    return(1);
-}
 
 #include "../linux/keycodes.h"
 #include "wskeys.h"
@@ -348,7 +337,7 @@ void vo_x11_decoration( Display * vo_Display,Window w,int d )
     XSetWindowAttributes attr;
     attr.override_redirect = True;
     XChangeWindowAttributes(vo_Display, w, CWOverrideRedirect, &attr);
-//    XMapWindow(vo_Display], w);
+//    XMapWindow(vo_Display, w);
   }
 
   if(vo_fsmode&8){
@@ -390,6 +379,24 @@ void vo_x11_classhint( Display * display,Window window,char *name ){
     vo_dwidth=w; vo_dheight=h;
  }
 #endif
+
+int vo_x11_uninit(Display *display, Window window)
+{
+    XUnmapWindow(display, window);
+
+#ifdef HAVE_NEW_GUI
+    /* destroy window only if it's not controlled by GUI */
+    if (vo_window == None)
+#endif
+    {
+	/* and -wid is set */
+	if (!(WinID > 0))
+	    XDestroyWindow(display, window);
+    }
+
+    XCloseDisplay(display);
+    return(1);
+}
 
 int vo_x11_check_events(Display *mydisplay){
  int ret=0;
