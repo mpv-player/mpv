@@ -11,14 +11,13 @@
 #ifndef __FIR_H__
 #define __FIR_H__
 
-/* Fixpoint 16 bit fir filter FIR filter. The filter is implemented
-both in C and MMX assembly. The filter consists of one macro
-UPDATE_QUE and one inline function firn. The macro can be used for
-adding new data to the circular buffer used by the filter firn.
-Limitations: max length of n = 16*4 and n must be multiple of 4 (pad
-fiter with zeros for other lengths). Sometimes it works with filters
-longer than 4*16 (the problem is overshoot and the acumulated energy
-in the filter taps). */
+/* Fixpoint 16 bit FIR filter. The filter is implemented both in C and
+MMX assembly. The filter consists of the two inline functions updateq
+and firn, update q is used for adding new data to the circular buffer
+used by the filter firn. Limitations: max length of n = 16*4 and n
+must be multiple of 4 (pad fiter with zeros for other lengths). 
+Sometimes it works with filters longer than 4*16 (the problem is
+overshoot and the acumulated energy in the filter taps). */
 
 #ifdef HAVE_MMX
 inline int32_t firn(int16_t* x, int16_t* w, int16_t n)
@@ -60,26 +59,14 @@ inline int32_t firn(int16_t* x, int16_t* w, int16_t n)
 
 #endif /* HAVE_MMX */
 
-// Macro to add new data to circular queue
-#define UPDATE_QUE(ind,xq,xid) \
-  xid=(--xid)&(L-1);      \
-  xq[xid]=xq[xid+L]=*(ind);
-
-#ifdef L8
-#ifdef HAVE_MMX
-#define FIR(x,w,y) *y=(int16_t)firn(x,w,8);
-#else /* HAVE_MMX */
-// Unrolled loop to speed up execution 
-#define FIR(x,w,y){ \
-  int16_t a = (w[0]*x[0]+w[1]*x[1]+w[2]*x[2]+w[3]*x[3]) >> 16; \
-  int16_t b = (w[4]*x[4]+w[5]*x[5]+w[6]*x[6]+w[7]*x[7]) >> 16; \
-  y[0]      = a+b; \
+/* Add new data to circular queue designed to be used with a FIR
+   filter. xq is the circular queue, in pointing at the new sample, xi
+   current index for in xq and l the lenght of the filter */
+inline uint16_t updateq(int16_t* xq, int16_t* in, uint16_t xi, uint16_t l)  
+{
+  xq[xi]=xq[xi+l]=*in;
+  return (--xi)&(l-1);      \
 }
-#endif /* HAVE_MMX */
-#endif /* L8 */
-
-#ifdef L16
-#define FIR(x,w,y) *y=(int16_t)firn(x,w,16);
-#endif /* L16 */
 
 #endif /* __FIR_H__ */
+

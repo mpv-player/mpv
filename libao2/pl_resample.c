@@ -48,13 +48,26 @@ LIBAO_PLUGIN_EXTERN(resample)
 */
 
 #if !defined(HAVE_SSE) && !defined(HAVE_3DNOW) //This machine is slow
-#define L8    	1	// Filter bank type
+
 #define W 	W8	// Filter bank parameters
 #define L   	8	// Filter length
-#else	// Fat machine
-#define L16	1
+#ifdef HAVE_MMX
+#define FIR(x,w,y) *y=(int16_t)firn(x,w,8);
+#else /* HAVE_MMX */
+// Unrolled loop to speed up execution 
+#define FIR(x,w,y){ \
+  int16_t a = (w[0]*x[0]+w[1]*x[1]+w[2]*x[2]+w[3]*x[3]) >> 16; \
+  int16_t b = (w[4]*x[4]+w[5]*x[5]+w[6]*x[6]+w[7]*x[7]) >> 16; \
+  y[0]      = a+b; \
+}
+#endif /* HAVE_MMX */
+
+#else  /* Fast machine */
+
 #define W 	W16
 #define L   	16
+#define FIR(x,w,y) *y=(int16_t)firn(x,w,16);
+
 #endif
 
 #define CH  6	// Max number of channels
@@ -192,7 +205,7 @@ int upsample(){
       register uint16_t	i = inc;
       if(wi<level) i++;
 
-      UPDATE_QUE(in,x,xi);
+      xi=updateq(x,in,xi,L);
       in+=nch;
       while(i--){
 	// Run the FIR filter
@@ -242,9 +255,8 @@ int downsample(){
 
     while(in < end){
 
-      UPDATE_QUE(in,x,xi);
+      xi=updateq(x,in,xi,L);
       in+=nch;
-      
       if(!--i){
 	// Run the FIR filter
 	FIR((&x[xi]),(&pl_resample.w[wi*L]),out);
