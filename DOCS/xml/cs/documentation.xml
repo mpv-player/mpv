@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.21 -->
+<!-- Synced with: 1.22 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - Multimediální přehrávač</title>
@@ -96,7 +96,7 @@ Enkodér) je jednoduchý filmový enkodér, navržený k enkódování
 (<emphasis role="bold">AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</emphasis>)
 do jiných <application>MPlayer</application>em přehrávatelných formátů (viz níže).
 Může enkódovat různými kodeky. jako je <emphasis role="bold">MPEG-4 (DivX4)</emphasis>
-(1 nebo 2 průchody), <systemitem class="library">libavcodec</systemitem>,
+(jedním nebo dvěma průchody), <systemitem class="library">libavcodec</systemitem>,
 <emphasis role="bold">PCM/MP3/VBR MP3</emphasis>
 audia.
 </para>

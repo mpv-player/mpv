@@ -636,7 +636,8 @@ mìli byste zadat volbu <option>-sub <replaceable>pøíklad.txt</replaceable></opti
   <term><option>-subdelay <replaceable>sek</replaceable></option></term>
   <listitem><simpara>
     Zpozdí titulky o <option><replaceable>sek</replaceable></option> sekund.
-    Hodnota mù¾e být i záporná.
+    Hodnota mù¾e být i záporná. Zadaná hodnota se pøipoète k ukazateli èasové
+    pozice filmu.
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
@@ -654,16 +655,17 @@ mìli byste zadat volbu <option>-sub <replaceable>pøíklad.txt</replaceable></opti
 </variablelist>
 
 <para>
-<!-- text odstavce zmìnìn podle pravdy, neodpovídá EN verzi -->
 Pokud se zvìt¹uje rozdíl mezi filmem a titulky pøi pou¾ití
 titulkového souboru ve formátu MicroDVD, je nejspí¹ rozdílná snímková rychlost filmu a
 titulkù. Poznamenejme, ¾e formát titulkù MicroDVD pou¾ívá absolutní èísla snímkù
-pro své èasování, ale nemá hlavièku která by stanovovala snímkovou rychlost, proto je nutné
-pou¾ít volbu <option>-subfps</option> s tímto formátem, jestli¾e se rychlost filmu a titulkù
-li¹í. Trvale lze snímkovou rychlost synchronizovat pouze manuální konverzí souboru s titulky.
-Pro tento úèel lze pou¾ít napø. perlový skript, jen¾ naleznete v adresáøi
-<filename class="directory">contrib</filename> na FTP serveru
-<application>MPlayer</application>u.
+pro své èasování, ale neobsahuje údaj o své snímkové rychlosti. Proto byste mìli
+pou¾ít volbu <option>-subfps</option> s tímto formátem.
+Trvale lze snímkovou rychlost synchronizovat pouze manuální konverzí souboru s titulky.
+Konverzi mù¾ete provést pøímo <application>MPlayer</application>em (fps=snímková rychlost):
+
+<screen>mplayer <replaceable>dummy.avi</replaceable> -fps fps_titulkù -subfps avi_fps
+[-subdelay sekund] [-sub soubor_s_titulky]
+<replaceable>-dumpmicrodvdsub</replaceable></screen>
 </para>
 
 <para>
