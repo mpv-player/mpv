@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
+<!-- synced with 1.3 -->
 <appendix id="mailinglists">
 <title>Почтовые рассылки</title>
 <para>
@@ -26,8 +27,8 @@ Quoting HOWTO [КАК цитировать]</ulink>.
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng"/>
 Это рассылка о разработке MPlayer'а! Разговор ведётся о изменениях в
 интерфейсе/API, новых библиотеках, оптимизации кода, изменениях в конфигурации.
-Присылайте сюда патчи, а не сообщения об ошибках, вопросы пользователей, запросы
-новых возможностей, чтобы сохранить низким трафик.
+Чтобы сохранить низкий трафик, присылайте сюда патчи, а не сообщения об ошибках, вопросы пользователей, запросы
+новых возможностей.
 </para></listitem>
 <listitem><para>
 Рассылка пользователей MPlayer'а:
@@ -38,7 +39,7 @@ Quoting HOWTO [КАК цитировать]</ulink>.
   ошибки</link> и <link linkend="bugreports">секцию сообщения об ошибках</link>).
   </para></listitem>
   <listitem><para>
-  Присылайте сюда запросы новых возможностей (прочитав <emphasis role="bold">
+  Присылайте сюда просьбы о новых возможностях (прочитав <emphasis role="bold">
   всю документацию</emphasis>).
   </para></listitem>
   <listitem><para>
@@ -55,7 +56,7 @@ Quoting HOWTO [КАК цитировать]</ulink>.
   Рассылка на венгерском языке.
   </para></listitem>
   <listitem><para>
-  Тема? Там видно будет... по большей части - флейм[flame] и RTFM вопросы :(
+  Тема? Там видно будет... пока по большей части &mdash; флейм[flame] и RTFM вопросы :(
   </para></listitem>
   </itemizedlist>
 </para></listitem>
@@ -92,12 +93,12 @@ MPlayer CVS-log:
 <listitem><para>
 Рассылка, относящаяся к переносу MPlayer под Cygwin:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin"/>
-Рассылка для обсуждения переноса MPlayer под Cygwin:
+Рассылка для обсуждения переноса MPlayer под Cygwin.
 </para></listitem>
 <listitem><para>
 Рассылка, относящаяся к переносу MPlayer под OS/2:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-os2"/>
-Рассылка для обсуждения переноса MPlayer под OS/2:
+Рассылка для обсуждения переноса MPlayer под OS/2.
 </para></listitem>
 <listitem><para>
 Рассылка для редакторов и переводчиков MPlayer Weekly News:
@@ -106,7 +107,7 @@ MPlayer CVS-log:
 </para></listitem>
 </itemizedlist>
 <note><para>
-Здесь Вы можете обнаружить архив рассылок с возможностью поиска:
+Здесь находится архив рассылок с возможностью поиска:
 <ulink url="http://www.mplayerhq.hu/cgi-bin/htsearch"/>.
 </para></note>
 </para>

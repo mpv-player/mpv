@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
+<!-- synced with 1.7 -->
 <appendix id="users-vs-dev">
 <title>Плач разработчиков</title>
 
@@ -13,8 +14,8 @@ GCC <emphasis role="bold">2.95</emphasis> серий &mdash; это официальный GNU рели
 проблем компиляции, которые можно было бы отнести на счёт gcc-2.95.3.
 Начиная с RedHat Linux 7.0, <emphasis role="bold">Red Hat</emphasis> включили сильно
 пропатченную CVS версию GCC и назвали её <emphasis role="bold">2.96</emphasis>.
-RedHat включили эту версию в дистрибутив, поскольку GCC 3.0 не был завершён
-в это время, а им требовался компилятор, который бы хорошо работал на всех
+RedHat включили эту версию в дистрибутив, поскольку в то время GCC 3.0 не был
+завершён, а им требовался компилятор, который бы хорошо работал на всех
 поддерживаемых платформах, включая IA64 и s390. Дистрибьютор Linux
 <emphasis role="bold">Mandrake</emphasis>, последовал примеру Red Hat и начал поставки
 GCC 2.96 с Linux-Mandrake серии 8.0.
@@ -194,14 +195,15 @@ url="http://www.linuxworld.com/linuxworld/lw-2000-06/lw-06-exam.html">читать док
 что превосходно подытоживает ситуацию:
 
 <blockquote><para>
-However, he also went on to say that he was "surprised" by my column about
-<application>Mplayer</application> and thought it was unfair, reminding me that it is
-a free software project. "If you don't like it," Bartsch said, "you're free not to use it." 
-
 [Однако, он также сказал, что он был "удивлён" моей колонкой о <application>MPlayer</application>'е и
 подумал, что это было бы неправильно напоминать мне, что это проект свободного
 программного обеспечения. "Если он вам не нравится", сказал Барцх, "Вы свободны
 не использовать его."]
+</para>
+<para>
+[However, he also went on to say that he was "surprised" by my column about
+<application>Mplayer</application> and thought it was unfair, reminding me that it is
+a free software project. "If you don't like it," Bartsch said, "you're free not to use it."]
 </para></blockquote>
 </para>
 
@@ -217,15 +219,16 @@ a free software project. "If you don't like it," Bartsch said, "you're free not 
 об этом человеке.
 
 <blockquote><para>
-You may all remember the LinuxWorld 2000, when he claimed that Linus T said
-that 'FreeBSD is just a handful of programmers'. Linus said NOTHING of the
-sort. When Joe was called on this, his reaction was to call BSD supporters
-assholes and jerks.
-
-[Вы все должно быть помните LinuxWorld 2000, когда от заявил, что Linus T
+Вы все должно быть помните LinuxWorld 2000, когда от заявил, что Linus T
 сказал, что 'FreeBSD &mdash; это только горстка программистов'. Linus НИЧЕГО
 подобного не говорил. Когда Джо притянули к ответу, его реакцией было  позвать
-BSD сторонников и сопляков.]
+BSD сторонников и сопляков.
+</para>
+<para>
+[You may all remember the LinuxWorld 2000, when he claimed that Linus T said
+that 'FreeBSD is just a handful of programmers'. Linus said NOTHING of the
+sort. When Joe was called on this, his reaction was to call BSD supporters
+assholes and jerks.]
 </para></blockquote>
 </para>
 
@@ -240,6 +243,8 @@ Robert Munro из рассылки
 лет тому назад, Джо Барр имел обыкновение регулярно бывать на форуме Will
 Zachmann'а Canopus на Compuserve. Тогда он был сторонником OS/2 (я тоже был
 фаном OS/2).
+</para>
+<para>
 [He's interesting, but not good at avoiding, um... controversy.  Joe Barr
 used to be one of the regulars on Will Zachmann's Canopus forum on
 Compuserve, years ago.  He was an OS/2 advocate then (I was an OS/2 fan
@@ -250,6 +255,8 @@ too).]
 Как правило он чрезмерно флеймил людей, и, как мне кажется, у него тогда были
 тяжёлые времена. Судя по его последним колонкам, он немного смягчился.
 Определённо, в то время тонкий юмор не был его стилем, совсем не был.
+</para>
+<para>
 [He used to go over-the-top, flaming people, and I suspect he had some hard
 times, then. He's mellowed some, judging by his columns recently.
 Moderately subtle humor was not his mode in those earlier days, not at all.]

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="KOI8-R"?>
+<!-- synced with 1.11 -->
 <sect1 id="install">
 <title>Установка</title>
 
@@ -30,14 +31,14 @@
   <emphasis role="bold">2.95.3</emphasis> (может быть <emphasis role="bold">2.95.4</emphasis>)
 и <emphasis role="bold">3.2+</emphasis>.
 <emphasis role="bold">НИКОГДА</emphasis> не используйте 2.96 или 3.0.x! Они генерируют ошибочный код 
-для <application>MPlayer'а</application>. Если Вы решите изменить gcc с версии 2.96, то не решайте
+для <application>MPlayer'а</application>. Если Вы решите изменить gcc с версии 2.96, то не принимайте решение
 в направлении 3.x только поскольку он новее. Ранние релизы 3.x содержали ещё
 больше ошибок, чем 2.96. Так что ставьте 2.95.x (поставьте также более старую
 libstdc++, это может потребоваться для других программ) или вообще ничего
 не меняйте (но в этом случае приготовьтесь к проблемам во время работы).
-Если Вы решите в сторону 3.x, попробуйте использовать последнюю версию,
-в ранних релизах были различные баги, так что используйте минимум 3.1, это
-протестировано и работает. Для детальной информации о багах в gcc 2.96
+Если Вы решите использовать 3.x, попробуйте использовать последнюю версию,
+в ранних релизах были различные ошибки/проблемы, так что используйте минимум 3.1, это
+протестированно и работает. Для детальной информации о багах в gcc 2.96
 (которые все ещё НЕ исправлены, а "ОБОЙДЕНЫ"[WORKED AROUND] в <application>MPlayer'е</application>!),
 см. <link linkend="gcc-296">gcc 2.96</link> и 
   <xref linkend="faq"/>.
@@ -45,9 +46,9 @@ libstdc++, это может потребоваться для других программ) или вообще ничего
 <listitem><para>
   <emphasis role="bold">XFree86</emphasis> - рекомендуемая версия - это <emphasis role="bold">всегда новейшая (4.3)</emphasis>.
 Обычно, все этого хотят, поскольку начиная с 4.0.2, XFree86 содержат
-<link linkend="xv">XVideo</link> расширение (кое-где упоминаемое, как
+<link linkend="xv">XVideo</link> расширение (иногда упоминаемое, как
 <emphasis role="bold">Xv</emphasis>) которое требуется для включения аппаратной YUV акселерации (быстрый
-вывод изображений на картах, которые это поддерживают.</para>
+вывод изображений на видеокартах, которые это поддерживают.</para>
   <para>
 Будьте уверены, что <emphasis role="bold">пакет разработки</emphasis> также установлен, иначе это
 не будет работать.</para>
@@ -56,7 +57,7 @@ libstdc++, это может потребоваться для других программ) или вообще ничего
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">make</emphasis> - рекомендуемая версия - это <emphasis role="bold">всегда новейшая</emphasis> (минимум
-3.79.x). Обычно это важно.
+3.79.x). Обычно это не очень важно.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">SDL</emphasis> - это не обязательно, но может помочь в некоторых случаях
@@ -66,7 +67,7 @@ libstdc++, это может потребоваться для других программ) или вообще ничего
 <listitem><para>
   <emphasis role="bold">libjpeg</emphasis> - необязательный декодер JPEG,
   используемый -mf и некоторыми QT MOV файлами. Полезен для
-  <application>MPlayer'а</application> и <application>MEncoder'а</application>,
+  <application>MPlayer</application>'а и <application>MEncoder</application>'а,
   если Вы планируете работать с jpeg файлами.
   </para></listitem>
 <listitem><para>
@@ -79,7 +80,7 @@ libstdc++, это может потребоваться для других программ) или вообще ничего
 рекомендуемая версия - это <emphasis role="bold"> всегда новейшая</emphasis> (как минимум 3.90).
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libogg</emphasis> - необязательно, необходимо для проигрывания OGG формата файлов.
+  <emphasis role="bold">libogg</emphasis> - необязательно, необходимо для проигрывания файлов формата OGG.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">libvorbis</emphasis> - необязательно, необходимо для проигрывания OGG Vorbis аудио.
@@ -89,7 +90,7 @@ libstdc++, это может потребоваться для других программ) или вообще ничего
 - необязательно, необходимо для проигрывания RTSP/RTP потоков.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">directfb</emphasis> - необязательно, из
+  <emphasis role="bold">directfb</emphasis> - необязательно, на
 <ulink url="http://www.directfb.org">http://www.directfb.org</ulink>
   </para></listitem>
 <listitem><para>
@@ -118,8 +119,8 @@ libstdc++, это может потребоваться для других программ) или вообще ничего
   <emphasis role="bold">libavcodec</emphasis>: Этот пакет кодеков способен декодировать 
 H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/SVQ1/SVQ3-кодированные видео потоки и
 WMA (Windows Media Audio) v1/v2 аудио потоки, на многих платформах.
-Он также известен как быстрейший для этой задачи.
-См. <link linkend="ffmpeg">эту секцию</link> для подробностей.
+Он также известен как быстрейший кодек для этих задач.
+Подробности см. в <link linkend="ffmpeg">этой секции</link>.
 Особенности:
   <itemizedlist>
   <listitem><simpara>
@@ -140,8 +141,8 @@ WMA (Windows Media Audio) v1/v2 аудио потоки, на многих платформах.
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">страницы кодеков</ulink>
 и установите их в <filename class="directory">/usr/local/lib/codecs</filename> <emphasis role="bold">ДО</emphasis> компиляции <application>MPlayer'а</application>,
 иначе поддержка Win32 будет отключена!
-<note><para>У проекта avifile похожий набор кодеков, но он отличается от нашего.
-  Если Вы хотите использовать все поддерживаемые кодеки, тогда поставьте наш
+<note><para>У проекта avifile похожий набор кодеков, но он отличается от нашего,
+  поэтому, если Вы хотите использовать все поддерживаемые кодеки, тогда поставьте наш
   пакет (не беспокойтесь, avifile работает с ними без проблем).</para>
   </note>
 Особенности:
@@ -170,7 +171,7 @@ QDesign аудио потоков. Инструкции по установке могут быть найдены в секции
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">DivX4/DivX5</emphasis>: информация об этом кодеке расположена в 
-<link linkend="divx4-5">секцииDivX4/DivX5</link>. Вам, вероятно, не потребуется
+<link linkend="divx4-5">секции DivX4/DivX5</link>. Вам, вероятно, не потребуется
 этот кодек, поскольку <emphasis role="bold">libavcodec</emphasis> (см. выше)
 гораздо быстрее и выше качеством, чем этот кодек, как для кодирования, так и для
 декодирования. Особенности:
@@ -197,17 +198,17 @@ QDesign аудио потоков. Инструкции по установке могут быть найдены в секции
   его исходный код открыт, поэтому он многоплатформенен.
   </simpara></listitem>
 <listitem><simpara>
-  он порядка 2 раз быстрее, чем DivX4 при кодировании - примерно такое же
+  он где-то раза в 2 быстрее, чем DivX4 при кодировании, при примерно таком же
 качество
   </simpara></listitem>
 </itemizedlist>
 </para></listitem>
 <listitem><para>
   <link linkend="xanim">XAnim'овские кодеки</link> - лучшие (полный экран,
-аппаратный YUV масштаб) для декодирования <emphasis role="bold">3ivx</emphasis> и Indeo 3/4/5 фильмов,
+аппаратное YUV масштабирование) для декодирования <emphasis role="bold">3ivx</emphasis>, Indeo 3/4/5 фильмов,
 и некоторых старых форматов. И они многоплатформенные, поэтому это единственный
 способ проигрывать Indeo на не-x86 платформах (ну, кроме как использовать
-Xanim:). Но к примеру, Cinepak фильмы лучше проигрываются с оригинальным
+Xanim:). Но, к примеру, Cinepak фильмы лучше проигрываются с оригинальным
 MPlayer'овским декодером!
   </para></listitem>
 <listitem><para>
@@ -291,20 +292,20 @@ nVidia TV-выход</link>, если Вы хотите использовать TV.
 Для подробностей, см. секцию <link linkend="vidix">VIDIX</link>.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">Другие карты</emphasis>: Ничего из вышеперечисленного?
+  <emphasis role="bold">Другие карты</emphasis>: Не упомянута выше?
 <itemizedlist>
 <listitem><simpara>
   Проверьте, поддерживает ли XFree86 драйвер (и Ваша карта) аппаратную
-акселерацию. См. <link linkend="xv">секцию Xv</link> для подробностей.
+акселерацию. Подробности см. в <link linkend="xv">секции Xv</link>.
   </simpara></listitem>
 <listitem><simpara>
-  Если нет, то видеовозможности Вашей карты не поддерживаются под Вашей
+  Если нет, то возможности Вашей видеокарты не поддерживаются под Вашей
 операционной системой :(
     Если аппаратная акселерация работает под Windows, это не значит, что
 	она будет работать под Linux или иной операционной системой: это зависит
 	от драйвера. Большинство производителей не делают Linux'овых драйверов
 	и не распространяют спецификации для их чипов, поэтому Вам не повезло,
-	что Вы используете их карты. См. 'Не-YUV карты'.
+	что Вы используете их карты. См. <xref linkend="non-yuv-cards"/>.
   </simpara></listitem>
 </itemizedlist>
 </para></listitem>
@@ -326,9 +327,9 @@ nVidia TV-выход</link>, если Вы хотите использовать TV.
 опции <option>-vm</option> и работает со следующими драйверами:
 <itemizedlist>
 <listitem><simpara>
-  <emphasis role="bold">используя</emphasis> XFree86: см секции
+  <emphasis role="bold">используя</emphasis> XFree86: подробности см. в секциях
 <link linkend="dga">DGA драйвер</link> и
-<link linkend="x11">X11 драйвер</link> для подробностей. Рекомендуется DGA !
+<link linkend="x11">X11 драйвер</link>. Рекомендуется DGA !
 Также попробуйте использовать DGA через SDL, иногда это лучше.
   </simpara></listitem>
 <listitem><simpara>
@@ -347,31 +348,31 @@ nVidia TV-выход</link>, если Вы хотите использовать TV.
 <title>Cirrus Logic карты</title>
 <itemizedlist>
 <listitem><para>
-  GD 7548: установлено и тестировалась в ноутбуках серии Compaq Armada 41xx.
+  GD 7548: установлено на материнской плате и тестировалась в ноутбуках серии
+  Compaq Armada 41xx.
   <itemizedlist>
-<listitem><simpara>
-  XFree86 3: работает в 8/16bpp режимах. Хотя, драйвер очень медленный и
-	    генерирует ошибки в режиме 800x600@16bpp.
-<emphasis role="bold">Рекомендуется: 640x480@16bpp</emphasis>
+  <listitem><simpara>
+    XFree86 3: работает в 8/16bpp режимах. Хотя, драйвер очень медленный и
+    генерирует ошибки в режиме 800x600@16bpp.
+    <emphasis role="bold">Рекомендуется: 640x480@16bpp</emphasis>
   </simpara></listitem>
-<listitem><simpara>
-  XFree86 4: Xserver замораживается вскоре после старта, если акселерация
-	    не отключена, но тогда все становится медленнее, чем под XFree86 3.
-	    Нет XVideo.
+  <listitem><simpara>
+    XFree86 4: Xserver замораживается вскоре после старта, если акселерация
+    не отключена, но тогда все становится медленнее, чем под XFree86 3.
+    Нет XVideo.
   </simpara></listitem>
-<listitem><simpara>
-  FBdev: фреймбуфер[framebuffer - кадровый буфер] может быть включён <option>clgenfb</option>
-	    драйвером в ядре, хотя для меня это работало только при 8bpp, и
-	    поэтому, непригодно. Исходный код должен быть расширен 7584 ID
-	    до компиляции.
+  <listitem><simpara>
+    FBdev: фреймбуфер[framebuffer - кадровый буфер] может быть включён <option>clgenfb</option>
+    драйвером в ядре, хотя для меня это работало только при 8bpp, и поэтому
+    непригодно. В исходный код до компиляции должен быть добавлен 7584 ID
   </simpara></listitem>
-<listitem><simpara>
-  VESA: карта совместима только с VBE 1.2, поэтому VESA вывод не может
-	    использоваться. Не может быть обойдено с UniVBE.
+  <listitem><simpara>
+    VESA: карта совместима только с VBE 1.2, поэтому VESA вывод не может
+    использоваться. Не может быть обойдено с UniVBE.
   </simpara></listitem>
-<listitem><simpara>
-  SVGAlib: определяет более старый Cirrus чип. Работает, но медленно с
-	  <option>-bpp 8</option>.
+  <listitem><simpara>
+    SVGAlib: определяется как более старый Cirrus чип. Работает, но медленно с
+    <option>-bpp 8</option>.
   </simpara></listitem>
 </itemizedlist>
 </para></listitem>
@@ -386,19 +387,19 @@ nVidia TV-выход</link>, если Вы хотите использовать TV.
 <itemizedlist>
 <listitem><simpara>
   <emphasis role="bold">Soundblaster Live!</emphasis>: с этой картой Вы можете использовать 4 или 6 (<emphasis role="bold">5.1</emphasis>)
-канальное AC3 декодирование, вместо 2. Читайте секцию
-<link linkend="swac3">Программное AC3 декодирование</link>.
-For hardware AC3 passthrough you <emphasis role="bold">must</emphasis> use ALSA 0.9 with OSS emulation!
+  канальное AC3 декодирование, вместо 2. Читайте секцию
+  <link linkend="swac3">Программное AC3 декодирование</link>.
+  Для аппаратного пропуска AC3[hardware AC3 passthrough] Вы
+  <emphasis role="bold">должны</emphasis> использовать ALSA 0.9 с эмуляцией OSS!
   </simpara></listitem>
 <listitem><simpara>
   <emphasis role="bold">C-Media с SP/DIF выходом</emphasis>: аппаратная AC3 передача[passthrough] возможна
-с этими картами, см. секцию <link linkend="hwac3">Аппаратное AC3
-декодирование</link>.
+  с этими картами, см. секцию <link linkend="hwac3">Аппаратное AC3
+  декодирование</link>.
   </simpara></listitem>
 <listitem><simpara>
   Возможности <emphasis role="bold">других карт</emphasis> не поддерживаются <application>MPlayer'ом</application>.
-Очень рекомендуется прочитать секцию <link linkend="audio-dev">звуковые карты
-</link>!
+  Очень рекомендуется прочитать секцию <link linkend="audio-dev">звуковые карты</link>!
   </simpara></listitem>
 </itemizedlist>
 </sect2>
@@ -409,15 +410,15 @@ For hardware AC3 passthrough you <emphasis role="bold">must</emphasis> use ALSA 
 
 <itemizedlist>
 <listitem><para>
-  Решите, нужен ли Вам GUI. Если да, читайте <link linkend="gui">секцию GUI</link>
-до компиляции.
+  Решите, нужен ли Вам GUI. Если да, прочитайте до компиляции
+  <link linkend="gui">секцию GUI</link>.
   </para></listitem>
 <listitem><para>
   Если Вы хотите установить <application>MEncoder</application> (наш великолепный многоцелевой кодировщик),
 читайте <link linkend="mencoder">секцию MEncoder</link>.
   </para></listitem>
 <listitem><para>
-  Если у Вас V4L совместимый <emphasis role="bold">TV тюнер</emphasis>, и Вы хотите смотреть/захватывать
+  Если у Вас есть V4L совместимый <emphasis role="bold">TV тюнер</emphasis>, и Вы хотите смотреть/захватывать
 и кодировать MPlayer'ом фильмы, читайте секцию <link linkend="tv-input">TV вход</link>.
   </para></listitem>
 <listitem><para>
@@ -436,7 +437,7 @@ make install</screen>
 
 <para>
 В этот момент, MPlayer готов к использованию. Каталог
-<filename class="directory">$PREFIX/etc/mplayer</filename> содержит файл <filename>codecs.conf</filename>,
+<filename class="directory">$PREFIX/share/mplayer</filename> содержит файл <filename>codecs.conf</filename>,
 который используется, чтобы сообщить программе обо всех кодеки и их возможности.
 Этот файл требуется только в том случае, если Вы хотите поменять их настройки,
 поскольку основной запускаемый файл содержит внутреннюю копию этого файла.
@@ -472,15 +473,15 @@ make install</screen>
 <filename>config.mak</filename>.
 Если у Вас стоят какие-то библиотеки, которые не определяются 
 <filename>./configure</filename>, проверьте, что у Вас установлены соответствующие
-заголовки[header files] (обычно -dev пакеты) и их версии совпадают. Файл
-<filename>configure.log</filename> Обычно говорит Вам, чего не хватает.
+заголовки[header files] (обычно это -dev пакеты) и их версии совпадают. Файл
+<filename>configure.log</filename> Обычно сообщит Вам, чего не хватает для сборки.
 </para>
 
 
 <para>
-Хотя это не обязательно, шрифты должны быть установлены, чтобы получить функционирующие
-OSD и субтитры. Рекомендуемый метод - установка TTF шрифта и указание MPlyer'у
-использовать его. Для подробностей, см.  секцию 
+Хотя это не обязательно, но чтобы получить функционирующие OSD и субтитры,
+должны быть установлены шрифты. Рекомендуемый метод - установка TTF шрифта и
+указание MPlyer'у использовать его. Подробности, см. в  секции
 <link linkend="subosd">Субтитры и OSD</link>.
 </para>
 
@@ -493,7 +494,7 @@ OSD и субтитры. Рекомендуемый метод - установка TTF шрифта и указание MPlyer'у
 <title>Как насчёт GUI?</title>
 
 <para>
-Для GUI требуется GTK 1.2.x (оно не GTK'шное, но панельки - да). Шкуры хранятся
+Для GUI требуется GTK 1.2.x (он не целиком GTK'шный, но панельки - да). Шкуры хранятся
 в PNG формате, поэтому GTK, <systemitem class="library">libpng</systemitem> (и их части для разработчиков, обычно они
 называются <systemitem class="library">gtk-dev</systemitem> и <systemitem class="library">libpng-dev</systemitem>) должны быть установлены.
 Вы можете собрать GUI, указав <option>--enable-gui</option> в <option>./configure</option>.
@@ -530,7 +531,7 @@ OSD и субтитры. Рекомендуемый метод - установка TTF шрифта и указание MPlyer'у
 <itemizedlist>
 <listitem><para>VobSub</para></listitem>
 <listitem><para>OGM</para></listitem>
-<listitem><para>CC (closed caption)</para></listitem>
+<listitem><para>CC (closed caption[скрытые титры])</para></listitem>
 <listitem><para>Microdvd</para></listitem>
 <listitem><para>SubRip</para></listitem>
 <listitem><para>SubViewer</para></listitem>
@@ -538,7 +539,7 @@ OSD и субтитры. Рекомендуемый метод - установка TTF шрифта и указание MPlyer'у
 <listitem><para>VPlayer</para></listitem>
 <listitem><para>RT</para></listitem>
 <listitem><para>SSA</para></listitem>
-<listitem><para>MPsub</para></listitem>
+<listitem><para><link linkend="mpsub">MPsub</link></para></listitem>
 <listitem><para>AQTitle</para></listitem>
 <listitem><para><ulink url="http://unicorn.us.com/jacosub/">JACOsub</ulink></para></listitem>
 </itemizedlist>
@@ -571,8 +572,8 @@ VobSub субтитры состоят из большого (несколько мегабайт) <filename>.SUB</filenam
 <filename>.IDX</filename> и/или <filename>.IFO</filename> файлов.
 Использование: если у Вас, например, есть файлы <filename>sample.sub</filename>,
 <filename>sample.ifo</filename> (необязательно), <filename>sample.idx</filename> - Вы должны указать
-MPlayer'у опции <option>-vobsub sample [-vobsubid <replaceable>id</replaceable>]</option> (полный путь
-указывать не обязательно). Опция <option>-vobsubid</option> похожа на <option>-sid</option>
+MPlayer'у опции <option>-vobsub sample [-vobsubid <replaceable>id</replaceable>]</option> (можно указать полный путь).
+Опция <option>-vobsubid</option> похожа на <option>-sid</option>
 для DVD, с её помощью, Вы можете выбирать между дорожками субтитров (языками).
 В случае, если <option>-vobsubid</option> пропущена, MPlayer попытается использовать
 языки, полученные через опцию <option>-slang</option> и перейти к пункту 
@@ -587,8 +588,7 @@ MPlayer'у опции <option>-vobsub sample [-vobsubid <replaceable>id</replaceable>]
 Прочие форматы субтитров состоят из единого текстового файла, содержащего информацию
 о синхронизации, местоположении и тексте субтитра.
 Использование: Если у Вас есть, например, файл <filename>sample.txt</filename>, 
-Вы должны указать опцию <option>-sub sample.txt</option> (полный путь указывать
-не обязательно).
+Вы должны указать опцию <option>-sub sample.txt</option> (можно указать полный путь).
 </para>
 </formalpara>
 
@@ -598,7 +598,7 @@ MPlayer'у опции <option>-vobsub sample [-vobsubid <replaceable>id</replaceable>]
   <term><option>-subdelay <replaceable>sec</replaceable></option></term>
   <listitem><simpara>
     Задерживает субтитры на <option><replaceable>sec</replaceable></option>
-	секунд. Может быть отрицательным.
+	секунд. Это значение может быть отрицательным.
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
@@ -617,7 +617,7 @@ MPlayer'у опции <option>-vobsub sample [-vobsubid <replaceable>id</replaceable>]
 
 <para>
 Если Вы наблюдаете увеличивающуюся задержку между фильмом и субтитрами, используя
-файл MicroDVD субтитров, наиболее вероятно, что частота кадров у фильма и файла
+файл субтитров в формате MicroDVD, наиболее вероятно, что частота кадров у фильма и файла
 субтитров не совпадают. Пожалуйста, обратите внимание, что формат MicroDVD
 использует абсолютные номера кадров для синхронизации, и поэтому опция
 <option>-subfps</option> не может использоваться с этим форматом. Поскольку
@@ -628,19 +628,19 @@ MPlayer'у опции <option>-vobsub sample [-vobsubid <replaceable>id</replaceable>]
 </para>
 
 <para>
-О DVD субтитрах, читайте <link linkend="dvd">секцию DVD</link>.
+О DVD субтитрах, читайте в <link linkend="dvd">секции DVD</link>.
 </para>
 
 
 <sect2 id="mpsub">
-<title>MPlayer's own subtitle format</title>
+<title>MPlayer's own subtitle format (MPsub)</title>
 
 <para>
 <application>MPlayer</application> ввёл в употребление новый формат субтитров,
 называемый <emphasis role="bold">MPsub</emphasis>. Он был
 разработан Gabucino. По существу, его основная особенность - это
-использование <emphasis>динамической</emphasis> временной зависимости (хотя существует и режим
-кадровой зависимости). Пример (из 
+использование <emphasis>динамической</emphasis> временной привязки (хотя существует и режим
+покадровой привязки). Пример (из 
 <ulink url="../../tech/mpsub.sub">DOCS/tech/mpsub.sub</ulink>):
 <programlisting>
 FORMAT=TIME
@@ -711,6 +711,7 @@ Display</emphasis>.  OSD используется для вывода текущего времени, полос громкос
   и использование опции <option>-utf8</option>, или просто обозвать файл
   субтитра <filename>&lt;video_name&gt;.utf</filename> и разместить его
   в каталоге с фильмом. Перекодировка из различных кодировок в utf8 может быть
+  <!-- FIXME: iconv (Debian) konwert (Red Hat) instead? -->
   осуществлена с помощью программ konwert (Debian) или iconv (Red Hat).
   </para><para>
   
@@ -729,7 +730,7 @@ Display</emphasis>.  OSD используется для вывода текущего времени, полос громкос
   <row><entry>
     <ulink url="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/"></ulink>
     </entry><entry>
-	разные шрифты от пользователей
+    различные шрифты, сделанные пользователями
     </entry></row>
   <row><entry>
     <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/"></ulink>
@@ -745,7 +746,7 @@ Display</emphasis>.  OSD используется для вывода текущего времени, полос громкос
   Использовать средство генерации шрифтов в <filename class="directory">
   TOOLS/subfont-c</filename>. Это законченное средство для преобразования
   из TTF/Type1/и т. п. шрифтов в mplayer'овские шрифтовые пакеты. 
-  (читайте <filename>TOOLS/subfont-c/README</filename> для подробностей)
+  (подробности читайте в <filename>TOOLS/subfont-c/README</filename>)
   </para></listitem>
 <listitem><para>
     используйте GIMP'овый плагин генерации шрифтов из <filename
@@ -862,7 +863,7 @@ class="directory">$PREFIX/share/mplayer</filename>. Затем переименуйте,
   Clock[часы истинного времени]) для этой задачи потому, что это таймер
   точностью 1ms. Это автоматически включается, когда доступно, но требует
   привилегий root'а, <emphasis>съюднутого по root'у</emphasis> исполняемого
-  файла <application>MPlayer</application>'а, или правильно настроенного ядро.
+  файла <application>MPlayer</application>'а, или правильно настроенного ядра.
   Если Вы работаете с ядром 2.4.19pre8 или более поздним, Вы можете настроить
   максимальную частоту RTC для обычных пользователей через файловую систему
   /proc. Используйте эту команду, чтобы сделать RTC доступным для обычных
@@ -880,7 +881,7 @@ class="directory">$PREFIX/share/mplayer</filename>. Затем переименуйте,
    и замените 64 на 1024. Хотя Вы должны знать, что Вы делаете.
    Вы увидите эффективность нового кода таймера по строке состояния.
    Функции управления потребляемой мощностью[power management] у некоторых
-   ноутбуковских BIOS'ов с speedstep-CPU плохо взаимодействуют с RTC. Аудио и
+   ноутбуковских BIOS'ов со speedstep-CPU плохо взаимодействуют с RTC. Аудио и
    видео могут десинхронизироваться. Вероятно, если Вы вставите штекер внешнего
    питания до включения ноутбука, то это поможет. Вы всегда можете отключить
    поддержку RTC, указав опцию <option>-nortc</option>. В некоторых аппаратных

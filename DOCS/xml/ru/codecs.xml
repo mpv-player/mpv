@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
+<!-- synced with 1.18 -->
 <sect1 id="codecs">
 <title>Поддерживаемые кодеки</title>
 
@@ -13,7 +14,7 @@
 </para>
 
 <para>
-Наиболее важные из них:
+Наиболее важные кодеки:
 </para>
 
 <itemizedlist>
@@ -78,11 +79,11 @@ importing HOWTO]</link> и помогите нам добавить для него поддержку.
 <title>DivX4/DivX5</title>
 
 <para>
-Эта секция содержит информацию о DivX4 b DivX5 кодеках из
+Эта секция содержит информацию о DivX4 b DivX5 кодеках от
 <ulink url="http://www.projectmayo.com">Project Mayo</ulink>.
 Их первыми доступными альфа версиями были OpenDivX alpha 47 и 48.
-Поддержка для них была включена в <application>MPlayer</application> в прошлом
-и собиралась по умолчанию.  Мы также использовали их код постобработки
+В прошлом поддержка для них была включена в <application>MPlayer</application>
+и собиралась по умолчанию. Также мы использовали их код постобработки
 для факультативного улучшения качества изображения в MPEG1/2 фильмах.
 Сейчас мы используем наш собственный фильтр для файлов всех типов.
 </para>
@@ -93,8 +94,8 @@ importing HOWTO]</link> и помогите нам добавить для него поддержку.
 быстрее, чем Win32 DivX DLL'и, но медленнее, чем <systemitem
 class="library">libavcodec</systemitem>. Поэтому, использовать его в качестве
 декодера <emphasis role="bold">НЕ РЕКОМЕНДУЕТСЯ</emphasis>. Хотя, он полезен
-для кодирования. Единственным недостатком этого кодека является то, у него
-не лицензия Открытым исходным кода[Open Source license]
+для кодирования. Единственным недостатком этого кодека является то, что он
+не доступен по лицензии с Открытым исходным кодом[Open Source license]
 </para>
 
 <para>
@@ -163,7 +164,7 @@ cp ../../src/decore.h /usr/local/include
 </para></step>
 <step><para>
 К сожалению, для библиотеки encore Linux'ового Makefile нет, и MMX оптимизированный
-код работает только под Windows. Вы все же можете скомпилировать её, используя этот
+код работает только под Windows. Вы всё же можете скомпилировать её, используя этот
 <ulink url="ftp://ftp.mplayerhq.hu/MPlayer/contrib/divx-mf/Makefile">Makefile</ulink>.
 <screen>
 cd ../../../encore/build
@@ -179,7 +180,7 @@ cp ../../src/encore.h /usr/local/include
 </procedure>
 
 <para>
-<application>MPlayer</application> автоматически находит DivX4/DivX5 если он был
+<application>MPlayer</application> автоматически находит DivX4/DivX5 если они были
 правильно установлен, просто компилируйте как обычно. Если он не находит этот
 кодек, то Вы неправильно установили или сконфигурировали DivX4/DivX5.
 </para>
@@ -308,7 +309,7 @@ author has yet to bring legal action against anyone for codec-related issues.
   </para></step>
 <step><para>
   Переименуйте/создайте символические ссылки, убрав части, относящиеся к
-  архитектуре, чтобы они назывались так: <filename>vid_cvid.xa</filename>,
+  архитектуре так, чтобы файлы назывались так: <filename>vid_cvid.xa</filename>,
   <filename>vid_h263.xa</filename>, <filename>vid_iv50.xa</filename>
   </para></step>
 </procedure>
@@ -400,15 +401,15 @@ RealVideo:
 <application>RealONE</application>, поскольку <application>MPlayer</application>
 может использовать их библиотеки для декодирования файлов с RealVideo 2.0 - 4.0
 видео. <application>MPlayer</application>'овский скрипт <filename>configure</filename>
-должен определить <application>RealPlayer</application>'овские библиотеки в
-стандартном местоположении полной установки. Если этого не происходит, сообщите
+должен найти <application>RealPlayer</application>'овские библиотеки, в
+стандартном местоположении при полной установке. Если этого не происходит, сообщите
 <filename>configure</filename>, где их искать опцией <option>--with-reallibdir</option>.
 </para>
 
 <para>
 Также, Вы можете скачать кодеки на
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">http://www.mplayerhq.hu/MPlayer/releases/codecs/</ulink>.
-После скаачивания пакета Real'овских кодеков, распакуйте их в каталог
+После скачивания пакета Real'овских кодеков, распакуйте их в каталог
 <filename class="directory">/usr/local/lib/codecs</filename>, или укажите
 путь опцией <option>--with-reallibdir</option>.
 </para>
@@ -426,10 +427,10 @@ RealVideo:
 <title>XviD</title>
 
 <para>
-<ulink url="http://www.xvid.org">XviD</ulink> - это отпочковавшаяся разработка
+<ulink url="http://www.xvid.org">XviD</ulink> - это разработка, отпочковавшаяся от
 OpenDivX кодека. Это произошло, когда ProjectMayo сделал исходный код OpenDivX
-закрытым (DivX4, ntgthm DivX5), и разработчики OpenDivX не из ProjectMayo
-разозлились, и начали XviD. Поэтому у обоих проектов общие корни.
+закрытым (DivX4, теперь DivX5), и разработчики OpenDivX не из ProjectMayo
+разозлились, и взялись за XviD. Поэтому у обоих проектов общие корни.
 
 <itemizedlist>
 <title>ПРЕИМУЩЕСТВА</title>
@@ -443,7 +444,7 @@ OpenDivX кодека. Это произошло, когда ProjectMayo сделал исходный код OpenDivX
   поддержка кодирования в 2 прохода
   </simpara></listitem>
 <listitem><simpara>
-  высокое качество кодирования, более высокая скорость, по сравнению с DivX4
+  хорошее качество кодирования, более высокая скорость, по сравнению с DivX4
   (вы можете его оптимизировать под Вашу машину во время компиляции)
   </simpara></listitem>
 </itemizedlist>
@@ -452,8 +453,8 @@ OpenDivX кодека. Это произошло, когда ProjectMayo сделал исходный код OpenDivX
 <title>НЕДОСТАТКИ</title>
 <listitem><simpara>
   в настоящий момент не все DivX/DivX4 файлы <emphasis role="bold">декодируются
-  </emphasis> (не проблема, поскольку <link linkend="ffmpeg">libavcodec</link>
-  может их проигрывать)
+  </emphasis> (не проблема, поскольку их может воспроизвести
+  <link linkend="ffmpeg">libavcodec</link>)
   </simpara></listitem>
 <listitem><simpara>
   разработка продолжается и в настоящий момент
@@ -513,11 +514,8 @@ Apple, которые распространяют его с <application>QuickTime Player</application>.
 <itemizedlist>
 <listitem><simpara>
   Sorenson 1 (fourcc <emphasis>SVQ1</emphasis>) - декодирование поддерживается
-  <emphasis role="bold">родными кодеками</emphasis>. В действительности есть два
-  (почти одинаковых) декодера для SVQ1: один в <application>MPlayer</application>'е,
-  другой в libavcodec. Вы можете запустить их соответственно опциями
-  <option>-vc svq1</option> и <option>-vc ffsvq1</option>. Некоторые файлы будут
-  работать с одним и не будут работать с другим, поэтому попробуйте оба декодера.
+  <emphasis role="bold">родным кодеком</emphasis>
+  (<link linkend="ffmpeg">libavcodec</link>)
   </simpara></listitem>
 <listitem><simpara>
   Sorenson 3 (fourcc <emphasis>SVQ3</emphasis>) - декодирование поддерживается,
@@ -527,7 +525,7 @@ Apple, которые распространяют его с <application>QuickTime Player</application>.
 
 <procedure>
 <title>КОМПИЛЯЦИЯ MPLAYER'А С ПОДДЕРЖКОЙ БИБЛИОТЕК QUICKTIME</title>
-<note><para>в настоящий момент поддерживаются только 32битные Intel'евские
+<note><para>в настоящий момент поддерживаются только 32битовые Intel'евские
 платформы.</para></note>
 <step><para>скачайте MPlayer'овский CVS</para></step>
 <step><para>скачайте пакет QuickTime DLL с
@@ -605,9 +603,8 @@ Apple, которые распространяют его с <application>QuickTime Player</application>.
 <para>
 Декодер AC3 может создавать аудио вывод микшированный для 2, 4 или 6 колонок.
 Будучи сконфигурированным для 6 колонок, этот декодер предоставляет раздельный
-вывод всех AC3 каналов звуковому драйверу , позволяя получить "звук вокруг"
+вывод всех AC3 каналов звуковому драйверу, позволяя получить "звук вокруг"
 без внешнего AC3 декодера, необходимого для использования hwac3 кодека.
-hwac3 codec.
 </para>
 
 <para>
@@ -642,7 +639,7 @@ SNDCTL_DSP_CHANNELS.  Примером подходящего драйвера является emu10k1
 Вам нужна AC3-совместимая карта с цифровым (SP/DIF) выводом. Драйвер карты
 должен должным образом поддерживать AFMT_AC3 формат (например C-Media).
 Подсоедините AC3 декодер к SP/DIF выводу и используйте опцию <option>-ac
-hwac3</option>. Это экспериментально, но известно, что это работает с
+hwac3</option>. Это экспериментальная возможность, но известно, что это работает с
 C-Media картами и Soundblaster Live! + ALSA (но не OSS) драйверами и
 картами MPEG декодирования DXR3/Hollywood+.
 </para>
@@ -655,7 +652,7 @@ C-Media картами и Soundblaster Live! + ALSA (но не OSS) драйверами и
 <para>
 <ulink url="http://mad.sourceforge.net">libmad</ulink> - это многоплатформенная
 библиотека декодирования MPEG аудио. Она не очень хорошо обрабатывает битые
-файлы и иногда испытывает проблемы с перемещением по файлу.
+файлы и иногда у неё бывают проблемы с перемещением по файлу.
 </para>
 
 <para>
@@ -706,7 +703,7 @@ RealAudio:
 <para>
 Аудио потоки QDesign (fourcc:<emphasis>QDMC, QDM2</emphasis>) обнаруживаются
 в MOV/QT файлах. Обе версии этого кодека могут декодироваться библиотеками
-QuickTime. Для инструкций по установке см. секцию 
+QuickTime. Инструкции по установке см. в секции
 <link linkend="sorenson">Sorenson video codec</link>.
 </para>
 </sect3>
@@ -716,7 +713,7 @@ QuickTime. Для инструкций по установке см. секцию
 <para>
 Аудио потоки Qualcomm (fourcc:<emphasis>Qclp</emphasis>) обнаруживаются
 в MOV/QT файлах. Они могут декодироваться библиотеками QuickTime.
-Для инструкций по установке см. секцию
+Инструкций по установке см. в секции
 <link linkend="sorenson">Sorenson video codec</link>.
 </para>
 </sect3>
@@ -725,24 +722,9 @@ QuickTime. Для инструкций по установке см. секцию
 <title>AAC кодек</title>
 <para>
 AAC (Advanced Audio Coding) - это кодек, иногда обнаруживаемый в MOV и MP4
-файлах. Декодер с открытым исходным кодом называется FAAD и доступен с
-<ulink url="http://www.audiocoding.com"/>. Вы можете скачать кодек второго
-поколения - FAAD2 на их <ulink url="http://www.audiocoding.com/download.php">
-странице скачивания</ulink>. К сожалению, FAAD2 1.1 не компилируется под Linux,
-поэтому Вам примется использовать CVS версию. И вот как:
-<screen>
-cvs -d:pserver:anonymous@cvs.audiocoding.com:/cvsroot/faac login
-cvs -z3 -d:pserver:anonymous@cvs.audiocoding.com:/cvsroot/faac co faad2
-cd faad2/
-chmod +x bootstrap
-./bootstrap
-./configure
-make
-make install
-</screen>
-Бинарии не доступны на audiocoding.com, но Вы получить(apt-get) Debian'овские
-пакеты с <ulink url="http://marillat.free.fr">домашней страницы Christian
-Marillat</ulink> и Mandrake'овские RPM'ы с <ulink url="http://plf.zarb.org">P.L.F</ulink>.
+файлах. Декодер с открытым исходным кодом, называемый FAAD, доступен с
+<ulink url="http://www.audiocoding.com"/>.
+MPlayer включает в себя libfaad 2.0RC1, поэтому Вам ничего не нужно дополнительно скачивать.
 </para>
 </sect3>
 
@@ -880,7 +862,7 @@ DirectShow - это более новый Video API, которые даже хуже, чем его предшественни
   </para></step>
 <step><para>
   Если GUID найден, Вы должны видеть поля <guilabel>FriendlyName</guilabel>
-  и <guilabel>CLSID</guilabel>. Выпишите 16-ти байтный CLSID, это GUID, который
+  и <guilabel>CLSID</guilabel>. Выпишите 16-ти байтовый CLSID, это GUID, который
   нам нужен.
   </para></step>
 </procedure>

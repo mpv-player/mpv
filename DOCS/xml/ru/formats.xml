@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="koi8-r"?>
+<!-- synced with 1.5 -->
 <sect1 id="formats">
 <title>Поддерживаемые форматы</title>
 
 <para>
 Важно разъяснить одну общую ошибку. Когда люди видят файл с расширением
 <filename>.AVI</filename>, они немедленно заключают, что это - не MPEG файл.
-Это не так. Во всяком случае не полностью. Супротив популярному мнению
+Это не так. Во всяком случае не всегда. Супротив популярному мнению
 такой файл <emphasis>может</emphasis> содержать MPEG видео.
 </para>
 
 <para>
-Как видите, <emphasis role="bold">кодек</emphasis> не совпадает с
-<emphasis role="bold">форматом файла</emphasis>.
+Как видите, <emphasis role="bold">кодек</emphasis> &mdash; это не то же самое,
+что и <emphasis role="bold">формат файла</emphasis>.
 Примеры видео <emphasis role="bold">кодеков</emphasis>: MPEG1, MPEG2, DivX, Indeo5, 3ivx.
 Примеры видео <emphasis role="bold">форматов</emphasis>: MPG, AVI, ASF.
 </para>
@@ -19,11 +20,11 @@
 <para>
 В теории, Вы можете поместить OpenDivX видео и MP3 аудио 
 в <emphasis role="bold">файл MPG формата</emphasis>. Хотя, большинство
-плееров не будут это проигрывать, поскольку они ожидают MPEG1 видео и 
+плееров не смогут это проиграть, поскольку они ожидают MPEG1 видео и 
 MP2 аудио (в отличие от 
 <emphasis role="bold">AVI</emphasis>, в <emphasis role="bold">MPG</emphasis>
 нет нужных полей для описания его видео и аудио потоков).
-Или Вы будете вынуждены поместить MPEG1 видео в AVI файл.
+Или Вы можете поместить MPEG1 видео в AVI файл.
 <ulink url="http://ffmpeg.sourceforge.net/">FFmpeg</ulink> и
 <link linkend="mencoder">MEncoder</link> могут создавать эти файлы.
 </para>
@@ -72,7 +73,7 @@ MPEG файлы бывают различных разновидностей:
 описывающее соотношение сторон видео потока. Например, на SVCD содержится
 видео разрешением 480x480, и заголовок установил его(поле) в 4:3, поэтому это
 будет проигрываться на 640x480. В AVI файлах такого поля нет, поэтому они должны
-быть смасштабированы при кодировании или проигрываться с опцией
+быть масштабированы при кодировании или проигрываться с опцией
 <option>-aspect</option>.
 </para>
 </sect3>
@@ -85,7 +86,7 @@ MPEG файлы бывают различных разновидностей:
 Разработанный Microsoft'ом <emphasis role="bold">AVI (Audio Video Interleaved
 [Аудио Видео 'Слоёные'])</emphasis> - это широко распространённый многоцелевой
 формат, в настоящий момент чаще всего применяемый для DivX и DivX4 видео.
-У него много известных недостатков и дефектов (например в потоках). Он
+У него много известных недостатков и недочётов (например в потоках). Он
 поддерживает 1 видео поток и от 0 до 99 аудио потоков и может быть не более
 2 Гб, хотя существует расширение<emphasis role="bold">OpenDML</emphasis>,
 допускающее большие файлы. В настоящий момент Microsoft сильно отговаривает от
@@ -193,7 +194,7 @@ QuickTime в качестве рекомендованного формата для MPEG4, из MOV файлы
 идут с расширением <filename>.MPG</filename> или <filename>.MP4</filename>
 (Интересно, что видео и аудио потоки в этих файлах - настоящие
 MPG и AAC файлы. Вы даже можете извлечь их, используя опции
-<option>-dumpvideo</option> b <option>-dumpaudio</option>.).
+<option>-dumpvideo</option> и <option>-dumpaudio</option>.).
 </para>
 
 <note>
@@ -213,14 +214,14 @@ MPG и AAC файлы. Вы даже можете извлечь их, используя опции
 <application>MPlayer</application> успешно демультиплексирует VIVO форматы
 файлов. Огромный недостаток этого формата заключается в том, что в нем нет
 ни индексных блоков, ни фиксированного размера пакетов или байтов синхронизации
-и в большинстве файлов нет даже основных кадров[keyframes], так что забудьте
+и в большинстве файлов нет даже ключевых кадров[keyframes], так что забудьте
 о перемещении по файлу!
 </para>
 
 <para>
 Видео кодек в VIVO/1.0 файлах - это стандартный <emphasis role="bold">h.263</emphasis>.
 Видео кодек в VIVO/2.0 файлах - это модифицированный, нестандартный
-<emphasis role="bold">h.263v2</emphasis>. Аудио одинаковое, это может быть
+<emphasis role="bold">h.263v2</emphasis>. Аудио в обоих форматах одинаковое, это может быть
 <emphasis role="bold">g.723 (стандарт)</emphasis>, или
 <emphasis role="bold">Vivo Siren</emphasis>.
 </para>
@@ -267,8 +268,8 @@ linkend="realaudio">RealAudio</link> кодеков.
 <ulink url="http://mars.tuwien.ac.at/~roman/nuppelvideo">NuppelVideo</ulink> -
 это средство захвата с ТВ (AFAIK:). <application>MPlayer</application> может
 читать его <filename>.NUV</filename> файлы (только NuppelVideo 5.0). Эти файлы
-могут содержать несжатые YV12, YV12+RTJpeg сжатые, YV12 RTJpeg+lzo сжатые и
-YV12+lzo сжатые кадры. <application>MPlayer</application> декодирует (и также
+могут содержать несжатые YV12, YV12+сжатые RTJpeg, YV12 сжатые RTJpeg+lzo и
+YV12 + сжатые lzo кадры. <application>MPlayer</application> декодирует (и также
 <emphasis role="bold">кодирует</emphasis> их <application>MEncoder
 </application>'ом в DivX/и т. д.!) все это. Перемещение работает.
 </para>
@@ -309,10 +310,10 @@ RoQ файлы - это мультимедийные файлы используемые в некоторых ID играх,
 <title>OGG/OGM файлы</title>
 <para>
 Это новый формат файлов от <ulink url="http://www.xiph.org">Xiphophorus</ulink>.
-Он может содержать любой видео или аудио кодек, CBR или VBR. Вам понадобятся
-установленные <systemitem class="library">libogg</systemitem> и
-<systemitem class="library">libvorbis</systemitem> до компиляции 
-<application>MPlayer</application>'а, чтобы проигрывать эти файлы.
+Он может содержать любой видео или аудио кодек, CBR или VBR. Вам понадобятся,
+чтобы <systemitem class="library">libogg</systemitem> и
+<systemitem class="library">libvorbis</systemitem> были установлены до компиляции 
+<application>MPlayer</application>'а, чтобы  иметь возможность проигрывать эти файлы.
 </para>
 </sect3>
 
@@ -322,7 +323,7 @@ RoQ файлы - это мультимедийные файлы используемые в некоторых ID играх,
 <para>
 <ulink url="ftp://ftp.rfc-editor.org/in-notes/rfc2327.txt">SDP</ulink> - это
 IETF стандартный формат для описания видео и аудио RTP потоков.
-(требуются &quot;<ulink url="http://www.live.com/mplayer/">LIVE.COM Streaming Media</ulink>&quot;.)
+(требуется &quot;<ulink url="http://www.live.com/mplayer/">LIVE.COM Streaming Media</ulink>&quot;.)
 </para>
 </sect3>
 
@@ -389,8 +390,8 @@ LZW сжатие.
 <application>MPlayer</application> - это проигрыватель
 <emphasis role="bold">фильмов</emphasis>, а не
 <emphasis role="bold">медиа</emphasis> плеер, хотя он может проигрывать
-некоторые форматы аудио файлов (они перечислены ниже). Это не рекомендуемое
-применение <application>MPlayer</application>, Вам лучше использовать <ulink
+некоторые форматы аудио файлов (они перечислены ниже). Это не является рекомендуемым
+применением <application>MPlayer</application>'а, Вам лучше использовать <ulink
 url="http://www.xmms.org">XMMS</ulink>.
 </para>
 
@@ -400,8 +401,8 @@ url="http://www.xmms.org">XMMS</ulink>.
 У Вас могут возникнуть проблемы при проигрывании некоторых MP3 файлов, которые
 <application>MPlayer</application> будет неверно определять, как MPEG'и и
 проигрывать неправильно или вообще никак. Это не может быть исправлено без
-потери поддержки некоторых плохих MPEG файлов и поэтому все останется как есть
-обозримом будущем. Опция <option>-demuxer</option>, описанная на man странице
+потери поддержки некоторых плохих MPEG файлов и поэтому всё останется как есть
+обозримом будущем. Опция <option>-demuxer</option>, описанная на man странице,
 может Вам помочь в этом случае.
 </para>
 </sect3>
@@ -453,7 +454,7 @@ url="http://www.xmms.org">XMMS</ulink>.
 <para>
 <application>MPlayer</application> может использовать
 <application>XMMS</application>
-расширения для ввода<!-- звучит жутко, но это - перевод из XMMS :) -->, чтобы
+расширения для ввода<!-- звучит жутковато, но это - перевод из XMMS :) -->, чтобы
 проигрывать множество форматов файлов. Существуют расширения для проигрывания
 мелодий из SNES игр, SID мелодий (из Commodore 64), множества Amiga форматов,
 .xm, .it, VQF, musepack, Bonk, shorten и множества других. Все это Вы можете
