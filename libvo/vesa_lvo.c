@@ -40,6 +40,7 @@ static uint8_t next_frame;
 static mga_vid_config_t mga_vid_config;
 static unsigned image_bpp,image_height,image_width,src_format;
 extern int verbose;
+uint32_t vlvo_control(uint32_t request, void *data, ...);
 
 #define PIXEL_SIZE() ((video_mode_info.BitsPerPixel+7)/8)
 #define SCREEN_LINE_SIZE(pixel_size) (video_mode_info.XResolution*(pixel_size) )
@@ -69,8 +70,7 @@ int vlvo_preinit(const char *drvname)
 	video_out_vesa.draw_frame=vlvo_draw_frame;
 	video_out_vesa.flip_page=vlvo_flip_page;
 	video_out_vesa.draw_osd=vlvo_draw_osd;
-	video_out_vesa.query_format=vlvo_query_info;
-	video_out_vesa.query_vaa=vlvo_query_vaa;
+  video_out_vesa.control=vlvo_control;
 	return 0;
 }
 
@@ -295,4 +295,16 @@ uint32_t vlvo_query_info(uint32_t format)
 {
   if(verbose > 1) printf("vesa_lvo: query_format was called: %x (%s)\n",format,vo_format_name(format));
   return 1;
+}
+
+uint32_t vlvo_control(uint32_t request, void *data, ...)
+{
+  switch (request) {
+  case VOCTRL_QUERY_VAA:
+    vlvo_query_vaa((vo_vaa_t*)data);
+    return VO_TRUE;
+  case VOCTRL_QUERY_FORMAT:
+    return vlvo_query_info(*((uint32_t*)data));
+  }
+  return VO_NOTIMPL;
 }

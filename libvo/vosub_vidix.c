@@ -627,6 +627,18 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 	return 0;
 }
 
+uint32_t vidix_control(uint32_t request, void *data, ...)
+{
+  switch (request) {
+  case VOCTRL_QUERY_VAA:
+    vidix_query_vaa((vo_vaa_t*)data);
+    return VO_TRUE;
+  case VOCTRL_QUERY_FORMAT:
+    return vidix_query_fourcc(*((uint32_t*)data));
+  }
+  return VO_NOTIMPL;
+}
+
 int vidix_preinit(const char *drvname,void *server)
 {
   int err;
@@ -656,8 +668,7 @@ int vidix_preinit(const char *drvname,void *server)
 	((vo_functions_t *)server)->draw_frame=vidix_draw_frame;
 	((vo_functions_t *)server)->flip_page=vidix_flip_page;
 	((vo_functions_t *)server)->draw_osd=vidix_draw_osd;
-	((vo_functions_t *)server)->query_format=vidix_query_fourcc;
-	((vo_functions_t *)server)->query_vaa=vidix_query_vaa;
+	((vo_functions_t *)server)->control=vidix_control;
 	vo_server = server;
 	return 0;
 }

@@ -87,7 +87,7 @@ static uint32_t draw_frame(uint8_t * src[])
 static uint32_t
 query_format(uint32_t format)
 {
-    return video_out_pgm.query_format(format);
+    return video_out_pgm.control(VOCTRL_QUERY_FORMAT, &format);
 }
 
 
@@ -108,7 +108,11 @@ static uint32_t preinit(const char *arg)
   return 0;
 }
 
-static void query_vaa(vo_vaa_t *vaa)
+uint32_t control(uint32_t request, void *data, ...)
 {
-  memset(vaa,0,sizeof(vo_vaa_t));
+  switch (request) {
+  case VOCTRL_QUERY_FORMAT:
+    return query_format(*((uint32_t*)data));
+  }
+  return VO_NOTIMPL;
 }

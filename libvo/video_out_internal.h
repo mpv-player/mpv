@@ -21,6 +21,7 @@
  *
  */
 
+static uint32_t control(uint32_t request, void *data, ...);
 static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 		     uint32_t d_height, uint32_t fullscreen, char *title,
 		     uint32_t format,const vo_tune_info_t *);
@@ -39,15 +40,14 @@ static void query_vaa(vo_vaa_t *);
 {\
 	preinit,\
 	config,\
-        query_format,\
+	control,\
 	get_info,\
 	draw_frame,\
 	draw_slice,\
      	draw_osd,\
 	flip_page,\
 	check_events,\
-	uninit,\
-	query_vaa\
+	uninit\
 };
 
 #include "osd.h"

@@ -1339,7 +1339,11 @@ static uint32_t preinit(const char *arg)
     if(!pre_init_err) return (pre_init_err=(fb_preinit()?0:-1));
 }
 
-static void query_vaa(vo_vaa_t *vaa)
+uint32_t control(uint32_t request, void *data, ...)
 {
-  memset(vaa,0,sizeof(vo_vaa_t));
+  switch (request) {
+  case VOCTRL_QUERY_FORMAT:
+    return query_format(*((uint32_t*)data));
+  }
+  return VO_NOTIMPL;
 }

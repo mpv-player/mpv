@@ -92,6 +92,39 @@ static vo_info_t vo_info =
 	""
 };
 
+uint32_t control(uint32_t request, void *data, ...)
+{
+	uint32_t flag = 0;
+	switch (request) {
+	case VOCTRL_RESET:
+		fsync(fd_video);
+		return VO_TRUE;
+	case VOCTRL_QUERY_FORMAT:
+		switch (*((uint32_t*)data)) {	
+		case IMGFMT_MPEGPES:
+			/* Hardware accelerated | Hardware supports subpics */
+			flag = 0x2 | 0x8;
+			break;
+#ifdef USE_LIBAVCODEC
+		case IMGFMT_YV12:
+		case IMGFMT_YUY2:
+		case IMGFMT_RGB24:
+		case IMGFMT_BGR24:
+			/* Conversion needed | OSD Supported */
+			flag = 0x1 | 0x4;
+			break;
+		default:
+			printf("VO: [dxr3] Format unsupported, mail dholm@iname.com\n");
+#else
+		default:
+			printf("VO: [dxr3] You have enable libavcodec support (Read DOCS/codecs.html)!\n");
+#endif
+		}
+		return flag;
+	}
+	return VO_NOTIMPL;
+}
+
 static uint32_t config(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, uint32_t fullscreen, char *title, uint32_t format,const vo_tune_info_t *info)
 {
 	int tmp1, tmp2;
@@ -288,13 +321,6 @@ static uint32_t draw_frame(uint8_t * src[])
 static void flip_page(void)
 {
 	/* Flush the device if a seek occured */
-	if (!vo_pts) {
-		/* Flush video */
-		/*ioval = EM8300_SUBDEVICE_VIDEO;
-		ioctl(fd_control, EM8300_IOCTL_FLUSH, &ioval);
-		*/
-		fsync(fd_video);
-	}
 #ifdef USE_LIBAVCODEC
 	if (img_format == IMGFMT_YV12) {
 		int out_size = avcodec_encode_video(avc_context, avc_outbuf, avc_outbuf_size, &avc_picture);
@@ -350,36 +376,6 @@ static uint32_t draw_slice(uint8_t *srcimg[], int stride[], int w, int h, int x0
 	}
 #endif
 	return -1;
-}
-
-static uint32_t query_format(uint32_t format)
-{
-	uint32_t flag = 0;
-	
-	if (format == IMGFMT_MPEGPES) {
-		/* Hardware accelerated | Hardware supports subpics */
-		flag = 0x2 | 0x8;
-#ifdef USE_LIBAVCODEC
-	} else if (format == IMGFMT_YV12) {
-		/* Conversion needed | OSD Supported */
-		flag = 0x1 | 0x4;
-	} else if (format == IMGFMT_YUY2) {
-		/* Conversion needed | OSD Supported */
-		flag = 0x1 | 0x4;
-	} else if (format == IMGFMT_RGB24) {
-		/* Conversion needed | OSD Supported */
-		flag = 0x1 | 0x4;
-	} else if (format == IMGFMT_BGR24) {
-		/* Conversion needed | OSD Supported */
-		flag = 0x1 | 0x4;
-	} else {
-		printf("VO: [dxr3] Format unsupported, mail dholm@iname.com\n");
-#else
-	} else {
-		printf("VO: [dxr3] You have enable libavcodec support (Read DOCS/codecs.html)!\n");
-#endif
-	}
-	return flag;
 }
 
 static void uninit(void)
@@ -483,9 +479,4 @@ static uint32_t preinit(const char *arg)
 #endif
 	
 	return 0;
-}
-
-static void query_vaa(vo_vaa_t *vaa)
-{
-	memset(vaa, 0, sizeof(vo_vaa_t));
 }

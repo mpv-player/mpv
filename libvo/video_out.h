@@ -7,6 +7,7 @@
  */
 
 #include <inttypes.h>
+#include <stdarg.h>
 
 #include "font_load.h"
 #include "img_format.h"
@@ -15,6 +16,19 @@
 #define VO_EVENT_EXPOSE 1
 #define VO_EVENT_RESIZE 2
 #define VO_EVENT_KEYPRESS 4
+
+/* takes a pointer to a vo_vaa_s struct */
+#define VOCTRL_QUERY_VAA 1
+/* takes a pointer to uint32_t fourcc */
+#define VOCTRL_QUERY_FORMAT 2
+/* signal a device reset (seek/paus) */
+#define VOCTRL_RESET 3
+
+#define VO_TRUE		1
+#define VO_FALSE	0
+#define VO_ERROR	-1
+#define VO_NOTAVAIL	-2
+#define VO_NOTIMPL	-3
 
 typedef struct vo_info_s
 {
@@ -93,13 +107,10 @@ typedef struct vo_functions_s
 			 uint32_t d_height, uint32_t fullscreen, char *title,
 			 uint32_t format,const vo_tune_info_t *);
 
-        /*
-         * Query that given pixel format is supported or not.
-	 * params:
-	 *   format: fourcc of pixel format
-         * returns : 1 if supported, 0 if unsupported
-         */
-        uint32_t (*query_format)(uint32_t format);
+	/*
+	 * Control interface
+	 */
+	uint32_t (*control)(uint32_t request, void *data, ...);
 
         /*
          * Return driver information.
@@ -144,14 +155,6 @@ typedef struct vo_functions_s
          * Closes driver. Should restore the original state of the system.
          */
         void (*uninit)(void);
-
-	/*
-	 * Query Video Accelerated Architecture information.
-	 * params:
-	 *   vaa: address of struct to be filled.
-	 *  (Note: driver should memset it to ZERO if it doesn't support vaa.)
-	 */
-	void (*query_vaa)(vo_vaa_t *vaa);
 
 } vo_functions_t;
 

@@ -23,6 +23,9 @@
  * - works only on x86 architectures
  *
  * $Log$
+ * Revision 1.40  2002/02/09 00:47:26  arpi
+ * query_ stuff replaced by new control() - patch by David Holm
+ *
  * Revision 1.39  2002/01/31 11:45:25  alex
  * removed obsoleted Terminate_Display_Process
  *
@@ -1176,9 +1179,13 @@ static uint32_t preinit(const char *arg)
   return 0;
 }
 
-static void query_vaa(vo_vaa_t *vaa)
+uint32_t control(uint32_t request, void *data, ...)
 {
-  memset(vaa,0,sizeof(vo_vaa_t));
+  switch (request) {
+  case VOCTRL_QUERY_FORMAT:
+    return query_format(*((uint32_t*)data));
+  }
+  return VO_NOTIMPL;
 }
 
 //---------------------------------------------------------

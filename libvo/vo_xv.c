@@ -770,3 +770,15 @@ static void query_vaa(vo_vaa_t *vaa)
   vaa->get_video_eq = xv_get_video_eq;
   vaa->set_video_eq = xv_set_video_eq;
 }
+
+uint32_t control(uint32_t request, void *data, ...)
+{
+  switch (request) {
+  case VOCTRL_QUERY_VAA:
+    query_vaa((vo_vaa_t*)data);
+    return VO_TRUE;
+  case VOCTRL_QUERY_FORMAT:
+    return query_format(*((uint32_t*)data));
+  }
+  return VO_NOTIMPL;
+}
