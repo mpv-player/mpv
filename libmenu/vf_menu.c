@@ -277,7 +277,8 @@ vf_info_t vf_info_menu  = {
   "menu",
   "Albeu",
   "",
-  open
+  open,
+  NULL
 };
 
 
