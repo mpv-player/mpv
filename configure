@@ -1217,7 +1217,7 @@ _ld_x11="-L$_x11libdir -lX11 -lXext $_ld_sock"
 #########
 
 echocheck "X11"
-if test "$_x11" = auto ; then
+if test "$_x11" = auto || test "$_x11" = yes ; then
   cat > $TMPC <<EOF
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -1231,6 +1231,8 @@ if test "$_x11" = yes ; then
   _vosrc="$_vosrc vo_x11.c"
 else
   _def_x11='#undef HAVE_X11'
+  _inc_x11=''
+  _ld_x11=''
 fi
 echores "$_x11"
 
@@ -1385,7 +1387,7 @@ echores "$_dga2"
 
 
 echocheck "OpenGL"
-if test "$_gl" = auto ; then
+if test "$_x11" = yes && test "$_gl" = auto ; then
   cat > $TMPC << EOF
 #include <GL/gl.h>
 int main(void) { return 0; }
@@ -1401,6 +1403,8 @@ EOF
     _gl=no
     cc_check $_inc_x11 $_ld_x11 -lGL -lm && _gl=yes
   fi
+else
+  _gl=no
 fi
 if test "$_gl" = yes ; then
   #FIXME ?? :  bsd && test -r /usr/X11R6/bin/XFree86 && _ld_gl="-lGL $_ld_pthread"
