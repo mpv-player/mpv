@@ -1,0 +1,6 @@
+TARGETNAME=dhahelper
+TARGETPATH=.
+TARGETTYPE=DRIVER
+NTDEBUG=ntsd
+
+SOURCES= dhahelper.c
