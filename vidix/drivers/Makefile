@@ -123,7 +123,7 @@ $(SIS_OBJS):    $(SIS_SRCS)
 	$(CC) -c $(SIS_CFLAGS) -o $@ $(basename $@).c
 
 $(SIS_VID):     $(SIS_OBJS)
-	$(LD) -g $(SIS_LIBS) -shared -soname $(SIS_VID) -o $(SIS_VID) $(SIS_OBJS)
+	$(CC) -shared $(SIS_OBJS) $(SIS_LIBS) -Wl,-soname,$(SIS_VID) -o $(SIS_VID) 
 
 clean:
 	rm -f *.o *.so *~
