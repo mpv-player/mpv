@@ -84,7 +84,7 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 	
         if(!(mpi->flags&MP_IMGFLAG_DIRECT)){
           // non-direct and not yet allocaed image. allocate it!
-	  mpi->planes[0]=memalign(64, mpi->bpp*mpi->width*mpi->height/8);
+	  mpi->planes[0]=memalign(64, mpi->bpp*mpi->width*(mpi->height+2)/8);
 	  if(mpi->flags&MP_IMGFLAG_PLANAR){
 	      // YV12/I420. feel free to add other planar formats here...
 	      if(!mpi->stride[0]) mpi->stride[0]=mpi->width;
