@@ -137,7 +137,7 @@ MPlayer (1.0)
     * better and faster audio resampler
     * New dc1394 grabbing interface
     * preliminary decoding support for H.264 with CABAC and B-frames
-    * dvr-ms suport in ASF demuxer
+    * dvr-ms support in ASF demuxer
     * NSV demuxer
     * DVD compatible MPEG muxer
     * MJPEG-B fixes
