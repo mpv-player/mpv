@@ -423,11 +423,8 @@ GtkWidget * create_PopUpMenu( void )
   AddMenuItem( Menu,MSGTR_MENU_Preferences, evPreferences );
   AddMenuItem( Menu,MSGTR_Equalizer, evEqualizer );
   AddSeparator( Menu );
-#if 0
-  AddMenuItem( Menu,MSGTR_MENU_NormalSize"      ", evNormalSize );
-  AddMenuItem( Menu,MSGTR_MENU_DoubleSize, evDoubleSize );
-  AddMenuItem( Menu,MSGTR_MENU_FullScreen, evFullScreen );
-#else
+
+  if ( guiIntfStruct.NoWindow == False )
    {
     int b1 = 0, b2 = 0;
     if ( !appMPlayer.subWindow.isFullScreen && guiIntfStruct.Playing )
@@ -438,9 +435,15 @@ GtkWidget * create_PopUpMenu( void )
      } else b1=!appMPlayer.subWindow.isFullScreen;
     AddMenuCheckItem( Menu,MSGTR_MENU_NormalSize"      ",b1,evNormalSize );
     AddMenuCheckItem( Menu,MSGTR_MENU_DoubleSize,b2,evDoubleSize );
+    AddMenuCheckItem( Menu,MSGTR_MENU_FullScreen,appMPlayer.subWindow.isFullScreen,evFullScreen );
    }
-  AddMenuCheckItem( Menu,MSGTR_MENU_FullScreen,appMPlayer.subWindow.isFullScreen,evFullScreen );
-#endif
+   else
+    {
+     MenuItem=AddMenuCheckItem( Menu,MSGTR_MENU_NormalSize"      ",0,evNormalSize ); gtk_widget_set_sensitive( MenuItem,FALSE );
+     MenuItem=AddMenuCheckItem( Menu,MSGTR_MENU_DoubleSize,0,evDoubleSize );         gtk_widget_set_sensitive( MenuItem,FALSE );
+     MenuItem=AddMenuCheckItem( Menu,MSGTR_MENU_FullScreen,0,evFullScreen );         gtk_widget_set_sensitive( MenuItem,FALSE );
+    }
+
   AddSeparator( Menu );
   AddMenuItem( Menu,MSGTR_MENU_Exit, evExit );
 
