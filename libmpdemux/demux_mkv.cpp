@@ -709,7 +709,7 @@ static int check_track_information(mkv_demuxer_t *d) {
         } else {
           if (!strcmp(t->codec_id, MKV_A_MP3))
             t->a_formattag = 0x0055;
-          else if (!strcmp(t->codec_id, MKV_A_AC3))
+          else if (!strncmp(t->codec_id, MKV_A_AC3, strlen(MKV_A_AC3)))
             t->a_formattag = 0x2000;
           else if (!strcmp(t->codec_id, MKV_A_DTS))
             // uses same format tag as AC3, only supported with -hwac3
@@ -1754,7 +1754,7 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
       sh_a->wf->wBitsPerSample = 0;
       sh_a->samplesize = 0;
 
-    } else if (!strcmp(track->codec_id, MKV_A_AC3)) {
+    } else if (!strncmp(track->codec_id, MKV_A_AC3, strlen(MKV_A_AC3))) {
       sh_a->wf->nAvgBytesPerSec = 16000;
       sh_a->wf->nBlockAlign = 1536;
       sh_a->wf->wBitsPerSample = 0;
