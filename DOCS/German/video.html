@@ -31,8 +31,8 @@
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>xmga</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Matrox G200/G400 Overlay (mga_vid) in X11 Fenster<BR>
 (<I>Xv Emulation auf X 3.3.x !</I>)</TD><TR>
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>syncfb</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Matrox G400 YUV Unterstützung auf Framebuffer (verwende besser mga/xmga)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>3dfx</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Voodoo2/3 Hardware YUV (/dev/3dfx) Unterstützung (noch nicht getestet, möglicherweise keine Funktion)
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>tdfxfb</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Voodoo2/3 Hardware YUV auf tdfx-Framebuffer (funkioniert!)
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>3dfx</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Voodoo 3 / Banshee Hardware YUV (/dev/3dfx) Unterstützung (noch nicht getestet, möglicherweise keine Funktion)
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>tdfxfb</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Voodoo 3 / Banshee Hardware YUV auf tdfx-Framebuffer (funkioniert!)
 </TD><TR>
 
 <TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Speziell:</B></P></TD><TR>
@@ -559,10 +559,7 @@ wird, füge die folgende Zeile an Ende der /etc/modules.conf Datei ein:</P>
 <B>MPlayer</B> wird mit '-vo mga' wenn man eine matroxfb Konsole hat oder mit
 '-vo xmga' unter XFree86 3.x.x oder 4.x.x realisiert.</P>
 
-<P>Hinweis: '-vo xmga' funktioniert unter XFree86 4.x.x, aber ist werden Kon-
-flikte mit dem Xv Treiber auftreten, also verwende nicht beide. Wenn Xv mit mga
-durcheinanderkommt, versuche <B>MPlayer</B> mit '-vo mga' . Es sollte das Be-
-heben.</P>
+<P>Der mga_vid Treiber arbeitet nun auch mit dem Xv zusammen.
   
 
 <P><B><A NAME=2.2.1.8>2.2.1.8. SiS 6326 Framebuffer (sis_vid)</A></B></P>
