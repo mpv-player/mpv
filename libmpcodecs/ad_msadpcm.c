@@ -44,8 +44,9 @@ static int ms_adapt_coeff2[] =
 
 #define MS_ADPCM_PREAMBLE_SIZE 6
 
-#define LE_16(x) (le2me_16(*(unsigned short *)(x)))
-#define LE_32(x) (le2me_32(*(unsigned int *)(x)))
+#define LE_16(x) (le2me_16((x)[1]+(256*(x)[0])))
+//#define LE_16(x) (le2me_16(*(unsigned short *)(x)))
+//#define LE_32(x) (le2me_32(*(unsigned int *)(x)))
 
 // useful macros
 // clamp a number between 0 and 88
