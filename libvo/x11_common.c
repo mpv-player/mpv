@@ -78,6 +78,7 @@ int WinID=-1;
 int vo_mouse_autohide = 0;
 int vo_wm_type = 0;
 static int vo_fs_type = 0;
+static int vo_fs_flip = 0;
 char** vo_fstype_list;
 
 /* if equal to 1 means that WM is a metacity (broken as hell) */
@@ -814,6 +815,7 @@ int vo_x11_check_events(Display *mydisplay){
       case MapNotify:
 		vo_hint.win_gravity = old_gravity;
 		XSetWMNormalHints( mDisplay,vo_window,&vo_hint );
+		vo_fs_flip = 0;
 	   break;
      }
   }
@@ -1056,7 +1058,7 @@ void vo_x11_fullscreen( void )
 {
  int x,y,w,h;
 
- if ( WinID >= 0 ) return;
+ if ( WinID >= 0 || vo_fs_flip) return;
 
  if ( vo_fs ){
    // fs->win
@@ -1084,6 +1086,7 @@ void vo_x11_fullscreen( void )
  if(vo_wm_type==0 && !(vo_fsmode&16)) {
     XUnmapWindow( mDisplay,vo_window );  // required for MWM
     XWithdrawWindow(mDisplay,vo_window,mScreen);
+    vo_fs_flip = 1;
  }
 
  vo_x11_decoration( mDisplay,vo_window,(vo_fs) ? 0 : 1 );
