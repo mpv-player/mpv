@@ -405,13 +405,43 @@ long RegCreateKeyExA(long key, const char* name, long reserved,
 //		return 0;
 	}
 	else
-		if (status) *status=REG_OPENED_EXISTING_KEY;
+	{
+            // this is a hack as I don't know how RegEnumValueA works
+	    if (strstr(fullname, "zlib") || strstr(fullname, "mszh"))
+                return 1;
+	    if (status) *status=REG_OPENED_EXISTING_KEY;
+	}
 
 	t=insert_handle(generate_handle(), fullname);
 	*newkey=t->handle;
 	free(fullname);
 	return 0;
 }
+
+long RegEnumValueA(HKEY hkey, DWORD index, LPSTR value, LPDWORD val_count,
+		   LPDWORD reserved, LPDWORD type, LPBYTE data, LPDWORD count)
+{
+    // have no idea how this should work
+    //printf("Reg Enum 0x%x %d  %p %d   data: %p %d  %d >%s<\n", hkey, index, value, *val_count, data, *count, reg_size, data);
+    {
+	reg_handle_t* t = find_handle(hkey);
+	if (t)
+	{
+	    struct reg_value* v=find_value_by_name(t->name);
+            *count = v->len;
+	    memcpy(data, v->value, *count);
+            *val_count = v->len;
+	    memcpy(value, v->value, *val_count);
+            if (type)
+		*type = v->type;
+	    //printf("Found handle  %s\n", v->name);
+            return 0;
+	}
+    }
+
+    return -1;
+}
+
 long RegSetValueExA(long key, const char* name, long v1, long v2, const void* data, long size)
 {
     struct reg_value* t;

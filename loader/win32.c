@@ -43,6 +43,9 @@
 #include <loader.h>
 #include <com.h>
 
+long RegEnumValueA(HKEY hkey, DWORD index, LPSTR value, LPDWORD val_count,
+		   LPDWORD reserved, LPDWORD type, LPBYTE data, LPDWORD count);
+
 char* def_path=WIN32_PATH;
 
 static void do_cpuid(unsigned int *regs)
@@ -1664,14 +1667,12 @@ int WINAPI expLoadLibraryA(char* name)
 //    printf("LoadLibrary wants: %s/%s\n", def_path, name);
 
     if(strncmp(name, "c:\\windows\\", 11)==0)name+=11;
+    if(strncmp(name, ".\\", 2)==0) name += 2;
     if(name[0]!='/')
     {
 	strcpy(qq, def_path);
 	strcat(qq, "/");
-	if(strncmp(name, ".\\", 2)==0)
-	    strcat(qq, name+2);
-	else
-	    strcat(qq, name);
+	strcat(qq, name);
     }
     printf("Loading DLL: %s", qq);fflush(stdout);
 //    printf("Entering LoadLibraryA(%s)\n", name);
@@ -2011,7 +2012,7 @@ int WINAPI expIsBadStringPtrW(const short* string, int nchars)
 
 int WINAPI expIsBadStringPtrA(const char* string, int nchars)
 {
-    int result;
+    int result=0;
 //    if(string==0)result=1; else result=0;
 //    dbgprintf("IsBadStringPtrW(0x%x, %d) => %d", string, nchars, result);
 //    if(string)wch_print(string);
@@ -2451,8 +2452,11 @@ WIN_BOOL
  
 // printf("RegEnumValueA(%x,%ld,%p,%p,%p,%p,%p,%p)\n",
 //   hkey, index, value, val_count, reserved, type, data, count );
+// return -1;
 
- return -1;
+ return RegEnumValueA(hkey, index, value, val_count,
+			 reserved, type, data, count);
+
 }
  
 
