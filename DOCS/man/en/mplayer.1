@@ -7463,6 +7463,15 @@ but temporal often looks better.
 direct_pred=0 is usually both slower and lower quality.
 .
 .TP
+.B (no)weight_b
+Use weighted prediction in B-frames.
+Without this option, bidirectionally predicted macroblocks give
+equal weight to each reference frame.
+With this option, the weights are determined by the temporal position
+of the B-frame relative to the references.
+Requires bframes > 1.
+.
+.TP
 .B (no)b8x8mv
 Use additional macroblock types b16x8, b8x16, b8x8 (default: enabled).
 Without this option, B-frames will use only types

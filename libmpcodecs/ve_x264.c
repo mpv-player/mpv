@@ -74,6 +74,7 @@ static int p4x4mv = 0;
 static int p8x8mv = 1;
 static int b8x8mv = 1;
 static int direct_pred = X264_DIRECT_PRED_TEMPORAL;
+static int weight_b = 0;
 static float ip_factor = 1.4;
 static float pb_factor = 1.3;
 static int rc_buffer_size = -1;
@@ -114,6 +115,8 @@ m_option_t x264encopts_conf[] = {
     {"b8x8mv", &b8x8mv, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"nob8x8mv", &b8x8mv, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"direct_pred", &direct_pred, CONF_TYPE_INT, CONF_RANGE, 0, 2, NULL},
+    {"weight_b", &weight_b, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    {"noweight_b", &weight_b, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"ip_factor", &ip_factor, CONF_TYPE_FLOAT, CONF_RANGE, -10.0, 10.0, NULL},
     {"pb_factor", &pb_factor, CONF_TYPE_FLOAT, CONF_RANGE, -10.0, 10.0, NULL},
     {"rc_buffer_size", &rc_buffer_size, CONF_TYPE_INT, CONF_RANGE, 0, 24000000, NULL},
@@ -215,6 +218,7 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     if(b8x8mv)
         mod->param.analyse.inter |= X264_ANALYSE_BSUB16x16;
     mod->param.analyse.i_direct_mv_pred = direct_pred;
+    mod->param.analyse.b_weighted_bipred = weight_b;
 
     mod->param.i_width = width;
     mod->param.i_height = height;
