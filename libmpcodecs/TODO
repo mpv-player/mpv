@@ -1,7 +1,5 @@
 TODO:
 - vo_config callbacks to cinepak
-- better mpi support to xanim (now it's EXPORT but could be better)
 - IP buffering for NUV
 - finish MPNG (8bpp support)
 - review authors
-
