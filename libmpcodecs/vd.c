@@ -46,6 +46,7 @@ extern vd_functions_t mpcodecs_vd_cyuv;
 extern vd_functions_t mpcodecs_vd_nuv;
 extern vd_functions_t mpcodecs_vd_mpng;
 extern vd_functions_t mpcodecs_vd_ijpg;
+extern vd_functions_t mpcodecs_vd_mtga;
 extern vd_functions_t mpcodecs_vd_libmpeg2;
 extern vd_functions_t mpcodecs_vd_huffyuv;
 extern vd_functions_t mpcodecs_vd_mpegpes;
@@ -93,6 +94,7 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 #ifdef HAVE_JPEG
 	&mpcodecs_vd_ijpg,
 #endif
+	&mpcodecs_vd_mtga,
         &mpcodecs_vd_libmpeg2,
         &mpcodecs_vd_huffyuv,
         &mpcodecs_vd_mpegpes,

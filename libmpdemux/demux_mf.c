@@ -95,9 +95,11 @@ demuxer_t* demux_open_mf(demuxer_t* demuxer){
 
   if ( !strcasecmp( mf_type,"jpg" ) || 
         !(strcasecmp(mf_type, "jpeg"))) sh_video->format = mmioFOURCC('I', 'J', 'P', 'G');
-   else 
+  else 
      if ( !strcasecmp( mf_type,"png" )) sh_video->format = mmioFOURCC('M', 'P', 'N', 'G' );
-       else { mp_msg(MSGT_DEMUX, MSGL_INFO, "[demux_mf] unknow input file type.\n" ); free( dmf ); return NULL; }
+  else
+     if ( !strcasecmp( mf_type,"tga" )) sh_video->format = mmioFOURCC('M', 'T', 'G', 'A' );
+  else { mp_msg(MSGT_DEMUX, MSGL_INFO, "[demux_mf] unknow input file type.\n" ); free( dmf ); return NULL; }
 
   sh_video->disp_w = mf_w;
   sh_video->disp_h = mf_h;
