@@ -1,5 +1,7 @@
-mplayer (0.99)
-  pre1:
+mplayer (g1)
+  pre1:  "Stalled"
+    # Stalled becouse the development slowed down a lot -- all the devs
+      are on summer holiday, or dunno.
   
     NOTE: the mplayer 'main' branch was forked at the time of 0.90-rc4, so
     0.90-rc5 (and later 0.90 releases) changes are independent!
@@ -25,11 +27,13 @@ mplayer (0.99)
     
     Ports:
     * HPUX fixes
-    * Ported to Darwin / Mac OS X
+    * Ported to Darwin / Mac OS X (with extra accurate Darwin timers)
     * Ported to Win32/MinGW (including network, timers, getch etc)
     * win32 codecs DLL support on Win32/Cygwin (and MinGW too!)
-    * Lots of Altivec optimizations
+    * Lots of PPC (including Altivec) optimizations
     * Some ARM fixes
+    * Alpha fixes (especially non-gcc3 support)
+    * Initial Hitachi SuperH support (SH3/SH4)
     
     Codecs/demuxers support:
     * realaudio win32 dlls support
@@ -55,10 +59,12 @@ mplayer (0.99)
     * support for latest XviD en/decoder features
     * decoder for Hauppauge PVR 250/350 MB-YUV format (fourcc HM12)
     * support for Vanguard's win32 h264 etc codecs
+    * Video for Linux 1: various bugfixes, video eq support
+    * Video for Linux 2 support
 
     FFmpeg/libavcodec:
     * libavcodec: static,const,compiler warning cleanup, UINTX -> uintx_t
-    * huffyuv v1 support
+    * old HuffYUV v1 support
     * PAL 4:1:1 SMPTE 314M DV streams support, NTSC DV last MB column fix
     * fixing padding bug autodetection for some rare files
     * DspContext.(i)dct_* bitexact cleanup
@@ -74,25 +80,34 @@ mplayer (0.99)
     * truncated unary binerization, unary k-th order exp golomb binarization :)
     * FFV1: lossless YUV codec, compress a lot better than huffyuv, but slower
     * lossless MJPEG en/decoding, pegasus "pseudo yuv" (=RCT) decoding
-
-    Others:
-    * TOOLS/plotpsnr.pl: PSNR plotting tool using gnuplot 
-    * DOCS/tech/mpcf.txt: MPCF/NUT draft/specification
+    * ATI VCR1 and VCR2 decoding
+    * full featured SH4 optimizations
+    * ARM optimized simple_idct
+    
+    Drivers:
     * vo/x11: fix detection of metacity
-    * configure: enable vidix for ppc
-    * spudec.c: Fix "invalid fragment" handling, Improved subtitle queueing
-    * TVout/matroxtv: various improvements
-    * tdfx_vid driver & vo support (3dfx cards overlay)
+    * tdfx_vid driver (3dfx cards overlay with AGP support)
+    * vo_xover: general x11 ovelay driver, currently onl tdfx_vid uses it
     * mga_vid: various fixes, 16MB G400 detection, support for multiple cards
     * new svgalib vo driver
-    * v4l capturing: various bugfixes, video eq support
+    * vo_directfb2: triple buffering support,configuration sys changed,fixes
+    * OpenGL driver cleanups/fixes (both vo_gl and vo_gl2)
+    * vo_fbdev cleanup/partial rewrite, now with real direct rendering
+
+    Others:
+    * lot of config/cmdline parsing fixes (some of them were at least 100000l bugs)
+    * configure: enable vidix for PPC
+    * configure: full featured PPC optimizations and rewritten architecture handling
+    * spudec.c: Fix "invalid fragment" handling, Improved subtitle queueing
     * network streaming layer: IPv6 support
     * playtree parsing speedup :)
-    * vo_directfb2: triple buffering support,configuration sys changed,fixes
     * various URL parsing fixes
-    * GUI PPC (reverse byteorder) fixes
     * crashing on broken config files finally fixed!
-    * OpenGL driver fixes
+    * GUI PPC (reverse byteorder) fixes
+    * mp3lib: moved the assembly sources into gcc inline assembly (c)
+    * TOOLS/plotpsnr.pl: PSNR plotting tool using gnuplot 
+    * DOCS/tech/mpcf.txt: MPCF/NUT draft/specification
+    * TVout/matroxtv: various improvements
 
 
 mplayer (0.90)
