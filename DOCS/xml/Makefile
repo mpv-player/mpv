@@ -5,6 +5,12 @@
 # The xsltproc program.
 XSLTPROC = xsltproc
 
+# Another xslt converter.
+# If you want to use it, change also USE_SAXON to 1 (below)
+# Probably you must also change the path to saxon.jar.
+USE_SAXON = 0
+SAXON_COMMAND = java -cp /usr/share/java/saxon.jar com.icl.saxon.StyleSheet
+
 # The xmllint program.
 XMLLINT = xmllint
 
@@ -38,7 +44,7 @@ HTML_TOP = ../HTML
 
 #####[ End of configuration ]###########################################
 
-export CHUNK_XSL SGML_CATALOG_FILES XMLLINT XSLTPROC
+export CHUNK_XSL SGML_CATALOG_FILES XMLLINT XSLTPROC SAXON_COMMAND USE_SAXON
 
 .PHONY: no-target
 no-target:

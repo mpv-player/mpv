@@ -12,6 +12,10 @@ ones successfully, so they are required:
 * xsltproc (part of libxslt1) is used for transforming XML files into HTML
   files.  Version 1.0.18 or later is recommended.
 
+Also it's possible to use the Saxon XSLT Processor. Russian translator
+used it (version 6.4.4) for a while. To enable it change USE_SAXON to 1 in
+the Makefile.
+
 
 Building the documentation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~

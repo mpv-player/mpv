@@ -20,8 +20,12 @@ HTML_STYLESHEET ?= ../default.css
 $(HTMLDIR)/index.html: documentation.xml $(XSL_DEPS)
 	-rm -f $(HTMLDIR)/*
 	$(XMLLINT) --noout --noent --postvalid --catalogs $<
-	$(XSLTPROC) --catalogs -o $(HTMLDIR)/ $(HTML_XSL) $<
 	cp $(HTML_STYLESHEET) $(HTMLDIR)/
+ifeq (0,$(USE_SAXON))
+	$(XSLTPROC) --catalogs -o $(HTMLDIR)/ $(HTML_XSL) $<
+else
+	cd $(HTMLDIR) && $(SAXON_COMMAND) $(CURDIR)/$< $(CURDIR)/$(HTML_XSL)
+endif
 
 ../html.xsl:
 	sh ../gen-html.xsl.sh $(CHUNK_XSL) > $@
