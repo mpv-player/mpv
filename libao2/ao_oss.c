@@ -149,11 +149,10 @@ ac3_retry:
   if(ao_data.format!=format)
 	mp_msg(MSGT_AO,MSGL_WARN,"WARNING! Your soundcard does NOT support %s sample format! Broken audio or bad playback speed are possible! Try with '-aop list=format'\n",audio_out_format_name(format));
 #endif
-
   
+  ao_data.channels = channels;
   if(format != AFMT_AC3) {
     // We only use SNDCTL_DSP_CHANNELS for >2 channels, in case some drivers don't have it
-    ao_data.channels = channels;
     if (ao_data.channels > 2) {
       if ( ioctl(audio_fd, SNDCTL_DSP_CHANNELS, &ao_data.channels) == -1 ||
 	   ao_data.channels != channels ) {
