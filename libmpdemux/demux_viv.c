@@ -150,7 +150,7 @@ static void vivo_parse_text_header(demuxer_t *demux, int header_len)
 	if (!strcmp(opt, "Producer"))
 	{
 	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Producer: %s\n", param);
-	    demux_info_add(demux, "software", param);
+	    demux_info_add(demux, "encoder", param);
 	    priv->producer = malloc(strlen(param));
 	    strcpy(priv->producer, param);
 	}
