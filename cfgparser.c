@@ -56,9 +56,10 @@ static int init_conf(struct config *conf, int mode)
 static int read_option(char *opt, char *param)
 {
 	int i;
-	int tmp_int;
-	float tmp_float;
+	long tmp_int;
+	double tmp_float;
 	int ret = -1;
+	char *endptr;
 
 	for (i = 0; i < nr_options; i++) {
 		if (!strcasecmp(opt, config[i].name))
@@ -113,13 +114,13 @@ static int read_option(char *opt, char *param)
 		case CONF_TYPE_INT:
 			if (param == NULL)
 				goto err_missing_param;
-			if (!isdigit(*param)) {
+
+			tmp_int = strtol(param, &endptr, 0);
+			if (*endptr) {
 				printf("parameter must be an integer:\n");
 				ret = ERR_OUT_OF_RANGE;
 				goto out;
 			}
-
-			tmp_int = atoi(param);
 
 			if (config[i].flags & CONF_MIN)
 				if (tmp_int < config[i].min) {
@@ -141,13 +142,13 @@ static int read_option(char *opt, char *param)
 		case CONF_TYPE_FLOAT:
 			if (param == NULL)
 				goto err_missing_param;
-			if (!isdigit(*param) && *param != '-' && *param != '.') {
+
+			tmp_float = strtod(param, &endptr);
+			if (*endptr) {
 				printf("parameter must be a floating point number:\n");
 				ret = ERR_MISSING_PARAM;
 				goto out;
 			}
-
-			tmp_float = atof(param);
 
 			if (config[i].flags & CONF_MIN)
 				if (tmp_float < config[i].min) {
