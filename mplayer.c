@@ -763,10 +763,14 @@ if(!use_stdin && !slave_mode){
 #endif
 
       while(guiIntfStruct.Playing!=1){
+#ifdef HAVE_NEW_INPUT
         mp_cmd_t* cmd;                                                                                   
+#endif
 	usleep(20000);
 	guiEventHandling();
+#ifdef HAVE_NEW_INPUT
 	if ( (cmd = mp_input_get_cmd(0,0)) != NULL) guiGetEvent( guiIEvent,(char *)cmd->id );
+#endif
       }
 
 play_dvd:
