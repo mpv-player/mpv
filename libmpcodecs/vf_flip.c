@@ -16,6 +16,13 @@ struct vf_priv_s {
 
 //===========================================================================//
 
+static int config(struct vf_instance_s* vf,
+        int width, int height, int d_width, int d_height,
+	unsigned int flags, unsigned int outfmt){
+    flags&=~8; // remove the FLIP flag
+    return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
+}
+
 static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
     if(mpi->flags&MP_IMGFLAG_ACCEPT_STRIDE){
 	// try full DR !
@@ -66,6 +73,7 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 //===========================================================================//
 
 static int open(vf_instance_t *vf, char* args){
+    vf->config=config;
     vf->get_image=get_image;
     vf->put_image=put_image;
     vf->default_reqs=VFCAP_ACCEPT_STRIDE;
