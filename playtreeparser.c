@@ -20,12 +20,6 @@
 #include "mp_msg.h"
 
 
-#if defined(__CYGWIN__) || defined(__OS2__)
-#define PATH_SEP '\\'
-#else
-#define PATH_SEP '/'
-#endif
-
 extern play_tree_t*
 asx_parser_build_tree(char* buffer, int ref);
 
@@ -630,8 +624,16 @@ play_tree_add_basepath(play_tree_t* pt, char* bp) {
 
   for(i = 0 ; pt->files[i] != NULL ; i++) {
     fl = strlen(pt->files[i]);
-    if(fl <= 0 || pt->files[i][0] == PATH_SEP || strstr(pt->files[i],"://"))
+    // if we find url:// or X:\ at the beginning, don't mangle it.
+    if(fl <= 0 || strstr(pt->files[i],"://") || strstr(pt->files[i],":\\") == pt->files[i] + 1)
       continue;
+    // if the path begins with \ then prepend drive letter to it.
+    if (pt->files[i][0] == '\\') {
+      pt->files[i] = (char*)realloc(pt->files[i],2+fl+1);
+      memmove(pt->files[i] + 2,pt->files[i],fl+1);
+      memcpy(pt->files[i],bp,2);
+      return;
+    }
     pt->files[i] = (char*)realloc(pt->files[i],bl+fl+1);
     memmove(pt->files[i] + bl,pt->files[i],fl+1);
     memcpy(pt->files[i],bp,bl);
@@ -648,7 +650,8 @@ void play_tree_add_bpf(play_tree_t* pt, char* filename)
     file = strdup(filename);
     if (file)
     {
-      ls = strrchr(file,PATH_SEP);
+      ls = strrchr(file,'/');
+      if(!ls) ls = strrchr(file,'\\');
       if(ls) {
         ls[1] = '\0';
         play_tree_add_basepath(pt,file);

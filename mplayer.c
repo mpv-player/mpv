@@ -619,7 +619,8 @@ static int libmpdemux_was_interrupted(int eof) {
   return eof;
 }
 
-#define mp_basename(s) (strrchr(s,'/')==NULL?(char*)s:(strrchr(s,'/')+1))
+#define mp_basename2(s) (strrchr(s,'/')==NULL?(char*)s:(strrchr(s,'/')+1))
+#define mp_basename(s) (strrchr(s,'\\')==NULL?(mp_basename2(s)):(strrchr(s,'\\')+1))
 
 int playtree_add_playlist(play_tree_t* entry)
 {
