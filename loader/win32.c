@@ -1160,8 +1160,8 @@ struct critsecs_list_t
 };
 
 /* 'NEWTYPE' is working with VIVO and 3ivX dll (no more segfaults) -- alex */
-#undef CRITSECS_NEWTYPE
-//#define CRITSECS_NEWTYPE 1
+//#undef CRITSECS_NEWTYPE
+#define CRITSECS_NEWTYPE 1
 
 #ifdef CRITSECS_NEWTYPE
 #define CRITSECS_LIST_MAX 20
