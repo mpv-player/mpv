@@ -59,7 +59,7 @@ static void CALLBACK waveOutProc(HWAVEOUT hWaveOut,UINT uMsg,DWORD dwInstance,
 	if(uMsg != WOM_DONE)
         return;
     if(full_buffers==0) return;    //no more data buffered!
-    buffered_bytes=0;              //buffer is empty
+    buffered_bytes-=BUFFER_SIZE;
     --full_buffers;
 }
 
