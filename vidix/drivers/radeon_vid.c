@@ -1070,20 +1070,39 @@ int 	vixPlaybackGetEq( vidix_video_eq_t * eq)
   return 0;
 }
 
+#ifndef RAGE128
+#define RTFSaturation(a)   (1.0 + ((a)*1.0)/1000.0)
+#define RTFBrightness(a)   (((a)*1.0)/2000.0)
+#define RTFContrast(a)   (1.0 + ((a)*1.0)/1000.0)
+#define RTFHue(a)   (((a)*3.1416)/1000.0)
+#define RTFCheckParam(a) {if((a)<-1000) (a)=-1000; if((a)>1000) (a)=1000;}
+#endif
+
 int 	vixPlaybackSetEq( const vidix_video_eq_t * eq)
 {
 #ifdef RAGE128
   int br,sat;
+#else
+  int itu_space;
 #endif
     memcpy(&equal,eq,sizeof(vidix_video_eq_t));
 #ifdef RAGE128
     br = equal.brightness * 64 / 1000;
-    sat = equal.saturation * 32 / 1000;
-    if(sat < 0) sat = 0;
+    if(br < -64) br = -64; if(br > 63) br = 63;
+    sat = (equal.saturation + 1000) * 32 / 1000;
+    if(sat < 0) sat = 0; if(sat > 31) sat = 31;
     OUTREG(OV0_COLOUR_CNTL, (br & 0x7f) | (sat << 8) | (sat << 16));
 #else
-  radeon_set_transform(equal.brightness,equal.contrast,
-		       equal.saturation,equal.hue,0);
+  itu_space = equal.flags == VEQ_FLG_ITU_R_BT_709 ? 1 : 0;
+  RTFCheckParam(equal.brightness);
+  RTFCheckParam(equal.saturation);
+  RTFCheckParam(equal.contrast);
+  RTFCheckParam(equal.hue);
+  radeon_set_transform(RTFBrightness(equal.brightness),
+		       RTFContrast(equal.contrast),
+		       RTFSaturation(equal.saturation),
+		       RTFHue(equal.hue),
+		       itu_space);
 #endif
   return 0;
 }

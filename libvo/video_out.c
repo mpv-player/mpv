@@ -47,7 +47,16 @@ int vo_pts=0; // for hw decoding
 float vo_fps=0; // for mp1e rte
 
 char *vo_subdevice = NULL;
-
+/****************************************
+*	GAMMA CORRECTION		*
+****************************************/
+int vo_gamma_brightness=0;
+int vo_gamma_saturation=0;
+int vo_gamma_contrast=0;
+int vo_gamma_hue=0;
+int vo_gamma_red_intense=0;
+int vo_gamma_green_intense=0;
+int vo_gamma_blue_intense=0;
 //
 // Externally visible list of all vo drivers
 //

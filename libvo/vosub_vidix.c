@@ -154,15 +154,51 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 	return 0;  
 }
 
+extern int vo_gamma_brightness;
+extern int vo_gamma_saturation;
+extern int vo_gamma_contrast;
+extern int vo_gamma_hue;
+extern int vo_gamma_red_intense;
+extern int vo_gamma_green_intense;
+extern int vo_gamma_blue_intense;
+
+vidix_video_eq_t vid_eq;
+
 void vidix_start(void)
 {
     int err;
 
+    if(verbose > 1)
+    {
+	printf("vosub_vidix: vo_gamma_brightness=%i\n"
+	       "vosub_vidix: vo_gamma_saturation=%i\n"
+	       "vosub_vidix: vo_gamma_contrast=%i\n"
+	       "vosub_vidix: vo_gamma_hue=%i\n"
+	       "vosub_vidix: vo_gamma_red_intense=%i\n"
+	       "vosub_vidix: vo_gamma_green_intense=%i\n"
+	       "vosub_vidix: vo_gamma_blue_intense=%i\n"
+	       ,vo_gamma_brightness
+	       ,vo_gamma_saturation
+	       ,vo_gamma_contrast
+	       ,vo_gamma_hue
+	       ,vo_gamma_red_intense
+	       ,vo_gamma_green_intense
+	       ,vo_gamma_blue_intense);
+    }
     if((err=vdlPlaybackOn(vidix_handler))!=0)
     {
 	printf("vosub_vidix: Can't start playback: %s\n",strerror(err));
 	return -1;
     }
+    vid_eq.brightness = vo_gamma_brightness;
+    vid_eq.saturation = vo_gamma_saturation;
+    vid_eq.contrast = vo_gamma_contrast;
+    vid_eq.hue = vo_gamma_hue;
+    vid_eq.red_intense = vo_gamma_red_intense;
+    vid_eq.green_intense = vo_gamma_green_intense;
+    vid_eq.blue_intense = vo_gamma_blue_intense;
+    vid_eq.flags = VEQ_FLG_ITU_R_BT_601;
+    vdlPlaybackSetEq(vidix_handler,&vid_eq);
     return 0;
 }
 

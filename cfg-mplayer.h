@@ -39,6 +39,14 @@ extern char *lirc_configfile;
 extern int vo_doublebuffering;
 extern int vo_fsmode;
 extern int vo_dbpp;
+/* gamma correction */
+extern int vo_gamma_brightness;
+extern int vo_gamma_saturation;
+extern int vo_gamma_contrast;
+extern int vo_gamma_hue;
+extern int vo_gamma_red_intense;
+extern int vo_gamma_green_intense;
+extern int vo_gamma_blue_intense;
 #endif
 
 #ifdef USE_SUB
@@ -237,6 +245,13 @@ static config_t mplayer_opts[]={
 	{"fsmode", &vo_fsmode, CONF_TYPE_INT, CONF_RANGE, 0, 15, NULL},
 	{"double", &vo_doublebuffering, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"nodouble", &vo_doublebuffering, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	{"brightness",&vo_gamma_brightness, CONF_TYPE_INT, CONF_RANGE, -1000, 1000, NULL},
+	{"saturation",&vo_gamma_saturation, CONF_TYPE_INT, CONF_RANGE, -1000, 1000, NULL},
+	{"constrast",&vo_gamma_contrast, CONF_TYPE_INT, CONF_RANGE, -1000, 1000, NULL},
+	{"hue",&vo_gamma_hue, CONF_TYPE_INT, CONF_RANGE, -1000, 1000, NULL},
+	{"red_instense",&vo_gamma_red_intense, CONF_TYPE_INT, CONF_RANGE, -1000, 1000, NULL},
+	{"green_intense",&vo_gamma_green_intense, CONF_TYPE_INT, CONF_RANGE, -1000, 1000, NULL},
+	{"blue_intense",&vo_gamma_blue_intense, CONF_TYPE_INT, CONF_RANGE, -1000, 1000, NULL},
 #endif
 
 #ifdef HAVE_AA
