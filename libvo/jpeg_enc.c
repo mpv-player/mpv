@@ -41,6 +41,8 @@
 
 #include "jpeg_enc.h"
 
+extern int avcodec_inited;
+
 /* zr_mjpeg_encode_mb needs access to these tables for the black & white 
  * option */
 typedef struct MJpegContext {
@@ -297,15 +299,12 @@ jpeg_enc_t *jpeg_enc_init(int w, int h, int y_psize, int y_rsize,
 
 	/* if libavcodec is used by the decoder then we must not
 	 * initialize again, but if it is not initialized then we must
-	 * initialize it here. There must be a better way to find out
-	 * if it is initialized */
-	if (av_fdct != jpeg_fdct_ifast 
-#ifdef HAVE_MMX
-			&& av_fdct != fdct_mmx
-#endif
-			) {
+	 * initialize it here. */
+	if (!avcodec_inited) {
 		/* we need to initialize libavcodec */
 		avcodec_init();
+		avcodec_register_all();
+		avcodec_inited=1;
 	}
 
 	if (mjpeg_init(j->s) < 0) {
