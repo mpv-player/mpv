@@ -40,7 +40,8 @@ Dominik Mierzejewski created and maintains official Red Hat RPM packages of
 
 <para>
 Mandrake RPM packages are available from the <ulink url="http://plf.zarb.org/">P.L.F.</ulink>.
-SuSE includes a crippled version of MPlayer in their distribution. You can get working RPMs
+SuSE used to include a crippled version of MPlayer in their distribution.
+They have removed it in their latest releases. You can get working RPMs
 from <ulink url="http://packman.links2linux.de/?action=128">links2linux.de</ulink>.
 </para>
 </sect2>
