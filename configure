@@ -728,7 +728,11 @@ if [ $_x11 = 'yes' ]; then
 fi
 
 # to screen.
+echo -n "Kernel: "
+uname -a
 echo "Using C compiler: $_cc"
+$_cc -v
+as --version | head -n 1
 echo "Checking for cpu vendor ... $pvendor ( $pfamily:$pmodel:$pstepping )"
 echo "Checking for cpu type ... $pname"
 echo "Optimizing to ... $proc"
