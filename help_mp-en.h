@@ -108,9 +108,9 @@ static char help_text[]=
 "         ************************************************\n"\
 "!!! Possible reasons, problems, workaround: \n"\
 "- Most common: broken/buggy _audio_ driver. workaround: try -ao sdl or use\n"\
-"  ALSA 0.5 or oss emulation of ALSA 0.9. read DOCS/sound.html for more tipps!\n"\
+"  ALSA 0.5 or oss emulation of ALSA 0.9. read DOCS/sound.html for more tips!\n"\
 "- Slow video output. try different -vo driver (for list: -vo help) or try\n"\
-"  with -framedrop !  Read DOCS/video.html for video tuning/speedup tipps.\n"\
+"  with -framedrop !  Read DOCS/video.html for video tuning/speedup tips.\n"\
 "- Slow cpu. don't try to playback big dvd/divx on slow cpu! try -hardframedrop\n"\
 "- Broken file. try various combinations of these: -nobps  -ni  -mc 0  -forceidx\n"\
 "If none of these apply, then read DOCS/bugreports.html !\n\n"
