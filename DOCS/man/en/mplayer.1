@@ -1669,10 +1669,6 @@ Specify the VOBsub subtitle ID.
 Override audio driver/\:card buffer size detection.
 .
 .TP
-.B \-aofile <filename>
-Override the default filename employed by \-ao pcm.
-.
-.TP
 .B \-aop <list=plugin1,plugin2...:option1=value1:opt2=val2...>
 Specify audio plugin(s) and their options
 (also see the audio plugins section of the documentation).
@@ -1768,11 +1764,6 @@ A value of 200 will allow you to adjust the volume up to a maximum of
 double the current level.
 With values below 100 the initial volume (which is 100%) will be above
 the maximum, which e.g.\& the OSD cannot display correctly.
-.
-.TP
-.B \-nowaveheader (\-ao pcm only)
-Don't include wave header.
-Used for raw PCM.
 .
 .TP
 .B \-volstep <0\-100>
@@ -1908,9 +1899,24 @@ Produces no audio output but maintains video playback speed.
 Use \-nosound for benchmarking.
 .
 .TP
-.B pcm (also see \-aofile)
+.B pcm
 Raw PCM/\:wave file writer audio output.
-Writes the sound to ./audiodump.wav.
+.PD 0
+.RSs
+.IPs (no)waveheader
+Include or do not include the wave header (default: included).
+When not included, raw PCM will be generated.
+.IPs file=<filename>
+Write the sound to <filename> instead of the default
+audiodump.wav.
+.REss
+.PD 1
+.RS
+.sp 1
+.I NOTE:
+If you do not specify any option the output is progressive
+(i.e.\& not interlaced).
+.RE
 .
 .TP
 .B plugin\ \ 

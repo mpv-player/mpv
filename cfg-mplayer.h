@@ -167,9 +167,9 @@ m_option_t mplayer_opts[]={
 	{"abs", &ao_data.buffersize, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
 
 	// -ao pcm options:
-	{"aofile", &ao_outputfilename, CONF_TYPE_STRING, 0, 0, 0, NULL},
-	{"waveheader", &ao_pcm_waveheader, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"nowaveheader", &ao_pcm_waveheader, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	{"aofile", "-aofile is deprecated. Use -ao pcm:file=<filename> instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
+	{"waveheader", "-waveheader is deprecated. Use -ao pcm:waveheader instead.\n", CONF_TYPE_PRINT, 0, 0, 1, NULL},
+	{"nowaveheader", "-nowaveheader is deprecated. Use -ao pcm:nowaveheader instead.\n", CONF_TYPE_PRINT, 0, 1, 0, NULL},
 
 	{"alsa", "-alsa has been removed. Remove it from your config file.\n",
             CONF_TYPE_PRINT, 0, 0, 0, NULL},

@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "bswap.h"
+#include "subopt-helper.h"
 #include "libaf/af_format.h"
 #include "audio_out.h"
 #include "audio_out_internal.h"
@@ -24,8 +25,8 @@ LIBAO_EXTERN(pcm)
 
 extern int vo_pts;
 
-char *ao_outputfilename = NULL;
-int ao_pcm_waveheader = 1;
+static char *ao_outputfilename = NULL;
+static int ao_pcm_waveheader = 1;
 
 #define WAV_ID_RIFF 0x46464952 /* "RIFF" */
 #define WAV_ID_WAVE 0x45564157 /* "WAVE" */
@@ -79,9 +80,20 @@ static int control(int cmd,void *arg){
 // return: 1=success 0=fail
 static int init(int rate,int channels,int format,int flags){
 	int bits;
-	if(!ao_outputfilename) {
-		ao_outputfilename = strdup(ao_pcm_waveheader ? "audiodump.wav" : "audiodump.pcm");
+	strarg_t file;
+	opt_t subopts[] = {
+	  {"waveheader", OPT_ARG_BOOL, &ao_pcm_waveheader, NULL},
+	  {"file",       OPT_ARG_STR,  &file,              NULL},
+	  {NULL}
 	}
+	// set defaults
+	ao_pcm_waveheader = 1;
+	file.str = "audiodump.wav";
+	file.len = 13;
+	if (subopt_parse(ao_subdevice, subopts) != 0) {
+	  return 0;
+	}
+	ao_outputfilename = strndup(file.str, file.len);
 
 	/* bits is only equal to format if (format == 8) or (format == 16);
 	   this means that the following "if" is a kludge and should
@@ -142,6 +154,9 @@ static void uninit(int immed){
 		fwrite(&wavhdr,sizeof(wavhdr),1,fp);
 	}
 	fclose(fp);
+	if (ao_outputfilename)
+	  free(ao_outputfilename);
+	ao_outputfilename = NULL;
 }
 
 // stop playing and empty buffers (for seeking/pause)
