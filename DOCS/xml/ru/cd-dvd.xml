@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="koi8-r"?>
+<chapter id="cd-dvd">
+<title>Использование CD/DVD</title>
+
+<sect1 id="drives">
+<title>приводы CD/DVD</title>
+<para>
+Из Linux'овской документации:
+</para>
+
+<para>
+Современные приводы CD-ROM могут работать на очень  высоких скоростях, некоторые
+из них способны регулировать скорость чтения. Несколько аргументов в пользу использования этой возможности:
+</para>
+
+<itemizedlist>
+<listitem><para>
+При высоких оборотах возрастает вероятность ошибки при чтении, особенно с
+неправильно записанных дисков. Уменьшение скорости может предотвратить потерю
+данных в некоторых случаях.
+</para></listitem>
+
+<listitem><para>
+Уровень шума, возрастающий с оборотами, может оказаться весьма существенным
+</para></listitem>
+</itemizedlist>
+
+<para>
+Вы можете уменьшить скорость врашения IDE CD-ROM приводов программами
+<command>hdparm</command> или <command>setcd</command>. Это работает так:
+<screen>hdparm -E <replaceable>[скорость]</replaceable> <replaceable>[привод]
+  </replaceable></screen>
+<screen>setcd -x <replaceable>[скорость]</replaceable> <replaceable>[привод]
+</replaceable></screen>
+</para>
+
+<para>
+Вы также можете попробовать
+<screen>echo current_speed:4 &gt; /proc/ide/[cdrom device]/settings</screen>
+но для этого требуются привилегии администратора. Следующая команда
+тоже может быть полезна:
+<screen>echo file_readahead:2000000 &gt; /proc/ide/[cdrom device]/settings</screen>
+</para>
+
+<para>
+Таким образом предварительно cчитывается 2 мегабайта (полезно при
+дисках с царапинами). Если поставить слишком высокое значение, то постоянный
+запуск и остановка вращения диска драматически снизят эффективность.
+Рекомендуется также подстроить привод, используя <command>hdparm</command>:
+<screen>hdparm -d1 -a8 -u1 <replaceable>привод</replaceable></screen>
+</para>
+
+<para>
+Таким образом включается прямой доступ к памяти[DMA], предварительное
+чтение и размаскировка IRQ (прочти man-страницу <command>hdparm</command>,
+для более подробного описания).
+</para>
+
+<para>
+Обратитесь к &quot;<filename>/proc/ide/<replaceable>[cdrom device]</replaceable>/settings</filename>&quot;
+для подстройки Вышего CD-ROM привода.
+</para>
+
+<para>
+У SCSI приводов нет общего способа выставить эти параметры (Вы знаете какой-нибудь?
+Расскажите нам!) Существует программа для 
+<ulink url="http://das.ist.org/~georg/">Plextor SCSI приводов</ulink>.
+</para>
+
+<para>FreeBSD:</para>
+<para>Скорость: <command>cdcontrol [-f <replaceable>device</replaceable>] speed <replaceable>speed</replaceable></command></para>
+<para>DMA: <command>sysctl hw.ata.atapi_dma=1</command></para>
+</sect1>
+
+<sect1 id="dvd">
+<title>Воспроизведение DVD</title>
+<para>
+Полный список возможных опций можно прочитать в man.
+Синтаксис для стандартных Цифровых Многоцелевых Дисков[Digital Versatile Disc]
+(DVD) таков:
+<screen>mplayer -dvd <replaceable>ролик</replaceable> [-dvd-device <replaceable>привод</replaceable>]</screen>
+</para>
+
+<para>
+Пример:
+<screen>mplayer -dvd 1 -dvd-device /dev/hdc</screen>
+</para>
+
+<para>
+Устройство DVD по-умолчанию - это <filename>/dev/dvd</filename>. Если Ваши
+настройки отличаются, создайте символическую ссылку или укажите правильное
+устройство в командной строке, используя опцию <option>-dvd-device</option>.
+</para>
+
+<formalpara>
+<title>Новая поддержка DVD (mpdvdkit2)</title>
+<para>
+<application>MPlayer</application> использует библиотеки <systemitem>libdvdread
+</systemitem> и <systemitem>libdvdcss</systemitem> для DVD расшифровки и
+воспроизведения. Эти две библиотеки содержатся в подкаталоге
+<filename class="directory">libmpdvdkit2/</filename> дерева исходного кода
+MPlayer'а, так что отдельно устанавливать их не нужно. Мы выбрали такое решение
+потому, что нам пришлось исправить ошибку в <systemitem>libdvdread</systemitem>
+и добавить патч к <systemitem>libdvdcss</systemitem> поддержку
+<emphasis role="bold">сохранения взломанных ключей CSS</emphasis>. Это
+предотвращает повторный взлом ключа при каждом просмотре, существенно увеличивая
+скорость.
+</para>
+</formalpara>
+
+<para>
+<application>MPlayer</application> способен использовать системные библиотеки
+<systemitem>libdvdread</systemitem> и <systemitem>libdvdcss</systemitem>, но это
+<emphasis role="bold">не рекомендуется</emphasis>, так как может приводить к
+ошибкам, несовместимости и потере скорости.
+</para>
+
+<formalpara>
+<title>Поддержка DVD навигации (dvdnav)</title>
+<para>
+Поддержка DVD навигации, используя <systemitem>dvdnav</systemitem> была начата,
+но никогда не была доведена до ума, и на данном этапе заброшена. Кто знает,
+она может даже скомпилироваться.
+</para>
+</formalpara>
+
+<formalpara>
+<title>Старая поддержка DVD - НЕ ОБЯЗАТЕЛЬНО</title>
+<para>
+Это может оказаться полезным, например, при просмотре зашифрованных VOB-файлов
+с <emphasis role="bold">жесткого диска</emphasis>. Cкомпилируйте и установите
+<emphasis role="bold">libcss</emphasis> (версию 0.0.1, ни в коем случае не
+более позднюю). Если <emphasis role="bold">MPlayer</emphasis> ее не
+обнаружит, добавьте <option>-csslib /path/to/libcss.so</option>. Для
+использования необходимы привилегии администратора или suid root на исполняемом
+файле MPlayer'а или позвольте MPlayer'у запустить suid root обработчик
+fibmap_mplayer.
+</para>
+</formalpara>
+
+<formalpara>
+<title>Структура DVD</title>
+<para>
+Диски DVD используют сектора размером в 2048 байтов с ECC/CRC. На них обычно
+единственная файловая система UDF на одной дорожке, которая содержит
+различные файлы (коротенькие .IFO и .BUK и длинные (порядка гигабайта)
+.VOB). Это настоящие файлы, которые можно просматривать/переписывать с
+замонтированного не зашифрованного DVD.
+</para>
+</formalpara>
+
+<para>
+Файлы .IFO содержат информацию для навигации (раздел/ролик/угол/язык и пр.),
+необходимую для интерпретации содержания .VOB (кино). Файлы .BUK &mdash; их
+дубли. Эти файлы содержат адреса в <emphasis role="bold">секторах</emphasis>,
+так что для исполнения навигации и расшифровки DVD, нужен доступ к файлам на
+уровне секторов.
+</para>
+
+<para>
+Из-за этого старая поддержка DVD c <systemitem>libcss</systemitem> нуждается в
+замонтированной файловой системе и посекторному доступу к устройству. К
+сожалению, для этого нужны привилегии администратора (под Linux). Проблема
+решается тремя способами:
+
+<itemizedlist>
+<listitem><para>
+Привилегированный доступ или исполняемый файл <application>MPlayer
+</application>'а с suid root.
+</para></listitem>
+
+<listitem><para>
+Позвольте <application>MPlayer</application>'у выполнять the suid-root
+обработчик fibmap_mplayer для доступа к DVD (используется в старом методе
+воспроизведения DVD через <systemitem>libcss</systemitem>).
+</para></listitem>
+
+<listitem><para>
+Не использовать драйвер файловой системы из ядра и все делать в пространстве
+пользователя. <systemitem>libdvdread</systemitem> 0.9.x и <systemitem>
+libmpdvdkit</systemitem> так и делают (новая поддержка DVD). Драйвер UDF
+файловой системы не нужен, поскольку в них встроенные драйвера файловой системы
+UDF. Также DVD не обязан быть замонтированным, поскольку используется
+только прямой посекторный доступ.
+</para></listitem>
+</itemizedlist>
+</para>
+
+<para>
+Иногда пользователи не могут читать <filename>/dev/dvd</filename>
+, поэтому авторы <systemitem>libdvdread</systemitem> написали эмуляционный
+уровень, который превращает секторные адреса в названия файла и смещение,
+для эмуляции прямого доступа на замонтированной файловой системе или на жестком
+диске.
+</para>
+
+<para>
+<systemitem>libdvdread</systemitem> даже принимает точку монтирования вместо
+имени устройства для прямого доступа, и получает его название из <filename>
+/proc/mounts</filename>. Этот метод придуман для Solaris-ов, где данные названия
+присваиваются динамически.
+</para>
+
+<para>
+Устройство DVD по-умолчанию &mdash; <filename>/dev/dvd</filename>. Если Ваши
+установки отличаются, создайте символическую ссылку или укажите правильное
+название в командной строке после опции <filename>-dvd-device</filename>.
+</para>
+
+<formalpara>
+<title>DVD аутентификация</title>
+<para>
+Аутентификация и дешифровка в новом методе поддержки DVD происходит, используя
+пропатченную <systemitem>libdvdcss</systemitem> (см. выше). Метод может быть
+указан в переменной среды <envar>DVDCSS_METHOD</envar>, которая может быть
+установлена в key, disk or title.
+</para>
+</formalpara>
+
+<para>
+Если ничего не указано, она пробует следующие методы (по-умолчанию: key,
+title request):
+</para>
+
+<orderedlist>
+<listitem><para>
+<emphasis role="bold">bus key</emphasis>: Этот ключ устанавливается во время
+аутентификации (длинная смесь ioctl'ов и различных обменов ключами,
+криптографические процедуры) и используется для зашифровки ключей диска и ролика
+при передаче по незащищенной шине (во избежания подслушивания). Он необходим для
+получения и предварительной расшифровки ключа диска.
+</para></listitem>
+
+<listitem><para>
+<emphasis role="bold">cached key</emphasis>: <application>MPlayer</application>
+ищет уже взломанный ключ ролика, который сохраняется в каталоге
+<filename class="directory">~/.mplayer/DVDKeys</filename> (быстро ;).
+</para></listitem>
+
+<listitem><para>
+<emphasis role="bold">key</emphasis>: Если кэшированного ключа нет,
+<application>MPlayer</application> пытается расшифровать ключ диска с помощью
+включенных ключей плейеров.
+</para></listitem>
+
+<listitem><para>
+<emphasis role="bold">disk</emphasis>: Если метод key проваливается
+(например, при отсутствии ключей плейеров) <application>MPlayer</application>
+взломает ключ грубой силой. Этот метод интенсивно использует процессор и
+нуждается в 64 мегабайтах памяти (хэш-таблица из 16 миллионов 32-разрядных
+записей). Работает наверняка (но медленно).
+</para></listitem>
+
+<listitem><para>
+<emphasis role="bold">title request</emphasis>: Используя ключ диска
+<application>MPlayer</application> запрашивает зашифрованные ключи роликов,
+которые находятся в <emphasis>скрытых секторах</emphasis>, используя 
+<systemitem>ioctl()</systemitem>. Региональная защита RPC-2 приводов
+осуществляется именно на этом этапе; может не сработать на подобных приводах.
+Если удается, ключи роликов будут расшифрованы, используя ключа диска и шины.
+</para></listitem>
+
+<listitem><para>
+<emphasis role="bold">title</emphasis>:Данный метод используется если title
+request не срабатывает. Он не опирается на обмен ключами с приводом.
+Используется криптографическая атака, чтобы угадать ключ непосредственно
+(находится повторяющаяся последовательность в расшифрованном содержимом VOB'а
+и предполагается, что текст, соответствующий первому зашифрованному байту - это
+продолжение этой последовательности). Метод также известен под названиями &quot;
+атака с известным открытым текстом&quot; или &quot;DeCSSPlus&quot;. В редких
+случаях этот метод проваливается, по причине недостаточности зашифрованного
+содержания для статистической атаки или из-за изменения ключа в середине
+ролика. Это единственный метод расшифровать содержимое DVD на жестком диске
+или на диске из неподходящего региона на проигрывателе RPC-2. (медленный метод).
+</para></listitem>
+</orderedlist>
+
+<para>
+С дисководами RPC-1, региональная защита осуществляется программно.
+Дисководы RPC-2 защищены аппаратными средствами, разрешающими менять регион
+всего 5 раз. Рекомендуется обновить прошивку[firmware] до RPC-1 если у тебя
+RPC-2 привод. Обновления прошивок могут быть найдены на
+<ulink url="http://www.firmware-flash.com/">странице прошивок</ulink>.  Если
+для Вашего дисковода нет обновления, используйте для изменения региона привода
+<ulink url="http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz">
+программу regionset</ulink> (для Linux). <emphasis role="bold">Внимание:
+</emphasis> Изменить регион можно всего 5 раз.
+</para>
+</sect1>
+
+<sect1 id="vcd">
+<title>воспроизведение VCD</title>
+<para>
+Полный список возможных опций можно прочитать в man. Синтаксис для обычного
+Видео-CD (VCD):
+<screen>mplayer -vcd <replaceable>дорожка</replaceable> [-cdrom-device <replaceable>устройство</replaceable>]</screen>
+Пример:
+<screen>mplayer -vcd 2 -cdrom-device /dev/hdc</screen>
+Устройство VCD по умолчанию &mdash; <filename>/dev/cdrom</filename>. Если Ваши
+настройки отличаются, создайте символическую ссылку добавьте правильное название
+в командной строке после опции <option>-cdrom-device</option>.
+</para>
+
+<note><para>
+По крайней ммере Plextor'ы и некоторые Toshiba SCSI CD-ROM прибоды показывают
+ужасную производительность при чтении VCD'ов. Это объясняется неполным
+осуществлением <systemitem>ioctl</systemitem> CDROMREADRAW на этих приводах.
+Если Вы имеете некоторые познания в сфере программирования SCSI, пожалуйста
+<ulink url="../../tech/patches.txt">помогите нам</ulink> в написании поддержки
+SCSI generic для VCD.
+</para></note>
+
+<para>
+В настоящий момент Вы можете извлечь данные с VCD'ов, используя 
+<ulink url="http://140.132.1.204/OS/Linux/packages/X/viewers/readvcd/">
+readvcd</ulink>, и воспроизвести получившийся файл <application>MPlayer
+</application>'ом.
+</para>
+
+<formalpara>
+<title>структура VCD</title>
+<para>
+Диски VCD состоят из одной или нескольких дорожек:
+</para>
+</formalpara>
+
+<itemizedlist>
+<listitem><para>
+Первая дорожка содержит несколько мегабайт секторами по 2048 байтов,
+с файловой системой iso9660, обычно содержащей проигрыватель VCD для
+Windows или прочую информацию, вроде картинок или текста.
+</para></listitem>
+
+<listitem><para>
+Вторая и остальные дорожки содержат MPEG-поток секторами по 2324 байта, по
+одному пакету MPEG PS на сектор вместо файловой системы. Эти дорожки <emphasis
+role="bold">не монтируются</emphasis> (Вы когда-нибудь монтировали аудио диск
+для того, чтобы его воспроизвести?) Так как большинство фильмов именно на этой
+дорожке, попробуй сначала <option>-vcd 2</option>.
+</para></listitem>
+
+<listitem><para>
+Существуют VCD диски без первой дорожки (единственная дорожка без файловой
+системы). Они просматриваются, но не монтируются.
+</para></listitem>
+</itemizedlist>
+
+<formalpara>
+<title>Про файлы .DAT</title>
+<para>
+Файл примерно в 600 мегабайт на первой дорожке не настоящий! Это так
+называемый ISO-переход, созданный, чтобы позволить Windows обрабатывать эти
+дорожки (Windows вообще запрещает приложениям использовать прямой доступ
+к устройствам). Под Linux Вы не можете копировать эти файлы (они выглядаят, как
+мусор). Под Windows это возможно, поскольку из iso9660 эмулирует прямой доступ
+к дорожкам через этот файл. Чтобы проигрывать .DAT файл Вам нужен драйвер,
+который может быть найден в Linux версии PowerDVD. Это модифицированный драйвер
+iso9660 файловой системы (<filename>vcdfs/isofs-2.4.X.o</filename>), который
+способен эмулировать прямой доступ к дорожкам через этот файл. Если Вы
+замонтируете диск, используя их драйвер, Вы можете копировать и даже проигрывать
+.DAT файлы <application>MPlayer</application>'ом. Но это не будет работать со
+стандартным драйвером iso9660 из ядра Linux! Используйте вместо этого опцию
+<option>-vcd</option>. Альтернативами для копирования VCD может послужить новый
+драйвер <ulink url="http://www.elis.rug.ac.be/~ronsse/cdfs/">cdfs</ulink> (не
+входит в официальное ядро) который показывает дорожки[сессии] на диске как файлы
+образов и <ulink url="http://cdrdao.sf.net/">cdrdao</ulink>, приложение для
+побитного чтения/копирования CD.
+</para>
+</formalpara>
+</sect1>
+</chapter>
