@@ -416,8 +416,8 @@ static m_obj_presets_t size_preset = {
 #undef ST_OFF
 #define ST_OFF(f) M_ST_OFF(struct vf_priv_s,f)
 static m_option_t vf_opts_fields[] = {
-  {"w", ST_OFF(w), CONF_TYPE_INT, M_OPT_MIN,1 ,0, NULL},
-  {"h", ST_OFF(h), CONF_TYPE_INT, M_OPT_MIN,1 ,0, NULL},
+  {"w", ST_OFF(w), CONF_TYPE_INT, M_OPT_MIN,-3 ,0, NULL},
+  {"h", ST_OFF(h), CONF_TYPE_INT, M_OPT_MIN,-3 ,0, NULL},
   {"chr-drop", ST_OFF(v_chr_drop), CONF_TYPE_INT, M_OPT_RANGE, 0, 3, NULL},
   {"param", ST_OFF(param), CONF_TYPE_INT, M_OPT_RANGE, 0, 100, NULL},
   // Note that here the 2 field is NULL (ie 0)
