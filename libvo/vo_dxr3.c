@@ -141,7 +141,7 @@
 #include "spuenc.h"
 #include "sub.h"
 #ifdef HAVE_NEW_GUI
-#include "../Gui/interface.h"
+#include "Gui/interface.h"
 #endif
 #ifdef HAVE_X11
 #include "x11_common.h"

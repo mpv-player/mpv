@@ -9,8 +9,8 @@
 #include "osd.h"
 #include "mp_msg.h"
 #include <inttypes.h>
-#include "../cpudetect.h"
-#include "../mangle.h"
+#include "cpudetect.h"
+#include "mangle.h"
 
 extern int verbose; // defined in mplayer.c
 

@@ -1,7 +1,7 @@
 #ifndef __MPLAYER_MEMCPY
 #define __MPLAYER_MEMCPY 1
 
-#include "../config.h"
+#include "config.h"
 
 #ifdef USE_FASTMEMCPY
 #if defined(HAVE_MMX) || defined(HAVE_MMX2) || defined(HAVE_3DNOW) \

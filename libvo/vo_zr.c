@@ -24,8 +24,8 @@
 
 #include "video_out.h"
 #include "video_out_internal.h"
-#include "../mp_msg.h"
-#include "../m_option.h"
+#include "mp_msg.h"
+#include "m_option.h"
 #include "fastmemcpy.h"
 
 #include "jpeg_enc.h"

@@ -17,14 +17,14 @@
 #include "video_out_internal.h"
 
 #include <windows.h>
-#include "../osdep/keycodes.h"
-#include "../input/input.h"
+#include "osdep/keycodes.h"
+#include "input/input.h"
 
 #include "aspect.h"
 #include "mp_msg.h"
 
 #include "vosub_vidix.h"
-#include "../vidix/vidixlib.h"
+#include "vidix/vidixlib.h"
 
 extern void mplayer_put_key(int code);
 

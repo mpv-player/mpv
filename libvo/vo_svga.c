@@ -44,8 +44,8 @@ TODO:
 
 #include "sub.h"
 
-#include "../mp_msg.h"
-//#include "../mp_image.h"
+#include "mp_msg.h"
+//#include "mp_image.h"
 
 #include <assert.h>
 

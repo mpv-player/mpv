@@ -25,7 +25,7 @@
 
 #include "video_out.h"
 #include "video_out_internal.h"
-#include "../mp_msg.h"
+#include "mp_msg.h"
 #include "fastmemcpy.h"
 
 static vo_info_t info = {

@@ -119,8 +119,8 @@
 #include "x11_common.h"
 #endif
 
-#include "../input/input.h"
-#include "../input/mouse.h"
+#include "input/input.h"
+#include "input/mouse.h"
 
 extern int verbose;
 int sdl_noxv;
@@ -1165,7 +1165,7 @@ static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int
  *  returns : doesn't return
  **/
 
-#include "../osdep/keycodes.h"
+#include "osdep/keycodes.h"
 extern void mplayer_put_key(int code);
 
 #define shift_key (event.key.keysym.mod==(KMOD_LSHIFT||KMOD_RSHIFT)) 

@@ -2,7 +2,7 @@
 #include "aspect.h"
 #include "geometry.h"
 #ifndef ASPECT_TEST
-#include "../mp_msg.h"
+#include "mp_msg.h"
 #endif
 
 //#define ASPECT_DEBUG

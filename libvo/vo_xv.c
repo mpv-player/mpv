@@ -37,7 +37,7 @@ Buffer allocation:
 #include "aspect.h"
 
 #ifdef HAVE_NEW_GUI
-#include "../Gui/interface.h"
+#include "Gui/interface.h"
 #endif
 
 static vo_info_t info = {

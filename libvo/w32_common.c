@@ -1,10 +1,10 @@
 #include <limits.h>
 #include <windows.h>
 
-#include "../osdep/keycodes.h"
-#include "../input/input.h"
-#include "../input/mouse.h"
-#include "../mp_msg.h"
+#include "osdep/keycodes.h"
+#include "input/input.h"
+#include "input/mouse.h"
+#include "mp_msg.h"
 #include "video_out.h"
 #include "aspect.h"
 #include "w32_common.h"

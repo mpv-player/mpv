@@ -31,8 +31,8 @@
 #include "mp_msg.h"
 #include "m_option.h"
 
-#include "../input/input.h"
-#include "../input/mouse.h"
+#include "input/input.h"
+#include "input/mouse.h"
 
 #include "vo_quartz.h"
 
@@ -112,7 +112,7 @@ enum
 	kFullScreenCmd		= 5
 };
 
-#include "../osdep/keycodes.h"
+#include "osdep/keycodes.h"
 extern void mplayer_put_key(int code);
 
 extern void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));

@@ -7,7 +7,7 @@ OBJS = sr1.o
 ifeq ($(TARGET_ARCH_SGI_MIPS),yes)
 OPTFLAGS := $(OPTFLAGS:-O4=-O0)
 endif
-CFLAGS  = $(OPTFLAGS) $(EXTRA_INC)
+CFLAGS  = -I.. $(OPTFLAGS) $(EXTRA_INC)
 ifeq ($(TARGET_ARCH_X86),yes)
 SRCS += decode_i586.c
 OBJS += decode_i586.o

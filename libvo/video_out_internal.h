@@ -22,8 +22,8 @@
  */
 
 /* All video drivers will want this */
-#include "../libmpcodecs/vfcap.h"
-#include "../libmpcodecs/mp_image.h"
+#include "libmpcodecs/vfcap.h"
+#include "libmpcodecs/mp_image.h"
 #include "geometry.h"
 
 static uint32_t control(uint32_t request, void *data, ...);

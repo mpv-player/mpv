@@ -56,7 +56,7 @@ static inline void vo_draw_text_osd(int dxs,int dys,void (*draw_alpha)(int x0,in
 
 #else
 
-#include "../subreader.h"
+#include "subreader.h"
 
 extern unsigned char* vo_osd_text;
 

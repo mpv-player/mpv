@@ -31,10 +31,10 @@
 #include "mp_msg.h"
 
 #include "vosub_vidix.h"
-#include "../vidix/vidixlib.h"
+#include "vidix/vidixlib.h"
 
 #ifdef HAVE_NEW_GUI
-#include "../Gui/interface.h"
+#include "Gui/interface.h"
 #endif
 
 

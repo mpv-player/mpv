@@ -28,10 +28,10 @@
 #include <fontconfig/fontconfig.h>
 #endif
 
-#include "../bswap.h"
+#include "bswap.h"
 #include "font_load.h"
 #include "mp_msg.h"
-#include "../mplayer.h"
+#include "mplayer.h"
 #include "osd_font.h"
 
 #if (FREETYPE_MAJOR > 2) || (FREETYPE_MAJOR == 2 && FREETYPE_MINOR >= 1)

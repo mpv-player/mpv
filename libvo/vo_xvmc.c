@@ -31,7 +31,7 @@
 #include "aspect.h"
 
 #ifdef HAVE_NEW_GUI
-#include "../Gui/interface.h"
+#include "Gui/interface.h"
 #endif
 
 //no chanse xinerama to be suported in near future

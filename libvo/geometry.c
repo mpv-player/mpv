@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "geometry.h"
-#include "../mp_msg.h"
+#include "mp_msg.h"
 
 /* A string of the form [WxH][+X+Y] or xpos[%]:ypos[%] */
 char *vo_geometry = NULL;

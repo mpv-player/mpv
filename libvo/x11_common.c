@@ -20,7 +20,7 @@
 #include "aspect.h"
 #include "geometry.h"
 #include "help_mp.h"
-#include "../osdep/timer.h"
+#include "osdep/timer.h"
 
 #include <X11/Xmd.h>
 #include <X11/Xlib.h>
@@ -45,12 +45,12 @@
 #include <X11/extensions/Xvlib.h>
 #endif
 
-#include "../input/input.h"
-#include "../input/mouse.h"
+#include "input/input.h"
+#include "input/mouse.h"
 
 #ifdef HAVE_NEW_GUI
-#include "../Gui/interface.h"
-#include "../mplayer.h"
+#include "Gui/interface.h"
+#include "mplayer.h"
 #endif
 
 #define WIN_LAYER_ONBOTTOM               2
@@ -523,7 +523,7 @@ void vo_uninit(void)
     mDisplay = NULL;
 }
 
-#include "../osdep/keycodes.h"
+#include "osdep/keycodes.h"
 #include "wskeys.h"
 
 extern void mplayer_put_key(int code);

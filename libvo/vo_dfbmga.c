@@ -1339,7 +1339,7 @@ control( uint32_t request, void *data, ... )
 
 extern void mplayer_put_key( int code );
 
-#include "../osdep/keycodes.h"
+#include "osdep/keycodes.h"
 
 static void
 check_events( void )

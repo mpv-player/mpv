@@ -17,7 +17,7 @@
 #include "sub.h"
 
 #ifdef HAVE_NEW_GUI
-#include "../Gui/interface.h"
+#include "Gui/interface.h"
 #endif
 
 #include <GL/gl.h>

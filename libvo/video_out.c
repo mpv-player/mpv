@@ -15,7 +15,7 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 
-#include "../osdep/shmem.h"
+#include "osdep/shmem.h"
 
 //int vo_flags=0;
 

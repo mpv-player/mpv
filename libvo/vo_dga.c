@@ -21,7 +21,7 @@
 #include "aspect.h"
 #include "x11_common.h"
 #include "fastmemcpy.h"
-#include "../mp_msg.h"
+#include "mp_msg.h"
 
 #include <X11/Xlib.h>
 #include <X11/extensions/xf86dga.h>

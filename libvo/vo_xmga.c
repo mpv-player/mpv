@@ -38,13 +38,13 @@
 #include "aspect.h"
 
 #ifdef SHOW_TIME
-#include "../osdep/timer.h"
+#include "osdep/timer.h"
 static unsigned int timer = 0;
 static unsigned int timerd = 0;
 #endif
 
 #ifdef HAVE_NEW_GUI
-#include "../Gui/interface.h"
+#include "Gui/interface.h"
 #endif
 
 static vo_info_t info = {

@@ -38,16 +38,16 @@ int XShmGetEventBase(Display *);
 #include "fastmemcpy.h"
 #include "sub.h"
 
-#include "../postproc/swscale.h"
-#include "../postproc/swscale_internal.h"       //FIXME
-#include "../postproc/rgb2rgb.h"
-#include "../libmpcodecs/vf_scale.h"
+#include "postproc/swscale.h"
+#include "postproc/swscale_internal.h"       //FIXME
+#include "postproc/rgb2rgb.h"
+#include "libmpcodecs/vf_scale.h"
 
-#include "../mp_msg.h"
+#include "mp_msg.h"
 
 #ifdef HAVE_NEW_GUI
-#include "../Gui/interface.h"
-#include "../mplayer.h"
+#include "Gui/interface.h"
+#include "mplayer.h"
 #endif
 
 static vo_info_t info = {
