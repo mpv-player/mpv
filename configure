@@ -4443,14 +4443,11 @@ AA_LIB = $_ld_aa
 # audio output
 ALSA_LIB = $_ld_alsa
 NAS_LIB = $_ld_nas
-MAD_LIB = $_ld_mad
 ARTS_LIB = $_ld_arts
 ARTS_INC = $_inc_arts
-VORBIS_LIB = $_ld_vorbis
-FAAD_LIB = $_ld_faad
 SGIAUDIO_LIB = $_ld_sgiaudio
 
-# input
+# input/demuxer/codecs
 TERMCAP_LIB = $_ld_termcap
 LIRC_LIB = $_ld_lirc
 CSS_USE = $_css
@@ -4473,7 +4470,7 @@ ARCH_LIB =  $_ld_arch $_ld_iconv
 DIVX4LINUX = $_divx4linux
 XVID = $_xvid
 XVID_LIB = $_ld_xvid
-DECORE_LIB = $_ld_decore $_ld_libdv
+DECORE_LIB = $_ld_decore
 MENCODER = $_mencoder
 ENCORE_LIB =  $_ld_encore $_ld_mp3lame
 DIRECTFB_INC = $_inc_directfb
@@ -4484,6 +4481,9 @@ FREETYPE_INC = $_inc_freetype
 FREETYPE_LIB = $_ld_freetype
 LZO= $_mkf_lzo
 LZO_LIB= $_ld_lzo
+MAD_LIB = $_ld_mad
+VORBIS_LIB = $_ld_vorbis $_ld_libdv
+FAAD_LIB = $_ld_faad
 
 # --- Some stuff for autoconfigure ----
 $_target_arch
