@@ -22,7 +22,7 @@
   <DD>OSS (ioctl) driver (supports hardware AC3 passthrough)</DD>
 
   <DT>sdl</DT>
-  <DD>SDL driver (supports <B>ESD</B>, <B>ARTS</B> etc)</DD>
+  <DD>SDL driver (supports sound daemons like <B>ESD</B> and <B>ARTS</B>)</DD>
 
   <DT>nas</DT>
   <DD>NAS (Network Audio System) driver</DD>
@@ -43,18 +43,21 @@
   <DD>native ESD driver (mostly for GNOME users)</DD>
 </DL>
 
-<P>Fact is, Linux sound card drivers have compatibility problems. The cause
-  is that MPlayer uses a feature that well coded audio drivers implement to
-  maintain audio/video sync. Regrettably, some driver authors do not care about
-  this function, it is not needed for playing MP3s or for sound effects.</P>
+<P>Linux sound card drivers have compatibility problems. This is because MPlayer
+  relies on an in-built feature of <EM>properly</EM> coded sound drivers that
+  enable them to maintain correct audio/video sync. Regrettably, some driver
+  authors don't take the care to code this feature since it is not needed for
+  playing MP3s or sound effects. </P>
 
-<P>Other media players like aviplay or xine possibly work out-of-the-box with
-  these drivers because they use "simple" methods with internal timing. A note:
-  time showed their methods aren't AS efficient as MPlayer's.</P>
-
-<P>With a correctly written audio driver MPlayer will never create audio related
-  A/V desynchronisation, unless your file is badly broken. Some options to work
-  around these problems are described in the man page).</P>
+<P>Other media players like <A HREF="http://avifile.sourceforge.net">aviplay</A>
+  or <A HREF="http://xine.sourceforge.net">xine</A> possibly work
+  out-of-the-box with these drivers because they use "simple" methods with
+  internal timing. Measuring showed that their methods are not as efficient
+  as MPlayer's. </P>
+  
+<P>Using MPlayer with a properly written audio driver will never result
+  in A/V desyncs related to the audio, except only with very badly created
+  files (check the man page for workarounds).</P>
 
 <P>If you happen to have a bad audio driver, try the <CODE>-autosync</CODE>
   option, it should sort out your problems. See the man page for detailed
@@ -67,94 +70,160 @@
     default). If you experience glitches, halts or anything out of the
     ordinary, try <CODE>-ao sdl</CODE> (NOTE: You need to have SDL libraries
     and header files installed). The SDL audio driver helps in a lot of cases
-    and also supports ESD and ARTS. (ESD is the sound daemon
-    from GNOME, ARTS is from KDE.)</LI>
+    and also supports ESD (GNOME) and ARTS (KDE).</LI>
   <LI>If you have ALSA version 0.5, then you almost always have to use
     <CODE>-ao alsa5</CODE> , since ALSA 0.5 has buggy OSS emulation code, and
     will <B>crash MPlayer</B> with a message like this:<BR>
     <CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE></LI>
-</UL>
-
-<P>On <B>Solaris</B>, use the SUN audio driver with the
-  <CODE>-ao sun</CODE> option, otherwise neither video nor audio will work.</P>
+  <LI>On Solaris, use the SUN audio driver with the <CODE>-ao sun</CODE> option,
+    otherwise neither video nor audio will work.</LI>
+  <LI>If the sound clicks when playing from CD-ROM, turn on IRQ unmasking, e.g.
+    <CODE>hdparm -u1 /dev/cdrom</CODE> (<CODE>man hdparm</CODE>). This is
+    generally beneficial and described in more detail in the
+    <A HREF="cd-dvd.html#drives">CD-ROM section</A>.</LI>
+  </UL>
 
 
 <H4><A NAME="experiences">2.3.2.2 Sound Card experiences, recommendations</A></H4>
 
-<TABLE BORDER="0" WIDTH="100%">
-  <TR><TD COLSPAN=3><B>VIA onboard chipset (via82cxxx) 48kHz only</B></TD></TR>
-  <TR><TD></TD><TD>Driver:</TD><TD> from the
-    <A HREF="http://sourceforge.net/project/showfiles.php?group_id=3242&amp;release_id=59602">gkernel project</A></TD></TR>
-
-  <TR><TD COLSPAN=3><B>Aureal Vortex 2</B></TD></TR>
-  <TR><TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD><TD>OSS:</TD><TD>no driver</TD></TR>
-  <TR><TD></TD><TD>OSS/Pro:</TD><TD>OK</TD></TR>
-  <TR><TD></TD><TD>ALSA:</TD><TD>no driver</TD></TR>
-  <TR><TD></TD><TD>Max kHz:</TD><TD>48</TD></TR>
-  <TR><TD></TD><TD>Driver:</TD><TD><A HREF="http://aureal.sourceforge.net">aureal.sourceforge.net</A></TD></TR>
-  <TR><TD></TD><TD>Driver2:</TD><TD> from <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">Pontscho's page</A>
-    (<I>buffer size increased to 32k</I>)</TD></TR>
-
-  <TR><TD COLSPAN=3><B>GUS PnP</B></TD></TR>
-  <TR><TD></TD><TD>OSS:</TD><TD>no driver</TD></TR>
-  <TR><TD></TD><TD>OSS/Pro:</TD><TD>OK</TD></TR>
-  <TR><TD></TD><TD>ALSA:</TD><TD>OK</TD></TR>
-  <TR><TD></TD><TD>Max kHz:</TD><TD>48</TD></TR>
-
-  <TR><TD COLSPAN=3><B>SB Live!</B></TD></TR>
-  <TR><TD></TD><TD>OSS:</TD><TD>Analog OK, SP/DIF not working</TD></TR>
-  <TR><TD></TD><TD>ALSA:</TD><TD>Both OK</TD></TR>
-  <TR><TD></TD><TD>Max kHz:</TD><TD>192</TD></TR>
-
-  <TR><TD COLSPAN=3><B>SB AWE 64</B></TD></TR>
-  <TR><TD></TD><TD>OSS:</TD><TD>max 44kHz</TD></TR>
-  <TR><TD></TD><TD>ALSA:</TD><TD>48kHz sounds bad</TD></TR>
-  <TR><TD></TD><TD>Max kHz:</TD><TD>48</TD></TR>
-
-  <TR><TD COLSPAN=3><B>Gravis UltraSound ACE</B></TD></TR>
-  <TR><TD></TD><TD>OSS:</TD><TD>not OK</TD></TR>
-  <TR><TD></TD><TD>ALSA:</TD><TD>OK</TD></TR>
-  <TR><TD></TD><TD>Max kHz:</TD><TD>44</TD></TR>
-
-  <TR><TD COLSPAN=3><B>Gravis UltraSound MAX</B></TD></TR>
-  <TR><TD></TD><TD>OSS:</TD><TD>OK</TD></TR>
-  <TR><TD></TD><TD>ALSA:</TD><TD>OK (?)</TD></TR>
-  <TR><TD></TD><TD>Max kHz:</TD><TD>48</TD></TR>
-
-  <TR><TD COLSPAN=3><B>ESS 688</B></TD></TR>
-  <TR><TD></TD><TD>OSS:</TD><TD>OK</TD></TR>
-  <TR><TD></TD><TD>ALSA:</TD><TD>OK (?)</TD></TR>
-  <TR><TD></TD><TD>Max kHz:</TD><TD>48</TD></TR>
-
-  <TR><TD COLSPAN=3><B>C-Media cards (which ones?)</B></TD></TR>
-  <TR><TD></TD><TD>OSS:</TD><TD>not OK (hissing) (?)</TD></TR>
-  <TR><TD></TD><TD>ALSA:</TD><TD>OK (?)</TD></TR>
-  <TR><TD></TD><TD>Max kHz:</TD><TD>?</TD></TR>
-
-  <TR><TD COLSPAN=3><B>Yamaha cards (*ymf*)</B></TD></TR>
-  <TR><TD></TD><TD>OSS:</TD><TD>not OK (?) (maybe <CODE>-ao sdl</CODE>)</TD></TR>
-  <TR><TD></TD><TD>ALSA:</TD><TD>OK only with ALSA 0.5 with OSS emulation <B>AND</B> <CODE>-ao sdl</CODE> (!) (?)</TD></TR>
-  <TR><TD></TD><TD>Max kHz:</TD><TD>?</TD></TR>
-
-  <TR><TD COLSPAN=3><B>Cards with envy24 chips (like Terratec EWS88MT)</B></TD></TR>
-  <TR><TD></TD><TD>OSS:</TD><TD>?</TD></TR>
-  <TR><TD></TD><TD>OSS/Pro:</TD><TD>OK</TD></TR>
-  <TR><TD></TD><TD>ALSA:</TD><TD>?</TD></TR>
-  <TR><TD></TD><TD>Max kHz:</TD><TD>?</TD></TR>
-
-  <TR><TD COLSPAN=3><B>PC Speaker or DAC</B></TD></TR>
-  <TR><TD></TD><TD>OSS:</TD><TD>OK (Use the SDL driver: <CODE>-ao sdl</CODE>)</TD></TR>
-  <TR><TD></TD><TD>ALSA:</TD><TD>no driver</TD></TR>
-  <TR><TD></TD><TD>Max kHz:</TD><TD>The driver emulates 44.1, maybe more.</TD></TR>
-  <TR><TD></TD><TD>Driver:</TD><TD><A HREF="ftp://ftp.infradead.org/pub/pcsp">ftp://ftp.infradead.org/pub/pcsp</A></TD></TR>
-</TABLE>
-
 <P>On Linux, a 2.4.x kernel is highly recommended. Kernel 2.2 is not tested.</P>
 
-<P>If the sound clicks when playing from CD-ROM, turn on IRQ unmasking, e.g.
-  <CODE>hdparm -u1 /dev/cdrom</CODE> (<CODE>man hdparm</CODE>). This is
-  generally beneficial and described in more detail in the
-  <A HREF="cd-dvd.html#drives">CD-ROM section</A>.</P>
+<P>Linux sound drivers are primarily provided by the free version of OSS. These
+  drivers have been superceded by <A HREF="http://www.alsa-project.org">ALSA</A>
+  (Advanced Linux Sound Architecture) in the 2.5 development series. If your
+  distribution does not already use ALSA you may wish to try their drivers if
+  you experience sound problems. ALSA drivers are generally superior to OSS in
+  compatibility, performance and features. But some sound cards are only
+  supported by the commercial OSS drivers from
+  <A HREF="http://www.opensound.com/">4Front Technologies</A>. They also support
+  several non-Linux systems.</P>
+
+<TABLE BORDER="1" WIDTH="100%">
+
+  <TR>
+    <TD ROWSPAN="2"><B>SOUND CARD</B></TD>
+    <TD COLSPAN="4"><B>DRIVER</B></TD>
+    <TD ROWSPAN="2"><B>Max kHz</B></TD>
+  </TR>
+
+  <TR>
+    <TD><B>OSS/Free</B></TD>
+    <TD><B>ALSA</B></TD>
+    <TD><B>OSS/Pro</B></TD>
+    <TD><B>other</B></TD>
+  </TR>
+
+  <TR>
+    <TD><B>VIA onboard (686/A/B, 8233, 8235)</B></TD>
+    <TD><A HREF="http://sourceforge.net/project/showfiles.php?group_id=3242&amp;release_id=59602">via82cxxx_audio</A></TD>
+    <TD>snd-via82xx</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>4-48 kHz or 48 kHz only, depending on the chipset</TD>
+  </TR>
+
+  <TR>
+    <TD><B>Aureal Vortex 2</B></TD>
+    <TD>none</TD>
+    <TD>none</TD>
+    <TD>OK</TD>
+    <TD><A HREF="http://aureal.sourceforge.net">Linux Aureal Drivers</A><BR>
+      <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">buffer size increased to 32k</A></TD> 
+    <TD>48</TD>
+  </TR>
+
+  <TR>
+    <TD><B>GUS PnP</B></TD>
+    <TD>none</TD>
+    <TD>OK</TD>
+    <TD>OK</TD>
+    <TD>&nbsp;</TD>
+    <TD>48</TD>
+  </TR>
+
+  <TR>
+    <TD><B>SB Live!</B></TD>
+    <TD>Analog OK, SP/DIF not working</TD>
+    <TD>Both OK</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>192</TD>
+  </TR>
+
+  <TR>
+    <TD><B>SB AWE 64</B></TD>
+    <TD>max 44kHz</TD>
+    <TD>48kHz sounds bad</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>48</TD>
+  </TR>
+  
+  <TR>
+    <TD><B>Gravis UltraSound ACE</B></TD>
+    <TD>not OK</TD>
+    <TD>OK</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>44</TD>
+  </TR>
+  
+  <TR>
+    <TD><B>Gravis UltraSound MAX</B></TD>
+    <TD>OK</TD>
+    <TD>OK (?)</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>48</TD>
+  </TR>
+  
+  <TR>
+    <TD><B>ESS 688</B></TD>
+    <TD>OK</TD>
+    <TD>OK (?)</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>48</TD>
+  </TR>
+  
+  <TR>
+    <TD><B>C-Media cards (which ones?)</B></TD>
+    <TD>not OK (hissing) (?)</TD>
+    <TD>OK (?)</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>?</TD>
+  </TR>
+  
+  <TR>
+    <TD><B>Yamaha cards (*ymf*)</B></TD>
+    <TD>not OK (?) (maybe <CODE>-ao sdl</CODE>)</TD>
+    <TD>OK only with ALSA 0.5 with OSS emulation <B>AND</B>
+      <CODE>-ao sdl</CODE> (!) (?)</TD>
+    <TD>&nbsp;</TD>
+    <TD>&nbsp;</TD>
+    <TD>?</TD>
+  </TR>
+  
+  <TR>
+    <TD><B>Cards with envy24 chips (like Terratec EWS88MT)</B></TD>
+    <TD>?</TD>
+    <TD>?</TD>
+    <TD>OK</TD>
+    <TD>&nbsp;</TD>
+    <TD>?</TD>
+  </TR>
+
+  <TR>
+    <TD><B>PC Speaker or DAC</B></TD>
+    <TD>OK (Use the SDL driver: <CODE>-ao sdl</CODE>)</TD>
+    <TD>none</TD>
+    <TD>&nbsp;</TD>
+    <TD><A HREF="http://www.geocities.com/stssppnn/pcsp.html">Linux PC speaker OSS driver</a></TD>
+    <TD>The driver emulates 44.1, maybe more.</TD>
+  </TR>
+
+</TABLE>
 
 <P>Feedback to this document is welcome. Please tell us how MPlayer
   and your sound card(s) worked together.</P>
@@ -474,7 +543,7 @@
 
 <DL>
   <DT><CODE>g1:g2:g3...g10</CODE></DT>
-  <DD>are floating point numbers between <CODE>-12<CODE> and <CODE>+12</CODE>
+  <DD>are floating point numbers between <CODE>-12</CODE> and <CODE>+12</CODE>
     representing the gain in dB for each frequency band.</DD>
 </DL>
 
@@ -591,8 +660,8 @@
 
 <H4><A NAME="plugins">2.3.2.4 Audio plugins (deprecated)</A></H4>
 
-<P>MPlayer has support for audio plugins. Audio plugins can be used for
-  changing the properties of the audio data before the sound reaches the sound
+<P>MPlayer has support for audio plugins. Audio plugins can be used to
+  change the properties of the audio data before it reaches the sound
   card. They are enabled using the <CODE>-aop</CODE> switch which takes a
   <CODE>list=plugin1,plugin2,...</CODE> argument. The <CODE>list</CODE> argument
   is required and determines which plugins should be used and in which order they
@@ -614,7 +683,7 @@
 <P>would set the output frequency of the resample plugin to 44100Hz and the
   output format of the format plugin to AFMT_U8.</P>
 
-<P>Currently audio plugins can not be used in MEncoder.</P>
+<P>Currently audio plugins cannot be used in MEncoder.</P>
 
 
 <H5><A NAME="resample">2.3.2.4.1 Up/Downsampling</A></H5>
@@ -622,11 +691,10 @@
 <P>MPlayer fully supports up/downsampling of the sound. This plugin can
   be used if you have a fixed frequency sound card or if you are
   stuck with an old sound card that is only capable of max 44.1kHz.
-  Whether is usage of this plugin is necessary or not, is <B>autodetected</B>.
-  This plugin has one switch:
-  <CODE>fout</CODE> which is used for setting the desired output sample
-  frequency. It defaults to 48kHz, and is given in
-  &lt;Hz&gt;.</P>
+  MPlayer <EM>autodetects</EM> whether or not usage of this plugin is necessary.
+  This plugin has one switch, <CODE>fout</CODE>, which is used for setting the
+  desired output sample frequency. The value is given in Hz, and defaults to
+  48kHz.</P>
 
 <P>Usage:<BR>
   &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=resample:fout=&lt;required
@@ -634,7 +702,7 @@
 
 <P>Note that the output frequency should not be scaled up from the default value.
   Scaling up will cause the audio and video streams to be played in slow motion
-  in addition to audio distortion.</P>
+  and cause audio distortion.</P>
 
 
 <H5><A NAME="surround_decoding">2.3.2.4.2 Surround Sound decoding</A></H5>
@@ -669,6 +737,10 @@
   new plugins. It can not be used for anything useful from a users perspective
   and is mentioned here for the sake of completeness only. Do not use this
   plugin unless you are a developer.</P>
+
+<P>If you have a file with a consistent A/V sync fault, use the <CODE>+/-</CODE>
+  keys to adjust timings on-the-fly instead.  Usage of the OSD is recommended
+  to make this easier.</P>
 
 
 <H5><A NAME="volume">2.3.2.4.5 Software volume control</A></H5>
