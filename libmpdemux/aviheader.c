@@ -50,7 +50,7 @@ while(1){
     id=stream_read_dword_le(demuxer->stream);        // list type
     mp_msg(MSGT_HEADER,MSGL_DBG2,"LIST %.4s  len=%d\n",(char *) &id,len);
     list_end=stream_tell(demuxer->stream)+((len+1)&(~1));
-    printf("list_end=0x%X\n",(int)list_end);
+    mp_msg(MSGT_HEADER,MSGL_V,"list_end=0x%X\n",(int)list_end);
     if(id==listtypeAVIMOVIE){
       // found MOVI header
       if(!demuxer->movi_start) demuxer->movi_start=stream_tell(demuxer->stream);
@@ -247,7 +247,7 @@ while(1){
     }
   }
   if(hdr){
-    printf("hdr=%s  size=%d\n",hdr,size2);
+    mp_msg(MSGT_HEADER,MSGL_V,"hdr=%s  size=%d\n",hdr,size2);
     if(size2==3)
       chunksize=1; // empty
     else {

@@ -12,6 +12,7 @@
 #include <stdio.h>
 
 #include "url.h"
+#include "mp_msg.h"
 
 URL_t*
 url_new(char* url) {
@@ -24,7 +25,7 @@ url_new(char* url) {
 	// Create the URL container
 	Curl = (URL_t*)malloc(sizeof(URL_t));
 	if( Curl==NULL ) {
-		printf("Memory allocation failed!\n");
+		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed!\n");
 		return NULL;
 	}
 	// Initialisation of the URL container members
@@ -33,14 +34,14 @@ url_new(char* url) {
 	// Copy the url in the URL container
 	Curl->url = strdup(url);
 	if( Curl->url==NULL ) {
-		printf("Memory allocation failed!\n");
+		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed!\n");
 		return NULL;
 	}
 
 	// extract the protocol
 	ptr1 = strstr(url, "://");
 	if( ptr1==NULL ) {
-		printf("Not an URL!\n");
+		mp_msg(MSGT_NETWORK,MSGL_V,"Not an URL!\n");
 		return NULL;
 	}
 	pos1 = ptr1-url;
@@ -74,7 +75,7 @@ url_new(char* url) {
 	// copy the hostname in the URL container
 	Curl->hostname = (char*)malloc(pos2-pos1-3+1);
 	if( Curl->hostname==NULL ) {
-		printf("Memory allocation failed!\n");
+		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed!\n");
 		return NULL;
 	}
 	strncpy(Curl->hostname, ptr1+3, pos2-pos1-3);
@@ -89,7 +90,7 @@ url_new(char* url) {
 			// copy the path/filename in the URL container
 			Curl->file = strdup(ptr2);
 			if( Curl->file==NULL ) {
-				printf("Memory allocation failed!\n");
+				mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed!\n");
 				return NULL;
 			}
 		}
@@ -98,7 +99,7 @@ url_new(char* url) {
 	if( Curl->file==NULL ) {
 		Curl->file = (char*)malloc(2);
 		if( Curl->file==NULL ) {
-			printf("Memory allocation failed!\n");
+			mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed!\n");
 			return NULL;
 		}
 		strcpy(Curl->file, "/");
