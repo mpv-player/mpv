@@ -8,6 +8,9 @@
 static void set_window( void );		/* forward declaration to kill warnings */
 #ifdef VO_XMGA
 static void mDrawColorKey( void );	/* forward declaration to kill warnings */
+#ifdef HAVE_XINERAMA
+extern int xinerama_screen;
+#endif
 #endif
 
 static int mga_next_frame=0;
@@ -472,11 +475,26 @@ static void set_window( void ){
 
 		 	/* find the screen we are on */
 		 	i = 0;
-		 	while(!(screens[i].x_org <= drwcX && screens[i].y_org <= drwcY &&
-		 	       screens[i].x_org + screens[i].width >= drwcX &&
-		 	       screens[i].y_org + screens[i].height >= drwcY ))
+		 	while(i<num_screens &&
+		 	    ((screens[i].x_org < drwcX) ||
+		 	     (screens[i].y_org < drwcY) ||
+		 	     (screens[i].x_org + screens[i].width >= drwcX) ||
+		 	     (screens[i].y_org + screens[i].height >= drwcY)))
 		 	{
 		 		i++;
+		 	}
+
+			if(i<num_screens)
+			{
+				/* save the screen we are on */
+				xinerama_screen = i;
+			} else {
+				/* oops.. couldnt find the screen we are on
+				 * because the upper left corner left the
+				 * visual range. assume we are still on the
+				 * same screen
+				 */
+				i = xinerama_screen;
 		 	}
 
 		 	/* set drwcX and drwcY to the right values */
