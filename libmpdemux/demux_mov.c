@@ -1009,7 +1009,8 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	{	ImageDescription* id=malloc(8+trak->stdata_len);
 		trak->desc=id;
 		id->idSize=8+trak->stdata_len;
-		id->cType=bswap_32(trak->fourcc);
+//		id->cType=bswap_32(trak->fourcc);
+		id->cType=le2me_32(trak->fourcc);
 		id->version=char2short(trak->stdata,8);
 		id->revisionLevel=char2short(trak->stdata,10);
 		id->vendor=char2int(trak->stdata,12);
