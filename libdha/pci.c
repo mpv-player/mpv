@@ -2,26 +2,6 @@
    (C) 2002 - library implementation by Nick Kyrshev
    XFree86 3.3.3 scanpci.c, modified for GATOS/win/gfxdump by Øyvind Aabling.
  */
- 
-#include "libdha.h"
- 
-#include <errno.h>
-#include <string.h>
-#include "AsmMacros.h"
-#ifdef __unix__
-#include <unistd.h>
-#include <sys/mman.h>
-#elif defined ( _WIN32 )
-#include <windows.h>
-#else
-#include <dos.h>
-#endif
- 
-#define outb	pcioutb
-#define outl	pcioutl
-#define inb	pciinb
-#define inl	pciinl
- 
 /* $XConsortium: scanpci.c /main/25 1996/10/27 11:48:40 kaleb $ */
 /*
  *  name:             scanpci.c
@@ -71,34 +51,47 @@
  *
  */
  
-#if defined(__SVR4)
+#include "libdha.h"
+#include <errno.h>
+#include <string.h>
+#include <stdio.h>
+#ifdef __unix__
+#include <unistd.h>
+#endif
+#include "AsmMacros.h"
+/* OS depended stuff */
+#if defined (linux)
+#include "sysdep/pci_linux.c"
+#elif defined (__FreeBSD__)
+#include "sysdep/pci_freebsd.c"
+#elif defined (__386BSD__)
+#include "sysdep/pci_386bsd.c"
+#elif defined (__NetBSD__)
+#include "sysdep/pci_netbsd.c"
+#elif defined (__OpenBSD__)
+#include "sysdep/pci_openbsd.c"
+#elif defined (__bsdi__)
+#include "sysdep/pci_bsdi.c"
+#elif defined (Lynx)
+#include "sysdep/pci_lynx.c"
+#elif defined (MACH386)
+#include "sysdep/pci_mach386.c"
+#elif defined (__SVR4)
 #if !defined(SVR4)
 #define SVR4
 #endif
+#include "sysdep/pci_svr4.c"
+#elif defined (SCO)
+#include "sysdep/pci_sco.c"
+#elif defined (ISC)
+#include "sysdep/pci_isc.c"
+#elif defined (__EMX__)
+#include "sysdep/pci_os2.c"
+#elif defined (_WIN32)
+#include "sysdep/pci_win32.c"
 #endif
- 
-#ifdef __EMX__
-#define INCL_DOSFILEMGR
-#include <os2.h>
-#endif
- 
-#include <stdio.h>
-#include <sys/types.h>
-#if defined(SVR4)
-#if defined(sun)
-#ifndef __EXTENSIONS__
-#define __EXTENSIONS__
-#endif
-#endif
-#include <sys/proc.h>
-#include <sys/tss.h>
-#if defined(NCR)
-#define __STDC
-#include <sys/sysi86.h>
-#undef __STDC
-#else
-#include <sys/sysi86.h>
-#endif
+
+#if 0
 #if defined(__SUNPRO_C) || defined(sun) || defined(__sun)
 #include <sys/psw.h>
 #else
@@ -106,186 +99,7 @@
 #endif
 #include <sys/v86.h>
 #endif
-#if defined(__FreeBSD__) || defined(__386BSD__)
-#include <sys/file.h>
-#include <machine/console.h>
-#ifndef GCCUSESGAS
-#define GCCUSESGAS
-#endif
-#endif
-#if defined(__NetBSD__)
-#include <sys/param.h>
-#include <sys/file.h>
-#include <machine/sysarch.h>
-#ifndef GCCUSESGAS
-#define GCCUSESGAS
-#endif
-#endif
-#if defined(__bsdi__)
-#include <sys/file.h>
-#include <sys/ioctl.h>
-#include <i386/isa/pcconsioctl.h>
-#ifndef GCCUSESGAS
-#define GCCUSESGAS
-#endif
-#endif
-#if defined(SCO) || defined(ISC)
-#ifndef ISC
-#include <sys/console.h>
-#endif
-#include <sys/param.h>
-#include <sys/immu.h>
-#include <sys/region.h>
-#include <sys/proc.h>
-#include <sys/tss.h>
-#include <sys/sysi86.h>
-#include <sys/v86.h>
-#endif
-#if defined(Lynx_22)
-#ifndef GCCUSESGAS
-#define GCCUSESGAS
-#endif
-#endif
  
- 
-#if defined(__WATCOMC__)
- 
-#include <stdlib.h>
-static void outl(unsigned port, unsigned data);
-#pragma aux outl =  "out    dx, eax" parm [dx] [eax];
-static void outb(unsigned port, unsigned data);
-#pragma aux outb = "out    dx, al" parm [dx] [eax];
-static unsigned inl(unsigned port);
-#pragma aux inl = "in     eax, dx" parm [dx];
-static unsigned inb(unsigned port);
-#pragma aux inb = "xor    eax,eax" "in     al, dx" parm [dx];
- 
-#else /* __WATCOMC__ */
- 
-#if defined(__GNUC__)
- 
-#if !defined(__alpha__) && !defined(__powerpc__)
-#if defined(GCCUSESGAS)
-#define OUTB_GCC "outb %0,%1"
-#define OUTL_GCC "outl %0,%1"
-#define INB_GCC  "inb %1,%0"
-#define INL_GCC  "inl %1,%0"
-#else
-#define OUTB_GCC "out%B0 (%1)"
-#define OUTL_GCC "out%L0 (%1)"
-#define INB_GCC "in%B0 (%1)"
-#define INL_GCC "in%L0 (%1)"
-#endif /* GCCUSESGAS */
- 
-static void outb(unsigned short port, unsigned char val) {
-     __asm__ __volatile__(OUTB_GCC : :"a" (val), "d" (port)); }
-static void outl(unsigned short port, unsigned long val) {
-     __asm__ __volatile__(OUTL_GCC : :"a" (val), "d" (port)); }
-static unsigned char inb(unsigned short port) { unsigned char ret;
-     __asm__ __volatile__(INB_GCC : "=a" (ret) : "d" (port)); return ret; }
-static unsigned long inl(unsigned short port) { unsigned long ret;
-     __asm__ __volatile__(INL_GCC : "=a" (ret) : "d" (port)); return ret; }
- 
-#endif /* !defined(__alpha__) && !defined(__powerpc__) */
-#else  /* __GNUC__ */
- 
-#if defined(__STDC__) && (__STDC__ == 1)
-# if !defined(NCR)
-#  define asm __asm
-# endif
-#endif
- 
-#if defined(__SUNPRO_C)
-/*
- * This section is a gross hack in if you tell anyone that I wrote it,
- * I'll deny it.  :-)
- * The leave/ret instructions are the big hack to leave %eax alone on return.
- */
-static unsigned char inb(int port) {
-		asm("	movl 8(%esp),%edx");
-		asm("	subl %eax,%eax");
-		asm("	inb  (%dx)");
-		asm("	leave");
-		asm("	ret");
-	}
- 
-static unsigned short inw(int port) {
-		asm("	movl 8(%esp),%edx");
-		asm("	subl %eax,%eax");
-		asm("	inw  (%dx)");
-		asm("	leave");
-		asm("	ret");
-	}
- 
-static unsigned long inl(int port) {
-		asm("	movl 8(%esp),%edx");
-		asm("	inl  (%dx)");
-		asm("	leave");
-		asm("	ret");
-	}
- 
-static void outb(int port, unsigned char value) {
-		asm("	movl 8(%esp),%edx");
-		asm("	movl 12(%esp),%eax");
-		asm("	outb (%dx)");
-	}
- 
-static void outw(int port, unsigned short value) {
-		asm("	movl 8(%esp),%edx");
-		asm("	movl 12(%esp),%eax");
-		asm("	outw (%dx)");
-	}
- 
-static void outl(int port, unsigned long value) {
-		asm("	movl 8(%esp),%edx");
-		asm("	movl 12(%esp),%eax");
-		asm("	outl (%dx)");
-	}
-#else
- 
-#if defined(SVR4)
-# if !defined(__USLC__)
-#  define __USLC__
-# endif
-#endif
- 
-#ifdef __unix__
-#ifndef SCO325
-# include <sys/inline.h>
-#else
-# include "scoasm.h"
-#endif
-#endif
- 
-#endif /* SUNPRO_C */
- 
-#endif /* __GNUC__ */
-#endif /* __WATCOMC__ */
- 
-#undef outb
-#undef outl
-#undef inb
-#undef inl
- 
-#if defined(__GLIBC__) && __GLIBC__ >= 2
-#if defined(linux)
-#ifdef __i386__
-#include <sys/perm.h>
-#else
-#include <sys/io.h>
-#endif
-#endif
-#endif
- 
-#if defined(__alpha__)
-#if defined(linux)
-#include <asm/unistd.h>
-#define BUS(tag) (((tag)>>16)&0xff)
-#define DFN(tag) (((tag)>>8)&0xff)
-#else
-Generate compiler error - scanpci unsupported on non-linux alpha platforms
-#endif /* linux */
-#endif /* __alpha__ */
 #if defined(Lynx) && defined(__powerpc__)
 /* let's mimick the Linux Alpha stuff for LynxOS so we don't have
  * to change too much code
@@ -635,7 +449,6 @@ struct pci_config_reg {
 #define MAX_PCI_DEVICES         64
 #define NF ((void (*)())NULL), { 0.0, 0, 0, NULL }
 #define PCI_MULTIFUNC_DEV	0x80
-#if defined(__alpha__) || defined(__powerpc__)
 #define PCI_ID_REG              0x00
 #define PCI_CMD_STAT_REG        0x04
 #define PCI_CLASS_REG           0x08
@@ -644,7 +457,6 @@ struct pci_config_reg {
 #define PCI_MAP_ROM_REG         0x30
 #define PCI_INTERRUPT_REG       0x3C
 #define PCI_REG_USERCONFIG      0x40
-#endif
  
 static int pcibus=-1, pcicard=-1, pcifunc=-1 ;
 /*static struct pci_device *pcidev=NULL ;*/
@@ -664,6 +476,22 @@ static int pcibus=-1, pcicard=-1, pcifunc=-1 ;
 #else
 #define	PCI_MODE2_FORWARD_REG		0xCFA
 #endif
+
+/* cpu depended stuff */
+#if defined(__alpha__)
+#include "sysdep/pci_alpha.c"
+#elif defined(__ia64__)
+#include "sysdep/pci_ia64.c"
+#elif defined(__sparc__)
+#include "sysdep/pci_sparc.c"
+#elif defined( __arm32__ )
+#include "sysdep/pci_arm32.c"
+#elif defined(__powerpc__)
+#include "sysdep/pci_powerpc.c"
+#else
+#include "sysdep/pci_x86.c"
+#endif
+
  
 static int pcicards=0 ;
 static pciinfo_t *pci_lst;
@@ -693,168 +521,9 @@ static void identify_card(struct pci_config_reg *pcr)
   pcicards++;
 }
 
-static int io_fd;
-#ifdef __EMX__
-static USHORT callgate[3] = {0,0,0};
-#endif
- 
-static void enable_os_io(void)
-{
-    io_fd = -1 ;
-#if defined(SVR4) || defined(SCO) || defined(ISC)
-#if defined(SI86IOPL)
-    sysi86(SI86IOPL, 3);
-#else
-    sysi86(SI86V86, V86SC_IOPL, PS_IOPL);
-#endif
-#endif
-#if defined(linux)
-    iopl(3);
-#endif
-#if defined(__FreeBSD__)  || defined(__386BSD__) || defined(__bsdi__)
-    if ((io_fd = open("/dev/console", O_RDWR, 0)) < 0) {
-        perror("/dev/console");
-        exit(1);
-    }
-#if defined(__FreeBSD__)  || defined(__386BSD__)
-    if (ioctl(io_fd, KDENABIO, 0) < 0) {
-        perror("ioctl(KDENABIO)");
-        exit(1);
-    }
-#endif
-#if defined(__bsdi__)
-    if (ioctl(io_fd, PCCONENABIOPL, 0) < 0) {
-        perror("ioctl(PCCONENABIOPL)");
-        exit(1);
-    }
-#endif
-#endif
-#if defined(__NetBSD__)
-#if !defined(USE_I386_IOPL)
-    if ((io_fd = open("/dev/io", O_RDWR, 0)) < 0) {
-	perror("/dev/io");
-	exit(1);
-    }
-#else
-    if (i386_iopl(1) < 0) {
-	perror("i386_iopl");
-	exit(1);
-    }
-#endif /* USE_I386_IOPL */
-#endif /* __NetBSD__ */
-#if defined(__OpenBSD__)
-    if (i386_iopl(1) < 0) {
-	perror("i386_iopl");
-	exit(1);
-    }
-#endif /* __OpenBSD__ */
-#if defined(MACH386)
-    if ((io_fd = open("/dev/iopl", O_RDWR, 0)) < 0) {
-        perror("/dev/iopl");
-        exit(1);
-    }
-#endif
-#ifdef __EMX__
-    {
-	HFILE hfd;
-	ULONG dlen,action;
-	APIRET rc;
-	static char *ioDrvPath = "/dev/fastio$";
- 
-	if (DosOpen((PSZ)ioDrvPath, (PHFILE)&hfd, (PULONG)&action,
-	   (ULONG)0, FILE_SYSTEM, FILE_OPEN,
-	   OPEN_SHARE_DENYNONE|OPEN_FLAGS_NOINHERIT|OPEN_ACCESS_READONLY,
-	   (ULONG)0) != 0) {
-		fprintf(stderr,"Error opening fastio$ driver...\n");
-		fprintf(stderr,"Please install xf86sup.sys in config.sys!\n");
-		exit(42);
-	}
-	callgate[0] = callgate[1] = 0;
- 
-/* Get callgate from driver for fast io to ports and other stuff */
- 
-	rc = DosDevIOCtl(hfd, (ULONG)0x76, (ULONG)0x64,
-		NULL, 0, NULL,
-		(ULONG*)&callgate[2], sizeof(USHORT), &dlen);
-	if (rc) {
-		fprintf(stderr,"xf86-OS/2: EnableIOPorts failed, rc=%d, dlen=%d; emergency exit\n",
-			rc,dlen);
-		DosClose(hfd);
-		exit(42);
-	}
- 
-/* Calling callgate with function 13 sets IOPL for the program */
- 
-	asm volatile ("movl $13,%%ebx;.byte 0xff,0x1d;.long _callgate"
-			: /*no outputs */
-			: /*no inputs */
-			: "eax","ebx","ecx","edx","cc");
- 
-        DosClose(hfd);
-   }
-#endif
-#if defined(Lynx) && defined(__powerpc__)
-    pciConfBase = (unsigned char *) smem_create("PCI-CONF",
-    	    (char *)0x80800000, 64*1024, SM_READ|SM_WRITE);
-    if (pciConfBase == (void *) -1)
-        exit(1);
-#endif
-}
- 
- 
-static void disable_os_io(void)
-{
-#if defined(SVR4) || defined(SCO) || defined(ISC)
-#if defined(SI86IOPL)
-    sysi86(SI86IOPL, 0);
-#else
-    sysi86(SI86V86, V86SC_IOPL, 0);
-#endif
-#endif
-#if defined(linux)
-    iopl(0);
-#endif
-#if defined(__FreeBSD__)  || defined(__386BSD__)
-    if (ioctl(io_fd, KDDISABIO, 0) < 0) {
-        perror("ioctl(KDDISABIO)");
-	close(io_fd);
-        exit(1);
-    }
-    close(io_fd);
-#endif
-#if defined(__NetBSD__)
-#if !defined(USE_I386_IOPL)
-    close(io_fd);
-#else
-    if (i386_iopl(0) < 0) {
-	perror("i386_iopl");
-	exit(1);
-    }
-#endif /* NetBSD1_1 */
-#endif /* __NetBSD__ */
-#if defined(__bsdi__)
-    if (ioctl(io_fd, PCCONDISABIOPL, 0) < 0) {
-        perror("ioctl(PCCONDISABIOPL)");
-	close(io_fd);
-        exit(1);
-    }
-    close(io_fd);
-#endif
-#if defined(MACH386)
-    close(io_fd);
-#endif
-#if defined(Lynx) && defined(__powerpc__)
-    smem_create(NULL, (char *) pciConfBase, 0, SM_DETACH);
-    smem_remove("PCI-CONF");
-    pciConfBase = NULL;
-#endif
-}
- 
 /*main(int argc, char *argv[])*/
 int pci_scan(pciinfo_t *pci_list,unsigned *num_pci)
 {
-    unsigned long tmplong1, tmplong2, config_cmd;
-    unsigned char tmp1, tmp2;
     unsigned int idx;
     struct pci_config_reg pcr;
     int do_mode1_scan = 0, do_mode2_scan = 0;
@@ -863,35 +532,8 @@ int pci_scan(pciinfo_t *pci_list,unsigned *num_pci)
     pci_lst = pci_list;
  
     enable_os_io();
- 
-#if !defined(__alpha__) && !defined(__powerpc__)
-    pcr._configtype = 0;
- 
-    outb(PCI_MODE2_ENABLE_REG, 0x00);
-    outb(PCI_MODE2_FORWARD_REG, 0x00);
-    tmp1 = inb(PCI_MODE2_ENABLE_REG);
-    tmp2 = inb(PCI_MODE2_FORWARD_REG);
-    if ((tmp1 == 0x00) && (tmp2 == 0x00)) {
-	pcr._configtype = 2;
-        /*printf("PCI says configuration type 2\n");*/
-    } else {
-        tmplong1 = inl(PCI_MODE1_ADDRESS_REG);
-        outl(PCI_MODE1_ADDRESS_REG, PCI_EN);
-        tmplong2 = inl(PCI_MODE1_ADDRESS_REG);
-        outl(PCI_MODE1_ADDRESS_REG, tmplong1);
-        if (tmplong2 == PCI_EN) {
-	    pcr._configtype = 1;
-            /*printf("PCI says configuration type 1\n");*/
-	} else {
-            /*printf("No PCI !\n");*/
-	    disable_os_io();
-	    /*exit(1);*/
-	    return ENODEV ;
-	}
-    }
-#else
-    pcr._configtype = 1;
-#endif
+
+    if((pcr._configtype = pci_config_type()) == 0xFFFF) return ENODEV;
  
     /* Try pci config 1 probe first */
  
@@ -912,78 +554,42 @@ int pci_scan(pciinfo_t *pci_list,unsigned *num_pci)
 		pcr._cardnum += 0x1) {
 	  func = 0;
 	  do { /* loop over the different functions, if present */
-#if !defined(__alpha__) && !defined(__powerpc__)
-	    config_cmd = PCI_EN | (pcr._pcibuses[pcr._pcibusidx]<<16) |
-                                  (pcr._cardnum<<11) | (func<<8);
- 
-            outl(PCI_MODE1_ADDRESS_REG, config_cmd);         /* ioreg 0 */
-            pcr._device_vendor = inl(PCI_MODE1_DATA_REG);
-#else
-	    pciconfig_read(pcr._pcibuses[pcr._pcibusidx], pcr._cardnum<<3,
-		PCI_ID_REG, 4, &pcr._device_vendor);
-#endif
- 
+	    pcr._device_vendor = pci_get_vendor(pcr._pcibuses[pcr._pcibusidx], pcr._cardnum,
+						func);
             if ((pcr._vendor == 0xFFFF) || (pcr._device == 0xFFFF))
                 break;   /* nothing there */
  
 	    /*printf("\npci bus 0x%x cardnum 0x%02x function 0x%04x: vendor 0x%04x device 0x%04x\n",
 	        pcr._pcibuses[pcr._pcibusidx], pcr._cardnum, func,
 		pcr._vendor, pcr._device);*/
-	    pcibus = pcr._pcibuses[pcr._pcibusidx] ;
-	    pcicard = pcr._cardnum ; pcifunc = func ;
+	    pcibus = pcr._pcibuses[pcr._pcibusidx];
+	    pcicard = pcr._cardnum;
+	    pcifunc = func;
  
-#if !defined(__alpha__) && !defined(__powerpc__)
-            outl(PCI_MODE1_ADDRESS_REG, config_cmd | 0x04);
-	    pcr._status_command  = inl(PCI_MODE1_DATA_REG);
-            outl(PCI_MODE1_ADDRESS_REG, config_cmd | 0x08);
-	    pcr._class_revision  = inl(PCI_MODE1_DATA_REG);
-            outl(PCI_MODE1_ADDRESS_REG, config_cmd | 0x0C);
-	    pcr._bist_header_latency_cache = inl(PCI_MODE1_DATA_REG);
-            outl(PCI_MODE1_ADDRESS_REG, config_cmd | 0x10);
-	    pcr._base0  = inl(PCI_MODE1_DATA_REG);
-            outl(PCI_MODE1_ADDRESS_REG, config_cmd | 0x14);
-	    pcr._base1  = inl(PCI_MODE1_DATA_REG);
-            outl(PCI_MODE1_ADDRESS_REG, config_cmd | 0x18);
-	    pcr._base2  = inl(PCI_MODE1_DATA_REG);
-            outl(PCI_MODE1_ADDRESS_REG, config_cmd | 0x1C);
-	    pcr._base3  = inl(PCI_MODE1_DATA_REG);
-            outl(PCI_MODE1_ADDRESS_REG, config_cmd | 0x20);
-	    pcr._base4  = inl(PCI_MODE1_DATA_REG);
-            outl(PCI_MODE1_ADDRESS_REG, config_cmd | 0x24);
-	    pcr._base5  = inl(PCI_MODE1_DATA_REG);
-            outl(PCI_MODE1_ADDRESS_REG, config_cmd | 0x30);
-	    pcr._baserom = inl(PCI_MODE1_DATA_REG);
-            outl(PCI_MODE1_ADDRESS_REG, config_cmd | 0x3C);
-	    pcr._max_min_ipin_iline = inl(PCI_MODE1_DATA_REG);
-            outl(PCI_MODE1_ADDRESS_REG, config_cmd | 0x40);
-	    pcr._user_config = inl(PCI_MODE1_DATA_REG);
-#else
-	    pciconfig_read(pcr._pcibuses[pcr._pcibusidx], pcr._cardnum<<3,
-			PCI_CMD_STAT_REG, 4, &pcr._status_command);
-	    pciconfig_read(pcr._pcibuses[pcr._pcibusidx], pcr._cardnum<<3,
-			PCI_CLASS_REG, 4, &pcr._class_revision);
-	    pciconfig_read(pcr._pcibuses[pcr._pcibusidx], pcr._cardnum<<3,
-			PCI_HEADER_MISC, 4, &pcr._bist_header_latency_cache);
-	    pciconfig_read(pcr._pcibuses[pcr._pcibusidx], pcr._cardnum<<3,
-			PCI_MAP_REG_START, 4, &pcr._base0);
-	    pciconfig_read(pcr._pcibuses[pcr._pcibusidx], pcr._cardnum<<3,
-			PCI_MAP_REG_START + 0x04, 4, &pcr._base1);
-	    pciconfig_read(pcr._pcibuses[pcr._pcibusidx], pcr._cardnum<<3,
-			PCI_MAP_REG_START + 0x08, 4, &pcr._base2);
-	    pciconfig_read(pcr._pcibuses[pcr._pcibusidx], pcr._cardnum<<3,
-			PCI_MAP_REG_START + 0x0C, 4, &pcr._base3);
-	    pciconfig_read(pcr._pcibuses[pcr._pcibusidx], pcr._cardnum<<3,
-			PCI_MAP_REG_START + 0x10, 4, &pcr._base4);
-	    pciconfig_read(pcr._pcibuses[pcr._pcibusidx], pcr._cardnum<<3,
-			PCI_MAP_REG_START + 0x14, 4, &pcr._base5);
-	    pciconfig_read(pcr._pcibuses[pcr._pcibusidx], pcr._cardnum<<3,
-			PCI_MAP_ROM_REG, 4, &pcr._baserom);
-	    pciconfig_read(pcr._pcibuses[pcr._pcibusidx], pcr._cardnum<<3,
-			PCI_INTERRUPT_REG, 4, &pcr._max_min_ipin_iline);
-	    pciconfig_read(pcr._pcibuses[pcr._pcibusidx], pcr._cardnum<<3,
-			PCI_REG_USERCONFIG, 4, &pcr._user_config);
-#endif
- 
+	    pcr._status_command = pci_config_read_long(pcr._pcibuses[pcr._pcibusidx],
+					pcr._cardnum,func,PCI_CMD_STAT_REG);
+	    pcr._class_revision = pci_config_read_long(pcr._pcibuses[pcr._pcibusidx],
+					pcr._cardnum,func,PCI_CLASS_REG);
+	    pcr._bist_header_latency_cache = pci_config_read_long(pcr._pcibuses[pcr._pcibusidx],
+					pcr._cardnum,func,PCI_HEADER_MISC);
+	    pcr._base0 = pci_config_read_long(pcr._pcibuses[pcr._pcibusidx],
+					pcr._cardnum,func,PCI_MAP_REG_START);
+	    pcr._base1 = pci_config_read_long(pcr._pcibuses[pcr._pcibusidx],
+					pcr._cardnum,func,PCI_MAP_REG_START+4);
+	    pcr._base2 = pci_config_read_long(pcr._pcibuses[pcr._pcibusidx],
+					pcr._cardnum,func,PCI_MAP_REG_START+8);
+	    pcr._base3 = pci_config_read_long(pcr._pcibuses[pcr._pcibusidx],
+					pcr._cardnum,func,PCI_MAP_REG_START+0x0C);
+	    pcr._base4 = pci_config_read_long(pcr._pcibuses[pcr._pcibusidx],
+					pcr._cardnum,func,PCI_MAP_REG_START+0x10);
+	    pcr._base5 = pci_config_read_long(pcr._pcibuses[pcr._pcibusidx],
+					pcr._cardnum,func,PCI_MAP_REG_START+0x14);
+	    pcr._baserom = pci_config_read_long(pcr._pcibuses[pcr._pcibusidx],
+					pcr._cardnum,func,PCI_MAP_ROM_REG);
+	    pcr._max_min_ipin_iline = pci_config_read_long(pcr._pcibuses[pcr._pcibusidx],
+					pcr._cardnum,func,PCI_INTERRUPT_REG);
+	    pcr._user_config = pci_config_read_long(pcr._pcibuses[pcr._pcibusidx],
+					pcr._cardnum,func,PCI_REG_USERCONFIG);
             /* check for pci-pci bridges */
 #define PCI_CLASS_MASK 		0xff000000
 #define PCI_SUBCLASS_MASK 	0x00ff0000
@@ -1089,74 +695,3 @@ int pci_scan(pciinfo_t *pci_list,unsigned *num_pci)
     return 0 ;
  
 }
-
-#if 0 
-void
-print_i128(struct pci_config_reg *pcr)
-{
-    /*
-    if (pcr->_status_command)
-        printf("  STATUS    0x%04x  COMMAND 0x%04x\n",
-            pcr->_status, pcr->_command);
-    if (pcr->_class_revision)
-        printf("  CLASS     0x%02x 0x%02x 0x%02x  REVISION 0x%02x\n",
-            pcr->_base_class, pcr->_sub_class, pcr->_prog_if, pcr->_rev_id);
-    if (pcr->_bist_header_latency_cache)
-        printf("  BIST      0x%02x  HEADER 0x%02x  LATENCY 0x%02x  CACHE 0x%02x\n",
-            pcr->_bist, pcr->_header_type, pcr->_latency_timer,
-            pcr->_cache_line_size);
-    printf("  MW0_AD    0x%08x  addr 0x%08x  %spre-fetchable\n",
-        pcr->_base0, pcr->_base0 & 0xFFC00000,
-        pcr->_base0 & 0x8 ? "" : "not-");
-    printf("  MW1_AD    0x%08x  addr 0x%08x  %spre-fetchable\n",
-        pcr->_base1, pcr->_base1 & 0xFFC00000,
-        pcr->_base1 & 0x8 ? "" : "not-");
-    printf("  XYW_AD(A) 0x%08x  addr 0x%08x\n",
-        pcr->_base2, pcr->_base2 & 0xFFC00000);
-    printf("  XYW_AD(B) 0x%08x  addr 0x%08x\n",
-        pcr->_base3, pcr->_base3 & 0xFFC00000);
-    printf("  RBASE_G   0x%08x  addr 0x%08x\n",
-        pcr->_base4, pcr->_base4 & 0xFFFF0000);
-    printf("  IO        0x%08x  addr 0x%08x\n",
-        pcr->_base5, pcr->_base5 & 0xFFFFFF00);
-    printf("  RBASE_E   0x%08x  addr 0x%08x  %sdecode-enabled\n",
-        pcr->_baserom, pcr->_baserom & 0xFFFF8000,
-        pcr->_baserom & 0x1 ? "" : "not-");
-    if (pcr->_max_min_ipin_iline)
-        printf("  MAX_LAT   0x%02x  MIN_GNT 0x%02x  INT_PIN 0x%02x  INT_LINE 0x%02x\n",
-            pcr->_max_lat, pcr->_min_gnt, pcr->_int_pin, pcr->_int_line);
-    */
-}
- 
-void
-print_pcibridge(struct pci_config_reg *pcr)
-{
-    /*
-    if (pcr->_status_command)
-        printf("  STATUS    0x%04x  COMMAND 0x%04x\n",
-            pcr->_status, pcr->_command);
-    if (pcr->_class_revision)
-        printf("  CLASS     0x%02x 0x%02x 0x%02x  REVISION 0x%02x\n",
-            pcr->_base_class, pcr->_sub_class, pcr->_prog_if, pcr->_rev_id);
-    if (pcr->_bist_header_latency_cache)
-        printf("  BIST      0x%02x  HEADER 0x%02x  LATENCY 0x%02x  CACHE 0x%02x\n",
-            pcr->_bist, pcr->_header_type, pcr->_latency_timer,
-            pcr->_cache_line_size);
-    printf("  PRIBUS 0x%02x SECBUS 0x%02x SUBBUS 0x%02x SECLT 0x%02x\n",
-           pcr->_primary_bus_number, pcr->_secondary_bus_number,
-	   pcr->_subordinate_bus_number, pcr->_secondary_latency_timer);
-    printf("  IOBASE: 0x%02x00 IOLIM 0x%02x00 SECSTATUS 0x%04x\n",
-	pcr->_io_base, pcr->_io_limit, pcr->_secondary_status);
-    printf("  NOPREFETCH MEMBASE: 0x%08x MEMLIM 0x%08x\n",
-	pcr->_mem_base, pcr->_mem_limit);
-    printf("  PREFETCH MEMBASE: 0x%08x MEMLIM 0x%08x\n",
-	pcr->_prefetch_mem_base, pcr->_prefetch_mem_limit);
-    printf("  RBASE_E   0x%08x  addr 0x%08x  %sdecode-enabled\n",
-        pcr->_baserom, pcr->_baserom & 0xFFFF8000,
-        pcr->_baserom & 0x1 ? "" : "not-");
-    if (pcr->_max_min_ipin_iline)
-        printf("  MAX_LAT   0x%02x  MIN_GNT 0x%02x  INT_PIN 0x%02x  INT_LINE 0x%02x\n",
-            pcr->_max_lat, pcr->_min_gnt, pcr->_int_pin, pcr->_int_line);
-    */
-}
-#endif 
