@@ -371,8 +371,11 @@ printf( "w: %d h: %d\n\n",vo_dwidth,vo_dheight );
   }
 
  if( format==IMGFMT_YV12 ) yuv2rgb_init( ( depth == 24 ) ? bpp : depth,mode );
-   
- if ( vo_window == None ) XSelectInput( mDisplay,mywindow,StructureNotifyMask | KeyPressMask );
+  
+#ifdef HAVE_NEW_GUI  
+ if ( vo_window == None ) 
+#endif 
+  XSelectInput( mDisplay,mywindow,StructureNotifyMask | KeyPressMask );
    
  X_already_started++;
 
