@@ -330,6 +330,16 @@ uninstall:
 	-rm -f  $(BINDIR)/$(PRG_MENCODER) $(MANDIR)/man1/mencoder.1
 	-rm -f $(prefix)/share/pixmaps/mplayer-desktop.xpm
 	-rm -f $(prefix)/share/applications/mplayer.desktop
+	-rm -f $(LIBDIR)/libmpdvdkit.so
+	for l in $(MAN_LANG); do \
+	  if test "i$$l" != "en"; then \
+	    -rm -f $(MANDIR)/$$l/man1/mplayer.1 $(MANDIR)/$$l/man1/mencoder.1 \
+	    -rm -f $(MANDIR)/$$l/man1/gmplayer.1 \
+	  fi \
+	done
+ifeq ($(VIDIX),yes)
+	$(DO_MAKE)
+endif
 	@echo "Uninstall completed"
 
 clean:

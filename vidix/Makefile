@@ -40,6 +40,9 @@ depend:
 install:
 	$(DO_MAKE)
 
+uninstall:
+	$(DO_MAKE)
+
 #
 # include dependency files if they exist
 #
