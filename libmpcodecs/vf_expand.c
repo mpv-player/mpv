@@ -195,10 +195,17 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
     if(vf->priv->exp_w==mpi->width ||
        (mpi->flags&(MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_ACCEPT_WIDTH)) ){
 	// try full DR !
-	vf->priv->dmpi=vf_get_image(vf->next,mpi->imgfmt,
+	mpi->priv=vf->priv->dmpi=vf_get_image(vf->next,mpi->imgfmt,
 	    mpi->type, mpi->flags, 
             MAX(vf->priv->exp_w, mpi->width +vf->priv->exp_x), 
             MAX(vf->priv->exp_h, mpi->height+vf->priv->exp_y));
+#if 1
+	if((vf->priv->dmpi->flags & MP_IMGFLAG_DRAW_CALLBACK) &&
+	  !(vf->priv->dmpi->flags & MP_IMGFLAG_DIRECT)){
+	    printf("Full DR not possible, trying SLICES instead!\n");
+	    return;
+	}
+#endif
 	// set up mpi as a cropped-down image of dmpi:
 	if(mpi->flags&MP_IMGFLAG_PLANAR){
 	    mpi->planes[0]=vf->priv->dmpi->planes[0]+
@@ -217,13 +224,38 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	mpi->stride[0]=vf->priv->dmpi->stride[0];
 	mpi->width=vf->priv->dmpi->width;
 	mpi->flags|=MP_IMGFLAG_DIRECT;
-	mpi->priv=(void*)vf->priv->dmpi;
+	mpi->flags&=~MP_IMGFLAG_DRAW_CALLBACK;
+//	vf->priv->dmpi->flags&=~MP_IMGFLAG_DRAW_CALLBACK;
     }
 }
 
+static void start_slice(struct vf_instance_s* vf, mp_image_t *mpi){
+//    printf("start_slice called! flag=%d\n",mpi->flags&MP_IMGFLAG_DRAW_CALLBACK);
+    if(!vf->next->draw_slice){
+	mpi->flags&=~MP_IMGFLAG_DRAW_CALLBACK;
+	return;
+    }
+    // they want slices!!! allocate the buffer.
+    if(!mpi->priv)
+	mpi->priv=vf->priv->dmpi=vf_get_image(vf->next,mpi->imgfmt,
+//	MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE | MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
+	    mpi->type, mpi->flags, 
+            MAX(vf->priv->exp_w, mpi->width +vf->priv->exp_x), 
+            MAX(vf->priv->exp_h, mpi->height+vf->priv->exp_y));
+    if(!(vf->priv->dmpi->flags&MP_IMGFLAG_DRAW_CALLBACK))
+	printf("WARNING! next filter doesn't support SLICES, get ready for sig11...\n"); // shouldn't happen.
+}
+
+static void draw_slice(struct vf_instance_s* vf,
+        unsigned char** src, int* stride, int w,int h, int x, int y){
+//    printf("draw_slice() called %d at %d\n",h,y);
+    vf_next_draw_slice(vf,src,stride,w,h,x+vf->priv->exp_x,y+vf->priv->exp_y);
+}
+
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
-    if(mpi->flags&MP_IMGFLAG_DIRECT){
+    if(mpi->flags&MP_IMGFLAG_DIRECT || mpi->flags&MP_IMGFLAG_DRAW_CALLBACK){
 	vf->priv->dmpi=mpi->priv;
+	mpi->priv=NULL;
 #ifdef OSD_SUPPORT
 	if(vf->priv->osd) draw_osd(vf,mpi->w,mpi->h);
 #endif
@@ -280,6 +312,8 @@ static int control(struct vf_instance_s* vf, int request, void* data){
 static int open(vf_instance_t *vf, char* args){
     vf->config=config;
     vf->control=control;
+    vf->start_slice=start_slice;
+    vf->draw_slice=draw_slice;
     vf->get_image=get_image;
     vf->put_image=put_image;
     vf->priv=malloc(sizeof(struct vf_priv_s));
