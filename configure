@@ -1562,9 +1562,13 @@ int main(void) { gettext("test"); return 0; }
 EOF
   _i18n=no
   _i18n_libs=""
-  for i18n_lib in "" "-lintl"; do
-    cc_check $i18n_lib && _i18n=yes && _i18n_libs=$i18n_lib && break
-  done
+  if test "$_i18n" = auto ; then
+    cc_check && _i18n=yes
+  else
+    for i18n_lib in "" "-lintl"; do
+      cc_check $i18n_lib && _i18n=yes && _i18n_libs=$i18n_lib && break
+    done
+  fi
 fi
 if test "$_i18n" = yes ; then
   _def_i18n='#define USE_I18N 1'
