@@ -3504,9 +3504,11 @@ use interlaced dct
 .RSss
 YV12: default
 .br
-422P: for huffyuv
+422P: for huffyuv or lossless jpeg
+.br
+411P,410P,BGR32: for lossless jpeg
 .REss
-.IPs pred
+.IPs pred 
 (for huffyuv)
 .RSss
 0: left prediction
@@ -3514,6 +3516,19 @@ YV12: default
 1: plane/gradient prediction
 .br
 2: median prediction
+.REss
+.IPs pred 
+(for lossless jpeg)
+.RSss
+0: left prediction
+.br
+1: top prediction
+.br
+2: topleft prediction
+.br
+3: plane/gradient prediction
+.br
+6: mean prediction
 .REss
 .IPs qpel
 use quarter pel motion compensation
