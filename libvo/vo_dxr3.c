@@ -6,6 +6,9 @@
  */
 
 /* ChangeLog added 2002-01-10
+ * 2002-02-02:
+ *  Cleaned out some old code which might have slowed down writes
+ *
  * 2002-01-17:
  *  Testrelease of new sync engine (using previously undocumented feature of em8300).
  *
@@ -87,12 +90,7 @@ static vo_info_t vo_info =
 #ifdef USE_MP1E
 void write_dxr3(rte_context *context, void *data, size_t size, void *user_data)
 {
-	size_t data_left = size;
-	
-	/* Force data into the buffer */
-	while (data_left) {
-		data_left -= write(fd_video, (void*) data + (size - data_left), data_left);
-	}
+	write(fd_video, data, size);
 }
 #endif
 
@@ -378,18 +376,11 @@ static uint32_t draw_frame(uint8_t * src[])
 {
 	if (img_format == IMGFMT_MPEGPES) {
 		vo_mpegpes_t *p = (vo_mpegpes_t *) src[0];
-		size_t data_left = p->size;
 
 		if (p->id == 0x20) {
-			/* Force subpic data into buffer */
-			while (data_left) {
-				data_left -= write(fd_spu, (void*) (p->data + p->size-data_left), data_left);
-			}
+			write(fd_spu, p->data, p->size);
 		} else {
-			/* Force video data into buffer */
-			while (data_left) {
-				data_left -= write(fd_video, (void*) (p->data + p->size-data_left), data_left);
-			}
+			write(fd_video, p->data, p->size);
 		}
 		return 0;
 	}
@@ -430,14 +421,12 @@ static uint32_t draw_frame(uint8_t * src[])
 
 static void flip_page(void)
 {
-	static int prev_pts = 0;
 	/* Flush the device if a seek occured */
-	if (prev_pts > vo_pts) {
+	if (!vo_pts) {
 		/* Flush video */
 		ioval = EM8300_SUBDEVICE_VIDEO;
 		ioctl(fd_control, EM8300_IOCTL_FLUSH, &ioval);
 	}
-	prev_pts = vo_pts;
 #ifdef USE_MP1E
 	if (img_format == IMGFMT_YV12) {
 		mp1e_buffer.data = picture_data[0];
@@ -554,10 +543,10 @@ static void check_events(void)
 
 static uint32_t preinit(const char *arg)
 {
-  return 0;
+	return 0;
 }
 
 static void query_vaa(vo_vaa_t *vaa)
 {
-  memset(vaa,0,sizeof(vo_vaa_t));
+	memset(vaa, 0, sizeof(vo_vaa_t));
 }
