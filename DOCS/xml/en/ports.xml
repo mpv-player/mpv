@@ -343,6 +343,17 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
   or similar). As a last resort, try putting them in the same directory as
   <application>MPlayer</application>.</para>
 
+<para>You can play VCDs by playing the <filename>.DAT</filename> or <filename>.MPG</filename> files
+  that Windows exposes on VCDs.  It works like this (adjust for the drive letter
+  of your CD-ROM):</para>
+
+<screen>mplayer <replaceable>d:/mpegav/avseq01.dat</replaceable></screen>
+
+<para>DVDs also work, adjust <option>-dvd-device</option> for the drive letter
+  of your DVD-ROM:</para>
+
+<screen>mplayer dvd://<replaceable>&lt;title&gt;</replaceable> -dvd-device <replaceable>d</replaceable>:</screen>
+
 <para>The <application>Cygwin</application>/<application>MinGW</application>
   console is rather slow. Redirecting output or using the
   <option>-quiet</option> option has been reported to improve performance on
@@ -373,21 +384,6 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
   <application>Cygwin</application> can be found on the
   <ulink url="http://www.libsdl.org/extras/win32/cygwin/">libsdl site</ulink>.</para>
 
-<para>You can play VCDs by playing the <filename>.DAT</filename> or <filename>.MPG</filename> files
-  that Windows exposes on VCDs.  It works like this (adjust for the drive letter
-  of your CD-ROM):</para>
-
-<screen>mplayer <replaceable>d:/mpegav/avseq01.dat</replaceable></screen>
-
-<screen>mplayer <replaceable>/cygdrive/d/MPEG2/AVSEQ01.MPG</replaceable></screen>
-
-<para>DVDs also work, adjust <option>-dvd-device</option> for the drive letter
-  of your DVD-ROM:</para>
-
-<screen>mplayer dvd://<replaceable>&lt;title&gt;</replaceable> -dvd-device <replaceable>d</replaceable>:</screen>
-
-<screen>mplayer dvd://<replaceable>&lt;title&gt;</replaceable> -dvd-device '\\.\<replaceable>d</replaceable>:'</screen>
-
 </sect2>
 
 
@@ -405,17 +401,6 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
   <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/types.h"><filename>types.h</filename></ulink>.</para>
 
 <para>Extract DirectX header files to <filename class="directory">/mingw/include/</filename>.</para>
-
-<para>VCDs and DVDs work almost like <application>Cygwin</application> (adjust
-  for the drive letter of your CD-ROM/DVD-ROM):</para>
-
-<screen>mplayer <replaceable>d:/mpegav/avseq01.dat</replaceable></screen>
-
-<screen>mplayer <replaceable>/d/MPEG2/AVSEQ01.MPG</replaceable></screen>
-
-<screen>mplayer dvd://<replaceable>&lt;title&gt;</replaceable> -dvd-device /<replaceable>d</replaceable>/</screen>
-
-<screen>mplayer dvd://<replaceable>&lt;title&gt;</replaceable> -dvd-device <replaceable>d</replaceable>:\\</screen>
 
 </sect2>
 
