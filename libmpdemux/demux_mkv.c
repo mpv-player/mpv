@@ -1821,7 +1821,7 @@ demux_mkv_open (demuxer_t *demuxer)
   str = ebml_read_header (s, &version);
   if (str == NULL || strcmp (str, "matroska") || version > 1)
     {
-      mp_msg (MSGT_DEMUX, MSGL_ERR, "[mkv] no head found\n");
+      mp_msg (MSGT_DEMUX, MSGL_DBG2, "[mkv] no head found\n");
       return 0;
     }
   free (str);
