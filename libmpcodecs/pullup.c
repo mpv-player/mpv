@@ -480,15 +480,19 @@ static int decide_frame_length(struct pullup_context *c)
 	struct pullup_field *f1 = f0->next;
 	struct pullup_field *f2 = f1->next;
 	struct pullup_field *f3 = f2->next;
+	int l;
 	
 	if (queue_length(c->first, c->last) < 6) return 0;
 	foo(c);
 
 	if (f0->affinity == -1) return 1;
 
-	switch (find_first_break(f0, 3)) {
+	l = find_first_break(f0, 3);
+	if (l == 1 && c->strict_breaks < 0) l = 0;
+	
+	switch (l) {
 	case 1:
-		if (!c->strict_breaks && f0->affinity == 1 && f1->affinity == -1)
+		if (c->strict_breaks > 0 && f0->affinity == 1 && f1->affinity == -1)
 			return 2;
 		else return 1;
 	case 2:
