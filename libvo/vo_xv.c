@@ -579,7 +579,7 @@ static void flip_page(void)
                       xvimage[current_buf], 0, 0, image_width,
                       image_height, drwX - (vo_panscan_x >> 1),
                       drwY - (vo_panscan_y >> 1), vo_dwidth + vo_panscan_x,
-                      (vo_fs ? vo_dheight - 1 : vo_dheight) + vo_panscan_y,
+                      vo_dheight + vo_panscan_y,
                       False);
     } else
 #endif
@@ -588,7 +588,7 @@ static void flip_page(void)
                    xvimage[current_buf], 0, 0, image_width, image_height,
                    drwX - (vo_panscan_x >> 1), drwY - (vo_panscan_y >> 1),
                    vo_dwidth + vo_panscan_x,
-                   (vo_fs ? vo_dheight - 1 : vo_dheight) + vo_panscan_y);
+                   vo_dheight + vo_panscan_y);
     }
     if (num_buffers > 1)
     {
