@@ -235,7 +235,6 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
       }
       d*=m;
     }
-    printf("\n%i %i %i\n",d,af->data->rate/d,n->rate/d);
 
     // Check if the the design needs to be redone
     if(s->up != af->data->rate/d || s->dn != n->rate/d){
