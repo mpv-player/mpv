@@ -300,7 +300,7 @@ static void init_registry(void)
 
 #ifdef USE_WIN32DLL
 	// MPlayer:
-	regpathname = get_path("registry");
+	localregpathname = get_path("registry");
 #else
 	// avifile:
 	if (localregpathname == 0)
