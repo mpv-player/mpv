@@ -27,7 +27,7 @@
 #define CODECS_STATUS__MAX		2
 
 
-#ifndef GUID_TYPE
+#if !defined(GUID_TYPE) && !defined(GUID_DEFINED)
 #define GUID_TYPE
 typedef struct {
 	unsigned long f1;

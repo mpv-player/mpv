@@ -23,6 +23,10 @@
 #ifdef __MINGW32__
 #define        SIGQUIT 3
 #endif
+#ifdef WIN32
+#include <windows.h>
+#endif
+
 #include <sys/time.h>
 
 #include "config.h"

@@ -12,7 +12,6 @@ char *get_path(char *filename){
 	if ((homedir = getenv("HOME")) == NULL)
 #if defined(__MINGW32__)||defined(__CYGWIN__) /*hack to get fonts etc. loaded outside of cygwin environment*/
 	{
-    	int __stdcall GetModuleFileNameA(void* hModule,char* lpFilename,int nSize);
         int i,imax=0;       
         char exedir[260];       
         GetModuleFileNameA(NULL, exedir, 260);

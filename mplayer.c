@@ -1,5 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef WIN32
+#define _UWIN 1  /*disable Non-underscored versions of non-ANSI functions as otherwise int eof would conflict with eof()*/
+#include <windows.h>
+#endif
 #include <string.h>
 #include <unistd.h>
 
@@ -792,8 +796,6 @@ int gui_no_filename=0;
   char tmppath[MAX_PATH*2 + 1];
   char win32path[MAX_PATH];
   char realpath[MAX_PATH];
-  int       WINAPI SetEnvironmentVariableA(char*,char*);
-  int       WINAPI GetModuleFileNameA(void*,char*,int);
 #ifdef __CYGWIN__
   cygwin_conv_to_full_win32_path(WIN32_PATH,win32path);
   strcpy(tmppath,win32path);
