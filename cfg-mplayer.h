@@ -346,8 +346,9 @@ static config_t mplayer_opts[]={
 	{"playlist", NULL, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
 	// a-v sync stuff:
-	{"dapsync", &dapsync, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"nodapsync", &dapsync, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+//	{"dapsync", &dapsync, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+//	{"nodapsync", &dapsync, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+
 	{"softsleep", &softsleep, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #ifdef HAVE_RTC
 	{"nortc", &nortc, CONF_TYPE_FLAG, 0, 0, 1, NULL},

@@ -209,7 +209,6 @@ static float max_pts_correction=0;//default_max_pts_correction;
 static float c_total=0;
        float audio_delay=0;
 
-static int dapsync=0;
 static int softsleep=0;
 
 static float force_fps=0;
@@ -1610,53 +1609,10 @@ if(!sh_video) {
 	  float delay=audio_out->get_delay();
 	  mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"delay=%f\n",delay);
 
-	if(!dapsync){
-
-	      /* Arpi's AV-sync */
-
           time_frame=sh_video->timer;
           time_frame-=sh_audio->timer-delay;
 
-	} else {  // if(!dapsync)
-
-	      /* DaP's AV-sync */
-
-    	      float SH_AV_delay;
-	      /* SH_AV_delay = sh_video->timer - (sh_audio->timer - (float)((float)delay + sh_audio->a_buffer_len) / (float)sh_audio->o_bps); */
-	      SH_AV_delay = sh_video->timer - (sh_audio->timer - (float)((float)delay) / (float)sh_audio->o_bps);
-	      // printf ("audio slp req: %.3f TF: %.3f delta: %.3f (v: %.3f a: %.3f) | ", i, time_frame,
-	      //	    i - time_frame, sh_video->timer, sh_audio->timer - (float)((float)delay / (float)sh_audio->o_bps));
-	      if(SH_AV_delay<-2*frame_time){
-	          drop_frame=frame_dropping; // tricky!
-	          ++drop_frame_cnt;
-		mp_msg(MSGT_AVSYNC,MSGL_INFO,"A-V SYNC: FRAMEDROP (SH_AV_delay=%.3f)!\n", SH_AV_delay);
-	        mp_msg(MSGT_AVSYNC,MSGL_DBG2,"\nframe drop %d, %.2f\n", drop_frame, time_frame);
-	        /* go into unlimited-TF cycle */
-    		time_frame = SH_AV_delay;
-	      } else {
-#define	SL_CORR_AVG_LEN	125
-	        /* don't adjust under framedropping */
-	        time_frame_corr_avg = (time_frame_corr_avg * (SL_CORR_AVG_LEN - 1) +
-	    				(SH_AV_delay - time_frame)) / SL_CORR_AVG_LEN;
-#define	UNEXP_CORR_MAX	0.1	/* limit of unexpected correction between two frames (percentage) */
-#define	UNEXP_CORR_WARN	1.0	/* warn limit of A-V lag (percentage) */
-	        time_frame += time_frame_corr_avg;
-	        // printf ("{%.3f - %.3f}\n", i - time_frame, frame_time + frame_time_corr_avg);
-	        if (SH_AV_delay - time_frame < (frame_time + time_frame_corr_avg) * UNEXP_CORR_MAX &&
-		    SH_AV_delay - time_frame > (frame_time + time_frame_corr_avg) * -UNEXP_CORR_MAX)
-		    time_frame = SH_AV_delay;
-	        else {
-		    if (SH_AV_delay - time_frame > (frame_time + time_frame_corr_avg) * UNEXP_CORR_WARN ||
-		        SH_AV_delay - time_frame < (frame_time + time_frame_corr_avg) * -UNEXP_CORR_WARN)
-		        mp_msg(MSGT_AVSYNC, MSGL_WARN, "WARNING: A-V SYNC LAG TOO LARGE: %.3f {%.3f - %.3f} (too little UNEXP_CORR_MAX?)\n",
-		  	    SH_AV_delay - time_frame, SH_AV_delay, time_frame);
-		        time_frame += (frame_time + time_frame_corr_avg) * ((SH_AV_delay > time_frame) ?
-		    		      UNEXP_CORR_MAX : -UNEXP_CORR_MAX);
-	        }
-	      }	/* /start dropframe */
-
-	} // if(dapsync)
-
+	// delay = amount of audio buffered in soundcard/driver
 	if(delay>0.25) delay=0.25; else
 	if(delay<0.10) delay=0.10;
 	if(time_frame>delay*0.6){
