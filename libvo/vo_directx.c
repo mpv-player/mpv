@@ -507,7 +507,7 @@ static uint32_t Directx_ManageDisplay()
           }
           else height=tmpheight;
       }    
-      ShowCursor(TRUE); 
+      while(ShowCursor(TRUE)<=0){}
     }
     rd.right=rd.left+width;
     rd.bottom=rd.top+height;
@@ -521,6 +521,21 @@ static uint32_t Directx_ManageDisplay()
         ZeroMemory(&capsDrv, sizeof(capsDrv));
         capsDrv.dwSize = sizeof(capsDrv);
         if(g_lpdd->lpVtbl->GetCaps(g_lpdd,&capsDrv, NULL) != DD_OK)return 1;
+		/*get minimum stretch, depends on display adaptor and mode (refresh rate!) */
+        uStretchFactor1000 = capsDrv.dwMinOverlayStretch>1000 ? capsDrv.dwMinOverlayStretch : 1000;
+        rd.right = ((width+rd.left)*uStretchFactor1000+999)/1000;
+        rd.bottom = (height+rd.top)*uStretchFactor1000/1000;
+        /*calculate xstretch1000 and ystretch1000*/
+        xstretch1000 = ((rd.right - rd.left)* 1000)/image_width ;
+        ystretch1000 = ((rd.bottom - rd.top)* 1000)/image_height;
+		rs.left=0;
+		rs.right=image_width;
+		rs.top=0;
+		rs.bottom=image_height;
+        if(rd.left < 0)rs.left=(-rd.left*1000)/xstretch1000;
+        if(rd.top < 0)rs.top=(-rd.top*1000)/ystretch1000;
+        if(rd.right > vo_screenwidth)rs.right=((vo_screenwidth-rd.left)*1000)/xstretch1000;
+        if(rd.bottom > vo_screenheight)rs.bottom=((vo_screenheight-rd.top)*1000)/ystretch1000;
 		/*do not allow to zoom or shrink if hardware isn't able to do so*/
 		if((width < image_width)&& !(capsDrv.dwFXCaps & DDFXCAPS_OVERLAYSHRINKX))
 		{
@@ -545,22 +560,7 @@ static uint32_t Directx_ManageDisplay()
 			if(capsDrv.dwFXCaps & DDFXCAPS_OVERLAYSTRETCHYN)mp_msg(MSGT_VO, MSGL_ERR,"<vo_directx><ERROR>can only stretchN\n");
 	        else mp_msg(MSGT_VO, MSGL_ERR,"<vo_directx><ERROR>can't stretch y\n");
 	        rd.bottom = rd.top + image_height;
-		}
-		/*get minimum stretch, depends on display adaptor and mode (refresh rate!) */
-        uStretchFactor1000 = capsDrv.dwMinOverlayStretch>1000 ? capsDrv.dwMinOverlayStretch : 1000;
-        rd.right = ((width+rd.left)*uStretchFactor1000+999)/1000;
-        rd.bottom = (height+rd.top)*uStretchFactor1000/1000;
-        /*calculate xstretch1000 and ystretch1000*/
-        xstretch1000 = ((rd.right - rd.left)* 1000)/image_width ;
-        ystretch1000 = ((rd.bottom - rd.top)* 1000)/image_height;
-		rs.left=0;
-		rs.right=image_width;
-		rs.top=0;
-		rs.bottom=image_height;
-        if(rd.left < 0)rs.left=(-rd.left*1000)/xstretch1000;
-        if(rd.top < 0)rs.top=(-rd.top*1000)/ystretch1000;
-        if(rd.right > vo_screenwidth)rs.right=((vo_screenwidth-rd.left)*1000)/xstretch1000;
-        if(rd.bottom > vo_screenheight)rs.bottom=((vo_screenheight-rd.top)*1000)/ystretch1000;
+		} 
 		/*the last thing to check are alignment restrictions
           these expressions (x & -y) just do alignment by dropping low order bits...
           so to round up, we add first, then truncate*/
@@ -1178,7 +1178,8 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
         rd.top = vo_dy;
         rd.right = rd.left + d_image_width;
         rd.bottom = rd.top + d_image_height;
-        SetWindowPos(hWnd,NULL, rd.left, rd.top,rd.right-rd.left,rd.bottom-rd.top,SWP_SHOWWINDOW|SWP_NOOWNERZORDER); 
+        AdjustWindowRect(&rd,WS_OVERLAPPEDWINDOW|WS_SIZEBOX,FALSE);  
+        SetWindowPos(hWnd,NULL, vo_dx, vo_dy,rd.right-rd.left,rd.bottom-rd.top,SWP_SHOWWINDOW|SWP_NOOWNERZORDER); 
     }
     else ShowWindow(hWnd,SW_SHOW); 
      
