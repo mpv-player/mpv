@@ -89,10 +89,6 @@ static vo_info_t vo_info =
 void write_dxr3(rte_context *context, void *data, size_t size, void *user_data)
 {
 	size_t data_left = size;
-	/* Set the timestamp of the next video packet */
-	if (ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &pts) < 0) {
-		printf("VO: [dxr3] Unable to set pts\n");
-	}
 	
 	/* Force data into the buffer */
 	while (data_left) {
@@ -452,9 +448,11 @@ static void flip_page(void)
 		ioval = EM8300_SUBDEVICE_VIDEO;
 		ioctl(fd_control, EM8300_IOCTL_FLUSH, &ioval);
 		pts += 90000.0 / vo_fps;
-		ioctl(fd_control, EM8300_IOCTL_SCR_SET, &pts);
-		if (ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &pts) < 0) {
-			printf("VO: [dxr3] Unable to set pts\n");
+		if (img_format == IMGFMT_MPEGPES) {
+			ioctl(fd_control, EM8300_IOCTL_SCR_SET, &pts);
+			if (ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &pts) < 0) {
+				printf("VO: [dxr3] Unable to set pts\n");
+			}
 		}
 	}
 	prev_pts = pts;
@@ -532,14 +530,14 @@ static uint32_t query_format(uint32_t format)
 		flag = 0x2 | 0x8 | 0x100;
 #ifdef USE_MP1E
 	} else if (format == IMGFMT_YV12) {
-		/* Conversion needed | OSD Supported | Hardware handles syncing */
-		flag = 0x1 | 0x4 | 0x100;
+		/* Conversion needed | OSD Supported */
+		flag = 0x1 | 0x4;
 	} else if (format == IMGFMT_YUY2) {
-		/* Conversion needed | OSD Supported | Hardware handles syncing */
-		flag = 0x1 | 0x4 | 0x100;
+		/* Conversion needed | OSD Supported */
+		flag = 0x1 | 0x4;
 	} else if (format == IMGFMT_BGR24) {
-		/* Conversion needed | OSD Supported | Hardware handles syncing */
-		flag = 0x1 | 0x4 | 0x100;
+		/* Conversion needed | OSD Supported */
+		flag = 0x1 | 0x4;
 	} else {
 		printf("VO: [dxr3] Format unsupported, mail dholm@iname.com\n");
 #else
