@@ -13,6 +13,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
+#include <ctype.h>
 
 #include <sys/mman.h>
 #include <sys/ioctl.h>

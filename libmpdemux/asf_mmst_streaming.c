@@ -118,7 +118,7 @@ static void string_utf16(char *dest, char *src, int len) {
     size_t len1, len2;
     char *ip, *op;
 
-    if (url_conv != -1)
+    if (url_conv != (iconv_t)(-1))
     {
     memset(dest, 0, 1000);
     len1 = len; len2 = 1000;
@@ -588,7 +588,7 @@ int asf_mmst_streaming_start(stream_t *stream)
   printf("mmst packet_length = %d\n",packet_length);
 
 #ifdef USE_ICONV
-  if (url_conv != -1)
+  if (url_conv != (iconv_t)(-1))
     iconv_close(url_conv);
 #endif
 

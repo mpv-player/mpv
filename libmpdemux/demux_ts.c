@@ -31,6 +31,7 @@
 
 #include "stream.h"
 #include "demuxer.h"
+#include "parse_es.h"
 #include "stheader.h"
 
 #include "bswap.h"

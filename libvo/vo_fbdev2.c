@@ -4,6 +4,7 @@
  * (C) 2003
  */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
@@ -18,6 +19,7 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 #include "fastmemcpy.h"
+#include "sub.h"
 #include "mp_msg.h"
 
 static vo_info_t info = {

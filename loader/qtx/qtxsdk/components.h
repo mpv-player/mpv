@@ -18,7 +18,7 @@ typedef signed short                    SInt16;
 typedef unsigned long                   UInt32;
 typedef signed long                     SInt32;
 
-#define FOUR_CHAR_CODE(x)       ((unsigned long)(x)) /* otherwise compiler will complain about values with high bit set */
+#define FOUR_CHAR_CODE(a,b,c,d)       ((unsigned long)(a)<<24 | (unsigned long)(b)<<16 | (unsigned long)(c)<<8 | (unsigned long)(d)) /* otherwise compiler will complain about values with high bit set */
 
 // codec private shit:
 typedef void *GlobalsPtr;
@@ -154,22 +154,22 @@ typedef ImageDescriptionPtr *           ImageDescriptionHandle;
 
 /* values for PixMap.pixelFormat*/
 enum {
-    k16LE555PixelFormat         = FOUR_CHAR_CODE('L555'),       /* 16 bit LE rgb 555 (PC)*/
-    k16LE5551PixelFormat        = FOUR_CHAR_CODE('5551'),       /* 16 bit LE rgb 5551*/
-    k16BE565PixelFormat         = FOUR_CHAR_CODE('B565'),       /* 16 bit BE rgb 565*/
-    k16LE565PixelFormat         = FOUR_CHAR_CODE('L565'),       /* 16 bit LE rgb 565*/
-    k24BGRPixelFormat           = FOUR_CHAR_CODE('24BG'),       /* 24 bit bgr */
-    k32BGRAPixelFormat          = FOUR_CHAR_CODE('BGRA'),       /* 32 bit bgra    (Matrox)*/
-    k32ABGRPixelFormat          = FOUR_CHAR_CODE('ABGR'),       /* 32 bit abgr    */
-    k32RGBAPixelFormat          = FOUR_CHAR_CODE('RGBA'),       /* 32 bit rgba    */
-    kYUVSPixelFormat            = FOUR_CHAR_CODE('yuvs'),       /* YUV 4:2:2 byte ordering 16-unsigned = 'YUY2'*/
-    kYUVUPixelFormat            = FOUR_CHAR_CODE('yuvu'),       /* YUV 4:2:2 byte ordering 16-signed*/
-    kYVU9PixelFormat            = FOUR_CHAR_CODE('YVU9'),       /* YVU9 Planar    9*/
-    kYUV411PixelFormat          = FOUR_CHAR_CODE('Y411'),       /* YUV 4:1:1 Interleaved  16*/
-    kYVYU422PixelFormat         = FOUR_CHAR_CODE('YVYU'),       /* YVYU 4:2:2 byte ordering   16*/
-    kUYVY422PixelFormat         = FOUR_CHAR_CODE('UYVY'),       /* UYVY 4:2:2 byte ordering   16*/
-    kYUV211PixelFormat          = FOUR_CHAR_CODE('Y211'),       /* YUV 2:1:1 Packed   8*/
-    k2vuyPixelFormat            = FOUR_CHAR_CODE('2vuy')        /* UYVY 4:2:2 byte ordering   16*/
+    k16LE555PixelFormat         = FOUR_CHAR_CODE('L','5','5','5'),       /* 16 bit LE rgb 555 (PC)*/
+    k16LE5551PixelFormat        = FOUR_CHAR_CODE('5','5','5','1'),       /* 16 bit LE rgb 5551*/
+    k16BE565PixelFormat         = FOUR_CHAR_CODE('B','5','6','5'),       /* 16 bit BE rgb 565*/
+    k16LE565PixelFormat         = FOUR_CHAR_CODE('L','5','6','5'),       /* 16 bit LE rgb 565*/
+    k24BGRPixelFormat           = FOUR_CHAR_CODE('2','4','B','G'),       /* 24 bit bgr */
+    k32BGRAPixelFormat          = FOUR_CHAR_CODE('B','G','R','A'),       /* 32 bit bgra    (Matrox)*/
+    k32ABGRPixelFormat          = FOUR_CHAR_CODE('A','B','G','R'),       /* 32 bit abgr    */
+    k32RGBAPixelFormat          = FOUR_CHAR_CODE('R','G','B','A'),       /* 32 bit rgba    */
+    kYUVSPixelFormat            = FOUR_CHAR_CODE('y','u','v','s'),       /* YUV 4:2:2 byte ordering 16-unsigned = 'YUY2'*/
+    kYUVUPixelFormat            = FOUR_CHAR_CODE('y','u','v','u'),       /* YUV 4:2:2 byte ordering 16-signed*/
+    kYVU9PixelFormat            = FOUR_CHAR_CODE('Y','V','U','9'),       /* YVU9 Planar    9*/
+    kYUV411PixelFormat          = FOUR_CHAR_CODE('Y','4','1','1'),       /* YUV 4:1:1 Interleaved  16*/
+    kYVYU422PixelFormat         = FOUR_CHAR_CODE('Y','V','Y','U'),       /* YVYU 4:2:2 byte ordering   16*/
+    kUYVY422PixelFormat         = FOUR_CHAR_CODE('U','Y','V','Y'),       /* UYVY 4:2:2 byte ordering   16*/
+    kYUV211PixelFormat          = FOUR_CHAR_CODE('Y','2','1','1'),       /* YUV 2:1:1 Packed   8*/
+    k2vuyPixelFormat            = FOUR_CHAR_CODE('2','v','u','y')        /* UYVY 4:2:2 byte ordering   16*/
 };
 
 struct __attribute__((__packed__)) PixMapExtension {

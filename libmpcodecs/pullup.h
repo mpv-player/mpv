@@ -64,7 +64,7 @@ struct pullup_buffer *pullup_lock_buffer(struct pullup_buffer *b, int parity);
 void pullup_release_buffer(struct pullup_buffer *b, int parity);
 struct pullup_buffer *pullup_get_buffer(struct pullup_context *c, int parity);
 
-int pullup_submit_field(struct pullup_context *c, struct pullup_buffer *b, int parity);
+void pullup_submit_field(struct pullup_context *c, struct pullup_buffer *b, int parity);
 void pullup_flush_fields(struct pullup_context *c);
 
 struct pullup_frame *pullup_get_frame(struct pullup_context *c);

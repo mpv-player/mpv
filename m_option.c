@@ -11,6 +11,7 @@
 #include "m_option.h"
 //#include "m_config.h"
 #include "mp_msg.h"
+#include "libmpdemux/url.h"
 
 // Don't free for 'production' atm
 #ifndef MP_DEBUG

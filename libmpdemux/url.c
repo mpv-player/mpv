@@ -43,7 +43,7 @@ url_new(const char* url) {
 	if( ptr1==NULL ) {
 	        // Check for a special case: "sip:" (without "//"):
 	        if (strstr(url, "sip:") == url) {
-		        ptr1 = &url[3]; // points to ':'
+		        ptr1 = (char *)&url[3]; // points to ':'
 			jumpSize = 1;
 		} else {
 		        mp_msg(MSGT_NETWORK,MSGL_V,"Not an URL!\n");

@@ -1051,7 +1051,7 @@ void * gtkSet( int cmd,float fparam, void * vparam )
 	return NULL;
    case gtkSetExtraStereo:
         gtkAOExtraStereoMul=fparam;
-	audio_plugin_extrastereo.control( AOCONTROL_PLUGIN_ES_SET,(int)&gtkAOExtraStereoMul );
+	audio_plugin_extrastereo.control( AOCONTROL_PLUGIN_ES_SET,(void *)&gtkAOExtraStereoMul );
         return NULL;
    case gtkSetPanscan:
         {
@@ -1082,7 +1082,7 @@ void * gtkSet( int cmd,float fparam, void * vparam )
         if ( eq )
 	 {
           gtkEquChannels[eq->channel][eq->band]=eq->gain;
-	  audio_plugin_eq.control( AOCONTROL_PLUGIN_EQ_SET_GAIN,(int)eq );
+	  audio_plugin_eq.control( AOCONTROL_PLUGIN_EQ_SET_GAIN,(void *)eq );
 	 }
 	 else
 	  {
@@ -1090,7 +1090,7 @@ void * gtkSet( int cmd,float fparam, void * vparam )
 	   memset( gtkEquChannels,0,sizeof( gtkEquChannels ) );
 	   for ( i=0;i<6;i++ )
 	    for ( j=0;j<10;j++ )
-	     { tmp.channel=i; tmp.band=j; audio_plugin_eq.control( AOCONTROL_PLUGIN_EQ_SET_GAIN,(int)&tmp ); }
+	     { tmp.channel=i; tmp.band=j; audio_plugin_eq.control( AOCONTROL_PLUGIN_EQ_SET_GAIN,(void *)&tmp ); }
 	  }
 	return NULL;
   }

@@ -72,6 +72,7 @@ extern char * get_path( char * filename );
 extern int    flip;
 extern int    frame_dropping;
 extern int    stop_xscreensaver;
+extern int    m_config_parse_config_file(m_config_t* config, char *conffile);
 
 static m_config_t * gui_conf;
 static m_option_t gui_opts[] =

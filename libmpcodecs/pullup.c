@@ -1,6 +1,8 @@
 
 
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "pullup.h"
 #include "config.h"
 
@@ -321,7 +323,7 @@ static void check_field_queue(struct pullup_context *c)
 	}
 }
 
-int pullup_submit_field(struct pullup_context *c, struct pullup_buffer *b, int parity)
+void pullup_submit_field(struct pullup_context *c, struct pullup_buffer *b, int parity)
 {
 	struct pullup_field *f;
 	
@@ -329,7 +331,7 @@ int pullup_submit_field(struct pullup_context *c, struct pullup_buffer *b, int p
 	check_field_queue(c);
 	
 	/* Cannot have two fields of same parity in a row; drop the new one */
-	if (c->last && c->last->parity == parity) return 0;
+	if (c->last && c->last->parity == parity) return;
 
 	f = c->head;
 	f->parity = parity;
