@@ -9,10 +9,6 @@ package        := mplayer
 prefix := $(shell pwd)/debian/$(package)
 
 arch   := $(shell dpkg --print-architecture)
-  
-ifeq ($(arch),powerpc)
-  arch-conf += --disable-mp1e
-endif
 
 
 configure: configure-stamp
