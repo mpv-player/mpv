@@ -651,6 +651,7 @@ _iconv=auto
 _rtc=auto
 _ossaudio=auto
 _mad=auto
+_mp1e=auto
 _vorbis=auto
 _css=auto
 _dvdread=auto
@@ -1973,6 +1974,26 @@ fi
 echores "$_mad"
 
 
+echocheck "mp1e rte support"
+if test "$_mp1e" = auto ; then
+  _mp1e=no
+  cat > $TMPC << EOF
+#include <sys/types.h>
+#include <unistd.h>
+#include <rte.h>
+int main(void) { return 0; }
+EOF
+  cc_check -lrte && _mp1e=yes
+fi
+if test "$_mp1e" = yes ; then
+  _def_mp1e='#define USE_MP1E 1'
+  _ld_mp1e='-lrte'
+else
+  _def_mp1e='#undef USE_MP1E'
+fi
+echores "$_mp1e"
+
+
 echocheck "OggVorbis support"
 if test "$_vorbis" = auto ; then
   _vorbis=no
@@ -2500,6 +2521,8 @@ DS_DEP = $_dep_dshow
 DS_LIB = $_ld_dshow
 AV_DEP = $_dep_libavcodec
 AV_LIB = $_ld_libavcodec
+MP1E_DEP = $_dep_mp1e
+MP1E_LIB = $_ld_mp1e
 ARCH_LIB =  $_ld_arch $_ld_iconv
 DIVX4LINUX = $_divx4linux
 DECORE_LIB = $_ld_decore
@@ -2654,6 +2677,9 @@ $_def_libavcodecso
 /* use only decoders from libavcodec: */
 #define CONFIG_DECODERS 1
 
+/* mp1e rte encoder */
+$_def_mp1e
+
 /* XAnim DLL support */
 $_def_xanim
 $_def_xanim_path
@@ -2724,6 +2750,9 @@ $_def_png
 
 /* libmad support */
 $_def_mad
+
+/* mp1e support */
+$_def_mp1e
 
 /* enable OggVorbis support */
 $_def_vorbis
