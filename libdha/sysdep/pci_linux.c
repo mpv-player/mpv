@@ -7,7 +7,9 @@
 #ifdef __i386__
 #include <sys/perm.h>
 #else
+#ifndef __sparc__
 #include <sys/io.h>
+#endif
 #endif
 
 #include "config.h"
