@@ -11,8 +11,8 @@
 // 100=best >=80 very good >=50 fast
 #define QUALITY 90
 
-#include "../libvo/img_format.h"
-#include "../mp_image.h"
+#include "img_format.h"
+#include "mp_image.h"
 #include "vf.h"
 
 //#include "../libvo/fastmemcpy.h"

@@ -45,8 +45,6 @@ LIBVO_EXTERN( x11 )
 
 #include "../mp_msg.h"
 
-#include "../mp_image.h"
-
 static vo_info_t vo_info =
 {
         "X11 ( XImage/Shm )",

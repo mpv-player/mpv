@@ -29,9 +29,9 @@
 #include "fastmemcpy.h"
 #include "osd.h"
 #include "video_out.h"
-#include "../mp_image.h"
 
 #include "../libmpcodecs/vfcap.h"
+#include "../libmpcodecs/mp_image.h"
 
 #define NUM_FRAMES VID_PLAY_MAXFRAMES /* Temporary: driver will overwrite it */
 #define UNUSED(x) ((void)(x)) /* Removes warning about unused arguments */

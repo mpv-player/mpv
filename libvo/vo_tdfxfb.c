@@ -37,7 +37,6 @@
 #include "fastmemcpy.h"
 #include "video_out.h"
 #include "video_out_internal.h"
-#include "mp_image.h"
 #include "drivers/3dfx.h"
 
 LIBVO_EXTERN(tdfxfb)

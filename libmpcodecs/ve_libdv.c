@@ -17,8 +17,8 @@
 
 #include "aviwrite.h"
 
-#include "../libvo/img_format.h"
-#include "../mp_image.h"
+#include "img_format.h"
+#include "mp_image.h"
 #include "vf.h"
 
 #include <libdv/dv.h>

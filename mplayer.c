@@ -140,8 +140,8 @@ static int max_framesize=0;
 #include "stheader.h"
 #include "parse_es.h"
 
-#include "dec_audio.h"
-#include "dec_video.h"
+#include "libmpcodecs/dec_audio.h"
+#include "libmpcodecs/dec_video.h"
 
 //**************************************************************************//
 //**************************************************************************//

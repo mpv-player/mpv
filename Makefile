@@ -38,7 +38,7 @@ MANDIR = ${prefix}/man
 INSTALL = install
 
 SRCS_COMMON = xacodec.c cpudetect.c mp_msg.c codec-cfg.c cfgparser.c my_profile.c spudec.c playtree.c playtreeparser.c asxparser.c vobsub.c
-SRCS_MENCODER = mencoder.c $(SRCS_COMMON) libao2/afmt.c divx4_vbr.c libvo/aclib.c libvo/img_format.c libvo/osd.c me-opt-reg.c
+SRCS_MENCODER = mencoder.c $(SRCS_COMMON) libao2/afmt.c divx4_vbr.c libvo/aclib.c libvo/osd.c me-opt-reg.c
 SRCS_MPLAYER = mplayer.c $(SRCS_COMMON) find_sub.c subreader.c lirc_mp.c mixer.c mp-opt-reg.c
 
 OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)

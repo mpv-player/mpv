@@ -39,7 +39,6 @@ LIBVO_EXTERN(xv)
 #include "aspect.h"
 
 #include "../postproc/rgb2rgb.h"
-#include "../mp_image.h"
 
 static vo_info_t vo_info =
 {

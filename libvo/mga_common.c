@@ -1,7 +1,6 @@
 
 #include "fastmemcpy.h"
 #include "../mmx_defs.h"
-#include "../mp_image.h"
 #include "../postproc/rgb2rgb.h"
 
 // mga_vid drawing functions

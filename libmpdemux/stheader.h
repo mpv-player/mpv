@@ -7,7 +7,7 @@
 #include "wine/avifmt.h"
 #include "wine/vfw.h"
 
-#include "../mp_image.h"
+#include "../libmpcodecs/mp_image.h"
 
 typedef struct {
   demux_stream_t *ds;

@@ -23,7 +23,7 @@
 #include "mp_msg.h"
 #include "bswap.h"
 
-#include "libvo/img_format.h"
+#include "img_format.h"
 #include "mp_image.h"
 
 #define DBUG	0

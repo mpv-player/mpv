@@ -1,6 +1,6 @@
 
 #include "codec-cfg.h"
-#include "../libvo/img_format.h"
+#include "img_format.h"
 
 #include "stream.h"
 #include "demuxer.h"

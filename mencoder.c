@@ -42,8 +42,8 @@ static char* banner_text=
 
 #include "libvo/video_out.h"
 
-#include "dec_audio.h"
-#include "dec_video.h"
+#include "libmpcodecs/dec_audio.h"
+#include "libmpcodecs/dec_video.h"
 
 #ifdef HAVE_MP3LAME
 #include <lame/lame.h>

@@ -5,8 +5,8 @@
 #include "../config.h"
 #include "../mp_msg.h"
 
-#include "../libvo/img_format.h"
-#include "../mp_image.h"
+#include "img_format.h"
+#include "mp_image.h"
 #include "vf.h"
 
 extern vf_info_t vf_info_vo;

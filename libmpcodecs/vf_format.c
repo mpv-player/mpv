@@ -6,8 +6,8 @@
 #include "../config.h"
 #include "../mp_msg.h"
 
-#include "../libvo/img_format.h"
-#include "../mp_image.h"
+#include "img_format.h"
+#include "mp_image.h"
 #include "vf.h"
 
 struct vf_priv_s {

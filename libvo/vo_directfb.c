@@ -59,7 +59,6 @@
 #include "sub.h"
 #include "../postproc/rgb2rgb.h"
 #include "aspect.h"
-#include "../mp_image.h"
 
 LIBVO_EXTERN(directfb)
 

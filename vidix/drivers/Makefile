@@ -105,7 +105,7 @@ distclean:
 dep:    depend
 
 depend:
-	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
+	echo "depend not supported"
 
 install:
 	mkdir -p $(BINDIR)

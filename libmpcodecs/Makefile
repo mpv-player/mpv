@@ -18,7 +18,7 @@ ifeq ($(JPEG),yes)
 VIDEO_SRCS += vd_ijpg.c
 endif
 
-SRCS=$(AUDIO_SRCS) $(VIDEO_SRCS) $(VFILTER_SRCS) $(NATIVE_SRCS)
+SRCS=$(AUDIO_SRCS) $(VIDEO_SRCS) $(VFILTER_SRCS) $(NATIVE_SRCS) img_format.c
 OBJS=$(SRCS:.c=.o)
 
 SRCS2=$(ENCODER_SRCS)
