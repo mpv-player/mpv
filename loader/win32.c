@@ -3286,6 +3286,7 @@ static HANDLE WINAPI expFindFirstFileA(LPCSTR s, LPWIN32_FIND_DATAA lpfd)
 #ifdef QTX
     if(strstr(s, "*.QTX")){
 	dbgprintf("FindFirstFileA(0x%x='%s', 0x%x) => QTX\n", s, s, lpfd);
+	printf("\n### Searching for QuickTime plugins (*.qtx) at %s...\n",def_path);
 	qtx_dir=opendir(def_path);
 	if(!qtx_dir) return (HANDLE)-1;
 	memset(lpfd,0,sizeof(*lpfd));
