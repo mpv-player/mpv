@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.21 -->
+<!-- synced with 1.22 -->
 <sect1 id="audio">
 <title>Audió kimeneti eszközök</title>
 <sect2 id="sync">
@@ -30,14 +30,14 @@ tartalmazza:
 <row><entry>alsa5</entry><entry>
   natív ALSA 0.5 vezérlő
   </entry></row>
-<row><entry>alsa9</entry><entry>
-  natív ALSA 0.9 vezérlő (támogatja a hardveres AC3 áteresztést)
+<row><entry>alsa</entry><entry>
+  natív ALSA 0.9/1.0 vezérlő (támogatja a hardveres AC3 áteresztést)
   </entry></row>
 <row><entry>sun</entry><entry>
   SUN audió vezérlő (<filename>/dev/audio</filename>) BSD és Solaris8 használóknak
   </entry></row>
 <row><entry>macosx</entry><entry>
-  natív MacOSX vezérlő
+  natív Mac OS X vezérlő
   </entry></row>
 <row><entry>win32</entry><entry>
   natív Win32 vezérlő
@@ -50,6 +50,9 @@ tartalmazza:
   </entry></row>
 <row><entry>jack</entry><entry>
   JACK (Jack Audio Connection Kit) vezérlő
+  </entry></row>
+<row><entry>polyp</entry><entry>
+  polypaudio vezérlő
   </entry></row>
 </tbody>
 </tgroup>
