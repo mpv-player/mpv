@@ -471,7 +471,12 @@ static struct size_preset {
   int w, h;
 } vf_size_presets_defs[] = {
   // TODO add more 'standard' resolutions
-  { "pal", 768, 576 },
+  { "qntsc", 352, 240 },
+  { "qpal", 352, 288 },
+  { "ntsc", 720, 480 },
+  { "pal", 720, 576 },
+  { "sntsc", 640, 480 },
+  { "spal", 768, 576 },
   { NULL, 0, 0}
 };
 
