@@ -70,7 +70,7 @@ static int control(int cmd, int arg)
 }
 
 #undef start /* orig. undef */
-#define buffersize 
+#define buffsize 
 #define buffertime /* orig. undef? */
 #define set_period
 #define sw_params /* orig. undef */
@@ -243,7 +243,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 		}
     }
 #endif
-#ifdef buffersize
+#ifdef buffsize
     if ((err = snd_pcm_hw_params_get_buffer_size(alsa_hwparams)) < 0)
     {
 	printf("alsa-init: unable to get buffer size: %s\n",
