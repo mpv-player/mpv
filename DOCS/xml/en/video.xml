@@ -1862,13 +1862,13 @@ if you want to use the <option>crop</option> filter, you would do
 </para>
 
 <para>
-Extra occurances of <option>-zrcrop</option> invoke <emphasis>cinerama</emphasis>
-ode, i.e. you can distribute the movie over several TV's or beamers to create a
+Extra occurrences of <option>-zrcrop</option> invoke <emphasis>cinerama</emphasis>
+mode, i.e. you can distribute the movie over several TV's or beamers to create a
 larger screen. Suppose you have two beamers. The left one is connected to your
 Buz at <systemitem>/dev/video1</systemitem> and the right one is connected to
 your DC10+ at <systemitem>/dev/video0</systemitem>. The movie has a resolution
 of 704x288. Suppose also that you want the right beamer in black and white and
-that the right beamer should have jpeg frames at quality 10, then you would
+that the left beamer should have JPEG frames at quality 10, then you would
 issue the following command
 <screen>
 mplayer -vo zr -zrdev /dev/video0 -zrcrop 352x288+352+0 -zrxdoff 0 -zrbw \

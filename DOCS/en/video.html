@@ -1366,13 +1366,13 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
   mplayer -vo zr -vf crop=720:320:80:0 benhur.avi
 </PRE>
 
-<P>Extra occurances of <CODE>-zrcrop</CODE> invoke <I>cinerama</I> mode, i.e.
+<P>Extra occurrences of <CODE>-zrcrop</CODE> invoke <I>cinerama</I> mode, i.e.
   you can distribute the movie over several TV's or beamers to create a larger
   screen. Suppose you have two beamers. The left one is connected to your Buz
   at <CODE>/dev/video1</CODE> and the right one is connected to your DC10+ at
   <CODE>/dev/video0</CODE>. The movie has a resolution of <CODE>704x288</CODE>.
   Suppose also that you want the right beamer in black and white and that
-  the right beamer should have jpeg frames at quality <CODE>10</CODE>,
+  the left beamer should have JPEG frames at quality <CODE>10</CODE>,
   then you would issue the following command</P>
 
 <PRE>
