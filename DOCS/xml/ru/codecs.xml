@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with 1.32 -->
+<!-- synced with 1.42 -->
 <sect1 id="codecs">
 <title>Поддерживаемые кодеки</title>
 
@@ -56,8 +56,10 @@
   FLI/FLC
   </simpara></listitem>
 <listitem><simpara>
-  <emphasis role="bold">RealVideo 1.0 &amp; 2.0 </emphasis> из libavcodec, и
-  <emphasis role="bold">RealVideo 3.0 &amp; 4.0</emphasis> кодеки, используя библиотеки RealPlayer
+  <emphasis role="bold">RealVideo 1.0 &amp; 2.0 </emphasis> из
+  <systemitem class="library">libavcodec</systemitem>, и
+  <emphasis role="bold">RealVideo 3.0 &amp; 4.0</emphasis> кодеки, используя 
+  библиотеки RealPlayer
   </simpara></listitem>
 <listitem><simpara>
   "родной" декодер для HuffYUV
@@ -90,9 +92,10 @@ importing HOWTO]</link> и помогите нам добавить для него поддержку.
 <para>
 Новое поколение этого кодека называется DivX4 и даже может декодировать фильмы,
 сделанные пресловутым DivX кодеком! В дополнение к этому, он значительно
-быстрее, чем Win32 DivX DLL'и, но медленнее, чем <systemitem
-class="library">libavcodec</systemitem>. Поэтому, использовать его в качестве
-декодера <emphasis role="bold">НЕ РЕКОМЕНДУЕТСЯ</emphasis>. Хотя, он полезен
+быстрее, чем Win32 DivX DLL'и, но медленнее, чем
+<systemitem class="library">libavcodec</systemitem>.
+Поэтому, использовать его в качестве декодера
+<emphasis role="bold">НЕ РЕКОМЕНДУЕТСЯ</emphasis>. Хотя, он полезен
 для кодирования. Единственным недостатком этого кодека является то, что он
 не доступен по лицензии с Открытым исходным кодом[Open Source license]
 </para>
@@ -130,7 +133,7 @@ divx4</option> может быть более быстрым, или даже наибыстрейшим решением.
 </para>
 
 <para>
-Двоичная библиотека Divx4/5 кодека может быть скачена с сайтов
+Двоичная библиотека DivX4/5 кодека может быть скачена с сайтов
 <ulink url="http://avifile.sourceforge.net">avifile</ulink> или
 <ulink url="http://www.divx.com">divx.com</ulink>
 Распакуйте его, запустите как администратор <filename>./install.sh</filename>,
@@ -140,7 +143,7 @@ divx4</option> может быть более быстрым, или даже наибыстрейшим решением.
 </para>
 
 <para>
-Так можно получить CVS версию СТАРОЙ OpenDivx основной библиотеки:
+Так можно получить CVS версию СТАРОЙ библиотеки OpenDivX core:
 </para>
 
 <procedure>
@@ -222,9 +225,10 @@ cp ../../src/encore.h /usr/local/include
 
 <para>
 Если вы используете релиз <application>MPlayer</application>'а, то у Вас в пакете
-уже есть libavcodec, просто компилируйте как обычно. Если Вы используете MPlayer
-из CVS, Вы должны извлечь libavcodec из CVS дерева FFmpeg, поскольку релизы
-FFmpeg <emphasis role="bold">не</emphasis> очень редки. Как правило, CVS
+уже есть <systemitem class="library">libavcodec</systemitem>,
+просто компилируйте как обычно. Если Вы используете MPlayer
+из CVS, Вы должны извлечь <systemitem class="library">libavcodec</systemitem>
+из CVS дерева FFmpeg, поскольку релизы FFmpeg очень редки. Как правило, CVS
 достаточно стабилен и предоставляет больше возможностей. Чтобы это сделать:
 </para>
 
@@ -233,7 +237,7 @@ FFmpeg <emphasis role="bold">не</emphasis> очень редки. Как правило, CVS
   <screen>cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg login</screen>
   </para></step>
 <step><para>
-  <screen>cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg co ffmpeg</screen>
+  <screen>cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg co ffmpeg</screen>
   </para></step>
 <step><para>
   Переместите каталог <filename>libavcodec</filename> из исходного кода FFmpeg
@@ -245,10 +249,11 @@ FFmpeg <emphasis role="bold">не</emphasis> очень редки. Как правило, CVS
   скопировать/переместить его!
   </para></step>
 <step><para>
-  Если Вы хотите, чтобы libavcodec обновлялся каждый раз, когда Вы обновляете
-  <application>MPlayer</application>'овский CVS, добавьте такую строчку в файл:
-  <filename>main/CVS/Entries</filename>:
-  <screen>D/libavcodec////</screen>
+  Если Вы хотите, чтобы <systemitem class="library">libavcodec</systemitem>
+  обновлялась каждый раз, когда Вы обновляете
+  <application>MPlayer</application>'овский CVS, добавьте такую строчку:
+  <filename>main/CVS/Entries</filename>
+  в файл <screen>D/libavcodec////</screen>
   </para></step>
 <step><para>
   Скомпилируйте. <filename>configure</filename> должен определить проблемы до
@@ -260,7 +265,8 @@ FFmpeg <emphasis role="bold">не</emphasis> очень редки. Как правило, CVS
 <para>
 <application>MPlayer</application> из CVS содержит подкаталог
 <filename>libavcodec</filename>, но он <emphasis role="bold">не</emphasis>
-содержит исходный код для libavcodec! Вы должны следовать указаниям,
+содержит исходный код для <systemitem class="library">libavcodec</systemitem>!
+Вы должны следовать указаниям,
 приведённым выше, чтобы получить исходный код этой библиотеки.
 </para>
 </note>
@@ -365,25 +371,14 @@ class="library">libmpeg2</systemitem>, исходный код которой включён в
 </sect3>
 
 
-<sect3 id="msvideo1">
-<title>MS Video1</title>
+<sect3 id="avicodecs">
+<title>MS Video1, Cinepak CVID, и другие старые кодеки</title>
 <para>
-Это очень старый и очень плохой кодек от Microsoft. В прошлом он декодировался
-Win32 кодеком <filename>msvidc32.dll</filename>, а сейчас у нас наше собственное
-его исполнение с открытым исходным кодом (его сделал
-<ulink url="mailto:melanson@pcisys.net">Mike Melanson</ulink>).
-</para>
-</sect3>
-
-
-<sect3 id="cinepak-cvid">
-<title>Cinepak CVID</title>
-<para>
-<application>MPlayer</application> по умолчанию использует свой собственный,
-многоплатформенный Cinepack декодер с открытым исходным кодом (сделан
-<ulink url="mailto:timf@csse.monash.edu.au">Dr. Tim Ferguson</ulink>).
-Он поддерживает YUV вывод, поэтому возможно аппаратное масштабирование, если
-драйвер видео вывода это разрешает.
+MPlayer может воспроизводить большую часть старых кодеков, использовавшихся
+в AVI и MOV файлах. Прежде они декодировались бинарными Win32 кодеками,
+а теперь, используя 
+<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>,
+для большинства из них у нас есть <emphasis role="bold">родные кодеки</emphasis>.
 </para>
 </sect3>
 
@@ -408,28 +403,30 @@ RealVideo:
 </para>
 
 <para>
-Рекомендуется скачать и установить <application>RealPlayer8</application> или
-<application>RealONE</application>, поскольку <application>MPlayer</application>
-может использовать их библиотеки для декодирования файлов с RealVideo 2.0 - 4.0
-видео. <application>MPlayer</application>'овский скрипт <filename>configure</filename>
-должен найти <application>RealPlayer</application>'овские библиотеки, в
-стандартном местоположении при полной установке. Если этого не происходит, сообщите
-<filename>configure</filename>, где их искать опцией <option>--with-reallibdir</option>.
+Cкачайте Real кодеки на
+<ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">http://www.mplayerhq.hu/MPlayer/releases/codecs/</ulink>
+и распакуйте их в каталог
+<filename class="directory">/usr/local/lib/codecs</filename>.
+Если Вы хотите хранить их в другом месте, укажите <command>configure</command>
+опцию <option>--with-reallibdir</option>.
 </para>
 
 <para>
-Также, Вы можете скачать кодеки на
-<ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">http://www.mplayerhq.hu/MPlayer/releases/codecs/</ulink>.
-После скачивания пакета Real'овских кодеков, распакуйте их в каталог
-<filename class="directory">/usr/local/lib/codecs</filename>, или укажите
-путь опцией <option>--with-reallibdir</option>.
+На Mac OS X Вы должны убедиться, что <filename>pncrt.Shlb</filename> (включая его
+resource fork!) находится в том же каталоге, что и Real кодеки. Скопируйте их,
+например, так: 
+<screen>ditto -rsrcFork "RealOne Player.app/Contents/MacOS/pncrt.Shlb" "RealOne Player.app/Contents/MacOS/Library/Codecs"</screen>
+Если Вы этого не сделаете, или забудете скопировать resource fork, Вы будете
+получать такие ошибки:
+<screen>GetDiskFragment() failed with error -2804: &lt;&lt;Unknown disk fragment&gt;&gt;&lt;&lt;Unknown disk fragment&gt;&gt;&lt;pncrt.Shlb&gt;&lt;&gt;</screen>
 </para>
+
 
 <note><para>
 <application>RealPlayer</application>'овские библиотеки в настоящий момент
 <emphasis role="bold">работают только под Linux, FreeBSD, NetBSD и Cygwin
 на x86, Alpha и PowerPC (тестировались Linux/Alpha и Linux/PowerPC)
-платформах</emphasis>.
+платформах и с Mac OS X</emphasis>.
 </para></note>
 </sect3>
 
@@ -465,7 +462,7 @@ OpenDivX кодека. Это произошло, когда ProjectMayo сделал исходный код OpenDivX
 <listitem><simpara>
   в настоящий момент не все DivX/DivX4 файлы <emphasis role="bold">декодируются
   </emphasis> (не проблема, поскольку их может воспроизвести
-  <link linkend="ffmpeg">libavcodec</link>)
+  <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
   </simpara></listitem>
 <listitem><simpara>
   разработка продолжается и в настоящий момент
@@ -506,7 +503,8 @@ OpenDivX кодека. Это произошло, когда ProjectMayo сделал исходный код OpenDivX
   </para></step>
 <step><para>
   Перекомпилируйте <application>MPlayer</application> с
-  <option>--with-xvidcore=<replaceable>/path/to/</replaceable>libxvidcore.a</option>.
+  <option>--with-xvidlibdir=<replaceable>/path/to/</replaceable>libxvidcore.a</option>
+  <option>--with-xvidincdir=<replaceable>/path/to/</replaceable>xvid.h</option>
   </para></step>
 </procedure>
 </sect3>
@@ -526,17 +524,18 @@ Apple, которые распространяют его с <application>QuickTime Player</application>.
 <listitem><simpara>
   Sorenson 1 (fourcc <emphasis>SVQ1</emphasis>) - декодирование поддерживается
   <emphasis role="bold">родным кодеком</emphasis>
-  (<link linkend="ffmpeg">libavcodec</link>)
+  (<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
   </simpara></listitem>
 <listitem><simpara>
   Sorenson 3 (fourcc <emphasis>SVQ3</emphasis>) - декодирование поддерживается,
-  используя <emphasis role="bold">"родной" кодек</emphasis> (<link linkend="ffmpeg">libavcodec</link>)
+  используя <emphasis role="bold">"родной" кодек</emphasis>
+  (<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
   </simpara></listitem>
 </itemizedlist>
 
 <procedure>
 <title>КОМПИЛЯЦИЯ MPLAYER'А С ПОДДЕРЖКОЙ БИБЛИОТЕК QUICKTIME</title>
-<note><para>в настоящий момент поддерживаются только 32битовые Intel'евские
+<note><para>в настоящий момент поддерживаются только 32битные Intel'евские
 платформы.</para></note>
 <step><para>скачайте <application>MPlayer</application>'овский CVS</para></step>
 <step><para>скачайте пакет QuickTime DLL с
@@ -564,7 +563,7 @@ Apple, которые распространяют его с <application>QuickTime Player</application>.
   </simpara></listitem>
 <listitem><simpara>
   Windows Media Audio 7 и 8 (aka WMAv1 и WMAv2) (<emphasis role="bold">"родной"</emphasis> код, с
-  <link linkend="ffmpeg">libavcodec</link>)
+  <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
   </simpara></listitem>
 <listitem><simpara>
   Windows Media Audio 9 (WMAv3) (используя DMO DLL)
@@ -644,9 +643,9 @@ SNDCTL_DSP_CHANNELS.  Примером подходящего драйвера является emu10k1
 <sect3 id="hwac3">
 <title>Аппаратное декодирование AC3</title>
 <para>
-Вам нужна AC3-совместимая карта с цифровым (SP/DIF) выводом. Драйвер карты
+Вам нужна AC3-совместимая карта с цифровым (S/PDIF) выводом. Драйвер карты
 должен должным образом поддерживать AFMT_AC3 формат (например C-Media).
-Подсоедините AC3 декодер к SP/DIF выводу и используйте опцию <option>-ac
+Подсоедините AC3 декодер к S/PDIF выводу и используйте опцию <option>-ac
 hwac3</option>. Это экспериментальная возможность, но известно, что это работает с
 C-Media картами и Soundblaster Live! + ALSA (но не OSS) драйверами и
 картами MPEG декодирования DXR3/Hollywood+.
@@ -702,8 +701,8 @@ RealAudio:
 </itemizedlist>
 
 <para>
-О том, как установить RealPlayer'овские библиотеки см. секцию 
-<link linkend="realmedia">формат файлов RealMedia</link>.
+Инструкции по установке RealPlayer'овские библиотек находятся в секции
+<link linkend="realvideo">RealVideo</link>.
 </para>
 </sect3>
 

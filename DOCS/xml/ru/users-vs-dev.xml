@@ -76,8 +76,9 @@ Red Hat заявляет, что GCC 2.96-85 и далее исправлены. Ситуация действительно
 использовать
 <ulink url="ftp://people.redhat.com/jakub/gcc/3.2.3-11/">gcc-3.2.3-11 пакеты</ulink>
 (неофициальные, но работают нормально) и поставить их совместно с gcc-2.96,
-который у Вас стоит. <application>MPlayer</application> их обнаружит, и будет использовать 3.2 вместо
-2.96. Если Вы не хотите или не можете использовать пакеты, вот как Вы можете
+который у Вас стоит. <application>MPlayer</application> их обнаружит,
+и будет использовать 3.2 вместо 2.96. Если Вы не хотите или не можете
+использовать пакеты, вот как Вы можете
 скомпилировать GCC 3 из исходного кода:
 </para>
 
@@ -188,12 +189,13 @@ nVidia драйвер и столкнулись с проблемой, связанной с драйвером, знайте, что
 
 <blockquote>
 <para>
-However, he also went on to say that he was "surprised" by my column about
+However, he also went on to say that he was &quot;surprised&quot; by my column about
 <application>Mplayer</application> and thought it was unfair, reminding me that it is
 a free software project. "If you don't like it," Bartsch said, "you're free not to use it."
 </para>
 <para>
-[Однако, он также сказал, что он был "удивлён" моей колонкой о <application>MPlayer</application>'е и
+[Однако, он также сказал, что он был &quot;удивлён&quot; моей колонкой
+о <application>MPlayer</application>'е и
 подумал, что это было бы неправильно напоминать мне, что это проект свободного
 программного обеспечения. "Если он вам не нравится", сказал Барцх, "Вы свободны
 не использовать его."]
@@ -202,7 +204,8 @@ a free software project. "If you don't like it," Bartsch said, "you're free not 
 
 Спустя почти два года, в октябре 2003, он написал другой обзор, названный
 Almost two years later in october 2003 he wrote another review called
-<ulink url="http://www.newsforge.com/article.pl?sid=03/10/02/0343200">Mplayer revisited[Снова MPlayer]</ulink>.
+<ulink url="http://www.newsforge.com/article.pl?sid=03/10/02/0343200">Mplayer revisited[Снова MPlayer]</ulink>
+(неправильное написание сохранено).
 В этой статье он пришёл к таким заключениям:
 
 <blockquote><para>

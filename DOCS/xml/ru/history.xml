@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="KOI8-R"?>
-<!-- synced with 1.9 -->
+<!-- synced with 1.11 -->
 <!-- FIXME: history really should be in the appendix -->
 <sect1 id="history">
 <title>История</title>
  
 <blockquote><para>
 Это началось около года назад...
-<application>Я попробовал множество плееров под linux (mtv</application>,
+Я попробовал множество плееров под Linux (<application>mtv</application>,
 <application>xmps</application>, <application>dvdview</application>, <application>
 livid/oms</application>, <application>videolan</application>, <application>xine
 </application>, <application>xanim</application>, <application>avifile</application>,
@@ -20,22 +20,23 @@ livid/oms</application>, <application>videolan</application>, <application>xine
 <para>
 <itemizedlist>
 <listitem><para>
-  <emphasis role="bold"><application>mpg12play</application> v0.1-v0.3:</emphasis> Sep 22-25, 2000</para>
+  <emphasis role="bold"><application>mpg12play</application> v0.1-v0.3:</emphasis> Sep 22-25, 2000
+  </para>
   <para>Первая попытка, создавалась полчаса!
-  Использовалась libmpeg3 с www.heroinewarrior.com до версии 0.3,
+  До версии 0.3 использовалась libmpeg3 с
+  <ulink url="http://www.heroinewarrior.com"/>,
   но там были проблемы с качеством изображения и скоростью.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold"><application>mpg12play</application> v0.5-v0.87:</emphasis> Sep 28-Oct 20, 2000</para>
-  <para>
-  Mpeg кодек заменён на DVDview от Dirk Farin, это был превосходный код,
-  но он был медленный и был написан на C++ (A'rpi ненавидит C++!!!)
+  <emphasis role="bold"><application>mpg12play</application> v0.5-v0.87:</emphasis> Sep 28-Oct 20, 2000
+  </para><para>MPEG кодек заменён на DVDview от Dirk Farin, это был превосходный
+  код, но он был медленный и был написан на C++ (A'rpi ненавидит C++!!!)
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold"><application>mpg12play</application> v0.9-v0.95pre5:</emphasis> Oct 21-Nov 2, 2000</para>
-  <para>
-  Mpeg кодек был libmpeg2 (mpeg2dec) от Aaron Holtzman и Michel Lespinasse.
-  Это превосходный, очень хорошо оптимизированный C код с совершенным качеством
+  <emphasis role="bold"><application>mpg12play</application> v0.9-v0.95pre5:</emphasis> Oct 21-Nov 2, 2000
+  </para><para>MPEG кодек был libmpeg2 (mpeg2dec) от Aaron Holtzman и
+  Michel Lespinasse. Это превосходный, очень хорошо оптимизированный
+  C код с совершенным качеством
   изображения и 100% совместимостью с MPEG стандартом.
   </para></listitem>
 <listitem><para>

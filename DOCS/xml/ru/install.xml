@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="KOI8-R"?>
-<!-- synced with 1.24 -->
+<!-- synced with 1.44 -->
 <sect1 id="install">
 <title>Установка</title>
 
@@ -117,6 +117,16 @@ libstdc++, это может потребоваться для других программ) или вообще ничего
 <listitem><para>
   <emphasis role="bold">libsmb</emphasis> - необязательно, для поддержки Samba.
   </para></listitem>
+<listitem><para>
+  <emphasis role="bold">bio2jack</emphasis> - необязательно, для поддержки
+  вывода звука через JACK, требуется только при компиляции. Вы можете получить
+  это с <ulink url="http://bio2jack.sf.net/">http://bio2jack.sf.net</ulink>.
+  Поскольку там нет возможности установить библиотеку, Вы должны вручную
+  скопировать файл <filename>libbio2jack.a</filename> куда-нибудь в Ваш
+  библиотечный путь (e.g. <filename>/usr/local/lib</filename>) или используйте
+  опцию <option>--with-bio2jack=DIR</option>, чтобы указать
+  <filename>./configure</filename> где искать этот файл.
+  </para></listitem>
 </itemizedlist>
 </sect2>
 
@@ -126,12 +136,12 @@ libstdc++, это может потребоваться для других программ) или вообще ничего
 
 <itemizedlist>
 <listitem><para>
-  <emphasis role="bold">libavcodec</emphasis>: Этот пакет кодеков способен декодировать 
-H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/SVQ1/SVQ3-кодированные видео потоки и
-WMA (Windows Media Audio) v1/v2 аудио потоки, на многих платформах.
-Он также известен как быстрейший кодек для этих задач.
-Подробности см. в разделе <link linkend="ffmpeg">FFmpeg</link>.
-Особенности:
+  <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>:
+  Этот пакет кодеков способен декодировать 
+  H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/SVQ1/SVQ3-кодированные видео потоки и
+  WMA (Windows Media Audio) v1/v2 аудио потоки, на многих платформах.
+  Он также известен как быстрейший кодек для этих задач.
+  Подробности см. в разделе <link linkend="ffmpeg">FFmpeg</link>. Особенности:
   <itemizedlist>
   <listitem><simpara>
     декодирование упомянутых выше видеокодеков на не-x86 платформах
@@ -168,8 +178,9 @@ WMA (Windows Media Audio) v1/v2 аудио потоки, на многих платформах.
 <listitem><simpara>
   Не нужно для старых ASF'ок с MP41 или MP42 видео (хотя в этих файлах часто
 встречается VoxWare аудио - декодируется Win32 кодеками), или WMV7. Также
-	не нужно для WMA (Windows Media Audio), в libavcodec для этого есть декодер
-	с открытыми исходниками.
+	не нужно для WMA (Windows Media Audio), в
+	<systemitem class="library">libavcodec</systemitem>
+	для этого есть декодер с открытыми исходниками.
   </simpara></listitem>
 </itemizedlist>
 </para></listitem>
@@ -182,7 +193,9 @@ QDesign аудио потоков. Инструкции по установке могут быть найдены в секции
 <listitem><para>
   <emphasis role="bold">DivX4/DivX5</emphasis>: информация об этом кодеке расположена в 
 секции <link linkend="divx4-5">DivX4/DivX5</link>. Вам, вероятно, не потребуется
-этот кодек, поскольку <emphasis role="bold">libavcodec</emphasis> (см. выше)
+этот кодек, поскольку
+  <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>
+(см. выше)
 гораздо быстрее и выше качеством, чем этот кодек, как для кодирования, так и для
 декодирования. Особенности:
 <itemizedlist>
@@ -192,7 +205,8 @@ QDesign аудио потоков. Инструкции по установке могут быть найдены в секции
   </simpara></listitem>
 <listitem><simpara>
   может проигрывать старые <emphasis role="bold">DivX3</emphasis> фильмы гораздо быстрее, чем Win32 DLL,
-но медленнее, чем <emphasis role="bold">libavcodec</emphasis>!
+но медленнее, чем
+    <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>!
   </simpara></listitem>
 <listitem><simpara>
   у него закрытые исходники, и доступна только x86 версия.
@@ -200,7 +214,8 @@ QDesign аудио потоков. Инструкции по установке могут быть найдены в секции
 </itemizedlist>
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">XviD</emphasis>: кодирующая альтернатива для Divx4Linux с открытым исходным кодом. Особенности:
+  <emphasis role="bold">XviD</emphasis>: кодирующая альтернатива
+  для DivX4Linux с открытым исходным кодом. Особенности:
 <itemizedlist>
 <listitem><simpara>
   кодирование в 1 или 2 прохода
@@ -211,7 +226,7 @@ QDesign аудио потоков. Инструкции по установке могут быть найдены в секции
   </simpara></listitem>
 <listitem><simpara>
   он где-то раза в 2 быстрее, чем DivX4 при кодировании, при примерно таком же
-качество
+качестве
   </simpara></listitem>
 </itemizedlist>
 </para></listitem>
@@ -231,7 +246,7 @@ MPlayer'овским декодером!
   </para></listitem>
 <listitem><para>
   MPlayer может использовать библиотеки из RealPlayer 8 или RealONE, чтобы
-проигрывать файлы с <emphasis role="bold">RealVideo 2.0 - 4.0</emphasis> видео, и Sipro/Cook аудио. См.
+проигрывать файлы с <emphasis role="bold">RealVideo 3.0 и 4.0</emphasis> видео, и Sipro/Cook аудио. См.
 секцию <link linkend="realmedia">RealMedia файлы</link> для инструкций по установке
 и дополнительной информации.
   </para></listitem>
@@ -405,7 +420,7 @@ nVidia TV-выход</link>, если Вы хотите использовать TV.
   <emphasis role="bold">должны</emphasis> использовать ALSA 0.9 с эмуляцией OSS!
   </simpara></listitem>
 <listitem><simpara>
-  <emphasis role="bold">C-Media с SP/DIF выходом</emphasis>: аппаратная AC3 передача[passthrough] возможна
+  <emphasis role="bold">C-Media с S/PDIF выходом</emphasis>: аппаратная AC3 передача[passthrough] возможна
   с этими картами, см. секцию <link linkend="hwac3">Аппаратное AC3
   декодирование</link>.
   </simpara></listitem>
@@ -542,7 +557,7 @@ make install</screen>
 Вместе с фильмом <application>MPlayer</application> может показывать и субтитры. В настоящий момент
 поддерживаются следующие форматы:
 <itemizedlist>
-<listitem><para>VobSub</para></listitem>
+<listitem><para>VOBsub</para></listitem>
 <listitem><para>OGM</para></listitem>
 <listitem><para>CC (closed caption[скрытые титры])</para></listitem>
 <listitem><para>MicroDVD</para></listitem>
@@ -552,6 +567,7 @@ make install</screen>
 <listitem><para>VPlayer</para></listitem>
 <listitem><para>RT</para></listitem>
 <listitem><para>SSA</para></listitem>
+<listitem><para>PJS (Phoenix Japanimation Society)</para></listitem>
 <listitem><para><link linkend="mpsub">MPsub</link></para></listitem>
 <listitem><para>AQTitle</para></listitem>
 <listitem><para><ulink url="http://unicorn.us.com/jacosub/">JACOsub</ulink></para></listitem>
@@ -571,7 +587,7 @@ make install</screen>
 </para>
 
 <para>
-<application>MEncoder</application> может выдавать DVD субтитры в <link linkend="menc-feat-extractsub">VobSub</link> формате.
+<application>MEncoder</application> может выдавать DVD субтитры в <link linkend="menc-feat-extractsub">VOBsub</link> формате.
 </para>
 
 <para>
@@ -579,12 +595,14 @@ make install</screen>
 </para>
 
 <formalpara>
-<title>VobSub субтитры</title>
+<title>VOBsub субтитры</title>
 <para>
-VobSub субтитры состоят из большого (несколько мегабайт) <filename>.SUB</filename> файла, и необязательных
+VOBsub субтитры состоят из большого (несколько мегабайт) <filename>.SUB</filename> файла, и необязательных
 <filename>.IDX</filename> и/или <filename>.IFO</filename> файлов.
-Использование: если у Вас, например, есть файлы <filename>sample.sub</filename>,
-<filename>sample.ifo</filename> (необязательно), <filename>sample.idx</filename> - Вы должны указать
+Использование: если у Вас, например, есть файлы
+<filename><replaceable>sample.sub</replaceable></filename>,
+<filename><replaceable>sample.ifo</replaceable></filename> (необязательно), 
+<filename><replaceable>sample.idx</replaceable></filename> - Вы должны указать
 <application>MPlayer</application>'у опции <option>-vobsub sample [-vobsubid <replaceable>id</replaceable>]</option> (можно указать полный путь).
 Опция <option>-vobsubid</option> похожа на <option>-sid</option>
 для DVD, с её помощью, Вы можете выбирать между дорожками субтитров (языками).
@@ -600,8 +618,10 @@ VobSub субтитры состоят из большого (несколько мегабайт) <filename>.SUB</filenam
 <para>
 Прочие форматы субтитров состоят из единого текстового файла, содержащего информацию
 о синхронизации, местоположении и тексте субтитра.
-Использование: Если у Вас есть, например, файл <filename>sample.txt</filename>, 
-Вы должны указать опцию <option>-sub sample.txt</option> (можно указать полный путь).
+Использование: Если у Вас есть, например, файл
+<filename><replaceable>sample.txt</replaceable></filename>, 
+Вы должны указать опцию <option>-sub <replaceable>sample.txt</replaceable></option>
+(можно указать полный путь).
 </para>
 </formalpara>
 
@@ -646,7 +666,7 @@ VobSub субтитры состоят из большого (несколько мегабайт) <filename>.SUB</filenam
 
 
 <sect2 id="mpsub">
-<title><application>MPlayer</application>'s own subtitle format (MPsub)</title>
+<title>Собственный формат субтитров <application>MPlayer</application>'а (MPsub)</title>
 
 <para>
 <application>MPlayer</application> ввёл в употребление новый формат субтитров,
@@ -675,7 +695,8 @@ Naboo was under an attack.<!--
 Как видите, основной целью было <emphasis role="bold">сделать простым редактирование/синхронизацию/
 объединение/разрезание простым</emphasis>. И, если Вы, например, получили SSA
 субтитры но они плохо синхронизированы с Вашей версией фильма,
-Вы просто запускаете <screen>mplayer dummy.avi -sub source.ssa -dumpmpsub</screen>.
+Вы просто запускаете
+<screen>mplayer <replaceable>dummy.avi</replaceable> -sub source.ssa -dumpmpsub</screen>.
 В текущем каталоге будет создан файл <filename>dump.mpsub</filename>, содержащий
 исходный текст субтитров, но в <emphasis role="bold">MPsub</emphasis> формате. После этого, Вы можете
 свободно добавлять/вычитать секунды к/от субтитра.
@@ -705,7 +726,7 @@ Display</emphasis>.  OSD используется для вывода текущего времени, полос громкос
   (подробности читайте в <filename>TOOLS/subfont-c/README</filename>)
   </para></listitem>
 <listitem><para>
-    используйте GIMP'овый плагин генерации шрифтов из <filename
+    используйте <application>GIMP</application>'овый плагин генерации шрифтов из <filename
 	class="directory">TOOLS/subfont-GIMP</filename> (замечание: также, у Вас
 	должен быть установлен HSI RAW плагин, см. <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/" /> ).
   </para></listitem>
@@ -714,19 +735,22 @@ Display</emphasis>.  OSD используется для вывода текущего времени, полос громкос
     Обязательна версия 2.0.9 или выше! Тогда у Вас есть два метода:
   <itemizedlist>
     <listitem><para>
-	  используйте опцию <option>-font /path/to/arial.ttf</option>, чтобы
-	  указывать каждый раз путь к TrueType шрифту
+	  используйте опцию <option>-font <replaceable>/path/to/sample_font.ttf</replaceable></option>,
+	  чтобы указывать каждый раз путь к TrueType шрифту
       </para></listitem>
     <listitem><para>
-	  создайте ссылку: <screen>ln -s /path/to/arial.ttf ~/.mplayer/subfont.ttf</screen>
+	  создайте ссылку:
+      <screen>ln -s <replaceable>/path/to/sample_font.ttf</replaceable> ~/.mplayer/subfont.ttf</screen>
       </para></listitem>
       </itemizedlist>
   Если <application>MPlayer</application> был скомпилирован с поддержкой 
   <systemitem class="library">fontconfig</systemitem>, эти методы не будут работать,
-  вместо этого, опция <option>-font</option> ожидает fontconfig'овское название
+  вместо этого, опция <option>-font</option> ожидает
+  <systemitem class="library">fontconfig</systemitem>'овское название
   шрифта, и по умолчанию это фонт без засечек (sans-serif). Чтобы получить список
-  фриштов известных fontconfig'у, используйте <command>fc-list</command>.
-  Пример: <option>-font 'Bitstream Vera Sans'</option>
+  шрифтов известных <systemitem class="library">fontconfig</systemitem>'у,
+  используйте <command>fc-list</command>.
+  Пример: <option>-font <replaceable>'Bitstream Vera Sans'</replaceable></option>
   </para></listitem>
 <listitem><para>
   Скачать готовый к употреблению пакет шрифтов с сайта MPlayer'а.
@@ -741,8 +765,7 @@ Display</emphasis>.  OSD используется для вывода текущего времени, полос громкос
   и использование опции <option>-utf8</option>, или просто обозвать файл
   субтитра <filename>&lt;video_name&gt;.utf</filename> и разместить его
   в каталоге с фильмом. Перекодировка из различных кодировок в utf8 может быть
-  <!-- FIXME: iconv (Debian) konwert (Red Hat) instead? -->
-  осуществлена с помощью программ konwert (Debian) или iconv (Red Hat).
+  осуществлена с помощью программ <command>konwert</command> или <command>iconv</command>.
   </para><para>
   
   <table>
@@ -776,10 +799,10 @@ Display</emphasis>.  OSD используется для вывода текущего времени, полос громкос
 Если Вы решите использовать не-TTF шрифты, UNZIP'ните скаченный файл в
 <filename class="directory">~/.mplayer</filename> или <filename
 class="directory">$PREFIX/share/mplayer</filename>. Затем переименуйте,
-или слинкуйте (создайте ссылку) один из каталогов в <filename>font</filename>
-(напр.:
+или слинкуйте (создайте ссылку) один из каталогов в
+<filename class="directory">font</filename> (напр.:
 
-<screen>ln -s ~/.mplayer/arial-24 ~/.mplayer/font</screen>).
+<screen>ln -s <replaceable>~/.mplayer/arial-24</replaceable> ~/.mplayer/font</screen>).
 Теперь Вы должны увидеть таймер в левом верхнем углу фильма (выключите его кнопкой <keycap>o</keycap>).
 </para>
 
@@ -850,7 +873,7 @@ class="directory">$PREFIX/share/mplayer</filename>. Затем переименуйте,
   </simpara></listitem>
 <listitem><para>
   запустите <application>MPlayer</application> как в следующем примере:
-  <screen>$ mplayer -menu file.avi</screen>
+  <screen>$ mplayer -menu <replaceable>file.avi</replaceable></screen>
   </para></listitem>
 <listitem><simpara>
   нажмите любую меню-кнопку, которую Вы определили
@@ -875,14 +898,15 @@ class="directory">$PREFIX/share/mplayer</filename>. Затем переименуйте,
   требуется даже большая точность синхронизации.
   </simpara></listitem>
 <listitem><para>
-<emphasis role="bold">Новый таймер</emphasis> использует PC'шные RTC (Real Time
+<emphasis role="bold">Новый таймер</emphasis> использует RTC (Real Time
   Clock[часы истинного времени]) для этой задачи потому, что это таймер
   точностью 1ms. Это автоматически включается, когда доступно, но требует
   привилегий root'а, <emphasis>съюднутого по root'у</emphasis> исполняемого
   файла <application>MPlayer</application>'а, или правильно настроенного ядра.
   Если Вы работаете с ядром 2.4.19pre8 или более поздним, Вы можете настроить
   максимальную частоту RTC для обычных пользователей через файловую систему
-  /proc. Используйте эту команду, чтобы сделать RTC доступным для обычных
+  <systemitem class="systemname">/proc</systemitem>.
+  Используйте эту команду, чтобы сделать RTC доступным для обычных
   пользователей:
   <screen>echo 1024 &gt; /proc/sys/dev/rtc/max-user-freq</screen>
   Если у Вас не такое свежее ядро, Вы также можете поменять одну строчку в 

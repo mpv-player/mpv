@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with 1.5 -->
+<!-- synced with 1.10 -->
 <appendix id="bugs">
 <title>Известные проблемы</title>
 <sect1 id="bugs-special">
@@ -31,8 +31,9 @@
 <para>Обход: используйте FFmpeg'овский (медленный) MP1/MP2/MP3 декодер (<option>-ac ffmpeg</option>)</para>
 </listitem>
 <listitem>
-<para>sig11 в libmpeg2, при масштабировании+кодировании:</para>
-<para>Проблема: известная ошибка в MMX у GCC 2.95.2, обновите до 2.95.3.</para>
+<para>SIGSEGV (сигнал 11) в libmpeg2, при масштабировании+кодировании:</para>
+<para>Проблема: известная ошибка в MMX у GCC 2.95.2</para>
+<para>Решение: обновите до 2.95.3.</para>
 </listitem>
 </itemizedlist>
 </sect1>
@@ -144,7 +145,7 @@
 <listitem>
 <para>
 Вы пытаетесь проиграть DivX 3.x файл, используя OpenDivX декодер или XviD
-(<option>-vc odivx</option>) - установите Divx4Linux и перекомпилируйте плеер
+(<option>-vc odivx</option>) - установите DivX4Linux и перекомпилируйте плеер
 </para>
 </listitem>
 </itemizedlist>

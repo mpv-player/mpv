@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="KOI8-R"?>
-<!-- synced with 1.7 -->
+<!-- synced with 1.17 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - The Movie Player</title>
@@ -10,7 +10,8 @@
   <year>2001</year>
   <year>2002</year>
   <year>2003</year>
-  <holder>Arpad Gereoffy (A'rpi/ESP-team)</holder>
+  <year>2004</year>
+  <holder>комманда MPlayer[MPlayer team]</holder>
 </copyright>
 <!--
 <legalnotice>
@@ -43,7 +44,7 @@
 эту тему, прочтите <xref linkend="faq"/>, или попытайтесь про'grep'пить файлы.
 На большую часть вопросов Вы найдёте ответы здесь, а остальные, наверное, уже
 спрашивались в наших <link linkend="mailinglists">рассылках</link>. Проверьте
-<ulink url="http://www.mplayerhq.hu/cgi-bin/htsearch">по архивам</ulink>, где
+<ulink url="http://www.mplayerhq.hu/cgi-bin/s-arch.cgi">по архивам</ulink>, где
 можно найти много ценной информации.
 </para>
 </preface>
@@ -59,10 +60,11 @@ CPU, см. <xref linkend="ports"/>). Он проигрывает большинство MPEG, VOB, AVI,
 OGG/OGM, VIVO, ASF/WMA/WMV, QT/MOV/MP4, FLI, RM, NuppelVideo, yuv4mpeg, FILM,
 RoQ, PVA, Matroska файлов, опираясь на множество "родных", XAnim'овских, RealPlayer'овских, и
 Win32 DLL кодеков. Вы также можете смотреть <emphasis role="bold">VideoCD, SVCD,
-DVD, 3ivx, RealMedia, Sorenson, Theora</emphasis>, и <emphasis role="bold">DivX</emphasis> фильмы
-(и вам совсем не нужна библиотека avifile!). Другой важной особенностью
-MPlayer'а является широкий спектр поддерживаемых устройств вывода. Он работает
-с X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, DirectFB, и кроме того Вы можете
+DVD, 3ivx, RealMedia, Sorenson, Theora</emphasis>, и
+<emphasis role="bold">DivX</emphasis> фильмы. Другой важной особенностью
+<application>MPlayer</application>'а является широкий спектр поддерживаемых
+устройств вывода. Он работает с X11, Xv, DGA, OpenGL, SVGAlib,
+fbdev, AAlib, libcaca, DirectFB, и кроме того Вы можете
 использовать GGI and SDL (и таким образом все их драйверы) и также несколько
 низкоуровневых драйверов для конкретных карт (для Matrox, 3Dfx and Radeon,
 Mach64, Permedia3)! Большинство из них поддерживают программное или аппаратное
@@ -70,7 +72,7 @@ Mach64, Permedia3)! Большинство из них поддерживают программное или аппаратное
 экране.<application>MPlayer</application> поддерживает некоторые аппаратные
 MPEG декодеры, такие как <link linkend="dvb">DVB</link> и
 <link linkend="dxr3">DXR3/Hollywood+</link>. А как насчёт славных больших
-сглаженных затенённых субтитров (<emphasis role="bold">10 поддерживаемых
+сглаженных затенённых субтитров (<emphasis role="bold">14 поддерживаемых
 типов</emphasis>) с Европейскими/ISO 8859-1,2 (венгерский, английский, чешский,
 и т. п.), кириллическими, корейскими шрифтами, и вывода информации на экран
 [On Screen Display (OSD)]?
@@ -81,7 +83,8 @@ MPEG декодеры, такие как <link linkend="dvb">DVB</link> и
 и он проигрывает плохие AVI файлы, которые не проигрываются известным 
 windows media player. Даже AVI файлы без индекса являются проигрываемыми, и
 Вы можете временно сделать индекс с помощью ключа <option>-idx</option>, или
-перманентно с помощью MEncoder'а, таким образом получив возможность перемещаться
+перманентно с помощью <application>MEncoder</application>'а,
+таким образом получив возможность перемещаться
 по фильму! Как видите стабильность и качество - наиболее важные вещи,
 но скорость также изумительна.
 </para>
@@ -91,10 +94,12 @@ windows media player. Даже AVI файлы без индекса являются проигрываемыми, и
 </application>'a [<application>MPlayer</application>'s Movie Encoder]) - это простой
 кодировщик фильмов предназначенный для кодирования фильмов, проигрываемых MPlayer'ом
 (<emphasis role="bold">AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</emphasis>) в другие
-проигрываемые <application>MPlayer</application>'ом форматы (см. ниже). Он может кодировать такими разными
-кодеками, как <emphasis role="bold">DivX4</emphasis> (1 или 2 прохода), libavcodec,
-<emphasis role="bold">PCM/MP3/VBR MP3</emphasis> звук. Кроме того у него мощная система
-плагинов для манипуляции видео.
+проигрываемые <application>MPlayer</application>'ом форматы (см. ниже).
+Он может кодировать такими разными кодеками, как
+<emphasis role="bold">DivX4</emphasis> (1 или 2 прохода),
+<systemitem class="library">libavcodec</systemitem>,
+<emphasis role="bold">PCM/MP3/VBR MP3</emphasis> звук. Кроме того у него мощная
+система плагинов для манипуляции видео.
 </para>
 
 <itemizedlist>
@@ -104,8 +109,8 @@ windows media player. Даже AVI файлы без индекса являются проигрываемыми, и
   <application>MPlayer'а</application>
   </simpara></listitem>
 <listitem><simpara>
-  кодирование во все кодеки ffmpeg'овской библиотеки
-  <link linkend="ffmpeg">libavcodec</link>
+  кодирование во все кодеки FFmpeg'овской библиотеки
+  <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
   </simpara></listitem>
 <listitem><simpara>
   кодирование видео с <emphasis role="bold">V4L совместимых TV тюнеров
@@ -150,7 +155,7 @@ windows media player. Даже AVI файлы без индекса являются проигрываемыми, и
   может кодировать DVD/VOBsub <emphasis role="bold">И</emphasis> текстовые субтитры в один выходной файл
   </simpara></listitem>
 <listitem><simpara>
-  может извлекать DVD субтитры в Vobsub формат
+  может извлекать DVD субтитры в VOBsub формат
   </simpara></listitem>
 
 </itemizedlist>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with 1.33 -->
+<!-- synced with 1.45 -->
 <chapter id="ports" xreflabel="Портинг">
 <title>Портинг</title>
 
@@ -58,12 +58,13 @@ MPlayer</application> &mdash; это скачать его с
 пакетных пастбищ[feeds]
 <ulink url="http://www.openzaurus.org">OpenZaurus</ulink>. Если Вы хотите
 скомпилировать его самостоятельно, обратите внимание на каталоги
-<ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/mplayer?nav=index.html|src/.|src/packages">MPlayer</ulink>
+<ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/mplayer?nav=index.html|src/.|src/packages">mplayer</ulink>
 и
 <ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/libavcodec?nav=index.html|src/.|src/packages">libavcodec</ulink>
 в корне сборки[buildroot] дистрибутива OpenZaurus. Там всегда найдутся
 свежий Makefile и патчи, используемые для сборки CVS <application>MPlayer</application>'а вместе с
-libavcodec. Если Вам нужен GUI, используйте xmms-embedded.
+<systemitem class="library">libavcodec</systemitem>.
+Если Вам нужен GUI, используйте xmms-embedded.
 </para>
 </sect2>
 </sect1>
@@ -133,10 +134,13 @@ BSD/OS и Darwin. Существуют портированные[ports]/пакеты сорцов[pkgsrcs]/fink/
 <para>
 На <emphasis role="bold">UltraSPARC</emphasis>'ах, <application>MPlayer</application>
 использует их расширение <emphasis role="bold">VIS</emphasis> (эквивалент MMX), но (в настоящий
-момент) только в <emphasis>libmpeg2</emphasis>, <emphasis>libvo</emphasis> и
-<emphasis>libavcodec</emphasis>, но не в mp3lib. Вы сможете просматривать VOB'ы
+момент) только в
+<systemitem class="library">libmpeg2</systemitem>,
+<systemitem class="library">libvo</systemitem>
+and <systemitem class="library">libavcodec</systemitem>, но не в
+<systemitem class="library">mp3lib</systemitem>. Вы сможете просматривать VOB'ы
 на 400MHz CPU. Вам потребуется установленная
-<ulink url="http://www.sun.com/sparc/vis/mediaLib.html">mLib</ulink>.
+<ulink url="http://www.sun.com/sparc/vis/mediaLib.html"><systemitem class="library">mLib</systemitem></ulink>.
 </para>
 
 <para>
@@ -158,12 +162,13 @@ Solaris'овый make не будет работать. Типичная ошибка которую Вы будете
 <para>
 На Solaris x86, Вам потребуются GNU ассемблер и GNU C/C++ компилятор,
 сконфигурированный, чтобы использовать GNU ассемблер! На x86 платформах
-код MPlayer'а использует много MMX, SSE и 3DNOW! инструкций, которые
-Sun'овский ассемблер <filename>/usr/ccs/bin/as</filename> не может
-скомпилировать.
+код <application>MPlayer</application>'а использует много MMX, SSE и 3DNOW!
+инструкций, которые Sun'овский ассемблер <filename>/usr/ccs/bin/as</filename>
+не может скомпилировать.
 </para>
 
-<para>Скрипт <filename>configure</filename> пытается обнаружить, какой ассемблер
+<para>
+Скрипт <filename>configure</filename> пытается обнаружить, какой ассемблер
 используется Вашей командой &quot;gcc&quot; (в том случае, если автоопределение
 не сработает, используйте опцию
 <option>--as=<replaceable>/там/где/у/Вас/установлен/gnu-as</replaceable></option>, чтобы сообщить
@@ -222,18 +227,6 @@ hsfs может не поддерживать разделы/диски больше 4 Гб, доступ к данным
 109765-04 (x86).
 </para></listitem>
 </itemizedlist>
-
-<para>
-Под Solaris с UltraSPARC CPU, вы можете получить ускорение за счёт использования
-VIS инструкций этого процессора для некоторых поглощающих время операций. VIS
-ускорение может использоваться в <application>MPlayer</application>'е путём вызова
-функций в Sun'овской <ulink url="http://www.sun.com/sparc/vis/mediaLib.html">mediaLib</ulink>.
-</para>
-
-<para>
-VIS-ускоренные операции из mediaLib используются для декодирования mpeg2 видео
-и преобразований цветовых пространств в драйверах видео вывода.
-</para>
 </sect1>
 
 <sect1 id="sgi">
@@ -293,23 +286,76 @@ QNX X'ы <emphasis>эмулируются</emphasis>, что ОЧЕНЬ медленно. Используйте SDL.
 
 <para>Лучшие результаты получаются при использовании родного DirectX видео
   вывода (<option>-vo directx</option>) и родного Windows waveout аудио драйвера
-  (<option>-ao win32</option>), поскольку OpenGL не работает, а на некоторых
-  системах SDL искажает звук и видео или ломает систему. 
+  (<option>-ao win32</option>). Альтернативой является использование OpenGL или
+  SDL, но производительность OpenGL сильно зависит от машины, а SDL на некоторых
+  системах искажает звук и видео или ломает систему. 
   Если изображение искажено, попробуйте отключить аппаратное ускорение, указав
   <option>-vo directx:noaccel</option>. Скачайте
   <ulink url="http://www.videolan.org/vlc/dx7headers.tgz">файлы заголовков
   DirectX 7</ulink>, чтобы скомпилировать видео драйвер DirectX.</para>
 
+<para><link linkend="vidix">VIDIX</link> теперь доступен из-под Windows, как
+  <option>-vo winvidix</option>, хотя это ещё экспериментально и требует небольшой
+	ручной установки. Скачайте
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/dhahelper.sys">dhahelper.sys</ulink>
+  и скопируйте его в каталог
+  <filename class="directory">libdha/dhahelperwin</filename> в Вашем дереве
+	исходного кода <application>MPlayer</application>'а.
+	Откройте консоль и перейдите в этот каталог. Теперь наберите
+
+  <screen>gcc -o dhasetup.exe dhasetup.c</screen>
+
+  и запустите
+
+  <screen>dhasetup.exe install</screen>
+
+  под Администратором[Administrator]. Теперь Вам нужно перезагрузить машину.
+  Когда всё будет закончено, скопируйте файлы
+  <systemitem class="library">.so</systemitem> из каталога
+	<filename class="directory">vidix/drivers</filename> в каталог
+	<filename class="directory">mplayer/vidix</filename> относительно вашего
+	<filename>mplayer.exe</filename>.</para>
+
+<para>Для получения наилучших результатов, <application>MPlayer</application>
+  должен использовать пространство цветов, аппаратно поддерживаемое Вашей
+  видеокартой. К сожалению, многие графические драйверы под Windows ошибочно
+  сообщают, что некоторые пространства цветов поддерживаются аппаратно.
+  Чтобы найти какие именно, попробуйте
+
+  <screen>mplayer -benchmark -nosound -frames 100 -vf format=<replaceable>colorspace</replaceable> <replaceable>movie</replaceable></screen>,
+
+  где <replaceable>colorspace</replaceable> может быть любым пространством
+  цветов из вывода опции <option>-vf format=fmt=help</option>. Если Вы найдёте
+  пространство цветов, которое Ваша карта особенно плохо поддерживает,
+  опция <option>-vf noformat=<replaceable>colorspace</replaceable></option>
+  помешает его использовани. Добавьте это в ваш конфигурационный файл, чтобы
+  это пространство цветов больше никогда не использовалось.</para>
+
 <para>Вы можете использовать Win32 кодеки и Real Win32 кодеки (не Real Linux кодеки),
-  если хотите. Поместите их куда-нибудь в пути или укажите <filename>
-  configure</filename> опцию <option>--with-codecsdir=c:/path/to/your/codecs
-  </option> (или <option>--with-codecsdir=/path/to/your/codecs</option>, но
-  только под <application>Cygwin</application>). У нас были сообщения о том, что Real DLL'и должны быть
-  доступны пользователю, запускающему <application>MPlayer</application>, для записи, но только на
+  если хотите. Поместите их куда-нибудь в пути или укажите
+  <filename>configure</filename> опцию
+  <option>--with-codecsdir=<replaceable>c:/path/to/your/codecs</replaceable></option>
+  (или <option>--with-codecsdir=<replaceable>/path/to/your/codecs</replaceable></option>, но
+  только под <application>Cygwin</application>). У нас были сообщения о том,
+  что Real DLL'и должны быть доступны пользователю, запускающему
+  <application>MPlayer</application>, для записи, но только на
   некоторых системах. Если у Вас проблемы с ними, попробуйте сделать их
   записываемыми. QuickTime DLL'и также работают, но Вы должны поместить их
-  в системный Windows каталог (<filename class="directory">C:\Windows\system\</filename>
-  или что-то в этом духе).</para>
+  в системный Windows каталог
+  (<filename class="directory"><replaceable>C:\Windows\system\</replaceable></filename>
+  или что-то в этом духе). В крайнем случае, попробуйте поместить их в тотже
+  каталог, что и <application>MPlayer</application>.</para>
+
+<para>Вы можете воспроизводить VCD, проигрывая <filename>.DAT</filename>
+  или <filename>.MPG</filename> файлы, которые Windows показывает на VCD.
+  Вот как это работает (указывайте букву диска Вашего CD-ROM):</para>
+
+<screen>mplayer <replaceable>d:/mpegav/avseq01.dat</replaceable></screen>
+
+<para>DVDs также работают, укажите <option>-dvd-device</option> с буквой
+  Вашего DVD-ROM:</para>
+
+<screen>mplayer dvd://<replaceable>&lt;title&gt;</replaceable> -dvd-device <replaceable>d</replaceable>:</screen>
 
 <para>Консоль <application>Cygwin</application>/<application>MinGW</application>
   слегка медленная. Перенаправление вывода или
@@ -323,7 +369,7 @@ QNX X'ы <emphasis>эмулируются</emphasis>, что ОЧЕНЬ медленно. Используйте SDL.
 <para>Иногда Саша Зоммер [Sascha Sommer] выпускает оффициальные бинарии
   под Windows, Джой Пэрриш[Joey Parrish] собирает
   неофициальные Windows пакеты с установочником. Ищщите ссылки в секции
-  Windows <ulink url="http://www.mplayerhq.hu/homepage/projects.html">
+  Windows <ulink url="http://www.mplayerhq.hu/homepage/projects.html#windows">
   нашей страницы проектов</ulink>.</para>
 
 <sect2 id="cygwin">
@@ -342,19 +388,6 @@ QNX X'ы <emphasis>эмулируются</emphasis>, что ОЧЕНЬ медленно. Используйте SDL.
 <para>Вы можете найти инструкции и файлы для запуска SDL
   под <application>Cygwin</application> на
   <ulink url="http://www.libsdl.org/extras/win32/cygwin/">сайте libsdl</ulink>.</para>
-
-<para>Вы можете проигрывать VCD, проигрывая <filename>.DAT</filename> или
-  <filename>.MPG</filename>файлы, которые Windows показывает на VCD'шниках.
-  Вот как это работает (подставьте букву Вашего CD-ROM'а):</para>
-
-<screen>mplayer d:/mpegav/avseq01.dat</screen>
-
-<screen>mplayer /cygdrive/d/MPEG2/AVSEQ01.MPG</screen>
-
-<para>DVD'шники тоже работают, укажите букву Вашего DVD-ROM'а опцией
-  <option>-dvd-device</option>:</para>
-
-<screen>mplayer dvd://&lt;title&gt; -dvd-device '\\.\d:'</screen>
 
 </sect2>
 
@@ -376,14 +409,11 @@ QNX X'ы <emphasis>эмулируются</emphasis>, что ОЧЕНЬ медленно. Используйте SDL.
 
 <para>Распакуйте файлы заголовков DirectX в <filename class="directory">/mingw/include/</filename>.</para>
 
-<para>VCD'шники и DVD'шники работают почти как в <application>Cygwin
-  </application> (подставьте букву Вашего CD-ROM'а/DVD-ROM'а):</para>
-
-<screen>mplayer d:/mpegav/avseq01.dat</screen>
-
-<screen>mplayer /d/MPEG2/AVSEQ01.MPG</screen>
-
-<screen>mplayer dvd://&lt;title&gt; -dvd-device /d/</screen>
+<para>Для поддержки сжатых заголовкоав MOV необходима
+  <ulink url="http://www.gzip.org/zlib/">zlib</ulink>, которую
+  <application>MinGW</application> по умолчанию не предоставляет.
+  Сконфигурируйте её, указав <option>--prefix=/mingw</option> и установите
+  её до компиляции <application>MPlayer</application>'а.</para>
 
 </sect2>
 
@@ -411,8 +441,8 @@ Apple'вский GCC 2.95.x не очень хорошо поддерживает C99 синтакс.
 </para>
 </sect1>
 
-<sect1 id="hpux">
-<title>HP UX</title>
+<sect1 id="hp-ux">
+<title>HP-UX</title>
 <para>
 Martin Gansser поддерживает 
 <ulink url="http://cloud.prohosting.com/patos/docs/mplayer_on_hpux11.htm">HOWTO</ulink>

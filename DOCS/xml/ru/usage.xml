@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with 1.14 -->
+<!-- synced with 1.19 -->
 <chapter id="usage">
 <title>Использование</title>
 
@@ -15,7 +15,7 @@
 и опций, идущих после имени файла, которые применяются только к данному
 файлу/URL/и т.п., например:
 
-<screen>mplayer -vfm 5 movie1.avi movie2.avi -vfm 4</screen>
+<screen>mplayer -vfm 5 <replaceable>movie1.avi</replaceable> <replaceable>movie2.avi</replaceable> -vfm 4</screen>
 </para>
 
 <para>
@@ -86,11 +86,11 @@
 <para>
 Примеры:
 <screen>
-mplayer -vo x11 /mnt/Films/Contact/contact2.mpg
-mplayer vcd://2 -cd-rom-device /dev/hdc
-mplayer -afm 3 /mnt/DVDtrailers/alien4.vob
-mplayer dvd://1 -dvd-device /dev/hdc
-mplayer -abs 65536 -delay -0.4 -nobps ~/movies/test.avi<!--
+mplayer -vo x11 <replaceable>/mnt/Films/Contact/contact2.mpg</replaceable>
+mplayer vcd://<replaceable>2</replaceable> -cdrom-device <replaceable>/dev/hdc</replaceable>
+mplayer -afm 3 <replaceable>/mnt/DVDtrailers/alien4.vob</replaceable>
+mplayer dvd://<replaceable>1</replaceable> -dvd-device <replaceable>/dev/hdc</replaceable>
+mplayer -abs 65536 -delay -0.4 -nobps <replaceable>~/movies/test.avi</replaceable><!--
 --></screen>
 </para>
 </sect1>
@@ -294,7 +294,7 @@ ENTER pt_step 1 1<!--
   </para></listitem>
 <listitem><para><literal>vobsub_lang</literal></para>
   <para>
-  Изменить язык VobSub субтитров.
+  Изменить язык VOBsub субтитров.
   </para></listitem>
 <listitem><para><literal>vo_fullscreen</literal></para>
   <para>
@@ -421,19 +421,19 @@ HTTP, FTP, MMS или RTSP/RTP протокол.
 Также, <application>MPlayer</application> учитывает переменную среды
 <envar>http_proxy</envar> и использует прокси[proxy], если это возможно.
 Также можно заставить использовать прокси:
-<screen>mplayer http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</screen>
+<screen>mplayer <replaceable>http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</replaceable></screen>
 </para>
 
 <para>
 <application>MPlayer</application> может считывать данные со стандартного входа
 (а <emphasis>не</emphasis> из поименованных каналов). Это может, например,
 использоваться при проигрывании файлов по FTP:
-<screen>wget ftp://micorsops.com/something.avi -O - | mplayer -</screen>
+<screen>wget <replaceable>ftp://micorsops.com/something.avi</replaceable> -O - | mplayer -</screen>
 </para>
 
 <note><para>
 Мы рекомендуем включать <option>-cache</option> при проигрывании из сети:
-<screen>wget ftp://micorsops.com/something.avi -O - | mplayer -cache 8192 -</screen>
+<screen>wget <replaceable>ftp://micorsops.com/something.avi</replaceable> -O - | mplayer -cache 8192 -</screen>
 </para></note>
 </sect1>
 
@@ -472,11 +472,11 @@ HTTP, FTP, MMS или RTSP/RTP протокол.
 <filename>netstream</filename>. Теперь, например, Вы можете проиграть
 вторую дорожку VCD'шника на сервере:
 <screen>
-mplayer -cache 5000 mpst://servername/vcd://2
+mplayer -cache 5000 <replaceable>mpst://servername/vcd://2</replaceable>
 </screen>
 Вы можете получить доступ к файлам на сервере:
 <screen>
-mplayer -cache 5000 mpst://servername//usr/local/movies/lol.avi
+mplayer -cache 5000 <replaceable>mpst://servername//usr/local/movies/lol.avi</replaceable>
 </screen>
 Обратите внимание, что пути не начинающиеся с / будут относительными к каталогу,
 в котором запущен сервер. Использование <option>-cache</option> не требуется,
@@ -493,4 +493,76 @@ mplayer -cache 5000 mpst://servername//usr/local/movies/lol.avi
 </sect2>
 
 </sect1>
+
+<sect1 id="edl" xreflabel="Редактируемые списки решений [Edit Decision Lists] (EDL)">
+<title>Редактируемые списки решений [Edit Decision Lists] (EDL)</title>
+
+<para>
+Система редактируемых списков решений [edit decision list] (EDL) позволяет Вам
+автоматически пропускать или заглушать части при воспроизведении, основываясь
+на специфичном для каждого фильма конфигурационном файле.
+</para>
+
+<para>
+Это полезно для тех, кто может захотеть посмотреть фильм в "семейном" режиме.
+Вы можете исключить любые проявления насилия, ненормативной лексики,
+Jar-Jar Binks, и т. п. из фильмов, сообразуясь с Вашими личными предпочтениями.
+Помимо этого, существуют другие применения, например автоматический пропуск рекламы
+при просмотре фильмов.
+</para>
+
+<para>
+Формат EDL файлов пока элементарен. Когда система EDL достигнет определённой
+степени завершённости, вероятно будет использоваться основанный на XML формат
+файлов (при этом сохранится совместимость с предыдущими форматами EDL).
+</para>
+
+<para>
+В текущем исполнении, количество EDL записей ограниченно 1000. Если Вам
+понадобится больше, измените <systemitem>#define MAX_EDL_ENTRIES</systemitem>
+в файле <filename>edl.h</filename>.
+</para>
+
+<sect2 id="edl_using">
+<title>Использование EDL файлов</title>
+
+<para>
+Включите опцию <option>-edl &lt;имя_файла&gt;</option>, когда Вы запускаете
+<application>MPlayer</application>, с именем EDL файла, который Вы хотите
+использовать с видео.
+</para>
+</sect2>
+
+<sect2 id="edl_making">
+<title>Создание EDL файлов</title>
+<para>
+Текущий формат файлов EDL:
+<programlisting>
+[начальная секунда] [конечная секунда] [действие]
+</programlisting>
+Где секунды - это числа с плавающей точкой (вещественные числа), а действие -
+это или <literal>0</literal> для пропуска или <literal>1</literal> для
+заглушения звука. Пример:
+<programlisting>
+5.3   7.1    0
+15    16.7   1
+420   422    0
+</programlisting>
+Это вызовет пропуск видео с 5.3 секунды до 7.1 секунды, затем заглушит звук
+на 15 секунде, включит обратно в 16.7 секунд и пропустит видео с 420 по 422
+секунды. Эти действия будут происходить, когда таймер проигрывания достигнет
+указанных в файле значений.
+</para>
+
+<para>
+Чтобы начать создать EDL файл, используйте опцию <option>-edlout
+&lt;filename&gt;</option>. При проигрывании, когда Вы хотите отметить
+предыдущие две секунды для пропуска, нажмите <keycap>i</keycap>.
+Соответствующая запись для этого времени будет добавлена в файл. Затем Вы
+можете вернуться и подстроить сгенерированный EDL файл.
+</para>
+</sect2>
+
+</sect1>
+
 </chapter>

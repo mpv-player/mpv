@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with 1.8 -->
+<!-- synced with 1.11 -->
 <sect1 id="tv-input" xreflabel="TV вход">
 <title>TV вход</title>
 
@@ -112,7 +112,8 @@ OpenGL  хранители экрана и другую подобную гадость.
 Эта проблема должен быть решена в текущих версиях и опция <option>outfmt
 </option> больше не требуется, поскольку значение по умолчанию подходит в
 большинстве случаев. Например если Вы будете захватывать в DivX, используя
-libavcodec, и укажете <option>outfmt=RGB24</option> для улучшения качества
+<systemitem class="library">libavcodec</systemitem> и укажете
+<option>outfmt=RGB24</option> для улучшения качества
 полученного изображения, то Вы увидите, что в действительности, изображение все
 равно будет перекодировано в YV12, поэтому все что Вы получите, это огромная
 загрузка CPU.
@@ -144,7 +145,7 @@ libavcodec, и укажете <option>outfmt=RGB24</option> для улучшения качества
 убедитесь, что оно действительно доступно. Возможны какие-нибудь трудности со
 звуковыми серверами, например arts (KDE) и esd (GNOME). Если у Вас
 полнодуплексная звуковая карта (почти все современные карты это поддерживают),
-и Вы используете KDE, попробуйте отметить галочку " full duplex" в меню настроек
+и Вы используете KDE, попробуйте отметить галочку "full duplex" в меню настроек
 звукового сервера.
 </para>
 </listitem>
@@ -183,7 +184,7 @@ mplayer -tv driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv tv://
      mencoder -tv driver=v4l:width=768:height=576 \
      -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=900 \
      -oac mp3lame -lameopts cbr:br=64 \
-     -vf crop=720:544:24:16,pp=lb -o output.avi tv://
+     -vf crop=720:544:24:16,pp=lb -o <replaceable>output.avi</replaceable> tv://
 </screen>
 </para>
 </informalexample>
@@ -199,7 +200,7 @@ mplayer -tv driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv tv://
      mencoder -tv driver=v4l:width=768:height=576 \
      -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=350:vhq:vqmax=31:keyint=300 \
      -oac mp3lame -lameopts cbr:br=48 \
-     -vf crop=720:540:24:18,pp=tn/lb,scale=384:288 -sws 1 -o output.avi tv://
+     -vf crop=720:540:24:18,pp=tn/lb,scale=384:288 -sws 1 -o <replaceable>output.avi</replaceable> tv://
 </screen>
 Также возможно указать меньшие размеры изображения в опции <option>-tv</option>
 и пропустить программное масштабирование, но приведённый подход использует

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with 1.9 -->
+<!-- synced with 1.12 -->
 <sect1 id="formats">
 <title>Поддерживаемые форматы</title>
 
@@ -253,9 +253,8 @@ Autodesk Animator, но это типичный формат для коротких операций в сети.
 
 <para>
 Да, <application>MPlayer</application> может читать (демультиплексировать)
-RealMedia (<filename>.rm</filename>) файлы. Перемещение работает, но Вы должны
-специально указать опцию <option>-forceidx</option> (формат поддерживает
-основные кадры[keyframes]. Здесь есть списки поддерживаемых <link
+RealMedia (<filename>.rm</filename>) файлы. 
+Здесь есть списки поддерживаемых <link
 linkend="realvideo">RealVideo</link> и <link
 linkend="realaudio">RealAudio</link> кодеков.
 </para>
@@ -338,6 +337,22 @@ PVA - это похожий на MPEG формат, используемый в программах DVB TV карт (наприме
 <para>
 Спецификации PVA могут быть скачены по следующему адресу:
 <ulink url="http://www.technotrend.de/download/av_format_v1.pdf"/>
+</para>
+</sect3>
+
+<sect3 id="nsv">
+<title>NSV files</title>
+<para>
+NSV (NullSoft Video) &mdash; это формат файла, используемый
+<application>Winamp</application>'ом для потокового фудио и видео.
+Видео бывает VP3, VP5 или VP6, а аудио &mdash; MP3, AAC или VLB.
+Версии NSV, в которых только аудио, имеют расширение <filename>.nsa</filename>.
+<application>MPlayer</application> воспроизводит как NSV потоки,
+так и файлы. Пожалуйста, заметьте, что большая часть файлов с
+<ulink url="http://www.winamp.com">сайта Winamp</ulink> использует VLB аудио,
+которое ещё не модет декодироваться. Более того, для потоков с этого сайта
+необходим ещё один уровень депакетизации, который ещё нужно написать (эти
+файлы всё равно невозможно проиграть, поскольку они используют VLB аудио).
 </para>
 </sect3>
 
