@@ -289,7 +289,8 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
 	mp_msg(MSGT_CPLAYER,MSGL_V,"vivo frame_time=%5.3f   \n",frame_time);
     }
 
-    if(demuxer->file_format==DEMUXER_TYPE_MPEG_PS) d_video->pts+=frame_time;
+    if(demuxer->file_format==DEMUXER_TYPE_MPEG_PS ||
+       demuxer->file_format==DEMUXER_TYPE_MPEG_ES) d_video->pts+=frame_time;
     
     if(frame_time_ptr) *frame_time_ptr=frame_time;
     return in_size;
