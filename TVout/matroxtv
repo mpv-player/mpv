@@ -1,0 +1,106 @@
+#!/bin/sh
+# Gabucino - no warranty
+# you need fbset, and matroxfb modules loaded
+
+# mode to use on the monitor in "1-Monitor only" and "4-Dualhead" mode
+# (from /etc/fb.modes)
+DEFAULTMODE="768x576-60"
+
+#echo "You didn't check this file for possible mis-configurations ! :)"
+#exit 1
+
+while [ 1 ]; do
+
+clear
+
+echo " [ 1 ]	Monitor only"
+echo " [ 2 ]	Cloning  - CRTC1 to Monitor and TV"
+echo " [ 3 ]	Dualhead - CRTC1 to Monitor, CRTC2 to TV"
+
+#echo " [ 4 ]	Cloning  - CRTC2 to Monitor and TV"
+#echo " [ 5 ]	Dualhead - CRTC2 to Monitor, CRTC1 to TV"
+
+echo
+
+#echo " [ Q ]	All consoles to fb0"
+#echo " [ W ]	tty3 to fb1"
+#echo
+
+echo " [ A ]	640x512"
+echo " [ S ]	640x528"
+echo " [ D ]	720x576"
+
+read ABC
+
+case "$ABC" in
+	1)
+	matroxset -f /dev/fb1 -m 0
+	matroxset -f /dev/fb0 -m 1
+	fbset -a -fb /dev/fb0 $DEFAULTMODE
+	echo
+	;;
+
+	2)
+	matroxset -f /dev/fb1 -m 0
+	matroxset -f /dev/fb0 -m 3
+	matroxset 1
+	# 640x512
+	fbset -fb /dev/fb1 -left 60 -right 0 -upper 70 -lower 39 -hslen 76 -vslen 4 -xres 640 -yres 512 -bcast true
+	;;
+
+
+	3)
+	fbset -a -fb /dev/fb0 $DEFAULTMODE
+	echo
+	matroxset -f /dev/fb0 -m 0
+	matroxset -f /dev/fb1 -m 2
+	matroxset -f /dev/fb0 -m 1
+	matroxset 1
+	;;
+
+	4)
+	matroxset -f /dev/fb0 -m 0
+	matroxset -f /dev/fb1 -m 3
+	matroxset 1
+	;;
+
+	5)
+	matroxset -f /dev/fb1 -m 0
+	matroxset -f /dev/fb0 -m 2
+	matroxset -f /dev/fb1 -m 1
+	matroxset 1
+	# 640x512
+	fbset -fb /dev/fb1 -left 60 -right 0 -upper 70 -lower 39 -hslen 76 -vslen 4 -xres 640 -yres 512 -bcast true
+	;;
+
+	q)
+	con2fb /dev/fb0 /dev/tty1
+	con2fb /dev/fb0 /dev/tty2
+	con2fb /dev/fb0 /dev/tty3
+	con2fb /dev/fb0 /dev/tty4
+	con2fb /dev/fb0 /dev/tty5
+	con2fb /dev/fb0 /dev/tty6
+	;;
+
+	w)
+	con2fb /dev/fb1 /dev/tty3
+	;;
+
+	a)
+	# 640x512
+	fbset -fb /dev/fb1 -left 60 -right 0 -upper 70 -lower 39 -hslen 76 -vslen 4 -xres 640 -yres 512 -bcast true
+	;;
+
+	s)
+	# 640x528
+	fbset -fb /dev/fb1 -left 40 -right 0 -upper 63 -lower 29 -hslen 56 -vslen 4 -xres 640 -yres 528 -vxres 640 -vyres 528 -depth 32 -laced false -bcast true
+	;;
+
+	d)
+	# 720x576
+	fbset -fb /dev/fb1 -left 54 -right -36 -upper 55 -lower -6 -hslen 46 -vslen 4 -xres 720 -yres 576 -vxres 720 -vyres 576 -depth 32 -laced false -bcast true
+	;;
+
+esac
+
+done
