@@ -10,7 +10,8 @@ outdated patches.
    out CVS and daily CVS snapshots are available from our download page.
    We do not accept patches for releases or outdated CVS versions.
 
-2. Make unified diffs ('diff -Naur' or 'cvs diff -u').
+2. Make unified diffs ('diff -Naur' or 'cvs diff -u'). Unified diffs can easily
+   be applied with 'patch'. This is much harder with other diff types.
 
 3. Test the functionality of your patch. We'll *refuse* it if it breaks
    something, even if it extends other features!
