@@ -2875,8 +2875,7 @@ Specify the output filename (default: ./md5sums).
 .TP
 .B yuv4mpeg
 Transforms the video stream into a sequence of uncompressed YUV 4:2:0
-images and stores it in a file called by default 'stream.yuv' in the current
-directory.
+images and stores it in a file (default: ./stream.yuv).
 The format is the same as the one employed by mjpegtools, so this is
 useful if you want to process the video with the mjpegtools suite.
 It supports the YV12, RGB (24 bpp) and BGR (24 bpp) format.
@@ -2887,7 +2886,7 @@ Write the output as interlaced frames, top field first.
 .IPs interlaced_bf
 Write the output as interlaced frames, bottom field first.
 .IPs file=<filename>
-Write the output to the given file instead of the default stream.yuv.
+Write the output to <filename> instead of the default stream.yuv.
 .REss
 .PD 1
 .RS
