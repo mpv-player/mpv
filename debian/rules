@@ -9,7 +9,6 @@ build:
 	./configure --prefix=/usr
 	make dep
 	make mplayer
-	strip mplayer
 	touch build
 
 clean:
