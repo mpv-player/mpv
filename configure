@@ -1478,6 +1478,7 @@ if test "$_3dfx" = yes ; then
   _vomodules="3dfx $_vomodules"
 else
   _def_3dfx='#undef HAVE_3DFX'
+  _novomodules="3dfx $_novomodules"
 fi
 echores "$_3dfx"
 
@@ -1489,6 +1490,7 @@ if test "$_tdfxfb" = yes ; then
   _vomodules="tdfxfb $_vomodules"
 else
   _def_tdfxfb='#undef HAVE_TDFXFB'
+  _novomodules="tdfxf $_novomodules"
 fi
 echores "$_tdfxfb"
 
@@ -1509,6 +1511,7 @@ if test "$_directfb" = yes ; then
   _ld_directfb='-ldirectfb'
 else
   _def_directfb='#undef HAVE_DIRECTFB'
+  _novomodules="directfb $_novomodules"
 fi
 echores "$_directfb"
 
@@ -1618,6 +1621,7 @@ else
   _def_x11='#undef HAVE_X11'
   _inc_x11=''
   _ld_x11=''
+  _novomodules="x11 $_novomodules"
 fi
 echores "$_x11"
 
@@ -1680,6 +1684,7 @@ if test "$_xv" = yes ; then
   _vomodules="xv $_vomodules"
 else
   _def_xv='#undef HAVE_XV'
+  _novomodules="xv $_novomodules"
 fi
 echores "$_xv"
 
@@ -1767,6 +1772,7 @@ elif test "$_dga" = 2 ; then
   echores "yes (using DGA 2.0)"
 elif test "$_dga" = no ; then
   echores "no"
+  _novomodules="dga $_novomodules"
 else
   die "DGA version must be 1 or 2"
 fi
@@ -1796,6 +1802,7 @@ if test "$_gl" = yes ; then
   _vomodules="opengl $_vomodules"
 else
   _def_gl='#undef HAVE_GL'
+  _novomodules="opengl $_novomodules"
 fi
 echores "$_gl"
 
@@ -1811,6 +1818,7 @@ if test "$_mga" = yes ; then
   _vomodules="mga $_vomodules"
 else
   _def_mga='#undef HAVE_MGA'
+  _novomodules="mga $_novomodules"
 fi
 echores "$_mga"
 
@@ -1838,6 +1846,7 @@ if test "$_xmga" = yes ; then
   _vomodules="xmga $_vomodules"
 else
   _def_xmga='#undef HAVE_XMGA'
+  _novomodules="xmga $_novomodules"
 fi
 echores "$_xmga"
 
@@ -1858,6 +1867,7 @@ if test "$_ggi" = yes ; then
   _vomodules="ggi $_vomodules"
 else
   _def_ggi='#undef HAVE_GGI'
+  _novomodules="ggi $_novomodules"
 fi
 echores "$_ggi"
 
@@ -1878,6 +1888,7 @@ if test "$_aa" = yes ; then
   _vomodules="aa $_vomodules"
 else
   _def_aa='#undef HAVE_AA'
+  _novomodules="aa $_novomodules"
 fi
 echores "$_aa"
 
@@ -1899,6 +1910,7 @@ if test "$_svga" = yes ; then
   _vomodules="svga $_vomodules"
 else
   _def_svga='#undef HAVE_SVGALIB'
+  _novomodules="svga $_novomodules"
 fi
 echores "$_svga"
 
@@ -1919,6 +1931,7 @@ if test "$_fbdev" = yes ; then
 else
   _def_fbdev='#undef HAVE_FBDEV'
   _def_fbdev_nocopy='#undef USE_CONVERT2FB'
+  _novomodules="fbdev $_novomodules"
 fi
 echores "$_fbdev"
 
@@ -1978,6 +1991,7 @@ if test "$_png" = yes ; then
   _mkf_png="yes"
 else
   _def_png='#undef HAVE_PNG'
+  _novomodules="png $_novomodules"
   _mkf_png="no"
 fi
 
@@ -2021,6 +2035,7 @@ if x86 && linux ; then
   echores "yes"
 else
   _def_vesa='#undef HAVE_VESA'
+  _novomodules="vesa $_novomodules"
   echores "no (not supported on this OS/architecture)"
 fi
 else
@@ -2076,6 +2091,8 @@ if test "$_sdl" = yes ; then
   echores "yes (using $_sdlconfig)"
 else
   _def_sdl='#undef HAVE_SDL'
+  _novomodules="sdl $_novomodules"
+  _noaomodules="sdl $_noaomodules"
   echores "no"
 fi
 
@@ -2094,6 +2111,7 @@ if test "$_nas" = yes ; then
   _aosrc="$_aosrc ao_nas.c"
   _aomodules="nas $_aomodules"
 else
+  _noaomodules="nas $_noaomodules"
   _def_nas='#undef HAVE_NAS'
 fi
 echores "$_nas"
@@ -2113,6 +2131,7 @@ if test "$_dxr3" = yes ; then
   _vomodules="dxr3 $_vomodules"
 else
   _def_dxr3='#undef HAVE_DXR3'
+  _novomodules="dxr3 $_novomodules"
   if test "$_mp1e" = auto ; then
     # we don't need mp1e
     _mp1e=no
@@ -2167,6 +2186,7 @@ else
   _def_ossaudio='#undef USE_OSS_AUDIO'
   _def_ossaudio_devdsp='#define PATH_DEV_DSP ""'
   _def_ossaudio_devmixer='#define PATH_DEV_MIXER ""'
+  _noaomodules="oss $_noaomodules"
 fi
 echores "$_ossaudio"
 
@@ -2207,6 +2227,8 @@ if test "$_alsa" = yes ; then
     _def_alsa9='#define HAVE_ALSA9 1'
   fi
   _ld_alsa='-lasound'
+else
+  _noaomodules="alsa $_noaomodules"
 fi
 
 
@@ -2226,6 +2248,7 @@ if test "$_sunaudio" = yes ; then
   _aomodules="sun $_aomodules"
 else
   _def_sunaudio='#undef USE_SUN_AUDIO'
+  _noaomodules="sun $_noaomodules"
 fi
 echores "$_sunaudio"
 
@@ -2267,6 +2290,7 @@ if test "$_sgiaudio" = "yes" ; then
   _aomodules="sgi $_aomodules"
 else
   _def_sgiaudio='#undef USE_SGI_AUDIO'
+  _noaomodules="sgi $_noaomodules"
 fi
 echores "$_sgiaudio"
 
@@ -2278,6 +2302,7 @@ if linux || bsdos || freebsd || sunos ; then
   echores "ok"
 else
   _def_vcd='#undef HAVE_VCD'
+  _noinputmodules="vcd $_noinputmodules"
   echores "not supported on this OS"
 fi
 
@@ -2302,6 +2327,7 @@ if test "$_css" = yes ; then
   echores "yes"
 else
   _def_css='#undef HAVE_LIBCSS'
+  _noinputmodules="dvdcss $_noinputmodules"
   echores "no"
 fi
 
@@ -2330,6 +2356,7 @@ if test "$_dvdread" = yes ; then
   echores "yes"
 else
   _def_dvdread='#undef USE_DVDREAD'
+  _noinputmodules="dvdread $_noinputmodules"
   echores "no"
 fi
 
@@ -2432,6 +2459,7 @@ if test "$_win32" = yes ; then
   echores "yes (using $_win32libdir)"
 else
   _def_win32='#undef USE_WIN32DLL'
+  _nocodecmodules="win32 $_nocodecmodules"
   _dshow=no
   echores "no"
 fi
@@ -2487,6 +2515,7 @@ if test "$_dshow" = yes ; then
   _codecmodules="directshow $_codecmodules"
 else
   _def_dshow='#undef USE_DIRECTSHOW'
+  _nocodecmodules="directshow $_nocodecmodules"
 fi
 
 
@@ -2521,6 +2550,7 @@ if test "$_xanim" = yes ; then
 else
   _def_xanim='#undef USE_XANIM'
   _def_xanim_path='#undef XACODEC_PATH'
+  _nocodecmodules="xanim $_nocodecmodules"
 fi
 
 
@@ -2635,6 +2665,8 @@ elif test "$_libavcodecso" = yes ; then
   _ld_libavcodec='-lffmpeg'
   _def_ffpostprocess='#define FF_POSTPROCESS 1'
   _codecmodules="libavcodec.so $_codecmodules"
+else
+  _nocodecmodules="libavcodec $_nocodecmodules"
 fi
 
 
@@ -2647,10 +2679,12 @@ if test "$_zr" = yes ; then
     echores "$_zr"
   else
     echores "libavcodec (static) is required by zr, sorry"
+    _novomodules="zr $_novomodules"
     _def_zr='#undef HAVE_ZR'
   fi
 else
   _def_zr='#undef HAVE_ZR'
+  _novomodules="zr $_novomodules"
   echores "$_zr"
 fi
 
@@ -2693,6 +2727,7 @@ elif test "$_divx4linux" != no && cc_check -lm -ldivxdecore -lm ; then
   _def_divx5='#undef DECORE_DIVX5'
   _def_odivx_postprocess='#define HAVE_ODIVX_POSTPROCESS 1'
   _codecmodules="divx4linux $_codecmodules"
+  _nocodecmodules="xvid $_nocodecmodules"
   echores "DivX4linux (with libdivxdecore.so)"
 elif test "$_divx4linux" != no ; then 
 # DivX5 check
@@ -2714,6 +2749,7 @@ if cc_check -lm -ldivxdecore -lm ; then
 #  _def_odivx_postprocess='#define HAVE_ODIVX_POSTPROCESS 1'
   _def_odivx_postprocess='#undef HAVE_ODIVX_POSTPROCESS'
   _codecmodules="divx5linux $_codecmodules"
+  _nocodecmodules="divx4linux $_nocodecmodules"
   echores "DivX5linux (with libdivxdecore.so)"
 elif test "$_opendivx" != no ; then
   _xvid=no
@@ -2725,6 +2761,7 @@ elif test "$_opendivx" != no ; then
   _def_divx5='#undef DECORE_DIVX5'
   _def_odivx_postprocess='#define HAVE_ODIVX_POSTPROCESS 1'
   _codecmodules="opendivx $_codecmodules"
+  _nocodecmodules="divx5linux $_nocodecmodules"
   echores "OpenDivX"
 else
   _xvid=no
@@ -2735,6 +2772,7 @@ else
   _def_divx='#undef USE_DIVX'
   _def_divx5='#undef DECORE_DIVX5'
   _def_odivx_postprocess='#undef HAVE_ODIVX_POSTPROCESS'
+  _nocodecmodules="opendivx $_nocodecmodules"
   echores "no"
 fi # DivX5 check
 fi
@@ -2805,6 +2843,7 @@ if test "$_tv" = yes ; then
   _def_tv='#define USE_TV 1'
   _inputmodules="tv $_inputmodules"
 else
+  _noinputmodules="tv $_noinputmodules"
   _def_tv='#undef USE_TV'
 fi
 echores "$_tv"
@@ -2827,6 +2866,7 @@ if test "$_tv_v4l" = yes ; then
   _def_tv_v4l='#define HAVE_TV_V4L 1'
   _inputmodules="tv-v4l $_inputmodules"
 else
+  _noinputmodules="tv-v4l $_noinputmodules"
   _def_tv_v4l='#undef HAVE_TV_V4L'
 fi
 echores "$_tv_v4l"
@@ -2848,6 +2888,7 @@ if test "$_streaming" != no ; then
   _ld_streaming="$_ld_sock"
   _inputmodules="network $_inputmodules"
 else
+  _noinputmodules="network $_noinputmodules"
   _def_streaming='#undef STREAMING'
 fi
 echores "$_streaming"
@@ -3019,6 +3060,8 @@ test "$_vidix" = no && _def_vidix='#undef CONFIG_VIDIX'
 if test "$_vidix" = yes && test "$_x11" = yes; then
   _vosrc="$_vosrc vo_xvidix.c"
   _vomodules="xvidix $_vomodules"
+else
+  _novomodules="xvidix $_novomodules"
 fi
 echo Checking for vidix ... "$_vidix"
 
@@ -3537,6 +3580,11 @@ Config files successfully generated by ./configure !
     Codecs: $_codecmodules
     Audio output: $_aomodules
     Video output: $_vomodules
+  Disabled optional drivers:
+    Input: $_noinputmodules
+    Codecs: $_nocodecmodules
+    Audio output: $_noaomodules
+    Video output: $_novomodules
 
 'config.h' and 'config.mak' contain your configuration options.
 Note: if you alter theses files (for instance CFLAGS) MPlayer may no longer
