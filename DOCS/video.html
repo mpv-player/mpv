@@ -497,9 +497,13 @@ whatever.  And don't forget to register your UniVBE ;))</P>
 used together with -x and -y options too. The -flip option is supported only
 if the movie's pixel format matches the video mode's pixel format.
 Pay attention to the bpp value, fbdev driver tries to use the current,
-or if you specify the -bpp option, then that.
+or if you specify the -bpp option, then that.</LI>
 <LI><B>-zoom</B> option isn't supported (software scaling is slow). -fs option
-isn't supported. You can't use 8bpp (or less) modes.</UL></P>
+isn't supported. You can't use 8bpp (or less) modes.</LI>
+<LI>you possibly want to turn the cursor off : <CODE>echo -e '\033[?25l'</CODE><BR>
+  and the screen saver: <CODE>setterm -blank 0</CODE><BR>
+  To turn the cursor back on : <CODE>echo -e '\033[?25h'</CODE>
+</UL></P>
 
 <P>NOTE: FBdev video mode changing _does not work_ with the VESA framebuffer,
 and don't ask for it, since it's not an <B>MPlayer</B> limitation.</P>
