@@ -4608,6 +4608,9 @@ large context model
 use quarter pel motion compensation
 Tip: This seems only useful for high bitrate encodings.
 .TP
+.B ildctcmp=<0\-2000>
+comparison function for interlaced dct decision
+.TP
 .B precmp=<0\-2000>
 comparison function for motion estimation pre pass
 .TP
@@ -4637,6 +4640,10 @@ number of bits needed for the block
 rate distortion optimal, slow
 .IPs "7 (ZERO)"
 0
+.IPs "8 (VSAD)"
+sum of absolute vertical differences 
+.IPs "9 (VSSE)"
+sum of squared vertical differences
 .IPs +256\ 
 use chroma too, doesn't work (correctly) with B frames currently
 .RE

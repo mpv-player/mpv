@@ -113,6 +113,9 @@ static int lavc_param_me_pre_cmp= 0;
 static int lavc_param_me_cmp= 0;
 static int lavc_param_me_sub_cmp= 0;
 static int lavc_param_mb_cmp= 0;
+#ifdef FF_CMP_VSAD
+static int lavc_param_ildct_cmp= FF_CMP_VSAD;
+#endif
 static int lavc_param_pre_dia_size= 0;
 static int lavc_param_dia_size= 0;
 static int lavc_param_qpel= 0;
@@ -223,6 +226,9 @@ m_option_t lavcopts_conf[]={
         {"cmp", &lavc_param_me_cmp, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
         {"subcmp", &lavc_param_me_sub_cmp, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
         {"mbcmp", &lavc_param_mb_cmp, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
+#ifdef FF_CMP_VSAD
+        {"ildctcmp", &lavc_param_ildct_cmp, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
+#endif
         {"predia", &lavc_param_pre_dia_size, CONF_TYPE_INT, CONF_RANGE, -2000, 2000, NULL},
         {"dia", &lavc_param_dia_size, CONF_TYPE_INT, CONF_RANGE, -2000, 2000, NULL},
 	{"qpel", &lavc_param_qpel, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_QPEL, NULL},
@@ -540,6 +546,9 @@ static int config(struct vf_instance_s* vf,
     lavc_venc_context->me_cmp= lavc_param_me_cmp;
     lavc_venc_context->me_sub_cmp= lavc_param_me_sub_cmp;
     lavc_venc_context->mb_cmp= lavc_param_mb_cmp;
+#ifdef FF_CMP_VSAD
+    lavc_venc_context->ildct_cmp= lavc_param_ildct_cmp;
+#endif    
     lavc_venc_context->dia_size= lavc_param_dia_size;
     lavc_venc_context->flags|= lavc_param_qpel;
 #endif 
