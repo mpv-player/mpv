@@ -4,3 +4,16 @@ mplayer
 .depend
 version.h
 help_mp.h
+.developer
+libac3/.depend
+libao2/.depend
+libmpdemux/.depend
+libmpeg2/.depend
+libvo/.depend
+linux/.depend
+loader/DirectShow/.depend
+mp3lib/.depend
+opendivx/.depend
+postproc/.depend
+xa/.depend
+
