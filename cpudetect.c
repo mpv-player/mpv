@@ -14,6 +14,11 @@ CpuCaps gCpuCaps;
 #include <stdio.h>
 #include <string.h>
 
+#ifdef __NetBSD__
+#include <sys/param.h>
+#include <setjmp.h>
+#endif
+
 #ifdef __FreeBSD__
 #include <sys/types.h>
 #include <sys/sysctl.h>
@@ -147,7 +152,7 @@ void GetCpuCaps( CpuCaps *caps)
 #endif
 
 		/* FIXME: Does SSE2 need more OS support, too? */
-#if defined(__linux__) || defined(__FreeBSD__)
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__)
 		if (caps->hasSSE)
 			check_os_katmai_support();
 		if (!caps->hasSSE)
@@ -237,6 +242,15 @@ char *GetCpuFriendlyName(unsigned int regs[], unsigned int regs2[]){
 #undef CPUID_STEPPING
 
 
+#ifdef __NetBSD__
+jmp_buf sseCheckEnv;
+
+void sseCheckHandler(int i)
+{
+        longjmp(sseCheckEnv, 1);
+}
+#endif
+
 #if defined(__linux__) && defined(_POSIX_SOURCE) && defined(X86_FXSR_MAGIC)
 static void sigill_handler_sse( int signal, struct sigcontext sc )
 {
@@ -293,6 +307,36 @@ static void check_os_katmai_support( void )
    if (ret || !has_sse)
       gCpuCaps.hasSSE=0;
 
+#elif defined(__NetBSD__)
+#if __NetBSD_Version__ >= 105260000
+   if ( gCpuCaps.hasSSE ) {
+      void (*oldHandler)(int);
+
+      mp_msg(MSGT_CPUDETECT,MSGL_V, "Testing OS support for SSE... " );
+
+      oldHandler = signal(SIGILL, sseCheckHandler);
+      if (setjmp(sseCheckEnv)) {
+        gCpuCaps.hasSSE = 0;
+      } else {
+         __asm__ __volatile__ (
+               "subl $0x10, %esp     \n"
+               "movups %xmm0, (%esp) \n"
+               "emms                 \n"
+               "addl $0x10, %esp     \n"
+           );
+      }
+      signal(SIGILL, oldHandler);
+
+      if ( gCpuCaps.hasSSE ) {
+	mp_msg(MSGT_CPUDETECT,MSGL_V, "no!\n" );
+      } else {
+	mp_msg(MSGT_CPUDETECT,MSGL_V, "yes!\n" );
+      }
+   }
+#else
+   gCpuCaps.hasSSE = 0
+   mp_msg(MSGT_CPUDETECT,MSGL_WARN, "No OS support for SSE, disabling to be safe.\n" );
+#endif
 #elif defined(__linux__)
 #if defined(_POSIX_SOURCE) && defined(X86_FXSR_MAGIC)
    struct sigaction saved_sigill;
