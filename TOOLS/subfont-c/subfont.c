@@ -524,16 +524,20 @@ void outline(
 		const int y1=(y<r) ? r-y : 0;
 		const int x2=(x+r>=width ) ? r+width -x : 2*r+1;
 		const int y2=(y+r>=height) ? r+height-y : 2*r+1;
+		register unsigned char *dstp= t + (y1+y-r)* width + x-r;
+		register int *mp  = m +  y1     *mwidth;
 		int my;
 
 		for(my= y1; my<y2; my++){
-		    unsigned char *dstp= t + (my+y-r)* width + x-r;
-		    int *mp  = m +  my     *mwidth;
-		    int mx;
+//		    unsigned char *dstp= t + (my+y-r)* width + x-r;
+//		    int *mp  = m +  my     *mwidth;
+		    register int mx;
 		    for(mx= x1; mx<x2; mx++){
 			const int tmp= (src*mp[mx] + 128)>>8;
 			if(dstp[mx] < tmp) dstp[mx]= tmp;
 		    }
+		    dstp+=width;
+		    mp+=mwidth;
 		}
             }
 	}
