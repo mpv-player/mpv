@@ -71,8 +71,8 @@ typedef struct {
   int eof;                 // end of demuxed stream? (true if all buffer empty)
   off_t pos;                 // position in the input stream (file)
   off_t dpos;                // position in the demuxed stream
+  off_t block_no;            // number of <=block_size length blocks (for VBR mp3)
   int pack_no;		   // serial number of packet
-  int block_no;            // number of <=block_size length blocks (for VBR mp3)
   int flags;               // flags of current packet (keyframe etc)
 //---------------
   int packs;              // number of packets in buffer
@@ -182,6 +182,10 @@ inline static off_t ds_tell(demux_stream_t *ds){
 
 inline static int ds_tell_pts(demux_stream_t *ds){
   return (ds->pts_bytes-ds->buffer_size)+ds->buffer_pos;
+}
+
+inline static off_t ds_tell_block(demux_stream_t *ds){
+  return ds->block_no-(ds->buffer_size-ds->buffer_pos)/ds->block_size;
 }
 
 int demux_read_data(demux_stream_t *ds,unsigned char* mem,int len);
