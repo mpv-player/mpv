@@ -2383,7 +2383,7 @@ switch(file_format){
 //  vo_osd_text=osd_text_buffer;
   
   // find sub
-  if(subtitles){
+  if(subtitles && d_video->pts>0){
       int pts=d_video->pts;
       if(sub_fps==0) sub_fps=sh_video->fps;
       current_module="find_sub";
