@@ -232,9 +232,9 @@ url_escape_string(char *outbuf, const char *inbuf) {
 			unsigned char c1 = ((c & 0xf0) >> 4);
 			unsigned char c2 = (c & 0x0f);
 			if (c1 < 10) c1+='0';
-			else c1+='A';
+			else c1+='A'-10;
 			if (c2 < 10) c2+='0';
-			else c2+='A';
+			else c2+='A'-10;
 			*outbuf++ = '%';
 			*outbuf++ = c1;
 			*outbuf++ = c2;
