@@ -422,6 +422,17 @@ HMODULE WINAPI LoadLibraryExA(LPCSTR libname, HANDLE hfile, DWORD flags)
 	if (!wm)
 	    printf("Win32 LoadLibrary failed to load: %s\n", checked);
 
+	if (strstr(libname,"vp31vfw.dll") && wm)
+	{
+	    int i;
+
+	  // sse hack moved from patch dll into runtime patching
+          if (PE_FindExportedFunction(wm, "DriverProc", TRUE)==(void*)0x10001000) {
+	    fprintf(stderr, "VP3 DLL found\n");
+	    for (i=0;i<18;i++) ((char*)0x10004bd6)[i]=0x90;
+	  }
+	}
+
         // remove a few divs in the VP codecs that make trouble
         if (strstr(libname,"vp5vfw.dll") && wm)
         {
