@@ -145,6 +145,10 @@ Nagyon könnyû bekapcsolni õket:</P>
   <LI>a <CODE>--with-xanimlibdir</CODE> opcióval mondd meg a configure-nak hogy
   hol vannak az xanim codec-ek. Alapállapotban a <CODE>/</CODE>
   könyvtárban keresi õket (...) .</LI>
+
+  <LI>nevezd át a codeceket, hogy így nézzenek ki : <CODE>vid_cvid.xa, vid_h263.xa,
+  vid_iv50.xa</CODE></LI>
+
 </UL>
 </P>
 
@@ -189,6 +193,13 @@ ennek dekódolásához az <CODE>msvidc32.dll</CODE> nevû Win32-es codecet
 használtuk, de mostmár van nyitott forrású implementációnk,
 <A HREF="mailto:melanson@pcisys.net">Mike
 Melanson</A>-tól.</P>
+
+
+<P><B><A NAME=2.2.1.7>2.2.1.7.  Cinepak CVID</A></B></P>
+
+<P>A CVID-del enkódolt filmek lejátszására a <CODE>vid_cvid.xa</CODE> nevû
+XAnim codec ajánlott, mivel támogat YV12 és YUY2 kimeneteket is, ellenben
+a Win32 codeccel ami csak RGB-t tud.</P>
 
 
 <P><B><A NAME=2.2.2>2.2.2.  Audio codec-ek</A></B></P>

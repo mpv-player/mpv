@@ -143,6 +143,10 @@ easy to enable them:</P>
 
   <LI>use the <CODE>--with-xanimlibdir</CODE> option to tell configure where
   it can find the xanim codecs. By default, it checks them at <CODE>/</CODE> (...) .</LI>
+
+  <LI>rename the filenames by cutting out the architecture stuff, so they will
+  have filenames like these : <CODE>vid_cvid.xa, vid_h263.xa, vid_iv50.xa</CODE>
+
 </UL>
 </P>
 
@@ -183,6 +187,13 @@ No speed decrease is measurable.</P>
 decoded with the <CODE>msvidc32.dll</CODE> Win32 codec, now we have our own
 open-source implementation (by <A HREF="mailto:melanson@pcisys.net">Mike
 Melanson</A>).</P>
+
+
+<P><B><A NAME=2.2.1.7>2.2.1.7.  Cinepak CVID</A></B></P>
+
+<P>The best way to view Cinepak videos with <B>MPlayer</B>, is using
+the XAnim codec <CODE>vid_cvid.xa</CODE>, because it supports YV12, YUY2
+outputs, in contrary to the Win32 codec which supports only RGB.</P>
 
 
 <P><B><A NAME=2.2.2>2.2.2.  Audio codecs</A></B></P>
