@@ -1,3 +1,5 @@
+#ifndef __DEMUXER_H
+#define __DEMUXER_H 1
 
 #define MAX_PACKS 4096
 #define MAX_PACK_BYTES 0x800000
@@ -190,3 +192,5 @@ extern int pts_from_bps;
 int demux_info_add(demuxer_t *demuxer, char *opt, char *param);
 char* demux_info_get(demuxer_t *demuxer, char *opt);
 int demux_info_print(demuxer_t *demuxer);
+
+#endif

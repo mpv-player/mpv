@@ -1,3 +1,5 @@
+#ifndef __MP_IMAGE_H
+#define __MP_IMAGE_H 1
 
 // set if buffer content shouldn't be modified:
 #define MP_IMGFLAG_PRESERVE 0x01
@@ -87,3 +89,5 @@ static inline mp_image_t* new_mp_image(int w,int h){
     mpi->height=mpi->h=h;
     return mpi;
 }
+
+#endif

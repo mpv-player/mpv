@@ -1,3 +1,6 @@
+#ifndef __ST_HEADER_H
+#define __ST_HEADER_H 1
+
 // Stream headers:
 
 #include "wine/mmreg.h"
@@ -79,3 +82,5 @@ sh_video_t* new_sh_video(demuxer_t *demuxer,int id);
 
 int video_read_properties(sh_video_t *sh_video);
 int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** start,int force_fps);
+
+#endif

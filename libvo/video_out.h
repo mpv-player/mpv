@@ -5,6 +5,9 @@
  *	Strongly modified, most parts rewritten: A'rpi/ESP-team - 2000-2001
  *
  */
+ 
+#ifndef __VIDEO_OUT_H
+#define __VIDEO_OUT_H 1
 
 #include <inttypes.h>
 #include <stdarg.h>
@@ -202,3 +205,4 @@ extern float vo_fps;
 
 extern char *vo_subdevice;
 
+#endif
