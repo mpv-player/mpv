@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.153
+// In synch with rev 1.155
 
 // ========================= MPlayer help ===========================
 
@@ -632,12 +632,14 @@ static char help_text[]=
 #define MSGTR_NEMFMR "Sorry, nicht genug Speicher für Menü-Rendering."
 #define MSGTR_IDFGCVD "Sorry, kann keinen GUI-kompatiblen Ausgabetreiber finden."
 #define MSGTR_NEEDLAVCFAME "Sorry, du versuchst, Nicht-MPEG Dateien ohne erneute Enkodierung abzuspielen.\nBitte aktiviere lavc oder fame in der DXR3/H+-Configbox."
+#define MSGTR_UNKNOWNWINDOWTYPE "Unbekannten Fenstertyp gefunden ..."
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[Skin] Fehler in Skin-Konfigurationsdatei in Zeile %d: %s" 
 #define MSGTR_SKIN_WARNING1 "[Skin] Warnung in Skin-Konfigurationsdatei in Zeile %d:\nWidget (%s) gefunden, aber davor wurde \"section\" nicht gefunden"
 #define MSGTR_SKIN_WARNING2 "[Skin] Warnung in Skin-Konfigurationsdatei in Zeile %d:\nWidget (%s) gefunden, aber davor wurde \"subsection\" nicht gefunden (%s)"
 #define MSGTR_SKIN_WARNING3 "[skin] Warnung in Skin-Konfigurationsdatei in Zeile %d:\nDiese Untersektion wird vom Widget nicht unterstützt (%s).\n"
+#define MSGTR_SKIN_SkinFileNotFound "[skin] Datei ( %s ) nicht gefunden.\n"
 #define MSGTR_SKIN_BITMAP_16bit  "Bitmaps mit 16 Bits oder weniger werden nicht unterstützt (%s).\n"
 #define MSGTR_SKIN_BITMAP_FileNotFound  "Datei nicht gefunden (%s)\n"
 #define MSGTR_SKIN_BITMAP_BMPReadError "BMP-Lesefehler (%s)\n"
@@ -654,6 +656,7 @@ static char help_text[]=
 #define MSGTR_SKIN_FONT_NonExistentFontID "nicht existierende Schriftbezeichnung (%s)\n"
 #define MSGTR_SKIN_UnknownParameter "unbekannter Parameter (%s)\n"
 #define MSGTR_SKIN_SKINCFG_SkinNotFound "Skin nicht gefunden (%s).\n"
+#define MSGTR_SKIN_SKINCFG_SelectedSkinNotFound "Ausgewähltes Skin ( %s ) wurde nicht gefunden, versuche 'Standard'...\n"
 #define MSGTR_SKIN_SKINCFG_SkinCfgReadError "Skin-Konfigurationsdatei: Lesefehler (%s)\n"
 #define MSGTR_SKIN_LABEL "Skins:"
 
@@ -836,6 +839,45 @@ static char help_text[]=
 #define MSGTR_MSGBOX_LABEL_Error "Fehler!"
 #define MSGTR_MSGBOX_LABEL_Warning "Warnung!"
 
+// bitmap.c
+
+#define MSGTR_NotEnoughMemoryC32To1 "[c32to1] Für das Bild ist nicht genügend Speicher vorhanden.\n"
+#define MSGTR_NotEnoughMemoryC1To32 "[c1to32] Für das Bild ist nicht genügend Speicher vorhanden.\n"
+
+// cfg.c
+
+#define MSGTR_ConfigFileReadError "[cfg] Fehler beim Lesen der Konfigurationsdatei ...\n"
+#define MSGTR_UnableToSaveOption "[cfg] Kann die Option '%s' nicht speichern.\n"
+
+// interface.c
+
+#define MSGTR_DeletingSubtitles "[GUI] Lösche Untertitel.\n"
+#define MSGTR_LoadingSubtitles "[GUI] Lade Untertitel: %s\n"
+#define MSGTR_AddingVideoFilter "[GUI] Füge Videofilter %s hinzu.\n"
+#define MSGTR_RemovingVideoFilter "[GUI] Entferne Videofilter: %s\n"
+
+// mw.c
+
+#define MSGTR_NotAFile "Dies scheint keine Datei zu sein: %s !\n"
+
+// ws.c
+
+#define MSGTR_WS_CouldNotOpenDisplay "[ws] Konnte das Display nicht öffnen.\n"
+#define MSGTR_WS_RemoteDisplay "[ws] Ferngesteuertes Display, deaktiviere XMITSHM.\n"
+#define MSGTR_WS_NoXshm "[ws] Sorry, dein System unterstützt die Shared-Memory-Erweiterung von X nicht.\n"
+#define MSGTR_WS_NoXshape "[ws] Sorry, dein System unterstützt die XShape-Erweiterung nicht.\n"
+#define MSGTR_WS_ColorDepthTooLow "[ws] Sorry, die Farbtiefe ist zu niedrig.\n"
+#define MSGTR_WS_TooManyOpenWindows "[ws] Es sind zu viele Fenster geöffnet.\n"
+#define MSGTR_WS_ShmError "[ws] Fehler der Shared-Memory-Erweiterung\n"
+#define MSGTR_WS_NotEnoughMemoryDrawBuffer "[ws] Sorry, nicht genügend Speicher zum Schreiben in den Buffer.\n"
+#define MSGTR_WS_DpmsUnavailable "DPMS nicht verfügbar?\n"
+#define MSGTR_WS_DpmsNotEnabled "Konnte DPMS nicht aktivieren.\n"
+ 
+// wsxdnd.c
+
+#define MSGTR_WS_NotAFile "Dies scheint keine Datei zu sein...\n"
+#define MSGTR_WS_DDNothing "D&D: Nichts zurückgegeben!\n"
+ 
 #endif
 
  // ======================= VO Video Output drivers ========================
@@ -990,3 +1032,25 @@ static char help_text[]=
 // ao_plugin.c
 
 #define MSGTR_AO_PLUGIN_InvalidPlugin "[AO PLUGIN] ungültiges Plugin: %s\n"
+
+// ======================= AF Audio Filters ================================
+
+// libaf
+
+// af_ladspa.c
+
+#define MSGTR_AF_LADSPA_AvailableLabels "verfügbare Label in"
+#define MSGTR_AF_LADSPA_WarnNoInputs "WARNUNG! Dieses LADSPA-Plugin hat keine Audio-Inputs.\n  Das eingehende Audiosignal wird verlorengehen."
+#define MSGTR_AF_LADSPA_ErrMultiChannel "Multi-channel (>2) Plugins werden (noch) nicht unterstützt.\n  Benutze nur Mono- und Stereo-Plugins."
+#define MSGTR_AF_LADSPA_ErrNoOutputs "Dieses LADSPA-Plugin hat keine Audio-Outputs."
+#define MSGTR_AF_LADSPA_ErrInOutDiff "Die Anzahl der Audio-Inputs und Audio-Outputs des LADSPA-Plugins sind verschieden."
+#define MSGTR_AF_LADSPA_ErrFailedToLoad "konnte nicht laden"
+#define MSGTR_AF_LADSPA_ErrNoDescriptor "Konnte die Funktion ladspa_descriptor() in der angegebenen Bibliotheksdatei nicht finden."
+#define MSGTR_AF_LADSPA_ErrLabelNotFound "Konnte Label in der Plugin-Bibliothek nicht finden."
+#define MSGTR_AF_LADSPA_ErrNoSuboptions "Keine Suboptionen angegeben"
+#define MSGTR_AF_LADSPA_ErrNoLibFile "Keine Bibliotheksdatei angegeben"
+#define MSGTR_AF_LADSPA_ErrNoLabel "Keine Filterlabel angegeben"
+#define MSGTR_AF_LADSPA_ErrNotEnoughControls "Nicht genügend Bedienelemente in der Kommandozeile angegeben"
+#define MSGTR_AF_LADSPA_ErrControlBelow "%s: Input-Kontrolle #%d ist unterhalb der Grenze von %0.4f.\n"
+#define MSGTR_AF_LADSPA_ErrControlAbove "%s: Input-Kontrolle #%d ist überhalb der Grenze von %0.4f.\n"
+
