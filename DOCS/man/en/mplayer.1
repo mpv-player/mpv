@@ -193,6 +193,9 @@ more.
 is MPlayer with a graphical user interface.
 It has the same options as MPlayer.
 .PP
+Usage examples to get you started quickly can be found at the end
+of this man page.
+.PP
 .B Also see the HTML documentation!
 .
 .
@@ -365,7 +368,7 @@ Use the specified file instead of system wide installed or builtin codecs.conf.
 Specify configuration file to be parsed after the default ones.
 .
 .TP
-.B \-quiet \ \ 
+.B \-quiet\ \ 
 Make console output less verbose; in particular, prevents the status line
 (i.e.\& A:   0.7 V:   0.6 A-V:  0.068 ...) from being displayed.
 Particularly useful on slow terminals or broken ones which do not properly
@@ -1449,11 +1452,11 @@ Specify how subtitles should be aligned with \-subpos.
 .PD 0
 .RSs
 .IPs 0
-align at top (original/\:default behavior)
+Align at top (original/\:default behavior).
 .IPs 1
-align at center
+Align at center.
 .IPs 2
-align at bottom
+Align at bottom.
 .RE
 .PD 1
 .
@@ -2784,7 +2787,7 @@ Allows specifying the output filename (default: ./md5).
 .
 .TP
 .B md5sum\ 
-Calculate the MD5 sum of each frame and write them to a file.
+Calculate MD5 sums of each frame and write them to a file.
 Supports RGB24 and YV12 colorspaces.
 Useful for debugging.
 .PD 0
@@ -2879,11 +2882,7 @@ Must be equal to or larger than 1 (default: 1000).
 Output each frame into a PNM file in the current directory.
 Each file takes the frame number padded with leading zeros as name.
 It supports PPM, PGM and PGMYUV files in both raw and ASCII mode.
-Also see
-.BR pnm (5),
-.BR ppm (5)
-and
-.BR pgm (5).
+Also see pnm(5), ppm(5) and pgm(5).
 .PD 0
 .RSs
 .IPs ppm
@@ -2900,10 +2899,9 @@ Write PNM files in raw mode (default).
 Write PNM files in ASCII mode.
 .IPs outdir=<dirname>
 Specify the directory to save the PNM files to (default: ./).
-.IPs subdirs=<value>
-Will create numbered subdirectories with the specified prefix.
-By default, no subdirectories are created and all PNM files are
-written to the same directory.
+.IPs subdirs=<prefix>
+Create numbered subdirectories with the specified prefix to
+save the files in instead of the current directory.
 .IPs maxfiles=<value> (subdir only)
 Maximum number of PNM files to be saved per subdirectory.
 Must be equal to or larger than 1 (default: 1000).
@@ -6743,7 +6741,7 @@ precision (default: 60).
 .TP
 .B frameref=<1\-15>
 Number of previous frames used as predictors in a P frame (default: 1).
-This is effective in Anime, but seems to make little difference in 
+This is effective in Anime, but seems to make little difference in
 live-action source material.
 Some decoders are unable to deal with large frameref values.
 .
