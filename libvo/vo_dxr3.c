@@ -142,7 +142,7 @@ static int ioval = 0;
 static int get_video_eq(vidix_video_eq_t *info);
 static int set_video_eq(vidix_video_eq_t *info);
 
-uint32_t control(uint32_t request, void *data, ...)
+static uint32_t control(uint32_t request, void *data, ...)
 {
 	switch (request) {
 	case VOCTRL_GUISUPPORT:
