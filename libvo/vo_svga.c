@@ -423,7 +423,11 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
   WIDTH=vga_getxdim();
   HEIGHT=vga_getydim();
   BYTESPERPIXEL=(bpp+4)>>3;
-  LINEWIDTH=WIDTH*BYTESPERPIXEL;
+  if(bpp==1)
+    LINEWIDTH=(WIDTH+7)/8;
+  else
+    LINEWIDTH=WIDTH*BYTESPERPIXEL;
+
   vga_setlinearaddressing();
   if(oldmethod) {
      buffer=malloc(HEIGHT*LINEWIDTH);
@@ -453,7 +457,11 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
   
   if (pformat == IMGFMT_YV12) {
     yuv2rgb_init(bpp, MODE_RGB);
-    yuvbuf = malloc(maxw * maxh * BYTESPERPIXEL);
+    if(bpp==1)
+      yuvbuf = malloc((maxw+7)/8 * maxh);
+    else
+      yuvbuf = malloc(maxw * maxh * BYTESPERPIXEL);
+
     if (yuvbuf == NULL) {
       printf("vo_svga: yuvbuf -> Not enough memory for buffering!\n");
       uninit();
@@ -476,7 +484,10 @@ static const vo_info_t* get_info(void) {
 
 static uint32_t draw_frame(uint8_t *src[]) {
   if (pformat == IMGFMT_YV12) {
-    yuv2rgb(yuvbuf, src[0], src[1], src[2], orig_w, orig_h, orig_w * BYTESPERPIXEL, orig_w, orig_w / 2);
+    if(bpp==1)
+      yuv2rgb(yuvbuf, src[0], src[1], src[2], orig_w, orig_h, (orig_w+7)/8, orig_w, orig_w / 2);
+    else
+      yuv2rgb(yuvbuf, src[0], src[1], src[2], orig_w, orig_h, orig_w * BYTESPERPIXEL, orig_w, orig_w / 2);
     src[0] = yuvbuf;
   }
   if (bpp_conv) {
@@ -509,8 +520,11 @@ static uint32_t draw_slice(uint8_t *image[], int stride[],
                            int w, int h, int x, int y) {
   uint8_t *src = yuvbuf;
   uint32_t sw, sh;
-  
-  yuv2rgb(yuvbuf, image[0], image[1], image[2], w, h, orig_w * BYTESPERPIXEL, stride[0], stride[1]);
+  if(bpp==1)
+    yuv2rgb(yuvbuf, image[0], image[1], image[2], w, h, (orig_w+7)/8, stride[0], stride[1]);
+  else
+    yuv2rgb(yuvbuf, image[0], image[1], image[2], w, h, orig_w * BYTESPERPIXEL, stride[0], stride[1]);
+
   putbox(x + x_pos, y + y_pos, w, h, src, 1);
 
   return (0);
@@ -699,15 +713,21 @@ static uint32_t query_format(uint32_t format) {
 
 static void putbox(int x, int y, int w, int h, uint8_t *buf, int prog) {
     int base, add, wid;
+    if(bpp==1)
+      wid=(w+7)/8;
+    else
+      wid=w*BYTESPERPIXEL;
+
     if(oldmethod) {
-        wid=w*BYTESPERPIXEL;
         add=wid*prog;
         while( (h--) > 0 ) {
-            memcpy(buffer+x*BYTESPERPIXEL+(y++)*LINEWIDTH, buf, wid);
+            if(bpp==1)
+              memcpy(buffer+(x+7)/8+(y++)*LINEWIDTH, buf, wid);
+            else
+              memcpy(buffer+x*BYTESPERPIXEL+(y++)*LINEWIDTH, buf, wid);
             buf+=add;
         }
     } else {
-        wid=w*BYTESPERPIXEL;
         add=wid*prog;
         base=frame*HEIGHT;
         while( (h--) > 0 ) {
