@@ -934,7 +934,7 @@ static void WINAPI expGetSystemInfo(SYSTEM_INFO* si)
 	        cachedsi.dwProcessorType = PROCESSOR_INTEL_486;
 		cachedsi.wProcessorLevel = 4;
 	    }
-	    else if (gCpuCaps.cpuType > 5)
+	    else if (gCpuCaps.cpuType >= 5)
 	    {
 		cachedsi.dwProcessorType = PROCESSOR_INTEL_PENTIUM;
 		cachedsi.wProcessorLevel = 5;
