@@ -2490,11 +2490,11 @@ print additional options and informations on presets settings.
 .PD 1
 .
 .TP
-.B \-lavcopts <option1:option2:...>
-If encoding with a codec from libavcodec, you can specify its parameters
-here.
+.B \-lavcopts <opció1:opció2:...>
+Ha a libavcodec egy codec-ével enkódolsz, itt kell megadnod a nevét és
+paramétereit.
 
-.I EXAMPLE:
+.I PÉLDA:
 .PD 0
 .RSs
 \-lavcopts vcodec=msmpeg4:vbitrate=1800:vhq:keyint=250
@@ -2502,12 +2502,13 @@ here.
 .PD 1
 
 .RS
-Available options are:
+A rendelkezésre álló opciók:
 .RE
 .
 .RSs
-.IPs vcodec=<value>
-use the specified codec (there is no default, you must specify it):
+.IPs vcodec=<érték>
+a megadott codec használata (nincs alapértelmezett, így ez a paraméter
+kötelezõ):
 .RSss
 mjpeg: Motion JPEG
 .br
@@ -2519,205 +2520,208 @@ mpeg4: DivX 4/\:5
 .br
 msmpeg4: DivX 3
 .br
-rv10: an old RealVideo codec
+rv10: egy régi RealVideo codec
 .br
 mpeg1video: MPEG1 video :)
 .REss
 .IPs vqmin=<1\-31>
-minimum quantizer (pass\ 1/\:2) (default: 2)
+minimum quantizer (pass 1/\:2) (alap: 2)
 .IPs vqscale=<1\-31>
-constant quantizer (selects fixed quantizer mode) (default: 0 (disabled))
+constant quantizer (fix quantizeres mód bekapcsolása) (alap: 0 (kikapcsolva))
 .IPs vqmax=<1\-31>
-maximum quantizer (pass\ 1/\:2) (default: 31)
+maximum quantizer (1/\:2-es menet) (alap: 31)
 .IPs mbqmin=<1\-31>
-minimum macroblock quantizer (pass\ 1/\:2) (default: 2)
+minimum macroblock quantizer (1/\:2-es menet) (alap: 2)
 .IPs mbqmax=<1\-31>
-maximum macroblock quantizer (pass\ 1/\:2) (default: 31)
+maximum macroblock quantizer (1/\:2-es menet) (alap: 31)
 .IPs vqdiff=<1\-31>
-maximum quantizer difference between I or P frames (pass\ 1/\:2) (default: 3)
+maximum quantizer különbség I vagy P képkockák között (1/\:2-es menet) (alap: 3)
 .IPs vmax_b_frames=<0\-4>
-maximum number of B frames between non B frames:
+két B képkocka közötti képkockák száma:
 .RSss
-0: no B frames (default)
+0: B frame-ek kikapcsolása (alap)
 .br
-0\-2: sane range
+0\-2: ésszerû értékek
 .REss
 .IPs vme=<0\-5>
-motion estimation method:
+mozgás kiszámítás (motion estimation) módszere:
 .RSss
-0: none (very lq)
+0: nincs (rossz minõség)
 .br
-1: full (slow)
+1: teljes (lassú)
 .br
-2: log (lq)
+2: log (rossz)
 .br
-3: phods (lq)
+3: phods (rossz)
 .br
-4: EPZS (default)
+4: EPZS (alap)
 .br
-5: X1 (experimental)
+5: X1 (kísérleti)
 .REss
 .IPs vhq\ \ 
-high quality mode, encode each macro block in all modes an choose the smallest
-(slow).
-(default: HQ disabled)
+jó minõségû enkódolás bekapcsolása, azaz a makroblokkok enkódolása az összes
+fenti módszerrel, majd a legkisebb használata (lassú).
+(alap: HQ kikapcsolva)
 .IPs v4mv
-4 motion vectors per macroblock (slightly better quality).
-(default: disabled)
+4 motion vector makroblokkonként (valamivel jobb minõség).
+(alap: kikapcsolva)
 .IPs keyint=<0\-300>
-interval between keyframes in frames.
-Larger numbers mean slightly smaller files, but less precise seeking, 0 means
-no key frames and values >300 aren't recommended.
-For a strict mpeg1/\:2/\:4 compliance this would have to be <=132.
-(default: 250 or one key frame every ten seconds in a 25fps movie)
+2 keyframe közötti intervallum, képkockákban.
+Nagyobb számok tipikusan kisebb file-t eredményeznek, de a tekerés kevésbé
+lesz pontos. A 0 érték a keyframe-ek teljes kikapcsolását jelenti, 300-nál
+nagyobb érték pedig nem ajánlott.
+Ha szoros MPEG1/\:2/\:4 konformancia szükséges, ezen értéknek 132-nek vagy
+annál kisebbnek kell lennie.
+(alap: 250, vagy egy keyframe tíz másodpercre egy 25fps-es filmben)
 .IPs vb_strategy=<0\-1>
-strategy to choose between I/\:P/\:B frames (pass\ 2):
+I/\:P/\:B frame-ek kiválasztásának stratégiája (második menet):
 .RSss
-0: always use the maximum number of B frames (default)
+0: a lehetõ legtöbb B frame használata (alap)
 .br
-1: avoid B frames in high motion scenes (bitrate mispredictions)
+1: mozgalmas jeleneteknél B frame-ek hanyagolása
 .REss
 .IPs vpass=<1\-2>
-Activates internal 2pass mode (default: disabled):
+2 menet mód használata (alap: kikapcsolva):
 .RSss
-1: first pass
+1: elsõ menet
 .br
-2: second pass
+2: második menet
 .REss
 .IPs aspect=<x/y>
-Store movie aspect internally, just like MPEG files.
-Much nicer solution than rescaling, because quality isn't decreased.
-Only MPlayer will play these files correctly, other players will display
-them with wrong aspect.
-The aspect parameter can be given as a ratio or a floating point number.
-Example:
+Film képarányának eltárolása, mint az MPEG file-okban.
+Sokkal normálisabb ez a megoldás mint a film átméretezése, mivel ilyenkor
+nem fog a minõség az átméretezés miatt leromlani.
+Csak az MPlayer lesz képes az így elkészült file-ok lejátszására, más
+lejátszók alapállapotban rossz képarányt fognak használni.
+A paraméter megadható arányként vagy lebegõpontos számként.
+Példa:
 .RSss
 aspect=16/9, aspect=1.78
 .REss
-.IPs vbitrate=<value>
-specify bitrate (pass\ 1/\:2) in
+.IPs vbitrate=<érték>
+bitráta megadása (1/\:2-es menet), mértékegység
 .RSss
-kBit <4\-16000> or
+kBit <4\-16000> vagy
 .br
 Bit  <16001\-24000000>
 .br
-(warning: 1kBit = 1000 Bits)
+(figyelem: 1kBit = 1000 Bit)
 .br
-(default: 800)
+(alap: 800)
 .REss
-.IPs vratetol=<value>
-approximated filesize tolerance in kbit.
-(warning: 1kBit = 1000 Bits)
-(default: 8000)
-.IPs vrc_maxrate=<value>
-maximum bitrate in kbit/\:sec (pass\ 1/\:2)
-.IPs vrc_minrate=<value>
-minimum bitrate in kbit/\:sec (pass\ 1/\:2)
-.IPs vrc_buf_size=<value>
-buffer size in kbit (pass\ 1/\:2).
-Note: vratetol should not be too large during the second pass or there might
-be problems if vrc_(min|max)rate is used.
+.IPs vratetol=<érték>
+megengedhetõ eltérés a cél filemérettõl, kilobit-ben.
+(figyelem: 1kBit = 1000 Bit)
+(alap: 8000)
+.IPs vrc_maxrate=<érték>
+maximális bitráta kilobit/\:másodpercben (1/\:2-es menet)
+.IPs vrc_minrate=<érték>
+minimális bitráta kilobit/\:másodpercben (1/\:2-es menet)
+.IPs vrc_buf_size=<érték>
+bufferméret kilobit-ben (1/\:2-es menet).
+Megjegyzés: a második menet során nem ajánlott a vratetol-t túl magasra
+állítani, mert különben problémák lesznek a vrc_(min|max) opciókkal
+történõ együttes használatkor.
 .IPs vb_qfactor=<-31.0\-31.0>
-quantizer factor between B and non B frames (pass\ 1/\:2) (default: 1.25)
+quantizer faktor a B és nem-B frame-ek között (1/\:2-es menet) (alap: 1.25)
 .IPs vi_qfactor=<-31.0\-31.0>
-(pass\ 1/\:2) (default: 0.8)
+(1/\:2-es menet) (alap: 0.8)
 .IPs vb_qoffset=<-31.0\-31.0>
-quantizer offset between B and non B frames (pass\ 1/\:2) (default: 1.25)
+quantizer offset B és nem-B frame-ek között (1/\:2-es menet) (alap: 1.25)
 .IPs vi_qoffset=<-31.0\-31.0>
-(pass\ 1/\:2) (default: 0.0)
+(1/\:2-es menet) (alap: 0.0)
 .br
-if v{b|i}_qfactor > 0
+ha v{b|i}_qfactor > 0
 .br
 I/\:B-Frame quantizer = P-Frame quantizer * v{b|i}_qfactor + v{b|i}_qoffset
 .br
-else
+máskülönben
 .br
-do normal ratecontrol (dont lock to next P frame quantizer) and set
+normális ratecontrol használata és
 q= -q * v{b|i}_qfactor + v{b|i}_qoffset
 .IPs vqblur=<0.0\-1.0>
-quantizer blur (pass1):
+quantizer blur (1-es menet):
 .RSss
-0.0: qblur disabled
+0.0: qblur kikapcsolása
 .br
-0.5 (default)
+0.5 (alap)
 .br
-1.0: average the quantizer over all previous frames, larger values will
- average the quantizer more over time (slower change)
+1.0: minden elõzõ képkocka figyelembe vételével történjen az átlagolás,
+a nagyobb érték többet jelent (lassabb változás)
 .REss
 .IPs vqblur=<0.0\-99.0>
-quantizer gaussian blur, larger values will average the quantizer more over
-time (slower change) (pass2) (default: 0.5)
-.IPs vqcomp=<value>
-quantizer compression, depends upon vrc_eq (pass\ 1/\:2) (default: 0.5)
+quantizer gaussian blur, nagyobb értékek a quantizer adott idõ alatti
+nagyobb átlagolását jelentik (lassabb változás) (2. menet) (alap: 0.5)
+.IPs vqcomp=<érték>
+quantizer tömörítés, a vrc_eq-tól (1/\:2-es menet) is függ (alap: 0.5)
 .IPs vrc_eq=<equation>
-main ratecontrol equation (pass\ 1/\:2):
+fõ ratecontrol equation (1/\:2-es menet):
 
-1: constant bitrate
+1: konstans bitráta
 .br
-tex: constant quality
+tex: konstans minõség
 .br
-1+(tex/\:avgTex-1)*qComp: approximately the equation of the old ratecontrol
-code
+1+(tex/\:avgTex-1)*qComp: nagyjából a régi ratecontrol kód viselkedése
 .br
-tex^qComp: with qcomp 0.5 or something like that (default)
+tex^qComp: qcomp 0.5 vagy valami hasonló (alap)
 
 infix operators: +,-,*,/,^
 
-variables:
+változók:
 .br
-tex:             texture complexity
+tex:             textúra komplexitása
 .br
-iTex,pTex:       intra, non intra texture complexity
+iTex,pTex:       intra, nem intra textúra komplexitása
 .br
-avgTex:          average texture complexity
+avgTex:          átlagos textúrakomplexitás
 .br
-avgIITexaverage: intra texture complexity in I frames
+avgIITexaverage: intra textúra komplexitása I frame-ekben
 .br
-avgPITexaverage: intra texture complexity in P frames
+avgPITexaverage: intra textúra komplexitása P frame-ekben
 .br
-avgPPTexaverage: non intra texture complexity in P frames
+avgPPTexaverage: nem-intra textúra komplexitása P frame-ekben
 .br
-avgBPTexaverage: non intra texture complexity in B frames
+avgBPTexaverage: nem-intra textúra komplexitása valahol...
 .br
-mv:              bits used for MVs
+mv:              MV-kre használt bitek száma
 .br
-fCode:           maximum length of MV in log2 scale
+fCode:           log2 scale esetén az MV-n hossza
 .br
-iCount:          number of intra MBs / number of MBs
+iCount:          intra MB-k száma az összes MB számra vonatkoztatva
 .br
-var:             spatial complexity
+var:             spatial komplexitás
 .br
-mcVar:           temporal complexity
+mcVar:           temporal komplexitás
 .br
-qComp:           qcomp from the command line
+qComp:           qcomp a parancssorból
 .br
-isI, isP, isB:   is 1 if picture type is I/\:P/\:B else 0
+isI, isP, isB:   1 ha a kép tipusa I/\:P/\:B máskülönben 0
 .br
-Pi,E:            see your favorite math book
+Pi,E:            lásd a kedvenc (?!) matekkönyvedben
 
-functions:
+funkciók:
 .br
 max(a,b),min(a,b): maximum / minimum
 .br
-gt(a,b): is 1 if a>b, 0 otherwise
+gt(a,b): 1 ha a>b, amúgy 0
 .br
-lt(a,b): is 1 if a<b, 0 otherwise
+lt(a,b): 1 ha a<b, amúgy 0
 .br
-eq(a,b): is 1 if a==b,0 otherwise
+eq(a,b): 1 ha a==b, amúgy 0
 .br
 sin, cos, tan, sinh, cosh, tanh, exp, log, abs
 .
-.IPs vrc_override=<options>
-User specified quality for specific parts (pass\ 1/\:2).
-The options are <start-frame, end-frame, quality[/\:start-frame, end-frame,
+.IPs vrc_override=<opciók>
+Bizonyos részek minõségének megváltoztatása (1/\:2-es menet).
+Az opciók: <start-frame, end-frame, quality[/\:start-frame, end-frame,
 quality[/...]]>:
 .RSss
 quality 2\-31: quantizer
 .br
-quality \-500\-0: quality correcture in %
+quality \-500\-0: minõségkorrektúra százalékban
 .REss
 .IPs vrc_init_cplx=<0\-1000>
-initial complexity (pass\ 1)
+induló komplexitás (1-es menet)
 .IPs vqsquish=<0\-1>
 specify how to keep the quantizer between qmin and qmax (pass\ 1/\:2):
 .RSss
