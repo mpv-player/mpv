@@ -59,6 +59,7 @@ extern Window vo_x11_create_smooth_window( Display *mDisplay, Window mRoot,
 	int depth, Colormap col_map);
 extern void vo_x11_clearwindow_part(Display *mDisplay, Window vo_window,
 	int img_width, int img_height, int use_fs);
+extern void vo_x11_clearwindow( Display *mDisplay, Window vo_window );
 
 #endif
 
