@@ -819,7 +819,7 @@ static int initGl(uint32_t d_width, uint32_t d_height)
         gl_bitmap_format_s, gl_bitmap_type_s, gl_alignment,
 	rgb_sz, r_sz, g_sz, b_sz, a_sz, gl_internal_format_s);
 
-  resize(vo_dwidth, vo_dheight);
+  resize(d_width, d_height);
 
   glClearColor( 0.0f,0.0f,0.0f,0.0f );
   glClear( GL_COLOR_BUFFER_BIT );
