@@ -12,6 +12,7 @@
 #endif
 
 #include "stream.h"
+#include "demuxer.h"
 
 #ifdef STREAMING
 #include "url.h"
