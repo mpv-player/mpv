@@ -283,7 +283,6 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
         return 0;
     }
     
-    x264_picture_alloc(&mod->pic, mod->param.i_csp, mod->param.i_width, mod->param.i_height);
     return 1;
 }
 
@@ -324,9 +323,8 @@ static int put_image(struct vf_instance_s *vf, mp_image_t *mpi)
     h264_module_t *mod=(h264_module_t*)vf->priv;
     int i;
     
-    int csp=mod->pic.img.i_csp;
     memset(&mod->pic, 0, sizeof(x264_picture_t));
-    mod->pic.img.i_csp=csp;
+    mod->pic.img.i_csp=mod->param.i_csp;
     mod->pic.img.i_plane=3;
     for(i=0; i<4; i++) {
         mod->pic.img.plane[i] = mpi->planes[i];
@@ -371,7 +369,6 @@ static void uninit(struct vf_instance_s *vf)
     // FIXME: flush delayed frames
     h264_module_t *mod=(h264_module_t*)vf->priv;
     x264_encoder_close(mod->x264);
-    //x264_picture_clean(&mod->pic);
 }
 
 static int vf_open(vf_instance_t *vf, char *args) {
