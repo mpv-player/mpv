@@ -908,8 +908,22 @@ cat > $TMPC << EOF
 int main( void ) { return 0; }
 EOF
 
+_memalign_def=
 _malloc_h=no
-$_cc -o $TMPO $TMPC 2> /dev/null && _malloc_h=yes
+if $_cc -o $TMPO $TMPC 2> /dev/null ; then
+_malloc_h=yes
+# check for memalign - atmos
+# should this be restricted to x86, or customized for cpu types (opt for cacheline sizes)?
+cat > $TMPC << EOF
+#include <malloc.h>
+int main ( void ) {
+char *string = NULL;
+string = memalign(64, sizeof(char));
+return 0;
+}
+EOF
+$_cc -o $TMPO $TMPC 2> /dev/null || _memalign_def='#define memalign(a,b) malloc(b)'
+fi
 
 
 cat > $TMPC << EOF
@@ -1993,6 +2007,9 @@ $_have_soundcard_h
 
 /* Define this if your system has the "malloc.h" header file */
 $_have_malloc_h
+
+/* memalign is mapped to malloc here, if unsupported */
+$_memalign_def
 
 /* Define this if your system has the "alloca.h" header file */
 $_have_alloca_h
