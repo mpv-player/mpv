@@ -30,9 +30,9 @@
 #include "../libvo/fastmemcpy.h"
 #include "osdep/timer.h"
 
-#define SAMPLESIZE   2048
+#define SAMPLESIZE   1024
 #define BUFFER_SIZE  4096
-#define BUFFER_COUNT 8
+#define BUFFER_COUNT 16
 
 
 static WAVEHDR*     waveBlocks;         //pointer to our ringbuffer memory
