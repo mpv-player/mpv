@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /bin/sh
 
 #
 # MPlayer configurator.   (C) 2000 Pontscho/fresh!mindworkz
@@ -144,6 +144,10 @@ bsdos() {
 }
 bsd() {
 	freebsd || openbsd || bsdos
+	return "$?"
+}
+irix64() {
+	test "$system_name" = "IRIX64"
 	return "$?"
 }
 
@@ -395,13 +399,12 @@ CHELP='help_mp.h'
 # ---  Check for C compiler:
 
 if test -z "$_x11libdir" ; then
-   if test -d /usr/X11R6 ; then
-      _x11libdir=-L/usr/X11R6/lib
-   else
-      if test -d /usr/X11 ; then
-         _x11libdir=-L/usr/X11/lib
-      fi
-   fi
+  for I in /usr/X11R6 /usr/X11 /usr/lib32 ; do 	
+    if test -d "$I" ; then
+      _x11libdir="-L$I"
+      break;
+    fi
+  done
 fi
 
 if test -z "$_x11incdir" ; then
@@ -887,7 +890,10 @@ _termcap=no
 cc_check $_extraincdir $_extralibdir -ltermcap && _termcap=yes
 
 _png=no
-cc_check $_extraincdir $_extralibdir -lpng -lz -lm && _png=yes
+if test ! irix64 ; then
+  # Don't check for -png on irix	
+  cc_check $_extraincdir $_extralibdir -lpng -lz -lm && _png=yes
+fi
 
 _vorbis=no
 cc_check $_extraincdir $_extralibdir -lvorbis -lm && _vorbis=yes
@@ -1149,6 +1155,7 @@ cc_check && _sys_soundcard_h=yes
 # ---
 # try to detect type of audio supported on this machine
 
+
 # check for OSS audio
 cat > $TMPC << EOF
 #include <sys/soundcard.h>
@@ -1156,16 +1163,6 @@ int main( void ) {  int arg = SNDCTL_DSP_SETFRAGMENT; }
 EOF
 _oss_audio=no
 cc_check && _oss_audio=yes
-
-
-# check for SUN audio
-cat > $TMPC << EOF
-#include <sys/types.h>
-#include <sys/audioio.h>
-int main( void ) {  audio_info_t info; AUDIO_INITINFO(&info); }
-EOF
-_sun_audio=no
-cc_check && _sun_audio=yes
 
 
 # check for ALSA audio: 0.5.x then 0.9.x
@@ -1195,14 +1192,25 @@ int main( void ){ return 0; }
 EOF
 cc_check $_extraincdir $_extralibdir -lesd || _esd=no
 
+
+# check for SUN audio
+cat > $TMPC << EOF
+#include <sys/types.h>
+#include <sys/audioio.h>
+int main( void ) {  audio_info_t info; AUDIO_INITINFO(&info); }
+EOF
+_sun_audio=no
+cc_check && _sun_audio=yes
+
+
 # check for SGI audio
 cat > $TMPC << EOF
 #include <dmedia/audio.h>
 int main( void ) { return 0; }
 EOF
-
 _sgi_audio=no
-$_cc -o $TMPO $TMPC 2> /dev/null && _sgi_audio=yes
+cc_check && _sgi_audio=yes
+
 
 # check for mad library
 cat > $TMPC << EOF
