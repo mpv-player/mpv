@@ -1435,12 +1435,14 @@ if(sh_audio && !demuxer2){
 	    (int)demuxer->filepos,
 	    (int)demuxer->movi_end);
 #else
-	mp_msg(MSGT_AVSYNC,MSGL_STATUS,"Pos:%6.1fs %6df (%2d%%) %3dfps Trem:%4dmin %3dmb  A-V:%5.3f  \r",
+	mp_msg(MSGT_AVSYNC,MSGL_STATUS,"Pos:%6.1fs %6df (%2d%%) %3dfps Trem:%4dmin %3dmb  A-V:%5.3f [%d:%d]\r",
 	    mux_v->timer, decoded_frameno, (int)(p*100),
 	    (t>1) ? (int)(decoded_frameno/t) : 0,
 	    (p>0.001) ? (int)((t/p-t)/60) : 0, 
 	    (p>0.001) ? (int)(ftell(muxer_f)/p/1024/1024) : 0,
-	    v_pts_corr
+	    v_pts_corr,
+	    (mux_v->timer>1) ? (int)(mux_v->size/mux_v->timer/125) : 0,
+	    (mux_a->timer>1) ? (int)(mux_a->size/mux_a->timer/125) : 0
 	);
 #endif
     }
