@@ -1257,8 +1257,8 @@ if (edl_check_mode() == EDL_ERROR && edl_filename)
     // Many users forget to include command line in bugreports...
     if(verbose>0){
       mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_CommandLine);
-      for(i=1;i<argc;i++)mp_msg(MSGT_FIXME, MSGL_FIXME," '%s'",argv[i]);
-      mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
+      for(i=1;i<argc;i++)mp_msg(MSGT_CPLAYER, MSGL_INFO," '%s'",argv[i]);
+      mp_msg(MSGT_CPLAYER, MSGL_INFO, "\n");
     }
 
     mp_msg_set_level(verbose+MSGL_STATUS);
