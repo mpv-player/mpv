@@ -3,7 +3,7 @@
 
 <FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 
-<P><CENTER><B>MPlayer - Movie Player for LINUX (C) 2000-2001 Arpad Gereoffy (A'rpi/ESP-team)</B><BR>
+<P><CENTER><B>MPlayer - Movie Player for LINUX (C) 2000-2002 Arpad Gereoffy (A'rpi/ESP-team)</B><BR>
 <BR><A HREF="http://www.mplayerhq.hu">http://www.mplayerhq.hu</A><BR><BR>
 <BR><A HREF="../documentation.html">[ Angielski ]</A>
 <A HREF="../Hungarian/documentation.html">[ Wêgierski ]</A>
@@ -20,6 +20,7 @@
 
 <P>
 <UL>
+  <LI><A HREF="#0">0. Jak czytaæ t± dokumentajê</A></LI>
   <LI><A HREF="#1">1. Wprowadzenie</A></LI>
   <UL>
     <LI><A HREF="#1.1">1.1 O programie</A></LI>
@@ -125,6 +126,7 @@
 	<LI><A HREF="sound.html#2.3.2.2">2.3.2.2 Wtyczki audio</A></LI>
 	  <UL>
 	    <LI><A HREF="sound.html#2.3.2.2.1">2.3.2.2.1 Up/Downsampling</A></LI>
+	    <LI><A HREF="sound.html#2.3.2.2.2">2.3.2.2.2 Dekodowanie d¼wiêku otaczaj±cego</A></LI>
 	  </UL>  
       </UL>
     </UL>
@@ -146,6 +148,13 @@
         <LI><A HREF="encoding.html#2.4.6">2.4.6 Przyk³ady</A></LI>
       </UL>
     <LI><A HREF=#2.5>2.5 Wej¶cie TV</A></LI>
+    <UL>
+      <LI><A HREF=#2.5.1>2.5.1 O zagadnieniu</A></LI>
+      <LI><A HREF=#2.5.2>2.5.2 Kompilacja</A></LI>
+      <LI><A HREF=#2.5.3>2.5.3 Dostêpne opcje</A></LI>
+      <LI><A HREF=#2.5.4>2.5.4 Sterowanie z klawiatury</A></LI>
+      <LI><A HREF=#2.5.5>2.5.5 Przyk³ady</A></LI>
+    </UL>
   </UL>
   <LI><A HREF="#3">3. Sposób u¿ycia</A></LI>
     <UL>
@@ -191,7 +200,33 @@
 </UL>
 </P>
 
+<P>
+<HR> ¯ale developerów <HR>
+</P>
+
+<P>
+<UL>
+  <LI><A HREF="users_against_developers.html#gcc">1. GCC 2.96</A></LI>
+  <LI><A HREF="users_against_developers.html#binary">2. Pakiety binarne</A></LI>
+  <LI><A HREF="users_against_developers.html#nvidia">3. Opcje NVidii</A></LI>
+  <LI><A HREF="users_against_developers.html#kotsog">4. O Joe Barr'ym</A></LI>
+</UL>
+</P>
+
 <P><HR></P>
+ 
+<P><B><A NAME=0>0. How to read this documentation</A></B></P>
+
+<P>If you are a first-time installer: be sure to read everything from here to
+  the end of the Installation section, and follow the links you will find. If
+  you have any other questions, return to the TOC (Table of Contents) and
+  search for the topic, read the FAQ, or try grepping though the files.</P>
+
+<P>The main rule of this documentation: if it's not documented, it
+  <U>does not exist</U>. If I don't say you encode audio from TV tuner, you
+  can't. A healthy quantity of combining ability is welcomed, though.
+  Good luck. You'll need it :)</P>
+
 
 <P><B><A NAME=1>1. Wprowadzenie</A></B></P>
 
@@ -425,11 +460,13 @@ Starsze, karty - nie Savage, nie zawieraj±, b±d¼ maj± bardzo wolne wsparcie
 sprzêtowe.</LI>
 
 <LI><B>Karty Nvidia</B>: to bardzo z³y wybór je¶li chodzi o odtwarzanie
-obrazów. Karty Nvidii s± produkowane na Dalekim Wschodzie i zawieraj± bardzo
-tanie i z³ej jako¶ci chipy. Co wiêcej, <U>wbudowany sterownik Nvidii w XFree86
-nie zawiera wsparcia dla sprzêtowej akceleracji YUV!</U> Musisz ¶ci±gn±æ
-sterowniki Nvidii, które s± closed-source, ze strony nvidia.com. Zobacz wiêcej
-szczegó³ów w sekcji <A HREF="video.html#2.3.1.2.3"> Sterowniki Nvidia Xv</LI>.
+obrazów. (NVidia ma <A HREF="users_against_developers.html#nvidia">inne
+opcje</A>!).  Karty Nvidii s± produkowane na Dalekim Wschodzie i zawieraj±
+bardzo tanie i z³ej jako¶ci chipy. Co wiêcej, <U>wbudowany sterownik Nvidii w
+XFree86 nie zawiera wsparcia dla sprzêtowej akceleracji YUV!</U> Musisz
+¶ci±gn±æ sterowniki Nvidii, które s± closed-source, ze strony nvidia.com.
+Zobacz wiêcej szczegó³ów w sekcji <A HREF="video.html#2.3.1.2.3"> Sterowniki
+Nvidia Xv</LI>.
 
 <LI><B>Inne karty</B>: ¿adna z wy¿ej wymienionych?
   <UL>
@@ -495,91 +532,98 @@ koder), zobacz sekcjê <A HREF="encoding.html#2.4">MEncoder</A>.</LI>
 kodowaæ filmy za pomoc± <B>MPlayera</B>, przeczytaj sekcjê <A HREF=#2.5>wej¶cie
 TV</A>.</LI>
 
-<LI>S± dwa kody timera w <B>MPlayerze</B>. Aby u¿yæ starej metody, nie
-musisz robiæ nic. Stosuje ona <CODE>usleep()</CODE>, aby dostroiæ A/V sync, z
+<LI>S± trzy kody timera w <B>MPlayerze</B>. Aby u¿yæ starej metody, nie musisz
+robiæ nic. Stosuje ona <CODE>usleep()</CODE>, aby dostroiæ A/V sync, z
 dok³adno¶ci± +/- 10ms. Jakkolwiek, czasami synchronizacja musi byæ dostrojona
 nawet lepiej. Nowy kod timera w tym celu RTC (Real Time Clock) komputera,
 poniewa¿ ma on precyzyjno¶æ tak±, jak timers 1ms. Wymaga to uprawnieñ roota
 (ew. <I>setuid root</I>) dla binariów <B>MPlayera</B> (lub drobnych zmian w
-j±drze, ale to jest odradzane). Mo¿esz zobaczyæ wydajno¶æ nowego timera w
-status line. Uwaga: <B>NIGDY nie instaluj binariów MPlayera jako setuid w
-systemie wielu u¿ytkowników!</B> To prosta droga dla ka¿dego, by zdobyæ
-uprawnienia roota.</LI>
+j±drze, ale to jest odradzane).  Mo¿esz zobaczyæ wydajno¶æ nowego timera w
+status line. Trzeci kod timera jest w³±czany za pomoc± opcji
+<CODE>-softsleep</CODE>.  Ma on wydajno¶æ RTC, ale nie wymaga uprawnieñ roota.
+Z innej strony, zu¿ywa on wiêcej CPU.  Uwaga: <B>NIGDY nie instaluj binariów
+MPlayera jako setuid w systemie wielu u¿ytkowników!</B> To prosta droga dla
+ka¿dego, by zdobyæ uprawnienia roota.</LI>
 </UL>
 
-<P>Then build <B>MPlayer</B>:</P>
+<P>Nastêpnie zbuduj <B>MPlayera</B>:</P>
 
 <PRE>    ./configure
     make
     make install</PRE>
 
-<P><B>Debian users</B> can build a .deb package for themselves, it's very
-simple. Just exec <CODE>fakeroot debian/rules binary</CODE> in <B>MPlayer</B>'s
-root dir. Detailed instructions can be found <A
-HREF="documentation.html#6.1">here</A>.</P>
+<P>Na tym etapie <B>MPlayer</B> jest gotowy do u¿ywania. Katalog
+<CODE>/usr/local/share/mplayer</CODE> zawiera plik <CODE>codecs.conf</CODE>,
+który jest u¿ywany, aby poinformowaæ program o wszystkich kodekach i ich
+mo¿liwo¶ciach. Ten plik powinien byæ zawsze uaktualniany wraz z bibliotek±
+main!</P>
 
-<P><B><I>ALWAYS browse the output of ./configure</I></B>, and the
-<CODE>configure.log</CODE> file, they contain info about what will be built,
-and what won't. You may also want to view config.h and config.mak files.</P>
+<P><B>U¿ytkownicy Debiana</B> mog± samodzielnie budowaæ pakiety .deb, to bardzo
+proste. Po prostu wywo³aj <CODE>fakeroot debian/rules binary</CODE> w g³ównym
+katalogu <B>MPlayera</B>. Szczegó³owe instrukcje mo¿na znale¼æ <A
+HREF="documentation.html#6.1">tu</A>.</P>
 
-<P>Though not mandatory, the fonts should be installed in order to gain
-OSD, and subtitle functionality. Download mp-arial-iso-8859-*.zip and/or optional
-(if exists) language updates. It's VERY RECOMMENDED to check
-<A HREF=#1.5>section 1.5</A> for details.</P>
+<P><B><I>ZAWSZE przegl±daj komunikaty z ./configure</I></B> oraz zawarto¶æ
+pliku <CODE>configure.log</CODE>, mo¿esz tam znale¼æ informacje o tym, co
+zostanie zbudowane, a co nie. Mo¿esz równie¿ przejrzeæ pliki config.h i
+config.mak.</P>
+
+<P>Choæ to nie jest niezbêdne, fonty powinny byæ zainstalowane, aby mo¿na by³o
+osi±gn±æ funkcjonalno¶æ OSD i napisy. ¦ci±gnij mp-arial-iso-8859-*.zip i/lub
+opcjonalnie (je¶li istniej±) uaktualnienia jêzykowe. BARDZO ZALECANE jest
+sprawdzenie szczegó³ów w <A HREF=#1.5>sekcji 1.5</A>.</P>
 
 <PRE>    mkdir ~/.mplayer/font
     cd ~/.mplayer/font
     unzip mp-arial-iso-8859-1.zip</PRE>
 
-<P>Only one thing remains: copy the <B>codecs.conf</B> file from the <CODE>etc</CODE>
-directory (relative to the <B>MPlayer</B> tree) to <CODE>$HOME/.mplayer/codecs.conf</CODE> .
-You should also check the manpage and <CODE>example.conf</CODE> for available options, and insert them
-into your config file, <CODE>$HOME/.mplayer/config</CODE> .</P>
-
-
 <P><B><A NAME=1.4>1.4. A co z GUI?</A></B></P>
 
-<P>The GUI needs GTK (it isn't GTK, but the panels are). The skins are stored
-in PNG format, so gtk, libpng (and their devel stuff) has to be installed.
-You can build it by specifying <CODE>--enable-gui</CODE> during ./configure .
-Then, to turn on GUI mode, you either
+<P>GUI wymaga GTK (nie jest ono napisane w GTK, ale panele s±). Skórki s± przechowywane
+w formacie PNGt, wiêc gtk i libpng (oraz ich czê¶ci devel) musz± byæ zainstalowane.
+Mo¿esz zbudowaæ GUI specyfikuj±c <CODE>--enable-gui</CODE> podczas ./configure .
+Jest kilka sposobów na  w³±czenie trybu GUI: 
 <UL>
-  <LI>use the <CODE>-gui</CODE> option</LI>
-  <LI>specify <CODE>gui=yes</CODE> in your config file</LI>
-  <LI><CODE>ln -s /usr/local/bin/mplayer /usr/local/bin/gmplayer</CODE> ,
-  and call <CODE>gmplayer</CODE> instead.
+  <LI>zastosuj opcjê <CODE>-gui</CODE></LI>
+  <LI>okre¶l <CODE>gui=yes</CODE> w pliku konfiguracyjnym</LI>
+  <LI><CODE>ln -s /usr/local/bin/mplayer /usr/local/bin/gmplayer</CODE>
+  i u¿ywaj <CODE>gmplayer</CODE>.
 </UL>
 </P>
 
-<P>Since GTK doesn't run from a <B>setuid root</B> binary, you can't use
-the GUI and the <B>new timer code</B> (mentioned above) together (unless
-you run <B>MPlayer</B> as root, of course).</P>
+<P>WSKAZÓWKA: u¿yj ¶rodkowego przycisku myszki (w 2 przyciskowych myszkach
+wci¶nij prawy i lewy przycisk jednocze¶nie), aby wywo³aæ menu GTK, z opcj±
+odgrywania DVD!</P>
 
-<P>As <B>MPlayer</B> doesn't have a skin included, you have to download them
-if you want to use the GUI. See the <A HREF="http://www.mplayerhq.hu/homepage/dload.html">download page</A>.
-They should be extracted to the usual system-wide directory (<CODE>/usr/local/share/mplayer/Skin</CODE>),
-or to <CODE>$HOME/.mplayer/Skin</CODE> . <B>MPlayer</B> by default looks in
-these directories for a <I>default</I> named directory, but you can use the
-<I>-skin newskin</I> option, or the <I>skin=newskin</I> config file
-directive to use the skin in <CODE>*/Skin/newskin</CODE> directory.</P>
+<P>Poniewa¿ <B>MPlayer</B> nie zawiera skórek, musisz ¶ci±gn±æ je, je¿eli
+chcesz uzywaæ GUI. Zobacz 
+<A HREF="http://www.mplayerhq.hu/homepage/dload.html">stronê download</A>.
+Skórki powinny byæ rozpakowane do typowego ogólnodostêpnego katalogu
+systemowego (<CODE>/usr/local/share/mplayer/Skin</CODE>), lub do
+<CODE>$HOME/.mplayer/Skin</CODE> . <B>MPlayer</B> domy¶lnie szuka w tych
+katalogach katalogu o nazwie <I>default</I>, ale mo¿esz za pomoc± opcji
+<I>-skin newskin</I>, b±d¼ dyrektywy <I>skin=newskin</I> w pliku
+konfiguracyjnym wskazaæ u¿ycie skórki z katalogu
+<CODE>*/Skin/newskin</CODE>.</P>
 
 <P><B><A NAME=1.5>1.5. Napisy i OSD</A></B></P>
 
-<P>Yes, <B>MPlayer</B> also supports many kinds of subtitles. Currently
-8 kinds of subtitle can be used by the subreader code. To see what are
-these subtitle formats, see subreader.c, line ~30.</P>
+<P>Tak, <B>MPlayer</B> obs³uguje wiele typów napisów. Obecnie 8 rodzajów
+napisów  mo¿e byæ u¿ywanych przez kod subreadera. Informacje o formatach
+napisów znajdziesz w pliku subreader.c, w okolicach linii 30.</P>
 
-<P>About DVD subtitles, read the <A HREF="cd-dvd.html#4.2">DVD section</A>.</P>
+<P>O napisach DVD przeczytaæ mo¿esz w <A HREF="cd-dvd.html#4.2">sekcji DVD</A>.</P>
 
-<P><B>MPlayer</B> introduces a new subtitle format called <B><I>MPsub</I></B>.
-It was designed by me (Gabucino). Basically its main feature is being
-<I>dynamically</I> time-based (although it has frame-based mode too). Example (from
-<A HREF="http://www.mplayerhq.hu/DOCS/tech/mpsub.sub">DOCS/tech/mpsub.sub</A>) :
+<P><B>MPlayer</B> wprowadza nowy format napisów zwany <B><I>MPsub</I></B>.
+Zosta³ on zaprojektowany przeze mnie (Gabucino). Oznacza to przede wszystkim tyle,
+¿e jego podstawow± cech± jest <I>dynamiczniy</I> tryb time-based (chocia¿
+posiada on równie¿ tryb frame-based). Przyk³ad (z 
+<A HREF="http://www.mplayerhq.hu/DOCS/tech/mpsub.sub">DOCS/tech/mpsub.sub</A>):
 </P>
 
 <P><CODE><I>
-# first number  : wait this much after previous subtitle disappeared<BR>
-# second number : display the current subtitle for this many seconds<BR>
+# pierwsza liczba : czekaj tyle sekund po znikniêciu porzedniego napisu<BR>
+# druga liczba : wy¶wietlaj aktualny napis przez tyle sekund<BR>
 <BR>
 15 3<BR>
 A long, long time ago...<BR>
@@ -591,84 +635,86 @@ in a galaxy far away...<BR>
 Naboo was under an attack.<BR>
 </I></CODE></P>
 
-<P>So you see, the main goal was to <B>make subtitle editing/timing/joining/cutting easy</B>. And,
-if you - say - get an SSA subtitle but it's badly timed/delayed to your
-version of the movie, you simply do a <I>mplayer dummy.avi -sub source.ssa
--dumpmpsub</I> . A <CODE>dump.mpsub</CODE> file will be created in the
-current directory, which will contain the source subtitle's text, but in
-<B>MPsub</B> format. Then you can freely add/substract seconds to/from the
-subtitle.</P>
+<P>A wiêc widzisz, ¿e g³ównym celem by³o <B>uczynienie napisów ³atwymi w
+edycji/taktowaniu/³aczeniu/obcinaniu</B>. I je¿eli, powiedzmy, dostaniesz do swojej wersji filmu napisy SSA, ale ¼le taktowane/opó¼nione, wywo³aj po prostu: 
+<I>mplayer dummy.avi -sub source.ssa -dumpmpsub</I> . Plik
+<CODE>dump.mpsub</CODE> bêdzie stworzony w aktualnym katalogu i bêdzie zawiera³
+¼ród³owy text napisów, ale w formacie <B>MPsub</B>. Wówczas mo¿esz ju¿  w
+dowolny sposób dodawaæ/usuwaæ sekundy do/z napisu.</P>
 
-<P>Subtitles are displayed with a technique called <B>'OSD', On Screen Display</B>.
-OSD is used to display current time, volume bar, seek bar etc.</P>
+<P>Napisy s± wy¶wietlane w technice nazywanej <B>'OSD', On Screen Display</B>.
+OSD jest stosowane do wy¶wietlania aktualnego czasu, paska g³o¶no¶ci, paska
+przeszukiwania itp.</P>
 
 <P><B>INSTALACJA OSD i SUB</B></P>
 
-<P>You need an <B>MPlayer</B> font package to be able to use OSD/SUB feature.
-There are many ways to get it:
+<P>Potrzebny ci bêdzie pakiet z fontami <B>MPlayera</B>, aby móc korzystaæ z
+w³a¶ciwo¶ci OSD/SUB. Jest wiele sposobów, aby je zdobyæ:
 <UL>
 
-<LI>download ready-to-use font packages from <B>MPlayer</B> site.
-Note: currently available fonts are limited for iso 8859-1/2 support,
-and there are a few special versions for korean, russian etc codepages.
-Font should have appropriate font.desc file which maps unicode font
-positions to the actual code page of the subtitles text. Other solution
-is to have subtitles encoded in utf8 encoding and use -utf8 option
-or just name the subtitles file <video_name>.utf and have it in the same
-dir as the video file. Recoding from different codepages to utf8 could be
-done by using konwert (debian) or iconv (RedHat) programs.<BR>
-Some URLs:
+<LI>¦ci±gnij gotowy-do-u¿ycia pakiet z fontami ze strony <B>MPlayera</B>.
+Uwaga: obecnie dostêpne fonty ograniczaj± siê do obs³ugi iso 8859-1/2 oraz
+istnieje nowa specjalna wersja dla kodowania koreañskiego, rosyjskiego itp.
+Font powinien mieæ w³a¶ciwy plik font.desc, który mapuje pozycje fontu unicode
+do aktualnej strony kodowej tekstu napisów. Inne rozwi±zanie to posiadanie
+napisów zakodowanych w kodowaniu utf8 i u¿ywanie opcji -utf8, albo po prostu
+zmiana nazwy pliku z napisami na: <nazwa_filmu>.utf i umieszczenie go w tym
+samym katalogu co plik z filmem. Przekodowanie z innego kodowania do utf8 mo¿e
+byæ wykodnane za pomoc± programów konwert (debian) lub iconv (RedHat).<BR>
+Kilka adresów URL:
 <UL>
-  <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/">ftp://ftp.mplayerhq.hu/MPlayer/releases/</A> - ISO fonts
-  <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/">ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/</A> - various fonts by users
-  <LI><A HREF="http://realtime.ssu.ac.kr/~lethean/mplayer">http://realtime.ssu.ac.kr/~lethean/mplayer</A> - korean fonts & RAW plugin
+  <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/">ftp://ftp.mplayerhq.hu/MPlayer/releases/</A> - fonty ISO
+  <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/">ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/</A> - ró¿ne fonty u¿ytkowników
+  <LI><A HREF="http://realtime.ssu.ac.kr/~lethean/mplayer">http://realtime.ssu.ac.kr/~lethean/mplayer</A> - fonty koreañskie i wtyczka RAW
 </UL>
 
-<LI>use the font generator tool at TOOLS/subfont-c
-It's a complete tool to convert from TTF/Type1/etc font to mplayer font pkg.
-(read TOOLS/subfont-c/README for details)
+<LI>U¿yj generatora fontów z TOOLS/subfont-c. Jest to kompletne narzêdzie do
+konwersji fontów TTF/Type1/etc do pakietu fontów mplayera (szczegó³y w
+TOOLS/subfont-c/README).
 
-
-<LI>use the font generator GIMP plugin at TOOLS/subfont-GIMP
-(note: you must have HSI RAW plugin too, see URL below)
-</UL>
+<LI>U¿yj wtyczki GIMPa - generatora fontów z TOOLS/subfont-GIMP (uwaga: musisz
+mieæ równie¿ wtyczkê HSI RAW, zobacz adres URL poni¿ej) </UL>
 </P>
 
-<P>After that, UNZIP the files to ~/.mplayer/font/ .
-Now you have to see a timer at the upper left corner of the movie
-(switch it off with 'o') .</P>
+<P>Potem rozpakuj pliki do ~/.mplayer/font/ .
+Teraz powiniene¶ zobaczyæ zegar w lewym górnym rogu ekranu
+(wy³±czysz to za pomoc± klawisza 'o').</P>
 
-<P>OSD has 3 states: (switch with 'o')<BR>
+<P>OSD ma 3 stany: (prze³±czane za pomoc± 'o')<BR>
 <UL>
-  <LI>timer + volume bar + seek bar + subtitles (default)
-  <LI>volume bar + seek bar + subtitles
-  <LI>subtitles only
+  <LI>zegar + pasek g³o¶no¶ci + pasek przeszukiwania + napisy (domy¶lny)
+  <LI>pasek g³o¶no¶ci + pasek przeszukiwania + napisy
+  <LI>tylko napisy
 </UL>
 
-<P>You can change default behaviour by setting <CODE>osdlevel=</CODE> variable in config file.</P>
+<P>Mo¿esz zmieniæ domy¶lne zachowanie, ustawiaj±c zmienn± <CODE>osdlevel=</CODE>
+w pliku konfiguracyjnym.</P>
 
 
 <P><B><A NAME=2>2. W³a¶ciwo¶ci</A></B></P>
 
 
-<P><A NAME=2.1>2.1. <A HREF="formats.html">Supported formats</A></P>
+<P><A NAME=2.1>2.1. <A HREF="formats.html">Wspierane formaty</A></P>
 
 
-<P><A NAME=2.2>2.2. <A HREF="codecs.html">Supported codecs</A></P>
+<P><A NAME=2.2>2.2. <A HREF="codecs.html">Wspierane kodeki</A></P>
 
 
-<P><A NAME=2.3>2.3. <A HREF="video.html">Video</A> & <A HREF="sound.html">Audio</A> output devices</P>
+<P><A NAME=2.3>2.3. <A HREF="video.html">Video</A> & <A
+HREF="sound.html">D¼wiêkowe </A> urz±dzenia wyj¶ciowe</P>
 
 
-<P><A NAME=2.4>2.4. <A HREF="encoding.html">MEncoder - An All-Purpose Encoder</P>
+<P><A NAME=2.4>2.4. <A HREF="encoding.html">MEncoder - wielozadaniowy koder</P>
 
 
-<P><A NAME=2.5><B>2.5. TV input</B></P>
+<P><A NAME=2.5><B>2.5. Wej¶cie TV</B></P>
 
-<P>This section is about how to enable <B>watching/grabbing from V4L compatible
-TV tuner</B>.</P>
+<A NAME=2.5.1><P><B><I>2.5.1. O zagadnieniu</I></B></P>
 
-<P><B><I>Compilation</I></B></P>
+<P>To jest sekcja o tym, jak w³±czyæ <B>ogl±danie/nagrywanie z u¿yciem tunera
+TV komatybilnego z V4L </B>.</P>
+
+<A NAME=2.5.2><P><B><I>2.5.2. Kompilacja</I></B></P>
 
 <P>
 <UL>
@@ -685,7 +731,7 @@ YV12 colorspace. Try I420 (you must use the <CODE>-vc rawi420</CODE> option
 too!), or YUY2, UYVY, RGB32 (this one with <CODE>-vo sdl</CODE>) colorspaces.
 You can specify these with the <CODE>outfmt=YV12</CODE> option see below.</P>
 
-<P><B><I>Available options</I></B><BR>
+<A NAME=2.5.3><P><B><I>2.5.3. Dostêpne opcje</I></B><BR>
 <TABLE BORDER=0>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
@@ -732,9 +778,9 @@ You can specify these with the <CODE>outfmt=YV12</CODE> option see below.</P>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>outfmt</I></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>in which output
-  format to display images (<B>rgb32</B>, <B>rgb24</B>, <B>yv12</B>,
-  <B>uyvy</B>)<BR>
-    The following option must have the same setting !</TD>
+  format should the tuner transport images to us (<B>rgb32</B>, <B>rgb24</B>, <B>yv12</B>,
+  <B>uyvy</B>, <B>i420</B> (for i420 you have to pass the <CODE>-vc i420</CODE>
+  option, because of a fourcc conflict))</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
@@ -774,7 +820,7 @@ You can specify these with the <CODE>outfmt=YV12</CODE> option see below.</P>
 </TABLE>
 </P>
 
-<P><B><I>Keyboard control</I></B></P>
+<A NAME=2.5.4><P><B><I>2.5.4. Sterowanie z klawiatury</I></B></P>
 
 <TABLE BORDER=0>
 <TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>h  or  l</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>select previous/next channel</TD><TR>
@@ -782,14 +828,14 @@ You can specify these with the <CODE>outfmt=YV12</CODE> option see below.</P>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>b</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>change channel list</TD><TR>
 </TABLE>
 
-<P><B><I>Examples</I></B></P>
+<A NAME=2.5.5><P><B><I>2.5.5. Przyk³ady</I></B></P>
 
 <P>
 Dummy output, to AAlib :)<BR>
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=dummy:width=640:height=480 -vo aa</CODE><BR>
 <BR>
 Input from standard V4L<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=v4l:width=800:height=600:device=/dev/video0:input=television:outfmt=yv12 -vo xv</CODE><BR>
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv</CODE><BR>
 </P>
 
 
@@ -1186,7 +1232,8 @@ No closer info yet.</P>
 <LI><B><A HREF="mailto:chass-@freemail.hu">Gyula László (Chass, Tégla)</A></B>
 <UL>
   <LI>first fonts (mp_font1.zip)</LI>
-  <LI>third (current) homepage design&gfx</LI>
+  <LI>third homepage design&gfx</LI>
+  <LI>fourth (current) homepage design&gfx</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:se7en@sch.bme.hu">Zoltán Márk Vicián (Se7en)</A></B>
@@ -1384,6 +1431,7 @@ No closer info yet.</P>
 <LI><B><A HREF="mailto:takis@lumumba.luc.ac.be">Panagiotis Issaris</A></B>
 <UL>
   <LI>-playlist option</LI>
+  <LI>NuppelVideo support</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:melanson@pcisys.net">Mike Melanson</A></B>
@@ -1424,6 +1472,11 @@ No closer info yet.</P>
 <UL>
   <LI>RTP streaming support (reading)</LI>
 </UL></LI>  
+<LI><B><A HREF="mailto:steve@daviesfam.org">Stephen Davies</A></B>
+<UL>
+  <LI>support for large video files (&gt;2^32 bytes in size)</LI>
+  <LI>surround sound</LI>
+</UL></LI>
 </UL></P>
 
 <P>Main testers:</P>
@@ -1478,7 +1531,10 @@ No closer info yet.</P>
                    [from a GSM library by Jutta Degener and Carsten Bormann]
 </LI></UL>
 
-</LI></UL></P>
+</LI><LI>Jake Janovetz:
+<UL><LI>remez.c author  [Used to calculate audio filter coefficients]
+</LI></UL>
+/LI></UL></P>
 
 <P>Their code is not used in current player version, but I've got some ideas or
 other technical help from:</P>
@@ -1544,6 +1600,7 @@ other technical help from:</P>
   <LI><B>vo_3dfx.c</B> - PRZESTARZA£E, u¿yj w zamian xv lub tdfxfb
   <LI><B>vo_tdfxfb.c</B> - <A HREF="mailto:zsteva@ptt.yu">Zeljko Stevanovic</A>
   <LI><B>vo_aa.c</B> - Folke Ashberg
+  <LI><B>vo_directfb.c</B> - <A HREF="mailto:Jiri.Svoboda@seznam.cz">Jiri Svoboda</A>
   <LI><B>vo_dga.c</B> - Acki
   <LI><B>vo_fbdev.c</B> - Szabi
   <LI><B>vo_fsdga.c</B> - PRZESTARZA£E, u¿yj w zamian dga
@@ -1579,17 +1636,17 @@ other technical help from:</P>
 </UL></P>
 <P>NARZÊDZIA:
 <UL>
-  <LI><B>subfont-c</B> - Artur Zaprzala: <zybi@fanthom.irc.pl></B>
-  <LI><B>subfont-GIMP</B> - lanzz@lanzz.org</B>
-  <LI><B>*.pl</B> - Atmos</B>
-  <LI><B>x2mpsub</B> - Gabucino</B>
-  <LI><B>others</B> - A'rpi</B>
+  <LI><B>subfont-c</B> - Artur Zaprzala: <zybi@fanthom.irc.pl>
+  <LI><B>subfont-GIMP</B> - lanzz@lanzz.org
+  <LI><B>*.pl</B> - Atmos
+  <LI><B>x2mpsub</B> - Gabucino
+  <LI><B>others</B> - A'rpi
 </UL></P>
 
 <P>Pozosta³e:
 <UL>
-  <LI><B>vbelib.*</B> - Nick Kurshev</B>
-  <LI><B>lrmi.*</B> - skopiowany przez Nick Kurshev (oryginalnie przez Josh Vanderhoof)</B>
+  <LI><B>vbelib.*</B> - Nick Kurshev
+  <LI><B>lrmi.*</B> - skopiowany przez Nick Kurshev (oryginalnie przez Josh Vanderhoof)
 </UL></P>
 
 
@@ -1609,8 +1666,9 @@ This list should be kept low-traffic.</P>
 </LI><LI>Lista uzytkowników MPlayera:<BR>
 <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-users">http://mplayerhq.hu/mailman/listinfo/mplayer-users</A>
 <P><UL>
-<LI>send bugreports here (after reading DOCS/BUGS, Appendix <A HREF="#C">C</A>)</LI>
-<LI>send feature requests here (after reading bugreports.html)</LI>
+<LI>send bugreports here (after reading <A HREF="#D">Known Bugs</A> section,
+and Appendix <A HREF="#C">C</A>)</LI>
+<LI>send feature requests here (after reading the WHOLE documentation)</LI>
 <LI>send user questions here (after reading all this documentation)</LI>
 </UL></P>
 
@@ -1698,6 +1756,7 @@ General audio delay or jerky sound (exists with all or many files):<BR>
   try with -vo null, if it plays well, then you have slow VGA card/driver<BR>
   Workaround: buy a faster card or read this documentation about how to speed up<BR>
   SOLVED: try -framedrop</LI>
+<LI>buggy audio driver</LI>
 </UL><BR>
 
 Audio delay/de-sync specific to one or a few files:<BR>
