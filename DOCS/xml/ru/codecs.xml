@@ -217,7 +217,7 @@ cp ../../src/encore.h /usr/local/include
 
 <para>
 Полный список доступных кодеков доступен на странице FFmpeg.
-Пожжерживаемые <ulink url="http://www.ffmpeg.org/ffmpeg-doc.html#SEC19">видео</ulink>
+Поддерживаемые <ulink url="http://www.ffmpeg.org/ffmpeg-doc.html#SEC19">видео</ulink>
 и <ulink url="http://www.ffmpeg.org/ffmpeg-doc.html#SEC20">аудио</ulink> кодеки.
 </para>
 
