@@ -1,0 +1,150 @@
+#!/usr/bin/perl
+
+# Simple modeline-to-fb.modes translator
+# (c) 1998 by Patrick Reynolds
+# distributed under the GNU General Public License
+ 
+# mapping of modeline options to fb.modes options
+%options_map = (
+  "-hsync" => "hsync low",
+  "-vsync" => "vsync low",
+  "+hsync" => "hsync high",
+  "+vsync" => "vsync high",
+  "interlace" => "laced true",
+  "doublescan" => "double true"
+);
+
+@possible_vxres = ( 640, 800, 1024, 1152, 1280, 1600, 1920, 2048 );
+
+# default settings (override with -d and -r)
+$depth = 8;
+$rounding = 128;
+
+# parse options
+while ($ARGV[0] =~ /^-/) {
+  $arg = shift;
+  if ($arg eq "-d" || $arg eq "--depth") {
+    if (!($arg = shift @ARGV)) {
+      usage("-d requires an argument");
+    }
+    $depth = $arg;
+  }
+  elsif ($arg eq "-r" || $arg eq "--rounding") {
+    if (!($arg = shift @ARGV)) {
+      usage("-r requires an argument");
+    }
+    $rounding = $arg;
+  }
+  elsif ($arg eq "-x" || $arg eq "--vxres") {
+    if (!($arg = shift @ARGV)) {
+      usage("-x requires an argument");
+    }
+    push @possible_vxres, (split/,/,$arg);
+    @possible_vxres = sort { $a <=> $b } @possible_vxres;
+    print "new vxres: " . (join ",", @possible_vxres) . "\n";
+  }
+  elsif ($arg eq "-h" || $arg eq "--help") {
+    usage();
+  }
+  else {
+    usage("unknown option: $arg");
+  }
+}
+
+# find out how much video memory is available
+open(FBSET, "fbset -i|") || die "could not detect available video memory";
+while (<FBSET>) {
+  if (/Size\s*:\s*(\d+)/) {
+    $size = $1;
+    last;
+  }
+}
+if (!$size) { die "could not detect available video memory"; }
+
+# huge kludge (hey, that rhymes!) ...
+#   subtract 16384 from the available memory $size
+#   why?  the default 640x480 mode uses all but 16384, and when I set it
+#   to use more than that, it oopses (!).  So... for safety's sake, and
+#   because you probably don't use those 15-25 lines anyway...
+$size -= 16384;
+
+print "# modes.fb - video mode descriptions for fbset
+#
+# See fbset(8) and fb.modes(5) for more information
+
+";
+
+$flag = 0;
+# read all XF86Config files
+while(<>) {
+  chomp;
+  next if !(($name, $clock, $xres, $xsyncstart, $xsyncend, $xfres,
+                  $yres, $ysyncstart, $ysyncend, $yfres, $extra) =
+    /^\s*modeline\s+"([^"]+)"\s+([0-9.]+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s*(.*)$/i);
+  $flag = 1;
+
+  # timing transformations, as described in the fb HOWTO
+  $pixtime = int(1000000/$clock);
+  $left = $xfres - $xsyncend;
+  $right = $xsyncstart - $xres;
+  $hsynclen = $xsyncend - $xsyncstart;
+  $top = $yfres - $ysyncend;
+  $bottom = $ysyncstart - $yres;
+  $vsynclen = $ysyncend - $ysyncstart;
+
+  # pick a virtual X and Y resolution
+  $vxres = get_vxres($xres);
+  if ($vxres < 0) {
+    print STDERR "Could not guess a good virtual resolution for mode $name.\n";
+    print STDERR "Use the advanced options --rounding and --vxres.\n";
+    next;
+  }
+  $vyres = int($size/$vxres);
+
+  # print out our entry
+  print "mode \"$name\"\n";
+  print "  geometry   $xres $yres   $vxres $vyres   $depth\n";
+  print "  timings    $pixtime   $left $right   $top $bottom   $hsynclen $vsynclen\n";
+
+  # handle extra options at the end of the modeline
+  $extra =~ tr/A-Z/a-z/;
+  @options = split/\s+/,$extra;
+  foreach (@options) {
+    if ($options_map{$_}) {
+      print "  $options_map{$_}\n";
+    }
+    else {
+      print "  # unknown option: $_\n";
+    }
+  }
+  print "endmode\n\n";
+}
+
+if (!$flag) {
+  print STDERR "No modelines found.\n";
+  print STDERR "Make sure the file you specified was an XF86Config file and\n";
+  print STDERR "used the single-line Modeline format.\n\n";
+  print STDERR "Use \"$0 --help\" for help.\n";
+}
+
+sub get_vxres {
+  foreach (@possible_vxres) {
+    return $_ if ($_ >= $_[0] && ($_ % $rounding) == 0);
+  }
+  return -1;
+}
+
+sub usage {
+  print STDERR "$_[0]\n" if ($_[0]);
+  print STDERR "$0 [OPTION] [FILES]\n\n";
+  print STDERR "  -d,--depth depth     use a certain display depth (default is 8)\n";
+  print STDERR "  -h,--help            what you see here\n\n";
+  print STDERR "Advanced options:\n";
+  print STDERR "  -r,--rounding div    vxres divisor (default is 128)\n";
+  print STDERR "  -x,--vxres X,X,X,... extra possible vxres values\n\n";
+  print STDERR "[FILES] refers to one or more XF86Config files.  Note that\n";
+  print STDERR "all modelines must be in single-line format.\n\n";
+  print STDERR "Example:\n";
+  print STDERR "  $0 -d 16 /etc/X11/XF86Config\n";
+  exit 0;
+}

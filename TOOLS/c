@@ -1,0 +1,1 @@
+gcc movinfo.c -o movinfo

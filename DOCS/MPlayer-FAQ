@@ -1,0 +1,120 @@
+Yes, this is the MPlayer FAQ.
+=============================
+
+About:
+~~~~~~
+Many people asked same questions so I decided to write this stuff.
+I know that people will never read this but at least i try to
+pull down number of these mails.
+And from now i can say that "read the fuckin' FAQ!" :-)
+
+Let's ask!
+~~~~~~~~~~
+Q: SDL output doesn't work or compile. Problem is ....
+A: It works only with SDL v1.1.7 (and maybe newer)
+   It does NOT work with 1.1.6, 1.1.5 1.1.4 1.1.3 1.0.4 etc, don't ask.
+
+Q: I am still having trouble compiling with SDL support. gcc says something
+   about "undefined reference to `SDL_EnableKeyRepeat'"   What's now?
+A: Where did you install the SDL library? If you installed in /usr/local
+   (the default) then edit the top level config.mak and add
+   "-L/usr/local/lib " after "X_LIBS=" Now type make. You're done!
+
+Q: I have problem ... with the SDL driver.
+A: It's very experimental & buggy code, and it's UNSUPPORTED by us.
+   Please do NOT report bugs or ask features relating to SDL.
+   But you can improve it, and send us patches!
+
+Q: It doesn't compile, and it misses uint64_t inttypes.h and similar things...
+A: copy DOCS/inttypes.h to MPlayer directory (cp DOCS/inttypes.h .)
+   try again... if fail, contact me
+
+Q: I have Pentium III but ./configure doesn't detect SSE
+A: Only kernel versions 2.4.x supports SSE
+
+Q: fullscreen option (-fs) and/or -xy doesn't work with x11 driver (-vo x11)
+A: x11 driver doesn't support scaling, and it can't change screen resolution.
+   Yes, I know that it should be but I have no time to write software
+   scaling routines and experiencing with XVidMode extension...
+   You can do it yourself, just press ALT,CTRL,- or ALT,CTRL,+ simultaneously,
+   see X-server docs for details.
+
+Q: audio goes out of sync playing .avi file
+A: try with -bps or -nobps option
+   if still bad, send me (upload to ftp) that file, I'll check.
+
+Q: what is the meaning of numbers in the status line?
+A: see:
+     A:   2.1  V:   2.2  A-V: -0.167  ct:  0.042   57  41%   0%  2.6% 0
+   - A: audio position in seconds
+   - V: video position in seconds
+   - A-V: audio-video difference in seconds (delay)
+   - ct: total A-V sync correction done
+   - frames played (counting from last seek)
+   - video codec cpu usage in percent (for mpeg it includes video_out too!)
+   - video_out cpu usage for avi, 0 for mpg (see above)
+   - audio codec cpu usage in percent
+   - dropped bad frames (mpg only)
+   Most of them are for debug purposes, and will be removed soon.
+
+Q: Why is video_out cpu usage zero (0%) for mpeg files?
+A: It's not zero, but it's built in into codec, so can't be measured separated.
+   You should try to play the file using -vo null and then -vo ... and check
+   the difference to see video_out speed...
+
+Q: OpenGL (-vo gl) output doesn't work (hangup/black window/X11 errors)
+A: your opengl driver doesn't support dynamic texture chanegs (glTexSubImage)
+   it's known not to work with X 4.0.x DRI drivers and nVidia's binary shit.
+   it's known to work with Utah-GLX and Matrox G400 card.
+   it will not work with 3DFX cards because the 256x256 texture size limit.
+
+Q: I have g200/g400, how to compile/use mga_vid driver?
+A: read INSTALL and README...
+
+Q: What's XMMP? (it's XMMS or XMPS but mispelled?)
+A: It's a new project, see www.frozenproductions.com for details
+
+Q: There are error messages about file not found /usr/lib/win32/....
+A: Download & install w32codec.zip from *our* FTP
+   (avifile's codec package has different DLL set)
+
+Q: It wants to load l3codeca.acm, but I don't have such file.
+A: You should use w32codec.zip from MPlayer FTP, instead of avifile's pack!
+
+Q: ...... works with avifile/aviplay while doesn't with MPlayer
+A: MPlayer != avifile
+   The only common thing between these players is the Win32 DLL loader.
+   The codecs (dll) sets, syncronization, demultiplexing etc is totaly
+   different and shouldn't be compared.
+   If something works with aviplay it doesn't mean that MPlayer should do
+   it and vice versa. You should contact me, I'll fix the bug!!!
+
+Q: Indeo 3.x/4.x movies are viewed upside-down!!!?
+A: It's a known bug (really it's a bug/limitation of the DLL codec)
+
+Q: Indeo 3.x,4.x video doesn't work at 32bpp resolutions (16,24 bpp are ok)
+A: It's a known bug (really it's a bug/limitation of the DLL codec)
+
+Q: I've got 'MPlayer interrupted by signal 11' in module audio_setup or
+   decode_audio.
+A: It's a damaged file with bad mp3 audio stream. Try it with  -afm 4
+
+Q: It aborts with signal 11 playing a file with IMA-ADPCM audio.
+A: This codec isn't yet supported!
+
+Q: Why do you enjoy making that much pre-releases?
+A: Download one and you'll know!
+
+Q: Are there rpm/deb/... packages of MPlayer?
+A: Not yet.
+
+Q: Are there any mailing lists on MPlayer?
+A: Yes! See README on how to subscribe them!
+
+Q: I've found a nasty bug when I tried to play my favourite video!!
+   Who should I inform?
+A: Inform the MPlayer-users mailing list about your problem. *ALWAYS*
+   read the README about what information we NEED to identify your problem.
+   Use the developers addresses (specified in AUTHORS) only if you want to
+   flame, or want to ask for a date. ;)
+

@@ -1,0 +1,20 @@
+
+
+			FBSET INSTALLATION GUIDE
+
+
+Change the current directory to the directory containing the fbset sources and
+type
+
+    make install
+
+This will create the fbset binary and install it, together with the manual
+pages. It also creates the standard frame buffer special device nodes.
+
+
+The etc subdirectory contains sample frame buffer mode definitions files. Copy
+one of them to /etc/fb.modes and edit it to your needs.
+
+
+Enjoy!
+

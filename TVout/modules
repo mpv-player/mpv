@@ -1,0 +1,8 @@
+
+# Load kernel modules...
+# (you must have 2.3/2.4 kernel with matroxfb enabled!)
+
+modprobe i2c-matroxfb
+modprobe matroxfb_Ti3026
+modprobe matroxfb_crtc2
+modprobe matroxfb_maven

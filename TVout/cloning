@@ -1,0 +1,14 @@
+
+# SETUP TVout
+# Same picture on TV & Monitor
+
+# CRTC1 -> TVout & Monitor
+matroxset/matroxset -f /dev/fb1 -m 0
+matroxset/matroxset -f /dev/fb0 -m 3
+
+# Enable TV
+matroxset/matroxset 1
+
+# Keep consoles on CRTC1
+con2fb/con2fb /dev/fb0 /dev/tty1
+con2fb/con2fb /dev/fb0 /dev/tty2

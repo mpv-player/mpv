@@ -1,0 +1,82 @@
+# LINUX Makefile made by A'rpi / Astral
+# Some cleanup by LGB: 	* 'make -C dir' instead of 'cd dir;make;cd..'
+#			* for loops instead of linear sequence of make directories
+#			* some minor problems with make clean and distclean were corrected
+
+include config.mak
+
+PRG = mplayer
+PRG_AVIP = aviparse
+PRG_TV = tvision
+prefix = /usr/local
+BINDIR = ${prefix}/bin
+# BINDIR = /usr/local/bin
+SRCS = linux/getch2.c linux/timer-lx.c linux/shmem.c xa/xa_gsm.c lirc_mp.c
+OBJS = linux/getch2.o linux/timer-lx.o linux/shmem.o xa/xa_gsm.o lirc_mp.o
+CFLAGS = $(OPTFLAGS) -Iloader -Ilibvo # -Wall
+A_LIBS = -Lmp3lib -lMP3 -Llibac3 -lac3
+VO_LIBS = -Llibvo -lvo $(X_LIBS)
+
+.SUFFIXES: .c .o
+
+# .PHONY: all clean
+
+all:	$(PRG)
+# $(PRG_AVIP)
+
+.c.o:
+	$(CC) -c $(CFLAGS) -o $@ $<
+
+COMMONLIBS = libvo/libvo.a libac3/libac3.a mp3lib/libMP3.a
+
+loader/libloader.a:
+	$(MAKE) -C loader
+
+libmpeg2/libmpeg2.a:
+	$(MAKE) -C libmpeg2
+
+libvo/libvo.a:
+	$(MAKE) -C libvo
+
+libac3/libac3.a:
+	$(MAKE) -C libac3
+
+mp3lib/libMP3.a:
+	$(MAKE) -C mp3lib
+
+opendivx/libdecore.a:
+	$(MAKE) -C opendivx
+
+encore/libencore.a:
+	$(MAKE) -C encore
+
+$(PRG):	mplayer.o $(OBJS) loader/libloader.a libmpeg2/libmpeg2.a opendivx/libdecore.a $(COMMONLIBS) encore/libencore.a
+	$(CC) $(CFLAGS) -o $(PRG) mplayer.o $(OBJS) $(XMM_LIBS) $(LIRC_LIBS) $(A_LIBS) -lm $(TERMCAP_LIB) -Lloader -lloader -ldl -Llibmpeg2 -lmpeg2 -Lopendivx -ldecore $(VO_LIBS) -Lencore -lencore -lpthread
+
+$(PRG_AVIP):	aviparse.o $(OBJS) loader/libloader.a $(COMMONLIBS)
+	$(CC) $(CFLAGS) -o $(PRG_AVIP) aviparse.o $(OBJS) $(A_LIBS) -lm $(TERMCAP_LIB) -Lloader -lloader -ldl $(VO_LIBS) -lpthread
+
+$(PRG_TV):	tvision.o $(OBJS) $(COMMONLIBS)
+	$(CC) $(CFLAGS) -o $(PRG_TV) tvision.o $(OBJS) -lm $(TERMCAP_LIB) $(VO_LIBS)
+
+install: $(PRG)
+	strip $(PRG)
+	cp $(PRG) $(BINDIR)
+	install -m 644 DOCS/mplayer.1 $(prefix)/man/man1/mplayer.1
+
+clean:
+	rm -f *.o *~ $(OBJS)
+
+distclean:
+	@for a in mp3lib libac3 libmpeg2 opendivx encore libvo loader drivers drivers/syncfb ; do $(MAKE) -C $$a distclean ; done
+	makedepend
+	rm -f *~ $(PRG) $(PRG_AVIP) $(PRG_TV) $(OBJS) *.o *.a Makefile.bak
+
+dep:	depend
+
+depend:
+	@for a in mp3lib libac3 libmpeg2 libvo opendivx encore ; do $(MAKE) -C $$a dep ; done
+#	cd loader;make dep;cd ..
+	makedepend -- $(CFLAGS) -- mplayer.c aviparse.c tvision.c $(SRCS) &>/dev/null
+
+# DO NOT DELETE

@@ -1,0 +1,21 @@
+Recommended options for better sound sync:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+(first try without these, maybe it works well without 'hacking' defaults)
+
+ALSA:			-alsa -abs 65536
+
+Aureal Vortex2:		-alsa -abs 65536 -delay -0.5
+
+SB Live!:		kernel 2.2.x: -alsa
+                               2.4.x: nothing
+
+OSS/Free:	        please contact me for good parameters
+
+
+... and not use your soundcard by other application ( for ex. XMMS ) ...
+... and use very-very high speed hdd or CDROM and CPU ...
+
+
+        Pontscho/fresh!mindworkz 
+	 pontscho@makacs.poliod.hu

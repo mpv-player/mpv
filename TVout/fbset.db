@@ -1,0 +1,34 @@
+
+# FBset mode database
+
+mode "640x480"                         # H: 33.78 kHz, V: 67.56 Hz
+   geometry 640 480 640 480 4
+   timings 35242 24 64 17 1 112 2
+endmode
+
+mode "640x480-60"
+    # D: 25.176 MHz, H: 31.469 kHz, V: 59.942 Hz
+    geometry 640 480 640 480 16
+    timings 39721 48 16 33 10 96 2
+    hsync high
+    accel true
+#    rgba 5/11,6/5,5/0,0/0
+endmode
+
+mode "640x400-60"
+    # D: 25.176 MHz, H: 31.469 kHz, V: 59.942 Hz
+    geometry 640 400 640 400 16
+    timings 39721 48 16 33 10 96 2
+    hsync high
+    accel true
+#    rgba 5/11,6/5,5/0,0/0
+endmode
+
+mode "vga70"
+    # H: 31.113 kHz, V: 69.294 Hz
+    geometry 640 400 640 400 4
+    timings 35242 64 96 35 12 112 2
+#    vsync high
+#    csync high
+endmode
+

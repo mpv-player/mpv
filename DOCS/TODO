@@ -1,0 +1,30 @@
+TO DO:
+~~~~~~
+Urgent:
+- asterix.avi audio delays after 5-10 mins (bps mode only)
+- PAUSE doesn't work in the X11 and SDL windows (because no Check X Events)
+- SDL fullscreen problems at quit/eof - DONE?
+- finish ASF seeking
+- fix vo_syncfb - DONE for G400
+
+Fix compilation problems:
+- SDL version detection into ./configure - DONE (disabled :))
+
+Libvo features:
+- framebuffer and svgalib support (both)
+- DGA support (LGB?)
+- real fullscreen (black bands at unused areas) support - DONE for xmga & x11
+- fix X4.0.x/DRI OpenGL (doesn't work, at least mga & tdfx & nvidia)
+- change libmpeg2 & libvo interface to be compatible with libmpeg2-0.2.0 release
+
+Player features:
+- libcss support
+- subtitles support (.sub files)
+- show movie length / position in percent
+- show current frame number [Gabucino]
+- seek_to_frame and seek_to_index options
+- fix mp3lib to avoid segfault with some damaged .avi files (workaround: -afm 4)
+- integrating the gui?
+- support for more codecs  (sample .avi files and .dll needed!) - HELP!
+- support for MPEG TS (transport streams) and PES format - I need sample files!
+- verify valid range of numeric options (like '-xy 0')

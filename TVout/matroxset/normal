@@ -1,0 +1,12 @@
+#! /bin/sh
+
+if [ -c /dev/fb0 ]; then
+  HEAD0=/dev/fb0
+  HEAD1=/dev/fb1
+else
+  HEAD0=/dev/fb/0
+  HEAD1=/dev/fb/1
+fi
+matroxset -f ${HEAD1} -m 0
+matroxset -f ${HEAD0} -m 1
+matroxset -f ${HEAD1} -m 2

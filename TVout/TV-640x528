@@ -1,0 +1,3 @@
+
+fbset/fbset -fb /dev/fb0 -left 40 -right 0 -upper 63 -lower 29 -hslen 56 -vslen 4 -xres 640 -yres 528 -vxres 640 -vyres 528 -depth 32 -laced false -bcast true
+

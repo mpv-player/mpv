@@ -1,0 +1,78 @@
+                            AUTHORS:
+                            ~~~~~~~~
+
+====================== The MPlayer project: ===========================
+
+Arpád Gereöffy (A'rpi/ESP-team):  <arpi@thot.banki.hu>
+- player code (mpeg stream demultiplexer and avi/asf parser, A-V sync, seek...)
+- mp3lib, based on mpg123 sources  [MP3 audio decoder]
+- getch2  [keyboard handler]
+- some changes in libmpeg2 code (progressive frames, bitrate & fps support)
+- libvo improvements: adding OpenGL support, bugfix in mga driver...
+- YUY2 support into mga_vid driver (for DivX/MPEG4)
+- YUY2, RGB/BGR 15/16/24/32 support into libvo drivers (for AVI codecs)
+- scripts in the TVout directory (allows using TVout on Matrox G400 DH on fb)
+- hacking DivX/Mpeg4 VfW codecs to get YUV output
+- opendivx decoder speed optimizations (see opendivx/ChangeLog)
+
+Zoltán Ponekker (Pontscho/Fresh!):  <pontscho@makacs.poliod.hu> 
+- configure script and Makefiles for easy compile
+- GUI system (coming soon!)
+- 3DNow! support into mp3lib
+- various X11 driver changes (keyboard handling, fullscreen, bpp detect, etc)
+- libvo: adding xmga driver (similar to Xv but works under X3.3.x)
+
+Gábor Lénárt (LGB): <lgb@supervisor.hu>
+- testing and some improvements in mpeg player's user interface (options)
+- ./configure script improvements
+
+Gabucino:  <gabucino@k2.jozsef.kando.hu>
+- web design, docs improvements/updating
+- testing, (Open)DivX encoding, picture quality comparsions
+
+Dariusz Pietrzak: <dariush@ajax.umcs.lublin.pl>
+- mailing lists hosting (see README for details)
+
+Main testers:
+  Gabucino
+  Balazs Tibor (Tibcu)
+  Sasi Peter (SaPe)
+  Christoph H. Lampert
+
+========================== The Codecs: ===================================
+
+Aaron Holtzman:  <aholtzma@engr.uvic.ca>
+- ac3dec (and libac3) author  [AC3 audio decoder]
+- mga_vid driver  [Matrox G200/G400 YUV Back-end Scaler]
+- mpeg2dec        [Fast MPEG1/MPEG2 video decoder, currently used in player]
+
+Michel Lespinasse:  <walken@zoy.org>
+- did large libmpeg2 changes for better speed and mpeg conformance
+
+Eugene Kuznetsov:  <divx@euro.ru>
+- avifile author  [AVI player library for linux, using Win32 VfW/ACM codecs]
+- technical help about AVI and ASF formats, and how to get YUV using VfW...
+
+Project Mayo:  [http://www.projectmayo.com]
+- the OpenDivX codec authors
+
+Michael Hipp:
+- mpg123 author   [free mpeg audio player, isn't used directly but in mp3lib]
+
+Mark Podlipec:
+- xanim author    [i'm using its aLaw audio decoder]
+
+Jutta Degener and Carsten Bormann:
+- xa_gsm.c authors  [MS-GSM audio codec]
+
+Their code is not used in current player version, but I've got some ideas or
+other technical help from:
+
+John F. McGowan   http://www.jmcgowan.com/
+- AVI FAQ author/collector. [site with many useful docs on codecs and avi fmt]
+
+Dirk Farin:      <farin@ti.uni-mannheim.de>
+- dvdview author  [MPEG1/MPEG2 video decoder, used in v0.5-v0.8]
+
+Adam Williams:   <broadcast@earthling.net>
+- libmpeg3 (and xmovie) author  [MPEG1/MPEG2 video decoder, used in v0.1-v0.4]

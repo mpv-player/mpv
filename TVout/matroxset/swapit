@@ -1,0 +1,5 @@
+#! /bin/sh
+~/mga/con2fb /dev/fb0 /dev/tty4
+rmmod matroxfb_maven
+modprobe matroxfb_maven
+~/mga/con2fb /dev/fb1 /dev/tty4
