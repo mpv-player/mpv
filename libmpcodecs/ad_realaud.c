@@ -189,7 +189,7 @@ static int load_sysm_windows(char *path)
     wraSetDLLAccessPath = GetProcAddress(handle, "SetDLLAccessPath");
     wraSetPwd = GetProcAddress(handle, "RASetPwd"); // optional, used by SIPR
     
-    if (wraCloseCodec && wraDecode && wraFlush && wraFreeDecoder &&
+    if (wraCloseCodec && wraDecode && /*wraFlush && */wraFreeDecoder &&
 	wraGetFlavorProperty && (wraOpenCodec || wraOpenCodec2) && wraSetFlavor &&
 	/*wraSetDLLAccessPath &&*/ wraInitDecoder)
     {
