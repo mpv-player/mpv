@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.6 -->
+<!-- synced with 1.8 -->
 <sect2 id="audio-dev">
 <title>Dispositivos de salida de audio</title>
 <sect3 id="sync">
@@ -512,7 +512,7 @@ formato (vea más abajo) será insertado para rectificar la diferencia.
 
 <para>
 MPlayer soporta completamente super/sub-muestreo de sonido a través
-del filtro <systemitem>resample</systemitem>. Puede ser usado si
+del filtro <option>resample</option>. Puede ser usado si
 tiene una frecuencia fija para la tarjeta de sonido o si tiene una tarjeta
 de sonido antigua que solo tiene como capacidad máxima 44.1kHz. Este filtro
 es activado automáticamente si es necesario, pero también puede ser habilitado
@@ -705,7 +705,6 @@ Reste las distancias s1 a s5 de la máxima distancia p.e.
 <listitem><para>
 Calcule el retardo requerido en ms como
     d[i] = 1000*s[i]/342; i = 1...5
-    s[i] = max(s) - s[i]; i = 1...5
 </para></listitem>
 </orderedlist>
 

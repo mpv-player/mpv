@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.10 -->
+<!-- synced with 1.11 -->
 <chapter id="usage">
 <title>Uso</title>
 
@@ -429,7 +429,8 @@ por ejemplo para reproducir desde FTP:
 </para>
 
 <note><para>
-Nota: también es recomendable activar la CACHE cuando se reproduce desde la red:
+Nota: también es recomendable activar la <option>-cache</option>cuando 
+se reproduce desde la red:
 <screen>wget ftp://micorsops.com/algo.avi -O - | mplayer -cache 8192 -</screen>
 </para></note>
 </sect1>
@@ -476,7 +477,7 @@ También puede acceder a los archivos en este servidor :
 mplayer -cache 5000 mpst://nombre-servidor//usr/local/peliculas/lol.avi
 </screen>
 Note que las rutas que no empiezan con un / deben ser relativas
-al directorio donde el servidor está corriendo. La opción de caché
+al directorio donde el servidor está corriendo. La opción <option>-cache</option> 
 no es necesaria pero es altamente recomendable.
 </para>
 

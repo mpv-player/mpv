@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.23 -->
+<!-- synced with 1.24 -->
 <sect2 id="video-dev">
 <title>Dispositivos de salida de video</title>
 
@@ -219,7 +219,7 @@ XFree86 :( Las quejas a nVidia.
 </para>
 
 <para>
-Sin embargo, MPlayer contiene un controlador <link linkend="vidix">Vidix</link>
+Sin embargo, MPlayer contiene un controlador <link linkend="vidix">VIDIX</link>
 (<link linkend="vidix-nvidia">nvidia_vid</link>) para la mayoría de las
 tarjetas nVidia. Actualmente está en estado beta, y tiene algunos problemas.
 Para más información, <link linkend="vidix-nvidia">clic aquí</link>.
@@ -289,7 +289,7 @@ con la tarjeta Cyberblade XP.
 </para>
 
 <para>
-Alternativamente, MPlayer contiene un controlador <link linkend="vidix">Vidix</link>
+Alternativamente, MPlayer contiene un controlador <link linkend="vidix">VIDIX</link>
 para la tarjeta Cyberblade/i1.
 </para>
 
@@ -1358,7 +1358,7 @@ de la reproducción de video.
   video, puede usar la opción "XaaNoPixmapCache" en la sección screen en su lugar.
   </simpara></listitem>
 <listitem><simpara>
-  Hay un controlador de consola vidix: <option>-vo cvidix</option>.
+  Hay un controlador de consola VIDIX: <option>-vo cvidix</option>.
   Requiere un framebuffer inicializado y funcionando para muchas tarjetas (o
   fastidiará su pantalla), y obtendrá un efecto similar al que se obtiene con
   <option>-vo mga</option> o <option>-vo fbdev</option>. Las tarjetas nVidia, sin
@@ -1401,7 +1401,7 @@ en pocas palabras). Por ese motivo puede pasar en la línea de órdenes de
 <application>MPlayer</application> las mismas teclas que para vo_server.
 Además entiende <option>-double</option> como un parámetro visible globalmente.
 (Recomiendo usar esto con VIDIX por lo menos en tarjetas ATI). Como para
-<option>-vo xvidix</option> : actualmente reconoce las siguientes opciones:
+<option>-vo xvidix</option>, actualmente reconoce las siguientes opciones:
 <option>-fs -zoom -x -y -double</option>.
 </para>
 </formalpara>

@@ -3,7 +3,7 @@
 <appendix id="mailinglists">
 <title>Listas de correo</title>
 <para>
-Existen varias listas de correos públicas sobre <application>MPlayer</application>. A menos
+Existen varias listas de correo públicas sobre <application>MPlayer</application>. A menos
 que se especifique, el lenguaje de estas listas es el <emphasis role="bold">inglés</emphasis>.
 Por favor no mande mensaje en otros idiomas o correo HTML! El tamaño máximo de un mensaje
 es 80k. Si tiene algo más grande póngalo en algún otro lado para descargar. Siga los
@@ -36,10 +36,10 @@ Lista para usuarios de MPlayer:
   y la sección <link linkend="bugreports">reportando fallos</link>.
   </para></listitem>
   <listitem><para>
-  Envíe pedido de nuevas funciones aquí (después de haber leído la <emphasis role="bold">documentación completa</emphasis>.
+  Envíe pedido de nuevas funciones aquí (después de haber leído la <emphasis role="bold">documentación completa</emphasis>).
   </para></listitem>
   <listitem><para>
-  Envíe preguntas de usuario aquí (después de haber luido la <emphasis role="bold">documentación completa</emphasis>.
+  Envíe preguntas de usuario aquí (después de haber leído la <emphasis role="bold">documentación completa</emphasis>).
   </para></listitem>
   </itemizedlist>
 </para></listitem>

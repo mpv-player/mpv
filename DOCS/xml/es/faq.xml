@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.15 -->
+<!-- synced with 1.18 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Preguntas de Usuario Frecuentes</title>
 
@@ -716,7 +716,8 @@ Me salió esto reproduciendo archivos MPEG: Can't find codec for video format 0x1
 Tiene una version vieja de <filename>codecs.conf</filename> en
 <filename class="directory">~/.mplayer/</filename>,
 <filename class="directory">/etc/</filename>,
-<filename class="directory">/usr/local/etc/</filename> o similar. Bórrelo.
+<filename class="directory">/usr/local/etc/</filename> o similar. Bórrelo,
+ya no sigue siendo necesario.
 <emphasis role="bold">O</emphasis> tiene la opción <option>vc=</option> o
 algo parecido en su archivo(s) de configuración.
 </para></answer>
@@ -859,6 +860,15 @@ Durante la reproducción de una película, de repente recibo el siguiente mensaje:
 <answer><para>
 Archivos malamente interleaved y la opción <option>-cache</option> no funcionan bien juntas.
 Pruebe <option>-nocache</option>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+¿Cómo puedo reproducir archivos de audio MPEG Layer 2 (mp2)?
+</para></question>
+<answer><para>
+Debe usar <option>-rawaudio on:format=0x50</option>.
 </para></answer>
 </qandaentry>
 </qandadiv>
