@@ -101,7 +101,7 @@ int out_video_codec=
 #ifdef USE_LIBAVCODEC
     VCODEC_LIBAVCODEC;
 #else
-    VCODEC_RAW;
+    VCODEC_COPY;
 #endif
 #endif
 
