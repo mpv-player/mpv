@@ -107,6 +107,7 @@ typedef struct {
     int                         aud_skew_cnt;
     unsigned char		*audio_ringbuffer;
     long long			*audio_skew_buffer;
+    long long			*audio_skew_delta_buffer;
     volatile int		audio_head;
     volatile int		audio_tail;
     volatile int		audio_cnt;
@@ -118,6 +119,7 @@ typedef struct {
 
     double                      audio_secs_per_block;
     long long                   audio_skew_total;
+    long long                   audio_skew_delta_total;
     long			audio_recv_blocks_total;
     long			audio_sent_blocks_total;
 } priv_t;
@@ -844,6 +846,8 @@ static int uninit(priv_t *priv)
 	    free(priv->audio_ringbuffer);
 	if (priv->audio_skew_buffer)
 	    free(priv->audio_skew_buffer);
+	if (priv->audio_skew_delta_buffer)
+	    free(priv->audio_skew_delta_buffer);
     }
 
     /* show some nice statistics ;-) */
@@ -866,6 +870,7 @@ static int init(priv_t *priv)
 
     priv->audio_ringbuffer = NULL;
     priv->audio_skew_buffer = NULL;
+    priv->audio_skew_delta_buffer = NULL;
 
     /* Open the video device. */
     priv->video_fd = open(priv->video_dev, O_RDWR);
@@ -1127,6 +1132,11 @@ static int start(priv_t *priv)
 	    mp_msg(MSGT_TV, MSGL_ERR, "cannot allocate skew buffer: %s\n", strerror(errno));
 	    return 0;
 	}
+	priv->audio_skew_delta_buffer = (long long*)malloc(sizeof(long long)*priv->aud_skew_cnt);
+	if (!priv->audio_skew_delta_buffer) {
+	    mp_msg(MSGT_TV, MSGL_ERR, "cannot allocate skew buffer: %s\n", strerror(errno));
+	    return 0;
+	}
 
 	priv->audio_ringbuffer = (unsigned char*)malloc(priv->audio_in.blocksize*priv->audio_buffer_size);
 	if (!priv->audio_ringbuffer) {
@@ -1143,6 +1153,7 @@ static int start(priv_t *priv)
 	priv->audio_drop = 0;
 	priv->audio_skew = 0;
 	priv->audio_skew_total = 0;
+	priv->audio_skew_delta_total = 0;
 	priv->audio_recv_blocks_total = 0;
 	priv->audio_sent_blocks_total = 0;
     }
@@ -1514,13 +1525,15 @@ static void *audio_grabber(void *data)
     priv_t *priv = (priv_t*)data;
     struct timeval tv;
     int i, audio_skew_ptr = 0;
-    long long current_time, prev_skew = 0;
+    long long current_time, prev_skew = 0, prev_skew_uncorr = 0;
 
     gettimeofday(&tv, NULL);
     priv->audio_start_time = (long long)1e6*tv.tv_sec + tv.tv_usec;
     audio_in_start_capture(&priv->audio_in);
     for (i = 0; i < priv->aud_skew_cnt; i++)
 	priv->audio_skew_buffer[i] = 0;
+    for (i = 0; i < priv->aud_skew_cnt; i++)
+	priv->audio_skew_delta_buffer[i] = 0;
 
     for (; !priv->shutdown;)
     {
@@ -1549,7 +1562,6 @@ static void *audio_grabber(void *data)
 	priv->audio_skew_buffer[audio_skew_ptr] = current_time
 	    - 1e6*priv->audio_secs_per_block*priv->audio_recv_blocks_total;
 	priv->audio_skew_total += priv->audio_skew_buffer[audio_skew_ptr];
-	audio_skew_ptr = (audio_skew_ptr+1) % priv->aud_skew_cnt;
 
 	pthread_mutex_lock(&priv->skew_mutex);
 	// linear interpolation - here we interpolate current skew value
@@ -1557,12 +1569,22 @@ static void *audio_grabber(void *data)
 	// of the interval
 	if (priv->audio_recv_blocks_total > priv->aud_skew_cnt) {
 	    priv->audio_skew = priv->audio_skew_total/priv->aud_skew_cnt;
-	    priv->audio_skew += (priv->audio_skew*priv->aud_skew_cnt)/(2*priv->audio_recv_blocks_total-priv->aud_skew_cnt);
+//	    priv->audio_skew += (priv->audio_skew*priv->aud_skew_cnt)/(2*priv->audio_recv_blocks_total-priv->aud_skew_cnt);
 	} else {
 	    // this smoothens the evolution of audio_skew at startup a bit
 	    priv->audio_skew = ((priv->aud_skew_cnt+priv->audio_recv_blocks_total)*priv->audio_skew_total)/(priv->aud_skew_cnt*priv->audio_recv_blocks_total);
 	}
-//	fprintf(stderr, "audio_skew = %lf\n", (double)priv->audio_skew/1e6);
+
+	priv->audio_skew_delta_total -= priv->audio_skew_delta_buffer[audio_skew_ptr];
+	priv->audio_skew_delta_buffer[audio_skew_ptr] = priv->audio_skew - prev_skew_uncorr;
+	priv->audio_skew_delta_total += priv->audio_skew_delta_buffer[audio_skew_ptr];
+	prev_skew_uncorr = priv->audio_skew;
+
+	audio_skew_ptr = (audio_skew_ptr+1) % priv->aud_skew_cnt;
+
+	priv->audio_skew += priv->audio_skew_delta_total/2;
+
+//	fprintf(stderr, "audio_skew = %lf, delta = %lf\n", (double)priv->audio_skew/1e6, (double)priv->audio_skew_delta_total/1e6);
 	// current skew factor (assuming linearity)
 	// used for further interpolation in video_grabber
 	// probably overkill but seems to be necessary for
