@@ -21,6 +21,16 @@
 #include <X11/extensions/dpms.h>
 #endif
 
+
+/*
+ * If SCAN_VISUALS is defined, vo_init() scans all available TrueColor
+ * visuals for the 'best' visual for MPlayer video display.  Note that
+ * the 'best' visual might be different from the default visual that
+ * is in use on the root window of the display/screen.
+ */
+#define	SCAN_VISUALS
+
+
 extern verbose;
 
 static int dpms_disabled=0;
@@ -49,16 +59,67 @@ void vo_hidecursor ( Display *disp , Window win )
 }
 
 
+#ifdef	SCAN_VISUALS
+/*
+ * Scan the available visuals on this Display/Screen.  Try to find
+ * the 'best' available TrueColor visual that has a decent color
+ * depth (at least 15bit).  If there are multiple visuals with depth
+ * >= 15bit, we prefer visuals with a smaller color depth.
+ */
+int vo_find_depth_from_visuals(Display *dpy, int screen, Visual **visual_return)
+{
+  XVisualInfo visual_tmpl;
+  XVisualInfo *visuals;
+  int nvisuals, i;
+  int bestvisual = -1;
+  int bestvisual_depth = -1;
+
+  visual_tmpl.screen = screen;
+  visual_tmpl.class = TrueColor;
+  visuals = XGetVisualInfo(dpy,
+			   VisualScreenMask | VisualClassMask, &visual_tmpl,
+			   &nvisuals);
+  if (visuals != NULL) {
+    for (i = 0; i < nvisuals; i++) {
+      if (verbose)
+	printf("vo: X11 truecolor visual %#x, depth %d, R:%lX G:%lX B:%lX\n",
+	       visuals[i].visualid, visuals[i].depth,
+	       visuals[i].red_mask, visuals[i].green_mask,
+	       visuals[i].blue_mask);
+      /*
+       * save the visual index and it's depth, if this is the first
+       * truecolor visul, or a visual that is 'preferred' over the
+       * previous 'best' visual
+       */
+      if (bestvisual_depth == -1
+	  || (visuals[i].depth >= 15 
+	      && (   visuals[i].depth < bestvisual_depth
+		  || bestvisual_depth < 15))) {
+	bestvisual = i;
+	bestvisual_depth = visuals[i].depth;
+      }
+    }
+
+    if (bestvisual != -1 && visual_return != NULL)
+      *visual_return = visuals[bestvisual].visual;
+
+    XFree(visuals);
+  }
+  return bestvisual_depth;
+}
+#endif
+
+
 int vo_init( void )
 {
 // int       mScreen;
- int bpp;
+ int depth, bpp;
  unsigned int mask;
 // char    * DisplayName = ":0.0";
 // Display * mDisplay;
- XImage  * mXImage;
+ XImage  * mXImage = NULL;
 // Window    mRootWin;
- static XWindowAttributes attribs;
+ XWindowAttributes attribs;
 
  if(vo_depthonscreen) return 1; // already called
 
@@ -76,23 +137,49 @@ int vo_init( void )
  mRootWin=RootWindow( mDisplay,mScreen );// Root window ID.
  vo_screenwidth=DisplayWidth( mDisplay,mScreen );
  vo_screenheight=DisplayHeight( mDisplay,mScreen );
- // get color depth:
-// XGetWindowAttributes(mydisplay, DefaultRootWindow(mDisplay), &attribs);
+
+ // get color depth (from root window, or the best visual):
  XGetWindowAttributes(mDisplay, mRootWin, &attribs);
- vo_depthonscreen=attribs.depth;
- // get bits/pixel:
-   mXImage=XGetImage( mDisplay,mRootWin,0,0,1,1,AllPlanes,ZPixmap );
+ depth=attribs.depth;
+
+#ifdef	SCAN_VISUALS
+ if (depth != 15 && depth != 16 && depth != 24 && depth != 32) {
+   Visual *visual;
+
+   depth = vo_find_depth_from_visuals(mDisplay, mScreen, &visual);
+   if (depth != -1)
+     mXImage=XCreateImage(mDisplay, visual, depth, ZPixmap,
+			  0, NULL, 1, 1, 8, 1);
+ } else
+#endif
+ mXImage=XGetImage( mDisplay,mRootWin,0,0,1,1,AllPlanes,ZPixmap );
+
+ vo_depthonscreen = depth;	// display depth on screen
+
+ // get bits/pixel from XImage structure:
+ if (mXImage == NULL) {
+   mask = 0;
+ } else {
+   /*
+    * for the depth==24 case, the XImage structures might use
+    * 24 or 32 bits of data per pixel.  The global variable
+    * vo_depthonscreen stores the amount of data per pixel in the
+    * XImage structure!
+    *
+    * Maybe we should rename vo_depthonscreen to (or add) vo_bpp?
+    */
    bpp=mXImage->bits_per_pixel;
    if((vo_depthonscreen+7)/8 != (bpp+7)/8) vo_depthonscreen=bpp; // by A'rpi
    mask=mXImage->red_mask|mXImage->green_mask|mXImage->blue_mask;
-   if(verbose)
-   printf("vo: X11 color mask:  %X  (R:%lX G:%lX B:%lX)\n",
-     mask,mXImage->red_mask,mXImage->green_mask,mXImage->blue_mask);
-   if(((vo_depthonscreen+7)/8)==2){
-     if(mask==0x7FFF) vo_depthonscreen=15; else
-     if(mask==0xFFFF) vo_depthonscreen=16;
-   }
    XDestroyImage( mXImage );
+   if(verbose)
+     printf("vo: X11 color mask:  %X  (R:%lX G:%lX B:%lX)\n",
+	    mask,mXImage->red_mask,mXImage->green_mask,mXImage->blue_mask);
+ }
+ if(((vo_depthonscreen+7)/8)==2){
+   if(mask==0x7FFF) vo_depthonscreen=15; else
+   if(mask==0xFFFF) vo_depthonscreen=16;
+ }
 // XCloseDisplay( mDisplay );
 /* slightly improved local display detection AST */
  if ( strncmp(mDisplayName, "unix:", 5) == 0)
@@ -100,7 +187,10 @@ int vo_init( void )
  else if ( strncmp(mDisplayName, "localhost:", 10) == 0)
 		mDisplayName += 9;
  if (*mDisplayName==':') mLocalDisplay=1; else mLocalDisplay=0;
- printf("vo: X11 running at %dx%d depth: %d (\"%s\" => %s display)\n",vo_screenwidth,vo_screenheight,vo_depthonscreen,mDisplayName,mLocalDisplay?"local":"remote");
+ printf("vo: X11 running at %dx%d with depth %d and %d bits/pixel (\"%s\" => %s display)\n",
+	vo_screenwidth,vo_screenheight,
+	depth, vo_depthonscreen,
+	mDisplayName,mLocalDisplay?"local":"remote");
  return 1;
 }
 
