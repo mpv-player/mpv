@@ -1,0 +1,41 @@
+Ustawienie MTTR dla X11 3.3.x, SVGAlib lub mga_vid:
+===================================================
+
+1. Znajd¼ adresy bazowe.
+~~~~~~~~~~~~~~~~~~~~~~~~
+Istniej± trzy sposoby znalezienia tego: 
+
+- w startowych komunikatach X11, np.: 
+(--) SVGA: PCI: Matrox MGA G400 AGP rev 4, Memory @ 0xd8000000, 0xd4000000
+(--) SVGA: Linear framebuffer at 0xD8000000
+
+- w /proc/pci (u¿yj  polecenia lspci -v ):
+01:00.0 VGA compatible controller: Matrox Graphics, Inc.: Unknown device 0525
+        Memory at d8000000 (32-bit, prefetchable)
+        
+- w komunikatach  sterownika j±dra dla mga_vid (u¿yj dmesg):
+mga_mem_base = d8000000
+
+2. Okre¶l rozmiar pamiêci.
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+To bardzo proste: zwyczajnie przekonwertuj rozmiar video ram na system
+szesnastkowy, b±d¼ u¿yj tabeli:
+   1 MB    0x100000
+   2 MB    0x200000
+   4 MB    0x400000
+   8 MB    0x800000
+  16 MB   0x1000000
+  32 MB   0x2000000
+
+3. Ustaw MTRR.
+~~~~~~~~~~~~~~
+Znasz ju¿ bazowe adresy i rozmiar pamiêci, ustawmy wiêc teraz rejestry mtrr!
+
+Na przyk³ad dla powy¿szej karty matrox (adres bazowy=0xd8000000) z 32MB pamiêci
+ram (rozmiar=0x2000000) wywo³aj:
+	echo "base=0xd8000000 size=0x2000000 type=write-combining" >| /proc/mtrr
+
+ - Starsze K6-2 [oko³o 266Mhz, stepping 0] nie wspomagaj± MTRR, jednak stepping
+   12 tak ('cat /proc/cpuinfo' aby to sprawdziæ).
+
+(t³um. nell)   

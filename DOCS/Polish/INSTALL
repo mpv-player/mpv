@@ -1,0 +1,47 @@
+  ===========================================================================
+  * JAK SKOMPILOWAÆ KOMPONENTY ODGRYWARKI FILMÓW * (C) 2001. A'rpi/ESP-team *
+  ===========================================================================
+
+1. Kodeki: (w32codecs.zip)
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ¶ci±gnij i rozpakuj w32codecs.zip do /usr/lib/win32
+  
+
+UWAGA: projekt avifile zawiera podobny pakiet kodeków, ale ró¿ni siê on od
+naszego, tak wiêc, je¶li chcesz u¿ywaæ wszystkich wspieranych kodeków - u¿yj
+naszego pakietu!
+
+2. Sterowniki: (mga_vid.o)
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+  cd drivers
+  make
+  mknod /dev/mga_vid c 178 0
+  chmod go+rw /dev/mga_vid
+
+3. Odgrywarka: (MPlayer)
+~~~~~~~~~~~~~~~~~~~~~~~~
+  ./configure
+[* przeczytaj komunikaty wys³ane w trakcie ./configure, to mo¿e byæ bardzo
+po¿yteczne! *]
+[* sprawd¼ zawarto¶æ plików config.h oraz config.mak! *]
+  make
+[* sprawd¼ czy nie by³o b³êdów! je¶li nie - powiniene¶ mieæ binaria ./mplayer *]
+  make install
+
+4. Narzêdzia Matrox G400 DH TV-out:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  cd TVout
+  ./compile.sh
+
+5. Czcionki:
+~~~~~~~~~~~~
+¦ciagnij  mp_font3.zip (i opcjonalnie najnowsze wercje jêzykowe) i rozpakuj do
+~/.mplayer/font/ :
+  
+  cd ~/.mplayer
+  mkdir font
+  cd font
+  unzip mp_font3.zip
+  unzip mp_font3_hu.zip
+
+(t³um. nell)

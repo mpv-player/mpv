@@ -1,0 +1,49 @@
+Strojenie CDROMu
+~~~~~~~~~~~~~~~~
+
+Wprowadzenie
+~~~~~~~~~~~~
+> Z dokumentacji Linuxa:
+
+Niektóre napêdy CDROM potrafi± zmieniaæ swoj± podstawow± prêdko¶æ. Jest kilka
+powodów, aby zmieniæ prêdko¶æ napêdu CDROM. "Badly pressed" CDROMy mog±
+skutkowaæ mniejsz±-ni¿-maksymalna prêdko¶ci± g³ówn±. Nowoczesne urz±dzenia
+CDROM mog± uzyskiwaæ wysokie g³ówne czêstotliwo¶ci (do 24x jest powszechne).
+Ustalono, ¿e te wysokie g³ówne prêdko¶ci powoduj± powstawanie b³êdów odczytu na
+tych wysokich czêstotliwo¶ciach, a w tych okoliczno¶ciach obni¿enie prêdko¶ci
+mo¿e zapobiec utracie danych. Ostatecznie, niektóre z tych napêdów mog± wydawaæ
+dra¿ni±co g³o¶ne d¼wiêki, co mo¿e zostaæ zredukowane przy mniejszej prêdko¶ci.
+
+Jak To Zrobiæ
+~~~~~~~~~~~~~
+
+Polecany jest wykorzystanie programu 'setcd'. Jest nieco stary, ale
+niew±tpliwie da siê go znale¼æ bez problemu w sieci.
+
+U¿yj tego z :
+	setcd -x <speed> <cdrom device>
+
+Mo¿esz te¿ spróbowaæ :
+	echo current_speed:4 >/proc/ide/<cdrom device>/settings
+ale bêd± potrzebne prawa roota. (u mnie to nie zadzia³a³o - Gabucino)
+
+U¿yj równie¿ nastêpuj±cych poleceñ:
+	echo file_readahead:2000000 >/proc/ide/<cdrom device>/settings
+w celu 2MB odczytywania z pliku przed sciagniêciem (to siê przydaje w przypadku
+porysowanych CDROMów).
+
+Zalecane jest, aby dostroiæ napêd CDROM tak¿e za pomoc± hdparm :
+	hdparm -d1 -a8 -u1 <cdrom device>
+w celu w³±czenia dostêpu DMA, odczytu bezpo¶redniego i odmaskowania IRQ.
+(je¶li jest to niezrozumia³e dla ciebie, *przeczytaj manpage do hdparm*)
+
+S³owo koñcowe
+~~~~~~~~~~~~~
+Odwo³aj siê do "/proc/ide/<cdrom device>/settings" aby poprawnie dostroiæ swój
+CDROM.
+
+	Nick Kurshev & Gabucino
+	  <nickols_k@mail.ru>
+	  
+(t³um. nell)
+
