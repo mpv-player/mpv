@@ -2,6 +2,9 @@ mplayer (1.0)
 
   pre2:  "Onjelolt-maintainerek-hava" /* FIXME */
 
+    Security:
+    * remotely exploitable buffer overflow in the asf streaming code fixed
+
     DOCS: /* FIXME */
     * massive French, Spanish and Russian docs update
     * Hungarian, Polish tranlations updated
@@ -14,13 +17,14 @@ mplayer (1.0)
     * freebsd 5.x (libkse/libthr) support in win32 dll loader
     * fixed mpdvdkit on mingw
     * slave mode, vobsub and mencoder support on windows
-    * finally fixed the compilation on non-mvi capable alpha cpus
+    * finally fixed the compilation on non-mvi capable alpha CPUs
     * MinGW 3.1.0 supports MPlayer out of the box!
 
     Codecs and demuxers:
     * support for QuickTime version 6.3 DLLs
     * fixed some bugs in imported FAAD
-    * disabled FAAD on when using buggy GCC
+    * disabled internal FAAD when using buggy GCC
+    * --enable-externalfaad option to force using external FAAD library
     * imaadpcm bug fixed
     * ViVD v2 codec support (dll only)
     * QuickTime codecs support inside Matroska
@@ -51,7 +55,7 @@ mplayer (1.0)
     * indeo3 decoder fixed
     
     Drivers:
-    * vidix driver for Nvidia cards (only older cards are supported (Riva/TNT))
+    * VIDIX driver for nVidia cards
     * SDL on IRIX support
     * directfb2 fixed for latest directfb
     * opengl video output for Windows
@@ -61,12 +65,11 @@ mplayer (1.0)
     * osd fixed with svga
     
     Others:
-    * buffer overflow fixes overall the code
     * several leak fixes
-    * selecting optimizations for ppc 7455 cpu
-    * cpudetection code now measures speed on x86
-    * cleaned up a bit unrarlib
-    * updated the list of known x86 cpus (including opteron!)
+    * selecting optimizations for ppc 7455 CPU
+    * CPU detection code now measures speed on x86
+    * unrarlib cleaned up a bit
+    * updated the list of known x86 CPUs (including opteron!)
     * alignment and smart line splitting option on subtitles
      
   pre1:  "Development" on the beach
