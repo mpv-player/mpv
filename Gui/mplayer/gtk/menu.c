@@ -17,6 +17,44 @@
 #include "../../../libmpdemux/stream.h"
 #include "../../../libmpdemux/demuxer.h"
 
+#include "../pixmaps/ab.xpm"
+#include "../pixmaps/normal.xpm"
+#include "../pixmaps/double.xpm"
+#include "../pixmaps/fs.xpm"
+#include "../pixmaps/exit.xpm"
+#include "../pixmaps/prefs.xpm"
+#include "../pixmaps/eq.xpm"
+#include "../pixmaps/pl.xpm"
+#include "../pixmaps/skin.xpm"
+#include "../pixmaps/sound.xpm"
+#include "../pixmaps/open.xpm"
+#include "../pixmaps/dvd.xpm"
+#include "../pixmaps/vcd.xpm"
+#include "../pixmaps/play.xpm"
+#include "../pixmaps/stop2.xpm"
+#include "../pixmaps/pause.xpm"
+#include "../pixmaps/prev.xpm"
+#include "../pixmaps/next.xpm"
+#include "../pixmaps/aspect.xpm"
+#include "../pixmaps/a11.xpm"
+#include "../pixmaps/a169.xpm"
+#include "../pixmaps/a235.xpm"
+#include "../pixmaps/a43.xpm"
+#include "../pixmaps/playdvd.xpm"
+#include "../pixmaps/playvcd.xpm"
+#include "../pixmaps/file2.xpm"
+#include "../pixmaps/url.xpm"
+#include "../pixmaps/sub.xpm"
+#include "../pixmaps/delsub.xpm"
+#include "../pixmaps/empty.xpm"
+#include "../pixmaps/empty1px.xpm"
+#include "../pixmaps/tongue.xpm"
+#include "../pixmaps/tonguebla.xpm"
+#include "../pixmaps/dolby.xpm"
+#include "../pixmaps/loadeaf.xpm"
+#include "../pixmaps/title.xpm"
+#include "../pixmaps/chapter.xpm"
+
 extern mixer_t mixer; // mixer from mplayer.c
 
 void ActivateMenuItem( int Item )
@@ -27,42 +65,100 @@ void ActivateMenuItem( int Item )
  mplEventHandling( Item & 0x0000ffff,Item >> 16 );
 }
 
-GtkWidget * AddMenuCheckItem(GtkWidget* Menu,char* label, gboolean state, int Number)
+GtkWidget * AddMenuCheckItem(GtkWidget *window1, const char * immagine_xpm, GtkWidget* Menu,char* label, gboolean state, int Number)
 {
+ GtkWidget * Label = NULL;
+ GtkWidget * Pixmap = NULL;
+ GtkWidget * hbox = NULL;
  GtkWidget * Item = NULL;
- Item=gtk_check_menu_item_new_with_label( label );
+
+ GdkPixmap *PixmapIcon = NULL;
+ GdkColor transparent;
+ GdkBitmap *MaskIcon = NULL;
+
+ PixmapIcon = gdk_pixmap_create_from_xpm_d (window1->window, &MaskIcon, &transparent,(gchar **)immagine_xpm );
+ Pixmap = gtk_pixmap_new (PixmapIcon, MaskIcon);
+ gdk_pixmap_unref (PixmapIcon);
+
+ Item=gtk_check_menu_item_new();
+ Label = gtk_label_new (label);
+ 
+ hbox = gtk_hbox_new (FALSE, 8);
+ gtk_box_pack_start (GTK_BOX (hbox), Pixmap, FALSE, FALSE, 0);
+ gtk_box_pack_start (GTK_BOX (hbox), Label, FALSE, FALSE, 0);
+ gtk_container_add (GTK_CONTAINER (Item), hbox);
+ 
  gtk_menu_append( GTK_MENU( Menu ),Item );
+ 
  gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(Item),state);
  gtk_signal_connect_object( GTK_OBJECT(Item),"activate",
    GTK_SIGNAL_FUNC(ActivateMenuItem),(gpointer)Number );
- gtk_widget_show( Item );
+ gtk_menu_item_right_justify (GTK_MENU_ITEM (Item));
+ gtk_widget_show_all(Item);
+   
  return Item;
 }
-
-
-GtkWidget * AddMenuItem( GtkWidget * Menu,char * label,int Number )
+GtkWidget * AddMenuItem( GtkWidget *window1, const char * immagine_xpm,  GtkWidget * SubMenu,char * label,int Number )
 {
+ GtkWidget * Label = NULL;
+ GtkWidget * Pixmap = NULL;
+ GtkWidget * hbox = NULL;
  GtkWidget * Item = NULL;
- Item=gtk_menu_item_new_with_label( label );
- gtk_menu_append( GTK_MENU( Menu ),Item );
+ GdkPixmap * PixmapIcon = NULL;
+ GdkColor transparent;
+ GdkBitmap * MaskIcon = NULL;
+
+ PixmapIcon = gdk_pixmap_create_from_xpm_d (window1->window, &MaskIcon, &transparent,(gchar **)immagine_xpm );
+ Pixmap = gtk_pixmap_new (PixmapIcon, MaskIcon);
+ gdk_pixmap_unref (PixmapIcon);
+
+ Item=gtk_menu_item_new();
+ Label = gtk_label_new (label);
+
+ hbox = gtk_hbox_new (FALSE, 8);
+ gtk_box_pack_start (GTK_BOX (hbox), Pixmap, FALSE, FALSE, 0);
+ gtk_box_pack_start (GTK_BOX (hbox), Label, FALSE, FALSE, 0);
+ gtk_container_add (GTK_CONTAINER (Item), hbox);
+
+
+ gtk_menu_append( GTK_MENU( SubMenu ),Item );
  gtk_signal_connect_object( GTK_OBJECT(Item),"activate",
    GTK_SIGNAL_FUNC(ActivateMenuItem),(gpointer)Number );
- gtk_widget_show( Item );
+
+ gtk_menu_item_right_justify (GTK_MENU_ITEM (Item));
+ gtk_widget_show_all(Item);
  return Item;
 }
 
-GtkWidget * AddSubMenu( GtkWidget * Menu,char * label )
+
+GtkWidget * AddSubMenu( GtkWidget *window1, const char * immagine_xpm, GtkWidget * Menu,char * label )
 {
+ GtkWidget * Label = NULL;
+ GtkWidget * Pixmap = NULL;
+ GtkWidget * hbox = NULL;
  GtkWidget * Item = NULL;
  GtkWidget * SubItem = NULL;
+ GdkPixmap * PixmapIcon = NULL;
+ GdkColor transparent;
+ GdkBitmap * MaskIcon = NULL;
 
- SubItem=gtk_menu_item_new_with_label( label );
- gtk_menu_append( GTK_MENU( Menu ),SubItem );
- gtk_widget_show( SubItem );
+ PixmapIcon = gdk_pixmap_create_from_xpm_d (window1->window, &MaskIcon, &transparent,(gchar **)immagine_xpm);
+ Pixmap = gtk_pixmap_new (PixmapIcon, MaskIcon);
+ gdk_pixmap_unref (PixmapIcon);
 
+ SubItem=gtk_menu_item_new();
  Item=gtk_menu_new();
- gtk_widget_show( Item );
+ Label = gtk_label_new (label);
+
+ hbox = gtk_hbox_new (FALSE, 8);
+ gtk_box_pack_start (GTK_BOX (hbox), Pixmap, FALSE, FALSE, 0);
+ gtk_box_pack_start (GTK_BOX (hbox), Label, FALSE, FALSE, 0);
+ gtk_container_add (GTK_CONTAINER (SubItem), hbox);
+ 
+ gtk_menu_append( GTK_MENU( Menu ),SubItem );
  gtk_menu_item_set_submenu( GTK_MENU_ITEM( SubItem ),Item );
+ 
+ gtk_widget_show_all( SubItem );
  return Item;
 }
 
@@ -285,33 +381,36 @@ GtkWidget * VCDTitleMenu;
 
 GtkWidget * create_PopUpMenu( void )
 {
+ GtkWidget * window1;
  GtkWidget * Menu = NULL;
  GtkWidget * SubMenu = NULL;
  GtkWidget * MenuItem = NULL;
  GtkWidget * N, * D, * F;
 
  Menu=gtk_menu_new();
+ gtk_widget_realize (Menu);
+ window1 = gtk_widget_get_toplevel(Menu);
 
-  AddMenuItem( Menu,MSGTR_MENU_AboutMPlayer"      ", evAbout );
+  AddMenuItem( window1, (const char*)ab_xpm, Menu,MSGTR_MENU_AboutMPlayer"     ", evAbout );
   AddSeparator( Menu );
-   SubMenu=AddSubMenu( Menu,MSGTR_MENU_Open );
-    AddMenuItem( SubMenu,MSGTR_MENU_PlayFile"    ", evLoadPlay );
+   SubMenu=AddSubMenu( window1, (const char*)open_xpm, Menu,MSGTR_MENU_Open );
+    AddMenuItem( window1, (const char*)file2_xpm, SubMenu,MSGTR_MENU_PlayFile"    ", evLoadPlay );
 #ifdef HAVE_VCD
-    AddMenuItem( SubMenu,MSGTR_MENU_PlayVCD, evPlayVCD );
+    AddMenuItem( window1, (const char*)playvcd_xpm, SubMenu,MSGTR_MENU_PlayVCD, evPlayVCD );
 #endif
 #ifdef USE_DVDREAD
-    AddMenuItem( SubMenu,MSGTR_MENU_PlayDVD, evPlayDVD );
+    AddMenuItem( window1, (const char*)playdvd_xpm, SubMenu,MSGTR_MENU_PlayDVD, evPlayDVD );
 #endif
-    AddMenuItem( SubMenu,MSGTR_MENU_PlayURL, evSetURL );
-    AddMenuItem( SubMenu,MSGTR_MENU_LoadSubtitle"   ", evLoadSubtitle );
-    AddMenuItem( SubMenu,MSGTR_MENU_DropSubtitle,evDropSubtitle );
-    AddMenuItem( SubMenu,MSGTR_MENU_LoadExternAudioFile, evLoadAudioFile );
-   SubMenu=AddSubMenu( Menu,MSGTR_MENU_Playing );
-    AddMenuItem( SubMenu,MSGTR_MENU_Play"        ", evPlay );
-    AddMenuItem( SubMenu,MSGTR_MENU_Pause, evPause );
-    AddMenuItem( SubMenu,MSGTR_MENU_Stop, evStop );
-    AddMenuItem( SubMenu,MSGTR_MENU_NextStream, evNext );
-    AddMenuItem( SubMenu,MSGTR_MENU_PrevStream, evPrev );
+    AddMenuItem( window1, (const char*)url_xpm, SubMenu,MSGTR_MENU_PlayURL, evSetURL );
+    AddMenuItem( window1, (const char*)sub_xpm, SubMenu,MSGTR_MENU_LoadSubtitle"   ", evLoadSubtitle );
+    AddMenuItem( window1, (const char*)delsub_xpm, SubMenu,MSGTR_MENU_DropSubtitle,evDropSubtitle );
+    AddMenuItem( window1, (const char*)loadeaf_xpm, SubMenu,MSGTR_MENU_LoadExternAudioFile, evLoadAudioFile );
+   SubMenu=AddSubMenu(window1, (const char*)play_xpm, Menu,MSGTR_MENU_Playing );
+    AddMenuItem( window1, (const char*)play_xpm, SubMenu,MSGTR_MENU_Play"        ", evPlay );
+    AddMenuItem( window1, (const char*)pause_xpm, SubMenu,MSGTR_MENU_Pause, evPause );
+    AddMenuItem( window1, (const char*)stop2_xpm, SubMenu,MSGTR_MENU_Stop, evStop );
+    AddMenuItem( window1, (const char*)next_xpm, SubMenu,MSGTR_MENU_NextStream, evNext );
+    AddMenuItem( window1, (const char*)prev_xpm, SubMenu,MSGTR_MENU_PrevStream, evPrev );
 //    AddSeparator( SubMenu );
 //    AddMenuItem( SubMenu,"Back 10 sec", evBackward10sec );
 //    AddMenuItem( SubMenu,"Fwd 10 sec", evForward10sec );
@@ -322,64 +421,65 @@ GtkWidget * create_PopUpMenu( void )
 //    AddMenuItem( SubMenu,MSGTR_MENU_DoubleSize, evDoubleSize );
 //    AddMenuItem( SubMenu,MSGTR_MENU_FullScreen, evFullScreen );
 #ifdef HAVE_VCD
-   VCDSubMenu=AddSubMenu( Menu,MSGTR_MENU_VCD );
-    AddMenuItem( VCDSubMenu,MSGTR_MENU_PlayDisc,evPlayVCD );
+   VCDSubMenu=AddSubMenu( window1, (const char*)vcd_xpm, Menu,MSGTR_MENU_VCD );
+    AddMenuItem( window1, (const char*)playvcd_xpm, VCDSubMenu,MSGTR_MENU_PlayDisc,evPlayVCD );
     AddSeparator( VCDSubMenu );
-    VCDTitleMenu=AddSubMenu( VCDSubMenu,MSGTR_MENU_Titles );
+    VCDTitleMenu=AddSubMenu( window1, (const char*)title_xpm, VCDSubMenu,MSGTR_MENU_Titles );
     if ( guiIntfStruct.VCDTracks ) 
      {
       char tmp[32]; int i;
       for ( i=0;i < guiIntfStruct.VCDTracks;i++ )
        {
         snprintf( tmp,32,MSGTR_MENU_Title,i+1 );
-	AddMenuItem( VCDTitleMenu,tmp,( (i+1) << 16 ) + evSetVCDTrack );
+    //AddMenuItem( VCDTitleMenu,tmp,( (i+1) << 16 ) + evSetVCDTrack );
+        AddMenuItem(window1, (const char*)empty_xpm, VCDTitleMenu,tmp,( (i+1) << 16 ) + evSetVCDTrack );
        }
      }
      else
       {
-       MenuItem=AddMenuItem( VCDTitleMenu,MSGTR_MENU_None,evNone );
+       MenuItem=AddMenuItem( window1, (const char*)empty_xpm, VCDTitleMenu,MSGTR_MENU_None,evNone );
        gtk_widget_set_sensitive( MenuItem,FALSE );
       }
 #endif
 #ifdef USE_DVDREAD
-   DVDSubMenu=AddSubMenu( Menu,MSGTR_MENU_DVD );
-    AddMenuItem( DVDSubMenu,MSGTR_MENU_PlayDisc"    ", evPlayDVD );
+   DVDSubMenu=AddSubMenu( window1, (const char*)dvd_xpm, Menu,MSGTR_MENU_DVD );
+    AddMenuItem( window1, (const char*)playdvd_xpm, DVDSubMenu,MSGTR_MENU_PlayDisc"    ", evPlayDVD );
 //    AddMenuItem( DVDSubMenu,MSGTR_MENU_ShowDVDMenu, evNone );
     AddSeparator( DVDSubMenu );
-    DVDTitleMenu=AddSubMenu( DVDSubMenu,MSGTR_MENU_Titles );
+    DVDTitleMenu=AddSubMenu( window1, (const char*)title_xpm, DVDSubMenu,MSGTR_MENU_Titles );
      if ( guiIntfStruct.DVD.titles )
       {
        char tmp[32]; int i;
        for ( i=1 ; i<= guiIntfStruct.DVD.titles;i++ )
         {
          snprintf( tmp,32,MSGTR_MENU_Title,i);
-         AddMenuCheckItem( DVDTitleMenu,tmp,
+         AddMenuCheckItem( window1, (const char*)empty1px_xpm, DVDTitleMenu,tmp,
 			   guiIntfStruct.DVD.current_title == i,
 			   (i << 16) + evSetDVDTitle );
         }
       }
       else
        {
-        MenuItem=AddMenuItem( DVDTitleMenu,MSGTR_MENU_None,evNone );
+        MenuItem=AddMenuItem( window1, (const char*)empty_xpm, DVDTitleMenu,MSGTR_MENU_None,evNone );
         gtk_widget_set_sensitive( MenuItem,FALSE );
        }
-    DVDChapterMenu=AddSubMenu( DVDSubMenu,MSGTR_MENU_Chapters );
+    DVDChapterMenu=AddSubMenu( window1, (const char*)chapter_xpm, DVDSubMenu,MSGTR_MENU_Chapters );
      if ( guiIntfStruct.DVD.chapters )
       {
        char tmp[32]; int i;
        for ( i=1;i <= guiIntfStruct.DVD.chapters;i++ )
         {
          snprintf( tmp,32,MSGTR_MENU_Chapter,i );
-         AddMenuCheckItem( DVDChapterMenu,tmp,guiIntfStruct.DVD.current_chapter == i,
+         AddMenuCheckItem( window1, (const char*)empty1px_xpm, DVDChapterMenu,tmp,guiIntfStruct.DVD.current_chapter == i,
 			   ( i << 16 ) + evSetDVDChapter );
         }
       }
       else
        {
-        MenuItem=AddMenuItem( DVDChapterMenu,MSGTR_MENU_None,evNone );
+        MenuItem=AddMenuItem( window1, (const char*)empty_xpm, DVDChapterMenu,MSGTR_MENU_None,evNone );
         gtk_widget_set_sensitive( MenuItem,FALSE );
        }
-    DVDAudioLanguageMenu=AddSubMenu( DVDSubMenu,MSGTR_MENU_AudioLanguages );
+    DVDAudioLanguageMenu=AddSubMenu( window1, (const char*)tongue_xpm, DVDSubMenu,MSGTR_MENU_AudioLanguages );
      if ( guiIntfStruct.DVD.nr_of_audio_channels )
       {
        char tmp[64]; int i, id = guiIntfStruct.demuxer ? ((demuxer_t *)guiIntfStruct.demuxer)->audio->id : audio_id;
@@ -389,43 +489,43 @@ GtkWidget * create_PopUpMenu( void )
 	   ChannelTypes[ guiIntfStruct.DVD.audio_streams[i].type ],
 	   ChannelNumbers[ guiIntfStruct.DVD.audio_streams[i].channels ] );
 //	 if ( id == -1 ) id=audio_id; //guiIntfStruct.DVD.audio_streams[i].id;
-         AddMenuCheckItem( DVDAudioLanguageMenu,tmp,
+         AddMenuCheckItem( window1, (const char*)dolby_xpm, DVDAudioLanguageMenu,tmp,
 			   id == guiIntfStruct.DVD.audio_streams[i].id,
 			   ( guiIntfStruct.DVD.audio_streams[i].id << 16 ) + evSetDVDAudio );
         }
       }
       else
        {
-        MenuItem=AddMenuItem( DVDAudioLanguageMenu,MSGTR_MENU_None,evNone );
+        MenuItem=AddMenuItem( window1, (const char*)empty_xpm, DVDAudioLanguageMenu,MSGTR_MENU_None,evNone );
         gtk_widget_set_sensitive( MenuItem,FALSE );
        }
-    DVDSubtitleLanguageMenu=AddSubMenu( DVDSubMenu,MSGTR_MENU_SubtitleLanguages );
+    DVDSubtitleLanguageMenu=AddSubMenu( window1, (const char*)tonguebla_xpm, DVDSubMenu,MSGTR_MENU_SubtitleLanguages );
      if ( guiIntfStruct.DVD.nr_of_subtitles )
       {
        char tmp[64]; int i;
-       AddMenuItem( DVDSubtitleLanguageMenu,MSGTR_MENU_None,( (unsigned short)-1 << 16 ) + evSetDVDSubtitle );
+       AddMenuItem( window1, (const char*)empty1px_xpm, DVDSubtitleLanguageMenu,MSGTR_MENU_None,( (unsigned short)-1 << 16 ) + evSetDVDSubtitle );
        for ( i=0;i < guiIntfStruct.DVD.nr_of_subtitles;i++ )
         {
 	 snprintf( tmp,64,"%s",GetLanguage( guiIntfStruct.DVD.subtitles[i].language ) );
-         AddMenuCheckItem( DVDSubtitleLanguageMenu,tmp,
+         AddMenuCheckItem( window1, (const char*)empty1px_xpm, DVDSubtitleLanguageMenu,tmp,
 			   dvdsub_id == guiIntfStruct.DVD.subtitles[i].id,
 			   ( guiIntfStruct.DVD.subtitles[i].id << 16 ) + evSetDVDSubtitle );
         }
       }
       else
        {
-        MenuItem=AddMenuItem( DVDSubtitleLanguageMenu,MSGTR_MENU_None,evNone );
+        MenuItem=AddMenuItem( window1, (const char*)empty_xpm, DVDSubtitleLanguageMenu,MSGTR_MENU_None,evNone );
         gtk_widget_set_sensitive( MenuItem,FALSE );
        }
 #endif
 
 //  if ( guiIntfStruct.Playing )
    {
-    AspectMenu=AddSubMenu( Menu,MSGTR_MENU_AspectRatio );
-    AddMenuItem( AspectMenu,MSGTR_MENU_Original,( 1 << 16 ) + evSetAspect );
-    AddMenuItem( AspectMenu,"16:9",( 2 << 16 ) + evSetAspect );
-    AddMenuItem( AspectMenu,"4:3",( 3 << 16 ) + evSetAspect );
-    AddMenuItem( AspectMenu,"2.35",( 4 << 16 ) + evSetAspect );
+    AspectMenu=AddSubMenu( window1, (const char*)aspect_xpm, Menu,MSGTR_MENU_AspectRatio );
+    AddMenuItem( window1, (const char*)a11_xpm, AspectMenu,MSGTR_MENU_Original,( 1 << 16 ) + evSetAspect );
+    AddMenuItem( window1, (const char*)a169_xpm, AspectMenu,"16:9",( 2 << 16 ) + evSetAspect );
+    AddMenuItem( window1, (const char*)a43_xpm, AspectMenu,"4:3",( 3 << 16 ) + evSetAspect );
+    AddMenuItem( window1, (const char*)a235_xpm, AspectMenu,"2.35",( 4 << 16 ) + evSetAspect );
    }
 
   if ( guiIntfStruct.Playing && guiIntfStruct.demuxer && guiIntfStruct.StreamType != STREAMTYPE_DVD )
@@ -437,13 +537,13 @@ GtkWidget * create_PopUpMenu( void )
     
     if ( c > 1 )
      {
-      SubMenu=AddSubMenu( Menu,MSGTR_MENU_AudioTrack );
+      SubMenu=AddSubMenu( window1, (const char*)empty_xpm, Menu,MSGTR_MENU_AudioTrack );
       for ( i=0;i < MAX_A_STREAMS;i++ )
        if ( ((demuxer_t *)guiIntfStruct.demuxer)->a_streams[i] )
         {
          char tmp[32];
          snprintf( tmp,32,MSGTR_MENU_Track,i );
-         AddMenuItem( SubMenu,tmp,( i << 16 ) + evSetAudio );
+         AddMenuItem( window1, (const char*)empty_xpm, SubMenu,tmp,( i << 16 ) + evSetAudio );
         }
      }
 
@@ -452,24 +552,24 @@ GtkWidget * create_PopUpMenu( void )
     
     if ( c > 1 )
      {
-      SubMenu=AddSubMenu( Menu,MSGTR_MENU_VideoTrack );
+      SubMenu=AddSubMenu( window1, (const char*)empty_xpm, Menu,MSGTR_MENU_VideoTrack );
       for ( i=0;i < MAX_V_STREAMS;i++ )
        if ( ((demuxer_t *)guiIntfStruct.demuxer)->v_streams[i] )
         {
          char tmp[32];
          snprintf( tmp,32,MSGTR_MENU_Track,i );
-         AddMenuItem( SubMenu,tmp,( i << 16 ) + evSetVideo );
+         AddMenuItem( window1, (const char*)empty_xpm, SubMenu,tmp,( i << 16 ) + evSetVideo );
         }
      }
    }
 
   AddSeparator( Menu );
-  MenuItem=AddMenuCheckItem( Menu,MSGTR_MENU_Mute,mixer.muted,evMute );
+  MenuItem=AddMenuCheckItem( window1, (const char*)sound_xpm, Menu,MSGTR_MENU_Mute,mixer.muted,evMute );
   if ( !guiIntfStruct.AudioType ) gtk_widget_set_sensitive( MenuItem,FALSE );
-  AddMenuItem( Menu,MSGTR_MENU_PlayList, evPlayList );
-  AddMenuItem( Menu,MSGTR_MENU_SkinBrowser, evSkinBrowser );
-  AddMenuItem( Menu,MSGTR_MENU_Preferences, evPreferences );
-  AddMenuItem( Menu,MSGTR_Equalizer, evEqualizer );
+  AddMenuItem( window1, (const char*)pl_xpm, Menu,MSGTR_MENU_PlayList, evPlayList );
+  AddMenuItem( window1, (const char*)skin_xpm, Menu,MSGTR_MENU_SkinBrowser, evSkinBrowser );
+  AddMenuItem( window1, (const char*)prefs_xpm, Menu,MSGTR_MENU_Preferences, evPreferences );
+  AddMenuItem( window1, (const char*)eq_xpm, Menu,MSGTR_Equalizer, evEqualizer );
 
   if ( guiIntfStruct.NoWindow == False )
    {
@@ -481,9 +581,9 @@ GtkWidget * create_PopUpMenu( void )
            ( appMPlayer.subWindow.Height == guiIntfStruct.MovieHeight * 2 ) ) b2=1;
 	   else b1=1;
      } else b1=!appMPlayer.subWindow.isFullScreen;
-    N=AddMenuCheckItem( Menu,MSGTR_MENU_NormalSize"      ",b1,evNormalSize );
-    D=AddMenuCheckItem( Menu,MSGTR_MENU_DoubleSize,b2,evDoubleSize );
-    F=AddMenuCheckItem( Menu,MSGTR_MENU_FullScreen,appMPlayer.subWindow.isFullScreen,evFullScreen );
+    N=AddMenuCheckItem( window1, (const char*)normal_xpm, Menu,MSGTR_MENU_NormalSize"      ",b1,evNormalSize );
+    D=AddMenuCheckItem( window1, (const char*)double_xpm, Menu,MSGTR_MENU_DoubleSize,b2,evDoubleSize );
+    F=AddMenuCheckItem( window1, (const char*)fs_xpm, Menu,MSGTR_MENU_FullScreen,appMPlayer.subWindow.isFullScreen,evFullScreen );
    }
 
   if ( !gtkShowVideoWindow && !guiIntfStruct.Playing )
@@ -494,7 +594,7 @@ GtkWidget * create_PopUpMenu( void )
    }
 
   AddSeparator( Menu );
-  AddMenuItem( Menu,MSGTR_MENU_Exit, evExit );
+  AddMenuItem( window1, (const char*)exit_xpm, Menu,MSGTR_MENU_Exit, evExit );
 
  return Menu;
 }

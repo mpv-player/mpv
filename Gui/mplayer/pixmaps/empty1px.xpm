@@ -1,0 +1,5 @@
+/* XPM */
+static char * empty1px_xpm[] = {
+"1 1 1 1",
+" 	c None",
+" "};
