@@ -1635,7 +1635,8 @@ end
 <P>To get native DirectX video (<CODE>-vo directx</CODE>), install
   <A HREF="http://www.videolan.org/vlc/dx7headers.tgz">DirectX 7 header files</A>
   and recompile. This, together with <CODE>-ao win32</CODE> should give you best
-  results.</P>
+  results. If the image is distorted, try turning off hardware acceleration with
+  <CODE>-vo directx:noaccel</CODE>.</P>
 
 <P>You will have to go to the MPlayer directory, and copy or symlink
   <CODE>etc/cygwin_inttypes.h</CODE> to <CODE>/usr/include/inttypes.h</CODE> to
