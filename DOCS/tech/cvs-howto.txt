@@ -91,14 +91,13 @@ II. POLICY / RULES:
 4. Do not change behavior of the program (renaming options etc) without
    discussing it first at the mplayer-dev-eng mailing list. Do not remove
    functionality from the code. Just improve!
-
-4.B. Do not commit changes to the build system (Makefiles, configure script)
-   which changes behaviour, defaults etc, without asking (and being accepted)
-   on the mplayer-dev-eng maillist. The same applies to compiler warning fixes,
-   trivial-looking fixes. We usually have the reason not doing things that way.
-   Send them as patches to the maillist, and if the code maintainers say OK,
-   then you may commit. This paragraph doesn't apply to your own files
-   (written and/or maintained by you).
+   Do not commit changes to the build system (Makefiles, configure script)
+   which change behaviour, defaults etc, without asking (and your change being
+   accepted) on the mplayer-dev-eng mailing list first. The same applies to
+   compiler warning fixes and trivial looking fixes. We usually have a reason
+   for doing things the way we do. Send them as patches to the mailing list,
+   and if the code maintainers say OK, you may commit. This does not apply to
+   files written and/or maintained by you.
    
 5. We refuse source indentation and other cosmetical changes, such commits will
    be rejected and removed. Every developer has his own indentation style, you
