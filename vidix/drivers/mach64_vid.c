@@ -1002,6 +1002,7 @@ int vixSetGrKeys(const vidix_grkey_t *grkey)
 			  ((mach64_grkey.ckey.blue &0xF8)>>3)
 			| ((mach64_grkey.ckey.green&0xFC)<<3)
 			| ((mach64_grkey.ckey.red  &0xF8)<<8);
+		besr.graphics_key_clr=le2me_32(besr.graphics_key_clr);
 		break;
 	case 24:
 		besr.graphics_key_msk=0xFFFFFF;
