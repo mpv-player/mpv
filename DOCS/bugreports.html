@@ -95,12 +95,14 @@ examples:<UL>
 <P><B><I>4. If the problem is specific to one or a few files,
   then please upload that file to:</I></B></P>
 <P><CODE>&nbsp;&nbsp;&nbsp;ftp://mplayerhq.hu/MPlayer/incoming/</CODE></P>
+  Also upload a small .txt file with the same name as your file,
+  describing the problem!<BR>
   Usually first 1-5 MB of the file is enough to reproduce
   the problem, but first you should try it:
 <P><CODE>&nbsp;&nbsp;&nbsp;dd if=yourfile of=smallfile bs=1k count=1024</CODE></P>
   (it will cut first 1MB of 'yourfile' and save to 'smallfile')
   Then try again on this small file, and if bug still exists
-  then it's enough to upload this small file.
+  then it's enough to upload this small file.<BR>
   NEVER send such files via mail! Upload it, and send only
   the path/filename of the file on the FTP.
   If the file is accessible on the net, then sending the
@@ -130,6 +132,10 @@ printf "esi=%08lX\n",$esi<BR>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=command_file >mplayer.bug</CODE></P>
 
 <P><B><I>5.b.: run MPlayer in gdb:</I></B></P>
+<P>Re-compile mplayer with debugging code enabled:<BR>
+./configure --enable-debug<BR>
+make
+</P>
 <P>[at root/user shell prompt:]<BR>
 &nbsp;&nbsp;&nbsp;&nbsp;<CODE># gdb mplayer</CODE><BR>
 [at gdb prompt:]<BR>
