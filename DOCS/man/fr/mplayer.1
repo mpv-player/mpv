@@ -1,4 +1,4 @@
-.\" synced with 1.763
+.\" synced with 1.765
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "04 Octobre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "07 Octobre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -172,7 +172,7 @@ Il fonctionne avec X11, XV, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca,
 DirectFB, Quartz, mais vous pouvez aussi utiliser GGI, SDL (et de cette
 façon tous leurs drivers), VESA (sur n'importe quelle carte compatible
 VESA, même sans X11), quelques drivers spécifiques à certaines cartes
-(pour Matrox, 3Dfx et ATI) et certaines carte de décompression MPEG,
+(pour Matrox, 3Dfx et ATI) et certaines cartes de décompression MPEG,
 telles que les Siemens DVB, DXR2 et DXR3/\:Hollywood+.
 La plupart d'entre eux gèrent le redimensionnement logiciel ou
 matériel, vous pouvez donc apprécier les films en plein écran.
@@ -440,8 +440,8 @@ cette option à une valeur entière supérieure à 1.
 Plus cette valeur sera élevée, plus le débit sera proche de \-nosound.
 Essayez \-autosync\ 30 pour faire disparaître les problèmes avec les drivers
 audio qui ne possèdent pas une mesure de décalage audio parfaite.
-Avec cette valeur, si de large écarts de synchro A/\:V se produisent, il ne
-mettront que une seconde ou deux pour disparaître.
+Avec cette valeur, si de larges écarts de synchro A/\:V se produisent, il ne
+mettront qu'une seconde ou deux pour disparaître.
 Ce temps de réaction devrait être le seul effet de bord si cette option est
 activé, pour tous les drivers audio.
 .
@@ -746,8 +746,9 @@ la quantité demandée de mémoire.
 .TP
 .B \-bandwidth <valeur> (réseau uniquement)
 Spécifie la bande passante maximum pour le streaming par le réseau (pour les
-serveurs capable d'envoyer du contenu à différents débits).
-Utile si vous voulez voir en direct avec un connexion lente des média streamés.
+serveurs capables d'envoyer du contenu à différents débits).
+Utile si vous voulez voir en direct avec une connexion lente des média
+streamés.
 .
 .TP
 .B \-cdrom-device <périph>
@@ -800,7 +801,7 @@ adressée en tant que LBA\ 0.
 Certains lecteurs Toshiba ont besoin de cela pour garder des transitions de
 pistes correctes.
 .IPs toc-offset=<valeur>
-Ajoutez <valeur> secteurs aux valeurs renvoyés pendant l'adressage des pistes.
+Ajouter <valeur> secteurs aux valeurs renvoyées pendant l'adressage des pistes.
 Peut être négatif.
 .IPs (no)skip
 (jamais) accepter les reconstructions imparfaites de données.
@@ -1232,8 +1233,8 @@ choisit un mode audio:
 Par défaut, le nombre de canaux audio est déterminé par l'interrogation
 automatique de la carte tv.
 Cette option vous permet de forcer l'enregistrement stereo/\:mono sans
-tenir compte de l'option amode et des valeurs retournés par v4l.
-Elle peut être utilisé quand la carte tv est incapable de renvoyer le
+tenir compte de l'option amode et des valeurs retournées par v4l.
+Elle peut être utilisée quand la carte tv est incapable de renvoyer le
 mode audio courant.
 .IPs adevice=<valeur>
 Indique un périphérique audio.
@@ -2467,7 +2468,7 @@ Sélectionnne le pilote à utiliser comme source pour l'incrustation dans X11.
 .PD 1
 .
 .TP
-.B xvmc (X11, \-vc ffmpeg12mc uniquement)
+.B xvmc (X11 avec \-vc ffmpeg12mc uniquement)
 Ce pilote emploie l'extension XvMC (X Video Motion Compensation) de
 XFree86 4.x pour accélérer les lectures de médias MPEG1/\:2 et VCR2.
 .PD 0
