@@ -457,8 +457,11 @@ set_volume:
 	  default: movie_aspect=-1;
 	 }
 	wsClearWindow( appMPlayer.subWindow );
+#ifdef USE_DVDREAD
 	if ( guiIntfStruct.StreamType == STREAMTYPE_DVD ) goto play_dvd_2;
-	 else guiIntfStruct.FilenameChanged=1;
+	 else 
+#endif
+	 guiIntfStruct.FilenameChanged=1;
 	break;
 
 // --- timer events
