@@ -6,6 +6,10 @@
  */
 
 /* ChangeLog added 2002-01-10
+ * 2002-03-23:
+ *  Thanks to Marcel Hild <hild@b4mad.net> the jitter-bug experienced
+ *  with some videos have been fixed, many thanks goes to him.
+ *
  * 2002-03-16:
  *  Fixed problems with fame, it gives a better picture than avcodec,
  *  but is slightly slower. Most notably the wobbling effect is gone
@@ -193,7 +197,8 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 {
 	int tmp1, tmp2, size;
 	em8300_register_t reg;
-    
+	extern float monitor_aspect;
+	
 	/* Softzoom turned on, downscale */
 	/* This activates the subpicture processor, you can safely disable this and still send */
 	/* broken subpics to the em8300, if it's enabled and you send broken subpics you will end */
@@ -235,6 +240,9 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	v_width = width;
 	v_height = height;
 
+	/* Set monitor_aspect to avoid jitter */
+	monitor_aspect = (float) width / (float) height;
+	
 	/* libavcodec requires a width and height that is x|16 */
 	aspect_save_orig(width, height);
 	aspect_save_prescale(d_width, d_height);
