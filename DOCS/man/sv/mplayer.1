@@ -166,14 +166,21 @@ mencoder \- filmkodare
 .
 .SH BESKRIVNING
 .B mplayer
-är en filmspelare, ursprungligen för Linux, men kan köras på de flesta platformar (se dokumentationen). Den spelare mestadels MPEG/\:VOB, AVI, ASF/\:WMA/\:WMV, RM, QT/\:MOV/\:MP4, OGG/\:OGM, MKV, VIVO, FLI, NuppelVideo, yuv4mpeg, FILM samt RoQ filer, är stödd av många nativa och binära codec. Du kan kolla VideoCD, SVCD, DVD, 3ivx, DivX\ 3/\:4/\:5 samt även WMV filmer.
+är en filmspelare, ursprungligen för Linux, men kan köras på de flesta platformar (se dokumentationen). 
+Den spelare mestadels MPEG/\:VOB, AVI, ASF/\:WMA/\:WMV, RM, QT/\:MOV/\:MP4, OGG/\:OGM, MKV, VIVO, FLI, NuppelVideo, yuv4mpeg, FILM samt RoQ filer, är stödd av många nativa och binära codec. 
+Du kan kolla VideoCD, SVCD, DVD, 3ivx, DivX\ 3/\:4/\:5 samt även WMV filmer.
 .PP
-MPlayer stödjer en uppsjö av video- och audio-ut-drivrutiner. Den funkar med X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca, DirectFB, Quartz, men du kan även använda GGI, SDL (pch alla deras drivrutiner), VESA (på verenda VESA-kompatibla kort, även utan X11), vissa låglevelade kortspecifika kortsdrivrutiner (för Matrox, 3Dfx samt ATI) och vissa hårdvaru-MPEG-avkodarkort, såsom Siemens DVB, DXR2 samt DXR3/\:Hollywood+. De flesta stödjer mjukvaro och hårdvaruskalning, så du kan kolla på filmer i fullskärmsmode
+MPlayer stödjer en uppsjö av video- och audio-ut-drivrutiner. 
+Den funkar med X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca, DirectFB, Quartz, men du kan även använda GGI, SDL (pch alla deras drivrutiner), VESA (på verenda VESA-kompatibla kort, även utan X11), vissa låglevelade kortspecifika kortsdrivrutiner (för Matrox, 3Dfx samt ATI) och vissa hårdvaru-MPEG-avkodarkort, såsom Siemens DVB, DXR2 samt DXR3/\:Hollywood+. 
+De flesta stödjer mjukvaro och hårdvaruskalning, så du kan kolla på filmer i fullskärmsmode
 .PP
-MPlayer har "onscreen display" (OSD) för statusinformation, snygga stora antialiserade skuggade textningstexter samt visuellt återgivning av tagentbordskontroller. Europeiska/\:ISO 8859-1,2 , kyrilliska, samt koreanska typsnitt är stött jämnsides med 12 textningsformat (MicroDVD, SubRip, OGM, SubViewer, Sami, VPlayer, RT, SSA, AQTitle, JACOsub, PJS samt vår egna: MPsub) och DVD-textning (SPU-ström, VOBsub och Closed Captions).
+MPlayer har "onscreen display" (OSD) för statusinformation, snygga stora antialiserade skuggade textningstexter samt visuellt återgivning av tagentbordskontroller. 
+Europeiska/\:ISO 8859-1,2 , kyrilliska, samt koreanska typsnitt är stött jämnsides med 12 textningsformat (MicroDVD, SubRip, OGM, SubViewer, Sami, VPlayer, RT, SSA, AQTitle, JACOsub, PJS samt vår egna: MPsub) och DVD-textning (SPU-ström, VOBsub och Closed Captions).
 .PP
 .B mencoder
-(MPlayer's Movie Encoder) är en enkel filmkodare, framtagen till att koda MPlayer-spelbara filmer (se ovan) till andra MPlayer-spelbara format (se nedan). Den kodar till DivX4, XviD, någon av libavcodecs codec, samt PCM/\:MP3/\:VBRMP3-audio i 1, 2 eller 3 pass. Även så har den strömkopieringsförmåga, ett kraftfullt filtersystem (crop, expand, flip, postprocess, rotate, scale, noise, rgb/\:yuv conversion) och mera.
+(MPlayer's Movie Encoder) är en enkel filmkodare, framtagen till att koda MPlayer-spelbara filmer (se ovan) till andra MPlayer-spelbara format (se nedan). 
+Den kodar till DivX4, XviD, någon av libavcodecs codec, samt PCM/\:MP3/\:VBRMP3-audio i 1, 2 eller 3 pass. 
+Även så har den strömkopieringsförmåga, ett kraftfullt filtersystem (crop, expand, flip, postprocess, rotate, scale, noise, rgb/\:yuv conversion) och mera.
 .PP
 .B gmplayer
 är MPlayer med ett grafiskt användargränssnitt (GUI). Det har samma alternativ som MPlayer.
@@ -328,7 +335,12 @@ Varje 'flag'-argument har en 'noflag'-motsvarighet, d.v.s.\& motsatsen till \-fs
 .PP
 Om ett argument är markerad som (XXX endast), kommer det endast att fungera i samarbete med XXX eller om XXX är inkompilerat.
 .PP
-Du kan lägga alla argument i en konfigurationsfil vilken kommer att bli inläst varje gång MPlayer körs. Den systemvida konfigurationsfilen 'mplayer.conf' är i din konfigurationskatalog (d.v.s.\& /etc/mplayer eller /usr/local/etc/mplayer), den användarspecifika är lokaliserad i '~.mplayer/config'. Användarspecifika inställningar skriver över systemvida inställningar, och argument angivna på kommandoraden skriver över bägge. Syntaxen i konfigurationsfilen är 'option=<value>', allting efter ett '#' är antaget som en kommentar. Inställningar som fungerar utan värden kan bli aktiverade genom att sätta dem till 'yes', '1' eller 'true', och kan bli avaktiverade genom att sätta dem till 'no', '0' eller 'false'. Även underargument kan bli specifierade på detta vis.
+Du kan lägga alla argument i en konfigurationsfil vilken kommer att bli inläst varje gång MPlayer körs. 
+Den systemvida konfigurationsfilen 'mplayer.conf' är i din konfigurationskatalog (d.v.s.\& /etc/mplayer eller /usr/local/etc/mplayer), den användarspecifika är lokaliserad i '~.mplayer/config'. 
+Användarspecifika inställningar skriver över systemvida inställningar, och argument angivna på kommandoraden skriver över bägge.
+Syntaxen i konfigurationsfilen är 'option=<value>', allting efter ett '#' är antaget som en kommentar. 
+Inställningar som fungerar utan värden kan bli aktiverade genom att sätta dem till 'yes', '1' eller 'true', och kan bli avaktiverade genom att sätta dem till 'no', '0' eller 'false'. 
+Även underargument kan bli specifierade på detta vis.
 .PP
 .I EXEMPEL:
 .nf
@@ -343,7 +355,8 @@ mf=type=png:fps=25
 vf=eq2=1.0:-0.8
 .fi
 .PP
-Du kan även skriva filspecifika konfigurationsfiler. Om du önskar att ha en konfigurationsfil för en fil kallad 'movie.avi', skapa då en fil kallad 'movie.avi.conf' med de filspecifika inställningar i sig och placera den i ~/.mplayer eller i samma katalog som filen.
+Du kan även skriva filspecifika konfigurationsfiler. 
+Om du önskar att ha en konfigurationsfil för en fil kallad 'movie.avi', skapa då en fil kallad 'movie.avi.conf' med de filspecifika inställningar i sig och placera den i ~/.mplayer eller i samma katalog som filen.
 .
 .
 .
@@ -384,72 +397,73 @@ skriver ut allting relaterat till inputtolkar (parser debug)
 .
 .TP
 .B \-autoq <kvalité> (används med \-vf [s]pp)
-Dynamiskt ändra nivån av afterproccessering beroende på tillgängliga CPU-cyklar. Värdet du specifierar kommer att bli den maximalt använda nivån, vanligtvis så kan du specifiera stora värden. Du måste använda \-vf [s]pp utan paramertar för att få detta att funka.
+Dynamiskt ändra nivån av afterproccessering beroende på tillgängliga CPU-cyklar. 
+Värdet du specifierar kommer att bli den maximalt använda nivån, vanligtvis så kan du specifiera stora värden. 
+Du måste använda \-vf [s]pp utan paramertar för att få detta att funka.
 .
 .TP
 .B \-autosync <faktor>
-Gradvist ställa in A/V-synkning baserat på audiofördröjningsmätning. On du anger \-autosync\ 0 (standard), kommer bildramsanpassningen att vara baserad endast av audiofördröjningsmätning. Om du anger \-autosync\ 1 så kommer liknande att inträffa, förutom att A/V-korrektionsalgoritmen kommer att ändras något. Ett udda videoframerate i en film vilken spelar bra med \-nosound kan ofta bli hjälot med att sätta denna till ett värde större än 1. Ju större värde, ju närmare anpassningen kommer att vara \-nosound. Testa \-autosync\ 30 för att plana ut problem med ljuddrivrutiner vilka inte implementerar en perfekt audiofördröjningsmätning. Med detta värde, om stora A/V-synkningsfel inträffar, kommer det endast att ta 1 eller 2\ sekunder att plana ut. Denna fördröjning i reaktionstid till plötslig A/V-fel torde varaa den enda sidoeffekt med att ha denna inställd aktiverad, för atta ljuddrivrutiner.
+Gradvist ställa in A/V-synkning baserat på audiofördröjningsmätning. 
+Om du anger \-autosync\ 0 (standard), kommer bildramsanpassningen att vara baserad endast av audiofördröjningsmätning. 
+Om du anger \-autosync\ 1 så kommer liknande att inträffa, förutom att A/V-korrektionsalgoritmen kommer att ändras något. 
+Ett udda videoframerate i en film vilken spelar bra med \-nosound kan ofta bli hjälpt med att sätta denna till ett värde större än 1. 
+Ju större värde, ju närmare anpassningen kommer att vara \-nosound. 
+Testa \-autosync\ 30 för att plana ut problem med ljuddrivrutiner vilka inte implementerar en perfekt audiofördröjningsmätning. 
+Med detta värde, om stora A/V-synkningsfel inträffar, kommer det endast att ta 1 eller 2\ sekunder att plana ut. 
+Denna fördröjning i reaktionstid till plötslig A/V-fel torde vara den enda sidoeffekt med att ha denna inställd aktiverad, för alla ljuddrivrutiner.
 .
 .TP
 .B \-benchmark
-Skriver ut viss statistik ang. CPU-användning samt tappade bildrutor vid slutet att uppspelning. Använd i kombination med \-nosound samt \-vo null för benchmarkning av endast videocodec.
+Skriver ut viss statistik ang. CPU-användning samt tappade bildrutor vid slutet att uppspelning. 
+Använd i kombination med \-nosound samt \-vo null för benchmarkning av endast videocodec.
 .br
 .I NOTERA:
 Med denna inställning så kommer MPlayer att ignorera bildramsduration vid spelande av endast video (du kan tänka detta som oändlig bps)
 .
-.\" TODO Translate rest...
 .TP
-.B \-colorkey <number>
-Changes the colorkey to an RGB value of your choice.
-0x000000 is black and 0xffffff is white.
-Only supported by the cvidix, fbdev, svga, vesa, winvidix, xmga, xvidix and
-xover video out drivers.
+.B \-colorkey <nummer>
+Ändrar färgnyckeln till av dig valt RGB-värde. 
+RGB-värdet är i form av 0xrrggbb där varje färg är ett värde från 00 till ff (0 till 255) där 0x000000 är svart samt 0xffffff är vitt. 
+Detta stödjs endast av cvidix-, fbdev-, svga-, vesa-, winvidix-, xmga-, xvidix- samt xover-video-ut-drivrutinerna.
 .
 .TP
 .B \-nocolorkey
-Disables colorkeying.
-Only supported by the cvidix, fbdev, svga, vesa, winvidix, xmga, xvidix and
-xover video out drivers.
+Inaktiverar färgnyckling. \" colorkeying?
+Dtödjs endast av cvidix-, fbdev-, svga-, vesa-, winvidix-, xmga-, xvidix- samt xover-video-ut-dtrivrutinerna.
 .
 .TP
-.B \-edl <filename> (EDL only)
-Enables edit decision list (EDL) actions during playback.
-Video will be skipped over and audio will be muted and unmuted according to
-the entries in the given file.
-See DOCS/\:HTML/\:en/\:edl.html for details on how to use this.
+.B \-edl <filnamn> (Endast EDL)
+Aktivera händelser för val i redigeringslista (EDL) under uppspelning. 
+Video kommer att skippas och audio kommer att bli mutad/omutad i relation till inlägg i given fil. 
+Se  DOCS/\:HTML/\:en/\:edl.html för detaljer att använda detta \" FIXME sv when that translation is done
 .
 .TP
-.B \-edlout <filename> (EDL only)
-Creates a new file and writes edit decision list (EDL) records to that file.
-During playback, when the user hits 'i', an entry to skip over the last two
-seconds of playback will be written to the file.
-This provides a starting point from which the user can fine-tune EDL entries
-later.
-See DOCS/\:HTML/\:en/\:edl.html for details.
+.B \-edlout <filnamn> (Endast EDL)
+Skapar en ny fil och skriver redigeringsvalslistsinspelning till denna fil. 
+Under uppspelning, när användaren knappar på 'i', ett inlägg för att hoppa över de två sista minuterna komma att skrivas in i filen.
+Detta möjliggör en startpunkt från det attanvändaren kan finjustea EDL-inläggen senare. Se DOCS/\:HTML/\:en/\:edl.html för detaljer. \" FIXME -''-
 .
 .TP
-.B \-enqueue (GUI only)
-Enqueue files given on the command line in the playlist instead of playing them
-immediately.
+.B \-enqueue (Endast GUI)
+Lägg till angivna filer till spellista istället för att spela upp dem på direkten.
 .
 .TP
-.B \-fixed-vo (BETA CODE!)
-Enforces a fixed video system for multiple files (one (un)initialisation for
-all files).
-Therefore only one window will be opened for all files.
-Currently the following drivers are fixed-vo compliant: gl2, mga, svga, x11,
-xmga, xv, xvidix and dfbmga.
+.B \-fixed-vo (BETAKOD!)
+Forcerar ett fixerat videosystem för multipla filer ( en (de)initiering för alla filer). 
+Därav endast ett fönster kommer att bli öppnat för alla filer. 
+För stunden endast följande drivrutiner stödjer detta: gl2, mga, svga, x11, xmga, xv, xvidix samt dfbmga.
 .
 .TP
-.B \-framedrop (also see \-hardframedrop)
-Skip displaying some frames to maintain A/\:V sync on slow systems.
-Video filters are not applied to such frames.
-For B-frames even decoding is skipped completely.
+.B \-framedrop (se även \-hardframedrop)
+Skippa visning av vissa bildrutor för att fårtfå en A/V-synkronisering på slöa system.
+Videofilter är inte applicerade på sådana bildrutor. 
+För B-bildrutor, även avkodning skippas helt.
 .
 .TP
 .B \-h, \-help, \-\-help
-Show short summary of options.
+Visa kort introduktion av argument.
 .
+.\" Translating FLAG
 .TP
 .B \-hardframedrop
 More intense frame dropping (breaks decoding).
