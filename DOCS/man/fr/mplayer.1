@@ -1,4 +1,4 @@
-.\" synced with 1.921
+.\" synced with 1.923
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "21 Mars 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "28 Mars 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -5400,7 +5400,7 @@ Fait une translation de champs de 1/\:4 pixel avec interpolation linéaire
 (pas de saut).
 .IPs 4
 Fait une translation de champs de 1/\:4 pixel avec le filtre 4tap (meilleure
-qualité).
+qualité) (par défaut).
 .RE
 .PD 1
 .
@@ -6599,9 +6599,18 @@ plus les quantum seront semblables d'une trame à l'autre
 (variations plus basses).
 .
 .TP
-.B vqcomp=<valeur>
-Compression quantum, dépend de vrc_eq (passe\ 1/\:2)
+.B vqcomp=<0.0\-1.0>
+Compression quantum, vrc_eq dépend de cette option (passe\ 1/\:2)
 (par défaut\ : 0.5).
+Par exemple, en prenant l'équation de contrôle de flux (rate control) par
+défaut, si vqcomp=1.0, le contrôle de flux alloue à chaque trame le nombre
+de bits nécessaire pour qu'elles soient toute encodées avec le même quantum
+(que cela soit nécessaire ou non).
+Si vqcomp=0.0, le contrôle de flux alloue à chaque trame le même nombre de
+bits, c-à-d un encodage à débit binaire strictement constant.
+.I NOTE\ :
+Ceci sont des exemples extrêmes et ne devraient jamais être utilisées.
+La qualité subjective étant optimale pour des valeurs entre ces deux extrêmes.
 .
 .TP
 .B vrc_eq=<équation>
