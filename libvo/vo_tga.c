@@ -11,8 +11,8 @@
  * The 16 bit file are loaded without problem from Gimp and ImageMagick but give an error
  * with entice (a visualizer from the enlightenment package that use the imlib2 package).
  *
- * In 32 bit mode the alpha channel is set to 255 (0xff). I may not work with big endian
- * machine (is probably enought to change the TGA_ALPHA32 from 0xff000000 to 0x000000ff).
+ * In 32 bit mode the alpha channel is set to 255 (0xff). For big endian
+ * machines, TGA_ALPHA32 changes from 0xff000000 to 0x000000ff, and TGA_SHIFT32 from 0 to 8.
  *
  * I need to fill the alpha channel because entice consider that alpha channel (and displays
  * nothing, only the background!), but ImageMacick (the program display) or gimp doesn't
@@ -35,8 +35,13 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 
-/* This must be changed for Motorola type processor ? */
+#ifdef WORDS_BIGENDIAN
+#define TGA_ALPHA32   0x000000ff
+#define TGA_SHIFT32   8
+#else
 #define TGA_ALPHA32   0xff000000
+#define TGA_SHIFT32   0
+#endif
 
 static vo_info_t info =
 {
@@ -121,7 +126,7 @@ static int write_tga( char *file, int bpp, int dx, int dy, uint8_t *buf, int str
                     s = (uint32_t *)buf;
                     d = line_buff;
                     for(x = 0; x < dx; x++) {
-                        *d++ = *s++ | TGA_ALPHA32;
+                        *d++ = ((*s++) << TGA_SHIFT32) | TGA_ALPHA32;
                     }
                     if (fwrite(line_buff, wb, 1, fo) != 1) {
                         er = 4;
