@@ -113,6 +113,7 @@ extern guiInterface_t guiIntfStruct;
 #define guiClearStruct      10
 #define guiReDraw	    11
 #define guiSetVolume        12
+#define guiSetDefaults	    13
 
 #define guiSetStop  0
 #define guiSetPlay  1
@@ -128,6 +129,21 @@ extern void guiInit( void );
 extern void guiDone( void );
 extern void guiGetEvent( int type,char * arg );
 extern void guiEventHandling( void );
+
+#define gtkSetContrast   0
+#define gtkSetBrightness 1
+#define gtkSetHue	 2
+#define gtkSetSaturation 3
+#define gtkSetEqualizer  4
+
+extern float gtkContrast;
+extern float gtkBrightness;
+extern float gtkHue;
+extern float gtkSaturation;
+
+extern float gtkEquChannels[6][10];
+
+extern void gtkSet( int cmd,float param, void * vparam );
 
 #define gstrdup( s,ss ) { s=malloc( strlen( ss ) + 3 ); strcpy( s,ss ); }
 

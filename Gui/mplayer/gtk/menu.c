@@ -385,6 +385,7 @@ GtkWidget * create_PopUpMenu( void )
   AddMenuItem( Menu,MSGTR_MENU_PlayList, evPlayList );
   AddMenuItem( Menu,MSGTR_MENU_SkinBrowser, evSkinBrowser );
   AddMenuItem( Menu,MSGTR_MENU_Preferences, evPreferences );
+  AddMenuItem( Menu,MSGTR_Equalizer, evEqualizer );
   AddSeparator( Menu );
   AddMenuItem( Menu,MSGTR_MENU_Exit, evExit );
 

@@ -46,6 +46,7 @@ int gtkInited = 0;
 #include "gtk/opts.h"
 #include "gtk/menu.h"
 #include "gtk/url.h"
+#include "gtk/eq.h"
 
 // --- init & close gtk
 
@@ -134,6 +135,10 @@ void gtkShow( int type,char * param )
 {
  switch( type )
   {
+   case evEqualizer:
+	ShowEqualizer();
+	gtkSetLayer( Equalizer );
+	break;
    case evSkinBrowser:
 	ShowSkinBrowser();
 //        gtkClearList( SkinList );

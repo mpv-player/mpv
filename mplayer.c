@@ -208,6 +208,7 @@ char* audio_lang=NULL;
 char* dvdsub_lang=NULL;
 static char* spudec_ifo=NULL;
 int vcd_track=0;
+char* filename=NULL; //"MI2-Trailer.avi";
 
 // cache2:
 static int stream_cache_size=0;
@@ -492,7 +493,6 @@ static sh_video_t *sh_video=NULL;
 // for multifile support:
 play_tree_iter_t* playtree_iter = NULL;
 
-char* filename=NULL; //"MI2-Trailer.avi";
 int file_format=DEMUXER_TYPE_UNKNOWN;
 
 int delay_corrected=1;
@@ -815,27 +815,8 @@ if(!use_stdin && !slave_mode){
 #endif
        } 
 
-#if defined( HAVE_VCD ) && defined( USE_DVDREAD )
-     if ( guiIntfStruct.DiskChanged )
-      {
-#ifdef USE_DVDREAD 
-       switch ( guiIntfStruct.StreamType )
-        {
-         case STREAMTYPE_DVD: filename=DEFAULT_DVD_DEVICE; break;
-	}
-#endif
-       guiIntfStruct.DiskChanged=0;
-       guiGetEvent( guiCEvent,(char *)guiSetPlay );
-      }
-#endif
+      guiGetEvent( guiSetDefaults,NULL );
 
-#ifdef USE_SUB
-      if ( guiIntfStruct.SubtitleChanged || !guiIntfStruct.FilenameChanged )
-       {
-        if ( ( guiIntfStruct.Subtitlename )&&( guiIntfStruct.Subtitlename[0] != 0 ) ) sub_name=guiIntfStruct.Subtitlename;
-        guiIntfStruct.SubtitleChanged=0;
-       }
-#endif
       if ( ( guiIntfStruct.FilenameChanged || !filename )
 #ifdef USE_DVDREAD
            && ( guiIntfStruct.StreamType != STREAMTYPE_DVD )
@@ -862,7 +843,6 @@ if(!use_stdin && !slave_mode){
          }
    	guiIntfStruct.FilenameChanged=0;
        } 
-     audio_stream=guiIntfStruct.AudioFile; 
     }
 #endif
 //---------------------------------------------------------------------------

@@ -239,6 +239,7 @@ static char help_text[]=
 #define MSGTR_AudioFileSelect "Select external audio channel ..."
 #define MSGTR_MessageBox "MessageBox"
 #define MSGTR_PlayList "PlayList"
+#define MSGTR_Equalizer "Equalizer"
 #define MSGTR_SkinBrowser "Skin Browser"
 
 // --- buttons ---

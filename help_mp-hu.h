@@ -233,6 +233,7 @@ static char help_text[]=
 #define MSGTR_OtherSelect "File kiválasztása ..."
 #define MSGTR_AudioFileSelect "Külsõ audio csatorna választása ..."
 #define MSGTR_MessageBox "Üzenetablak"
+#define MSGTR_Equalizer "Equalizer"
 #define MSGTR_PlayList "Lejátszási lista"
 #define MSGTR_SkinBrowser "Skin böngészõ"
 

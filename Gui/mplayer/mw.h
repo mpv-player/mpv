@@ -371,7 +371,7 @@ NoPause:
    case evSkinBrowser: gtkShow( evSkinBrowser,skinName ); break;
    case evAbout:       gtkShow( evAbout,NULL ); break;
    case evPreferences: gtkShow( evPreferences,NULL ); break;
-   case evEqualizer:   gtkMessageBox( GTK_MB_WARNING,"Sorry, this feature is not implemented yet ..." ); break;
+   case evEqualizer:   gtkShow( evEqualizer,NULL ); break;
 
    case evForward1min:      mplRelSeek( 60 );  break;
    case evBackward1min:     mplRelSeek( -60 ); break;

@@ -8,6 +8,7 @@
 #include "mplayer/play.h"
 #include "interface.h"
 #include "skin/skin.h"
+#include "mplayer/gtk/eq.h"
 
 #include "../mplayer.h"
 #include "mplayer/widgets.h"
@@ -17,6 +18,9 @@
 #include "../libvo/video_out.h"
 #include "../input/input.h"
 #include "../libao2/audio_out.h"
+#include "../mixer.h"
+#include "../libao2/audio_plugin.h"
+#include "../libao2/eq.h"
 
 #include <inttypes.h>
 #include <sys/types.h>
@@ -26,9 +30,27 @@
 
 guiInterface_t guiIntfStruct;
 
+char * gstrcat( char ** dest,char * src )
+{
+ char * tmp = NULL;
+
+ if ( !src ) return NULL;
+
+ if ( *dest )
+  {
+   tmp=malloc( strlen( *dest ) + strlen( src ) + 1 );
+   strcpy( tmp,*dest ); strcat( tmp,src ); free( *dest ); 
+  }
+  else
+   { tmp=malloc( strlen( src ) + 1 ); strcpy( tmp,src ); }
+ *dest=tmp;
+ return tmp;
+}
+
 void guiInit( void )
 {
  memset( &guiIntfStruct,0,sizeof( guiIntfStruct ) );
+ memset( &gtkEquChannels,0,sizeof( gtkEquChannels ) );
  appInit( (void*)mDisplay );
 }
 
@@ -187,11 +209,63 @@ void guiGetEvent( int type,char * arg )
 	 mixer_getvolume( &l,&r );
 	 guiIntfStruct.Volume=(r>l?r:l);
 	 if ( r != l ) guiIntfStruct.Balance=( ( r - l ) + 100 ) * 0.5f;
-	   else guiIntfStruct.Balance=0.0f;
+	   else guiIntfStruct.Balance=50.0f;
 	 btnModify( evSetVolume,guiIntfStruct.Volume );
 	 btnModify( evSetBalance,guiIntfStruct.Balance );
 	}
-        break;
+
+	if ( gtkEnableVideoEqualizer )
+	 {
+	  gtkSet( gtkSetContrast,gtkContrast,NULL );
+	  gtkSet( gtkSetBrightness,gtkBrightness,NULL );
+	  gtkSet( gtkSetHue,gtkHue,NULL );
+	  gtkSet( gtkSetSaturation,gtkSaturation,NULL );
+	 }
+	if ( gtkEnableAudioEqualizer )
+	 {
+	  equalizer_t eq;
+	  int i,j;
+	  for ( i=0;i<6;i++ )
+	    for ( j=0;j<10;j++ )
+	     {
+	      eq.channel=i; eq.band=j; eq.gain=gtkEquChannels[i][j];
+	      gtkSet( gtkSetEqualizer,0,&eq );
+	     }
+	 }
+	break;
+   case guiSetDefaults:
+#if defined( HAVE_VCD ) || defined( USE_DVDREAD )
+        if ( guiIntfStruct.DiskChanged )
+          {
+#ifdef USE_DVDREAD
+           switch ( guiIntfStruct.StreamType )
+            {
+             case STREAMTYPE_DVD: filename=DEFAULT_DVD_DEVICE; break;
+            }
+#endif
+           guiIntfStruct.DiskChanged=0;
+	   guiGetEvent( guiCEvent,(char *)guiSetPlay );
+	  }
+#endif
+
+#ifdef USE_SUB
+       if ( guiIntfStruct.SubtitleChanged || !guiIntfStruct.FilenameChanged )
+         {
+	  if ( ( guiIntfStruct.Subtitlename )&&( guiIntfStruct.Subtitlename[0] != 0 ) ) sub_name=guiIntfStruct.Subtitlename;
+	  guiIntfStruct.SubtitleChanged=0;
+	 }
+#endif
+				    
+        if ( guiIntfStruct.AudioFile ) audio_stream=guiIntfStruct.AudioFile;
+	  else if ( guiIntfStruct.FilenameChanged ) audio_stream=NULL;
+
+	if ( gtkEnableAudioEqualizer )
+	 {
+	  if ( ao_plugin_cfg.plugin_list ) { if ( !strstr( ao_plugin_cfg.plugin_list,"eq" ) )  gstrcat( &ao_plugin_cfg.plugin_list,"," ); }
+	    else gstrcat( &ao_plugin_cfg.plugin_list,"eq" );
+	 }
+	
+	break;
   }
 }
 
@@ -204,4 +278,58 @@ void guiEventHandling( void )
  gtkEventHandling();
  mplTimer=GetTimerMS() / 20;
 // if ( !( GetTimerMS()%2 ) ) 
+}
+
+// --- 
+
+float gtkContrast = 0.0f;
+float gtkBrightness = 0.0f;
+float gtkHue = 0.0f;
+float gtkSaturation = 0.0f;
+
+float gtkEquChannels[6][10];
+
+void gtkSet( int cmd,float fparam, void * vparam )
+{
+ mp_cmd_t * mp_cmd = (mp_cmd_t *)calloc( 1,sizeof( *mp_cmd ) );
+ equalizer_t * eq = (equalizer_t *)vparam;
+ 
+ switch ( cmd )
+  {
+   case gtkSetContrast:
+	mp_cmd->id=MP_CMD_CONTRAST;   mp_cmd->name=strdup( "contrast" );
+	gtkContrast=fparam;
+	break;
+   case gtkSetBrightness:
+	mp_cmd->id=MP_CMD_BRIGHTNESS; mp_cmd->name=strdup( "brightness" );
+	gtkBrightness=fparam;
+	break;
+   case gtkSetHue:
+	mp_cmd->id=MP_CMD_HUE;        mp_cmd->name=strdup( "hue" );
+	gtkHue=fparam;
+	break;
+   case gtkSetSaturation:
+	mp_cmd->id=MP_CMD_SATURATION; mp_cmd->name=strdup( "saturation" );
+	gtkSaturation=fparam;
+	break;
+   case gtkSetEqualizer:
+        if ( eq )
+	 {
+          gtkEquChannels[eq->channel][eq->band]=eq->gain;
+	  audio_plugin_eq.control( AOCONTROL_PLUGIN_EQ_SET_GAIN,(int)eq );
+	 }
+	 else
+	  {
+	   int i,j; equalizer_t tmp; tmp.gain=0.0f;
+	   memset( gtkEquChannels,0,sizeof( gtkEquChannels ) );
+	   for ( i=0;i<6;i++ )
+	    for ( j=0;j<10;j++ )
+	     { tmp.channel=i; tmp.band=j; audio_plugin_eq.control( AOCONTROL_PLUGIN_EQ_SET_GAIN,(int)&tmp ); }
+	  }
+	return;
+   default: free( mp_cmd ); return;
+  }
+ mp_cmd->args[0].v.i=(int)fparam;
+ mp_cmd->args[1].v.i=1;
+ mp_input_queue_cmd( mp_cmd );
 }

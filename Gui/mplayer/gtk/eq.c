@@ -9,81 +9,198 @@
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 
+#include "../../events.h"
+#include "../../../config.h"
+#include "../../../help_mp.h"
+#include "../../../mplayer.h"
+#include "../../../libao2/eq.h"
+#include "../widgets.h"
+#include "../mplayer.h"
+
 #include "eq.h"
 
-static GtkWidget * Equalizer;
+GtkWidget * Equalizer;
+
+static GtkWidget * Notebook;
 static GtkWidget * ChannelsList;
 static GtkWidget * VContrast, * VBrightness, * VHue, * VSaturation;
 static GtkAdjustment * VContrastadj, * VBrightnessadj, * VHueadj, * VSaturationadj;
-static GtkWidget * Ok;
+static GtkWidget * Ok, * Clear;
 static GtkWidget * A3125,  * A125, * A6250, * A250, * A500, * A1000, * A2000, * A4000, * A8000, * A16000;
 static GtkAdjustment * A3125adj, * A125adj, * A6250adj, * A250adj, * A500adj, * A1000adj, * A2000adj, * A4000adj, * A8000adj, * A16000adj;
 
 static int Channel = -1;
+static int gtkVEqualizer = 0;
+
+int gtkEnableAudioEqualizer = 1;
+int gtkEnableVideoEqualizer = 1;
+
+static void eqSetBands( int channel )
+{
+ if ( channel < 0 ) channel=0;
+ gtk_adjustment_set_value( A3125adj,0.0f - gtkEquChannels[channel][0] );
+ gtk_adjustment_set_value( A6250adj,0.0f - gtkEquChannels[channel][1] );
+ gtk_adjustment_set_value( A125adj,0.0f - gtkEquChannels[channel][2] );
+ gtk_adjustment_set_value( A250adj,0.0f - gtkEquChannels[channel][3] );
+ gtk_adjustment_set_value( A500adj,0.0f - gtkEquChannels[channel][4] );
+ gtk_adjustment_set_value( A1000adj,0.0f - gtkEquChannels[channel][5] );
+ gtk_adjustment_set_value( A2000adj,0.0f - gtkEquChannels[channel][6] );
+ gtk_adjustment_set_value( A4000adj,0.0f - gtkEquChannels[channel][7] );
+ gtk_adjustment_set_value( A8000adj,0.0f - gtkEquChannels[channel][8] );
+ gtk_adjustment_set_value( A16000adj,0.0f - gtkEquChannels[channel][9] );
+ gtk_adjustment_set_value( VContrastadj,gtkContrast );
+ gtk_adjustment_set_value( VBrightnessadj,gtkBrightness );
+ gtk_adjustment_set_value( VHueadj,gtkHue );
+ gtk_adjustment_set_value( VSaturationadj,gtkSaturation );
+}
+
+void ShowEqualizer( void )
+{
+ if ( gtkVEqualizer ) gtkActive( Equalizer );
+    else Equalizer=create_Equalizer();
+
+  {
+   gchar * str[2];  str[1]="";
+   str[0]="All"; gtk_clist_append( GTK_CLIST( ChannelsList ) ,str);
+   if ( guiIntfStruct.AudioType > 1 )
+    {
+     str[0]="Front Right"; gtk_clist_append( GTK_CLIST( ChannelsList ) ,str);
+     str[0]="Front Left"; gtk_clist_append( GTK_CLIST( ChannelsList ) ,str);
+    }
+   if ( guiIntfStruct.AudioType > 2 )
+    {
+     str[0]="Channel 3. (Back Right?)"; gtk_clist_append( GTK_CLIST( ChannelsList ) ,str);
+     str[0]="Channel 4. (Back Left?)"; gtk_clist_append( GTK_CLIST( ChannelsList ) ,str);
+    }
+   if ( guiIntfStruct.AudioType > 4 )
+    {
+     str[0]="Channel 5. (?)"; gtk_clist_append( GTK_CLIST( ChannelsList ) ,str);
+     str[0]="Channel 6. (?)"; gtk_clist_append( GTK_CLIST( ChannelsList ) ,str);
+    }
+   gtk_clist_select_row( GTK_CLIST( ChannelsList ),1,0 );
+
+   VContrastadj->value=gtkContrast;
+   VBrightnessadj->value=gtkBrightness;
+   VHueadj->value=gtkHue;
+   VSaturationadj->value=gtkSaturation;
+
+   if ( !guiIntfStruct.Playing && gtkEnableVideoEqualizer )
+    {
+     
+     gtk_widget_set_sensitive( VContrast,FALSE );
+     gtk_widget_set_sensitive( VBrightness,FALSE );
+     gtk_widget_set_sensitive( VHue,FALSE );
+     gtk_widget_set_sensitive( VSaturation,FALSE );
+    }
+
+   Channel=0;
+   eqSetBands( 0 );
+    
+   if ( !guiIntfStruct.Playing && gtkEnableAudioEqualizer )
+    {
+     gtk_widget_set_sensitive( ChannelsList,FALSE );
+     gtk_widget_set_sensitive( A3125,FALSE );
+     gtk_widget_set_sensitive( A125,FALSE );
+     gtk_widget_set_sensitive( A6250,FALSE );
+     gtk_widget_set_sensitive( A250,FALSE );
+     gtk_widget_set_sensitive( A500,FALSE );
+     gtk_widget_set_sensitive( A1000,FALSE );
+     gtk_widget_set_sensitive( A2000,FALSE );
+     gtk_widget_set_sensitive( A4000,FALSE );
+     gtk_widget_set_sensitive( A8000,FALSE );
+     gtk_widget_set_sensitive( A16000,FALSE );
+    }
+  }
+
+ gtk_widget_show( Equalizer );
+}
 
 void HideEqualizer( void )
-{ gtk_widget_hide( Equalizer ); gtk_widget_destroy( Equalizer ); gtk_main_quit(); }
+{ gtkVEqualizer=0; gtk_widget_hide( Equalizer ); gtk_widget_destroy( Equalizer ); }
 
-gboolean eqHScaleMotion( GtkWidget * widget,GdkEventMotion  * event,gpointer user_data )
+static gboolean eqHScaleMotion( GtkWidget * widget,GdkEventMotion  * event,gpointer user_data )
 {
- float value;
+ equalizer_t eq;
  switch ( (int)user_data ) 
   {
-    case 0: value=A3125adj->value; break;
-	case 1: value=A6250adj->value; break;
-	case 2: value=A125adj->value; break;
-	case 3: value=A250adj->value; break;
-	case 4: value=A500adj->value; break;
-	case 5: value=A1000adj->value; break;
-	case 6: value=A2000adj->value; break;
-	case 7: value=A4000adj->value; break;
-	case 8: value=A8000adj->value; break;
-	case 9: value=A16000adj->value; break;
-	default: return FALSE;
-  }
- value=0.0f - value;
-  
-  printf( "hscale: %d -> %.2f\n",(int)user_data,value );
-  return FALSE;
-}
-
-gboolean eqVScaleMotion( GtkWidget * widget,GdkEventMotion  * event,gpointer user_data )
-{
-  float value;
-  switch( (int)user_data )
-  {
-   case 1: value=VContrastadj->value; break;
-   case 2: value=VBrightnessadj->value; break;
-   case 3: value=VHueadj->value; break;
-   case 4: value=VSaturationadj->value; break;
+   case 0: eq.gain=A3125adj->value; break;
+   case 1: eq.gain=A6250adj->value; break;
+   case 2: eq.gain=A125adj->value; break;
+   case 3: eq.gain=A250adj->value; break;
+   case 4: eq.gain=A500adj->value; break;
+   case 5: eq.gain=A1000adj->value; break;
+   case 6: eq.gain=A2000adj->value; break;
+   case 7: eq.gain=A4000adj->value; break;
+   case 8: eq.gain=A8000adj->value; break;
+   case 9: eq.gain=A16000adj->value; break;
    default: return FALSE;
   }
-
-  printf( "vscale: %d -> %.2f\n",(int)user_data,value );
-  return FALSE;
+ eq.gain=0.0f - eq.gain;
+ eq.band=(int)user_data;
+ if ( Channel == -1 ) 
+  {
+   int i;
+   for ( i=0;i<6;i++ )
+    { eq.channel=i; gtkSet( gtkSetEqualizer,0,&eq ); }
+  } else { eq.channel=Channel; gtkSet( gtkSetEqualizer,0,&eq ); }
+  
+ return FALSE;
 }
 
-void eqButtonReleased( GtkButton * button,gpointer user_data )
-{ HideEqualizer(); }
+static gboolean eqVScaleMotion( GtkWidget * widget,GdkEventMotion  * event,gpointer user_data )
+{
+
+ switch( (int)user_data )
+  {
+   case 1: gtkSet( gtkSetContrast,VContrastadj->value,NULL );      break;
+   case 2: gtkSet( gtkSetBrightness,VBrightnessadj->value,NULL );  break;
+   case 3: gtkSet( gtkSetHue,VHueadj->value,NULL );		   break;
+   case 4: gtkSet( gtkSetSaturation,VSaturationadj->value,NULL );  break;
+  }
+
+ return FALSE;
+}
+
+static void eqButtonReleased( GtkButton * button,gpointer user_data )
+{ 
+ switch( (int)user_data )
+  {
+   case 0: HideEqualizer(); break;
+   case 1: 
+	if ( gtk_notebook_get_current_page( Notebook ) == 0 )
+	 { 
+	  gtkSet( gtkSetEqualizer,0,NULL ); 
+	  eqSetBands( Channel ); 
+	 }
+	 else
+	  {
+	   gtkSet( gtkSetContrast,0.0f,NULL );
+	   gtkSet( gtkSetBrightness,0.0f,NULL );
+	   gtkSet( gtkSetHue,0.0f,NULL );
+	   gtkSet( gtkSetSaturation,0.0f,NULL );
+	  }
+	break;
+  }
+}
 
 gboolean eqDestroy( GtkWidget * widget,GdkEvent * event,gpointer user_data )
 { HideEqualizer(); return FALSE; }
 
-void eqShow( GtkWidget * widget,gpointer user_data )
-{
- gchar * str[2];  str[1]="";
- str[0]="All"; gtk_clist_append( GTK_CLIST( ChannelsList ) ,str);
- str[0]="Left"; gtk_clist_append( GTK_CLIST( ChannelsList ) ,str);
- str[0]="Right"; gtk_clist_append( GTK_CLIST( ChannelsList ) ,str);
- gtk_clist_select_row( GTK_CLIST( ChannelsList ),0,0 );
-}
+static void eqShow( GtkWidget * widget,gpointer user_data )
+{ gtkVEqualizer=(int)user_data; }
 
-void eqSelectChannelsListRow( GtkCList * clist,gint row,gint column,GdkEvent * event,gpointer user_data )
+static void eqSelectChannelsListRow( GtkCList * clist,gint row,gint column,GdkEvent * event,gpointer user_data )
 {
  char * tmp;
  Channel=row - 1;
- gtk_clist_get_text( clist,row,0,&tmp );
- printf( "Selected channel: %s (%d)\n",tmp,Channel );
+ eqSetBands( Channel );
+ if ( Channel == -1 )
+  {
+   int i,j; equalizer_t eq;
+   for ( i=1;i<6;i++ )
+    for ( j=0;j<10;j++ )
+     { eq.band=j; eq.channel=i; eq.gain=gtkEquChannels[0][j]; gtkSet( gtkSetEqualizer,0,&eq ); }
+  }
 }
 
 GtkWidget * create_Equalizer( void )
@@ -93,7 +210,6 @@ GtkWidget * create_Equalizer( void )
   GtkWidget * frame3;
   GtkWidget * frame4;
   GtkWidget * vbox1;
-  GtkWidget * Notebook;
   GtkWidget * hbox1;
   GtkWidget * scrolledwindow1;
   GtkWidget * table1;
@@ -455,7 +571,7 @@ GtkWidget * create_Equalizer( void )
   gtk_widget_show( vbox3 );
   gtk_box_pack_start( GTK_BOX( hbox2 ),vbox3,TRUE,TRUE,0 );
 
-  VContrastadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-100,100,1,0,0 ) );
+  VContrastadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,100,1,0,0 ) );
   VContrast=gtk_hscale_new( VContrastadj );
   gtk_widget_set_name( VContrast,"VContrast" );
   gtk_widget_ref( VContrast );
@@ -464,7 +580,7 @@ GtkWidget * create_Equalizer( void )
   gtk_box_pack_start( GTK_BOX( vbox3 ),VContrast,TRUE,TRUE,0 );
   gtk_scale_set_value_pos( GTK_SCALE( VContrast ),GTK_POS_RIGHT );
 
-  VBrightnessadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-100,100,1,0,0 ) );
+  VBrightnessadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,100,1,0,0 ) );
   VBrightness=gtk_hscale_new( VBrightnessadj );
   gtk_widget_set_name( VBrightness,"VBrightness" );
   gtk_widget_ref( VBrightness );
@@ -473,7 +589,7 @@ GtkWidget * create_Equalizer( void )
   gtk_box_pack_start( GTK_BOX( vbox3 ),VBrightness,TRUE,TRUE,0 );
   gtk_scale_set_value_pos( GTK_SCALE( VBrightness ),GTK_POS_RIGHT );
 
-  VHueadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-100,100,1,0,0 ) );
+  VHueadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,100,1,0,0 ) );
   VHue=gtk_hscale_new( VHueadj );
   gtk_widget_set_name( VHue,"VHue" );
   gtk_widget_ref( VHue );
@@ -482,7 +598,7 @@ GtkWidget * create_Equalizer( void )
   gtk_box_pack_start( GTK_BOX( vbox3 ),VHue,TRUE,TRUE,0 );
   gtk_scale_set_value_pos( GTK_SCALE( VHue ),GTK_POS_RIGHT );
 
-  VSaturationadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-100,100,1,0,0 ) );
+  VSaturationadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,100,1,0,0 ) );
   VSaturation=gtk_hscale_new( VSaturationadj );
   gtk_widget_set_name( VSaturation,"VSaturation" );
   gtk_widget_ref( VSaturation );
@@ -505,6 +621,16 @@ GtkWidget * create_Equalizer( void )
   gtk_widget_show( hbuttonbox1 );
   gtk_box_pack_end( GTK_BOX( vbox1 ),hbuttonbox1,FALSE,TRUE,0 );
   gtk_button_box_set_layout( GTK_BUTTON_BOX( hbuttonbox1 ),GTK_BUTTONBOX_END );
+  gtk_button_box_set_spacing( GTK_BUTTON_BOX( hbuttonbox1 ),0 );
+
+  Clear=gtk_button_new_with_label( "Clear" );
+  gtk_widget_set_name( Clear,"Clear" );
+  gtk_widget_ref( Clear );
+  gtk_object_set_data_full( GTK_OBJECT( Equalizer ),"Clear",Clear,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( Clear );
+  gtk_container_add( GTK_CONTAINER( hbuttonbox1 ),Clear );
+  GTK_WIDGET_UNSET_FLAGS( Clear,GTK_CAN_FOCUS );
+  GTK_WIDGET_SET_FLAGS( Clear,GTK_CAN_DEFAULT );
 
   Ok=gtk_button_new_with_label( "Ok" );
   gtk_widget_set_name( Ok,"Ok" );
@@ -526,7 +652,8 @@ GtkWidget * create_Equalizer( void )
   gtk_widget_set_usize( hseparator1,-2,5 );
 
   gtk_signal_connect( GTK_OBJECT( Equalizer ),"destroy",GTK_SIGNAL_FUNC( eqDestroy ),NULL );
-  gtk_signal_connect( GTK_OBJECT( Equalizer ),"show",GTK_SIGNAL_FUNC( eqShow ),NULL );
+  gtk_signal_connect( GTK_OBJECT( Equalizer ),"show",GTK_SIGNAL_FUNC( eqShow ),(void *)1 );
+  gtk_signal_connect( GTK_OBJECT( Equalizer ),"hide",GTK_SIGNAL_FUNC( eqShow ),(void *)0 );
   gtk_signal_connect( GTK_OBJECT( ChannelsList ),"select_row",GTK_SIGNAL_FUNC( eqSelectChannelsListRow ),NULL );
 
   gtk_signal_connect( GTK_OBJECT( A3125 ),"motion_notify_event",GTK_SIGNAL_FUNC( eqHScaleMotion ),(void*)0 );
@@ -545,7 +672,8 @@ GtkWidget * create_Equalizer( void )
   gtk_signal_connect( GTK_OBJECT( VHue ),"motion_notify_event",GTK_SIGNAL_FUNC( eqVScaleMotion ),(void*)3 );
   gtk_signal_connect( GTK_OBJECT( VSaturation ),"motion_notify_event",GTK_SIGNAL_FUNC( eqVScaleMotion ),(void *)4 );
   
-  gtk_signal_connect( GTK_OBJECT( Ok ),"released",GTK_SIGNAL_FUNC( eqButtonReleased ),NULL );
+  gtk_signal_connect( GTK_OBJECT( Ok ),"released",GTK_SIGNAL_FUNC( eqButtonReleased ),(void *)0 );
+  gtk_signal_connect( GTK_OBJECT( Clear ),"released",GTK_SIGNAL_FUNC( eqButtonReleased ),(void *)1 );
 
   gtk_window_add_accel_group( GTK_WINDOW( Equalizer ),accel_group );
 
