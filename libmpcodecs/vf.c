@@ -80,6 +80,7 @@ extern vf_info_t vf_info_tile;
 extern vf_info_t vf_info_delogo;
 extern vf_info_t vf_info_hue;
 extern vf_info_t vf_info_spp;
+extern vf_info_t vf_info_yuvcsp;
 
 // list of available filters:
 static vf_info_t* filter_list[]={
@@ -149,6 +150,7 @@ static vf_info_t* filter_list[]={
 #ifdef USE_LIBAVCODEC
     &vf_info_spp,
 #endif
+    &vf_info_yuvcsp,
     NULL
 };
 
