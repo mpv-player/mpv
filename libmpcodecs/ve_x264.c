@@ -304,7 +304,9 @@ static int put_image(struct vf_instance_s *vf, mp_image_t *mpi)
         i_size += x264_nal_encode(mod->mux->buffer + i_size, &i_data, 1, &nal[i]);
     }
     if(i_size>0) {
-        muxer_write_chunk(mod->mux, i_size, (mod->pic.i_type == X264_TYPE_I)?0x10:0);
+        int keyframe = (mod->pic.i_type == X264_TYPE_IDR) ||
+                       (mod->pic.i_type == X264_TYPE_I && frame_ref == 1);
+        muxer_write_chunk(mod->mux, i_size, keyframe?0x10:0);
     }
     return 1;
 }
