@@ -216,8 +216,8 @@ faster than the original. Be sure to prefer this instead of the binary codec!
 
 <para>
 For a complete list of supported codecs please visit the FFmpeg homepage.
-Supported <ulink url="http://www.ffmpeg.org/ffmpeg-doc.html#SEC19">video</ulink>
-and <ulink url="http://www.ffmpeg.org/ffmpeg-doc.html#SEC20">audio</ulink> codecs.
+Supported <ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC19">video</ulink>
+and <ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC20">audio</ulink> codecs.
 </para>
 
 <para>
@@ -722,7 +722,7 @@ to get it separately.
 <para>
 If you use gcc 3.2 which fails to compile our internal FAAD or want to use
 the external library for some other reason, download the library from the
-<ulink url="http://www.audiocoding.com/download.php">download page</ulink>
+<ulink url="http://www.audiocoding.com/modules/mydownloads/">download page</ulink>
 and pass <option>--enable-external-faad</option> to <filename>configure</filename>.
 You do not need all of faad2 to decode AAC files, libfaad is enough. Build
 it like this:
@@ -736,7 +736,7 @@ make
 make install
 </screen>
 Binaries are not available from audiocoding.com, but you can (apt-)get Debian
-packages from <ulink url="http://marillat.free.fr">Christian Marillat's homepage</ulink>,
+packages from <ulink url="http://hpisi.nerim.net">Christian Marillat's homepage</ulink>,
 Mandrake RPMs from the <ulink url="http://plf.zarb.org">P.L.F</ulink> and RedHat RPMs
 from <ulink url="http://greysector.rangers.eu.org/">Grey Sector</ulink>.
 </para>

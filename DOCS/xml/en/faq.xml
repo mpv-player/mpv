@@ -1219,7 +1219,7 @@ Yes. See the <link linkend="dvd">DVD chapter</link>.
 How can I set the region code of my DVD-drive? I don't have Windows!
 </para></question>
 <answer><para>
-Use the <ulink url="http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz">regionset tool</ulink>.
+Use the <ulink url="http://linvdr.org/projects/regionset/">regionset tool</ulink>.
 </para></answer>
 </qandaentry>
 

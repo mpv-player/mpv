@@ -231,7 +231,7 @@ is in beta stage, and has some drawbacks. For more information, see
 <title>ATI cards</title>
 
 <para>
-The <ulink url="http://www.linuxvideo.org/gatos">GATOS driver</ulink>
+The <ulink url="http://gatos.sf.net">GATOS driver</ulink>
 (which you should use, unless you have Rage128 or Radeon) has VSYNC enabled
 by default. It means that decoding speed (!) is synced to the monitor's
 refresh rate. If playing seems to be slow, try disabling VSYNC somehow, or
@@ -1828,7 +1828,7 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 
 <para>
   Verify that your drivers are working properly with a program such as
-  <ulink url="http://www.sf.net/projects/dvbtools/"><command>dvbstream</command></ulink>
+  <ulink url="http://sf.net/projects/dvbtools/"><command>dvbstream</command></ulink>
   (that is the base of the DVB input module).
 </para>
 
