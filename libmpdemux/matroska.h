@@ -47,7 +47,10 @@
 #define MKV_S_TEXTASCII  "S_TEXT/ASCII"
 #define MKV_S_TEXTUTF8   "S_TEXT/UTF8"
 #define MKV_S_TEXTSSA    "S_TEXT/SSA"
+#define MKV_S_TEXTASS    "S_TEXT/ASS"
 #define MKV_S_VOBSUB     "S_VOBSUB"
+#define MKV_S_SSA        "S_SSA" // Deprecated
+#define MKV_S_ASS        "S_ASS" // Deprecated
 
 typedef struct {
   char type;                    // t = text, v = VobSub

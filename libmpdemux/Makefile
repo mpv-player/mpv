@@ -26,7 +26,10 @@ SRCS += dvbin.c
 SRCS += dvb_tune.c
 endif
 
-ifeq ($(MATROSKA),yes)
+ifeq ($(MATROSKA_INTERNAL),yes)
+SRCS += demux_mkv.c ebml.c
+endif
+ifeq ($(MATROSKA_EXTERNAL),yes)
 CPLUSPLUSSRCS += demux_mkv.cpp
 endif
 
