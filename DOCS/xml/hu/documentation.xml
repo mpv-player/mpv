@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.18 -->
+<!-- synced with 1.19 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - The Movie Player</title>
@@ -60,8 +60,8 @@ is, lásd <xref linkend="ports"/>). Le tudja játszani a legtöbb MPEG, VOB, AVI,
 OGG/OGM, VIVO, ASF/WMA/WMV, QT/MOV/MP4, FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ,
 PVA, és Matroska file-t, és ezekhez felsorakoztat jónéhány natív, XAnim, RealPlayer
 és Win32 DLL codecet. Nézhetsz vele 
-<emphasis role="bold">VideoCD-t, SVCD-t, DVD-t, 3ivx-et, RealMedia-t, Sorenson-t, Theora-t</emphasis>
-és <emphasis role="bold">DivX-et</emphasis> is. Az <application>MPlayer</application>
+<emphasis role="bold">VideoCD-t, SVCD-t, DVD-t, 3ivx, RealMedia, Sorenson, Theora</emphasis>
+és <emphasis role="bold">MPEG4 (DivX)</emphasis> filmet is. Az <application>MPlayer</application>
 másik nagy előnye a megjelenítési módok széles választékában rejlik.
 Működik X11, Xv, DGA, OpenGL, SVGAlib,
 fbdev, AAlib, libcaca, DirectFB, sőt SDL-lel vagy GGI-vel is (beleértve ezáltal
@@ -95,7 +95,7 @@ Encoder) egy egyszerű film kódoló, az <application>MPlayer</application> által
 ismert formátumok
 (<emphasis role="bold">AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</emphasis>)
 más, az <application>MPlayer</application>rel is lejátszható formátumokba való
-átalakításra. Sokféle codec-kel tud enkódolni, például <emphasis role="bold">DivX4</emphasis>-gyel
+átalakításra. Sokféle codec-kel tud kódolni, például <emphasis role="bold">MPEG4 (DivX4)</emphasis>-gyel
 (1 vagy 2 menetes), a <systemitem class="library">libavcodec</systemitem>-et
 alkotó codec-ekkel, audiót tekintve pedig
 <emphasis role="bold">PCM/MP3/VBR MP3</emphasis> a választék.
