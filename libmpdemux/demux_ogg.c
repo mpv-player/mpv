@@ -70,7 +70,7 @@ typedef struct stream_header_audio
 	ogg_int32_t	avgbytespersec;
 } stream_header_audio;
 
-typedef struct stream_header
+typedef struct __attribute__((__packed__)) stream_header
 {
 	char	streamtype[8];
 	char	subtype[4];
@@ -83,6 +83,8 @@ typedef struct stream_header
 
 	ogg_int32_t buffersize;
 	ogg_int16_t	bits_per_sample;
+
+	ogg_int16_t padding;
 
 	union
 	{
