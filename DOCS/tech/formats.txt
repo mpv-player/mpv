@@ -35,7 +35,7 @@
 
   - AVI streams.
     Two kind of RIFF AVI files exists:
-    1. interleaved: audio and video content is interlaved. it's faster and
+    1. interleaved: audio and video content is interleaved. it's faster and
        requires only 1 reading thread, so it's recommended (and mostly used).
     2. non-interleaved: audio and video aren't interleaved, i mean first come
        whole video followed by whole audio. it requires 2 reading process or
@@ -46,7 +46,7 @@
        played as non-interleaved otherwise you get a-v desync or buffer overflow.
 
     MPlayer supports 2 kind of timing for AVI files:
-    - bps-based: it is based on bitrate/samplerate of video/audio steram.
+    - bps-based: it is based on bitrate/samplerate of video/audio stream.
       this method is used by most players, including avifile and wmp.
       files with broken headers, and files created with VBR audio but not
       vbr-compliant encoder will result a-v desync with this method.
@@ -73,7 +73,7 @@
     I also note, that most AVI encoders/multiplexers create bad files if
     using VBR audio. only 2 exception (known by me): NaNDub and MEncoder.
     
-    FPS: only constant framerate allowed, but it's possib;e to skip frames.
+    FPS: only constant framerate allowed, but it's possible to skip frames.
 
   - ASF streams:
     ASF (active streaming format) comes from Microsoft. they developed two
