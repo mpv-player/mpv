@@ -52,8 +52,8 @@ void demux_seek_nuv ( demuxer_t *demuxer, float rel_seek_secs, int flags )
 #define MAX_TIME 1000000
 	nuv_priv_t* priv = demuxer->priv;
 	struct rtframeheader rtjpeg_frameheader;
-	int orig_pos;
-	int curr_pos;
+	off_t orig_pos;
+	off_t curr_pos;
 	float current_time = 0;
 	float start_time = MAX_TIME;
 	float target_time = start_time + rel_seek_secs * 1000; /* target_time, start_time are ms, rel_seek_secs s */
@@ -138,7 +138,7 @@ void demux_seek_nuv ( demuxer_t *demuxer, float rel_seek_secs, int flags )
 int demux_nuv_fill_buffer ( demuxer_t *demuxer )
 {
 	struct rtframeheader rtjpeg_frameheader;
-	int orig_pos;
+	off_t orig_pos;
 	nuv_priv_t* priv = demuxer->priv;
 
 	orig_pos = stream_tell ( demuxer->stream );
@@ -287,7 +287,7 @@ int nuv_check_file ( demuxer_t* demuxer )
 	struct nuv_signature ns;
 
 	/* Store original position */
-	int orig_pos = stream_tell(demuxer->stream);
+	off_t orig_pos = stream_tell(demuxer->stream);
 
 	mp_msg ( MSGT_DEMUX, MSGL_V, "Checking for NuppelVideo\n" );
 
