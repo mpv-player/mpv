@@ -31,18 +31,10 @@
 #include "subreader.h"
 #endif
 
-#ifdef USE_LIBVO2
-#include "libvo2/libvo2.h"
-#else
 #include "libvo/video_out.h"
 extern void* mDisplay; // Display* mDisplay;
-#endif
 
-#ifdef USE_LIBVO2
-#include "libvo2/sub.h"
-#else
 #include "libvo/sub.h"
-#endif
 
 #include "libao2/audio_out.h"
 #include "libao2/audio_plugin.h"
@@ -166,11 +158,7 @@ int frameratecode2framerate[16] = {
 int use_stdin=0;
 //**************************************************************************//
 
-#ifdef USE_LIBVO2
-static vo2_handle_t *video_out=NULL;
-#else
 static vo_functions_t *video_out=NULL;
-#endif
 ao_functions_t *audio_out=NULL;
 
 // benchmark:
@@ -318,11 +306,7 @@ void uninit_player(unsigned int mask){
   if(mask&INITED_VO){
     inited_flags&=~INITED_VO;
     current_module="uninit_vo";
-#ifdef USE_LIBVO2
-    vo2_close(video_out);
-#else
     video_out->uninit();
-#endif
   }
 
   if(mask&INITED_AO){
@@ -595,7 +579,6 @@ vo_tune_info_t vtune;
     }
 #endif
 
-#ifndef USE_LIBVO2
     if(video_driver && strcmp(video_driver,"help")==0){
       printf("Available video output drivers:\n");
       i=0;
@@ -606,7 +589,7 @@ vo_tune_info_t vtune;
       printf("\n");
       exit(0);
     }
-#endif
+
     if(audio_driver && strcmp(audio_driver,"help")==0){
       printf("Available audio output drivers:\n");
       i=0;
@@ -874,11 +857,6 @@ play_dvd:
     sh_audio=NULL;
     sh_video=NULL;
     
-#ifdef USE_LIBVO2
-    current_module="vo2_new";
-    video_out=vo2_new(video_driver);
-    current_module=NULL;
-#else
 // check video_out driver name:
     if (video_driver)
 	if ((i = strcspn(video_driver, ":")) > 0)
@@ -903,7 +881,7 @@ play_dvd:
       video_out = video_out_drivers[i];break;
     }
   }
-#endif
+
   if(!video_out){
     mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_InvalidVOdriver,video_driver?video_driver:"?");
     exit_player(MSGTR_Exit_error);
@@ -1279,11 +1257,7 @@ for(i=0;i<CODECS_MAX_OUTFMT;i++){
 //    int ret;
     out_fmt=sh_video->codec->outfmt[i];
     if(out_fmt==(signed int)0xFFFFFFFF) continue;
-#ifdef USE_LIBVO2
-    vo_flags=vo2_query_format(video_out);
-#else
     vo_flags=video_out->control(VOCTRL_QUERY_FORMAT, &out_fmt);
-#endif
     mp_msg(MSGT_CPLAYER,MSGL_DBG2,"vo_debug: query(%s) returned 0x%X\n",vo_format_name(out_fmt),vo_flags);
     if(vo_flags) break;
 }
@@ -1369,7 +1343,6 @@ current_module="init_libvo";
     }
   }
 
-#ifndef USE_LIBVO2
    { const vo_info_t *info = video_out->get_info();
      mp_msg(MSGT_CPLAYER,MSGL_INFO,"VO: [%s] %dx%d => %dx%d %s %s%s%s%s\n",info->short_name,
          sh_video->disp_w,sh_video->disp_h,
@@ -1386,7 +1359,6 @@ current_module="init_libvo";
     if(strlen(info->comment) > 0)
         mp_msg(MSGT_CPLAYER,MSGL_V,"VO: Comment: %s\n", info->comment);
    }
-#endif
 
 #ifdef HAVE_NEW_GUI
    if ( use_gui )
@@ -1424,16 +1396,10 @@ current_module="init_libvo";
                       fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3),
                       title,out_fmt);
 
-#ifdef USE_LIBVO2
-   if(!vo2_start(video_out,
-               sh_video->disp_w,sh_video->disp_h,out_fmt,0,
-                      fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3) )){
-#else
    if(video_out->config(sh_video->disp_w,sh_video->disp_h,
                       screen_size_x,screen_size_y,
                       fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3),
                       title,out_fmt,&vtune)){
-#endif
      mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_CannotInitVO);
      goto goto_next_file; // exit_player(MSGTR_Exit_error);
    }
@@ -1689,10 +1655,8 @@ if(1)
     //------------------------ frame decoded. --------------------
     
 //------------------------ add OSD to frame contents ---------
-#ifndef USE_LIBVO2
     current_module="draw_osd";
     video_out->draw_osd();
-#endif
 
     current_module="av_sync";
 
@@ -1842,9 +1806,6 @@ if(!(vo_flags&256)){ // flag 256 means: libvo driver does its timing (dvb card)
 }
 
         current_module="flip_page";
-#ifdef USE_LIBVO2
-        if(blit_frame) vo2_flip(video_out,0);
-#else
 	video_out->check_events();
         if(blit_frame){
 	   unsigned int t2=GetTimer();
@@ -1871,7 +1832,6 @@ if(!(vo_flags&256)){ // flag 256 means: libvo driver does its timing (dvb card)
 	    our_n_frames++;
 	   }
 	}
-#endif
 //        usec_sleep(50000); // test only!
 
     }
@@ -2065,9 +2025,7 @@ read_input:
 #endif
              (use_stdin || getch2(20)<=0) && mplayer_get_key()<=0){
 #endif /* HAVE_NEW_INPUT */
-#ifndef USE_LIBVO2
 	     if(sh_video && video_out) video_out->check_events();
-#endif 
 #ifdef HAVE_NEW_GUI
              if(use_gui){
 		guiEventHandling();
@@ -2277,13 +2235,11 @@ if(step_sec>0) {
 	printf("ABS seek to %5.3f   \n",rel_seek_secs);
 	break;
 #else
-#ifndef USE_LIBVO2
     /* User wants to have screen shot */
     case 'S':
     case 's':
 		video_out->control(VOCTRL_SCREENSHOT, NULL);
 		break;
-#endif
     // Contrast:
     case '1':
     case '2':
