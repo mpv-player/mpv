@@ -171,7 +171,7 @@ static int output_quality=0;
 
 int use_gui=0;
 
-int osd_level=2;
+int osd_level=1;
 int osd_visible=100;
 
 // seek:
