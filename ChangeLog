@@ -5,6 +5,7 @@ MPlayer (1.0)
     DOCS:
     * Czech documentation translation started
     * German man page almost synced
+    * slave mode command documentation finished
 
     Ports:
     * DirectX video output fixed on Windows95
@@ -34,7 +35,7 @@ MPlayer (1.0)
     * MP3 in Real files
     * more user-friendly info about audio and subtitle tracks in Ogg files
     * avisynth demuxer
-    * Multichannel MP3 in mp4 files support (MP3on4)
+    * Multichannel MP3 in MP4 files support (MP3on4)
 
     Streaming:
     * stream selection and bandwidth support for MMS over HTTP
@@ -50,6 +51,7 @@ MPlayer (1.0)
 
     GUI:
     * half size event implemented and added to the menu
+    * ESD configuration dialog and software volume control option
     * memleaks fixed
 
     Filters:
@@ -61,6 +63,7 @@ MPlayer (1.0)
     * -z option replaced by -vo png suboption
     * icc fix in the Win32 loader
     * crash with Turkish locale fixed
+    * several memleak fixes
 
 
   pre6: "X-mas present" December 23, 2004
