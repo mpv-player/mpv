@@ -1,13 +1,3 @@
-TODO: collect old version changelogs from freshmeat.net, news/maillist archive...
-    -> both was included, freshmeat somehow deleted all logs before 0.50 :((((
-
-TODO: cleanup old (<=0.17a) versions, find the place for these:
-  * new stream selection code (autodetected)
-  * pre-devel-alpha DVD code (libcss)
-  * subtitle code 100% (perfected timing code)
-  * new output drivers (SVGAlib, FBdev)
-  * faster memcpy() routine (MMX/3DNow!/SSE optimized)
-
 
 mplayer (0.90)
 
@@ -270,6 +260,12 @@ mplayer v0.17 "IdegCounter" : Apr 27  2001
   * source cleanup, most part of the code rewritten
 
 * jumped to 0.17 * (why 17? oh. chass just got a new 17" monitor :))
+
+  - faster memcpy() routine (MMX/3DNow!/SSE optimized)
+  - new stream selection code (autodetected)
+  - pre-devel-alpha DVD code (libcss)
+  - subtitle code 100% (perfected timing code)
+  - new output drivers (SVGAlib, FBdev)
 
 mplayer v0.11-pre27-CVS:
   - updated libmpeg2 source to libmpeg2-0.2.1-CVS version
