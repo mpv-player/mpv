@@ -25,7 +25,7 @@ reg00: base=0xe4000000 (3648MB), size=  16MB: write-combining, count=9<BR>
 reg01: base=0xd8000000 (3456MB), size= 128MB: write-combining, count=1<BR>
 </CODE></P>
 
-<P>It's right, shows my Matrox G400 with 16Mb memory. I did this from
+<P>It's right, shows my Matrox G400 with 16MB memory. I did this from
 XFree 4.x.x , which sets up MTRR registers automatically.</P>
 
 <P>If nothing worked, you have to do it manually. First, you have to find the base
@@ -58,7 +58,7 @@ size to hexadecimal, or use this table:</P>
 </TABLE>
 
 
-<P>You know base address and memory size, let's setup mtrr registers!
+<P>You know base address and memory size, let's setup MTRR registers!
 For example, for the Matrox card above (base=0xd8000000) with 32MB
 ram (size=0x2000000) just execute:</P>
 
@@ -66,7 +66,7 @@ ram (size=0x2000000) just execute:</P>
 <P><CODE>&nbsp;&nbsp;echo "base=0xd8000000 size=0x2000000 type=write-combining" &gt;| /proc/mtrr</CODE></P>
 
 
-<P>Not all CPUs support MTRRs. For example older K6-2's [around 266Mhz,
+<P>Not all CPUs support MTRRs. For example older K6-2's [around 266MHz,
 stepping 0] doesn't support MTRR, but stepping 12's do ('<CODE>cat /proc/cpuinfo</CODE>'
 to check it').</P>
 
@@ -132,7 +132,7 @@ usable with <B>MPlayer</B>.</P>
 
 <P>Older 3dfx drivers were known to have problems with XVideo acceleration,
 it didn't support either YUY2 or YV12, and so. Verify that you have
-XFree86 version 4.2.0 or greater, it works ok with YV12 and YUY2. Previous
+XFree86 version 4.2.0 or greater, it works OK with YV12 and YUY2. Previous
 versions, including 4.1.0 <B>crashes with YV12</B>!
 If you experience strange effects using -vo xv, try SDL (it has XVideo too)
 and see if it helps. Check the <A HREF="#2.3.1.4">SDL section</A> for details.</P>
@@ -156,17 +156,17 @@ driver</A>, it uses MMX2 for this task and is faster than the native X driver.</
 
 <P><B><A NAME=2.3.1.2.3>2.3.1.2.3. nVidia cards</A></B></P>
 
-<P>nVidia isn't a very good choice under Linux (according to NVidia, this
+<P>nVidia isn't a very good choice under Linux (according to nVidia, this
 is <A HREF="users_against_developers.html#nvidia">not true</A>).. You'll have to use the
-binary closed-source nVidia driver, available at nVidia's website. The standard XFree86
+binary closed-source nVidia driver, available at nVidia's web site. The standard XFree86
 driver doesn't support XVideo for these cards, due to nVidia's closed
 sources/specifications.</P>
 
 <P>As far as I know the latest XFree86 driver contains XVideo support for
-Geforce 2 and 3.</P>
+GeForce 2 and 3.</P>
 
-<P>Riva128 cards don't have XVideo support even with the nvidia driver :(
-Complain to NVidia.</P>
+<P>Riva128 cards don't have XVideo support even with the nVidia driver :(
+Complain to nVidia.</P>
 
 
 <P><B><A NAME=2.3.1.2.4>2.3.1.2.4. ATI cards</A></B></P>
@@ -207,8 +207,8 @@ EndSection
 <P><B><A NAME=2.3.1.2.6>2.3.1.2.6. Trident cards</A></B></P>
 
 <P>If you want to use xv with a trident card, provided that it doesn't
-work with 4.1.0, try the latest cvs of Xfree or wait for Xfree 4.2.0.
-The latest cvs adds support for fullscreen xv support with the
+work with 4.1.0, try the latest CVS of XFree or wait for XFree 4.2.0.
+The latest CVS adds support for fullscreen xv support with the
 Cyberblade XP card.</P>
 
 <P><B><A NAME=2.3.1.3>2.3.1.3. DGA</A></B></P>
@@ -216,7 +216,7 @@ Cyberblade XP card.</P>
 <P><B><A NAME=2.3.1.3.1>2.3.1.3.1. Summary</A></B></P>
 
 <P>This document tries to explain in some words what DGA is in general and
-what the DGA video output driver for mplayer can do (and what it can't).</P>
+what the DGA video output driver for <B>MPlayer</B> can do (and what it can't).</P>
 
 
 <P><B><A NAME=2.3.1.3.2>2.3.1.3.2. What is DGA</A></B></P>
@@ -226,7 +226,7 @@ bypass the X-Server and directly modifying the framebuffer memory.
 Technically spoken this happens by mapping the framebuffer memory into
 the memory range of your process. This is allowed by the kernel only
 if you have superuser privileges. You can get these either by logging in
-as root or by setting the suid bit on the mplayer excecutable (NOT
+as root or by setting the SUID bit on the <B>MPlayer</B> executable (NOT
 recommended!).</P>
 
 <P>There are two versions of DGA: DGA1 is used by XFree 3.x.x and DGA2 was
@@ -238,11 +238,11 @@ XVidMode extension.</P>
 
 <P>DGA2 incorporates the features of XVidMode extension and also allows
 switching the depth of the display. So you may, although basically
-running a 32 bit depth XServer, switch to a depth of 15 bits and vice
+running a 32 bit depth X server, switch to a depth of 15 bits and vice
 versa. </P>
 
 <P>However DGA has some drawbacks. It seems it is somewhat dependent on the
-graphics chip you use and on the implementation of the XServer's video
+graphics chip you use and on the implementation of the X server's video
 driver that controls this chip. So it does not work on every system ...</P>
 
 
@@ -275,7 +275,7 @@ If you want to run it as user, then install <B>MPlayer</B> SUID root:</P>
 <P><B>!!!! BUT STAY TUNED !!!!</B><BR>
 This is a <B>BIG</B> security risk! Never do this on a server or on a computer
 can be accessed by more people than only you because they can gain root
-privilegies through suid root mplayer.<BR>
+privileges through SUID root <B>MPlayer</B>.<BR>
 <B>!!!! SO YOU HAVE BEEN WARNED ... !!!!</B></P>
 
 <P>Now use '-vo dga' option, and there you go! (hope so:)
@@ -287,11 +287,11 @@ faster!!!</P>
 <P>The DGA driver allows for switching the resolution of the output signal.
 This avoids the need for doing (slow) software scaling and at the same
 time provides a fullscreen image. Ideally it would switch to the exact
-resolution (except for honouring aspect ratio) of the video data, but the
-XServer only allows switching to resolutions predefined in
+resolution (except for honoring aspect ratio) of the video data, but the
+X server only allows switching to resolutions predefined in
 <CODE>/etc/X11/XF86Config</CODE> (<CODE>/etc/X11/XF86Config-4</CODE> for XFree 4.0.X respectively).
-Those are defined by so-called modelines and depend on the capabilites
-of your video hardware. The XServer scans this config file on startup and
+Those are defined by so-called modelines and depend on the capabilities
+of your video hardware. The X server scans this config file on startup and
 disables the modelines not suitable for your hardware. You can find
 out which modes survive with the X11 log file. It can be found at:
 <CODE>/var/log/XFree86.0.log</CODE>.</P>
@@ -307,7 +307,7 @@ how the DGA driver for <B>MPlayer</B> works.</P>
 <P><B><A NAME=2.3.1.3.6>2.3.1.3.6. Features of the DGA driver</A></B></P>
 
 <P>The DGA driver is invoked by specifying -vo dga at the command line.
-The default behaviour is to switch to a resolution matching the original
+The default behavior is to switch to a resolution matching the original
 resolution of the video as close as possible. It deliberately ignores the
 -vm and -fs switches (enabling of video mode switching and fullscreen) -
 it always tries to cover as much area of your screen as possible by switching
@@ -347,7 +347,7 @@ CPU time!) depending on the implementation of DGA for your hardware.</P>
 
 <P>Generally spoken, DGA framebuffer access should be at least as fast as using
 the X11 driver with the additional benefit of getting a fullscreen image.
-The percentage speed values printed by mplayer have to be interpreted with
+The percentage speed values printed by <B>MPlayer</B> have to be interpreted with
 some care, as for example, with the X11 driver they do not include the time
 used by the X-Server needed for the actual drawing. Hook a terminal to a
 serial line of your box and start top to see what is really going on in your
@@ -363,12 +363,12 @@ only half the memory bandwidth of a 32 bit display.</P>
 <P>Using a depth of 24bit is even a good idea if your card natively just supports
 32 bit depth since it transfers 25% less data compared to the 32/32 mode.</P>
 
-<P>I've seen some avi files already be replayed on a Pentium MMX 266. AMD K6-2
+<P>I've seen some AVI files already be replayed on a Pentium MMX 266. AMD K6-2
 CPUs might work at 400 MHZ and above.</P>
 
 <P><B><A NAME=2.3.1.3.8>2.3.1.3.8. Known bugs</A></B></P>
 
-<P>Well, according to some developpers of XFree, DGA is quite a beast. They
+<P>Well, according to some developers of XFree, DGA is quite a beast. They
 tell you better not to use it. Its implementation is not always flawless
 with every chipset driver for XFree out there.</P>
 
@@ -410,14 +410,14 @@ case the DGA driver will crash telling you about a nonsense mode of
   EndSection
 </PRE>
 
-<P>These entries work fine with my Riva128 chip, using nv.o XServer driver
+<P>These entries work fine with my Riva128 chip, using nv.o X server driver
 module.</P>
 
 
 <P><B><A NAME=2.3.1.3.B>2.3.1.3.B. Bug Reports</A></B></P>
 
 <P>If you experience troubles with the DGA driver please feel free to file
-a bug report to me (e-mail address below). Please start mplayer with the
+a bug report to me (e-mail address below). Please start <B>MPlayer</B> with the
 -v option and include all lines in the bug report that start with vo_dga:</P>
 
 <P>Please do also include the version of X11 you are using, the graphics card
@@ -454,13 +454,13 @@ also help. Thanks!</P>
 
 
 <TABLE BORDER=0>
-<TR><TD COLSPAN=4><P><B>There are several commandline switches for SDL:</B></P></TD></TR>
+<TR><TD COLSPAN=4><P><B>There are several command line switches for SDL:</B></P></TD></TR>
 <TR><TD>&nbsp;&nbsp;</TD><TD>-vo sdl:name</TD><TD>&nbsp;&nbsp;</TD><TD>
-specifies sdl video driver to use (ie. aalib, dga, x11)</TD></TR>
-<TR><TD></TD><TD>-ao sdl:name</TD><TD></TD><TD>specifies sdl audio driver to use (ie. dsp,
+specifies sdl video driver to use (i.e.. aalib, dga, x11)</TD></TR>
+<TR><TD></TD><TD>-ao sdl:name</TD><TD></TD><TD>specifies sdl audio driver to use (i.e.. dsp,
 esd, arts)</TD></TR>
-<TR><TD></TD><TD>-noxv</TD><TD></TD><TD>disables Xvideo hardware acceleration</TD></TR>
-<TR><TD></TD><TD>-forcexv</TD><TD></TD><TD>tries to force Xvideo acceleration</TD></TR>
+<TR><TD></TD><TD>-noxv</TD><TD></TD><TD>disables XVideo hardware acceleration</TD></TR>
+<TR><TD></TD><TD>-forcexv</TD><TD></TD><TD>tries to force XVideo acceleration</TD></TR>
 
 <TR><TD COLSPAN=4><P><B>SDL Keys:</B></P></TD></TR>
 
@@ -642,7 +642,7 @@ for download and installation instructions.</P>
 
 <P><B>AAlib</B> is a library for displaying graphics in text mode, using powerful
 ASCII renderer. There are LOTS of programs already supporting it, like Doom,
-Quake, etc. MPlayer contains a very usable driver for it.
+Quake, etc. <B>MPlayer</B> contains a very usable driver for it.
 If ./configure detects aalib installed, the aalib libvo driver will be built.</P>
 
 <TABLE BORDER=0>
@@ -652,22 +652,22 @@ If ./configure detects aalib installed, the aalib libvo driver will be built.</P
 <TR><TD></TD><TD>3</TD><TD></TD><TD>decrease brightness</TD></TR>
 <TR><TD></TD><TD>4</TD><TD></TD><TD>increase brightness</TD></TR>
 <TR><TD></TD><TD>5</TD><TD></TD><TD>switch fast rendering on/off</TD></TR>
-<TR><TD></TD><TD>6</TD><TD></TD><TD>set dithering mode (none, error distribution, floyd steinberg)</TD></TR>
+<TR><TD></TD><TD>6</TD><TD></TD><TD>set dithering mode (none, error distribution, Floyd Steinberg)</TD></TR>
 <TR><TD></TD><TD>7</TD><TD></TD><TD>invert image</TD></TR>
-<TR><TD></TD><TD>a</TD><TD></TD><TD>toggles between aa and mplayer control)</TD></TR>
+<TR><TD></TD><TD>a</TD><TD></TD><TD>toggles between aa and <B>MPlayer</B> control)</TD></TR>
 
 <TR><TD COLSPAN=4><P><B>The following command line options can be used:</B></P></TD></TR>
 
-<TR><TD></TD><TD>-aaosdcolor=V</TD><TD></TD><TD>change osd color</TD></TR>
+<TR><TD></TD><TD>-aaosdcolor=V</TD><TD></TD><TD>change OSD color</TD></TR>
 <TR><TD></TD><TD>-aasubcolor=V</TD><TD></TD><TD>change subtitle color</TD></TR>
-<TR><TD COLSPAN=3></TD><TD><P><I>where V can be: (0/normal, 1/dark, 2/bold, 3/boldfont, 4/reverse, 5/special)</I></P></TD></TR>
+<TR><TD COLSPAN=3></TD><TD><P><I>where V can be: (0/normal, 1/dark, 2/bold, 3/bold font, 4/reverse, 5/special)</I></P></TD></TR>
 
-<TR><TD COLSPAN=4><P><B>AAlib itselves provides a large sum of options.
+<TR><TD COLSPAN=4><P><B>AAlib itself provides a large sum of options.
 Here are some important:</B></P></TD></TR>
 
-<TR><TD></TD><TD>-aadriver</TD><TD></TD><TD>set recommended aa driver (X11, curses, linux)</TD></TR>
+<TR><TD></TD><TD>-aadriver</TD><TD></TD><TD>set recommended aa driver (X11, curses, Linux)</TD></TR>
 <TR><TD></TD><TD>-aaextended</TD><TD></TD><TD>use all 256 characters</TD></TR>
-<TR><TD></TD><TD>-aaeight</TD><TD></TD><TD>use eight bit ascii</TD></TR>
+<TR><TD></TD><TD>-aaeight</TD><TD></TD><TD>use eight bit ASCII</TD></TR>
 <TR><TD></TD><TD>-aahelp</TD><TD></TD><TD>prints out all aalib options</TD></TR>
 </TABLE>
 
@@ -675,13 +675,13 @@ Here are some important:</B></P></TD></TR>
 (using aalib on X), and it's least CPU intensive on standard,
 non-framebuffer console. Use SVGATextMode to set up a big textmode,
 then enjoy! (secondary head Hercules cards rock :)) (anyone can enhance
-bdev to do conversion/dithering to hgafb? Would be neat :)</P>
+fbdev to do conversion/dithering to hgafb? Would be neat :)</P>
 
-<P>Use the -framedrop option if your comp isn't fast enough to render all frames!</P>
+<P>Use the -framedrop option if your computer isn't fast enough to render all frames!</P>
 
-<P>Playing on terminal you'll get better speed and quality using the linux driver, not
+<P>Playing on terminal you'll get better speed and quality using the Linux driver, not
 curses (-aadriver linux). But therefore you need write access on /dev/vcsa&lt;terminal&gt;!
-That isn't autodetected by aalib, bu vo_aa tries to find the best mode.
+That isn't autodetected by aalib, but vo_aa tries to find the best mode.
 See <A HREF="http://aa-project.sourceforge.net/tune/">http://aa-project.sourceforge.net/tune/</A> for further tuning issues.</P>
 
 
@@ -751,17 +751,17 @@ in vm86 mode).<BR>
 <P>
 <B>Known problems and workaround:</B><BR>
  - If you have installed <B>NLS</B> font on your Linux box and run VESA driver
-from text-mode then after terminating mplayer you will have <B>ROM font</B> loaded instead
+from text-mode then after terminating <B>MPlayer</B> you will have <B>ROM font</B> loaded instead
 of national. You can load national font again by using <B><I>setsysfont</I></B> utility
 from for example Mandrake distribution.<BR>
-(<B>Hint</B>: The same utility is used for localizating fbdev).<BR>
+(<B>Hint</B>: The same utility is used for localization of fbdev).<BR>
  - Some <B>Linux graphics drivers</B> don't update active <B>BIOS mode</B> in DOS memory. So if you have such
 problem - always use VESA driver only from <B>text-mode</B>. Otherwise text-mode (#03) will be
 activated anyway and you will need restart your computer.<BR>
  - Often after terminating VESA driver you get <B>black screen</B>. To return your screen
 to original state - simply switch to other console (by pressing <B>Alt-Fx</B>) then switch
 to your previous console by the same way.<BR>
- - To get <B>working TV-out</B> you need have plugged tv-connector in before booting
+ - To get <B>working TV-out</B> you need have plugged TV-connector in before booting
 your PC since video BIOS initializes itself only once during POST procedure.
 </P>
 
@@ -776,7 +776,7 @@ hardware scaling support, use the <CODE>-vo xv</CODE> output for them, or
 
 <P>The problem is that most cards' driver doesn't support
 hardware acceleration on the second head/TV. In those cases, you see green/blue
-coloured window instead of the movie. This is where this driver comes in
+colored window instead of the movie. This is where this driver comes in
 handy, but you need powerful CPU to use software scaling. Don't use the
 SDL driver's software output+scaler, it has worse image quality !</P>
 
@@ -819,7 +819,7 @@ video modes.</P>
 <UL>
   <LI>You can use standalone video output driver: <CODE>-vo xvidix</CODE><BR>
     This driver was developed as X11's front end to VIDIX technology.  It
-    requires XServer and can work only under XServer.</LI>
+    requires X server and can work only under X server.</LI>
   <LI>You can use VIDIX subdevice which was applied to several video output
     drivers, such as:<BR>
     <CODE>-vo vesa:vidix</CODE> (<B>LINUX ONLY</B>) and <CODE>-vo fbdev:vidix</CODE></LI>
@@ -878,7 +878,7 @@ recognize <CODE>:vidix</CODE> subdevice.
 
 <P>And the last <B>WARNING</B>: (un)fortunately you <B>MUST</B> have
   <B>ROOT</B> privileges to use VIDIX due to direct hardware access. At least
-  set the <B>suid</B> bit on the <B>MPlayer</B> excecutable.
+  set the <B>SUID</B> bit on the <B>MPlayer</B> executable.
 </P>
 
 <P><B>VIDEO EQUALIZER</B></P>
@@ -914,7 +914,7 @@ recognize <CODE>:vidix</CODE> subdevice.
 </P>
 <P>
   <B>Note:</B> Not every driver provides support for each of those parameters.
-  Currently only <B>radeon_vid.so</B> provides full support for video eqalizing.
+  Currently only <B>radeon_vid.so</B> provides full support for video equalizing.
   Other drivers only partly support these options.
 </P>
 <P><B>Examples:</B><BR>
@@ -945,13 +945,13 @@ Some remarks:
     it will crash your computer. It is, however, fine to <B>FIRST</B> start 
     XawTV, <B>THEN</B> start <B>MPlayer</B>, wait for <B>MPlayer</B> to finish 
     and <B>THEN</B> stop XawTV.</LI>
-  <LI>this driver adds <CODE>-zr*</CODE> commandline options. The explanation
+  <LI>this driver adds <CODE>-zr*</CODE> command line options. The explanation
     of these options can be viewed with <CODE>-zrhelp</CODE>. It is possible to
-    crop the input frame (cut borders to make it fit or to enhance performace)
+    crop the input frame (cut borders to make it fit or to enhance performance)
     and to do other things.</LI>
   <LI>the driver takes data in YV12 and YUY2 format, this means that some 
     codecs won't work. Some old VfW (Video for Windows) codecs, for example,
-    are incompatible with this driver. The errormessage that you will see is: 
+    are incompatible with this driver. The error message that you will see is: 
     <CODE>Sorry, selected video_out device is incompatible with this codec.
     </CODE></LI>
   <LI>OSD is currently not supported, so you won't see
@@ -977,7 +977,7 @@ Some remarks:
     on it!  The windows driver somehow workarounds this, probably by using the
     3D engine to zoom, and the YUV framebuffer to display the zoomed
     image. If you really want to use X, use the <CODE>-vo x11 -fs -zoom</CODE>
-    options, but it will be <B>SLOW</B>, and has <B>Macrovision</B> copyprotection
+    options, but it will be <B>SLOW</B>, and has <B>Macrovision</B> copy protection
     enabled (you can "workaround" Macrovision using
     <A HREF="http://avifile.sourceforge.net/mgamacro.pl">this</A> perl
     script.</LI>
