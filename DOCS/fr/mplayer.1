@@ -1,4 +1,3 @@
-
 .\" MPlayer (C) 2000-2003 Arpad Gereoffy
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < n@tourmentine.com >
@@ -1499,8 +1498,7 @@ Il supporte également le format d'option standard pour l'option X standard
 \-geometry.
 Les valeur données doivent être des valeurs entières.
 
-Note: Cette option n'est supportée que par quelques vo, incluant tdfxfb, fbdev et
-xv.
+Note: Cette option n'est supportée que par un vo: xv.
 
 .I EXEMPLE:
 .PD 0
@@ -2246,6 +2244,13 @@ Cela ne fonctionnera surement pas correctement avec MPlayer, mais peut être
 utilisé avec "mencoder -fps 29.97 -ofps 29.97 -vop telecine". Les deux options
 fps sont essentielles ! (la synchro A/V sera brisée si elles sont mauvaises.)
 Le paramètre optionnel départ indique où démarrer (0-3).
+.IPs "tfields[=mode]"
+Séparation temporelle des champs -- sépare les champs en trames, doublant le
+débit de sortie. En mode 0, le filtre ne touchera pas aux champs, ce qui
+donnera une sortie demi-hauteur. En mode 1, les parties entrelaçées de l'image
+seront interpolées pour reconstruire des trames pleines-hauteur. Comme le filtre
+telecine, "tfields" ne fonctionnera correctement qu'avec MEncoder, et seulement
+si -fps et -ofps sont définis au débit (double) désiré !
 .IPs "boxblur=rayon:puissance[:rayon:puissance]"
 flou boite
 .RSss
@@ -2857,7 +2862,7 @@ gt(a,b): est 1 si a>b, 0 sinon
 .br
 lt(a,b): est 1 si a<b, 0 sinon
 .br
-eq(a,b): est 1 si a==b,0 sinon
+eq(a,b): est 1 si a==b, 0 sinon
 .br
 sin, cos, tan, sinh, cosh, tanh, exp, log, abs
 .
