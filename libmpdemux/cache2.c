@@ -31,13 +31,13 @@ typedef struct {
   int sector_size; // size of a single sector (2048/2324)
   int back_size;   // we should keep back_size amount of old bytes for backward seek
   int fill_limit;  // we should fill buffer only if space>=fill_limit
-  // reader's pointers:
-  int read_filepos;
   // filler's pointers:
-  int min_filepos; // buffer contain only a part of the file, from min-max pos
-  int max_filepos;
-  int offset;      // filepos <-> bufferpos  offset value (filepos of the buffer's first byte)
   int eof;
+  off_t min_filepos; // buffer contain only a part of the file, from min-max pos
+  off_t max_filepos;
+  off_t offset;      // filepos <-> bufferpos  offset value (filepos of the buffer's first byte)
+  // reader's pointers:
+  off_t read_filepos;
   // commands/locking:
 //  int seek_lock;   // 1 if we will seek/reset buffer, 2 if we are ready for cmd
 //  int fifo_flag;  // 1 if we should use FIFO to notice cache about buffer reads.
@@ -63,9 +63,7 @@ int cache_read(cache_vars_t* s,unsigned char* buf,int size){
 
   //printf("CACHE2_READ: 0x%X <= 0x%X <= 0x%X  \n",s->min_filepos,s->read_filepos,s->max_filepos);
     
-    newb=s->max_filepos-s->read_filepos; // new bytes in the buffer
-
-    if(newb<=0 || s->read_filepos<s->min_filepos){
+    if(s->read_filepos>=s->max_filepos || s->read_filepos<s->min_filepos){
 	// eof?
 	if(s->eof) break;
 	// waiting for buffer fill...
@@ -73,6 +71,7 @@ int cache_read(cache_vars_t* s,unsigned char* buf,int size){
 	continue; // try again...
     }
 
+    newb=s->max_filepos-s->read_filepos; // new bytes in the buffer
     if(newb<min_fill) min_fill=newb; // statistics...
 
 //    printf("*** newb: %d bytes ***\n",newb);
@@ -104,9 +103,8 @@ int cache_read(cache_vars_t* s,unsigned char* buf,int size){
 }
 
 int cache_fill(cache_vars_t* s){
-  int read,back,back2,newb,space,len,pos,endpos;
-  
-  read=s->read_filepos;
+  int back,back2,newb,space,len,pos,endpos;
+  off_t read=s->read_filepos;
   
   if(read<s->min_filepos || read>s->max_filepos){
       // seek...
