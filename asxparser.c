@@ -9,6 +9,7 @@
 #include "playtree.h"
 #include "playtreeparser.h"
 #include "libmpdemux/stream.h"
+#include "libmpdemux/demuxer.h"
 #include "asxparser.h"
 #include "mp_msg.h"
 #include "m_config.h"
@@ -506,7 +507,7 @@ asx_parse_entryref(ASX_Parser_t* parser,char* buffer,char** _attribs) {
   char *href;
   stream_t* stream;
   play_tree_parser_t* ptp;
-  int f;
+  int f=DEMUXER_TYPE_UNKNOWN;
 
   if(parser->deep > 0)
     return NULL;

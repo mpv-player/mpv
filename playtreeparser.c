@@ -15,6 +15,7 @@
 #include "playtree.h"
 #include "playtreeparser.h"
 #include "libmpdemux/stream.h"
+#include "libmpdemux/demuxer.h"
 #include "mp_msg.h"
 
 
@@ -518,7 +519,7 @@ parse_smil(play_tree_parser_t* p) {
 
 play_tree_t*
 embedded_playlist_parse(char *line) {
-  int f;
+  int f=DEMUXER_TYPE_PLAYLIST;
   stream_t* stream;
   play_tree_parser_t* ptp;
   play_tree_t* entry;
@@ -646,7 +647,7 @@ play_tree_t*
 parse_playlist_file(char* file) {
   stream_t *stream;
   play_tree_t* ret;
-  int f;
+  int f=DEMUXER_TYPE_PLAYLIST;
 
   stream = open_stream(file,0,&f);
 

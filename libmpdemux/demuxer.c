@@ -1377,7 +1377,7 @@ extern int hr_mp3_seek;
 demuxer_t* demux_open(stream_t *vs,int file_format,int audio_id,int video_id,int dvdsub_id,char* filename){
   stream_t *as = NULL,*ss = NULL;
   demuxer_t *vd,*ad = NULL,*sd = NULL;
-  int afmt = 0,sfmt = 0;
+  int afmt =DEMUXER_TYPE_UNKNOWN,sfmt = DEMUXER_TYPE_UNKNOWN ;
 
   if(audio_stream) {
     as = open_stream(audio_stream,0,&afmt);

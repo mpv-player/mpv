@@ -115,7 +115,12 @@ stream_t* open_stream(char* filename,char** options, int* file_format){
 stream_t* stream=NULL;
 int f=-1;
 off_t len;
-*file_format = DEMUXER_TYPE_UNKNOWN;
+
+  // Check if playlist or unknown 
+  if (*file_format != DEMUXER_TYPE_PLAYLIST){
+    *file_format=DEMUXER_TYPE_UNKNOWN;
+  }
+
 if(!filename) {
    mp_msg(MSGT_OPEN,MSGL_ERR,"NULL filename, report this bug\n");
    return NULL;

@@ -337,7 +337,7 @@ demux_stream_t *d_dvdsub=NULL;
 sh_audio_t *sh_audio=NULL;
 sh_video_t *sh_video=NULL;
 int file_format=DEMUXER_TYPE_UNKNOWN;
-int i;
+int i=DEMUXER_TYPE_UNKNOWN;
 void *vobsub_writer=NULL;
 
 uint32_t ptimer_start;

@@ -1168,7 +1168,13 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 		return -1;
 	}
 	stream->streaming_ctrl->url = check4proxies( url );
+
+        if (*demuxer_type != DEMUXER_TYPE_PLAYLIST){ 
 	ret = autodetectProtocol( stream->streaming_ctrl, &stream->fd, demuxer_type );
+        } else {
+	  ret=0;
+	}
+
 	if( ret<0 ) {
 		return -1;
 	}
