@@ -221,6 +221,12 @@
           <LI><A HREF="#tv_examples">2.5.3 Examples</A></LI>
         </UL>
       </LI>
+      <LI><A HREF="#edl">2.6 Edit Decision Lists (EDL)</A>
+        <UL>
+          <LI><A HREF="#edl_using">2.6.1 Using an EDL file</A></LI>
+          <LI><A HREF="#edl_making">2.6.2 Making an EDL file</A></LI>
+        </UL>
+      </LI>
     </UL>
   </LI>
   <LI><A HREF="#usage">3. Usage</A>
@@ -1190,6 +1196,58 @@ on:driver=v4l:width=640:height=480 -vo xv</CODE><BR>
   resistant to noise. The bt8x8 chips can do the pixel averaging only
   in the horizontal direction due to a hardware limitation.</P>
 
+
+<H2><A NAME="edl">2.6 Edit Decision Lists (EDL)</A></H2>
+
+<P>The edit decision list (EDL) system allows you to automatically skip or mute
+  sections of videos during playback, based on a movie specific EDL
+  configuration file.</P>
+
+<P>This is useful for those who may want to watch a film in "family-friendly"
+  mode. You can cut out any violence, profanity, Jar-Jar Binks .. from a movie
+  according to your own personal preferences. Aside from this, there are other
+  uses, like automatically skipping over commercials in video files you
+  watch.</P>
+
+<P>The EDL file format is pretty bare-bones. Once the EDL system has reached a
+  certain level of maturity, an XML-based file format will probably be
+  implemented (keeping backwards compatibility with previous EDL formats).</P>
+  
+<P>The maximum number of EDL entries for the current incarnation of EDL is 1000.
+  If you happen to need more, change the <CODE>#define MAX_EDL_ENTRIES</CODE>
+  in the <CODE>edl.h</CODE> file.</P>
+  
+<H3><A NAME="edl_using">2.6.1 Using an EDL file</A></H3>
+
+<P>Include the <CODE>-edl &lt;filename&gt;</CODE> flag when you run MPlayer,
+  with the name of the EDL file you want applied to the video.</P>
+
+<H3><A NAME="edl_making">2.6.1 Making an EDL file</A></H3>
+
+<P>The current EDL file format is:</P>
+
+<CODE>[begin second] [end second] [action]</CODE>
+
+<P>Where the seconds are floating-point numbers and the action is either
+  <CODE>0</CODE> for skip or <CODE>1</CODE> for mute. Example:</P>
+
+<PRE>
+5.3   7.1    0
+15    16.7   1
+420   422    0
+</PRE>
+
+<P>This will skip from second 5.3 to second 7.1 of the video, then mute at
+  15 seconds, unmute at 16.7 seconds and skip from second 420 to second
+  422 of the video. These actions will be performed when the playback timer
+  reaches the times given in the file.</P>
+  
+<P>To create an EDL file to work from, use the
+  <CODE>-edlout &lt;filename&gt;</CODE> flag. During playback, when you want to
+  mark the previous two seconds to skip over, hit <CODE>i</CODE>. A
+  corresponding entry will be written to the file for that time. You can then go
+  back and fine-tune the generated EDL file.</P>
+  
 
 
 <H1><A NAME="usage">3. Usage</A></H1>
