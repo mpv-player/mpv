@@ -50,6 +50,8 @@ extern int frameratecode2framerate[16];
 
 #include "postproc/postprocess.h"
 
+#include "cpudetect.h"
+
 extern picture_t *picture;	// exported from libmpeg2/decode.c
 
 int divx_quality=0;
@@ -100,8 +102,6 @@ static void* ds_vdec=NULL;
 extern int tv_param_on;
 extern tvi_handle_t *tv_handler;
 #endif
-
-#include "mmx_defs.h"
 
 void AVI_Decode_RLE8(char *image,char *delta,int tdsize,
     unsigned int *map,int imagex,int imagey,unsigned char x11_bytes_pixel);
@@ -808,11 +808,14 @@ if(verbose>1){
 } // switch
 //------------------------ frame decoded. --------------------
 
-#ifdef HAVE_MMX
 	// some codecs is broken, and doesn't restore MMX state :(
 	// it happens usually with broken/damaged files.
-	__asm __volatile (EMMS:::"memory");
-#endif
+if(gCpuCaps.has3DNow){
+	__asm __volatile ("femms\n\t":::"memory");
+}
+else if(gCpuCaps.hasMMX){
+	__asm __volatile ("emms\n\t":::"memory");
+}
 
 t2=GetTimer();t=t2-t;video_time_usage+=t*0.000001f;
 
