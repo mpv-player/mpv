@@ -36,6 +36,7 @@
  
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -45,7 +46,10 @@
 #include <stdint.h>
 
 #include "config.h"
-#include "transcode.h"
+
+#include "divx4_vbr.h"
+
+//#include "transcode.h"
 
 #define FALSE 0
 #define TRUE 1
@@ -82,39 +86,23 @@ typedef struct entry_s
 		short drop;
 	} entry;
 
-int m_iCount;
-int m_iQuant;
-int m_iCrispness;
-short m_bDrop;
-float m_fQuant;
+static int m_iCount;
+static int m_iQuant;
+static int m_iCrispness;
+static short m_bDrop;
+static float m_fQuant;
 
-int64_t m_lEncodedBits;
-int64_t m_lExpectedBits;
+static int64_t m_lEncodedBits;
+static int64_t m_lExpectedBits;
 
-FILE  *m_pFile;
+static FILE  *m_pFile;
 
-entry    vFrame;
-entry *m_vFrames;
-long	lFrameStart;
+static entry    vFrame;
+static entry *m_vFrames;
+static long	lFrameStart;
 
-int	iNumFrames;
-int	dummy;
-
-// methods from class VbrControl
-
-	void VbrControl_init_1pass_vbr(int quality, int crispness);
-	int VbrControl_init_2pass_vbr_encoding(const char* filename, int bitrate, double framerate, int crispness, int quality);
-	int VbrControl_init_2pass_vbr_analysis(const char* filename, int quality);
-
-	void VbrControl_update_1pass_vbr();
-	void VbrControl_update_2pass_vbr_encoding(int motion_bits, int texture_bits, int total_bits);
-	void VbrControl_update_2pass_vbr_analysis(int is_key_frame, int motion_bits, int texture_bits, int total_bits, int quant);
-
-	int VbrControl_get_quant();
-	void VbrControl_set_quant(float q);
-	int VbrControl_get_intra();
-	short VbrControl_get_drop();
-	void VbrControl_close();
+static int	iNumFrames;
+static int	dummy;
 
 
 void VbrControl_init_1pass_vbr(int quality, int crispness)
@@ -233,14 +221,14 @@ int VbrControl_init_2pass_vbr_encoding(const char *filename, int bitrate, double
 		iNumFrames++;
 		average_complexity=complexity/iNumFrames;
 		
-		if (verbose & TC_DEBUG)	{
-		    fprintf(stderr, "(%s) frames %d, texture %lld, motion %lld, total %lld, complexity %lld\n", __FILE__, iNumFrames, text_bits, motion_bits, total_bits, complexity);
-		}
+//		if (verbose & TC_DEBUG)	{
+//		    fprintf(stderr, "(%s) frames %d, texture %lld, motion %lld, total %lld, complexity %lld\n", __FILE__, iNumFrames, text_bits, motion_bits, total_bits, complexity);
+//		}
 		
 		m_vFrames = (entry*)malloc(iNumFrames*sizeof(entry));
 		if (!m_vFrames) 
 		{	printf("out of memory");
-			return TC_EXPORT_ERROR;
+			return -2; //TC_EXPORT_ERROR;
 		}
 			
 	   fseek(m_pFile, lFrameStart, SEEK_SET);		// start again
