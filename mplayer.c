@@ -345,7 +345,6 @@ void uninit_player(unsigned int mask){
 }
 
 void exit_player(char* how){
- total_time_usage_start=GetTimer()-total_time_usage_start;
 
   uninit_player(INITED_ALL);
 
@@ -353,20 +352,6 @@ void exit_player(char* how){
 
   if(how) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_Exiting,how);
   mp_msg(MSGT_CPLAYER,MSGL_V,"max framesize was %d bytes\n",max_framesize);
-  if(benchmark){
-      double tot=video_time_usage+vout_time_usage+audio_time_usage;
-      double total_time_usage=(float)total_time_usage_start*0.000001;
-      mp_msg(MSGT_CPLAYER,MSGL_INFO,"BENCHMARKs: V:%8.3fs VO:%8.3fs A:%8.3fs Sys:%8.3fs = %8.3fs\n",
-          video_time_usage,vout_time_usage,audio_time_usage,
-	  total_time_usage-tot,total_time_usage);
-      if(total_time_usage>0.0)
-      mp_msg(MSGT_CPLAYER,MSGL_INFO,"BENCHMARK%%: V:%8.4f%% VO:%8.4f%% A:%8.4f%% Sys:%8.4f%% = %8.4f%%\n",
-          100.0*video_time_usage/total_time_usage,
-	  100.0*vout_time_usage/total_time_usage,
-	  100.0*audio_time_usage/total_time_usage,
-	  100.0*(total_time_usage-tot)/total_time_usage,
-	  100.0);
-  }
 
   exit(1);
 }
@@ -2366,7 +2351,26 @@ mp_msg(MSGT_GLOBAL,MSGL_V,"EOF code: %d  \n",eof);
 
 goto_next_file:  // don't jump here after ao/vo/getch initialization!
 
+
+if(benchmark){
+  double tot=video_time_usage+vout_time_usage+audio_time_usage;
+  double total_time_usage;
+  total_time_usage_start=GetTimer()-total_time_usage_start;
+  total_time_usage = (float)total_time_usage_start*0.000001;
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"BENCHMARKs: V:%8.3fs VO:%8.3fs A:%8.3fs Sys:%8.3fs = %8.3fs\n",
+	 video_time_usage,vout_time_usage,audio_time_usage,
+	 total_time_usage-tot,total_time_usage);
+  if(total_time_usage>0.0)
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"BENCHMARK%%: V:%8.4f%% VO:%8.4f%% A:%8.4f%% Sys:%8.4f%% = %8.4f%%\n",
+	   100.0*video_time_usage/total_time_usage,
+	   100.0*vout_time_usage/total_time_usage,
+	   100.0*audio_time_usage/total_time_usage,
+	   100.0*(total_time_usage-tot)/total_time_usage,
+	   100.0);
+}
+
 if(eof == PT_NEXT_ENTRY || eof == PT_PREV_ENTRY) {
+  eof = eof == PT_NEXT_ENTRY ? 1 : -1;
   if(play_tree_iter_step(playtree_iter,eof,0) == PLAY_TREE_ITER_ENTRY) {
     uninit_player(INITED_ALL-(INITED_GUI+INITED_LIRC));
     eof = 1;
