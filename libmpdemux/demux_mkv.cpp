@@ -1,3 +1,9 @@
+// Matroska demuxer
+// written by Moritz Bunkus <moritz@bunkus.org>
+// License: GPL of course ;)
+
+// $Id$
+
 extern "C" {
 #include "config.h"
 }
@@ -2416,9 +2422,7 @@ extern "C" void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
           if (!index->entries[k].is_key)
             continue;
           diff = target_timecode - (int64_t)index->entries[k].timecode;
-          if (diff < 0)
-            diff *= -1;
-          if (diff < min_diff) {
+          if ((diff > 0) && (diff < min_diff)) {
             min_diff = diff;
             entry = & index->entries[k];
           }
