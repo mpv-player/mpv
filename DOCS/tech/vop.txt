@@ -183,7 +183,7 @@ Current plugins:
 
 -vf unsharp=l|cWxH:amount[:l|cWxH:amount]
     unsharp mask / gaussian blur.
-        l   apply effect on luma components
+        l   apply effect on luma component
         c   apply effect on chroma components
       WxH   width and height of the matrix, odd sized in both directions
             min = 3x3, max = 13x11 or 11x13
