@@ -1,3 +1,4 @@
+#include "../config.h"
 
 #ifndef HAVE_GETTIMEOFDAY
 #include <sys/time.h>
