@@ -89,10 +89,8 @@ main header:
 	version					v
 	stream_count				v
 	max_distance				v
-	max_short_distance			v
 	global_time_base_nom			v
 	global_time_base_denom			v
-	short_startcode				v
 	for(i=0; i<256; ){
 		tmp_flag			v
 		tmp_fields			v
@@ -218,9 +216,7 @@ file
 			if(next_code == info_startcode)
 				info_packet
 			else{
-				if(next_code == short_startcode)
-					short_startcode    u(24)
-				else if(next_code == frame_startcode)                
+				if(next_code == frame_startcode)                
 					sync_point
 				frame
 			}
@@ -264,21 +260,6 @@ max_distance
 	SHOULD be set to <=32768 or at least <=65536 unless there is a very good
 	reason to set it higher otherwise reasonable error recovery will be
 	impossible
-
-max_short_distance
-	max distance of short startcodes or frame_startcodes, the distance may
-	only be larger if there is only a single frame between the 2 
-	frame_startcodes/short startcodes this can be used by the demuxer to
-	detect damaged frame headers if the damage results in a too long chain
-	SHOULD be set to <=4096 or at least <=8192 unless there is a very good
-	reason to set it higher otherwise reasonable error recovery will be
-	impossible
-
-
-short_startcode
-	MUST be 3 bytes long and MUST have 'N' as first byte, the second byte
-	MUST not be a printable uppercase letter / must not be within 65..90, 
-	default is 0x4EFE79
 
 stream_id
 	Note: streams with a lower relative class MUST have a lower relative id
