@@ -681,7 +681,7 @@ if test -c /dev/mga_vid ; then
  _syncfb=yes
 fi
 
-if test -e /dev/ost/video ; then
+if test -c /dev/ost/video ; then
  _dvb=yes
 fi
 
