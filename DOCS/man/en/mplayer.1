@@ -3583,9 +3583,23 @@ Output video using the SVGA library.
 .TP
 .B gl\ \ \ \ \ 
 OpenGL output driver.
+Very simple version, no OSD support and video size must be smaller than
+the maximum texture size of your OpenGL implementation.
+Intended to work even with the most simple OpenGL implementations.
+.PD 0
+.RSs
+.IPs manyfmts
+Enables support for more (RGB and BGR) color formats.
+Needs OpenGL version >= 1.2, NOT yet WORKING correctly.
+.IPs <number>
+Number of lines copied to texture in one piece.
+0 for whole image.
+.RE
+.PD 1
 .TP
 .B gl2\ \ \ \ 
 OpenGL output driver, second generation.
+Supports OSD and videos larger than maximum texture size.
 .TP
 .B null\ \ \ 
 Produces no video output.
