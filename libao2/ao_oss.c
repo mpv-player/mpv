@@ -26,6 +26,8 @@ static ao_info_t info =
 	""
 };
 
+/* Support for >2 output channels added 2001-11-25 - Steve Davies <steve@daviesfam.org> */
+
 LIBAO_EXTERN(oss)
 
 static char *dsp="/dev/dsp";
@@ -95,8 +97,8 @@ static int control(int cmd,int arg){
 // return: 1=success 0=fail
 static int init(int rate,int channels,int format,int flags){
 
-//  printf("ao2: %d Hz  %d chans  %s\n",rate,channels,
-//    audio_out_format_name(format));
+  printf("ao2: %d Hz  %d chans  %s\n",rate,channels,
+    audio_out_format_name(format));
 
   if (ao_subdevice)
     dsp = ao_subdevice;
@@ -124,13 +126,26 @@ static int init(int rate,int channels,int format,int flags){
     audio_out_format_name(ao_data.format), audio_out_format_name(format));
   
   if(format != AFMT_AC3) {
-  ao_data.channels=channels-1;
-  ioctl (audio_fd, SNDCTL_DSP_STEREO, &ao_data.channels);
-  
-  // set rate
-  ao_data.samplerate=rate;
-  ioctl (audio_fd, SNDCTL_DSP_SPEED, &ao_data.samplerate);
-  printf("audio_setup: using %d Hz samplerate (requested: %d)\n",ao_data.samplerate,rate);
+    // We only use SNDCTL_DSP_CHANNELS for >2 channels, in case some drivers don't have it
+    ao_data.channels = channels;
+    if (ao_data.channels > 2) {
+      if (ioctl (audio_fd, SNDCTL_DSP_CHANNELS, &ao_data.channels) == -1) {
+	printf("audio_setup: Failed to set audio device to %d channels\n", ao_data.channels);
+	return 0;
+      }
+    }
+    else {
+      int c = ao_data.channels-1;
+      if (ioctl (audio_fd, SNDCTL_DSP_STEREO, &c) == -1) {
+	printf("audio_setup: Failed to set audio device to %d channels\n", ao_data.channels);
+	return 0;
+      }
+    }
+    printf("audio_setup: using %d channels (requested: %d)\n", ao_data.channels, ao_data.channels);
+    // set rate
+    ao_data.samplerate=rate;
+    ioctl (audio_fd, SNDCTL_DSP_SPEED, &ao_data.samplerate);
+    printf("audio_setup: using %d Hz samplerate (requested: %d)\n",ao_data.samplerate,rate);
   }
 
   if(ioctl(audio_fd, SNDCTL_DSP_GETOSPACE, &zz)==-1){
@@ -195,8 +210,13 @@ static void reset(){
 
   ioctl (audio_fd, SNDCTL_DSP_SETFMT, &ao_data.format);
   if(ao_data.format != AFMT_AC3) {
-  ioctl (audio_fd, SNDCTL_DSP_STEREO, &ao_data.channels);
-  ioctl (audio_fd, SNDCTL_DSP_SPEED, &ao_data.samplerate);
+    if (ao_data.channels > 2)
+      ioctl (audio_fd, SNDCTL_DSP_CHANNELS, &ao_data.channels);
+    else {
+      int c = ao_data.channels-1;
+      ioctl (audio_fd, SNDCTL_DSP_STEREO, &c);
+    }
+    ioctl (audio_fd, SNDCTL_DSP_SPEED, &ao_data.samplerate);
   }
 }
 
@@ -267,7 +287,3 @@ static float get_delay(){
   }
   return ((float)ao_data.buffersize)/(float)ao_data.bps;
 }
-
-
-
-

@@ -74,6 +74,9 @@ extern int pl_delay_len;
 /* from libvo/aspect.c */
 extern float monitor_aspect;
 
+/* from dec_audio, currently used for ac3surround decoder only */
+extern int audio_output_channels;
+
 /*
  * CONF_TYPE_FUNC_FULL :
  * allows own implemtations for passing the params
@@ -103,6 +106,7 @@ struct config conf[]={
 	{"dsp", "Use -ao oss:dsp_path!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
         {"mixer", &mixer_device, CONF_TYPE_STRING, 0, 0, 0},
         {"master", &mixer_usemaster, CONF_TYPE_FLAG, 0, 0, 1},
+	{"channels", &audio_output_channels, CONF_TYPE_INT, CONF_RANGE, 2, 6},
 #ifdef HAVE_X11
 	{"display", &mDisplayName, CONF_TYPE_STRING, 0, 0, 0},
 #endif

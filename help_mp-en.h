@@ -33,6 +33,7 @@ static char help_text[]=
 #ifdef USE_FAKE_MONO
 " -stereo <mode>  select MPEG1 stereo output (0:stereo 1:left 2:right)\n"
 #endif
+" -channels <n>   target number of audio output channels\n"
 " -fs -vm -zoom   fullscreen playing options (fullscr,vidmode chg,softw.scale)\n"
 " -x <x> -y <y>   scale image to <x> * <y> resolution [if -vo driver supports!]\n"
 " -sub <file>     specify subtitle file to use (see also -subfps, -subdelay)\n"

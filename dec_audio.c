@@ -83,6 +83,9 @@ static struct mad_stream mad_stream;
 static struct mad_frame  mad_frame;
 static struct mad_synth  mad_synth;
 
+/* used for ac3surround decoder - set using -channels option */
+int audio_output_channels = 2;
+
 
 // ensure buffer is filled with some data
 static void mad_prepare_buffer(sh_audio_t* sh_audio, struct mad_stream* ms, int length)
@@ -228,7 +231,8 @@ case AFM_ALAW:
   break;
 case AFM_AC3:
   // Dolby AC3 audio:
-  sh_audio->audio_out_minsize=4*256*6;
+  // however many channels, 2 bytes in a word, 256 samples in a block, 6 blocks in a frame
+  sh_audio->audio_out_minsize=audio_output_channels*2*256*6;
   break;
 case AFM_HWAC3:
   // Dolby AC3 audio:
@@ -329,7 +333,7 @@ case AFM_AC3: {
   // Dolby AC3 audio:
   dec_audio_sh=sh_audio; // save sh_audio for the callback:
   ac3_config.fill_buffer_callback = ac3_fill_buffer;
-  ac3_config.num_output_ch = 2;
+  ac3_config.num_output_ch = audio_output_channels;
   ac3_config.flags = 0;
 if(gCpuCaps.hasMMX){
   ac3_config.flags |= AC3_MMX_ENABLE;
@@ -342,7 +346,7 @@ if(gCpuCaps.has3DNow){
   if(sh_audio->ac3_frame){
     ac3_frame_t* fr=(ac3_frame_t*)sh_audio->ac3_frame;
     sh_audio->samplerate=fr->sampling_rate;
-    sh_audio->channels=2;
+    sh_audio->channels=ac3_config.num_output_ch;
     // 1 frame: 6*256 samples     1 sec: sh_audio->samplerate samples
     //sh_audio->i_bps=fr->frame_size*fr->sampling_rate/(6*256);
     sh_audio->i_bps=fr->bit_rate*(1000/8);
