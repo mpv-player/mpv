@@ -245,9 +245,18 @@ while(fgets(sor,1020,f)){
       }
   }
   printf("Syntax error in font desc: %s\n",sor);
+  free(desc);
+  fclose(f);
+  return NULL;
 
 }
 fclose(f);
+
+ if (first == 1) {
+   printf("%s is empty or a directory, ignoring\n", fname);
+   free(desc);
+   return NULL;
+ }
 
 //printf("font: pos of U = %d\n",desc->start[218]);
 
