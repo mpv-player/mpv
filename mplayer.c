@@ -1929,11 +1929,41 @@ while(sh_audio){
 
 if(!sh_video) {
   // handle audio-only case:
-  if(!quiet) mp_msg(MSGT_AVSYNC,MSGL_STATUS,"A:%6.1f %4.1f%% %d%%   \r"
-		    ,sh_audio->delay-audio_out->get_delay()
+  if(!quiet) {
+      //
+      // convert time to HH:MM:SS.F format
+      //
+      long tenths = 10 * sh_audio->delay-audio_out->get_delay();
+      int hh = (tenths / 36000) % 100;
+      int mm = (tenths / 600) % 60;
+      int ss = (tenths /  10) % 60;
+      int f1 = tenths % 10;
+      char hhmmssf[16]; // only really need 11, but just in case...
+      sprintf( hhmmssf, "%2d:%2d:%2d.%1d", hh, mm, ss, f1);
+      if (0 == hh) {
+        hhmmssf[1] = ' ';
+        hhmmssf[2] = ' ';
+      }
+      // uncomment the next three lines to show leading zero ten-hours
+      // else if (' ' == hhmmssf[0]) {
+      //   hhmmssf[0] = '0';
+      // }
+      if ((0 == hh) && (0 == mm)) {
+        hhmmssf[4] = ' ';
+        hhmmssf[5] = ' ';
+      }
+      else if ((' ' == hhmmssf[3]) && (' ' != hhmmssf[2])) {
+        hhmmssf[3] = '0';
+      }
+      if ((' ' == hhmmssf[6]) && (' ' != hhmmssf[5])) {
+        hhmmssf[6] = '0';
+      }
+             mp_msg(MSGT_AVSYNC,MSGL_STATUS,"A:  %s %4.1f%% %d%%   \r"
+		    ,hhmmssf
 		    ,(sh_audio->delay>0.5)?100.0*audio_time_usage/(double)sh_audio->delay:0
 		    ,cache_fill_status
 		    );
+  }
   if(d_audio->eof) eof = PT_NEXT_ENTRY;
 
 } else {
