@@ -66,6 +66,7 @@ extern vo_functions_t video_out_fbdev;
 extern vo_functions_t video_out_svga;
 extern vo_functions_t video_out_png;
 extern vo_functions_t video_out_ggi;
+extern vo_functions_t video_out_aa;
 
 vo_functions_t* video_out_drivers[] =
 {
@@ -106,6 +107,10 @@ vo_functions_t* video_out_drivers[] =
 #ifdef HAVE_SVGALIB
 	&video_out_svga,
 #endif
+#ifdef HAVE_AA
+	&video_out_aa,
+#endif
+
 #ifdef HAVE_PNG
 	&video_out_png,
 #endif	

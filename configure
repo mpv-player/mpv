@@ -135,6 +135,7 @@ params:
         --enable-dga            build with DGA support [autodetect]
         --enable-svga           build with SVGAlib support [autodetect]
         --enable-sdl            build with SDL render support [autodetect]
+        --enable-aa             build with AAlib render support [autodetect]
         --enable-ggi            build with GGI render support [autodetect]
         --enable-mga            build with mga_vid support [autodetect, if /dev/mga_vid
                                 is available]
@@ -439,6 +440,7 @@ _sse=no
 _mga=no
 _gl=no
 _sdl=no
+_aa=no
 _ggi=no
 _xv=no
 _vm=no
@@ -467,6 +469,7 @@ _y=1
 _gllib=
 _sdllib=
 _sdlcflags=
+_aalib=
 _ggilib=
 _xvlib=
 _x11lib=
@@ -751,6 +754,12 @@ if $_cc `$_sdlconfig --cflags` $TMPC -o $TMPO `$_sdlconfig --libs` > /dev/null 2
 fi	
 fi
 
+
+_aa=no
+if test -s "/usr/local/lib/libaa.a"  || test -s "/usr/lib/libaa.a" ; then
+	_aa=yes
+fi	
+
 # Atmosfear: added libcss autodetect
 _css=no
 if test -s "/usr/local/lib/libcss.so" ; then
@@ -1021,6 +1030,9 @@ for ac_option do
   --enable-sdl)
         _sdl=yes
         ;;
+  --enable-aa)
+        _aa=yes
+        ;;
   --enable-ggi)
         _ggi=yes
         ;;
@@ -1118,6 +1130,9 @@ for ac_option do
         ;;
   --disable-sdl)
         _sdl=no
+        ;;
+  --disable-sdl)
+        _aa=no
         ;;
   --disable-ggi)
         _ggi=no
@@ -1378,6 +1393,7 @@ echo "Checking for X11 headers ... $_x11incdir"
 echo "Checking mga_vid device ... $_mga"
 echo "Checking for xmga ... $_xmga" 
 echo "Checking for SDL ... $_sdl"
+echo "Checking for AA ... $_aa"
 echo "Checking for GGI ... $_ggi"
 echo "Checking for OpenGL ... $_gl"
 echo "Checking for Xv ... $_xv"
@@ -1662,6 +1678,15 @@ fi
 _vosrc=''
 #_aosrc=''
 
+if [ $_aa = yes ]; then
+ _aa='#define HAVE_AA'
+ _vosrc=$_vosrc' vo_aa.c'
+ _aalib='-laa'
+else
+ _aa='#undef HAVE_AA'
+ _aalib=''
+fi
+
 if [ $_png = yes ]; then
  _png='#define HAVE_PNG'
  _vosrc=$_vosrc' vo_png.c'
@@ -1812,7 +1837,7 @@ WIN32_PATH=-DWIN32_PATH=\\"$_win32libdir\\"
 
 X11_INC=$_x11incdir
 X11DIR=$_x11libdir
-X_LIBS=$_x11libdir $_extralibdir $_gllib $_ggilib $_sdllib $_dgalib $_x11lib $_xvlib $_vmlib $_svgalib $_libpng $_socklib
+X_LIBS=$_x11libdir $_extralibdir $_gllib $_ggilib $_sdllib $_dgalib $_x11lib $_xvlib $_vmlib $_svgalib $_libpng $_socklib $_aalib
 
 TERMCAP_LIB=$_libtermcap
 XMM_LIBS = $_xmmplibs
@@ -2015,6 +2040,7 @@ $_syncfb
 $_fbdev
 $_svga
 $_have_xdpms
+$_aa
 
 #if defined(HAVE_GL)||defined(HAVE_X11)||defined(HAVE_XV)
 #define X11_FULLSCREEN
