@@ -285,7 +285,9 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
   distorted, try turning off hardware acceleration with
   <option>-vo directx:noaccel</option>. Download
   <ulink url="http://www.videolan.org/vlc/dx7headers.tgz">DirectX 7 header files</ulink>
-  to compile the DirectX video output driver.</para>
+  to compile the DirectX video output driver. Furthermore you need to have
+  DirectX 7 or later installed for the DirectX video output driver to work.
+  </para>
 
 <para><link linkend="vidix">VIDIX</link> now works under Windows as
   <option>-vo winvidix</option>, although it is still experimental
