@@ -201,14 +201,16 @@ static int init(sh_video_t *sh){
   fclose(f);
 }
 #else
-    framedescHandle=&(sh->ImageDesc);
+    printf("ImageDescription size: %d\n",((ImageDescription*)(sh->ImageDesc))->idSize);
+    framedescHandle=(ImageDescriptionHandle)NewHandleClear(((ImageDescription*)(sh->ImageDesc))->idSize);
+    memcpy(*framedescHandle,sh->ImageDesc,((ImageDescription*)(sh->ImageDesc))->idSize);
 #endif
 //Find codecscomponent for video decompression
 //    result = FindCodec ('SVQ1',anyCodec,&compressor,&decompressor );                 
 //    printf("FindCodec SVQ1 returned:%i compressor: 0x%X decompressor: 0x%X\n",result,compressor,decompressor);
 
     sh->context = kYUVSPixelFormat;
-#if 0
+#if 1
     {
 	int imgfmt = sh->codec->outfmt[sh->outfmtidx];
 	int qt_imgfmt;
@@ -218,7 +220,10 @@ static int init(sh_video_t *sh){
 	    qt_imgfmt = kYUVSPixelFormat;
 	    break;
 	case IMGFMT_YVU9:
-	    qt_imgfmt = kYVU9PixelFormat;
+	    qt_imgfmt = 0x73797639; //kYVU9PixelFormat;
+	    break;
+	case IMGFMT_YV12:
+	    qt_imgfmt = 0x79343230;
 	    break;
 	case IMGFMT_UYVY:
 	    qt_imgfmt = kUYVY422PixelFormat;
