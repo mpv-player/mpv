@@ -95,7 +95,9 @@ void navRead_PCI(pci_t *pci, unsigned char *buffer) {
   /* pci hli btnit */
   for(i = 0; i < pci->hli.hl_gi.btngr_ns; i++) {
     for(j = 0; j < (36 / pci->hli.hl_gi.btngr_ns); j++) {
-/*      int n = (36 / pci->hli.hl_gi.btngr_ns) * i + j;*/
+#ifdef HAVE_ASSERT_H
+      int n = (36 / pci->hli.hl_gi.btngr_ns) * i + j;
+#endif
       assert(pci->hli.btnit[n].zero1 == 0);
       assert(pci->hli.btnit[n].zero2 == 0);
       assert(pci->hli.btnit[n].zero3 == 0);
