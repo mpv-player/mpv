@@ -129,7 +129,7 @@ static int int_pos(int *mf)
 static uint32_t preinit(const char *arg)
 {
     int ppm_type = 0, pgm_type = 0, pgmyuv_type = 0,
-        raw_mode = 0, ascii_mode = 0, maxfiles = 0;
+        raw_mode = 0, ascii_mode = 0;
     strarg_t outdir  = {0, NULL},
              subdirs = {0, NULL};
     opt_t subopts[] = {
@@ -140,7 +140,7 @@ static uint32_t preinit(const char *arg)
         {"ascii",       OPT_ARG_BOOL,   &ascii_mode,    NULL},
         {"outdir",      OPT_ARG_STR,    &outdir,        NULL},
         {"subdirs",     OPT_ARG_STR,    &subdirs,       NULL},
-        {"maxfiles",    OPT_ARG_INT,    &maxfiles,      (opt_test_f)int_pos},
+        {"maxfiles",    OPT_ARG_INT,    &pnm_maxfiles,  (opt_test_f)int_pos},
         {NULL}
     };
     const char *info_message = NULL;
@@ -148,20 +148,20 @@ static uint32_t preinit(const char *arg)
     mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
                                             MSGTR_VO_ParsingSuboptions);
 
+    pnm_maxfiles = 1000;
+
     if (subopt_parse(arg, subopts) != 0) {
         return -1;
     }
 
     pnm_type     = PNM_TYPE_PPM;
     pnm_mode     = PNM_RAW_MODE;
-    pnm_maxfiles = 1000;
 
     if (pgmyuv_type) pnm_type     = PNM_TYPE_PGMYUV;
     if (pgm_type)    pnm_type     = PNM_TYPE_PGM;
     if (ppm_type)    pnm_type     = PNM_TYPE_PPM;
     if (ascii_mode)  pnm_mode     = PNM_ASCII_MODE;
     if (raw_mode)    pnm_mode     = PNM_RAW_MODE;
-    if (maxfiles)    pnm_maxfiles = maxfiles;
 
     if (outdir.len) {
         pnm_outdir = malloc(outdir.len + 1);
