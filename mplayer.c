@@ -2877,7 +2877,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 			
 		if(dvb_step_channel(priv, dir))
 		{
-	  		uninit_player(INITED_ALL-(INITED_STREAM));
+	  		uninit_player(INITED_ALL-(INITED_STREAM|INITED_INPUT));
 			printf("UNINIT COMPLETE\n");
 			goto goto_open_demuxer;
 		}
@@ -2906,7 +2906,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	  {
   		if(dvb_set_channel(priv, cmd->args[0].v.i))
 		{
-	  	  uninit_player(INITED_ALL-(INITED_STREAM));
+	  	  uninit_player(INITED_ALL-(INITED_STREAM|INITED_INPUT));
 		  goto goto_open_demuxer;
 		}
 	  }
