@@ -384,6 +384,9 @@ Keil, Jürgen <jk@tools.de>
     * mediaLib support in libavcodec
     * esd driver in libao2
 
+Kesterson, Robert <robertk@robertk.com>
+    * yuv4mpeg video output driver
+
 Kinali, Attila (KotH) <attila@kinali.ch>
     * various small fixes in the X11 code
     * xinerama support
