@@ -44,14 +44,16 @@ grab_frames
     ???
 
 pt_step <value> [<force>]
-    Go to the next/previous entry in the playtree.
+    Go to the next/previous entry in the playtree. The sign of <value> tells
+    the direction.  If no entry is available in the given direction it will do
+    nothing unless force is non-zero.
 
 pt_up_step <value> [<force>]
-    Like pt_step but it jumps to next/previous in the parent list.
+    Similar to pt_step but jumps to the next/previous entry in the parent list.
+    Useful to break out of the inner loop in the playtree.
 
-alt_src_step <value>
-    When more than one source is available it selects the next/previous one
-    (only supported by ASX playlist).
+alt_src_step <value> (ASX playlist only)
+    When more than one source is available it selects the next/previous one.
 
 sub_delay <value> [<abs>]
     Adjust the subtitle delay by +/- <value> seconds or set it to <value>
@@ -211,7 +213,6 @@ dvb_set_channel <channel_number> <card_number>
 
 screenshot
     Take a screenshot.
-
 
 menu <value>
     ???
