@@ -192,6 +192,7 @@ Advanced options:
 
 Hazardous options a.k.a. "DO NOT BUGREPORT ANYTHING !"
   --disable-gcc-checking   disable gcc version checking [enable]
+  --enable-xp            enable eXtra Performance [default=no]
 
 Use these options if autodetection fails:
   --with-extraincdir=DIR   extra headers (png, dvb, mad, sdl, css, ...) in DIR
@@ -218,6 +219,7 @@ done # for parm in ...
 _cc=gcc
 test "$CC" && _cc="$CC"
 _as=auto
+_enable_xp=no
 for ac_option do
   case "$ac_option" in
   --target=*)
@@ -234,6 +236,12 @@ for ac_option do
     ;;
   --disable-gcc-checking)
     _skip_cc_check=yes
+    ;;
+  --enable-xp)
+    _enable_xp=yes
+    ;;
+  --disable-xp)
+    _enable_xp=no
     ;;
   --enable-static)
     _ld_static='-static'
@@ -498,7 +506,7 @@ int main() {
 }
 EOF
   $_cc -o "$TMPO" "$TMPC"
-  case `"$TMPO"` in
+  case "$TMPO" in
     0-0) proc="ev4" ;;
     1-0) proc="ev5" ;;
     1-1) proc="ev56" ;;
@@ -2977,7 +2985,10 @@ else
 fi
 echores "$_lirc"
 
-
+# checking for extra performance
+_def_xp='#undef __ENABLE_XP'
+test "$_enable_xp" = yes && _def_xp='#define __ENABLE_XP 1'
+echo Checking for xp = bleeding edge ... "$_enable_xp"
 
 #############################################################################
 echo "Creating config.mak"
@@ -3073,6 +3084,10 @@ GLIBLIB = $_ld_static  $_ld_glib
 GTK_LIBS =  $_ld_static $_ld_gui
 GUI = $_gui
 DEBUG = -DDEBUG
+
+# --- HAZARDOUS STUFF
+
+ENABLE_XP=$_enable_xp
 
 EOF
 
@@ -3369,6 +3384,12 @@ $_def_xshape
 
 #if defined(HAVE_GL) || defined(HAVE_X11) || defined(HAVE_XV)
 #define X11_FULLSCREEN 1
+#endif
+
+$_def_xp
+
+#ifdef __ENABLE_XP
+#define __ENABLE_DEC_AHEAD 1
 #endif
 
 EOF

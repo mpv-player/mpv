@@ -6,6 +6,15 @@
 
 include config.mak
 
+ifeq ($(ENABLE_XP),yes)
+PRG = mplayerxp
+PRG_HQ = mplayerHQxp
+PRG_AVIP = aviparsexp
+PRG_FIBMAP = fibmap_mplayerxp
+PRG_TV = tvisionxp
+PRG_CFG = codec-cfg-xp
+PRG_MENCODER = mencoderxp
+else
 PRG = mplayer
 PRG_HQ = mplayerHQ
 PRG_AVIP = aviparse
@@ -13,6 +22,7 @@ PRG_FIBMAP = fibmap_mplayer
 PRG_TV = tvision
 PRG_CFG = codec-cfg
 PRG_MENCODER = mencoder
+endif
 # these subdirectories required installation due binaries within them
 ifeq ($(VIDIX),yes)
 SUBDIRS += libdha vidix
