@@ -305,8 +305,14 @@ extern "C" int demux_rtp_fill_buffer(demuxer_t* demuxer, demux_stream_t* ds) {
     // audio and video streams get this far apart.)
     // (We don't do this when streaming over TCP, because then the audio and
     // video streams are interleaved.)
+    // (Also, if the stream is *excessively* far behind, then we allow
+    // the packet, because in this case it probably means that there was
+    // an error in the source's timestamp synchronization.)
     const float ptsBehindThreshold = 1.0; // seconds
-    if (ptsBehind < ptsBehindThreshold || rtspStreamOverTCP) { // packet's OK
+    const float ptsBehindLimit = 60.0; // seconds
+    if (ptsBehind < ptsBehindThreshold ||
+	ptsBehind > ptsBehindLimit ||
+	rtspStreamOverTCP) { // packet's OK
       ds_add_packet(ds, dp);
       break;
     }
