@@ -152,11 +152,11 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { {  KEY_DOWN, 0 }, "seek -60" },
   { {  KEY_PAGE_UP, 0 }, "seek 600" },
   { { KEY_PAGE_DOWN, 0 }, "seek -600" },
-  { { '+', 0 }, "audio_delay 0.100" },
-  { { '-', 0 }, "audio_delay -0.100" },
+  { { '-', 0 }, "audio_delay 0.100" },
+  { { '+', 0 }, "audio_delay -0.100" },
   { { 'q', 0 }, "quit" },
   { { KEY_ESC, 0 }, "quit" },
-  { { KEY_ENTER, 0 }, "quit" },
+  { { KEY_ENTER, 0 }, "pt_step 1 1" },
 #ifndef HAVE_NEW_GUI
   { { 'p', 0 }, "pause" },
 #endif
@@ -177,7 +177,6 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { { '/', 0 }, "volume -1" },
   { { '0', 0 }, "volume 1" },
   { { '*', 0 }, "volume 1" },
-  { { 'm', 0 }, "use_master" },
   { { '1', 0 }, "contrast -1" },
   { { '2', 0 }, "contrast 1" },
   { { '3', 0 }, "brightness -1" },
