@@ -790,7 +790,11 @@ play_dvd:
     mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_InvalidVOdriver,video_driver?video_driver:"?");
     exit_player(MSGTR_Exit_error);
   }
-
+  if((i=video_out->preinit(vo_subdevice))!=0)
+  {
+    mp_msg(MSGT_CPLAYER,MSGL_FATAL,"error on vo preinit = %u\n",i);
+    exit_player(MSGTR_Exit_error);
+  }
 // check audio_out driver name:
     if (audio_driver)
 	if ((i = strcspn(audio_driver, ":")) > 0)
