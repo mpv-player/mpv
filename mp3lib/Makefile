@@ -54,6 +54,9 @@ libMP3.a:	$(OBJS)
 ifeq ($(TARGET_OS),CYGWIN)
 	./mp3lib_objfix.sh
 endif
+ifeq ($(TARGET_MINGW32),yes)
+	./mp3lib_objfix.sh
+endif
 ifeq ($(TARGET_OS),OpenBSD)
 	./mp3lib_objfix.sh
 endif
