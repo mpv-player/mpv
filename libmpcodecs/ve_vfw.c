@@ -22,6 +22,15 @@
 
 #include "dll_init.h"
 
+static char *vfw_param_codec = NULL;
+
+#include "cfgparser.h"
+
+struct config vfwopts_conf[]={
+    {"codec", &vfw_param_codec, CONF_TYPE_STRING, 0, 0, 0, NULL},
+    {NULL, NULL, 0, 0, 0, 0, NULL}
+};
+
 struct vf_priv_s {
     aviwrite_stream_t* mux;
     BITMAPINFOHEADER* bih;
@@ -84,8 +93,15 @@ static int vf_open(vf_instance_t *vf, char* args){
     vfw_bih->biBitCount=24;
     vfw_bih->biCompression=0;
 //    vfw_bih->biSizeImage=vo_w*vo_h*((vfw_bih->biBitCount+7)/8);
+
+    if (!vfw_param_codec)
+    {
+	printf("No VfW codec specified! It's required!\n");
+	return 0;
+    }
 //    mux_v->bih=vfw_open_encoder("divxc32.dll",vfw_bih,mmioFOURCC('D', 'I', 'V', '3'));
-    mux_v->bih=vfw_open_encoder("AvidAVICodec.dll",vfw_bih, 0);
+//    mux_v->bih=vfw_open_encoder("AvidAVICodec.dll",vfw_bih, 0);
+    mux_v->bih = vfw_open_encoder(vfw_param_codec, vfw_bih, 0);
     if(!mux_v->bih) return 0;
 
     return 1;
