@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.25 -->
+<!-- synced with 1.28 -->
 <sect1 id="codecs">
 <title>Codecs Supportés</title>
 
@@ -7,7 +7,7 @@
 <title>Codecs vidéo</title>
 
 <para>
-Voir la <ulink url="http://www.mplayerhq.hu/DOCS/codecs-status.html">table d'état des codecs</ulink>
+Voir la <ulink url="http://www.mplayerhq.hu/homepage/codecs-status.html">table d'état des codecs</ulink>
 pour une liste complète, générée quotidiennement. Très peu de codecs sont disponibles en téléchargement
 sur notre page web. Récupérez-les depuis notre
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">page des codecs</ulink>.
@@ -557,14 +557,11 @@ répertoire de codecs Win32
 <itemizedlist>
 <title>Les plus importants d'entre eux:</title>
 <listitem><simpara>
-  MPEG layer 2 (MP2), et layer 3 (MP3) audio (code <emphasis role="bold">natif</emphasis>,
+  MPEG layer 1/2/3 (MP1/2/3) audio (code <emphasis role="bold">natif</emphasis>,
   avec optimisation MMX/SSE/3DNow!)
   </simpara></listitem>
 <listitem><simpara>
-  MPEG layer 1 audio (code <emphasis role="bold">natif</emphasis>, avec libavcodec)
-  </simpara></listitem>
-<listitem><simpara>
-  Windows Media Audio v1, v2 (code <emphasis role="bold">natif</emphasis>, avec
+  Windows Media Audio 7 et 8 (alias WMAv1 et WMAv2) (code <emphasis role="bold">natif</emphasis>, avec
   libavcodec)
   </simpara></listitem>
 <listitem><simpara>
@@ -576,6 +573,9 @@ répertoire de codecs Win32
   </simpara></listitem>
 <listitem><simpara>
   AC3 par l'intermédiaire de la carte son
+  </simpara></listitem>
+<listitem><simpara>
+  AAC
   </simpara></listitem>
 <listitem><simpara>
   codec audio Ogg Vorbis (librairie <emphasis role="bold">native</emphasis>)
@@ -590,13 +590,10 @@ répertoire de codecs Win32
   VIVO audio (g723, Vivo Siren)
   </simpara></listitem>
 <listitem><simpara>
-  Voxware audio (en utilisant les DLL DirectShow)
+  Voxware audio (en utilisant la DLL DirectShow)
   </simpara></listitem>
 <listitem><simpara>
   alaw et ulaw, formats divers gsm, adpcm, pcm et autres vieux codecs audio simples
-  </simpara></listitem>
-<listitem><simpara>
-  AAC
   </simpara></listitem>
 </itemizedlist>
 
@@ -656,9 +653,11 @@ pas OSS) et les décodeurs MPEG DXR3/Hollywood+.
 <title>support libmad</title>
 
 <para>
-<ulink url="http://mad.sourceforge.net">libmad</ulink> est une librairie de
-décodage MPEG audio multiplateforme. Il ne gère pas très bien les fichiers
-endommagés, et il à parfois des problèmes pour le déplacement.
+<ulink url="http://mad.sourceforge.net">libmad</ulink> est une librairie
+multi-plateforme de décodage MPEG audio entière (24bit PCM interne) uniquement.
+Elle ne gère pas très bien les fichiers endommagés, et elle a parfois des problèmes
+pour le déplacement, mais elle peut mieux se comporter que mp3lib sur des
+plateformes sans FPU (tel que <link linkend="arm">ARM</link>).
 </para>
 
 <para>

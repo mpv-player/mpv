@@ -291,7 +291,7 @@ X qui est TRÈS lente. Utilisez SDL.
   les DLLs Real doivent être accessibles en écriture pour l'utilisateur, mais
   seulement sur certains systèmes. Essayez de les rendre accessibles en écriture
   si vous avez des problèmes. Les DLLs QuickTime focntionnent aussi, mais vous
-  devrez les placer dans le répertoire de Windows
+  devrez les placer dans le répertoire système de Windows
   (<filename class="directory">C:\Windows\system\</filename> ou similaire).</para>
 
 <para>La console Cygwin/MinGW est plutôt lente. Il semble que rediriger la sortie
