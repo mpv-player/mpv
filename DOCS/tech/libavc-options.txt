@@ -6,9 +6,12 @@ have an cvs account :)
 lavcopts: (encoder options)
 ---------------------------
 
-vqmin 1-31 (minimum quantizer) for pass1/2
-	1 is not recommended (much larger file, little quality difference and
-           possibly other weird things)
+vqmin 2-31 (minimum quantizer) for pass1/2
+	1 is not recommended (much larger file, little quality difference (if u are lucky) 
+           and other weird things (if u are less lucky))
+           weird things: msmpeg4, h263 will be very low quality
+                         ratecontrol will be confused -> lower quality
+                         some decoders will not be able to decode it
 	2 is recommended for normal mpeg4/mpeg1video encoding
 	3 is recommended for h263(p)/msmpeg4 (default)
 	   the reason for 3 instead of 2 is that 2 could lead to overflows
