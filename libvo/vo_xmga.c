@@ -1,4 +1,6 @@
 
+//#define SHOW_TIME
+
 /*
  *    video_out_xmga.c
  *
@@ -44,6 +46,12 @@ LIBVO_EXTERN( xmga )
 #include <errno.h>
 
 #include "x11_common.h"
+
+#ifdef SHOW_TIME    
+#include "../linux/timer.h"
+static unsigned int timer=0;
+static unsigned int timerd=0;
+#endif
 
 static vo_info_t vo_info =
 {
@@ -130,6 +138,14 @@ static void check_events(void)
 }
 
 static void flip_page(void){
+#ifdef SHOW_TIME    
+    unsigned int t;
+    t=GetTimer();
+    printf("  [timer: %08X  diff: %6d  dd: %6d ]  \n",t,t-timer,(t-timer)-timerd);
+    timerd=t-timer;
+    timer=t;
+#endif    
+
     check_events();
     vo_mga_flip_page();
 }
