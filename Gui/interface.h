@@ -24,7 +24,7 @@ typedef struct
 {
  int  signal;
  char module[512];
-} guiUnknowErrorStruct;
+} guiUnknownErrorStruct;
 
 typedef struct
 {
@@ -54,9 +54,9 @@ typedef struct
 typedef struct
 {
  int message;
-   guiResizeStruct      resize;
-   guiVideoStruct       videodata;
-   guiUnknowErrorStruct error;
+   guiResizeStruct       resize;
+   guiVideoStruct        videodata;
+   guiUnknownErrorStruct error;
    
    void * sh_video;
    void * demuxer;
