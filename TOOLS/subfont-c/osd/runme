@@ -1,4 +1,4 @@
 #
 ./gen.py > osd.t1a &&
 t1asm --pfb osd.t1a osd.pfb &&
-ftview 80 osd.pfb &> /dev/null &
+ftview 80 osd.pfb 2>&1 /dev/null &
