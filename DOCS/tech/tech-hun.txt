@@ -1,86 +1,86 @@
-Nos, akkor leirom, hogyan is mûködik ez az egész.
+Nos, akkor leírom, hogyan is mûködik ez az egész.
 
 A fõ modulok:
 
 1. streamer.c: ez az input layer, azaz ez olvassa a filet, VCD-t vagy stdin-t.
-   amit tudnia kell: megfelelõ sectoronkenti bufferelés, seek, skip funkciók,
+   amit tudnia kell: megfelelõ sectoronkénti bufferelés, seek, skip funkciók,
 	 byte-onkénti ill. tetszõleges méretû blockonkénti olvasás.
-	 Egy stream (input device/file) leírására a stream_t struktura szolgál.
-	 
+	 Egy stream (input device/file) leírására a stream_t struktúra szolgál.
+
 2. demuxer.c: ez végzi az input szétszedését audio és video csatornákra,
    és a kiválasztott csatornák bufferelt package-enkénti olvasását.
 	 A demuxer.c inkább csak egy framework, ami közös minden input
-	 formátumra, és az egyes formátumokhoz (mpeg-es,mpeg-ps, avi, avi-ni, asf)
-	 külön parser van, ezek a demux_*.c fileokban vannak.
-	 A hozza tartozo struktura a demuxer_t. osszesen egy demuxer van.
-	 
+	 formátumra, és az egyes formátumokhoz (mpeg-es, mpeg-ps, avi, avi-ni,
+	 asf) külön parser van, ezek a demux_*.c file-okban vannak.
+	 A hozzá tartozó struktúra a demuxer_t. Összesen egy demuxer van.
+
 2.a. demux_packet_t, azaz dp.
-   ez egy darab chunk-ot (avi) vagy packet-et (asf,mpg) tartalmaz.
-	 memoriaban ezek lancolt listaban vannak, mivel kulonbozo meretuek.
+   ez egy darab chunk-ot (avi) vagy packet-et (asf, mpg) tartalmaz.
+	 memóriában ezek láncolt listában vannak, mivel különbözõ méretûek.
 
 2.b. demuxer stream, azaz ds.
    struct: demux_stream_t
-   minden egyes csatornahoz (a/v) tartozik egy ilyen.
-	 ez tartalmazza a stream-hez tartozo packeteket (lasd. 2.a.)
-	 egyelore demuxer-enkent 3 ilyen lehet:
+   minden egyes csatornához (a/v) tartozik egy ilyen.
+	 ez tartalmazza a stream-hez tartozó packeteket (lásd. 2.a.)
+	 egyelõre demuxer-enként 3 ilyen lehet:
 	 - hang (d_audio)
-	 - kep  (d_video)
+	 - kép  (d_video)
 	 - DVD felirat (d_dvdsub)
 
-2.c. stream header. 2 fele van (egyelore): sh_audio_t es sh_video_t
-   ez tartalmaz minden, a dekodolashoz szukseges parametert, igy az input
-   es output buffereket, kivalasztott codecet, fps/framerate stb adatokat.
-   Annyi van belole, ahany stream van a fileban tarolva. Lesz minimum egy
-   a videohoz, ha van hang akkor ahhoz is, de ha tobb audio/video stream
+2.c. stream header. 2 féle van (egyelõre): sh_audio_t és sh_video_t
+   ez tartalmaz minden, a dekódoláshoz szükséges paramétert, így az input
+   és output buffereket, kiválasztott codecet, fps/framerate stb adatokat.
+   Annyi van belõle, ahány stream van a file-ban tárolva. Lesz minimum egy
+   a videohoz, ha van hang akkor ahhoz is, de ha több audio/video stream
    is van, akkor mindegyikhez lesz egy ilyen struct.
-   Ezeket avi/asf eseten a header alapjan tolti fel a header beolvaso,
-   mpeg eseten pedig a demux_mpg.c fogja letrehozni ha egy uj streamet
-   talal. Uj stream eseten ====> Found audio/video stream: <id>  jelenik meg.
-   
-   A kivalasztott stream header es a hozza tartozo demuxer stream kolcsonosen
-   hivatkoznak egymasra (ds->sh es sh->ds) az egyszerubb hasznalat miatt.
-   (igy a funkciotol fuggoen eleg vagy csak a ds vagy csak az sh atadasa)
-   
-   Pelda: van egy .asf fileunk, abban 6 db stream, ebbol 1 audio es 5 video.
-   A header beolvasasakor letre fog jonni 6 db sh struct, 1 audio es 5 video.
-   Amikor elkezdi olvasni a packeteket, az elso talalt audio es video
-   packethez tartozo streamet
-   kivalasztja, es ezekre allitja be a d_audio es d_video sh pointereit.
-   Igy kesobbiekben mar csak ezeket a streameket olvassa, a tobbit nem.
-   Persze ha az user masik streameket szeretne kivalasztani, akkor
-   force-olhatja a -aid es -vid kapcsolokkal.
-   Jo pelda erre a DVD, ahol nem mindig az angol szinkron hang az elso
-   megtalalt stream, es igy random minden vob mas nyelven szolalhat meg :)
-   Ilyenkor kell pl. az -aid 128 kaocsolot hasznalni.
-   
-  hogy is muxik ez a beolvasosdi?
-	 - meghivodik a demuxer.c/demux_read_data(), megkapja melyik ds-bol
-	   (audio vagy video), mennyi byteot es hova (memoriacim) szeretnenk 
-		 beolvasni. ezt hivogatjak gyakorlatilag a codec-ek.
-	 - ez megnezi,hogy az adott ds bufferében van-e valami, ha igen akkor 
-	   onnan olvas amennyit kell. ha nincs/nincs eleg, akkor meghivja
+   Ezeket avi/asf esetén a header alapján tölti fel a header beolvasó,
+   mpeg esetén pedig a demux_mpg.c fogja létrehozni, ha egy új streamet
+   talál. Új stream esetén ====> Found audio/video stream: <id>  jelenik meg.
+
+   A kiválasztott stream header és a hozzá tartozó demuxer stream kölcsönösen
+   hivatkoznak egymásra (ds->sh és sh->ds) az egyszerûbb használat végett.
+   (így a funkciótól függõen elég vagy csak a ds vagy csak az sh átadása)
+
+   Példa: van egy .asf file-unk, abban 6 db stream, ebbõl 1 audio és 5 video.
+   A header beolvasásakor létre fog jönni 6 db sh struct, 1 audio és 5 video.
+   Amikor elkezdi olvasni a packeteket, az elsõ talált audio és video
+   packethez tartozó streamet kivalasztja, es ezekre allitja be a d_audio
+   és d_video sh pointereit.
+   Így a késõbbiekben már csak ezeket a streameket olvassa, a többit nem.
+   Persze, ha a user másik streameket szeretne kiválasztani, akkor
+   force-olhatja az -aid és -vid kapcsolókkal.
+   Jó pelda erre a DVD, ahol nem mindig az angol szinkron hang az elsõ
+   megtalált stream, és így random minden vob más nyelven szólalhat meg :)
+   Ilyenkor kell pl. az -aid 128 kapcsolót használni.
+
+  hogy is mûxik ez a beolvasósdi?
+	 - meghívódik a demuxer.c/demux_read_data(), megkapja melyik ds-bõl
+	   (audio vagy video), mennyi byte-ot és hova (memóriacím) szeretnénk
+		 beolvasni. Ezt hívogatják gyakorlatilag a codec-ek.
+	 - ez megnézi, hogy az adott ds bufferében van-e valami, ha igen akkor
+	   onnan olvas, amennyit kell. Ha nincs/nincs elég, akkor meghívja
 		 a ds_fill_buffer()-t ami:
-	 - megnezi hogy az adott ds-ben vannak-e bufferelve csomagok (dp-k)
-	   ha igen, akkor a legregebbit atrakja a bufferbe es olvas tovabb.
-		 ha ures a lancolt lista, akkor meghivja a demux_fill_buffer()-t:
-	 - ez az input formatumnak megfelelo parser-t meghivja ami olvassa
-	   tovabb a filet, es a talalt csomagokat rakja be a megfelelo bufferbe.
-		 na ha mondjuk audio csomagot szeretnenk, de csak egy rakat video csomag
-		 van, akkor jon elobb-utobb a DEMUXER: Too many (%d in %d bytes) audio 
-		 packets in the buffer... hibauzenet.
+	 - megnézi, hogy az adott ds-ben vannak-e bufferelve csomagok (dp-k)
+	   ha igen, akkor a legrégebbit átrakja a bufferbe és olvas tovább. Ha
+		 üres a láncolt lista, akkor meghívja a demux_fill_buffer()-t:
+	 - ez az input formátumnak megfelelõ parser-t hívja meg, ami továbbol-
+	   vassa a file-t, és a talált csomagokat berakja a megfelelõ bufferbe.
+		 Na, ha mondjuk audio csomagot szeretnénk, de csak egy rakat
+		 video csomag van, akkor jön elõbb-utóbb a DEMUXER: Too many
+		 (%d in %d bytes) audio packets in the buffer... hibaüzenet.
 
-Eddig kb tiszta ugy, ezt akarom majd atrakni kulon lib-be.
+Eddig kb. tiszta ügy, ezt akarom majd átrakni külön lib-be.
 
-na nezzuk tovabb:
+na nézzuk tovább:
 
-3. mplayer.c - igen, o a fonok :)
-   az idozites eleg erdekesen van megoldva, foleg azert mert minden
-	 fileformatumnal maskepp kell/celszeru, es neha tobbfele keppen is lehet.
+3. mplayer.c - igen, õ a fõnök :)
+   az idõzítes élég érdekesen van megoldva, fõleg azért mert minden file-
+	 formátumnál másképp kell/célszerû, és néha többféle képpen is lehet.
 
-	 van egy a_frame es egy v_frame nevu float valtozo, ez tarolja az epp
-	 lathato/hallhato a/v poziciojat masodpercben.
-	 
-	 A lejatszo ciklus felepitese:
+	 van egy a_frame és egy v_frame nevû float változó, ez tárolja az épp
+	 látható/hallható a/v pozícióját másodpercben.
+
+	 A lejátszó ciklus felépítése:
 	 while(not EOF) {
 	     fill audio buffer (read & decode audio) + increase a_frame
 	     read & decode a single video frame + increase v_frame
@@ -89,201 +89,201 @@ na nezzuk tovabb:
 	     apply A-V PTS correction to a_frame
 	     check for keys -> pause,seek,...
 	 }
-	 
-	 amikor lejatszik (hang/kep) akkor a lejatszott valami idotartamaval
-	 noveli a megfelelo valtozot:
-	 - audional ez a lejatszott byteok / sh_audio->o_bps
-	 megj: i_bps = tomoritett byteok szama egy masodpercnyi hanghoz
-	       o_bps = tomoritetlen byteok szama egy masodpercnyi hanghoz
-	           (ez utobbi == bps*samplerate*channels)
-	 - videonal ez altalaban az sh_video->frametime.
-	 Ez altalaban == 1.0/fps, persze meg kell jegyeznem hogy videonal nem
-	 igazan szamit az fps, asf-nel pl. nincs is olyan, ahelyett duration
-	 van es framenkent valtozhat.
-	 mpeg2-nel pedig repeat_count van ami 1-2.5 idotartamban elnyujtja
-	 a framet... avi-nal van talan egyedul fix fps, meg mpeg1-nel.
 
-	 Na most ez addig nagyon szepen mukodik, amig a hang es kep tokeletes
-	 szinkronban van, mivel igy vegulis a hang szol, az adja az idozitest,
-	 es amikor eltelt egy framenyi ido akkor kirakja a kovetkezo framet.
-	 de mi van ha valamiert az input fileban csuszik a ketto?
-	 Akkor jon be a PTS correction. az input demuxer-ek olvassak a csomagokkal
-	 egyutt a hozzajuk tartozo PTS-t (presentation timestamp) is, ami alapjan
-	 eszreveheto ha el van csuszva a ketto. ilyenkor egy megadott maximalis
-	 hataron (lasd -mc opcio) belul kepes az mplayer korrigalni az a_frame 
-	 erteket. a korrekciok osszege van a c_total-ban.
-	 
-	 persze ez meg nem minden szinkron ugyben, van meg nemi gaz.
-	 pl. az hogy a hangkartya eleg rendesen kesleltet, ezt az mplayernek
-	 korrigalnia kell! Az osszes audio kesleltetes masodpercben ezek osszege:
-	 - az utolso timestamp (PTS) ota beolvasott byteok:
+	 amikor lejátszik (hang/kép) akkor a lejátszott valami idõtartamával
+	 növeli a megfelelõ változót:
+	 - audionál ez a lejátszott byte-ok / sh_audio->o_bps
+	 megj.: i_bps = tömörített byte-ok széma egy másodpercnyi hanghoz
+	        o_bps = tömörítetlen byte-ok száma egy másodpercnyi hanghoz
+	            (ez utóbbi == bps*samplerate*channels)
+	 - videonál ez általában az sh_video->frametime.
+	 Ez általában == 1.0/fps, persze meg kell jegyeznem, hogy videonál nem
+	 igazán számít az fps, asf-nél pl. nincs is olyan, ahelyett duration
+	 van és frame-enként változhat.
+	 mpeg2-nél pedig repeat_count van, ami 1-2.5 idõtartamban elnyújtja
+	 a frame-et... avi-nál van talán egyedül fix fps, meg mpeg1-nél.
+
+	 Na most ez addig nagyon szépen mûködik, amíg a hang és kép tökéletes
+	 szinkronban van, mivel így végülis a hang szól, az adja az idõzítést,
+	 és amikor eltelt egy frame-nyi idõ, akkor kirakja a következõ frame-et.
+	 De mi van, ha valamiért az input file-ban csúszik a kettõ?
+	 Akkor jön be a PTS correction. Az input demuxer-ek olvassák a
+	 csomagokkal együtt a hozzájuk tartozó PTS-t (presentation timestamp)
+	 is, ami alapján észrevehetõ, ha el van csúszva a kettõ. Ilyenkor egy
+	 megadott maximális határon (lásd -mc opció) belül képes az mplayer
+	 korrigalni az a_frame értékét. A korrekciók összege van a c_total-ban.
+
+	 Persze ez még nem minden szinkron ügyben, van még némi gáz. Pl. az,
+	 hogy a hangkártya elég rendesen késleltet, ezt az mplayernek korrigálnia
+	 kell! Az összes audio késleltetés másodpercben ezek összege:
+	 - az utolsó timestamp (PTS) óta beolvasott byte-ok:
 	   t1 = d_audio->pts_bytes/sh_audio->i_bps
-	 - Win32/ACM eseten az audio input bufferben tarolt byteok:
+	 - Win32/ACM esetén az audio input bufferben tárolt byte-ok:
 	   t2 = a_in_buffer_len/sh_audio->i_bps
-	 - az audio out bufferben tarolt tomoritetlen byteok:
+	 - az audio out bufferben tárolt tömörítetlen byte-ok:
 	   t3 = a_buffer_len/sh_audio->o_bps
-	 - a hangkartya buffereben (vagy DMA bufferben) tarolt, meg nem
-	   lejatszott byteok:
+	 - a hangkártya bufferében (vagy DMA bufferben) tárolt, még nem
+	   lejátszott byte-ok:
 	   t4 = get_audio_delay()/sh_audio->o_bps
-	 
-	 Ezekbol kiszamolhato egeszen pontosan, hogy az epp hallhato hanghoz 
-	 milyen PTS tartozik, majd ezt osszevetve a video-hoz tartozo PTS-el
-	 meg is kapjuk az A-V eltereset!
-	 
-	 avi-nal sem egyszeru az elet. ott a 'hivatalos' idozitesi mod a
-	 BPS-alapu, azaz a headerben le van tarolva hany tomoritett audio
-	 byte tartozik egy masodpercnyi (fps darab) kephez.
-	 ez persze nem mindig mukodik... miert is mukodne :)
-	 ezert en megcsinaltam hogy az mpeg-nel hasznalatos sectoronkenti
-	 PTS erteket emulalom avi-ra is, azaz az AVI parser minden beolvasott
-	 chunk-nal szamol egy kamu PTS-t a framek tipusa alapjan. es ez
-	 alapjan idozitek. es van amikor ez mukodik jobban.
-	 persze itt meg bejatszik az is, hogy AVI-nal altalaban elore letarolnak
-	 egy nagyobb adag hangot, es csak utana kezdodik a kep. ezt persze
-	 bele kell szamolni a kesleltetesbe, ez az Initial PTS delay.
-	 ilyen persze 2 is van, az egyik a headerben le is van irva, es
-	 nem nagyon hasznlajak :) a masik sehol nincs leirva de hasznaljak, ezt
-	 csak merni lehet...
+
+	 Ezekbõl kiszámolható egészen pontosan, hogy az épp hallható hanghoz
+	 milyen PTS tartozik, majd ezt összevetve a video-hoz tartozo PTS-el
+	 meg is kapjuk az A-V eltérését!
+
+	 Avi-nál sem egyszerû az élet. Ott a 'hivatalos' idõzítési mód a
+	 BPS-alapú, azaz a headerben le van tárolva, hány tömörített audio
+	 byte tartozik egy másodpercnyi (fps darab) képhez.
+	 ez persze nem mindig mûködik... miért is mûködne :)
+	 Ezért én megcsináltam, hogy az mpeg-nél használatos sectoronkénti
+	 PTS értéket emulálom avi-ra is, azaz az AVI parser minden beolvasott
+	 chunk-nál számol egy kamu PTS-t a frame-ek típusa alapján, és ez
+	 alapjan idozitek. És van amikor ez mûködik jobban.
+	 Persze itt még bejátszik az is, hogy AVI-nál általában elõre
+	 letárolnak egy nagyobb adag hangot, és csak utána kezdõdik a kép.
+	 Ezt persze bele kell számolni a késleltetésbe, ez az Initial PTS delay.
+	 Ilyen persze 2 is van, az egyik a headerben le is van írva, és
+	 nem nagyon használják. :) A másik sehol nincs leírva, de használják,
+	 ezt csak mérni lehet...
 
 3.a. audio playback:
-	 par szo az audio lejatszasrol:
-	 az egeszben nem maga a lejatszas a nehez, hanem:
-	 1. hogy tudjuk mikor lehet irni a bufferbe, blocking nelkul
-	 2. hogy tudjuk, mennyit jatszott mar le abbol amit a bufferbe irtunk
-	 Az 1. az audio dekodolashoz kell, valamint hogy a buffert mindig teli
-	 allapotban tudjuk tartani (igy sose fog megakadni a hang).
-	 A 2. pedig a korrekt idoziteshez szukseges, ugyanis nemely hangkartya
-	 akar 3-7 masodpercet is kesleltet, ami azert nem elhanyagolhato!
-	 Ezek megvalositasara az OSS tobbfele lehetoseget is kinal:
-	 - ioctl(SNDCTL_DSP_GETODELAY): megmondja hany lejatszatlan byte
-	   varakozik a hangkartya bufferjeben -> idoziteshez kivallo,
-	   de nem minden driver tamogatja :(
-	 - ioctl(SNDCTL_DSP_GETOSPACE): megmondja mennyit irhatunk a kartya
-	   bufferebe blocking nelkul. ha a driver nem tudja a GETODELAY-t,
-	   akkor ezt hasznalhatjuk arra is, hogy megtudjuk a kesleltetest.
-	 - select(): meg kene mondja, hogy irhatunk-e a kartya bufferebe
-	   blocking nelkul. azt, hogy emnnyit irhatunk, nem mondja meg :(
-	   valamint sok driverrel egyaltalan nem, vagy rosszul mukodik :((
-	   csak akkor hasznalom, ha egyik fenti ioctl() sem mukodik.
+	 pár szó az audio lejátszásról:
+	 az egészben nem maga a lejátszás a nehéz, hanem:
+	 1. hogy tudjuk, mikor lehet írni a bufferbe, blocking nélkül
+	 2. hogy tudjuk, mennyit játszott már le abból, amit a bufferbe írtunk
+	 Az 1. az audio dekódoláshoz kell, valamint hogy a buffert mindig teli
+	 állapotban tudjuk tartani (így sose fog megakadni a hang).
+	 A 2. pedig a korrekt idõzítéshez szükséges, ugyanis némely hangkártya
+	 akár 3-7 másodpercet is késleltet, ami azért nem elhanyagolható!
+	 Ezek megvalósítására az OSS többféle lehetõséget is kínál:
+	 - ioctl(SNDCTL_DSP_GETODELAY): megmondja, hány lejátszatlan byte
+	   várakozik a hangkártya bufferében -> idõzítéshez kiváló,
+	   de nem minden driver támogatja :(
+	 - ioctl(SNDCTL_DSP_GETOSPACE): megmondja, mennyit írhatunk a kártya
+	   bufferébe blocking nélkül. Ha a driver nem tudja a GETODELAY-t,
+	   akkor ezt hasznalhatjuk arra is, hogy megtudjuk a késleltetést.
+	 - select(): meg kéne mondja, hogy írhatunk-e a kártya bufferébe
+	   blocking nélkül. Azt, hogy mennyit írhatunk, nem mondja meg :(
+	   valamint sok driverrel egyáltalán nem, vagy rosszul mûködik :((
+	   csak akkor használom, ha egyik fenti ioctl() sem mûködik.
 
-4. codecek. ezek kulonbozo lib-ek szanaszet mindenfelol.
+4. codecek. ezek különbözõ lib-ek szanaszét mindenfelõl.
    mint pl. libac3, libmpeg2, xa/*, alaw.c, opendivx/*, loader, mp3lib.
-	 az mplayer.c hivogatja oket amikor egy egy darab hangot vagy framet
-	 kell lejatszani (lasd 3. pont elejen).
-	 ezek pedig hivjak a megfelelo demuxert hogy megkapjak a tomoritett
-	 adatokat (lasd 2. pont).
-	 parameterkent a megfelelo stream headert (sh_audio/sh_video) kell
-	 atadni, ez elvileg tartalmaz minden infot ami szukseges a
-	 dekodolashoz (tobbek kozott a demuxert is: sh->ds).
-   A codecek szeparalasa folyamatban van, az audio mar el van kulonitve
-   (lasd. dec_audio.c), a videon meg dolgozunk. Cel, hogy ne az mplayer.c
-   kelljen tudja milyen codecek vannak es hogy kell oket hasznalni, hanem
-   egy kozos init/decode audio/video functiont kelljen csak meghivnia.
+	 az mplayer.c hívogatja õket, amikor egy-egy darab hangot vagy frame-et
+	 kell lejátszani (lásd 3. pont elején).
+	 ezek pedig hívják a megfelelõ demuxert, hogy megkapják a tömörített
+	 adatokat (lásd 2. pont).
+	 paraméterként a megfelelõ stream headert (sh_audio/sh_video) kell
+	 átadni, ez elvileg tartalmaz minden infót, ami szükséges a
+	 dekódoláshoz (többek között a demuxert is: sh->ds).
+   A codecek szeparálasa folyamatban van, az audio már el van különítve
+   (lásd. dec_audio.c), a videon még dolgozunk. Cél, hogy ne az mplayer.c
+   kelljen tudja, milyen codecek vannak és hogy kell õket használni, hanem
+   egy közös init/decode audio/video functiont kelljen csak meghívnia.
 
-5. libvo: ez vegzi a kep kirakasat.
+5. libvo: ez végzi a kép kirakását.
 
-  Az img_format.h-ban definialva vannak konstansok a kulonbozo pixel-
-  formatumokhoz, ezeket kotelezo hasznalni.
-  
-  1-1 vo driver a kovetkezoket kell kotelezoen implementalja:
+  Az img_format.h-ban definiálva vannak konstansok a különbözõ pixel-
+  formátumokhoz, ezeket kötelezõ használni.
 
-  query_format()  - lekerdezi hogy egy adott pixelformat tamogatott-e.
+  1-1 vo drivernek a következõket kell kötelezõen implementálnia:
+
+  query_format()  - lekérdezi, hogy egy adott pixelformat támogatott-e.
                     return value:  flags:
 		       0x1 - supported (by hardware or with conversion)
 		       0x2 - supported (by hardware, without conversion)
 		       0x4 - sub/osd supported (has draw_alpha)
-  FONTOS: minden vo driver kotelezo tamogassa az YV12 formatumot, es
-  egyiket (vagy mindkettot) a BGR15 es BGR24 kozul, ha kell, konvertalassal.
-  Ha ezeket nem tamogatja, akkor nem fog minden codec-kel mukodni!
-  Ennek az az oka, hogy az mpeg codecek csak YV12-t tudnak eloallitani,
-  a regebbi Win32 DLL codecek pedig csak 15 es 24bpp-t tudnak.
-  Van egy gyors MMX-es 15->16bpp konvertalo, igy az nem okoz kulonosebb
-  sebessegcsokkenest!
-  
-  A BPP tablazat, ha a driver nem tud bpp-t valtani:
+  FONTOS: minden vo drivernek kötelezõ támogatnia az YV12 formátumot, és
+  egyiket (vagy mindkettõt) a BGR15 és BGR24 közül, ha kell, konvertálással.
+  Ha ezeket nem támogatja, akkor nem fog minden codec-kel mûködni!
+  Ennek az az oka, hogy az mpeg codecek csak YV12-t tudnak elõállítani,
+  a régebbi Win32 DLL codecek pedig csak 15 és 24bpp-t tudnak.
+  Van egy gyors MMX-es 15->16bpp konvertáló, így az nem okoz különösebb
+  sebességcsökkenést!
+
+  A BPP táblázat, ha a driver nem tud bpp-t váltani:
       jelenlegi bpp:    ezeket kell elfogadni:
            15                    15
 	   16                    15,16
 	   24                    24
 	   24,32                 24,32
 
-  Ha tud bpp-t valtani (pl. DGA 2, fbdev, svgalib) akkor ha lehet, be kell
-  valtani a kert bpp-re. Ha azt a hardver nem tamogatja, akkor a legkozelebbi
-  modra (15 eseten 16-ra, 24 eseten 32-re) kell valtani es konvertalni!
+  Ha tud bpp-t váltani (pl. DGA 2, fbdev, svgalib) akkor, ha lehet, be kell
+  váltani a kért bpp-re. Ha azt a hardver nem támogatja, akkor a legközelebbi
+  módra (15 esetén 16-ra, 24 esetén 32-re) kell váltani és konvertálni!
 
-  init() - ez hivodik meg a legelso frame kirakasa elott - bufferek foglalasa
-           stb a celja.
-	   van egy flags parameter is (regen fullscreen volt a neve):
+  init() - ez hívódik meg a legelsõ frame kirakása elõtt - bufferek foglalása
+           stb a célja.
+	   van egy flags paraméter is (régen fullscreen volt a neve):
 	   0x01 - fullscreen (-fs)
 	   0x02 - vidmode switch (-vm)
 	   0x04 - scaling enabled (-zoom)
 	   0x08 - flip image (upside-down)
 
-  draw_slice(): ez planar YV12 kepet rak ki (3 db plane, egy teljes
-	 meretu ami a fenyerot (Y) tartalmazza, es 2 negyedakkora, ami a
-	 szin (U,V) infot). ezt hasznaljak az mpeg codecek (libmpeg2,opendivx).
-	 ez mar tud olyat hogy nem az egesz kep kirakasa, hanem csak kis
-	 reszletek updatelese: ilyenkor a sarkanak es a darabka meretenek
-	 megadasaval lehet csinalni.
+  draw_slice(): ez planar YV12 képet rak ki (3 db plane, egy teljes
+	 méretû, ami a fényerõt (Y) tartalmazza, és 2 negyedakkora, ami a
+	 szín (U,V) infót). ezt használják az mpeg codecek (libmpeg2, opendivx).
+	 ez már tud olyat, hogy nem az egész kép kirakása, hanem csak kis
+	 részletek update-elése: ilyenkor a sarkának és a darabka méretének
+	 megadásával lehet használni.
 
-  draw_frame(): ez a regebbi interface, ez csak komplett framet rak ki,
-   es csak packed formatumot (YUY2 stb, RGB/BGR) tud.
-	 ezt hasznaljak a win32 codecek (divx,indeo stb).
-	 
-  draw_alpha(): ez rakja ki a subtitle-t es az OSD-t.
-   hasznalata kicsit cseles, mivel ez nem a libvo API resze, hanem egy
-   callback jellegu cucc. a flip_page() kell meghivja a vo_draw_text()-et
-   ugy, hogy parameterkent atadja a kepernyo mereteit es a pixelformatumnak
-   megfelelo draw_alpha() implementaciot (function pointer).
-   Ezutan a vo_draw_text() vegigmegy a kirajzolando karaktereken, es egyenkent
-   meghivja minden karakterre a draw_alpha()-t.
-   Segitseg keppen az osd.c-ben meg van irva a draw_alpha mindenfele
-   pixelformatumhoz, ha lehet ezt hasznald!
-   
-  flip_page(): ez meghivodik minden frame utan, ez kell tenylegesen
-   megjelenitse a buffert. double buffering eseten ez lesz a 'swapbuffers'.
-  
-6. libao2: ez vezerli a hang lejatszast
+  draw_frame(): ez a régebbi interface, ez csak komplett frame-et rak ki,
+	 és csak packed formátumot (YUY2 stb, RGB/BGR) tud.
+	 ezt használják a win32 codecek (divx, indeo stb).
 
-  A libvo-hoz (lasd 5.) hasonloan itt is kulonbozo driverek vannak, amik
-  egy kozos API-t (interface) valositanak meg:
-  
+  draw_alpha(): ez rakja ki a subtitle-t és az OSD-t.
+	 használata kicsit cseles, mivel ez nem a libvo API része, hanem egy
+	 callback jellegû cucc. a flip_page() kell meghívja a vo_draw_text()-et
+	 úgy, hogy paraméterként átadja a képernyõ méreteit és a pixel-
+	 formátumnak megfelelõ draw_alpha() implementációt (function pointer).
+	 Ezután a vo_draw_text() végigmegy a kirajzolandó karaktereken, és
+	 egyenként meghívja minden karakterre a draw_alpha()-t.
+	 Segítség képpen az osd.c-ben meg van írva a draw_alpha mindenféle
+	 pixelformátumhoz, ha lehet ezt használd!
+
+  flip_page(): ez meghívódik minden frame után, ennek kell ténylegesen meg-
+	 jeleníteni a buffert. double buffering esetén ez lesz a 'swapbuffers'.
+
+6. libao2: ez vezérli a hang lejátszást
+
+  A libvo-hoz (lásd 5.) hasonlóan itt is különbözõ driverek vannak, amik
+  egy közös API-t (interface) valósítanak meg:
+
 static int control(int cmd,int arg);
-  Ez egy altalanos celu fuggveny, a driverfuggo es egyeb specialis parameterek
-  olvasasara/beallitasara. Egyelore nem nagyon hasznalt.
+  Ez egy általános célú függvény, a driverfüggõ és egyéb speciális paraméterek
+  olvasására/beállítására. Egyelõre nem nagyon használt.
 
 static int init(int rate,int channels,int format,int flags);
-  Driver initje, ilyenkor kell megnyitni a devicet, beallitani samplerate,
-  channels, sample format parametereket.
-  Sample format: altalaban AFMT_S16_LE vagy AFMT_U8, tovabbi definiciokert
-  lasd. dec_audio.c ill. linux/soundcard.h fileok!
-  
+  Driver initje, ilyenkor kell megnyitni a device-t, beállítani samplerate,
+  channels, sample format paramétereket.
+  Sample format: általában AFMT_S16_LE vagy AFMT_U8, további definíciókért
+  lásd. dec_audio.c ill. linux/soundcard.h file-okat!
+
 static void uninit();
-  talald ki.
-  na jo, segitek: lezarja a devicet, kilepeskor (meg nem) hivodik meg.
-  
+  Találd ki!
+  Na jó, segítek: lezárja a device-t, kilépéskor (még nem) hívódik meg.
+
 static void reset();
-  reseteli a devicet. egesz pontosan a bufferek torlesere szolgal,
-  tehat hogy a reset() utan mar ne szoljon tovabb az amit elotte kapott.
-  (pause ill. seek eseten hivodik meg)
+  Reseteli a device-t. Egész pontosan a bufferek törlésére szolgál,
+  tehát hogy a reset() után már ne szóljon tovább az, amit elõtte kapott.
+  (pause ill. seek esetén hívódik meg)
 
 static int get_space();
-  vissza kell adja hogy hany byte irhato az audio bufferbe anelkul hogy
-  blockolna (varakoztatna a hivo processt). amennyiben a buffer (majdnem)
+  Vissza kell adja, hogy hány byte írható az audio bufferbe anélkül, hogy
+  blockolna (várakoztatná a hívó processt). Amennyiben a buffer (majdnem)
   tele van, 0-t kell visszaadni!
-  ha sosem ad vissza 0-at akkor nem fog mukodni az MPlayer!
+  Ha sosem ad vissza 0-t, akkor nem fog mûködni az MPlayer!
 
 static int play(void* data,int len,int flags);
-  lejatszik egy adag hangot, amit a data cimu memoriateruleten kap, es len
-  a merete. a flags meg nem hasznalt. az adatokat at kell masolnia, mert a
-  hivas utan felulirodhatnak! nem kell feltetlen minden byetot felhasznalni,
-  hanem azt kell visszaadnia mennyit hasznalt fel (masolt a bufferbe).
+  Lejátszik egy adag hangot, amit a data címû memóriaterületen kap és len
+  a mérete. a flags még nem használt. Az adatokat át kell másolnia, mert a
+  hívás után felülíródhatnak! Nem kell feltétlen minden byte-ot felhasználni,
+  hanem azt kell visszaadnia, mennyit használt fel (másolt a bufferbe).
 
 static int get_delay();
-  vissza kell adja hogy hany byte varakozik az audio bufferben. lehetoleg
-  minel pontosabban, mert ettol fugg az egesz idozites!
-  legrosszabb esetben adja vissza a buffer meretet.
+  Vissza kell adja, hogy hány byte várakozik az audio bufferben. lehetõleg
+  minél pontosabban, mert ettõl függ az egész idõzítés!
+  Legrosszabb esetben adja vissza a buffer méretét!
 
-!!!  Mivel a kep a hanghoz (hangkartyahoz) van szinkronizalva, igy nagyon
-!!!  fontos hogy a get_space ill. get_delay fuggvenyek korrektul legyenek megirva!
+!!! Mivel a kép a hanghoz (hangkártyához) van szinkronizálva, így nagyon fontos,
+!!! hogy a get_space ill. get_delay függvények korrektül legyenek megírva!
 
