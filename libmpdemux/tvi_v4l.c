@@ -980,15 +980,21 @@ static int control(priv_t *priv, int cmd, void *arg)
 	{
 	    int req_mode = (int)*(void **)arg;
 
-	    if ((req_mode != TV_NORM_PAL) && (req_mode != TV_NORM_NTSC) && (req_mode != TV_NORM_SECAM)) {
+	    if ((req_mode != TV_NORM_PAL) && (req_mode != TV_NORM_NTSC) && (req_mode != TV_NORM_SECAM)
+		&& (req_mode != TV_NORM_PALNC) && (req_mode != TV_NORM_PALM) && (req_mode != TV_NORM_PALN)
+		&& (req_mode != TV_NORM_NTSCJP)) {
 		mp_msg(MSGT_TV, MSGL_ERR, "Unknown norm!\n");
 		return(TVI_CONTROL_FALSE);
 	    }
 
 	    if (priv->channels[priv->act_channel].flags & VIDEO_VC_TUNER) {
 		control(priv, TVI_CONTROL_TUN_GET_TUNER, 0);
-		if (((req_mode == TV_NORM_PAL) && !(priv->tuner.flags & VIDEO_TUNER_PAL)) ||
-		    ((req_mode == TV_NORM_NTSC) && !(priv->tuner.flags & VIDEO_TUNER_NTSC)) ||
+		if (((req_mode == TV_NORM_PAL
+		      || req_mode == TV_NORM_PALNC
+		      || req_mode == TV_NORM_PALN) && !(priv->tuner.flags & VIDEO_TUNER_PAL)) ||
+		    ((req_mode == TV_NORM_NTSC
+		      || req_mode == TV_NORM_NTSCJP
+		      || req_mode == TV_NORM_PALM) && !(priv->tuner.flags & VIDEO_TUNER_NTSC)) ||
 		    ((req_mode == TV_NORM_SECAM) && !(priv->tuner.flags & VIDEO_TUNER_SECAM)))
 		{
 		    mp_msg(MSGT_TV, MSGL_ERR, "Tuner isn't capable to set norm!\n");
@@ -997,9 +1003,13 @@ static int control(priv_t *priv, int cmd, void *arg)
 
 		switch(req_mode) {
 		case TV_NORM_PAL:
+		case TV_NORM_PALNC:
+		case TV_NORM_PALN:
 		    priv->tuner.mode = VIDEO_MODE_PAL;
 		    break;
 		case TV_NORM_NTSC:
+		case TV_NORM_NTSCJP:
+		case TV_NORM_PALM:
 		    priv->tuner.mode = VIDEO_MODE_NTSC;
 		    break;
 		case TV_NORM_SECAM:
@@ -1023,6 +1033,18 @@ static int control(priv_t *priv, int cmd, void *arg)
 	    case TV_NORM_SECAM:
 		priv->channels[priv->act_channel].norm = VIDEO_MODE_SECAM;
 		break;
+	    case TV_NORM_PALNC:
+		priv->channels[priv->act_channel].norm = 3;
+		break;
+	    case TV_NORM_PALM:
+		priv->channels[priv->act_channel].norm = 4;
+		break;
+	    case TV_NORM_PALN:
+		priv->channels[priv->act_channel].norm = 5;
+		break;
+	    case TV_NORM_NTSCJP:
+		priv->channels[priv->act_channel].norm = 6;
+		break;
 	    }
 	    if (ioctl(priv->video_fd, VIDIOCSCHAN, &priv->channels[priv->act_channel]) == -1)
 	    {
@@ -1035,11 +1057,11 @@ static int control(priv_t *priv, int cmd, void *arg)
 		return(TVI_CONTROL_FALSE);
 	    }
 
-	    if(req_mode == TV_NORM_PAL || req_mode == TV_NORM_SECAM) {
+	    if(req_mode == TV_NORM_PAL || req_mode == TV_NORM_SECAM || req_mode == TV_NORM_PALN || req_mode == TV_NORM_PALNC) {
 		priv->fps = PAL_FPS;
             }
 
-	    if(req_mode == TV_NORM_NTSC) {
+	    if(req_mode == TV_NORM_NTSC || req_mode == TV_NORM_NTSCJP || req_mode == TV_NORM_PALM) {
 		priv->fps = NTSC_FPS;
             }
 

@@ -154,6 +154,10 @@ int tv_step_chanlist(tvi_handle_t *tvh);
 #define TV_NORM_PAL		1
 #define TV_NORM_NTSC		2
 #define TV_NORM_SECAM		3
+#define TV_NORM_PALNC		4
+#define TV_NORM_PALM		5
+#define TV_NORM_PALN		6
+#define TV_NORM_NTSCJP		7
 
 #endif /* USE_TV */
 
