@@ -13,8 +13,8 @@
 #include <wine/vfw.h>
 #include <registry.h>
 
-#include "com.h"
-typedef long STDCALL (*GETCLASS) (GUID*, GUID*, void**);
+//#include "com.h"
+//typedef long STDCALL (*GETCLASS) (GUID*, GUID*, void**);
 
 
 #ifdef __FreeBSD__
@@ -155,7 +155,7 @@ DrvOpen(LPARAM lParam2)
    
     if (!(npDriver->DriverProc = (DRIVERPROC)
              GetProcAddress(npDriver->hDriverModule, "DriverProc"))) {
-#if 0
+#if 1
          printf("Library %s is not a VfW/ACM valid codec\n", win32_codec_name);
 #else
         // Try DirectShow...
