@@ -124,10 +124,12 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src, unsigne
 //default window event handler
 static OSStatus MainEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
 {
-    OSStatus err = noErr;
+    OSStatus result = noErr;
 	UInt32 class = GetEventClass (event);
 	UInt32 kind = GetEventKind (event); 
-  
+
+	result = CallNextEventHandler(nextHandler, event);
+ 
 	if(class == kEventClassWindow)
 	{
 		WindowRef     window;
@@ -153,9 +155,7 @@ static OSStatus MainEventHandler(EventHandlerCallRef nextHandler, EventRef event
 				flip_page();
 				break;
 			
-			default:
-				err = eventNotHandledErr;
-				break;
+			default:result = eventNotHandledErr;break;
 		}
 	}
 	else if(class == kEventClassKeyboard)
@@ -173,9 +173,14 @@ static OSStatus MainEventHandler(EventHandlerCallRef nextHandler, EventRef event
 			case kEventRawKeyDown: 
 			{			
 				switch(macKeyCode)
-				{ 
+				{
+					case QZ_IBOOK_ENTER:
 					case QZ_RETURN: mplayer_put_key(KEY_ENTER);break;
 					case QZ_ESCAPE: mplayer_put_key(KEY_ESC);break;
+					case QZ_BACKSPACE: mplayer_put_key(KEY_BACKSPACE);break;
+					case QZ_LALT: mplayer_put_key(KEY_BACKSPACE);break;
+					case QZ_LCTRL: mplayer_put_key(KEY_BACKSPACE);break;
+					case QZ_LSHIFT: mplayer_put_key(KEY_BACKSPACE);break;
 					case QZ_F1: mplayer_put_key(KEY_F+1);break;
 					case QZ_F2: mplayer_put_key(KEY_F+2);break;
 					case QZ_F3: mplayer_put_key(KEY_F+3);break;
@@ -188,21 +193,23 @@ static OSStatus MainEventHandler(EventHandlerCallRef nextHandler, EventRef event
 					case QZ_F10: mplayer_put_key(KEY_F+10);break;
 					case QZ_F11: mplayer_put_key(KEY_F+11);break;
 					case QZ_F12: mplayer_put_key(KEY_F+12);break;
-					//case QZ_7: mplayer_put_key(shift_key?'/':'7');
-					//case QZ_PLUS: mplayer_put_key(shift_key?'*':'+');
+					case QZ_INSERT: mplayer_put_key(KEY_INSERT);break;
+					case QZ_DELETE: mplayer_put_key(KEY_DELETE);break;
+					case QZ_HOME: mplayer_put_key(KEY_HOME);break;
+					case QZ_END: mplayer_put_key(KEY_END);break;
 					case QZ_KP_PLUS: mplayer_put_key('+');break;
-					case QZ_MINUS:
 					case QZ_KP_MINUS: mplayer_put_key('-');break;
-					case QZ_TAB: mplayer_put_key('\t');break;
+					case QZ_TAB: mplayer_put_key(KEY_TAB);break;
 					case QZ_PAGEUP: mplayer_put_key(KEY_PAGE_UP);break;
 					case QZ_PAGEDOWN: mplayer_put_key(KEY_PAGE_DOWN);break;  
 					case QZ_UP: mplayer_put_key(KEY_UP);break;
 					case QZ_DOWN: mplayer_put_key(KEY_DOWN);break;
 					case QZ_LEFT: mplayer_put_key(KEY_LEFT);break;
 					case QZ_RIGHT: mplayer_put_key(KEY_RIGHT);break;
-					case QZ_KP_MULTIPLY: mplayer_put_key('*'); break;
-					case QZ_SLASH:
-					case QZ_KP_DIVIDE: mplayer_put_key('/'); break;
+					case QZ_KP_MULTIPLY: mplayer_put_key('*');break;
+					case QZ_KP_DIVIDE: mplayer_put_key('/');break;
+					case QZ_KP_ENTER: mplayer_put_key(KEY_BACKSPACE);break;
+					case QZ_KP_PERIOD: mplayer_put_key(KEY_KPDEC); break;
 					case QZ_KP0: mplayer_put_key(KEY_KP0); break;
 					case QZ_KP1: mplayer_put_key(KEY_KP1); break;
 					case QZ_KP2: mplayer_put_key(KEY_KP2); break;
@@ -213,18 +220,14 @@ static OSStatus MainEventHandler(EventHandlerCallRef nextHandler, EventRef event
 					case QZ_KP7: mplayer_put_key(KEY_KP7); break;
 					case QZ_KP8: mplayer_put_key(KEY_KP8); break;
 					case QZ_KP9: mplayer_put_key(KEY_KP9); break;
-					case QZ_KP_PERIOD: mplayer_put_key(KEY_KPDEC); break;
-					case QZ_KP_ENTER: mplayer_put_key(KEY_KPENTER); break;
 					case QZ_LEFTBRACKET: SetWindowAlpha(theWindow, winAlpha-=0.05);break;
 					case QZ_RIGHTBRACKET: SetWindowAlpha(theWindow, winAlpha+=0.05);break;
-				
+
 					default:mplayer_put_key(macCharCodes);break;
 				}
 			}
 			
-			default:
-				err = eventNotHandledErr;
-				break;
+			default:result = eventNotHandledErr;break;
 		}
 	}
 	else if(class == kEventClassMouse)
@@ -256,7 +259,7 @@ static OSStatus MainEventHandler(EventHandlerCallRef nextHandler, EventRef event
 						case 2: mplayer_put_key(MOUSE_BTN2);break;
 						case 3: mplayer_put_key(MOUSE_BTN1);break;
 				
-						default:break;
+						default:result = eventNotHandledErr;break;
 					}
 				}
 			}		
@@ -279,13 +282,11 @@ static OSStatus MainEventHandler(EventHandlerCallRef nextHandler, EventRef event
 			}
 			break;
 			
-			default:
-				err = eventNotHandledErr;
-				break;
+			default:result = eventNotHandledErr;break;
 		}
 	}
 	
-    return err;
+    return result;
 }
 
 static void quartz_CreateWindow(uint32_t d_width, uint32_t d_height, WindowAttributes windowAttrs) 
