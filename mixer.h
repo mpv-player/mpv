@@ -6,6 +6,8 @@
 
 extern char * mixer_device;
 extern char * mixer_channel;
+extern int soft_vol;
+extern float soft_vol_max;
 
 typedef struct mixer_s {
     ao_functions_t *audio_out;

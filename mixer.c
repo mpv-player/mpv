@@ -15,13 +15,16 @@
 
 char * mixer_device=NULL;
 char * mixer_channel=NULL;
+int soft_vol = 0;
+float soft_vol_max = 110.0;
 
 void mixer_getvolume(mixer_t *mixer, float *l, float *r)
 {
   ao_control_vol_t vol;
   *l=0; *r=0;
   if(mixer->audio_out){
-    if(CONTROL_OK != mixer->audio_out->control(AOCONTROL_GET_VOLUME,&vol)) {
+    if(soft_vol ||
+        CONTROL_OK != mixer->audio_out->control(AOCONTROL_GET_VOLUME,&vol)) {
       if (!mixer->afilter)
         return;
       else {
@@ -31,8 +34,8 @@ void mixer_getvolume(mixer_t *mixer, float *l, float *r)
           db_vals[0] = db_vals[1] = 1.0;
         else
         af_from_dB (2, db_vals, db_vals, 20.0, -200.0, 60.0);
-        vol.left = db_vals[0] * 90.0;
-        vol.right = db_vals[1] * 90.0;
+        vol.left = (db_vals[0] / (soft_vol_max / 100.0)) * 100.0;
+        vol.right = (db_vals[1] / (soft_vol_max / 100.0)) * 100.0;
       }
     }
     *r=vol.right;
@@ -45,19 +48,18 @@ void mixer_setvolume(mixer_t *mixer, float l, float r)
   ao_control_vol_t vol;
   vol.right=r; vol.left=l;
   if(mixer->audio_out){
-    if(CONTROL_OK != mixer->audio_out->control(AOCONTROL_SET_VOLUME,&vol)) {
+    if(soft_vol ||
+        CONTROL_OK != mixer->audio_out->control(AOCONTROL_SET_VOLUME,&vol)) {
       if (!mixer->afilter)
         return;
       else {
         // af_volume uses values in dB
         float db_vals[AF_NCH];
         int i;
-        // a volume of 90% will give 0 dB (no change)
-        // like this, amplification is possible as well
-        db_vals[0] = l / 90.0;
-        db_vals[1] = r / 90.0;
+        db_vals[0] = (l / 100.0) * (soft_vol_max / 100.0);
+        db_vals[1] = (r / 100.0) * (soft_vol_max / 100.0);
         for (i = 2; i < AF_NCH; i++) {
-          db_vals[i] = (l + r) / 180.0;
+          db_vals[i] = ((l + r) / 100.0) * (soft_vol_max / 100.0) / 2.0;
         }
         af_to_dB (AF_NCH, db_vals, db_vals, 20.0);
         if (!af_control_any_rev(mixer->afilter,

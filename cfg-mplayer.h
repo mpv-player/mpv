@@ -174,6 +174,9 @@ m_option_t mplayer_opts[]={
 	{"dsp", "Use -ao oss:dsp_path.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
         {"mixer", &mixer_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
         {"mixer-channel", &mixer_channel, CONF_TYPE_STRING, 0, 0, 0, NULL},
+        {"softvol", &soft_vol, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+        {"nosoftvol", &soft_vol, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+        {"softvol-max", &soft_vol_max, CONF_TYPE_FLOAT, CONF_RANGE, 10, 10000, NULL},
 	{"volstep", &volstep, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
 	{"master", "Option -master has been removed, use -aop list=volume instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	// override audio buffer size (used only by -ao oss, anyway obsolete...)

@@ -1738,6 +1738,18 @@ ALSA mixer channel names followed by a number must be specified in the
 <name,number> format, i.e.\& a channel labeled 'PCM 1' in alsamixer must
 be converted to
 .BR PCM,1 .
+.TP
+.B \-softvol
+Force the use of the software mixer, instead of using the soundcard
+mixer.
+.
+.TP
+.B \-softvol-max <10.0\-10000.0>
+Set the maximum amplification level in percent (default: 110).
+A value of 200 will allow you to adjust the volume up to a maximum of
+double the current level.
+With values below 100 the starting volume (which is 100%) will be above
+the maximum, which e.g. the OSD cannot display correctly.
 .
 .TP
 .B \-nowaveheader (\-ao pcm only)
