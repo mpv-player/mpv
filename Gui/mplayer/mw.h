@@ -447,6 +447,19 @@ set_volume:
         mplFullScreen();
         break;
 
+   case evSetAspect:
+	switch ( (int)param )
+	 {
+	  case 2:  movie_aspect=16.0f / 9.0f; break;
+	  case 3:  movie_aspect=4.0f / 3.0f;  break;
+	  case 4:  movie_aspect=2.35;         break;
+	  case 1:
+	  default: movie_aspect=-1;
+	 }
+	guiIntfStruct.FilenameChanged=1;
+	wsClearWindow( appMPlayer.subWindow );
+	break;
+
 // --- timer events
    case evRedraw:
         mplMainRender=1;

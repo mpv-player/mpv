@@ -258,7 +258,7 @@ GtkWidget * DVDTitleMenu;
 GtkWidget * DVDChapterMenu;
 GtkWidget * DVDAudioLanguageMenu;
 GtkWidget * DVDSubtitleLanguageMenu;
-
+GtkWidget * AspectMenu;
 GtkWidget * VCDSubMenu;
 GtkWidget * VCDTitleMenu;
 
@@ -388,6 +388,12 @@ GtkWidget * create_PopUpMenu( void )
         gtk_widget_set_sensitive( MenuItem,FALSE );
        }
 #endif
+  AspectMenu=AddSubMenu( Menu,"Aspect ratio" );
+  AddMenuItem( AspectMenu,"Original",( 1 << 16 ) + evSetAspect );
+  AddMenuItem( AspectMenu,"16:9",( 2 << 16 ) + evSetAspect );
+  AddMenuItem( AspectMenu,"4:3",( 3 << 16 ) + evSetAspect );
+  AddMenuItem( AspectMenu,"2.35",( 4 << 16 ) + evSetAspect );
+
   AddSeparator( Menu );
   AddMenuItem( Menu,"Mute", evMute );
   AddMenuItem( Menu,MSGTR_MENU_PlayList, evPlayList );

@@ -48,7 +48,8 @@ evName evNames[] =
   { evPlayVCD,		 "evPlayVCD"	       },
   { evSetURL,		 "evSetURL"	       },
   { evLoadAudioFile,	 "evLoadAudioFile"     },
-  { evDropSubtitle,      "evDropSubtitle"      }
+  { evDropSubtitle,      "evDropSubtitle"      },
+  { evSetAspect,	 "evSetAspect"	       }
  };
 
 int evBoxs = sizeof( evNames ) / sizeof( evName );
