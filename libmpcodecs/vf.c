@@ -356,6 +356,7 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 	      //if(!mpi->stride[0]) 
 	      mpi->stride[0]=mpi->width;
 	      //if(!mpi->stride[1]) 
+	      if(mpi->num_planes > 2){
 	      mpi->stride[1]=mpi->stride[2]=mpi->chroma_width;
 	      if(mpi->flags&MP_IMGFLAG_SWAPPED){
 	          // I420/IYUV  (Y,U,V)
@@ -365,6 +366,11 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 	          // YV12,YVU9,IF09  (Y,V,U)
 	          mpi->planes[2]=mpi->planes[0]+mpi->width*mpi->height;
 	          mpi->planes[1]=mpi->planes[2]+mpi->chroma_width*mpi->chroma_height;
+	      }
+	      } else {
+	          // NV12/NV21
+	          mpi->stride[1]=mpi->chroma_width;
+	          mpi->planes[1]=mpi->planes[0]+mpi->width*mpi->height;
 	      }
 	  } else {
 	      //if(!mpi->stride[0]) 

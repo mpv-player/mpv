@@ -56,6 +56,8 @@ static unsigned int outfmt_list[]={
     IMGFMT_YVU9,
     IMGFMT_IF09,
     IMGFMT_411P,
+    IMGFMT_NV12,
+    IMGFMT_NV21,
     IMGFMT_YUY2,
     IMGFMT_UYVY,
 // RGB and grayscale (Y8 and Y800):
@@ -175,6 +177,8 @@ static int config(struct vf_instance_s* vf,
     case IMGFMT_YV12:		/* YV12 needs w & h rounded to 2 */
     case IMGFMT_I420:
     case IMGFMT_IYUV:
+    case IMGFMT_NV12:
+    case IMGFMT_NV21:
       vf->priv->h = (vf->priv->h + 1) & ~1;
     case IMGFMT_YUY2:		/* YUY2 needs w rounded to 2 */
     case IMGFMT_UYVY:
