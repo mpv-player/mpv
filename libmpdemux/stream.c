@@ -14,6 +14,13 @@
 #include <strings.h>
 
 #include "config.h"
+
+#ifndef HAVE_WINSOCK2
+#define closesocket close
+#else
+#include <winsock2.h>
+#endif
+
 #include "mp_msg.h"
 #include "help_mp.h"
 #include "../osdep/shmem.h"
@@ -376,6 +383,14 @@ stream_t* new_stream(int fd,int type){
   stream_t *s=malloc(sizeof(stream_t));
   if(s==NULL) return NULL;
   memset(s,0,sizeof(stream_t));
+
+#ifdef HAVE_WINSOCK2
+  {
+    WSADATA wsdata;
+    int temp = WSAStartup(0x0202, &wsdata); // there might be a better place for this (-> later)
+    mp_msg(MSGT_STREAM,MSGL_V,"WINSOCK2 init: %i\n", temp);
+  }
+#endif
   
   s->fd=fd;
   s->type=type;
@@ -414,7 +429,11 @@ void free_stream(stream_t *s){
   default:
     if(s->close) s->close(s);
   }
-  if(s->fd>0) close(s->fd);
+  if(s->fd>0) closesocket(s->fd);
+#ifdef HAVE_WINSOCK2
+  mp_msg(MSGT_STREAM,MSGL_V,"WINSOCK2 uninit\n");
+  WSACleanup(); // there might be a better place for this (-> later)
+#endif
   // Disabled atm, i don't like that. s->priv can be anything after all
   // streams should destroy their priv on close
   //if(s->priv) free(s->priv);

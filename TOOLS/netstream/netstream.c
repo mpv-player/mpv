@@ -28,11 +28,17 @@
 #include <inttypes.h>
 #include <errno.h>
 #include <signal.h>
-
 #include <sys/types.h>
+
+#include "config.h"
+
+#ifndef HAVE_WINSOCK2
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#else
+#include <winsock2.h>
+#endif
 
 #include <libmpdemux/stream.h>
 #include <mp_msg.h>

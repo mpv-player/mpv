@@ -29,9 +29,15 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <assert.h>
+#include "config.h"
+#ifndef HAVE_WINSOCK2
+#define closesocket close
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#else
+#include <winsock2.h>
+#endif
 #include <string.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -119,9 +125,13 @@ static int host_connect_attempt(struct in_addr ia, int port) {
   sin.sin_port   = htons(port);
   
   if (connect(s, (struct sockaddr *)&sin, sizeof(sin))==-1 
+#ifndef HAVE_WINSOCK2
       && errno != EINPROGRESS) {
+#else
+      && WSAGetLastError() == WSAEINPROGRESS) {
+#endif
     printf ("rtsp: connect(): %s\n", strerror(errno));
-    close(s);
+    closesocket(s);
     return -1;
   }
 
@@ -163,7 +173,11 @@ static int write_stream(int s, const char *buf, int len) {
     if (n > 0)
       total += n;
     else if (n < 0) {
+#ifndef HAVE_WINSOCK2
       if ((timeout>0) && ((errno == EAGAIN) || (errno == EINPROGRESS))) {
+#else
+      if ((timeout>0) && ((errno == EAGAIN) || (WSAGetLastError() == WSAEINPROGRESS))) {
+#endif
         sleep (1); timeout--;
       } else
         return -1;
@@ -641,7 +655,7 @@ rtsp_t *rtsp_connect(int fd, char* mrl, char *path, char *host, int port, char *
 
 void rtsp_close(rtsp_t *s) {
 
-  if (s->server_state) close(s->s); /* TODO: send a TEAROFF */
+  if (s->server_state) closesocket(s->s); /* TODO: send a TEAROFF */
   if (s->path) free(s->path);
   if (s->host) free(s->host);
   if (s->mrl) free(s->mrl);

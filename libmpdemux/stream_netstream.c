@@ -48,9 +48,14 @@
 #include <inttypes.h>
 #include <errno.h>
 
+#ifndef HAVE_WINSOCK2
+#define closesocket close
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#else
+#include <winsock2.h>
+#endif
 
 #include "mp_msg.h"
 #include "stream.h"
@@ -89,6 +94,7 @@ static struct m_struct_st stream_opts = {
 //// When the cache is running we need a lock as
 //// fill_buffer is called from another proccess
 static int lock_fd(int fd) {
+#ifndef HAVE_WINSOCK2
   struct flock lock;
 
   memset(&lock,0,sizeof(struct flock));
@@ -104,10 +110,14 @@ static int lock_fd(int fd) {
     }
   } while(0);
   mp_msg(MSGT_STREAM,MSGL_DBG2, "Locked (%d)\n",getpid());
+#else
+printf("FIXME? should lock here\n");
+#endif
   return 1;
 }
 
 static int unlock_fd(int fd) {
+#ifndef HAVE_WINSOCK2
   struct flock lock;
 
   memset(&lock,0,sizeof(struct flock));
@@ -119,6 +129,9 @@ static int unlock_fd(int fd) {
 	   strerror(errno));
     return 0;
   }
+#else
+printf("FIXME? should unlock here\n");
+#endif
   return 1;
 }
 
@@ -280,7 +293,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   return STREAM_OK;
 
   error:
-  close(f);
+  closesocket(f);
   m_struct_free(&stream_opts,opts);
   return STREAM_ERROR;
 }

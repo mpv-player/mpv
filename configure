@@ -155,6 +155,7 @@ Optional features:
   --disable-edl          disable EDL (edit decision list) support [enable]
   --disable-rtc          disable RTC (/dev/rtc) on Linux [autodetect]
   --disable-network      disable network support (for: http/mms/rtp) [enable]
+  --enable-winsock2      enable winsock2 usage [autodetect]
   --enable-smb           enable Samba (SMB) input support [autodetect]
   --enable-live          enable LIVE.COM Streaming Media support [disable]
   --enable-dvdnav        enable dvdnav support [disable]
@@ -1058,6 +1059,7 @@ _tv_v4l=auto
 _tv_bsdbt848=auto
 _edl=yes
 _network=yes
+_winsock2=auto
 _smbsupport=auto
 _vidix=auto
 _joystick=no
@@ -1233,6 +1235,8 @@ for ac_option do
   --disable-fastmemcpy)	_fastmemcpy=no	;;
   --enable-network)	_network=yes	;;
   --disable-network)	_network=no	;;
+  --enable-winsock2)	_winsock2=yes	;;
+  --disable-winsock2)	_winsock2=no	;;
   --enable-smb)		_smbsupport=yes	;;
   --disable-smb)	_smbsupport=no	;;
   --enable-vidix)	_vidix=yes	;;
@@ -1807,10 +1811,26 @@ EOF
 cc_check -lsocket && _ld_sock="-lsocket"
 cc_check -lnsl && _ld_sock="-lnsl"
 cc_check -lsocket -lnsl && _ld_sock="-lsocket -lnsl"
+if test $_winsock2 = auto && not cygwin ; then
+  _winsock2=no
+  cat > $TMPC << EOF
+#include <winsock2.h>
+int main(void) { (void) gethostbyname(0); return 0; }
+EOF
+  cc_check -lws2_32 && _ld_sock="-lws2_32" && _winsock2=yes
+fi
 if test "$_ld_sock" ; then
   echores "yes (using $_ld_sock)"
 else
   echores "no"
+fi
+
+
+if test $_winsock2 = yes ; then
+  _ld_sock="-lws2_32"
+  _def_winsock2='#define HAVE_WINSOCK2 1'
+else
+  _def_winsock2='#undef HAVE_WINSOCK2'
 fi
 
 
@@ -1822,7 +1842,9 @@ cat > $TMPC << EOF
 #include <arpa/inet.h>
 int main(void) { (void) inet_pton(0, 0, 0); return 0; }
 EOF
-if cc_check $_ld_sock ; then
+if test "$_winsock2" = yes ; then
+    echores "not needed (using winsock2 functions)"
+elif cc_check $_ld_sock ; then
   # NOTE: Linux has libresolv but does not need it
   :
   echores "yes (using $_ld_sock)"
@@ -5790,6 +5812,9 @@ $_def_faad_version
 
 /* enable network */
 $_def_network
+
+/* enable winsock2 instead of Unix functions*/
+$_def_winsock2
 
 /* define this to use inet_aton() instead of inet_pton() */
 $_def_use_aton

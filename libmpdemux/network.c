@@ -16,6 +16,13 @@
 
 #include "config.h"
 
+#ifndef HAVE_WINSOCK2
+#define closesocket close
+#else
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#endif
+
 #include "stream.h"
 #include "demuxer.h"
 #include "../m_config.h"
@@ -194,6 +201,10 @@ connect2Server_with_af(char *host, int port, int af) {
 	struct hostent *hp=NULL;
 	char buf[255];
 	
+#ifdef HAVE_WINSOCK2
+	u_long val;
+#endif
+	
 	socket_server_fd = socket(af, SOCK_STREAM, 0);
 	
 	
@@ -215,10 +226,14 @@ connect2Server_with_af(char *host, int port, int af) {
 	
 	bzero(&server_address, sizeof(server_address));
 	
+#ifndef HAVE_WINSOCK2
 #ifdef USE_ATON
 	if (inet_aton(host, our_s_addr)!=1)
 #else
 	if (inet_pton(af, host, our_s_addr)!=1)
+#endif
+#else
+	if ( inet_addr(host)==INADDR_NONE )
 #endif
 	{
 		mp_msg(MSGT_NETWORK,MSGL_STATUS,"Resolving %s for %s...\n", host, af2String(af));
@@ -235,6 +250,12 @@ connect2Server_with_af(char *host, int port, int af) {
 		
 		memcpy( our_s_addr, (void*)hp->h_addr, hp->h_length );
 	}
+#ifdef HAVE_WINSOCK2
+	else {
+		unsigned long addr = inet_addr(host);
+		memcpy( our_s_addr, (void*)&addr, sizeof(addr) );
+	}
+#endif
 	
 	switch (af) {
 		case AF_INET:
@@ -254,7 +275,7 @@ connect2Server_with_af(char *host, int port, int af) {
 			return -2;
 	}
 
-#ifdef USE_ATON
+#if defined(USE_ATON) || defined(HAVE_WINSOCK2)
 	strncpy( buf, inet_ntoa( *((struct in_addr*)our_s_addr) ), 255);
 #else
 	inet_ntop(af, our_s_addr, buf, 255);
@@ -262,11 +283,20 @@ connect2Server_with_af(char *host, int port, int af) {
 	mp_msg(MSGT_NETWORK,MSGL_STATUS,"Connecting to server %s[%s]:%d ...\n", host, buf , port );
 
 	// Turn the socket as non blocking so we can timeout on the connection
+#ifndef HAVE_WINSOCK2
 	fcntl( socket_server_fd, F_SETFL, fcntl(socket_server_fd, F_GETFL) | O_NONBLOCK );
+#else
+	val = 1;
+	ioctlsocket( socket_server_fd, FIONBIO, &val );
+#endif
 	if( connect( socket_server_fd, (struct sockaddr*)&server_address, server_address_size )==-1 ) {
+#ifndef HAVE_WINSOCK2
 		if( errno!=EINPROGRESS ) {
+#else
+		if( (WSAGetLastError() != WSAEINPROGRESS) && (WSAGetLastError() != WSAEWOULDBLOCK) ) {
+#endif
 			mp_msg(MSGT_NETWORK,MSGL_ERR,"Failed to connect to server with %s\n", af2String(af));
-			close(socket_server_fd);
+			closesocket(socket_server_fd);
 			return -1;
 		}
 	}
@@ -293,7 +323,12 @@ connect2Server_with_af(char *host, int port, int af) {
 	}
 
 	// Turn back the socket as blocking
+#ifndef HAVE_WINSOCK2
 	fcntl( socket_server_fd, F_SETFL, fcntl(socket_server_fd, F_GETFL) & ~O_NONBLOCK );
+#else
+	val = 0;
+	ioctlsocket( socket_server_fd, FIONBIO, &val );
+#endif
 	// Check if there were any error
 	err_len = sizeof(int);
 	ret =  getsockopt(socket_server_fd,SOL_SOCKET,SO_ERROR,&err,&err_len);
@@ -655,7 +690,7 @@ extension=NULL;
 
 			http_hdr = http_read_response( fd );
 			if( http_hdr==NULL ) {
-				close( fd );
+				closesocket( fd );
 				http_free( http_hdr );
 				return -1;
 			}
@@ -734,7 +769,7 @@ extension=NULL;
 					// TODO: RFC 2616, recommand to detect infinite redirection loops
 					next_url = http_get_field( http_hdr, "Location" );
 					if( next_url!=NULL ) {
-						close( fd );
+						closesocket( fd );
 						url_free( url );
 						streaming_ctrl->url = url = url_new( next_url );
 						http_free( http_hdr );
@@ -840,7 +875,7 @@ nop_streaming_start( stream_t *stream ) {
 				break;
 			default:
 				mp_msg(MSGT_NETWORK,MSGL_ERR,"Server return %d: %s\n", http_hdr->status_code, http_hdr->reason_phrase );
-				close( fd );
+				closesocket( fd );
 				fd = -1;
 		}
 		stream->fd = fd;
@@ -938,7 +973,7 @@ realrtsp_streaming_start( stream_t *stream ) {
 	if ( redirected == 1 ) {
 		url_free(stream->streaming_ctrl->url);
 		stream->streaming_ctrl->url = url_new(mrl);
-		close(fd);
+		closesocket(fd);
 	}
 
 	free(mrl);
@@ -988,19 +1023,28 @@ rtp_open_socket( URL_t *url ) {
 		}
 		memcpy( (void*)&server_address.sin_addr.s_addr, (void*)hp->h_addr, hp->h_length );
 	} else {
+#ifndef HAVE_WINSOCK2
 #ifdef USE_ATON
 		inet_aton(url->hostname, &server_address.sin_addr);
 #else
 		inet_pton(AF_INET, url->hostname, &server_address.sin_addr);
+#endif
+#else
+		unsigned int addr = inet_addr(url->hostname);
+		memcpy( (void*)&server_address.sin_addr, (void*)&addr, sizeof(addr) );
 #endif
 	}
 	server_address.sin_family=AF_INET;
 	server_address.sin_port=htons(url->port);
 
 	if( bind( socket_server_fd, (struct sockaddr*)&server_address, sizeof(server_address) )==-1 ) {
+#ifndef HAVE_WINSOCK2
 		if( errno!=EINPROGRESS ) {
+#else
+		if( WSAGetLastError() != WSAEINPROGRESS ) {
+#endif
 			mp_msg(MSGT_NETWORK,MSGL_ERR,"Failed to connect to server\n");
-			close(socket_server_fd);
+			closesocket(socket_server_fd);
 			return -1;
 		}
 	}
@@ -1032,7 +1076,7 @@ rtp_open_socket( URL_t *url ) {
 		if( err ) {
 			mp_msg(MSGT_NETWORK,MSGL_ERR,"Timeout! No data from host %s\n", url->hostname );
 			mp_msg(MSGT_NETWORK,MSGL_DBG2,"Socket error: %d\n", err );
-			close(socket_server_fd);
+			closesocket(socket_server_fd);
 			return -1;
 		}
 	}
@@ -1091,7 +1135,7 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 	// For RTP streams, we usually don't know the stream type until we open it.
 	if( !strcasecmp( stream->streaming_ctrl->url->protocol, "rtp")) {
 		if(stream->fd >= 0) {
-			if(close(stream->fd) < 0)
+			if(closesocket(stream->fd) < 0)
 				mp_msg(MSGT_NETWORK,MSGL_ERR,"streaming_start : Closing socket %d failed %s\n",stream->fd,strerror(errno));
 		}
 		stream->fd = -1;

@@ -16,6 +16,12 @@
 
 #include "config.h"
 
+#ifndef HAVE_WINSOCK2
+#define closesocket close
+#else
+#include <winsock2.h>
+#endif
+
 #include "url.h"
 #include "asf.h"
 
@@ -433,7 +439,7 @@ int asf_mmst_streaming_start(stream_t *stream)
   int s = stream->fd;
 
   if( s>0 ) {
-	  close( stream->fd );
+	  closesocket( stream->fd );
 	  stream->fd = -1;
   }
   

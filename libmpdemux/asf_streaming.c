@@ -6,6 +6,12 @@
 
 #include "config.h"
 
+#ifndef HAVE_WINSOCK2
+#define closesocket close
+#else
+#include <winsock2.h>
+#endif
+
 #include "url.h"
 #include "http.h"
 #include "asf.h"
@@ -643,7 +649,7 @@ asf_http_streaming_start( stream_t *stream, int *demuxer_type ) {
 
 	do {
 		done = 1;
-		if( fd>0 ) close( fd );
+		if( fd>0 ) closesocket( fd );
 
 		if( !strcasecmp( url->protocol, "http_proxy" ) ) {
 			if( url->port==0 ) url->port = 8080;
@@ -729,7 +735,7 @@ asf_http_streaming_start( stream_t *stream, int *demuxer_type ) {
 			case ASF_Unknown_e:
 			default:
 				mp_msg(MSGT_NETWORK,MSGL_ERR,"Unknown ASF streaming type\n");
-				close(fd);
+				closesocket(fd);
 				http_free( http_hdr );
 				return -1;
 		}

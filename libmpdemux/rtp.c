@@ -2,12 +2,18 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <netinet/in.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h>
+#include "config.h"
+#ifndef HAVE_WINSOCK2
+#include <netinet/in.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#else
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#endif
 
 /* MPEG-2 TS RTP stack */
 

@@ -26,9 +26,6 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <assert.h>
-#include <sys/socket.h>
-//#include <netinet/in.h>
-//#include <netdb.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -36,6 +33,16 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include <inttypes.h>
+
+#include "config.h"
+#ifndef HAVE_WINSOCK2
+#define closesocket close
+#include <sys/socket.h>
+//#include <netinet/in.h>
+//#include <netdb.h>
+#else
+#include <winsock2.h>
+#endif
 
 #include "pnm.h"
 //#include "libreal/rmff.h"
@@ -207,7 +214,11 @@ static int rm_write(int s, const char *buf, int len) {
     if (n > 0)
       total += n;
     else if (n < 0) {
+#ifndef HAVE_WINSOCK2
       if ((timeout>0) && ((errno == EAGAIN) || (errno == EINPROGRESS))) {
+#else
+      if ((timeout>0) && ((errno == EAGAIN) || (WSAGetLastError() == WSAEINPROGRESS))) {
+#endif
         sleep (1); timeout--;
       } else
         return -1;
@@ -810,7 +821,7 @@ int pnm_peek_header (pnm_t *this, char *data) {
 
 void pnm_close(pnm_t *p) {
 
-  if (p->s >= 0) close(p->s);
+  if (p->s >= 0) closesocket(p->s);
   free(p->path);
   free(p);
 }

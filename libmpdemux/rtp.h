@@ -1,7 +1,12 @@
 #ifndef _RTP_H
 #define _RTP_H
 
+#include "config.h"
+#ifndef HAVE_WINSOCK2
 #include <sys/socket.h>
+#else
+#include <winsock2.h>
+#endif
 
 struct rtpbits {
   unsigned int v:2;           /* version: 2 */
