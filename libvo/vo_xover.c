@@ -33,8 +33,6 @@
 #include "aspect.h"
 #include "mp_msg.h"
 
-#include "../mplayer.h" /* exit_player() */
-
 #ifdef HAVE_NEW_GUI
 #include "../Gui/interface.h"
 #endif
@@ -424,11 +422,11 @@ static uint32_t preinit(const char *arg)
       break;
   }
   if(!video_out_drivers[i]) {
-    mp_msg(MSGT_VO, MSGL_ERR, "VO XOverlay: Subdriver %s not found\n");
+    mp_msg(MSGT_VO, MSGL_ERR, "VO XOverlay: Subdriver %s not found\n", arg);
     return 1;
   }
   if(video_out_drivers[i]->control(VOCTRL_XOVERLAY_SUPPORT,NULL) != VO_TRUE) {
-    mp_msg(MSGT_VO, MSGL_ERR, "VO XOverlay: %s doesn't support XOverlay\n");
+    mp_msg(MSGT_VO, MSGL_ERR, "VO XOverlay: %s doesn't support XOverlay\n", arg);
     return 1;
   }
   // X11 init

@@ -175,7 +175,7 @@ int zoran_getcap(zr_info_t *zr) {
 	}
 	
 	if (ioctl(zr->vdes, VIDIOCGCAP, &zr->vc) < 0) {
-		mp_msg(MSGT_VO, MSGL_ERR, "zr: error getting video capabilities from %s\n");
+		mp_msg(MSGT_VO, MSGL_ERR, "zr: error getting video capabilities from %s\n", dev);
 		return 1;
 	}
 	mp_msg(MSGT_VO, MSGL_V, "zr: MJPEG card reports maxwidth=%d, maxheight=%d\n", zr->vc.maxwidth, zr->vc.maxheight);

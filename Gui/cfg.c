@@ -285,7 +285,7 @@ int cfg_write( void )
 	fprintf( f,"%s = \"%s\"\n",gui_opts[i].name, v);
 	free(v);
       } else if((int)v == -1)
-	mp_msg(MSGT_GPLAYER,MSGL_WARN,"Unable to save the %s option\n");
+	mp_msg(MSGT_GPLAYER,MSGL_WARN,"Unable to save the '%s' option\n", gui_opts[i].name);
     }
    fclose( f );
   }

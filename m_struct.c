@@ -24,7 +24,7 @@ m_struct_alloc(m_struct_t* st) {
   void* r;
 
   if(!st->defaults) {
-    mp_msg(MSGT_CFGPARSER, MSGL_ERR,"Struct %s need defaults\n");
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR,"Struct %s needs defaults\n",st->name);
     return NULL;
   }
   // Check the struct fields
