@@ -16,9 +16,16 @@
 #ifdef USE_IOCTL
 #include <sys/ioctl.h>
 #endif
+
 #ifdef HAVE_TERMIOS
+#ifdef HAVE_TERMIOS_H
+#include <termios.h>
+#endif
+#ifdef HAVE_TERMIOS_SYS_H 
 #include <sys/termios.h>
 #endif
+#endif
+
 #include <unistd.h>
 
 #include "keycodes.h"
