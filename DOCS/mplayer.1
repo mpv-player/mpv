@@ -2,6 +2,8 @@
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" 
 .\" Run groff -m man -Thtml mplayer.1 > manpage.html for a html version
+.\" Run groff -m man -Tascii mplayer.1 | col -bx > manpage.txt for a text
+.\"   version
 .\" 
 .
 .\" --------------------------------------------------------------------------
@@ -37,7 +39,7 @@
 .\" Title
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2002-10-13"
+.TH MPlayer 1 "2002-10-14"
 .
 .SH NAME
 mplayer  \- Movie Player for Linux
@@ -1936,7 +1938,7 @@ tex: constant quality
 tex^qComp: with qcomp 0.5 or something like that (default)
 
 infix operators: +,-,*,/,^
-.br
+
 variables:
 .br
 tex: texture complexity
@@ -2215,7 +2217,7 @@ minimum interval between key frames (2pass only)
 .IPs max_key_interval=<value>
 maximum interval between key frames
 .IPs (no)debug
-show or don't show debug messages (default: on)
+save or don't save debug messages in xvid.dbg (default: on)
 .IPs statsfile=<filename>
 filename for the statistics of the first pass (1/2pass mode only)
 .IPs keyframe_boost=<value>
