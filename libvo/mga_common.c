@@ -280,6 +280,17 @@ static uint32_t control(uint32_t request, void *data, ...)
   case VOCTRL_GUISUPPORT:
     return VO_TRUE;
 #endif
+#ifdef VO_XMGA
+  case VOCTRL_GET_PANSCAN:
+      return VO_TRUE;
+  case VOCTRL_SET_PANSCAN:
+      if ( vo_fs && ( vo_panscan != vo_panscan_amount ) )
+       {
+	panscan_calc();
+        set_window( 1 );
+       }
+      return VO_TRUE;
+#endif
   }
   return VO_NOTIMPL;
 }

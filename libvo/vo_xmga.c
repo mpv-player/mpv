@@ -103,7 +103,7 @@ static void mDrawColorKey( void )
  XFlush( mDisplay );
 }
 
-static void set_window(){
+static void set_window( int ps ){
 
 	 if ( WinID )
 	  {
@@ -127,8 +127,7 @@ static void set_window(){
            drwHeight=(dheight > vo_screenheight?vo_screenheight:dheight);
            mp_msg(MSGT_VO,MSGL_V,"[xmga-fs] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
           }
-
-         mDrawColorKey();
+	 vo_dwidth=drwWidth; vo_dheight=drwHeight;
 
 #ifdef HAVE_XINERAMA
 		 if(XineramaIsActive(mDisplay))
@@ -155,18 +154,34 @@ static void set_window(){
 		 }
 
 #endif
+
+         mDrawColorKey();
+
          mga_vid_config.x_org=drwcX;
          mga_vid_config.y_org=drwcY;
          mga_vid_config.dest_width=drwWidth;
          mga_vid_config.dest_height=drwHeight;
-
+	 if ( ps )
+	  {
+	   drwX-=vo_panscan_x>>1;
+	   drwY-=vo_panscan_y>>1;
+	   drwWidth+=vo_panscan_x;
+	   drwHeight+=vo_panscan_y;
+  
+	   mga_vid_config.x_org-=vo_panscan_x>>1;
+	   mga_vid_config.y_org-=vo_panscan_y>>1;
+           mga_vid_config.dest_width=drwWidth;
+           mga_vid_config.dest_height=drwHeight;
+	   mDrawColorKey();
+	   if ( ioctl( f,MGA_VID_CONFIG,&mga_vid_config ) ) mp_msg(MSGT_VO,MSGL_WARN,"Error in mga_vid_config ioctl (wrong mga_vid.o version?)" );
+	  }
 }
 
 static void check_events(void)
 {
  int e=vo_x11_check_events(mDisplay);
  if ( !(e&VO_EVENT_RESIZE) && !(e&VO_EVENT_EXPOSE) ) return;
- set_window();
+ set_window( 0 );
  mDrawColorKey();
  if ( ioctl( f,MGA_VID_CONFIG,&mga_vid_config ) ) mp_msg(MSGT_VO,MSGL_WARN,"Error in mga_vid_config ioctl (wrong mga_vid.o version?)" );
 }
@@ -230,6 +245,8 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
  aspect_save_screenres(vo_screenwidth,vo_screenheight);
 
  mvWidth=width; mvHeight=height;
+
+ vo_panscan_x=vo_panscan_y=vo_panscan_amount=0;
 
  vo_dx=( vo_screenwidth - d_width ) / 2; vo_dy=( vo_screenheight - d_height ) / 2;
  vo_dwidth=d_width; vo_dheight=d_height;
@@ -307,7 +324,7 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
 
  if ( ( flags&1 )&&( !WinID ) ) { vo_dx=0; vo_dy=0; vo_dwidth=vo_screenwidth; vo_dheight=vo_screenheight; vo_fs=1; }
  
- set_window();
+ set_window( 0 );
 
  mga_vid_config.src_width=width;
  mga_vid_config.src_height=height;

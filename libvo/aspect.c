@@ -10,6 +10,12 @@
 #include <stdio.h>
 #endif
 
+int vo_panscan_x = 0;
+int vo_panscan_y = 0;
+float vo_panscan_amount = 0;
+
+#include "video_out.h"
+
 float monitor_aspect=4.0/3.0;
 
 static struct {
@@ -19,6 +25,7 @@ static struct {
   int preh; // prescaled height
   int scrw; // horizontal resolution
   int scrh; // vertical resolution
+  float asp;
 } aspdat;
 
 void aspect_save_orig(int orgw, int orgh){
@@ -79,8 +86,24 @@ void aspect(int *srcw, int *srch, int zoom){
 #endif
     }
   }
+  aspdat.asp=*srcw / (float)*srch;
 #ifdef ASPECT_DEBUG
   printf("aspect(3) wh: %dx%d (org: %dx%d)\n",*srcw,*srch,aspdat.prew,aspdat.preh);
 #endif
+}
+
+void panscan_init( void )
+{
+ vo_panscan_x=0;
+ vo_panscan_y=0;
+ vo_panscan_amount=0.0f;
+}
+
+void panscan_calc( void )
+{
+ int vo_panscan_area = (vo_screenheight-vo_dheight);
+ vo_panscan_amount = vo_fs ? vo_panscan : 0;
+ vo_panscan_x = vo_panscan_area * vo_panscan_amount * aspdat.asp;
+ vo_panscan_y = vo_panscan_area * vo_panscan_amount;
 }
 

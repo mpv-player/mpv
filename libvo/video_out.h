@@ -45,6 +45,9 @@
 #define VOCTRL_GET_FRAME_NUM  11
 #define VOCTRL_SET_FRAME_NUM  12
 
+#define VOCTRL_GET_PANSCAN 13
+#define VOCTRL_SET_PANSCAN 14
+
 #define VO_TRUE		1
 #define VO_FALSE	0
 #define VO_ERROR	-1

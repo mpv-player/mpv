@@ -74,7 +74,7 @@ static uint32_t window_width, window_height;
 static uint32_t drwX, drwY, drwWidth, drwHeight, drwBorderWidth,
     drwDepth, drwcX, drwcY, dwidth, dheight;
 
-static void set_window(int force_update,const vo_tune_info_t *info)
+static void set_window(int force_update,const vo_tune_info_t *info, int ps)
 {
     Window mRoot;
     if ( WinID )
@@ -82,9 +82,9 @@ static void set_window(int force_update,const vo_tune_info_t *info)
       XGetGeometry(mDisplay, vo_window, &mRoot, &drwX, &drwY, &drwWidth,
 	  &drwHeight, &drwBorderWidth, &drwDepth);
       drwX = drwY = 0;
+
       XTranslateCoordinates(mDisplay, vo_window, mRoot, 0, 0,
 	  &drwcX, &drwcY, &mRoot);
-
       aspect(&dwidth,&dheight,A_NOZOOM);
       if (!vo_fs)
 	  mp_msg(MSGT_VO, MSGL_V, "[xvidix] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",
@@ -113,6 +113,8 @@ static void set_window(int force_update,const vo_tune_info_t *info)
     }
 #endif
 
+    vo_dwidth=drwWidth; vo_dheight=drwHeight;
+
 #ifdef HAVE_XINERAMA
     if (XineramaIsActive(mDisplay))
     {
@@ -134,6 +136,16 @@ static void set_window(int force_update,const vo_tune_info_t *info)
 	XFree(screens);
     }
 #endif
+
+    if ( ps )
+     {
+      drwcX-=vo_panscan_x >> 1;
+      drwcY-=vo_panscan_y >> 1;
+      drwX-=vo_panscan_x >> 1;
+      drwY-=vo_panscan_y >> 1;
+      drwWidth+=vo_panscan_x;
+      drwHeight+=vo_panscan_y;
+     }
 
     /* set new values in VIDIX */
     if (force_update || (window_x != drwcX) || (window_y != drwcY) ||
@@ -195,6 +207,8 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 //    if (title)
 //	free(title);
     title = "MPlayer VIDIX X11 Overlay";
+
+    panscan_init();
 
     image_height = height;
     image_width = width;
@@ -349,7 +363,7 @@ else
 	vidix_grkey_set(&gr_key);
     }
 
-    set_window(1,info);
+    set_window(1,info,0);
     if(info) memcpy(&vtune,info,sizeof(vo_tune_info_t));
     else     memset(&vtune,0,sizeof(vo_tune_info_t));
     XFlush(mDisplay);
@@ -370,7 +384,7 @@ static void check_events(void)
     const int event = vo_x11_check_events(mDisplay);
 
     if ((event & VO_EVENT_RESIZE) || (event & VO_EVENT_EXPOSE))
-	set_window(0,&vtune);
+	set_window(0,&vtune,0);
 
     return;
 }
@@ -449,6 +463,15 @@ static uint32_t control(uint32_t request, void *data, ...)
   case VOCTRL_FULLSCREEN:
     vo_x11_fullscreen();
     return VO_TRUE;
+  case VOCTRL_GET_PANSCAN:
+      return VO_TRUE;
+  case VOCTRL_SET_PANSCAN:
+      if ( vo_fs && ( vo_panscan != vo_panscan_amount ) )
+        {
+         panscan_calc();
+	 set_window( 0,&vtune,1 );
+        }
+      return VO_TRUE;
   }
   return VO_NOTIMPL;
 }

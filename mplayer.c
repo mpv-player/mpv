@@ -2545,22 +2545,24 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	if(video_out && vo_config_count) video_out->control(VOCTRL_FULLSCREEN, 0);
     } break;
     case MP_CMD_PANSCAN : {
-      int abs= cmd->args[1].v.i;
-      float v = cmd->args[0].v.f;
-      float res;
-      if(abs)
-	res = v;
-      else
-	res = vo_panscan+v;
-      vo_panscan = res > 1 ? 1 : res < 0 ? 0 : res;
+      if ( video_out->control( VOCTRL_GET_PANSCAN,NULL ) == VO_TRUE )
+       {
+        int abs= cmd->args[1].v.i;
+        float v = cmd->args[0].v.f;
+        float res;
+        if(abs) res = v;
+          else res = vo_panscan+v;
+        vo_panscan = res > 1 ? 1 : res < 0 ? 0 : res;
+        video_out->control( VOCTRL_SET_PANSCAN,NULL );
 #ifdef USE_OSD
-      if(osd_level){
-	osd_visible=sh_video->fps; // 1 sec
-	vo_osd_progbar_type=OSD_PANSCAN;
-	vo_osd_progbar_value=vo_panscan*256;
-	vo_osd_changed(OSDTYPE_PROGBAR);
-      }
+        if(osd_level){
+	  osd_visible=sh_video->fps; // 1 sec
+	  vo_osd_progbar_type=OSD_PANSCAN;
+	  vo_osd_progbar_value=vo_panscan*256;
+	  vo_osd_changed(OSDTYPE_PROGBAR);
+        }
 #endif
+       }
     } break;
     case MP_CMD_SUB_POS:
     {
