@@ -33,22 +33,24 @@ contains these drivers:</P>
 It <B>may</B> take a while to find your optimal settings.</P>
 
 <UL>
-<LI>If you have an OSS driver, first try <CODE>-ao oss</CODE> (this is the default).
-If you experience glitches, halts or anything out of the ordinary, try
-<CODE>-ao sdl</CODE> (NOTE: you need to have SDL libraries and header files
-installed). The SDL audio driver helps in a lot of cases and also supports ESD,
-ARTS, and up/downsampling. (ESD is the sound daemon from GNOME, ARTS is from KDE.)</LI>
-<LI>If you have ALSA version 0.5, then you almost always have to use <CODE>-ao alsa5</CODE> ,
-since ALSA 0.5 has buggy OSS emulation code, and will <B>crash MPlayer</B> with
-a message like this:<BR>
-<CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE></LI>
-<LI>If you have ALSA version 0.9 you may choose between <CODE>-ao oss</CODE> and
-<CODE>-ao sdl</CODE>. You can also use <CODE>-ao alsa9</CODE>. It works, but
-there may be problems like lost sync and disappearing audio.</LI>
+  <LI>If you have an OSS driver, first try <CODE>-ao oss</CODE> (this is the
+    default). If you experience glitches, halts or anything out of the
+    ordinary, try <CODE>-ao sdl</CODE> (NOTE: you need to have SDL libraries
+    and header files installed). The SDL audio driver helps in a lot of cases
+    and also supports ESD, ARTS, and up/downsampling. (ESD is the sound daemon
+    from GNOME, ARTS is from KDE.)</LI>
+  <LI>If you have ALSA version 0.5, then you almost always have to use
+    <CODE>-ao alsa5</CODE> , since ALSA 0.5 has buggy OSS emulation code, and
+    will <B>crash MPlayer</B> with a message like this:<BR>
+    <CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE></LI>
+  <LI>If you have ALSA version 0.9 you may choose between <CODE>-ao oss</CODE>
+    and <CODE>-ao sdl</CODE>. You can also use <CODE>-ao alsa9</CODE>. It
+    works, but there may be problems like lost sync and disappearing
+    audio.</LI>
 </UL>
 
 <P>On <B>Solaris/FreeBSD</B> systems, use the SUN audio driver with the
-<CODE>-ao sun</CODE> option, otherwise neither video nor audio will work.</P>
+  <CODE>-ao sun</CODE> option, otherwise neither video nor audio will work.</P>
 
 <P><B><A NAME="experiences">2.3.2.1 Sound Card experiences, recommendations</A></B></P>
 
@@ -120,17 +122,18 @@ there may be problems like lost sync and disappearing audio.</LI>
 </TABLE>
 
 <UL>
-<LI>On Linux, a 2.4.x kernel is highly recommended. Kernel 2.2 is not tested.</LI>
-<LI>If sound clicks when playing from CD-ROM, turn on IRQ unmasking, e.g.
-  <CODE>hdparm -u1 /dev/cdrom</CODE> (<CODE>man hdparm</CODE>). This is
-  generally beneficial and described more detailed in the
-  <A HREF="cd-dvd.html#drives">CD/DVD drives</A> section.</LI>
-<LI>Sharing your sound card with another application like XMMS is <B>strongly discouraged</B>!
-  If the other sound application is using ESD, start <B>MPlayer</B> with the <CODE>-vo sdl:esd</CODE> option
-  to combine both sound streams! In fact, the option <CODE>-vo sdl:esd</CODE> could be used with ESD 
-  even when playing <B>Mplayer</B> alone.</LI>
-<LI>Feedback to this document is welcome. Please tell us how <B>MPlayer</B> and
-  your sound card(s) worked together.</LI>
+  <LI>On Linux, a 2.4.x kernel is highly recommended. Kernel 2.2 is not tested.</LI>
+  <LI>If sound clicks when playing from CD-ROM, turn on IRQ unmasking, e.g. 
+    <CODE>hdparm -u1 /dev/cdrom</CODE> (<CODE>man hdparm</CODE>). This is
+    generally beneficial and described more detailed in the <A
+    HREF="cd-dvd.html#drives">CD-ROM section</A>.</LI>
+  <LI>Sharing your sound card with another application like XMMS is <B>strongly
+    discouraged</B>!  If the other sound application is using ESD, start
+    <B>MPlayer</B> with the <CODE>-vo sdl:esd</CODE> option to combine both
+    sound streams! In fact, the option <CODE>-vo sdl:esd</CODE> could be used
+    with ESD even when playing <B>Mplayer</B> alone.</LI>
+  <LI>Feedback to this document is welcome. Please tell us how <B>MPlayer</B>
+    and your sound card(s) worked together.</LI>
 </UL>
 
 

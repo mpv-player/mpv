@@ -15,11 +15,12 @@
 <P><B><A NAME="overview">2.4.1  Overview</A></B></P>
 
 <P><B>MEncoder</B> (<B>MPlayer</B>'s Movie Encoder) is a simple movie encoder,
-designed to encode MPlayer-playable movies
-(<B>AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET</B>) to other MPlayer-playable
-formats (see below). It can encode with various codecs, like <B>DivX4</B> (1 or
-2 passes), libavcodec, <B>PCM</B>/<B>MP3</B>/<B>VBRMP3</B> audio. Also has
-powerful plugin system for video manipulation.</P>
+  designed to encode MPlayer-playable movies
+  (<B>AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET</B>) to other
+  MPlayer-playable formats (see below). It can encode with various codecs, like
+  <B>DivX4</B> (1 or 2 passes), libavcodec,
+  <B>PCM</B>/<B>MP3</B>/<B>VBR MP3</B> audio. Also has powerful plugin system
+  for video manipulation.</P>
 
 <P><B><A NAME="compilation">2.4.2  Compilation</A></B></P>
 
@@ -52,7 +53,7 @@ powerful plugin system for video manipulation.</P>
 </UL>
 
 <P>You are ready. As you probably know, other encoding tools need the
-<I>avifile</I> library installed. <B>MEncoder</B> doesn't need it at all.</P>
+  <I>avifile</I> library installed. <B>MEncoder</B> doesn't need it at all.</P>
 
 <P><B><A NAME="features">2.4.3  MEncoder features</A></B></P>
 
@@ -71,7 +72,7 @@ powerful plugin system for video manipulation.</P>
   <LI>stream copying</LI>
   <LI>input A/V synchronizing (PTS-based, can be disabled with -mc 0 option)</LI>
   <LI>FPS correction with <CODE>-ofps</CODE> option (useful when encoding
-  29.97fps VOB to 24fps AVI)</LI>
+    29.97fps VOB to 24fps AVI)</LI>
   <LI>using our very powerful plugin system (crop, expand, flip, postprocess,
     rotate, scale, rgb/yuv conversion)</LI>
   <LI>can encode DVD/VOBsub <B>AND</B> text subtitles into the output file</LI>
@@ -81,26 +82,30 @@ powerful plugin system for video manipulation.</P>
 <B>Planned features:</B>
 <UL>
   <LI>even wider variety of available en/decoding formats/codecs
-  (creating VOB files with DivX4/Indeo5/VIVO streams :)</LI>
+    (creating VOB files with DivX4/Indeo5/VIVO streams :)</LI>
   <LI>audio encoding from v4l (DONE for FreeBSD ?)</LI>
 </UL>
 
 <P><B><A NAME="2pass">2.4.3.1  Encoding 2 or 3-pass DivX4</A></B></P>
 
-<P><U><B>2-pass encoding:</B></U> the name comes from the fact that this method encodes the file <I>twice</I>.
-The first encoding (dubbed <I>pass</I>) creates some temporary files (*.log) with a
-size of few megabytes, do not delete them yet (you can delete the AVI). In the second pass, the
-2-pass output file is created, using the bitrate data from the temporary files. The resulting
-file will have much better image quality. If this is the first time you heard
-about this, you should consult some guides available on the Net.</P>
+<P><U><B>2-pass encoding:</B></U> the name comes from the fact that this method
+  encodes the file <I>twice</I>. The first encoding (dubbed <I>pass</I>)
+  creates some temporary files (*.log) with a size of few megabytes, do not
+  delete them yet (you can delete the AVI). In the second pass, the 2-pass
+  output file is created, using the bitrate data from the temporary files. The
+  resulting file will have much better image quality. If this is the first time
+  you heard about this, you should consult some guides available on the
+  Net.</P>
 
 <P>This example shows how to encode a DVD to a 2-pass DivX4 AVI. Just two
-commands are needed:<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> - remove this file, which
-  can come from a previous 3-pass encoding (it interferes with current one)<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -lavcopts vcodec=mpeg4:more_options
-  -o movie.avi -pass 1<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -lavcopts vcodec=mpeg4:more_options -o movie.avi -pass 2</CODE></P>
+  commands are needed:<BR>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> - remove this file, which
+    can come from a previous 3-pass encoding (it interferes with current
+    one)<BR>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -lavcopts
+    -vcodec=mpeg4:more_options -o movie.avi -pass 1<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -lavcopts vcodec=mpeg4:more_options
+    -o movie.avi -pass 2</CODE></P>
 
 <P><U><B>3-pass encoding:</B></U> this is an extension of 2-pass encoding,
   where the audio encoding takes place in a separate pass. This method enables
@@ -143,29 +148,33 @@ commands are needed:<BR>
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> - remove this file,
   which can come from a previous 3-pass encoding (it interferes with current
   one)<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc frameno
-  -o frameno.avi</CODE><BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2
-  -lavcopts vcodec=mpeg4:more_options -oac copy -o movie.avi -pass 1<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2
-  -lavcopts vcodec=mpeg4:more_options -oac copy -o movie.avi -pass 2</CODE>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc frameno
+    -o frameno.avi<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2
+    -lavcopts vcodec=mpeg4:more_options -oac copy -o movie.avi -pass 1<BR>
+  &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2
+    -lavcopts vcodec=mpeg4:more_options -oac copy -o movie.avi -pass 2</CODE>
 </P>
 
 <P><U><B>2 or 3-pass encoding using internal libavcodec controller:</B></U>
-Optionally you can use libavcodec's internal 2 or 3-pass mode, it may gives you
-better final rate accuracy than using the external, DivX4-inspired 2-pass rate
-controler with libavcodec.</P>
+  Optionally you can use libavcodec's internal 2 or 3-pass mode, it may give
+  you better final rate accuracy than using the external, DivX4-inspired 2-pass
+  rate controler with libavcodec.</P>
 
 <UL>
-<LI><B>2-pass encoding:</B><BR>
-<CODE>rm -f lavc_stats.txt<BR>
-mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 (audio-options) -o movie.avi<BR>
-mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 (audio-options) -o movie.avi</CODE></LI>
-<LI><B>3-pass encoding:</B><BR>
-<CODE>rm -f frameno.avi lavc_stats.txt<BR>
-mencoder -dvd 2 -ovc frameno (audio-options) -o frameno.avi<BR>
-mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o movie.avi<BR>
-mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o movie.avi</CODE></LI>
+  <LI><B>2-pass encoding:</B><BR>
+    <CODE>rm -f lavc_stats.txt<BR>
+    mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 (audio-options) -o
+      movie.avi<BR>
+    mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 (audio-options) -o
+      movie.avi</CODE></LI>
+  <LI><B>3-pass encoding:</B><BR>
+    <CODE>rm -f frameno.avi lavc_stats.txt<BR>
+    mencoder -dvd 2 -ovc frameno (audio-options) -o frameno.avi<BR>
+    mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o
+      movie.avi<BR>
+    mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o
+      movie.avi</CODE></LI>
 </UL>
 
 <P><B><A NAME="rescaling">2.4.3.2  Rescaling movies</A></B></P>
@@ -185,7 +194,9 @@ mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o movie.avi<
   fast bilinear.</P>
 
 <P>Usage:<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder sample-svcd.mpg -lavcopts vcodec=mpeg4:more_options -vop scale=640:480 -sws 2 -o output.avi</CODE></P>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder sample-svcd.mpg -lavcopts
+    vcodec=mpeg4:more_options -vop scale=640:480 -sws 2 -o
+    output.avi</CODE></P>
 
 
 <P><B><A NAME="copying">2.4.3.3  Stream copying</A></B></P>
@@ -194,26 +205,28 @@ mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o movie.avi<
   <B>copy</B> them. This section is about <B>copying</B>.</P>
 
 <UL>
-  <LI><B>Video stream</B> (option <CODE>-ovc copy</CODE>): nice stuff can be done :)<BR>
-  Like, putting (not converting!) FLI or VIVO or MPEG1 video into an AVI file!
-  Of course only <B>MPlayer</B> can play such files :) And it probably has no
-  real life value at all. Rationally: video stream copying can be useful for
-  example when only the audio stream has to be encoded (like, uncompressed PCM
-  to MP3).</LI>
+  <LI><B>Video stream</B> (option <CODE>-ovc copy</CODE>): nice stuff can be
+    done :)<BR>
+    Like, putting (not converting!) FLI or VIVO or MPEG1 video into
+    an AVI file! Of course only <B>MPlayer</B> can play such files :) And it
+    probably has no real life value at all. Rationally: video stream copying
+    can be useful for example when only the audio stream has to be encoded
+    (like, uncompressed PCM to MP3).</LI>
 
   <LI><B>Audio stream</B> (option <CODE>-oac copy</CODE>): straightforward.
-  It is possible to take an external audio file (MP3, AC3, Vorbis) and mux it
-  into the output stream. Use the <CODE>-audiofile &lt;filename&gt;</CODE>
-  option for this.</LI>
+    It is possible to take an external audio file (MP3, Vorbis) and mux it
+    into the output stream. Use the <CODE>-audiofile &lt;filename&gt;</CODE>
+    option for this.</LI>
 </UL>
 
 
 <P><B><A NAME="fixing">2.4.3.4  Fixing AVIs with broken index or interleaving</A></B></P>
 
 <P>Easiest thing. We simply copy the video and audio streams, and
-<B>MEncoder</B> generates the index. Of course this cannot fix possible bugs in
-the video and/or audio streams. It also fixes files with broken interleaving,
-thus the <CODE>-ni</CODE> option won't be needed for them anymore.</P>
+  <B>MEncoder</B> generates the index. Of course this cannot fix possible bugs
+  in the video and/or audio streams. It also fixes files with broken
+  interleaving, thus the <CODE>-ni</CODE> option won't be needed for them
+  anymore.</P>
 
 <P>Command: <CODE>mencoder -idx input.avi -ovc copy -oac copy -o output.avi</CODE></P>
 
@@ -221,8 +234,8 @@ thus the <CODE>-ni</CODE> option won't be needed for them anymore.</P>
 <P><B><A NAME="libavcodec">2.4.3.5  Encoding with the libavcodec codec family</A></B></P>
 
 <P><A HREF="codecs.html#libavcodec">libavcodec</A> provides simple encoding to a
-lot of interesting video and audio formats (currently its audio codecs are
-unsupported). You can encode to the following codecs:</P>
+  lot of interesting video and audio formats (currently its audio codecs are
+  unsupported). You can encode to the following codecs:</P>
 
 <UL>
   <LI>mjpeg - Motion JPEG</LI>
@@ -239,7 +252,8 @@ unsupported). You can encode to the following codecs:</P>
   <CODE>vcodec</CODE> config, like: <CODE>-lavcopts vcodec=msmpeg4</CODE></P>
 
 <P>An example, with MJPEG compression:<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg</CODE></P>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi -ovc lavc
+    -lavcopts vcodec=mjpeg</CODE></P>
 
 
 <P><B><A NAME="image_files">2.4.3.6  Encoding from multiple input image files (JPEGs or PNGs)</A></B></P>
@@ -288,38 +302,42 @@ unsupported). You can encode to the following codecs:</P>
 <P><B><A NAME="vobsub">2.4.3.7  Extracting DVD subtitles to Vobsub file</A></B></P>
 
 <P><B>MEncoder</B> is capable of extracting subtitles from a DVD into
-Vobsub fomat files. They consist of a pair of files ending in <CODE>.idx</CODE>
-and <CODE>.sub</CODE> and are usually packaged in a single <CODE>.rar</CODE>
-archive. <B>MPlayer</B> can play these with the <CODE>-vobsub</CODE> and
-<CODE>-vobsubid</CODE> options.</P>
+  Vobsub fomat files. They consist of a pair of files ending in
+  <CODE>.idx</CODE> and <CODE>.sub</CODE> and are usually packaged in a single
+  <CODE>.rar</CODE> archive. <B>MPlayer</B> can play these with the
+  <CODE>-vobsub</CODE> and <CODE>-vobsubid</CODE> options.</P>
 
 <P>You specify the basename (i.e without the <CODE>.idx</CODE> or
-<CODE>.sub</CODE> extension) of the output files with <CODE>-vobsubout</CODE>
-and the index for this subtitle in the resulting files with
-<CODE>-vobsuboutindex</CODE>.</P>
+  <CODE>.sub</CODE> extension) of the output files with <CODE>-vobsubout</CODE>
+  and the index for this subtitle in the resulting files with
+  <CODE>-vobsuboutindex</CODE>.</P>
 
 <P>If the input is not from a DVD you should use <CODE>-ifo</CODE> to
-indicate the <CODE>.ifo</CODE> file needed to construct the resulting
-<CODE>.idx</CODE> file.</P>
+  indicate the <CODE>.ifo</CODE> file needed to construct the resulting
+  <CODE>.idx</CODE> file.</P>
 
-<P>If the input is not from a DVD and you do not have the <CODE>.ifo</CODE> file
-you will need to use the <CODE>-vobsubid</CODE> option to let it know what
-language id to put in the <CODE>.idx</CODE> file.</P>
+<P>If the input is not from a DVD and you do not have the <CODE>.ifo</CODE>
+  file you will need to use the <CODE>-vobsubid</CODE> option to let it know
+  what language id to put in the <CODE>.idx</CODE> file.</P>
 
 <P>Each run will append the running subtitle if the <CODE>.idx</CODE> and
-<CODE>.sub</CODE> files already exist. So you should remove any before starting.</P>
+  <CODE>.sub</CODE> files already exist. So you should remove any before
+  starting.</P>
 
 <P><B>Examples</B></P>
 
 <P><I>Copying two subtitles from a DVD while doing 3-pass encoding</I><BR>
-&nbsp;&nbsp;<CODE>rm subtitles.idx subtitles.sub</CODE><BR>
-&nbsp;&nbsp;<CODE>mencoder -dvd 1 -vobsubout subtitles -vobsuboutindex 0 -sid 2 -o frameno.avi -ovc frameno</CODE><BR>
-&nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -pass 1</CODE><BR>
-&nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -pass 2 -vobsubout subtitles -vobsuboutindex 1 -sid 5</CODE></P>
+  &nbsp;&nbsp;<CODE>rm subtitles.idx subtitles.sub</CODE><BR>
+  &nbsp;&nbsp;<CODE>mencoder -dvd 1 -vobsubout subtitles -vobsuboutindex 0
+    -sid 2 -o frameno.avi -ovc frameno</CODE><BR>
+  &nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -pass 1</CODE><BR>
+  &nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -pass 2 -vobsubout
+    subtitles -vobsuboutindex 1 -sid 5</CODE></P>
 
 <P><I>Copying a french subtitle from an MPEG file</I><BR>
-&nbsp;&nbsp;<CODE>rm subtitles.idx subtitles.sub</CODE><BR>
-&nbsp;&nbsp;<CODE>mencoder movie.mpg -ifo movie.ifo -vobsubout subtitles -vobsuboutindex 0 -vobsuboutid fr -sid 1</CODE></P>
+  &nbsp;&nbsp;<CODE>rm subtitles.idx subtitles.sub</CODE><BR>
+  &nbsp;&nbsp;<CODE>mencoder movie.mpg -ifo movie.ifo -vobsubout subtitles
+    -vobsuboutindex 0 -vobsuboutid fr -sid 1</CODE></P>
 
 
 <P><B><A NAME="syntax">2.4.4  Syntax</A></B></P>
@@ -468,8 +486,7 @@ language id to put in the <CODE>.idx</CODE> file.</P>
 <P>Encoding from tuner (for tuner options <A HREF="documentation.html#tv">see the TV input section!</A>):<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -tv on:driver=v4l:width=640:height=480 &lt;options&gt;</CODE></P>
 
-<P>For all available options, <B>check the MEncoder man page!</B>
-<P>
+<P>For all available options, <B>check the MEncoder man page!</B></P>
 
 </BODY>
 </HTML>

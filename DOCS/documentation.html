@@ -339,12 +339,11 @@ library at all!). The another big feature of mplayer is the wide range of
 supported output drivers. It works with X11, Xv, DGA, OpenGL, SVGAlib, fbdev,
 AAlib, DirectFB, but you can use GGI and SDL (and this way all their drivers)
 and some lowlevel card-specific drivers (for Matrox, 3Dfx and Radeon,
-Mach64, Permedia3), too! Most
+Mach64, Permedia3) too! Most
 of them supports software or hardware scaling, so you can enjoy movies in
 fullscreen. <B>MPlayer</B> supports displaying through some hardware MPEG
 decoder boards, such as the <B><A HREF="video.html#dvb">DVB</A></B> and
-<B> <A HREF="video.html#dxr3">DXR3/Hollywood+</A></B>! And what about the
-nice big antialiased
+<B><A HREF="video.html#dxr3">DXR3/Hollywood+</A></B>! And what about the nice big antialiased
 shaded subtitles (<B>10 supported types!!!</B>) with european/ISO 8859-1,2
 (Hungarian, English, Czech, etc), Cyrillic, Korean fonts, and the onscreen
 display (OSD)?</P>
@@ -405,7 +404,7 @@ too. So I've decided to write/modify one...</P>
     MOV/VIVO/RM/FLI/NUV fileformats support, native CRAM, Cinepak, ADPCM codecs,
     and support for XAnim's binary codecs; DVD subtitles support, first
     release of MEncoder, TV grabbing, cache, liba52, countless fixes.</LI>
-<LI><B>MPlayer 0.90 "?"</B> Jul? ??, 2002<BR>
+<LI><B>MPlayer 0.90 "?"</B> Aug? ??, 2002<BR>
     </LI>
 </UL>
 
@@ -426,7 +425,7 @@ will take some time, but it DOES worth it.</P>
   <LI><B>binutils</B> - suggested version is <B>2.11.x</B> . This program is
     responsible for generating MMX/3DNow!/etc instructions, thus very important.</LI>
   <LI><B>gcc</B> - suggested versions are: <B>2.95.3</B>, <B>2.95.4</B> and <B>3.1</B>.
-    <B>NEVER</B> use 2.96 or 3.0.x!!! They generate faulty code for MPlayer.
+    <B>NEVER</B> use 2.96 or 3.0.x !!! They generate faulty code for MPlayer.
     If you decide to change gcc from 2.96, then don't decide in favor of 3.0.x
     just because it's newer! Early releases of 3.0.x were even more buggy than
     2.96. So downgrade to 2.95.x (downgrade libstdc++ too, other programs may
@@ -464,59 +463,64 @@ will take some time, but it DOES worth it.</P>
 
 <UL>
 <LI><B>libavcodec</B>: This codec package is capable of decoding
-  H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1 encoded video streams on
-  multiple platforms. Details can be found
-  <A HREF="codecs.html#libavcodec">here</A>. Features:
+  H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1 encoded video streams, on
+  multiple platforms. It is also known to be the fastest for this task.
+  Details can be found <A HREF="codecs.html#libavcodec">here</A>. Features:<BR>
   <UL>
-    <LI>Decoding of above mentioned codecs on non-x86 machines.</LI>
-    <LI>Encoding with most of the above mentioned codecs.</LI>
-    <LI>This is the <B>fastest available</B> codec for DivX/3/4/5 and other
-      MPEG4 types and therefore highly recommended.</LI>
+    <LI>gain decoding of videos mentioned above, on non-x86 machines</B></LI>
+    <LI>encoding with most of the mentioned codecs</LI>
+    <LI>this codec is the <B>fastest codec available</B> for DivX/3/4/5 and
+      other MPEG4 types. Recommended!</LI>
   </UL>
 </LI>
-<LI><B>Win32 codecs:</B> If you plan to use <B>MPlayer</B> on x86
-architecture, you will possibly need them. Download and unzip w32codecs.zip to
-/usr/lib/win32 <B>BEFORE</B> compiling <B>MPlayer</B>, otherwise no Win32
-support will be compiled!<BR>
-Note: the avifile project has similar codecs package, but it
-differs from ours, so if you want to use all supported codecs, then use our
-package! However, you can use our codecs package with avifile. Features:<BR>
-<UL>
-  <LI>you need this if you want to play or encode for example movies recorded
-  with various hardware compressors, like tuner cards, digital cameras (example: DV, ATI VCR, MJPEG)</LI>
-  <LI>needed if you want to play <B>WMV8 movies</B>. Not needed for old
-  ASF's with MP41 or MP42 video (though VoxWare audio is frequent for these
-  files - it's done by the Win32 codec), or WMV7.</LI>
-</UL>
+
+<LI><B>Win32 codecs</B>: If you plan to use <B>MPlayer</B> on x86
+  architecture, you will possibly need them. Download and unzip w32codecs.zip
+  to /usr/lib/win32 <B>BEFORE</B> compiling <B>MPlayer</B>, otherwise no Win32
+  support will be compiled!<BR>
+  <B>Note</B>: the avifile project has similar codecs package, but it differs
+  from ours, so if you want to use all supported codecs, then use our package!
+  However, you can use our codecs package with avifile. Features:<BR>
+  <UL>
+    <LI>you need this if you want to play or encode for example movies recorded
+      with various hardware compressors, like tuner cards, digital cameras (example: DV, ATI VCR, MJPEG)</LI>
+    <LI>needed if you want to play <B>WMV8 movies</B>. Not needed for old
+      ASF's with MP41 or MP42 video (though VoxWare audio is frequent for these
+      files - it's done by the Win32 codec), or WMV7.</LI>
+  </UL>
 </LI>
 
-<LI><B>DivX4/DivX5:</B> information about this codec is available in the
-<A HREF="codecs.html#divx">DivX4/DivX5</A> section. If you don't want to encode
-with it, you possibly don't want this codec as <B>libavcodec</B> (see above) is
-much faster than this.<BR>
-Features:
-<UL>
-  <LI>1 pass or 2 pass encoding with <A HREF="encoding.html">MEncoder</A></LI>
-  <LI>can play old <B>DivX3</B> movies much faster than the Win32 DLL but
-    slower than <B>libavcodec</B>!</LI>
-  <LI>it's closed-source, and only an x86 version is available.</LI>
-</UL>
+<LI><B>DivX4/DivX5</B>: information about this codec is available in the
+  <A HREF="codecs.html#divx">DivX4/DivX5</A> section. You possibly don't want
+  this codec as <B>libavcodec</B> (see above) is much faster and has better
+  quality than this, for both decoding and encoding.<BR>
+  Features:
+  <UL>
+    <LI>1 pass or 2 pass encoding with
+      <A HREF="encoding.html">MEncoder</A></LI>
+    <LI>can play old <B>DivX3</B> movies much faster than the Win32 DLL but
+      slower than <B>libavcodec</B>!</LI>
+    <LI>it's closed-source, and only an x86 version is available.</LI>
+  </UL>
 </LI>
 
-<LI><B>XviD:</B> Open source encoding alternative to Divx4Linux<BR>
-Features:
-<UL>
-  <LI>1 pass or 2 pass encoding with <A HREF="encoding.html">MEncoder</A></LI>
-  <LI>it's open-source, so not only an x86 version is available.</LI>
-  <LI>it's about 2 times faster than divx4 when encoding - about the same quality</LI>
-</UL>
+<LI><B>XviD</B>: Open source encoding alternative to Divx4Linux<BR>
+  Features:
+  <UL>
+    <LI>1 pass or 2 pass encoding with
+      <A HREF="encoding.html">MEncoder</A></LI>
+    <LI>it's open-source, so it's multiplatform.</LI>
+    <LI>it's about 2 times faster than DivX4 when encoding - about the same
+      quality</LI>
+  </UL>
 </LI>
 
-<LI>The <A HREF="codecs.html#xanim">XAnim codecs</A> are the best (full screen,
-hardware YUV zoom) for decoding <B>3ivx</B> and Indeo 3/4/5 movies, and some
-old formats. And they are multiplatform, so this is the only way to play Indeo on
-non-x86 platforms (well, apart from using XAnim:). But for example Cinepak
-movies are best played with <B>MPlayer</B>'s own Cinepak decoder!</LI>
+<LI>The <A HREF="codecs.html#xanim">XAnim codecs</A> are the best (full
+  screen, hardware YUV zoom) for decoding <B>3ivx</B> and Indeo 3/4/5 movies,
+  and some old formats. And they are multiplatform, so this is the only way to
+  play Indeo on non-x86 platforms (well, apart from using XAnim:). But for
+  example Cinepak movies are best played with <B>MPlayer</B>'s own Cinepak
+  decoder!</LI>
 
 <LI>For <B>Ogg Vorbis</B> audio decoding you need to install
   <CODE>libvorbis</CODE> properly. Use deb/rpm packages if available, or
@@ -528,7 +532,6 @@ movies are best played with <B>MPlayer</B>'s own Cinepak decoder!</LI>
   files with <B>RealVideo 2.0 and 3.0</B> video, and Sipro/Cook audio. See
   <A HREF="formats.html#real">RealMedia file format</A> section for
   installation instructions and more information!</LI>
-
 </UL>
 
 <P><B>VIDEO CARDS</B></P>
@@ -545,8 +548,8 @@ their memory, with <B>small CPU usage</B> (zooming doesn't increase it!), thus
 you get a nice and very fast fullscreen playing.</P>
 
 <UL>
-<LI><B>Matrox G200/G400/G450/G550 cards:</B> although a
-  <A HREF="video.html#vidix">VIDIX driver</A> is provided, it is recommended
+<LI><B>Matrox G200/G400/G450/G550 cards</B>: although a
+  <A HREF="video.html#vidix">Vidix driver</A> is provided, it is recommended
   to use the old mga_vid kernel module instead, for it works much better.
   Please see the <A HREF="video.html#mga_vid">mga_vid</A> section about its
   installation and usage. It is important to do these steps <I>before</I>
@@ -555,7 +558,7 @@ you get a nice and very fast fullscreen playing.</P>
   <U><B>If you are non-Linux user</B></U>, your only possibility is the Vidix
   driver: read <A HREF="video.html#vidix">VIDIX</A> documentation!</LI>
 
-<LI><B>3Dfx Voodoo3/Banshee cards:</B> please see the
+<LI><B>3Dfx Voodoo3/Banshee cards</B>: please see the
   <A HREF="video.html#tdfxfb">tdfxfb</A> section in order to gain big
   speedup. It is important to do these steps <I>before</I> compiling
   <B>MPlayer</B>, otherwise no 3Dfx support will be built. Also see the <A
@@ -563,41 +566,42 @@ you get a nice and very fast fullscreen playing.</P>
   least 4.2.0, as 3dfx Xv driver was broken in 4.1.0, and earlier
   releases!</LI>
 
-<LI><B>ATI cards:</B> <A HREF="video.html#vidix">VIDIX driver</A> is
+<LI><B>ATI cards</B>: <A HREF="video.html#vidix">Vidix driver</A> is
   provided for the following cards:
   <B>Radeon</B>, <B>Rage128</B>, <B>Mach64</B> (Rage XL/Mobility, Xpert98).
   Also see the <A HREF="video.html#tv-out_ati">ATI cards
   section</A> of the TV-out documentation, to know if you card's TV-out is
   supported under Linux/MPlayer.</LI>
 
-<LI><B>S3 cards:</B> the Savage and Virge/DX chips have hardware acceleration. Use as
-new XFree86 version as possible, older drivers are buggy. Savage chips
-have problems with YV12 display, see <A HREF="video.html#xv_s3">S3 Xv
-section</A> for details. Older, Trio cards have no, or slow hardware
-support.</LI>
+<LI><B>S3 cards</B>: the Savage and Virge/DX chips have hardware acceleration.
+  Use as new XFree86 version as possible, older drivers are buggy. Savage chips
+  have problems with YV12 display, see <A HREF="video.html#xv_s3">S3 Xv
+  section</A> for details. Older, Trio cards have no, or slow hardware
+  support.</LI>
 
-<LI><B>nVidia cards:</B> very bad choice for video playing (nVidia has
-<A HREF="users_against_developers.html#nvidia">different opinion</A>!).
-nVidia's cards have very cheap and bad
-quality chips. Moreover, <U>the built-in nVidia driver in XFree86 doesn't
-contain support for hardware YUV acceleration for all nVidia cards!</U>
-You have to download nVidia's closed-source drivers from nVidia.com. See
-details in <A HREF="video.html#xv_nvidia">nVidia Xv driver</A> section.</LI>
+<LI><B>nVidia cards</B>: very bad choice for video playing (nVidia has
+  <A HREF="users_against_developers.html#nvidia">different opinion</A>!). 
+  nVidia's cards have very cheap and bad quality chips. Moreover, <U>the
+  built-in nVidia driver in XFree86 doesn't contain support for hardware YUV
+  acceleration for all nVidia cards!</U> You have to download nVidia's
+  closed-source drivers from nVidia.com. See details in <A
+  HREF="video.html#xv_nvidia">nVidia Xv driver</A> section.</LI>
 
 <LI><B>3DLabs GLINT R3 and Permedia3</B>: a VIDIX driver is provided
   (pm3_vid). Please see the <A HREF="video.html#vidix">VIDIX
   instructions</A>.</LI>
 
-<LI><B>other cards:</B> none of the above?
+<LI><B>other cards</B>: none of the above?
   <UL>
     <LI>Try if the XFree86 driver (and your card) supports hardware
       acceleration. See the <A HREF="video.html#xv">Xv section</A> for
       details.</LI>
-    <LI>If it doesn't, then your card's video features aren't supported under your OS:(<BR>
-      If it does hardware scaling under Windows, it doesn't mean it will do the same
-      under Linux or other OS, it depends on the drivers! Most manufacturers don't
-      make Linux drivers nor release chip specs - so you're unlucky if using their cards.
-      See next section:
+    <LI>If it doesn't, then your card's video features aren't supported under
+      your OS :(<BR>
+      If it does hardware scaling under Windows, it doesn't mean it will do the
+      same under Linux or other OS, it depends on the drivers! Most
+      manufacturers don't make Linux drivers nor release chip specs - so you're
+      unlucky using their cards.  See the next section:
     </LI>
   </UL>
 </LI>
@@ -607,14 +611,13 @@ details in <A HREF="video.html#xv_nvidia">nVidia Xv driver</A> section.</LI>
 <P>
 <B>Non-YUV cards</B></P>
 
-<P>
-Fullscreen playing can be achieved by either zooming
-<B>by software</B> (use the option -zoom, but i warn you: this is slooow!),
-or changing to a smaller video mode, for
-example to 352x288. If you don't have YUV acceleration, this latter method is
-the recommended one. Throughout <B>MPlayer</B>, <U>this behavior can
-be switched on by using the <CODE>-vm</CODE> option</U> and with
-the following drivers:
+<P>Fullscreen playing can be achieved by either zooming <B>by software</B> (use
+  the option <CODE>-zoom</CODE> or <A HREF="#2.6.11"><CODE>-vop
+  scale</CODE></A>, but I warn you: this is SLOW!), or changing to a smaller
+  video mode, for example to 352x288. If you don't have YUV acceleration, this
+  latter method is the recommended one. Throughout <B>MPlayer</B>, <U>this
+  behavior can be switched on by using the <CODE>-vm</CODE> option</U> and with
+  the following drivers:
 </P>
 
 <UL>
@@ -629,35 +632,64 @@ the following drivers:
     <A HREF="video.html#aalib">aalib</A>.</LI>
 </UL>
 
+<P>Some cards:</P>
+
+<UL>
+  <LI><B>Cirrus Logic cards</B>:
+    <UL>
+      <LI>GD 7548: present on-board and tested in Compaq Armada 41xx notebook
+        series.
+        <UL>
+          <LI>XFree86 3: works in 8/16bpp modes. However, the driver is
+            dramatically slow and buggy in 800x600@16bpp
+            <B>Recommended: 640x480@16bpp</B></LI>
+          <LI>XFree86 4: the Xserver freezes soon after start unless
+            acceleration is disabled, but then the whole thing gets
+            slower than XFree86 3. No XVideo.</LI>
+          <LI>FBdev: the card is only VBE 1.2 capable, so VESA framebuffer
+            can't be used. When tried to workaround with UniVBE, the
+            framebuffer was unusably full of debris.</LI>
+          <LI>VESA: the card is only VBE 1.2 capable, so VESA output can't be
+            used. Can't be workarounded with UniVBE.</LI>
+          <LI>SVGAlib: detects an older Cirrus chip. Usable but slow with
+            <CODE>-bpp 8</CODE>.</LI>
+        </UL>
+      </LI>
+    </UL>
+  </LI>
+</UL>
+
+
 <P><B>SOUND CARDS</B></P>
 
 <UL>
-<LI><B>Soundblaster Live!:</B> with this card you can use 4 or 6 (<B>5.1</B>)
-channels AC3 decoding instead of 2. Read the
-<A HREF="codecs.html#software_ac3">Software AC3 decoding</A> section.
-For hardware AC3 passthrough you MUST use ALSA 0.9 oss emulation!</LI>
+<LI><B>Soundblaster Live!</B>: with this card you can use 4 or 6 (<B>5.1</B>)
+  channels AC3 decoding instead of 2. Read the
+  <A HREF="codecs.html#software_ac3">Software AC3 decoding</A> section.
+  For hardware AC3 passthrough you MUST use ALSA 0.9 oss emulation!</LI>
 
-<LI><B>C-Media with SP/DIF out:</B> hardware AC3 passthrough is possible
+<LI><B>C-Media with SP/DIF out</B>: hardware AC3 passthrough is possible
   with these cards, see
   <A HREF="codecs.html#hardware_ac3">Hardware AC3 decoding</A> section.</LI>
 
 <LI><B>other cards'</B> features aren't supported by <B>MPlayer</B>.
   <U>It's very recommended to read the <A HREF="sound.html">sound card
-  section</A>!</U>
+  section</A>!</U></LI>
 </UL>
 
 <P><B>FEATURES</B></P>
 
 <UL>
 <LI>Decide if you need GUI. If you do, see the <A HREF="#gui">GUI section</A>
-before compiling.</LI>
+  before compiling.</LI>
 
 <LI>If you want to install <B>MEncoder</B> (our great all-purpose encoder),
-see the <A HREF="encoding.html">MEncoder section</A>.</LI>
+  see the <A HREF="encoding.html">MEncoder section</A>.</LI>
 
 
-<LI>If you have a V4L compatible <B>TV tuner</B> card, and wish to watch/grab and
-encode movies with <B>MPlayer</B>, read the <A HREF="#tv">TV input</A> section.</LI>
+<LI>If you have a V4L compatible <B>TV tuner</B> card, and wish to watch/grab
+  and encode movies with <B>MPlayer</B>, read the <A HREF="#tv">TV input</A>
+  section.</LI>
 
 <LI>There are three timing methods in <B>MPlayer</B>.
   <UL>
@@ -673,7 +705,7 @@ encode movies with <B>MPlayer</B>, read the <A HREF="#tv">TV input</A> section.<
       RTC frequency for normal users through the <CODE>/proc</CODE> filesystem.
       Use this command to enable RTC for normal users:
       <P>
-      <CODE>echo 1024 > /proc/sys/dev/rtc/max-user-freq</CODE>
+        <CODE>echo 1024 > /proc/sys/dev/rtc/max-user-freq</CODE>
       </P>
       If you do not have such a new kernel, you can also change one line in
       <CODE>drivers/char/rtc.c</CODE> and recompile your kernel. Find the
@@ -703,9 +735,8 @@ encode movies with <B>MPlayer</B>, read the <A HREF="#tv">TV input</A> section.<
 </LI>
 </UL>
 
-Note: <B>NEVER install a setuid root MPlayer binary on a
-multiuser system!</B> It's a clear way for everyone to gain root.
-
+Note: <B>NEVER install a setuid root MPlayer binary on a multiuser system!</B>
+It's a clear way for everyone to gain root.
 
 <P>Then build <B>MPlayer</B>:</P>
 
@@ -716,29 +747,30 @@ multiuser system!</B> It's a clear way for everyone to gain root.
 </PRE>
 
 <P>At this point, <B>MPlayer</B> is ready to use. The directory
-<CODE>$PREFIX/share/mplayer</CODE> contains the <CODE>codecs.conf</CODE>
-file, which is used to tell the program all the codecs and their capabilities.
-This file should always be kept uptodate together with the main binary!<BR>
-Check if you have codecs.conf in your home directory (~/.mplayer/codecs.conf)
-left from old MPlayer versions, and remove it!</P>
+  <CODE>$PREFIX/share/mplayer</CODE> contains the <CODE>codecs.conf</CODE>
+  file, which is used to tell the program all the codecs and their
+  capabilities.  This file should always be kept uptodate together with the
+  main binary!<BR> Check if you have codecs.conf in your home directory
+  (~/.mplayer/codecs.conf) left from old MPlayer versions, and remove it!</P>
 
 <P><B>Debian users</B> can build a .deb package for themselves, it's very
-simple. Just exec <CODE>fakeroot debian/rules binary</CODE> in <B>MPlayer</B>'s
-root dir. Detailed instructions can be found <A HREF="documentation.html#debian">here</A>.</P>
+  simple. Just exec <CODE>fakeroot debian/rules binary</CODE> in
+  <B>MPlayer</B>'s root dir. Detailed instructions can be found
+  <A HREF="documentation.html#debian">here</A>.</P>
 
 <P><B>ALWAYS browse the output of <CODE>./configure</CODE></B>, and the
-<CODE>configure.log</CODE> file, they contain information about what will be
-built, and what will not. You may also want to view <CODE>config.h</CODE> and
-<CODE>config.mak</CODE> files.<BR>
-If you have some libraries installed, but not detected by <CODE>./configure</CODE>,
-then check if you also have the proper header files (usually the -dev packages)
-and their version matches. The <CODE>configure.log</CODE> file usually tells
-you what is missing.</P>
+  <CODE>configure.log</CODE> file, they contain information about what will be
+  built, and what will not. You may also want to view <CODE>config.h</CODE> and
+  <CODE>config.mak</CODE> files.<BR>
+  If you have some libraries installed, but not detected by
+  <CODE>./configure</CODE>, then check if you also have the proper header files
+  (usually the -dev packages) and their version matches. The
+  <CODE>configure.log</CODE> file usually tells you what is missing.</P>
 
-<P>Though not mandatory, the fonts should be installed in order to gain
-OSD, and subtitle functionality. Download <CODE>mp-arial-iso-8859-*.zip</CODE>
-and/or optional (if exists) language updates. It's VERY RECOMMENDED to check the
-<A HREF="#subtitles_osd">subtitle and OSD section</A> for details.</P>
+<P>Though not mandatory, the fonts should be installed in order to gain OSD,
+  and subtitle functionality. Download <CODE>mp-arial-iso-8859-*.zip</CODE>
+  and/or optional (if exists) language updates. It's VERY RECOMMENDED to check
+  section <A HREF="#subtitles_osd">1.5</A> for details.</P>
 
 <PRE>
     mkdir ~/.mplayer/font
@@ -751,86 +783,94 @@ and/or optional (if exists) language updates. It's VERY RECOMMENDED to check the
 <P><B><A NAME="gui">1.4 What about the GUI?</A></B></P>
 
 <P>The GUI needs GTK (it isn't GTK, but the panels are). The skins are stored
-in PNG format, so gtk, libpng (and their devel stuff) has to be installed.
-You can build it by specifying <CODE>--enable-gui</CODE> during
-<CODE>./configure</CODE>. Then, to turn on GUI mode, you either</P>
-<UL>
-  <LI>use the <CODE>-gui</CODE> option</LI>
-  <LI>specify <CODE>gui=yes</CODE> in your config file</LI>
-  <LI><CODE>ln -s $PREFIX/bin/mplayer $PREFIX/bin/gmplayer</CODE> ,
-  and call <CODE>gmplayer</CODE> instead.
-</UL>
+  in PNG format, so gtk, libpng (and their devel stuff) has to be installed. 
+  You can build it by specifying <CODE>--enable-gui</CODE> during
+  <CODE>./configure</CODE>. Then, to turn on GUI mode, you either</P>
+  <UL>
+    <LI>use the <CODE>-gui</CODE> option</LI>
+    <LI>specify <CODE>gui=yes</CODE> in your config file</LI>
+    <LI><CODE>ln -s $PREFIX/bin/mplayer $PREFIX/bin/gmplayer</CODE> ,
+    and call <CODE>gmplayer</CODE> instead.</LI>
+  </UL>
 
 <P>HINT: use the middle button (on 2 button mice press left and right
-simultaneously) for a popup GTK menu, with DVD playing option!</P>
+  simultaneously) for a popup GTK menu, with DVD playing option!</P>
 
-<P>As <B>MPlayer</B> doesn't have a skin included, you have to download them
-if you want to use the GUI. See the <A HREF="http://www.mplayerhq.hu/homepage/dload.html">download page</A>.
-They should be extracted to the usual system-wide directory (<CODE>$PREFIX/share/mplayer/Skin</CODE>),
-or to <CODE>$HOME/.mplayer/Skin</CODE> . <B>MPlayer</B> by default looks in
-these directories for a <I>default</I> named directory, but you can use the
-<CODE>-skin newskin</CODE> option, or the <CODE>skin=newskin</CODE> config file
-directive to use the skin in <CODE>*/Skin/newskin</CODE> directory.</P>
+<P>As <B>MPlayer</B> doesn't have a skin included, you have to download them if
+  you want to use the GUI. See the
+  <A HREF="http://www.mplayerhq.hu/homepage/dload.html">download page</A>.
+  They should be extracted to the usual system-wide directory
+  (<CODE>$PREFIX/share/mplayer/Skin</CODE>), or to
+  <CODE>$HOME/.mplayer/Skin</CODE>. <B>MPlayer</B> by default looks in these
+  directories for a directory named <I>default</I>, but you can use the
+  <CODE>-skin newskin</CODE> option, or the <CODE>skin=newskin</CODE> config
+  file directive to use the skin in <CODE>*/Skin/newskin</CODE> directory.</P>
 
 <P><B><A NAME="subtitles_osd">1.5 Subtitles and OSD</A></B></P>
 
 <P>
-<B>MPlayer</B> can display subtitles along with movie files. Currently the following 
-formats are supported:</P>
+  <B>MPlayer</B> can display subtitles along with movie files. Currently the following 
+  formats are supported:</P>
 <UL>
-<LI>VobSub</LI>
-<LI>Microdvd</LI>
-<LI>SubRip</LI>
-<LI>SubViewer</LI>
-<LI>Sami</LI>
-<LI>VPlayer</LI>
-<LI>RT</LI>
-<LI>SSA</LI>
-<LI>MPsub</LI>
-<LI>AQTitle</LI>
+  <LI>VobSub</LI>
+  <LI>Microdvd</LI>
+  <LI>SubRip</LI>
+  <LI>SubViewer</LI>
+  <LI>Sami</LI>
+  <LI>VPlayer</LI>
+  <LI>RT</LI>
+  <LI>SSA</LI>
+  <LI>MPsub</LI>
+  <LI>AQTitle</LI>
 </UL>
+
 The command line options differ slightly for the different formats:
 
 <P>
-<B>VobSub subtitles</B><BR> 
-VobSub subtitles consist of a big (some megabytes) .SUB file, and optional 
-.IDX and/or .IFO files.<BR>
-Usage: if you have files like <CODE>sample.sub</CODE>, <CODE>sample.ifo</CODE>,
-<CODE>sample.idx</CODE> - you have to pass the <CODE>-vobsub sample -vobsubid
-&lt;id&gt;</CODE> options (optionally with pathname, of course). The
-<CODE>-vobsubid</CODE> option is like <CODE>-sid</CODE> for DVDs, you can
-choose between subtitle tracks (languages) with it.</P>
+  <B>VobSub subtitles</B><BR> 
+  VobSub subtitles consist of a big (some megabytes) .SUB file, and optional 
+  .IDX and/or .IFO files.<BR>
+  Usage: if you have files like <CODE>sample.sub</CODE>,
+  <CODE>sample.ifo</CODE>, <CODE>sample.idx</CODE> - you have to pass the
+  <CODE>-vobsub sample -vobsubid
+  &lt;id&gt;</CODE> options (optionally with pathname, of course). The
+  <CODE>-vobsubid</CODE> option is like <CODE>-sid</CODE> for DVDs, you can
+  choose between subtitle tracks (languages) with it.</P>
 
 <P>
-<B>Other subtitles</B><BR>
-The other formats consist of a single text file containing timing, placement
-and text information.<BR>
-Usage: if you have a file like <CODE>sample.txt</CODE>, you have to pass 
-the option <CODE>-sub sample.txt</CODE> (optionally with pathname, of course). 
+  <B>Other subtitles</B><BR>
+  The other formats consist of a single text file containing timing, placement
+  and text information.<BR>
+  Usage: if you have a file like <CODE>sample.txt</CODE>, you have to pass the
+  option <CODE>-sub sample.txt</CODE> (optionally with pathname, of course).
 </P>
 
 <P>
-<B>Adjusting subtitle timing and placement</B><BR>
-
-<CODE>-subdelay &lt;sec&gt;</CODE>: Delays subtitles by &lt;sec&gt; seconds. Can be negative.<BR>
-<CODE>-subfps &lt;rate&gt;</CODE>: Specify frame/sec rate of subtitle file (float number)<BR>
-<CODE>-subpos &lt;0 - 100&gt;</CODE>: Specify the position of subtitles.<BR>
+  <B>Adjusting subtitle timing and placement</B><BR>
+  <CODE>-subdelay &lt;sec&gt;</CODE>: Delays subtitles by &lt;sec&gt; seconds.
+    Can be negative.<BR>
+  <CODE>-subfps &lt;rate&gt;</CODE>: Specify frame/sec rate of subtitle file
+    (float number)<BR>
+  <CODE>-subpos &lt;0 - 100&gt;</CODE>: Specify the position of subtitles.<BR>
 </P>
-<P>
-If you experience a growing delay between the movie and the subtitles when using a MicroDVD
-subtitle file, most likely the frame rate of the movie and the subtitle file are different.<BR>
-Please note that the MicroDVD subtitle format uses absolute frame numbers for its
-timing, and therefore the <CODE>-subfps</CODE> option cannot be used with this format. As 
-<B>MPlayer</B> has no way to guess the frame rate of the subtitle file, you have to manually
-convert the frame rate. There is a little perl script in the <CODE>contrib</CODE> directory of 
-the MPlayer FTP site to do this conversion for you.</P>
+
+<P>If you experience a growing delay between the movie and the subtitles when
+  using a MicroDVD subtitle file, most likely the frame rate of the movie and
+  the subtitle file are different.<BR> Please note that the MicroDVD subtitle
+  format uses absolute frame numbers for its timing, and therefore the
+  <CODE>-subfps</CODE> option cannot be used with this format. As
+  <B>MPlayer</B> has no way to guess the frame rate of the subtitle file, you
+  have to manually convert the frame rate. There is a little perl script in the
+  <CODE>contrib</CODE> directory of the MPlayer FTP site to do this conversion
+  for you.</P>
 
 <P>About DVD subtitles, read the <A HREF="cd-dvd.html#dvd">DVD section</A>.</P>
 
-<P><B>MPlayer</B> introduces a new subtitle format called <B>MPsub</B>.
-It was designed by me (Gabucino). Basically its main feature is being
-<I>dynamically</I> time-based (although it has frame-based mode too). Example (from
-<A HREF="http://www.mplayerhq.hu/DOCS/tech/mpsub.sub">DOCS/tech/mpsub.sub</A>):
+<P><B>MPlayer</B> introduces a new subtitle format called <B>MPsub</B>. It was
+  designed by me (Gabucino). Basically its main feature is being
+  <I>dynamically</I> time-based (although it has frame-based mode too). Example
+  (from
+  <A HREF="tech/mpsub.sub">DOCS/tech/mpsub.sub</A>):
 </P>
 
 <P><CODE><I>
@@ -847,64 +887,68 @@ in a galaxy far away...<BR>
 Naboo was under an attack.<BR>
 </I></CODE></P>
 
-<P>So you see, the main goal was to <B>make subtitle editing/timing/joining/cutting easy</B>. And,
-if you - say - get an SSA subtitle but it's badly timed/delayed to your
-version of the movie, you simply do a <CODE>mplayer dummy.avi -sub source.ssa
--dumpmpsub</CODE> . A <CODE>dump.mpsub</CODE> file will be created in the
-current directory, which will contain the source subtitle's text, but in
-<B>MPsub</B> format. Then you can freely add/subtract seconds to/from the
-subtitle.</P>
+<P>So you see, the main goal was to <B>make subtitle
+  editing/timing/joining/cutting easy</B>. And, if you - say - get an SSA
+  subtitle but it's badly timed/delayed to your version of the movie, you
+  simply do a <CODE>mplayer dummy.avi -sub source.ssa -dumpmpsub</CODE>.
+  A <CODE>dump.mpsub</CODE> file will be created in the current directory,
+  which will contain the source subtitle's text, but in <B>MPsub</B> format.
+  Then you can freely add/subtract seconds to/from the subtitle.</P>
 
-<P>Subtitles are displayed with a technique called <B>'OSD', On Screen Display</B>.
-OSD is used to display current time, volume bar, seek bar etc.</P>
+<P>Subtitles are displayed with a technique called <B>'OSD', On Screen
+  Display</B>.  OSD is used to display current time, volume bar, seek bar
+  etc.</P>
 
 <P><B>INSTALLING OSD and SUB</B></P>
 
 <P>You need an <B>MPlayer</B> font package to be able to use OSD/SUB feature.
-There are many ways to get it:</P>
+  There are many ways to get it:</P>
+
 <UL>
+  <LI>download ready-to-use font packages from <B>MPlayer</B> site.
+    Note: currently available fonts are limited for iso 8859-1/2 support,
+    but there are some other (including Korean, Russian, 8859-8 etc) fonts
+    at contrib/font section of FTP, made by users.<BR>
+    <BR>
+    Font should have appropriate font.desc file which maps unicode font
+    positions to the actual code page of the subtitles text. Other solution is
+    to have subtitles encoded in utf8 encoding and use <CODE>-utf8</CODE>
+    option or just name the subtitles file &lt;video_name&gt;.utf and have it
+    in the same dir as the video file. Recoding from different codepages to
+    utf8 could be done by using konwert (Debian) or iconv (Red Hat)
+    programs.<BR>
+    Some URLs:
+    <UL>
+      <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/">ftp://ftp.mplayerhq.hu/MPlayer/releases/</A> - ISO fonts
+      <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/">ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/</A> - various fonts by users
+      <LI><A HREF="http://realtime.ssu.ac.kr/~lethean/mplayer">http://realtime.ssu.ac.kr/~lethean/mplayer</A> - Korean fonts & RAW plugin
+    </UL>
+  </LI>
 
-<LI>download ready-to-use font packages from <B>MPlayer</B> site.
-Note: currently available fonts are limited for iso 8859-1/2 support,
-but there are some other (including Korean, Russian, 8859-8 etc) fonts
-at contrib/font section of FTP, made by users.
+  <LI>use the font generator tool at TOOLS/subfont-c
+    It's a complete tool to convert from TTF/Type1/etc font to mplayer font pkg.
+    (read TOOLS/subfont-c/README for details)</LI>
 
-Font should have appropriate font.desc file which maps unicode font
-positions to the actual code page of the subtitles text. Other solution
-is to have subtitles encoded in utf8 encoding and use -utf8 option
-or just name the subtitles file &lt;video_name&gt;.utf and have it in the same
-dir as the video file. Recoding from different codepages to utf8 could be
-done by using konwert (Debian) or iconv (Red Hat) programs.<BR>
-Some URLs:
-<UL>
-  <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/">ftp://ftp.mplayerhq.hu/MPlayer/releases/</A> - ISO fonts
-  <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/">ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/</A> - various fonts by users
-  <LI><A HREF="http://realtime.ssu.ac.kr/~lethean/mplayer">http://realtime.ssu.ac.kr/~lethean/mplayer</A> - Korean fonts & RAW plugin
-</UL>
-</LI>
-
-<LI>use the font generator tool at TOOLS/subfont-c
-It's a complete tool to convert from TTF/Type1/etc font to mplayer font pkg.
-(read TOOLS/subfont-c/README for details)</LI>
-
-<LI>use the font generator GIMP plugin at TOOLS/subfont-GIMP
-(note: you must have HSI RAW plugin too, see URL below)</LI>
+  <LI>use the font generator GIMP plugin at TOOLS/subfont-GIMP
+    (note: you must have HSI RAW plugin too, see URL below)</LI>
 </UL>
 
 <P>After that, UNZIP the file you downloaded to <CODE>~/.mplayer</CODE> or
-<CODE>$PREFIX/share/mplayer</CODE>. Then rename or symlink one of them to
-<CODE>font</CODE> (like: <CODE>ln -s ~/.mplayer/arial-24
-~/.mplayer/font</CODE>). Now you have to see a timer at the upper left corner
-of the movie (switch it off with the "o" key).</P>
+  <CODE>$PREFIX/share/mplayer</CODE>. Then rename or symlink one of them to
+  <CODE>font</CODE> (like: <CODE>ln -s ~/.mplayer/arial-24
+  ~/.mplayer/font</CODE>). Now you have to see a timer at the upper left corner
+  of the movie (switch it off with the "o" key).</P>
 
 <P>OSD has 3 states: (switch with 'o')</P>
+
 <UL>
-  <LI>timer + volume bar + seek bar + subtitles (default)
-  <LI>volume bar + seek bar + subtitles
-  <LI>subtitles only
+  <LI>timer + volume bar + seek bar + subtitles (default)</LI>
+  <LI>volume bar + seek bar + subtitles</LI>
+  <LI>subtitles only</LI>
 </UL>
 
-<P>You can change default behaviour by setting <CODE>osdlevel=</CODE> variable in config file.</P>
+<P>You can change default behaviour by setting <CODE>osdlevel=</CODE> variable
+  in config file.</P>
 
 
 <P><B><A NAME="features">2. Features</A></B></P>
@@ -1053,11 +1097,11 @@ Input from standard V4L<BR>
 </P>
 
 <P>
-<B>Note:</B><BR>
-If you have a TV card with an external audio device and get only a black
-screen, although input works with xawtv or similar, then try to use the
-<CODE>-noaudio</CODE> option. For the example above this would be:<BR> 
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:noaudio:driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv</CODE>
+  <B>Note:</B><BR>
+  If you have a TV card with an external audio device and get only a black
+  screen, although input works with xawtv or similar, then try to use the
+  <CODE>-noaudio</CODE> option. For the example above this would be:<BR> 
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:noaudio:driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv</CODE>
 </P>
 
 
@@ -1279,7 +1323,7 @@ screen, although input works with xawtv or similar, then try to use the
 
 <P><B><U>Description</U></B>:</P>
 
-<P>Draws a rectangle of the requested width and height at the designated
+<P>Draws a white rectangle of the requested width and height at the designated
   coordinates over the image.  Useful to get visual feedback for the parameters
   of <CODE>-vop crop</CODE> before applying them.</P>
 
@@ -1590,7 +1634,7 @@ end
 </PRE>
 
 <P>If you don't like the standard location for the lirc-config file (~/.lircrc)
-use the -lircconf &lt;filename&gt; switch to specify another file.</P>
+  use the -lircconf &lt;filename&gt; switch to specify another file.</P>
 
 
 <P><B><A NAME="slave">3.2.4 Slave mode</A></B></P>
@@ -1604,17 +1648,18 @@ use the -lircconf &lt;filename&gt; switch to specify another file.</P>
 
 <P><B>MPlayer</B> can play files from network, using the HTTP or MMS protocol.</P>
 
-<P>Playing goes by simply using adding the URL to the command line. <B>MPlayer</B>
-also honors the http_proxy environment variable, and uses proxy if available.
-Proxy usage can also be forced:</P>
+<P>Playing goes by simply using adding the URL to the command line.
+  <B>MPlayer</B> also honors the http_proxy environment variable, and uses
+  proxy if available. Proxy usage can also be forced:</P>
 
 <P><CODE>mplayer http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</CODE></P>
 
 <P><B>MPlayer</B> can read from stdin (NOT named pipes). This can be for example
-used to play from FTP:</P>
+  used to play from FTP:</P>
+
 <P><CODE>&nbsp;&nbsp;wget ftp://micorsops.com/something.avi -O - | mplayer -</CODE></P>
 
-<P>Note: It is recommended to enable the cache when playing from the network:</P>
+<P>Note: it's also recommended to enable CACHE when playback from network:</P>
 
 <P><CODE>&nbsp;&nbsp;wget ftp://micorsops.com/something.avi -O - | mplayer -cache 8192 -</CODE></P>
 
@@ -1631,7 +1676,7 @@ used to play from FTP:</P>
 <P><B><A NAME="debian">6.1 Debian packaging</A></B></P>
 
 <P>To build the package, get the cvs version, or .tgz and uncompress it,
-and cd into programs directory:</P>
+  and cd into programs directory:</P>
 
 <PRE>
     cd main
@@ -1639,7 +1684,7 @@ and cd into programs directory:</P>
 </PRE>
 
 <P>(... mplayer detects hardware/software, builds itself and.. )
-dpkg-deb: building package `mplayer' in `../mplayer_0.90-1_i386.deb'.</P>
+  dpkg-deb: building package `mplayer' in `../mplayer_0.90-1_i386.deb'.</P>
 
 <P>And now just become root, and:</P>
 
@@ -1662,15 +1707,15 @@ dpkg-deb: building package `mplayer' in `../mplayer_0.90-1_i386.deb'.</P>
 <P><B><A NAME="freebsd">6.2 FreeBSD</A></B></P>
 
 <P>To build the package you will need GNU make (gmake, /usr/ports/devel/gmake),
-native BSD make will not work.</P>
+  native BSD make will not work.</P>
 
 <P>To run <B>MPlayer</B> you will need to re-compile the kernel with
-"options USER_LDT" (unless you are running -CURRENT, where this is default).
-If you have a CPU with SSE also use "options CPU_ENABLE_SSE" to use it
-(FreeBSD-STABLE required, or use kernel patches).</P>
+  "options USER_LDT" (unless you are running -CURRENT, where this is default).
+  If you have a CPU with SSE also use "options CPU_ENABLE_SSE" to use it
+  (FreeBSD-STABLE required, or use kernel patches).</P>
 
 <P>If <B>MPlayer</B> complains about "CD-ROM Device '/dev/cdrom' not found!" make a
-symbolic link: <CODE>ln -s /dev/(your_cdrom_device) /dev/cdrom</CODE></P>
+  symbolic link: <CODE>ln -s /dev/(your_cdrom_device) /dev/cdrom</CODE></P>
 
 <P>There's no DVD support for FreeBSD yet.</P>
 
@@ -1679,22 +1724,22 @@ symbolic link: <CODE>ln -s /dev/(your_cdrom_device) /dev/cdrom</CODE></P>
 <P>MPlayer should work on Solaris 2.6 or newer.</P>
 
 <P>AVI file playback works best on Solaris x86, because you have the
-option to use the win32 codecs on the x86 platform, or can use MMX/MMX2/3DNow/etc
-instructions for MP3/DivX/DVD/whatever. On Solaris SPARC,
-you'll find quite a few AVI files with non working video and/or
-audio playback, because the video/audio codecs using the Win32 DLLs
-are not available. However, <B>DivX/OpenDivX</B> movies should work,
-when using libavcodec.</P>
+  option to use the win32 codecs on the x86 platform, or can use
+  MMX/MMX2/3DNow/etc instructions for MP3/DivX/DVD/whatever. On Colaris SPARC,
+  you'll find quite a few AVI files with non working video and/or audio
+  playback, because the video/audio codecs using the Win32 DLLs are not
+  available. However, <B>DivX/OpenDivX</B> movies should work, when using
+  libavcodec.</P>
 
 <P>On <B>UltraSPARC</B>s, <B>MPlayer</B> takes advantage of their <B>VIS</B>
-extensions (equivalent to MMX), currently only in <I>libmpeg2</I>,
-<I>libvo</I> and <I>libavcodec</I>, but not in mp3lib. You can watch a VOB file
-on a 400MHz CPU. You'll need <A
-HREF="http://www.sun.com/sparc/vis/mediaLib.html">mLib</A> installed.</P>
+  extensions (equivalent to MMX), currently only in <I>libmpeg2</I>,
+  <I>libvo</I> and <I>libavcodec</I>, but not in mp3lib. You can watch a VOB
+  file on a 400MHz CPU. You'll need
+  <A HREF="http://www.sun.com/sparc/vis/mediaLib.html">mLib</A> installed.</P>
 
 <P>To build the package you will need GNU make (gmake, /opt/sfw/gmake), native
-Solaris make will not work. Typical error you get when building with Solaris'
-make instead of GNU make:</P>
+  Solaris make will not work. Typical error you get when building with Solaris'
+  make instead of GNU make:</P>
 
 <PRE>
    % /usr/ccs/bin/make
@@ -1702,21 +1747,20 @@ make instead of GNU make:</P>
 </PRE>
 
 <P>On Solaris SPARC, you need the GNU C/C++ Compiler; it does not matter
-if GNU C/C++ compiler is configured with or without the GNU assembler.</P>
+  if GNU C/C++ compiler is configured with or without the GNU assembler.</P>
 
-<P>On Solaris x86, you need the GNU assembler and the GNU C/C++
-compiler, configured to use the GNU assembler!  The mplayer code on
-the x86 platform makes heavy use of MMX, SSE and 3DNOW!
-instructions that cannot be compiled using Sun's assembler
-<CODE>/usr/ccs/bin/as</CODE>.</P>
+<P>On Solaris x86, you need the GNU assembler and the GNU C/C++ compiler,
+  configured to use the GNU assembler! The mplayer code on the x86 platform
+  makes heavy use of MMX, SSE and 3DNOW! instructions that cannot be compiled
+  using Sun's assembler <CODE>/usr/ccs/bin/as</CODE>.</P>
 
-<P>The configure script tries to find out, which assembler program is
-used by your "gcc" command (in case the autodetection fails, use
-the "--as=/whereever/you/have/installed/gnu-as" option to tell the
-configure script where it can find GNU "as" on your system).</P>
+<P>The configure script tries to find out, which assembler program is used by
+  your "gcc" command (in case the autodetection fails, use the
+  <CODE>--as=/whereever/you/have/installed/gnu-as</CODE> option to tell the
+  configure script where it can find GNU "as" on your system).</P>
 
 <P>Error message from configure on a Solaris x86 system using GCC
-without GNU assembler:</P>
+  without GNU assembler:</P>
 
 <PRE>
    % configure
@@ -1728,7 +1772,7 @@ without GNU assembler:</P>
 <P>(Solution: Install and use a gcc configured with "--with-as=gas")</P>
 
 <P>Typical error you get when building with a GNU C compiler that does
-not use GNU as:</P>
+  not use GNU as:</P>
 
 <PRE>
    % gmake
@@ -1742,22 +1786,23 @@ not use GNU as:</P>
 </PRE>
 
 <P>For DVD support you must have the patched libcss installed. Patch:
-<A HREF="http://www.tools.de/solaris/mplayer/">http://www.tools.de/solaris/mplayer/</A>.</P>
+  <A HREF="http://www.tools.de/solaris/mplayer/">http://www.tools.de/solaris/mplayer/</A>.</P>
 
 <P>Due to two bugs in Solaris 8 x86,  you cannot reliably play DVDs using a
-capacity >4GB:</P>
+  capacity >4GB:</P>
 
 <UL>
-<LI>The sd(7D) driver on Solaris 8 x86 driver has bug when accessing a
-disk block >4GB on a device using a logical blocksize != DEV_BSIZE
-(i.e. CD-ROM and DVD media).  Due to a 32bit int overflow, a disk
-address modulo 4GB is accessed.
-(<A HREF="http://groups.yahoo.com/group/solarisonintel/message/22516">http://groups.yahoo.com/group/solarisonintel/message/22516</A>)
-
-<LI>The similar bug is present in the hsfs(7FS) filesystem code (aka
-ISO9660), hsfs currently does not support partitions/disks >4GB,
-all data is accessed modulo 4GB
-(<A HREF="http://groups.yahoo.com/group/solarisonintel/message/22592">http://groups.yahoo.com/group/solarisonintel/message/22592</A>)
+  <LI>The sd(7D) driver on Solaris 8 x86 driver has bug when accessing a disk
+    block >4GB on a device using a logical blocksize != DEV_BSIZE (i.e.  CD-ROM
+    and DVD media).  Due to a 32bit int overflow, a disk address modulo 4GB is
+    accessed.
+    (<A HREF="http://groups.yahoo.com/group/solarisonintel/message/22516">http://groups.yahoo.com/group/solarisonintel/message/22516</A>)
+  </LI>
+  <LI>The similar bug is present in the hsfs(7FS) filesystem code (aka
+    ISO9660), hsfs currently does not support partitions/disks >4GB, all data
+    is accessed modulo 4GB
+    (<A HREF="http://groups.yahoo.com/group/solarisonintel/message/22592">http://groups.yahoo.com/group/solarisonintel/message/22592</A>)
+  </LI>
 </UL>
 
 <P>On Solaris with an UltraSPARC CPU, you can get some extra speed by
@@ -1782,7 +1827,7 @@ all data is accessed modulo 4GB
 <P><B><A NAME="sgi">6.5 Silicon Graphics / IRIX</A></B></P>
 
 <P>Reported working. You'll probably have to use the <I>SGI</I> ao driver.
-Anyone has closer info?</P>
+  Anyone has closer info?</P>
 
 
 <P><B><A NAME="qnx">6.6 QNX</A></B></P>
@@ -1798,31 +1843,31 @@ Anyone has closer info?</P>
 <P><B><A NAME="openbsd">6.7 OpenBSD</A></B></P> 
     
 <P>To build the package you will need GNU make (gmake,
-/usr/ports/devel/gmake), native BSD make will not work, and a recent
-binutils (including objcopy).</P>
+  /usr/ports/devel/gmake), native BSD make will not work, and a recent
+  binutils (including objcopy).</P>
 
-<P>Due to limitations in different versions of gas (relocation vs mmx),
-you'll need to compile in two steps: First make sure that the
-non-native as is first in PATH and do a '<CODE>gmake -k</CODE>', then make sure
-that the native version is used and do '<CODE>gmake</CODE>'.</P>
+<P>Due to limitations in different versions of gas (relocation vs mmx), you'll
+  need to compile in two steps: First make sure that the non-native as is first
+  in PATH and do a '<CODE>gmake -k</CODE>', then make sure that the native
+  version is used and do '<CODE>gmake</CODE>'.</P>
 
 <P>To use Win32 DLLs with <B>MPlayer</B> you will need to re-compile the
-kernel with "<CODE>option USER_LDT</CODE>".</P>
+  kernel with "<CODE>option USER_LDT</CODE>".</P>
 
 <P>If <B>MPlayer</B> complains about not finding '/dev/cdrom' or
-'/dev/dvd' make a symbolic link, e.g. <CODE>ln -s
-/dev/rcd0c /dev/dvd</CODE></P>
+  '/dev/dvd' make a symbolic link, e.g. <CODE>ln -s
+  /dev/rcd0c /dev/dvd</CODE></P>
 
 <P>The not so hardcore hackers amongst us might want to use the ports
-version (/usr/ports/x11/mplayer).</P>
+  version (/usr/ports/x11/mplayer).</P>
 
-<P><A NAME="cygwin"></A><B>6.8 Cygwin</B><BR>
-</P>
+
+<P><A NAME="cygwin"></A><B>6.8. Cygwin</B><BR></P>
  
 <P>You will have to go to the <B>MPlayer</B> directory, and copy or symlink
-<CODE>etc/cygwin_inttypes.h</CODE> to <CODE>/usr/include/inttypes.h</CODE> to
-make <B>MPlayer</B> compile. Otherwise it will complain about missing
-<CODE>intypes.h</CODE>.</P>
+  <CODE>etc/cygwin_inttypes.h</CODE> to <CODE>/usr/include/inttypes.h</CODE> to
+  make <B>MPlayer</B> compile. Otherwise it will complain about missing
+  <CODE>intypes.h</CODE>.</P>
 
 <P><B><A NAME="authors">Appendix A - Authors</A></B></P>
 
@@ -2528,7 +2573,7 @@ Send Matrox related questions here
 </LI>
 <LI>MPlayer &amp; DVB card users:<BR>
 <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb">http://mplayerhq.hu/mailman/listinfo/mplayer-dvb</A>
-<P>Things related to the hardware decoder card called DVB. (NOT DXR3!)</P>
+<P>Things related to the hardware decoder card called DVB. (NOT dxr3!)</P>
 </LI>
 <LI>MPlayer CVS-log: <BR>
 <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog">http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog</A>
