@@ -569,7 +569,20 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
         fprintf(fvstats, "time= %0.3f br= %7.1fkbits/s avg_br= %7.1fkbits/s ",
            all_frametime, (double)(len*8)/sh->frametime/1000.0,
            (double)(all_len*8)/all_frametime/1000.0);
-        fprintf(fvstats, "type= %c\n", sh->ds->flags&1 ? 'I' : 'P');
+	switch(avctx->pict_type){
+	case I_TYPE:
+            fprintf(fvstats, "type= I\n");
+	    break;
+	case P_TYPE:
+            fprintf(fvstats, "type= P\n");
+	    break;
+	case S_TYPE:
+            fprintf(fvstats, "type= S\n");
+	    break;
+	case B_TYPE:
+            fprintf(fvstats, "type= B\n");
+	    break;
+	}
         break;
     }
 //--
