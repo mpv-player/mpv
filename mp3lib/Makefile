@@ -12,7 +12,7 @@ ifeq ($(TARGET_ARCH_X86),yes)
 SRCS += d_cpu.s decode_i586.s
 OBJS += d_cpu.o decode_i586.o
 ifeq ($(TARGET_MMX),yes)
-SRCS += decode_MMX.s dct64_MMX.s tabinit_MMX.c
+SRCS += decode_MMX.c dct64_MMX.s tabinit_MMX.c
 OBJS += decode_MMX.o dct64_MMX.o tabinit_MMX.o
 endif
 #ifeq ($(TARGET_SSE),yes)
