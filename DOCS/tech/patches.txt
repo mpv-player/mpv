@@ -20,8 +20,12 @@ outdated patches.
 
 5. Comment parts that really need it (tricky side-effects etc).
    Commenting trivial code not required. Comments must be English!
+
+6. If you implement new features, add or change command line switches or modify
+   the behavior of existing features, please do not forget to also update the
+   documentation. The documentation maintainers will assist you in doing this.
    
-6. Send your patch to the mplayer-dev-eng mailing list as a base64-encoded
+7. Send your patch to the mplayer-dev-eng mailing list as a base64-encoded
    attachment (use gzip or bzip2 *only* if it's bigger than 80k or if you know
    that your mailer messes up (reformats) text attachments) with the subject
    line: '[PATCH] very short description of the patch'.
@@ -37,14 +41,14 @@ outdated patches.
    worry, mplayer-dev-eng is not high traffic and you can subscribe with the
    nomail option if you do not wish to receive all the mails.
 
-7. Give us a few days to react. We try to review patches as fast as possible,
+8. Give us a few days to react. We try to review patches as fast as possible,
    but unfortunately we are constantly overloaded with work, be it MPlayer
    related or from our day to day lives. If your patch seems to be ignored,
    please resend it and mention that you got ignored. We are interested in your
    work and will eventually either accept it or reject it with an explanation
    what and why we disliked about your patch.
 
-8. Do not immediately ask for CVS write access. If you contributed one or more
+9. Do not immediately ask for CVS write access. If you contributed one or more
    nice, acceptable patches and they need maintaining or you want to be an
    MPlayer developer, you'll get CVS write access.
    
