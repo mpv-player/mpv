@@ -934,6 +934,7 @@ fi
 # ---
 
 _vosrc=''
+_aosrc=''
 
 if [ $_png = yes ]; then
  _png='#define HAVE_PNG'
@@ -962,6 +963,7 @@ fi
 if [ $_sdl = yes ]; then
  _sdldef='#define HAVE_SDL'
  _vosrc=$_vosrc' vo_sdl.c'
+ _aosrc=$_aosrc' ao_sdl.c'
 else
  _sdldef='#undef HAVE_SDL'
 fi
@@ -1185,6 +1187,19 @@ OPTIONAL_OBJS=$_voobj
 
 EOF
 
+echo "Creating libao2/config.mak"
+
+_aoobj=`echo $_aosrc | sed -e 's/\.c/\.o/g'`
+
+cat > libao2/config.mak << EOF
+
+include ../config.mak
+
+OPTIONAL_SRCS=$_aosrc
+OPTIONAL_OBJS=$_aoobj
+
+EOF
+
 echo "Creating libac3/config.mak"
 
 if [ $_sse = yes ]; then
@@ -1266,9 +1281,11 @@ fi
 if [ $_sdl = outdated ]; then
  echo "You have libSDL installed, but your version is outdated (earlier then"
  echo "v.1.1.7), SDL support has been disabled please update, if you want to"
- echo "use it (libSDL v1.1.8 and v1.2.0 are tested and known to work, recent"
+ echo "use it (libSDL v1.1.8 and v1.2.0/1 are tested and known to work, recent"
  echo "versions are available from http://www.libsdl.org/)."
  echo "After updating you need to re-run ./configure and recompile to enable SDL."
+ echo "(If you only want to use SDLlib audio driver older versions might work, you"
+ echo "can use --enable-sdl to force using SDLlib)"
  echo
 fi
 
