@@ -469,14 +469,35 @@ E' un bug di SDL, io non posso cambiarlo (provato con SDL 1.2.1).
 
 <P><B><A NAME=2.3.1.5>2.3.1.5. SVGAlib</A></B></P>
 
-<P>Se non hai X, puoi usare l'output SVGAlib! Assicurati di non usare l'opzione
--fs, in quanto abilita l'utilizzo del ridimensionamento software, e è LEEENTO
-per ora, a meno che tu non abbia una CPU veramente veloce (e/o MTRR?). :(</P>
+<P><B><U>Installazione</U></B><BR>
+  Devi installare svgalib e il suo pacchetto di sviluppo per fare in modo che
+  <B>MPlayer</B> compili il suo driver SVGAlib (riconosciuto automaticamente, ma può essere forzato),
+  e non dimenticare di modificare /etc/vga/libvga.config per adattarlo alla tua scheda &amp; monitor.</P>
 
-<P>Naturalmente dovrai installare svgalib e il suo pacchetto di sviluppo
-in modo che <B>MPlayer</B> possa compilare il suo driver SVGAlib (trovato automaticamente, ma può essere
-forzato), e non dimenticare di modificare /etc/vga/libvga.config per adattarlo alla tua
-scheda video &amp; monitor.</P>
+<P><B><U>Note</U></B><BR>
+  Non usare l'opzione -fs, in quanto abilita il ridimensionamento via software,
+  che è lento. Se ne hai davvero bisogno, usa l'opzione <CODE>-sws 4</CODE>,
+  risulterà una qualità peggiore ma è in qualche modo più veloce.</P>
+
+<P><B><U>Supporto EGA (4bpp)</U></B><BR>
+  SVGAlib incorpora EGAlib, e <B>MPlayer</B> può mostrare qualsiasi
+  filmato in 16 colori, quindi è utilizzabile con le seguenti configurazioni:</P>
+
+<UL>
+  <LI>Scheda EGA con monitor EGA: 320x200x4bpp, 640x200x4bpp, 640x350x4bpp</LI>
+  <LI>Scheda EGA con monitor CGA: 320x200x4bpp, 640x200x4bpp</LI>
+</UL>
+
+<P>Il valore di bpp (bits per pixel) deve essere impostato manualmente a 4:<BR>
+  &nbsp;&nbsp;<CODE>-bpp 4</CODE><BR>
+  Il filmato probabilmente deve essere ridimensionato per adattarlo alla modalità EGA:<BR>
+  &nbsp;&nbsp;<CODE>-vop scale=640:350</CODE> or<BR>
+  &nbsp;&nbsp;<CODE>-vop scale=320:200</CODE><BR>
+  Per questo abbiamo bisogno di una routine di ridimensionamento veloca ma di cattiva qualità:<BR>
+  &nbsp;&nbsp;<CODE>-sws 4</CODE><BR>
+  Forse deve essere disabilitata la correzione automatica dell'aspetto:<BR>
+  &nbsp;&nbsp;<CODE>-noaspect</CODE><BR>
+</P>
 
 <P><B><A NAME=2.3.1.6>2.3.1.6. Output col Framebuffer (FBdev)</A></B></P>
 
@@ -658,7 +679,7 @@ Vedi <A HREF="http://aa-project.sourceforge.net/tune/">http://aa-project.sourcef
 <P>
 Questo driver è stato pensato e introdotto come un <b>driver generico</b> per qualsiasi scheda video
 con un BIOS VESA VBE 2.0 compatibile. Ma c'è ancora una ragione per lo sviluppo di
-questo driver - le sue molte possibilità di visualizzazione sulla TV.<BR>
+questo driver - la sua possibilità di abilitare l'output sulla TV.<BR>
 <b>VESA BIOS EXTENSION (VBE) Versione 3.0 Data: 16 Settembre 1998</b> (Pagina 70)
 dice:
 </P>
@@ -695,19 +716,15 @@ almeno.)
  - Questo driver richiama l'handler <b>int 10h</b> quindi non è un emulatore - richiama le
 cose <b>reali</b> del <b>reale</b> BIOS in modalità <b>reale</b>. (detto meglio -
 in modalità vm86).<BR>
- - Molto più importante :) puoi guardare i <b>DVD a 320x200</b> se non hai una CPU potente.<BR>
+ - Puoi usarlo insieme a Vidix, ottenendo così l'accelerazione video
+<B>E</B> l'output su TV allo stesso tempo! (raccomandato per le schede ATI)
 </P>
 
 <P>
 <b>Le cose negative:</b><BR>
  - Funziona solo su <b>sistemi x86</b>.<BR>
- - <b>E' il driver più lento</b> di tutti quelli disponibili per MPlayer.<BR>
-   (Ma solo se la tua scheda non supporta la <b>modalità DGA</b> - altrimenti questo
-   driver è simile in velocità a quelli <b>-vo dga</b> e <b>-vo fbdev</b>.<BR>
-
  - Può essere usato solo da <b>ROOT</b>.<BR>
  - Attualmente è disponibile solo per <b>Linux</b>.<BR>
- - <b>Non usa</b> nessuna <b>accelerazione hardware</b> (come il livello YUV  o lo scaling hw).<BR>
 </P>
 
 <P>Non usare questo driver col <B>GCC 2.96</B> ! Non funzionerà !</P>
@@ -776,41 +793,22 @@ risoluzione.</P>
 
 <P>Questa sezione è OBSOLETA ! Usa Vidix !</P>
 
-<P><B><A NAME=2.3.1.15>2.3.1.15. VIDIX</A></B></P>
+<P><B><A NAME=2.3.1.15>2.3.1.15. Vidix</A></B></P>
 
 <P><B><I>COS'E' IL VIDIX</I></B></P>
 
 <P>VIDIX è l'acronimo di <b>VID</b>eo <b>I</b>nterface for
   *ni<b>X</b> (Interfaccia Video per *nix, ndt).<BR>
   VIDIX è stato studiato e implementato come un'interfaccia per veloci driver in spazio utente
-  che forniscono <b>DGA</b> ovunque è possibile (<b>a differenza di X11</b>).
-  Spero che questi driver saranno portabili come X11 (<b>non solo su
-  *nix</b>).<BR>
-  Cos'è:
-  <LI>E' un successore portabile della tecnologia mga_vid, ma è localizzato in spazio
-    utente.</LI>
-  <LI>A differenza di X11 fornisce DGA ovunque è possibile</LI>
-  <LI>A differenza di v4l fornisce un'interfaccia per la riproduzione video</LI>
-  <LI>A differenza dei driver linux usa librerie matematiche</LI>
-</P>
-
-<P>Posso dirtelo in lettere maiuscole e grassetto :<BR>
-  <b>VIDIX FORNISCE ACCESSO DIRETTO ALLA GRAFICA ALLA MEMORIA YUV BES.</b>
-</P>
-
-<P><i>Bene (è tra le cose che devo fare) - implementare un decoder da DGA a MPEG2.</i></P>
-
+  che offrono le stesse performance video che mga_vid fornisce pe le schede Matrox. E anche
+  molto portabile.</P>
 <P>Questa interfaccia è stata studiata come un tentativo di far rientrare le esistenti interfacce
-  di accelerazione video (conosciute come mga_vid, mga_yuv, radeon_vid) in uno schema fisso. Fornisce
+  di accelerazione video (conosciute come mga_vid, rage128_vid, radeon_vid, pm3_vid) in uno schema fisso. Fornisce
   un'interfaccia di alto livello ai chip conosciuti come BES (BackEnd
   scaler) o OV (Video Overlay). Non fornisce un'interfaccia di basso livello
   a cose conosciute come server grafici. (Non voglio competere con il team di X11
   nel cambiamento di modalità grafica). Cioè, l'obbiettivo principale di questa interfaccia
-  è di fornire la massima velocità di riproduzione video ma non di mettere il segnale video sullo
-  schermo della tua TV o sul nastro del tuo videoregistratore. Sebbene anche queste cose siano
-  molto importanti - è esattamente un altro compito. (Comunque penso che sarebbe possibile
-  implementare qualcosa come un mini-X (non confondetelo con Minix ;) in
-  futuro, se si troverà un certo numero di volontari.
+  è di fornire la massima velocità di riproduzione video.
 </P>
 
 <P><B><I>UTILIZZO</I></B></P>
@@ -821,7 +819,7 @@ risoluzione.</P>
     necessita di un server X e può funzionare solo sotto un server X.</LI>
   <LI>Si può usare il sottodispositivo VIDIX che è stato applicato a molti driver di output video,
     come:<BR>
-    <CODE>-vo vesa:vidix</CODE> e <CODE>-vo fbdev:vidix</CODE></LI>
+    <CODE>-vo vesa:vidix</CODE> (<B>SOLO PER LINUX</B>) e <CODE>-vo fbdev:vidix</CODE></LI>
   Infatti non importa quale driver di output video si usa con <b>VIDIX</b>.
 </P>
 
@@ -1037,85 +1035,32 @@ devi far funzionare questo prima. Poi ricompila <B>MPlayer</B> con
 <P><B><A NAME=2.3.1.A.2>2.3.1.A.2. Schede ATI</A></B></P>
 
 <P>
-<b>Poche parole sul TV-out di ATI:</b><BR>
-Attualmente ATI non vuole supportare nessuno dei suoi chip TV-out sotto Linux.
-Sotto c'è la risposta ufficiale di ATI Inc.:
+<B><U>PREAMBOLO</U></B><BR>
+Attualmente ATI non vuole supportare nessuno dei suoi chip TV-out sotto Linux
+a causa della tecnologia sotto licenza della Macrovision che utilizzano.
 
+<P><B><U>STATO DEL TV-OUT DELLE SCHEDE ATI SOTTO LINUX</U></B></P>
+<UL>
+<LI><b>ATI Mach64</b> è supportato da <A HREF="http://gatos.sf.net">gatos</A>.</LI>
+<LI><b>ASIC Radeon VIVO</b> è supportato da <A HREF="http://gatos.sf.net">gatos</A>.</LI>
+<LI><B>Radeon</B> e <B>Rage128</B>: supportate da <B>MPlayer</B>!
+Controlla le sezioni <a href="#2.3.1.12">driver VESA</a> e <A HREF="#2.3.1.15">Vidix</A>.</LI>
+</UL>
 <P>
-<code>
-<i>
-<br>&gt; Ciao!
-<br>&gt;
-<br>&gt; Sulle vostre pagine scrivete che supportate gli sviluppatori linux.
-<br>&gt; Attualmente partecipo al progetto mplayer (www.mplayerhq.hu)
-<br>&gt; Sono interessato ad abilitare il TV-out su chip Radeon VE durante
-<br>&gt; la riproduzione di filmati. Sarebbe bello aggiungere questa caratteristica al driver radeonfb
-<br>&gt; (che si trova nell'albero CVS del progetto mplayer in main/drivers/radeon).
-<br>&gt; Ho la possibilità di avere della documentazione tecnica ufficiale?
-</i>
-<br>Non possiamo fornire documentazione relativa al TV out a causa della presenza di macrovision.
-<br>Anche il decoding mpeg2 è qualcosa che POTREMMO considerare nel futuro ma non
-<br>al momento. Questo è dovuto ancora a informazioni proprietarie e di terze
-<br>parti.
-</code>
+  Con altre schede, usate semplicemente il <a href="#2.3.1.12">driver VESA</a>, senza
+  Vidix. Però è necessaria una CPU potente.
 </P>
 
-<P>Peccato vero?</P>
-
-<P>
-<code>
-<B>D:Cos'è Macrovision?</B><BR>
-R:E' un meccanismo di protezione dalla copia.</code>
-</P>
-
-<P>Significa che se loro rilasciano qualunque informazione relativa al TV-out allora gli
-hacker saranno in grado di disabilitare la protezione dalla copia sui loro chip. Quindi
-non abbiamo possibilità di far funzionare il TV-out sulle ATI.</P>
-
-<P>Qual'è lo stato dei chip tv-out ATI sotto Linux:
-<LI><b>ATI Mach64</b> ha <i>ImpacTV</i> che è supportato da <A HREF="http://gatos.sf.net">gatos</A>.
-<LI><b>ASIC Radeon VIVO</b> ha <i>Rage Theatre</i> che è supportato da <A HREF="http://gatos.sf.net">gatos</A>.
-<LI><b>Radeon VE</b> e <b>Rage PRO LT</b> hanno <i>ImpacTV2+</i> che non è supportato sotto Linux.
-Ma con <B>MPlayer</B> ottieni <B>piena accelerazione hardware</B> e <B>TV out</B>
-per le Radeon !
-Guarda le sezioni <a href=#2.3.1.12>driver VESA</a> e <A HREF=#2.3.1.14>accelerazione Radeon
-</A>.</P>
-
-<P>
-Fortunatamente, i possessori di CPU abbastanza potenti (Duron, Celeron2 e migliori) <b>possono vedere
-i film sulla TV</b> attraverso i <a href=#2.3.1.12>driver VESA</a>.
-</P>
-
-<P>
-Dovrei dire anche delle buone parole a ATI Inc. :<br>
-<b>producono dei BIOS della migliore qualità.</b>
-</P>
-
-<P>
-I <b>driver VESA</b> non usano nessuna accelerazione hardware ma simulano
-<b>DGA</b> con una finestra di 64K, che è configurata con le funzioni a 32-bit
-del BIOS. Le schede ATI hanno una <b>memoria video</b> abbastanza veloce (chip DIMM o DDR
-con accesso a 64 - 128-bit) quindi non è un collo di bottiglia per loro. Non ci sono limitazioni
-per la scelta della modalità video da mostrare sulla TV (come in altre
-schede) quindi puoi usare <b>qualunque modalità video</b> sulla tua <b>TV</b> (da
-<b>320x200</b> fino a <b>1024x768</b>).<br>
-D'altra parte (si sa con certezza almeno per le <b>Radeon</b>) c'è una modalità <b>DGA</b>
-che è riconosciuta automaticamente e in questo caso otterrai una velocità paragonabile a quella
-dei driver <b>-vo dga</b> e <b>-vo fbdev</b>.<br>
-L'unica cosa che devi fare - <b>connettere la TV prima di avviare il tuo
-PC</b> in quanto il BIOS video si inizializza una sola volta durante la procedura di POST.
-</P>
-
-<P>
-Per dettagli vedi le sezioni <a href="video.html#2.3.1.12">VESA</a> di questa
-documentazione.
+<P>La sola cosa che devi fare - <B>collegare la TV prima di avviare
+  il PC</B> in quanto il BIOS video si inizializza solo al momento della
+  procedura di POST.
 </P>
 
 
 <P><B><A NAME=2.3.1.A.3>2.3.1.A.3. Voodoo 3</A></B></P>
 
 <P>
-Guarda a <A HREF="http://www.iki.fi/too/tvout-voodoo3-3000-xfree">questa URL</A>.
+Controlla <A HREF="http://www.iki.fi/too/tvout-voodoo3-3000-xfree">questa URL</A>.
 </P>
 
 </BODY>
