@@ -420,6 +420,12 @@ static int config(struct vf_instance_s* vf,
         lavc_venc_context->pix_fmt= PIX_FMT_YUV420P;
     else if(!strcasecmp(lavc_param_format, "422P"))
         lavc_venc_context->pix_fmt= PIX_FMT_YUV422P;
+    else if(!strcasecmp(lavc_param_format, "444P"))
+        lavc_venc_context->pix_fmt= PIX_FMT_YUV444P;
+    else if(!strcasecmp(lavc_param_format, "411P"))
+        lavc_venc_context->pix_fmt= PIX_FMT_YUV411P;
+    else if(!strcasecmp(lavc_param_format, "YVU9"))
+        lavc_venc_context->pix_fmt= PIX_FMT_YUV410P;
     else{
         mp_msg(MSGT_MENCODER,MSGL_ERR,"%s is not a supported format\n", lavc_param_format);
         return 0;
@@ -504,8 +510,20 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
         if(!strcasecmp(lavc_param_format, "YV12"))
             return VFCAP_CSP_SUPPORTED | VFCAP_ACCEPT_STRIDE;
         break;
+    case IMGFMT_411P:
+        if(!strcasecmp(lavc_param_format, "411P"))
+            return VFCAP_CSP_SUPPORTED | VFCAP_ACCEPT_STRIDE;
+        break;
     case IMGFMT_422P:
         if(!strcasecmp(lavc_param_format, "422P"))
+            return VFCAP_CSP_SUPPORTED | VFCAP_ACCEPT_STRIDE;
+        break;
+    case IMGFMT_444P:
+        if(!strcasecmp(lavc_param_format, "444P"))
+            return VFCAP_CSP_SUPPORTED | VFCAP_ACCEPT_STRIDE;
+        break;
+    case IMGFMT_YVU9:
+        if(!strcasecmp(lavc_param_format, "YVU9"))
             return VFCAP_CSP_SUPPORTED | VFCAP_ACCEPT_STRIDE;
         break;
     }
