@@ -57,6 +57,7 @@ static GtkWidget * CBDR;
 static GtkWidget * CBFramedrop;
 static GtkWidget * CBHFramedrop;
 //static GtkWidget * CBFullScreen;
+static GtkWidget * CBShowVideoWindow;
 static GtkWidget * CBNonInterlaved;
 static GtkWidget * CBIndex;
 static GtkWidget * CBFlip;
@@ -351,6 +352,12 @@ void ShowPreferences( void )
 // --- 6. page
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBPostprocess ),gtkVopPP );
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBLoadFullscreen ),gtkLoadFullscreen );
+ gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBShowVideoWindow ),gtkShowVideoWindow );
+ if ( !gtkShowVideoWindow )
+  {
+   gtk_widget_set_sensitive( CBLoadFullscreen,FALSE );
+   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBLoadFullscreen ),0 );
+  }
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBStopXScreenSaver ),stop_xscreensaver );
  gtk_adjustment_set_value( HSPPQualityadj,auto_quality );
 
@@ -406,6 +413,7 @@ void ShowPreferences( void )
  gtk_signal_connect( GTK_OBJECT( CBExtraStereo ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)0 );
  gtk_signal_connect( GTK_OBJECT( CBNormalize ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)1 );
  gtk_signal_connect( GTK_OBJECT( CBAudioEqualizer ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)2 );
+ gtk_signal_connect( GTK_OBJECT( CBShowVideoWindow ),"toggled",GTK_SIGNAL_FUNC( prToggled ), (void*)3 );
 #ifdef HAVE_FREETYPE
  gtk_signal_connect( GTK_OBJECT( RBFontNoAutoScale ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)4 );
  gtk_signal_connect( GTK_OBJECT( BRFontAutoScaleWidth ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)5 );
@@ -583,6 +591,7 @@ void prButton( GtkButton * button,gpointer user_data )
 	// --- 6. page
 	gtkVopPP=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBPostprocess ) ); 
 	gtkLoadFullscreen=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBLoadFullscreen ) );
+	gtkShowVideoWindow=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBShowVideoWindow ) );
 	stop_xscreensaver=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBStopXScreenSaver ) );
 	gtkEnablePlayBar=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBPlayBar ) );
 	gtkSet( gtkSetAutoq,HSPPQualityadj->value,NULL );
@@ -684,6 +693,19 @@ static void prToggled( GtkToggleButton * togglebutton,gpointer user_data )
 //   case 2: // equalizer
 //	if ( guiIntfStruct.Playing ) gtkMessageBox( GTK_MB_WARNING,"Please remember, this function need restart the playing." );
 //	break;
+   case 3: 
+	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBShowVideoWindow ) ) ) gtk_widget_set_sensitive( CBLoadFullscreen,TRUE );
+	 else
+	  {
+	   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBLoadFullscreen ),0 );
+	   gtk_widget_set_sensitive( CBLoadFullscreen,FALSE );
+	  }
+	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBShowVideoWindow ) ) )
+	 {
+	  wsVisibleWindow( &appMPlayer.subWindow,wsShowWindow );
+	  gtkActive( Preferences );
+	 } else wsVisibleWindow( &appMPlayer.subWindow,wsHideWindow );
+	break;
    case 4:
    case 5:
    case 6:
@@ -1171,6 +1193,7 @@ GtkWidget * create_Preferences( void )
     AddFrame( NULL,GTK_SHADOW_NONE,
       AddFrame( MSGTR_PREFERENCES_FRAME_Misc,GTK_SHADOW_ETCHED_OUT,vbox601,1 ),1 ),0 );
 
+  CBShowVideoWindow=AddCheckButton( MSGTR_PREFERENCES_ShowVideoWindow,vbox602 );
   CBLoadFullscreen=AddCheckButton( MSGTR_PREFERENCES_LoadFullscreen,vbox602 );
   CBStopXScreenSaver=AddCheckButton( MSGTR_PREFERENCES_XSCREENSAVER,vbox602 );
   CBPlayBar=AddCheckButton( MSGTR_PREFERENCES_PlayBar,vbox602 );

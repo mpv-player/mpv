@@ -585,6 +585,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_CDROMDevice "CD-ROM device:"
 #define MSGTR_PREFERENCES_DVDDevice "DVD device:"
 #define MSGTR_PREFERENCES_FPS "Movie FPS:"
+#define MSGTR_PREFERENCES_ShowVideoWindow "Show Video Window when inactive"
 
 #define MSGTR_ABOUT_UHU "GUI development sponsored by UHU Linux\n"
 #define MSGTR_ABOUT_CoreTeam "   MPlayer core team:\n"

@@ -286,6 +286,7 @@ GtkWidget * create_PopUpMenu( void )
  GtkWidget * Menu = NULL;
  GtkWidget * SubMenu = NULL;
  GtkWidget * MenuItem = NULL;
+ GtkWidget * N, * D, * F;
 
  Menu=gtk_menu_new();
 
@@ -478,9 +479,16 @@ GtkWidget * create_PopUpMenu( void )
            ( appMPlayer.subWindow.Height == guiIntfStruct.MovieHeight * 2 ) ) b2=1;
 	   else b1=1;
      } else b1=!appMPlayer.subWindow.isFullScreen;
-    AddMenuCheckItem( Menu,MSGTR_MENU_NormalSize"      ",b1,evNormalSize );
-    AddMenuCheckItem( Menu,MSGTR_MENU_DoubleSize,b2,evDoubleSize );
-    AddMenuCheckItem( Menu,MSGTR_MENU_FullScreen,appMPlayer.subWindow.isFullScreen,evFullScreen );
+    N=AddMenuCheckItem( Menu,MSGTR_MENU_NormalSize"      ",b1,evNormalSize );
+    D=AddMenuCheckItem( Menu,MSGTR_MENU_DoubleSize,b2,evDoubleSize );
+    F=AddMenuCheckItem( Menu,MSGTR_MENU_FullScreen,appMPlayer.subWindow.isFullScreen,evFullScreen );
+   }
+
+  if ( !gtkShowVideoWindow && !guiIntfStruct.Playing )
+   {
+    gtk_widget_set_sensitive( N,FALSE );
+    gtk_widget_set_sensitive( D,FALSE );
+    gtk_widget_set_sensitive( F,FALSE );
    }
 
   AddSeparator( Menu );

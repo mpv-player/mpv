@@ -277,6 +277,7 @@ set_volume:
          }
         break;
    case evDoubleSize:
+    	btnSet( evFullScreen,btnReleased );
         if ( guiIntfStruct.Playing )
          {
           appMPlayer.subWindow.isFullScreen=True;
@@ -288,6 +289,7 @@ set_volume:
          }
         break;
    case evNormalSize:
+	btnSet( evFullScreen,btnReleased );
         if ( guiIntfStruct.Playing )
          {
           appMPlayer.subWindow.isFullScreen=True;
@@ -299,15 +301,10 @@ set_volume:
 	  break;
          } else if ( !appMPlayer.subWindow.isFullScreen ) break;
    case evFullScreen:
-        for ( j=0;j<appMPlayer.NumberOfItems + 1;j++ )
-         {
-          if ( appMPlayer.Items[j].msg == evFullScreen )
-           {
-            appMPlayer.Items[j].tmp=!appMPlayer.Items[j].tmp;
-            appMPlayer.Items[j].pressed=appMPlayer.Items[j].tmp;
-           }
-         }
+        if ( !guiIntfStruct.Playing && !gtkShowVideoWindow ) break;
         mplFullScreen();
+	if ( appMPlayer.subWindow.isFullScreen ) btnSet( evFullScreen,btnPressed );
+	 else btnSet( evFullScreen,btnReleased );
         break;
 
    case evSetAspect:

@@ -57,6 +57,7 @@ int    gtkSubDumpMPSub = 0;
 int    gtkSubDumpSrt = 0;
 
 int    gtkLoadFullscreen = 0;
+int    gtkShowVideoWindow = 1;
 int    gtkEnablePlayBar = 1;
 
 // ---
@@ -133,6 +134,7 @@ static config_t gui_opts[] =
 
  { "playbar",&gtkEnablePlayBar,CONF_TYPE_FLAG,0,0,1,NULL }, 
  { "load_fullscreen",&gtkLoadFullscreen,CONF_TYPE_FLAG,0,0,1,NULL },
+ { "show_videowin", &gtkShowVideoWindow,CONF_TYPE_FLAG,0,0,1,NULL },
  { "stopxscreensaver",&stop_xscreensaver,CONF_TYPE_FLAG,0,0,1,NULL },
 
  { "autosync",&gtkAutoSyncOn,CONF_TYPE_FLAG,0,0,1,NULL },

@@ -514,6 +514,7 @@ void fs_Ok_released( GtkButton * button,gpointer user_data )
   }
  if ( i ) fsTopList_items=g_list_prepend( fsTopList_items,(gchar *)get_current_dir_name() );
  if ( mplMainAutoPlay ) { mplMainAutoPlay=0; mplEventHandling( evPlay,0 ); }
+  else guiGetEvent( guiCEvent,guiSetStop );
 }
 
 void fs_Cancel_released( GtkButton * button,gpointer user_data )

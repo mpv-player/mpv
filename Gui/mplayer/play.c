@@ -37,30 +37,7 @@ static int mplGotoTheNext = 1;
 void mplFullScreen( void )
 {
  if ( guiIntfStruct.NoWindow && guiIntfStruct.Playing ) return;
-#if 0
- static int sx,sy;
-// if ( !guiIntfStruct.Playing )
-  {
-   wsVisibleWindow( &appMPlayer.subWindow,wsHideWindow );
-   if ( appMPlayer.subWindow.isFullScreen )
-    {
-     wsResizeWindow( &appMPlayer.subWindow,sx,sy );
-     wsMoveWindow( &appMPlayer.subWindow,True,appMPlayer.sub.x,appMPlayer.sub.y );
-     wsWindowDecoration( &appMPlayer.subWindow,appMPlayer.subWindow.Decorations );
-     appMPlayer.subWindow.isFullScreen=0;
-    }
-    else
-     {
-      sx=appMPlayer.subWindow.Width; sy=appMPlayer.subWindow.Height;
-      wsResizeWindow( &appMPlayer.subWindow,wsMaxX,wsMaxY );
-      wsMoveWindow( &appMPlayer.subWindow,True,0,0 );
-      wsWindowDecoration( &appMPlayer.subWindow,0 );
-      appMPlayer.subWindow.isFullScreen=1;
-     }
-   vo_fs=appMPlayer.subWindow.isFullScreen;     
-   wsVisibleWindow( &appMPlayer.subWindow,wsShowWindow );
-  }// else { vo_x11_fullscreen(); appMPlayer.subWindow.isFullScreen=vo_fs; }
-#else
+
   if ( ( guiIntfStruct.Playing )&&( appMPlayer.subWindow.isFullScreen ) )
    { 
     appMPlayer.subWindow.OldWidth=guiIntfStruct.MovieWidth; appMPlayer.subWindow.OldHeight=guiIntfStruct.MovieHeight; 
@@ -77,13 +54,11 @@ void mplFullScreen( void )
       default: appMPlayer.subWindow.OldY=appMPlayer.sub.y; break;
      }
    }
-  wsFullScreen( &appMPlayer.subWindow );
-  vo_fs=appMPlayer.subWindow.isFullScreen;
+  if ( guiIntfStruct.Playing || gtkShowVideoWindow ) wsFullScreen( &appMPlayer.subWindow );
+  fullscreen=vo_fs=appMPlayer.subWindow.isFullScreen;
   wsSetLayer( wsDisplay,appMPlayer.mainWindow.WindowID,appMPlayer.subWindow.isFullScreen );
   wsSetLayer( wsDisplay,appMPlayer.menuWindow.WindowID,appMPlayer.subWindow.isFullScreen );
-#endif
 
- fullscreen=appMPlayer.subWindow.isFullScreen;
  if ( guiIntfStruct.Playing ) wsSetBackgroundRGB( &appMPlayer.subWindow,0,0,0 );
   else wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.sub.R,appMPlayer.sub.G,appMPlayer.sub.B );
 }

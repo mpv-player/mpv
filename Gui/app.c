@@ -210,6 +210,9 @@ void btnSet( int event,int set )
 {
  int j;
  for ( j=0;j<appMPlayer.NumberOfItems + 1;j++ )
-   if ( appMPlayer.Items[j].msg == event ) appMPlayer.Items[j].pressed=set;
+   if ( appMPlayer.Items[j].msg == event )
+    { appMPlayer.Items[j].pressed=set; appMPlayer.barItems[j].tmp=0; }
+ for ( j=0;j<appMPlayer.NumberOfBarItems + 1;j++ )
+   if ( appMPlayer.barItems[j].msg == event )
+    { appMPlayer.barItems[j].pressed=set; appMPlayer.barItems[j].tmp=0; } 
 }
-												    

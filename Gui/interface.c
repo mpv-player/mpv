@@ -193,10 +193,10 @@ void guiInit( void )
    fprintf( stderr,MSGTR_NEMDB );
    exit( 0 );
   }
-
+ 
  wsCreateWindow( &appMPlayer.subWindow,
   appMPlayer.sub.x,appMPlayer.sub.y,appMPlayer.sub.width,appMPlayer.sub.height,
-  wsNoBorder,wsShowMouseCursor|wsHandleMouseButton|wsHandleMouseMove,wsShowFrame|wsHideWindow,"ViDEO" );
+  wsNoBorder,wsShowMouseCursor|wsHandleMouseButton|wsHandleMouseMove,wsShowFrame|wsHideWindow,"MPlayer - Video" );
 
  wsDestroyImage( &appMPlayer.subWindow );
  wsCreateImage( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Width,appMPlayer.sub.Bitmap.Height );
@@ -249,7 +249,7 @@ void guiInit( void )
  if ( !appMPlayer.mainDecoration ) wsWindowDecoration( &appMPlayer.mainWindow,0 );
  
  wsVisibleWindow( &appMPlayer.mainWindow,wsShowWindow );
-#if 1
+#if 0
  wsVisibleWindow( &appMPlayer.subWindow,wsShowWindow );
 
  {
@@ -264,6 +264,38 @@ void guiInit( void )
    mplFullScreen();
    btnModify( evFullScreen,btnPressed );
   }
+#else
+ if ( gtkShowVideoWindow )
+ {
+       wsVisibleWindow( &appMPlayer.subWindow,wsShowWindow );
+       {
+        XEvent xev;
+        do { XNextEvent( wsDisplay,&xev ); } while ( xev.type != MapNotify || xev.xmap.event != appMPlayer.subWindow.WindowID );
+        appMPlayer.subWindow.Mapped=wsMapped;
+   }
+
+       if ( fullscreen )
+       {
+        mplFullScreen();
+        btnModify( evFullScreen,btnPressed );
+       }
+ }
+ else
+ {
+       if ( fullscreen )
+       {
+         wsVisibleWindow( &appMPlayer.subWindow,wsShowWindow );
+         {
+          XEvent xev;
+          do { XNextEvent( wsDisplay,&xev ); } while ( xev.type != MapNotify || xev.xmap.event != appMPlayer.subWindow.WindowID );
+          appMPlayer.subWindow.Mapped=wsMapped;
+         }
+         wsVisibleWindow( &appMPlayer.subWindow, wsShowWindow );
+
+          mplFullScreen();
+          btnModify( evFullScreen,btnPressed );
+         }
+ }
 #endif
  mplSubRender=1;
 // ---
@@ -442,8 +474,14 @@ int guiGetEvent( int type,char * arg )
    case guiCEvent:
         switch ( (int)arg )
 	 {
-          case guiSetPlay:  guiIntfStruct.Playing=1; break;
-          case guiSetStop:  guiIntfStruct.Playing=0; break;
+	  case guiSetPlay: 
+	       guiIntfStruct.Playing=1;
+	       if ( !gtkShowVideoWindow ) wsVisibleWindow( &appMPlayer.subWindow,wsHideWindow );
+	       break;
+	  case guiSetStop:
+	       guiIntfStruct.Playing=0;
+	       if ( !gtkShowVideoWindow ) wsVisibleWindow( &appMPlayer.subWindow,wsHideWindow );
+	       break;
           case guiSetPause: guiIntfStruct.Playing=2; break;
 	 }
 	mplState();

@@ -39,6 +39,7 @@ extern char * gtkEquChannel4;
 extern char * gtkEquChannel5;
 extern char * gtkEquChannel6;
 extern int    gtkLoadFullscreen;
+extern int    gtkShowVideoWindow;
 extern int    gtkEnablePlayBar;
 
 extern int cfg_read( void );
