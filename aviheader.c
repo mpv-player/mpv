@@ -69,8 +69,8 @@ while(1){
   switch(id){
     case mmioFOURCC('I','S','F','T'): hdr="Software";break;
     case mmioFOURCC('I','N','A','M'): hdr="Name";break;
-    case mmioFOURCC('I','S','B','J'): hdr="Subject";break;
-    case mmioFOURCC('I','A','R','T'): hdr="Artist";break;
+    case mmioFOURCC('I','S','B','J'): hdr="Title";break;
+    case mmioFOURCC('I','A','R','T'): hdr="Author";break;
     case mmioFOURCC('I','C','O','P'): hdr="Copyright";break;
     case mmioFOURCC('I','C','M','T'): hdr="Comment";break;
     case ckidAVIMAINHDR:          // read 'avih'
