@@ -1438,7 +1438,8 @@ echores "$_dga2"
 
 
 echocheck "OpenGL"
-if test "$_x11" = yes && test "$_gl" = auto ; then
+#Note: this test is run even with --enable-gl since we autodetect $_ld_gl
+if test "$_x11" = yes && test "$_gl" != no ; then
   cat > $TMPC << EOF
 #include <GL/gl.h>
 int main(void) { return 0; }
@@ -1458,7 +1459,6 @@ else
   _gl=no
 fi
 if test "$_gl" = yes ; then
-  #FIXME ?? :  bsd && test -r /usr/X11R6/bin/XFree86 && _ld_gl="-lGL $_ld_pthread"
   _def_gl='#define HAVE_GL 1'
   _vosrc="$_vosrc vo_gl.c vo_gl2.c"
 else
@@ -1886,6 +1886,7 @@ if test "$_rtc" = yes ; then
 else
   _def_rtc='#undef HAVE_RTC'
 fi
+
 
 echocheck "mad support"
 if test "$_mad" = auto ; then
