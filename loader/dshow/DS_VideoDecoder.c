@@ -749,15 +749,15 @@ int DS_VideoDecoder_SetValue(DS_VideoDecoder *this, const char* name, int value)
 	    printf("No such interface\n");
 	    return -1;
 	}
-	if (strcmp(name, "Postprocessing") == 0)
+	if (strcasecmp(name, "Postprocessing") == 0)
 	    pIDivx->vt->put_PPLevel(pIDivx, value * 10);
-	else if (strcmp(name, "Brightness") == 0)
+	else if (strcasecmp(name, "Brightness") == 0)
 	    pIDivx->vt->put_Brightness(pIDivx, value);
-	else if (strcmp(name, "Contrast") == 0)
+	else if (strcasecmp(name, "Contrast") == 0)
 	    pIDivx->vt->put_Contrast(pIDivx, value);
-	else if (strcmp(name, "Saturation") == 0)
+	else if (strcasecmp(name, "Saturation") == 0)
 	    pIDivx->vt->put_Saturation(pIDivx, value);
-	else if (strcmp(name, "MaxAuto") == 0)
+	else if (strcasecmp(name, "MaxAuto") == 0)
             this->m_iMaxAuto = value;
 	pIDivx->vt->Release((IUnknown*)pIDivx);
 	//printf("Set %s  %d\n", name, value);
@@ -782,21 +782,21 @@ int DS_VideoDecoder_SetValue(DS_VideoDecoder *this, const char* name, int value)
 // get5=set4 19
 	// get6=set5 23
     	hidden = (IHidden*)((int)this->m_pDS_Filter->m_pFilter + 0xb8);
-//	printf("DS_SetValue for DIVX, name=%s  value=%d\n",name,value);
-	if (strcmp(name, "Quality") == 0)
+	printf("DS_SetValue for DIVX, name=%s  value=%d\n",name,value);
+	if (strcasecmp(name, "Quality") == 0)
 	{
             this->m_iLastQuality = value;
 	    return hidden->vt->SetSmth(hidden, value, 0);
 	}
-	if (strcmp(name, "Brightness") == 0)
+	if (strcasecmp(name, "Brightness") == 0)
 	    return hidden->vt->SetSmth2(hidden, value, 0);
-	if (strcmp(name, "Contrast") == 0)
+	if (strcasecmp(name, "Contrast") == 0)
 	    return hidden->vt->SetSmth3(hidden, value, 0);
-	if (strcmp(name, "Saturation") == 0)
+	if (strcasecmp(name, "Saturation") == 0)
 	    return hidden->vt->SetSmth4(hidden, value, 0);
-	if (strcmp(name, "Hue") == 0)
+	if (strcasecmp(name, "Hue") == 0)
 	    return hidden->vt->SetSmth5(hidden, value, 0);
-	if (strcmp(name, "MaxAuto") == 0)
+	if (strcasecmp(name, "MaxAuto") == 0)
 	{
             this->m_iMaxAuto = value;
 	}
@@ -853,7 +853,7 @@ vim: vi* sux.
 
 int DS_SetAttr_DivX(char* attribute, int value){
     int result, status, newkey, count;
-        if(strcmp(attribute, "Quality")==0){
+        if(strcasecmp(attribute, "Quality")==0){
 	    char* keyname="SOFTWARE\\Microsoft\\Scrunch";
     	    result=RegCreateKeyExA(HKEY_CURRENT_USER, keyname, 0, 0, 0, 0, 0,	   		&newkey, &status);
             if(result!=0)
@@ -879,10 +879,10 @@ int DS_SetAttr_DivX(char* attribute, int value){
 	}   	
 
         if(
-	(strcmp(attribute, "Saturation")==0) ||
-	(strcmp(attribute, "Hue")==0) ||
-	(strcmp(attribute, "Contrast")==0) ||
-	(strcmp(attribute, "Brightness")==0)
+	(strcasecmp(attribute, "Saturation")==0) ||
+	(strcasecmp(attribute, "Hue")==0) ||
+	(strcasecmp(attribute, "Contrast")==0) ||
+	(strcasecmp(attribute, "Brightness")==0)
 	)
         {
 	    char* keyname="SOFTWARE\\Microsoft\\Scrunch\\Video";
