@@ -36,7 +36,6 @@
 
 #include "bswap.h"
 #include "../unrarlib.h"
-#include "../liba52/a52.h" 
 
 #define TS_FEC_PACKET_SIZE 204
 #define TS_PACKET_SIZE 188
@@ -373,12 +372,48 @@ typedef struct {
 	off_t probe;
 } tsdemux_init_t;
 
+//stripped down version of a52_syncinfo() from liba52
+//copyright belongs to Michel Lespinasse <walken@zoy.org> and Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
+static int a52_framesize(uint8_t * buf)
+{
+	int rate[] = {	32,  40,  48,  56,  64,  80,  96, 112,
+			128, 160, 192, 224, 256, 320, 384, 448,
+			512, 576, 640
+	};
+	uint8_t halfrate[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3};
+	int frmsizecod, bitrate, half;
+	
+	if((buf[0] != 0x0b) || (buf[1] != 0x77))	/* syncword */
+		return 0;
+	
+	if(buf[5] >= 0x60)		/* bsid >= 12 */
+		return 0;
 
-#ifdef USE_LIBA52
+	half = halfrate[buf[5] >> 3];
+	
+	frmsizecod = buf[4] & 63;
+	if(frmsizecod >= 38)
+		return 0;
+
+	bitrate = rate[frmsizecod >> 1];
+	
+	switch(buf[4] & 0xc0) 
+	{
+		case 0:	/* 48 KHz */
+			return 4 * bitrate;
+		case 0x40:	/* 44.1 KHz */
+			return 2 * (320 * bitrate / 147 + (frmsizecod & 1));
+		case 0x80: /* 32 KHz */
+			return 6 * bitrate;
+	}
+	
+	return 0;
+}
+
 //second stage: returns the count of A52 syncwords found
 static int a52_check(char *buf, int len)
 {
-	int cnt, frame_length, flags, sample_rate, bit_rate, ok;
+	int cnt, frame_length, ok;
 	
 	cnt = ok = 0;
 	if(len < 8)
@@ -388,7 +423,7 @@ static int a52_check(char *buf, int len)
 	{
 		if(buf[cnt] == 0x0B && buf[cnt+1] == 0x77)
 		{
-			frame_length = a52_syncinfo(&buf[cnt], &flags, &sample_rate, &bit_rate);
+			frame_length = a52_framesize(&buf[cnt]);
 			if(frame_length>=7 && frame_length<=3840)
 			{
 				cnt += frame_length;
@@ -404,7 +439,6 @@ static int a52_check(char *buf, int len)
 	mp_msg(MSGT_DEMUXER, MSGL_V, "A52_CHECK(%d input bytes), found %d frame syncwords of %d bytes length\n", len, ok, frame_length);	
 	return ok;
 }
-#endif
 
 
 static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
@@ -436,7 +470,6 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 		pos = stream_tell(demuxer->stream);
 		if(ts_parse(demuxer, &es, tmp, 1))
 		{
-#ifdef USE_LIBA52
 			//Non PES-aligned A52 audio may escape detection if PMT is not present;
 			//in this case we try to find at least 3 A52 syncwords
 			if((es.type == PES_PRIVATE1) && (! audio_found))
@@ -454,7 +487,6 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 					}
 				}
 			}
-#endif
 			
 			is_audio = ((es.type == AUDIO_MP2) || (es.type == AUDIO_A52) || (es.type == AUDIO_LPCM_BE) || (es.type == AUDIO_AAC));
 			is_video = ((es.type == VIDEO_MPEG1) || (es.type == VIDEO_MPEG2) || (es.type == VIDEO_MPEG4));
