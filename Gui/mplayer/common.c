@@ -214,6 +214,30 @@ void PutImage( txSample * bf,int x,int y,int max,int ofs )
 #endif
 }
 
+void SimplePotmeterPutImage( txSample * bf,int x,int y,float frac )
+{
+ int i=0,w,r,ix,iy;
+ uint32_t * buf = NULL;
+ uint32_t * drw = NULL;
+ register uint32_t tmp;
+
+ if ( ( !bf )||( bf->Image == NULL ) ) return;
+
+ buf=(uint32_t *)image_buffer;
+ drw=(uint32_t *)bf->Image;
+ w=bf->Width*frac;
+ r=bf->Width-w;
+ for ( iy=y;iy < (int)(y+bf->Height);iy++ )
+ {
+  for ( ix=x;ix < (int)(x+w);ix++ )
+   {
+    tmp=drw[i++]; 
+    if ( tmp != 0x00ff00ff ) buf[iy * image_width + ix]=tmp;
+   }
+  i+=r;
+ }
+}
+
 void Render( wsTWindow * window,wItem * Items,int nrItems,char * db,int size )
 {
  wItem    * item;
@@ -232,10 +256,12 @@ void Render( wsTWindow * window,wItem * Items,int nrItems,char * db,int size )
           PutImage( &item->Bitmap,item->x,item->y,3,item->pressed );
           break;
      case itPotmeter:
-          PutImage( &item->Bitmap,item->x,item->y,item->phases,( item->phases - 1 ) * ( item->value / 100.0f ) );
+          if (item->phases == 1)SimplePotmeterPutImage( &item->Bitmap,item->x,item->y, item->value / 100.0f );
+          else PutImage( &item->Bitmap,item->x,item->y,item->phases,( item->phases - 1 ) * ( item->value / 100.0f ) );
           break;
      case itHPotmeter:
-          PutImage( &item->Bitmap,item->x,item->y,item->phases,item->phases * ( item->value / 100.0f ) );
+          if (item->phases == 1)SimplePotmeterPutImage( &item->Bitmap,item->x,item->y, item->value / 100.0f );
+          else PutImage( &item->Bitmap,item->x,item->y,item->phases,( item->phases - 1 ) * ( item->value / 100.0f ) );
           PutImage( &item->Mask,item->x + (int)( ( item->width - item->psx ) * item->value / 100.0f ),item->y,3,item->pressed );
           break;
      case itVPotmeter:
