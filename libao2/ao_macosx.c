@@ -209,10 +209,10 @@ static int control(int cmd,void *arg){
 }
 
 
-static void print_format(AudioStreamBasicDescription *f){
+static void print_format(const char* str,AudioStreamBasicDescription *f){
     uint32_t flags=(uint32_t) f->mFormatFlags;
-    ao_msg(MSGT_AO,MSGL_INFO, "hw-format: %7.1fHz %dbit [%c%c%c%c] %s %s %s%s%s%s\n",
-	    f->mSampleRate, f->mBitsPerChannel,
+    ao_msg(MSGT_AO,MSGL_V, "%s %7.1fHz %dbit [%c%c%c%c] %s %s %s%s%s%s\n",
+	    str, f->mSampleRate, f->mBitsPerChannel,
 	    (int)(f->mFormatID & 0xff000000) >> 24,
 	    (int)(f->mFormatID & 0x00ff0000) >> 16,
 	    (int)(f->mFormatID & 0x0000ff00) >>  8,
@@ -224,13 +224,13 @@ static void print_format(AudioStreamBasicDescription *f){
 	    (flags&kAudioFormatFlagIsAlignedHigh) ? " aligned" : "",
 	    (flags&kAudioFormatFlagIsNonInterleaved) ? " ni" : "" );
 
-    ao_msg(MSGT_AO,MSGL_V, "%5d mBytesPerPacket\n",
+    ao_msg(MSGT_AO,MSGL_DBG2, "%5d mBytesPerPacket\n",
 	    (int)f->mBytesPerPacket);
-    ao_msg(MSGT_AO,MSGL_V, "%5d mFramesPerPacket\n",
+    ao_msg(MSGT_AO,MSGL_DBG2, "%5d mFramesPerPacket\n",
 	    (int)f->mFramesPerPacket);
-    ao_msg(MSGT_AO,MSGL_V, "%5d mBytesPerFrame\n",
+    ao_msg(MSGT_AO,MSGL_DBG2, "%5d mBytesPerFrame\n",
 	    (int)f->mBytesPerFrame);
-    ao_msg(MSGT_AO,MSGL_V, "%5d mChannelsPerFrame\n",
+    ao_msg(MSGT_AO,MSGL_DBG2, "%5d mChannelsPerFrame\n",
 	    (int)f->mChannelsPerFrame);
 
 }
@@ -265,27 +265,31 @@ static int init(int rate,int channels,int format,int flags)
     }
 
 
-#if 0
+    propertySize = sizeof(ao->outputStreamBasicDescription);
+    status = AudioDeviceGetProperty(ao->outputDeviceID, 0, false, kAudioDevicePropertyStreamFormat, &propertySize, &ao->outputStreamBasicDescription);
+    if(!status) print_format("default:",&ao->outputStreamBasicDescription);
+
+
+#if 1
 // dump supported format list:
 {   AudioStreamBasicDescription* p;
     Boolean ow;
     int i;
     propertySize=0; //sizeof(p);
-    status = AudioDeviceGetPropertyInfo(ao->outputDeviceID, 0, true, kAudioStreamPropertyPhysicalFormats, &propertySize, &ow);
-//    status = AudioDeviceGetPropertyInfo(ao->outputDeviceID, 0, true, kAudioDevicePropertyStreamFormats, &propertySize, &ow);
+//    status = AudioDeviceGetPropertyInfo(ao->outputDeviceID, 0, false, kAudioStreamPropertyPhysicalFormats, &propertySize, &ow);
+    status = AudioDeviceGetPropertyInfo(ao->outputDeviceID, 0, false, kAudioDevicePropertyStreamFormats, &propertySize, &ow);
     if (status) {
         ao_msg(MSGT_AO,MSGL_WARN, "AudioDeviceGetPropertyInfo returned 0x%X when getting kAudioDevicePropertyStreamFormats\n", (int)status);
     }
     p=malloc(propertySize);
-//    printf("propertySize=%d\n",propertySize);
-    status = AudioDeviceGetProperty(ao->outputDeviceID, 0, true, kAudioStreamPropertyPhysicalFormats, &propertySize, p);
-//    status = AudioDeviceGetProperty(ao->outputDeviceID, 0, true, kAudioDevicePropertyStreamFormats, &propertySize, p);
+//    status = AudioDeviceGetProperty(ao->outputDeviceID, 0, false, kAudioStreamPropertyPhysicalFormats, &propertySize, p);
+    status = AudioDeviceGetProperty(ao->outputDeviceID, 0, false, kAudioDevicePropertyStreamFormats, &propertySize, p);
     if (status) {
         ao_msg(MSGT_AO,MSGL_WARN, "AudioDeviceGetProperty returned 0x%X when getting kAudioDevicePropertyStreamFormats\n", (int)status);
 //	return CONTROL_FALSE;
     }
     for(i=0;i<propertySize/sizeof(AudioStreamBasicDescription);i++)
-	print_format(&p[i]);
+	print_format("support:",&p[i]);
 //    printf("FORMATS: (%d) %p %p %p %p\n",propertySize,p[0],p[1],p[2],p[3]);
     free(p);
 }
@@ -293,6 +297,7 @@ static int init(int rate,int channels,int format,int flags)
 
     // fill in our wanted format, and let's see if the driver accepts it or
     // offers some similar alternative:
+    propertySize = sizeof(ao->outputStreamBasicDescription);
     memset(&ao->outputStreamBasicDescription,0,propertySize);
     ao->outputStreamBasicDescription.mSampleRate=rate;
     ao->outputStreamBasicDescription.mFormatID=kAudioFormatLinearPCM;
@@ -303,10 +308,10 @@ static int init(int rate,int channels,int format,int flags)
     case AF_FORMAT_24BIT: ao->outputStreamBasicDescription.mBitsPerChannel=24; break;
     case AF_FORMAT_32BIT: ao->outputStreamBasicDescription.mBitsPerChannel=32; break;
     }
-    if(format&AF_FORMAT_F){
+    if((format&AF_FORMAT_POINT_MASK)==AF_FORMAT_F){
 	// float
 	ao->outputStreamBasicDescription.mFormatFlags=kAudioFormatFlagIsFloat|kAudioFormatFlagIsPacked;
-    } else if(format&AF_FORMAT_SI){
+    } else if((format&AF_FORMAT_SIGN_MASK)==AF_FORMAT_SI){
 	// signed int
 	ao->outputStreamBasicDescription.mFormatFlags=kAudioFormatFlagIsSignedInteger|kAudioFormatFlagIsPacked;
     } else {
@@ -320,17 +325,12 @@ static int init(int rate,int channels,int format,int flags)
     ao->outputStreamBasicDescription.mBytesPerFrame=channels*(ao->outputStreamBasicDescription.mBitsPerChannel/8);
     ao->outputStreamBasicDescription.mFramesPerPacket=1;
 
-//    print_format(&ao->outputStreamBasicDescription);
+    print_format("wanted: ",&ao->outputStreamBasicDescription);
 
-//    propertySize = sizeof(ao->outputStreamBasicDescription);
-//    status = AudioDeviceGetProperty(ao->outputDeviceID, 0, true, kAudioDevicePropertyStreamFormatSupported, &propertySize, &ao->outputStreamBasicDescription);
-//    if (status) {
-//        ao_msg(MSGT_AO,MSGL_V, "AudioDeviceGetProperty returned 0x%X when getting kAudioDevicePropertyStreamFormatSupported\n", (int)status);
-//    }
-    
-//    status = AudioDeviceGetProperty(ao->outputDeviceID, 0, false, kAudioDevicePropertyStreamFormat, &propertySize, &ao->outputStreamBasicDescription);
+    // try 1: ask if it accepts our specific requirements?
     propertySize = sizeof(ao->outputStreamBasicDescription);
-    status = AudioDeviceGetProperty(ao->outputDeviceID, 0, true, kAudioDevicePropertyStreamFormatMatch, &propertySize, &ao->outputStreamBasicDescription);
+//    status = AudioDeviceGetProperty(ao->outputDeviceID, 0, false, kAudioStreamPropertyPhysicalFormatMatch, &propertySize, &ao->outputStreamBasicDescription);
+    status = AudioDeviceGetProperty(ao->outputDeviceID, 0, false, kAudioDevicePropertyStreamFormatMatch, &propertySize, &ao->outputStreamBasicDescription);
     if (status || ao->outputStreamBasicDescription.mSampleRate!=rate
 	       || ao->outputStreamBasicDescription.mFormatID!=kAudioFormatLinearPCM) {
         ao_msg(MSGT_AO,MSGL_V, "AudioDeviceGetProperty returned 0x%X when getting kAudioDevicePropertyStreamFormatMatch\n", (int)status);
@@ -340,12 +340,14 @@ static int init(int rate,int channels,int format,int flags)
 	memset(&ao->outputStreamBasicDescription,0,propertySize);
 	ao->outputStreamBasicDescription.mSampleRate=rate;
 	ao->outputStreamBasicDescription.mFormatID=kAudioFormatLinearPCM;
-	status = AudioDeviceGetProperty(ao->outputDeviceID, 0, true, kAudioDevicePropertyStreamFormatMatch, &propertySize, &ao->outputStreamBasicDescription);
+//	status = AudioDeviceGetProperty(ao->outputDeviceID, 0, false, kAudioStreamPropertyPhysicalFormatMatch, &propertySize, &ao->outputStreamBasicDescription);
+	status = AudioDeviceGetProperty(ao->outputDeviceID, 0, false, kAudioDevicePropertyStreamFormatMatch, &propertySize, &ao->outputStreamBasicDescription);
 	if (status || ao->outputStreamBasicDescription.mFormatID!=kAudioFormatLinearPCM) {
     	    ao_msg(MSGT_AO,MSGL_V, "AudioDeviceGetProperty returned 0x%X when getting kAudioDevicePropertyStreamFormatMatch\n", (int)status);
 	    // failed again. (error or bad type)
 	    // giving up... just read the default.
 	    propertySize = sizeof(ao->outputStreamBasicDescription);
+//	    status = AudioDeviceGetProperty(ao->outputDeviceID, 0, false, kAudioStreamPropertyPhysicalFormat, &propertySize, &ao->outputStreamBasicDescription);
 	    status = AudioDeviceGetProperty(ao->outputDeviceID, 0, false, kAudioDevicePropertyStreamFormat, &propertySize, &ao->outputStreamBasicDescription);
 	    if (status) {
 		// failed to read the default format - WTF?
@@ -355,7 +357,23 @@ static int init(int rate,int channels,int format,int flags)
 	}
     }
 
-    print_format(&ao->outputStreamBasicDescription);
+//    propertySize = sizeof(ao->outputStreamBasicDescription);
+//    status = AudioDeviceGetProperty(ao->outputDeviceID, 0, false, kAudioDevicePropertyStreamFormatSupported, &propertySize, &ao->outputStreamBasicDescription);
+//    if (status) {
+//        ao_msg(MSGT_AO,MSGL_V, "AudioDeviceGetProperty returned 0x%X when getting kAudioDevicePropertyStreamFormatSupported\n", (int)status);
+//    }
+
+    // ok, now try to set the new (default or matched) audio format:
+    print_format("best:   ",&ao->outputStreamBasicDescription);
+    propertySize = sizeof(ao->outputStreamBasicDescription);
+    status = AudioDeviceSetProperty(ao->outputDeviceID, 0, 0, false, kAudioDevicePropertyStreamFormat, propertySize, &ao->outputStreamBasicDescription);
+    if(status)
+	ao_msg(MSGT_AO,MSGL_WARN, "AudioDeviceSetProperty returned 0x%X when getting kAudioDevicePropertyStreamFormat\n", (int)status);
+
+    // see what did we get finally... we'll be forced to use this anyway :(
+    propertySize = sizeof(ao->outputStreamBasicDescription);
+    status = AudioDeviceGetProperty(ao->outputDeviceID, 0, false, kAudioDevicePropertyStreamFormat, &propertySize, &ao->outputStreamBasicDescription);
+    print_format("final:  ",&ao->outputStreamBasicDescription);
 
     /* get requested buffer length */
     // TODO: set NUM_BUFS dinamically, based on buffer size!
