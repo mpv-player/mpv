@@ -61,12 +61,6 @@ URL:   ftp://thot.banki.hu/MPlayer/releases/w32codec.zip
 Note:  Please use only this codec set (it differs from avifile's)
        Status/info page: http://mplayer.sourceforge.net/DOCS/codecs.html
 
-nasm
-~~~~
-Brief: Netwide assembler
-URL:   http://www.web-sites.co.uk/nasm/
-Note:  It's required for compilation libavcodec stuff
-
 Optional Requirements:
 **********************
 
