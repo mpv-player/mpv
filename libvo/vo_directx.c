@@ -69,6 +69,7 @@ extern int vo_doublebuffering;                      //tribblebuffering
 extern int vo_fs;
 extern int vo_directrendering;
 extern int vo_ontop;
+extern int vo_rootwin;
 extern int vidmode;
 
 /*****************************************************************************
@@ -600,9 +601,9 @@ static uint32_t Directx_ManageDisplay()
           RECT rdw=rd;
           AdjustWindowRect(&rdw,WS_OVERLAPPEDWINDOW|WS_SIZEBOX,FALSE);
 //          printf("window: %i %i %ix%i\n",rdw.left,rdw.top,rdw.right - rdw.left,rdw.bottom - rdw.top);      
-          SetWindowPos(hWnd,(vo_ontop)?HWND_TOPMOST:HWND_NOTOPMOST,rdw.left,rdw.top,rdw.right-rdw.left,rdw.bottom-rdw.top,SWP_NOOWNERZORDER); 
+          SetWindowPos(hWnd,(vo_ontop)?HWND_TOPMOST:(vo_rootwin?HWND_BOTTOM:HWND_NOTOPMOST),rdw.left,rdw.top,rdw.right-rdw.left,rdw.bottom-rdw.top,SWP_NOOWNERZORDER); 
     }
-    else SetWindowPos(hWndFS,HWND_TOPMOST,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE|SWP_NOOWNERZORDER);
+    else SetWindowPos(hWndFS,vo_rootwin?HWND_BOTTOM:HWND_TOPMOST,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE|SWP_NOOWNERZORDER);
 
   	/*for nonoverlay mode we are finished, for overlay mode we have to display the overlay first*/
 	if(nooverlay)return 0;
@@ -1267,8 +1268,18 @@ static uint32_t control(uint32_t request, void *data, ...)
 			}
 	        else
 			{
-			    if(!vo_fs){vo_fs=1;ShowWindow(hWndFS,SW_SHOW);}  
-                else {vo_fs=0; ShowWindow(hWndFS,SW_HIDE);}  
+			    if(!vo_fs)
+				{
+					vo_fs=1;
+					ShowWindow(hWndFS,SW_SHOW);
+					ShowWindow(hWnd,SW_HIDE);
+				}
+                else
+				{
+					vo_fs=0;
+					ShowWindow(hWndFS,SW_HIDE);
+					ShowWindow(hWnd,SW_SHOW);
+				}  
 				Directx_ManageDisplay();
                 break;				
 			}
