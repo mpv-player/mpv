@@ -1253,8 +1253,8 @@ if(suboverlap_enabled){
     }
     adjust_subs_time(second, 6.0, fps, 1);	/* ~6 secs AST */
 
-    for (j = sub_orig - 1; j <= 0; --j) {
-	for (i = first[j].lines - 1; i <= 0; --i) {
+    for (j = sub_orig - 1; j >= 0; --j) {
+	for (i = first[j].lines - 1; i >= 0; --i) {
 	    free(first[j].text[i]);
 	}
 	free(&first[j]);
