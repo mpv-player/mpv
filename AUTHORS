@@ -561,8 +561,9 @@ Plourde, Nicolas <nicolas.plourde@sympatico.ca>
     * quartz video output driver for Mac OS X
 
 Poirier, Guillaume <guillaume.poirier@ifsic.univ-rennes1.fr>
-	* French documentation translation and synchronization
-	* XviD documentation
+    * French documentation translation and synchronization
+    * XviD documentation
+    * lavc's turbo mode
 
 Ponekker, Zoltán (Pontscho/fresh!mindworkz) <pontscho@makacs.poliod.hu>
     * the original configure script and Makefiles for easy compilation
