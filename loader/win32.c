@@ -584,7 +584,7 @@ void* WINAPI expResetEvent(void* event)
 void* WINAPI expWaitForSingleObject(void* object, int duration)
 {
     mutex_list *ml = (mutex_list *)object;
-    int ret;
+    int ret=0x12345678; // fixed by Zdenek Kabelac
     mutex_list* pp=mlist;
 //    dbgprintf("WaitForSingleObject(0x%x, duration %d) =>\n",object, duration);
     do {
@@ -2338,11 +2338,19 @@ WIN_BOOL
 }
 
 
+/******************************************************************************
+ *           RegEnumValueA   [ADVAPI32.@]
+ */
+ DWORD WINAPI expRegEnumValueA( HKEY hkey, DWORD index, LPSTR value, LPDWORD val_count,
+                             LPDWORD reserved, LPDWORD type, LPBYTE data, LPDWORD count )
+{
+ 
+ printf("RegEnumValueA(%x,%ld,%p,%p,%p,%p,%p,%p)\n",
+   hkey, index, value, val_count, reserved, type, data, count );
 
-
-
-
-
+ return -1;
+}
+ 
 
 
 
@@ -2515,6 +2523,7 @@ FF(RegCreateKeyExA, -1)
 FF(RegQueryValueExA, -1)
 FF(RegSetValueExA, -1)
 FF(RegCloseKey, -1)
+//FF(RegEnumValueA, -1)
 };
 struct exports exp_gdi32[]={
 FF(CreateCompatibleDC, -1)
