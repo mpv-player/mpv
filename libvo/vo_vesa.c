@@ -25,7 +25,7 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 
-#ifdef HAVE_MEMALIGN
+#ifdef HAVE_MALLOC_H
 #include <malloc.h>
 #endif
 
@@ -791,11 +791,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		  cpy_blk_fnc = __vbeCopyBlock;
 		  if(yuv_fmt || rgb2rgb_fnc)
 		  {
-#ifdef HAVE_MEMALIGN
 		    if(!(dga_buffer = memalign(64,video_mode_info.XResolution*video_mode_info.YResolution*video_mode_info.BitsPerPixel)))
-#else
-		    if(!(dga_buffer = malloc(video_mode_info.XResolution*video_mode_info.YResolution*video_mode_info.BitsPerPixel)))
-#endif
 		    {
 		      printf("vo_vesa: Can't allocate temporary buffer\n");
 		      return -1;

@@ -1153,19 +1153,18 @@ cc_check $_extraincdir $_extralibdir -I$_mlibdir/include -L$_mlibdir/lib -lmlib 
 # ---
 # check availability of some header files
 
-# check for malloc.h and memalign() in it
+# check for malloc.h
 cat > $TMPC << EOF
 #include <malloc.h>
 int main( void ) { return 0; }
 EOF
-_memalign_def=
-_memalign=no
 _malloc_h=no
-if cc_check ; then
- _malloc_h=yes
- # check for memalign - atmos
- # should this be restricted to x86, or customized for cpu types (opt for cacheline sizes)?
- cat > $TMPC << EOF
+cc_check && _malloc_h=yes
+
+
+# check for memalign() in malloc.h
+# XXX restrict to x86 ? extend to other CPUs/cacheline sizes ?
+cat > $TMPC << EOF
 #include <malloc.h>
 int main ( void ) {
 char *string = NULL;
@@ -1173,14 +1172,9 @@ string = memalign(64, sizeof(char));
 return 0;
 }
 EOF
- if cc_check ; then
-  _memalign_def='/* #define memalign(a,b) malloc(b) */'
-  _memalign=yes
- else
-  _memalign_def='#define memalign(a,b) malloc(b)'
-  _memalign=no
- fi
-fi
+_memalign=no
+cc_check && _memalign=yes
+
 
 # check for alloca.h
 cat > $TMPC << EOF
@@ -2172,7 +2166,7 @@ if test "$_malloc_h" = yes ; then
 else
   _have_malloc_h='#undef  HAVE_MALLOC_H'
 fi
-# malloc.h useless in FreeBSD
+# malloc.h emits a warning in FreeBSD
 freebsd && _have_malloc_h='#undef  HAVE_MALLOC_H'
 
 if test "$_memalign" = yes ; then
@@ -2627,9 +2621,11 @@ $_have_soundcard_h
 /* Define this if your system has the "malloc.h" header file */
 $_have_malloc_h
 
-/* memalign is mapped to malloc here, if unsupported */
-$_memalign_def
+/* memalign is mapped to malloc if unsupported */
 $_have_memalign
+#ifndef HAVE_MEMALIGN
+# define memalign(a,b) malloc(b)
+#endif
 
 /* Define this if your system has the "alloca.h" header file */
 $_have_alloca_h
