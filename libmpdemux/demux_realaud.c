@@ -44,9 +44,6 @@ int ra_check_file(demuxer_t* demuxer)
 {
 	unsigned int chunk_id;
   
-  stream_reset(demuxer->stream);
-  stream_seek(demuxer->stream, 0);
-
 	chunk_id = stream_read_dword_le(demuxer->stream);
 	if (chunk_id == FOURCC_DOTRA)
 		return 1;
@@ -92,7 +89,7 @@ int demux_ra_fill_buffer(demuxer_t *demuxer)
 			ptr += 2;
 		}
 	}
-	dp->pts = demuxer->filepos / ra_priv->data_size;;
+	dp->pts = demuxer->filepos / ra_priv->data_size;
 	dp->pos = demuxer->filepos;
 	dp->flags = 0;
 	ds_add_packet(ds, dp);
