@@ -581,13 +581,13 @@ play_next_file:
 
 #ifdef HAVE_NEW_GUI
     if ( use_gui ) {
-      if(filename) strcpy( mplShMem->Filename,filename );
+      if(filename && !mplShMem->FilenameChanged) strcpy( mplShMem->Filename,filename );
 //      mplShMem->Playing= (gui_no_filename) ? 0 : 1;
       while(mplShMem->Playing!=1){
 	usleep(20000);
 	EventHandling();
       }
-      if(gui_no_filename){
+      if(mplShMem->FilenameChanged){
         filename=mplShMem->Filename;
       }
     }
@@ -1494,6 +1494,7 @@ if(auto_quality>0){
 #endif
 
   if(osd_function==OSD_PAUSE){
+      int gui_pause_flag=0; // gany!
       mp_msg(MSGT_CPLAYER,MSGL_STATUS,"\n------ PAUSED -------\r");fflush(stdout);
 #ifdef HAVE_NEW_GUI
       if(use_gui) mplShMem->Playing=2;
@@ -1511,7 +1512,8 @@ if(auto_quality>0){
 #ifdef HAVE_NEW_GUI
              if(use_gui){
 		EventHandling();
-		if(mplShMem->Playing!=2 || (rel_seek_secs || abs_seek_pos)) break; // end of pause or seek
+		if(mplShMem->Playing!=2 || (rel_seek_secs || abs_seek_pos))
+		  { gui_pause_flag=1; break; } // end of pause or seek
              }
 #endif
              if(use_stdin) usec_sleep(1000); // do not eat the CPU
@@ -1520,7 +1522,7 @@ if(auto_quality>0){
       if (audio_out && sh_audio)
         audio_out->resume();	// resume audio
 #ifdef HAVE_NEW_GUI
-      if(use_gui) if(mplShMem->Playing==2) mplShMem->Playing=1;
+      if(use_gui && !gui_pause_flag) mplShMem->Playing=1; // play from keyboard
 #endif
   }
 
