@@ -1,7 +1,7 @@
 // Translated by: Fabio Olimpieri <fabio.olimpieri@tin.it>
 // Updated by: Roberto Togni <see AUTHORS for email address>
 
-// Updated to help_mp-en.h v1.61
+// Updated to help_mp-en.h v1.63
 
 // Translated files should be uploaded to ftp://mplayerhq.hu/MPlayer/incoming
 // and send a notify message to mplayer-dev-eng maillist.
@@ -101,11 +101,13 @@ static char help_text[]=
 "!!! Possibili cause, problemi, soluzioni: \n"\
 "- Nella maggior parte dei casi: driver audio corrotto/bacato. Soluzione: prova -ao sdl o usa\n"\
 "  ALSA 0.5 o l\'emulazione oss di ALSA 0.9. Leggi DOCS/sound.html per ulteriori suggerimenti!\n"\
+" Puoi anche provare con -autosync 30 o altri valori.\n"\
 "- Output video lento. Prova un differente -vo driver (per la lista completa: -vo help) o prova\n"\
 "  con -framedrop !  Leggi DOCS/video.html per suggerimenti sulla regolazione/accelerazione del video.\n"\
 "- Cpu lenta. Non provare a riprodurre grossi dvd/divx su cpu lente! Prova -hardframedrop\n"\
 "- File corrotto. Prova varie combinazioni di: -nobps  -ni  -mc 0  -forceidx\n"\
-"- Stai usando -cache per riprodurre un file senza interleave? Prova con -nocache.\n"\
+"- Per riprodurre da dispositivi lenti (dischi nfs/smb, dvd, vcd etc) prova -cache 8192\n"\
+"- Stai usando -cache per riprodurre un file AVI senza interleave? Prova con -nocache.\n"\
 "Se il problema non è in nessuno di questi casi, allora leggi DOCS/bugreports.html !\n\n"
 
 #define MSGTR_NoGui "MPlayer è stato compilato senza il supporto della GUI!\n"
@@ -167,6 +169,10 @@ static char help_text[]=
 #define MSGTR_UnableOpenURL "Impossibile aprire la URL: %s\n"
 #define MSGTR_ConnToServer "Connesso al server: %s\n"
 #define MSGTR_FileNotFound "File non trovato: '%s'\n"
+
+#define MSGTR_SMBInitError "Impossibile inizializzare la libreria libsmbclient: %d\n"
+#define MSGTR_SMBFileNotFound "Impossibile aprire dalla rete: '%s'\n"
+#define MSGTR_SMBNotCompiled "MPlayer non è stato compilato con supporto di lettura da SMB\n"
 
 #define MSGTR_CantOpenDVD "Impossibile aprire il dispositivo DVD: %s\n"
 #define MSGTR_DVDwait "Leggo la struttura del disco, per favore aspetta...\n"
