@@ -648,22 +648,24 @@ switch(file_format){
   stream_seek(demuxer->stream,demuxer->movi_start);
 //  demuxer->idx_pos=0;
 //  demuxer->endpos=avi_header.movi_end;
-  if(!ds_fill_buffer(d_video)){
-    mp_msg(MSGT_DEMUXER,MSGL_WARN,"ASF: " MSGTR_MissingVideoStream);
-    sh_video=NULL;
-    //printf("ASF: missing video stream!? contact the author, it may be a bug :(\n");
-    //GUI_MSG( mplASFErrorMissingVideoStream )
-  } else {
-    sh_video=d_video->sh;sh_video->ds=d_video;
-    sh_video->fps=1000.0f; sh_video->frametime=0.001f; // 1ms
-    mp_msg(MSGT_DEMUXER,MSGL_INFO,"VIDEO:  [%.4s]  %ldx%ld  %dbpp\n",
-      (char *)&sh_video->bih->biCompression,
-      sh_video->bih->biWidth,
-      sh_video->bih->biHeight,
-      sh_video->bih->biBitCount);
-//      sh_video->i_bps=10*asf_packetsize; // FIXME!
+  if(d_video->id != -2) {
+    if(!ds_fill_buffer(d_video)){
+      mp_msg(MSGT_DEMUXER,MSGL_WARN,"ASF: " MSGTR_MissingVideoStream);
+      sh_video=NULL;
+      //printf("ASF: missing video stream!? contact the author, it may be a bug :(\n");
+      //GUI_MSG( mplASFErrorMissingVideoStream )
+    } else {
+      sh_video=d_video->sh;sh_video->ds=d_video;
+      sh_video->fps=1000.0f; sh_video->frametime=0.001f; // 1ms
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,"VIDEO:  [%.4s]  %ldx%ld  %dbpp\n",
+        (char *)&sh_video->bih->biCompression,
+        sh_video->bih->biWidth,
+        sh_video->bih->biHeight,
+        sh_video->bih->biBitCount);
+      //      sh_video->i_bps=10*asf_packetsize; // FIXME!
+    }
   }
-  if(audio_id!=-2){
+  if(d_audio->id!=-2){
     mp_msg(MSGT_DEMUXER,MSGL_V,"ASF: Searching for audio stream (id:%d)\n",d_audio->id);
     if(!ds_fill_buffer(d_audio)){
       mp_msg(MSGT_DEMUXER,MSGL_INFO,"ASF: " MSGTR_MissingAudioStream);
@@ -755,7 +757,7 @@ if(!demuxer->seekable){
     if(sh_audio) sh_audio->timer=sh_video->timer;
 #else
     if(sh_audio) sh_audio->timer=0;
-    sh_video->timer=0; // !!!!!!
+    if(sh_video) sh_video->timer=0; // !!!!!!
 #endif
 
 switch(demuxer->file_format){

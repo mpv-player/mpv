@@ -200,6 +200,7 @@ int abs_seek_pos=0;
 
 // codecs:
 int has_audio=1;
+int has_video=1;
 char *audio_codec=NULL; // override audio codec
 char *video_codec=NULL; // override video codec
 int audio_family=-1;     // override audio codec family 
@@ -1055,26 +1056,31 @@ current_module="video_read_properties";
 
 if(sh_video){
 
-  if(!video_read_properties(sh_video)) goto goto_next_file; // exit_player(MSGTR_Exit_error); // couldn't read header?
+  if(!video_read_properties(sh_video)) {
+    mp_msg(MSGT_CPLAYER,MSGL_ERR,"Video: can't read properties\n");
+    sh_video=d_video->sh=NULL;
+  } else {
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"[V] filefmt:%d  fourcc:0x%X  size:%dx%d  fps:%5.2f  ftime:=%6.4f\n",
+	   demuxer->file_format,sh_video->format, sh_video->disp_w,sh_video->disp_h,
+	   sh_video->fps,sh_video->frametime
+	   );
 
-  mp_msg(MSGT_CPLAYER,MSGL_INFO,"[V] filefmt:%d  fourcc:0x%X  size:%dx%d  fps:%5.2f  ftime:=%6.4f\n",
-   demuxer->file_format,sh_video->format, sh_video->disp_w,sh_video->disp_h,
-   sh_video->fps,sh_video->frametime
-  );
-
-  if(!sh_video->fps && !force_fps){
-    mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_FPSnotspecified);
-    goto goto_next_file; //  exit_player(MSGTR_Exit_error);
+    if(!sh_video->fps && !force_fps){
+      mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_FPSnotspecified);
+      sh_video=d_video->sh=NULL;
+    }
   }
 
 }
 
 fflush(stdout);
 
-if(!sh_video){
-    mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_NoVideoStream);
+if(!sh_video && !sh_audio){
+    mp_msg(MSGT_CPLAYER,MSGL_FATAL,"No stream found\n");
     goto goto_next_file; // exit_player(MSGTR_Exit_error);
 }
+
+if(!sh_video) goto init_audio;
 
 #ifdef USE_DVDREAD
 current_module="spudec";
@@ -1119,7 +1125,7 @@ if(sub_name){
 demux_info_print(demuxer);
 
 //================== Init AUDIO (codec) ==========================
-
+init_audio:
 current_module="init_audio_codec";
 
 if(sh_audio){
@@ -1165,7 +1171,8 @@ if(sh_audio){
 }
 
 //================== Init VIDEO (codec & libvo) ==========================
-
+if(!sh_video)
+   goto main;
 current_module="init_video_codec";
 
 // Go through the codec.conf and find the best codec...
@@ -1187,7 +1194,8 @@ while(1){
 		if(bestprio==-1 || !video_codec) {
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantFindVideoCodec,sh_video->format);
     mp_msg(MSGT_CPLAYER,MSGL_HINT, MSGTR_TryUpgradeCodecsConfOrRTFM,get_path("codecs.conf"));
-    goto goto_next_file; // exit_player(MSGTR_Exit_error);
+    sh_video = d_video->sh = NULL; 
+    goto main; // exit_player(MSGTR_Exit_error);
     }
   } else {
     // is next line needed anymore? - atmos ::
@@ -1384,6 +1392,8 @@ current_module="init_libvo";
    fflush(stdout);
    
 //================== MAIN: ==========================
+   main:
+if(!sh_video) osd_level = 0;
 {
 
 //int frame_corr_num=0;   //
@@ -1427,6 +1437,8 @@ if(sh_audio){
       sh_audio->channels,sh_audio->sample_format,0)){
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CannotInitAO);
     sh_audio=d_audio->sh=NULL;
+    if(sh_video == NULL)
+      goto goto_next_file;
   } else {
     inited_flags|=INITED_AO;
   }
@@ -1442,7 +1454,7 @@ if(sh_audio){
 //  sh_audio->timer=-(audio_buffer_delay);
 }
 
-  sh_video->timer=0;
+  if(sh_video) sh_video->timer=0;
   if(sh_audio) sh_audio->timer=-audio_delay;
 
 if(!sh_audio){
@@ -1452,7 +1464,13 @@ if(!sh_audio){
   d_audio->id=-2;         // do not read audio chunks
   if(audio_out) uninit_player(INITED_AO); // close device
 }
-
+ if(!sh_video){
+   mp_msg(MSGT_CPLAYER,MSGL_INFO,"Video: no video!!!\n");
+   if(verbose) mp_msg(MSGT_CPLAYER,MSGL_V,"Freeing %d unused video chunks\n",d_video->packs);
+   ds_free_packs(d_video);
+   d_video->id=-2;
+   if(video_out) uninit_player(INITED_VO);
+ }
   current_module=NULL;
 
 if(demuxer->file_format!=DEMUXER_TYPE_AVI) pts_from_bps=0; // it must be 0 for mpeg/asf!
@@ -1485,9 +1503,6 @@ while(!eof){
       if(play_n_frames<0) eof = PT_NEXT_ENTRY;
     }
 
-  vo_pts=sh_video->timer*90000.0;
-  vo_fps=sh_video->fps;
-
 /*========================== PLAY AUDIO ============================*/
 while(sh_audio){
   unsigned int t;
@@ -1507,7 +1522,12 @@ while(sh_audio){
   while(sh_audio->a_buffer_len<playsize && !d_audio->eof){
     int ret=decode_audio(sh_audio,&sh_audio->a_buffer[sh_audio->a_buffer_len],
         playsize-sh_audio->a_buffer_len,sh_audio->a_buffer_size-sh_audio->a_buffer_len);
-    if(ret>0) sh_audio->a_buffer_len+=ret; else break;
+    if(ret>0) sh_audio->a_buffer_len+=ret; 
+    else {
+      if(!sh_video)
+	eof = PT_NEXT_ENTRY;
+      break;
+    }
   }
   current_module=NULL;   // Leave AUDIO decoder module
   t=GetTimer()-t;audio_time_usage+=t*0.000001;
@@ -1545,7 +1565,20 @@ while(sh_audio){
   }
 #endif
 
+if(!sh_video) {
+  if(!quiet) mp_msg(MSGT_AVSYNC,MSGL_STATUS,"A:%6.1f %4.1f%% %d%%   \r"
+		    ,sh_audio->timer-audio_out->get_delay()
+		    ,(sh_audio->timer>0.5)?100.0*audio_time_usage/(double)sh_audio->timer:0
+		    ,cache_fill_status
+		    );
+  usec_sleep(sh_audio->a_buffer_len/sh_audio->o_bps/1000);
+  goto read_input;
+}
+
 /*========================== PLAY VIDEO ============================*/
+
+vo_pts=sh_video->timer*90000.0;
+vo_fps=sh_video->fps;
 
 cvideo_base_vframe=sh_video->timer;
 cvideo_base_vtime=video_time_usage;
@@ -1887,6 +1920,8 @@ if(auto_quality>0){
 #endif
 }
 
+read_input:
+
 #ifdef USE_OSD
   if(osd_visible){
     if (!--osd_visible){ vo_osd_progbar_type=-1; // disable
@@ -1903,7 +1938,10 @@ if(auto_quality>0){
 #ifdef HAVE_NEW_GUI
       int gui_pause_flag=0; // gany!
 #endif
-      mp_msg(MSGT_CPLAYER,MSGL_STATUS,"\n------ PAUSED -------\r");fflush(stdout);
+      if(!quiet) {
+	mp_msg(MSGT_CPLAYER,MSGL_STATUS,"\n------ PAUSED -------\r");
+	fflush(stdout);
+      }
 #ifdef HAVE_NEW_GUI
       if(use_gui) mplShMem->Playing=2;
 #endif
@@ -1935,7 +1973,7 @@ if(auto_quality>0){
              (use_stdin || getch2(20)<=0) && mplayer_get_key()<=0){
 #endif 
 #ifndef USE_LIBVO2
-	     video_out->check_events();
+	     if(sh_video && video_out) video_out->check_events();
 #endif /* HAVE_NEW_INPUT */
 #ifdef HAVE_NEW_GUI
              if(use_gui){
@@ -2098,7 +2136,8 @@ if(step_sec>0) {
 	eof = PT_PREV_SRC;
       break;
     case 'o':  // toggle OSD
-      osd_level=(osd_level+1)%3;
+      if(sh_video)
+	osd_level=(osd_level+1)%3;
       break;
     case 'z':
       sub_delay -= 0.1;
@@ -2352,13 +2391,14 @@ if(step_sec>0) {
 	sub_delay += v;
       osd_show_sub_delay = 9; // show the subdelay in OSD
     } break;
-    case MP_CMD_OSD :  {
-      int v = cmd->args[0].v.i;
-      if(v < 0)
-	osd_level=(osd_level+1)%3;
-      else
-	osd_level= v > 2 ? 2 : v;
-    } break;
+    case MP_CMD_OSD : 
+      if(sh_video) {
+	int v = cmd->args[0].v.i;
+	if(v < 0)
+	  osd_level=(osd_level+1)%3;
+	else
+	  osd_level= v > 2 ? 2 : v;
+      } break;
     case MP_CMD_VOLUME :  {
       int v = cmd->args[0].v.i;
       if(v > 0)
@@ -2556,18 +2596,19 @@ if(rel_seek_secs || abs_seek_pos){
 	}
       }
 #endif
-      
-      c_total=0;
-      max_pts_correction=0.1;
-      osd_visible=sh_video->fps; // to rewert to PLAY pointer after 1 sec
-      audio_time_usage=0; video_time_usage=0; vout_time_usage=0;
-      drop_frame_cnt=0;
-      too_slow_frame_cnt=0;
-      too_fast_frame_cnt=0;
+      if(sh_video) {
+	c_total=0;
+	max_pts_correction=0.1;
+	osd_visible=sh_video->fps; // to rewert to PLAY pointer after 1 sec
+	audio_time_usage=0; video_time_usage=0; vout_time_usage=0;
+	drop_frame_cnt=0;
+	too_slow_frame_cnt=0;
+	too_fast_frame_cnt=0;
 
 #ifdef USE_DVDREAD
       if(vo_spudec) spudec_reset(vo_spudec);
 #endif
+      }
   }
   rel_seek_secs=0;
   abs_seek_pos=0;
