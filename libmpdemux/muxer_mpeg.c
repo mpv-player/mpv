@@ -6,6 +6,7 @@
 
 #include "config.h"
 #include "../version.h"
+#include "../mp_msg.h"
 
 #include "wine/mmreg.h"
 #include "wine/avifmt.h"
@@ -60,16 +61,6 @@ static muxer_stream_t* mpegfile_new_stream(muxer_t *muxer,int type){
   if (!(s->b_buffer = malloc (MUXER_MPEG_BLOCKSIZE))) {
     free (s);
     return NULL; // no mem?!
-  } else if (type == MUXER_TYPE_VIDEO) {
-    s->ckid = be2me_32 (0x1e0 + muxer->num_videos);
-    muxer->num_videos++;
-    s->h.fccType=streamtypeVIDEO;
-    if(!muxer->def_v) muxer->def_v=s;
-//    printf ("Added video stream %d\n", muxer->num_videos);
-  } else { // MUXER_TYPE_AUDIO
-    s->ckid = be2me_32 (0x1c0 + s->id - muxer->num_videos);
-    s->h.fccType=streamtypeAUDIO;
-//    printf ("Added audio stream %d\n", s->id - muxer->num_videos + 1);
   }
   muxer->streams[muxer->avih.dwStreams]=s;
   s->type=type;
@@ -77,6 +68,17 @@ static muxer_stream_t* mpegfile_new_stream(muxer_t *muxer,int type){
   s->timer=0.0;
   s->size=0;
   s->muxer=muxer;
+  if (type == MUXER_TYPE_VIDEO) {
+    s->ckid = be2me_32 (0x1e0 + muxer->num_videos);
+    muxer->num_videos++;
+    s->h.fccType=streamtypeVIDEO;
+    if(!muxer->def_v) muxer->def_v=s;
+    mp_msg (MSGT_MUXER, MSGL_DBG2, "Added video stream %d, ckid=%X\n", muxer->num_videos, s->ckid);
+  } else { // MUXER_TYPE_AUDIO
+    s->ckid = be2me_32 (0x1c0 + s->id - muxer->num_videos);
+    s->h.fccType=streamtypeAUDIO;
+    mp_msg (MSGT_MUXER, MSGL_DBG2, "Added audio stream %d, ckid=%X\n", s->id - muxer->num_videos + 1, s->ckid);
+  }
   muxer->avih.dwStreams++;
   return s;
 }
@@ -119,6 +121,7 @@ static int write_mpeg_block(muxer_t *muxer, muxer_stream_t *s, FILE *f, char *bl
   unsigned int mints=0;
   uint16_t l1;
 
+  mp_dbg(MSGT_MUXER, MSGL_DBG3, " MPEG block: size=%u, scr=%u, rate=%u, id=%X;", len, muxer->file_end, muxer->sysrate, s->ckid);
   if (s->b_buffer_ptr == 0) { // 00001111 if no PTS
     s->b_buffer[0] = 0xf;
     s->b_buffer_ptr = 1;
@@ -238,6 +241,7 @@ static void set_mpeg_pts(muxer_t *muxer, muxer_stream_t *s, unsigned int pts) {
   }
   else
     dts -= nts/2; // one frame :)
+  mp_dbg(MSGT_MUXER, MSGL_DBG3, ", dts=%u", dts);
   write_mpeg_ts (s->b_buffer+7, dts, 0x10);
 }
 
@@ -316,6 +320,7 @@ static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags
     else
       sz = len;
   }
+  mp_dbg(MSGT_MUXER, MSGL_DBG3, "\nMPEG chunk: size=%u, pts=%f", len, s->timer);
   set_mpeg_pts (muxer, s, pts);
   // alter counters:
   if (s->h.dwSampleSize) {
@@ -361,6 +366,7 @@ static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags
     memcpy (s->b_buffer+s->b_buffer_ptr, s->buffer+ptr, len);
     s->b_buffer_ptr += len;
   }
+  mp_dbg(MSGT_MUXER, MSGL_DBG3, " next pts=%f\n", s->timer);
 }
 
 static void mpegfile_write_header(muxer_t *muxer){
