@@ -52,7 +52,7 @@ static Rect OutBufferRect;              //the dimensions of our GWorld
 
 static GWorldPtr OutBufferGWorld = NULL;//a GWorld is some kind of description for a drawing environment
 static ImageDescriptionHandle framedescHandle;
-//static HINSTANCE qtml_dll;
+static HINSTANCE qtime_qts; // handle to the preloaded quicktime.qts
 static HMODULE handler;
 
 #if defined(USE_QTX_CODECS) && !defined(MACOSX)
@@ -116,6 +116,13 @@ static int init(sh_video_t *sh){
     Setup_LDT_Keeper();
 #endif
 
+    //preload quicktime.qts to avoid the problems caused by the hardcoded path inside the dll
+    qtime_qts = LoadLibraryA("QuickTime.qts");
+    if(!qtime_qts){
+    mp_msg(MSGT_DECVIDEO,MSGL_ERR,"unable to load QuickTime.qts\n" );
+    return 0;
+    }
+    
     handler = LoadLibraryA("qtmlClient.dll");
     if(!handler){
     mp_msg(MSGT_DECVIDEO,MSGL_ERR,"unable to load qtmlClient.dll\n");

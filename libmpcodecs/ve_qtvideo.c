@@ -34,6 +34,7 @@
 HMODULE   WINAPI LoadLibraryA(LPCSTR);
 FARPROC   WINAPI GetProcAddress(HMODULE,LPCSTR);
 int       WINAPI FreeLibrary(HMODULE);
+static HINSTANCE qtime_qts; //handle to preloaded quicktime.qts
 static HMODULE handler;
 
 static OSErr        (*FindCodec)(CodecType              cType,
@@ -296,6 +297,13 @@ static int vf_open(vf_instance_t *vf, char* args){
 #ifdef WIN32_LOADER
     Setup_LDT_Keeper();
 #endif
+    //preload quicktime.qts to avoid the problems caused by the hardcoded path inside the dll
+    qtime_qts = LoadLibraryA("QuickTime.qts");
+    if(!qtime_qts){
+        mp_msg(MSGT_MENCODER,MSGL_ERR,"unable to load QuickTime.qts\n" );
+        return 0;
+    }
+    
     handler = LoadLibraryA("qtmlClient.dll");
     if(!handler){
         mp_msg(MSGT_MENCODER,MSGL_ERR,"unable to load qtmlClient.dll\n");

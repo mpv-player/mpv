@@ -68,6 +68,7 @@ typedef int (__cdecl* LPFUNC8)(SoundConverter sc,
                                 unsigned long *outputBytes);
 typedef int (__cdecl* LPFUNC9)(SoundConverter         sc) ;                                
 
+static HINSTANCE qtime_qts; // handle to the preloaded quicktime.qts
 static HINSTANCE qtml_dll;
 static LPFUNC1 InitializeQTML;
 static LPFUNC2 SoundConverterOpen;
@@ -91,10 +92,17 @@ static int loader_init()
 #ifdef WIN32_LOADER
     Setup_LDT_Keeper();
 #endif
+    //preload quicktime.qts to avoid the problems caused by the hardcoded path inside the dll
+    qtime_qts = LoadLibraryA("QuickTime.qts");
+    if( qtime_qts == (HMODULE)NULL )
+    {
+        mp_msg(MSGT_DECAUDIO,MSGL_ERR,"failed loading QuickTime.qts\n" );
+        return 1;
+    }
     qtml_dll = LoadLibraryA("qtmlClient.dll");
     if( qtml_dll == (HMODULE)NULL )
     {
-        mp_msg(MSGT_DECAUDIO,MSGL_ERR,"failed loading dll\n" );
+        mp_msg(MSGT_DECAUDIO,MSGL_ERR,"failed loading qtmlClient.dll\n" );
 	return 1;
     }
 #if 1
@@ -269,6 +277,8 @@ static void uninit(sh_audio_t *sh){
 //    printf("TerminateQTML:%i\n",error);
 //    FreeLibrary( qtml_dll );
 //    qtml_dll = NULL;
+//    FreeLibrary( qtime_qts );
+//    qtime_qts = NULL;
 //    printf("qt dll loader uninit done\n");
 #ifdef MACOSX
     ExitMovies();
