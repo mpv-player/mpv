@@ -33,7 +33,7 @@
 .\" Title
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2004-11-07" "The MPlayer Project" "The Movie Player"
+.TH MPlayer 1 "2004-11-17" "The MPlayer Project" "The Movie Player"
 .
 .SH NAME
 mplayer  \- movie player
@@ -183,8 +183,8 @@ DVD subtitles (SPU streams, VOBsub and Closed Captions).
 (MPlayer's Movie Encoder) is a simple movie encoder, designed to encode
 MPlayer-playable movies (see above) to other MPlayer-playable formats (see
 below).
-It encodes to DivX4, XviD, one of the libavcodec codecs and PCM/\:MP3/\:VBRMP3
-audio in 1, 2 or 3\ passes.
+It encodes to MPEG4 (DivX/XviD), one of the libavcodec codecs and
+PCM/\:MP3/\:VBRMP3 audio in 1, 2 or 3\ passes.
 Furthermore it has stream copying abilities, a powerful filter system (crop,
 expand, flip, postprocess, rotate, scale, noise, rgb/\:yuv conversion) and
 more.
@@ -232,7 +232,7 @@ next/\:previous playtree entry in the parent list
 .IPs "INS and DEL"
 next/\:previous alternative source (ASX playlist only)
 .IPs "p / SPACE"
-Pause movie (any key unpauses).
+Pause movie (pressing again unpauses).
 .IPs .\ \ \ \ 
 Step forward.
 Pressing once will pause movie, every consecutive press will play one frame
@@ -890,7 +890,7 @@ or ~/.mplayer/\:channels.conf as a last resort.
 .B \-dvd-device <path\ to\ device> (DVD only)
 Specify the DVD device (default: /dev/\:dvd).
 You can also specify a directory that contains files previously copied directly
-from a DVD (such as with vobcopy).
+from a DVD (with e.g.\& vobcopy).
 Note that using \-dumpstream is usually a better way to
 copy DVD titles in the first place (see the examples).
 .
@@ -1740,7 +1740,7 @@ be converted to
 .BR PCM,1 .
 .TP
 .B \-softvol
-Force the use of the software mixer, instead of using the soundcard
+Force the use of the software mixer, instead of using the sound card
 mixer.
 .
 .TP
@@ -1748,8 +1748,8 @@ mixer.
 Set the maximum amplification level in percent (default: 110).
 A value of 200 will allow you to adjust the volume up to a maximum of
 double the current level.
-With values below 100 the starting volume (which is 100%) will be above
-the maximum, which e.g. the OSD cannot display correctly.
+With values below 100 the initial volume (which is 100%) will be above
+the maximum, which e.g.\& the OSD cannot display correctly.
 .
 .TP
 .B \-nowaveheader (\-ao pcm only)
@@ -3048,14 +3048,14 @@ With MEncoder, you need to also use \-srate <srate>.
 srate: the output sample rate
 .br
 length: length of the filter with respect to the lower sampling rate
-default: 16
+(default: 16)
 .br
-linear: if 1 then filters will be linearly interpolated between polyphase 
+linear: if 1 then filters will be linearly interpolated between polyphase
 entries
 .br
-count: log2 of the number of polyphase entries 
+count: log2 of the number of polyphase entries
 (..., 10->1024, 11->2048, 12->4096, ...)
-default: 10->1024
+(default: 10->1024)
 .br
 cutoff: cutoff frequency (0.0-1.0), default set depending upon filter length
 .REss
@@ -3707,9 +3707,19 @@ Mirrors the image on the Y axis.
 .
 .TP
 .B rotate[=<0\-7>]
-Rotates and flips (optional) the image +/\:- 90 degrees.
-For parameters between 4\-7 rotation is only done if the movie's geometry is
+Rotates the image by 90 degrees and optionally flips it.
+For values between 4\-7 rotation is only done if the movie geometry is
 portrait and not landscape.
+.RSs
+.IPs 0
+Rotate by 90 degrees clockwise and flip.
+.IPs 1
+Rotate by 90 degrees clockwise.
+.IPs 2
+Rotate by 90 degrees counterclockwise.
+.IPs 3
+Rotate by 90 degrees counterclockwise and flip.
+.RE
 .
 .TP
 .B scale[=w:h[:interlaced[:chr_drop[:param[:param2[:presize]]]]]]
@@ -4030,6 +4040,14 @@ and contrast adjustment.
 Note that it uses the same MMX optimized code as \-vf eq if all
 gamma values are 1.0.
 The parameters are given as floating point values.
+.RSs
+.IPs rg
+gamma value for the red component
+.IPs gg
+gamma value for the green component
+.IPs bg
+gamma value for the blue component
+.RE
 Parameters rg, gg, bg are the independent gamma values for the red, green
 and blue components.
 The weight parameter can be used to reduce the effect of a high gamma value on
@@ -5311,7 +5329,7 @@ H.263
 .IPs h263p
 H.263+
 .IPs mpeg4
-DivX 4/\:5
+MPEG4 (DivX 4/5)
 .IPs msmpeg4
 DivX 3
 .IPs msmpeg4v2
@@ -6620,7 +6638,7 @@ releases of XviD 1.0.x (api4).
 .B (no)packed
 This option is meant to solve frame-order issues when encoding to
 container formats like AVI that cannot cope with out-of-order frames.
-In practise, most decoders (both software and hardware) are able to deal
+In practice, most decoders (both software and hardware) are able to deal
 with frame-order themselves, and may get confused when this option is
 turned on, so you can safely leave if off, unless you really know what
 you are doing.
@@ -6678,7 +6696,7 @@ Playing with this setting may result in a jerky video, so use it at your
 own risks!
 .
 .TP
-.B (no)qpel\ 
+.B (no)qpel
 MPEG4 uses a half pixel precision for its motion search by default.
 The standard proposes a mode where encoders are allowed to use quarter
 pixel precision.
@@ -6690,7 +6708,7 @@ It's better to test with and without this option and see whether it
 is worth activating.
 .
 .TP
-.B (no)gmc\ 
+.B (no)gmc
 Enable Global Motion Compensation, which makes XviD generate special
 frames (GMC-frames) which are well suited for Pan/\:Zoom/\:Rotating images.
 Whether or not the use of this option will save bits is highly
