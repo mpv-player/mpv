@@ -148,6 +148,24 @@ int pass_working=0;
 
 static int play_n_frames=-1;
 
+#include "libvo/font_load.h"
+#include "libvo/sub.h"
+
+// sub:
+char *font_name=NULL;
+float font_factor=0.75;
+char *sub_name=NULL;
+float sub_delay=0;
+float sub_fps=0;
+int   sub_auto = 0;
+
+#ifdef USE_SUB
+static subtitle* subtitles=NULL;
+float sub_last_pts = -303;
+#endif
+
+
+
 //char *out_audio_codec=NULL; // override audio codec
 //char *out_video_codec=NULL; // override video codec
 
@@ -217,8 +235,6 @@ void parse_cfgfiles( m_config_t* conf )
 
 
 //---------------------------------------------------------------------------
-
-void *vo_spudec=NULL;
 
 int dec_audio(sh_audio_t *sh_audio,unsigned char* buffer,int total){
     int size=0;
@@ -333,6 +349,21 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
       gCpuCaps.has3DNow, gCpuCaps.has3DNowExt,
       gCpuCaps.hasSSE, gCpuCaps.hasSSE2);
 #endif
+
+// check font
+#ifdef USE_OSD
+  if(font_name){
+       vo_font=read_font_desc(font_name,font_factor,verbose>1);
+       if(!vo_font) mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadFont,font_name);
+  } else {
+      // try default:
+       vo_font=read_font_desc(get_path("font/font.desc"),font_factor,verbose>1);
+       if(!vo_font)
+       vo_font=read_font_desc(DATADIR"/font/font.desc",font_factor,verbose>1);
+  }
+#endif
+
+  vo_init_osd();
 
   // FIXME: get rid of -dvd and other tricky options and config/playtree
   stream2=open_stream(frameno_filename,0,&i);
@@ -481,6 +512,22 @@ vo_spudec=spudec_new_scaled(stream->type==STREAMTYPE_DVD?((dvd_priv_t *)(stream-
 }
 #endif
 
+#ifdef USE_SUB
+// after reading video params we should load subtitles because
+// we know fps so now we can adjust subtitles time to ~6 seconds AST
+// check .sub
+//  current_module="read_subtitles_file";
+  if(sub_name){
+    subtitles=sub_read_file(sub_name, sh_video->fps);
+    if(!subtitles) mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadSub,sub_name);
+  } else
+  if(sub_auto) { // auto load sub file ...
+    subtitles=sub_read_file( filename ? sub_filename( get_path("sub/"), filename )
+	                              : "default.sub", sh_video->fps );
+  }
+#endif	
+
+
 // set up output file:
 muxer_f=fopen(out_filename,"wb");
 if(!muxer_f) {
@@ -557,6 +604,8 @@ default:
         mp_msg(MSGT_MENCODER,MSGL_FATAL,"Failed to open the encoder\n");
         mencoder_exit(1,NULL);
     }
+    // append 'expand' filter, it fixes stride problems and renders osd:
+    sh_video->vfilter=vf_open_filter(sh_video->vfilter,"expand","-1:-1:-1:-1:1");
     sh_video->vfilter=append_filters(sh_video->vfilter);
 
 mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
@@ -1027,6 +1076,30 @@ if(sh_audio && !demuxer2){
     }
         fflush(stdout);
 
+#ifdef USE_SUB
+  // find sub
+  if(subtitles && d_video->pts>0){
+      float pts=d_video->pts;
+      if(sub_fps==0) sub_fps=sh_video->fps;
+      if (pts > sub_last_pts || pts < sub_last_pts-1.0 ) {
+         find_sub(subtitles,sub_uses_time?(100*(pts+sub_delay)):((pts+sub_delay)*sub_fps)); // FIXME! frame counter...
+         sub_last_pts = pts;
+      }
+  }
+#endif
+
+#ifdef USE_DVDREAD
+// DVD sub:
+ if(vo_spudec){
+     unsigned char* packet=NULL;
+     int len;
+     while((len=ds_get_packet_sub(d_dvdsub,&packet))>0){
+	 mp_msg(MSGT_MENCODER,MSGL_V,"\rDVD sub: len=%d  v_pts=%5.3f  s_pts=%5.3f  \n",len,d_video->pts,d_dvdsub->pts);
+	 spudec_assemble(vo_spudec,packet,len,90000*d_dvdsub->pts);
+     }
+     spudec_heartbeat(vo_spudec,90000*d_video->pts);
+ }
+#endif
 
 
 } // while(!eof)

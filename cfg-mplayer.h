@@ -58,15 +58,6 @@ extern int vo_gamma_blue_intensity;
 extern int vo_directrendering;
 extern int vd_use_slices;
 
-#ifdef USE_SUB
-extern int sub_unicode;
-extern int sub_utf8;
-#ifdef USE_ICONV
-extern char *sub_cp;
-#endif
-extern int sub_pos;
-#endif
-
 #ifdef USE_OSD
 extern int osd_level;
 #endif
@@ -191,24 +182,7 @@ static config_t mplayer_opts[]={
 //	{"encode", &encode_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"vobsub", &vobsub_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"vobsubid", &vobsub_id, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
-#ifdef USE_SUB
-	{"sub", &sub_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
-#ifdef USE_ICONV
-	{"subcp", &sub_cp, CONF_TYPE_STRING, 0, 0, 0, NULL},
-#endif	
-	{"subdelay", &sub_delay, CONF_TYPE_FLOAT, 0, 0.0, 10.0, NULL},
-	{"subfps", &sub_fps, CONF_TYPE_FLOAT, 0, 0.0, 10.0, NULL},
-        {"noautosub", &sub_auto, CONF_TYPE_FLAG, 0, 1, 0, NULL},
-	{"unicode", &sub_unicode, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"nounicode", &sub_unicode, CONF_TYPE_FLAG, 0, 1, 0, NULL},
-	{"utf8", &sub_utf8, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"noutf8", &sub_utf8, CONF_TYPE_FLAG, 0, 1, 0, NULL},
- 	{"subpos",&sub_pos,  CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
-#endif
-#ifdef USE_OSD
-	{"font", &font_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
-	{"ffactor", &font_factor, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 10.0, NULL},
-#endif
+
 //	{"bg", &play_in_bg, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 //	{"nobg", &play_in_bg, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"sstep", &step_sec, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},

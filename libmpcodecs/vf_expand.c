@@ -1,4 +1,4 @@
-//#define OSD_SUPPORT
+#define OSD_SUPPORT
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,6 +23,7 @@ struct vf_priv_s {
     int exp_x,exp_y;
     mp_image_t *dmpi;
     int osd;
+    unsigned char* fb_ptr;
 };
 
 //===========================================================================//
@@ -33,7 +34,8 @@ static int orig_w,orig_h;
 
 static void remove_func_2(int x0,int y0, int w,int h){
     // TODO: let's cleanup the place
-    printf("OSD clear: %d;%d %dx%d  \n",x0,y0,w,h);
+    //printf("OSD clear: %d;%d %dx%d  \n",x0,y0,w,h);
+    vf_mpi_clear(vf->priv->dmpi,x0,y0,w,h);
 }
 
 static void remove_func(int x0,int y0, int w,int h){
@@ -60,10 +62,30 @@ static void remove_func(int x0,int y0, int w,int h){
 }
 
 static void draw_func(int x0,int y0, int w,int h,unsigned char* src, unsigned char *srca, int stride){
-    unsigned char* dst=vf->priv->dmpi->planes[0]+
+    unsigned char* dst;
+    if(!vo_osd_changed_flag && vf->priv->dmpi->planes[0]==vf->priv->fb_ptr){
+	// ok, enough to update the area inside the video, leave the black bands
+	// untouched!
+	if(x0<vf->priv->exp_x){
+	    int tmp=vf->priv->exp_x-x0;
+	    w-=tmp; src+=tmp; srca+=tmp; x0+=tmp;
+	}
+	if(y0<vf->priv->exp_y){
+	    int tmp=vf->priv->exp_y-y0;
+	    h-=tmp; src+=tmp*stride; srca+=tmp*stride; y0+=tmp;
+	}
+	if(x0+w>vf->priv->exp_x+orig_w){
+	    w=vf->priv->exp_x+orig_w-x0;
+	}
+	if(y0+h>vf->priv->exp_y+orig_h){
+	    h=vf->priv->exp_y+orig_h-y0;
+	}
+    }
+    if(w<=0 || h<=0) return; // nothing to do...
+//    printf("OSD redraw: %d;%d %dx%d  \n",x0,y0,w,h);
+    dst=vf->priv->dmpi->planes[0]+
 			vf->priv->dmpi->stride[0]*y0+
 			(vf->priv->dmpi->bpp>>3)*x0;
-    if(!vo_osd_changed_flag) return;
     switch(vf->priv->dmpi->imgfmt){
     case IMGFMT_BGR15:
     case IMGFMT_RGB15:
@@ -97,12 +119,22 @@ static void draw_func(int x0,int y0, int w,int h,unsigned char* src, unsigned ch
 
 static void draw_osd(struct vf_instance_s* vf_,int w,int h){
     vf=vf_;orig_w=w;orig_h=h;
+//    printf("======================================\n");
     if(vf->priv->exp_w!=w || vf->priv->exp_h!=h ||
-       vf->priv->exp_x || vf->priv->exp_y){
-       // yep, we're expanding image, not just copy.
-       vo_remove_text(vf->priv->exp_w,vf->priv->exp_h,remove_func);
+	vf->priv->exp_x || vf->priv->exp_y){
+	// yep, we're expanding image, not just copy.
+	if(vf->priv->dmpi->planes[0]!=vf->priv->fb_ptr){
+	    // double buffering, so we need full clear :(
+	    remove_func(0,0,vf->priv->exp_w,vf->priv->exp_h);
+	} else {
+	    // partial clear:
+	    vo_remove_text(vf->priv->exp_w,vf->priv->exp_h,remove_func);
+	}
     }
     vo_draw_text(vf->priv->exp_w,vf->priv->exp_h,draw_func);
+    // save buffer pointer for double buffering detection - yes, i know it's
+    // ugly method, but note that codecs with DR support does the same...
+    vf->priv->fb_ptr=vf->priv->dmpi->planes[0];
 }
 
 #endif
@@ -120,6 +152,7 @@ static int config(struct vf_instance_s* vf,
     // check:
 //    if(vf->priv->exp_w+vf->priv->exp_x>width) return 0; // bad width
 //    if(vf->priv->exp_h+vf->priv->exp_y>height) return 0; // bad height
+    vf->priv->fb_ptr=NULL;
     ret=vf_next_config(vf,vf->priv->exp_w,vf->priv->exp_h,d_width,d_height,flags,outfmt);
     return ret;
 }

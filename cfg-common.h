@@ -99,7 +99,28 @@
 	{"tv", "MPlayer was compiled without TV Interface support\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #endif
 	{"vivo", vivoopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
-    {"vop", &vo_plugin_args, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
+	{"vop", &vo_plugin_args, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
+
+// ------------------------- subtitles options --------------------
+
+#ifdef USE_SUB
+	{"sub", &sub_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
+#ifdef USE_ICONV
+	{"subcp", &sub_cp, CONF_TYPE_STRING, 0, 0, 0, NULL},
+#endif	
+	{"subdelay", &sub_delay, CONF_TYPE_FLOAT, 0, 0.0, 10.0, NULL},
+	{"subfps", &sub_fps, CONF_TYPE_FLOAT, 0, 0.0, 10.0, NULL},
+        {"noautosub", &sub_auto, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	{"unicode", &sub_unicode, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"nounicode", &sub_unicode, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	{"utf8", &sub_utf8, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"noutf8", &sub_utf8, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+ 	{"subpos",&sub_pos,  CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
+#endif
+#ifdef USE_OSD
+	{"font", &font_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"ffactor", &font_factor, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 10.0, NULL},
+#endif
 
 #else
 

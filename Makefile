@@ -25,9 +25,9 @@ MANDIR = ${prefix}/man
 # a BSD compatible 'install' program
 INSTALL = install
 
-SRCS_COMMON = xacodec.c cpudetect.c mp_msg.c codec-cfg.c cfgparser.c my_profile.c spudec.c playtree.c playtreeparser.c asxparser.c vobsub.c
-SRCS_MENCODER = mencoder.c $(SRCS_COMMON) libao2/afmt.c divx4_vbr.c libvo/aclib.c libvo/osd.c me-opt-reg.c
-SRCS_MPLAYER = mplayer.c $(SRCS_COMMON) find_sub.c subreader.c lirc_mp.c mixer.c mp-opt-reg.c
+SRCS_COMMON = xacodec.c cpudetect.c mp_msg.c codec-cfg.c cfgparser.c my_profile.c spudec.c playtree.c playtreeparser.c asxparser.c vobsub.c subreader.c find_sub.c
+SRCS_MENCODER = mencoder.c $(SRCS_COMMON) libao2/afmt.c divx4_vbr.c libvo/aclib.c libvo/osd.c libvo/sub.c libvo/font_load.c me-opt-reg.c
+SRCS_MPLAYER = mplayer.c $(SRCS_COMMON) lirc_mp.c mixer.c mp-opt-reg.c
 
 OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
 OBJS_MPLAYER = $(SRCS_MPLAYER:.c=.o)
@@ -268,18 +268,19 @@ config.h: configure
 # do not rebuild after cvs commits if .developer file is present!
 
 # rebuild at every config.h/config.mak change:
-version.h: config.h config.mak Makefile
+version.h:
 	./version.sh `$(CC) --version`
 ifeq ($(wildcard .developer),)
 	$(MAKE) distclean
 endif
 	$(MAKE) depend
 
-# rebuild at every CVS update:
+# rebuild at every CVS update or config/makefile change:
 ifeq ($(wildcard .developer),)
 ifneq ($(wildcard CVS/Entries),)
 version.h: CVS/Entries
 endif
+version.h: config.h config.mak Makefile
 endif
 
 #

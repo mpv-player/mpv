@@ -85,6 +85,14 @@ extern void* vo_vobsub;
 extern char * __sub_osd_names[];
 extern char * __sub_osd_names_short[];
 
+extern int sub_unicode;
+extern int sub_utf8;
+
+#ifdef USE_ICONV
+extern char *sub_cp;
+#endif
+extern int sub_pos;
+
 //extern void vo_draw_text_osd(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));
 //extern void vo_draw_text_progbar(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));
 //extern void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));
