@@ -76,8 +76,8 @@ Now, go on:
    The timing is solved odd, since it has/recommended to be done differently
 	 for each of the formats, and sometimes can be done in many ways.
 
-	 There is are float variables called a_frame and v_frame, they store
-	 the just played A/V position is seconds.
+	 There are float variables called a_frame and v_frame, they store
+	 the just played A/V position in seconds.
 
 	 The structure of the playing loop :
          while(not EOF) {
