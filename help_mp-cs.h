@@ -313,8 +313,8 @@ static char help_text[]=
 #define MSGTR_CodecDidNotSet "VDec: kodek nenastavil sh->disp_w a sh->disp_h, pokou¹ím se to pøekonat!\n"
 #define MSGTR_VoConfigRequest "VDec: vo po¾adovaná konfigurace - %d x %d (preferovaný csp: %s)\n"
 #define MSGTR_CouldNotFindColorspace "Nemohu nalézt spoleèný barevný prostor - zkou¹ím to znovu s -vop scale...\n"
-#define MSGTR_MovieAspectIsSet "Film-pomìr stran je %.2f:1 - pøedbì¾nì zvìt¹uji na správnou velikost.\n"
-#define MSGTR_MovieAspectUndefined "Film-pomìr stran není definován - nemìním velikost.\n"
+#define MSGTR_MovieAspectIsSet "Obraz - pomìr stran je %.2f:1 - pøedbì¾nì mìním velikost obrazu.\n"
+#define MSGTR_MovieAspectUndefined "Obraz - pomìr stran není definován - nemìním velikost.\n"
 
 // ====================== GUI messages/buttons ========================
 
@@ -471,7 +471,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_PostProcess "Aktivovat postprocessing"
 #define MSGTR_PREFERENCES_AutoQuality "Automatická kontrola kvality:"
 #define MSGTR_PREFERENCES_NI "Pou¾ít parser pro neprokládaný AVI formát"
-#define MSGTR_PREFERENCES_IDX "Vytvoøit tabulku indexù pokud je tøeba"
+#define MSGTR_PREFERENCES_IDX "Vytvoøit tabulku indexù, pokud je to tøeba"
 #define MSGTR_PREFERENCES_VideoCodecFamily "Rodina video kodeku:"
 #define MSGTR_PREFERENCES_AudioCodecFamily "Rodina audio kodeku:"
 #define MSGTR_PREFERENCES_FRAME_OSD_Level "Typ OSD"
@@ -505,6 +505,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding18 "Japon¹tina (SHIFT-JIS)"
 #define MSGTR_PREFERENCES_FontEncoding19 "Korej¹tina (CP949)"
 #define MSGTR_PREFERENCES_FontEncoding20 "Thaj¹tina (CP874)"
+#define MSGTR_PREFERENCES_FontEncoding21 "Cyrilice Windows (CP1251)"
 #define MSGTR_PREFERENCES_FontNoAutoScale "Bez automatické velikosti"
 #define MSGTR_PREFERENCES_FontPropWidth "Proporènì dle ¹íøky obrazu"
 #define MSGTR_PREFERENCES_FontPropHeight "Proporènì dle vý¹ky obrazu"
