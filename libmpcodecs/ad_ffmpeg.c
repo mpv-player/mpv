@@ -82,6 +82,18 @@ static int init(sh_audio_t *sh_audio)
         return 0;
     }
    mp_msg(MSGT_DECAUDIO,MSGL_V,"INFO: libavcodec init OK!\n");
+   
+//   printf("\nFOURCC: 0x%X\n",sh_audio->format);
+   if(sh_audio->format==0x3343414D){
+       // MACE 3:1
+       sh_audio->ds->ss_div = 2*3; // 1 samples/packet
+       sh_audio->ds->ss_mul = 2*1; // 1 bytes/packet
+   } else
+   if(sh_audio->format==0x3643414D){
+       // MACE 6:1
+       sh_audio->ds->ss_div = 2*6; // 1 samples/packet
+       sh_audio->ds->ss_mul = 2*1; // 1 bytes/packet
+   }
 
    // Decode at least 1 byte:  (to get header filled)
    x=decode_audio(sh_audio,sh_audio->a_buffer,1,sh_audio->a_buffer_size);
