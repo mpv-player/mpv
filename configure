@@ -2102,6 +2102,30 @@ fi
 echores "$_inttypes"
 
 
+echocheck "int_fastXY_t in inttypes.h"
+cat > $TMPC << EOF
+#include <inttypes.h>
+int main(void) { 
+volatile int_fast16_t v= 0;
+return v; }
+EOF
+_fast_inttypes=no
+cc_check && _fast_inttypes=yes
+if test "$_fast_inttypes" = yes ; then
+  # nothing to do
+  :
+else
+  _def_fast_inttypes='  
+    typedef signed char int_fast8_t;
+    typedef signed int  int_fast16_t;
+    typedef signed int  int_fast32_t;
+    typedef unsigned char uint_fast8_t;
+    typedef unsigned int  uint_fast16_t;
+    typedef unsigned int  uint_fast32_t;'
+fi
+echores "$_fast_inttypes"
+
+
 echocheck "word size"
 _mp_wordsize="#undef MP_WORDSIZE"
 cat > $TMPC << EOF
@@ -6198,6 +6222,9 @@ $_def_vcd
 
 /* C99 lrintf function available */
 $_def_lrintf
+
+/* int_fastXY_t emulation */
+$_def_fast_inttypes
 
 /* nanosleep support */
 $_def_nanosleep
