@@ -42,7 +42,7 @@ int	mtrr_set_type(unsigned base,unsigned size,int type)
     return ENOSYS;
 #else
 #warning Please port MTRR stuff!!!
-    return ENOSYS
+    return ENOSYS;
 #endif
 }
 #else
