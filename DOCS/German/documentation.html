@@ -1425,9 +1425,14 @@ Lösung: versuche -framedrop</LI>
 Audio verschiebt sich / verliert die Synchronisation bei einer oder mehreren Dateien<BR>
 <UL>
 <LI>defekte Datei (bitten uploaden, das wir das prüfen und korrigieren können<BR>
-Abhilfe: -ni oder -nobps Option (für nicht-interlaced oder defekte Dateien)<BR>
--mc 0 (erforderlich bei Dateien mit schlechtem Interleave und VBR-Audio)<BR>
--Delay-Einstellung oder +/- Tasten bei Abspielen</LI>
+Abhilfe:
+<UL>
+    <LI>-ni oder -nobps Option (für nicht-interlaced oder defekte Dateien)<BR></LI>
+  und/oder
+    <LI>-mc 0 (erforderlich bei Dateien mit schlechtem Interleave und VBR-Audio)<BR></LI>
+  und/oder
+    <LI>-delay Option oder +/- Tasten bei Abspielen</LI>
+</UL>
 <LI>deine Soundkarte unterstützt keine 48KHz Wiedergabe<BR>
 Abhilfe: kaufe eine bessere Soundkarte... oder versuche die Bilder/Sekunde um 10% zu vermindern (verwende -fps 27 bei 30fps-Filmen)</LI>
 <LI>langsamer Rechner<BR>
