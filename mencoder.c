@@ -30,11 +30,6 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 
-static char* banner_text=
-"\n\n"
-"MEncoder " VERSION MSGTR_MEncoderCopyright
-"\n";
-
 #include "cpudetect.h"
 
 #include "codec-cfg.h"
@@ -364,7 +359,7 @@ unsigned int timer_start;
 
   mp_msg_init();
   mp_msg_set_level(MSGL_STATUS);
-  mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s",banner_text);
+  mp_msg(MSGT_CPLAYER,MSGL_INFO, "MEncoder " VERSION " (C) 2000-2003 MPlayer Team\n\n");
 
   /* Test for cpu capabilities (and corresponding OS support) for optimizing */
   GetCpuCaps(&gCpuCaps);

@@ -4,11 +4,6 @@
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
-static char* banner_text=
-"\n\n"
-"MPlayer " VERSION "(C) 2000-2003 MPlayer Team\n"
-"\n";
-
 static char help_text[]=
 "用法:   mplayer [options] [url|path/]filename\n"
 "\n"
@@ -161,7 +156,6 @@ static char help_text[]=
 
 // mencoder.c:
 
-#define MSGTR_MEncoderCopyright "(C) 2000-2003 Arpad Gereoffy (看DOCS!)\n"
 #define MSGTR_UsingPass3ControllFile "使用pass3控制文件: %s\n"
 #define MSGTR_MissingFilename "\n没有文件名!\n\n"
 #define MSGTR_CannotOpenFile_Device "无法打开文件/设备\n"

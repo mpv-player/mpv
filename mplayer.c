@@ -1,5 +1,3 @@
-// Movie Player    v0.90   (C) 2000-2002. by A'rpi/ESP-team & `cat AUTHORS`
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -758,7 +756,7 @@ int gui_no_filename=0;
   mp_msg_init();
   mp_msg_set_level(MSGL_STATUS);
 
-  mp_msg(MSGT_CPLAYER,MSGL_INFO,banner_text);
+  mp_msg(MSGT_CPLAYER,MSGL_INFO, "MPlayer " VERSION " (C) 2000-2003 MPlayer Team\n");
   /* Test for cpu capabilities (and corresponding OS support) for optimizing */
   GetCpuCaps(&gCpuCaps);
 #ifdef ARCH_X86

@@ -15,11 +15,6 @@
 
 
 #ifdef HELP_MP_DEFINE_STATIC
-static char* banner_text=
-"\n\n"
-"MPlayer " VERSION "(C) 2000-2003 MPlayer Team\n"
-"\n";
-
 static char help_text[]=
 "Uso:   mplayer [opciones] [url o ruta del archivo]\n"
 "\n"
@@ -164,7 +159,6 @@ static char help_text[]=
 
 // mencoder.c:
 
-#define MSGTR_MEncoderCopyright "(C) 2000-2002 Arpad Gereoffy (véase DOCS!)\n"
 #define MSGTR_UsingPass3ControllFile "Usando el archivo de control pass3: %s\n"
 #define MSGTR_MissingFilename "\nFalta el nombre del archivo.\n\n"
 #define MSGTR_CannotOpenFile_Device "No se pudo abrir el archivo o el dispositivo.\n"

@@ -1,11 +1,6 @@
 // Translated by:  Panagiotis Issaris <takis@lumumba.luc.ac.be>
 
 #ifdef HELP_MP_DEFINE_STATIC
-static char* banner_text=
-"\n\n"
-"MPlayer " VERSION "(C) 2000-2003 MPlayer Team\n"
-"\n";
-
 static char help_text[]=
 "Gebruik:   mplayer [opties] [pad/]bestandsnaam\n"
 "\n"
@@ -157,7 +152,6 @@ static char help_text[]=
 
 // mencoder.c:
 
-#define MSGTR_MEncoderCopyright "(C) 2000-2003 Arpad Gereoffy (zie DOCS!)\n"
 #define MSGTR_UsingPass3ControllFile "Pass3 control bestand gebruikend: %s\n"
 #define MSGTR_MissingFilename "\nOntbrekende bestandsnaam!\n\n"
 #define MSGTR_CannotOpenFile_Device "Kan bestand/aparaat niet openen\n"
