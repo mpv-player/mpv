@@ -153,7 +153,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 			m = 1;
 			break;
 		default:
-			format = AF_FORMAT_S16_LE;
+			format = AF_FORMAT_S16_NE;
 			bits_per_sample = 16;
 			m = 2;
 			break;
