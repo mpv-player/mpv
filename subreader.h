@@ -59,6 +59,9 @@ subtitle* subcp_recode1 (subtitle *sub);
 // setting to NULL disables enca.
 void subcp_open (FILE *enca_fd); /* for demux_ogg.c */
 void subcp_close (void); /* for demux_ogg.c */
+#ifdef HAVE_ENCA
+void* guess_cp(FILE *enca_fd, char *preferred_language, char *fallback);
+#endif
 char ** sub_filenames(char *path, char *fname);
 void list_sub_file(sub_data* subd);
 void dump_srt(sub_data* subd, float fps);
