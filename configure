@@ -3408,6 +3408,7 @@ EOF
 fi
 if test "$_caca" = yes ; then
   _def_caca='#define HAVE_CACA 1'
+  _inc_caca=`caca-config --cflags`
   _ld_caca=`caca-config --libs`
   _vosrc="$_vosrc vo_caca.c"
   _vomodules="caca $_vomodules"
@@ -6033,6 +6034,7 @@ GIF_LIB = $_ld_gif
 SDL_LIB = $_ld_sdl
 SVGA_LIB = $_ld_svga
 AA_LIB = $_ld_aa
+CACA_INC = $_inc_caca
 CACA_LIB = $_ld_caca
 
 # audio output
