@@ -716,11 +716,6 @@ EOF
 esac
 
 
-echocheck "binutils"
-_binutils=no
-$_as libac3/downmix/downmix_i386.S -o $TMPO > /dev/null 2>&1 && _binutils=yes
-echores "$_binutils"
-
 if x86 && test "$_runtime_cpudetection" = no ; then
   extcheck() {
     if test "$1" = yes ; then
@@ -3464,8 +3459,6 @@ TARGET_MMX2 = $_mmx2
 TARGET_3DNOW = $_3dnow
 TARGET_3DNOWEX = $_3dnowex
 TARGET_SSE = $_sse
-
-BINUTILS = $_binutils
 
 # --- GUI stuff ---
 GTKLIB = $_ld_static $_ld_gtk
