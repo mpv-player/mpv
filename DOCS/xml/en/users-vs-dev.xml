@@ -139,7 +139,7 @@ Another impediment to binary redistribution was compiletime optimizations
 for CPU architecture.  <application>MPlayer</application> now supports
 runtime CPU detection (specify the
 <option>--enable-runtime-cpudetection</option> option when compiling). It
-is disabled by default because it implies a small speed sacrifice, it is
+is disabled by default because it implies a small speed sacrifice, but it is
 now possible to create binaries that run on different members of the Intel
 CPU family.
 </para>
