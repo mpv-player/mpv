@@ -320,8 +320,8 @@ void exit_player(char* how){
   #endif
      getch2_disable();
   video_out->uninit();
-  audio_out->reset();
-  audio_out->uninit();
+//  audio_out->reset();
+  if(audio_out) audio_out->uninit();
   if(encode_name) avi_fixate();
 #ifdef HAVE_LIRC
   #ifdef HAVE_GUI
