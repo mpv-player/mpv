@@ -412,12 +412,12 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
     pic->data[1]= mpi->planes[1];
     pic->data[2]= mpi->planes[2];
     
-    assert(mpi->width  >= ((width +align)&(~align)));   
-    assert(mpi->height >= ((height+align)&(~align)));
-    assert(mpi->stride[0] >= mpi->width);
+    assert(mpi->w >= ((width +align)&(~align)));
+    assert(mpi->h >= ((height+align)&(~align)));
+    assert(mpi->stride[0] >= mpi->w);
     if(mpi->imgfmt==IMGFMT_I420 || mpi->imgfmt==IMGFMT_YV12 || mpi->imgfmt==IMGFMT_IYUV){
-        const int y_size= mpi->stride[0] * mpi->height;
-        const int c_size= mpi->stride[1] * mpi->chroma_height;
+        const int y_size= mpi->stride[0] * (mpi->h-1) + mpi->w;
+        const int c_size= mpi->stride[1] * ((mpi->h>>1)-1) + (mpi->w>>1);
         
         assert(mpi->planes[0] > mpi->planes[1] || mpi->planes[0] + y_size <= mpi->planes[1]);
         assert(mpi->planes[0] > mpi->planes[2] || mpi->planes[0] + y_size <= mpi->planes[2]);
