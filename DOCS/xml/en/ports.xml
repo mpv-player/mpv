@@ -396,4 +396,34 @@ compiled <application>MPlayer</application> binaries for Mac OS X from the
 </para>
 </sect1>
 
+<sect1 id="hpux">
+<title>HP UX</title>
+<para>
+Martin Gansser maintains a valuable 
+<ulink url="http://cloud.prohosting.com/patos/docs/mplayer_on_hpux11.htm">HOWTO</ulink>
+about building <application>MPlayer</application> on HP-UX. It even has a FAQ
+section!
+</para>
+
+<para>
+Anyway, our "raw" <application>MPlayer</application> source is used to compile
+on HP-UX without flaws.
+</para>
+</sect1>
+
+<sect1 id="amiga">
+<title>Amiga/MorphOS (GeekGadgets)</title>
+<para>
+Nicholas Det at Genesi has done a big and powerful port of <application>MPlayer
+</application> for MorphOS. Sadly it's based on the 0.90 series.
+</para>
+
+<para>
+Get if from <ulink url="http://www.morphzone.org/">MorphZone</ulink>:
+<ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=90">MPlayer 0.91 binary</ulink>
+<ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=91">MPlayer 0.91 source</ulink>
+<ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=912">MEncoder 0.91 binary</ulink>
+</para>
+</sect1>
+
 </chapter>
