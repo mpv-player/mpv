@@ -23,8 +23,7 @@ endif
 
 # -funroll-loops  removed, triggered gcc 3.0.4 (3.x?) bug
 CFLAGS= -I. $(OPTFLAGS) $(EXTRA_INC)\
-	-DSYS_LINUX -D__USE_UNIX98 -D_REENTRANT -D_GNU_SOURCE \
-	-ffast-math -fomit-frame-pointer 
+	-DSYS_LINUX -D__USE_UNIX98 -D_REENTRANT -D_GNU_SOURCE
 
 .c.o:
 	$(CC) $(CFLAGS) -c -o $@ $<
