@@ -416,16 +416,25 @@ static void rivatv_overlay_colorkey (rivatv_info* info, unsigned int chromakey){
 	b = chromakey & 0x000000FF;
 	switch (info->depth) {
 	case 15:
-		key = ((r >> 3) << 10) | ((g >> 3) << 5) | ((b >> 3)) | 0x00008000;
+		key = ((r >> 3) << 10) | ((g >> 3) << 5) | ((b >> 3));
+#ifndef WIN32
+        key = key | 0x00008000;
+#endif       
 		break;
 	case 16: // XXX unchecked
-		key = ((r >> 3) << 11) | ((g >> 2) << 5) | ((b >> 3)) | 0x00008000;
+		key = ((r >> 3) << 11) | ((g >> 2) << 5) | ((b >> 3));
+#ifndef WIN32
+        key = key | 0x00008000;
+#endif       
 		break;
-	case 24: // XXX unchecked, maybe swap order of masking
+	case 24: // XXX unchecked, maybe swap order of masking - FIXME Can the card be in 24 bit mode anyway?
 		key = (chromakey & 0x00FFFFFF) | 0x00800000;
 		break;
 	case 32:
-		key = chromakey | 0x80000000;
+		key = chromakey;
+#ifndef WIN32
+        key = key | 0x80000000;
+#endif       
 		break;
 	}
 	//printf("[nvidia_vid] depth=%d %08X \n", info->depth, chromakey);
@@ -515,17 +524,17 @@ void rivatv_overlay_start (struct rivatv_info *info,int bufno){
 	case NV_ARCH_30:
 
 		/* NV_PVIDEO_BASE */
-		VID_WR32 (info->chip.PVIDEO, 0x900 + 0, base);
+		VID_WR32 (info->chip.PVIDEO, 0x900 + 0, base + offset);
 		//VID_WR32 (info->chip.PVIDEO, 0x900 + 4, base);
 		/* NV_PVIDEO_LIMIT */
-		VID_WR32 (info->chip.PVIDEO, 0x908 + 0, base + size - 1);
+		VID_WR32 (info->chip.PVIDEO, 0x908 + 0, base + offset + size - 1);
 		//VID_WR32 (info->chip.PVIDEO, 0x908 + 4, base + size - 1);
 
 		/* extra code for NV20 && NV30 architectures */
 		if (info->chip.arch == NV_ARCH_20 || info->chip.arch == NV_ARCH_30) {
-			VID_WR32 (info->chip.PVIDEO, 0x800 + 0, base);
+			VID_WR32 (info->chip.PVIDEO, 0x800 + 0, base + offset);
 			//VID_WR32 (info->chip.PVIDEO, 0x800 + 4, base);
-			VID_WR32 (info->chip.PVIDEO, 0x808 + 0, base + size - 1);
+			VID_WR32 (info->chip.PVIDEO, 0x808 + 0, base + offset + size - 1);
 			//VID_WR32 (info->chip.PVIDEO, 0x808 + 4, base + size - 1);
 		}
 
@@ -537,7 +546,7 @@ void rivatv_overlay_start (struct rivatv_info *info,int bufno){
 		//VID_WR32 (info->chip.PVIDEO, 0x918 + 4, 0x00001000);
 
 		/* NV_PVIDEO_OFFSET */
-		VID_WR32 (info->chip.PVIDEO, 0x920 + 0, offset + 0);
+		VID_WR32 (info->chip.PVIDEO, 0x920 + 0, 0x0);
 		//VID_WR32 (info->chip.PVIDEO, 0x920 + 4, offset + pitch);
 		/* NV_PVIDEO_SIZE_IN */
 		VID_WR32 (info->chip.PVIDEO, 0x928 + 0, ((info->height) << 16) | info->width);
