@@ -74,7 +74,7 @@ static AVPicture lavc_venc_picture;
 /* video options */
 char *lavc_param_vcodec = NULL;
 int lavc_param_vbitrate = -1;
-int lavc_param_vrate_tolerance = 1024*1024*8;
+int lavc_param_vrate_tolerance = 1024*8;
 int lavc_param_vhq = 0; /* default is realtime encoding */
 int lavc_param_vme = 3;
 int lavc_param_vqscale = 0;
@@ -1089,10 +1089,10 @@ case VCODEC_LIBAVCODEC:
     lavc_venc_context.width = vo_w;
     lavc_venc_context.height = vo_h;
     if (lavc_param_vbitrate >= 0) /* != -1 */
-	lavc_venc_context.bit_rate = lavc_param_vbitrate;
+	lavc_venc_context.bit_rate = lavc_param_vbitrate*1000;
     else
 	lavc_venc_context.bit_rate = 800000; /* default */
-    lavc_venc_context.bit_rate_tolerance= lavc_param_vrate_tolerance;
+    lavc_venc_context.bit_rate_tolerance= lavc_param_vrate_tolerance*1000;
     lavc_venc_context.frame_rate = (float)(force_ofps?force_ofps:sh_video->fps) * FRAME_RATE_BASE;
     lavc_venc_context.qmin= lavc_param_vqmin;
     lavc_venc_context.qmax= lavc_param_vqmax;
