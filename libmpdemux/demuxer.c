@@ -1276,7 +1276,7 @@ unsigned long demuxer_get_time_length(demuxer_t *demuxer){
 
 int demuxer_get_percent_pos(demuxer_t *demuxer){     
     int ans;     
-    if (demux_control(demuxer, DEMUXER_CTRL_GET_PERCENT_POS, &ans)<=DEMUXER_CTRL_OK)  {
+    if (demux_control(demuxer, DEMUXER_CTRL_GET_PERCENT_POS, &ans)<=0)  {
         ans=0;     
     }
     if (ans>100 || ans<0) ans=0;
