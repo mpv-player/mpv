@@ -293,11 +293,11 @@ struct NewMainArchiveHeader NewMhd;
 struct NewFileHeader NewLhd;
 struct BlockHeader BlockHead;
 
-UBYTE *TempMemory;                          /* temporary unpack-buffer      */
-char *CommMemory;
+UBYTE *TempMemory = NULL;                          /* temporary unpack-buffer      */
+char *CommMemory = NULL;
 
 
-UBYTE *UnpMemory;
+UBYTE *UnpMemory = NULL;
 char ArgName[NM];                           /* current file in rar archive  */
 char ArcFileName[NM];                       /* file to decompress           */
 
@@ -422,9 +422,9 @@ int urarlib_get(void *output,
   }
 #endif
 
-  free(UnpMemory);                          /* free memory                  */
-  free(TempMemory);
-  free(CommMemory);
+  if(UnpMemory) free(UnpMemory);           /* free memory                  */
+  if(TempMemory) free(TempMemory);
+  if(CommMemory) free(CommMemory);
   UnpMemory=NULL;
   TempMemory=NULL;
   CommMemory=NULL;
@@ -432,7 +432,8 @@ int urarlib_get(void *output,
 
   if(retcode == FALSE)
   {
-    free(temp_output_buffer);               /* free memory and return NULL  */
+    if(temp_output_buffer)                  /* free memory and return NULL  */
+      free(temp_output_buffer);
     temp_output_buffer=NULL;
     *(DWORD*)output=0;                      /* pointer on errors            */
     *size=0;
