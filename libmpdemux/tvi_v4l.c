@@ -405,9 +405,9 @@ static int init(priv_t *priv)
     if (ioctl(priv->video_fd, VIDIOCGTUNER, &priv->tuner) == -1)
     {
 	mp_msg(MSGT_TV, MSGL_ERR, "ioctl get tuner failed: %s\n", strerror(errno));
-	goto err;
-    }
-
+	priv->fps = PAL_FPS;
+//	goto err;
+    } else
     switch (priv->tuner.mode) {
     case VIDEO_MODE_PAL:
     case VIDEO_MODE_SECAM:
