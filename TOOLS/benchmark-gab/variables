@@ -1,4 +1,5 @@
 #!/bin/sh
+export PATH=$PATH:/sbin:/usr/local/bin:/usr/local/sbin:/usr/X11R6/bin
 
 VENDOR="`cat /proc/cpuinfo | grep vendor_id | cut -c 13-`"
 MODEL="`cat /proc/cpuinfo | grep "model name" | cut -c 14-`"
@@ -7,10 +8,8 @@ MEMORY="`cat /proc/meminfo | grep MemTotal | awk '{print $2}'` Kb"
 BUILD="`echo $VENDOR $MODEL $MHZ | tr [\ ] [_]`"
 VGA="`lspci | grep VGA | cut -c 36-`"
 
-export LOGFILE="`pwd`/$BUILD.logs/log-`date +\"%Y-%m-%d\"`"
+export LOGFILE="`pwd`/log-$BUILD-`date +\"%Y-%m-%d\"`"
 export COMPILEOPTIONS="--enable-runtime-cpudetection"
-
-mkdir $BUILD.logs 2> /dev/null
 
 function wrtlog {
 	echo "[ `date +\"%Y-%m-%d %T\"` ] $*" >> "$LOGFILE"

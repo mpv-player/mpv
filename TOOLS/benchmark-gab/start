@@ -4,7 +4,7 @@
 
 rm -f $LOGFILE
 
-wrtlog Script version v0.9
+wrtlog Script version v0.91
 wrtlog CPU: $VENDOR $MODEL $MHZ
 wrtlog MEM: $MEMORY
 wrtlog VGA: $VGA
