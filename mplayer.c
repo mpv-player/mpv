@@ -1731,9 +1731,10 @@ if(time_frame>0.001 && !(vo_flags&256)){
 
 //====================== FLIP PAGE (VIDEO BLT): =========================
 
-        current_module="flip_page";
-
+        current_module="vo_check_events";
 	if(vo_config_count) video_out->check_events();
+
+        current_module="flip_page";
         if(blit_frame && !frame_time_remaining){
 	   unsigned int t2=GetTimer();
 	   double tt;
