@@ -6,16 +6,19 @@
 #
 # Changes in reversed order:
 #
-# 2000/03/08 by LGB:
+# 2001/03/22 by Bivanbi:
+#  - new option: --cc  (to specify C compiler path+name)
+#
+# 2001/03/08 by LGB:
 #  - DGA detection-o-matic :)
 #  - '--disable-dga' option to force disabling DGA vo driver compiling into mplayer
 #  - line about '--enable-dga' is added to the help message
 #
-# 2000/02/26 by A'rpi:
+# 2001/02/26 by A'rpi:
 #  - added DGA option:  --enable-dga
 #  - no notify if --with-win32libdir used [Tibcu]
 #
-# 2000/02/25 by LGB:
+# 2001/02/25 by LGB:
 #  - TMPDIR or TEMPDIR variable is honored during tests for temporary files
 #  - ChangeLog inside configure was reversed ;-)
 #
@@ -62,6 +65,7 @@ cat << EOF
 usage: $0 [options]
 
 params:
+        --cc                    use this C compiler to build MPlayer [gcc]
         --enable-mmx            build with mmx support [autodetect]
         --enable-3dnow          build with 3dnow! support [autodetect]
         --enable-sse            build with sse support [autodetect]
@@ -115,6 +119,19 @@ fi
 # config files
 CCONF='config.h'
 MCONF='config.mak'
+
+# ---  Check for C compiler:
+
+_cc=gcc
+
+for ac_option
+do
+ case "$ac_option" in
+  --cc=*)
+        _cc=`echo $ac_option | cut -d '=' -f 2`
+        ;;
+ esac
+done
 
 # ---
 
@@ -287,39 +304,39 @@ EOF
 #echo -n "Checking your GCC CPU optimalization abilities: "
 if [ "$proc" = "k7" ]; then
 #	echo -n "trying k7  "
-	gcc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=athlon
+	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=athlon
 fi
 if [ "$proc" = "athlon" ]; then
 #	echo -n "trying athlon  "
-	gcc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=k6
+	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=k6
 fi
 if [ "$proc" = "k6" ]; then
 #	echo -n "trying k6  "
-	gcc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=k5
+	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=k5
 fi
 if [ "$proc" = "k5" ]; then
 #	echo -n "trying k5  "
-	gcc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=pentium
+	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=pentium
 fi
 if [ "$proc" = "i686" ]; then
 #	echo -n "trying i686  "
-	gcc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=pentiumpro
+	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=pentiumpro
 fi
 if [ "$proc" = "pentiumpro" ]; then
 #	echo -n "trying pentiumpro  "
-	gcc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=pentium
+	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=pentium
 fi
 if [ "$proc" = "pentium" ]; then
 #	echo -n "trying pentium  "
-	gcc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=i486
+	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=i486
 fi
 if [ "$proc" = "i486" ]; then
 #	echo -n "trying i486  "
-	gcc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=i386
+	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=i386
 fi
 if [ "$proc" = "i386" ]; then
 #	echo -n "trying i386  "
-	gcc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=error
+	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=error
 fi
 if [ "$proc" = "error" ]; then
 	echo
@@ -332,19 +349,19 @@ fi
 
 # check GL & X11 & Xext & Xv & SDL & termcap libs
 
-gcc $TMPC -o $TMPO $_x11libdir/ -lGL &> /dev/null && _gl=yes
-gcc $TMPC -o $TMPO $_x11libdir -lX11 -lXext &> /dev/null && _x11=yes
-gcc $TMPC -o $TMPO $_x11libdir -lXv &> /dev/null && _xv=yes
-gcc $TMPC -o $TMPO $_x11libdir -L/usr/local/lib/ -lpthread &> /dev/null || \
+$_cc $TMPC -o $TMPO $_x11libdir/ -lGL &> /dev/null && _gl=yes
+$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext &> /dev/null && _x11=yes
+$_cc $TMPC -o $TMPO $_x11libdir -lXv &> /dev/null && _xv=yes
+$_cc $TMPC -o $TMPO $_x11libdir -L/usr/local/lib/ -lpthread &> /dev/null || \
  { echo "Lib pthread not found."; rm -f $TMPC $TMPO ; exit 1; }
 
 # SDL disabled by default (0.11pre22-) because of the compilation problems
 # this is very buggy & experimental code, use it only if you really need it!!
 _have_sdl=no
-gcc $TMPC -o $TMPO $_x11libdir -L/usr/local/lib/ -lSDL -lpthread &> /dev/null && _have_sdl=yes
+$_cc $TMPC -o $TMPO $_x11libdir -L/usr/local/lib/ -lSDL -lpthread &> /dev/null && _have_sdl=yes
 
 _termcap=no
-gcc $TMPC -o $TMPO -ltermcap &> /dev/null && _termcap=yes
+$_cc $TMPC -o $TMPO -ltermcap &> /dev/null && _termcap=yes
 
 _binutils=no
 as libac3/downmix/downmix_i386.S -o $TMPO &> /dev/null && _binutils=yes
@@ -359,7 +376,7 @@ int main (void) { return 0;}
 EOF
 
 _dga=no
-gcc $TMPC -o $TMPO -L/usr/X11R6/lib -L/usr/X11/lib -lX11 -lXext -lXxf86dga -lXxf86vm &> /dev/null && _dga=yes
+$_cc $TMPC -o $TMPO -L/usr/X11R6/lib -L/usr/X11/lib -lX11 -lXext -lXxf86dga -lXxf86vm &> /dev/null && _dga=yes
 # Note: the -lXxf86vm library is the VideoMode extension and though it's
 # not needed for DGA, AFAIK every distribution packages together with DGA
 # stuffs named 'X extensions' or something similar. This check can be usefull
@@ -373,7 +390,7 @@ cat > $TMPC << EOF
 int main( void ) { return 0; }
 EOF
 
-gcc $TMPC -o $TMPO $_x11libdir/ -lGL &> /dev/null || \
+$_cc $TMPC -o $TMPO $_x11libdir/ -lGL &> /dev/null || \
  { _gl=no; echo "GL includes not found!";}
 
 rm -f $TMPC $TMPO
@@ -495,11 +512,13 @@ do
   --size-y=*)
 	_y=`echo $ac_option | cut -d '=' -f 2`
 	;;
+  --cc=*)
+	;;
  esac
 done
 
 # to screen.
-
+echo "Using C compiler: $_cc"
 echo "Checking for cpu vendor ... $pvendor ( $pfamily:$pmodel:$pstepping )"
 echo "Checking for cpu type ... $pname"
 echo "Optimizing to ... $proc"
@@ -571,7 +590,7 @@ cat > $MCONF << EOF
 # -------- Generated by ./configure -----------
 
 AR=ar
-CC=gcc
+CC=$_cc
 # OPTFLAGS=-O4 -march=$proc -mcpu=$proc -pipe -fomit-frame-pointer -ffast-math
 OPTFLAGS=-O4 -march=$proc -mcpu=$proc -pipe -ffast-math
 # LIBS=-L/usr/lib -L/usr/local/lib $_x11libdir $_gllib $_sdllib $_dgalib $_x11lib $_xvlib
