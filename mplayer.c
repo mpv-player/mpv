@@ -2100,7 +2100,7 @@ if(!sh_video) {
 	    float d=delay-sh_audio->delay;
 	    // we should avoid dropping to many frames in sequence unless we
 	    // are too late. and we allow 100ms A-V delay here:
-	    if(d<-dropped_frames*frame_time-0.100){
+	    if(d<-dropped_frames*frame_time-0.100 && osd_function != OSD_PAUSE){
 		drop_frame=frame_dropping;
 		++drop_frame_cnt;
 		++dropped_frames;
