@@ -23,6 +23,9 @@ static vd_info_t info = {
 
 LIBVD_EXTERN(ffmpeg)
 
+#include "../postproc/rgb2rgb.h"
+
+
 #ifdef USE_LIBAVCODEC_SO
 #include <libffmpeg/avcodec.h>
 #else
@@ -40,6 +43,8 @@ typedef struct {
     int last_aspect;
     int do_slices;
     int vo_inited;
+    int convert;
+    int yuy2_support;
 } vd_ffmpeg_ctx;
 
 //#ifdef FF_POSTPROCESS
@@ -48,6 +53,13 @@ typedef struct {
 
 // to set/get/query special features/parameters
 static int control(sh_video_t *sh,int cmd,void* arg,...){
+    vd_ffmpeg_ctx *ctx = sh->context;
+    switch(cmd){
+    case VDCTRL_QUERY_FORMAT:
+	if( (*((int*)arg)) == IMGFMT_YV12 ) return CONTROL_TRUE;
+	if( (*((int*)arg)) == IMGFMT_YUY2 && ctx->yuy2_support ) return CONTROL_TRUE;
+	return CONTROL_FALSE;
+    }
     return CONTROL_UNKNOWN;
 }
 
@@ -135,7 +147,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
     if(len<=0) return NULL; // skipped frame
     
-    if(ctx->vo_inited){
+    if(ctx->vo_inited && !ctx->convert){
 	mpi=mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, MP_IMGFLAG_PRESERVE |
 	    (ctx->do_slices?MP_IMGFLAG_DRAW_CALLBACK:0),
 	    sh->disp_w, sh->disp_h);
@@ -177,8 +189,22 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	sh->disp_w = avctx->width;
 	sh->disp_h = avctx->height;
 	ctx->vo_inited=1;
-    	if (mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YV12))
+	ctx->yuy2_support=(avctx->pix_fmt==PIX_FMT_YUV422P);
+    	if (!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,
+	    ctx->yuy2_support ? IMGFMT_YUY2 : IMGFMT_YV12))
     		return NULL;
+	ctx->convert=(sh->codec->outfmt[sh->outfmtidx]==IMGFMT_YUY2);
+    }
+    
+    if(!mpi && ctx->convert){
+	// do yuv422p -> yuy2 conversion:
+        mpi=mpcodecs_get_image(sh, MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
+	    avctx->width, avctx->height);
+	if(!mpi) return NULL;
+	yuv422ptoyuy2(lavc_picture.data[0],lavc_picture.data[1],lavc_picture.data[2],
+	    mpi->planes[0],avctx->width,avctx->height,
+	    lavc_picture.linesize[0],lavc_picture.linesize[1],mpi->stride[0]);
+	return mpi;
     }
     
     if(!mpi)
@@ -197,6 +223,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     mpi->stride[2]=lavc_picture.linesize[2];
 
     if(avctx->pix_fmt==PIX_FMT_YUV422P){
+	// we have 422p but user wants yv12 (420p)
 	mpi->stride[1]*=2;
 	mpi->stride[2]*=2;
     }
