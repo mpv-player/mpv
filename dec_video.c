@@ -733,6 +733,11 @@ mp_image_t *mpi=sh_video->image;
 unsigned int out_fmt=mpi->imgfmt; //sh_video->codec->outfmt[sh_video->outfmtidx];
 int planar=(mpi->flags&MP_IMGFLAG_PLANAR)!=0; //(out_fmt==IMGFMT_YV12||out_fmt==IMGFMT_IYUV||out_fmt==IMGFMT_I420);
 int blit_frame=0;
+bes_da_t bda;
+void *vmem;
+int use_dr;
+int painted;
+static int double_buff_num = 0;
 
 //uint8_t* planes_[3];
 //uint8_t** planes=planes_;
@@ -742,6 +747,10 @@ int blit_frame=0;
 unsigned int t=GetTimer();
 unsigned int t2;
 
+memset(&bda,0,sizeof(bes_da_t));
+painted = 0;
+  if(vo_vaa.query_bes_da)
+    use_dr = vo_vaa.query_bes_da(&bda) ? 0 : 1;
 #ifdef USE_MP_IMAGE
 if(mpi->type!=MP_IMGTYPE_EXPORT)
 if( !(mpi->flags&MP_IMGFLAG_ALLOCATED) && !(mpi->flags&MP_IMGFLAG_DIRECT) ){
@@ -859,7 +868,22 @@ switch(sh_video->codec->driver){
 #ifdef USE_DIRECTSHOW
   case VFM_DSHOW: {        // W32/DirectShow
     if(drop_frame<2)
-	DS_VideoDecoder_DecodeInternal(ds_vdec, start, in_size, 0, drop_frame ? 0 : sh_video->our_out_buffer);
+    {
+	/* FIXME: WILL WORK ONLY FOR PACKED FOURCC. BUT WHAT ABOUT PLANAR? */
+        vmem = 0;
+	if(use_dr && bda.dest.pitch.y == 16)
+	{
+	    vmem = bda.dga_addr + bda.offsets[0] + bda.offset.y;
+	    if(vo_doublebuffering && bda.num_frames>1)
+	    {
+		if(double_buff_num) vmem = bda.dga_addr + bda.offsets[1] + bda.offset.y;
+		else		    vmem = bda.dga_addr + bda.offsets[0] + bda.offset.y;
+		double_buff_num = double_buff_num ? 0 : 1;
+	    }
+	}
+	DS_VideoDecoder_DecodeInternal(ds_vdec, start, in_size, 0, drop_frame ? 0 : vmem ? vmem : sh_video->our_out_buffer);
+	if(vmem) painted = 1;
+    }
     if(!drop_frame && sh_video->our_out_buffer) blit_frame=3;
     break;
   }
@@ -1070,7 +1094,7 @@ else if(gCpuCaps.hasMMX){
 #endif
 
 t2=GetTimer();t=t2-t;video_time_usage+=t*0.000001f;
-
+if(painted) return 1;
 switch(blit_frame){
 case 3:
       if(planar){
