@@ -50,6 +50,7 @@ typedef struct {
     // Navi:
     int packs_left;
     dsi_t dsi_pack;
+    int angle_seek;
 } dvd_priv_t;
 
 #endif
@@ -209,6 +210,7 @@ if(dvd_title){
     d->cur_pgc = vts_file->vts_pgcit->pgci_srp[pgc_id-1].pgc;
     d->cur_cell = d->cur_pgc->program_map[pgn-1] - 1; // start playback here
     d->packs_left=-1;      // for Navi stuff
+    d->angle_seek=0;
     
     if( d->cur_pgc->cell_playback[d->cur_cell].block_type 
 	== BLOCK_TYPE_ANGLE_BLOCK ) d->cur_cell+=dvd_angle;
@@ -352,6 +354,12 @@ read_next:
 	    // process!
     	    d->packs_left = d->dsi_pack.dsi_gi.vobu_ea;
 	    mp_msg(MSGT_DVD,MSGL_DBG2, "Found NAVI packet! lba=0x%X  len=%d  \n",d->cur_pack,d->packs_left);
+	    if(d->angle_seek){
+		int skip=d->dsi_pack.sml_agli.data[dvd_angle].address;
+		if(skip) d->cur_pack=d->dsi_pack.dsi_gi.nv_pck_lbn+skip;
+		d->angle_seek=0;
+		mp_msg(MSGT_DVD,MSGL_V, "Angle-seek synced! skip=%d  new_lba=0x%X  \n",skip,d->cur_pack);
+	    }
 	}
 	++d->cur_pack;
 	goto read_next;
@@ -359,6 +367,8 @@ read_next:
 
     ++d->cur_pack;
     if(d->packs_left>=0) --d->packs_left;
+    
+    if(d->angle_seek) goto read_next; // searching for Navi packet
 
     return d->cur_pack-1;
 }
@@ -368,7 +378,7 @@ void dvd_seek(dvd_priv_t *d,int pos){
     d->cur_pack=pos;
     
 // check if we stay in current cell (speedup things, and avoid angle skip)
-if(d->cur_pack>d->cell_last_pack &&
+if(d->cur_pack>d->cell_last_pack ||
    d->cur_pack<d->cur_pgc->cell_playback[ d->cur_cell ].first_sector){
 
     // ok, cell change, find the right cell!
@@ -391,13 +401,15 @@ if(d->cur_pack>d->cell_last_pack &&
     }
     d->cur_cell=next;
   }
+
 }
 
 mp_msg(MSGT_DVD,MSGL_V, "DVD Seek! lba=0x%X  cell=%d  packs: 0x%X-0x%X  \n",
     d->cur_pack,d->cur_cell,d->cur_pgc->cell_playback[ d->cur_cell ].first_sector,d->cell_last_pack);
 
-// TODO: if we're in interleaved multi-angle cell, find the right angle chain!
+// if we're in interleaved multi-angle cell, find the right angle chain!
 // (read Navi block, and use the seamless angle jump table)
+d->angle_seek=1;
 
 }
 
