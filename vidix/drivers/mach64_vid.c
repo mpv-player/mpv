@@ -145,11 +145,17 @@ static __inline__ int ATIGetMach64LCDReg(int _Index)
 static __inline__ uint32_t INPLL(uint32_t addr)
 {
     uint32_t res;
-
+    uint32_t in;
+    
+    /* preserve unknown bits */
+    in= INREG8(CLOCK_CNTL + 1);
+    if(__verbose>0)printf("[mach64] pll: %X\n", in);
+    in &= ~((PLL_WR_EN | PLL_ADDR)>>8); //clean some stuff
+    
     /* write addr byte */
-    OUTREG8(CLOCK_CNTL + 1, (addr << 2));
+    OUTREG8(CLOCK_CNTL + 1, in | (addr << 2));
     /* read the register value */
-    res = INREG(CLOCK_CNTL + 2);
+    res = INREG8(CLOCK_CNTL + 2);
     return res;
 }
 
@@ -257,7 +263,6 @@ static uint32_t mach64_get_yres( void )
 static int mach64_get_vert_stretch(void)
 {
     int lcd_index;
-    int lcd_gen_ctrl;
     int vert_stretching;
     int ext_vert_stretch;
     int ret;
@@ -740,7 +745,7 @@ static int mach64_vid_init_video( vidix_playback_t *config )
     v_inc>>=4; // convert 16.16 -> 20.12
     v_inc/= dest_h;
     
-    h_inc = (src_w << 12) / dest_w;
+    h_inc = (src_w << (12+ecp)) / dest_w;
     /* keep everything in 16.16 */
     config->offsets[0] = 0;
     for(i=1; i<config->num_frames; i++)
