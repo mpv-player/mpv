@@ -1,4 +1,3 @@
-#define HAVE_DIVX4ENCORE /* FIXME!! add it to configure */
 
 #define VCODEC_COPY 0
 #define VCODEC_FRAMENO 1
