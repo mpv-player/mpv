@@ -1184,7 +1184,7 @@ static void *video_grabber(void *data)
     mp_dbg(MSGT_TV, MSGL_DBG3, "\npicture sync failed\n");
 
     prev_interval = 0.0;
-    prev_skew = priv->audio_skew;
+    prev_skew = 0.0;
 
     for (;!priv->shutdown;)
     {
@@ -1209,29 +1209,33 @@ static void *video_grabber(void *data)
 		priv->starttime = curtime.tv_sec + curtime.tv_usec*.000001;
 		priv->audio_skew_measure_time = 0;
 		pthread_mutex_unlock(&priv->audio_starter);
+		// first frame must always have timestamp of zero
+		xskew = 0.0;
+		skew = 0.0;
+		interval = 0.0;
 		first = 0;
-	    }
-
-	    interval = curtime.tv_sec + curtime.tv_usec*.000001 - priv->starttime;
-
-	    if (!priv->immediate_mode && (
-		    ((interval - prev_interval < 1.0/priv->fps*0.85) && interval > 0.0001)
-		    || (interval - prev_interval > 1.0/priv->fps*1.15) ) ) {
-		mp_msg(MSGT_TV, MSGL_V, "\nvideo capture thread: frame delta ~ %.1lf fps\n",
-		       1.0/(interval - prev_interval));
-	    }
-
-	    // interpolate the skew in time
-	    pthread_mutex_lock(&priv->skew_mutex);
-	    xskew = priv->audio_skew + (interval - priv->audio_skew_measure_time)*priv->audio_skew_factor;
-	    pthread_mutex_unlock(&priv->skew_mutex);
-	    // correct extreme skew changes to avoid (especially) moving backwards in time
-	    if (xskew - prev_skew > (interval - prev_interval)*MAX_SKEW_DELTA) {
-		skew = prev_skew + (interval - prev_interval)*MAX_SKEW_DELTA;
-	    } else if (xskew - prev_skew < -(interval - prev_interval)*MAX_SKEW_DELTA) {
-		skew = prev_skew - (interval - prev_interval)*MAX_SKEW_DELTA;
 	    } else {
-		skew = xskew;
+		interval = curtime.tv_sec + curtime.tv_usec*.000001 - priv->starttime;
+
+		if (!priv->immediate_mode && (
+			(interval - prev_interval < 1.0/priv->fps*0.85)
+			|| (interval - prev_interval > 1.0/priv->fps*1.15) ) ) {
+		    mp_msg(MSGT_TV, MSGL_V, "\nvideo capture thread: frame delta ~ %.1lf fps\n",
+			   1.0/(interval - prev_interval));
+		}
+
+		// interpolate the skew in time
+		pthread_mutex_lock(&priv->skew_mutex);
+		xskew = priv->audio_skew + (interval - priv->audio_skew_measure_time)*priv->audio_skew_factor;
+		pthread_mutex_unlock(&priv->skew_mutex);
+		// correct extreme skew changes to avoid (especially) moving backwards in time
+		if (xskew - prev_skew > (interval - prev_interval)*MAX_SKEW_DELTA) {
+		    skew = prev_skew + (interval - prev_interval)*MAX_SKEW_DELTA;
+		} else if (xskew - prev_skew < -(interval - prev_interval)*MAX_SKEW_DELTA) {
+		    skew = prev_skew - (interval - prev_interval)*MAX_SKEW_DELTA;
+		} else {
+		    skew = xskew;
+		}
 	    }
 
 	    mp_msg(MSGT_TV, MSGL_DBG3, "\nfps = %lf, v_interval = %lf, a_skew = %f, corr_skew = %f\n",
