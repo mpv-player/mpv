@@ -134,10 +134,10 @@ frame
 	if(sub_packet_type==00)
 		sub_packet[0]
 	else{
-		subpacket_base_size		v
 		subpacket_count			v
 		shuffle_type			v
 		if(subpacket_type==10){
+		    subpacket_base_size		v
 		    for(i=0; i<subpacket_count; i++)
 			subpacket_size_diff[i]	v
 		}
@@ -295,10 +295,11 @@ subpacket_type
 	be put in a single packet
 
 subpacket_base_size
-	the size of the subpackets for fixed fize subpackets
 	an offset which should be added to the subpacket_size_diff of each 
 	subpacket to get the actual size, so its normally the size of the 
 	smallest subpacket
+	for fixed length subpackets, the size is calculated from the 
+	subpacket_count
 
 subpacket_count
 	the number of subpackets, if not pressent then 1
