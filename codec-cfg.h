@@ -30,6 +30,7 @@
 #define AFM_VORBIS 10
 #define AFM_FFMPEG 11
 #define AFM_MAD 12
+#define AFM_IMA4 13
 
 #define VFM_MPEG 1
 #define VFM_VFW 2
