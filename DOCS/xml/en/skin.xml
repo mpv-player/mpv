@@ -394,13 +394,13 @@ dragged horizontally. The parameters are:
     button (must have three parts below each other, like in case of
     <link linkend="skin-button">button</link>)
     </para></listitem>
-    <listitem><para><literal>bwidth</literal>,<literal>bheight</literal> - size
+    <listitem><para><literal>bwidth</literal>, <literal>bheight</literal> - size
     of the button
     </para></listitem>
    <listitem><para><literal>phases</literal> - the image to be used for the
    different phases of the hpotmeter. A special value of <literal>NULL</literal>
    can be used if you want no such image. The image must be divided into
-   <literal>numphasesparts</literal> vertically like this:
+   <literal>numphases</literal> parts vertically like this:
     </para>
 <informalfigure>
 <screen>
@@ -422,9 +422,9 @@ dragged horizontally. The parameters are:
     <listitem><para><literal>default</literal> - default value for hpotmeter
     (in the range <literal>0</literal> to <literal>100</literal>)
     </para></listitem>
-    <listitem><para><literal>X</literal>,<literal>Y</literal> - position for the hpotmeter
+    <listitem><para><literal>X</literal>, <literal>Y</literal> - position for the hpotmeter
     </para></listitem>
-    <listitem><para><literal>width</literal>,<literal>height</literal> - width and height
+    <listitem><para><literal>width</literal>, <literal>height</literal> - width and height
     of the <literal>hpotmeter</literal>
     </para></listitem>
     <listitem><para><literal>message</literal> - the message to be generated when the
