@@ -136,10 +136,10 @@ enum MpegCodec {
 	MPG_CODEC_FAME
 };
 
-#if defined(USE_LIBFAME)
-static int mpeg_codec = MPG_CODEC_FAME;
-#elif defined(USE_LIBAVCODEC)
+#if defined(USE_LIBAVCODEC)
 static int mpeg_codec = MPG_CODEC_AVCODEC;
+#elif defined(USE_LIBFAME)
+static int mpeg_codec = MPG_CODEC_FAME;
 #else
 static int mpeg_codec = MPG_CODEC_NONE;
 #endif
