@@ -26,6 +26,7 @@
 
 
 extern int verbose; // defined in mplayer.c
+void cache_uninit(stream_t *s); // defined in cache2.c
 
 #include "cue_read.h"
 

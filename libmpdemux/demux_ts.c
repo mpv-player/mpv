@@ -94,7 +94,7 @@ typedef struct {
 	MpegTSContext ts;
 } ts_priv_t;
 
-
+int ts_parse(demuxer_t *demuxer, ES_stream_t *es, unsigned char *packet);
 
 static uint8_t get_packet_size(const unsigned char *buf, int size)
 {

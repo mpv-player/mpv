@@ -19,6 +19,7 @@
 
 #include "../osdep/timer.h"
 #ifndef WIN32
+#include <sys/wait.h>
 #include "../osdep/shmem.h"
 #else
 #undef DATADIR
