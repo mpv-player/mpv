@@ -333,14 +333,14 @@ problémákba ütközni:<BR>
 <LI>Ha van V4L kompatibilis <B>TV tunered</B>, nézd meg a <A HREF=#2.5>TV bemenet</A>
   fejezetet.</LI>
 
-<LI>Kétféle audio/video szinkronizáló kód van az <B>MPlayerben</B>. A régi
+<LI>Kétféle idõzítõ kód van az <B>MPlayerben</B>. A régi
 módszer használatához nem kell semmit tenned, alapértelmezett. Lényege hogy
 <CODE>usleep()</CODE>-et használ az A/V szinkron javításához, +/- 10ms
 pontossággal. Néha ez nem elég pontos. Az új kód a PC-k RTC-jét (Real Time
 Clock) használja erre a célra, mivel ezzel sokkal pontosabb, +/- 1ms-os
 idõzítést lehet elérni. Ez root jogokat követel, vagy egy <I>setuid root</I>
 <B>MPlayer</B> binárist (nos, vagy egy kis kernel átirást, ezt azért inkább
-ne..). Az új szinkron kód hatékonysága szépen látszik a státuszsorban.
+ne..). Az új idõzítõ kód hatékonysága szépen látszik a státuszsorban.
 Megj.: <B>SOHA ne installálj setuid MPlayer binárist többfelhasználós
 gépre!</B> Ez a legegyszerûbb módja hogy mindenki root jogot szerezzen.</LI>
 
