@@ -94,23 +94,26 @@ main header:
 	short_startcode				v
 	for(i=0; i<256; ){
 		tmp_flag			v
-		tmp_stream			v
-		tmp_mul				v
-		tmp_size			v
-		tmp_timestamp			s
-		tmp_res				v
-		count				v
-		for(j=0; j<count; j++, i++){
+		tmp_fields			v
+		if(tmp_fields>0) tmp_timestamp	s
+		if(tmp_fields>1) tmp_mul	v
+		if(tmp_fields>2) tmp_stream	v
+		if(tmp_fields>3) tmp_size	v
+		else tmp_size=0
+		if(tmp_fields>4) tmp_res	v
+		else tmp_res=0
+		if(tmp_fields>5) count		v
+		else count= tmp_mul - tmp_size
+		for(j=6; j<tmp_fields; j++){
+			tmp_reserved[i]		v
+		}
+		for(j=0; j<count && i<256; j++, i++){
 			flags[i]= tmp_flag;
 			stream_id_plus1[i]= tmp_stream;
 			data_size_mul[i]= tmp_mul;
-			data_size_lsb[i]= tmp_size;
+			data_size_lsb[i]= tmp_size + j;
 			timestamp_delta[i]= tmp_timestamp;
 			reserved_v[i]= tmp_res;
-			if(++tmp_size >= tmp_mul){
-				tmp_size=0;
-				tmp_stream++;
-			}
 		}
 	}
 	reserved_bytes
