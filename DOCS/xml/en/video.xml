@@ -1513,9 +1513,11 @@ There's a relatively new nVidia driver out there, it's known to work on Riva
 <listitem><para>
   Currently only codecs capable of UYVY colorspace output
   can work in conjunction with this driver. Unfortunately, this excludes
-  every single decoder from the libavcodec family. This leaves us with the
-  following usable popular codecs: <systemitem>cvid, divxds, xvid, divx4,
-  wmv7, wmv8</systemitem> and some others. Please note that this is only
+  every single decoder from the
+  <systemitem class="library">libavcodec</systemitem> family. This leaves
+  us with the following usable popular codecs:
+  <systemitem>cvid, divxds, xvid, divx4, wmv7, wmv8</systemitem> and some
+  others. Please note that this is only
   a temporal inconvenience. The usage syntax is as follows:
   <screen>
     mplayer -vf format=uyvy -vc divxds <replaceable>divx3file.avi</replaceable>
@@ -1944,7 +1946,9 @@ This does not work with digital audio output (<option>-ac hwac3</option>).
 <term><option>-vf lavc/fame</option></term>
 <listitem><para>
 To watch non-MPEG content on the em8300 (i.e. DivX or RealVideo) you have to
-specify an MPEG1 video filter such as libavcodec (lavc) or libfame (fame). At
+specify an MPEG1 video filter such as
+<systemitem class="library">libavcodec</systemitem> (lavc) or
+<systemitem class="library">libfame</systemitem> (fame). At
 the moment lavc is both faster and gives better image quality, it is suggested
 that you use that unless you have problems with it. See the man page for further
 info about <option>-vf lavc/fame</option>.
@@ -1993,7 +1997,8 @@ it must be used to specify the DXR3's output instead of a soundcard.
 This is a display-driver (<option>-vo zr</option>) for a number of MJPEG
 capture/playback cards (tested for DC10+ and Buz, and it should work for the
 LML33, the DC10). The driver works by encoding the frame to JPEG and then
-sending it to the card. For the JPEG encoding <systemitem>libavcodec</systemitem>
+sending it to the card. For the JPEG encoding
+<systemitem class="library">libavcodec</systemitem>
 is used, and required. With the special <emphasis>cinerama</emphasis> mode,
 you can watch movies in true wide screen provided that you have two beamers
 and two MJPEG cards. Depending on resolution and quality settings, this driver

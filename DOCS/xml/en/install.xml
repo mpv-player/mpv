@@ -126,7 +126,8 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
 
 <itemizedlist>
 <listitem><para>
-  <emphasis role="bold">libavcodec</emphasis>: This codec package is capable
+  <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>:
+  This codec package is capable
   of decoding H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/SVQ1/SVQ3 encoded video
   streams and WMA (Windows Media Audio) v1/v2 audio streams, on multiple
   platforms. It is also known to be the fastest for this task. See
@@ -169,7 +170,9 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
   <listitem><simpara>
     Not needed for old ASF's with MP41 or MP42 video (though VoxWare audio is
     frequent for these files - it's done by the Win32 codec), or WMV7. Also not
-    needed for WMA (Windows Media Audio), libavcodec has opensource decoder for that.
+    needed for WMA (Windows Media Audio),
+    <systemitem class="library">libavcodec</systemitem> has open source decoder
+    for that.
     </simpara></listitem>
   </itemizedlist>
   </para></listitem>
@@ -182,8 +185,9 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
 <listitem><para>
   <emphasis role="bold">DivX4/DivX5</emphasis>: information about this codec is
   available in the <link linkend="divx4-5">DivX4/DivX5</link> section. You possibly
-  don't want this codec as <emphasis role="bold">libavcodec</emphasis> (see
-  above) is much faster and has better quality than this, for both decoding
+  don't want this codec as
+  <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>
+  (see above) is much faster and has better quality than this, for both decoding
   and encoding. Features:
   <itemizedlist>
   <listitem><simpara>
@@ -192,7 +196,8 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
     </simpara></listitem>
   <listitem><simpara>
     can play old <emphasis role="bold">DivX3</emphasis> movies much faster than
-    the Win32 DLL but slower than <emphasis role="bold">libavcodec</emphasis>!
+    the Win32 DLL but slower than
+    <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>!
     </simpara></listitem>
   <listitem><simpara>
     it's closed-source, and only a x86 version is available.

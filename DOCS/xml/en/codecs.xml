@@ -56,7 +56,8 @@ The most important ones above all:
   FLI/FLC
   </simpara></listitem>
 <listitem><simpara>
-  <emphasis role="bold">RealVideo 1.0 &amp; 2.0</emphasis> from libavcodec, and
+  <emphasis role="bold">RealVideo 1.0 &amp; 2.0</emphasis> from
+  <systemitem class="library">libavcodec</systemitem>, and
   <emphasis role="bold">RealVideo 3.0 &amp; 4.0</emphasis> codecs using RealPlayer
   libraries
   </simpara></listitem>
@@ -91,9 +92,10 @@ for all file types.
 <para>
 The new generation of this codec is called DivX4 and can even decode
 movies made with the infamous DivX codec! In addition it is much faster
-than the native Win32 DivX DLLs but slower than <systemitem
-class="library">libavcodec</systemitem>.  Hence its usage as a decoder is
-<emphasis role="bold">DISCOURAGED</emphasis>. However, it is useful for
+than the native Win32 DivX DLLs but slower than
+<systemitem class="library">libavcodec</systemitem>.
+Hence its usage as a decoder is
+<emphasis role="bold">discouraged</emphasis>. However, it is useful for
 encoding. One disadvantage of this codec is that it is not available under an
 Open Source license.
 </para>
@@ -219,9 +221,11 @@ and <ulink url="http://www.ffmpeg.org/ffmpeg-doc.html#SEC20">audio</ulink> codec
 </para>
 
 <para>
-If you use an <application>MPlayer</application> release you have libavcodec
+If you use an <application>MPlayer</application> release you have
+<systemitem class="library">libavcodec</systemitem>
 right in the package, just build  as usual. If you use
-<application>MPlayer</application> from CVS you have to extract libavcodec from
+<application>MPlayer</application> from CVS you have to extract
+<systemitem class="library">libavcodec</systemitem> from
 the FFmpeg CVS tree as FFmpeg releases are very rare. The CVS is mostly stable
 and offers the most features. In order to achieve this do:
 </para>
@@ -243,7 +247,8 @@ and offers the most features. In order to achieve this do:
   copy/move it!
   </para></step>
 <step><para>
-  If you prefer having libavcodec updated at the same time you update
+  If you prefer having <systemitem class="library">libavcodec</systemitem>
+  updated at the same time you update
   <application>MPlayer</application> CVS, put the following line into the
   <filename>main/CVS/Entries</filename> file:
   <screen>D/libavcodec////</screen>
@@ -258,7 +263,8 @@ and offers the most features. In order to achieve this do:
 <para>
 <application>MPlayer</application> from CVS does contain a
 <filename>libavcodec</filename> subdirectory, but it does
-<emphasis role="bold">not</emphasis> contain the source for libavcodec!
+<emphasis role="bold">not</emphasis> contain the source for
+<systemitem class="library">libavcodec</systemitem>!
 You must follow the steps above to obtain the source for this library.
 </para>
 </note>
@@ -457,7 +463,8 @@ then started XviD. So both projects have the same origin.
 <title>DISADVANTAGES</title>
 <listitem><simpara>
   currently it does not properly <emphasis role="bold">decode</emphasis> all
-  DivX/DivX4 files (no problem as <link linkend="ffmpeg">libavcodec</link>
+  DivX/DivX4 files (no problem as
+  <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
   can play them)
   </simpara></listitem>
 <listitem><simpara>
@@ -519,12 +526,12 @@ decoders:
 <listitem><simpara>
   Sorenson Video v1 (fourcc <emphasis>SVQ1</emphasis>) - decoding supported
   by <emphasis role="bold">native codec</emphasis>
-  (<link linkend="ffmpeg">libavcodec</link>)
+  (<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
   </simpara></listitem>
 <listitem><simpara>
   Sorenson Video v3 (fourcc <emphasis>SVQ3</emphasis>) - decoding supported by
   <emphasis role="bold">native codec</emphasis>
-  (<link linkend="ffmpeg">libavcodec</link>)
+  (<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
   </simpara></listitem>
 </itemizedlist>
 
@@ -557,7 +564,7 @@ decoders:
   </simpara></listitem>
 <listitem><simpara>
   Windows Media Audio 7 and 8 (aka WMAv1 and WMAv2) (<emphasis role="bold">native</emphasis> code, with
-  <link linkend="ffmpeg">libavcodec</link>)
+  <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
   </simpara></listitem>
 <listitem><simpara>
   Windows Media Audio 9 (WMAv3) (using DMO DLL)

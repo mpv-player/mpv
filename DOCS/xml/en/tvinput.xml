@@ -107,7 +107,8 @@ In the older versions of <application>MPlayer</application>/
 <application>MEncoder</application> it was necessary to specify the output
 format. This issue should be fixed in the current releases and <option>outfmt</option>
 isn't required anymore, and the default suits the most purposes. For example,
-if you are capturing into DivX using libavcodec and specify
+if you are capturing into DivX using
+<systemitem class="library">libavcodec</systemitem> and specify
 <option>outfmt=RGB24</option> in order to increase the quality of the captured
 images, the captured image will be actually later converted back into YV12 so
 the only thing you achieve is a massive waste of CPU power.

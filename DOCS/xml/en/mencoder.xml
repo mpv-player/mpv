@@ -109,7 +109,8 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o <replacea
 <title>Encoding to MPEG format</title>
 <para>
 <application>MEncoder</application> can create MPEG (MPEG-PS) format output
-files. It's probably useful only with <link linkend="ffmpeg">libavcodec</link>'s
+files. It's probably useful only with
+<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>'s
 <emphasis>mpeg1video</emphasis> codec, because players - except
 <application>MPlayer</application> - expect MPEG1 video, and MPEG1 layer 2 (MP2)
 audio streams in MPEG files.
@@ -234,11 +235,12 @@ must not be broken. You may need to fix your input AVI files first, as described
 </sect1>
 
 <sect1 id="menc-feat-enc-libavcodec">
-<title>Encoding with the libavcodec codec family</title>
+<title>Encoding with the <systemitem class="library">libavcodec</systemitem>
+  codec family</title>
 
 <para>
-<link linkend="ffmpeg">libavcodec</link> provides simple encoding to a lot
-of interesting video and audio formats.
+<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
+provides simple encoding to a lot of interesting video and audio formats.
 You can encode to the following codecs (more or less up to date):
 
 <informaltable frame="all">
@@ -485,7 +487,8 @@ attribute of MPEG4, except <application>MPlayer</application>.
 </para>
 
 <para>
-This feature can be used only with <link linkend="ffmpeg">libavcodec</link>'s
+This feature can be used only with
+<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>'s
 <systemitem>mpeg4</systemitem> codec. Keep in mind: although
 <application>MPlayer</application> will correctly play the created file,
 other players will use the wrong aspect ratio.
@@ -506,9 +509,10 @@ Usage
 <sect1 id="custommatrices"><title>Custom inter/intra matrices</title>
 
 <para>
-With this feature of <link linkend="ffmpeg">libavcodec</link> you are
-able to set custom inter (I-frames/key frames) and intra (P-frames/predicted
-frames) matrices. It is supported by many of the codecs:
+With this feature of
+<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
+you are able to set custom inter (I-frames/key frames) and intra
+(P-frames/predicted frames) matrices. It is supported by many of the codecs:
 <systemitem>mpeg1video</systemitem> and <systemitem>mpeg2video</systemitem>
 are reported as working.
 </para>
@@ -575,7 +579,8 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Ripping a DVD title into a maximally high quality MPEG4 (DivX) file
   involves many considerations. Below is an example of the process when
   there is no file size goal (other than perhaps fitting the result into 2GB).
-  <systemitem class="library">libavcodec</systemitem> will be used for the video,
+  <systemitem class="library"><systemitem class="library">libavcodec</systemitem></systemitem>
+  will be used for the video,
   and the audio will be copied as is without any changes.
 </para>
 
@@ -602,8 +607,8 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   quantizing AKA constant quality is a good choice. That way each frame
   is given as much bits as its needs to keep the quality at the desired
   level, but multiple encoding passes are not needed. With
-  <systemitem class="library">libavcodec</systemitem>, you get constant
-  quality by using
+  <systemitem class="library"><systemitem class="library">libavcodec</systemitem></systemitem>,
+  you get constant quality by using
   <option>-lavcopts vqscale=<replaceable>N</replaceable></option>.
   <option>vqscale=3</option> should give you a file below 2GB in size,
   depending mainly on the movie length and video noisiness (the more

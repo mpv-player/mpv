@@ -55,11 +55,12 @@ get working RPMs from
 Compaq Ipaq. The easiest way to obtain <application>MPlayer</application> is to get it
 from one of the <ulink url="http://www.openzaurus.org">OpenZaurus</ulink> package feeds. If
 you want to compile it yourself, you should look at the
-<ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/mplayer?nav=index.html|src/.|src/packages">MPlayer</ulink>
+<ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/mplayer?nav=index.html|src/.|src/packages">mplayer</ulink>
 and the
 <ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/libavcodec?nav=index.html|src/.|src/packages">libavcodec</ulink>
 directory in the OpenZaurus distribution buildroot. These always have the latest
-Makefile and patches used for building a CVS <application>MPlayer</application> with libavcodec.
+Makefile and patches used for building a CVS <application>MPlayer</application> with
+<systemitem class="library">libavcodec</systemitem>.
 If you need a GUI frontend, you can use xmms-embedded.
 </para>
 </sect2>
@@ -128,10 +129,14 @@ See the <link linkend="macos">Mac OS</link> section.
 <para>
 On <emphasis role="bold">UltraSPARCs</emphasis>, <application>MPlayer</application>
 takes advantage of their <emphasis role="bold">VIS</emphasis> extensions
-(equivalent to MMX), currently only in <emphasis>libmpeg2</emphasis>, <emphasis>libvo</emphasis>
-and <emphasis>libavcodec</emphasis>, but not in mp3lib. You can watch a VOB file
+(equivalent to MMX), currently only in
+<systemitem class="library">libmpeg2</systemitem>,
+<systemitem class="library">libvo</systemitem>
+and <systemitem class="library">libavcodec</systemitem>, but not in
+<systemitem class="library">mp3lib</systemitem>. You can watch a VOB file
 on a 400MHz CPU. You'll need
-<ulink url="http://www.sun.com/sparc/vis/mediaLib.html">mLib</ulink> installed.
+<ulink url="http://www.sun.com/sparc/vis/mediaLib.html"><systemitem class="library">mLib</systemitem></ulink>
+installed.
 </para>
 
 <para>
@@ -386,7 +391,8 @@ Mac OS versions and send patches!
 
 <para>
 Apple's modified GCC 3.x is preferred for compiling
-<application>MPlayer</application> especially when using libavcodec as Apple's
+<application>MPlayer</application> especially when using
+<systemitem class="library">libavcodec</systemitem> as Apple's
 modified GCC 2.95.x doesn't support C99 syntax well.
 </para>
 

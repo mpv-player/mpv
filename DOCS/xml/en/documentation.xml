@@ -92,7 +92,8 @@ Encoder) is a simple movie encoder, designed to encode
 (<emphasis role="bold">AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</emphasis>)
 to other <application>MPlayer</application>-playable formats (see below). It
 can encode with various codecs, like <emphasis role="bold">DivX4</emphasis>
-(1 or 2 passes), libavcodec, <emphasis role="bold">PCM/MP3/VBR MP3</emphasis>
+(1 or 2 passes), <systemitem class="library">libavcodec</systemitem>,
+<emphasis role="bold">PCM/MP3/VBR MP3</emphasis>
 audio. Also has powerful plugin system for video manipulation.
 </para>
 
@@ -104,8 +105,8 @@ audio. Also has powerful plugin system for video manipulation.
   <application>MPlayer</application>
   </simpara></listitem>
 <listitem><simpara>
-  Encoding to all the codecs of ffmpeg's <link
-  linkend="ffmpeg">libavcodec</link>
+  Encoding to all the codecs of FFmpeg's
+  <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
   </simpara></listitem>
 <listitem><simpara>
   Video encoding from <emphasis role="bold">V4L compatible TV tuners</emphasis>

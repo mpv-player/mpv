@@ -549,10 +549,12 @@ You use a vo driver with single buffering (x11,xv). With xv, use the
 
 <qandaentry>
 <question><para>
-What exactly is this libavcodec thing?
+What exactly is this <systemitem class="library">libavcodec</systemitem> thing?
 </para></question>
 <answer><para>
-See the <link linkend="ffmpeg">libavcodec</link> section.
+See the
+<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
+section.
 </para></answer>
 </qandaentry>
 
@@ -562,8 +564,10 @@ But configure tells me
 <screen>Checking for libavcodec ... no</screen>
 </para></question>
 <answer><para>
-You need to get libavcodec from FFmpeg's CVS. Read the instructions in the
-<link linkend="ffmpeg">libavcodec</link> section.
+You need to get <systemitem class="library">libavcodec</systemitem> from
+FFmpeg's CVS. Read the instructions in the
+<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
+section.
 </para></answer>
 </qandaentry>
 
