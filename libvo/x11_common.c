@@ -47,7 +47,7 @@
 #define	SCAN_VISUALS
 
 
-extern verbose;
+extern int verbose;
 
 static int dpms_disabled=0;
 static int timeout_save=0;
@@ -144,7 +144,7 @@ static void x11_errorhandler(Display *display, XErrorEvent *event)
 #define MSGLEN 60
     char msg[MSGLEN];
         
-    XGetErrorText(display, event->error_code, &msg, MSGLEN);
+    XGetErrorText(display, event->error_code, (char *)&msg, MSGLEN);
     
     printf("X11 error: %s\n", msg);
     
@@ -173,9 +173,18 @@ int vo_init( void )
 
  if(vo_depthonscreen) return 1; // already called
 
+ XSetErrorHandler(x11_errorhandler);
+
+#if 0
  if (!mDisplayName)
    if (!(mDisplayName=getenv("DISPLAY")))
      mDisplayName=strdup(":0.0");
+#else
+ mDisplayName = XDisplayName(mDisplayName);
+#endif
+
+ if (verbose)
+    printf("X11 opening display: %s\n", mDisplayName);
 
  mDisplay=XOpenDisplay(mDisplayName);
  if ( !mDisplay )
@@ -264,8 +273,6 @@ int vo_init( void )
 	vo_screenwidth,vo_screenheight,
 	depth, vo_depthonscreen,
 	mDisplayName,mLocalDisplay?"local":"remote");
-
- XSetErrorHandler(x11_errorhandler);
  
  return 1;
 }
@@ -445,6 +452,22 @@ int vo_x11_check_events(Display *mydisplay){
       case ConfigureNotify:
            vo_dwidth=Event.xconfigure.width;
            vo_dheight=Event.xconfigure.height;
+#if 0
+	   /* when resizing, x and y are zero :( */
+	   vo_dx=Event.xconfigure.x;
+	   vo_dy=Event.xconfigure.y;
+#else
+	   {
+	    Window root;
+	    int foo;
+	    XGetGeometry(mydisplay, vo_window, &root, &foo, &foo, 
+		&foo/*width*/, &foo/*height*/, &foo, &foo);
+	    XTranslateCoordinates(mydisplay, vo_window, root, 0, 0,
+		&vo_dx, &vo_dy, (Window *)&foo);
+	    }
+#endif
+	   if (verbose)
+	    printf("X11 Window %dx%d-%dx%d\n", vo_dx, vo_dy, vo_dwidth, vo_dheight);
            ret|=VO_EVENT_RESIZE;
            break;
       case KeyPress:
