@@ -1,4 +1,74 @@
 mplayer (1.0)
+
+  pre2:  "Onjelolt-maintainerek-hava" /* FIXME */
+
+    DOCS: /* FIXME */
+    * massive French, Spanish and Russian docs update
+    * Hungarian, Polish tranlations updated
+    * New Romanian translation in XML format
+    * numerous sections updated
+    
+    Ports:
+    * initial Amiga/MorphOS (throught GeekGadgets) support
+    * libmenu now works on mingw
+    * freebsd 5.x (libkse/libthr) support in win32 dll loader
+    * fixed mpdvdkit on mingw
+    * slave mode, vobsub and mencoder support on windows
+    * finally fixed the compilation on non-mvi capable alpha cpus
+    * MinGW 3.1.0 supports MPlayer out of the box!
+
+    Codecs and demuxers:
+    * support for QuickTime version 6.3 DLLs
+    * fixed some bugs in imported FAAD
+    * disabled FAAD on when using buggy GCC
+    * imaadpcm bug fixed
+    * ViVD v2 codec support (dll only)
+    * QuickTime codecs support inside Matroska
+    * improved seeking inside Matroska
+    * some bugs with DMO codecs have been fixed
+    * fix for mov files with bogus user data length
+    * fixed some demuxers which read after the EOF
+    * better RTP synchronisation
+    
+    Filters:
+    * new delogo filter (for removing the channel-logos)
+    * presets support in swscaler filter
+    * new audio filter export, for supporting visual effect applications
+    
+    FFmpeg/libavcodec:
+    * better divx/xvid bug detection code
+    * Id RoQ decoder
+    * Interplay MVE decoder
+    * WC3/Xan video decoder
+    * Xan DPCM, DK3 & DK4 ADPCM audio decoders
+    * detect old xvid with fourcc=DIVX
+    * vp3 decoder fixes
+    * improved the Alpha optimiziations
+    * x86 optimiziations are thread-safe now
+    * settable scenechange threshold
+    * better MPEG1/MPEG2 conformance encoder
+    * quality improvement for high bitrate videos with trellis quantization
+    * indeo3 decoder fixed
+    
+    Drivers:
+    * vidix driver for Nvidia cards (only older cards are supported (Riva/TNT))
+    * SDL on IRIX support
+    * directfb2 fixed for latest directfb
+    * opengl video output for Windows
+    * smoother audio playback with alsa9
+    * fullscreen and geometry support in directx
+    * fullscreen support with opengl drivers
+    * osd fixed with svga
+    
+    Others:
+    * buffer overflow fixes overall the code
+    * several leak fixes
+    * selecting optimizations for ppc 7455 cpu
+    * cpudetection code now measures speed on x86
+    * cleaned up a bit unrarlib
+    * updated the list of known x86 cpus (including opteron!)
+    * alignment and smart line splitting option on subtitles
+     
   pre1:  "Development" on the beach
     NOTE: the mplayer 'main' branch was forked at the time of 0.90-rc4, so
     0.90-rc5 (and later 0.90 releases) changes are independent!
