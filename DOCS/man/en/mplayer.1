@@ -601,17 +601,17 @@ Useful for slideshows.
 .TP
 .B \-a52drc <level>
 Select the Dynamic Range Compression level for AC3 audio streams.
-<level> is a float value ranging from 0 to 1, where 0 means no compression 
-and 1 (which is the default) means full compression (make loud passages more 
+<level> is a float value ranging from 0 to 1, where 0 means no compression
+and 1 (which is the default) means full compression (make loud passages more
 silent and vice versa).
-This option only shows an effect if the AC3 stream contains the required range 
+This option only shows an effect if the AC3 stream contains the required range
 compression information.
 .TP
 .B \-aid <id> (also see \-alang option)
 Select audio channel [MPEG: 0\-31 AVI/\:OGM: 1\-99 ASF/\:RM: 0\-127
 VOB(AC3): 128\-159 VOB(LPCM): 160\-191 MPEG-TS 17\-8190].
 MPlayer prints the available IDs when running in verbose (\-v) mode.
-When playing an MPEG-TS stream, MPlayer/MEncoder will use the first program 
+When playing an MPEG-TS stream, MPlayer/MEncoder will use the first program
 (if present) with the chosen audio stream.
 .TP
 .B \-alang <two letter\ country\ code> (also see \-aid option) (DVD only)
@@ -973,25 +973,25 @@ seeks to 1\ hour 10\ min
 .PD 1
 .
 .TP
-.B \-tskeepbroken 
+.B \-tskeepbroken
 Tells MPlayer not to discard TS packets reported as broken in the stream.
 Sometimes needed to play corrupted MPEG-TS files.
 .
 .TP
 .B \-tsprog <1\-65534>
-When playing an MPEG-TS stream, you can specify with this option which  
+When playing an MPEG-TS stream, you can specify with this option which
 program (if present) you want to play. Can be used with \-vid and \-aid.
 .
 .TP
 .B \-tsprobe <byte\ position>
-When playing an MPEG-TS stream, this option lets you specify how many 
+When playing an MPEG-TS stream, this option lets you specify how many
 bytes in the stream you want MPlayer to search for the desired
 audio and video pids.
 .
 .TP
 .B \-tv <option1:option2:...> (TV only)
 This option tunes various properties of the TV capture module.
-For watching TV with MPlayer, use 'tv://' or 'tv://<channel_number>' 
+For watching TV with MPlayer, use 'tv://' or 'tv://<channel_number>'
 or even 'tv://<channel_name> (see option channels for channel_name below)
 as a movie URL.
 .br
@@ -1096,9 +1096,9 @@ A value of 0 means capture and buffer audio and video together
 A value of 1 (default for MPlayer) means to do video capture only and let the
 audio go through a loopback cable from the TV card to the soundcard.
 .IPs mjpeg
-Use hardware mjpeg compression (if the card supports it). 
+Use hardware mjpeg compression (if the card supports it).
 When using this option, you do not need to specify the width and height
-of the output window, because MPlayer will determine it automatically 
+of the output window, because MPlayer will determine it automatically
 from the decimation value (see below).
 .IPs decimation=<1,2,4>
 choose the size of the picture that will be compressed by hardware
@@ -1313,7 +1313,7 @@ The default is 1.0.
 .B \-sub <subtitlefile1,subtitlefile2,...>
 Use/\:display these subtitle files.
 Only one file can be displayed at the same time and the files can be
-switched with 'j'. 
+switched with 'j'.
 .TP
 .B \-sub-bg-alpha <0\-255>
 Specify the alpha channel value for subtitles and OSD backgrounds.
@@ -1554,7 +1554,7 @@ Options for OSS include
 .B vol, pcm, line.
 For a complete list of options look for SOUND_DEVICE_NAMES in
 /usr/include/linux/soundcard.h.
-For ALSA you can use the names e.g. alsamixer displays, like 
+For ALSA you can use the names e.g. alsamixer displays, like
 .B Master, Line, PCM.
 .TP
 .B \-nowaveheader (\-ao pcm only)
@@ -1975,7 +1975,7 @@ needs to understand window aspect hints.).
 .B \-noxv (SDL only)
 Disables XVideo SDL driver.
 .TP
-.B \-ontop 
+.B \-ontop
 Makes the player window stay on top other windows.
 Supported by drivers which use X11, except SDL, as well as directx and gl2 under Windows.
 .TP
@@ -2728,7 +2728,7 @@ manually work around encoder bugs:
 .br
 2 (msmpeg4v3): some old lavc generated msmpeg4v3 files (no autodetect)
 .br
-4 (mpeg4): XviD interlacing bug (autodetected if fourcc==XVIX) 
+4 (mpeg4): XviD interlacing bug (autodetected if fourcc==XVIX)
 .br
 8 (mpeg4): UMP4 (autodetected if fourcc==UMP4)
 .br
@@ -2940,7 +2940,7 @@ Activate direct rendering method 2.
 Deactivate direct rendering method 2.
 .IPs filmeffect
 Activate XviD internal film grain effect.
-Adds artificial film grain to the video. 
+Adds artificial film grain to the video.
 May increase perceived quality, while lowering true quality.
 Also see \-vf noise.
 .RE
@@ -3200,7 +3200,7 @@ format name like rgb15, bgr24, yv12, etc (default: yuy2)
 .TP
 .B noformat[=fourcc]
 Restricts the colorspace for the next filter without doing any conversion.
-Unlike the format filter, this will allow any colorspace 
+Unlike the format filter, this will allow any colorspace
 .B except
 the one you specify.
 For a list of available formats see noformat=fmt=help.
@@ -3522,7 +3522,7 @@ This filter is very similar to the il filter but much faster, the main
 disadvantage is that it doesn't always work.
 Especially if combined with other filters it may produce randomly messed
 up images, so be happy if it works but don't complain if it doesn't for
-your combination of filters. 
+your combination of filters.
 .PD 0
 .RSs
 .IPs d
@@ -3725,7 +3725,7 @@ Set the minimum strength the telecine pattern must have for the filter to
 believe in it (default: 0.5).
 This is used to avoid recognizing false pattern from the parts of the video
 that are very dark or very still.
-.IPs window=numframes 
+.IPs window=numframes
 Set the number of past frames to look at when searching for pattern
 (default: 30).
 Longer window improves the reliability of the pattern search, but shorter
@@ -3968,7 +3968,7 @@ Arguments are:
 .IPs "width, height"
 size of image/area
 .IPs "xpos, ypos"
-start blitting at X/Y position   
+start blitting at X/Y position
 .IPs alpha
 set alpha difference.
 If you set this to -255 you can then send a sequence of ALPHA-commands to set
@@ -3994,7 +3994,7 @@ send 1,8MB of RGBA32 data everytime a small part of the screen is updated.
 .B framestep=I|[i]step
 Renders only every nth frame or every Intra (key) frame.
 
-If you call the filter with I (uppercase) as the parameter, then ONLY 
+If you call the filter with I (uppercase) as the parameter, then ONLY
 keyframes are rendered.
 For DVDs it generally means one in every 15/12  frames (IBBPBBPBBPBBPBB),
 for AVI it means every scene change or every keyint value (see \-lavcopts
@@ -4008,10 +4008,10 @@ because it contains the time (in seconds) and frame number of the keyframe
 If you call the filter with a numeric parameter 'step' then only one in
 every 'step' frames is rendered.
 
-If you put an 'i' (lowercase) before the number then an I! is printed 
+If you put an 'i' (lowercase) before the number then an I! is printed
 (like the I parameter).
 
-If you give only the i then nothing is done to the frames, only I! is 
+If you give only the i then nothing is done to the frames, only I! is
 printed.
 .TP
 .B tile=xtile:ytile:output:start:delta
@@ -4035,7 +4035,7 @@ should be a number less than xtile * ytile.
 Missing tiles are left blank.
 You could, for example, write an 8 * 7 tile every 50 frames to have one
 image every 2 seconds @ 25 fps.
-.IPs start  
+.IPs start
 pixel at the start (x/y) (default: 2)
 .IPs delta
 pixel between 2 tiles, (x/y) (default: 4)
@@ -4068,7 +4068,7 @@ output device.
 These options set the maximum width and height the zr card
 can handle (the MPlayer filter layer currently cannot query those).
 .IPs {dc10+,dc10,buz,lml33}-{PAL|NTSC}
-Use these options to set maxwidth and maxheight automatically to the 
+Use these options to set maxwidth and maxheight automatically to the
 values known for card/mode combo.
 For example, valid options are: dc10-PAL and buz-NTSC (default: dc10+PAL)
 .IPs color|bw
@@ -4415,7 +4415,7 @@ adjust
 .PD 1
 .TP
 .B fast\ \ \ 
-switch on faster encoding on subsequent VBR presets modes, slightly lower 
+switch on faster encoding on subsequent VBR presets modes, slightly lower
 quality and higher bitrates.
 .TP
 .B highpassfreq=<freq>
@@ -4671,7 +4671,7 @@ For a strict MPEG1/\:2/\:4 compliance this would have to be <=132.
 .TP
 .B sc_threshold=<-1000000\-1000000>
 Threshold for scene change detection.
-Libavcodec inserts a keyframe when it detects a scene change. 
+Libavcodec inserts a keyframe when it detects a scene change.
 You can specify the sensitivity of the detection with this option.
 -1000000 means there is a scene change detected at every frame, 1000000 means
 no scene changes are detected (default 0).
@@ -5206,7 +5206,7 @@ rate distortion optimal, slow
 .IPs "7 (ZERO)"
 0
 .IPs "8 (VSAD)"
-sum of absolute vertical differences 
+sum of absolute vertical differences
 .IPs "9 (VSSE)"
 sum of squared vertical differences
 .IPs "10 (NSSE)"
@@ -5239,20 +5239,20 @@ experimental
 normal size=1 diamond (default) =EPZS type diamond
 .nf
 .ne
-      0 
+      0
      000
-      0 
+      0
 .fi
 .br
 .IPs 2
 normal size=2 diamond
 .nf
 .ne
-      0  
-     000 
+      0
+     000
     00000
-     000 
-      0  
+     000
+      0
 .fi
 .RE
 .TP
@@ -5260,7 +5260,7 @@ normal size=2 diamond
 Trellis searched quantization.
 This will find the optimal encoding for each 8x8 block.
 Trellis searched quantization is quite simple a optimal quantization in the PSNR
-vs bitrate sense (assuming that there would be no rounding errors introduced 
+vs bitrate sense (assuming that there would be no rounding errors introduced
 by the IDCT, which is obviously not the case) it simply finds a block for
 the minimum of error and lambda*bits.
 .PD 0
@@ -5299,7 +5299,7 @@ previous frame
 .RE
 .PD 1
 .TP
-.B preme=<0\-2> 
+.B preme=<0\-2>
 motion estimation pre-pass
 .PD 0
 .RSs
@@ -5461,7 +5461,7 @@ you need realtime encoding.
 .TP
 .B interlacing
 For interlaced video material, turn this option on.
-.I Note: 
+.I Note:
 This option does not deinterlace video, it encodes it field-based
 (default: off).
 .TP
@@ -5533,7 +5533,7 @@ The above two settings can be used to adjust the size of keyframes that
 you consider too close to the first (in a row).
 kfthreshold sets the range in which keyframes are reduced, and
 kfreduction determines the bitrate reduction they get.
-The last i-frame will get treated normally. 
+The last i-frame will get treated normally.
 (default: 30, 2pass mode only)
 .RE
 .PP
