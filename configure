@@ -431,7 +431,7 @@ if test -z "$_target" ; then
       case "`( uname -m ) 2>&1`" in
       i[3-9]86*|x86|x86pc|k5|k6|k6_2|k6_3|k6-2|k6-3|pentium*|athlon*|i586_i686|i586-i686) host_arch=i386 ;;
       ia64) host_arch=ia64 ;;
-      x86_64) host_arch=x86_64 ;;
+      x86_64|amd64) host_arch=x86_64 ;;
       ppc) host_arch=ppc ;;
       alpha) host_arch=alpha ;;
       sparc*) host_arch=sparc ;;
