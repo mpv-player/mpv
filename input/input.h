@@ -41,6 +41,7 @@
 #ifdef USE_EDL
 #define MP_CMD_EDL_MARK 38
 #endif
+#define MP_CMD_SUB_ALIGNMENT 39
 
 #define MP_CMD_GUI_EVENTS       5000
 #define MP_CMD_GUI_LOADFILE     5001

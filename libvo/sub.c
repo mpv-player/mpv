@@ -37,6 +37,7 @@ unsigned char* vo_osd_text=NULL;
 int sub_unicode=0;
 int sub_utf8=0;
 int sub_pos=100;
+int sub_alignment=2; /* 0=top, 1=center, 2=bottom */
 int sub_visibility=1;
 
 // return the real height of a char:
@@ -418,12 +419,22 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
        *sfalco*
      */
     if(suboverlap_enabled) obj->y -= vo_font->pic_a[vo_font->font[40]]->h - vo_font->height;
-    if (obj->y >= (dys * sub_pos / 100)){
-	int old=obj->y;
-	obj->y = dys * sub_pos /100;
-	obj->bbox.y2-=old-obj->y;
-    }
-    
+
+    h = dys - obj->y;
+    if (sub_alignment == 2)
+        obj->y = dys * sub_pos / 100 - h;
+    else if (sub_alignment == 1)
+        obj->y = dys * sub_pos / 100 - h / 2;
+    else
+        obj->y = dys * sub_pos / 100;
+
+    if (obj->y < 0)
+        obj->y = 0;
+    if (obj->y > dys - h)
+        obj->y = dys - h;
+
+    obj->bbox.y2 = obj->y + h;
+
     // calculate bbox:
     obj->bbox.x1=xmin;
     obj->bbox.x2=xmax;

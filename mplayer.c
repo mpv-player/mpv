@@ -575,6 +575,7 @@ int osd_show_av_delay = 0;
 int osd_show_sub_delay = 0;
 int osd_show_sub_pos = 0;
 int osd_show_sub_visibility = 0;
+int osd_show_sub_alignment = 0;
 int osd_show_vobsub_changed = 0;
 
 int rtc_fd=-1;
@@ -2485,6 +2486,16 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	vo_osd_changed(OSDTYPE_SUBTITLE);
         osd_show_sub_pos = 9;
     }	break;
+    case MP_CMD_SUB_ALIGNMENT:
+    {
+    	if (cmd->nargs >= 1)
+    	    sub_alignment = cmd->args[0].v.i;
+    	else
+            sub_alignment = (sub_alignment+1) % 3;
+	osd_show_sub_alignment = 9;
+	vo_osd_changed(OSDTYPE_SUBTITLE);
+	break;
+    }
     case MP_CMD_SUB_VISIBILITY:
     {
 	sub_visibility=1-sub_visibility;
@@ -2919,6 +2930,12 @@ if(rel_seek_secs || abs_seek_pos){
       if (osd_show_sub_pos) {
          sprintf(osd_text_tmp, "Sub position: %d/100", sub_pos);
          osd_show_sub_pos--;
+      } else
+      if (osd_show_sub_alignment) {
+         sprintf(osd_text_tmp, "Sub alignment: %s",
+	    (sub_alignment == 2 ? "bottom" :
+	    (sub_alignment == 1 ? "center" : "top")));
+         osd_show_sub_alignment--;
       } else
       if (osd_show_av_delay) {
 	  sprintf(osd_text_tmp, "A-V delay: %d ms",(int)(audio_delay*1000));

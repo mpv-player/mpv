@@ -97,6 +97,7 @@ extern int sub_utf8;
 extern char *sub_cp;
 #endif
 extern int sub_pos;
+extern int sub_alignment;
 extern int sub_visibility;
 extern int suboverlap_enabled;
 

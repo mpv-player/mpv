@@ -69,6 +69,7 @@ static mp_cmd_t mp_cmds[] = {
   { MP_CMD_SATURATION, "saturation",1,  { {MP_CMD_ARG_INT,{0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}} }  },
   { MP_CMD_FRAMEDROPPING, "frame_drop",0, { { MP_CMD_ARG_INT,{-1} }, {-1,{0}} } },
   { MP_CMD_SUB_POS, "sub_pos", 1, { {MP_CMD_ARG_INT,{0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
+  { MP_CMD_SUB_ALIGNMENT, "sub_alignment",0, { {MP_CMD_ARG_INT,{-1}}, {-1,{0}} } },
   { MP_CMD_SUB_VISIBILITY, "sub_visibility", 0, { {-1,{0}} } },
   { MP_CMD_VOBSUB_LANG, "vobsub_lang", 0, { {-1,{0}} } },
   { MP_CMD_GET_PERCENT_POS, "get_percent_pos", 0, { {-1,{0}} } },
@@ -247,6 +248,7 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { { 'd', 0 }, "frame_drop" },
   { { 'r', 0 }, "sub_pos -1" },
   { { 't', 0 }, "sub_pos +1" },
+  { { 'i', 0 }, "sub_alignment" },
   { { 'v', 0 }, "sub_visibility" },
   { { 'j', 0 }, "vobsub_lang" },
 #ifdef USE_EDL
