@@ -5,10 +5,18 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <sys/ioctl.h>
 // #include <sys/mman.h>
 #include <sys/types.h>
+#ifndef __MINGW32__
+#include <sys/ioctl.h>
 #include <sys/wait.h>
+#else
+#define	SIGHUP	1	/* hangup */
+#define	SIGQUIT	3	/* quit */
+#define	SIGKILL	9	/* kill (cannot be caught or ignored) */
+#define	SIGBUS	10	/* bus error */
+#endif
+
 #include <sys/time.h>
 #include <sys/stat.h>
 
@@ -465,7 +473,9 @@ static void exit_sighandler(int x){
   if(sig_count==5 || (inited_flags==0 && sig_count>1)) exit(1);
   if(sig_count>5){
     // can't stop :(
+#ifndef __MINGW32__
     kill(getpid(),SIGKILL);
+#endif
   }
   mp_msg(MSGT_CPLAYER,MSGL_FATAL,"\n" MSGTR_IntBySignal,x,
       current_module?current_module:mp_gettext("unknown")
@@ -508,7 +518,11 @@ if (m_config_parse_config_file(conf, CONFDIR"/mplayer.conf") < 0)
 if ((conffile = get_path("")) == NULL) {
   mp_msg(MSGT_CPLAYER,MSGL_WARN,MSGTR_NoHomeDir);
 } else {
+#ifdef __MINGW32__
+  mkdir(conffile);
+#else
   mkdir(conffile, 0777);
+#endif
   free(conffile);
   if ((conffile = get_path("config")) == NULL) {
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_GetpathProblem);
@@ -1005,17 +1019,27 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 #endif
 
 // ========== Init keyboard FIFO (connection to libvo) ============
-make_pipe(&keyb_fifo_get,&keyb_fifo_put);
 
 // Init input system
 current_module = "init_input";
 mp_input_init();
+#ifndef HAVE_NO_POSIX_SELECT
+make_pipe(&keyb_fifo_get,&keyb_fifo_put);
+
 if(keyb_fifo_get > 0)
   mp_input_add_key_fd(keyb_fifo_get,1,NULL,NULL);
+#else
+  mp_input_add_key_fd(-1,0,mplayer_get_key,NULL);
+#endif
 if(slave_mode)
    mp_input_add_cmd_fd(0,1,NULL,NULL);
 else if(!use_stdin)
+#ifndef HAVE_NO_POSIX_SELECT
   mp_input_add_key_fd(0,1,NULL,NULL);
+#else
+  mp_input_add_key_fd(0,0,NULL,NULL);
+#endif
+
 inited_flags|=INITED_INPUT;
 current_module = NULL;
 
@@ -3238,11 +3262,13 @@ if(rel_seek_secs || abs_seek_pos){
   }
 #endif
 
+#ifdef HAVE_X11
 if (stop_xscreensaver && sh_video) {
   current_module="stop_xscreensaver";
   xscreensaver_heartbeat(sh_video->pts);
   current_module=NULL;
 }
+#endif
   
   // DVD sub:
 if(vo_config_count && vo_spudec) {

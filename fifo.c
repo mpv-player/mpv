@@ -1,4 +1,6 @@
 
+#ifndef HAVE_NO_POSIX_SELECT
+
 // keyboard:
 static int keyb_fifo_put=-1;
 static int keyb_fifo_get=-1;
@@ -28,3 +30,30 @@ void mplayer_put_key(int code){
 //             printf("*** key event dropped (FIFO is full) ***\n");
            }
 }
+
+#else
+
+#define KEY_FIFO_SIZE 1024
+static int key_fifo_data[KEY_FIFO_SIZE];
+static int key_fifo_read=0;
+static int key_fifo_write=0;
+
+void mplayer_put_key(int code){
+//  printf("mplayer_put_key(%d)\n",code);
+  if(((key_fifo_write+1)%KEY_FIFO_SIZE)==key_fifo_read) return; // FIFO FULL!!
+  key_fifo_data[key_fifo_write]=code;
+  key_fifo_write=(key_fifo_write+1)%KEY_FIFO_SIZE;
+}
+
+int mplayer_get_key(int fd){
+  int key;
+//  printf("mplayer_get_key(%d)\n",fd);
+  if(key_fifo_write==key_fifo_read) return MP_INPUT_NOTHING;
+  key=key_fifo_data[key_fifo_read];
+  key_fifo_read=(key_fifo_read+1)%KEY_FIFO_SIZE;
+//  printf("mplayer_get_key => %d\n",key);
+  return key;
+}
+
+#endif
+
