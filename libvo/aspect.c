@@ -101,7 +101,12 @@ void panscan_init( void )
 
 void panscan_calc( void )
 {
- int vo_panscan_area = (aspdat.scrh-vo_dheight);
+ int fwidth,fheight;
+ int vo_panscan_area;
+
+ aspect(&fwidth,&fheight,A_ZOOM);
+ vo_panscan_area = (aspdat.scrh-fheight);
+
  vo_panscan_amount = vo_fs ? vo_panscan : 0;
  vo_panscan_x = vo_panscan_area * vo_panscan_amount * aspdat.asp;
  vo_panscan_y = vo_panscan_area * vo_panscan_amount;

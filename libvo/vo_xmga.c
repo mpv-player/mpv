@@ -105,7 +105,7 @@ static void mDrawColorKey( void )
  XFlush( mDisplay );
 }
 
-static void set_window( int ps ){
+static void set_window( void ){
 
 	 if ( WinID )
 	  {
@@ -163,7 +163,7 @@ static void set_window( int ps ){
          mga_vid_config.y_org=drwcY;
          mga_vid_config.dest_width=drwWidth;
          mga_vid_config.dest_height=drwHeight;
-	 if ( ps )
+	 if ( vo_panscan > 0.0f && vo_fs )
 	  {
 	   drwX-=vo_panscan_x>>1;
 	   drwY-=vo_panscan_y>>1;
@@ -183,7 +183,7 @@ static void check_events(void)
 {
  int e=vo_x11_check_events(mDisplay);
  if ( !(e&VO_EVENT_RESIZE) && !(e&VO_EVENT_EXPOSE) ) return;
- set_window( 0 );
+ set_window();
  mDrawColorKey();
  if ( ioctl( f,MGA_VID_CONFIG,&mga_vid_config ) ) mp_msg(MSGT_VO,MSGL_WARN,"Error in mga_vid_config ioctl (wrong mga_vid.o version?)" );
 }
@@ -323,8 +323,10 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
   }
 
  if ( ( flags&1 )&&( !WinID ) ) { vo_dx=0; vo_dy=0; vo_dwidth=vo_screenwidth; vo_dheight=vo_screenheight; vo_fs=1; }
+
+ panscan_calc();
  
- set_window( 0 );
+ set_window();
 
  mga_vid_config.src_width=width;
  mga_vid_config.src_height=height;

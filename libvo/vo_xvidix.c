@@ -74,7 +74,7 @@ static uint32_t window_width, window_height;
 static uint32_t drwX, drwY, drwWidth, drwHeight, drwBorderWidth,
     drwDepth, drwcX, drwcY, dwidth, dheight;
 
-static void set_window(int force_update,const vo_tune_info_t *info, int ps)
+static void set_window(int force_update,const vo_tune_info_t *info)
 {
     Window mRoot;
     if ( WinID )
@@ -137,7 +137,7 @@ static void set_window(int force_update,const vo_tune_info_t *info, int ps)
     }
 #endif
 
-    if ( ps )
+    if ( vo_panscan > 0.0f && vo_fs )
      {
       drwcX-=vo_panscan_x >> 1;
       drwcY-=vo_panscan_y >> 1;
@@ -363,11 +363,13 @@ else
 	vidix_grkey_set(&gr_key);
     }
 
-    set_window(1,info,0);
+    set_window(1,info);
     if(info) memcpy(&vtune,info,sizeof(vo_tune_info_t));
     else     memset(&vtune,0,sizeof(vo_tune_info_t));
     XFlush(mDisplay);
     XSync(mDisplay, False);
+
+    panscan_calc();
 
     saver_off(mDisplay); /* turning off screen saver */
     
@@ -386,7 +388,7 @@ static void check_events(void)
     const int event = vo_x11_check_events(mDisplay);
 
     if ((event & VO_EVENT_RESIZE) || (event & VO_EVENT_EXPOSE))
-	set_window(0,&vtune,0);
+	set_window(0,&vtune);
 
     return;
 }
@@ -463,17 +465,16 @@ static uint32_t control(uint32_t request, void *data, ...)
     return query_format(*((uint32_t*)data));
   case VOCTRL_GUISUPPORT:
     return VO_TRUE;
-  case VOCTRL_FULLSCREEN:
-    vo_x11_fullscreen();
-    return VO_TRUE;
   case VOCTRL_GET_PANSCAN:
       if ( !vo_config_count || !vo_fs ) return VO_FALSE;
       return VO_TRUE;
+  case VOCTRL_FULLSCREEN:
+      vo_x11_fullscreen();
   case VOCTRL_SET_PANSCAN:
       if ( vo_fs && ( vo_panscan != vo_panscan_amount ) )
         {
          panscan_calc();
-	 set_window( 0,&vtune,1 );
+	 set_window( 0,&vtune );
         }
       return VO_TRUE;
   }

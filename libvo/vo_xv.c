@@ -499,6 +499,8 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
        vo_dheight=(vo_dheight > vo_screenheight?vo_screenheight:vo_dheight);
        mp_msg(MSGT_VO,MSGL_V, "[xv-fs] dx: %d dy: %d dw: %d dh: %d\n",drwX,drwY,vo_dwidth,vo_dheight );
       }
+
+     panscan_calc();
      
      mp_msg(MSGT_VO,MSGL_V, "[xv] dx: %d dy: %d dw: %d dh: %d\n",drwX,drwY,vo_dwidth,vo_dheight );
 

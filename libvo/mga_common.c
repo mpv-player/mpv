@@ -5,7 +5,7 @@
 
 // mga_vid drawing functions
 #ifdef VO_XMGA
-static void set_window( int ps );	/* forward declaration to kill warnings */
+static void set_window( void );	/* forward declaration to kill warnings */
 #endif
 
 static int mga_next_frame=0;
@@ -272,26 +272,33 @@ static uint32_t control(uint32_t request, void *data, ...)
     return query_format(*((uint32_t*)data));
   case VOCTRL_GET_IMAGE:
     return get_image(data);
+
+#ifndef VO_XMGA
   case VOCTRL_FULLSCREEN:
-#ifdef VO_XMGA
-    vo_x11_fullscreen();
-#else
     mga_fullscreen();
-#endif
     return VO_TRUE;
+#endif
+
 #if defined( VO_XMGA ) && defined( HAVE_NEW_GUI )
   case VOCTRL_GUISUPPORT:
     return VO_TRUE;
 #endif
+
 #ifdef VO_XMGA
   case VOCTRL_GET_PANSCAN:
       if ( !inited || !vo_fs ) return VO_FALSE;
       return VO_TRUE;
+  case VOCTRL_FULLSCREEN:
+      vo_x11_fullscreen();
+      vo_panscan_amount=0;
+    /* indended, fallthrough to update panscan on fullscreen/windowed switch */
   case VOCTRL_SET_PANSCAN:
-      if ( vo_fs && ( vo_panscan != vo_panscan_amount ) )
+      if ( vo_fs && ( vo_panscan != vo_panscan_amount ) ) // || ( !vo_fs && vo_panscan_amount ) )
        {
+        int old_y = vo_panscan_y;
 	panscan_calc();
-        set_window( 1 );
+//        if ( old_y != vo_panscan_y ) 
+	set_window();
        }
       return VO_TRUE;
 #endif
