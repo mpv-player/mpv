@@ -172,8 +172,6 @@ static int init(sh_video_t *sh){
 #endif
     
     mp_dbg(MSGT_DECVIDEO,MSGL_DBG2,"libavcodec.size: %d x %d\n",avctx->width,avctx->height);
-    if (sh->format == mmioFOURCC('R', 'V', '1', '3'))
-	avctx->sub_id = 3;
 #if LIBAVCODEC_BUILD >= 4605
     /* AVRn stores huffman table in AVI header */
     /* Pegasus MJPEG stores it also in AVI header, but it uses the common
@@ -204,9 +202,18 @@ static int init(sh_video_t *sh){
        || sh->format == mmioFOURCC('R', 'V', '1', '3')){
         unsigned int* extrahdr=(unsigned int*)(sh->bih+1);
         avctx->extradata_size= 8;
-	avctx->extradata = malloc(avctx->extradata_size);
+        avctx->extradata = malloc(avctx->extradata_size);
+        if(sh->ds->demuxer->type != DEMUXER_TYPE_REAL){
+            /* not .rm container -> only 1 packet per frame & sub_id from fourcc */
+            if (sh->format == mmioFOURCC('R', 'V', '1', '3'))
+	        extrahdr[1] = 0x10003001;
+            else
+	        extrahdr[1] = 0x10000000;
+        }
         ((uint32_t*)avctx->extradata)[0] = extrahdr[0];
         ((uint32_t*)avctx->extradata)[1] = extrahdr[1];
+        avctx->sub_id= extrahdr[1];
+
 //        printf("%X %X %d %d\n", extrahdr[0], extrahdr[1]);
     }
 
@@ -231,6 +238,12 @@ static void uninit(sh_video_t *sh){
 #if LIBAVCODEC_BUILD >= 4605
     if (avctx->extradata_size)
 	free(avctx->extradata);
+    avctx->extradata=NULL;
+#endif
+#if LIBAVCODEC_BUILD >= 4630
+    if(avctx->slice_offset!=NULL) 
+        free(avctx->slice_offset);
+    avctx->slice_offset=NULL;
 #endif
 
     if (avctx)
@@ -422,6 +435,15 @@ else
 }
 #endif
 
+// copypaste from demux_real.c - it should match to get it working!
+//FIXME put into some header
+typedef struct dp_hdr_s {
+    uint32_t chunks;	// number of chunks
+    uint32_t timestamp; // timestamp from packet header
+    uint32_t len;	// length of actual data
+    uint32_t chunktab;	// offset to chunk offset array
+} dp_hdr_t;
+
 // decode a frame
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     int got_picture=0;
@@ -448,6 +470,23 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
 #if LIBAVCODEC_BUILD > 4603
     avctx->hurry_up=(flags&3)?((flags&2)?2:1):0;
+#endif
+
+#if LIBAVCODEC_BUILD >= 4630
+    if(sh->ds->demuxer->type == DEMUXER_TYPE_REAL){
+        int i;
+        dp_hdr_t *hdr= (dp_hdr_t*)data;
+
+        if(avctx->slice_offset==NULL) 
+            avctx->slice_offset= malloc(sizeof(int)*1000);
+        
+//        for(i=0; i<25; i++) printf("%02X ", ((uint8_t*)data)[i]);
+        
+        avctx->slice_count= hdr->chunks+1;
+        for(i=0; i<avctx->slice_count; i++)
+            avctx->slice_offset[i]= ((uint32_t*)(data+hdr->chunktab))[2*i+1];
+        data+= sizeof(dp_hdr_t);
+    }
 #endif
 
     ret = avcodec_decode_video(avctx, &lavc_picture,

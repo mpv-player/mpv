@@ -8,6 +8,9 @@
     TODO: fix the whole syncing mechanism
     
     $Log$
+    Revision 1.27  2002/10/01 20:01:04  michael
+    rv10 cleanup
+
     Revision 1.26  2002/09/22 02:33:26  arpi
     tons of warning fixes, also some 10l bugfixes, including Dominik's PVA bug
 
@@ -575,9 +578,6 @@ loop:
 	    ds_add_packet(ds, dp);
 	} else
 	if (sh_video != NULL) {
-	    if (sh_video->format==0x30345652 ||
-		sh_video->format==0x30335652 ||
-		sh_video->format==0x30325652 ) {
 		// we need a more complicated demuxing
 		// a block may contain multiple packets
 		// as well as a packet may be contained in multiple blocks
@@ -743,28 +743,6 @@ loop:
 		printf("\n******** !!!!!!!! BUG!! len=%d !!!!!!!!!!! ********\n",len);
 		if(len>0) stream_skip(demuxer->stream, len);
 	    }
-
-	    } else {
-		// old video stream type
-
-		dp = new_demux_packet(len);
-		stream_read(demuxer->stream, dp->buffer, len);
-#if 0		
-		{ unsigned char* p=dp->buffer;
-		  int i;
-		  printf("\n#HDR# %04X",len);
-		  for(i=0;i<20;i++) printf(" %02X",p[i]);
-		  printf("\n");
-		  if((p[0]&0x80)) printf("#HDR#\n");
-		}
-#endif
-
-		dp->pts = timestamp/1000.0f;
-		dp->pos = demuxer->filepos;
-		dp->flags = (flags & 0x2) ? 0x10 : 0;
-		ds_add_packet(ds, dp);
-	    }
-
 	}
     }
 #endif
