@@ -502,7 +502,8 @@ switch(sh_video->codec->driver){
 
    sh_video->our_out_buffer = (char*)memalign(64,sh_video->disp_w*sh_video->disp_h*bpp/8); // FIXME!!!
 #endif
-
+   /* Warning: these pitches tested only with YUY2 fourcc */
+   pitches[0] = 16; pitches[1] = pitches[2] = 8;
    DS_SetAttr_DivX("Quality",divx_quality);
 
    DS_VideoDecoder_StartInternal(ds_vdec);
