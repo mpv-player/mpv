@@ -999,7 +999,7 @@ static void patch_panscan(muxer_priv_t *priv, unsigned char *buf)
 
 static uint32_t get_audio_frame_size(muxer_headers_t *spriv, uint8_t *buf, int format, int samples_ps)
 {
-	uint32_t sz, tmp;
+	uint32_t sz, tmp, spf;
 	
 #ifdef USE_LIBA52
 #include "../liba52/a52.h"
@@ -1011,7 +1011,14 @@ static uint32_t get_audio_frame_size(muxer_headers_t *spriv, uint8_t *buf, int f
 			return sz;
 	}
 #endif
-	tmp = spriv->bitrate * (format == 0x2000 ? 1536 : 1152);
+	if(format == 0x2000)
+		spf = 1536;
+	else if((format == 0x55) && (samples_ps < 32000))
+		spf = 576;
+	else
+		spf = 1152;
+
+	tmp = spriv->bitrate * spf;
 	sz = tmp / samples_ps;
 	if(sz % 2)
 		sz++;
