@@ -3,7 +3,8 @@ include ../config.mak
 
 LIBNAME = libosdep.a
 
-SRCS= shmem.c strsep.c vsscanf.c scandir.c gettimeofday.c fseeko.c # timer.c
+SRCS= shmem.c strsep.c strl.c vsscanf.c scandir.c gettimeofday.c fseeko.c \
+      # timer.c
 
 ifeq ($(TARGET_ARCH_X86),yes)
 ifeq ($(TARGET_OS),Linux)

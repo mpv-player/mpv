@@ -54,8 +54,12 @@ char * gstrcat( char ** dest,char * src )
  if ( *dest )
   {
    tmp=malloc( strlen( *dest ) + strlen( src ) + 1 );
-   strcpy( tmp,*dest ); strcat( tmp,src ); free( *dest ); 
-  }
+   
+   if ( tmp ) /* TODO: advanced error handling */
+    {
+     strcpy( tmp,*dest ); strcat( tmp,src ); free( *dest ); 
+    }
+   }
   else
    { tmp=malloc( strlen( src ) + 1 ); strcpy( tmp,src ); }
  *dest=tmp;

@@ -2712,6 +2712,34 @@ else
 fi
 echores "$_strsep"
 
+echocheck "strlcpy()"
+cat > $TMPC << EOF
+#include <string.h>
+int main (void) { char *s = "Hello, world!", t[20]; (void) strlcpy(t, s, sizeof( t )); return 0; }
+EOF
+_strlcpy=no
+cc_check && _strlcpy=yes
+if test "$_strlcpy" = yes ; then
+ _def_strlcpy='#define HAVE_STRLCPY 1'
+else
+ _def_strlcpy='#undef HAVE_STRLCPY'
+fi
+echores "$_strlcpy"
+
+echocheck "strlcat()"
+cat > $TMPC << EOF
+#include <string.h>
+int main (void) { char *s = "Hello, world!", t[20]; (void) strlcat(t, s, sizeof( t )); return 0; }
+EOF
+_strlcat=no
+cc_check && _strlcat=yes
+if test "$_strlcat" = yes ; then
+ _def_strlcat='#define HAVE_STRLCAT 1'
+else
+ _def_strlcat='#undef HAVE_STRLCAT'
+fi
+echores "$_strlcat"
+
 echocheck "fseeko()"
 cat > $TMPC << EOF
 #include <stdio.h>
@@ -6335,6 +6363,18 @@ $_def_scandir
 
 /* Define this if your system has strsep */
 $_def_strsep
+
+/* Define this if your system has strlcpy */
+$_def_strlcpy
+#ifndef HAVE_STRLCPY
+unsigned int strlcpy (char *dest, char *src, unsigned int size);
+#endif
+
+/* Define this if your system has strlcat */
+$_def_strlcat
+#ifndef HAVE_STRLCAT
+unsigned int strlcat (char *dest, char *src, unsigned int size);
+#endif
 
 /* Define this if your system has fseeko */
 $_def_fseeko

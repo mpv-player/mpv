@@ -150,8 +150,10 @@ static void add_string(struct menu_priv_s* priv, char* l) {
     return;
   }
   priv->lines[ll] = realloc(priv->lines[ll],strlen(priv->lines[ll]) + strlen(l) + 1);
-  strcat(priv->lines[ll],l);
-  
+  if ( priv->lines[ll] != NULL )
+  {
+    strcat(priv->lines[ll],l);
+  }
 }
 
 static void draw(menu_t* menu, mp_image_t* mpi) {

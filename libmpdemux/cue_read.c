@@ -135,6 +135,10 @@ int cue_getTrackinfo(char *Line, tTrack *track)
 
 
 
+/* FIXME: the string operations ( strcpy,strcat ) below depend
+ * on the arrays to have the same size, thus we need to make
+ * sure the sizes are in sync.
+ */
 int cue_find_bin (char *firstline) {
   int i,j;
   char s[256];
@@ -178,7 +182,7 @@ int cue_find_bin (char *firstline) {
            bin_filename);
 
     /* now try to find it with the path of the cue file */
-    sprintf(s,"%s/%s",bincue_path, bin_filename);
+    snprintf(s,sizeof( s ),"%s/%s",bincue_path,bin_filename);
     fd_bin = open (s, O_RDONLY);
     if (fd_bin == -1)
     {
@@ -195,7 +199,7 @@ int cue_find_bin (char *firstline) {
                "[bincue] bin filename tested: %s\n", s);
 
         /* ok try it with path */
-        sprintf(t,"%s/%s",bincue_path, s);
+        snprintf(t, sizeof( t ), "%s/%s", bincue_path, s);
         fd_bin = open (t, O_RDONLY);
         if (fd_bin == -1)
         {
@@ -211,7 +215,7 @@ int cue_find_bin (char *firstline) {
             mp_msg(MSGT_OPEN,MSGL_STATUS,
                    "[bincue] bin filename tested: %s \n", s);
             /* ok try it with path */
-            sprintf(t,"%s/%s",bincue_path, s);
+            snprintf(t, sizeof( t ), "%s/%s", bincue_path, s);
             fd_bin = open (t, O_RDONLY);
             if (fd_bin == -1)
             {
@@ -299,15 +303,16 @@ int cue_read_cue (char *in_cue_filename)
        strcpy(t, "/");
   }
   printf ("dirname: %s\n", t);
-  strcpy(bincue_path,t);
+  strlcpy(bincue_path,t,sizeof( bincue_path ));
 
 
   /* no path at all? */
   if (strcmp(bincue_path, ".") == 0) {
     printf ("bincue_path: %s\n", bincue_path);
-    strcpy(cue_filename,in_cue_filename);
+    strlcpy(cue_filename,in_cue_filename,sizeof( cue_filename ));
   } else {
-    strcpy(cue_filename,in_cue_filename + strlen(bincue_path) + 1);
+    strlcpy(cue_filename,in_cue_filename + strlen(bincue_path) + 1,
+            sizeof( cue_filename ));
   }
 
 

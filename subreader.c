@@ -1133,7 +1133,7 @@ subtitle* subcp_recode1 (subtitle *sub)
   while (l){
      char *ip = icbuffer;
      char *op = sub->text[--l];
-     strcpy(ip, op);
+     strlcpy(ip, op, ICBUFFSIZE);
      ileft = strlen(ip);
      oleft = ICBUFFSIZE - 1;
 		

@@ -175,12 +175,14 @@ int dxr3_overlay = 0;
 int dxr3_device_num = 0;
 int dxr3_norm = 0;
 
+#define MAX_STR_SIZE 80 /* length for the static strings  */
+
 /* File descriptors */
 static int fd_control = -1;
 static int fd_video = -1;
 static int fd_spu = -1;
-static char fdv_name[80];
-static char fds_name[80];
+static char fdv_name[MAX_STR_SIZE];
+static char fds_name[MAX_STR_SIZE];
 
 #ifdef SPU_SUPPORT
 /* on screen display/subpics */
@@ -865,7 +867,7 @@ static void check_events(void)
 
 static uint32_t preinit(const char *arg)
 {
-	char devname[80];
+	char devname[MAX_STR_SIZE];
 	int fdflags = O_WRONLY;
 
 	/* Parse commandline */
@@ -1136,13 +1138,13 @@ static int overlay_read_state(overlay_t *o, char *p)
     int j;
 	
     if(!p) {
-	strcpy(fname,getenv("HOME"));
-	strcat(fname,"/.overlay");	    
+	strlcpy(fname, getenv("HOME"), sizeof( fname ));
+	strlcat(fname,"/.overlay", sizeof( fname ));	    
     } else
-	strcpy(fname,p);
+	strlcpy(fname, p, sizeof( fname ));
     
     sprintf(tmp,"/res_%dx%dx%d",o->xres,o->yres,o->depth);
-    strcat(fname,tmp);
+    strlcat(fname, tmp, sizeof( fname ));
 
     if(!(fp=fopen(fname,"r")))
 	return -1;
@@ -1199,10 +1201,10 @@ static int overlay_write_state(overlay_t *o, char *p)
     int i,j;
 	
     if(!p) {
-	strcpy(fname,getenv("HOME"));
-	strcat(fname,"/.overlay");	    
+	strlcpy(fname, getenv("HOME"), sizeof( fname ));
+	strlcat(fname,"/.overlay", sizeof( fname ));	    
     } else
-	strcpy(fname,p);
+	strlcpy(fname, p, sizeof( fname ));
 
     if(access(fname, W_OK|X_OK|R_OK)) {
 	if(mkdir(fname,0766))
@@ -1210,7 +1212,7 @@ static int overlay_write_state(overlay_t *o, char *p)
     }	
     
     sprintf(tmp,"/res_%dx%dx%d",o->xres,o->yres,o->depth);
-    strcat(fname,tmp);
+    strlcat(fname, tmp, sizeof( fname ));
     
     if(!(fp=fopen(fname,"w")))
 	return -1;

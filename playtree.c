@@ -936,7 +936,7 @@ void pt_add_file(play_tree_t** ppt, char* filename)
 
 void pt_add_gui_file(play_tree_t** ppt, char* path, char* file)
 {
-  char* wholename = malloc(strlen(path)+strlen(file)+3);
+  char* wholename = malloc(strlen(path)+strlen(file)+2);
 
   if (wholename)
   {

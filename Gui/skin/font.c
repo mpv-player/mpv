@@ -27,7 +27,7 @@ int fntAddNewFont( char * name )
 
  if ( ( Fonts[id]=calloc( 1,sizeof( bmpFont ) ) ) == NULL ) return -1;
 
- strcpy( Fonts[id]->name,name );
+ strlcpy( Fonts[id]->name,name,128 ); // FIXME: as defined in font.h
  for ( i=0;i<256;i++ ) 
    Fonts[id]->Fnt[i].x=Fonts[id]->Fnt[i].y=Fonts[id]->Fnt[i].sx=Fonts[id]->Fnt[i].sy=-1;
 
@@ -60,7 +60,8 @@ int fntRead( char * path,char * fname )
  
  if ( id < 0 ) return id;
 
- strcpy( tmp,path ); strcat( tmp,fname ); strcat( tmp,".fnt" );
+ strlcpy( tmp,path,sizeof( tmp ) );
+ strlcat( tmp,fname,sizeof( tmp ) ); strlcat( tmp,".fnt",sizeof( tmp ) );
  if ( ( f=fopen( tmp,"rt" ) ) == NULL ) 
    { free( Fonts[id] ); return -3; }
    
@@ -93,7 +94,7 @@ int fntRead( char * path,char * fname )
      {
       if ( !strcmp( command,"image" ) )
        {
-        strcpy( tmp,path ); strcat( tmp,param );
+        strlcpy( tmp,path,sizeof( tmp )  ); strlcat( tmp,param,sizeof( tmp ) );
         mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[font] font imagefile: %s\n",tmp );
         if ( skinBPRead( tmp,&Fonts[id]->Bitmap ) ) return -4;
        }
