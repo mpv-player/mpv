@@ -154,6 +154,7 @@ Optional features:
   --disable-libdv        disable libdv 0.9.5 support [autodetect]
   --disable-streaming    disable network streaming support
                          (support for: http/mms/rtp) [enable]
+  --disable-live         disable LIVE.COM Streaming Media support [disable]
   --disable-vidix        disable VIDIX stuff [enable on x86 *nix]
   --disable-new-input    disable new input system [enable]
   --enable-joystick      enable joystick support in new input [disable]
@@ -241,6 +242,7 @@ Use these options if autodetection fails:
   --with-gtk-config=PATH   path to gtk*-config (e.g. /opt/bin/gtk-config)
   --with-glib-config=PATH  path to glib*-config (e.g. /opt/bin/glib-config)
   --with-dvdnav-config=PATH  path to dvdnav-config
+  --with-livelibdir=DIR       path to LIVE.COM Streaming Media libraries
 
 EOF
     exit 0
@@ -929,6 +931,7 @@ _dvdread=auto
 _dvdkit=auto
 _xanim=auto
 _real=auto
+_live=no
 _xinerama=auto
 _mga=auto
 _xmga=auto
@@ -1052,6 +1055,8 @@ for ac_option do
   --disable-xanim)	_xanim=no	;;
   --enable-real)	_real=yes	;;
   --disable-real)	_real=no	;;
+  --enable-live)	_live=yes	;;
+  --disable-live)	_live=no	;;
   --enable-xinerama)	_xinerama=yes	;;
   --disable-xinerama)	_xinerama=no	;;
   --enable-mga)		_mga=yes	;;
@@ -1148,6 +1153,10 @@ for ac_option do
   --with-reallibdir=*)
     _reallibdir=`echo $ac_option | cut -d '=' -f 2`
     _real=yes
+    ;;
+  --with-livelibdir=*)
+    _livelibdir=`echo $ac_option | cut -d '=' -f 2`
+    _live=yes
     ;;
   --with-csslibdir=*)
     _csslibdir=`echo $ac_option | cut -d '=' -f 2`
@@ -3397,6 +3406,41 @@ else
 fi
 
 
+if test -z "$_livelibdir" ; then
+    for I in $_libdir/live /usr/lib/live /usr/local/lib/live; do
+      if test -d "$I" ; then
+        _livelibdir="$I"
+        break;
+      fi;
+    done
+fi
+
+echocheck "LIVE.COM Streaming Media libraries"
+if test "$_live" = auto ; then
+  _live=yes
+  test "$_livelibdir" || _live=no
+  # TODO: deeper, more reliable test of libs, and version!
+  # (users may have empty live/ dir or something different there, for
+  # example 'live config files', or they may have old, incompatibel version)
+fi
+if test "$_live" = yes ; then
+  echores "yes (using $_livelibdir)"
+  _streaming=yes
+  _def_live='#define STREAMING_LIVE_DOT_COM 1'
+  _live_libs_def="# LIVE.COM Streaming Media libraries:
+LIVE_LIB_DIR = $_livelibdir
+LIVE_LIBS =  \$(LIVE_LIB_DIR)/liveMedia/libliveMedia.a
+LIVE_LIBS += \$(LIVE_LIB_DIR)/groupsock/libgroupsock.a
+LIVE_LIBS += \$(LIVE_LIB_DIR)/UsageEnvironment/libUsageEnvironment.a
+LIVE_LIBS += \$(LIVE_LIB_DIR)/BasicUsageEnvironment/libBasicUsageEnvironment.a
+LIVE_LIBS += -lstdc++"
+  _ld_live='$(LIVE_LIBS)'
+else
+  echores "no"
+  _def_live='#undef STREAMING_LIVE_DOT_COM'
+fi
+
+
 echocheck "iconv"
 if test "$_iconv" = auto ; then
   if freebsd ; then
@@ -4069,8 +4113,11 @@ EXTRA_INC = $_inc_extra $_inc_gtk
 WIN32_PATH = -DWIN32_PATH=\\"$_win32libdir\\"
 STRIPBINARIES = $_stripbinaries
 
+$_live_libs_def
+
 STREAMING = $_streaming
-STREAMING_LIB = $_ld_streaming
+STREAMING_LIVE_DOT_COM = $_live
+STREAMING_LIB = $_ld_streaming $_ld_live
 VIDIX = $_vidix
 
 OPENDIVX = $_opendivx
@@ -4375,6 +4422,9 @@ $_def_xanim_path
 $_def_real
 /* Default search path */
 $_def_real_path
+
+/* LIVE.COM Streaming Media library support */
+$_def_live
 
 /* Use 3dnow/mmxext/sse/mmx optimized fast memcpy() [maybe buggy... signal 4]*/
 $_def_fastmemcpy

@@ -150,6 +150,7 @@ extern void demux_close_fli(demuxer_t* demuxer);
 extern void demux_close_nuv(demuxer_t* demuxer);
 extern void demux_close_audio(demuxer_t* demuxer);
 extern void demux_close_ogg(demuxer_t* demuxer);
+extern void demux_close_rtp(demuxer_t* demuxer);
 extern void demux_close_demuxers(demuxer_t* demuxer);
 extern void demux_close_avi(demuxer_t *demuxer);
 
@@ -179,6 +180,10 @@ void free_demuxer(demuxer_t *demuxer){
       demux_close_audio(demuxer); break;
     case DEMUXER_TYPE_OGG:
       demux_close_ogg(demuxer); break;
+#ifdef STREAMING_LIVE_DOT_COM
+    case DEMUXER_TYPE_RTP:
+      demux_close_rtp(demuxer); break;
+#endif
     case DEMUXER_TYPE_DEMUXERS:
       demux_close_demuxers(demuxer); return;
     case DEMUXER_TYPE_AVI: 
@@ -255,6 +260,7 @@ int demux_mov_fill_buffer(demuxer_t *demux,demux_stream_t* ds);
 int demux_vivo_fill_buffer(demuxer_t *demux);
 int demux_real_fill_buffer(demuxer_t *demuxer);
 int demux_nuv_fill_buffer(demuxer_t *demux);
+int demux_rtp_fill_buffer(demuxer_t *demux, demux_stream_t* ds);
 #ifdef USE_TV
 #include "tv.h"
 extern tvi_handle_t *tv_handler;
@@ -296,6 +302,9 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
     case DEMUXER_TYPE_DEMUXERS: return demux_demuxers_fill_buffer(demux,ds);
     case DEMUXER_TYPE_OGG: return demux_ogg_fill_buffer(demux);
     case DEMUXER_TYPE_RAWAUDIO: return demux_rawaudio_fill_buffer(demux,ds);
+#ifdef STREAMING_LIVE_DOT_COM
+    case DEMUXER_TYPE_RTP: return demux_rtp_fill_buffer(demux, ds);
+#endif
   }
   return 0;
 }
@@ -793,6 +802,11 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AUDIO){
     demuxer = NULL;
   }
 }
+//=============== Try to open as a RTP stream): ===========
+ if(file_format==DEMUXER_TYPE_RTP) {
+   demuxer=new_demuxer(stream,DEMUXER_TYPE_RTP,audio_id,video_id,dvdsub_id);
+ }
+
 //=============== Unknown, exiting... ===========================
 if(file_format==DEMUXER_TYPE_UNKNOWN || demuxer == NULL){
   mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_FormatNotRecognized);
@@ -947,6 +961,12 @@ switch(file_format){
 	return(NULL);
     }
     break;
+ }
+#endif
+#ifdef STREAMING_LIVE_DOT_COM
+ case DEMUXER_TYPE_RTP: {
+   demux_open_rtp(demuxer);
+   break;
  }
 #endif
 } // switch(file_format)

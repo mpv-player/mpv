@@ -22,6 +22,10 @@
 #ifdef STREAMING
 #include "url.h"
 #include "network.h"
+#ifdef STREAMING_LIVE_DOT_COM
+#include "demux_rtp.h"
+int isSDPFile = 0;
+#endif
 static URL_t* url;
 #endif
 
@@ -471,6 +475,14 @@ tv_err:
 #else
 	 mp_msg(MSGT_OPEN,MSGL_V,"File size is %u bytes\n", (unsigned int)len);
 #endif
+
+#ifdef STREAMING_LIVE_DOT_COM
+	 // Check for a special case: a SDP file:
+	 if (isSDPFile) {
+	   return stream_open_sdp(f, len, file_format);
+	 }
+#endif
+
        stream=new_stream(f,STREAMTYPE_FILE);
        stream->end_pos=len;
        return stream;

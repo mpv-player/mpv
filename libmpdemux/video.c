@@ -79,6 +79,13 @@ switch(d_video->demuxer->file_format){
 #endif
   break;
  }
+#ifdef STREAMING_LIVE_DOT_COM
+ case DEMUXER_TYPE_RTP:
+   // If the RTP stream is a MPEG stream, then we use this code to check
+   // for MPEG headers:
+   if (!demux_is_mpeg_rtp_stream(d_video->demuxer)) break;
+   // otherwise fall through to...
+#endif
  case DEMUXER_TYPE_MPEG_ES:
  case DEMUXER_TYPE_MPEG_PS: {
 //mpeg_header_parser:
@@ -211,7 +218,11 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
     
     *start=NULL;
 
-  if(demuxer->file_format==DEMUXER_TYPE_MPEG_ES || demuxer->file_format==DEMUXER_TYPE_MPEG_PS){
+  if(demuxer->file_format==DEMUXER_TYPE_MPEG_ES || demuxer->file_format==DEMUXER_TYPE_MPEG_PS
+#ifdef STREAMING_LIVE_DOT_COM
+    || (demuxer->file_format==DEMUXER_TYPE_RTP && demux_is_mpeg_rtp_stream(demuxer))
+#endif
+  ){
         int in_frame=0;
         //float newfps;
         //videobuf_len=0;

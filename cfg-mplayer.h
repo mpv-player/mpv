@@ -80,6 +80,10 @@ extern int vo_zr_parseoption(struct config * conf, char *opt, char * param);
 extern void vo_zr_revertoption(config_t* opt,char* pram);
 #endif
 
+#ifdef STREAMING_LIVE_DOT_COM
+extern int isSDPFile;
+#endif
+
 #ifdef HAVE_NEW_GUI
 extern char * skinName;
 #endif
@@ -274,6 +278,13 @@ static config_t mplayer_opts[]={
 #ifdef HAVE_ZR
 	// -vo zr
 	{"zr*", vo_zr_parseoption, CONF_TYPE_FUNC_FULL, 0, 0, 0, &vo_zr_revertoption },
+#endif
+
+#ifdef STREAMING_LIVE_DOT_COM
+	// -sdp option, specifying that the source is a SDP file
+        {"sdp", &isSDPFile, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+#else
+	{"sdp", "MPlayer was compiled WITHOUT the \"LIVE.COM Streaming Media\" libraries!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
 
 //---------------------- mplayer-only options ------------------------

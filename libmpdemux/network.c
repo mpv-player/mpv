@@ -25,7 +25,9 @@
 #include "http.h"
 #include "url.h"
 #include "asf.h"
+#ifndef STREAMING_LIVE_DOT_COM
 #include "rtp.h"
+#endif
 
 #include "../version.h"
 
@@ -113,6 +115,7 @@ streaming_ctrl_free( streaming_ctrl_t *streaming_ctrl ) {
 	free( streaming_ctrl );
 }
 
+#ifndef STREAMING_LIVE_DOT_COM
 int
 read_rtp_from_server(int fd, char *buffer, int length) {
 	struct rtpheader rh;
@@ -132,6 +135,7 @@ read_rtp_from_server(int fd, char *buffer, int length) {
 	memcpy(buffer, data, len);
 	return(len);
 }
+#endif
 
 // Connect to a server using a TCP connection
 int
@@ -454,10 +458,18 @@ extension=NULL;
 
 		// Checking for RTSP
 		if( !strcasecmp(url->protocol, "rtsp") ) {
-			mp_msg(MSGT_NETWORK,MSGL_ERR,"RTSP protocol not yet implemented!\n");
+#ifdef STREAMING_LIVE_DOT_COM
+			*file_format = DEMUXER_TYPE_RTP;
+			return 0;
+#else
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"RTSP protocol support requires the \"LIVE.COM Streaming Media\" libraries!\n");
 			return -1;
+#endif
 		}
 
+#ifndef STREAMING_LIVE_DOT_COM
+	// Old, hacked RTP support, which works for MPEG Program Streams
+	//   RTP streams only:
 		// Checking for RTP
 		if( !strcasecmp(url->protocol, "rtp") ) {
 			if( url->port==0 ) {
@@ -466,6 +478,7 @@ extension=NULL;
 			}
 			return 0;
 		}
+#endif
 
 		// Checking for ASF
 		if( !strncasecmp(url->protocol, "mms", 3) ) {
@@ -688,6 +701,7 @@ nop_streaming_start( stream_t *stream ) {
 	return 0;
 }
 
+#ifndef STREAMING_LIVE_DOT_COM
 // Start listening on a UDP port. If multicast, join the group.
 int
 rtp_open_socket( URL_t *url ) {
@@ -789,6 +803,7 @@ rtp_streaming_start( stream_t *stream ) {
 	streaming_ctrl->status = streaming_playing_e;
 	return 0;
 }
+#endif
 
 int
 streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
@@ -820,6 +835,7 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 		}
 	}
 	
+#ifndef STREAMING_LIVE_DOT_COM
 	// For RTP streams, we usually don't know the stream type until we open it.
 	if( !strcasecmp( stream->streaming_ctrl->url->protocol, "rtp")) {
 		if(stream->fd >= 0) {
@@ -829,6 +845,7 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 		stream->fd = -1;
 		ret = rtp_streaming_start( stream );
 	} else
+#endif
 	// For connection-oriented streams, we can usually determine the streaming type.
 	switch( *demuxer_type ) {
 		case DEMUXER_TYPE_ASF:
@@ -840,6 +857,15 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 				mp_msg(MSGT_NETWORK,MSGL_ERR,"asf_streaming_start failed\n");
 			}
 			break;
+#ifdef STREAMING_LIVE_DOT_COM
+		case DEMUXER_TYPE_RTP:
+			// RTSP/RTP streaming is handled separately:
+			ret = rtsp_streaming_start( stream );
+			if( ret<0 ) {
+				mp_msg(MSGT_NETWORK,MSGL_ERR,"rtsp_rtp_streaming_start failed\n");
+			}
+			break;
+#endif
 		case DEMUXER_TYPE_MPEG_ES:
 		case DEMUXER_TYPE_MPEG_PS:
 		case DEMUXER_TYPE_AVI:

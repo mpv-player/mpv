@@ -29,10 +29,11 @@
 #define DEMUXER_TYPE_OGG 18
 #define DEMUXER_TYPE_BMP 19
 #define DEMUXER_TYPE_RAWAUDIO 20
+#define DEMUXER_TYPE_RTP 21
 // This should always match the higest demuxer type number.
 // Unless you want to disallow users to force the demuxer to some types
 #define DEMUXER_TYPE_MIN 0
-#define DEMUXER_TYPE_MAX 20
+#define DEMUXER_TYPE_MAX 21
 
 #define DEMUXER_TYPE_DEMUXERS (1<<16)
 // A virtual demuxer type for the network code
@@ -123,9 +124,9 @@ typedef struct demuxer_st {
 } demuxer_t;
 
 inline static demux_packet_t* new_demux_packet(int len){
-  demux_packet_t* dp=malloc(sizeof(demux_packet_t));
+  demux_packet_t* dp=(demux_packet_t*)malloc(sizeof(demux_packet_t));
   dp->len=len;
-  dp->buffer=len?malloc(len+8):NULL;
+  dp->buffer=len?(unsigned char*)malloc(len+8):NULL;
   dp->next=NULL;
   dp->pts=0;
   dp->pos=0;
@@ -136,7 +137,7 @@ inline static demux_packet_t* new_demux_packet(int len){
 }
 
 inline static demux_packet_t* clone_demux_packet(demux_packet_t* pack){
-  demux_packet_t* dp=malloc(sizeof(demux_packet_t));
+  demux_packet_t* dp=(demux_packet_t*)malloc(sizeof(demux_packet_t));
   while(pack->master) pack=pack->master; // find the master
   memcpy(dp,pack,sizeof(demux_packet_t));
   dp->next=NULL;
