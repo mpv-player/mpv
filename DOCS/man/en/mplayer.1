@@ -2133,6 +2133,38 @@ error resilience:
 .br
 4: very agressive
 .REss
+.IPs debug=<value>
+debug:
+.RSss
+.br
+0: disabled
+.br
+1: picture info
+.br
+2: rate control
+.br
+4: bitstream
+.br
+8: MB type
+.br
+16: QP
+.br
+32: Motion vector
+.br
+0x0040: Motion vector vissualization (use -noslices)
+.br
+0x0080: MB skip
+.br
+0x0100: startcode
+.br
+0x0200: PTS
+.br
+0x0400: error resilience
+.br
+0x0800: memory management control operations (H264)
+.br
+0x1000: bugs
+.REss
 .IPs bug=<value>
 manually work around encoder bugs:
 .RSss
@@ -3667,6 +3699,9 @@ X1 (experimental)
 .RE
 .PD 1
 .TP
+.B me_range=<0\-9999>
+motion estimation search range, note, 0 is unlimited and default
+.TP
 .B mbd=<0\-2>
 Macroblock decision algorithm (high quality mode), encode each macro
 block in all modes and choose the best.
@@ -4088,6 +4123,9 @@ disabled (default)
 sane range
 .RE
 .TP
+.B p_mask=<0.0\-1.0>
+inter MB masking (default: 0.0 (disabled))
+.TP
 .B naq\ \ \ \ 
 Normalize adaptive quantization (experimental).
 When using adaptive quantization (*_mask), the average per-MB quantizer may no
@@ -4109,7 +4147,7 @@ for huffyuv, lossless jpeg and ffv1
 .IPs 411P,YVU9
 for lossless jpeg and ffv1
 .IPs BGR32
-for lossless jpeg only
+for lossless jpeg and ffv1
 .RE
 .TP
 .B pred
@@ -4153,6 +4191,17 @@ arithmetic coding (cabac)
 .RE
 .PD 1
 .TP
+.B context
+(for ffv1)
+.PD 0
+.RSs
+.IPs 0
+small context model
+.IPs 1
+large context model
+.RE
+.PD 1
+.TP
 .B qpel\ \ \ 
 use quarter pel motion compensation
 Tip: This seems only useful for high bitrate encodings.
@@ -4165,6 +4214,9 @@ comparison function for full pel motion estimation
 .TP
 .B subcmp=<0\-2000>
 comparison function for sub pel motion estimation
+.TP
+.B mbcmp=<0\-2000>
+comparison function for the macroblock decission, only used if mbd=0
 .PD 0
 .RSs
 .IPs "0 (SAD)"
@@ -4316,6 +4368,9 @@ Note: the h263 MMX quantizer cannot handle positive biases (set vfdct=1or2)
       the mpeg MMX quantizer cannot handle negative biases (set vfdct=1or2)
 .br
 Tip: a more positive bias (-32 \- -16 instead of -64) seems to improve the PSNR
+.TP
+.B nr=<0\-100000>
+noise reduction, 0 is disabled
 .TP
 .B inter_matrix=<comma separated matrix>
 Use custom inter matrix. It needs a comma separated string of 64 integers.
