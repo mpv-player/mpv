@@ -621,9 +621,10 @@ TV-Tuner ermöglicht</B>.</P>
 </UL>
 </P>
 
-<P><B>Hinweis</B>: sind die Farben falsch? Dann kein dein Tuner kein YV12 darstellen. Versuche
-  YUY2, UYVY oder wenn nicht von denen funktioniert: RGB32 (dies aber mit <CODE>-vo sdl</CODE>).
-  Du kannst diese Eigenschaft mit der <CODE>outfmt=YV12</CODE> Option (siehe unten) einstellen.</P>
+<P><B>Hinweis</B>: sind die Farben falsch? Dann kein dein Tuner kein YV12 darstellen.
+   Versuche I420 (verwende die auch die <CODE>-vc rawi420</CODE> Option!), YUY2, UYVY oder RGB32 (mit
+   <CODE>-vo sdl</CODE>) Colorspaces.
+   Du kannst diese Eigenschaft mit der <CODE>outfmt=YV12</CODE> Option (siehe unten) einstellen.</P>
 
 <P><B><I>Verfügbare Optionen</I></B><BR>
 <TABLE BORDER=0>
