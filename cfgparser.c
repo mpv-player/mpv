@@ -103,7 +103,7 @@ m_config_save_option(m_config_t* config, config_t* conf,char* opt, char *param) 
   case CONF_TYPE_FUNC :    
     break;
   default :
-    printf("Should never append in m_config_save_option : conf->type=%d\n",conf->type);
+    mp_msg(MSGT_CFGPARSER,MSGL_ERR,"Should never append in m_config_save_option : conf->type=%d\n",conf->type);
   }
 
   config->config_stack[config->cs_level] = save;
@@ -165,7 +165,7 @@ m_config_revert_option(m_config_t* config, config_save_t* save) {
       break;
     case CONF_TYPE_FUNC_PARAM :
       if (iter->param.as_pointer == NULL) {
-	printf("We lost param for option %s?\n",iter->opt->name);
+	mp_msg(MSGT_CFGPARSER,MSGL_ERR,"We lost param for option %s?\n",iter->opt->name);
 	return -1;
       } 
       if ((((cfg_func_param_t) iter->opt->p)(iter->opt, (char*)iter->param.as_pointer)) < 0)
@@ -184,7 +184,7 @@ m_config_revert_option(m_config_t* config, config_save_t* save) {
     }
     break;
   default :
-    printf("Why do we reverse this : name=%s type=%d ?\n",save->opt->name,save->opt->type);
+    mp_msg(MSGT_CFGPARSER,MSGL_WARN,"Why do we reverse this : name=%s type=%d ?\n",save->opt->name,save->opt->type);
   }
 			
   return 1;
@@ -666,7 +666,7 @@ static int config_read_option(m_config_t *config,config_t** conf_list, char *opt
 			break;
 		    }
 		case CONF_TYPE_PRINT:
-			printf("%s", (char *) conf[i].p);
+			mp_msg(MSGT_CFGPARSER, MSGL_INFO, "%s", (char *) conf[i].p);
 			exit(1);
 		default:
 			mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Unknown config type specified in conf-mplayer.h!\n");
@@ -733,7 +733,7 @@ int m_config_set_option(m_config_t *config,char *opt, char *param) {
 
 int m_config_parse_config_file(m_config_t *config, char *conffile)
 {
-#define PRINT_LINENUM	printf("%s(%d): ", conffile, line_num)
+#define PRINT_LINENUM	mp_msg(MSGT_CFGPARSER,MSGL_INFO,"%s(%d): ", conffile, line_num)
 #define MAX_LINE_LEN	1000
 #define MAX_OPT_LEN	100
 #define MAX_PARAM_LEN	100
@@ -755,10 +755,10 @@ int m_config_parse_config_file(m_config_t *config, char *conffile)
 	//	assert(conf_list != NULL);
 #endif
 	if (++config->recursion_depth > 1)
-		printf("Reading config file: %s", conffile);
+		mp_msg(MSGT_CFGPARSER,MSGL_INFO,"Reading config file: %s", conffile);
 
 	if (config->recursion_depth > MAX_RECURSION_DEPTH) {
-		printf(": too deep 'include'. check your configfiles\n");
+		mp_msg(MSGT_CFGPARSER,MSGL_INFO,": too deep 'include'. check your configfiles\n");
 		ret = -1;
 		goto out;
 	}
@@ -769,24 +769,24 @@ int m_config_parse_config_file(m_config_t *config, char *conffile)
 	}
 
 	if ((line = (char *) malloc(MAX_LINE_LEN + 1)) == NULL) {
-		printf("\ncan't get memory for 'line': %s", strerror(errno));
+		mp_msg(MSGT_CFGPARSER,MSGL_INFO,"\ncan't get memory for 'line': %s", strerror(errno));
 		ret = -1;
 		goto out;
 	}
 
 	if ((fp = fopen(conffile, "r")) == NULL) {
 		if (config->recursion_depth > 1)
-			printf(": %s\n", strerror(errno));
+			mp_msg(MSGT_CFGPARSER,MSGL_INFO,": %s\n", strerror(errno));
 		free(line);
 		ret = 0;
 		goto out;
 	}
 	if (config->recursion_depth > 1)
-		printf("\n");
+		mp_msg(MSGT_CFGPARSER,MSGL_INFO,"\n");
 
 	while (fgets(line, MAX_LINE_LEN, fp)) {
 		if (errors >= 16) {
-			printf("too many errors\n");
+			mp_msg(MSGT_CFGPARSER,MSGL_INFO,"too many errors\n");
 			goto out;
 		}
 
@@ -809,7 +809,7 @@ int m_config_parse_config_file(m_config_t *config, char *conffile)
 			opt[opt_pos++] = line[line_pos++];
 			if (opt_pos >= MAX_OPT_LEN) {
 				PRINT_LINENUM;
-				printf("too long option\n");
+				mp_msg(MSGT_CFGPARSER,MSGL_INFO,"too long option\n");
 				errors++;
 				ret = -1;
 				goto nextline;
@@ -817,7 +817,7 @@ int m_config_parse_config_file(m_config_t *config, char *conffile)
 		}
 		if (opt_pos == 0) {
 			PRINT_LINENUM;
-			printf("parse error\n");
+			mp_msg(MSGT_CFGPARSER,MSGL_INFO,"parse error\n");
 			ret = -1;
 			errors++;
 			continue;
@@ -826,7 +826,7 @@ int m_config_parse_config_file(m_config_t *config, char *conffile)
 
 #ifdef MP_DEBUG
 		PRINT_LINENUM;
-		printf("option: %s\n", opt);
+		mp_msg(MSGT_CFGPARSER,MSGL_INFO,"option: %s\n", opt);
 #endif
 
 		/* skip whitespaces */
@@ -836,7 +836,7 @@ int m_config_parse_config_file(m_config_t *config, char *conffile)
 		/* check '=' */
 		if (line[line_pos++] != '=') {
 			PRINT_LINENUM;
-			printf("option without parameter\n");
+			mp_msg(MSGT_CFGPARSER,MSGL_INFO,"option without parameter\n");
 			ret = -1;
 			errors++;
 			continue;
@@ -854,7 +854,7 @@ int m_config_parse_config_file(m_config_t *config, char *conffile)
 				param[param_pos++] = line[line_pos++];
 				if (param_pos >= MAX_PARAM_LEN) {
 					PRINT_LINENUM;
-					printf("too long parameter\n");
+					mp_msg(MSGT_CFGPARSER,MSGL_INFO,"too long parameter\n");
 					ret = -1;
 					errors++;
 					goto nextline;
@@ -867,7 +867,7 @@ int m_config_parse_config_file(m_config_t *config, char *conffile)
 				param[param_pos++] = line[line_pos++];
 				if (param_pos >= MAX_PARAM_LEN) {
 					PRINT_LINENUM;
-					printf("too long parameter\n");
+					mp_msg(MSGT_CFGPARSER,MSGL_INFO,"too long parameter\n");
 					ret = -1;
 					errors++;
 					goto nextline;
@@ -879,7 +879,7 @@ int m_config_parse_config_file(m_config_t *config, char *conffile)
 		/* did we read a parameter? */
 		if (param_pos == 0) {
 			PRINT_LINENUM;
-			printf("option without parameter\n");
+			mp_msg(MSGT_CFGPARSER,MSGL_INFO,"option without parameter\n");
 			ret = -1;
 			errors++;
 			continue;
@@ -887,7 +887,7 @@ int m_config_parse_config_file(m_config_t *config, char *conffile)
 
 #ifdef MP_DEBUG
 		PRINT_LINENUM;
-		printf("parameter: %s\n", param);
+		mp_msg(MSGT_CFGPARSER,MSGL_INFO,"parameter: %s\n", param);
 #endif
 
 		/* now, check if we have some more chars on the line */
@@ -898,7 +898,7 @@ int m_config_parse_config_file(m_config_t *config, char *conffile)
 		/* EOL / comment */
 		if (line[line_pos] != '\0' && line[line_pos] != '#') {
 			PRINT_LINENUM;
-			printf("extra characters on line: %s\n", line+line_pos);
+			mp_msg(MSGT_CFGPARSER,MSGL_INFO,"extra characters on line: %s\n", line+line_pos);
 			ret = -1;
 		}
 
@@ -909,7 +909,7 @@ int m_config_parse_config_file(m_config_t *config, char *conffile)
 		case ERR_OUT_OF_RANGE:
 		case ERR_FUNC_ERR:
 			PRINT_LINENUM;
-			printf("%s\n", opt);
+			mp_msg(MSGT_CFGPARSER,MSGL_INFO,"%s\n", opt);
 			ret = -1;
 			errors++;
 			continue;
