@@ -1,0 +1,867 @@
+<html>
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=iso-8859-1">
+<title>MPlayer skin format</title>
+<style type="text/css">
+em.note {color: green}
+em.warn {color: red}
+</style>
+</head>
+
+<body bgcolor=white text=black>
+
+<h1 align="center">Formato skin di MPlayer</h1>
+
+<hr>
+
+<h2>Contenuti</h2>
+
+<ul type=disc>
+<li><a href="#intro">1 Introduzione</a></li>
+<li><a href="#overview">2 Generale</a></li>
+  <ul type=circle>
+  <li><a href="#dirs">2.1 Directory</a></li>
+  <li><a href="#images">2.2 Immagini</a></li>
+  <li><a href="#parts">2.3 Parti di una skin</a></li>
+  <li><a href="#files">2.4 File</a></li>
+  </ul>
+<li><a href="#skin">3 Il file <code>skin</code></a></li>
+  <ul type=circle>
+  <li><a href="#mainwin">3.1 Finestra principale</a></li>
+  <li><a href="#subwindow">3.2 Sotto finestra</a></li>
+  <li><a href="#skinmenu">3.3 Menu della skin</a></li>
+  </ul>
+<li><a href="#fonts">4 Font</a></li>
+  <ul type=circle>
+  <li><a href="#symbols">4.1 Simboli</a></li>
+  </ul>
+<li><a href="#guimsg">Appendice A: messaggi della GUI</a></li>
+</ul>
+
+<hr>
+
+<div align=center>
+Ultima modifica: Sep 10, 2001
+</div>
+
+<hr>
+
+<h2><a name="intro">1 Introduzione</a></h2>
+
+Il proposito di questo documento è di descrivere il formato delle skin di MPlayer.
+Le in formazioni qui contenute possono essere errate, in quanto <em>a)</em> non sono stato io
+a scrivere la GUI, <em>b)</em> la GUI non è finita, <em>c)</em> posso
+sbagliarmi. Quindi non sorprenderti se qualcosa non funziona come descritto qui.
+
+<p>
+Grazie a <em>Zoltán Ponekker</em> per il suo aiuto.
+
+<p>
+<em>András Mohari &lt;mayday@freemail.hu&gt;</em>
+
+
+<h2><a name="overview">2 Generale</a></h2>
+
+Non ha niente a che fare col formato delle skin, ma dovresti sapere
+che <em>MPlayer <b>non</b> ha include una skin, quindi <b>devi installare almeno
+una skin per poter usare la GUI.</b></em>
+
+
+<h3><a name="dirs">2.1 Directory</a></h3>
+
+Le directory in cui si cerca per le skin sono (in ordine):
+<pre>
+    /usr/local/share/mplayer/Skin/
+    ~/.mplayer/Skin/
+</pre>
+
+<p>
+Nota che il primo path può variare a seconda di come è stato configurato MPlayer
+(vedi l'argomento <code>--datadir</code> dello script <code>configure</code>).
+
+
+<p>
+Ogni skin è installata in una sua propria directory sotto una delle directory
+elencate sopra, per esempio:
+<pre>
+    /usr/local/share/mplayer/Skin/default/
+</pre>
+
+
+<h3><a name="images">2.2 Formati delle immagini</a></h3>
+
+Le immagini devono essere in truecolor (24 o 32 bpp) e possono essere in formato
+BMP, PNG e TGA (nota che le immagini TGA devono essere non compresse).
+<em>Il formato preferito è PNG perchè si comprime molto bene.</em>
+
+<p>
+Nella finestra principale (vedi sotto) puoi usare immagini con `trasparenze':
+regioni riempite col colore #FF00FF (<font color="#FF00FF">magenta</font>)
+sono del tutto trasparenti quando viste con MPlayer. Questo significa che puoi anche ottenere
+finestre con una certa forma se il tuo server X ha l'estensione XShape.
+
+
+<h3><a name="parts">2.3 Parti di una skin</a></h3>
+
+Le skin sono del tutto in formato libero (non come le skin a formato fisso di
+Winamp/XMMS, per esempio), quindi sta a te creare qualcosa di grandioso.
+
+<p>
+Attualmente ci sono tre finestre da essere decorate: la
+<a href="#mainwin">finestra principale</a>, la <a href="#subwindow">sotto finestra</a> e
+il <a href="#skinmenu">menu della skin</a> (che può essere attivata con il tasto
+destro).
+
+<ul>
+<li>
+La <b>finestra principale</b> è dove puoi controllare MPlayer. Lo sfondo della
+finestra è un'immagine. Vari oggetti possono (e devono) essere
+piazzati nella finestra: <em>bottoni</em>, <em>slider</em> e <em>etichetta</em>.
+Per ogni oggetto, devi
+specificare la sua posizione e dimensione.
+
+<p>
+Un <b>bottone</b> ha tre stati (premuto, rilasciato,
+disabilitato), quindi la sua immagine deve essere divisa in tre parti verticalmente.
+Vedi l'oggetto <a href="#main.button">bottone</a> per dettagli.
+<p>
+Uno <b>slider</b> (usati principalmente per la barra di ricerca e il controllo di volume/bilanciamento)
+può avere qualsiasi numero di fasi dividendo la sua immagine in differenti parti
+una sotto l'altra.
+Vedi <a href="#main.hpotmeter">hslider</a> e
+<a href="#main.potmeter">slider</a> per dettagli.
+
+<p>
+Le <b>etichette</b> sono un po' speciali: i caratteri necessari a disegnarli sono presi
+da un file immagine, e i caratteri nell'immagine sono descritti
+da un <a href="#fonts">file per la descrizione del font</a>.
+Questo è un normale file di testo che specifica
+la posizione x,y e la dimensione di ogni carattere nell'immagine. (Quindi
+il file d'immagine e il suo file di descrizione del font formano un font <em>insieme</em>.)
+Vedi <a href="#main.dlabel">dlabel</a> e <a href="#main.slabel">slabel</a>
+per dettagli.
+
+<p>
+<em class=note>
+<b>Nota:</b> tutte le immagini possono avere la piena trasparenza come descritto nella
+sezione sui <a href="#images">formati immagine</a>.
+</em>
+</li>
+
+<li>
+La <b>sotto finestra</b> è dove appare il filmato. Può mostrare una specifica immagine
+se non c'è nessun video caricato (è noioso avere una finestra vuota
+:-))
+<em class=note><b>Nota:</b> la trasparenza
+<b>non è permessa</b> qui.</em>
+</li>
+
+<li>
+Il <b>menu della skin</b> è solo un modo per controllare MPlayer per mezzo delle voci
+del menu. Sono necessarie due immagini per il menu: una è l'immagine di base
+che mostra il menu nel suo stato normale, l'altra è usata per mostrare
+le voci selezionate. Quando attivi il menu, viene mostrata la prima immagine.
+Se muovi il mouse sulle voci del menu, la voce attualmente selezionata
+è copiata dalla seconda immagine sotto il puntatore del mouse.
+(Quindi la seconda immagine non è mai mostrata interamente.)
+<p>
+Una voce del menu è definita dalla sua posizione e dimensione nell'immagine (vedi la
+sezione sul <a href="#skinmenu">menu della skin</a> per dettagli).
+</li>
+</ul>
+
+<p>
+C'è una cosa importante non ancora menzionata: per far funzionare bottoni, slider e
+voci del menu, MPlayer deve sapere cosa fare se sono cliccati.
+Questo è fatto tramite <a href="#guimsg">messaggi</a> (eventi). Per questi oggetti
+devi definire i messaggi che devono essere generati quando vengono attivati.
+
+<h3><a name="files">2.4 File</a></h3>
+
+Devi avere i seguenti file per fare una skin.
+<ul>
+<li>
+Il file di configurazione chiamato <a href="#skin">skin</a> dice a MPlayer come
+mettere insieme le diverse parti della skin e cosa fare se si clicca
+da qualche parte nella finestra.
+</li>
+<li>L'immagine di sfondo della finestra principale.</li>
+<li>Immagini per gli oggetti della finestra principale (inclusi uno o più file di descrizione dei font
+necessari per disegnare le etichette).</li>
+<li>l'immagine da mostrare nella sotto finestra (opzionale).</li>
+<li>Due immagini per il menu della skin (ne hai bisogno solo se vuoi creare un
+menu).
+</ul>
+
+Con l'eccezione del file di configurazione della skin, puoi nominare gli altri file
+come vuoi (ma nota che i file di descrizione dei font devono avere l'estensione
+.fnt).
+
+
+<h2><a name="skin">3 Il file <code><b>skin</b></code></a></h2>
+
+<p>
+Come menzionato sopra, questo è il file di configurazione della skin.
+E' orientato alla linea; le linee di commento iniziano col carattere '<code>;</code>'
+all'inizio della linea (solo spazi e tab sono permessi prima del
+'<code>;</code>').
+
+<p>
+Il file è fatto di sezioni. Ogni sezione descrive la skin per un'applicazione e
+ha la seguente forma:
+<table border=1 width="100%"><tr bgcolor=silver><td><pre>
+section = <i>nome sezione</i>
+.
+.
+.
+end
+</pre></td></tr></table>
+
+<p>
+Attualmente c'è solo una applicazione, quindi hai bisogno solo di una sezione:
+il suo nome è <b>movieplayer</b>.
+
+<p>
+Dentro questa sezione ogni finestra è descritta da un blocco nella seguente forma:
+<table border=1 width="100%"><tr bgcolor=silver><td><pre>
+window = <i>nome finestra</i>
+.
+.
+.
+end
+</pre></tr></td></table>
+dove <i>nome finestra</i> può essere una di queste stringhe:
+<ul>
+<li><b>main</b> - per la finestra principale</li>
+<li><b>sub</b> - per la sotto finestra</li>
+<li><b>menu</b> - per il menu della skin</li>
+</ul>
+
+<p>
+(I blocchi sub e menu sono opzionali---non devi per forza creare un menu o decorare
+la sotto finestra.)
+
+<p>
+Dentro un blocco finestra, puoi definire ogni oggetto della finestra
+con una linea in questa forma:
+
+<blockquote>
+<pre>
+oggetto = parametro
+</pre>
+</blockquote>
+
+<p>
+dove <i>oggetto</i> è unastringa che identifica il tipo di oggetto della GUI,
+<i>parametro</i> è un valore numerico o testuale (o una lista di valori
+separati da virgole).
+</p>
+
+<p>
+mettendo insieme quanto sopra, l'intero file appare così:
+
+<p>
+<table border=1 width="100%"><tr bgcolor=silver><td><pre>
+section = movieplayer
+  window = main
+  ; ... oggetti della finestra principale ...
+  end
+
+  window = sub
+  ; ... oggetti della sotto finestra ...
+  end
+  
+  window = menu
+  ; ... oggetti del menu della skin ...
+  end
+end
+</pre></tr></td></table>
+
+<p>
+In fine alcune parole su come specificare le immagini per i vari oggetti.
+<br>
+Il nome di un file immagine deve essere dato senza il percorso---
+le immagini vengono cercate nella directory della skin. Puoi (ma non è necessario)
+specificare l'estensione del file. Se il file non esiste, MPlayer cerca di
+caricare il file <i>&lt;nomefile&gt;.&lt;est&gt;</i>, dove <i>tga</i>,
+<i>TGA</i>, <i>bmp</i>, <i>BMP</i>, <i>png</i> e <i>PNG</i> sono provati
+al posto di <i>&lt;est&gt;</i> (in questo ordine). Il primo file corrispondente sarà usato.
+
+<p>
+
+<table border=1 cellpadding=5 width="100%"><tr bgcolor="#ffffcc"><td>
+Ecco un esempio per rendere le cose chiare. Supponi di avere un'immagine chiamata
+<i>main.png</i> che usi per la finestra principale:
+<blockquote>
+<pre>
+    base = main, -1, -1
+</pre>
+</blockquote>
+
+MPlayer cerca di caricare <i>main</i>, <i>main.tga</i>, <i>main.TGA</i>,
+<i>main.bmp</i> ecc, quindi verrà trovata <i>main.png</i>.
+<br>
+Se (per sbaglio) scrivi
+<blockquote>
+<pre>
+    base = main.bmp, -1, -1
+</pre>
+</blockquote>
+allora saranno cercati <i>main.bmp</i>, <i>main.bmp.tga</i>, <i>main.bmp.TGA</i>,
+<i>main.bmp.bmp</i> e MPlayer alla fine rinuncerà
+perchè non c'è nessun <i>main.bmp</i> nella directory, ma <i>main.png</i>.
+</td></tr></table>
+
+
+<h3><a name="mainwin">3.1 Finestra principale</a></h3>
+
+Sotto puoi vedere la lista degli oggetti che possono essere usati nel blocco
+'<code>window = main</code>' .&nbsp;.&nbsp;. '<code>end</code>'
+
+<dl>
+<dt><a name="main.base">
+<b>base = <i>immagine, x, y</i></b>
+</a></dt>
+<dd>
+Permette di specificare l'immagine di sfondo da usare per la finestra principale.
+La finestra apparirà sullo schermo alla posizione <i>x</i>,<i>y</i> data
+(0,0 è l'angolo in alto a sinistra). Puoi specificare -1 per il centro
+e -2 per destra (x) e in basso (y). La finestra sarà larga quanto l'immagine.
+<p>
+<em class=warn>
+<b>Avvertimento:</b> le zone trasparenti dell' immagine (colore #FF00FF) appaiono
+nere se il server X non supporta l'estensione XShape.
+</em>
+</dd>
+</dl>
+
+<dl>
+<dt><a name="main.button">
+<b>button = <i>immagine, x, y, larghezza, altezza, messaggio</i></b></a></dt>
+<dd>
+Posiziona un bottone di dimensioni <i>larghezza</i> * <i>altezza</i> alla posizione
+<i>x</i>,<i>y</i>. Il messaggio specificato è generato quando viene
+cliccato il bottone.
+L'immagine data da <i>immagine</i> deve avere tre parti una sotto l'altra
+(secondo i possibili stati del bottone), in questo modo:
+<div align=center><table><tr><td><pre><small>
++------------+
+|  premuto   |
++------------+
+| rilasciato |
++------------+
+|disabilitato|
++------------+
+</small></pre></td></tr></table></div>
+</dd>
+</dl>
+
+<dl>
+<dt><a name="main.decoration">
+<b>decoration = enable|disable</b>
+</a></dt>
+<dd>
+Abilita o disabilita la decorazione della finestra principale. Il default
+è <b>disable</b>.
+</dd>
+</dl>
+
+<dl>
+<dt>
+<a name="main.hpotmeter">
+<b>
+hpotmeter = <i>bott, lb,ab, fasi, numfasi, default, x, y, l, a, msg</i>
+</b>
+</a>
+</dt>
+<dd>
+Inserisce uno slider orizzontale di dimensioni <i>l</i> * <i>a</i> alla posizione
+<i>x</i>,<i>y</i>. L'immagine può essere divisa in diverse parti
+per le diverse fasi dello slider (per esempio,
+puoi avere uno slider per il controllo volume che cambia da verde a rosso
+al cambiare del suo valore dal minimo al massimo.)
+hpotmeter può avere un bottone che si può trascinare orizzontalmente.
+I parametri sono:
+<ul>
+<li><i>bott</i> - l'immagine da usare per il bottone
+(deve avere tre parti una sotto l'altra, come nel caso del
+<a href="#main.button">bottone</a>)</li>
+<li><i>lb</i>, <i>ab</i> - dimensione del bottone</li>
+<li><i>fasi</i> - L'immagine da usare per le differenti fasi dello
+slider. L'immagine deve essere divisa in <i>numfasi</i> parti verticalmente
+(vedi sotto). Può essere usato un valore speciale <kbd>NULL</kbd> se non vuoi
+l'immagine.
+</li>
+<li><i>numfasi</i> - numero di fasi inserite nell'immagine <i>fasi</i>
+</li>
+<li><i>default</i> - valore di default dello slider (da 0 a
+100)</li>
+<li><i>x</i>, <i>y</i> - posizione dello slider</li>
+<li><i>l</i>, <i>a</i> - larghezza e altezza dello slider</li>
+<li><i>msg</i> - il messaggio da generare quando viene cambiato il valore dello
+slider</li>
+</ul>
+L'immagine usata per le differenti fasi deve essere più o meno così:
+<div align=center><table border=0><tr><td><pre><small>
++------------+
+|  fase #1  |
++------------+
+|  fase #2  |
++------------+
+     ...
++------------+
+|  fase #n  |
++------------+
+</small></pre></td></tr></table></div>
+<em class=note>
+<b>Nota:</b> ci sarà anche un oggetto vpotmeter, ma non è ancora stato
+implementato.
+</em>
+</dd>	
+</dl>
+
+<dl>
+<dt><a name="main.potmeter">
+<b>potmeter = <i>fasi, numfasi, default, x, y, l, a, msg</i></b>
+</a></dt>
+<dd>
+Uno slider senza bottone. (Penso sia inteso per essere girato,
+ma reagisce solo al trascinamento orizzontale.)
+Per la descrizione dei parametri vedi
+<a href="#main.hpotmeter">hpotmeter</a>. <i>fasi</i> può essere
+<code>NULL</code>, ma è proprio inutile, infatti non puoi vedere dove
+è situato lo slider.
+</dd>
+</dl>
+
+<dl>
+<dt><a name="main.font">
+<b>font = <i>filefont, fontid</i></b>
+</a></dt>
+<dd>
+Definisce un font. <i>filefont</i> è il nome di un file che descrive un font
+con estensione <code>.fnt</code> (<b>non c'è bisogno</b> di specificare l'estensione
+qui).
+<i>fontid</i> è usato per riferirsi al font
+(vedi <a href="#main.dlabel">dlabel</a> e <a href="#main.slabel">slabel</a>).
+Possono essere definiti fino a 25 font.
+</dd>
+</dl>
+
+<dl>
+<dt><a name="main.dlabel">
+<b>dlabel = <i>x, y, lunghezza, allineamento, fontid, "testo"</i></b>
+</a></dt>
+<dd>
+Posiziona una etichetta dinamica in <i>x</i>,<i>y</i>. L'etichetta è detta
+dinamica perchè il suo testo è aggiornato periodicamente.
+La lunghezza massima dell'etichetta è data da <i>lunghezza</i> (la sua altezza è quella di un
+carattere).
+Se il testo da visualizzare è più largo, allora sarà fatto
+ruotare, altrimenti è allineato nello spazio specificato tramite il valore
+del parametro <i>allineamento</i>: 0 per destra, 1 per centro,
+2 per sinistra.
+<br>
+Il testo da mostrare è dato da <i>testo</i>: deve essere scritto tra
+virgolette (<code>"</code>) (ma le <code>"</code> non possono essere parte del
+testo). L'etichetta è visualizzata usando il font identificato da <i>fontid</i>.
+Puoi usare le seguenti variabili nel testo.
+
+<div align=center>
+<table valign=top border=1>
+<tr align=center><th>Variabile</th><th align=left>Significato</th></tr>
+<tr><td align=center><kbd>$1</kbd></td>
+    <td>tempo in formato <em>hh:mm:ss</em></td></tr>
+<tr><td align=center><kbd>$2</kbd></td>
+    <td>tempo in formato <em>mmmm:ss</em></td></tr>
+<tr><td align=center><kbd>$3</kbd></td>
+    <td>tempo in formato <em>hh</em> (ore)</td></tr>
+<tr><td align=center><kbd>$4</kbd></td>
+    <td>tempo in formato <em>mm</em> (minuti)</td></tr>
+<tr><td align=center><kbd>$5</kbd></td>
+    <td>tempo in formato <em>ss</em> (secondi)</td></tr>
+<tr><td align=center><kbd>$6</kbd></td>
+    <td>lunghezza filmato nel formato <em>hh:mm:ss</em></td></tr>
+<tr><td align=center><kbd>$7</kbd></td>
+    <td>lunghezza filmato nel formato <em>mmmm:ss</em></td></tr>
+<tr><td align=center><kbd>$8</kbd></td>
+    <td>tempo in formato <em>h:mm:ss</em></td></tr>
+<tr><td align=center><kbd>$v</kbd></td>
+    <td>volume in formato <em>xxx.xx%</em></td></tr>
+<tr><td align=center><kbd>$V</kbd></td>
+    <td>volume in formato <em>xxx.x</em></td></tr>
+<tr><td align=center><kbd>$b</kbd></td>
+    <td>bilanciamento in formato <em>xxx.xx%</em></td></tr>
+<tr><td align=center><kbd>$B</kbd></td>
+    <td>bilanciamento in formato <em>xxx.x</em></td></tr>
+<tr><td align=center><kbd>$$</kbd></td>
+    <td>il carattere <kbd>$</kbd></td></tr>
+<tr><td align=center><kbd>$a</kbd></td>
+    <td>un carattere a seconda del tipo di audio (nessuno: <code>n</code>,
+    mono: <code>m</code>, stereo: <code>t</code>)</td></tr>
+<tr><td align=center><kbd>$t</kbd></td>
+    <td>numero traccia (nella playlist)</td></tr>
+<tr><td align=center><kbd>$o</kbd></td>
+    <td>nomefile</td></tr>
+<tr><td align=center><kbd>$f</kbd></td>
+    <td>nomefile in minuscolo</td></tr>
+<tr><td align=center><kbd>$F</kbd></td>
+    <td>nomefile in maiuscolo</td></tr>
+<tr><td align=center><kbd>$T</kbd></td>
+    <td>un carattere a seconda del tipo di stream (file: <code>f</code>,
+    video CD: <code>v</code>, DVD: <code>d</code>, URL: <code>u</code>)
+    </td></tr>
+<tr><td align=center><kbd>$p</kbd></td>
+    <td>il carattere "p" (se si sta leggendo un filmato e il font ha il carattere
+    "p")
+    </td></tr>
+<tr><td align=center><kbd>$s</kbd></td>
+    <td>il carattere "s" (se non si sta leggendo un filmato e il font ha il carattere
+    "s")
+    </td></tr>
+<tr><td align=center><kbd>$e</kbd></td>
+    <td>il carattere "e" (se il filmato è in pausa e il font ha il carattere
+    "e")
+    </td></tr>
+</table></div>
+<p>
+<b>Nota:</b> Le variabili <kbd>$a</kbd>, <kbd>$T</kbd>, <kbd>$p</kbd>, <kbd>$s</kbd>
+e <kbd>$e</kbd> ritornano tutte caratteri che dovrebbero essere visualizzati
+come simboli speciali (per esempio, "e" è per il simbolo della pausa che di solito
+appare come <code>||</code>). Dovresti avere un font per i caratteri normali
+e un altro per i simboli.
+Vedi la sezione sui <a href="#symbols">simboli</a> per altre informazioni.
+</dd>
+</dl>
+
+<dl>
+<dt><a name="main.slabel">
+<b>slabel = <i>x, y, fontid, testo</i></b>
+</a></dt>
+<dd>
+Posiziona una etichetta statica in <i>x</i>,<i>y</i>.
+Il <i>testo</i> è visualizzato usando il font identificato da <i>fontid</i>.
+Il testo è una pura stringa (le variabili $x non funzionano) che deve essere racchiuso
+tra virgolette (le <code>"</code> non possono essere parte del testo).
+
+</dd>
+</dl>
+
+
+<h3><a name="subwindow">3.2 Sotto finestra</a></h3>
+
+I seguenti oggetti possono essere usati nel blocco
+'<code>window = sub</code>' .&nbsp;.&nbsp;. '<code>end</code>'.
+
+<dl>
+<dt><a name="sub.base">
+<b>base = <i>immagine, x, y, larghezza, altezza</i></b>
+</a></dt>
+<dd>
+L'immagine da visualizzare nella finestra.
+La finestra apparirà alla posizione <i>x</i>,<i>y</i> data
+sullo schermo (0,0 è l'angolo in alto a sinistra). Puoi specificare -1 per centro
+e -2 destra (x) e sotto (y). La finestra sarà grande quanto l'immagine.
+<i>larghezza</i> e <i>altezza</i> danno la dimensione della finestra; sono opzionali
+(se mancano, la finestra è grande quanto l'immagine).
+</dd>
+</dl>
+
+<dl>
+<dt><a name="sub.background">
+<b>background = <i>r, g, b</i></b>
+</a></dt>
+<dd>
+Permette di definire il colore di sfondo. Utile se l'immagine è più piccola della
+finestra.
+<i>r</i>, <i>g</i> e <i>b</i> specificano le componenti rossa, verde e blu
+del colore (ognuno è un numero decimale compreso tra 0 e 255).
+</dd>
+</dl>
+
+
+<h3><a name="skinmenu">3.3 Menu della skin</a></h3>
+
+Come menzionatoprima, il menu è visualizzato usando due immagini.
+Le normali voci del menu sono prese dall'immagine specificata dall'oggetto <i>base</i>,
+mentre la voce attualmente selezionata è presa dall'immagine specificata dall'oggetto
+<i>selected</i>.
+Devi definire la posizione e la dimensione di ogni voce del menu tramite l'oggetto <i>menu</i>.
+
+
+<p>
+Questi sono gli oggetti che possono essere usati nel blocco '<code>window = menu</code>'
+.&nbsp;.&nbsp;. '<code>end</code>'.
+
+<dl>
+<dt><a name="menu.base">
+<b>base = <i>immagine</i></b>
+</a></dt>
+<dd>
+L'immagine delle normali voci del menu.
+</dl>
+</dd>
+
+<dl>
+<dt><a name="menu.selected">
+<b>selected = <i>immagine</i></b>
+</a></dt>
+<dd>
+L'immagine che mostra il menu con tutte le voci selezionate.
+</dd>
+</dl>
+
+<dl>
+<dt><a name="menu.menu">
+<b>menu = <i>x, y, larghezza, altezza, messaggio</i></b>
+</a></dt>
+<dd>
+Definisce la posizione <i>x</i>,<i>y</i> e la grandezza di una voce del menu nelle
+immagini. <i>messaggio</i> è il messaggio da generare quando
+il bottone del mouse è rilasciato sopra la voce.
+</dd>
+</dl>
+
+
+<h2><a name="fonts">4 Font</a></h2>
+
+Come detto nella sezione sulle varie parti di una skin, un font è definito da
+un'immagine e un file di descrizione.
+Puoi mettere i caratteri ovunque nell'immagine, ma assicurati
+che la loro posizione e dimensione sia data esattamente nel file di descrizione.
+
+<p>
+Il file di descrizione del font (con estensione .fnt) può avere linee di commento
+che iniziano con '<code>;</code>'.
+Il file deve avere una linea nella forma
+<blockquote>
+<pre>
+image = <i>immagine</i>
+</pre>
+</blockquote>
+
+<p>
+dove <i>immagine</i> è il nome del file immagine da usare per
+il font (non devi specificare l'estensione).
+La linea sopra è seguita dalle linee di definizione del carattere nella forma:
+
+<blockquote>
+<pre>
+"<i>car</i>" = <i>x, y, l, a</i>
+</pre>
+</blockquote>
+
+<p>
+Qui <i>x</i> e <i>y</i> specificano la posizione del carattere
+<i>car</i> nell'immagine (0,0 è l'angolo in alto a sinistra).
+<i>l</i> e <i>a</i> sono la larghezza e  l'altezza del carattere
+(in pixel, naturalmente).
+
+<p>
+Ecco un esempio che definisce i caratteri A, B, C usando font.png.
+<table width="100%" border=1><tr bgcolor=silver><td><pre>
+; può essere "font" invece di "font.png"
+image = font.png
+
+; Tre caratteri sono abbastanza solo per una dimostrazione. :-)
+"A" =  0,0, 7,13
+"B" =  7,0, 7,13
+"C" = 14,0, 7,13
+</pre></td></tr></table>
+
+
+<h3><a name="symbols">4.1 Simboli</a></h3>
+
+Alcuni caratteri hanno significati speciali quando ritornati da alcune variabili
+usate in
+<a href="#main.dlabel">dlabel</a>; questi caratteri vengono visualizzati
+come simboli. (Per esempio, in caso di un flusso DVD, si può visualizzare
+un bel logo DVD invece del carattere 'd'.)
+
+<p>
+La tabella seguente elenca tutti i caratteri che possono essere usati per visualizzare
+simboli (e quindi richiedono un font differente).
+
+<div align=center>
+<table>
+<tr><th align=center>Carattere</th><th align=left>Simbolo</th></tr>
+<tr><td align=center><kbd>p</kbd></td>
+    <td align=left>play</td></tr>
+<tr><td align=center><kbd>s</kbd></td>
+    <td align=left>stop</td></tr>
+<tr><td align=center><kbd>e</kbd></td>
+    <td align=left>pausa</td></tr>
+<tr><td align=center><kbd>n</kbd></td>
+    <td align=left>muto</td></tr>
+<tr><td align=center><kbd>m</kbd></td>
+    <td align=left>suono mono</td></tr>
+<tr><td align=center><kbd>t</kbd></td>
+    <td align=left>suono stereo</td></tr>
+<tr><td align=center><kbd>f</kbd></td>
+    <td align=left>lo stream è un file</td></tr>
+<tr><td align=center><kbd>v</kbd></td>
+    <td align=left>lo stream è un video CD</td></tr>
+<tr><td align=center><kbd>d</kbd></td>
+    <td align=left>lo stream è un DVD</td></tr>
+<tr><td align=center><kbd>u</kbd></td>
+    <td align=left>lo stream è una URL</td></tr>
+</table>
+</div>
+
+<p>
+<b>Nota:</b> attualmente sono usati solo 'p', 's', 'e', 'n', 'm' e 't'.
+</p>
+
+<h2><a name="guimsg">Appendice A: messaggi della GUI</a></h2>
+
+Questi sono i messaggi che possono essere generati da bottoni, slider e
+voci del menu.
+
+<p>
+<em class=note>
+<b>Nota:</b> alcuni messaggi possono non funzionare come ci si aspetta (o non
+funzionare del tutto). Come sai, la GUI è in sviluppo.</em>
+
+<p>
+<i>Controllo riproduzione:</i>
+<blockquote>
+<dl>
+<dt><b>evNext</b>
+<dd>Salta alla prossima traccia della playlist.
+
+<dt><b>evPause</b>
+<dd>Pausa la riproduzione.
+
+<dt><b>evPauseSwitchToPlay</b>
+<dd>Forma un interruttore logico insieme a <i>evPlaySwitchToPause</i>. Possono essere usati
+per avere un bottone comune di play/pausa. Entrambi i messaggi dovrebbero venire assegnati
+a bottoni visualizzati nella stessa posizione della finestra. Questo
+messaggio mette in pausa la riproduzione e viene mostrata l'immagine per il bottone <i>evPlaySwitchToPause</i>
+(ad indicare che il bottone può essere premuto per continuare la riproduzione).
+
+<dt><b>evPlay</b>
+<dd>Inizia la riproduzione.
+
+<dt><b>evPlaySwitchToPause</b>
+<dd>L'opposto di <i>evPauseSwitchToPlay</i>. Questo messaggio inizia la riproduzione
+ed è mostrata l'immagine per il bottone <i>evPauseSwitchToPlay</i> (ad
+indicare che il bottone può essere premuto per mettere in pausa).
+
+<dt><b>evPrev</b>
+<dd>Salta alla traccia precedente nella playlist.
+
+<dt><b>evStop</b>
+<dd>Ferma la riproduzione.
+</dl>
+</blockquote>
+
+<p>
+<i>Ricerca nello stream:</i>
+<blockquote>
+<dl>
+<dt><b>evBackward10sec</b>
+<dt><b>evBackward1min</b>
+<dt><b>evBackward10min</b>
+<dd>Per andare indietro di 10 secondi / 1 minuto / 10 minuti.
+
+<dt><b>evForward10sec</b>
+<dt><b>evForward1min</b>
+<dt><b>evForward10min</b>
+<dd>Per andare avanti di 10 secondi / 1 minuto / 10 minuti.
+
+<dt><b>evSetMoviePosition</b>
+<dd>Per andare alla posizione (può essere usato da uno slider; è usato il valore
+relativo (0-100%) dello slider).
+</dl>
+</blockquote>
+  
+<p>
+<i>Controllo video:</i>
+<blockquote>
+<dl>
+<dt><b>evDoubleSize</b>
+<dd>Raddoppia le dimensioni della finestra del filmato.
+
+<dt><b>evFullScreen</b>
+<dd>Manda a pieno schermo e vice versa.
+
+<dt><b>evNormalSize</b>
+<dd>Regola la finestra del filmato alle sue dimensioni normali.
+</dl>
+</blockquote>
+
+<p>
+<i>Controllo audio:</i>
+<blockquote>
+<dl>
+<dt><b>evDecAudioBufDelay</b>
+<dd>Diminuisce il ritardo del buffer audio.
+
+<dt><b>evDecBalance</b>
+<dd>Diminuisce il bilanciamento.
+
+<dt><b>evDecVolume</b>
+<dd>Diminuisce il volume.
+
+<dt><b>evIncAudioBufDelay</b>
+<dd>Aumenta il ritardo del buffer audio.
+
+<dt><b>evIncBalance</b>
+<dd>Aumenta il bilanciamento.
+
+<dt><b>evIncVolume</b>
+<dd>Aumenta il volume.
+
+<dt><b>evMute</b>
+<dd>Regola il suono su muto e vice versa.
+
+<dt><b>evSetBalance</b>
+<dd>Regola il bilanciamento (può essere usato da uno slider; è usato il valore
+relativo (0-100%) dello slider).
+
+<dt><b>evSetVolume</b>
+<dd>Regola il volume (può essere usato da uno slider; è usato il valore
+relativo (0-100%) dello slider).
+</dl>
+</blockquote>
+
+<p>
+<i>Vari:</i>
+<blockquote>
+<dl>
+<dt><b>evAbout</b>
+<dd>Apre la finestra "about".
+
+<dt><b>evEqualeaser</b>
+<dd>Accende/spegne l'equalizzatore.
+
+<dt><b>evExit</b>
+<dd>Esce dal programma.
+
+<dt><b>evIconify</b>
+<dd>Riduce ad icona la finestra.
+
+<dt><b>evLoad</b>
+<dd>Carica un file (aprendo una finestra del file browser, dove puoi scegliere
+un file).
+
+<dt><b>evLoadPlay</b>
+<dd>Fa la stessa cosa di <i>evLoad</i>, ma inizia automaticamente la riproduzione
+dopo il caricamento del file.
+
+<dt><b>evNone</b>
+<dd>Messaggio vuoto, non ha nessun effetto. (Eccetto forse nella versione CVS. :-))
+
+<dt><b>evPlayList</b>
+<dd>Apre/chiude la finestra della playlist.
+
+<dt><b>evPreferences</b>
+<dd>Apre la finestra delle preferenze.
+
+<dt><b>evSkinBrowser</b>
+<dd>Apre la finestra dello skin browser.
+</dl>
+</blockquote>
+
+</body>
+</html>

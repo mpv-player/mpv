@@ -1,0 +1,176 @@
+<HTML>
+<BODY BGCOLOR=white>
+
+<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+
+<P><B><I>In medias res</I></B></P>
+
+<P>Ci sono due argomenti principali che causano sempre grandi dispute e flame sulla mailing list degli
+<A HREF="http://www.MPlayerHQ.hu/cgi-bin/htsearch">utenti-mplayer</A>.
+Il numero uno è naturalmente l'argomento</P>
+
+<A NAME=gcc><P><B><I>GCC 2.96</I></B></P>
+
+<P><B>Leggi anche <A HREF="gcc-2.96-3.0.html">questo</A> testo !!!</B></P>
+
+<P>Il <I>retroscena</I> : C'erano/ci sono le serie GCC <B>2.95</B>. Il migliore
+era il 2.95.3 . Per favore nota lo stile di numerazione delle versioni.
+Così è come il team GCC numera i loro compilatori. Quelli della serie 2.95 sono buoni.
+Non abbiamo mai visto nulla compilato male a causa di errori del 2.95.</P>
+
+<P>L' <I>atto</I> : <B>RedHat</B> cominciò ad includere una versione <B>2.96</B> di GCC
+con le loro distribuzioni. Nota il numero di versione. Questo dovrebbe essere una versione del
+team GCC. Hanno modificato la versione CVS di GCC (qualcosa tre 2.95 e 3.0)
+L'hanno modificata profondamente, e hanno usato questa versione nella distribuzione perchè il 3.0
+non era uscito a quel tempo, e vollero che IA64 supportasse ASAP (ragioni di mercato).
+Oh, e GCC 2.95 compila male bash sull'architettura s390 (non esiste nessuna
+distribuzione RedHat per s390..) .</P>
+
+<P>I <I>fatti</I> : Per compilare <B>MPlayer</B> necessita l'opzione
+<CODE>--disable-gcc-checking</CODE> per procedere dopo l'aver trovato la versione 2.96 di GCC
+(apparentemente la necessita anche con <B>egcs</B>. Questo perchè noi non
+testiamo <B>MPlayer</B> con egcs. Perdonaci, noi preferiamo sviluppare <B>MPlayer</B>).
+Se conosci <B>MPlayer</B>, dovresti sapere che è molto veloce. Ottiene questo
+grazie al fatto di avere codici MMX/SSE/3DNow/ecc stra-ottimizzati, fastmemcpy, e
+molte altre caratteristiche. <B>MPlayer</B> contiene istruzioni MMX/3DNow in una
+sintassi che tutti i compilaturi linux accettano... tranne il GCC della RedHat (è più
+compatibile con gli standard). Semplicemente li <B><I>salta</I></B>. Non mostra
+errori. Non mostra avvertimenti. <B>E</B>, c'è Lame. Col gcc 2.96, il suo test di qualità
+(<CODE>make test</CODE> dopo aver compilato) <I>non parte nemmeno !!!</I>
+Ma hey, compila bash su s390 e IA64.</P>
+
+<P>Le <I>dichiarazioni</I> : la maggior parte degli sviluppatori del mondo cominciarono
+ad avere una cattiva idea del GCC 2.96 della RedHat, e dissero ai loro utenti RedHat di
+compilare con un altro compilatore. Il disappunto degli utenti RedHat si trasformò lentamente
+in rabbia. A cosa serviva,
+se non a procurare mal di testa agli sviluppatori, gettare benzina su flame anti-RedHat,
+confondere gli utenti? La risposta, non la conosco.</P>
+
+<P><I>I giorni nostri</I> : RedHat dice che il GCC 2.96-85 e superiori
+sono stati corretti, e funzionano propriamente. Nota il numero di versione. Avrebbero dovuto cominciare
+con qualcosa del genere. Com'è il GCC 2.96.85 ? Non importa ora.
+Non ho cercato, ma vedo ancora bug nel 2.96 . Non importa ora,
+si spera che ora <B>RedHat dimenticherà il 2.96</B> e si rivolgerà verso il <B>3.0</B>.
+Verso un 3.0 profondamente modificato...
+</P>
+
+<P><I>Quello che non capisco</I> è perchè gli utenti RedHat ci odino per aver
+inserito messaggi di avvertimento, e documenti che consigliano di stare alla larga dal 2.96 in <B>MPlayer</B> .
+Perchè siamo chiamati "teste bacate", "scemi totali", "puerili" dagli
+<B>utenti RedHat</B>, sulla nostra mailing list, e perfino su quella <B>redhat-devel</B> .
+Hanno anche considerato l'idea di un fork di <B>MPlayer</B> per loro stessi. Utenti RedHat.
+Perchè? E' RedHat che ha fatto il compilatore, perchè <U>voi</U> dovete odiarci?
+Siete <U>così</U> adoratori di RedHat? Per favore smettetela. Non abbiamo
+nessun rancore nei confronti degli utenti, non importa se vi sembra tanto il contrario.
+Per favore andateci di flame con Linus Torvalds, gli sviluppatori DRI (oh, ora so perchè sono
+stati sospesi da VA!), di Wine, di avifile. Anche se siamo arroganti,
+non siamo come questi elencati? Perchè <B>noi</B> dovremmo
+soffrire la vostra ingiusta collera?</P>
+
+<P><A HREF="mailto:willis_matthew@yahoo.com">Matt Willis</A> ci ha gentilmente mandato
+  un semplice documento su come compilare col GCC-3.0.3, lo copio qui sotto:</P>
+
+<P>
+<UL>
+ <LI>Scarica gcc. Vai alla pagina <A
+  HREF="http://gcc.gnu.org/mirrors.html">http://gcc.gnu.org/mirrors.html</A>
+   Io ho scaricato i seguenti file, ma non devi avere tutto:<BR>
+    <CODE>gcc-g++-3.0.3.tar.gz<BR>
+    gcc-objc-3.0.3.tar.gz<BR>
+    gcc-3.0.3.tar.gz<BR>
+    gcc-g77-3.0.3.tar.gz<BR>
+    gcc-testsuite-3.0.3.tar.gz<BR>
+    gcc-core-3.0.3.tar.gz<BR>
+    gcc-java-3.0.3.tar.gz</CODE>
+  </LI>
+
+  <LI>Scompatta i file, fai una directory per la compilazione, e compila<CODE><PRE>
+     tar xvzf gcc-*3.0.3.tar.gz
+     mkdir gcc-build; cd gcc-build
+     ../gcc-3.0.3/configure --prefix=/opt --program-suffix=-3.0.3
+     make bootstrap; mkdir -p /opt; make install</PRE></CODE>
+
+  <LI>Inserisci nel tuo path /opt/bin<BR>
+     <CODE>export PATH=/opt/bin:${PATH}</CODE>
+
+  <LI>Ora puoi compilare MPlayer.</LI>
+</UL>
+</P>
+
+<A NAME=binary><P><B><I>Distribuzione binaria di MPlayer</I></B></P>
+
+<P>Tonnellate di utenti ci hanno chiesto questo. Per esempio gli utenti Debian tendono a dire: Oh,
+Posso <CODE>apt-get install avifile</CODE>, perchè dovrei <B>compilare MPlayer</B> ?
+Sebbene questo possa sembrare ragionevole, la questione è un po' più complessa che
+quei-fottuti-sviluppatori-MPlayer-odiano-gcc-2.96-e-RedHat-e-Debian.</P>
+
+<P>Ragioni: <B>Legge</B></P>
+
+<P><B>MPlayer</B> designa il <U>codice sorgente</U>. Questo contiene molti file con licenze
+incompatibili specialmente a livello di clausole di redistribuzione. Come file sorgente, possono
+coesistere in uno stesso progetto.</P>
+
+<P>Quindi, <U>NON POSSONO ESISTERE NE BINARI NE PACCHETTI BINARI DI <B>MPlayer</B> IN QUANTO
+TALI OGGETTI VANNO CONTRO LE LICENZE</U>. PERSONE CHE DISTRIBUISCONO TALI PACCHETTI BINARI STANNO
+COMPIENDO ATTIVITA' ILLEGALI.</P>
+
+<P>Quindi se conosci qualcuno che mantiene un pacchetto binario mandagli
+questo testo e contattaci o chiedi a lui di farlo. Quello che sta facendo è illegale e
+NON E' PIU' <B>MPlayer</B>, ma il <U>suo</U> mplayer. Se qualcosa non va con quel pacchetto, è
+colpa sua. Non venite a lamentarvi sulle mailing list di <B>MPlayer</B>, sarai probabilmente
+messo in blacklist.</P>
+
+<P>Ragioni: <B>Tecniche</B></P>
+
+<P>
+<UL>
+  <LI>Le ottimizzazioni di velocità di <B>MPlayer</B> (MMX, SSE, fastmemcpy, ecc) sono
+    stabilite durante la compilazione. Così un binario compilato contiene codice
+    specifico del processore. Un binario <B>MPlayer</B> compilato per K6 non funzionerà su
+    Pentium e vice versa. Questo deve essere aggirato dal riconoscimento a
+    runtime, che non è una cosa facile da fare perchè da come risultato una grande diminuzione di
+    velocità. Se non ci credi (è stato spiegato in dettaglio 10000 volte su
+    mplayer-users, cerca negli archivi), risolvi il problema e mandaci una patch. Qualcuno
+    aveva cominciato a lavorarci, ma da allora è scomparso.</LI>
+  <LI>Il sistema audio/video di <B>MPlayer</B> non è basato su plugin. E' compilato
+    nel binario, facendolo così dipendere da varie librerie (la
+    GUI dipende da GTK, DivX4 dipende da libdivxdecore, SDL dipende da libSDL,
+    ogni versione di SDL contiene un bug proprio che deve essere aggirato alla
+    compilazione, l'output X11 compila diversamente per X3 e X4, ecc). Potrai dire:
+    si, facciamo 30 versioni di binari scaricabili! Noi no. Inseriremo
+    queste cose come plugin nel futuro.</LI>
+</UL>
+
+<A NAME=nvidia><P><B><I>NVidia</I></B></P>
+
+<P>Non ci piacciono i driver binari di nvidia, la loro qualità, instabilità,
+l'inesistente supporto all'utente, la regolare comparsa di nuovi bug. E la maggio parte degli utenti fa
+lo stesso. Ultimamente siamo stati contattati da NVidia, e loro hanno detto che questi bug non
+esistono, l'instabilità è causata da pessimi chip AGP, e che non hanno ricevuto nessuna segnalazione
+di bug del driver (la linea viola, per esempio). Quindi: se hai problemi con
+la tua NVidia, aggiorna il driver nvidia e/o compra una nuova
+scheda madre.</P>
+
+<A NAME=kotsog><P><B><I>Joe Barr</I></B></P>
+
+<P>Non risponde alle nostre mail. Il suo editore non risponde alle nostre mail.
+la rete è piena delle sue false dichiarazioni e accuse (apparentemente non
+gli piacciono i ragazzi BSD, a causa dei loro diversi punti di vista
+[su cosa?]).</P>
+
+<P>Ora alcune citazioni di diverse persone circa Joe Barr (solo per farvi sapere
+perchè non conta assolutamente niente):</P>
+
+<P><I>"Voi tutti ricorderete il LinuxWorld 2000, quando lui affermò che Linus T disse
+che 'FreeBSD è solo un aiuto per i programmatori'. Linus non disse NIENTE del
+genere. Quando furono chieste spiegazioni a Joe, la sua reazione fu quella di chiamare tutti i sostenitori BSD
+stupidi e tonti."</I></P>
+
+<P><I>"E' interessante, ma non è bravo ad evitare, um... le discussioni.  Joe Barr
+era regolarmente presente sul forum Canopus di Zachmann su Compuserve,
+anni fa. Allora era un sostenitore di OS/2 (anche io ero un fan di OS/2).
+Era solito passare il limite, insultando la gente, e credo che avesse passato dei brutti quarti d'ora,
+la tempo. Si è ammorbidito un po' recentemente, giudicando dalle sue colonne.  L'umorismo moderatamente
+subdolo non era suo uso a quei tempi, per niente."</I></P>
+
+</HTML>

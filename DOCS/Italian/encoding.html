@@ -1,0 +1,392 @@
+<HTML>
+<BODY BGCOLOR=white>
+
+<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+
+<P><B><A NAME=2.4>2.4.  Codificare con MEncoder</A></B></P>
+
+<P><B><A NAME=2.4.1>2.4.1.  Generale</B></P>
+
+<P><B>MEncoder</B> (<B>MPlayer</B>'s Movie Encoder, Codificatore Filmati di MPlayer) è un semplice encoder,
+studiato per codificare i filmati leggibili da MPlayer
+(<B>AVI/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET</B>) in altri formati leggibili da MPlayer
+(vedi sotto). Può usare vari codec, come <B>DivX4</B> (1 o
+2 passaggi), libavcodec, audio <B>PCM</B>/<B>MP3</B>/<B>VBRMP3</B>. Ha anche
+capacità di copiare da stream e di ridimensionare i video.</P>
+
+<P><B><A NAME=2.4.2>2.4.2.  Compilazione</B></P>
+
+<P>
+  <UL>
+    <LI><B>OPZIONALE</B> - leggi le istruzioni di compilazione di <B>MPlayer</B>, contengono informazioni
+      su come installare <I>libdvdread</I> per il supporto <B>DVD</B>, ecc.</LI>
+    <LI><B>OPZIONALE</B> - scarica le librerie <B>DivX4linux</B> più recenti
+      da <A HREF="http://avifile.sourceforge.net/download.htm">avifile.sourceforge.net</A>,
+      e installale CORRETTAMENTE. Ti servono se vuoi codificare in DivX4
+      (1/2 passaggi).</LI>
+    <LI><B>OPZIONALE</B> - per il supporto libavcodec, installa libavcodec come
+      descritto nella <A HREF="codecs.html#2.2.1.2">sezione libavcodec</A>.</LI>
+    <LI><B>OPZIONALE</B> - scarica e compila <B>libmp3lame</B> (da lame 3.89beta o lame CVS).<BR>
+      <B>ATTENZIONE : NON COMPILARE LAME CON <U>GCC 2.96</U> ! Non funzionerà
+      propriamente !</B><BR>
+      Questo
+      è necessario per la possibilità di codificare audio CBR/VBR MP3. Nota che il singolo binario di
+      <CODE>lame</CODE> non è sufficiente. Comunque: meno ottimizzazione usi
+      per lame, migliore sarà la qualità. Puoi testare la
+      qualità eseguendo <CODE>make test</CODE> dopo aver finito il processo di compilazione di
+      lame. Il numero risultante dovrebbe essere minore di <B>30</B>. Non ti spaventare
+      se è <B>400</B> o comunque alto, non dovresti sentire una diminuzione di
+      qualità. Oh, e se il tuo compilatore non esegue nemmeno <CODE>make test</CODE> ...
+      Bhe, cancella quel <B>GCC 2.96</B>.</LI>
+  </UL>
+</P>
+
+<P>Sei pronto. Come forse saprai, altri strumenti per la codifica necessitano installata
+la libreria <I>avifile</I>. <B>MEncoder</B> non ne ha per niente bisogno.</P>
+
+<P><B><A NAME=2.4.3>2.4.3.  Caratteristiche di MEncoder</B></P>
+
+<P>
+  <UL>
+    <LI>codifica dall'ampia scelta di formati file e decoder di <B>MPlayer</B></LI>
+    <LI>codifica in tutti i codec del
+      <A HREF=codecs.html#2.2.1.2>libavcodec</A>di ffmpeg</LI>
+    <LI>codifica video da <B>sintonizzatori TV compatibili con V4L</B></LI>
+    <LI>codifica/multiplexing a file AVI intervallati con un indice corretto</LI>
+    <LI>1, 2 o 3 passaggi video <B>DivX4</B></LI>
+    <LI>Audio MP3 <B>VBR</B> - <B>NOTA IMPORTANTE</B> : l'audio MP3 VBR non sempre
+      viene letto bene da i lettori di windows! Se hai intenzione di codificare AVI
+      principalmente per windows, codifica con CBR!</LI>
+    <LI>Audio PCM</LI>
+    <LI>copia da stream</LI>
+    <LI>sincronizzazione dell'input A/V (basata su PTS, può essere disabilitata con l'opzione -mc 0)</LI>
+    <LI>correzione FPS con l'opzione <CODE>-ofps</CODE> (utile quando si codifica
+    un VOB a 29.97fps in un AVI a 24fps)</LI>
+    <LI>ridimensionamento filmati</LI>
+  </UL>
+</P>
+
+<P><B><I>Caratteristiche programmate</I></B> :
+  <UL>
+    <LI>usare audio da un file separato (AC3, MP3, OGG)</LI>
+    <LI>ancora più ampia scelta disponibile di formati/codec di (de)codifica
+    (creare file VOB con flussi DivX4/Indeo5/VIVO :)</LI>
+    <LI>codifica audio da v4l</LI>
+  </UL>
+</P>
+
+<P><B><A NAME=2.4.3.1>2.4.3.1.  Codificare DivX4 in 2 o 3 passaggi</B></P>
+
+<P><U><B>codifica a 2 passaggi :</B></U> il nome deriva dal fatto che questo metodo codifica il file <I>due volte</I>.
+La prima codifica (<I>passaggio</I> doppiato) crea dei file temporanei (*.log) con una grandezza
+di pochi megabyte, non cancellarli ancora (puoi cancellare l' AVI). Nel secondo passaggio, viene creato il
+file di output, usando i dati sul bitrate dei file temporanei. Il file risultante avrà una
+migliore qualità d'immagine. Se questa è la prima volta che ne senti parlare,
+dovresti consultare alcune guide disponibili in rete.</P>
+
+<P>Questo esempio mostra come codificare un DVD in un AVI DivX4 a 2 passaggi. Bisogna dare solo
+due comandi :<BR>
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> - rimuovi questo file che può essere rimasto
+  da una precedente codifica a 3 passaggi (interferisce col processo attuale)<BR>
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -divx4opts br=1100
+-o movie.avi -pass 1<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -divx4opts br=1100 -o movie.avi -pass 2</CODE></P>
+
+<P><U><B>codifica a 3 passaggi :</B></U> questa è un' estensione della codifica a 2 passaggi,
+  dove la codifica audio avviene in un passaggio separato. Questo metodo abilita la
+  stima del bitrate video raccomandato per far stare il file risultante in un CD. In più,
+  l'audio è codificato solo una volta, diversamente dalla modalità in 2 passaggi. Schema :</P>
+
+<P>
+  <TABLE>
+  <TR>
+    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+      <CODE>rm frameno.avi</CODE></TD>
+    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+      <B>rimuovi il file temporaneo che va in conflitto</B></TD>
+  </TR>
+  <TR>
+    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+      <CODE>mencoder &lt;file/DVD&gt; -ovc frameno -o
+        frameno.avi</CODE></TD>
+    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+      <B><U>Primo passaggio</U> : sarà creato un file avi di solo audio, contenente SOLO
+      il flusso audio richiesto. Non dimenticare <CODE>-lameopts</CODE>, se ne
+      hai bisogno. Se stai codificando un filmato lungo, MEncoder da
+      i valori di bitrate consigliati per dimensioni di destinazione di 650Mb, 700Mb, e 800Mb,
+      dopo la fine di questo passaggio.</B></TD>
+  </TR>
+  <TR>
+    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+      <CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 1
+        -divx4opts br=&lt;bitrate&gt;</CODE></TD>
+    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+      <B><U>Secondo passaggio</U> : cioè il primo passaggio della codifica del video DivX4.
+      Puoi specificare il bitrate video dato da MEncoder alla fine del precedente
+      passaggio.</B></TD>
+  </TR>
+  <TR>
+    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+      <CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 2
+        -divx4opts br=&lt;bitrate&gt;</CODE></TD>
+    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+      <B><U>Terzo passaggio</U> : cioè il secondo passaggio della codifica video DivX4.
+      Puoi specificare il bitrate video dato da MEncoder alla fine del precedente
+      passaggio. In questo passaggio, l'audio da <CODE>frameno.avi</CODE> sarà inserito
+      nel file di destinazione.. ed è tutto pronto!</B></TD>
+  </TR>
+  </TABLE>
+</P>
+
+<P><B>Esempio di codifica a 3 passaggi :</B></P>
+
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> - rimuovi questo file,
+  che può essere rimasto da una precedente codifica a 3 passaggi (interferisce con quella attuale)<BR>
+
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc frameno
+  -o frameno.avi<BR>
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2
+  -divx4opts br=1100 -oac copy -o movie.avi -pass 1<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2
+  -divx4opts br=1100 -oac copy -o movie.avi -pass 2</CODE>
+</P>
+
+
+<P><B><A NAME=2.4.3.2>2.4.3.2.  Ridimensionare i filmati</B></P>
+
+<P>Spesso emerge l'esigenza di ridimensionare le immagini del filmato. Le ragioni possono essere molte,
+  come diminuire la grandezza del file di output, codificare SVCD in DivX. I DVD "rippati"
+  sono spesso da ridimensionare, per esempio un DVD in scala 4:3 dovrebbe essere in 640x480, specialmente se vuoi
+  che entri in 1 CD, e avere una buona qualità allo stesso tempo.
+  Gli SVCD hanno dimensione di 480x480, e la loro intestazione contiene le proporzioni
+  che il lettore dovrebbe usare (Es.: 480x480 + 4:3 = 640x480). Però quando codifichi
+  un file AVI (DivX), devi fare attenzione che l'intestazione dell'AVI non includa
+  questo valore. Quindi, l'unica soluzione è ridimensionare.</P>
+
+<P><B>MEncoder</B> può ridimensionare le immagini di input se sono in formato YV12 (per esempio:
+  ffdivx, driver odivx, o mpeg1/2). Le dimensioni di output si specificano co le opzioni
+  <CODE>-x</CODE>, e <CODE>-y</CODE>.  Inoltre, ci sono 3 filtri
+  di ridimensionamento in <B>MEncoder</B>, <I>0
+  : bilineare veloce</I>, <I>1 : bilineare</I>, <I>2 : bicubico</I> (migliore qualità).
+  Possono essere specificati con l'opzione <CODE>-sws</CODE>. Se non specificato,
+  <B>MEncoder</B> userà 0 : bilineare veloce.</P>
+
+<P>Ridimensionare è molto semplice :<BR>
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder sample-svcd.mpg -divx4opts br=1300 -x 640 -y 480 -sws 2 -o output.avi</CODE></P>
+
+
+<P><B><A NAME=2.4.3.3>2.4.3.3.  Copia da stream</B></P>
+
+<P><B>MEncoder</B> può gestire i flussi in entrata in due modi : <B>codificandoli</B> o
+  <B>copiandoli</B>. Questa sezione tratta la <B>copia</B>.</P>
+
+<P>
+<UL>
+  <LI><B>Flusso video</B> (opzione <CODE>-ovc copy</CODE>) : si possono fare tante belle cose :)<BR>
+  Come, mettere (non convertire!) video FLI o VIVO o MPEG1 in un file AVI !
+  Naturalmente solo <B>MPlayer</B> può leggere tali file :) E probabilmente non ha
+  alcuna utilità nella vita reale. Seriamente : la copia del flusso video può essere utile per esempio
+  quando si vuole codificare solo il flusso audio (come, PCM non compresso
+  in MP3).</LI>
+
+  <LI><B>Flusso audio</B> (opzione <CODE>-oac copy</CODE>) : inutile spiegare.</LI>
+</UL>
+</P>
+
+
+<P><B><A NAME=2.4.3.4>2.4.3.4.  Correggere gli AVI con indice o intervallo malformati</B></P>
+
+<P>La cosa più semplice. Copiamo semplicemente i flussi audio e video, e
+<B>MEncoder</B> genera l'indice. Naturalmente questo non può correggere possibili bug
+nei flussi video e/o audio. Corregge anche i file con mal intervallati,
+così non sarà più necessaria l'opzione <CODE>-ni</CODE> per leggerli.</P>
+
+<P>Comando : <CODE>mencoder input.avi -ovc copy -oac copy -o output.avi</CODE></P>
+
+
+<P><B><A NAME=2.4.3.5>2.4.3.5.  Codificare con le famiglia di codec <I>libavcodec</I></B></P>
+
+<P><A HREF="codecs.html#2.2.1.2">libavcodec</A> fornisce una semplice codifica in
+molti interessanti formati video e audio (al momento i suoi codec audio non sono
+supportati). Puoi codificare i seguenti codec :</P>
+
+<P>
+<UL>
+  <LI>mjpeg - Motion JPEG</LI>
+  <LI>h263 - H263</LI>
+  <LI>h263p - H263 Plus</LI>
+  <LI>mpeg4 - DivX4</LI>
+  <LI>msmpeg4 - il vecchio DivX</LI>
+  <LI>rv10 - un vecchio codec RealVideo</LI>
+  <LI>mpeg1video - video MPEG1 :)</LI>
+</UL>
+</P>
+
+<P>La prima colonna contiene i nomi dei codec che devono essere passati dopo l'opzione
+  <CODE>vcodec</CODE>, come : <CODE>-lavcopts vcodec=msmpeg4</CODE></P>
+
+<P>Un esempio, con la compressione MJPEG :<BR>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg</CODE></P>
+
+
+<P><B><A NAME=2.4.4>2.4.4.  Sintassi</B></P>
+
+<P>&nbsp;&nbsp;<CODE>mencoder [opzioni] [file di input] [opzioni] ...</P>
+
+
+<P><B><A NAME=2.4.5>2.4.5.  Opzioni disponibili</B></P>
+
+<P>NOTA : per tutte le opzioni disponibili, <B>leggi la pagina di man !</B></P>
+
+<P>
+  Dato che <B>MEncoder</B> è costruito sulle stesso codice di <B>MPlayer</B>, ci sono
+  molte opzioni di <B>MPlayer</B> che hanno funzioni anche in <B>MEncoder</B>!
+  Vedi, puoi usare <CODE>-sid</CODE> per "rippare" un  DVD con i sottotitoli, o
+  <CODE>-noidx</CODE> per ignorare in input l'indice malformato di un AVI. <B>Sii sveglio!</B>
+</P>
+
+<TABLE BORDER=1>
+<TR>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <I>-ss</I> tempo</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    comincia a codificare dal tempo dato (può partire solo dai frame chiave !)
+  </TD>
+</TR>
+<TR>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <I>-endpos</I> tempo</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    smetti di codificare al tempo dato. Vedi la pagina di man per esempi !
+  </TD>
+</TR>
+<TR>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <I>-o</I> nomefile</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    specifica il nome del file di output
+  </TD>
+</TR>
+<TR>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <I>-x</I> larghezza in pixel</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    ridimensiona l'output alla data larghezza in pixel
+  </TD>
+</TR>
+<TR>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <I>-y</I> altezza in pixel</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    ridimensiona l'output alla data altezza in pixel
+  </TD>
+</TR>
+<TR>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <I>-sws</I> 0-2</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    metodo di ridimensionamento<BR>
+    &nbsp;&nbsp;0 - bilineare veloce<BR>
+    &nbsp;&nbsp;1 - bilineare<BR>
+    &nbsp;&nbsp;2 - bicubico (migliore qualità)<BR>
+  </TD>
+</TR>
+<TR>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <I>-ovc</I> nomecodec</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    Codifica col codec dato (i nomi dei codec sono quelli presenti in codecs.conf). Esempi:<BR>
+    &nbsp;&nbsp;<B>help</B> - ottieni una lista dei codec disponibili<BR>
+    &nbsp;&nbsp;<B>null</B> - non creare un flusso video nell'AVI di output<BR>
+    &nbsp;&nbsp;<B>raw</B> - crea un video non compresso<BR>
+    &nbsp;&nbsp;<B>rawrgb</B> - ?<BR>
+    &nbsp;&nbsp;<B>copy</B> - nessuna codifica, copia il flusso (solo da AVI/ASF per ora)<BR>
+    &nbsp;&nbsp;<B>divx4</B> - codifica in DivX4<BR>
+    &nbsp;&nbsp;<B>lavc</B> - codifica con un codec di libavcodec<BR>
+    &nbsp;&nbsp;<B>vfw</B> - codifica con una DLL Windows<BR>
+  </TD>
+</TR>
+<TR>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <I>-oac</I> nomecodec</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    Codifica col codec dato (i nomi dei codec sono quelli presenti in codecs.conf). Esempi:<BR>
+    &nbsp;&nbsp;<B>help</B> - ottieni una lista dei codec disponibili<BR>
+    &nbsp;&nbsp;<B>copy</B> - nessuna codifica, copia il flusso (solo da AVI/ASF per ora)<BR>
+    &nbsp;&nbsp;<B>pcm</B> - codifica in un PCM non compresso<BR>
+    &nbsp;&nbsp;<B>mp3lame</B> - codifica in MP3 (usando Lame)<BR>
+  </TD>
+</TR>
+<TR>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <I>-divx4opts</I></TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    Se codifichi in DivX4, puoi specificare i sui parametri qui, come:<BR>
+    &nbsp;&nbsp;<CODE>-divx4opts br=1800:deinterlace:key=250</CODE><BR>
+    Opzioni comuni: <B>(per la lista completa leggi la pagina di man!)</B><BR>
+    &nbsp;&nbsp;<B>help</B> - ottieni l'aiuto<BR>
+    &nbsp;&nbsp;<B>br</B>=XXX - specifica il bitrate in kbit &lt;4-16000&gt; o bit &lt;16001-24000000&gt;<BR>
+    &nbsp;&nbsp;<B>q</B>=XXXX - qualità (1-veloce, 5-migliore - predefinito 5)<BR>
+    &nbsp;&nbsp;<B>key</B>=XXXX - intervallo tra i frame chiave<BR>
+  </TD>
+</TR>
+<TR>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <I>-lavcopts</I></TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    Se codifichi in libavcodec, puoi specificare i sui parametri qui, come:<BR>
+    &nbsp;&nbsp;<CODE>-lavcopts vcodec=msmpeg4:vbitrate=1800:vhq:keyint=250</CODE><BR>
+    Opzioni comuni: <B>(per la lista completa leggi la pagina di man!)</B><BR>
+    &nbsp;&nbsp;<B>help</B> - ottieni l'aiuto<BR>
+    &nbsp;&nbsp;<B>vcodec</B>=XXX - seleziona il codec video (per la lista completa, vedi la sezione libavcodec sopra)<BR>
+    &nbsp;&nbsp;<B>vbitrate</B>=XXX - specifica il bitrate in kbit &lt;4-16000&gt; o bit &lt;16001-24000000&gt;<BR>
+    &nbsp;&nbsp;<B>vhq</B> - alta qualità<BR>
+    &nbsp;&nbsp;<B>keyint</B>=XXX - intervallo tra i frame chiave<BR>
+  </TD>
+</TR>
+<TR>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <I>-lameopts</I></TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    Se codifichi in MP3 con libmp3lame, puoi specificare i sui parametri qui, come:<BR>
+    &nbsp;&nbsp;<CODE>-lameopts q=3</CODE><BR>
+    &nbsp;&nbsp;<CODE>-lameopts br=192:cbr</CODE><BR>
+    Opzioni comuni: <B>(per la lista completa leggi la pagina di man!)</B><BR>
+    &nbsp;&nbsp;<B>help</B> - ottieni l'aiuto<BR>
+    &nbsp;&nbsp;<B>cbr</B> - seleziona MP£ <B>CBR</B> MP3 (il default è <B>VBR</B>)<BR>
+    &nbsp;&nbsp;<B>br</B>=XXX - specifica il bitrate in kbit &lt;0-1024&gt; (solo per <B>CBR</B>!)<BR>
+    &nbsp;&nbsp;<B>q</B>=XXXX - qualità (0-alta, 9-veloce - predefinito 0) (solo per <B>VBR</B>!)<BR>
+  </TD>
+</TR>
+</TABLE>
+
+<P><B><A NAME=2.4.6>2.4.6.  Esempi</B></P>
+
+<P>Usare <B>MEncoder</B> è la cosa più facile della Terra. Vedi il seguito :</P>
+
+<P>Codificare da DVD, titolo 2 :<BR>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi</CODE></P>
+
+<P>Lo stesso, ma con la famiglia libavcodec, compressione MJPEG :<BR>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg -ffourcc mjpg</CODE></P>
+
+<P>Codifica da DVD, titolo 2, con ridimensionamento :<BR>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -x 640 -y 480 -sws 2 -o title2.avi</CODE></P>
+
+<P>Codifica da HTTP :<BR>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder http://mplayer.hq/example.avi  -o  example.avi</CODE></P>
+
+<P>Codifica da pipe :<BR>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;rar p test-SVCD.rar | mencoder -divx4opts br=800 -ofps 24 -pass 1 -- -</CODE></P>
+
+<P>Codificare file *.vob multipli :<BR>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;cat *.vob | mencoder &lt;opzioni&gt; -</CODE></P>
+
+<P>Codifica da sintonizzatore TV (per le opzioni <A HREF="documentation.html#2.5">vedi la sezione input TV !</A>) :<BR>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -tv on:driver=v4l:width=640:height=480 &lt;opzioni&gt;</CODE></P>
+
+<P>Per tutte le opzioni disponibili, <B><I>controlla la pagina man di MEncoder !</I></B>
+<P>
+</FONT>
+</BODY>
+</HTML>
