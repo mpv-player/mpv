@@ -25,8 +25,8 @@
     M$ MPEG4 v1, v2 and other MPEG4 variants</LI>
   <LI>native decoder for Windows Media Video 7 (WMV1), and Win32 DLL decoder for
     Windows Media Video 8 (WMV2), both used in .wmv files</LI>
-  <LI>native Sorenson (SVQ1) decoder</LI>
-  <LI>Sorenson (SVQ3) decoder</LI>
+  <LI><B>native Sorenson 1 (SVQ1) decoder</B></LI>
+  <LI><B>Win32 Sorenson 3 (SVQ3) decoder</B></LI>
   <LI>3ivx decoder</LI>
   <LI>Cinepak and Intel Indeo codecs (3.1, 3.2, 4.1, 5.0)</LI>
   <LI>MJPEG, AVID, VCR2, ASV2 and other hardware formats</LI>
@@ -270,18 +270,34 @@ MPlayer supports decoding all versions of RealVideo:
 
 <H4><A NAME="sorenson">2.2.1.10 Sorenson</A></H4>
 
-<P><B>Sorenson</B> is a video codec used primarily in Apple QuickTime. We are
-  currently able to decode the first version (SVQ1) with a native decoder and
-  SVQ3 through an external DLL.</P>
+<P><B>Sorenson</B> is a video codec developed by Apple. We are currently able
+  to decode all versions of Sorenson video files with the following
+  decoders:</P>
 
-<P>The Sorenson SVQ1 decoder is compiled and usable per default.</P>
+<UL>
+  <LI>Sorenson 1 (fourcc <I>SVQ1</I>) - decoding supported by <B>native
+    codecs</B><BR>
+    Actually there are two (nearly equal) decoders for SVQ1: one is built in
+    MPlayer, the other is in libavcodec. You can invoke each of them with the
+    <CODE>-vc svq1</CODE> and <CODE>-vc ffsvq1</CODE> options respectively.
+    Some files may work with one of them, and not with the other, so test
+    both decoders.</LI>
+  <LI>Sorenson 3 (fourcc <I>SVQ3</I>) - decoding supported by <B>Win32
+    QuickTime libraries</B></LI>
+</UL>
 
-<P>To get Sorenson SVQ3 playback, download the QuickTime 5 (extra stability) or
-  QuickTime 6 (extra speed) DLLs from
-  <A HREF="http://www.mplayerhq.hu/~alex/codecs/">the codecs page</A>, extract
-  them to your Win32 codecs directory
-  (probably <CODE>/usr/local/lib/win32</CODE>) and recompile MPlayer with
-  <CODE>--enable-qtx-codecs</CODE>.</P>
+<H4>Compiling MPlayer with QuickTime libraries support</H4>
+
+<P><B>NOTE:</B> currently only 32bit Intel platforms are supported.</P>
+
+<OL>
+  <LI>download MPlayer CVS</LI>
+  <LI>compile MPlayer with:<BR>
+    <CODE>$ ./configure --enable-qtx-codecs</CODE></LI>
+  <LI>download QuickTime DLL pack from <A HREF="http://www.mplayerhq.hu/~alex/codecs">http://www.mplayerhq.hu/~alex/codecs</A></LI>
+  <LI>extract QuickTime DLL pack to your Win32 codecs directory (default:
+    <CODE>/usr/lib/win32</CODE>)</LI>
+</OL>
 
 
 <H3><A NAME="audio_codecs">2.2.2 Audio codecs</A></H3>
@@ -373,6 +389,14 @@ MPlayer supports decoding nearly all versions of RealAudio:
 
 <P>On how to install RealPlayer libraries, see the
   <A HREF="#realvideo">RealVideo</A> section.</P>
+
+
+<H4><A NAME="qdesign">2.2.2.6 QDesign codecs</A></H4>
+
+<P>QDesign audio streams (fourcc: <I>QDMC</I>, <I>QDM2</I>) are found in MOV/QT
+  files. Both versions of this codec can be decoded with QuickTime libraries. 
+  For installation instructions please see the <A HREF="#sorenson">Sorenson
+  video codec</A> section.</P>
 
 
 <H3><A NAME="importing">2.2.3 Win32 codec importing HOWTO</A></H3>
