@@ -35,7 +35,9 @@ all: html-chunked html-single
 html-chunked: $(HTMLDIR)/index.html
 html-single: $(HTMLFILE)
 
-$(HTMLDIR)/index.html: main.xml $(CHUNK_XSL_DEPS) $(if $(findstring yes,$(USE_SYMLINKS)),symlinks)
+SYMLINKS_DEPS:=$(if $(findstring yes,$(USE_SYMLINKS)), $(patsubst ../en/%,%,$(wildcard ../en/*.xml)))
+
+$(HTMLDIR)/index.html: main.xml $(CHUNK_XSL_DEPS) $(SYMLINKS_DEPS)
 ifndef HTMLDIR
 	$(warning $(HTMLDIR))
 	$(warning Error: HTMLDIR not set!!!)
@@ -47,7 +49,7 @@ endif
 	cp -f $(HTML_STYLESHEET) $(HTMLDIR)/
 	../xsltproc.sh $(HTMLDIR)/ $(HTML_CHUNK_XSL) $<
 
-$(HTMLFILE): main.xml $(XSL_DEPS) $(if $(findstring yes,$(USE_SYMLINKS)),symlinks)
+$(HTMLFILE): main.xml $(XSL_DEPS) $(SYMLINKS_DEPS)
 ifndef HTMLFILE
 	$(warning Error: HTMLFILE not set!!!)
 	$(warning Typically this means, that you've run make from a subdir of DOCS/xml.)
@@ -61,8 +63,8 @@ endif
 ../html-chunk.xsl ../html-single.xsl main.xml:
 	cd .. && sh configure
 
-.PHONY: symlinks
-symlinks:
+$(filter-out main.xml, $(patsubst ../en/%,%, $(wildcard ../en/*.xml))):
+	$(if $(findstring yes,$(USE_SYMLINKS)), ,exit 0;)\
 	for file in ../en/*.xml ; do \
 	if ! test -r `basename $$file` ; then \
 		ln -s $$file `basename $$file` ; \
