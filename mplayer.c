@@ -278,6 +278,24 @@ static unsigned int inited_flags=0;
 
 void uninit_player(unsigned int mask){
   mask=inited_flags&mask;
+
+  mp_msg(MSGT_CPLAYER,MSGL_DBG2,"\n*** uninit(0x%X)\n",mask);
+
+  if(mask&INITED_STREAM){
+    inited_flags&=~INITED_STREAM;
+    current_module="uninit_stream";
+    if(stream) free_stream(stream);
+    stream=NULL;
+  }
+
+  if(mask&INITED_GETCH2){
+    inited_flags&=~INITED_GETCH2;
+    current_module="uninit_getch2";
+    mp_msg(MSGT_CPLAYER,MSGL_DBG2,"\n[[[uninit getch2]]]\n");
+  // restore terminal:
+    getch2_disable();
+  }
+
 #ifdef USE_DVDREAD
   if (mask&INITED_SPUDEC){
     inited_flags&=~INITED_SPUDEC;
@@ -288,20 +306,13 @@ void uninit_player(unsigned int mask){
   if(mask&INITED_VO){
     inited_flags&=~INITED_VO;
     current_module="uninit_vo";
-    video_out->uninit();
+    video_out->uninit(); video_out=NULL;
   }
 
   if(mask&INITED_AO){
     inited_flags&=~INITED_AO;
     current_module="uninit_ao";
-    audio_out->uninit();
-  }
-
-  if(mask&INITED_GETCH2){
-    inited_flags&=~INITED_GETCH2;
-    current_module="uninit_getch2";
-  // restore terminal:
-    getch2_disable();
+    audio_out->uninit(); audio_out=NULL;
   }
 
 #ifdef HAVE_NEW_GUI
@@ -311,13 +322,6 @@ void uninit_player(unsigned int mask){
     guiDone();
   }
 #endif
-
-  if(mask&INITED_STREAM){
-    inited_flags&=~INITED_STREAM;
-    current_module="uninit_stream";
-    if(stream) free_stream(stream);
-    stream=NULL;
-  }
 
 #if defined(HAVE_LIRC) && ! defined(HAVE_NEW_INPUT)
   if(mask&INITED_LIRC){
@@ -603,11 +607,7 @@ int gui_no_filename=0;
 if(!parse_codec_cfg(get_path("codecs.conf"))){
   if(!parse_codec_cfg(CONFDIR"/codecs.conf")){
     mp_msg(MSGT_CPLAYER,MSGL_HINT,MSGTR_CopyCodecsConf);
-//    printf("Exit.\n");
     exit(0);  // From unknown reason a hangup occurs here :((((((
-//    kill(getpid(),SIGTERM);
-//    usleep(20000);
-//    kill(getpid(),SIGKILL);
   }
 }
 
@@ -748,6 +748,7 @@ play_next_file:
 if(!use_stdin && !slave_mode){
   getch2_enable();  // prepare stdin for hotkeys...
   inited_flags|=INITED_GETCH2;
+  mp_msg(MSGT_CPLAYER,MSGL_DBG2,"\n[[[init getch2]]]\n");
 }
 
 #ifdef HAVE_NEW_GUI
@@ -861,11 +862,6 @@ play_dvd:
 
   if(!video_out){
     mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_InvalidVOdriver,video_driver?video_driver:"?");
-    exit_player(MSGTR_Exit_error);
-  }
-  if((i=video_out->preinit(vo_subdevice))!=0)
-  {
-    mp_msg(MSGT_CPLAYER,MSGL_FATAL,"error on vo preinit = %u\n",i);
     exit_player(MSGTR_Exit_error);
   }
 // check audio_out driver name:
@@ -1170,7 +1166,8 @@ if(sh_audio){
 //================== Init VIDEO (codec & libvo) ==========================
 if(!sh_video)
    goto main;
-current_module="init_video_codec";
+
+current_module="select_video_codec";
 
 // Go through the codec.conf and find the best codec...
 sh_video->codec=NULL;
@@ -1222,7 +1219,16 @@ if(bestprio!=-1) {
 mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s video codec: [%s] drv:%d prio:%d (%s)\n",
     video_codec?mp_gettext("Forcing"):mp_gettext("Detected"),sh_video->codec->name,sh_video->codec->driver,sh_video->codec->priority!=-1?sh_video->codec->priority:0,sh_video->codec->info);
 
+current_module="preinit_libvo";
+
+if((i=video_out->preinit(vo_subdevice))!=0){
+    mp_msg(MSGT_CPLAYER,MSGL_FATAL,"error on vo preinit = %u\n",i);
+    goto goto_next_file; // exit_player(MSGTR_Exit_error);
+}
 sh_video->video_out=video_out;
+inited_flags|=INITED_VO;
+
+current_module="init_video_codec";
 
 // init codec:
 //if(!init_video(sh_video,&vtune.pitch[0])){
@@ -1241,28 +1247,6 @@ if(auto_quality>0){
 }
 
 // ========== Init display (sh_video->disp_w*sh_video->disp_h/out_fmt) ============
-
-current_module="init_libvo";
-
-#if 0
-
-   { const vo_info_t *info = video_out->get_info();
-     mp_msg(MSGT_CPLAYER,MSGL_INFO,"VO: [%s] %dx%d => %dx%d %s %s%s%s%s\n",info->short_name,
-         sh_video->disp_w,sh_video->disp_h,
-         screen_size_x,screen_size_y,
-	 vo_format_name(out_fmt),
-         fullscreen?"fs ":"",
-         vidmode?"vm ":"",
-         softzoom?"zoom ":"",
-         (flip==1)?"flip ":""
-//         fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3)
-     );
-    mp_msg(MSGT_CPLAYER,MSGL_V,"VO: Description: %s\n",info->name);
-    mp_msg(MSGT_CPLAYER,MSGL_V,"VO: Author: %s\n", info->author);
-    if(strlen(info->comment) > 0)
-        mp_msg(MSGT_CPLAYER,MSGL_V,"VO: Comment: %s\n", info->comment);
-   }
-#endif
 
 #ifdef HAVE_NEW_GUI
    if ( use_gui )
@@ -1294,8 +1278,8 @@ current_module="init_libvo";
     }
 #endif
 
-   inited_flags|=INITED_VO;
-   mp_msg(MSGT_CPLAYER,MSGL_V,"INFO: Video OUT driver init OK!\n");
+current_module="init_vo_vaa";
+
    if(video_out->control(VOCTRL_QUERY_VAA, &vo_vaa)==VO_NOTIMPL)
      memset(&vo_vaa,0,sizeof(vo_vaa_t));
    /*
@@ -1318,13 +1302,12 @@ current_module="init_libvo";
 	    */
 	}
    }
-   init_video_vaa(sh_video->disp_w);
-   fflush(stdout);
 
 //================== MAIN: ==========================
    main:
 if(!sh_video) osd_level = 0;
 
+fflush(stdout);
 
 {
 //int frame_corr_num=0;   //
@@ -1383,14 +1366,14 @@ if(!sh_audio){
   if(verbose) mp_msg(MSGT_CPLAYER,MSGL_V,"Freeing %d unused audio chunks\n",d_audio->packs);
   ds_free_packs(d_audio); // free buffered chunks
   d_audio->id=-2;         // do not read audio chunks
-  if(audio_out) uninit_player(INITED_AO); // close device
+  uninit_player(INITED_AO); // close device
 }
 if(!sh_video){
    mp_msg(MSGT_CPLAYER,MSGL_INFO,"Video: no video!!!\n");
    if(verbose) mp_msg(MSGT_CPLAYER,MSGL_V,"Freeing %d unused video chunks\n",d_video->packs);
    ds_free_packs(d_video);
    d_video->id=-2;
-   if(video_out) uninit_player(INITED_VO);
+   uninit_player(INITED_VO);
 }
 
 if(demuxer->file_format!=DEMUXER_TYPE_AVI) pts_from_bps=0; // it must be 0 for mpeg/asf!
@@ -2729,10 +2712,12 @@ if(benchmark){
   }	
 #endif
 
+uninit_player(INITED_VO|INITED_AO);
+
 if(eof == PT_NEXT_ENTRY || eof == PT_PREV_ENTRY) {
   eof = eof == PT_NEXT_ENTRY ? 1 : -1;
   if(play_tree_iter_step(playtree_iter,eof,0) == PLAY_TREE_ITER_ENTRY) {
-    uninit_player(INITED_ALL-(INITED_GUI+INITED_LIRC+INITED_INPUT+INITED_VO));
+    uninit_player(INITED_ALL-(INITED_GUI+INITED_LIRC+INITED_INPUT));
     eof = 1;
   } else {
     play_tree_iter_free(playtree_iter);
@@ -2741,18 +2726,16 @@ if(eof == PT_NEXT_ENTRY || eof == PT_PREV_ENTRY) {
 } else if (eof == PT_UP_NEXT || eof == PT_UP_PREV) {
   eof = eof == PT_UP_NEXT ? 1 : -1;
   if(play_tree_iter_up_step(playtree_iter,eof,0) == PLAY_TREE_ITER_ENTRY) {
-    uninit_player(INITED_ALL-(INITED_GUI+INITED_LIRC+INITED_INPUT+INITED_VO));
+    uninit_player(INITED_ALL-(INITED_GUI+INITED_LIRC+INITED_INPUT));
     eof = 1;
   } else {
     play_tree_iter_free(playtree_iter);
     playtree_iter = NULL;
   }
-}else { // NEXT PREV SRC
-     uninit_player(INITED_ALL-(INITED_GUI+INITED_LIRC+INITED_INPUT+INITED_VO));
+} else { // NEXT PREV SRC
+     uninit_player(INITED_ALL-(INITED_GUI+INITED_LIRC+INITED_INPUT));
      eof = eof == PT_PREV_SRC ? -1 : 1;
 }
-
-uninit_player(INITED_VO);
 
 if(eof == 0) eof = 1;
 
@@ -2791,8 +2774,6 @@ if(use_gui || playtree_iter != NULL
     subtitles=NULL;
    }
 
-  video_out=NULL;
-  audio_out=NULL;
   eof = 0;
   goto play_next_file;
 }
