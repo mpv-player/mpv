@@ -405,6 +405,8 @@
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>ftp://ftp.mplayerhq.hu/MPlayer/incoming/[codecname]/</CODE></P>
 
+<P><B>Note:</B> On Windows NT/2000/XP search for this info in the registry, e.g. search for
+  "VIDC.HFYU". To find out how to do this, look at the old DirectShow method below.</P>
 
 <H4><A NAME="importing_directshow">2.2.3.2 DirectShow codecs</A></H4>
 
@@ -417,7 +419,24 @@
   <LI>we need the GUID of the codec.
 </UL>
 
-<P>Take a deep breath and start searching the registry...</P>
+<P><B>New Method:</B> Using Microsoft GraphEdit (fast)</P>
+
+<OL>
+  <LI>Get GraphEdit from either DirecX SDK or <A HREF="http://doom9.org">Doom9</A>
+  <LI>Start <CODE>graphedit.exe</CODE>
+  <LI>From the menue select Graph -&gt; Insert Filters
+  <LI>Expand item <CODE>DirectShow Filters</CODE>
+  <LI>Select the right codec name and expand item
+  <LI>In the entry <CODE>DisplayName</CODE> look at the text in winged brackets
+    after the backslash and write it down (five dash-delimited blocks, the GUID)
+  <LI>The codec binary is the file specified in the <CODE>Filename</CODE> entry
+</OL>
+
+<P><B>Note:</B> If there is no <CODE>Filename</CODE> entry and <CODE>DisplayName</CODE>
+  contains something like <CODE>device:dmo</CODE>, then it is a DMO-Codec, which are
+  currently not supported by MPlayer.</P>
+
+<P><B>Old Method:</B> Take a deep breath and start searching the registry...</P>
 
 <OL>
   <LI>Start <CODE>regedit</CODE>.
