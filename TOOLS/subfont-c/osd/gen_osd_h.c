@@ -4,7 +4,7 @@ int main()
 {
     int c;
     int cnt;
-    printf("unsigned char *osd_font_pfb = {");
+    printf("unsigned char osd_font_pfb[] = {");
     for (cnt = 0;;cnt++) {
 	if (cnt % 16 == 0) printf("\n");
 	c = getchar();
