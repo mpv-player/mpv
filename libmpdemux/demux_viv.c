@@ -187,7 +187,7 @@ int vivo_check_file(demuxer_t* demuxer){
     buf[len]=0;
 //    printf("VIVO header: '%s'\n",buf);
 
-#if 1
+#if 0
     vivo_parse_text_header(demuxer, len);
     if (priv->supported == 0)
 	return 0;
@@ -472,6 +472,11 @@ void demux_open_vivo(demuxer_t* demuxer){
 		    else
 			sh->fps=15.0f;
 		sh->frametime=1.0f/sh->fps;
+
+#warning "FIXME! we can't scale"
+		priv->disp_width = priv->width;
+		priv->disp_height = priv->height;
+
 		if (priv->disp_width)
 		    sh->disp_w = priv->disp_width;
 		else
