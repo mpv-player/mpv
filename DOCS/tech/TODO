@@ -3,11 +3,8 @@ TODO:
 
 Post-0.90 / CVS CLEANUP work:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-- remove old config/cmdline parser code
 - maybe remove .raw font support too
-- remove SVQ1 from libmpcodecs
 - remove -vf yuy2, yvu9
-- upgrade libmpeg2 to 0.3.1+Fabian's patch
 - maybe upgrade to liba52 cvs & merge in (or redo?) the asm optimizations
 - change build & install stuff (cross-lib dependency etc)
   - re-design makefile dependency system
@@ -16,7 +13,6 @@ Post-0.90 / CVS CLEANUP work:
   - MPlayer-0.90rc2.rawyuv.diff - raw YUV (I420) video 'encoder'
     (checks requires for stride==width, and aligned planes)
   - of-raw-1.diff - raw audio/video stream dump 'muxer'
-  - timer-win.c - GetTimer() etc implementation using native win32 API
   - bte.diff - something input plugin (uses fork() )
   - lavc_statsfile_errorchecking-patch - handle errors writing to logfile
   - xine-lib-cvs-xvmc.diff - XvMC support for libmpeg2 0.3.x
@@ -66,6 +62,16 @@ mencoder:
 - add ogg/vorbis audio encoder
 - stop/resume
 
+DOCS:
+- merge tech/encoding-tips.txt into encoding.html
+- finish reviewing all of the docs
+  - mplayer.1
+  - encoding.html
+  - video.html
+  - documentation.html
+- enhance the FAQ
+- man page HTML version
+
 
 FUTURE:
 ~~~~~~~
@@ -81,29 +87,9 @@ decoders:
 other:
 - dvd server
 - mga_vid crtc2 fix
-- make nvidia_vid ;)
 - X11 Render support into DGA for OSD (from the DOCS;)
 
-
-DOCUMENTATION TODO:
-===================
-
-FOR THE v0.91 RELEASE:
-~~~~~~~~~~~~~~~~~~~~~~
-
-- merge tech/encoding-tips.txt into encoding.html
-- finish reviewing all of the docs
-  - mplayer.1
-  - encoding.html
-  - video.html
-  - documentation.html
-- enhance the FAQ
-- man page HTML version
-
-
-FUTURE:
-~~~~~~~
-
+DOCS:
 - update the man page with all current options
   (prefer-ipv4/6, ipv4-only-proxy, tsfastparse, dvbin + subopts, sub-demuxer,
   (no)autoexpand, oldpp, grabpointer, nuvopts + subopts, remove -aop?)
