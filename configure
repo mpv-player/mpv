@@ -3685,12 +3685,12 @@ echores "$_dshow"
 
 if test "$_dshow" = yes ; then
   _def_dshow='#define USE_DIRECTSHOW 1'
-  _ld_dshow='loader/dshow/libDS_Filter.a'
-  _dep_dshow='loader/dshow/libDS_Filter.a'
-  _codecmodules="directshow $_codecmodules"
+  _ld_dshow='loader/dshow/libDS_Filter.a loader/dmo/libDMO_Filter.a'
+  _dep_dshow='loader/dshow/libDS_Filter.a loader/dmo/libDMO_Filter.a'
+  _codecmodules="dshow/dmo $_codecmodules"
 else
   _def_dshow='#undef USE_DIRECTSHOW'
-  _nocodecmodules="directshow $_nocodecmodules"
+  _nocodecmodules="dshow/dmo $_nocodecmodules"
 fi
 
 

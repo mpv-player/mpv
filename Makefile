@@ -62,7 +62,7 @@ ifeq ($(GUI),yes)
 PARTS += Gui
 endif
 ifneq ($(W32_LIB),)
-PARTS += loader loader/dshow
+PARTS += loader loader/dshow loader/dmo
 endif
 ifeq ($(LIBMENU),yes)
 PARTS += libmenu
@@ -135,6 +135,9 @@ libmpcodecs/libmpcodecs.a:
 
 loader/dshow/libDS_Filter.a:
 	$(MAKE) -C loader/dshow
+
+loader/dmo/libDMO_Filter.a:
+	$(MAKE) -C loader/dmo
 
 libavcodec/libavcodec.a:
 	$(MAKE) -C libavcodec

@@ -30,6 +30,7 @@ extern vd_functions_t mpcodecs_vd_cinepak;
 extern vd_functions_t mpcodecs_vd_qtrpza;
 extern vd_functions_t mpcodecs_vd_ffmpeg;
 extern vd_functions_t mpcodecs_vd_dshow;
+extern vd_functions_t mpcodecs_vd_dmo;
 extern vd_functions_t mpcodecs_vd_vfw;
 extern vd_functions_t mpcodecs_vd_vfwex;
 extern vd_functions_t mpcodecs_vd_odivx;
@@ -68,6 +69,7 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 #ifdef USE_WIN32DLL
 #ifdef USE_DIRECTSHOW
         &mpcodecs_vd_dshow,
+        &mpcodecs_vd_dmo,
 #endif
         &mpcodecs_vd_vfw,
         &mpcodecs_vd_vfwex,
