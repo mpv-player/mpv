@@ -25,6 +25,7 @@ extern af_info_t af_info_sub;
 extern af_info_t af_info_export;
 extern af_info_t af_info_volnorm;
 extern af_info_t af_info_extrastereo;
+extern af_info_t af_info_lavcresample;
 
 static af_info_t* filter_list[]={ 
    &af_info_dummy,
@@ -44,6 +45,9 @@ static af_info_t* filter_list[]={
 #endif
    &af_info_volnorm,
    &af_info_extrastereo,
+#ifdef USE_LIBAVCODEC
+   &af_info_lavcresample,
+#endif
    NULL 
 };
 
