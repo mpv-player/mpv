@@ -46,6 +46,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-noframedrop ]
 .RB [ \-framedrop ]
 .RB [ \-hardframedrop ]
+.RB [ \-dvdkey\ key ]
 .I - or file
 .PP
 .SH DESCRIPTION
@@ -223,6 +224,10 @@ frame dropping : decode all frames, video may skip
 .B \-hardframe
 hard frame dropping : skip even decoding (when using with DivX also
 specify -nodshow !!!)
+.TP
+.B \-dvdkey key
+key to decrypt stream encrypted with CSS. For example : -dvdkey F169072699
+(this is NOT for DVD playing! For DVD use the -dvd option!)
 .IP
 .SH "ALPHA/BETA CODE"
 .TP
