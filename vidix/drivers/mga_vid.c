@@ -45,6 +45,8 @@
 
 #undef MGA_EQUALIZER
 
+#undef MGA_PCICONFIG_MEMDETECT
+
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -111,8 +113,8 @@ static vidix_capability_t mga_cap =
     "Matrox MGA G200/G400 YUV Video",
     TYPE_OUTPUT,
     { 0, 0, 0, 0 },
-    1024, /* 2048x2048 is supported if Pontscho is right */
-    768,
+    1600, /* 2048x2048 is supported if Pontscho is right */
+    1200,
     4,
     4,
     -1,
@@ -1198,7 +1200,7 @@ int vixProbe(int verbose,int force)
 	for (i = 0; i < num_pci; i++)
 	{
 	    if (mga_verbose > 2)
-		printf("pci[%d] vendor: %d device: %d\n",
+		printf("[mga] pci[%d] vendor: %d device: %d\n",
 		    i, lst[i].vendor, lst[i].device);
 	    if (lst[i].vendor == VENDOR_MATROX)
 	    {
@@ -1241,7 +1243,7 @@ card_found:
 
 int vixInit(void)
 {
-    unsigned int card_option;
+    unsigned int card_option = 0;
 
     printf("[mga] init\n");
 
@@ -1255,16 +1257,9 @@ int vixInit(void)
 	return(EINTR);
     }
 
-#warning "FIXME: implement pciconfig_read! (or enable syscall)\n"
-#if 0
-/* from linux/pci.h */
-#define PCI_DEVFN(slot, func) ((((slot) & 0x1f) << 3) | ((func) & 0x07))
-
-//    pci_config_read(pci_info.bus, PCI_DEVFN(pci_info.card, pci_info.func),
-//        0x40, 4, &card_option);
+#ifdef MGA_PCICONFIG_MEMDETECT
     pci_config_read(pci_info.bus, pci_info.card, pci_info.func,
         0x40, 4, &card_option);
-//    pci_read_config_dword(dev,  0x40, &card_option);
     printf("[mga] OPTION word: 0x%08X  mem: 0x%02X  %s\n", card_option,
     	(card_option>>10)&0x17, ((card_option>>14)&1)?"SGRAM":"SDRAM");
 #endif
