@@ -267,27 +267,58 @@ static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int
     return 0;
 }
 
+/* Please comment it out if you want have OSD within movie */
+#define OSD_OUTSIDE_MOVIE 1
+
 static void draw_alpha_32(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)
 {
    unsigned int dstride=HAS_DGA()?video_mode_info.XResolution:dstW;
+#ifndef OSD_OUTSIDE_MOVIE
+   if(HAS_DGA())
+   {
+	x0 += x_offset;
+	y0 += y_offset;
+   }
+#endif
    vo_draw_alpha_rgb32(w,h,src,srca,stride,dga_buffer+4*(y0*dstride+x0),4*dstride);
 }
 
 static void draw_alpha_24(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)
 {
    unsigned int dstride=HAS_DGA()?video_mode_info.XResolution:dstW;
+#ifndef OSD_OUTSIDE_MOVIE
+   if(HAS_DGA())
+   {
+	x0 += x_offset;
+	y0 += y_offset;
+   }
+#endif
    vo_draw_alpha_rgb24(w,h,src,srca,stride,dga_buffer+3*(y0*dstride+x0),3*dstride);
 }
 
 static void draw_alpha_16(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)
 {
    unsigned int dstride=HAS_DGA()?video_mode_info.XResolution:dstW;
+#ifndef OSD_OUTSIDE_MOVIE
+   if(HAS_DGA())
+   {
+	x0 += x_offset;
+	y0 += y_offset;
+   }
+#endif
    vo_draw_alpha_rgb16(w,h,src,srca,stride,dga_buffer+2*(y0*dstride+x0),2*dstride);
 }
 
 static void draw_alpha_15(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)
 {
    unsigned int dstride=HAS_DGA()?video_mode_info.XResolution:dstW;
+#ifndef OSD_OUTSIDE_MOVIE
+   if(HAS_DGA())
+   {
+	x0 += x_offset;
+	y0 += y_offset;
+   }
+#endif
    vo_draw_alpha_rgb15(w,h,src,srca,stride,dga_buffer+2*(y0*dstride+x0),2*dstride);
 }
 
@@ -309,8 +340,13 @@ static void draw_osd(void)
  if(verbose > 2)
 	printf("vo_vesa: draw_osd was called\n");
  {
+#ifdef OSD_OUTSIDE_MOVIE
    w = HAS_DGA()?video_mode_info.XResolution:dstW;
    h = HAS_DGA()?video_mode_info.YResolution:dstH;
+#else
+   w = dstW;
+   h = dstH;
+#endif
    if(dga_buffer) vo_draw_text(w,h,draw_alpha_fnc);
  }
 }
