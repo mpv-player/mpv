@@ -496,6 +496,7 @@ float font_factor=0.75;
 char *sub_name=NULL;
 float sub_delay=0;
 float sub_fps=0;
+int   sub_auto = 1;
 //int user_bpp=0;
 
 #include "mixer.h"
@@ -586,8 +587,12 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
        subtitles=sub_read_file(sub_name);
        if(!subtitles) printf("Can't load subtitles: %s\n",font_name);
   } else {
-      // try default:
-       subtitles=sub_read_file(get_path("default.sub"));
+    if ( sub_auto )
+      {
+       // auto load sub file ...
+       subtitles=sub_read_file( sub_filename( filename ) );
+       if ( subtitles == NULL ) subtitles=sub_read_file(get_path("default.sub")); // try default:
+      } else subtitles=sub_read_file(get_path("default.sub")); // try default:
   }
 
 
@@ -1702,10 +1707,7 @@ switch(sh_video->codec->driver){
       mixer_decvolume();
       break;
     case 'm':
-      mixer_usemaster=1;
-      break;;
-    case 'c':
-      mixer_usemaster=0;
+      mixer_usemaster=!mixer_usemaster;
       break;
   }
   if(rel_seek_secs)
