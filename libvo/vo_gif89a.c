@@ -50,7 +50,7 @@ GifFileType *newgif=NULL;
 
 static uint32_t config
 	(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, 
-		uint32_t fullscreen, char *title, uint32_t format, const vo_tune_info_t *info) {
+		uint32_t fullscreen, char *title, uint32_t format) {
     char filename[] = "out.gif";
     ColorMapObject *Cmap;
 #ifdef HAVE_GIF_4

@@ -245,18 +245,17 @@ csp_again:
   }
 
     // Time to config libvo!
-    mp_msg(MSGT_CPLAYER,MSGL_V,"video_out->init(%dx%d->%dx%d,flags=%d,'%s',0x%X)\n",
+    mp_msg(MSGT_CPLAYER,MSGL_V,"VO Config (%dx%d->%dx%d,flags=%d,'%s',0x%X)\n",
                       sh->disp_w,sh->disp_h,
                       screen_size_x,screen_size_y,
                       fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3),
                       "MPlayer",out_fmt);
 
-//    memset(&vtune,0,sizeof(vo_tune_info_t));
     if(vf->config(vf,sh->disp_w,sh->disp_h,
                       screen_size_x,screen_size_y,
                       fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3),
                       out_fmt)==0){
-//                      "MPlayer",out_fmt,&vtune)){
+//                      "MPlayer",out_fmt)){
 	mp_msg(MSGT_CPLAYER,MSGL_WARN,MSGTR_CannotInitVO);
 	sh->vf_inited=-1;
 	return 0;

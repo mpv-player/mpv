@@ -51,7 +51,6 @@ static vo_functions_t *   vo_server;
 static vidix_yuv_t	  dstrides;
 static uint32_t (*server_control)(uint32_t request, void *data, ...);
 
-static int  vidix_get_bes_da(bes_da_t *);
 static int  vidix_get_video_eq(vidix_video_eq_t *info);
 static int  vidix_set_video_eq(const vidix_video_eq_t *info);
 static int  vidix_get_num_fx(unsigned *info);
@@ -389,24 +388,6 @@ int vidix_grkey_set(const vidix_grkey_t *gr_key)
     return(vdlSetGrKeys(vidix_handler, gr_key));
 }
 
-static int  vidix_get_bes_da(bes_da_t *info)
-{
-  if(!video_on) return EPERM;
-  info->dest.x = vidix_play.src.x;
-  info->dest.y = vidix_play.src.y;
-  info->dest.w = vidix_play.src.w;
-  info->dest.h = vidix_play.src.h;
-  info->dest.pitch.y = vidix_play.dest.pitch.y;
-  info->dest.pitch.u = vidix_play.dest.pitch.u;
-  info->dest.pitch.v = vidix_play.dest.pitch.v;
-  info->flags = vidix_play.flags;
-  info->frame_size = vidix_play.frame_size;
-  info->num_frames = vidix_play.num_frames;
-  memcpy(info->offsets,vidix_play.offsets,sizeof(unsigned)*vidix_play.num_frames);
-  memcpy(&info->offset,&vidix_play.offset,sizeof(vidix_yuv_t));
-  info->dga_addr = vidix_play.dga_addr;
-  return 0;
-}
 
 static int  vidix_get_video_eq(vidix_video_eq_t *info)
 {
@@ -448,7 +429,7 @@ static int is_422_planes_eq=0;
 int      vidix_init(unsigned src_width,unsigned src_height,
 		   unsigned x_org,unsigned y_org,unsigned dst_width,
 		   unsigned dst_height,unsigned format,unsigned dest_bpp,
-		   unsigned vid_w,unsigned vid_h,const void *info)
+		   unsigned vid_w,unsigned vid_h)
 {
   size_t i;
   int err;
@@ -529,48 +510,7 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 	vidix_play.dest.h = dst_height;
 	vidix_play.num_frames=vo_doublebuffering?NUM_FRAMES-1:1;
 	vidix_play.src.pitch.y = vidix_play.src.pitch.u = vidix_play.src.pitch.v = 0;
-	if(info)
-	{
-	switch(((const vo_tune_info_t *)info)->pitch[0])
-	{
-	    case 2:
-	    case 4:
-	    case 8:
-	    case 16:
-	    case 32:
-	    case 64:
-	    case 128:
-	    case 256: vidix_play.src.pitch.y = ((const vo_tune_info_t *)info)->pitch[0];
-		      break;
-	    default: break;
-	}
-	switch(((const vo_tune_info_t *)info)->pitch[1])
-	{
-	    case 2:
-	    case 4:
-	    case 8:
-	    case 16:
-	    case 32:
-	    case 64:
-	    case 128:
-	    case 256: vidix_play.src.pitch.u = ((const vo_tune_info_t *)info)->pitch[1];
-		      break;
-	    default: break;
-	}
-	switch(((const vo_tune_info_t *)info)->pitch[2])
-	{
-	    case 2:
-	    case 4:
-	    case 8:
-	    case 16:
-	    case 32:
-	    case 64:
-	    case 128:
-	    case 256: vidix_play.src.pitch.v = ((const vo_tune_info_t *)info)->pitch[2];
-		      break;
-	    default: break;
-	}
-	}
+
 	if((err=vdlConfigPlayback(vidix_handler,&vidix_play))!=0)
 	{
 		printf("vosub_vidix: Can't configure playback: %s\n",strerror(err));

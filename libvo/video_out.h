@@ -21,8 +21,7 @@
 #define VO_EVENT_RESIZE 2
 #define VO_EVENT_KEYPRESS 4
 
-/* takes a pointer to a vo_vaa_s struct */
-#define VOCTRL_QUERY_VAA 1
+/* Obsolete: VOCTRL_QUERY_VAA 1 */
 /* does the device support the required format */
 #define VOCTRL_QUERY_FORMAT 2
 /* signal a device reset seek */
@@ -76,49 +75,6 @@ typedef struct vo_info_s
         const char *comment;
 } vo_info_t;
 
-/* Direct access to BES */
-typedef struct bes_da_s
-{
-	vidix_rect_t	dest;           /* This field should be filled by x,y,w,h
-					   from vidix:src but pitches from
-					   vidix:dest */
-	int		flags;          /* Probably will work only when flag == 0 */
-	/* memory model */
-	unsigned	frame_size;		/* destination frame size */
-	unsigned	num_frames;		/* number of available frames */
-	unsigned	offsets[VID_PLAY_MAXFRAMES]; /* relative offset of each frame from begin of video memory */
-	vidix_yuv_t	offset;			/* relative offsets within frame for yuv planes */
-	void*		dga_addr;		/* linear address of BES */
-}bes_da_t;
-
-/*
-   Video Accelearted Architecture.
-   Every field of this structure can be set to NULL that means that
-   features is not supported
-*/
-typedef struct vo_vaa_s
-{
-	uint32_t    flags; /* currently undefined */
-		/*
-		 * Query Direct Access to BES
-		 * info - information to be filled
-		 * returns: 0 on success errno on error.
-		 */
-	int  (*query_bes_da)(bes_da_t *info);
-	int  (*get_video_eq)(vidix_video_eq_t *info);
-	int  (*set_video_eq)(const vidix_video_eq_t *info);
-	int  (*get_num_fx)(unsigned *info);
-	int  (*get_oem_fx)(vidix_oem_fx_t *info);
-	int  (*set_oem_fx)(const vidix_oem_fx_t *info);
-	int  (*set_deint)(const vidix_deinterlace_t *info);
-}vo_vaa_t;
-
-/* Misc info to tuneup vo driver */
-typedef struct vo_tune_info_s
-{
-	int	pitch[3]; /* Should be 0 if unknown else power of 2 */
-}vo_tune_info_t;
-
 typedef struct vo_functions_s
 {
 	/*
@@ -139,7 +95,7 @@ typedef struct vo_functions_s
          */
         uint32_t (*config)(uint32_t width, uint32_t height, uint32_t d_width,
 			 uint32_t d_height, uint32_t fullscreen, char *title,
-			 uint32_t format,const vo_tune_info_t *);
+			 uint32_t format);
 
 	/*
 	 * Control interface

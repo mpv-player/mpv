@@ -58,7 +58,7 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
  vo_draw_alpha_rgb24(w, h, src, srca, stride, image_data + 3 * (y0 * image_width + x0), 3 * image_width);
 }
 
-static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format,const vo_tune_info_t *info)
+static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format)
 {
  if ( fullscreen&0x04 && ( width != d_width || height != d_height )&&( ( format == IMGFMT_YV12 ) ) )
   {

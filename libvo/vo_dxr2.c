@@ -583,7 +583,7 @@ static void dxr2_set_overlay_window(void) {
 
 }
 
-static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t width, uint32_t height, uint32_t flags, char *title, uint32_t format, const vo_tune_info_t *info)
+static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t width, uint32_t height, uint32_t flags, char *title, uint32_t format)
 {
   int arg;
   dxr2_threeArg_t arg3;

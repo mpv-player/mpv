@@ -65,7 +65,7 @@ static vo_info_t vo_info =
 };
 
 static uint32_t
-config(uint32_t s_width, uint32_t s_height, uint32_t width, uint32_t height, uint32_t fullscreen, char *title, uint32_t format,const vo_tune_info_t *info)
+config(uint32_t s_width, uint32_t s_height, uint32_t width, uint32_t height, uint32_t fullscreen, char *title, uint32_t format)
 {
 #ifdef HAVE_DVB
     switch(s_height){

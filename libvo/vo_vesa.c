@@ -585,7 +585,7 @@ static int set_refresh(unsigned x, unsigned y, unsigned mode,struct VesaCRTCInfo
  */
 
 static uint32_t
-config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format,const vo_tune_info_t *info)
+config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
   struct VbeInfoBlock vib;  
   struct VesaModeInfoBlock vmib;
@@ -930,7 +930,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		{
 		  if(vidix_init(width,height,x_offset,y_offset,dstW,
 				dstH,format,dstBpp,
-				video_mode_info.XResolution,video_mode_info.YResolution,info) != 0)
+				video_mode_info.XResolution,video_mode_info.YResolution) != 0)
 		  {
 		    printf("vo_vesa: Can't initialize VIDIX driver\n");
 		    vidix_name = NULL;

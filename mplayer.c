@@ -105,11 +105,6 @@ play_tree_t* playtree;
 
 m_config_t* mconfig;
 
-/**************************************************************************
-             Video accelerated architecture
-**************************************************************************/
-vo_vaa_t vo_vaa;
-
 //**************************************************************************//
 //             Config file
 //**************************************************************************//
@@ -510,13 +505,10 @@ int i;
 
 int gui_no_filename=0;
 
-//vo_tune_info_t vtune;
-
   mp_msg_init();
   mp_msg_set_level(MSGL_STATUS);
 
   mp_msg(MSGT_CPLAYER,MSGL_INFO,banner_text);
-//  memset(&vtune,0,sizeof(vo_tune_info_t));
   /* Test for cpu capabilities (and corresponding OS support) for optimizing */
 #ifdef ARCH_X86
   GetCpuCaps(&gCpuCaps);

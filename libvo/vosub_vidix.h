@@ -17,7 +17,7 @@ int	 vidix_preinit(const char *drvname,void *server);
 int      vidix_init(unsigned src_width,unsigned src_height,
 		    unsigned dest_x,unsigned dest_y,unsigned dst_width,
 		    unsigned dst_height,unsigned format,unsigned dest_bpp,
-		    unsigned vid_w,unsigned vid_h,const void *info);
+		    unsigned vid_w,unsigned vid_h);
 int	 vidix_start(void);
 int	 vidix_stop(void);
 void     vidix_term( void );

@@ -58,7 +58,6 @@ static vidix_grkey_t gr_key;
 
 /* VIDIX related */
 static char *vidix_name;
-static vo_tune_info_t vtune;
 
 /* Image parameters */
 static uint32_t image_width;
@@ -75,7 +74,7 @@ static uint32_t drwX, drwY, drwWidth, drwHeight, drwBorderWidth,
 
 extern void set_video_eq( int cap );
 
-static void set_window(int force_update,const vo_tune_info_t *info)
+static void set_window(int force_update)
 {
     Window mRoot;
     if ( WinID )
@@ -164,7 +163,7 @@ static void set_window(int force_update,const vo_tune_info_t *info)
 	vidix_stop();
 	if (vidix_init(image_width, image_height, vo_dx, vo_dy,
 	    window_width, window_height, image_format, vo_depthonscreen,
-	    vo_screenwidth, vo_screenheight,info) != 0)
+	    vo_screenwidth, vo_screenheight) != 0)
         {
 	    mp_msg(MSGT_VO, MSGL_FATAL, "Can't initialize VIDIX driver: %s\n", strerror(errno));
     	    exit_player("vidix error"); /* !!! */
@@ -193,7 +192,7 @@ static void set_window(int force_update,const vo_tune_info_t *info)
  * allocate colors and (shared) memory
  */
 static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
-    uint32_t d_height, uint32_t flags, char *title, uint32_t format,const vo_tune_info_t *info)
+    uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
     XVisualInfo vinfo;
     XSizeHints hint;
@@ -333,10 +332,8 @@ else
 	vidix_grkey_set(&gr_key);
     }
 
-    set_window(1,info);
+    set_window(1);
 
-    if(info) memcpy(&vtune,info,sizeof(vo_tune_info_t));
-    else     memset(&vtune,0,sizeof(vo_tune_info_t));
     XFlush(mDisplay);
     XSync(mDisplay, False);
 
@@ -359,7 +356,7 @@ static void check_events(void)
     const int event = vo_x11_check_events(mDisplay);
 
     if ((event & VO_EVENT_RESIZE) || (event & VO_EVENT_EXPOSE))
-	set_window(0,&vtune);
+	set_window(0);
 
     return;
 }
@@ -445,7 +442,7 @@ static uint32_t control(uint32_t request, void *data, ...)
       if ( vo_fs && ( vo_panscan != vo_panscan_amount ) )
         {
          panscan_calc();
-	 set_window( 0,&vtune );
+	 set_window(0);
         }
       return VO_TRUE;
   case VOCTRL_SET_EQUALIZER:

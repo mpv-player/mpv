@@ -61,10 +61,6 @@ static char* banner_text=
 
 #include "fastmemcpy.h"
 
-/**************************************************************************
-             Video accelerated architecture
-**************************************************************************/
-vo_vaa_t vo_vaa;			// FIXME! remove me!
 int vo_doublebuffering=0;
 int vo_directrendering=0;
 int vo_config_count=0;

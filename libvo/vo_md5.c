@@ -38,10 +38,10 @@ extern char vo_pgm_filename[24];
 static FILE * md5_file;
 
 static uint32_t
-config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format,const vo_tune_info_t *info)
+config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format)
 {
     md5_file = fopen ("md5", "w");
-    return video_out_pgm.config (width, height, d_width,d_height,fullscreen, title, format,info);
+    return video_out_pgm.config (width, height, d_width,d_height,fullscreen, title, format);
 }
 
 static const vo_info_t*

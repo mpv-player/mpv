@@ -58,7 +58,7 @@ static vo_info_t vo_info =
 #define FBDEV	"/dev/fb0"
 
 static uint32_t
-config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format,const vo_tune_info_t *info)
+config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format)
 {
 
 //	if (f >= 0) mga_uninit();

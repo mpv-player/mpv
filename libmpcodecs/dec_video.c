@@ -34,7 +34,6 @@ extern int verbose; // defined in mplayer.c
 
 extern double video_time_usage;
 extern double vout_time_usage;
-extern vo_vaa_t vo_vaa;
 
 #include "postproc/postprocess.h"
 

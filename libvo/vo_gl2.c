@@ -602,7 +602,7 @@ static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsi
  * allocate colors and (shared) memory
  */
 static uint32_t 
-config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format,const vo_tune_info_t *info)
+config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
 //	int screen;
 	unsigned int fg, bg;

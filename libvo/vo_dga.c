@@ -21,6 +21,9 @@
  *      BGR_32_24_888
  *
  * $Log$
+ * Revision 1.46  2002/08/28 21:32:31  alex
+ * finally removed query_vaa, bes_da and vo_tune_info - the obsoleted libvo api
+ *
  * Revision 1.45  2002/05/27 17:14:13  alex
  * revised query_format. added support for native/conversion detection
  *
@@ -795,7 +798,7 @@ int check_res( int num, int x, int y, int bpp,
 
 static uint32_t config( uint32_t width,  uint32_t height,
                       uint32_t d_width,uint32_t d_height,
-                      uint32_t flags,char *title,uint32_t format,const vo_tune_info_t *info )
+                      uint32_t flags,char *title,uint32_t format)
 {
 
   int x_off, y_off;

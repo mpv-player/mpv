@@ -159,7 +159,8 @@ static void clear_screen()
      since it actually checks the status of the card. 
   */
   /* first wait for the card to be ready, do not try to write every time - alex */
-  do {} while((reg_IO->status & 0x1f) < 1);
+//  do {} while((reg_IO->status & 0x1f) < 1);
+  usec_sleep(10*1000);
   memset(vidpage, 0, screenwidth * screenheight * screendepth);
   
   	if(vo_doublebuffering) {
@@ -203,7 +204,7 @@ static void setup_screen(uint32_t full)
 }
 
 static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height,
-		uint32_t flags, char *title, uint32_t format, const vo_tune_info_t *info)
+		uint32_t flags, char *title, uint32_t format)
 {
 	screenwidth = fb_vinfo.xres;
 	screenheight = fb_vinfo.yres;

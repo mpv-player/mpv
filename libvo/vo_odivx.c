@@ -200,7 +200,7 @@ query_format(uint32_t format)
 extern int encode_bitrate;
 
 static uint32_t
-config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format,const vo_tune_info_t *info)
+config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format)
 {
 	uint32_t frame_size;
         ENC_PARAM enc_param;
