@@ -1045,11 +1045,13 @@ static iconv_t icdsc = (iconv_t)(-1);
 void	subcp_open_noenca ()
 {
     char enca_lang[100], enca_fallback[100];
-    if (sscanf(sub_cp, "enca:%2s:%s", enca_lang, enca_fallback) == 2
-	|| sscanf(sub_cp, "ENCA:%2s:%s", enca_lang, enca_fallback) == 2) {
-	subcp_open(enca_fallback);
-    } else {
-	subcp_open(sub_cp);
+    if (sub_cp) {
+	if (sscanf(sub_cp, "enca:%2s:%s", enca_lang, enca_fallback) == 2
+	    || sscanf(sub_cp, "ENCA:%2s:%s", enca_lang, enca_fallback) == 2) {
+	    subcp_open(enca_fallback);
+	} else {
+	    subcp_open(sub_cp);
+	}
     }
 }
 #else
