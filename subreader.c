@@ -74,6 +74,20 @@ static void trail_space(char *s) {
 	while (i > 0 && isspace(s[i])) s[i--] = '\0';
 }
 
+static char *stristr(const char *haystack, const char *needle) {
+    int len = 0;
+    const char *p = haystack;
+
+    if (!(haystack && needle)) return NULL;
+
+    len=strlen(needle);
+    while (*p != '\0') {
+	if (strncasecmp(p, needle, len) == 0) return (char*)p;
+	p++;
+    }
+
+    return NULL;
+}
 
 subtitle *sub_read_line_sami(FILE *fd, subtitle *current) {
     static char line[LINE_LEN+1];
@@ -92,11 +106,11 @@ subtitle *sub_read_line_sami(FILE *fd, subtitle *current) {
 	switch (state) {
 
 	case 0: /* find "START=" or "Slacktime:" */
-	    slacktime_s = strstr (s, "Slacktime:");
+	    slacktime_s = stristr (s, "Slacktime:");
 	    if (slacktime_s) 
                 sub_slacktime = strtol (slacktime_s+10, NULL, 0) / 10;
 
-	    s = strstr (s, "Start=");
+	    s = stristr (s, "Start=");
 	    if (s) {
 		current->start = strtol (s + 6, &s, 0) / 10;
 		state = 1; continue;
@@ -104,7 +118,7 @@ subtitle *sub_read_line_sami(FILE *fd, subtitle *current) {
 	    break;
  
 	case 1: /* find "<P" */
-	    if ((s = strstr (s, "<P"))) { s += 2; state = 2; continue; }
+	    if ((s = stristr (s, "<P"))) { s += 2; state = 2; continue; }
 	    break;
  
 	case 2: /* find ">" */
@@ -131,7 +145,7 @@ subtitle *sub_read_line_sami(FILE *fd, subtitle *current) {
 	    continue;
 
 	case 4: /* get current->end or skip <TAG> */
-	    q = strstr (s, "Start=");
+	    q = stristr (s, "Start=");
 	    if (q) {
 		current->end = strtol (q + 6, &q, 0) / 10 - 1;
 		*p = '\0'; trail_space (text);
