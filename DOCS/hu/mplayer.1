@@ -222,7 +222,7 @@ flip=igen
 .br
 # Több PNG file dekódolása
 .br
-mf= type=png:fps=25
+mf=type=png:fps=25
 
 File-specifikus konfigurációs file-okat is írhatsz.
 Ha például a 'movie.avi' file-hoz szeretnél konfigurációs file-t, úgy hozz
@@ -257,6 +257,10 @@ alatt helyreáll a helyes szinkron.
 A lejátszás végén CPU statisztikák kiírása.
 A \-nosound és \-vo null opciókkal együtt a video codec sebességének
 mérésére használható.
+.br
+.I MEGJEGYZÉS:
+Ezzel az opcióval az MPlayer figyelmen kívül hagyja a képkockák késleltetését,
+ha hang nélküli lejátszás történik (felfogható végtelen FPS-ként is).
 .TP
 .B \-edl <filenév>
 Edit decision list (EDL) használatának bekapcsolása.
@@ -322,6 +326,11 @@ Használandó joystick megadása (alapállapot: /dev/\:input/\:js0).
 .IPs file
 Parancsok beolvasása a megadott file-ból. Leginkább fifo megadása
 esetén hasznos.
+.br
+.I MEGJEGYZÉS:
+Ha az adott file egy fifo, az MPlayer mindkét végét megnyitja, tehát kiadhatsz
+több \'echo "seek 10" > mp_pipe\' parancsot is, és a pipe még mindig
+mûködni fog.
 .RE
 .PD 1
 .
@@ -356,16 +365,15 @@ A Linux RTC használatának kikapcsolása, mint idõzítõ mechanizmus.
 .B \-playlist <file>
 File-ok lejátszása lejátszási lista használatával (1 file/sor, vagy Winamp
 illetve ASX formátum).
+.br
+.I MEGJEGYZÉS:
+Az ezután megadott opciók csak a lejátszási lista elemeire lesznek érvényesek.
 .TP
 .B \-quiet \ \ 
 Kevesebb kimeneti és státusz üzenet kiírása.
 .TP
 .B \-really\-quiet \ \ 
 Még kevesebb üzenet kiírása.
-.TP
-.B \-sdp
-Annak megadása hogy a bemeneti file SDP tipusú ('Session Description Protocol'),
-mely egy RTP session-t ír le (lásd http://www.live.com/mplayer/).
 .TP
 .B \-shuffle \ \ 
 File-ok lejátszása véletlenszerû sorrendben.
@@ -531,10 +539,6 @@ Példákat lásd alább.
 (régi tipusú DVD opció) Ezzel az opcióval felül lehet bírálni a libcss.so
 alapértelmezett helyét.
 .TP
-.B \-cuefile <filenév> (lásd még \-vcd)
-(S)VCD lejátszása a CDRwin (bin/cue) image-ébõl, amit az itt megadott
-file ír le.
-.TP
 .B \-demuxer <szám>
 Használandó demuxer tipusának felülbírálata.
 A demuxers.h file-ban leírt ID-k lehetnek a paraméterek.
@@ -601,14 +605,14 @@ lejátszásához szükséges ez az opció, mely megadja a dekódoláshoz
 szükséges CSS kulcsot (amelyet a \-dvdauth opcióval történõ autentikációval
 lehet megszerezni).
 .TP
-.B \-dvdnav (BÉTA KÓD)
-libdvdnav használatának kényszerítése.
-.TP
 .B \-forceidx
 INDEX újraépítésének kényszerítése.
 Hibás AVI-k lejátszásánál hasznos, a tekerés bekapcsolásához.
 Az ilyen file-okat a MEncoder-rel lehet maradandóan javítani (lásd a
 dokumentációt.
+.I MEGJEGYZÉS:
+Értelemszerûen ez az opció csak akkor használható ha a média tekerhetõ
+(tehát pl pipe-al nem).
 .TP
 .B \-fps <érték>
 A video framerate-jének felülbírálata (ha a fejlécben nem, vagy rosszul
@@ -628,6 +632,9 @@ akkor lehet lassú ha hátrafelé kell tekerni, mivel ilyenkor a file elejétõl
 AVI INDEX újraépítése, ha hiányzik, így a tekerés lehetõvé tétele.
 Hasznos hibás/\:folyamatban lévõ letöltésekhez, vagy rosszul
 létrehozott file-okhoz.
+.I MEGJEGYZÉS:
+Értelemszerûen ez az opció csak akkor használható ha a média tekerhetõ
+(tehát pl pipe-al nem).
 .TP
 .B \-mc <másodperc/frame>
 Maximális A-V szinkron javítás egy képkocka alatt.
@@ -639,8 +646,6 @@ A rendelkezésre álló opciók:
 
 .PD 0
 .RSs
-.IPs on\ \ \ 
-multifile támogatás bekapcsolása
 .IPs w=<érték>
 a kimenet szélessége (autodetekt)
 .IPs h=<érték>
@@ -1116,7 +1121,7 @@ A VobSub felirat ID-je itt adható meg.
 .TP
 .B \-spualign <-1\-2>
 Megadja hogy az spu (DVD/VobSub) feliratok hogyan legyenek helyezve.
-Az értékek ugyanazok mint a -subpos esetén, illetve a -1 az eredeti
+Az értékek ugyanazok mint a -subalign esetén, illetve a -1 az eredeti
 helyet jelenti.
 .TP
 .B \-spuaa <mód>
@@ -1375,24 +1380,21 @@ Vigyázat: OSD/\:SUB széteséséhez vezethet!
 .TP
 .B \-dxr2 <opció1:opció2:...>
 Ezzel az opcióval a dxr2 kimenetet lehet paraméterezni.
-Megjegyzés: nem MPEG1/2 formátum lejátszása esetén a lavc szûrõ
-automatikusan beillesztésre kerül, így az összes MPlayer által támogatott
-formátum out-of-the-box mûködik (ha elég gyors a CPU-d a menet közbeni
-átkódoláshoz).
-A DXR2-n használt overlay chipset elég rossz minõségû, de az alap
-beállítások elvileg mindenkinél mûködnek.
-Az OSD-t az overlay-on lehet használni (nem TV-n).
-Az alap colorkey beállítás érdekes effekteket is eredményezhet, valószínûleg
-a karakterek körül lesznek rajzolva a colorkey színével, stb. Ha állítgatsz
-rajta egy kicsit akkor javulni fog.
-.
+
 .RSs
 .IPs ar-mode=<érték>
 aspect ratio (0 = normál, 1 = pan scan, 2 = letterbox (alap))
-.IPs iec958\-encoded/\:decoded
+.IPs iec958\-encoded
 iec958 kimenet mód
+.IPs iec958\-decoded
+iec958 kimenet mód beállítása dekódoltra (alap)
+.IPs macrovision=<érték>
+macrovision mód (0 = ki (alap), 1 = agc, 2 = agc 2 colorstripe,
+3 = agc 4 colorstripe)
 .IPs mute
 hangkimenet elnémítása
+.IPs unmute
+hangkimenet megszólaltatása
 .IPs ucode=<érték>
 útvonal a mikrokódhoz
 .RE
@@ -1406,43 +1408,54 @@ hangkimenet elnémítása
 .IPs bw\ \ \ 
 fekete fehér TV kimenet
 .IPs color
-színes TV kimenet
+színes TV kimenet (alap)
 .IPs interlaced
 váltottsoros TV kimenet
-.IPs macrovision=<érték>
-macrovision mód (0 = ki (alap), 1 = agc, 2 = agc 2 colorstripe,
-3 = agc 4 colorstripe)
+.IPs nointerlaced
+váltottsoros TV kimenet kikapcsolása
 .IPs norm=<érték>
 TV norma (ntsc (alap), pal,pal60,palm,paln,palnc)
-.IPs square/\:ccir601\-pixel
-TV pixel mód
+.IPs square\-pixel
+pixelmód: négyzet alakú
+.IPs ccir601\-pixel
+pixelmód: ccir601
 .RE
 .RS
 
 .I Overlay
 .RE
 .RSs
-.IPs cr-[left|right|top|bot]=<\-20\-20>
-overlay vágás állítása
-.IPs ck-[rgb]min=<0\-255>
-a colorkey minimum értéke
-.IPs ck-[rgb]max=<0\-255>
-a colorkey maximum értéke
-.IPs ck-[rgb]=<0\-255>
-color key értékei
+.IPs cr-left=<0\-500>
+bal oldali vágás mértéke (alap: 50)
+.IPs cr-right=<0\-500>
+jobb oldali vágás értéke (alap: 300)
+.IPs cr-top=<0\-500>
+fentrõl történõ vágás mértéke (alap: 0)
+.IPs cr-bottom=<0\-500>
+alulról történõ vágás mértéke (alap: 0)
+.IPs ck-[r|g|b]=<0\-255>
+overlay colorkey színkomponenseinek átállítása
+.IPs ck-[r|g|b]min=<0\-255>
+minimum értéke a vonatkozó colorkey-nek
+.IPs ck-[r|g|b]max=<0\-255>
+maximum értéke a vonatkozó colorkey-nek
 .IPs ignore\-cache
-ne használja a VGA cache-t
+hagyja figyelmen kívül a cache-elt overlay beállításokat
+.IPs update\-cache
+frissítsa a cache-elt overlay beállításokat
 .IPs ol-osd
-osd hack bekapcsolása az overlayon
-.IPs ol[hwxy]\-cor=<érték>
+OSD bekapcsolása
+.IPs nool-osd
+OSD kikapcsolása
+.IPs ol[h|w|x|y]\-cor=<-20\-20>
 overlay méretének és pozíciójának állítása, ha nem tökéletesen érintkezik
-az ablakkal
+az ablakkal (alap: 0)
 .IPs overlay
-overlay bekapcsolása
+overlay bekapcsolása (alap)
+.IPs nooverlay
+TV kimenet bekapcsolása
 .IPs overlay-ratio=<1\-2500>
 overlay hangolása (alapban 1000)
-.IPs update\-cache
-VGA cache újrakreálása
 .RE
 .
 .TP
@@ -1822,6 +1835,9 @@ Csak libmpeg2 és libavcodec codec-eknél van hatása.
 .TP
 .B \-nosound
 Hang lejátszásának/\:enkódolásának kikapcsolása.
+.TP
+.B \-novideo
+Video lejátszásának/\:enkódolásának kikapcsolása.
 .TP
 .B \-pp <minõség> (lásd még \-vf pp)
 A DLL minõségjavító szintjének beállítása.
@@ -2652,6 +2668,9 @@ Példa:
 .RSss
 aspect=16/9, aspect=1.78
 .REss
+.IPs autoaspect
+Ugyanarra vonatkozik mint az aspect opció, de ez automatikusan számol,
+a megadott crop/expand/scale/stb szûrõket is figyelembe véve.
 .IPs vbitrate=<érték>
 bitráta megadása (1/\:2-es menet), mértékegység
 .RSss
@@ -3322,14 +3341,14 @@ Ugrás a film adott pozíciójára.
 A 0-ás tipus relatív +/\:- <érték> mennyiségû tekerést tesz lehetõvé.
 Az 1-es tipus a film <érték> százalékához ugrik.
 A 2-es tipus abszolut <érték> másodperc pozícióra ugrik.
+.IPs "edl_mark"
+????
 .IPs "audio_delay <érték>"
 Audio késleltetésének beállítása adott másodpercre.
 .IPs quit
 Kilépés az MPlayer-bõl
 .IPs pause
 Lejátszás szüneteltetése
-.IPs grap_frames
-Tudja valaki?
 .IPs "pt_step <érték> [force=<érték>]"
 A következõ/\:elõzõ playtree bejegyzésre ugrás.
 .IPs "pt_up_step <érték> [force=<érték>]"
@@ -3343,22 +3362,46 @@ Feliratok késleltetésének beállítása +/\:- <érték> másodpercre.
 OSD mód átváltása.
 .IPs "volume <dir>"
 Hangerõ növelése/\:csökkentése
+.IPs "use_master"
+Hangerõ állítás master vagy pcm csatornán történjen.
+.IPs "mute"
+Hang kimenet elnémítása/\:bekapcsolása.
 .IPs "[contrast|brightness|hue|saturation] <\-100\-100> [abs=<érték>]"
 Video paramétereinek beállítása.
 .IPs "frame_drop [type=<érték>]"
 Képkockák eldobásának bekapcsolása/módjának kiválasztása.
+.IPs "sub_alignment <érték>"
+Feliratok elhelyezésének beállítása.
 .IPs "sub_visibility"
 Feliratok megjelenítésének ki/bekapcsolása.
 .IPs "sub_pos <érték>"
 Feliratok pozíciójának megváltoztatása.
+.IPs "vobsub_lang"
+VOBSub feliratok nyelvének átváltása.
+.IPs "get_percent_pos"
+???
+.IPs "get_time_length"
+???
 .IPs vo_fullscreen
 Teljesképernyõs módba váltás.
+.IPs "panscan érték [érték2]"
+???
+.IPs "loadfile url"
+Megadott file/\:URL betöltése.
+.IPs "loadlist file"
+Megadott lejátszási lista betöltése.
+.IPs "change_rectangle val1 val2"
+??? rectangle video szûrõhöz
 .IPs "tv_step_channel <dir>"
 Következõ/\:elõzõ tv csatornára váltás.
 .IPs "tv_step_norm"
 TV norma átváltása.
 .IPs "tv_step_chanlist"
 Csatornalista átváltása.
+.IPs "tv_set_channel channel"
+TV csatorna átváltása.
+.IPs "tv_last_channel"
+TV csatorna átváltása az utolsóra.
 .IPs "gui_[loadsubtitle|about|play|stop]"
 GUI funkciók
 .RE
@@ -3412,19 +3455,19 @@ A felirat file-ok keresési sorrendje a következõ (a példa film
 .SH PÉLDÁK
 .TP
 .B DVD lejátszás indítása
-mplayer \dvd://1
+mplayer dvd://1
 .TP
 .B Japán hanggal, és angol felirattal
-mplayer \dvd://1 \-alang ja \-slang en
+mplayer dvd://1 \-alang ja \-slang en
 .TP
 .B Csak az 5, 6, 7 fejezetek lejátszása
-mplayer \dvd://1 \-chapter 5\-7
+mplayer dvd://1 \-chapter 5\-7
 .TP
 .B Más nézõpont kiválasztása
-mplayer \dvd://1 \-dvdangle 2
+mplayer dvd://1 \-dvdangle 2
 .TP
 .B Más DVD egység használata
-mplayer \dvd://1 \-dvd\-device /dev/\:dvd2
+mplayer dvd://1 \-dvd\-device /dev/\:dvd2
 .TP
 .B Régi tipusú DVD (VOB) lejátszás
 mplayer \-dvdauth /dev/\:dvd /mnt/\:dvd/\:VIDEO_TS/\:VTS_02_4.VOB
@@ -3438,38 +3481,41 @@ mplayer rtsp://server.example.com/\:streamName
 .B Felirat konvertálása MPsub-á (./\:dump.mpsub)
 mplayer dummy.avi \-sub source.sub \-dumpmpsub
 .TP
+.B Felirat konvertálása MPsub-á, valamilyen film megnyitása nélkül
+mplayer /dev/zero \-rawvideo on:pal:fps=xx \-vc null \-vo null \-noframedrop
+\-benchmark \-sub source.sub \-dumpmpsub
+.TP
 .B V4L bemenet használata
-mplayer \-tv on:driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420
+mplayer tv:// \-tv driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420
 \-vo xv
 .TP
 .B DVD 2-es sávjának enkódolása, csak a kiválasztott fejezetekkel
-mencoder \dvd://2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc divx4
+mencoder dvd://2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc divx4
 .TP
 .B DVD 2-es sávjának enkódolása, átméretezés 640x480-ba
-mencoder \dvd://2 \-vf scale=640:480 \-o title2.avi \-oac copy \-ovc divx4
+mencoder dvd://2 \-vf scale=640:480 \-o title2.avi \-oac copy \-ovc divx4
 .TP
 .B DVD 2-es sávjának enkódolása, átméretezés 512xMMM-be (képarány
 megtartásával)
-mencoder \dvd://2 \-vf scale \-zoom \-xy 512 \-o title2.avi \-oac copy
+mencoder dvd://2 \-vf scale \-zoom \-xy 512 \-o title2.avi \-oac copy
 \-ovc divx4
 .TP
 .B Ugyanez, de a libavcodec-kel, MPEG4 tömörítéssel
-mencoder \dvd://2 \-o title2.avi \-ovc lavc
+mencoder dvd://2 \-o title2.avi \-ovc lavc
 \-lavcopts vcodec=mpeg4:vhq:vbitrate=1800 \-oac copy
 .TP
 .B Ugyanez MJPEG-gel
-mencoder \dvd://2 \-o titel2.avi \-ovc lavc
+mencoder dvd://2 \-o titel2.avi \-ovc lavc
 \-lavcopts vcodec=mjpeg:vhq:vbitrate=1800 \-oac copy
 .TP
 .B A jelenlegi könyvtárban lévõ összes *.jpg file enkódolása
-mencoder \\*.jpg \-mf on:fps=25 \-o output.avi \-ovc divx4
+mencoder "mf://*.jpg" \-mf on:fps=25 \-o output.avi \-ovc divx4
 .TP
 .B Enkódolás tunerrõl
-mencoder \-tv on:driver=v4l:width=640:height=480 \-o tv.avi \-ovc rawrgb
+mencoder \-tv driver=v4l:width=640:height=480 tv:// \-o tv.avi \-ovc rawrgb
 .TP
 .B Enkódolás pipe-ból
-rar p test-SVCD.rar | mencoder \-ovc divx4 \-divx4opts br=800 \-ofps 24
-\-\- \-
+rar p test-SVCD.rar | mencoder \-ovc divx4 \-divx4opts br=800 \-ofps 24 \-
 .TP
 .B Több *.vob file enkódolása
 cat *.vob | mencoder <options> \-
