@@ -14,10 +14,10 @@ extern char *monitor_dotclock_str;
 extern int z_compression;
 #endif
 #ifdef HAVE_SDL
-extern char *sdl_driver;
+//extern char *sdl_driver;
 extern int sdl_noxv;
 extern int sdl_forcexv;
-extern char *sdl_adriver;
+//extern char *sdl_adriver;
 #endif
 #ifdef USE_FAKE_MONO
 extern int fakemono; // defined in dec_audio.c
@@ -137,10 +137,12 @@ struct config conf[]={
 	{"z", &z_compression, CONF_TYPE_INT, CONF_RANGE, 0, 10},
 #endif	
 #ifdef HAVE_SDL
-	{"sdl", &sdl_driver, CONF_TYPE_STRING, 0, 0, 0},
+	{"sdl", "Use -vo sdl:driver instead of -vo sdl -sdl driver\n",
+	    CONF_TYPE_PRINT, 0, 0, 0},
 	{"noxv", &sdl_noxv, CONF_TYPE_FLAG, 0, 0, 1},
 	{"forcexv", &sdl_forcexv, CONF_TYPE_FLAG, 0, 0, 1},
-	{"sdla", &sdl_adriver, CONF_TYPE_STRING, 0, 0, 0},
+	{"sdla", "Use -ao sdl:driver instead of -ao sdl -sdla driver\n",
+	    CONF_TYPE_PRINT, 0, 0, 0},
 #endif	
 	{"x", &screen_size_x, CONF_TYPE_INT, CONF_RANGE, 1, 4096},
 	{"y", &screen_size_y, CONF_TYPE_INT, CONF_RANGE, 1, 4096},
