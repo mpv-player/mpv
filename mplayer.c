@@ -2423,7 +2423,8 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 
 {
   mp_cmd_t* cmd;
-  while( (cmd = mp_input_get_cmd(0,0)) != NULL) {
+  int brk_cmd = 0;
+  while( !brk_cmd && (cmd = mp_input_get_cmd(0,0)) != NULL) {
     switch(cmd->id) {
     case MP_CMD_SEEK : {
       int v,abs;
@@ -2447,6 +2448,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	rel_seek_secs+= v;
 	osd_function= (v > 0) ? OSD_FFW : OSD_REW;
       }
+      brk_cmd = 1;
     } break;
 #ifdef USE_EDL
     case MP_CMD_EDL_MARK:
@@ -2464,6 +2466,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     } break;
     case MP_CMD_PAUSE : {
       osd_function=OSD_PAUSE;
+      brk_cmd = 1;
     } break;
     case MP_CMD_QUIT : {
       exit_player_with_rc(MSGTR_Exit_quit, 0);
@@ -2497,6 +2500,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	eof = (n > 0) ? PT_NEXT_ENTRY : PT_PREV_ENTRY;
       if(eof)
 	play_tree_step = n;
+      brk_cmd = 1;
      }
     } break;
     case MP_CMD_PLAY_TREE_UP_STEP : {
@@ -2510,6 +2514,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	play_tree_iter_free(i);
       } else
 	eof = (n > 0) ? PT_UP_NEXT : PT_UP_PREV;
+      brk_cmd = 1;
     } break;
     case MP_CMD_PLAY_ALT_SRC_STEP : {
       if(playtree_iter && playtree_iter->num_files > 1) {
@@ -2519,6 +2524,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	else if(v < 0 && playtree_iter->file > 1)
 	  eof = PT_PREV_SRC;
       }
+      brk_cmd = 1;
     } break;
     case MP_CMD_SUB_DELAY : {
       int abs= cmd->args[1].v.i;
@@ -2589,6 +2595,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       play_tree_set_child(playtree,e);
       play_tree_iter_step(playtree_iter,0,0);
       eof = PT_NEXT_SRC;
+      brk_cmd = 1;
     } break;
     case MP_CMD_LOADLIST : {
       play_tree_t* e = parse_playlist_file(cmd->args[0].v.s);
@@ -2603,6 +2610,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	play_tree_iter_step(playtree_iter,0,0);
 	eof = PT_NEXT_SRC;	
       }
+      brk_cmd = 1;
     } break;
     case MP_CMD_GAMMA :  {
       int v = cmd->args[0].v.i, abs = cmd->args[1].v.i;
