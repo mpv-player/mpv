@@ -2219,6 +2219,22 @@ switch(file_format){
     if(newpos<0 || newpos<demuxer->movi_start) newpos=demuxer->movi_start;
 //    printf("\r -- asf: newpos=%d -- \n",newpos);
     stream_seek(demuxer->stream,newpos);
+
+    ds_fill_buffer(d_video);
+    if(has_audio) ds_fill_buffer(d_audio);
+    
+    while(1){
+	if(has_audio){
+	  // sync audio:
+          if (d_video->pts > d_audio->pts){
+	      if(!ds_fill_buffer(d_audio)) has_audio=0; // skip audio. EOF?
+	      continue;
+	  }
+	}
+	if(d_video->flags&1) break; // found a keyframe!
+	if(!ds_fill_buffer(d_video)) break; // skip frame.  EOF?
+    }
+
   }
   break;
   
