@@ -140,8 +140,9 @@ int demux_nuv_fill_buffer ( demuxer_t *demuxer )
 	struct rtframeheader rtjpeg_frameheader;
 	off_t orig_pos;
 	nuv_priv_t* priv = demuxer->priv;
+	int want_audio = (demuxer->audio)&&(demuxer->audio->id!=-2);
 
-	orig_pos = stream_tell ( demuxer->stream );
+	demuxer->filepos = orig_pos = stream_tell ( demuxer->stream );
 	if (stream_read ( demuxer->stream, (char*)& rtjpeg_frameheader, sizeof ( rtjpeg_frameheader ) ) < sizeof(rtjpeg_frameheader))
 	    return 0; /* EOF */
 
@@ -183,9 +184,18 @@ int demux_nuv_fill_buffer ( demuxer_t *demuxer )
 	    (rtjpeg_frameheader.comptype == '0'))
 	{
 	    priv->current_audio_frame++;
-	    /* put Audio to audio buffer */
-	    ds_read_packet ( demuxer->audio, demuxer->stream, rtjpeg_frameheader.packetlength, 
-		rtjpeg_frameheader.timecode*0.001, orig_pos + 12, 0 );
+	    if (want_audio) {
+	      /* put Audio to audio buffer */
+	      ds_read_packet ( demuxer->audio, demuxer->stream,
+			       rtjpeg_frameheader.packetlength, 
+			       rtjpeg_frameheader.timecode*0.001,
+			       orig_pos + 12, 0 );
+	    } else {
+	      /* skip audio block */
+	      stream_seek ( demuxer->stream,
+			    stream_tell ( demuxer->stream )
+			    + rtjpeg_frameheader.packetlength );
+	    }
 	}
 
 	return 1;
