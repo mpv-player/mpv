@@ -52,12 +52,13 @@ static int fb_init_done = 0;
 
 static int fb_init(void)
 {
-	int fd, vt;
+	int fd;
+#if 0
+	int vt;
 	char vt_name[11];
 	struct vt_stat vt_state;
 	struct vt_mode vt_mode;
 
-#if 0
 	/* get a free vt */
 	if ((fd = open("/dev/tty0", O_WRONLY, 0)) == -1) {
 		printf("Can't open /dev/tty0: %s\n", strerror(errno));
@@ -68,8 +69,7 @@ static int fb_init(void)
 		return 1;
 	}
 	close(fd);
-#endif
-#if 0
+
 	/* open the vt */
 	snprintf(vt_name, 10, "/dev/tty%d", vt);
 	if ((vt_fd = open(vt_name, O_RDWR | O_NONBLOCK, 0)) == -1) {
@@ -86,8 +86,7 @@ static int fb_init(void)
 		ioctl(fd, TIOCNOTTY, 0);
 		close(fd);
 	}
-#endif
-#if 0
+
 	/* switch to the new vt */
 	if (ioctl(vt_fd, VT_ACTIVATE, vt_active))
 		printf("ioctl VT_ACTIVATE: %s\n", strerror(errno));
@@ -177,6 +176,12 @@ static int fb_init(void)
 	printf("fb_init: bpp: %d\n", fb_bpp);
 	printf("fb_init: pixel per line: %d\n", screen_width / (fb_bpp / 8));
 	printf("fb_init: visual: %d\n", fb_fix_info.visual);
+	printf("fb_init: red: %d %d %d\n", fb_var_info.red.offset,
+			fb_var_info.red.length, fb_var_info.red.msb_right);
+	printf("fb_init: green: %d %d %d\n", fb_var_info.green.offset,
+			fb_var_info.green.length, fb_var_info.green.msb_right);
+	printf("fb_init: blue: %d %d %d\n", fb_var_info.blue.offset,
+			fb_var_info.blue.length, fb_var_info.blue.msb_right);
 
 	fb_init_done = 1;
 	return 0;
@@ -216,6 +221,7 @@ static uint32_t query_format(uint32_t format)
 	switch (format) {
 		case IMGFMT_YV12:
 			goto supported;
+/*
 		case IMGFMT_RGB32:
 			if (fb_bpp == 32)
 				goto supported;
@@ -232,6 +238,7 @@ static uint32_t query_format(uint32_t format)
 			if (fb_bpp == 15)
 				goto supported;
 			break;
+*/
 		case IMGFMT_BGR|32:
 			if (fb_bpp == 32)
 				goto supported;
