@@ -21,6 +21,7 @@ static int mode = 0;
 #define LOCAL 1
 #define DROP_LOCAL 2
 
+#define dvd_range(a)  (a>0 && a<256)
 #define UNSET_GLOBAL (mode = LOCAL)
 // Use this 1 if you want to have only global option (no per file option)
 // #define UNSET_GLOBAL (mode = GLOBAL)
@@ -58,9 +59,10 @@ static inline void add_entry(play_tree_t **last_parentp,
 play_tree_t*
 m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
 {
-  int i;
+  int i,j,start_title=-1,end_title=-1;
   int tmp = 0;
-  char *opt;
+  char *opt,*splitpos=NULL;
+  char entbuf[10];
   int no_more_opts = 0;
   play_tree_t *last_parent, *last_entry = NULL, *root;
 
@@ -196,7 +198,42 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
       {
 	play_tree_t* entry = play_tree_new();
 	mp_msg(MSGT_CFGPARSER, MSGL_DBG2,"Adding file %s\n",argv[i]);
+        // if required expand DVD filename entries like dvd://1-3 into component titles
+        if ( strstr(argv[i],"dvd://") != NULL )
+	{
+             splitpos=strstr(argv[i]+6,"-");
+             if(splitpos != NULL)
+             {
+               start_title=strtol(argv[i]+6,NULL,10);
+	       if (start_title<0) { //entries like dvd://-2 start title implied 1
+		   end_title=abs(start_title);
+                   start_title=1;
+               } else {
+                   end_title=strtol(splitpos+1,NULL,10);
+               }
+              
+               if (dvd_range(start_title) && dvd_range(end_title) && (start_title<end_title))      
+               {
+                 for (j=start_title;j<=end_title;j++)
+                 {
+                  if (j!=start_title) 
+                      entry=play_tree_new();
+                  snprintf(entbuf,9,"dvd://%d",j);
+                  play_tree_add_file(entry,entbuf);
+                  add_entry(&last_parent,&last_entry,entry);
+		  last_entry = entry;
+                 }
+               } else {
+                 mp_msg(MSGT_CFGPARSER, MSGL_ERR,"Invalid play entry %s\n",argv[i]);
+               }
+         
+	     } else { // dvd:// or dvd://x entry
+                play_tree_add_file(entry,argv[i]);
+             }
+        } else {
 	play_tree_add_file(entry,argv[i]);
+	}
+
 	// Lock stdin if it will be used as input
 	if(strcasecmp(argv[i],"-") == 0)
 	  m_config_set_option(config,"use-stdin",NULL);
