@@ -449,7 +449,8 @@ if test -z "$_target" ; then
       x86_64|amd64) host_arch=x86_64 ;;
       macppc|ppc) host_arch=ppc ;;
       alpha) host_arch=alpha ;;
-      sparc*) host_arch=sparc ;;
+      sparc) host_arch=sparc ;;
+      sparc64) host_arch=sparc64 ;;
       parisc*|hppa*|9000*) host_arch=hppa ;;
       arm*) host_arch=arm ;;
       s390) host_arch=s390 ;;
@@ -885,7 +886,33 @@ EOF
     _def_arch='#define ARCH_SPARC 1'
     _target_arch='TARGET_ARCH_SPARC = yes'
     iproc='sparc'
-    proc='v8'
+    if sunos ; then
+	echocheck "CPU type"
+	karch=`uname -m`
+	case "`echo $karch`" in
+	    sun4) proc=v7 ;;
+	    sun4c) proc=v7 ;; 
+	    sun4d) proc=v8 ;;
+	    sun4m) proc=v8 ;;
+	    sun4u) proc=v9 _vis='yes' _def_vis='#define HAVE_VIS = yes' ;;
+	    *) ;;
+	esac
+	echores "$proc"
+    else
+	proc=v8
+    fi
+    _march=''
+    _mcpu="-mcpu=$proc"
+    _optimizing="$proc"
+    ;;
+
+  sparc64)
+    _def_arch='#define ARCH_SPARC 1'
+    _target_arch='TARGET_ARCH_SPARC = yes'
+    _vis='yes'
+    _def_vis='#define HAVE_VIS = yes'
+    iproc='sparc'
+    proc='v9'
     _march=''
     _mcpu="-mcpu=$proc"
     _optimizing="$proc"
@@ -6265,6 +6292,7 @@ TARGET_3DNOW = $_3dnow
 TARGET_3DNOWEX = $_3dnowex
 TARGET_SSE = $_sse
 TARGET_ALTIVEC = $_altivec
+TARGET_VIS = $_vis
 
 # --- GUI stuff ---
 GTKLIB = $_ld_static $_ld_gtk
@@ -6820,6 +6848,7 @@ $_def_altivec_h	// enables usage of altivec.h
 
 
 $_def_mlib  // Sun mediaLib, available only on solaris
+$_def_vis	// only define if you have VIS ( ultrasparc )
 
 /* libmpeg2 uses a different feature test macro for mediaLib */
 #ifdef HAVE_MLIB

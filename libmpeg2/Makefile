@@ -13,6 +13,10 @@ ifeq ($(TARGET_ALTIVEC),yes)
 SRCS += motion_comp_altivec.c idct_altivec.c
 endif
 
+ifeq ($(TARGET_VIS),yes)
+SRCS += motion_comp_vis.c
+endif
+
 .SUFFIXES: .c .o
 
 # .PHONY: all clean
