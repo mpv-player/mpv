@@ -6,9 +6,9 @@ Aureal Vortex 2:
 			run ./configure script with --disable-select option
 
 GUS PnP:
-			OSS	: OK (?)
+			OSS	: none
 			ALSA	: see Aureal Vortex2
-			Max kHz	: 48 (?)
+			Max kHz	: 48
 
 SB Live!:
 			OSS	: OK
