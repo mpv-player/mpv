@@ -394,6 +394,8 @@ static int a52_check(char *buf, int len)
 				cnt += frame_length;
 				ok++;
 			}
+			else
+			    cnt++;
 		}
 		else
 			cnt++;
