@@ -738,6 +738,7 @@ Hay muchas maneras de conseguirlo:
   debe tener también el plugin HSI RAW,
   vea <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/" />).
   </para></listitem>
+<listitem><para>
   usando una tipografía TrueType (TTF), gracias a la biblioteca
   <systemitem class="library">freetype</systemitem>.
   ¡La versión debe ser 2.0.9 o mayor! Entonces tiene 2 métodos:
