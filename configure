@@ -2339,30 +2339,45 @@ if test "$_gif" = auto ; then
 cat > $TMPC << EOF
 #include <gif_lib.h>
 int main(void) {
-  EGifPutExtensionFirst(NULL, 0xFF, 11, NULL);
   return 0;
 }
 EOF
-  if cc_check -lungif ; then
+  if cc_check -lungif && "$TMPO" >> "$TMPLOG" ; then
     _gif=yes
     _ld_gif="-lungif"
-  elif cc_check -lgif ; then
+  elif cc_check -lgif && "$TMPO" >> "$TMPLOG" ; then
     _gif=yes
     _ld_gif="-lgif"
   fi
 fi
-echores "$_gif"
 
 if test "$_gif" = yes ; then
   _def_gif='#define HAVE_GIF 1'
   _vosrc="$_vosrc vo_gif89a.c"
   _vomodules="gif89a $_vomodules"
   _mkf_gif="yes"
+  _gif="yes (old version, some functions disabled)"
+  _def_gif_4='#undef HAVE_GIF_4'
+
+  cat > $TMPC << EOF
+#include <gif_lib.h>
+int main(void) {
+  printf("EGifPutExtensionFirst is at address %p\n", EGifPutExtensionFirst);
+  EGifSetGifVersion("89a");   // this will segfault a buggy gif lib.
+  return 0;
+}
+EOF
+  if cc_check "$_ld_gif" && ( "$TMPO" ) >>"$TMPLOG" 2>&1 ; then
+    _def_gif_4='#define HAVE_GIF_4 1'
+    _gif="yes"
+  fi
 else
   _def_gif='#undef HAVE_GIF'
+  _def_gif_4='#undef HAVE_GIF_4'
   _novomodules="gif89a $_novomodules"
   _mkf_gif="no"
 fi
+echores "$_gif"
 
 
 if test "$_vesa" != no ; then
@@ -4047,6 +4062,7 @@ $_def_jpg
 
 /* enable GIF support */
 $_def_gif
+$_def_gif_4
 
 /* libmad support */
 $_def_mad
