@@ -24,6 +24,7 @@ static char help_text[]=
 #endif
 #ifdef USE_DVDREAD
 " -dvd <titelnr>   speel DVD titel/track van device in plaats van gewoon bestand\n"
+" -alang/-slang    selecteer DVD audio/ondertitelingstaal (door middel van 2-karakter landcode)\n"
 #endif
 " -ss <timepos>    ga naar opgegeven (seconden of hh:mm:ss) positie\n"
 " -nosound         speel het geluid niet af\n"
@@ -44,7 +45,7 @@ static char help_text[]=
 " p of SPACE       pauzeer film (druk eender welke toets om verder te gaan)\n"
 " q of ESC         stop afspelen en sluit programma af\n"
 " + of -           pas audio vertraging aan met +/- 0.1 seconde\n"
-" o                cycle OSD mode:  geen / zoekbalk / zoekbalk+tijd\n"
+" o                doorloop OSD modes: geen / enkel zoekbalk / zoekbalk en tijd\n"
 " * of /           verhoog of verlaag volume (druk 'm' om master/pcm te selecteren)\n"
 " z of x           pas ondertiteling vertraging aan met +/- 0.1 seconde\n"
 " r or t           verticale positionering van de ondertiteling, zie ook -vop expand !\n"
@@ -76,7 +77,7 @@ static char help_text[]=
 #define MSGTR_DVDauthOk "DVD auth sequence lijkt OK te zijn.\n"
 #define MSGTR_DumpSelectedSteramMissing "dump: FATAL: geselecteerde stream ontbreekt!\n"
 #define MSGTR_CantOpenDumpfile "Kan dump bestand niet openen!!!\n"
-#define MSGTR_CoreDumped "core dumped :)\n"
+#define MSGTR_CoreDumped "Debuginformatie weggeschreven naar bestand core\n"
 #define MSGTR_FPSnotspecified "FPS niet gespecificeerd (of foutief) in de header! Gebruik de optie -fps!\n"
 #define MSGTR_NoVideoStream "Sorry, geen video stream... het is nog niet afspeelbaar\n"
 #define MSGTR_TryForceAudioFmt "Probeer audio codec driver familie %d te forceren...\n"
@@ -94,6 +95,7 @@ static char help_text[]=
 #define MSGTR_CannotInitVO "FATAL: Kan video driver niet initialiseren!\n"
 #define MSGTR_CannotInitAO "Kon audio device niet open/init -> NOSOUND\n"
 #define MSGTR_StartPlaying "Start afspelen...\n"
+
 #define MSGTR_SystemTooSlow "\n\n"\
 "         ************************************************\n"\
 "         ** Je system is te TRAAG om dit af te spelen! **\n"\
@@ -276,6 +278,21 @@ static char help_text[]=
 #define MSGTR_AC3only48k "Alleen 48000 Hz streams ondersteund.\n"
 #define MSGTR_UnknownAudio "Onbekend/ontbrekend audio formaat, gebruik -nosound\n"
 
+#define MSGTR_UsingExternalPP "[PP] Gebruik makend van externe postprocessing filter, max q = %d\n"
+#define MSGTR_UsingCodecPP "[PP] Gebruik makend van de codec's interne postprocessing, max q = %d\n"
+#define MSGTR_VideoAttributeNotSupportedByVO_VD "Video attribuut '%s' wordt niet ondersteund door de gekozen vo & vd! \n"
+#define MSGTR_VideoCodecFamilyNotAvailable "Aangevraagde video codec familie [%s] (vfm=%d) niet beschikbaar (activeer het bij het compileren!)\n"
+#define MSGTR_AudioCodecFamilyNotAvailable "Aangevraagde audio codec familie [%s] (afm=%d) niet beschikbaar (activeer het bij het compileren!)\n"
+#define MSGTR_OpeningVideoDecoder "Bezig met het openen van de video decoder: [%s] %s\n"
+#define MSGTR_OpeningAudioDecoder "Bezig met het openen van de audio decoder: [%s] %s\n"
+#define MSGTR_UninitVideo "Deinitialisatie video: %d  \n"
+#define MSGTR_UninitAudio "Deinitialisatie audio: %d  \n"
+#define MSGTR_VDecoderInitFailed "VDecoder initialisatie mislukt :(\n"
+#define MSGTR_ADecoderInitFailed "ADecoder initialisatie mislukt :(\n"
+#define MSGTR_ADecoderPreinitFailed "ADecoder preinitialisatie mislukt :(\n"
+#define MSGTR_AllocatingBytesForInputBuffer "dec_audio: Bezig met het toekennen van %d bytes voor de invoer buffer\n"
+#define MSGTR_AllocatingBytesForOutputBuffer "dec_audio: Bezig met het toekennen van %d + %d = %d bytes voor uitvoer buffer\n"
+
 // LIRC:
 #define MSGTR_SettingUpLIRC "Bezig met configuratie van lirc ondersteuning...\n"
 #define MSGTR_LIRCdisabled "Je zal je afstandsbediening niet kunnen gebruiken\n"
@@ -283,7 +300,19 @@ static char help_text[]=
 #define MSGTR_LIRCsocketerr "Er is iets mis met de lirc socket: %s\n"
 #define MSGTR_LIRCcfgerr "Lezen van LIRC config bestand mislukt %s !\n"
 
+// vf.c
+#define MSGTR_CouldNotFindVideoFilter "Kon video filter '%s' niet vinden\n"
+#define MSGTR_CouldNotOpenVideoFilter "Kon video filter '%s' niet openen\n"
+#define MSGTR_OpeningVideoFilter "Bezig met het openen van video filter: "
+#define MSGTR_CannotFindColorspace "Kan geen gemeenschappelijke colorspace vinden, zelfs bij gebruik van 'scale' :(\n"
 
+// vd.c
+#define MSGTR_CodecDidNotSet "VDec: codec stelde sh->disp_w en sh->disp_h niet in, ik probeer het probleem te omzeilen!\n"
+#define MSGTR_VoConfigRequest "VDec: vo config aanvraag - %d x %d (csp voorkeur: %s)\n"
+#define MSGTR_CouldNotFindColorspace "Kon geen matching colorspace vinden - ik probeer opnieuw met -vop scale...\n"
+#define MSGTR_MovieAspectIsSet "Movie-Aspect is %.2f:1 - prescaling to correct movie aspect.\n"
+#define MSGTR_MovieAspectUndefined "Movie-Aspect is niet gedefinieerd - geen voorscalering toegepast.\n"
+	
 // ====================== GUI messages/buttons ========================
 
 #ifdef HAVE_NEW_GUI
@@ -313,12 +342,12 @@ static char help_text[]=
 #define MSGTR_ConfigDriver "Configureer driver"
 #define MSGTR_Browse "Browse"
 
-
 // --- error messages ---
 #define MSGTR_NEMDB "Sorry, niet genoeg geheugen voor tekenbuffer."
 #define MSGTR_NEMFMR "Sorry, niet genoeg geheugen voor menu rendering."
 #define MSGTR_NEMFMM "Sorry, niet genoeg geheugen voor hoofdvenster shape mask."
 #define MSGTR_IDFGCVD "Sorry, kon geen GUI compatibele video uitvoer driver vinden."
+#define MSGTR_NEEDLAVCFAME "Sorry, je kan geen niet-MPEG bestanden met je DXR3/H+ apparaat aspelen zonder het bestand te herencoderen.\nActiveer lavc of fame in het DXR3/H+ configuratiescherm."
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[skin] fout skin config bestand op regel %d: %s" 
@@ -353,7 +382,7 @@ static char help_text[]=
 #define MSGTR_MENU_PlayURL "Speel URL ..."
 #define MSGTR_MENU_LoadSubtitle "Laad ondertitels ..."
 #define MSGTR_MENU_LoadExternAudioFile "Laad extern audio bestand ..."
-#define MSGTR_MENU_Playing "Bezig met afspelen"
+#define MSGTR_MENU_Playing "Afspelen"
 #define MSGTR_MENU_Play "Speel"
 #define MSGTR_MENU_Pause "Pauzeer"
 #define MSGTR_MENU_Stop "Stop"
@@ -449,6 +478,9 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_OSS_Device "Apparaat:"
 #define MSGTR_PREFERENCES_OSS_Mixer "Mixer:"
 #define MSGTR_PREFERENCES_Message "Denk eraan, dat sommige functies het afspelen herstarten."
+#define MSGTR_PREFERENCES_DXR3_VENC "Video encoder:"
+#define MSGTR_PREFERENCES_DXR3_LAVC "Gebruik LAVC (ffmpeg)"
+#define MSGTR_PREFERENCES_DXR3_FAME "Gebruik FAME"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "fatale fout ..."
