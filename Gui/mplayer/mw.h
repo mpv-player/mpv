@@ -540,53 +540,70 @@ potihandled:
 
 int keyPressed = 0;
 
-void mplMainKeyHandle( int State,int Type,int Key )
+void mplMainKeyHandle( int KeyCode,int Type,int Key )
 {
  int msg = evNone;
 
  if ( Type != wsKeyPressed ) return;
- switch ( Key )
+ 
+ if ( !Key )
   {
-   case wsEnter:     msg=evPlay; break;
+   switch ( KeyCode )
+    {
+     case wsXFMMPrev:     msg=evPrev;              break;
+     case wsXFMMStop:	  msg=evStop;              break;
+     case wsXFMMPlay:	  msg=evPlaySwitchToPause; break;
+     case wsXFMMNext:	  msg=evNext;	           break;
+     case wsXFMMVolUp:	  msg=evIncVolume;         break;
+     case wsXFMMVolDown:  msg=evDecVolume;         break;
+     case wsXFMMMute: 	  msg=evMute;	           break;
+    }
+  }
+  else
+   {
+    switch ( Key )
+     {
+      case wsEnter:     msg=evPlay; break;
 #ifndef HAVE_NEW_INPUT
-   case '.':
-   case '>':         msg=evNext; break;
-   case ',':
-   case '<':         msg=evPrev; break;
+      case '.':
+      case '>':         msg=evNext; break;
+      case ',':
+      case '<':         msg=evPrev; break;
 
-   case wsEscape:    msg=evExit; break;
+      case wsEscape:    msg=evExit; break;
 
-   case wsSpace:     msg=evPause; break;
-   case wsa:
-   case wsA:         msg=evAbout; break;
-   case wsb:
-   case wsB:         msg=evSkinBrowser; break;
-   case wse:
-   case wsE:         msg=evEqualeaser; break;
-   case wsf:
-   case wsF:         msg=evFullScreen; break;
-   case wsl:
-   case wsL:         msg=evLoad; break;
-   case wsu:
-   case wsU:         msg=evLoadSubtitle; break;
-   case wsm:
-   case wsM:         msg=evMute; break;
-   case wss:
-   case wsS:         msg=evStop; break;
-   case wsp:
-   case wsP:         msg=evPlayList; break;
+      case wsSpace:     msg=evPause; break;
+      case wsa:
+      case wsA:         msg=evAbout; break;
+      case wsb:
+      case wsB:         msg=evSkinBrowser; break;
+      case wse:
+      case wsE:         msg=evEqualeaser; break;
+      case wsf:
+      case wsF:         msg=evFullScreen; break;
+      case wsl:
+      case wsL:         msg=evLoad; break;
+      case wsu:
+      case wsU:         msg=evLoadSubtitle; break;
+      case wsm:
+      case wsM:         msg=evMute; break;
+      case wss:
+      case wsS:         msg=evStop; break;
+      case wsp:
+      case wsP:         msg=evPlayList; break;
 #endif
 
-   case wsXF86LowerVolume:  msg=evDecVolume; break;
-   case wsXF86RaiseVolume:  msg=evIncVolume; break;
-   case wsXF86Mute:         msg=evMute; break;
-   case wsXF86Play:         msg=evPlaySwitchToPause; break;
-   case wsXF86Stop:         msg=evStop; break;
-   case wsXF86Prev:         msg=evPrev; break;
-   case wsXF86Next:         msg=evNext; break;
-   case wsXF86Media:        msg=evLoad; break;
+      case wsXF86LowerVolume:  msg=evDecVolume; break;
+      case wsXF86RaiseVolume:  msg=evIncVolume; break;
+      case wsXF86Mute:         msg=evMute; break;
+      case wsXF86Play:         msg=evPlaySwitchToPause; break;
+      case wsXF86Stop:         msg=evStop; break;
+      case wsXF86Prev:         msg=evPrev; break;
+      case wsXF86Next:         msg=evNext; break;
+      case wsXF86Media:        msg=evLoad; break;
 
-   default:          vo_x11_putkey( Key ); return;
-  }
+      default:          vo_x11_putkey( Key ); return;
+     }
+   }
  if ( msg != evNone ) mplEventHandling( msg,0 );
 }

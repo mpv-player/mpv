@@ -625,13 +625,13 @@ mp_input_get_cmd_from_keys(int n,int* keys, int paused) {
     cmd = mp_input_find_bind_for_key(def_cmd_binds,n,keys);
 
   if(cmd == NULL) {
-    mp_msg(MSGT_INPUT,MSGL_ERR,"No bind found for key %s",mp_input_get_key_name(keys[0]));
+    mp_msg(MSGT_INPUT,MSGL_WARN,"No bind found for key %s",mp_input_get_key_name(keys[0]));
     if(n > 1) {
       int s;
       for(s=1; s < n; s++)
-	mp_msg(MSGT_INPUT,MSGL_ERR,"-%s",mp_input_get_key_name(keys[s]));
+	mp_msg(MSGT_INPUT,MSGL_WARN,"-%s",mp_input_get_key_name(keys[s]));
     }
-    mp_msg(MSGT_INPUT,MSGL_ERR,"                         \n");
+    mp_msg(MSGT_INPUT,MSGL_WARN,"                         \n");
     return NULL;
   }
   ret =  mp_input_parse_cmd(cmd);

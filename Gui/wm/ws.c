@@ -618,14 +618,17 @@ keypressed:
         if ( Event->xkey.state & ShiftMask ) wsWindowList[l]->Shift=1;
         if ( Event->xkey.state & LockMask ) wsWindowList[l]->CapsLock=1;
 #if 0
-        keySym=XKeycodeToKeysym( wsDisplay,Event->xkey.keycode,0 );
-        if ( keySym != NoSymbol )
-         {
-          keySym=( (keySym&0xff00) != 0?( (keySym&0x00ff) + 256 ):( keySym ) );
-          wsKeyTable[ keySym ]=i;
-          if ( wsWindowList[l]->KeyHandler )
-            wsWindowList[l]->KeyHandler( Event->xkey.state,i,keySym );
-         }
+        {
+	 KeySym        keySym;
+         keySym=XKeycodeToKeysym( wsDisplay,Event->xkey.keycode,0 );
+         if ( keySym != NoSymbol )
+          {
+           keySym=( (keySym&0xff00) != 0?( (keySym&0x00ff) + 256 ):( keySym ) );
+           wsKeyTable[ keySym ]=i;
+           if ( wsWindowList[l]->KeyHandler )
+             wsWindowList[l]->KeyHandler( Event->xkey.state,i,keySym );
+          }
+	}
 #else
 	{
         	int    		key;
@@ -636,7 +639,7 @@ keypressed:
 	 XLookupString( &Event->xkey,buf,sizeof(buf),&keySym,&stat );
 	 key=( (keySym&0xff00) != 0?( (keySym&0x00ff) + 256 ):( keySym ) );
 	 wsKeyTable[ key ]=i;
-	 if ( wsWindowList[l]->KeyHandler ) wsWindowList[l]->KeyHandler( Event->xkey.state,i,key );
+	 if ( wsWindowList[l]->KeyHandler ) wsWindowList[l]->KeyHandler( Event->xkey.keycode,i,key );
 	}
 #endif
         break;

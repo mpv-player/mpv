@@ -98,7 +98,7 @@
 typedef   void (*wsTReDraw)( wsParamDisplay );
 typedef   void (*wsTReSize)( unsigned int X,unsigned int Y,unsigned int width,unsigned int height );
 typedef   void (*wsTIdle)( void );
-typedef   void (*wsTKeyHandler)( int State,int Type,int Key );
+typedef   void (*wsTKeyHandler)( int KeyCode,int Type,int Key );
 typedef   void (*wsTMouseHandler)( int Button,int X,int Y,int RX,int RY  );
 typedef   void (*wsRemoteHandler)( char * str );
 

@@ -1934,7 +1934,11 @@ if(auto_quality>0){
         video_out->control(VOCTRL_RESUME, NULL);	// resume video
       (void)GetRelativeTime();	// keep TF around FT in next cycle
 #ifdef HAVE_NEW_GUI
-      if (use_gui) guiGetEvent( guiCEvent,(char *)guiSetPlay );
+      if (use_gui) 
+       {
+        if ( guiIntfStruct.Playing == guiSetStop ) goto goto_next_file;
+        guiGetEvent( guiCEvent,(char *)guiSetPlay );
+       }
 #endif
   }
 
