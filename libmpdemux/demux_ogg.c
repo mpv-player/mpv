@@ -819,7 +819,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
         mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AUDIO_ID=%d\n", n_audio);
       ogg_d->subs[ogg_d->num_sub].id = n_audio;
       n_audio++;
-      mp_msg(MSGT_DEMUX,MSGL_V,"Ogg : stream %d is vorbis\n",ogg_d->num_sub);
+      mp_msg(MSGT_DEMUX,MSGL_INFO,"[Ogg] stream %d: audio (Vorbis), -aid %d\n",ogg_d->num_sub,n_audio-1);
 
       // check for Theora
 #   ifdef HAVE_OGGTHEORA
@@ -859,15 +859,13 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	      mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VIDEO_ID=%d\n", n_video);
 	    ogg_d->subs[ogg_d->num_sub].id = n_video;
 	    n_video++;
-	    mp_msg(MSGT_DEMUX,MSGL_V,
-		   "Ogg : stream %d is theora v%i.%i.%i %i:%i, %.3f FPS,"
-		   " aspect %i:%i\n", ogg_d->num_sub,
+	    mp_msg(MSGT_DEMUX,MSGL_INFO,
+		   "[Ogg] stream %d: video (Theora v%d.%d.%d), -vid %d\n",
+		   ogg_d->num_sub,
 		   (int)inf.version_major, 
 		   (int)inf.version_minor, 
 		   (int)inf.version_subminor, 
-		   inf.width, inf.height,
-		   sh_v->fps,
-		   inf.aspect_numerator, inf.aspect_denominator);
+		   n_video - 1);
 	    if(verbose>0) print_video_header(sh_v->bih);
 	}
 #   endif /* HAVE_OGGTHEORA */
@@ -881,7 +879,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	n_audio++;
 	ogg_d->subs[ogg_d->num_sub].flac = 1;
 	sh_a->wf = NULL;
-	mp_msg(MSGT_DEMUX,MSGL_V,"Ogg : stream %d is FLAC\n",ogg_d->num_sub);
+	mp_msg(MSGT_DEMUX,MSGL_INFO,"[Ogg] stream %d: audio (FLAC), -aid %d\n",ogg_d->num_sub,n_audio-1);
 #   endif /* HAVE_FLAC */
 
       /// Check for old header
