@@ -78,6 +78,16 @@ typedef struct tvi_handle_s {
 #define TVI_CONTROL_VID_GET_HEIGHT	0x112
 #define TVI_CONTROL_VID_CHK_HEIGHT	0x113
 #define TVI_CONTROL_VID_SET_HEIGHT	0x114
+#define TVI_CONTROL_VID_GET_BRIGHTNESS	0x115
+#define TVI_CONTROL_VID_SET_BRIGHTNESS	0x116
+#define TVI_CONTROL_VID_GET_HUE		0x117
+#define TVI_CONTROL_VID_SET_HUE		0x118
+#define TVI_CONTROL_VID_GET_SATURATION	0x119
+#define TVI_CONTROL_VID_SET_SATURATION	0x11a
+#define TVI_CONTROL_VID_GET_CONTRAST	0x11b
+#define TVI_CONTROL_VID_SET_CONTRAST	0x11c
+#define TVI_CONTROL_VID_GET_PICTURE	0x11d
+#define TVI_CONTROL_VID_SET_PICTURE	0x11e
 
 /* TUNER controls */
 #define TVI_CONTROL_TUN_GET_FREQ	0x201
@@ -100,5 +110,11 @@ typedef struct tvi_handle_s {
 extern tvi_handle_t *tv_begin(void);
 extern int tv_init(tvi_handle_t *tvh);
 extern int tv_uninit(tvi_handle_t *tvh);
+
+
+#define TV_COLOR_BRIGHTNESS	1
+#define TV_COLOR_HUE		2
+#define TV_COLOR_SATURATION	3
+#define TV_COLOR_CONTRAST	4
 
 #endif /* USE_TV */

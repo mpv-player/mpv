@@ -552,6 +552,36 @@ static int control(priv_t *priv, int cmd, void *arg)
 	case TVI_CONTROL_VID_SET_HEIGHT:
 	    priv->height = (int)*(void **)arg;
 	    return(TVI_CONTROL_TRUE);
+	case TVI_CONTROL_VID_GET_PICTURE:
+	    if (ioctl(priv->fd, VIDIOCGPICT, &priv->picture) == -1)
+	    {
+		mp_msg(MSGT_TV, MSGL_ERR, "ioctl get picture failed: %s\n", strerror(errno));
+		return(TVI_CONTROL_FALSE);
+	    }
+	    return(TVI_CONTROL_TRUE);
+	case TVI_CONTROL_VID_SET_PICTURE:
+	    if (ioctl(priv->fd, VIDIOCSPICT, &priv->picture) == -1)
+	    {
+		mp_msg(MSGT_TV, MSGL_ERR, "ioctl get picture failed: %s\n", strerror(errno));
+		return(TVI_CONTROL_FALSE);
+	    }
+	    return(TVI_CONTROL_TRUE);
+	case TVI_CONTROL_VID_SET_BRIGHTNESS:
+	    priv->picture.brightness = (int)*(void **)arg;
+	    control(priv, TVI_CONTROL_VID_SET_PICTURE, 0);
+	    return(TVI_CONTROL_TRUE);
+	case TVI_CONTROL_VID_SET_HUE:
+	    priv->picture.hue = (int)*(void **)arg;
+	    control(priv, TVI_CONTROL_VID_SET_PICTURE, 0);
+	    return(TVI_CONTROL_TRUE);
+	case TVI_CONTROL_VID_SET_SATURATION:
+	    priv->picture.colour = (int)*(void **)arg;
+	    control(priv, TVI_CONTROL_VID_SET_PICTURE, 0);
+	    return(TVI_CONTROL_TRUE);
+	case TVI_CONTROL_VID_SET_CONTRAST:
+	    priv->picture.contrast = (int)*(void **)arg;
+	    control(priv, TVI_CONTROL_VID_SET_PICTURE, 0);
+	    return(TVI_CONTROL_TRUE);
 
 	/* ========== TUNER controls =========== */
 	case TVI_CONTROL_TUN_GET_FREQ:
