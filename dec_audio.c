@@ -453,6 +453,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
         len=MP3_DecodeFrame(buf,-1);
 //        len=MP3_DecodeFrame(buf,3);
         break;
+#ifdef HAVE_OGGVORBIS
       case AFM_VORBIS: { // OggVorbis
         /* note: good minlen would be 4k or 8k IMHO - atmos */
         int ret;
@@ -547,6 +548,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
         } // from else, packetout ok
 
         break;
+#endif
       }
       case AFM_PCM: // AVI PCM
         len=demux_read_data(sh_audio->ds,buf,minlen);
