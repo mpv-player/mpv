@@ -1,3 +1,9 @@
+mplayer (0.60pre1-1) unstable; urgency=low
+
+  * 0.60 pre-release.
+
+ -- Dariush Pietrzak <eyck@ghost.anime.pl>  Tue, 25 Dec 2001 00:47:36 +0100
+
 mplayer (0.50-3) unstable; urgency=low
 
   * debian/rules: improve install routine; will include mencore if it is
