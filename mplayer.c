@@ -1907,7 +1907,7 @@ if(sh_audio){
 #endif
   }
   mixer.audio_out = audio_out;
-  mixer.afilter = sh_audio->afilter;
+  mixer.afilter = sh_audio ? sh_audio->afilter : NULL;
   mixer.volstep = 3;
 }
 
