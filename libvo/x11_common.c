@@ -108,6 +108,8 @@ void vo_x11_putkey(int key){
    case wsDiv:       mplayer_put_key('/'); break;
    case wsm:
    case wsM:	     mplayer_put_key('m'); break;
+   case wso:
+   case wsO:         mplayer_put_key('o'); break;
    default: if((key>='a' && key<='z')||(key>='A' && key<='Z')) mplayer_put_key(key);
   }
 
