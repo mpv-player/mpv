@@ -1580,7 +1580,7 @@ videorate+=(GetTimerMS() - ptimer_start);
 
 if(skip_flag<0){
     // duplicate frame
-	if(file_format != DEMUXER_TYPE_TV && !verbose) mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_DuplicateFrames,-skip_flag);
+	if(file_format != DEMUXER_TYPE_TV && !quiet) mp_msg(MSGT_MENCODER, MSGL_WARN, MSGTR_DuplicateFrames,-skip_flag);
     while(skip_flag<0){
 	duplicatedframes++;
 	if (!encode_duplicates || !sh_video->vfilter || ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_DUPLICATE_FRAME, 0) != CONTROL_TRUE)
@@ -1590,7 +1590,7 @@ if(skip_flag<0){
 } else
 if(skip_flag>0){
     // skip frame
-	if(file_format != DEMUXER_TYPE_TV && !verbose) mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_SkipFrame);
+	if(file_format != DEMUXER_TYPE_TV && !quiet) mp_msg(MSGT_MENCODER, MSGL_WARN, MSGTR_SkipFrame);
 	skippedframes++;
     --skip_flag;
 }
