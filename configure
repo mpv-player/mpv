@@ -230,7 +230,7 @@ done # for parm in ...
 _cc=gcc
 test "$CC" && _cc="$CC"
 _as=auto
-_runtime_cpudetection=yes
+_runtime_cpudetection=no
 for ac_option do
   case "$ac_option" in
   --target=*)
