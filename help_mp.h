@@ -41,5 +41,5 @@ static char* help_text=
 "    + or -          adjust audio delay by +/- 0.1 second\n"
 "    o               toggle OSD:  none / seek / seek+timer\n"
 "    * or /          increase or decrease volume\n"
-"    m or c          use mixer master or pcm channel\n"
+"    m               use mixer master or pcm channel\n"
 "\n";
