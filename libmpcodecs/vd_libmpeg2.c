@@ -8,301 +8,168 @@
 
 #include "vd_internal.h"
 
+//#undef MPEG12_POSTPROC
+
 static vd_info_t info = 
 {
-	"MPEG 1/2 Video decoder v2.0",
+	"MPEG 1/2 Video decoder libmpeg2-v0.3.1",
 	"libmpeg2",
-	"A'rpi",
+	"A'rpi & Fabian Franz",
 	"Aaron & Walken",
 	"native"
 };
 
 LIBVD_EXTERN(libmpeg2)
 
-#define USE_SIGJMP_TRICK
-
-#ifdef USE_SIGJMP_TRICK
-#include <signal.h>
-#include <setjmp.h>
-#endif
-
-//#include "libmpdemux/parse_es.h"
-
-#include "libvo/video_out.h"	// FIXME!!!
+//#include "libvo/video_out.h"	// FIXME!!!
 
 #include "libmpeg2/mpeg2.h"
 #include "libmpeg2/mpeg2_internal.h"
-#include "libmpeg2/mm_accel.h"
+//#include "libmpeg2/convert.h"
 
 #include "../cpudetect.h"
-
-mpeg2_config_t config;	// FIXME!!!
-static picture_t *picture=NULL;	// exported from libmpeg2/decode.c
-
-static int table_init_state=0;
 
 // to set/get/query special features/parameters
 static int control(sh_video_t *sh,int cmd,void* arg,...){
     return CONTROL_UNKNOWN;
 }
 
-static vo_frame_t frames[3];
-
 // init driver
 static int init(sh_video_t *sh){
+    mpeg2dec_t * mpeg2dec;
+    const mpeg2_info_t * info;
+    int accel;
 
-    config.flags = 0;
-if(gCpuCaps.hasMMX)
-    config.flags |= MM_ACCEL_X86_MMX;
-if(gCpuCaps.hasMMX2)
-    config.flags |= MM_ACCEL_X86_MMXEXT;
-if(gCpuCaps.has3DNow)
-    config.flags |= MM_ACCEL_X86_3DNOW;
-#ifdef HAVE_MLIB
-    config.flags |= MM_ACCEL_MLIB;
-#endif
+    accel = 0;
+    if(gCpuCaps.hasMMX)
+       accel |= MPEG2_ACCEL_X86_MMX;
+    if(gCpuCaps.hasMMX2)
+       accel |= MPEG2_ACCEL_X86_MMXEXT;
+    if(gCpuCaps.has3DNow)
+       accel |= MPEG2_ACCEL_X86_3DNOW;
+    #ifdef HAVE_MLIB
+       accel |= MPEG2_ACCEL_MLIB;
+    #endif
+    mpeg2_accel(accel);
 
-    picture=malloc(sizeof(picture_t)); // !!! NEW HACK :) !!!
-    memset(picture,0,sizeof(picture_t));
-    header_state_init (picture);
+    mpeg2dec = mpeg2_init ();
 
-    if(!table_init_state){
-	idct_init ();
-	motion_comp_init ();
-	table_init_state=1;
-    }
+    if(!mpeg2dec) return 0;
 
-    picture->pp_options=divx_quality;
+    mpeg2_custom_fbuf(mpeg2dec,1); // enable DR1
     
-    memset(frames,0,3*sizeof(vo_frame_t));
-    
-    picture->forward_reference_frame=&frames[0];
-    picture->backward_reference_frame=&frames[1];
-    picture->temp_frame=&frames[2];
-    picture->current_frame=NULL;
-    
-    // send seq header to the decoder:  *** HACK ***
-//    mpeg2_decode_data(NULL,videobuffer,videobuffer+videobuf_len,0);
-//    mpeg2_allocate_image_buffers (picture);
-    return mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YV12);
+    sh->context=mpeg2dec;
+
+    return 1;
+    //return mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YV12);
 }
 
 // uninit driver
 static void uninit(sh_video_t *sh){
-//    mpeg2_free_image_buffers (picture);
+    mpeg2dec_t * mpeg2dec = sh->context;
+    mpeg2_close (mpeg2dec);
 }
 
-static void draw_slice (vo_frame_t * frame, uint8_t ** src){
+static void draw_slice (void * _sh, uint8_t ** src, unsigned int y){ 
+    sh_video_t* sh = (sh_video_t*) _sh;
+    mpeg2dec_t* mpeg2dec = sh->context;
+    const mpeg2_info_t * info = mpeg2_info (mpeg2dec);
     int stride[3];
-    int y=picture->slice<<4;
 
-    stride[0]=picture->coded_picture_width;
-    stride[1]=stride[2]=stride[0]/2;
+    printf("draw_slice() y=%d  \n",y);
 
-    mpcodecs_draw_slice(frame->vo, src,
-		stride, picture->display_picture_width,
-		(y+16<=picture->display_picture_height) ? 16 :
-		    picture->display_picture_height-y,
+    stride[0]=mpeg2dec->decoder.stride;
+    stride[1]=stride[2]=mpeg2dec->decoder.uv_stride;
+
+    mpcodecs_draw_slice(sh, (uint8_t **)src,
+		stride, info->sequence->display_width,
+		(y+16<=info->sequence->display_height) ? 16 :
+		    info->sequence->display_height-y,
 		0, y);
-    
-    ++picture->slice;
 }
-
-static int in_slice_flag=0; // FIXME! move to picture struct
-static int drop_frame=0;    // FIXME! move to picture struct
-
-static mp_image_t* parse_chunk (sh_video_t* sh, int code, uint8_t * buffer, int framedrop){
-    mp_image_t* mpi=NULL;
-
-//    stats_header (code, buffer);
-
-    if (in_slice_flag && ((!code) || (code >= 0xb0))) {
-	// ok, we've completed decoding a frame/field!
-	in_slice_flag = 0;
-	mpi=picture->display_frame->mpi;
-	if(picture->picture_structure!=FRAME_PICTURE && !picture->second_field)
-	    mpi=NULL; // we don't draw first fields!
-    }
-
-    switch (code) {
-    case 0x00:	/* picture_start_code */
-	if (header_process_picture_header (picture, buffer)) {
-	    printf ("bad picture header\n");
-	}
-	drop_frame = framedrop && (picture->picture_coding_type == B_TYPE);
-	drop_frame |= framedrop>=2; // hard drop
-	break;
-
-    case 0xb3:	/* sequence_header_code */
-	if (header_process_sequence_header (picture, buffer)) {
-	    printf ("bad sequence header\n");
-	}
-	break;
-
-    case 0xb5:	/* extension_start_code */
-	if (header_process_extension (picture, buffer)) {
-	    printf ("bad extension\n");
-	}
-	break;
-
-    default:
-	if (code >= 0xb0)  break;
-
-	if (!in_slice_flag) {
-	    in_slice_flag = 1;
-
-	    // set current_frame pointer:
-	    if (!picture->second_field){
-		mp_image_t* mpi;
-		int flags;
-		if (picture->picture_coding_type == B_TYPE){
-		    flags=(!framedrop && vd_use_slices && 
-			picture->picture_structure==FRAME_PICTURE) ?
-			    MP_IMGFLAG_DRAW_CALLBACK:0;
-		    picture->display_frame=
-		    picture->current_frame = picture->temp_frame;
-		} else {
-		    flags=MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE;
-		    picture->current_frame = picture->forward_reference_frame;
-		    picture->display_frame=
-		    picture->forward_reference_frame = picture->backward_reference_frame;
-		    picture->backward_reference_frame = picture->current_frame;
-		}
-		mpi=mpcodecs_get_image(sh,MP_IMGTYPE_IPB, flags,
-			picture->coded_picture_width,
-			picture->coded_picture_height);
-		// ok, lets see what did we get:
-		if(mpi->flags&MP_IMGFLAG_DRAW_CALLBACK &&
-		 !(mpi->flags&MP_IMGFLAG_DIRECT)){
-		    // nice, filter/vo likes draw_callback :)
-		    picture->current_frame->copy=draw_slice;
-		} else
-		    picture->current_frame->copy=NULL;
-		// let's, setup pointers!
-		picture->current_frame->base[0]=mpi->planes[0];
-		picture->current_frame->base[1]=mpi->planes[1];
-		picture->current_frame->base[2]=mpi->planes[2];
-		picture->current_frame->mpi=mpi;	// tricky!
-#if 1
-		if(!picture->forward_reference_frame->base[0]){
-		    // workaround for sig11
-		    picture->forward_reference_frame->base[0]=mpi->planes[0];
-		    picture->forward_reference_frame->base[1]=mpi->planes[1];
-		    picture->forward_reference_frame->base[2]=mpi->planes[2];
-		}
-		if(!picture->backward_reference_frame->base[0]){
-		    // workaround for sig11
-		    picture->backward_reference_frame->base[0]=mpi->planes[0];
-		    picture->backward_reference_frame->base[1]=mpi->planes[1];
-		    picture->backward_reference_frame->base[2]=mpi->planes[2];
-		}
-#endif
-#ifdef MPEG12_POSTPROC
-		mpi->qscale=&picture->current_frame->quant_store[1][1];
-		mpi->qstride=(MPEG2_MBC+1);
-#endif
-		mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"mpeg2: [%c] %p  %s  \n",
-		    (picture->picture_coding_type == B_TYPE) ? 'B':'P',
-		    mpi, (mpi->flags&MP_IMGFLAG_DIRECT)?"DR!":"");
-	    }
-
-	    picture->current_frame->vo=sh;
-	    picture->slice=0;
-
-	}
-
-	if (!drop_frame) {
-	    slice_process (picture, code, buffer);
-#ifdef ARCH_X86
-	    if (config.flags & MM_ACCEL_X86_MMX) __asm__ __volatile__ ("emms");
-#endif
-	}
-
-    }
-    return mpi;
-}
-
-#ifdef USE_SIGJMP_TRICK
-
-static jmp_buf mpeg2_jmp_buf;
-
-static void mpeg2_sighandler(int sig){
-    longjmp(mpeg2_jmp_buf,1);
-}
-#endif
 
 // decode a frame
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
-    static uint32_t code;
-    static uint8_t* pos;
-    static uint8_t* current;
-    uint8_t* end=data+len;
-    static mp_image_t* mpi;
-    mp_image_t* ret=NULL;
-    int framedrop=flags&3;
-    void* old_sigh;
+    mpeg2dec_t * mpeg2dec = sh->context;
+    const mpeg2_info_t * info = mpeg2_info (mpeg2dec);
+    mp_image_t* mpi=NULL;
+    int drop_frame, framedrop=flags&3;
 
-    // Note: static is REQUIRED because of longjmp() may destroy stack!
-    pos=NULL;
-    current=data;
-    mpi=NULL;
+    // append extra 'end of frame' code:
+    ((char*)data+len)[0]=0;
+    ((char*)data+len)[1]=0;
+    ((char*)data+len)[2]=1;
+    ((char*)data+len)[3]=0xff;
+    len+=4;
 
-#ifdef USE_SIGJMP_TRICK
-    old_sigh=signal(SIGSEGV,mpeg2_sighandler);
+    mpeg2_buffer (mpeg2dec, data, data+len);
+    
+    while(1){
+	int state=mpeg2_parse (mpeg2dec);
+	switch(state){
+	case -1:
+	    // parsing of the passed buffer finished, return.
+//	    if(!mpi) printf("\nNO PICTURE!\n");
+	    return mpi;
+	case STATE_SEQUENCE:
+	    // video parameters inited/changed, (re)init libvo:
+	    if(!mpcodecs_config_vo(sh,
+		info->sequence->width,
+		info->sequence->height, IMGFMT_YV12)) return 0;
+	    break;
+	case STATE_PICTURE: {
+	    int type=info->current_picture->flags&PIC_MASK_CODING_TYPE;
+	    mp_image_t* mpi;
+	    
+	    printf("\mlibmpeg2: TYPE=%d\n",type);
+
+	    drop_frame = framedrop && (mpeg2dec->decoder.coding_type == B_TYPE);
+            drop_frame |= framedrop>=2; // hard drop
+            if (drop_frame) {
+               mpeg2_skip(mpeg2dec, 1);
+	       //printf("Dropping Frame ...\n");
+	       break;
+	    }
+            mpeg2_skip(mpeg2dec, 0); //mpeg2skip skips frames until set again to 0
+
+	    // get_buffer "callback":
+	     mpi=mpcodecs_get_image(sh,MP_IMGTYPE_IPB,
+		(type==PIC_FLAG_CODING_TYPE_B)
+		? ((!framedrop && vd_use_slices &&
+		    (info->current_picture->flags&PIC_FLAG_PROGRESSIVE_FRAME)) ?
+			    MP_IMGFLAG_DRAW_CALLBACK:0)
+		: (MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE),
+		info->sequence->picture_width,
+		info->sequence->picture_height);
+	    if(!mpi) return 0; // VO ERROR!!!!!!!!
+	    mpeg2_set_buf(mpeg2dec, mpi->planes, mpi);
+
+#ifdef MPEG12_POSTPROC
+	    if(!mpi->qscale){
+		mpi->qstride=info->sequence->picture_width>>4;
+		mpi->qscale=malloc(mpi->qstride*(info->sequence->picture_height>>4));
+	    }
+	    mpeg2dec->decoder.quant_store=mpi->qscale;
+	    mpeg2dec->decoder.quant_stride=mpi->qstride;
+	    mpi->pict_type=type; // 1->I, 2->P, 3->B
 #endif
 
-while(current<end){
-  // FIND NEXT HEAD:
-  static unsigned int head;
-  static uint8_t c;
-  head=-1;
-  //--------------------
-  while(current<end){
-      c=current[0];
-      ++current;
-      head<<=8;
-      if(head==0x100) break; // synced
-      head|=c;
-  }
-  //--------------------
-  if(pos){
-#ifdef USE_SIGJMP_TRICK
-    if(setjmp(mpeg2_jmp_buf)){
-#ifdef ARCH_X86
-	if (config.flags & MM_ACCEL_X86_MMX) __asm__ __volatile__ ("emms");
-#endif
-	printf("@@@ libmpeg2 returned from sig11... (bad file?) @@@\n");
-    } else
-#endif
-    {
-	ret=parse_chunk(sh, code&0xFF, pos, framedrop);
-	if(ret) mpi=ret;
-    }
-  }
-  //--------------------
-  pos=current;code=head|c;
-}
-
-#ifdef USE_SIGJMP_TRICK
-    signal(SIGSEGV,old_sigh); // restore sighandler
-#endif
-
-//    if(code==0x1FF){
-	ret=parse_chunk(sh, 0xFF, NULL, framedrop); // send 'end of frame'
-	if(ret) mpi=ret;
-//    }
-
-    if(mpi){
-        static int last_non_b_type= 0;
-
-	if(picture->picture_coding_type == B_TYPE)
-	    mpi->pict_type= B_TYPE;
-	else{
-	    mpi->pict_type= last_non_b_type;
-	    last_non_b_type= picture->picture_coding_type;
+	    if(mpi->flags&MP_IMGFLAG_DRAW_CALLBACK &&
+		!(mpi->flags&MP_IMGFLAG_DIRECT)){
+		   // nice, filter/vo likes draw_callback :)
+		    mpeg2dec->decoder.convert=draw_slice;
+		    mpeg2dec->decoder.fbuf_id=sh;
+		} else
+		    mpeg2dec->decoder.convert=NULL;
+	    break;
+	}
+	case STATE_SLICE:
+	case STATE_END:
+	    // decoding done:
+	    if(mpi) printf("AJAJJJJJJJJ2!\n");
+	    if(info->display_fbuf) mpi=info->display_fbuf->id;
+//	    return mpi;
 	}
     }
-
-    return mpi;
 }
 #endif
