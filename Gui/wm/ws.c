@@ -427,7 +427,12 @@ void wsCreateWindow( wsTWindow * win,int X,int Y,int wX,int hY,int bW,int cV,uns
   win->VisualInfo.visual,
   win->WindowMask,&win->WindowAttrib );
 
+#if 0
  wsClassHint.res_name=label;
+#else
+ wsClassHint.res_name="MPlayer";
+#endif
+
  wsClassHint.res_class="MPlayer";
  XSetClassHint( wsDisplay,win->WindowID,&wsClassHint );
 

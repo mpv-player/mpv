@@ -130,7 +130,7 @@ void mplMenuInit( void )
 
  wsCreateWindow( &appMPlayer.menuWindow,
  appMPlayer.menuBase.x,appMPlayer.menuBase.y,appMPlayer.menuBase.width,appMPlayer.menuBase.height,
- wsNoBorder,wsShowMouseCursor|wsHandleMouseButton|wsHandleMouseMove,wsHideFrame|wsMaxSize|wsMinSize|wsHideWindow,"MPlayer menu" );
+ wsNoBorder,wsShowMouseCursor|wsHandleMouseButton|wsHandleMouseMove,wsOverredirect|wsHideFrame|wsMaxSize|wsMinSize|wsHideWindow,"MPlayer menu" );
 
  #ifdef DEBUG
   dbprintf( 1,"[menu.h] menu: 0x%x\n",(int)appMPlayer.menuWindow.WindowID );
