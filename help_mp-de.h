@@ -235,8 +235,10 @@ static char help_text[]=
 #define MSGTR_FileSelect "Wähle Datei ..."
 #define MSGTR_SubtitleSelect "Wähle Untertitel ..."
 #define MSGTR_OtherSelect "Wähle ..."
+#define MSGTR_AudioFileSelect "Wähle externen Audiokanal ..."
 #define MSGTR_MessageBox "Message-Box"
 #define MSGTR_PlayList "Playlist"
+#define MSGTR_Equalizer "Equalizer"
 #define MSGTR_SkinBrowser "Skin Browser"
 
 // --- buttons ---
@@ -282,6 +284,7 @@ static char help_text[]=
 #define MSGTR_MENU_PlayDVD "Spiele DVD ..."
 #define MSGTR_MENU_PlayURL "Spiele URL ..."
 #define MSGTR_MENU_LoadSubtitle "Lade Untertitel ..."
+#define MSGTR_MENU_LoadExternAudioFile "Lade externe Audiodatei ..."
 #define MSGTR_MENU_Playing "Spiele"
 #define MSGTR_MENU_Play "Spiele"
 #define MSGTR_MENU_Pause "Pause"
