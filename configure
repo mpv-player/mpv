@@ -2135,7 +2135,7 @@ AR=ar
 CC=$_cc
 # OPTFLAGS=-O4 $_profile $_debug $_march $_mcpu -pipe -fomit-frame-pointer -ffast-math
 OPTFLAGS=$CFLAGS
-EXTRA_INC=$_extraincdir
+EXTRA_INC=$_extraincdir $_gtkinc
 WIN32_PATH=-DWIN32_PATH=\\"$_win32libdir\\"
 
 X11_INC=$_x11incdir
