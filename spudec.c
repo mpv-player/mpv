@@ -1,17 +1,3 @@
-/* Valid values for ANTIALIASING_ALGORITHM:
-  -1: bilinear (similiar to vobsub, fast and good quality)
-   0: none (fastest, most ugly)
-   1: approximate
-   2: full (slowest, best looking)
- */
-#define ANTIALIASING_ALGORITHM -1
-
-/* Valid values for SUBPOS:
-   0: leave the sub on it's original place
-   1: put the sub at the bottom of the picture
- */
-#define SUBPOS 0
-
 /* SPUdec.c
    Skeleton of function spudec_process_controll() is from xine sources.
    Further works:
@@ -34,13 +20,25 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#if ANTIALIASING_ALGORITHM == 2
 #include <math.h>
-#endif
 #include "libvo/video_out.h"
 #include "spudec.h"
+#include "postproc/swscale.h"
 
 #define MIN(a, b)	((a)<(b)?(a):(b))
+
+/* Valid values for spu_aamode:
+   0: none (fastest, most ugly)
+   1: approximate
+   2: full (slowest)
+   3: bilinear (similiar to vobsub, fast and not too bad)
+   4: uses swscaler gaussian (this is the only one that looks good)
+ */
+
+int spu_aamode = 3;
+int spu_alignment = -1;
+float spu_gaussvar = 1.0;
+extern int sub_pos;
 
 typedef struct packet_t packet_t;
 struct packet_t {
@@ -605,13 +603,33 @@ void spudec_calc_bbox(void *me, unsigned int dxs, unsigned int dys, unsigned int
     unsigned int scaley = 0x100 * dys / spu->orig_frame_height;
     bbox[0] = spu->start_col * scalex / 0x100;
     bbox[1] = spu->start_col * scalex / 0x100 + spu->width * scalex / 0x100;
-#if SUBPOS == 0
-    bbox[2] = spu->start_row * scaley / 0x100;
-    bbox[3] = spu->start_row * scaley / 0x100 + spu->height * scaley / 0x100;
-#elif SUBPOS == 1
-    bbox[3] = dys -1;
-    bbox[2] = bbox[3] -spu->height * scaley / 0x100;
-#endif
+    switch (spu_alignment) {
+    case 0:
+      bbox[3] = dys*sub_pos/100 + spu->height * scaley / 0x100;
+      if (bbox[3] > dys) bbox[3] = dys;
+      bbox[2] = bbox[3] - spu->height * scaley / 0x100;
+      break;
+    case 1:
+      if (sub_pos < 50) {
+        bbox[2] = dys*sub_pos/100 - spu->height * scaley / 0x200;
+        if (bbox[2] < 0) bbox[2] = 0;
+        bbox[3] = bbox[2] + spu->height;
+      } else {
+        bbox[3] = dys*sub_pos/100 + spu->height * scaley / 0x200;
+        if (bbox[3] > dys) bbox[3] = dys;
+        bbox[2] = bbox[3] - spu->height * scaley / 0x100;
+      }
+      break;
+    case 2:
+      bbox[2] = dys*sub_pos/100 - spu->height * scaley / 0x100;
+      if (bbox[2] < 0) bbox[2] = 0;
+      bbox[3] = bbox[2] + spu->height;
+      break;
+    default: /* -1 */
+      bbox[2] = spu->start_row * scaley / 0x100;
+      bbox[3] = spu->start_row * scaley / 0x100 + spu->height * scaley / 0x100;
+      break;
+    }
   }
 }
 /* transform mplayer's alpha value into an opacity value that is linear */
@@ -627,7 +645,6 @@ typedef struct {
 }scale_pixel;
 
 
-#if ANTIALIASING_ALGORITHM == -1
 static void scale_table(unsigned int start_src, unsigned int start_tar, unsigned int end_src, unsigned int end_tar, scale_pixel * table)
 {
   unsigned int t;
@@ -674,7 +691,32 @@ static void scale_image(int x, int y, scale_pixel* table_x, scale_pixel* table_y
       spu->scaled_image[scaled] = 256 - spu->scaled_aimage[scaled];
   }
 }
-#endif
+
+void sws_spu_image(unsigned char *d1, unsigned char *d2, int dw, int dh, int ds,
+	unsigned char *s1, unsigned char *s2, int sw, int sh, int ss)
+{
+	SwsContext *ctx;
+	static SwsFilter filter;
+	static int firsttime = 1;
+	static float oldvar;
+	int i;
+
+	if (!firsttime && oldvar != spu_gaussvar) freeVec(filter.lumH);
+	if (firsttime) {
+		filter.lumH = filter.lumV =
+			filter.chrH = filter.chrV = getGaussianVec(spu_gaussvar, 3.0);
+		normalizeVec(filter.lumH, 1.0);
+		firsttime = 0;
+		oldvar = spu_gaussvar;
+	}
+	
+	ctx=getSwsContext(sw, sh, IMGFMT_Y800, dw, dh, IMGFMT_Y800, SWS_GAUSS, &filter, NULL);
+	ctx->swScale(ctx,&s1,&ss,0,sh,&d1,&ds);
+	for (i=ss*sh-1; i>=0; i--) if (!s2[i]) s2[i] = 255; //else s2[i] = 1;
+	ctx->swScale(ctx,&s2,&ss,0,sh,&d2,&ds);
+	for (i=ds*dh-1; i>=0; i--) if (d2[i]==0) d2[i] = 1; else if (d2[i]==255) d2[i] = 0;
+	freeSwsContext(ctx);
+}
 
 void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride))
 {
@@ -682,8 +724,8 @@ void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*dra
   scale_pixel *table_x;
   scale_pixel *table_y;
   if (spu->start_pts <= spu->now_pts && spu->now_pts < spu->end_pts) {
-    if (spu->orig_frame_width == 0 || spu->orig_frame_height == 0
-	|| (spu->orig_frame_width == dxs && spu->orig_frame_height == dys)) {
+    if (!(spu_aamode&16) && (spu->orig_frame_width == 0 || spu->orig_frame_height == 0
+	|| (spu->orig_frame_width == dxs && spu->orig_frame_height == dys))) {
       if (spu->image)
       {
 	draw_alpha(spu->start_col, spu->start_row, spu->width, spu->height,
@@ -729,7 +771,13 @@ void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*dra
 	  if (spu->scaled_width <= 1 || spu->scaled_height <= 1) {
 	    goto nothing_to_do;
 	  }
-#if ANTIALIASING_ALGORITHM == -1
+	  switch(spu_aamode&15) {
+	  case 4:
+	  sws_spu_image(spu->scaled_image, spu->scaled_aimage,
+		  spu->scaled_width, spu->scaled_height, spu->scaled_stride,
+		  spu->image, spu->aimage, spu->width, spu->height, spu->stride);
+	  break;
+	  case 3:
 	  table_x = calloc(spu->scaled_width, sizeof(scale_pixel));
 	  table_y = calloc(spu->scaled_height, sizeof(scale_pixel));
 	  if (!table_x || !table_y) {
@@ -742,7 +790,8 @@ void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*dra
 	      scale_image(x, y, table_x, table_y, spu);
 	  free(table_x);
 	  free(table_y);
-#elif ANTIALIASING_ALGORITHM == 0
+	  break;
+	  case 0:
 	  /* no antialiasing */
 	  for (y = 0; y < spu->scaled_height; ++y) {
 	    int unscaled_y = y * 0x100 / scaley;
@@ -754,7 +803,8 @@ void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*dra
 	      spu->scaled_aimage[scaled_strides + x] = spu->aimage[strides + unscaled_x];
 	    }
 	  }
-#elif ANTIALIASING_ALGORITHM == 1
+	  break;
+	  case 1:
 	  {
 	    /* Intermediate antialiasing. */
 	    for (y = 0; y < spu->scaled_height; ++y) {
@@ -792,7 +842,8 @@ void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*dra
 	      }
 	    }
 	  }
-#else
+	  break;
+	  case 2:
 	  {
 	    /* Best antialiasing.  Very slow. */
 	    /* Any pixel (x, y) represents pixels from the original
@@ -959,17 +1010,33 @@ void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*dra
 	      }
 	    }
 	  }
-#endif
+	  }
 nothing_to_do:
 	  spu->scaled_frame_width = dxs;
 	  spu->scaled_frame_height = dys;
 	}
       }
       if (spu->scaled_image){
-#if SUBPOS == 1
-	/*set subs at the bottom, i don't like to put it at the very bottom, so -1 :)*/
-	spu->scaled_start_row = dys - spu->scaled_height - 1;
-#endif
+        switch (spu_alignment) {
+        case 0:
+          spu->scaled_start_row = dys*sub_pos/100;
+	  if (spu->scaled_start_row + spu->scaled_height > dys)
+	    spu->scaled_start_row = dys - spu->scaled_height;
+	  break;
+	case 1:
+          spu->scaled_start_row = dys*sub_pos/100 - spu->scaled_height/2;
+          if (sub_pos < 50) {
+	    if (spu->scaled_start_row < 0) spu->scaled_start_row = 0;
+	  } else {
+	    if (spu->scaled_start_row + spu->scaled_height > dys)
+	      spu->scaled_start_row = dys - spu->scaled_height;
+	  }
+	  break;
+        case 2:
+          spu->scaled_start_row = dys*sub_pos/100 - spu->scaled_height;
+	  if (spu->scaled_start_row < 0) spu->scaled_start_row = 0;
+	  break;
+	}
 	draw_alpha(spu->scaled_start_col, spu->scaled_start_row, spu->scaled_width, spu->scaled_height,
 		   spu->scaled_image, spu->scaled_aimage, spu->scaled_stride);
 	spu->spu_changed = 0;

@@ -1047,6 +1047,36 @@ This is the full pathname without extensions, i.e.\& without the '.idx',
 .TP
 .B \-vobsubid <0-31>
 Specify the VobSub subtitle id.
+.TP
+.B \-spualign <-1\-2>
+Specify how spu (DVD/VobSub) subtitles should be aligned.
+Values are the same as for -subpos, with the extra choice -1 for original
+position.
+.TP
+.B \-spuaa <mode>
+Antialiasing/scaling mode for DVD/VobSub. A value of 16 may be added
+to mode in order to force scaling even when original and scaled frame
+size already match, for example to smooth subtitles with the gaussian
+blur. The available modes are:
+.PD 0
+.RSs
+.IPs 0
+none (fastest, very ugly)
+.IPs 1
+approximate (broken?)
+.IPs 2
+full (slow)
+.IPs 3
+bilinear (default, fast and not too bad)
+.IPs 4
+uses swscaler gaussian blur (looks very good)
+.RE
+.PD 1
+.
+.TP
+.B \-spugauss <0.0\-3.0>
+Variance parameter of gaussian used by -spuaa 4. Higher means more
+blur. The default is 1.0.
 
 
 .SH "AUDIO OUTPUT OPTIONS (MPLAYER ONLY)"

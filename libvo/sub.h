@@ -103,6 +103,9 @@ extern int sub_visibility;
 extern int suboverlap_enabled;
 extern int sub_bg_color; /* subtitles background color */
 extern int sub_bg_alpha;
+extern int spu_alignment;
+extern int spu_aamode;
+extern float spu_gaussvar;
 
 //extern void vo_draw_text_osd(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));
 //extern void vo_draw_text_progbar(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));
