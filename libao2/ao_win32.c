@@ -203,7 +203,7 @@ static int init(int rate,int channels,int format,int flags)
  	
     //open sound device
     //WAVE_MAPPER always points to the default wave device on the system
-    result = waveOutOpen(&hWaveOut,WAVE_MAPPER,(WAVEFORMATEX*)&wformat,(DWORD_PTR)waveOutProc,0,CALLBACK_FUNCTION|WAVE_FORMAT_DIRECT);
+    result = waveOutOpen(&hWaveOut,WAVE_MAPPER,(WAVEFORMATEX*)&wformat,(DWORD_PTR)waveOutProc,0,CALLBACK_FUNCTION);
 	if(result == WAVERR_BADFORMAT)
 	{
 		mp_msg(MSGT_AO, MSGL_ERR,"ao_win32: format not supported switching to default\n");
