@@ -30,10 +30,10 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
   
   if(verbose>=3) printf("demux_read_packet: %X\n",id);
 
-  if(id==0x1F0){
-    demux->synced=0; // force resync after 0x1F0
-    return -1;
-  }
+//  if(id==0x1F0){
+//    demux->synced=0; // force resync after 0x1F0
+//    return -1;
+//}
 
 //  if(id==0x1BA) packet_start_pos=stream_tell(demux->stream);
   if(id<0x1BC || id>=0x1F0) return -1;
@@ -42,7 +42,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
 
   len=stream_read_word(demux->stream);
   if(verbose>=3)  printf("PACKET len=%d",len);
-  if(len==62480){ demux->synced=0;return -1;} /* :) */
+//  if(len==62480){ demux->synced=0;return -1;} /* :) */
 //  if(len==0 || len>MAX_PS_PACKETSIZE) return -2;  // invalid packet !!!!!!
   if(len==0 || len>MAX_PS_PACKETSIZE){
     if(verbose>=2) printf("Invalid PS packet len: %d\n",len);
@@ -112,12 +112,14 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
       if(demux->audio->id==-1) demux->audio->id=aid;
 
       if(demux->audio->id==aid){
+//        int type;
         ds=demux->audio;
         if(!ds->sh) ds->sh=avi_header.a_streams[aid];
         // READ Packet: Skip additional audio header data:
-        c=stream_read_char(demux->stream);
-        c=stream_read_char(demux->stream);
-        c=stream_read_char(demux->stream);
+        c=stream_read_char(demux->stream);//type=c;
+        c=stream_read_char(demux->stream);//type|=c<<8;
+        c=stream_read_char(demux->stream);//type|=c<<16;
+//        printf("[%06X]",type);
         len-=3;
         if(ds->type==-1){
           // autodetect type
@@ -139,7 +141,8 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
     }
 
   } else {
-    //if(c!=0x0f) printf("  {ERROR5,c=%d}  \n",c);
+    if(c!=0x0f) printf("  {ERROR5,c=%d}  \n",c);
+    return -1;  // invalid packet !!!!!!
   }
   if(verbose>=3) printf(" => len=%d\n",len);
 
@@ -181,7 +184,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
     return 1;
   }
   if(verbose>=2) printf("DEMUX_MPG: Skipping %d data bytes from packet %04X\n",len,id);
-  stream_skip(demux->stream,len);
+  if(len<=2356) stream_skip(demux->stream,len);
   return 0;
 }
 
@@ -207,11 +210,20 @@ int ret=0;
 do{
   demux->filepos=stream_tell(demux->stream);
   head=stream_read_dword(demux->stream);
-  while((head&0xffffff00)!=0x00000100){
-    if(stream_eof(demux->stream)) break;
-    head=(head<<8)|stream_read_char(demux->stream);
-    ++skipped; ++demux->filepos;
+  demux->filepos-=skipped;
+  while(1){
+    int c=stream_read_char(demux->stream);
+    if(c<0) break; //EOF
+    head<<=8;
+    if(head!=0x100){
+      head|=c;
+      ++skipped; //++demux->filepos;
+      continue;
+    }
+    head|=c;
+    break;
   }
+  demux->filepos+=skipped;
   if(stream_eof(demux->stream)) break;
   // sure: head=0x000001XX
   if(verbose>=4) printf("*** head=0x%X\n",head);
@@ -222,6 +234,8 @@ do{
     if(head==0x1BB || (head>=0x1C0 && head<=0x1EF)){
       demux->synced=2;
       if(verbose) printf("system stream synced at 0x%X (%d)!\n",demux->filepos,demux->filepos);
+      num_elementary_packets100=0; // requires for re-sync!
+      num_elementary_packets101=0; // requires for re-sync!
     } else demux->synced=0;
   } // else
   if(demux->synced==2){
