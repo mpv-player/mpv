@@ -890,7 +890,7 @@ int vixQueryFourcc(vidix_fourcc_t *to)
 		    VID_DEPTH_12BPP| VID_DEPTH_15BPP|
 		    VID_DEPTH_16BPP| VID_DEPTH_24BPP|
 		    VID_DEPTH_32BPP;
-	to->flags = VID_CAP_EXPAND | VID_CAP_SHRINK | VID_CAP_COLORKEY;
+	to->flags = VID_CAP_EXPAND | VID_CAP_SHRINK/* | VID_CAP_COLORKEY*/;
 	return 0;
     }
     else  to->depth = to->flags = 0;
