@@ -608,6 +608,7 @@ void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags){
 	    curr_audio_pos*=align;
 #else
 	    curr_audio_pos=(priv->avi_video_pts)*(float)sh_audio->audio.dwRate/(float)sh_audio->audio.dwScale;
+	    curr_audio_pos-=sh_audio->audio.dwStart;
 	    curr_audio_pos*=sh_audio->audio.dwSampleSize;
 #endif
 

@@ -1559,6 +1559,7 @@ if(!(vo_flags&256)){ // flag 256 means: libvo driver does its timing (dvb card)
         unsigned int samples=(sh_audio->audio.dwSampleSize)?
           ((ds_tell(d_audio)-sh_audio->a_in_buffer_len)/sh_audio->audio.dwSampleSize) :
           (d_audio->pack_no); // <- used for VBR audio
+	samples+=sh_audio->audio.dwStart; // offset
         a_pts=samples*(float)sh_audio->audio.dwScale/(float)sh_audio->audio.dwRate;
 #else
       if(sh_audio->audio.dwSampleSize)
