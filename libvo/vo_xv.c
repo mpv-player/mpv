@@ -593,14 +593,22 @@ static uint32_t preinit(const char *arg)
     XvPortID xv_p;
     int busy_ports=0;
     
+    xv_port = 0;
+
     if(arg) 
     {
-	mp_msg(MSGT_VO,MSGL_ERR,"vo_xv: Unknown subdevice: %s\n",arg);
-	return ENOSYS;
+	if ((strlen(arg) >= 6) && !strncmp(arg, "port=", 5))
+	{
+	    xv_port = atoi(arg+5);
+	}
+	else
+	{
+	    mp_msg(MSGT_VO,MSGL_ERR,"vo_xv: Unknown subdevice: %s\n",arg);
+	    return ENOSYS;
+	}
     }
     if (!vo_init()) return -1;
 
-    xv_port = 0;
    /* check for Xvideo extension */
     if (Success != XvQueryExtension(mDisplay,&ver,&rel,&req,&ev,&err)){
 	mp_msg(MSGT_VO,MSGL_ERR,"Sorry, Xv not supported by this X11 version/driver\n");
@@ -610,11 +618,22 @@ static uint32_t preinit(const char *arg)
     
    /* check for Xvideo support */
     if (Success != XvQueryAdaptors(mDisplay,DefaultRootWindow(mDisplay), &adaptors,&ai)){
-	mp_msg(MSGT_VO,MSGL_ERR,"Xv: XvQueryAdaptors failed");
+	mp_msg(MSGT_VO,MSGL_ERR,"Xv: XvQueryAdaptors failed\n");
 	return -1;
     }
 
    /* check adaptors */
+    if(xv_port >= adaptors)
+    {
+    	mp_msg(MSGT_VO, MSGL_WARN,"Xv: Invalid port parameter, overriding with port 0\n");
+    	xv_port = 0;
+    }
+    if (xv_port)
+    {
+      if (XvGrabPort(mDisplay, xv_port, CurrentTime))
+        xv_port = 0;
+    }
+   
     for (i = 0; i < adaptors && xv_port == 0; i++){
       if ((ai[i].type & XvInputMask) && (ai[i].type & XvImageMask)) {
 	 for (xv_p = ai[i].base_id; xv_p < ai[i].base_id+ai[i].num_ports; ++xv_p)
