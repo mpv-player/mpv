@@ -554,7 +554,7 @@ static void disable_irq(){
 
 void mga_handle_irq(int irq, void *dev_id, struct pt_regs *pregs) {
 //	static int frame=0;
-	static int counter=0;
+//	static int counter=0;
 	long int cc;
 //	if ( ! mga_enabled_flag ) return;
 
@@ -629,7 +629,7 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 			//FIXME remove
 //			printk(KERN_DEBUG "vcount = %d\n",readl(mga_mmio_base + VCOUNT));
 			printk(KERN_DEBUG "mga_mmio_base = %p\n",mga_mmio_base);
-			printk(KERN_DEBUG "mga_mem_base = %08lx\n",mga_mem_base);
+			printk(KERN_DEBUG "mga_mem_base = %08x\n",mga_mem_base);
 			//FIXME remove
 
 			printk(KERN_DEBUG "mga_vid: Received configuration\n");
@@ -724,7 +724,7 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 static int mga_vid_find_card(void)
 {
 	struct pci_dev *dev = NULL;
-	unsigned int card_option, temp;
+	unsigned int card_option;
 
 	if((dev = pci_find_device(PCI_VENDOR_ID_MATROX, PCI_DEVICE_ID_MATROX_G400, NULL)))
 	{
@@ -758,7 +758,7 @@ static int mga_vid_find_card(void)
 	mga_mmio_base = ioremap_nocache(dev->base_address[1] & PCI_BASE_ADDRESS_MEM_MASK,0x4000);
 	mga_mem_base =  dev->base_address[0] & PCI_BASE_ADDRESS_MEM_MASK;
 #endif
-	printk(KERN_INFO "mga_vid: MMIO at 0x%p IRQ: %d  framebuffer: 0x%08lX\n", mga_mmio_base, mga_irq, mga_mem_base);
+	printk(KERN_INFO "mga_vid: MMIO at 0x%p IRQ: %d  framebuffer: 0x%08X\n", mga_mmio_base, mga_irq, mga_mem_base);
 
 	pci_read_config_dword(dev,  0x40, &card_option);
 	printk(KERN_INFO "mga_vid: OPTION word: 0x%08X  mem: 0x%02X  %s\n", card_option,

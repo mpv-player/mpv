@@ -15,7 +15,7 @@
 #ifndef __LINUX_MGAVID_H
 #define __LINUX_MGAVID_H
 
-#include <inttypes.h>
+//#include <inttypes.h>
 
 typedef struct mga_vid_config_s
 {
