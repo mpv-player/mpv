@@ -2,6 +2,7 @@
 If wishes were fishes, we'd all cast nets ...
 
 
+
 Documentation:
 
  * a nice and complete MEncoder tutorial
@@ -37,6 +38,8 @@ Small improvements:
  * Ability to resize to full size/double size/triple (or half) size
    upon key presses.
 
+ * wildcard support for MEncoder - mencoder *.avi blah
+
 
 
 Cleanup:
@@ -48,7 +51,7 @@ Cleanup:
 
  * remove all obsolete code, options, files etc
 
- * move zoran jpeg encoder to video filters
+ * move Zoran JPEG encoder to video filters
 
  * convert -zr options to -zr suboption:suboption format
 
@@ -68,7 +71,7 @@ Enhancements:
 
  * merge VIDIX from MPlayerXP/sourceforge
 
- * port asf muxing from MPlayerXP
+ * port ASF muxing from MPlayerXP
 
  * write nut muxer/demuxer
 
@@ -84,21 +87,28 @@ Enhancements:
 
  * G400 2nd head through mga_vid ;)
 
- * dts support
+ * DTS support
 
  * do more things automagically
 
  * guess correct DVD title
 
- * syuv and paletted rgb support in swscaler
+ * SYUV and paletted RGB support in swscaler
 
  * implement Plextor compatible SCSI VCD reading
 
  * udp:// support (like xine and vlc)
 
- * write native MacOS X video driver
-
  * -stop option for MPlayer similar to -endpos for MEncoder
+
+ * color subtitles
+
+ * swf (flash) demuxer
+
+ * DirectX video acceleration -vo for Windows (similar to XvmC)
+
+ * hardware MPEG encoding support (Ati cards)
+
 
 
 Difficult stuff:
@@ -117,11 +127,11 @@ Difficult stuff:
 
  * write something like mptv to replace xawtv
 
- * write/adapt a C implementation of rtsp
+ * write/adapt a C implementation of RTSP
 
  * real mmsu:// support
 
- * encode to ogm, mp4, asf, nut
+ * encode to OGM, MP4, ASF, nut
 
  * xinerama video filter that splits movie to 2 screens (like zr)
 
@@ -132,3 +142,9 @@ Difficult stuff:
  * write mpdump application to handle all -dump* options
 
  * modular MEncoder with audio encoding API
+
+ * support for pausing/resuming of encoding in MEncoder
+
+ * TV support under Windows
+
+ * DRM support (divx.com, WMV, WMA, iTunes)
