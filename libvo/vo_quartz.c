@@ -334,6 +334,11 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	windowAttrs =   kWindowStandardDocumentAttributes
 					| kWindowStandardHandlerAttribute
 					| kWindowLiveResizeAttribute;
+					
+	if (!(IMGFMT_IS_RGB(image_format)))
+	{
+		windowAttrs &= (~kWindowResizableAttribute);
+	}
 
 	SetRect(&winRect, 0, 0, d_width, d_height);
 	SetRect(&dstRect, 0, 0, d_width, d_height);
@@ -900,10 +905,10 @@ void window_resized()
 	CreateCGContextForPort(GetWindowPort(theWindow),&context);
 
 	//fill background with black
-	//CGRect winBounds = CGRectMake( winRect.top, winRect.left, winRect.right, winRect.bottom);
-	//CGContextSetRGBFillColor(context, 0.0, 0.0, 0.0, 1.0);
-	//CGContextFillRect(context, winBounds);
-	//CGContextFlush(context);
+	CGRect winBounds = CGRectMake( winRect.top, winRect.left, winRect.right, winRect.bottom);
+	CGContextSetRGBFillColor(context, 0.0, 0.0, 0.0, 1.0);
+	CGContextFillRect(context, winBounds);
+	CGContextFlush(context);
 
 #ifdef QUARTZ_ENABLE_YUV
 	switch (image_format)
@@ -977,7 +982,9 @@ void window_fullscreen()
 		HideCursor();
 		
 		//go fullscreen
-		ChangeWindowAttributes(theWindow, 0, kWindowResizableAttribute);
+		if (IMGFMT_IS_RGB(image_format))
+			ChangeWindowAttributes(theWindow, 0, kWindowResizableAttribute);
+			
 		MoveWindow (theWindow, 0, 0, 1);		
 		SizeWindow(theWindow, device_width, device_height,1);
 
@@ -999,7 +1006,9 @@ void window_fullscreen()
 		ShowCursor();
 		
 		//revert window to previous setting
-		ChangeWindowAttributes(theWindow, kWindowResizableAttribute, 0);
+		if (IMGFMT_IS_RGB(image_format))
+			ChangeWindowAttributes(theWindow, kWindowResizableAttribute, 0);
+			
 		SizeWindow(theWindow, oldRect.right, oldRect.bottom,1);
 		RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
 		
