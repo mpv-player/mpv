@@ -5301,7 +5301,7 @@ log (low quality)
 .IPs 3
 phods (low quality)
 .IPs 4
-EPZS (default)
+EPZS: size=1 diamond (default)
 .IPs 5
 X1 (experimental)
 .RE
@@ -5334,6 +5334,7 @@ Same as mbd=1, kept for compatibility reasons.
 .TP
 .B v4mv\ \ \ 
 Allow 4 motion vectors per macroblock (slightly better quality).
+Works better if used with mbd>0.
 .
 .TP
 .B obmc\ \ \ 
@@ -5454,6 +5455,8 @@ The aspect parameter can be given as a ratio or a floating point number.
 Same as the aspect option, but automatically computes aspect, taking
 into account all the adjustments (crop/\:expand/\:scale/\:etc.) made in the
 filter chain.
+Does not incur a performance penalty, so you can safely leave it
+always on.
 .
 .TP
 .B vbitrate=<value>
@@ -5793,7 +5796,12 @@ sh4
 .
 .TP
 .B lumi_mask=<0.0\-1.0>
-luminance masking
+Luminance masking is a 'psychosensory' setting that is supposed to
+make use of the fact that the human eye tends to notice less details
+in very bright parts of the picture.
+Luminance masking compresses bright areas stronger than medium ones,
+so it will save bits that can be spent again on other frames, raising
+overall subjective quality, while possibly reducing PSNR.
 .br
 .I WARNING:
 Be careful, overly large values can cause disastrous things.
@@ -5810,7 +5818,12 @@ sane range
 .
 .TP
 .B dark_mask=<0.0\-1.0>
-darkness masking
+Darkness masking is a 'psychosensory' setting that is supposed to
+make use of the fact that the human eye tends to notice less details
+in very drak parts of the picture.
+Darkness masking compresses dark areas stronger than medium ones,
+so it will save bits that can be spent again on other frames, raising
+overall subjective quality, while possibly reducing PSNR.
 .br
 .I WARNING:
 Be careful, overly large values can cause disastrous things.
@@ -6010,9 +6023,6 @@ If you prefer to keep some noise in your encoded video rather than
 filtering it away before encoding, this setting controls NSSE weight,
 where larger weights will result in more noise.
 0 NSSE is identical to SSE.
-
-NSSE weight, larger weights will result in more noise,
-with 0 NSSE is identical to SSE.
 .
 .TP
 .B predia=<-99\-6>
