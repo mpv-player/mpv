@@ -412,6 +412,11 @@ video_out.draw_frame=draw_frame;
 
 // set up output file:
 muxer_f=fopen(out_filename,"wb");
+if(!muxer_f) {
+  printf("Cannot open output file '%s'\n", out_filename);
+  exit(1);
+}
+
 muxer=aviwrite_new_muxer();
 
 // ============= VIDEO ===============
