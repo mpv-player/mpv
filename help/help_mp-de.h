@@ -114,7 +114,7 @@ static char help_text[]=
 
 #define MSGTR_NoGui "MPlayer wurde OHNE GUI-Unterstützung kompiliert.\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI erfordert X11.\n"
-#define MSGTR_Playing "Spiele %s\n"
+#define MSGTR_Playing "Wiedergabe %s\n"
 #define MSGTR_NoSound "Audio: kein Ton!\n"
 #define MSGTR_FPSforced "FPS von %5.3f erzwungen (ftime: %5.3f)\n"
 #define MSGTR_CompiledWithRuntimeDetection "MPlayer mit CPU-Erkennung zur Laufzeit kompiliert - WARNUNG, das ist nicht optimal!\nKompiliere MPlayer mit --disable-runtime-cpudetection für beste Performance.\n"
