@@ -1021,11 +1021,10 @@ if(stream_dump_type==5){
   int len;
   FILE *f;
   current_module="dumpstream";
-// this check is bad! for example DVD, CDDA etc support uses stream but fd=-1 !
-//  if(stream->fd<0){
-//    mp_msg(MSGT_CPLAYER,MSGL_FATAL,"Cannot dump this stream - no 'fd' available\n");
-//    exit_player(MSGTR_Exit_error);
-//  }
+  if(stream->type==STREAMTYPE_STREAM && stream->fd<0){
+    mp_msg(MSGT_CPLAYER,MSGL_FATAL,"Cannot dump this stream - no 'fd' available\n");
+    exit_player(MSGTR_Exit_error);
+  }
   stream_reset(stream);
   stream_seek(stream,stream->start_pos);
   f=fopen(stream_dump_name,"wb");
