@@ -5942,6 +5942,184 @@ ausgiebige Suche
 .RE
 .PD 1
 .
+.TP
+.B min_iquant=<0\-31>
+minimaler Wert für den Quantisierungsparameter für I-Frames (Standard: 2)
+.
+.TP
+.B max_iquant=<0\-31>
+maximaler Wert für den Quantisierungsparameter für I-Frames (Standard: 2)
+.
+.TP
+.B min_pquant=<0\-31>
+minimaler Wert für den Quantisierungsparameter für P-Frames (Standard: 2)
+.
+.TP
+.B max_pquant=<0\-31>
+maximaler Wert für den Quantisierungsparameter für P-Frames (Standard: 31)
+.
+.TP
+.B min_bquant=<0\-31>
+minimaler Wert für den Quantisierungsparameter für B-Frames (Standard: 2)
+.
+.TP
+.B max_bquant=<0\-31>
+minimaler Wert für den Quantisierungsparameter für B-Frames (Standard: 31)
+.
+.TP
+.B quant_intra_matrix=<Dateiname>
+Lädt eine Datei mit einer eigenen Intra-Matrix.
+Du kannst eine solche erstellen mit dem Matrixeditor xvid4conf.
+.
+.TP
+.B quant_inter_matrix=<Dateiname>
+Lädt eine Datei mit einer eigenen Inter-Matrix.
+Du kannst eine solche erstellen mit dem Matrixeditor xvid4conf.
+.
+.TP
+.B curve_compression_high=<0\-100>
+Diese Einstellung erlaubt XviD, einen gewissen Teil der Bits weg von Szenen
+mit hohen Bitraten zu nehmen und dem allgemeinen Vorrat für Bits hinzuzufügen.
+Du kannst diese Option benutzen, falls du einen Film mit so vielen schnell
+bewegten Szenen hast, dass die Szenen mit geringeren Bitraten anfangen,
+schlecht auszusehen (Standard: 0).
+.
+.TP
+.B curve_compression_low=<0\-100>
+Diese Einstellung erlaubt XviD, einen gewissen Teil der allgemein verfügbaren
+Bits den Szenen zuzuteilen, die mit niedrigen/niedrigeren Bitraten codiert
+werden, wobei dafür dem ganzen Video ein paar Bits weggenommen werden.
+Die kann sich nützlich erweisen, wenn du ein paar Szenen mit eigentlich
+niedriger Bitrate hast, die trotzdem Blockeffekte zeigen (Standard: 0).
+.
+.TP
+.B overflow_control_strength=<0\-100>
+Während des ersten Durchlaufs der two-pass-Encodierung wird eine skalierte
+Kurve berechnet.
+Die Differenz zwischen dieser erwarteten Kurve und dem bei der Encodierung
+erzielten Resultat wird Overflow genannt.
+Offensichtlich wird beim zweiten Durchlauf versucht, diesen Overflow zu
+kompensieren, indem er über die nächsten Frames verteilt wird.
+Diese Einstellung kontrolliert, wie stark ein Overflow für jeden neuen
+Frame verteilt wird.
+Niedrige Werte erlauben eine lässige Kontrolle des Overflows, so dass sehr
+hohe Bitraten langsamer abgefangen werden (was bei kurzen Clips die
+Präzision verringern kann).
+Hohe Werte machen Änderungen der Bit-Verteilung abrupter, wahrscheinlich sogar
+zu abrupt, wenn du zu hohe Werte wählst, was zu Artefakten führen kann
+(Standard: 5).
+.br
+.I ANMERKUNG:
+Diese Einstellung hat großen Einfluss auf die Qualität, spiele damit also nur
+vorsichtig!
+.
+.TP
+.B max_overflow_improvement=<0\-100>
+Während der Zuteilung von Bits für Frames kann die Kontrolle für den Overflow
+die Größe eines Frames erhöhen.
+Dieser Parameter bestimmt den maximalen Anteil, um den dieser Kontrolle
+erlaubt wird, die Größe eines Frames im Vergleich zu der idealen Kurve zu
+erhöhen (Standard: 5).
+.
+.TP
+.B max_overflow_degradation=<0\-100>
+Während der Zuteilung von Bits für Frames, kann die Kontrolle für den Overflow
+die Größe eines Frames verringern.
+Dieser Parameter bestimmt den maximalen Anteil, um den dieser Kontrolle
+erlaubt wird, die Größe eines Frames im Vergleich zu der idealen Kurve zu
+verringern (Standard: 5).
+.
+.TP
+.B container_frame_overhead=<0...>
+Gibt den mittleren Frame-Overhead pro Frame in Bytes an.
+Meistens geben Benutzer die Zielbitrate für ein Video an, ohne dabei den
+Overhead des Videocontainers zu beachten.
+Dieser kleine aber (meistens) konstante Overhead kann dazu führen, dass die
+gewünschte Dateigröße überschritten wird.
+XviD erlaubt Benutzern, den Anteil des Overheads anzugeben, der pro Frame
+erzeugt wird (gib nur einen Durchschnittswert pro Frame an).
+Die Null hat eine spezielle Bedeutung, sie lässt XviD eigene Standardwerte
+wählen (Standard: 24 \- durchschnittlicher Overhead für AVIs).
+.
+.TP
+.B par=<Modus>
+Gibt den Modus für die Pixel Aspect Ratio (PAR) an, also dem Größenverhältnis
+der Pixel (nicht zu verwechseln mit dem Aspekt auf dem Bildschirm).
+PAR ist das Verhältnis von Breite zu Höhe eines einzelnen Pixels.
+Beide Verhältnisse stehen also in folgendem in Zusammenhang: DAR = PAR *
+(width/height).
+.br
+MPEG-4 definiert 5 verschiedene Pixel-Aspekte sowie einen erweiterten, der es
+erlaubt, einen eigenen spezifischen Pixel-Aspekt anzugeben.
+Fünf Standardmodi können angegeben werden:
+.PD 0
+.RSs
+.IPs vga11
+Das ist der normale PAR für Inhalte auf dem PC.
+Pixel sind hierbei einheitliche Quadrate.
+.IPs pal43
+PAL-Standard 4:3 PAR.
+Pixel sind Rechtecke.
+.IPs pal169
+das gleiche wie oben
+.IPs ntsc43
+das gleiche wie oben
+.IPs ntsc169
+das gleiche wie oben erwähnt (Vergiss nicht, das genaue Verhältnis anzugeben)
+.IPs ext\ \ 
+Erlaubt dir, einen eigenen Aspekt (PAR) mit par_width und par_height anzugeben.
+.RE
+.PD 1
+.RS
+.I ANMERKUNG:
+Normalerweise ist das Setzen der Optionen aspect und autoaspect ausreichend.
+.RE
+.
+.TP
+.B par_width=<1\-255> (nur bei par=ext)
+Gibt die Breite des Pixel-Größenverhältnisses an.
+.
+.TP
+.B par_height=<1\-255> (nur bei par=ext)
+Gibt die Höhe des Pixel-Größenverhältnisses an.
+.
+.TP
+.B aspect=<x/\:y | f (Fließkommazahl)>
+Speichere den Filmaspekt intern, wie bei MPEG-Dateien.
+Dies ist eine viel elegantere Lösung als den Film neu zu skalieren, da die
+Qualität nicht verringert wird.
+MPlayer und ein paar andere Player werden diese Dateien korrekt wiedergeben,
+andere werden das Größenverhältnis falsch darstellen.
+Der Parameter für das Verhältnis kann als Bruch oder Fließkommawert angegeben
+werden.
+.
+.TP
+.B (no)autoaspect
+Das gleiche wie die Option aspect, wobei jedoch das Verhältnis automatisch
+berechnet wird.
+Veränderungen in der Filterkette wie crop/\:expand/\:scale/\:etc.\& werden
+dabei berücksichtigt.
+.
+.TP
+.B psnr\ \ \ 
+Gib den PSNR-Wert (Peak Signal to Noise Ratio) des kompletten Films nach dem
+Encodieren aus und speichere ihn für jeden einzelnen Frame in einer Datei der
+Form 'psnr_hhmmss.log' im aktuellen Verzeichnis.
+Die angegebenen Werte haben die Einheit dB (Dezibel), je höher desto besser.
+.
+.PP
+.sp 1
+Die folgende Option ist nur in den Entwicklerversionen von XviD 1.1.x
+verfügbar.
+.
+.TP
+.B bvhq=<0|1>
+Diese Einstellung erlaubt mögliche Auswahlen des Encodierungsvorgangs für
+B-Frames, einen Raten-störungsoptimierten Operator verwenden, was für
+P-Frames mit der Option vhq getan wird.
+Dies liefert besser aussehende B-Frames, während fast keine
+Performance-Einbußen auftreten.
+.
 .
 .\" --------------------------------------------------------------------------
 .\" Dateien
