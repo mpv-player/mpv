@@ -1149,6 +1149,18 @@ Maximal skipable frames after non-skipped one
 .TP
 .B \-v, \-\-verbose
 Enable verbose output (more \-v means more verbosity)
+.TP
+.B \-vobsubout <basename>
+Specify the basename for the output .idx and .sub files.  This turns
+off subtitle rendering in the encoded movie and diverts it to Vobsub
+subtitle files.
+.TP
+.B \-vobsuboutindex <index>
+Specify the index of this subtitles in the output files.  Defaults to 0
+.TP
+.B \-vobsuboutid <langid>
+Specify the language two letter code for this subtitle.  This
+overrides what is read from the DVD or the .ifo file.
 
 
 .SH "KEYBOARD CONTROL"
