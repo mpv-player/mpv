@@ -95,13 +95,19 @@ I. TECH SIDE:
 9. Reverting broken commits
 
   In case you committed something really broken and wish to undo it completely,
-  you can use the 'cvs admin -o' command. Assuming that 1.123 is the latest
-  version of the file and the one you want to remove
+  you can use the 'cvs admin -o' command, which removes entries from the
+  revision history of a file. For the corner case that you remove the last
+  revision this amounts to reverting a commit.
+
+  Assuming that 1.123 is the last revision
 
     cvs -z3 admin -o1.123 filename
 
-  Do NOT do this unless you really know what you are doing and the version you
-  are removing is the last version, e.g. there were no commits after yours.
+  will remove revision 1.123, thus reverting the file back to revision 1.122.
+
+  ONLY use this command to delete the LAST revision of a file. Removing other
+  revisions will NOT undo the changes from that revision in the last revision
+  and leave holes in the revision history.
 
 
 Contact A'rpi <arpi@thot.banki.hu> if you have technical problems with the CVS
