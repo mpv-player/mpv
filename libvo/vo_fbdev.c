@@ -410,7 +410,8 @@ static fb_mode_t *find_best_mode(int xres, int yres, range_t *hfreq,
 
 static void set_bpp(struct fb_var_screeninfo *p, int bpp)
 {
-	p->bits_per_pixel = (bpp == 15) ? 16 : bpp;
+/*	p->bits_per_pixel = (bpp == 15) ? 16 : bpp; */
+	p->bits_per_pixel = (bpp + 1) & ~1;
 	p->red.msb_right = p->green.msb_right = p->blue.msb_right = 0;
 	switch (bpp) {
 		case 32:
