@@ -4,7 +4,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-extern int verbose; // defined in mplayer.c
+#include "config.h"
+#include "mp_msg.h"
 
 #include "config.h"
 #include "dvdauth.h"
@@ -27,7 +28,7 @@ static unsigned int read_mpeg_timestamp(stream_t *s,int c){
     return 0; // invalid pts
   }
   pts=(((c>>1)&7)<<30)|((d>>1)<<15)|(e>>1);
-  if(verbose>=3) printf("{%d}",pts);
+  mp_dbg(MSGT_DEMUX,MSGL_DBG3,"{%d}",pts);
   return pts;
 }
 
@@ -53,7 +54,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
   unsigned int dts=0;
   demux_stream_t *ds=NULL;
   
-  if(verbose>=3) printf("demux_read_packet: %X\n",id);
+  mp_dbg(MSGT_DEMUX,MSGL_DBG3,"demux_read_packet: %X\n",id);
 
 //  if(id==0x1F0){
 //    demux->synced=0; // force resync after 0x1F0
@@ -66,10 +67,10 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
   if(id==0x1BF) return -1; // private2
 
   len=stream_read_word(demux->stream);
-  if(verbose>=3)  printf("PACKET len=%d",len);
+  mp_dbg(MSGT_DEMUX,MSGL_DBG3,"PACKET len=%d",len);
 //  if(len==62480){ demux->synced=0;return -1;} /* :) */
   if(len==0 || len>MAX_PS_PACKETSIZE){
-    if(verbose>=2) printf("Invalid PS packet len: %d\n",len);
+    mp_dbg(MSGT_DEMUX,MSGL_DBG2,"Invalid PS packet len: %d\n",len);
     return -2;  // invalid packet !!!!!!
   }
 
@@ -106,14 +107,14 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
 #ifdef HAVE_LIBCSS
         css=1;
 #else
-        printf("Encrypted VOB file (not compiled with libcss support)! Read file DOCS/DVD\n");
+        mp_msg(MSGT_DEMUX,MSGL_WARN,"Encrypted VOB file (not compiled with libcss support)! Read file DOCS/DVD\n");
 #endif
     }
     c=stream_read_char(demux->stream); pts_flags=c>>6;
     c=stream_read_char(demux->stream); hdrlen=c;
     len-=2;
-    if(verbose>=3) printf("  hdrlen=%d  (len=%d)",hdrlen,len);
-    if(hdrlen>len){ printf("demux_mpg: invalid header length  \n"); return -1;}
+    mp_dbg(MSGT_DEMUX,MSGL_DBG3,"  hdrlen=%d  (len=%d)",hdrlen,len);
+    if(hdrlen>len){ mp_msg(MSGT_DEMUX,MSGL_V,"demux_mpg: invalid header length  \n"); return -1;}
     if(pts_flags==2){
       c=stream_read_char(demux->stream);
       pts=read_mpeg_timestamp(demux->stream,c);
@@ -144,7 +145,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
         aid&=0x1F;
 
         if(!demux->s_streams[aid]){
-            printf("==> Found subtitle: %d\n",aid);
+            mp_msg(MSGT_DEMUX,MSGL_V,"==> Found subtitle: %d\n",aid);
             demux->s_streams[aid]=1;
         }
 
@@ -180,26 +181,26 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
             c=stream_read_char(demux->stream);
             head|=c;--len;
           }
-          if(!len) printf("End of packet while searching for PCM header\n");
+          if(!len) mp_msg(MSGT_DEMUX,MSGL_V,"End of packet while searching for PCM header\n");
         }
       } //  if(demux->audio->id==aid)
 
-      } else printf("Unknown 0x1BD substream: 0x%02X  \n",aid);
+      } else mp_msg(MSGT_DEMUX,MSGL_V,"Unknown 0x1BD substream: 0x%02X  \n",aid);
 
     } //if(id==0x1BD)
 
   } else {
     if(c!=0x0f){
-      if (verbose>=1) printf("  {ERROR5,c=%d}  \n",c);
+      mp_msg(MSGT_DEMUX,MSGL_V,"  {ERROR5,c=%d}  \n",c);
       return -1;  // invalid packet !!!!!!
     }
   }
-  if(mpeg_pts_error) printf("  {PTS_err:%d}  \n",mpeg_pts_error);
-  if(verbose>=3) printf(" => len=%d\n",len);
+  if(mpeg_pts_error) mp_msg(MSGT_DEMUX,MSGL_V,"  {PTS_err:%d}  \n",mpeg_pts_error);
+  mp_dbg(MSGT_DEMUX,MSGL_DBG3," => len=%d\n",len);
 
 //  if(len<=0 || len>MAX_PS_PACKETSIZE) return -1;  // Invalid packet size
   if(len<=0 || len>MAX_PS_PACKETSIZE){
-    if(verbose>=2) printf("Invalid PS data len: %d\n",len);
+    mp_dbg(MSGT_DEMUX,MSGL_DBG2,"Invalid PS data len: %d\n",len);
     return -1;  // invalid packet !!!!!!
   }
   
@@ -225,19 +226,19 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
   }
 
   if(ds){
-    if(verbose>=2) printf("DEMUX_MPG: Read %d data bytes from packet %04X\n",len,id);
+    mp_dbg(MSGT_DEMUX,MSGL_DBG2,"DEMUX_MPG: Read %d data bytes from packet %04X\n",len,id);
 //    printf("packet start = 0x%X  \n",stream_tell(demux->stream)-packet_start_pos);
 #ifdef HAVE_LIBCSS
     if (css) {
 	    if (descrambling) CSSDescramble(demux->stream->buffer,key_title); else
-		    printf("Encrypted stream but authentication was not requested by you!!\n");
+		    mp_msg(MSGT_DEMUX,MSGL_WARN,"Encrypted stream but authentication was not requested by you!!\n");
     }
 #endif
     ds_read_packet(ds,demux->stream,len,pts/90000.0f,0,0);
 //    if(ds==demux->sub) parse_dvdsub(ds->last->buffer,ds->last->len);
     return 1;
   }
-  if(verbose>=2) printf("DEMUX_MPG: Skipping %d data bytes from packet %04X\n",len,id);
+  mp_dbg(MSGT_DEMUX,MSGL_DBG2,"DEMUX_MPG: Skipping %d data bytes from packet %04X\n",len,id);
   if(len<=2356) stream_skip(demux->stream,len);
   return 0;
 }
@@ -284,13 +285,13 @@ do{
   }
   if(stream_eof(demux->stream)) break;
   // sure: head=0x000001XX
-  if(verbose>=4) printf("*** head=0x%X\n",head);
+  mp_dbg(MSGT_DEMUX,MSGL_DBG4,"*** head=0x%X\n",head);
   if(demux->synced==0){
     if(head==0x1BA) demux->synced=1;
 #if 0
     else if(head>=0x1C0 && head<=0x1EF){
       demux->synced=2;
-      if(verbose) printf("Mpeg PES stream synced at 0x%X (%d)!\n",demux->filepos,demux->filepos);
+      mp_msg(MSGT_DEMUX,MSGL_V,"Mpeg PES stream synced at 0x%X (%d)!\n",demux->filepos,demux->filepos);
       num_elementary_packets100=0; // requires for re-sync!
       num_elementary_packets101=0; // requires for re-sync!
     }
@@ -299,7 +300,7 @@ do{
   if(demux->synced==1){
     if(head==0x1BB || head==0x1BD || (head>=0x1C0 && head<=0x1EF)){
       demux->synced=2;
-      if(verbose) printf("system stream synced at 0x%X (%d)!\n",demux->filepos,demux->filepos);
+      mp_msg(MSGT_DEMUX,MSGL_V,"system stream synced at 0x%X (%d)!\n",demux->filepos,demux->filepos);
       num_elementary_packets100=0; // requires for re-sync!
       num_elementary_packets101=0; // requires for re-sync!
     } else demux->synced=0;
@@ -309,33 +310,33 @@ do{
       if(!ret)
         if(--max_packs==0){
           demux->stream->eof=1;
-          printf("demux: file doesn't contain the selected audio or video stream\n");
+          mp_msg(MSGT_DEMUX,MSGL_ERR,"demux: file doesn't contain the selected audio or video stream\n");
           return 0;
         }
   } else {
     if(head>=0x100 && head<0x1B0){
       if(head==0x100) ++num_elementary_packets100; else
       if(head==0x101) ++num_elementary_packets101;
-      if(verbose>=3) printf("Opps... elementary video packet found: %03X\n",head);
+      mp_msg(MSGT_DEMUX,MSGL_DBG3,"Opps... elementary video packet found: %03X\n",head);
     } else
     if(head>=0x1C0 && head<0x1F0){
       ++num_elementary_packetsPES;
-      if(verbose>=3) printf("Opps... PES packet found: %03X\n",head);
+      mp_msg(MSGT_DEMUX,MSGL_DBG3,"Opps... PES packet found: %03X\n",head);
     } else
       if(head==0x1B6) ++num_elementary_packets1B6;
 #if 1
     if( ( (num_elementary_packets100>50 && num_elementary_packets101>50) ||
           (num_elementary_packetsPES>50) ) && skipped>4000000){
-        if(verbose) printf("sync_mpeg_ps: seems to be ES/PES stream...\n");
+        mp_msg(MSGT_DEMUX,MSGL_V,"sync_mpeg_ps: seems to be ES/PES stream...\n");
         demux->stream->eof=1;
         break;
     }
 #endif
   }
 } while(ret!=1);
-  if(verbose>=2) printf("demux: %d bad bytes skipped\n",skipped);
+  mp_dbg(MSGT_DEMUX,MSGL_DBG2,"demux: %d bad bytes skipped\n",skipped);
   if(demux->stream->eof){
-    if(verbose>=2) printf("MPEG Stream reached EOF\n");
+    mp_msg(MSGT_DEMUX,MSGL_V,"MPEG Stream reached EOF\n");
     return 0;
   }
   return 1;

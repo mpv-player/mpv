@@ -6,6 +6,7 @@
 #include <fcntl.h>
 
 #include "config.h"
+#include "mp_msg.h"
 
 #ifdef __FreeBSD__
 #include <sys/cdrio.h>
@@ -20,7 +21,6 @@
 static URL_t* url;
 #endif
 
-extern int verbose;
 extern int vcd_get_track_end(int fd,int track);
 
 // Open a new stream  (stdin/file/vcd/url)
@@ -40,14 +40,14 @@ int bsize = VCD_SECTOR_SIZE;
 if(vcd_track){
   int ret,ret2;
   f=open(filename,O_RDONLY);
-  if(f<0){ fprintf(stderr,"CD-ROM Device '%s' not found!\n",filename);return NULL; }
+  if(f<0){ mp_msg(MSGT_OPEN,MSGL_ERR,"CD-ROM Device '%s' not found!\n",filename);return NULL; }
   vcd_read_toc(f);
   ret2=vcd_get_track_end(f,vcd_track);
-  if(ret2<0){ fprintf(stderr,"Error selecting VCD track! (get)\n");return NULL;}
+  if(ret2<0){ mp_msg(MSGT_OPEN,MSGL_ERR,"Error selecting VCD track! (get)\n");return NULL;}
   ret=vcd_seek_to_track(f,vcd_track);
-  if(ret<0){ fprintf(stderr,"Error selecting VCD track! (seek)\n");return NULL;}
+  if(ret<0){ mp_msg(MSGT_OPEN,MSGL_ERR,"Error selecting VCD track! (seek)\n");return NULL;}
 //  seek_to_byte+=ret;
-  if(verbose) printf("VCD start byte position: 0x%X  end: 0x%X\n",ret,ret2);
+  mp_msg(MSGT_OPEN,MSGL_V,"VCD start byte position: 0x%X  end: 0x%X\n",ret,ret2);
 #ifdef VCD_CACHE
   vcd_cache_init(vcd_cache_size);
 #endif
@@ -65,7 +65,7 @@ if(vcd_track){
 //============ Open STDIN ============
   if(!strcmp(filename,"-")){
       // read from stdin
-      printf("Reading from stdin...\n");
+      mp_msg(MSGT_OPEN,MSGL_INFO,"Reading from stdin...\n");
       f=0; // 0=stdin
       stream=new_stream(f,STREAMTYPE_STREAM);
       return stream;
@@ -76,13 +76,13 @@ if(vcd_track){
   if(url) {
         (*file_format)=autodetectProtocol( url, &f );
         if( (*file_format)==DEMUXER_TYPE_UNKNOWN ) { 
-          fprintf(stderr,"Unable to open URL: %s\n", filename);
+          mp_msg(MSGT_OPEN,MSGL_ERR,"Unable to open URL: %s\n", filename);
           url_free(url);
           return NULL;
         }
         f=streaming_start( &url, f, file_format );
-        if(f<0){ fprintf(stderr,"Unable to open URL: %s\n", url->url); return NULL; }
-        printf("Connected to server: %s\n", url->hostname );
+        if(f<0){ mp_msg(MSGT_OPEN,MSGL_ERR,"Unable to open URL: %s\n", url->url); return NULL; }
+        mp_msg(MSGT_OPEN,MSGL_INFO,"Connected to server: %s\n", url->hostname );
         stream=new_stream(f,STREAMTYPE_STREAM);
 	return NULL;
   }
@@ -90,16 +90,16 @@ if(vcd_track){
 
 //============ Open plain FILE ============
        f=open(filename,O_RDONLY);
-       if(f<0){ fprintf(stderr,"File not found: '%s'\n",filename);return NULL; }
+       if(f<0){ mp_msg(MSGT_OPEN,MSGL_ERR,"File not found: '%s'\n",filename);return NULL; }
        len=lseek(f,0,SEEK_END); lseek(f,0,SEEK_SET);
        if (len == -1)
 	 perror("Error: lseek failed to obtain video file size");
        else
         if(verbose)
 #ifdef _LARGEFILE_SOURCE
-	 printf("File size is %lld bytes\n", (long long)len);
+	 mp_msg(MSGT_OPEN,MSGL_V,"File size is %lld bytes\n", (long long)len);
 #else
-	 printf("File size is %u bytes\n", (unsigned int)len);
+	 mp_msg(MSGT_OPEN,MSGL_V,"File size is %u bytes\n", (unsigned int)len);
 #endif
        stream=new_stream(f,STREAMTYPE_FILE);
        stream->end_pos=len;

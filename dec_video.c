@@ -4,6 +4,7 @@
 #include <unistd.h>
 
 #include "config.h"
+#include "mp_msg.h"
 
 extern int verbose; // defined in mplayer.c
 extern int divx_quality;
@@ -152,7 +153,7 @@ switch(sh_video->codec->driver){
 //     exit(1);
       return 0;
    }  
-   if(verbose) printf("INFO: Win32 video codec init OK!\n");
+   mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: Win32 video codec init OK!\n");
    break;
  }
  case VFM_VFWEX: {
@@ -161,12 +162,12 @@ switch(sh_video->codec->driver){
 //     exit(1);
       return 0;
    }  
-   if(verbose) printf("INFO: Win32Ex video codec init OK!\n");
+   mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: Win32Ex video codec init OK!\n");
    break;
  }
  case VFM_DSHOW: { // Win32/DirectShow
 #ifndef USE_DIRECTSHOW
-   fprintf(stderr,"MPlayer was compiled WITHOUT directshow support!\n");
+   mp_msg(MSGT_DECVIDEO,MSGL_ERR,"MPlayer was compiled WITHOUT directshow support!\n");
    return 0;
 //   GUI_MSG( mplCompileWithoutDSSupport )
 //   exit(1);
@@ -174,10 +175,10 @@ switch(sh_video->codec->driver){
    int bpp;
    if(DS_VideoDecoder_Open(sh_video->codec->dll,&sh_video->codec->guid, sh_video->bih, 0, &sh_video->our_out_buffer)){
 //   if(DS_VideoDecoder_Open(sh_video->codec->dll,&sh_video->codec->guid, sh_video->bih, 0, NULL)){
-        printf("ERROR: Couldn't open required DirectShow codec: %s\n",sh_video->codec->dll);
-        printf("Maybe you forget to upgrade your win32 codecs?? It's time to download the new\n");
-        printf("package from:  ftp://thot.banki.hu/esp-team/linux/MPlayer/w32codec.zip  !\n");
-        printf("Or you should disable DShow support: make distclean;make -f Makefile.No-DS\n");
+        mp_msg(MSGT_DECVIDEO,MSGL_ERR,"ERROR: Couldn't open required DirectShow codec: %s\n",sh_video->codec->dll);
+        mp_msg(MSGT_DECVIDEO,MSGL_HINT,"Maybe you forget to upgrade your win32 codecs?? It's time to download the new\n");
+        mp_msg(MSGT_DECVIDEO,MSGL_HINT,"package from:  ftp://mplayerhq.hu/MPlayer/releases/w32codec.zip  !\n");
+//        mp_msg(MSGT_DECVIDEO,MSGL_HINT,"Or you should disable DShow support: make distclean;make -f Makefile.No-DS\n");
       return 0;
 //        #ifdef HAVE_GUI
 //         if ( !nogui )
@@ -213,7 +214,7 @@ switch(sh_video->codec->driver){
 //   printf("DivX setting result = %d\n", DS_SetAttr_DivX("Quality",divx_quality) );
 //   printf("DivX setting result = %d\n", DS_SetValue_DivX("Brightness",60) );
    
-   if(verbose) printf("INFO: Win32/DShow video codec init OK!\n");
+   mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: Win32/DShow video codec init OK!\n");
    break;
 #endif
  }
@@ -221,11 +222,11 @@ switch(sh_video->codec->driver){
  case VFM_VFW:
  case VFM_DSHOW:
  case VFM_VFWEX:
-   fprintf(stderr,"Support for win32 codecs disabled, or unavailable on non-x86 platforms!\n");
+   mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Support for win32 codecs disabled, or unavailable on non-x86 platforms!\n");
    return 0;
 #endif	/* !USE_WIN32DLL */
  case VFM_ODIVX: {  // OpenDivX
-   if(verbose) printf("OpenDivX video codec\n");
+   mp_msg(MSGT_DECVIDEO,MSGL_V,"OpenDivX video codec\n");
    { DEC_PARAM dec_param;
      DEC_SET dec_set;
         memset(&dec_param,0,sizeof(dec_param));
@@ -240,15 +241,15 @@ switch(sh_video->codec->driver){
 	dec_set.postproc_level = divx_quality;
 	decore(0x123, DEC_OPT_SETPP, &dec_set, NULL);
    }
-   if(verbose) printf("INFO: OpenDivX video codec init OK!\n");
+   mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: OpenDivX video codec init OK!\n");
    break;
  }
  case VFM_DIVX4: {  // DivX4Linux
 #ifndef NEW_DECORE
-   fprintf(stderr,"MPlayer was compiled WITHOUT DivX4Linux (libdivxdecore.so) support!\n");
+   mp_msg(MSGT_DECVIDEO,MSGL_ERR,"MPlayer was compiled WITHOUT DivX4Linux (libdivxdecore.so) support!\n");
    return 0; //exit(1);
 #else
-   if(verbose) printf("DivX4Linux video codec\n");
+   mp_msg(MSGT_DECVIDEO,MSGL_V,"DivX4Linux video codec\n");
    { DEC_PARAM dec_param;
      DEC_SET dec_set;
      int bits=16;
@@ -263,7 +264,7 @@ switch(sh_video->codec->driver){
 	case IMGFMT_BGR24: dec_param.output_format=DEC_RGB24_INV;bits=24;break;
 	case IMGFMT_BGR32: dec_param.output_format=DEC_RGB32_INV;bits=32;break;
 	default:
-	  fprintf(stderr,"Unsupported out_fmt: 0x%X\n",out_fmt);
+	  mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Unsupported out_fmt: 0x%X\n",out_fmt);
 	  return 0;
 	}
 	dec_param.x_dim = sh_video->bih->biWidth;
@@ -274,35 +275,35 @@ switch(sh_video->codec->driver){
 	sh_video->our_out_buffer = shmem_alloc(((bits*dec_param.x_dim+7)/8)*dec_param.y_dim);
 //	sh_video->our_out_buffer = shmem_alloc(dec_param.x_dim*dec_param.y_dim*5);
    }
-   if(verbose) printf("INFO: OpenDivX video codec init OK!\n");
+   mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: OpenDivX video codec init OK!\n");
    break;
 #endif
  }
  case VFM_FFMPEG: {  // FFmpeg's libavcodec
 #ifndef USE_LIBAVCODEC
-   fprintf(stderr,"MPlayer was compiled WITHOUT libavcodec support!\n");
+   mp_msg(MSGT_DECVIDEO,MSGL_ERR,"MPlayer was compiled WITHOUT libavcodec support!\n");
    return 0; //exit(1);
 #else
-   if(verbose) printf("FFmpeg's libavcodec video codec\n");
+   mp_msg(MSGT_DECVIDEO,MSGL_V,"FFmpeg's libavcodec video codec\n");
     avcodec_init();
     avcodec_register_all();
     lavc_codec = (AVCodec *)avcodec_find_decoder_by_name(sh_video->codec->dll);
     if(!lavc_codec){
-	fprintf(stderr,"Can't find codec '%s' in libavcodec...\n",sh_video->codec->dll);
+	mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Can't find codec '%s' in libavcodec...\n",sh_video->codec->dll);
 	return 0; //exit(1);
     }
     memset(&lavc_context, 0, sizeof(lavc_context));
 //    sh_video->disp_h/=2; // !!
     lavc_context.width=sh_video->disp_w;
     lavc_context.height=sh_video->disp_h;
-    printf("libavcodec.size: %d x %d\n",lavc_context.width,lavc_context.height);
+    mp_dbg(MSGT_DECVIDEO,MSGL_DBG2,"libavcodec.size: %d x %d\n",lavc_context.width,lavc_context.height);
     /* open it */
     if (avcodec_open(&lavc_context, lavc_codec) < 0) {
-        fprintf(stderr, "could not open codec\n");
+        mp_msg(MSGT_DECVIDEO,MSGL_ERR, "could not open codec\n");
         return 0; //exit(1);
     }
    
-   if(verbose) printf("INFO: libavcodec init OK!\n");
+   mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: libavcodec init OK!\n");
    break;
 #endif
  }
@@ -313,9 +314,9 @@ switch(sh_video->codec->driver){
    picture->pp_options=divx_quality;
 #else
    if(divx_quality){
-       printf("WARNING! You requested image postprocessing for an MPEG 1/2 video,\n");
-       printf("         but compiled MPlayer without MPEG 1/2 postprocessing support!\n");
-       printf("         #define MPEG12_POSTPROC in config.h, and recompile libmpeg2!\n");
+       mp_msg(MSGT_DECVIDEO,MSGL_HINT,"WARNING! You requested image postprocessing for an MPEG 1/2 video,\n");
+       mp_msg(MSGT_DECVIDEO,MSGL_HINT,"         but compiled MPlayer without MPEG 1/2 postprocessing support!\n");
+       mp_msg(MSGT_DECVIDEO,MSGL_HINT,"         #define MPEG12_POSTPROC in config.h, and recompile libmpeg2!\n");
    }
 #endif
    mpeg2_allocate_image_buffers (picture);
@@ -415,7 +416,7 @@ switch(sh_video->codec->driver){
 #ifdef USE_LIBAVCODEC
   case VFM_FFMPEG: {        // libavcodec
     int got_picture=0;
-if(verbose>1) printf("Calling ffmpeg...\n");
+    mp_dbg(MSGT_DECVIDEO,MSGL_DBG2,"Calling ffmpeg...\n");
     if(drop_frame<2 && in_size>0){
         int ret = avcodec_decode_video(&lavc_context, &lavc_picture,
 	     &got_picture, start, in_size);
@@ -431,10 +432,10 @@ if(verbose>1){
      case PIX_FMT_YUV444P: x="YUV444P";break;
 #endif
      }
-     printf("DONE -> got_picture=%d  format=0x%X (%s) \n",got_picture,
+     mp_dbg(MSGT_DECVIDEO,MSGL_DBG2,"DONE -> got_picture=%d  format=0x%X (%s) \n",got_picture,
 	lavc_context.pix_fmt,x);
 }
-	if(ret<0) fprintf(stderr, "Error while decoding frame!\n");
+	if(ret<0) mp_msg(MSGT_DECVIDEO,MSGL_WARN, "Error while decoding frame!\n");
 	if(!drop_frame && got_picture){
 //	if(!drop_frame){
 	  if(planar){
@@ -498,7 +499,7 @@ else
                         &sh_video->o_bih,
                         drop_frame ? 0 : sh_video->our_out_buffer);
 
-      if(ret){ printf("Error decompressing frame, err=%d\n",(int)ret);break; }
+      if(ret){ mp_msg(MSGT_DECVIDEO,MSGL_WARN,"Error decompressing frame, err=%d\n",(int)ret);break; }
 
     if(!drop_frame) blit_frame=3;
     break;
@@ -570,38 +571,38 @@ switch(d_video->demuxer->file_format){
  case DEMUXER_TYPE_MPEG_ES:
  case DEMUXER_TYPE_MPEG_PS: {
    // Find sequence_header first:
-   if(verbose) printf("Searching for sequence header... ");fflush(stdout);
+   mp_msg(MSGT_DECVIDEO,MSGL_V,"Searching for sequence header... ");fflush(stdout);
    while(1){
       int i=sync_video_packet(d_video);
       if(i==0x1B3) break; // found it!
       if(!i || !skip_video_packet(d_video)){
-        if(verbose)  printf("NONE :(\n");
-        fprintf(stderr,"MPEG: FATAL: EOF while searching for sequence header\n");
+        if(verbose)  mp_msg(MSGT_DECVIDEO,MSGL_V,"NONE :(\n");
+        mp_msg(MSGT_DECVIDEO,MSGL_ERR,"MPEG: FATAL: EOF while searching for sequence header\n");
 	return 0;
 //        GUI_MSG( mplMPEGErrorSeqHeaderSearch )
 //        exit(1);
       }
    }
-   if(verbose) printf("OK!\n");
+   mp_msg(MSGT_DECVIDEO,MSGL_V,"OK!\n");
 //   sh_video=d_video->sh;sh_video->ds=d_video;
    mpeg2_init();
    // ========= Read & process sequence header & extension ============
    videobuffer=shmem_alloc(VIDEOBUFFER_SIZE);
    if(!videobuffer){ 
-     fprintf(stderr,"Cannot allocate shared memory\n");
+     mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Cannot allocate shared memory\n");
      return 0;
 //     GUI_MSG( mplErrorShMemAlloc )
 //     exit(0);
    }
    videobuf_len=0;
    if(!read_video_packet(d_video)){ 
-     fprintf(stderr,"FATAL: Cannot read sequence header!\n");
+     mp_msg(MSGT_DECVIDEO,MSGL_ERR,"FATAL: Cannot read sequence header!\n");
      return 0;
 //     GUI_MSG( mplMPEGErrorCannotReadSeqHeader )
 //     exit(1);
    }
    if(header_process_sequence_header (picture, &videobuffer[4])) {
-     printf ("bad sequence header!\n"); 
+     mp_msg(MSGT_DECVIDEO,MSGL_ERR,"bad sequence header!\n"); 
      return 0;
 //     GUI_MSG( mplMPEGErrorBadSeqHeader )
 //     exit(1);
@@ -610,13 +611,13 @@ switch(d_video->demuxer->file_format){
 //    videobuf_len=0;
     int pos=videobuf_len;
     if(!read_video_packet(d_video)){ 
-      fprintf(stderr,"FATAL: Cannot read sequence header extension!\n");
+      mp_msg(MSGT_DECVIDEO,MSGL_ERR,"FATAL: Cannot read sequence header extension!\n");
       return 0;
 //      GUI_MSG( mplMPEGErrorCannotReadSeqHeaderExt )
 //      exit(1);
     }
     if(header_process_extension (picture, &videobuffer[pos+4])) {
-      printf ("bad sequence header extension!\n");  
+      mp_msg(MSGT_DECVIDEO,MSGL_ERR,"bad sequence header extension!\n");  
       return 0;
 //      GUI_MSG( mplMPEGErrorBadSeqHeaderExt )
 //      exit(1);
@@ -640,8 +641,8 @@ switch(d_video->demuxer->file_format){
    if(picture->bitrate!=0x3FFFF) // unspecified/VBR ?
        sh_video->i_bps=1000*picture->bitrate/16;
    // info:
-   if(verbose) printf("mpeg bitrate: %d (%X)\n",picture->bitrate,picture->bitrate);
-   printf("VIDEO:  %s  %dx%d  (aspect %d)  %4.2f fps  %5.1f kbps (%4.1f kbyte/s)\n",
+   mp_dbg(MSGT_DECVIDEO,MSGL_DBG2,"mpeg bitrate: %d (%X)\n",picture->bitrate,picture->bitrate);
+   mp_msg(MSGT_DECVIDEO,MSGL_INFO,"VIDEO:  %s  %dx%d  (aspect %d)  %4.2f fps  %5.1f kbps (%4.1f kbyte/s)\n",
     picture->mpeg1?"MPEG1":"MPEG2",
     sh_video->disp_w,sh_video->disp_h,
     picture->aspect_ratio_information,

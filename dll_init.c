@@ -4,8 +4,7 @@
 #include <unistd.h>
 
 #include "config.h"
-
-extern int verbose; // defined in mplayer.c
+#include "mp_msg.h"
 
 #include "stream.h"
 #include "demuxer.h"
@@ -31,7 +30,7 @@ int init_acm_audio_codec(sh_audio_t *sh_audio){
     WAVEFORMATEX *in_fmt=sh_audio->wf;
     unsigned long srcsize=0;
 
-  if(verbose) printf("======= Win32 (ACM) AUDIO Codec init =======\n");
+    mp_msg(MSGT_WIN32,MSGL_V,"======= Win32 (ACM) AUDIO Codec init =======\n");
 
     sh_audio->srcstream=NULL;
 
@@ -52,31 +51,31 @@ int init_acm_audio_codec(sh_audio_t *sh_audio){
 		    NULL,0,0,0);
     if(ret){
         if(ret==ACMERR_NOTPOSSIBLE)
-            printf("ACM_Decoder: Unappropriate audio format\n");
+            mp_msg(MSGT_WIN32,MSGL_ERR,"ACM_Decoder: Unappropriate audio format\n");
         else
-            printf("ACM_Decoder: acmStreamOpen error %d", (int)ret);
+            mp_msg(MSGT_WIN32,MSGL_ERR,"ACM_Decoder: acmStreamOpen error %d", (int)ret);
         sh_audio->srcstream=NULL;
         return 0;
     }
-    if(verbose) printf("Audio codec opened OK! ;-)\n");
+    mp_msg(MSGT_WIN32,MSGL_V,"Audio codec opened OK! ;-)\n");
 
     acmStreamSize(sh_audio->srcstream, in_fmt->nBlockAlign, &srcsize, ACM_STREAMSIZEF_SOURCE);
     //if(verbose) printf("Audio ACM output buffer min. size: %ld (reported by codec)\n",srcsize);
     srcsize*=2;
     //if(srcsize<MAX_OUTBURST) srcsize=MAX_OUTBURST;
     if(!srcsize){
-        printf("Warning! ACM codec reports srcsize=0\n");
+        mp_msg(MSGT_WIN32,MSGL_WARN,"Warning! ACM codec reports srcsize=0\n");
         srcsize=16384;
     }
     // limit srcsize to 4-16kb
     //while(srcsize && srcsize<4096) srcsize*=2;
     //while(srcsize>16384) srcsize/=2;
     sh_audio->audio_out_minsize=srcsize; // audio output min. size
-    if(verbose) printf("Audio ACM output buffer min. size: %ld\n",srcsize);
+    mp_msg(MSGT_WIN32,MSGL_V,"Audio ACM output buffer min. size: %ld\n",srcsize);
 
     acmStreamSize(sh_audio->srcstream, srcsize, &srcsize, ACM_STREAMSIZEF_DESTINATION);
     sh_audio->audio_in_minsize=srcsize; // audio input min. size
-    if(verbose) printf("Audio ACM input buffer min. size: %ld\n",srcsize);
+    mp_msg(MSGT_WIN32,MSGL_V,"Audio ACM input buffer min. size: %ld\n",srcsize);
     
     if(srcsize<in_fmt->nBlockAlign) srcsize=in_fmt->nBlockAlign;
 
@@ -93,7 +92,7 @@ int acm_decode_audio(sh_audio_t *sh_audio, void* a_buffer,int minlen,int maxlen)
         DWORD srcsize=0;
         DWORD len=minlen;
         acmStreamSize(sh_audio->srcstream,len , &srcsize, ACM_STREAMSIZEF_DESTINATION);
-        if(verbose>=3)printf("acm says: srcsize=%ld  (buffsize=%d)  out_size=%d\n",srcsize,sh_audio->a_in_buffer_size,len);
+        mp_msg(MSGT_WIN32,MSGL_DBG3,"acm says: srcsize=%ld  (buffsize=%d)  out_size=%d\n",srcsize,sh_audio->a_in_buffer_size,len);
 
         if(srcsize<sh_audio->wf->nBlockAlign){
            srcsize=sh_audio->wf->nBlockAlign;
@@ -108,7 +107,7 @@ int acm_decode_audio(sh_audio_t *sh_audio, void* a_buffer,int minlen,int maxlen)
             demux_read_data(sh_audio->ds,&sh_audio->a_in_buffer[sh_audio->a_in_buffer_len],
             srcsize-sh_audio->a_in_buffer_len);
         }
-        if(verbose>=3)printf("acm convert %d -> %d bytes\n",sh_audio->a_in_buffer_len,len);
+        mp_msg(MSGT_WIN32,MSGL_DBG3,"acm convert %d -> %d bytes\n",sh_audio->a_in_buffer_len,len);
         memset(&ash, 0, sizeof(ash));
         ash.cbStruct=sizeof(ash);
         ash.fdwStatus=0;
@@ -119,17 +118,17 @@ int acm_decode_audio(sh_audio_t *sh_audio, void* a_buffer,int minlen,int maxlen)
         ash.cbDstLength=len;
         hr=acmStreamPrepareHeader(sh_audio->srcstream,&ash,0);
         if(hr){
-          printf("ACM_Decoder: acmStreamPrepareHeader error %d\n",(int)hr);
+          mp_msg(MSGT_WIN32,MSGL_V,"ACM_Decoder: acmStreamPrepareHeader error %d\n",(int)hr);
 					return -1;
         }
         hr=acmStreamConvert(sh_audio->srcstream,&ash,0);
         if(hr){
-          if(verbose>=2) printf("ACM_Decoder: acmStreamConvert error %d\n",(int)hr);
+          mp_msg(MSGT_WIN32,MSGL_DBG2,"ACM_Decoder: acmStreamConvert error %d\n",(int)hr);
           
 //					return -1;
         }
         if(verbose>1)
-          printf("acm converted %d -> %d\n",ash.cbSrcLengthUsed,ash.cbDstLengthUsed);
+          mp_msg(MSGT_WIN32,MSGL_DBG2,"acm converted %d -> %d\n",ash.cbSrcLengthUsed,ash.cbDstLengthUsed);
         if(ash.cbSrcLengthUsed>=sh_audio->a_in_buffer_len){
           sh_audio->a_in_buffer_len=0;
         } else {
@@ -139,7 +138,7 @@ int acm_decode_audio(sh_audio_t *sh_audio, void* a_buffer,int minlen,int maxlen)
         len=ash.cbDstLengthUsed;
         hr=acmStreamUnprepareHeader(sh_audio->srcstream,&ash,0);
         if(hr){
-          printf("ACM_Decoder: acmStreamUnprepareHeader error %d\n",(int)hr);
+          mp_msg(MSGT_WIN32,MSGL_V,"ACM_Decoder: acmStreamUnprepareHeader error %d\n",(int)hr);
         }
         return len;
 }
@@ -151,7 +150,7 @@ int init_video_codec(sh_video_t *sh_video,int ex){
   int yuv=0;
   unsigned int outfmt=sh_video->codec->outfmt[sh_video->outfmtidx];
 
-  if(verbose) printf("======= Win32 (VFW) VIDEO Codec init =======\n");
+  mp_msg(MSGT_WIN32,MSGL_V,"======= Win32 (VFW) VIDEO Codec init =======\n");
 
   memset(&sh_video->o_bih, 0, sizeof(BITMAPINFOHEADER));
   sh_video->o_bih.biSize = sizeof(BITMAPINFOHEADER);
@@ -160,7 +159,7 @@ int init_video_codec(sh_video_t *sh_video,int ex){
 //  sh_video->hic = ICOpen( 0x63646976, sh_video->bih->biCompression, ICMODE_FASTDECOMPRESS);
   sh_video->hic = ICOpen( 0x63646976, sh_video->bih->biCompression, ICMODE_DECOMPRESS);
   if(!sh_video->hic){
-    printf("ICOpen failed! unknown codec / wrong parameters?\n");
+    mp_msg(MSGT_WIN32,MSGL_ERR,"ICOpen failed! unknown codec / wrong parameters?\n");
     return 0;
   }
 
@@ -168,10 +167,10 @@ int init_video_codec(sh_video_t *sh_video,int ex){
 
   ret = ICDecompressGetFormat(sh_video->hic, sh_video->bih, &sh_video->o_bih);
   if(ret){
-    printf("ICDecompressGetFormat failed: Error %d\n", (int)ret);
+    mp_msg(MSGT_WIN32,MSGL_ERR,"ICDecompressGetFormat failed: Error %d\n", (int)ret);
     return 0;
   }
-  if(verbose) printf("ICDecompressGetFormat OK\n");
+  mp_msg(MSGT_WIN32,MSGL_V,"ICDecompressGetFormat OK\n");
   
 //  printf("ICM_DECOMPRESS_QUERY=0x%X",ICM_DECOMPRESS_QUERY);
 
@@ -234,7 +233,7 @@ int init_video_codec(sh_video_t *sh_video,int ex){
       break;
 
   default:
-      printf("unsupported image format: 0x%x\n", outfmt);
+      mp_msg(MSGT_WIN32,MSGL_ERR,"unsupported image format: 0x%x\n", outfmt);
       return 0;
   }
 
@@ -272,22 +271,22 @@ int init_video_codec(sh_video_t *sh_video,int ex){
       ICDecompressQueryEx(sh_video->hic, sh_video->bih, &sh_video->o_bih) :
       ICDecompressQuery(sh_video->hic, sh_video->bih, &sh_video->o_bih);
   if(ret){
-    printf("ICDecompressQuery failed: Error %d\n", (int)ret);
+    mp_msg(MSGT_WIN32,MSGL_ERR,"ICDecompressQuery failed: Error %d\n", (int)ret);
     return 0;
   }
-  if(verbose) printf("ICDecompressQuery OK\n");
+  mp_msg(MSGT_WIN32,MSGL_V,"ICDecompressQuery OK\n");
 
   ret = ex ?
       ICDecompressBeginEx(sh_video->hic, sh_video->bih, &sh_video->o_bih) :
       ICDecompressBegin(sh_video->hic, sh_video->bih, &sh_video->o_bih);
   if(ret){
-    printf("ICDecompressBegin failed: Error %d\n", (int)ret);
+    mp_msg(MSGT_WIN32,MSGL_ERR,"ICDecompressBegin failed: Error %d\n", (int)ret);
     return 0;
   }
 
   sh_video->our_out_buffer = shmem_alloc(sh_video->o_bih.biSizeImage);
   if(!sh_video->our_out_buffer){
-    printf("not enough memory for decoded picture buffer (%ld bytes)\n", sh_video->o_bih.biSizeImage);
+    mp_msg(MSGT_WIN32,MSGL_ERR,"not enough memory for decoded picture buffer (%ld bytes)\n", sh_video->o_bih.biSizeImage);
     return 0;
   }
 
@@ -296,6 +295,6 @@ int init_video_codec(sh_video_t *sh_video,int ex){
 
 //  avi_header.our_in_buffer=malloc(avi_header.video.dwSuggestedBufferSize); // FIXME!!!!
   
-  if(verbose) printf("VIDEO CODEC Init OK!!! ;-)\n");
+  mp_msg(MSGT_WIN32,MSGL_V,"VIDEO CODEC Init OK!!! ;-)\n");
   return 1;
 }

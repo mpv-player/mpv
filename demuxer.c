@@ -7,9 +7,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-extern int verbose; // defined in mplayer.c
-
 #include "config.h"
+#include "mp_msg.h"
 
 #include "stream.h"
 #include "demuxer.h"
@@ -64,9 +63,9 @@ demuxer_t* new_demuxer(stream_t *stream,int type,int a_id,int v_id,int s_id){
 
 sh_audio_t* new_sh_audio(demuxer_t *demuxer,int id){
     if(demuxer->a_streams[id]){
-        printf("Warning! Audio stream header %d redefined!\n",id);
+        mp_msg(MSGT_DEMUXER,MSGL_WARN,"Warning! Audio stream header %d redefined!\n",id);
     } else {
-        if(verbose) printf("==> Found audio stream: %d\n",id);
+        mp_msg(MSGT_DEMUXER,MSGL_V,"==> Found audio stream: %d\n",id);
         demuxer->a_streams[id]=malloc(sizeof(sh_audio_t));
         memset(demuxer->a_streams[id],0,sizeof(sh_audio_t));
     }
@@ -75,9 +74,9 @@ sh_audio_t* new_sh_audio(demuxer_t *demuxer,int id){
 
 sh_video_t* new_sh_video(demuxer_t *demuxer,int id){
     if(demuxer->v_streams[id]){
-        printf("Warning! video stream header %d redefined!\n",id);
+        mp_msg(MSGT_DEMUXER,MSGL_WARN,"Warning! video stream header %d redefined!\n",id);
     } else {
-        if(verbose) printf("==> Found video stream: %d\n",id);
+        mp_msg(MSGT_DEMUXER,MSGL_V,"==> Found video stream: %d\n",id);
         demuxer->v_streams[id]=malloc(sizeof(sh_video_t));
         memset(demuxer->v_streams[id],0,sizeof(sh_video_t));
     }
@@ -101,8 +100,7 @@ void ds_add_packet(demux_stream_t *ds,demux_packet_t* dp){
       // first packet in stream
       ds->first=ds->last=dp;
     }
-    if(verbose>=2)
-      printf("DEMUX: Append packet to %s, len=%d  pts=%5.3f  pos=%u  [packs: A=%d V=%d]\n",
+    mp_dbg(MSGT_DEMUXER,MSGL_DBG2,"DEMUX: Append packet to %s, len=%d  pts=%5.3f  pos=%u  [packs: A=%d V=%d]\n",
         (ds==ds->demuxer->audio)?"d_audio":"d_video",
         dp->len,dp->pts,(unsigned int)dp->pos,ds->demuxer->audio->packs,ds->demuxer->video->packs);
 }
@@ -148,9 +146,9 @@ int ds_fill_buffer(demux_stream_t *ds){
   demuxer_t *demux=ds->demuxer;
   if(ds->buffer) free(ds->buffer);
   if(verbose>2){
-    if(ds==demux->audio) printf("ds_fill_buffer(d_audio) called\n");else
-    if(ds==demux->video) printf("ds_fill_buffer(d_video) called\n");else
-                         printf("ds_fill_buffer(unknown 0x%X) called\n",(unsigned int)ds);
+    if(ds==demux->audio) mp_dbg(MSGT_DEMUXER,MSGL_DBG3,"ds_fill_buffer(d_audio) called\n");else
+    if(ds==demux->video) mp_dbg(MSGT_DEMUXER,MSGL_DBG3,"ds_fill_buffer(d_video) called\n");else
+                         mp_dbg(MSGT_DEMUXER,MSGL_DBG3,"ds_fill_buffer(unknown 0x%X) called\n",(unsigned int)ds);
   }
   while(1){
     if(ds->packs){
@@ -177,23 +175,23 @@ int ds_fill_buffer(demux_stream_t *ds){
       return 1; //ds->buffer_size;
     }
     if(demux->audio->packs>=MAX_PACKS || demux->audio->bytes>=MAX_PACK_BYTES){
-      printf("\nDEMUXER: Too many (%d in %d bytes) audio packets in the buffer!\n",demux->audio->packs,demux->audio->bytes);
-      printf("(maybe you play a non-interleaved stream/file or audio codec failed)\n");
+      mp_msg(MSGT_DEMUXER,MSGL_ERR,"\nDEMUXER: Too many (%d in %d bytes) audio packets in the buffer!\n",demux->audio->packs,demux->audio->bytes);
+      mp_msg(MSGT_DEMUXER,MSGL_HINT,"(maybe you play a non-interleaved stream/file or audio codec failed)\n");
       break;
     }
     if(demux->video->packs>=MAX_PACKS || demux->video->bytes>=MAX_PACK_BYTES){
-      printf("\nDEMUXER: Too many (%d in %d bytes) video packets in the buffer!\n",demux->video->packs,demux->video->bytes);
-      printf("(maybe you play a non-interleaved stream/file or video codec failed)\n");
+      mp_msg(MSGT_DEMUXER,MSGL_ERR,"\nDEMUXER: Too many (%d in %d bytes) video packets in the buffer!\n",demux->video->packs,demux->video->bytes);
+      mp_msg(MSGT_DEMUXER,MSGL_HINT,"(maybe you play a non-interleaved stream/file or video codec failed)\n");
       break;
     }
     if(!demux_fill_buffer(demux,ds)){
-       if(verbose) printf("ds_fill_buffer()->demux_fill_buffer() failed\n");
+       mp_dbg(MSGT_DEMUXER,MSGL_DBG2,"ds_fill_buffer()->demux_fill_buffer() failed\n");
        break; // EOF
     }
   }
   ds->buffer_pos=ds->buffer_size=0;
   ds->buffer=NULL;
-  if(verbose) printf("ds_fill_buffer: EOF reached (stream: %s)  \n",ds==demux->audio?"audio":"video");
+  mp_msg(MSGT_DEMUXER,MSGL_V,"ds_fill_buffer: EOF reached (stream: %s)  \n",ds==demux->audio?"audio":"video");
   ds->eof=1;
   return 0;
 }
@@ -330,7 +328,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AVI){
       stream_read_dword_le(demuxer->stream); //filesize
       id=stream_read_dword_le(demuxer->stream); // "AVI "
       if(id==formtypeAVI){ 
-        printf("Detected AVI file format!\n");
+        mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected AVI file format!\n");
         file_format=DEMUXER_TYPE_AVI;
       }
     }
@@ -340,7 +338,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AVI){
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_ASF){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_ASF,audio_id,video_id,dvdsub_id);
   if(asf_check_header(demuxer)){
-      printf("Detected ASF file format!\n");
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected ASF file format!\n");
       file_format=DEMUXER_TYPE_ASF;
   }
 }
@@ -352,9 +350,9 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
   if(!pes) demuxer->synced=1; // hack!
   if(ds_fill_buffer(demuxer->video)){
     if(!pes)
-      printf("Detected MPEG-PES file format!\n");
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected MPEG-PES file format!\n");
     else
-      printf("Detected MPEG-PS file format!\n");
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected MPEG-PS file format!\n");
     file_format=DEMUXER_TYPE_MPEG_PS;
   } else {
     // some hack to get meaningfull error messages to our unhappy users:
@@ -366,9 +364,9 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
       file_format=DEMUXER_TYPE_MPEG_ES; //  <-- hack is here :)
     } else {
       if(demuxer->synced==2)
-        printf("Missing MPEG video stream!? contact the author, it may be a bug :(\n");
+        mp_msg(MSGT_DEMUXER,MSGL_ERR,"Missing MPEG video stream!? contact the author, it may be a bug :(\n");
       else
-        printf("Not MPEG System Stream format... (maybe Transport Stream?)\n");
+        mp_msg(MSGT_DEMUXER,MSGL_V,"Not MPEG System Stream format... (maybe Transport Stream?)\n");
     }
   }
   break;
@@ -378,10 +376,10 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
 if(file_format==DEMUXER_TYPE_MPEG_ES){ // little hack, see above!
   demuxer=new_demuxer(stream,DEMUXER_TYPE_MPEG_ES,audio_id,video_id,dvdsub_id);
   if(!ds_fill_buffer(demuxer->video)){
-    printf("Invalid MPEG-ES stream??? contact the author, it may be a bug :(\n");
+    mp_msg(MSGT_DEMUXER,MSGL_ERR,"Invalid MPEG-ES stream??? contact the author, it may be a bug :(\n");
     file_format=DEMUXER_TYPE_UNKNOWN;
   } else {
-    printf("Detected MPEG-ES file format!\n");
+    mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected MPEG-ES file format!\n");
   }
 }
 //=============== Try to open as MOV file: =================
@@ -389,15 +387,15 @@ if(file_format==DEMUXER_TYPE_MPEG_ES){ // little hack, see above!
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MOV){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_MOV,audio_id,video_id,dvdsub_id);
   if(mov_check_file(demuxer)){
-      printf("Detected QuickTime/MOV file format!\n");
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected QuickTime/MOV file format!\n");
       file_format=DEMUXER_TYPE_MOV;
   }
 }
 #endif
 //=============== Unknown, exiting... ===========================
 if(file_format==DEMUXER_TYPE_UNKNOWN){
-  fprintf(stderr,"============= Sorry, this file format not recognized/supported ===============\n");
-  fprintf(stderr,"=== If this file is an AVI, ASF or MPEG stream, please contact the author! ===\n");
+  mp_msg(MSGT_DEMUXER,MSGL_ERR,"============= Sorry, this file format not recognized/supported ===============\n");
+  mp_msg(MSGT_DEMUXER,MSGL_ERR,"=== If this file is an AVI, ASF or MPEG stream, please contact the author! ===\n");
   return NULL;
 //  GUI_MSG( mplUnknowFileType )
 //  exit(1);
@@ -426,7 +424,7 @@ switch(file_format){
 //  demuxer->idx_pos=0;
 //  demuxer->endpos=avi_header.movi_end;
   if(!ds_fill_buffer(d_video)){
-    printf("ASF: no video stream found!\n");
+    mp_msg(MSGT_DEMUXER,MSGL_WARN,"ASF: no video stream found!\n");
     sh_video=NULL;
     //printf("ASF: missing video stream!? contact the author, it may be a bug :(\n");
     //GUI_MSG( mplASFErrorMissingVideoStream )
@@ -434,7 +432,7 @@ switch(file_format){
   } else {
     sh_video=d_video->sh;sh_video->ds=d_video;
     sh_video->fps=1000.0f; sh_video->frametime=0.001f; // 1ms
-    printf("VIDEO:  [%.4s]  %ldx%ld  %dbpp\n",
+    mp_msg(MSGT_DEMUXER,MSGL_INFO,"VIDEO:  [%.4s]  %ldx%ld  %dbpp\n",
       (char *)&sh_video->bih->biCompression,
       sh_video->bih->biWidth,
       sh_video->bih->biHeight,
@@ -442,9 +440,9 @@ switch(file_format){
 //      sh_video->i_bps=10*asf_packetsize; // FIXME!
   }
   if(audio_id!=-2){
-    if(verbose) printf("ASF: Searching for audio stream (id:%d)\n",d_audio->id);
+    mp_msg(MSGT_DEMUXER,MSGL_V,"ASF: Searching for audio stream (id:%d)\n",d_audio->id);
     if(!ds_fill_buffer(d_audio)){
-      printf("ASF: No Audio stream found...  ->nosound\n");
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,"ASF: No Audio stream found...  ->nosound\n");
       sh_audio=NULL;
     } else {
       sh_audio=d_audio->sh;sh_audio->ds=d_audio;
@@ -463,7 +461,7 @@ switch(file_format){
   sh_video=d_video->sh;sh_video->ds=d_video;
   if(audio_id!=-2) {
    if(!ds_fill_buffer(d_audio)){
-    printf("MPEG: No Audio stream found...  ->nosound\n");
+    mp_msg(MSGT_DEMUXER,MSGL_INFO,"MPEG: No Audio stream found...  ->nosound\n");
     sh_audio=NULL;
    } else {
     sh_audio=d_audio->sh;sh_audio->ds=d_audio;

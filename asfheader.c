@@ -7,6 +7,9 @@
 
 extern int verbose; // defined in mplayer.c
 
+#include "config.h"
+#include "mp_msg.h"
+
 #include "stream.h"
 #include "demuxer.h"
 
@@ -66,7 +69,7 @@ void pack_asf_string(char* string, int length) {
 // the variable string is modify in this function
 void print_asf_string(const char* name, char* string, int length) {
   pack_asf_string(string, length);
-  printf("%s%s\n", name, string);
+  mp_msg(MSGT_HEADER,MSGL_V,"%s%s\n", name, string);
 }
 
 static char* asf_chunk_type(unsigned char* guid) {
@@ -116,11 +119,11 @@ int asf_check_header(demuxer_t *demuxer){
 //  for(i=0;i<16;i++) printf(" %02X",temp[i]);printf("\n");
 //  for(i=0;i<16;i++) printf(" %02X",asfhdrguid[i]);printf("\n");
   if(memcmp(asfhdrguid,asfh.objh.guid,16)){
-    if(verbose) printf("ASF_check: not ASF guid!\n");
+    mp_msg(MSGT_HEADER,MSGL_V,"ASF_check: not ASF guid!\n");
     return 0; // not ASF guid
   }
   if(asfh.cno>256){
-    if(verbose) printf("ASF_check: invalid subchunks_no %d\n",(int) asfh.cno);
+    mp_msg(MSGT_HEADER,MSGL_V,"ASF_check: invalid subchunks_no %d\n",(int) asfh.cno);
     return 0; // invalid header???
   }
   return 1;
@@ -148,15 +151,15 @@ while(!stream_eof(demuxer->stream)){
       stream_read(demuxer->stream,(char*) &streamh,sizeof(streamh));
       le2me_ASF_stream_header_t(&streamh);
       if(verbose){
-        printf("stream type: %s\n",asf_chunk_type(streamh.type));
-	printf("stream concealment: %s\n",asf_chunk_type(streamh.concealment));
-	printf("type: %d bytes,  stream: %d bytes  ID: %d\n",(int)streamh.type_size,(int)streamh.stream_size,(int)streamh.stream_no);
-	printf("unk1: %lX  unk2: %X\n",(unsigned long)streamh.unk1,(unsigned int)streamh.unk2);
-	printf("FILEPOS=0x%X\n",stream_tell(demuxer->stream));
+        mp_msg(MSGT_HEADER,MSGL_V,"stream type: %s\n",asf_chunk_type(streamh.type));
+	mp_msg(MSGT_HEADER,MSGL_V,"stream concealment: %s\n",asf_chunk_type(streamh.concealment));
+	mp_msg(MSGT_HEADER,MSGL_V,"type: %d bytes,  stream: %d bytes  ID: %d\n",(int)streamh.type_size,(int)streamh.stream_size,(int)streamh.stream_no);
+	mp_msg(MSGT_HEADER,MSGL_V,"unk1: %lX  unk2: %X\n",(unsigned long)streamh.unk1,(unsigned int)streamh.unk2);
+	mp_msg(MSGT_HEADER,MSGL_V,"FILEPOS=0x%X\n",stream_tell(demuxer->stream));
       }
       if(streamh.type_size>1024 || streamh.stream_size>1024){
-          printf("FATAL: header size bigger than 1024 bytes!\n");
-          printf("Please contact mplayer authors, and upload/send this file.\n");
+          mp_msg(MSGT_HEADER,MSGL_FATAL,"FATAL: header size bigger than 1024 bytes!\n"
+              "Please contact mplayer authors, and upload/send this file.\n");
           exit(1);
       }
       // type-specific data:
@@ -177,7 +180,7 @@ while(!stream_eof(demuxer->stream)){
 	} else {
 	  asf_scrambling_b=asf_scrambling_h=asf_scrambling_w=1;
 	}
-	printf("ASF: audio scrambling: %d x %d x %d\n",asf_scrambling_h,asf_scrambling_w,asf_scrambling_b);
+	mp_msg(MSGT_HEADER,MSGL_V,"ASF: audio scrambling: %d x %d x %d\n",asf_scrambling_h,asf_scrambling_w,asf_scrambling_b);
 	//if(demuxer->audio->id==-1) demuxer->audio->id=streamh.stream_no & 0x7F;
         break;
         }
@@ -203,14 +206,14 @@ while(!stream_eof(demuxer->stream)){
     case ASF_GUID_PREFIX_file_header: // guid_file_header
       stream_read(demuxer->stream,(char*) &fileh,sizeof(fileh));
       le2me_ASF_file_header_t(&fileh);
-      if(verbose) printf("ASF: packets: %d  flags: %d  pack_size: %d  frame_size: %d\n",(int)fileh.packets,(int)fileh.flags,(int)fileh.packetsize,(int)fileh.frame_size);
+      mp_msg(MSGT_HEADER,MSGL_V,"ASF: packets: %d  flags: %d  pack_size: %d  frame_size: %d\n",(int)fileh.packets,(int)fileh.flags,(int)fileh.packetsize,(int)fileh.frame_size);
       asf_packetsize=fileh.packetsize;
       asf_packet=malloc(asf_packetsize); // !!!
       break;
     case ASF_GUID_PREFIX_data_chunk: // guid_data_chunk
       demuxer->movi_start=stream_tell(demuxer->stream)+26;
       demuxer->movi_end=endpos;
-      if(verbose>=1) printf("Found movie at 0x%X - 0x%X\n",demuxer->movi_start,demuxer->movi_end);
+      mp_msg(MSGT_HEADER,MSGL_V,"Found movie at 0x%X - 0x%X\n",demuxer->movi_start,demuxer->movi_end);
       break;
 
 //  case ASF_GUID_PREFIX_index_chunk: return "guid_index_chunk";
@@ -220,11 +223,12 @@ while(!stream_eof(demuxer->stream)){
         char *string=NULL;
         stream_read(demuxer->stream,(char*) &contenth,sizeof(contenth));
 	le2me_ASF_content_description_t(&contenth);
+	mp_msg(MSGT_HEADER,MSGL_V,"\n");
         // extract the title
         if( contenth.title_size!=0 ) {
           string=(char*)malloc(contenth.title_size);
           stream_read(demuxer->stream, string, contenth.title_size);
-          print_asf_string("\n Title: ", string, contenth.title_size);
+          print_asf_string(" Title: ", string, contenth.title_size);
         }
         // extract the author 
         if( contenth.author_size!=0 ) {
@@ -250,7 +254,7 @@ while(!stream_eof(demuxer->stream)){
           stream_read(demuxer->stream, string, contenth.rating_size);
           print_asf_string(" Rating: ", string, contenth.rating_size);
         }
-	printf("\n");
+	mp_msg(MSGT_HEADER,MSGL_V,"\n");
         free(string);
       }
       break;

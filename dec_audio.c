@@ -4,6 +4,8 @@
 #include <unistd.h>
 
 #include "config.h"
+#include "mp_msg.h"
+
 #include "libao2/afmt.h"
 
 extern int verbose; // defined in mplayer.c
@@ -82,7 +84,7 @@ sh_audio->audio_out_minsize=8192;// default size, maybe not enough for Win32/ACM
 switch(driver){
 case AFM_ACM:
 #ifndef	USE_WIN32DLL
-  printf("Win32/ACM audio codec disabled, or unavailable on non-x86 CPU -> force nosound :(\n");
+  mp_msg(MSGT_DECAUDIO,MSGL_ERR,"Win32/ACM audio codec disabled, or unavailable on non-x86 CPU -> force nosound :(\n");
   driver=0;
 #else
   // Win32 ACM audio codec:
@@ -95,20 +97,20 @@ case AFM_ACM:
 //    if(sh_audio->a_buffer_size<sh_audio->audio_out_minsize+MAX_OUTBURST)
 //        sh_audio->a_buffer_size=sh_audio->audio_out_minsize+MAX_OUTBURST;
   } else {
-    printf("Could not load/initialize Win32/ACM AUDIO codec (missing DLL file?)\n");
+    mp_msg(MSGT_DECAUDIO,MSGL_ERR,"Could not load/initialize Win32/ACM AUDIO codec (missing DLL file?)\n");
     driver=0;
   }
 #endif
   break;
 case AFM_DSHOW:
 #ifndef USE_DIRECTSHOW
-  printf("Compiled without DirectShow support -> force nosound :(\n");
+  mp_msg(MSGT_DECAUDIO,MSGL_ERR,"Compiled without DirectShow support -> force nosound :(\n");
   driver=0;
 #else
   // Win32 DShow audio codec:
 //  printf("DShow_audio: channs=%d  rate=%d\n",sh_audio->channels,sh_audio->samplerate);
   if(DS_AudioDecoder_Open(sh_audio->codec->dll,&sh_audio->codec->guid,sh_audio->wf)){
-    printf("ERROR: Could not load/initialize Win32/DirctShow AUDIO codec: %s\n",sh_audio->codec->dll);
+    mp_msg(MSGT_DECAUDIO,MSGL_ERR,"ERROR: Could not load/initialize Win32/DirctShow AUDIO codec: %s\n",sh_audio->codec->dll);
     driver=0;
   } else {
     sh_audio->i_bps=sh_audio->wf->nAvgBytesPerSec;
@@ -153,12 +155,12 @@ if(!driver) return 0;
 // allocate audio out buffer:
 sh_audio->a_buffer_size=sh_audio->audio_out_minsize+MAX_OUTBURST; // worst case calc.
 
-if(verbose) printf("dec_audio: Allocating %d + %d = %d bytes for output buffer\n",
+mp_msg(MSGT_DECAUDIO,MSGL_V,"dec_audio: Allocating %d + %d = %d bytes for output buffer\n",
     sh_audio->audio_out_minsize,MAX_OUTBURST,sh_audio->a_buffer_size);
 
 sh_audio->a_buffer=malloc(sh_audio->a_buffer_size);
 if(!sh_audio->a_buffer){
-    fprintf(stderr,"Cannot allocate audio out buffer\n");
+    mp_msg(MSGT_DECAUDIO,MSGL_ERR,"Cannot allocate audio out buffer\n");
     return 0;
 }
 memset(sh_audio->a_buffer,0,sh_audio->a_buffer_size);
@@ -169,7 +171,7 @@ switch(driver){
 case AFM_ACM: {
     int ret=acm_decode_audio(sh_audio,sh_audio->a_buffer,4096,sh_audio->a_buffer_size);
     if(ret<0){
-        printf("ACM decoding error: %d\n",ret);
+        mp_msg(MSGT_DECAUDIO,MSGL_WARN,"ACM decoding error: %d\n",ret);
         driver=0;
     }
     sh_audio->a_buffer_len=ret;
@@ -234,12 +236,12 @@ case AFM_HWAC3: {
   len = ds_get_packet(sh_audio->ds, &buffer); // maybe 1 packet is not enough,
     // at least for mpeg, PS packets contain about max. 2000 bytes of data.
   if(ac3_iec958_parse_syncinfo(buffer, len, &ai, &skipped) < 0) {
-      fprintf(stderr, "AC3 stream not valid.\n");
+      mp_msg(MSGT_DECAUDIO,MSGL_ERR, "AC3 stream not valid.\n");
       driver = 0;
       break;
   }
   if(ai.samplerate != 48000) {
-      fprintf(stderr, "Only 48000 Hz streams supported.\n");
+      mp_msg(MSGT_DECAUDIO,MSGL_ERR,"Only 48000 Hz streams supported.\n");
       driver = 0;
       break;
   }
@@ -289,7 +291,7 @@ case AFM_MPEG: {
 }
 
 if(!sh_audio->channels || !sh_audio->samplerate){
-  printf("Unknown/missing audio format, using nosound\n");
+  mp_msg(MSGT_DECAUDIO,MSGL_WARN,"Unknown/missing audio format, using nosound\n");
   driver=0;
 }
 
@@ -385,7 +387,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
       { int size_in=0;
         int size_out=0;
         int srcsize=DS_AudioDecoder_GetSrcSize(maxlen);
-        if(verbose>2)printf("DShow says: srcsize=%d  (buffsize=%d)  out_size=%d\n",srcsize,sh_audio->a_in_buffer_size,maxlen);
+        mp_msg(MSGT_DECAUDIO,MSGL_DBG3,"DShow says: srcsize=%d  (buffsize=%d)  out_size=%d\n",srcsize,sh_audio->a_in_buffer_size,maxlen);
         if(srcsize>sh_audio->a_in_buffer_size) srcsize=sh_audio->a_in_buffer_size; // !!!!!!
         if(sh_audio->a_in_buffer_len<srcsize){
           sh_audio->a_in_buffer_len+=
@@ -394,8 +396,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
         }
         DS_AudioDecoder_Convert(sh_audio->a_in_buffer,sh_audio->a_in_buffer_len,
             buf,maxlen, &size_in,&size_out);
-        if(verbose)
-          printf("DShow: audio %d -> %d converted  (in_buf_len=%d of %d)  %d\n",size_in,size_out,sh_audio->a_in_buffer_len,sh_audio->a_in_buffer_size,ds_tell_pts(sh_audio->ds));
+        mp_dbg(MSGT_DECAUDIO,MSGL_DBG2,"DShow: audio %d -> %d converted  (in_buf_len=%d of %d)  %d\n",size_in,size_out,sh_audio->a_in_buffer_len,sh_audio->a_in_buffer_size,ds_tell_pts(sh_audio->ds));
         if(size_in>=sh_audio->a_in_buffer_len){
           sh_audio->a_in_buffer_len=0;
         } else {

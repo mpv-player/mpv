@@ -290,16 +290,16 @@ void exit_player(char* how){
   }
 #endif
 
-  if(how) printf("\nExiting... (%s)\n",how);
-  if(verbose) printf("max framesize was %d bytes\n",max_framesize);
+  if(how) mp_msg(MSGT_CPLAYER,MSGL_INFO,"\nExiting... (%s)\n",how);
+  mp_msg(MSGT_CPLAYER,MSGL_V,"max framesize was %d bytes\n",max_framesize);
   if(benchmark){
       double tot=video_time_usage+vout_time_usage+audio_time_usage;
       double total_time_usage=(float)total_time_usage_start*0.000001;
-      printf("BENCHMARKs: V:%8.3fs VO:%8.3fs A:%8.3fs Sys:%8.3fs = %8.3fs\n",
+      mp_msg(MSGT_CPLAYER,MSGL_INFO,"BENCHMARKs: V:%8.3fs VO:%8.3fs A:%8.3fs Sys:%8.3fs = %8.3fs\n",
           video_time_usage,vout_time_usage,audio_time_usage,
 	  total_time_usage-tot,total_time_usage);
       if(total_time_usage>0.0)
-      printf("BENCHMARK%%: V:%8.4f%% VO:%8.4f%% A:%8.4f%% Sys:%8.4f%% = %8.4f%%\n",
+      mp_msg(MSGT_CPLAYER,MSGL_INFO,"BENCHMARK%%: V:%8.4f%% VO:%8.4f%% A:%8.4f%% Sys:%8.4f%% = %8.4f%%\n",
           100.0*video_time_usage/total_time_usage,
 	  100.0*vout_time_usage/total_time_usage,
 	  100.0*audio_time_usage/total_time_usage,
@@ -337,7 +337,7 @@ void exit_sighandler(int x){
     // can't stop :(
     kill(getpid(),SIGKILL);
   }
-  fprintf(stderr,"\nMPlayer interrupted by signal %d in module: %s \n",x,
+  mp_msg(MSGT_CPLAYER,MSGL_FATAL,"\nMPlayer interrupted by signal %d in module: %s \n",x,
       current_module?current_module:"unknown"
   );
   #ifdef HAVE_GUI
@@ -382,15 +382,15 @@ int conffile_fd;
 if (parse_config_file(conf, "/etc/mplayer.conf") < 0)
   exit(1);
 if ((conffile = get_path("")) == NULL) {
-  printf("Can't find HOME dir\n");
+  mp_msg(MSGT_CPLAYER,MSGL_WARN,"Can't find HOME dir\n");
 } else {
   mkdir(conffile, 0777);
   free(conffile);
   if ((conffile = get_path("config")) == NULL) {
-    printf("get_path(\"config\") sziiiivas\n");
+    mp_msg(MSGT_CPLAYER,MSGL_ERR,"get_path(\"config\") problem\n");
   } else {
     if ((conffile_fd = open(conffile, O_CREAT | O_EXCL | O_WRONLY, 0666)) != -1) {
-      printf("Creating config file: %s\n", conffile);
+      mp_msg(MSGT_CPLAYER,MSGL_INFO,"Creating config file: %s\n", conffile);
       write(conffile_fd, default_config, strlen(default_config));
       close(conffile_fd);
     }
@@ -446,7 +446,9 @@ float rel_seek_secs=0;
 int i;
 int use_stdin=0; //int f; // filedes
 
-  printf("%s",banner_text);
+  mp_msg_init(MSGL_STATUS);
+
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s",banner_text);
 
 #ifdef HAVE_GUI
   if ( nogui )
@@ -526,7 +528,7 @@ if(!filename){
   }
 #endif
   if(!video_out){
-    fprintf(stderr,"Invalid video output driver name: %s\nUse '-vo help' to get a list of available video drivers.\n",video_driver?video_driver:"?");
+    mp_msg(MSGT_CPLAYER,MSGL_FATAL,"Invalid video output driver name: %s\nUse '-vo help' to get a list of available video drivers.\n",video_driver?video_driver:"?");
     return 0;
   }
 
@@ -555,7 +557,7 @@ if(!filename){
     }
   }
   if (!audio_out){
-    fprintf(stderr,"Invalid audio output driver name: %s\nUse '-ao help' to get a list of available audio drivers.\n",audio_driver);
+    mp_msg(MSGT_CPLAYER,MSGL_FATAL,"Invalid audio output driver name: %s\nUse '-ao help' to get a list of available audio drivers.\n",audio_driver);
     return 0;
   }
 /*DSP!!  if(dsp) audio_out->control(AOCONTROL_SET_DEVICE,(int)dsp);*/
@@ -563,8 +565,7 @@ if(!filename){
 // check codec.conf
 if(!parse_codec_cfg(get_path("codecs.conf"))){
   if(!parse_codec_cfg(DATADIR"/codecs.conf")){
-    printf("(copy/link DOCS/codecs.conf to ~/.mplayer/codecs.conf)\n");
-    GUI_MSG( mplCodecConfNotFound )
+    mp_msg(MSGT_CPLAYER,MSGL_HINT,"(copy/link DOCS/codecs.conf to ~/.mplayer/codecs.conf)\n");
     exit(1);
   }
 }
@@ -573,7 +574,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 #ifdef USE_OSD
   if(font_name){
        vo_font=read_font_desc(font_name,font_factor,verbose>1);
-       if(!vo_font) fprintf(stderr,"Can't load font: %s\n",font_name);
+       if(!vo_font) mp_msg(MSGT_CPLAYER,MSGL_ERR,"Can't load font: %s\n",font_name);
   } else {
       // try default:
        vo_font=read_font_desc(get_path("font/font.desc"),font_factor,verbose>1);
@@ -586,7 +587,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 // check .sub
   if(sub_name){
        subtitles=sub_read_file(sub_name);
-       if(!subtitles) fprintf(stderr,"Can't load subtitles: %s\n",sub_name);
+       if(!subtitles) mp_msg(MSGT_CPLAYER,MSGL_ERR,"Can't load subtitles: %s\n",sub_name);
   } else {
       if(sub_auto)  // auto load sub file ...
          subtitles=sub_read_file( sub_filename( get_path("sub/"), filename ) );
@@ -602,11 +603,10 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 #ifdef HAVE_LIBCSS
   if (dvdimportkey) {
     if (dvd_import_key(dvdimportkey)) {
-	fprintf(stderr,"Error processing DVD KEY.\n");
-        GUI_MSG( mplErrorDVDKeyProcess )
+	mp_msg(MSGT_CPLAYER,MSGL_FATAL,"Error processing DVD KEY.\n");
 	exit(1);
     }
-    printf("DVD command line requested key is stored for descrambling.\n");
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"DVD command line requested key is stored for descrambling.\n");
   }
   if (dvd_auth_device) {
 //  if (dvd_auth(dvd_auth_device,f)) {
@@ -614,7 +614,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
         GUI_MSG( mplErrorDVDAuth )
         exit(0);
       } 
-    printf("DVD auth sequence seems to be OK.\n");
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"DVD auth sequence seems to be OK.\n");
   }
 #endif
 
@@ -642,7 +642,7 @@ if(stream_dump_type){
   case 3: ds=d_dvdsub;break;
   }
   if(!ds){        
-      fprintf(stderr,"dump: FATAL: selected stream missing!\n");
+      mp_msg(MSGT_CPLAYER,MSGL_FATAL,"dump: FATAL: selected stream missing!\n");
       exit(1);
   }
   // disable other streams:
@@ -651,7 +651,7 @@ if(stream_dump_type){
   if(d_dvdsub && d_dvdsub!=ds) {ds_free_packs(d_dvdsub); d_dvdsub->id=-2; }
   // let's dump it!
   f=fopen(stream_dump_name?stream_dump_name:"stream.dump","wb");
-  if(!f){ fprintf(stderr,"Can't open dump file!!!\n");exit(1); }
+  if(!f){ mp_msg(MSGT_CPLAYER,MSGL_FATAL,"Can't open dump file!!!\n");exit(1); }
   while(!ds->eof){
     unsigned char* start;
     int in_size=ds_get_packet(ds,&start);
@@ -660,7 +660,7 @@ if(stream_dump_type){
     if(in_size>0) fwrite(start,in_size,1,f);
   }
   fclose(f);
-  printf("core dumped :)\n");
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"core dumped :)\n");
   exit(1);
 }
 
@@ -671,13 +671,13 @@ if(sh_video){
 
   if(!video_read_properties(sh_video)) exit(1); // couldn't read header?
 
-  printf("[V] filefmt:%d  fourcc:0x%X  size:%dx%d  fps:%5.2f  ftime:=%6.4f\n",
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"[V] filefmt:%d  fourcc:0x%X  size:%dx%d  fps:%5.2f  ftime:=%6.4f\n",
    file_format,sh_video->format, sh_video->disp_w,sh_video->disp_h,
    sh_video->fps,sh_video->frametime
   );
 
   if(!sh_video->fps && !force_fps){
-    fprintf(stderr,"FPS not specified (or invalid) in the header! Use the -fps option!\n");
+    mp_msg(MSGT_CPLAYER,MSGL_FATAL,"FPS not specified (or invalid) in the header! Use the -fps option!\n");
     exit(1);
   }
 
@@ -686,7 +686,7 @@ if(sh_video){
 fflush(stdout);
 
 if(!sh_video){
-    fprintf(stderr,"Sorry, no video stream... it's unplayable yet\n");
+    mp_msg(MSGT_CPLAYER,MSGL_FATAL,"Sorry, no video stream... it's unplayable yet\n");
     exit(1);
 }
 
@@ -694,36 +694,36 @@ if(!sh_video){
 if(sh_audio){
   // Go through the codec.conf and find the best codec...
   sh_audio->codec=NULL;
-  if(audio_family!=-1) printf("Trying to force audio codec driver family %d ...\n",audio_family);
+  if(audio_family!=-1) mp_msg(MSGT_CPLAYER,MSGL_INFO,"Trying to force audio codec driver family %d ...\n",audio_family);
   while(1){
     sh_audio->codec=find_codec(sh_audio->format,NULL,sh_audio->codec,1);
     if(!sh_audio->codec){
       if(audio_family!=-1) {
         sh_audio->codec=NULL; /* re-search */
-        printf("Can't find audio codec for forced driver family, fallback to other drivers.\n");
+        mp_msg(MSGT_CPLAYER,MSGL_ERR,"Can't find audio codec for forced driver family, fallback to other drivers.\n");
         audio_family=-1;
         continue;      
       }
-      printf("Can't find codec for audio format 0x%X !\n",sh_audio->format);
-      printf("*** Try to upgrade %s from DOCS/codecs.conf\n",get_path("codecs.conf"));
-      printf("*** If it's still not OK, then read DOCS/CODECS!\n");
+      mp_msg(MSGT_CPLAYER,MSGL_ERR,"Can't find codec for audio format 0x%X !\n",sh_audio->format);
+      mp_msg(MSGT_CPLAYER,MSGL_HINT, "*** Try to upgrade %s from DOCS/codecs.conf\n",get_path("codecs.conf"));
+      mp_msg(MSGT_CPLAYER,MSGL_HINT, "*** If it's still not OK, then read DOCS/CODECS!\n");
       sh_audio=NULL;
       break;
     }
     if(audio_codec && strcmp(sh_audio->codec->name,audio_codec)) continue;
     else if(audio_family!=-1 && sh_audio->codec->driver!=audio_family) continue;
-    printf("%s audio codec: [%s] drv:%d (%s)\n",audio_codec?"Forcing":"Detected",sh_audio->codec->name,sh_audio->codec->driver,sh_audio->codec->info);
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s audio codec: [%s] drv:%d (%s)\n",audio_codec?"Forcing":"Detected",sh_audio->codec->name,sh_audio->codec->driver,sh_audio->codec->info);
     break;
   }
 }
 
 if(sh_audio){
-  if(verbose) printf("Initializing audio codec...\n");
+  mp_msg(MSGT_CPLAYER,MSGL_V,"Initializing audio codec...\n");
   if(!init_audio(sh_audio)){
-    printf("Couldn't initialize audio codec! -> nosound\n");
+    mp_msg(MSGT_CPLAYER,MSGL_ERR,"Couldn't initialize audio codec! -> nosound\n");
     sh_audio=0;
   } else {
-    printf("AUDIO: srate=%d  chans=%d  bps=%d  sfmt=0x%X  ratio: %d->%d\n",sh_audio->samplerate,sh_audio->channels,sh_audio->samplesize,
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"AUDIO: srate=%d  chans=%d  bps=%d  sfmt=0x%X  ratio: %d->%d\n",sh_audio->samplerate,sh_audio->channels,sh_audio->samplesize,
         sh_audio->sample_format,sh_audio->i_bps,sh_audio->o_bps);
   }
 }
@@ -732,28 +732,20 @@ if(sh_audio){
 
 // Go through the codec.conf and find the best codec...
 sh_video->codec=NULL;
-if(video_family!=-1) printf("Trying to force video codec driver family %d ...\n",video_family);
+if(video_family!=-1) mp_msg(MSGT_CPLAYER,MSGL_INFO,"Trying to force video codec driver family %d ...\n",video_family);
 while(1){
   sh_video->codec=find_codec(sh_video->format,
     sh_video->bih?((unsigned int*) &sh_video->bih->biCompression):NULL,sh_video->codec,0);
   if(!sh_video->codec){
     if(video_family!=-1) {
       sh_video->codec=NULL; /* re-search */
-      printf("Can't find video codec for forced driver family, fallback to other drivers.\n");
+      mp_msg(MSGT_CPLAYER,MSGL_WARN,"Can't find video codec for forced driver family, fallback to other drivers.\n");
       video_family=-1;
       continue;      
     }
-    printf("Can't find codec for video format 0x%X !\n",sh_video->format);
-      printf("*** Try to upgrade %s from DOCS/codecs.conf\n",get_path("codecs.conf"));
-      printf("*** If it's still not OK, then read DOCS/CODECS!\n");
-    #ifdef HAVE_GUI
-     if ( !nogui )
-      {
-       mplShMem->items.videodata.format=sh_video->format;
-       mplSendMessage( mplCantFindCodecForVideoFormat );
-       usec_sleep( 10000 );
-      }
-    #endif
+    mp_msg(MSGT_CPLAYER,MSGL_ERR,"Can't find codec for video format 0x%X !\n",sh_video->format);
+    mp_msg(MSGT_CPLAYER,MSGL_HINT,"*** Try to upgrade %s from DOCS/codecs.conf\n",get_path("codecs.conf"));
+    mp_msg(MSGT_CPLAYER,MSGL_HINT,"*** If it's still not OK, then read DOCS/CODECS!\n");
     exit(1);
   }
   // is next line needed anymore? - atmos ::
@@ -763,7 +755,7 @@ while(1){
   break;
 }
 
-printf("%s video codec: [%s] drv:%d (%s)\n",video_codec?"Forcing":"Detected",sh_video->codec->name,sh_video->codec->driver,sh_video->codec->info);
+mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s video codec: [%s] drv:%d (%s)\n",video_codec?"Forcing":"Detected",sh_video->codec->name,sh_video->codec->driver,sh_video->codec->info);
 
 for(i=0;i<CODECS_MAX_OUTFMT;i++){
     int ret;
@@ -774,12 +766,11 @@ for(i=0;i<CODECS_MAX_OUTFMT;i++){
 #else
     ret=video_out->query_format(out_fmt);
 #endif
-    if(verbose) printf("vo_debug: query(%s) returned 0x%X\n",vo_format_name(out_fmt),ret);
+    mp_msg(MSGT_CPLAYER,MSGL_DBG2,"vo_debug: query(%s) returned 0x%X\n",vo_format_name(out_fmt),ret);
     if(ret) break;
 }
 if(i>=CODECS_MAX_OUTFMT){
-    fprintf(stderr,"Sorry, selected video_out device is incompatible with this codec.\n");
-    GUI_MSG( mplIncompatibleVideoOutDevice )
+    mp_msg(MSGT_CPLAYER,MSGL_FATAL,"Sorry, selected video_out device is incompatible with this codec.\n");
     exit(1);
 }
 sh_video->outfmtidx=i;
@@ -792,11 +783,10 @@ if(flip==-1){
          flip=1;
 }
 
-if(verbose) printf("vo_debug1: out_fmt=%s\n",vo_format_name(out_fmt));
+mp_msg(MSGT_CPLAYER,MSGL_DBG2,"vo_debug1: out_fmt=%s\n",vo_format_name(out_fmt));
 
 if(!init_video(sh_video)){
-     fprintf(stderr,"FATAL: Couldn't initialize video codec :(\n");
-     GUI_MSG( mplUnknowError )
+     mp_msg(MSGT_CPLAYER,MSGL_FATAL,"FATAL: Couldn't initialize video codec :(\n");
      exit(1);
 }
 
@@ -805,7 +795,7 @@ if(auto_quality>0){
     output_quality=get_video_quality_max(sh_video);
     if(auto_quality>output_quality) auto_quality=output_quality;
     else output_quality=auto_quality;
-    printf("AutoQ: setting quality to %d\n",output_quality);
+    mp_msg(MSGT_CPLAYER,MSGL_V,"AutoQ: setting quality to %d\n",output_quality);
     set_video_quality(sh_video,output_quality);
 }
 
@@ -815,12 +805,12 @@ if(auto_quality>0){
      FILE *encode_file=fopen(encode_name,"rb");
      if(encode_file){
        fclose(encode_file);
-       fprintf(stderr,"File already exists: %s (don't overwrite your favourite AVI!)\n",encode_name);
+       mp_msg(MSGT_CPLAYER,MSGL_FATAL,"File already exists: %s (don't overwrite your favourite AVI!)\n",encode_name);
        return 0;
      }
      encode_file=fopen(encode_name,"wb");
      if(!encode_file){
-       fprintf(stderr,"Cannot create file for encoding\n");
+       mp_msg(MSGT_CPLAYER,MSGL_FATAL,"Cannot create file for encoding\n");
        return 0;
      }
      write_avi_header_1(encode_file,mmioFOURCC('d', 'i', 'v', 'x'),sh_video->fps,sh_video->disp_w,sh_video->disp_h);
@@ -866,7 +856,7 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
 
 #ifndef USE_LIBVO2
    { const vo_info_t *info = video_out->get_info();
-     printf("VO: [%s] %dx%d => %dx%d %s %s%s%s%s\n",info->short_name,
+     mp_msg(MSGT_CPLAYER,MSGL_INFO,"VO: [%s] %dx%d => %dx%d %s %s%s%s%s\n",info->short_name,
          sh_video->disp_w,sh_video->disp_h,
          screen_size_x,screen_size_y,
 	 vo_format_name(out_fmt),
@@ -876,19 +866,14 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
          (flip==1)?"flip ":""
 //         fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3)
      );
-    if(verbose){
-    printf("VO: Description: %s\n"
-           "VO: Author: %s\n",
-        info->name,
-        info->author	
-     );
+    mp_msg(MSGT_CPLAYER,MSGL_V,"VO: Description: %s\n",info->name);
+    mp_msg(MSGT_CPLAYER,MSGL_V,"VO: Author: %s\n", info->author);
     if(strlen(info->comment) > 0)
-        printf("VO: Comment: %s\n", info->comment);
-    }
+        mp_msg(MSGT_CPLAYER,MSGL_V,"VO: Comment: %s\n", info->comment);
    }
 #endif
 
-   if(verbose) printf("video_out->init(%dx%d->%dx%d,flags=%d,'%s',0x%X)\n",
+   mp_msg(MSGT_CPLAYER,MSGL_V,"video_out->init(%dx%d->%dx%d,flags=%d,'%s',0x%X)\n",
                       sh_video->disp_w,sh_video->disp_h,
                       screen_size_x,screen_size_y,
                       fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3),
@@ -907,8 +892,7 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
    if(!vo2_start(video_out,
                sh_video->disp_w,sh_video->disp_h,out_fmt,0,
                       fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3) )){
-     fprintf(stderr,"FATAL: Cannot initialize video driver!\n");
-     GUI_MSG( mplCantInitVideoDriver )
+     mp_msg(MSGT_CPLAYER,MSGL_FATAL,"FATAL: Cannot initialize video driver!\n");
      exit(1);
    }
 #else
@@ -916,12 +900,11 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
                       screen_size_x,screen_size_y,
                       fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3),
                       title,out_fmt)){
-     fprintf(stderr,"FATAL: Cannot initialize video driver!\n");
-     GUI_MSG( mplCantInitVideoDriver )
+     mp_msg(MSGT_CPLAYER,MSGL_FATAL,"FATAL: Cannot initialize video driver!\n");
      exit(1);
    }
 #endif
-   if(verbose) printf("INFO: Video OUT driver init OK!\n");
+   mp_msg(MSGT_CPLAYER,MSGL_V,"INFO: Video OUT driver init OK!\n");
 
    fflush(stdout);
    
@@ -987,23 +970,21 @@ double vdecode_time;
 if(sh_audio){
   
   const ao_info_t *info=audio_out->info;
-  printf("AO: [%s] %iHz %s %s\n",
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"AO: [%s] %iHz %s %s\n",
       info->short_name,
       force_srate?force_srate:sh_audio->samplerate,
       sh_audio->channels>1?"Stereo":"Mono",
       audio_out_format_name(sh_audio->sample_format)
    );
-  if(verbose){
-   printf("AO: Description: %s\nAO: Author: %s\n",
+   mp_msg(MSGT_CPLAYER,MSGL_V,"AO: Description: %s\nAO: Author: %s\n",
       info->name,
       info->author	
    );
    if(strlen(info->comment) > 0)
-      printf("AO: Comment: %s\n", info->comment);
-  }
+      mp_msg(MSGT_CPLAYER,MSGL_V,"AO: Comment: %s\n", info->comment);
   if(!audio_out->init(force_srate?force_srate:sh_audio->samplerate,
       sh_audio->channels,sh_audio->sample_format,0)){
-    printf("couldn't open/init audio device -> NOSOUND\n");
+    mp_msg(MSGT_CPLAYER,MSGL_ERR,"couldn't open/init audio device -> NOSOUND\n");
     sh_audio=0; audio_out=NULL;
   }
 
@@ -1022,8 +1003,8 @@ if(sh_audio){
   if(sh_audio) sh_audio->timer=0;
 
 if(!sh_audio){
-  printf("Audio: no sound\n");
-  if(verbose) printf("Freeing %d unused audio chunks\n",d_audio->packs);
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"Audio: no sound\n");
+  if(verbose) mp_msg(MSGT_CPLAYER,MSGL_V,"Freeing %d unused audio chunks\n",d_audio->packs);
   ds_free_packs(d_audio); // free buffered chunks
   d_audio->id=-2;         // do not read audio chunks
   if(sh_audio) if(sh_audio->a_buffer) free(sh_audio->a_buffer);
@@ -1057,10 +1038,10 @@ if(file_format==DEMUXER_TYPE_AVI && sh_audio){
 if(force_fps){
   sh_video->fps=force_fps;
   sh_video->frametime=1.0f/sh_video->fps;
-  printf("FPS forced to be %5.3f  (ftime: %5.3f)\n",sh_video->fps,sh_video->frametime);
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"FPS forced to be %5.3f  (ftime: %5.3f)\n",sh_video->fps,sh_video->frametime);
 }
 
-printf("Start playing...\n");fflush(stdout);
+mp_msg(MSGT_CPLAYER,MSGL_INFO,"Start playing...\n");fflush(stdout);
 
 InitTimer();
 
@@ -1197,7 +1178,7 @@ if(1)
     // get mpeg fps:
     newfps=frameratecode2framerate[picture->frame_rate_code]*0.0001f;
     if(ABS(sh_video->fps-newfps)>0.01f) if(!force_fps){
-            printf("Warning! FPS changed %5.3f -> %5.3f  (%f) [%d]  \n",sh_video->fps,newfps,sh_video->fps-newfps,picture->frame_rate_code);
+            mp_msg(MSGT_CPLAYER,MSGL_WARN,"Warning! FPS changed %5.3f -> %5.3f  (%f) [%d]  \n",sh_video->fps,newfps,sh_video->fps-newfps,picture->frame_rate_code);
             sh_video->fps=newfps;
             sh_video->frametime=10000.0f/(float)frameratecode2framerate[picture->frame_rate_code];
     }
@@ -1245,22 +1226,22 @@ if(1)
 
     if(file_format==DEMUXER_TYPE_MPEG_PS) d_video->pts+=frame_time;
     
-    if(verbose>1) printf("*** ftime=%5.3f ***\n",frame_time);
+    mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"*** ftime=%5.3f ***\n",frame_time);
 
     if(drop_frame){
 
       if(sh_audio && !d_audio->eof){
           int delay=audio_out->get_delay();
-          if(verbose>1)printf("delay=%d\n",delay);
+          mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"delay=%d\n",delay);
           time_frame=sh_video->timer;
           time_frame-=sh_audio->timer-(float)delay/(float)sh_audio->o_bps;
 	  if(time_frame>-2*frame_time) {
 	    drop_frame=0; // stop dropping frames
-	    if (verbose>0) printf("\nstop frame drop %.2f\n", time_frame);
+	    mp_msg(MSGT_AVSYNC,MSGL_DBG2,"\nstop frame drop %.2f\n", time_frame);
 	  }else{
 	    ++drop_frame_cnt;
 	    if (verbose > 0 && drop_frame_cnt%10 == 0)
-	      printf("\nstill dropping, %.2f\n", time_frame);
+	      mp_msg(MSGT_AVSYNC,MSGL_DBG2,"\nstill dropping, %.2f\n", time_frame);
 	  }
       }
       video_out->check_events(); // check events AST
@@ -1272,7 +1253,7 @@ if(1)
 
       if(sh_audio && !d_audio->eof){
           int delay=audio_out->get_delay();
-          if(verbose>1)printf("delay=%d\n",delay);
+          mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"delay=%d\n",delay);
           time_frame=sh_video->timer;
           time_frame-=sh_audio->timer-(float)delay/(float)sh_audio->o_bps;
           // we are out of time... drop next frame!
@@ -1282,12 +1263,13 @@ if(1)
 	      ++drop_frame_cnt;
 	      if(drop_frame_cnt>50 && AV_delay>0.5 && !drop_message){
 	          drop_message=1;
-	          printf("\n************************************************************************"
+	          mp_msg(MSGT_AVSYNC,MSGL_WARN,
+		         "\n************************************************************************"
 		         "\n** Your system is too SLOW to play this! try with -framedrop or RTFM! **"
 			 "\n************************************************************************"
 			 "\n");
 	      }
-	      if (verbose>0) printf("\nframe drop %d, %.2f\n", drop_frame, time_frame);
+	      mp_msg(MSGT_AVSYNC,MSGL_DBG2,"\nframe drop %d, %.2f\n", drop_frame, time_frame);
 	  }
       } else {
           if( (time_frame<-3*frame_time || time_frame>3*frame_time) || benchmark)
@@ -1367,8 +1349,7 @@ if(1)
     }
     v_pts=d_video->pts;
 
-    if(verbose>1)
-      printf("### A:%8.3f (%8.3f)  V:%8.3f  A-V:%7.4f  \n",a_pts,a_pts-audio_delay-delay,v_pts,(a_pts-delay-audio_delay)-v_pts);
+      mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"### A:%8.3f (%8.3f)  V:%8.3f  A-V:%7.4f  \n",a_pts,a_pts-audio_delay-delay,v_pts,(a_pts-delay-audio_delay)-v_pts);
 
       if(delay_corrected){
         float x;
@@ -1381,7 +1362,7 @@ if(1)
         else
           max_pts_correction=sh_video->frametime*0.10; // +-10% of time
         sh_audio->timer+=x; c_total+=x;
-        if(!quiet) printf("A:%6.1f V:%6.1f A-V:%7.3f ct:%7.3f  %3d/%3d  %2d%% %2d%% %4.1f%% %d %d\r",
+        if(!quiet) mp_msg(MSGT_AVSYNC,MSGL_STATUS,"A:%6.1f V:%6.1f A-V:%7.3f ct:%7.3f  %3d/%3d  %2d%% %2d%% %4.1f%% %d %d\r",
 	  a_pts-audio_delay-delay,v_pts,AV_delay,c_total,
           (int)sh_video->num_frames,(int)sh_video->num_frames_decoded,
           (sh_video->timer>0.5)?(int)(100.0*video_time_usage/(double)sh_video->timer):0,
@@ -1397,7 +1378,7 @@ if(1)
     // No audio:
     
     if(!quiet)
-      printf("V:%6.1f  %3d  %2d%%  %2d%%  %3.1f%% \r",d_video->pts,
+      mp_msg(MSGT_AVSYNC,MSGL_STATUS,"V:%6.1f  %3d  %2d%%  %2d%%  %3.1f%% \r",d_video->pts,
         (int)sh_video->num_frames,
         (sh_video->timer>0.5)?(int)(100.0*video_time_usage/(double)sh_video->timer):0,
         (sh_video->timer>0.5)?(int)(100.0*vout_time_usage/(double)sh_video->timer):0,
@@ -1418,7 +1399,7 @@ if(auto_quality>0){
      (0.95*sh_video->timer-(vout_time_usage+audio_time_usage))*
      (sh_video->timer-cvideo_base_vframe-frame_correction)){
     output_quality>>=1;
-    printf("Downgrading quality to %i.\n",output_quality);
+    mp_msg(MSGT_AUTOQ,MSGL_DBG2,"Downgrading quality to %i.\n",output_quality);
     set_video_quality(sh_video,output_quality);
   } else
   /*If we had plenty of extra time, upgrade the quality.*/
@@ -1428,7 +1409,7 @@ if(auto_quality>0){
      (0.67*sh_video->timer-(vout_time_usage+audio_time_usage))*
      (sh_video->timer-cvideo_base_vframe-frame_correction)){
     output_quality++;
-    printf("Upgrading quality to %i.\n",output_quality);
+    mp_msg(MSGT_AUTOQ,MSGL_DBG2,"Upgrading quality to %i.\n",output_quality);
     set_video_quality(sh_video,output_quality);
   }
 #else
@@ -1458,7 +1439,7 @@ if(auto_quality>0){
 #endif
 
   if(osd_function==OSD_PAUSE){
-      printf("\n------ PAUSED -------\r");fflush(stdout);
+      mp_msg(MSGT_CPLAYER,MSGL_STATUS,"\n------ PAUSED -------\r");fflush(stdout);
       if (audio_out && sh_audio)
          audio_out->pause();	// pause audio, keep data if possible
 #ifdef HAVE_GUI
@@ -1651,7 +1632,7 @@ _jump1:
 
     case 'd':
       frame_dropping=(frame_dropping+1)%3;
-      printf("== drop: %d ==  \n",frame_dropping);
+      mp_msg(MSGT_CPLAYER,MSGL_V,"== drop: %d ==  \n",frame_dropping);
       break;
   }
 } // keyboard event handler
@@ -1678,11 +1659,11 @@ if(rel_seek_secs){
 	if(verbose){
 	    float a_pts=d_audio->pts;
             a_pts+=(ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
-	    printf("SEEK: A: %5.3f  V: %5.3f  A-V: %5.3f   \n",a_pts,d_video->pts,a_pts-d_video->pts);
+	    mp_msg(MSGT_AVSYNC,MSGL_V,"SEEK: A: %5.3f  V: %5.3f  A-V: %5.3f   \n",a_pts,d_video->pts,a_pts-d_video->pts);
 	}
-        printf("A:%6.1f  V:%6.1f  A-V:%7.3f  ct: ?   \r",d_audio->pts,d_video->pts,0.0f);
+        mp_msg(MSGT_AVSYNC,MSGL_STATUS,"A:%6.1f  V:%6.1f  A-V:%7.3f  ct: ?   \r",d_audio->pts,d_video->pts,0.0f);
       } else {
-        printf("A: ---   V:%6.1f   \r",d_video->pts);
+        mp_msg(MSGT_AVSYNC,MSGL_STATUS,"A: ---   V:%6.1f   \r",d_video->pts);
       }
       fflush(stdout);
 
@@ -1745,19 +1726,19 @@ if(rel_seek_secs){
     if(len>=2){
       int len2;
       len2=(packet[0]<<8)+packet[1];
-      if(verbose) printf("\rDVD sub: %d / %d  \n",len,len2);
+      mp_msg(MSGT_CPLAYER,MSGL_V,"\rDVD sub: %d / %d  \n",len,len2);
       if(len==len2)
         spudec_decode(packet,len);
       else
-        printf("fragmented dvd-subs not yet supported!!!\n");
+        mp_msg(MSGT_CPLAYER,MSGL_V,"fragmented dvd-subs not yet supported!!!\n");
     } else if(len>=0) {
-      printf("invalud dvd sub\n");
+      mp_msg(MSGT_CPLAYER,MSGL_V,"invalid dvd sub\n");
     }
   }
   
 } // while(!eof)
 
-if(verbose) printf("EOF code: %d  \n",eof);
+mp_msg(MSGT_GLOBAL,MSGL_V,"EOF code: %d  \n",eof);
 
 exit_player("End of file");
 }

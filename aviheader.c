@@ -4,8 +4,7 @@
 #include <unistd.h>
 
 #include "config.h"
-
-extern int verbose; // defined in mplayer.c
+#include "mp_msg.h"
 
 #include "stream.h"
 #include "demuxer.h"
@@ -51,12 +50,12 @@ while(1){
   if(id==mmioFOURCC('L','I','S','T')){
     int len=stream_read_dword_le(demuxer->stream)-4; // list size
     id=stream_read_dword_le(demuxer->stream);        // list type
-    if(verbose>=2) printf("LIST %.4s  len=%d\n",(char *) &id,len);
+    mp_dbg(MSGT_HEADER,MSGL_DBG2,"LIST %.4s  len=%d\n",(char *) &id,len);
     if(id==listtypeAVIMOVIE){
       // found MOVI header
       demuxer->movi_start=stream_tell(demuxer->stream);
       demuxer->movi_end=demuxer->movi_start+len;
-      if(verbose>=1) printf("Found movie at 0x%X - 0x%X\n",demuxer->movi_start,demuxer->movi_end);
+      mp_msg(MSGT_HEADER,MSGL_V,"Found movie at 0x%X - 0x%X\n",demuxer->movi_start,demuxer->movi_end);
       if(index_mode==-2) break; // reading from non-seekable source (stdin)
       len=(len+1)&(~1);
       stream_skip(demuxer->stream,len);
@@ -64,7 +63,7 @@ while(1){
     continue;
   }
   size2=stream_read_dword_le(demuxer->stream);
-  if(verbose>=2) printf("CHUNK %.4s  len=%d\n",(char *) &id,size2);
+  mp_dbg(MSGT_HEADER,MSGL_DBG2,"CHUNK %.4s  len=%d\n",(char *) &id,size2);
   chunksize=(size2+1)&(~1);
   switch(id){
     case ckidAVIMAINHDR:          // read 'avih'
@@ -94,7 +93,7 @@ while(1){
       if(last_fccType==streamtypeVIDEO){
         sh_video->bih=calloc((chunksize<sizeof(BITMAPINFOHEADER))?sizeof(BITMAPINFOHEADER):chunksize,1);
 //        sh_video->bih=malloc(chunksize); memset(sh_video->bih,0,chunksize);
-        if(verbose>=1) printf("found 'bih', %d bytes of %d\n",chunksize,sizeof(BITMAPINFOHEADER));
+        mp_msg(MSGT_HEADER,MSGL_V,"found 'bih', %d bytes of %d\n",chunksize,sizeof(BITMAPINFOHEADER));
         stream_read(demuxer->stream,(char*) sh_video->bih,chunksize);
 	le2me_BITMAPINFOHEADER(sh_video->bih);  // swap to machine endian
         if(verbose>=1) print_video_header(sh_video->bih);
@@ -126,7 +125,7 @@ while(1){
 	int wf_size = chunksize<sizeof(WAVEFORMATEX)?sizeof(WAVEFORMATEX):chunksize;
         sh_audio->wf=calloc(wf_size,1);
 //        sh_audio->wf=malloc(chunksize); memset(sh_audio->wf,0,chunksize);
-        if(verbose>=1) printf("found 'wf', %d bytes of %d\n",chunksize,sizeof(WAVEFORMATEX));
+        mp_msg(MSGT_HEADER,MSGL_V,"found 'wf', %d bytes of %d\n",chunksize,sizeof(WAVEFORMATEX));
         stream_read(demuxer->stream,(char*) sh_audio->wf,chunksize);
 	le2me_WAVEFORMATEX(sh_audio->wf);
 	if (sh_audio->wf->cbSize != 0 &&
@@ -142,7 +141,7 @@ while(1){
     case ckidAVINEWINDEX: if(index_mode){
       int i;
       priv->idx_size=size2>>4;
-      if(verbose>=1) printf("Reading INDEX block, %d chunks for %ld frames\n",
+      mp_msg(MSGT_HEADER,MSGL_V,"Reading INDEX block, %d chunks for %ld frames\n",
         priv->idx_size,avih.dwTotalFrames);
       priv->idx=malloc(priv->idx_size<<4);
       stream_read(demuxer->stream,(char*)priv->idx,priv->idx_size<<4);
@@ -154,7 +153,7 @@ while(1){
     }
   }
   if(chunksize>0) stream_skip(demuxer->stream,chunksize); else
-  if(chunksize<0) printf("WARNING!!! chunksize=%d  (id=%.4s)\n",chunksize,(char *) &id);
+  if(chunksize<0) mp_msg(MSGT_HEADER,MSGL_WARN,"chunksize=%d  (id=%.4s)\n",chunksize,(char *) &id);
   
 }
 
@@ -202,7 +201,7 @@ if(index_mode>=2 || (priv->idx_size==0 && index_mode==1)){
         if(c&0x40) idx->dwFlags=0;
       }
     
-    if(verbose>=2) printf("%08X %08X %.4s %02X %X\n",demuxer->filepos,id,(char *) &id,c,(unsigned int) idx->dwFlags);
+    mp_dbg(MSGT_HEADER,MSGL_DBG2,"%08X %08X %.4s %02X %X\n",demuxer->filepos,id,(char *) &id,c,(unsigned int) idx->dwFlags);
 #if 0
     { unsigned char tmp[64];
       int i;
@@ -217,7 +216,7 @@ skip_chunk:
     stream_seek(demuxer->stream,8+demuxer->filepos+skip);
   }
   priv->idx_size=priv->idx_pos;
-  printf("AVI: Generated index table for %d chunks!\n",priv->idx_size);
+  mp_msg(MSGT_HEADER,MSGL_INFO,"AVI: Generated index table for %d chunks!\n",priv->idx_size);
 }
 
 }
