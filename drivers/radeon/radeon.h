@@ -506,6 +506,7 @@
 #	define REG_LD_CTL_VBLANK_DURING_LOCK   0x00000002L
 #	define REG_LD_CTL_STALL_GUI_UNTIL_FLIP 0x00000004L
 #	define REG_LD_CTL_LOCK_READBACK        0x00000008L
+/*#define OV0_REG_SLICE_CNTL                     0xXXXX*/
 #define OV0_SCALE_CNTL                         0x0420  
 #	define SCALER_PIX_EXPAND               0x00000001L
 #	define SCALER_Y2R_TEMP                 0x00000002L
@@ -594,7 +595,6 @@
 #	define VIF_BUF5_1ST_LINE_LSBS_MASK     0x48000000L
 #define OV0_VID_BUF_PITCH0_VALUE               0x0460
 #define OV0_VID_BUF_PITCH1_VALUE               0x0464  
-#define OV0_VID_BUF_PITCH2_VALUE               0x0468
 #define OV0_AUTO_FLIP_CNTL                     0x0470  
 #	define OV0_AUTO_FLIP_CNTL_SOFT_BUF_NUM        0x00000007
 #	define OV0_AUTO_FLIP_CNTL_SOFT_REPEAT_FIELD   0x00000008

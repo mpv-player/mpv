@@ -21,4 +21,48 @@ and at least '8bpp packed pixel support' compiled and installed as module.
 (But if you plan to use this module with mplayer you also should have
 16bpp, 24bpp and 32bpp pixel support compiled as modules).  
 
+
+                      Radeon video overlay
+		      ====================
+		      
+Was designed for mplayer and currently can be used only by mplayer.
+It's RGB-YUV BES for radeon cards (althrough there is experimental
+support for rage128 / rage128pro chips).
+
+Installation:
+~~~~~~~~~~~~~
+
+After building modules just copy them to:
+/lib/modules/$(LINUX_VER)/kernel/drivers/video
+directory.
+Don't forget about: 
+depmod -a
+
+If you are doing it first time then create the device then execute
+following command:
+mknod /dev/radeon_vid c 178 0
+for radeon_vid.o
+mknod /dev/rage128_vid c 178 0
+for rage128_vid.o
+
+Using with mplayer:
+~~~~~~~~~~~~~~~~~~~
+
+Currently there is only way to use ATI's drivers:
+mplayer -vo vesa:lvo:/dev/radeon_vid -<your options> filename
+or
+mplayer -vo vesa:lvo:/dev/rage128_vid -<your options> filename
+
+Note:
+~~~~~
+You can pass only options with can be recognized by vo_vesa driver.
+(Indeed radeon_vid and rage128_vid are stupid things and can create
+video overlay only. But mode switching and other adjustement performs
+vo_vesa driver. This mean that they use VESA BIOS as graphics server).
+
+Conslusion:
+~~~~~~~~~~~
+This stuff (radeon(rage128)_vid) currently doesn't support any standards.
+So after implementing linux standards I'll fully rewrite this driver.
+
 Enjoy

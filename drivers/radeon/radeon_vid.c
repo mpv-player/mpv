@@ -4,7 +4,7 @@
  *
  * Copyright (C) 2001 Nick Kurshev
  * 
- * BES YUV video overlay driver for Radeon cards
+ * BES YUV video overlay driver for Radeon/Rage128Pro/Rage128 cards
  * 
  * This software has been released under the terms of the GNU Public
  * license. See http://www.gnu.org/copyleft/gpl.html for details.
@@ -14,19 +14,20 @@
  * Also here was used code from CVS of GATOS project and X11 trees.
  */
 
-#define RADEON_VID_VERSION "0.9.9.1"
+#define RADEON_VID_VERSION "1.0.0"
 
 /*
   It's entirely possible this major conflicts with something else
   mknod /dev/radeon_vid c 178 0
- */
-
-/* TESTED and WORKING formats: YUY2 */
-
-/*
+  or
+  mknod /dev/rage128_vid c 178 0
+  for Rage128/Rage128Pro chips (althrough it doesn't matter)
+  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  TESTED and WORKING formats: YUY2, UYVY, IYUV, I420, YV12
+  -----------------------------------------------------------
   TODO:
-  Highest priority: fbvid.h compatibility and UYVY test
-  High priority: YV12, I420, IYUV support
+  Highest priority: fbvid.h compatibility
+  High priority: RGB/BGR 2-32, YVU9, IF09 support
   Middle priority:
     OV0_COLOUR_CNTL         brightness saturation 
      SCALER_GAMMA_SEL_BRIGHT  gamma correction ??? 
@@ -35,7 +36,7 @@
     OV0_FILTER_CNTL
     OV0_VIDEO_KEY_CLR
     OV0_KEY_CNTL
-  Low priority:  RGB/BGR 2-32, YVU9, IF09, CLPL, IYU1, IYU2, UYNV, CYUV
+  Low priority:  CLPL, IYU1, IYU2, UYNV, CYUV
 		 YUNV, YVYU, Y41P, Y211, Y41T, Y42T, V422, V655, CLJR
 		       ^^^^
 		 YUVP, UYVP, Mpeg PES (mpeg-1,2) support
@@ -73,9 +74,17 @@
 
 
 MODULE_AUTHOR("Nick Kurshev <nickols_k@mail.ru>");
-MODULE_DESCRIPTION("Accelerated YUV BES driver for Radeons. Version: "RADEON_VID_VERSION);
+MODULE_DESCRIPTION("Accelerated YUV BES driver for Rage128/Radeons. Version: "RADEON_VID_VERSION);
 #ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
+#endif
+
+#ifdef RAGE128
+#define RVID_MSG "rage128_vid: "
+#define X_ADJUST 0
+#else
+#define RVID_MSG "radeon_vid: "
+#define X_ADJUST 8
 #endif
 
 typedef struct bes_registers_s
@@ -173,7 +182,6 @@ static int32_t radeon_overlay_off = 0;
 
 static uint32_t radeon_ram_size = 0;
 
-//static struct video_window radeon_win;
 static mga_vid_config_t radeon_config; 
 
 #undef DEBUG
@@ -269,20 +277,20 @@ static void radeon_vid_stop_video( void )
 static void radeon_vid_display_video( void )
 {
     int bes_flags;
-RTRACE("radeon_vid: OV0: v_inc=%x h_inc=%x step_by=%x\n",besr.v_inc,besr.h_inc,besr.step_by);
-RTRACE("radeon_vid: OV0: vid_buf0_base=%x\n",besr.vid_buf0_base_adrs);
-RTRACE("radeon_vid: OV0: y_x_start=%x y_x_end=%x blank_at_top=%x pitch0_value=%x\n"
+RTRACE(RVID_MSG"OV0: v_inc=%x h_inc=%x step_by=%x\n",besr.v_inc,besr.h_inc,besr.step_by);
+RTRACE(RVID_MSG"OV0: vid_buf0_base=%x\n",besr.vid_buf0_base_adrs);
+RTRACE(RVID_MSG"OV0: y_x_start=%x y_x_end=%x blank_at_top=%x pitch0_value=%x\n"
 ,besr.y_x_start,besr.y_x_end,besr.p1_blank_lines_at_top,besr.vid_buf_pitch0_value);
-RTRACE("radeon_vid: OV0: p1_x_start_end=%x p2_x_start_end=%x p3_x_start-end=%x\n"
+RTRACE(RVID_MSG"OV0: p1_x_start_end=%x p2_x_start_end=%x p3_x_start-end=%x\n"
 ,besr.p1_x_start_end,besr.p2_x_start_end,besr.p2_x_start_end);
-RTRACE("radeon_vid: OV0: p1_v_accum_init=%x p1_h_accum_init=%x p23_h_accum_init=%x\n"
+RTRACE(RVID_MSG"OV0: p1_v_accum_init=%x p1_h_accum_init=%x p23_h_accum_init=%x\n"
 ,besr.p1_v_accum_init,besr.p1_h_accum_init,besr.p23_h_accum_init);
     OUTREG(OV0_REG_LOAD_CNTL,		REG_LD_CTL_LOCK);
     while(!(INREG(OV0_REG_LOAD_CNTL)&REG_LD_CTL_LOCK_READBACK));
 
     OUTREG(OV0_AUTO_FLIP_CNTL,OV0_AUTO_FLIP_CNTL_SOFT_BUF_ODD);
 
-    OUTREG(OV0_DEINTERLACE_PATTERN,0xAAAAAAAA);
+    OUTREG(OV0_DEINTERLACE_PATTERN,0x900AAAAA);
    
     OUTREG(OV0_AUTO_FLIP_CNTL,(INREG(OV0_AUTO_FLIP_CNTL)^OV0_AUTO_FLIP_CNTL_SOFT_EOF_TOGGLE));
     OUTREG(OV0_AUTO_FLIP_CNTL,(INREG(OV0_AUTO_FLIP_CNTL)^OV0_AUTO_FLIP_CNTL_SOFT_EOF_TOGGLE));
@@ -293,12 +301,13 @@ RTRACE("radeon_vid: OV0: p1_v_accum_init=%x p1_h_accum_init=%x p23_h_accum_init=
     OUTREG(OV0_Y_X_END,			besr.y_x_end);
     OUTREG(OV0_V_INC,			besr.v_inc);
     OUTREG(OV0_P1_BLANK_LINES_AT_TOP,	besr.p1_blank_lines_at_top);
+    OUTREG(OV0_P23_BLANK_LINES_AT_TOP,	besr.p23_blank_lines_at_top);
     OUTREG(OV0_VID_BUF_PITCH0_VALUE,	besr.vid_buf_pitch0_value);
     OUTREG(OV0_VID_BUF_PITCH1_VALUE,	besr.vid_buf_pitch1_value);
     OUTREG(OV0_P1_X_START_END,		besr.p1_x_start_end);
     OUTREG(OV0_P2_X_START_END,		besr.p2_x_start_end);
     OUTREG(OV0_P3_X_START_END,		besr.p3_x_start_end);
-#if 0
+#if 1
     OUTREG(OV0_BASE_ADDR,		besr.base_addr);
 #endif
     OUTREG(OV0_VID_BUF0_BASE_ADRS,	besr.vid_buf0_base_adrs);
@@ -310,6 +319,7 @@ RTRACE("radeon_vid: OV0: p1_v_accum_init=%x p1_h_accum_init=%x p23_h_accum_init=
     OUTREG(OV0_P1_V_ACCUM_INIT,		besr.p1_v_accum_init);
     OUTREG(OV0_P1_H_ACCUM_INIT,		besr.p1_h_accum_init);
     OUTREG(OV0_P23_H_ACCUM_INIT,	besr.p23_h_accum_init);
+    OUTREG(OV0_P23_V_ACCUM_INIT,	besr.p23_v_accum_init);
 
     bes_flags = SCALER_ENABLE |
                 SCALER_DOUBLE_BUFFER |
@@ -326,18 +336,19 @@ RTRACE("radeon_vid: OV0: p1_v_accum_init=%x p1_h_accum_init=%x p23_h_accum_init=
         case IMGFMT_BGR24: bes_flags |= SCALER_SOURCE_24BPP; break;
         case IMGFMT_RGB32:
 	case IMGFMT_BGR32: bes_flags |= SCALER_SOURCE_32BPP; break;
-
-	case IMGFMT_UYVY:  bes_flags |= SCALER_SOURCE_YVYU422; break;
+        /* 4:1:0*/
+	case IMGFMT_IF09:
         case IMGFMT_YVU9:  bes_flags |= SCALER_SOURCE_YUV9; break;
-	
+        /* 4:2:0 */
 	case IMGFMT_IYUV:
 	case IMGFMT_I420:
-	case IMGFMT_YV12:  bes_flags |= SCALER_SOURCE_YUV12;
-			   break;
+	case IMGFMT_YV12:  bes_flags |= SCALER_SOURCE_YUV12;  break;
+        /* 4:2:2 */
+	case IMGFMT_UYVY:  bes_flags |= SCALER_SOURCE_YVYU422; break;
 	case IMGFMT_YUY2:
 	default:           bes_flags |= SCALER_SOURCE_VYUY422; break;
     }
-RTRACE("radeon_vid: OV0: SCALER=%x\n",bes_flags);
+RTRACE(RVID_MSG"OV0: SCALER=%x\n",bes_flags);
     OUTREG(OV0_SCALE_CNTL,		bes_flags);
 /*
  TODO:
@@ -350,11 +361,6 @@ RTRACE("radeon_vid: OV0: SCALER=%x\n",bes_flags);
 
 */
     OUTREG(OV0_REG_LOAD_CNTL,		0);
-}
-
-static void radeon_vid_start_video( void )
-{
-  radeon_vid_display_video();
 }
 
 #define XXX_SRC_X   0
@@ -370,7 +376,7 @@ static int radeon_vid_init_video( mga_vid_config_t *config )
 {
     uint32_t tmp,src_w,src_h,pitch,h_inc,step_by,left,leftUV,top;
     int is_420;
-RTRACE("radeon_vid: usr_config: version = %x format=%x card=%x ram=%u src(%ux%u) dest(%u:%ux%u:%u) frame_size=%u num_frames=%u\n"
+RTRACE(RVID_MSG"usr_config: version = %x format=%x card=%x ram=%u src(%ux%u) dest(%u:%ux%u:%u) frame_size=%u num_frames=%u\n"
 	,(uint32_t)config->version
 	,(uint32_t)config->format
 	,(uint32_t)config->card_type
@@ -398,17 +404,19 @@ RTRACE("radeon_vid: usr_config: version = %x format=%x card=%x ram=%u src(%ux%u)
         case IMGFMT_BGR24:
         case IMGFMT_RGB32:
 	case IMGFMT_BGR32:
-
+	/* 4:1:0 */
+	case IMGFMT_IF09:
         case IMGFMT_YVU9:
+	/* 4:2:0 */	
 	case IMGFMT_IYUV:
-	case IMGFMT_UYVY:
-
 	case IMGFMT_YV12:
 	case IMGFMT_I420:
+	/* 4:2:2 */
+	case IMGFMT_UYVY:
 	case IMGFMT_YUY2:
 				break;
 	default:
-		printk( "radeon_vid: Unsupported pixel format: 0x%X\n",config->format);
+		printk(RVID_MSG"Unsupported pixel format: 0x%X\n",config->format);
 		return -1;
     }
     is_420 = 0;
@@ -417,12 +425,16 @@ RTRACE("radeon_vid: usr_config: version = %x format=%x card=%x ram=%u src(%ux%u)
        config->format == IMGFMT_IYUV) is_420 = 1;
     switch(config->format)
     {
-        default:
+	/* 4:1:0 */
         case IMGFMT_YVU9:
+        case IMGFMT_IF09:
+	/* 4:2:0 */
 	case IMGFMT_IYUV:
-	case IMGFMT_UYVY:
 	case IMGFMT_YV12:
-	case IMGFMT_I420:
+	case IMGFMT_I420: pitch = (src_w + 31) & ~31; break;
+	/* 4:2:2 */
+        default:
+	case IMGFMT_UYVY:
 	case IMGFMT_YUY2:
         case IMGFMT_RGB15:
         case IMGFMT_BGR15:
@@ -446,17 +458,26 @@ RTRACE("radeon_vid: usr_config: version = %x format=%x card=%x ram=%u src(%ux%u)
     }
 
     /* keep everything in 16.16 */
-    besr.base_addr = radeon_overlay_off;
+    besr.base_addr = radeon_mem_base;
     if(is_420)
     {
-        uint32_t dstPitch,d1line,d2line,d3line;
-	dstPitch = ((src_w + 15) & ~15);  /* of luma */
-	d1line = top*dstPitch;
-	d2line = src_h*dstPitch+(d1line>>1);
-	d3line = d2line+((src_h*dstPitch)>>2);
-        besr.vid_buf0_base_adrs=((radeon_overlay_off+d1line)&VIF_BUF0_BASE_ADRS_MASK)|VIF_BUF0_PITCH_SEL;
-        besr.vid_buf1_base_adrs=((radeon_overlay_off+d2line)&VIF_BUF1_BASE_ADRS_MASK)|VIF_BUF0_PITCH_SEL;
-        besr.vid_buf2_base_adrs=((radeon_overlay_off+d3line)&VIF_BUF2_BASE_ADRS_MASK)|VIF_BUF0_PITCH_SEL;
+        uint32_t d1line,d2line,d3line;
+	d1line = top*pitch;
+	d2line = src_h*pitch+(d1line>>1);
+	d3line = d2line+((src_h*pitch)>>2);
+	d1line += (left >> 16) & ~15;
+	d2line += (left >> 17) & ~15;
+	d3line += (left >> 17) & ~15;
+        besr.vid_buf0_base_adrs=((radeon_overlay_off+d1line)&VIF_BUF0_BASE_ADRS_MASK);
+        besr.vid_buf1_base_adrs=((radeon_overlay_off+d2line)&VIF_BUF1_BASE_ADRS_MASK)|VIF_BUF1_PITCH_SEL;
+        besr.vid_buf2_base_adrs=((radeon_overlay_off+d3line)&VIF_BUF2_BASE_ADRS_MASK)|VIF_BUF2_PITCH_SEL;
+	if(besr.fourcc == IMGFMT_I420 || besr.fourcc == IMGFMT_IYUV)
+	{
+	  uint32_t tmp;
+	  tmp = besr.vid_buf1_base_adrs;
+	  besr.vid_buf1_base_adrs = besr.vid_buf2_base_adrs;
+	  besr.vid_buf2_base_adrs = tmp;
+	}
     }
     else
     {
@@ -476,7 +497,6 @@ RTRACE("radeon_vid: usr_config: version = %x format=%x card=%x ram=%u src(%ux%u)
     tmp = ((left >> 1) & 0x0001ffff) + 0x00028000 + (h_inc << 2);
     besr.p23_h_accum_init = ((tmp <<  4) & 0x000f8000) |
 			    ((tmp << 12) & 0x70000000);
-
     tmp = (top & 0x0000ffff) + 0x00018000;
     besr.p1_v_accum_init = ((tmp << 4) & OV0_P1_V_ACCUM_INIT_MASK)
 			    |(OV0_P1_MAX_LN_IN_PER_LN_OUT & 1);
@@ -489,8 +509,8 @@ RTRACE("radeon_vid: usr_config: version = %x format=%x card=%x ram=%u src(%ux%u)
     left = (left >> 16) & 15;
     besr.h_inc = h_inc | ((h_inc >> 1) << 16);
     besr.step_by = step_by | (step_by << 8);
-    besr.y_x_start = (config->x_org+8) | (config->y_org << 16);
-    besr.y_x_end = (config->x_org + config->dest_width+8) | ((config->y_org + config->dest_height) << 16);
+    besr.y_x_start = (config->x_org+X_ADJUST) | (config->y_org << 16);
+    besr.y_x_end = (config->x_org + config->dest_width+X_ADJUST) | ((config->y_org + config->dest_height) << 16);
     besr.p1_blank_lines_at_top = P1_BLNK_LN_AT_TOP_M1_MASK|((src_h-1)<<16);
     if(is_420)
     {
@@ -500,30 +520,14 @@ RTRACE("radeon_vid: usr_config: version = %x format=%x card=%x ram=%u src(%ux%u)
     else besr.p23_blank_lines_at_top = 0;
     besr.vid_buf_pitch0_value = pitch;
     besr.vid_buf_pitch1_value = is_420 ? pitch>>1 : pitch;
-RTRACE("radeon_vid: BES: v_inc=%x h_inc=%x step_by=%x\n",besr.v_inc,besr.h_inc,besr.step_by);
-RTRACE("radeon_vid: BES: vid_buf0_basey=%x\n",besr.vid_buf0_base_adrs);
-RTRACE("radeon_vid: BES: y_x_start=%x y_x_end=%x blank_at_top=%x pitch0_value=%x\n"
+RTRACE(RVID_MSG"BES: v_inc=%x h_inc=%x step_by=%x\n",besr.v_inc,besr.h_inc,besr.step_by);
+RTRACE(RVID_MSG"BES: vid_buf0_basey=%x\n",besr.vid_buf0_base_adrs);
+RTRACE(RVID_MSG"BES: y_x_start=%x y_x_end=%x blank_at_top=%x pitch0_value=%x\n"
 ,besr.y_x_start,besr.y_x_end,besr.p1_blank_lines_at_top,besr.vid_buf_pitch0_value);
     besr.p1_x_start_end = (src_w+left-1)|(left<<16);
-    if(is_420)
-    {
-	if(config->format == IMGFMT_YV12)
-	{
-	    besr.p3_x_start_end = ((src_w/2)+left-1)|((leftUV)<<16);
-	    besr.p2_x_start_end = (src_w+left-1)|((src_w/2+leftUV)<<16);
-	}
-	else
-	{
-	    besr.p2_x_start_end = ((src_w/2)+left-1)|((leftUV)<<16);
-	    besr.p3_x_start_end = (src_w+left-1)|((src_w/2+leftUV)<<16);
-	}
-    }
-    else
-    {
-	src_w>>=1;
-	besr.p2_x_start_end = (src_w+left-1)|(leftUV<<16);
-	besr.p3_x_start_end = besr.p2_x_start_end;
-    }
+    src_w>>=1;
+    besr.p2_x_start_end = (src_w+left-1)|(leftUV<<16);
+    besr.p3_x_start_end = besr.p2_x_start_end;
     return 0;
 }
 
@@ -561,25 +565,25 @@ static int radeon_vid_ioctl(struct inode *inode, struct file *file, unsigned int
 		case MGA_VID_CONFIG:
 			RTRACE( "radeon_mmio_base = %p\n",radeon_mmio_base);
 			RTRACE( "radeon_mem_base = %08x\n",radeon_mem_base);
-			RTRACE( "radeon_vid: Received configuration\n");
+			RTRACE(RVID_MSG"Received configuration\n");
 
  			if(copy_from_user(&radeon_config,(mga_vid_config_t*) arg,sizeof(mga_vid_config_t)))
 			{
-				printk( "radeon_vid: failed copy from userspace\n");
+				printk(RVID_MSG"failed copy from userspace\n");
 				return -EFAULT;
 			}
 			if(radeon_config.version != MGA_VID_VERSION){
-				printk( "radeon_vid: incompatible version! driver: %X  requested: %X\n",MGA_VID_VERSION,radeon_config.version);
+				printk(RVID_MSG"incompatible version! driver: %X  requested: %X\n",MGA_VID_VERSION,radeon_config.version);
 				return -EFAULT;
 			}
 
 			if(radeon_config.frame_size==0 || radeon_config.frame_size>1024*768*2){
-				printk( "radeon_vid: illegal frame_size: %d\n",radeon_config.frame_size);
+				printk(RVID_MSG"illegal frame_size: %d\n",radeon_config.frame_size);
 				return -EFAULT;
 			}
 
 			if(radeon_config.num_frames<1 || radeon_config.num_frames>4){
-				printk( "radeon_vid: illegal num_frames: %d\n",radeon_config.num_frames);
+				printk(RVID_MSG"illegal num_frames: %d\n",radeon_config.num_frames);
 				return -EFAULT;
 			}
 
@@ -589,27 +593,27 @@ static int radeon_vid_ioctl(struct inode *inode, struct file *file, unsigned int
 			radeon_overlay_off = radeon_ram_size*0x100000 - radeon_config.frame_size*radeon_config.num_frames;
 			radeon_overlay_off &= 0xffff0000;
 			if(radeon_overlay_off < 0){
-			    printk("radeon_vid: not enough video memory. Need: %u has: %u\n",radeon_config.frame_size*radeon_config.num_frames,radeon_ram_size*0x100000);
+			    printk(RVID_MSG"not enough video memory. Need: %u has: %u\n",radeon_config.frame_size*radeon_config.num_frames,radeon_ram_size*0x100000);
 			    return -EFAULT;
 			}
-			RTRACE("radeon_vid: using video overlay at offset %p\n",radeon_overlay_off);
+			RTRACE(RVID_MSG"using video overlay at offset %p\n",radeon_overlay_off);
 			if (copy_to_user((mga_vid_config_t *) arg, &radeon_config, sizeof(mga_vid_config_t)))
 			{
-				printk( "radeon_vid: failed copy to userspace\n");
+				printk(RVID_MSG"failed copy to userspace\n");
 				return -EFAULT;
 			}
-			printk("radeon_vid: configuring for '%s' fourcc\n",fourcc_format_name(radeon_config.format));
+			printk(RVID_MSG"configuring for '%s' fourcc\n",fourcc_format_name(radeon_config.format));
 			return radeon_vid_init_video(&radeon_config);
 		break;
 
 		case MGA_VID_ON:
-			RTRACE( "radeon_vid: Video ON (ioctl)\n");
-			radeon_vid_start_video();
+			RTRACE(RVID_MSG"Video ON (ioctl)\n");
+			radeon_vid_display_video();
 			video_on = 1;
 		break;
 
 		case MGA_VID_OFF:
-			RTRACE( "radeon_vid: Video OFF (ioctl)\n");
+			RTRACE(RVID_MSG"Video OFF (ioctl)\n");
 			if(video_on) radeon_vid_stop_video();
 			video_on = 0;
 		break;
@@ -617,14 +621,14 @@ static int radeon_vid_ioctl(struct inode *inode, struct file *file, unsigned int
 		case MGA_VID_FSEL:
 			if(copy_from_user(&frame,(int *) arg,sizeof(int)))
 			{
-				printk("radeon_vid: FSEL failed copy from userspace\n");
+				printk(RVID_MSG"FSEL failed copy from userspace\n");
 				return(-EFAULT);
 			}
 			radeon_vid_frame_sel(frame);
 		break;
 
 	        default:
-			printk( "radeon_vid: Invalid ioctl\n");
+			printk(RVID_MSG"Invalid ioctl\n");
 			return (-EINVAL);
 	}
 
@@ -633,10 +637,71 @@ static int radeon_vid_ioctl(struct inode *inode, struct file *file, unsigned int
 
 struct ati_card_id_s
 {
-  int id;
-  char name[17];
-}ati_card_ids[]=
+  const int id;
+  const char name[17];
+};
+
+const struct ati_card_id_s ati_card_ids[]=
 {
+#ifdef RAGE128
+ /*
+    This driver should be compatible with Rage128 (pro) chips.
+    (include adaptive deinterlacing!!!).
+    Moreover: the same logic can be used with Mach64 chips.
+    (I mean: mach64xx, 3d rage, 3d rage IIc, 3D rage pro, 3d rage mobility).
+    but they are incompatible by i/o ports. So if enthusiasts will want
+    then they can redefine OUTREG and INREG macros and redefine OV0_*
+    constants. Also it seems that mach64 chips supports only: YUY2, YV12, UYVY
+    fourccs (422 and 420 formats only).
+  */
+/* Rage128 Pro GL */
+ { PCI_DEVICE_ID_ATI_Rage128_PA, "R128Pro PA" },
+ { PCI_DEVICE_ID_ATI_Rage128_PB, "R128Pro PB" },
+ { PCI_DEVICE_ID_ATI_Rage128_PC, "R128Pro PC" },
+ { PCI_DEVICE_ID_ATI_Rage128_PD, "R128Pro PD" },
+ { PCI_DEVICE_ID_ATI_Rage128_PE, "R128Pro PE" },
+ { PCI_DEVICE_ID_ATI_RAGE128_PF, "R128Pro PF" },
+/* Rage128 Pro VR */
+ { PCI_DEVICE_ID_ATI_RAGE128_PG, "R128Pro PG" },
+ { PCI_DEVICE_ID_ATI_RAGE128_PH, "R128Pro PH" },
+ { PCI_DEVICE_ID_ATI_RAGE128_PI, "R128Pro PI" },
+ { PCI_DEVICE_ID_ATI_RAGE128_PJ, "R128Pro PJ" },
+ { PCI_DEVICE_ID_ATI_RAGE128_PK, "R128Pro PK" },
+ { PCI_DEVICE_ID_ATI_RAGE128_PL, "R128Pro PL" },
+ { PCI_DEVICE_ID_ATI_RAGE128_PM, "R128Pro PM" },
+ { PCI_DEVICE_ID_ATI_RAGE128_PN, "R128Pro PN" },
+ { PCI_DEVICE_ID_ATI_RAGE128_PO, "R128Pro PO" },
+ { PCI_DEVICE_ID_ATI_RAGE128_PP, "R128Pro PP" },
+ { PCI_DEVICE_ID_ATI_RAGE128_PQ, "R128Pro PQ" },
+ { PCI_DEVICE_ID_ATI_RAGE128_PR, "R128Pro PR" },
+ { PCI_DEVICE_ID_ATI_RAGE128_TR, "R128Pro TR" },
+ { PCI_DEVICE_ID_ATI_RAGE128_PS, "R128Pro PS" },
+ { PCI_DEVICE_ID_ATI_RAGE128_PT, "R128Pro PT" },
+ { PCI_DEVICE_ID_ATI_RAGE128_PU, "R128Pro PU" },
+ { PCI_DEVICE_ID_ATI_RAGE128_PV, "R128Pro PV" },
+ { PCI_DEVICE_ID_ATI_RAGE128_PW, "R128Pro PW" },
+ { PCI_DEVICE_ID_ATI_RAGE128_PX, "R128Pro PX" },
+/* Rage128 GL */
+ { PCI_DEVICE_ID_ATI_RAGE128_RE, "R128 RE" },
+ { PCI_DEVICE_ID_ATI_RAGE128_RF, "R128 RF" },
+ { PCI_DEVICE_ID_ATI_RAGE128_RG, "R128 RG" },
+ { PCI_DEVICE_ID_ATI_RAGE128_RH, "R128 RH" },
+ { PCI_DEVICE_ID_ATI_RAGE128_RI, "R128 RI" },
+/* Rage128 VR */
+ { PCI_DEVICE_ID_ATI_RAGE128_RK, "R128 RK" },
+ { PCI_DEVICE_ID_ATI_RAGE128_RL, "R128 RL" },
+ { PCI_DEVICE_ID_ATI_RAGE128_RM, "R128 RM" },
+ { PCI_DEVICE_ID_ATI_RAGE128_RN, "R128 RN" },
+ { PCI_DEVICE_ID_ATI_RAGE128_RO, "R128 RO" },
+/* Rage128 M3 */
+ { PCI_DEVICE_ID_ATI_RAGE128_LE, "R128 LE" },
+ { PCI_DEVICE_ID_ATI_RAGE128_LF, "R128 LF" },
+/* Rage128 Pro Ultra */
+ { PCI_DEVICE_ID_ATI_RAGE128_U1, "R128 U1" },
+ { PCI_DEVICE_ID_ATI_RAGE128_U2, "R128 U2" },
+ { PCI_DEVICE_ID_ATI_RAGE128_U3, "R128 U3" }
+#else
+/* Radeons (indeed: Rage 256 Pro ;) */
  { PCI_DEVICE_ID_RADEON_QD, "Radeon QD " },
  { PCI_DEVICE_ID_RADEON_QE, "Radeon QE " },
  { PCI_DEVICE_ID_RADEON_QF, "Radeon QF " },
@@ -648,6 +713,7 @@ struct ati_card_id_s
  { PCI_DEVICE_ID_RADEON_LW, "Radeon M7 LW " },
  { PCI_DEVICE_ID_R200_QL,   "Radeon2 8500 QL " },
  { PCI_DEVICE_ID_RV200_QW,  "Radeon2 7500 QW " }
+#endif
 };
 
 static int radeon_vid_config_card(void)
@@ -660,23 +726,23 @@ static int radeon_vid_config_card(void)
 		break;
 	if(!dev)
 	{
-		printk("radeon_vid: No supported cards found\n");
+		printk(RVID_MSG"No supported cards found\n");
 		return FALSE;
 	}
 
 	radeon_mmio_base = ioremap_nocache(pci_resource_start (dev, 2),RADEON_REGSIZE);
 	radeon_mem_base =  dev->resource[0].start;
 
-	RTRACE( "radeon_vid: MMIO at 0x%p\n", radeon_mmio_base);
-	RTRACE( "radeon_vid: Frame Buffer at 0x%08x\n", radeon_mem_base);
+	RTRACE(RVID_MSG"MMIO at 0x%p\n", radeon_mmio_base);
+	RTRACE(RVID_MSG"Frame Buffer at 0x%08x\n", radeon_mem_base);
 
 	/* video memory size */
 	radeon_ram_size = INREG(CONFIG_MEMSIZE);
 
-	/* mem size is bits [28:0], mask off the rest */
+	/* mem size is bits [28:0], mask off the rest. Range: from 1Mb up to 512 Mb */
 	radeon_ram_size &=  CONFIG_MEMSIZE_MASK;
 	radeon_ram_size /= 0x100000;
-	printk("radeon_vid: Found %s (%uMb memory)\n",ati_card_ids[i].name,radeon_ram_size);
+	printk(RVID_MSG"Found %s (%uMb memory)\n",ati_card_ids[i].name,radeon_ram_size);
 
 	return TRUE;
 }
@@ -695,11 +761,11 @@ static ssize_t radeon_vid_write(struct file *file, const char *buf, size_t count
 static int radeon_vid_mmap(struct file *file, struct vm_area_struct *vma)
 {
 
-	RTRACE( "radeon_vid: mapping video memory into userspace\n");
+	RTRACE(RVID_MSG"mapping video memory into userspace\n");
 	if(remap_page_range(vma->vm_start, radeon_mem_base + radeon_overlay_off,
 		 vma->vm_end - vma->vm_start, vma->vm_page_prot)) 
 	{
-		printk( "radeon_vid: error mapping video memory\n");
+		printk(RVID_MSG"error mapping video memory\n");
 		return(-EAGAIN);
 	}
 
@@ -708,7 +774,6 @@ static int radeon_vid_mmap(struct file *file, struct vm_area_struct *vma)
 
 static int radeon_vid_release(struct inode *inode, struct file *file)
 {
-	//Close the window just in case
 	radeon_vid_in_use = 0;
 	radeon_vid_stop_video();
 
@@ -771,17 +836,20 @@ static struct file_operations radeon_vid_fops =
 static int radeon_vid_initialize(void)
 {
 	radeon_vid_in_use = 0;
-
-	printk( "radeon_vid: Radeon video overlay driver v"RADEON_VID_VERSION" (C) Nick Kurshev\n");
+#ifdef RAGE128
+	printk(RVID_MSG"Rage128/Rage128Pro video overlay driver v"RADEON_VID_VERSION" (C) Nick Kurshev\n");
+#else
+	printk(RVID_MSG"Radeon video overlay driver v"RADEON_VID_VERSION" (C) Nick Kurshev\n");
+#endif
 	if(register_chrdev(RADEON_VID_MAJOR, "radeon_vid", &radeon_vid_fops))
 	{
-		printk( "radeon_vid: unable to get major: %d\n", RADEON_VID_MAJOR);
+		printk(RVID_MSG"unable to get major: %d\n", RADEON_VID_MAJOR);
 		return -EIO;
 	}
 
 	if (!radeon_vid_config_card())
 	{
-		printk("radeon_vid: can't configure this card\n");
+		printk(RVID_MSG"can't configure this card\n");
 		unregister_chrdev(RADEON_VID_MAJOR, "radeon_vid");
 		return -EINVAL;
 	}
@@ -800,7 +868,7 @@ void cleanup_module(void)
 	if(radeon_mmio_base)
 		iounmap(radeon_mmio_base);
 
-	RTRACE( "radeon_vid: Cleaning up module\n");
+	RTRACE(RVID_MSG"Cleaning up module\n");
 	unregister_chrdev(RADEON_VID_MAJOR, "radeon_vid");
 }
 
