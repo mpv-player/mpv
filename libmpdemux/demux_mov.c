@@ -797,12 +797,21 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		mp_msg(MSGT_DEMUX, MSGL_INFO, "Audio bits: %d  chans: %d  rate: %d\n",
 		    trak->stdata[19],trak->stdata[17],sh->samplerate);
 
-		if(trak->stdata_len >= 44 && trak->stdata[9]>=1)
+		if(trak->stdata_len >= 44 && trak->stdata[9]>=1){
 		  mp_msg(MSGT_DEMUX,MSGL_V,"Audio header: samp/pack=%d bytes/pack=%d bytes/frame=%d bytes/samp=%d  \n",
 		    char2int(trak->stdata,28),
 		    char2int(trak->stdata,32),
 		    char2int(trak->stdata,36),
 		    char2int(trak->stdata,40));
+		  if(trak->stdata_len>=44+8){
+		    int len=char2int(trak->stdata,44);
+		    int fcc=char2int(trak->stdata,48);
+		    // we have extra audio headers!!!
+		    printf("Audio extra header: len=%d  fcc=0x%X\n",len,fcc);
+		    sh->codecdata_len = len-8;
+		    sh->codecdata = trak->stdata+44+8;
+		  }
+		}
 
 		if((trak->stdata[9]==0) && trak->stdata_len >= 36) { // version 0 with extra atoms
 		    int atom_len = char2int(trak->stdata,28);
