@@ -463,6 +463,9 @@ mp_input_parse_cmd(char* str) {
       cmd->args[i].v.s = strdup(cmd_def->args[i].v.s);
   }
 
+  if(i < MP_CMD_MAX_ARGS)
+    cmd->args[i].type = -1;
+
   return cmd;
 }
 
