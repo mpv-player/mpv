@@ -135,13 +135,18 @@ void uninit_video(sh_video_t *sh_video){
 }
 
 int init_video(sh_video_t *sh_video,char* codecname,int vfm,int status){
+    unsigned int orig_fourcc=sh_video->bih?sh_video->bih->biCompression:0;
     sh_video->codec=NULL;
     sh_video->vf_inited=0;
-    while((sh_video->codec=find_codec(sh_video->format,
-      sh_video->bih?((unsigned int*) &sh_video->bih->biCompression):NULL,
-      sh_video->codec,0) )){
-	// ok we found one codec
+
+    while(1){
 	int i;
+	// restore original fourcc:
+	if(sh_video->bih) sh_video->bih->biCompression=orig_fourcc;
+	if(!(sh_video->codec=find_codec(sh_video->format,
+          sh_video->bih?((unsigned int*) &sh_video->bih->biCompression):NULL,
+          sh_video->codec,0) )) break;
+	// ok we found one codec
 	if(sh_video->codec->flags&CODECS_FLAG_SELECTED) continue; // already tried & failed
 	if(codecname && strcmp(sh_video->codec->name,codecname)) continue; // -vc
 	if(vfm>=0 && sh_video->codec->driver!=vfm) continue; // vfm doesn't match
