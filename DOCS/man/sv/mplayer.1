@@ -1,4 +1,7 @@
 .\" synced with 1.793 (TODO)    
+.\"
+.\" Work in progress, help appreciated
+.\"
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Translator: Carl Fürstenberg < azatoth at gmail dot com >
@@ -166,24 +169,41 @@ mencoder \- filmkodare
 .
 .SH BESKRIVNING
 .B mplayer
-är en filmspelare, ursprungligen för Linux, men kan köras på de flesta platformar (se dokumentationen). 
-Den spelare mestadels MPEG/\:VOB, AVI, ASF/\:WMA/\:WMV, RM, QT/\:MOV/\:MP4, OGG/\:OGM, MKV, VIVO, FLI, NuppelVideo, yuv4mpeg, FILM samt RoQ filer, är stödd av många nativa och binära codec. 
-Du kan kolla VideoCD, SVCD, DVD, 3ivx, DivX\ 3/\:4/\:5 samt även WMV filmer.
+är en filmspelare, ursprungligen för Linux, men kan köras på de flesta
+platformar (se dokumentationen). Den spelare mestadels MPEG/\:VOB, AVI,
+ASF/\:WMA/\:WMV, RM, QT/\:MOV/\:MP4, OGG/\:OGM, MKV, VIVO, FLI, NuppelVideo,
+yuv4mpeg, FILM samt RoQ filer, är stödd av många nativa och binära codec. Du
+kan kolla VideoCD, SVCD, DVD, 3ivx, DivX\ 3/\:4/\:5 samt även WMV filmer.
 .PP
-MPlayer stödjer en uppsjö av video- och audio-ut-drivrutiner. 
-Den funkar med X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca, DirectFB, Quartz, men du kan även använda GGI, SDL (pch alla deras drivrutiner), VESA (på verenda VESA-kompatibla kort, även utan X11), vissa låglevelade kortspecifika kortsdrivrutiner (för Matrox, 3Dfx samt ATI) och vissa hårdvaru-MPEG-avkodarkort, såsom Siemens DVB, DXR2 samt DXR3/\:Hollywood+. 
-De flesta stödjer mjukvaro och hårdvaruskalning, så du kan kolla på filmer i fullskärmsmode
+MPlayer stödjer en uppsjö av video- och audio-ut-drivrutiner. Den funkar med
+X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca, DirectFB, Quartz, men du
+kan även använda GGI, SDL (pch alla deras drivrutiner), VESA (på varenda
+VESA-kompatibla kort, även utan X11), vissa låglevelade kortspecifika
+kortsdrivrutiner (för Matrox, 3Dfx samt ATI) och vissa
+hårdvaru-MPEG-avkodarkort, såsom Siemens DVB, DXR2 samt DXR3/\:Hollywood+. De
+flesta stödjer mjukvaro och hårdvaruskalning, så du kan kolla på filmer i
+fullskärmsmode
 .PP
-MPlayer har "onscreen display" (OSD) för statusinformation, snygga stora antialiserade skuggade textningstexter samt visuellt återgivning av tagentbordskontroller. 
-Europeiska/\:ISO 8859-1,2 , kyrilliska, samt koreanska typsnitt är stött jämnsides med 12 textningsformat (MicroDVD, SubRip, OGM, SubViewer, Sami, VPlayer, RT, SSA, AQTitle, JACOsub, PJS samt vår egna: MPsub) och DVD-textning (SPU-ström, VOBsub och Closed Captions).
+MPlayer har "onscreen display" (OSD) för statusinformation, snygga stora
+antialiserade skuggade textningstexter samt visuellt återgivning av
+tagentbordskontroller. Europeiska/\:ISO 8859-1,2 , kyrilliska, samt koreanska
+typsnitt är stött
+jämnsides med 12 textningsformat (MicroDVD, SubRip, OGM, SubViewer, Sami, 
+VPlayer, RT, SSA, AQTitle, JACOsub, PJS samt vår egna: MPsub) och DVD-textning 
+(SPU-ström, VOBsub och Closed Captions).
 .PP
 .B mencoder
-(MPlayer's Movie Encoder) är en enkel filmkodare, framtagen till att koda MPlayer-spelbara filmer (se ovan) till andra MPlayer-spelbara format (se nedan). 
-Den kodar till DivX4, XviD, någon av libavcodecs codec, samt PCM/\:MP3/\:VBRMP3-audio i 1, 2 eller 3 pass. 
-Även så har den strömkopieringsförmåga, ett kraftfullt filtersystem (crop, expand, flip, postprocess, rotate, scale, noise, rgb/\:yuv conversion) och mera.
+(MPlayer's Movie Encoder) är en enkel filmkodare, framtagen till att koda 
+MPlayer-spelbara filmer (se ovan) till andra MPlayer-spelbara format (se 
+nedan). 
+Den kodar till DivX4, XviD, någon av libavcodecs codec, samt 
+PCM/\:MP3/\:VBRMP3-audio i 1, 2 eller 3 pass. 
+Även så har den strömkopieringsförmåga, ett kraftfullt filtersystem (crop, 
+expand, flip, postprocess, rotate, scale, noise, rgb/\:yuv conversion) och mera.
 .PP
 .B gmplayer
-är MPlayer med ett grafiskt användargränssnitt (GUI). Det har samma alternativ som MPlayer.
+är MPlayer med ett grafiskt användargränssnitt (GUI). Det har samma alternativ 
+som MPlayer.
 .PP
 Användningsexempel för snabbstart är lokaliserade i slutet på denna manual.
 .PP
@@ -195,7 +215,10 @@ Användningsexempel för snabbstart är lokaliserade i slutet på denna manual.
 .\" --------------------------------------------------------------------------
 .
 .SH "TAGENTBORDSKONTROLL"
-MPlayer har en fullt ut konfigurerbar, kommandoradsorienterat kontrollager vilken tillåter dig att kontrollera MPlayer med hjälp av tagentbord, mus, joystick samt fjärrkontroll (med LIRC). Hänvisa till '-input'-argumentet för flera sätt att konfigurera det.
+MPlayer har en fullt ut konfigurerbar, kommandoradsorienterat kontrollager 
+vilken tillåter dig att kontrollera MPlayer med hjälp av tagentbord, mus, 
+joystick samt fjärrkontroll (med LIRC). Hänvisa till '-input'-argumentet för 
+flera sätt att konfigurera det.
 .
 .TP
 .B generella kontroller
@@ -216,13 +239,16 @@ Halvera/dubbla uppspelningshastighet.
 .IPs "< samt >"
 backa/hoppa frmaåt i spellista.
 .IPs "HOME samt END"
-nästa/föregående spelträdsinölägg i förälderlistan. \" FIXME next/\:previous playtree entry in the parent list
+nästa/föregående spelträdsinölägg i förälderlistan. 
+.\" FIXME next/\:previous playtree entry in the parent list
 .IPs "INS samt DEL"
 nästa/föregående alternativa source (ASX-spellista endast). \" FIXME source
 .IPs "p / MELLANSLAG"
 Pausa filmen(valfri tagent fortsätter uppspelningen).
 .IPs .\ \ \ \ 
-Steppa framåt. Pressa en gång kommer att pausa filmen, varje efterföljande knapptryckning kommer hoppa fram en bildruta and sedan gå in i pausläge igen (valfri tagent fortsätter uppspelningen).
+Steppa framåt. Pressa en gång kommer att pausa filmen, varje efterföljande 
+knapptryckning kommer hoppa fram en bildruta and sedan gå in i pausläge igen 
+(valfri tagent fortsätter uppspelningen).
 .IPs "q / ESC"
 Stanna uppspelningen och avsluta programmet.
 .IPs "+ samt -"
@@ -261,7 +287,9 @@ Sätt EDL-märke.
 .RE
 .PD 1
 .PP
-(Följande tagenter är endast tillgängliga vid användande av hårdvaruacceleread video-ut (xv, (x)vidix, (x)mga, etc...), eller mjukvaruequalizerfilter (\-vf eq eller \-vf eq2).
+(Följande tagenter är endast tillgängliga vid användande av hårdvaruacceleread 
+video-ut (xv, (x)vidix, (x)mga, etc...), eller mjukvaruequalizerfilter (\-vf eq 
+eller \-vf eq2).
 .PP
 .PD 0
 .RSs
@@ -276,7 +304,8 @@ Ställ in saturation. \" FIXME saturation
 .RE
 .PD 1
 .PP
-(Följande tegenter är endast tillgängliga vid användande av quartzvideo-ut-drivrutin.)
+(Följande tegenter är endast tillgängliga vid användande av 
+quartzvideo-ut-drivrutin.)
 .PP
 .PD 0
 .RSs
@@ -291,7 +320,8 @@ Aktivera fullskärm (se även \-fs).
 .IPs "alternativ + [ och alternativ + ]"
 Sätt filmfönsteralfa. \" FIXME movie window alpha?
 .IPs T\ \ \ \ 
-Aktivera videlager: ontop/below/normal (se även \-ontop). \" FIXME translate ontop etc...?
+Aktivera videlager: ontop/below/normal (se även \-ontop). 
+\" FIXME translate ontop etc...?
 .RE
 .PD 1
 .
@@ -331,15 +361,22 @@ Välj föregående/nästa kanal.
 .\" --------------------------------------------------------------------------
 .
 .SH "ANVÄNDNING"
-Varje 'flag'-argument har en 'noflag'-motsvarighet, d.v.s.\& motsatsen till \-fs är \-nofs
+Varje 'flag'-argument har en 'noflag'-motsvarighet, d.v.s.\& motsatsen till 
+\-fs är \-nofs
 .PP
-Om ett argument är markerad som (XXX endast), kommer det endast att fungera i samarbete med XXX eller om XXX är inkompilerat.
+Om ett argument är markerad som (XXX endast), kommer det endast att fungera i 
+samarbete med XXX eller om XXX är inkompilerat.
 .PP
-Du kan lägga alla argument i en konfigurationsfil vilken kommer att bli inläst varje gång MPlayer körs. 
-Den systemvida konfigurationsfilen 'mplayer.conf' är i din konfigurationskatalog (d.v.s.\& /etc/mplayer eller /usr/local/etc/mplayer), den användarspecifika är lokaliserad i '~.mplayer/config'. 
-Användarspecifika inställningar skriver över systemvida inställningar, och argument angivna på kommandoraden skriver över bägge.
-Syntaxen i konfigurationsfilen är 'option=<value>', allting efter ett '#' är antaget som en kommentar. 
-Inställningar som fungerar utan värden kan bli aktiverade genom att sätta dem till 'yes', '1' eller 'true', och kan bli avaktiverade genom att sätta dem till 'no', '0' eller 'false'. 
+Du kan lägga alla argument i en konfigurationsfil vilken kommer att bli inläst 
+varje gång MPlayer körs. Den systemvida konfigurationsfilen 'mplayer.conf' är i
+din konfigurationskatalog (d.v.s.\& /etc/mplayer eller /usr/local/etc/mplayer), 
+den användarspecifika är lokaliserad i '~.mplayer/config'. Användarspecifika
+inställningar skriver över systemvida inställningar, och argument angivna på 
+kommandoraden skriver över bägge. Syntaxen i konfigurationsfilen är 
+\'option=<value>\', allting efter ett '#' är antaget som en kommentar. 
+Inställningar som fungerar utan värden kan bli aktiverade genom att sätta dem 
+till 'yes', '1' eller 'true', och kan bli avaktiverade genom att sätta dem till 
+\'no\', '0' eller 'false'. 
 Även underargument kan bli specifierade på detta vis.
 .PP
 .I EXEMPEL:
@@ -356,7 +393,9 @@ vf=eq2=1.0:-0.8
 .fi
 .PP
 Du kan även skriva filspecifika konfigurationsfiler. 
-Om du önskar att ha en konfigurationsfil för en fil kallad 'movie.avi', skapa då en fil kallad 'movie.avi.conf' med de filspecifika inställningar i sig och placera den i ~/.mplayer eller i samma katalog som filen.
+Om du önskar att ha en konfigurationsfil för en fil kallad 'movie.avi', skapa 
+då en fil kallad 'movie.avi.conf' med de filspecifika inställningar i sig och 
+placera den i ~/.mplayer eller i samma katalog som filen.
 .
 .
 .
@@ -372,8 +411,10 @@ Specifiera konfigurationsfil till att bli tolkad efter de vanliga.
 .
 .TP
 .B \-quiet\ \ 
-Gör konsolutskrift mindre uttömmande; till exempel så ser den till att statuslinje (d.v.s.\& A:   0.7 V:   0.6 A-V:  0.068 ...) från att visas. 
-Speciellt användbart på slöa terminaler och trasiga sådana som inte hanterar fullt ut vagnretur (d.v.s.\& \\r).
+Gör konsolutskrift mindre uttömmande; till exempel så ser den till att 
+statuslinje (d.v.s.\& A:   0.7 V:   0.6 A-V:  0.068 ...) från att visas. 
+Speciellt användbart på slöa terminaler och trasiga sådana som inte hanterar 
+fullt ut vagnretur (d.v.s.\& \\r).
 .
 .TP
 .B \-v, \-verbose
@@ -397,237 +438,249 @@ skriver ut allting relaterat till inputtolkar (parser debug)
 .
 .TP
 .B \-autoq <kvalité> (används med \-vf [s]pp)
-Dynamiskt ändra nivån av afterproccessering beroende på tillgängliga CPU-cyklar. 
-Värdet du specifierar kommer att bli den maximalt använda nivån, vanligtvis så kan du specifiera stora värden. 
-Du måste använda \-vf [s]pp utan paramertar för att få detta att funka.
+Dynamiskt ändra nivån av afterproccessering beroende på tillgängliga 
+CPU-cyklar. Värdet du specifierar kommer att bli den maximalt använda nivån,
+vanligtvis så kan du specifiera stora värden. Du måste använda \-vf [s]pp 
+utan paramertar för att få detta att funka.
 .
 .TP
 .B \-autosync <faktor>
 Gradvist ställa in A/V-synkning baserat på audiofördröjningsmätning. 
-Om du anger \-autosync\ 0 (standard), kommer bildramsanpassningen att vara baserad endast av audiofördröjningsmätning. 
-Om du anger \-autosync\ 1 så kommer liknande att inträffa, förutom att A/V-korrektionsalgoritmen kommer att ändras något. 
-Ett udda videoframerate i en film vilken spelar bra med \-nosound kan ofta bli hjälpt med att sätta denna till ett värde större än 1. 
-Ju större värde, ju närmare anpassningen kommer att vara \-nosound. 
-Testa \-autosync\ 30 för att plana ut problem med ljuddrivrutiner vilka inte implementerar en perfekt audiofördröjningsmätning. 
-Med detta värde, om stora A/V-synkningsfel inträffar, kommer det endast att ta 1 eller 2\ sekunder att plana ut. 
-Denna fördröjning i reaktionstid till plötslig A/V-fel torde vara den enda sidoeffekt med att ha denna inställd aktiverad, för alla ljuddrivrutiner.
+Om du anger \-autosync\ 0 (standard), kommer bildramsanpassningen att vara 
+baserad endast av audiofördröjningsmätning. Om du anger \-autosync\ 1 så 
+kommer liknande att inträffa, förutom att A/V-korrektionsalgoritmen kommer
+att ändras något. Ett udda videoframerate i en film vilken spelar bra med
+\-nosound kan ofta bli hjälpt med att sätta denna till ett värde större än 1. 
+Ju större värde, ju närmare anpassningen kommer att vara \-nosound. Testa 
+\-autosync\ 30 för att plana ut problem med ljuddrivrutiner vilka inte 
+implementerar en perfekt audiofördröjningsmätning. Med detta värde, om 
+stora A/V-synkningsfel inträffar, kommer det endast att ta 1 eller 2\ 
+sekunder att plana ut. Denna fördröjning i reaktionstid till plötslig 
+A/V-fel torde vara den enda sidoeffekt med att ha denna inställd aktiverad, 
+för alla ljuddrivrutiner.
 .
 .TP
 .B \-benchmark
-Skriver ut viss statistik ang. CPU-användning samt tappade bildrutor vid slutet att uppspelning. 
-Använd i kombination med \-nosound samt \-vo null för benchmarkning av endast videocodec.
+Skriver ut viss statistik ang. CPU-användning samt tappade bildrutor vid slutet 
+att uppspelning. Använd i kombination med \-nosound samt \-vo null för 
+benchmarkning av endast videocodec.
 .br
 .I NOTERA:
-Med denna inställning så kommer MPlayer att ignorera bildramsduration vid spelande av endast video (du kan tänka detta som oändlig bps)
+Med denna inställning så kommer MPlayer att ignorera bildramsduration vid 
+spelande av endast video (du kan tänka detta som oändlig bps)
 .
 .TP
 .B \-colorkey <nummer>
-Ändrar färgnyckeln till av dig valt RGB-värde. 
-RGB-värdet är i form av 0xrrggbb där varje färg är ett värde från 00 till ff (0 till 255) där 0x000000 är svart samt 0xffffff är vitt. 
-Detta stödjs endast av cvidix-, fbdev-, svga-, vesa-, winvidix-, xmga-, xvidix- samt xover-video-ut-drivrutinerna.
+Ändrar färgnyckeln till av dig valt RGB-värde. RGB-värdet är i form av 
+0xrrggbb där varje färg är ett värde från 00 till ff (0 till 255) där 
+0x000000 är svart samt 0xffffff är vitt. Detta stödjs endast av cvidix-,
+fbdev-, svga-, vesa-, winvidix-, xmga-, xvidix- samt xover-video-ut-\
+drivrutinerna.
 .
 .TP
 .B \-nocolorkey
-Inaktiverar färgnyckling. \" colorkeying?
-Dtödjs endast av cvidix-, fbdev-, svga-, vesa-, winvidix-, xmga-, xvidix- samt xover-video-ut-dtrivrutinerna.
+Inaktiverar färgnyckling. Dtödjs endast av cvidix-, fbdev-, svga-, vesa-,
+winvidix-, xmga-, xvidix- samt xover-video-ut-dtrivrutinerna.
+.\" colorkeying?
 .
 .TP
 .B \-edl <filnamn> (Endast EDL)
-Aktivera händelser för val i redigeringslista (EDL) under uppspelning. 
-Video kommer att skippas och audio kommer att bli mutad/omutad i relation till inlägg i given fil. 
-Se  DOCS/\:HTML/\:en/\:edl.html för detaljer att använda detta \" FIXME sv when that translation is done
+Aktivera händelser för val i redigeringslista (EDL) under uppspelning. Video
+kommer att skippas och audio kommer att bli mutad/omutad i relation till 
+inlägg i given fil. Se  DOCS/\:HTML/\:en/\:edl.html för detaljer att använda
+detta 
+\" FIXME sv when that translation is done
 .
 .TP
 .B \-edlout <filnamn> (Endast EDL)
 Skapar en ny fil och skriver redigeringsvalslistsinspelning till denna fil. 
-Under uppspelning, när användaren knappar på 'i', ett inlägg för att hoppa över de två sista minuterna komma att skrivas in i filen.
-Detta möjliggör en startpunkt från det attanvändaren kan finjustea EDL-inläggen senare. Se DOCS/\:HTML/\:en/\:edl.html för detaljer. \" FIXME -''-
+Under uppspelning, när användaren knappar på 'i', ett inlägg för att hoppa över 
+de två sista minuterna komma att skrivas in i filen. Detta möjliggör en 
+startpunkt från det attanvändaren kan finjustea EDL-inläggen senare. 
+Se DOCS/\:HTML/\:en/\:edl.html för detaljer. \" FIXME -''-
 .
 .TP
 .B \-enqueue (Endast GUI)
-Lägg till angivna filer till spellista istället för att spela upp dem på direkten.
+Lägg till angivna filer till spellista istället för att spela upp dem på 
+direkten.
 .
 .TP
 .B \-fixed-vo (BETAKOD!)
-Forcerar ett fixerat videosystem för multipla filer ( en (de)initiering för alla filer). 
-Därav endast ett fönster kommer att bli öppnat för alla filer. 
-För stunden endast följande drivrutiner stödjer detta: gl2, mga, svga, x11, xmga, xv, xvidix samt dfbmga.
+Forcerar ett fixerat videosystem för multipla filer ( en (de)initiering för 
+alla filer). Därav endast ett fönster kommer att bli öppnat för alla filer. 
+För stunden endast följande drivrutiner stödjer detta: gl2, mga, svga, x11, 
+xmga, xv, xvidix samt dfbmga.
 .
 .TP
 .B \-framedrop (se även \-hardframedrop)
-Skippa visning av vissa bildrutor för att fårtfå en A/V-synkronisering på slöa system.
-Videofilter är inte applicerade på sådana bildrutor. 
-För B-bildrutor, även avkodning skippas helt.
+Skippa visning av vissa bildrutor för att fårtfå en A/V-synkronisering på
+slöa system. Videofilter är inte applicerade på sådana bildrutor. För 
+B-bildrutor, även avkodning skippas helt.
 .
 .TP
 .B \-h, \-help, \-\-help
 Visa kort introduktion av argument.
 .
-.\" Translating FLAG
 .TP
 .B \-hardframedrop
-More intense frame dropping (breaks decoding).
-Leads to image distortion!
+Mer intensiv framedropping (byter dekodning). Leder till bildförstörning.
 .
 .TP
 .B \-identify
-Show file parameters in an easily parseable format.
-The wrapper script TOOLS/\:midentify suppresses the other MPlayer output and
-(hopefully) shellescapes the filenames.
+Visar filparametrar i ett enkelt tolkningsbart format. Wrapperscriptet
+TOOLS/midentify tar bort övrig MPlayer-output och (förhoppningsvis)
+shellescapear filnamnet.
 .
 .TP
-.B \-input <commands>
-This option can be used to configure certain parts of the input system.
-Paths are relative to ~/\:.mplayer/.
+.B \-input <kommandon>
+Detta argument kan användas för att konfigurera specifika delar av
+input-systemet. Kataloger är relativa till ~/.mplayer/.
 .br
-.I NOTE:
-Autorepeat is currently only supported by joysticks.
+.I NOTERA:
+Autorepeat stödls för tillfället endast av joystick.
 .sp 1
-Available commands are:
+Tillgängliga kommandon är:
 .sp 1
 .PD 0
 .RSs
-.IPs conf=<filename>
-Specify input configuration file other than the default
-~/\:.mplayer/\:input.conf.
-~/\:.mplayer/\:<filename> is assumed if no full path is given.
+.IPs conf=<filnamn>
+Specifiera input-konfigurationsfil istället för standard ~/.mplayer/input.conf.
+~/.pmlayer/<filnamn> är antaget om inte full path är given.
 .IPs ar-delay
-Delay in msec before we start to autorepeat a key (0 to disable).
+Fördröj i millisekunder före vi startar med att autoupprpa en nyckel (0 för att
+inaktivera)
 .IPs ar-rate
-Number of key presses to generate per second on autorepeat.
+Antalet nycklar nedtryckta per sekund för autouprepning.
 .IPs keylist
-Prints all keys that can be bound to commands.
+Skriv ut alla nucklar som kan kopplas till kommandon.
 .IPs cmdlist
-Prints all commands that can be bound to keys.
+Skriv ut atta kommandon som kan bli kopplade till nycklar.
 .IPs js-dev
-Specifies the joystick device to use (default: /dev/\:input/\:js0).
+Specifera joysticksenheten (standard: /dev/input/js0).
 .IPs file\ 
-Read commands from the given file.
-Mostly useful with a FIFO.
+Läs kommandon från given fil. Mestadels användbar med en FIFO.
 .br
-.I NOTE:
-When the given file is a FIFO MPlayer opens both ends so you can do
-several 'echo "seek 10" > mp_pipe' and the pipe will stay valid.
+.I NOTERA:
+När given fil är en FIFO, Kommer MPlayer att öppna båda ändarna så du kan göra
+flera 'echo "seek 10" > mp_pipe' och pipen kommer att fortsätta vara valid.
 .RE
 .PD 1
 .
 .TP
-.B \-lircconf <filename> (LIRC only)
-Specifies a configuration file for LIRC (default: ~/\:.lircrc).
+.B \-lircconf <filnamn> (Endast LIRC)
+Specifiera en konfigurationsfil för LIRC (standard: ~/\:.lircrc).
 .
 .TP
 .B \-list-options
-Prints out all the available options.
+Skriv ut alla tillgängliga alternativ.
 .
 .TP
-.B \-loop <number>
-Loops movie playback <number> times.
-0 means forever.
+.B \-loop <nummer>
+Loopar filmuppspelningen <nummer> gånger. 0 betyder oändligt.
 .
 .TP
-.B \-menu (OSD menu only)
-Turn on OSD menu support.
+.B \-menu (Endast OSD-meny)
+Aktiverar OSD-menystöd.
 .
 .TP
-.B \-menu-cfg <filename> (OSD menu only)
-Use an alternative menu.conf.
+.B \-menu-cfg <filnamn> (Endast OSD-meny)
+Använd en alternativ menu.conf.
 .
 .TP
-.B \-menu-root <value> (OSD menu only)
-Specify the main menu.
+.B \-menu-root <värde> (Endast OSD-meny)
+Specifiera huvudmenyn.
 .
 .TP
-.B \-menu-startup (OSD menu only)
-Display the main menu at MPlayer startup.
+.B \-menu-startup (Endast OSD-meny)
+Deaktivera huvudmenyn vid start av MPlayer.
 .
 .TP
 .B \-noconsolecontrols
-Prevent MPlayer from reading key events from standard input.
-Useful when reading data from standard input.
-This is automatically enabled when \- is found on the command line.
-There are situations where you have to set it manually, e.g.\&
-if you open /dev/\:stdin (or the equivalent on your system), use stdin
-in a playlist or intend to read from stdin later on via the loadfile or
-loadlist slave commands.
+Förhindrar MPlayer från att läsa nyckelhändelser från stdin. Användbart vid
+läsning av data från stdin. Detta är automatiskt aktiverat när \- är angivet på
+kommandoraden. Det är situationer där du måste aktivera det manuellt, t.ex.\& om
+du öppnar /dev/\:stdin (eller ekvivalent på ditt system), använder stdin i en
+spellista, eller kommer att läsa från stdin senare via laddningsfilen eller
+slavanrop från laddningsfilen.
 .
 .TP
 .B \-nojoystick
-Turns off joystick support.
+Deaktiverar joysticksstöd.
 .
 .TP
 .B \-nolirc
-Turns off LIRC support.
+Deaktiverar LIRC-stöd.
 .
 .TP
-.B \-nomouseinput (X11 only)
-Disable mouse button press/\:release input (mozplayerxp's context menu relies
-on this option).
+.B \-nomouseinput (Endast X11)
+Deaktiverar input av musknappshändelser (mozplayerxp:s sammanhangsmeny stödjer
+sig på detta alternativ).
 .
 .TP
-.B \-nortc (RTC only)
-Turns off usage of the Linux RTC (realtime clock \- /dev/\:rtc) as timing
-mechanism.
+.B \-nortc (Endast RTC)
+Stänger av användning av Linux-RTC (realtisdklocka \- /dev/\:rtc) som
+tidtagningsmekanism.
 .
 .TP
-.B \-playlist <filename>
-Play files according to a playlist file (ASX, Winamp, SMIL, or
-one-file-per-line format).
+.B \-playlist <filnamn>
+Spela filerna enligt en spellistsfil (ASX, Winamp, SMIL, eller en fil men en fil
+att spela per rad).
 .br
-.I NOTE:
-This option is considered an entry so options found after it will apply
-only to the elements of this playlist.
+.I NOTERA:
+Detta alternativ är tolkat som ett inlägg, så alternativ funna efter deta kommer
+bara att appliceras på elementen i spellistan.
 .br
-FIXME: This needs to be clarified and documented thoroughly.
+-\"FIXME : This needs to be clarified and documented thoroughly. (org. text).
 .
 .TP
-.B \-really-quiet (also see \-quiet)
-Display even less output and status messages than with \-quiet.
+.B \-really-quiet (se även \-quiet)
+Visa allt mindre information och statusmeddelande än med \-quiet.
 .
 .TP
-.B \-rtc-device <device>
-Use the specified device for RTC timing.
+.B \-rtc-device <enhet>
+Använd specifierad enhet för RTC-tidtagning.
 .
 .TP
 .B \-shuffle
-Play files in random order.
+Spela filerna i slumpvis ordning.
 .
 .TP
-.B \-skin <name> (GUI only)
-Loads a skin from the directory given as parameter below the default skin
-directories, /usr/\:local/\:share/\:mplayer/\:Skin/\: and ~/.mplayer/\:Skin/.
+.B \-skin <namn> (Endast GUI)
+Ladda angivet skin från en katalog vilke som standard är:
+/usr/\:local/\:share/\:mplayer/\:Skin/\: samt ~/.mplayer/\:Skin/.
 .sp 1
-.I EXAMPLE:
+.I EXEMPEL:
 .PD 0
 .RSs
 .IPs "\-skin fittyfene"
-Tries /usr/\:local/\:share/\:mplayer/\:Skin/\:fittyfene
-and afterwards ~/.mplayer/\:Skin/\:fittyfene.
+Försöker /usr/\:local/\:share/\:mplayer/\:Skin/\:fittyfene och efteråt ~/.mplayer/\:Skin/\:fittyfene.
 .RE
 .PD 1
 .
 .TP
-.B \-slave (also see \-input)
-Switches on slave mode, in which MPlayer works as a backend for other programs.
-Instead of intercepting keyboard events, MPlayer will read commands from stdin.
+.B \-slave (se även \-input)
+Aktiverar slavmode, i vilken MPlayer arbetar såsom ett backend för andra
+program. Istället för att ta tagentbordshändelser, så kommer MPlayer att läsa
+kommandon från stdin.
 .br
-.I NOTE:
-See \-input cmdlist for a list of slave commands and DOCS/\:tech/\:slave.txt
-for their description.
+.I NOTERA:
+Se '\-input cmdlist' för en lista över slavkommandon och
+DOCS/\:tech/\:slave.txt för deras beskrivning.
 .
 .TP
 .B \-softsleep
-Use high-quality software timers instead of the RTC.
-As precise as the RTC without requiring special privileges.
-Comes at the price of higher CPU consumption.
+Använd högkvalitativa mjukvarutidtagningstidtagare istället för RTC. Såsom
+precis som RTC utan att kräva speciella privilegier. Kommer med priset av högre
+CPU-konsumtion.
 .
 .TP
 .B \-speed <0.01\-100>
-Slow down or speed up playback by the factor given as parameter.
+Sakta ner eller speeda upp uppspelning med faktorn given i parametern.
 .
 .TP
-.B \-sstep <sec>
-Display one frame every <sec> seconds.
-Useful for slideshows.
+.B \-sstep <sekunder>
+Visa en bildram var <sekunder> sekund. Användbart för slideshows. 
+\" FIXME slideshows???
 .
 .
 .
@@ -2164,7 +2217,8 @@ Currently only supported by \-vo directx combined with the \-vm option.
 .B \-rootwin
 Play movie in the root window (desktop background).
 Desktop background images may cover the movie window, though.
-Only works with the x11, xv, xmga, xvidix, quartz and directx video output drivers.
+Only works with the x11, xv, xmga, xvidix, quartz and directx video output 
+drivers.
 .
 .TP
 .B \-saturation <-100\-100>
@@ -2590,8 +2644,10 @@ Play video using the DirectFB library.
 .IPs (no)input
 Use the DirectFB instead of the MPlayer keyboard code (default: enabled).
 .IPs buffermode=single|double|triple
-Double and triple buffering give best results if you want to avoid tearing issues.
-Triple buffering is more efficent than double buffering as it doesn't block MPlayer
+Double and triple buffering give best results if you want to avoid tearing 
+issues.
+Triple buffering is more efficent than double buffering as it doesn't block 
+MPlayer
 while waiting for the vertical retrace.
 Single buffering should be avoided (default: single).
 .IPs fieldparity=top|bottom
@@ -2627,8 +2683,10 @@ with proper sync to every odd/\:even field.
 .IPs (no)input
 Use the DirectFB instead of the MPlayer keyboard code (default: disabled).
 .IPs buffermode=single|double|triple
-Double and triple buffering give best results if you want to avoid tearing issues.
-Triple buffering is more efficent than double buffering as it doesn't block MPlayer
+Double and triple buffering give best results if you want to avoid tearing 
+issues.
+Triple buffering is more efficent than double buffering as it doesn't block 
+MPlayer
 while waiting for the vertical retrace.
 Single buffering should be avoided (default: triple).
 .IPs fieldparity=top|bottom
@@ -3006,7 +3064,8 @@ completely and +60dB equals a gain of 1000).
 sc: Enable soft clipping.
 .REss
 .IPs pan[=n:l01:l02:...l10:l11:l12:...ln0:ln1:ln2:...]
-Mixes channels arbitrarily, see DOCS/\:HTML/\:en/\:devices.html#audio-dev for details.
+Mixes channels arbitrarily, see DOCS/\:HTML/\:en/\:devices.html#audio-dev for 
+details.
 .RSss
 n: number of input channels (1\-6)
 .br
@@ -7204,11 +7263,13 @@ mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg file.avi
 .
 .TP
 .B Encode DVD title #2, only selected chapters:
-mencoder dvd://2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mpeg4
+mencoder dvd://2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc lavc 
+\-lavcopts vcodec=mpeg4
 .
 .TP
 .B Encode DVD title #2, resizing to 640x480:
-mencoder dvd://2 \-vf scale=640:480 \-o title2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mpeg4
+mencoder dvd://2 \-vf scale=640:480 \-o title2.avi \-oac copy \-ovc lavc 
+\-lavcopts vcodec=mpeg4
 .
 .TP
 .B Encode DVD title #2, resizing to 512xHHH (keep aspect ratio):
@@ -7227,7 +7288,8 @@ mencoder dvd://2 \-o titel2.avi \-ovc lavc
 .
 .TP
 .B Encode all *.jpg files in the current dir:
-mencoder "mf://*.jpg" \-mf fps=25 \-o output.avi \-ovc lavc \-lavcopts vcodec=mpeg4
+mencoder "mf://*.jpg" \-mf fps=25 \-o output.avi \-ovc lavc \-lavcopts 
+vcodec=mpeg4
 .
 .TP
 .B Encode from a tuner (specify a format with \-vf format):
@@ -7235,7 +7297,8 @@ mencoder \-tv driver=v4l:width=640:height=480 tv:// \-o tv.avi \-ovc raw
 .
 .TP
 .B Encode from a pipe:
-rar p test-SVCD.rar | mencoder \-ovc lavc \-lavcopts vcodec=mpeg4:vbitrate=800 \-ofps 24 \-
+rar p test-SVCD.rar | mencoder \-ovc lavc \-lavcopts vcodec=mpeg4:vbitrate=800 
+\-ofps 24 \-
 .
 .
 .\" --------------------------------------------------------------------------
@@ -7246,7 +7309,8 @@ rar p test-SVCD.rar | mencoder \-ovc lavc \-lavcopts vcodec=mpeg4:vbitrate=800 \
 If you find one, report it to us, but please make sure you have read all
 of the documentation first.
 Many bugs are the result of incorrect setup or parameter usage.
-The bug reporting section of the documentation (DOCS/\:HTML/\:en/\:bugreports.html)
+The bug reporting section of the documentation 
+(DOCS/\:HTML/\:en/\:bugreports.html)
 explains how to create useful bug reports.
 .
 .
