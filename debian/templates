@@ -26,6 +26,7 @@ Description: MPlayer Main Menu
 
 Template: mplayer/voutput
 Type: select
+Default: x11
 Choices: ${vochoices}
 Description: MPlayer Video Output
   Mplayer can use very wide range of video output drivers:
