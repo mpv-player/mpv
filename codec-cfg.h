@@ -7,6 +7,7 @@
 
 // Global flags:
 #define CODECS_FLAG_SEEKABLE	(1<<0)
+#define CODECS_FLAG_SELECTED	(1<<15)  /* for internal use */
 
 // Outfmt flags:
 #define CODECS_FLAG_FLIP	(1<<0)

@@ -702,12 +702,28 @@ codecs_t* find_codec(unsigned int fourcc,unsigned int *fourccmap,
 				if (c->fourcc[j]==fourcc || c->driver==0) {
 					if (fourccmap)
 						*fourccmap = c->fourccmap[j];
+					c->flags|=CODECS_FLAG_SELECTED;
 					return c;
 				}
 			}
 		}
 	}
 	return NULL;
+}
+
+void codecs_reset_selection(int audioflag){
+	int i;
+	codecs_t *c;
+	if (audioflag) {
+		i = nr_acodecs;
+		c = audio_codecs;
+	} else {
+		i = nr_vcodecs;
+		c = video_codecs;
+	}
+	if(i)
+	for (/* NOTHING */; i--; c++)
+		c->flags&=(~CODECS_FLAG_SELECTED);
 }
 
 void list_codecs(int audioflag){
