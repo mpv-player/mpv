@@ -184,7 +184,7 @@ http_send_request( URL_t *url ) {
 
 	http_hdr = http_new_header();
 
-	if( !strcasecmp(url->protocol, "proxy") ) {
+	if( !strcasecmp(url->protocol, "http_proxy") ) {
 		proxy = 1;
 		server_url = url_new( (url->file)+1 );
 		http_set_uri( http_hdr, server_url->url );
@@ -325,7 +325,7 @@ extension=NULL;
 		}
 
 		// HTTP based protocol
-		if( !strcasecmp(url->protocol, "http") || !strcasecmp(url->protocol, "proxy") ) {
+		if( !strcasecmp(url->protocol, "http") || !strcasecmp(url->protocol, "http_proxy") ) {
 			//if( url->port==0 ) url->port = 80;
 
 			fd = http_send_request( url );

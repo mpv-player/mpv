@@ -63,7 +63,7 @@ asf_streaming_start( stream_t *stream ) {
 	}
 	if( 	!strncasecmp( proto_s, "http", 4) || 
 		!strncasecmp( proto_s, "mms", 3)  ||
-		!strncasecmp( proto_s, "proxy", 5)
+		!strncasecmp( proto_s, "http_proxy", 10)
 		) {
 		printf("Trying ASF/HTTP...\n");
 		fd = asf_http_streaming_start( stream );
@@ -398,7 +398,7 @@ asf_http_request(streaming_ctrl_t *streaming_ctrl) {
 	http_set_field( http_hdr, "User-Agent: NSPlayer/4.1.0.3856" );
 
 	// Check if we are using a proxy
-	if( !strcasecmp( url->protocol, "proxy" ) ) {
+	if( !strcasecmp( url->protocol, "http_proxy" ) ) {
 		server_url = url_new( (url->file)+1 );
 		if( server_url==NULL ) {
 			printf("Invalid proxy URL\n");
@@ -561,7 +561,7 @@ asf_http_streaming_start( stream_t *stream ) {
 		done = 1;
 		if( fd>0 ) close( fd );
 
-		if( !strcasecmp( url->protocol, "proxy" ) ) {
+		if( !strcasecmp( url->protocol, "http_proxy" ) ) {
 			if( url->port==0 ) url->port = 8080;
 		} else {
 			if( url->port==0 ) url->port = 80;
