@@ -1,8 +1,8 @@
 #ifndef __CODEC_CFG_H
 #define __CODEC_CFG_H
 
-#define CODECS_MAX_FOURCC	16
-#define CODECS_MAX_OUTFMT	16
+#define CODECS_MAX_FOURCC	32
+#define CODECS_MAX_OUTFMT	32
 
 // Global flags:
 #define CODECS_FLAG_SEEKABLE	(1<<0)
