@@ -97,8 +97,7 @@ static int init(int rate,int channels,int format,int flags){
 	       "PCM: Samplerate: %iHz Channels: %s Format %s\n",
 	       ao_outputfilename, (ao_pcm_waveheader?"WAVE":"RAW PCM"), rate,
 	       (channels > 1) ? "Stereo" : "Mono", audio_out_format_name(format));
-	printf("PCM: Info: fastest dumping is achieved with -vo null "
-	       "-hardframedrop.\n"
+	printf("PCM: Info: fastest dumping is achieved with -vc null -vo null\n"
 	       "PCM: Info: to write WAVE files use -waveheader (default); "
 	       "for RAW PCM -nowaveheader.\n");
 
