@@ -23,6 +23,7 @@ mplayer (0.99)
     * Ported to Win32/MinGW (including network, timers, getch etc)
     * win32 codecs DLL support on Win32/Cygwin (and MinGW too!)
     * Lots of Altivec optimizations
+    * Some ARM fixes
     
     Codecs/demuxers support:
     * realaudio win32 dlls support
@@ -62,7 +63,7 @@ mplayer (0.99)
     * Indeo 3 video decoding
     * buggy VP3 video decoder (no UMV and inaccurate idct)
     * Sorenson 3 (SVQ3) video decoder (it's actually a h264 variant)
-    * 3IV1 (3ivx v1) decoding, ASV1 (ASUS Vidoe v1) decoding
+    * 3IV1 (3ivx v1) decoding, ASV1 (ASUS Video v1) decoding
     * Improved SVQ1 decoding (using FFmpeg VLC functions)
     * truncated unary binerization, unary k-th order exp golomb binarization :)
     * FFV1: lossless YUV codec, compress a lot better than huffyuv, but slower
@@ -86,6 +87,7 @@ mplayer (0.99)
     * various URL parsing fixes
     * GUI PPC (reverse byteorder) fixes
     * crashing on broken config files finally fixed!
+    * OpenGL driver fixes
 
 
 mplayer (0.90)
