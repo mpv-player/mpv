@@ -519,11 +519,22 @@ static void mach64_vid_display_video( void )
     OUTREG(SCALER_BUF1_OFFSET_U,		besr.vid_buf4_base_adrs);
     OUTREG(SCALER_BUF1_OFFSET_V,		besr.vid_buf5_base_adrs);
     OUTREG(OVERLAY_SCALE_CNTL, 0xC4000003);
+// OVERLAY_SCALE_CNTL bits & what they seem to affect
+// bit 0 no effect
+// bit 1 yuv2rgb coeff related
+// bit 2 horizontal interpolation if 0
+// bit 3 vertical interpolation if 0
+// bit 4 chroma related
+// bit 5-6 gamma correction
+// bit 7 nothing visible if set
+// bit 8-27 no effect
+// bit 28-31 nothing interresting just crashed my system when i played with them  :(
+    
     mach64_wait_for_idle();
     vf = INREG(VIDEO_FORMAT);
 
 // Bits 16-19 seem to select the format
-// Bit 28 seems to toggle the chroma encoding
+// Bit 28 seems to toggle something affects luma & chroma
 // the remaining bits seem to have no effect
 
     switch(besr.fourcc)
