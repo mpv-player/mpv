@@ -3273,7 +3273,7 @@ if test "$_cdparanoia" = auto ; then
 int main(void) { return 1; }
 EOF
     _cdparanoia=no
-    cc_check $_inc_cdparanoia $_ld_cdparanoia -lcdda_interface -lcdda_paranoia && _cdparanoia=yes
+    cc_check $_inc_cdparanoia $_ld_cdparanoia -lcdda_interface -lcdda_paranoia -lm && _cdparanoia=yes
 fi
 if test "$_cdparanoia" = yes ; then
     _def_cdparanoia='#define HAVE_CDDA'
