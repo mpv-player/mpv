@@ -1,6 +1,6 @@
 /*
    nvidia_vid - VIDIX based video driver for NVIDIA chips
-   Copyrights 2003 Sascha Sommer. This file is based on sources from
+   Copyrights 2003 - 2004 Sascha Sommer. This file is based on sources from
    RIVATV (rivatv.sf.net)
    Licence: GPL
    WARNING: THIS DRIVER IS IN BETA STAGE
@@ -852,20 +852,7 @@ int vixConfigPlayback(vidix_playback_t *vinfo){
 		    vinfo->offset.y = 0;
 		    vinfo->offset.v = 0;
 		    vinfo->offset.u = 0;
-
-		    info->pitch = info->width << 1;
-		    vinfo->frame_size = info->pitch * info->height;
-		    break;
-	    case IMGFMT_YV12:
-		    vinfo->dest.pitch.y = 1;
-		    vinfo->dest.pitch.u = 1;
-		    vinfo->dest.pitch.v = 1;
-
-		    vinfo->offset.y = 0;
-		    vinfo->offset.v = (info->width) * info->height;
-		    vinfo->offset.u = vinfo->offset.v * 5 / 4;
-
-		    info->pitch = info->width + (info->width >> 1);
+		    info->pitch = ((info->width << 1) + (vinfo->dest.pitch.y-1)) & ~(vinfo->dest.pitch.y-1);
 		    vinfo->frame_size = info->pitch * info->height;
 		    break;
     }
