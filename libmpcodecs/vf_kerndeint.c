@@ -281,12 +281,8 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
         switch(fmt)
 	{
 	case IMGFMT_YV12:
-	case IMGFMT_I420:
-	case IMGFMT_IYUV:
-	case IMGFMT_YVU9:
-	case IMGFMT_444P:
-	case IMGFMT_422P:
-	case IMGFMT_411P:
+	case IMGFMT_RGB:
+	case IMGFMT_YUY2:
 		return vf_next_query_format(vf, fmt);
 	}
 	return 0;
@@ -314,8 +310,8 @@ static int open(vf_instance_t *vf, char* args){
         if (args)
         {
             sscanf(args, "%d:%d:%d:%d:%d",
-		&vf->priv->map, &vf->priv->order,
-		&vf->priv->thresh, &vf->priv->sharp,
+		&vf->priv->thresh, &vf->priv->map,
+		&vf->priv->order, &vf->priv->sharp,
 		&vf->priv->twoway);
         }
 	if (vf->priv->order > 1) vf->priv->order = 1;

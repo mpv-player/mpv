@@ -2905,17 +2905,17 @@ be detected as interlaced to drop the frame.
 .B lavcdeint
 Use libavcodec's deinterlace filter.
 .TP
-.B kerndeint[=map[:order[:thresh[:sharp[:twoway]]]]]
+.B kerndeint[=thresh[:map[:order[:sharp[:twoway]]]]]
 Donald Graft's adaptive kernel deinterlacer.
 Deinterlaces parts of a video if a configurable threshold is exceeded.
 .PD 0
 .RSs
+.IPs "thresh (0 - 255)"
+Threshold (default 10).
 .IPs "map (0 or 1)"
 Paint pixels which exceed the threshold white (default: 0).
 .IPs "order (0 or 1)"
 Swap fields if 1 (default: 0).
-.IPs "thresh (0 - 255)"
-Threshold (default 10).
 .IPs "sharp (0 or 1)"
 Enable additional sharpening (default: 0).
 .IPs "twoway (0 or 1)"
