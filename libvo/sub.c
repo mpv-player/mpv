@@ -48,14 +48,16 @@ inline static void vo_draw_text_progbar(int dxs,int dys,void (*draw_alpha)(int x
 //        printf("osd.progbar  width=%d  xpos=%d\n",width,x);
 
         c=vo_osd_progbar_type;
-        if(vo_osd_progbar_type>0 && (font=vo_font->font[c])>=0)
-            draw_alpha(x-vo_font->width[c]-vo_font->spacewidth,y,
+        if(vo_osd_progbar_type>0 && (font=vo_font->font[c])>=0) {
+	    int xp=x-vo_font->width[c]-vo_font->spacewidth;
+	   draw_alpha((xp<0?0:xp),y,
               vo_font->width[c],
               vo_font->pic_a[font]->h,
               vo_font->pic_b[font]->bmp+vo_font->start[c],
               vo_font->pic_a[font]->bmp+vo_font->start[c],
               vo_font->pic_a[font]->w);
-
+	}
+   
         c=OSD_PB_START;
         if ((font=vo_font->font[c])>=0)
             draw_alpha(x,y,
@@ -197,23 +199,29 @@ inline static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,in
 
    k=i=0; l=lines;
    while (l--){
-       x = xtbl[i++];
-       if(y<dys)
-       while ((c=utbl[k++])){
-	     if (x>=0 && x+vo_font->width[c]<=dxs)
-		if ((font=vo_font->font[c])>=0)
-	           draw_alpha(x,y,
-			      vo_font->width[c],
+      if (y>=0){
+	 x= xtbl[i++]; 
+	 while ((c=utbl[k++])){
+	    if (x>=0 && x+vo_font->width[c]<=dxs)
+	       if ((font=vo_font->font[c])>=0)
+		  draw_alpha(x,y,
+			     vo_font->width[c],
 //			      vo_font->pic_a[font]->h,
-			      (y+vo_font->pic_a[font]->h<=dys)?vo_font->pic_a[font]->h:dys-y,
-			      vo_font->pic_b[font]->bmp+vo_font->start[c],
-			      vo_font->pic_a[font]->bmp+vo_font->start[c],
-			      vo_font->pic_a[font]->w);
-	  x+=vo_font->width[c]+vo_font->charspace;
-       }
-       y+=vo_font->height;
+			     (y+vo_font->pic_a[font]->h<=dys)?vo_font->pic_a[font]->h:dys-y,
+			     vo_font->pic_b[font]->bmp+vo_font->start[c],
+			     vo_font->pic_a[font]->bmp+vo_font->start[c],
+			     vo_font->pic_a[font]->w);
+	    x+=vo_font->width[c]+vo_font->charspace;
+	 }
+      } else { 
+	 while (utbl[k++]) ; // skip lines with negative y value
+	 i++;		     // seldom case but who know ;-)
+      }
+      y+=vo_font->height;
    }
 }
+
+
 
 static int draw_alpha_init_flag=0;
 
