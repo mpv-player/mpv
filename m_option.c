@@ -179,10 +179,10 @@ m_option_type_t m_option_type_int = {
 // Float
 
 #undef VAL
-#define VAL(x) (*(float*)(x))
+#define VAL(x) (*(double*)(x))
 
-static int parse_float(m_option_t* opt,char *name, char *param, void* dst, int src) {
-  float tmp_float;
+static int parse_double(m_option_t* opt,char *name, char *param, void* dst, int src) {
+  double tmp_float;
   char* endptr;
   src = 0;
 
@@ -228,6 +228,33 @@ static int parse_float(m_option_t* opt,char *name, char *param, void* dst, int s
 
   if(dst) VAL(dst) = tmp_float;
   return 1;
+}
+
+static char* print_double(m_option_t* opt,  void* val) {
+  opt = NULL;
+  return dup_printf("%f",VAL(val));
+}
+
+m_option_type_t m_option_type_double = {
+  "Double",
+  "double precission floating point number or ratio (numerator[:/]denominator)",
+  sizeof(double),
+  0,
+  parse_double,
+  print_double,
+  copy_opt,
+  copy_opt,
+  NULL,
+  NULL
+};
+
+#undef VAL
+#define VAL(x) (*(float*)(x))
+
+static int parse_float(m_option_t* opt,char *name, char *param, void* dst, int src) {
+    double tmp;
+    int r= parse_double(opt, name, param, &tmp, src);
+    if(r==1 && dst) VAL(dst) = tmp;
 }
 
 static char* print_float(m_option_t* opt,  void* val) {

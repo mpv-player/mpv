@@ -11,6 +11,7 @@ struct m_struct_st;
 extern m_option_type_t m_option_type_flag;
 extern m_option_type_t m_option_type_int;
 extern m_option_type_t m_option_type_float;
+extern m_option_type_t m_option_type_double;
 extern m_option_type_t m_option_type_string;
 extern m_option_type_t m_option_type_string_list;
 extern m_option_type_t m_option_type_position;
@@ -78,6 +79,7 @@ extern m_obj_params_t m_span_params_def;
 #define CONF_TYPE_FLAG		(&m_option_type_flag)
 #define CONF_TYPE_INT		(&m_option_type_int)
 #define CONF_TYPE_FLOAT		(&m_option_type_float)
+#define CONF_TYPE_DOUBLE	(&m_option_type_double)
 #define CONF_TYPE_STRING	(&m_option_type_string)
 #define CONF_TYPE_FUNC		(&m_option_type_func)
 #define CONF_TYPE_FUNC_PARAM	(&m_option_type_func_param)
