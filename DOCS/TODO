@@ -1,8 +1,7 @@
 TO DO:
 ~~~~~~
 For the Release:
-- upgrade opendivx decore
-- remove opendivx encore
+- fix help-mp.h (remove -alsa etc, add new important options)
 
 After the release:
 - finish OSD control (mixer, brightness/contrast/etc..)
@@ -16,8 +15,10 @@ After the release:
 - fast forward (changing fps on-the-fly)
 - subtitles with black rectangle background (option)
 - audio downmixing (for fast-forward and for old soundcards)
+- upgrade opendivx decore - FAILED
+- remove opendivx encore - SKIPPED
 
-DONE:
+DONE: (move this to ChangeLog among other things)
 - fix up fonts (make release version of font generator?) - DONE
 - apply X11/ICCCM compliance patches - DONE
 - play_only_n_frames option (chl) - DONE
