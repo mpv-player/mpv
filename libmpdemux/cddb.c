@@ -10,8 +10,6 @@
  *	 Copyright (c) 1998-2000 Jeremy D. Zawodny <Jeremy@Zawodny.com>
  *	 Code release under GPL
  *
- * TODO: 
- * 	* do a xmcd parser
  */
 
 #include "config.h"
@@ -40,6 +38,7 @@
 #include <sys/cdio.h>
 #endif
 
+#include "cdd.h"
 #include "../version.h"
 #include "stream.h"
 #include "network.h"
@@ -49,23 +48,7 @@
 
 stream_t* open_cdda(char *dev, char *track);
 
-typedef struct {
-	char cddb_hello[1024];	
-	unsigned long disc_id;
-	unsigned int tracks;
-	char *cache_dir;
-	char *freedb_server;
-	int freedb_proto_level;
-	char category[100];
-	char *xmcd_file;
-	size_t xmcd_file_size;
-	void *user_data;
-} cddb_data_t;
-
-
-struct toc {
-	int min, sec, frame;
-} cdtoc[100];
+static cd_toc_t cdtoc[100];
 
 #if defined(__linux__)
 int 
@@ -504,11 +487,21 @@ void
 cddb_create_hello(cddb_data_t *cddb_data) {
 	char host_name[51];
 	char *user_name;
-
-	if( gethostname(host_name, 50)<0 ) {
+	
+	if( cddb_data->anonymous ) {	// Default is anonymous
+		/* Note from Eduardo Pérez Ureta <eperez@it.uc3m.es> : 
+		 * We don't send current user/host name in hello to prevent spam.
+		 * Software that sends this is considered spyware
+		 * that most people don't like.
+		 */
+		user_name = "anonymous";
 		strcpy(host_name, "localhost");
+	} else {
+		if( gethostname(host_name, 50)<0 ) {
+			strcpy(host_name, "localhost");
+		}
+		user_name = getenv("LOGNAME");
 	}
-	user_name = getenv("LOGNAME");
 	sprintf( cddb_data->cddb_hello, "&hello=%s+%s+%s+%s", user_name, host_name, "MPlayer", VERSION );
 }
 
@@ -547,13 +540,14 @@ cddb_retrieve(cddb_data_t *cddb_data) {
 }
 
 int
-cddb_resolve(char *xmcd_file) {
+cddb_resolve(char **xmcd_file) {
 	char cddb_cache_dir[] = DEFAULT_CACHE_DIR;
 	char *home_dir = NULL;
 	cddb_data_t cddb_data;
 
 	cddb_data.tracks = read_toc();
 	cddb_data.disc_id = cddb_discid(cddb_data.tracks);
+	cddb_data.anonymous = 1;	// Don't send user info by default
 	
 	home_dir = getenv("HOME");
 	if( home_dir==NULL ) {
@@ -574,21 +568,264 @@ cddb_resolve(char *xmcd_file) {
 			return -1;
 		}
 	}
-	
+
 	if( cddb_data.xmcd_file!=NULL ) {
-		printf("%s\n", cddb_data.xmcd_file );
-		xmcd_file = cddb_data.xmcd_file;
+//		printf("%s\n", cddb_data.xmcd_file );
+		*xmcd_file = cddb_data.xmcd_file;
+		return 0;
 	}
 	
-	return 0;
+	return -1;
+}
+
+/*******************************************************************************************************************
+ *
+ * xmcd parser, cd info list
+ *
+ *******************************************************************************************************************/
+
+cd_info_t*
+cd_info_new() {
+	cd_info_t *cd_info = NULL;
+	
+	cd_info = (cd_info_t*)malloc(sizeof(cd_info_t));
+	if( cd_info==NULL ) {
+		printf("Memory allocation failed\n");
+		return NULL;
+	}
+	
+	memset(cd_info, 0, sizeof(cd_info_t));
+	
+	return cd_info;
+}
+
+void
+cd_info_free(cd_info_t *cd_info) {
+	cd_track_t *cd_track, *cd_track_next;
+	int i;
+	if( cd_info==NULL ) return;
+	if( cd_info->artist!=NULL ) free(cd_info->artist);
+	if( cd_info->album!=NULL ) free(cd_info->album);
+	if( cd_info->genre!=NULL ) free(cd_info->genre);
+
+	cd_track_next = cd_info->first;
+	while( cd_track_next!=NULL ) {
+		cd_track = cd_track_next;
+		cd_track_next = cd_track->next;
+		if( cd_track->name!=NULL ) free(cd_track->name);
+		free(cd_track);
+	}
+}
+
+cd_track_t*
+cd_info_add_track(cd_info_t *cd_info, char *track_name, unsigned int track_nb, unsigned int min, unsigned int sec, unsigned int msec, unsigned long frame_begin, unsigned long frame_length) {
+	cd_track_t *cd_track, current_track;
+	
+	if( cd_info==NULL || track_name==NULL ) return NULL;
+	
+	cd_track = (cd_track_t*)malloc(sizeof(cd_track_t));
+	if( cd_track==NULL ) {
+		printf("Memory allocation failed\n");
+		return NULL;
+	}
+	memset(cd_track, 0, sizeof(cd_track_t));
+	
+	cd_track->name = (char*)malloc(strlen(track_name)+1);
+	if( cd_track->name==NULL ) {
+		printf("Memory allocation failed\n");
+		free(cd_track);
+		return NULL;
+	}
+	strcpy(cd_track->name, track_name);
+	cd_track->track_nb = track_nb;
+	cd_track->min = min;
+	cd_track->sec = sec;
+	cd_track->msec = msec;
+	cd_track->frame_begin = frame_begin;
+	cd_track->frame_length = frame_length;
+
+	if( cd_info->first==NULL ) {
+		cd_info->first = cd_track;
+	}
+	if( cd_info->last!=NULL ) {
+		cd_info->last->next = cd_track;
+	}
+
+	cd_track->prev = cd_info->last;
+	
+	cd_info->last = cd_track;
+	cd_info->current = cd_track;
+
+	cd_info->nb_tracks++;
+	
+	return cd_track;
+}
+
+cd_track_t*
+cd_info_get_track(cd_info_t *cd_info, unsigned int track_nb) {
+	cd_track_t *cd_track=NULL;
+
+	if( cd_info==NULL ) return NULL;
+
+	cd_track = cd_info->first;
+	while( cd_track!=NULL ) {
+		if( cd_track->track_nb==track_nb ) {
+			return cd_track;
+		}
+		cd_track = cd_track->next;
+	}
+	return NULL;
+}
+
+void
+cd_info_debug(cd_info_t *cd_info) {
+	cd_track_t *current_track;
+	printf("================ CD INFO === start =========\n");
+	if( cd_info==NULL ) {
+		printf("cd_info is NULL\n");
+		return;
+	}
+	printf(" artist=[%s]\n", cd_info->artist);
+	printf(" album=[%s]\n", cd_info->album);
+	printf(" genre=[%s]\n", cd_info->genre);
+	printf(" nb_tracks=%d\n", cd_info->nb_tracks);
+	printf(" length= %2d:%02d.%02d\n", cd_info->min, cd_info->sec, cd_info->msec);
+	current_track = cd_info->first;
+	while( current_track!=NULL ) {
+		printf("  #%2d %2d:%02d.%02d @ %7ld\t[%s] \n", current_track->track_nb, current_track->min, current_track->sec, current_track->msec, current_track->frame_begin, current_track->name);
+		current_track = current_track->next;
+	}
+	printf("================ CD INFO ===  end  =========\n");
+}
+
+char*
+xmcd_parse_dtitle(cd_info_t *cd_info, char *line) {
+	char *ptr, *album;
+	ptr = strstr(line, "DTITLE=");
+	if( ptr!=NULL ) {
+		ptr += 7;
+		album = strstr(ptr, "/");
+		if( album==NULL ) return NULL;
+		cd_info->album = (char*)malloc(strlen(album+2)+1);
+		if( cd_info->album==NULL ) {
+			return NULL;
+		}
+		strcpy( cd_info->album, album+2 );
+		album--;
+		album[0] = '\0';
+		cd_info->artist = (char*)malloc(strlen(ptr)+1);
+		if( cd_info->artist==NULL ) {
+			return NULL;
+		}
+		strcpy( cd_info->artist, ptr );
+	}
+	return ptr;
+}
+
+char*
+xmcd_parse_dgenre(cd_info_t *cd_info, char *line) {
+	char *ptr;
+	ptr = strstr(line, "DGENRE=");
+	if( ptr!=NULL ) {
+		ptr += 7;
+		cd_info->genre = (char*)malloc(strlen(ptr)+1);
+		if( cd_info->genre==NULL ) {
+			return NULL;
+		}
+		strcpy( cd_info->genre, ptr );
+	}
+	return ptr;
+}
+
+char*
+xmcd_parse_ttitle(cd_info_t *cd_info, char *line) {
+	unsigned int track_nb;
+	unsigned long sec, off;
+	char *ptr;
+	ptr = strstr(line, "TTITLE");
+	if( ptr!=NULL ) {
+		ptr += 6;
+		// Here we point to the track number
+		track_nb = atoi(ptr);
+		ptr = strstr(ptr, "=");
+		if( ptr==NULL ) return NULL;
+		ptr++;
+		
+		sec = cdtoc[track_nb].frame;
+		off = cdtoc[track_nb+1].frame-sec+1;
+
+		cd_info_add_track( cd_info, ptr, track_nb+1, (unsigned int)(off/(60*75)), (unsigned int)((off/75)%60), (unsigned int)(off%75), sec, off );
+	}
+	return ptr;
+}
+
+cd_info_t*
+cddb_parse_xmcd(char *xmcd_file) {
+	cd_info_t *cd_info = NULL;
+	int length, pos = 0;
+	char *ptr, *ptr2;
+	unsigned int audiolen;
+	if( xmcd_file==NULL ) return NULL;
+	
+	cd_info = cd_info_new();
+	if( cd_info==NULL ) {
+		return NULL;
+	}
+	
+	length = strlen(xmcd_file);
+	ptr = xmcd_file;
+	while( ptr!=NULL && pos<length ) {
+		// Read a line
+		ptr2 = ptr;
+		while( ptr2[0]!='\0' && ptr2[0]!='\r' && ptr2[0]!='\n' ) ptr2++;
+		if( ptr2[0]=='\0' ) {
+			break;
+		}
+		ptr2[0] = '\0';
+		// Ignore comments
+		if( ptr[0]!='#' ) {
+			// Search for the album title
+			if( xmcd_parse_dtitle(cd_info, ptr) );
+			// Search for the genre
+			else if( xmcd_parse_dgenre(cd_info, ptr) );
+			// Search for a track title
+			else if( xmcd_parse_ttitle(cd_info, ptr) );
+		}
+		if( ptr2[1]=='\n' ) ptr2++;
+		pos = (ptr2+1)-ptr;
+		ptr = ptr2+1;
+	}
+
+	audiolen = cdtoc[cd_info->nb_tracks].frame-cdtoc[0].frame;	
+	cd_info->min  = (unsigned int)(audiolen/(60*75));
+	cd_info->sec  = (unsigned int)((audiolen/75)%60);
+	cd_info->msec = (unsigned int)(audiolen%75);
+	
+	return cd_info;
 }
 
 stream_t* 
 cddb_open(char *dev, char *track) {
-	char *xmcd_file;
-	cddb_resolve(xmcd_file);
+	stream_t *stream;
+	cd_info_t *cd_info = NULL;
+	cdda_priv *priv;
+	char *xmcd_file = NULL;
+	int ret;
+	
+	ret = cddb_resolve(&xmcd_file);
+	if( ret==0 ) {
+		cd_info = cddb_parse_xmcd(xmcd_file);
+		free(xmcd_file);
+cd_info_debug( cd_info );	
+	}
+	stream = open_cdda(dev, track);
 
-	return open_cdda(dev, track);
+	priv = ((cdda_priv*)(stream->priv));
+cd_info_debug(priv->cd_info);
+	if( cd_info!=NULL ) { 
+		cd_info_free(priv->cd_info);
+		priv->cd_info = cd_info;
+	}	
+	return stream;
 }
-
 #endif
