@@ -792,7 +792,7 @@ subtitle *sub_read_line_jacosub(FILE * fd, subtitle * current)
 	    strcpy(line2, line1);
 	    p = line2;
 	}
-	for (q = line1; (!eol(*p)) && (current->lines < SUB_MAX_TEXT);
+	for (q = line1; (!eol(*p)) && (current->lines + 1 < SUB_MAX_TEXT);
 	     ++p) {
 	    switch (*p) {
 	    case '{':
