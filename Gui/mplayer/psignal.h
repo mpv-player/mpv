@@ -39,6 +39,10 @@
 #define mplIncAudioBufferDelay                   28
 #define mplDecAudioBufferDelay                   29
 
+#ifdef	__bsdi__
+#define	_NSIG NSIG
+#endif
+
 #ifdef	__SVR4
 #define	SIGTYPE SIGUSR2
 #warning should we use SIGUSR1 or SIGUSR2 on linux, bsd, ... too?

@@ -1,11 +1,13 @@
 //=================== VideoCD ==========================
-#if	defined(linux) || defined(sun)
+#if	defined(linux) || defined(sun) || defined(__bsdi__)
 
 #if	defined(linux)
 #include <linux/cdrom.h>
 #elif	defined(sun)
 #include <sys/cdio.h>
 static int sun_vcd_read(int, int*);
+#elif	defined(__bsdi__)
+#include <dvd.h>
 #endif
 
 
@@ -79,7 +81,7 @@ void vcd_read_toc(int fd){
 static char vcd_buf[VCD_SECTOR_SIZE];
 
 static int vcd_read(int fd,char *mem){
-#if	defined(linux)
+#if	defined(linux) || defined(__bsdi__)
   memcpy(vcd_buf,&vcd_entry.cdte_addr.msf,sizeof(struct cdrom_msf));
   if(ioctl(fd,CDROMREADRAW,vcd_buf)==-1) return 0; // EOF?
   memcpy(mem,&vcd_buf[VCD_SECTOR_OFFS],VCD_SECTOR_DATA);
@@ -236,7 +238,7 @@ int vcd_cache_read(int fd,char* mem){
   ++vcd_cache_index;if(vcd_cache_index>=vcd_cache_size)vcd_cache_index=0;
   // read data!
   vcd_set_msf(vcd_cache_current);
-#if	defined(linux)
+#if	defined(linux) || defined(__bsdi__)
   memcpy(vcd_buf,&vcd_entry.cdte_addr.msf,sizeof(struct cdrom_msf));
   if(ioctl(fd,CDROMREADRAW,vcd_buf)==-1) return 0; // EOF?
   memcpy(mem,&vcd_buf[VCD_SECTOR_OFFS],VCD_SECTOR_DATA);

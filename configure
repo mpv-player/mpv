@@ -298,7 +298,7 @@ echo "Detected host architecture: $host_arch"
 # Determine OS dependent libs
 _confcygwin="TARGET_CYGWIN=no"
 _confwin32=
-if [ "$system_name" = "FreeBSD" -o "$system_name" = "OpenBSD" ]; then
+if [ "$system_name" = "FreeBSD" -o "$system_name" = "OpenBSD" -o "$system_name" = "BSD/OS" ]; then
     _archlibs="-rdynamic -pthread"
 elif [ `echo $system_name | sed 's/[cC][yY][gG][wW][iI][nN].*/CYGWIN/'` = "CYGWIN" ]; then
     _confcygwin="TARGET_CYGWIN=yes"
@@ -306,6 +306,10 @@ elif [ `echo $system_name | sed 's/[cC][yY][gG][wW][iI][nN].*/CYGWIN/'` = "CYGWI
     _archlibs="-lpthread"
 else
     _archlibs="-ldl -lpthread"
+fi
+
+if [ "$system_name" = "BSD/OS" ]; then
+	_archlibs="$_archlibs -ldvd"
 fi
 
 # LGB: temporary files
@@ -765,7 +769,7 @@ echo Using ... "$_mp_help" file
 
 $_cc $_extraincdir $_extralibdir $TMPC -o $TMPO -lvgagl -lvga > /dev/null 2>&1 && _svga=yes
 
-if [ "$system_name" = "FreeBSD" -o "$system_name" = "OpenBSD" ]; then
+if [ "$system_name" = "FreeBSD" -o "$system_name" = "OpenBSD" -o "$system_name" = "BSD/OS" ]; then
 $_cc $TMPC -o $TMPO -pthread > /dev/null 2>&1 || \
  { echo "Lib pthread not found."; rm -f $TMPC $TMPO $TMPS ; exit 1; }
 else
@@ -855,7 +859,7 @@ fi
 if [ $_x11 = yes ]; then
 
 $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXdpms $_socklib > /dev/null 2>&1 && _xdpms_3=yes
-nm `echo $_x11libdir|cut -b 3-`/libXext.a | grep DPMSQueryExtension > /dev/null 2>&1 && _xdpms_4=yes
+nm `echo $_x11libdir|cut -c 3-`/libXext.a | grep DPMSQueryExtension > /dev/null 2>&1 && _xdpms_4=yes
 $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXv $_socklib > /dev/null 2>&1 && _xv=yes
 $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXxf86vm $_socklib > /dev/null 2>&1 && _vm=yes
 

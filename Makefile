@@ -113,15 +113,19 @@ $(PRG_CFG): version.h codec-cfg.c codec-cfg.h
 	$(CC) $(CFLAGS) -g codec-cfg.c -o $(PRG_CFG) -DCODECS2HTML
 
 install: $(PRG) $(PRG_FIBMAP)
-	install -d $(BINDIR)
+	if [ ! -e $(BINDIR) ]; then \
+		mkdir -p $(BINDIR); \
+	fi
 	install -m 755 -s $(PRG) $(BINDIR)/$(PRG)
-	install -d $(prefix)/man/man1
-	install -m 644 DOCS/mplayer.1 $(prefix)/man/man1/mplayer.1
+	if [ ! -e $(prefix)/man/man1 ]; then \
+		mkdir -p $(prefix)/man/man1; \
+	fi
+	install -c -m 644 DOCS/mplayer.1 $(prefix)/man/man1/mplayer.1
 	@echo "Following task requires root privs. If it fails don't panic"
 	@echo "however it means you can't use fibmap_mplayer."
 	@echo "Without this (or without running mplayer as root) you won't be"
 	@echo "able to play encrypted DVDs."
-	install -o 0 -g 0 -m 4755 -s $(PRG_FIBMAP) $(BINDIR)/$(PRG_FIBMAP)
+	-install -o 0 -g 0 -m 4755 -s $(PRG_FIBMAP) $(BINDIR)/$(PRG_FIBMAP)
 
 clean:
 	rm -f *.o *~ $(OBJS)

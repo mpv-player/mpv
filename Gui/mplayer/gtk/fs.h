@@ -9,7 +9,7 @@
 #include <glob.h>
 #include <unistd.h>
 
-#ifdef	__SVR4
+#if	defined(__SVR4) || defined(__bsdi__)
 #define	get_current_dir_name()	getcwd(NULL, PATH_MAX)
 #endif
 
