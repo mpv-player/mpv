@@ -66,6 +66,7 @@ static int init(sh_audio_t *sh_audio)
     lavc_context->bit_rate = sh_audio->wf->nAvgBytesPerSec * 8;
     lavc_context->fourcc = sh_audio->format;
     lavc_context->block_align = sh_audio->wf->nBlockAlign;
+    lavc_context->codec_id = lavc_codec->id;
 
     /* alloc extra data */
     if (sh_audio->wf->cbSize > 0) {
