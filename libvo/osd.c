@@ -8,8 +8,6 @@
 #include "config.h"
 #include "osd.h"
 #include "mp_msg.h"
-//#define ENABLE_PROFILE
-#include "../my_profile.h"
 #include <inttypes.h>
 #include "../cpudetect.h"
 #include "../mangle.h"

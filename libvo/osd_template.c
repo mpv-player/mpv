@@ -32,7 +32,6 @@ static inline void RENAME(vo_draw_alpha_yv12)(int w,int h, unsigned char* src, u
 #if defined(FAST_OSD) && !defined(HAVE_MMX)
     w=w>>1;
 #endif
-PROFILE_START();
     for(y=0;y<h;y++){
         register int x;
 #ifdef HAVE_MMX
@@ -91,7 +90,6 @@ PROFILE_START();
 #ifdef HAVE_MMX
 	asm volatile(EMMS:::"memory");
 #endif
-PROFILE_END("vo_draw_alpha_yv12");
     return;
 }
 
@@ -100,7 +98,6 @@ static inline void RENAME(vo_draw_alpha_yuy2)(int w,int h, unsigned char* src, u
 #if defined(FAST_OSD) && !defined(HAVE_MMX)
     w=w>>1;
 #endif
-PROFILE_START();
     for(y=0;y<h;y++){
         register int x;
 #ifdef HAVE_MMX
@@ -160,7 +157,6 @@ PROFILE_START();
 #ifdef HAVE_MMX
 	asm volatile(EMMS:::"memory");
 #endif
-PROFILE_END("vo_draw_alpha_yuy2");
     return;
 }
 
@@ -268,7 +264,6 @@ static inline void RENAME(vo_draw_alpha_rgb24)(int w,int h, unsigned char* src, 
 
 static inline void RENAME(vo_draw_alpha_rgb32)(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
     int y;
-PROFILE_START();
 #ifdef WORDS_BIGENDIAN
     dstbase++;
 #endif
@@ -420,6 +415,5 @@ PROFILE_START();
 #ifdef HAVE_MMX
 	asm volatile(EMMS:::"memory");
 #endif
-PROFILE_END("vo_draw_alpha_rgb32");
     return;
 }
