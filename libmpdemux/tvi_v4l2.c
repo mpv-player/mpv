@@ -405,7 +405,7 @@ static int set_mute(priv_t *priv, int value)
 }
 
 /*
-** Mplayer uses values from -100 up to 100 for controls.
+** MPlayer uses values from -100 up to 100 for controls.
 ** Here they are scaled to what the tv card needs and applied.
 */
 static int set_control(priv_t *priv, struct v4l2_control *control, int val_signed) {

@@ -1,12 +1,12 @@
 
 ;
-; Mplayer subtitle font description file - HighreS ONE
+; MPlayer subtitle font description file - HighreS ONE
 ; font created by a'rpi & chass
 ; .desc created by chass & atmosfear
 ; -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 ;
 ;
-; This file contains the data for Mplayer to build up the font
+; This file contains the data for MPlayer to build up the font
 ; table from the bitmap files. These fonts are used for the OSD
 ; (On Screen Display) and for the subtitles.
 ;
@@ -14,7 +14,7 @@
 ; A few words for the novice user about the fonts:
 ; -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 ;
-; Mplayer uses antialiased bitmap fonts, which look far better
+; MPlayer uses antialiased bitmap fonts, which look far better
 ; then the TTF rendering used by other players. A letter consists
 ; of two main parts: the Bitmap and the Alpha chanel. The bitmap
 ; is what you see on the screen, and the Aplha chanel makes the 
@@ -22,10 +22,10 @@
 ; the alpha to get a smooth black outline of the letters, which 
 ; makes them visible even on white areas of the movie.
 ;
-; Mplayer needs at least two seperate 8bit/pixel format bitmap 
+; MPlayer needs at least two seperate 8bit/pixel format bitmap 
 ; files and a .desc file to be able to use the font. One of the
 ; files is the bitmap the other is the alpha. The .desc (like this
-; one) gives Mplayer the information needed to convert a bitmap
+; one) gives MPlayer the information needed to convert a bitmap
 ; to characters. But the .desc allows to use more bitmap and alpha
 ; files: this feature is useful when one wants to add local language
 ; support for the subtitles.

@@ -252,7 +252,7 @@ void render() {
     if (append_mode) {
 	fprintf(f, "\n\n# ");
     } else {
-	fprintf(f,  "# This file was generated with subfont for Mplayer.\n"
+	fprintf(f,  "# This file was generated with subfont for MPlayer.\n"
 		    "# Subfont by Artur Zaprzala <zybi@fanthom.irc.pl>.\n\n");
 	fprintf(f, "[info]\n");
     }

@@ -142,7 +142,7 @@ static char help_text[]=
 "  η μεταγλώττιση/βελτιστοποίηση.\n"\
 "  Ελέγξτε το!\n"
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
-"- Το Mplayer κατέρρευσε  από κακή χρήση του επεξεργαστή ή της μνήμης.\n"\
+"- Το MPlayer κατέρρευσε  από κακή χρήση του επεξεργαστή ή της μνήμης.\n"\
 "  Αναμεταγλωττίστε το MPlayer με --enable-debug και τρέξτε 'gdb' backtrace και\n"\
 "  disassembly. Για λεπτομέρειες, δείτε το DOCS/HTML/en/bugreports_what.html#bugreports_crash\n"
 #define MSGTR_Exit_SIGCRASH \

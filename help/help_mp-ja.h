@@ -137,7 +137,7 @@ static char help_text[]=
 "  compiled/optimized for.\n"\
 "  Verify this!\n"
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
-"- Mplayerは不良な CPU/FPU/RAM によってクラッシュしました.\n"\
+"- MPlayerは不良な CPU/FPU/RAM によってクラッシュしました.\n"\
 "  Recompile MPlayer with --enable-debug and make a 'gdb' backtrace and\n"\
 "  --enable-debugをつけてMPlyaerをコンパイルしなおし、gdbで調査しましょう\n"\
 "  詳細は DOCS/HTML/en/bugreports.html#bugreports_crash にあります\n"

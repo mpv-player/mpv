@@ -532,7 +532,7 @@ int demux_ty_fill_buffer( demuxer_t *demux )
 		0x20000 ) );
 
 
-   // Let's make a Video Demux Stream for Mplayer
+   // Let's make a Video Demux Stream for MPlayer
    aid = 0x0;
    if( !demux->v_streams[ aid ] ) new_sh_video( demux, aid );
    if( demux->video->id == -1 ) demux->video->id = aid;

@@ -103,7 +103,7 @@ static char help_text[]=
 "阅读DOCS/zh/video.html和DOCS/zh/sound.html来寻找调整/加速的技巧。\n"\
 "如果这些一个都用不上，阅读DOCS/zh/bugreports.html！\n\n"
 
-#define MSGTR_NoGui "Mplayer没有编译GUI的支持!\n"
+#define MSGTR_NoGui "MPlayer没有编译GUI的支持!\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI需要X11!\n"
 #define MSGTR_Playing "播放 %s.\n"
 #define MSGTR_NoSound "音频: no sound\n"
@@ -524,7 +524,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SUB_POS "位置: "
 #define MSGTR_PREFERENCES_SUB_AutoLoad "禁用字幕自动装载"
 #define MSGTR_PREFERENCES_SUB_Unicode "Unicode字幕"
-#define MSGTR_PREFERENCES_SUB_MPSUB "将所给字幕转换为Mplayer的字幕文件"
+#define MSGTR_PREFERENCES_SUB_MPSUB "将所给字幕转换为MPlayer的字幕文件"
 #define MSGTR_PREFERENCES_SUB_SRT "将所给字幕转换为基于时间的SubViewer(SRT) 格式"
 #define MSGTR_PREFERENCES_SUB_Overlap "开启字幕重叠"
 #define MSGTR_PREFERENCES_Font "字体:"

@@ -10,7 +10,7 @@
 # Needed programs:
 #
 # Getopt::Long - Perl Module
-# Mplayer - http://www.mplayerhq.hu
+# MPlayer - http://www.mplayerhq.hu
 # BladeEnc - http://bladeenc.mp3.no
 # oggenc - http://www.vorbis.com
 # mp3info - http://www.ibiblio.org/mp3info

@@ -119,7 +119,7 @@ static OutputPlugin xmms_output_plugin =
 {
 	NULL,
 	NULL,
-	"Mplayer output interface Plugin ", /* Description */
+	"MPlayer output interface plugin ", /* Description */
 	disk_init,
 	NULL,			/* about */
 	NULL,			/* configure */
