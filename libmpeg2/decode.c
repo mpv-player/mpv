@@ -52,7 +52,7 @@ mpeg2_config_t config;
 //static uint8_t chunk_buffer[224 * 1024 + 4];
 //static uint32_t shift = 0;
 
-static int drop_flag = 0;
+//static int drop_flag = 0;
 static int drop_frame = 0;
 
 #ifdef MPEG12_POSTPROC
@@ -151,7 +151,7 @@ static void copy_slice (vo_frame_t * frame, uint8_t ** src){
 
 static int in_slice_flag=0;
 
-static int parse_chunk (vo_functions_t * output, int code, uint8_t * buffer)
+static int parse_chunk (vo_functions_t * output, int code, uint8_t * buffer, int framedrop)
 {
     int is_frame_done = 0;
 
@@ -163,6 +163,7 @@ static int parse_chunk (vo_functions_t * output, int code, uint8_t * buffer)
         
 //        if(picture->picture_structure != FRAME_PICTURE) printf("Field! %d  \n",picture->second_field);
         
+	if(!framedrop)
 	if (((picture->picture_structure == FRAME_PICTURE) ||
 		 (picture->second_field))
            ) {
@@ -208,7 +209,8 @@ static int parse_chunk (vo_functions_t * output, int code, uint8_t * buffer)
 	    //exit (1);
 	}
 
-	drop_frame = drop_flag && (picture->picture_coding_type == B_TYPE);
+	drop_frame = framedrop && (picture->picture_coding_type == B_TYPE);
+	drop_frame |= framedrop>=2; // hard drop
 	//decode_reorder_frames ();
 	break;
 
@@ -259,7 +261,7 @@ static int parse_chunk (vo_functions_t * output, int code, uint8_t * buffer)
 #endif
 		    picture->current_frame->copy=copy_slice;
 #endif
-	    
+	    if(framedrop) picture->current_frame->copy=NULL;
 	    picture->current_frame->vo=output;
 	    picture->slice=0;
 
@@ -285,7 +287,7 @@ static void mpeg2_sighandler(int sig){
     longjmp(mpeg2_jmp_buf,1);
 }
 
-int mpeg2_decode_data (vo_functions_t *output, uint8_t *current, uint8_t *end)
+int mpeg2_decode_data (vo_functions_t *output, uint8_t *current, uint8_t *end,int framedrop)
 {
     //static uint8_t code = 0xff;
     //static uint8_t chunk_buffer[65536];
@@ -323,7 +325,7 @@ while(current<end){
     //if((code&0x100)!=0x100) printf("libmpeg2: FATAL! code=%X\n",code);
     //printf("pos=%d  chunk %3X  size=%d  next-code=%X\n",pos-start,code,current-pos,head|c);
     if(setjmp(mpeg2_jmp_buf)==0){
-      ret+=parse_chunk(output, code&0xFF, pos);
+      ret+=parse_chunk(output, code&0xFF, pos, framedrop);
     } else {
 #ifdef ARCH_X86
 	    if (config.flags & MM_ACCEL_X86_MMX) emms ();
@@ -337,13 +339,13 @@ while(current<end){
 
   signal(SIGSEGV,old_sigh); // restore sighandler
 
-  if(code==0x1FF) ret+=parse_chunk(output, 0xFF, NULL); // send 'end of frame'
+  if(code==0x1FF) ret+=parse_chunk(output, 0xFF, NULL, framedrop); // send 'end of frame'
 
     return ret;
 }
 
-void mpeg2_drop (int flag)
-{
-    drop_flag = flag;
-}
+//void mpeg2_drop (int flag)
+//{
+//    drop_flag = flag;
+//}
 

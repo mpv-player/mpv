@@ -1711,7 +1711,7 @@ switch(sh_video->codec->driver){
 	}
         
         t-=GetTimer();
-          mpeg2_decode_data(video_out, videobuffer, videobuffer+videobuf_len);
+          mpeg2_decode_data(video_out, videobuffer, videobuffer+videobuf_len,drop_frame);
         t+=GetTimer(); video_time_usage+=t*0.000001;
 
         newfps=frameratecode2framerate[picture->frame_rate_code]*0.0001f;
