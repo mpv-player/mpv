@@ -6,6 +6,13 @@
  */
 
 /* ChangeLog added 2002-01-10
+ * 2002-02-13:
+ *  Using the swscaler instead of the old hand coded shit. (Checkout man mplayer and search for sws ;).
+ *  Using aspect function to setup a proper mpeg1, no more hassling with odd resolutions or GOP-sizes,
+ *  this would only create jitter on some vids!
+ *  The swscaler sometimes exits with sig8 on mpegs, I don't know why yet (just use -vc mpegpes in this
+ *  case, and report to me if you have any avi's etc which does this...)
+ *
  * 2002-02-09:
  *  Thanks to the new control() method I have finally been able to enable the em8300 prebuffering.
  *  This should speed up playback on all systems, the vout cpu usage should rocket since I will be hogging
@@ -35,6 +42,7 @@
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/select.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -48,7 +56,9 @@
 
 #include "video_out.h"
 #include "video_out_internal.h"
+#include "aspect.h"
 #include "../postproc/rgb2rgb.h"
+#include "../postproc/swscale.h"
 
 #ifdef USE_LIBAVCODEC
 #ifdef USE_LIBAVCODEC_SO
@@ -79,6 +89,8 @@ static int d_pos_x, d_pos_y;
 static int osd_w, osd_h;
 static int noprebuf = 0;
 static int img_format = 0;
+static SwsContext * sws = NULL;
+float scalefactor = 1.0;
 
 /* File descriptors */
 static int fd_control = -1;
@@ -138,11 +150,12 @@ uint32_t control(uint32_t request, void *data, ...)
 	return VO_NOTIMPL;
 }
 
-static uint32_t config(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, uint32_t fullscreen, char *title, uint32_t format,const vo_tune_info_t *info)
+static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format,const vo_tune_info_t *info)
 {
 	int tmp1, tmp2;
 	em8300_register_t reg;
     
+	/* Softzoom turned on, downscale */
 	/* This activates the subpicture processor, you can safely disable this and still send */
 	/* broken subpics to the em8300, if it's enabled and you send broken subpics you will end */
 	/* up in a lockup */
@@ -180,19 +193,26 @@ static uint32_t config(uint32_t scr_width, uint32_t scr_height, uint32_t width, 
 
 	/* Store some variables statically that we need later in another scope */
 	img_format = format;
-	v_width = scr_width;
-	v_height = scr_height;
+	v_width = width;
+	v_height = height;
 
-	/* libmp1e requires a width and height that is x|16 */
-	s_width = (v_width + 15) / 16;
-	s_width *= 16;
-	s_height = (v_height + 15) / 16;
-	s_height *= 16;
+	/* libavcodec requires a width and height that is x|16 */
+	aspect_save_orig(width, height);
+	aspect_save_prescale(d_width, d_height);
+	ioctl(fd_control, EM8300_IOCTL_GET_VIDEOMODE, &ioval);
+	if (ioval == EM8300_VIDEOMODE_NTSC) {
+		printf("VO: [dxr3] Setting up for NTSC.\n");
+		aspect_save_screenres(352, 240);
+	} else {
+		printf("VO: [dxr3] Setting up for PAL/SECAM.\n");
+		aspect_save_screenres(352, 288);
+	}
+	aspect(&s_width, &s_height, A_ZOOM);
     
 	/* Try to figure out whether to use widescreen output or not */
 	/* Anamorphic widescreen modes makes this a pain in the ass */
-	tmp1 = abs(height - ((width / 4) * 3));
-	tmp2 = abs(height - (int) (width / 2.35));
+	tmp1 = abs(d_height - ((d_width / 4) * 3));
+	tmp2 = abs(d_height - (int) (d_width / 2.35));
 	if (tmp1 < tmp2) {
 		ioval = EM8300_ASPECTRATIO_4_3;
 		printf("VO: [dxr3] Setting aspect ratio to 4:3\n");
@@ -214,10 +234,16 @@ static uint32_t config(uint32_t scr_width, uint32_t scr_height, uint32_t width, 
 		}
 		avc_context = malloc(sizeof(AVCodecContext));
 		memset(avc_context, 0, sizeof(avc_context));
-		avc_context->width = v_width;
-		avc_context->height = v_height;
-		avc_context->frame_rate = 30 * FRAME_RATE_BASE;
-		avc_context->gop_size = 12;
+		avc_context->width = s_width;
+		avc_context->height = s_height;
+		ioctl(fd_control, EM8300_IOCTL_GET_VIDEOMODE, &ioval);
+		if (ioval == EM8300_VIDEOMODE_NTSC) {
+			avc_context->gop_size = 18;
+			avc_context->frame_rate = 29.97 * FRAME_RATE_BASE;
+		} else {
+			avc_context->gop_size = 15;
+			avc_context->frame_rate = 25 * FRAME_RATE_BASE;
+		}
 		avc_context->bit_rate = 8e6;
 		avc_context->flags = CODEC_FLAG_HQ | CODEC_FLAG_QSCALE;
 		avc_context->quality = 2;
@@ -225,6 +251,13 @@ static uint32_t config(uint32_t scr_width, uint32_t scr_height, uint32_t width, 
 		if (avcodec_open(avc_context, avc_codec) < 0) {
 			printf("VO: [dxr3] Unable to open codec\n");
 			uninit();
+			return -1;
+		}
+		
+		sws = getSwsContextFromCmdLine(v_width, v_height, img_format, s_width, s_height, IMGFMT_YV12);
+		if (!sws)
+		{
+			printf("vo_vesa: Can't initialize SwScaler\n");
 			return -1;
 		}
 	
@@ -240,7 +273,7 @@ static uint32_t config(uint32_t scr_width, uint32_t scr_height, uint32_t width, 
 			s_pos_x = 0;
 		}
 		osd_h = s_height;
-		d_pos_y = (s_height - v_height) / 2;
+		d_pos_y = (s_height - v_width) / 2;
 		if (d_pos_y < 0) {
 			s_pos_y = -d_pos_y;
 			d_pos_y = 0;
@@ -251,9 +284,9 @@ static uint32_t config(uint32_t scr_width, uint32_t scr_height, uint32_t width, 
 
 		/* Create a pixel buffer and set up pointers for color components */
 		memset(&avc_picture, 0, sizeof(avc_picture));
-		avc_picture.linesize[0] = v_width;
-		avc_picture.linesize[1] = v_width / 2;
-		avc_picture.linesize[2] = v_width / 2;
+		avc_picture.linesize[0] = s_width;
+		avc_picture.linesize[1] = s_width / 2;
+		avc_picture.linesize[2] = s_width / 2;
 		avc_outbuf = malloc(avc_outbuf_size);
 
 		size = s_width * s_height;
@@ -318,14 +351,8 @@ static uint32_t draw_frame(uint8_t * src[])
 		return 0;
 #ifdef USE_LIBAVCODEC
 	} else {
-		int size = s_width * s_height;
-		if (img_format == IMGFMT_YUY2) {
-			yuy2toyv12(src[0], avc_picture.data[0], avc_picture.data[1], avc_picture.data[2],
-				v_width, v_height, avc_picture.linesize[0], avc_picture.linesize[1], v_width*2);
-		} else if (img_format == IMGFMT_BGR24) {
-			rgb24toyv12(src[0], avc_picture.data[0], avc_picture.data[1], avc_picture.data[2],
-				v_width, v_height, avc_picture.linesize[0], avc_picture.linesize[1], v_width*3);
-		}
+		int size, srcStride = (img_format == IMGFMT_YUY2) ? (v_width * 2) : (v_width * 3);
+		sws->swScale(sws, src, &srcStride, 0, v_height, avc_picture.data, avc_picture.linesize);
 		draw_osd();
 		size = avcodec_encode_video(avc_context, avc_outbuf, avc_outbuf_size, &avc_picture);
 		write(fd_video, avc_outbuf, size);
@@ -337,6 +364,8 @@ static uint32_t draw_frame(uint8_t * src[])
 
 static void flip_page(void)
 {
+	fd_set rfds;
+	struct timeval tv;
 #ifdef USE_LIBAVCODEC
 	if (img_format == IMGFMT_YV12) {
 		int out_size = avcodec_encode_video(avc_context, avc_outbuf, avc_outbuf_size, &avc_picture);
@@ -346,51 +375,18 @@ static void flip_page(void)
 		write(fd_video, avc_outbuf, out_size);
 	}
 #endif
+	tv.tv_sec = 0;
+	tv.tv_usec = 1e6 / floor(vo_fps);
+	FD_ZERO(&rfds);
+	FD_SET(fd_video, &rfds);
+	select(fd_video + 1, NULL, &rfds, NULL, &tv);
 }
 
 static uint32_t draw_slice(uint8_t *srcimg[], int stride[], int w, int h, int x0, int y0)
 {
 #ifdef USE_LIBAVCODEC
 	if (img_format == IMGFMT_YV12) {
-		int y;
-		unsigned char *s, *s1;
-		unsigned char *d, *d1;
-
-		x0 += d_pos_x;
-		y0 += d_pos_y;
-
-		if ((x0 + w) > avc_picture.linesize[0]) {
-			w = avc_picture.linesize[0] - x0;
-		}
-		if ((y0 + h) > s_height) {
-			h = s_height - y0;
-		}
-
-		s = srcimg[0] + s_pos_x + s_pos_y * stride[0];
-		d = avc_picture.data[0] + x0 + y0 * avc_picture.linesize[0];
-		for(y = 0; y < h; y++) {
-			memcpy(d, s, w);
-			s += stride[0];
-			d += avc_picture.linesize[0];
-		}
-
-		w /= 2;
-		h /= 2;
-		x0 /= 2;
-		y0 /= 2;
-	
-		s = srcimg[1] + s_pos_x + (s_pos_y * stride[1]);
-		d = avc_picture.data[1] + x0 + (y0 * avc_picture.linesize[1]);
-		s1 = srcimg[2] + s_pos_x + (s_pos_y * stride[2]);
-		d1 = avc_picture.data[2] + x0 + (y0 * avc_picture.linesize[2]);
-		for(y = 0; y < h; y++) {
-			memcpy(d, s, w);
-			memcpy(d1, s1, w);
-			s += stride[1];
-			s1 += stride[2];
-			d += avc_picture.linesize[1];
-			d1 += avc_picture.linesize[2];
-		}
+		sws->swScale(sws, srcimg, stride, y0, h, avc_picture.data, avc_picture.linesize);
 		return 0;
 	}
 #endif
@@ -400,6 +396,9 @@ static uint32_t draw_slice(uint8_t *srcimg[], int stride[], int w, int h, int x0
 static void uninit(void)
 {
 	printf("VO: [dxr3] Uninitializing\n");
+	if (sws) {
+		freeSwsContext(sws);
+	}
 #ifdef USE_LIBAVCODEC
 	if (avc_context) {
 		avcodec_close(avc_context);
