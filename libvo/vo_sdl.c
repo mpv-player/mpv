@@ -89,10 +89,7 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 
-/* FIXME: MPlayer crashes in fastmemcpy.h when SDL_NOXV is defined! */
-#ifndef SDL_NOXV
 #include "fastmemcpy.h"
-#endif
 
 LIBVO_EXTERN(sdl)
 
@@ -386,7 +383,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 {
 	struct sdl_priv_s *priv = &sdl_priv;
         unsigned int sdl_format;
-
+	
 	sdl_format = format;
         switch(format){
 		case IMGFMT_YV12:
@@ -664,16 +661,22 @@ static void check_events (void)
 					mplayer_put_key('q');
 				break;
                                 /*case SDLK_o: mplayer_put_key('o');break;
-                                case SDLK_p: mplayer_put_key('p');break;
-                                case SDLK_SPACE: mplayer_put_key(' ');break;*/
+                                case SDLK_SPACE: mplayer_put_key(' ');break;
+                                case SDLK_p: mplayer_put_key('p');break;*/
                                 case SDLK_UP: mplayer_put_key(KEY_UP);break;
                                 case SDLK_DOWN: mplayer_put_key(KEY_DOWN);break;
                                 case SDLK_LEFT: mplayer_put_key(KEY_LEFT);break;
                                 case SDLK_RIGHT: mplayer_put_key(KEY_RIGHT);break;
-                                /*case SDLK_PLUS:
+                                case SDLK_PLUS:
                                 case SDLK_KP_PLUS: mplayer_put_key('+');break;
                                 case SDLK_MINUS:
-                                case SDLK_KP_MINUS: mplayer_put_key('-');break;*/
+                                case SDLK_KP_MINUS: mplayer_put_key('-');break;
+                                case SDLK_ASTERISK:
+				case SDLK_KP_MULTIPLY:
+				case SDLK_w: mplayer_put_key('*');break;
+				case SDLK_SLASH:
+				case SDLK_KP_DIVIDE:
+                                case SDLK_s: mplayer_put_key('/');break;
 				default:
 					mplayer_put_key(keypressed);
                                 }
