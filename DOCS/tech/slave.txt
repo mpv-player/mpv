@@ -19,7 +19,7 @@ edl_mark
     ???
 
 audio_delay <value>
-    Adjust the audio delay of value seconds.
+    Adjust the audio delay by <value> seconds.
 
 quit
     Quit MPlayer.
@@ -105,6 +105,10 @@ vo_ontop
 
 vo_rootwin
     Toggle playback on the root window.
+
+switch_vsync [<value>]
+    Toggle vsync (1 == on, 0 == off). If no value is provided,
+    vsync status is inverted.
 
 panscan <value> [value2]
     ???
