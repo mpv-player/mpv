@@ -85,7 +85,9 @@ void vo_x11_putkey(int key){
    case wsGrayMinus: mplayer_put_key('-'); break;
    case wsPlus:
    case wsGrayPlus:  mplayer_put_key('+'); break;
+   default: if((key>='a' && key<='z')||(key>='A' && key<='Z')) mplayer_put_key(key);
   }
+
 }
 
 
