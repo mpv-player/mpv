@@ -1220,6 +1220,13 @@ if(has_audio==7){
   if(!DS_AudioDecoder_Open(avi_header.audio_codec,avi_header.auds_guid,in_fmt)){
     MP3_channels=avi_header.wf.nChannels;
     MP3_samplerate=avi_header.wf.nSamplesPerSec;
+
+    avi_header.audio_in_minsize=2*avi_header.wf.nBlockAlign;
+    if(avi_header.audio_in_minsize<8192) avi_header.audio_in_minsize=8192;
+    a_in_buffer_size=avi_header.audio_in_minsize;
+    a_in_buffer=malloc(a_in_buffer_size);
+    a_in_buffer_len=0;
+
   } else {
     printf("Could not load/initialize Win32/DirctShow AUDIO codec (missing .AX file?)\n");
     if((in_fmt->wFormatTag)==0x55){
@@ -1489,6 +1496,33 @@ while(has_audio){
         if(ret>0) a_buffer_len+=ret;
         break;
       }
+      case 7: // DirectShow
+      { int ret;
+        int len=a_buffer_size-a_buffer_len;
+        int size_in=0;
+        int size_out=0;
+        int srcsize=DS_AudioDecoder_GetSrcSize(len);
+        if(verbose>2)printf("DShow says: srcsize=%d  (buffsize=%d)  out_size=%d\n",srcsize,a_in_buffer_size,len);
+        if(srcsize>a_in_buffer_size) srcsize=a_in_buffer_size; // !!!!!!
+        if(a_in_buffer_len<srcsize){
+          a_in_buffer_len+=
+            demux_read_data(d_audio,&a_in_buffer[a_in_buffer_len],
+            srcsize-a_in_buffer_len);
+        }
+        DS_AudioDecoder_Convert(a_in_buffer,a_in_buffer_len,
+            &a_buffer[a_buffer_len],len, &size_in,&size_out);
+        if(verbose>2)printf("DShow: audio %d -> %d converted  (in_buf_len=%d of %d)\n",size_in,size_out,a_in_buffer_len,a_in_buffer_size);
+        if(size_in>=a_in_buffer_len){
+          a_in_buffer_len=0;
+        } else {
+          a_in_buffer_len-=size_in;
+          memcpy(a_in_buffer,&a_in_buffer[size_in],a_in_buffer_len);
+        }
+        a_buffer_len+=size_out;
+        
+        break;
+      }
+
     }
   }
   current_module=NULL;   // Leave AUDIO decoder module
