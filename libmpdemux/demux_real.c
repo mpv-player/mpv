@@ -908,6 +908,7 @@ void demux_open_real(demuxer_t* demuxer)
 		    sh->wf->cbSize = 0;
 		    sh->format = MKTAG(buf[0], buf[1], buf[2], buf[3]);
 
+#if 0
 		    switch (sh->format){
 			case MKTAG('d', 'n', 'e', 't'):
 			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: DNET (AC3 with low-bitrate extension)\n");
@@ -924,6 +925,7 @@ void demux_open_real(demuxer_t* demuxer)
 			default:
 			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: Unknown (%s)\n", buf);
 		    }
+#endif
 
 		    switch (sh->format)
 		    {
