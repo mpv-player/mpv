@@ -39,7 +39,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2003-01-26"
+.TH MPlayer 1 "2003-03-22"
 .
 .SH NAME
 mplayer  \- Lecteur Vidéo pour Linux
@@ -2340,8 +2340,10 @@ l'on doit extraire un champs pair ou impair (selon que n soit pair ou impair).
 .IPs "detc"
 Essaie d'inverser le processus de "telecine" pour retrouver un flux propre et
 non-entralaçé au débit du film. Ce filtre est toujours expérimental mais semble
-être utilisable. Les arguments suivant (voir leur syntaxe plus bas) peuvent
-êtres utilisés pour contrôler son comportement:
+être utilisable. Soyez conscient qu'il n'y a absolument aucun usage de ce filtre
+à moins que vous ne voyez d'entrelacement pendant la lecture d'un film! Les
+arguments suivant (voir leur syntaxe plus bas) peuvent être utilisés pour
+contrôler son comportement:
 .RSss
 dr: Définie le mode saut de trames. 0 (par défaut) signifie ne pas sauter
 de trames pour maintenir le débit de sortie. 1 signifie toujours sauter la trame
@@ -3487,7 +3489,9 @@ si >16000 (CBR ou mode 2passes, défault=687 kbits/s)
 .IPs fixed_quant=<1\-31>
 passe en mode quantizer fixe et spécifie le quantizer à utiliser
 .IPs me_quality=<0\-6>
-spécifie la qualité de détection de mouvement (par défaut=4)
+spécifie la qualité de détection de mouvement (par défaut=6)
+.IPs interlacing
+active le support pour contenu entrelacé (défaut=off)
 .IPs 4mv
 utilise 4 vecteurs de mouvement par macro-bloc, peut apporter une meilleure 
 compression au coût d'un encodage plus lent (par défaut=off)
@@ -3511,15 +3515,8 @@ utilise les quantizers MPEG au lieu de H.263 (défaut=off)
 .IPs mod_quant
 décide d'utiliser ou non les quantizers MPEG ou H.263 sur une base
 trame-par-trame. (défaut=off, mode 2passes uniquement)
-.IPs lumi_mask
-utilise un algorithme de lumimasquage (défaut=off, semble bogué)
-.IPs hintedme
-sauve les vecteurs d'Estimation de Mouvement dans un fichier durant la
-première passe et réutilise ce fichier dans la seconde (défaut=off,
-mode 2passes uniquement, semble bogué)
-.IPs hintfile
-spécifie le fichier temporaire qui devra être utilisé par l'option 'hintedme'
-(par défaut=./xvid_hint_me.dat, mode 2passes uniquement)
+.IPs greyscale
+encode en noir & blanc (défault=off)
 .IPs debug
 sauve les statistiques par trames dans xvid.dbg (par défaut: off)
 .br
@@ -3530,6 +3527,64 @@ ce n'est *pas* le fichier de contrôle 2passes
 (défaut=10, mode 2passes uniquement)
 .IPs kfreduction=<0\-100>
 (défaut=30, mode 2passes uniquement)
+.RE
+
+.RSs
+Les options suivantes ne sont disponibles que dans la version instable
+(cvs -HEAD) de XviD. Soyez conscient que ces options sont expérimentales et
+risquent de ne pas fonctionner comme prévu.
+.IPs packed
+Crée un flux de bits pouvant être décodé sans décalage (défaut=off)
+.br
+.I ATTENTION:
+ceci génèrera un flux de bits illégal, et NE SERA PAS décodable par les
+décodeurs excepté divx/libavcodec/xvid
+.br
+.I ATTENTION:
+ceci ajoutera également une fausse version de divx dans le fichier donc
+l'autodétection de bogues risque de ne pas fonctionner
+.IPs divx5bvop
+génère des trames B compatibles DivX5 (défaut=on)
+.IPs qpel
+active l'estimation quarter-pixel motion (défaut=off)
+.IPs gmc
+active la compensation de mouvement globale, peut sauver des bits sur les scenes
+panoramiques (défaut=off)
+.IPs chroma_me
+utilise l'information chroma pour estimer le mouvement (défaut=off)
+.IPs chroma_opt
+active un préfiltre d'optimisation chroma (défaut=off)
+.IPs reduced
+active l'encodage de trames en résolution réduite (défaut=off)
+.IPs max_bframes=<0\-4>
+nombre maximum de trames B à insérer entre les trames I/P (défaut=0)
+.IPs bquant_ratio=<0\-1000>
+rapport de quantiseur entre les trames B et non B, 150=1.50 (défault=150)
+.IPs bquant_offset=<-1000\-1000>
+offset quantiseur entre les trames B et non B, 100=1.00 (défault=100)
+.IPs bf_threshold=<-255\-255>
+change la probabilité qu'une trame soit une trame B (défaut=0)
+.IPs hq_ac
+active une meilleur prévision du composant AC (défaut=off)
+.IPs vhq=<0\-4>
+active une recherche ME de meilleur qualité en utilisant DCT, de plus rapide à
+plus lent:
+
+.br
+0 = off (défaut)
+.br
+1 = sélection du mode (inter/intra MB)
+.br
+2 = recherche limitée
+.br
+3 = recherche moyenne
+.br
+4 = recherche large
+.IPs psnr
+affiche le psnr (peak signal to noise ratio, rapport du signal crête sur bruit)
+pour l'ensemble de la vidéo après encodage et stocke le psnr par trame dans un
+fichier portant un nom tel que  'psnr_hhmmss.log'.
+Les valeurs renvoyées sont en dB (décibel), le plus haut est le mieux.
 .RE
 
 
@@ -3861,7 +3916,7 @@ et traduite en français par
 Merci d'envoyer les mails la concernant sur la liste de diffusion MPlayer-users.
 
 
-.SH "DISCLAIMER STANDARD"
+.SH "DÉNÉGATION STANDARD"
 A utiliser à vos risques et périls!
 Il peut y avoir des erreurs et inexactitudes qui peuvent endommager votre 
 système ou votre oeil.
