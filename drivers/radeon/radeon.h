@@ -519,18 +519,30 @@
 #	define SCALER_GAMMA_SEL_G14            0x00000060L
 #	define SCALER_COMCORE_SHIFT_UP_ONE     0x00000080L
 #	define SCALER_SURFAC_FORMAT            0x00000f00L
+#	define SCALER_SOURCE_UNK0	       0x00000000L /* 2 bpp ??? */
+#	define SCALER_SOURCE_UNK1	       0x00000100L /* 4 bpp ??? */
+#	define SCALER_SOURCE_UNK2	       0x00000200L /* 8 bpp ??? */
 #	define SCALER_SOURCE_15BPP             0x00000300L
 #	define SCALER_SOURCE_16BPP             0x00000400L
 #	define SCALER_SOURCE_24BPP             0x00000500L
 #	define SCALER_SOURCE_32BPP             0x00000600L
-#	define SCALER_SOURCE_YUV9              0x00000900L
+#	define SCALER_SOURCE_UNK3	       0x00000700L /* 8BPP_RGB332 ??? */
+#	define SCALER_SOURCE_UNK4	       0x00000800L /* 8BPP_Y8 ??? */
+#	define SCALER_SOURCE_YUV9              0x00000900L /* 8BPP_RGB8 */
 #	define SCALER_SOURCE_YUV12             0x00000A00L
 #	define SCALER_SOURCE_VYUY422           0x00000B00L
 #	define SCALER_SOURCE_YVYU422           0x00000C00L
+#	define SCALER_SOURCE_UNK5	       0x00000D00L /* ??? */
+#	define SCALER_SOURCE_UNK6	       0x00000E00L /* 32BPP_AYUV444 */
+#	define SCALER_SOURCE_UNK7	       0x00000F00L /* 16BPP_ARGB4444 */
 #	define SCALER_ADAPTIVE_DEINT           0x00001000L
+#	define SCALER_UNKNOWN_FLAG0            0x00002000L /* ??? */
+#	define SCALER_UNKNOWN_FLAG1            0x00004000L /* ??? */
 #	define SCALER_SMART_SWITCH             0x00008000L
 #	define SCALER_BURST_PER_PLANE          0x00ff0000L
 #	define SCALER_DOUBLE_BUFFER            0x01000000L
+#	define SCALER_UNKNOWN_FLAG3            0x02000000L /* ??? */
+#	define SCALER_UNKNOWN_FLAG4            0x04000000L /* ??? */
 #	define SCALER_DIS_LIMIT                0x08000000L
 #	define SCALER_PRG_LOAD_START           0x10000000L
 #	define SCALER_INT_EMU                  0x20000000L
@@ -541,6 +553,8 @@
 #	define OV0_P1_MAX_LN_IN_PER_LN_OUT     0x00000003L
 #	define OV0_P1_V_ACCUM_INIT_MASK        0x01ff8000L
 #define OV0_P23_V_ACCUM_INIT                   0x042C  
+#	define OV0_P23_MAX_LN_IN_PER_LN_OUT     0x00000003L
+#	define OV0_P23_V_ACCUM_INIT_MASK        0x01ff8000L
 #define OV0_P1_BLANK_LINES_AT_TOP              0x0430  
 #	define P1_BLNK_LN_AT_TOP_M1_MASK       0x00000fffL
 #	define P1_ACTIVE_LINES_M1              0x0fff0000L
@@ -564,10 +578,23 @@
 #	define VIF_BUF2_BASE_ADRS_MASK         0x03fffff0L
 #	define VIF_BUF2_1ST_LINE_LSBS_MASK     0x48000000L
 #define OV0_VID_BUF3_BASE_ADRS                 0x044C  
+#	define VIF_BUF3_PITCH_SEL              0x00000001L
+#	define VIF_BUF3_TILE_ADRS              0x00000002L
+#	define VIF_BUF3_BASE_ADRS_MASK         0x03fffff0L
+#	define VIF_BUF3_1ST_LINE_LSBS_MASK     0x48000000L
 #define OV0_VID_BUF4_BASE_ADRS                 0x0450
+#	define VIF_BUF4_PITCH_SEL              0x00000001L
+#	define VIF_BUF4_TILE_ADRS              0x00000002L
+#	define VIF_BUF4_BASE_ADRS_MASK         0x03fffff0L
+#	define VIF_BUF4_1ST_LINE_LSBS_MASK     0x48000000L
 #define OV0_VID_BUF5_BASE_ADRS                 0x0454
+#	define VIF_BUF5_PITCH_SEL              0x00000001L
+#	define VIF_BUF5_TILE_ADRS              0x00000002L
+#	define VIF_BUF5_BASE_ADRS_MASK         0x03fffff0L
+#	define VIF_BUF5_1ST_LINE_LSBS_MASK     0x48000000L
 #define OV0_VID_BUF_PITCH0_VALUE               0x0460
 #define OV0_VID_BUF_PITCH1_VALUE               0x0464  
+#define OV0_VID_BUF_PITCH2_VALUE               0x0468
 #define OV0_AUTO_FLIP_CNTL                     0x0470  
 #	define OV0_AUTO_FLIP_CNTL_SOFT_BUF_NUM        0x00000007
 #	define OV0_AUTO_FLIP_CNTL_SOFT_REPEAT_FIELD   0x00000008

@@ -21,17 +21,24 @@
   mknod /dev/radeon_vid c 178 0
  */
 
+/* TESTED and WORKING formats: YUY2 */
+
 /*
   TODO:
-  OV0_COLOUR_CNTL         brightness saturation 
-   SCALER_GAMMA_SEL_BRIGHT  gamma correction ??? 
-  OV0_GRAPHICS_KEY_CLR    color key 
-  OV0_AUTO_FLIP_CNTL
-  OV0_FILTER_CNTL
-  OV0_VIDEO_KEY_CLR
-  OV0_KEY_CNTL
-
-  BPP should be known
+  Highest priority: fbvid.h compatibility and UYVY test
+  High priority: YV12, I420, IYUV support
+  Middle priority:
+    OV0_COLOUR_CNTL         brightness saturation 
+     SCALER_GAMMA_SEL_BRIGHT  gamma correction ??? 
+    OV0_GRAPHICS_KEY_CLR    color key 
+    OV0_AUTO_FLIP_CNTL
+    OV0_FILTER_CNTL
+    OV0_VIDEO_KEY_CLR
+    OV0_KEY_CNTL
+  Low priority:  RGB/BGR 2-32, YVU9, IF09, CLPL, IYU1, IYU2, UYNV, CYUV
+		 YUNV, YVYU, Y41P, Y211, Y41T, Y42T, V422, V655, CLJR
+		       ^^^^
+		 YUVP, UYVP, Mpeg PES (mpeg-1,2) support
 */
 
 #include <linux/config.h>
@@ -90,6 +97,7 @@ typedef struct bes_registers_s
   uint32_t p1_x_start_end;
   uint32_t p2_x_start_end;
   uint32_t p3_x_start_end;
+  uint32_t base_addr;
   uint32_t vid_buf0_base_adrs;
   /* These ones are for auto flip: maybe in the future */
   uint32_t vid_buf1_base_adrs;
@@ -135,6 +143,7 @@ static video_registers_t vregs[] =
   { OV0_P1_X_START_END, 0 },
   { OV0_P2_X_START_END, 0 },
   { OV0_P3_X_START_END, 0 },
+  { OV0_BASE_ADDR, 0 },
   { OV0_VID_BUF0_BASE_ADRS, 0 },
   { OV0_VID_BUF1_BASE_ADRS, 0 },
   { OV0_VID_BUF2_BASE_ADRS, 0 },
@@ -173,6 +182,48 @@ static mga_vid_config_t radeon_config;
 #else
 #define RTRACE(...)	((void)0)
 #endif
+
+static char *fourcc_format_name(int format)
+{
+    switch(format)
+    {
+	case IMGFMT_RGB8: return("RGB 8-bit");
+	case IMGFMT_RGB15: return("RGB 15-bit");
+	case IMGFMT_RGB16: return("RGB 16-bit");
+	case IMGFMT_RGB24: return("RGB 24-bit");
+	case IMGFMT_RGB32: return("RGB 32-bit");
+	case IMGFMT_BGR8: return("BGR 8-bit");
+	case IMGFMT_BGR15: return("BGR 15-bit");
+	case IMGFMT_BGR16: return("BGR 16-bit");
+	case IMGFMT_BGR24: return("BGR 24-bit");
+	case IMGFMT_BGR32: return("BGR 32-bit");
+	case IMGFMT_YVU9: return("Planar YVU9");
+	case IMGFMT_IF09: return("Planar IF09");
+	case IMGFMT_YV12: return("Planar YV12");
+	case IMGFMT_I420: return("Planar I420");
+	case IMGFMT_IYUV: return("Planar IYUV");
+	case IMGFMT_CLPL: return("Planar CLPL");
+	case IMGFMT_IYU1: return("Packed IYU1");
+	case IMGFMT_IYU2: return("Packed IYU2");
+	case IMGFMT_UYVY: return("Packed UYVY");
+	case IMGFMT_UYNV: return("Packed UYNV");
+	case IMGFMT_cyuv: return("Packed CYUV");
+	case IMGFMT_YUY2: return("Packed YUY2");
+	case IMGFMT_YUNV: return("Packed YUNV");
+	case IMGFMT_YVYU: return("Packed YVYU");
+	case IMGFMT_Y41P: return("Packed Y41P");
+	case IMGFMT_Y211: return("Packed Y211");
+	case IMGFMT_Y41T: return("Packed Y41T");
+	case IMGFMT_Y42T: return("Packed Y42T");
+	case IMGFMT_V422: return("Packed V422");
+	case IMGFMT_V655: return("Packed V655");
+	case IMGFMT_CLJR: return("Packed CLJR");
+	case IMGFMT_YUVP: return("Packed YUVP");
+	case IMGFMT_UYVP: return("Packed UYVP");
+/*	case IMGFMT_MPEGPES: return("Mpeg PES");*/
+    }
+    return("Unknown");
+}
 
 
 /*
@@ -247,6 +298,9 @@ RTRACE("radeon_vid: OV0: p1_v_accum_init=%x p1_h_accum_init=%x p23_h_accum_init=
     OUTREG(OV0_P1_X_START_END,		besr.p1_x_start_end);
     OUTREG(OV0_P2_X_START_END,		besr.p2_x_start_end);
     OUTREG(OV0_P3_X_START_END,		besr.p3_x_start_end);
+#if 0
+    OUTREG(OV0_BASE_ADDR,		besr.base_addr);
+#endif
     OUTREG(OV0_VID_BUF0_BASE_ADRS,	besr.vid_buf0_base_adrs);
     OUTREG(OV0_VID_BUF1_BASE_ADRS,	besr.vid_buf1_base_adrs);
     OUTREG(OV0_VID_BUF2_BASE_ADRS,	besr.vid_buf2_base_adrs);
@@ -275,12 +329,10 @@ RTRACE("radeon_vid: OV0: p1_v_accum_init=%x p1_h_accum_init=%x p23_h_accum_init=
 
 	case IMGFMT_UYVY:  bes_flags |= SCALER_SOURCE_YVYU422; break;
         case IMGFMT_YVU9:  bes_flags |= SCALER_SOURCE_YUV9; break;
-	case IMGFMT_IYUV:  bes_flags |= SCALER_SOURCE_YUV12; break;
-
+	
+	case IMGFMT_IYUV:
 	case IMGFMT_I420:
-	case IMGFMT_YV12:  bes_flags |= SCALER_SOURCE_YUV12 |
-					SCALER_PIX_EXPAND |
-					SCALER_Y2R_TEMP;
+	case IMGFMT_YV12:  bes_flags |= SCALER_SOURCE_YUV12;
 			   break;
 	case IMGFMT_YUY2:
 	default:           bes_flags |= SCALER_SOURCE_VYUY422; break;
@@ -360,7 +412,9 @@ RTRACE("radeon_vid: usr_config: version = %x format=%x card=%x ram=%u src(%ux%u)
 		return -1;
     }
     is_420 = 0;
-    if(config->format == IMGFMT_YV12 || config->format == IMGFMT_I420) is_420 = 1;
+    if(config->format == IMGFMT_YV12 ||
+       config->format == IMGFMT_I420 ||
+       config->format == IMGFMT_IYUV) is_420 = 1;
     switch(config->format)
     {
         default:
@@ -392,17 +446,17 @@ RTRACE("radeon_vid: usr_config: version = %x format=%x card=%x ram=%u src(%ux%u)
     }
 
     /* keep everything in 16.16 */
-
+    besr.base_addr = radeon_overlay_off;
     if(is_420)
     {
         uint32_t dstPitch,d1line,d2line,d3line;
 	dstPitch = ((src_w + 15) & ~15);  /* of luma */
-	d1line = top * dstPitch;
-	d2line = (src_h * dstPitch) + ((top >> 1) * (dstPitch >> 1));
-	d3line = d2line + ((src_h >> 1) * (dstPitch >> 1));
-        besr.vid_buf0_base_adrs = ((radeon_overlay_off + d1line) & VIF_BUF0_BASE_ADRS_MASK) | VIF_BUF0_PITCH_SEL;
-        besr.vid_buf1_base_adrs = ((radeon_overlay_off + d2line) & VIF_BUF1_BASE_ADRS_MASK) | VIF_BUF1_PITCH_SEL;
-        besr.vid_buf2_base_adrs = ((radeon_overlay_off + d3line) & VIF_BUF2_BASE_ADRS_MASK) | VIF_BUF2_PITCH_SEL;
+	d1line = top*dstPitch;
+	d2line = src_h*dstPitch+(d1line>>1);
+	d3line = d2line+((src_h*dstPitch)>>2);
+        besr.vid_buf0_base_adrs=((radeon_overlay_off+d1line)&VIF_BUF0_BASE_ADRS_MASK)|VIF_BUF0_PITCH_SEL;
+        besr.vid_buf1_base_adrs=((radeon_overlay_off+d2line)&VIF_BUF1_BASE_ADRS_MASK)|VIF_BUF0_PITCH_SEL;
+        besr.vid_buf2_base_adrs=((radeon_overlay_off+d3line)&VIF_BUF2_BASE_ADRS_MASK)|VIF_BUF0_PITCH_SEL;
     }
     else
     {
@@ -424,11 +478,12 @@ RTRACE("radeon_vid: usr_config: version = %x format=%x card=%x ram=%u src(%ux%u)
 			    ((tmp << 12) & 0x70000000);
 
     tmp = (top & 0x0000ffff) + 0x00018000;
-    besr.p1_v_accum_init = ((tmp << 4) & 0x03ff8000) | 0x00000001;
-
+    besr.p1_v_accum_init = ((tmp << 4) & OV0_P1_V_ACCUM_INIT_MASK)
+			    |(OV0_P1_MAX_LN_IN_PER_LN_OUT & 1);
 
     tmp = ((top >> 1) & 0x0000ffff) + 0x00018000;
-    besr.p23_v_accum_init = is_420 ? ((tmp << 4) & 0x01ff8000) | 0x00000001 : 0;
+    besr.p23_v_accum_init = is_420 ? ((tmp << 4) & OV0_P23_V_ACCUM_INIT_MASK)
+			    |(OV0_P23_MAX_LN_IN_PER_LN_OUT & 1) : 0;
 
     leftUV = (left >> 17) & 15;
     left = (left >> 16) & 15;
@@ -437,8 +492,12 @@ RTRACE("radeon_vid: usr_config: version = %x format=%x card=%x ram=%u src(%ux%u)
     besr.y_x_start = (config->x_org+8) | (config->y_org << 16);
     besr.y_x_end = (config->x_org + config->dest_width+8) | ((config->y_org + config->dest_height) << 16);
     besr.p1_blank_lines_at_top = P1_BLNK_LN_AT_TOP_M1_MASK|((src_h-1)<<16);
-    src_h = (src_h + 1) >> 1;
-    besr.p23_blank_lines_at_top = is_420 ? P23_BLNK_LN_AT_TOP_M1_MASK|((src_h-1)<<16):0;
+    if(is_420)
+    {
+	src_h = (src_h + 1) >> 1;
+	besr.p23_blank_lines_at_top = P23_BLNK_LN_AT_TOP_M1_MASK|((src_h-1)<<16);
+    }
+    else besr.p23_blank_lines_at_top = 0;
     besr.vid_buf_pitch0_value = pitch;
     besr.vid_buf_pitch1_value = is_420 ? pitch>>1 : pitch;
 RTRACE("radeon_vid: BES: v_inc=%x h_inc=%x step_by=%x\n",besr.v_inc,besr.h_inc,besr.step_by);
@@ -446,9 +505,25 @@ RTRACE("radeon_vid: BES: vid_buf0_basey=%x\n",besr.vid_buf0_base_adrs);
 RTRACE("radeon_vid: BES: y_x_start=%x y_x_end=%x blank_at_top=%x pitch0_value=%x\n"
 ,besr.y_x_start,besr.y_x_end,besr.p1_blank_lines_at_top,besr.vid_buf_pitch0_value);
     besr.p1_x_start_end = (src_w+left-1)|(left<<16);
-    src_w>>=1;
-    besr.p2_x_start_end = (src_w+left-1)|(leftUV<<16);
-    besr.p3_x_start_end = besr.p2_x_start_end;
+    if(is_420)
+    {
+	if(config->format == IMGFMT_YV12)
+	{
+	    besr.p3_x_start_end = ((src_w/2)+left-1)|((leftUV)<<16);
+	    besr.p2_x_start_end = (src_w+left-1)|((src_w/2+leftUV)<<16);
+	}
+	else
+	{
+	    besr.p2_x_start_end = ((src_w/2)+left-1)|((leftUV)<<16);
+	    besr.p3_x_start_end = (src_w+left-1)|((src_w/2+leftUV)<<16);
+	}
+    }
+    else
+    {
+	src_w>>=1;
+	besr.p2_x_start_end = (src_w+left-1)|(leftUV<<16);
+	besr.p3_x_start_end = besr.p2_x_start_end;
+    }
     return 0;
 }
 
@@ -523,6 +598,7 @@ static int radeon_vid_ioctl(struct inode *inode, struct file *file, unsigned int
 				printk( "radeon_vid: failed copy to userspace\n");
 				return -EFAULT;
 			}
+			printk("radeon_vid: configuring for '%s' fourcc\n",fourcc_format_name(radeon_config.format));
 			return radeon_vid_init_video(&radeon_config);
 		break;
 
@@ -582,9 +658,7 @@ static int radeon_vid_config_card(void)
 	for(i=0;i<sizeof(ati_card_ids)/sizeof(struct ati_card_id_s);i++)
 	  if((dev=pci_find_device(PCI_VENDOR_ID_ATI, ati_card_ids[i].id, NULL)))
 		break;
-	if(dev)
-		printk("radeon_vid: Found %s\n",ati_card_ids[i].name);
-	else
+	if(!dev)
 	{
 		printk("radeon_vid: No supported cards found\n");
 		return FALSE;
@@ -596,7 +670,13 @@ static int radeon_vid_config_card(void)
 	RTRACE( "radeon_vid: MMIO at 0x%p\n", radeon_mmio_base);
 	RTRACE( "radeon_vid: Frame Buffer at 0x%08x\n", radeon_mem_base);
 
-	radeon_ram_size = pci_resource_len(dev, 0)/0x100000;
+	/* video memory size */
+	radeon_ram_size = INREG(CONFIG_MEMSIZE);
+
+	/* mem size is bits [28:0], mask off the rest */
+	radeon_ram_size &=  CONFIG_MEMSIZE_MASK;
+	radeon_ram_size /= 0x100000;
+	printk("radeon_vid: Found %s (%uMb memory)\n",ati_card_ids[i].name,radeon_ram_size);
 
 	return TRUE;
 }
