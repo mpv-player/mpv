@@ -246,10 +246,11 @@ ifeq ($(GUI),yes)
 	-ln -sf $(PRG) $(BINDIR)/gmplayer
 endif
 	if test ! -d $(MANDIR)/man1 ; then mkdir -p $(MANDIR)/man1; fi
-	$(INSTALL) -c -m 644 DOCS/$(LINGUAS)/mplayer.1 $(MANDIR)/man1/mplayer.1
+	$(INSTALL) -c -m 644 DOCS/en/mplayer.1 $(MANDIR)/man1/mplayer.1
+	@for LCLMANS in de fr hu pl; do $(INSTALL) -D -c -m 644 DOCS/$$LCLMANS/mplayer.1 $(MANDIR)/$$LCLMANS/man1/mplayer.1; done
 ifeq ($(MENCODER),yes)
 	$(INSTALL) -m 755 $(INSTALLSTRIP) $(PRG_MENCODER) $(BINDIR)/$(PRG_MENCODER)
-	-ln -sf mplayer.1 $(MANDIR)/man1/mencoder.1
+	@for LCLMANS in de fr hu pl; do ln -sf mplayer.1 $(MANDIR)/$$LCLMANS/man1/mencoder.1; done
 endif
 	@if test ! -d $(DATADIR) ; then mkdir -p $(DATADIR) ; fi
 	@if test ! -d $(DATADIR)/font ; then mkdir -p $(DATADIR)/font ; fi
