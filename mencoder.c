@@ -153,6 +153,7 @@ char* passtmpfile="divx2pass.log";
 int pass_working=0;
 
 static int play_n_frames=-1;
+static int play_n_frames_mf=-1;
 
 #include "libvo/font_load.h"
 #include "libvo/sub.h"
@@ -799,6 +800,8 @@ if(tv_param_on == 1)
 	audio_preload = 0.0;
 	default_max_pts_correction = 0;
 	}
+
+play_n_frames=play_n_frames_mf;
 
 while(!at_eof){
 

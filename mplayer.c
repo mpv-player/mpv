@@ -233,6 +233,7 @@ static float force_fps=0;
 static int force_srate=0;
 static int frame_dropping=0; // option  0=no drop  1= drop vo  2= drop decode
 static int play_n_frames=-1;
+static int play_n_frames_mf=-1;
 
 // screen info:
 char* video_driver=NULL; //"mga"; // default
@@ -1489,12 +1490,18 @@ if (dvd_nav && stream->type==STREAMTYPE_DVDNAV) {
 total_time_usage_start=GetTimer();
 audio_time_usage=0; video_time_usage=0; vout_time_usage=0;
 total_frame_cnt=0; drop_frame_cnt=0; // fix for multifile fps benchmark
+play_n_frames=play_n_frames_mf;
+
+if(play_n_frames==0){
+  eof=PT_NEXT_ENTRY; goto goto_next_file;
+}
+
 while(!eof){
     float aq_sleep_time=0;
 
     if(play_n_frames>=0){
       --play_n_frames;
-      if(play_n_frames<0) eof = PT_NEXT_ENTRY;
+      if(play_n_frames<=0) eof = PT_NEXT_ENTRY;
     }
 
 /*========================== PLAY AUDIO ============================*/

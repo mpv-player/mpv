@@ -49,7 +49,7 @@
 // ------------------------- demuxer options --------------------
 
 	// number of frames to play/convert
-	{"frames", &play_n_frames, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
+	{"frames", &play_n_frames_mf, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
 
 	// seek to byte/seconds position
 	{"sb", &seek_to_byte, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
