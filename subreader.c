@@ -37,6 +37,7 @@ int sub_format=-1;     // 0 for microdvd
 		 // 6 for ssa (Sub Station Alpha)
 		// 7 for ... erm ... dunnowhat. tell me if you know
 	       // 8 for the glorious MPsub
+	      // 9 for AQTitle
 
 int eol(char p) {
     return (p=='\r' || p=='\n' || p=='\0');
@@ -48,6 +49,7 @@ static inline void trail_space(char *s) {
 	i = strlen(s) - 1;
 	while (i > 0 && isspace(s[i])) s[i--] = '\0';
 }
+
 
 subtitle *sub_read_line_sami(FILE *fd, subtitle *current) {
     static char line[1001];
@@ -406,6 +408,47 @@ subtitle *sub_read_line_mpsub(FILE *fd, subtitle *current) {
 	}
 }
 
+subtitle *previous_aqt_sub = NULL;
+
+subtitle *sub_read_line_aqt(FILE *fd,subtitle *current) {
+    char line[1001];
+
+    bzero (current, sizeof(subtitle));
+
+    while (1) {
+    // try to locate next subtitle
+        if (!fgets (line, 1000, fd))
+		return NULL;
+        if (!(sscanf (line, "-->> %ld", &(current->start)) <1))
+		break;
+    }
+    
+    if (previous_aqt_sub != NULL) 
+	previous_aqt_sub->end = current->start-1;
+    
+    previous_aqt_sub = current;
+
+    if (!fgets (line, 1000, fd))
+	return NULL;
+
+    sub_readtext(&line,&current->text[0]);
+    current->lines = 1;
+    current->end = current->start; // will be corrected by next subtitle
+
+    if (!fgets (line, 1000, fd))
+	return current;;
+
+    sub_readtext(&line,&current->text[1]);
+    current->lines = 2;
+
+    if ((current->text[0]=="") && (current->text[1]=="")) {
+	// void subtitle -> end of previous marked and exit
+	previous_aqt_sub = NULL;
+	return NULL;
+	}
+
+    return current;
+}
 
 int sub_autodetect (FILE *fd) {
     char line[1001];
@@ -444,6 +487,8 @@ int sub_autodetect (FILE *fd) {
 		{sub_uses_time=0; return 8;}
 	if (sscanf (line, "FORMAT=TIM%c", &p)==1 && p=='E')
 		{sub_uses_time=1; return 8;}
+	if (strstr (line, "-->>"))
+		{sub_uses_time=0; return 9;}
     }
 
     return -1;  // too many bad lines
@@ -530,7 +575,9 @@ subtitle* sub_read_file (char *filename) {
 	    sub_read_line_rt,
 	    sub_read_line_ssa,
 	    sub_read_line_dunnowhat,
-	    sub_read_line_mpsub
+	    sub_read_line_mpsub,
+	    sub_read_line_aqt
+
     };
 
     fd=fopen (filename, "r"); if (!fd) return NULL;
@@ -612,7 +659,9 @@ char * sub_filename(char* path,  char * fname )
     ".txt",
     ".TXT",
     ".ssa",
-    ".SSA"};
+    ".SSA",
+    ".aqt",
+    ".AQT"};
 
 
  if ( fname == NULL ) return NULL;
