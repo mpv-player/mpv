@@ -1645,6 +1645,15 @@ else
 fi
 echores "$_inttypes"
 
+echocheck "word size"
+_mp_wordsize="#undef MP_WORDSIZE"
+cat > $TMPC << EOF
+#include <stdio.h>
+#include <sys/types.h>
+int main(void) { printf("%d\n", sizeof(size_t)*8); return 0; }
+EOF
+cc_check && _wordsize=`$TMPO` && _mp_wordsize="#define MP_WORDSIZE $_wordsize"
+echores "$_wordsize"
 
 echocheck "stddef.h"
 cat > $TMPC << EOF
@@ -4691,6 +4700,8 @@ $_def_confwin32
 
 /* Define this to any prefered value from 386 up to infinity with step 100 */
 #define __CPU__ $iproc
+
+$_mp_wordsize
 
 $_def_linux
 
