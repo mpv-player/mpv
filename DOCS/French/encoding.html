@@ -22,7 +22,7 @@
   pour trouver les discussions à propos de tous les aspects et problèmes relatif
   à l'encodage avec MEncoder.</P>
 
-<H2><A NAME="2pass">7.1 Encodage MPEG-4 (&quot;DIVX&quot;) 2 ou 3-passes</A></H2>
+<H2><A NAME="2pass">7.1 Encodage MPEG-4 (&quot;DivX&quot;) 2 ou 3-passes</A></H2>
 
 <P><U><B>Encodage 2-passes:</B></U> le nom vient du fait que cette méthode encode
   le fichier <I>deux fois</I>. Le premier encodage (<I>passe</I> doublée)
@@ -184,28 +184,28 @@ Explication du processus:
 <A HREF="#options">options</A> globales et dans la page de man.</P>
 
 <P><I>Créer un fichier DivX4 à partir de tous les fichiers JPEG du rép courant:</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc divx4
-  -o sortie.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25 -ovc divx4
+  -o sortie.avi \*.jpg</CODE></P>
 
 <P><I>Créer un fichier DivX4 à partir de quelques fichiers JPEG du rép courant:</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder trame001.jpg,trame002.jpg -mf on:w=800:h=600:fps=25
-  -ovc divx4 -o sortie.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25
+  -ovc divx4 -o sortie.avi trame001.jpg,trame002.jpg</CODE></P>
 
 <P><I>Créer un fichier Motion JPEG (MJPEG) à partir de tous les fichiers JPEG du rép courant:</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc copy
-  -o sortie.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25 -ovc copy
+  -o sortie.avi \*.jpg</CODE></P>
 
 <P><I>Créer un fichier non-compressé à partir de tous les fichiers PNG du rép courant:</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc raw
-  -o sortie.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25:type=png -ovc raw
+  -o sortie.avi \*.png</CODE></P>
 
 <P><I>Créer un fichier Motion PNG (MPNG) à partir de tous les fichiers PNG du rép courant:</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc copy
-  -oac copy -o sortie.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25:type=png -ovc copy
+  -oac copy -o sortie.avi \*.png</CODE></P>
 
 <P><I>Créer un fichier Motion TGA (MTGA) à partir de tous les fichiers TGA du rép courant:</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder \*.tga -mf on:w=800:h=600:fps=25:type=tga -ovc copy
-  -o sortie.avi</CODE></P>
+  &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25:type=tga -ovc copy
+  -o sortie.avi \*.tga</CODE></P>
 
 
 <H2><A NAME="vobsub">7.7 Extractaction des sous-titres DVD dans un fichier Vobsub</A></H2>

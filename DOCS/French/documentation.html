@@ -1774,7 +1774,7 @@ end
 <H2><A NAME="cygwin">6.6. Cygwin</A></H2>
 
 <P>Le port Cygwin est toujours à ces débuts. Actuellement il n'y a aucun support pour
-  les DLLs Win32, les VCDs ou OpenGL. SDL est connu pour distordre le son et l'image ou 
+  les DLLs Win32 ou OpenGL. SDL est connu pour distordre le son et l'image ou 
   planter syr certains systèmes. Les <A HREF="tech/patches.txt">patches</A> sont toujours 
   bienvenus. Les meilleurs résultats peuvent être obtenus avec le pilote SDL natif de 
   sortie vidéo (<CODE>-vo directx</CODE>) et le pilote Windows waveout natif de sortie
@@ -1791,11 +1791,29 @@ end
   Si l'image est distordue, essayez de désactiver l'accélération matérielle avec 
   <CODE>-vo directx:noaccel</CODE>.</P>
 
-<P>Les instructions et les fichiers pour faire tourner SDL sous Cygwin peuvent être trouvé sur le
+<P>Les instructions et les fichiers pour faire tourner SDL sous Cygwin peuvent être trouvés sur le
   <A HREF="http://www.libsdl.org/extras/win32/cygwin/">site de libsdl</A>.</P>
 
+<P>Vous pouvez jouer des VCDs en lisant les fichiers <CODE>.DAT</CODE> ou <CODE>.MPG</CODE>
+  que Windows fait apparaître sur les VCDs. Cela fonctionne comme ça (changez la lettre
+  de votre lecteur CD-ROM):
+  
+<P><CODE>mplayer d:/mpegav/avseq01.dat</CODE></P>
+
+<P><CODE>mplayer /cydrive/d/MPEG2/AVSEQ01.MPG</CODE></P>
+
+<P>Les DVDs fonctionnent également, définissez juste votre périphérique DVD pour qu'il
+  corresponde à votre périphérique CD-ROM:</P>
+
+<P><CODE>mplayer -dvd &lt;title&gt; -dvd-device '\\.\d:'</CODE></P>
+
+<P>Les DLLs QuickTime sont censées fonctionner. Compilez avec
+  <CODE>--enable-qtx-codecs</CODE> et placez les codecs dans l'emplacement par
+  défaut des DLL Windows, <CODE>C:\WINNT\system32</CODE> ou <CODE>C:\Windows\system</CODE> 
+  selon votre version de Windows.</P>
 
 
+  
 <H1><A NAME="encoding">7.</A> <A HREF="encoding.html">Encodage avec MEncoder</A></H1>
 
 
