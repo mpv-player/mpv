@@ -28,13 +28,6 @@ extern int verbose; // defined in mplayer.c
 
 #endif
 
-#ifdef USE_DVDNAV
-#include <dvdnav.h>
-#include <../linux/timer.h>
-static int still_sleep_until;
-static int sleeping=0;
-static int stillen=0;
-#endif
 #ifdef USE_DVDREAD
 int dvd_read_sector(void* d,void* p2);
 void dvd_seek(void* d,off_t pos);
@@ -68,93 +61,8 @@ int stream_fill_buffer(stream_t *s){
 #endif
 #ifdef USE_DVDNAV
   case STREAMTYPE_DVDNAV: {
-    int event = DVDNAV_NOP;
-    if(sleeping)
-    {
-      dvdnav_still_skip(s->priv);
-      if(sleeping==1) if(GetTimer()>=still_sleep_until) sleeping = 0;
-      len = stillen;
-    }
-    if(dvdnav_get_next_block(s->priv,s->buffer,&event,&len)!=DVDNAV_STATUS_OK)
-      printf( "Error getting next block from DVD (%s)\n",dvdnav_err_to_string(s->priv) );
-    else switch(event) {
-      case DVDNAV_BLOCK_OK: {
-          /* be silent about this one */
-                break;
-          }
-      case DVDNAV_HIGHLIGHT: {
-          dvdnav_highlight_event_t *hevent = (dvdnav_highlight_event_t*)(s->buffer);
-          if (!hevent) {
-                printf("Highlight event broken\n");
-                break;
-          }
-
-          if (hevent->display)
-          {
-    	        printf( "Highlight (%u,%u)-(%u,%u) (button %d)\n",
-                     hevent->sx,hevent->sy,
-                     hevent->ex,hevent->ey,
-                     hevent->buttonN );
-          }
-          else {
-                  printf("Highlight Hide\n");
-          }
-        break;
-        }
-      case DVDNAV_STILL_FRAME: {
-          dvdnav_still_event_t *still_event = (dvdnav_still_event_t*)(s->buffer);
-          printf( "Still Frame\n" );
-	  if(still_event->length==0xff) { printf( "Sleeping indefinately\n" ); sleeping=2; }
-	  else  {
-	    InitTimer();
-	    still_sleep_until = GetTimer() + still_event->length*1000000;
-	    printf( "Sleeping %d sec(s)\n", still_event->length );
-	    sleeping=1;
-	  }
-          stillen = len;          
-	break;
-        }
-      case DVDNAV_STOP: {
-          printf( "Nav Stop\n" );
-          len=0;
-	break;
-        }
-      case DVDNAV_NOP: {
-        printf("Nav NOP\n");
-	break;
-        }
-      case DVDNAV_SPU_STREAM_CHANGE: {
-        printf("Nav SPU Stream Change\n");
-	break;
-        }
-      case DVDNAV_AUDIO_STREAM_CHANGE: {
-        printf("Nav Audio Stream Change\n");
-	break;
-        }
-      case DVDNAV_VTS_CHANGE: {
-        printf("Nav VTS Change\n");
-	break;
-        }
-      case DVDNAV_CELL_CHANGE: {
-        printf("Nav Cell Change\n");
-	break;
-        }
-      case DVDNAV_NAV_PACKET: {
-        // printf("Nav Packet\n");
-	break;
-        }
-      case DVDNAV_SPU_CLUT_CHANGE: {
-        printf("Nav SPU CLUT Change\n");
-	break;
-        }
-      case DVDNAV_SEEK_DONE: {
-        printf("Nav Seek Done\n");
-	break;
-        }
-      default:
-        printf("Weird nav event %d\n",event);
-        break;
-      }
+    dvdnav_stream_read((dvdnav_priv_t*)s->priv,s->buffer,&len);
+    if (len==0) return 0; // this was an event, so repeat the read
     break;
   }
 #endif
@@ -236,6 +144,19 @@ if(newpos==0 || newpos!=s->pos){
     vcd_set_msf(s->pos/VCD_SECTOR_DATA);
 #endif
     break;
+#endif
+#ifdef USE_DVDNAV
+  case STREAMTYPE_DVDNAV: {
+    if (newpos==0) {
+      if (dvdnav_stream_reset((dvdnav_priv_t*)s->priv))
+        s->pos=0;
+    }
+    if(newpos!=s->pos){
+      mp_msg(MSGT_STREAM,MSGL_INFO,"Cannot seek in DVDNAV streams yet!\n");
+      return 1;
+    }
+    break;
+  }
 #endif
 #ifdef USE_DVDREAD
   case STREAMTYPE_DVD:
