@@ -120,7 +120,11 @@ static int init(){
   pl_resample.up=UP;
 
   // Sheck input format
+#ifndef WORDS_BIGENDIAN
   if(ao_plugin_data.format != AFMT_S16_LE){
+#else
+  if(ao_plugin_data.format != AFMT_S16_BE){
+#endif	  
     fprintf(stderr,"[pl_resample] Input audio format not yet suported. \n");
     return 0;
   }
