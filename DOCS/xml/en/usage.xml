@@ -119,6 +119,13 @@ using the <option>-input <replaceable>conf</replaceable></option> option
 (relative path are relative to <filename>$HOME/.mplayer</filename>).
 </para>
 
+<para>
+You can get a full list of supported key names by running
+<command>mplayer -input keylist</command>
+and a full list of available commands by running
+<command>mplayer -input cmdlist</command>.
+</para>
+
 <example>
 <title>A simple input control file</title>
 <programlisting>
@@ -136,207 +143,6 @@ q quit
 ENTER pt_step 1 1<!--
 --></programlisting>
 </example>
-
-
-<sect3 id="ctrl-cfg-keys">
-<title>Key names</title>
-
-<para>
-You can have a full list by running
-<command>mplayer -input keylist</command>.
-</para>
-
-<itemizedlist>
-<title>Keyboard</title>
-<listitem><simpara>Any printable character</simpara></listitem>
-<listitem><simpara><literal>SPACE</literal></simpara></listitem>
-<listitem><simpara><literal>ENTER</literal></simpara></listitem>
-<listitem><simpara><literal>TAB</literal></simpara></listitem>
-<listitem><simpara><literal>CTRL</literal></simpara></listitem>
-<listitem><simpara><literal>BS</literal></simpara></listitem>
-<listitem><simpara><literal>DEL</literal></simpara></listitem>
-<listitem><simpara><literal>INS</literal></simpara></listitem>
-<listitem><simpara><literal>HOME</literal></simpara></listitem>
-<listitem><simpara><literal>END</literal></simpara></listitem>
-<listitem><simpara><literal>PGUP</literal></simpara></listitem>
-<listitem><simpara><literal>PGDWN</literal></simpara></listitem>
-<listitem><simpara><literal>ESC</literal></simpara></listitem>
-<listitem><simpara><literal>RIGHT</literal></simpara></listitem>
-<listitem><simpara><literal>LEFT</literal></simpara></listitem>
-<listitem><simpara><literal>UP</literal></simpara></listitem>
-<listitem><simpara><literal>DOWN</literal></simpara></listitem>
-</itemizedlist>
-
-<itemizedlist>
-<title>Mouse (only supported under X)</title>
-<listitem><simpara>
-  <literal>MOUSE_BTN0</literal> (Left button)</simpara></listitem>
-<listitem><simpara>
-  <literal>MOUSE_BTN1</literal> (Right button)</simpara></listitem>
-<listitem><simpara>
-  <literal>MOUSE_BTN2</literal> (Middle button)</simpara></listitem>
-<listitem><simpara>
-  <literal>MOUSE_BTN3</literal> (Wheel)</simpara></listitem>
-<listitem><simpara>
-  <literal>MOUSE_BTN4</literal> (Wheel)</simpara></listitem>
-<listitem><simpara>...</simpara></listitem>
-<listitem><simpara><literal>MOUSE_BTN9</literal></simpara></listitem>
-</itemizedlist>
-
-<itemizedlist>
-<title>Joystick (support must be enabled at compile time)</title>
-<listitem><simpara>
-  <literal>JOY_RIGHT</literal> or
-  <literal>JOY_AXIS0_PLUS</literal></simpara></listitem>
-<listitem><simpara>
-  <literal>JOY_LEFT</literal> or
-  <literal>JOY_AXIS0_MINUS</literal></simpara></listitem>
-<listitem><simpara>
-  <literal>JOY_UP</literal> or
-  <literal>JOY_AXIS1_MINUS</literal></simpara></listitem>
-<listitem><simpara>
-  <literal>JOY_DOWN</literal> or
-  <literal>JOY_AXIS1_PLUS</literal></simpara></listitem>
-<listitem><simpara><literal>JOY_AXIS2_PLUS</literal></simpara></listitem>
-<listitem><simpara><literal>JOY_AXIS2_MINUS</literal></simpara></listitem>
-<listitem><simpara>...</simpara></listitem>
-<listitem><simpara><literal>JOY_AXIS9_PLUS</literal></simpara></listitem>
-<listitem><simpara><literal>JOY_AXIS9_MINUS</literal></simpara></listitem>
-</itemizedlist>
-</sect3>
-
-
-<sect3 id="ctrl-cfg-commands">
-<title>Commands</title>
-
-<para>
-You can have a full list of known commands by running
-<command>mplayer -input cmdlist</command>.
-</para>
-
-<itemizedlist>
-<listitem><para><literal>seek</literal> (int) val [(int) type=0]</para>
-  <para>
-  Seek to some place in the movie.
-  Type <literal>0</literal> is a relative seek of +/- val seconds.
-  Type <literal>1</literal> seek to val % in the movie.
-  </para></listitem>
-<listitem><para><literal>speed_mult</literal> (float) val</para>
-  <para>
-  Multiply the current speed with val.
-  </para></listitem>
-<listitem><para><literal>speed_incr</literal> (float) val</para>
-  <para>
-  Add val to the current playback speed.
-  </para></listitem>
-<listitem><para><literal>speed_set</literal> (float) val</para>
-  <para>
-  Set the speed to val.
-  </para></listitem>
-<listitem><para><literal>audio_delay</literal> (float) val</para>
-  <para>
-  Adjust the audio delay of val seconds
-  </para></listitem>
-<listitem><para><literal>quit</literal></para>
-  <para>
-  Quit <application>MPlayer</application>
-  </para></listitem>
-<listitem><para><literal>pause</literal></para>
-  <para>
-  Pause/unpause the playback
-  </para></listitem>
-<listitem><para><literal>grap_frames</literal></para>
-  <para>
-  Somebody know ?
-  </para></listitem>
-<listitem><para><literal>pt_step</literal> (int) val [(int) force=0]</para>
-  <para>
-  Go to next/previous entry in playtree. Val sign tell the direction.  If
-  no other entry is available in the given direction it won't do anything
-  unless force is non 0.
-  </para></listitem>
-<listitem><para><literal>pt_up_step</literal> (int) val [(int) force=0]</para>
-  <para>
-  Like pt_step but it jump to next/previous in the parent list. It's useful
-  to break inner loop in the playtree.
-  </para></listitem>
-<listitem><para><literal>alt_src_step</literal> (int) val</para>
-  <para>
-  When more than one source is available it select the next/previous one
-  (only supported by asx playlist).
-  </para></listitem>
-<listitem><para><literal>sub_delay</literal> (float) val [(int) abs=0]</para>
-  <para>
-  Adjust the subtitles delay of +/- val seconds or set it to val seconds
-  when abs is non zero.
-  </para></listitem>
-<listitem><para><literal>osd</literal> [(int) level=-1]</para>
-  <para>
-  Toggle osd mode or set it to level when level &gt; 0.
-  </para></listitem>
-<listitem><para><literal>volume</literal> (int) dir</para>
-  <para>Increase/decrease volume
-  </para></listitem>
-<listitem><simpara><literal>contrast</literal> (int) val [(int) abs=0]
-  </simpara></listitem>
-<listitem><simpara><literal>brightness</literal> (int) val [(int) abs=0]
-  </simpara></listitem>
-<listitem><simpara><literal>hue</literal> (int) val [(int) abs=0]
-  </simpara></listitem>
-<listitem><para><literal>saturation</literal> (int) val [(int) abs=0]</para>
-  <para>
-  Set/Adjust video parameters. Val range from -100 to 100.
-  </para></listitem>
-<listitem><para><literal>frame_drop</literal> [(int) type=-1]</para>
-  <para>
-  Toggle/Set frame dropping mode.
-  </para></listitem>
-<listitem><para><literal>sub_visibility</literal></para>
-  <para>
-  Adjust subtitles visibility.
-  </para></listitem>
-<listitem><para><literal>sub_pos</literal> (int) val</para>
-  <para>
-  Adjust subtitles position.
-  </para></listitem>
-<listitem><para><literal>vobsub_lang</literal></para>
-  <para>
-  Change the language of VOBsub subtitles.
-  </para></listitem>
-<listitem><para><literal>vo_fullscreen</literal></para>
-  <para>
-  Switch fullscreen mode.
-  </para></listitem>
-<listitem><para><literal>vo_ontop</literal></para>
-  <para>
-  Toggle stay-on-top. Supported by drivers which use X11, except SDL,
-  as well as directx and gl2 under Windows.
-  </para></listitem>
-<listitem><para><literal>tv_step_channel</literal> (int) dir</para>
-  <para>
-  Select next/previous tv channel.
-  </para></listitem>
-<listitem><para><literal>tv_step_norm</literal></para>
-  <para>
-  Change TV norm.
-  </para></listitem>
-<listitem><para><literal>tv_step_chanlist</literal></para>
-  <para>
-  Change channel list.
-  </para></listitem>
-<listitem><simpara><literal>gui_loadfile</literal></simpara></listitem>
-<listitem><simpara><literal>gui_loadsubtitle</literal></simpara></listitem>
-<listitem><simpara><literal>gui_about</literal></simpara></listitem>
-<listitem><simpara><literal>gui_play</literal></simpara></listitem>
-<listitem><simpara><literal>gui_stop</literal></simpara></listitem>
-<listitem><simpara><literal>gui_playlist</literal></simpara></listitem>
-<listitem><simpara><literal>gui_preferences</literal></simpara></listitem>
-<listitem><para><literal>gui_skinbrowser</literal></para>
-  <para>
-  GUI actions
-  </para></listitem>
-</itemizedlist>
-</sect3>
 </sect2>
 
 
@@ -406,10 +212,12 @@ file.
 <sect2 id="slave-mode">
 <title>Slave mode</title>
 <para>
-The slave mode allow you to build simple frontend to
-<application>MPlayer</application>. When enabled (with the
-<option>-slave</option> option) <application>MPlayer</application> will
-read commands separated by new line (\n) from stdin.
+The slave mode allows you to build simple frontends to
+<application>MPlayer</application>. When run with the
+<option>-slave</option> option <application>MPlayer</application> will
+read commands separated by a newline (\n) from stdin.
+The commands are documented in the
+<ulink url="../../tech/slave.txt">slave.txt</ulink> file.
 </para>
 </sect2>
 </sect1>
