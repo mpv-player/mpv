@@ -5125,14 +5125,16 @@ if test "$_vorbis" = yes ; then
     else
 	_tremor_flags=''
     fi
+    _codecmodules="tremor(internal) $_codecmodules"
   elif test "$_tremor" = yes ; then
     _def_tremor='#define TREMOR 1'
     _ld_vorbis='-lvorbisidec'
+    _codecmodules="tremor $_codecmodules"
   else
     _def_tremor='#undef TREMOR'
     _ld_vorbis='-lvorbis -logg'
+    _codecmodules="libvorbis $_codecmodules"
   fi
-  _codecmodules="libvorbis $_codecmodules"
 else
   _def_vorbis='#undef HAVE_OGGVORBIS'
   _def_tremor='#undef TREMOR'
