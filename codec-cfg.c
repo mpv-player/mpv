@@ -252,6 +252,7 @@ static short get_driver(char *s,int audioflag)
 		"roqvideo",
 		"qtrpza",
 		"mpng",
+		"ijpg",
 		NULL
 	};
         char **drv=audioflag?audiodrv:videodrv;

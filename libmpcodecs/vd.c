@@ -41,6 +41,7 @@ extern vd_functions_t mpcodecs_vd_roqvideo;
 extern vd_functions_t mpcodecs_vd_cyuv;
 extern vd_functions_t mpcodecs_vd_nuv;
 extern vd_functions_t mpcodecs_vd_mpng;
+extern vd_functions_t mpcodecs_vd_ijpg;
 extern vd_functions_t mpcodecs_vd_libmpeg2;
 
 vd_functions_t* mpcodecs_vd_drivers[] = {
@@ -77,6 +78,9 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 #endif
 #ifdef HAVE_PNG
         &mpcodecs_vd_mpng,
+#endif
+#ifdef HAVE_JPEG
+	&mpcodecs_vd_ijpg,
 #endif
         &mpcodecs_vd_libmpeg2,
 	NULL

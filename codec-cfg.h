@@ -60,6 +60,7 @@
 #define VFM_ROQVIDEO 19
 #define VFM_QTRPZA 20
 #define VFM_MPNG 21
+#define VFM_IJPG 22
 
 #ifndef GUID_TYPE
 #define GUID_TYPE

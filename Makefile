@@ -55,7 +55,7 @@ else
 VO_LIBS = -Llibvo -lvo
 VO_INC = -Ilibvo
 endif
-V_LIBS = $(X_LIB) $(MP1E_LIB) $(GGI_LIB) $(MLIB_LIB) $(PNG_LIB) $(SDL_LIB) $(SVGA_LIB) $(AA_LIB) $(DIRECTFB_LIB)
+V_LIBS = $(X_LIB) $(MP1E_LIB) $(GGI_LIB) $(MLIB_LIB) $(JPEG_LIB) $(PNG_LIB) $(SDL_LIB) $(SVGA_LIB) $(AA_LIB) $(DIRECTFB_LIB)
 
 AO_LIBS = -Llibao2 -lao2
 A_LIBS = $(ALSA_LIB) $(NAS_LIB) $(MAD_LIB) $(VORBIS_LIB) $(SGIAUDIO_LIB)

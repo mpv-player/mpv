@@ -120,6 +120,8 @@ Optional features:
   --enable-termcap       use termcap database for key codes [autodetect]
   --enable-lirc          enable LIRC (remote control) support [autodetect]
   --enable-gui           enable GUI [disable]
+  --enable-png		 enable png support [autodetect]
+  --enable-jpeg		 enable jpeg support [autodetect]
   --disable-tv           disable TV Interface (tv/dvb grabbers) [enable]
   --disable-tv-v4l       disable Video 4 Linux TV Interface support [autodetect]
   --disable-win32        disable Win32 DLL support [autodetect]
@@ -737,6 +739,7 @@ _xv=auto
 _sdl=auto
 _nas=auto
 _png=auto
+_jpg=auto
 _gl=auto
 _ggi=auto
 _aa=auto
@@ -816,6 +819,8 @@ for ac_option do
   --disable-nas)	_nas=no		;;
   --enable-png)		_png=yes	;;
   --disable-png)	_png=no		;;
+  --enable-jpeg)	_jpg=yes	;;
+  --disable-jpeg)	_jpg=no		;;
   --enable-gl)		_gl=yes		;;
   --disable-gl)		_gl=no		;;
   --enable-ggi)		_ggi=yes	;;
@@ -1978,6 +1983,39 @@ else
   _mkf_png="no"
 fi
 
+echocheck "JPEG support"
+if test "$_jpg" = auto ; then
+  _jpg=no
+cat > $TMPC << EOF
+#include <stdio.h>
+#include <stdlib.h>
+#include <setjmp.h>
+#include <string.h>
+#include <jpeglib.h>
+int main(void) {
+  return 0;
+}
+EOF
+    if cc_check -ljpeg -lm ; then
+      if "$TMPO" >> "$TMPLOG" ; then
+        _jpg=yes
+        echores yes
+      fi
+    else
+      echores no
+    fi
+else
+  echores "$_jpg"
+fi
+if test "$_jpg" = yes ; then
+  _def_jpg='#define HAVE_JPEG 1'
+  _ld_jpg='-ljpeg'
+  _mkf_jpg="yes"
+else
+  _def_jpg='#undef HAVE_JPEG'
+  _mkf_jpg="no"
+fi
+
 
 if test "$_vesa" != no ; then
 echocheck "VESA support"
@@ -3061,6 +3099,7 @@ OPENDIVX = $_opendivx
 VO2 = $_vo2
 
 PNG = $_mkf_png
+JPEG = $_mkf_jpg
 
 EXTRA_LIB = $_ld_extra
 Z_LIB =  $_ld_static $_ld_zlib
@@ -3076,6 +3115,7 @@ GGI_LIB = $_ld_ggi
 MLIB_LIB =  $_ld_mlib
 MLIB_INC = $_inc_mlib
 PNG_LIB = $_ld_png
+JPEG_LIB = $_ld_jpg
 SDL_LIB = $_ld_sdl
 SVGA_LIB = $_ld_svga
 AA_LIB = $_ld_aa
@@ -3358,6 +3398,9 @@ $_def_termios_sys_h
 
 /* enable PNG support */
 $_def_png
+
+/* enable JPEG support */
+$_def_jpg
 
 /* libmad support */
 $_def_mad
