@@ -408,62 +408,6 @@ if [ "$_as" = auto ]; then
   fi
 fi
 
-# check if compiler supports C++ and C++-libs are installed correctly
-cat > $TMPCPP << EOF
-/* very useful C++ test program by atmos */
-#include <string>
-
-class myclass {
-  private:
-    int ret;
-  public:
-    int myreturn(void);
-};
-
-int myclass::myreturn(void) {
-  ret = 0;
-  return ret;
-}
-
-int main(void) {
-  myclass myobject;
-  return myobject.myreturn();
-}
-EOF
-echo $_echo_n "Checking if your C++ compiler '$_cc' works ... $_echo_c"
-if $_cc $TMPCPP -o $TMPO > /dev/null 2>&1 ; then
-  echo "yes"
-  echo $_echo_n "Checking for proper C++ runtime enviroment ... $_echo_c"
-  if $TMPO ; then
-    echo "yes"
-  else
-    echo "no"
-    cat << EOF
-Your C++ runtime enviroment is broken, make sure you correctly install the
-C++ libraries (libstdc++) and that the library path containing them is in
-your (/etc/)ld.so.conf!
-If you don't need DirectShow support, you can also use:
-./configure --disable-dshow <your-normal-configure-options>
-to disable building of the C++ based DirectShow code.
-EOF
-    rm -f $TMPCPP $TMPO
-    exit
-  fi
-else
-  echo "no"
-  cat << EOF
-Your C++ compiler does not support C++, make sure you have enabled it on
-compiler compilation or for binary packages, make sure the appropriate
-packages are installed!
-If you don't need DirectShow support, you can also use:
-./configure --disable-dshow <your-normal-configure-options>
-to disable building of the C++ based DirectShow code.
-EOF
-  rm -f $TMPCPP $TMPO
-  exit
-fi
-rm -f $TMPCPP $TMPO
-
 if [ "$host_arch" = i386 ]; then
     if [ -r /proc/cpuinfo ]; then
 	# linux with /proc mounted, extract cpu information from it
@@ -1555,6 +1499,65 @@ echo "Checking for DVDread support ... $_dvdread"
 echo "Checking for PNG support ... $_png"
 echo "Checking for Win32 DLL support ... $_win32dll"
 echo "Checking for DirectShow ... $_dshow"
+
+# check if compiler supports C++ and C++-libs are installed correctly
+if [ $_win32dll = yes -a $_dshow = yes ] ; then
+cat > $TMPCPP << EOF
+/* very useful C++ test program by atmos */
+#include <string>
+
+class myclass {
+  private:
+    int ret;
+  public:
+    int myreturn(void);
+};
+
+int myclass::myreturn(void) {
+  ret = 0;
+  return ret;
+}
+
+int main(void) {
+  myclass myobject;
+  return myobject.myreturn();
+}
+EOF
+echo $_echo_n "Checking if your compiler '$_cc' supports C++ ... $_echo_c"
+if $_cc $TMPCPP -o $TMPO > /dev/null 2>&1 ; then
+  echo "yes"
+  echo $_echo_n "Checking for proper C++ runtime enviroment ... $_echo_c"
+  if $TMPO ; then
+    echo "yes"
+  else
+    echo "no"
+    cat << EOF
+Your C++ runtime enviroment is broken, make sure you correctly install the
+C++ libraries (libstdc++) and that the library path containing them is in
+your (/etc/)ld.so.conf!
+If you don't need DirectShow support, you can also use:
+./configure --disable-dshow <your-normal-configure-options>
+to disable building of the C++ based DirectShow code.
+EOF
+    rm -f $TMPCPP $TMPO
+    exit
+  fi
+else
+  echo "no"
+  cat << EOF
+Your C++ compiler does not support C++, make sure you have enabled it on
+compiler compilation or for binary packages, make sure the appropriate
+packages are installed!
+If you don't need DirectShow support, you can also use:
+./configure --disable-dshow <your-normal-configure-options>
+to disable building of the C++ based DirectShow code.
+EOF
+  rm -f $TMPCPP $TMPO
+  exit
+fi
+rm -f $TMPCPP $TMPO
+fi
+
 echo "Checking for libavcodec ... $_libavcodec"
 echo "Checking for divx4linux ... $_divx4linux"
 echo "Checking for fastmemcpy ... $_fastmemcpy"
@@ -1658,7 +1661,6 @@ else
 fi
 
 fi
-
 
 
 if [ $_win32dll = yes ]; then
