@@ -118,6 +118,7 @@ static void c_longcount_tsc(long long* z)
 	 "movl %%edx, 4(%%ebx)\n\t"
 	 "popl %%ebx\n\t"
 	 ::"a"(z)
+	 :"edx"
 	);
 }
 static unsigned int c_localcount_notsc()

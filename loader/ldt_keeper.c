@@ -118,6 +118,7 @@ void Setup_FS_Segment(void)
 
     __asm__ __volatile__(
 	"movl %0,%%eax; movw %%ax, %%fs" : : "r" (ldt_desc)
+	:"eax"
     );
 }
 
