@@ -83,6 +83,8 @@ void mplPBDraw( void )
   {
    btnModify( evSetMoviePosition,guiIntfStruct.Position );
    btnModify( evSetVolume,guiIntfStruct.Volume );
+   
+   vo_mouse_autohide=0;
 
    memcpy( mplPBDrawBuffer,appMPlayer.bar.Bitmap.Image,appMPlayer.bar.Bitmap.ImageSize );
    Render( &appMPlayer.barWindow,appMPlayer.barItems,appMPlayer.NumberOfBarItems,mplPBDrawBuffer,appMPlayer.bar.Bitmap.ImageSize );
