@@ -890,7 +890,7 @@ if(!demuxer->seekable){
 	mp_msg(MSGT_SEEK,MSGL_WARN,MSGTR_CantSeekRawAVI);
 #ifdef USE_TV
     else if (demuxer->file_format==DEMUXER_TYPE_TV)
-	mp_msg(MSGT_SEEK,MSGL_WARN,"TV input isn't seekable! (probarly seeking will be for changing channels ;)\n");
+	mp_msg(MSGT_SEEK,MSGL_WARN,"TV input isn't seekable! (probably seeking will be for changing channels ;)\n");
 #endif
     else
 	mp_msg(MSGT_SEEK,MSGL_WARN,MSGTR_CantSeekFile);
