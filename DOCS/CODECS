@@ -48,11 +48,11 @@ Problems:
   asusasv2.dll: loads, image upside-down and very pixelized (no YUY2, but YVYU)
 - ATI VCR1:  (VCR1)
   ativcr1.dll: can't load (16-bit DLL)
+- I263:  (I263)
+  i263_32.drv: segfault
 
 Not tested:
 
-- I263:  (I263)
-  i263_32.drv: not tested (no sample file)
 - Motion Wavelets: (MVW1)
   icmw_32.dll: not tested (no sample file)
 - Indeo Video 3.1:  (IV31)
