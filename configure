@@ -606,12 +606,12 @@ done
 _win32libdir=
 if test "$_win32" = yes ; then
   for I in /usr/local/lib/win32 /usr/lib/win32 ; do
-    if test -d /usr/lib/win32 ; then
+    if test -d "$I" ; then
       _win32libdir="$I"
       break;
     fi;
   done
-fi      
+fi
 
 
 if test -d libavcodec && test -f libavcodec/Makefile ; then
@@ -2644,7 +2644,16 @@ directory or download them from:
 EOF
     fi
   else
-    echo "Ok, found Win32 codecs directory at $_win32libdir."
+    if test "$_win32libdir" ; then	  
+      echo "Ok, found Win32 codecs directory at $_win32libdir."
+    else
+      cat <<EOF
+Failed to find a WIN32 codecs dir at $_win32libdir!
+Create it and copy the DLL files there! (You can get them from your windows
+directory or download them from:
+  ftp://ftp.MPlayerHQ.hu/MPlayer/releases/w32codec.zip
+EOF
+    fi
   fi
 else
   cat <<EOF	
