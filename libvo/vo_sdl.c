@@ -933,11 +933,10 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 static int setup_surfaces(void)
 {
     struct sdl_priv_s *priv = &sdl_priv;
-    float h_scale = ((float) priv->dstwidth) / priv->width;
     float v_scale = ((float) priv->dstheight) / priv->height;
     int surfwidth, surfheight;
 
-    surfwidth = priv->width + (priv->surface->w - priv->dstwidth) / h_scale;
+    surfwidth = priv->width;
     surfheight = priv->height + (priv->surface->h - priv->dstheight) / v_scale;
 
     /* Place the image in the middle of the screen */
@@ -958,15 +957,11 @@ static int setup_surfaces(void)
     else if(priv->overlay)
         SDL_FreeYUVOverlay(priv->overlay);
 
-    if(priv->mode != YUV) {
-		if((priv->format&0xFF) != priv->bpp) {
-            priv->dblit = 0;
-            printf("SDL: using depth/colorspace conversion, this will slow things"
-                   "down (%ibpp -> %ibpp).\n", priv->format&0xFF, priv->bpp);
-            priv->framePlaneRGB = priv->width * priv->height * priv->rgbsurface->format->BytesPerPixel;
-            priv->stridePlaneRGB = priv->width * priv->rgbsurface->format->BytesPerPixel;
-        }
-		else if(strcmp(priv->driver, "x11") == 0) {
+    priv->rgbsurface = NULL;
+    priv->overlay = NULL;
+    
+    if(priv->mode != YUV && (priv->format&0xFF) == priv->bpp) {
+		if(strcmp(priv->driver, "x11") == 0) {
             priv->dblit = 1;
             priv->framePlaneRGB = priv->width * priv->height * priv->surface->format->BytesPerPixel;
             priv->stridePlaneRGB = priv->width * priv->surface->format->BytesPerPixel;
@@ -985,52 +980,28 @@ static int setup_surfaces(void)
 		// 15 bit: r:111110000000000b g:000001111100000b b:000000000011111b
 		// FIXME: colorkey detect based on bpp, FIXME static bpp value, FIXME alpha value correct?
 	    case IMGFMT_RGB15:
-		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, surfwidth, surfheight, 15, 31, 992, 31744, 0))) {
-			printf ("SDL: Couldn't create a RGB surface: %s\n", SDL_GetError());
-			return -1;
-		}
+            priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, surfwidth, surfheight, 15, 31, 992, 31744, 0);
 	    break;	
 	    case IMGFMT_BGR15:
-		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, surfwidth, surfheight, 15, 31744, 992, 31, 0))) {
-			printf ("SDL: Couldn't create a RGB surface: %s\n", SDL_GetError());
-			return -1;
-		}
+            priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, surfwidth, surfheight, 15, 31744, 992, 31, 0);
 	    break;	
 	    case IMGFMT_RGB16:
-		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, surfwidth, surfheight, 16, 31, 2016, 63488, 0))) {
-			printf ("SDL: Couldn't create a RGB surface: %s\n", SDL_GetError());
-			return -1;
-		}
+            priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, surfwidth, surfheight, 16, 31, 2016, 63488, 0);
 	    break;	
 	    case IMGFMT_BGR16:
-		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, surfwidth, surfheight, 16, 63488, 2016, 31, 0))) {
-			printf ("SDL: Couldn't create a RGB surface: %s\n", SDL_GetError());
-			return -1;
-		}
+            priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, surfwidth, surfheight, 16, 63488, 2016, 31, 0);
 	    break;	
 	    case IMGFMT_RGB24:
-		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, surfwidth, surfheight, 24, 0x0000FF, 0x00FF00, 0xFF0000, 0))) {
-			printf ("SDL: Couldn't create a RGB surface: %s\n", SDL_GetError());
-			return -1;
-		}
+            priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, surfwidth, surfheight, 24, 0x0000FF, 0x00FF00, 0xFF0000, 0);
 	    break;	
 	    case IMGFMT_BGR24:
-		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, surfwidth, surfheight, 24, 0xFF0000, 0x00FF00, 0x0000FF, 0))) {
-			printf ("SDL: Couldn't create a RGB surface: %s\n", SDL_GetError());
-			return -1;
-		}
+            priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, surfwidth, surfheight, 24, 0xFF0000, 0x00FF00, 0x0000FF, 0);
 	    break;	
 	    case IMGFMT_RGB32:
-		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, surfwidth, surfheight, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0/*0xFF000000*/))) {
-			printf ("SDL: Couldn't create a RGB surface: %s\n", SDL_GetError());
-			return -1;
-		}
+            priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, surfwidth, surfheight, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0/*0xFF000000*/);
 	    break;	
 	    case IMGFMT_BGR32:
-		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, surfwidth, surfheight, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0/*0xFF000000*/))) {
-			printf ("SDL: Couldn't create a RGB surface: %s\n", SDL_GetError());
-			return -1;
-		}
+            priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, surfwidth, surfheight, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0/*0xFF000000*/);
 	    break;	
 	    default:
 		/* Initialize and create the YUV Overlay used for video out */
@@ -1046,6 +1017,22 @@ static int setup_surfaces(void)
 		priv->stridePlaneYUY = priv->width * 2;
 	}
 	
+    if(priv->mode != YUV) {
+        if(!priv->rgbsurface) {
+            printf ("SDL: Couldn't create a RGB surface: %s\n", SDL_GetError());
+            return -1;
+        }
+
+        priv->dblit = 0;
+
+        if((priv->format&0xFF) != priv->bpp)
+            printf("SDL: using depth/colorspace conversion, this will slow things"
+                   "down (%ibpp -> %ibpp).\n", priv->format&0xFF, priv->bpp);
+
+        priv->framePlaneRGB = priv->width * priv->height * priv->rgbsurface->format->BytesPerPixel;
+        priv->stridePlaneRGB = priv->width * priv->rgbsurface->format->BytesPerPixel;
+    }
+    
     erase_rectangle(0, 0, surfwidth, surfheight);
 
 	return 0;
