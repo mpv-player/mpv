@@ -103,17 +103,23 @@ static int init(int rate,int channels,int format,int flags){
   if (verbose)
     printf("audio_setup: using '%s' dsp device\n", dsp);
 
+#ifdef __linux__
   audio_fd=open(dsp, O_WRONLY | O_NONBLOCK);
+#else
+  audio_fd=open(dsp, O_WRONLY);
+#endif
   if(audio_fd<0){
     printf("Can't open audio device %s: %s  -> no sound\n", dsp, strerror(errno));
     return 0;
   }
 
+#ifdef __linux__
   /* Remove the non-blocking flag */
   if(fcntl(audio_fd, F_SETFL, 0) < 0) {
    printf("Can't make filedescriptor non-blocking: %s -> no sound\n", strerror(errno));
    return 0;
   }  
+#endif
   
   ao_data.bps=channels*rate;
   if(format != AFMT_U8 && format != AFMT_S8)
@@ -217,8 +223,13 @@ static void uninit(){
 // stop playing and empty buffers (for seeking/pause)
 static void reset(){
     uninit();
+#ifdef __linux__
     audio_fd=open(dsp, O_WRONLY | O_NONBLOCK);
     if(audio_fd < 0 || fcntl(audio_fd, F_SETFL, 0) < 0){
+#else
+    audio_fd=open(dsp, O_WRONLY);
+    if(audio_fd < 0){
+#endif
 	printf("\nFatal error: *** CANNOT RE-OPEN / RESET AUDIO DEVICE *** %s\n", strerror(errno));
 	return;
     }
