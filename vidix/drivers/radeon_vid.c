@@ -861,7 +861,8 @@ static unsigned short ati_card_ids[] =
  DEVICE_ATI_RADEON_R300_ND,
  DEVICE_ATI_RADEON_R300_NE,
  DEVICE_ATI_RADEON_R300_NF,
- DEVICE_ATI_RADEON_R300_NG
+ DEVICE_ATI_RADEON_R300_NG,
+ DEVICE_ATI_RADEON_R350_NH
 #endif
 };
 
@@ -993,6 +994,11 @@ int vixProbe( int verbose,int force )
             case DEVICE_ATI_RADEON_R300_NG:
               RadeonFamily = 300;
               break;
+
+            case DEVICE_ATI_RADEON_R350_NH:
+              RadeonFamily = 350;
+              break;
+
             default:
               break;
           }
