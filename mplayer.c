@@ -602,7 +602,7 @@ int gui_no_filename=0;
 #endif
 
     if(vo_plugin_args && vo_plugin_args[0] && strcmp(vo_plugin_args[0],"help")==0){
-      mp_msg(MSGT_CPLAYER, MSGL_INFO, "Available video output pluggins:\n");
+      mp_msg(MSGT_CPLAYER, MSGL_INFO, "Available video output plugins:\n");
       vf_list_plugins();
       printf("\n");
       exit(0);
