@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.59 -->
+<!-- synced with 1.60 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portok</title>
 
@@ -149,6 +149,7 @@ Lásd a <link linkend="macos">Mac OS</link> részt.
 <title>Sun Solaris</title>
 <para>
 Az <application>MPlayer</application> Solaris 2.6 vagy újabb rendszereken működik.
+A SUN audió vezérlőjét a <option>-ao sun</option> kapcsolóval használhatod.
 </para>
 
 <para>
