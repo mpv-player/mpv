@@ -391,10 +391,7 @@ void free_stream(stream_t *s){
 //  printf("\n*** free_stream() called ***\n");
 #ifdef USE_STREAM_CACHE
   if(s->cache_pid) {
-//    kill(s->cache_pid,SIGTERM);
-    kill(s->cache_pid,SIGKILL);
-    waitpid(s->cache_pid,NULL,0);
-    shmem_free(s->cache_data);
+    cache_uninit(s);
   }
 #endif
   switch(s->type) {

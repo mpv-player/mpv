@@ -196,6 +196,16 @@ cache_vars_t* cache_init(int size,int sector){
   return s;
 }
 
+void cache_uninit(stream_t *s) {
+  cache_vars_t* c = s->cache_data;
+  if(!s->cache_pid) return;
+  kill(s->cache_pid,SIGKILL);
+  waitpid(s->cache_pid,NULL,0);
+  if(!c) return;
+  shmem_free(c->buffer,c->buffer_size);
+  shmem_free(s->cache_data,sizeof(cache_vars_t));
+}
+
 static void exit_sighandler(int x){
   // close stream
   exit(0);
