@@ -903,7 +903,9 @@ nop_streaming_seek( int fd, off_t pos, streaming_ctrl_t *stream_ctrl ) {
 int
 nop_streaming_start( stream_t *stream ) {
 	HTTP_header_t *http_hdr = NULL;
-	int fd;
+	char *next_url=NULL;
+	URL_t *rd_url=NULL;
+	int fd,ret;
 	if( stream==NULL ) return -1;
 
 	fd = stream->fd;
@@ -924,10 +926,36 @@ nop_streaming_start( stream_t *stream ) {
 					}
 				}
 				break;
+			// Redirect
+			case 301: // Permanently
+			case 302: // Temporarily
+				ret=-1;
+				next_url = http_get_field( http_hdr, "Location" );
+
+				if (next_url != NULL)
+					rd_url=url_new(next_url);
+
+				if (next_url != NULL && rd_url != NULL) {
+					mp_msg(MSGT_NETWORK,MSGL_STATUS,"Redirected: Using this url instead %s\n",next_url);
+							stream->streaming_ctrl->url=check4proxies(rd_url);
+					ret=nop_streaming_start(stream); //recursively get streaming started 
+				} else {
+					mp_msg(MSGT_NETWORK,MSGL_ERR,"Redirection failed\n");
+					closesocket( fd );
+					fd = -1;
+				}
+				return ret;
+				break;
+			case 401: //Authorization required
+			case 403: //Forbidden
+			case 404: //Not found
+			case 500: //Server Error
 			default:
-				mp_msg(MSGT_NETWORK,MSGL_ERR,"Server return %d: %s\n", http_hdr->status_code, http_hdr->reason_phrase );
+				mp_msg(MSGT_NETWORK,MSGL_ERR,"Server returned code %d: %s\n", http_hdr->status_code, http_hdr->reason_phrase );
 				closesocket( fd );
 				fd = -1;
+				return -1;
+				break;
 		}
 		stream->fd = fd;
 	} else {
