@@ -245,7 +245,7 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
  #ifdef HAVE_GUI
   mdwidth=d_width; mdheight=d_height;
  #endif
- mFullscreen=fullscreen;
+ mFullscreen=fullscreen&1;
 
  switch ( vo_depthonscreen )
   {
@@ -260,7 +260,7 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
  if ( vo_window == None )
   {
 #endif
-   if ( fullscreen )
+   if ( mFullscreen )
     {
      wndWidth=vo_screenwidth;
      wndHeight=vo_screenheight;
@@ -285,7 +285,7 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
      vinfo.visual,xswamask,&xWAttribs );
    vo_hidecursor(mDisplay,mWindow);
 
-   if ( fullscreen ) vo_x11_decoration( mDisplay,mWindow,0 );
+   if ( mFullscreen ) vo_x11_decoration( mDisplay,mWindow,0 );
 
    XGetNormalHints( mDisplay,mWindow,&hint );
    hint.x=wndX; hint.y=wndY;

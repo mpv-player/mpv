@@ -93,7 +93,7 @@ static uint32_t               drwcX,drwcY,dwidth,dheight,mFullscreen;
  * connect to server, create and map window,
  * allocate colors and (shared) memory
  */
-static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format)
+static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
  int screen;
  char *hello = (title == NULL) ? "Xv render" : title;
@@ -110,7 +110,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
  image_width = width;
  image_format=format;
 
- mFullscreen=fullscreen;
+ mFullscreen=flags&1;
  dwidth=d_width; dheight=d_height;
 
  if(getenv("DISPLAY")) name = getenv("DISPLAY");
@@ -133,7 +133,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
    hint.y = 0;
    hint.width = d_width;
    hint.height = d_height;
-   if ( fullscreen )
+   if ( mFullscreen )
     {
      hint.width=vo_screenwidth;
      hint.height=vo_screenheight;
@@ -155,7 +155,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
 
    XSelectInput(mydisplay, mywindow, StructureNotifyMask | KeyPressMask );
    XSetStandardProperties(mydisplay, mywindow, hello, hello, None, NULL, 0, &hint);
-   if ( fullscreen ) vo_x11_decoration( mydisplay,mywindow,0 );
+   if ( mFullscreen ) vo_x11_decoration( mydisplay,mywindow,0 );
    XMapWindow(mydisplay, mywindow);
    XFlush(mydisplay);
    XSync(mydisplay, False);
