@@ -16,9 +16,6 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<tracknr>   Spiele einen VCD-Titel (Video CD) anstelle einer Datei\n"
 #endif
-#ifdef HAVE_LIBCSS
-" -dvdauth <dev>   Benutze DVD-Gerät für die Authentifizierung (für verschl. DVDs)\n"
-#endif
 #ifdef USE_DVDREAD
 " dvd://<titelnr>   Spiele DVD-Titel von Gerät anstelle einer Datei\n"
 " -alang/-slang    Wähle DVD Audio/Untertitel Sprache (2-Zeichen-Ländercode)\n"
@@ -282,9 +279,6 @@ static char help_text[]=
 #define MSGTR_CouldntDetFNo "Konnte die Anzahl der Frames (für absolute Suche) nicht finden.\n"
 #define MSGTR_CantSeekRawAVI "Kann keine RAW .AVI-Streams durchsuchen. (Index erforderlich, versuche es mit der -idx Option.)\n"
 #define MSGTR_CantSeekFile "Kann diese Datei nicht durchsuchen.\n"
-
-#define MSGTR_EncryptedVOB "Verschlüsselte VOB-Datei (wurde ohne libcss Unterstützung kompiliert). Lies DOCS/de/cd-dvd.html.\n"
-#define MSGTR_EncryptedVOBauth "Verschlüsselter Stream, jedoch wurde die Authentifizierung nicht von Dir gefordert.\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Komprimierte Header werden (zur Zeit) nicht unterstützt.\n"
 #define MSGTR_MOVvariableFourCC "MOV: Warnung: Variable FOURCC erkannt!?\n"

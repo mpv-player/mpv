@@ -15,9 +15,6 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<trackno>  legge traccia VCD (Video CD) da dispositivo anziché da file\n"
 #endif
-#ifdef HAVE_LIBCSS
-" -dvdauth <dev>  dispositivo DVD per l\'autenticazione (per dischi criptati)\n"
-#endif
 #ifdef USE_DVDREAD
 " dvd://<titleno>  legge titolo/traccia DVD dal dispositivo anziché da file\n"
 " -alang/-slang   sceglie lingua audio/sottotitoli DVD (cod nazione 2 caratteri)\n"
@@ -277,7 +274,6 @@ static char help_text[]=
 #define MSGTR_CantSeekFile "Impossibile spostarsi in questo file!  \n"
 
 #define MSGTR_EncryptedVOB "File VOB criptato! Leggi il file DOCS/it/cd-dvd.html\n"
-#define MSGTR_EncryptedVOBauth "Flusso criptato di cui non è stata chiesta l\'autenticazione!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Il supporto delle intestazioni compresse richiede ZLIB!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Avvertimento! Rilevato FOURCC variabile!?\n"

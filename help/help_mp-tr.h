@@ -13,9 +13,6 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<trackno>  vcd yi Çalmaya baþlar. (Video CD) VCD track numarasýný girebilirsiniz\n"
 #endif
-#ifdef HAVE_LIBCSS
-" -dvdauth <aygit>  Doðrulamak için bir DVD aygýtý seçin (Þifreli dvdler için)\n"
-#endif
 #ifdef USE_DVDREAD
 " dvd://<baþlýkno>  DVD baþlýðý çal. Baþlýk numarasýný gireblirsiniz.\n"
 " -alang/-slang    DVD dublaj/altyazý dili seçin (2-char country codu tarafýndan)\n"
@@ -202,9 +199,6 @@ static char help_text[]=
 #define MSGTR_CouldntDetFNo "Frame numaralarý bulunamadý (sade seek için)  \n"
 #define MSGTR_CantSeekRawAVI "AVI Biçimleri Raw da aranamadý! (Index zorunlu, -idx  komutuyla deneyin!)  \n"
 #define MSGTR_CantSeekFile "Bu dosyada aranamaz!  \n"
-
-#define MSGTR_EncryptedVOB "Þifreli VOB dosyasý (libcss desteði olmadan oluþturulmuþ)! DOCS/HTML/en/dvd.html ye göz atýn.\n"
-#define MSGTR_EncryptedVOBauth "Þifreli biçim ama giriþ isteði gönderilmemiþ!!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Þýkýþtýrýlmýþ biçimler (þimdilik) deskteklenmiyor!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Dikkat! FOURCC bulundu!?\n"

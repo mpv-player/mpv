@@ -16,9 +16,6 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<spor>  afspil et VCD (Video CD) spor fra et drev i stedet for en fil\n"
 #endif
-#ifdef HAVE_LIBCSS
-" -dvdauth <enhed>  angiv DVD enhed til verificering (krypterede diske)\n"
-#endif
 #ifdef USE_DVDREAD
 " dvd://<titelnr> afspil DVD titel fra et drev i stedet for en fil\n"
 " -alang/-slang   vælg sprog til lyd og undertekster (vha. landekode på 2 tegn)\n"
@@ -282,8 +279,6 @@ static char help_text[]=
 #define MSGTR_CouldntDetFNo "Kunne ikke beregne antallet af billeder (til søgning)  \n"
 #define MSGTR_CantSeekRawAVI "Søgning i rå AVI-filer ikke mulig. (Index kræves, prøv -idx.)  \n"
 #define MSGTR_CantSeekFile "Kan ikke søge i denne fil.\n"
-#define MSGTR_EncryptedVOB "Krypteret VOB fil (ikke kompileret med libcss support)! Se DOCS/HTML/en/dvd.html\n"
-#define MSGTR_EncryptedVOBauth "Krypteret film men autorisation blev ikke påbegyndt.\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Komprimerede headers (endnu) ikke understøttet!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Advarsel! variabel FOURCC!?\n"

@@ -14,9 +14,6 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<n°piste>  lit une piste VCD (Video CD) plutôt qu'un fichier\n"
 #endif
-#ifdef HAVE_LIBCSS
-" -dvdauth <pér>   précise le chemin du lecteur DVD (pour les DVD cryptés)\n"
-#endif
 #ifdef USE_DVDREAD
 " dvd://<n°titre>  joue un titre DVD plutôt qu'un fichier\n"
 " -alang/-slang    sélectionne la langue audio/sous-titres (code pays à 2 lettres)\n"
@@ -280,9 +277,6 @@ static char help_text[]=
 #define MSGTR_CouldntDetFNo "Impossible de déterminer le nombre de trames (pour recherche absolue)\n"
 #define MSGTR_CantSeekRawAVI "Impossible de chercher dans un flux AVI brut ! (Index requis, essayez l'option -idx.)\n"
 #define MSGTR_CantSeekFile "Impossible de chercher dans ce fichier.\n"
-
-#define MSGTR_EncryptedVOB "Fichier VOB crypté (support libcss non compilé !) Lire DOCS/HTML/fr/dvd.html.\n"
-#define MSGTR_EncryptedVOBauth "Flux crypté mais vous n'avez pas demandé d'authentification !\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Les entêtes compressées nécessitent ZLIB !\n"
 #define MSGTR_MOVvariableFourCC "MOV: ATTENTION: FOURCC Variable détecté !?\n"

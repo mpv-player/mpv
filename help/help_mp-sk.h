@@ -15,9 +15,6 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<trackno>  prehra» VCD (video cd) stopu zo zariadenia namiesto zo súboru\n"
 #endif
-#ifdef HAVE_LIBCSS
-" -dvdauth <dev>  urèenie DVD zariadenia pre overenie autenticity (pre kódované disky)\n"
-#endif
 #ifdef USE_DVDREAD
 " dvd://<titleno>  prehra» DVD titul/stopu zo zariadenia (mechaniky) namiesto súboru\n"
 " -alang/-slang   vybra» jazyk DVD zvuku/titulkov(pomocou 2-miest. kódu krajiny)\n"
@@ -272,9 +269,6 @@ static char help_text[]=
 #define MSGTR_CouldntDetFNo "Nemô¾em urèi» poèet snímkov (pre absolútny posun)  \n"
 #define MSGTR_CantSeekRawAVI "Nemô¾em sa posúva» v surových (raw) .AVI prúdoch! (Potrebujem index, zkuste pou¾í» voµbu -idx!)  \n"
 #define MSGTR_CantSeekFile "Nemô¾em sa posúva» v tomto súbore!  \n"
-
-#define MSGTR_EncryptedVOB "Kódovaný VOB súbor (prelo¾ené bez podpory libcss)! Preèítajte si DOCS/HTML/en/dvd.html\n"
-#define MSGTR_EncryptedVOBauth "Zakódovaný prúd, ale overenie autenticity ste nepo¾adovali!!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Komprimované hlavièky nie sú (e¹te) podporované!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Upozornenie! premenná FOURCC detekovaná!?\n"

@@ -12,9 +12,6 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<trackno>   speel VCD (Video CD) track van cdrom in plaats van standaard bestand\n"
 #endif
-#ifdef HAVE_LIBCSS
-" -dvdauth <dev>   specificeer DVD device voor authenticatie (voor geencrypteerde schijven)\n"
-#endif
 #ifdef USE_DVDREAD
 " dvd://<titelnr>   speel DVD titel/track van device in plaats van gewoon bestand\n"
 " -alang/-slang    selecteer DVD audio/ondertitelingstaal (door middel van 2-karakter landcode)\n"
@@ -278,9 +275,6 @@ static char help_text[]=
 #define MSGTR_CouldntDetFNo "Kon het aantal frames niet bepalen (voor absolute verplaatsing)  \n"
 #define MSGTR_CantSeekRawAVI "Kan niet in raw .AVI streams verplaatsen! (index nodig, probeer met de -idx optie!)  \n"
 #define MSGTR_CantSeekFile "Kan niet verplaatsen in dit bestand!  \n"
-
-#define MSGTR_EncryptedVOB "Geencrypteerd VOB bestand (niet gecompileerd met libcss ondersteuning)! Lees DOCS/HTML/en/dvd.html bestand\n"
-#define MSGTR_EncryptedVOBauth "Geencrypteerde stream maar authenticatie was niet aangevraagd door u!!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Gecomprimeerde headers (nog) niet ondersteund!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Waarschuwing! variabele FOURCC gedetecteerd!?\n"

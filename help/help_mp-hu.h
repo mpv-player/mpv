@@ -15,9 +15,6 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<sávszám>  lejátszás VCD (video cd)-sávból, közvetlenül az eszközrõl\n"
 #endif
-#ifdef HAVE_LIBCSS
-" -dvdauth <megh> DVD-meghajtó elérési útjának megadása (kódolt lemezekhez)\n"
-#endif
 #ifdef USE_DVDREAD
 " dvd://<titleno>  a megadott DVD sáv lejátszása, file helyett\n"
 " -alang/-slang   DVD audio/felirat nyelv kiválasztása (2 betûs országkóddal)\n"
@@ -282,9 +279,6 @@ static char help_text[]=
 #define MSGTR_CouldntDetFNo "Nem tudom meghatározni a képkockák számát (abszolut tekeréshez)   \n"
 #define MSGTR_CantSeekRawAVI "Nem tudok nyers .AVI-kban tekerni! (index kell, próbáld az -idx kapcsolóval!)\n"
 #define MSGTR_CantSeekFile "Nem tudok ebben a fileban tekerni!  \n"
-
-#define MSGTR_EncryptedVOB "Kódolt VOB file (libcss támogatás nincs befordítva!) Olvasd el a doksit\n"
-#define MSGTR_EncryptedVOBauth "Kódolt folyam, de nem kértél autentikálást!!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Tömörített fejlécek (még) nincsenek támogatva!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Vigyázat! változó FOURCC detektálva!?\n"

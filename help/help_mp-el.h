@@ -13,9 +13,6 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<αριθμός track>  αναπαραγωγή track VCD (video cd)  από συσκευή αντί για αρχείο\n"
 #endif
-#ifdef HAVE_LIBCSS
-" -dvdauth <dev>  ορίζει τη συσκευή DVD για πιστοποίηση (για κρυπτογραφημένους δίσκους)\n"
-#endif
 #ifdef USE_DVDREAD
 " dvd://<titleno>  αναπαραγωγή του τίτλου/track DVD από τη συσκευή αντί για αρχείο\n"
 " -alang/-slang   επιλογή της γλώσσας του ήχου/υποτίτλων του DVD (2 χαρακτήρες του κωδικού της χώρας)\n"
@@ -278,9 +275,6 @@ static char help_text[]=
 #define MSGTR_CouldntDetFNo "Δεν μπόρεσε να διεκρυνιστεί ο αριθμός των frames (για απόλυτη αναζήτηση)  \n"
 #define MSGTR_CantSeekRawAVI "Μη δυνατη αναζήτηση σε raw .AVI κανάλια! (το index είναι απαραίτητο, δοκιμάστε με την επιλογή -idx!)  \n"
 #define MSGTR_CantSeekFile "Αδύνατη η αναζήτηση σε αυτό το αρχείο!  \n"
-
-#define MSGTR_EncryptedVOB "Κωδικοποιημένο VOB αρχείο (η μετάφραση έγινε χωρίς την libcss υποστήριξη)! Διαβάστε to DOCS/HTML/en/dvd.html\n"
-#define MSGTR_EncryptedVOBauth "Κωδικοποιημένο κανάλι αλλά δεν ζητήθηκε πιστοποίηση!!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Συμπιεσμένες επικεφαλίδες δεν υποστηρίζονται (ακόμα)!\n"
 #define MSGTR_MOVvariableFourCC "MOV: ΠΡΟΕΙΔΟΠΟΙΗΣΗ! μεταβλητό FOURCC βρέθηκε!?\n"

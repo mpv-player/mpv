@@ -18,10 +18,6 @@ static char help_text[]=
 " vcd://<numtrilha> reproduz trilha de VCD (Video CD) do dispositivo em vez de um\n"
 "                 arquivo\n"
 #endif
-#ifdef HAVE_LIBCSS
-" -dvdauth <dev>  especifica o dispositivo de DVD para autenticação (para discos\n"
-"                 encriptados)\n"
-#endif
 #ifdef USE_DVDREAD
 " dvd://<numtítilo> reproduz título de DVD do dispositivo em vez de um arquivo\n"
 " -alang/-slang   seleciona o idioma/legenda do DVD (pelo código país de duas\n"
@@ -288,9 +284,6 @@ static char help_text[]=
 #define MSGTR_CouldntDetFNo "Impossível determinar o número de quadros (para busca absoluta)  \n"
 #define MSGTR_CantSeekRawAVI "Impossível buscar em fluxos de .AVI brutos! (índice requerido, tente com a opção -idx!)  \n"
 #define MSGTR_CantSeekFile "Impossível buscar neste arquivo!  \n"
-
-#define MSGTR_EncryptedVOB "Arquivo VOB encriptado (compilado sem suporte a libcss)! Leia DOCS/HTML/en/dvd.html.\n"
-#define MSGTR_EncryptedVOBauth "Fluxo encriptado mas você não requisitou autenticação!!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Cabeçalhos comprimidos não suportados (ainda)!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Advertência! Variável FOURCC detectada!?\n"

@@ -11,9 +11,6 @@ static char help_text[]=
 " -vo <drv[:dev]> velg video-ut driver og enhet (se '-vo help' for liste)\n"
 " -ao <drv[:dev]> velg lyd-ut driver og enhet (se '-ao help' for liste)\n"
 " vcd://<sporno>   spill VCD (video cd) spor fra enhet i stedet for fil\n"
-#ifdef HAVE_LIBCSS
-" -dvdauth <dev>  spesifiser DVD enhet for autentikasjon (for krypterte disker)\n"
-#endif
 #ifdef USE_DVDREAD
 " dvd://<tittelno> spill DVD tittel/spor fra enhet i stedet for fil\n"
 #endif
@@ -149,9 +146,6 @@ static char help_text[]=
 #define MSGTR_CouldntDetFNo "Kan ikke bestemme antall frames (for absolutt søk)  \n"
 #define MSGTR_CantSeekRawAVI "Kan ikke søke i rå .AVI streams! (index behøves, prøv med -idx valget!)  \n"
 #define MSGTR_CantSeekFile "Kan ikke søke i denne filen!  \n"
-
-#define MSGTR_EncryptedVOB "Kryptert VOB fil (ikke kompilert med libcss støtte)! Les filen DOCS/HTML/en/dvd.html\n"
-#define MSGTR_EncryptedVOBauth "Kryptert stream men autentikasjon var ikke forespurt av deg!!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Komprimerte headere ikke støttet (enda)!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Advarsel! variabel FOURCC detektert!?\n"

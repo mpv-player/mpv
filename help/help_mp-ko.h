@@ -13,9 +13,6 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<trackno>  파일이 아닌 장치로부터 VCD (비디오 CD) 트랙 재생\n"
 #endif
-#ifdef HAVE_LIBCSS
-" -dvdauth <dev>   인증을 위해 DVD 장치 지정 (암호화된 디스크용)\n"
-#endif
 #ifdef USE_DVDREAD
 " dvd://<titleno>  파일이 아닌 장치로부터 DVD 타이틀/트랙 재생\n"
 " -alang/-slang    DVD 오디오/자막 언어 선택 (두 글자의 국가 코드)\n"
@@ -278,9 +275,6 @@ static char help_text[]=
 #define MSGTR_CouldntDetFNo "(절대 탐색을 위한) 프레임 수를 결정할 수 없습니다.\n"
 #define MSGTR_CantSeekRawAVI "raw AVI 스트림에서는 탐색할 수 없습니다. (인덱스가 필요합니다. -idx 스위치로 시도해보세요.)  \n"
 #define MSGTR_CantSeekFile "이 파일에서는 탐색할 수 없습니다.\n"
-
-#define MSGTR_EncryptedVOB "암호화된 VOB 파일입니다 (libcss 지원없이 컴파일되었음)! DOCS/HTML/en/dvd.html을 참조하세요\n"
-#define MSGTR_EncryptedVOBauth "암호화된 스트림이나, 인증 요청을 하지않았습니다!!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: 압축된 헤더는 (아직) 지원되지않습니다.\n"
 #define MSGTR_MOVvariableFourCC "MOV: 경고: 가변적인 FOURCC 발견!?\n"

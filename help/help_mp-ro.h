@@ -10,9 +10,6 @@ static char help_text[]=
 " -vo <drv[:disp]> Ieºirea video: driver&dispozitiv ('-vo help' pentru o listã)\n"
 " -ao <drv[:disp]> Ieºirea audio: driver&dispozitiv ('-ao help' pentru o listã)\n"
 " vcd://<numãr pistã>  foloseºte <pista> de pe dispozitivul VCD în loc de fiºier\n"
-#ifdef HAVE_LIBCSS
-" -dvdauth <disp>  dispozitivul DVD pentru autentificare (la discuri encriptate)\n"
-#endif
 #ifdef USE_DVDREAD
 " dvd://<titlu>  foloseºte titlu/pista de pe dispozitivul DVD în loc de fiºier\n"
 #endif
@@ -133,9 +130,6 @@ static char help_text[]=
 #define MSGTR_CouldntDetFNo "Nu pot determina numãrul de cadre (pentru cãutare absolutã)\n"
 #define MSGTR_CantSeekRawAVI "Nu pot cãuta în fiºiere .AVI neindexate! (am nevoie de index, încercaþi cu -idx!)  \n"
 #define MSGTR_CantSeekFile "Nu pot cãuta în fiºier!  \n"
-
-#define MSGTR_EncryptedVOB "Fiºier VOB encriptat (necompilat cu suport libcss)! Citiþi fiºierul DOCS/HTML/en/dvd.html\n"
-#define MSGTR_EncryptedVOBauth "Fiºier encriptat dar autentificarea nu a fost cerutã de dumneavoastrã.!!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Antetele compresate nu sunt (încã) suportate!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Atenþie! variabilã FOURCC detectatã!?\n"

@@ -13,9 +13,6 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<trackno>  从设备而不是普通文件上播放VCD(video cd)track\n"
 #endif
-#ifdef HAVE_LIBCSS
-" -dvdauth <dev>  为DVD设备设置授权码(用于加密光盘)\n"
-#endif
 #ifdef USE_DVDREAD
 " dvd://<titleno>  从设备而不是普通文件上播放DVD title/track\n"
 " -alang/-slang   选择DVD音轨/字幕的语言(使用两位的国家代码)\n"
@@ -282,7 +279,6 @@ static char help_text[]=
 #define MSGTR_CantSeekFile "无法在这个文件中搜索.  \n"
 
 #define MSGTR_EncryptedVOB "加密的VOB文件! 阅读DOCS/zh/cd-dvd.html.\n"
-#define MSGTR_EncryptedVOBauth "加密流但你没有要求使用授权!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: 压缩的文件头的支持需要ZLIB!\n"
 #define MSGTR_MOVvariableFourCC "MOV: 警告! 检测到可变的FOURCC!?\n"

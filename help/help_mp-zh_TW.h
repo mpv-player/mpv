@@ -15,9 +15,6 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<trackno>   從裝置而並非一般檔案播放 VCD (Video CD) track\n"
 #endif
-#ifdef HAVE_LIBCSS
-" -dvdauth <dev>   指定要授權的 DVD 裝置 (用於加密光碟)\n"
-#endif
 #ifdef USE_DVDREAD
 " dvd://<titleno>   從裝置而並非一般檔案播放 DVD title\n"
 " -alang/-slang    選擇 DVD 音效/字幕的語言 (使用兩位的國家代號)\n"
@@ -284,7 +281,6 @@ static char help_text[]=
 #define MSGTR_CantSeekFile "無法在這檔案中作搜尋。\n"
 
 #define MSGTR_EncryptedVOB "已加密的 VOB 檔﹗請參閱 DOCS/zh/cd-dvd.html。\n"
-#define MSGTR_EncryptedVOBauth "已加密的串流，而你並無要求授權﹗\n"
 
 #define MSGTR_MOVcomprhdr "MOV: 壓縮的標頭的支援需要ZLIB﹗\n"
 #define MSGTR_MOVvariableFourCC "MOV: 警告: 偵測到變動的 FOURCC!?\n"

@@ -14,9 +14,6 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<trackno>   пушта VCD (Video CD) од уред наместо од датотека\n"
 #endif
-#ifdef HAVE_LIBCSS
-" -dvdauth <dev>   го одредува DVD уредот за афтентикација (за криптирани дискови)\n"
-#endif
 #ifdef USE_DVDREAD
 " dvd://<titleno>   пушта DVD наслови од уред наместо од датотека\n"
 " -alang/-slang    избира јазик на DVD аудио/превод (од 2-char код на државата)\n"
@@ -283,7 +280,6 @@ static char help_text[]=
 #define MSGTR_CantSeekFile "Не може да бара во оваа датотека.\n"
 
 #define MSGTR_EncryptedVOB "Криптирана VOB датотека! Прочитајте DOCS/HTML/en/dvd.html.\n"
-#define MSGTR_EncryptedVOBauth "Криптиран проток но не бараше афтентикација!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: За подршка на компресирани хедери потребно е ZLIB!\n"
 #define MSGTR_MOVvariableFourCC "MOV: ПРЕДУПРЕДУВАЊЕ: Откриено е променливо FOURCC!?\n"

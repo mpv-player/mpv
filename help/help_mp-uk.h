@@ -13,9 +13,6 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<номер треку> грати VCD (video cd) трек з пристрою зам╕сть файлу\n"
 #endif
-#ifdef HAVE_LIBCSS
-" -dvdauth <dev>  виб╕р пристрою DVD для авторизац╕╖ (для шифрованих диск╕в)\n"
-#endif
 #ifdef USE_DVDREAD
 " dvd://<номер титр╕в> грати DVD титри/трек з пристрою зам╕сть файлу\n"
 " -alang/-slang   вибрати мову DVD ауд╕о/субтитр╕в (двосимвольний код кра╖ни)\n"
@@ -273,9 +270,6 @@ static char help_text[]=
 #define MSGTR_CouldntDetFNo "Не зм╕г визначити число кадр╕в (для абсолютного перенесення)\n"
 #define MSGTR_CantSeekRawAVI "Не можу перем╕ститися у непро╕ндексованому потоц╕ .AVI! (вимага╓ться ╕ндекс, спробуйте з ключом -idx!)\n"
 #define MSGTR_CantSeekFile "Не можу перем╕щуватися у цьому файл╕!\n"
-
-#define MSGTR_EncryptedVOB "Шифрований VOB файл (mplayer не скомп╕льований з п╕дтримкою libcss)! Див. DOCS/HTML/en/dvd.html\n"
-#define MSGTR_EncryptedVOBauth "Шифрований пот╕к але ви не вимагали авторизац╕╖!!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Стиснут╕ заголовки (поки що) не п╕дтримуються!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Попередження! Знайдено перем╕нний FOURCC!?\n"

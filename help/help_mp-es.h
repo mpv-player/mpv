@@ -17,9 +17,6 @@ static char help_text[]=
 " -vo <driver[:disp]>  Seleccionar driver de salida de vídeo y dispositivo ('-vo help' para obtener una lista).\n"
 " -ao <driver[:disp]>  Seleccionar driver de salida de audio y dispositivo ('-ao help' para obtener una lista).\n"
 " vcd://<numpista>      Reproducir pista de VCD (Video CD) desde un dispositivo en vez de un archivo regular.\n"
-#ifdef HAVE_LIBCSS
-" -dvdauth <disp>      Especificar dispositivo DVD para autenticación (para discos encriptados).\n"
-#endif
 #ifdef USE_DVDREAD
 " dvd://<número>        Reproducir título o pista de DVD desde un dispositivo en vez de un archivo regular.\n"
 " -alang <lengua>      Seleccionar lengua para el audio del DVD (con código de país de dos caracteres. p. ej. 'es').\n"
@@ -276,9 +273,6 @@ static char help_text[]=
 #define MSGTR_CouldntDetFNo "No se puede determinar el número de frames (para una búsqueda absoluta).\n"
 #define MSGTR_CantSeekRawAVI "No se puede avanzar o retroceder en un stream crudo .AVI (se requiere índice, prueba con -idx).\n"
 #define MSGTR_CantSeekFile "No se puede avanzar o retroceder en este archivo.\n"
-
-#define MSGTR_EncryptedVOB "Archivo VOB encriptado (no se compiló con soporte de libcss). Lee DOCS/HTML/es/dvd.html.\n"
-#define MSGTR_EncryptedVOBauth "Stream encriptado pero no pediste autenticación.\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Cabecera comprimida no suportada (por ahora).\n"
 #define MSGTR_MOVvariableFourCC "MOV: Advertencia. ¡Variable FOURCC detectada!\n"

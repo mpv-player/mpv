@@ -15,9 +15,6 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<numer_¶cie¿ki>  odtwórz ¶cie¿kê VCD (Video CD) bezpo¶rednio z napêdu\n"
 #endif
-#ifdef HAVE_LIBCSS
-" -dvdauth <dev>   wybierz napêd DVD do uwierzytelnienia (dla zaszyfrowanych dysków)\n"
-#endif
 #ifdef USE_DVDREAD
 " dvd://<tytu³>    odtwórz tytu³ bezpo¶rednio z p³yty DVD \n"
 " -alang/-slang    wybierz jêzyk d¼wiêku/napisów (dwuznakowy kod kraju)\n"
@@ -285,7 +282,6 @@ static char help_text[]=
 #define MSGTR_CantSeekFile "Nie mogê przeszukiwaæ tego pliku\n"
 
 #define MSGTR_EncryptedVOB "Zaszyfrowany plik VOB! Przeczytaj DOCS/HTML/pl/dvd.html.\n"
-#define MSGTR_EncryptedVOBauth "Zaszyfrowany strumieñ, ale nie za¿±da³e¶ autoryzacji!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Obs³uga skompresowanych nag³ówków wymaga ZLIB!\n"
 #define MSGTR_MOVvariableFourCC "MOV: UWAGA: Zmienna FOURCC wykryta!?\n"

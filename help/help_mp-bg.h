@@ -18,9 +18,6 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<trackno>  Пуска VCD (Видео Копакт Диск) писта, вместо файл\n"
 #endif
-#ifdef HAVE_LIBCSS
-" -dvdauth <dev>  Указва DVD устройство за дешифриране (при кодирани дискове)\n"
-#endif
 #ifdef USE_DVDREAD
 " dvd://<titleno>  Пуска DVD заглавие/пътечка от устройството, вместо от файл\n"
 " -alang/-slang   Избира език на DVD - аудио/субтитри (с 2-буквен код - 'bg')\n"
@@ -244,9 +241,6 @@ static char help_text[]=
 #define MSGTR_CouldntDetFNo "Не мога да определя броя на кадрите (за процентно превъртане)\n"
 #define MSGTR_CantSeekRawAVI "Не мога да превъртам при `сурови` .AVI потоци! (необходим е индекс, опитай с опция -idx!)\n"
 #define MSGTR_CantSeekFile "Не мога превъртам в този файл!\n"
-
-#define MSGTR_EncryptedVOB "Кодиран VOB файл (компилирано е без libcss дешифратор)! Прочети DOCS/HTML/en/dvd.html\n"
-#define MSGTR_EncryptedVOBauth "Кодиран VOB поток, но вие не сте поискали authentication!!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Compressed headers (засега) на се поддържат!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Внимание! Засечен променлив FOURCC код!?\n"

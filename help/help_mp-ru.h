@@ -13,9 +13,6 @@ static char help_text[]=
 #ifdef HAVE_VCD
 " vcd://<номер трека> играть дорожку VCD (video cd) с устройства вместо файла\n"
 #endif
-#ifdef HAVE_LIBCSS
-" -dvdauth <dev>  выбор устройства DVD для авторизации (для шифрованных дисков)\n"
-#endif
 #ifdef USE_DVDREAD
 " dvd://<номер ролика> играть DVD ролик с устройства вместо файла\n"
 " -alang/-slang   выбрать язык аудио/субтитров DVD (двубуквенный код страны)\n"
@@ -283,7 +280,6 @@ static char help_text[]=
 #define MSGTR_CantSeekFile "Не могу перемещаться в этом файле!\n"
 
 #define MSGTR_EncryptedVOB "Шифрованный VOB файл! См. DOCS/HTML/ru/dvd.html\n"
-#define MSGTR_EncryptedVOBauth "Шифрованный поток, но авторизация не была Вами затребована!!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Для поддержки сжатых заголовков необходима zlib!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Предупреждение! Обнаружен переменный FOURCC!?\n"
