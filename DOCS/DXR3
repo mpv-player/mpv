@@ -1,6 +1,10 @@
 DXR3/H+ video/audio output plugins manual by David Holm
 =======================================================
 
+2001-11-29: thanks to Felix Buenemann I managed to
+	    optimize the odivx playback as well as add
+	    support for the rest of the codecs!
+	    
 2001-11-28: ffmpeg replaced with mp1e, divx playback
 	    won't get much faster than this, huge thanks
 	    goes out to Ivan Kalvachev for helping me
@@ -51,15 +55,17 @@ These days, you have two uses for this card:
    the CVS version since most of the time I use the latest features
    which are only available through cvs)
 
- * Second, if you want DivX playback you need to download and install
-   RTE from zapping.sourceforge.net compile and install it BEFORE
-   running configure in the mplayer dir.
+ * Second, if you want to be able to play back anything other than 
+   mpeg12 (vcd/dvd) through your dxr3 you need to install RTE from 
+   zapping.sourceforge.net compile and install it BEFORE running 
+   configure in the mplayer dir. With RTE you should be able to play
+   any movie supported by MPlayer.
    
  * Run <mplayerdir>/configure and make sure that DXR3/H+ support =yes
    and optionally that mp1e rte = yes, if it's = no, please mail me
    your configure.log and I'll fix it.
    
- From here on compilation (of at least my code ;) should go without
+ From here on compilation (of at least my code ;) should go without any
  problems.
 
 
@@ -82,17 +88,12 @@ section will have to specify "-vc mpeg12" if you want to playback
 any of these video types _without_ "-vo dxr3"!
 
 DIVX Notes
-When playing divx's add "-vc odivx"
+When playing divx's add "-vc odivx" for maximum performance.
 I've switched to mp1e from ffmpeg so it should be lightning fast now.
 
 Other codecs:
-Currently they don't work. I'm working on implementing libvo2 which
-will be a much more convenient and faster way of working with
-vo<->codec interaction. If libvo2 takes longer to develop than I
-have estimated perhaps I'll add more codec support to libvo. Otherwise
-you'll just have to wait for libvo2. (there is an implementation
-for other codecs, but I think it's pretty broken currently ;)
-
+No "-vc <codec>" switches should be required as mplayer will autodetect.
+If you find an unsupported codec please contact me!
 
  
 4. Contacting me

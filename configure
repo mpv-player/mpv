@@ -1751,6 +1751,7 @@ if test "$_dxr3" = yes ; then
   _ld_dxr3='-ldxr3'
   _vosrc="$_vosrc vo_dxr3.c"
   _aosrc="$_aosrc ao_dxr3.c"
+  _vomodules="dxr3 $_vomodules"
   _aomodules="dxr3 $_aomodules"
 else
   _def_dxr3='#undef HAVE_DXR3'

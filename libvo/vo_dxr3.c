@@ -4,9 +4,6 @@
  *
  * Copyright (C) 2001 David Holm <dholm@iname.com>
  *
- * libav - MPEG-PS multiplexer, part of ffmpeg
- * Copyright Gerard Lantau  (see http://ffmpeg.sf.net)
- *
  */
 
 #include "fastmemcpy.h"
@@ -124,7 +121,7 @@ init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, u
     s_height = scr_height;
     spubuf = malloc(53220); /* 53220 bytes is the standardized max size of a subpic */
 
-    if( format == IMGFMT_YV12 )
+    if( format == IMGFMT_YV12 || format == IMGFMT_YUY2 )
     {
 #ifdef USE_MP1E
 	int size;
@@ -194,7 +191,7 @@ init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, u
 	}
 	
 	rte_set_input( mp1e_context, RTE_VIDEO, RTE_PUSH, TRUE, NULL, NULL, NULL );
-	rte_set_output( mp1e_context, write_dxr3, NULL, NULL );
+	rte_set_output( mp1e_context, (void*)write_dxr3, NULL, NULL );
 	
 	if( !rte_init_context( mp1e_context ) )
 	{
@@ -205,16 +202,18 @@ init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, u
 
         osd_w=scr_width;
         d_pos_x=(c_width-(int)scr_width)/2;
-        if(d_pos_x<0){
-          s_pos_x=-d_pos_x;d_pos_x=0;
-          osd_w=c_width;
+        if(d_pos_x<0)
+	{
+    	    s_pos_x=-d_pos_x;d_pos_x=0;
+    	    osd_w=c_width;
         } else s_pos_x=0;
     
         osd_h=scr_height;
         d_pos_y=(c_height-(int)scr_height)/2;
-        if(d_pos_y<0){
-          s_pos_y=-d_pos_y;d_pos_y=0;
-          osd_h=c_height;
+        if(d_pos_y<0)
+	{
+    	    s_pos_y=-d_pos_y;d_pos_y=0;
+    	    osd_h=c_height;
         } else s_pos_y=0;
     
         printf("VO: [dxr3] position mapping: %d;%d => %d;%d\n",s_pos_x,s_pos_y,d_pos_x,d_pos_y);
@@ -279,6 +278,27 @@ static uint32_t draw_frame(uint8_t * src[])
 
 	return 0;
     }
+    else if( img_format == IMGFMT_YUY2 )
+    {
+	int w=v_width,h=v_height;
+	unsigned char *s,*dY,*dU,*dV;
+	
+        if(d_pos_x+w>picture_linesize[0]) w=picture_linesize[0]-d_pos_x;
+        if(d_pos_y+h>c_height) h=c_height-d_pos_y;
+	
+	s = src[0]+s_pos_x+s_pos_y*(w*2);
+	dY = picture_data[0]+d_pos_x+d_pos_y*picture_linesize[0];
+	dU = picture_data[1]+(d_pos_x/2)+(d_pos_y/2)*picture_linesize[1];
+	dV = picture_data[2]+(d_pos_x/2)+(d_pos_y/2)*picture_linesize[2];
+	
+	yuy2toyv12( s, dY, dU, dV, w, h, picture_linesize[0], picture_linesize[1], w*2 );
+	
+	mp1e_buffer.data = picture_data[0];
+	mp1e_buffer.time = vo_pts/90000.0;
+	mp1e_buffer.user_data = NULL;
+	rte_push_video_buffer( mp1e_context, &mp1e_buffer );
+	return 0;
+    }
     
     printf( "VO: [dxr3] Error in draw_frame(...)\n" );
     return -1;
@@ -297,7 +317,6 @@ static void flip_page (void)
 
 static uint32_t draw_slice( uint8_t *srcimg[], int stride[], int w, int h, int x0, int y0 )
 {
-    int y;
     unsigned char* s;
     unsigned char* d;
     
@@ -309,38 +328,18 @@ static uint32_t draw_slice( uint8_t *srcimg[], int stride[], int w, int h, int x
         if(x0+w>picture_linesize[0]) w=picture_linesize[0]-x0;
         if(y0+h>c_height) h=c_height-y0;
 
-	// Y
         s=srcimg[0]+s_pos_x+s_pos_y*stride[0];
         d=picture_data[0]+x0+y0*picture_linesize[0];
-	for( y = 0; y < h; y++)
-	{
-	    memcpy(d,s,w);
-	    s+=stride[0];
-	    d+=picture_linesize[0];
-        }
-    
-	w/=2;h/=2;x0/=2;y0/=2;
+	memcpy(d,s,(w*h));
 
-        // U
-        s=srcimg[1]+(s_pos_x/2)+(s_pos_y/2)*stride[1];
-        d=picture_data[1]+x0+y0*picture_linesize[1];
-        for( y = 0; y < h; y++)
-	{
-	    memcpy(d,s,w);
-    	    s+=stride[1];
-    	    d+=picture_linesize[1];
-        }
-    
-        // V
-        s=srcimg[2]+(s_pos_x/2)+(s_pos_y/2)*stride[2];
-        d=picture_data[2]+x0+y0*picture_linesize[2];
-        for(y=0;y<h;y++)
-	{
-	    memcpy(d,s,w);
-	    s+=stride[2];
-	    d+=picture_linesize[2];
-	}
+	s=srcimg[1]+s_pos_x+s_pos_y*stride[1];
+	d=picture_data[1]+(x0/2)+(y0/2)*picture_linesize[1];
+	memcpy(d,s,(w*h)/4);
 
+	s=srcimg[2]+s_pos_x+s_pos_y*stride[2];
+	d=picture_data[2]+(x0/2)+(y0/2)*picture_linesize[2];
+	memcpy(d,s,(w*h)/4);
+	
 	return 0;
 #endif
 	printf( "VO: [dxr3] You need to install mp1e rte, read DOCS/DXR3\n" );
@@ -357,15 +356,16 @@ query_format(uint32_t format)
     if(format==IMGFMT_MPEGPES) return 1;
 #ifdef USE_MP1E
     if(format==IMGFMT_YV12) return 1;
+    if(format==IMGFMT_YUY2) return 1;
 #else
-    if(format==IMGFMT_YV12) {printf("VO: [dxr3] You need to compile with mp1e rte to play this file! (http://zapping.sf.net)\n" ); return 0;}
+    if(format==IMGFMT_YV12) {printf("VO: [dxr3] You need to compile with mp1e rte to play this file! Read DOCS/DXR3\n" ); return 0;}
+    if(format==IMGFMT_YUY2) {printf("VO: [dxr3] You need to compile with mp1e rte to play this file! Read DOCS/DXR3\n" ); return 0;}
 #endif
-    else printf( "If this is a DivX add \"-vc odivx\" or if it is an mpeg add \"-vc mpegpes\" otherwise this video format is currently unsupported\n" );
+    else printf( "VO: [dxr3] Format unsupported, mail dholm@iname.com\n" );
     return 0;
 }
 
-static void
-uninit(void)
+static void uninit(void)
 {
     printf( "VO: [dxr3] Uninitializing\n" );
 #ifdef USE_MP1E
