@@ -3313,7 +3313,7 @@ grayscale only decoding (a bit faster than with color)
 .IPs "idct=<0\-99> (see \-lavcopts)"
 For best decoding quality use the same IDCT algorithm for decoding and encoding.
 This may come at a price in accuracy, though.
-.IPs lowres=<number>
+.IPs lowres=<number>[,<w>]
 Decode at lower resolutions.
 Low resolution decoding is not supported by all codecs, and it will
 often result in ugly artifacts.
@@ -3328,6 +3328,9 @@ This is not a bug, but a side effect of not decoding at full resolution.
 .br
 3: 1/8 resolution
 .REss
+If <w> is specified lowres decoding will be used only if the width of the
+video is major than or equal to <w>.
+
 .IPs "sb=<number> (MPEG-2 only)"
 Skip the given number of macroblock rows at the bottom.
 .IPs "st=<number> (MPEG-2 only)"
