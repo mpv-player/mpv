@@ -379,10 +379,12 @@ if(i>=CODECS_MAX_OUTFMT){
 }
 sh_video->outfmtidx=i;
 
-if(out_fmt==IMGFMT_YV12 && vo_w!=0 && vo_h!=0)
+if(out_fmt==IMGFMT_YV12 && (vo_w!=0 || vo_h!=0))
 {
 	scale_srcW= sh_video->disp_w;
 	scale_srcH= sh_video->disp_h;
+	if(!vo_w) vo_w=sh_video->disp_w;
+	if(!vo_h) vo_h=sh_video->disp_h;
 }
 else
 {
