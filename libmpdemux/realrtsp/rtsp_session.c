@@ -93,7 +93,7 @@ connect:
     else
       server=strdup("unknown");
   }
-  if (strstr(server,"Real"))
+  if (strstr(server,"Real") || strstr(server,"Helix"))
   {
     /* we are talking to a real server ... */
 
