@@ -13,12 +13,15 @@
  * 11/04/02: Added a compile option so you can watch the film with the console
  * as the background, or not.
  * 13/04/02: Fix rough OSD stuff by rendering it straight onto the output
- * buffer. Added double-buffering, as such had to remove the non-blanking
- * console mode. Supports hardware zoom/reduce zoom modes.
+ * buffer. Added double-buffering. Supports hardware zoom/reduce zoom modes.
  *
  * Hints and tricks:
  * - Use -dr to get direct rendering
  * - Use -vop yuy2 to get yuy2 rendering, *MUCH* faster than yv12
+ * - To get a black background and nice smooth OSD, use -double
+ * - To get the console as a background, but with scaled OSD, use -nodouble
+ * - The driver supports both scaling and shrinking the image using the -x and
+ *   -y options on the mplayer commandline.
  */
 
 #include <stdio.h>
@@ -72,7 +75,7 @@ static volatile voodoo_io_reg *reg_IO;
 static voodoo_2d_reg *reg_2d;
 static voodoo_yuv_reg *reg_YUV;
 static struct YUV_plane *YUV;
-static void (*alpha_func)();
+static void (*alpha_func)(), (*alpha_func_double)();
 
 static uint32_t preinit(const char *arg)
 {
@@ -152,8 +155,10 @@ static void uninit(void)
 
 static void clear_screen()
 {
-	memset(vidpage, 0, screenwidth * screenheight * screendepth);
-	memset(hidpage, 0, screenwidth * screenheight * screendepth);
+	if(vo_doublebuffering) {
+		memset(vidpage, 0, screenwidth * screenheight * screendepth);
+		memset(hidpage, 0, screenwidth * screenheight * screendepth);
+	}
 }
 
 /* Setup output screen dimensions etc */
@@ -208,19 +213,19 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	case 16:
 		screendepth = 2;
 		vid_voodoo_format = VOODOO_BLT_FORMAT_16;
-		alpha_func = vo_draw_alpha_rgb16;
+		alpha_func_double = vo_draw_alpha_rgb16;
 		break;
 
 	case 24:
 		screendepth = 3;
 		vid_voodoo_format = VOODOO_BLT_FORMAT_24;
-		alpha_func = vo_draw_alpha_rgb24;
+		alpha_func_double = vo_draw_alpha_rgb24;
 		break;
 
 	case 32:
 		screendepth = 4;
 		vid_voodoo_format = VOODOO_BLT_FORMAT_32;
-		alpha_func = vo_draw_alpha_rgb32;
+		alpha_func_double = vo_draw_alpha_rgb32;
 		break;
 
 	default:
@@ -233,6 +238,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	/* Some defaults here */
 	in_voodoo_format = VOODOO_BLT_FORMAT_YUYV;
 	in_depth = 2;
+	alpha_func = vo_draw_alpha_yuy2;
 
 	switch(in_format) {
 	case IMGFMT_YV12:
@@ -243,16 +249,19 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 
 	case IMGFMT_BGR16:
 		in_voodoo_format = VOODOO_BLT_FORMAT_16;
+		alpha_func = vo_draw_alpha_rgb16;
 		break;
 
 	case IMGFMT_BGR24:
 		in_depth = 3;
 		in_voodoo_format = VOODOO_BLT_FORMAT_24;
+		alpha_func = vo_draw_alpha_rgb24;
 		break;
 
 	case IMGFMT_BGR32:
 		in_depth = 4;
 		in_voodoo_format = VOODOO_BLT_FORMAT_32;
+		alpha_func = vo_draw_alpha_rgb32;
 		break;
 
 	default:
@@ -263,8 +272,13 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	in_voodoo_format |= in_width * in_depth;
 
 	/* Linux lives in the first frame */
-	vidpageoffset = screenwidth * screenheight * screendepth;
-	hidpageoffset = vidpageoffset + screenwidth * screenheight * screendepth;
+	if(vo_doublebuffering) {
+		vidpageoffset = screenwidth * screenheight * screendepth;
+		hidpageoffset = vidpageoffset + screenwidth * screenheight * screendepth;
+	} else {
+		vidpageoffset = hidpageoffset = 0;		/* Console background */
+	}
+
 	inpageoffset = hidpageoffset + screenwidth * screenheight * screendepth;
 
 	if(inpageoffset + in_width * in_depth * in_height > fb_finfo.smem_len) {
@@ -289,11 +303,26 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	return 0;
 }
 
-static void draw_alpha(int x, int y, int w, int h, unsigned char *src,
+/* Double-buffering draw_alpha */
+static void draw_alpha_double(int x, int y, int w, int h, unsigned char *src,
 		unsigned char *srca, int stride)
 {
 	char *dst = (char *)vidpage + ((y + vidy) * screenwidth + x + vidx) * screendepth;
-	alpha_func(w, h, src, srca, stride, dst, screenwidth * screendepth);
+	alpha_func_double(w, h, src, srca, stride, dst, screenwidth * screendepth);
+}
+
+/* Single-buffering draw_alpha */
+static void draw_alpha(int x, int y, int w, int h, unsigned char *src,
+		unsigned char *srca, int stride)
+{
+	char *dst = (char *)inpage + (y * in_width + x) * in_depth;
+	alpha_func(w, h, src, srca, stride, dst, in_width * in_depth);
+}
+
+static void draw_osd(void)
+{
+	if(!vo_doublebuffering)
+		vo_draw_text(in_width, in_height, draw_alpha);
 }
 
 /* Render onto the screen */
@@ -302,14 +331,16 @@ static void flip_page(void)
 	voodoo_2d_reg regs = *reg_2d;		/* Copy the regs */
 	int i = 0;
 
-	/* Flip to an offscreen buffer for rendering */
-	uint32_t t = vidpageoffset;
-	void *j = vidpage;
+	if(vo_doublebuffering) {
+		/* Flip to an offscreen buffer for rendering */
+		uint32_t t = vidpageoffset;
+		void *j = vidpage;
 
-	vidpage = hidpage;
-	hidpage = j;
-	vidpageoffset = hidpageoffset;
-	hidpageoffset = t;
+		vidpage = hidpage;
+		hidpage = j;
+		vidpageoffset = hidpageoffset;
+		hidpageoffset = t;
+	}
 
 	reg_2d->commandExtra = 0;
 	reg_2d->clip0Min = 0;
@@ -355,7 +386,8 @@ static void flip_page(void)
 	reg_2d->command = 0;
 
 	/* Render any text onto this buffer */
-	vo_draw_text(vidwidth, vidheight, draw_alpha);
+	if(vo_doublebuffering)
+		vo_draw_text(vidwidth, vidheight, draw_alpha_double);
 
 	/* And flip to the new buffer! */
 	reg_IO->vidDesktopStartAddr = vidpageoffset;
@@ -463,6 +495,5 @@ static uint32_t control(uint32_t request, void *data, ...)
 }
 
 /* Dummy funcs */
-static void check_events(void) { }
-static void draw_osd(void) {}
+static void check_events(void) {}
 static const vo_info_t* get_info(void) { return &vo_info; }
