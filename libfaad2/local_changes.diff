@@ -1,0 +1,107 @@
+--- libfaad/bits.h	2004-03-11 14:32:39.000000000 +0100
++++ libfaad2/bits.h	2004-06-24 10:47:02.000000000 +0200
+@@ -58,7 +60,7 @@
+ 
+ #if defined (_WIN32) && !defined(_WIN32_WCE) && !defined(__MINGW32__)
+ #define BSWAP(a) __asm mov eax,a __asm bswap eax __asm mov a, eax
+-#elif defined(LINUX) || defined(DJGPP) || defined(__MINGW32__)
++#elif defined(LINUX) || defined(DJGPP)
+ #define BSWAP(a) __asm__ ( "bswapl %0\n" : "=r" (a) : "0" (a) )
+ #else
+ #define BSWAP(a) \
+diff -u libfaad/common.h /usr/src/mplayer/main/libfaad2/common.h
+--- libfaad/common.h	2004-06-30 14:45:56.000000000 +0200
++++ libfaad2/common.h	2004-10-19 03:16:03.000000000 +0200
+@@ -32,10 +34,13 @@
+ extern "C" {
+ #endif
+ 
+-#ifdef HAVE_CONFIG_H
+-#  include "../config.h"
++/* Allow build on Cygwin*/
++#if defined(__CYGWIN__)
++#define __STRICT_ANSI__
+ #endif
+ 
++#include "../config.h"
++
+ #define INLINE __inline
+ #if 0 //defined(_WIN32) && !defined(_WIN32_WCE)
+ #define ALIGN __declspec(align(16))
+@@ -117,6 +122,9 @@
+ # ifdef MAIN_DEC
+ #  undef MAIN_DEC
+ # endif
++# ifdef SBR_DEC
++#  undef SBR_DEC
++# endif
+ #endif // FIXED_POINT
+ 
+ #ifdef DRM
+@@ -157,6 +165,7 @@
+ 
+ #include <stdlib.h>
+ 
++#if 0
+ typedef unsigned __int64 uint64_t;
+ typedef unsigned __int32 uint32_t;
+ typedef unsigned __int16 uint16_t;
+@@ -165,11 +174,31 @@
+ typedef __int32 int32_t;
+ typedef __int16 int16_t;
+ typedef __int8  int8_t;
++#else
++#include <inttypes.h>
++#endif
++
+ typedef float float32_t;
+ 
+ 
+ #else
+ 
++/* #undef HAVE_FLOAT32_T */
++/* Define if you have the <inttypes.h> header file. */
++#define HAVE_INTTYPES_H 1
++
++/* Define if you have the `memcpy' function. */
++#define HAVE_MEMCPY 1
++
++/* Define if you have the <stdint.h> header file. */
++#define HAVE_STDINT_H 1
++
++/* Define if you have the `strchr' function. */
++#define HAVE_STRCHR 1
++
++/* Define if you have the ANSI C header files. */
++#define STDC_HEADERS 1
++
+ #include <stdio.h>
+ #if HAVE_SYS_TYPES_H
+ # include <sys/types.h>
+@@ -311,7 +340,7 @@
+         }
+         return i;
+     }
+-  #elif (defined(__i386__) && defined(__GNUC__))
++  #elif (defined(__i386__) && defined(__GNUC__)) && !defined(__MINGW32__)
+     #define HAS_LRINTF
+     // from http://www.stereopsis.com/FPU.html
+     static INLINE int lrintf(float f)
+@@ -340,6 +369,8 @@
+ 
+   #else
+ 
++#include <math.h>
++
+ #ifdef HAVE_LRINTF
+ #  define HAS_LRINTF
+ #  define _ISOC9X_SOURCE 1
+@@ -348,8 +379,6 @@
+ #  define __USE_ISOC99   1
+ #endif
+ 
+-    #include <math.h>
+-
+ #ifdef HAVE_SINF
+ #  define sin sinf
+ #error
