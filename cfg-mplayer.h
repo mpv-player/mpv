@@ -253,7 +253,7 @@ static config_t mplayer_opts[]={
 	{"saturation",&vo_gamma_saturation, CONF_TYPE_INT, CONF_RANGE, -1000, 1000, NULL},
 	{"contrast",&vo_gamma_contrast, CONF_TYPE_INT, CONF_RANGE, -1000, 1000, NULL},
 	{"hue",&vo_gamma_hue, CONF_TYPE_INT, CONF_RANGE, -1000, 1000, NULL},
-	{"red_instense",&vo_gamma_red_intense, CONF_TYPE_INT, CONF_RANGE, -1000, 1000, NULL},
+	{"red_intense",&vo_gamma_red_intense, CONF_TYPE_INT, CONF_RANGE, -1000, 1000, NULL},
 	{"green_intense",&vo_gamma_green_intense, CONF_TYPE_INT, CONF_RANGE, -1000, 1000, NULL},
 	{"blue_intense",&vo_gamma_blue_intense, CONF_TYPE_INT, CONF_RANGE, -1000, 1000, NULL},
 #endif
