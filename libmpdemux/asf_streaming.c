@@ -370,31 +370,32 @@ asf_http_streaming_type(char *content_type, char *features, HTTP_header_t *http_
 		// so we could used mime type to know the stream type,
 		// but guess what? All of them are not well configured.
 		// So we have to check for an asf header :(, but it works :p
-		if( asf_header_check( http_hdr )==0 ) {
-			printf("=====> ASF Plain text\n");
-			return ASF_PlainText_e;
+		if( http_hdr->body_size>sizeof(ASF_obj_header_t) ) {
+			if( asf_header_check( http_hdr )==0 ) {
+				printf("=====> ASF Plain text\n");
+				return ASF_PlainText_e;
+			} else {
+				printf("=====> ASF Redirector\n");
+				return ASF_Redirector_e;
+			}
 		} else {
-			printf("=====> ASF Redirector\n");
-			return ASF_Redirector_e;
+			if(	(!strcasecmp(content_type, "audio/x-ms-wax")) ||
+				(!strcasecmp(content_type, "audio/x-ms-wma")) ||
+				(!strcasecmp(content_type, "video/x-ms-asf")) ||
+				(!strcasecmp(content_type, "video/x-ms-afs")) ||
+				(!strcasecmp(content_type, "video/x-ms-wvx")) ||
+				(!strcasecmp(content_type, "video/x-ms-wmv")) ||
+				(!strcasecmp(content_type, "video/x-ms-wma")) ) {
+				printf("=====> ASF Redirector\n");
+				return ASF_Redirector_e;
+			} else if( !strcasecmp(content_type, "text/plain") ) {
+				printf("=====> ASF Plain text\n");
+				return ASF_PlainText_e;
+			} else {
+				printf("=====> ASF unknown content-type: %s\n", content_type );
+				return ASF_Unknown_e;
+			}
 		}
-/*
-		if(	(!strcasecmp(content_type, "audio/x-ms-wax")) ||
-			(!strcasecmp(content_type, "audio/x-ms-wma")) ||
-			(!strcasecmp(content_type, "video/x-ms-asf")) ||
-			(!strcasecmp(content_type, "video/x-ms-afs")) ||
-			(!strcasecmp(content_type, "video/x-ms-wvx")) ||
-			(!strcasecmp(content_type, "video/x-ms-wmv")) ||
-			(!strcasecmp(content_type, "video/x-ms-wma")) ) {
-			printf("=====> ASF Redirector\n");
-			return ASF_Redirector_e;
-		} else if( !strcasecmp(content_type, "text/plain") ) {
-			printf("=====> ASF Plain text\n");
-			return ASF_PlainText_e;
-		} else {
-			printf("=====> ASF unknown content-type: %s\n", content_type );
-			return ASF_Unknown_e;
-		}
-*/
 	}
 	return ASF_Unknown_e;
 }
