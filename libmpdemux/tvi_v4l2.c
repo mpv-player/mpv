@@ -77,7 +77,7 @@ typedef struct {
     struct map			*map;
     int				mapcount;
     int				frames;
-    long long                   first_frame;
+    volatile long long          first_frame;
     long long                   curr_frame;
     /* audio video interleaving ;-) */
     volatile int		streamon;
@@ -1395,7 +1395,9 @@ static void *video_grabber(void *data)
 
 	/* store the timestamp of the very first frame as reference */
 	if (!priv->frames++) {
+	    pthread_mutex_lock(&priv->skew_mutex);
 	    priv->first_frame = (long long)1e6*buf.timestamp.tv_sec + buf.timestamp.tv_usec;
+	    pthread_mutex_unlock(&priv->skew_mutex);
 	}
 	priv->curr_frame = (long long)buf.timestamp.tv_sec*1e6+buf.timestamp.tv_usec;
 //	fprintf(stderr, "idx = %d, ts = %lf\n", buf.index, (double)(priv->curr_frame) / 1e6);
@@ -1610,6 +1612,12 @@ static void *audio_grabber(void *data)
 	priv->audio_skew_measure_time = current_time;
 	prev_skew = priv->audio_skew;
 	priv->audio_skew -= priv->audio_start_time - priv->first_frame;
+
+	// re-adjust the skew to zero after first few audio frames
+	if (priv->audio_recv_blocks_total == priv->aud_skew_cnt) {
+	    priv->audio_start_time += priv->audio_skew;
+	}
+
 	pthread_mutex_unlock(&priv->skew_mutex);
 
 //	fprintf(stderr, "audio_skew = %lf, delta = %lf\n", (double)priv->audio_skew/1e6, (double)priv->audio_skew_delta_total/1e6);
