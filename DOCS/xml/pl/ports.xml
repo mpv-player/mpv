@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.36 -->
+<!-- synced with 1.37 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -326,7 +326,7 @@ wolna. Używaj SDL.
 <para>Sascha Sommer wydaje, od czasu do czasu, oficjalne paczki dla Windowsa,
   Joey Parrish tworzy nieoficjalne paczki z instalatorem.
   Poszukaj ich w sekcji Windows
-  <ulink url="http://www.mplayerhq.hu/homepage/projects.html">na stronie naszych
+  <ulink url="http://www.mplayerhq.hu/homepage/projects.html#windows">na stronie naszych
   projektów</ulink>.</para>
 
 
