@@ -64,7 +64,7 @@ static char help_text[]=
 #define MSGTR_CantLoadSub "Kan ondertitels niet lezen: %s\n"
 #define MSGTR_DumpSelectedStreamMissing "dump: FATAL: geselecteerde stream ontbreekt!\n"
 #define MSGTR_CantOpenDumpfile "Kan dump bestand niet openen!!!\n"
-#define MSGTR_CoreDumped "Debuginformatie weggeschreven naar bestand core\n"
+#define MSGTR_CoreDumped "Core dumped ;)\n"
 #define MSGTR_FPSnotspecified "FPS niet gespecificeerd (of foutief) in de header! Gebruik de optie -fps!\n"
 #define MSGTR_TryForceAudioFmtStr "Probeer audio codec driver familie %s te forceren...\n"
 #define MSGTR_CantFindAudioCodec "Kan codec voor audio format 0x%X niet vinden!\n"
