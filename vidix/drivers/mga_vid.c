@@ -1461,7 +1461,11 @@ int 	vixPlaybackSetEq( const vidix_video_eq_t * eq)
 	if(contrast < 0)   contrast = 0;
 	if(contrast > 255) contrast = 255;
 	beslumactl = ((brightness & 0xff) << 16) | (contrast & 0xff);
+
+    if (is_g400)
 	writel(beslumactl,mga_mmio_base + BESLUMACTL);
+    else
+	printf("[mga] equalizer isn't supported with G200\n");
     return 0;
 }
 
