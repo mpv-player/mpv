@@ -2204,7 +2204,7 @@ manually work around encoder bugs:
 .br
 2 (msmpeg4v3): some old lavc generated msmpeg4v3 files (no autodetect)
 .br
-4 (mpeg4): xvid interlacing bug (autodetected if fourcc==XVIX) 
+4 (mpeg4): XviD interlacing bug (autodetected if fourcc==XVIX) 
 .br
 8 (mpeg4): UMP4 (autodetected if fourcc==UMP4)
 .br
@@ -2212,7 +2212,7 @@ manually work around encoder bugs:
 .br
 32 (mpeg4): illegal vlc bug (autodetected per fourcc)
 .br
-64 (mpeg4): XVID and DIVX qpel bug (autodetected per fourcc/ver)
+64 (mpeg4): XviD and DivX qpel bug (autodetected per fourcc/ver)
 .br
 128 (mpeg4): old standard qpel (autodetected per fourcc/ver)
 .br
@@ -2404,10 +2404,10 @@ Specify additional parameters when decoding with XviD.
 .PD 0
 .RSs
 .IPs deblock-chroma
-Activate xvid internal postprocessing filter: chroma deblock filter.
+Activate XviD internal postprocessing filter: chroma deblock filter.
 See also \-vf pp, which is faster than XviD's own filter.
 .IPs deblock-luma
-Activate xvid internal postprocessing filter: luma deblock filter.
+Activate XviD internal postprocessing filter: luma deblock filter.
 See also \-vf pp, which is faster than XviD's own filter.
 .IPs dr2\ \ 
 Activate direct rendering method 2.
@@ -3741,6 +3741,31 @@ CBR only, VBR ignores this as it puts each packet in a new chunk.
 .B \-audio-preload <0.0\-2.0>
 Sets up audio buffering time interval (default: 0.5s).
 .TP
+.B \-aviaspect <w:h>
+Encode an additional AVI header with aspect ratio.
+This is a different method than the "aspect=..." option of
+libavcodec or XviD, and is prioritized over it during playback,
+because this header is processed first.
+
+This option is included for completeness.
+Some players can understand it, while they do not understand the
+aspect headers produced by the codec.
+If you wish to target such a player, use this option.
+Generally, encoding AVIs with square pixels is still the best
+choice, so aspect headers should be avoided.
+Only use this option if you know what you are doing.
+Avoid using it together with the aspect option of the codec, as it
+could give unpredictable results.
+
+.I EXAMPLE:
+.PD 0
+.RSs
+.IPs "\-aviaspect 16:9"
+will add a header specifying 16:9 aspect ratio.
+.RE
+.PD 1
+.
+.TP
 .B \-endpos <[[hh:]mm:]ss[.ms]|size[b|kb|mb]> (see \-ss and \-sb option too)
 Stop encoding at given time or byte position.
 Can be specified in many ways:
@@ -3770,30 +3795,6 @@ Can be used to override the video fourcc of the output file.
 .RSs
 .IPs "\-ffourcc div3"
 will have the output file contain 'div3' as video fourcc.
-.RE
-.PD 1
-.
-.TP
-.B \-aviaspect <w:h>
-Encode an additional AVI header with aspect ratio. This is a different
-method than the "aspect=..." option of libavcodec or xvid, and is
-prioritized over it during playback, because this header is processed
-first.
-
-This option is included for completeness. Some players can understand
-it, while they do not understand the aspect headers produced by the
-codec. If you wish to target such a player, use this
-option. Generally, encoding AVIs with square pixels is still the best
-choice, so aspect headers should be avoided. Use this option only if
-you know what you are doing. Avoid using it together with
-the aspect option of the codec, as it could bring unpredictable
-results.
-
-.I EXAMPLE:
-.PD 0
-.RSs
-.IPs "\-aviaspect 16:9"
-will add a header specifying 16:9 aspect ratio.
 .RE
 .PD 1
 .
@@ -3930,8 +3931,8 @@ Where <codec> may be: lavc, xvidenc, divx4, lame
 .
 .
 .SS divx4 (\-divx4opts)
-divx4 is obsolete and only supported for completeness.
-For details about divx4 options, read the source, most options are not
+DivX4 is obsolete and only supported for completeness.
+For details about DivX4 options, read the source, most options are not
 described here.
 .TP
 .B help\ \ \ 
@@ -5149,10 +5150,10 @@ create a bitstream that can be decoded delay-free (default=off)
 .br
 .I WARNING:
 this will generate an illegal bitstream, and WILL NOT be 
-decodeable by ISO-MPEG4 decoders except divx/libavcodec/xvid
+decodeable by ISO-MPEG4 decoders except DivX/libavcodec/XviD
 .br
 .I WARNING:
-this will also store a fake divx version in the file so the bug
+this will also store a fake DivX version in the file so the bug
 autodetection of some decoders might be confused
 .TP
 .B divx5bvop
