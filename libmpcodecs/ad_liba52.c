@@ -48,7 +48,9 @@ while(1){
 	if(c<0) return -1; /* EOF*/
         sh_audio->a_in_buffer[sh_audio->a_in_buffer_len++]=c;
     }
+#ifndef WORDS_BIGENDIAN
     if(sh_audio->format!=0x2000) swab(sh_audio->a_in_buffer,sh_audio->a_in_buffer,8);
+#endif
     length = a52_syncinfo (sh_audio->a_in_buffer, &flags, &sample_rate, &bit_rate);
     if(length>=7 && length<=3840) break; /* we're done.*/
     /* bad file => resync*/
