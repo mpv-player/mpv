@@ -532,7 +532,7 @@ Specify the VobSub subtitle id. Valid values range from 0 to 31.
 
 .SH "AUDIO OUTPUT OPTIONS (MPLAYER ONLY)"
 .TP
-.B \-abs <value>  [OBSOLETE]
+.B \-abs <value>  (OBSOLETE)
 Override audio driver/card buffer size detection, -ao oss only
 .TP
 .B \-ao <driver>[:<device>]
@@ -790,9 +790,6 @@ Turns off lirc support
 .B \-nortc
 Turns off usage of /dev/rtc (real-time clock)
 .TP
-.B \-noskip
-Don't skip frames
-.TP
 .B \-playlist <file>
 Play files according to this filelist (1 file/row or Winamp or ASX format).
 .TP
@@ -850,15 +847,20 @@ Available options:
                      rate control reaction ratio
   crispness=<0\-100>  specify crispness/smoothness
 .TP
-.B \-endpos <time>
-Stop encoding at given time. Can be specified in many was :
+.B \-endpos <time|byte\ position>
+Stop encoding at given time or byte position. Can be specified in many was :
 
     -endpos 56       encode only 56 seconds
     -endpos 01:10:00 encode only 1 hours
+    -endpos 100 mb   encode only 100 mbytes
 
-Can be used in conjuction with -ss!
+Can be used in conjuction with -ss or -sb!
+.br
+.I NOTE:
+Byte position won't be accurate, as it can only stop at
+a frame boundary.
 .TP
-.B \-ffourcc fourcc
+.B \-ffourcc <fourcc>
 Can be used to override the video fourcc of the output file. For example -ffourcc
 div3 will have the output file contain "div3" as video fourcc.
 .TP
@@ -1032,7 +1034,8 @@ The following options apply only to B frames :
                    higher quantizer for b frames)
                    default = 2.0
 
-  vb_qfactor=XXX   quantizer factor between b
+  vb_qfactor=<value>
+                   quantizer factor between b
                    and i/p frames (larger means
                    higher quantizer for b frames)
                    default = 2.0
@@ -1047,6 +1050,9 @@ You can use the following options only in pass 2 of 2-pass mode :
   vrc_strategy, vb_strategy
 
 All other options can be used in all modes.
+.TP
+.B \-noskip
+Don't skip frames
 .TP
 .B \-o <filename>
 Outputs to the given filename, instead of the default 'test.avi'.
