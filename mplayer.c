@@ -27,12 +27,9 @@
 #define HELP_MP_DEFINE_STATIC
 #include "help_mp.h"
 
-#ifdef NEW_CONFIG
 #include "m_option.h"
 #include "m_config.h"
-#else
-#include "cfgparser.h"
-#endif
+
 #include "cfg-mplayer-def.h"
 
 #ifdef USE_SUB
@@ -89,7 +86,6 @@ static int quiet=0;
 
 #ifdef USE_TV
 #include "libmpdemux/tv.h"
-extern int tv_param_on;
 #endif
 
 #ifdef HAS_DVBIN_SUPPORT
@@ -119,12 +115,10 @@ play_tree_iter_t* playtree_iter = NULL;
 //**************************************************************************//
 m_config_t* mconfig;
 
-#ifdef NEW_CONFIG
 extern play_tree_t*
 m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv);
 extern int
 m_config_parse_config_file(m_config_t* config, char *conffile);
-#endif
 
 //**************************************************************************//
 //             Config file
@@ -231,7 +225,6 @@ int vobsub_id=-1;
 static char* audio_lang=NULL;
 static char* dvdsub_lang=NULL;
 static char* spudec_ifo=NULL;
-int vcd_track=0;
 char* filename=NULL; //"MI2-Trailer.avi";
 
 // cache2:
@@ -729,13 +722,7 @@ int gui_no_filename=0;
       (strrchr(argv[0],'/') && !strcmp(strrchr(argv[0],'/'),"/gmplayer") ) )
           use_gui=1;
 
-#ifdef NEW_CONFIG
     mconfig = m_config_new();
-#else
-    playtree = play_tree_new();
-
-    mconfig = m_config_new(playtree);
-#endif
     m_config_register_options(mconfig,mplayer_opts);
     // TODO : add something to let modules register their options
     mp_input_register_options(mconfig);
@@ -745,13 +732,9 @@ int gui_no_filename=0;
     if ( use_gui ) cfg_read();
 #endif
 
-#ifdef NEW_CONFIG
     playtree = m_config_parse_mp_command_line(mconfig, argc, argv);
     if(playtree == NULL)
       exit(1);
-#else
-    if(m_config_parse_command_line(mconfig, argc, argv) < 0) exit(1); // error parsing cmdline
-#endif
 
     playtree = play_tree_cleanup(playtree);
     if(playtree) {
@@ -948,7 +931,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
  }
 #endif
 
-    if(!filename && !vcd_track && !dvd_title && !dvd_nav && !tv_param_on && !dvbin_param_on){
+    if(!filename){
       if(!use_gui){
 	// no file/vcd/dvd -> show HELP:
 	mp_msg(MSGT_CPLAYER, MSGL_INFO, help_text);
@@ -1173,7 +1156,7 @@ if(!use_stdin && !slave_mode){
   sh_video=NULL;
 
   current_module="open_stream";
-  stream=open_stream(filename,vcd_track,&file_format);
+  stream=open_stream(filename,0,&file_format);
   if(!stream) { // error...
     eof = libmpdemux_was_interrupted(PT_NEXT_ENTRY);
     goto goto_next_file;
@@ -1184,7 +1167,7 @@ if(!use_stdin && !slave_mode){
   if ( use_gui ) guiGetEvent( guiSetStream,(char *)stream );
 #endif
 
-  if(stream->type == STREAMTYPE_PLAYLIST) {
+  if(file_format == DEMUXER_TYPE_PLAYLIST) {
     play_tree_t* entry;
     // Handle playlist
     current_module="handle_playlist";
@@ -1248,7 +1231,7 @@ if(stream->type==STREAMTYPE_DVD){
 #endif
 
 #ifdef USE_DVDNAV
-  if (dvd_nav) stream_cache_size=0;	// must disable caching...
+  if (stream->type==STREAMTYPE_DVDNAV) stream_cache_size=0;	// must disable caching...
 #endif
 
 // CACHE2: initial prefill: 20%  later: 5%  (should be set by -cacheopts)
@@ -1773,7 +1756,7 @@ mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_StartPlaying);fflush(stdout);
 InitTimer();
 
 #ifdef USE_DVDNAV
-if (dvd_nav && stream->type==STREAMTYPE_DVDNAV) {
+if (stream->type==STREAMTYPE_DVDNAV) {
   dvdnav_stream_fullstart((dvdnav_priv_t *)stream->priv);
 }
 #endif
@@ -2641,7 +2624,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     } break;
 #ifdef USE_TV
     case MP_CMD_TV_STEP_CHANNEL :  {
-      if (tv_param_on == 1) {
+      if (file_format == DEMUXER_TYPE_TV) {
 	int v = cmd->args[0].v.i;
 	if(v > 0){
 	  tv_step_channel((tvi_handle_t*)(demuxer->priv), TV_CHANNEL_HIGHER);
@@ -2677,7 +2660,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 
     break;
     case MP_CMD_TV_SET_CHANNEL :  {
-      if (tv_param_on == 1) {
+      if (file_format == DEMUXER_TYPE_TV) {
 	tv_set_channel((tvi_handle_t*)(demuxer->priv), cmd->args[0].v.s);
 #ifdef USE_OSD
 	if (tv_channel_list) {
@@ -2688,7 +2671,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       }
     } break;
     case MP_CMD_TV_LAST_CHANNEL :  {
-      if (tv_param_on == 1) {
+      if (file_format == DEMUXER_TYPE_TV) {
 	tv_last_channel((tvi_handle_t*)(demuxer->priv));
 #ifdef USE_OSD
 	if (tv_channel_list) {
@@ -2699,11 +2682,11 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       }
     } break;
     case MP_CMD_TV_STEP_NORM :  {
-      if (tv_param_on == 1)
+      if (file_format == DEMUXER_TYPE_TV)
 	tv_step_norm((tvi_handle_t*)(demuxer->priv));
     } break;
     case MP_CMD_TV_STEP_CHANNEL_LIST :  {
-      if (tv_param_on == 1)
+      if (file_format == DEMUXER_TYPE_TV)
 	tv_step_chanlist((tvi_handle_t*)(demuxer->priv));
     } break;
 #endif
@@ -2803,15 +2786,10 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       dvdnav_event_t * dvdnav_event = (dvdnav_event_t *)(cmd->args[0].v.v);
 
       /* ignore these events if we're not in dvd_nav mode */
-      if (!dvd_nav) break;
+      if (stream->type != STREAMTYPE_DVDNAV) break;
 
       if (!dvdnav_event) {
         printf("DVDNAV Event NULL?!\n");
-        break;
-      }
-
-      if (stream->type!=STREAMTYPE_DVDNAV) {
-        printf("Got DVDNAV event when not running a DVDNAV stream!?\n");
         break;
       }
 
@@ -2980,7 +2958,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       dvdnav_priv_t * dvdnav_priv=(dvdnav_priv_t*)stream->priv;
 
       /* ignore these events if we're not in dvd_nav mode */
-      if (!dvd_nav) break;
+      if (stream->type != STREAMTYPE_DVDNAV) break;
 
       switch (cmd->args[0].v.i) {
         case MP_CMD_DVDNAV_UP:
