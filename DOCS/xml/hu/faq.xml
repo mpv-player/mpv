@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.50 -->
+<!-- synced with 1.52 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -1122,7 +1122,7 @@ A <systemitem>tdfx</systemitem> vezérlő az XFree86 4.0.2/4.0.3-ban hibás volt. E
 javította az <ulink url="http://www.xfree86.org/cvs/changes_4_1.html">XFree86
 4.1.0 CVS log #621 hibajavító foltja</ulink>. Frissíts hát XFree86 4.1.0 vagy későbbi
 verzióra. Alternatívaként vagy töltsd le (legalább) a DRI 0.6-os verzióját a
-<ulink url="http://dri.sourceforge.net">DRI weboldaláról</ulink>, vagy használd a
+<ulink url="http://dri.sf.net">DRI weboldaláról</ulink>, vagy használd a
 DRI CVS-ét.
 </para></answer>
 </qandaentry>
