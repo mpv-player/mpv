@@ -4,7 +4,7 @@
     (C) 2001 Mike Melanson
     
     The description of the algorithm you can read here:
-      http://www.pcisys.net/~melanson/video1.txt
+      http://www.pcisys.net/~melanson/codecs/
 
     32bpp support (c) alex
 */
@@ -103,7 +103,6 @@ void AVI_Decode_Video1_16(
       {
         flags = (byte_b << 8) | byte_a;
 
-//        quad[0][0].c1 = LE_16(&encoded[stream_ptr]);
         quad[0][0].c1 = LE_16(&encoded[stream_ptr]);
         stream_ptr += 2;
         quad[0][0].c2 = LE_16(&encoded[stream_ptr]);

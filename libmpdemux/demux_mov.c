@@ -24,6 +24,9 @@
 
 #include <fcntl.h>
 
+#define BE_16(x) (be2me_16(*(unsigned short *)(x)))
+#define BE_32(x) (be2me_32(*(unsigned int *)(x)))
+
 typedef struct {
     unsigned int pts; // duration
     unsigned int size;
@@ -562,6 +565,10 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		break;
 	    }
 	    case MOV_TRAK_VIDEO: {
+		int i, entry;
+		int flag, start, count_flag, end, palette_count;
+		int hdr_ptr = 43+33;  // the byte just after depth
+		unsigned char *palette_map;
 		sh_video_t* sh=new_sh_video(demuxer,priv->track_db);
 		int depth = trak->stdata[43+32]; /* requested by Mike Melanson for Apple RLE decoder -- alex */
 		sh->format=trak->fourcc;
@@ -570,10 +577,49 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		sh->disp_w=trak->tkdata[77]|(trak->tkdata[76]<<8);
 		sh->disp_h=trak->tkdata[81]|(trak->tkdata[80]<<8);
 
+		// palettized?
+		if ((depth == 2) || (depth == 4) || (depth == 8) ||
+		  (depth == 34) || (depth == 36) || (depth == 40))
+		  palette_count = (1 << (depth & 0x0F));
+		else
+		  palette_count = 0;
+
 		// emulate BITMAPINFOHEADER:
-		sh->bih=malloc(sizeof(BITMAPINFOHEADER));
-		memset(sh->bih,0,sizeof(BITMAPINFOHEADER));
-		sh->bih->biSize=40;
+		if (palette_count)
+		{
+		  sh->bih=malloc(sizeof(BITMAPINFOHEADER) + palette_count * 4);
+		  memset(sh->bih,0,sizeof(BITMAPINFOHEADER) + palette_count * 4);
+		  sh->bih->biSize=40 + palette_count * 4;
+		  // fetch the relevant fields
+		  flag = BE_16(&trak->stdata[hdr_ptr]);
+		  hdr_ptr += 2;
+		  start = BE_32(&trak->stdata[hdr_ptr]);
+		  hdr_ptr += 4;
+		  count_flag = BE_16(&trak->stdata[hdr_ptr]);
+		  hdr_ptr += 2;
+		  end = BE_16(&trak->stdata[hdr_ptr]);
+		  hdr_ptr += 2;
+		  palette_map = (unsigned char *)sh->bih + 40;
+		  for (i = start; i <= end; i++)
+		  {
+		    entry = BE_16(&trak->stdata[hdr_ptr]);
+		    hdr_ptr += 2;
+		    // apparently, if count_flag is set, entry is same as i
+		    if (count_flag & 0x8000)
+		      entry = i;
+		    // only care about top 8 bits of 16-bit R, G, or B value
+		    palette_map[entry * 4 + 0] = trak->stdata[hdr_ptr + 0];
+		    palette_map[entry * 4 + 1] = trak->stdata[hdr_ptr + 2];
+		    palette_map[entry * 4 + 2] = trak->stdata[hdr_ptr + 4];
+		    hdr_ptr += 6;
+		  }
+		}
+		else
+		{
+		  sh->bih=malloc(sizeof(BITMAPINFOHEADER));
+		  memset(sh->bih,0,sizeof(BITMAPINFOHEADER));
+		  sh->bih->biSize=40;
+		}
 		sh->bih->biWidth=sh->disp_w;
 		sh->bih->biHeight=sh->disp_h;
 		sh->bih->biPlanes=0;
