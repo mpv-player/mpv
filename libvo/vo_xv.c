@@ -75,8 +75,8 @@ static int current_buf=0;
 static int num_buffers=1; // default
 static XvImage* xvimage[NUM_BUFFERS];
 
-#include <sys/ipc.h>
 #ifdef HAVE_SHM
+#include <sys/ipc.h>
 #include <sys/shm.h>
 #include <X11/extensions/XShm.h>
 
