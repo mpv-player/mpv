@@ -128,20 +128,85 @@ static inline void add_block(int16_t *dst, int stride, DCTELEM block[64]){
 	}
 }
 
+static void store_slice_c(uint8_t *dst, int16_t *src, int dst_stride, int src_stride, int width, int log2_scale){
+	int y, x;
+
+#define STORE(pos) \
+	temp= ((src[x + y*src_stride + pos]<<log2_scale) + d[pos])>>6;\
+	if(temp & 0x100) temp= ~(temp>>31);\
+	dst[x + y*dst_stride + pos]= temp;
+
+	for(y=0; y<8; y++){
+		uint8_t *d= dither[y];
+		for(x=0; x<width; x+=8){
+			int temp;
+			STORE(0);
+			STORE(1);
+			STORE(2);
+			STORE(3);
+			STORE(4);
+			STORE(5);
+			STORE(6);
+			STORE(7);
+		}
+	}
+}
+
+#ifdef HAVE_MMX
+static void store_slice_mmx(uint8_t *dst, int16_t *src, int dst_stride, int src_stride, int width, int log2_scale){
+	int y;
+
+	for(y=0; y<8; y++){
+		uint8_t *dst1= dst;
+		int16_t *src1= src;
+		asm volatile(
+			"movq (%3), %%mm3	\n\t"
+			"movq (%3), %%mm4	\n\t"
+			"movd %4, %%mm2		\n\t"
+			"pxor %%mm0, %%mm0	\n\t"
+			"punpcklbw %%mm0, %%mm3	\n\t"
+			"punpckhbw %%mm0, %%mm4	\n\t"
+			"psraw %%mm2, %%mm3	\n\t"
+			"psraw %%mm2, %%mm4	\n\t"
+			"movd %5, %%mm2		\n\t"
+			"1:			\n\t"
+			"movq (%0), %%mm0	\n\t"
+			"movq 8(%0), %%mm1	\n\t"
+			"paddw %%mm3, %%mm0	\n\t"
+			"paddw %%mm4, %%mm1	\n\t"
+			"psraw %%mm2, %%mm0	\n\t"
+			"psraw %%mm2, %%mm1	\n\t"
+			"packuswb %%mm1, %%mm0	\n\t"
+			"movq %%mm0, (%1) 	\n\t"
+			"addl $16, %0		\n\t"
+			"addl $8, %1		\n\t"
+			"cmpl %2, %1		\n\t"
+			" jb 1b			\n\t"
+			: "+r" (src1), "+r"(dst1)
+			: "r"(dst + width), "r"(dither[y]), "g"(log2_scale), "g"(6-log2_scale)
+		);
+		src += src_stride;
+		dst += dst_stride;
+	}
+//	if(width != mmxw)
+//		store_slice_c(dst + mmxw, src + mmxw, dst_stride, src_stride, width - mmxw, log2_scale);
+}
+#endif
+
+static void (*store_slice)(uint8_t *dst, int16_t *src, int dst_stride, int src_stride, int width, int log2_scale)= store_slice_c;
+
 static void filter(struct vf_priv_s *p, uint8_t *dst, uint8_t *src, int dst_stride, int src_stride, int width, int height, uint8_t *qp_store, int qp_stride, int is_luma){
 	int x, y, i;
 	const int count= 1<<p->log2_count;
-	const int log2_scale= 6-p->log2_count;
-	const int stride= p->temp_stride; //FIXME
+	const int stride= is_luma ? p->temp_stride : (p->temp_stride/2 + 8);
 	uint64_t block_align[32];
 	DCTELEM *block = (DCTELEM *)block_align;
 	DCTELEM *block2= (DCTELEM *)(block_align+16);
-        
+	
 	for(y=0; y<height; y++){
-		memcpy(p->src + 8 + 8*stride + y*stride, src + y*src_stride, width);
-		memset(p->temp + 8*stride + y*stride, 0, stride*sizeof(int16_t));
+		int index= 8 + 8*stride + y*stride;
+		memcpy(p->src + index, src + y*src_stride, width);
 		for(x=0; x<8; x++){ 
-			int index= 8 + 8*stride + y*stride;
 			p->src[index         - x - 1]= p->src[index +         x    ];
 			p->src[index + width + x    ]= p->src[index + width - x - 1];
 		}
@@ -153,6 +218,7 @@ static void filter(struct vf_priv_s *p, uint8_t *dst, uint8_t *src, int dst_stri
 	//FIXME (try edge emu)
 
 	for(y=0; y<height+8; y+=8){
+		memset(p->temp + (8+y)*stride, 0, 8*stride*sizeof(int16_t));
 		for(x=0; x<width+8; x+=8){
 			const int qps= 3 + is_luma;
 			int qp;
@@ -174,27 +240,8 @@ static void filter(struct vf_priv_s *p, uint8_t *dst, uint8_t *src, int dst_stri
 				add_block(p->temp + index, stride, block2);
 			}
 		}
-	}
-        
-#define STORE(pos) \
-	temp= ((p->temp[index + pos]<<log2_scale) + d[pos])>>6;\
-	if(temp & 0x100) temp= ~(temp>>31);\
-	dst[x + y*dst_stride + pos]= temp;
-
-	for(y=0; y<height; y++){
-		uint8_t *d= dither[y&7];
-		for(x=0; x<width; x+=8){
-			const int index= 8 + 8*stride + x + y*stride;
-			int temp;
-			STORE(0);
-			STORE(1);
-			STORE(2);
-			STORE(3);
-			STORE(4);
-			STORE(5);
-			STORE(6);
-			STORE(7);
-		}
+		if(y)
+			store_slice(dst + (y-8)*dst_stride, p->temp + 8 + y*stride, dst_stride, stride, width, 6-p->log2_count);
 	}
 #if 0
 	for(y=0; y<height; y++){
@@ -315,7 +362,10 @@ static int open(vf_instance_t *vf, char* args){
 
     vf->priv->avctx= avcodec_alloc_context();
     dsputil_init(&vf->priv->dsp, vf->priv->avctx);
-
+    if(gCpuCaps.hasMMX){
+	store_slice= store_slice_mmx;
+    }
+    
     vf->priv->log2_count= 6;
     
     if (args) sscanf(args, "%d:%d", &vf->priv->log2_count, &vf->priv->qp);
