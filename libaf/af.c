@@ -380,12 +380,13 @@ int af_init(af_stream_t* s, int force_output)
     af_instance_t* af = NULL; // New filter
     // Check output frequency if not OK fix with resample
     if(s->last->data->rate!=s->output.rate){
-      if(NULL==(af=af_get(s,"resample"))){
+      if(NULL==(af=af_get(s,"lavcresample")) &&
+          NULL==(af=af_get(s,"resample"))){
 	if((AF_INIT_TYPE_MASK & s->cfg.force) == AF_INIT_SLOW){
 	  if(!strcmp(s->first->info->name,"format"))
-	    af = af_append(s,s->first,"resample");
+	    af = af_append(s,s->first,"lavcresample");
 	  else
-	    af = af_prepend(s,s->first,"resample");
+	    af = af_prepend(s,s->first,"lavcresample");
 	}		
 	else{
 	  if(!strcmp(s->last->info->name,"format"))
