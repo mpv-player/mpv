@@ -81,6 +81,8 @@
 
 #ifdef USE_TV
 	{"tv", tvopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0},
+#else
+	{"tv", "MPlayer was compiled without TV Interface support", CONF_TYPE_PRINT, 0, 0, 0},
 #endif
 
 #else
