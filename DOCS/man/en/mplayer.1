@@ -475,9 +475,9 @@ Paths are relative to ~/\:.mplayer/.
 .br
 .I NOTE:
 Autorepeat is currently only supported by joysticks.
-
+.sp 1
 Available commands are:
-
+.sp 1
 .PD 0
 .RSs
 .IPs conf=<file>
@@ -568,7 +568,7 @@ Play files in random order.
 .B \-skin <name> (GUI only)
 Loads a skin from the directory given as parameter below the default skin
 directories, /usr/local/share/mplayer/Skin/ and ~/.mplayer/Skin/.
-
+.sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
@@ -620,7 +620,7 @@ It selects the DVD audio language and always tries to play audio streams whose
 language matches the given code.
 For the list of available languages, use with the \-v option and look at the
 output.
-
+.sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
@@ -666,7 +666,7 @@ the cache prefill threshold set with this option is reached.
 .TP
 .B \-cdda <option1:option2> (CDDA only)
 This option can be used to tune the CD Audio reading feature of MPlayer.
-
+.sp 1
 Available options are:
 .
 .RSs
@@ -718,9 +718,9 @@ audio into the requested number of channels.
 .I NOTE:
 This option is honored by codecs (AC3 only) filters (surround) and ao drivers
 (OSS at least).
-
+.sp 1
 Available options are:
-
+.sp 1
 .PD 0
 .RSs
 .IPs 2
@@ -769,7 +769,7 @@ Dump raw compressed video stream to ./stream.dump (not very usable).
 .B \-dvbin <options> (DVB only)
 Pass the following parameters to the DVB input module, in order to override
 the default ones:
-
+.sp 1
 .PD 0
 .RSs
 .IPs card=<1\-4>
@@ -842,9 +842,9 @@ Maximum A-V sync correction per frame (in seconds).
 .TP
 .B \-mf <option1:option2:...>
 Used when decoding from multiple PNG or JPEG files.
-
+.sp 1
 Available options are:
-
+.sp 1
 .PD 0
 .RSs
 .IPs w=<value>
@@ -889,9 +889,9 @@ Falls back to IPv4 automatically.
 This option lets you play raw audio files.
 It may also be used to play audio CDs which are not 44KHz 16Bit stereo.
 For playing raw AC3 streams use \-rawaudio on:format=0x2000.
-
+.sp 1
 Available options are:
-
+.sp 1
 .PD 0
 .RSs
 .IPs on\ \ \ 
@@ -912,9 +912,9 @@ fourcc in hex
 .TP
 .B \-rawvideo <option1:option2:...>
 This option lets you play raw video files.
-
+.sp 1
 Available options are:
-
+.sp 1
 .PD 0
 .RSs
 .IPs on\ \ \ 
@@ -961,7 +961,7 @@ MEncoder passes this value to lame for resampling.
 .TP
 .B \-ss <time> (see \-sb option too)
 Seek to given time position.
-
+.sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
@@ -1003,7 +1003,7 @@ Be advised that although you can select any samplerate when using ALSA,
 the LAME audio codec is able to encode only the 'standard' samplerates.
 You'll get an .avi file with no sound when you choose an odd
 samplerate and use this codec.
-
+.sp 1
 Available options are:
 .
 .RSs
@@ -1201,7 +1201,7 @@ fonts: ~/\:.mplayer/\:font/\:font.desc, default for FreeType fonts:
 With FreeType, this option determines path to the text font file.
 .br
 With fontconfig, this option determines the fontconfig font name.
-
+.sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
@@ -1268,7 +1268,7 @@ output.
 .br
 Otherwise, determines an optional subtitle suffix which gets a higher
 priority when searching for subtitles.
-
+.sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
@@ -1362,7 +1362,7 @@ CC subtitles have not been spotted on DVDs from other regions so far.
 .B \-subcp <codepage> (iconv only)
 If your system supports iconv(3), you can use this option to
 specify codepage of the subtitle.
-
+.sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
@@ -1379,7 +1379,7 @@ make ENCA detect the codepage automatically.
 If unsure, enter anything and watch mplayer -v output for available
 languages. Fallback codepage specifies the codepage to use, when the
 autodetection fails.
-
+.sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
@@ -1405,9 +1405,9 @@ Sets the autoscale mode.
 .br
 .I NOTE:
 Zero means that text-scale and osd-scale are font heights in points.
-
+.sp 1
 The mode can be:
-
+.sp 1
 .PD 0
 .RSs
 .IPs 0
@@ -1481,7 +1481,7 @@ Filename for \-ao pcm.
 .TP
 .B \-aop <list=plugin1,plugin2...:option1=value1:opt2=val2...>
 Specify audio plugin(s) and their options (see documentation too).
-
+.sp 1
 Available options are:
 .
 .RSs
@@ -1575,7 +1575,7 @@ Suboptions are optional and can mostly be omitted.
 .br
 .I NOTE:
 See \-ao help for a list of compiled-in drivers.
-
+.sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
@@ -1586,10 +1586,10 @@ Sets noblock-mode, mmap-mode and the device-name as first card, fourth device.
 .RE
 .PD 1
 .
-
+.sp 1
 FIXME: Document suboptions for sdl, arts, esd, jack, nas, macosx, sgi, sun,
 win32, dxr2, mpegpes, null, pcm, plugin.
-
+.sp 1
 Available audio output drivers are:
 .
 .TP
@@ -1705,7 +1705,7 @@ Specify a parameter list for the directfb driver.
 .B \-display <name> (X11 only)
 Specify the hostname and display number of the X server you want to display
 on.
-
+.sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
@@ -1748,7 +1748,7 @@ unmute sound output
 path to the microcode
 .RE
 .RS
-
+.sp 1
 .I TV Out
 .RE
 .RSs
@@ -1772,7 +1772,7 @@ set pixel mode to square
 set pixel mode to ccir601
 .RE
 .RS
-
+.sp 1
 .I Overlay
 .RE
 .RSs
@@ -1841,7 +1841,7 @@ Try this option if you still experience fullscreen problems.
 Specify a priority list of fullscreen layer setting modes to be
 used.
 The available types are:
-
+.sp 1
 .PD 0
 .RSs
 .IPs above
@@ -1892,7 +1892,7 @@ The values given must be integers.
 .I NOTE:
 This option is only supported by vo x11, xmga, xv, xvmc, xvidix,
 directx and tdfxfb.
-
+.sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
@@ -1921,7 +1921,7 @@ You can get colored negative of image with this option.
 Specify options for the JPEG output.
 .br
 Available options are:
-
+.sp 1
 .PD 0
 .RSs
 .IPs [no]progressive
@@ -1952,7 +1952,7 @@ Specify the vertical frequency range of the monitor.
 .B \-monitoraspect <ratio>
 Set aspect ratio of your monitor or TV screen.
 See also \-aspect for movie aspect.
-
+.sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
@@ -2098,7 +2098,7 @@ Suboptions are optional and can mostly be omitted.
 .br
 .I NOTE:
 See \-vo help for a list of compiled-in drivers.
-
+.sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
@@ -2109,11 +2109,11 @@ Uses the DirectX driver with acceleration features turned off.
 .RE
 .PD 1
 .
-
+.sp 1
 FIXME: Document suboptions for x11, xover, dga, sdl, vidix, xvidix, fbdev,
 fbdev2, vesa, svga, null, aa, bl, ggi, mga, xmga, syncfb, 3dfx, tdfx_vid,
 tdfxfb, dxr2, dxr3, mpegpes, zr, zr2, yuv4mpeg, gif89a, jpeg, pgm, png, tga.
-
+.sp 1
 Available video output drivers are:
 .
 .TP
@@ -2485,7 +2485,7 @@ Use a '-' before the codec name to omit it.
 See \-ac help for a full list of available codecs.
 .br
 If the list has a trailing ',' it will fallback to codecs not listed.
-
+.sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
@@ -2602,7 +2602,7 @@ It falls back to default if none is ok.
 .br
 .I NOTE:
 See \-afm help for a full list of available drivers.
-
+.sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
@@ -2617,7 +2617,7 @@ try Win32 codecs first
 .B \-aspect <ratio>
 Override aspect ratio of movies.
 It's autodetected on MPEG files, but can't be autodetected on most AVI files.
-
+.sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
@@ -2636,14 +2636,14 @@ Flip image upside-down.
 .TP
 .B \-lavdopts <option1:option2:...> (DEBUG CODE)
 If decoding with libavcodec, you can specify its parameters here.
-
+.sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
 \-lavdopts bug=1
 .RE
 .PD 1
-
+.sp 1
 .RS
 .I NOTE:
 Just add the values of the things you want to enable.
@@ -2789,7 +2789,7 @@ Show a summary about the available postprocess filters and their usage.
 .TP
 .B \-ssf <mode>
 Specifies SwScaler parameters.
-
+.sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
@@ -2840,7 +2840,7 @@ Possible settings are:
 For \-sws\ 2 and 7, the sharpness can be set with the scaling parameter (p)
 of \-vf scale (0 (soft) \- 100 (sharp)), for \-sws 9, it specifies the filter
 length (1 \- 10).
-
+.sp 1
 .PD 0
 .RSs
 .IPs 0
@@ -2878,7 +2878,7 @@ Use a '-' before the codec name to omit it.
 See \-vc help for a full list of available codecs.
 .br
 If the list has a trailing ',' it will fallback to codecs not listed.
-
+.sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
@@ -2906,7 +2906,7 @@ For difference between them and when to use which, check the DivX4 section in
 the documentation.
 .br
 See \-vfm help for a full list of available drivers.
-
+.sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
@@ -2993,7 +2993,7 @@ from the upper left corner of the bigger image.
 .br
 .I NOTE:
 To get a full list of available filters, see \-vf help.
-
+.sp 1
 Filters are managed in lists.
 There are a few commands to manage the filter list.
 .TP
@@ -3064,7 +3064,7 @@ Can be used for placing subtitles/\:OSD in the resulting black bands.
 .IPs w,h
 expanded width,height (default: original width,height).
 Negative values for w and h are treated as offsets to the original size.
-
+.sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
@@ -3233,7 +3233,7 @@ Do chrominance filtering, too.
 Do not do chrominance filtering (only luminance filtering).
 .RE
 .PD 1
-
+.sp 1
 .RS
 .I EXAMPLE:
 .RE
@@ -3932,7 +3932,7 @@ path/filename for the FIFO (named pipe connecting mplayer \-vf bmovl to the
 controlling application)
 .RE
 .PD 1
-
+.sp 1
 .RS
 FIFO commands are:
 .RE
@@ -3959,7 +3959,7 @@ hide bitmap
 show bitmap
 .RE
 .PD 1
-
+.sp 1
 .RS
 Arguments are:
 .RE
@@ -3993,24 +3993,24 @@ send 1,8MB of RGBA32 data everytime a small part of the screen is updated.
 .TP
 .B framestep=I|[i]step
 Renders only every nth frame or every Intra (key) frame.
-
+.sp 1
 If you call the filter with I (uppercase) as the parameter, then ONLY
 keyframes are rendered.
 For DVDs it generally means one in every 15/12  frames (IBBPBBPBBPBBPBB),
 for AVI it means every scene change or every keyint value (see \-lavcopts
 keyint= value if you use MEncoder to encode the video).
-
+.sp 1
 When a key frame is found, an 'I!' string followed by a newline character is
 printed, leaving the current line of mplayer/mencoder output on the screen,
 because it contains the time (in seconds) and frame number of the keyframe
 (You can use this information to split the AVI.).
-
+.sp 1
 If you call the filter with a numeric parameter 'step' then only one in
 every 'step' frames is rendered.
-
+.sp 1
 If you put an 'i' (lowercase) before the number then an I! is printed
 (like the I parameter).
-
+.sp 1
 If you give only the i then nothing is done to the frames, only I! is
 printed.
 .TP
@@ -4022,7 +4022,7 @@ value is used. You can also stop when you're OK (... \-vf tile=10:5 ...)
 It is probably a good idea to put the scale filter before the tile :-)
 .br
 The parameters are:
-
+.sp 1
 .PD 0
 .RSs
 .IPs xtile
@@ -4113,7 +4113,7 @@ Can be specified in many ways:
 .I NOTE:
 Byte position won't be accurate, as it can only stop at
 a frame boundary.
-
+.sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
@@ -4129,7 +4129,7 @@ encode only 100 MBytes
 .TP
 .B \-ffourcc <fourcc>
 Can be used to override the video fourcc of the output file.
-
+.sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
@@ -4186,7 +4186,7 @@ Outputs to the given filename, instead of the default 'test.avi'.
 Encode with the given audio codec.
 Use \-oac help to get a list of available codecs.
 (no default set)
-
+.sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
@@ -4205,7 +4205,7 @@ encode with a libavcodec codec
 .B \-of <format> (BETA CODE!)
 Encode to the specified format.
 Use \-of help to get a list of available formats.
-
+.sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
@@ -4228,7 +4228,7 @@ You MUST set it for variable fps (asf, some mov) and progressive
 Encode with the given video codec.
 Use \-ovc help to get a list of available codecs.
 (no default set)
-
+.sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
@@ -4444,7 +4444,7 @@ CBR encoding, highest preset quality, 320 kbps bitrate.
 .IPs <8\-320>
 ABR encoding at average given kbps bitrate.
 .RE
-
+.sp 1
 .RS
 .I EXAMPLE:
 .RE
@@ -4696,7 +4696,7 @@ first pass
 second pass
 .RE
 .PD 1
-
+.sp 1
 .RS
 huffyuv:
 .RE
@@ -4715,7 +4715,7 @@ Much nicer solution than rescaling, because quality isn't decreased.
 Only MPlayer will play these files correctly, other players will display
 them with wrong aspect.
 The aspect parameter can be given as a ratio or a floating point number.
-
+.sp 1
 .RS
 .I EXAMPLE:
 .RE
@@ -5537,7 +5537,7 @@ The last i-frame will get treated normally.
 (default: 30, 2pass mode only)
 .RE
 .PP
-
+.sp 1
 The following options are only available with the latest stable
 releases of XviD 1.0.x (api4).
 .TP
