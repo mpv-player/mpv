@@ -1,0 +1,199 @@
+                ________________________________________________
+                 How to make good binary package(s) of MPlayer?
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                       by Dominik 'Rathann' Mierzejewski
+
+About this document
+~~~~~~~~~~~~~~~~~~~
+
+With the release of MPlayer 0.90pre9, all licensing issues have been
+eliminated and all code is licensed under the GPL, which allows
+independent packagers to create and distribute binary packages. At first,
+this was discouraged by some of the developers, but the users' demand for
+ready-to-use binary packages convinced some people to create them.
+Unfortunately, many currently available packages are crippled, include
+their own obsolete config files or are mispackaged in some other way. This
+document aims to establish a common set of packaging guidelines so that
+proper official binary packages for various Linux distributions and other
+operating systems can be maintained.
+
+
+Conventions
+~~~~~~~~~~~
+Whenever you see "MUST", it means that following the mentioned guideline
+is required. Whenever you see "SHOULD", it means that following the
+guideline is highly recommended, but not required.
+
+
+Minimum feature set
+~~~~~~~~~~~~~~~~~~~
+Due to MPlayer design, it is impossible to simply include all possible
+features and enable or disable them at runtime. That is why packagers
+SHOULD avoid "dependency hell" by retaining a reasonable, limited default
+feature set. After some discussion with other developers, we agreed that
+the following features MUST be included in any official binary package:
+
+* audio/video output
+  - fbdev
+  - JPEG/PNG/TGA
+  - (X)MGA
+  - OSS 
+  - SDL
+  - tdfxfb
+  - (c/x)vidix
+  - X11/Xvideo
+
+* codecs
+  - FAAD
+  - libavcodec(internal)
+  - native codecs (libmpeg2/liba52/mp3lib)
+  - Ogg Vorbis support
+  - RealPlayer codecs support
+  - Win32/VfW/DShow/QT codecs support
+  - XAnim codecs support
+
+* general:
+  - default font
+  - FreeType fonts support
+  - HTML documentation
+  - large file support
+  - man page(s)
+
+* input/demuxers:
+  - DVD(mpdvdkit2)
+  - streaming
+  - Matroska(internal)
+  - (S)VCD
+  - tv(v4l/v4l2)
+
+There is great demand for the GUI, so it SHOULD be included, but it MUST
+come as a separate package (see Tips and Tricks for details).
+
+Including other features, like LIVE.COM streaming or JACK support, is
+acceptable. They SHOULD, however, be build-time configurable, with the
+default build configuration containing the above set.
+
+It seems there are some packages in the wild which lack included docs.
+This is VERY BAD, as it forces users to look for outside support when most
+of the common problems are easy to solve and are already described in the
+docs, thus increasing the number of repeated posts in MPlayer mailing
+lists. Binary packages MUST include both the man page and HTML
+documentation. Translated versions SHOULD be included, even if your
+package management system does not provide specific support for
+internationalization.
+
+Libavcodec MUST always be in the latest development version and it SHOULD
+be linked statically into mplayer binary, because MPlayer requires a
+recent libavcodec snapshot. While some distributions provide ffmpeg
+packages containing shared libavcodec library, they are often based on the
+last "release" version of ffmpeg, which is quite old and will usually not
+function with MPlayer.
+
+
+File locations
+~~~~~~~~~~~~~~
+In general, you SHOULD follow your distribution guidelines. For example,
+for RedHat and Fedora RPMs I am using FHS-compliant paths:
+
+/etc/mplayer/                   system-wide configs
+/usr/bin/                       binaries
+/usr/lib/codecs/                binary codecs
+/usr/share/doc/mplayer-version/ docs
+/usr/share/man/man1/            man page
+/usr/share/man/XX/man1/         translated man page
+/usr/share/mplayer/font/        fonts
+/usr/share/mplayer/Skin/        GUI skins
+
+You MUST never include the codecs.conf file in your package. It is useful
+only for development purposes and often causes obscure problems for users.
+
+
+One package or many packages?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Although it is tempting to simply provide a single all-in-one package,
+I think it is best to split MPlayer into several packages. It may be
+a little more troublesome for less clueful users, but it allows you to
+install only what you need. This is the layout I am using for RedHat and
+Fedora RPMs:
+
+mencoder         contains MEncoder binary (mencoder)
+mplayer          contains MPlayer binary without GUI (mplayer),
+                 config files, man pages and documentation;
+                 required by mplayer-gui
+mplayer-codecs-* contain binary codecs available from MPlayer's site
+mplayer-font-*   contain various bitmap fonts for OSD (obsolete)
+mplayer-gui      contains MPlayer binary with GUI (gmplayer);
+                 requires default skin package
+mplayer-skin-*   contain various MPlayer GUI skins
+mplayer-vidix    contains vidix support library for MPlayer
+mplayer-vidix-*  contain vidix drivers for specific cards, one per package
+
+There is no strict policy for now, just use your common sense.
+
+
+Compilation
+~~~~~~~~~~~
+While it is acceptable to provide packages optimized for specific CPUs,
+you MUST provide at least one "lowest common denominator" package set
+that will work on all CPUs. This means it MUST be configured with
+--enable-runtime-cpudetection option. Building for specific CPUs requires
+disabling this option, but try to make sure that users cannot accidentally
+install a package not suitable for their CPU. With RPMs, for example, this
+is handled automatically, when building with "--target arch" rpm option.
+
+Compiler flags MUST be set to either configure-generated CFLAGS or something
+as close to them as possible.
+
+Users MUST be able to rebuild your source package without hand-editing on
+any system with the same distribution installed. Remember to disable
+(--disable-xxx) any optional features, because MPlayer's configure script
+autodetects most of them. This ensures that binary package builds are
+deterministic -- that is, provided they have at least the required
+development packages installed, two different people using the same
+distribution will get binaries with the same dependencies.
+
+You SHOULD provide an option to rebuild the package with full debug
+information enabled (by passing --enable-debug=3 to ./configure and
+disabling any stripping of binaries and libs during the build process).
+For example my source RPM can be rebuilt with "--with debug" option, which
+does just that, making it easier to supply gdb information along with any
+bug reports, while retaining all benefits of using binary packages.
+
+
+Modifications
+~~~~~~~~~~~~~
+
+You MUST modify `mplayer -v` output so that it is clear that a user is
+using your binary package, by patching version.h and modifying the version
+string inside. Suggested convention is to include distribution name and,
+possibly, the signature of the packager or the repository. For example:
+
+original:
+ MPlayer 1.0pre5-3.3.2 (C) 2000-2004 MPlayer Team
+modified:
+ MPlayer 1.0pre5-Fedora-GS-3.3.2 (C) 2000-2004 MPlayer Team
+ MPlayer 1.0pre5-Mandrake-PLF-3.2.3 (C) 2000-2004 MPlayer Team
+ MPlayer 1.0pre5-Solaris-3.4.0 (C) 2000-2004 MPlayer Team
+
+
+Tips and tricks
+~~~~~~~~~~~~~~~
+In my package layout, mplayer and mplayer-gui can be installed at the same
+time, because they contain differently named binaries and there is no
+conflict. The trick is to build MPlayer once with --enable-gui, rename the
+resulting binary to "gmplayer" and then build it again, without GUI, but
+keeping the rest of ./configure options the same.
+
+To provide man pages for all MPlayer suite binaries (mplayer, gmplayer,
+mencoder), you can use man-links instead of regular symbolic links.
+Creating a mencoder man page linked to mplayer is as simple as:
+
+  echo ".so mplayer.1" >> mencoder.1
+
+Similar trick can be used for "man gmplayer". This avoids problems with
+gzipped man pages and symbolic links.
+
+Newer RedHat and Fedora distributions keep localized man pages encoded in
+UTF-8. If your distribution does the same, make sure you convert MPlayer's
+translated man pages to UTF-8 so that man mplayer works for locales other
+than English.
