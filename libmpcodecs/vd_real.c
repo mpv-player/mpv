@@ -1,3 +1,5 @@
+//#define USE_WIN32_REAL_CODECS
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -59,6 +61,8 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
     return CONTROL_UNKNOWN;
 }
 
+#ifndef USE_WIN32_REAL_CODECS
+
 /* exits program when failure */
 int load_syms(char *path) {
 		void *handle;
@@ -99,6 +103,30 @@ int load_syms(char *path) {
 		}
 	return 1;
 }
+
+#else
+
+int load_syms(char *path) {
+    void *handle;
+    Setup_LDT_Keeper();
+    rv_handle = handle = LoadLibraryA(path);
+    printf("win32 real codec handle=%p  \n",handle);
+
+    rvyuv_custom_message = GetProcAddress(handle, "RV20toYUV420CustomMessage");
+    rvyuv_free = GetProcAddress(handle, "RV20toYUV420Free");
+    rvyuv_hive_message = GetProcAddress(handle, "RV20toYUV420HiveMessage");
+    rvyuv_init = GetProcAddress(handle, "RV20toYUV420Init");
+    rvyuv_transform = GetProcAddress(handle, "RV20toYUV420Transform");
+    
+    if(rvyuv_custom_message &&
+       rvyuv_free &&
+       rvyuv_hive_message &&
+       rvyuv_init &&
+       rvyuv_transform) return 1;
+    return 0; // error
+}
+
+#endif
 
 /* we need exact positions */
 struct rv_init_t {
