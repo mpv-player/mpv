@@ -30,3 +30,7 @@ A: Maybe from the source of OMS (www.livid.org).
 Q: How can I ... (insert some expectable DVD player feature here)
 A: The current implementation is only for viewing VOB files from DVD.
    Nothing more, like subtitles, menus and so on.
+
+Q: How can I set the region code of my DVD-Drive ? I don't have windows!
+A: Use the 'regionset' tool :
+   http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz

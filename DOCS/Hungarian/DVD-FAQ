@@ -29,3 +29,6 @@ A: Talán az OMS forrásából (www.livid.org).
 Q: Hogy lehet... (képzeld ide azt, ami leginkább kellene neked DVD-hez)
 A: Jelenleg csak lejátszani lehet DVD-rõl. Semmi több.
 
+Q: Hogy allithatom be a DVD regiokodjat ? Nincs windowsom!
+A: Hasznald a 'regionset' parancsot :
+   http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz
