@@ -196,6 +196,7 @@ Codecs:
   --disable-libdv        disable libdv 0.9.5 en/decoding support [autodetect]
   --disable-mad          disable libmad (mpeg audio) support [autodetect]
   --enable-xmms          build with XMMS inputplugin support [disabled]
+  --enable-externalfaad  use externel faad library if available [disabled]
   
 Video output:
   --disable-vidix        disable VIDIX stuff [enable on x86 *nix]
@@ -1078,6 +1079,7 @@ _theora=auto
 _matroska=auto
 _tremor=no
 _faad=yes
+_faad_local=yes
 _xmms=no
 _css=auto
 # dvdnav disabled, it does not work
@@ -1241,6 +1243,8 @@ for ac_option do
   --disable-matroska)   _matroska=no    ;;
   --enable-faad)	_faad=yes	;;
   --disable-faad)	_faad=no	;;
+  --enable-externalfaad) _faad_local=no ;;
+  --disable-externalfaad) _faad_local=yes ;;
   --enable-xmms)	_xmms=yes	;;
   --enable-css)		_css=yes	;;
   --disable-css)	_css=no		;;
@@ -4288,18 +4292,28 @@ echores "$_matroska"
 
 
 echocheck "faad2 (AAC) support"
-#if test "$_faad" = auto ; then
-#  _faad=no
-#  cat > $TMPC << EOF
-##include <faad.h>
-#int main(void) { faacDecHandle testhand; faacDecFrameInfo testinfo; testhand = faacDecOpen(); return 0; }
-#EOF
-#  cc_check -lfaad -lm && _faad=yes
-#fi
+if test "$_faad_local" = no ; then
+  _faad=no
+  cat > $TMPC << EOF
+#include <faad.h>
+int main(void) { faacDecHandle testhand; faacDecFrameInfo testinfo; testhand = faacDecOpen(); return 0; }
+EOF
+  cc_check -lfaad -lm && _faad=yes
+else
+  # dunno if 3.2.2 fails or not (some reports say it fails, some not)
+  if test "$_faad_local" = yes && test "$_cc_major" -eq "3" &&
+    test "$_cc_minor" -eq "2" ; then 
+    _faad=no
+  fi
+fi
+
 if test "$_faad" = yes ; then
   _def_faad='#define HAVE_FAAD 1'
-  _inc_faad="-I`pwd`"
-#  _ld_faad='-lfaad'
+  if test "$_faad_local" = yes ; then
+    _inc_faad="-I`pwd`/libfaad2"
+  else
+    _ld_faad='-lfaad'
+   fi
   _codecmodules="faad2 $_codecmodules"
 else
   _def_faad='#undef HAVE_FAAD'
@@ -4308,8 +4322,7 @@ fi
 
 if test "$_faad" = yes; then
 cat > $TMPC <<EOF
-//#include <faad.h>
-#include "libfaad2/faad.h"
+#include <faad.h>
 #ifndef FAAD_MIN_STREAMSIZE
 #error Too old version
 #endif
@@ -4322,10 +4335,7 @@ int main(void) {
   return 0;
 }
 EOF
-  if test "$_cc_major" -eq "3" && test "$_cc_minor" -eq "2" ; then 
-    _faad=no
-    echores "no (buggy gcc fails compiling)"
-  elif cc_check $_inc_faad $_ld_faad -lm && "$TMPO" >> "$TMPLOG" ; then
+  if cc_check $_inc_faad $_ld_faad -lm && "$TMPO" >> "$TMPLOG" ; then
     _faad_version=`"$TMPO"`
     _faad_tempversion=`"$TMPO" | sed -e 's/^\([0-9]\{1,\}\)\.\([0-9]\{1,\}\).*/\1\2/'`
     _def_faad_version="#define FAADVERSION $_faad_tempversion"
@@ -4335,7 +4345,11 @@ EOF
     echores "no (failed to get version)"
   fi
 else
-  echores "$_faad"
+  if test "$_faad_local" = yes ; then
+    echores "no (buggy gcc fails compiling)"
+  else
+     echores "$_faad"
+  fi
 fi
 
 if test "$_win32" = auto ; then
