@@ -176,8 +176,7 @@ A: Lásd az elõzõ választ.
 
 Q: Letöltöttem egy ASF-et az asfrecorderrel, de az MPlayer nem tudja
    lejátszani !
-A: Az asfrecorder, és maga az ASF formátum egy nagy szar. Ne írj nekünk,
-   menj a jó francba!
+A: Az asfrecorder, és maga az ASF formátum egy nagy szar. Ne írj nekünk.
 
 Q: Ooo, mi az az "IdegCounter" ?
 A: Az "Ideg" magyar szó, és a "Counter" (számláló) angol szó keveréke.
@@ -211,24 +210,16 @@ A: Ezeknek a file-oknak valószínûleg 48Khz-es audiojuk van, és a
    hangkártyád/drivered nem támogatja rendesen ezt. Az audio downsampling
    (még) nincs benne MPlayer-ben.
 
-Q: Szeretném használni/átírni az MPlayer-t a(z) <képzeld ide a kedvenc
-   architektúrád> a(z) <képzeld ide a kedvenc oprendszered>-re. Lehetséges?
-A: Nem.
-
-Q: De...!
-A: Nem.
-
-Q: És ha megelégszem az MPEG-gel?
-A: Talán. De jobban jársz, ha már létezõ MPEG lejátszót keresel arra a
-   bizonyos platformra.
-
 Q: Az MPlayer "MPlayer interrupted by signal 4 in module: decode_video"
    üzenettel leáll.
 A: Azon a gépen futtasd az MPlayer-t, amin lefordítottad! Vagy fordítsd újra!
    Semmiképp se használd másik processzoron, mint amin lefordítottad!
 
-Q: Gondjaim vannak az icewm-el és a teljesképernyõs xv móddal..
-A: Tudjuk, az icewm szar.
+Q: Gondjaim vannak a WindowMaker-rel, és a teljesképernyõs xv móddal..
+   Az ICCCM patch elõtt még jó volt.
+A1: Tudjuk, az ICCCM szar.
+A2: Kapcsold ki az ICCCM patchet a következõ módon: a libvo/x11_common.c file
+    161.-edik sorában lévo "#if 1"-et írd át "#if 0"-ra, és fordítsd újra.
 
 Q: Dehát aviplay-jel mûködik !
 A: És?
@@ -263,3 +254,17 @@ A: gcc 2.96 a RedHat NEM HIVATALOS (csak a RedHat-nál, vagy RedHat
    probléma, számos más project (DRI, avifile, stb..) szenved ebbõl fakadó
    problémáktól.
    ** NE HASZNÁLD a gcc 2.96-ot !!! **
+
+Q: Hogyan játszhatok le QuickTime és RealMedia file-okat MPlayer-rel?
+A: Nem lehetséges. A legjobb az lenne ha lángok nyelnék el ezeket a
+   formátumokat. Elméletileg visszafejthetõk a Linuxos Real codec-ek
+   (.so file-ként tárolódnak), de gyakorlatban ez nagyon nehéz feladat, még
+   akkor is az, ha tudnád hogy miként lett fordítva. A régebbi QuickTime
+   formátumok lejátszhatóak, és hamarosan az MPlayer-ben is lesz ilyen funkció,
+   de az újabb filmek Sorenson-nal vannak tömörítve és ez a codec mélyen bele
+   van ágyazva a QT programba, ergo lehetetlen felhasználni.
+
+Q: nVidia TNT/TNT2 kártyám van, és egy furcsa színekkel teli sáv van a film alatt!
+   Kinek a hibája ez?
+A: Az nVidia driver-é. Ezek a hibák CSAK TNT/TNT2 kártyákkal jönnek elõ, és
+   nem tehetünk róla, a hiba az Ön készülékében van.

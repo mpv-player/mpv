@@ -255,3 +255,8 @@ A: There's no way to do it. Therefore these formats deserve to die in flames.
    capability will be added to mplayer soon, but newer clips are all Sorenson
    encoded, and that codec is built-in deep in the QT executable, there's
    no way to use it.
+
+Q: I have an nVidia TNT/TNT2 card, and I have a band with strange colours,
+   right under the movie! Whose fault is this?
+A: It's the nVidia X driver's. These bugs are ONLY with the TNT/TNT2 cards,
+   and we can't do anything about it, it's not our bug.
