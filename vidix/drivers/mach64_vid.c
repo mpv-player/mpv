@@ -262,7 +262,7 @@ static int mach64_get_vert_stretch(void)
     int ret;
     int yres= mach64_get_yres();
 
-    if(!supports_lcd_etch) return 1<<16;
+    if(!supports_lcd_v_stretch) return 1<<16;
 
     lcd_index= INREG(LCD_INDEX);
     
