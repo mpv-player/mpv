@@ -1,11 +1,13 @@
 TO DO:
 ~~~~~~
 For the Release:
-- play_only_n_frames option (chl)
 - fast forward (changing fps on-the-fly)
-- -benchmark option [Gabucino]
+- subtitles with black rectangle background (option)
 
 DONE:
+- apply X11/ICCCM compliance patches - DONE
+- play_only_n_frames option (chl) - DONE
+- -benchmark option [Gabucino] - DONE
 - gcc 3.0 fixup - DONE
 - ': File not found!' bug - DONE [szabi]
 - sub sync +/- keys - DONE (lez)
