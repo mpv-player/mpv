@@ -18,6 +18,8 @@ extern int verbose; // defined in mplayer.c
 #include "ad.h"
 #include "../libao2/afmt.h"
 
+#include "../libaf/af.h"
+
 #ifdef USE_FAKE_MONO
 int fakemono=0;
 #endif
@@ -118,6 +120,10 @@ int init_audio_codec(sh_audio_t *sh_audio)
 	sh_audio->samplerate,sh_audio->channels,
 	sh_audio->samplesize*8,sh_audio->sample_format,
         sh_audio->i_bps,sh_audio->o_bps,sh_audio->i_bps*8*0.001);
+
+  sh_audio->a_out_buffer_size=sh_audio->a_buffer_size;
+  sh_audio->a_out_buffer=sh_audio->a_buffer;
+  sh_audio->a_out_buffer_len=sh_audio->a_buffer_len;
   
   return 1;
 }
@@ -210,23 +216,149 @@ return 1; // success
 
 void uninit_audio(sh_audio_t *sh_audio)
 {
+    if(sh_audio->afilter){
+	mp_msg(MSGT_DECAUDIO,MSGL_V,"Uninit audio filters...\n");
+	af_uninit(sh_audio->afilter);
+	sh_audio->afilter=NULL;
+    }
     if(sh_audio->inited){
 	mp_msg(MSGT_DECAUDIO,MSGL_V,MSGTR_UninitAudioStr,sh_audio->codec->drv);
 	mpadec->uninit(sh_audio);
 	sh_audio->inited=0;
     }
+    if(sh_audio->a_out_buffer!=sh_audio->a_buffer) free(sh_audio->a_out_buffer);
+    sh_audio->a_out_buffer=NULL;
     if(sh_audio->a_buffer) free(sh_audio->a_buffer);
     sh_audio->a_buffer=NULL;
     if(sh_audio->a_in_buffer) free(sh_audio->a_in_buffer);
     sh_audio->a_in_buffer=NULL;
 }
 
+ /* Init audio filters */
+int init_audio_filters(sh_audio_t *sh_audio, 
+	int in_samplerate, int in_channels, int in_format, int in_bps,
+	int out_samplerate, int out_channels, int out_format, int out_bps,
+	int out_minsize, int out_maxsize){
+  af_stream_t* afs=malloc(sizeof(af_stream_t));
+  memset(afs,0,sizeof(af_stream_t));
+
+  // input format: same as codec's output format:
+  afs->input.rate   = in_samplerate;
+  afs->input.nch    = in_channels;
+  afs->input.format = in_format;
+  afs->input.bps    = in_bps;
+
+  // output format: same as ao driver's input format (if missing, fallback to input)
+  afs->output.rate   = out_samplerate ? out_samplerate : afs->input.rate;
+  afs->output.nch    = out_channels ? out_channels : afs->input.nch;
+  afs->output.format = out_format ? out_format : afs->input.format;
+  afs->output.bps    = out_bps ? out_bps : afs->input.bps;
+
+  // filter config:  
+  afs->cfg.force = 0;
+  afs->cfg.list = NULL;
+  
+  mp_msg(MSGT_DECAUDIO, MSGL_INFO, "Building audio filter chain for %dHz/%dch/%dbit -> %dHz/%dch/%dbit...\n",
+      afs->input.rate,afs->input.nch,afs->input.bps*8,
+      afs->output.rate,afs->output.nch,afs->output.bps*8);
+  
+  // let's autoprobe it!
+  if(0 != af_init(afs)){
+    free(afs);
+    return 0; // failed :(
+  }
+  
+  // allocate the a_out_* buffers:
+  if(out_maxsize<out_minsize) out_maxsize=out_minsize;
+  if(out_maxsize<8192) out_maxsize=MAX_OUTBURST; // not sure this is ok
+
+  sh_audio->a_out_buffer_size=out_maxsize;
+  sh_audio->a_out_buffer=malloc(sh_audio->a_out_buffer_size);
+  memset(sh_audio->a_out_buffer,0,sh_audio->a_out_buffer_size);
+  sh_audio->a_out_buffer_len=0;
+  
+  // ok!
+  sh_audio->afilter=(void*)afs;
+  return 1;
+}
+
 int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen)
 {
-  if(sh_audio->inited) 
-    return mpadec->decode_audio(sh_audio,buf,minlen,maxlen);
+  int declen;
+  af_data_t  afd;  // filter input
+  af_data_t* pafd; // filter output
+
+  if(!sh_audio->inited) return -1; // no codec
+  if(!sh_audio->afilter){
+      // no filter, just decode:
+      // FIXME: don't drop initial decoded data in a_buffer!
+      return mpadec->decode_audio(sh_audio,buf,minlen,maxlen);
+  }
+  
+//  declen=af_inputlen(sh_audio->afilter,minlen);
+  declen=af_calc_insize_constrained(sh_audio->afilter,minlen,maxlen,
+      sh_audio->a_buffer_size-sh_audio->audio_out_minsize);
+
+  mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"\ndecaudio: minlen=%d maxlen=%d declen=%d (max=%d)\n",
+      minlen, maxlen, declen, sh_audio->a_buffer_size);
+
+  if(declen<=0) return -1; // error!
+
+  // limit declen to buffer size: - DONE by af_calc_insize_constrained
+//  if(declen>sh_audio->a_buffer_size) declen=sh_audio->a_buffer_size;
+
+  // decode if needed:
+  while(declen>sh_audio->a_buffer_len){
+      int len=declen-sh_audio->a_buffer_len;
+      int maxlen=sh_audio->a_buffer_size-sh_audio->a_buffer_len;
+
+      mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"decaudio: decoding %d bytes, max: %d (%d)\n",
+        len, maxlen, sh_audio->audio_out_minsize);
+
+      if(maxlen<sh_audio->audio_out_minsize) break; // don't overflow buffer!
+      // not enough decoded data waiting, decode 'len' bytes more:
+      len=mpadec->decode_audio(sh_audio,
+          sh_audio->a_buffer+sh_audio->a_buffer_len, len, maxlen);
+      if(len<=0) break; // EOF?
+      sh_audio->a_buffer_len+=len;
+  }
+  if(declen>sh_audio->a_buffer_len)
+    declen=sh_audio->a_buffer_len; // still no enough data (EOF) :(
+
+  // round to whole samples:
+//  declen/=sh_audio->samplesize*sh_audio->channels;
+//  declen*=sh_audio->samplesize*sh_audio->channels;
+
+  // run the filters:
+  afd.audio=sh_audio->a_buffer;
+  afd.len=declen;
+  afd.rate=sh_audio->samplerate;
+  afd.nch=sh_audio->channels;
+  afd.format=sh_audio->sample_format;
+  afd.bps=sh_audio->samplesize;
+  //pafd=&afd;
+//  printf("\nAF: %d --> ",declen);
+  pafd=af_play(sh_audio->afilter,&afd);
+//  printf("%d  \n",pafd->len);
+
+  if(!pafd) return -1; // error
+
+  mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"decaudio: declen=%d out=%d (max %d)\n",
+      declen, pafd->len, maxlen);
+  
+  // copy filter==>out:
+  if(maxlen < pafd->len)
+    mp_msg(MSGT_DECAUDIO,MSGL_WARN,"%i bytes of audio data lost due to buffer overflow, len = %i", pafd->len - maxlen,pafd->len);
   else
-    return -1;
+    maxlen=pafd->len;
+  memmove(buf, pafd->audio, maxlen);
+  
+  // remove processed data from decoder buffer:
+  sh_audio->a_buffer_len-=declen;
+  if(sh_audio->a_buffer_len>0)
+    memmove(sh_audio->a_buffer, sh_audio->a_buffer+declen, sh_audio->a_buffer_len);
+  
+  return maxlen;
 }
 
 void resync_audio_stream(sh_audio_t *sh_audio)

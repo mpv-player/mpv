@@ -111,9 +111,6 @@ extern int nortc;
 /* from libvo/aspect.c */
 extern float monitor_aspect;
 
-/* from dec_audio, currently used for ac3surround decoder only */
-extern int audio_output_channels;
-
 /* Options related to audio out plugins */
 struct config ao_plugin_conf[]={
 	{"list", &ao_plugin_cfg.plugin_list, CONF_TYPE_STRING, 0, 0, 0, NULL},
@@ -173,7 +170,6 @@ static config_t mplayer_opts[]={
 	{"dsp", "Use -ao oss:dsp_path!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
         {"mixer", &mixer_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"master", "Option -master has been removed, use -aop list=volume instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
-	{"channels", &audio_output_channels, CONF_TYPE_INT, CONF_RANGE, 2, 6, NULL},
 	// override audio buffer size (used only by -ao oss, anyway obsolete...)
 	{"abs", &ao_data.buffersize, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
 

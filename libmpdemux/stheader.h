@@ -55,15 +55,21 @@ typedef struct {
   int o_bps; // == samplerate*samplesize*channels   (uncompr. bytes/sec)
   int i_bps; // == bitrate  (compressed bytes/sec)
   // in buffers:
-  int audio_in_minsize;
+  int audio_in_minsize;	// max. compressed packet size (== min. in buffer size)
   char* a_in_buffer;
   int a_in_buffer_len;
   int a_in_buffer_size;
-  // out buffers:
-  int audio_out_minsize;
+  // decoder buffers:
+  int audio_out_minsize; // max. uncompressed packet size (==min. out buffsize)
   char* a_buffer;
   int a_buffer_len;
   int a_buffer_size;
+  // output buffers:
+  char* a_out_buffer;
+  int a_out_buffer_len;
+  int a_out_buffer_size;
+//  void* audio_out;        // the audio_out handle, used for this audio stream
+  void* afilter;          // the audio filter stream
   // win32-compatible codec parameters:
   AVIStreamHeader audio;
   WAVEFORMATEX* wf;

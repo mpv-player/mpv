@@ -45,6 +45,8 @@ static char* banner_text=
 
 #include "libvo/video_out.h"
 
+#include "libao2/afmt.h"
+
 #include "libmpcodecs/mp_image.h"
 #include "libmpcodecs/dec_audio.h"
 #include "libmpcodecs/dec_video.h"
@@ -249,19 +251,19 @@ static int dec_audio(sh_audio_t *sh_audio,unsigned char* buffer,int total){
     while(size<total && !at_eof){
 	int len=total-size;
 		if(len>MAX_OUTBURST) len=MAX_OUTBURST;
-		if(len>sh_audio->a_buffer_size) len=sh_audio->a_buffer_size;
-		if(len>sh_audio->a_buffer_len){
+		if(len>sh_audio->a_out_buffer_size) len=sh_audio->a_out_buffer_size;
+		if(len>sh_audio->a_out_buffer_len){
 		    int ret=decode_audio(sh_audio,
-			&sh_audio->a_buffer[sh_audio->a_buffer_len],
-    			len-sh_audio->a_buffer_len,
-			sh_audio->a_buffer_size-sh_audio->a_buffer_len);
-		    if(ret>0) sh_audio->a_buffer_len+=ret; else at_eof=1;
+			&sh_audio->a_out_buffer[sh_audio->a_out_buffer_len],
+    			len-sh_audio->a_out_buffer_len,
+			sh_audio->a_out_buffer_size-sh_audio->a_out_buffer_len);
+		    if(ret>0) sh_audio->a_out_buffer_len+=ret; else at_eof=1;
 		}
-		if(len>sh_audio->a_buffer_len) len=sh_audio->a_buffer_len;
-		memcpy(buffer+size,sh_audio->a_buffer,len);
-		sh_audio->a_buffer_len-=len; size+=len;
-		if(sh_audio->a_buffer_len>0)
-		    memcpy(sh_audio->a_buffer,&sh_audio->a_buffer[len],sh_audio->a_buffer_len);
+		if(len>sh_audio->a_out_buffer_len) len=sh_audio->a_out_buffer_len;
+		memcpy(buffer+size,sh_audio->a_out_buffer,len);
+		sh_audio->a_out_buffer_len-=len; size+=len;
+		if(sh_audio->a_out_buffer_len>0)
+		    memcpy(sh_audio->a_out_buffer,&sh_audio->a_out_buffer[len],sh_audio->a_out_buffer_len);
     }
     return size;
 }
@@ -694,15 +696,25 @@ case ACODEC_PCM:
     printf("CBR PCM audio selected\n");
     mux_a->h.dwSampleSize=2*sh_audio->channels;
     mux_a->h.dwScale=1;
-    mux_a->h.dwRate=sh_audio->samplerate;
+    mux_a->h.dwRate=force_srate?force_srate:sh_audio->samplerate;
     mux_a->wf=malloc(sizeof(WAVEFORMATEX));
     mux_a->wf->nBlockAlign=mux_a->h.dwSampleSize;
     mux_a->wf->wFormatTag=0x1; // PCM
-    mux_a->wf->nChannels=sh_audio->channels;
-    mux_a->wf->nSamplesPerSec=sh_audio->samplerate;
+    mux_a->wf->nChannels=audio_output_channels?audio_output_channels:sh_audio->channels;
+    mux_a->wf->nSamplesPerSec=mux_a->h.dwRate;
     mux_a->wf->nAvgBytesPerSec=mux_a->h.dwSampleSize*mux_a->wf->nSamplesPerSec;
     mux_a->wf->wBitsPerSample=16;
     mux_a->wf->cbSize=0; // FIXME for l3codeca.acm
+    // setup filter:
+    if(!init_audio_filters(sh_audio, 
+        sh_audio->samplerate,
+	sh_audio->channels, sh_audio->sample_format, sh_audio->samplesize,
+	mux_a->wf->nSamplesPerSec, mux_a->wf->nChannels,
+	(mux_a->wf->wBitsPerSample==8)?	AFMT_U8:AFMT_S16_LE,
+	mux_a->wf->wBitsPerSample/8,
+	16384, mux_a->wf->nAvgBytesPerSec)){
+      mp_msg(MSGT_CPLAYER,MSGL_ERR,"Couldn't find matching filter / ao format!\n");
+    }
     break;
 case ACODEC_VBRMP3:
     printf("MP3 audio selected\n");
@@ -712,8 +724,9 @@ case ACODEC_VBRMP3:
     if(sizeof(MPEGLAYER3WAVEFORMAT)!=30) mp_msg(MSGT_MENCODER,MSGL_WARN,"sizeof(MPEGLAYER3WAVEFORMAT)==%d!=30, maybe broken C compiler?\n",sizeof(MPEGLAYER3WAVEFORMAT));
     mux_a->wf=malloc(sizeof(MPEGLAYER3WAVEFORMAT)); // should be 30
     mux_a->wf->wFormatTag=0x55; // MP3
-    mux_a->wf->nChannels= sh_audio->channels;
-    mux_a->wf->nSamplesPerSec=force_srate?force_srate:sh_audio->samplerate;
+    mux_a->wf->nChannels= (lame_param_mode<0) ? sh_audio->channels :
+	((lame_param_mode==3) ? 1 : 2);
+    mux_a->wf->nSamplesPerSec=mux_a->h.dwRate;
     mux_a->wf->nAvgBytesPerSec=192000/8; // FIXME!
     mux_a->wf->nBlockAlign=(mux_a->h.dwRate<32000)?576:1152; // required for l3codeca.acm + WMP 6.4
     mux_a->wf->wBitsPerSample=0; //16;
@@ -724,6 +737,15 @@ case ACODEC_VBRMP3:
     ((MPEGLAYER3WAVEFORMAT*)(mux_a->wf))->nBlockSize=(mux_a->h.dwRate<32000)?576:1152; // ???
     ((MPEGLAYER3WAVEFORMAT*)(mux_a->wf))->nFramesPerBlock=1;
     ((MPEGLAYER3WAVEFORMAT*)(mux_a->wf))->nCodecDelay=0;
+    // setup filter:
+    if(!init_audio_filters(sh_audio, 
+        sh_audio->samplerate,
+	sh_audio->channels, sh_audio->sample_format, sh_audio->samplesize,
+	mux_a->wf->nSamplesPerSec, mux_a->wf->nChannels,
+	AFMT_S16_LE, 2,
+	4608, mux_a->h.dwRate*mux_a->wf->nChannels*2)){
+      mp_msg(MSGT_CPLAYER,MSGL_ERR,"Couldn't find matching filter / ao format!\n");
+    }
     break;
 }
 
@@ -748,7 +770,8 @@ case ACODEC_VBRMP3:
 
 lame=lame_init();
 lame_set_bWriteVbrTag(lame,0);
-lame_set_in_samplerate(lame,sh_audio->samplerate);
+lame_set_in_samplerate(lame,mux_a->wf->nSamplesPerSec);
+//lame_set_in_samplerate(lame,sh_audio->samplerate); // if resampling done by lame
 lame_set_num_channels(lame,mux_a->wf->nChannels);
 lame_set_out_samplerate(lame,mux_a->wf->nSamplesPerSec);
 lame_set_quality(lame,lame_param_algqual); // 0 = best q

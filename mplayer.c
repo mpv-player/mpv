@@ -1237,6 +1237,7 @@ if(sh_audio){
   if(!(audio_out=init_best_audio_out(audio_driver_list,
       (ao_plugin_cfg.plugin_list), // plugin flag
       force_srate?force_srate:sh_audio->samplerate,
+      audio_output_channels?audio_output_channels:
       sh_audio->channels,sh_audio->sample_format,0))){
     // FAILED:
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CannotInitAO);
@@ -1244,7 +1245,7 @@ if(sh_audio){
   } else {
     // SUCCESS:
     inited_flags|=INITED_AO;
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,"AO: [%s] %iHz %dch %s\n",
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"AO: [%s] %dHz %dch %s\n",
       audio_out->info->short_name,
       force_srate?force_srate:sh_audio->samplerate,
       sh_audio->channels,
@@ -1253,6 +1254,19 @@ if(sh_audio){
       audio_out->info->name, audio_out->info->author);
     if(strlen(audio_out->info->comment) > 0)
       mp_msg(MSGT_CPLAYER,MSGL_V,MSGTR_AOComment, audio_out->info->comment);
+    // init audio filters:
+#if 1
+    current_module="af_init";
+    if(!init_audio_filters(sh_audio, 
+        sh_audio->samplerate,
+	sh_audio->channels, sh_audio->sample_format, sh_audio->samplesize,
+	ao_data.samplerate, ao_data.channels, ao_data.format,
+	audio_out_format_bits(ao_data.format)/8, /* ao_data.bps, */
+	ao_data.outburst*4, ao_data.buffersize)){
+      mp_msg(MSGT_CPLAYER,MSGL_ERR,"Couldn't find matching filter / ao format, -> nosound\n");
+      sh_audio=d_audio->sh=NULL; // -> nosound
+    }
+#endif
   }
 }
 
@@ -1338,24 +1352,25 @@ while(sh_audio){
   // Fill buffer if needed:
   current_module="decode_audio";   // Enter AUDIO decoder module
   t=GetTimer();
-  while(sh_audio->a_buffer_len<playsize && !d_audio->eof){
-    int ret=decode_audio(sh_audio,&sh_audio->a_buffer[sh_audio->a_buffer_len],
-        playsize-sh_audio->a_buffer_len,sh_audio->a_buffer_size-sh_audio->a_buffer_len);
+  while(sh_audio->a_out_buffer_len<playsize && !d_audio->eof){
+    int ret=decode_audio(sh_audio,&sh_audio->a_out_buffer[sh_audio->a_out_buffer_len],
+        playsize-sh_audio->a_out_buffer_len,sh_audio->a_out_buffer_size-sh_audio->a_out_buffer_len);
     if(ret<=0) break; // EOF?
-    sh_audio->a_buffer_len+=ret;
+    sh_audio->a_out_buffer_len+=ret;
   }
   t=GetTimer()-t;
   tt = t*0.000001f; audio_time_usage+=tt;
-  if(playsize>sh_audio->a_buffer_len) playsize=sh_audio->a_buffer_len;
+  if(playsize>sh_audio->a_out_buffer_len) playsize=sh_audio->a_out_buffer_len;
 
   // play audio:  
   current_module="play_audio";
-  playsize=audio_out->play(sh_audio->a_buffer,playsize,0);
+  playsize=audio_out->play(sh_audio->a_out_buffer,playsize,0);
 
   if(playsize>0){
-      sh_audio->a_buffer_len-=playsize;
-      memmove(sh_audio->a_buffer,&sh_audio->a_buffer[playsize],sh_audio->a_buffer_len);
-      sh_audio->timer+=playsize/(float)(sh_audio->o_bps);
+      sh_audio->a_out_buffer_len-=playsize;
+      memmove(sh_audio->a_out_buffer,&sh_audio->a_out_buffer[playsize],sh_audio->a_out_buffer_len);
+      sh_audio->timer+=playsize/((float)((ao_data.bps && sh_audio->afilter) ?
+          ao_data.bps : sh_audio->o_bps));
   }
 
   break;

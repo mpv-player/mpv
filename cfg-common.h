@@ -91,6 +91,7 @@
 	// force video/audio rate:
 	{"fps", &force_fps, CONF_TYPE_FLOAT, CONF_MIN, 0, 0, NULL},
 	{"srate", &force_srate, CONF_TYPE_INT, CONF_RANGE, 1000, 8*48000, NULL},
+	{"channels", &audio_output_channels, CONF_TYPE_INT, CONF_RANGE, 1, 6, NULL},
 
 // ------------------------- codec/vfilter options --------------------
 
@@ -186,6 +187,9 @@ extern float screen_size_xy;
 extern float movie_aspect;
 extern int softzoom;
 extern int flip;
+
+/* from dec_audio, currently used for ac3surround decoder only */
+extern int audio_output_channels;
 
 #ifdef STREAMING
 /* defined in network.c */
