@@ -233,8 +233,8 @@ static char help_text[]=
 // --- buttons ---
 #define MSGTR_Ok "Ok"
 #define MSGTR_Cancel "Mégse"
-#define MSGTR_Add "Hozzáadás"
-#define MSGTR_Remove "Elvétel"
+#define MSGTR_Add "Hozzáad"
+#define MSGTR_Remove "Kivesz"
 
 // --- error messages ---
 #define MSGTR_NEMDB "Nincs elég memória a buffer kirajzolásához."
