@@ -634,6 +634,7 @@ mp_input_read_keys(int time,int paused) {
     if((unsigned int)i >= num_key_fd) {
       i = -1;
       last_loop++;
+      last_loop %= (num_key_fd+1);
       continue;
     }
     // No input from this fd
@@ -785,6 +786,7 @@ mp_input_read_cmds(int time) {
     if((unsigned int)i >= num_cmd_fd) {
       i = -1;
       last_loop++;
+      last_loop %= (num_cmd_fd+1);
       continue;
     }
     if( ! (cmd_fds[i].flags & MP_FD_NO_SELECT) && ! FD_ISSET(cmd_fds[i].fd,&fds) && ! (cmd_fds[i].flags & MP_FD_GOT_CMD) )

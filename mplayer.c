@@ -163,7 +163,7 @@ int frameratecode2framerate[16] = {
 
 // Common FIFO functions, and keyboard/event FIFO code
 #include "fifo.c"
-
+int use_stdin=0;
 //**************************************************************************//
 
 #ifdef USE_LIBVO2
@@ -273,8 +273,6 @@ static int screen_size_x=0;//SCREEN_SIZE_X;
 static int screen_size_y=0;//SCREEN_SIZE_Y;
 static int screen_size_xy=0;
 static float movie_aspect=-1.0;
-
-char* playlist_file;
 
 // sub:
 char *font_name=NULL;
@@ -512,7 +510,6 @@ int rtc_fd=-1;
 //float a_frame=0;    // Audio
 
 int i;
-int use_stdin=0; //int f; // filedes
 
 int gui_no_filename=0;
 
@@ -734,7 +731,7 @@ if(keyb_fifo_get > 0)
   mp_input_add_key_fd(keyb_fifo_get,1,NULL,NULL);
 if(slave_mode)
    mp_input_add_cmd_fd(0,1,NULL,NULL);
-else
+else if(!use_stdin)
   mp_input_add_key_fd(0,1,NULL,NULL);
 inited_flags|=INITED_INPUT;
 current_module = NULL;
@@ -935,19 +932,6 @@ play_dvd:
       }
     }
   }
-
-#ifdef HAVE_NEW_INPUT
-    if(!slave_mode && filename && !use_stdin && !strcmp(filename,"-")) {      
-    mp_input_rm_key_fd(0);
-    use_stdin = 1;
-  }
-  else if(!slave_mode && use_stdin && (!filename || strcmp(filename,"-"))) {
-    mp_input_add_key_fd(0,1,NULL,NULL);
-    use_stdin = 0;
-  }
-#else
-  use_stdin=filename && (!strcmp(filename,"-"));
-#endif
 
   current_module="open_stream";
   stream=open_stream(filename,vcd_track,&file_format);
