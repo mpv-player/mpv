@@ -36,6 +36,9 @@ extern int verbose; // defined in mplayer.c
 
 #include "cpudetect.h"
 
+/* used for ac3surround decoder - set using -channels option */
+int audio_output_channels = 2;
+
 #ifdef USE_FAKE_MONO
 int fakemono=0;
 #endif
@@ -82,10 +85,6 @@ typedef struct ov_struct_st {
 static struct mad_stream mad_stream;
 static struct mad_frame  mad_frame;
 static struct mad_synth  mad_synth;
-
-/* used for ac3surround decoder - set using -channels option */
-int audio_output_channels = 2;
-
 
 // ensure buffer is filled with some data
 static void mad_prepare_buffer(sh_audio_t* sh_audio, struct mad_stream* ms, int length)
