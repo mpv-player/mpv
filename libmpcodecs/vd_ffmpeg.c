@@ -727,6 +727,9 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
         mpi->stride[1]=pic->linesize[1];
         mpi->stride[2]=pic->linesize[2];
     }
+    
+    if (!mpi->planes[0])
+	return NULL;
 
     if(avctx->pix_fmt==PIX_FMT_YUV422P && mpi->chroma_y_shift==1){
 	// we have 422p but user wants 420p
