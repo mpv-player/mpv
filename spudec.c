@@ -133,13 +133,21 @@ static inline void spudec_cut_image(spudec_handle_t *this)
   unsigned int first_y, last_y;
   unsigned char *image;
   unsigned char *aimage;
+
   for (fy = 0; fy < this->image_size && !this->aimage[fy]; fy++);
   for (ly = this->stride * this->height-1; ly && !this->aimage[ly]; ly--);
   first_y = fy / this->stride;
   last_y = ly / this->stride;
   //printf("first_y: %d, last_y: %d\n", first_y, last_y);
   this->start_row += first_y;
-  this->height = last_y - first_y +1;
+
+  // Some subtitles trigger this condition
+  if (last_y + 1 > first_y ) {
+	  this->height = last_y - first_y +1;
+  } else {
+	  this->height = 0;
+  }
+  
   //printf("new h %d new start %d (sz %d st %d)---\n\n", this->height, this->start_row, this->image_size, this->stride);
   image = malloc(2 * this->stride * this->height);
   if(image){
@@ -150,9 +158,12 @@ static inline void spudec_cut_image(spudec_handle_t *this)
     free(this->image);
     this->image = image;
     this->aimage = aimage;
+  } else {
+    // We'll get NULL if 0 byte is requested and it's not an error
+    if (this->stride && this->height ) {
+      fprintf(stderr,"Fatal: update_spu: malloc requested %d bytes\n", 2 * this->stride * this->height);
+    }
   }
-  else
-    perror("Fatal: update_spu: malloc");
 }
 
 static void spudec_process_data(spudec_handle_t *this)
