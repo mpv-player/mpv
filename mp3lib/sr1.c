@@ -24,7 +24,7 @@
 #include "mpg123.h"
 #include "huffman.h"
 #include "mp3.h"
-
+#include "bswap.h"
 #include "d_cpu.h"
 
 //static FILE* mp3_file=NULL;
@@ -122,9 +122,7 @@ LOCAL unsigned int getbits_fast(short number_of_bits)
 //  if(MP3_frames>=7741) printf("getbits_fast: bits=%d  bitsleft=%d  wordptr=%x\n",number_of_bits,bitsleft,wordpointer);
   if((bitsleft-=number_of_bits)<0) return 0;
   if(!number_of_bits) return 0;
-   rval = wordpointer[0];
-         rval <<= 8;
-         rval |= wordpointer[1];
+  rval = bswap_16(*((unsigned short *)wordpointer));
          rval <<= bitindex;
          rval &= 0xffff;
          bitindex += number_of_bits;
@@ -159,19 +157,15 @@ LOCAL void set_pointer(long backstep)
 
 LOCAL int stream_head_read(unsigned char *hbuf,unsigned long *newhead){
   if(mp3_read(hbuf,4) != 4) return FALSE;
-  *newhead = ((unsigned long) hbuf[0] << 24) |
-                   ((unsigned long) hbuf[1] << 16) |
-                   ((unsigned long) hbuf[2] << 8)  |
-                    (unsigned long) hbuf[3];
-        return TRUE;
+  *newhead = bswap_32(*((unsigned long *)hbuf));
+  return TRUE;
 }
 
 LOCAL int stream_head_shift(unsigned char *hbuf,unsigned long *head){
-  memmove (&hbuf[0], &hbuf[1], 3);
+  *((unsigned long *)hbuf) >>= 8;
   if(mp3_read(hbuf+3,1) != 1) return 0;
   *head <<= 8;
   *head |= hbuf[3];
-  *head &= 0xffffffff;
   return 1;
 }
 
@@ -182,9 +176,8 @@ LOCAL int stream_head_shift(unsigned char *hbuf,unsigned long *head){
 LOCAL int decode_header(struct frame *fr,unsigned long newhead){
 
     // head_check:
-    if( (newhead & 0xffe00000) != 0xffe00000)   return FALSE;
-    if( ((newhead>>12)&0xf) == 0xf)     return FALSE;
-    if( ((newhead>>10)&0x3) == 0x3 )    return FALSE;
+    if( (newhead & 0xffe00000) != 0xffe00000 ||  
+        (newhead & 0x0000f300) == 0x0000f300) return FALSE;
 
     fr->lay = 4-((newhead>>17)&3);
 //    if(fr->lay!=3) return FALSE;
