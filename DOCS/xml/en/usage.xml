@@ -454,8 +454,8 @@ After having compiled <application>MPlayer</application> go to the
 <filename>TOOLS/netstream</filename> directory and enter
 <application>make</application> to build the server binary.
 You can then copy the <application>netstream</application> binary
-to the right place on your system (usely <filename>/usr/local/bin</filename>
-on Linux).
+to the right place on your system (usually
+<filename class="directory">/usr/local/bin</filename> on Linux).
 </para>
 </sect2>
 
