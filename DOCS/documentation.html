@@ -1410,6 +1410,15 @@ Table of Contents
   <B>Q: I can't compile SVGAlib.. I'm using 2.3/2.4 kernel.
   </B>A: You have to edit SVGAlib's Makefile.cfg and comment "BACKGROUND = y" out.
 
+  <B>Q: I compiled <B>MPlayer</B> with libcss support, but when I try to start
+        it, it says :
+	  > error while loading shared libraries: libcss.so.0: cannot load
+	  > shared object file: No such file or directory
+	I checked up on the file and it IS there in /usr/local/lib.
+  </B>A: What are you doing on Linux? Can't you install a library? Why do
+    we get these questions? It's not <B>MPlayer</B> specific at all! Add
+    /usr/local/lib to <B>/etc/ld.so.conf</B> and run <B>ldconfig</B> .
+
   <A NAME=6.2>6.2.  General questions
 
   <B>Q: What about DVD playback?
