@@ -717,6 +717,7 @@ int eof=0;
 int osd_function=OSD_PLAY;
 int osd_last_pts=-303;
 int osd_show_av_delay = 0;
+int osd_show_text = 0;
 int osd_show_sub_delay = 0;
 int osd_show_sub_pos = 0;
 int osd_show_sub_visibility = 0;
@@ -1727,6 +1728,7 @@ float time_frame=0; // Timer
 //float num_frames=0;      // number of frames played
 int grab_frames=0;
 char osd_text_buffer[64];
+char osd_show_text_buffer[64];
 int drop_frame=0;     // current dropping status
 int dropped_frames=0; // how many frames dropped since last non-dropped frame
 int too_slow_frame_cnt=0;
@@ -2492,6 +2494,14 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	else
 	  osd_level= v > MAX_OSD_LEVEL ? MAX_OSD_LEVEL : v;
       } break;
+    case MP_CMD_OSD_SHOW_TEXT :  {
+#ifdef USE_OSD
+      if(osd_level && sh_video){
+	osd_show_text=sh_video->fps; // 1 sec
+        strncpy(osd_show_text_buffer, cmd->args[0].v.s, 64);
+      }
+#endif
+    } break;
     case MP_CMD_VOLUME :  {
       int v = cmd->args[0].v.i;
 
@@ -3263,6 +3273,10 @@ if(rel_seek_secs || abs_seek_pos){
 	  osd_show_tv_channel--;
       } else
 #endif
+      if (osd_show_text) {
+	  snprintf(osd_text_tmp, 63, "%s", osd_show_text_buffer);
+	  osd_show_text--;
+      } else
       if (osd_show_sub_visibility) {
 	  snprintf(osd_text_tmp, 63, "Subtitles: %sabled", sub_visibility?"en":"dis");
 	  osd_show_sub_visibility--;
