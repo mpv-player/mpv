@@ -790,9 +790,9 @@ La sortie FBdev accepte certains paramètres additionnels:
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
-  <term><option>-monitor_hfreq</option></term>
-  <term><option>-monitor_vfreq</option></term>
-  <term><option>-monitor_dotclock</option></term>
+  <term><option>-monitor-hfreq</option></term>
+  <term><option>-monitor-vfreq</option></term>
+  <term><option>-monitor-dotclock</option></term>
   <listitem><simpara>
     valeurs <emphasis role="bold">importantes</emphasis>, voir
     <filename>example.conf</filename>
@@ -1141,7 +1141,7 @@ que la sortie TV est souvent une tête indépendante ou au moins une sortie indépe
   </simpara></listitem>
 <listitem><simpara>
   si vous avez un BIOS VESA VBE 3.0+, et que vous avez spécifié
-  <systemitem>monitor_hfreq, monitor_vfreq, monitor_dotclock</systemitem> quelque part
+  <systemitem>monitor-hfreq, monitor-vfreq, monitor-dotclock</systemitem> quelque part
   (fichier de config, ou ligne de commande) vous aurez le plus haut taux de
   rafraîchissement possible (en utilisant la Formule Générale de Timing). Pour activer
   cette fonctionnalité vous devrez spécifier <emphasis role="bold">toutes</emphasis>

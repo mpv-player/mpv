@@ -516,9 +516,9 @@ quello che vuoi.  E non dimenticare di registrare il tuo UniVBE ;))</P>
 <FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>specifica il dispositivo framebuffer da usare (/dev/fb0)</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fbmode</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>nome della modalità da usare (secondo /etc/fb.modes)</TD><TR>
 <TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fbmodeconfig</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>	file di configurazione delle modalità (default /etc/fb.modes)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-monitor_hfreq</TD><TD></TD><TD ROWSPAN=3><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>valori IMPORTANTI, vedi example.conf</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-monitor_vfreq</TD><TD></TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-monitor_dotclock</TD><TD></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-monitor-hfreq</TD><TD></TD><TD ROWSPAN=3><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>valori IMPORTANTI, vedi example.conf</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-monitor-vfreq</TD><TD></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-monitor-dotclock</TD><TD></TD><TR>
 </TABLE></P>
 
 <P>Se vuoi cambiare ad una modalità specifica, allora usa</P>
@@ -710,8 +710,8 @@ almeno.)
   <B>reale</B>. (detto meglio -in modalità vm86).</LI>
  <LI>Puoi usarlo insieme a Vidix, ottenendo così l'accelerazione video <B>E</B>
   l'output su TV allo stesso tempo! (raccomandato per le schede ATI)</LI>
-<LI>Se hai VESA VBE 3.0+, e hai specificato <CODE>monitor_hfreq</CODE>,
-    <CODE>monitor_vfreq</CODE>, <CODE>monitor_dotclock</CODE> da qualche parte (file di 
+<LI>Se hai VESA VBE 3.0+, e hai specificato <CODE>monitor-hfreq</CODE>,
+    <CODE>monitor-vfreq</CODE>, <CODE>monitor-dotclock</CODE> da qualche parte (file di 
     configurazione, o linea di comando) otterrai il refresh rate più alto possibile. (Usando
     General Timing Formula). Per abilitalo dovrai specificare
     <B>tutte</B> le opzioni del tuo monitor.</LI>

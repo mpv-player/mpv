@@ -522,9 +522,9 @@ esd, arts)</TD><TR>
 a framebuffer egység megadása (/dev/fb0)</TD><TR> 
 <TD></TD><TD>-fbmode</TD><TD></TD><TD>a használni kívánt videomód neve (/etc/fb.modes szerint)</TD><TR>
 <TD></TD><TD>-fbmodeconfig</TD><TD></TD><TD>módkonfigurációs file (alapban /etc/fb.modes)</TD><TR>
-<TD></TD><TD>-monitor_hfreq</TD><TD></TD><TD ROWSPAN=3>see etc/example.conf</TD><TR>
-<TD></TD><TD>-monitor_vfreq</TD><TD></TD><TR>
-<TD></TD><TD>-monitor_dotclock</TD><TD></TD><TR>        
+<TD></TD><TD>-monitor-hfreq</TD><TD></TD><TD ROWSPAN=3>see etc/example.conf</TD><TR>
+<TD></TD><TD>-monitor-vfreq</TD><TD></TD><TR>
+<TD></TD><TD>-monitor-dotclock</TD><TD></TD><TR>        
 </TABLE>
 
 <P>Ha egy specifikus videomódba akarsz váltani, azt így teheted :</P>
@@ -713,8 +713,8 @@ Here are some important:</P></B></TD><TR>
   <LI>Használhatod vele a Vidix-et, így a hardveres gyorsítású megjelenítést,
     ÉS a TV kimenetet egyszerre használhatod! (ATI kártyákhoz ajánlott)</LI>
   <LI>Ha a videokártyád VESA VBE 3.0-át is tud és megfelelõen kitöltötted a
-    <CODE>monitor_hfreq</CODE>, <CODE>monitor_vfreq</CODE>,
-    <CODE>monitor_dotclock</CODE> értékeket (akár a config file-ban, akár
+    <CODE>monitor-hfreq</CODE>, <CODE>monitor-vfreq</CODE>,
+    <CODE>monitor-dotclock</CODE> értékeket (akár a config file-ban, akár
     parancssorban), a lehetõ legmagasabb képfrissítési frekvencia lesz
     kiválasztva.</LI>
 </UL>

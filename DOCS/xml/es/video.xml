@@ -813,9 +813,9 @@ La salida FBdev toma parámetros adicionales sobre los otros:
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
-  <term><option>-monitor_hfreq</option></term>
-  <term><option>-monitor_vfreq</option></term>
-  <term><option>-monitor_dotclock</option></term>
+  <term><option>-monitor-hfreq</option></term>
+  <term><option>-monitor-vfreq</option></term>
+  <term><option>-monitor-dotclock</option></term>
   <listitem><simpara>
     valores importantes <emphasis role="bold">important</emphasis>, vea
     <filename>example.conf</filename>
@@ -1192,7 +1192,7 @@ al menos una salida individual.)
   </simpara></listitem>
 <listitem><simpara>
   Si tiene VESA VBE 3.0+, y especifica
-  <systemitem>monitor_hfreq, monitor_vfreq, monitor_dotclock</systemitem> en
+  <systemitem>monitor-hfreq, monitor-vfreq, monitor-dotclock</systemitem> en
   algún sitio (archivo de configuración, o línea de órdenes) podrá obtener
   la tasa de refresco mayor posible. (Usando la Fórmula de Temporización General).
   Para activar ésta característica debe especificar <emphasis role="bold">todas</emphasis>
