@@ -23,22 +23,21 @@ Contents
 2. What is DGA?
 ~~~~~~~~~~~~~~~
 
- DGA is short for Direct Graphics Access and is a method for a program to
- bypass the X-Server and directly modify the framebuffer memory. 
+ DGA is short for Direct Graphics Access and is a means for a programm to
+ bypass the X-Server and directly modifying the framebuffer memory. 
  Technically spoken this happens by mapping the framebuffer memory into
- the memory range of your process. This is only allowed by the kernel
+ the memory range of your process. This is just allowed by the kernel
  if you have superuser privileges. You can get these either by logging in 
- as root or by setting the suid bit on the mplayer executable (NOT
- recommended!).
+ as root or by setting the suid bit on the mplayer excecutable.
 
- There are two versions of DGA: DGA1 is used by XFree 3.x.x and DGA2 was 
+ There are two versions of DGA: DGA1 is used by XFree 3.X.X and DGA2 was 
  introduced with XFree 4.0.1.
 
- DGA1 provides only the direct framebuffer access as described above. For 
+ DGA1 just provides direct framebuffer access as described above. For 
  switching the resolution of the video signal you have to rely on the 
  XVidMode extension.
 
- DGA2 incorporated the features of XVidMode extension and also allows
+ DGA2 incorporates the features of XVidMode extension and also allows
  switching the depth of the display. So you may, although basically 
  running a 32 bit depth XServer, switch to a depth of 15 bits and vice 
  versa. 
@@ -58,12 +57,12 @@ Contents
  /etc/X11/XF86Config (/etc/X11/XF86Config-4 for XFree 4.0.X respectively).
  Those are defined by so-called modelines and depend on the capabilites
  of your video hardware. The XServer scans this config file on startup and
- disables the modelines not suitable for your hardware. You can find 
+ disables those modelines not suitable for your hardware. You can find 
  out which modes survive with the X11 log file. It can be found at:
- /var/log/XFree86.0.log
+ /var/log/XFree86.0.log (on Debian systems ... :-) )
  See appendix A for some sample modeline definitions.
 
-4. DGA & MPlayer
+4. DGA & MPLayer
 ~~~~~~~~~~~~~~~~
 
  DGA is used in two places with MPlayer: The SDL driver can be made to make
@@ -76,47 +75,88 @@ Contents
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  
  The DGA driver is invoked by specifying -vo dga at the command line.
+ The default behaviour is to switch to a resolution matching the original 
+ resolution of the video as close as possible. It deliberately ignores the 
+ -vm and -fs switches (enabling of video mode switching and fullscreen) - 
+ it always tries to cover as much area of your screen as possible by switching
+ the video mode, thus refraining to use a single additional cycle of your CPU 
+ to scale the image.
+ If you don't like the mode it chooses you may force it to choose the mode
+ matching closest the resolution you specify by -x and -y. 
+ By providing the -v option, the DGA driver will print, among a lot of other 
+ things, a list of all resolutions supported by your current XF86-Config 
+ file.
+ Having DGA2 you may also force it to use a certain depth by using the -bpp 
+ option. Valid depths are 15, 16, 24 and 32. It depends on your hardware 
+ whether these depths are natively supported or if a (possibly slow) 
+ conversion has to be done.
+ 
+ If you should be lucky enough to have enough offscreen memory left to 
+ put a whole image there, the DGA driver will use doublebuffering, which 
+ results in much smoother movie replaying. It will tell you whether double-
+ buffering is enabled or not.
 
- ... to be continued during the next days ...
 
-# An advantage of this method is that you are in full control of the 
-# framebuffer and can put your hand on the code that is used for copying
-# to the framebuffer. However there are two disadvantages:
- 
-# First, you control the screen - no more windowmanager functionally - just
-# the one application that uses DGA is visible.
+6. Speed issues
+~~~~~~~~~~~~~~~
+ Generally spoken, DGA framebuffer access should be at least as fast as using
+ the X11 driver with the additional benefit of getting a fullscreen image.
+ The percentage speed values printed by mplayer have to be interpreted with 
+ some care, as for example, with the X11 driver they do not include the time
+ used by the X-Server needed for the actual drawing. Hook a terminal to a 
+ serial line of your box and start top to see what is really going on in your 
+ box ...
 
-# Second you 
- 
- 
- 
-# Do it like this (you got to be root for this):
+ Generally spoken, the speedup done by using DGA against 'normal' use of X11 
+ highly depends on your graphics card and how well the X-Server module for it 
+ is optimized.
 
- # chown root /usr/local/bin/mplayer
- # chmod 750 /usr/local/bin/mplayer 
- # chmod +s /usr/local/bin/mplayer 
+ If you have a slow system, better use 15 or 16bit depth since they require 
+ only half the memory bandwidth of a 32 bit display. 
  
-# Now it works for simple users, too.
-# !!!! BUT STAY TUNED !!!!
-# This is a BIG security risk! Never do this on a server or on a computer
-# can be accessed by more people than only you because they can gain root
-# privilegies through suid root mplayer.
-# !!!! SO YOU HAVE BEEN WARNED ... !!!!
-#
+ Using a depth of 24bit is even a good idea if your card natively just supports 
+ 32 bit depth since it transfers 25% less data compared to the 32/32 mode. 
+ 
+ I've seen some avi files already be replayed on a Pentium MMX 266. AMD K6-2
+ CPUs might work at 400 MHZ and above.
+
+7. Known Bugs
+~~~~~~~~~~~~~
+
+ Well, according to some developpers of XFree, DGA is quite a beast. They 
+ tell you better not to use it. Its implementation is not always flawless
+ with every chipset driver for XFree out there.
+
+ o with XFree 4.0.3 and nv.o there is a bug resulting in strange colors
+ o ATI driver requires to switch mode back more than once after finishing 
+   using of DGA
+ o some drivers simply fail to switch back to normal resolution (use 
+   Ctrl-Alt-Keypad +, - to switch back manually)
+ o some drivers simply display strange colors
+ o some drivers lie about the amount of memory they map into the process's
+   address spacei, thus vo_dga won't use doublebuffering (SIS?)
+ o some drivers seem to fail to report even a single valid mode. In this
+   case the DGA driver will crash telling you about a nonsense mode of 
+   100000x100000 or the like ...
+ o OSD only works with doublebuffering enabled
+
+8. Future work
+~~~~~~~~~~~~~~
+
+ o use of the new X11 render interface for OSD
+ o where is my TODO list ???? :-(((
+
 
 A. Sample modelines
 ~~~~~~~~~~~~~~~~~~~
 Section "Modes"
   Identifier    "Modes[0]"
-  # 800x600 @ 60 Hz, 37.8 kHz hsync
-  Modeline	"800x600"  40     800 840 968 1056  600 601 605 628 
   Modeline      "712x600"  35.0   712 740 850 900   400 410 412 425
   Modeline      "640x480"  25.175 640 664 760 800   480 491 493 525 
-  Modeline 	"400x300"     20     400  416  480  528   300  301  303  314 Doublescan
-  Modeline	"352x288"  25.10  352 368 416 432   288 296 290 310
   Modeline      "352x240"  15.750 352 368 416 432   240 244 246 262 Doublescan
-  Modeline	"320x240"     12.588  320 336 384 400 240 245 246 262 Doublescan
-
+  # 800x600 @ 60 Hz, 37.8 kHz hsync
+  Modeline	"800x600"  40     800 840 968 1056  600 601 605 628 
+  Modeline	"352x288"  25.10  352 368 416 432   288 296 290 310
 EndSection
 
 
