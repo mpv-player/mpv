@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.50 -->
+<!-- synced with 1.51 -->
 <sect1 id="install">
 <title>Telepítés</title>
 
@@ -113,6 +113,10 @@ Nem árt, ha vmi újabb rendszered van. Linuxon a 2.4.x-es kernel javasolt.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">libsmb</emphasis> - választható, Samba támogatáshoz kell.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">ALSA</emphasis> - választható, az ALSA audió kimenet
+  támogatásához. Legalább 0.9.0rc4 szükséges.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">bio2jack</emphasis> - választható, a JACK audió kimenet támogatásához kell,
