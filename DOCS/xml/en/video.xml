@@ -1826,7 +1826,7 @@ scaler. The commandline is
 Cropping can be done by the <systemitem>crop</systemitem> filter and by this
 driver itself. Suppose that a movie is too wide for display on your Buz and
 that you want to use <option>-zrcrop</option> to make the movie less wide,
-the you would issue the following command
+then you would issue the following command
 <screen>mplayer -vo zr -zrcrop 720x320+80+0 benhur.avi</screen>
 </para>
 
@@ -1854,7 +1854,7 @@ mplayer -vo zr -zrdev /dev/video0 -zrcrop 352x288+352+0 -zrxdoff 0 -zrbw \
 You see that the options appearing before the second <option>-zrcrop</option>
 only apply to the DC10+ and that the options after the second
 <option>-zrcrop</option> apply to the Buz. The maximum number of MJPEG cards
-participating in <emphasis>cinerama</emphasis> is four, so you can buid a
+participating in <emphasis>cinerama</emphasis> is four, so you can build a
 2x2 vidiwall.
 </para>
 
