@@ -676,17 +676,57 @@ directive to use the skin in <CODE>*/Skin/newskin</CODE> directory.</P>
 
 <P><B><A NAME=1.5>1.5. Subtitles and OSD</A></B></P>
 
-<P>Yes, <B>MPlayer</B> also supports many kinds of subtitles. Currently
-10 kinds of subtitle can be used by the subreader code. To see what are
-these subtitle formats, see subreader.c, line ~30.</P>
+<P>
+<B>MPlayer</B> can display subtitles along with movie files. Currently the following 
+formats are supported:
+<UL>
+<LI>VobSub</LI>
+<LI>Microdvd</LI>
+<LI>SubRip</LI>
+<LI>SubViewer</LI>
+<LI>Sami</LI>
+<LI>VPlayer</LI>
+<LI>RT</LI>
+<LI>SSA</LI>
+<LI>MPsub</LI>
+<LI>AQTitle</LI>
+</UL>
+The command line options differ slightly for the different formats:
+</P>
 
-<P><B>MPlayer</B> supports VobSub subtitles. VobSub subtitles consist of
-a big (some megabytes) .SUB file, and optional .IDX and/or .IFO files.
+<P>
+<B>VobSub subtitles</B><BR> 
+VobSub subtitles consist of a big (some megabytes) .SUB file, and optional 
+.IDX and/or .IFO files.<BR>
 Usage : if you have files like <CODE>sample.sub</CODE>, <CODE>sample.ifo</CODE>,
 <CODE>sample.idx</CODE> - you have to pass the <CODE>-vobsub sample -vobsubid
-0</CODE> options (optionally with pathname, of course). The
+&lt;id&gt;</CODE> options (optionally with pathname, of course). The
 <CODE>-vobsubid</CODE> option is like <CODE>-sid</CODE> for DVDs, you can
 choose between subtitle tracks (languages) with it.</P>
+
+<P>
+<B>Other subtitles</B><BR>
+The other formats consist of a single text file containing timing, placement
+and text information.<BR>
+Usage : if you have a file like <CODE>sample.txt</CODE>, you have to pass 
+the option <CODE>-sub sample.txt (optionally with pathname, of course). 
+</P>
+
+<P>
+<B>Adjusting subtitle timing and placement</B><BR>
+
+<CODE>-subdelay &lt;sec&gt;</CODE> : Delays subtitles by &lt;sec&gt; seconds. Can be negative.<BR>
+<CODE>-subfps &lt;rate&gt;</CODE> : Specify frame/sec rate of subtitle file (float number)<BR>
+<CODE>-subpos &lt;0 - 100&gt;</CODE> : Specify the position of subtitles.<BR>
+</P>
+<P>
+If you experience a growing delay between the movie and the subtitles when using a MicroDVD
+subtitle file, most likely the frame rate of the movie and the subtitle file are different.<BR>
+Please note that the MicroDVD subtitle format uses absolute frame numbers for its
+timing, and therefore the <CODE>-subfps</CODE> option cannot be used with this format. As 
+<B>MPlayer</B> has no way to guess the frame rate of the subtitle file, you have to manually
+convert the frame rate. There is a little perl script in the <CODE>contrib</CODE> directory of 
+the MPlayer ftp site to do this conversation for you. 
 
 <P>About DVD subtitles, read the <A HREF="cd-dvd.html#4.2">DVD section</A>.</P>
 

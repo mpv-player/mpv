@@ -168,6 +168,23 @@ commands are needed :<BR>
   -divx4opts br=1100 -oac copy -o movie.avi -pass 2</CODE>
 </P>
 
+<P><U><B>2 or 3-pass encoding using internal libavcodec controler</B></U> :
+Optionally you can use libavcodec's internal 2 or 3-pass mode, it may gives you
+better final rate accuracy than using the external, DivX4-inspired 2-pass rate
+controler with libavcodec.<BR>
+<UL>
+<B>2-pass encoding</B> :<BR>
+<CODE>rm -f lavc_stats.txt<BR>
+mencoder -dvd 2 -ovc lavc -lacvopts vpass=1 (audio-options) -o movie.avi<BR>
+mencoder -dvd 2 -ovc lavc -lacvopts vpass=2 (audio-options) -o movie.avi</CODE><BR>
+<BR>
+<B>3-pass encoding</B> :<BR>
+<CODE>rm -f frameno.avi lavc_stats.txt<BR>
+mencoder -dvd 2 -ovc frameno (audio-options) -o frameno.avi<BR>
+mencoder -dvd 2 -ovc lavc -lacvopts vpass=1 -oac copy -o movie.avi<BR>
+mencoder -dvd 2 -ovc lavc -lacvopts vpass=2 -oac copy -o movie.avi</CODE><BR>
+</UL>
+</P>
 
 <P><B><A NAME=2.4.3.2>2.4.3.2.  Rescaling movies</B></P>
 

@@ -194,32 +194,132 @@ like:
 Available options:
 
   help           get help
-  vcodec=XXX     use the specified codec
-                 (for full list, see html doc!)
+
+  vcodec=XXX     use the specified codec :
+                   mjpeg - Motion JPEG
+                   h263 - H263
+                   h263p - H263 Plus
+                   mpeg4 - DivX 4/5
+                   msmpeg4 - DivX 3
+                   rv10 - an old RealVideo codec
+                   mpeg1video - MPEG1 video :)
+                 There's no default, you must
+                 specify it.
+
   vbitrate=XXX   specify bitrate in
                  kbit <4-16000> or
                  bit  <16001-24000000>
+                 (warning: 1kbit = 1000 bits)
+                 default = 800k
+
+  vratetol=XXX   approximated *filesize* tolerance
+                 in bits/kbits.
+                 (warning: 1kbit = 1000 bits)
+                 default = 1024*8 bits.
+
   keyint=XXX     interval between keyframes
-                 (specify in frames)
-  vhq            very high quality
-  vme=XXX        motion estimation method
-  vqmin=XXX      minimum quantizer
-  vqmax=XXX      maximum quantizer
-  vqdiff=XXX     quantizer difference. Limits the
-                 maximum quantizer difference
-                 between frames.
-  vratetol=XXX   approximated bitrate tolerance
+                 (specify in frames, >300 are not
+                 recommended)
+                 default = 250 (one key frame every
+                 ten seconds in a 25fps movie)
+
+  vhq            high quality mode, macro blocks
+                 will be encoded multiple times and
+                 the smallest will be used.
+                 default = HQ disabled
+
+  vme=XXX        [0..5] motion estimation method :
+                   0 - no ME at all
+                   1 - ME_FULL
+                   2 - ME_LOG
+                   3 - ME_PHODS
+                   4 - ME_EPZS
+                   5 - ME_X1
+                 EPZS usually gives best results,
+                 but you can try X1 too. FULL is
+                 very slow and the others are
+                 experimental.
+                 default = EPZS
+
   vqcomp=XXX     if the value is set to 1.0, the
                  quantizer will stay nearly
-                 constant. If it's 0.0, the
+                 constant (high motion scenes will
+                 look bad). If it's 0.0, the
                  quantizer will be changed
-                 to make all frames
-                 approximately equally sized.
+                 to make all frames approximately
+                 equally sized (low motion scenes
+                 will look bad).
+                 default = 0.5
+
   vqblur=XXX     blurs the quantizer graph over
                  time.
                     0.0 : no blur
                     1.0 : average all past
                           quantizers
+                 default = 0.5
+
+  vqscale=XXX    [2..31] gives each frame the same
+                 quantizer (selects fixed quantizer
+                 mode).
+                 default = 0 (fixed quantizer mode
+                 disabled)
+
+  vrc_strategy=X [0..2] different strategies to
+                 decide which frames should get
+                 which quantizer.
+                 default = 2
+
+  v4mv           4 motion vectors per macroblock,
+                 may gives you slightly better
+                 quality, can only be used in HQ
+                 mode and is buggy with B frames
+                 currently.
+                 default = disabled
+
+  vpass=X        [1,2] select internal first pass
+                 or second pass of 2-pass mode.
+                 default = 0 (1-pass mode)
+
+The next 3 options apply only to I & P frames :
+
+  vqmin=XX       [1..31] minimum quantizer,
+                 default = 3
+
+  vqmax=XX       [1..31] maximum quantizer
+                 default = 15
+
+  vqdiff=XX      [1..31] quantizer difference.
+                 Limits the maximum quantizer
+                 difference between frames.
+                 default = 3
+
+The following options apply only to B frames :
+
+  vmax_b_frames=X  [0..4] maximum number of frames
+                   between each I/P frame.
+                   default = 0 (B-frames generation
+                   disabled)
+
+  vb_strategy=X    strategy to choose between
+                   I/P/B frames :
+                     0 allways use max B
+                     1 avoid B frames in high
+                       motion / scene change (can
+                       lead to filesize miss
+                       prediction)
+                   default = 0
+
+In fixed quantizer mode you can use those options :
+  vqscale, vmax_b_frames, vhq, vme, keyint
+
+You can use the following options only in pass 1 of 2-pass mode or in 1-pass mode :
+  vqblur, vqdiff
+
+You can use the following options only in pass 2 of 2-pass mode :
+  vrc_strategy, vb_strategy
+
+All other options can be used in all modes.
+
 .TP
 .B \-lameopts
 If encoding to MP3 with libmp3lame, you can specify its parameters here, like:
