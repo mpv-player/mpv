@@ -1,4 +1,4 @@
-.\" synced with 1.818
+.\" synced with 1.822
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" Tuto man stránku napsali/pí¹í Gabucino, Diego Biurrun, Jonas Jermann
 .\" Pøeklad (translation): Jiøí Heryán
@@ -699,8 +699,8 @@ Zpomalí nebo zrychlí pøehrávání násobkem zadaným jako parametr.
 .B \-sstep <sek>
 Zobrazí jeden snímek ka¾dých <sek> sekund.
 Pou¾itelné pro slideshow.
-Volba pou¾ívá bì¾né pøevíjení, proto je stejnì nepøesná (èili ve vìt¹inì formátù
-dostanete jeden ze snímkù mezi <sec> a <sec>+20 sekund). 
+To mù¾e být nepøesné, proto¾e MPlayer umí pøevíjet pouze na dal¹í klíèový snímek.
+Vìt¹ina formátù má jeden z klíèových snímkù v rozmezí <sec> a <sec>+20 sekund. 
 .
 .
 .SH "VOLBY PRO DEMUXER/\:DATOVÝ PROUD"
@@ -1460,13 +1460,13 @@ pou¾ívá softwarové Gaussovo rozostøení (vypadá skvìle)
 Urèí jak budou zarovnány SPU (DVD/\:VOBsub) titulky.
 .PD 0
 .RSs
-.IPs -1
+.IPs "-1"
 originální pozice
-.IPs 0
+.IPs " 0"
 zarovnané na horní okraj (originální/\:výchozí chování)
-.IPs 1
+.IPs " 1"
 zarovnané na støed
-.IPs 2
+.IPs " 2"
 zarovnané na spodní okraj
 .RE
 .PD 1
@@ -1711,25 +1711,25 @@ v libao2/\:afmt.h):
 .
 .PD 0
 .RSs
-.IPs 1
+.IPs "   1"
 Mu-Law
-.IPs 2
+.IPs "   2"
 A-Law
-.IPs 4
+.IPs "   4"
 Ima-ADPCM
-.IPs 8
+.IPs "   8"
 unsigned 8-bit
-.IPs 16
+.IPs "  16"
 signed  16-bit (little-endian)
-.IPs 32
+.IPs "  32"
 signed 16-bit (big-endian)
-.IPs 64
+.IPs "  64"
 signed 8-bit
-.IPs 128
+.IPs " 128"
 unsigned 16-bit (little-endian)
-.IPs 256
+.IPs " 256"
 unsigned 16-bit (big-endian)
-.IPs 512
+.IPs " 512"
 MPEG (2) Audio
 .IPs 1024
 AC3
@@ -1829,16 +1829,6 @@ pokud pøesnì nevíte jak to nastavit správnì.
 .RE
 .
 .PD 1
-.
-.TP
-.B alsa1x (ZASTARALÝ)
-Zvukové rozhraní ALSA 1.x.
-Pøekonáno obecným alsa audio rozhraním.
-.
-.TP
-.B alsa9 (ZASTARALÝ)
-Zvukové rozhraní ALSA 0.9.
-Pøekonáno obecným alsa audio rozhraním.
 .
 .TP
 .B alsa5\ \ 
@@ -2883,7 +2873,7 @@ Nastaví jméno výstupního souboru (výchozí: ./md5sums).
 .TP
 .B yuv4mpeg
 Pøevádí video proud na sekvenci nekomprimovaných YUV 4:2:0 obrázkù a
-ukládá je do souboru jménem 'stream.yuv' v aktuálním adresáøi.
+ukládá je do souboru (výchozí: ./stream.yuv).
 Formát je shodný s tím, který pou¾ívá mjpegtools, co¾ je výhodné pokud chcete
 video zpracovávat pomocí sady mjpegtools.
 Podporuje formáty: YV12, RGB (24 bpp) a BGR (24 bpp).
@@ -2966,15 +2956,15 @@ Podporuje PPM, PGM a PGMYUV soubory v re¾imu raw i ASCII.
 Viz té¾ pnm (5), ppm (5) a pgm (5).
 .PD 0
 .RSs
-.IPs ppm
+.IPs ppm\ \ 
 Zapisuje PPM soubory (výchozí).
-.IPs pgm
+.IPs pgm\ \ 
 Zapisuje PGM soubory.
 .IPs pgmyuv
 Zapisuje PGMYUV soubory.
 PGMYUV jsou podobné PGM, ale zároveò obsahují U a V slo¾ku pøidanou na spodní
 okraj obrázku.
-.IPs raw
+.IPs raw\ \ 
 Zapisuje PNM soubory v raw re¾imu (výchozí).
 .IPs ascii
 Zapisuje PNM soubory v ASCII re¾imu.
@@ -4057,6 +4047,7 @@ umo¾òující gama korekci navíc k jednoduché korekci jasu a kontrastu.
 Pokud jsou v¹echny gama hodnoty nastaveny na 1.0, pak pou¾ívá stejný MMX
 optimalizovaný kód jako \-vf eq.
 Parametry jsou desetinná èísla.
+.PD 0
 .RSs
 .IPs rg
 hodnota gamma èervené slo¾ky
@@ -4064,7 +4055,9 @@ hodnota gamma èervené slo¾ky
 hodnota gamma zelené slo¾ky
 .IPs bg
 hodnota gamma modré slo¾ky
-.RE
+.REss
+.PD 1
+.RS
 Parametry rg, gg, bg jsou nezávislými gama hodnotami pro èervenou (rg), 
 zelenou (gg) a modrou (bg) slo¾ku.
 Parametr váha mù¾e být pou¾it pro omezení vysoké gama korekce velmi jasných
@@ -4074,6 +4067,7 @@ Ve výchozím stavu je gama=1.0, kontrast=1.0, jas=0.0, sytost_barev=1.0,
 váha=1.0.
 Rozsah hodnot je 0.1\-10 pro gama, -2\-2 pro kontrast (záporné hodnoty vytvoøí
 negativ obrázku), -1\-1 pro jas, 0\-3 pro sytost barev a 0\-1 pro váhu.
+.RE
 .
 .TP
 .B hue[=hue:barevná_sytost]
