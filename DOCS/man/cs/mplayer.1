@@ -1,4 +1,4 @@
-.\" synced with 1.726
+.\" synced with 1.734
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" Tuto man stránku napsali/pí¹í Gabucino, Diego Biurrun, Jonas Jermann
 .\" Pøeklad (translation): Jiøí Heryán
@@ -2767,7 +2767,7 @@ Umo¾òuje zadat jméno výstupního souboru (default: ./md5).
 .PD 1
 .
 .TP
-.B md5sum\ \ \ \ 
+.B md5sum\ 
 Spoèítá MD5 otisk pro ka¾dý snímek a zapí¹e je do souboru.
 Podporuje barevné prostory RGB24 a YV12.
 Pou¾itelné pøi hledání chyb.
@@ -2843,24 +2843,21 @@ faktor optimalizace (default: 100)
 faktor rozmazání (default: 0)
 .IPs quality=<0\-100>
 faktor kvality (default: 75)
-.IPs outdir=<hodnota>
-Nastavuje adresáø do kterého se budou ukládat JPEG soubory.
-Pokud není uveden, v¹echny JPEG soubory jsou ulo¾eny do aktuálního adresáøe.
+.IPs outdir=<adresáø>
+Nastavuje adresáø do kterého se budou ukládat JPEG soubory (default: ./).
 .IPs subdirs=<hodnota>
-Pokud je volba uvedena, MPlayer vytvoøí oèíslované podadresáøe 
-s uvedenou pøedponou.
-Pokud není uvedena, nebudou vytváøeny ¾ádné podadresáøe
-a v¹echny JPEG soubory budou zapsány do stejného adresáøe.
-.IPs maxfiles=<hodnota>
-Maximální mno¾ství JPEG souborù ulo¾ených do ka¾dého podadresáøe v pøípadì,
-¾e bylo zadáno pou¾ití podadresáøù.
+Bude vytváøet oèíslované podadresáøe se zadanou pøedponou.
+Defaultnì nejsou vytváøeny ¾ádné podadresáøe podadresáøe a v¹echny PNM soubory
+jsou zapsány do stejného adresáøe.
+.IPs maxfiles=<hodnota> (pouze subdirs)
+Maximální poèet JPEG souborù ulo¾ených v jednom podadresáøi.
 Musí být vìt¹í nebo rovno 1 (default: 1000).
 .RE
 .PD 1
 .
 .TP
 .B pnm\ \ \ \ 
-Vyexportuje ka¾dý snímek do PNM souboru do aktuálního adresáøe.
+Vyexportuje ka¾dý snímek do PNM souboru v aktuálního adresáøe.
 Ka¾dý ze souborù je pojmenován èíslem snímku vèetnì úvodních nul.
 Podporuje PPM, PGM a PGMYUV soubory v re¾imu raw i ASCII.
 Viz té¾ 
@@ -2882,17 +2879,14 @@ okraj obrázku.
 Zapisuje PNM soubory v raw re¾imu (default).
 .IPs ascii
 Zapisuje PNM soubory v ASCII re¾imu.
-.IPs outdir=<hodnota>
-Nastaví adresáø pro ukládání PNM souborù.
-Pokud není zadán, v¹echny PNM soubory jsou zapsány do aktuálního adresáøe.
+.IPs outdir=<adresáø>
+Nastaví adresáø pro ukládání PNM souborù (default: ./).
 .IPs subdirs=<hodnota>
-Pokud je zadán, bude MPlayer vytváøet oèíslované podadresáøe se zadanou
-pøedponou.
-Pokud není zadán, nejsou vytváøeny podadresáøe a v¹echny PNM soubory jsou
-zapsány do stejného adresáøe.
-.IPs maxfiles=<hodnota>
-Maximální poèet PNM souborù ulo¾ených v podadresáøi, pokud je nastaveno
-vytváøení podadresáøù.
+Bude vytváøet oèíslované podadresáøe se zadanou pøedponou.
+Defaultnì nejsou vytváøeny ¾ádné podadresáøe podadresáøe a v¹echny PNM soubory
+jsou zapsány do stejného adresáøe.
+.IPs maxfiles=<hodnota> (pouze subdirs)
+Maximální poèet PNM souborù ulo¾ených v jednom podadresáøi.
 Musí být vìt¹í nebo rovno 1 (default: 1000).
 .RE
 .PD 1
@@ -3727,7 +3721,7 @@ jméno formátu jako rgb15, bgr24, yv12, atd (default: yv12)
 .TP
 .B pp[=filtr1[:volba1[:volba2...]]/\:[-]filtr2...] (viz také volbu \-pphelp)
 Zapíná uvedený øetìzec postprocesních filtrù.
-Jednotlivé filtry musí být oddìleny '/' a mohou být vypnuty pou¾itím '\-'.
+Filtry musí být oddìleny '/' a mohou být vypnuty pou¾itím '\-'.
 Zamìøení filtru mù¾e být vymezeno pøidáním ':' následované 'a', 'c' nebo 'y'
 (default: c):
 .PD 0
@@ -4412,7 +4406,7 @@ Kolikrát bude filtr aplikován.
 .
 .TP
 .B sab=prùm:pf:rozdílBarev[:prùm:pf:rozdílBarev]
-tvarovì adaptivní rozostøení
+tvarovì-adaptivní rozostøení
 .PD 0
 .RSs
 .IPs rad\ \ \ 
@@ -5068,6 +5062,28 @@ vypí¹e doplòkové volby a informace o preset nastaveních.
 .PD 1
 .
 .
+.SS toolame (\-toolameopts)
+.
+.TP
+.B br=<0\-384>
+nastaví datový tok v kBitech/\:s (pouze CBR)
+.TP
+.B mode=<stereo  |  jstereo  |  mono  |  dual>
+(default: mono pro 1-kanálový zvuk, jinak stereo)
+.TP
+.B psy=<0\-3>
+psychoakustický model (default: 2)
+.TP
+.B errprot=<0 | 1>
+zaøadí ochranu proti chybám
+.TP
+.B debug=<0\-10>
+úroveò ladících informací
+.RE
+
+.PD 1
+.
+.
 .SS lavc (\-lavcopts)
 Mnoho lavc voleb je velmi specializovaných a jen struènì dokumentovaných.
 V¹echny detaily naleznete ve zdrojovém kódu.
@@ -5319,15 +5335,39 @@ datového toku)
 .RE
 .
 .TP
-.B vpass=<1\-2>
-Aktivuje interní dvou-prùchodový re¾im, uveïte pouze v pøípadech kdy chcete 
-provádìt dvou-prùchodové enkódování.
+.B vpass=<1\-3>
+Aktivuje interní dvou(nebo tøí)prùchodový re¾im, uveïte pouze v pøípadech kdy chcete 
+provádìt dvou(tøí)prùchodové enkódování.
 .PD 0
 .RSs
 .IPs 1
-první prùchod
+první prùchod (viz také turbo)
 .IPs 2
 druhý prùchod
+.IPs 3
+Ntý prùchod (druhý a tøetí prùchod ve tøíprùchodovém re¾imu enkódování)
+.RE
+.RS
+Popis funkce a pou¾ití:
+.br
+V prvním prùchodu (vpass=1) se zapí¹í statistická data do souboru.
+Asi budete chtít vypnout nìkteré volby nároèné na CPU, podobnì jako to
+dìlá "turbo" re¾im.
+.br
+Ve dvouprùchodovém re¾imu: se ve druhém prùchodu (vpass=2) ètou statistiky
+z prvního prùchodu. Na jejich základì pak probíhá rozhodování regulátoru 
+datového toku.
+.br
+Ve tøíprùchodovém re¾imu: se ve druhém prùchodu (vpass=3, toto není pøeklep)
+nejprve ètou statistiky a následnì jsou pøepsány.
+Asi si budete chtít zálohovat divx2pass.log je¹tì pøed provedením druhého
+prùchodu pro pøípad, ¾e byste z nìjakého dùvodu pøeru¹ili MEncoder.
+Mù¾ete pou¾ít v¹echny enkódovací volby, kromì tìch velmi nároèných na CPU,
+jako je "qns".
+.br
+Tøetí prùchod (vpass=3) je stejný jako druhý prùchod, a¾ na to, ¾e nyní
+pou¾íváme statistická data ze druhého prùchodu.
+Mù¾ete pou¾ít v¹echny enkódovací volby vèetnì tìch nejnároènìj¹ích na CPU.
 .RE
 .PD 1
 .sp 1
@@ -5932,16 +5972,26 @@ Druh a rozmìr diamantu pro odhad pohybu v pøedprùchodu
 .TP
 .B dia=<-99\-6>
 Druh a rozmìr diamantu pro odhad pohybu.
+Vyhledávání pohybu je opakovaný proces.
+Pou¾ití malého diamantu neomezí vyhledávání jen na malé vektory pohybu.
+Jen je èastìji skonèeno døíve, ne¾ je nalezen úplnì nejlep¹í vektor pohybu,
+zvlá¹tì pokud je pøítomen ¹um.
+Vìt¹í diamanty umo¾òují vìt¹í zábìr pøi vyhledávání vektoru pohybu, co¾ je
+pomalej¹í, ale dosáhne se tak vy¹¹í kvality.
+.br
+Velké normální diamanty dosahují lep¹í kvality ne¾ tvarovì-adaptivní diamanty.
+.br
+Tvarovì-adaptivní diamanty jsou dobrým kompromisem mezi rychlostí a kvalitou.
 .br
 .I POZNÁMKA:
 Rozmìr u normálních diamantù a tìch s adaptivním tvarem nemá stejný význam.
 .RSs
 .IPs -3
-tvarovì adaptivní (rychlý) diamant velikost 3
+tvarovì-adaptivní (rychlý) diamant velikost 3
 .IPs -2
-tvarovì adaptivní (rychlý) diamant velikost 2
+tvarovì-adaptivní (rychlý) diamant velikost 2
 .IPs -1
-experimentální
+ponìkud speciální: Mù¾e být pomalej¹í a/nebo lep¹í ne¾ dia=-2.
 .IPs  1
 normální diamant velikost=1 (default) =diamant typu EPZS
 .nf
@@ -6085,8 +6135,11 @@ Redukce ¹umu, 0 znamená vypnuto.
 .
 .TP
 .B qns=<0\-3>
-Tvarování ¹umu kvantizeru, omezuje krou¾kové artefakty, vìt¹í hodnoty jsou 
-pomalej¹í, ale nemusí zlep¹it kvalitu.
+Tvarování ¹umu kvantizeru.
+Místo kvantizace, která co nejlépe odpovídá vstupnímu videu ve smyslu PSNR,
+radìji volí kvantizaci která kryje ¹um (obvykle krou¾kové artefakty) frekvenènì
+podobným obsahem obrázku.
+Vìt¹í hodnoty jsou pomalej¹í, ale nemusí zlep¹it kvalitu.
 Toto mù¾e, a mìlo by, být pou¾íváno spolu s Trellisovou kvantizací. V tom 
 pøípadì bude Trellisova kvantizace (optimální pro konstantní váhu) pou¾ita jako
 výchozí bod pro opakované vyhledávání.
@@ -6657,6 +6710,7 @@ Ovlivòuje maximální povolený gradient uvnitø dvou pøilehlých blokù.
 .TP
 .B cabac\ \ \ 
 Pou¾ije CABAC (Kontextovì-Adaptivní Binární Aritmetické Kódování).
+Zpomalí enkódování, ale mìlo by u¹etøit 10-15% bitù.
 .
 .TP
 .B cabacidc=<hodnota>
@@ -6724,7 +6778,7 @@ Zapne 2-prùchodový re¾im.
 První prùchod ukládá statistiky.
 .
 .TP
-.B qcompress=<0\-1>
+.B qcomp=<0\-1>
 komprese kvantizeru (default: 0.6).
 Toto ovlivòuje regulaci datového toku: ni¾¹í hodnota èiní datový tok stálej¹ím,
 zatímco vy¹¹í hodnota èiní stabilnìj¹ím kvantizaèní parametr.
@@ -6738,7 +6792,9 @@ vy¹¹í hodnoty vynucují pozvolnìj¹í zmìny.
 .TP
 .B fullinter
 Pou¾ije ve snímku v¹echny dostupné typy makrobloku (i16x16, i4x4, p16x16-4x4)
-(default: i16x16, i4x4, p16x16-8x8).
+Úèelem je najít typ a rozmìr nejlépe odpovídající urèité oblasti obrázku,
+co¾ se projeví zejména na animované tvorbì, kde jsou obvyklé velké stejnobarevné
+oblasti (default: i16x16, i4x4, p16x16-8x8).
 .
 .TP
 .B log=<-1\-3>
@@ -6754,6 +6810,25 @@ Nastavení mno¾ství logovacích informací vypisovaných na obrazovku.
 (default)
 .br
  3: PSNR, QP, typ snímku, velikost a ostatní statistiky pro ka¾dý snímek
+.REss
+.
+.TP
+.B subq=<0\-5>
+Nastavuje kvalitu subpel dolaïování.
+Tento parametr ovlivòuje pomìr kvalita versus rychlost v procesu rozhodování
+o pøedpokládaném pohybu.
+.RSs
+0: pouze halfpel
+.br
+1: 1 opakování qpel na vítìzném kandidátovi (default)
+.br
+2: 2 opakování qpel na vítìzném kandidátovi
+.br
+3: halfpel na v¹ech typech MB, qpel na vítìzi
+.br
+4: qpel na v¹ech
+.br
+5: více opakování qpel
 .REss
 .
 .TP
