@@ -71,7 +71,7 @@ The most important ones above all:
 
 <para>
 If you have a Win32 codec not listed here which is not supported yet,
-please read the <link linkend="win32-codecs">codec importing HOWTO</link>
+please read the <link linkend="codec-importing">codec importing HOWTO</link>
 and help us add support for it.
 </para>
 
@@ -746,7 +746,7 @@ from <ulink url="http://greysector.rangers.eu.org/">Grey Sector</ulink>.
 
 <!-- ********** -->
 
-<sect2 id="win32-codecs">
+<sect2 id="codec-importing">
 <title>Win32 codecs importing HOWTO</title>
 
 <!-- TODO: a short paragraph of text would be nice here... -->
