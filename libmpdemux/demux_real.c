@@ -8,6 +8,9 @@
     TODO: fix the whole syncing mechanism
     
     $Log$
+    Revision 1.28  2002/10/10 23:24:15  arpi
+    stream selection cleanup, fixed -nosound
+
     Revision 1.27  2002/10/01 20:01:04  michael
     rv10 cleanup
 
@@ -147,10 +150,10 @@ typedef struct {
     float	v_pts;  // previous video timestamp
     
     /* stream id table */
-    int		last_a_stream;
-    int 	a_streams[MAX_STREAMS];
-    int		last_v_stream;
-    int 	v_streams[MAX_STREAMS];
+//    int		last_a_stream;
+//    int 	a_streams[MAX_STREAMS];
+//    int		last_v_stream;
+//    int 	v_streams[MAX_STREAMS];
 } real_priv_t;
 
 /* originally from FFmpeg */
@@ -433,8 +436,6 @@ int demux_real_fill_buffer(demuxer_t *demuxer)
 {
     real_priv_t *priv = demuxer->priv;
     demux_stream_t *ds = NULL;
-    sh_audio_t *sh_audio = NULL;
-    sh_video_t *sh_video = NULL;
     int len;
     int timestamp;
     int stream_id;
@@ -443,31 +444,32 @@ int demux_real_fill_buffer(demuxer_t *demuxer)
     int version;
     int reserved;
 
-loop:
+  while(1){
+
     /* also don't check if no num_of_packets was defined in header */
     if ((priv->current_packet > priv->num_of_packets) &&
 	(priv->num_of_packets != -10)){
 	printf("num_of_packets reached!\n");
 	return 0; /* EOF */
     }
+
     demuxer->filepos = stream_tell(demuxer->stream);
     version = stream_read_word(demuxer->stream); /* version */
     len = stream_read_word(demuxer->stream);
     
     if (len == -256){ /* EOF */
-	printf("len==-256!\n");
+//	printf("len==-256!\n");
 	return 0;
     }
-    if (len < 12)
-    {
+    if (len < 12){
 	printf("%08X: packet v%d len=%d  \n",(int)demuxer->filepos,(int)version,(int)len);
 	printf("bad packet len (%d)\n", len);
 	stream_skip(demuxer->stream, len);
-	goto loop;
+	continue; //goto loop;
     }
+
     stream_id = stream_read_word(demuxer->stream);
     timestamp = stream_read_dword(demuxer->stream);
-
     reserved = stream_read_char(demuxer->stream);
     flags = stream_read_char(demuxer->stream);
     /* flags:		*/
@@ -478,7 +480,6 @@ loop:
 //	(int)demuxer->filepos,(int)version,(int)len, stream_id,
 //	(int) timestamp, reserved, flags);
 
-// debug re-enabled (FS)
     mp_dbg(MSGT_DEMUX,MSGL_DBG2, "len:%d\n", len);
     mp_dbg(MSGT_DEMUX,MSGL_V,  "\npacket#%d: pos: 0x%0x, len: %d, id: %d, pts: %d, flags: %x rvd:%d\n",
 	priv->current_packet, (int)demuxer->filepos, len, stream_id, timestamp, flags, reserved);
@@ -488,59 +489,20 @@ loop:
 
 //    printf("s_id=%d  aid=%d  vid=%d  \n",stream_id,demuxer->audio->id,demuxer->video->id);
 
-    /* check if stream_id is audio stream */
-    if(demuxer->audio->id==-1 || demuxer->audio->id==stream_id)
-    for (i = 0; i < priv->last_a_stream; i++)
-    {
-	if (priv->a_streams[i] == stream_id)
-	{
-	    mp_dbg(MSGT_DEMUX,MSGL_DBG2, "packet is audio (id: %d)\n", stream_id);
-	    ds = demuxer->audio; /* FIXME */
-	    sh_audio = ds->sh;
-	    priv->current_apacket++;
-	    demuxer->audio->id=stream_id;
-	    break;
-	}
-    }
-    /* check if stream_id is video stream */
-    if(demuxer->video->id==-1 || demuxer->video->id==stream_id)
-    for (i = 0; i < priv->last_v_stream; i++)
-    {
-	if (priv->v_streams[i] == stream_id)
-	{
-	    mp_dbg(MSGT_DEMUX,MSGL_DBG2, "packet is video (id: %d)\n", stream_id);
-	    ds = demuxer->video; /* FIXME */
-            sh_video = ds->sh;
-	    priv->current_vpacket++;
-	    demuxer->video->id=stream_id;
-	    break;
-	}
-    }
+    /* check stream_id: */
 
-    /* id not found */
-    if (ds == NULL)
-    {
-	mp_msg(MSGT_DEMUX,MSGL_DBG2, "unknown stream id (%d)\n", stream_id);
-	stream_skip(demuxer->stream, len);
-	goto loop;	
-    }
+    if(demuxer->audio->id==stream_id){
+	ds=demuxer->audio;
+	mp_dbg(MSGT_DEMUX,MSGL_DBG2, "packet is audio (id: %d)\n", stream_id);
 
-#if 0
-    ds_read_packet(ds, demuxer->stream, len, timestamp/90000.0f,
-	demuxer->filepos, (flags & 0x2) ? 0x10 : 0);
-#else
-    {
-	demux_packet_t *dp=NULL;
-// = new_demux_packet(len);
-	
-	/* if DNET, swap bytes! */
-	if (sh_audio != NULL) {
+	// parse audio chunk:
+	{
 #ifdef CRACK_MATRIX
 	    int spos=stream_tell(demuxer->stream);
 	    static int cnt=0;
 	    static int cnt2=CRACK_MATRIX;
 #endif
-            dp = new_demux_packet(len);
+            demux_packet_t *dp = new_demux_packet(len);
 	    stream_read(demuxer->stream, dp->buffer, len);
 #ifdef CRACK_MATRIX
 	    printf("*** audio block len=%d\n",len);
@@ -559,10 +521,10 @@ loop:
 		if(cnt2>0x150) *((int*)NULL)=1; // sig11 :)
 	    }
 #endif
-	    if (sh_audio->format == 0x2000)
-	    {
+	    if( ((sh_audio_t *)ds->sh)->format == 0x2000) {
+		// if DNET, swap bytes, as DNET is byte-swapped AC3:
 		char *ptr = dp->buffer;
-
+		int i;
 		for (i = 0; i < len; i += 2)
 		{
 		    const char tmp = ptr[0];
@@ -576,14 +538,24 @@ loop:
 	    dp->pos = demuxer->filepos;
 	    dp->flags = (flags & 0x2) ? 0x10 : 0;
 	    ds_add_packet(ds, dp);
-	} else
-	if (sh_video != NULL) {
-		// we need a more complicated demuxing
-		// a block may contain multiple packets
-		// as well as a packet may be contained in multiple blocks
-	        int vpkg_header, vpkg_length, vpkg_offset;
-		int vpkg_seqnum=-1;
-		int vpkg_subseq=0;
+	}
+	
+	return 1;
+    }
+    
+    if(demuxer->video->id==stream_id){
+	ds=demuxer->video;
+	mp_dbg(MSGT_DEMUX,MSGL_DBG2, "packet is video (id: %d)\n", stream_id);
+	
+	// parse video chunk:
+	{
+	    // we need a more complicated, 2nd level demuxing, as the video
+	    // frames are stored fragmented in the video chunks :(
+	    sh_video_t *sh_video = ds->sh;
+	    demux_packet_t *dp;
+	    int vpkg_header, vpkg_length, vpkg_offset;
+	    int vpkg_seqnum=-1;
+	    int vpkg_subseq=0;
 
 	    while(len>2){
 		dp_hdr_t* dp_hdr;
@@ -744,10 +716,13 @@ loop:
 		if(len>0) stream_skip(demuxer->stream, len);
 	    }
 	}
-    }
-#endif
 
-    return 1;
+	return 1;
+    }
+
+    mp_msg(MSGT_DEMUX,MSGL_DBG2, "unknown stream id (%d)\n", stream_id);
+    stream_skip(demuxer->stream, len);
+  }//    goto loop;
 }
 
 void demux_open_real(demuxer_t* demuxer)
@@ -774,12 +749,14 @@ void demux_open_real(demuxer_t* demuxer)
 	chunk_size = stream_read_dword(demuxer->stream);
 
 	stream_skip(demuxer->stream, 2); /* version */
-	
-	if (chunk_size < 10)
-	    goto fail;
-	
+
 	mp_msg(MSGT_DEMUX,MSGL_V, "Chunk: %.4s (%x) (size: 0x%x, offset: 0x%x)\n",
 	    (char *)&chunk_id, chunk_id, chunk_size, chunk_pos);
+	
+	if (chunk_size < 10){
+	    mp_msg(MSGT_DEMUX,MSGL_ERR,"demux_real: invalid chunksize! (%d)\n",chunk_size);
+	    return;
+	}
 	
 	switch(chunk_id)
 	{
@@ -908,8 +885,10 @@ void demux_open_real(demuxer_t* demuxer)
 		}
 #endif
 
+#ifdef MP_DEBUG
 #define stream_skip(st,siz) { int i; for(i=0;i<siz;i++) mp_msg(MSGT_DEMUX,MSGL_V," %02X",stream_read_char(st)); mp_msg(MSGT_DEMUX,MSGL_V,"\n");}
-		
+#endif
+
 		if (tmp == MKTAG(0xfd, 'a', 'r', '.'))
 		{
 		    /* audio header */
@@ -979,7 +958,6 @@ void demux_open_real(demuxer_t* demuxer)
 		    sh->wf->cbSize = 0;
 		    sh->format = MKTAG(buf[0], buf[1], buf[2], buf[3]);
 
-		    tmp = 1; /* supported audio codec */
 		    switch (sh->format)
 		    {
 			case MKTAG('d', 'n', 'e', 't'):
@@ -1030,33 +1008,20 @@ void demux_open_real(demuxer_t* demuxer)
 			    break;
 			default:
 			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: Unknown (%s)\n", buf);
-			    tmp = 0;
 		    }
 
 		    sh->wf->wFormatTag = sh->format;
 		    
 		    print_wave_header(sh->wf);
 
-		    if (tmp)
-		    {
-			/* insert as stream */
-			demuxer->audio->sh = sh;
-			sh->ds = demuxer->audio;
-//			demuxer->audio->id = -1;//stream_id;
-		    
-			if (priv->last_a_stream+1 < MAX_STREAMS)
-			{
-			    priv->a_streams[priv->last_a_stream] = stream_id;
-			    priv->last_a_stream++;
-			}
-//	    		priv->current_aid = stream_id;
+		    if(demuxer->audio->id==-1 || demuxer->audio->id==stream_id){
+			demuxer->audio->id=stream_id;
+			sh->ds=demuxer->audio;
+			demuxer->audio->sh=sh;
 		    }
-		    else
-			free(sh->wf);
-//		    break;
-
+#ifdef stream_skip
 #undef stream_skip
-
+#endif
 		}
 		else
 //		case MKTAG('V', 'I', 'D', 'O'):
@@ -1094,7 +1059,8 @@ void demux_open_real(demuxer_t* demuxer)
 		        sh->fps = stream_read_word(demuxer->stream);
 	        	sh->frametime = 1.0f/sh->fps;
 		    } else {
-	    		stream_skip(demuxer->stream, 2);
+	    		int fps=stream_read_word(demuxer->stream);
+			printf("realvid: ignoring FPS = %d\n",fps);
 		    }
 		    stream_skip(demuxer->stream, 2);
 		    
@@ -1132,17 +1098,13 @@ void demux_open_real(demuxer_t* demuxer)
 			    /* codec id: none */
 			    mp_msg(MSGT_DEMUX,MSGL_V,"unknown id: %x\n", tmp);
 		    }
-		        
-		    /* insert as stream */
-		    demuxer->video->sh = sh;
-		    sh->ds = demuxer->video;
-//		    demuxer->video->id = -1; //stream_id;
-		    if (priv->last_v_stream+1 < MAX_STREAMS)
-		    {
-			priv->v_streams[priv->last_v_stream] = stream_id;
-			priv->last_v_stream++;
+		    
+		    if(demuxer->video->id==-1 || demuxer->video->id==stream_id){
+			demuxer->video->id=stream_id;
+			sh->ds=demuxer->video;
+			demuxer->video->sh=sh;
 		    }
-//	    	    priv->current_vid = stream_id;
+
 		}
 		else {
 		    mp_msg(MSGT_DEMUX, MSGL_ERR, "Not audio/video stream or unsupported!\n");
@@ -1190,11 +1152,9 @@ header_end:
 
     if (index_mode == 2)
 	generate_index(demuxer);
-    else if (priv->index_chunk_offset && ((index_mode == 1) || (index_mode == 2)))
+    else if (priv->index_chunk_offset && (index_mode == 1))
 	parse_index_chunk(demuxer);
 
-fail:
-    return;
 }
 
 void demux_close_real(demuxer_t *demuxer)
