@@ -12,14 +12,14 @@
 
 <FONT CLASS="text">
 
-<P><B><A NAME=2.3.2>2.3.2. Audio output devices</A></P></B>
+<P><B><A NAME=2.3.2>2.3.2. Audio output devices</A></B></P>
 
 <P><B>MPlayer</B>'s audio interface is called <I>libao2</I>. It currently
-contains these drivers :</P>
+contains these drivers:</P>
 
 <TABLE BORDER=0>
 
-<TD COLSPAN=4><P><B><FONT CLASS="text">General:</B></P></TD>
+<TR><TD COLSPAN=4><P><B><FONT CLASS="text">General:</B></P></TD></TR>
 
 <TR><TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT CLASS="text">oss</TD><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">OSS (ioctl) driver</TD></TR>
 <TR><TD></TD><TD VALIGN=top><FONT CLASS="text">sdl</TD><TD></TD><TD><FONT CLASS="text">SDL driver (supports up/downsampling, <B>ESD</B>, <B>ARTS</B> etc)</TD></TR>
@@ -30,33 +30,32 @@ contains these drivers :</P>
 
 </TABLE>
 
-<P>The fact is, Linux soundcard drivers are usually bad, and always as
-incompatible as they can be. It MAY take a while to find your optimal settings.</P>
-<P><UL>
-<LI>if you have OSS as driver, first try with <I>-ao oss</I> (this is the default).
-If you experience glitches, halts or anything out of the ordinary, have a
-look at <I>-ao sdl</I> (NOTE: of course you'll have to have a new SDL library and its
-devel pair installed). It helps in a lot of cases (it also supports ESD, ARTS, and
-up/downsampling. /esd is GNOME's, arts is KDE's sound daemon/).</LI>
-<LI>if you have ALSA version 0.5, then you ALMOST always have to use <I>-ao alsa5</I> ,
-since 0.5 has buggy OSS emulation code, and will <B>crash MPlayer</B> with
+<P>Fact is, Linux sound card drivers have compatibility problems.
+It <B>may</B> take a while to find your optimal settings.</P>
+
+<UL>
+<LI>If you have an OSS driver, first try <CODE>-ao oss</CODE> (this is the default).
+If you experience glitches, halts or anything out of the ordinary, try
+<CODE>-ao sdl</CODE> (NOTE: you need to have SDL libraries and header files
+installed). The SDL audio driver helps in a lot of cases and also supports ESD,
+ARTS, and up/downsampling. (ESD is the sound daemon from GNOME, ARTS is from KDE.)</LI>
+<LI>If you have ALSA version 0.5, then you almost always have to use <CODE>-ao alsa5</CODE> ,
+since ALSA 0.5 has buggy OSS emulation code, and will <B>crash MPlayer</B> with
 a message like this:<BR>
-  <UL>
-  <CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE></UL>
-</LI>
-<LI>if you have ALSA version 0.9, use <I>-ao oss</I> or <I>-ao sdl</I> as you
-wish. You can also use <I>-ao alsa9</I> as it works now, however it has many
-problems (losing sync, disappearing audio, etc).</LI>
-</UL></P>
+<CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE></LI>
+<LI>If you have ALSA version 0.9 you may choose between <CODE>-ao oss</CODE> and
+<CODE>-ao sdl</CODE>. You can also use <CODE>-ao alsa9</CODE>. It works, but
+there are problems like lost sync and disappearing audio.</LI>
+</UL>
 
 <P>On <B>Solaris/FreeBSD</B> systems, use the SUN audio driver with the
-<I>-ao sun</I> option, otherwise you'll have no video, nor audio playing.</P>
+<CODE>-ao sun</CODE> option, otherwise neither video nor audio will work.</P>
 
-<P><B><A NAME=2.3.2.1>2.3.2.1. Soundcard experiences, recommendations</A></B></P>
+<P><B><A NAME=2.3.2.1>2.3.2.1. Sound Card experiences, recommendations</A></B></P>
 
-<P><TABLE BORDER=0 WIDTH=100%>
-<TD COLSPAN=3><B><FONT CLASS="text">VIA onboard chipset (via82cxxx) 48Khz only</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">Driver:</TD><TD><FONT CLASS="text"> from <A HREF="http://sourceforge.net/project/showfiles.php?group_id=3242&release_id=59602">here</A></TD><TR>
+<TABLE BORDER=0 WIDTH="100%">
+<TR><TD COLSPAN=3><B><FONT CLASS="text">VIA onboard chipset (via82cxxx) 48kHz only</B></TD><TR>
+<TD></TD><TD><FONT CLASS="text">Driver:</TD><TD><FONT CLASS="text"> from <A HREF="http://sourceforge.net/project/showfiles.php?group_id=3242&amp;release_id=59602">here</A></TD><TR>
 
 <TD COLSPAN=3><B><FONT CLASS="text">Aureal Vortex 2</B></TD><TR>
 <TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">no driver</TD><TR>
@@ -74,13 +73,13 @@ problems (losing sync, disappearing audio, etc).</LI>
 <TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">48</TD><TR>
 
 <TD COLSPAN=3><B><FONT CLASS="text">SB Live!</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">Analog OK, SP/DIF won't work</TD><TR>
+<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">Analog OK, SP/DIF not working</TD><TR>
 <TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">Both OK</TD><TR>
 <TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">192</TD><TR>
 
 <TD COLSPAN=3><B><FONT CLASS="text">SB AWE 64</B></TD><TR>
 <TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">max 44kHz</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">48kHz sounds shit</TD><TR>
+<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">48kHz sounds bad</TD><TR>
 <TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">48</TD><TR>
 
 <TD COLSPAN=3><B><FONT CLASS="text">Gravis UltraSound ACE</B></TD><TR>
@@ -104,8 +103,8 @@ problems (losing sync, disappearing audio, etc).</LI>
 <TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">?</TD><TR>
 
 <TD COLSPAN=3><B><FONT CLASS="text">Yamaha cards (*ymf*)</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">not OK (?) (maybe -ao sdl)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">OK only with ALSA 0.5 with OSS emulation <B>AND</B> <I>-ao sdl</I> (!) (?)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">not OK (?) (maybe <CODE>-ao sdl</CODE>)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">OK only with ALSA 0.5 with OSS emulation <B>AND</B> <CODE>-ao sdl</CODE> (!) (?)</TD><TR>
 <TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">?</TD><TR>
 
 <TD COLSPAN=3><B><FONT CLASS="text">Cards with envy24 chips (like Terratec EWS88MT)</B></TD><TR>
@@ -115,32 +114,35 @@ problems (losing sync, disappearing audio, etc).</LI>
 <TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">?</TD><TR>
 
 <TD COLSPAN=3><B><FONT CLASS="text">PC Speaker or DAC</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">OK (<I>use the SDL driver : -ao sdl</I>)</TD><TR>
+<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">OK (Use the SDL driver: <CODE>-ao sdl</CODE>)</TD><TR>
 <TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">no driver</TD><TR>
-<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">the driver emulates 44.1 maybe more</TD><TR>
-<TD></TD><TD><FONT CLASS="text">Driver:</TD><TD><FONT CLASS="text"><A HREF="ftp://ftp.infradead.org/pub/pcsp">ftp://ftp.infradead.org/pub/pcsp</A></TD><TR>
-</TABLE></P>
+<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">The driver emulates 44.1, maybe more.</TD><TR>
+<TD></TD><TD><FONT CLASS="text">Driver:</TD><TD><FONT CLASS="text"><A HREF="ftp://ftp.infradead.org/pub/pcsp">ftp://ftp.infradead.org/pub/pcsp</A></TD>
+</TABLE>
 
-<P><UL>
-<LI>on Linux, use at least kernel 2.4 if possible, 2.2 isn't tested
-<LI>if sound clicks when playing from CD-ROM, turn on IRQ unmasking !
-     for example "hdparm -u1 /dev/cdrom" (see "man hdparm" !!!)
-     This is recommended anyways... (for XMMS, etc...)
-     Read section <A HREF="cd-dvd.html#4.1">4.1</A>.
-<LI>don't use your soundcard by other application ( for ex. XMMS ) !
-     if you use ESD, start MPlayer with the '-vo sdl:esd' option !
-<LI>Please tell us how MPlayer and your soundcard(s) worked together!
-</UL></P>
+<UL>
+<LI>On Linux, a 2.4.x kernel is highly recommended. Kernel 2.2 is not tested.</LI>
+<LI>If sound clicks when playing from CD-ROM, turn on IRQ unmasking, e.g.
+  <CODE>hdparm -u1 /dev/cdrom</CODE> (<CODE>man hdparm</CODE>). This is
+  generally beneficial and described more detailed in the
+  <A HREF="cd-dvd.html#4.1">CD-ROM section</A>.</LI>
+<LI>Sharing your sound card with another application like XMMS is <B>strongly discouraged</B>!
+  If the other sound application is using ESD, start <B>MPlayer</B> with the <CODE>-vo sdl:esd</CODE> option
+  to combine both sound streams! In fact, the option <CODE>-vo sdl:esd</CODE> could be used with ESD 
+  even when playing <B>Mplayer</B> alone.</LI>
+<LI>Feedback to this document is welcome. Please tell us how <B>MPlayer</B> and
+  your sound card(s) worked together.</LI>
+</UL>
 
 
 <P><B><A NAME=2.3.2.2>2.3.2.2. Audio plugins</A></B></P>
 
 <P><B>MPlayer</B> has support for audio plugins. Audio plugins can be used for
   changing the properties of the audio data before the sound reaches the sound
-  card. They are enabled using the <CODE>-aop</CODE> switch followed by the
-  <CODE>list=plugin1,plugin2,...</CODE> switch. The <CODE>list</CODE> switch is
-  required and determines which plugins that should be used and in which order
-  they should be executed, example:
+  card. They are enabled using the <CODE>-aop</CODE> switch which takes a
+  <CODE>list=plugin1,plugin2,...</CODE> argument. The <CODE>list</CODE> argument
+  is required and determines which plugins should be used and in which order they
+  should be executed. Example:
 </P>
 
 <P>&nbsp;&nbsp;<CODE>mplayer media.avi -aop list=resample,format</CODE></P>
@@ -149,14 +151,14 @@ problems (losing sync, disappearing audio, etc).</LI>
   plugin.
 </P>
 
-<P>The plugins can also have switches that changes their behaviour. These
+<P>The plugins can also have switches that change their behavior. These
   switches are explained in detail in the sections below. A plugin will execute
-  using default settings if it's switches are omitted.  Example of how to use
-  plugins in combination with plugin specific switches:
+  using default settings if its switches are omitted.  Here is an example of how
+  to use plugins in combination with plugin specific switches:
 </P>
 
 <P>&nbsp;&nbsp;<CODE>mplayer media.avi -aop
-  list=resample,format:fout=48000:format=0x8</CODE>
+  list=resample,format:fout=44100:format=0x8</CODE>
 </P>
 
 <P>would set the output frequency of the resample plugin to 44100Hz and the
@@ -168,46 +170,47 @@ problems (losing sync, disappearing audio, etc).</LI>
 
 <P><B><A NAME=2.3.2.2.1>2.3.2.2.1. Up/Downsampling</A></B></P>
 
-<P><B>MPlayer</B> fully supports up/down sampling of the sound. This plugin can
-  for example be used if you have a fixed frequency sound card or if you are
-  stuck with an olqd sound card that is only capable of max 44.1kHz.
+<P><B>MPlayer</B> fully supports up/downsampling of the sound. This plugin can
+  be used if you have a fixed frequency sound card or if you are
+  stuck with an old sound card that is only capable of max 44.1kHz.
   Limitations in your hardware are not auto detected, so you have to specify
   the sample frequency explicitly. This plugin has one switch:
   <CODE>fout</CODE> which is used for setting the desired output sample
-  frequency, it defaults to 48kHz, and is given in
+  frequency. It defaults to 48kHz, and is given in
   &lt;Hz&gt;.
 </P>
 
-<P>Usage :<BR>
+<P>Usage:<BR>
 &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=resample:fout=&lt;required
   frequency in Hz, like 44100&gt;</CODE></P>
 
+<P>Note that the output frequency should not be scaled up from the default value.
+  Scaling up will cause the audio and video streams to be played in slow motion
+  in addition to audio distortion.</P>
 
 <P><B><A NAME=2.3.2.2.2>2.3.2.2.2. Surround Sound decoding</A></B></P>
 
-<P><B>MPlayer</b> has an audio plugin that can decode matrix encoded
-surround sound.  Dolby Surround is an example of a matrix encoded format.</p>
+<P><B>MPlayer</B> has an audio plugin that can decode matrix encoded
+surround sound. Dolby Surround is an example of a matrix encoded format.
+Many files with 2 channel audio actually contain matrixed surround sound.
+To use this feature you need a sound card supporting at least 4 channels.</P>
 
-<P>Many files with 2 channel audio actually contain matrixed surround
-sound.</p>
-
-<P>To use this feature, you will need a sound-card supporting at least 4 channels.</P>
-
-<P>Usage :<BR>
+<P>Usage:<BR>
 &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=surround</CODE></P>
 
 
 <P><B><A NAME=2.3.2.2.3>2.3.2.2.3. Sample format converter</A></B></P>
                                                                                
-<P>If your sound card driver doesn't support signed 16bit int, this plugin can
+<P>If your sound card driver does not support signed 16bit <CODE>int</CODE> data type, 
+  this plugin can
   be used to change the format to one which your sound card can understand. It
-  has one switch <CODE>format</CODE> which can be set to one of the numbers
-  found in libao2/afmt.h. This plugin is hardly ever needed and is intended for
-  advanced users. Observe that this plugin only changes the sample format and
-  not the sample frequency or the number of channels.
+  has one switch, <CODE>format</CODE>, which can be set to one of the numbers
+  found in <CODE>libao2/afmt.h</CODE>. This plugin is hardly ever needed and is
+  intended for advanced users. Keep in mind that this plugin only changes the
+  sample format and not the sample frequency or the number of channels.
 </P>
 
-<P>Usage :<BR>
+<P>Usage:<BR>
   &nbsp;&nbsp;<CODE>mplayer media.avi -aop
   list=format:format=&lt;required output format&gt;</CODE>
 </P>
@@ -216,15 +219,15 @@ sound.</p>
 <P><B><A NAME=2.3.2.2.4>2.3.2.2.4. Delay</A></B></P>
 
 <P>This plugin delays the sound and is intended as an example of how to develop
-  new plugins. It can not be used for anything useful from users perspective
+  new plugins. It can not be used for anything useful from a users perspective
   and is mentioned here for the sake of completeness only. Do not use this
   plugin unless you are a developer.</P>
 
 <P><B><A NAME=2.3.2.2.5>2.3.2.2.5. Software volume control</A></B></P>
 
 <P>This plugin is a software replacement for the volume control, and
-  can be used in machines with broken mixer device. It can also be
-  used if one wants to change the output volume from <B>MPlayer</B>
+  can be used on machines with a broken mixer device. It can also be
+  used if one wants to change the output volume of <B>MPlayer</B>
   without changing the PCM volume setting in the mixer. It has one
   switch <CODE>volume</CODE> that is used for setting the initial
   sound level. The initial sound level can be set to values between 0
@@ -232,26 +235,26 @@ sound.</p>
   plugin with caution since it can reduce the signal to noise ratio of
   the sound. In most cases it is best to set the level for the PCM
   sound to max, leave this plugin out and control the output level to
-  your speakers with the mixers master volume control. If there is an
+  your speakers with the master volume control of the mixer. If there is an
   external amplifier connected to the computer (this is almost always
   the case), the noise level can be minimized by adjusting the master
   level and the volume knob on the amplifier until the hissing noise
   in the background is gone.
 </P>
 
-<P>Usage :<BR>
+<P>Usage:<BR>
   &nbsp;&nbsp;<CODE>mplayer media.avi -aop
   list=volume:volume=&lt;0-255&gt;</CODE>
 </P>
 
-<P>This plugin also have a compressor or "soft-clipping" capabilities.
+<P>This plugin also has compressor or "soft-clipping" capabilities.
   Compression can be used if the dynamic range of the sound is very
   high or if the dynamic range of the loudspeakers is very
-  low. Observe that this feature creates distortion and should be
+  low. Be aware that this feature creates distortion and should be
   considered a last resort.
 </P>
 
-<P>Usage :<BR>
+<P>Usage:<BR>
   &nbsp;&nbsp;<CODE>mplayer media.avi -aop
   list=volume:softclip</CODE>
 </P>
@@ -259,27 +262,25 @@ sound.</p>
 
 <P><B><A NAME=2.3.2.2.6>2.3.2.2.6. Extrastereo</A></B></P>
 
-<P>This plugin increases (linearly) the difference between left and right
-  channels (as the XMMS extrastereo plugin) which has some of "live" effect 
-  on playback.
+<P>This plugin (linearly) increases the difference between left and right
+  channels (like the XMMS extrastereo plugin) which gives some sort of "live"
+  effect to playback.
 </P>
 
-<P>Usage :<BR>
+<P>Usage:<BR>
   &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=extrastereo</CODE><BR>
   &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=extrastereo:mul=3.45</CODE></P>
 
 <P>The default coefficient (<CODE>mul</CODE>) is a float number that defaults
-  to 2.5.  If you set it to 0.0, you will have a mono sound (average of both
-  channels), if you set it to 1.0, sound will be unchanged.</P>
+  to 2.5. If you set it to 0.0, you will have mono sound (average of both
+  channels). If you set it to 1.0, sound will be unchanged.</P>
 
 
 <P><B><A NAME=2.3.2.2.7>2.3.2.2.7. Volume normalizer</A></B></P>
 
-<P>This plugin maximizes the volume while maintaining distortionless
-  sound.
-</P>
+<P>This plugin maximizes the volume without distorting the sound.</P>
 
-<P>Usage :<BR>
+<P>Usage:<BR>
   &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=volnorm</CODE><BR>
 
 
