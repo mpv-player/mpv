@@ -86,6 +86,7 @@ reserved_bytes
 main header:
 	main_startcode				f(64)
 	packet header
+	branch					v
 	version					v
 	stream_count				v
 	max_distance				v
@@ -248,6 +249,9 @@ index_startcode
 	0xDD672F23E64EULL + (((uint64_t)('N'<<8) + 'X')<<48)
 info_startcode
 	0xAB68B596BA78ULL + (((uint64_t)('N'<<8) + 'I')<<48)
+
+branch
+	1 for my fork, 0 for the official nut container
 
 version
 	2 for now
