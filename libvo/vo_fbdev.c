@@ -706,6 +706,11 @@ static int fb_preinit(void)
 
 	fb_bpp = fb_vinfo.bits_per_pixel;
 
+	if (fb_bpp == 8 && !vo_dbpp) {
+		printf(FBDEV "8 bpp output is not supported.\n");
+		goto err_out_fd;
+	}
+
 	/* 16 and 15 bpp is reported 16 bpp */
 	if (fb_bpp == 16)
 		fb_bpp = fb_vinfo.red.length + fb_vinfo.green.length +
@@ -715,7 +720,7 @@ static int fb_preinit(void)
 		if (vo_dbpp != 15 && vo_dbpp != 16 && vo_dbpp != 24 &&
 				vo_dbpp != 32) {
 			printf(FBDEV "can't switch to %d bpp\n", vo_dbpp);
-			goto err_out;
+			goto err_out_fd;
 		}
 		fb_bpp = vo_dbpp;		
 	}
@@ -897,7 +902,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 		fb_vinfo.blue.length;
 	fb_bpp = (fb_pixel_size == 4) ? 32 : fb_real_bpp;
 	if (fb_bpp_we_want != fb_bpp)
-		printf(FBDEV "requested %d bpp, got %d bpp)!!!\n",
+		printf(FBDEV "requested %d bpp, got %d bpp!!!\n",
 				fb_bpp_we_want, fb_bpp);
 
 	switch (fb_bpp) {
