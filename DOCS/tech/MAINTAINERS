@@ -22,18 +22,19 @@ English documentation:
     * user docs: Gabucino, Diego Biurrun
     * review, grammar & html fixes: Diego Biurrun, Nilmoni Deb, András Mohari
     * input layer, lirc, slave mode docs: Albeu
-    * man page: Jonas Jermann <jjermann@gmx.net>
+    * man page: Jonas Jermann, Diego Biurrun
     * tech/* docs: A'rpi
 
 Documentation translations:
     * Help Messages: Johannes Feigl
     * Hungarian: Gabucino
-    * German: Jonas Jermann <jjermann@gmx.net>
-    * French: Nicolas Le Gaillart
+    * German: Moritz Bunkus
+    * French: Nicolas Tourmentine
     * Spanish: TeLeNiEkO (outdated)
     * Russian: Nick Kurshev (outdated)
     * Polish: Justyna Biala <nell@skrzynka.pl>
     * Italian: Matteo Balduzzi
+    * Chinese: hephooey@fastmail.fm
 
 Platforms/ports: (see also DOCS/tech/porting-status.txt)
     * Debian packaging: Dariusz Pietrzak

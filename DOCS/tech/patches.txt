@@ -37,7 +37,14 @@ outdated patches.
    worry, mplayer-dev-eng is not high traffic and you can subscribe with the
    nomail option if you do not wish to receive all the mails.
 
-7. Do not immediately ask for CVS write access. If you contributed one or more
+7. Give us a few days to react. We try to review patches as fast as possible,
+   but unfortunately we are constantly overloaded with work, be it MPlayer
+   related or from our day to day lives. If your patch seems to be ignored,
+   please resend it and mention that you got ignored. We are interested in your
+   work and will eventually either accept it or reject it with an explanation
+   what and why we disliked about your patch.
+
+8. Do not immediately ask for CVS write access. If you contributed one or more
    nice, acceptable patches and they need maintaining or you want to be an
    MPlayer developer, you'll get CVS write access.
    

@@ -5,7 +5,6 @@ TODO:
 FOR THE NEXT PRE_RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 - fix -vop expand=-50 + ffdivx
-- fix -npp in manpage
 - remove -vop lavcdeint, remove -vop yuy2, yvu9
 
 FOR THE v0.90 RELEASE:
