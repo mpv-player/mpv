@@ -165,6 +165,7 @@ Optional features:
   --disable-new-conf     Disable new experimental config parser code [enabled]
   --enable-menu          Enable osd menu support (needs new config) [disabled]
   --disable-sortsub      Disable subtitles sorting [enabled]
+  --disable-macosx       Disable Mac OS X specific features [autodetect]
 
 Codecs:
   --enable-gif		 enable gif support [autodetect]
@@ -1059,6 +1060,7 @@ _shared_pp=no
 _new_conf=yes
 _menu=no
 _qtx_codecs=auto
+_macosx=auto
 _sortsub=yes
 _freetypeconfig='freetype-config'
 
@@ -1259,6 +1261,9 @@ for ac_option do
 
   --enable-qtx-codecs) _qtx_codecs=yes ;;
   --disable-qtx-codecs) _qtx_codecs=no ;;
+
+  --enable-macosx) _macosx=yes ;;
+  --disable-macosx) _macosx=no ;;
 
   --enable-sortsub) _sortsub=yes ;;
   --disable-sortsub) _sortsub=no ;;
@@ -2257,6 +2262,39 @@ else
   _def_sys_sysinfo='#undef HAVE_SYS_SYSINFO_H'
 fi
 echores "$_sys_sysinfo"
+
+
+echocheck "Mac OS X APIs"
+if test "$_macosx" = auto ; then
+    if darwin && ppc; then
+        _macosx=yes
+    else
+	_macosx=no
+    fi
+fi
+if test "$_macosx" = yes ; then
+  cat > $TMPC <<EOF
+#include <Carbon/Carbon.h>
+#include <Cocoa/Cocoa.h>
+#include <QuickTime/QuickTime.h>
+int main(void) { 
+  NSApplicationLoad(); 
+}
+EOF
+  if cc_check -ObjC -framework Carbon -framework Cocoa -framework QuickTime ; then 
+    _macosx=yes
+    _macosx_frameworks="-framework Carbon -framework Cocoa -framework QuickTime "
+  else
+    _macosx=no
+    echo -n "failed to detect Mac OS X APIs, defaulting to "
+  fi
+fi
+if test "$_macosx" = yes ; then
+    _def_macosx='#define MACOSX 1'
+else
+    _def_macosx='#undef MACOSX'
+fi
+echores "$_macosx"
 
 
 #########
@@ -4553,6 +4591,7 @@ else
 fi
 echores "$_qtx_codecs"
 
+
 echocheck "Subtitles sorting"
 if test "$_sortsub" = yes ; then
     _def_sortsub='#define USE_SORTSUB 1'
@@ -4944,6 +4983,8 @@ VORBIS_LIB = $_ld_vorbis $_ld_libdv
 FAAD_LIB = $_ld_faad
 XMMS_PLUGINS = $_xmms
 XMMS_LIB = $_xmms_lib
+MACOSX = $_macosx
+MACOSX_FRAMEWORKS = $_macosx_frameworks
 
 # --- Some stuff for autoconfigure ----
 $_target_arch
@@ -5169,6 +5210,9 @@ $_def_win32
 /* DirectShow support */
 $_def_dshow
 
+/* Mac OS X specific features */
+$_def_macosx
+
 /* Build our Win32-loader */
 $_def_win32_loader
 
@@ -5277,6 +5321,9 @@ $_def_vcd
 #elif defined(WIN32)
 #define DEFAULT_CDROM_DEVICE    "D:"
 #define DEFAULT_DVD_DEVICE	"D:"
+#elif defined(MACOSX)
+#define DEFAULT_CDROM_DEVICE    "/dev/rdisk1"
+#define DEFAULT_DVD_DEVICE	DEFAULT_CDROM_DEVICE
 #else
 #define DEFAULT_CDROM_DEVICE    "/dev/cdrom"
 #define DEFAULT_DVD_DEVICE	"/dev/dvd"
