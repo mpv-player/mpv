@@ -1,4 +1,5 @@
 // Transated by: Firebird <firebird@chez.com>
+// Small fixes by pl <p_l@gmx.fr>
 
 // ========================= Aide MPlayer ===========================
 
@@ -49,7 +50,7 @@ static char help_text[]=
 " -framedrop       Active le drop d'images (pour ordinateurs lents)\n"
 "\n"
 "Touches:\n"
-" gauche ou droite Saute en avant/arrière de 10 secondes\n"
+" <- ou ->         Saute en avant/arrière de 10 secondes\n"
 " haut ou bas      Saute en avant/arrière de 1 minute\n"
 " < ou >           Saute en avant/arrière dans la playlist\n"
 " p ou ESPACE      Pause (presser n'importe quelle touche pour continuer)\n"
@@ -72,7 +73,7 @@ static char help_text[]=
 #define MSGTR_Exit_quit "Fin"
 #define MSGTR_Exit_eof "Fin du fichier"
 #define MSGTR_Exit_error "Erreur fatale"
-#define MSGTR_IntBySignal "\nMPlayer interrompu par le signal %d du module: %s \n"
+#define MSGTR_IntBySignal "\nMPlayer interrompu par le signal %d dans le module: %s \n"
 #define MSGTR_NoHomeDir "Ne peut trouver répertoire home\n"
 #define MSGTR_GetpathProblem "Problème get_path(\"config\")\n"
 #define MSGTR_CreatingCfgFile "Création du fichier de config: %s\n"
@@ -92,7 +93,7 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmt "Tente de forcer famille de pilotes codec audio de famille %d ...\n"
 #define MSGTR_CantFindAfmtFallback "Ne peut trouver de codec audio pour famille de pilotes choisie, utilise d'autres.\n"
 #define MSGTR_CantFindAudioCodec "Ne peut trouver codec pour format audio 0x%X !\n"
-#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Tente de mettre à jour %s de etc/codecs.conf\n*** Si ce n'est toujours pas bon, alors lisez DOCS/codecs.html!\n"
+#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Tentez de mettre à jour %s à partir de etc/codecs.conf\n*** Si ce n'est toujours pas bon, alors lisez DOCS/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "Ne peut trouver de codec audio! -> Aucun son\n"
 #define MSGTR_TryForceVideoFmt "Tente de forcer famille de pilotes codec vidéo %d ...\n"
 #define MSGTR_CantFindVfmtFallback "Ne peut trouver de codec vidéo pour famille de pil. choisie, utilise d'autres.\n"
@@ -189,6 +190,7 @@ static char help_text[]=
 #define MSGTR_NoACMSupport "Codecs audio Win32/ACM désactivés ou non disponibles sur plateformes non-x86 -> force -nosound :(\n"
 #define MSGTR_NoDShowAudio "MPlayer a été compilé sans support DirectShow -> force -nosound :(\n"
 #define MSGTR_NoOggVorbis "Codec audio OggVorbis désactivé -> force -nosound :(\n"
+#define MSGTR_NoXAnimSupport "MPlayer a été compilé SANS support XAnim!\n"
 
 #define MSGTR_MpegPPhint "ATTENTION! Vous avez demandé un filtre de sortie pour une vidéo MPEG 1/2,\n" \
 			 "           mais avez compilé MPlayer sans support de filtre MPEG 1/2!\n" \
