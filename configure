@@ -5006,7 +5006,7 @@ if test "$_tv_v4l2" = yes ; then
   _inputmodules="tv-v4l2 $_inputmodules"
 else
   _noinputmodules="tv-v4l2 $_noinputmodules"
-  _def_tv_v4l='#undef HAVE_TV_V4L2'
+  _def_tv_v4l2='#undef HAVE_TV_V4L2'
 fi
 echores "$_tv_v4l2"
 
