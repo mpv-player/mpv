@@ -51,7 +51,14 @@ Problems:
 - ATI VCR1:  (VCR1)
   ativcr1.dll: can't load (16-bit DLL)
 - TrueMotion 2.0:  (TM20)
-  tm20dec.ax: segfault
+  tm20dec.ax: dest format not accepted
+- ZLIB
+  avizlib.dll: YUY2 only (no RGB), Called unk_RegEnumValueA -> endless loop
+- MSZH
+  avimszh.dll: RGB only (no YUV), Called unk_RegEnumValueA -> endless loop
+- DV - Sony Digital Video (dvsd)
+  qdv.dll: source format not accepted
+- MWV1: calls many unk_ functions and then segfaults.
 
 Not tested:
 
@@ -63,8 +70,6 @@ Not tested:
   APmpg4v1.dll: not tested
 - Windows Media Video 8 (WMV2)
   wmv8ds32.ax: not tested (no sample file)
-- DV - Sony Digital Video (dvsd)
-  qdv.dll: not tested
   
 
 Audio codecs:
