@@ -133,9 +133,6 @@ libmpdemux/libmpdemux.a:
 libmpcodecs/libmpcodecs.a:
 	$(MAKE) -C libmpcodecs
 
-loader/DirectShow/libDS_Filter.a:
-	$(MAKE) -C loader/DirectShow
-
 loader/dshow/libDS_Filter.a:
 	$(MAKE) -C loader/dshow
 
@@ -317,3 +314,4 @@ endif
 ifneq ($(wildcard .depend),)
 include .depend
 endif
+include libdeps
