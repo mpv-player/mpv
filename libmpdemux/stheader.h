@@ -4,6 +4,8 @@
 #include "wine/avifmt.h"
 #include "wine/vfw.h"
 
+#include "../mp_image.h"
+
 typedef struct {
   demux_stream_t *ds;
   unsigned int format;
@@ -62,6 +64,7 @@ typedef struct {
   float num_frames;       // number of frames played
   int num_frames_decoded;       // number of frames decoded
   char *our_out_buffer;
+  mp_image_t *image;
   // win32 codec stuff:
   AVIStreamHeader video;
   BITMAPINFOHEADER *bih;   // in format
