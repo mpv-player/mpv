@@ -2700,19 +2700,28 @@ if(rel_seek_secs || abs_seek_pos){
 #ifdef USE_OSD
   if(osd_level>=2){
       int pts=d_video->pts;
+      char osd_text_tmp[50];
       if(pts==osd_last_pts-1) ++pts; else osd_last_pts=pts;
       vo_osd_text=osd_text_buffer;
       if (osd_show_sub_delay) {
-	  sprintf(vo_osd_text, "Sub delay: %d ms",(int)(sub_delay*1000));
+	  sprintf(osd_text_tmp, "Sub delay: %d ms",(int)(sub_delay*1000));
 	  osd_show_sub_delay--;
       } else
       if (osd_show_av_delay) {
-	  sprintf(vo_osd_text, "A-V delay: %d ms",(int)(audio_delay*1000));
+	  sprintf(osd_text_tmp, "A-V delay: %d ms",(int)(audio_delay*1000));
 	  osd_show_av_delay--;
       } else
-          sprintf(vo_osd_text,"%c %02d:%02d:%02d",osd_function,pts/3600,(pts/60)%60,pts%60);
+          sprintf(osd_text_tmp,"%c %02d:%02d:%02d",osd_function,pts/3600,(pts/60)%60,pts%60);
+      
+      if(strcmp(vo_osd_text, osd_text_tmp)) {
+	      strcpy(vo_osd_text, osd_text_tmp);
+	      vo_osd_changed(1);
+      }
   } else {
+      if(vo_osd_text) {
       vo_osd_text=NULL;
+	  vo_osd_changed(1);
+      }
   }
 //  for(i=1;i<=11;i++) osd_text_buffer[10+i]=i;osd_text_buffer[10+i]=0;
 //  vo_osd_text=osd_text_buffer;
@@ -2737,6 +2746,9 @@ if(rel_seek_secs || abs_seek_pos){
   if(vo_vobsub){
     current_module="vobsub";
     vobsub_process(vo_vobsub,d_video->pts);
+    
+    /* Don't know how to detect wether the sub has changed or not */
+    vo_osd_changed(1);
     current_module=NULL;
   }
 
@@ -2760,6 +2772,9 @@ if(rel_seek_secs || abs_seek_pos){
       spudec_assemble(vo_spudec,packet,len,100*d_dvdsub->pts);
     }
     spudec_heartbeat(vo_spudec,100*d_video->pts);
+
+    /* Don't know how to detect wether the sub has changed or not */
+    vo_osd_changed(1);
     current_module=NULL;
   }
 #endif

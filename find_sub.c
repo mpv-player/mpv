@@ -35,6 +35,9 @@ void find_sub(subtitle* subtitles,int key){
     }
     // sub changed!
 
+    /* Tell the OSD subsystem that the OSD contents will change soon */
+    vo_osd_changed(1);
+
     if(key<=0){
       vo_sub=NULL; // no sub here
       return;

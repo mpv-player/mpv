@@ -50,5 +50,7 @@ extern char * __sub_osd_names_short[];
 //extern void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));
 extern void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));
 
+int vo_osd_changed(int new_value);
+
 #endif
 #endif

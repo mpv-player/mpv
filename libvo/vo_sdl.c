@@ -164,6 +164,29 @@ static void setenv(const char *name, const char *val, int _xx)
 #define ZOOM 0x04
 #define FLIP 0x08  
 
+#ifdef SDL_ENABLE_LOCKS
+#define	SDL_OVR_LOCK(x)        if (SDL_LockYUVOverlay (priv->overlay)) { \
+				if(verbose) printf("SDL: Couldn't lock YUV overlay\n"); \
+				return x; \
+	    		    }
+#define SDL_OVR_UNLOCK      SDL_UnlockYUVOverlay (priv->overlay);
+
+#define SDL_SRF_LOCK(srf, x)   if(SDL_MUSTLOCK(srf)) { \
+				if(SDL_LockSurface (srf)) { \
+					if(verbose) printf("SDL: Couldn't lock RGB surface\n"); \
+					return x; \
+				} \
+			    }
+
+#define SDL_SRF_UNLOCK(srf) if(SDL_MUSTLOCK(srf)) \
+				SDL_UnlockSurface (srf);
+#else
+#define SDL_OVR_LOCK(x)
+#define SDL_OVR_UNLOCK
+#define SDL_SRF_LOCK(srf, x)
+#define SDL_SRF_UNLOCK(srf)
+#endif
+
 /** Private SDL Data structure **/
 
 static struct sdl_priv_s {
@@ -221,10 +244,8 @@ static struct sdl_priv_s {
 	/* is X running (0/1) */
 	int X;
 
-#ifdef HAVE_X11
 	/* X11 Resolution */
 	int XWidth, XHeight;
-#endif
 	
         /* original image dimensions */
 	int width, height;
@@ -232,10 +253,53 @@ static struct sdl_priv_s {
 	/* destination dimensions */
 	int dstwidth, dstheight;
 
+    /* Draw image at coordinate y on the SDL surfaces */
+    int y;
+
+    /* The image is displayed between those y coordinates in priv->surface */
+    int y_screen_top, y_screen_bottom;
+
+    /* 1 if the OSD has changed otherwise 0 */
+    int osd_has_changed;
+    
 	/* source image format (YUV/RGB/...) */
         int format;
+
+    /* dirty_off_frame[0] contains a bounding box around the osd contents drawn above the image
+       dirty_off_frame[1] is the corresponding thing for OSD contents drawn below the image
+    */
+    SDL_Rect dirty_off_frame[2];
 } sdl_priv;
 
+static void erase_area_4(int x_start, int width, int height, int pitch, uint32_t color, uint8_t* pixels);
+static void erase_area_1(int x_start, int width, int height, int pitch, uint8_t color, uint8_t* pixels);
+static int setup_surfaces(void);
+static void set_video_mode(int width, int height, int bpp, uint32_t sdlflags);
+static void erase_rectangle(int x, int y, int w, int h);
+
+/* Expand 'rect' to contain the rectangle specified by x, y, w and h */
+static void expand_rect(SDL_Rect* rect, int x, int y, int w, int h)
+{
+    if(rect->x < 0 || rect->y < 0) {
+        rect->x = x;
+        rect->y = y;
+        rect->w = w;
+        rect->h = h;
+        return;
+    }
+    
+    if(rect->x > x)
+        rect->x = x;
+
+    if(rect->y > y)
+        rect->y = y;
+
+    if(rect->x + rect->w < x + w)
+        rect->w = x + w - rect->x;
+
+    if(rect->y + rect->h < y + h)
+        rect->h = y + h - rect->y;
+}
 
 /** libvo Plugin functions **/
 
@@ -247,11 +311,45 @@ static struct sdl_priv_s {
 static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
 	struct sdl_priv_s *priv = &sdl_priv;
 	
+    if(priv->osd_has_changed) {
+        /* OSD did change. Store a bounding box of everything drawn into the OSD */
+        if(priv->y >= y0) {
+            /* Make sure we don't mark part of the frame area dirty */
+            if(h + y0 > priv->y) 
+                expand_rect(&priv->dirty_off_frame[0], x0, y0, w, priv->y - y0);
+            else
+                expand_rect(&priv->dirty_off_frame[0], x0, y0, w, h);
+        }
+        else if(priv->y + priv->height <= y0 + h) {
+            /* Make sure we don't mark part of the frame area dirty */
+            if(y0 < priv->y + priv->height) 
+                expand_rect(&priv->dirty_off_frame[1], x0,
+                            priv->y + priv->height,
+                            w, h - ((priv->y + priv->height) - y0));
+            else
+                expand_rect(&priv->dirty_off_frame[1], x0, y0, w, h);
+        }
+    }
+    else { /* OSD contents didn't change only draw parts that was erased by the frame */
+        if(priv->y >= y0) {
+           src = src + (priv->y - y0) * stride;
+           srca = srca + (priv->y - y0) * stride;
+           h -= priv->y - y0;
+           y0 = priv->y;
+        }
+
+        if(priv->y + priv->height <= y0 + h)
+            h = priv->y + priv->height - y0;
+
+        if(h <= 0)
+            return;
+    }
+
 	switch(priv->format) {
 		case IMGFMT_YV12:  
 		case IMGFMT_I420:
         	case IMGFMT_IYUV:
-    			vo_draw_alpha_yv12(w,h,src,srca,stride,((uint8_t *) *(priv->overlay->pixels))+priv->width*y0+x0,priv->width);
+            vo_draw_alpha_yv12(w,h,src,srca,stride,((uint8_t *) *(priv->overlay->pixels))+priv->overlay->pitches[0]*y0+x0,priv->width);
 		break;
 		case IMGFMT_YUY2:
         	case IMGFMT_YVYU:		
@@ -260,6 +358,7 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
         	case IMGFMT_UYVY:
     			vo_draw_alpha_yuy2(w,h,src,srca,stride,((uint8_t *) *(priv->overlay->pixels))+2*(priv->width*y0+x0)+1,2*priv->width);
 		break;
+
 		default:
 		if(priv->dblit)		
 		switch(priv->format) {
@@ -419,7 +518,7 @@ static int sdl_open (void *plugin, void *name)
     * we'll force the BPP to 16, and pray that SDL can emulate for us.
     */
 	priv->bpp = vidInfo->vfmt->BitsPerPixel;
-	if (!priv->mode && priv->bpp < 16) {
+	if (priv->mode == YUV && priv->bpp < 16) {
 
 		if(verbose) printf("SDL: Your SDL display target wants to be at a color depth of (%d), but we need it to be at\
 least 16 bits, so we need to emulate 16-bit color. This is going to slow things down; you might want to\
@@ -556,40 +655,73 @@ static void set_fullmode (int mode)
 }
 #endif
 
+/* Set video mode. Not fullscreen */
+static void set_video_mode(int width, int height, int bpp, uint32_t sdlflags)
+{
+	struct sdl_priv_s *priv = &sdl_priv;
+    SDL_Surface* newsurface;    
+
+    newsurface = SDL_SetVideoMode(width, height, bpp, sdlflags);
+
+    if(newsurface) {
+
+        /* priv->surface will be NULL the first time this function is called. */
+        if(priv->surface)
+            SDL_FreeSurface(priv->surface);
+
+        priv->surface = newsurface;
+        priv->dstwidth = width;
+        priv->dstheight = height;
+
+        setup_surfaces();
+    }
+    else
+        printf("set_video_mode: SDL_SetVideoMode failed: %s\n", SDL_GetError());
+}
+
 static void set_fullmode (int mode) {
 	struct sdl_priv_s *priv = &sdl_priv;
 	SDL_Surface *newsurface = NULL;
+ 	int screen_surface_w, screen_surface_h;
 	
 	/* if we haven't set a fullmode yet, default to the lowest res fullmode first */
 	/* But select a mode where the full video enter */
-	if (mode < 0) {
-	        int i = 0;
+	if(priv->X && priv->fulltype & FS) {
+		screen_surface_w = priv->XWidth;
+		screen_surface_h = priv->XHeight;
+	}
+	else if (mode < 0) {
+        int i;
 		mode = 0; // Default to the biggest mode avaible
 		for(i = findArrayEnd(priv->fullmodes) - 1; i >=0; i--) {
-		  if( (priv->fullmodes[i]->w >= priv->width) && 
-		      (priv->fullmodes[i]->h >= priv->height) ) {
+		  if( (priv->fullmodes[i]->w >= priv->dstwidth) && 
+		      (priv->fullmodes[i]->h >= priv->dstheight) ) {
 		    mode = i;
 		    break;
 		  }
 		}
 		priv->fullmode = mode;
+        screen_surface_h = priv->fullmodes[mode]->h;
+        screen_surface_w = priv->fullmodes[mode]->w;
+	}
+    else {
+       screen_surface_h = priv->fullmodes[mode]->h;
+       screen_surface_w = priv->fullmodes[mode]->w;
 	}
 	
-	aspect_save_screenres(priv->fullmodes[mode]->w, priv->fullmodes[mode]->h);
+	aspect_save_screenres(screen_surface_w, screen_surface_h);
 
 	/* calculate new video size/aspect */
-	if(!priv->mode) {
-	if(priv->fulltype&FS) {
-#ifdef HAVE_X11		
+	if(priv->mode == YUV) {
+        if(priv->fulltype&FS)
 		aspect_save_screenres(priv->XWidth, priv->XHeight);
-#endif		
-	}
-	aspect(&priv->dstwidth, &priv->dstheight, A_ZOOM);
 
+        aspect(&priv->dstwidth, &priv->dstheight, A_ZOOM);
 	}
 
 	/* try to change to given fullscreenmode */
-	newsurface = SDL_SetVideoMode(priv->dstwidth, priv->dstheight, priv->bpp, priv->sdlfullflags);
+	newsurface = SDL_SetVideoMode(priv->dstwidth, screen_surface_h, priv->bpp,
+                                  priv->sdlfullflags);
 	
 	/* if creation of new surface was successfull, save it and hide mouse cursor */
 	if(newsurface) {
@@ -597,7 +729,13 @@ static void set_fullmode (int mode) {
 	    	    SDL_FreeSurface(priv->surface);
 		priv->surface = newsurface;
 		SDL_ShowCursor(0);
+        SDL_SRF_LOCK(priv->surface, -1)
+        SDL_FillRect(priv->surface, NULL, 0);
+        SDL_SRF_UNLOCK(priv->surface)
+        setup_surfaces();
 	}		
+    else
+        printf("set_fullmode: SDL_SetVideoMode failed: %s\n", SDL_GetError());
 }
 
 
@@ -621,8 +759,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	static Display *XDisplay;
 	static int XScreen;
 #endif
-	aspect_save_orig(width,height);
-	aspect_save_prescale(d_width,d_height);
 
 	sdl_format = format;
         switch(format){
@@ -640,6 +776,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 			if(verbose) printf("SDL: Using 0x%X (I420) image format\n", format);
 			printf("SDL: Mapping I420 to IYUV\n");
 			sdl_format = SDL_IYUV_OVERLAY;
+            priv->mode = YUV;
 		break;
 		case IMGFMT_BGR15:	
 			if(verbose) printf("SDL: Using 0x%X (BGR15) image format\n", format);
@@ -682,6 +819,28 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		priv->sdlfullflags |= SDL_ANYFORMAT;
 	}
 
+    /* SDL can only scale YUV data */
+    if(priv->mode == RGB || priv->mode == BGR) {
+        d_width = width;
+        d_height = height;
+    }
+
+    aspect_save_orig(width,height);
+	aspect_save_prescale(d_width ? d_width : width, d_height ? d_height : height);
+
+	/* Save the original Image size */
+    priv->X = 0;
+    priv->width  = width;
+    priv->height = height;
+    priv->dstwidth  = d_width ? d_width : width;
+    priv->dstheight = d_height ? d_height : height;
+
+    priv->rgbsurface = NULL;
+    priv->overlay = NULL;
+    priv->surface = NULL;
+    
+    priv->format = sdl_format;
+    
 #ifdef HAVE_X11
 	if(getenv("DISPLAY")) {
 		if(verbose) printf("SDL: deactivating XScreensaver/DPMS\n");
@@ -702,20 +861,11 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	SDL_WM_SetCaption (".: MPlayer : F = Fullscreen/Windowed : C = Cycle Fullscreen Resolutions :.", title);
 	//SDL_WM_SetCaption (title, title);
 
-	/* Save the original Image size */
-	
-	priv->width  = width;
-	priv->height = height;
-	priv->dstwidth  = d_width ? d_width : width;
-	priv->dstheight = d_height ? d_height : height;
-
-	/*priv->width  = res.w;
-	priv->height = res.h;*/
-        priv->format = format;
-#ifdef HAVE_X11
+    if(priv->X) {
 	aspect_save_screenres(priv->XWidth,priv->XHeight);
 	aspect(&priv->dstwidth,&priv->dstheight,A_NOZOOM);
-#endif
+    }
+    
 	priv->windowsize.w = priv->dstwidth;
   	priv->windowsize.h = priv->dstheight;
         
@@ -753,7 +903,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
         else {
 		if((strcmp(priv->driver, "x11") == 0) || ((strcmp(priv->driver, "aalib") == 0) && priv->X)) {
 			if(verbose) printf("SDL: setting windowed mode\n");
-          	priv->surface = SDL_SetVideoMode (priv->dstwidth, priv->dstheight, priv->bpp, priv->sdlflags);
+            set_video_mode(priv->dstwidth, priv->dstheight, priv->bpp, priv->sdlflags);
 		}
 		else {
 			if(verbose) printf("SDL: setting zoomed fullscreen with modeswitching\n");
@@ -767,7 +917,60 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		return -1;
 	}	
 
-	switch(format) {
+	return 0;
+}
+
+/* Free priv->rgbsurface or priv->overlay if they are != NULL.
+ * Setup priv->rgbsurface or priv->overlay depending on source format.
+ * The size of the created surface or overlay depends on the size of
+ * priv->surface, priv->width, priv->height, priv->dstwidth and priv->dstheight.
+ */
+static int setup_surfaces(void)
+{
+    struct sdl_priv_s *priv = &sdl_priv;
+    float h_scale = ((float) priv->dstwidth) / priv->width;
+    float v_scale = ((float) priv->dstheight) / priv->height;
+    int surfwidth, surfheight;
+
+    surfwidth = priv->width + (priv->surface->w - priv->dstwidth) / h_scale;
+    surfheight = priv->height + (priv->surface->h - priv->dstheight) / v_scale;
+
+    /* Place the image in the middle of the screen */
+    priv->y = (surfheight - priv->height) / 2;
+    priv->y_screen_top = priv->y * v_scale;
+    priv->y_screen_bottom = (priv->y + priv->dstheight) * v_scale;
+
+    priv->dirty_off_frame[0].x = -1;
+    priv->dirty_off_frame[0].y = -1;
+    priv->dirty_off_frame[1].x = -1;
+    priv->dirty_off_frame[1].y = -1;
+
+    /* Make sure the entire screen is updated */
+    vo_osd_changed(1);
+
+    if(priv->rgbsurface)
+        SDL_FreeSurface(priv->rgbsurface);
+    else if(priv->overlay)
+        SDL_FreeYUVOverlay(priv->overlay);
+
+    if(priv->mode != YUV) {
+		if((priv->format&0xFF) != priv->bpp) {
+            priv->dblit = 0;
+            printf("SDL: using depth/colorspace conversion, this will slow things"
+                   "down (%ibpp -> %ibpp).\n", priv->format&0xFF, priv->bpp);
+            priv->framePlaneRGB = priv->width * priv->height * priv->rgbsurface->format->BytesPerPixel;
+            priv->stridePlaneRGB = priv->width * priv->rgbsurface->format->BytesPerPixel;
+        }
+		else if(strcmp(priv->driver, "x11") == 0) {
+            priv->dblit = 1;
+            priv->framePlaneRGB = priv->width * priv->height * priv->surface->format->BytesPerPixel;
+            priv->stridePlaneRGB = priv->width * priv->surface->format->BytesPerPixel;
+            erase_rectangle(0, 0, priv->surface->w, priv->surface->h);
+            return 0;
+        }
+	}
+
+	switch(priv->format) {
 	    	/* Initialize and create the RGB Surface used for video out in BGR/RGB mode */
 //SDL_Surface *SDL_CreateRGBSurface(Uint32 flags, int width, int height, int depth, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask, Uint32 Amask);	
 		//	SDL_SWSURFACE,SDL_HWSURFACE,SDL_SRCCOLORKEY, priv->flags?	guess: exchange Rmask and Bmask for BGR<->RGB
@@ -777,98 +980,72 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		// 15 bit: r:111110000000000b g:000001111100000b b:000000000011111b
 		// FIXME: colorkey detect based on bpp, FIXME static bpp value, FIXME alpha value correct?
 	    case IMGFMT_RGB15:
-		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, width, height, 15, 31, 992, 31744, 0))) {
+		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, surfwidth, surfheight, 15, 31, 992, 31744, 0))) {
 			printf ("SDL: Couldn't create a RGB surface: %s\n", SDL_GetError());
 			return -1;
 		}
 	    break;	
 	    case IMGFMT_BGR15:
-		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, width, height, 15, 31744, 992, 31, 0))) {
+		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, surfwidth, surfheight, 15, 31744, 992, 31, 0))) {
 			printf ("SDL: Couldn't create a RGB surface: %s\n", SDL_GetError());
 			return -1;
 		}
 	    break;	
 	    case IMGFMT_RGB16:
-		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, width, height, 16, 31, 2016, 63488, 0))) {
+		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, surfwidth, surfheight, 16, 31, 2016, 63488, 0))) {
 			printf ("SDL: Couldn't create a RGB surface: %s\n", SDL_GetError());
 			return -1;
 		}
 	    break;	
 	    case IMGFMT_BGR16:
-		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, width, height, 16, 63488, 2016, 31, 0))) {
+		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, surfwidth, surfheight, 16, 63488, 2016, 31, 0))) {
 			printf ("SDL: Couldn't create a RGB surface: %s\n", SDL_GetError());
 			return -1;
 		}
 	    break;	
 	    case IMGFMT_RGB24:
-		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, width, height, 24, 0x0000FF, 0x00FF00, 0xFF0000, 0))) {
+		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, surfwidth, surfheight, 24, 0x0000FF, 0x00FF00, 0xFF0000, 0))) {
 			printf ("SDL: Couldn't create a RGB surface: %s\n", SDL_GetError());
 			return -1;
 		}
 	    break;	
 	    case IMGFMT_BGR24:
-		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, width, height, 24, 0xFF0000, 0x00FF00, 0x0000FF, 0))) {
+		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, surfwidth, surfheight, 24, 0xFF0000, 0x00FF00, 0x0000FF, 0))) {
 			printf ("SDL: Couldn't create a RGB surface: %s\n", SDL_GetError());
 			return -1;
 		}
 	    break;	
 	    case IMGFMT_RGB32:
-		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, width, height, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0/*0xFF000000*/))) {
+		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, surfwidth, surfheight, 32, 0x000000FF, 0x0000FF00, 0x00FF0000, 0/*0xFF000000*/))) {
 			printf ("SDL: Couldn't create a RGB surface: %s\n", SDL_GetError());
 			return -1;
 		}
 	    break;	
 	    case IMGFMT_BGR32:
-		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, width, height, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0/*0xFF000000*/))) {
+		if (!(priv->rgbsurface = SDL_CreateRGBSurface (SDL_SRCCOLORKEY, surfwidth, surfheight, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0/*0xFF000000*/))) {
 			printf ("SDL: Couldn't create a RGB surface: %s\n", SDL_GetError());
 			return -1;
 		}
 	    break;	
 	    default:
 		/* Initialize and create the YUV Overlay used for video out */
-		if (!(priv->overlay = SDL_CreateYUVOverlay (width, height, sdl_format, priv->surface))) {
+		if (!(priv->overlay = SDL_CreateYUVOverlay (surfwidth, surfheight, priv->format, priv->surface))) {
 			printf ("SDL: Couldn't create a YUV overlay: %s\n", SDL_GetError());
 			return -1;
 		}
-		priv->framePlaneY = width * height;
-		priv->framePlaneUV = (width * height) >> 2;
-		priv->framePlaneYUY = width * height * 2;
-		priv->stridePlaneY = width;
-		priv->stridePlaneUV = width/2;
-		priv->stridePlaneYUY = width * 2;
+		priv->framePlaneY = priv->width * priv->height;
+		priv->framePlaneUV = (priv->width * priv->height) >> 2;
+		priv->framePlaneYUY = priv->width * priv->height * 2;
+		priv->stridePlaneY = priv->width;
+		priv->stridePlaneUV = priv->width/2;
+		priv->stridePlaneYUY = priv->width * 2;
 	}
 	
-	if(priv->mode) {
-		if((priv->format&0xFF) != priv->bpp) { priv->dblit = 0; printf("SDL: using depth/colorspace conversion, this will slow things down (%ibpp -> %ibpp).\n", priv->format&0xFF, priv->bpp); }
-		else if(strcmp(priv->driver, "x11") == 0) priv->dblit = 1;
-		priv->framePlaneRGB = width * height * priv->rgbsurface->format->BytesPerPixel;
-		priv->stridePlaneRGB = width * priv->rgbsurface->format->BytesPerPixel;
-	}	
+    erase_rectangle(0, 0, surfwidth, surfheight);
+
 	return 0;
 }
 
-#ifdef SDL_ENABLE_LOCKS
-#define	SDL_OVR_LOCK        if (SDL_LockYUVOverlay (priv->overlay)) { \
-				if(verbose) printf("SDL: Couldn't lock YUV overlay\n"); \
-				return -1; \
-	    		    }
-#define SDL_OVR_UNLOCK      SDL_UnlockYUVOverlay (priv->overlay);
-
-#define SDL_SRF_LOCK(srf)   if(SDL_MUSTLOCK(srf)) { \
-				if(SDL_LockSurface (srf)) { \
-					if(verbose) printf("SDL: Couldn't lock RGB surface\n"); \
-					return -1; \
-				} \
-			    }
-
-#define SDL_SRF_UNLOCK(srf) if(SDL_MUSTLOCK(srf)) \
-				SDL_UnlockSurface (srf);
-#else
-#define SDL_OVR_LOCK
-#define SDL_OVR_UNLOCK
-#define SDL_SRF_LOCK(srf)
-#define SDL_SRF_UNLOCK(srf)
-#endif
 
 /**
  * Draw a frame to the SDL YUV overlay.
@@ -889,27 +1066,29 @@ static uint32_t draw_frame(uint8_t *src[])
         case IMGFMT_YV12:
         case IMGFMT_I420:
         case IMGFMT_IYUV:
-	    SDL_OVR_LOCK
-	    dst = (uint8_t *) *(priv->overlay->pixels);
-	    memcpy (dst, src[0], priv->framePlaneY);
-	    dst += priv->framePlaneY;
-	    memcpy (dst, src[2], priv->framePlaneUV);
-	    dst += priv->framePlaneUV;
-	    memcpy (dst, src[1], priv->framePlaneUV);
+        SDL_OVR_LOCK(-1)
+            
+        dst = priv->overlay->pixels[0] + priv->y*priv->overlay->pitches[0];
+        memcpy(dst, src[0], priv->overlay->pitches[0]*priv->overlay->h);
+        dst = priv->overlay->pixels[1] + priv->y*priv->overlay->pitches[1]/2;
+        memcpy(dst, src[1], priv->overlay->pitches[1]*priv->overlay->h/2);
+        dst = priv->overlay->pixels[2] + priv->y*priv->overlay->pitches[2]/2;
+        memcpy(dst, src[2], priv->overlay->pitches[2]*priv->overlay->h/2);
+        
 	    SDL_OVR_UNLOCK
             break;
 
         case IMGFMT_YUY2:
         case IMGFMT_UYVY:
         case IMGFMT_YVYU:
-	    SDL_OVR_LOCK
-	    dst = (uint8_t *) *(priv->overlay->pixels);
+        SDL_OVR_LOCK(-1)
+        dst = (uint8_t *) *(priv->overlay->pixels) + priv->overlay->pitches[0]*priv->y;
 	    if(priv->flip) {
 	    	mysrc+=priv->framePlaneYUY;
 		for(i = 0; i < priv->height; i++) {
 			mysrc-=priv->stridePlaneYUY;
 			memcpy (dst, mysrc, priv->stridePlaneYUY);
-			dst+=priv->stridePlaneYUY;
+                dst+=priv->overlay->pitches[0];
 		}
 	    }
 	    else memcpy (dst, src[0], priv->framePlaneYUY);
@@ -925,27 +1104,28 @@ static uint32_t draw_frame(uint8_t *src[])
 	case IMGFMT_RGB32:
 	case IMGFMT_BGR32:
 		if(priv->dblit) {
-			SDL_SRF_LOCK(priv->surface)
-			dst = (uint8_t *) priv->surface->pixels;
+			SDL_SRF_LOCK(priv->surface, -1)
+            dst = (uint8_t *) priv->surface->pixels + priv->y*priv->surface->pitch;
+            
 			if(priv->flip) {
 				mysrc+=priv->framePlaneRGB;
 				for(i = 0; i < priv->height; i++) {
 					mysrc-=priv->stridePlaneRGB;
 					memcpy (dst, mysrc, priv->stridePlaneRGB);
-					dst+=priv->stridePlaneRGB;
+					dst += priv->surface->pitch;
 				}
 			}
 			else memcpy (dst, src[0], priv->framePlaneRGB);
 			SDL_SRF_UNLOCK(priv->surface)
 		} else {
-			SDL_SRF_LOCK(priv->rgbsurface)
-			dst = (uint8_t *) priv->rgbsurface->pixels;
+			SDL_SRF_LOCK(priv->rgbsurface, -1)
+			dst = (uint8_t *) priv->rgbsurface->pixels + priv->y*priv->rgbsurface->pitch;
 			if(priv->flip) {
 				mysrc+=priv->framePlaneRGB;
 				for(i = 0; i < priv->height; i++) {
 					mysrc-=priv->stridePlaneRGB;
 					memcpy (dst, mysrc, priv->stridePlaneRGB);
-					dst+=priv->stridePlaneRGB;
+					dst += priv->rgbsurface->pitch;
 				}
 			}
 			else memcpy (dst, src[0], priv->framePlaneRGB);
@@ -974,35 +1154,35 @@ static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int
 	uint8_t *src;
         int i;
 
-	SDL_OVR_LOCK
+    SDL_OVR_LOCK(-1)
 
-	dst = (uint8_t *) *(priv->overlay->pixels) 
-            + (priv->stridePlaneY * y + x);
+    y += priv->y;
+    
+    dst = priv->overlay->pixels[0] + priv->overlay->pitches[0]*y + x;
+
         src = image[0];
         for(i=0;i<h;i++){
             memcpy(dst,src,w);
             src+=stride[0];
-            dst+=priv->stridePlaneY;
+        dst += priv->overlay->pitches[0];
         }
         
         x/=2;y/=2;w/=2;h/=2;
 
-	dst = (uint8_t *) *(priv->overlay->pixels) + priv->framePlaneY
-            + (priv->stridePlaneUV * y + x);
-        src = image[2];
+    dst = priv->overlay->pixels[2] + priv->overlay->pitches[2]*y + x;
+    src = image[1];
         for(i=0;i<h;i++){
             memcpy(dst,src,w);
             src+=stride[2];
-            dst+=priv->stridePlaneUV;
+        dst += priv->overlay->pitches[2];
         }
         
-	dst = (uint8_t *) *(priv->overlay->pixels) + priv->framePlaneY
-            + priv->framePlaneUV + (priv->stridePlaneUV * y + x);
-        src = image[1];
+    dst = priv->overlay->pixels[1] + priv->overlay->pitches[1]*y + x;
+    src = image[2];
         for(i=0;i<h;i++){
             memcpy(dst,src,w);
             src+=stride[1];
-            dst+=priv->stridePlaneUV;
+        dst += priv->overlay->pitches[1];
         }
 
 	SDL_OVR_UNLOCK
@@ -1036,7 +1216,8 @@ static void check_events (void)
 
 			/* capture window resize events */
 			case SDL_VIDEORESIZE:
-				if(!priv->dblit) priv->surface = SDL_SetVideoMode(event.resize.w, event.resize.h, priv->bpp, priv->sdlflags);
+				if(!priv->dblit)
+                    set_video_mode(event.resize.w, event.resize.h, priv->bpp, priv->sdlflags);
 
 				/* save video extents, to restore them after going fullscreen */
 			 	//if(!(priv->surface->flags & SDL_FULLSCREEN)) {
@@ -1134,13 +1315,13 @@ static void check_events (void)
 					aspect(&priv->dstwidth, &priv->dstheight,A_NOZOOM);
 #endif					
 					if (priv->surface->w != priv->dstwidth || priv->surface->h != priv->dstheight) {
-						priv->surface = SDL_SetVideoMode(priv->dstwidth, priv->dstheight, priv->bpp, priv->sdlflags);
+                        set_video_mode(priv->dstwidth, priv->dstheight, priv->bpp, priv->sdlflags);
 					    	priv->windowsize.w = priv->surface->w;
 						priv->windowsize.h = priv->surface->h;
 						if(verbose > 1) printf("SDL: Normal size\n");
 					} else
 					if (priv->surface->w != priv->dstwidth * 2 || priv->surface->h != priv->dstheight * 2) {
-						priv->surface = SDL_SetVideoMode(priv->dstwidth * 2, priv->dstheight * 2, priv->bpp, priv->sdlflags);
+                        set_video_mode(priv->dstwidth * 2, priv->dstheight * 2, priv->bpp, priv->sdlflags);
 					    	priv->windowsize.w = priv->surface->w;
 						priv->windowsize.h = priv->surface->h;
 						if(verbose > 1) printf("SDL: Double size\n");
@@ -1207,11 +1388,163 @@ static void check_events (void)
 }
 #undef shift_key
 
+/* Erase (paint it black) the rectangle specified by x, y, w and h in the surface
+   or overlay which is used for OSD
+*/
+static void erase_rectangle(int x, int y, int w, int h)
+{
+    struct sdl_priv_s *priv = &sdl_priv;
+
+    switch(priv->format) {
+        case IMGFMT_YV12:  
+        case IMGFMT_I420:
+        case IMGFMT_IYUV:
+        {
+            SDL_OVR_LOCK((void) 0)
+                        
+                    /* Erase Y plane */
+                erase_area_1(x, w, h,
+                             priv->overlay->pitches[0], 0,
+                             priv->overlay->pixels[0] +
+                             priv->overlay->pitches[0]*y);
+                        
+                /* Erase U and V planes */
+                w /= 2;
+                x /= 2;
+                h /= 2;
+                y /= 2;
+                        
+                erase_area_1(x, w, h,
+                             priv->overlay->pitches[1], 128,
+                             priv->overlay->pixels[1] +
+                             priv->overlay->pitches[1]*y);
+                        
+                erase_area_1(x, w, h,
+                             priv->overlay->pitches[2], 128,
+                             priv->overlay->pixels[2] +
+                             priv->overlay->pitches[2]*y);
+            SDL_OVR_UNLOCK
+                break;
+        }
+
+        case IMGFMT_YUY2:
+        case IMGFMT_YVYU:
+        {
+                /* yuy2 and yvyu represent black the same way */
+            uint8_t yuy2_black[] = {0, 128, 0, 128};
+
+            SDL_OVR_LOCK((void) 0)
+                erase_area_4(x*2, w*2, h,
+                             priv->overlay->pitches[0],
+                             *((uint32_t*) yuy2_black),
+                             priv->overlay->pixels[0] +
+                             priv->overlay->pitches[0]*y);
+            SDL_OVR_UNLOCK
+                break;
+        }
+            
+        case IMGFMT_UYVY:
+        {
+            uint8_t uyvy_black[] = {128, 0, 128, 0};
+
+            SDL_OVR_LOCK((void) 0)
+                erase_area_4(x*2, w*2, h,
+                             priv->overlay->pitches[0],
+                             *((uint32_t*) uyvy_black),
+                             priv->overlay->pixels[0] +
+                             priv->overlay->pitches[0]*y);
+            SDL_OVR_UNLOCK
+                break;
+        }
+            
+        case IMGFMT_RGB15:
+        case IMGFMT_BGR15:
+        case IMGFMT_RGB16:
+        case IMGFMT_BGR16:
+        case IMGFMT_RGB24:
+        case IMGFMT_BGR24:
+        case IMGFMT_RGB32:
+        case IMGFMT_BGR32:
+        {
+            SDL_Rect rect;
+            rect.w = w; rect.h = h;
+            rect.x = x; rect.y = y;
+
+            if(priv->dblit) {
+                SDL_SRF_LOCK(priv->surface, (void) 0)
+                    SDL_FillRect(priv->surface, &rect, 0);
+                SDL_SRF_UNLOCK(priv->surface)
+                    }
+            else {
+                SDL_SRF_LOCK(priv->rgbsurface, (void) 0)
+                    SDL_FillRect(priv->rgbsurface, &rect, 0);
+                SDL_SRF_UNLOCK(priv->rgbsurface)
+                    }
+            break;
+        }
+    }
+}
+
 static void draw_osd(void)
 {	struct sdl_priv_s *priv = &sdl_priv;
 
+    priv->osd_has_changed = vo_osd_changed(0);
+
+    if(priv->osd_has_changed)
+    {
+        int i;
+        
+        for(i = 0; i < 2; i++) {
+            if(priv->dirty_off_frame[i].x < 0 || priv->dirty_off_frame[i].y < 0)
+                continue;
+
+            erase_rectangle(priv->dirty_off_frame[i].x, priv->dirty_off_frame[i].y,
+                            priv->dirty_off_frame[i].w, priv->dirty_off_frame[i].h);
+            
+            priv->dirty_off_frame[i].x = -1;
+            priv->dirty_off_frame[i].y = -1;
+        }
+    }
+ 
 	/* update osd/subtitles */
-	vo_draw_text(priv->width,priv->height,draw_alpha);
+    if(priv->mode == YUV)
+        vo_draw_text(priv->overlay->w, priv->overlay->h, draw_alpha);
+    else {
+        if(priv->dblit)
+            vo_draw_text(priv->surface->w, priv->surface->h, draw_alpha);
+        else
+            vo_draw_text(priv->rgbsurface->w, priv->rgbsurface->h, draw_alpha);
+    }
+}
+
+/* Fill area beginning at 'pixels' with 'color'. 'x_start', 'width' and 'pitch'
+ * are given in bytes. 4 bytes at a time.
+ */
+static void erase_area_4(int x_start, int width, int height, int pitch, uint32_t color, uint8_t* pixels)
+{
+    int x_end = x_start/4 + width/4;
+    int x, y;
+    uint32_t* data = (uint32_t*) pixels;
+    
+    x_start /= 4;
+    pitch /= 4;
+
+    for(y = 0; y < height; y++) {
+        for(x = x_start; x < x_end; x++)
+            data[y*pitch + x] = color;
+    }
+}
+
+/* Fill area beginning at 'pixels' with 'color'. 'x_start', 'width' and 'pitch'
+ * are given in bytes. 1 byte at a time.
+ */
+static void erase_area_1(int x_start, int width, int height, int pitch, uint8_t color, uint8_t* pixels)
+{
+    int y;
+    
+    for(y = 0; y < height; y++) {
+        memset(&pixels[y*pitch + x_start], color, width);
+    }
 }
 
 /**
@@ -1242,7 +1575,13 @@ static void flip_page (void)
 
 		/* update screen */
 		//SDL_UpdateRect(priv->surface, 0, 0, priv->surface->clip_rect.w, priv->surface->clip_rect.h);
+        if(priv->osd_has_changed) {
+            priv->osd_has_changed = 0;
 		SDL_UpdateRects(priv->surface, 1, &priv->surface->clip_rect);
+        }
+        else
+            SDL_UpdateRect(priv->surface, 0, priv->y_screen_top,
+                           priv->surface->clip_rect.w, priv->y_screen_bottom);
 		
 		/* check if we have a double buffered surface and flip() if we do. */
 		if ( priv->surface->flags & SDL_DOUBLEBUF )
@@ -1320,7 +1659,7 @@ static uint32_t control(uint32_t request, void *data, ...)
     return query_format(*((uint32_t*)data));
   case VOCTRL_FULLSCREEN:
     if (priv->surface->flags & SDL_FULLSCREEN) {
-      priv->surface = SDL_SetVideoMode(priv->windowsize.w, priv->windowsize.h, priv->bpp, priv->sdlflags);
+      set_video_mode(priv->windowsize.w, priv->windowsize.h, priv->bpp, priv->sdlflags);
       SDL_ShowCursor(1);
       if(verbose > 1) printf("SDL: Windowed mode\n");
     } else if (priv->fullmodes) {

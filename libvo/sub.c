@@ -320,3 +320,11 @@ void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h,
 
 }
          
+static int vo_osd_changed_status = 0;
+
+int vo_osd_changed(int new_value)
+{
+    int ret = vo_osd_changed_status;
+    vo_osd_changed_status = new_value;
+    return ret;
+}
