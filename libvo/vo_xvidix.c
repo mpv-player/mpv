@@ -202,7 +202,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     image_height = height;
     image_width = width;
     image_format = format;
-    
+
     if (IMGFMT_IS_RGB(format))
     {
 	image_depth = IMGFMT_RGB_DEPTH(format);
@@ -225,9 +225,10 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	    image_depth = 16;
 	    break;
 	default:
+	    image_depth = 16;
 	    mp_msg(MSGT_VO, MSGL_FATAL, "Unknown image format: %s\n",
 		vo_format_name(format));
-	    return(-1);
+	    break;
     }
 
     if (X_already_started)
