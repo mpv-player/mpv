@@ -22,6 +22,22 @@ typedef struct _fli_frames_t {
   unsigned int *frame_size;
 } fli_frames_t;
 
+void demux_seek_fli(demuxer_t *demuxer,float rel_seek_secs,int flags){
+  fli_frames_t *frames = (fli_frames_t *)demuxer->priv;
+  sh_video_t *sh_video = demuxer->video->sh;
+  int newpos=(flags&1)?0:frames->current_frame;
+  if(flags&2){
+      // float 0..1
+      newpos+=rel_seek_secs*frames->num_frames;
+  } else {
+      // secs
+      newpos+=rel_seek_secs*sh_video->fps;
+  }
+  if(newpos<0) newpos=0; else
+  if(newpos>frames->num_frames) newpos=frames->num_frames;
+  frames->current_frame=newpos;
+}
+
 // return value:
 //     0 = EOF or no stream found
 //     1 = successfully read a packet
@@ -30,7 +46,7 @@ int demux_fli_fill_buffer(demuxer_t *demuxer){
   sh_video_t *sh_video = demuxer->video->sh;
 
   // see if the end has been reached
-  if (frames->current_frame == frames->num_frames)
+  if (frames->current_frame >= frames->num_frames)
     return 0;
 
   // fetch the frame from the file
