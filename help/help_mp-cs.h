@@ -1,6 +1,6 @@
 // Translated by:  Jiri Svoboda, jiri.svoboda@seznam.cz
 // Updated by:     Tomas Blaha,  tomas.blaha at kapsa.club.cz
-// Synced to 1.105
+// Synced to 1.125
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -66,7 +66,7 @@ static char help_text[]=
 #define MSGTR_CantLoadSub "Nemohu naèíst titulky: %s\n"
 #define MSGTR_ErrorDVDkey "Pøi zpracování DVD klíèe do¹lo k chybì.\n"
 #define MSGTR_CmdlineDVDkey "Roz¹ifrovávám pomocí zadaného DVD klíèe.\n"
-#define MSGTR_DVDauthOk "Autentizaèní sekvence na DVD vypadá vpoøádku.\n"
+#define MSGTR_DVDauthOk "Autentizaèní sekvence na DVD vypadá v poøádku.\n"
 #define MSGTR_DumpSelectedStreamMissing "dump: Kritická chyba: po¾adovaný proud chybí!\n"
 #define MSGTR_CantOpenDumpfile "Nelze otevøít soubor pro dump!!!\n"
 #define MSGTR_CoreDumped "Jádro vydumpováno ;)\n"
@@ -74,6 +74,7 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmtStr "Pokou¹ím se vynutit rodinu audiokodeku %s...\n"
 #define MSGTR_CantFindAfmtFallback "Nemohu nalézt audio kodek v po¾adované rodinì, pou¾iji ostatní rodiny.\n"
 #define MSGTR_CantFindAudioCodec "Nemohu nalézt kodek pro audio formát 0x%X!\n"
+#define MSGTR_RTFMCodecs "Pøeètìte si DOCS/HTML/en/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "Nelze inicializovat audio kodek - nebude zvuk!\n"
 #define MSGTR_TryForceVideoFmtStr "Poku¹ím se vynutit rodinu videokodeku %s...\n"
 #define MSGTR_CantFindVideoCodec "Nemohu nalézt kodek pro vybraný -vo a video formát 0x%X.\n"
@@ -172,6 +173,135 @@ static char help_text[]=
 #define MSGTR_RecommendedVideoBitrate "Doporuèený datový tok videa pro CD %s: %d\n"
 #define MSGTR_VideoStreamResult "\nVideo proud: %8.3f kbit/s  (%d bps)  velikost: %d bajtù  %5.3f sekund  %d snímkù\n"
 #define MSGTR_AudioStreamResult "\nAudio proud: %8.3f kbit/s  (%d bps)  velikost: %d bajtù  %5.3f sekund\n"
+#define MSGTR_OpenedStream "úspìch: formát: %d  data: 0x%X - 0x%x\n"
+#define MSGTR_VCodecFramecopy "videokodek: framecopy (%dx%d %dbpp fourcc=%x)\n"
+#define MSGTR_ACodecFramecopy "audiokodek: framecopy (formát=%x kanálù=%d frekvence=%ld bitù=%d bps=%ld vzorek-%ld)\n"
+#define MSGTR_CBRPCMAudioSelected "vybrán CBR PCM zvuk\n"
+#define MSGTR_MP3AudioSelected "vybrán MP3 zvuk\n"
+#define MSGTR_CannotAllocateBytes "Nemohu alokovat %d bajtù\n"
+#define MSGTR_SettingAudioDelay "Nastavuji ZPO®DÌNÍ ZVUKU na %5.3f\n"
+#define MSGTR_SettingAudioInputGain "Nastavuji vstupní zesílení zvuku na %f\n"
+#define MSGTR_LamePresetEquals "\npreset=%s\n\n"
+#define MSGTR_LimitingAudioPreload "Omezuji dopøedné naètení zvuku na 0.4s\n"
+#define MSGTR_IncreasingAudioDensity "Zvy¹uji hustotu audia na 4\n"
+#define MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection "Vynucuji audio preload na 0, max pts korekce na 0\n"
+#define MSGTR_CBRAudioByterate "\n\nCBR zvuk: %ld bytes/sec, %d bytes/block\n"
+#define MSGTR_LameVersion "LAME verze %s (%s)\n\n"
+#define MSGTR_InvalidBitrateForLamePreset "Chyba: Specifikovaný bitový tok je mimo rozvah pro toto pøednastavení\n"\
+"\n"\
+"Pokud pou¾íváte tento re¾im, musíte zadat hodnotu od \"8\" do \"320\".\n"\
+"\n"\
+"Pro dal¹í informace zkuste: \"-lameopts preset=help\"\n"
+#define MSGTR_InvalidLamePresetOptions "Chyba: Nezadali jste platný profil nebo volby pøednastavení\n"\
+"\n"\
+"Dostupné profily jsou:\n"\
+"\n"\
+"   <fast>        standard\n"\
+"   <fast>        extreme\n"\
+"                 insane\n"\
+"   <cbr> (ABR Mode) - Implikuje re¾im ABR. Pro jeho pou¾ití,\n"\
+"                      jednodu¹e zadejte bitrate. Napøíklad:\n"\
+"                      \"preset=185\" aktivuje toto pøednastavení\n"\
+"                      a pou¾ije prùmìrnou bitrate 185 kbps.\n"\
+"\n"\
+"    Nìkolik pøíkladù:\n"\
+"\n"\
+"    \"-lameopts fast:preset=standard  \"\n"\
+" or \"-lameopts  cbr:preset=192       \"\n"\
+" or \"-lameopts      preset=172       \"\n"\
+" or \"-lameopts      preset=extreme   \"\n"\
+"\n"\
+"Pro dal¹í informace zkuste: \"-lameopts preset=help\"\n"
+#define MSGTR_LamePresetsLongInfo "\n"\
+"Pøednastacení jsou navr¾ena tak, aby poskytovala co nejvy¹¹í mo¾nou kvalitu.\n"\
+"\n"\
+"Vìt¹ina z nich byla testována a vyladìna pomocí zevrubných dvojitì slepých\n"\
+"poslechových testù, za úèelem dosa¾ení a ovìøení této kvality.\n"\
+"\n"\
+"Nastavení jsou neustále aktualizována v souladu s nejnovìj¹ím vývojem\n"\
+"a mìla by poskytovat prakticky nejvy¹¹í mo¾nou kvalitu, jaká je v souèasnosti \n"\
+"s kodekem LAME dosa¾itelná.\n"\
+"\n"\
+"Aktivaci tìchto pøednastavení:\n"\
+"\n"\
+"   Pro re¾imy VBR (v¹eobecnì nejvy¹¹í kvalita):\n"\
+"\n"\
+"     \"preset=standard\" toto nastavení by mìlo být transparentní\n"\
+"                             pro vìt¹inu lidí a hudebních ¾ánrù a je\n"\
+"                             ji¾ velmi kvalitní.\n"\
+"\n"\
+"     \"preset=extreme\" Pokud máte výjimeènì dobrý sluch a odpovídající\n"\
+"                             vybavení, toto nastavení obvykle poskytuje\n"\
+"                             mírnì vy¹¹í kvalitu ne¾ re¾im \"standard\".\n"\
+"\n"\
+"   Pro CBR 320kbps (nejvy¹¹í mo¾ná kvalita ze v¹ech pøednastavení):\n"\
+"\n"\
+"     \"preset=insane\"  Toto nastavení je pro vìt¹inu lidí a situací\n"\
+"                             pøedimenzované, ale pokud vy¾adujete\n"\
+"                             absolutnì nejvy¹¹í kvalitu bez ohledu na\n"\
+"                             velikost souboru, je toto va¹e volba.\n"\
+"\n"\
+"   Pro re¾imy ABR (vysoká kvalita na daném bitovém toku, ale ne tak vysoká jako VBR):\n"\
+"\n"\
+"     \"preset=<kbps>\"  Pou¾itím tohoto nastavení obvykle dosáhnete dobré\n"\
+"                             kvality pøi uvedeném bitovém toku. V závislosti na\n"\
+"                             zadaném toku toto  pøednastavené urèí\n"\
+"                             optimální nastavení pro danou situaci.\n"\
+"                             Aèkoli tento pøístup funguje, není ani zdaleka\n"\
+"                             tak flexibilní jako VBR, a obvykle nedosahuje\n"\
+"                             stejné úrovnì kvality jako VBR na vy¹¹ích datových tocích.\n"\
+"\n"\
+"Pro odpovídající profily jsou také dostupné následující volby:\n"\
+"\n"\
+"   <fast>        standard\n"\
+"   <fast>        extreme\n"\
+"                 insane\n"\
+"   <cbr> (ABR Mode) - Implikuje re¾im ABR. Pro jeho pou¾ití,\n"\
+"                      jednodu¹e zadejte bitrate. Napøíklad:\n"\
+"                      \"preset=185\" aktivuje toto pøednastavení\n"\
+"                      a pou¾ije prùmìrnou bitrate 185 kbps.\n"\
+"\n"\
+"   \"fast\" - Pro daný profil aktivuje novou rychlou VBR kompresi.\n"\
+"            Nevýhodou je to, ¾e bitový tok bude obvykle mírnì vy¹¹í,\n"\
+"            ne¾ v normálním re¾imu a také mù¾e dojít k mírnému\n"\
+"            poklesu kvality.\n"\
+"   Pozor:   v souèasné verzi mù¾e nastavení \"fast\" vést k pøíli¹\n"\
+"            vysokému datovému toku ve srovnání s normálním nastavením.\n"\
+"\n"\
+"   \"cbr\"  - Pokud pou¾ijete re¾im ABR (viz vý¹e) s významným\n"\
+"            datovým tokem, napø. 80, 96, 112, 128, 160, 192, 224, 256, 320,\n"\
+"            mù¾ete pou¾ít volbu \"cbr\" k vynucení kódování v re¾imu CBR\n"\
+"            (konstantní tok) namísto standardního ABR re¾imu. ABR nezajistí\n"\
+"            lep¹í kvalitu, ale CBR mù¾e být u¾iteèný v situacích jako je\n"\
+"            vysílání mp3 proudu po internetu.\n"\
+"\n"\
+"    Napøíklad:\n"\
+"\n"\
+"      \"-lameopts fast:preset=standard  \"\n"\
+" nebo \"-lameopts  cbr:preset=192       \"\n"\
+" nebo \"-lameopts      preset=172       \"\n"\
+" nebo \"-lameopts      preset=extreme   \"\n"\
+"\n"\
+"\n"\
+"Pro ABR re¾im je k dispozici nìkolik zkratek:\n"\
+"phone => 16kbps/mono        phon+/lw/mw-eu/sw => 24kbps/mono\n"\
+"mw-us => 40kbps/mono        voice => 56kbps/mono\n"\
+"fm/radio/tape => 112kbps    hifi => 160kbps\n"\
+"cd => 192kbps               studio => 256kbps"
+#define MSGTR_ConfigfileError "chyba konfiguraèního souboru"
+#define MSGTR_ErrorParsingCommandLine "chyba pøi zpracovávání pøíkazového øádku"
+#define MSGTR_VideoStreamRequired "videoproud je povinný!\n"
+#define MSGTR_ForcingInputFPS "vstupní fps budou interpretovány jako %5.2f\n"
+#define MSGTR_RawvideoDoesNotSupportAudio "Výstupní formát souboru RAWVIDEO nepodporuje zvuk - vypínám ho\n"
+#define MSGTR_DemuxerDoesntSupportNosound "Tento demuxer zatím nepodporuje -nosound.\n"
+#define MSGTR_MemAllocFailed "alokace pamìti se nezdaøila"
+#define MSGTR_NoMatchingFilter "Nemohu najít odpovídající filtr/ao formát!\n"
+#define MSGTR_MP3WaveFormatSizeNot30 "sizeof(MPEGLAYER3WAVEFORMAT)==%d!=30, mo¾ná je vadný pøekladaè C?\n"
+#define MSGTR_NoLavcAudioCodecName "Audio LAVC, chybí jméno kodeku!\n"
+#define MSGTR_LavcAudioCodecNotFound "Audio LAVC, nemohu najít enkodér pro kodek %s\n"
+#define MSGTR_CouldntAllocateLavcContext "Audio LAVC, nemohu alokovat kontext!\n"
+#define MSGTR_CouldntOpenCodec "nemohu otevøít kodek %s, br=%d\n"
+#define MSGTR_FramesizeBufsizeTag "FRAME_SIZE: %d, BUFFER_SIZE: %d, TAG: 0x%x\n"
 
 // cfg-mencoder.h:
 
@@ -261,7 +391,7 @@ static char help_text[]=
 #define MSGTR_NotSystemStream "Toto není formát MPEG System Stream... (mo¾ná Transport Stream?)\n"
 #define MSGTR_InvalidMPEGES "©patný MPEG-ES proud??? Kontaktujte autora, mo¾ná to je chyba :(\n"
 #define MSGTR_FormatNotRecognized "======= Bohu¾el, formát tohoto souboru nebyl rozpoznán/není podporován =======\n"\
-                                  "==== Pokud je soubor AVI, ASF nebo MPEG proud, kontaktujte prosim autora! ====\n"
+                                  "==== Pokud je soubor AVI, ASF nebo MPEG proud, kontaktujte prosím autora! ====\n"
 #define MSGTR_MissingVideoStream "®ádný video proud nenalezen.\n"
 #define MSGTR_MissingAudioStream "®ádný audio proud nenalezen -> nebude zvuk.\n"
 #define MSGTR_MissingVideoStreamBug "Chybí video proud!? Kontaktujte autora, mo¾ná to je chyba :(\n"
@@ -276,6 +406,8 @@ static char help_text[]=
 #define MSGTR_CouldntDetFNo "Nemohu urèit poèet snímkù (pro absolutní posun)\n"
 #define MSGTR_CantSeekRawAVI "Nelze se posouvat v surových (raw) AVI proudech! (Potøebuji index, zkuste pou¾ít volbu -idx.)\n"
 #define MSGTR_CantSeekFile "Nemohu se posouvat v tomto souboru.\n"
+
+#define MSGTR_EncryptedVOB "©ifrovaný soubor VOB! Pøeètìte si DOCS/HTML/en/dvd.html.\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Komprimované hlavièky nejsou (je¹tì) podporovány.\n"
 #define MSGTR_MOVvariableFourCC "MOV: UPOZORNÌNÍ: Promìnná FOURCC detekována!?\n"
@@ -293,6 +425,8 @@ static char help_text[]=
 #define MSGTR_DemuxerInfoAlreadyPresent "Informace o demuxeru %s ji¾ pøítomna!\n"
 #define MSGTR_ClipInfo "Informace o klipu:\n"
 
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: detekováno 30fps NTSC, pøepínám frekvenci snímkù.\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: detekováno 24fps progresivní NTSC, pøepínám frekvenci snímkù.\n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Nemohu otevøít kodek.\n"
@@ -347,6 +481,17 @@ static char help_text[]=
 #define MSGTR_MovieAspectIsSet "Pomìr stran obrazu filmu je %.2f:1 - ¹káluji na správný pomìr.\n"
 #define MSGTR_MovieAspectUndefined "Pomìr stran obrazu filmu není definován - nemìním velikost.\n"
 
+// vd_dshow.c, vd_dmo.c
+#define MSGTR_DownloadCodecPackage "Potøebujete aktualizovat nebo nainstalovat binární kodeky.\nJdìte na http://mplayerhq.hu/homepage/dload.html\n"
+#define MSGTR_DShowInitOK "INFO: Inicializace Win32/DShow videokodeku OK.\n"
+#define MSGTR_DMOInitOK "INFO: Inicializace Win32/DMO videokodeku OK.\n"
+
+// x11_common.c
+#define MSGTR_EwmhFullscreenStateFailed "\nX11: Nemohu poslat událost EWMH fullscreen!\n"
+
+#define MSGTR_InsertingAfVolume "[Mixer] Hardwarový mixér není k dispozici, vkládám filtr pro hlasitost.\n"
+#define MSGTR_NoVolume "[Mixer] Øízení hlasitosti není dostupné.\n"
+
 // ====================== GUI messages/buttons ========================
 
 #ifdef HAVE_NEW_GUI
@@ -363,8 +508,7 @@ static char help_text[]=
 #define MSGTR_Network "Sí»ové vysílání..."
 #define MSGTR_Preferences "Nastavení" // Pøedvolby?
 #define MSGTR_FontSelect "Vybrat font..."
-#define MSGTR_OSSPreferences "Konfigurace ovladaèe OSS"
-#define MSGTR_SDLPreferences "Konfigurace ovladaèe SDL"
+#define MSGTR_AudioPreferences "Konfigurace ovladaèe zvuku"
 #define MSGTR_NoMediaOpened "Nic není otevøeno."
 #define MSGTR_VCDTrack "VCD stopa %d"
 #define MSGTR_NoChapter "¾ádná kapitola" //bez kapitoly?
@@ -489,6 +633,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Misc "Ostatní"
 
 #define MSGTR_PREFERENCES_None "Nic"
+#define MSGTR_PREFERENCES_DriverDefault "implicitní nastavení"
 #define MSGTR_PREFERENCES_AvailableDrivers "Dostupné ovladaèe:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Nepøehrávat zvuk"
 #define MSGTR_PREFERENCES_NormalizeSound "Normalizovat zvuk"
@@ -529,9 +674,9 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Kodek & demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "Vyrovnávací pamì»"
 #define MSGTR_PREFERENCES_FRAME_Misc "Ostatní"
-#define MSGTR_PREFERENCES_OSS_Device "Zaøízení:"
-#define MSGTR_PREFERENCES_OSS_Mixer "Smì¹ovaè:"
-#define MSGTR_PREFERENCES_SDL_Driver "Ovladaè:"
+#define MSGTR_PREFERENCES_Audio_Device "Zaøízení:"
+#define MSGTR_PREFERENCES_Audio_Mixer "Mixér:"
+#define MSGTR_PREFERENCES_Audio_MixerChannel "Kanál mixéru:"
 #define MSGTR_PREFERENCES_Message "Pozor, nìkterá nastavení potøebují pro svou funkci restartovat pøehrávání!"
 #define MSGTR_PREFERENCES_DXR3_VENC "Video enkodér:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Pou¾ít LAVC (FFmpeg)"
