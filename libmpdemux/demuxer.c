@@ -588,6 +588,7 @@ extern int demux_xmms_open(demuxer_t* demuxer);
 extern int gif_check_file(demuxer_t *demuxer);
 extern int demux_open_gif(demuxer_t* demuxer);
 extern int ts_check_file(demuxer_t * demuxer);
+extern int demux_open_ts(demuxer_t *demuxer);
 extern int demux_open_mkv(demuxer_t *demuxer);
 extern int ra_check_file(demuxer_t *demuxer);
 extern int demux_open_ra(demuxer_t* demuxer);
