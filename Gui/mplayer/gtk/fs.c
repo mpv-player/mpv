@@ -50,13 +50,15 @@ char * fsVideoFilterNames[][2] =
 	   { "RealVideo files (*.rm)",					"*.rm"  },
 	   { "Windows Media Video (*.wmv)",			  	"*.wmv" },
 	   { "OGG Media files (*.ogm)",			  		"*.ogm" },
+	   { "Matroska Media files (*.mkv)",			  	"*.mkv" },
 	   { "Autodesk animations (*.fli,*.flc)",			"*.fli,*.flc" },
 	   { "NuppelVideo files (*.nuv)",				"*.nuv" },
-	   { "MP3 files (*.mp3,mp2)",					"*.mp3,*.mp2" },
+	   { "MP3 files (*.mp3,*.mp2)",					"*.mp3,*.mp2" },
 	   { "Wave files (*.wav)",					"*.wav" },
 	   { "WMA files (*.wma)",					"*.wma" },
-	   { "Audio files",						"*.wav,*.ogg,*.mp2,*.mp3,*.wma" },
-	   { "Video files", 						"*.asf,*.avi,*.divx,*.fli,*.flc,*.ogm,*.mpg,*.mpeg,*.m1v,*.mov,*.nuv,*.qt,*.rm,*.vob,*.viv,*.wmv" },
+	   { "Matroska Audio files (*.mka)",			  	"*.mka" },
+	   { "Audio files",						"*.wav,*.ogg,*.mp2,*.mp3,*.wma,*.mka" },
+	   { "Video files", 						"*.asf,*.avi,*.divx,*.fli,*.flc,*.ogm,*.mpg,*.mpeg,*.m1v,*.mov,*.nuv,*.qt,*.rm,*.vob,*.viv,*.wmv,*.mkv" },
            { "All files",	      					"*" },
 	   { NULL,NULL }
 	 };
@@ -86,7 +88,9 @@ char * fsAudioFileNames[][2] =
 	   { "WAV files (*.wav)",					   "*.wav" },
 	   { "MP3 files (*.mp2, *.mp3)",				   "*.mp2,*.mp3" },
 	   { "OGG Vorbis files (*.ogg)",				   "*.ogg" },
-	   { "Audio files",						   "*.ogg,*.mp2,*.mp3,*.wav" },
+	   { "WMA files (*.wma)",				 	   "*.wma" },
+	   { "Matroska Audio files (*.mka)",			  	   "*.mka" },
+	   { "Audio files",						   "*.ogg,*.mp2,*.mp3,*.wav,*.wma,*.mka" },
 	   { "All files",						   "*" },
 	   { NULL, NULL }
 	 };
