@@ -201,11 +201,11 @@ Codecs:
   --enable-tremor        build with integer-only OggVorbis support [disabled]
   --enable-theora        build with OggTheora support [autodetect]
   --enable-matroska      build with Matroska support [autodetect]
-  --enable-faad          build with FAAD2 (MP4/AAC) support [autodetect]
+  --enable-external-faad build with external FAAD2 (AAC) support [autodetect]
+  --disable-internal-faad disable internal FAAD2 (AAC) support [autodetect]
   --disable-libdv        disable libdv 0.9.5 en/decoding support [autodetect]
   --disable-mad          disable libmad (MPEG audio) support [autodetect]
   --enable-xmms          build with XMMS inputplugin support [disabled]
-  --enable-external-faad build with external libfaad [disabled]
   --enable-flac          build with FLAC support [autodetect]
   --enable-external-flac build with external libFLAC [disable]
   
@@ -1118,8 +1118,8 @@ _vorbis=auto
 _theora=auto
 _matroska=auto
 _tremor=no
-_faad=auto
-_faad_local=yes
+_faad_internal=auto
+_faad_external=auto
 _xmms=no
 _flac=auto
 _external_flac=auto
@@ -1284,10 +1284,10 @@ for ac_option do
   --disable-theora)	_theora=no	;;
   --enable-matroska)    _matroska=yes   ;;
   --disable-matroska)   _matroska=no    ;;
-  --enable-faad)	_faad=yes	;;
-  --disable-faad)	_faad=no	;;
-  --enable-external-faad) _faad_local=no ;;
-  --disable-external-faad) _faad_local=yes ;;
+  --enable-internal-faad)	_faad_internal=yes	_faad_external=no	;;
+  --disable-internal-faad)	_faad_internal=no	;;
+  --enable-external-faad)	_faad_external=yes	_faad_internal=no	;;
+  --disable-external-faad)	_faad_external=no	;;
   --enable-xmms)	_xmms=yes	;;
   --enable-flac)	_flac=yes	;;
   --disable-flac)	_flac=no	;;
@@ -4447,52 +4447,53 @@ else
 fi
 echores "$_matroska"
 
-echocheck "faad2 (AAC) support"
-_def_faad_internal="#undef USE_INTERNAL_FAAD"
-if test "$_faad" = no ; then
-  echores "no (disabled)"
+
+
+echocheck "internal FAAD2 (AAC) support"
+_inc_faad="-I`pwd`/libfaad2"
+if test "$_faad_internal" = auto ; then
+  # the faad check needs a config.h file
+  if not test -f "config.h" ; then
+    > config.h
+  fi
+  # internal faad: check if our dear gcc is able to compile it...
+  cp "`pwd`/libfaad2/cfft.c" $TMPC
+  if ( cc_check -c -O4 $_march $_mcpu -pipe -ffast-math -fomit-frame-pointer $_inc_faad ); then
+    _faad_internal=yes
+  else
+    _faad_internal="no (broken gcc)"
+  fi
+fi
+if test "$_faad_internal" = yes ; then
+  _def_faad_internal="#define USE_INTERNAL_FAAD 1"
+  _faad_external=no
 else
-if test "$_faad_local" = no ; then
+  _def_faad_internal="#undef USE_INTERNAL_FAAD"
+  _inc_faad=
+fi
+echores "$_faad_internal"
+
+
+echocheck "external FAAD2 (AAC) support"
+if test "$_faad_external" != no ; then
   _ld_faad='-lfaad'
+  _inc_faad="$_inc_extra"
   # external faad: check if it's really faad2 :)
-  if test "$_faad" = auto ; then
-    _faad=no
+  if test "$_faad_external" = auto ; then
+    _faad_external=no
     cat > $TMPC << EOF
 #include <faad.h>
 int main(void) { faacDecHandle testhand; faacDecFrameInfo testinfo; testhand = faacDecOpen(); return 0; }
 EOF
-    cc_check $_inc_faad $_ld_faad -lm && _faad=yes
+    cc_check $_inc_faad $_ld_faad -lm && _faad_external=yes
   fi
-  echores "$_faad (external)"
+  echores "$_faad_external"
 else
-  _inc_faad="-I`pwd`/libfaad2"
-  _faad=yes
-  # the faad check needs a config.h file
-  if test -f "config.h" ; then
-    _rm_config_h=no
-  else
-    _rm_config_h=yes
-    echo "" > config.h
-  fi
-  # internal faad: check if our dear gcc is able to compile it...
-  echo "$_cc -c -O4 $_march $_mcpu -pipe -ffast-math -fomit-frame-pointer $CFLAGS $_inc_faad $_inc_extra `pwd`/libfaad2/cfft.c -o $TMPO" >> "$TMPLOG"
-  if ( $_cc -c -O4 $_march $_mcpu -pipe -ffast-math -fomit-frame-pointer $CFLAGS $_inc_faad $_inc_extra "`pwd`/libfaad2/cfft.c" -o "$TMPO" ) >> "$TMPLOG" 2>&1 ; then
-    echores "$_faad (internal)"
-    _def_faad_internal="#define USE_INTERNAL_FAAD 1"
-  else
-    _faad=no
-    _faad_local=no
-    echores "no (broken gcc)"
-  fi
-  # remove a temporarily config.h, which was needed for the faad compile check
-  if test "$_rm_config_h" = yes; then
-    rm config.h
-  fi
-fi
+  echores "no"
 fi
 
-if test "$_faad" = yes; then
-echocheck "faad2 version"
+if test "$_faad_internal" = yes -o "$_faad_external" = yes; then
+echocheck "FAAD2 version"
 cat > $TMPC <<EOF
 #include <faad.h>
 #ifndef FAAD_MIN_STREAMSIZE
@@ -4507,24 +4508,27 @@ int main(void) {
   return 0;
 }
 EOF
-  if cc_check $_inc_faad $_ld_faad -lm && "$TMPO" >> "$TMPLOG" ; then
+  if cc_check -I- $_inc_faad $_ld_faad -lm && "$TMPO" >> "$TMPLOG" ; then
     _faad_version=`"$TMPO"`
     _faad_tempversion=`"$TMPO" | sed -e 's/^\([0-9]\{1,\}\)\.\([0-9]\{1,\}\).*/\1\2/'`
     _def_faad_version="#define FAADVERSION $_faad_tempversion"
     echores "$_faad_version"
   else
-    _faad=no
+    _faad_external=no
+    _faad_internal=no
     echores "failed to get version"
   fi
 fi
 
-if test "$_faad" = yes ; then
+if test "$_faad_external" = yes; then
   _def_faad='#define HAVE_FAAD 1'
-  _codecmodules="faad2 $_codecmodules"
+  _codecmodules="faad2(external) $_codecmodules"
+elif test "$_faad_internal" = yes; then
+  _def_faad='#define HAVE_FAAD 1'
+  _codecmodules="faad2(internal) $_codecmodules"
 else
   _def_faad='#undef HAVE_FAAD'
   _nocodecmodules="faad2 $_nocodecmodules"
-  _inc_faad=
   _ld_faad=
 fi
 
@@ -5831,7 +5835,7 @@ MAD_LIB = $_ld_mad
 VORBIS_LIB = $_ld_vorbis $_ld_libdv
 THEORA_LIB = $_ld_theora
 FAAD_LIB = $_ld_faad
-INTERNAL_FAAD = $_faad_local
+INTERNAL_FAAD = $_faad_internal
 SMBSUPPORT_LIB = $_ld_smb
 XMMS_PLUGINS = $_xmms
 XMMS_LIB = $_xmms_lib
