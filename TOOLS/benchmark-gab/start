@@ -1,0 +1,24 @@
+#!/bin/sh
+
+. ./variables
+
+rm -f $LOGFILE
+
+wrtlog Script version v0.9
+wrtlog CPU: $VENDOR $MODEL $MHZ
+wrtlog MEM: $MEMORY
+wrtlog VGA: $VGA
+
+if [ ! -e no_compile ]; then
+  ./compile
+else
+  wrtlog Skipping compilation
+fi
+
+if [ ! -e no_benchmark ]; then
+  ./benchmark
+else
+  wrtlog Skipping benchmark
+fi
+
+wrtlog Exiting.

@@ -1,0 +1,40 @@
+===================================================
+MPlayer benchmark scripts v0.9
+By Gabucino 2002-08-30
+License: for exclusive usage with MPlayer (wonder;)
+         NO WARRANTY
+         By using this software you agree not to
+         blame the author or the MPlayer team
+         for any mischief, backdoor, rm -rf /
+         or else this script may or may not do.
+===================================================
+
+Preamble
+========
+
+             BEGINNERS MUST NOT TRY USING THESE SCRIPTS!!!
+
+Installation
+============
+ - READ AND _U N D E R S T A N D_ WHAT THE SCRIPTS DO!
+ - Copy the four shell scripts into an empty dir
+ - Copy main.tar.gz to the same place (CVS checkout, compressed)
+ - Copy ffmpeg.tar.gz to the same place (CVS checkout, compressed)
+ - Create samples/ dir
+ - Create samples to be used for benchmarking
+ - (OPTIONAL) Create SAMPLE_FILE_NAME.opts file, containing
+   standard MPlayer options - for usage with ONLY that file.
+   Like:  samples/MPEG1			MPEG1 file
+	  samples/MPEG1.opts		"-vc mpeg12"
+	  samples/MPEG1_ffmpeg12	same MPEG1 file as MPEG1
+	  samples/MPEG1_ffmpeg12.opts	"-vc ffmpeg12"
+   etc...
+ - 'touch xmga' if you have Matrox, and want to test mga_vid too
+   (RTFS for these "touch" features)
+ - if doing Xv and/or xmga tests, start an X server, and exec xhost +localhost
+ - Push ./start
+ - WAIT
+ - (recover from backup;)))
+ - See $BUILDDIR/log-2002-08-30 (today's date..) for the output.
+
+Fuck. (TODO?;)

@@ -1,0 +1,100 @@
+#!/bin/sh
+
+. ./variables
+
+function benchsamples {
+for i in `ls samples/* | grep -v -e '\.opts'`; do
+  BENCHOPTS=`cat $i.opts 2> /dev/null`
+  wrtlog Caching file...
+  dd if=$i of=/dev/null bs=512k 2> /dev/null
+  wrtlog Video decoding: `basename $i`, size: `ls -Ll $i | awk '{print $5}'`
+  wrtlog Options for this run:
+  wrtlog "$DEFAULTOPTS"
+  wrtlog "Options for this file:"
+  wrtlog "$BENCHOPTS"
+  BENCH="`$BUILD/mplayer $DEFAULTOPTS $BENCHOPTS $i 2>&1 | grep BENCHMARKs`"
+  VC=`echo $BENCH | awk '{print $3}'`
+  SYS=`echo $BENCH | awk '{print $9}'`
+  wrtlog VC: $VC \(Sys: $SYS\)
+
+  BENCH="`$BUILD/mplayer $DEFAULTOPTS $BENCHOPTS $i 2>&1 | grep BENCHMARKs`"
+  VC=`echo $BENCH | awk '{print $3}'`
+  SYS=`echo $BENCH | awk '{print $9}'`
+  wrtlog VC: $VC \(Sys: $SYS\)
+
+  BENCH="`$BUILD/mplayer $DEFAULTOPTS $BENCHOPTS $i 2>&1 | grep BENCHMARKs`"
+  VC=`echo $BENCH | awk '{print $3}'`
+  SYS=`echo $BENCH | awk '{print $9}'`
+  wrtlog VC: $VC \(Sys: $SYS\)
+done
+}
+
+if [ ! -d samples ]; then
+  wrtlog Samples subdirectory not present, exiting...
+  exit 1
+fi
+
+wrtlog Starting benchmarks
+
+if [ ! -e no_codec ]; then
+  wrtlog Starting CODEC benchmark runs, with 3 tries...
+  DEFAULTOPTS="-nosound -benchmark -vo null -vop disabled -autoq 0"
+  benchsamples
+fi
+
+export DISPLAY=:0
+export XAUTHORITY=$HOME/.Xauthority
+
+if [ ! -e no_xv ]; then
+  if [ ! -e no_xv_nodr ]; then
+    wrtlog Starting XVideo \(no DR\) benchmark runs, with 3 tries...
+    DEFAULTOPTS="-nosound -benchmark -vo xv -fs -nodr -slices -vop disabled -autoq 0"
+    benchsamples
+  fi
+
+  if [ ! -e no_xv_nodr_noslices ]; then
+    wrtlog Starting XVideo \(no DR\) \(no slices\) benchmark runs, with 3 tries...
+    DEFAULTOPTS="-nosound -benchmark -vo xv -fs -nodr -noslices -vop disabled -autoq 0"
+    benchsamples
+  fi
+
+  if [ ! -e no_xv_dr ]; then
+    wrtlog Starting XVideo \(DR\) benchmark runs, with 3 tries...
+    DEFAULTOPTS="-nosound -benchmark -vo xv -fs -dr -slices -vop disabled -autoq 0"
+    benchsamples
+  fi
+
+  if [ ! -e no_xv_dr_noslices ]; then
+    wrtlog Starting XVideo \(DR\) \(no slices\) benchmark runs, with 3 tries...
+    DEFAULTOPTS="-nosound -benchmark -vo xv -fs -dr -noslices -vop disabled -autoq 0"
+    benchsamples
+  fi
+fi
+
+if [ -e xmga ]; then
+  if [ ! -e xmga_nodr ]; then
+    wrtlog Starting XMGA \(no DR\) benchmark runs, with 3 tries...
+    DEFAULTOPTS="-nosound -benchmark -vo xmga -fs -dr -slices -vop disabled -autoq 0"
+    benchsamples
+  fi
+
+  if [ ! -e xmga_nodr_noslices ]; then
+    wrtlog Starting XMGA \(no DR\) \(no slices\) benchmark runs, with 3 tries...
+    DEFAULTOPTS="-nosound -benchmark -vo xmga -fs -dr -noslices -vop disabled -autoq 0"
+    benchsamples
+  fi
+
+  if [ ! -e xmga_dr ]; then
+    wrtlog Starting XMGA \(DR\) benchmark runs, with 3 tries...
+    DEFAULTOPTS="-nosound -benchmark -vo xmga -fs -dr -vop disabled -autoq 0"
+    benchsamples
+  fi
+
+  if [ ! -e xmga_dr ]; then
+    wrtlog Starting XMGA \(DR\) \(no slices\) benchmark runs, with 3 tries...
+    DEFAULTOPTS="-nosound -benchmark -vo xmga -fs -dr -noslices -vop disabled -autoq 0"
+    benchsamples
+  fi
+fi
+
+wrtlog Benchmarks ready

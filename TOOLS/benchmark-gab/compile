@@ -1,0 +1,56 @@
+#!/bin/sh
+
+. ./variables
+
+wrtlog Starting compilation
+wrtlog Options: $COMPILEOPTIONS
+
+if [ ! -e main.tar.gz ]; then
+  wrtlog MPlayer source main.tar.gz not present, exiting...
+  exit 1
+fi
+
+if [ ! -e main.tar.gz ]; then
+  wrtlog libavcodec source ffmpeg.tar.gz not present, exiting...
+  exit 1
+fi
+
+if [ ! -d main ]; then
+  wrtlog Unpacking source...
+  tar xfzv main.tar.gz > /dev/null || (wrtlog Error; exit 1)
+  wrtlog Unpacking done
+  wrtlog Source total size: `du -hs main | awk '{print $1}'`
+else
+  wrtlog MPlayer source already there, not unpacking
+fi
+
+wrtlog Creating and entering separate build dir...
+rm -rf $BUILD
+mkdir $BUILD || (wrtlog Error; exit 1)
+cd $BUILD
+lndir ../main > /dev/null || (wrtlog Error; exit 1)
+wrtlog Separate build dir created
+
+wrtlog Unpacking libavcodec
+rm -rf libavcodec
+ln -s . ffmpeg || (wrtlog Error; exit 1)
+tar xfzv ../ffmpeg.tar.gz ffmpeg/libavcodec > /dev/null || (wrtlog Error; exit 1)
+rm -f ffmpeg
+wrtlog Unpacking libavcodec done
+wrtlog libavcodec total size: `du -hs libavcodec | awk '{print $1}'`
+
+wrtlog Executing configure...
+./configure $COMPILEOPTIONS > /dev/null || (wrtlog Error; exit 1)
+wrtlog Configure done
+
+wrtlog Executing main compile process...
+unset CFLAGS CPPFLAGS CXXFLAGS
+make > /dev/null 2> /dev/null || (wrtlog Error; exit 1)
+wrtlog Compile ready
+wrtlog Build dir size: `du -hs . | awk '{print $1}'`
+
+wrtlog Unstripped mplayer  binary size: `ls -l mplayer | awk '{print $5}'`
+wrtlog Unstripped mencoder binary size: `ls -l mencoder | awk '{print $5}'`
+
+cd ..
+rm -rf main
