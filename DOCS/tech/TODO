@@ -4,14 +4,13 @@ TODO:
 
 FOR THE v0.90 RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
-- codec (vc/ac) priority option
-- ao/vo priority option
+- finish audio filter layer
+- new demuxer layer - at least modularized...
+- fix AVI index offset base position handling ('no video stream found' bug)
 
 FOR THE v1.00 RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
 
-- audio filter layer
-- new demuxer layer - at least modularized...
 - display OSD and subtitles using DVB card's OSD
 
 mpg demuxer:
@@ -19,7 +18,6 @@ mpg demuxer:
 - implement common mpeg 1/2/4 es/ps/pes/mp3 demuxer
 
 avi demuxer: (needs rewrite)
-- fix AVI index offset base position handling ('no video stream found' bug)
 - implement OpenDML index support (read & write)
 - implement hardcore bruteforce avi re-sync for broken files (-forceidx)
 - fix for growing avi files (movi_end pos > stream->end_pos)
