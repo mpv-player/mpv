@@ -1,7 +1,7 @@
 // Translated by:  Kuba "Qba" Misiorny <jim85@wp.pl>
 // Wszelkie uwagi i poprawki mile widziane :)
 //
-// Synced with help_mp-en.h 1.116
+// Synced with help_mp-en.h 1.117
 
 // ========================= MPlayer help ===========================
 
@@ -354,6 +354,9 @@ static char help_text[]=
 #define MSGTR_CouldNotFindColorspace "Nie mogê znale¼æ pasuj±cej przestrzeni koloru - próbujê ponownie ze skal± -vf...\n"
 #define MSGTR_MovieAspectIsSet "Proporcje filmu (obrazu) to %.2f:1 - skalujê do prawid³owych proporcji.\n"
 #define MSGTR_MovieAspectUndefined "Proporcje filmu (obrazu) nie s± zdefiniowane - nie skalujê.\n"
+
+// x11_common.c
+#define MSGTR_EwmhFullscreenStateFailed "\nX11: Nie mogê wys³aæ zdarzenia pe³nego ekranu EWMH!\n"
 
 // ====================== GUI messages/buttons ========================
 
