@@ -40,7 +40,7 @@ static int control(struct vf_instance_s* vf, int request, void* data){
 }
 
 static int query_format(struct vf_instance_s* vf, unsigned int fmt){
-    if(fmt==IMGFMT_BGR24) return 3;
+    if(fmt==IMGFMT_BGR24) return 3 | VFCAP_FLIPPED;
     return 0;
 }
 
