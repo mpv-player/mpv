@@ -5264,7 +5264,7 @@ echocheck "libdts support"
 if test "$_libdts" = auto ; then
   _libdts=no
   cat > $TMPC << EOF
-#include <stdint.h>
+#include <inttypes.h>
 #include <dts.h>
 int main(void) { dts_init (0); return 0; }
 EOF
@@ -5917,8 +5917,7 @@ fi
 
 echocheck "x264"
 cat > $TMPC << EOF
-#include <stdint.h>
-#include <stdarg.h>
+#include <inttypes.h>
 #include <x264.h>
 #if X264_BUILD < 0x0014
 #error We do not support old versions of x264. Get the latest from SVN.
