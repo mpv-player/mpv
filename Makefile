@@ -23,11 +23,6 @@ SUBDIRS += libdha vidix
 DO_MAKE = @ for i in $(SUBDIRS); do $(MAKE) -C $$i $@; done
 endif
 
-#prefix = /usr/local
-BINDIR = ${prefix}/bin
-# BINDIR = /usr/local/bin
-MANDIR = ${prefix}/man
-
 # a BSD compatible 'install' program
 INSTALL = install
 

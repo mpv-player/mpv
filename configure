@@ -117,8 +117,12 @@ Configuration:
 
 Installation directories:
   --prefix=DIR           use this prefix for installing mplayer [/usr/local]
+  --bindir=DIR           use this prefix for installing mplayer binary
+                         [PREFIX/bin]
   --datadir=DIR          use this prefix for installing machine independent
                          data files (fonts, skins) [PREFIX/share/mplayer]
+  --mandir=DIR           use this prefix for installing manpages
+                         [PREFIX/man]
   --confdir=DIR          use this prefix for installing configuration files
                          [same as datadir]
   --libdir=DIR           use this prefix for object code libraries
@@ -1250,8 +1254,14 @@ for ac_option do
   --prefix=*)
     _prefix=`echo $ac_option | cut -d '=' -f 2`
     ;;
+  --bindir=*)
+    _bindir=`echo $ac_option | cut -d '=' -f 2`
+    ;;
   --datadir=*)
     _datadir=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --mandir=*)
+    _mandir=`echo $ac_option | cut -d '=' -f 2`
     ;;
   --confdir=*)
     _confdir=`echo $ac_option | cut -d '=' -f 2`
@@ -1269,7 +1279,9 @@ for ac_option do
 done
 
 # Atmos: moved this here, to be correct, if --prefix is specified
+test -z "$_bindir" && _bindir="$_prefix/bin"
 test -z "$_datadir" && _datadir="$_prefix/share/mplayer"
+test -z "$_mandir" && _mandir="$_prefix/man"
 test -z "$_confdir" && _confdir="$_prefix/etc/mplayer"
 test -z "$_libdir" && _libdir="$_prefix/lib"
 test -z "$_mlibdir" && _mlibdir="$MLIBHOME"
@@ -4237,7 +4249,9 @@ LANG = C
 TARGET_OS = $system_name
 DESTDIR =
 prefix = \$(DESTDIR)$_prefix
+BINDIR = \$(DESTDIR)$_bindir
 DATADIR = \$(DESTDIR)$_datadir
+MANDIR = \$(DESTDIR)$_mandir
 CONFDIR = \$(DESTDIR)$_confdir
 LIBDIR = \$(DESTDIR)$_libdir
 #AR = ar
