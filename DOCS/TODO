@@ -8,20 +8,19 @@ Urgent:
 They Have Been Around For A Long Time:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 High Priority:
-- integrating the gui?
 - finish ASF seeking (find next keyframe)
-- seeking support for broken avi files without index chunk
-- support for MPEG TS (transport streams) and PES format (?) - I need
-  sample files!
-- audio copy/encoding capability
+- asterix.avi audio delays after 5-10 mins (bps mode only)
+- fix mp3lib to avoid segfault with some damaged .avi files
 
 Medium Priority:
+- seeking support for broken avi files without index chunk
 - fix x11 driver to work without SHM (for remote playing etc)
 - show current frame number [Gabucino]
 - seek_to_frame and seek_to_index options
-- fix mp3lib to avoid segfault with some damaged .avi files (workaround: -afm 4)
+- audio copy/encoding capability
 
 Low Priority:
 - SDL version detection into ./configure - DONE (disabled :))
-- asterix.avi audio delays after 5-10 mins (bps mode only)
 - fix X4.0.x/DRI OpenGL (doesn't really work, at least mga & tdfx & nvidia)
+- support for MPEG TS (transport streams) - I need sample files!
+- integrating the gui?
