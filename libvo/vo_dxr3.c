@@ -78,6 +78,7 @@
 #include "aspect.h"
 #include "../postproc/rgb2rgb.h"
 #include "../postproc/swscale.h"
+#include "../cpudetect.h"
 
 /*#ifndef USE_LIBAVCODEC*/
 #  define USE_LIBFAME
@@ -518,7 +519,7 @@ static uint32_t preinit(const char *arg)
 	int fdflags = O_WRONLY;
 
 	/* Open the control interface */
-	if (arg && !strcmp("noprebuf", arg)) {
+	if ((arg && !strcmp("noprebuf", arg)) || gCpuCaps.has3DNowExt) {
 		printf("VO: [dxr3] Disabling prebuffering.\n");
 		noprebuf = 1;
 		fdflags |= O_NONBLOCK;
