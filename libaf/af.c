@@ -80,9 +80,10 @@ af_instance_t* af_create(af_stream_t* s, char* name)
   }
 
   // Initialize the new filter
-  if(AF_OK==new->info->open(new)) 
+  if(AF_OK == new->info->open(new) && 
+     AF_ERROR < new->control(new,AF_CONTROL_POST_CREATE,&s->cfg))
     return new;
-
+  
   free(new);
   mp_msg(MSGT_AFILTER,MSGL_ERR,"Couldn't create audio filter '%s'\n",name);  
   return NULL;
@@ -140,6 +141,9 @@ af_instance_t* af_append(af_stream_t* s, af_instance_t* af, char* name)
 void af_remove(af_stream_t* s, af_instance_t* af)
 {
   if(!af) return;
+
+  // Notify filter before changing anything
+  af->control(af,AF_CONTROL_PRE_DESTROY,0);
 
   // Detach pointers
   if(af->prev)
@@ -255,7 +259,6 @@ void af_uninit(af_stream_t* s)
    -1 if failure */
 int af_init(af_stream_t* s)
 {
-  int cfg=SLOW;  // configuration type
   int i=0;
 
   // Sanity check
@@ -266,13 +269,11 @@ int af_init(af_stream_t* s)
   s->input.len    = s->output.len    = 0;
 
   // Figure out how fast the machine is
-  if(s->cfg.force)
-    cfg=s->cfg.force;
-  else{
+  if(AF_INIT_AUTO == (AF_INIT_TYPE_MASK & s->cfg.force)){
 #    if defined(HAVE_SSE) || defined(HAVE_3DNOWEX)
-      cfg=FAST;
+    s->cfg.force = (s->cfg.force & ~AF_INIT_TYPE_MASK) | AF_INIT_FAST;
 #    else
-      cfg=SLOW;
+    s->cfg.force = (s->cfg.force & ~AF_INIT_TYPE_MASK) | AF_INIT_SLOW;
 #    endif
   }
 
@@ -296,12 +297,12 @@ int af_init(af_stream_t* s)
     return -1;
 
   // Check output format
-  if(cfg!=FORCE){
+  if((AF_INIT_TYPE_MASK & s->cfg.force) != AF_INIT_FORCE){
     af_instance_t* af = NULL; // New filter
     // Check output frequency if not OK fix with resample
     if(s->last->data->rate!=s->output.rate){
       if(NULL==(af=af_get(s,"resample"))){
-	if(cfg==SLOW){
+	if((AF_INIT_TYPE_MASK & s->cfg.force) == AF_INIT_SLOW){
 	  if(!strcmp(s->first->info->name,"format"))
 	    af = af_append(s,s->first,"resample");
 	  else

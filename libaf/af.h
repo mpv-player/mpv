@@ -1,3 +1,5 @@
+#include "control.h"
+
 #ifndef __aop_h__
 #define __aop_h__
 
@@ -53,10 +55,12 @@ typedef struct af_instance_s
 		 the length of the buffer. */
 }af_instance_t;
 
-// Initialization types
-#define SLOW  1
-#define FAST  2
-#define FORCE 3
+// Initialization flags
+#define AF_INIT_AUTO		0x00000000
+#define AF_INIT_SLOW		0x00000001
+#define AF_INIT_FAST		0x00000002
+#define AF_INIT_FORCE	  	0x00000003
+#define AF_INIT_TYPE_MASK 	0x00000003
 
 // Configuration switches
 typedef struct af_cfg_s{
@@ -79,43 +83,6 @@ typedef struct af_stream_s
 }af_stream_t;
 
 /*********************************************
-// Control parameters 
-*/
-
-/* The control system is divided into 3 levels 
-   mandatory calls 	 - all filters must answer to all of these
-   optional calls  	 - are optional
-   filter specific calls - applies only to some filters
-*/
-
-#define AF_CONTROL_MANDATORY_BASE	0
-#define AF_CONTROL_OPTIONAL_BASE	100
-#define AF_CONTROL_FILTER_SPECIFIC_BASE	200
-
-// MANDATORY CALLS
-
-/* Reinitialize filter. The optional argument contains the new
-   configuration in form of a af_data_t struct. If the filter does not
-   support the new format the struct should be changed and AF_FALSE
-   should be returned. If the incoming and outgoing data streams are
-   identical the filter can return AF_DETACH. This will remove the
-   filter. */
-#define AF_CONTROL_REINIT  		1 + AF_CONTROL_MANDATORY_BASE
-
-// OPTIONAL CALLS
-
-
-// FILTER SPECIFIC CALLS
-
-// Set output rate in resample
-#define AF_CONTROL_RESAMPLE		1 + AF_CONTROL_FILTER_SPECIFIC_BASE
-// Set output format in format
-#define AF_CONTROL_FORMAT		2 + AF_CONTROL_FILTER_SPECIFIC_BASE
-// Set number of output channels in channels
-#define AF_CONTROL_CHANNELS		3 + AF_CONTROL_FILTER_SPECIFIC_BASE
-// Set delay length in delay
-#define AF_CONTROL_SET_DELAY_LEN	4 + AF_CONTROL_FILTER_SPECIFIC_BASE
-/*********************************************
 // Return values
 */
 
@@ -129,7 +96,9 @@ typedef struct af_stream_s
 
 
 
+/*********************************************
 // Export functions
+*/
 
 /* Initialize the stream "s". This function creates a new fileterlist
    if nessesary according to the values set in input and output. Input
@@ -201,12 +170,21 @@ int af_lencalc(frac_t mul, af_data_t* data);
 #define RESIZE_LOCAL_BUFFER(a,d)\
 ((a->data->len < af_lencalc(a->mul,d))?af_resize_local_buffer(a,d):AF_OK)
 
+/* Some other useful macro definitions*/
 #ifndef min
 #define min(a,b)(((a)>(b))?(b):(a))
 #endif
 
 #ifndef max
 #define max(a,b)(((a)>(b))?(a):(b))
+#endif
+
+#ifndef clamp
+#define clamp(a,min,max) (((a)>(max))?(max):(((a)<(min))?(min):(a)))
+#endif
+
+#ifndef sign
+#define sign(a) (((x)>0)?(1):(-1)) 
 #endif
 
 #endif

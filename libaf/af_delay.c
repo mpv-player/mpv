@@ -30,9 +30,9 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     af->data->format = ((af_data_t*)arg)->format;
     af->data->bps    = ((af_data_t*)arg)->bps;
     
-    return af->control(af,AF_CONTROL_SET_DELAY_LEN,&((af_delay_t*)af->setup)->tlen);
+    return af->control(af,AF_CONTROL_DELAY_SET_LEN,&((af_delay_t*)af->setup)->tlen);
   }
-  case AF_CONTROL_SET_DELAY_LEN:{
+  case AF_CONTROL_DELAY_SET_LEN:{
     af_delay_t* s  = (af_delay_t*)af->setup;
     void*       bt = s->buf; // Old buffer
     int         lt = s->len; // Old len

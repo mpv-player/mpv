@@ -2,7 +2,7 @@ include ../config.mak
 
 LIBNAME = libaf.a
 
-SRCS=af.c af_dummy.c af_delay.c af_channels.c af_format.c af_resample.c window.c filter.c
+SRCS=af.c af_dummy.c af_delay.c af_channels.c af_format.c af_resample.c window.c filter.c af_volume.c
 
 OBJS=$(SRCS:.c=.o)
 
@@ -15,7 +15,7 @@ CFLAGS  = $(OPTFLAGS) -I. -Wall
 $(LIBNAME):     $(OBJS) Makefile
 	$(AR) r $(LIBNAME) $(OBJS)
 
-$(OBJS):af.h dsp.h filter.h window.h
+$(OBJS):af.h control.h dsp.h filter.h window.h
 
 all:    $(LIBNAME)
 
