@@ -1579,7 +1579,7 @@ if test "$_i18n" = yes ; then
 else
   _def_i18n='#undef USE_I18N'
 fi
-if test -z $_i18n_libs ; then
+if test -z "$_i18n_libs" ; then
   echores "$_i18n"
 else
   echores "$_i18n (using $_i18n_libs)"
