@@ -57,8 +57,15 @@ MPlayer code:
     * config files & commandline parser: Albeu, Szabi
     * playtree, input layer: Albeu
     * postproc, colorspace converters: Michael Niedermayer
+
+Imported libs/projects:
     * libavcodec: Michael Niedermayer, Fabrice Bellard @ ffmpeg
     * VIDIX core, libdha: Alex, Nick Kurshev @ mplayerxp
+    * mp3lib: A'rpi, mpg123/mpglib project
+    * loader, dshow: A'rpi, Zdenek Kabelac @ avifile
+    * liba52, libmpeg2: A'rpi, Michel LESPINASSE @ liba52.sf.net
+    * libmpdvdkit2: A'rpi, libdvdcss-devel@videolan.org
+    * libfame: A'rpi, fame.sf.net
 
 libvo drivers:
     * vo_3dfx.c - OBSOLETED, use xv or tdfxfb
@@ -94,7 +101,7 @@ VIDIX drivers:
     * genfb_vid - al3x
     * mach64_vid - Michael Niedermayer, A'rpi
     * mga_vid - al3x ?
-    * nvidia_vid - al3x (development stopped - don't expect it)
+    * nvidia_vid - pontscho, al3x (development stopped - don't expect it)
     * radeon_vid - al3x, Nick Kurshev @ mplayerxp
     * rage128_vid - ? , Nick Kurshev @ mplayerxp
 
