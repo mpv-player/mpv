@@ -103,7 +103,7 @@ endif
 
 # .PHONY: $(COMMON_DEPS)
 
-all:	$(ALL_PRG)
+all:	version.h $(ALL_PRG)
 
 .c.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
@@ -301,7 +301,7 @@ clean:
 	-rm -f *.o *~ $(OBJS) codecs.conf.h
 
 distclean:
-	-rm -f *~ $(PRG) $(PRG_FIBMAP) $(PRG_MENCODER) $(OBJS)
+	-rm -f *~ $(PRG) $(PRG_FIBMAP) $(PRG_MENCODER) $(PRG_CFG) $(OBJS)
 	-rm -f *.o *.a .depend configure.log codecs.conf.h
 	@for a in $(PARTS); do $(MAKE) -C $$a distclean; done
 
