@@ -782,7 +782,7 @@ case 0:
     break;
 case VCODEC_FRAMENO:
     mux_v->buffer=&decoded_frameno; // tricky
-    aviwrite_write_chunk(muxer,mux_v,muxer_f,sizeof(int),0);
+    if(skip_flag<=0) aviwrite_write_chunk(muxer,mux_v,muxer_f,sizeof(int),0);
     break;
 case VCODEC_DIVX4:
     blit_frame=decode_video(&video_out,sh_video,start,in_size,0);
