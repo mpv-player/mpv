@@ -131,6 +131,44 @@ signed short mad_scale(mad_fixed_t sample)
 
   /* quantize */
   return sample >> (MAD_F_FRACBITS + 1 - 16);
+
+}
+
+static void mad_sync(sh_audio_t* sh_audio, struct mad_stream* ms)
+{
+    int len;
+    int skipped = 0;
+
+//    printf("buffer len: %d\n", sh_audio->a_in_buffer_len);    
+    while(sh_audio->a_in_buffer_len - skipped)
+    {
+	len = mp_decode_mp3_header(sh_audio->a_in_buffer+skipped);
+	if (len != -1)
+	{
+//	    printf("Frame len=%d\n", len);
+	    break;
+	}
+	else
+	    skipped++;
+    }
+    if (skipped)
+    {
+	printf("Audio synced, skipped bytes: %d\n", skipped);
+	ms->skiplen += skipped;
+    }
+    
+    if (sh_audio->a_in_buffer_len - skipped < MAD_BUFFER_GUARD)
+	printf("Mad reports: too small buffer\n");
+
+    mad_prepare_buffer(sh_audio, ms, sh_audio->a_in_buffer_len-skipped);
+    mad_stream_buffer(ms, sh_audio->a_in_buffer+skipped, sh_audio->a_in_buffer_len-skipped);
+#if 0    
+    len = mad_stream_sync(&ms);
+    if (len == -1)
+    {
+	printf("Mad sync failed\n");
+    }
+#endif
 }
 #endif
 
@@ -681,6 +719,8 @@ case AFM_VORBIS: {
 #ifdef USE_LIBMAD
  case AFM_MAD:
    {
+     printf("%s %s %s (%s)\n", mad_version, mad_copyright, mad_author, mad_build);
+
      printf(__FILE__ ":%d:mad: initialising\n", __LINE__);
      mad_frame_init(&mad_frame);
      mad_stream_init(&mad_stream);
@@ -688,7 +728,8 @@ case AFM_VORBIS: {
      printf(__FILE__ ":%d:mad: preparing buffer\n", __LINE__);
      mad_prepare_buffer(sh_audio, &mad_stream, sh_audio->a_in_buffer_size);
      mad_stream_buffer(&mad_stream, (unsigned char*)(sh_audio->a_in_buffer), sh_audio->a_in_buffer_len);
-     mad_stream_sync(&mad_stream);
+//     mad_stream_sync(&mad_stream);
+     mad_sync(sh_audio, &mad_stream);
      mad_synth_init(&mad_synth);
 
      if(mad_frame_decode(&mad_frame, &mad_stream) == 0)
@@ -1061,6 +1102,8 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
       {
 	mad_prepare_buffer(sh_audio, &mad_stream, sh_audio->a_in_buffer_size);
 	mad_stream_buffer(&mad_stream, sh_audio->a_in_buffer, sh_audio->a_in_buffer_len);
+//        mad_stream_sync(&mad_stream);
+	mad_sync(sh_audio, &mad_stream);
 	if(mad_frame_decode(&mad_frame, &mad_stream) == 0)
 	  {
 	    mad_synth_frame(&mad_synth, &mad_frame);
@@ -1085,7 +1128,10 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
 	  }
 	else
 	  {
-	    printf(__FILE__ ":%d:mad: frame decoding failed\n", __LINE__);
+	    printf(__FILE__ ":%d:mad: frame decoding failed (error: %d)\n", __LINE__,
+		mad_stream.error);
+	    if (mad_stream.error & MAD_ERROR_LOSTSYNC)
+		printf("lost sync\n");
 	  }
 	
 	break;
@@ -1126,7 +1172,8 @@ void resync_audio_stream(sh_audio_t *sh_audio){
 	case AFM_MAD:
 	  mad_prepare_buffer(sh_audio, &mad_stream, sh_audio->a_in_buffer_size);
 	  mad_stream_buffer(&mad_stream, sh_audio->a_in_buffer, sh_audio->a_in_buffer_len);
-	  mad_stream_sync(&mad_stream);
+//	  mad_stream_sync(&mad_stream);
+	  mad_sync(sh_audio, &mad_stream);
 	  mad_postprocess_buffer(sh_audio, &mad_stream);
 	  break;
 #endif	
@@ -1163,7 +1210,8 @@ void skip_audio_frame(sh_audio_t *sh_audio){
 		  mad_prepare_buffer(sh_audio, &mad_stream, sh_audio->a_in_buffer_size);
 		  mad_stream_buffer(&mad_stream, sh_audio->a_in_buffer, sh_audio->a_in_buffer_len);
 		  mad_stream_skip(&mad_stream, 2);
-		  mad_stream_sync(&mad_stream);
+//		  mad_stream_sync(&mad_stream);
+		  mad_sync(sh_audio, &mad_stream);
 		  mad_postprocess_buffer(sh_audio, &mad_stream);
 		  break;
 		}
