@@ -329,7 +329,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
                                                               ExposureMask)));
             XSetStandardProperties(mDisplay, vo_window, hello, hello, None,
                                    NULL, 0, &hint);
-            XSetWMNormalHints(mDisplay, vo_window, &hint);
+            vo_x11_sizehint(hint.x, hint.y, hint.width, hint.height, 0);
             XMapWindow(mDisplay, vo_window);
             if (flags & 1)
                 vo_x11_fullscreen();
@@ -338,8 +338,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 #ifdef HAVE_XINERAMA
                 vo_x11_xinerama_move(mDisplay, vo_window);
 #endif
-                vo_x11_sizehint(hint.x, hint.y, hint.width, hint.height,
-                                0);
             }
         } else
         {
