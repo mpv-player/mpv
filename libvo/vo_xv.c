@@ -118,8 +118,8 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
 
  hint.x = 0;
  hint.y = 0;
- hint.width = image_width;
- hint.height = image_height;
+ hint.width = d_width;
+ hint.height = d_height;
  if ( fullscreen )
   {
    hint.width=vo_screenwidth;
