@@ -91,6 +91,7 @@ synth_1to1_sse:
         pushl %eax
         call  dct64
         addl  $12,%esp
+	emms
         movl  16(%esp),%edx
         leal  0(,%edx,4),%edx
         movl  $decwin+64,%eax
@@ -110,15 +111,12 @@ synth_1to1_sse:
 	movups	48(%ecx), %xmm0
 	mulps	48(%ebx), %xmm0
 	addps	%xmm0, %xmm4
-	shufps	$0xDD, %xmm4, %xmm1 /* fake of pfacc. 3|2|3|2 */
+	movhlps	%xmm4, %xmm1 /* fake of pfacc */
 	addps	%xmm1, %xmm4
 	shufps	$0x55, %xmm4, %xmm1 /* fake of pfnacc. 1|1|1|1 */
 	subps	%xmm1, %xmm4
-	cvtps2pi %xmm4, %mm4
+	cvtss2si %xmm4, %eax
 
-        movd	%mm4,%eax
-
-        sar	$16,%eax
         movw	%ax,(%esi)
 
         addl  $64,%ebx
@@ -140,13 +138,10 @@ synth_1to1_sse:
 	movups	48(%ecx), %xmm0
 	mulps	48(%ebx), %xmm0
 	addps	%xmm0, %xmm4
-	shufps	$0xDD, %xmm4, %xmm1 /* 3|2|3|2 */
+	movhlps	%xmm4, %xmm1 /* 3|2|3|2 */
 	addps	%xmm1, %xmm4
-	cvtps2pi %xmm4, %mm4
+	cvtss2si %xmm4, %eax
 
-	movd	%mm4, %eax
-
-        sar	$16,%eax
 
         movw	%ax,(%esi)
 
@@ -156,29 +151,30 @@ synth_1to1_sse:
         movl  $15,%ebp
 
 .L68:
-	xorps	%xmm3, %xmm3
+	xorps  %xmm0, %xmm0
 
-	movups	(%ecx), %xmm4
-	mulps	(%ebx), %xmm4
-	subps	%xmm4, %xmm3
-	movups	16(%ecx), %xmm0
-	mulps	16(%ebx), %xmm0
-	subps	%xmm0, %xmm3
-	movups	32(%ecx), %xmm1
-	mulps	32(%ebx), %xmm1
-	subps	%xmm1, %xmm3
-	movups	48(%ecx), %xmm0
-	mulps	48(%ebx), %xmm0
-	subps	%xmm0, %xmm3
-	shufps	$0xDD, %xmm3, %xmm1 /* 3|2|3|2 */
-	addps	%xmm1, %xmm3
-	shufps	$0x55, %xmm3, %xmm1 /* fake of pfacc 1|1|1|1 */
-	addps	%xmm1, %xmm3
-	cvtps2pi %xmm3, %mm0
+        movups (%ecx),%xmm2
+        mulps  (%ebx),%xmm2
+        subps %xmm2,%xmm0
 
-        movd	%mm0,%eax
+        movups 16(%ecx),%xmm2
+        mulps  16(%ebx),%xmm2
+        subps  %xmm2,%xmm0
 
-        sar	$16,%eax
+        movups 32(%ecx),%xmm2
+        mulps  32(%ebx),%xmm2
+        subps  %xmm2,%xmm0
+
+        movups 48(%ecx),%xmm2
+        mulps  48(%ebx),%xmm2
+        subps  %xmm2,%xmm0
+
+	movhlps	%xmm0, %xmm1 /* 3|2|3|2 */
+	addps	%xmm1, %xmm0
+	shufps	$0x55, %xmm0, %xmm1 /* fake of pfacc 1|1|1|1 */
+	addps	%xmm1, %xmm0
+	cvtss2si %xmm0, %eax
+
 
         movw	%ax,(%esi)
 
