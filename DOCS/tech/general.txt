@@ -1,0 +1,152 @@
+
+So, I'll describe how this stuff works.
+
+The basis of the program's structure is basically logical, however it's
+a big hack :)
+
+The main modules:
+
+1. streamer.c: this is the input, this reads the file or the VCD.
+   what it has to know: appropriate buffering, seek, skip functions,
+	 reading by bytes, or blocks with any size.
+	 The stream_t structure describes the input stream, file/device.
+
+2. demuxer.c: this makes the demultiplexing of the input to audio and video
+   channels, and their reading by buffered packages.
+	 The demuxer.c is basically a framework, which is the same for all the
+	 input formats, and there are parsers for each of them (mpeg-es,
+	 mpeg-ps, avi, avi-ni, asf), these are in the demux_*.c files.
+	 The structure is the demuxer_t. There is only one demuxer.
+
+2.a. demuxer stream, that is DS. Its struct is demux_stream_t
+   Every channel (a/v) has one.
+	 For now, there can be 2 for each demuxer, one for the audio and one
+	 for the video.
+
+2.b. demux_packet_t, that is DP.
+   This contains one chunk (avi) or packet (asf,mpg).
+	 In the memory they are stored as chained lists, since they are of
+	 different sizes.
+	 
+  Now, how this reading works?
+	 - demuxer.c/demux_read_data() is called, it gets how many bytes,
+	   and where (memory address), would we like to read, and from which
+           DS. The codecs call this.
+	 - this checks if the given DS's buffer contains something, if so, it
+	   reads from there as much as needed. If there isn't enough, it calls
+	   ds_fill_buffer(), which:
+	 - checks if the given DS has buffered packages (DP's), if so, it moves
+	   the oldest to the buffer, and reads on. If the list is empty, it
+	   calls demux_fill_buffer() :
+	 - this calls the parser for the input format, which reads the file
+	   onward, and moves the found packages to their buffers.
+		 Well it we'd like an audio package, but only a bunch of video
+		 packages are available, then sooner or later the:
+		 DEMUXER: Too many (%d in %d bytes) audio packets in the buffer
+		 error shows up.
+
+So everything is ok 'till now, I want to move them to a separate lib.
+
+Now, go on:
+
+3. mplayer.c - ooh, he's the boss :)
+   The timing is solved odd, since it has/recommended to be done differently
+	 for each of the formats, and sometimes can be done by many ways.
+	 There are the a_frame and v_frame float variables, they store the
+	 just played a/v position is seconds.
+	 A new frame is displayed if v_frame<a_frame, and sound is decoded if
+	 a_frame<v_frame.
+	 When playing (a/v), it increases the variables by the duration of the
+	 played a/v. In video, it's usually 1.0/fps, but I have to mention that
+	 doesn't really matters at video, for example asf doesn't have that,
+	 instead there is "duration" and it can change per frames.
+	 MPEG2 has "repeat_count" which delays the frame by 1-2.5 ...
+	 Maybe only AVI and MPEG1 has fixed fps.
+
+	 So everything works perfect until the audio and video are in perfect
+	 synchronity, since the audio goes, it gives the timing, and if the
+	 time of a frame passed, the next frame is displayed.
+	 But what if these two aren't synchronized in the input file?
+	 PTS correction kicks in. The input demuxers read the PTS (presentation
+	 timestamp) of the packages, and with it we can see if the streams
+	 are synchronized. Then MPlayer can correct the a_frame, within
+	 a given maximal bounder (see -mc option). The summary of the
+	 corrections can be found in c_total .
+
+	 Of course this is not everything, several things suck.
+	 For example the soundcards delay, which has to be corrected by
+	 MPlayer: that's why it needs the size of the audio buffer. It can
+	 be measured with select(), which is unfortunately not supported by
+	 every card... That's when it has to be given with the -abs option.
+	 
+	 Then there's another problem: in MPEG, the PTS is not given by
+	 frames, rather by sectors, which can contain 10 frames, or only 0.1 .
+	 In order this won't fuck up timing, we average the PTS by 5 frames,
+	 and use this when correcting.
+	 
+	 Life didn't get simpler with AVI. There's the "official" timing
+	 method, the BPS-based, so the header contains how many compressed
+	 audio bytes belong to one second of frames.
+	 Of course this doesn't always work... why it should :)
+	 So I emulate the MPEG's PTS/sector method on AVI, that is the
+	 AVI parser calculates a fake PTS for every read chunk, decided by
+	 the type of the frames. This is how my timing is done. And sometimes
+	 this works better.
+
+	 In AVI, usually there is a bigger piece of audio stored first, then
+	 comes the video. This needs to be calculated into the delay, this is
+	 called "Initial PTS delay".
+	 Of course there are 2 of them, one is stored in the header and not
+	 really used :) the other isn't stored anywhere, this can only be
+	 measured...
+	 
+4. Codecs. They are separate libs.
+   For example libac3, libmpeg2, xa/*, alaw.c, opendivx/*, loader, mp3lib.
+	 mplayer.c calls them if a piece of audio or video needs to be played.
+	 (see the beginning of 3.)
+	 And they call the appropriate demuxer, to get the compressed data.
+	 (see 2.)
+
+5.a Codec controller: this is the greates hack in the whole :)
+	 The libmpeg2 is so unstable, that I can't believe it.
+	 Of course I don't mean it bullshit :) rather it only accepts
+	 totally perfect, errorfree streams. If it founds error, it's
+	 just a segfault ;) And don't start laughing, this is great this way,
+	 from the view of speed it would be 50-100% slower if stuffed full with
+	 verifications. That's why I solved it by running it in a separate
+	 process, and if it dies, who cares, just start another.
+	 However, a few things are needed for this:
+	 - codec controller process: a separate process, which sleeps, but if
+		 its child (the libmpeg2 process) dies, it quickly starts another.
+		 So the MPlayer doesn't have to care about this, it just pumps the
+		 compressed stuff into the child, which displays it.
+	 - shmem: the compressed data, and the uncompressed frames are both
+	   in shared memory, so all 3 processes (mplayer, codeccontrol,
+		 libmpeg2 codec) sees 'em, so they can trade data fast.
+	 - FIFO is used for the communication between them.
+	 - If the child dies while decoding, the succesfully decoded data
+		 isn't lost, they are inherited by the new child throught the
+		 shared mem! So only a little error can be seen in the video,
+		 it won't disappear or turn green, as in the older versions.
+
+	 The disadvantage of this all is that since the libvo and libmpeg2
+	 are closely related, the libvo needs to run in the same process as
+	 the libmpeg2, in the one that keeps dying/reborning, and not in the
+	 one that has the controlling process, the MPlayer. This causes a
+	 lot of problems, mostly at the handling of events in the libvo window
+	 (keypresses, etc). So there are miscellaneous workarounds, a lot of
+	 FIFO, and trick which exploits that X doesn't care which process
+	 queries its events.
+
+	 I'd like to solve this in the near future, and use the signal/longjmp
+	 (this is a hack, too:)) method, developed on the mpeg2dec-devel list.
+
+5. libvo: this displays the frame. There are 2 different output routines in it:
+
+5.a draw_slice(): this displays YV12 pictures (3 frames, a full sized which
+	 contains brightness, and 2 with 1/4 sizes, which contain the colour
+	 info). MPEG codecs (libmpeg2, opendivx) use this. This doesn't have
+	 to display the whole frame, only update small parts of it.
+5.b draw_frame(): this is the older interface, this displays only complete
+	 frames, and can do only packed format (YUV2, RGB/BGR).
+	 Win32 codecs use this (DivX, Indeo, etc).
