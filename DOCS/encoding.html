@@ -104,9 +104,9 @@ about this, you should consult some guides available on the Net.</P>
 commands are needed :<BR>
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> - remove this file, which
   can come from a previous 3-pass encoding (it interferes with current one)<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -divx4opts br=1100
--o movie.avi -pass 1<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -divx4opts br=1100 -o movie.avi -pass 2</CODE></P>
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -lavcopts vcodec=mpeg4:more_options
+  -o movie.avi -pass 1<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -lavcopts vcodec=mpeg4:more_options -o movie.avi -pass 2</CODE></P>
 
 <P><U><B>3-pass encoding :</B></U> this is an extension of 2-pass encoding,
   where the audio encoding takes place in a separate pass. This method enables
@@ -135,7 +135,7 @@ commands are needed :<BR>
   <TR>
     <TD><FONT CLASS="text">
       <CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 1
-        -divx4opts br=&lt;bitrate&gt;</CODE></TD>
+        -ovc divx4 -divx4opts br=&lt;bitrate&gt;</CODE></TD>
     <TD><FONT CLASS="text">
       <B><U>Second pass</U> : alias the first pass of DivX4 video encoding. 
       Optionally specify the video bitrate MEncoder printed at the end of the
@@ -144,7 +144,7 @@ commands are needed :<BR>
   <TR>
     <TD><FONT CLASS="text">
       <CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 2
-        -divx4opts br=&lt;bitrate&gt;</CODE></TD>
+        -ovc divx4 -divx4opts br=&lt;bitrate&gt;</CODE></TD>
     <TD><FONT CLASS="text">
       <B><U>Third pass</U> : alias the second pass of DivX4 video encoding. 
       Optionally specify the video bitrate MEncoder printed at the end of the
@@ -159,12 +159,12 @@ commands are needed :<BR>
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> - remove this file,
   which can come from a previous 3-pass encoding (it interferes with current
   one)<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc frameno
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -l-ovc frameno
   -o frameno.avi<BR>
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2
-  -divx4opts br=1100 -oac copy -o movie.avi -pass 1<BR>
+  -lavcopts vcodec=mpeg4:more_options -oac copy -o movie.avi -pass 1<BR>
 &nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2
-  -divx4opts br=1100 -oac copy -o movie.avi -pass 2</CODE>
+  -lavcopts vcodec=mpeg4:more_options -oac copy -o movie.avi -pass 2</CODE>
 </P>
 
 <P><U><B>2 or 3-pass encoding using internal libavcodec controler</B></U> :
@@ -174,14 +174,14 @@ controler with libavcodec.<BR>
 <UL>
 <B>2-pass encoding</B> :<BR>
 <CODE>rm -f lavc_stats.txt<BR>
-mencoder -dvd 2 -ovc lavc -lacvopts vpass=1 (audio-options) -o movie.avi<BR>
-mencoder -dvd 2 -ovc lavc -lacvopts vpass=2 (audio-options) -o movie.avi</CODE><BR>
+mencoder -dvd 2 -ovc lavc -lacvopts vcodec=mpeg4:vpass=1 (audio-options) -o movie.avi<BR>
+mencoder -dvd 2 -ovc lavc -lacvopts vcodec=mpeg4:vpass=2 (audio-options) -o movie.avi</CODE><BR>
 <BR>
 <B>3-pass encoding</B> :<BR>
 <CODE>rm -f frameno.avi lavc_stats.txt<BR>
 mencoder -dvd 2 -ovc frameno (audio-options) -o frameno.avi<BR>
-mencoder -dvd 2 -ovc lavc -lacvopts vpass=1 -oac copy -o movie.avi<BR>
-mencoder -dvd 2 -ovc lavc -lacvopts vpass=2 -oac copy -o movie.avi</CODE><BR>
+mencoder -dvd 2 -ovc lavc -lacvopts vcodec=mpeg4:vpass=1 -oac copy -o movie.avi<BR>
+mencoder -dvd 2 -ovc lavc -lacvopts vcodec=mpeg4:vpass=2 -oac copy -o movie.avi</CODE><BR>
 </UL>
 </P>
 
@@ -202,7 +202,7 @@ mencoder -dvd 2 -ovc lavc -lacvopts vpass=2 -oac copy -o movie.avi</CODE><BR>
   fast bilinear.</P>
 
 <P>Usage :<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder sample-svcd.mpg -divx4opts br=1300 -vop scale=640:480 -sws 2 -o output.avi</CODE></P>
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder sample-svcd.mpg -lavcopts vcodec=mpeg4:more_options -vop scale=640:480 -sws 2 -o output.avi</CODE></P>
 
 
 <P><B><A NAME=2.4.3.3>2.4.3.3.  Stream copying</B></P>
@@ -286,7 +286,7 @@ unsupported). You can encode to the following codecs :</P>
   global <A HREF=#2.4.5>Options</A> section and in the manpage.</P>
 
 <P><I>Creating a DivX4 file from all the JPEG files in the current dir :</I><BR>
-  &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc divx4 -o
+  &nbsp;&nbsp;<CODE>mencoder \*.jpg -lavcopts -mf on:w=800:h=600:fps=25 -ovc divx4 -o
   output.avi</CODE></P>
 
 <P><I>Creating a DivX4 file from some JPEG files in the current dir :</I><BR>
@@ -440,19 +440,19 @@ unsupported). You can encode to the following codecs :</P>
 <P>Using <B>MEncoder</B> is the easiest thing on Earth. See the following :</P>
 
 <P>Encoding from DVD, title 2 :<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi</CODE></P>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -lavcopts vcodec=mpeg4:more_options -o title2.avi</CODE></P>
 
 <P>The same, but with libavcodec family, MJPEG compression :<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg -ffourcc mjpg</CODE></P>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -lavcopts vcodec=mpeg4:more_options -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg -ffourcc mjpg</CODE></P>
 
 <P>Encoding from DVD, title 2, with rescaling :<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -vop scale=640:480 -sws 2 -o title2.avi</CODE></P>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -vop scale=640:480 -sws 2 -lavcopts vcodec=mpeg4:more_options -o title2.avi</CODE></P>
 
 <P>Encoding from HTTP :<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder http://mplayer.hq/example.avi  -o  example.avi</CODE></P>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder http://mplayer.hq/example.avi -lavcopts vcodec=mpeg4:more_options -o example.avi</CODE></P>
 
 <P>Encoding from a pipe :<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;rar p test-SVCD.rar | mencoder -divx4opts br=800 -ofps 24 -pass 1 -- -</CODE></P>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;rar p test-SVCD.rar | mencoder -lavcopts vcodec=mpeg4:more_options -ofps 24 -pass 1 -- -</CODE></P>
 
 <P>Encoding multiple *.vob files :<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;cat *.vob | mencoder &lt;options&gt; -</CODE></P>
