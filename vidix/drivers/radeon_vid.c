@@ -838,6 +838,20 @@ static void radeon_vid_display_video( void )
 #endif
 }
 
+static unsigned radeon_query_pitch(unsigned fourcc)
+{
+  unsigned pitch;
+  switch(fourcc)
+  {
+	/* 4:2:0 */
+	case IMGFMT_IYUV:
+	case IMGFMT_YV12:
+	case IMGFMT_I420: pitch = 32; break;
+	default:	  pitch = 16; break;
+  }
+  return pitch;
+}
+
 static int radeon_vid_init_video( vidix_playback_t *config )
 {
     uint32_t tmp,src_w,src_h,dest_w,dest_h,pitch,h_inc,step_by,left,leftUV,top;
@@ -966,10 +980,19 @@ static int radeon_vid_init_video( vidix_playback_t *config )
     return 0;
 }
 
+static void radeon_compute_framesize(vidix_playback_t *info)
+{
+  unsigned pitch,awidth;
+  pitch = radeon_query_pitch(info->fourcc);
+  awidth = info->src.w + ((pitch-1) & ~(pitch-1));
+  info->frame_size = awidth*info->src.h+(awidth*info->src.h)/2;
+}
+
 int vixConfigPlayback(vidix_playback_t *info)
 {
   if(!is_supported_fourcc(info->fourcc)) return ENOSYS;
   if(info->num_frames>2) info->num_frames=2;
+  radeon_compute_framesize(info);
   radeon_overlay_off = radeon_ram_size - info->frame_size*info->num_frames;
   radeon_overlay_off &= 0xffff0000;
   if(radeon_overlay_off < 0) return EINVAL;
