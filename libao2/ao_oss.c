@@ -102,8 +102,8 @@ static int control(int cmd,int arg){
 // return: 1=success 0=fail
 static int init(int rate,int channels,int format,int flags){
 
-  printf("ao2: %d Hz  %d chans  %s\n",rate,channels,
-    audio_out_format_name(format));
+//  printf("ao2: %d Hz  %d chans  %s\n",rate,channels,
+//    audio_out_format_name(format));
 
   if (ao_subdevice)
     dsp = ao_subdevice;

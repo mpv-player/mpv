@@ -677,6 +677,7 @@ if(vcd_track){
        if (len == -1)
 	 perror("Error: lseek failed to obtain video file size");
        else
+        if(verbose)
 #ifdef _LARGEFILE_SOURCE
 	 printf("File size is %lld bytes\n", (long long)len);
 #else
@@ -979,6 +980,7 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
          (flip==1)?"flip ":""
 //         fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3)
      );
+    if(verbose){
     printf("VO: Description: %s\n"
            "VO: Author: %s\n",
         info->name,
@@ -986,6 +988,7 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
      );
     if(strlen(info->comment) > 0)
         printf("VO: Comment: %s\n", info->comment);
+    }
    }
 #endif
 
@@ -1088,19 +1091,20 @@ double vdecode_time;
 if(sh_audio){
   
   const ao_info_t *info=audio_out->info;
-  printf("AO: [%s] %iHz %s %s\n"
-         "AO: Description: %s\n"
-         "AO: Author: %s\n",
+  printf("AO: [%s] %iHz %s %s\n",
       info->short_name,
       force_srate?force_srate:sh_audio->samplerate,
       sh_audio->channels>1?"Stereo":"Mono",
-      audio_out_format_name(sh_audio->sample_format),
+      audio_out_format_name(sh_audio->sample_format)
+   );
+  if(verbose){
+   printf("AO: Description: %s\nAO: Author: %s\n",
       info->name,
       info->author	
    );
-  if(strlen(info->comment) > 0)
+   if(strlen(info->comment) > 0)
       printf("AO: Comment: %s\n", info->comment);
-
+  }
   if(!audio_out->init(force_srate?force_srate:sh_audio->samplerate,
       sh_audio->channels,sh_audio->sample_format,0)){
     printf("couldn't open/init audio device -> NOSOUND\n");
@@ -1371,6 +1375,11 @@ if(1)
 	  if(time_frame<-2*frame_time){
 	      drop_frame=frame_dropping; // tricky!
 	      ++drop_frame_cnt;
+	      if(drop_frame_cnt==50 && frame_dropping<1)
+	          printf("\n************************************************************************"
+		         "\n** Your system is too SLOW to play this! try with -framedrop or RTFM! **"
+			 "\n************************************************************************"
+			 "\n");
 	      if (verbose>0) printf("\nframe drop %d, %.2f\n", drop_frame, time_frame);
 	  }
       } else {
@@ -1434,9 +1443,10 @@ if(1)
       if(verbose)printf("%5.3f|",v_pts-d_video->pts);
     } else {
       if(!delay_corrected && d_audio->pts){
+//        float x=d_audio->pts-d_video->pts-(delay);
         float x=d_audio->pts-d_video->pts-(delay+audio_delay);
         float y=-(delay+audio_delay);
-        printf("Initial PTS delay: %5.3f sec  (calculated: %5.3f)\n",x,y);
+        printf("Initial PTS delay: %5.3f sec  (calculated: %5.3f)  audio_delay=%5.3f\n",x,y,audio_delay);
 	initial_pts_delay+=x;
         audio_delay+=x;
         delay_corrected=1;
@@ -1447,7 +1457,8 @@ if(1)
       // PTS = (last timestamp) + (bytes after last timestamp)/(bytes per sec)
       a_pts=d_audio->pts;
       a_pts+=(ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
-      v_pts=d_video->pts-frame_time;
+//      v_pts=d_video->pts-frame_time;
+      v_pts=d_video->pts;
     }
 
     if(verbose>1)printf("### A:%8.3f (%8.3f)  V:%8.3f  A-V:%7.4f  \n",a_pts,a_pts-audio_delay-delay,v_pts,(a_pts-delay-audio_delay)-v_pts);

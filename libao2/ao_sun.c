@@ -238,8 +238,8 @@ static int init(int rate,int channels,int format,int flags){
 	enable_sample_timing = realtime_samplecounter_available(audio_dev);
     }
 
-    printf("ao2: %d Hz  %d chans  %s [0x%X]\n",
-	   rate,channels,audio_out_format_name(format),format);
+//    printf("ao2: %d Hz  %d chans  %s [0x%X]\n",
+//	   rate,channels,audio_out_format_name(format),format);
 
     audio_fd=open(audio_dev, O_WRONLY);
     if(audio_fd<0){

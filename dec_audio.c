@@ -145,12 +145,12 @@ if(!driver) return 0;
 // allocate audio out buffer:
 sh_audio->a_buffer_size=sh_audio->audio_out_minsize+MAX_OUTBURST; // worst case calc.
 
-printf("dec_audio: Allocating %d + %d = %d bytes for output buffer\n",
+if(verbose) printf("dec_audio: Allocating %d + %d = %d bytes for output buffer\n",
     sh_audio->audio_out_minsize,MAX_OUTBURST,sh_audio->a_buffer_size);
 
 sh_audio->a_buffer=malloc(sh_audio->a_buffer_size);
 if(!sh_audio->a_buffer){
-    printf("Cannot allocate audio out buffer\n");
+    fprintf(stderr,"Cannot allocate audio out buffer\n");
     return 0;
 }
 memset(sh_audio->a_buffer,0,sh_audio->a_buffer_size);

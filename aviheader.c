@@ -24,6 +24,7 @@ extern int verbose; // defined in mplayer.c
 static MainAVIHeader avih;
 
 extern void print_avih(MainAVIHeader *h);
+extern void print_avih_flags(MainAVIHeader *h);
 extern void print_strh(AVIStreamHeader *h);
 extern void print_wave_header(WAVEFORMATEX *h);
 extern void print_index(AVIINDEXENTRY *idx,int idx_size);
@@ -67,7 +68,7 @@ while(1){
       stream_read(demuxer->stream,(char*) &avih,MIN(size2,sizeof(avih)));
       le2me_MainAVIHeader(&avih); // swap to machine endian
       chunksize-=MIN(size2,sizeof(avih));
-      if(verbose) print_avih(&avih);
+      if(verbose) print_avih(&avih); else print_avih_flags(&avih);
       break;
     case ckidSTREAMHEADER: {      // read 'strh'
       AVIStreamHeader h;

@@ -21,6 +21,8 @@
 #include <X11/extensions/dpms.h>
 #endif
 
+extern verbose;
+
 static int dpms_disabled=0;
 static int timeout_save=0;
 
@@ -83,6 +85,7 @@ int vo_init( void )
    bpp=mXImage->bits_per_pixel;
    if((vo_depthonscreen+7)/8 != (bpp+7)/8) vo_depthonscreen=bpp; // by A'rpi
    mask=mXImage->red_mask|mXImage->green_mask|mXImage->blue_mask;
+   if(verbose)
    printf("vo: X11 color mask:  %X  (R:%lX G:%lX B:%lX)\n",
      mask,mXImage->red_mask,mXImage->green_mask,mXImage->blue_mask);
    if(((vo_depthonscreen+7)/8)==2){

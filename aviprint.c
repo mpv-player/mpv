@@ -15,13 +15,8 @@
 //#include "codec-cfg.h"
 //#include "stheader.h"
 
-
-void print_avih(MainAVIHeader *h){
-  printf("======= AVI Header =======\n");
-  printf("us/frame: %ld  (fps=%5.3f)\n",h->dwMicroSecPerFrame,1000000.0f/(float)h->dwMicroSecPerFrame);
-  printf("max bytes/sec: %ld\n",h->dwMaxBytesPerSec);
-  printf("padding: %ld\n",h->dwPaddingGranularity);
-  printf("flags: (%ld)%s%s%s%s%s%s\n",h->dwFlags,
+void print_avih_flags(MainAVIHeader *h){
+  printf("MainAVIHeader.dwFlags: (%ld)%s%s%s%s%s%s\n",h->dwFlags,
     (h->dwFlags&AVIF_HASINDEX)?" HAS_INDEX":"",
     (h->dwFlags&AVIF_MUSTUSEINDEX)?" MUST_USE_INDEX":"",
     (h->dwFlags&AVIF_ISINTERLEAVED)?" IS_INTERLEAVED":"",
@@ -29,6 +24,14 @@ void print_avih(MainAVIHeader *h){
     (h->dwFlags&AVIF_WASCAPTUREFILE)?" WAS_CAPTUREFILE":"",
     (h->dwFlags&AVIF_COPYRIGHTED)?" COPYRIGHTED":""
   );
+}
+
+void print_avih(MainAVIHeader *h){
+  printf("======= AVI Header =======\n");
+  printf("us/frame: %ld  (fps=%5.3f)\n",h->dwMicroSecPerFrame,1000000.0f/(float)h->dwMicroSecPerFrame);
+  printf("max bytes/sec: %ld\n",h->dwMaxBytesPerSec);
+  printf("padding: %ld\n",h->dwPaddingGranularity);
+  print_avih_flags(h);
   printf("frames  total: %ld   initial: %ld\n",h->dwTotalFrames,h->dwInitialFrames);
   printf("streams: %ld\n",h->dwStreams);
   printf("Suggested BufferSize: %ld\n",h->dwSuggestedBufferSize);

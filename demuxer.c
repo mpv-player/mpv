@@ -64,7 +64,7 @@ sh_audio_t* new_sh_audio(demuxer_t *demuxer,int id){
     if(demuxer->a_streams[id]){
         printf("Warning! Audio stream header %d redefined!\n",id);
     } else {
-        printf("==> Found audio stream: %d\n",id);
+        if(verbose) printf("==> Found audio stream: %d\n",id);
         demuxer->a_streams[id]=malloc(sizeof(sh_audio_t));
         memset(demuxer->a_streams[id],0,sizeof(sh_audio_t));
     }
@@ -75,7 +75,7 @@ sh_video_t* new_sh_video(demuxer_t *demuxer,int id){
     if(demuxer->v_streams[id]){
         printf("Warning! video stream header %d redefined!\n",id);
     } else {
-        printf("==> Found video stream: %d\n",id);
+        if(verbose) printf("==> Found video stream: %d\n",id);
         demuxer->v_streams[id]=malloc(sizeof(sh_video_t));
         memset(demuxer->v_streams[id],0,sizeof(sh_video_t));
     }
