@@ -1425,13 +1425,20 @@ if(sh_audio && !demuxer2){
     {	float t=(GetTimerMS()-timer_start)*0.001f;
 	float len=(demuxer->movi_end-demuxer->movi_start);
 	float p=len>1000 ? (float)(demuxer->filepos-demuxer->movi_start) / len : 0;
-	mp_msg(MSGT_AVSYNC,MSGL_STATUS,"Pos:%6.1fs %6df (%2d%%) %3dfps  ETA:%4dmin/%3dmb  A-V:%5.3f  \r",
+#if 0
+	mp_msg(MSGT_AVSYNC,MSGL_STATUS,"%d < %d < %d  \r",
+	    (int)demuxer->movi_start,
+	    (int)demuxer->filepos,
+	    (int)demuxer->movi_end);
+#else
+	mp_msg(MSGT_AVSYNC,MSGL_STATUS,"Pos:%6.1fs %6df (%2d%%) %3dfps Trem:%4dmin %3dmb  A-V:%5.3f  \r",
 	    mux_v->timer, decoded_frameno, (int)(p*100),
 	    (t>1) ? (int)(decoded_frameno/t) : 0,
-	    (p>0.001) ? (int)(t/p/60) : 0, 
+	    (p>0.001) ? (int)((t/p-t)/60) : 0, 
 	    (p>0.001) ? (int)(ftell(muxer_f)/p/1024/1024) : 0,
 	    v_pts_corr
 	);
+#endif
     }
 
         fflush(stdout);
@@ -1465,9 +1472,9 @@ aviwrite_write_header(muxer,muxer_f); // update header
 fclose(muxer_f);
 
 if(out_video_codec==VCODEC_FRAMENO && mux_v->timer>100){
-    printf("Suggested video bitrate for 650MB CD: %d\n",(int)((650*1024*1024-muxer_f_size)/mux_v->timer/125));
-    printf("Suggested video bitrate for 700MB CD: %d\n",(int)((700*1024*1024-muxer_f_size)/mux_v->timer/125));
-    printf("Suggested video bitrate for 800MB CD: %d\n",(int)((800*1024*1024-muxer_f_size)/mux_v->timer/125));
+    printf("Recommended video bitrate for 650MB CD: %d\n",(int)((650*1024*1024-muxer_f_size)/mux_v->timer/125));
+    printf("Recommended video bitrate for 700MB CD: %d\n",(int)((700*1024*1024-muxer_f_size)/mux_v->timer/125));
+    printf("Recommended video bitrate for 800MB CD: %d\n",(int)((800*1024*1024-muxer_f_size)/mux_v->timer/125));
 }
 
 printf("\nVideo stream: %8.3f kbit/s  (%d bps)  size: %d bytes  %5.3f secs  %d frames\n",
