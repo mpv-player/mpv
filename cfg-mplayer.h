@@ -292,10 +292,8 @@ m_option_t mplayer_opts[]={
 	{"grabpointer", &vo_grabpointer, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"nograbpointer", &vo_grabpointer, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	
-#ifdef HAVE_DIRECTX
-    {"adapter", &adapter_num, CONF_TYPE_INT, CONF_RANGE, 0, 5, NULL},
-    {"refreshrate",&refresh_rate,CONF_TYPE_INT,CONF_RANGE, 0,100, NULL},
-#endif
+    {"adapter", &vo_adapter_num, CONF_TYPE_INT, CONF_RANGE, 0, 5, NULL},
+    {"refreshrate",&vo_refresh_rate,CONF_TYPE_INT,CONF_RANGE, 0,100, NULL},
 #ifdef HAVE_X11
 	// x11,xv,xmga,xvidix
 	{"wid", &WinID, CONF_TYPE_INT, 0, 0, 0, NULL},

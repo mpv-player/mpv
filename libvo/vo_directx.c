@@ -58,8 +58,6 @@ static uint32_t dstride;                            //surface stride
 static uint32_t nooverlay = 0;                      //NonOverlay mode
 static DWORD    destcolorkey;                       //colorkey for our surface
 static COLORREF windowcolor = RGB(0,0,16);          //windowcolor == colorkey
-int adapter_num=0;
-int refresh_rate=0;
 static int adapter_count=0;
 static GUID selected_guid;
 static GUID *selected_guid_ptr = NULL;
@@ -180,7 +178,7 @@ static uint32_t Directx_CreatePrimarySurface()
 	if(g_lpddsPrimary)g_lpddsPrimary->lpVtbl->Release(g_lpddsPrimary);
 	g_lpddsPrimary=NULL;
 	
-    if(vidmode)g_lpdd->lpVtbl->SetDisplayMode(g_lpdd,vm_width,vm_height,vm_bpp,refresh_rate,0);
+    if(vidmode)g_lpdd->lpVtbl->SetDisplayMode(g_lpdd,vm_width,vm_height,vm_bpp,vo_refresh_rate,0);
     ZeroMemory(&ddsd, sizeof(ddsd));
     ddsd.dwSize = sizeof(ddsd);
     //set flags and create a primary surface.
@@ -346,7 +344,7 @@ static BOOL WINAPI EnumCallbackEx(GUID FAR *lpGUID, LPSTR lpDriverDescription, L
         mp_msg(MSGT_VO, MSGL_INFO ,"%s", lpDriverDescription);
     }
     
-    if(adapter_count == adapter_num){
+    if(adapter_count == vo_adapter_num){
         if (!lpGUID)
             selected_guid_ptr = NULL;
         else
@@ -380,7 +378,7 @@ static uint32_t Directx_InitDirectDraw()
 		return 1;
     }
 	
-	if(adapter_num){ //display other than default
+	if(vo_adapter_num){ //display other than default
         OurDirectDrawEnumerateEx = (LPDIRECTDRAWENUMERATEEX) GetProcAddress(hddraw_dll,"DirectDrawEnumerateExA");
         if (!OurDirectDrawEnumerateEx){
             FreeLibrary( hddraw_dll );
@@ -393,8 +391,8 @@ static uint32_t Directx_InitDirectDraw()
         // enumerate all display devices attached to the desktop
         OurDirectDrawEnumerateEx(EnumCallbackEx, NULL, DDENUM_ATTACHEDSECONDARYDEVICES );
 
-        if(adapter_num >= adapter_count)
-            mp_msg(MSGT_VO, MSGL_ERR,"Selected adapter (%d) doesn't exist: Default Display Adapter selected\n",adapter_num);
+        if(vo_adapter_num >= adapter_count)
+            mp_msg(MSGT_VO, MSGL_ERR,"Selected adapter (%d) doesn't exist: Default Display Adapter selected\n",vo_adapter_num);
     }
 
 	OurDirectDrawCreateEx = (void *)GetProcAddress(hddraw_dll, "DirectDrawCreateEx");
@@ -446,7 +444,7 @@ static uint32_t Directx_InitDirectDraw()
 	        mp_msg(MSGT_VO, MSGL_FATAL,"<vo_directx><FATAL ERROR>can't set displaymode\n");
 	        return 1;
 		}
-	    mp_msg(MSGT_VO, MSGL_V,"<vo_directx><INFO>Inited adapter %i for %i x %i @ %i \n",adapter_num,vm_width,vm_height,vm_bpp);	
+	    mp_msg(MSGT_VO, MSGL_V,"<vo_directx><INFO>Inited adapter %i for %i x %i @ %i \n",vo_adapter_num,vm_width,vm_height,vm_bpp);	
 	    return 0;	
 	}
 	if (g_lpdd->lpVtbl->SetCooperativeLevel(g_lpdd, hWnd, DDSCL_NORMAL) != DD_OK) // or DDSCL_SETFOCUSWINDOW

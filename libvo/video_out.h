@@ -196,6 +196,8 @@ extern int vo_vsync;
 extern int vo_fs;
 extern int vo_fsmode;
 extern float vo_panscan;
+extern int vo_adapter_num;
+extern int vo_refresh_rate;
 
 extern int vo_gamma_brightness;
 extern int vo_gamma_saturation;
