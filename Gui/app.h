@@ -74,8 +74,8 @@ extern listItems   appMPlayer;
 extern listItems   appTV;
 extern listItems   appRadio;
 
-extern char      * appMPlayerDirInHome;
-extern char      * appMPlayerDir;
+//extern char      * appMPlayerDirInHome;
+//extern char      * appMPlayerDir;
 extern char      * skinDirInHome;
 extern char      * skinMPlayerDir;
 

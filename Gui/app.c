@@ -15,8 +15,8 @@ listItems   appMPlayer;
 listItems   appTV;
 listItems   appRadio;
 
-char      * appMPlayerDirInHome=NULL;
-char      * appMPlayerDir=NULL;
+//char      * appMPlayerDirInHome=NULL;
+//char      * appMPlayerDir=NULL;
 char      * skinDirInHome=NULL;
 char      * skinMPlayerDir=NULL;
 
@@ -98,14 +98,19 @@ int appFindMessage( unsigned char * str )
 
 void appInit( int argc,char* argv[], char *envp[] )
 {
- if ( ( appMPlayerDirInHome=(char *)calloc( 1,strlen( getenv( "HOME" ) ) + 9 ) ) != NULL )
-  { strcpy( appMPlayerDirInHome,getenv( "HOME" ) ); strcat( appMPlayerDirInHome,"/.mplayer" ); }
- if ( ( skinDirInHome=(char *)calloc( 1,strlen( appMPlayerDirInHome ) + 5 ) ) != NULL )
-  { strcpy( skinDirInHome,appMPlayerDirInHome ); strcat( skinDirInHome,"/Skin" ); }
- if ( ( appMPlayerDir=(char *)calloc( 1,strlen( PREFIX ) + 14 ) ) != NULL )
-  { strcpy( appMPlayerDir,PREFIX ); strcat( appMPlayerDir,"/share/mplayer" ); }
- if ( ( skinMPlayerDir=(char *)calloc( 1,strlen( appMPlayerDir ) + 5 ) ) != NULL )
-  { strcpy( skinMPlayerDir,appMPlayerDir ); strcat( skinMPlayerDir,"/Skin" ); }
+ skinDirInHome=get_path("Skin");
+ skinMPlayerDir=DATADIR "/Skin";
+ printf("SKIN dir 1: '%s'\n",skinDirInHome);
+ printf("SKIN dir 2: '%s'\n",skinMPlayerDir);
+
+// if ( ( appMPlayerDirInHome=(char *)calloc( 1,strlen( getenv( "HOME" ) ) + 9 ) ) != NULL )
+//  { strcpy( appMPlayerDirInHome,getenv( "HOME" ) ); strcat( appMPlayerDirInHome,"/.mplayer" ); }
+// if ( ( skinDirInHome=(char *)calloc( 1,strlen( appMPlayerDirInHome ) + 5 ) ) != NULL )
+//  { strcpy( skinDirInHome,appMPlayerDirInHome ); strcat( skinDirInHome,"/Skin" ); }
+// if ( ( appMPlayerDir=(char *)calloc( 1,strlen( PREFIX ) + 14 ) ) != NULL )
+//  { strcpy( appMPlayerDir,PREFIX ); strcat( appMPlayerDir,"/share/mplayer" ); }
+// if ( ( skinMPlayerDir=(char *)calloc( 1,strlen( appMPlayerDir ) + 5 ) ) != NULL )
+//  { strcpy( skinMPlayerDir,appMPlayerDir ); strcat( skinMPlayerDir,"/Skin" ); }
 
  initDebug(NULL); // write messages to stderr
 

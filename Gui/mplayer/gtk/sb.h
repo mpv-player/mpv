@@ -296,9 +296,9 @@ GtkWidget * create_SkinBrowser( void )
                      GTK_SIGNAL_FUNC( on_SkinBrowser_destroy ),
                      NULL );
 
- if ( ( sbMPlayerDirInHome=(char *)calloc( 1,strlen( skinDirInHome ) + 2 ) ) != NULL )
+ if ( ( sbMPlayerDirInHome=(char *)calloc( 1,strlen( skinDirInHome ) + 4 ) ) != NULL )
   { strcpy( sbMPlayerDirInHome,skinDirInHome ); strcat( sbMPlayerDirInHome,"/*" ); }
- if ( ( sbMPlayerPrefixDir=(char *)calloc( 1,strlen( skinMPlayerDir ) + 2 ) ) != NULL )
+ if ( ( sbMPlayerPrefixDir=(char *)calloc( 1,strlen( skinMPlayerDir ) + 4 ) ) != NULL )
   { strcpy( sbMPlayerPrefixDir,skinMPlayerDir ); strcat( sbMPlayerPrefixDir,"/*" ); }
 
  gtk_widget_grab_focus( SkinList );

@@ -30,8 +30,7 @@ char * Translate( char * str )
      switch ( str[++i] )
       {
        case 't':
-            if ( mplShMem->Track < 10 ) strcat( trbuf,"0" );
-            sprintf( tmp,"%d",mplShMem->Track ); strcat( trbuf,tmp );
+            sprintf( tmp,"%02d",mplShMem->Track ); strcat( trbuf,tmp );
             break;
        case 'f':
             if ( strlen( gtkShMem->fs.filename ) )
@@ -85,39 +84,17 @@ calclengthmmmmss:
             s=t%60; m=( ( t - s ) / 60 ) % 60;
             sprintf( tmp,"%04d:%02d",m,s ); strcat( trbuf,tmp );
             break;
-       case '3':
-            sprintf( tmp,"%02d",( mplShMem->TimeSec - ( mplShMem->TimeSec % 60 ) ) / 3600 ); strcat( trbuf,tmp );
-            break;
-       case '4':
-            sprintf( tmp,"%02d",( ( mplShMem->TimeSec - ( mplShMem->TimeSec % 60 ) ) / 60 ) % 60 ); strcat( trbuf,tmp );
-            break;
-       case '5':
-            sprintf( tmp,"%02d",mplShMem->TimeSec % 60 ); strcat( trbuf,tmp );
-            break;
-       case 'v':
-            sprintf( tmp,"%3.2f%%",mplShMem->Volume ); strcat( trbuf,tmp );
-            break;
-       case 'V':
-            sprintf( tmp,"%3.1f",mplShMem->Volume ); strcat( trbuf,tmp );
-            break;
-       case 'b':
-            sprintf( tmp,"%3.2f%%",mplShMem->Balance ); strcat( trbuf,tmp );
-            break;
-       case 'B':
-            sprintf( tmp,"%3.1f",mplShMem->Balance ); strcat( trbuf,tmp );
-            break;
-       case 's':
-            if ( mplShMem->Playing == 0 ) strcat( trbuf,"s" );
-            break;
-       case 'l':
-            if ( mplShMem->Playing == 1 ) strcat( trbuf,"p" );
-            break;
-       case 'e':
-            if ( mplShMem->Playing == 2 ) strcat( trbuf,"e" );
-            break;
-       case '$':
-            strcat( trbuf,"$" );
-            break;
+       case '3': sprintf( tmp,"%02d",( mplShMem->TimeSec - ( mplShMem->TimeSec % 60 ) ) / 3600 ); strcat( trbuf,tmp ); break;
+       case '4': sprintf( tmp,"%02d",( ( mplShMem->TimeSec - ( mplShMem->TimeSec % 60 ) ) / 60 ) % 60 ); strcat( trbuf,tmp ); break;
+       case '5': sprintf( tmp,"%02d",mplShMem->TimeSec % 60 ); strcat( trbuf,tmp ); break;
+       case 'v': sprintf( tmp,"%3.2f%%",mplShMem->Volume ); strcat( trbuf,tmp ); break;
+       case 'V': sprintf( tmp,"%3.1f",mplShMem->Volume ); strcat( trbuf,tmp ); break;
+       case 'b': sprintf( tmp,"%3.2f%%",mplShMem->Balance ); strcat( trbuf,tmp ); break;
+       case 'B': sprintf( tmp,"%3.1f",mplShMem->Balance ); strcat( trbuf,tmp ); break;
+       case 's': if ( mplShMem->Playing == 0 ) strcat( trbuf,"s" ); break;
+       case 'l': if ( mplShMem->Playing == 1 ) strcat( trbuf,"p" ); break;
+       case 'e': if ( mplShMem->Playing == 2 ) strcat( trbuf,"e" ); break;
+       case '$': strcat( trbuf,"$" ); break;
        default: continue;
       }
      c=strlen( trbuf );
@@ -182,7 +159,8 @@ void mplMainDraw( wsParamDisplay )
             image=fntRender( item->fontid,0,item->width,"%s",item->label );
             goto drawrenderedtext;
        case itDLabel:
-            image=fntRender( item->fontid,( mplTimer / 10 )%item->width,item->width,"%s",Translate( item->label ) );
+//            image=fntRender( item->fontid,( mplTimer / 10 )%item->width,item->width,"%s",Translate( item->label ) );
+            image=fntRender( item->fontid,( mplRedrawTimer / 10 )%item->width,item->width,"%s",Translate( item->label ) );
 drawrenderedtext:
             PutImage( image,item->x,item->y,1,0 );
             if ( image )
@@ -197,6 +175,7 @@ drawrenderedtext:
    mplMainRender=0;
   }
  wsPutImage( &appMPlayer.mainWindow );
+ XFlush( wsDisplay );
 }
 
 void mplMsgHandle( int msg,float param )
