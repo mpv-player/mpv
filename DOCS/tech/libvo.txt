@@ -26,18 +26,18 @@ Each vo driver _has_ to implement these:
 		    0x2  -  supported without conversion (define 0x1 too!)
 		    0x100  -  driver/hardware handles timing (blocking)
 		also SET sw/hw scaling and osd support flags, and flip,
-		and accept_stride if you implement put_image (see vfcaps.h)
+		and accept_stride if you implement VOCTRL_DRAW_IMAGE (see bellow)
 		NOTE: VOCTRL_QUERY_FORMAT may be called _before_ first config()
 		but is always called between preinit() and uninit()
 	 VOCTRL_GET_IMAGE
 		libmpcodecs Direct Rendering interface
 		You need to update mpi (mp_image.h) structure, for example,
 		look at vo_x11, vo_sdl, vo_xv or mga_common.
-	 VOCTRL_PUT_IMAGE
+	 VOCTRL_DRAW_IMAGE
 		replacement for the current draw_slice/draw_frame way of
 		passing video frames. by implementing SET_IMAGE, you'll get
 		image in mp_image struct instead of by calling draw_*.
-		unless you return VO_TRUE for VOCTRL_PUT_IMAGE call, the
+		unless you return VO_TRUE for VOCTRL_DRAW_IMAGE call, the
 		old-style draw_* functils will be called!
 		Note: draw_slice is still mandatory, for per-slice rendering!
 	 VOCTRL_RESET  -  reset the video device
@@ -88,7 +88,7 @@ Each vo driver _has_ to implement these:
     draw_frame(): this is the older interface, this displays only complete
 	 frames, and can do only packed format (YUY2, RGB/BGR).
 	 Win32 codecs use this (DivX, Indeo, etc).
-	 If you implement VOCTRL_PUT_IMAGE, you can left draw_frame.
+	 If you implement VOCTRL_DRAW_IMAGE, you can left draw_frame.
 
     draw_osd(): this displays subtitles and OSD.
 	 It's a bit tricky to use it, since it's a callback-style stuff.
