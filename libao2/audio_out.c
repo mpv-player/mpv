@@ -19,11 +19,17 @@ extern ao_functions_t audio_out_oss;
 //extern ao_functions_t audio_out_alsa;
 //extern ao_functions_t audio_out_esd;
 extern ao_functions_t audio_out_null;
+#ifdef HAVE_SDL
+extern ao_functions_t audio_out_sdl;
+#endif
 
 ao_functions_t* audio_out_drivers[] =
 {
         &audio_out_oss,
         &audio_out_null,
+#ifdef HAVE_SDL
+        &audio_out_sdl,
+#endif
 	NULL
 };
 
