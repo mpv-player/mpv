@@ -38,6 +38,8 @@ int vo_depthonscreen=0;
 int vo_screenwidth=0;
 int vo_screenheight=0;
 
+int vo_config_count=0;
+
 // requested resolution/bpp:  (-x -y -bpp options)
 int vo_dx=0;
 int vo_dy=0;

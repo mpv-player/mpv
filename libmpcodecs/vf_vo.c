@@ -19,6 +19,7 @@ static int config(struct vf_instance_s* vf,
 	unsigned int flags, unsigned int outfmt){
     if(video_out->config(width,height,d_width,d_height,flags,"MPlayer",outfmt,NULL))
 	return 0;
+    ++vo_config_count;
     return 1;
 }
 
@@ -34,12 +35,13 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
 
 static void get_image(struct vf_instance_s* vf,
         mp_image_t *mpi){
-    if(vo_directrendering) 
+    if(vo_directrendering && vo_config_count)
 	video_out->control(VOCTRL_GET_IMAGE,mpi);
 }
 
 static void put_image(struct vf_instance_s* vf,
         mp_image_t *mpi){
+  if(!vo_config_count) return; // vo not configured?
   // first check, maybe the vo/vf plugin implements draw_image using mpi:
   if(video_out->control(VOCTRL_DRAW_IMAGE,mpi)==VO_TRUE) return; // done.
   // nope, fallback to old draw_frame/draw_slice:
@@ -54,6 +56,7 @@ static void put_image(struct vf_instance_s* vf,
 
 static void draw_slice(struct vf_instance_s* vf,
         unsigned char* src, int* stride, int w,int h, int x, int y){
+    if(!vo_config_count) return; // vo not configured?
     video_out->draw_slice(src,stride,w,h,x,y);
 }
 

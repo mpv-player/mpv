@@ -310,7 +310,8 @@ void uninit_player(unsigned int mask){
   if(mask&INITED_VO){
     inited_flags&=~INITED_VO;
     current_module="uninit_vo";
-    video_out->uninit(); video_out=NULL;
+    video_out->uninit();
+    video_out=NULL;
   }
 
   if(mask&INITED_AO){
@@ -1210,6 +1211,7 @@ if(!sh_video)
 
 current_module="preinit_libvo";
 
+vo_config_count=0;
 if((video_out->preinit(vo_subdevice))!=0){
     mp_msg(MSGT_CPLAYER,MSGL_FATAL,"Error opening/initializing the selected video_out (-vo) device!\n");
     goto goto_next_file; // exit_player(MSGTR_Exit_error);
@@ -1538,7 +1540,7 @@ if(1)
     
 //------------------------ add OSD to frame contents ---------
     current_module="draw_osd";
-    video_out->draw_osd();
+    if(vo_config_count) video_out->draw_osd();
 
     current_module="av_sync";
 
@@ -1566,7 +1568,7 @@ if(1)
 #ifdef HAVE_NEW_GUI
       if(use_gui) guiEventHandling();
 #endif
-      video_out->check_events(); // check events AST
+      if(vo_config_count) video_out->check_events(); // check events AST
     } else {
       // It's time to sleep...
       current_module="sleep";
@@ -1688,7 +1690,7 @@ if(!(vo_flags&256)){ // flag 256 means: libvo driver does its timing (dvb card)
 }
 
         current_module="flip_page";
-	video_out->check_events();
+	if(vo_config_count) video_out->check_events();
         if(blit_frame){
 	   unsigned int t2=GetTimer();
 	   double tt;
@@ -1703,7 +1705,7 @@ if(!(vo_flags&256)){ // flag 256 means: libvo driver does its timing (dvb card)
 		too_slow_frame_cnt++;
 		/* printf ("PANIC: too slow frame (%.3f)!\n", j); */
 
-	   video_out->flip_page();
+	   if(vo_config_count) video_out->flip_page();
 	   t2=GetTimer()-t2;
 	   tt = t2*0.000001f;
 	   vout_time_usage+=tt;
@@ -1865,7 +1867,7 @@ read_input:
 #ifdef HAVE_NEW_GUI
       if(use_gui) guiGetEvent( guiCEvent,(char *)guiSetPause );
 #endif
-      if (video_out && sh_video)
+      if (video_out && sh_video && vo_config_count)
 	 video_out->control(VOCTRL_PAUSE, NULL);
 
       if (audio_out && sh_audio)
@@ -1895,7 +1897,7 @@ read_input:
 #endif
              (use_stdin || getch2(20)<=0) && mplayer_get_key()<=0){
 #endif /* HAVE_NEW_INPUT */
-	     if(sh_video && video_out) video_out->check_events();
+	     if(sh_video && video_out && vo_config_count) video_out->check_events();
 #ifdef HAVE_NEW_GUI
              if(use_gui){
 		guiEventHandling();
@@ -1914,7 +1916,7 @@ read_input:
          osd_function=OSD_PLAY;
       if (audio_out && sh_audio)
         audio_out->resume();	// resume audio
-      if (video_out && sh_video)
+      if (video_out && sh_video && vo_config_count)
         video_out->control(VOCTRL_RESUME, NULL);	// resume video
       (void)GetRelativeTime();	// keep TF around FT in next cycle
 #ifdef HAVE_NEW_GUI
@@ -2113,7 +2115,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     /* User wants to have screen shot */
     case 'S':
     case 's':
-		video_out->control(VOCTRL_SCREENSHOT, NULL);
+		if(vo_config_count) video_out->control(VOCTRL_SCREENSHOT, NULL);
 		break;
     // Contrast:
     case '1':
@@ -2253,7 +2255,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 #endif
 
     case 'f':
-	video_out->control(VOCTRL_FULLSCREEN, 0);
+	if(vo_config_count) video_out->control(VOCTRL_FULLSCREEN, 0);
      break;
   }
 } // keyboard event handler
@@ -2476,7 +2478,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
      if ( use_gui ) guiGetEvent( guiIEvent,(char *)MP_CMD_GUI_FULLSCREEN );
       else
 #endif
-	if(video_out) video_out->control(VOCTRL_FULLSCREEN, 0);
+	if(video_out && vo_config_count) video_out->control(VOCTRL_FULLSCREEN, 0);
     } break;
     case MP_CMD_SUB_POS:
     {
@@ -2732,7 +2734,7 @@ if(rel_seek_secs || abs_seek_pos){
 
       if(sh_video){
 	 current_module="seek_video_reset";
-         video_out->control(VOCTRL_RESET,NULL);
+         if(vo_config_count) video_out->control(VOCTRL_RESET,NULL);
       }
       
       if(sh_audio){
@@ -2879,7 +2881,7 @@ if(rel_seek_secs || abs_seek_pos){
     packet.id=0x20; /* Subpic */
     while((packet.size=ds_get_packet_sub(d_dvdsub,&packet.data))>0){
       mp_msg(MSGT_CPLAYER,MSGL_V,"\rDVD sub: len=%d  v_pts=%5.3f  s_pts=%5.3f  \n",packet.size,d_video->pts,d_dvdsub->pts);
-      video_out->draw_frame(&pkg);
+      if(vo_config_count) video_out->draw_frame(&pkg);
     }
   }else if(vo_spudec){
     unsigned char* packet=NULL;

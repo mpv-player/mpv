@@ -106,8 +106,9 @@ codecs_t *vfw_codec = NULL;
              Video accelerated architecture
 **************************************************************************/
 vo_vaa_t vo_vaa;
-int vo_doublebuffering;
-int vo_directrendering;
+int vo_doublebuffering=0;
+int vo_directrendering=0;
+int vo_config_count=0;
 
 //--------------------------
 
