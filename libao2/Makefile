@@ -4,7 +4,7 @@ include config.mak
 LIBNAME = libao2.a
 
 # TODO: moveout ao_sdl.c so it's only used when SDL is detected
-SRCS=audio_out.c ao_null.c ao_pcm.c $(OPTIONAL_SRCS)
+SRCS=audio_out.c ao_mpegpes.c ao_null.c ao_pcm.c $(OPTIONAL_SRCS)
 OBJS=$(SRCS:.c=.o)
 
 CFLAGS  = $(OPTFLAGS) -I. -I.. $(SDL_INC) $(EXTRA_INC)
