@@ -3751,7 +3751,7 @@ fi
 echores "$_vorbis"
 
 
-echocheck "FAAD (AAC) support"
+echocheck "faad2 (AAC) support"
 if test "$_faad" = auto ; then
   _faad=no
   cat > $TMPC << EOF
@@ -3766,7 +3766,34 @@ if test "$_faad" = yes ; then
 else
   _def_faad='#undef HAVE_FAAD'
 fi
-echores "$_faad"
+
+if test "$_faad" = yes; then
+cat > $TMPC <<EOF
+#include <faad.h>
+#ifndef FAAD_MIN_STREAMSIZE
+#error Too old version
+#endif
+int main(void) {
+#ifdef FAAD2_VERSION
+  printf("%s",FAAD2_VERSION);
+#else
+  printf("1.0");
+#endif
+  return 0;
+}
+EOF
+  if cc_check $_ld_faad -lm && "$TMPO" >> "$TMPLOG" ; then
+    _faad_version=`"$TMPO"`
+    _faad_tempversion=`"$TMPO" | sed -e 's/^\([0-9]\+\)\.\([0-9]\+\).*/\1\2/'`
+    _def_faad_version="#define FAADVERSION $_faad_tempversion"
+    echores "yes ($_faad_version)"
+  else
+    _faad=no
+    echores "no (failed to get version)"
+  fi
+else
+  echores "$_faad"
+fi
 
 if test "$_win32" = auto ; then
   if x86 ; then
@@ -5251,6 +5278,7 @@ $_def_tremor
 
 /* enable FAAD (AAC) support */
 $_def_faad
+$_def_faad_version
 
 /* enable streaming */
 $_def_streaming

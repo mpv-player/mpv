@@ -85,8 +85,13 @@ static int init(sh_audio_t *sh)
     sh->a_in_buffer_len = demux_read_data(sh->ds, sh->a_in_buffer, sh->a_in_buffer_size);
 
     /* init the codec */
+#if (FAADVERSION <= 11)
     faac_init = faacDecInit(faac_hdec, sh->a_in_buffer,
        &faac_samplerate, &faac_channels);
+#else
+    faac_init = faacDecInit(faac_hdec, sh->a_in_buffer,
+       sh->a_in_buffer_len, &faac_samplerate, &faac_channels);
+#endif
 
     sh->a_in_buffer_len -= (faac_init > 0)?faac_init:0; // how many bytes init consumed
     // XXX FIXME: shouldn't we memcpy() here in a_in_buffer ?? --A'rpi
@@ -164,7 +169,12 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
   if(!sh->codecdata_len){
    // raw aac stream:
    do {
+#if (FAADVERSION <= 11)
     faac_sample_buffer = faacDecDecode(faac_hdec, &faac_finfo, sh->a_in_buffer+j);
+#else
+    faac_sample_buffer = faacDecDecode(faac_hdec, &faac_finfo, sh->a_in_buffer+j, sh->a_in_buffer_len);
+#endif
+	
     /* update buffer index after faacDecDecode */
     if(faac_finfo.bytesconsumed >= sh->a_in_buffer_len) {
       sh->a_in_buffer_len=0;
@@ -184,7 +194,11 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
     unsigned char* bufptr=NULL;
     int buflen=ds_get_packet(sh->ds, &bufptr);
     if(buflen<=0) break;
+#if (FAADVERSION <= 11)
     faac_sample_buffer = faacDecDecode(faac_hdec, &faac_finfo, bufptr);
+#else
+    faac_sample_buffer = faacDecDecode(faac_hdec, &faac_finfo, bufptr, buflen);
+#endif
 //    printf("FAAC decoded %d of %d  (err: %d)  \n",faac_finfo.bytesconsumed,buflen,faac_finfo.error);
   }
   
