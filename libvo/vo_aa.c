@@ -33,7 +33,7 @@
 
 #include "osdep/keycodes.h"
 #include <aalib.h>
-#include "cfgparser.h"
+#include "m_option.h"
 #include "mp_msg.h"
 
 
@@ -80,7 +80,6 @@ int aaconfigmode=1;
 font_desc_t* vo_font_save = NULL;
 #endif
 static struct SwsContext *sws=NULL;
-extern m_config_t *mconfig;
 
 /* our version of the playmodes :) */
 
@@ -514,7 +513,6 @@ uninit(void) {
 
     if (strstr(c->driver->name,"Curses") || strstr(c->driver->name,"Linux")){
 	freopen("/dev/tty", "w", stderr);
-	m_config_set_option(mconfig,"quiet",NULL); /* enable mplayer outputs */
     }
 #ifdef USE_OSD
     if(vo_font_save) {
@@ -590,7 +588,7 @@ getcolor(char * s){
 }
 
 int
-vo_aa_parseoption(struct config * conf, char *opt, char *param){
+vo_aa_parseoption(m_option_t * conf, char *opt, char *param){
     /* got an option starting with aa */
     char *pseudoargv[4];
     int pseudoargc;
@@ -598,12 +596,12 @@ vo_aa_parseoption(struct config * conf, char *opt, char *param){
     int i;
     /* do WE need it ? */
     if (!strcasecmp(opt, "aaosdcolor")){
-	if (param==NULL) return ERR_MISSING_PARAM;
-	if ((i=getcolor(param))==-1) return ERR_OUT_OF_RANGE;
+	if (param==NULL) return M_OPT_MISSING_PARAM;
+	if ((i=getcolor(param))==-1) return M_OPT_OUT_OF_RANGE;
 	aaopt_osdcolor=i;
 	return 1;
     }else if (!strcasecmp(opt, "aasubcolor")){
-	if ((i=getcolor(param))==-1) return ERR_OUT_OF_RANGE;
+	if ((i=getcolor(param))==-1) return M_OPT_OUT_OF_RANGE;
 	aaopt_subcolor=i;
 	return 1;
     }else if (!strcasecmp(opt, "aahelp")){
@@ -656,7 +654,7 @@ vo_aa_parseoption(struct config * conf, char *opt, char *param){
 	fprintf(stderr,"VO: [aa] ");
 	i=aa_parseoptions(&aa_defparams, &aa_defrenderparams, &pseudoargc, pseudoargv);
 	if (i!=1){
-	    return ERR_MISSING_PARAM;
+	    return M_OPT_MISSING_PARAM;
 	}
 	if (pseudoargv[1]!=NULL){
 	    /* aalib has given param back */
@@ -667,12 +665,12 @@ vo_aa_parseoption(struct config * conf, char *opt, char *param){
 	return 1; /* all opt & params accepted */
 
     }
-    return ERR_NOT_AN_OPTION;
+    return M_OPT_UNKNOW;
 		
 }
 
 void
-vo_aa_revertoption(config_t* opt,char* param) {
+vo_aa_revertoption(m_option_t* opt,char* param) {
   if (!strcasecmp(param, "aaosdcolor"))
     aaopt_osdcolor= AA_SPECIAL;
   else if (!strcasecmp(param, "aasubcolor"))
@@ -733,7 +731,6 @@ static uint32_t preinit(const char *arg)
 
     if ((strstr(c->driver->name,"Curses")) || (strstr(c->driver->name,"Linux"))){
 	freopen("/dev/null", "w", stderr);
-	m_config_set_option(mconfig,"noquiet",NULL); /* disable mplayer outputs */
 	/* disable console blanking */
 	printf("\033[9;0]");
     }
