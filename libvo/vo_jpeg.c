@@ -313,16 +313,6 @@ static int int_zero_hundred(int *val)
     return 0;
 }
 
-/** \brief Validation function for maxfiles > 0
- */
-
-static int int_pos(int *mf)
-{
-    if ( *mf > 0 )
-        return 1;
-    return 0;
-}
-
 static uint32_t preinit(const char *arg)
 {
     opt_t subopts[] = {
