@@ -270,7 +270,8 @@ mailing list for help and latest information.
 </para>
 
 <para>
-You have to copy or symlink <filename>etc/cygwin_inttypes.h</filename>
+Cygwin versions prior to 1.3.23 do not include <filename>inttypes.h</filename>.
+You will have to copy or symlink <filename>etc/cygwin_inttypes.h</filename>
 from the MPlayer source directory to <filename>/usr/include/inttypes.h</filename>
 in order to make MPlayer compile.
 </para>
@@ -279,8 +280,10 @@ in order to make MPlayer compile.
 To get native DirectX video, download
 <ulink url="http://www.videolan.org/vlc/dx7headers.tgz">DirectX 7 header files</ulink>,
 extract them to <filename>/usr/include/</filename> or <filename>/usr/local/include/</filename>
-and recompile. If the image is distorted, try turning off hardware acceleration with
-<option>-vo directx:noaccel</option>
+and recompile. You will then be able to use the directx video out driver. You
+can make the movie window stay on top with <option>-vo directx:ontop</option>. If
+the image is distorted, try turning off hardware acceleration with
+<option>-vo directx:noaccel</option>.
 </para>
 
 <para>
@@ -308,6 +311,12 @@ the default Windows DLL location, <filename class="directory">C:\WINNT\system32<
 or <filename class="directory">C:\Windows\system</filename> depending on your
 Windows version.
 </para>
+
+<para>
+The Cygwin console is rather slow. Redirecting output or using the
+<option>-quiet</option> option has been reported to improve performance.
+</para>
+ 
 </sect1>
 
 </chapter>
