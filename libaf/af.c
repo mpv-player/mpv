@@ -610,3 +610,11 @@ int af_control_any_rev (af_stream_t* s, int cmd, void* arg) {
   return (res == AF_OK);
 }
 
+void af_help (void) {
+  int i = 0;
+  while (filter_list[i]) {
+    af_msg(AF_MSG_INFO, "  %-15s: %s\n", filter_list[i]->name, filter_list[i]->info);
+    i++;
+  }
+}
+

@@ -950,6 +950,11 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
       printf("\n");
       exit(0);
     }
+    if(af_cfg.list && strcmp(af_cfg.list[0],"help")==0){
+      af_help();
+      printf("\n");
+      exit(0);
+    }
 #ifdef HAVE_X11
     if(vo_fstype_list && strcmp(vo_fstype_list[0],"help")==0){
       fstype_help();
