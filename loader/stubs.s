@@ -1,6 +1,6 @@
 	.data
 .LC0:	.string	"Called unk_%s\n"
-	.align 4
+       .balign 4
 .globl unk_exp1
 unk_exp1:
 	pushl %ebp

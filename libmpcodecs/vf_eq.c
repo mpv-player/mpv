@@ -44,7 +44,7 @@ static void process_MMX(unsigned char *dest, int dstride, unsigned char *src, in
 			"movq (%6), %%mm4 \n\t"
 			"pxor %%mm0, %%mm0 \n\t"
 			"movl %4, %%eax\n\t"
-			".align 16 \n\t"
+                       ".balign 16 \n\t"
 			"1: \n\t"
 			"movq (%0), %%mm1 \n\t"
 			"movq (%0), %%mm2 \n\t"
