@@ -155,10 +155,6 @@ Used in combination with \-nosound and \-vo null for benchmarking only video cod
 .B \-cdrom\-device\ <path\ to\ device>
 Override default CDROM drive name /dev/cdrom
 .TP 
-.B \-conf\ <path\ to\ input.conf\ file>
-Get input bindings from an alternative input.conf file (default:
-~/.mplayer/input.conf).
-.TP 
 .B \-dr
 Turns on direct rendering (not supported by all codecs and video outputs)
 (default is off).
@@ -370,9 +366,6 @@ Select number of audio output channels to be used
 
 Currently this option is only honoured for AC3 audio.
 .TP 
-.B \-config <config\ file>
-Specifies where to search for config file
-.TP
 .B \-contrast <\-1000\ \-\ 1000>
 Adjust contrast of video output (default 0). Works in similar manner as brightness.
 .TP 
@@ -484,6 +477,9 @@ This option can be used to configure certain parts of the input system.
                     bound to
         cmdlist     prints all commands that can
                     be bound
+        js-dev      specifies the joystick device
+                    to use 
+                    (default is /dev/input/js0)
 
 .I NOTE:
 Autorepeat is currently only supported by joysticks.
@@ -810,7 +806,9 @@ S               select
 
 .SH "SLAVE MODE PROTOCOL"
 If the \-slave switch is given, playback is controlled by a 
-line\-based protocol with the following tokens:
+line\-based protocol. If the new input is enabled (default)
+each line must contain one command otherwise one of the 
+following tokens:
 .TP 
        stop            pause playback
 .br
