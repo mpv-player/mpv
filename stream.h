@@ -112,22 +112,22 @@ inline static int stream_seek(stream_t *s,off_t pos){
   return stream_seek_long(s,pos);
 }
 
-inline static void stream_skip(stream_t *s,int len){
+inline static int stream_skip(stream_t *s,int len){
   if(len<0 || (len>2*STREAM_BUFFER_SIZE && s->type!=STREAMTYPE_STREAM)){
     // negative or big skip!
-    stream_seek(s,stream_tell(s)+len);
-    return;
+    return stream_seek(s,stream_tell(s)+len);
   }
   while(len>0){
     int x=s->buf_len-s->buf_pos;
     if(x==0){
-      if(!stream_fill_buffer(s)) return; // EOF
+      if(!stream_fill_buffer(s)) return 0; // EOF
       x=s->buf_len-s->buf_pos;
     }
     if(x>len) x=len;
     //memcpy(mem,&s->buf[s->buf_pos],x);
     s->buf_pos+=x; len-=x;
   }
+  return 1;
 }
 
 void stream_reset(stream_t *s);
