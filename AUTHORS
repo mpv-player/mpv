@@ -358,6 +358,7 @@ Sascha Sommer (Faust3) <saschasommer@freenet.de>
     * MinGW port, Cygwin fixes
     * winvidix driver
     * nvidia_vid driver
+    * dhahelperwin for direct hardware access under Windows NT/2000/XP
 
 Sidik Isani <lksi@cfht.hawaii.edu>
     * get_delay() smoothing code (-autosync)
@@ -580,8 +581,14 @@ Translation from scratch:
     * Piotr 'Cobra' Michniewski		<cobra_666(at)poczta(dot)onet(dot)pl>
     * Waclaw 'Torinthiel' Schiller	<torinthiel(at)wp(dot)pl>
 
+Nehal Mistry <nehalmistry@gmx.net>
+    * various audio driver fixes
+    
 Reimar Döffinger <reimar.doeffinger@stud.uni-karlsruhe.de>
     * GL code fixes
+
+Rune <runner@mail.tele.dk>
+    * adapter selection support for vo directx
 
 adland <adland123@yahoo.com>
     * support for various Windows DLL codecs (LCW2, ASLC)
