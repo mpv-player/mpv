@@ -7,7 +7,7 @@ Aureal Vortex 2:
 			OSS	: OK
 			ALSA	: no driver
 			Max kHz : 48
-			Driver	: aureal.sourceforge.net (not OK)
+			Driver	: aureal.sourceforge.net (not OK with slow CPU)
 
 GUS PnP:
 			OSS/Free: no driver

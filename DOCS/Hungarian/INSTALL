@@ -6,27 +6,32 @@ Pontscho/Fresh! csinált néhány scriptet és makefile-t, így a fordítás
 nagyon könnyû.
 
 1. A Lejátszó: (mplayer)
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
   ./configure
 [* nézd át a config.h és config.mak file-okat! *]
   make
   make install
 [* ha DGA-t akarsz használni, olvasd el a VIDEOCARDS file-t! *]
 
-2. Driverek: (mga_vid.o)
-~~~~~~~~~~~~~~~~~~~~~~~
+2. A Kodekek: (w32codecs.zip)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  tomoritsd ki a w32codecs.zip-et /usr/lib/win32-be
+  A fileneveket KISBETUSRE ird at!
+
+3. Driverek: (mga_vid.o)
+~~~~~~~~~~~~~~~~~~~~~~~~
   cd drivers
   make
   mknod /dev/mga_vid c 178 0
   chmod go+rw /dev/mga_vid
 
-3. Matrox G400 DH TV-out:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+4. Matrox G400 DH TV-out:
+~~~~~~~~~~~~~~~~~~~~~~~~~
   cd TVout
   ./compile.sh
 
-4. Fontok:
-~~~~~~~~~
+5. Fontok:
+~~~~~~~~~~
   Töltsd le a neked tetszõ .zip file-t honlapunkról!
   cd ~/.mplayer
   mkdir font
