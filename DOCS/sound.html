@@ -123,5 +123,21 @@ problems (losing sync, disappearing audio, etc).</LI>
 <LI>Please tell us how MPlayer and your soundcard(s) worked together!
 </UL></P>
 
+
+<P><B><A NAME=2.3.2.2>2.3.2.2. Audio plugins</B></P>
+
+<P><B><A NAME=2.3.2.2.1>2.3.2.2.1. Up/Downsampling</B></P>
+
+<P><B>MPlayer</B> fully supports up/downsampling of audio stream.
+It is not autodetected, so you have to specify it explicitly even when
+for example you have a max 44.1Khz capable soundcard, and the audio
+is 48Khz. Also, this functionality is currently unimplemented in
+<B>MEncoder</B>.</P>
+
+<P>Usage :<BR>
+&nbsp;&nbsp;<CODE>mplayer media.avi -aop list=resample:fout=&lt;required
+  frequency in Hz, like 44100&gt;</CODE></P>
+
+
 </BODY>
 </HTML>
