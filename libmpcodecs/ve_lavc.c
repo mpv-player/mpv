@@ -143,7 +143,8 @@ static int config(struct vf_instance_s* vf,
 	if (VbrControl_init_2pass_vbr_analysis(passtmpfile, 5) == -1){
 	    mp_msg(MSGT_MENCODER,MSGL_ERR,"2pass failed: filename=%s\n", passtmpfile);
 	    pass=0;
-	}
+	} else
+	    lavc_venc_context.flags &= ~CODEC_FLAG_HQ;
 	break;
     case 2:
         if (VbrControl_init_2pass_vbr_encoding(passtmpfile,
