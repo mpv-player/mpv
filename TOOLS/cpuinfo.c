@@ -153,6 +153,7 @@ main(int argc, char **argv)
 		    	{ 22, "mmxext","MMX Technology (AMD Extensions)" },
 			{ 30, "3dnowext","3Dnow! Extensions" },
 			{ 31, "3dnow", "3Dnow!" },
+			{ 32, "k6_mtrr", "Memory Type Range Registers" },
 			{ -1 }
 		};
 		int i;
