@@ -629,6 +629,9 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		    off_t pos=stream_tell(demuxer->stream);
 		    off_t len=stream_read_dword(demuxer->stream);
 		    unsigned int fourcc=stream_read_dword_le(demuxer->stream);
+		    /* some files created with Broadcast 2000 (e.g. ilacetest.mov)
+		       contain raw I420 video but have a yv12 fourcc */
+		    if(fourcc==mmioFOURCC('y','v','1','2')) fourcc=mmioFOURCC('I','4','2','0');
 		    if(len<8) break; // error
 		    mp_msg(MSGT_DEMUX,MSGL_V,"MOV: %*s desc #%d: %.4s  (%d bytes)\n",level,"",i,&fourcc,len-16);
 		    if(fourcc!=trak->fourcc && i)
