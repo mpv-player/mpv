@@ -169,6 +169,7 @@ Alban Bedel <albeu@free.fr>
     * DXR2 driver
     * vo_aa improvements
     * CDDA support
+    * OSD menu
 
 Artur Zaprzala <zybi@fanthom.irc.pl>
     * Complete font generator prog + OSD font (TOOLS/subfont-c)
