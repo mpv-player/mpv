@@ -38,6 +38,10 @@ Fully functional Win32 VfW/DShow codecs:
   wmvds32.ax: works, YUV supported
 - I263:  (I263)
   i263_32.drv: works, YUV supported
+- DV - Sony Digital Video (dvsd)
+  ?
+- ASUS ASV2: (ASV2)
+  asusasv2.dll: works, image upside-down on RGB (YUV ok!)
 
 Problems:
 
@@ -45,8 +49,6 @@ Problems:
   ir41_32.dll: works, no YUV, image upside-down
 - Indeo Video 3.2:  (IV32)
   ir32_32.dll: works, no YUV, image upside-down
-- ASUS ASV2: (ASV2)
-  asusasv2.dll: works, image upside-down on RGB (YUV ok!)
 - ATI VCR1:  (VCR1)
   ativcr1.dll: can't load (16-bit DLL)
 - TrueMotion 2.0:  (TM20)
@@ -55,8 +57,6 @@ Problems:
   avizlib.dll: YUY2 only (no RGB), Called unk_RegEnumValueA -> endless loop
 - MSZH
   avimszh.dll: RGB only (no YUV), Called unk_RegEnumValueA -> endless loop
-- DV - Sony Digital Video (dvsd)
-  qdv.dll: source format not accepted
 - MWV1: calls many unk_ functions and then segfaults.
 
 Not tested:
