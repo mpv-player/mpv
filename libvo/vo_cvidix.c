@@ -142,7 +142,7 @@ static void uninit(void){
 static uint32_t preinit(const char *arg){
   if(arg)vidix_name = strdup(arg);
   else {
-    mp_msg(MSGT_VO, MSGL_INFO, "vo_cvidix: No vidix driver name provided, probing available ones!\n");
+    mp_msg(MSGT_VO, MSGL_INFO, "vo_cvidix: No vidix driver name provided, probing available ones (-v option for details)!\n");
 	vidix_name = NULL;
   }
   if(vidix_preinit(vidix_name, &video_out_cvidix))return 1;

@@ -444,7 +444,7 @@ static uint32_t preinit(const char *arg)
         vidix_name = strdup(arg);
     else
     {
-	mp_msg(MSGT_VO, MSGL_INFO, "No vidix driver name provided, probing available ones!\n");
+	mp_msg(MSGT_VO, MSGL_INFO, "No vidix driver name provided, probing available ones (-v option for details)!\n");
 	vidix_name = NULL;
     }
 
