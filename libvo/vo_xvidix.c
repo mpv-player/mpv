@@ -51,6 +51,7 @@ static int X_already_started = 0;
 /* Colorkey handling */
 static XGCValues mGCV;
 static uint32_t	fgColor;
+static uint32_t bgColor;
 static vidix_grkey_t gr_key;
 
 /* VIDIX related */
@@ -153,7 +154,7 @@ static void set_window(int force_update,const vo_tune_info_t *info)
     /* mDrawColorKey: */
 
     /* fill drawable with specified color */
-    XSetBackground( mDisplay,vo_gc,0 );
+    XSetBackground( mDisplay,vo_gc,bgColor );
     XClearWindow( mDisplay,vo_window );
     XSetForeground(mDisplay, vo_gc, fgColor);
     XFillRectangle(mDisplay, vo_window, vo_gc, drwX, drwY, drwWidth,
@@ -179,7 +180,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 
 //    if (title)
 //	free(title);
-    title = strdup("MPlayer VIDIX X11 Overlay");
+    title = "MPlayer VIDIX X11 Overlay";
 
     image_height = height;
     image_width = width;
@@ -234,6 +235,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     X_already_started++;
     
     /* from xmga.c */
+    bgColor = 0x0L;
     switch(vo_depthonscreen)
     {
 	case 32:
@@ -443,6 +445,8 @@ static uint32_t control(uint32_t request, void *data, ...)
   switch (request) {
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
+  case VOCTRL_GUISUPPORT:
+    return VO_TRUE;
   case VOCTRL_FULLSCREEN:
     vo_x11_fullscreen();
     return VO_TRUE;
