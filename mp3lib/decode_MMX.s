@@ -48,10 +48,10 @@ costab_mmx:
 .text
 
 .globl synth_1to1_MMX_s
-/*
-   void synth_1to1_MMX_s(real *bandPtr, int channel, short *samples,
-                         short *buffs, int *bo);
-*/
+//
+// void synth_1to1_MMX_s(real *bandPtr, int channel, short *samples,
+//                       short *buffs, int *bo);
+//
 synth_1to1_MMX_s:
         pushl %ebp
         pushl %edi
