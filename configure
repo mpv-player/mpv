@@ -230,10 +230,10 @@ for ac_option do
         _sdlconfig=`echo $ac_option | cut -d '=' -f 2`
         ;;
   --with-extralibdir=*)
-        _extralibdir=-L`echo $ac_option | cut -d '=' -f 2`
+        _extralibdir=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
         ;;
   --with-extraincdir=*)
-        _extraincdir=-I`echo $ac_option | cut -d '=' -f 2`
+        _extraincdir=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
         ;;
  esac
 done
@@ -349,10 +349,14 @@ fi
 
 # Lots of stuff are installed under /usr/local
 
+if [ "$_extralibdir" = "" ]; then
 _extralibdir=-L/usr/local/lib
+fi
+if [ "$_extraincdir" = "" ]; then
 _extraincdir=-I/usr/local/include
+fi
 
-if [ x"$_sdlconfig" = x"" ]; then
+if [ "$_sdlconfig" = "" ]; then
    if [ "$system_name" = "FreeBSD" ]; then
       _sdlconfig='sdl11-config'
    else
@@ -1605,7 +1609,7 @@ CFLAGS="$CFLAGS -D_THREAD_SAFE"
 fi
 
 # 64 bit file offsets?
-if [ "$_largefiles" = "yes" ]; then
+if [ "$_largefiles" = "yes" -o "$system_name" = "FreeBSD" ]; then
 CFLAGS="$CFLAGS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
 fi
 
