@@ -741,7 +741,7 @@ Spielt denjenigen Audiostream, der dem angegebenen Sprachcode entspricht.
 Verschiedene Containerformate verwenden unterschiedliche Ländercodes.
 DVDs benutzen den zweibuchstabigen ISO 639-1 Sprachcode, Matroska und NUT
 benutzen den dreibuchstabigen ISO 639-2 Sprachcode, während OGM einen
-formfreien Bezeichner verwendet.
+beliebigen Bezeichner verwendet.
 MPlayer gibt eine Liste aller vorhandenen Sprachen aus, wenn er im
 Verbose-Modus (\-v) gestartet wird.
 .sp 1
@@ -936,7 +936,7 @@ oder ~/\:.mplayer/\:channels.conf als letzte Möglichkeit).
 Gibt das DVD-Gerät an (Standard: /dev/\:dvd).
 Du kannst auch ein Verzeichnis angeben, das die zuvor direkt von DVD kopierten
 Dateien enthält (so wie mit vobcopy).
-Merke, daß die Benutzung von \-dumpstream normalerweise ein besserer Weg ist,
+Merke, dass die Benutzung von \-dumpstream normalerweise ein besserer Weg ist,
 DVD-Titel zu kopieren (siehe Beispiele).
 .
 .TP
@@ -1370,8 +1370,9 @@ Benutzt dazu FriBiDi.
 .
 .TP
 .B \-noflip-hebrew-commas
-Ändere die Annahmen von FriBiDi über die Positionen von Kommas in Untertiteln.
-Benutze dies, falls Kommas in Untertiteln am Anfang eines Satzes anstelle am
+Ändere die Annahmen von FriBiDi über die Positionierung von Kommata in
+Untertiteln.
+Benutze dies, falls Kommata in Untertiteln am Anfang eines Satzes anstatt am
 Ende angezeigt werden.
 .TP
 .B \-font <Pfad\ zur\ font.desc-Datei> (nur bei OSD)
@@ -1838,9 +1839,6 @@ viertes Gerät.
 .RE
 .PD 1
 .sp 1
-FIXME: Suboptionen für sdl, arts, esd, jack, nas, macosx, sgi, sun,
-dxr2, mpegpes, null, pcm, plugin.
-.sp 1
 Verfügbare Audioausgabetreiber sind folgende:
 .
 .TP
@@ -1856,6 +1854,8 @@ Setzt den noblock-Modus.
 .IPs device=<Gerät>
 Setzt den Gerätenamen.
 Ersetze jedes ',' mit '.' und jeden ':' mit '=' im ALSA-Gerätenamen.
+Setze diese Option nicht, wenn du hwac3-Ausgabe über S/PDIF wünschst, es sei
+denn, du weißt wirklich, wie sie gesetzt werden muß.
 .RE
 .PD 1
 .
@@ -1887,6 +1887,12 @@ Setzt das Audioausgabegerät (Standard: /dev/\:dsp).
 .B sdl\ \ \ \ 
 Audioausgabetreiber der größtenteils plattformunabhängigen SDL (Simple
 Directmedia Layer) Bibliothek.
+.PD 0
+.RSs
+.IPs <Treiber>
+Wähle den SDL-Audioausgabetreiber explizit (Standard: lasse SDL wählen).
+.RE
+.PD 1
 .
 .TP
 .B arts\ \ \ 
@@ -1895,6 +1901,12 @@ Audioausgabe über den Arts-Daemon.
 .TP
 .B esd\ \ \ \ 
 Audioausgabe über den ESD-Daemon.
+.PD 0
+.RSs
+.IPs <Server>
+Wähle den zu benutzenden ESD-Server explizit (Standard: localhost).
+.RE
+.PD 1
 .
 .TP
 .B jack\ \ \ \ 
@@ -1915,6 +1927,12 @@ Nativer SGI-Audioausgabetreiber.
 .TP
 .B sun (nur bei Sun)
 Nativer Sun-Audioausgabetreiber.
+.PD 0
+.RSs
+.IPs <Gerät>
+Wähle das zu benutzende Audiogerät explizit (Standard: /dev/\:audio).
+.RE
+.PD 1
 .
 .TP
 .B win32 (nur bei Windows)
@@ -2014,7 +2032,7 @@ Mit dieser Option wird der dxr2-Videoausgabetreiber gesteuert.
 .RSs
 .IPs ar-mode=<Wert>
 Modus für die Anpassung des Höhen-/Breitenverhältnisses (0 = normal,
-1 = pan und scan, 2 = letterbox (Standard)
+1 = Panscan, 2 = letterbox (Standard))
 .IPs iec958-encoded
 Setzt den iec958-Ausgabemodus auf 'encoded'.
 .IPs iec958-decoded
@@ -2146,7 +2164,7 @@ Benutze die _NETWM_STATE_BELOW-Anweisung, falls verfügbar.
 Benutze die _NETWM_STATE_FULLSCREEN-Anweisung, falls verfügbar.
 .IPs layer
 Benutze die _WIN_LAYER-Anweisung mit dem Standard-Layer.
-.IPs layer=<0..15>
+.IPs layer=<0...15>
 Benutze die _WIN_LAYER-Anweisung mit der angegebenen Layernummer.
 .IPs netwm
 Erzwinge den NETWM-Stil.
@@ -2268,7 +2286,8 @@ Aktiviert Pan & Scan.
 Dabei werden z.B.\& bei einem 16:9-Film und einem 4:3-Monitor die Seiten
 abgeschnitten, damit der komplette Bildbereich ausgefüllt wird.
 Der Bereich kontrolliert, wieviel vom Bild abgeschnitten wird.
-Dies funktioniert nur mit den xv-, xmga-, mga- und xvidix-Videoausgabetreibern.
+Dies funktioniert nur mit den xv-, xmga-, mga-, gl- und
+xvidix-Videoausgabetreibern.
 .
 .TP
 .B \-refreshrate <Hz>
@@ -2431,10 +2450,6 @@ Benutzt den directx-Treiber mit abgeschalteten Beschleunigungs-Features.
 .RE
 .PD 1
 .sp 1
-FIXME: Dokumentiere die Suboptionen für x11, xover, dga, sdl, vidix, xvidix,
-fbdev, fbdev2, vesa, aa, bl, ggi, mga, xmga, syncfb, 3dfx, tdfx_vid, tdfxfb,
-dxr2, dxr3, mpegpes, zr, zr2.
-.sp 1
 Folgende Videoausgabetreiber sind verfügbar:
 .
 .TP
@@ -2459,9 +2474,16 @@ immer funktioniert, wenn X11 läuft.
 .B xover (nur bei X11)
 Ergänzt alle Overlay-basierten Treiber um X11-Unterstützung.
 Momentan nur von tdfx_vid unterstützt.
+.PD 0
+.RSs
+.IPs <vo_Treiber>
+Wähle den Treiber, der als Quelle für das Overlay überhalb von X11 benutzt
+werden soll.
+.RE
+.PD 1
 .
 .TP
-.B xvmc (nur bei X11, nur mit \-vc ffmpeg12mc)
+.B xvmc (nur bei X11 mit \-vc ffmpeg12mc)
 Ein Videoausgabetreiber, der die XvMC- (X Video Motion Compensation)
 Unterstützung von XFree86 4.x benutzt, um das Decodieren von MPEG1/\:2 und VCR2
 zu beschleunigen.
@@ -2496,6 +2518,12 @@ Höchst-plattformunabhängiger Videoausgabetreiber der SDL-Bibliothek (Simple
 Directmedia Layer).
 Da SDL einen eigenen X11-Layer benutzt, haben die X11-Optionen von MPlayer
 keine Wirkung auf SDL.
+.PD 0
+.RSs
+.IPs <Treiber>
+Wähle den zu benutzenden SDL-Treiber explizit.
+.RE
+.PD 1
 .
 .TP
 .B vidix\ \ 
@@ -2567,11 +2595,25 @@ Wähle ein Gerät für die Darstellung im Vollbildmodus.
 .TP
 .B fbdev (nur bei Linux)
 Benutze für die Videoausgabe den Kernel-Framebuffer.
+.PD 0
+.RSs
+.IPs <Gerät>
+Wähle explizit das zu benutzende fbdev-Gerät (z.B.\& /dev/\:fb0) oder das
+VIDIX-Subdevice, falls der Gerätename mit 'vidix' beginnt (z.B.\&
+'vidixsis_vid' beim SIS-Treiber).
+.RE
+.PD 1
 .
 .TP
 .B fbdev2 (nur bei Linux)
 Benutze für die Videoausgabe den Kernel-Framebuffer, alternative
 Implementation.
+.PD 0
+.RSs
+.IPs <Gerät>
+Wähle das zu benutzende fbdev-Gerät explizit. (Standard: /dev/\:fb0).
+.RE
+.PD 1
 .
 .TP
 .B vesa\ \ \ 
@@ -2583,10 +2625,14 @@ Karte funktionieren sollte.
 Schaltet den DGA-Modus an.
 .IPs nodga
 Schaltet den DGA-Modus ab.
+.IPs neotv_pal
+Aktiviere die TV-Ausgabe von NeoMagic und setze die Norm auf PAL.
+.IPs neotv_ntsc
+Aktiviere die TV-Ausgabe von NeoMagic und setze die Norm auf NTSC.
 .IPs vidix
-FIXME: dokumentiere dies
-.IPs lvo\ \ 
-FIXME: dokumentiere dies
+Benutze des VIDIX-Treiber.
+.IPs lvo:\ \ \ 
+Aktiviere das Linux-Video-Overlay über dem VESA-Modus.
 .RE
 .PD 1
 .
@@ -2618,18 +2664,34 @@ Benutze svga mit VIDIX.
 .TP
 .B gl\ \ \ \ \ 
 OpenGL-Videoausgabetreiber.
-Sehr einfache Version ohne OSD-Unterstützung, die Videogröße muß kleiner
+Einfache Version, die Videogröße muß kleiner
 sein als die maximale Texturgröße deiner OpenGL-Implementierung.
 Es ist beabsichtigt, auch mit den einfachsten OpenGL-Implementierungen zu
 funktionieren.
 .PD 0
 .RSs
-.IPs manyfmts
+.IPs (no))manyfmts
 Schaltet die Unterstütztung für mehr (RGB und BGR) Farbformate.
-Benötigt eine OpenGL-Version >= 1.2, funktioniert noch nicht korrekt.
+Benötigt eine OpenGL-Version >= 1.2.
 .IPs slice-height=<0\-...>
 Anzahl der Linien, die an einem Stück zur Textur kopiert werden (Standard: 4).
 0 für ganzes Bild.
+.IPs (no)osd
+(De)aktiviere die Unterstützung für das Rendern des OSD via OpenGL (Standard:
+aktiviert).
+Hauptsächlich für Testzwecke, Du solltest \-osdlevel 0 benutzen, um OSD zu
+deaktivieren.
+.IPs (no)scaled-osd
+Ändert das Verhalten des OSD bei Änderung der Fenstergröße (Standard:
+deaktiviert).
+Falls aktiviert ist das Verhalten den anderen Videoausgabetreibern ähnlicher,
+was bei Schriftarten mit fester Größe besser ist.
+Deaktiviert sieht es mit FreeType-Schriftarten besser aus und benutzt im
+Vollbildmodus die Ränder.
+.IPs (no)aspect
+(De)aktiviert die Skalierung des Aspekts und die Unterstützung für Panscan
+(Standard: aktiviert).
+Deaktivierung könnte die Geschwindigkeit erhöhen.
 .RE
 .PD 1
 .
