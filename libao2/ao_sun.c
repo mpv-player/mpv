@@ -208,6 +208,24 @@ error:
     return rtsc_ok;
 }
 
+static void setup_device_paths()
+{
+    if (audio_dev == NULL) {
+	if ((audio_dev = getenv("AUDIODEV")) == NULL)
+	    audio_dev = "/dev/audio";
+    }
+
+    if (sun_mixer_device == NULL) {
+	if ((sun_mixer_device = mixer_device) == NULL || !sun_mixer_device[0]) {
+	    sun_mixer_device = malloc(strlen(audio_dev) + 4);
+	    strcpy(sun_mixer_device, audio_dev);
+	    strcat(sun_mixer_device, "ctl");
+	}
+    }
+
+    if (ao_subdevice) audio_dev = ao_subdevice;
+}
+
 // to set/get/query special features/parameters
 static int control(int cmd,int arg){
     switch(cmd){
@@ -220,14 +238,27 @@ static int control(int cmd,int arg){
     {
         int fd,v,cmd,devs;
 
+	if ( !sun_mixer_device )    /* control function is used before init? */
+	    setup_device_paths();
+
 	fd=open( sun_mixer_device,O_RDONLY );
 	if ( fd != -1 )
 	{
 	    ao_control_vol_t *vol = (ao_control_vol_t *)arg;
+	    float volume;
 	    struct audio_info info;
 	    ioctl( fd,AUDIO_GETINFO,&info);
-	    vol->left=info.play.gain * 100. / AUDIO_MAX_GAIN;
-	    vol->right=info.play.gain * 100. / AUDIO_MAX_GAIN;
+	    volume = info.play.gain * 100. / AUDIO_MAX_GAIN;
+	    if ( info.play.balance == AUDIO_MID_BALANCE ) {
+		vol->right = vol->left = volume;
+	    } else if ( info.play.balance < AUDIO_MID_BALANCE ) {
+		vol->left  = volume;
+		vol->right = volume * info.play.balance / AUDIO_MID_BALANCE;
+	    } else {
+		vol->left  = volume * (AUDIO_RIGHT_BALANCE-info.play.balance)
+							/ AUDIO_MID_BALANCE;
+		vol->right = volume;
+	    }
 	    close( fd );
 	    return CONTROL_OK;
 	}	
@@ -238,12 +269,21 @@ static int control(int cmd,int arg){
 	ao_control_vol_t *vol = (ao_control_vol_t *)arg;
         int fd,v,cmd,devs;
 
+	if ( !sun_mixer_device )    /* control function is used before init? */
+	    setup_device_paths();
+
 	fd=open( sun_mixer_device,O_RDONLY );
 	if ( fd != -1 )
 	{
 	    struct audio_info info;
+	    float volume;
 	    AUDIO_INITINFO(&info);
-	    info.play.gain = (vol->right+vol->left) * AUDIO_MAX_GAIN / 100 / 2;
+	    volume = vol->right > vol->left ? vol->right : vol->left;
+	    info.play.gain = volume * AUDIO_MAX_GAIN / 100;
+	    if ( vol->right == vol->left )
+		info.play.balance = AUDIO_MID_BALANCE;
+	    else
+		info.play.balance = (vol->right - vol->left + volume) * AUDIO_RIGHT_BALANCE / (2*volume);
 	    ioctl( fd,AUDIO_SETINFO,&info );
 	    close( fd );
 	    return CONTROL_OK;
@@ -261,20 +301,7 @@ static int init(int rate,int channels,int format,int flags){
     audio_info_t info;
     int ok;
 
-    if (audio_dev == NULL) {
-	if ((audio_dev = getenv("AUDIODEV")) == NULL)
-	    audio_dev = "/dev/audio";
-    }
-
-    if (sun_mixer_device == NULL) {
-	if ((sun_mixer_device = mixer_device) == NULL) {
-	    sun_mixer_device = malloc(strlen(audio_dev) + 4);
-	    strcpy(sun_mixer_device, audio_dev);
-	    strcat(sun_mixer_device, "ctl");
-	}
-    }
-
-    if (ao_subdevice) audio_dev = ao_subdevice;
+    setup_device_paths();
 
     if (enable_sample_timing == RTSC_UNKNOWN
 	&& !getenv("AO_SUN_DISABLE_SAMPLE_TIMING")) {
