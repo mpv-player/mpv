@@ -450,19 +450,18 @@ static int sdl_open (void *plugin, void *name)
 	
 	
 	/* default to no fullscreen mode, we'll set this as soon we have the avail. modes */
-	priv->fullmode = -2;
-	
-	priv->surface = NULL;
-	priv->rgbsurface = NULL;
-	priv->overlay = NULL;
-	priv->fullmodes = NULL;
+    priv->fullmode = -2;
+
+    priv->fullmodes = NULL;
 	priv->bpp = 0;
 
 	/* initialize the SDL Video system */
-	if (SDL_Init (SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE)) {
-		printf("SDL: Initializing of SDL failed: %s.\n", SDL_GetError());
-		return -1;
-	}
+    if (!SDL_WasInit(SDL_INIT_VIDEO)) {
+        if (SDL_Init (SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE)) {
+            printf("SDL: Initializing of SDL failed: %s.\n", SDL_GetError());
+            return -1;
+        }
+    }
 	
 	SDL_VideoDriverName(priv->driver, 8);
 	printf("SDL: Using driver: %s\n", priv->driver);
@@ -521,9 +520,12 @@ static int sdl_open (void *plugin, void *name)
 	priv->bpp = vidInfo->vfmt->BitsPerPixel;
 	if (priv->mode == YUV && priv->bpp < 16) {
 
-		if(verbose) printf("SDL: Your SDL display target wants to be at a color depth of (%d), but we need it to be at\
-least 16 bits, so we need to emulate 16-bit color. This is going to slow things down; you might want to\
-increase your display's color depth, if possible.\n", priv->bpp);
+		if(verbose) printf("SDL: Your SDL display target wants to be at a color "
+                           "depth of (%d), but we need it to be at least 16 "
+                           "bits, so we need to emulate 16-bit color. This is "
+                           "going to slow things down; you might want to "
+                           "increase your display's color depth, if possible.\n",
+                           priv->bpp);
 
 		priv->bpp = 16;  
 	}
@@ -571,10 +573,8 @@ static int sdl_close (void)
 	/* DONT attempt to free the fullscreen modes array. SDL_Quit* does this for us */
 	
 	/* Cleanup SDL */
-	//SDL_Quit();
-	SDL_QuitSubSystem(SDL_INIT_VIDEO);
-	/* might have to be changed to quitsubsystem only, if plugins become
-	 * changeable on the fly */
+    if(SDL_WasInit(SDL_INIT_VIDEO))
+        SDL_QuitSubSystem(SDL_INIT_VIDEO);
 
 	if(verbose > 2) printf("SDL: Closed Plugin\n");
 
@@ -812,10 +812,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
     priv->dstwidth  = d_width ? d_width : width;
     priv->dstheight = d_height ? d_height : height;
 
-    priv->rgbsurface = NULL;
-    priv->overlay = NULL;
-    priv->surface = NULL;
-    
     priv->format = format;
     
 #ifdef HAVE_X11
@@ -1616,7 +1612,13 @@ uninit(void)
 
 static uint32_t preinit(const char *arg)
 {
-  return 0;
+    struct sdl_priv_s *priv = &sdl_priv;
+
+    priv->rgbsurface = NULL;
+    priv->overlay = NULL;
+    priv->surface = NULL;
+
+    return 0;
 }
 
 static uint32_t get_image(mp_image_t *mpi)
