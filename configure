@@ -2001,6 +2001,27 @@ int main(void) { IDirectFB *foo; return 0; }
 EOF
   linux && test -c /dev/fb0 && cc_check $_inc_directfb -ldirectfb && _directfb=yes
 fi
+
+if test "$_directfb" = yes; then
+cat > $TMPC <<EOF
+#include <directfb.h>
+int main(void) { 
+  printf ("%i",(directfb_major_version*100+directfb_minor_version)*100+directfb_micro_version);
+  return 0; 
+}
+EOF
+  if cc_check $_inc_directfb -ldirectfb && "$TMPO" >> "$TMPLOG" ; then
+    _directfb_version=`"$TMPO"`
+    _def_directfb_version="#define DIRECTFBVERSION $_directfb_version"
+    echores "yes ($_directfb_version)"
+  else
+    _directfb=no
+    echores "no (failed to get version)"
+  fi
+else
+  echores "$_directfb"
+fi
+
 if test "$_directfb" = yes ; then
   _def_directfb='#define HAVE_DIRECTFB 1'
   _vosrc="$_vosrc vo_directfb.c"
@@ -2010,53 +2031,6 @@ else
   _def_directfb='#undef HAVE_DIRECTFB'
   _novomodules="directfb $_novomodules"
   _inc_directfb=""
-fi
-echores "$_directfb"
-
-if test "$_directfb" = yes; then
-echocheck "DirectFB >= 0.9.9"
-  _directfb099=no
-  cat > $TMPC <<EOF
-#include <directfb.h>
-int main(void) { IDirectFBEventBuffer *foo; return 0; }
-EOF
-  cc_check $_inc_directfb -ldirectfb && _directfb099=yes
-if test "$_directfb099" = yes ; then
-  _def_directfb099='#define HAVE_DIRECTFB099 1'
-else
-  _def_directfb099='#undef HAVE_DIRECTFB099'
-fi
-echores "$_directfb099"
-fi
-if test "$_directfb" = yes; then
-echocheck "DirectFB >= 0.9.10"
-  _directfb0910=no
-  cat > $TMPC <<EOF
-#include <directfb.h>
-int main(void) { DFBDisplayLayerCapabilities  caps=DLCAPS_DST_COLORKEY; return 0; }
-EOF
-  cc_check $_inc_directfb -ldirectfb && _directfb0910=yes
-if test "$_directfb0910" = yes ; then
-  _def_directfb0910='#define HAVE_DIRECTFB0910 1'
-else
-  _def_directfb0910='#undef HAVE_DIRECTFB0910'
-fi
-echores "$_directfb0910"
-fi
-if test "$_directfb" = yes; then
-echocheck "DirectFB >= 0.9.11"
-  _directfb0911=no
-  cat > $TMPC <<EOF
-#include <directfb.h>
-int main(void) { DFBInputEvent *foo; return foo->key_symbol; }
-EOF
-  cc_check $_inc_directfb -ldirectfb && _directfb0911=yes
-if test "$_directfb0911" = yes ; then
-  _def_directfb0911='#define HAVE_DIRECTFB0911 1'
-else
-  _def_directfb0911='#undef HAVE_DIRECTFB0911'
-fi
-echores "$_directfb0911"
 fi
 
 
@@ -4598,9 +4572,7 @@ $_def_ggi
 $_def_3dfx
 $_def_tdfxfb
 $_def_directfb
-$_def_directfb099
-$_def_directfb0910
-$_def_directfb0911
+$_def_directfb_version
 $_def_zr
 $_def_mga
 $_def_xmga
