@@ -902,15 +902,15 @@ static void vt_set_textarea(int u, int l)
 }
 
 static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
-		uint32_t d_height, uint32_t fullscreen, char *title,
+		uint32_t d_height, uint32_t flags, char *title,
 		uint32_t format,const vo_tune_info_t *info)
 {
 	struct fb_cmap *cmap;
-	int vm = fullscreen & 0x02;
-	int zoom = fullscreen & 0x04;
+	int vm = flags & 0x02;
+	int zoom = flags & 0x04;
 
-	fs = fullscreen & 0x01;
-	flip = fullscreen & 0x08;
+	fs = flags & 0x01;
+	flip = flags & 0x08;
 
 	if(pre_init_err == -2)
 	{
@@ -1089,21 +1089,15 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	if(vidix_name)
 	{
 	    unsigned image_width,image_height,x_offset,y_offset;
+	    if(zoom || fs){
+		aspect_save_orig(width,height);
+		aspect_save_prescale(d_width,d_height);
+		aspect_save_screenres(fb_xres,fb_yres);
+		aspect(&image_width,&image_height,fs ? A_ZOOM : A_NOZOOM);
+	    } else {
 		image_width=width;
 		image_height=height;
-		if(zoom > 1)
-		{
-		        aspect_save_orig(width,height);
-			aspect_save_prescale(d_width,d_height);
-			aspect_save_screenres(fb_xres,fb_yres);
-			aspect(&image_width,&image_height,A_ZOOM);
-		}
-		else
-		if(fs)
-		{
-			image_width = fb_xres;
-			image_height = fb_yres;
-		}
+	    }
 		if(fb_xres > image_width)
 		    x_offset = (fb_xres - image_width) / 2;
 		else x_offset = 0;
@@ -1172,6 +1166,10 @@ static uint32_t query_format(uint32_t format)
 
 	if (!fb_preinit())
 		return 0;
+#ifdef CONFIG_VIDIX
+	if(vidix_name)
+		return (vidix_query_fourcc(format));
+#endif
 	if ((format & IMGFMT_BGR_MASK) == IMGFMT_BGR) {
 		int bpp = format & 0xff;
 
