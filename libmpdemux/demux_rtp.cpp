@@ -2,6 +2,10 @@
 ////////// and the "LIVE.COM Streaming Media" libraries:
 
 extern "C" {
+// on MinGW, we must include windows.h before the things it conflicts
+#ifdef __MINGW32__    // with.  they are each protected from
+#include <windows.h>  // windows.h, but not the other way around.
+#endif
 #include "demux_rtp.h"
 #include "stheader.h"
 }
