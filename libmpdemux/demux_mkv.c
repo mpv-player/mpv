@@ -89,6 +89,9 @@ typedef struct mkv_track
   /* generic content encoding support */
   mkv_content_encoding_t *encodings;
   int num_encodings;
+
+  /* For VobSubs */
+  mkv_sh_sub_t sh_sub;
 } mkv_track_t;
 
 typedef struct mkv_index
@@ -300,6 +303,89 @@ aac_get_sample_rate_index (uint32_t sample_rate)
     return 10;
   else
     return 11;
+}
+
+
+static int
+demux_mkv_parse_idx (mkv_track_t *t)
+{
+  int things_found, last;
+  char *buf, *pos, *start;
+
+  if ((t->private_data == NULL) || (t->private_size == 0))
+    return 0;
+
+  things_found = 0;
+  buf = (char *)malloc(t->private_size + 1);
+  if (buf == NULL)
+    return 0;
+  memcpy(buf, t->private_data, t->private_size);
+  buf[t->private_size] = 0;
+
+  pos = buf;
+  start = buf;
+  last = 0;
+  do
+    {
+      if ((*pos == 0) || (*pos == '\r') || (*pos == '\n'))
+        {
+          if (*pos == 0)
+            last = 1;
+          *pos = 0;
+
+          if (!strncmp(start, "size: ", 6) &&
+              ((things_found & 1) == 0) &&
+              (sscanf(&start[6], "%dx%d", &t->sh_sub.width, &t->sh_sub.height)
+               == 2))
+            {
+              things_found |= 1;
+              mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] VobSub size: %ux%u\n",
+                     t->sh_sub.width, t->sh_sub.height);
+            }
+          else if (!strncmp(start, "palette: ", 9) &&
+                   ((things_found & 2) == 0) &&
+                   (sscanf(&start[9], "%06x,%06x,%06x,%06x,%06x,%06x,%06x,"
+                           "%06x,%06x,%06x,%06x,%06x,%06x,%06x,%06x,%06x",
+                           &t->sh_sub.palette[0], &t->sh_sub.palette[1],
+                           &t->sh_sub.palette[2], &t->sh_sub.palette[3],
+                           &t->sh_sub.palette[4], &t->sh_sub.palette[5],
+                           &t->sh_sub.palette[6], &t->sh_sub.palette[7],
+                           &t->sh_sub.palette[8], &t->sh_sub.palette[9],
+                           &t->sh_sub.palette[10], &t->sh_sub.palette[11],
+                           &t->sh_sub.palette[12], &t->sh_sub.palette[13],
+                           &t->sh_sub.palette[14], &t->sh_sub.palette[15]) ==
+                    16))
+            {
+              things_found |= 2;
+              mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] VobSub palette: %06x,%06x,"
+                     "%06x,%06x,%06x,%06x,%06x,%06x,%06x,%06x,%06x,%06x,%06x,"
+                     "%06x,%06x,%06x\n", t->sh_sub.palette[0],
+                     t->sh_sub.palette[1], t->sh_sub.palette[2],
+                     t->sh_sub.palette[3], t->sh_sub.palette[4],
+                     t->sh_sub.palette[5], t->sh_sub.palette[6],
+                     t->sh_sub.palette[7], t->sh_sub.palette[8],
+                     t->sh_sub.palette[9], t->sh_sub.palette[10],
+                     t->sh_sub.palette[11], t->sh_sub.palette[12],
+                     t->sh_sub.palette[13], t->sh_sub.palette[14],
+                     t->sh_sub.palette[15]);
+            }
+          if (last)
+            break;
+          do
+            {
+              pos++;
+            }
+          while ((*pos == '\r') || (*pos == '\n'));
+          start = pos;
+        }
+      else
+        pos++;
+    }
+  while (!last && (*start != 0) && (things_found != 3));
+
+  free(buf);
+
+  return (things_found == 3);
 }
 
 
@@ -1807,6 +1893,12 @@ demux_mkv_open_sub (demuxer_t *demuxer, mkv_track_t *track)
             {
               free (track->private_data);
               track->private_data = buffer;
+            }
+          if (demux_mkv_parse_idx (track))
+            {
+              demuxer->sub->sh = malloc(sizeof(mkv_sh_sub_t));
+              if (demuxer->sub->sh != NULL)
+                memcpy(demuxer->sub->sh, &track->sh_sub, sizeof(mkv_sh_sub_t));
             }
         }
     }
