@@ -395,7 +395,6 @@ _xdpms=no
 _3dfx=no
 _syncfb=no
 _mlib=no
-_mpg123=no
 _xmga=autodetect
 _dga=no
 _dga2=no
@@ -432,12 +431,10 @@ for i in $pparam; do
  case "$i" in
   3dnow)
         _3dnow=yes
-        _mpg123=yes
         ;;
   3dnowext)
         _3dnow=yes
         _3dnowex=yes
-        _mpg123=yes
         ;;
   mmx)
         _mmx=yes
@@ -1649,12 +1646,6 @@ else
  _fbdev='#undef HAVE_FBDEV'
 fi
 
-if [ $_mpg123 = yes ]; then
- _mpg123='#define DEFAULT_MPG123'
-else
- _mpg123='#undef DEFAULT_MPG123'
-fi
-
 if [ $_gui = yes ]; then
  _gui='#define HAVE_GUI'
 else
@@ -1732,13 +1723,6 @@ cat > $CCONF << EOF
    If you have kernel Oops, player hangups, or just no audio, you should
    try to recompile MPlayer with this option disabled! */
 $_select
-
-/* You have a choice for MP3 decoding: mp3lib(mpg123) or Win32(l3codeca.acm)
-   #define this if you prefer mpg123 (with 3Dnow! support) than l3codeca.acm
-   (with mmx/sse optimizations)
-   You can still change it runtime using -afm 1 (mpg123) or -afm 4 (l3codeca)*/
-$_mpg123
-
 
 /* XMMP support: (test code) */
 $_xmmpaudio
