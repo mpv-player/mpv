@@ -93,6 +93,7 @@ A: MPlayer != avifile
 
 Q: Indeo 3.x/4.x movies are viewed upside-down!!!?
 A: It's a known bug (really it's a bug/limitation of the DLL codec)
+   Try if your vo driver supports the -flip switch.
 
 Q: Indeo 3.x,4.x video doesn't work at 32bpp resolutions (16,24 bpp are ok)
 A: It's a known bug (really it's a bug/limitation of the DLL codec)
@@ -220,4 +221,4 @@ A: Maybe. But you better look for already existant MPEG players on that
 
 Q: MPlayer dies with "MPlayer interrupted by signal 4 in module: decode_video".
 A: Try running MPlayer on the machine you compiled on. Or recompile. Don't
-   use MPlayer on different CPU that it was compiled on.
+   use MPlayer on different CPU than it was compiled on.
