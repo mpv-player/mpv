@@ -77,6 +77,9 @@ using namespace std;
 // for e.g. "-slang ger"
 extern char *dvdsub_lang;
 extern char *audio_lang;
+// for "-chapter x-y"
+extern int dvd_chapter;
+extern int dvd_last_chapter;
 
 // default values for Matroska elements
 #define MKVD_TIMECODESCALE 1000000 // 1000000 = 1ms
@@ -187,6 +190,10 @@ typedef struct {
   uint32_t enc_keyid_len, sig_keyid_len, signature_len;
 } mkv_content_encoding_t;
 
+typedef struct {
+  int64_t start, end;
+} mkv_chapter_t;
+
 typedef struct mkv_track {
   uint32_t tnum, xid;
   
@@ -268,6 +275,9 @@ typedef struct mkv_demuxer {
 
   int64_t skip_to_timecode;
   bool v_skip_to_keyframe, a_skip_to_keyframe;
+
+  vector<mkv_chapter_t> *chapters; // No support for nested chapters atm.
+  uint64_t stop_timecode;
 } mkv_demuxer_t;
 
 typedef struct {
@@ -1116,6 +1126,8 @@ static void free_mkv_demuxer(mkv_demuxer_t *d) {
     delete d->in;
   if (d->segment != NULL)
     delete d->segment;
+  if (d->chapters != NULL)
+    delete d->chapters;
 
   free(d);
 }
@@ -1295,6 +1307,79 @@ static void parse_cues(mkv_demuxer_t *mkv_d, uint64_t pos) {
   mkv_d->cues_found = 1;
 }
 
+static void parse_chapters(mkv_demuxer_t *mkv_d, uint64_t pos) {
+  EbmlElement *l2 = NULL;
+  EbmlStream *es;
+  KaxChapters *kchapters;
+  KaxEditionEntry *keentry;
+  KaxChapterAtom *kcatom;
+  KaxChapterTimeStart *kctstart;
+  KaxChapterTimeEnd *kctend;
+  int upper_lvl_el, i, k;
+  mkv_chapter_t chapter;
+
+  if (mkv_d->chapters != NULL)
+    return;
+
+  es = mkv_d->es;
+  upper_lvl_el = 0;
+
+  mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] /---- [ parsing chapters ] ---------\n");
+
+  mkv_d->in->setFilePointer(pos);
+
+  kchapters =
+    (KaxChapters *)es->FindNextElement(mkv_d->segment->Generic().Context,
+                                       upper_lvl_el, 0xFFFFFFFFL, true, 1);
+  if (kchapters == NULL)
+    return;
+
+  if (!(EbmlId(*kchapters) == KaxChapters::ClassInfos.GlobalId)) {
+    mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] No KaxChapters element found but %s.\n"
+           "[mkv] \\---- [ parsing chapters ] ---------\n",
+           kchapters->Generic().DebugName);
+    
+    return;
+  }
+
+  mkv_d->chapters = new vector<mkv_chapter_t>;
+  kchapters->Read(*es, KaxChapters::ClassInfos.Context, upper_lvl_el, l2,
+                  true);
+
+  for (i = 0; i < (int)kchapters->ListSize(); i++) {
+    keentry = (KaxEditionEntry *)(*kchapters)[i];
+    if (EbmlId(*keentry) == KaxEditionEntry::ClassInfos.GlobalId) {
+      for (k = 0; k < (int)keentry->ListSize(); k++) {
+        kcatom = (KaxChapterAtom *)(*keentry)[k];
+        if (EbmlId(*kcatom) == KaxChapterAtom::ClassInfos.GlobalId) {
+          chapter.start = 0;
+          chapter.end = 0;
+          kctstart = FINDFIRST(kcatom, KaxChapterTimeStart);
+          if (kctstart != NULL)
+            chapter.start = uint64(*kctstart) / 1000000;
+          kctend = FINDFIRST(kcatom, KaxChapterTimeEnd);
+          if (kctend != NULL)
+            chapter.end = uint64(*kctend) / 1000000;
+          mkv_d->chapters->push_back(chapter);
+          mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] Chapter %u from %02d:%02d:%02d."
+                 "%03d to %02d:%02d:%02d.%03d\n", mkv_d->chapters->size(),
+                 (int)(chapter.start / 60 / 60 / 1000),
+                 (int)((chapter.start / 60 / 1000) % 60),
+                 (int)((chapter.start / 1000) % 60),
+                 (int)(chapter.start % 1000),
+                 (int)(chapter.end / 60 / 60 / 1000),
+                 (int)((chapter.end / 60 / 1000) % 60),
+                 (int)((chapter.end / 1000) % 60),
+                 (int)(chapter.end % 1000));
+        }
+      }
+    }
+  }
+
+  mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] \\---- [ parsing chapters ] ---------\n");
+  delete kchapters;
+}
+
 static void parse_seekhead(mkv_demuxer_t *mkv_d, uint64_t pos) {
   EbmlElement *l2 = NULL;
   EbmlStream *es;
@@ -1369,6 +1454,8 @@ static void parse_seekhead(mkv_demuxer_t *mkv_d, uint64_t pos) {
         parse_seekhead(mkv_d, seek_pos);
       else if (*id == KaxCues::ClassInfos.GlobalId)
         parse_cues(mkv_d, seek_pos);
+      else if (*id == KaxChapters::ClassInfos.GlobalId)
+        parse_chapters(mkv_d, seek_pos);
     }
 
     if (id != NULL)
@@ -1380,7 +1467,8 @@ static void parse_seekhead(mkv_demuxer_t *mkv_d, uint64_t pos) {
   mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] \\---- [ parsing seek head ] ---------\n");
 }
 
-extern "C" void print_wave_header(WAVEFORMATEX *h);
+extern "C" void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
+                               int flags);
 
 extern "C" int demux_mkv_open(demuxer_t *demuxer) {
   unsigned char signature[4];
@@ -1824,6 +1912,10 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
                  !mkv_d->cues_found) {
         if (!find_in_vector(cues_to_parse, l1->GetElementPosition()))
           cues_to_parse.push_back(l1->GetElementPosition());
+        l1->SkipData(*es, l1->Generic().Context);
+
+      } else if (EbmlId(*l1) == KaxChapters::ClassInfos.GlobalId) {
+        parse_chapters(mkv_d, l1->GetElementPosition());
         l1->SkipData(*es, l1->Generic().Context);
 
       } else if (EbmlId(*l1) == KaxCluster::ClassInfos.GlobalId) {
@@ -2294,15 +2386,33 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
     }
   }
 
+  demuxer->priv = mkv_d;
+
+  if (mkv_d->chapters != NULL) {
+    for (i = 0; i < (int)mkv_d->chapters->size(); i++) {
+      (*mkv_d->chapters)[i].start -= mkv_d->first_tc;
+      (*mkv_d->chapters)[i].end -= mkv_d->first_tc;
+    }
+    if ((dvd_last_chapter > 0) &&
+        (dvd_last_chapter <= (int)mkv_d->chapters->size())) {
+      if ((*mkv_d->chapters)[dvd_last_chapter - 1].end != 0)
+        mkv_d->stop_timecode = (*mkv_d->chapters)[dvd_last_chapter - 1].end;
+      else if ((dvd_last_chapter + 1) <= (int)mkv_d->chapters->size())
+        mkv_d->stop_timecode = (*mkv_d->chapters)[dvd_last_chapter].start;
+    }
+  }
+
   if (s->end_pos == 0)
     demuxer->seekable = 0;
   else {
     demuxer->movi_start = s->start_pos;
     demuxer->movi_end = s->end_pos;
     demuxer->seekable = 1;
+    if ((dvd_chapter != 1) && (mkv_d->chapters != NULL) &&
+        (dvd_chapter <= (int)mkv_d->chapters->size()))
+      demux_mkv_seek(demuxer, (float)(*mkv_d->chapters)[dvd_chapter - 1].start
+                     / 1000.0, 1);
   }
-
-  demuxer->priv = mkv_d;
 
   return 1;
 }
@@ -2718,8 +2828,15 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
               block_duration = uint64(*kbdur);
 
             kblock = FINDFIRST(l2, KaxBlock);
-            if (kblock != NULL)
+            if (kblock != NULL) {
               kblock->SetParent(*mkv_d->cluster);
+              if ((mkv_d->stop_timecode > 0) &&
+                  ((kblock->GlobalTimecode() / 1000000 - mkv_d->first_tc) >=
+                   mkv_d->stop_timecode)) {
+                delete l2;
+                return 0;
+              }
+            }
 
             krefblock = FINDFIRST(l2, KaxReferenceBlock);
             while (krefblock != NULL) {
@@ -3026,7 +3143,7 @@ extern "C" void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
           if (!index->entries[k].is_key)
             continue;
           diff = target_timecode - (int64_t)index->entries[k].timecode;
-          if ((target_timecode <= (mkv_d->last_pts * 1000)) &&
+          if (((flags & 1) || (target_timecode <= (mkv_d->last_pts * 1000))) &&
               (diff >= 0) && (diff < min_diff)) {
             min_diff = diff;
             entry = &index->entries[k];
