@@ -724,7 +724,7 @@ static void make_default_gamma_correction( void )
 static void radeon_vid_make_default(void)
 {
 #ifdef RAGE128
-  OUTREG(OV0_COLOUR_CNTL,0x00101000UL); /* Default brihgtness and saturation for Rage128 */
+  OUTREG(OV0_COLOUR_CNTL,0x00101000UL); /* Default brightness and saturation for Rage128 */
 #else
   make_default_gamma_correction();
 #endif
@@ -906,6 +906,8 @@ int vixProbe( int verbose,int force )
   return err;
 }
 
+static void radeon_vid_dump_regs( void ); /* forward declaration */
+
 int vixInit( void )
 {
   int err;
@@ -924,11 +926,20 @@ int vixInit( void )
   printf(RADEON_MSG" Video memory = %uMb\n",radeon_ram_size/0x100000);
   err = mtrr_set_type(pci_info.base0,radeon_ram_size,MTRR_TYPE_WRCOMB);
   if(!err) printf(RADEON_MSG" Set write-combining type of video memory\n");
+  if(__verbose > 1) radeon_vid_dump_regs();
   return 0;  
 }
 
 void vixDestroy( void )
 {
+  /* remove colorkeying */
+  radeon_fifo_wait(3);
+  OUTREG(OV0_GRAPHICS_KEY_CLR, 0);
+  OUTREG(OV0_GRAPHICS_KEY_MSK, 0);
+  OUTREG(OV0_VID_KEY_CLR, 0);
+  OUTREG(OV0_VID_KEY_MSK, 0);
+  OUTREG(OV0_KEY_CNTL, 0);
+
   unmap_phys_mem(radeon_mem_base,radeon_ram_size);
   unmap_phys_mem(radeon_mmio_base,0xFFFF);
 }
@@ -941,7 +952,7 @@ int vixGetCapability(vidix_capability_t *to)
 
 /*
   Full list of fourcc which are supported by Win2K redeon driver:
-  YUY2, UYVY, DDES, OGLT, OGl2, OGLS, OGLB, OGNT, OGNZ, OGNS,
+  YUY2, UYVY, DDES, OGLT, OGL2, OGLS, OGLB, OGNT, OGNZ, OGNS,
   IF09, YVU9, IMC4, M2IA, IYUV, VBID, DXT1, DXT2, DXT3, DXT4, DXT5
 */
 uint32_t supported_fourcc[] = 
@@ -1066,6 +1077,7 @@ static void radeon_vid_display_video( void )
                 SCALER_SMART_SWITCH |
 #ifdef RADEON
 		SCALER_HORZ_PICK_NEAREST |
+//		SCALER_VERT_PICK_NEAREST |
 #endif
 		SCALER_Y2R_TEMP |
 		SCALER_PIX_EXPAND;
