@@ -1,0 +1,142 @@
+#!/bin/sh
+# needs very much fixing
+
+#
+# 720x576, the upper left corner is right on my TV, but
+# it's too tall and wide
+#
+
+LEFT=54
+RIGHT=-36
+UPPER=55
+LOWER=-6
+XRES=720
+YRES=576
+
+while [ 1 ]; do
+
+clear
+
+echo q w	left
+echo a s	right
+echo e r	upper
+echo d f	lower
+echo t y	xres
+echo g h	yres
+echo z		reset
+echo x		save
+
+echo n		LEFT
+echo m		RIGHT
+echo o		TALLER	-BUG-
+echo k		SHORTER	-BUG-
+echo p		UP
+echo l		DOWN
+
+echo $LEFT $RIGHT
+echo $UPPER $LOWER
+echo $XRES $YRES
+echo
+fbset
+
+read ABC
+
+case "$ABC" in
+	q)
+	LEFT=$(($LEFT-2))
+	;;
+
+	w)
+	LEFT=$(($LEFT+2))
+	;;
+
+	a)
+	RIGHT=$(($RIGHT-2))
+	;;
+
+	s)
+	RIGHT=$(($RIGHT+2))
+	;;
+
+	e)
+	UPPER=$(($UPPER-2))
+	;;
+
+	r)
+	UPPER=$(($UPPER+2))
+	;;
+
+	d)
+	LOWER=$(($LOWER-2))
+	;;
+
+	f)
+	LOWER=$(($LOWER+2))
+	;;
+
+	t)
+	XRES=$(($XRES-2))
+	;;
+
+	y)
+	XRES=$(($XRES+2))
+	;;
+
+	g)
+	YRES=$(($YRES-2))
+	;;
+
+	h)
+	YRES=$(($YRES+2))
+	;;
+
+	n)
+	LEFT=$(($LEFT-2))
+	RIGHT=$(($RIGHT+2))
+	;;
+
+	m)
+	LEFT=$(($LEFT+2))
+	RIGHT=$(($RIGHT-2))
+	;;
+
+	o)
+	UPPER=$(($UPPER-2))
+	LOWER=$(($LOWER-2))
+	YRES=$(($YRES+4))
+	;;
+
+	k)
+	UPPER=$(($UPPER+2))
+	LOWER=$(($LOWER+2))
+	YRES=$(($YRES-4))
+	;;
+
+	p)
+	UPPER=$(($UPPER-2))
+	LOWER=$(($LOWER+2))
+	;;
+
+	l)
+	UPPER=$(($UPPER+2))
+	LOWER=$(($LOWER-2))
+	;;
+
+	z)
+LEFT=54
+RIGHT=-36
+UPPER=55
+LOWER=-6
+XRES=720
+YRES=576
+	;;
+
+	x)
+	echo "fbset -fb /dev/fb1 -left $LEFT -right $RIGHT -upper $UPPER -lower $LOWER -hslen 46 -vslen 4 -xres $XRES -yres $YRES -vxres 720 -vyres 576 -depth 32 -laced false -bcast true" > save
+	;;
+
+esac
+
+fbset -fb /dev/fb1 -left $LEFT -right $RIGHT -upper $UPPER -lower $LOWER -hslen 46 -vslen 4 -xres $XRES -yres $YRES -vxres 720 -vyres 576 -depth 32 -laced false -bcast true
+
+done
