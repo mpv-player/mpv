@@ -1,4 +1,4 @@
-// sync'ed with help_mp-en.h 1.73
+// sync'ed with help_mp-en.h 1.77
 // Updates & fixes by pl <p_l@gmx.fr> & n.le gaillart <n@tourmentine.com>
 // Original transation by Firebird <firebird@chez.com>
 
@@ -69,6 +69,7 @@ static char help_text[]=
 #define MSGTR_InvalidVOdriver "Nom du pilote de sortie vidéo invalide: %s\nUtilisez '-vo help' pour avoir une liste des pilotes disponibles.\n"
 #define MSGTR_InvalidAOdriver "Nom du pilote de sortie audio invalide: %s\nUtilisez '-ao help' pour avoir une liste des pilotes disponibles.\n"
 #define MSGTR_CopyCodecsConf "Copiez/liez etc/codecs.conf depuis le source de MPlayer vers ~/.mplayer/codecs.conf)\n"
+#define MSGTR_BuiltinCodecsConf "Utilisation du codecs.conf intégré par défaut\n"
 #define MSGTR_CantLoadFont "Ne peut charger la police: %s\n"
 #define MSGTR_CantLoadSub "Ne peut charger les sous-titres: %s\n"
 #define MSGTR_ErrorDVDkey "Erreur avec la clé du DVD.\n"
@@ -133,6 +134,25 @@ static char help_text[]=
 #define MSGTR_NotInitializeVOPorVO "\nFATAL: n'a pas pu initialiser les filtres vidéo (-vop) ou la sortie vidéo (-vo).\n"
 #define MSGTR_Paused "\n================= PAUSE =================\r"
 #define MSGTR_PlaylistLoadUnable "\nNe peut pas charger la liste de lecture %s.\n"
+#define MSGTR_Exit_SIGILL_RTCpuSel \
+"- MPlayer à planté à cause d'une 'Instruction Illegale'.\n"\
+"  Il y a peut-être un bogue dans notre nouveau code de détection CPU...\n"\
+"  veuillez lire DOCS/bugreports.html\n"
+#define MSGTR_Exit_SIGILL \
+"- MPlayer à planté à cause d'une 'Instruction Illegale'.\n"\
+"  Cela se produit généralement quand vous le lancez sur un CPU différent\n"\
+"  de celui pour lequel il a été compilé/optimisé.\n Verifiez cela!\n"
+#define MSGTR_Exit_SIGSEGV_SIGFPE \
+"- MPlayer à planté à cause d'une mauvaise utilisation de CPU/FPU/RAM.\n"\
+"  Recompilez MPlayer avec --enable-debug et faites un backtrace 'gdb'\n"\
+"  et desassemblez. Pour les détails, voir DOCS/bugreports.html section 5.b.\n"
+#define MSGTR_Exit_SIGCRASH \
+"- MPlayer à planté. Cela n'aurait pas dù arriver.\n"\
+"  Il y a peut-être un bogue dans le code de MPlayer _ou_ dans vos pilotes _ou_ dans votre\n"\
+"  version de gcc. Si vous pensez que c'est la faute de MPlayer, merci de lire DOCS/bugreports.html\n"\
+"  et d'en suivre les instructions. Nous ne pourrons et ne voudrons pas vous aider à moins que vous\n"\
+"  ne fournissiez ces informations en rapportant un bogue possible.\n"
+
 
 // mencoder.c
 
@@ -156,6 +176,56 @@ static char help_text[]=
 #define MSGTR_RecommendedVideoBitrate "Bitrate vidéo recommandé pour %s CD: %d\n"
 #define MSGTR_VideoStreamResult "\nFlux vidéo: %8.3f kbit/s  (%d bps)  taille: %d octets  %5.3f secs  %d trames\n"
 #define MSGTR_AudioStreamResult "\nFlux audio: %8.3f kbit/s  (%d bps)  taille: %d octets  %5.3f secs\n"
+
+// cfg-mencoder.h:
+
+#define MSGTR_MEncoderMP3LameHelp "\n\n"\
+" vbr=<0-4>     méthode variable bitrate\n"\
+"                0: cbr\n"\
+"                1: mt\n"\
+"                2: rh(par défaut)\n"\
+"                3: abr\n"\
+"                4: mtrh\n"\
+"\n"\
+" abr           bitrate moyen\n"\
+"\n"\
+" cbr           bitrate constant\n"\
+"               Force également l'encodage en mode CBR sur les modes ABR présélectionnés suivants\n"\
+"\n"\
+" br=<0-1024>   specifie le bitrate en kBit (CBR et ABR uniquement)\n"\
+"\n"\
+" q=<0-9>       qualité (0-plus haut, 9-plus bas) (uniquement pour VBR)\n"\
+"\n"\
+" aq=<0-9>      qualité algorithmique (0-meilleure/plus lent, 9-pire/plus rapide)\n"\
+"\n"\
+" ratio=<1-100> rapport de compression\n"\
+"\n"\
+" vol=<0-10>    définie le gain d'entrée audio\n"\
+"\n"\
+" mode=<0-3>    (par défaut: auto)\n"\
+"                0: stereo\n"\
+"                1: joint-stereo\n"\
+"                2: dualchannel\n"\
+"                3: mono\n"\
+"\n"\
+" padding=<0-2>\n"\
+"                0: non\n"\
+"                1: tout\n"\
+"                2: ajuste\n"\
+"\n"\
+" fast          accélère l'encodage pour les modes VBR préselectionnés suivants,\n"\
+"               qualité légèrement inférieure et plus hauts bitrates.\n"\
+"\n"\
+" preset=<valeur> fournit les plus hauts paramètres de qualité possibles.\n"\
+"                 medium: encodage VBR, bonne qualité\n"\
+"                 (interval de bitrate 150-180 kbps)\n"\
+"                 standard: encodage VBR, haute qualité\n"\
+"                 (interval de bitrate 170-210 kbps)\n"\
+"                 extreme: encodage VBR, très haute qualité\n"\
+"                 (interval de bitrate 200-240 kbps)\n"\
+"                 insane: encodage CBR, plus haute qualité préselectionnée\n"\
+"                 (bitrate 320 kbps)\n"\
+"                 <8-320>: encodage ABR au bitrate moyen indiqué en kbps.\n\n"
 
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "Lecteur CD-ROM '%s' non trouvé!\n"
