@@ -794,13 +794,11 @@ library. Version 2.0.9 or greater is mandatory! Then you have two methods:
       create a symlink:<screen>ln -s /path/to/arial.ttf ~/.mplayer/subfont.ttf</screen>
       </para></listitem>
       </itemizedlist>
-  <para>
-    if compiled with <systemitem class="library">fontconfig</systemitem>
+    If compiled with <systemitem class="library">fontconfig</systemitem>
     support, the above methods won't work, instead the <option>-font</option>
     expects a fontconfig font name and defaults to the sans-serif font. To get
     a list of fonts known to fontconfig, use <command>fc-list</command>.
     Example: <option>-font 'Bitstream Vera Sans'</option>
-    </para>
   </para></listitem>
 </itemizedlist>
 
