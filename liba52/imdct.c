@@ -75,6 +75,7 @@ static uint8_t bit_reverse_256[] = {
 #ifdef HAVE_SSE
 // NOTE: SSE needs 16byte alignment or it will segfault 
 static complex_t __attribute__((aligned(16))) buf[128];
+static float __attribute__((aligned(16))) ps111_1[4]={1,1,1,-1};
 #else
 static complex_t buf[128];
 #endif
@@ -220,14 +221,72 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 		:: "g" (buf), "r" (buf + 128)
 		: "%esi"
 	);
-    
-    for (m=1; m < 7; m++) {
-	if(m)
-	    two_m = (1 << m);
-	else
-	    two_m = 1;
 
-	two_m_plus_one = (1 << (m+1));
+	// Note w[1]={{1,0}, {0,-1}}
+	// C Code for the following asm loop
+/*	    for(i = 0; i < 128; i += 4) {
+		p = 0 + i;
+		q = p + 2;
+		tmp_a_r = buf[p].real;
+		tmp_a_i = buf[p].imag;
+		tmp_b_r = buf[q].real;
+		tmp_b_i = buf[q].imag;
+		buf[p].real = tmp_a_r + tmp_b_r;
+		buf[p].imag =  tmp_a_i + tmp_b_i;
+		buf[q].real = tmp_a_r - tmp_b_r;
+		buf[q].imag =  tmp_a_i - tmp_b_i;
+		tmp_a_r = buf[p+1].real;
+		tmp_a_i = buf[p+1].imag;
+		tmp_b_r = buf[q+1].imag;
+		tmp_b_i = buf[q+1].real;
+		buf[p+1].real = tmp_a_r + tmp_b_r;
+		buf[p+1].imag =  tmp_a_i - tmp_b_i;
+		buf[q+1].real = tmp_a_r - tmp_b_r;
+		buf[q+1].imag =  tmp_a_i + tmp_b_i;
+	    }
+*/
+	asm volatile(
+		"movaps ps111_1, %%xmm7		\n\t" // 1,1,1,-1
+		"movl %0, %%esi			\n\t"
+		"1:				\n\t"
+		"movaps 16(%%esi), %%xmm2	\n\t" //r2,i2,r3,i3
+		"shufps $0xB4, %%xmm2, %%xmm2	\n\t" //r2,i2,i3,r3
+		"mulps %%xmm7, %%xmm2		\n\t" //r2,i2,i3,-r3
+		"movaps (%%esi), %%xmm0		\n\t" //r0,i0,r1,i1
+		"movaps (%%esi), %%xmm1		\n\t" //r0,i0,r1,i1
+		"addps %%xmm2, %%xmm0		\n\t"
+		"subps %%xmm2, %%xmm1		\n\t"
+		"movaps %%xmm0, (%%esi)		\n\t"
+		"movaps %%xmm1, 16(%%esi)	\n\t"
+		"addl $32, %%esi	\n\t"
+		"cmpl %1, %%esi		\n\t"
+		" jb 1b			\n\t"
+		:: "g" (buf), "r" (buf + 128)
+		: "%esi"
+	);
+	
+	m=2;
+	two_m = 4;
+
+	for(k = 0; k < two_m; k++) {
+	    for(i = 0; i < 128; i += 8) {
+		p = k + i;
+		q = p + two_m;
+		tmp_a_r = buf[p].real;
+		tmp_a_i = buf[p].imag;
+		tmp_b_r = buf[q].real * w[m][k].real - buf[q].imag * w[m][k].imag;
+		tmp_b_i = buf[q].imag * w[m][k].real + buf[q].real * w[m][k].imag;
+		buf[p].real = tmp_a_r + tmp_b_r;
+		buf[p].imag =  tmp_a_i + tmp_b_i;
+		buf[q].real = tmp_a_r - tmp_b_r;
+		buf[q].imag =  tmp_a_i - tmp_b_i;
+	    }
+	}
+
+    for (m=3; m < 7; m++) {
+	two_m = (1 << m);
+
+	two_m_plus_one = two_m<<1;
 
 	for(k = 0; k < two_m; k++) {
 	    for(i = 0; i < 128; i += two_m_plus_one) {
