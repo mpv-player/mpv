@@ -34,14 +34,14 @@ double ff_eval(char *s, double *const_value, const char **const_name,
                double (**func1)(void *, double), const char **func1_name,
                double (**func2)(void *, double, double), char **func2_name,
                void *opaque);
-#else
+#endif
+
 #ifdef USE_LIBAVCODEC_SO
 #include <ffmpeg/avcodec.h>
-#include <ffmpeg/mpegvideo.h>
+#include <ffmpeg/dsputil.h>
 #else
 #include "../libavcodec/avcodec.h"
-#include "../libavcodec/mpegvideo.h"
-#endif
+#include "../libavcodec/dsputil.h"
 #endif
 
 #ifdef HAVE_MALLOC_H
