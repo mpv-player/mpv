@@ -1,0 +1,205 @@
+#!/usr/bin/perl
+use 5.6.0;
+use warnings;
+use strict;
+use Gtk; # just so that compilation fails without it
+use Gimp qw(:auto);
+use Gimp::Feature qw(gimp-1.2);
+use Gimp::Fu;
+
+my $head = <<EOF;
+[files]
+alpha arpi_osd_a.raw
+bitmap arpi_osd_b.raw
+
+[characters]
+0x01 0 36
+0x02 35 71
+0x03 70 106
+0x04 116 152
+0x05 164 200
+0x06 209 245
+0x07 256 292
+0x08 305 342
+0x09 354 400
+0x0A 407 442
+0x0B 457 494
+
+[files]
+alpha arpi_progress_a.raw
+bitmap arpi_progress_b.raw
+
+[characters]
+0x10 4 21
+0x11 30 41
+0x12 50 66
+0x13 74 85
+
+EOF
+
+sub geninfo {
+  my ($font, $height) = @_;
+
+  my $size = (split("-", $font))[7];
+  $font = (split("-", $font))[2];
+  
+  return(sprintf(<<EOF, $font, $size, int($size/2), -3-int($size/10), $size));
+[info]
+name "%s \@%d; created in gimp; plugin by lanzz\@lanzz.org"
+descversion 1
+spacewidth %d
+charspace %d
+height %d
+
+EOF
+}
+
+sub basename($) {
+  my ($f) = @_;
+  $f =~ m#([^/]*)$#;
+  return($1);
+}
+
+sub render_subfont {
+  my ($font, $bfile, $afile, $dfile, $keep) = @_;
+
+  my ($raw) = gimp_procedural_db_query("^file_raw_save\$", "","","","","","");
+  if ($raw ne "file_raw_save") {
+    gimp_message("HSI Raw plugin not installed");
+    return(undef);
+  }
+
+  unless (open(D, "> $dfile")) {
+    gimp_message("Cannot write to $dfile");
+    return(undef);
+  }
+
+  my @size = xlfd_size($font);
+  $size[0] *= 2;
+
+  my (undef, $h) = gimp_text_get_extents_fontname(join("", map(chr($_), 33 .. 255)), @size, $font);
+  $h += 10;
+  my $w = 0;
+  gimp_palette_set_foreground([255, 255, 255]);
+  gimp_palette_set_background([0, 0, 0]);
+
+  my $img = gimp_image_new(1, $h, GRAY);
+  gimp_image_undo_disable($img);
+  gimp_image_set_filename($img, $bfile);
+  my $draw = gimp_layer_new($img, 1, $h, GRAY_IMAGE, "subfont", 100, NORMAL_MODE);
+  gimp_image_add_layer($img, $draw, 0);
+  gimp_edit_fill($draw, BG_IMAGE_FILL);
+
+  my $x = 0;
+  print D (geninfo($font));
+  print D ($head);
+  printf D (<<EOF, basename($afile), basename($bfile));
+[files]
+alpha %s
+bitmap %s
+
+EOF
+  
+  print D ("[characters]\n");
+  gimp_progress_init("Rendering font...");
+  for (my $c = 33; $c <= 255; $c++) {
+    my ($cw) = gimp_text_get_extents_fontname(chr($c), @size, $font);
+    printf D ("0x%02X %d %d\n", $c, int($x / 2), int(($x + $cw + 5) / 2));
+    $cw = (int($cw / 8) + 2) * 8;
+    $w += $cw;
+    gimp_image_resize($img, $w, $h, 0, 0);
+    gimp_layer_resize($draw, $w, $h, 0, 0);
+    gimp_floating_sel_anchor(gimp_text_fontname($img, $draw, $x + 5, 5, chr($c), -1, 1, @size, $font));
+    $x += $cw;
+    gimp_progress_update(($c - 33) / 222);
+  }
+  close(D);
+
+  gimp_image_scale($img, int($w / 2), int($h / 2));
+  gimp_image_undo_enable($img);
+  file_raw_save($img, $draw, $bfile, $bfile);
+
+  my $aimg = gimp_channel_ops_duplicate($img);
+  gimp_image_undo_disable($aimg);
+  gimp_image_set_filename($aimg, $afile);
+  $draw = gimp_image_flatten($aimg);
+  gimp_by_color_select($draw, [0, 0, 0], 15, REPLACE, 1, 0, 0, 0);
+  gimp_selection_invert($aimg);
+  gimp_selection_grow($aimg, 1);
+  gimp_edit_fill($draw, FG_IMAGE_FILL);
+  gimp_selection_clear($aimg);
+  plug_in_gauss_rle2($img, $draw, 3, 3);
+  gimp_image_undo_enable($aimg);
+  file_raw_save($aimg, $draw, $afile, $afile);
+
+  gimp_message(<<EOF);
+Render done.
+
+Bitmap: $bfile
+Alpha: $afile
+Desc: $dfile
+EOF
+  if ($keep) {
+    gimp_image_clean_all($img);
+    gimp_image_clean_all($aimg);
+    return($img, $aimg);
+  } else {
+    return(undef);
+  }
+}
+
+sub render_subfont_alpha {
+  my ($img) = @_;
+  
+  my $aimg = gimp_channel_ops_duplicate($img);
+  gimp_image_undo_disable($aimg);
+  gimp_image_set_filename($aimg, "alpha.raw");
+  my $draw = gimp_image_flatten($aimg);
+  gimp_by_color_select($draw, [0, 0, 0], 15, REPLACE, 1, 0, 0, 0);
+  gimp_selection_invert($aimg);
+  gimp_selection_grow($aimg, 1);
+  gimp_edit_fill($draw, FG_IMAGE_FILL);
+  gimp_selection_clear($aimg);
+  plug_in_gauss_rle2($img, $draw, 3, 3);
+  gimp_image_undo_enable($aimg);
+
+  return($aimg);
+}
+
+register(
+  "render_subfont",
+  "Render a grayscale MPlayer subtitle font",
+  "No help (yet)",
+  "lanzz\@lanzz.org",
+  "Copyright 2001, lanzz\@lanzz.org",
+  "2001-07-31",
+  "<Toolbox>/Xtns/MPlayer/Render Subfont",
+  undef,
+  [
+    [PF_FONT, "font", "", "-*-arial-medium-r-normal-*-16-*-*-*-*-*-*-*", undef],
+    [PF_FILE, "bitmap", "", "bitmap.raw", undef],
+    [PF_FILE, "alpha", "", "alpha.raw", undef],
+    [PF_FILE, "desc", "", "font.desc", undef],
+    [PF_TOGGLE, "toggle", "Keep images opened", 0, undef]
+  ],
+  [ ],
+  [ ],
+  \&render_subfont
+);
+
+register(
+  "render_subfont_alpha",
+  "Render alpha shadow for MPlayer subtitle font",
+  "No help (yet)",
+  "lanzz\@lanzz.org",
+  "Copyright 2001, lanzz\@lanzz.org",
+  "2001-07-31",
+  "<Image>/Filters/MPlayer/Render Shadow",
+  "GRAY",
+  [ ],
+  [ PF_IMAGE ],
+  [ ],
+  \&render_subfont_alpha
+);
+
+exit(main());
