@@ -661,7 +661,7 @@ int real_get_rdt_chunk(rtsp_t *rtsp_session, char **buffer) {
   size-=12;
   n=rtsp_read_data(rtsp_session, (*buffer)+12, size);
   
-  return n+12;
+  return (n <= 0) ? 0 : n+12;
 }
 
 int convert_timestamp(char *str, int *sec, int *msec) {
@@ -744,7 +744,10 @@ rmff_header_t  *real_setup_and_get_header(rtsp_t *rtsp_session, uint32_t bandwid
 
   description=malloc(sizeof(char)*(size+1));
 
-  rtsp_read_data(rtsp_session, description, size);
+  if( rtsp_read_data(rtsp_session, description, size) <= 0) {
+    buf = xbuffer_free(buf);
+    return NULL;
+  }
   description[size]=0;
 
   /* parse sdp (sdpplin) and create a header and a subscribe string */

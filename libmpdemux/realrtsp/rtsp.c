@@ -73,8 +73,6 @@ struct rtsp_s {
   unsigned int  server_state;
   uint32_t      server_caps;
   
-  char          buffer[BUF_SIZE]; /* scratch buffer */
-
   unsigned int  cseq;
   char         *session;
 
@@ -271,11 +269,12 @@ static void hexdump (char *buf, int length) {
 static char *rtsp_get(rtsp_t *s) {
 
   int n=0;
-  char *string;
+  char *buffer = malloc(BUF_SIZE);
+  char *string = NULL;
 
   while (n<BUF_SIZE) {
-    read_stream(s->s, &s->buffer[n], 1);
-    if ((s->buffer[n-1]==0x0d)&&(s->buffer[n]==0x0a)) break;
+    read_stream(s->s, &(buffer[n]), 1);
+    if ((buffer[n-1]==0x0d)&&(buffer[n]==0x0a)) break;
     n++;
   }
 
@@ -284,7 +283,7 @@ static char *rtsp_get(rtsp_t *s) {
     exit(1);
   }
   string=malloc(sizeof(char)*n);
-  memcpy(string,s->buffer,n-1);
+  memcpy(string,buffer,n-1);
   string[n-1]=0;
 
 #ifdef LOG
@@ -292,6 +291,7 @@ static char *rtsp_get(rtsp_t *s) {
 #endif
   
 
+  free(buffer);
   return string;
 }
 
@@ -352,8 +352,13 @@ static int rtsp_get_code(const char *string) {
 static void rtsp_send_request(rtsp_t *s, const char *type, const char *what) {
 
   char **payload=s->scheduled;
-  sprintf(s->buffer,"%s %s %s",type, what, rtsp_protocol_version);
-  rtsp_put(s,s->buffer);
+  char *buf;
+  
+  buf = malloc(strlen(type)+strlen(what)+strlen(rtsp_protocol_version)+3);
+  
+  sprintf(buf,"%s %s %s",type, what, rtsp_protocol_version);
+  rtsp_put(s,buf);
+  free(buf);
   if (payload)
     while (*payload) {
       rtsp_put(s,*payload);
@@ -369,11 +374,17 @@ static void rtsp_send_request(rtsp_t *s, const char *type, const char *what) {
 
 static void rtsp_schedule_standard(rtsp_t *s) {
 
-  sprintf(s->buffer, "Cseq: %u", s->cseq);
-  rtsp_schedule_field(s, s->buffer);
+  char tmp[16];
+  
+  snprintf(tmp, 16, "Cseq: %u", s->cseq);
+  rtsp_schedule_field(s, tmp);
+  
   if (s->session) {
-    sprintf(s->buffer, "Session: %s", s->session);
-    rtsp_schedule_field(s, s->buffer);
+    char *buf;
+    buf = malloc(strlen(s->session)+15);
+    sprintf(buf, "Session: %s", s->session);
+    rtsp_schedule_field(s, buf);
+    free(buf);
   }
 }
 /*
@@ -388,6 +399,8 @@ static int rtsp_get_answers(rtsp_t *s) {
   int code;
   
   answer=rtsp_get(s);
+  if (!answer)
+    return 0;
   code=rtsp_get_code(answer);
   free(answer);
 
@@ -396,6 +409,8 @@ static int rtsp_get_answers(rtsp_t *s) {
   do { /* while we get answer lines */
   
     answer=rtsp_get(s);
+    if (!answer)
+      return 0;
     
     if (!strncmp(answer,"Cseq:",5)) {
       sscanf(answer,"Cseq: %u",&answer_seq);
@@ -407,26 +422,29 @@ static int rtsp_get_answers(rtsp_t *s) {
       }
     }
     if (!strncmp(answer,"Server:",7)) {
-      sscanf(answer,"Server: %s",s->buffer);
+      char *buf = malloc(strlen(answer));
+      sscanf(answer,"Server: %s",buf);
       if (s->server) free(s->server);
-      s->server=strdup(s->buffer);
+      s->server=strdup(buf);
+      free(buf);
     }
     if (!strncmp(answer,"Session:",8)) {
-      memset(s->buffer,0, BUF_SIZE);
-      sscanf(answer,"Session: %s",s->buffer);
+      char *buf = calloc(1, strlen(answer));
+      sscanf(answer,"Session: %s",buf);
       if (s->session) {
-        if (strcmp(s->buffer, s->session)) {
-          printf("rtsp: warning: setting NEW session: %s\n", s->buffer);
+        if (strcmp(buf, s->session)) {
+          printf("rtsp: warning: setting NEW session: %s\n", buf);
           free(s->session);
-          s->session=strdup(s->buffer);
+          s->session=strdup(buf);
         }
       } else
       {
 #ifdef LOG
-        printf("rtsp: setting session id to: %s\n", s->buffer);
+        printf("rtsp: setting session id to: %s\n", s->buf);
 #endif
-        s->session=strdup(s->buffer);
+        s->session=strdup(buf);
       }
+      free(buf);
     }
     *answer_ptr=answer;
     answer_ptr++;
@@ -555,13 +573,15 @@ int rtsp_read_data(rtsp_t *s, char *buffer, unsigned int size) {
     if ((buffer[0]=='S')&&(buffer[1]=='E')&&(buffer[2]=='T')&&(buffer[3]=='_'))
     {
       char *rest=rtsp_get(s);
-      /* a real server wanna play table tennis? */
-      memcpy(s->buffer, buffer, 4);
-      strcpy(s->buffer+4, rest);
+      if (!rest)
+        return -1;      
+
       seq=-1;
       do {
         free(rest);
         rest=rtsp_get(s);
+        if (!rest)
+          return -1;
         if (!strncmp(rest,"Cseq:",5))
           sscanf(rest,"Cseq: %u",&seq);
       } while (strlen(rest)!=0);
