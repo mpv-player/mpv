@@ -141,8 +141,7 @@ Optional features:
   --disable-new-input    disable new input system [enable]
   --enable-joystick      enable joystick support in new input [disable]
   --enable-i18n          GNU internationalisation [disable]
-  --enable-runtime-cpudetection
-                         enable runtime CPU detection code [disable]
+  --disable-runtime-cpudetection    disable runtime CPU detection [enable]
 Video:
   --enable-gl            build with OpenGL render support [autodetect]
   --enable-dga[=n]       build with DGA [n in {1, 2} ] support [autodetect]
@@ -796,7 +795,7 @@ _language=en
 _shm=auto
 _linux_devfs=no
 _i18n=no
-_runtime_cpudetection=no
+_runtime_cpudetection=yes
 
 for ac_option do
   case "$ac_option" in
