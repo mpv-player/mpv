@@ -257,6 +257,13 @@
  	{"subfont-outline", &subtitle_font_thickness, CONF_TYPE_FLOAT, CONF_RANGE, 0, 8, NULL},
  	{"subfont-autoscale", &subtitle_autoscale, CONF_TYPE_INT, CONF_RANGE, 0, 3, NULL},
 #endif
+#ifdef HAVE_FONTCONFIG
+	{"fontconfig", &font_fontconfig, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"nofontconfig", &font_fontconfig, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+#else
+	{"fontconfig", "MPlayer wasn't compiled with Fontconfig support\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+	{"nofontconfig", "MPlayer wasn't compiled with Fontconfig support\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+#endif
 #endif
 
 #else
