@@ -180,6 +180,14 @@ void decode_duck_tm1(
   int height,
   int bytes_per_pixel);
 
+void qt_decode_rpza(
+  unsigned char *encoded,
+  int encoded_size,
+  unsigned char *decoded,
+  int width,
+  int height,
+  int bytes_per_pixel);
+
 //**************************************************************************//
 //             The OpenDivX stuff:
 //**************************************************************************//
@@ -698,6 +706,7 @@ switch(sh_video->codec->driver){
  case VFM_FLI:
  case VFM_QTRLE:
  case VFM_DUCKTM1:
+ case VFM_QTRPZA:
    {
 #ifdef USE_MP_IMAGE
     sh_video->image->type=MP_IMGTYPE_STATIC;
@@ -1135,6 +1144,13 @@ if(verbose>1){
      sh_video->disp_w, sh_video->disp_h, sh_video->context);
    blit_frame = 3;
    break;
+  case VFM_QTRPZA:
+    qt_decode_rpza(
+        start, in_size, sh_video->our_out_buffer,
+        sh_video->disp_w, sh_video->disp_h,
+        ((out_fmt&255)+7)/8);
+    blit_frame = 3;
+    break;
 } // switch
 //------------------------ frame decoded. --------------------
 
