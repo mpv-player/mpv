@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h 1.144
+// Sync'ed with help_mp-en.h 1.147
 
 // ========================= MPlayer help ===========================
 
@@ -88,7 +88,7 @@ static char help_text[]=
 "         ***************************************\n"\
 "Lehetséges okok, és megoldásaik:\n"\
 "- Legyakrabban : hibás _audio_ meghajtó\n"\
-"  - Próbáld ki az -ao sdl opciót, vagy használd az ALSA 0.9 OSS emulációját.\n"\
+"  - Próbáld ki az -ao sdl opciót, vagy használd az ALSA OSS emulációját.\n"\
 "  - Adj különbözõ értékeket az -autosync opciónak, kezdetnek a 30 megteszi.\n"\
 "- Lassú videokimenet\n"\
 "  - Egy másik -vo meghajtó kipróbálása eredményre vezethet (a listához lásd\n"\
@@ -400,6 +400,34 @@ static char help_text[]=
 "                 insane:  CBR  kódolás, legjobb minõség\n"\
 "                 (320 kbps bitráta)\n"\
 "                 <8-320>: ABR kódolás átlagban a megadott bitrátával.\n\n"
+
+//codec-cfg.c:
+#define MSGTR_DuplicateFourcc "dupla FourCC"
+#define MSGTR_TooManyFourccs "túl sok FourCCs/formátum..."
+#define MSGTR_ParseError "értelmezési hiba"
+#define MSGTR_ParseErrorFIDNotNumber "értelmezési hiba (a formátum ID nem szám?)"
+#define MSGTR_ParseErrorFIDAliasNotNumber "értelmezési hiba (a formátum ID álnév nem szám?)"
+#define MSGTR_DuplicateFID "duplikált formátum ID"
+#define MSGTR_TooManyOut "túl sok kiesett..."
+#define MSGTR_InvalidCodecName "\na codec(%s) név hibás!\n"
+#define MSGTR_CodecLacksFourcc "\na codec(%s) nem FourCC/formátumú!\n"
+#define MSGTR_CodecLacksDriver "\na codec(%s) nem rendelkezik vezélõvel!\n"
+#define MSGTR_CodecNeedsDLL "\na codec(%s) 'dll'-t igényel!\n"
+#define MSGTR_CodecNeedsOutfmt "\ncodec(%s) 'outfmt'-t igényel!\n"
+#define MSGTR_CantAllocateComment "Nem tudok memóriát foglalni a megjegyzésnek. "
+#define MSGTR_GetTokenMaxNotLessThanMAX_NR_TOKEN "get_token(): max >= MAX_MR_TOKEN!"
+#define MSGTR_ReadingFile "%s olvasása: "
+#define MSGTR_CantOpenFileError "Nem tudom megnyitni '%s'-t: %s\n"
+#define MSGTR_CantGetMemoryForLine "Nem tudok memóriát foglalni a 'line'-nak: %s\n"
+#define MSGTR_CantReallocCodecsp "A '*codecsp' nem foglalható le újra: %s\n"
+#define MSGTR_CodecNameNotUnique "A(z) '%s' codec név nem egyedi."
+#define MSGTR_CantStrdupName "Nem végezhetõ el: strdup -> 'name': %s\n"
+#define MSGTR_CantStrdupInfo "Nem végezhetõ el: strdup -> 'info': %s\n"
+#define MSGTR_CantStrdupDriver "Nem végezhetõ el: strdup -> 'driver': %s\n"
+#define MSGTR_CantStrdupDLL "Nem végezhetõ el: strdup -> 'dll': %s"
+#define MSGTR_AudioVideoCodecTotals "%d audió & %d videó codec\n"
+#define MSGTR_CodecDefinitionIncorrect "A codec nincs megfelelõen definiálva."
+#define MSGTR_OutdatedCodecsConf "Ez a codecs.conf túl régi és nem kompatibilis az MPlayer ezen kiadásával!"
 
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "A CD-ROM meghajtó (%s) nem található!\n"
