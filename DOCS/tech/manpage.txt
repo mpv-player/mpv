@@ -55,7 +55,7 @@ A setting of 4 should look readable. Here's an overview again:
 
     - groff:     Groff is the "official" tool to convert man pages.
                  To get good results you need a recent version (1.18.2).
-                 cat mplayer.1 | sed s/SS\ 20/SS\ 4/ | groff -man -Thtml - > manpage.html
+                 groff -man -Thtml mplayer.1 > manpage.html
                  groff -rLL=64n -m man -Tascii mplayer.1 | col -bx > manpage.txt
                  The groff man page lists other output formats to use with -T.
     - man2html:  You can view it through a CGI script:
