@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.58 -->
+<!-- synced with 1.59 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portok</title>
 
@@ -466,18 +466,18 @@ Használj SDL-t.
   kapcsolóval megakadályozhatod a használatát. Írd be ezt a konfigurációs fájlodba,
   hogy véglegesen kimaradjon a használatból.</para>
 
-<para>Használhatod a Win32 codec-eket és a Real Win32 codec-eket (nem a Real Linux codec-eket)
-  ha akarod. Tedd a codec-eket valahova a path-ba vagy add meg a
-  <option>--with-codecsdir=<replaceable>c:/eleresi/ut/a/codecekhez</replaceable></option> (alternatívaként
-  <option>--with-codecsdir=<replaceable>/eleresi/ut/a/codecekhez</replaceable></option> csak
-  <application>Cygwin</application> alatt) kapcsolót a <filename>configure</filename>-nak.
-  Kaptunk pár jelentést, hogy a Real DLL-eknek írhatóaknak kell lenniük az
-  <application>MPlayer</application>t futtató felhasználó által, de csak néhány
-  rendszeren. Próbáld meg írhatóvá tenni őket, ha probléma adódna. A QuickTime
-  DLL-ek szintén működnek, de be kell másolnod őket a Windows system könyvtárába
-  (<filename class="directory"><replaceable>C:\Windows\system\</replaceable></filename>
-  vagy hasonló). Utolsó reményként próbáld meg az <application>MPlayer</application>rel
-  azonos könyvtárba tenni őket.</para>
+<para>Vannak speciálisan Windowsra készített codec csomagok a
+  <ulink url="http://mplayerhq.hu/homepage/design7/codecs.html">codec oldalunkon</ulink>,
+  melyek segítségével azokat a formátumokat is lejátszhatod, amikhez még
+  nincs natív támogatás.
+  Tedd be a codec-eket valahova az elérési útvonaladba vagy add meg a
+  <option>--with-codecsdir=<replaceable>c:/ut/a/codecjeidhez</replaceable></option>
+  (alternatívaként
+  <option>--with-codecsdir=<replaceable>/ut/a/codecjeidhez</replaceable></option>
+  csak <application>Cygwin</application> alatt) kapcsolóval a <filename>configure</filename>-nak.
+  Kaptunk olyan visszajelzéseket, hogy a Real DLL-eknek írhatóaknak kell lenniük az
+  <application>MPlayer</application>t futtató felhasználó által, de csak bizonyos
+  rendszereken (NT4). Próbáld meg írhatóvá tenni őket, ha problémáid vannak.</para>
 
 <para>VCD-ket is lejátszhatsz a <filename>.DAT</filename> vagy <filename>.MPG</filename> fájlok
   lejátszásával, amit a Windows meglát a VCD-n. Így nagyszerűen működik (javítsd ki a CD-ROM-od
