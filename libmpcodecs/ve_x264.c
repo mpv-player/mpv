@@ -49,7 +49,7 @@
 
 #include <x264.h>
 
-#if X264_BUILD < 0x000e
+#if X264_BUILD < 0x0010
 #error We do not support old versions of x264. Get the latest from SVN.
 #endif
 
@@ -90,7 +90,7 @@ static int pass = 0;
 static float qcomp = 0.6;
 static float qblur = 0.5;
 static float complexity_blur = 20;
-static char *rc_eq = "tex*blurTex^(qComp-1)";
+static char *rc_eq = "blurCplx^(1-qComp)";
 static int subq = 5;
 static int psnr = 0;
 static int log_level = 2;
