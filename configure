@@ -6106,6 +6106,13 @@ $_def_dynamic_plugins
 /* "restrict" keyword */
 #define restrict $_def_restrict_keyword
 
+/* attribute(used) as needed by some compilers */
+#if (__GNUC__ * 100 + __GNUC_MINOR__ >= 300)
+# define attribute_used __attribute__((used))
+#else
+# define attribute_used
+#endif
+
 #define PREFIX "$_prefix"
 
 #define USE_OSD 1
