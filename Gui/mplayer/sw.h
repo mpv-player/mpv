@@ -37,7 +37,9 @@ void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )
  switch( Button )
   {
    case wsPMMouseButton:
+#ifdef USE_DVDREAD
 	  memcpy( &gtkShMem->DVD,&mplShMem->DVD,sizeof( mplDVDStruct ) );
+#endif
           gtkSendMessage( evShowPopUpMenu );
           break;
    case wsPRMouseButton:

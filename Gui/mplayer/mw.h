@@ -470,7 +470,9 @@ void mplMainMouseHandle( int Button,int X,int Y,int RX,int RY )
           break;
 	  
    case wsPMMouseButton:
+#ifdef USE_DVDREAD
 	memcpy( &gtkShMem->DVD,&mplShMem->DVD,sizeof( mplDVDStruct ) );
+#endif
         gtkSendMessage( evShowPopUpMenu );
 	break;	  
 
