@@ -253,17 +253,17 @@ subtitle *sub_read_line_vplayer(FILE *fd,subtitle *current) {
 	char line[LINE_LEN+1];
 	char line2[LINE_LEN+1];
 	int a1,a2,a3,b1,b2,b3;
-	char *p=NULL, *next;
+	char *p=NULL, *next,*separator;
 	int i,len,len2,plen;
 
 	memset(current, '\0', sizeof(subtitle));
 
 	while (!current->text[0]) {
 		if (!fgets (line, LINE_LEN, fd)) return NULL;
-		if ((len=sscanf (line, "%d:%d:%d:%n",&a1,&a2,&a3,&plen)) < 3)
+		if ((len=sscanf (line, "%d:%d:%d%c%n",&a1,&a2,&a3,&separator,&plen)) < 4)
 			continue;
 		if (!fgets (line2, LINE_LEN, fd)) return NULL;
-		if ((len2=sscanf (line2, "%d:%d:%d:",&b1,&b2,&b3)) < 3)
+		if ((len2=sscanf (line2, "%d:%d:%d%c",&b1,&b2,&b3,&separator)) < 3)
 			continue;
 		// przewiñ o linijkê do ty³u:
 		fseek(fd,-strlen(line2),SEEK_CUR);
