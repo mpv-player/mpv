@@ -57,8 +57,7 @@ static int mp_read(URLContext *h, unsigned char *buf, int size){
     if(stream_eof(stream)) //needed?
         return -1;
     ret=stream_read(stream, buf, size);
-    if(ret>0)
-        stream->eof=0;
+
     mp_msg(MSGT_HEADER,MSGL_DBG2,"%d=mp_read(%p, %p, %d), eof:%d\n", ret, h, buf, size, stream->eof);
     return ret;
 }
@@ -78,10 +77,11 @@ static offset_t mp_seek(URLContext *h, offset_t pos, int whence){
     else if(whence != SEEK_SET)
         return -1;
 
+    if(pos<stream->end_pos)
+        stream_reset(stream);
     if(stream_seek(stream, pos)==0)
         return -1;
-    if(pos==stream->end_pos)
-        stream->eof=0;
+
     return pos;
 }
 
