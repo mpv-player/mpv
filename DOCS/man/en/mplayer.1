@@ -3372,7 +3372,7 @@ Threshold, which can be optionally specified from nothing (0) to
 everything (255) (default: 24).
 .br
 .IPs round
-Value which the width/height should be divisible by (default: 16).
+Value which the width/\:height should be divisible by (default: 16).
 The offset is automatically adjusted to center the video.
 Use 2 to get only even dimensions (needed for 4:2:2 video).
 16 is best when encoding to most video codecs.
@@ -3387,7 +3387,7 @@ that takes two parameters.
 .RSs
 .IPs w,h
 width and height (default: -1, maximum possible width where boundaries
-are still visible.
+are still visible.)
 .IPs x,y
 top left corner position (default: -1, uppermost leftmost)
 .RE
@@ -3400,14 +3400,14 @@ unscaled original at coordinates x, y.
 Can be used for placing subtitles/\:OSD in the resulting black bands.
 .RSs
 .IPs w,h
-expanded width,height (default: original width,height).
+Expanded width,height (default: original width,height).
 Negative values for w and h are treated as offsets to the original size.
 .sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
 .IP expand=0:-50:0:0
-adds a 50 pixel border to the bottom of the picture
+Adds a 50 pixel border to the bottom of the picture.
 .RE
 .PD 1
 .IPs x,y
@@ -3461,13 +3461,13 @@ Toggle interlaced scaling.
 .IPs chr_drop
 chroma skipping
 .RSss
-0: use all available input lines for chroma
+0: Use all available input lines for chroma.
 .br
-1: use only every 2. input line for chroma
+1: Use only every 2. input line for chroma.
 .br
-2: use only every 4. input line for chroma
+2: Use only every 4. input line for chroma.
 .br
-3: use only every 8. input line for chroma
+3: Use only every 8. input line for chroma.
 .REss
 .IPs param
 scaling parameter (depends upon the scaling method used)
