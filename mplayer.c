@@ -337,7 +337,10 @@ void exit_player(char* how){
   if(how) printf("\nExiting... (%s)\n",how);
   if(verbose) printf("max framesize was %d bytes\n",max_framesize);
   // restore terminal:
-  getch2_disable();
+  #ifdef HAVE_GUI
+   if ( nogui )
+  #endif
+     getch2_disable();
   video_out->uninit();
 #ifdef USE_XMMP_AUDIO
   if(verbose) printf("XMM: closing audio driver...\n");
@@ -461,6 +464,8 @@ int stream_dump_type=0;
 int osd_visible=100;
 int osd_function=OSD_PLAY;
 int osd_last_pts=-303;
+
+float a_frame=0;    // Audio
 
 float rel_seek_secs=0;
 
@@ -1384,7 +1389,6 @@ if(verbose) printf("vo_debug3: out_fmt=0x%08X\n",out_fmt);
 //float buffer_delay=0;
 float frame_correction=0; // A-V timestamp kulonbseg atlagolas
 int frame_corr_num=0;   //
-float a_frame=0;    // Audio
 float v_frame=0;    // Video
 float time_frame=0; // Timer
 float c_total=0;
@@ -1407,10 +1411,17 @@ int drop_frame_cnt=0;
   lirc_mp_setup();
 #endif
 
+  #ifdef HAVE_GUI
+   if ( nogui )
+    {
+  #endif
 #ifdef USE_TERMCAP
   load_termcap(NULL); // load key-codes
 #endif
   if(f) getch2_enable();
+  #ifdef HAVE_GUI
+   }
+  #endif 
 
   //========= Catch terminate signals: ================
   // terminate requests:
