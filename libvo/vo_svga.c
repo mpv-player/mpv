@@ -18,6 +18,10 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 
+#ifdef CONFIG_VIDIX
+#include "vosub_vidix.h"
+#endif
+
 #include "sub.h"
 #include "../postproc/rgb2rgb.h"
 
@@ -41,6 +45,10 @@ static uint8_t *GRAPH_MEM;
 
 static int BYTESPERPIXEL, WIDTH, HEIGHT, LINEWIDTH;
 static int frame, maxframes, oldmethod=0;
+static int directrender;
+
+static int force_vm=0;
+static int squarepix=0;
 
 static uint32_t pformat;
 static uint32_t orig_w, orig_h, maxw, maxh; // Width, height
@@ -79,6 +87,10 @@ static vo_info_t info = {
         ""
 };
 
+#ifdef CONFIG_VIDIX
+static char vidix_name[32] = "";
+#endif
+
 LIBVO_EXTERN(svga)
 
 static uint32_t preinit(const char *arg)
@@ -93,13 +105,55 @@ static uint32_t preinit(const char *arg)
       maxframes=1;
   }
 
+  if(arg)while(*arg) {
+	  if(!strncmp(arg,"old",3)) {
+			oldmethod=1;
+			arg+=3;
+			if( *arg == ':' ) arg++;
+	  }
+
+#ifdef CONFIG_VIDIX  
+	  if(memcmp(arg,"vidix",5)==0) {
+		  int i;
+		  i=6;
+		  while(arg[i] && arg[i]!=':') i++;
+		  strncpy(vidix_name, arg+6, i-6);
+		  vidix_name[i-5]=0;
+		  if(arg[i]==':')i++;
+		  arg+=i;
+		  vidix_preinit(vidix_name, &video_out_svga);
+	  }
+#endif
+	  if(!strncmp(arg,"sq",2)) {
+	  	squarepix=1;
+		arg+=2;
+		if( *arg == ':' ) arg++;
+	  }
+ 
+	  if(*arg) {
+		  int i;
+		  char s[64];
+printf("arg is %s\n",arg);
+		  i=0;
+		  while(arg[i] && arg[i]!=':')i++;
+		  strncpy(s, arg, i);
+		  s[i]=0;
+		  arg+=i;
+		  if(*arg==':')arg++;
+printf("i=%i new arg is %s\n",i, arg);
+		  i=vga_getmodenumber(s);
+		  if(i>0) {
+			  force_vm = i;
+			  if(verbose)printf("vo_svga: Forcing mode %i\n",force_vm);
+	  	  }
+	  }
+  }
+
   if (!checked) {
     if (checksupportedmodes()) // Looking for available video modes 
       return(1);
   }
 
-// printf("vo_svga: preinit - maxframes=%i\n",maxframes);
-  
   return 0;
 }
 
@@ -115,7 +169,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 }
 
 static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
-                     uint32_t d_height, uint32_t fullscreen, char *title, 
+                     uint32_t d_height, uint32_t flags, char *title, 
 		     uint32_t format) {
   uint32_t req_w = (d_width > 0 ? d_width : width);
   uint32_t req_h = (d_height > 0 ? d_height : height);
@@ -124,6 +178,10 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
   uint16_t buf_w = USHRT_MAX, buf_h = USHRT_MAX;
   vga_modelist_t *list = modelist;
 
+  if(verbose)
+	  printf("vo_svga: config(%i, %i, %i, %i, %08x, %s, %08x)\n", width, height, 
+			  d_width, d_height, flags, title, format);
+  
   bpp_avail = 0;
   while (list != NULL) {
     if ((list->modeinfo.width >= req_w) && (list->modeinfo.height >= req_h)) {
@@ -147,7 +205,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
   // bpp check
   bpp_conv = 0;
   if (!vo_dbpp) {
-    if (format == IMGFMT_YV12) bpp = 32;
+    if (!IMGFMT_IS_RGB(format) && !IMGFMT_IS_BGR(format)) bpp = 32;
     else bpp = format & 255;
     if (verbose)
       printf("vo_svga: vo_dbpp == 0, bpp: %d\n",bpp);
@@ -346,20 +404,10 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     list = list->next;
   }
 
-  if((vo_subdevice) && (strlen(vo_subdevice)>2)) {
-     if(!strncmp(vo_subdevice,"old",3)) {
-        oldmethod=1;
-        vo_subdevice+=3;
-        if( *vo_subdevice == ',' ) vo_subdevice++;
-     }
-  }
-
-  if((vo_subdevice)  && *vo_subdevice) {
-      int vm;
-      vm=vga_getmodenumber(vo_subdevice);
+  if(force_vm) {
       list=modelist;
       while(list) {
-          if(list->modenum == vm) {
+          if(list->modenum == force_vm) {
              buf_w = list->modeinfo.width;
              buf_h = list->modeinfo.height;
 	     res_widescr = (((buf_w*1.0)/buf_h) > (4.0/3)) ? 1 : 0;
@@ -394,12 +442,13 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
                      }
                      break;
              }
-             vid_mode=vm;
+             vid_mode=force_vm;
              list=NULL;
       	  } else list=list->next;
       }
   }
 
+ 
   if (verbose)
     printf("vo_svga: vid_mode: %d\n",vid_mode);
   if (vga_setmode(vid_mode) == -1) {
@@ -427,13 +476,17 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
   if(bpp==1)
     LINEWIDTH=(WIDTH+7)/8;
   else
-    LINEWIDTH=WIDTH*BYTESPERPIXEL;
+    LINEWIDTH=vga_getmodeinfo(vid_mode)->linewidth;
 
   vga_setlinearaddressing();
   if(oldmethod) {
      buffer=malloc(HEIGHT*LINEWIDTH);
      maxframes=0;
+  } else if ((vga_getmodeinfo(vid_mode)->flags&IS_LINEAR)) {
+  	directrender=1;
+	if(verbose) printf("vo_svga: Using direct rendering to linear video ram.\n");
   }
+  
   vga_claimvideomemory((maxframes+1)*HEIGHT*LINEWIDTH);
   GRAPH_MEM=vga_getgraphmem();
   frame=0;
@@ -441,8 +494,8 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
   
   orig_w = width;
   orig_h = height;
-  maxw = orig_w;
-  maxh = orig_h;
+  maxw = req_w;
+  maxh = req_h;
 
   if (bpp_conv) {
     bppbuf = malloc(maxw * maxh * BYTESPERPIXEL);
@@ -453,11 +506,26 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     }  
   }
   
+  if(!vidix_name[0]){
+  	maxw = width; /* No scaling */
+  	maxh = height;
+  }	
+  if (pformat == IMGFMT_YV12) {
+    yuv2rgb_init(bpp, MODE_RGB);
+  }
+
   x_pos = (WIDTH - maxw) / 2;
   y_pos = (HEIGHT - maxh) / 2;
   
-  if (pformat == IMGFMT_YV12) {
-    yuv2rgb_init(bpp, MODE_RGB);
+#ifdef CONFIG_VIDIX
+  if(vidix_name[0]){ 
+  	vidix_init(width, height, x_pos, y_pos, maxw, maxh, format, bpp, 
+		  WIDTH, HEIGHT);
+  	printf("vo_svga: Using VIDIX. w=%i h=%i  mw=%i mh=%i\n",width,height,maxw,maxh);
+  	vidix_start();
+  }
+#endif    
+
     if(bpp==1)
       yuvbuf = malloc((maxw+7)/8 * maxh);
     else
@@ -468,8 +536,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
       uninit();
       return (1);
     }
-  }
-
   printf("vo_svga: SVGAlib resolution: %dx%d %dbpp - ", WIDTH, HEIGHT, bpp);
   if (maxw != orig_w || maxh != orig_h) printf("Video scaled to: %dx%d\n",maxw,maxh);
   else printf("No video scaling\n");
@@ -481,16 +547,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 
 static uint32_t draw_frame(uint8_t *src[]) {
   uint8_t *s=src[0];
-#if 0
-  // draw_frame() is never called for YV12
-  if (pformat == IMGFMT_YV12) {
-    if(bpp==1)
-      yuv2rgb(yuvbuf, src[0], src[1], src[2], orig_w, orig_h, (orig_w+7)/8, orig_w, orig_w / 2);
-    else
-      yuv2rgb(yuvbuf, src[0], src[1], src[2], orig_w, orig_h, orig_w * BYTESPERPIXEL, orig_w, orig_w / 2);
-    s = yuvbuf;
-  }
-#endif
   if (bpp_conv) {
     switch(bpp) {
       case 32:
@@ -510,12 +566,19 @@ static uint32_t draw_slice(uint8_t *image[], int stride[],
                            int w, int h, int x, int y) {
   uint8_t *src = yuvbuf;
   uint32_t sw, sh;
+
+  if(directrender) {
+  	  yuv2rgb(GRAPH_MEM+(frame*HEIGHT+y+y_pos)*LINEWIDTH+(x+x_pos)*BYTESPERPIXEL,
+		  	  image[0], image[1], image[2], w, h, LINEWIDTH, stride[0], stride[1]);
+  } else {
   if(bpp==1)
     yuv2rgb(yuvbuf, image[0], image[1], image[2], w, h, (orig_w+7)/8, stride[0], stride[1]);
   else
-    yuv2rgb(yuvbuf, image[0], image[1], image[2], w, h, orig_w * BYTESPERPIXEL, stride[0], stride[1]);
+		yuv2rgb(yuvbuf, image[0], image[1], image[2], w, h, orig_w * BYTESPERPIXEL, 
+				stride[0], stride[1]);
 
   putbox(x + x_pos, y + y_pos, w, h, src, 1);
+  }
 
   return (0);
 }
@@ -564,12 +627,18 @@ static void check_events(void) {
 static void uninit(void) {
   vga_modelist_t *list = modelist;
 
+#ifdef CONFIG_VIDIX
+  if(vidix_name[0])vidix_term();
+#endif
+  
   vga_setmode(TEXT);
 
   if (bppbuf != NULL)
     free(bppbuf);
+  bppbuf=NULL;
   if (yuvbuf != NULL)
     free(yuvbuf);
+  
   while (modelist != NULL) {
        list=modelist;
        modelist=modelist->next;
@@ -584,6 +653,8 @@ static void uninit(void) {
 static uint32_t add_mode(uint16_t mode, vga_modeinfo minfo) {
   vga_modelist_t *list;
 
+  if(squarepix && (minfo.height*4 != minfo.width*3)) return 0;
+  
   if (modelist == NULL) {
     modelist = (vga_modelist_t *) malloc(sizeof(vga_modelist_t));
     if (modelist == NULL) {
@@ -699,12 +770,6 @@ static uint32_t query_format(uint32_t format) {
           return (res);
         } break;
         case IMGFMT_YV12: return (1); break;
-        case IMGFMT_RGB8:
-        case IMGFMT_BGR8: return ((bpp_avail & BPP_8) ? 1 : 0); break;
-        case IMGFMT_RGB4:
-        case IMGFMT_BGR4: return ((bpp_avail & BPP_4) ? 1 : 0); break;
-        case IMGFMT_RGB1:
-        case IMGFMT_BGR1: return ((bpp_avail & BPP_1) ? 1 : 0); break;
       }
     }
   return (0);
