@@ -74,6 +74,9 @@ contrast=decval            (-1000:+1000) -1000 == black screen
 hue=decval                 (-1000:+1000) -1000 == +1000 (full circle)
                            all other values are within this range
 Note: 0 is default value for every parameter on radeons
+WARNING: If you are non-x86 user then color correction will be
+unavailable for you due kernel limitation. Please port MATH stuff
+on your system or please send me more universal solution.
 
 double_buff=on/off         enables/disables double buffering
 deinterlace=on/off         enables/disables adaprive deinterlacing
