@@ -642,20 +642,17 @@ present) black bar.
 </variablelist>
 
 <table>
-<title>SDL keys</title>
+<title>SDL only keys</title>
 <tgroup cols="2">
 <thead>
 <row><entry>Key</entry><entry>Action</entry></row>
 </thead>
 <tbody>
-<row><entry><keycap>F</keycap></entry><entry>
-    toggles fullscreen/windowed mode
-    </entry></row>
-<row><entry><keycap>C</keycap></entry><entry>
+<row><entry><keycap>c</keycap></entry><entry>
     cycles available fullscreen modes
     </entry></row>
-<row><entry><keycap>W</keycap>/<keycap>S</keycap></entry><entry>
-    mappings for <keycap>*</keycap> and <keycap>/</keycap> (mixer control)
+<row><entry><keycap>n</keycap></entry><entry>
+    changes back to normal mode
     </entry></row>
 </tbody>
 </tgroup>
