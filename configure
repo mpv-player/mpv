@@ -803,8 +803,8 @@ if [ $_png = yes ]; then
 fi
 
 # Checking for CFLAGS
-if test "$CFLAGS" = ""; then
- CFLAGS=-O4 -march=$proc -mcpu=$proc -pipe -ffast-math
+if [ "$CFLAGS" = "" ]; then
+ CFLAGS="-O4 -march=$proc -mcpu=$proc -pipe -ffast-math"
 fi
 
 echo
