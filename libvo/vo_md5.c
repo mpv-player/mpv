@@ -57,7 +57,7 @@ static void flip_page (void)
 
     video_out_pgm.flip_page();
 
-    sprintf (buf2, "md5sum %s", vo_pgm_filename);
+    snprintf (buf2, 100, "md5sum %s", vo_pgm_filename);
     f = popen (buf2, "r");
     i = fread (buf2, 1, sizeof(buf2), f);
     pclose (f);
