@@ -265,7 +265,7 @@ static int ms_ima_adpcm_decode_block(unsigned short *output,
 
   if (channels == 1)
     for (i = 0;
-      i < (block_size - MS_IMA_ADPCM_PREAMBLE_SIZE * channels) / 2; i++)
+      i < (block_size - MS_IMA_ADPCM_PREAMBLE_SIZE * channels); i++)
     {
       output[i * 2 + 0] = input[MS_IMA_ADPCM_PREAMBLE_SIZE + i] & 0x0F;
       output[i * 2 + 1] = input[MS_IMA_ADPCM_PREAMBLE_SIZE + i] >> 4;
