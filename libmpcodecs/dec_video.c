@@ -30,19 +30,6 @@ extern int verbose; // defined in mplayer.c
 #include "dec_video.h"
 
 // ===================================================================
-// temp hack:
-
-#ifdef FF_POSTPROCESS
-#ifndef MBC
-#define MBC 48
-#define MBR 36
-#endif
-int quant_store[MBR+1][MBC+1]; // [Review]
-#endif
-
-//int avcodec_inited=0;
-
-// ===================================================================
 
 extern int benchmark;
 extern double video_time_usage;
@@ -123,8 +110,7 @@ int set_video_colors(sh_video_t *sh_video,char *item,int value)
 	}
     }
     try_sw_control:
-
-
+    if(mpvdec) return mpvdec->control(sh_video,VDCTRL_SET_EQUALIZER,item,(int)value);
     return 0;
 }
 
@@ -148,7 +134,11 @@ pitches[0] = pitches[1] =pitches[2] = 0; /* fake unknown */
     if(mpcodecs_vd_drivers[i]->info->id==sh_video->codec->driver){
 	mpvdec=mpcodecs_vd_drivers[i]; break;
     }
-  if(!mpvdec) return 0; // no such driver
+  if(!mpvdec){
+      mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Requested video codec family [%s] (vfm=%d) not available (enable it at compile time!)\n",
+          sh_video->codec->name, sh_video->codec->driver);
+      return 0; // no such driver
+  }
   
   printf("Selecting Video Decoder: [%s] %s\n",mpvdec->info->short_name,mpvdec->info->name);
   
