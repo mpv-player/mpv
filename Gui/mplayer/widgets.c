@@ -59,8 +59,6 @@ void widgetsCreate( void )
  Options=create_Options();
 }
 
-int             gtkParent = 1;
-
 // --- forked function
 
 static void gtkThreadProc( int argc,char * argv[] )
@@ -71,9 +69,7 @@ static void gtkThreadProc( int argc,char * argv[] )
 
  widgetsCreate();
 
-// gtkParentPID=getppid();
-// gtkChildPID=getpid();
- gtkParent=0;
+ gtkPID=getppid();
 
  signal( SIGTYPE,gtkSigHandler );
 
@@ -89,9 +85,8 @@ static void gtkThreadProc( int argc,char * argv[] )
 
 void gtkInit( int argc,char* argv[], char *envp[] )
 {
- gtkParentPID=getpid();
  gtkShMem=shmem_alloc( ShMemSize );
- if ( ( gtkChildPID = fork() ) == 0 ) gtkThreadProc( argc,argv );
+ if ( ( gtkPID = fork() ) == 0 ) gtkThreadProc( argc,argv );
 }
 
 void gtkDone( void ){
@@ -99,7 +94,7 @@ void gtkDone( void ){
  gtkSendMessage(evExit);
  usleep(50000); // 50ms should be enough!
  printf("gtk killed...\n");
- kill( gtkChildPID,SIGKILL );
+ kill( gtkPID,SIGKILL );
 }
 
 void gtkMessageBox( gchar * str )

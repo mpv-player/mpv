@@ -53,7 +53,7 @@ void mplInit( int argc,char* argv[], char *envp[], void* disp )
 // parse_cfgfiles( argc,argv,envp );
 
  // allocates shmem to gtkShMem
- // fork() a process which runs gtkThreadProc()  [gtkChildPID]
+ // fork() a process which runs gtkThreadProc()  [gtkPID]
  gtkInit( argc,argv,envp );
 
  // allocates shmem to mplShMem
@@ -76,6 +76,7 @@ void mplInit( int argc,char* argv[], char *envp[], void* disp )
   wsNoBorder,wsShowMouseCursor|wsHandleMouseButton|wsHandleMouseMove,wsShowFrame|wsShowWindow,"ViDEO" );
 
  vo_setwindow(appMPlayer.subWindow.WindowID, appMPlayer.subWindow.wGC);
+ vo_setwindowsize( appMPlayer.sub.width,appMPlayer.sub.height );
  mplSubRender=0;
  
  wsCreateWindow( &appMPlayer.mainWindow,
