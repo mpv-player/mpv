@@ -205,7 +205,7 @@ int vo_wm_detect( void )
 #if 1
 // --- netwm 
  type=XInternAtom( mDisplay,"_NET_SUPPORTED",False );
- if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,65536 / sizeof( long ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
+ if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,16384,False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
   {
    mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is of class NetWM.\n" );
    XFree( args );
@@ -702,7 +702,7 @@ void vo_x11_setlayer( int layer )
   }
 
  type=XInternAtom( mDisplay,"_NET_SUPPORTED",False );
- if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,65536 / sizeof( long ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
+ if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,16384,False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
   {
    XEvent e;
    
@@ -721,7 +721,7 @@ void vo_x11_setlayer( int layer )
    return;
   }
  type=XInternAtom( mDisplay,"_WIN_SUPPORTING_WM_CHECK",False );
- if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,65536 / sizeof( long ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
+ if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,16384,False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
   {
    XClientMessageEvent  xev;
    

@@ -52,7 +52,7 @@ extern int verbose;
 /* Name of VIDIX driver */
 static const char *vidix_name = NULL;
 #endif
-static int pre_init_err = 0xFFFFFFFEUL;
+static signed int pre_init_err = -2;
 /******************************
 *	fb.modes support      *
 ******************************/
@@ -912,7 +912,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	fs = fullscreen & 0x01;
 	flip = fullscreen & 0x08;
 
-	if(pre_init_err == 0xFFFFFFFEUL)
+	if(pre_init_err == -2)
 	{
 	    printf(FBDEV "Internal fatal error: init() was called before preinit()\n");
 	    return -1;
@@ -1347,6 +1347,7 @@ static uint32_t preinit(const char *arg)
 	printf("vo_subdevice: initialization returns: %i\n",pre_init_err);
 #endif
     if(!pre_init_err) return (pre_init_err=(fb_preinit()?0:-1));
+    return(-1);
 }
 
 #ifdef HAVE_PNG
