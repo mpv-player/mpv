@@ -186,8 +186,6 @@ static int benchmark=0;
 
 static int play_in_bg=0;
 
-extern float gui_position;
-
 extern void avi_fixate();
 
 // options:
@@ -1745,10 +1743,6 @@ if(rel_seek_secs || abs_seek_pos){
 #ifdef HAVE_NEW_GUI
       if(use_gui){
         int len=((demuxer->movi_end-demuxer->movi_start));
-//        if(len>0)
-//          gui_position=(float)(demuxer->filepos-demuxer->movi_start)/len;
-//        else
-//	  gui_position=-1;
 	if ( len > 0 ) mplShMem->Position=(float)(demuxer->filepos-demuxer->movi_start) / len * 100.0f;
 	 else mplShMem->Position=0;
 	mplShMem->TimeSec=d_video->pts; 
