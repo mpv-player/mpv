@@ -52,8 +52,6 @@ void mplTimerHandler( int signum )
 
 void mplInit( int argc,char* argv[], char *envp[], void* disp )
 {
-// parse_cfgfiles( argc,argv,envp );
-
  // allocates shmem to gtkShMem
  // fork() a process which runs gtkThreadProc()  [gtkPID]
  gtkInit( argc,argv,envp );

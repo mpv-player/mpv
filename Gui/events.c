@@ -40,7 +40,8 @@ evName evNames[] =
   { evDoubleSize,        "evDoubleSize"        }, // 38
   { evSetMoviePosition,  "evSetMoviePosition"  }, // 39
   { evSetVolume,         "evSetVolume"         }, // 40
-  { evSetBalance,        "evSetBalance"        }  // 41
+  { evSetBalance,        "evSetBalance"        }, // 41
+  { evHelp,		 "evHelp"	       }	
  };
 
 const int evBoxs = sizeof( evNames ) / sizeof( evName );

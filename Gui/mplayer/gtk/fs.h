@@ -257,6 +257,7 @@ void fs_Ok_released( GtkButton * button,gpointer user_data )
         break;
   }
  strcpy( gtkShMem->fs.dir,fsSelectedDirectory );
+printf( "----gtk---> filname: %s\n",fsSelectedFile );
  strcpy( gtkShMem->fs.filename,fsSelectedFile );
  item=fsTopList_items;
  while( item )

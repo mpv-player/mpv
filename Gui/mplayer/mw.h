@@ -91,6 +91,7 @@ calclengthmmmmss:
        case 'V': sprintf( tmp,"%3.1f",mplShMem->Volume ); strcat( trbuf,tmp ); break;
        case 'b': sprintf( tmp,"%3.2f%%",mplShMem->Balance ); strcat( trbuf,tmp ); break;
        case 'B': sprintf( tmp,"%3.1f",mplShMem->Balance ); strcat( trbuf,tmp ); break;
+       case 'd': sprintf( tmp,"%d",mplShMem->FrameDrop ); strcat( trbuf,tmp ); break;
        case 's': if ( mplShMem->Playing == 0 ) strcat( trbuf,"s" ); break;
        case 'l': if ( mplShMem->Playing == 1 ) strcat( trbuf,"p" ); break;
        case 'e': if ( mplShMem->Playing == 2 ) strcat( trbuf,"e" ); break;

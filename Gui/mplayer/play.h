@@ -46,6 +46,7 @@ typedef struct
    int    StreamType;
    int    TimeSec;
    int    LengthInSec;
+   int    FrameDrop;
    
    char   Filename[4096];
    int    FilenameChanged;

@@ -35,7 +35,6 @@ int VisibleMainWindow( void )
 
  for (i=0; i < nchilds; i++) if ( childs[i]==me ) break;
  for ( ;i<nchilds;i++ ) if ( childs[i] == mainw ) visible=1; 
-// printf( "-----------> visible main vindov: %d ---\n",visible );
  return visible;
 }
 
@@ -45,6 +44,10 @@ int count = 0;
 
 void mplSubDraw( wsParamDisplay )
 {
+// mainisvisible1=VisibleMainWindow();
+// printf( "--------> main: %d ---\n",mainisvisible1 );
+
+
 // if ( ( appMPlayer.subWindow.Visible == wsWindowNotVisible )||
 //      ( appMPlayer.subWindow.State != wsWindowExpose ) ) return;
 
@@ -67,6 +70,7 @@ void mplSubDraw( wsParamDisplay )
    XFlush( wsDisplay );
   }
  appMPlayer.subWindow.State=0; 
+// mainis=0;
 }
 
 void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )
@@ -89,9 +93,7 @@ void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )
           break;
 // ---	  
    case wsPLMouseButton:
-          oldmainisvisible=VisibleMainWindow();
-	  printf( "----> %d %d\n",mainisvisible1,mainisvisible2 );
-	  //=mainisvisible;
+//mainis=0;
           sx=X; sy=Y;
           msButton=wsPLMouseButton;
           mplSubMoved=0;
@@ -110,6 +112,15 @@ void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )
            }
           break;
    case wsRLMouseButton:
+// if ( ( appMPlayer.subWindow.Focused == 0 && appMPlayer.subWindow.OFocused == 2 ) )
+//      ( appMPlayer.mainWindow.Focused == 0 && appMPlayer.mainWindow.OFocused == 2 ) ) 
+//          if ( ( !mplSubMoved )&&( !appMPlayer.mainWindow.Focused ) )
+printf( "-----> mainis: %d ---- \n",mainis );
+if ( !mainis )
+{
+wsMoveTopWindow( &appMPlayer.mainWindow );
+}
+/*
           if ( ( !mplSubMoved )&&
 	       ( appMPlayer.subWindow.isFullScreen )&&
 	       ( !VisibleMainWindow() ) )
@@ -117,6 +128,7 @@ void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )
 wsMoveTopWindow( &appMPlayer.mainWindow );
 //	     else wsMoveTopWindow( &appMPlayer.mainWindow );
 	   }
+*/	   
           msButton=0;
           mplSubMoved=0;
           break;

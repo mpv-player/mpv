@@ -41,6 +41,8 @@
 #define evSetVolume         36
 #define evSetBalance        37
 
+#define evHelp              38
+
 #define evExit              1000
 
 // --- General events ---

@@ -10,7 +10,7 @@
 
 float mixerGetVolume( void )
 {
- mplShMem->Volume=mixer_getbothvolume();
+// mplShMem->Volume=(float)mixer_getbothvolume();
  return mplShMem->Volume;
 }
 
@@ -22,13 +22,13 @@ void  mixerSetVolume( float v )
 
 void mixerIncVolume( void )
 {
- mixer_incvolume();
+// mixer_incvolume();
  mixerGetVolume();
 }
 
 void mixerDecVolume( void )
 {
- mixer_decvolume();
+// mixer_decvolume();
  mixerGetVolume();
 }
 

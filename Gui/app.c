@@ -72,8 +72,9 @@ void appInitStruct( listItems * item )
 
  appClearItem( &item->main );
  appClearItem( &item->sub );
- item->sub.Bitmap.Width=256; item->sub.Bitmap.Height=256;
- item->sub.width=256; item->sub.height=256;
+ item->sub.Bitmap.Width=384; item->sub.Bitmap.Height=384;
+ item->sub.width=384; item->sub.height=384;
+ item->sub.x=-1; item->sub.y=-1;
  appClearItem( &item->menuBase );
  appClearItem( &item->menuSelected );
  item->subR=0;
@@ -104,27 +105,14 @@ void appInit( int argc,char* argv[], char *envp[], void* disp )
  printf("SKIN dir 1: '%s'\n",skinDirInHome);
  printf("SKIN dir 2: '%s'\n",skinMPlayerDir);
 
-// if ( ( appMPlayerDirInHome=(char *)calloc( 1,strlen( getenv( "HOME" ) ) + 9 ) ) != NULL )
-//  { strcpy( appMPlayerDirInHome,getenv( "HOME" ) ); strcat( appMPlayerDirInHome,"/.mplayer" ); }
-// if ( ( skinDirInHome=(char *)calloc( 1,strlen( appMPlayerDirInHome ) + 5 ) ) != NULL )
-//  { strcpy( skinDirInHome,appMPlayerDirInHome ); strcat( skinDirInHome,"/Skin" ); }
-// if ( ( appMPlayerDir=(char *)calloc( 1,strlen( PREFIX ) + 14 ) ) != NULL )
-//  { strcpy( appMPlayerDir,PREFIX ); strcat( appMPlayerDir,"/share/mplayer" ); }
-// if ( ( skinMPlayerDir=(char *)calloc( 1,strlen( appMPlayerDir ) + 5 ) ) != NULL )
-//  { strcpy( skinMPlayerDir,appMPlayerDir ); strcat( skinMPlayerDir,"/Skin" ); }
-
  initDebug(NULL); // write messages to stderr
 
  cfgDefaults(); // set skin to "default"
  cfgRead();     // empty function - NOP
-// if ( !strcmp( cfgAppName,"movieplayer" ) )
-//  {
-   appMPlayer.sub.x=-1; appMPlayer.sub.y=-1; appMPlayer.sub.width=512; appMPlayer.sub.height=256;
-   switch ( skinRead( cfgSkin ) )
-    {
-     case -1: dbprintf( 0,"[app] skin configfile not found.\n" ); exit( 0 );
-     case -2: dbprintf( 0,"[app] skin configfile read error.\n" ); exit( 0 );
-    }
-   mplInit( argc,argv,envp,disp ); // does gtk & ws initialization, create windows
-//  }
+ switch ( skinRead( cfgSkin ) )
+  {
+   case -1: dbprintf( 0,"[app] skin configfile not found.\n" ); exit( 0 );
+   case -2: dbprintf( 0,"[app] skin configfile read error.\n" ); exit( 0 );
+  }
+ mplInit( argc,argv,envp,disp ); // does gtk & ws initialization, create windows
 }

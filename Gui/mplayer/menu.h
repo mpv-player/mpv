@@ -55,11 +55,11 @@ void mplMenuMouseHandle( int X,int Y,int RX,int RY )
    return;
   }
 
- for( i=0;i<appMPlayer.NumberOfMenuItems+1;i++ )
+ for( i=0;i<=appMPlayer.NumberOfMenuItems;i++ )
   {
    if ( wgIsRect( x,y,
          appMPlayer.MenuItems[i].x,appMPlayer.MenuItems[i].y,
-         appMPlayer.MenuItems[i].x+appMPlayer.MenuItems[i].width,appMPlayer.MenuItems[i].y+appMPlayer.MenuItems[i].height ) ) mplMenuItem=i;
+         appMPlayer.MenuItems[i].x+appMPlayer.MenuItems[i].width,appMPlayer.MenuItems[i].y+appMPlayer.MenuItems[i].height ) ) { mplMenuItem=i; break; }
   }
  wsPostRedisplay( &appMPlayer.menuWindow );
 }
@@ -92,11 +92,15 @@ void mplHideMenu( int mx,int my )
 
  x=mx-mplMenuX;
  y=my-mplMenuY;
+// x=RX - appMPlayer.menuWindow.X;
+// y=RY - appMPlayer.menuWindow.Y;
 
  wsVisibleWindow( &appMPlayer.menuWindow,wsHideWindow );
 
  if ( ( x < 0 ) || ( y < 0 ) ) return;
 
+ printf( "---------> %d %d,%d\n",i,x,y ); 
+ printf( "--------> mi: %d,%d %dx%d\n",appMPlayer.MenuItems[i].x,appMPlayer.MenuItems[i].y,appMPlayer.MenuItems[i].width,appMPlayer.MenuItems[i].height );
  if ( wgIsRect( x,y,
         appMPlayer.MenuItems[i].x,appMPlayer.MenuItems[i].y,
         appMPlayer.MenuItems[i].x+appMPlayer.MenuItems[i].width,
