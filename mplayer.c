@@ -535,6 +535,18 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
   }
 #endif
 
+#ifdef USE_SUB
+// check .sub
+  if(sub_name){
+       int l=strlen(sub_name);
+       if ((l>4) && ((0==strcmp(&sub_name[l-4],".utf"))
+		   ||(0==strcmp(&sub_name[l-4],".UTF"))))
+	  sub_utf8=1;
+       subtitles=sub_read_file(sub_name);
+       if(!subtitles) mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadSub,sub_name);
+  }
+#endif
+
 
 #ifdef HAVE_LIRC
  #ifdef HAVE_GUI
@@ -574,14 +586,7 @@ play_next_file:
 
 #ifdef USE_SUB
 // check .sub
-  if(sub_name){
-       int l=strlen(sub_name);
-       if ((l>4) && ((0==strcmp(&sub_name[l-4],".utf"))
-		   ||(0==strcmp(&sub_name[l-4],".UTF"))))
-	  sub_utf8=1;
-       subtitles=sub_read_file(sub_name);
-       if(!subtitles) mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadSub,sub_name);
-  } else {
+  if(!sub_name){
       if(sub_auto && filename) { // auto load sub file ...
          subtitles=sub_read_file( sub_filename( get_path("sub/"), filename ) );
       }
@@ -589,7 +594,6 @@ play_next_file:
   }
 #endif
 
-    
     demuxer=NULL; stream=NULL;
     
 #ifdef USE_LIBVO2
