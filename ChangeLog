@@ -5,19 +5,18 @@ mplayer (1.0)
     Security:
     * remotely exploitable buffer overflow in the asf streaming code fixed
 
-    DOCS: /* FIXME */
-    * massive French, Spanish and Russian docs update
-    * Hungarian, Polish tranlations updated
-    * New Romanian translation in XML format
+    DOCS:
+    * Spanish and Russian translations almost finished
+    * French, Hungarian, Polish translations updated
+    * New Romanian translation started
     * numerous sections updated
     
     Ports:
     * initial Amiga/MorphOS (through GeekGadgets) support
-    * libmenu now works on mingw
-    * freebsd 5.x (libkse/libthr) support in win32 DLL loader
-    * fixed mpdvdkit on mingw
-    * slave mode, vobsub and mencoder support on windows
+    * FreeBSD 5.x (libkse/libthr) support in win32 DLL loader
     * finally fixed the compilation on non-mvi capable alpha CPUs
+    * OSD menu now works on MinGW
+    * slave mode, vobsub and MEncoder support on Windows
     * MinGW 3.1.0 supports MPlayer out of the box!
 
     Codecs and demuxers:
@@ -30,12 +29,12 @@ mplayer (1.0)
     * QuickTime codecs support inside Matroska
     * improved seeking inside Matroska
     * some bugs with DMO codecs have been fixed
-    * fix for mov files with bogus user data length
+    * fix for MOV files with bogus user data length
     * fixed some demuxers which read after the EOF
     * better RTP synchronisation
     
     Filters:
-    * new delogo filter (for removing the channel-logos)
+    * new delogo filter (for removing TV channel logos)
     * presets support in swscaler filter
     * new audio filter export, for supporting visual effect applications
     
@@ -48,12 +47,12 @@ mplayer (1.0)
     * detect old xvid with fourcc=DIVX
     * vp3 decoder fixes
     * improved the Alpha optimizations
-    * x86 optimiziations are thread-safe now
+    * x86 optimizations are threadsafe now
     * settable scene change threshold
     * better MPEG1/MPEG2 conformance encoder
     * quality improvement for high bitrate videos with trellis quantization
     * indeo3 decoder fixed
-    * Rate distorted optimal coded block pattern
+    * new options: mv0, cbp
     
     Drivers:
     * VIDIX driver for nVidia cards
@@ -63,14 +62,14 @@ mplayer (1.0)
     * smoother audio playback with alsa9
     * fullscreen and geometry support in directx
     * fullscreen support with opengl drivers
-    * osd fixed with svga
+    * OSD fixed with svga
     
     Others:
     * several leak fixes
-    * selecting optimizations for ppc 7455 CPU
+    * selecting optimizations for PPC 7455 CPU
     * CPU detection code now measures speed on x86
     * unrarlib cleaned up a bit
-    * updated the list of known x86 CPUs (including opteron!)
+    * updated the list of known x86 CPUs (including Opteron!)
     * alignment and smart line splitting option on subtitles
      
   pre1:  "Development" on the beach
@@ -107,7 +106,8 @@ mplayer (1.0)
     * HP-UX fixes
     * Ported to Darwin / Mac OS X (with extra accurate Darwin timers)
     * Ported to Win32/MinGW (including network, timers, getch etc)
-    * win32 codecs DLL support on Win32/Cygwin (and MinGW too!)
+    * win32 codecs DLL support on Win32/Cygwin (and MinGW, too!)
+    * fixed mpdvdkit on Cygwin and MinGW
     * Lots of PPC (including Altivec) optimizations
     * Some ARM fixes
     * Alpha fixes (especially non-gcc3 support)
