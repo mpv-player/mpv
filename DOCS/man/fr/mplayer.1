@@ -1,4 +1,4 @@
-.\" synced with 1.818
+.\" synced with 1.821
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "05 Décembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "15 Décembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -739,11 +739,12 @@ en paramètre.
 .
 .TP
 .B \-sstep <sec>
-Spécifie le nombre de secondes entre chaque trame.
+Affiche une trame toutes les <sec> secondes.
 Utile pour les diaporamas.
-Cela utilise le déplacement/navigation normal, donc est aussi inexact
-(i.e.\& avez la plupart des formats, vous aurez une trame toutes les <sec>
-à <sec>+20 secondes).
+Étant donné que MPlayer ne peut se déplacer dans les flux que de trame-clé
+en trame-clé, ceci peut donc est aussi inexact.
+La plupart des formats n'ont une trame-clé toutes les <sec> à <sec>+20
+secondes).
 .
 .
 .SH "OPTIONS DEMULTIPLEXEUR/\:FLUX"
@@ -1552,16 +1553,16 @@ utilise le flou gaussien swscaler (très joli)
 Définit l'alignement des sous-titres SPU (DVD/\:VobSub).
 .PD 0
 .RSs
-.IPs -1
+.IPs "-1"
 position originale.
-.IPs 0
+.IPs "0"
 aligner en haut (par défaut)
-.IPs 1
+.IPs "1"
 aligner au milieu
-.IPs 2
+.IPs "2"
 aligner en bas
 .RE
-.PD 1
+.PD
 .
 .TP
 .B \-spugauss <0.0\-3.0> (OSD uniquement)
@@ -1811,25 +1812,25 @@ Sélectionne le format utilisé pour la sortie depuis la couche filtre
 .
 .PD 0
 .RSs
-.IPs 1
+.IPs "   1"
 Mu-Law
-.IPs 2
+.IPs "   2"
 A-Law
-.IPs 4
+.IPs "   4"
 Ima-ADPCM
-.IPs 8
+.IPs "   8"
 8-bit non signé
-.IPs 16
+.IPs "  16"
 16-bit signé (little-endian)
-.IPs 32
+.IPs "  32"
 16-bit signé (big-endian)
-.IPs 64
+.IPs "  64"
 8-bit signé
-.IPs 128
+.IPs " 128"
 16-bit non signé (little-endian)
-.IPs 256
+.IPs " 256"
 16-bit non signé (big-endian)
-.IPs 512
+.IPs " 512"
 MPEG (2) audio
 .IPs 1024
 AC3
@@ -1935,16 +1936,6 @@ directement hwac3 via S/PDIF, à moins que vous sachiez vraiment comment bien
 le configurer.
 .RE
 .PD 1
-.
-.TP
-.B alsa1x (OBSOLÈTE)
-Pilote de sortie audio ALSA 1.x.
-Rendu obsolète par le pilote générique audio alsa.
-.
-.TP
-.B alsa9 (OBSOLÈTE)
-Pilote de sortie audio ALSA 0.9.
-Rendu obsolète par le pilote générique audio alsa.
 .
 .TP
 .B alsa5\ \ 
@@ -3040,9 +3031,9 @@ Définit le nom de fichier de sortie (par défaut\ : ./md5sums).
 .TP
 .B yuv4mpeg
 Transforme le flux vidéo en une séquence d'images YUV 4:2:0 non compressées
-et les stocke dans un fichier nommé 'stream.yuv' dans le répertoire courant.
+et les stocke dans un fichier (par défaut\ : ./stream.yuv).
 Ce format est identique à celui employé par la suite mjpegtools, ce qui peut
-vous être utile pour retraiter cette vidéo avec cette suite.
+vous être utile si vous comptez retraiter cette vidéo avec cette suite.
 Ne gère que les formats YV12, RGB (24 bits/pixel) et BGR (24 bits/pixel).
 .PD 0
 .RSs
@@ -3051,7 +3042,7 @@ Entrelace les trames de sortie, en commençant par les champs du haut.
 .IPs interlaced_bf
 Entrelace les trames de sortie, en commençant par les champs du bas.
 .IPs file=<nom_fichier>
-Définit le nom du fichier de sortie (par défaut\ : ./stream.yuv).
+Écrit la sortie dans <nom_fichier> (par défaut\ : ./stream.yuv).
 .REss
 .PD 1
 .RS
@@ -3126,15 +3117,15 @@ Gère les fichiers PPM, PGM et PGMYUB, en mode brut ou ASCII.
 Voir aussi les pages de manuel pnm (5), ppm (5) et pgm (5).
 .PD 0
 .RSs
-.IPs ppm
+.IPs ppm\ \ 
 Écrit des fichiers PPM (par défaut).
-.IPs pgm
+.IPs pgm\ \ 
 Écrit des fichiers PGM.
 .IPs pgmyuv
 Écrit des fichiers PGMYUV.
 PGMYUV est similaire à PGM, mais contient en plus les plans U et V, rajoutés
 en bas de l'image.
-.IPs raw
+.IPs raw\ \ 
 Écrit les fichiers PNM en mode brut (par défaut).
 .IPs ascii
 Écrit les fichiers PNM en mode ASCII (par défaut).
@@ -4256,6 +4247,7 @@ luminosité et de contraste.
 Notez que cela utilise le même code MMX optimisé que \-vf eq si toutes les
 valeurs gamma sont 1.0.
 Les paramètres sont donnés en nombres flottants.
+.PD 0
 .RSs
 .IPs rg
 valeur gamma pour la composante rouge
@@ -4263,7 +4255,9 @@ valeur gamma pour la composante rouge
 valeur gamma pour la composante verte
 .IPs bg
 valeur gamma pour la composante bleue
-.RE
+.REss
+.PD 1
+.RS
 Les paramètres rg, vg, bg sont les valeurs gamma indépendantes pour les
 composantes rouges, vertes et bleues.
 Le paramètre poids peut être utilisé pour réduire l'effet d'un gamma trop
@@ -4276,6 +4270,7 @@ saturation=1.0, poids=1.0.
 Les intervalles de valeur sont 0.1\-10 pour les gamma, -2\-2 pour le contraste
 (les valeurs négatives produisent une image négative), -1\-1 pour la
 luminosité, 0\-3 pour la saturation et 0\-1 pour le poids.
+.RE
 .
 .TP
 .B hue[=couleur:saturation]
