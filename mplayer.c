@@ -920,6 +920,7 @@ if ( use_gui && stream->type == STREAMTYPE_DVD )
   memcpy( mplShMem->DVD.subtitles,dvdp->subtitles,sizeof( dvdp->subtitles ) );
   mplShMem->DVD.current_title=dvd_title + 1;
   mplShMem->DVD.current_chapter=dvd_chapter + 1;
+  mplShMem->DVD.current_angle=dvd_angle + 1;
   mplShMem->Track=dvd_title + 1;
  } 
 #endif

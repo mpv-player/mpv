@@ -240,6 +240,26 @@ void mplMsgHandle( int msg,float param )
          }
         mplPlay();
         break;
+   case evSetDVDSubtitle:
+        break;
+   case evSetDVDAudio:
+        break;
+   case evSetDVDChapter:
+	mplStop();
+	dvd_title=mplShMem->DVD.current_title - 1;
+	dvd_angle=mplShMem->DVD.current_angle - 1;
+        dvd_chapter=(int)param;
+        strcpy( mplShMem->Filename,"/dev/dvd" );
+	mplPlay();
+        break;
+   case evSetDVDTitle:
+	mplStop();
+        dvd_title=(int)param;
+	dvd_chapter=1;
+	dvd_angle=1;
+        strcpy( mplShMem->Filename,"/dev/dvd" );
+	mplPlay();
+        break;
 
    case evPause:
    case evPauseSwitchToPlay:

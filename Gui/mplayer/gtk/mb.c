@@ -40,7 +40,6 @@ GtkWidget * create_MessageBox( int type )
  GtkWidget * frame4;
  GtkWidget * vbox1;
  GtkWidget * hbox1;
- GtkWidget * pixmap1;
  GtkWidget * hseparator1;
  GtkWidget * hbuttonbox1;
  GtkWidget * Ok;

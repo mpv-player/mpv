@@ -42,6 +42,7 @@ typedef struct
  int angles;
  int current_chapter;
  int current_title;
+ int current_angle;
  int nr_of_audio_channels;
  audio_stream_t audio_streams[8];
  int nr_of_subtitles;
