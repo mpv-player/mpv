@@ -50,15 +50,10 @@ int gtkFillSkinList( gchar * mdir )
 
  gtkOldSkin=strdup( skinName );
  prev=gtkOldSkin;
- if ( ( str[0]=(char *)calloc( 1,7 ) ) == NULL )
-  {
-   gtkMessageBox( GTK_MB_FATAL,MSGTR_SKINBROWSER_NotEnoughMemory );
-   return 0;
-  }
+
+ str[0]="default";
  str[1]="";
- strcpy( str[0],"default" );
  if ( gtkFindCList( SkinList,str[0] ) == -1 ) gtk_clist_append( GTK_CLIST( SkinList ),str );
- free( str[0] );
 
  glob( mdir,GLOB_NOSORT,NULL,&gg );
  for( i=0;i<(int)gg.gl_pathc;i++ )
@@ -69,10 +64,8 @@ int gtkFillSkinList( gchar * mdir )
     {
      tmp=strrchr( gg.gl_pathv[i],'/' ); tmp++;
      if ( !strcmp( tmp,"default" ) ) continue;
-     if ( ( str[0]=(char *)malloc( strlen( tmp ) + 1 ) ) == NULL ) { gtkMessageBox( GTK_MB_FATAL,MSGTR_SKINBROWSER_NotEnoughMemory ); return 0; }
-     strcpy( str[0],tmp );
+     str[0]=tmp;
      if ( gtkFindCList( SkinList,str[0] ) == -1 ) gtk_clist_append( GTK_CLIST( SkinList ),str );
-     free( str[0] );
     }
   }
  globfree( &gg );
