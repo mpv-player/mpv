@@ -812,7 +812,7 @@ static uint32_t preinit(const char *arg)
     }
     if(!xv_port){
       if(busy_ports)
-	mp_msg(MSGT_VO,MSGL_ERR,"Couldn't find free Xvideo port - maybe other applications keep open it.\n"
+	mp_msg(MSGT_VO,MSGL_ERR,"Could not find free Xvideo port - maybe another process is already using it.\n"
 	    "Close all video applications, and try again. If that does not help,\n"
 	    "see 'mplayer -vo help' for other (non-xv) video out drivers.\n");
       else
