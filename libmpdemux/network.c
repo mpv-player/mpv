@@ -18,7 +18,7 @@
 
 #include "stream.h"
 #include "demuxer.h"
-#include "../cfgparser.h"
+#include "../m_config.h"
 
 #include "network.h"
 #include "http.h"
@@ -36,7 +36,7 @@ extern int stream_cache_size;
 
 extern int mp_input_check_interrupt(int time);
 
-int asf_streaming_start( stream_t *stream );
+int asf_streaming_start( stream_t *stream, int *demuxer_type );
 int rtsp_streaming_start( stream_t *stream );
 
 /* Variables for the command line option -user, -passwd & -bandwidth */
@@ -1006,7 +1006,9 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 			// Send the appropriate HTTP request
 			// Need to filter the network stream.
 			// ASF raw stream is encapsulated.
-			ret = asf_streaming_start( stream );
+			// It can also be a playlist (redirector)
+			// so we need to pass demuxer_type too
+			ret = asf_streaming_start( stream, demuxer_type );
 			if( ret<0 ) {
 				mp_msg(MSGT_NETWORK,MSGL_ERR,"asf_streaming_start failed\n");
 			}
@@ -1040,8 +1042,6 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 			if( ret<0 ) {
 				mp_msg(MSGT_NETWORK,MSGL_ERR,"nop_streaming_start failed\n");
 			}
-			if((*demuxer_type) == DEMUXER_TYPE_PLAYLIST)
-			  stream->type = STREAMTYPE_PLAYLIST;
 			break;
 		default:
 			mp_msg(MSGT_NETWORK,MSGL_ERR,"Unable to detect the streaming type\n");

@@ -11,7 +11,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include "cfgparser.h"
+#include "m_config.h"
 #include "playtree.h"
 #include "playtreeparser.h"
 #include "libmpdemux/stream.h"
@@ -456,7 +456,6 @@ parse_playtree(stream_t *stream, int forced) {
 
 #ifdef MP_DEBUG
   assert(stream != NULL);
-//  assert(stream->type == STREAMTYPE_PLAYLIST);
 #endif
 
   p = play_tree_parser_new(stream,0);
@@ -517,24 +516,18 @@ play_tree_t*
 parse_playlist_file(char* file) {
   stream_t *stream;
   play_tree_t* ret;
-  int fd;
+  int f;
 
-  if(!strcmp(file,"-"))
-    fd = 0;
-  else
-    fd = open(file,O_RDONLY);
+  stream = open_stream(file,0,&f);
 
-  if(fd < 0) {
+  if(!stream) {
     mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Error while opening playlist file %s : %s\n",file,strerror(errno));
     return NULL;
   }
 
   mp_msg(MSGT_PLAYTREE,MSGL_V,"Parsing playlist file %s...\n",file);
 
-  stream = new_stream(fd,STREAMTYPE_PLAYLIST);
   ret = parse_playtree(stream,1);
-  if(close(fd) < 0)
-    mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Warning error while closing playlist file %s : %s\n",file,strerror(errno));
   free_stream(stream);
 
   play_tree_add_bpf(ret, file);
