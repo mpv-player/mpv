@@ -818,6 +818,13 @@
 #define CAP_INT_CNTL				0x0908
 #define CAP_INT_STATUS				0x090C
 #define FCP_CNTL				0x0910
+#	define FCP_CNTL__PCICLK			0
+#	define FCP_CNTL__PCLK			1
+#	define FCP_CNTL__PCLK6			2
+#	define FCP_CNTL__HREF			3
+#	define FCP_CNTL__GND			4
+#	define FCP_CNTL__HREF6			5
+
 #define	CAP0_BUF0_OFFSET			0x0920
 #define	CAP0_BUF1_OFFSET			0x0924
 #define	CAP0_BUF0_EVEN_OFFSET			0x0928

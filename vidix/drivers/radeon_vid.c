@@ -211,6 +211,22 @@ static uint32_t radeon_ram_size = 0;
 		OUTREG(addr, _tmp);					\
 	} while (0)
 
+static __inline__ uint32_t INPLL(uint32_t addr)
+{
+	OUTREG8(CLOCK_CNTL_INDEX, addr & 0x0000001f);
+	return (INREG(CLOCK_CNTL_DATA));
+}
+
+#define OUTPLL(addr,val)	OUTREG8(CLOCK_CNTL_INDEX, (addr & 0x0000001f) | 0x00000080); \
+				OUTREG(CLOCK_CNTL_DATA, val)
+#define OUTPLLP(addr,val,mask)  					\
+	do {								\
+		unsigned int _tmp = INPLL(addr);			\
+		_tmp &= (mask);						\
+		_tmp |= (val);						\
+		OUTPLL(addr, _tmp);					\
+	} while (0)
+
 static uint32_t radeon_vid_get_dbpp( void )
 {
   uint32_t dbpp,retval;
@@ -236,6 +252,24 @@ static int radeon_is_interlace( void )
   return (INREG(CRTC_GEN_CNTL))&CRTC_INTERLACE_EN;
 }
 
+static uint32_t radeon_get_xres( void )
+{
+  /* FIXME: currently we extract that from CRTC!!!*/
+  uint32_t xres,h_total;
+  h_total = INREG(CRTC_H_TOTAL_DISP);
+  xres = (h_total >> 16) & 0xffff;
+  return (xres + 1)*8;
+}
+
+static uint32_t radeon_get_yres( void )
+{
+  /* FIXME: currently we extract that from CRTC!!!*/
+  uint32_t yres,v_total;
+  v_total = INREG(CRTC_V_TOTAL_DISP);
+  yres = (v_total >> 16) & 0xffff;
+  return yres + 1;
+}
+
 static __inline__ void radeon_engine_flush ( void )
 {
 	int i;
@@ -250,34 +284,135 @@ static __inline__ void radeon_engine_flush ( void )
 	}
 }
 
+static void _radeon_engine_idle(void);
+static void _radeon_fifo_wait(unsigned);
+#define radeon_engine_idle()		_radeon_engine_idle()
+#define radeon_fifo_wait(entries)	_radeon_fifo_wait(entries)
 
-static __inline__ void _radeon_fifo_wait (unsigned entries)
+static void radeon_engine_reset( void )
 {
-	int i;
+	uint32_t clock_cntl_index, mclk_cntl, rbbm_soft_reset;
 
-	for (i=0; i<2000000; i++)
-		if ((INREG(RBBM_STATUS) & 0x7f) >= entries)
-			return;
+	radeon_engine_flush ();
+
+	clock_cntl_index = INREG(CLOCK_CNTL_INDEX);
+	mclk_cntl = INPLL(MCLK_CNTL);
+
+	OUTPLL(MCLK_CNTL, (mclk_cntl |
+			   FORCEON_MCLKA |
+			   FORCEON_MCLKB |
+			   FORCEON_YCLKA |
+			   FORCEON_YCLKB |
+			   FORCEON_MC |
+			   FORCEON_AIC));
+	rbbm_soft_reset = INREG(RBBM_SOFT_RESET);
+
+	OUTREG(RBBM_SOFT_RESET, rbbm_soft_reset |
+				SOFT_RESET_CP |
+				SOFT_RESET_HI |
+				SOFT_RESET_SE |
+				SOFT_RESET_RE |
+				SOFT_RESET_PP |
+				SOFT_RESET_E2 |
+				SOFT_RESET_RB |
+				SOFT_RESET_HDP);
+	INREG(RBBM_SOFT_RESET);
+	OUTREG(RBBM_SOFT_RESET, rbbm_soft_reset & (uint32_t)
+				~(SOFT_RESET_CP |
+				  SOFT_RESET_HI |
+				  SOFT_RESET_SE |
+				  SOFT_RESET_RE |
+				  SOFT_RESET_PP |
+				  SOFT_RESET_E2 |
+				  SOFT_RESET_RB |
+				  SOFT_RESET_HDP));
+	INREG(RBBM_SOFT_RESET);
+
+	OUTPLL(MCLK_CNTL, mclk_cntl);
+	OUTREG(CLOCK_CNTL_INDEX, clock_cntl_index);
+	OUTREG(RBBM_SOFT_RESET, rbbm_soft_reset);
+
+	return;
 }
 
-
-static __inline__ void _radeon_engine_idle ( void )
+static void radeon_engine_restore( void )
 {
-	int i;
+    int pitch64;
+    uint32_t xres,yres,bpp;
+    radeon_fifo_wait(1);
+    xres = radeon_get_xres();
+    yres = radeon_get_yres();
+    bpp = radeon_vid_get_dbpp();
+    /* turn of all automatic flushing - we'll do it all */
+    OUTREG(RB2D_DSTCACHE_MODE, 0);
 
-	/* ensure FIFO is empty before waiting for idle */
-	_radeon_fifo_wait (64);
+    pitch64 = ((xres * (bpp / 8) + 0x3f)) >> 6;
 
+    radeon_fifo_wait(1);
+    OUTREG(DEFAULT_OFFSET, (INREG(DEFAULT_OFFSET) & 0xC0000000) |
+				  (pitch64 << 22));
+
+    radeon_fifo_wait(1);
+#if defined(__BIG_ENDIAN)
+    OUTREGP(DP_DATATYPE,
+	    HOST_BIG_ENDIAN_EN, ~HOST_BIG_ENDIAN_EN);
+#else
+    OUTREGP(DP_DATATYPE, 0, ~HOST_BIG_ENDIAN_EN);
+#endif
+
+    radeon_fifo_wait(1);
+    OUTREG(DEFAULT_SC_BOTTOM_RIGHT, (DEFAULT_SC_RIGHT_MAX
+				    | DEFAULT_SC_BOTTOM_MAX));
+    radeon_fifo_wait(1);
+    OUTREG(DP_GUI_MASTER_CNTL, (INREG(DP_GUI_MASTER_CNTL)
+				       | GMC_BRUSH_SOLID_COLOR
+				       | GMC_SRC_DATATYPE_COLOR));
+
+    radeon_fifo_wait(7);
+    OUTREG(DST_LINE_START,    0);
+    OUTREG(DST_LINE_END,      0);
+    OUTREG(DP_BRUSH_FRGD_CLR, 0xffffffff);
+    OUTREG(DP_BRUSH_BKGD_CLR, 0x00000000);
+    OUTREG(DP_SRC_FRGD_CLR,   0xffffffff);
+    OUTREG(DP_SRC_BKGD_CLR,   0x00000000);
+    OUTREG(DP_WRITE_MASK,     0xffffffff);
+
+    radeon_engine_idle();
+}
+
+static void _radeon_fifo_wait (unsigned entries)
+{
+    int i;
+
+    for(;;)
+    {
+	for (i=0; i<2000000; i++)
+		if ((INREG(RBBM_STATUS) & RBBM_FIFOCNT_MASK) >= entries)
+			return;
+	radeon_engine_reset();
+	radeon_engine_restore();
+    }
+}
+
+static void _radeon_engine_idle ( void )
+{
+    int i;
+
+    /* ensure FIFO is empty before waiting for idle */
+    radeon_fifo_wait (64);
+    for(;;)
+    {
 	for (i=0; i<2000000; i++) {
 		if (((INREG(RBBM_STATUS) & GUI_ACTIVE)) == 0) {
 			radeon_engine_flush ();
 			return;
 		}
 	}
+	radeon_engine_reset();
+	radeon_engine_restore();
+    }
 }
 
-#define radeon_engine_idle()		_radeon_engine_idle()
-#define radeon_fifo_wait(entries)	_radeon_fifo_wait(entries)
 
 
 #ifndef RAGE128
@@ -753,6 +888,7 @@ static void radeon_vid_dump_regs( void )
   printf(RADEON_MSG"radeon_mem_base=%p\n",radeon_mem_base);
   printf(RADEON_MSG"radeon_overlay_off=%08X\n",radeon_overlay_off);
   printf(RADEON_MSG"radeon_ram_size=%08X\n",radeon_ram_size);
+  printf(RADEON_MSG"video mode: %ux%u@%u\n",radeon_get_xres(),radeon_get_yres(),radeon_vid_get_dbpp());
   printf(RADEON_MSG"*** Begin of OV0 registers dump ***\n");
   for(i=0;i<sizeof(vregs)/sizeof(video_registers_t);i++)
 	printf(RADEON_MSG"%s = %08X\n",vregs[i].sname,INREG(vregs[i].name));
@@ -778,9 +914,13 @@ static void radeon_vid_display_video( void )
     radeon_engine_idle();
     while(!(INREG(OV0_REG_LOAD_CNTL)&REG_LD_CTL_LOCK_READBACK));
     radeon_fifo_wait(15);
+
+    /* Shutdown capturing */
+    OUTREG(FCP_CNTL, FCP_CNTL__GND);
+    OUTREG(CAP0_TRIG_CNTL, 0);
+
+
     OUTREG(OV0_AUTO_FLIP_CNTL,OV0_AUTO_FLIP_CNTL_SOFT_BUF_ODD);
-    OUTREG(OV0_AUTO_FLIP_CNTL,(INREG(OV0_AUTO_FLIP_CNTL)^OV0_AUTO_FLIP_CNTL_SOFT_EOF_TOGGLE));
-    OUTREG(OV0_AUTO_FLIP_CNTL,(INREG(OV0_AUTO_FLIP_CNTL)^OV0_AUTO_FLIP_CNTL_SOFT_EOF_TOGGLE));
 
     if(besr.deinterlace_on) OUTREG(OV0_DEINTERLACE_PATTERN,besr.deinterlace_pattern);
 #ifdef RAGE128
@@ -832,11 +972,10 @@ static void radeon_vid_display_video( void )
     bes_flags = SCALER_ENABLE |
                 SCALER_SMART_SWITCH |
 #ifdef RADEON
-		SCALER_HORZ_PICK_NEAREST;
-#else
+		SCALER_HORZ_PICK_NEAREST |
+#endif
 		SCALER_Y2R_TEMP |
 		SCALER_PIX_EXPAND;
-#endif
     if(besr.double_buff) bes_flags |= SCALER_DOUBLE_BUFFER;
     if(besr.deinterlace_on) bes_flags |= SCALER_ADAPTIVE_DEINT;
 #ifdef RAGE128
@@ -870,6 +1009,7 @@ static void radeon_vid_display_video( void )
     }
     OUTREG(OV0_SCALE_CNTL,		bes_flags);
     OUTREG(OV0_REG_LOAD_CNTL,		0);
+    if(__verbose > 1) printf(RADEON_MSG"we wanted: scaler=%08X\n",bes_flags);
     if(__verbose > 1) radeon_vid_dump_regs();
 }
 
@@ -988,11 +1128,13 @@ static int radeon_vid_init_video( vidix_playback_t *config )
 
     /* keep everything in 16.16 */
     besr.base_addr = INREG(DISPLAY_BASE_ADDR);
+    config->offsets[0] = 0;
+    config->offsets[1] = config->frame_size;
     if(is_420)
     {
         uint32_t d1line,d2line,d3line;
 	d1line = top*pitch;
-	d2line = src_h*pitch+(d1line>>1);
+	d2line = src_h*pitch+(d1line>>2);
 	d3line = d2line+((src_h*pitch)>>2);
 	d1line += (left >> 16) & ~15;
 	d2line += (left >> 17) & ~15;
@@ -1000,9 +1142,15 @@ static int radeon_vid_init_video( vidix_playback_t *config )
 	config->offset.y = d1line & VIF_BUF0_BASE_ADRS_MASK;
 	config->offset.v = d2line & VIF_BUF1_BASE_ADRS_MASK;
 	config->offset.u = d3line & VIF_BUF2_BASE_ADRS_MASK;
-        besr.vid_buf0_base_adrs=(radeon_overlay_off+config->offset.y);
-        besr.vid_buf1_base_adrs=(radeon_overlay_off+config->offset.v)|VIF_BUF1_PITCH_SEL;
-        besr.vid_buf2_base_adrs=(radeon_overlay_off+config->offset.u)|VIF_BUF2_PITCH_SEL;
+        besr.vid_buf0_base_adrs=((radeon_overlay_off+config->offsets[0]+config->offset.y)&VIF_BUF0_BASE_ADRS_MASK);
+        besr.vid_buf1_base_adrs=((radeon_overlay_off+config->offsets[0]+config->offset.v)&VIF_BUF1_BASE_ADRS_MASK)|VIF_BUF1_PITCH_SEL;
+        besr.vid_buf2_base_adrs=((radeon_overlay_off+config->offsets[0]+config->offset.u)&VIF_BUF2_BASE_ADRS_MASK)|VIF_BUF2_PITCH_SEL;
+        besr.vid_buf3_base_adrs=((radeon_overlay_off+config->offsets[1]+config->offset.y)&VIF_BUF0_BASE_ADRS_MASK);
+        besr.vid_buf4_base_adrs=((radeon_overlay_off+config->offsets[1]+config->offset.v)&VIF_BUF1_BASE_ADRS_MASK)|VIF_BUF1_PITCH_SEL;
+        besr.vid_buf5_base_adrs=((radeon_overlay_off+config->offsets[1]+config->offset.u)&VIF_BUF2_BASE_ADRS_MASK)|VIF_BUF2_PITCH_SEL;
+	config->offset.y = ((besr.vid_buf0_base_adrs)&VIF_BUF0_BASE_ADRS_MASK) - radeon_overlay_off;
+	config->offset.v = ((besr.vid_buf1_base_adrs)&VIF_BUF1_BASE_ADRS_MASK) - radeon_overlay_off;
+	config->offset.u = ((besr.vid_buf2_base_adrs)&VIF_BUF2_BASE_ADRS_MASK) - radeon_overlay_off;
 	if(besr.fourcc == IMGFMT_I420 || besr.fourcc == IMGFMT_IYUV)
 	{
 	  uint32_t tmp;
@@ -1010,23 +1158,18 @@ static int radeon_vid_init_video( vidix_playback_t *config )
 	  config->offset.u = config->offset.v;
 	  config->offset.v = tmp;
 	}
-	besr.vid_buf3_base_adrs = besr.vid_buf0_base_adrs+config->frame_size;
-	besr.vid_buf4_base_adrs = besr.vid_buf1_base_adrs+config->frame_size;
-	besr.vid_buf5_base_adrs = besr.vid_buf2_base_adrs+config->frame_size;
     }
     else
     {
       besr.vid_buf0_base_adrs = radeon_overlay_off;
       config->offset.y = config->offset.u = config->offset.v = ((left & ~7) << 1)&VIF_BUF0_BASE_ADRS_MASK;
       besr.vid_buf0_base_adrs += config->offset.y;
-      besr.vid_buf1_base_adrs = besr.vid_buf0_base_adrs+config->frame_size;
+      besr.vid_buf1_base_adrs = besr.vid_buf0_base_adrs;
       besr.vid_buf2_base_adrs = besr.vid_buf0_base_adrs;
       besr.vid_buf3_base_adrs = besr.vid_buf0_base_adrs+config->frame_size;
-      besr.vid_buf4_base_adrs = besr.vid_buf0_base_adrs;
+      besr.vid_buf4_base_adrs = besr.vid_buf0_base_adrs+config->frame_size;
       besr.vid_buf5_base_adrs = besr.vid_buf0_base_adrs+config->frame_size;
     }
-    config->offsets[0] = 0;
-    config->offsets[1] = config->frame_size;
 
     tmp = (left & 0x0003ffff) + 0x00028000 + (h_inc << 3);
     besr.p1_h_accum_init = ((tmp <<  4) & 0x000f8000) |
@@ -1071,30 +1214,37 @@ static int radeon_vid_init_video( vidix_playback_t *config )
 
 static void radeon_compute_framesize(vidix_playback_t *info)
 {
-  unsigned pitch,awidth;
+  unsigned pitch,awidth,dbpp;
   pitch = radeon_query_pitch(info->fourcc,&info->src.pitch);
-  awidth = (info->src.w + (pitch-1)) & ~(pitch-1);
+  dbpp = radeon_vid_get_dbpp();
   switch(info->fourcc)
   {
     case IMGFMT_I420:
     case IMGFMT_YV12:
     case IMGFMT_IYUV:
-		info->frame_size = awidth*info->src.h+(awidth*info->src.h)/2;
+		awidth = (info->src.w + (pitch-1)) & ~(pitch-1);
+		info->frame_size = (awidth*(info->src.h+info->src.h/2)+dbpp-1)/dbpp;
 		break;
     case IMGFMT_RGB32:
     case IMGFMT_BGR32:
-		info->frame_size = awidth*info->src.h*4;
+		awidth = (info->src.w*4 + (pitch-1)) & ~(pitch-1);
+		info->frame_size = ((awidth*info->src.h)+dbpp-1)/dbpp;
 		break;
     /* YUY2 YVYU, RGB15, RGB16 */
-    default:	info->frame_size = awidth*info->src.h*2;
+    default:	
+		awidth = (info->src.w*2 + (pitch-1)) & ~(pitch-1);
+		info->frame_size = ((awidth*info->src.h)+dbpp-1)/dbpp;
 		break;
   }
+  info->frame_size *= dbpp;
 }
 
 int vixConfigPlayback(vidix_playback_t *info)
 {
   if(!is_supported_fourcc(info->fourcc)) return ENOSYS;
   if(info->num_frames>2) info->num_frames=2;
+  if(info->num_frames==1) besr.double_buff=0;
+  else                    besr.double_buff=1;
   radeon_compute_framesize(info);
   radeon_overlay_off = radeon_ram_size - info->frame_size*info->num_frames;
   radeon_overlay_off &= 0xffff0000;
@@ -1123,7 +1273,8 @@ int vixPlaybackFrameSelect(unsigned frame)
     buf3-5 always should point onto second buffer for better
     deinterlacing and TV-in
     */
-    if(frame%2)
+    if(!besr.double_buff) return 0;
+    if((frame%2))
     {
       off[0] = besr.vid_buf3_base_adrs;
       off[1] = besr.vid_buf4_base_adrs;
@@ -1141,11 +1292,14 @@ int vixPlaybackFrameSelect(unsigned frame)
       off[4] = besr.vid_buf4_base_adrs;
       off[5] = besr.vid_buf5_base_adrs;
     }
+    radeon_fifo_wait(2);
     OUTREG(OV0_REG_LOAD_CNTL,		REG_LD_CTL_LOCK);
+    radeon_engine_idle();
     while(!(INREG(OV0_REG_LOAD_CNTL)&REG_LD_CTL_LOCK_READBACK));
     OUTREG(OV0_VID_BUF0_BASE_ADRS,	off[0]);
     OUTREG(OV0_VID_BUF1_BASE_ADRS,	off[1]);
     OUTREG(OV0_VID_BUF2_BASE_ADRS,	off[2]);
+    radeon_fifo_wait(9);
     OUTREG(OV0_VID_BUF3_BASE_ADRS,	off[3]);
     OUTREG(OV0_VID_BUF4_BASE_ADRS,	off[4]);
     OUTREG(OV0_VID_BUF5_BASE_ADRS,	off[5]);
