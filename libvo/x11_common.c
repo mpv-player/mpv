@@ -755,6 +755,7 @@ void saver_on(Display *mDisplay) {
                 // DPMS does not seem to be enabled unless we call DPMSInfo
 	        BOOL onoff;
         	CARD16 state;
+		DPMSForceLevel(mDisplay, DPMSModeOn);
         	DPMSInfo(mDisplay, &state, &onoff);
                 if (onoff) {
 	            mp_msg(MSGT_VO,MSGL_INFO,"Successfully enabled DPMS\n");
@@ -776,8 +777,10 @@ void saver_on(Display *mDisplay) {
 	timeout_save=0;
     }
 
-    if (xscreensaver_was_running && stop_xscreensaver)
-       system("xscreensaver -no-splash &");
+    if (xscreensaver_was_running && stop_xscreensaver) {
+	system("cd /; xscreensaver -no-splash &");
+	xscreensaver_was_running = 0;
+    }
 
 }
 
@@ -802,9 +805,11 @@ void saver_off(Display *mDisplay) {
 	}
     }
 #endif
-    XGetScreenSaver(mDisplay, &timeout_save, &interval, &prefer_blank, &allow_exp);
-    if (timeout_save)
-	XSetScreenSaver(mDisplay, 0, interval, prefer_blank, allow_exp);
+    if (!timeout_save) {
+	XGetScreenSaver(mDisplay, &timeout_save, &interval, &prefer_blank, &allow_exp);
+	if (timeout_save)
+	    XSetScreenSaver(mDisplay, 0, interval, prefer_blank, allow_exp);
+    }
     xscreensaver_was_running = stop_xscreensaver && ! system("xscreensaver-command -exit");
 		    // turning off screensaver
 }
