@@ -49,14 +49,19 @@ Oder du kannst ein MPEG1 Video in ein .AVI geben.
 <P>
 <LI>MPG : Dies ist die <B>grundlegende</B> Form des MPEG Dateiformates. Es
 enthält MPEG1 Video und MP2 Audio.</LI>
-<LI>VOB : VOB ist das MPEG Dateiformat das bei <B>DVD</B>s verwendet wird.
-Es enthält MPEG2 video und normalerweise AC3 Audio.<BR>
-<B>Lese die <A HREF="cd-dvd.html#4.2">DVD Sektion</A> !</B></LI>
 <LI>DAT : Dies ist das MPEG Dateiformat auf <B>Video CD</B>s. Es ist gleich
 zu MPG, aber aufgund der Tatsache dass VCDs erzeugt und Linux entworfen wurde
 kann man die DAT-Dateien einer VCD weder abspielen noch kopieren. Du musst die
 <CODE>-vcd</CODE> Option zum Abspielen verwenden.</LI>
+<LI>VOB : VOB ist das MPEG Dateiformat das bei <B>DVD</B>s verwendet wird.
+Es ist das selbe wie MPG mit zusätzlicher Kapazität um Untertitel oder nicht-MPEG (AC3)
+Audio aufzunehmen. Es enthält MPEG2 Video und normalerweise AC3 Audio, aber MP2 ist auch erlaubt.<BR>
+<B>Lese die <A HREF="cd-dvd.html#4.2">DVD Sektion</A> !</B></LI>
 </P>
+
+<P>In MPEG Dateien sind mehrere Frames zusammengefasst zu einer Gruppe, welche unabhängig
+zu anderen Gruppen ist. Das bedeutet, dass du eine MPEG-Datei mit einem Standard-Dateitool
+(wie dd oder cut) scheiden und zusammenfügen kannst und es bleibt vollständig funktionsfähig.</P>
 
 <P>Ein wichtiges Feature von MPGs ist, dass sie ein Feld besitzen das die
 Aspect Ratio des Video Streams angibt. SVCDs haben zum Beispiel Video mit
@@ -99,7 +104,7 @@ finden, aber wir denken der der Parser perfekt ist.
 
 <P><B>MPlayer</B> demuxt nun auch fröhlich VIVO-Dateiformate. Dieser Code ist
 neu und möglicherweise fehlerhalft und es gibt noch keine Suchfunktion. Siehe
-<A HREF=codecs.html#2.2.1.4>VIVO Videocodec</A> und <A HREF=codecs.html#2.2.2.3>VIVO Audiocodec</A>
+<A HREF=codecs.html#2.2.1.4>VIVO Videocodec</A> und <A HREF=codecs.html#2.2.2.4>VIVO Audiocodec</A>
 Sektion für Anweisungen zur Installation.</P>
 
 
