@@ -110,6 +110,9 @@ will need to compile in two steps: First make sure that the non-native as
 is first in your <envar>$PATH</envar> and do a <command>gmake -k</command>, then
 make sure that the native version is used and do <command>gmake</command>.
 </para>
+<para>
+As of OpenBSD 3.4 the hack above is no longer needed.
+</para>
 </sect2>
 
 <sect2 id="darwin">
