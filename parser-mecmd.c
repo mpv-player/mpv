@@ -110,6 +110,8 @@ m_config_parse_me_command_line(m_config_t *config, int argc, char **argv)
 	    no++;
 	  } else {
 //	    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "m_config_set_option() failed (%d)\n",tmp);
+	    if(tmp == M_OPT_EXIT)
+	      exit(0);
 	    goto err_out;
 	  }
 	}

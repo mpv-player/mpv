@@ -186,8 +186,11 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
 	  }
 	}
 
-	if (tmp < 0)
+	if (tmp < 0) {
+	  if (tmp == M_OPT_EXIT)
+	    exit(0);
 	  goto err_out;
+	}
 	i += tmp;
       }
     else /* filename */
