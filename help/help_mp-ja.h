@@ -17,7 +17,7 @@ static char help_text[]=
 #endif
 #ifdef USE_DVDREAD
 " dvd://<titleno>   play DVD title from device instead of plain file\n"
-" -alang/-slang    select DVD audio/subtitle language (by 2-char country code)\n"
+" -alang/-slang    DVDの 音声/サブタイトル 言語設定 (2文字のカントリーコードで指定)\n"
 #endif
 " -ss <timepos>    timeposに与えられた場所から再生します(seconds or hh:mm:ss)\n"
 " -nosound         音声出力を抑止します\n"
@@ -66,19 +66,13 @@ static char help_text[]=
 #define MSGTR_CantLoadFont "フォントをロード出来ません: %s\n"
 #define MSGTR_CantLoadSub "サブタイトルをロード出来ません: %s\n"
 #define MSGTR_ErrorDVDkey "DVD keyの処理でエラー\n"
-#define MSGTR_CmdlineDVDkey "The requested DVD key is used for descrambling.\n"
 #define MSGTR_DVDauthOk "DVD認証処理は正常に完了しました\n"
-#define MSGTR_DumpSelectedStreamMissing "dump: FATAL: selected stream missing!\n"
 #define MSGTR_CantOpenDumpfile "dump fileを開けません\n"
 #define MSGTR_CoreDumped "コアダンプ ;)\n"
 #define MSGTR_FPSnotspecified "FPS がヘッダに指定されていないか不正です. -fps オプションを利用して下さい.\n"
-#define MSGTR_TryForceAudioFmtStr "Trying to force audio codec driver family %s ...\n"
-#define MSGTR_CantFindAfmtFallback "Cannot find audio codec for forced driver family, falling back to other drivers.\n"
 #define MSGTR_CantFindAudioCodec "audio format 0x%X 向けのコーデックを見付ける事が出来ませんでした.\n"
 #define MSGTR_RTFMCodecs "DOCS/HTML/en/codecs.html を御覧下さい\n"
 #define MSGTR_CouldntInitAudioCodec "音声出力コーデックの初期化に失敗しました -> 無音声になります.\n"
-#define MSGTR_TryForceVideoFmtStr "Trying to force video codec driver family %s ...\n"
-#define MSGTR_CantFindVideoCodec "Cannot find codec matching selected -vo and video format 0x%X.\n"
 #define MSGTR_VOincompCodec "選択された映像出力デバイスはコーデックと互換性がありません\n"
 #define MSGTR_CannotInitVO "FATAL: 映像出力ドライバの初期化に失敗しました.\n"
 #define MSGTR_CannotInitAO "音声デバイスの初期化に失敗しました -> 無音声になります.\n"
@@ -110,7 +104,7 @@ static char help_text[]=
 #define MSGTR_Playing "%s を再生中\n"
 #define MSGTR_NoSound "音声: 無し\n"
 #define MSGTR_FPSforced "FPS forced to be %5.3f  (ftime: %5.3f)\n"
-#define MSGTR_CompiledWithRuntimeDetection "Compiled with Runtime CPU Detection - WARNING - this is not optimal!\nTo get best performance, recompile MPlayer with --disable-runtime-cpudetection\n"
+#define MSGTR_CompiledWithRuntimeDetection "コンパイル時にRuntime CPU Detectionが試用されています、これは最適ではありません\n最適なパフォーマスを得るには、--disable-runtime-cpudetectionを有効にしてMPLayerを再コンパイルして下さい\n"
 #define MSGTR_CompiledWithCPUExtensions "x86 CPU 向けにコンパイルされました:"
 #define MSGTR_AvailableVideoOutputPlugins "有効な音声出力プラグイン:\n"
 #define MSGTR_AvailableVideoOutputDrivers "有効な映像出力ドライバ:\n"
@@ -121,12 +115,12 @@ static char help_text[]=
 #define MSGTR_AvailableVideoFm "\n有効な(組み込まれた)映像コーデック families/drivers:\n"
 #define MSGTR_AvailableFsType "全画面表示モードへの切替えは可能です:\n"
 #define MSGTR_UsingRTCTiming "Linux hardware RTC timing (%ldHz) を使っています.\n"
-#define MSGTR_CannotReadVideoProperties "Video: Cannot read properties.\n"
+#define MSGTR_CannotReadVideoProperties "Video: プロパティーを読み取れません.\n"
 #define MSGTR_NoStreamFound "ストリームを見付けることが出来ませんでした.\n"
 #define MSGTR_InitializingAudioCodec "音声コーデックを初期化中...\n"
 #define MSGTR_ErrorInitializingVODevice "選択された映像出力(-vo)デバイスを開く事が出来ませんでした.\n"
-#define MSGTR_ForcedVideoCodec "Forced video codec: %s\n"
-#define MSGTR_ForcedAudioCodec "Forced audio codec: %s\n"
+#define MSGTR_ForcedVideoCodec "指定された映像コーデック: %s\n"
+#define MSGTR_ForcedAudioCodec "指定された音声コーデック: %s\n"
 #define MSGTR_AODescription_AOAuthor "AO: 詳細: %s\nAO: 著者: %s\n"
 #define MSGTR_AOComment "AO: コメント: %s\n"
 #define MSGTR_Video_NoVideo "Video: 映像がありません\n"
@@ -134,11 +128,11 @@ static char help_text[]=
 #define MSGTR_Paused "\n  =====  停止  =====\r" // no more than 23 characters (status line for audio files)
 #define MSGTR_PlaylistLoadUnable "\nプレイリストの読み込みが出来ません %s.\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
-"- MPlayer crashed by an 'Illegal Instruction'.\n"\
-"  It may be a bug in our new runtime CPU-detection code...\n"\
-"  Please read DOCS/HTML/en/bugreports.html.\n"
+"- MPLayerは不正な命令(Illegal Instruction)によりクラッシュしました\n"\
+"  恐らくこれは あたらしいCPU-Detection codeにバグがあります\n"\
+"  DOCS/HTML/en/bugreports.html をお読み下さい.\n"
 #define MSGTR_Exit_SIGILL \
-"- MPlayer crashed by an 'Illegal Instruction'.\n"\
+"- MPLayerは不正な命令(Illegal Instruction)によりクラッシュしました\n"\
 "  It usually happens when you run it on a CPU different than the one it was\n"\
 "  compiled/optimized for.\n"\
 "  Verify this!\n"
@@ -148,7 +142,7 @@ static char help_text[]=
 "  --enable-debugをつけてMPlyaerをコンパイルしなおし、gdbで調査しましょう\n"\
 "  詳細は DOCS/HTML/en/bugreports.html#bugreports_crash にあります\n"
 #define MSGTR_Exit_SIGCRASH \
-"- MPlayer crashed. This shouldn't happen.\n"\
+"- MPlayer は想定されていないクラッシュを起こしました.\n"\
 "  It can be a bug in the MPlayer code _or_ in your drivers _or_ in your\n"\
 "  gcc version. If you think it's MPlayer's fault, please read\n"\
 "  DOCS/HTML/en/bugreports.html and follow the instructions there. We can't and\n"\
@@ -157,14 +151,11 @@ static char help_text[]=
 
 // mencoder.c:
 
-#define MSGTR_UsingPass3ControllFile "Using pass3 control file: %s\n"
-#define MSGTR_MissingFilename "\nFilename missing.\n\n"
 #define MSGTR_CannotOpenFile_Device "ファイル及びデバイスが開けません.\n"
-#define MSGTR_ErrorDVDAuth "Error in DVD authentication.\n"
+#define MSGTR_ErrorDVDAuth "DVD認証に失敗しました.\n"
 #define MSGTR_CannotOpenDemuxer "demuxerを開くことが出来ません.\n"
 #define MSGTR_NoAudioEncoderSelected "\n音声エンコーダ(-oac)が指定されていません、 何か指定するか、無指定(-nosound)を与えて下さい。詳細は '-oac help'\n"
 #define MSGTR_NoVideoEncoderSelected "\n映像エンコーダ(-ovc)が指定されていません、 何か指定して下さい。 詳細は '-ovc help'\n"
-// #define MSGTR_InitializingAudioCodec "Initializing audio codec...\n"
 #define MSGTR_CannotOpenOutputFile "出力ファイル'%s'を開く事が出来ません.\n"
 #define MSGTR_EncoderOpenFailed "エンコーダを開くことに失敗しました.\n"
 #define MSGTR_ForcingOutputFourcc "fourccを %x [%.4s] に指定します\n"
@@ -174,63 +165,13 @@ static char help_text[]=
 #define MSGTR_ErrorWritingFile "%s: ファイル書き込みエラー.\n"
 #define MSGTR_WritingAVIIndex "\nAVI indexを書き込み中...\n"
 #define MSGTR_FixupAVIHeader "AVIヘッダを修復中...\n"
-#define MSGTR_RecommendedVideoBitrate "Recommended video bitrate for %s CD: %d\n"
 #define MSGTR_VideoStreamResult "\n映像ストリーム: %8.3f kbit/s  (%d bps)  サイズ: %d bytes  %5.3f secs  %d フレーム\n"
 #define MSGTR_AudioStreamResult "\n音声ストリーム: %8.3f kbit/s  (%d bps)  サイズ: %d bytes  %5.3f secs\n"
 
 // cfg-mencoder.h:
 
-#define MSGTR_MEncoderMP3LameHelp "\n\n"\
-" vbr=<0-4>     variable bitrate method\n"\
-"                0: cbr\n"\
-"                1: mt\n"\
-"                2: rh(default)\n"\
-"                3: abr\n"\
-"                4: mtrh\n"\
-"\n"\
-" abr           average bitrate\n"\
-"\n"\
-" cbr           constant bitrate\n"\
-"               Also forces CBR mode encoding on subsequent ABR presets modes.\n"\
-"\n"\
-" br=<0-1024>   specify bitrate in kBit (CBR and ABR only)\n"\
-"\n"\
-" q=<0-9>       quality (0-highest, 9-lowest) (only for VBR)\n"\
-"\n"\
-" aq=<0-9>      algorithmic quality (0-best/slowest, 9-worst/fastest)\n"\
-"\n"\
-" ratio=<1-100> compression ratio\n"\
-"\n"\
-" vol=<0-10>    set audio input gain\n"\
-"\n"\
-" mode=<0-3>    (default: auto)\n"\
-"                0: stereo\n"\
-"                1: joint-stereo\n"\
-"                2: dualchannel\n"\
-"                3: mono\n"\
-"\n"\
-" padding=<0-2>\n"\
-"                0: no\n"\
-"                1: all\n"\
-"                2: adjust\n"\
-"\n"\
-" fast          Switch on faster encoding on subsequent VBR presets modes,\n"\
-"               slightly lower quality and higher bitrates.\n"\
-"\n"\
-" preset=<value> Provide the highest possible quality settings.\n"\
-"                 medium: VBR  encoding,  good  quality\n"\
-"                 (150-180 kbps bitrate range)\n"\
-"                 standard:  VBR encoding, high quality\n"\
-"                 (170-210 kbps bitrate range)\n"\
-"                 extreme: VBR encoding, very high quality\n"\
-"                 (200-240 kbps bitrate range)\n"\
-"                 insane:  CBR  encoding, highest preset quality\n"\
-"                 (320 kbps bitrate)\n"\
-"                 <8-320>: ABR encoding at average given kbps bitrate.\n\n"
-
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "CD-ROM デバイス '%s' が存在しません.\n"
-#define MSGTR_ErrTrackSelect "Error selecting VCD track."
 #define MSGTR_ReadSTDIN "標準入力から読み込んでいます...\n"
 #define MSGTR_UnableOpenURL "指定されたURLを読み込めません: %s\n"
 #define MSGTR_ConnToServer "サーバに接続中: %s\n"
@@ -255,15 +196,10 @@ static char help_text[]=
 // demuxer.c, demux_*.c:
 #define MSGTR_AudioStreamRedefined "警告: Audio stream header %d redefined.\n"
 #define MSGTR_VideoStreamRedefined "警告: Video stream header %d redefined.\n"
-#define MSGTR_TooManyAudioInBuffer "\nToo many audio packets in the buffer: (%d in %d bytes).\n"
-#define MSGTR_TooManyVideoInBuffer "\nToo many video packets in the buffer: (%d in %d bytes).\n"
-#define MSGTR_MaybeNI "Maybe you are playing a non-interleaved stream/file or the codec failed?\n" \
-		      "For AVI files, try to force non-interleaved mode with the -ni option.\n"
-#define MSGTR_SwitchToNi "\nBadly interleaved AVI file detected - switching to -ni mode...\n"
-#define MSGTR_Detected_XXX_FileFormat "%s file format detected.\n"
-#define MSGTR_DetectedAudiofile "Audio file detected.\n"
-#define MSGTR_NotSystemStream "Not MPEG System Stream format... (maybe Transport Stream?)\n"
-#define MSGTR_InvalidMPEGES "Invalid MPEG-ES stream??? Contact the author, it may be a bug :(\n"
+#define MSGTR_TooManyAudioInBuffer "\nバッファに多過ぎる音声パケットが与えられてます: (%d in %d bytes).\n"
+#define MSGTR_TooManyVideoInBuffer "\nバッファに多過ぎる映像パケットが与えられてます: (%d in %d bytes).\n"
+#define MSGTR_Detected_XXX_FileFormat "%s ファイルフォーマットと判断.\n"
+#define MSGTR_DetectedAudiofile "音声ファイルと判断.\n"
 #define MSGTR_FormatNotRecognized "============ このファイルフォーマットは サポートしていません =============\n"\
 				  "======= もしこのファイルが AVI、ASF、MPEGなら作成者に連絡して下さい ======\n"
 #define MSGTR_MissingVideoStream "映像ストリームが存在しません.\n"
@@ -276,8 +212,6 @@ static char help_text[]=
 #define MSGTR_NI_Detected "Detected"
 #define MSGTR_NI_Message "%s NON-INTERLEAVED AVI ファイル フォーマット.\n"
 
-#define MSGTR_UsingNINI "Using NON-INTERLEAVED broken AVI file format.\n"
-#define MSGTR_CouldntDetFNo "Could not determine number of frames (for absolute seek).\n"
 #define MSGTR_CantSeekRawAVI "Cannot seek in raw AVI streams. (Indexが必要です, -idx を試して下さい.)\n"
 #define MSGTR_CantSeekFile "このファイルはシークすることが出来ません.\n"
 
@@ -297,11 +231,11 @@ static char help_text[]=
 #define MSGTR_OpeningAudioDemuxerFailed "audio demuxerを開くこと開くことが出来ません: %s\n"
 #define MSGTR_OpeningSubtitlesDemuxerFailed "subtitle demuxerを開くことが出来ません: %s\n"
 #define MSGTR_TVInputNotSeekable "TV入力はシークすることは出来ません(シークは恐らくチャンネル選択に相当するのでは? ;)\n"
-#define MSGTR_DemuxerInfoAlreadyPresent "Demuxer info %s already present!\n"
-#define MSGTR_ClipInfo "Clip info:\n"
+#define MSGTR_DemuxerInfoAlreadyPresent "Demuxer 情報 %s already present!\n"
+#define MSGTR_ClipInfo "クリップ情報:\n"
 
-#define MSGTR_LeaveTelecineMode "\ndemux_mpg: 30fps NTSC content detected, switching framerate.\n"
-#define MSGTR_EnterTelecineMode "\ndemux_mpg: 24fps progressive NTSC content detected, switching framerate.\n"
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: 30fps NTSC コンテンツ検出, フレームレート変更中.\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: 24fps プログレッシブ NTSC コンテンツ検出, フレームレート変更中.\n"
 
 
 // dec_video.c & dec_audio.c:
@@ -323,8 +257,6 @@ static char help_text[]=
 
 #define MSGTR_UnknownAudio "未知の、もしくは壊れた音声フォーマットです -> 無音声になります\n"
 
-#define MSGTR_UsingExternalPP "[PP] Using external postprocessing filter, max q = %d.\n"
-#define MSGTR_UsingCodecPP "[PP] Using codec's postprocessing, max q = %d.\n"
 #define MSGTR_VideoAttributeNotSupportedByVO_VD "選択された vo と vd では映像属性 '%s' はサポートされてません.\n"
 #define MSGTR_VideoCodecFamilyNotAvailableStr "要求された映像コーデック [%s] (vfm=%s) は無効です (有効にするにはコンパイル時に指定します)\n"
 #define MSGTR_AudioCodecFamilyNotAvailableStr "要求された音声コーデック [%s] (afm=%s) は無効です (有効にするにはコンパイル時に指定します)\n"
@@ -340,7 +272,7 @@ static char help_text[]=
 
 // LIRC:
 #define MSGTR_SettingUpLIRC "LIRC サポートをセッティング中...\n"
-#define MSGTR_LIRCdisabled "You will not be able to use your remote control.\n"
+#define MSGTR_LIRCdisabled "リモートコントロールを使用することは出来ません.\n"
 #define MSGTR_LIRCopenfailed "LIRC サポートを開く事に失敗.\n"
 #define MSGTR_LIRCcfgerr "LIRC 設定ファイル %s を開くことに失敗しました.\n"
 
@@ -351,7 +283,6 @@ static char help_text[]=
 #define MSGTR_CannotFindColorspace "common colorspaceが見付かりません, even by inserting 'scale' :(\n"
 
 // vd.c
-#define MSGTR_CodecDidNotSet "VDec: Codec did not set sh->disp_w and sh->disp_h, trying workaround.\n"
 #define MSGTR_VoConfigRequest "VDec: 映像出力設定 - %d x %d (preferred csp: %s)\n"
 #define MSGTR_CouldNotFindColorspace "一致するカラースペースが見付かりません - '-vop'をつけて試みて下さい...\n"
 #define MSGTR_MovieAspectIsSet "Movie-Aspect is %.2f:1 - prescaling to correct movie aspect.\n"
@@ -366,12 +297,10 @@ static char help_text[]=
 #define MSGTR_FileSelect "ファイル選択 ..."
 #define MSGTR_SubtitleSelect "サブタイトル選択 ..."
 #define MSGTR_OtherSelect "選択 ..."
-#define MSGTR_AudioFileSelect "Select external audio channel ..."
 #define MSGTR_FontSelect "フォント選択 ..."
 #define MSGTR_PlayList "プレイリスト"
 #define MSGTR_Equalizer "エコライザー"
 #define MSGTR_SkinBrowser "スキンブラウザ"
-#define MSGTR_Network "Network streaming..."
 #define MSGTR_Preferences "設定"
 #define MSGTR_OSSPreferences "OSS ドライバ設定"
 #define MSGTR_SDLPreferences "SDL ドライバ設定"
@@ -394,8 +323,6 @@ static char help_text[]=
 // --- error messages ---
 #define MSGTR_NEMDB "描画に必要なバッファを確保するためのメモリが足りません."
 #define MSGTR_NEMFMR "メニューを描画に必要なメモリが足りません."
-#define MSGTR_IDFGCVD "Sorry, i did not find a GUI compatible video output driver."
-#define MSGTR_NEEDLAVCFAME "Sorry, you cannot play non-MPEG files with your DXR3/H+ device without reencoding.\nPlease enable lavc or fame in the DXR3/H+ configbox."
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[skin] エラー: スキン設定ファイル %d 行: %s"
@@ -412,10 +339,8 @@ static char help_text[]=
 #define MSGTR_SKIN_BITMAP_ConvertError "24bitから32bitへの変換エラー (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "未知のメッセージ: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "メモリが不足しています\n"
-#define MSGTR_SKIN_FONT_TooManyFontsDeclared "too many fonts declared\n"
 #define MSGTR_SKIN_FONT_FontFileNotFound "フォントファイルが存在しません\n"
 #define MSGTR_SKIN_FONT_FontImageNotFound "フォントイメージファイルが存在しません\n"
-#define MSGTR_SKIN_FONT_NonExistentFontID "non-existent font identifier (%s)\n"
 #define MSGTR_SKIN_UnknownParameter "未知のパラメータ(%s)\n"
 #define MSGTR_SKINBROWSER_NotEnoughMemory "[skinbrowser] メモリが不足しています.\n"
 #define MSGTR_SKIN_SKINCFG_SkinNotFound "スキンが存在しません( %s ).\n"
@@ -431,7 +356,6 @@ static char help_text[]=
 #define MSGTR_MENU_PlayURL "URL 再生 ..."
 #define MSGTR_MENU_LoadSubtitle "サブタイトル読み込み ..."
 #define MSGTR_MENU_DropSubtitle "サブタイトル破棄 ..."
-#define MSGTR_MENU_LoadExternAudioFile "Load external audio file ..."
 #define MSGTR_MENU_Playing "現在のファイル"
 #define MSGTR_MENU_Play "再生"
 #define MSGTR_MENU_Pause "一時停止"
@@ -448,9 +372,7 @@ static char help_text[]=
 #define MSGTR_MENU_ShowDVDMenu "DVD メニューの表示"
 #define MSGTR_MENU_Titles "タイトル"
 #define MSGTR_MENU_Title "タイトル %2d"
-#define MSGTR_MENU_None "(none)"
-#define MSGTR_MENU_Chapters "Chapters"
-#define MSGTR_MENU_Chapter "Chapter %2d"
+#define MSGTR_MENU_None "(無し)"
 #define MSGTR_MENU_AudioLanguages "音声言語"
 #define MSGTR_MENU_SubtitleLanguages "サブタイトル言語"
 #define MSGTR_MENU_PlayList "プレイリスト"
@@ -460,17 +382,14 @@ static char help_text[]=
 #define MSGTR_MENU_Mute "消音"
 #define MSGTR_MENU_Original "オリジナル"
 #define MSGTR_MENU_AspectRatio "Aspect ratio"
-#define MSGTR_MENU_AudioTrack "音声トラック"
 #define MSGTR_MENU_Track "トラック %d"
 #define MSGTR_MENU_VideoTrack "映像トラック"
 
 // --- equalizer
 #define MSGTR_EQU_Audio "音声"
 #define MSGTR_EQU_Video "映像"
-#define MSGTR_EQU_Contrast "Contrast: "
-#define MSGTR_EQU_Brightness "Brightness: "
-#define MSGTR_EQU_Hue "Hue: "
-#define MSGTR_EQU_Saturation "Saturation: "
+#define MSGTR_EQU_Contrast "明暗: "
+#define MSGTR_EQU_Brightness "光度: "
 #define MSGTR_EQU_Front_Left "前方 左"
 #define MSGTR_EQU_Front_Right "前方 右"
 #define MSGTR_EQU_Back_Left "後方 左"
@@ -498,101 +417,54 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Codecs "コーデック & demuxer"
 #define MSGTR_PREFERENCES_Misc "Misc"
 
-#define MSGTR_PREFERENCES_None "None"
+#define MSGTR_PREFERENCES_None "無し"
 #define MSGTR_PREFERENCES_AvailableDrivers "有効なドライバ:"
-#define MSGTR_PREFERENCES_DoNotPlaySound "Do Not Play Sound"
-#define MSGTR_PREFERENCES_NormalizeSound "Normalize sound"
 #define MSGTR_PREFERENCES_EnEqualizer "イコライザーの有効"
-#define MSGTR_PREFERENCES_ExtraStereo "Enable extra stereo"
-#define MSGTR_PREFERENCES_Coefficient "Coefficient:"
-#define MSGTR_PREFERENCES_AudioDelay "Audio delay"
 #define MSGTR_PREFERENCES_DoubleBuffer "double buffering 有効"
 #define MSGTR_PREFERENCES_DirectRender "direct rendering 有効"
 #define MSGTR_PREFERENCES_FrameDrop "frame dropping 有効"
 #define MSGTR_PREFERENCES_HFrameDrop "HARD frame dropping (危険です) 有効"
-#define MSGTR_PREFERENCES_Flip "Flip image upside down"
-#define MSGTR_PREFERENCES_Panscan "Panscan: "
-#define MSGTR_PREFERENCES_OSDTimer "Timer and indicators"
+#define MSGTR_PREFERENCES_OSDTimer "タイマーとインディケイター"
 #define MSGTR_PREFERENCES_OSDProgress "プログレスバーだけ"
-#define MSGTR_PREFERENCES_OSDTimerPercentageTotalTime "Timer, percentage and total time"
-#define MSGTR_PREFERENCES_Subtitle "Subtitle:"
+#define MSGTR_PREFERENCES_OSDTimerPercentageTotalTime "タイマー パーセンテージとトータル時間"
+#define MSGTR_PREFERENCES_Subtitle "サブタイトル:"
 #define MSGTR_PREFERENCES_SUB_Delay "Delay: "
 #define MSGTR_PREFERENCES_SUB_FPS "FPS:"
-#define MSGTR_PREFERENCES_SUB_POS "Position: "
+#define MSGTR_PREFERENCES_SUB_POS "位置: "
 #define MSGTR_PREFERENCES_SUB_AutoLoad "subtitle 自動読み込み無効"
-#define MSGTR_PREFERENCES_SUB_Unicode "Unicode subtitle"
-#define MSGTR_PREFERENCES_SUB_MPSUB "Convert the given subtitle to MPlayer's subtitle format"
-#define MSGTR_PREFERENCES_SUB_SRT "Convert the given subtitle to the time based SubViewer (SRT) format"
-#define MSGTR_PREFERENCES_SUB_Overlap "Toggle subtitle overlapping"
+#define MSGTR_PREFERENCES_SUB_Unicode "Unicode サブタイトル"
+#define MSGTR_PREFERENCES_SUB_MPSUB "与えられたサブタイトルをMPLayerのサブタイトルフォーマットに変換"
 #define MSGTR_PREFERENCES_Font "フォント:"
-#define MSGTR_PREFERENCES_FontFactor "Font factor:"
-#define MSGTR_PREFERENCES_PostProcess "Enable postprocessing"
-#define MSGTR_PREFERENCES_AutoQuality "Auto quality: "
-#define MSGTR_PREFERENCES_NI "Use non-interleaved AVI parser"
-#define MSGTR_PREFERENCES_IDX "Rebuild index table, if needed"
-#define MSGTR_PREFERENCES_VideoCodecFamily "Video codec family:"
-#define MSGTR_PREFERENCES_AudioCodecFamily "Audio codec family:"
-#define MSGTR_PREFERENCES_FRAME_OSD_Level "OSD level"
-#define MSGTR_PREFERENCES_FRAME_Subtitle "Subtitle"
-#define MSGTR_PREFERENCES_FRAME_Font "Font"
-#define MSGTR_PREFERENCES_FRAME_PostProcess "Postprocessing"
-#define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec & demuxer"
-#define MSGTR_PREFERENCES_FRAME_Cache "Cache"
+#define MSGTR_PREFERENCES_PostProcess "postprocessing 有効"
+#define MSGTR_PREFERENCES_NI "non-interleaved AVI パーサ使用"
+#define MSGTR_PREFERENCES_IDX "必要ならindex tableの再構築"
+#define MSGTR_PREFERENCES_VideoCodecFamily "映像コーデック:"
+#define MSGTR_PREFERENCES_AudioCodecFamily "音声コーデック:"
+#define MSGTR_PREFERENCES_FRAME_OSD_Level "OSD レベル"
+#define MSGTR_PREFERENCES_FRAME_Subtitle "サブタイトル"
+#define MSGTR_PREFERENCES_FRAME_Font "フォント"
+#define MSGTR_PREFERENCES_FRAME_CodecDemuxer "コーデック& demuxer"
+#define MSGTR_PREFERENCES_FRAME_Cache "キャッシュ"
 #define MSGTR_PREFERENCES_FRAME_Misc "Misc"
-#define MSGTR_PREFERENCES_OSS_Device "Device:"
+#define MSGTR_PREFERENCES_OSS_Device "デバイス:"
 #define MSGTR_PREFERENCES_OSS_Mixer "Mixer:"
-#define MSGTR_PREFERENCES_SDL_Driver "Driver:"
-#define MSGTR_PREFERENCES_Message "Please remember that you need to restart playback for some options to take effect!"
-#define MSGTR_PREFERENCES_DXR3_VENC "Video encoder:"
-#define MSGTR_PREFERENCES_DXR3_LAVC "Use LAVC (FFmpeg)"
-#define MSGTR_PREFERENCES_DXR3_FAME "Use FAME"
-#define MSGTR_PREFERENCES_FontEncoding1 "Unicode"
-#define MSGTR_PREFERENCES_FontEncoding2 "Western European Languages (ISO-8859-1)"
-#define MSGTR_PREFERENCES_FontEncoding3 "Western European Languages with Euro (ISO-8859-15)"
-#define MSGTR_PREFERENCES_FontEncoding4 "Slavic/Central European Languages (ISO-8859-2)"
-#define MSGTR_PREFERENCES_FontEncoding5 "Esperanto, Galician, Maltese, Turkish (ISO-8859-3)"
-#define MSGTR_PREFERENCES_FontEncoding6 "Old Baltic charset (ISO-8859-4)"
-#define MSGTR_PREFERENCES_FontEncoding7 "Cyrillic (ISO-8859-5)"
-#define MSGTR_PREFERENCES_FontEncoding8 "Arabic (ISO-8859-6)"
-#define MSGTR_PREFERENCES_FontEncoding9 "Modern Greek (ISO-8859-7)"
-#define MSGTR_PREFERENCES_FontEncoding10 "Turkish (ISO-8859-9)"
-#define MSGTR_PREFERENCES_FontEncoding11 "Baltic (ISO-8859-13)"
-#define MSGTR_PREFERENCES_FontEncoding12 "Celtic (ISO-8859-14)"
-#define MSGTR_PREFERENCES_FontEncoding13 "Hebrew charsets (ISO-8859-8)"
-#define MSGTR_PREFERENCES_FontEncoding14 "Russian (KOI8-R)"
-#define MSGTR_PREFERENCES_FontEncoding15 "Ukrainian, Belarusian (KOI8-U/RU)"
-#define MSGTR_PREFERENCES_FontEncoding16 "Simplified Chinese charset (CP936)"
-#define MSGTR_PREFERENCES_FontEncoding17 "Traditional Chinese charset (BIG5)"
-#define MSGTR_PREFERENCES_FontEncoding18 "Japanese charsets (SHIFT-JIS)"
-#define MSGTR_PREFERENCES_FontEncoding19 "Korean charset (CP949)"
-#define MSGTR_PREFERENCES_FontEncoding20 "Thai charset (CP874)"
-#define MSGTR_PREFERENCES_FontEncoding21 "Cyrillic Windows (CP1251)"
-#define MSGTR_PREFERENCES_FontEncoding22 "Slavic/Central European Windows (CP1250)"
-#define MSGTR_PREFERENCES_FontNoAutoScale "No autoscale"
-#define MSGTR_PREFERENCES_FontPropWidth "Proportional to movie width"
-#define MSGTR_PREFERENCES_FontPropHeight "Proportional to movie height"
-#define MSGTR_PREFERENCES_FontPropDiagonal "Proportional to movie diagonal"
-#define MSGTR_PREFERENCES_FontEncoding "Encoding:"
-#define MSGTR_PREFERENCES_FontBlur "Blur:"
-#define MSGTR_PREFERENCES_FontOutLine "Outline:"
-#define MSGTR_PREFERENCES_FontTextScale "Text scale:"
-#define MSGTR_PREFERENCES_FontOSDScale "OSD scale:"
-#define MSGTR_PREFERENCES_Cache "Cache on/off"
-#define MSGTR_PREFERENCES_CacheSize "Cache size: "
-#define MSGTR_PREFERENCES_LoadFullscreen "Start in fullscreen"
-#define MSGTR_PREFERENCES_SaveWinPos "Save window position"
-#define MSGTR_PREFERENCES_XSCREENSAVER "Stop XScreenSaver"
-#define MSGTR_PREFERENCES_PlayBar "Enable playbar"
-#define MSGTR_PREFERENCES_AutoSync "AutoSync on/off"
-#define MSGTR_PREFERENCES_AutoSyncValue "Autosync: "
-#define MSGTR_PREFERENCES_CDROMDevice "CD-ROM device:"
-#define MSGTR_PREFERENCES_DVDDevice "DVD device:"
+#define MSGTR_PREFERENCES_SDL_Driver "ドライバー:"
+#define MSGTR_PREFERENCES_DXR3_VENC "Video エンコーダ:"
+#define MSGTR_PREFERENCES_DXR3_LAVC "LAVC (FFmpeg)使用"
+#define MSGTR_PREFERENCES_DXR3_FAME "FAME 使用"
+#define MSGTR_PREFERENCES_FontEncoding1 "ユニコード"
+#define MSGTR_PREFERENCES_FontEncoding "エンコーディング:"
+#define MSGTR_PREFERENCES_Cache "キャッシュ on/off"
+#define MSGTR_PREFERENCES_CacheSize "キャッシュサイズ: "
+#define MSGTR_PREFERENCES_LoadFullscreen "開始時にフルスクリーン"
+#define MSGTR_PREFERENCES_SaveWinPos "ウィンドウ位置を保持"
+#define MSGTR_PREFERENCES_XSCREENSAVER "XScreenSaverをストップ"
+#define MSGTR_PREFERENCES_PlayBar "プレイバー有効"
+#define MSGTR_PREFERENCES_CDROMDevice "CD-ROM デバイス:"
+#define MSGTR_PREFERENCES_DVDDevice "DVD デバイス:"
 #define MSGTR_PREFERENCES_FPS "Movie FPS:"
-#define MSGTR_PREFERENCES_ShowVideoWindow "Show video window when inactive"
 
-#define MSGTR_ABOUT_UHU "GUI development sponsored by UHU Linux\n"
 #define MSGTR_ABOUT_CoreTeam "   MPlayer コアチーム:\n"
-#define MSGTR_ABOUT_AdditionalCoders "   Additional coders:\n"
 #define MSGTR_ABOUT_MainTesters "   メインテスター:\n"
 
 // --- messagebox
