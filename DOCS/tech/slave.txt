@@ -114,6 +114,7 @@ switch_vsync [<value>]
 switch_ratio [<value>]
     Change aspect ratio at runtime. Value is the new aspect ratio expressed
     as a float (e.g. 1.77778 for 16/9).
+    There might be problems with some video filters.
 
 panscan <value> [value2]
     ???
