@@ -3,7 +3,7 @@ How to enable DivX4Linux support?
 =================================
 
 1. Download the codec:
-  http://download.projectmayo.com/dnload/divx4linux/divx4linux-20010718.zip
+  http://download2.projectmayo.com/dnload/divx4linux/divx4linux-20010718.zip
   
 2. Unpack it, and copy files to their place:
  cp libdivxdecore.so.0.0.0 /usr/local/lib/
