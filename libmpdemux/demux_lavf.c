@@ -323,7 +323,11 @@ void demux_seek_lavf(demuxer_t *demuxer, float rel_seek_secs, int flags){
     lavf_priv_t *priv = demuxer->priv;
     mp_msg(MSGT_DEMUX,MSGL_DBG2,"demux_seek_lavf(%p, %f, %d)\n", demuxer, rel_seek_secs, flags);
     
+#if LIBAVFORMAT_BUILD < 4619
     av_seek_frame(priv->avfc, -1, priv->last_pts + rel_seek_secs*AV_TIME_BASE);
+#else
+    av_seek_frame(priv->avfc, -1, priv->last_pts + rel_seek_secs*AV_TIME_BASE, rel_seek_secs < 0 ? AVSEEK_FLAG_BACKWARD : 0);
+#endif
 }
 
 int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
