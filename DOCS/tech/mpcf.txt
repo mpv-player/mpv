@@ -540,7 +540,7 @@ static inline void put_bytes(BufferContext *bc, int count, uint64_t val){
 	return val;
 }
 
-static inline uint64_t get_v(ByteStream *bc){
+static inline uint64_t get_v(BufferContext *bc){
 	uint64_t val= 0;
 
 	for(; spaceLeft(bc) > 0; ){
@@ -554,7 +554,7 @@ static inline uint64_t get_v(ByteStream *bc){
 	return -1;
 }
 
-static inline int put_v(ByteStream *bc, uint64_t val){
+static inline int put_v(BufferContext *bc, uint64_t val){
 	int i;
         
 	if(spaceLeft(bc) < 9) return -1;
@@ -572,12 +572,12 @@ static inline int put_v(ByteStream *bc, uint64_t val){
 	return 0;
 }
 
-static inline int put_s(ByteStream *bc, uint64_t val){
+static inline int put_s(BufferContext *bc, uint64_t val){
 	if(val<=0) return put_v(bc, -2*val  );
 	else       return put_v(bc,  2*val-1);
 }
 
-static inline int64_t get_s(ByteStream *bc){
+static inline int64_t get_s(BufferContext *bc){
 	int64_t v= get_v(bc) + 1;
 	if(v&1) return -(v>>1);
 	else    return  (v>>1);
