@@ -177,6 +177,32 @@ int acm_decode_audio(sh_audio_t *sh_audio, void* a_buffer,int minlen,int maxlen)
         return len;
 }
 
+int close_acm_audio_codec(sh_audio_t *sh_audio)
+{
+    HRESULT ret;
+    
+    ret = acmStreamClose(sh_audio->srcstream, 0);
+    
+    if (ret)
+    switch(ret)
+    {
+	case ACMERR_BUSY:
+	case ACMERR_CANCELED:
+	    mp_msg(MSGT_WIN32, MSGL_DBG2, "ACM_Decoder: stream busy, waiting..\n");
+	    sleep(100);
+	    return(close_acm_audio_codec(sh_audio));
+	case ACMERR_UNPREPARED:
+	case ACMERR_NOTPOSSIBLE:
+	    return(0);
+	default:
+	    mp_msg(MSGT_WIN32, MSGL_WARN, "ACM_Decoder: unknown error occured: %d\n", ret);
+	    return(0);
+    }
+    
+//    MSACM_UnregisterAllDrivers();
+    return(1);
+}
+
 int init_vfw_video_codec(sh_video_t *sh_video,int ex){
   HRESULT ret;
   int yuv=0;
@@ -410,6 +436,27 @@ int vfw_decode_video(sh_video_t* sh_video,void* start,int in_size,int drop_frame
                         drop_frame ? 0 : sh_video->our_out_buffer);
 
     return (int)ret;
+}
+
+int vfw_close_video_codec(sh_video_t *sh_video, int ex)
+{
+    HRESULT ret;
+    
+    ret = ICDecompressEnd(sh_video->hic);
+    if (ret)
+    {
+	mp_msg(MSGT_WIN32, MSGL_WARN, "ICDecompressEnd failed: %d\n", ret);
+	return(0);
+    }
+
+    ret = ICClose(sh_video->hic);
+    if (ret)
+    {
+	mp_msg(MSGT_WIN32, MSGL_WARN, "ICClose failed: %d\n", ret);
+	return(0);
+    }
+
+    return(1);
 }
 
 /************************ VFW COMPRESSION *****************************/
