@@ -71,7 +71,7 @@
 <para>
 Главное правило этой документации: если что-то не документировано, это 
 <emphasis>не существует</emphasis>. Если я не говорю, как кодировать звук
-с TV тюнера, это не возможно. Хотя, значительное количество способности
+с TV тюнера, значит это не возможно. Хотя, значительное количество способности
 комбинировать всегда приветствуется. Удачи. Она Вам понадобится :) В качестве
 другого хорошего совета, позвольте мне процитировать Chris Phillips из
 <ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>
@@ -111,9 +111,9 @@ read the words on the OTHER side of the colon.]
 (работает на многих других UNIX'ах и <emphasis role="bold">non-x86</emphasis>
 CPU, см. <xref linkend="ports"/>). Он проигрывает большинство MPEG, VOB, AVI,
 OGG/OGM, VIVO, ASF/WMA/WMV, QT/MOV/MP4, FLI, RM, NuppelVideo, yuv4mpeg, FILM,
-RoQ, PVA files, опираясь на множество "родных", XAnim'овских, RealPlayer'овских, и
+RoQ, PVA, Matroska файлов, опираясь на множество "родных", XAnim'овских, RealPlayer'овских, и
 Win32 DLL кодеков. Вы также можете смотреть <emphasis role="bold">VideoCD, SVCD,
-DVD, 3ivx, RealMedia</emphasis>, и <emphasis role="bold">DivX</emphasis> фильмы
+DVD, 3ivx, RealMedia, Sorenson, Theora</emphasis>, и <emphasis role="bold">DivX</emphasis> фильмы
 (и вам совсем не нужна библиотека avifile!). Другой важной особенностью
 MPlayer'а является широкий спектр поддерживаемых устройств вывода. Он работает
 с X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, DirectFB, и кроме того Вы можете

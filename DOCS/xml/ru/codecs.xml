@@ -36,7 +36,7 @@
   "родной" <emphasis role="bold">Sorenson 1 (SVQ1)</emphasis> декодер
   </simpara></listitem>
 <listitem><simpara>
-  Win32/QT <emphasis role="bold">Sorenson 3 (SVQ3)</emphasis> декодер
+  "родной" <emphasis role="bold">Sorenson 3 (SVQ3)</emphasis> декодер
   </simpara></listitem>
 <listitem><simpara>
   <emphasis role="bold">3ivx</emphasis> v1, v2 декодер
@@ -195,7 +195,7 @@ cp ../../src/encore.h /usr/local/include
 <para>
 <ulink url="http://ffmpeg.sourceforge.net">FFmpeg</ulink> содержит пакет кодеков
 с <emphasis role="bold">открытым исходным кодом</emphasis>, который способен
-декодировать потоки, закодированные H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/HuffYUV
+декодировать потоки, закодированные H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/HuffYUV/SVQ1/SVQ3
 видео , или WMA (Windows Media Audio) аудио кодеками. Кроме того, с некоторыми
 из них можно ещё и закодировать, причём этот пакет быстрее, чем Win32 кодеки или
 DivX.com DivX4/5 библиотека!
@@ -203,8 +203,15 @@ DivX.com DivX4/5 библиотека!
 
 <para>
 Он содержит множество хороших кодеков, из которых наиболее важными являются
-варианты MPEG4: DivX3, DivX4, DivX5, Windows Media Video 7 (WMV1). Также весьма
+варианты MPEG4: DivX3, DivX4, DivX5, Windows Media Video 7/8 (WMV1/WMV2). Также весьма
 интересен декодер WMA.
+</para>
+
+<para>
+Наконец, последний кодеком, заслуживающий внимания &mdash; это
+<emphasis role="bold">Sorenson 3</emphasis>(SVQ3) кодек. Это первая реализация
+этого кодека с полностью открытым исходным кодом. Она даже быстрее оригинала.
+Используйте её, вместо двоичного кодека!
 </para>
 
 <para>
@@ -495,7 +502,7 @@ OpenDivX кодека. Это произошло, когда ProjectMayo сделал исходный код OpenDivX
 Sorenson - это видео кодек, разработанный в Sorenson Media и лицензированный
 Apple, которые распространяют его с <application>QuickTime Player</application>.
 В настоящий момент мы способны декодировать все версии Sorenson видео файлов
-следующими декодерами.
+следующими декодерами:
 </para>
 
 <itemizedlist>
@@ -506,12 +513,10 @@ Apple, которые распространяют его с <application>QuickTime Player</application>.
   другой в libavcodec. Вы можете запустить их соответственно опциями
   <option>-vc svq1</option> и <option>-vc ffsvq1</option>. Некоторые файлы будут
   работать с одним и не будут работать с другим, поэтому попробуйте оба декодера.
-  Декодер был написан (восстановлен[reverse engineered]) авторами
-  <ulink url="http://www.xinehq.de">xine</ulink>.
   </simpara></listitem>
 <listitem><simpara>
   Sorenson 3 (fourcc <emphasis>SVQ3</emphasis>) - декодирование поддерживается,
-  используя <emphasis role="bold">библиотеки Win32 QuickTime</emphasis>
+  используя <emphasis role="bold">"родной" кодек</emphasis> (<link linkend="ffmpeg">libavcodec</link>)
   </simpara></listitem>
 </itemizedlist>
 

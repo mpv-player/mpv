@@ -98,7 +98,14 @@ Windows Media 9, MPlayer - это первый в мире плеер, поддерживающий все
 известные видео форматы!
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">MPlayer 0.90 "?"</emphasis> Дата ещё не известна
+  <emphasis role="bold">MPlayer 0.90 "The CounterCounter"</emphasis> Apr 6, 2003
+  </para><para>Более, чем через год, мы решили, что код вновь достаточно
+    стабилен и готов к публикации в качестве релиза. К несчастью, мы даже забыли
+	увеличить номер версии, туда попали другие досадные ошибки, так что
+	приготовьтесь к...
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer 0.91 "?"</emphasis> Дата ещё не известна
   </para></listitem>
 </itemizedlist>
 </para>

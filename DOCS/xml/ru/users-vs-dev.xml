@@ -8,15 +8,15 @@
 <formalpara>
 <title>Предпосылки:</title>
 <para>
-GCC <emphasis>2.95</emphasis> серий &mdash; это официальный GNU релиз и версия 2.95.3
+GCC <emphasis role="bold">2.95</emphasis> серий &mdash; это официальный GNU релиз и версия 2.95.3
 &mdash; максимально свободная от ошибок в этой серии. Мы никогда не замечали
 проблем компиляции, которые можно было бы отнести на счёт gcc-2.95.3.
-Начиная с RedHat Linux 7.0, <emphasis>Red Hat</emphasis> включили сильно
-пропатченную CVS версию GCC и назвали её <emphasis>2.96</emphasis>.
+Начиная с RedHat Linux 7.0, <emphasis role="bold">Red Hat</emphasis> включили сильно
+пропатченную CVS версию GCC и назвали её <emphasis role="bold">2.96</emphasis>.
 RedHat включили эту версию в дистрибутив, поскольку GCC 3.0 не был завершён
 в это время, а им требовался компилятор, который бы хорошо работал на всех
 поддерживаемых платформах, включая IA64 и s390. Дистрибьютор Linux
-<emphasis>Mandrake</emphasis>, последовал примеру Red Hat и начал поставки
+<emphasis role="bold">Mandrake</emphasis>, последовал примеру Red Hat и начал поставки
 GCC 2.96 с Linux-Mandrake серии 8.0.
 </para>
 </formalpara>
@@ -65,7 +65,7 @@ Red Hat заявляет, что GCC 2.96-85 и далее исправлены. Ситуация действительно
 важно. Предположительно готовый GCC 3.x должным образом разрешит эти вопросы.
 Если Вы хотите скомпилировать, используя версию 2.96, укажите опцию <option>
 --disable-gcc-checking</option> в <filename>configure</filename>. Помните, что
-Вам решать, и <emphasis>не сообщайте об ошибках в этом случае</emphasis>.
+Вам решать, и <emphasis role="bold">не сообщайте об ошибках в этом случае</emphasis>.
 Если Вы попробуете, Вы будете изгнаны из наших рассылок, поскольку у нас уже
 было достаточно 'сражений' из-за GCC 2.96. Давайте оставим эту тему в покое.
 </para>
@@ -80,22 +80,23 @@ Red Hat заявляет, что GCC 2.96-85 и далее исправлены. Ситуация действительно
 (неофициальные, но работают нормально) и поставить их совместно с gcc-2.96,
 который у Вас стоит. MPlayer их обнаружит, и будет использовать 3.2 вместо
 2.96. Если Вы не хотите или не можете использовать пакеты, вот как Вы можете
-скомпилировать GCC 3.x из исходного кода:
+скомпилировать GCC 3 из исходного кода:
 </para>
 
 <procedure>
 <step><para>
   Пойдите на страницу
   <ulink url="http://gcc.gnu.org/mirrors.html">GCC зеркал</ulink>
-  и скачайте <filename>gcc-core-XXX.tar.gz</filename>, где XXX &mdash; это
+  и скачайте <filename>gcc-core-<replaceable>XXX</replaceable>.tar.gz</filename,
+  где XXX &mdash; это
   номер версии. Этот файл включает полноценный компилятор C, которого достаточно
   для <application>MPlayer</application>'а. Если Вы также хотите C++, Java или
   какие-нибудь другие дополнительные возможности GCC, Вам, возможно, больше
-  подойдёт <filename>gcc-XXX.tar.gz</filename>.
+  подойдёт <filename>gcc-<replaceable>XXX</replaceable>.tar.gz</filename>.
   </para></step>
 <step><para>
   Распакуйте архив:
-  <screen>tar -xvzf gcc-core-XXX.tar.gz</screen>
+  <screen>tar -xvzf gcc-core-<replaceable>XXX</replaceable>.tar.gz</screen>
   </para></step>
 <step><para>
   В отличие от других программ GCC собирается не в каталоге с исходным кодом,
@@ -107,7 +108,7 @@ Red Hat заявляет, что GCC 2.96-85 и далее исправлены. Ситуация действительно
   Вам нужно конфигурировать из каталога с исходным кодом:
   <screen>
 cd gcc-build
-../gcc-3.XXX/configure</screen>
+../gcc-3.<replaceable>XXX</replaceable>/configure</screen>
   </para></step>
 <step><para>
   Скомпилируйте GCC, выполнив эту команду в каталоге для сборки:
@@ -187,17 +188,17 @@ url="http://www.linuxworld.com/linuxworld/lw-2000-06/lw-06-exam.html">читать док
 <ulink url="http://www.linuxworld.com/site-stories/2001/1227.predictions.html">
 10 Linux predictions for 2002[10 предсказаний о Linux на 2002]</ulink>.
 В появившемся затем 
-<ulink url="http://www.linuxworld.com/site-stories/2002/0125.xine.html">обзоре xine</ulink>
+<ulink url="http://www.linuxworld.com/site-stories/2002/0125.xine.html">обзоре Xine</ulink>
 он продолжил раздувать спор. Иронично, но в конце этой статьи он цитирует
-интервью с Гюнтером Барцхом[G&uuml;nter Bartsch], подлинным автором xine,
+интервью с Гюнтером Барцхом[G&uuml;nter Bartsch], первоначальным автором <application>Xine</application>,
 что превосходно подытоживает ситуацию:
 
 <blockquote><para>
 However, he also went on to say that he was "surprised" by my column about
-Mplayer and thought it was unfair, reminding me that it is a free software
-project. "If you don't like it," Bartsch said, "you're free not to use it." 
+<application>Mplayer</application> and thought it was unfair, reminding me that it is
+a free software project. "If you don't like it," Bartsch said, "you're free not to use it." 
 
-[Однако, он также сказал, что он был "удивлён" моей колонкой о MPlayer'е и
+[Однако, он также сказал, что он был "удивлён" моей колонкой о <application>MPlayer</application>'е и
 подумал, что это было бы неправильно напоминать мне, что это проект свободного
 программного обеспечения. "Если он вам не нравится", сказал Барцх, "Вы свободны
 не использовать его."]
@@ -213,7 +214,7 @@ project. "If you don't like it," Bartsch said, "you're free not to use it."
 <para>
 Марк Рассбах[Marc Rassbach]
 <ulink url="http://daily.daemonnews.org/view_story.php3?story_id=2102">кое-что сказал</ulink>
-об этом человеке
+об этом человеке.
 
 <blockquote><para>
 You may all remember the LinuxWorld 2000, when he claimed that Linus T said
