@@ -99,10 +99,6 @@ static int add_to_format(char *s, unsigned int *fourcc, unsigned int *fourccmap)
 	return 1;
 }
 
-
-static int add_to_out(char *sfmt, char *sflags, unsigned int *outfmt,
-		unsigned char *outflags)
-{
         static struct {
 	        const char *name;
 	        const unsigned int num;
@@ -127,6 +123,11 @@ static int add_to_out(char *sfmt, char *sflags, unsigned int *outfmt,
 		{"BGR32", IMGFMT_BGR|32},
 		{NULL,    0}
 	};
+
+
+static int add_to_out(char *sfmt, char *sflags, unsigned int *outfmt,
+		unsigned char *outflags)
+{
 
 	static char *flagstr[] = {
 		"flip",
@@ -622,6 +623,175 @@ codecs_t* find_codec(unsigned int fourcc,unsigned int *fourccmap,
 	}
 	return NULL;
 }
+
+#ifdef CODECS2HTML
+
+void wrapline(FILE *f2,char *s){
+    int c;
+    if(!s){
+        fprintf(f2,"-");
+        return;
+    }
+    while((c=*s++)){
+        if(c==',') fprintf(f2,"<br>"); else fputc(c,f2);
+    }
+}
+
+void parsehtml(FILE *f1,FILE *f2,codecs_t *codec,int section,int dshow){
+        int c,d;
+        while((c=fgetc(f1))>=0){
+            if(c!='%'){
+                fputc(c,f2);
+                continue;
+            }
+            d=fgetc(f1);
+            if(d=='.') return; // end of section
+            
+            switch(d){
+            case '.':
+                return;
+            case 'n':
+                wrapline(f2,codec->name); break;
+            case 'i':
+                wrapline(f2,codec->info); break;
+            case 'c':
+                wrapline(f2,codec->comment); break;
+            case 'd':
+                wrapline(f2,codec->dll); break;
+            case 'D':
+                fprintf(f2,"%c",codec->driver==dshow?'+':'-'); break;
+            case 'F':
+                for(d=0;d<CODECS_MAX_FOURCC;d++)
+                    if(codec->fourcc[d]!=0xFFFFFFFF)
+                        fprintf(f2,"%s%.4s",d?"<br>":"",codec->fourcc[d]<0x20202020?"-":(char*) &codec->fourcc[d]);
+                break;
+            case 'f':
+                for(d=0;d<CODECS_MAX_FOURCC;d++)
+                    if(codec->fourcc[d]!=0xFFFFFFFF)
+                        fprintf(f2,"%s0x%X",d?"<br>":"",codec->fourcc[d]);
+                break;
+            case 'Y':
+                for(d=0;d<CODECS_MAX_OUTFMT;d++)
+                    if(codec->outfmt[d]!=0xFFFFFFFF){
+		        for (c=0; fmt_table[c].name; c++)
+                            if(fmt_table[c].num==codec->outfmt[d]) break;
+                        if(fmt_table[c].name)
+                            fprintf(f2,"%s%s",d?"<br>":"",fmt_table[c].name);
+                    }
+                break;
+            default:
+                fputc(c,f2);
+                fputc(d,f2);
+            }
+        }
+
+}
+
+void skiphtml(FILE *f1){
+        int c,d;
+        while((c=fgetc(f1))>=0){
+            if(c!='%'){
+                continue;
+            }
+            d=fgetc(f1);
+            if(d=='.') return; // end of section
+        }
+}
+
+int main(void)
+{
+	codecs_t **codecs, *cl;
+        FILE *f1;
+        FILE *f2;
+        int c,d,i;
+        int pos;
+        int section=-1;
+        int nr_codecs;
+        int win32=-1;
+        int dshow=-1;
+
+	if (!(codecs = parse_codec_cfg("DOCS/codecs.conf")))
+		return 0;
+	if (!codecs[0])
+		printf("no videoconfig.\n");
+	if (!codecs[1])
+		printf("no audioconfig.\n");
+
+        f1=fopen("DOCS/codecs-in.html","rb"); if(!f1) exit(1);
+        f2=fopen("DOCS/codecs.html","wb"); if(!f2) exit(1);
+        
+        while((c=fgetc(f1))>=0){
+            if(c!='%'){
+                fputc(c,f2);
+                continue;
+            }
+            d=fgetc(f1);
+            if(d>='0' && d<='9'){
+                // begin section
+                section=d-'0';
+                printf("BEGIN %d\n",section);
+                if(section>=5){
+                    // audio
+		    cl = codecs[1];
+		    nr_codecs = nr_acodecs;
+                    dshow=7;win32=4;
+                } else {
+                    // video
+		    cl = codecs[0];
+		    nr_codecs = nr_vcodecs;
+                    dshow=4;win32=2;
+                }
+                pos=ftell(f1);
+                for(i=0;i<nr_codecs;i++){
+                    fseek(f1,pos,SEEK_SET);
+                    switch(section){
+                    case 0:
+                    case 5:
+                        if(cl[i].status==CODECS_STATUS_WORKING)
+                            if(!(cl[i].driver==win32 || cl[i].driver==dshow))
+                                parsehtml(f1,f2,&cl[i],section,dshow);
+                        break;
+                    case 1:
+                    case 6:
+                        if(cl[i].status==CODECS_STATUS_WORKING)
+                            if(cl[i].driver==win32 || cl[i].driver==dshow)
+                                parsehtml(f1,f2,&cl[i],section,dshow);
+                        break;
+                    case 2:
+                    case 7:
+                        if(cl[i].status==CODECS_STATUS_PROBLEMS)
+                            parsehtml(f1,f2,&cl[i],section,dshow);
+                        break;
+                    case 3:
+                    case 8:
+                        if(cl[i].status==CODECS_STATUS_NOT_WORKING)
+                            parsehtml(f1,f2,&cl[i],section,dshow);
+                        break;
+                    case 4:
+                    case 9:
+                        if(cl[i].status==CODECS_STATUS_UNTESTED)
+                            parsehtml(f1,f2,&cl[i],section,dshow);
+                        break;
+                    default:
+                        printf("Warning! unimplemented section: %d\n",section);
+                    }
+                }
+                fseek(f1,pos,SEEK_SET);
+                skiphtml(f1);
+//void parsehtml(FILE *f1,FILE *f2,codecs_t *codec,int section,int dshow){
+                
+                continue;
+            }
+            fputc(c,f2);
+            fputc(d,f2);
+        }
+        
+        fclose(f2);
+        fclose(f1);
+	return 0;
+}
+
+#endif
 
 #ifdef TESTING
 int main(void)
