@@ -248,20 +248,6 @@ static uint32_t vidix_draw_slice_packed(uint8_t *image[], int stride[], int w,in
     return 0;
 }
 
-static uint32_t vidix_draw_slice_packed_fast(uint8_t *image[], int stride[], int w,int h,int x,int y)
-{
-    uint8_t *src;
-    uint8_t *dest;
-
-    UNUSED(w);
-    UNUSED(stride);
-    dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.y;
-    dest += dstrides.y*y + x;
-    src = image[0];
-    memcpy(dest,src,h*dstrides.y);
-    return 0;
-}
-
 uint32_t vidix_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
 	UNUSED(image);
@@ -276,24 +262,21 @@ uint32_t vidix_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int 
 	return 0;
 }
 
+static uint32_t  vidix_draw_image(mp_image_t *mpi){
+    if(verbose > 1) printf("vosub_vidix: vidix_draw_image() was called\n");
+
+    // if -dr or -slices then do nothing:
+    if(mpi->flags&(MP_IMGFLAG_DIRECT|MP_IMGFLAG_DRAW_CALLBACK)) return VO_TRUE;
+
+    vo_server->draw_slice(mpi->planes,mpi->stride,
+	vidix_play.src.w,vidix_play.src.h,vidix_play.src.x,vidix_play.src.y);
+    return VO_TRUE;
+}
+
 uint32_t vidix_draw_frame(uint8_t *image[])
 {
-  int stride[1];
-  if(verbose > 1) printf("vosub_vidix: vidix_draw_frame() was called\n");
-/* Note it's very strange but sometime for YUY2 draw_frame is called */
-    if(src_format == IMGFMT_YV12 || src_format == IMGFMT_I420 || src_format == IMGFMT_IYUV
-	|| src_format == IMGFMT_YVU9 || src_format == IMGFMT_IF09)
-	printf("vosub_vidix: draw_frame for YUV420 called, frame cannot be written\n");
-    else
-    if(src_format == IMGFMT_RGB32 || src_format == IMGFMT_BGR32)
-	stride[0] = vidix_play.src.w*4;
-    else
-    if(src_format == IMGFMT_RGB24 || src_format == IMGFMT_BGR24)
-	stride[0] = vidix_play.src.w*3;
-    else
-	stride[0] = vidix_play.src.w*2;
-    return vo_server->draw_slice(image,stride,vidix_play.src.w,vidix_play.src.h,
-				 vidix_play.src.x,vidix_play.src.y);
+  printf("vosub_vidix: vidix_draw_frame() was called!!!!\n");
+  return -1;
 }
 
 void     vidix_flip_page(void)
@@ -576,10 +559,7 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 		 vo_server->draw_slice = vidix_draw_slice_420;
 	    else if (src_format == IMGFMT_YVU9 || src_format == IMGFMT_IF09)
 		 vo_server->draw_slice = vidix_draw_slice_410;
-	    else vo_server->draw_slice =
-		 is_422_planes_eq ?
-		 vidix_draw_slice_packed_fast:
-		 vidix_draw_slice_packed;
+	    else vo_server->draw_slice = vidix_draw_slice_packed;
 	}
 	return 0;
 }
@@ -588,7 +568,9 @@ static uint32_t vidix_get_image(mp_image_t *mpi)
 {
     if(mpi->type==MP_IMGTYPE_STATIC && vidix_play.num_frames>1) return VO_FALSE;
     if(mpi->flags&MP_IMGFLAG_READABLE) return VO_FALSE; /* slow video ram */
-    if((is_422_planes_eq || (mpi->flags&(MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_ACCEPT_WIDTH))) && 
+    if(( (mpi->stride[0]==dstrides.y && (!(mpi->flags&MP_IMGFLAG_PLANAR) ||
+      (mpi->stride[1]==dstrides.u && mpi->stride[2]==dstrides.v)) )
+      || (mpi->flags&(MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_ACCEPT_WIDTH))) && 
        (!forced_fourcc && !(vidix_play.flags & VID_PLAY_INTERLEAVED_UV)))
     {
 	if(mpi->flags&MP_IMGFLAG_ACCEPT_WIDTH){
@@ -622,6 +604,8 @@ uint32_t vidix_control(uint32_t request, void *data, ...)
     return vidix_query_fourcc(*((uint32_t*)data));
   case VOCTRL_GET_IMAGE:
     return vidix_get_image(data);
+  case VOCTRL_DRAW_IMAGE:
+    return vidix_draw_image(data);
   case VOCTRL_GET_FRAME_NUM:
 	*(uint32_t *)data = next_frame;
 	return VO_TRUE;
