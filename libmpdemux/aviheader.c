@@ -373,19 +373,6 @@ while(1){
 	le2me_AVIINDEXENTRY((AVIINDEXENTRY*)priv->idx + i);
       chunksize-=priv->idx_size<<4;
       if(verbose>=2) print_index(priv->idx,priv->idx_size);
-      /*
-       * Fixup index for files >4GB
-       */
-      for (i = 0; i < priv->idx_size; i++) {
-	AVIINDEXENTRY *idx = (AVIINDEXENTRY*)priv->idx + i;
-	idx->dwFlags &= 0xffff;
-	if (idx->dwChunkOffset < last_off) {
-	  mp_msg(MSGT_HEADER,MSGL_WARN,"Index offset going backwards (last=%08X, now=%08X), compensating...\n", last_off, idx->dwChunkOffset);
-	  base += 0x100000000LL;
-	}
-	idx->dwFlags |= base >> 16;
-	last_off = idx->dwChunkOffset;
-      }
     }
     break;
     /* added May 2002 */
