@@ -9,7 +9,7 @@ SRCS += asf_streaming.c url.c http.c network.c
 endif
 
 OBJS	= $(SRCS:.c=.o)
-INCLUDE = -I../loader $(EXTRA_INC)
+INCLUDE = -I../loader $(CSS_INC) $(EXTRA_INC)
 CFLAGS  = $(OPTFLAGS) $(INCLUDE)
 
 .SUFFIXES: .c .o

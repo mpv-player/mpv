@@ -16,9 +16,13 @@ PRG_CFG = codec-cfg
 #prefix = /usr/local
 BINDIR = ${prefix}/bin
 # BINDIR = /usr/local/bin
+
+# a BSD compatible 'install' program
+INSTALL = install
+
 SRCS = ima4.c xacodec.c cpudetect.c mp_msg.c ac3-iec958.c find_sub.c dec_audio.c dec_video.c codec-cfg.c subreader.c lirc_mp.c cfgparser.c mixer.c spudec.c
 OBJS = $(SRCS:.c=.o)
-CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader -Ilibvo $(CSS_INC) $(EXTRA_INC) $(MADLIB_INC) # -Wall
+CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader -Ilibvo $(EXTRA_INC) $(MADLIB_INC) # -Wall
 A_LIBS = -Lmp3lib -lMP3 -Llibac3 -lac3 $(ALSA_LIB) $(ESD_LIB) $(MADLIB_LIB) $(SGI_AUDIO_LIB)
 VO_LIBS = -Llibvo -lvo $(MLIB_LIB) $(X_LIBS)
 OSDEP_LIBS = -Llinux -losdep
@@ -135,18 +139,18 @@ $(PRG_CFG): version.h codec-cfg.c codec-cfg.h
 
 install: $(ALL_PRG)
 	if test ! -d $(BINDIR) ; then mkdir -p $(BINDIR) ; fi
-	install -m 755 -s $(PRG) $(BINDIR)/$(PRG)
+	$(INSTALL) -m 755 -s $(PRG) $(BINDIR)/$(PRG)
 ifeq ($(GUI),yes)
 	-ln -sf $(BINDIR)/$(PRG) $(BINDIR)/gmplayer
 endif
 	if test ! -d $(prefix)/man/man1 ; then mkdir -p $(prefix)/man/man1; fi
-	install -c -m 644 DOCS/mplayer.1 $(prefix)/man/man1/mplayer.1
+	$(INSTALL) -c -m 644 DOCS/mplayer.1 $(prefix)/man/man1/mplayer.1
 ifeq ($(CSS_USE),yes)
 	@echo "Following task requires root privs. If it fails don't panic"
 	@echo "however it means you can't use fibmap_mplayer."
 	@echo "Without this (or without running mplayer as root) you won't be"
 	@echo "able to play encrypted DVDs."
-	-install -o 0 -g 0 -m 4755 -s $(PRG_FIBMAP) $(BINDIR)/$(PRG_FIBMAP)
+	-$(INSTALL) -o 0 -g 0 -m 4755 -s $(PRG_FIBMAP) $(BINDIR)/$(PRG_FIBMAP)
 endif
 
 uninstall:
