@@ -16,6 +16,7 @@
 #include "audio_out.h"
 #include "audio_out_internal.h"
 #include "afmt.h"
+#include <SDL.h>
 
 #include "../libvo/fastmemcpy.h"
 
@@ -46,7 +47,7 @@ static unsigned int buf_read=0;
 static unsigned int buf_write=0;
 static unsigned int buf_read_pos=0;
 static unsigned int buf_write_pos=0;
-
+static unsigned int volume=127;
 static int full_buffers=0;
 static int buffered_bytes=0;
 
@@ -79,6 +80,7 @@ static int read_buffer(unsigned char* data,int len){
     x=BUFFSIZE-buf_read_pos;
     if(x>len) x=len;
     memcpy(data+len2,buffer[buf_read]+buf_read_pos,x);
+    SDL_MixAudio(data+len2, data+len2, x, volume);
     len2+=x; len-=x;
     buffered_bytes-=x; buf_read_pos+=x;
     if(buf_read_pos>=BUFFSIZE){
@@ -92,8 +94,6 @@ static int read_buffer(unsigned char* data,int len){
 }
 
 // end ring buffer stuff
-
-#include <SDL.h>
 
 #if	defined(sun) && defined(__svr4__)
 /* setenv is missing on solaris */
@@ -114,7 +114,23 @@ static void setenv(const char *name, const char *val, int _xx)
 
 // to set/get/query special features/parameters
 static int control(int cmd,int arg){
-    return -1;
+	switch (cmd) {
+		case AOCONTROL_GET_VOLUME:
+		{
+			ao_control_vol_t* vol = (ao_control_vol_t*)arg;
+			vol->left = vol->right = (float)((volume + 127)/2.55);
+			return CONTROL_OK;
+		}
+		case AOCONTROL_SET_VOLUME:
+		{
+			float diff;
+			ao_control_vol_t* vol = (ao_control_vol_t*)arg;
+			diff = (vol->left+vol->right) / 2;
+			volume = (int)(diff * 2.55) - 127;
+			return CONTROL_OK;
+		}
+	}
+	return -1;
 }
 
 // SDL Callback function
