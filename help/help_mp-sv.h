@@ -34,17 +34,17 @@ static char help_text[]=
 " < eller >           stega bakåt/framåt i spellistan\n"
 " p eller SPACE       pausa filmen (tryck på valfri tagent för att fortsätta)\n"
 " q eller ESC         stanna spelningen och avsluta programmet\n"
-" + eller -           ställ in audiofördröjning med Â± 0.1 sekund\n"
+" + eller -           ställ in audiofördröjning med ± 0.1 sekund\n"
 " o                   växla OSD läge:  ingen / lägesindikator / lägesindikator + tidtagare\n"
 " * eller /           öka eller sänk PCM-volym\n"
-" z eller x           ställ in textningsfördröjning med Â± 0.1 sekund\n"
+" z eller x           ställ in textningsfördröjning med ± 0.1 sekund\n"
 " r or t              ställ in textningsposition upp/ner, se också '-vf expand'\n"
 "\n"
 " * * * LÄS MANUALEN FÖR FLER DETALJER, MER AVANCERADE ARGUMENT OCH KOMMANDON * * *\n"
 "\n";
 #endif
 
-#define MSGTR_SamplesWanted "Fler exempel på detta format behövs för att vidare öka support. Var vänlig kontakta untecklarna.\n"
+#define MSGTR_SamplesWanted "Fler exempel på detta format behövs för att vidare öka support. Var vänlig kontakta utvecklarna.\n"
 
 // ========================= MPlayer messages ===========================
 
@@ -195,6 +195,24 @@ static char help_text[]=
 #define MSGTR_DvdnavNavCellChange "DVDNAV-händelse: 'Nav Cell' ändrad\n"
 #define MSGTR_DvdnavNavSpuClutChange "DVDNAV-händelse: 'Nav SPU CLUT' ändrad\n"
 #define MSGTR_DvdnavNavSeekDone "DVDNAV-händelse: 'Nav Seek' ändrad\n"
+/*
+ * FIXME A lot of shorted words, not translating atm
+ */
+
+#define MSGTR_DvdnavNullEvent "DVDNAV-hÃ¤ndelse NULL?!\n"
+#define MSGTR_DvdnavHighlightEventBroken "DVDNAV-hÃ¤ndelse: Highlight-hÃ¤ndelse trasig\n" // FIXME highlight
+#define MSGTR_DvdnavEvent "DVDNAV-hÃ¤ndelse Event: %s\n"
+#define MSGTR_DvdnavHighlightHide "DVDNAV-hÃ¤ndelse: Highlight gÃ¶md\n"
+#define MSGTR_DvdnavStillFrame "######################################## DVDNAV-hÃ¤ndelse: Fortfarande bildruta: %d sekunder\n"
+#define MSGTR_DvdnavNavStop "DVDNAV-hÃ¤ndelse: Nav Stop\n" // FIXME Nav Stop?
+#define MSGTR_DvdnavNavNOP "DVDNAV-hÃ¤ndelse: Nav NOP\n"
+#define MSGTR_DvdnavNavSpuStreamChangeVerbose "DVDNAV-hÃ¤ndelse: 'Nav SPU'-strÃ¶mningsÃ¤ndring: fysisk: %d/%d/%d logisk: %d\n"
+#define MSGTR_DvdnavNavSpuStreamChange "DVDNAV-hÃ¤ndelse: 'Nav SPU'-strÃ¶mningsÃ¤ndring: fysisk: %d logisk: %d\n"
+#define MSGTR_DvdnavNavAudioStreamChange "DVDNAV-hÃ¤ndelse: 'Nav Audio'-strÃ¶mningsÃ¤ndring: fysisk: %d logisk: %d\n"
+#define MSGTR_DvdnavNavVTSChange "DVDNAV-hÃ¤ndelse: 'Nav VTS' Ã¤ndrad\n"
+#define MSGTR_DvdnavNavCellChange "DVDNAV-hÃ¤ndelse: 'Nav Cell' Ã¤ndrad\n"
+#define MSGTR_DvdnavNavSpuClutChange "DVDNAV-hÃ¤ndelse: 'Nav SPU CLUT' Ã¤ndrad\n"
+#define MSGTR_DvdnavNavSeekDone "DVDNAV-hÃ¤ndelse: 'Nav Seek' Ã¤ndrad\n"
 /*
  * FIXME A lot of shorted words, not translating atm
  */
