@@ -1,4 +1,4 @@
-.\" synced with 1.788
+.\" synced with 1.790
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -200,7 +200,7 @@ rotation, redimensionnement, bruit, conversion rgb/\:yuv) et bien plus.
 est l'interface graphique de MPlayer.
 Il possède les mêmes options que MPlayer.
 .PP
-Des exemples d'usage pour vous familiariser rapidement dont disponibles
+Des exemples d'usages pour vous familiariser rapidement sont disponibles
 à la fin de cette page de manuel.
 .PP
 .B Regardez également la documentation HTML !
@@ -232,6 +232,12 @@ Recule/\:avance de 10 secondes.
 Recule/\:avance d'1 minute.
 .IPs "pgup et pgdown"
 recule/\:avance de 10 minutes
+.IPs "[ et ]"
+Diminue/accélère la vitesse courante de lecture de 10%.
+.IPs "{ and }"
+Réduit de moitié/double la vitesse courante de lecture.
+.IPs "Backspace"
+Reset playback speed to normal.
 .IPs "< et >"
 Recule/\:avance dans la liste de lecture (playlist).
 .IPs "HOME et END"
@@ -244,7 +250,7 @@ uniquement)
 Met le film en pause (n'importe quelle touche pour redémarrer).
 .IPs "."
 Avance d'une trame.
-Le premier appui mettra le film en pause, et chaque appuis suivant jouera
+Le premier appui mettra le film en pause, et chaque appui suivant jouera
 juste une trame et remettra le film en pause (toute autre touche arrête la
 pause).
 .IPs "q / ESC"
@@ -300,6 +306,26 @@ Ajuste la luminosité.
 Ajuste la couleur.
 .IPs "7 et 8"
 Ajuste la saturation.
+.RE
+.PD 1
+.PP
+Les touches suivantes ne sont valides que lorsque le pilote de sortie vidéo quartz est utilisé.
+.PP
+.PD 0
+.RSs
+.IPs "option + 0"
+Divise par deux la taille de la fenêtre vidéo.
+.IPs "option + 1"
+Ajuste la fenêtre fenêtre vidéo à sa taille d'origine.
+.IPs "option + 2"
+Double la taille de la fenêtre vidéo.
+.IPs "option + f"
+Bascule en mode plein écran (voir aussi \-fs).
+.IPs "option + [ et option + ]"
+Change l'alpha (transparence) de la fenêtre vidéo.
+.IPs T\ \ \ \ 
+Bascule entre les modes d'empilement de fenêtres devant/dessous/normal
+(voir aussi \-ontop).
 .RE
 .PD 1
 .
@@ -509,7 +535,7 @@ x11, xmga, xv, xvidix et dfbmga.
 Saute l'affichage de certaines trames pour maintenir la synchro A/\:V sur
 les machines lentes.
 Les filtres vidéo ne sont pas appliqués sur de telles trames.
-Pour les trames-B même leur décodage est complétement désactivé.
+Pour les trames-B même leur décodage est complètement désactivé.
 .
 .TP
 .B \-h, \-help, \-\-help
@@ -635,7 +661,7 @@ Joue les fichiers d'après une liste de lecture (1 fichier par ligne, ou aux
 formats Winamp ou ASX).
 .br
 .I NOTE:
-Cette option est considérée comme une entrée donc les options trouvées à la
+Cette option est considérée comme une entrée, donc les options trouvées à la
 suite s'appliqueront uniquement aux éléments de la liste de lecture.
 .br
 FIXME: Cette description est quelque peu alambiquée, et devrait être mieux
@@ -717,7 +743,7 @@ Pour jouer des flux MPEG-TS, MPlayer/\:MEncoder utilisera le premier programme
 .TP
 .B \-alang <code-de-langue> (voir aussi \-aid)
 Joue la piste audio dont la langue correspond au code-pays donné.
-Chaque container comprend des codes-pays différent.
+Chaque container comprend des codes-pays différents.
 Les DVDs utilisent les codes de langue ISO 639-1 à deux lettres,
 Matroska et NUT utilisent ceux à trois lettres d'ISO 639-2, tandis que
 OGM permet des identifiants libres.
@@ -1535,7 +1561,7 @@ La valeur 255 signifie blanc et 0 noir.
 .TP
 .B \-sub-demuxer <nombre> (\-subfile uniquement) (CODE BÉTA)
 Force le type de démultiplexeur de sous-titres pour \-subfile.
-Donnez l'ID du demuxer tel que defini dans subreader.h.
+Donnez l'ID du demuxer tel que défini dans subreader.h.
 .
 .TP
 .B \-sub-fuzziness <mode>
@@ -1581,7 +1607,7 @@ d'autres zones.
 .TP
 .B \-subcp <codepage> (iconv uniquement)
 Si votre système gère iconv(3), vous pouvez utiliser cette
-option pour définir la page de code du sous-titres
+option pour définir la page de code du sous-titre.
 .sp 1
 .I EXEMPLE:
 .PD 0
@@ -2436,7 +2462,7 @@ La syntaxe est:
 .B \-vo <pilote1[:option],pilote2,...[,]>
 Spécifie une liste des priorités pour les pilotes de sortie à utiliser.
 .PP
-Si la liste ce termine par ','   les autres pilotes seront essayés en cas
+Si la liste se termine par ','   les autres pilotes seront essayés en cas
 d'échec.
 Les sous-options sont optionnelles et peuvent être omises pour la plupart.
 .br
@@ -2800,7 +2826,7 @@ la majorité des vidéos MPEG.
 Vous devriez activer cette option si vous observez des distortions ou des
 mouvements saccadés lorsque vous regardez une vidéo entrelacée.
 .IPs tvnorm=pal|ntsc|auto
-Défini la norme TV de la carte Matrox sans avoir besoin de modifier
+Définit la norme TV de la carte Matrox sans avoir besoin de modifier
 /etc/\:directfbrc (par défaut\ : désactivé).
 Les normes valides sont pal = PAL, ntsc = NTSC.
 La norme auto est particulière (auto-ajustement PAL/\:NTSC) puisqu'elle choisit
@@ -3109,7 +3135,7 @@ mplayer video.nut \-vf format=bgr15 \-vo tga
 .
 .TP
 .B \-ac <[-]codec1,[-]codec2,...[,]>
-Défini une liste de priorité des codecs audio à utiliser, à partir de leur
+Définit une liste de priorité des codecs audio à utiliser, à partir de leur
 nom de codec dans codecs.conf.
 Utilisez un '-' avant le nom d'un codec pour l'omettre.
 Si la liste se termine par ',', se rabat alors sur les codecs non-listés.
@@ -3226,7 +3252,7 @@ Maximalise le volume sans introduire de distortions sonores.
 .
 .TP
 .B \-af-adv <force=(0\-3):list=(filtres)> (voir aussi \-af)
-Défini les options avancées de filtrage audio\ :
+Définit les options avancées de filtrage audio\ :
 .RSs
 .IPs force=<0\-3>
 Force l'insertion de filtres audios de l'une des façons suivantes:
@@ -3710,7 +3736,7 @@ de la liste (-1 pour le dernier).
 .B \-vf-clr
 Vide complètement la liste de filtres.
 .PP
-Avec les filtres qui le permetent, vous pouvez accéder à leur paramètres via
+Avec les filtres qui le permettent, vous pouvez accéder à leur paramètres via
 noms.
 .
 .TP
@@ -4164,7 +4190,7 @@ luminosité, 0\-3 pour la saturation et 0\-1 pour le poids.
 .
 .TP
 .B hue[=couleur:saturation]
-Les valeur par défaut sont couleur=0.0, saturation=1.0.
+Les valeurs par défaut sont couleur=0.0, saturation=1.0.
 Les intervalles pour la couleur sont -180\-180, et -2\-2 pour la saturation
 (des valeurs négatives impliquent un chroma négatif).
 .
@@ -4218,7 +4244,7 @@ Cela permet aux filtres qui ont besoin de voir toutes les trames
 (téléciné inverse, débruitage temporel, etc.\&) pour fonctionner
 correctement.
 Il devrait être placé après les filtres qui ont besoin de voir toutes
-les trames et avant tout filtre gourmant en temps de calcul.
+les trames et avant tout filtre gourmand en temps de calcul.
 .
 .TP
 .B decimate[=max:haut:bas:frac]
@@ -4533,7 +4559,7 @@ Cela produit de meilleurs résultats.
 La passe 1 analyse la vidéo et écrit les résultats dans un fichier journal.
 La 2ème passe lit alors le journal et utilise ces informations pour faire
 le travail.
-Notez que ces deux passes ne correspondent aux deux passes du processus
+Notez que ces deux passes ne correspondent pas aux deux passes du processus
 d'encodage.
 Si vous voulez utiliser le mode 2-passes de divtc lors d'un encodage vidéo,
 il vous faut réaliser 3 passes\ : d'abord la passe 1 de divtc et la passe 1
