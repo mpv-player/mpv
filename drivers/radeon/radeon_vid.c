@@ -11,6 +11,7 @@
  *
  * This file is partly based on mga_vid and sis_vid stuff from
  * mplayer's package.
+ * Also here was used code from CVS of GATOS project and X11 trees.
  */
 
 /*
@@ -24,7 +25,6 @@
    SCALER_GAMMA_SEL_BRIGHT  gamma correction ??? 
   OV0_GRAPHICS_KEY_CLR    color key 
   OV0_AUTO_FLIP_CNTL
-  OV0_DEINTERLACE_PATTERN
   OV0_FILTER_CNTL
   OV0_VIDEO_KEY_CLR
   OV0_KEY_CNTL
@@ -220,7 +220,7 @@ static void radeon_vid_display_video( void )
 
     OUTREG(OV0_AUTO_FLIP_CNTL,OV0_AUTO_FLIP_CNTL_SOFT_BUF_ODD);
 
-    OUTREG(OV0_DEINTERLACE_PATTERN,0xAAAAA);
+    OUTREG(OV0_DEINTERLACE_PATTERN,0xAAAAAAAA);
    
     OUTREG(OV0_AUTO_FLIP_CNTL,(INREG(OV0_AUTO_FLIP_CNTL)^OV0_AUTO_FLIP_CNTL_SOFT_EOF_TOGGLE));
     OUTREG(OV0_AUTO_FLIP_CNTL,(INREG(OV0_AUTO_FLIP_CNTL)^OV0_AUTO_FLIP_CNTL_SOFT_EOF_TOGGLE));
@@ -312,8 +312,7 @@ RTRACE("radeon_vid: usr_config: version = %x card=%x ram=%x src(%xx%x) dest(%x:%
 	,(uint32_t)config->dest_height
 	,(uint32_t)config->frame_size
 	,(uint32_t)config->num_frames);
-
-    config->num_frames = 1; /* FIXME: should be 6 later */
+    radeon_vid_stop_video();
     switch(config->format)
     {
         case IMGFMT_RGB15:
@@ -341,8 +340,8 @@ RTRACE("radeon_vid: usr_config: version = %x card=%x ram=%x src(%xx%x) dest(%x:%
     pitch = ((XXX_WIDTH << 1) + 15) & ~15;
     besr.fourcc = config->format;
 
-    besr.v_inc = (config->src_height << 20) / (config->dest_height<<4);
-    besr.h_inc = (config->src_width  << 12) / (config->dest_width<<4);
+    besr.v_inc = (config->src_height << 20) / (config->dest_height);
+    besr.h_inc = (config->src_width  << 12) / (config->dest_width);
     besr.step_by = 1;
 
     while(besr.h_inc >= (2 << 12)) {
@@ -374,7 +373,7 @@ RTRACE("radeon_vid: BES: vid_buf0_basey=%x\n",besr.vid_buf0_base_adrs);
     besr.p1_v_accum_init = ((tmp << 4) & 0x03ff8000) | 0x00000001;
 
     left = 0; /*(XXX_SRC_X >> 16) & 7;*/
-    besr.h_inc |= ((besr.h_inc >> 1) << 16);
+    besr.h_inc |= ((besr.h_inc/* >> 1*/) << 16);
     besr.step_by |= (besr.step_by << 8);
     besr.y_x_start = (config->x_org + 8) | (config->y_org << 16);
     besr.y_x_end = ((config->x_org + config->dest_width) + 8) | ((config->y_org + config->dest_height) << 16);
@@ -391,7 +390,22 @@ RTRACE("radeon_vid: BES: y_x_start=%x y_x_end=%x blank_at_top=%x pitch0_value=%x
 
 static void radeon_vid_frame_sel(int frame)
 {
-  /* TODO ASAP */
+    uint32_t off;
+    switch(frame)
+    {
+      default:
+      case 0:  off = besr.vid_buf0_base_adrs; break;
+      case 1:  off = besr.vid_buf1_base_adrs; break;
+      case 2:  off = besr.vid_buf2_base_adrs; break;
+      case 3:  off = besr.vid_buf3_base_adrs; break;
+      case 4:  off = besr.vid_buf4_base_adrs; break;
+      case 5:  off = besr.vid_buf5_base_adrs; break;
+    }
+    OUTREG(OV0_REG_LOAD_CNTL,		REG_LD_CTL_LOCK);
+    while(!(INREG(OV0_REG_LOAD_CNTL)&REG_LD_CTL_LOCK_READBACK));
+    OUTREG(OV0_VID_BUF0_BASE_ADRS,	off);
+    OUTREG(OV0_REG_LOAD_CNTL,		0);
+  
 }
 
 static int radeon_vid_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigned long arg)
