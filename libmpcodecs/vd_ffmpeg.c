@@ -17,8 +17,8 @@ static vd_info_t info = {
 	"FFmpeg's libavcodec codec family",
 	"ffmpeg",
 	"A'rpi",
-	"http://ffmpeg.sf.net",
-	"native codecs"
+	"A'rpi, Michael, Alex",
+	"native codecs (http://ffmpeg.sf.net/)"
 };
 
 LIBVD_EXTERN(ffmpeg)
@@ -273,6 +273,11 @@ static int init_vo(sh_video_t *sh){
 	avctx->height != sh->disp_h ||
 	!ctx->vo_inited)
     {
+#if LIBAVCODEC_BUILD >= 4623
+	mp_dbg(MSGT_DECVIDEO, MSGL_DBG2, "aspect_ratio_info: %d\n", avctx->aspect_ratio_info);
+	mp_dbg(MSGT_DECVIDEO, MSGL_DBG2, "par_width: %f\n", (float)avctx->aspected_width);
+	mp_dbg(MSGT_DECVIDEO, MSGL_DBG2, "par_height: %f\n", (float)avctx->aspected_height);
+#endif
 	ctx->last_aspect = avctx->aspect_ratio_info;
 	switch(avctx->aspect_ratio_info)
 	{
@@ -287,6 +292,12 @@ static int init_vo(sh_video_t *sh){
 	    case FF_ASPECT_SQUARE:
 		sh->aspect = 0.0;
 		break;
+#if LIBAVCODEC_BUILD >= 4623
+	    case FF_ASPECT_EXTENDED:
+		if (avctx->aspected_width && avctx->aspected_height)
+		    sh->aspect = (float)avctx->aspected_width/(float)avctx->aspected_height;
+		break;
+#endif
 	}
 	sh->disp_w = avctx->width;
 	sh->disp_h = avctx->height;
