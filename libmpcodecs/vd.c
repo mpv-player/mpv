@@ -187,6 +187,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outf
     }
   }
 
+  if(video_out->get_info)
   { const vo_info_t *info = video_out->get_info();
     mp_msg(MSGT_CPLAYER,MSGL_INFO,"VO: [%s] %dx%d => %dx%d %s %s%s%s%s\n",info->short_name,
          sh->disp_w,sh->disp_h,
