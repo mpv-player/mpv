@@ -4146,16 +4146,17 @@ Diese Option aktiviert die Benutzung von MPlayers internen
 Postprocessing-Filtern.
 Unterfilter müssen durch ein '/'\-Zeichen voneinander getrennt werden und
 können durch ein vorangestelltes '\-' deaktiviert werden.
-Mit einem ':' und einem der folgenden Buchstaben 'a', 'c' oder 'y'
-angehängt hinter der Option kann angegeben werden, wann/\:wie der Filter
-arbeitet (Standard: c).
+Jeder Unterfilter und manche Optionen haben einen kurzen und einen langen
+Namen, die abwechselnd benutzt werden können, z.B.\& dr/dering gleichzeitig.
+Alle Unterfilter teilen gemeinsame Optionen, um ihren Geltungsbereich zu
+bestimmen:
 .PD 0
 .RSs
-.IPs a
+.IPs a/autoq
 Schalte den Unterfilter automatisch aus, falls die CPU zu langsam ist.
-.IPs c
+.IPs c/chrom
 Führe außerdem Chrominanz-Filterung durch.
-.IPs y
+.IPs y/nochrom
 Führe Luminanz-Filterung durch (keine Chrominanz).
 .RE
 .PD 1
@@ -4165,6 +4166,102 @@ Führe Luminanz-Filterung durch (keine Chrominanz).
 .I ANMERKUNG:
 \-pphelp zeigt eine Liste der verfügbaren Unterfilter.
 .sp 1
+Verfügbare Unterfilter sind folgende:
+.RE
+.RSs
+.IPs hb/hdeblock[:Differenz[:Flachheit]]
+horizontaler Deblocking-Filter
+.RSss
+<Differenz>: Differenzfaktor, wobei größere Werte mehr Deblocking
+bedeuten (Standard: 32).
+.br
+<Flachheit>: Schwellenwert für die Flachheit, wobei niedrigere Werte
+mehr Deblocking bedeuten (Standard: 39).
+.REss
+.IPs vb/vdeblock[:Differenz[:Flachheit]]
+vertikaler Deblocking-Filter
+.RSss
+<Differenz>: Differenzfaktor, wobei größere Werte mehr Deblocking
+bedeuten (Standard: 32).
+.br
+<Flachheit>: Schwellenwert für die Flachheit, wobei niedrigere Werte
+mehr Deblocking bedeuten (Standard: 39).
+.REss
+.IPs ha/hadeblock[:Differenz[:Flachheit]]
+genauer horizontaler Deblocking-Filter
+.RSss
+<Differenz>: Differenzfaktor, wobei größere Werte mehr Deblocking
+bedeuten (Standard: 32).
+.br
+<Flachheit>: Schwellenwert für die Flachheit, wobei niedrigere Werte
+mehr Deblocking bedeuten (Standard: 39).
+.REss
+.IPs va/vadeblock[:Differenz[:Flachheit]]
+genauer vertikaler Deblocking-Filter
+.RSss
+<Differenz>: Differenzfaktor, wobei größere Werte mehr Deblocking
+bedeuten (Standard: 32).
+.br
+<Flachheit>: Schwellenwert für die Flachheit, wobei niedrigere Werte
+mehr Deblocking bedeuten (Standard: 39).
+.REss
+.sp 1
+Die horizontalen und vertikalen Deblocking-Filter benutzen die Werte
+für Differenz und Flachheit gemeinsam, du kannst daher keine unterschiedlichen
+horizontalen und vertikalen Schwellenwerte angeben.
+.sp 1
+.IPs h1/x1hdeblock
+experimenteller horizontaler Deblocking-Filter
+.IPs v1/x1vdeblock
+experimenteller vertikaler Deblocking-Filter
+.IPs dr/dering
+Störungsfilter
+.IPs tn/tmpnoise[:Schwellenwert1[:Schwellenwert2[:Schwellenwert3]]]
+Reduzierung zeitweisen Rauschens
+.RSss
+<Schwellenwert1>: größer -> stärkere Filterung
+.br
+<Schwellenwert2>: größer -> stärkere Filterung
+.br
+<Schwellenwert3>: größer -> stärkere Filterung
+.REss
+.IPs al/autolevels[:f/fullyrange]
+automatische Korrektur von Helligkeit und Kontrast
+.RSss
+f/fullyrange: Ausdehnung der Luminanz auf (0\-255).
+.REss
+.IPs lb/linblenddeint
+Linearer Mischungs-Deinterlace-Filter, der Deinterlacing eines gegebenen
+Blocks durch Filterung mit einem (1 2 1)-Filter durchführt.
+.IPs li/linipoldeint
+Linearer Interpolations-Deinterlace-Filter, der Deinterlacing eines gegebenen
+Blocks durch lineare Interpolation jeder zweiten Zeile durchführt.
+.IPs ci/cubicipoldeint
+Cubischer Interpolations-Deinterlace-Filter, der Deinterlacing eines gegebenen
+Blocks durch cubische Interpolation jeder zweiten Zeile durchführt.
+.IPs md/mediandeint
+Median-Deinterlace-Filter, der Deinterlacing eines gegebenen Blocks durch
+Medianfilterung jeder zweiten Zeile durchführt.
+.IPs fd/ffmpegdeint
+FFmpeg-Deinterlace-Filter, der Deinterlacing eines gegebenen Blocks durch
+Filterung jeder zweiten Zeite mit einem (-1 4 2 4 -1)-Filter durchführt.
+.IPs l5/lowpass5
+Vertikal angewendeter FIR-Tiefpass-Deinterlace-Filter, der Deinterlacing eines
+gegebenen Blocks durch Filterung aller Zeilen mit einem (-1 2 6 2 -1)-Filter
+durchführt.
+.IPs fq/forceQuant[:Quantisierungsparameter]
+Überschreibt die Quantisierungstabelle der Eingabe mit einem konstanten
+Quantisierungsparameter, den du angibst.
+.RSss
+<Quantisierungsparameter>: zu benutzender Quantisierungsparameter
+.REss
+.IPs de/default
+Standard-pp-Filterkombination (hb:a,vb:a,dr:a)
+.IPs fa/fast
+schnelle pp-Filterkombination (h1:a,v1:a,dr:a)
+.RE
+.RS
+.sp 1
 .I BEISPIEL:
 .RE
 .PD 0
@@ -4172,12 +4269,9 @@ Führe Luminanz-Filterung durch (keine Chrominanz).
 .IPs "\-vf pp=hb/vb/dr/al"
 horizontales und vertikales Deblocking, Abschwächung und automatische
 Helligkeit/\:Kontrast
-.IPs "\-vf pp=hb/vb/dr/al/lb"
-horizontales und vertikales Deblocking, Abschwächung, automatische
-Helligkeit/\:Kontrast und linearer Mischungsdeinterlacer
 .IPs "\-vf pp=de/-al"
 Standardfilter ohne Helligkeits\-/\:Kontrastkorrektur
-.IPs "\-vf pp=de/tn:1:2:3"
+.IPs "\-vf pp=default/tmpnoise:1:2:3"
 Aktiviert Standardfilter und temporäre Rauschunterdrücker.
 .IPs "\-vf pp=hb:y/vb:a"
 Horizontales Deblocking nur luminanz-bezogen, schaltet vertikales Deblocking
