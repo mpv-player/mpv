@@ -27,7 +27,7 @@
  *
  *  Changes:
  *    Dominik Schnitzer <dominik@schnitzer.at> - November 08, 2000.
- *    - Added resizing support, fullscreen: chnaged the sdlmodes selection
+ *    - Added resizing support, fullscreen: changed the sdlmodes selection
  *       routine.
  *    - SDL bugfixes: removed the atexit(SLD_Quit), SDL_Quit now resides in
  *       the plugin_exit routine.
@@ -40,6 +40,8 @@
  *    - Better error handling
  *    Bruno Barreyra <barreyra@ufl.edu> - December 10, 2000.
  *    - Eliminated memcpy's for entire frames
+ *    Felix Buenemann <Felix.Buenemann@ePost.de> - March 11, 2001
+ *    - Added aspect-ratio awareness for fullscreen
  */
 
 #include <stdio.h>
@@ -58,7 +60,7 @@ LIBVO_EXTERN(sdl)
 
 static vo_info_t vo_info = 
 {
-	"SDL YUV overlay (SDL v1.1.7 only!)",
+	"SDL YUV overlay (SDL v1.1.7+ only!)",
 	"sdl",
 	"Ryan C. Gordon <icculus@lokigames.com>",
 	""
@@ -138,7 +140,7 @@ static int sdl_open (void *plugin, void *name)
 
 //	LOG (LOG_DEBUG, "SDL video out: Opened Plugin");
 	
-	/* default to no fullscreen mode, we'll set this as soon we have the avail. mdoes */
+	/* default to no fullscreen mode, we'll set this as soon we have the avail. modes */
 	priv->fullmode = -2;
 	/* other default values */
 	priv->sdlflags = SDL_HWSURFACE|SDL_RESIZABLE|SDL_ASYNCBLIT;
@@ -254,14 +256,19 @@ static void set_fullmode (int mode)
 {
 	struct sdl_priv_s *priv = &sdl_priv;
 	SDL_Surface *newsurface = NULL;
-	
+	unsigned int aspect;
 	
 	/* if we haven't set a fullmode yet, default to the lowest res fullmode first */
 	if (mode < 0) 
 		mode = priv->fullmode = findArrayEnd(priv->fullmodes) - 1;
 
-	/* change to given fullscreen mode and hide the mouse cursor*/
-	newsurface = SDL_SetVideoMode(priv->fullmodes[mode]->w, priv->fullmodes[mode]->h, priv->bpp, priv->sdlfullflags);
+	/* Calculate proper aspect ratio for fullscreen */
+	aspect = (priv->width * 0.75 - priv->height) * (float) ((float) priv->fullmodes[mode]->w / (float) priv->width);
+//	printf ("Aspect: %i\n", aspect);
+	
+	/* change to given fullscreen mode and hide the mouse cursor
+	   Felix Buenemann: added - aspect to use proper aspect ratio in fullscreen */
+	newsurface = SDL_SetVideoMode(priv->fullmodes[mode]->w, priv->fullmodes[mode]->h - aspect, priv->bpp, priv->sdlfullflags);
 	
 	/* if we were successfull hide the mouse cursor and save the mode */
 	if (newsurface) {
@@ -286,7 +293,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 //static int sdl_setup (int width, int height)
 {
 	struct sdl_priv_s *priv = &sdl_priv;
-        unsigned int sdl_format;
+        unsigned int sdl_format, aspectheight;
 
         switch(format){
           case IMGFMT_YV12: sdl_format=SDL_YV12_OVERLAY;break;
@@ -299,7 +306,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	sdl_open (NULL, NULL);
 
 	/* Save the original Image size */
-
+	
 	priv->width  = width;
 	priv->height = height;
         priv->format = format;
@@ -491,7 +498,6 @@ static void check_events (void)
 				 	if (priv->surface->flags & SDL_FULLSCREEN) {
 						priv->surface = SDL_SetVideoMode(priv->windowsize.w, priv->windowsize.h, priv->bpp, priv->sdlflags);
 						SDL_ShowCursor(1);
-						
 //						LOG (LOG_DEBUG, "SDL video out: Windowed mode");
 					} 
 					else if (priv->fullmodes){
