@@ -1593,8 +1593,8 @@ switch(sh_video->codec->driver){
     if(eof) break;
     if(force_redraw){
       --force_redraw;
-      if(!force_redraw) osd_function=OSD_PLAY;
     }
+    if(!force_redraw) osd_function=OSD_PLAY;
 
 //    printf("A:%6.1f  V:%6.1f  A-V:%7.3f  frame=%5.2f   \r",d_audio->pts,d_video->pts,d_audio->pts-d_video->pts,a_frame);
 //    fflush(stdout);
@@ -1733,11 +1733,26 @@ switch(sh_video->codec->driver){
       osd_level=(osd_level+1)%3;
       break;
     case '*':
-      mixer_incvolume();
-      break;
-    case '/':
-      mixer_decvolume();
-      break;
+    case '/': {
+        int mixer_l=0; int mixer_r=0;
+        mixer_getvolume( &mixer_l,&mixer_r );
+        if(c=='*'){
+            if ( mixer_l < 100 ) mixer_l++;
+            if ( mixer_r < 100 ) mixer_r++;
+        } else {
+            if ( mixer_l > 0 ) mixer_l--;
+            if ( mixer_r > 0 ) mixer_r--;
+        }
+        mixer_setvolume( mixer_l,mixer_r );
+
+        if(osd_level){
+          osd_visible=sh_video->fps; // 1 sec
+          vo_osd_progbar_type=OSD_VOLUME;
+          vo_osd_progbar_value=(mixer_l+mixer_r)*5/4;
+          //printf("volume: %d\n",vo_osd_progbar_value);
+        }
+      }
+      break; 
     case 'm':
       mixer_usemaster=!mixer_usemaster;
       break;
