@@ -10,6 +10,7 @@
 
 //#include "DS_VideoDecoder.h"
 //#include <string.h>
+using namespace std;
 #include <stdlib.h>
 #include <except.h>
 #define __MODULE__ "DirectShow_VideoDecoder"
@@ -44,7 +45,6 @@
 #include "DS_VideoDec.h"
 
 
-using namespace std;
 extern "C" char* def_path;
 
     static char** m_destptr=0;

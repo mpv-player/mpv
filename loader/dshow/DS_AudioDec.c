@@ -10,6 +10,7 @@
 
 //#include "DS_AudioDecoder.h"
 //#include <string.h>
+using namespace std;
 #include <stdlib.h>
 #include <except.h>
 #define __MODULE__ "DirectShow_AudioDecoder"
@@ -50,7 +51,6 @@ const GUID MEDIASUBTYPE_PCM={
 0x00000001, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71};
 
 
-using namespace std;
 extern "C" char* def_path;
 
     static DS_Filter* dsf=0;
