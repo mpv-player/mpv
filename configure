@@ -427,6 +427,7 @@ if [ $_x11 = yes ]; then
 
 $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXdpms &> /dev/null && _xdpms=yes
 $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXv &> /dev/null && _xv=yes
+$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXxf86vm &> /dev/null && _vm=yes
 
 $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL &> /dev/null && _gl=yes
 
@@ -436,8 +437,6 @@ int main( void ) { return 0; }
 EOF
 $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL &> /dev/null || \
  { _gl=no; echo "GL includes not found!";}
-
-$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXxf86vm &> /dev/null && _vm=yes
 
 cat > $TMPC << EOF
 #include <stdio.h>
