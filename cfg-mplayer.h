@@ -205,13 +205,16 @@ static config_t mplayer_opts[]={
 	    CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #endif
 
+#if defined(HAVE_FBDEV)||defined(HAVE_VESA) 
+       {"monitor_hfreq", &monitor_hfreq_str, CONF_TYPE_STRING, 0, 0, 0, NULL}, 
+       {"monitor_vfreq", &monitor_vfreq_str, CONF_TYPE_STRING, 0, 0, 0, NULL}, 
+       {"monitor_dotclock", &monitor_dotclock_str, CONF_TYPE_STRING, 0, 0, 0, NULL}, 
+#endif 
+
 #ifdef HAVE_FBDEV
 	{"fb", &fb_dev_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"fbmode", &fb_mode_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"fbmodeconfig", &fb_mode_cfgfile, CONF_TYPE_STRING, 0, 0, 0, NULL},
-	{"monitor_hfreq", &monitor_hfreq_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
-	{"monitor_vfreq", &monitor_vfreq_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
-	{"monitor_dotclock", &monitor_dotclock_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #else
 #ifdef HAVE_DIRECTFB
 	{"fb", &fb_dev_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
