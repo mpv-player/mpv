@@ -475,7 +475,10 @@ if(strncmp("dvd://",filename,6) == 0){
   }
 #endif
 
-  url = url_new(filename);
+  // FIXME: to avoid nonsense error messages...
+  if (strncmp("tv://", filename, 5) && strncmp("mf://", filename, 5) &&
+    strncmp("vcd://", filename, 6))
+    url = url_new(filename);
   if(url) {
 	if (strcmp(url->protocol, "smb")==0){
 #ifdef LIBSMBCLIENT
