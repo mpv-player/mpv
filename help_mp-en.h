@@ -318,7 +318,7 @@ static char help_text[]=
 // --- equalizer
 #define MSGTR_EQU_Audio "Audio"
 #define MSGTR_EQU_Video "Video"
-#define MSGTR_EQU_Contrast "Contras: "
+#define MSGTR_EQU_Contrast "Contrast: "
 #define MSGTR_EQU_Brightness "Brightness: "
 #define MSGTR_EQU_Hue "Hue: "
 #define MSGTR_EQU_Saturation "Saturation: "
