@@ -1270,8 +1270,14 @@ if(!use_stdin && !slave_mode){
 
   stream=NULL;
   demuxer=NULL;
-  d_audio=NULL;
-  d_video=NULL;
+  if (d_audio) {
+    free_demuxer_stream(d_audio);
+    d_audio=NULL;
+  }
+  if (d_video) {
+    free_demuxer_stream(d_video);
+    d_video=NULL;
+  }
   sh_audio=NULL;
   sh_video=NULL;
 
