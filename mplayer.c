@@ -434,6 +434,8 @@ int v_saturation=50;
 int i;
 int use_stdin=0; //int f; // filedes
 
+int gui_no_filename=0;
+
   mp_msg_init(MSGL_STATUS);
 
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s",banner_text);
@@ -484,10 +486,12 @@ int use_stdin=0; //int f; // filedes
       exit(0);
     }
 
-    if(!num_filenames && !vcd_track && !dvd_title && !use_gui){
+    if(!num_filenames && !vcd_track && !dvd_title){
+      if(!use_gui){
 	// no file/vcd/dvd -> show HELP:
 	printf("%s",help_text);
 	exit(0);
+      } else gui_no_filename=1;
     }
 
     // Many users forget to include command line in bugreports...
@@ -572,13 +576,18 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
     curr_filename=0;
 play_next_file:
     filename=(num_filenames>0)?filenames[curr_filename]:NULL;
+
 #ifdef HAVE_NEW_GUI
-    if ( use_gui ) 
-     {
-      strcpy( mplShMem->Filename,filename );
-      mplShMem->Playing=1;
-     } 
-#endif    
+    if ( use_gui ) {
+      if(filename) strcpy( mplShMem->Filename,filename );
+      mplShMem->Playing= (gui_no_filename) ? 0 : 1;
+      while(mplShMem->Playing!=1){
+	usleep(20000);
+	wsHandleEvents();mplTimerHandler(0); // handle GUI timer events
+      }
+    }
+#endif
+
     if(filename) mp_msg(MSGT_CPLAYER,MSGL_INFO,"Playing %s\n", filename);
 
 #ifdef USE_SUB
