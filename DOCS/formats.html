@@ -16,7 +16,7 @@
 <LI> <A HREF="#2.1.1.3">ASF/WMV</A> 1.0 file format
 <LI> <A HREF="#2.1.1.4">QT/MOV</A> file format with (un)compressed headers
 <LI> <A HREF="#2.1.1.5">VIVO</A> format (.viv files)
-<LI> supports <A HREF="documentation.html#3.3">reading from file</A>, stdin, or network via HTTP
+<LI> supports <A HREF="documentation.html#3.3">reading from stdin</A>, or network via HTTP
 </UL></P>
 
 <P>Note: about realmedia (.ra/.rm) support read the FAQ!</P>
@@ -59,6 +59,12 @@ the DAT files can't be played nor copied from VCDs. You have to use the
 <CODE>-vcd</CODE> option to play the VideoCD.</LI>
 </P>
 
+<P>One important feature for MPGs is that they have a field to describe
+the aspect ratio of the video stream within. For example SVCDs have
+480x480 resolution video, and in the header that field is set to 4:3, so
+it's played at 640x480. AVI files don't have this field, so one has to
+scale it during encoding.</P>
+
 
 <P><B><A NAME=2.1.1.2>2.1.1.2. AVI files</A></B></P>
 
@@ -67,7 +73,7 @@ widespread multipurpose format, currently used mostly for DivX and DivX4
 videos. Has many known drawbacks, and inabilities (for example in streaming).
 Has support for one video stream, and 99 audio streams. Can be as big as
 2Gb. There exists an extension for it to be bigger, called <B>OpenDMS</B>.
-M$ is currently strongly discourages its use and propagates ASF/WMV. Not if
+M$ currently strongly discourages its use and propagates ASF/WMV. Not if
 anybody cares.<BR>
 <B>NOTE</B> : DV cameras can create two types of AVI format, one is the usual and
 playable, the other is neither.</P>
