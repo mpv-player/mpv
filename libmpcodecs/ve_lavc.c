@@ -150,6 +150,8 @@ static int lavc_param_top= -1;
 static int lavc_param_alt= 0;
 static int lavc_param_ilme= 0;
 static int lavc_param_nssew= 8;
+static int lavc_param_closed_gop = 0;
+static int lavc_param_dc_precision = 8;
 static int lavc_param_threads= 1;
 
 
@@ -287,6 +289,12 @@ m_option_t lavcopts_conf[]={
 #endif
 #ifdef CODEC_FLAG_INTERLACED_ME
 	{"ilme", &lavc_param_ilme, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_INTERLACED_ME, NULL},
+#endif
+#ifdef CODEC_FLAG_CLOSED_GOP
+	{"cgop", &lavc_param_closed_gop, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_CLOSED_GOP, NULL},
+#endif
+#if LIBAVCODEC_BUILD >= 4711
+	{"dc", &lavc_param_dc_precision, CONF_TYPE_INT, CONF_RANGE, 8, 10, NULL},
 #endif
 	{"inter_threshold", &lavc_param_inter_threshold, CONF_TYPE_INT, CONF_RANGE, -1000000, 1000000, NULL},
 	{"sc_threshold", &lavc_param_sc_threshold, CONF_TYPE_INT, CONF_RANGE, -1000000, 1000000, NULL},
@@ -585,12 +593,18 @@ static int config(struct vf_instance_s* vf,
     lavc_venc_context->flags|= lavc_param_ss;
     lavc_venc_context->flags|= lavc_param_alt;
     lavc_venc_context->flags|= lavc_param_ilme;
+#ifdef CODEC_FLAG_CLOSED_GOP
+    lavc_venc_context->flags|= lavc_param_closed_gop;
+#endif    
     if(lavc_param_gray) lavc_venc_context->flags|= CODEC_FLAG_GRAY;
 
     if(lavc_param_normalize_aqp) lavc_venc_context->flags|= CODEC_FLAG_NORMALIZE_AQP;
     if(lavc_param_interlaced_dct) lavc_venc_context->flags|= CODEC_FLAG_INTERLACED_DCT;
 #if LIBAVCODEC_BUILD >= 4643
     lavc_venc_context->flags|= lavc_param_psnr;
+#endif
+#if LIBAVCODEC_BUILD >= 4711
+    lavc_venc_context->intra_dc_precision = lavc_param_dc_precision - 8;
 #endif
     lavc_venc_context->prediction_method= lavc_param_prediction_method;
     switch(lavc_param_format)
