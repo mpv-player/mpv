@@ -1055,6 +1055,27 @@ LPWSTR WINAPI expGetEnvironmentStringsW()
     return (LPWSTR)envs;
 }
 
+void * WINAPI expRtlZeroMemory(void *p, size_t len)
+{
+    void* result=memset(p,0,len);
+    dbgprintf("RtlZeroMemory(0x%x, len %d) => 0x%x\n",p,len,result);
+    return result;
+}
+void * WINAPI expRtlMoveMemory(void *dst, void *src, size_t len)
+{
+    void* result=memmove(dst,src,len);
+    dbgprintf("RtlMoveMemory (dest 0x%x, src 0x%x, len %d) => 0x%x\n",dst,src,len,result);
+    return result;
+}
+
+void * WINAPI expRtlFillMemory(void *p, int ch, size_t len)
+{
+    void* result=memset(p,ch,len);
+    dbgprintf("RtlFillMemory(0x%x, char 0x%x, len %d) => 0x%x\n",p,ch,len,result);
+    return result;
+}
+
+
 int WINAPI expFreeEnvironmentStringsW(short* strings)
 {
     dbgprintf("FreeEnvStringsW\n");
@@ -1569,6 +1590,9 @@ FF(OutputDebugStringA, -1)
 FF(GetLocalTime, -1)
 FF(GetSystemTime, -1)
 FF(GetEnvironmentVariableA, -1)
+FF(RtlZeroMemory,-1)
+FF(RtlMoveMemory,-1)
+FF(RtlFillMemory,-1)
 };
 
 struct exports exp_msvcrt[]={
