@@ -4,15 +4,17 @@
  * vo_md5sum.c, md5sum Video Output Driver for MPlayer
  *
  * 
- * Written by Ivo van Poorten. (GPL)2004
+ * Written by Ivo van Poorten. (C) Copyright 2004, 2005.
+ * Licensed under GNU General Public License version 2.
  *
  *
  * Changelog
  * 
- * 2004-09-13   First draft.
+ * 2005-01-16   Replaced suboption parser by call to subopt-helper.
  * 2004-09-16   Second draft. It now acts on VOCTRL_DRAW_IMAGE and does not
  *              maintain a local copy of the image if the format is YV12.
  *              Speed improvement and uses less memory.
+ * 2004-09-13   First draft.
  *
  */
 
@@ -30,6 +32,7 @@
 /* Local Includes */
 
 #include "config.h"
+#include "subopt-helper.h"
 #include "mp_msg.h"
 #include "video_out.h"
 #include "video_out_internal.h"
@@ -69,22 +72,6 @@ int framenum = 0;
 
 /* ------------------------------------------------------------------------- */
 
-/** \brief Memory allocation failed.
- *
- * The video output driver failed to allocate a block of memory it needed.
- * It displays a message and exits the player.
- *
- * \return nothing It does not return.
- */
-
-void md5sum_malloc_failed(void) {
-    mp_msg(MSGT_VO, MSGL_ERR, "%s: %s\n", info.short_name,
-            MSGTR_MemAllocFailed);
-    exit_player(MSGTR_Exit_error);
-}
-
-/* ------------------------------------------------------------------------- */
-
 /** \brief An error occured while writing to a file.
  *
  * The program failed to write data to a file.
@@ -116,50 +103,31 @@ void md5sum_write_error(void) {
 
 static uint32_t preinit(const char *arg)
 {
+    strarg_t outfile = {0, NULL};
+    opt_t subopts[] = {
+        {"outfile",     OPT_ARG_STR,    &outfile,   NULL},
+        {NULL}
+    };
+
     char *buf;      /* buf is used to store parsed string values */
 
     mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
                                             MSGTR_VO_ParsingSuboptions);
-    
-    if (arg) {
 
-        while (*arg != '\0') {
-            if (!strncmp(arg, ":", 1)) {
-                arg++;
-                continue;   /* multiple ':' is not really an error */
-            } else if (!strncmp(arg, "outfile=", 8)) {
-                arg += 8;
-                buf = malloc(strlen(arg)+1); /* maximum length possible */
-                if (!buf) {
-                    md5sum_malloc_failed(); /* message and exit_player! */
-                }
-                if (sscanf(arg, "%[^:]", buf) == 1) {
-                    mp_msg(MSGT_VO, MSGL_INFO, "%s: %s --> %s\n",
-                            info.short_name, "outfile", buf);
-                    arg += strlen(buf);
-                    md5sum_outfile = strdup(buf);
-                    if (!md5sum_outfile) md5sum_malloc_failed();
-                    free(buf);
-                } else {
-                    mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n",
-                            info.short_name, "outfile",
-                            MSGTR_VO_NoValueSpecified);
-                    exit_player(MSGTR_Exit_error);
-                }
-            } else {
-                mp_msg(MSGT_VO, MSGL_ERR, "%s: %s %-20s...\n", info.short_name,
-                        MSGTR_VO_UnknownSuboptions, arg);
-                exit_player(MSGTR_Exit_error);
-            }
-        } /* end while */
-    } /* endif */
-    
-    /* If md5sum_outfile is not set by an option, resort to default of
-                                                                "md5sums" */
-    if (!md5sum_outfile) {
-        md5sum_outfile = strdup("md5sums");
-        if (!md5sum_outfile) md5sum_malloc_failed();
+    if (subopt_parse(arg, subopts) != 0) {
+        return -1;
     }
+
+    if (outfile.len) {
+        md5sum_outfile = malloc(outfile.len + 1);
+        memcpy(md5sum_outfile, outfile.str, outfile.len);
+        md5sum_outfile[outfile.len] = '\0';
+    } else {
+        md5sum_outfile = strdup("md5sums");
+    }
+
+    mp_msg(MSGT_VO, MSGL_V, "%s: outfile --> %s\n", info.short_name,
+                                                            md5sum_outfile);
 
     mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
                                             MSGTR_VO_SuboptionsParsedOK);

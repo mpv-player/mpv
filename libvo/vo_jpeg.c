@@ -11,6 +11,7 @@
  * 2004-08-04   Added multiple subdirectory support -- Ivo (ivop@euronet.nl)
  * 2004-09-01   Cosmetics update -- Ivo
  * 2004-09-05   Added suboptions parser -- Ivo
+ * 2005-01-16   Replaced suboption parser by call to subopt-helper --Ivo
  *
  */
 
@@ -26,13 +27,13 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <math.h>               /* for log10() */
 
 /* ------------------------------------------------------------------------- */
 
 /* Local Includes */
 
 #include "config.h"
+#include "subopt-helper.h"
 #include "mp_msg.h"
 #include "video_out.h"
 #include "video_out_internal.h"
@@ -302,202 +303,94 @@ static void check_events(void)
 
 /* ------------------------------------------------------------------------- */
 
-/** \brief Memory allocation failed.
- *
- * This function can be called if memory allocation failed. It prints a
- * message and exits the player.
- *
- * \return none     It never returns.
+/** \brief Validation function for values [0-100]
  */
 
-void jpeg_malloc_failed(void) {
-    mp_msg(MSGT_VO, MSGL_ERR, "%s: %s\n", info.short_name,
-            MSGTR_MemAllocFailed);
-    exit_player(MSGTR_Exit_error);
+static int int_zero_hundred(int *val)
+{
+    if ( (*val >=0) && (*val<=100) )
+        return 1;
+    return 0;
 }
 
-/* ------------------------------------------------------------------------- */
+/** \brief Validation function for maxfiles > 0
+ */
+
+static int int_pos(int *mf)
+{
+    if ( *mf > 0 )
+        return 1;
+    return 0;
+}
 
 static uint32_t preinit(const char *arg)
 {
-    char *buf;      /* buf is used to store parsed string values */
-    int value;      /* storage for parsed integer values */
+    strarg_t outdir = {0, NULL}, subdirs = {0, NULL};
+    opt_t subopts[] = {
+        {"progressive", OPT_ARG_BOOL,   &jpeg_progressive_mode, NULL},
+        {"baseline",    OPT_ARG_BOOL,   &jpeg_baseline,         NULL},
+        {"optimize",    OPT_ARG_INT,    &jpeg_optimize,
+                                                (opt_test_f)int_zero_hundred},
+        {"smooth",      OPT_ARG_INT,    &jpeg_smooth,
+                                                (opt_test_f)int_zero_hundred},
+        {"quality",     OPT_ARG_INT,    &jpeg_quality,
+                                                (opt_test_f)int_zero_hundred},
+        {"outdir",      OPT_ARG_STR,    &outdir,                NULL},
+        {"subdirs",     OPT_ARG_STR,    &subdirs,               NULL},
+        {"maxfiles",    OPT_ARG_INT,    &jpeg_maxfiles, (opt_test_f)int_pos},
+        {NULL}
+    };
+    const char *info_message = NULL;
 
     mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
                                             MSGTR_VO_ParsingSuboptions);
-    
-    if (arg) {
 
-        while (*arg != '\0') {
-            if (!strncmp(arg, ":", 1)) {
-                arg++;
-                continue;   /* multiple ':' is not really an error */
-            } if (!strncmp(arg, "progressive", 11)) {
-                arg += 11;
-                jpeg_progressive_mode = 1;
-                mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
-                        MSGTR_VO_JPEG_ProgressiveJPEG);
-            } else if (!strncmp(arg, "noprogressive", 13)) {
-                arg += 13;
-                jpeg_progressive_mode = 0;
-                mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
-                        MSGTR_VO_JPEG_NoProgressiveJPEG);
-            } else if (!strncmp(arg, "baseline", 8)) {
-                arg += 8;
-                jpeg_baseline = 1;
-                mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
-                        MSGTR_VO_JPEG_BaselineJPEG);
-            } else if (!strncmp(arg, "nobaseline", 10)) {
-                arg += 10;
-                jpeg_baseline = 0;
-                mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
-                        MSGTR_VO_JPEG_NoBaselineJPEG);
-            } else if (!strncmp(arg, "optimize=", 9)) {
-                arg += 9;
-                if (sscanf(arg, "%d", &value) == 1) {
-                    if ( (value < 0 ) || (value > 100) ) {
-                        mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s %s.\n",
-                                info.short_name, "optimize",
-                                MSGTR_VO_ValueOutOfRange, "[0-100]");
-                        exit_player(MSGTR_Exit_error);
-                    } else {
-                        jpeg_optimize = value;
-                        mp_msg(MSGT_VO, MSGL_INFO, "%s: %s --> %d\n",
-                                info.short_name, "optimize", value);
-                    }
-                } else {
-                    mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n",
-                            info.short_name, "optimize",
-                            MSGTR_VO_NoValueSpecified);
-                    exit_player(MSGTR_Exit_error);
-                }
-                /* only here if value is set and sane */
-                if (value) {
-                    arg += (int)log10(value) + 1;
-                } else {
-                    arg++;  /* log10(0) fails */
-                }
-            } else if (!strncmp(arg, "smooth=", 7)) {
-                arg += 7;
-                if (sscanf(arg, "%d", &value) == 1 ) {
-                    if ( (value < 0) || (value > 100) ) {
-                        mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s %s.\n",
-                                info.short_name, "smooth",
-                                MSGTR_VO_ValueOutOfRange, "[0-100]");
-                        exit_player(MSGTR_Exit_error);
-                    } else {
-                        jpeg_smooth = value;
-                        mp_msg(MSGT_VO, MSGL_INFO, "%s: %s --> %d\n",
-                                info.short_name, "smooth", value);
-                    }
-                } else {
-                    mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n",
-                            info.short_name, "smooth",
-                            MSGTR_VO_NoValueSpecified);
-                    exit_player(MSGTR_Exit_error);
-                }
-                /* only here if value is set and sane */
-                if (value) {
-                    arg += (int)log10(value) + 1;
-                } else {
-                    arg++;  /* log10(0) fails */
-                }
-            } else if (!strncmp(arg, "quality=", 8)) {
-                arg += 8;
-                if (sscanf(arg, "%d", &value) == 1) {
-                    if ( (value < 0) || (value > 100) ) {
-                        mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s %s.\n",
-                                info.short_name, "quality",
-                                MSGTR_VO_ValueOutOfRange, "[0-100]");
-                        exit_player(MSGTR_Exit_error);
-                    } else {
-                        jpeg_quality = value;
-                        mp_msg(MSGT_VO, MSGL_INFO, "%s: %s --> %d\n",
-                                info.short_name, "quality", value);
-                    }
-                } else {
-                    mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n",
-                            info.short_name, "quality",
-                            MSGTR_VO_NoValueSpecified);
-                    exit_player(MSGTR_Exit_error);
-                }
-                /* only here if value is set and sane */
-                if (value) {
-                    arg += (int)log10(value) + 1;
-                } else {
-                    arg++;  /* log10(0) fails */
-                }
-            } else if (!strncmp(arg, "outdir=", 7)) {
-                arg += 7;
-                buf = malloc(strlen(arg)+1); /* maximum length possible */
-                if (!buf) jpeg_malloc_failed(); /* print msg and exit */
-                if (sscanf(arg, "%[^:]", buf) == 1) {
-                    mp_msg(MSGT_VO, MSGL_INFO, "%s: %s --> %s\n",
-                            info.short_name, "outdir", buf);
-                    arg += strlen(buf);
-                    jpeg_outdir = strdup(buf);
-                    if (!jpeg_outdir) jpeg_malloc_failed();
-                    free(buf);
-                } else {
-                    mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n",
-                            info.short_name, "outdir",
-                            MSGTR_VO_NoValueSpecified);
-                    exit_player(MSGTR_Exit_error);
-                }
-            } else if (!strncmp(arg, "subdirs=", 8)) {
-                arg += 8;
-                buf = malloc(strlen(arg)+1); /* maximum length possible */
-                if (!buf) jpeg_malloc_failed();
-                if (sscanf(arg, "%[^:]", buf) == 1) {
-                    mp_msg(MSGT_VO, MSGL_INFO, "%s: %s --> %s\n",
-                            info.short_name, "subdirs", buf);
-                    arg += strlen(buf);
-                    jpeg_subdirs = strdup(buf);
-                    if (!jpeg_subdirs) jpeg_malloc_failed();
-                    free(buf);
-                } else {
-                    mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n",
-                            info.short_name, "subdirs",
-                            MSGTR_VO_NoValueSpecified);
-                    exit_player(MSGTR_Exit_error);
-                }
-            } else if (!strncmp(arg, "maxfiles=", 9)) {
-                arg += 9;
-                if (sscanf(arg, "%d", &value) == 1) {
-                    if (value < 1) {
-                        mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s %s.\n",
-                                info.short_name, "maxfiles",
-                                MSGTR_VO_ValueOutOfRange, ">=1");
-                        exit_player(MSGTR_Exit_error);
-                    } else {
-                        jpeg_maxfiles = value;
-                        mp_msg(MSGT_VO, MSGL_INFO, "%s: %s --> %d\n",
-                                info.short_name, "maxfiles", value);
-                    }
-                } else {
-                    mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n",
-                            info.short_name, "maxfiles",
-                            MSGTR_VO_NoValueSpecified);
-                    exit_player(MSGTR_Exit_error);
-                }
-                /* only here if value is set and sane */
-                if (value) {
-                    arg += (int)log10(value) + 1;
-                } else {
-                    arg++;  /* log10(0) fails */
-                }
-            } else {
-                mp_msg(MSGT_VO, MSGL_ERR, "%s: %s %-20s...\n", info.short_name,
-                        MSGTR_VO_UnknownSuboptions, arg);
-                exit_player(MSGTR_Exit_error);
-            }
-        } /* end while */
-    } /* endif */
-    
-    /* If jpeg_outdir is not set by an option, resort to default of "." */
-    if (!jpeg_outdir) {
+    jpeg_progressive_mode = 0;
+    jpeg_baseline = 1;
+    jpeg_optimize = 100;
+    jpeg_smooth = 0;
+    jpeg_quality = 75;
+    jpeg_maxfiles = 1000;
+
+    if (subopt_parse(arg, subopts) != 0) {
+        return -1;
+    }
+
+    if (outdir.len) {
+        jpeg_outdir = malloc(outdir.len + 1);
+        memcpy(jpeg_outdir, outdir.str, outdir.len);
+        jpeg_outdir[outdir.len] = '\0';
+    } else {
         jpeg_outdir = strdup(".");
-        if (!jpeg_outdir) jpeg_malloc_failed();
+    }
+
+    if (subdirs.len) {
+        jpeg_subdirs = malloc(subdirs.len + 1);
+        memcpy(jpeg_subdirs, subdirs.str, subdirs.len);
+        jpeg_subdirs[subdirs.len] = '\0';
+    }
+
+    if (jpeg_progressive_mode) info_message = MSGTR_VO_JPEG_ProgressiveJPEG;
+    else info_message = MSGTR_VO_JPEG_NoProgressiveJPEG;
+    mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name, info_message);
+
+    if (jpeg_baseline) info_message = MSGTR_VO_JPEG_BaselineJPEG;
+    else info_message = MSGTR_VO_JPEG_NoBaselineJPEG;
+    mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name, info_message);
+
+    mp_msg(MSGT_VO, MSGL_V, "%s: optimize --> %d\n", info.short_name,
+                                                                jpeg_optimize);
+    mp_msg(MSGT_VO, MSGL_V, "%s: smooth --> %d\n", info.short_name,
+                                                                jpeg_smooth);
+    mp_msg(MSGT_VO, MSGL_V, "%s: quality --> %d\n", info.short_name,
+                                                                jpeg_quality);
+    mp_msg(MSGT_VO, MSGL_V, "%s: outdir --> %s\n", info.short_name,
+                                                                jpeg_outdir);
+    if (jpeg_subdirs) {
+        mp_msg(MSGT_VO, MSGL_V, "%s: subdirs --> %s\n", info.short_name,
+                                                                jpeg_subdirs);
+        mp_msg(MSGT_VO, MSGL_V, "%s: maxfiles --> %d\n", info.short_name,
+                                                                jpeg_maxfiles);
     }
 
     mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
