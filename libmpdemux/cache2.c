@@ -8,7 +8,7 @@
 
 #define READ_USLEEP_TIME 10000
 #define FILL_USLEEP_TIME 50000
-#define PREFILL_USLEEP_TIME 200000
+#define PREFILL_SLEEP_TIME 200
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -196,7 +196,7 @@ static void exit_sighandler(int x){
   exit(0);
 }
 
-void stream_enable_cache(stream_t *stream,int size,int min,int prefill){
+int stream_enable_cache(stream_t *stream,int size,int min,int prefill){
   int ss=(stream->type==STREAMTYPE_VCD)?VCD_SECTOR_DATA:STREAM_BUFFER_SIZE;
   cache_vars_t* s=cache_init(size,ss);
   stream->cache_data=s;
@@ -213,9 +213,10 @@ void stream_enable_cache(stream_t *stream,int size,int min,int prefill){
 	    s->max_filepos-s->read_filepos
 	);
 	if(s->eof) break; // file is smaller than prefill size
-	usleep(PREFILL_USLEEP_TIME);
+	if(mpdemux_check_interrupt(PREFILL_SLEEP_TIME))
+	  return 0;
     }
-    return; // parent exits
+    return 1; // parent exits
   }
   
 // cache thread mainloop:

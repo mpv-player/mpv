@@ -19,6 +19,7 @@
 #include "stream.h"
 #include "demuxer.h"
 #include "../cfgparser.h"
+#include "mpdemux.h"
 
 #include "network.h"
 #include "http.h"
@@ -124,7 +125,7 @@ int
 connect2Server(char *host, int port) {
 	int socket_server_fd;
 	int err, err_len;
-	int ret;
+	int ret,count = 0;
 	fd_set set;
 	struct timeval tv;
 	struct sockaddr_in server_address;
@@ -160,16 +161,24 @@ connect2Server(char *host, int port) {
 			return -1;
 		}
 	}
-	tv.tv_sec = 15;	// 15 seconds timeout on connection
-	tv.tv_usec = 0;	
+	tv.tv_sec = 0;
+	tv.tv_usec = 500000;
 	FD_ZERO( &set );
 	FD_SET( socket_server_fd, &set );
 	// When the connection will be made, we will have a writable fd
-	ret = select(socket_server_fd+1, NULL, &set, NULL, &tv);
-	if( ret<=0 ) {
-		if( ret<0 ) perror("select failed");
-		else printf("Connection timeout\n");
+	while((ret = select(socket_server_fd+1, NULL, &set, NULL, &tv)) == 0) {
+	      if( ret<0 ) perror("select failed");
+	      else if(ret > 0) break;
+	      else if(count > 15 || mpdemux_check_interrupt(500)) {
+		if(count > 15)
+		  printf("Connection timeout\n");
+		else
+		  printf("Connection interuppted by user\n");
 		return -1;
+	      }
+	      count++;
+	      FD_ZERO( &set );
+	      FD_SET( socket_server_fd, &set );
 	}
 
 	// Turn back the socket as blocking

@@ -343,7 +343,7 @@ void uninit_player(unsigned int mask){
     stream=NULL;
   }
 
-#ifdef HAVE_LIRC
+#if defined(HAVE_LIRC) && ! defined(HAVE_NEW_INPUT)
   if(mask&INITED_LIRC){
     inited_flags&=~INITED_LIRC;
     current_module="uninit_lirc";
@@ -420,6 +420,34 @@ if ((conffile = get_path("")) == NULL) {
     free(conffile);
   }
 }
+}
+
+// When libmpdemux perform a blocking operation (network connection or cache filling)
+// if the operation fail we use this function to check if it was interrupted by the user.
+// The function return a new value for eof.
+static int libmpdemux_was_interrupted(int eof) {
+#ifdef HAVE_NEW_INPUT
+  mp_cmd_t* cmd;
+  if((cmd = mp_input_get_cmd(0,0)) != NULL) {
+       switch(cmd->id) {
+       case MP_CMD_QUIT:
+	 exit_player(MSGTR_Exit_quit);
+       case MP_CMD_PLAY_TREE_STEP: {
+	 eof = (cmd->args[0].v.i > 0) ? PT_NEXT_ENTRY : PT_PREV_ENTRY;
+       } break;
+       case MP_CMD_PLAY_TREE_UP_STEP: {
+	 eof = (cmd->args[0].v.i > 0) ? PT_UP_NEXT : PT_UP_PREV;
+       } break;	  
+       case MP_CMD_PLAY_ALT_SRC_STEP: {
+	 eof = (cmd->args[0].v.i > 0) ?  PT_NEXT_SRC : PT_PREV_SRC;
+       } break;
+       }
+       mp_cmd_free(cmd);
+  }
+  return eof;
+#else
+  return 0;
+#endif
 }
 
 int main(int argc,char* argv[], char *envp[]){
@@ -724,6 +752,11 @@ current_module = NULL;
 
 play_next_file:
 
+if(!use_stdin && !slave_mode){
+  getch2_enable();  // prepare stdin for hotkeys...
+  inited_flags|=INITED_GETCH2;
+}
+
 #ifdef HAVE_NEW_GUI
     if ( use_gui ) {
 
@@ -891,11 +924,24 @@ play_dvd:
     }
   }
 
+#ifdef HAVE_NEW_INPUT
+    if(!slave_mode && filename && !use_stdin && !strcmp(filename,"-")) {      
+    mp_input_rm_key_fd(0);
+    use_stdin = 1;
+  }
+  else if(!slave_mode && use_stdin && (!filename || strcmp(filename,"-"))) {
+    mp_input_add_key_fd(0,1,NULL,NULL);
+    use_stdin = 0;
+  }
+#else
+  use_stdin=filename && (!strcmp(filename,"-"));
+#endif
+
   current_module="open_stream";
   stream=open_stream(filename,vcd_track,&file_format);
   if(!stream) { // error...
-    uninit_player(inited_flags-(INITED_GUI+INITED_LIRC+INITED_INPUT));
-    goto goto_next_file_src;
+    eof = libmpdemux_was_interrupted(PT_NEXT_ENTRY);
+    goto goto_next_file;
   }
   inited_flags|=INITED_STREAM;
   if(stream->type == STREAMTYPE_PLAYLIST) {
@@ -905,23 +951,29 @@ play_dvd:
     entry = parse_playtree(stream);
     if(!entry) {      
       entry = playtree_iter->tree;
-      if(play_tree_iter_step(playtree_iter,1,0) != PLAY_TREE_ITER_ENTRY)
+      if(play_tree_iter_step(playtree_iter,1,0) != PLAY_TREE_ITER_ENTRY) {
+	eof = PT_NEXT_ENTRY;
 	goto goto_next_file;
-      if(playtree_iter->tree == entry) { // Loop with a single file
-	if(play_tree_iter_up_step(playtree_iter,1,0) != PLAY_TREE_ITER_ENTRY)
+      }
+      if(playtree_iter->tree == entry ) { // Loop with a single file
+	if(play_tree_iter_up_step(playtree_iter,1,0) != PLAY_TREE_ITER_ENTRY) {
+	  eof = PT_NEXT_ENTRY;
 	  goto goto_next_file;
+	}
       }
       play_tree_remove(entry,1,1);
-      uninit_player(inited_flags-(INITED_GUI+INITED_LIRC+INITED_INPUT));
-      goto goto_next_file_src;
+      eof = PT_NEXT_SRC;
+      goto goto_next_file;
     }
     play_tree_insert_entry(playtree_iter->tree,entry);
     entry = playtree_iter->tree;
-    if(play_tree_iter_step(playtree_iter,1,0) != PLAY_TREE_ITER_ENTRY)
+    if(play_tree_iter_step(playtree_iter,1,0) != PLAY_TREE_ITER_ENTRY) {
+      eof = PT_NEXT_ENTRY;
       goto goto_next_file;
+    }      
     play_tree_remove(entry,1,1);
-    uninit_player(inited_flags-(INITED_GUI+INITED_LIRC+INITED_INPUT));
-    goto goto_next_file_src;
+    eof = PT_NEXT_SRC;
+    goto goto_next_file;
   }
   stream->start_pos+=seek_to_byte;
 
@@ -954,20 +1006,11 @@ current_module=NULL;
 #endif
 
     // initial prefill: 20%  later: 5%  (should be set by -cacheopts)
-  if(stream_cache_size) stream_enable_cache(stream,stream_cache_size*1024,stream_cache_size*1024/5,stream_cache_size*1024/20);
-
-#ifdef HAVE_NEW_INPUT
-    if(!slave_mode && filename && !use_stdin && !strcmp(filename,"-")) {      
-    mp_input_rm_key_fd(0);
-    use_stdin = 1;
-  }
-  else if(!slave_mode && use_stdin && (!filename || strcmp(filename,"-"))) {
-    mp_input_add_key_fd(0,1,NULL,NULL);
-    use_stdin = 0;
-  }
-#else
-  use_stdin=filename && (!strcmp(filename,"-"));
-#endif
+ if(stream_cache_size && ! stream_enable_cache(stream,stream_cache_size*1024,stream_cache_size*1024/5,stream_cache_size*1024/20)) {
+   eof = libmpdemux_was_interrupted(PT_NEXT_ENTRY);
+   if(eof)
+     goto goto_next_file;
+ }
 
 #ifdef HAVE_LIBCSS
   current_module="libcss";
@@ -1532,7 +1575,12 @@ while(sh_audio){
   ao_data.pts=sh_audio->timer*90000.0;
   playsize=audio_out->get_space();
   
-  if(!playsize) break; // buffer is full, do not block here!!!
+  if(!playsize) {
+    if(sh_video)
+      break; // buffer is full, do not block here!!!
+    usec_sleep(10000); // Wait a tick before retry
+    continue;
+  }
   
   if(playsize>MAX_OUTBURST) playsize=MAX_OUTBURST; // we shouldn't exceed it!
   //if(playsize>outburst) playsize=outburst;
@@ -1592,7 +1640,6 @@ if(!sh_video) {
 		    ,(sh_audio->timer>0.5)?100.0*audio_time_usage/(double)sh_audio->timer:0
 		    ,cache_fill_status
 		    );
-  usec_sleep(sh_audio->a_buffer_len/(float)sh_audio->o_bps*1000000);
   goto read_input;
 }
 
@@ -2826,8 +2873,6 @@ if(eof == PT_NEXT_ENTRY || eof == PT_PREV_ENTRY) {
      uninit_player(INITED_ALL-(INITED_GUI+INITED_LIRC+INITED_INPUT));
      eof = eof == PT_PREV_SRC ? -1 : 1;
 }
-
-goto_next_file_src: // When we have multiple src for file
 
 if(eof == 0) eof = 1;
 
