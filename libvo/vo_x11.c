@@ -259,7 +259,7 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
  srcW= width;
  srcH= height;
  vo_dx=( vo_screenwidth - d_width ) / 2; vo_dy=( vo_screenheight - d_height ) / 2;
- vo_dwidth=width; vo_dheight=height;
+ vo_dwidth=d_width; vo_dheight=d_height;
  
  if( flags&0x03 ) fullscreen = 1;
  if( flags&0x02 ) vm = 1;
