@@ -15,7 +15,6 @@
 /   return: cpu ident number.
 / ---------------------------------------------------------------------------
 CpuDetect:
-	pushl %eax
         pushl %ebx
         pushl %ecx
         pushl %edx
@@ -42,7 +41,6 @@ exit_cpudetect:
         popl  %edx
         popl  %ecx
         popl  %ebx
-	popl  %eax
         ret
 
 / ---------------------------------------------------------------------------
