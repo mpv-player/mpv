@@ -230,7 +230,7 @@ static void uninit(){
 // stop playing and empty buffers (for seeking/pause)
 static void reset(){
 
-	printf("SDL: reset called!\n");	
+	//printf("SDL: reset called!\n");	
 
 	/* Reset ring-buffer state */
 	buf_read=0;
@@ -247,16 +247,16 @@ static void reset(){
 static void audio_pause()
 {
 
-	printf("SDL: audio_pause called!\n");	
+	//printf("SDL: audio_pause called!\n");	
+	SDL_LockAudio();
 	
-	// for now, just call reset();
-	//reset();
-
 }
 
 // resume playing, after audio_pause()
 static void audio_resume()
 {
+	//printf("SDL: audio_resume called!\n");	
+	SDL_UnlockAudio();
 }
 
 
