@@ -260,6 +260,7 @@ Audio output:
   --disable-ossaudio     disable OSS sound support [autodetect]
   --disable-arts         disable aRts sound support [autodetect]
   --disable-esd          disable esd sound support [autodetect]
+  --disable-polyp        disable Polypaudio sound support [autodetect]
   --disable-jack         disable JACK sound support [autodetect]
   --disable-nas          disable NAS sound support [autodetect]
   --disable-sgiaudio     disable SGI sound support [autodetect]
@@ -1286,6 +1287,7 @@ _rtc=auto
 _ossaudio=auto
 _arts=auto
 _esd=auto
+_polyp=auto
 _jack=auto
 _liblzo=auto
 _mad=auto
@@ -1462,6 +1464,8 @@ for ac_option do
   --disable-arts)	_arts=no	;;
   --enable-esd)		_esd=yes	;;
   --disable-esd)	_esd=no		;;
+  --enable-polyp)	_polyp=yes	;;
+  --disable-polyp)	_polyp=no		;;
   --enable-jack)	_jack=yes	;;
   --disable-jack)	_jack=no	;;
   --enable-mad)		_mad=yes	;;
@@ -4389,6 +4393,34 @@ else
   _noaomodules="esd $_noaomodules"
 fi
 
+echocheck "Polyp"
+if test "$_polyp" = auto ; then
+  _polyp=no
+  if ( pkg-config --exists 'polyplib >= 0.6 polyplib-error >= 0.6 polyplib-mainloop >= 0.6' ) >> "$TMPLOG" 2>&1 ; then
+
+cat > $TMPC << EOF
+#include <polyp/polyplib.h>
+#include <polyp/mainloop.h>
+#include <polyp/polyplib-error.h>
+int main(void) { return 0; }
+EOF
+cc_check `pkg-config --libs --cflags polyplib polyplib-error polyplib-mainloop` && ( "$TMPO" >> "$TMPLOG" 2>&1 ) && _polyp=yes
+
+  fi
+fi
+echores "$_polyp"
+
+if test "$_polyp" = yes ; then
+  _def_polyp='#define USE_POLYP 1'
+  _aosrc="$_aosrc ao_polyp.c"
+  _aomodules="polyp $_aomodules"
+  _ld_polyp=`pkg-config --libs polyplib polyplib-error polyplib-mainloop`
+  _inc_polyp=`pkg-config --cflags polyplib polyplib-error polyplib-mainloop`
+else
+  _def_polyp='#undef USE_POLYP'
+  _noaomodules="polyp $_noaomodules"
+fi
+
 
 echocheck "JACK"
 if test "$_jack" = auto ; then
@@ -6465,6 +6497,8 @@ ARTS_LIB = $_ld_arts
 ARTS_INC = $_inc_arts
 ESD_LIB = $_ld_esd
 ESD_INC = $_inc_esd
+POLYP_LIB = $_ld_polyp
+POLYP_INC = $_inc_polyp
 JACK_LIB = $_ld_jack
 JACK_INC = $_inc_jack
 SGIAUDIO_LIB = $_ld_sgiaudio
@@ -6889,6 +6923,7 @@ $_def_alsa1x
 $_def_arts
 $_def_esd
 $_def_esd_latency
+$_def_polyp
 $_def_jack
 $_def_sys_asoundlib_h
 $_def_alsa_asoundlib_h
