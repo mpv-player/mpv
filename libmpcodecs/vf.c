@@ -13,6 +13,7 @@ extern vf_info_t vf_info_vo;
 extern vf_info_t vf_info_crop;
 extern vf_info_t vf_info_expand;
 extern vf_info_t vf_info_pp;
+extern vf_info_t vf_info_scale;
 
 char** vo_plugin_args=(char**) NULL;
 
@@ -21,7 +22,7 @@ static vf_info_t* filter_list[]={
     &vf_info_crop,
     &vf_info_expand,
     &vf_info_pp,
-//    &vf_info_zoom,
+    &vf_info_scale,
 //    &vf_info_osd,
     &vf_info_vo,
     NULL
