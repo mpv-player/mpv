@@ -538,6 +538,7 @@ static uint32_t get_image(mp_image_t *mpi)
 {
     if (zoomFlag ||
 	!IMGFMT_IS_BGR(mpi->imgfmt) ||
+	(IMGFMT_BGR_DEPTH(mpi->imgfmt) != vo_depthonscreen) ||
 	((mpi->type != MP_IMGTYPE_STATIC) && (mpi->type != MP_IMGTYPE_TEMP)) ||
 	(mpi->flags & MP_IMGFLAG_PLANAR) ||
 	(mpi->flags & MP_IMGFLAG_YUV) ||
