@@ -1047,7 +1047,7 @@ static int mp4_parse_sl_packet(pmt_t *pmt, uint8_t *buf, uint16_t packet_len, in
 		if(sl->random_accesspoint)
 			rap_flag = getbits(buf, n++, 1);
 		
-		if((rap_flag || sl->random_accesspoint_only) || (!sl->random_accesspoint && !sl->random_accesspoint_only))
+		if(rap_flag || sl->random_accesspoint_only)
 			pes_es->is_synced = 1;
 		
 		n += sl->au_seqnum_len;
@@ -2364,7 +2364,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 	demux_packet_t **dp = NULL;
 	int *dp_offset = 0, *buffer_size = 0;
 	int32_t progid, pid_type, bad, ts_error;
-	int junk = 0;
+	int junk = 0, rap_flag = 0;
 	pmt_t *pmt;
 
 
@@ -2374,6 +2374,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 		ds = (demux_stream_t*) NULL;
 		dp = (demux_packet_t **) NULL;
 		dp_offset = buffer_size = NULL;
+		rap_flag = 0;
 
 		junk = priv->ts.packet_size - TS_PACKET_SIZE;
 		buf_size = priv->ts.packet_size - junk;
@@ -2430,33 +2431,29 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 		    
 		bad = ts_error; // || (! cc_ok);
     
-		if(! bad)
+		afc = (packet[3] >> 4) & 3;
+		if(afc > 1)
 		{
-			// skip adaptation field, but only if cc_ok is not corrupt,
-			//otherwise we may throw away good data  
-			afc = (packet[3] >> 4) & 3;
-			if(! (afc % 2))	//no payload in this TS packet
-			{
-			    stream_skip(stream, buf_size-1+junk);
-			    continue;
-			}
-			
-			if(afc == 3)
-			{
-				int c;
-				c = stream_read_char(stream);
-				buf_size--;
+			int c;
+			c = stream_read_char(stream);
+			buf_size--;
+			rap_flag = stream_read_char(stream) & 0x40;
+			buf_size--;
 
-				c = min(c, buf_size);
-				stream_skip(stream, c);
-				buf_size -= c;
-				if(buf_size == 0)
-					continue;
-
-				afc = c + 1;
-			}
+			c = min(c-1, buf_size);
+			stream_skip(stream, c);
+			buf_size -= c;
+			if(buf_size == 0)
+				continue;
 		}
-		else
+		
+		if(! (afc % 2))	//no payload in this TS packet
+		{
+			stream_skip(stream, buf_size-1+junk);
+			continue;
+		}
+		
+		if(bad)
 		{
 			// logically this packet should be dropped, but if I do it
 			// certain streams play corrupted. Maybe the decoders know
@@ -2652,7 +2649,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 
 			len = pes_parse2(p, buf_size, es, pid_type, pmt, pid);
 			es->pid = tss->pid;
-			tss->is_synced = es->is_synced;
+			tss->is_synced = es->is_synced | rap_flag;
 			
 			if(es->type==SL_PES_STREAM && !tss->is_synced)
 			{
