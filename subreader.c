@@ -1694,14 +1694,20 @@ char** sub_filenames(char* path, char *fname)
 		// we have a (likely) subtitle file
 		if (found) {
 		    int prio = 0;
-		    if (tmp_sub_id && (sub_match_fuzziness >= 1) && (strcmp(tmp_fname_trim, tmpresult) == 0))
+		    if (!prio && tmp_sub_id)
 		    {
-			// matches the movie name + lang extension
-			prio = 5;
-		    } else if (strcmp(tmp_fname_trim, f_fname_trim) == 0) {
+			sprintf(tmpresult, "%s %s", f_fname_trim, tmp_sub_id);
+			printf("dvdsublang...%s\n", tmpresult);
+			if (strcmp(tmp_fname_trim, tmpresult) == 0 && sub_match_fuzziness >= 1) {
+			    // matches the movie name + lang extension
+			    prio = 5;
+			}		    
+		    }
+		    if (!prio && strcmp(tmp_fname_trim, f_fname_trim) == 0) {
 			// matches the movie name
 			prio = 4;
-		    } else if ((tmp = strstr(tmp_fname_trim, f_fname_trim)) && (sub_match_fuzziness >= 1)) {
+		    }
+		    if (!prio && (tmp = strstr(tmp_fname_trim, f_fname_trim)) && (sub_match_fuzziness >= 1)) {
 			// contains the movie name
 			tmp += strlen(f_fname_trim);
 			if (tmp_sub_id && strstr(tmp, tmp_sub_id)) {
@@ -1714,7 +1720,8 @@ char** sub_filenames(char* path, char *fname)
 			    // with no localized subs found, try any else instead
 			    prio = 2;
 			}
-		    } else {
+		    }
+		    if (!prio) {
 			// doesn't contain the movie name
 			// don't try in the mplayer subtitle directory
 			if ((j == 0) && (sub_match_fuzziness >= 2)) {
