@@ -15,8 +15,7 @@ Wrangings:
  -  retrace sync works only in doublebuffer mode.
  -  the retrace sync may slow down decoding a lot - mplayer is blocked while
     waiting for retrace
- -  denoise3d fails to find common colorspace, vf_scale doesn't help - It is 
-    mplayer bug.
+ -  denoise3d fails to find common colorspace, use -vf denoise3d,scale
    
 TODO:
  - let choose_best_mode take aspect into account
