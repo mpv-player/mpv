@@ -25,8 +25,22 @@ extern int verbose; // defined in mplayer.c
 #include "libvo/video_out.h"
 
 #include "stheader.h"
+#include "vd.h"
 
 #include "dec_video.h"
+
+// ===================================================================
+// temp hack:
+
+#ifdef FF_POSTPROCESS
+#ifndef MBC
+#define MBC 48
+#define MBR 36
+#endif
+int quant_store[MBR+1][MBC+1]; // [Review]
+#endif
+
+int avcodec_inited=0;
 
 // ===================================================================
 
@@ -44,6 +58,8 @@ extern vo_vaa_t vo_vaa;
 #include "cpudetect.h"
 
 int divx_quality=0;
+
+static vd_functions_t* mpvdec=NULL;
 
 int get_video_quality_max(sh_video_t *sh_video){
 // switch(sh_video->codec->driver){
@@ -111,24 +127,32 @@ int set_video_colors(sh_video_t *sh_video,char *item,int value)
 void uninit_video(sh_video_t *sh_video){
     if(!sh_video->inited) return;
     mp_msg(MSGT_DECVIDEO,MSGL_V,"uninit video: %d  \n",sh_video->codec->driver);
-//    switch(sh_video->codec->driver){
+    mpvdec->uninit(sh_video);
     sh_video->inited=0;
 }
 
 int init_video(sh_video_t *sh_video,int *pitches)
 {
-unsigned int out_fmt=sh_video->codec->outfmt[sh_video->outfmtidx];
+//unsigned int out_fmt=sh_video->codec->outfmt[sh_video->outfmtidx];
+int i;
 pitches[0] = pitches[1] =pitches[2] = 0; /* fake unknown */
 
-sh_video->our_out_buffer=NULL;
-sh_video->our_out_buffer_size=0U;
+//sh_video->our_out_buffer=NULL;
+//sh_video->our_out_buffer_size=0U;
 
-sh_video->image=new_mp_image(sh_video->disp_w,sh_video->disp_h);
-mp_image_setfmt(sh_video->image,out_fmt);
-
-//switch(sh_video->codec->driver)
-
-
+  for (i=0; mpcodecs_vd_drivers[i] != NULL; i++)
+    if(mpcodecs_vd_drivers[i]->info->id==sh_video->codec->driver){
+	mpvdec=mpcodecs_vd_drivers[i]; break;
+    }
+  if(!mpvdec) return 0; // no such driver
+  
+  printf("Selecting Video Decoder: [%s] %s\n",mpvdec->info->short_name,mpvdec->info->name);
+  
+  if(!mpvdec->init(sh_video)){
+      printf("VDecoder init failed :(\n");
+      return 0;
+  }
+  
   sh_video->inited=1;
   return 1;
 }
@@ -161,7 +185,8 @@ unsigned int t=GetTimer();
 unsigned int t2;
 double tt;
 
- 
+mpi=mpvdec->decode(sh_video, start, in_size, drop_frame);
+
 //------------------------ frame decoded. --------------------
 
 #ifdef ARCH_X86
@@ -175,6 +200,8 @@ else if(gCpuCaps.hasMMX){
 }
 #endif
 
+if(!mpi) return 0; // error / skipped frame
+
 t2=GetTimer();t=t2-t;
 tt = t*0.000001f;
 video_time_usage+=tt;
@@ -184,11 +211,13 @@ if(benchmark)
     cur_video_time_usage=tt;
 }
 
-if(mpi){
-//    if(planar)
-//        video_out->draw_slice(mpi->planes,mpi->stride,sh_video->disp_w,sh_video->disp_h,0,0);
-//    else
-//        video_out->draw_frame(mpi->planes);
+if(!(mpi->flags&(MP_IMGFLAG_DIRECT|MP_IMGFLAG_DRAW_CALBACK))){
+    // blit frame:
+    if(mpi->flags&MP_IMGFLAG_PLANAR)
+        video_out->draw_slice(mpi->planes,mpi->stride,sh_video->disp_w,sh_video->disp_h,0,0);
+    else
+        video_out->draw_frame(mpi->planes);
+}
 
     t2=GetTimer()-t2;
     tt=t2*0.000001f;
@@ -199,7 +228,6 @@ if(mpi){
 	cur_vout_time_usage=tt;
     }
     blit_frame=1;
-}
 
   return blit_frame;
 }
