@@ -4181,7 +4181,7 @@ echores "$_byte_order"
 
 echocheck "shared postprocess lib"
 if test "$_shared_pp" = yes ; then
-  _ld_pp='-lpostproc -L postproc'
+  _ld_pp='-Lpostproc -lpostproc'
 else
   _ld_pp='postproc/libpostproc.a'
 fi
