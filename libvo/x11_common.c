@@ -59,6 +59,7 @@
  
 int fs_layer=WIN_LAYER_ABOVE_DOCK;
 static int orig_layer=0;
+static int old_gravity = NorthWestGravity;
 
 int stop_xscreensaver=0;
 
@@ -810,6 +811,10 @@ int vo_x11_check_events(Display *mydisplay){
 	    XFree( name );
 	   }
 	   break;
+      case MapNotify:
+		vo_hint.win_gravity = old_gravity;
+		XSetWMNormalHints( mDisplay,vo_window,&vo_hint );
+	   break;
      }
   }
   return ret;
@@ -1066,6 +1071,15 @@ void vo_x11_fullscreen( void )
    vo_fs=VO_TRUE;
    vo_old_x=vo_dx; vo_old_y=vo_dy; vo_old_width=vo_dwidth; vo_old_height=vo_dheight;
    x=0; y=0; w=vo_screenwidth; h=vo_screenheight;
+ 
+ }
+ {
+	long dummy;
+	XGetWMNormalHints(mDisplay, vo_window, &vo_hint, &dummy);
+	if (!(vo_hint.flags & PWinGravity))
+		old_gravity = NorthWestGravity;
+	else
+		old_gravity = vo_hint.win_gravity;
  }
  vo_x11_decoration( mDisplay,vo_window,(vo_fs) ? 0 : 1 );
  vo_x11_sizehint( x,y,w,h,0 );
