@@ -220,7 +220,7 @@ $(MPLAYER_DEP): version.h
 $(MENCODER_DEP): version.h
 
 $(PRG_CFG): version.h codec-cfg.c codec-cfg.h
-	$(CC) $(CFLAGS) -g codec-cfg.c -o $(PRG_CFG) -DCODECS2HTML
+	$(CC) $(CFLAGS) -g codec-cfg.c mp_msg.c -o $(PRG_CFG) -DCODECS2HTML
 
 install: $(ALL_PRG)
 ifeq ($(VIDIX),yes)
