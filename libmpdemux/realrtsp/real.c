@@ -55,7 +55,9 @@ const unsigned char xor_table[] = {
 
 #define BE_32(x)  be2me_32(*(uint32_t*)(x))
 
+#ifndef MAX
 #define MAX(x,y) ((x>y) ? x : y)
+#endif
 
 #ifdef LOG
 static void hexdump (const char *buf, int length) {
