@@ -44,7 +44,7 @@ Abtastrate möglicherweise besser als bei der maximalen. Moderne CDROM-Laufwerke
 können sehr hohe Abtastraten erreichen (bis zu 50-fach ist normal). Es wurde
 berichtet, dass diese Laufwerke bei diesen hohen Geschwindkeiten Lesefehler
 erzeugen; das Herabsetzen der Geschwindigkeit kann die Datenverluste verringern.
-Zu guter letzt erzeugen einige dieser Laufwerke störend laute Geräusche, die
+Zu guter Letzt erzeugen einige dieser Laufwerke störend laute Geräusche, die
 eine niedrigere Geschwindigkeit ebenfalls reduzieren kann.</P>
 
 <P>Der empfohlene Weg die Lesegeschwindigkeit zu verringen ist mittels des
@@ -78,7 +78,7 @@ Es ist auch zu empfehlenswert das CD-Rom via 'hdparm' einzustellellen:</P>
   die DVD Entschlüsselung und Wiedergabe. Diese beiden Bibliotheken sind im
   <CODE>libmpdvdkit/</CODE> Unterverzeichnis enthalten, sie müssen nicht separat
   installiert werden. Wir gehen in diese Richtung, da ein libdvdread Bug
-  behoben werden musste und wir einen Patch hinzufügten, welcher
+  behoben werden musste und wir einen Patch hinzufügt haben, welcher
   <B>Cache Support für gecrackte CSS-Keys</B> für libdvdcss erlaubt (führt zu einer
   hohen Geschwindigkeitssteigerung vor der Wiedergabe). Die gecrackten Keys werden
   im <CODE>$HOME/.mplayer/DVDKeys</CODE> Verzeichnis abgelegt.</P>
@@ -87,7 +87,7 @@ Es ist auch zu empfehlenswert das CD-Rom via 'hdparm' einzustellellen:</P>
   
 <P><B>Alte DVD Unterstützung - <I>OPTIONAL</I></B></P>
 
-<I>Nützlich, wenn du verschlüsselte VOBs von der Festplatte abspielen willst. Kompiliere und installiere <B>libcss</B>
+<P>Nützlich, wenn du verschlüsselte VOBs von der Festplatte abspielen willst. Kompiliere und installiere <B>libcss</B>
  0.0.1 (nicht neuer) (wenn <B>MPlayer</B> sie nicht findet, dann benutze die Option <CODE>-csslib /pfad/zu/libcss.so</CODE>).</I><BR>
 
 <P><B>Kompiliere MPlayer:</B></P>
@@ -133,16 +133,16 @@ Es ist auch zu empfehlenswert das CD-Rom via 'hdparm' einzustellellen:</P>
   Gib die Option <CODE>-v</CODE> nach den DVD-Optionen an und betrachte die Ausgabe,
   um eine Liste der verf|gbaren Sprachen zu erhalten.<BR>
   Zum Beispiel:<BR>
-  &nbsp;&nbsp;<CODE>-slang hu,en</CODE> - versucht zuerst die ungarischen Untertitel abzubilden und zeigt
-  die englischen Untertitel, dalls es jene nicht findet.</TD></TR>
+  &nbsp;&nbsp;<CODE>-slang hu,en</CODE> - versucht zuerst die ungarischen Untertitel anzuzeigen und zeigt
+  die englischen Untertitel, falls es die ungarischen nicht findet.</TD></TR>
 <TD VALIGN=top><FONT CLASS="text">-sid &lt;subtitel_id&gt;&nbsp;</TD>
 <TD><FONT CLASS="text">
   Aktiviert die DVD-Untertitel Ausgabe für einen bestimmten Kanal durch die gegebenen <CODE>subtitel_id</CODE> 
-  (Die Werte können von 0-31 gehen). Nützlich um z.B. schlecht erstellte DVDs abzuspielen, 
+  (Die Werte können von 0-31 sein). Nützlich um z.B. schlecht erstellte DVDs abzuspielen, 
   wo eine Länderangabe den falschen Kanal wählt.</TD></TR>
 <TD VALIGN=top><FONT CLASS="text">-csslib &lt;pfad/dateiname&gt;</TD>
 <TD><FONT CLASS="text">
-  (alte DVD Option) Diese Option wird benützt um übliche Lage <CODE>libcss.so</CODE> zu überschreiben.
+  (alte DVD Option) Diese Option wird benützt die Lage von <CODE>libcss.so</CODE> anzugeben.
 </TD></TR>
 <TD VALIGN=top><FONT CLASS="text">-dvdauth &lt;DVD Gerät (Device)&gt;&nbsp;</TD>
 <TD><FONT CLASS="text">
@@ -150,7 +150,7 @@ Es ist auch zu empfehlenswert das CD-Rom via 'hdparm' einzustellellen:</P>
 </TD></TR>
 <TD VALIGN=top><FONT CLASS="text">-dvdkey &lt;CSS key&gt;</TD>
 <TD><FONT CLASS="text">
-  (alte DVD Option) Wenn keine DVD dekodiert wird, gibt diese Option den CSS Key an welcher benötigt wird,
+  (alte DVD Option) Wenn keine DVD dekodiert wird, gibt diese Option den CSS Key an welcher benötigt wird
   um die DVD zu knacken. (Der CSS Key wird bei der Authentifizierung mit der DVD angezeigt).
 </TD></TR>
 </TABLE>

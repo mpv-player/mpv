@@ -31,12 +31,12 @@ nicht gelöst werden kann, dann berichte über den Fehler:</P>
 und sende deinen Fehlerbericht an:<BR>
 &nbsp;&nbsp;&nbsp;&nbsp;<A HREF="mailto:mplayer-users@mplayerhq.hu">mplayer-users@mplayerhq.hu</A><BR>
 Es sei darauf hingewiesen, dass wir keine individuellen Kopien (CC) versenden werden.
-Es ist also eine gute Idee sich anzumelden, wenn man auch eine Antwort erhalten möchte.</P>
+Es ist also eine gute Idee sich anzumelden, wenn man auch eine Antwort erhalten will.</P>
 
-<P>Sende auf keinen Fall Fehlerberichte an individuelle Entwickler. Das ist Gemeinschaftsarbeit,
-so dass es vielleicht mehrere interessierte Leute geben wird.
-Es kommt auch teilweise vor, dass derselbe Fehler von anderen Benutzer erlebt wurde, welche eine Lösung
-zur Umgehung des Problems haben (sogar bei einem Fehler im mplayer Code).<BR>
+<P>Sende auf keinen Fall Fehlerberichte an individuelle Entwickler. MPlayer ist Gemeinschaftsarbeit,
+also wird es vielleicht mehrere interessierte Leute geben.
+Es kommt auch teilweise vor, dass derselbe Fehler von anderen Benutzern erlebt wurde, die bereits eine Lösung
+zur Umgehung des Problems haben (sogar bei einem Fehler im MPlayer Code).<BR>
 Die Sprache dieser Mailingliste ist ENGLISCH!</P>
 
 <P>Bitte beschreibe dein Problem detailiert - Beispiele usw. - aber vergiss
@@ -44,7 +44,7 @@ nicht, dass dein Bericht folgendes beinhalten sollte:</P>
 
 <P><B>Was soll berichtet werden?</B></P>
 
-<P><B><I>Systeminformationen</I></B></P>
+<P><B><I>Systeminformationen:</I></B></P>
 
 <UL>
 <LI>Deine Linux Distribution oder Betriebssystem:<BR>
@@ -72,7 +72,7 @@ nicht, dass dein Bericht folgendes beinhalten sollte:</P>
     <CODE>cat /proc/cpuinfo</CODE>
 <LI>Grafikkartenhersteller und Modell:<BR>
     <UL>
-        <LI>ASUS V3800U chip: nVidia TNT2 Ultra Pro 32MB SDRAM
+	<LI>ASUS V3800U, Chipset: nVidia TNT2 Ultra Pro 32MB SDRAM
         <LI>Matrox G400 DH 32MB SGRAM
     </UL>
 <LI>Grafikkartentreiber-Typ &amp; Version:<BR>
@@ -91,7 +91,7 @@ nicht, dass dein Bericht folgendes beinhalten sollte:</P>
 <LI>wenn du dir unsicher bist, schick die Ausgabe von <CODE>lspci -vv</CODE> mit (auf Linux Systemen)
 </UL>
 
-<P><B>Bei Kompilierungsfehlern/-problemen</B></P>
+<P><B>Bei Kompilierungsfehlern/-problemen:</B></P>
 
 <P><B><I>Bitte schicke diese Dateien mit:</I></B></P>
 <UL>
@@ -101,21 +101,21 @@ nicht, dass dein Bericht folgendes beinhalten sollte:</P>
 <LI>libvo/config.mak
 </UL>
 
-<P><B>Bei Wiedergabeproblemen</B></P>
+<P><B>Bei Wiedergabeproblemen:</B></P>
 
-<P><B><I>Bitte gib die Ausgabe von MPlayer in Ausführlichkeits-Stufe 1 (-v) mit an</I></B></P>
+<P><B><I>Bitte gib die Ausgabe von MPlayer in Ausführlichkeits-Stufe 1 (-v) mit an:</I></B></P>
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -v [Optionen] Dateiname &amp;&gt; mplayer.log</CODE></P>
   
 <P><B><I>Wenn das Problem spezifisch für eine oder einige wenige Dateien besteht,
-  lade die Datei bitte auf:</I></B></P>
+  lade die Datei bitte auf</I></B></P>
 <P><CODE>&nbsp;&nbsp;&nbsp;<A HREF="ftp://mplayerhq.hu/MPlayer/incoming/">ftp://mplayerhq.hu/MPlayer/incoming/</A></P>
   Uploade auch eine kleine .txt-Datei mit dem selben Namen wie die Datei 
   (+ .txt Endung), die eine Problembeschreibung zur jeweiligen Datei, die 
-  detaillierte Ausgabe (-v) von mplayer und deine deine email-Adresse enthält!
-  Normalerweise reichen die ersten 1-5MB der Datei aus, um das Problem zu
-  reproduzieren, aber als erstes solltest du das ausprobieren:
+  detaillierte Ausgabe (-v) von MPlayer und deine Email-Adresse enthält!
+  Normalerweise reichen die ersten 1-5MB der Datei aus um das Problem zu
+  reproduzieren, aber als erstes solltest du folgendes ausprobieren:
 <P><CODE>&nbsp;&nbsp;&nbsp;dd if=deinedatei of=kleinedatei bs=1024k count=5</CODE></P>
-  (kopiert die ersten 5 MB von 'deinedatei' in die Datei 'kleinedatei')
+  (kopiert die ersten 5 MB von 'deinedatei' in die Datei 'kleinedatei'.)
   Nun versuche es nochmals mit dieser kleinen Datei, wenn der Fehler
   immer noch auftritt reicht es die kleine Datei hochzuladen.<BR>
   Sende <STRONG>NIE</STRONG> solche Dateien via Mail! Lade es herauf und schicke nur den Pfad/
@@ -123,12 +123,12 @@ nicht, dass dein Bericht folgendes beinhalten sollte:</P>
   Wenn die Datei im Internet bereits verfügbar ist reicht die <STRONG>exakte</STRONG> URL
   aus!
 
-<P><B><I>Bei Abstürze</I></B></P>
+<P><B>Bei Abstürze:</B></P>
 
-<P><I>Wenn du ein Speicherabbild (core dump) vom Absturz besitzt, lies beim nächsten
-  Paragraph weiter, ansonsten lass ihn aus.</I></P>
+<P>Wenn du ein Speicherabbild (core dump) vom Absturz besitzt, lies beim nächsten
+  Paragraph weiter, ansonsten lass ihn aus.</P>
 
-<P><B><I>Wie brauchbare Informationen von einem core dump extrahiert werden können</I></B></P>
+<P><B><I>Wie brauchbare Informationen von einem core dump extrahiert werden können:</I></B></P>
 
 <P>Bitte erzeuge die folgende Befehlsdatei (Command File):</P>
 
@@ -143,11 +143,11 @@ printf "edi=%08lX\n",$edi<BR>
 printf "esi=%08lX\n",$esi<BR>
 </CODE></P>
 
-<P>Dann führe einfach den folgenden Befehl auf deiner Kommandozeile aus:</P>
+<P>Dann führe einfach den folgenden Befehl auf der Konsole aus:</P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=Kommandodatei &gt; mplayer.bug</CODE></P>
 
-<P><B><I>Wie informationen eines reproduzierbaren Absturzes bewahrt werden können</I></B></P>
-<P>Kompiliere MPlayer neu, mit eingeschaltetem debugging:<P>
+<P><B><I>Wie Informationen eines reproduzierbaren Absturzes bewahrt werden können:</I></B></P>
+<P>Kompiliere MPlayer mit eingeschaltetem Debugging mit:<P>
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;./configure --enable-debug=3<BR>
 &nbsp;&nbsp;&nbsp;&nbsp;make</CODE></P>
 lass dann MPlayer mit gdb laufen:
@@ -174,11 +174,11 @@ das ein Bug in MPlayer, nicht ein Problem mit dem Kompiler oder eine defekte Dat
 du auch der mplayer-advusers - Mailingliste beitreten und dort posten wenn du alle
 Dokumentation gelesen hast und dein Soundtreiber ok ist. Du wirst schnellere und besser
 Antworten erhalten.<BR><BR>
-Aber sei gewarnt: Wenn du Newbiefragen oder Fragen, welche hier beantwortet wurden, schickst 
+Aber sei gewarnt: Wenn du Newbiefragen oder Fragen welche hier beantwortet werden schickst, 
 wirst du sofort gebannt anstatt eine Antwort zu erhalten.<BR>
-Also ärgere und nicht und trette der -advusers-Liste nur bei, wenn du weisst was du machst und 
+Also ärgere uns nicht und trette der -advusers-Liste nur bei, wenn du weisst was du machst und 
 du dich wie ein Advanced-MPlayer-User oder Entwickler fühlst. Wenn du wirklich ein Advanced-User 
-bist sollte das kein Problem für dich sein zu subscriben...
+bist sollte es kein Problem für dich sein zu subscriben...
 </P>
 
 </BODY>
