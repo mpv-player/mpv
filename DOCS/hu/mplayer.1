@@ -359,6 +359,9 @@ Alapállapotban bekapcsolva.
 .B \-nolirc
 LIRC támogatás kikapcsolása.
 .TP
+.B \-nomouseinput
+Kikapcsolja az egérgombok kezelését (mozplayerxp számára szükséges opció)
+.TP
 .B \-nortc \ \ 
 A Linux RTC használatának kikapcsolása, mint idõzítõ mechanizmus.
 .TP
@@ -418,6 +421,7 @@ Slideshow-oknál hatásos.
 .B \-use-stdin
 Adat olvasása a stdin-rõl.
 Az \-idx opció nem használható ilyenkor.
+
 
 .SH "DEMUXER/STREAM OPCIÓK"
 .TP
@@ -2346,6 +2350,45 @@ a képernyõnek csak egy része frissül.
 .REss
 .RE
 .PD 1
+.TP
+.B "framestep=I|[i]lépés"
+Csak a megadott számú képkockák, valamint az összes intra (kulcs) képkocka
+megjelenítése. Ha nagy "I" paraméterrel hívod meg a szûrõt, az esetben
+CSAK a kulcs képkockák kerülnek megjelenítésre.
+Például DVD-nél ez minden 15/12 képkockából 1-et, AVI-nál pedig
+jelenetváltásonként egyet jelent.
+
+Amikor a lejátszó I képkockát talál, egy "I!" karakterláncot ír a kimenetre,
+ezáltal az éppen kiírt MPlayer/MEncoder státuszsor megmarad, és az abban
+lévõ információt (I kocka idõpontja és száma) fel lehet használni az AVI
+szétvágására.
+
+Ha "i" az opció, azesetben csak az "I!" kiírására kerül sor.
+.TP     
+.B "tile=xtile:ytile:output:start:delta"
+Képsorozat rögzítése egy nagyobb képben.
+
+A paraméterek:
+.PD 0
+.RSs
+.IPs xtile
+képkockák száma az x tengelyen (5)
+.IPs ytile
+képkockák száma az y tengelyen (5)
+.IPs xytile
+when write the image, it can be different then xtile * ytile
+(for example you can write 8 * 7 tile, writing the file every
+50 frame, to have one image every 2 seconds @ 25 fps ).
+.IPs start
+pixel at the start (x/y), default 2
+.IPs delta
+pixel between 2 tile, (x/y), default 4
+.RE
+.PD 1
+Ha egy paraméter hiányzik, vagy az értéke kisebb mint 0, abban az esetben az
+alapértelmezett érték kerül használatra.
+
+Jó ötlet a scale szûrõt a tile szûrõ elé tenni :)
 
 
 .SH "AZ ENKÓDOLÁS OPCIÓI (CSAK MENCODER)"
