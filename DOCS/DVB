@@ -1,0 +1,54 @@
+
+Some words about Siemens-DVB card support.         by A'rpi
+==========================================
+
+Requirements:
+~~~~~~~~~~~~~
+- Siemens DVB-S card or compatible (technotrend,galaxis,hauppage etc)
+  see www.linuxtv.org for details and download latest driver there.
+- MPlayer-CVS, ffmpeg-libavcodec. divx4linux is recommended for speed & pp.
+- Fast CPU - at least for software decoding (divx...)
+
+
+How to enable/use?
+~~~~~~~~~~~~~~~~~~
+1. Edit libvo/vo_mpegpes.c, and change first #undef HAVE_DVB to:
+    #define HAVE_DVB
+2. Download ffmpeg-CVS and copy libavcodec to mplayer (see DOC for details)
+   Move this line out of CONFIG_ENCODERS section:
+       register_avcodec(&mpeg1video_encoder);
+   
+3. Compile mplayer
+
+To play standard mpeg 1/2 files:  (hardware decoding)
+
+  mplayer -vo mpegpes -vc mpegpes file.mpg|vob
+
+To play non-standard mpeg files:  (software decoding)
+
+  mplayer -vo mpegpes file.mpg|vob
+
+To play divx files:
+
+  mplayer -vo mpegpes -vc ffdivx|odivx file.avi|asf
+  
+To force letterbox size (16:9 at 4:3 TV), add options:  -x 352 -y 288
+
+To play non-25fps movies, or with slow CPU, add option:  -framedrop
+
+
+Mailing list:
+~~~~~~~~~~~~~
+  http://mplayerhq.hu/mailman/listinfo/mplayer-dvb
+  
+
+Future plans/TODO:
+~~~~~~~~~~~~~~~~~~
+
+- audio playback through the DVB card (currently it uses soundcard)
+- display OSD and subtitles using DVB card's OSD feature
+- better (more fluent) playback of non-25fps movies
+- more speed optimizations
+- YUY2 support (for win32 codecs, like Indeo5 and WMV 7/8)
+- realtime transcoding between mpeg2 <-> mpeg4 (partial decompression)
+
