@@ -207,10 +207,10 @@ int vo_init( void )
    bpp=mXImage->bits_per_pixel;
    if((vo_depthonscreen+7)/8 != (bpp+7)/8) vo_depthonscreen=bpp; // by A'rpi
    mask=mXImage->red_mask|mXImage->green_mask|mXImage->blue_mask;
-   XDestroyImage( mXImage );
    if(verbose)
      printf("vo: X11 color mask:  %X  (R:%lX G:%lX B:%lX)\n",
 	    mask,mXImage->red_mask,mXImage->green_mask,mXImage->blue_mask);
+   XDestroyImage( mXImage );
  }
  if(((vo_depthonscreen+7)/8)==2){
    if(mask==0x7FFF) vo_depthonscreen=15; else
