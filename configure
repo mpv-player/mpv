@@ -1502,7 +1502,7 @@ movntq	%mm0, (%eax)
 EOF
 fi
 
-if "$_sse" = yes ; then
+if test "$_sse" = yes ; then
 _pref_as_version='2.10.1'
 cat >> $TMPS <<EOF
 xorps %xmm0, %xmm0
