@@ -310,7 +310,9 @@ dvd_reader_t *DVDOpen( const char *path )
 	    if( cdir >= 0 ) {
 		chdir( path_copy );
 		new_path = getcwd( NULL, PATH_MAX );
+#ifndef __MINGW32__       
 		fchdir( cdir );
+#endif       
 		close( cdir );
 		if( new_path ) {
 		    free( path_copy );
