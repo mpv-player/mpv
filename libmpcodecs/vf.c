@@ -184,13 +184,18 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
     // accept restrictions & draw_slice flags only:
     mpi->flags|=mp_imgflag&(MP_IMGFLAGMASK_RESTRICTIONS|MP_IMGFLAG_DRAW_CALLBACK);
     if(!vf->draw_slice) mpi->flags&=~MP_IMGFLAG_DRAW_CALLBACK;
-    if((mpi->width!=w2 || mpi->height!=h) && !(mpi->flags&MP_IMGFLAG_DIRECT)){
-	mpi->width=w2; mpi->chroma_width=w2>>mpi->chroma_x_shift;
-	mpi->height=h; mpi->chroma_height=h>>mpi->chroma_y_shift;
+    if(mpi->width!=w2 || mpi->height!=h){
+//	printf("vf.c: MPI parameters changed!  %dx%d -> %dx%d   \n", mpi->width,mpi->height,w2,h);
 	if(mpi->flags&MP_IMGFLAG_ALLOCATED){
-	    // need to re-allocate buffer memory:
-	    free(mpi->planes[0]);
-	    mpi->flags&=~MP_IMGFLAG_ALLOCATED;
+	    if(mpi->width<w2 || mpi->height<h){
+		// need to re-allocate buffer memory:
+		free(mpi->planes[0]);
+		mpi->flags&=~MP_IMGFLAG_ALLOCATED;
+		printf("vf.c: have to REALLOCATE buffer memory :(\n");
+	    }
+	} else {
+	    mpi->width=w2; mpi->chroma_width=w2>>mpi->chroma_x_shift;
+	    mpi->height=h; mpi->chroma_height=h>>mpi->chroma_y_shift;
 	}
     }
     if(!mpi->bpp) mp_image_setfmt(mpi,outfmt);
@@ -246,6 +251,7 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 	  } else {
 	      if(!mpi->stride[0]) mpi->stride[0]=mpi->width*mpi->bpp/8;
 	  }
+//	  printf("clearing img!\n");
 	  vf_mpi_clear(mpi,0,0,mpi->width,mpi->height);
 	  mpi->flags|=MP_IMGFLAG_ALLOCATED;
         }
@@ -267,6 +273,9 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
     }
 
   }
+//    printf("\rVF_MPI: %p %p %p %d %d %d    \n",
+//	mpi->planes[0],mpi->planes[1],mpi->planes[2],
+//	mpi->stride[0],mpi->stride[1],mpi->stride[2]);
   return mpi;
 }
 
