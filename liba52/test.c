@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <inttypes.h>
+#include <string.h>
 
 #include "a52.h"
 #include "mm_accel.h"
@@ -20,6 +21,10 @@ static uint8_t buf[3840];
 static int buf_size=0;
 
 static int16_t out_buf[6*256*6];
+
+void mp_msg_c( int x, const char *format, ... ) // stub for cpudetect.c
+{
+}
 
 #ifdef TIMING
 static inline long long rdtsc()
