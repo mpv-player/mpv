@@ -144,6 +144,7 @@ subtitle *sub_read_line_sami(FILE *fd, subtitle *current) {
 		    current->text[current->lines++] = strdup (text);
 		s += 4;
 	    }
+	    else if ((*s == '{') && !sub_no_text_pp) { state = 5; ++s; continue; }
 	    else if (*s == '<') { state = 4; }
 	    else if (!strncasecmp (s, "&nbsp;", 6)) { *p++ = ' '; s += 6; }
 	    else if (*s == '\t') { *p++ = ' '; s++; }
@@ -168,6 +169,10 @@ subtitle *sub_read_line_sami(FILE *fd, subtitle *current) {
 	    s = strchr (s, '>');
 	    if (s) { s++; state = 3; continue; }
 	    break;
+	case 5: /* get rid of {...} text */
+	    if (*s == '}') state = 3;
+	    ++s;
+	    continue;
 	}
 
 	/* read next line */
