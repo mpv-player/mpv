@@ -151,7 +151,7 @@ too.
 MPlayer supports a wide range of video and audio output drivers.
 It works with X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca, DirectFB,
 Quartz, but you can also use GGI, SDL (and all their drivers), VESA (on every
-VESA compatible card, even without X11), some low level card-specific drivers
+VESA-compatible card, even without X11), some low-level card-specific drivers
 (for Matrox, 3Dfx and ATI) and some hardware MPEG decoder boards, such as the
 Siemens DVB, DXR2 and DXR3/\:Hollywood+.
 Most of them support software or hardware scaling, so you can enjoy movies in
@@ -186,7 +186,7 @@ It has the same options as MPlayer.
 .\" --------------------------------------------------------------------------
 .
 .SH "KEYBOARD CONTROL"
-MPlayer has a fully configurable, command driven, control layer
+MPlayer has a fully configurable, command-driven control layer
 which allows you to control MPlayer using keyboard, mouse, joystick
 or remote control (with LIRC).
 .br
@@ -359,9 +359,9 @@ See also \-afm, \-ac, \-vfm and \-vc.
 Specify configuration file to be parsed after the default ones.
 .TP
 .B \-quiet \ \ 
-Make MPlayer output less verbose, in particular the status line
-(i.e. A:   0.7 V:   0.6 A-V:  0.068 ...) will not be displayed.
-Particularly useful on slow terminals or broken ones that do not properly
+Make console output less verbose; in particular, prevents the status line
+(i.e. A:   0.7 V:   0.6 A-V:  0.068 ...) from being displayed.
+Particularly useful on slow terminals or broken ones which do not properly
 handle carriage return (i.e. \\r).
 .TP
 .B \-v, \-verbose
@@ -573,7 +573,7 @@ Instead of intercepting keyboard events, MPlayer will read commands from stdin.
 See DOCS/tech/slave.txt and \-input cmdlist for a list of slave commands.
 .TP
 .B \-softsleep
-Use high quality software timers instead of RTC.
+Use high-quality software timers instead of the RTC.
 As precise as the RTC without requiring special privileges.
 Comes at the price of higher CPU consumption.
 .TP
