@@ -1496,6 +1496,7 @@ while(has_audio){
         if(ret>0) a_buffer_len+=ret;
         break;
       }
+#ifdef USE_DIRECTSHOW
       case 7: // DirectShow
       { int ret;
         int len=a_buffer_size-a_buffer_len;
@@ -1522,7 +1523,7 @@ while(has_audio){
         
         break;
       }
-
+#endif
     }
   }
   current_module=NULL;   // Leave AUDIO decoder module
