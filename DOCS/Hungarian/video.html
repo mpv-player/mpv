@@ -251,7 +251,10 @@ HREF=#2.3.1.9>2.3.1.9-es</A> fejezet.</P>
 <P><B>Megj</B>.: a Savage kártyáknak lassú az YV12 megjelenítési képessége
   (YV12-YUY2 konverziót csinál a meghajtója mert a Savage hardver képtelen
   YV12-t megjeleníteni). Így amikor ezen dokumentáció azt mondja hogy
-  "itt az YV12 kimenetet használd mert az gyorsabb", az nem biztos.</P>
+  "itt az YV12 kimenetet használd mert az gyorsabb", az nem biztos.
+  Próbáld ki <A HREF="http://www.mplayerhq.hu/MPlayer/contrib/Savage-driver/savage_drv.o.mmx2.bz2">ezt
+  a meghajtót</A> - MMX2 utasításokat használ a konverzióra, így gyorsabb
+  mint az alap X-es meghajtó.</P>
 
 
 <P><B><A NAME=2.3.1.2.3>2.3.1.2.3.  nVidia kártyák</A></B></P>
@@ -291,12 +294,11 @@ HREF=#2.3.1.14>Radeon video overlay</A> fejezeteket.</LI>
 
 <P><B><A NAME=2.3.1.2.5>2.3.1.2.5. NeoMagic kártyák</A></B></P>
 
-<P>
-Ezek a kártyák sok laptopban megtalálhatók. Linux alatt a teljesítményük
-kimerül a DGA-ban. Sajnos a 4.1.0-ás X-ben található DGA meghajtó nem
-mûködik, így vagy megvárod a 4.2.0-át, vagy letöltesz egy módosított
-meghajtót innen :
-<A HREF="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver">http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver</A>.<BR>
+<P>Ezek a kártyák sok laptopban megtalálhatók. Sajnos az alap 4.2.0-es X-ben
+  lévõ meghajtó nem tud Xv-t. Tölts le tõlünk egy módosított, Xv-t tudó
+  meghajtót
+  <A HREF="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/neomagic_drv.o.4.2.0.bz2">innen</A>.
+  4.2.0 elõtti X-szel fölösleges próbálkozni...
 </P>
 
 
