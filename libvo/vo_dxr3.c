@@ -215,22 +215,22 @@ typedef struct {
 } overlay_t;
 
 
-overlay_t *overlay_init(int dev);
-int overlay_release(overlay_t *);
+static overlay_t *overlay_init(int dev);
+static int overlay_release(overlay_t *);
 
-int overlay_read_state(overlay_t *o, char *path);
-int overlay_write_state(overlay_t *o, char *path);
+static int overlay_read_state(overlay_t *o, char *path);
+static int overlay_write_state(overlay_t *o, char *path);
 
-int overlay_set_screen(overlay_t *o, int xres, int yres, int depth);
-int overlay_set_mode(overlay_t *o, int mode);
-int overlay_set_attribute(overlay_t *o, int attribute, int val);
-int overlay_set_keycolor(overlay_t *o, int color);
-int overlay_set_window(overlay_t *o, int xpos,int ypos,int width,int height);
-int overlay_set_bcs(overlay_t *o, int brightness, int contrast, int saturation);
+static int overlay_set_screen(overlay_t *o, int xres, int yres, int depth);
+static int overlay_set_mode(overlay_t *o, int mode);
+static int overlay_set_attribute(overlay_t *o, int attribute, int val);
+static int overlay_set_keycolor(overlay_t *o, int color);
+static int overlay_set_window(overlay_t *o, int xpos,int ypos,int width,int height);
+static int overlay_set_bcs(overlay_t *o, int brightness, int contrast, int saturation);
 
-int overlay_autocalibrate(overlay_t *o, pattern_drawer_cb pd, void *arg);
-void overlay_update_params(overlay_t *o);
-int overlay_signalmode(overlay_t *o, int mode);
+static int overlay_autocalibrate(overlay_t *o, pattern_drawer_cb pd, void *arg);
+static void overlay_update_params(overlay_t *o);
+static int overlay_signalmode(overlay_t *o, int mode);
 /* End overlay.h */
 
 
@@ -240,6 +240,9 @@ static XWindowAttributes xwin_attribs;
 static overlay_t *overlay_data;
 #endif
 
+
+/* Functions for working with the em8300's internal clock */
+/* End of internal clock functions */
 
 static uint32_t control(uint32_t request, void *data, ...)
 {
@@ -936,7 +939,7 @@ static int update_parameters(overlay_t *o)
     return 0;
 }
 
-int overlay_set_attribute(overlay_t *o, int attribute, int value)
+static int overlay_set_attribute(overlay_t *o, int attribute, int value)
 {
     em8300_attribute_t attr;
     
@@ -951,7 +954,7 @@ int overlay_set_attribute(overlay_t *o, int attribute, int value)
     return 0;
 }
 
-overlay_t *overlay_init(int dev)
+static overlay_t *overlay_init(int dev)
 {
     overlay_t *o;
 
@@ -969,7 +972,7 @@ overlay_t *overlay_init(int dev)
     return o;
 }
 
-int overlay_release(overlay_t *o)
+static int overlay_release(overlay_t *o)
 {
     if(o)
 	free(o);
@@ -1007,7 +1010,7 @@ static struct lut_entry *new_lookuptable(overlay_t *o)
     return p;
 }
 
-int lookup_parameter(overlay_t *o, struct lut_entry *lut, char *name, void **ptr, int *type) {
+static int lookup_parameter(overlay_t *o, struct lut_entry *lut, char *name, void **ptr, int *type) {
     int i;
 
     for(i=0; lut[i].name; i++) {
@@ -1020,7 +1023,7 @@ int lookup_parameter(overlay_t *o, struct lut_entry *lut, char *name, void **ptr
     return 0;
 }
 
-int overlay_read_state(overlay_t *o, char *p)
+static int overlay_read_state(overlay_t *o, char *p)
 {
     char *a,*tok;
     char path[128],fname[128],tmp[128],line[256];
@@ -1080,11 +1083,11 @@ int overlay_read_state(overlay_t *o, char *p)
     return 0;
 }
 
-void overlay_update_params(overlay_t *o) {
+static void overlay_update_params(overlay_t *o) {
     update_parameters(o);
 }
 
-int overlay_write_state(overlay_t *o, char *p)	
+static int overlay_write_state(overlay_t *o, char *p)	
 {
     char *a;
     char path[128],fname[128],tmp[128];
@@ -1137,7 +1140,7 @@ int overlay_write_state(overlay_t *o, char *p)
     return 0;
 }
 
-int overlay_set_screen(overlay_t *o, int xres, int yres, int depth)
+static int overlay_set_screen(overlay_t *o, int xres, int yres, int depth)
 {
    em8300_overlay_screen_t scr;
 
@@ -1156,7 +1159,7 @@ int overlay_set_screen(overlay_t *o, int xres, int yres, int depth)
    return 0;
 }
 
-int overlay_set_mode(overlay_t *o, int mode)
+static int overlay_set_mode(overlay_t *o, int mode)
 {
     if (ioctl(o->dev, EM8300_IOCTL_OVERLAY_SETMODE, &mode)==-1) {
 	perror("Failed enabling overlay..exiting");
@@ -1165,7 +1168,7 @@ int overlay_set_mode(overlay_t *o, int mode)
     return 0;
 }
 
-int overlay_set_window(overlay_t *o, int xpos,int ypos,int width,int height)
+static int overlay_set_window(overlay_t *o, int xpos,int ypos,int width,int height)
 {
     em8300_overlay_window_t win;
     win.xpos = xpos;
@@ -1181,7 +1184,7 @@ int overlay_set_window(overlay_t *o, int xpos,int ypos,int width,int height)
     return 0;
 }
 
-int overlay_set_bcs(overlay_t *o, int brightness, int contrast, int saturation)
+static int overlay_set_bcs(overlay_t *o, int brightness, int contrast, int saturation)
 {
     em8300_bcs_t bcs;
     bcs.brightness = brightness;
@@ -1207,7 +1210,7 @@ static int col_interp(float x, struct coeff c)
     return rint(y);
 }
 
-int overlay_set_keycolor(overlay_t *o, int color) {
+static int overlay_set_keycolor(overlay_t *o, int color) {
     int r = (color & 0xff0000) >> 16;
     int g = (color & 0x00ff00) >> 8;
     int b = (color & 0x0000ff);
@@ -1256,7 +1259,7 @@ static void least_sq_fit(int *x, int *y, int n, float *k, float *m)
     *k=(sxy*n-sx*sy)/delta;
 }
 
-int overlay_autocalibrate(overlay_t *o, pattern_drawer_cb pd, void *arg)
+static int overlay_autocalibrate(overlay_t *o, pattern_drawer_cb pd, void *arg)
 {
     em8300_overlay_calibrate_t cal;
     em8300_overlay_window_t win;
@@ -1376,7 +1379,7 @@ int overlay_autocalibrate(overlay_t *o, pattern_drawer_cb pd, void *arg)
 }
 
 
-int overlay_signalmode(overlay_t *o, int mode) {
+static int overlay_signalmode(overlay_t *o, int mode) {
 	if(ioctl(o->dev, EM8300_IOCTL_OVERLAY_SIGNALMODE, &mode) ==-1) {
 	    perror("Failed set signal mix");
 	    return -1;
