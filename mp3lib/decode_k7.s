@@ -7,6 +7,10 @@
 ///  - Added new opcode PFNACC
 ///  - decreased number of opcodes (as it was suggested by k7 manual)
 ///    (using memory reference as operand of instructions)
+///  - added PREFETCHW opcode. It has different semantic than k6-2
+///    and saves 15-25 cpu clocks for athlon.
+///  - partial unrolling loops for removing slower MOVW insns.
+///    (Note probably same operation should be done for decode_3dnow)
 ///  - change function name for support 3DNowEx! automatic detect
 ///
 /// note: because K7 processors are an aggresive out-of-order three-way
@@ -42,9 +46,10 @@
 .bss
         .comm   buffs,4352,4
 .data
-        .align 4
-bo:
-        .long 1
+        .align 8
+null_one: .long 0x0000ffff, 0x0000ffff
+one_null: .long 0xffff0000, 0xffff0000
+bo:       .long 1
 .text
 /* int synth_1to1(real *bandPtr,int channel,unsigned char *out) */
 .globl synth_1to1_3dnowex
@@ -100,56 +105,83 @@ synth_1to1_3dnowex:
         movl  $decwin+64,%eax
         movl  %eax,%ecx            
         subl  %edx,%ecx
-        movl  $16,%ebp
+        movl  $8,%ebp
+	prefetchw (%esi)
 
 .L55:
 
         movq  (%ecx),%mm0
         pfmul (%ebx),%mm0
+        movq  128(%ecx),%mm4
+        pfmul 64(%ebx),%mm4
 
         movq  8(%ecx),%mm1
         pfmul 8(%ebx),%mm1
         pfadd %mm1,%mm0
+        movq  136(%ecx),%mm5
+        pfmul 72(%ebx),%mm5
+        pfadd %mm5,%mm4
 
         movq  16(%ebx),%mm2
         pfmul 16(%ecx),%mm2
         pfadd %mm2,%mm0
+        movq  80(%ebx),%mm6
+        pfmul 144(%ecx),%mm6
+        pfadd %mm6,%mm4
 
         movq  24(%ecx),%mm3
         pfmul 24(%ebx),%mm3
         pfadd %mm3,%mm0
+        movq  152(%ecx),%mm7
+        pfmul 88(%ebx),%mm7
+        pfadd %mm7,%mm4
 
-        movq  32(%ebx),%mm4
-        pfmul 32(%ecx),%mm4
-        pfadd %mm4,%mm0
+        movq  32(%ebx),%mm1
+        pfmul 32(%ecx),%mm1
+        pfadd %mm1,%mm0
+        movq  96(%ebx),%mm5
+        pfmul 160(%ecx),%mm5
+        pfadd %mm5,%mm4
 
-        movq  40(%ecx),%mm5
-        pfmul 40(%ebx),%mm5
-	pfadd %mm5,%mm0
+        movq  40(%ecx),%mm2
+        pfmul 40(%ebx),%mm2
+	pfadd %mm2,%mm0
+        movq  168(%ecx),%mm6
+        pfmul 104(%ebx),%mm6
+	pfadd %mm6,%mm4
 
-        movq  48(%ebx),%mm6
-        pfmul 48(%ecx),%mm6
-        pfadd %mm6,%mm0
+        movq  48(%ebx),%mm3
+        pfmul 48(%ecx),%mm3
+        pfadd %mm3,%mm0
+        movq  112(%ebx),%mm7
+        pfmul 176(%ecx),%mm7
+        pfadd %mm7,%mm4
 
-        movq  56(%ecx),%mm7
-        pfmul 56(%ebx),%mm7
-        pfadd %mm7,%mm0
+        movq  56(%ecx),%mm1
+        pfmul 56(%ebx),%mm1
+        pfadd %mm1,%mm0
+        movq  184(%ecx),%mm5
+        pfmul 120(%ebx),%mm5
+        pfadd %mm5,%mm4
 
-	pfnacc %mm0, %mm0
-
-        pf2id %mm0,%mm0
-        movd  %mm0,%eax
-
-        sar   $16,%eax
-        movw  %ax,(%esi)
-
-        addl  $64,%ebx
-        subl  $-128,%ecx
-        addl  $4,%esi
+	pfnacc %mm4, %mm0
+	movq   (%esi), %mm1
+	pf2id  %mm0, %mm0
+	pand   one_null, %mm1
+	psrld  $16,%mm0
+	pand   null_one, %mm0
+	por    %mm0, %mm1
+	movq   %mm1,(%esi)
+	
+        addl  $128,%ebx
+        addl  $256,%ecx
+        addl  $8,%esi
         decl  %ebp
         jnz  .L55
 
 / --- end of  loop 1 ---
+
+	prefetchw (%esi)  /* prefetching for writing this block and next loop */
 
         movd  (%ecx),%mm0
         pfmul (%ebx),%mm0
@@ -189,12 +221,88 @@ synth_1to1_3dnowex:
 
         movw  %ax,(%esi)
 
-        addl  $-64,%ebx
+        subl  $64,%ebx
         addl  $4,%esi
         addl  $256,%ecx
-        movl  $15,%ebp
+        movl  $7,%ebp
 
 .L68:
+	pxor  %mm0, %mm0
+	pxor  %mm4, %mm4
+
+        movq  (%ecx),%mm1
+        pfmul (%ebx),%mm1
+        pfsub %mm1,%mm0
+        movq  128(%ecx),%mm5
+        pfmul -64(%ebx),%mm5
+        pfsub %mm5,%mm4
+
+        movq  8(%ecx),%mm2
+        pfmul 8(%ebx),%mm2
+        pfsub %mm2,%mm0
+        movq  136(%ecx),%mm6
+        pfmul -56(%ebx),%mm6
+        pfsub %mm6,%mm4
+
+        movq  16(%ecx),%mm3
+        pfmul 16(%ebx),%mm3
+        pfsub %mm3,%mm0
+        movq  144(%ecx),%mm7
+        pfmul -48(%ebx),%mm7
+        pfsub %mm7,%mm4
+
+        movq  24(%ecx),%mm1
+        pfmul 24(%ebx),%mm1
+        pfsub %mm1,%mm0
+        movq  152(%ecx),%mm5
+        pfmul -40(%ebx),%mm5
+        pfsub %mm5,%mm4
+
+        movq  32(%ecx),%mm2
+        pfmul 32(%ebx),%mm2
+        pfsub %mm2,%mm0
+        movq  160(%ecx),%mm6
+        pfmul -32(%ebx),%mm6
+        pfsub %mm6,%mm4
+
+        movq  40(%ecx),%mm3
+        pfmul 40(%ebx),%mm3
+        pfsub %mm3,%mm0
+        movq  168(%ecx),%mm7
+        pfmul -24(%ebx),%mm7
+        pfsub %mm7,%mm4
+
+        movq  48(%ecx),%mm1
+        pfmul 48(%ebx),%mm1
+        pfsub %mm1,%mm0
+        movq  176(%ecx),%mm5
+        pfmul -16(%ebx),%mm5
+        pfsub %mm5,%mm4
+
+        movq  56(%ecx),%mm2
+        pfmul 56(%ebx),%mm2
+        pfsub %mm2,%mm0
+        movq  184(%ecx),%mm6
+        pfmul -8(%ebx),%mm6
+        pfsub %mm6,%mm4
+
+        pfacc  %mm4,%mm0
+	movq   (%esi), %mm1
+	pf2id  %mm0, %mm0
+	pand   one_null, %mm1
+	psrld  $16,%mm0
+	pand   null_one, %mm0
+	por    %mm0, %mm1
+	movq   %mm1,(%esi)
+
+        subl  $128,%ebx
+        addl  $256,%ecx
+        addl  $8,%esi
+        decl  %ebp
+        jnz   .L68
+
+/ --- end of loop 2
+
 	pxor  %mm0, %mm0
 
         movq  (%ecx),%mm1
@@ -237,14 +345,6 @@ synth_1to1_3dnowex:
         sar   $16,%eax
 
         movw  %ax,(%esi)
-
-        addl  $-64,%ebx
-        subl  $-128,%ecx
-        addl  $4,%esi
-        decl  %ebp
-        jnz   .L68
-
-/ --- end of loop 2
 
         femms
 

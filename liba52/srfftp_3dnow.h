@@ -96,10 +96,10 @@ static complex_t HSQRT2_3DNOW __attribute__ ((aligned (8))) = { 0.707106781188, 
 	"movq	%%mm2, %%mm3\n\t"\
 	"pfadd	%%mm5, %%mm0\n\t" /*A0 = a1 + u;*/\
 	"pfadd	%%mm4, %%mm2\n\t" /*A12 = a1 + v;*/\
-	"pfsub	%%mm5, %%mm1\n\t" /*A1 = a1 - u;*/\
-	"pfsub	%%mm4, %%mm3\n\t" /*A4  = a1 - v;*/\
 	"movq	%%mm0, %0\n\t"\
+	"pfsub	%%mm5, %%mm1\n\t" /*A1 = a1 - u;*/\
 	"movq	%%mm2, %3\n\t"\
+	"pfsub	%%mm4, %%mm3\n\t" /*A4  = a1 - v;*/\
 	"movq	%%mm1, %1\n\t"\
 	"movq	%%mm3, %2"\
 	:"=m"(A0), "=m"(A8), "=m"(A4), "=m"(A12)\
@@ -187,11 +187,11 @@ static complex_t HSQRT2_3DNOW __attribute__ ((aligned (8))) = { 0.707106781188, 
 	"movq	%%mm2, %%mm3\n\t"\
 	"pfadd	%%mm4, %%mm0\n\t"/*A1 = a1 + u*/\
 	"pfsub	%%mm5, %%mm2\n\t"/*A5 = a1 - v*/\
-	"pfsub	%%mm4, %%mm1\n\t"/*A9 = a1 - u*/\
-	"pfadd	%%mm5, %%mm3\n\t"/*A9 = a1 + v*/\
 	"movq	%%mm0, %0\n\t"\
-	"movq	%%mm1, %1\n\t"\
+	"pfsub	%%mm4, %%mm1\n\t"/*A9 = a1 - u*/\
 	"movq	%%mm2, %2\n\t"\
+	"pfadd	%%mm5, %%mm3\n\t"/*A9 = a1 + v*/\
+	"movq	%%mm1, %1\n\t"\
 	"movq	%%mm3, %3"\
 	:"=m"(A1), "=m"(A9), "=m"(A5), "=m"(A13)\
 	:"0"(A1), "2"(A5)\
