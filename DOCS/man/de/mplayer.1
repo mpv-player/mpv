@@ -6350,7 +6350,8 @@ andere Frames verwendet werden können, was die subjektive Qualität im Ganzen
 erhöht und den PSNR-Wert möglicherweise reduziert.
 .br
 .I WARNUNG:
-Sei vorsichtig! Zu große Werte können katastrophale Ergebnisse liefern.
+Sei vorsichtig!
+Zu große Werte können katastrophale Ergebnisse liefern.
 .br
 .I WARNUNG:
 Große Werte mögen auf einigen Monitoren gut aussehen, können auf anderen
@@ -6418,91 +6419,237 @@ wird (Standard: 0.0 (deaktiviert)).
 p_mask=1.0 verdoppelt die Anzahl der jedem Intrablock zugeteilten Bits.
 .
 .TP
-.\" man page is synced from top down to this option.
 .B naq\ \ \ \ 
 Normalisierte adaptive Quantisierung (experimentell).
 Wenn adaptive Quantisierung benutzt wird (*_mast), dann wird der
-durchschnittliche Quantizer pro Makroblock eventuell nicht mehr dem
-geforderten Bild\-Quantizer entsprechen. NAQ versucht dann, den pro Makroblock
-verwendeten Quantizer anzupassen, um den geforderten Durschnitt zu erreichen.
-
-.IPs ildct
-benutze die interlaced DCT
-.IPs format=<value>
-.RSss
-YV12: Standard
+durchschnittliche Quantisierungsparameter pro Macroblock eventuell
+nicht mehr dem geforderten Quantisierungsparameter auf Framelevel entsprechen.
+NAQ versucht dann, den pro Macroblock verwendeten Quantisierungsparameter
+anzupassen, um den geforderten Durchschnitt beizubehalten.
+.
+.TP
+.B ildct\ \ 
+Benutze die interlaced DCT.
+.
+.TP
+.B ilme\ \ \ 
+Benutze interlaced Bewegungsabschätzung (schließt qpel gegenseitig aus).
+.
+.TP
+.B alt\ \ \ \ 
+Benutzt eine alternative Suchtabelle.
+.
+.TP
+.B top=<-1\-1>\ \ \ 
+.PD 0
+.RSs
+.IPs -1
+automatisch
+.IPs 0
+bottom field first (unteres Feld zuerst)
+.IPs 1
+top field first (oberes Feld zuerst)
+.RE
+.PD 1
+.
+.TP
+.B format=<Wert>
+.PD 0
+.RSs
+.IPs YV12\ 
+Standard
+.IPs 444P\ 
+für ffv1
+.IPs 422P\ 
+für HuffYUV, verlustfreies JPEG und ffv1
+.IPs 411P,YVU9
+für verlustfreies JPEG und ffv1
+.IPs BGR32
+für verlustfreies JPEG und ffv1
+.RE
+.PD 1
+.
+.TP
+.B pred\ \ \ 
+(für HuffYUV)
+.PD 0
+.RSs
+.IPs 0
+linke Vorhersage
+.IPs 1
+Vorhersage der Ebene/\:des Gradienten
+.IPs 2
+Medianvorhersage
+.RE
+.PD 1
+.
+.TP
+.B pred\ \ \ 
+(für verlustfreies JPEG)
+.PD 0
+.RSs
+.IPs 0
+linke Vorhersage
+.IPs 1
+obere Vorhersage
+.IPs 2
+linke obere Vorhersage
+.IPs 3
+Vorhersage der Ebene/\:des Gradienten
+.IPs 6
+Durchschnittsvorhersage
+.RE
+.PD 1
+.
+.TP
+.B coder\ \ 
+(für ffv1)
+.PD 0
+.RSs
+.IPs 0
+vlc-Codierung (Golomb-Rice)
+.IPs 1
+arithmetische Codierung (CABAC)
+.RE
+.PD 1
+.
+.TP
+.B context
+(für ffv1)
+.PD 0
+.RSs
+.IPs 0
+Modell zu kleinem Kontext
+.IPs 1
+Modell zu großem Kontext
+.RE
+.PD 1
+.
+.TP
+.B qpel\ \ \ 
+Benutze "quarter pel"-Bewegungsabschätzung (schließt ilme gegenseitig aus).
 .br
-422P: für huffyuv
-.REss
-.IPs pred
-(für huffyuv)
-.RSss
-0: left prediction
+.I ANMERKUNG:
+Dies scheint nur für Encodierung mit hohen Bitraten sinnvoll zu sein.
+.
+.TP
+.B mbcmp=<0\-2000>
+Setzt die Vergleichsfunktion für Macroblockentscheidungen, wird nur bei mbd=0
+benutzt.
+.PD 0
+.RSs
+.IPs "0 (SAD)"
+Summe der absoluten Differenzen, schnell (Standard)
+.IPs "1 (SSE)"
+Summe der quadrierten Fehler
+.IPs "2 (SATD)"
+Summe der absoluten Hadamard-transformierten Differenzen
+.IPs "3 (DCT)"
+Summe der absoluten DCT-transformierten Differenzen
+.IPs "4 (PSNR)"
+Summe der quadratischen Quantisierungsfehler (zu vermeiden, niedrige Qualität)
+.IPs "5 (BIT)"
+Anzahl der für den Block benötigten Bits
+.IPs "6 (RD)"
+rate distortion (Ratenverzerrung) optimal, langsam
+.IPs "7 (ZERO)"
+0
+.IPs "8 (VSAD)"
+Summe der absoluten vertikalen Differenzen
+.IPs "9 (VSSE)"
+Summe der quadrierten vertikalen Differenzen
+.IPs "10 (NSSE)"
+Rauschen beibehaltende Summe der quadrierten Differenzen
+.IPs +256\ 
+Benutze auch die Farbinformation, funktioniert momentan nicht (korrekt) mit
+B-Frames.
+.RE
+.PD 1
+.
+.TP
+.B ildctcmp=<0\-2000>
+Setzt die Vergleichsfunktion für interlaced DCT-Entscheidungen (siehe mbcmp
+für eine Liste der verfügbaren Vergleichsfunktionen).
+.
+.TP
+.B precmp=<0\-2000>
+Setzt die Vergleichsfunktion für "pre pass"-Bewegungsabschätzung (siehe mbcmp
+für eine Liste der verfügbaren Vergleichsfunktionen) (Standard: 0).
+.
+.TP
+.B cmp=<0\-2000>
+Setzt die Vergleichsfunktion für "full pel"-Bewegungsabschätzung (siehe mbcmp
+für eine Liste der verfügbaren Vergleichsfunktionen) (Standard: 0).
+.
+.TP
+.B subcmp=<0\-2000>
+Setzt die Vergleichsfunktion für "sub pel"-Bewegungsabschätzung (siehe mbcmp
+für eine Liste der verfügbaren Vergleichsfunktionen) (Standard: 0).
+.
+.TP
+.B nssew=<0\-100>
+Diese Einstellung kontrolliert die NSSE-Gewichtung, wobei eine höhere
+Gewichtung stärkeres Rauschen erzeugt.
+NSSE 0 ist identisch mit SSE.
+Vielleicht findest du dies nützlich, wenn du die Beibehaltung von etwas
+Rauschen in deinem encodierten Video besser findest als es vor dem Encodieren
+herauszufiltern.
+.
+.TP
+.B predia=<-99\-6>
+Rautentyp und -größe für "pre pass"-Bewegungsabschätzung
+.
+.TP
+.B dia=<\-99\-6>
+Rautentyp und -größe für die Bewegungsabschätzung.
+Bewegungsabschätzung ist ein iterativer Prozess.
+Eine kleine Raute zu benutzen begrenzt die Suche nicht auf das Auffinden von
+kleinen Motion-Vectors.
+Es ist nur irgendwie wahrscheinlicher, dass die Suche anhält, bevor der beste
+Motion-Vector gefunden wurde \- vor allem, wenn Rauschen involviert ist.
+Größere Rauten erlauben eine ausgedehntere Suche nach dem besten
+Motion-Vector, welche daher langsamer ist, dafür aber zu einem besseren
+Ergebnis führt.
 .br
-1: plane/gradient prediction
+Große normale Rauten sind qualitativ besser als "shape adaptive" (Gestalt
+anpassende) Rauten.
 .br
-2: median prediction
-.REss
-.IPs qpel
-benutze quarter pel motion compensation
-.IPs precmp=<0\-2000>
-Vergleichsfunktion für motion estimation pre pass
-.IPs cmp=<0\-2000>
-Vergleichsfunktion für full pel motion estimation
-.IPs subcmp=<0\-2000>
-Vergleichsfunktion für sub pel motion estimation
-.RSss
-0 (SAD): Summe der absoluten Differenzen, schnell (standard)
+Shape adaptive Rauten sind ein guter Kompromiss zwischen Geschwindigkeit
+und Qualität.
 .br
-1 (SSE): Summe der quadratischen Fehler
-.br
-2 (SATD): Summe der absoluten Hadamard\-transformierten Differenzen
-.br
-3 (DCT): Summe der absoluten DCT\-transformierten Differenzen
-.br
-4 (PSNR): Summe der quadratischen Quantisierungsfehler
-.br
-5 (BIT): Anzahl der für den Block benötigten Bits
-.br
-6 (RD): rate distoration optimal, langsam
-.br
-7 (ZERO): 0
-.br
-+256: benutze auch die Farbinformation. Funktioniert momentan nicht mit
-B\-Frames.
-.REss
-.IPs predia=<\-99\-6>
-Diamantentyp und \-größe für motion estimation pre pass
-.IPs dia=<\-99\-6>
-Diamantentyp und \-größe für motion estimation.
-Anmerkung: Die Größe von normalen Diamanten und von shape adaptiven Diamanten
-sind nicht das gleiche.
-.RSss
-\-3: shape adaptiver (schnell) Diamant mit einer Größe von 3
-.br
-\-2: shape adaptiver (schnell) Diamant mit einer Größe von 2
-.br
-\-1: experimentell
-.br
- 1: normaler Diamant mit Größe 1 (Standard) = EPZS\-Typ\-Diamant
+.I ANMERKUNG:
+Die Größen von normalen und "shape adaptive"-Rauten haben unterschiedliche
+Bedeutung.
+.RSs
+.IPs -3
+shape adaptive (schnell) Raute der Größe 3
+.IPs -2
+shape adaptive (schnell) Raute der Größe 2
+.IPs -1
+etwas speziell: Kann langsamer und/oder besser sein als dia=-2.
+.IPs  1
+Normale Raute der Größe 1 (Standard), entspricht einer Raute des Typs EPZS.
 .nf
 .ne
-      0 
+      0
      000
-      0 
+      0
 .fi
-.br
- 2: normaler Diamant mit Größe 2
+.IPs 2
+normale Raute der Größe 2
 .nf
 .ne
-      0  
-     000 
+      0
+     000
     00000
-     000 
-      0  
+     000
+      0
 .fi
-.REss
-.IPs trell
+.RE
+.
+.TP
+.\" man page is synced from top down to this option.
+.B trell\ \
 Trellis\-Quantisierung.
 Hiermit wird die optimale Encodierung für jeden 8x8\-Block gefunden.
 Die Trellis\-Quantisierung ist im Sinne von 'PSNR vs Bitrate' einfahc die
