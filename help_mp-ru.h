@@ -130,6 +130,7 @@ static char help_text[]=
 #define MSGTR_TooManyAudioInBuffer "\nDEMUXER: Слишком много (%d в %d байтах) аудио пакетов в буфере!\n"
 #define MSGTR_TooManyVideoInBuffer "\nDEMUXER: Слишком много (%d в %d байтах) видео пакетов в буфере!\n"
 #define MSGTR_MaybeNI "(возможно Вы проигрываете нечередованный поток/файл или неудачный кодек)\n"
+#define MSGTR_DetectedFLIfile "Обнаружен FLI формат файла!\n"
 #define MSGTR_DetectedAVIfile "Обнаружен AVI формат файла!\n"
 #define MSGTR_DetectedASFfile "Обнаружен ASF формат файла!\n"
 #define MSGTR_DetectedMPEGPESfile "Обнаружен MPEG-PES формат файла!\n"
