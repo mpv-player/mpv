@@ -1,1 +1,1 @@
-#define VERSION "0.11pre-cvs"
+#define VERSION "0.11cvs-010415-00:56"

@@ -21,25 +21,29 @@ static int demux_asf_read_packet(demuxer_t *demux,unsigned char *data,int len,in
   
   if(verbose>=4) printf("demux_asf.read_packet: id=%d seq=%d len=%d\n",id,seq,len);
   
-#if 0
-  if(demux->video->id==-1) {
-    demux->video->id=asf_video_id;
-    if(verbose) printf("ASF video ID = %d\n",demux->video->id);
-  }
+  if(demux->video->id==-1)
+    if(avi_header.v_streams[id])
+        demux->video->id=id;
+
   if(demux->audio->id==-1)
-    if(id!=asf_video_id && id!=demux->video->id){
-      demux->audio->id=id;
-      if(verbose) printf("ASF audio ID = %d\n",demux->audio->id);
-    }
-#endif
+    if(avi_header.a_streams[id])
+        demux->audio->id=id;
 
   if(id==demux->audio->id){
       // audio
       ds=demux->audio;
+      if(!ds->sh){
+        ds->sh=avi_header.a_streams[id];
+        if(verbose) printf("Auto-selected ASF audio ID = %d\n",ds->id);
+      }
   } else 
   if(id==demux->video->id){
       // video
       ds=demux->video;
+      if(!ds->sh){
+        ds->sh=avi_header.v_streams[id];
+        if(verbose) printf("Auto-selected ASF video ID = %d\n",ds->id);
+      }
   }
   
   if(ds){

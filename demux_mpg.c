@@ -83,19 +83,15 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
     
     //============== DVD Audio sub-stream ======================
     if(id==0x1BD){
-      int aid=stream_read_char(demux->stream)&0x7F;--len;
-      ds=demux->audio;
-      if(ds->id==-1) ds->id=aid;
-      if(!dvdaudio_table[aid]){
-        dvdaudio_table[aid]=1;
-        printf("DVD Audio format: %s  ID=%d%s\n",
-          ((aid&0x70)==0x20)?"PCM":"AC3",aid,(ds->id==aid)?"  CURRENT":"");
-      }
+      int aid=128+(stream_read_char(demux->stream)&0x7F);--len;
       if(len<3) return -1; // invalid audio packet
-      if(ds->id!=aid){
-        // drop packet (not selected channel)
-        ds=NULL;
-      } else {
+
+      if(!avi_header.a_streams[aid]) new_sh_audio(aid);
+      if(demux->audio->id==-1) demux->audio->id=aid;
+
+      if(demux->audio->id==aid){
+        ds=demux->audio;
+        if(!ds->sh) ds->sh=avi_header.a_streams[aid];
         // READ Packet: Skip additional audio header data:
         c=stream_read_char(demux->stream);
         c=stream_read_char(demux->stream);
@@ -130,17 +126,23 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
   if(id>=0x1C0 && id<=0x1DF){
     // mpeg audio
     int aid=id-0x1C0;
+    if(!avi_header.a_streams[aid]) new_sh_audio(aid);
     if(demux->audio->id==-1) demux->audio->id=aid;
     if(demux->audio->id==aid){
       ds=demux->audio;
+      if(!ds->sh) ds->sh=avi_header.a_streams[aid];
       if(ds->type==-1) ds->type=1;
     }
   } else
   if(id>=0x1E0 && id<=0x1EF){
     // mpeg video
     int aid=id-0x1E0;
+    if(!avi_header.v_streams[aid]) new_sh_video(aid);
     if(demux->video->id==-1) demux->video->id=aid;
-    if(demux->video->id==aid) ds=demux->video;
+    if(demux->video->id==aid){
+      ds=demux->video;
+      if(!ds->sh) ds->sh=avi_header.v_streams[aid];
+    }
   }
 
   if(ds){

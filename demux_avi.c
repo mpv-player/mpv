@@ -17,8 +17,32 @@ static inline int avi_stream_id(unsigned int id){
 // Select ds from ID
 static inline demux_stream_t* demux_avi_select_stream(demuxer_t *demux,unsigned int id){
   int stream_id=avi_stream_id(id);
-  if(stream_id==demux->audio->id) return demux->audio;
-  if(stream_id==demux->video->id) return demux->video;
+
+//  printf("demux_avi_select_stream(%d)  {a:%d/v:%d}\n",stream_id,
+//       demux->audio->id,demux->video->id);
+
+  if(demux->video->id==-1)
+    if(avi_header.v_streams[stream_id])
+        demux->video->id=stream_id;
+
+  if(demux->audio->id==-1)
+    if(avi_header.a_streams[stream_id])
+        demux->audio->id=stream_id;
+
+  if(stream_id==demux->audio->id){
+      if(!demux->audio->sh){
+        demux->audio->sh=avi_header.a_streams[stream_id];
+        if(verbose) printf("Auto-selected AVI audio ID = %d\n",demux->audio->id);
+      }
+      return demux->audio;
+  }
+  if(stream_id==demux->video->id){
+      if(!demux->video->sh){
+        demux->video->sh=avi_header.v_streams[stream_id];
+        if(verbose) printf("Auto-selected AVI video ID = %d\n",demux->video->id);
+      }
+      return demux->video;
+  }
   if(id!=mmioFOURCC('J','U','N','K')){
      // unknown
      if(verbose>=2) printf("Unknown chunk: %.4s (%X)\n",&id,id);

@@ -154,12 +154,20 @@ char *get_path(char *filename){
 
 static int max_framesize=0;
 
-static int dbg_es_sent=0;
-static int dbg_es_rcvd=0;
+//static int dbg_es_sent=0;
+//static int dbg_es_rcvd=0;
 
 //static int show_packets=0;
 
 //**************************************************************************//
+//**************************************************************************//
+//             Input media streaming & demultiplexer:
+//**************************************************************************//
+
+#include "stream.c"
+#include "demuxer.c"
+
+#include "stheader.h"
 
 typedef struct {
   // file:
@@ -173,6 +181,9 @@ typedef struct {
   int idx_pos_a;
   int idx_pos_v;
   int idx_offset;  // ennyit kell hozzaadni az index offset ertekekhez
+  // streams:
+  sh_audio_t* a_streams[256];
+  sh_video_t* v_streams[256];
   // video:
   unsigned int bitrate;
 } avi_header_t;
@@ -181,20 +192,28 @@ avi_header_t avi_header;
 
 #include "aviprint.c"
 
-extern picture_t *picture;
+sh_audio_t* new_sh_audio(int id){
+    if(avi_header.a_streams[id]){
+        printf("Warning! Audio stream header %d redefined!\n",id);
+    } else {
+        if(verbose) printf("Found audio stream: %d\n",id);
+        avi_header.a_streams[id]=malloc(sizeof(sh_audio_t));
+        memset(avi_header.a_streams[id],0,sizeof(sh_audio_t));
+    }
+    return avi_header.a_streams[id];
+}
 
-char* encode_name=NULL;
-char* encode_index_name=NULL;
-int encode_bitrate=0;
+sh_video_t* new_sh_video(int id){
+    if(avi_header.v_streams[id]){
+        printf("Warning! video stream header %d redefined!\n",id);
+    } else {
+        if(verbose) printf("Found video stream: %d\n",id);
+        avi_header.v_streams[id]=malloc(sizeof(sh_video_t));
+        memset(avi_header.v_streams[id],0,sizeof(sh_video_t));
+    }
+    return avi_header.v_streams[id];
+}
 
-//**************************************************************************//
-//             Input media streaming & demultiplexer:
-//**************************************************************************//
-
-#include "stream.c"
-#include "demuxer.c"
-
-#include "stheader.h"
 
 #include "demux_avi.c"
 #include "demux_mpg.c"
@@ -203,13 +222,17 @@ demuxer_t *demuxer=NULL;
 demux_stream_t *d_audio=NULL;
 demux_stream_t *d_video=NULL;
 
-sh_audio_t sh_audio_i; // FIXME later!
-sh_video_t sh_video_i;
-sh_audio_t *sh_audio=&sh_audio_i;
-sh_video_t *sh_video=&sh_video_i;
+sh_audio_t *sh_audio=NULL;//&sh_audio_i;
+sh_video_t *sh_video=NULL;//&sh_video_i;
+
+char* encode_name=NULL;
+char* encode_index_name=NULL;
+int encode_bitrate=0;
 
 // MPEG video stream parser:
 #include "parse_es.c"
+
+extern picture_t *picture;
 
 static const int frameratecode2framerate[16] = {
    0, 24000*10000/1001, 24*10000,25*10000, 30000*10000/1001, 30*10000,50*10000,60000*10000/1001,
@@ -349,6 +372,7 @@ void exit_sighandler(int x){
 }
 
 int divx_quality=0;
+extern int vo_dbpp;
 
 int main(int argc,char* argv[], char *envp[]){
 char* filename=NULL; //"MI2-Trailer.avi";
@@ -406,7 +430,7 @@ char *sub_name=NULL;
 float sub_delay=0;
 float sub_fps=0;
 //int user_bpp=0;
-extern int vo_dbpp;
+
 #include "cfg-mplayer.h"
 
   printf("%s",banner_text);
@@ -594,8 +618,10 @@ if(file_format==DEMUXER_TYPE_UNKNOWN){
 //====== File format recognized, set up these for compatibility: =========
 d_audio=demuxer->audio;
 d_video=demuxer->video;
-d_audio->sh=sh_audio; sh_audio->ds=d_audio;
-d_video->sh=sh_video; sh_video->ds=d_video;
+//d_audio->sh=sh_audio; 
+//d_video->sh=sh_video; 
+//sh_audio=d_audio->sh;sh_audio->ds=d_audio;
+//sh_video=d_video->sh;sh_video->ds=d_video;
 
 switch(file_format){
  case DEMUXER_TYPE_AVI: {
@@ -662,12 +688,17 @@ switch(file_format){
     printf("AVI: missing video stream!? contact the author, it may be a bug :(\n");
     exit(1);
   }
+  sh_video=d_video->sh;sh_video->ds=d_video;
   if(has_audio){
-    if(verbose) printf("ASF: Searching for audio stream (id:%d)\n",d_audio->id);
+    if(verbose) printf("AVI: Searching for audio stream (id:%d)\n",d_audio->id);
     if(!ds_fill_buffer(d_audio)){
-      printf("ASF: No Audio stream found...  ->nosound\n");
+      printf("AVI: No Audio stream found...  ->nosound\n");
       has_audio=0;
-    } else sh_audio->format=sh_audio->wf.wFormatTag;
+      sh_audio=NULL;
+    } else {
+      sh_audio=d_audio->sh;sh_audio->ds=d_audio;
+      sh_audio->format=sh_audio->wf.wFormatTag;
+    }
   }
   // calc. FPS:
   sh_video->fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
@@ -698,12 +729,17 @@ switch(file_format){
     printf("ASF: missing video stream!? contact the author, it may be a bug :(\n");
     exit(1);
   }
+  sh_video=d_video->sh;sh_video->ds=d_video;
   if(has_audio){
     if(verbose) printf("ASF: Searching for audio stream (id:%d)\n",d_audio->id);
     if(!ds_fill_buffer(d_audio)){
       printf("ASF: No Audio stream found...  ->nosound\n");
       has_audio=0;
-    } else sh_audio->format=sh_audio->wf.wFormatTag;
+      sh_audio=NULL;
+    } else {
+      sh_audio=d_audio->sh;sh_audio->ds=d_audio;
+      sh_audio->format=sh_audio->wf.wFormatTag;
+    }
   }
   sh_video->fps=1000.0f; sh_video->frametime=0.001f; // 1ms
   printf("VIDEO:  [%.4s]  %dx%d  %dbpp\n",
@@ -714,16 +750,17 @@ switch(file_format){
   break;
  }
  case DEMUXER_TYPE_MPEG_ES: {
-   demuxer->audio->type=0;
-   has_audio=0; // ES streams has no audio channel
+   d_audio->type=0;
+   has_audio=0;sh_audio=NULL; // ES streams has no audio channel
    break;
  }
  case DEMUXER_TYPE_MPEG_PS: {
   if(has_audio)
   if(!ds_fill_buffer(d_audio)){
     printf("MPEG: No Audio stream found...  ->nosound\n");
-    has_audio=0;
+    has_audio=0;sh_audio=NULL;
   } else {
+    sh_audio=d_audio->sh;sh_audio->ds=d_audio;
     if(verbose) printf("detected MPG-PS audio format: %d\n",d_audio->type);
     switch(d_audio->type){
       case 1: sh_audio->format=0x50;break; // mpeg
@@ -760,6 +797,7 @@ switch(file_format){
       }
    }
    if(verbose) printf("OK!\n");
+   sh_video=d_video->sh;sh_video->ds=d_video;
    sh_video->format=1; // mpeg video
    mpeg2_init();
    // ========= Read & process sequence header & extension ============
@@ -1440,12 +1478,12 @@ switch(sh_video->codec->driver){
         if(x> max_pts_correction) x= max_pts_correction;
         max_pts_correction=default_max_pts_correction;
         a_frame+=x; c_total+=x;
-        printf("  ct:%7.3f  %3d  %2d%%  %2d%%  %3.1f%% %d \r",c_total,
+        printf("  ct:%7.3f  %3d  %2d%%  %2d%%  %3.1f%% \r",c_total,
         (int)num_frames,
         (v_frame>0.5)?(int)(100.0*video_time_usage/(double)v_frame):0,
         (v_frame>0.5)?(int)(100.0*vout_time_usage/(double)v_frame):0,
-        (v_frame>0.5)?(100.0*audio_time_usage/(double)v_frame):0,
-        dbg_es_sent-dbg_es_rcvd 
+        (v_frame>0.5)?(100.0*audio_time_usage/(double)v_frame):0
+//        dbg_es_sent-dbg_es_rcvd 
         );
         fflush(stdout);
       }
@@ -1457,12 +1495,13 @@ switch(sh_video->codec->driver){
     if(d_video->pts) v_pts=d_video->pts;
     if(frame_corr_num==5){
 //      printf("A: ---   V:%6.1f   \r",v_pts);
-      printf("V:%6.1f  %3d  %2d%%  %2d%%  %3.1f%% %d \r",v_pts,
+      printf("V:%6.1f  %3d  %2d%%  %2d%%  %3.1f%% \r",v_pts,
         (int)num_frames,
         (v_frame>0.5)?(int)(100.0*video_time_usage/(double)v_frame):0,
         (v_frame>0.5)?(int)(100.0*vout_time_usage/(double)v_frame):0,
-        (v_frame>0.5)?(100.0*audio_time_usage/(double)v_frame):0,
-        dbg_es_sent-dbg_es_rcvd);
+        (v_frame>0.5)?(100.0*audio_time_usage/(double)v_frame):0
+//        dbg_es_sent-dbg_es_rcvd
+        );
 
       fflush(stdout);
       frame_corr_num=0;
