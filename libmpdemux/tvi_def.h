@@ -36,6 +36,10 @@ static tvi_handle_t *new_handle()
     h->functions = &functions;
     h->params = NULL;
     h->seq = 0;
+    h->chanlist = -1;
+    h->chanlist_s = NULL;
+    h->norm = -1;
+    h->channel = -1;
     return(h);
 }
 

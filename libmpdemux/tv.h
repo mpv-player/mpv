@@ -1,3 +1,5 @@
+#ifndef TV_H
+#define TV_H
 
 extern int tv_param_on;
 
@@ -9,6 +11,7 @@ extern int tv_param_on;
 
 extern char *tv_param_freq;
 extern char *tv_param_channel;
+extern char *tv_param_chanlist;
 extern char *tv_param_norm;
 extern char *tv_param_device;
 extern char *tv_param_driver;
@@ -48,6 +51,12 @@ typedef struct tvi_handle_s {
     void		*priv;
     tvi_param_t		*params;
     int 		seq;
+
+    /* specific */
+    int			norm;
+    int			chanlist;
+    struct CHANLIST	*chanlist_s;
+    int			channel;
 } tvi_handle_t;
 
 
@@ -111,10 +120,23 @@ extern tvi_handle_t *tv_begin(void);
 extern int tv_init(tvi_handle_t *tvh);
 extern int tv_uninit(tvi_handle_t *tvh);
 
-
+int tv_set_color_options(tvi_handle_t *tvh, int opt, int val);
 #define TV_COLOR_BRIGHTNESS	1
 #define TV_COLOR_HUE		2
 #define TV_COLOR_SATURATION	3
 #define TV_COLOR_CONTRAST	4
 
+int tv_step_channel(tvi_handle_t *tvh, int direction);
+#define TV_CHANNEL_LOWER	1
+#define TV_CHANNEL_HIGHER	2
+
+int tv_step_norm(tvi_handle_t *tvh);
+int tv_step_chanlist(tvi_handle_t *tvh);
+
+#define TV_NORM_PAL		1
+#define TV_NORM_NTSC		2
+#define TV_NORM_SECAM		3
+
 #endif /* USE_TV */
+
+#endif /* TV_H */

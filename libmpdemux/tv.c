@@ -29,10 +29,13 @@ int tv_param_on = 0;
 
 #include "tv.h"
 
+#include "frequencies.h"
+
 /* some default values */
 char *tv_param_freq = NULL;
 char *tv_param_channel = "26"; /* hungarian national tv channel 1 */
 char *tv_param_norm = "pal";
+char *tv_param_chanlist = "europe-east";
 char *tv_param_device = NULL;
 char *tv_param_driver = "dummy";
 int tv_param_width = -1;
@@ -92,6 +95,7 @@ int demux_tv_fill_buffer(demuxer_t *demux, tvi_handle_t *tvh)
 
 int stream_open_tv(stream_t *stream, tvi_handle_t *tvh)
 {
+    int i;
     tvi_functions_t *funcs = tvh->functions;
     int picture_format = 0;
 
@@ -159,6 +163,56 @@ int stream_open_tv(stream_t *stream, tvi_handle_t *tvh)
 	funcs->control(tvh->priv, TVI_CONTROL_TUN_GET_FREQ, &freq);
 	mp_msg(MSGT_TV, MSGL_INFO, "Current frequency: %lu (%.3f)\n",
 	    freq, (float)freq/16);
+    }
+
+    /* select video norm */
+    if (!strcasecmp(tv_param_norm, "pal"))
+	tvh->norm = TV_NORM_PAL;
+    else if (!strcasecmp(tv_param_norm, "ntsc"))
+	tvh->norm = TV_NORM_NTSC;
+    else if (!strcasecmp(tv_param_norm, "secam"))
+	tvh->norm = TV_NORM_SECAM;
+
+    mp_msg(MSGT_TV, MSGL_INFO, "Selected norm: %s\n", tv_param_norm);
+
+    /* select channel list */
+    for (i = 0; chanlists[i].name != NULL; i++)
+    {
+	if (!strcasecmp(chanlists[i].name, tv_param_chanlist))
+	{
+	    tvh->chanlist = i;
+	    tvh->chanlist_s = chanlists[i].list;
+	    break;
+	}
+    }
+
+    if (tvh->chanlist == -1)
+	mp_msg(MSGT_TV, MSGL_WARN, "Unable to find selected channel list! (%s)\n",
+	    tv_param_chanlist);
+
+    mp_msg(MSGT_TV, MSGL_INFO, "Selected channel list: %s (including %d channels)\n",
+	chanlists[tvh->chanlist].name, chanlists[tvh->chanlist].count);
+
+    if (tv_param_freq && tv_param_channel)
+	mp_msg(MSGT_TV, MSGL_HINT, "You can't set frequency and channel simultanly!\n");
+
+    if (!tv_param_freq && tv_param_channel)
+    {
+	struct CHANLIST cl;
+	for (i = 0; i < chanlists[tvh->chanlist].count; i++)
+	{
+	    cl = tvh->chanlist_s[i];
+//	    printf("count%d: name: %s, freq: %d\n",
+//		i, cl.name, cl.freq);
+	    if (!strcasecmp(cl.name, tv_param_channel))
+	    {
+		tvh->channel = i;
+		mp_msg(MSGT_TV, MSGL_INFO, "Selected channel: %s (freq: %.3f)\n",
+		    cl.name, (float)cl.freq/1000);
+		tv_set_freq(tvh, (unsigned long)(((float)cl.freq/1000)*16));
+		break;
+	    }
+	}
     }
     
     /* also start device! */
@@ -365,5 +419,55 @@ int tv_set_color_options(tvi_handle_t *tvh, int opt, int value)
     }
     
     return(1);
+}
+
+int tv_set_freq(tvi_handle_t *tvh, unsigned long freq)
+{
+    if (tvh->functions->control(tvh->priv, TVI_CONTROL_IS_TUNER, 0) == TVI_CONTROL_TRUE)
+    {
+//	unsigned long freq = atof(tv_param_freq)*16;
+
+        /* set freq in MHz */
+	tvh->functions->control(tvh->priv, TVI_CONTROL_TUN_SET_FREQ, &freq);
+
+	tvh->functions->control(tvh->priv, TVI_CONTROL_TUN_GET_FREQ, &freq);
+	mp_msg(MSGT_TV, MSGL_INFO, "Current frequency: %lu (%.3f)\n",
+	    freq, (float)freq/16);
+    }
+}
+
+int tv_step_channel(tvi_handle_t *tvh, int direction)
+{
+    struct CHANLIST cl;
+
+    if (direction == TV_CHANNEL_LOWER)
+    {
+	if (tvh->channel-1 >= 0)
+	{
+	    cl = tvh->chanlist_s[tvh->channel--];
+	    mp_msg(MSGT_TV, MSGL_INFO, "Selected channel: %s (freq: %.3f)\n",
+		cl.name, (float)cl.freq/1000);
+	    tv_set_freq(tvh, (unsigned long)(((float)cl.freq/1000)*16));
+	}	
+    }
+
+    if (direction == TV_CHANNEL_HIGHER)
+    {
+	if (tvh->channel+1 <= chanlists[tvh->chanlist].count)
+	{
+	    cl = tvh->chanlist_s[tvh->channel++];
+	    mp_msg(MSGT_TV, MSGL_INFO, "Selected channel: %s (freq: %.3f)\n",
+		cl.name, (float)cl.freq/1000);
+	    tv_set_freq(tvh, (unsigned long)(((float)cl.freq/1000)*16));
+	}	
+    }
+}
+
+int tv_step_norm(tvi_handle_t *tvh)
+{
+}
+
+int tv_step_chanlist(tvi_handle_t *tvh)
+{
 }
 #endif /* USE_TV */

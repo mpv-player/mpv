@@ -98,6 +98,7 @@ struct config tvopts_conf[]={
 	{"device", &tv_param_device, CONF_TYPE_STRING, 0, 0, 0},
 	{"freq", &tv_param_freq, CONF_TYPE_STRING, 0, 0, 0},
 	{"channel", &tv_param_channel, CONF_TYPE_STRING, 0, 0, 0},
+	{"chanlist", &tv_param_chanlist, CONF_TYPE_STRING, 0, 0, 0},
 	{"norm", &tv_param_norm, CONF_TYPE_STRING, 0, 0, 0},
 	{"width", &tv_param_width, CONF_TYPE_INT, 0, 0, 4096},
 	{"height", &tv_param_height, CONF_TYPE_INT, 0, 0, 4096},

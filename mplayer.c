@@ -79,6 +79,13 @@ int quiet=0;
 #include <linux/rtc.h>
 #endif
 
+#ifdef USE_TV
+#include "libmpdemux/tv.h"
+
+extern int tv_param_on;
+extern tvi_handle_t *tv_handler;
+#endif
+
 //**************************************************************************//
 //             Config file
 //**************************************************************************//
@@ -1820,6 +1827,25 @@ if(step_sec>0) {
       frame_dropping=(frame_dropping+1)%3;
       mp_msg(MSGT_CPLAYER,MSGL_V,"== drop: %d ==  \n",frame_dropping);
       break;
+      
+#ifdef USE_TV
+    case 'h':
+     if (tv_param_on == 1)
+        tv_step_channel(tv_handler, TV_CHANNEL_HIGHER);
+     break;
+    case 'l':
+     if (tv_param_on == 1)
+        tv_step_channel(tv_handler, TV_CHANNEL_LOWER);
+     break;
+    case 'n':
+     if (tv_param_on == 1)
+	 tv_step_norm(tv_handler);
+     break;
+    case 'b':
+     if (tv_param_on == 1)
+        tv_step_chanlist(tv_handler);
+     break;
+#endif
   }
 } // keyboard event handler
 
