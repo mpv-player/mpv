@@ -254,6 +254,10 @@ m_config_parse_option(m_config_t *config, char* arg, char* param,int set) {
 	    mp_msg(MSGT_CFGPARSER, MSGL_ERR,"Error: option '%s' has no suboption '%s'\n",co->name,lst[2*i]);
 	    r = M_OPT_INVALID;
 	  } else
+	  if(sr == M_OPT_MISSING_PARAM){
+	    mp_msg(MSGT_CFGPARSER, MSGL_ERR,"Error: suboption '%s' of '%s' must have a parameter!\n",lst[2*i],co->name);
+	    r = M_OPT_INVALID;
+	  } else
 	    r = sr;
 	}
       }
@@ -284,8 +288,14 @@ m_config_set_option(m_config_t *config, char* arg, char* param) {
 
 int
 m_config_check_option(m_config_t *config, char* arg, char* param) {
+  int r;
   mp_msg(MSGT_CFGPARSER, MSGL_DBG2,"Checking %s=%s\n",arg,param);
-  return m_config_parse_option(config,arg,param,0);
+  r=m_config_parse_option(config,arg,param,0);
+  if(r==M_OPT_MISSING_PARAM){
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR,"Error: option '%s' must have a parameter!\n",arg);
+    return M_OPT_INVALID;
+  }
+  return r;
 }
 
 
