@@ -124,7 +124,8 @@ Optional features:
   --disable-win32        disable Win32 DLL support [autodetect]
   --disable-dshow        disable DirectShow support [autodetect]
   --disable-xanim        disable XAnim DLL support [autodetect]
-  --disable-divx4linux   disable Divx4Linux codec [enable]
+  --disable-xvid         disable XviD codec [autodetect]
+  --disable-divx4linux   disable DivX4linux codec [autodetect]
   --disable-opendivx     disable OpenDivx codec [enable]
   --enable-vorbis        build with OggVorbis support [autodetect]
   --disable-iconv        do not use iconv(3) function [autodetect]
@@ -201,6 +202,7 @@ Use these options if autodetection fails:
   --with-mlibdir=DIR       libmlib (MLIB support) in DIR (Solaris only)
   --with-win32libdir=DIR   W*ndows DLL files in DIR
   --with-xanimlibdir=DIR   XAnim DLL files in DIR
+  --with-xvidcore=PATH     path to XviD libcore.a (e.g: /opt/lib/libcore.a)
   --with-sdl-config=PATH   path to sdl*-config (e.g.: /opt/bin/sdl-config)
   --with-gtk-config=PATH   path to gtk*-config (e.g.: /opt/bin/gtk-config)
   --with-glib-config=PATH  path to glib*-config (e.g.: /opt/bin/glib-config)
@@ -762,6 +764,7 @@ _streaming=yes
 _vidix=yes
 _new_input=no
 _joystick=no
+_xvid=auto
 _divx4linux=auto
 _opendivx=yes
 _lirc=auto
@@ -870,6 +873,8 @@ for ac_option do
   --disable-new-input)	_new_input=no	;;
   --enable-joystick)	_joystick=yes	;;
   --disable-joystick)	_joystick=no	;;
+  --enable-xvid)	_xvid=yes	;;
+  --disable-xvid)	_xvid=no	;;
   --enable-divx4linux)	_divx4linux=yes	;;
   --disable-divx4linux)	_divx4linux=no	;;
   --enable-opendivx)	_opendivx=yes	;;
@@ -963,6 +968,9 @@ for ac_option do
     ;;
   --with-x11libdir=*)
     _ld_x11=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
+    ;;
+  --with-xvidcore=*)
+    _xvidcore=`echo $ac_option | cut -d '=' -f 2`
     ;;
   --with-sdl-config=*)
     _sdlconfig=`echo $ac_option | cut -d '=' -f 2`
@@ -1607,7 +1615,6 @@ int main(void) {
 EOF
   cc_check $_inc_x11 $_ld_x11 && _xdpms4=yes
 fi
-
 if test "$_xdpms4" = yes ; then
   _def_xdpms='#define HAVE_XDPMS 1'
   echores "yes (using Xdpms 4)"
@@ -2558,6 +2565,7 @@ elif test "$_libavcodecso" = yes ; then
   _codecmodules="libavcodec.so $_codecmodules"
 fi
 
+
 echocheck "zr"
 if test "$_zr" = yes ; then
   if test "$_libavcodec" = yes ; then
@@ -2574,44 +2582,63 @@ else
   echores "$_zr"
 fi
 
-# FIXME : variables don't have a "standard" name so check this one day
-if test "$_divx4linux" = auto ; then
-  _divx4linux=no
-  echocheck "Divx4linux decore"
-  cat > $TMPC << EOF
+
+echocheck "XviD/DivX4linux/OpenDivX decore"
+cat > $TMPC << EOF
 #include <decore.h>
 int main(void) { (void) decore(0, 0, 0, 0);  return DEC_OPT_FRAME_311; }
 EOF
-  _divx4linux_decore=no
-  if cc_check  -ldivxdecore -lm ; then
-    _divx4linux_decore=yes
-  else
-    _divx4linux_decore='not found'
-  fi
-  echores "$_divx4linux_decore"
-  test "$_divx4linux_decore" = yes && _divx4linux=yes
-fi
-if test "$_divx4linux_decore" = yes ; then
-  _opendivx='no'
+if test "$_xvidcore" && cc_check -lm "$_xvidcore" ; then
+  _xvid=yes
+  _divx4linux=no
+  _opendivx=no
+  _ld_decore="$_xvidcore"
   _def_decore='#define NEW_DECORE 1'
+  _def_divx='#define USE_DIVX'
+  _def_odivx_postprocess='#undef HAVE_ODIVX_POSTPROCESS'
+  _codecmodules="xvid $_codecmodules"
+  echores "XviD (with $_xvidcore)"
+elif test "$_xvid" != no && cc_check -lm -lxvidcore ; then
+  _xvid=yes
+  _divx4linux=no
+  _opendivx=no
+  _ld_decore='-lxvidcore'
+  _def_decore='#define NEW_DECORE 1'
+  _def_divx='#define USE_DIVX'
+  _def_odivx_postprocess='#undef HAVE_ODIVX_POSTPROCESS'
+  _codecmodules="xvid $_codecmodules"
+  echores "XviD (with libxvidcore.so)"
+elif test "$_divx4linux" != no && cc_check -lm -ldivxdecore -lm ; then
+  _xvid=no
+  _divx4linux=yes
+  _opendivx=no
   _ld_decore='-ldivxdecore opendivx/postprocess.o'
+  _def_decore='#define NEW_DECORE 1'
   _def_divx='#define USE_DIVX'
   _def_odivx_postprocess='#define HAVE_ODIVX_POSTPROCESS 1'
   _codecmodules="divx4linux $_codecmodules"
+  echores "Divx4linux (with libdivxdecore.so)"
+elif test "$_opendivx" != no ; then
+  _xvid=no
+  _divx4linux=no
+  _opendivx=yes
+  _ld_decore='-Lopendivx -ldecore'
+  _def_decore='#undef NEW_DECORE'
+  _def_divx='#define USE_DIVX'
+  _def_odivx_postprocess='#define HAVE_ODIVX_POSTPROCESS 1'
+  _codecmodules="opendivx $_codecmodules"
+  echores "OpenDivX"
 else
-  if test "$_opendivx" = yes ; then
-    _ld_decore='-Lopendivx -ldecore'
-    _def_decore='#undef NEW_DECORE'
-    _def_divx='#define USE_DIVX'
-    _def_odivx_postprocess='#define HAVE_ODIVX_POSTPROCESS 1'
-    _codecmodules="opendivx $_codecmodules"
-  else
-    _ld_decore=''
-    _def_decore='#undef NEW_DECORE'
-    _def_divx='#undef USE_DIVX'
-    _def_odivx_postprocess='#undef HAVE_ODIVX_POSTPROCESS'
-  fi
+  _xvid=no
+  _divx4linux=no
+  _opendivx=no
+  _ld_decore=''
+  _def_decore='#undef NEW_DECORE'
+  _def_divx='#undef USE_DIVX'
+  _def_odivx_postprocess='#undef HAVE_ODIVX_POSTPROCESS'
+  echores "no"
 fi
+
 
 # mencoder requires (optional) those libs: libmp3lame and divx4linux encore
 if test "$_mencoder" != no ; then
@@ -2632,21 +2659,28 @@ EOF
   fi
   echores "$_mp3lame"
 
-  echocheck "Divx4linux encore (for mencoder)"
-  _divx4linux_encore=no
-  cat > $TMPC <<EOF
+
+  echocheck "XviD/DivX4linux encore (for mencoder)"
+  cat > $TMPC << EOF
 #include <encore2.h>
 int main(void) { (void) encore(0, 0, 0, 0); return 0; }
 EOF
-  if cc_check -ldivxencore -lm ; then
-    _divx4linux_encore=yes
+  if test "$_xvid" != no && test "$_xvidcore" && cc_check -lm "$_xvidcore" ; then
     _def_encore='#define HAVE_DIVX4ENCORE 1'
-    _ld_encore='-ldivxencore'
+    _ld_encore="lm $_xvidcore"
+    echores "XviD (with $_xvidcore)"
+  elif test "$_xvid" != no && cc_check -lm -lxvidcore ; then
+    _def_encore='#define HAVE_DIVX4ENCORE 1'
+    _ld_encore='lm -lxvidcore'
+    echores "XviD (with libxvidcore.so)"
+  elif test "$_divx4linux" != no && cc_check -lm -ldivxencore ; then
+    _def_encore='#define HAVE_DIVX4ENCORE 1'
+    _ld_encore='-lm -ldivxencore'
+    echores "DivX4linux (with libdivxencore.so)"
   else
     _def_encore='#undef HAVE_DIVX4ENCORE'
+    echores "no"
   fi
-  echores "$_divx4linux_encore"
-
 fi
 
 echocheck "mencoder"
@@ -2993,6 +3027,7 @@ MP1E_DEP = $_dep_mp1e
 MP1E_LIB = $_ld_mp1e
 ARCH_LIB =  $_ld_arch $_ld_iconv
 DIVX4LINUX = $_divx4linux
+XVID = $_xvid
 DECORE_LIB = $_ld_decore
 MENCODER = $_mencoder
 ENCORE_LIB =  $_ld_encore $_ld_mp3lame
@@ -3048,17 +3083,17 @@ $_def_dvdread
    -cache <kilobytes> */
 #define USE_STREAM_CACHE 1
 
-/* Define to include support for OpenDivx/Divx4Linux */
+/* Define to include support for XviD/Divx4Linux/OpenDivx */
 $_def_divx
 
-/* Define for using new DivX4Linux library, instead of open-source OpenDivX */
+/* Define for using new XviD/DivX4Linux library, instead of open-source OpenDivX */
 /* You have to change DECORE_LIBS in config.mak too! */
 $_def_decore
 
 /* If build mencoder */
 $_mencoder_flag
 
-/* Indicates if Divx4linux encore is available
+/* Indicates if XviD/Divx4linux encore is available
    Note: for mencoder */
 $_def_encore
 
