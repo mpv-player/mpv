@@ -15,6 +15,10 @@ unsigned int GetTimerMS(){
 }
 
 int usec_sleep(int usec_delay){
+  // Sleep(0) won't sleep for one clocktick as the unix usleep 
+  // instead it will only make the thread ready
+  // it may take some time until it actually starts to run again
+  if(usec_delay<1000)usec_delay=1000;  
   Sleep( usec_delay/1000);
   return 0;
 }
