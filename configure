@@ -2657,6 +2657,20 @@ else
 fi
 echores "$_fseeko"
 
+echocheck "localtime_r()"
+cat > $TMPC << EOF
+#include <time.h>
+int main( void ) { localtime_r(NULL, NULL); }
+EOF
+_localtime_r=no
+cc_check && _localtime_r=yes
+if test "$_localtime_r" = yes ; then
+ _def_localtime_r='#define HAVE_LOCALTIME_R 1'
+else
+ _def_localtime_r='#undef HAVE_LOCALTIME_R'
+fi
+echores "$_localtime_r"
+
 echocheck "vsscanf()"
 cat > $TMPC << EOF
 #include <stdarg.h>
@@ -6253,6 +6267,8 @@ $_def_fseeko
 #include <sys/types.h>
 int fseeko(FILE *, off_t, int);
 #endif
+
+$_def_localtime_r
 
 /* Define this if your system has vsscanf */
 $_def_vsscanf
