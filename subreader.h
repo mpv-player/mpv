@@ -10,7 +10,7 @@ extern int sub_format;     // 0 for microdvd
 			 // 2 for the third format
 			// 3 for SAMI (smi)
 		       // 4 for vplayer format
-
+		      // other stuff in subreader.c
 #define SUB_MAX_TEXT 5
 
 typedef struct {

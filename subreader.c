@@ -21,10 +21,11 @@ int sub_errs=0;
 int sub_num=0;          // number of subtitle structs
 int sub_format=-1;     // 0 for microdvd
 		      // 1 for SubRip
-		     // 2 for the third format (what's this?)
+		     // 2 for SubViewer
 		    // 3 for SAMI (smi)
 		   // 4 for vplayer format
 		  // 5 for RT format
+		 // 6 for ssa (Sub Station Alpha)
 
 int eol(char p) {
     return (p=='\r' || p=='\n' || p=='\0');
@@ -295,7 +296,27 @@ subtitle *sub_read_line_rt(FILE *fd,subtitle *current) {
     return current;
 }
 
+subtitle *sub_read_line_ssa(FILE *fd,subtitle *current) {
+	int hour1, min1, sec1, hunsec1,
+	    hour2, min2, sec2, hunsec2, nothing;
+	
+	char line[1000],
+	     line2[1000];
+	do {
+		if (!fgets (line, 1000, fd)) return NULL;
+	} while (sscanf (line, "Dialogue: Marked=%d,%d:%d:%d.%d,%d:%d:%d.%d,"
+			"*Default,%d,%d,%d,%d,,%[^\n\r]", &nothing, &hour1, &min1,
+			&sec1, &hunsec1,
+			&hour2, &min2, &sec2, &hunsec2, &nothing,
+			&nothing, &nothing, &nothing, line2) < 14);
+	current->lines=1;
+	current->start = 360000*hour1 + 6000*min1 + 100*sec1 + hunsec1;
+	current->end   = 360000*hour2 + 6000*min2 + 100*sec2 + hunsec2;
+	current->text[0]=(char *) malloc(strlen(line2)+1);
+	strcpy(current->text[0],line2);
 
+	return current;
+}
 
 int sub_autodetect (FILE *fd) {
     char line[1001];
@@ -320,9 +341,14 @@ int sub_autodetect (FILE *fd) {
 	//TODO: just checking if first line of sub starts with "<" is WAY
 	// too weak test for RT
 	// Please someone who knows the format of RT... FIX IT!!!
-	// It may conflict with other sub formats in the future
+	// It may conflict with other sub formats in the future (actually it doesn't)
 	if ( *line == '<' )
 		{sub_uses_time=1;return 5;}
+
+	// I have only seen only 1 piece of .ssa file.
+	// It may be not correct (tell me if it's not)
+	if (!memcmp(line, "Dialogue: Marked", 16))
+		{sub_uses_time=1; return 6;}
     }
 
     return -1;  // too many bad lines
@@ -333,14 +359,15 @@ subtitle* sub_read_file (char *filename) {
     FILE *fd;
     int n_max;
     subtitle *first;
-    subtitle * (*func[6])(FILE *fd,subtitle *dest)=
+    subtitle * (*func[7])(FILE *fd,subtitle *dest)=
     {
 	    sub_read_line_microdvd,
 	    sub_read_line_subrip,
 	    sub_read_line_third,
 	    sub_read_line_sami,
 	    sub_read_line_vplayer,
-	    sub_read_line_rt
+	    sub_read_line_rt,
+	    sub_read_line_ssa
     };
 
     fd=fopen (filename, "r"); if (!fd) return NULL;
