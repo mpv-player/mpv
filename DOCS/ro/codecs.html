@@ -1,0 +1,540 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//ro">
+<HTML>
+
+<HEAD>
+  <TITLE>Codecuri - MPlayer - Media Player pentru Linux</TITLE>
+  <LINK REL="stylesheet" TYPE="text/css" HREF="../default.css">
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+</HEAD>
+
+<BODY>
+
+
+<H2><A NAME="codecs">2.2 Codecuri suportate</A></H2>
+
+
+<H3><A NAME="video_codecs">2.2.1 Codecuri video</A></H3>
+
+<P>Consultă
+  <A HREF="http://www.mplayerhq.hu/DOCS/codecs-status.html">tabelul cu starea codecurilor</A>
+  pentru lista completă, generată zilnic. Câteva din ele sunt disponibile pentru
+  descărcare de pe pagina noastră. Se găsesc pe <A HREF="http://www.mplayerhq.hu/MPlayer/releases/codecs/">pagina codecurilor</A>.</P>
+
+<P>Cele mai importante dintre ele sunt:</P>
+<UL>
+  <LI>video <B>MPEG1</B> (<B>VCD</B>) şi <B>MPEG2</B> (<B>DVD</B>) </LI>
+  <LI>decodoare native pentru <B>DivX ;-)</B>, <B>OpenDivX</B>, <B>DivX4</B>, <B>
+    DivX5</B>, <B>M$ MPEG4</B> v1, v2 şi alte variante MPEG4</LI>
+  <LI>decodoare native pentru <B>Windows Media Video 7/8</B> (<B>WMV1/WMV2</B>), şi
+   decodorul Win32 DLL pentru  <B>Windows Media Video 9</B> (<B>WMV3</B>), ambele utilizate in fişiere de tip.wmv</LI>
+  <LI>decodor nativ <B>Sorenson 1 (SVQ1)</B> </LI>
+  <LI>decodor nativ <B>Sorenson 3 (SVQ3)</B> </LI>
+  <LI>decodor <B>3ivx</B> v1, v2 </LI>
+  <LI>codecuri Cinepak and <B>Intel Indeo</B> (3.1, 3.2, 4.1, 5.0)</LI>
+  <LI><B>MJPEG</B>, AVID, VCR2, ASV2 şi alte formate hardware</LI>
+  <LI>VIVO 1.0, 2.0, I263 şi alte variante <B>h263</B>(+) </LI>
+  <LI>FLI/FLC</LI>
+  <LI>codecul <B>RealVideo 1.0</B> din libavcodec, şi <B>RealVideo 2.0</B>,
+    <B>3.0</B> şi <B>4.0</B>, codecuri ce folosesc biblioteci Real Player</LI>
+  <LI>decodor nativ pentru HuffYUV</LI>
+  <LI>diferite formate simple mai vechi de tip RLE</LI>
+</UL>
+
+<P>Dacă ai un codec Win32 absent din lista de faţă şi nesuportat încă, citeşte, te rog <A HREF="#importing">CUM SĂ imporţi codecuri</A> şi ajută-ne să-l implementăm.</P>
+
+
+<H4><A NAME="divx">2.2.1.1 DivX4/DivX5</A></H4>
+
+<P>Această secţiune conţine informaţii despre codecurile DivX4 şi DivX5 de la
+  <A HREF="http://www.projectmayo.com">Project Mayo</A>. Prima lor versiune alfa disponibilă
+  a fost OpenDivX 4.0 alfa 47 şi 48. Suportul pentru acesta a fost inclus în MPlayer, în trecut,
+  devenind standard. De asemenea, am folosit codul lor de postprocesare pentru a îmbunătăţi, opţional, calitatea
+  vizuală a filmelor MPEG1/2.
+  În prezent folosim propriul nostru cod, pentru toate tipurile de fişiere.
+  </P>
+
+<P>Noua generaţie a acestui codec este numită DivX4 şi poate decoda filme făcute cu
+  codecul de proastă reputaţie DivX! În plus, e mult mai rapid decât
+  Win32 DivX DLL nativ dar mai lent decât <B>libavcodec</B>. De acum încolo folosirea lui
+ ca decodor e <B>DESCURAJATĂ</B>. Oricum, e util pentru encodare. Un
+  dezavantaj al acestui codec este că nu e disponibil sub o licenţă Open Source.
+ </P>
+
+<P>DivX4Linux funcţionează în două moduri:</P>
+
+<DL>
+  <DT><CODE>-vc odivx</CODE></DT>
+  <DD>Foloseşte codecul în stilul OpenDivX. În acest caz,
+    produce imagini YV12 în propriul buffer, iar MPlayer face conversia spaţiului de culoare folosind
+    libvo. (<B>Rapid, recomandat!</B>)</DD>
+
+  <DT><CODE>-vc divx4</CODE></DT>
+  <DD>Foloseşte conversia spaţiului de culoare a codecului.
+    În acest mod poţi folosi, de asemenea,YUY2/UYVY. (<B>Lent</B>)</DD>
+</DL>
+
+<P>Metoda <CODE>-vc odivx</CODE> este, de obicei, mai rapidă datorită faptului că
+  se transferă imaginile în formatul YV12 (planar YUV 4:2:0), folsind astfel mult mai puţin lăţimea de bandă pe magistrală.
+   Pentru modurile comprimate YUV (YUY2, UYVY) foloseşte metoda
+  <CODE>-vc divx4</CODE>. Pentru modurile RGB viteza este aceeaşi, diferind
+cu adâncimea de culoare curentă.</P>
+
+<P><B>Notă:</B> Dacă driverul tău <CODE>-vo</CODE> suportă direct rendering, atunci
+  <CODE>-vc divx4</CODE> poate fi mai rapid sau chiar varianta cea mai rapidă.</P>
+
+<P>Biblioteca binară a codecului Divx4/5 poate fi descărcată de la
+  <A HREF="http://avifile.sourceforge.net">avifile</A> sau
+  <A HREF="http://www.divx.com">divx.com</A>.
+  Dezarhivează, rulează <CODE>./install.sh</CODE> ca utilizator root şi nu uita să adaugi
+  <CODE>/usr/local/lib</CODE> în <CODE>/etc/ld.so.conf</CODE> şi apoi să rulezi
+  <CODE>ldconfig</CODE>.</P>
+
+<P>Obţine versiunea CVS a bibliotecii nucleu a vechiului OpenDivx astfel:</P>
+
+<OL>
+  <LI><CODE>cvs -d:pserver:anonymous@cvs.projectmayo.com:/cvsroot login</CODE></LI>
+  <LI><CODE>cvs -d:pserver:anonymous@cvs.projectmayo.com:/cvsroot co divxcore</CODE></LI>
+  <LI>Această bibliotecă nucleu e împărţită într-o bibliotecă decore şi o bibliotecă encore ce au nevoie să fie compilate separat.
+Pentru biblioteca decore tastează:
+    <PRE>
+    cd divxcore/decore/build/linux
+    make
+    cp libdivxdecore.so /usr/local/lib 
+    ln -s libdivxdecore.so /usr/local/lib/libdivxdecore.so.0 
+    cp ../../src/decore.h /usr/local/include
+    </PRE>
+    </LI>
+  <LI>Dar vai, pentru biblioteca encore nu există nici un Linux Makefile disponibil, şi
+    codul MMX optimizat rulează doar pe Windows. Cu toate acestea, poţi totuşi compila,
+    folosind acest    <A HREF="ftp://ftp.mplayerhq.hu/MPlayer/contrib/divx-mf/Makefile">Makefile</A>.
+    <PRE>
+    cd ../../../encore/build
+    mkdir linux
+    cd linux
+    cp path/Makefile .
+    make
+    cp libdivxencore.so /usr/local/lib
+    ln -s libdivxencore.so /usr/local/lib/libdivxencore.so.0
+    cp ../../src/encore.h /usr/local/include
+    </PRE>
+    </LI>
+</OL>
+
+<P>MPlayer autodetectează DivX4/DivX5 dacă e corect instalat, doar
+  compilează ca de obicei. Dacă nu-l detectează,nu l-ai instalat sau configurat corect.
+</P>
+
+
+<H4><A NAME="libavcodec">2.2.1.2 FFmpeg/libavcodec</A></H4>
+
+<P><A HREF="http://ffmpeg.sourceforge.net">FFmpeg</A> conţine un pachet
+  <B>open source</B>, care e capabil să decodeze  fluxuri encodate cu codecuri video H263/MJPEG/LJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/HuffYUV/SVQ1/SVQ3/
+  MPEG1/MPEG2/VCR1/VCR2/ASV1/ASV2/CLJR, sau codecuri audio WMA (Windows Media Audio). Nu doar că pot fi encodate cu el,
+  dar oferă şi o viteză mai mare decât codecurile Win32
+  sau biblioteca DivX.com DivX4/5 !</P>
+
+<P>Conţine o mulţime de codecuri interesante, cele mai importante fiind variantele MPEG4:
+
+  DivX3, DivX4, DivX5, Windows Media Video 7/8 (WMV1/WMV2). De asemenea, unul interesant
+  decodorul WMA.</P>
+
+<P>Cel mai recent codec meritând apreciere este <B>Sorenson 3</B> (SVQ3).
+  Acesta e prima implementare complet open source a acestui codec.
+E chiar mai rapid decât originalul. Asigură-te că-l foloseşti în locul codecului binar!
+</P>
+
+<P>Dacă foloseşti o versiune release a MPlayer ai  libavcodec chiar în pachet,
+   doar configurează ca de obicei. Dacă foloseşti o versiune MPlayer din CVS trebuie
+  să extragi libavcodec din arborele FFmpeg CVS pentru ca FFmpeg release <B>nu</B>
+  funcţionează cu MPlayer. Pentru a-l obţine tastează:</P>
+
+<OL>
+  <LI><CODE>cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg login</CODE></LI>
+  <LI><CODE>cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg co ffmpeg</CODE></LI>
+  <LI>Mută directorul <CODE>libavcodec</CODE> din sursa FFmpeg către
+    rădăcina arborelui MPlayer CVS. Ar trebui să arate cam aşa:
+    <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>main/libavcodec</CODE></P>
+    Un link simbolic <B>nu</B> e de ajuns, trebuie să-l copiezi sau să-l muţi!</LI>
+  <LI>Compilează. Configure ar trebui să detecteze problemele înainte de compilare.</LI>
+</OL>
+
+<P><B>Notă:</B> MPlayer din CVS conţine un subdirector libavcodec,
+  dar <B>nu</B> conţine sursa libavcodec!
+  Trebuie să urmezi paşi amintiţi anterior pentru a obţine sursa acestei biblioteci.</P>
+
+<P>Cu FFmpeg şi Matrox G400, pot vedea filme DivX la cea mai mare rezoluţie
+  fără pierderi de cadre pe un K6/2 500.</P>
+
+
+<H4><A NAME="xanim">2.2.1.3 Codecurile XAnim </A></H4>
+
+<H4>PREFAŢĂ</H4>
+<P>
+  Ia cunoştinţă cu faptul că pachetul de codecuri XAnim conţine un text
+  pretinzând a fi o licentă software de constrângere legală care, printre alte restricţii,
+  interzice folosirea acestui codec cu alte programe decat XAnim.
+Oricum, autorul XAnim ar trebui să aducă acuzatii împotriva tuturor pentru codecuri înrudite.
+
+</P>
+
+<H4>INSTALARE ŞI FOLOSIRE</H4>
+<P>MPlayer e capabil să întrebuinţeze codecurile XAnim pentru decodare. Urmează
+  instrucţiunile pentru a permite aceasta:</P>
+
+<OL>
+  <LI>Descarcă codecurile pe care doreşti să le foloseşti de pe
+    <A HREF="http://xanim.va.pubnix.com">site-ul XAnim</A>. Codecul <B>3ivx</B>
+    nu e acolo ci pe<A HREF="http://www.3ivx.com"> site-ul 3ivx</A>.</LI>
+  <LI><B>SAU</B> descarcă pachetul de codecuri de pe
+    <A HREF="http://www.mplayerhq.hu/MPlayer/releases/codecs/">pagina noastră de codecuri</A>.
+    </LI>
+  <LI>Foloseşte opţiunea <CODE>--with-xanimlibdir</CODE> pentru a arăta lui configure unde
+    să găsească codecurile XAnim. În modul standard, le caută la
+    <CODE>/usr/local/lib/codecs, /usr/local/lib/xanim/mods, /usr/lib/xanim/mods şi /usr/lib/xanim</CODE>.
+    În mode alternativ poţi configura variabila de mediu <I>XANIM_MOD_DIR</I> către
+    directorul cu codecurile XAnim.</LI>
+  <LI>Redenumeşte/symlink fişierele, eliminând sufixele legate de arhitectură, astfel încât vor avea denumirile
+  astfel: <CODE>vid_cvid.xa, vid_h263.xa, vid_iv50.xa</CODE>.</LI>
+</OL>
+
+<P>XAnim este familia de codecuri <CODE>xanim</CODE>, astfel că trebuie să foloseşti opţiunea <CODE>-vfm xanim</CODE>
+  pentru a cere MPlayer-ului să le folosească dacă e posibil.</P>
+
+<P>Codecurile testate includ: <B>Indeo 3.2</B>, <B>4.1</B>, <B>5.0</B>, <B>CVID</B>,
+  <B>3ivX</B>, <B>h263</B>.</P>
+
+
+<H4><A NAME="vivo_video">2.2.1.4 VIVO video</A></H4>
+
+<P>MPlayer poate rula fişiere video Vivo (1.0 and 2.0). Cel mai potrivit codec pentru
+  fişierele 1.0 este decodorul H263 al FFmpeg-ului, îl poţi folosi cu opţiunea <CODE>-vc
+  ffh263</CODE>. Pentru fişierele 2.0, foloseşte Win32 DLL prin opţiunea
+  <CODE>-vc vivo</CODE>. Dacă nu furnizezi o opţiune în linia de comandă
+  MPlayer selectează automat cel mai bun codec.</P>
+  
+  
+  
+  
+  
+  
+  
+
+
+<H4><A NAME="mpeg">2.2.1.5 MPEG 1/2 video</A></H4>
+
+<P>MPEG1 şi MPEG2 sunt decodate de biblioteca nativă multiplatformă <B>libmpeg2</B>,
+a cărei sursă e incusă în MPlayer. Fişierele video MPEG 1/2 cu probleme sunt redate reţinând semnalul <CODE>Signal 11 (Segmentation fault)</CODE>,
+  şi reiniţializând rapid codecul, continund exact din locul în care a apărut eroarea.
+Această tehnică de recuperare nu are nici un handicap de viteză măsurabil.</P>
+
+
+<H4><A NAME="ms_video1">2.2.1.6 MS Video1</A></H4>
+
+<P>Acesta este un codec foarte vechi şi foarte problematic de la Microsoft. În trecut a fost decodat
+  codecul Win32 <CODE>msvidc32.dll</CODE>, acum avem propria implementare open source
+(de <A HREF="mailto:melanson@pcisys.net">Mike
+  Melanson</A>).</P>
+
+
+<H4><A NAME="cinepak">2.2.1.7 Cinepak CVID</A></H4>
+
+<P>MPlayer foloseşte propriul decodor, multiplatformă Cinepak (de
+  <A HREF="mailto:timf@csse.monash.edu.au">Dr. Tim Ferguson</A>), din standard.
+  Suporă ieşiri YUV,astfel că scalarea hardware este posibilă
+  dacă driverul video o permite.</P>
+
+
+<H4><A NAME="realvideo">2.2.1.8 RealVideo</A></H4>
+
+MPlayer suportă decodări ale tuturor tipurilor de fişiere RealVideo:
+
+<UL>
+  <LI>RealVideo 1.0 (prescurtat RV10) - en/decodare suportată de <B>libavcodec</B></LI>
+  <LI>RealVideo 2.0, 3.0, 4.0 (prescurtat RV20, RV30, RV40) - decodare suportată de <B>bibliotecile RealPlayer</B></LI>
+</UL>
+
+<P>Este recomandat să descărcaţi şi să instalaţi RealPlayer8 sau RealONE, deoarece
+  MPlayer poate folosi bibliotecile lor pentru a decoda fişiere video RealVideo 2.0 -
+  4.0. Scriptul configure al MPlayer-ului ar trebui să detecteze
+bibliotecile RealPlayer în locaţiile standard la o instalare completă. Dacă nu o face,
+   arată scriptului configure unde să caute folosind opţiunea
+  <CODE>--with-reallibdir</CODE>.</P>
+
+<P>Ca o a doua şansă poţi descărca codecurile de la
+  <a href="http://www.mplayerhq.hu/MPlayer/releases/codecs/">http://www.mplayerhq.hu/MPlayer/releases/codecs/</a>.
+  După descărcare pachetului cu codecuri Real, extrage-l în directorul /usr/local/lib/codecs,
+ sau poţi specifica o cale unică folosind opţiunea <CODE>--with-reallibdir</CODE>.</P>
+
+<P><B>Notă:</B> Bibliotecile curente RealPlayer <B>lucrează doar cu Linux, FreeBSD,
+  NetBSD şi Cygwin pe platforme the x86, Alpha şi PowerPC (Linux/Alpha şi Linux/PowerPC
+  au fost testate).</B></P>
+
+
+<H4><A NAME="xvid">2.2.1.9 XviD</A></H4>
+
+<P><A HREF="http://www.xvid.org/"><B>XviD</B></A> este o dezvoltare alternativă
+  a codecului OpenDivX. A început atunci când ProjectMayo a schimbat OpenDivX în closed
+  source DivX4 (acum DivX5), şi cei care lucrau la OpenDivX în afara ProjectMayo
+  s-au înfuriat, începând atunci XviD. Astfel că ambele proiecte au aceiaşi origine.</P>
+
+<H4>AVANTAJE</H4>
+
+<UL>
+  <LI>open source</LI>
+  <LI>API-ul său e compatibil cu DivX4 astfel că adăugarea suportului pentru el e facilă</LI>
+  <LI>suportă encodare 2-pass</LI>
+  <LI>calitate bună la encodare,mai rapid decât DivX4 (il poţi optimiza pentru PC-ul tău în timpul compilării)</LI>
+</UL>
+
+<H4>DEZAVANTAJE</H4>
+
+<UL>
+  <LI>în prezent nu <B>decodează</B> suficient de bine toate fişierele DivX/DivX4 (nici o problemă
+  pentru că <A HREF="#libavcodec">libavcodec</A> le poate rula pe toate)</LI>
+  <LI>e în dezvoltare</LI>
+</UL>
+
+<H4>INSTALARE XVID DIN CVS</H4>
+
+<P>XviD e în prezent disponibil doar din CVS. Aici sunt instrucţiunile de descărcare şi instalare
+ (ai nevoie de autoconf 2.50 minim, automake şi libtool):</P>
+
+<OL>
+  <LI><CODE>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid login</CODE></LI>
+  <LI><CODE>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid co xvidcore</CODE></LI>
+  <LI><CODE>cd xvidcore/build/generic</CODE></LI>
+  <LI><CODE>./bootstrap.sh</CODE></LI>
+  <LI><CODE>./configure</CODE><BR>
+    Poţi adăuga câteva opţiuni (examinează rezultatul comenzii
+    <CODE>./configure --help</CODE>).</LI>
+  <LI><CODE>make &amp;&amp; make install</CODE></LI>
+  <LI>Dacă ai specificat <CODE>--enable-divxcompat</CODE>,
+    copiază header-ul <CODE>divx4.h</CODE> din
+    <CODE>xvidcore/src/</CODE> în <CODE>/usr/local/include/</CODE>.</LI>
+  <LI>Recompilează MPlayer cu
+    <CODE>--with-xvidcore=/path/to/libxvidcore.a</CODE>.</LI>
+</OL>
+
+
+<H4><A NAME="sorenson">2.2.1.10 Sorenson</A></H4>
+
+<P><B>Sorenson</B> e o familie de codecuri video dezvolatate de  Sorenson Media şi
+  licenţiate către Apple care îl  distribuie cu playerul lor QuickTime.
+În acest moment putem decoda toate versiunile de fişiere video Sorenson
+cu următoarele decodoare:</P>
+
+<UL>
+  <LI>Sorenson Video v1 (prescurtat <I>SVQ1</I>) - decodare suportată prin <B>codec nativ</B>
+   (<A HREF="#libavcodec">libavcodec</A>)</LI>
+  <LI>Sorenson Video v3 (prescurtat <I>SVQ3</I>) - decodare suportată prin <B>codec nativ </B> (<A HREF="#libavcodec">libavcodec</A>)</LI>
+</UL>
+
+<H4>COMPILARE MPLAYER CU SUPORT QUICKTIME</H4>
+
+<P><B>NOTĂ:</B> în acest moment doar platformele Intel 32bit sunt suportate.</P>
+
+<OL>
+  <LI>descarcă MPlayer CVS</LI>
+  <LI>descarcă pachetul QuickTime DLL de la
+    <A HREF="http://www.mplayerhq.hu/MPlayer/releases/codecs/">http://www.mplayerhq.hu/MPlayer/releases/codecs/</A></LI>
+  <LI>extrage pachetul QuickTime DLL în directorul tău Win32 (standard este:
+    <CODE>/usr/local/lib/codecs/</CODE>)</LI>
+  <LI>compilează MPlayer</LI>
+</OL>
+
+
+<H3><A NAME="audio_codecs">2.2.2 Codecuri audio</A></H3>
+
+<P>Cele mai importante codecuri audio:<BR></P>
+
+<UL>
+  <LI>MPEG layer 2 (MP2), şi layer 3 (MP3) audio (<B>cod nativ</B>, cu
+    optimizări MMX/SSE/3DNow!)</LI>
+  <LI>MPEG layer 1 audio (<B>cod nativ</B>, cu libavcodec)</LI>
+  <LI>Windows Media Audio v1, v2 (<B>cod nativ</B>, cu libavcodec)</LI>
+  <LI>Windows Media Audio 9 (WMAv3) (folosind DMO DLL)</LI>
+  <LI>AC3 Dolby audio (<B>cod nativ</B>, cu optimizări MMX/SSE/3DNow!)</LI>
+  <LI>AC3 direct prin placa de sunet</LI>
+  <LI>codecul audio Ogg Vorbis (<B>bibliotecă nativă</B>)</LI>
+  <LI>RealAudio: DNET (low bitrate AC3), Cook, Sipro şi ATRAC3</LI>
+  <LI>QuickTime: Qualcomm şi codecurile audio QDesign </LI>
+  <LI>VIVO audio (g723, Vivo Siren)</LI>
+  <LI>Voxware audio (folosind DirectShow DLL)</LI>
+  <LI>alaw şi ulaw, diferite formate gsm, adpcm şi pcm şi alte codecuri audio simple mai vechi</LI>
+  <LI>AAC</LI>
+</UL>
+
+
+<H4><A NAME="software_ac3">2.2.2.1 Decodare software AC3</A></H4>
+
+<P>Acesta este decodorul standard folosit pentru fişierele audio AC3.</P>
+
+<P>Decodorul AC3 poate crea ieşiri audio pentru  2, 4, sau 6 difuzoare. Când e configurat
+  pentru 6 difuzoare, Acest decodor oferă ieşiri separate pentru toate canalele
+  AC3, permiţând experienţa "surround sound"
+ fără a avea un decodor extern AC3 necesar folosirii codecului hwac3.</P>
+
+<P>Foloseşte opţiunea <CODE>-channels</CODE> pentru a selecta numărul de canale pentru ieşire.
+ Foloseşte <CODE>-channels 2</CODE> pentru mixare stereo. Pentru mixare 4
+  canale (ieşirile Left Front, Right Front, Left Surround and Right Surround),
+  foloseşte <CODE>-channels 4</CODE>. În acest caz, fiecare canal centru va fi mixat în mod egal
+  cu canalele Front. <CODE>-channels 6</CODE> va oferi
+  toate canalele AC3 aşa cum sunt encodate - în ordinea Left, Right, Left
+  Surround, Right Surround, Center şi LFE.</P>
+
+<P>Numărul standard de canale de ieşire este 2.</P>
+
+<P>Pentru a folosi mai mult de 2 canale de ieşire, trebuie să foloseşti OSS, şi să ai
+  o placă de sunet care suportă numărul corespunzător de canale de ieşire prin
+  SNDCTL_DSP_CHANNELS ioctl. Un exemplu de driver potrivit este emu10k1 (folosit
+  de plăcile Soundblaster Live!) din August 2001 sau mai noi (ALSA CVS ar trebui, de asemenea,
+ să funcţioneze).</P>
+
+
+<H4><A NAME="hardware_ac3">2.2.2.2 Decodare hardware AC3</A></H4>
+
+<P>Ai nevoie de o placă de sunet capabilă AC3, cu ieşire digitală (SP/DIF). Driverul plăcii
+  trebuie să suporte în mod corespunzător formatul AFMT_AC3 t (C-Media o face). Conectează
+  decodorul AC3 la ieşirea SP/DIF, şi foloseşte opţiunea <CODE>-ac hwac3</CODE>.
+  E experimental dar se ştie că funcţionează cu plăcile C-Media,
+  Soundblaster Live! folosind driverele ALSA (dar nu OSS) şi plăcile de decodare DXR3/Hollywood+ MPEG.</P>
+
+
+<H4><A NAME="libmad">2.2.2.3 Suport pentru libmad</A></H4>
+
+<P><A HREF="http://mad.sourceforge.net">Libmad</A> e o bibliotecă multiplatformă de de codare audio MPEG.
+Nu se descurcă prea bine cu fişiere cu erori, şi uneori are probleme cu căutarea.</P>
+
+<P>Pentru a activa suportul, compilează scriptul configure cu opţiunea <CODE>--enable-mad</CODE>.</P>
+
+
+<H4><A NAME="vivo_audio">2.2.2.4 VIVO audio</A></H4>
+
+<P>Codecul audio folosit în fişierele VIVO variază în funcţie de fişierul folosit: VIVO/1.0 sau
+  VIVO/2.0. Fişierele VIVO/1.0 au codecul audio <B>g.723</B>,  iar fişierele VIVO/2.0
+  au codecul audio<B>Vivo Siren</B>. Ambele sunt suportate.</P>
+
+<H4><A NAME="realaudio">2.2.2.5 RealAudio</A></H4>
+
+MPlayer suportă decodarea a aproape toate tipurile de fişiere RealAudio:
+
+<UL>
+  <LI>RealAudio DNET - decodare suportată de <B>liba52</B></LI>
+  <LI>RealAudio Cook/Sipro/ATRAC3 - decodare suportată de  <B>bibliotecile  RealPlayer</B></LI>
+</UL>
+
+<P>Pentru a vedea cum se instalează bibliotecile RealPlayer, consultă secţiunea
+  <A HREF="#realvideo">RealVideo</A>.</P>
+
+
+<H4><A NAME="qdesign">2.2.2.6 Codecurile QDesign</A></H4>
+
+<P>Stream-urile audio QDesign (prescurtat: <I>QDMC</I>, <I>QDM2</I>) se găsesc în fişierele MOV/QT.
+Ambele versiuni ale acestui codec pot fi decodate cu bibliotecile QuickTime.
+  Pentru instrucţiuni de instalare te rog consultă secţiunea <A HREF="#sorenson">Codecuri video Sorenson</A>.</P>
+
+
+<H4><A NAME="qclp">2.2.2.7 Codecurile Qualcomm </A></H4>
+
+<P>Stream-urile audio Qualcomm (prescurtat: <I>Qclp</I>) se găsesc în fişierele MOV/QT.
+  Pot fi decodate cu bibliotecile QuickTime. Pentru instrucţiuni de instalare te rog consultă secţiunea <A HREF="#sorenson">Codecuri video Sorenson</A>.</P>
+
+
+<H4><A NAME="aac">2.2.2.8 Codecurile AAC</A></H4>
+
+<P>AAC (Advanced Audio Coding) e un codec audio întâlnit adesea în fişierele MOV şi MP4.
+Un decodor open source numit FAAD este diponibil la
+  <A HREF="http://www.audiocoding.com/">AudioCoding.com</A>.
+  MPlayer include libfaad 2.0RC1, astfel că nu e nevoie să-l obţii separat.</P>
+
+
+
+<H3><A NAME="importing">2.2.3 CUM SĂ imporţi codecuri Win32</A></H3>
+
+
+<H4><A NAME="importing_vfw">2.2.3.1 Codecuri VFW</A></H4>
+
+<P>VFW (Video for Windows) este vechiul Video API pentru Windows. Codecurile lor
+  au extensia .DLL sau (rareori) .DRV.
+  Dacă MPlayer eşuează la rularea unui astfel de AVI cu un mesaj de genul:</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>UNKNOWN video codec: HFYU (0x55594648)</CODE></P>
+
+<P>Înseamnă că AVI-ul tău e encodat cu un codec care are  prescurtare HFYU (HFYU =
+  codecul HuffYUV, DIV3 = DivX Low Motion, etc...). Acum că şti acest lucru, trebuie să cauţi
+  DLL-ul pe care  Windows-ul îl încarcă pentru a putea rula cest tip de fişier. În cazul nostru,
+  <CODE>system.ini</CODE> conţine această informaţie în linia care spune:</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>VIDC.HFYU=huffyuv.dll</CODE></P>
+
+<P>Aşa că ai nevoie de fişierul <CODE>huffyuv.dll</CODE>. Notează că audio codecurile sunt
+  specificate de prefixul MSACM:</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>msacm.l3acm=L3codeca.acm</CODE></P>
+
+
+<P>Acesta e codecul MP3. După ce ai obţinut toate informaţiile necesare
+  (prescurtare, fişier codec, secvenţă AVI), trimite cererea de suport pentru codec prin email,
+  şi încarcă aceste fişiere către locaţia FTP:</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>ftp://ftp.mplayerhq.hu/MPlayer/incoming/[numecodec]/</CODE></P>
+
+<P><B>Notă:</B> În Windows NT/2000/XP caută această informaţie în registry, ex.. caută
+  "VIDC.HFYU". Pentru a afla cum se face această căutare, priveşte la vechea metodă DirectShow de mai jos.</P>
+
+<H4><A NAME="importing_directshow">2.2.3.2 Codecurile DirectShow</A></H4>
+
+<P>DirectShow este noul Video API, care e chiar mai rău decât predecesorul său.
+  Situaţia e mai grea cu DirectShow, deoarece</P>
+
+<UL>
+  <LI><CODE>system.ini</CODE> nu conţine informaţiile dorite, pentru că
+    sunt păstrate în registry şi</LI>
+  <LI>avem nevoie de GUID al codec-ului.</LI>
+</UL>
+
+<P><B>Noua metodă:</B> Folosind Microsoft GraphEdit (rapid)</P>
+
+<OL>
+  <LI>Obţine GraphEdit din DirectX SDK sau
+    <A HREF="http://doom9.org">Doom9</A>.</LI>
+  <LI>Porneşte <CODE>graphedit.exe</CODE>.</LI>
+  <LI>Din meniu selectează Graph -&gt; Insert Filters.</LI>
+  <LI>Expandează tab-ul <CODE>DirectShow Filters</CODE>.</LI>
+  <LI>Selectează numele codecului şi expandează-l.</LI>
+  <LI>La intrarea <CODE>DisplayName</CODE> caută textul dintre acolade după
+    backslash şi notează-l (cinci blocuri delimitate de liniuţe, GUID-ul).</LI>
+  <LI>Codecul binar este fişierul specificat în <CODE>numele intrării </CODE>.</LI>
+</OL>
+
+<P><B>Notă:</B> Dacă nu este nici un <CODE>nume</CODE> şi <CODE>DisplayName</CODE>
+  conţine ceva de genul <CODE>device:dmo</CODE>, atunci este un codec DMO.</P>
+
+<P><B>Vechea metodă:</B> Respiră adânc şi începe căutarea în registry...</P>
+
+<OL>
+  <LI>Start <CODE>regedit</CODE>.</LI>
+  <LI>Apasă <CODE>Ctrl-f</CODE>, dezactivează primele două opţiuni, şi activează
+    pe cea de-a treia. Tastează prescurtarea codecului (ex. TM20).</LI>
+  <LI>Ar trebui să vezi un câmp care conţine calea şi numele fişierului
+    (e.g. <CODE>C:\WINDOWS\SYSTEM\TM20DEC.AX</CODE>).</LI>
+  <LI>Acum că ai fişierul, ai nevoie de GUID. Reîncepe căutarea, dar acum
+    caută numele codecului, nu prescurtarea. Numele lui poate fi obţinut atunci când
+    Media Player rulează fişierul, verificând la  File -&gt; Properties
+    -&gt; Advanced.
+    Dacă nu merge, ai ghinion. Încearcă să ghiceşti (ex. caută TrueMotion).</LI>
+  <LI>Dacă GUID-ul este găsit ar trebui să vezi un FriendlyName asi un câmp CLSID.
+  Notează CLSID de 16 byte, este chiar GUID-ul căutat .</LI>
+</OL>
+
+<P><B>Notă:</B> Dacă eşuezi în căutarea ta, bifează toate opţiunile. Poţi avea
+  rezultate false, dar s-ar putea să ai noroc...</P>
+
+<P>Acum că ai toate informaţiile necesare (prescurtare, GUID, fişierul codecului,
+  secvenţa AVI), trimite cererea de suport pentru codec prin email,
+  şi încarcă aceste fişiere către locaţia FTP:</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>ftp://ftp.mplayerhq.hu/MPlayer/incoming/[numecodec]/</CODE></P>
+
+</BODY>
+</HTML>
