@@ -8,7 +8,8 @@ outdated patches.
 
 0. Do not send complete files. These need to be diffed by hand to see the
    changes, which makes reviews harder and less likely to occur. Besides as
-   soon as one of the files changes, your version becomes obsolete.
+   soon as one of the files changes, your version becomes harder to apply,
+   thus reducing its chances of being accepted.
 
 1. Always make patches for the CVS version. The README describes how to check
    out CVS and daily CVS snapshots are available from our download page.
