@@ -22,6 +22,11 @@ void find_sub(subtitle* subtitles,int key){
       if(key>nosub_range_start && key<nosub_range_end) return; // OK!
     }
     // sub changed!
+
+    if(key<=0){
+      vo_sub=NULL; // no sub here
+      return;
+    }
     
 //    printf("\r---- sub changed ----\n");
     
