@@ -3289,6 +3289,7 @@ fi
 
 if test "$_dvb" = yes || test "$_dvbhead" = yes ; then
     _dvbin=yes
+    _inputmodules="dvb $_inputmodules"
 else
     _dvbin=no
 fi
@@ -4769,6 +4770,11 @@ else
   echores "$_libavcodec"
 fi
 
+_def_haveffpostprocess='no'
+if test -d libavcodec && test -f libavcodec/libpostproc/postprocess.h ; then
+   _def_haveffpostprocess='yes'
+fi
+
 if test "$_libavcodec" != yes ; then
 echocheck "FFmpeg libavcodec (dynamic)"
 if test "$_libavcodecso" = auto ; then
@@ -4806,7 +4812,6 @@ elif test "$_libavcodecso" = yes ; then
   _def_libavcodec='#define USE_LIBAVCODEC 1'
   _def_libavcodecso='#define USE_LIBAVCODEC_SO 1'
   _ld_libavcodec='-lavcodec'
-  _def_ffpostprocess='#define FF_POSTPROCESS 1'
   _codecmodules="libavcodec.so $_codecmodules"
 else
   _nocodecmodules="libavcodec $_nocodecmodules"
@@ -5676,7 +5681,7 @@ MATROSKA_LIB = $_ld_matroska
 OPENDIVX = $_opendivx
 
 UNRARLIB = $_unrarlib
-
+HAVE_FFPOSTPROCESS = $_def_haveffpostprocess
 PNG = $_mkf_png
 JPEG = $_mkf_jpg
 GIF = $_mkf_gif

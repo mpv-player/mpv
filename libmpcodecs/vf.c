@@ -26,7 +26,9 @@ extern vf_info_t vf_info_bmovl;
 #endif
 extern vf_info_t vf_info_crop;
 extern vf_info_t vf_info_expand;
+#ifdef FF_POSTPROCESS
 extern vf_info_t vf_info_pp;
+#endif
 extern vf_info_t vf_info_scale;
 #ifdef USE_LIBFAME
 extern vf_info_t vf_info_fame;
@@ -84,7 +86,7 @@ static vf_info_t* filter_list[]={
 #endif
     &vf_info_crop,
     &vf_info_expand,
-#ifdef USE_LIBAVCODEC
+#ifdef FF_POSTPROCESS
     &vf_info_pp,
 #endif
     &vf_info_scale,
