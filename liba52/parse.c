@@ -127,7 +127,7 @@ int a52_frame (a52_state_t * state, uint8_t * buf, int * flags,
     state->acmod = acmod = buf[6] >> 5;
 
     bitstream_set_ptr (buf + 6);
-    bitstream_get (3);	/* skip acmod we already parsed */
+    bitstream_skip (3);	/* skip acmod we already parsed */
 
     if ((acmod == 2) && (bitstream_get (2) == 2))	/* dsurmod */
 	acmod = A52_DOLBY;
@@ -650,7 +650,7 @@ int a52_block (a52_state_t * state, sample_t * samples)
 	    if (parse_exponents (chexpstr[i], nchgrps, state->fbw_exp[i][0],
 				 state->fbw_exp[i] + 1))
 		return 1;
-	    bitstream_get (2);	/* gainrng */
+	    bitstream_skip (2);	/* gainrng */
 	}
     if (lfeexpstr != EXP_REUSE) {
 	do_bit_alloc |= 32;
