@@ -7,6 +7,8 @@ extern int vobsub_parse_ifo(void* this, const char *const name, unsigned int *pa
 extern int vobsub_get_packet(void *vobhandle, float pts,void** data, int* timestamp);
 extern int vobsub_get_next_packet(void *vobhandle, void** data, int* timestamp);
 extern void vobsub_close(void *this);
+extern unsigned int vobsub_get_indexes_count(void * /* vobhandle */);
+extern char *vobsub_get_id(void * /* vobhandle */, unsigned int /* index */);
 
 extern void *vobsub_out_open(const char *basename, const unsigned int *palette, unsigned int orig_width, unsigned int orig_height, const char *id, unsigned int index);
 extern void vobsub_out_output(void *me, const unsigned char *packet, int len, double pts);

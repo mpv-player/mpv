@@ -1134,6 +1134,20 @@ vobsub_close(void *this)
     free(vob);
 }
 
+unsigned int
+vobsub_get_indexes_count(void *vobhandle)
+{
+    vobsub_t *vob = (vobsub_t *) vobhandle;
+    return vob->spu_streams_size;
+}
+
+char *
+vobsub_get_id(void *vobhandle, unsigned int index)
+{
+    vobsub_t *vob = (vobsub_t *) vobhandle;
+    return (index < vob->spu_streams_size) ? vob->spu_streams[index].id : NULL;
+}
+
 int
 vobsub_get_packet(void *vobhandle, float pts,void** data, int* timestamp) {
   vobsub_t *vob = (vobsub_t *)vobhandle;

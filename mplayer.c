@@ -517,6 +517,7 @@ int osd_last_pts=-303;
 int osd_show_av_delay = 0;
 int osd_show_sub_delay = 0;
 int osd_show_sub_visibility = 0;
+int osd_show_vobsub_changed = 0;
 
 int rtc_fd=-1;
 
@@ -2207,6 +2208,18 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	vo_osd_changed(OSDTYPE_SUBTITLE);
 	break;
     }
+    case MP_CMD_VOBSUB_LANG:
+    {
+	int new_id = vobsub_id + 1;
+	if (vobsub_id < 0)
+	    new_id = 0;
+	if ((unsigned int) new_id >= vobsub_get_indexes_count(vo_vobsub))
+	    new_id = -1;
+        if(new_id != vobsub_id)
+	    osd_show_vobsub_changed = 9;
+	vobsub_id = new_id;
+	break;
+    }
     case MP_CMD_SCREENSHOT :
       if(vo_config_count) video_out->control(VOCTRL_SCREENSHOT, NULL);
       break;
@@ -2574,6 +2587,13 @@ if(rel_seek_secs || abs_seek_pos){
       if (osd_show_sub_visibility) {
 	  sprintf(osd_text_tmp, "Subtitles: %sabled", sub_visibility?"en":"dis");
 	  osd_show_sub_visibility--;
+      } else
+      if (osd_show_vobsub_changed) {
+	  const char *language = "none";
+	  if (vobsub_id >= 0)
+	      language = vobsub_get_id(vo_vobsub, (unsigned int) vobsub_id);
+	  sprintf(osd_text_tmp, "Subtitles: (%d) %s", vobsub_id, language ? language : "unknown");
+	  osd_show_vobsub_changed--;
       } else
       if (osd_show_sub_delay) {
 	  sprintf(osd_text_tmp, "Sub delay: %d ms",(int)(sub_delay*1000));
