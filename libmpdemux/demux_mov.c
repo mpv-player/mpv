@@ -47,17 +47,15 @@
 #include <fcntl.h>
 #endif
 
-#define BE_16(x) (be2me_16(*(unsigned short *)(x)))
-#define BE_32(x) (be2me_32(*(unsigned int *)(x)))
+#define BE_16(x) (((unsigned char *)(x))[0] <<  8 | \
+		  ((unsigned char *)(x))[1])
+#define BE_32(x) (((unsigned char *)(x))[0] << 24 | \
+		  ((unsigned char *)(x))[1] << 16 | \
+		  ((unsigned char *)(x))[2] <<  8 | \
+		  ((unsigned char *)(x))[3])
 
-#ifndef WORDS_BIGENDIAN
-#define char2short(x,y) ((x[y]<<8)|x[y+1])
-#define char2int(x,y) ((x[y]<<24)|(x[y+1]<<16)|(x[y+2]<<8)|x[y+3])
-#else
-#warning Check the implementation of char2short and char2int on BIGENDIAN!!!
-#define char2short(x,y) (x[y]|(x[y+1]<<8))
-#define char2int(x,y) (x[y]|(x[y+1]<<8)|(x[y+2]<<16)|(x[y+3]<<24))
-#endif
+#define char2short(x,y)	BE_16(&(x)[(y)])
+#define char2int(x,y) 	BE_32(&(x)[(y)])
 
 typedef struct {
     unsigned int pts; // duration
