@@ -87,12 +87,12 @@ static int init(sh_audio_t *sh_audio)
    if(sh_audio->format==0x3343414D){
        // MACE 3:1
        sh_audio->ds->ss_div = 2*3; // 1 samples/packet
-       sh_audio->ds->ss_mul = 2*1; // 1 bytes/packet
+       sh_audio->ds->ss_mul = 2*sh_audio->wf->nChannels; // 1 byte*ch/packet
    } else
    if(sh_audio->format==0x3643414D){
        // MACE 6:1
        sh_audio->ds->ss_div = 2*6; // 1 samples/packet
-       sh_audio->ds->ss_mul = 2*1; // 1 bytes/packet
+       sh_audio->ds->ss_mul = 2*sh_audio->wf->nChannels; // 1 byte*ch/packet
    }
 
    // Decode at least 1 byte:  (to get header filled)
