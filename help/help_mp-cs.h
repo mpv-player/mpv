@@ -1,7 +1,7 @@
 // Translated by:  Jiri Svoboda, jiri.svoboda@seznam.cz
 // Updated by:     Tomas Blaha,  tomas.blaha at kapsa.club.cz
 //                 Jiri Heryan,  technik at domotech.cz
-// Synced to 1.154
+// Synced to 1.156
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -831,7 +831,7 @@ static char help_text[]=
 // cfg.c
 
 #define MSGTR_ConfigFileReadError "[cfg] chyba pøi ètení konfiguraèního souboru...\n"
-#define MSGTR_UnableToSaveOption "Nelze ulo¾it volbu '%s'.\n"
+#define MSGTR_UnableToSaveOption "[cfg] Nelze ulo¾it volbu '%s'.\n"
 
 // interface.c
 
@@ -1016,3 +1016,24 @@ static char help_text[]=
 // ao_plugin.c
 
 #define MSGTR_AO_PLUGIN_InvalidPlugin "[AO PLUGIN] neplatný zásuvný modul: %s\n"
+
+// ======================= AF Audio Filters ================================
+
+// libaf 
+
+// af_ladspa.c
+
+#define MSGTR_AF_LADSPA_AvailableLabels "dostupné názvy v"
+#define MSGTR_AF_LADSPA_WarnNoInputs "VAROVÁNÍ! Tento LADSPA plugin nemá audio vstupy.\n  Vstupní audio signál bude ztracen."
+#define MSGTR_AF_LADSPA_ErrMultiChannel "Vícekanálové (>2) pluginy nejsou podporovány (zatím).\n  Pou¾ívejte pouze mono a stereo pluginy."
+#define MSGTR_AF_LADSPA_ErrNoOutputs "Tento LADSPA plugin nemá audio výstupy."
+#define MSGTR_AF_LADSPA_ErrInOutDiff "Poèet audio vstupù LADSPA pluginu je odli¹ný od poètu audio výstupù."
+#define MSGTR_AF_LADSPA_ErrFailedToLoad "selhalo naètení"
+#define MSGTR_AF_LADSPA_ErrNoDescriptor "Nelze nalézt funkci ladspa_descriptor() v uvedené knihovnì."
+#define MSGTR_AF_LADSPA_ErrLabelNotFound "Nelze nalézt po¾adovaný název v knihovnì pluginù."
+#define MSGTR_AF_LADSPA_ErrNoSuboptions "Nebyla zadány ¾ádné podvolby"
+#define MSGTR_AF_LADSPA_ErrNoLibFile "Nebyla zadána ¾ádná knihovna"
+#define MSGTR_AF_LADSPA_ErrNoLabel "Nebyl zadán název ¾ádného filtru"
+#define MSGTR_AF_LADSPA_ErrNotEnoughControls "Na pøíkazovém øádku bylo uvedeno málo volièù"
+#define MSGTR_AF_LADSPA_ErrControlBelow "%s: Vstupní voliè #%d je ni¾¹í ne¾ minimální hodnota %0.4f.\n"
+#define MSGTR_AF_LADSPA_ErrControlAbove "%s: Vstupní voliè #%d je vy¹¹í ne¾ maximální hodnota %0.4f.\n"
