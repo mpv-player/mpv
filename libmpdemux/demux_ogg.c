@@ -779,7 +779,6 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	/// Check for text (subtitles) header
       } else if (strncmp(st->streamtype, "text", 4) == 0) {
           mp_msg(MSGT_DEMUX, MSGL_V, "OGG stream %d is text\n", ogg_d->num_sub);
-          if(demuxer->sub->id==-1) demuxer->sub->id = ogg_d->num_sub;
 	  ogg_d->subs[ogg_d->num_sub].samplerate= get_uint64(&st->time_unit)/10;
           n_text++;
           demux_ogg_init_sub();
