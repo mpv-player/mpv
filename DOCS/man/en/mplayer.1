@@ -5352,15 +5352,31 @@ avoid B frames in high motion scenes (will cause bitrate misprediction)
 .RE
 .
 .TP
-.B vpass=<1\-2>
-Activates internal two pass mode, only specify if you wish to use two pass
-encoding.
+.B vpass=<1\-3>
+Activates internal two (or three) pass mode, only specify if you wish to
+use two (or three) pass encoding.
 .PD 0
 .RSs
 .IPs 1
 first pass
 .IPs 2
 second pass
+.IPs 3 (also see turbo)
+Second and third pass of three pass encoding.
+Here is how it works, and how to use it:
+.br
+The first pass (vpass=1) writes the stats file.
+You might want to deactivate some CPU-hungry options, like "turbo"
+mode does.
+.br
+The second pass (vpass=3, that is not a typo ;-) ) reads the stats file and
+bases ratecontrol decisions on it.
+You can use all encoding options, except very CPU-hungry options like "qns",
+.br
+The third pass (vpass=3) does both.
+It first read the stats then overwrite them (You might want to backup
+divx2pass.log before doing this if there's any possibility that you'll
+have to cancel MEncoder).
 .RE
 .PD 1
 .sp 1
@@ -6121,8 +6137,11 @@ noise reduction, 0 is disabled
 .
 .TP
 .B qns=<0\-3>
-Quantizer noise shaping, reduces ringing artefacts, larger values are slower
-but may not result in better quality.
+Quantizer noise shaping.
+Rather than choosing quantization to most closely match the source video
+in the PSNR sense, it chooses quantization such that noise (usually ringing)
+will be masked by similar-frequency content in the image.
+Larger values are slower but may not result in better quality.
 This can and should be used together with trellis quantization, in which case
 the trellis quantization (optimal for constant weight) will be used as
 startpoint for the iterative search.
@@ -6703,6 +6722,7 @@ Affects the maximum allowed gradient within two adjacent blocks.
 .TP
 .B cabac\ \ \ 
 Use CABAC (Context-Adaptive Binary Arithmetic Coding).
+Slows down encoding but should save 10-15% of the bits.
 .
 .TP
 .B cabacidc=<value>
@@ -6787,7 +6807,9 @@ higher values force it to vary more smoothly.
 .TP
 .B fullinter
 Use all available interframe macroblock types (i16x16, i4x4, p16x16-4x4)
-(default: i16x16, i4x4, p16x16-8x8)
+The idea is to find the type and size that best describe a certain area
+of the picture, i.e.\& very effective for Anime, which usually contains
+large areas of the same color (default: i16x16, i4x4, p16x16-8x8).
 .
 .TP
 .B log=<-1\-3>
