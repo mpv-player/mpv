@@ -152,11 +152,11 @@ static int control(int cmd, void *arg)
 	}
 
       snd_mixer_selem_get_playback_volume_range(elem,&pmin,&pmax);
-      f_multi = (100 / (float)pmax - pmin);
+      f_multi = (100 / (float)(pmax - pmin));
 
       if (cmd == AOCONTROL_SET_VOLUME) {
 
-	set_vol = (vol->left + pmin) / f_multi + 0.5;
+	set_vol = vol->left / f_multi + pmin + 0.5;
 
 	//setting channels
 	if ((err = snd_mixer_selem_set_playback_volume(elem, 0, set_vol)) < 0) {
@@ -166,7 +166,7 @@ static int control(int cmd, void *arg)
 	}
 	mp_msg(MSGT_AO,MSGL_DBG2,"left=%li, ", set_vol);
 
-	set_vol = (vol->right + pmin) / f_multi + 0.5;
+	set_vol = vol->right / f_multi + pmin + 0.5;
 
 	if ((err = snd_mixer_selem_set_playback_volume(elem, 1, set_vol)) < 0) {
 	  mp_msg(MSGT_AO,MSGL_ERR,"alsa-control: error setting right channel, %s\n", 
@@ -178,9 +178,9 @@ static int control(int cmd, void *arg)
       }
       else {
 	snd_mixer_selem_get_playback_volume(elem, 0, &get_vol);
-	vol->left = (get_vol * f_multi) - pmin;
+	vol->left = (get_vol - pmin) * f_multi;
 	snd_mixer_selem_get_playback_volume(elem, 1, &get_vol);
-	vol->right = (get_vol * f_multi) - pmin;
+	vol->right = (get_vol - pmin) * f_multi;
 
 	mp_msg(MSGT_AO,MSGL_DBG2,"left=%f, right=%f\n",vol->left,vol->right);
       }
@@ -1103,7 +1103,7 @@ static int get_space()
       }
     }
 
-    if (snd_pcm_status_get_state(status) == SND_PCM_STATE_RUNNING)
+    if (snd_pcm_status_get_state(status) != SND_PCM_STATE_RUNNING)
       mp_msg(MSGT_AO,MSGL_V,"alsa-space: free space = %i, status=%i, %s --\n", ret, status, str_status);
     
     if (ret < 0) {
