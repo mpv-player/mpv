@@ -81,17 +81,36 @@ stream.
 Use specified codec (according to codecs.conf) for decoding input audio
 stream.
 .TP
-.B \-vfm <video family>
-(useful?) (yes!)
+.B \-vfm <video codec family>
+Force decoding by using a specific codec FAMILY, and FALLBACK to default
+if failed.  For examples see MPlayer manpage.
 .TP
-.B \-afm <audio family>
-(useful?) (yes!)
+.B \-afm <audio codec family>
+Force decoding by using a specific codec FAMILY, and FALLBACK to default
+if failed.  For examples see MPlayer manpage.
 .TP
 .B \-include
 Include what? Configfile.
 .TP
 .B \-v
 Increase verbosity.
+.TP
+.B \-ovc <codecname>
+Encode with the given codec (codec names are from codecs.conf).
+Examples:
+
+  -ovc help      get help
+  -ovc copy      no encoding, just streamcopy
+  -ovc divx4     encode to DivX4
+.TP
+.B \-oac <codecname>
+Encode with the given codec (codec names are from codecs.conf).
+Examples:
+
+  -oac help      get help
+  -oac copy      no encoding, just streamcopy
+  -oac pcm       encode to uncompressed PCM
+  -oac mp3lame   encode to MP3 (using Lame)
 .TP
 .B \-divx4opts
 If encoding to DivX4, you can specify its parameters here, like:
