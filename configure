@@ -573,6 +573,9 @@ elif test -r /compat/linux/proc/cpuinfo ; then
   # FreeBSD with Linux emulation /proc mounted,
   # extract CPU information from it
   _cpuinfo="cat /compat/linux/proc/cpuinfo"
+elif darwin ; then
+  # use hostinfo on Darwin
+  _cpuinfo="hostinfo"
 elif x86; then
   # all other OSes try to extract CPU information from a small helper
   # program TOOLS/cpuinfo instead
@@ -844,9 +847,13 @@ EOF
 	fi
     fi
     if darwin ; then
+	proc=`$_cpuinfo | grep "Processor type" | cut -f 3 -d ' ' | sed 's/ppc//'`
 	if [ `sysctl -n hw.vectorunit` -eq 1 ]; then
 	    _altivec=yes
  	fi
+	if [ `sysctl -n hw.optional.altivec` -eq 1 ]; then
+	    _altivec=yes
+	fi
     fi
     if test "$_altivec" = yes; then
         echores "$proc altivec"
@@ -1977,6 +1984,7 @@ EOF
 cc_check -lsocket && _ld_sock="-lsocket"
 cc_check -lnsl && _ld_sock="-lnsl"
 cc_check -lsocket -lnsl && _ld_sock="-lsocket -lnsl"
+cc_check -lsocket -ldnet && _ld_sock="-lsocket -ldnet"
 if test $_winsock2 = auto && not cygwin ; then
   _winsock2=no
   cat > $TMPC << EOF
@@ -5239,7 +5247,11 @@ if test "$_xmms" = yes ; then
   fi
 
   _def_xmms='#define HAVE_XMMS 1'
-  _xmms_lib="${_xmmslibdir}/libxmms.so.1 -export-dynamic"
+  if darwin ; then
+     _xmms_lib="${_xmmslibdir}/libxmms.dylib"
+  else
+     _xmms_lib="${_xmmslibdir}/libxmms.so.1 -export-dynamic"
+  fi
 else
   _def_xmms='#undef HAVE_XMMS'
 fi
@@ -5474,7 +5486,7 @@ EOF
 fi
 if darwin ; then
   # use gnu style cpp on Darwin
-  CFLAGS="$CFLAGS -no-cpp-precomp -DSYS_DARWIN"
+  CFLAGS="$CFLAGS -no-cpp-precomp -DSYS_DARWIN -Wl,-bind_at_load"
   # libavcodec (from ffmpeg) requires CONFIG_DARWIN to enable AltiVec on Darwin/MacOSX
   test "$_altivec" = yes && CFLAGS="$CFLAGS -DCONFIG_DARWIN"
 fi
