@@ -444,15 +444,10 @@ compiled <application>MPlayer</application> binaries for Mac OS X from the
 <sect1 id="hp-ux">
 <title>HP-UX</title>
 <para>
-Martin Gansser maintains a valuable
-<ulink url="http://cloud.prohosting.com/patos/docs/mplayer_on_hpux11.htm">HOWTO</ulink>
-about building <application>MPlayer</application> on HP-UX. It even has a FAQ
-section!
-</para>
-
-<para>
-Anyway, our "raw" <application>MPlayer</application> source is used to compile
-on HP-UX without flaws.
+Joe Page hosts a HP-UX <application>MPlayer</application>
+<ulink url="http://users.rcn.com/joepage/mplayer_on_hpux11.htm">HOWTO</ulink>
+by Martin Gansser on his homepage. With these instructions the build should
+work out of the box.
 </para>
 </sect1>
 
