@@ -134,7 +134,7 @@ Installation directories:
                          data files (fonts, skins) [PREFIX/share/mplayer]
   --mandir=DIR           use this prefix for installing manpages [PREFIX/man]
   --confdir=DIR          use this prefix for installing configuration files
-                         [same as datadir]
+                         [PREFIX/etc/mplayer]
   --libdir=DIR           use this prefix for object code libraries [PREFIX/lib]
 
 Optional features:
