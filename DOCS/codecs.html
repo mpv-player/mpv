@@ -238,6 +238,45 @@ RV20 and RV30 codecs which are closed-source. Their future support is
 unlikely :(</P>
 
 
+<P><B><A NAME=2.2.1.9>2.2.1.9.  XViD</A></B></P>
+
+<P><B>XViD</B> is another development from good old OpenDivX (first
+development was DivX4).</P>
+
+<P><B>Advantages</B> :
+  <UL>
+    <LI>opensource</LI>
+    <LI>its API is compatible with DivX4 so it's easy to add support for
+      it</LI>
+    <LI>2-pass encoding support</LI>
+    <LI>nice encoding quality, higher speed than DivX4 (you can optimize it for
+      your box while compiling)</LI>
+  </UL>
+</P>
+
+<P><B>Disadvantages</B> :
+  <UL>
+    <LI>currently it doesn't properly decode all DivX/DivX4 files</LI>
+    <LI>you have to choose between DivX4 <B>OR</B> XViD support at
+      compiletime</LI>
+    <LI>under development</LI>
+  </UL>
+</P>
+
+<P><B>Installation</B> : it's currently available only in CVS. Here are the
+  downloading and installation instructions :<BR>
+  &nbsp;&nbsp;<CODE>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid
+    login</CODE><BR>
+  &nbsp;&nbsp;<CODE>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid co
+    xvidcore</CODE><BR>
+  &nbsp;&nbsp;<CODE>cd xvidcore/build/generic</CODE><BR>
+  &nbsp;&nbsp;<CODE>Edit Makefile.linux to fit your needs</CODE><BR>
+  &nbsp;&nbsp;<CODE>make -f Makefile.linux</CODE><BR>
+  &nbsp;&nbsp;<CODE>recompile <B>MPlayer</B> with
+    --with-xvidcore=/path/to/libcore.a</CODE><BR>
+</P>
+
+
 <P><B><A NAME=2.2.2>2.2.2.  Audio codecs</A></B></P>
 
 <P>The most important audio codecs above all :<BR>
@@ -314,45 +353,6 @@ then copy it into the <CODE>/usr/lib/win32</CODE> directory, or respectively.</P
 <P>Currently the only supported one is the DNET codec. Actually it's a
 low-bitrate version of the well-known AC3 codec. It can be found either in
 old and new RealMedia movies.</P>
-
-
-<P><B><A NAME=2.2.2.6>2.2.2.6.  XViD</A></B></P>
-
-<P><B>XViD</B> is another development from good old OpenDivX (first
-development was DivX4).</P>
-
-<P><B>Advantages</B> :
-  <UL>
-    <LI>opensource</LI>
-    <LI>its API is compatible with DivX4 so it's easy to add support for
-      it</LI>
-    <LI>2-pass encoding support</LI>
-    <LI>nice encoding quality, higher speed than DivX4 (you can optimize it for
-      your box while compiling)</LI>
-  </UL>
-</P>
-
-<P><B>Disadvantages</B> :
-  <UL>
-    <LI>currently it doesn't properly decode all DivX/DivX4 files</LI>
-    <LI>you have to choose between DivX4 <B>OR</B> XViD support at
-      compiletime</LI>
-    <LI>under development</LI>
-  </UL>
-</P>
-
-<P><B>Installation</B> : it's currently available only in CVS. Here are the
-  downloading and installation instructions :<BR>
-  &nbsp;&nbsp;<CODE>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid
-    login</CODE><BR>
-  &nbsp;&nbsp;<CODE>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid co
-    xvidcore</CODE><BR>
-  &nbsp;&nbsp;<CODE>cd xvidcore/build/generic</CODE><BR>
-  &nbsp;&nbsp;<CODE>Edit Makefile.linux to fit your needs</CODE><BR>
-  &nbsp;&nbsp;<CODE>make -f Makefile.linux</CODE><BR>
-  &nbsp;&nbsp;<CODE>recompile <B>MPlayer</B> with
-    --with-xvidcore=/path/to/libcore.a</CODE><BR>
-</P>
 
 
 <P><B><A NAME=2.2.3>2.2.3. Win32 codec importing howto</A></B></P>
