@@ -2,14 +2,22 @@ TO DO:
 ~~~~~~
 For the Release:
 - fix -framedrop, support for mpeg files
-- fix -nobps avi seeking
+
 - audio playback rate setting [Jelmer Feenstra]
-- finish ASF seeking (find next keyframe)
+- RESET_AUDIO optional - DONE? - with libao2 it shouldn't be problem
+
+DONE:
+- sub sync +/- keys - DONE (lez)
+- fix subtitle path in sub_filename() - DONE (lez)
+- fix -nobps avi seeking - DONE? (arpi)
+- fix x11 driver to work without SHM (for remote playing etc) - DONE?
+- fast OSD renderer - DONE (arpi)
+- fix -fps option for mpeg2 - DONE (arpi)
 
 High Priority:
-- fix x11 driver to work without SHM (for remote playing etc) - DONE?
+- finish ASF seeking (find next keyframe)
 - further optimizations - DONE?
-- support mpeg2 interlaced files (field pictures)
+- support mpeg2 interlaced files (field pictures) - hacked
 
 Medium Priority:
 - show current frame number [Gabucino]
