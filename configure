@@ -2328,28 +2328,23 @@ echores "$_iconv"
 
 
 echocheck "FFmpeg libavcodec (static)"
-if test "$_libavcodec" != no ; then
+if test "$_libavcodec" = auto ; then
   # Note: static linking is preferred to dynamic linking
   _libavcodec=no
-  cat > $TMPC << EOF
-#define FF_POSTPROCESS 1
-#include "libavcodec/avcodec.h"
-int quant_store[MBR+1][MBC+1];
-int main(void) { return 0; }
-EOF
-  if test -d libavcodec && test -f libavcodec/Makefile ; then
-    if cc_check -I. -lm ; then
+  if test -d libavcodec && test -f libavcodec/avcodec.h ; then
+    if grep MBC libavcodec/avcodec.h > /dev/null 2>&1 ; then
       _libavcodec=yes
       echores "yes"
     else
-      echores "no: see DOC/codecs.html"
+      echores "no: old ffmpeg version, use CVS !"
     fi
   else
-    echores "no: see DOC/codecs.html"
+    echores "no: see DOCS/codecs.html"
   fi
 else
-  echores "no"
+  echores "$_libavcodec"
 fi
+
 echocheck "FFmpeg libavcodec (dynamic)"
 if test "$_libavcodec" != yes && test "$_libavcodecso" = auto ; then
   _libavcodecso=no
