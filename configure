@@ -1895,6 +1895,9 @@ fi
 
 if test "$_iconv" = yes ; then
 _iconv='#define USE_ICONV'
+  if test "$system_name" = "FreeBSD" || test "$system_name" = "BSD/OS" ; then
+    _iconvlib="-liconv"
+  fi
 else
 _iconv='#undef USE_ICONV'
 fi
@@ -1954,7 +1957,8 @@ else
  _have_soundcard_h='#undef  HAVE_SYS_SOUNDCARD_H'
 fi
 
-if test "$_malloc_h" = yes ; then
+# malloc.h useless in FreeBSD
+if test "$_malloc_h" = yes && test "$system_name" != "FreeBSD" ; then
  _have_malloc_h='#define HAVE_MALLOC_H 1'
 else
  _have_malloc_h='#undef  HAVE_MALLOC_H'
@@ -1997,12 +2001,6 @@ fi
 # for MT applications: 
 if test "$system_name" = "Linux" || test "$system_name" =  "FreeBSD" ; then
 CFLAGS="$CFLAGS -D_THREAD_SAFE"
-fi
-
-if test "$system_name" = "FreeBSD" || test "$system_name" = "BSD/OS" ; then
-  if test "$_iconv" = "#define USE_ICONV" ; then
-    _iconvlib="-liconv"
-  fi
 fi
 
 
