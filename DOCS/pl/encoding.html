@@ -3,7 +3,7 @@
 
 <HEAD>
   <TITLE>Kodowanie - MEncoder - Koder filmów dla Linuksa</TITLE>
-  <LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
+  <LINK REL="stylesheet" TYPE="text/css" HREF="../default.css">
   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-2">
 </HEAD>
 
@@ -15,7 +15,7 @@
 <P>Po kompletną listę dostępnych opcji i przykładów MEncoder, proszę zobaczyć
   stronę manuala. Po serie ręcznych przykładów i detali używania różnych 
   parametrów kodowania, czytaj
-  <A HREF="tech/encoding-tips.txt">sztuczki-kodowania</A> gdzie zgromadzone są
+  <A HREF="../tech/encoding-tips.txt">sztuczki-kodowania</A> gdzie zgromadzone są
   rożne wątki mailowe
   <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-users">mplayer-users</A>.
   Szukaj w <A HREF="http://mplayerhq.hu/pipermail/mplayer-users/">archiwach</A>
@@ -109,14 +109,14 @@
   Zamiast tego czytaj sekcję <A HREF="#aspect">Zachowując aspekt stosunku</A>.</P>
 
 <P>Proces skalowanie nadzorowany jest przez filter wideo <I>'scale'</I>:
-  <CODE>-vop scale=szerokość:wysokość</CODE>. Jego jakość może zostać ustawiona
+  <CODE>-vf scale=szerokość:wysokość</CODE>. Jego jakość może zostać ustawiona
   przez opcję <CODE>-sws</CODE>. Jeśli nie zostanie określona, MEncoder użyje 0:
   fast bilinear.</P>
 
 <H4>Użycje:</H4>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder input.mpg -ovc lavc -lavcopts
-  vcodec=mpeg4 -vop scale=640:480 -oac copy -o
+  vcodec=mpeg4 -vf scale=640:480 -oac copy -o
   output.avi</CODE></P>
 
 
@@ -285,8 +285,6 @@ RAW RGB AVI.</P>
   że nagłówki AVI nie zapamiętują takiej wartości.
   W taki sposób jedynym rozwiąznaniem jest skalowanie!</P>
 
-<P>Tu jest.</P>
-
 <P>MPEG4 posiada niespotykaną cechę: strumień wideo może zawierać jego wymagany 
   stosunek. Tak, tylko takie pliki jak MPEG1/2 (DVD, SVCD).
   Przesadzając, <U>nie</U> ma odtwarzaczy wideo które obsługują tą cechę.
@@ -303,7 +301,7 @@ RAW RGB AVI.</P>
 <H4>Użycie:</H4>
 
 <P><CODE>$ mencoder sample-svcd.mpg -ovc lavc -lavcopts
-  vcodec=mpeg4:aspect=16.0/9.0 -vop crop=714:548:0:14 -oac copy -o output.avi</CODE></P>
+  vcodec=mpeg4:aspect=16.0/9.0 -vf crop=714:548:0:14 -oac copy -o output.avi</CODE></P>
 
 </BODY>
 </HTML>
