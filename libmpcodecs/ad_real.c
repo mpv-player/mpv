@@ -168,7 +168,7 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
       int x,y;
       for(y=0;y<h;y++)
         for(x=0;x<w;x++){
-	    demux_read_data(sh->ds, sh->a_in_buffer+sps*(h*x+(h/2)*(y&1)+(y>>1)), sps);
+	    demux_read_data(sh->ds, sh->a_in_buffer+sps*(h*x+((h+1)/2)*(y&1)+(y>>1)), sps);
 	}
       sh->a_in_buffer_size=
       sh->a_in_buffer_len=w*h*sps;
