@@ -249,18 +249,17 @@ static uint32_t our_n_frames=0;
 // screen info:
 char* video_driver=NULL; //"mga"; // default
 char* audio_driver=NULL;
-int fullscreen=0;
-static int vidmode=0;
-int softzoom=0;
-static int flip=-1;
-// We need this opt_* because the values are then calculated so the options use the opt_*
-// and before each file we reset the calculated value using this opt_* values
-static int opt_screen_size_x=0;//SCREEN_SIZE_X;
-static int opt_screen_size_y=0;//SCREEN_SIZE_Y;
-static int screen_size_x=0;//SCREEN_SIZE_X;
-static int screen_size_y=0;//SCREEN_SIZE_Y;
-static int screen_size_xy=0;
-static float movie_aspect=-1.0;
+
+// libvo opts: (defiend at libmpcodecs/vd.c)
+extern int opt_screen_size_x;
+extern int opt_screen_size_y;
+extern int screen_size_xy;
+extern float movie_aspect;
+extern int fullscreen;
+extern int vidmode;
+extern int softzoom;
+extern int flip;
+extern int vo_flags;
 
 // sub:
 char *font_name=NULL;
@@ -467,7 +466,7 @@ char* filename=NULL; //"MI2-Trailer.avi";
 int file_format=DEMUXER_TYPE_UNKNOWN;
 
 int delay_corrected=1;
-char* title="MPlayer";
+//char* title="MPlayer";
 
 // movie info:
 int out_fmt=0;
@@ -491,8 +490,6 @@ int v_green_intensity=0;
 int v_blue_intensity=0;
 */
 
-int vo_flags=0;
-
 int rtc_fd=-1;
 
 //float a_frame=0;    // Audio
@@ -501,12 +498,12 @@ int i;
 
 int gui_no_filename=0;
 
-vo_tune_info_t vtune;
+//vo_tune_info_t vtune;
 
   mp_msg_init(MSGL_STATUS);
 
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s",banner_text);
-  memset(&vtune,0,sizeof(vo_tune_info_t));
+//  memset(&vtune,0,sizeof(vo_tune_info_t));
   /* Test for cpu capabilities (and corresponding OS support) for optimizing */
 #ifdef ARCH_X86
   GetCpuCaps(&gCpuCaps);
@@ -1253,31 +1250,11 @@ if(bestprio!=-1) {
 
 mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s video codec: [%s] drv:%d prio:%d (%s)\n",video_codec?"Forcing":"Detected",sh_video->codec->name,sh_video->codec->driver,sh_video->codec->priority!=-1?sh_video->codec->priority:0,sh_video->codec->info);
 
-for(i=0;i<CODECS_MAX_OUTFMT;i++){
-//    int ret;
-    out_fmt=sh_video->codec->outfmt[i];
-    if(out_fmt==(signed int)0xFFFFFFFF) continue;
-    vo_flags=video_out->control(VOCTRL_QUERY_FORMAT, &out_fmt);
-    mp_msg(MSGT_CPLAYER,MSGL_DBG2,"vo_debug: query(%s) returned 0x%X\n",vo_format_name(out_fmt),vo_flags);
-    if(vo_flags) break;
-}
-if(i>=CODECS_MAX_OUTFMT){
-    mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_VOincompCodec);
-    goto goto_next_file; // exit_player(MSGTR_Exit_error);
-}
-sh_video->outfmtidx=i;
+sh_video->video_out=video_out;
 
-if(flip==-1){
-    // autodetect flipping
-    flip=0;
-    if(sh_video->codec->outflags[i]&CODECS_FLAG_FLIP)
-      if(!(sh_video->codec->outflags[i]&CODECS_FLAG_NOFLIP))
-         flip=1;
-}
-
-mp_msg(MSGT_CPLAYER,MSGL_DBG2,"vo_debug1: out_fmt=%s\n",vo_format_name(out_fmt));
-
-if(!init_video(sh_video,&vtune.pitch[0])){
+// init codec:
+//if(!init_video(sh_video,&vtune.pitch[0])){
+if(!init_video(sh_video,NULL)){
      mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_CouldntInitVideoCodec);
      goto goto_next_file; // exit_player(MSGTR_Exit_error);
 }
@@ -1295,53 +1272,7 @@ if(auto_quality>0){
 
 current_module="init_libvo";
 
-#if 0 /* was X11_FULLSCREEN hack -> moved to libvo/vo_xv.c where it belongs ::atmos */
-   if(fullscreen){
-     if(vo_init()){
-       //if(verbose) printf("X11 running at %dx%d depth: %d\n",vo_screenwidth,vo_screenheight,vo_depthonscreen);
-     }
-     if(!screen_size_xy) screen_size_xy=vo_screenwidth; // scale with asp.ratio
-   }
-#endif
-   
-  // Set default VGA 1:1 aspect as fallback ::atmos
-  if(movie_aspect>-1.0) sh_video->aspect = movie_aspect; // cmdline overrides autodetect
-//  if(!sh_video->aspect) sh_video->aspect=1.0;
-  screen_size_x = opt_screen_size_x;
-  screen_size_y = opt_screen_size_y;
-  if(screen_size_xy||screen_size_x||screen_size_y){
-   if(screen_size_xy>0){
-     if(screen_size_xy<=8){
-       screen_size_x=screen_size_xy*sh_video->disp_w;
-       screen_size_y=screen_size_xy*sh_video->disp_h;
-     } else {
-       screen_size_x=screen_size_xy;
-       screen_size_y=screen_size_xy*sh_video->disp_h/sh_video->disp_w;
-     }
-   } else if(!vidmode){
-     if(!screen_size_x) screen_size_x=SCREEN_SIZE_X;
-     if(!screen_size_y) screen_size_y=SCREEN_SIZE_Y;
-     if(screen_size_x<=8) screen_size_x*=sh_video->disp_w;
-     if(screen_size_y<=8) screen_size_y*=sh_video->disp_h;
-   }
-  } else {
-    // check source format aspect, calculate prescale ::atmos
-    screen_size_x=sh_video->disp_w;
-    screen_size_y=sh_video->disp_h;
-    if(sh_video->aspect>0.01){
-      mp_msg(MSGT_CPLAYER,MSGL_INFO,"Movie-Aspect is %.2f:1 - prescaling to correct movie aspect.\n",
-             sh_video->aspect);
-      screen_size_x=(int)((float)sh_video->disp_h*sh_video->aspect);
-      screen_size_x+=screen_size_x%2; // round
-      if(screen_size_x<sh_video->disp_w){
-        screen_size_x=sh_video->disp_w;
-        screen_size_y=(int)((float)sh_video->disp_w*(1.0/sh_video->aspect));
-        screen_size_y+=screen_size_y%2; // round
-      }
-    } else {
-      mp_msg(MSGT_CPLAYER,MSGL_INFO,"Movie-Aspect is undefined - no prescaling applied.\n");
-    }
-  }
+#if 0
 
    { const vo_info_t *info = video_out->get_info();
      mp_msg(MSGT_CPLAYER,MSGL_INFO,"VO: [%s] %dx%d => %dx%d %s %s%s%s%s\n",info->short_name,
@@ -1359,6 +1290,7 @@ current_module="init_libvo";
     if(strlen(info->comment) > 0)
         mp_msg(MSGT_CPLAYER,MSGL_V,"VO: Comment: %s\n", info->comment);
    }
+#endif
 
 #ifdef HAVE_NEW_GUI
    if ( use_gui )
@@ -1390,19 +1322,6 @@ current_module="init_libvo";
     }
 #endif
 
-   mp_msg(MSGT_CPLAYER,MSGL_V,"video_out->init(%dx%d->%dx%d,flags=%d,'%s',0x%X)\n",
-                      sh_video->disp_w,sh_video->disp_h,
-                      screen_size_x,screen_size_y,
-                      fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3),
-                      title,out_fmt);
-
-   if(video_out->config(sh_video->disp_w,sh_video->disp_h,
-                      screen_size_x,screen_size_y,
-                      fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3),
-                      title,out_fmt,&vtune)){
-     mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_CannotInitVO);
-     goto goto_next_file; // exit_player(MSGTR_Exit_error);
-   }
    inited_flags|=INITED_VO;
    mp_msg(MSGT_CPLAYER,MSGL_V,"INFO: Video OUT driver init OK!\n");
    if(video_out->control(VOCTRL_QUERY_VAA, &vo_vaa)==VO_NOTIMPL)

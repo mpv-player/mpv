@@ -4,6 +4,7 @@
 
 #include "config.h"
 #include "mp_msg.h"
+#include "help_mp.h"
 
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
@@ -89,9 +90,110 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 #include "libvo/video_out.h"
 extern int vaa_use_dr;
 
+// libvo opts:
+int fullscreen=0;
+int vidmode=0;
+int softzoom=0;
+int flip=-1;
+int opt_screen_size_x=0;
+int opt_screen_size_y=0;
+int screen_size_xy=0;
+float movie_aspect=-1.0;
+int vo_flags=0;
+
+static vo_tune_info_t vtune;
+
 int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outfmt){
+    int i;
+    unsigned int out_fmt=0;
+    int screen_size_x=0;//SCREEN_SIZE_X;
+    int screen_size_y=0;//SCREEN_SIZE_Y;
+    vo_functions_t* video_out=sh->video_out;
+
+    memset(&vtune,0,sizeof(vo_tune_info_t));
+
     mp_msg(MSGT_DECVIDEO,MSGL_INFO,"VDec: vo config request - %d x %d, %s  \n",
 	w,h,vo_format_name(preferred_outfmt));
+
+    // check if libvo and codec has common outfmt:
+    for(i=0;i<CODECS_MAX_OUTFMT;i++){
+	out_fmt=sh->codec->outfmt[i];
+	if(out_fmt==(signed int)0xFFFFFFFF) continue;
+	vo_flags=video_out->control(VOCTRL_QUERY_FORMAT, &out_fmt);
+	mp_msg(MSGT_CPLAYER,MSGL_DBG2,"vo_debug: query(%s) returned 0x%X\n",vo_format_name(out_fmt),vo_flags);
+	// TODO: check (query) if codec really support this outfmt...
+	if(vo_flags) break;
+    }
+    if(i>=CODECS_MAX_OUTFMT){
+	// TODO: no match - we should use conversion...
+	mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_VOincompCodec);
+	return 0;	// failed
+    }
+    sh->outfmtidx=i;
+
+    // autodetect flipping
+    if(flip==-1){
+	flip=0;
+	if(sh->codec->outflags[i]&CODECS_FLAG_FLIP)
+	    if(!(sh->codec->outflags[i]&CODECS_FLAG_NOFLIP))
+		flip=1;
+    }
+
+    // time to do aspect ratio corrections...
+
+  if(movie_aspect>-1.0) sh->aspect = movie_aspect; // cmdline overrides autodetect
+//  if(!sh->aspect) sh->aspect=1.0;
+  screen_size_x = opt_screen_size_x;
+  screen_size_y = opt_screen_size_y;
+  if(screen_size_xy||screen_size_x||screen_size_y){
+   if(screen_size_xy>0){
+     if(screen_size_xy<=8){
+       screen_size_x=screen_size_xy*sh->disp_w;
+       screen_size_y=screen_size_xy*sh->disp_h;
+     } else {
+       screen_size_x=screen_size_xy;
+       screen_size_y=screen_size_xy*sh->disp_h/sh->disp_w;
+     }
+   } else if(!vidmode){
+     if(!screen_size_x) screen_size_x=SCREEN_SIZE_X;
+     if(!screen_size_y) screen_size_y=SCREEN_SIZE_Y;
+     if(screen_size_x<=8) screen_size_x*=sh->disp_w;
+     if(screen_size_y<=8) screen_size_y*=sh->disp_h;
+   }
+  } else {
+    // check source format aspect, calculate prescale ::atmos
+    screen_size_x=sh->disp_w;
+    screen_size_y=sh->disp_h;
+    if(sh->aspect>0.01){
+      mp_msg(MSGT_CPLAYER,MSGL_INFO,"Movie-Aspect is %.2f:1 - prescaling to correct movie aspect.\n",
+             sh->aspect);
+      screen_size_x=(int)((float)sh->disp_h*sh->aspect);
+      screen_size_x+=screen_size_x%2; // round
+      if(screen_size_x<sh->disp_w){
+        screen_size_x=sh->disp_w;
+        screen_size_y=(int)((float)sh->disp_w*(1.0/sh->aspect));
+        screen_size_y+=screen_size_y%2; // round
+      }
+    } else {
+      mp_msg(MSGT_CPLAYER,MSGL_INFO,"Movie-Aspect is undefined - no prescaling applied.\n");
+    }
+  }
+
+    // Time to config libvo!
+    mp_msg(MSGT_CPLAYER,MSGL_V,"video_out->init(%dx%d->%dx%d,flags=%d,'%s',0x%X)\n",
+                      sh->disp_w,sh->disp_h,
+                      screen_size_x,screen_size_y,
+                      fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3),
+                      "MPlayer",out_fmt);
+
+    if(video_out->config(sh->disp_w,sh->disp_h,
+                      screen_size_x,screen_size_y,
+                      fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3),
+                      "MPlayer",out_fmt,&vtune)){
+	mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_CannotInitVO);
+	return 0; // exit_player(MSGTR_Exit_error);
+    }
+
     return 1;
 }
 
