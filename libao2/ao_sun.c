@@ -628,7 +628,7 @@ static void uninit(int immed){
 static void reset(){
     audio_info_t info;
 
-    uninit();
+    uninit(1);
     audio_fd=open(audio_dev, O_WRONLY);
     if(audio_fd<0){
 	printf("\nFatal error: *** CANNOT RE-OPEN / RESET AUDIO DEVICE (%s) ***\n", strerror(errno));
