@@ -1909,7 +1909,8 @@ switch(sh_video->codec->driver){
 
     if(pts_from_bps){
       // PTS = (audio position)/(bytes per sec)
-      a_pts=(ds_tell(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
+//      a_pts=(ds_tell(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
+      a_pts=(ds_tell(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->wf->nAvgBytesPerSec;
       delay_corrected=1; // hack
     } else {
       if(!delay_corrected && d_audio->pts){
