@@ -491,12 +491,12 @@ static uint32_t draw_slice(uint8_t *image[], int stride[],
   uint8_t *src = yuvbuf;
   uint32_t sw, sh;
   
-#ifdef HAVE_MMX
-  emms();
-#endif
+  yuv2rgb(yuvbuf, image[0], image[1], image[2], w, h, orig_w * BYTESPERPIXEL, stride[0], stride[1]);
+//#ifdef HAVE_MMX
+//  emms();
+//#endif
   sw = (uint32_t) (w * scaling);
   sh = (uint32_t) (h * scaling);
-  yuv2rgb(yuvbuf, image[0], image[1], image[2], w, h, orig_w * BYTESPERPIXEL, stride[0], stride[1]);
   if (scalebuf != NULL) {
     gl_scalebox(w, h, yuvbuf, sw, sh, scalebuf);
     src = scalebuf;
