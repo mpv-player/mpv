@@ -134,7 +134,7 @@ frame
 		msb_timestamp			v
 	bitstream
         if(checksum_flag)
-		checksum			u(32)
+		frame_checksum			u(32)
 
 Index:
 	packet header
@@ -192,6 +192,7 @@ stream_class
 	32	audio
 	64	subtiles
 	Note the remaining values are reserved and MUST NOT be used
+	     a decoder MUST ignore streams with reserved classes
 
 fourcc
 	identification for the codec
@@ -286,7 +287,7 @@ checksum_flag
 frame_checksum
 	identical to checksum, but instead of covering just the current 
 	packet, it covers all frames of the same stream id since the last
-	checksum
+	frame_checksum
 	this field is only coded if checksum_flag=1
         
 index_timestamp
