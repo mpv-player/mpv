@@ -40,8 +40,6 @@ extern vd_functions_t mpcodecs_vd_divx4;
 extern vd_functions_t mpcodecs_vd_raw;
 extern vd_functions_t mpcodecs_vd_hmblck;
 extern vd_functions_t mpcodecs_vd_xanim;
-extern vd_functions_t mpcodecs_vd_fli;
-extern vd_functions_t mpcodecs_vd_qtrle;
 extern vd_functions_t mpcodecs_vd_roqvideo;
 extern vd_functions_t mpcodecs_vd_cyuv;
 extern vd_functions_t mpcodecs_vd_nuv;
@@ -55,7 +53,6 @@ extern vd_functions_t mpcodecs_vd_zrmjpeg;
 extern vd_functions_t mpcodecs_vd_realvid;
 extern vd_functions_t mpcodecs_vd_xvid;
 extern vd_functions_t mpcodecs_vd_libdv;
-extern vd_functions_t mpcodecs_vd_lcl;
 extern vd_functions_t mpcodecs_vd_lzo;
 extern vd_functions_t mpcodecs_vd_qtvideo;
 
@@ -85,8 +82,6 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
         &mpcodecs_vd_lzo,
         &mpcodecs_vd_raw,
         &mpcodecs_vd_hmblck,
-        &mpcodecs_vd_fli,
-        &mpcodecs_vd_qtrle,
         &mpcodecs_vd_roqvideo,
         &mpcodecs_vd_cyuv,
         &mpcodecs_vd_nuv,
@@ -117,7 +112,6 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 #ifdef HAVE_LIBDV095
 	&mpcodecs_vd_libdv,
 #endif
-	&mpcodecs_vd_lcl,
 #if defined(USE_QTX_CODECS) || defined(MACOSX)
 	&mpcodecs_vd_qtvideo,
 #endif
