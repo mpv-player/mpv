@@ -30,7 +30,6 @@ Post-0.90 / CVS CLEANUP work:
   maybe use Albeu's new filter args parser hack in all filters, remove sscanf()
 - new demuxer layer - at least modularized...
 - review and implement draw_slice() support in video filters
-- apply Sascha Sommer's Cygwin loader/ patches (al3x)
 
 FOR THE NEXT RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -89,7 +88,7 @@ other:
 DOCUMENTATION TODO:
 ===================
 
-FOR THE v0.90 RELEASE:
+FOR THE v0.91 RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
 
 - merge tech/encoding-tips.txt into encoding.html
@@ -99,13 +98,15 @@ FOR THE v0.90 RELEASE:
   - video.html
   - documentation.html
 - enhance the FAQ
+- man page HTML version
 
 
 FUTURE:
 ~~~~~~~
 
 - update the man page with all current options
-  (prefer-ipv4/6, ipv4-only-proxy, tsfastparse, dvbin + subopts,
-  (no)autoexpand, nuvopts + subopts, remove -aop?)
+  (prefer-ipv4/6, ipv4-only-proxy, tsfastparse, dvbin + subopts, sub-demuxer,
+  (no)autoexpand, oldpp, grabpointer, nuvopts + subopts, remove -aop?)
+- break up 6 level deep sections
+- convert man page to XML
 - write a detailed encoding guide
-- restructuring?
