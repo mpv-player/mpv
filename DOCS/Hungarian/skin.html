@@ -99,10 +99,10 @@ A skinhez használt képek trucolor (24 vagy 32 bit/pixel) PNG
 formátumban lehetnek.
 
 <p>
-A fõablakban (lásd alább) teljesen "átlátszó" részeket tartalmazó képeket
+A fõablakban illetve a lejátszósávban (lásd alább) teljesen "átlátszó" részeket tartalmazó képeket
 is lehet használni: az átlátszónak szánt területeket az #FF00FF
 (<font color="#FF00FF">lila</font>) színnel kell megjelölni. Ez azt jelenti,
-hogy a fõablak akár "formára vágott" is lehet, ha az X szervereden van
+hogy a fõablak illetva a lejátszósáv akár "formára vágott" is lehet, ha az X szervereden van
 XShape támogatás.
 
 
@@ -112,13 +112,13 @@ A skin felépítése meglehetõsen szabad (ellentétben például a Winamp/XMMS
 fix felépítésû skinjével), így csak rajtad múlik, hogy mit hozol ki belõle.
 
 <p>
-Jelenleg három "bõrözhetõ" ablak van: a <a href="#mainwin">fõablak</a>,
-a <a href="#subwindow">lejátszóablak</a> és a <a href="#skinmenu">skin menü</a>
+Jelenleg négy "bõrözhetõ" ablak van: a <a href="#mainwin">fõablak</a>,
+a <a href="#subwindow">lejátszóablak</a>, a <a href="#mainwin">lejátszósáv</a> és a <a href="#skinmenu">skin menü</a>
 (utóbbi a jobb gomb lenyomásával jeleníthetõ meg).
 
 <ul>
 <li>
-Az MPlayert a <b>fõablakból</b> lehet irányítani. Az ablak alapját egy
+Az MPlayert a <b>fõablakból</b> illetve a <b>lejátszósáv</b> lehet irányítani. Az ablak alapját egy
 kép adja, erre lesznek rárajzolva a különféle elemek:
 <em>gombok</em>, <em>potméterek</em> és <em>címkék</em>.
 Természetesen minden elemhez tartozik egy kép, aminek kirajzolásához meg
@@ -144,7 +144,7 @@ megadni. A címkékrõl részletesen a <a href="#main.dlabel">dlabel</a> és
 
 <p>
 <em class=note>
-<b>Megjegyzés:</b> a fõablak rajzolásához használt képek tartalmazhatnak
+<b>Megjegyzés:</b> a fõablak illetve a lejátszósáv rajzolásához használt képek tartalmazhatnak
 teljesen átlátszó részeket, ahogy arról a
 <a href="#images">képformátumoknál</a> már szó volt. Ha az X Server nem tartalmazza az XShape bõvitményt, akkor
 az átlátszónak megjelölt részek fekete színüek lesznek. Ha ezt ki szeretnéd használni, akkor a main ablak hátter
@@ -246,6 +246,7 @@ Az <i>ablaknév</i> a következõk valamelyike lehet:
 <li><b>main</b> - a fõablak</li>
 <li><b>sub</b> - a lejátszóablak</li>
 <li><b>menu</b> - a skin menü</li>
+<li><b>playbar</b> - lejátszósáv</li>
 </ul>
 
 <p>
@@ -283,6 +284,10 @@ section = movieplayer
   window = menu
   ; ... a menü elemei ...
   end
+  
+  window = playbar
+  ; ... a lejátszósáv elemei ...
+  end
 end
 </pre></td></tr></table>
 
@@ -315,10 +320,12 @@ majd a <i>main.PNG<i> fájlt, így végül megtalálja a
 </td></tr></table>
 
 
-<h3><a name="mainwin">3.1. A fõablak</a></h3>
+<h3><a name="mainwin">3.1. A fõablak és a lejátszósáv</a></h3>
 
 Az alábbiakban a "<code>window = main</code>" .&nbsp;.&nbsp;.
-"<code>end</code>" blokkban használható elemek leírása következik.
+"<code>end</code>" 
+és a "<code>window = playbar</code>" .&nbsp;.&nbsp;. "<code>end</code>"
+blokkban használható elemek leírása következik.
 
 <dl>
 <dt><a name="main.base">
@@ -331,6 +338,10 @@ Ezzel kell megadni a fõablak hátteréül szolgáló képet. Az
 sarka). Értékük igazításra is használható: a -1 középre, a
 -2 pedig jobbra (x) illetve alulra (y) igazítást jelent.
 <p>
+<em class=warn>
+<b>Figyelem:</b> a koordináta megadás a lejátszó ablaknál egyenlõre nem mûködik.
+</em>
+<br>
 <em class=warn>
 <b>Figyelem:</b> a képen az átlátszónak megjelölt területek (#FF00FF színûek)
 feketék lesznek az XShape támogatás nélküli X szervereken. A kép szélességének oszthatónak kell lennie nyolccal.
@@ -366,6 +377,12 @@ A <i>kép</i> paraméterrel megadott képnek három egymás alatti részbõl kell
 <dd>
 Engedélyezi (<b>enable</b>) vagy tiltja (<b>disable</b>) az ablakkezelõnek
 a fõablak dekorációját. Alapértelmezés szerint a dekoráció le van tiltva.
+<br>
+<br>
+<em class=warn>
+<b>Figyelem:</b> Ez lejátszó ablaknál nem mûködik, nincs rá szükség.
+</em>
+<br>
 </dd>
 </dl>
 
@@ -374,6 +391,8 @@ a fõablak dekorációját. Alapértelmezés szerint a dekoráció le van tiltva.
 <a name="main.hpotmeter">
 <b>
 hpotmeter = <i>gomb, gsz, gm, fáziskép, fázisok, alap, x, y, sz, m, üzenet</i>
+<br>
+vpotmeter = <i>gomb, gsz, gm, fáziskép, fázisok, alap, x, y, sz, m, üzenet</i>
 </b>
 </a>
 </dt>
@@ -416,10 +435,6 @@ Az egyes fázisokat tartalmazó képnek valahogy így kell kinéznie:
 |  n. fázis képe  |
 +-----------------+
 </small></pre></td></tr></table></div>
-<em class=note>
-<b>Megjegyzés:</b> a hpotmeter-nek lesz párja is (vpotmeter), de az jelenleg
-még nincs kész.
-</em>
 </dd>	
 </dl>
 

@@ -87,8 +87,8 @@ void mplEventHandling( int msg,float param )
         break;
 
    case evPlayNetwork:
-        if ( guiIntfStruct.Subtitlename ) { free( guiIntfStruct.Subtitlename ); guiIntfStruct.Subtitlename=NULL; }
-	if ( guiIntfStruct.AudioFile ) { free( guiIntfStruct.AudioFile ); guiIntfStruct.AudioFile=NULL; }
+        gfree( (void **)&guiIntfStruct.Subtitlename );
+	gfree( (void **)&guiIntfStruct.AudioFile );
 	guiIntfStruct.StreamType=STREAMTYPE_STREAM;
         goto play;
    case evSetURL:
