@@ -58,11 +58,6 @@ typedef struct MJpegContext {
 } MJpegContext;
 
 
-/* A very important function pointer */
-extern int (*dct_quantize)(MpegEncContext *s, 
-		DCTELEM *block, int n, int qscale, int *overflow);
-
-
 /* Begin excessive code duplication ************************************/
 /* Code coming from mpegvideo.c and mjpeg.c in ../libavcodec ***********/
 
@@ -78,14 +73,28 @@ static const unsigned short aanscales[64] = {
     4520,  6270,  5906,  5315,  4520,  3552,  2446,  1247
 };
 
-static void convert_matrix(int (*qmat)[64], uint16_t (*qmat16)[64], uint16_t (*qmat16_bias)[64],
-                           const UINT16 *quant_matrix, int bias)
+static void convert_matrix(MpegEncContext *s, int (*qmat)[64], 
+		uint16_t (*qmat16)[64], uint16_t (*qmat16_bias)[64],
+		const UINT16 *quant_matrix, int bias)
 {
     int qscale;
 
     for(qscale=1; qscale<32; qscale++){
         int i;
-        if (av_fdct == fdct_ifast) {
+	if (s->fdct == ff_jpeg_fdct_islow) {
+		for (i = 0; i < 64; i++) {
+			const int j = block_permute_op(i);
+			/* 16    <= qscale * quant_matrix[i] <= 7905 
+			 * 19952 <= aanscales[i] *  \
+			 * 	        qscale * quant_matrix[i]     <= 205026 
+			 * (1<<36)/19952 >= (1<<36)/(aanscales[i] * \
+			 * 	qscale * quant_matrix[i]) >= (1<<36)/249205025
+			 * 3444240       >= (1<<36)/(aanscales[i] *
+			 *      qscale * quant_matrix[i]) >= 275              */
+			qmat[qscale][j] = (int)((UINT64_C(1) << (QMAT_SHIFT-3))/
+					(qscale * quant_matrix[j]));
+		}
+	} else if (s->fdct == fdct_ifast) {
             for(i=0;i<64;i++) {
                 const int j= block_permute_op(i);
                 /* 16 <= qscale * quant_matrix[i] <= 7905 */
@@ -355,7 +364,7 @@ jpeg_enc_t *jpeg_enc_init(int w, int h, int y_psize, int y_rsize,
 	for (i = 1; i < 64; i++) 
 		j->s->intra_matrix[i] = 
 			(ff_mpeg1_default_intra_matrix[i]*j->s->qscale) >> 3;
-	convert_matrix(j->s->q_intra_matrix, j->s->q_intra_matrix16, 
+	convert_matrix(j->s, j->s->q_intra_matrix, j->s->q_intra_matrix16, 
 			j->s->q_intra_matrix16_bias, 
 			j->s->intra_matrix, j->s->intra_quant_bias);
 	return j;
@@ -447,24 +456,24 @@ int jpeg_enc_frame(jpeg_enc_t *j, unsigned char *y_data,
 			emms_c(); /* is this really needed? */
 
 			j->s->block_last_index[0] = 
-				dct_quantize(j->s, j->s->block[0], 
+				j->s->dct_quantize(j->s, j->s->block[0], 
 						0, 8, &overflow);
 			if (overflow) clip_coeffs(j->s, j->s->block[0], 
 					j->s->block_last_index[0]);
 			j->s->block_last_index[1] = 
-				dct_quantize(j->s, j->s->block[1], 
+				j->s->dct_quantize(j->s, j->s->block[1], 
 						1, 8, &overflow);
 			if (overflow) clip_coeffs(j->s, j->s->block[1], 
 					j->s->block_last_index[1]);
 
 			if (!j->bw) {
 				j->s->block_last_index[4] =
-					dct_quantize(j->s, j->s->block[2], 
+					j->s->dct_quantize(j->s, j->s->block[2],
 							4, 8, &overflow);
 				if (overflow) clip_coeffs(j->s, j->s->block[2], 
 						j->s->block_last_index[2]);
 				j->s->block_last_index[5] =
-					dct_quantize(j->s, j->s->block[3], 
+					j->s->dct_quantize(j->s, j->s->block[3],
 							5, 8, &overflow);
 				if (overflow) clip_coeffs(j->s, j->s->block[3], 
 						j->s->block_last_index[3]);
