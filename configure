@@ -94,7 +94,7 @@ Installation directories:
 
 Optional features:
   --enable-largefiles    enable support for files >2^32 bytes long [disable]
-  --enable-termcap       use termcap database for key codes [disable]
+  --enable-termcap       use termcap database for key codes [autodetect]
   --enable-lirc          enable LIRC (remote control) support [disable]
   --enable-gui           enable GUI [disable]
   --enable-tv            enable TV Interface (tv/dvb grabbers) [disable]
@@ -616,7 +616,7 @@ fi
 _prefix="/usr/local"
 
 _libavcodec=auto
-_libavcodec_so=auto
+_libavcodecso=auto
 
 _x11=auto
 _dga=auto
@@ -657,7 +657,7 @@ _streaming=no
 _divx4linux=auto
 _lirc=no
 _gui=no
-_termcap=no
+_termcap=auto
 _3dfx=no
 _tdfxfb=no
 
@@ -994,7 +994,11 @@ int main(void) { return 0; }
 EOF
 cc_check $_ld_sock -lsocket && _ld_sock="$_ld_sock -lsocket"
 cc_check $_ld_sock -lnsl && _ld_sock="$_ld_sock -lnsl"
-echores "$_ld_sock"
+if test "$_ld_sock" ; then
+  echores "$_ld_sock"
+else
+  echores "not needed"
+fi
 
 
 echocheck "malloc.h"
@@ -1095,8 +1099,7 @@ echores "$_sys_soundcard"
 
 
 echocheck "termcap"
-if test "$termcap" = yes ; then
-  # FIXME: User wanted so he'll get it
+if test "$termcap" = auto ; then
   _termcap=no
   cat > $TMPC <<EOF
 int main(void) { return 0; }
@@ -1203,7 +1206,7 @@ if test "$_x11" = auto ; then
 int main(void) { return 0; }
 EOF
   _x11=no
-  cc_check $_ld_x11 -lXext $_ld_sock && _x11=yes
+  cc_check $_inc_x11 $_ld_x11 -lXext $_ld_sock && _x11=yes
 fi
 if test "$_x11" = yes ; then
   _def_x11='#define HAVE_X11 1'
@@ -1214,7 +1217,7 @@ fi
 echores "$_x11"
 
 
-echocheck "DMPS"
+echocheck "DPMS"
 _xdpms3=no
 if test "$_x11" = yes ; then
   cat > $TMPC <<EOF
@@ -1225,7 +1228,7 @@ if test "$_x11" = yes ; then
 #include <X11/extensions/dpms.h>
 int main(void) { return 0; }
 EOF
-  cc_check $_ld_x11 -lXdpms $_ld_sock && _xdpms3=yes
+  cc_check $_inc_x11 $_ld_x11 -lXdpms $_ld_sock && _xdpms3=yes
 fi
 _xdpms4=no
 if test "$_x11" = yes ; then
@@ -1239,7 +1242,7 @@ int main(void) {
   (void) DPMSQueryExtension(0, 0, 0);
 }
 EOF
-  cc_check $_ld_x11 && _xdpms4=yes
+  cc_check $_inc_x11 $_ld_x11 && _xdpms4=yes
 fi
 
 if test "$_xdpms4" = yes ; then
@@ -1261,7 +1264,7 @@ if test "$_x11" = yes && test "$_xv" = auto ; then
 int main(void) { return 0; }
 EOF
   _xv=no
-  cc_check $_ld_x11 -lXv $_ld_sock && _xv=yes
+  cc_check $_inc_x11 $_ld_x11 -lXv $_ld_sock && _xv=yes
 else
   _xv=no
 fi
@@ -1281,7 +1284,7 @@ if test "$_x11" = yes && test "$_xinerama" = auto ; then
 int main(void) { return 0; }
 EOF
   _xinerama=no
-  cc_check $_ld_x11 -lXinerama $_ld_sock && _xinerama=yes
+  cc_check $_inc_x11 $_ld_x11 -lXinerama $_ld_sock && _xinerama=yes
 else
   _xinerama=no
 fi
@@ -1882,7 +1885,8 @@ fi
 echocheck "XAnim DLL"
 if test "$_xanim" = auto ; then
   _xanim=no
-  if test "$_dl" = yes ; then
+  # FreeBSD does not libdl
+  if freebsd || test "$_dl" = yes ; then
     if test "$host_arch" = i386 ; then
       if test -z "$_xanimlibdir" ; then
         for I in /usr/local/lib/xanim/mods /usr/lib/xanim/mods ; do
@@ -1975,16 +1979,16 @@ if test "$_libavcodec" = auto ; then
   _libavcodec=no
   test -d libavcodec && test -f libavcodec/Makefile && _libavcodec=yes
 fi
-if test "$_libavcodec_so" = auto ; then
-  _libavcodec_so=no
+if test "$_libavcodecso" = auto ; then
+  _libavcodecso=no
   cat > $TMPC << EOF
 #include <libffmpeg/avcodec.h>
 int main(void) { return 0; }
 EOF
-  cc_check  -lffmpeg -lm && _libavcodec_so=yes
+  cc_check  -lffmpeg -lm && _libavcodecso=yes
 fi
 _def_libavcodec='#undef USE_LIBAVCODEC'
-_def_libavcodec_so='#undef USE_LIBAVCODEC'
+_def_libavcodecso='#undef USE_LIBAVCODEC_SO'
 _def_ffpostprocess='#undef FF_POSTPROCESS'
 if test "$_libavcodec" = yes ; then
   _def_libavcodec='#define USE_LIBAVCODEC 1'
@@ -1992,8 +1996,8 @@ if test "$_libavcodec" = yes ; then
   _dep_libavcodec='libavcodec/libavcodec.a'
   _def_ffpostprocess='#define FF_POSTPROCESS 1'
   echores "static libavcodec"
-elif test "$_libavcodec_so" = yes ; then
-  _def_libavcodec_so='#define USE_LIBAVCODEC_SO 1'
+elif test "$_libavcodecso" = yes ; then
+  _def_libavcodecso='#define USE_LIBAVCODEC_SO 1'
   _ld_libavcodec='-lffmpeg'
   _def_ffpostprocess='#define FF_POSTPROCESS 1'
   echores "dynamic libffmpeg.so"
@@ -2412,7 +2416,7 @@ $_def_dshow
 
 /* ffmpeg's libavcodec support (requires libavcodec source) */
 $_def_libavcodec
-$_def_libavcodec_so
+$_def_libavcodecso
 
 /* use only decoders from libavcodec: */
 #define CONFIG_DECODERS 1
