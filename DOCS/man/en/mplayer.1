@@ -5991,6 +5991,17 @@ Diamond type and size for motion estimation pre pass
 .TP
 .B dia=<-99\-6>
 Diamond type & size for motion estimation.
+Motion search is an iterative process.
+Using a small diamond does not limit the search to finding only small
+motion vectors.
+It is just somewhat more likely to stop before finding the very best motion
+vector, especially when noise is involved.
+Bigger diamonds allow a wider search for the best motion vector, thus are
+slower but result in better quality.
+.br
+Big normal diamonds are better quality than shape-adaptive diamonds.
+.br
+Shape-adaptive diamonds are a good tradeoff between speed and quality.
 .br
 .I NOTE:
 The sizes of the normal diamonds and shape adaptive ones don't have
@@ -6001,7 +6012,7 @@ shape adaptive (fast) diamond with size 3
 .IPs -2
 shape adaptive (fast) diamond with size 2
 .IPs -1
-experimental
+slightly special: Can be slower and/or better than dia=-2.
 .IPs  1
 normal size=1 diamond (default) =EPZS type diamond
 .nf
