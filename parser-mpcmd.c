@@ -238,7 +238,7 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
 	  m_option_t* mp_opt = NULL;
 	  play_tree_t* entry = NULL;
 
-	  tmp = is_entry_option(opt,argv[i + 1],&entry);
+	  tmp = (i+1<argc) ? is_entry_option(opt,argv[i + 1],&entry) : 0;
 	  if(tmp > 0)  { // It's an entry
 	    if(entry) {
 	      add_entry(entry);
@@ -251,9 +251,10 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
 	    mp_opt = m_config_get_option(config,opt);
 	    if (mp_opt != NULL) { // Option exist
 	      if(mode == GLOBAL || (mp_opt->flags & M_OPT_GLOBAL))
-		tmp = m_config_set_option(config, opt, argv[i + 1]);
+                tmp = (i+1<argc) ? m_config_set_option(config, opt, argv[i + 1])
+				 : m_config_set_option(config, opt, NULL);
 	      else {
-		tmp = m_config_check_option(config, opt, argv[i + 1]);
+		tmp = (i+1<argc) ? m_config_check_option(config, opt, argv[i + 1]) : -1;
 		if(tmp >= 0 && mode != DROP_LOCAL) {
 		  play_tree_t* pt = last_entry ? last_entry : last_parent;
 		  play_tree_set_param(pt,opt, argv[i + 1]);
