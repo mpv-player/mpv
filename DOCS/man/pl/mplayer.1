@@ -1,4 +1,4 @@
-.\" synced with 1.832
+.\" synced with 1.833
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -7286,7 +7286,7 @@ wspó³czynnik kwantyzatora miêdzy ramkami I a P (domy¶lnie: 1.4)
 .
 .TP
 .B pb_factor=<warto¶æ>
-wspó³czynnik kwantyzatora miêdzy ramkami P a B (domy¶lnie: 1.4)
+wspó³czynnik kwantyzatora miêdzy ramkami P a B (domy¶lnie: 1.3)
 .
 .TP
 .B pass=<1\-3>
@@ -7355,15 +7355,47 @@ Ni¿sze warto¶ci pozwalaj± na wiêksze skoki warto¶ci kwantyzatora,
 wy¿sze zmuszaj± go do delikatniejszych zmian.
 .
 .TP
-.B (no)4x4mv
-Wykorzystuje wszystkie dostêpne makrobloki inter-klatek
-(i16x16, i4x4, p16x16, p16x8, p8x16, p8x8, p8x4, p4x8, p4x4, skip).
+.B direct_pred=<0\-2>
+Wykrywa typ systemu przewidywania ruchu dla bezpo¶rednich makrobloków w klatkach
+typu B.
+.PD 0
+.RSs
+.IPs 0
+¯aden: bezpo¶rednie makrobloki nie s± wykorzystywane.
+.IPs 1
+Tymczasowy: wektory ruchu s± interpolowane z nastêpnych klatek P.
+.IPs 2
+Przestrzenny: wektory ruchu s± ekstrapolowane z s±siednich bloków.
+.RE
+.PD 1
+Typ przestrzenny i tymczasowy maj± podobn± prêdko¶æ dzia³ania i ¿aden z nich
+nie jest szczególnie lepszy od drugiego.
+W³a¶ciwy wybór zale¿y od filmu.
+direct_pred=0 to zazwyczaj wolniejsza i daj±ca gorsz± jako¶æ metoda.
+.
+.TP
+.B (no)b8x8mv
+Wykorzystuje makrobloki typu b16x8, b8x16 i b8x8 (domy¶lnie: w³±czone).
+Wymaga klatek B.
+Wiecej szczegó³ów znajdziesz w dokumentacji opcji 4x4mv.
+.
+.TP
+ .B (no)4x4mv
+Wykorystuje makrobloki typu p8x4, p4x8 i p4x4 (domy¶lnie: w³±czone).
+.br
+Dostêpne typy makrobloków interklatek to i16x16, i4x4, p16x16, p16x8,
+p8x16, p8x8, p8x4, p4x8, p4x4, b16x16, b16x8, b8x16, b8x8, skip i bezpo¶rednie.
+i16x16, i4x4, p16x16-8x8, b16x16 i skip s± zawsze wykorzystywane.
+.br
 Pomys³ polega na tym, aby odnale¼æ typ i rozmiar, który najlepiej opisuje
-okre¶lony obszar obrazu, np.\& daje to bardzo dobre rezultaty dla Anime, które
-zazwyczaj zawieraj± du¿e obszary tego samego koloru
-(domy¶lnie: i16x16, i2x4, p16x16-8x8, skip).
-Zale¿nie od materia³u ¼ród³owego, parametr ten mo¿e zwiêkszyæ lub
-zmniejszyæ jako¶æ, u¿ywaj go ostro¿nie.
+okre¶lony obszar obrazu.
+of the picture.
+Na przyk³ad, globalny pan jest lepiej reprezentowany przez bloki 16x16,
+podczas gdy ma³e poruszaj±ce siê obiekty przez mniejsze segmenty.
+.br
+Zaleca siê u¿ywanie 4x4mv tylko z subq >= 3.
+W zale¿no¶ci od ¼ród³owego materia³u, mo¿e to polepszyæ lub pogorszyæ jako¶æ,
+korzystaj z tego ostro¿nie.
 .
 .TP
 .B subq=<0\-5>
@@ -7374,11 +7406,11 @@ Mo¿e znacznie poprawiæ jako¶æ.
 .RSs
 0: tylko halfpel
 .br
-1: 1 iteracja qpel na wygrywaj±cym kandydacie (domy¶lnie)
+1: 1 iteracja qpel na wygrywaj±cym kandydacie
 .br
 2: 2 iteracje qpel na wygrywaj±cym kandydacie
 .br
-3: halfpel na wszystkich typach makrobloków (MB), qpel na zwyciêzcy
+3: halfpel na wszystkich typach makrobloków (MB), qpel na zwyciêzcy (domy¶lnie)
 .br
 4: qpel na wszystkim
 .br
