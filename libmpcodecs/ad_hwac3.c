@@ -364,6 +364,8 @@ static int decode_audio_dts(unsigned char *indata_ptr, int len, unsigned char *b
 #else
   //TODO if fzise is odd, swab doesn't copy the last byte
   swab(indata_ptr, &buf[8], fsize);
+  if (fsize & 1)
+    buf[8+fsize] = indata_ptr[fsize];
 #endif
   memset(&buf[fsize + 8], 0, nr_samples * 2 * 2 - (fsize + 8));
 
