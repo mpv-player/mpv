@@ -1,4 +1,4 @@
-MPlayer (CVS version)           (C) 2000-2001 Árpád Gereöffy (A'rpi/ESP-team)
+MPlayer 0.18                    (C) 2000-2001 Árpád Gereöffy (A'rpi/ESP-team)
 =============================== * Készítõk teljes listáját lásd AUTHORS file*
 http://mplayer.sourceforge.net
 
@@ -48,6 +48,10 @@ a képminõséggel, vagy a sebességgel is. Elhatároztam, hogy (át)írok egyet...
   A 0.11pre sorozat végsõ verziója, 4 hónapnyi kõkemény fejlesztés után!
   Próbáld ki és ess ámulatba! Ezernyi új dolog... és persze a régi kód
   feljavítva, bugok eltávolítva stb.
+- MPlayer 0.18
+  2 hónap telt el a 0.17 óta, és itt az újabb release.. Teljes ASF támogatás,
+  még több subtitle formátum, libao (mint libvo, csak ez audio-ra), és még
+  stabilabb mint eddig! KÖTELEZÕ !
 
 Látható, hogy nem codeceket írtam, csak néhány lejátszót. Sok idõt töltöttem
 azzal is, hogy megtaláljam a megfelelõ módszert a hibás file-ok beolvasására

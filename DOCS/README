@@ -1,4 +1,4 @@
-MPlayer (CVS version)           (C) 2000-2001 Arpad Gereoffy (A'rpi/ESP-team)
+MPlayer 0.18                    (C) 2000-2001 Arpad Gereoffy (A'rpi/ESP-team)
 =============================== * See the file AUTHORS for the complete list *
 http://mplayer.sourceforge.net
 
@@ -46,6 +46,10 @@ or speed problems too. So I've decided to write/modify one...
   The release version of the 0.11pre after 4 months of heavy development!
   Try it, and be amazed! Thousands of new features added... and of course
   old code was improved too, bugs removed etc.
+- MPlayer 0.18
+  2 months since 0.17 and here's a new release.. Completed ASF support,
+  more subtitle formats, introduced libao (similar to libvo but to audio),
+  even more stable than ever, and so on. It's a MUST !
 
 As you see, I didn't write any codecs, just some players. Instead I spent
 a lot of time finding the best way to parse bad damaged input files
