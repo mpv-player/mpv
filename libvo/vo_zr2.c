@@ -217,6 +217,8 @@ static uint32_t preinit(const char *arg) {
 				"Example: mplayer -vo zr2:dev=/dev/video1:"
 				"norm=PAL movie.avi\n\n"
 				, guess_device(NULL, 0));
+		free(norm_arg);
+		free(dev_arg);
 		return -1;
 	}
 				
