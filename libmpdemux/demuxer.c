@@ -150,6 +150,7 @@ void ds_read_packet(demux_stream_t *ds,stream_t *stream,int len,float pts,off_t 
 // return value:
 //     0 = EOF or no stream found or invalid type
 //     1 = successfully read a packet
+int demux_roq_fill_buffer(demuxer_t *demux);
 int demux_film_fill_buffer(demuxer_t *demux);
 int demux_fli_fill_buffer(demuxer_t *demux);
 int demux_mpg_es_fill_buffer(demuxer_t *demux);
@@ -176,6 +177,7 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
   // Note: parameter 'ds' can be NULL!
 //  printf("demux->type=%d\n",demux->type);
   switch(demux->type){
+    case DEMUXER_TYPE_ROQ: return demux_roq_fill_buffer(demux);
     case DEMUXER_TYPE_FILM: return demux_film_fill_buffer(demux);
     case DEMUXER_TYPE_FLI: return demux_fli_fill_buffer(demux);
     case DEMUXER_TYPE_MPEG_ES: return demux_mpg_es_fill_buffer(demux);
@@ -367,11 +369,13 @@ int mov_check_file(demuxer_t* demuxer);
 int mov_read_header(demuxer_t* demuxer);
 int demux_open_fli(demuxer_t* demuxer);
 int demux_open_film(demuxer_t* demuxer);
+int demux_open_roq(demuxer_t* demuxer);
 
 extern int vivo_check_file(demuxer_t *demuxer);
 extern void demux_open_vivo(demuxer_t *demuxer);
 extern int y4m_check_file(demuxer_t *demuxer);
 extern void demux_open_y4m(demuxer_t *demuxer);
+extern int roq_check_file(demuxer_t *demuxer);
 
 extern int real_check_file(demuxer_t *demuxer);
 extern void demux_open_real(demuxer_t *demuxer);
@@ -462,7 +466,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_VIVO){
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_REAL){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_REAL,audio_id,video_id,dvdsub_id);
   if(real_check_file(demuxer)){
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected REAL file format!\n");
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedREALfile);
       file_format=DEMUXER_TYPE_REAL;
   }
 }
@@ -490,6 +494,14 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_FILM){
       mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedFILMfile);
       file_format=DEMUXER_TYPE_FILM;
     }
+  }
+}
+//=============== Try to open as RoQ file: =================
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_ROQ){
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_ROQ,audio_id,video_id,dvdsub_id);
+  if(roq_check_file(demuxer)){
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedROQfile);
+      file_format=DEMUXER_TYPE_ROQ;
   }
 }
 //=============== Try to open as MPEG-PS file: =================
@@ -572,6 +584,10 @@ switch(file_format){
  }
  case DEMUXER_TYPE_FILM: {
   if (!demux_open_film(demuxer)) return NULL;
+  break;
+ }
+ case DEMUXER_TYPE_ROQ: {
+  if (!demux_open_roq(demuxer)) return NULL;
   break;
  }
  case DEMUXER_TYPE_MOV: {
