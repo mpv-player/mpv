@@ -60,6 +60,7 @@ typedef struct {
     int		current_vpacket;
     
     // timestamp correction:
+    int		kf_base;// timestamp of the prev. video keyframe
     int		kf_pts;	// timestamp of next video keyframe
     int		a_pts;	// previous audio timestamp
     float	v_pts;  // previous video timestamp
@@ -321,7 +322,9 @@ static float real_fix_timestamp(real_priv_t* priv, unsigned char* s, int timesta
   uint32_t buffer= (s[0]<<24) + (s[1]<<16) + (s[2]<<8) + s[3];
   int kf=timestamp;
   int pict_type;
-  
+  int orig_kf;
+
+#if 1
   if(format==mmioFOURCC('R','V','3','0') || format==mmioFOURCC('R','V','4','0')){
     if(format==mmioFOURCC('R','V','3','0')){
       SKIP_BITS(3);
@@ -330,24 +333,36 @@ static float real_fix_timestamp(real_priv_t* priv, unsigned char* s, int timesta
     }else{
       SKIP_BITS(1);
       pict_type= SHOW_BITS(2);
-      SKIP_BITS(2 + 7 + 1);
+      SKIP_BITS(2 + 7 + 3);
     }
-    kf= 2*SHOW_BITS(12);
-    if(verbose>1) printf("\nTS: %08X (%04X) %d %02X %02X %02X %02X\n",timestamp,kf,pict_type,s[0],s[1],s[2],s[3]);
-    kf|=timestamp&(~0x1fff);	// combine with packet timestamp
-    if(kf<timestamp-4096) kf+=8192; else // workaround wrap-around problems
-    if(kf>timestamp+4096) kf-=8192;
+    orig_kf=
+    kf= SHOW_BITS(13);  //    kf= 2*SHOW_BITS(12);
+//    if(pict_type==0)
+    if(pict_type<=1){
+      // I frame, sync timestamps:
+      priv->kf_base=timestamp-kf;
+      if(verbose>1) printf("\nTS: base=%08X\n",priv->kf_base);
+      kf=timestamp;
+    } else {
+      // P/B frame, merge timestamps:
+      int tmp=timestamp-priv->kf_base;
+      kf|=tmp&(~0x1fff);	// combine with packet timestamp
+      if(kf<tmp-4096) kf+=8192; else // workaround wrap-around problems
+      if(kf>tmp+4096) kf-=8192;
+      kf+=priv->kf_base;
+    }
     if(pict_type != 3){ // P || I  frame -> swap timestamps
 	int tmp=kf;
 	kf=priv->kf_pts;
 	priv->kf_pts=tmp;
 //	if(kf<=tmp) kf=0;
     }
+    if(verbose>1) printf("\nTS: %08X -> %08X (%04X) %d %02X %02X %02X %02X %5d\n",timestamp,kf,orig_kf,pict_type,s[0],s[1],s[2],s[3],kf-(int)(1000.0*priv->v_pts));
   }
+#endif
     v_pts=kf*0.001f;
-    if(v_pts<priv->v_pts || !kf) v_pts=priv->v_pts+frametime;
+//    if(v_pts<priv->v_pts || !kf) v_pts=priv->v_pts+frametime;
     priv->v_pts=v_pts;
-//    printf("\n#T# %5d/%5d (%5.3f) %5.3f  \n",kf,timestamp,frametime,v_pts);
     return v_pts;
 }
 
