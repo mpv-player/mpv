@@ -179,6 +179,7 @@ int lame_param_mode=-1; // unset
 int lame_param_padding=-1; // unset
 int lame_param_br=-1; // unset
 int lame_param_ratio=-1; // unset
+float lame_param_scale=-1; // unset
 #endif
 
 static int vo_w=0, vo_h=0;
@@ -751,6 +752,10 @@ if(lame_param_vbr){  // VBR:
 }
 if(lame_param_mode>=0) lame_set_mode(lame,lame_param_mode); // j-st
 if(lame_param_ratio>0) lame_set_compression_ratio(lame,lame_param_ratio);
+if(lame_param_scale>0) {
+    printf("Setting audio input gain to %f\n", lame_param_scale);
+    lame_set_scale(lame,lame_param_scale);
+}
 lame_init_params(lame);
 if(verbose){
     lame_print_config(lame);
