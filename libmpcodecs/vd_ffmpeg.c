@@ -47,6 +47,15 @@ LIBVD_EXTERN(ffmpeg)
 #define PIX_FMT_RGBA32 PIX_FMT_BGRA32
 #endif
 
+//!!TODO!! when ffmpeg is patched set correct version number
+#if LIBAVCODEC_BUILD < 4669
+#undef HAVE_XVMC
+#endif
+
+#ifdef HAVE_XVMC
+#include "xvmc_render.h"
+#endif
+
 int avcodec_inited=0;
 
 #if defined(FF_POSTPROCESS) && defined(MBR)
@@ -79,6 +88,14 @@ typedef struct {
 static int get_buffer(AVCodecContext *avctx, AVFrame *pic);
 static void release_buffer(AVCodecContext *avctx, AVFrame *pic);
 
+#ifdef HAVE_XVMC
+static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic);
+static void mc_release_buffer(AVCodecContext *avctx, AVFrame *pic);
+static void mc_render_slice(struct AVCodecContext *s,
+                	uint8_t **src, int linesize,
+                	int y, int width, int height);
+#endif
+
 static int lavc_param_workaround_bugs= FF_BUG_AUTODETECT;
 static int lavc_param_error_resilience=2;
 static int lavc_param_error_concealment=3;
@@ -106,9 +123,15 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
     AVCodecContext *avctx = ctx->avctx;
     switch(cmd){
     case VDCTRL_QUERY_FORMAT:
-	if( (*((int*)arg)) == ctx->best_csp ) return CONTROL_TRUE;//supported
+        {
+            int format =(*((int*)arg));
+	    if( format == ctx->best_csp ) return CONTROL_TRUE;//supported
+#ifdef HAVE_XVMC
+	    if( (avctx->pix_fmt == PIX_FMT_XVMC) && IMGFMT_IS_XVMC(format) ) 
+                return CONTROL_TRUE;
+#endif
 	// possible conversions:
-	switch( (*((int*)arg)) ){
+	    switch( format ){
         case IMGFMT_YV12:
         case IMGFMT_IYUV:
         case IMGFMT_I420:
@@ -118,6 +141,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 	    break;
 	}
         return CONTROL_FALSE;
+    }
     }
     return CONTROL_UNKNOWN;
 }
@@ -164,6 +188,17 @@ static int init(sh_video_t *sh){
     ctx->avctx = avcodec_alloc_context();
     avctx = ctx->avctx;
 
+#ifdef HAVE_XVMC
+    if(lavc_codec->id == CODEC_ID_MPEG2VIDEO_XVMC){
+        printf("vd_ffmpeg: XVMC accelerated MPEG2\n");
+        assert(ctx->do_dr1);//these are must to!
+        assert(ctx->do_slices); //it is (vo_)ffmpeg bug if this fails
+        avctx->flags|= CODEC_FLAG_EMU_EDGE;//do i need that??!!
+        avctx->get_buffer= mc_get_buffer;
+        avctx->release_buffer= mc_release_buffer;
+	avctx->draw_horiz_band = mc_render_slice;
+    }else
+#endif
     if(ctx->do_dr1){
         avctx->flags|= CODEC_FLAG_EMU_EDGE; 
         avctx->get_buffer= get_buffer;
@@ -359,6 +394,11 @@ static int init_vo(sh_video_t *sh){
 	case PIX_FMT_YUV422:  ctx->best_csp=IMGFMT_YUY2;break; //huffyuv perhaps in the future
 	case PIX_FMT_RGB24 :  ctx->best_csp=IMGFMT_BGR24;break; //huffyuv
 	case PIX_FMT_RGBA32:  ctx->best_csp=IMGFMT_BGR32;break; //huffyuv
+#ifdef HAVE_XVMC
+	case PIX_FMT_XVMC: //ctx->best_csp=IMGFMT_XVMC_MPEG2;
+	   ctx->best_csp=sh->codec->outfmt[sh->outfmtidx];//!!maybe!!??
+           break;
+#endif
 	default:
 	    ctx->best_csp=0;
 	}
@@ -527,6 +567,11 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
     if(len<=0) return NULL; // skipped frame
 
+#ifdef HAVE_XVMC
+// in fact if(!dr1) should be the only condition, but this way we hide an 
+//ffmpeg interlace (mpeg2) bug. use -noslices to avoid it.
+    if( (avctx->pix_fmt != PIX_FMT_XVMC) )// && (!dr1) )
+#endif
     avctx->draw_horiz_band=NULL;
     avctx->opaque=sh;
     if(ctx->vo_inited && !(flags&3) && !dr1){
@@ -682,5 +727,136 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     
     return mpi;
 }
+
+#ifdef HAVE_XVMC
+static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic){
+    sh_video_t * sh = avctx->opaque;
+    vd_ffmpeg_ctx *ctx = sh->context;
+    mp_image_t* mpi=NULL;
+    xvmc_render_state_t * render;
+    int flags= MP_IMGFLAG_ACCEPT_STRIDE | MP_IMGFLAG_PREFER_ALIGNED_STRIDE| 
+               MP_IMGFLAG_DRAW_CALLBACK;
+    
+//  printf("vd_ffmpeg::mc_get_buffer (xvmc) %d %d %d\n", pic->reference, ctx->ip_count, ctx->b_count);
+    if(avctx->pix_fmt != PIX_FMT_XVMC){
+        printf("vd_ffmpeg::mc_get_buffer should work only with XVMC format!!!");
+        assert(0);
+        exit(1);
+    }
+    assert(avctx->draw_horiz_band == mc_render_slice);
+    assert(avctx->release_buffer == mc_release_buffer);
+    if(verbose > 4)
+        printf("vd_ffmpeg::mc_get_buffer\n");
+    if(init_vo(sh)<0){
+        printf("vd_ffmpeg: Unexpected init_vo error\n");
+        exit(1);
+    }
+
+
+
+    if(!pic->reference){
+        ctx->b_count++;
+    }else{
+        ctx->ip_count++;
+        flags|= MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE;
+    }
+
+    mpi= mpcodecs_get_image(sh, MP_IMGTYPE_IPB,flags ,
+                            avctx->width, avctx->height);
+    if(mpi==NULL){
+        printf("Unrecoverable error, render buffers not taken\n");
+        assert(0);
+        exit(1);
+    };
+    
+    if( (mpi->flags & MP_IMGFLAG_DIRECT) == 0){
+        printf("Only buffers allocated by vo_xvmc allowed\n");
+        assert(0);
+        exit(1);
+    }
+    
+    pic->data[0]= mpi->planes[0];
+    pic->data[1]= mpi->planes[1];
+    pic->data[2]= mpi->planes[2];
+
+
+    /* Note, some (many) codecs in libavcodec must have stride1==stride2 && no changes between frames
+     * lavc will check that and die with an error message, if its not true
+     */
+    pic->linesize[0]= mpi->stride[0];
+    pic->linesize[1]= mpi->stride[1];
+    pic->linesize[2]= mpi->stride[2];
+
+    pic->opaque = mpi;
+
+    if(pic->reference){
+    //I or P frame
+        pic->age= ctx->ip_age[0];
+        
+        ctx->ip_age[0]= ctx->ip_age[1]+1;
+        ctx->ip_age[1]= 1;
+        ctx->b_age++;
+    }else{
+    //B frame
+        pic->age= ctx->b_age;
+    
+        ctx->ip_age[0]++;
+        ctx->ip_age[1]++;
+        ctx->b_age=1;
+    }
+#if LIBAVCODEC_BUILD >= 4644
+    pic->type= FF_BUFFER_TYPE_USER;
+#endif
+    render=(xvmc_render_state_t*)mpi->priv;//same as data[2]
+    assert(render != 0);
+    assert(render->magic == MP_XVMC_RENDER_MAGIC);
+    render->state |= MP_XVMC_STATE_PREDICTION;
+    return 0;
+}
+
+
+static void mc_release_buffer(AVCodecContext *avctx, AVFrame *pic){
+    mp_image_t* mpi= pic->opaque;
+    sh_video_t * sh = avctx->opaque;
+    vd_ffmpeg_ctx *ctx = sh->context;
+    xvmc_render_state_t * render;
+    int i;
+
+
+    if(ctx->ip_count <= 2 && ctx->b_count<=1){
+        if(mpi->flags&MP_IMGFLAG_PRESERVE)
+            ctx->ip_count--;
+        else
+            ctx->b_count--;
+    }
+
+//printf("R%X %X\n", pic->linesize[0], pic->data[0]);
+//mark the surface as not requared for prediction
+    render=(xvmc_render_state_t*)pic->data[2];//same as mpi->priv
+    assert(render!=NULL);
+    assert(render->magic==MP_XVMC_RENDER_MAGIC);
+    render->state&=~MP_XVMC_STATE_PREDICTION;
+    if(verbose > 4)
+        printf("vd_ffmpeg::mc_release buffer (render=%p)\n",render);
+    for(i=0; i<4; i++){
+        pic->data[i]= NULL;
+    }
+}
+
+static void mc_render_slice(struct AVCodecContext *s,
+                	uint8_t **src, int linesize,
+                	int y, int width, int height){
+
+    sh_video_t * sh = s->opaque;
+    int stride[3];
+    
+    assert(linesize==0);
+
+    stride[0]=stride[1]=stride[2]=linesize;
+    mpcodecs_draw_slice (sh,src, stride, width, height, 0, y);
+
+}
+
+#endif // HAVE_XVMC
 
 #endif
