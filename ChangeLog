@@ -22,6 +22,7 @@ mplayer (1.0)
     * fixed the MPEG muxer
     * fixed tons of bugs in MMS streaming
     * user settable http user-agent field
+    * improved seeking in realmedia format
     
     Filters:
     * some fixes in the delogo filter 
