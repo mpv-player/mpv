@@ -225,10 +225,6 @@ Q: Es ha megelegszek az MPEG-gel?
 A: Talan. De jobban jarsz ha mar letezo MPEG lejatszot keresel arra a
    bizonyos platformra.
 
-Q: MPlayer dies with "MPlayer interrupted by signal 4 in module: decode_video".
-A: Try running MPlayer on the machine you compiled on. Or recompile. Don't
-   use MPlayer on different CPU that it was compiled on.
-
 Q: Az MPlayer "MPlayer interrupted by signal 4 in module: decode_video"
    uzenettel leall.
 A: Azon a gepen futtasd az MPlayert amin leforditottad. Vagy forditsd ujra.
