@@ -298,8 +298,8 @@ It's called <filename>XFree86-devel*</filename> under Red Hat, and
 <filename class="directory">/usr/include/X11</filename> symlinks exist (this
 can be a problem on Mandrake systems). They can be created with these commands:
 <screen>
-     $ ln -sf /usr/X11R6 /usr/X11
-     $ ln -sf /usr/X11R6/include/X11 /usr/include/X11
+     # ln -sf /usr/X11R6 /usr/X11
+     # ln -sf /usr/X11R6/include/X11 /usr/include/X11
 </screen>
 Your distribution may differ from the
 <ulink url="http://www.pathname.com/fhs/">Filesystem Hierarchy Standard</ulink>.
