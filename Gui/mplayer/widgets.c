@@ -68,6 +68,10 @@ static void gtkThreadProc( int argc,char * argv[] )
 {
  struct sigaction sa;
 
+ #ifdef HAVE_RTC
+  setuid( getuid() ); // strongly test, please check this.
+ #endif
+
  gtk_set_locale();
  gtk_init( &argc,&argv );
  gdk_set_use_xshm( TRUE );

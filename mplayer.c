@@ -634,6 +634,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 	} else
 	    printf("Using Linux's hardware RTC timing (%ldHz)\n", irqp);
     }
+    setuid( getuid() ); // strongly test, please check this.
     if(rtc_fd<0)
 #endif
 	printf("Using %s timing\n",softsleep?"software":"usleep()");
