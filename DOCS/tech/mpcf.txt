@@ -84,7 +84,7 @@ stream_header:
 	stream_class				v
 	fourcc					b
 	average_bitrate				v
-	language_code				v
+	language_code				b
 	time_base_nom				v
 	time_base_denom				v
 	lsb_timestamp_length			v
@@ -220,9 +220,11 @@ stream_class
 fourcc
 	identification for the codec
 	example: "H264"
+	MUST contain 4 bytes, note, this might be increasd in the future if
+	needed
         
 language_code 
-	something like 'u'<<24 + 's'<<16 + 'e'<<8 + 'n' (US english), can be 0
+	something like "usen" (US english), can be 0
 	if unknown
 
 time_base_nom / time_base_denom = time_base
