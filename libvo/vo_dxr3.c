@@ -368,10 +368,6 @@ static uint32_t draw_frame(uint8_t * src[])
 
 static void flip_page(void)
 {
-	if (!vo_fps) {
-		ioval = 90000.0 / vo_fps;
-		ioctl(fd_control, EM8300_IOCTL_SCR_SETSPEED, &ioval);
-	}
 #ifdef USE_LIBAVCODEC
 	if (img_format == IMGFMT_YV12) {
 		int out_size = avcodec_encode_video(avc_context, avc_outbuf, avc_outbuf_size, &avc_picture);
