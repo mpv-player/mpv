@@ -7,9 +7,12 @@
 #ifndef __MATROSKA_H
 #define __MATROSKA_H
 
-#define MKV_A_MP3        "A_MPEG/L3"
+#define MKV_A_AAC_2LC    "A_AAC/MPEG2/LC"
+#define MKV_A_AAC_4LC    "A_AAC/MPEG4/LC"
+#define MKV_A_AAC_4SBR   "A_AAC/MPEG4/SBR"
 #define MKV_A_AC3        "A_AC3"
 #define MKV_A_DTS        "A_DTS"
+#define MKV_A_MP3        "A_MPEG/L3"
 #define MKV_A_PCM        "A_PCM/INT/LIT"
 #define MKV_A_VORBIS     "A_VORBIS"
 #define MKV_A_ACM        "A_MS/ACM"

@@ -138,7 +138,7 @@ typedef struct mkv_track {
   uint32_t v_width, v_height, v_dwidth, v_dheight;
   float v_frate;
 
-  uint16_t a_formattag;
+  uint32_t a_formattag;
   uint32_t a_channels, a_bps;
   float a_sfreq;
 
@@ -464,6 +464,10 @@ static int check_track_information(mkv_demuxer_t *d) {
             t->a_formattag = 0x2000;
           else if (!strcmp(t->codec_id, MKV_A_PCM))
             t->a_formattag = 0x0001;
+          else if (!strcmp(t->codec_id, MKV_A_AAC_2LC) ||
+                   !strcmp(t->codec_id, MKV_A_AAC_4LC) ||
+                   !strcmp(t->codec_id, MKV_A_AAC_4SBR))
+            t->a_formattag = mmioFOURCC('M', 'P', '4', 'A');
           else if (!strcmp(t->codec_id, MKV_A_VORBIS)) {
             if (t->private_data == NULL) {
               mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] WARNING: CodecID for "
@@ -1514,7 +1518,8 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
         return 0;
       }
     }
-    sh_a->format = sh_a->wf->wFormatTag = track->a_formattag;
+    sh_a->format = track->a_formattag;
+    sh_a->wf->wFormatTag = track->a_formattag;
     sh_a->channels = sh_a->wf->nChannels = track->a_channels;
     sh_a->samplerate = sh_a->wf->nSamplesPerSec = (uint32_t)track->a_sfreq;
     if (!strcmp(track->codec_id, MKV_A_MP3)) {
@@ -1532,6 +1537,13 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
       sh_a->wf->nBlockAlign = sh_a->wf->nAvgBytesPerSec;
       sh_a->wf->wBitsPerSample = track->a_bps;
       sh_a->samplesize = track->a_bps / 8;
+    } else if (!strcmp(track->codec_id, MKV_A_AAC_2LC) ||
+               !strcmp(track->codec_id, MKV_A_AAC_4LC) ||
+               !strcmp(track->codec_id, MKV_A_AAC_4SBR)) {
+      sh_a->wf->nAvgBytesPerSec = 16000;
+      sh_a->wf->nBlockAlign = 1024;
+      sh_a->wf->wBitsPerSample = 0;
+      sh_a->samplesize = 0;
     } else if (!strcmp(track->codec_id, MKV_A_VORBIS)) {
       for (i = 0; i < 3; i++) {
         dp = new_demux_packet(track->header_sizes[i]);
