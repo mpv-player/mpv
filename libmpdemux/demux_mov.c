@@ -327,19 +327,52 @@ int mov_check_file(demuxer_t* demuxer){
 	  tmp = stream_read_dword(demuxer->stream);
 	  switch(tmp) {
 	    case MOV_FOURCC('i','s','o','m'):
-	      mp_msg(MSGT_DEMUX,MSGL_V,"MOV: File-Type Major-Brand: ISO Media File\n");
+	      mp_msg(MSGT_DEMUX,MSGL_V,"ISO: File Type Major Brand: ISO Base Media\n");
+     	      break;
+	    case MOV_FOURCC('m','p','4','1'):
+	      mp_msg(MSGT_DEMUX,MSGL_INFO,"ISO: File Type Major Brand: ISO/IEC 14496-1 (MPEG-4 system) v1\n");
+     	      break;
+	    case MOV_FOURCC('m','p','4','2'):
+	      mp_msg(MSGT_DEMUX,MSGL_INFO,"ISO: File Type Major Brand: ISO/IEC 14496-1 (MPEG-4 system) v2\n");
+     	      break;
+	    case MOV_FOURCC('M','4','A',' '):
+	      mp_msg(MSGT_DEMUX,MSGL_INFO,"ISO: File Type Major Brand: Apple iTunes AAC-LC Audio\n");
+     	      break;
+	    case MOV_FOURCC('M','4','P',' '):
+	      mp_msg(MSGT_DEMUX,MSGL_INFO,"ISO: File Type Major Brand: Apple iTunes AAC-LC Protected Audio\n");
+     	      break;
+	    case MOV_FOURCC('q','t',' ',' '):
+	      mp_msg(MSGT_DEMUX,MSGL_INFO,"ISO: File Type Major Brand: Original QuickTime\n");
+     	      break;
+	    case MOV_FOURCC('3','g','p','1'):
+	      mp_msg(MSGT_DEMUX,MSGL_INFO,"ISO: File Type Major Brand: 3GPP Profile 1\n");
+     	      break;
+	    case MOV_FOURCC('3','g','p','2'):
+	      mp_msg(MSGT_DEMUX,MSGL_INFO,"ISO: File Type Major Brand: 3GPP Profile 2\n");
+     	      break;
+	    case MOV_FOURCC('3','g','p','3'):
+	      mp_msg(MSGT_DEMUX,MSGL_INFO,"ISO: File Type Major Brand: 3GPP Profile 3\n");
+     	      break;
+	    case MOV_FOURCC('3','g','p','4'):
+	      mp_msg(MSGT_DEMUX,MSGL_INFO,"ISO: File Type Major Brand: 3GPP Profile 4\n");
+     	      break;
+	    case MOV_FOURCC('3','g','p','5'):
+	      mp_msg(MSGT_DEMUX,MSGL_INFO,"ISO: File Type Major Brand: 3GPP Profile 5\n");
+     	      break;
+	    case MOV_FOURCC('m','m','p','4'):
+	      mp_msg(MSGT_DEMUX,MSGL_INFO,"ISO: File Type Major Brand: Mobile ISO/IEC 14496-1 (MPEG-4 system)\n");
      	      break;
 	    default:
 	      tmp = be2me_32(tmp);  
-	      mp_msg(MSGT_DEMUX,MSGL_WARN,"MOV: File-Type unknown Major-Brand: %.4s\n",&tmp);
+	      mp_msg(MSGT_DEMUX,MSGL_WARN,"ISO: Unknown File Type Major Brand: %.4s\n",&tmp);
 	  }
-	  mp_msg(MSGT_DEMUX,MSGL_V,"MOV: File-Type Minor-Version: %d\n",
+	  mp_msg(MSGT_DEMUX,MSGL_V,"ISO: File Type Minor Version: %d\n",
 	      stream_read_dword(demuxer->stream));
 	  skipped += 8;
 	  // List all compatible brands
 	  for(i = 0; i < ((len-16)/4); i++) {
 	    tmp = be2me_32(stream_read_dword(demuxer->stream));
-	    mp_msg(MSGT_DEMUX,MSGL_V,"MOV: File-Type Compatible-Brands #%d: %.4s\n",i,&tmp);
+	    mp_msg(MSGT_DEMUX,MSGL_V,"ISO: File Type Compatible Brand #%d: %.4s\n",i,&tmp);
 	    skipped += 4;
 	  }
 #endif	  
