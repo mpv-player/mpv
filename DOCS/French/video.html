@@ -1114,19 +1114,17 @@ pour une TV 16:9: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
     des outils externes comme em8300setup. Les normes valides sont 5 = NTSC, 4 = PAL-60,
     3 = PAL. Les normes spéciales sont 2 (ajustement auto utilisant PAL/PAL-60) et 1
     (ajustement auto utilisant PAL/NTSC) parce qu'elles décident quelle norme utiliser
-    en regardant le frame rate du film. Les télés modernes peuvent afficher du PAL et
-    du NTSC. Regarder le film au framerate auquel il a été initialement encodé donnera
-    une lecture fluide dans saut de trame. norm = 0 (par défaut) ne change pas la norme
+    en regardant le frame rate du film. norm = 0 (par défaut) ne change pas la norme
     courante.<BR>
     <CODE>&lt;périph.&gt;</CODE> = numéro de périphérique à utiliser si vous avez plus
     d'une carte em8300.
     <BR>
     Chacune de ces options peut être laissé de côté.<BR>
-    <CODE>:prebuf:sync</CODE> semble fonctionner à merveille en lisant des DivX etc,
-    même sur des CPU AMD. Mais des gens ont rapporté des problèmes en utilisant ces
-    options en lisant des MPEGs normaux. Vous devriez vouloir essayer sans aucune option
-    en premier, si vous avez des problèmes de synchro laissez une chance à
-    <CODE>:sync</CODE>.</DD>
+    <CODE>:prebuf:sync</CODE> semble fonctionner à merveille en lisant des DivX.
+    Des gens ont signalé des problèmes en utilisant l'option <CODE>prebuf</CODE>
+    pendant la lecture de fichiers MPEG1/2. Vous pourriez vouloir essayer sans aucune 
+    option en premier, si vous avez des problèmes de synchro, ou des problèmes de 
+    sous-titres avec les DVDs, essayez avec <CODE>:sync</CODE>.</DD>
 
   <DT><CODE>-ao oss:/dev/em8300_ma-X</CODE></DT>
   <DD>Pour la sortie audio, où <CODE>X</CODE> est le numéro de périphérique
@@ -1169,21 +1167,8 @@ pour une TV 16:9: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
   <DD>L'em8300 supporte la lecture audio AC3 (son surround) au travers de la
     sortie audio numérique de la carte. Voir l'option <CODE>-ao oss</CODE>
     plus haut, elle doit être utilisé pour spécifier la sortie DXR3 au lieu
-    d'une carte son. Lisez aussi la section <A HREF="codecs.html#hardware_ac3">AC3 Matériel</A>
-    pour de plus amples informations sur l'AC3.</DD>
+    d'une carte son.</DD>
 </DL>
-
-<H4>Notes MPEG1, MPEG2, VCD et DVD</H4>
-
-<P>Dans certaines circonstances, les sous-titres peuvent ne pas apparaître
-  correctement synchronisés avec le flux A/V en utilisant le décodage matériel.
-  C'est un bogue connu. L'em8300 ne gérera pas correctement les sous-titres 
-  trop gros également, et peut se bloquer pendant une seconde ou deux. A ce 
-  moment-là, le seul contournement est d'utiliser <CODE>-vop lavc</CODE> pour
-  regarder regarder des DVDs avec sous-titres. En exécutant avec <CODE>-vop lavc</CODE>
-  MPlayer va réencoder la vidéo en MPEG (même si c'est déjà du MPEG). Cela
-  signifie qu'il nécessitera plus de puissance CPU, et vous perdrez peut-être
-  en qualité d'image.</P>
 
 
 <H4><A NAME="other">2.3.1.4 Autres matériels de visualisation</A></H4>
