@@ -3733,13 +3733,17 @@ else
 fi
 echores "$_faad"
 
-
-echocheck "Win32 DLL support"
-qnx && _win32=no
-cygwin && _win32="Win32 DLLs not supported under Cygwin"
 if test "$_win32" = auto ; then
-  _win32=no
   if x86 ; then
+    cygwin && _win32=no # Win32 DLLs not supported under Cygwin
+    qnx && _win32=no
+  else
+    _win32=no # x86 arch only
+  fi
+fi
+
+if test "$_win32" != no ; then
+  echocheck "Win32 codec DLL files path"
     if test -z "$_win32libdir" ; then
       for I in "$_libdir/win32" /usr/local/lib/win32 /usr/lib/win32 ; do
         if test -d "$I" ; then
@@ -3748,15 +3752,20 @@ if test "$_win32" = auto ; then
         fi;
       done
     fi
-    test "$_win32libdir" && _win32=yes
-  fi
+  echores "$_win32libdir"
+fi
+
+echocheck "Win32 codec DLL support"
+if test "$_win32" = auto ; then
+  _win32=no
+  test -n "$_win32libdir" && _win32=yes
 fi
 if test "$_win32" = yes ; then
   _def_win32='#define USE_WIN32DLL 1'
   _ld_win32='loader/libloader.a'
   _dep_win32='loader/libloader.a'
   _codecmodules="win32 $_codecmodules"
-  echores "yes (using $_win32libdir)"
+  echores "yes"
   if openbsd ; then
     x86 && _ld_win32="$_ld_win32 -li386"
   fi
@@ -3764,9 +3773,8 @@ else
   _def_win32='#undef USE_WIN32DLL'
   _nocodecmodules="win32 $_nocodecmodules"
   _dshow=no
-  echores "$_win32"
+  echores "no"
 fi
-
 
 echocheck "DirectShow"
 if false ; then
