@@ -1199,6 +1199,17 @@ have to set it by hand using <option>-ofps</option>.
 </para></answer>
 </qandaentry>
 
+
+<qandaentry>
+<question><para>
+How can I put subtitles in the output file?
+</para></question>
+<answer><para>
+Just pass the <option>-sub &lt;filename&gt;</option> (or <option>-sid</option>,
+<option>-vobsub</option>, respectively) option to MEncoder.
+</para></answer>
+</qandaentry>
+
 </qandadiv>
 </qandaset>
 
