@@ -19,7 +19,9 @@
 
 extern vf_info_t vf_info_vo;
 extern vf_info_t vf_info_rectangle;
+#ifndef HAVE_NO_POSIX_SELECT
 extern vf_info_t vf_info_bmovl;
+#endif
 extern vf_info_t vf_info_crop;
 extern vf_info_t vf_info_expand;
 extern vf_info_t vf_info_pp;
@@ -65,7 +67,9 @@ extern vf_info_t vf_info_tfields;
 // list of available filters:
 static vf_info_t* filter_list[]={
     &vf_info_rectangle,
+#ifndef HAVE_NO_POSIX_SELECT
     &vf_info_bmovl,
+#endif
     &vf_info_crop,
     &vf_info_expand,
 #ifdef USE_LIBAVCODEC

@@ -66,6 +66,9 @@
 #include "mp_image.h"
 #include "vf.h"
 #include "img_format.h"
+#include "../config.h"
+
+#ifndef HAVE_NO_POSIX_SELECT
 
 #include "../mp_msg.h"
 
@@ -455,3 +458,5 @@ vf_info_t vf_info_bmovl = {
     vf_open,
     NULL
 };
+
+#endif
