@@ -404,6 +404,11 @@ int demux_open_tv(demuxer_t *demuxer)
         tv_param_noaudio = 1; 
         }
 
+    /* disable TV audio if -nosound is present */
+    if (!demuxer->audio || demuxer->audio->id == -2) {
+        tv_param_noaudio = 1; 
+    }
+
     /* set width */
     funcs->control(tvh->priv, TVI_CONTROL_VID_GET_WIDTH, &sh_video->disp_w);
 
