@@ -9,9 +9,9 @@
 	
 	MPlayer Mac OSX Quartz video out module.
 	
-	todo:   -Redo event handling.
-			-Choose fullscreen display device.
-			-Fullscreen antialiasing.
+	todo:   -'plist' resource
+			-Redo event handling.
+			-Choose fullscreen display device (-xineramascreen / -multiscreen).
 			-resize black bar without CGContext
 			-rootwin
 			-non-blocking event
@@ -43,8 +43,6 @@
 
 #include "vo_quartz.h"
 
-#define QUARTZ_ENABLE_YUV
-
 static vo_info_t info = 
 {
 	"Mac OSX (Quartz)",
@@ -61,25 +59,21 @@ static uint32_t image_depth;
 static uint32_t image_format;
 static uint32_t image_size;
 static uint32_t image_buffer_size;
-char *image_data;
+static char *image_data;
 
-#ifdef QUARTZ_ENABLE_YUV
+static ImageSequence seqId;
 static CodecType image_qtcodec;
 static PlanarPixmapInfoYUV420 *P;
 static struct
 {
-	ImageSequence seqId;
 	ImageDescriptionHandle desc;
 	Handle extension_colr;
 	Handle extension_fiel;
 	Handle extension_clap;
 	Handle extension_pasp;
-	MatrixRecord matrix;
 } yuv_qt_stuff;
-static DecompressorComponent mycodec;
-static ComponentInstance myopenedcodec;
+static MatrixRecord matrix;
 static int EnterMoviesDone = 0;
-#endif
 
 extern int vo_ontop;
 extern int vo_fs;
@@ -121,7 +115,6 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src, unsigne
 		case IMGFMT_RGB32:
 			vo_draw_alpha_rgb32(w,h,src,srca,stride,image_data+4*(y0*imgRect.right+x0),4*imgRect.right);
 			break;
-#ifdef QUARTZ_ENABLE_YUV
 		case IMGFMT_YV12:
 		case IMGFMT_IYUV:
 		case IMGFMT_I420:
@@ -133,7 +126,6 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src, unsigne
 		case IMGFMT_YUY2:
 			vo_draw_alpha_yuy2(w,h,src,srca,stride,((char*)P) + (x0 + y0 * image_width) * 2,image_width*2);
 			break;
-#endif
   }
 }
 
@@ -307,9 +299,8 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	switch (image_format) 
 	{
 		case IMGFMT_RGB32:
-			image_depth = IMGFMT_RGB_DEPTH(format);
+			image_depth = 32;
 			break;
-#ifdef QUARTZ_ENABLE_YUV
 		case IMGFMT_YV12:
 		case IMGFMT_IYUV:
         case IMGFMT_I420:
@@ -317,7 +308,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
         case IMGFMT_YUY2:
 			image_depth = 16;
 			break;
-#endif
 	}
 	image_size = ((image_width*image_height*image_depth)+7)/8;
 
@@ -335,10 +325,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 					| kWindowStandardHandlerAttribute
 					| kWindowLiveResizeAttribute;
 					
-	if (!(IMGFMT_IS_RGB(image_format)))
-	{
-		windowAttrs &= (~kWindowResizableAttribute);
-	}
+	windowAttrs &= (~kWindowResizableAttribute);
 
 	SetRect(&winRect, 0, 0, d_width, d_height);
 	SetRect(&dstRect, 0, 0, d_width, d_height);
@@ -362,184 +349,173 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	InstallWindowEventHandler (theWindow, NewEventHandlerUPP (MainKeyboardEventHandler), GetEventTypeCount(keyEvents), keyEvents, theWindow, NULL);
 	InstallApplicationEventHandler (NewEventHandlerUPP (MainMouseEventHandler), GetEventTypeCount(mouseEvents), mouseEvents, 0, NULL);
 
-#ifdef QUARTZ_ENABLE_YUV
-	if (!(IMGFMT_IS_RGB(image_format)))
+	if (!EnterMoviesDone)
 	{
-		if (!EnterMoviesDone)
-		{
-			qterr = EnterMovies();
-			EnterMoviesDone = 1;
-		}
-		else
-			qterr = 0;
-	  
-		mp_msg(MSGT_VO, MSGL_INFO, "\nQuartz: EnterMovies\n");
-		if (qterr)
-		{
-			mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: EnterMovies (%d)\n", qterr);
-		}
-		
-		{
-			ComponentDescription cd2;
-			Handle h1 = NewHandleClear(4);
-			Handle h2 = NewHandleClear(4);
-			char ch1[256], ch2[256];
+		qterr = EnterMovies();
+		EnterMoviesDone = 1;
+	}
+	else
+		qterr = 0;
+	
+	if (qterr)
+	{
+		mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: EnterMovies (%d)\n", qterr);
+	}
+	
+	SetPort(GetWindowPort(theWindow));
+	SetIdentityMatrix(&matrix);
+	
+	if ((d_width != width) || (d_height != height))
+	{
+		ScaleMatrix(&matrix, FixDiv(Long2Fix(d_width),Long2Fix(width)), FixDiv(Long2Fix(d_height),Long2Fix(height)), 0, 0);
+	}
 
-			qterr = FindCodec(image_qtcodec, bestSpeedCodec, NULL, &mycodec);
+
+	switch (image_format) 
+	{
+		case IMGFMT_RGB32:
+		{
+			ImageDescriptionHandle desc;
+		
+			image_data = calloc(sizeof(image_size),1);
+			NewGWorldFromPtr (&imgGWorld, k32ARGBPixelFormat, &imgRect, 0, 0, 0, image_data, image_width * 4);
+			MakeImageDescriptionForPixMap(GetGWorldPixMap(imgGWorld), &desc);
+			DisposeGWorld(imgGWorld);
+		
+			qterr = DecompressSequenceBeginS (  &seqId,
+												desc,
+												image_data,
+												image_size,
+												GetWindowPort(theWindow),
+												NULL,
+												NULL,
+												((d_width != width) || (d_height != height)) ? &matrix : NULL,
+												srcCopy,
+												NULL,
+												0,
+												codecLosslessQuality,
+												bestSpeedCodec);
 			if (qterr)
 			{
-				mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: FindCodec (%d)\n", qterr);
+				mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: DecompressSequenceBeginS (%d)\n", qterr);
 			}
-	    
-			qterr = GetComponentInfo(mycodec, &cd2, h1, h2, NULL);
+		}
+		break;
+		
+		case IMGFMT_YV12:
+		case IMGFMT_IYUV:
+		case IMGFMT_I420:
+		case IMGFMT_UYVY:
+		case IMGFMT_YUY2:
+		{
+			yuv_qt_stuff.desc = (ImageDescriptionHandle)NewHandleClear( sizeof(ImageDescription) );
+		
+			yuv_qt_stuff.extension_colr = NewHandleClear(sizeof(NCLCColorInfoImageDescriptionExtension));
+			((NCLCColorInfoImageDescriptionExtension*)(*yuv_qt_stuff.extension_colr))->colorParamType = kVideoColorInfoImageDescriptionExtensionType;
+			((NCLCColorInfoImageDescriptionExtension*)(*yuv_qt_stuff.extension_colr))->primaries = 2;
+			((NCLCColorInfoImageDescriptionExtension*)(*yuv_qt_stuff.extension_colr))->transferFunction = 2;
+			((NCLCColorInfoImageDescriptionExtension*)(*yuv_qt_stuff.extension_colr))->matrix = 2;
+		
+			yuv_qt_stuff.extension_fiel = NewHandleClear(sizeof(FieldInfoImageDescriptionExtension));
+			((FieldInfoImageDescriptionExtension*)(*yuv_qt_stuff.extension_fiel))->fieldCount = 1;
+			((FieldInfoImageDescriptionExtension*)(*yuv_qt_stuff.extension_fiel))->fieldOrderings = 0;
+		
+			yuv_qt_stuff.extension_clap = NewHandleClear(sizeof(CleanApertureImageDescriptionExtension));
+			((CleanApertureImageDescriptionExtension*)(*yuv_qt_stuff.extension_clap))->cleanApertureWidthN = image_width;
+			((CleanApertureImageDescriptionExtension*)(*yuv_qt_stuff.extension_clap))->cleanApertureWidthD = 1;
+			((CleanApertureImageDescriptionExtension*)(*yuv_qt_stuff.extension_clap))->cleanApertureHeightN = image_height;
+			((CleanApertureImageDescriptionExtension*)(*yuv_qt_stuff.extension_clap))->cleanApertureHeightD = 1;
+			((CleanApertureImageDescriptionExtension*)(*yuv_qt_stuff.extension_clap))->horizOffN = 0;
+			((CleanApertureImageDescriptionExtension*)(*yuv_qt_stuff.extension_clap))->horizOffD = 1;
+			((CleanApertureImageDescriptionExtension*)(*yuv_qt_stuff.extension_clap))->vertOffN = 0;
+			((CleanApertureImageDescriptionExtension*)(*yuv_qt_stuff.extension_clap))->vertOffD = 1;
+        
+			yuv_qt_stuff.extension_pasp = NewHandleClear(sizeof(PixelAspectRatioImageDescriptionExtension));
+			((PixelAspectRatioImageDescriptionExtension*)(*yuv_qt_stuff.extension_pasp))->hSpacing = 1;
+			((PixelAspectRatioImageDescriptionExtension*)(*yuv_qt_stuff.extension_pasp))->vSpacing = 1;
+
+			(*yuv_qt_stuff.desc)->idSize = sizeof(ImageDescription);
+			(*yuv_qt_stuff.desc)->cType = image_qtcodec;
+			(*yuv_qt_stuff.desc)->version = 2;
+			(*yuv_qt_stuff.desc)->revisionLevel = 0;
+			(*yuv_qt_stuff.desc)->vendor = 'mpla';
+			(*yuv_qt_stuff.desc)->width = image_width;
+			(*yuv_qt_stuff.desc)->height = image_height;
+			(*yuv_qt_stuff.desc)->hRes = Long2Fix(72);
+			(*yuv_qt_stuff.desc)->vRes = Long2Fix(72);
+			(*yuv_qt_stuff.desc)->temporalQuality = 0;
+			(*yuv_qt_stuff.desc)->spatialQuality = codecLosslessQuality;
+			(*yuv_qt_stuff.desc)->frameCount = 1;
+			(*yuv_qt_stuff.desc)->dataSize = 0;
+			(*yuv_qt_stuff.desc)->depth = 24;
+			(*yuv_qt_stuff.desc)->clutID = -1;
+	  
+			qterr = AddImageDescriptionExtension(yuv_qt_stuff.desc, yuv_qt_stuff.extension_colr, kColorInfoImageDescriptionExtension);
 			if (qterr)
 			{
-				mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: GetComponentInfo (%d)\n", qterr);
+				mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: AddImageDescriptionExtension [colr] (%d)\n", qterr);
 			}
 			
-			memcpy(ch1, &((unsigned char*)(*h1))[1], ((unsigned char*)(*h1))[0]);
-			ch1[((unsigned char*)(*h1))[0]] = '\0';
-			memcpy(ch2, &((unsigned char*)(*h2))[1], ((unsigned char*)(*h2))[0]);
-			ch2[((unsigned char*)(*h2))[0]] = '\0';
-			DisposeHandle(h1);
-			DisposeHandle(h2);
-			mp_msg(MSGT_VO, MSGL_INFO, "Quartz: QuickTime FindCodec reports component %.4s %.4s %.4s, %s, %s, [flags: 0x%08x, mask: 0x%08x]\n",
-			&cd2.componentType,
-			&cd2.componentSubType,
-			&cd2.componentManufacturer,
-			ch1,
-			ch2,
-			cd2.componentFlags,
-			cd2.componentFlagsMask);
-
+			qterr = AddImageDescriptionExtension(yuv_qt_stuff.desc, yuv_qt_stuff.extension_fiel, kFieldInfoImageDescriptionExtension);
+			if (qterr)
 			{
-				CodecInfo ci;
-				qterr = GetCodecInfo(&ci, 'imdc', mycodec);
-				
-				if (qterr)
-				{
-					mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: GetCodecInfo (%d)\n", qterr);
-				}
-				mp_msg(MSGT_VO, MSGL_INFO, "Quartz: CodecInfo:\n\tname: %s\n\tvendor: %.4s\n\tversion/revision: %d/%d\n\tdecompressFlags: 0x%08x\n\tcompressFlags: 0x%08x\n\tformatFlags: 0x%08x\n", ch1, &ci.vendor, ci.version, ci.revisionLevel, ci.decompressFlags, ci.compressFlags, ci.formatFlags);
+				mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: AddImageDescriptionExtension [fiel] (%d)\n", qterr);
 			}
-		}
 		
-		yuv_qt_stuff.desc = (ImageDescriptionHandle)NewHandleClear( sizeof(ImageDescription) );
-		yuv_qt_stuff.extension_colr = NewHandleClear(sizeof(NCLCColorInfoImageDescriptionExtension));
-		((NCLCColorInfoImageDescriptionExtension*)(*yuv_qt_stuff.extension_colr))->colorParamType = kVideoColorInfoImageDescriptionExtensionType;
-		((NCLCColorInfoImageDescriptionExtension*)(*yuv_qt_stuff.extension_colr))->primaries = 2;
-		((NCLCColorInfoImageDescriptionExtension*)(*yuv_qt_stuff.extension_colr))->transferFunction = 2;
-		((NCLCColorInfoImageDescriptionExtension*)(*yuv_qt_stuff.extension_colr))->matrix = 2;
-		yuv_qt_stuff.extension_fiel = NewHandleClear(sizeof(FieldInfoImageDescriptionExtension));
-		((FieldInfoImageDescriptionExtension*)(*yuv_qt_stuff.extension_fiel))->fieldCount = 1;
-		((FieldInfoImageDescriptionExtension*)(*yuv_qt_stuff.extension_fiel))->fieldOrderings = 0;
-		yuv_qt_stuff.extension_clap = NewHandleClear(sizeof(CleanApertureImageDescriptionExtension));
-        ((CleanApertureImageDescriptionExtension*)(*yuv_qt_stuff.extension_clap))->cleanApertureWidthN = image_width;
-        ((CleanApertureImageDescriptionExtension*)(*yuv_qt_stuff.extension_clap))->cleanApertureWidthD = 1;
-        ((CleanApertureImageDescriptionExtension*)(*yuv_qt_stuff.extension_clap))->cleanApertureHeightN = image_height;
-		((CleanApertureImageDescriptionExtension*)(*yuv_qt_stuff.extension_clap))->cleanApertureHeightD = 1;
-        ((CleanApertureImageDescriptionExtension*)(*yuv_qt_stuff.extension_clap))->horizOffN = 0;
-        ((CleanApertureImageDescriptionExtension*)(*yuv_qt_stuff.extension_clap))->horizOffD = 1;
-        ((CleanApertureImageDescriptionExtension*)(*yuv_qt_stuff.extension_clap))->vertOffN = 0;
-        ((CleanApertureImageDescriptionExtension*)(*yuv_qt_stuff.extension_clap))->vertOffD = 1;
-        yuv_qt_stuff.extension_pasp = NewHandleClear(sizeof(PixelAspectRatioImageDescriptionExtension));
-        ((PixelAspectRatioImageDescriptionExtension*)(*yuv_qt_stuff.extension_pasp))->hSpacing = 1;
-        ((PixelAspectRatioImageDescriptionExtension*)(*yuv_qt_stuff.extension_pasp))->vSpacing = 1;
+			qterr = AddImageDescriptionExtension(yuv_qt_stuff.desc, yuv_qt_stuff.extension_clap, kCleanApertureImageDescriptionExtension);
+			if (qterr)
+			{
+				mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: AddImageDescriptionExtension [clap] (%d)\n", qterr);
+			}
+		
+			qterr = AddImageDescriptionExtension(yuv_qt_stuff.desc, yuv_qt_stuff.extension_pasp, kCleanApertureImageDescriptionExtension);
+			if (qterr)
+			{
+				mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: AddImageDescriptionExtension [pasp] (%d)\n", qterr);
+			}
+		
+			P = calloc(sizeof(PlanarPixmapInfoYUV420) + image_size, 1);
+			switch (image_format)
+			{
+				case IMGFMT_YV12:
+				case IMGFMT_IYUV:
+				case IMGFMT_I420:
+					P->componentInfoY.offset = sizeof(PlanarPixmapInfoYUV420);
+					P->componentInfoCb.offset = P->componentInfoY.offset + image_size / 2;
+					P->componentInfoCr.offset = P->componentInfoCb.offset + image_size / 4;
+					P->componentInfoY.rowBytes = image_width;
+					P->componentInfoCb.rowBytes =  image_width / 2;
+					P->componentInfoCr.rowBytes =  image_width / 2;
+					image_buffer_size = image_size + sizeof(PlanarPixmapInfoYUV420);
+					break;
+				case IMGFMT_UYVY:
+				case IMGFMT_YUY2:
+					image_buffer_size = image_size;
+					break;
+			}
 
-		(*yuv_qt_stuff.desc)->idSize = sizeof(ImageDescription);
-		(*yuv_qt_stuff.desc)->cType = image_qtcodec;
-		(*yuv_qt_stuff.desc)->version = 2;
-		(*yuv_qt_stuff.desc)->revisionLevel = 0;
-		(*yuv_qt_stuff.desc)->vendor = 'mpla';
-		(*yuv_qt_stuff.desc)->width = image_width;
-		(*yuv_qt_stuff.desc)->height = image_height;
-		(*yuv_qt_stuff.desc)->hRes = Long2Fix(72);
-		(*yuv_qt_stuff.desc)->vRes = Long2Fix(72);
-		(*yuv_qt_stuff.desc)->temporalQuality = 0;
-		(*yuv_qt_stuff.desc)->spatialQuality = codecLosslessQuality;
-		(*yuv_qt_stuff.desc)->frameCount = 1;
-		(*yuv_qt_stuff.desc)->dataSize = 0;
-		(*yuv_qt_stuff.desc)->depth = 24;
-		(*yuv_qt_stuff.desc)->clutID = -1;
-	  
-		qterr = AddImageDescriptionExtension(yuv_qt_stuff.desc, yuv_qt_stuff.extension_colr, kColorInfoImageDescriptionExtension);
-		if (qterr)
-		{
-			mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: AddImageDescriptionExtension [colr] (%d)\n", qterr);
-		}
-		
-		qterr = AddImageDescriptionExtension(yuv_qt_stuff.desc, yuv_qt_stuff.extension_fiel, kFieldInfoImageDescriptionExtension);
-		if (qterr)
-		{
-			mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: AddImageDescriptionExtension [fiel] (%d)\n", qterr);
-		}
-		
-		qterr = AddImageDescriptionExtension(yuv_qt_stuff.desc, yuv_qt_stuff.extension_clap, kCleanApertureImageDescriptionExtension);
-		if (qterr)
-		{
-			mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: AddImageDescriptionExtension [clap] (%d)\n", qterr);
-		}
-		
-		qterr = AddImageDescriptionExtension(yuv_qt_stuff.desc, yuv_qt_stuff.extension_pasp, kCleanApertureImageDescriptionExtension);
-		if (qterr)
-		{
-			mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: AddImageDescriptionExtension [pasp] (%d)\n", qterr);
-		}
-	  
-		SetPort(GetWindowPort(theWindow));
-		SetIdentityMatrix(&yuv_qt_stuff.matrix);
-		if ((d_width != width) || (d_height != height))
-		{
-			ScaleMatrix(&yuv_qt_stuff.matrix, FixDiv(Long2Fix(d_width),Long2Fix(width)), FixDiv(Long2Fix(d_height),Long2Fix(height)), 0, 0);
-		}
-		
-		P = calloc(sizeof(PlanarPixmapInfoYUV420) + image_size, 1);
-		switch (image_format)
-		{
-			case IMGFMT_YV12:
-			case IMGFMT_IYUV:
-			case IMGFMT_I420:
-				P->componentInfoY.offset = sizeof(PlanarPixmapInfoYUV420);
-				P->componentInfoCb.offset = P->componentInfoY.offset + image_size / 2;
-				P->componentInfoCr.offset = P->componentInfoCb.offset + image_size / 4;
-				P->componentInfoY.rowBytes = image_width;
-				P->componentInfoCb.rowBytes =  image_width / 2;
-				P->componentInfoCr.rowBytes =  image_width / 2;
-				image_buffer_size = image_size + sizeof(PlanarPixmapInfoYUV420);
-				break;
-			case IMGFMT_UYVY:
-			case IMGFMT_YUY2:
-				image_buffer_size = image_size;
-				break;
-		}
-	  
-		mp_msg(MSGT_VO, MSGL_INFO, "Quartz: DecompressSequenceBeginS\n");
-		mp_msg(MSGT_VO, MSGL_INFO, "Quartz: width=%d, height=%d, d_width=%d, d_height=%d\n", width, height, d_width, d_height);
-		myopenedcodec = OpenComponent(mycodec);
-
-		qterr = DecompressSequenceBeginS(&yuv_qt_stuff.seqId,
+			qterr = DecompressSequenceBeginS(&seqId,
 					   yuv_qt_stuff.desc,
-					   P,
+					   (char *)P,
 					   image_buffer_size,
 					   GetWindowPort(theWindow),
-					   NULL, // GDHandle
-					   NULL, // srcRect
+					   NULL,
+					   NULL,
 					   ((d_width != width) || (d_height != height)) ? 
-					   &yuv_qt_stuff.matrix : NULL,
+					   &matrix : NULL,
 					   srcCopy,
-					   NULL, // mask,
-					   0, //codecFlagUseImageBuffer,
+					   NULL,
+					   0,
 					   codecLosslessQuality,
 					   bestSpeedCodec);
-	                                   //mycodec); // some codec reported by FindCodec() won't work (?)
-					   //myopenedcodec); // doesn't seem to help, either
-		if (qterr)
-		{
-			mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: DecompressSequenceBeginS (%d)\n", qterr);
+
+			if (qterr)
+			{
+				mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: DecompressSequenceBeginS (%d)\n", qterr);
+			}
 		}
-		mp_msg(MSGT_VO, MSGL_INFO, "Quartz: DecompressSequenceBeginS done\n");
+		break;
 	}
-#endif /* QUARTZ_ENABLE_YUV */
 
 	//Show window
 	RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
@@ -592,47 +568,31 @@ static void draw_osd(void)
 
 static void flip_page(void)
 {
-  switch (image_format) {
-  case IMGFMT_RGB32:
-    {
-	OSStatus error;
-	CGrafPtr oldPort,deskPort;
-	GDHandle oldGDevice;
-	OSStatus lockPixelsError;
-	Boolean canLockPixels;
-
-	GetGWorld (&oldPort, &oldGDevice);
-	SetGWorld(GetWindowPort(theWindow), GetMainDevice());
-	
-	CGrafPtr windowPort = GetWindowPort(theWindow);
-	
-	lockPixelsError = LockPortBits(windowPort);
-	
-	if (lockPixelsError == noErr)
-		canLockPixels = true;
-	else 
-		canLockPixels = false;
-	
-	if (canLockPixels)
+	switch (image_format) 
 	{
-		CopyBits( GetPortBitMapForCopyBits (imgGWorld), GetPortBitMapForCopyBits (windowPort), &imgRect, &dstRect, srcCopy, 0 );
-		lockPixelsError = UnlockPortBits(windowPort);
-	}
-	
-	RgnHandle theVisibleRegion; 
-	
-	if (QDIsPortBuffered(windowPort))
-	{
-		theVisibleRegion = NewRgn();
-		GetPortVisibleRegion(windowPort, theVisibleRegion);
-		QDFlushPortBuffer(windowPort, theVisibleRegion); 
-		DisposeRgn(theVisibleRegion);
-	} 
+		case IMGFMT_RGB32:
+		{
+			if (EnterMoviesDone) 
+			{
+				OSErr qterr;
+				CodecFlags flags = 0;
+				
+				qterr = DecompressSequenceFrameWhen(seqId,
+													image_data,
+													image_size,
+													0,
+													&flags,
+													NULL,
+													NULL);
+													
+				if (qterr)
+				{
+					mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: DecompressSequenceFrameWhen in flip_page (%d) flags:0x%08x\n", qterr, flags);
+				}
+			}
+		}
+		break;
 
-	SetGWorld(oldPort, oldGDevice); 
-    }
-    break;
-#ifdef QUARTZ_ENABLE_YUV
   case IMGFMT_YV12:
   case IMGFMT_IYUV:
   case IMGFMT_I420:
@@ -641,8 +601,8 @@ static void flip_page(void)
     if (EnterMoviesDone) {
       OSErr qterr;
       CodecFlags flags = 0;
-      qterr = DecompressSequenceFrameWhen(yuv_qt_stuff.seqId,
-					  P,
+      qterr = DecompressSequenceFrameWhen(seqId,
+					  (char *)P,
 					  image_buffer_size,
 					  0, //codecFlagUseImageBuffer,
 					  &flags,
@@ -653,13 +613,11 @@ static void flip_page(void)
       }
     }
     break;
-#endif
   }
 }
 
 static uint32_t draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
 {
-#ifdef QUARTZ_ENABLE_YUV
   switch (image_format) {
   case IMGFMT_YV12:
   case IMGFMT_I420:
@@ -682,7 +640,6 @@ static uint32_t draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y
 	       w, h, image_width / 2, stride[2]);
     return 0;
   }
-#endif
 	return -1;
 }
 
@@ -691,15 +648,12 @@ static uint32_t draw_frame(uint8_t *src[])
   switch (image_format) {
   case IMGFMT_RGB32:
 	image_data = src[0];
-	DisposeGWorld(imgGWorld);
-	NewGWorldFromPtr (&imgGWorld, k32ARGBPixelFormat, &imgRect, 0, 0, 0, image_data, image_width * 4);
 	return 0;
-#ifdef QUARTZ_ENABLE_YUV
+
   case IMGFMT_UYVY:
   case IMGFMT_YUY2:
     memcpy_pic(((char*)P), src[0], image_width * 2, image_height, image_width * 2, image_width * 2);
     return 0;
-#endif
   }
   return -1;
 }
@@ -707,12 +661,12 @@ static uint32_t draw_frame(uint8_t *src[])
 static uint32_t query_format(uint32_t format)
 {
 	image_format = format;
-	
-    if (format == IMGFMT_RGB32)
-        return VFCAP_CSP_SUPPORTED | VFCAP_OSD | VFCAP_SWSCALE | VFCAP_CSP_SUPPORTED_BY_HW;
-
-#ifdef QUARTZ_ENABLE_YUV
-    image_qtcodec = 0;
+	image_qtcodec = 0;
+    
+	if (format == IMGFMT_RGB32)
+	{
+        return VFCAP_CSP_SUPPORTED | VFCAP_OSD | VFCAP_SWSCALE;
+	}
     
     if ((format == IMGFMT_YV12) || (format == IMGFMT_IYUV) || (format == IMGFMT_I420))
 	{
@@ -731,37 +685,23 @@ static uint32_t query_format(uint32_t format)
 		image_qtcodec = k422YpCbCr8CodecType;
 		return VFCAP_CSP_SUPPORTED | VFCAP_OSD | VFCAP_SWSCALE;
 	}
-#endif
 
     return 0;
 }
 
 static void uninit(void)
 {
-	switch (image_format)
-	{
-		case IMGFMT_YV12:
-		case IMGFMT_IYUV:
-		case IMGFMT_I420:
-		case IMGFMT_UYVY:
-		case IMGFMT_YUY2:
-		{
-			OSErr qterr;
+	OSErr qterr;
 			
-			if (EnterMoviesDone)
-			{
-				qterr = CDSequenceEnd(yuv_qt_stuff.seqId);
-				if (qterr)
-				{
-					mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: CDSequenceEnd (%d)\n", qterr);
-				}
-			}
+	if (EnterMoviesDone)
+	{
+		qterr = CDSequenceEnd(seqId);
+		if (qterr)
+		{
+			mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: CDSequenceEnd (%d)\n", qterr);
 		}
-		break;
-		
-		default:
-		break;
 	}
+
 	ShowMenuBar();
 }
 
@@ -770,7 +710,6 @@ static uint32_t preinit(const char *arg)
     return 0;
 }
 
-#ifdef QUARTZ_ENABLE_YUV
 static uint32_t draw_yuv_image(mp_image_t *mpi)
 {
 	// ATM we're only called for planar IMGFMT
@@ -833,7 +772,6 @@ static uint32_t get_yuv_image(mp_image_t *mpi)
 	}
 	return VO_FALSE;
 }
-#endif /* QUARTZ_ENABLE_YUV */
 
 static uint32_t control(uint32_t request, void *data, ...)
 {
@@ -844,7 +782,6 @@ static uint32_t control(uint32_t request, void *data, ...)
 		case VOCTRL_FULLSCREEN: window_fullscreen(); return VO_TRUE;
 		case VOCTRL_ONTOP: window_ontop(); return VO_TRUE;
 		case VOCTRL_QUERY_FORMAT: return query_format(*((uint32_t*)data));
-#ifdef QUARTZ_ENABLE_YUV
 		case VOCTRL_GET_IMAGE:
 			switch (image_format)
 			{
@@ -867,7 +804,6 @@ static uint32_t control(uint32_t request, void *data, ...)
 					return draw_yuv_image(data);
 					break;
 			}
-#endif
 	}
 	return VO_NOTIMPL;
 }
@@ -910,41 +846,26 @@ void window_resized()
 	CGContextFillRect(context, winBounds);
 	CGContextFlush(context);
 
-#ifdef QUARTZ_ENABLE_YUV
-	switch (image_format)
-	{
-		case IMGFMT_YV12:
-		case IMGFMT_IYUV:
-		case IMGFMT_I420:
-		case IMGFMT_UYVY:
-		case IMGFMT_YUY2:
-		{
-			long scale_X = FixDiv(Long2Fix(dstRect.right - dstRect.left),Long2Fix(image_width));
-			long scale_Y = FixDiv(Long2Fix(dstRect.bottom - dstRect.top),Long2Fix(image_height));
+	long scale_X = FixDiv(Long2Fix(dstRect.right - dstRect.left),Long2Fix(image_width));
+	long scale_Y = FixDiv(Long2Fix(dstRect.bottom - dstRect.top),Long2Fix(image_height));
 
-			SetIdentityMatrix(&yuv_qt_stuff.matrix);
-			if (((dstRect.right - dstRect.left)   != image_width) || ((dstRect.bottom - dstRect.right) != image_height))
-			{
-				ScaleMatrix(&yuv_qt_stuff.matrix, scale_X, scale_Y, 0, 0);
+	SetIdentityMatrix(&matrix);
+	if (((dstRect.right - dstRect.left)   != image_width) || ((dstRect.bottom - dstRect.right) != image_height))
+	{
+		ScaleMatrix(&matrix, scale_X, scale_Y, 0, 0);
 	      
-				if (padding > 0)
-				{
-					TranslateMatrix(&yuv_qt_stuff.matrix, Long2Fix(dstRect.left), Long2Fix(dstRect.top));
-				}
-			}
-			
-			SetDSequenceMatrix(yuv_qt_stuff.seqId, &yuv_qt_stuff.matrix);
+		if (padding > 0)
+		{
+			TranslateMatrix(&matrix, Long2Fix(dstRect.left), Long2Fix(dstRect.top));
 		}
-		break;
-#endif
-		default:
-		break;
 	}
+			
+	SetDSequenceMatrix(seqId, &matrix);
 }
 
 void window_ontop()
 {	
-	if(!vo_ontop)
+	if(vo_ontop)
 		SetWindowClass( theWindow, kUtilityWindowClass);
 	else
 		SetWindowClass( theWindow, kDocumentWindowClass);
@@ -963,7 +884,7 @@ void window_fullscreen()
 	Rect deviceRect;
 
 	//go fullscreen
-	if(!vo_fs)
+	if(vo_fs)
 	{
 		//BeginFullScreen( &restoreState,nil,&width,&height,nil,&black,nil);
 		HideMenuBar();
@@ -982,13 +903,10 @@ void window_fullscreen()
 		HideCursor();
 		
 		//go fullscreen
-		if (IMGFMT_IS_RGB(image_format))
-			ChangeWindowAttributes(theWindow, 0, kWindowResizableAttribute);
+		//ChangeWindowAttributes(theWindow, 0, kWindowResizableAttribute);
 			
 		MoveWindow (theWindow, 0, 0, 1);		
 		SizeWindow(theWindow, device_width, device_height,1);
-
-		vo_fs = 1;
 	}
 	else //go back to windowed mode
 	{
@@ -1006,14 +924,13 @@ void window_fullscreen()
 		ShowCursor();
 		
 		//revert window to previous setting
-		if (IMGFMT_IS_RGB(image_format))
-			ChangeWindowAttributes(theWindow, kWindowResizableAttribute, 0);
+		//ChangeWindowAttributes(theWindow, kWindowResizableAttribute, 0);
 			
 		SizeWindow(theWindow, oldRect.right, oldRect.bottom,1);
 		RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
-		
-		vo_fs = 0;
 	}
+	
+	vo_fs = (!(vo_fs));
 	
 	window_resized();
 }
