@@ -253,15 +253,16 @@ MPlayer wspiera dekodowanie wszystkich wersji RealVideo:
   do configure, gdzie ma ich szukaæ opcj± <CODE>--with-reallibdir</CODE>.</P>
 
 <P><B>Informacja:</B> Biblioteki RealPlayera aktualnie <B>dzia³aj± tylko z Linuksem,
-  FreeBSD, NetBSD i Cygwinem na platformach x86 i Alpha.</B></P>
+  FreeBSD, NetBSD i Cygwinem na platformach x86, Alpha i PowerPC
+  (Linux/Alpha i Linux/PowerPC zosta³y przetestowane).</B></P>
 
 
-<H4><A NAME="xvid">2.2.1.9 XViD</A></H4>
+<H4><A NAME="xvid">2.2.1.9 XviD</A></H4>
 
 <P><A HREF="http://www.xvid.org/"><B>XViD</B></A> jest odga³êzieniem od projektu
   kodeka OpenDivX. Sta³o siê to, gdy ProjectMayo przeniós³ OpenDivX na zamkniêto
   ¼ród³owy DivX4 (teraz DivX5), i ludzie nie-ProjectMayo pracuj±cy nad OpenDivX
-  rozz³o¶cili siê, wtedy posta³ XViD. Wiêc oba projekty maj± to samo ¼ród³o.</P>
+  rozz³o¶cili siê, wtedy posta³ XviD. Wiêc oba projekty maj± to samo ¼ród³o.</P>
 
 <H4>KORZY¦CI</H4>
 
@@ -278,27 +279,29 @@ MPlayer wspiera dekodowanie wszystkich wersji RealVideo:
 <UL>
   <LI>aktualnie niezbyt poprawnie <B>dekoduje</B> wszystkich plików DivX/DivX4 (nie
     problemu, bo <A HREF="#libavcodec">libavcodec</A> odtwarza je wszystkie)</LI>
-  <LI>musisz wybraæ miêdzy wsparciem dla DivX4 <B>lub</B> XViD podczas kompilacji</LI>
+  <LI>musisz wybraæ miêdzy wsparciem dla DivX4 <B>lub</B> XviD podczas kompilacji</LI>
   <LI>nie ukoñczony</LI>
 </UL>
 
 <H4>INSTALOWANIE XVID Z CVS</H4>
 
-<P>Aktualnie XViD jest dostêpny tylko z CVS. Tutaj znajduje siê instrukcja
-  pobrania i instalacji:</P>
+<P>Aktualnie XviD jest dostêpny tylko z CVS. Tutaj znajduje siê instrukcja
+  pobrania i instalacji(potrzebujesz przynajmniej autoconf 2.50, automake i libtool):</P>
 
 <OL>
   <LI><CODE>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid login</CODE></LI>
   <LI><CODE>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid co xvidcore</CODE></LI>
   <LI><CODE>cd xvidcore/build/generic</CODE></LI>
-  <LI>Zedytuj Makefile dla twojej architektury (prawdopodobnie
-    <CODE>Makefile.linuxx86</CODE>) by dopasowaæ swoje wymagania.</LI>
-  <LI><CODE>make -f Makefile.linuxx86</CODE></LI>
-  <LI>Skopiuj pliki nag³ówkowe <CODE>divx4.h</CODE> i <CODE>xvid.h</CODE> z
-    <CODE>xvidcore/src/</CODE> do <CODE>/usr/local/include/</CODE>.</LI>
-  <LI>Pobierz <CODE>encore2.h</CODE> i <CODE>decore.h</CODE> z pakietu DivX4Linux,
-    i skopiuj go do <CODE>/usr/local/include/</CODE>.</LI>
-  <LI>Przekompiluj MPlayer z <CODE>--with-xvidcore=/path/to/libxvidcore.a</CODE>.</LI>
+  <LI><CODE>./bootstrap.sh</CODE></LI>
+  <LI><CODE>./configure</CODE><BR>
+    Mo¿esz dodaæ kilka opcji (przestudiuj komunikaty
+    <CODE>./configure --help</CODE>).</LI>
+  <LI><CODE>make &amp;&amp; make install</CODE></LI>
+  <LI>Je¿eli okre¶li³e¶ <CODE>--enable-divxcompat</CODE>, skopiuj plik
+    nag³ówkowy <CODE>divx4.h</CODE> z <CODE>xvidcore/src/</CODE>
+    do <CODE>/usr/local/include/</CODE>.</LI>
+  <LI>Przekompiluj MPlayer z
+    <CODE>--with-xvidcore=/path/to/libxvidcore.a</CODE>.</LI>
 </OL>
 
 
