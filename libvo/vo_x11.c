@@ -398,6 +398,8 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
 
   /* always allocate swsContext as size could change between frames */
   swsContext= sws_getContextFromCmdLine(width, height, in_format, width, height, out_format );
+  if (!swsContext)
+    return -1;
 
   //printf( "X11 bpp: %d  color mask:  R:%lX  G:%lX  B:%lX\n",bpp,myximage->red_mask,myximage->green_mask,myximage->blue_mask );
 
@@ -565,7 +567,7 @@ static uint32_t query_format( uint32_t format )
     mp_msg(MSGT_VO,MSGL_DBG2,"vo_x11: query_format was called: %x (%s)\n",format,vo_format_name(format));
     if (IMGFMT_IS_BGR(format))
     {
-	if (IMGFMT_BGR_DEPTH(format) == 8)
+	if (IMGFMT_BGR_DEPTH(format) <= 8)
 	    return 0; // TODO 8bpp not yet fully implemented
 	if (IMGFMT_BGR_DEPTH(format) == vo_depthonscreen)
 	    return 3|VFCAP_OSD|VFCAP_SWSCALE|VFCAP_FLIP|VFCAP_ACCEPT_STRIDE;
