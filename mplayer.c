@@ -1449,6 +1449,8 @@ if(!sh_video) {
 		    ,(sh_audio->timer>0.5)?100.0*audio_time_usage/(double)sh_audio->timer:0
 		    ,cache_fill_status
 		    );
+  if(d_audio->eof && sh_audio->a_buffer_len < ao_data.outburst)
+    eof = PT_NEXT_ENTRY;
   goto read_input;
 }
 
