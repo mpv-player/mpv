@@ -1,0 +1,12 @@
+Alternatively you can use GraphEdit Utility by M$ to find out the CLSID:
+ - Get GraphEdit from either DirectX SDK or http://doom9.org
+ - Open graphedit.exe
+ - From menu select Graph->Insert Filters
+ - Expand item "DirectShow Filters"
+ - Choose right codec name and expand item
+ - In the entry "DisplayName" look at the entry in winged brackets after
+   the Backslash and write it down (five dash-delimited blocks)
+ - The file given after "Filename" entry is the codec binary  
+
+Written 2002-09-06 by Atmosfear
+
