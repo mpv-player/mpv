@@ -766,6 +766,8 @@ if ((force_fourcc != NULL) && (strlen(force_fourcc) >= 4))
 	mux_v->bih->biCompression, (char *)&mux_v->bih->biCompression);
 }
 
+if(demuxer->file_format!=DEMUXER_TYPE_AVI) pts_from_bps=0; // it must be 0 for mpeg/asf!
+
 // ============= AUDIO ===============
 if(sh_audio){
 
@@ -780,20 +782,12 @@ mux_a->codec=out_audio_codec;
 
 switch(mux_a->codec){
 case ACODEC_COPY:
-    if(sh_audio->audio.dwScale){
-	mux_a->h.dwSampleSize=sh_audio->audio.dwSampleSize;
-	mux_a->h.dwScale=sh_audio->audio.dwScale;
-	mux_a->h.dwRate=sh_audio->audio.dwRate;
-    } else {
-	mux_a->h.dwSampleSize=1;
-	mux_a->h.dwScale=1;
-	mux_a->h.dwRate=sh_audio->i_bps;
-    }
     if (sh_audio->wf){
 	mux_a->wf=sh_audio->wf;
+	if(!sh_audio->i_bps) sh_audio->i_bps=mux_a->wf->nAvgBytesPerSec;
     } else {
 	mux_a->wf = malloc(sizeof(WAVEFORMATEX));
-	mux_a->wf->nBlockAlign = mux_a->h.dwSampleSize;
+	mux_a->wf->nBlockAlign = 1; //mux_a->h.dwSampleSize;
 	mux_a->wf->wFormatTag = sh_audio->format;
 	mux_a->wf->nChannels = sh_audio->channels;
 	mux_a->wf->nSamplesPerSec = sh_audio->samplerate;
@@ -801,9 +795,18 @@ case ACODEC_COPY:
 	mux_a->wf->wBitsPerSample = 16; // FIXME
 	mux_a->wf->cbSize=0; // FIXME for l3codeca.acm
     }
-    printf("audiocodec: framecopy (format=%x chans=%d rate=%d bits=%d)\n",
+    if(sh_audio->audio.dwScale){
+	mux_a->h.dwSampleSize=sh_audio->audio.dwSampleSize;
+	mux_a->h.dwScale=sh_audio->audio.dwScale;
+	mux_a->h.dwRate=sh_audio->audio.dwRate;
+    } else {
+	mux_a->h.dwSampleSize=mux_a->wf->nBlockAlign;
+	mux_a->h.dwScale=mux_a->h.dwSampleSize;
+	mux_a->h.dwRate=mux_a->wf->nAvgBytesPerSec;
+    }
+    printf("audiocodec: framecopy (format=%x chans=%d rate=%d bits=%d bps=%d sample=%d)\n",
 	mux_a->wf->wFormatTag, mux_a->wf->nChannels, mux_a->wf->nSamplesPerSec,
-	mux_a->wf->wBitsPerSample);
+	mux_a->wf->wBitsPerSample, mux_a->wf->nAvgBytesPerSec, mux_a->h.dwSampleSize);
     break;
 case ACODEC_PCM:
     printf("CBR PCM audio selected\n");
@@ -1128,7 +1131,7 @@ if(sh_audio){
 	    // CBR - copy 0.5 sec of audio
 	    switch(mux_a->codec){
 	    case ACODEC_COPY: // copy
-		len=sh_audio->i_bps/2;
+		len=mux_a->wf->nAvgBytesPerSec/2;
 		len/=mux_a->h.dwSampleSize;if(len<1) len=1;
 		len*=mux_a->h.dwSampleSize;
 		len=demux_read_data(sh_audio->ds,mux_a->buffer,len);
@@ -1360,6 +1363,7 @@ if(sh_audio && !demuxer2){
         unsigned int samples=(sh_audio->audio.dwSampleSize)?
           ((ds_tell(d_audio)-sh_audio->a_in_buffer_len)/sh_audio->audio.dwSampleSize) :
           (d_audio->pack_no); // <- used for VBR audio
+	printf("samples=%d  \n",samples);
         a_pts=samples*(float)sh_audio->audio.dwScale/(float)sh_audio->audio.dwRate;
       delay_corrected=1;
     } else {
