@@ -30,7 +30,7 @@ Interfejs audio <application>MPlayera</application> nazywa siê
 <row><entry>alsa5</entry><entry>
   rdzenny sterownik ALSA 0.5
   </entry></row>
-<row><entry>alsa5</entry><entry>
+<row><entry>alsa</entry><entry>
   rdzenny sterownik ALSA 0.9/1.0 (sprzêtowa obs³uga AC3)
   </entry></row>
 <row><entry>sun</entry><entry>

@@ -37,6 +37,7 @@ Aby wyczy¶ci¶ katalog ze ¼ród³ami wykonaj poni¿sza komendê:
 <screen>fakeroot debian/rules clean</screen>
 
 Jako superu¿ytkownik mo¿esz zainstalowaæ pakiet <filename>.deb</filename> tak, jak zwykle:
+
 <screen>dpkg -i ../mplayer_<replaceable>wersja</replaceable>.deb</screen>
 </para>
 
@@ -286,12 +287,12 @@ najmniejszych problemów. Poni¿sze informacje s± zaczerpniête z tego opracowania.
 
 <para>
 Do budowy bêdziesz potrzebowa³ GCC 3.4.0, GNU make 3.80, i SDL 1.2.7 lub ich
-nowszych wersji.Kompilator HP cc nie wyprodukuje dzia³aj±cego programu,
+nowszych wersji. Kompilator HP cc nie wyprodukuje dzia³aj±cego programu,
 a wcze¶niejsze wersje GCC s± pe³ne b³êdów.
 Aby moæ skorzystaæ z OpenGL, musisz zainstalowaæ biblioteki Mesa, wtedy
 sterowniki wyj¶cia video gl i gl2 powinny dzia³aæ. Ich wydajno¶æ mo¿e byæ
 tragiczna, jednak zale¿ne jest to od mocy obliczeniowej procesora. Dobrym
-zammiennikiem, raczej kiepskiego, systemu d¼wiêkowego HP-UX jest GNU esound.
+zamiennikiem, raczej kiepskiego, systemu d¼wiêkowego HP-UX jest GNU esound.
 </para>
 
 <para>
@@ -387,8 +388,8 @@ parametr <systemitem>maxssiz</systemitem> do 350MB dla 32-bitowych programów).
 Musisz rozszerzyæ <systemitem>maxssiz</systemitem> i przekompilowaæ j±dro
 (i uruchomiæ ponownie komputer). Mo¿esz wykorzystaæ do tego celu SAM. (Kiedy
 w nim bêdziesz, sprawd¼ warto¶æ <systemitem>maxdsiz</systemitem>. Okre¶la ona
-maksymalny rozmiar danych, jak± program mo¿e u¿yæ. To czy 64MB wystarcz± czy nie,
-zale¿y wy³±cznie od wymagañ Twoich aplikacji.)
+maksymalny rozmiar danych, jak± program mo¿e u¿yæ. To czy domy¶lne 64MB wystarczy
+czy nie, zale¿y wy³±cznie od wymagañ Twoich aplikacji.)
 </para>
 </listitem>
 </itemizedlist>
@@ -440,7 +441,7 @@ wolna. U¿ywaj SDL.
   <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/dhahelperwin/dhahelper.sys">dhahelper.sys</ulink>
   lub
   <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/dhahelperwin/withmtrr/dhahelper.sys">dhahelper.sys
-  (z wsparciem dla MTRR)</ulink>
+  (z obs³ug± MTRR)</ulink>
   i skopiuj go do
   <filename class="directory">libdha/dhahelperwin</filename> w drzewie ¼ród³owym
   <application>MPlayera</application>. Uruchom konsolê, nastêpnie przejd¼ do tego katalogu i wykonaj

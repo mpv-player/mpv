@@ -244,8 +244,7 @@ Potrzebujesz do¶æ nowego sprzêtu. Je¶li u¿ywasz Linuksa, zalecane s± j±dra z ser
   Do dekodowania d¼wiêku <emphasis role="bold">Ogg Vorbis</emphasis>, bêdziesz musia³
   poprawnie zainstalowaæ <systemitem class="library">libvorbis</systemitem>.
   ¬ród³a i odpowiednie pakiety binarne mo¿esz pobraæ ze
-  z pakietów deb/rpm, je¿eli s± dostêpne lub skompiluj ze
-  <ulink url="http://www.vorbis.com/download.psp">sotry ogg vorbis</ulink>.
+  <ulink url="http://www.vorbis.com/download.psp">strony ogg vorbis</ulink>.
   </para></listitem>
 <listitem><para>
   <application>MPlayer</application> mo¿e korzystaæ z bibliotek RealPlayer 8
