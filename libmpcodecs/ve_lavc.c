@@ -40,7 +40,7 @@ extern char* passtmpfile;
 #error we dont support libavcodec prior to build 4641, get the latest libavcodec CVS
 #endif
 
-#if LIBAVCODEC_BUILD < 4645
+#if LIBAVCODEC_BUILD < 4659
 #warning your version of libavcodec is old, u might want to get a newer one
 #endif
 
@@ -117,6 +117,7 @@ static int lavc_param_trell= 0;
 static int lavc_param_last_pred= 0;
 static int lavc_param_pre_me= 1;
 static int lavc_param_me_subpel_quality= 8;
+static int lavc_param_me_range= 0;
 
 #include "cfgparser.h"
 
@@ -193,6 +194,7 @@ struct config lavcopts_conf[]={
 	{"last_pred", &lavc_param_last_pred, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
 	{"preme", &lavc_param_pre_me, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
 	{"subq", &lavc_param_me_subpel_quality, CONF_TYPE_INT, CONF_RANGE, 0, 8, NULL},
+	{"me_range", &lavc_param_me_range, CONF_TYPE_INT, CONF_RANGE, 0, 16000, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 #endif
@@ -279,7 +281,10 @@ static int config(struct vf_instance_s* vf,
 #if LIBAVCODEC_BUILD >= 4652
     lavc_venc_context->me_subpel_quality= lavc_param_me_subpel_quality;
 #endif
-    
+#if LIBAVCODEC_BUILD >= 4659
+    lavc_venc_context->me_range= lavc_param_me_range;
+#endif
+
     p= lavc_param_rc_override_string;
     for(i=0; p; i++){
         int start, end, q;
