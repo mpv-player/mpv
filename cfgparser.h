@@ -47,11 +47,11 @@ typedef int (*cfg_func_t)(struct config *);
  */
 int parse_config_file(struct config *conf, char *conffile);
 
-/* parse_command_line reutrns:
+/* parse_command_line returns:
  * 	-1 on error (invalid option...)
  * 	 0 if there was no filename on command line
- * 	 1 if it found a filename
+ * 	 >=1 if there were filenames
  */
-int parse_command_line(struct config *conf, int argc, char **argv, char **envp, char **filename);
+int parse_command_line(struct config *conf, int argc, char **argv, char **envp, char ***filenames);
 
 #endif /* __CONFIG_H */

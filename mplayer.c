@@ -424,6 +424,11 @@ static demux_stream_t *d_dvdsub=NULL;
 static sh_audio_t *sh_audio=NULL;
 static sh_video_t *sh_video=NULL;
 
+// for multifile support:
+char **filenames=NULL;
+int num_filenames=0;
+int curr_filename=0;
+
 char* filename=NULL; //"MI2-Trailer.avi";
 stream_t* stream=NULL;
 int file_format=DEMUXER_TYPE_UNKNOWN;
@@ -460,7 +465,10 @@ int use_stdin=0; //int f; // filedes
    {
 #endif
     parse_cfgfiles();
-    if (parse_command_line(conf, argc, argv, envp, &filename) < 0) exit(1);
+    if ((num_filenames=parse_command_line(conf, argc, argv, envp, &filenames)) < 0) exit(1);
+    printf("XXX num_filenames: %d\n",num_filenames);
+    curr_filename=0;
+    filename=(num_filenames>0)?filenames[curr_filename]:NULL;
     
     mp_msg_init(verbose+MSGL_STATUS);
 

@@ -431,10 +431,11 @@ out:
 	return ret;
 }
 
-int parse_command_line(struct config *conf, int argc, char **argv, char **envp, char **filename)
+int parse_command_line(struct config *conf, int argc, char **argv, char **envp, char ***filenames)
 {
 	int i;
-	int found_filename = 0;
+	char **f = NULL;
+	int f_nr = 0;
 	int tmp;
 	char *opt;
 
@@ -452,13 +453,8 @@ int parse_command_line(struct config *conf, int argc, char **argv, char **envp, 
 
 	for (i = 1; i < argc; i++) {
 		opt = argv[i];
-		if (*opt != '-') {
-			if (found_filename) {
-				printf("invalid option:\n");
-				goto err_out;
-			}
+		if (*opt != '-')
 			goto filename;
-		}
 
 		/* remove trailing '-' */
 		opt++;
@@ -467,14 +463,12 @@ int parse_command_line(struct config *conf, int argc, char **argv, char **envp, 
 
 		switch (tmp) {
 		case ERR_NOT_AN_OPTION:
-			/* opt is not an option -> treat it as a filename */
-			if (found_filename) {
-				/* we already have a filename */
-				goto err_out;
-			}
 filename:
-			found_filename = 1;
-			*filename = argv[i];
+			/* opt is not an option -> treat it as a filename */
+			if (!(f = (char **) realloc(f, sizeof(*f) * (f_nr + 2))))
+				goto err_out_mem;
+
+			f[f_nr++] = argv[i];
 			break;
 		case ERR_MISSING_PARAM:
 		case ERR_OUT_OF_RANGE:
@@ -485,8 +479,14 @@ filename:
 			i += tmp;
 		}
 	}
+	if (f)
+		f[f_nr] = NULL;
+	if (filenames)
+		*filenames = f;
 	--recursion_depth;
-	return found_filename;
+	return f_nr; //filenames_nr;
+err_out_mem:
+	printf("can't allocate memory for filenames\n");
 err_out:
 	--recursion_depth;
 	printf("command line: %s\n", argv[i]);
