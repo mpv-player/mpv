@@ -15,6 +15,8 @@
 #include "audio_out_internal.h"
 #include "afmt.h"
 
+#include "../mp_msg.h"
+
 extern int verbose;
 
 static ao_info_t info = 
@@ -50,18 +52,17 @@ static int init(int rate_hz, int channels, int format, int flags)
     snd_pcm_info_t info;
     snd_pcm_channel_info_t chninfo;
 
-    printf("alsa-init: requested format: %d Hz, %d channels, %s\n", rate_hz,
+    mp_msg(MSGT_AO, MSGL_INFO, "alsa-init: requested format: %d Hz, %d channels, %s\n", rate_hz,
 	channels, audio_out_format_name(format));
 
     alsa_handler = NULL;
 
-    if (verbose)
-	printf("alsa-init: compiled for ALSA-%s (%d)\n", SND_LIB_VERSION_STR,
-	    SND_LIB_VERSION);
+    mp_msg(MSGT_AO, MSGL_V, "alsa-init: compiled for ALSA-%s (%d)\n", SND_LIB_VERSION_STR,
+        SND_LIB_VERSION);
 
     if ((cards = snd_cards()) < 0)
     {
-	printf("alsa-init: no soundcards found\n");
+	mp_msg(MSGT_AO, MSGL_ERR, "alsa-init: no soundcards found\n");
 	return(0);
     }
 
@@ -111,7 +112,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	    ao_data.bps *= 2;
 	    break;
 	case -1:
-	    printf("alsa-init: invalid format (%s) requested - output disabled\n",
+	    mp_msg(MSGT_AO, MSGL_ERR, "alsa-init: invalid format (%s) requested - output disabled\n",
 		audio_out_format_name(format));
 	    return(0);
 	default:
@@ -164,18 +165,18 @@ static int init(int rate_hz, int channels, int format, int flags)
 
     if ((err = snd_pcm_open(&alsa_handler, 0, 0, SND_PCM_OPEN_PLAYBACK)) < 0)
     {
-	printf("alsa-init: playback open error: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO, MSGL_ERR, "alsa-init: playback open error: %s\n", snd_strerror(err));
 	return(0);
     }
 
     if ((err = snd_pcm_info(alsa_handler, &info)) < 0)
     {
-	printf("alsa-init: pcm info error: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO, MSGL_ERR, "alsa-init: pcm info error: %s\n", snd_strerror(err));
 	return(0);
     }
 
-    printf("alsa-init: %d soundcard%s found, using: %s\n", cards,
-	(cards == 1) ? "" : "s", info.name);
+    mp_msg(MSGT_AO, MSGL_INFO, "alsa-init: %d soundcard(s) found, using: %s\n",
+	cards, info.name);
 
     if (info.flags & SND_PCM_INFO_PLAYBACK)
     {
@@ -183,7 +184,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	chninfo.channel = SND_PCM_CHANNEL_PLAYBACK;
 	if ((err = snd_pcm_channel_info(alsa_handler, &chninfo)) < 0)
 	{
-	    printf("alsa-init: pcm channel info error: %s\n", snd_strerror(err));
+	    mp_msg(MSGT_AO, MSGL_ERR, "alsa-init: pcm channel info error: %s\n", snd_strerror(err));
 	    return(0);
 	}
 
@@ -192,9 +193,8 @@ static int init(int rate_hz, int channels, int format, int flags)
 	    ao_data.buffersize = chninfo.buffer_size;
 #endif
 
-	if (verbose)
-	    printf("alsa-init: setting preferred buffer size from driver: %d bytes\n",
-		ao_data.buffersize);
+	mp_msg(MSGT_AO, MSGL_V, "alsa-init: setting preferred buffer size from driver: %d bytes\n",
+	    ao_data.buffersize);
     }
 
     memset(&params, 0, sizeof(params));
@@ -208,7 +208,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 
     if ((err = snd_pcm_channel_params(alsa_handler, &params)) < 0)
     {
-	printf("alsa-init: error setting parameters: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO, MSGL_ERR, "alsa-init: error setting parameters: %s\n", snd_strerror(err));
 	return(0);
     }
 
@@ -221,17 +221,17 @@ static int init(int rate_hz, int channels, int format, int flags)
     
     if ((err = snd_pcm_channel_setup(alsa_handler, &setup)) < 0)
     {
-	printf("alsa-init: error setting up channel: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO, MSGL_ERR, "alsa-init: error setting up channel: %s\n", snd_strerror(err));
 	return(0);
     }
 
     if ((err = snd_pcm_channel_prepare(alsa_handler, SND_PCM_CHANNEL_PLAYBACK)) < 0)
     {
-	printf("alsa-init: channel prepare error: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO, MSGL_ERR, "alsa-init: channel prepare error: %s\n", snd_strerror(err));
 	return(0);
     }
 
-    printf("AUDIO: %d Hz/%d channels/%d bps/%d bytes buffer/%s\n",
+    mp_msg(MSGT_AO, MSGL_INFO, "AUDIO: %d Hz/%d channels/%d bps/%d bytes buffer/%s\n",
 	ao_data.samplerate, ao_data.channels+1, ao_data.bps, ao_data.buffersize,
 	snd_pcm_get_format_name(alsa_format.format));
     return(1);
@@ -244,19 +244,19 @@ static void uninit()
 
     if ((err = snd_pcm_playback_drain(alsa_handler)) < 0)
     {
-	printf("alsa-uninit: playback drain error: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO, MSGL_ERR, "alsa-uninit: playback drain error: %s\n", snd_strerror(err));
 	return;
     }
 
     if ((err = snd_pcm_channel_flush(alsa_handler, SND_PCM_CHANNEL_PLAYBACK)) < 0)
     {
-	printf("alsa-uninit: playback flush error: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO, MSGL_ERR, "alsa-uninit: playback flush error: %s\n", snd_strerror(err));
 	return;
     }
 
     if ((err = snd_pcm_close(alsa_handler)) < 0)
     {
-	printf("alsa-uninit: pcm close error: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO, MSGL_ERR, "alsa-uninit: pcm close error: %s\n", snd_strerror(err));
 	return;
     }
 }
@@ -268,19 +268,19 @@ static void reset()
 
     if ((err = snd_pcm_playback_drain(alsa_handler)) < 0)
     {
-	printf("alsa-reset: playback drain error: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO, MSGL_ERR, "alsa-reset: playback drain error: %s\n", snd_strerror(err));
 	return;
     }
 
     if ((err = snd_pcm_channel_flush(alsa_handler, SND_PCM_CHANNEL_PLAYBACK)) < 0)
     {
-	printf("alsa-reset: playback flush error: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO, MSGL_ERR, "alsa-reset: playback flush error: %s\n", snd_strerror(err));
 	return;
     }
 
     if ((err = snd_pcm_channel_prepare(alsa_handler, SND_PCM_CHANNEL_PLAYBACK)) < 0)
     {
-	printf("alsa-reset: channel prepare error: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO, MSGL_ERR, "alsa-reset: channel prepare error: %s\n", snd_strerror(err));
 	return;
     }
 }
@@ -292,13 +292,13 @@ static void audio_pause()
 
     if ((err = snd_pcm_playback_drain(alsa_handler)) < 0)
     {
-	printf("alsa-pause: playback drain error: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO, MSGL_ERR, "alsa-pause: playback drain error: %s\n", snd_strerror(err));
 	return;
     }
 
     if ((err = snd_pcm_channel_flush(alsa_handler, SND_PCM_CHANNEL_PLAYBACK)) < 0)
     {
-	printf("alsa-pause: playback flush error: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO, MSGL_ERR, "alsa-pause: playback flush error: %s\n", snd_strerror(err));
 	return;
     }
 }
@@ -309,7 +309,7 @@ static void audio_resume()
     int err;
     if ((err = snd_pcm_channel_prepare(alsa_handler, SND_PCM_CHANNEL_PLAYBACK)) < 0)
     {
-	printf("alsa-resume: channel prepare error: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO, MSGL_ERR, "alsa-resume: channel prepare error: %s\n", snd_strerror(err));
 	return;
     }
 }
@@ -320,27 +320,33 @@ static void audio_resume()
 */
 static int play(void* data, int len, int flags)
 {
-    if ((len = snd_pcm_write(alsa_handler, data, len)) != len)
+    int got_len;
+    
+    if (!len)
+	return(0);
+    
+    if ((got_len = snd_pcm_write(alsa_handler, data, len)) < 0)
     {
-	if (len == -EPIPE) /* underrun? */
+	if (got_len == -EPIPE) /* underrun? */
 	{
-	    printf("alsa-play: alsa underrun, resetting stream\n");
-	    if ((len = snd_pcm_channel_prepare(alsa_handler, SND_PCM_CHANNEL_PLAYBACK)) < 0)
+	    mp_msg(MSGT_AO, MSGL_ERR, "alsa-play: alsa underrun, resetting stream\n");
+	    if ((got_len = snd_pcm_channel_prepare(alsa_handler, SND_PCM_CHANNEL_PLAYBACK)) < 0)
 	    {
-		printf("alsa-play: playback prepare error: %s\n", snd_strerror(len));
+		mp_msg(MSGT_AO, MSGL_ERR, "alsa-play: playback prepare error: %s\n", snd_strerror(got_len));
 		return(0);
 	    }
-	    if ((len = snd_pcm_write(alsa_handler, data, len)) != len)
+	    if ((got_len = snd_pcm_write(alsa_handler, data, len)) < 0)
 	    {
-		printf("alsa-play: write error after reset: %s - giving up\n",
-		    snd_strerror(len));
+		mp_msg(MSGT_AO, MSGL_ERR, "alsa-play: write error after reset: %s - giving up\n",
+		    snd_strerror(got_len));
 		return(0);
 	    }
-	    return(len); /* 2nd write was ok */
+	    return(got_len); /* 2nd write was ok */
 	}
-	printf("alsa-play: output error: %s\n", snd_strerror(len));
+	mp_msg(MSGT_AO, MSGL_ERR, "alsa-play: output error: %s\n", snd_strerror(got_len));
+	return(0);
     }
-    return(len);
+    return(got_len);
 }
 
 /* how many byes are free in the buffer */
