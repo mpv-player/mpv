@@ -40,6 +40,7 @@ extern vf_info_t vf_info_yvu9;
 extern vf_info_t vf_info_lavcdeint;
 extern vf_info_t vf_info_eq;
 extern vf_info_t vf_info_halfpack;
+extern vf_info_t vf_info_dint;
 
 char** vo_plugin_args=(char**) NULL;
 
@@ -73,6 +74,7 @@ static vf_info_t* filter_list[]={
     &vf_info_yvu9,
     &vf_info_eq,
     &vf_info_halfpack,
+    &vf_info_dint,
     NULL
 };
 
