@@ -663,7 +663,7 @@ a proper bug report.
 I got this playing MPEG files: Can't find codec for video format 0x10000001!
 </para></question>
 <answer><para>
-You have an old version of <filename>codecs.conf</filename> at
+You have an old version of <filename>codecs.conf</filename> in
 <filename class="directory">~/.mplayer/</filename>,
 <filename class="directory">/etc/</filename>,
 <filename class="directory">/usr/local/etc/</filename> or similar. Remove it.
@@ -693,7 +693,11 @@ I have an AVI that produces a gray screen when played with <option>-vc odivx</op
 and a green one with <option>-vc divx4</option>.
 </para></question>
 <answer><para>
-It's not a DivX file, but an MS MPEG4v3. Update your <filename>codecs.conf</filename>.
+It's not a DivX file, but an MS MPEG4v3.
+If you have an old version of <filename>codecs.conf</filename> in
+<filename class="directory">~/.mplayer/</filename>,
+<filename class="directory">/etc/</filename>,
+<filename class="directory">/usr/local/etc/</filename> or similar, remove it.
 </para></answer>
 </qandaentry>
 
@@ -731,8 +735,7 @@ I have an MJPEG file which works with other players but displays only a black im
 <application>MPlayer</application>
 </para></question>
 <answer><para>
-Disable the Windows DLL in <filename>codecs.conf</filename>, or use the
-<option>-vc ffmjpeg</option> option (compile MPlayer with libavcodec for this to work).
+Use another codec to play the file, try <option>-vc ffmjpeg</option>.
 </para></answer>
 </qandaentry>
 
@@ -764,7 +767,10 @@ only sound! <application>MPlayer</application> prints:
 <screen>Detected video codec: [null] drv:0 (NULL codec (no decoding))</screen>
 </para></question>
 <answer><para>
-Update your <filename>codecs.conf</filename>.
+If you have an old version of <filename>codecs.conf</filename> in
+<filename class="directory">~/.mplayer/</filename>,
+<filename class="directory">/etc/</filename>,
+<filename class="directory">/usr/local/etc/</filename> or similar, remove it.
 </para></answer>
 </qandaentry>
 
