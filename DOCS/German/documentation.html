@@ -104,8 +104,9 @@
     </UL>
 </LI><LI><A HREF="#B">B. Mailing-Listen</A>
 </LI><LI><A HREF="bugreports.html">C. Wie man einen Fehler berichtet</A>
+</LI><LI><A HREF="../tech/patches.txt">C/2. Wie man Patches einschickt (Englisch)</A>
 </LI><LI><A HREF="#D">D. Bekannte Probleme</A>
-</LI><LI><A HREF="../skin-en.html">X. Wie man eine befühmter SkinMaker in 5 min wird!</A>
+</LI><LI><A HREF="../skin-en.html">X. Wie man ein befühmter SkinMaker in 5 min wird! (Englisch)</A>
 </LI></UL></P>
 
 <P><HR></P>
@@ -120,7 +121,8 @@
 
 <P><B>MPlayer</B> ist einen Video-Player für LINUX, welcher auch auf manchen
 anderen Unix-Systemen und <B>nicht-x86</B> CPU läuft, siehe <A HREF="#6">Sektion
-6</A>. Er spielt die meisten MPEG, AVI und ASF/WMF Dateien, unterstützt von einigen
+6</A>. Er spielt die meisten MPEG, AVI und ASF/WMF Dateien (auch einige
+QT/MOV-Dateien mit CVID, VP32 und Raw Audio-Format), unterstützt von einigen
 eingebauten und einigen Win32 DLL Codecs. Du kannst <B>VideoCD</B>, <B>SVCD</B>,
 <B>DVD</B> und auch <B>DivX</B> Filme sehen (und die braust die avifile Libraty nicht!).
 Ein anderes großes Feature von
@@ -129,14 +131,13 @@ funktioniert mit X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, aber du kannst SDL
 verwenden (und dadurch alle SDL-Treiber) und auch einigen Low-Level grafikkartenabhängige
 Treiber (für Matrox, 3Dfx und Radeon). Die meinsten von ihnen unterstützen
 Software oder Hardware-Scaling, also kannst du die Videos in Vollbild geniesen.
-Und was meinst du über die großen, antialiase schattierten Untertitel (7
+Und was meinst du über die großen, antialiase schattierten Untertitel (8
 unterstützte Typen!!!) mit europäischen/ISO 8859-1,2 (ungarische, englische,
 tschechische, usw.), kyrillischen und koreanischen Schriften und OSD?</P>
 
-<P>MPlayer könnte nach den Bedienungen der <A HREF="http://www.gnu.org/licenses/gpl.html">GNU GPL</A> verbreitet werden,
-jedoch das Verbreiten in Binärer Form ist <B>verboten</B> und das MPlayer-Team
-ignoniert Fehlerberichte, wenn sie von solch einer Version sind! Dem OpenDivX
-Code hat seine eigene Lizenz.</P>
+<P>MPlayer ist grundsätzlich <A HREF="http://www.gnu.org/licenses/gpl.html">GNU GPL</A>, enthält
+jedoch auch einige Nicht-GPL-Teile die es das Verbeiten in Binärer Form nicht erlauben.
+Es enthält ausserdem die OpenDivX-Bibliotek, die eine spezielle Lizenz besitzt.</P>
 
 <P>Ich schreibe keine Codecs, nur einen Player. Stattdessen verbringe ich eine
 menge Zeit mit dem Finden des besten Weges um zerstörte Input-Files (beides MPEG
@@ -260,14 +261,12 @@ was eingebaut wird, und was nicht. Du kannst dir auch die config.h und config.ma
 Dateien ansehen.</P>
 
 <P>Wenn auch unwichtig sollten trotzdem die Schiften installiert werden um das OSD und die
-Untertitel-Unterstützung zu ermöglichen. Lade dir mp_font3.zip und optionale (fall
-sie existieren) Sprachupdates. Es ist SEHR ZU EMPFEHLEN die <A HREF=#1.5>Sektion 1.5</A>
-für Details zu lesen.</P>
+Untertitel-Unterstützung zu ermöglichen. Lade dir mp_arial-iso-8859-*.zip und optionale (fall
+sie existieren) Sprachupdates. Es ist SEHR ZU EMPFEHLEN für Details die <A HREF=#1.5>Sektion 1.5</A>zu lesen.</P>
 
 <PRE>    mkdir ~/.mplayer/font
     cd ~/.mplayer/font
-    unzip mp_font3.zip
-    unzip mp_font3_hu.zip</PRE>
+    unzip mp_arial-iso-8859-*.zip</PRE>
 
 <P>Jetzt bleibt nur mehr eins übrig: kompiere die <B>codecs.conf</B>-Datei vom
 <CODE>etc</CODE> Verzeichnis (im MPlayer-Hauptstamm) nach $HOME/.mplayer/codecs.conf.</P>
@@ -275,7 +274,7 @@ für Details zu lesen.</P>
 <P><B><A NAME=1.4>1.4. Was ist mit dem GUI?</A></B></P>
 
 <P>Das GUI basiert auf GTK, also muss gtk (und die devel-Sachen) installiert sein.
-Du kannst es einbauen durch die Parameter <CODE>--enable-new-gui</CODE> bei ./configure .
+Du kannst es einbauen durch die Parameter <CODE>--enable-gui</CODE> bei ./configure .
 Um MPlayer im GUI-Modus zu betreiben kannst du entweder
 <UL>
   <LI>die <CODE>-gui</CODE> Option verwenden</LI>
@@ -630,15 +629,16 @@ Autoren!</P>
 <UL><LI>player code (mpeg stream demultiplexer and avi/asf parser, A-V sync, seek...)
 </LI><LI>mp3lib, based on mpglib sources  [MP3 audio decoder]
 </LI><LI>getch2  [keyboard handler]
-</LI><LI>some changes in libmpeg2 code (progressive frames, bitrate & fps support)
+</LI><LI>some changes in libmpeg2 code (progressive frames, bitrate &amp; fps support)
 </LI><LI>libvo improvements: adding OpenGL support, bugfix in mga driver...
-</LI><LI>triple buffering & YUY2 support (for DivX/MPEG4) into mga_vid driver 
+</LI><LI>triple buffering &amp; YUY2 support (for DivX/MPEG4) into mga_vid driver 
 </LI><LI>scripts in the TVout directory (TVout on Matrox G400DH, read documentation)
 </LI><LI>hacking DivX/Mpeg4 VfW codecs to get YUV output
 </LI><LI>opendivx decoder speed optimizations (see opendivx/ChangeLog)
-</LI><LI>OSD & SUB display code
+</LI><LI>OSD &amp; SUB display code
 </LI><LI>ffmpeg/libavcodec integration
 </LI><LI>DivX4Linux (ProjectMayo) support (see documentation)
+</LI><LI>New DVD-Support using libdvdread
 </LI></UL>
 
 </LI><LI>Zoltán Ponekker (Pontscho/Fresh!):  &lt;pontscho@makacs.poliod.hu&gt; 
@@ -656,16 +656,17 @@ Autoren!</P>
 </LI><LI>Makefile improvements
 </LI><LI>prelimenary DVD support
 </LI><LI>various X11 cleanups and fixes
+</LI><LI>HTMLization of documentation
 </LI></UL>
 
 </LI><LI>Gábor Bérczi (Gabucino):  &lt;gabucino@k2.jozsef.kando.hu&gt;
 <UL><LI>documentation maintainer
 </LI><LI>hungarian translation of documentation
-</LI><LI>second webpage design&gfx
+</LI><LI>second webpage design&amp;gfx
 </LI><LI>webpage maintainer
-</LI><LI>testing, codecs quality & speed comparsions
-</LI><LI>IRC channel #<B>MPlayer</B> operator
-(devel channel, users earn kickban)
+</LI><LI>testing, codecs quality &amp; speed comparsions
+</LI><LI>IRC channels operator
+(#MPlayer is user channel)
 </LI><LI>experimental MINIX port :)
 </LI></UL>
 
@@ -709,6 +710,8 @@ Autoren!</P>
 </LI><LI>flipping support (for Indeo 3/4, etc)
 </LI><LI>SDL audio driver in libao2
 </LI><LI>RAW PCM/WAVE file writer for libao2
+</LI><LI>OggVorbis audio support
+</LI><LI>Various aspect code
 </LI></UL>
 
 </LI><LI>TeLeNiEkO: &lt;telenieko@telenieko.com&gt;
@@ -733,8 +736,7 @@ Autoren!</P>
 </LI></UL>
 
 </LI><LI>German Gomez Garcia: &lt;german@piraos.com&gt;
-<UL><LI>DVD .ifo parser and chapter selection [not yet in the main trunk]
-</LI><LI>SPDIF AC3 output for SBLive!
+<UL><LI>SPDIF AC3 output for SBLive!
 </LI></UL>
 
 </LI><LI>Dariush Pietrzak (Eyck): &lt;eyck@incubus.ar.lublin.pl&gt;
@@ -747,7 +749,7 @@ Autoren!</P>
 <UL><LI>initial solaris8-x86 support
 </LI></UL>
 
-</LI><LI>Jürgen Keil and Marcus Comstedt: &lt;jk@tools.de&gt; &lt;marcus@idonex.se&gt;
+</LI><LI>Jürgen Keil and Marcus Comstedt: &lt;jk@tools.de&gt;
 <UL><LI>patched <B>MPlayer</B> to work on Solaris 8 x86
 </LI><LI>configure fixes
 </LI><LI>various fixes (win32, configure, etc)
@@ -922,7 +924,6 @@ other technical help from:</P>
   <LI><B>vo_x11.c</B>    - Pontscho
   <LI><B>vo_xmga.c</B>   - Pontscho
   <LI><B>vo_xv.c</B>     - Pontscho
-  <LI><B>vo_aa.c</B>     - Folke Ashberg
 </UL></P>
 							  
 <P>libao2 Treiber:
@@ -989,7 +990,7 @@ siche, dass der Ziel-Entwickler diese Liste liest!</P>
 <P>HINWEIS: Sprache der oberen Listen ist ENGLISCH, ausser wenn es extra
 anders angeben ist. Bitte sende keine Nachrichten in andere Sprache!</P>	   
 
-<P><B><A NAME=C><A HREF="bugreports.html">Anhang C</A> - Wie man einen Fehler berichtet</A></B></P>
+<P>HINWEIS: Du kannst das durchsuchbare Maillinglisten-Archiv <A HREF="http://www.mplayerhq.hu/cgi-bin/htsearch">hier</A> erreichen<P><B><A NAME=C><A HREF="bugreports.html">Anhang C</A> - Wie man einen Fehler berichtet</A></B></P>
 
 <P><B><A NAME=D>Anhang D - Bekannte Probleme</A></B></P>
 
