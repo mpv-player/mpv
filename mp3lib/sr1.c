@@ -355,6 +355,7 @@ void MP3_Init(int fakemono){
 #else
 void MP3_Init(){
 #endif
+#ifdef ARCH_X86
     _CpuID=CpuDetect();
     _i586=ipentium();
 #ifndef HAVE_MMX
@@ -384,11 +385,15 @@ void MP3_Init(){
        Note: It's ok, Since K8 will have SSE2 support and will much faster
        of P4 ;) 
      */
-      printf( "mp3lib: Using SSE%s! optimized decore.\n",(_isse>1?"2":""));
+//      printf( "mp3lib: Using SSE%s! optimized decore.\n",(_isse>1?"2":""));
+      printf( "mp3lib: Using Pentium%s optimized decore.\n",(_i586>1?"-MMX":""));
     else
     if(_3dnow)
       printf( "mp3lib: Using AMD 3dnow%s! optimized decore.\n",(_3dnow>1?"-dsp(k7)":""));
-
+#else
+      _CpuID = _i586 = _3dnow = _isse = _has_mmx = 0;
+      printf( "mp3lib: Using generic decore.\n");
+#endif
 /* Use it for any MMX cpu */
    if(_has_mmx)	make_decode_tables_MMX(outscale);
    else		make_decode_tables(outscale);

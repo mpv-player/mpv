@@ -48,7 +48,7 @@ exit_cpudetect:
 /  in C: unsigled long ipentium( void );
 /  return: 0 if this processor i386 or i486
 /          1 otherwise
-/          2 if this cpu supports mmx
+/          3 if this cpu supports mmx
 / ---------------------------------------------------------------------------
 ipentium:
         pushl  %ebx
@@ -74,7 +74,7 @@ ipentium:
         incl   %eax
 	test   $0x00800000, %edx
 	jz     exit
-	incl   %eax
+	orl    $2, %eax
         jmp    exit
 no_cpuid:
         xorl   %eax,%eax
@@ -88,7 +88,7 @@ exit:
 /  in C: unsigned long a3dnow( void );
 /  return: 0 if this processor does not support 3dnow!
 /          1 otherwise
-/          2 if this cpu supports 3dnow-dsp extension
+/          3 if this cpu supports 3dnow-dsp extension
 / ---------------------------------------------------------------------------
 a3dnow:
         pushl  %ebx
@@ -114,7 +114,7 @@ a3dnow:
         testl  $0x40000000,%edx
         jz     exit2
 /// eax=2 - K7 3DNowEx!	
-        inc    %eax
+        orl    $2, %eax
 exit2:
 
         popl   %ecx
@@ -126,7 +126,7 @@ exit2:
 /  in C: unsigned long isse( void );
 /  return: 0 if this processor does not support sse
 /          1 otherwise
-/          2 if this cpu supports sse2 extension
+/          3 if this cpu supports sse2 extension
 / ---------------------------------------------------------------------------
 isse:
         pushl  %ebx
@@ -145,7 +145,7 @@ isse:
 	incl   %eax
         testl  $0x04000000,%edx
         jz     exit3
-        incl   %eax
+        orl    $2, %eax
 exit3:
         popl   %ecx
         popl   %edx
