@@ -51,6 +51,13 @@
   size=2><a href=#2.3.1.12>vesa</a></TD><TD></TD><TD><FONT face="Verdana, Arial,
   Helvetica, sans-serif" size=2>Output to VESA BIOS.</TD><TR>
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2><a href=#2.3.1.15>vidix</a></TD><TD></TD><TD><FONT face="Verdana, Arial,
+  Helvetica, sans-serif" size=2>VIDeo Interface for *niX (this entry is not a
+  real driver, but an explanation of VIDIX)</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2><a href=#2.3.1.15>xvidix</a></TD><TD></TD><TD><FONT face="Verdana, Arial,
+  Helvetica, sans-serif" size=2>VIDIX in X window</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
   size=2>directfb</TD><TD></TD><TD><FONT face="Verdana, Arial,
   Helvetica, sans-serif" size=2>Direct Framebuffer Device</TD><TR>
 
@@ -883,6 +890,108 @@ it only from textmode console.</P>
 to improve something then simply send me your patches.
 </P>
 
+<P><B><A NAME=2.3.1.15>2.3.1.15. VIDIX</A></B></P>
+
+<P><B><I>WHAT IS VIDIX</I></B></P>
+
+<P>VIDIX is the abbreviation for <b>VID</b>eo <b>I</b>nterface for
+  *ni<b>X</b>.<BR>
+  VIDIX was designed and introduced as an interface for fast user-space drivers
+  providing <b>DGA</b> everywhere where it's possible (<b>unlike X11</b>). I
+  hope that these drivers will be as portable as X11 (<b>not only on
+  *nix</b>).<BR>
+  What is it:
+  <LI>It's a portable successor of mga_vid technology, but it's located in
+    user-space.</LI>
+  <LI>Unlike X11 it provides DGA everywhere it's possible</LI>
+  <LI>Unlike v4l it provides interface for video playback</LI>
+  <LI>Unlike linux's drivers it uses mathematics library</LI>
+</P>
+
+<P>I can tell you in bold capital letters :<BR>
+  <b>VIDIX PROVIDES DIRECT GRAPHICS ACCESS TO BES YUV MEMORY.</b>
+</P>
+
+<P><i>Well (it's in my todo) - implement DGA to MPEG2 decoder.</i></P>
+
+<P>This interface was designed as an attempt to fit existing video acceleration
+  interfaces (known as mga_vid, mga_yuv, radeon_vid) into a fixed scheme. It
+  provides highlevel interface to chips which are known as BES (BackEnd
+  scalers) or OV (Video Overlays). It doesn't provide lowlevel interface to
+  things which are known as graphics servers. (I don't want to compete with X11
+  team in graphics mode switching). I.e. main goal of this interface is to
+  provide maximal speed of video playback but not putting video signal on
+  screen of your TV or on tape of your VCR. Although these things are also very
+  significant - it's perfectly other task. (However I guess that it would be
+  possible to implement something like mini-X (don't mix it with Minix ;) in
+  the future, if some number of volunteers will be found.
+</P>
+
+<P><B><I>USAGE</I></B></P>
+
+<P>
+  <LI>You can use standalone video output driver: <CODE>-vo xvidix</CODE><BR>
+    This driver was developed as X11's front end to VIDIX technology.  It
+    requires XServer and can work only under XServer.</LI>
+  <LI>You can use VIDIX subdevice which was applied to several video output
+    drivers, such as:<BR>
+    <CODE>-vo vesa:vidix</CODE> and <CODE>-vo fbdev:vidix</CODE></LI>
+  Indeed it doesn't matter which video output driver is used with <b>VIDIX</b>.
+</P>
+
+<P><B><I>REQUIREMENTS</I></B></P>
+
+<P>
+  <LI>video card should be in graphics mode (I write <b>should</b> simply
+    because I tested it in text mode - it works but has awful output ;) Use
+    AAlib for that).<BR>
+    <I>Note: Everyone can try this trick by commenting out mode switching in
+    vo_vesa driver.</I></LI>
+  <LI><B>MPlayer</B>'s video output driver should know active video mode and be
+    able to tell to VIDIX subdevice some video characteristics of server.</LI>
+  I hope that probably every video output driver of <B>MPlayer</B> will
+  recognize <CODE>:vidix</CODE> subdevice.
+</P>
+
+<P><B><I>USAGE METHODS</I></B></P>
+
+<P>When VIDIX is used as <b>subdevice</b> (<CODE>-vo vesa:xvidix</CODE>) then
+  video mode configuration is performed by video output device
+  (<b>vo_server</b> in short). Therefore you can pass into command line of
+  <B>MPlayer</B> the same keys as for vo_server. In addition it understands
+  <CODE>-double</CODE> key as globally visible parameter. (I recommend using
+  this key with VIDIX at least for ATI's card).<BR>
+  As for <CODE>-vo xvidix</CODE> : currently it recognizes the following
+  options: <CODE>-fs -zoom -x -y</CODE>.<BR>
+</P>
+
+<P>Also you can specify VIDIX's driver directly as third subargument in command
+  line :<BR>
+  <BR>
+  &nbsp;&nbsp;<code>mplayer -vo xvidix:mga_vid.so -fs -zoom -double
+    file.avi</code><BR>
+  or<BR>
+  &nbsp;&nbsp;<code>mplayer -vo vesa:vidix:radeon_vid.so -fs -zoom -double -bpp
+    32 file.avi</code><BR>
+  <BR>
+  But it's dangerous, and you shouldn't do that. In this case given driver will
+  be forced and result is unpredictable (it may <b>freeze</b> your
+  computer). The Right Way is to use VIDIX without arguments to enable driver
+  autodetection.
+</P>
+
+<P>
+  VIDIX is very new technology and it's extremely possible that on your system
+  (OS=abc CPU=xyz) it won't work. In this case only solution for you it's port
+  it (mainly libdha). But there is hope that it will work on those systems
+  where X11 does.
+</P>
+
+<P>And the last <b>WARNING</b>: (un)fortunately you <b>MUST</b> have
+  <b>ROOT</b> privileges to use VIDIX due to direct hardware access. At least
+  set the <b>suid</b> bit on the <B>MPlayer</B> excecutable.
+</P>
+
 
 <P><B><A NAME=2.3.1.A>2.3.1.A. TV-out support</A></B></P>
 
@@ -994,8 +1103,8 @@ hackers will be able to disable copy protection on their chips. Therefore
 we have no chance to get working TV-out on ATI.</P>
 
 <P>What's status of ATI's tv-out chips under Linux:
-<LI><b>ATI Mach64</b> has <i>ImpacTV</i> which is supported by <A HREF="http://www.linuxvideo.org/gatos">gatos</A>.
-<LI><b>ASIC Radeon VIVO</b> has <i>Rage Theatre</i> which is supported by <A HREF="http://www.linuxvideo.org/gatos">gatos</A>.
+<LI><b>ATI Mach64</b> has <i>ImpacTV</i> which is supported by <A HREF="http://gatos.sf.net">gatos</A>.
+<LI><b>ASIC Radeon VIVO</b> has <i>Rage Theatre</i> which is supported by <A HREF="http://gatos.sf.net">gatos</A>.
 <LI><b>Radeon VE</b> and <b>Rage PRO LT</b> have <i>ImpacTV2+</i> which is not supported under Linux.
 But with <B>MPlayer</B> you get <B>full hardware acceleration</B> and <B>TV out</B>
 for Radeons !

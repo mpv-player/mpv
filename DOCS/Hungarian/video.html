@@ -50,6 +50,13 @@
   size=2><a href=#2.3.1.12>vesa</a></TD><TD></TD><TD><FONT face="Verdana, Arial
   Helvetica, sans-serif" size=2>Kimenet VESA BIOS-ok segítségével.</TD><TR>
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2><a href=#2.3.1.15>vidix</a></TD><TD></TD><TD><FONT face="Verdana, Arial
+  Helvetica, sans-serif" size=2>VIDeo Interface for *niX (ez nem egy valós
+  meghajtó, hanem a VIDIX leírása)</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
+  size=2><a href=#2.3.1.15>xvidix</a></TD><TD></TD><TD><FONT face="Verdana, Arial
+  Helvetica, sans-serif" size=2>VIDIX, X ablakban</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
   size=2>directfb</a></TD><TD></TD><TD><FONT face="Verdana, Arial
   Helvetica, sans-serif" size=2>Direct Framebuffer Device</TD><TR>
 
@@ -867,6 +874,102 @@ egyidõben ! Csak szöveges konzolról futtasd !</P>
 küldj patchet.</P>
 
 
+<P><B><A NAME=2.3.1.15>2.3.1.15. VIDIX</A></B></P>
+
+<P><B><I>MI IS AZ A VIDIX ?</I></B></P>
+
+<P>A VIDIX a <B>VID</B>eo <B>I</B>nterface for *ni<B>X</B> szavak rövidítése.
+  A VIDIX tervezésekor a cél egy - néhány userspace meghajtót egységbe fogó -
+  interface létrehozása volt, ezáltal - az X11-tõl eltérõen - mindenhol
+  elérhetõvé tenni a DGA-t, ahol ez lehetséges. Remélem hogy ezek a meghajtók
+  legalább annyira portolhatóak lesznek mint az X11 (<B>és nem csak
+  *nix-okon</B>).<BR>
+  Amibõl áll:
+  <LI>Portolható utódja az mga_vid technológiának, de userspace-ben helyezkedik
+    el.</LI>
+  <LI>Az X11-tõl eltérõen mindenhol elérhetõ vele a DGA, ahol csak
+    lehetséges</LI>
+  <LI>A v4l-tõl eltérõen interface-t nyújt a videok lejátszására is</LI>
+  <LI>Más Linuxos meghajtóktól eltérõen matematikai libraryt használ</LI>
+</P>
+
+<P>És ilyen szép nagy betûkkel :<BR>
+  <B>A VIDIX KÖZVETLEN HOZZÁFÉRÉST NYÚJT A KÁRTYA BES YUV MEMÓRIÁJÁHOZ.</B>
+</P>
+
+<P>Ez az interface a meglévõ meghajtókat (amik mga_vid, mga_yuv, radeon_vid
+  neveken ismertek) egy fix keretbe foglalja. Továbbá magas szintû interface-t
+  nyújt a BES (BackEnd Scaler) vagy OV (Video Overlay) chip-ek eléréséhez.
+  Nincs benne viszont alacsonyszintû interface a grafikus szerverekhez
+  hasonlóan (nem akarok az X11-gyel versengeni). A jövõben el tudok képzelni
+  valami olyasmit mint egy mini-X (nem összekeverendõ a Minix-szel ;), ha
+  elegendõen jelentkeznek.
+</P>
+
+<P><B><I>HASZNÁLAT</I></B></P>
+
+<P>
+  <LI>Használható például közvetlenül: <CODE>-vo xvidix</CODE><BR>
+    Ez a meghajtó csak X alatt használható, es egyfajta frontend a VIDIX
+    technológiához.</LI>
+  <LI>A VIDIX használható alegységként is, más ismert kimeneteken keresztül,
+    például :<BR>
+    <CODE>-vo vesa:vidix</CODE> vagy <CODE>-vo fbdev:vidix</CODE></LI>
+  A <B>VIDIX</B> számára mindez teljesen lényegtelen.
+</P>
+
+<P><B><I>SZÜKSÉGES</I></B></P>
+
+<P>
+  <LI>Hogy a videokártya grafikus módban legyen (bár megnéztem szöveges
+    módban is.. hát elég rettenetes ;) arra AAlib való).<BR>
+    <I>Megjegyzés: ez kipróbálható, csak a vo_vesa meghajtóban kell
+    kikommentezni a grafikus módba váltó sort.</I></LI>
+  <LI>Az <B>MPlayer</B> választott video kimeneti meghajtójának tudnia kell
+    a használt képernyõ méreteirõl, és ezt el is kell mondania a VIDIX
+    almeghajtónak.</LI>
+  Remélem hogy hamarosan az összes meghajtó el fogja fogadni a <CODE>:vidix</CODE>
+  almeghajtót.
+</P>
+
+<P><B><I>VARIÁCIÓK A HASZNÁLATRA</I></B></P>
+
+<P>Amikor a VIDIX-et almeghajtóként használod, a tulajdonképpeni konfigurálást
+  maga a "fõ" meghajtó végzi (rövidebben a vo_server). Így használhatod
+  azokat az opciókat is, amiket VIDIX nélkül is használhattál. Plusz,
+  értelmezi a <CODE>-double</CODE> opciót (a használata ajánlott, legalábbis
+  az ATI kártyákhoz).<BR>
+  A <CODE>-vo xvidix</CODE> opció jelenleg a következõ opciókat ismeri fel :
+  <CODE>-fs -zoom -x -y</CODE>.<BR>
+</P>
+
+<P>Továbbá, lehetséges átugrani az autodetektálást, a kívánt VIDIX
+  meghajtó harmadik opcióként történõ megadásával :<BR>
+  <BR>
+  &nbsp;&nbsp;<code>mplayer -vo xvidix:mga_vid.so -fs -zoom -double
+    file.avi</code><BR>
+  vagy<BR>
+  &nbsp;&nbsp;<code>mplayer -vo vesa:vidix:radeon_vid.so -fs -zoom -double -bpp  
+    32 file.avi</code><BR>
+  <BR>
+  Viszont ez elég veszélyes, mivel ilyenkor mindenképp a megadott meghajtó
+  lesz betöltve, és elõre nem látható következményekhez vezethet, akár
+  lefagyáshoz is. A helyes módszer az, amikor a VIDIX autodetektál.
+</P>
+
+<P>
+  A VIDIX nagyon új technológia, és nagyon valószínû hogy a Te rendszereden
+  (számunkra ismeretlen OS, stb) nem fog mûködni. Ilyenkor az egyetlen
+  lehetõség, ha átportolod (fõleg a libdha-t). Nagyon valószínû hogy a VIDIX
+  minden olyan rendszeren mûködõképes, ahol az X11.</P>
+
+<P>És egy utolsó figyelmezetetés: sajnos/szerencsére a VIDIX <B>CSAK ROOT</B>
+  jogosultsággal elérhetõ, mivel közvetlen hardveres hozzáférésre van
+  szükség. A minimum, hogy a <B>suid</B> bitet bebillented az <B>MPlayer</B>
+  binárison.
+</P>
+
+
 <P><B><A NAME=2.3.1.A>2.3.1.A.  TV kimenet</A></B></P>
 
 <P><B><A NAME=2.3.1.A.1>2.3.1.A.1.  Matrox kártyák</A></B></P>
@@ -976,8 +1079,8 @@ A:Egy másolásvédelmi mechanizmus.</code>
 a másolásvédelmet a chipjeiken. Ígyhát nincs esélyünk TV kimenetre.</P>
 
 <P>Az ATI TV kimenetek jelenlegi támogatottsága :
-<LI><b>ATI Mach64</b> : <i>ImpacTV</i> van rajta, amit a <A HREF="http://www.linuxvideo.org/gatos">gatos</A> támogat.
-<LI><b>ASIC Radeon VIVO</b> : <i>Rage Theatre</i>, ami szintén támogatott a <A HREF="http://www.linuxvideo.org/gatos">gatos</A> által.
+<LI><b>ATI Mach64</b> : <i>ImpacTV</i> van rajta, amit a <A HREF="http://gatos.sourceforge.net">gatos</A> támogat.
+<LI><b>ASIC Radeon VIVO</b> : <i>Rage Theatre</i>, ami szintén támogatott a <A HREF="http://gatos.sourceforge.net">gatos</A> által.
 <LI><b>Radeon VE</b> és <b>Rage PRO LT</b> : <i>ImpacTV2+</i> ami jelenleg nem támogatott Linux alatt.
 Viszont <B>MPlayer</B>-rel teljeskörû <B>hardveres gyorsítást</B> és
 <B>TV kimenetet</B> kapsz Radeonokhoz ! Lásd a <a href=#2.3.1.12>VESA meghajtó</a> és
