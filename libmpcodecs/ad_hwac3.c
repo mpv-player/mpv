@@ -25,7 +25,7 @@ static int isdts = -1;
 
 static ad_info_t info = 
 {
-  "AC3/DTS pass-through SP/DIF",
+  "AC3/DTS pass-through S/PDIF",
   "hwac3",
   "Nick Kurshev/Peter Schüller",
   "???",
