@@ -375,13 +375,11 @@ printf( "w: %d h: %d\n\n",vo_dwidth,vo_dheight );
 #ifdef HAVE_NEW_GUI  
  if ( vo_window == None ) 
 #endif 
-  XSelectInput( mDisplay,mywindow,StructureNotifyMask | KeyPressMask );
-   
+  {
+   XSelectInput( mDisplay,mywindow,StructureNotifyMask | KeyPressMask );
+   saver_off(mDisplay);
+  }
  X_already_started++;
-
-// vo_initthread( mThread );
-
- saver_off(mDisplay);
  return 0;
 }
 
@@ -553,9 +551,16 @@ static uint32_t query_format( uint32_t format )
 static void
 uninit(void)
 {
-saver_on(mDisplay); // screen saver back on
+#ifdef HAVE_NEW_GUI
+ if ( vo_window == None )
+#endif
+ saver_on(mDisplay); // screen saver back on
 #ifdef HAVE_XF86VM
+ #ifdef HAVE_NEW_GUI
+        if ((vidmodes!=NULL)&&( vo_window == None ) )
+ #else
         if (vidmodes!=NULL)
+ #endif
         {
           int screen; screen=DefaultScreen( mDisplay );
           XF86VidModeSwitchToMode(mDisplay,screen,vidmodes[0]);
@@ -563,7 +568,7 @@ saver_on(mDisplay); // screen saver back on
           free(vidmodes);
         }
 #endif
-
+ XClearWindow( mDisplay,mywindow );
 printf("vo: uninit!\n");
 }
 

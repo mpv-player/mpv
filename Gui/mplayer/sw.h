@@ -2,25 +2,30 @@
 // sub window
 
 int             mplSubRender = 1;
+int             SubVisible = 0;
 
 void mplSubDraw( wsParamDisplay )
 {
+ if ( appMPlayer.subWindow.State == wsFocused ||
+      appMPlayer.subWindow.State ==
+ 
+ ) SubVisible=0;
+ 
+ if ( !appMPlayer.subWindow.Mapped ||
+      appMPlayer.subWindow.Visible == wsWindowNotVisible ) return;
 
-// if ( ( appMPlayer.subWindow.Visible == wsWindowNotVisible )||
-//      ( appMPlayer.subWindow.State != wsWindowExpose ) ) return;
-
- if ( ( mplShMem->Playing ) )//&&( appMPlayer.subWindow.State == wsWindowExpose ) )
+ if ( mplShMem->Playing )
   { 
+   wsSetBackgroundRGB( &appMPlayer.subWindow,0,0,0 );
+   wsClearWindow( appMPlayer.subWindow );
    vo_expose=1; 
    mplSubRender=0;
   }
 
  if ( mplSubRender )
   {
-   wsSetForegroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
-   XFillRectangle( wsDisplay,appMPlayer.subWindow.WindowID,appMPlayer.subWindow.wGC,0,0,
-    appMPlayer.subWindow.Width,appMPlayer.subWindow.Height );
-   if ( appMPlayer.sub.Bitmap.Image ) 
+   wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
+   if ( appMPlayer.sub.Bitmap.Image )
     {
      wsConvert( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Image,appMPlayer.sub.Bitmap.ImageSize );
      wsPutImage( &appMPlayer.subWindow );
@@ -67,6 +72,7 @@ void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )
            }
           break;
    case wsRLMouseButton:
+          if ( ( !mplSubMoved )&&( !( SubVisible++%2 ) ) ) wsMoveTopWindow( &appMPlayer.mainWindow );
           msButton=0;
           mplSubMoved=0;
           break;

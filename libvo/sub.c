@@ -163,7 +163,7 @@ inline static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,in
 	  t=vo_sub->text[i++];	  
 	  len=strlen(t)-1;
 	  
-	  printf("sub(%d) '%s'\n",len,t);
+//	  printf("sub(%d) '%s'\n",len,t);
 //	  if(len<0) memy -=h; // according to max of vo_font->pic_a[font]->h 
 //	  else
 	  for (j=0;j<=len;j++){

@@ -104,17 +104,12 @@ static void mDrawColorKey( void )
 
 static void set_window(){
 
-         XGetGeometry( mDisplay,mWindow,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
-         drwX=0; drwY=0; // drwWidth=wndWidth; drwHeight=wndHeight;
-         XTranslateCoordinates( mDisplay,mWindow,mRoot,0,0,&drwcX,&drwcY,&mRoot );
-         fprintf( stderr,"[xmga] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
-
          #ifdef HAVE_NEW_GUI
           if ( vo_window != None )
            {
             mFullscreen=0;
             dwidth=mdwidth; dheight=mdheight;
-            if ( ( drwWidth == vo_screenwidth )&&( drwHeight == vo_screenheight ) )
+            if ( ( vo_dwidth == vo_screenwidth )&&( vo_dheight == vo_screenheight ) )
              {
               mFullscreen=1;
               dwidth=vo_screenwidth;
@@ -122,6 +117,11 @@ static void set_window(){
              }
            }
          #endif
+
+         XGetGeometry( mDisplay,mWindow,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
+         drwX=0; drwY=0; // drwWidth=wndWidth; drwHeight=wndHeight;
+         XTranslateCoordinates( mDisplay,mWindow,mRoot,0,0,&drwcX,&drwcY,&mRoot );
+         fprintf( stderr,"[xmga] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
 
          if ( mFullscreen )
           {
@@ -131,7 +131,7 @@ static void set_window(){
            drwcY+=drwY;
            drwWidth=(dwidth > vo_screenwidth?vo_screenwidth:dwidth);
            drwHeight=(dheight > vo_screenheight?vo_screenheight:dheight);
-           //fprintf( stderr,"[xmga-fs] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
+           fprintf( stderr,"[xmga-fs] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
           }
 
          mDrawColorKey();
@@ -235,7 +235,8 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
  wndWidth=d_width; wndHeight=d_height;
  dwidth=d_width; dheight=d_height;
  #ifdef HAVE_NEW_GUI
-  mdwidth=d_width; mdheight=d_height;
+//  mdwidth=d_width; mdheight=d_height;
+  mdwidth=width; mdheight=height;
  #endif
  mFullscreen=fullscreen&1;
 
@@ -294,13 +295,13 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
   else
     {
      mWindow=vo_window;
-     fprintf( stderr,"[xmga] width: %d height: %d d_width: %d d_height: %d\n",width,height,d_width,d_height );
-     if ( vo_screenwidth != d_width )
-      {
-       XMoveWindow( mDisplay,mWindow,( vo_screenwidth - d_width ) / 2,( vo_screenheight - d_height ) / 2 );
-       XResizeWindow( mDisplay,mWindow,d_width,d_height );
-      }
-      else mFullscreen=1;
+//     fprintf( stderr,"[xmga] width: %d height: %d d_width: %d d_height: %d\n",width,height,d_width,d_height );
+//     if ( vo_screenwidth != d_width )
+//      {
+//       XMoveWindow( mDisplay,mWindow,( vo_screenwidth - d_width ) / 2,( vo_screenheight - d_height ) / 2 );
+//       XResizeWindow( mDisplay,mWindow,d_width,d_height );
+//      }
+//      else mFullscreen=1;
       mGC=vo_gc; //XCreateGC( mDisplay,mWindow,GCForeground,&wGCV );
     }
 #endif
@@ -316,6 +317,8 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
  mga_vid_config.colkey_blue=255;
 
  if(mga_init()) return -1;
+ 
+ set_window();
 
 #ifdef HAVE_NEW_GUI
  if ( vo_window == None )
@@ -324,7 +327,11 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
    XFlush( mDisplay );
    XSync( mDisplay,False );
  }
- saver_off(mDisplay);
+ 
+#ifdef HAVE_NEW_GUI
+ if ( vo_window == None )
+#endif
+  saver_off(mDisplay);
 
  return 0;
 }
@@ -336,7 +343,11 @@ static const vo_info_t* get_info( void )
 static void
 uninit(void)
 {
- saver_on(mDisplay);
+#ifdef HAVE_NEW_GUI
+ if ( vo_window == None )
+#endif
+  saver_on(mDisplay);
  mga_uninit();
+ XClearWindow( mDisplay,mWindow );
  printf("vo: uninit!\n");
 }

@@ -10,12 +10,12 @@
 #include "../language.h"
 #include "../../config.h"
 
-char            SkinDir[] = "/.mplayer/Skin/";
-char          * Skin;
+//char            SkinDir[] = "/.mplayer/Skin/";
+//char          * Skin;
 
 listItems     * skinAppMPlayer = &appMPlayer;
-listItems     * skinAppTV      = &appTV;
-listItems     * skinAppRadio   = &appRadio;
+//listItems     * skinAppTV      = &appTV;
+//listItems     * skinAppRadio   = &appRadio;
 
 int             linenumber;
 
@@ -118,8 +118,8 @@ int __base( char * in )
  CHECKWINLIST( "base" );
 
  cutItem( in,fname,',',0 );
- cutItem( in,tmp,',',1 ); x=atoi( tmp );
- cutItem( in,tmp,',',2 ); y=atoi( tmp );
+ x=cutItemToInt( in,',',1 );
+ y=cutItemToInt( in,',',2 );
  #ifdef DEBUG
   dbprintf( 3,"\n[skin] base: %s x: %d y: %d\n",fname,x,y );
  #endif
@@ -140,18 +140,19 @@ int __base( char * in )
     defList->main.Mask.Image=(char *)calloc( 1,defList->main.Mask.ImageSize );
     if ( defList->main.Mask.Image == NULL ) message( True,langNEMFMM );
     {
-     int i,b,c=0; unsigned long * buf = NULL; unsigned char tmp = 0;
+     int i,b,c=0; unsigned long * buf = NULL; unsigned char tmp = 0; int nothaveshape = 1;
      buf=(unsigned long *)defList->main.Bitmap.Image;
      for ( b=0,i=0;i < defList->main.Mask.Width * defList->main.Mask.Height;i++ )
       {
        if ( buf[i] != 0x00ff00ff ) tmp=( tmp >> 1 )|128;
-        else { tmp=tmp >> 1; buf[i]=0; }
-       if ( b++ == 7 ) { defList->main.Mask.Image[c++]=tmp; tmp=0; b=0; }
+        else { tmp=tmp >> 1; buf[i]=nothaveshape=0; }
+       if ( b++ == 7 ) { defList->main.Mask.Image[c++]=tmp; tmp=b=0; }
       }
-     if (b) defList->main.Mask.Image[c++]=tmp;
+     if ( b ) defList->main.Mask.Image[c]=tmp;
+     if ( nothaveshape ) { free( defList->main.Mask.Image ); defList->main.Mask.Image=NULL; }
     }
     #ifdef DEBUG
-     dbprintf( 3,"[skin]  mask: %dX%d\n",defList->main.Mask.Width,defList->main.Mask.Height );
+     dbprintf( 3,"[skin]  mask: %dx%d\n",defList->main.Mask.Width,defList->main.Mask.Height );
     #endif
    #else
     defList->main.Mask.Image=NULL;
@@ -204,16 +205,14 @@ int __base( char * in )
 
 int __background( char * in )
 {
- unsigned char tmp[512];
-
  CHECKDEFLIST( "background" );
  CHECKWINLIST( "background" );
 
  if ( !strcmp( winList,"sub" ) )
   {
-   cutItem( in,tmp,',',0 ); defList->subR=atoi( tmp );
-   cutItem( in,tmp,',',1 ); defList->subG=atoi( tmp );
-   cutItem( in,tmp,',',2 ); defList->subB=atoi( tmp );
+   defList->subR=cutItemToInt( in,',',0 ); 
+   defList->subG=cutItemToInt( in,',',1 );
+   defList->subB=cutItemToInt( in,',',2 ); 
    #ifdef DEBUG
     dbprintf( 3,"\n[skin] subwindow background color is #%x%x%x.\n",defList->subR,defList->subG,defList->subB );
    #endif
@@ -231,13 +230,11 @@ int __button( char * in )
  CHECKDEFLIST( "button" );
  CHECKWINLIST( "button" );
 
-// button=prev,17,89,23,18,Up,evPrev
-
  cutItem( in,fname,',',0 );
- cutItem( in,tmp,',',1 ); x=atoi( tmp );
- cutItem( in,tmp,',',2 ); y=atoi( tmp );
- cutItem( in,tmp,',',3 ); sx=atoi( tmp );
- cutItem( in,tmp,',',4 ); sy=atoi( tmp );
+ x=cutItemToInt( in,',',1 );
+ y=cutItemToInt( in,',',2 );
+ sx=cutItemToInt( in,',',3 );
+ sy=cutItemToInt( in,',',4 );
  cutItem( in,msg,',',5 );
 
  defList->NumberOfItems++;
@@ -302,10 +299,10 @@ int __menu( char * in )
  CHECKDEFLIST( "menu" );
  CHECKWINLIST( "menu" );
 
- cutItem( in,tmp,',',0 ); x=atoi( tmp );
- cutItem( in,tmp,',',1 ); y=atoi( tmp );
- cutItem( in,tmp,',',2 ); sx=atoi( tmp );
- cutItem( in,tmp,',',3 ); sy=atoi( tmp );
+ x=cutItemToInt( in,',',0 );
+ y=cutItemToInt( in,',',1 );
+ sx=cutItemToInt( in,',',2 );
+ sy=cutItemToInt( in,',',3 );
  cutItem( in,tmp,',',4 ); msg=appFindMessage( tmp );
 
  defList->NumberOfMenuItems++;
@@ -342,15 +339,15 @@ int __hpotmeter( char * in )
  CHECKWINLIST( "hpotmeter" );
 
  cutItem( in,pfname,',',0 );
- cutItem( in,tmp,',',1 ); psx=atoi( tmp );
- cutItem( in,tmp,',',2 ); psy=atoi( tmp );
+ psx=cutItemToInt( in,',',1 );
+ psy=cutItemToInt( in,',',2 );
  cutItem( in,phfname,',',3 );
- cutItem( in,tmp,',',4 ); ph=atoi( tmp );
- cutItem( in,tmp,',',5 ); d=atoi( tmp );
- cutItem( in,tmp,',',6 ); x=atoi( tmp );
- cutItem( in,tmp,',',7 ); y=atoi( tmp );
- cutItem( in,tmp,',',8 ); sx=atoi( tmp );
- cutItem( in,tmp,',',9 ); sy=atoi( tmp );
+ ph=cutItemToInt( in,',',4 );
+ d=cutItemToInt( in,',',5 );
+ x=cutItemToInt( in,',',6 );
+ y=cutItemToInt( in,',',7 );
+ sx=cutItemToInt( in,',',8 );
+ sy=cutItemToInt( in,',',9 );
  cutItem( in,tmp,',',10 ); msg=appFindMessage( tmp );
 
  #ifdef DEBUG
@@ -400,12 +397,12 @@ int __potmeter( char * in )
  CHECKWINLIST( "potmeter" );
 
  cutItem( in,phfname,',',0 );
- cutItem( in,tmp,',',1 ); ph=atoi( tmp );
- cutItem( in,tmp,',',2 ); d=atoi( tmp );
- cutItem( in,tmp,',',3 ); x=atoi( tmp );
- cutItem( in,tmp,',',4 ); y=atoi( tmp );
- cutItem( in,tmp,',',5 ); sx=atoi( tmp );
- cutItem( in,tmp,',',6 ); sy=atoi( tmp );
+ ph=cutItemToInt( in,',',1 );
+ d=cutItemToInt( in,',',2 );
+ x=cutItemToInt( in,',',3 );
+ y=cutItemToInt( in,',',4 );
+ sx=cutItemToInt( in,',',5 );
+ sy=cutItemToInt( in,',',6 );
  cutItem( in,tmp,',',7 ); msg=appFindMessage( tmp );
 
  #ifdef DEBUG
@@ -488,8 +485,8 @@ int __slabel( char * in )
   dbprintf( 3,"\n[skin] slabel\n" );
  #endif
 
- cutItem( in,tmp,',',0 ); x=atoi( tmp );
- cutItem( in,tmp,',',1 ); y=atoi( tmp );
+ x=cutItemToInt( in,',',0 );
+ y=cutItemToInt( in,',',1 );
  cutItem( in,sid,',',2 ); id=fntFindID( sid );
  if ( id < 0 ) { ERRORMESSAGE( "nonexistent font id. ( %s )\n",sid ); return 1; }
  cutItem( in,tmp,',',3 ); cutItem( tmp,tmp,'"',1 );
@@ -526,10 +523,10 @@ int __dlabel( char * in )
   dbprintf( 3,"\n[skin] dlabel\n" );
  #endif
 
- cutItem( in,tmp,',',0 ); x=atoi( tmp );
- cutItem( in,tmp,',',1 ); y=atoi( tmp );
- cutItem( in,tmp,',',2 ); sx=atoi( tmp );
- cutItem( in,tmp,',',3 ); a=atoi( tmp );
+ x=cutItemToInt( in,',',0 );
+ y=cutItemToInt( in,',',1 );
+ sx=cutItemToInt( in,',',2 );
+ a=cutItemToInt( in,',',3 ); 
  cutItem( in,sid,',',4 ); id=fntFindID( sid );
  if ( id < 0 ) { ERRORMESSAGE( "nonexistent font id. ( %s )\n",sid ); return 1; }
  cutItem( in,tmp,',',5 ); cutItem( tmp,tmp,'"',1 );

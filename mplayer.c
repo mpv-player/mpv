@@ -1594,9 +1594,6 @@ if(auto_quality>0){
     case '/': {
         float mixer_l, mixer_r;
         mixer_getvolume( &mixer_l,&mixer_r );
-	#ifdef HAVE_NEW_GUI
-	 if ( use_gui ) mplShMem->Volume=( mixer_l + mixer_r ) / 2;
-	#endif
         if(c=='*' || c=='0'){
             if ( ++mixer_l > 100 ) mixer_l = 100;
             if ( ++mixer_r > 100 ) mixer_r = 100;
@@ -1611,7 +1608,7 @@ if(auto_quality>0){
           osd_visible=sh_video->fps; // 1 sec
           vo_osd_progbar_type=OSD_VOLUME;
           vo_osd_progbar_value=((mixer_l+mixer_r)*256.0)/200.0;
-          // printf("volume: %d\n",vo_osd_progbar_value);
+          //printf("volume: %d\n",vo_osd_progbar_value);
         }
 #endif
       }
@@ -1789,19 +1786,22 @@ if(rel_seek_secs || abs_seek_pos){
 	  mplShMem->Position=(len<=0)?0:((float)(pos-demuxer->movi_start) / len * 100.0f);
 	}
 	mplShMem->TimeSec=d_video->pts; 
-//	printf("mplShMem->Playing=%d  \n",mplShMem->Playing);
 	if(mplShMem->Playing==0) break; // STOP
 	if(mplShMem->Playing==2) osd_function=OSD_PAUSE;
-#ifdef USE_OSD
-        if ( ( osd_level )&&( mplShMem->VolumeChanged ) )
+	if ( mplShMem->VolumeChanged ) 
 	 {
-          osd_visible=sh_video->fps; // 1 sec
-          vo_osd_progbar_type=OSD_VOLUME;
-          vo_osd_progbar_value=((mplShMem->Volume )*256.0)/100.0;
-         }
+	  mixer_setvolume( mplShMem->Volume,mplShMem->Volume );
+	  mplShMem->VolumeChanged=0;
+#ifdef USE_OSD
+          if ( osd_level )
+	   {
+            osd_visible=sh_video->fps; // 1 sec
+            vo_osd_progbar_type=OSD_VOLUME;
+            vo_osd_progbar_value=( ( mplShMem->Volume ) * 256.0 ) / 100.0;
+           }
 #endif
-	mixer_setvolume( mplShMem->Volume,mplShMem->Volume );
-	mplShMem->VolumeChanged=0;
+	 } 
+	mplShMem->Volume=(float)mixer_getbothvolume();
       }
 #endif
 
@@ -1883,6 +1883,7 @@ goto_next_file:  // don't jump here after ao/vo/getch initialization!
         wsPostRedisplay( &appMPlayer.subWindow );
         mplShMem->TimeSec=0;
         mplShMem->Position=0;       
+	mplShMem->FrameDrop=0;
        }	
 #endif
 

@@ -66,8 +66,8 @@ void mplPlay( void )
       ( mplShMem->Playing == 1 ) ) return;
  if ( mplShMem->Playing == 2 ) { mplPause(); return; }
  mplShMem->Playing=1;
- wsClearWindow( appMPlayer.subWindow );
  mplSubRender=0;
+ wsPostRedisplay( &appMPlayer.subWindow );
 }
 
 void mplPause( void )
@@ -90,7 +90,7 @@ void mplPause( void )
 
 void mplResize( unsigned int X,unsigned int Y,unsigned int width,unsigned int height )
 {
- printf( "----resize---> %dx%d --- \n",width,height );
+// printf( "----resize---> %dx%d --- \n",width,height );
  vo_setwindowsize( width,height );
  vo_resize=1;
 }

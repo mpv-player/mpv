@@ -1143,10 +1143,14 @@ void wsScreenSaverOff( Display * mDisplay )
 void wsSetShape( wsTWindow * win,char * data )
 {
 #ifdef HAVE_XSHAPE
- if ( ( !wsUseXShape )||( !data ) ) return;
- win->Mask=XCreateBitmapFromData( wsDisplay,win->WindowID,data,win->Width,win->Height );
- XShapeCombineMask( wsDisplay,win->WindowID,ShapeBounding,0,0,win->Mask,ShapeSet );
- XFreePixmap( wsDisplay,win->Mask );
+ if ( !wsUseXShape ) return;
+ if ( data )
+  {
+   win->Mask=XCreateBitmapFromData( wsDisplay,win->WindowID,data,win->Width,win->Height );
+   XShapeCombineMask( wsDisplay,win->WindowID,ShapeBounding,0,0,win->Mask,ShapeSet );
+   XFreePixmap( wsDisplay,win->Mask );
+  }
+  else XShapeCombineMask( wsDisplay,win->WindowID,ShapeBounding,0,0,None,ShapeSet );
 #endif
 }
 

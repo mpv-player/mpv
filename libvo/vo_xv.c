@@ -475,14 +475,15 @@ static uint32_t query_format(uint32_t format)
 */
 }
 
-static void uninit(void) {
-int i;
+static void uninit(void) 
+{
+ int i;
 #ifdef HAVE_NEW_GUI
-     if ( vo_window == None )
+ if ( vo_window == None )
 #endif
-      saver_on(mDisplay); // screen saver back on
-for( i=0;i<num_buffers;i++ )
- deallocate_xvimage( i );
+  saver_on(mDisplay); // screen saver back on
+ for( i=0;i<num_buffers;i++ ) deallocate_xvimage( i );
+ XClearWindow( mDisplay,mywindow );
 }
 
 
