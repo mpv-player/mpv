@@ -1698,8 +1698,10 @@ if test "$_dvb" != no ; then
 fi
 if test "$_dvb" = yes ; then
   _def_dvb='#define HAVE_DVB 1'
+  _vomodules="mpegpes(dvb) $_vomodules"
 else
   _def_dvb='#undef HAVE_DVB'
+  _vomodules="mpegpes(file) $_vomodules"  
 fi
 echores "$_dvb"
 
