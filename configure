@@ -428,24 +428,15 @@ if test -e "/usr/local/lib/libcss.so" ; then
 	if test -e "/usr/local/include/css.h" ; then
 		_cssincdir="/usr/local/include"
 		_css=yes
-	else
+	fi	
+else
+	if test -e "/usr/lib/libcss.so" ; then
+		_csslibdir="/usr/lib/"
 		if test -e "/usr/include/css.h" ; then
 			_cssincdir="/usr/include/"
 			_css=yes
 		fi	
-	fi	
-fi
-if test -e "/usr/lib/libcss.so" ; then
-	_csslibdir="/usr/lib/"
-	if test -e "/usr/include/css.h" ; then
-		_cssincdir="/usr/include/"
-		_css=yes
-	else	
-		if test -e "/usr/local/include/css.h" ; then
-			_cssincdir="/usr/local/include"
-			_css=yes
-		fi	
-	fi	
+	fi
 fi
 	
 _termcap=no
