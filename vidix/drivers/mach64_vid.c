@@ -588,7 +588,7 @@ static int mach64_vid_init_video( vidix_playback_t *config )
     v_inc = (src_h << (12
 		+(mach64_is_interlace()?1:0)
 		-(mach64_is_dbl_scan()?1:0)
-		+(is_420?1:0)
+//		+(is_420?1:0)
 		)) / dest_h;
     h_inc = (src_w << (12+ecp)) / dest_w;
     /* keep everything in 16.16 */
@@ -649,7 +649,7 @@ static int mach64_vid_init_video( vidix_playback_t *config )
     if(mach64_is_interlace()) y_pos/=2;
     besr.y_x_end = y_pos | ((config->dest.x + dest_w) << 16);
     besr.height_width = ((src_w - left)<<16) | (src_h - top);
-    besr.vid_buf_pitch = pitch/2;
+    besr.vid_buf_pitch = is_420 ? pitch : pitch/2;
     return 0;
 }
 
