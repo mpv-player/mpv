@@ -102,7 +102,9 @@ static uint8_t *mga_param_buff = NULL;
 static uint32_t mga_param_buff_size=0;
 static uint32_t mga_param_buff_len=0;
 
+#ifndef min
 #define min(x,y) (((x)<(y))?(x):(y))
+#endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,4,0)
 #include <linux/ctype.h>
@@ -1577,9 +1579,12 @@ extern devfs_handle_t devfs_register (devfs_handle_t dir, const char *name,
 					MGA_VID_MAJOR, 0,
 					S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IFCHR,
 					&mga_vid_fops, NULL)) == NULL)
-#else
-	if(register_chrdev(MGA_VID_MAJOR, "mga_vid", &mga_vid_fops))
+	{
+		printk(KERN_ERR "mga_vid: unable to get major: %d (devfs)\n", MGA_VID_MAJOR);
+		return -EIO;
+	}
 #endif		
+	if(register_chrdev(MGA_VID_MAJOR, "mga_vid", &mga_vid_fops))
 	{
 		printk(KERN_ERR "mga_vid: unable to get major: %d\n", MGA_VID_MAJOR);
 		return -EIO;
@@ -1590,9 +1595,8 @@ extern devfs_handle_t devfs_register (devfs_handle_t dir, const char *name,
 		printk(KERN_ERR "mga_vid: no supported devices found\n");
 #ifdef CONFIG_DEVFS_FS
 		devfs_unregister(dev_handle);
-#else
-		unregister_chrdev(MGA_VID_MAJOR, "mga_vid");
 #endif
+		unregister_chrdev(MGA_VID_MAJOR, "mga_vid");
 		return -EINVAL;
 	}
 	mga_param_buff = kmalloc(PARAM_BUFF_SIZE,GFP_KERNEL);
@@ -1623,8 +1627,7 @@ void cleanup_module(void)
 	printk(KERN_INFO "mga_vid: Cleaning up module\n");
 #ifdef CONFIG_DEVFS_FS
 	devfs_unregister(dev_handle);
-#else
-	unregister_chrdev(MGA_VID_MAJOR, "mga_vid");
 #endif
+	unregister_chrdev(MGA_VID_MAJOR, "mga_vid");
 }
 
