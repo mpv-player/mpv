@@ -65,7 +65,7 @@ static char help_text[]=
 #define MSGTR_CopyCodecsConf "((MPlayer 소스 트리의) etc/codecs.conf를 ~/.mplayer/codecs.conf로 복사 또는 링크하세요.)\n"
 #define MSGTR_BuiltinCodecsConf "내장된 기본 codecs.conf를 사용합니다.\n"
 #define MSGTR_CantLoadFont "폰트를 읽어 들일 수 없습니다.: %s\n"
-#define MSGTR_CantLoadSub "자막을 일어 들일 수 없습니다.: %s\n"
+#define MSGTR_CantLoadSub "자막을 읽어 들일 수 없습니다.: %s\n"
 #define MSGTR_ErrorDVDkey "DVD 키를 처리하는 도중 오류가 발생했습니다.\n"
 #define MSGTR_CmdlineDVDkey "암호해독을 위해 요청한 DVD 키를 사용합니다.\n"
 #define MSGTR_DVDauthOk "DVD 인증 결과가 정상적인듯 합니다.\n"
