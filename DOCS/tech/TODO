@@ -2,10 +2,22 @@
 TODO:
 =====
 
+FOR THE PRE-RELEASE:
+~~~~~~~~~~~~~~~~~~~~
+- fix libmpeg2 sig11, when the stream starts with non-I frame
+- osd filter
+- automatic colorspace conversion
+- filters autoselection (scale, flip, osd)
+- move realtime mpeg1 encoders (lavc, fame, rte) to libmpcodecs/vf
+- finish mencoder -ovc vfw (bitrate setting, codec selection etc)
+- codec priority option
+
+
 FOR THE RELEASE:
 ~~~~~~~~~~~~~~~~
-remove all non-GPL code...
-(move them out from 'main' tree to some 'obsoleted' tree in cvs)
+- remove all non-GPL code...
+  (move them out from 'main' tree to some 'obsoleted' tree in cvs)
+- mencoder: migrate to muxer layer
 
 demuxer:
 - fix AVI index offset base position handling ('no video stream found' bug)
@@ -17,14 +29,6 @@ demuxer:
 - forward seeking from stdin ?
 - fix the whole syncing mechanism of Real demuxer
 - implement mpeg-TS demuxer
-
-URGENT:
-- fix libmpeg2 sig11, when the stream starts with non-I frame
-- finish mencoder -ovc vfw (bitrate setting, codec selection etc)
-- codec priority option
-- mencoder: move encoders from mencoder.c to libmpcodecs
-- mencoder: migrate to muxer layer
-- move realtime mpeg1 encoders (lavc, fame, rte) to libmpcodecs/vf
 
 
 FUTURE:
