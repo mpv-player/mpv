@@ -3227,8 +3227,11 @@ if test "$_real" = auto ; then
     if linux ; then
       _real=yes
       echores "yes"
+    elif freebsd ; then
+      _real=yes
+      echores "yes"
     else
-      echores "no (untested on non-linux arch)"
+      echores "no (tested only on Linux and FreeBSD arch)"
     fi
   else
     echores "no (dynamic loader support needed)"
