@@ -2118,18 +2118,18 @@ for Matrox G450/G550 TV-out instructions, please see the next section!
     <step><para>
       Enter <filename class="directory">TVout</filename> and type
       <command>./compile.sh</command>. Install
-      <filename class="directory">TVout/matroxset/matroxset</filename>
-      into somewhere in your <envar>PATH</envar>.
+      <filename>TVout/matroxset/matroxset</filename>
+      somewhere into your <envar>PATH</envar>.
       </para></step>
     <step><para>
       If you don't have <command>fbset</command> installed, put
-      <filename class="directory">TVout/fbset/fbset</filename>
-      into somewhere in your <envar>PATH</envar>.
+      <filename>TVout/fbset/fbset</filename>
+      somewhere into your <envar>PATH</envar>.
       </para></step>
     <step><para>
       If you don't have <command>con2fb</command> installed, put
-      <filename class="directory">TVout/con2fb/con2fb</filename>
-      into somewhere in your <envar>PATH</envar>.
+      <filename>TVout/con2fb/con2fb</filename>
+      somewhere into your <envar>PATH</envar>.
       </para></step>
     <step><para>
       Then enter into the <filename class="directory">TVout/</filename> directory
