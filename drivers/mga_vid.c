@@ -1580,8 +1580,8 @@ extern devfs_handle_t devfs_register (devfs_handle_t dir, const char *name,
 					S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IFCHR,
 					&mga_vid_fops, NULL)) == NULL)
 	{
-		printk(KERN_ERR "mga_vid: unable to get major: %d (devfs)\n", MGA_VID_MAJOR);
-		return -EIO;
+		printk(KERN_ERR "mga_vid: unable to get major: %d (devfs) => fallback to non-devfs mode\n", MGA_VID_MAJOR);
+//		return -EIO;
 	}
 #endif		
 	if(register_chrdev(MGA_VID_MAJOR, "mga_vid", &mga_vid_fops))
@@ -1594,7 +1594,7 @@ extern devfs_handle_t devfs_register (devfs_handle_t dir, const char *name,
 	{
 		printk(KERN_ERR "mga_vid: no supported devices found\n");
 #ifdef CONFIG_DEVFS_FS
-		devfs_unregister(dev_handle);
+		if(dev_handle) devfs_unregister(dev_handle);
 #endif
 		unregister_chrdev(MGA_VID_MAJOR, "mga_vid");
 		return -EINVAL;
@@ -1626,7 +1626,7 @@ void cleanup_module(void)
 	//FIXME turn off BES
 	printk(KERN_INFO "mga_vid: Cleaning up module\n");
 #ifdef CONFIG_DEVFS_FS
-	devfs_unregister(dev_handle);
+	if(dev_handle) devfs_unregister(dev_handle);
 #endif
 	unregister_chrdev(MGA_VID_MAJOR, "mga_vid");
 }
