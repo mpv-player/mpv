@@ -52,7 +52,7 @@ struct config ovc_conf[]={
 };
 
 struct config oac_conf[]={
-	{"copy", &out_audio_codec, CONF_TYPE_FLAG, 0, 0, 0},
+	{"copy", &out_audio_codec, CONF_TYPE_FLAG, 0, 0, ACODEC_COPY},
 	{"pcm", &out_audio_codec, CONF_TYPE_FLAG, 0, 0, ACODEC_PCM},
 #ifdef HAVE_MP3LAME
 	{"mp3lame", &out_audio_codec, CONF_TYPE_FLAG, 0, 0, ACODEC_VBRMP3},
