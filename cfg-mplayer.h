@@ -21,6 +21,11 @@ extern char *fb_mode_name;
 extern char *fb_dev_name;
 #endif
 #endif
+#ifdef HAVE_DIRECTFB
+#if DIRECTFBVERSION > 912
+extern char *dfb_params;
+#endif
+#endif
 #ifdef HAVE_PNG
 extern int z_compression;
 #endif
@@ -235,6 +240,11 @@ static config_t mplayer_opts[]={
 #else
 #ifdef HAVE_DIRECTFB
 	{"fb", &fb_dev_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
+#endif
+#endif
+#ifdef HAVE_DIRECTFB
+#if DIRECTFBVERSION > 912
+	{"dfbopts", &dfb_params, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
 #endif
 

@@ -38,7 +38,11 @@
 
 #include <sys/mman.h>
 #include <sys/ioctl.h>
+#ifdef __linux__
 #include <sys/kd.h>
+#else
+#include <linux/kd.h>
+#endif
 
 #include "config.h"
 #include "video_out.h"
@@ -59,7 +63,7 @@ static vo_info_t vo_info = {
 	"Direct Framebuffer Device",
 	"directfb",
 	"Jiri Svoboda Jiri.Svoboda@seznam.cz",
-	"version 2.0beta"
+	"v 2.0 (for DirectFB version >=0.9.13)"
 };
 
 extern int verbose;
@@ -130,6 +134,8 @@ extern char *fb_dev_name;
 #else
 char *fb_dev_name;
 #endif
+char *dfb_params;
+int layer_id = -1;
 
 /******************************
 *	   implementation     *
@@ -148,7 +154,36 @@ DFBResult ret;
 	
 if (verbose) printf("DirectFB: Preinit entered\n");
 
+	if (arg) {
+	    int tmp=-1;
+	    if (sscanf(arg,"%i",&tmp)) {
+		layer_id=tmp;
+		if (verbose) printf("DirectFB: Layer id forced to %i\n",layer_id);
+	    };
+	}
+
+	if (dfb_params)
+	{
+	    int argc = 2;
+	    char arg0[10] = "mplayer";
+	    char arg1[256] = "--dfb:";
+	    char* argv[3];
+	    char ** a;
+	    
+	    a = &argv[0];
+	    
+	    strncat(arg1,dfb_params,249);
+
+	    argv[0]=arg0;
+	    argv[1]=arg1;
+	    argv[2]=NULL;
+	    
+    	    DFBCHECK (DirectFBInit (&argc,&a));
+
+	} else {
+	
         DFBCHECK (DirectFBInit (NULL,NULL));
+	}
 
 	if (((directfb_major_version <= 0) &&
 	    (directfb_minor_version <= 9) &&
@@ -182,7 +217,9 @@ if (verbose) printf("DirectFB: Preinit entered\n");
    */
 
         DFBCHECK (DirectFBCreate (&dfb));
-        DFBCHECK (dfb->SetCooperativeLevel (dfb, DFSCL_FULLSCREEN));
+        if (DFB_OK != dfb->SetCooperativeLevel (dfb, DFSCL_FULLSCREEN)) {
+	    printf("DirectFB: Warning - cannot swith to fullscreen mode");
+	};
 
   /*
    * (Get keyboard)
@@ -255,6 +292,8 @@ DFBEnumerationResult test_format_callback( unsigned int                 id,
      IDirectFBDisplayLayer *layer;
      DFBResult ret;
     
+     if ((layer_id == -1 )||(layer_id == id)) {
+    
      ret = dfb->GetDisplayLayer( dfb, id, &layer);
      if (ret) {
                DirectFBError( "dfb->GetDisplayLayer failed", ret );
@@ -298,6 +337,8 @@ DFBEnumerationResult test_format_callback( unsigned int                 id,
 	};
      };
 
+    };
+    
     return DFENUM_OK;
 }
 
@@ -539,12 +580,16 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 
 // test surface for flipping	
 	DFBCHECK(primary->GetCapabilities(primary,&caps));
-//	primary->Clear(primary,0,0,0,0);
+#if DIRECTFBVERSION > 913
+	primary->Clear(primary,0,0,0,0);
+#endif	
         flipping = 0;
 	if (caps & DSCAPS_FLIPPING) {
 	    ret = primary->Flip(primary,NULL,0);
 	    if (ret==DFB_OK) { 
-//		primary->Clear(primary,0,0,0,0);
+#if DIRECTFBVERSION > 913
+		primary->Clear(primary,0,0,0,0);
+#endif	
 		flipping = 1; 
 	    } 
 	};
