@@ -613,6 +613,15 @@ Use:
 
 <qandaentry>
 <question><para>
+I'm trying to play a random stream off the internet but it fails.
+</para></question>
+<answer><para>
+Try playing the stream with the <option>-playlist</option> option.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
 I downloaded a movie off a P2P network and it doesn't work!
 </para></question>
 <answer><para>
