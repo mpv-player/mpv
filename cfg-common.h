@@ -89,9 +89,9 @@
 
 #include "config.h"
 
-#ifdef USE_TV
 #include "libmpdemux/tv.h"
 
+#ifdef USE_TV
 struct config tvopts_conf[]={
 	{"on", &tv_param_on, CONF_TYPE_FLAG, 0, 0, 1},
 	{"driver", &tv_param_driver, CONF_TYPE_STRING, 0, 0, 0},
