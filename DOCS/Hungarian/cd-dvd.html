@@ -61,7 +61,15 @@
 <P><B><A NAME=dvd>4.2.  DVD lejátszás</A></B></P>
 
 <P>A rendelkezésre álló opciók teljes listája a man page-ben tekinthetõ
-  meg.</P>
+  meg. Egy szabványos DVD lemez lejátszása a következõképpen történik:</P>
+
+<P><CODE>mplayer -dvd &lt;sáv&gt; [-dvd-device &lt;egység&gt;]</CODE></P>
+
+<P>Például: <CODE>mplayer -dvd 1 -dvd-device /dev/hdc</CODE></P>
+
+<P>Az alapértelmezett DVD egység a <CODE>/dev/dvd</CODE>. Ha a rendszered ettõl
+  különbözik, egy megfelelõ symlink-kel, vagy a <CODE>-dvd-device</CODE>
+  opció használatával megoldhatod a problémát.</P>
 
 <H4>Új DVD támogatás (mpdvdkit2)</H4>
 
