@@ -858,6 +858,11 @@ EOF
 	_march='-mcpu=750'
 	_mcpu='-mtune=750'
     fi
+    if darwin ; then
+	if [[ $(sysctl -n hw.vectorunit) == 1 ]]; then
+	    _altivec=yes
+ 	fi
+    fi
     ;;
 
   alpha)
@@ -2366,29 +2371,27 @@ if test "$_macosx" = auto ; then
         _macosx=yes
     else
 	_macosx=no
+	_def_macosx='#undef MACOSX'
     fi
 fi
 if test "$_macosx" = yes ; then
   cat > $TMPC <<EOF
 #include <Carbon/Carbon.h>
-#include <Cocoa/Cocoa.h>
 #include <QuickTime/QuickTime.h>
-int main(void) { 
-  NSApplicationLoad(); 
+int main(void) {
+    EnterMovies();
+    ExitMovies();
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, false);
 }
 EOF
-  if cc_check -ObjC -framework Carbon -framework Cocoa -framework QuickTime ; then 
+  if cc_check -framework Carbon -framework QuickTime ; then 
     _macosx=yes
-    _macosx_frameworks="-framework Carbon -framework Cocoa -framework QuickTime "
+    _macosx_frameworks="-framework Carbon -framework QuickTime"
+    _def_macosx='#define MACOSX 1'
   else
     _macosx=no
-    echo -n "failed to detect Mac OS X APIs, defaulting to "
-  fi
-fi
-if test "$_macosx" = yes ; then
-    _def_macosx='#define MACOSX 1'
-else
     _def_macosx='#undef MACOSX'
+  fi
 fi
 echores "$_macosx"
 
