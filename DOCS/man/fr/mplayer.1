@@ -281,23 +281,24 @@ ajuste le décalage audio de +/\:- 0.1 seconde
 réduit/\:augmente le volume
 .IPs "9 et 0"
 réduit/\:augmente le volume
-.IPs m
+.IPs m\ \ \ \
 coupe le son (mute)
-.IPs f
+.IPs f\ \ \ \
 bascule en plein-écran
 .IPs T\ \ \ \
 bascule le mode toujours visible.
 .IPs "w et e"
 réduit/\:augmente l'intervalle panscan
-.IPs o
+.IPs o\ \ \ \
 bascule entre les états OSD: aucun / déplacement / déplacement+chrono
-.IPs d
-bascule les sauts de trame
-.IPs v
+.IPs d\ \ \ \
+bascule les modes de sauts de trame: aucun / saut d'affichage / saut de 
+décodage (voir \-framedrop et \-hardframedrop)
+.IPs v\ \ \ \
 bascule l'affichage des sous-titres
-.IPs j
+.IPs j\ \ \ \
 change de langue de sous-titres
-.IPs a
+.IPs a\ \ \ \
 bascule l'alignement des sous-titres: haut/milieu/bas
 .IPs "z et x"
 ajuste le décalage des sous-titres de +/\:- 0.1 seconde
@@ -2696,6 +2697,19 @@ nom de format comme rgb15, bgr24, yv12, etc (par défaut: yuy2)
 .RE
 .PD 1
 .TP
+.B noformat[=fourcc]
+Restreint l'espace de couleur au prochain filtre sans faire aucune conversion.
+Contrairement au filtre format, il permet n'importe quel espace de couleur
+.B excepté
+celui que vous spécifiez.
+Pour une liste des différents formats disponible, voyez noformat=fmt=help.
+.PD 0
+.RSs
+.IPs fourcc
+nom du format comme rgb15, bgr24, yv12, etc. (par défaut: yv12)
+.RE
+.PD 1
+.TP
 .B pp[=filtre1[:option1[:option2...]]/[-]filtre2...] (voir aussi \-pphelp)
 Cette option active le filtre interne de postprocessing, et propose une
 interface où vous pouvez passer des options au filtre nommé.
@@ -2746,6 +2760,13 @@ filtre de postprocessing simple
 0\-6
 .IPs qp\ \ \
 paramètre pour forcer la quantisation
+.RE
+.TP
+.B qp=equation
+filtre qp change
+.RSs
+.IPs equation
+une équation comme "2+2*sin(PI*qp)"
 .RE
 .TP
 .B test\ \ \
@@ -4130,6 +4151,12 @@ Débit audio en kBit (224 par défaut).
 .TP
 .B atag=<valeur>
 Utilise le tag Windows audio spécifié (par ex. atag=0x55).
+.TP
+.B bit_exact
+Utilise uniquement les algorithmes à bit exact (excepté (i)dct).
+Cela supprime également l'entête user-data des flux MPEG-4
+(cette section peut être utilisée par certains lecteur comme Quicktime player
+d'Apple pour déclarer le flux corompu).
 .TP
 .B vcodec=<valeur>
 utilise le codec indiqué (par défaut: mpeg4):
