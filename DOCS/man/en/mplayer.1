@@ -1686,39 +1686,11 @@ Override audio driver/\:card buffer size detection.
 Audio delay in seconds (positive or negative float value).
 .
 .TP
-.B \-format <0\-8192>
-Select the format used for output from the filter layer (according to the
-defines in libao2/\:afmt.h):
-.PD 0
-.RSs
-.IPs "   1"
-Mu-Law
-.IPs "   2"
-A-Law
-.IPs "   4"
-Ima-ADPCM
-.IPs "   8"
-unsigned 8-bit
-.IPs "  16"
-signed 16-bit (little-endian)
-.IPs "  32"
-signed 16-bit (big-endian)
-.IPs "  64"
-signed 8-bit
-.IPs " 128"
-unsigned 16-bit (little-endian)
-.IPs " 256"
-unsigned 16-bit (big-endian)
-.IPs " 512"
-MPEG (2) Audio
-.IPs 1024
-AC3
-.IPs 4096
-signed 32-bit (little-endian)
-.IPs 8192
-signed 32-bit (big-endian)
-.RE
-.PD 1
+.B \-format <format> (also see the format audio filter)
+Select the sample format used for output from the audio filter
+layer to the sound card.
+The values that <format> can adopt are listed below in the
+description of the format audio filter.
 .
 .TP
 .B \-mixer <device>
@@ -3670,7 +3642,7 @@ Channel 4 and 5 will contain silence.
 .PD 1
 .
 .TP
-.B format[=format]
+.B format[=format] (also see \-format)
 Convert between different sample formats.
 Automatically enabled when needed by the sound card or another filter.
 .PD 0
