@@ -203,15 +203,8 @@ Please include these files:
 
 <P>Please create the following command file:</P>
 
-<P><CODE>disass $eip-32 $eip+32<BR>
-  printf "eax=%08lX\n",$eax<BR>
-  printf "ebx=%08lX\n",$ebx<BR>
-  printf "ecx=%08lX\n",$ecx<BR>
-  printf "edx=%08lX\n",$edx<BR>
-  printf "esp=%08lX\n",$esp<BR>
-  printf "ebp=%08lX\n",$ebp<BR>
-  printf "edi=%08lX\n",$edi<BR>
-  printf "esi=%08lX\n",$esi</CODE></P>
+<P><CODE>disass $pc-32 $pc+32<BR>
+  info all-registers</CODE></P>
 
 <P>Then simply execute the following on your command line:</P>
 
@@ -237,7 +230,7 @@ and reproduce your crash. As soon as you did it, gdb will
 return you to the command line prompt where you have to enter
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;bt<BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;disass $eip-32 $eip+32</CODE></P>
+  &nbsp;&nbsp;&nbsp;&nbsp;disass $pc-32 $pc+32</CODE></P>
 
 and send the complete output to us.
 
