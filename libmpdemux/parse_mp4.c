@@ -102,13 +102,15 @@ int mp4_parse_esds(unsigned char *data, int datalen, esds_t *esds) {
       esds->bufferSizeDB, esds->maxBitrate/1000.0,
       esds->avgBitrate/1000.0);
 
+  esds->decoderConfigLen=0;
+
   if (len < 15) {
-    freereturn(s,1);
+    freereturn(s,0);
   }
 
   /* get and verify DecSpecificInfoTag */
   if (stream_read_char(s) != MP4DecSpecificDescrTag) {
-    freereturn(s,1);
+    freereturn(s,0);
   }
 
   /* read length */
@@ -125,7 +127,7 @@ int mp4_parse_esds(unsigned char *data, int datalen, esds_t *esds) {
 
   /* get and verify SLConfigDescrTag */
   if(stream_read_char(s) != MP4SLConfigDescrTag) {
-    freereturn(s,1);
+    freereturn(s,0);
   }
 
   /* Note: SLConfig is usually constant value 2, size 1Byte */
