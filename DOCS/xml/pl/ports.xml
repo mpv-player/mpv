@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.41 -->
+<!-- synced with 1.42 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -412,6 +412,13 @@ zawiera <filename>inttypes.h</filename>. Umieść plik
 </para>
 
 <para>Rozpakuj pliki nagłówkowe DirectX do <filename class="directory">/mingw/include/</filename>.</para>
+
+<para>Do obsługi skompresowanych nagłówków MOV wymagana jest biblioteka
+  <ulink url="http://www.gzip.org/zlib/">zlib</ulink>, która nie jest
+  domyślnie dostępna w <application>MinGW</application>.
+  Skonfiguruj ją z opcją <option>--prefix=/mingw</option> i zainstaluj
+  przed kompilacją <application>MPlayera</application>.</para>
+
 
 </sect2>
 
