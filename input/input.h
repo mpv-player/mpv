@@ -1,4 +1,4 @@
-// All commands id
+// All command IDs
 #define MP_CMD_SEEK   0
 #define MP_CMD_AUDIO_DELAY 1
 #define MP_CMD_QUIT 2
@@ -74,13 +74,13 @@
 #define MP_CMD_DVDNAV_MENU      5
 #define MP_CMD_DVDNAV_SELECT    6
 
-/// Console command
+/// Console commands
 #define MP_CMD_CHELP 7000
 #define MP_CMD_CEXIT 7001
 #define MP_CMD_CHIDE 7002
 #define MP_CMD_CRUN 7003
 
-// The args types
+// The arg types
 #define MP_CMD_ARG_INT 0
 #define MP_CMD_ARG_FLOAT 1
 #define MP_CMD_ARG_STRING 2
@@ -96,12 +96,12 @@
 #define MP_INPUT_ERROR -1
 // A fatal error occured, this driver should be removed
 #define MP_INPUT_DEAD -2
-// No input were avaible
+// No input was available
 #define MP_INPUT_NOTHING -3
 
-// For the keys drivers, if possible you can send key up and key down
+// For the key's drivers, if possible you can send key up and key down
 // events. Key up is the default, to send a key down you must or the key
-// code with MP_KEY_DOWN
+// code with MP_KEY_DOWN.
 #define MP_KEY_DOWN (1<<29)
 // Use this when the key shouldn't be auto-repeated (like mouse buttons)
 #define MP_NO_REPEAT_KEY (1<<28)
@@ -140,51 +140,51 @@ typedef struct mp_key_name {
   char* name;
 } mp_key_name_t;
 
-// These typedefs are for the drivers. They are the functions used to retrive
+// These typedefs are for the drivers. They are the functions used to retrieve
 // the next key code or command.
 
-// These functions should return the key code or one of the error code
+// These functions should return the key code or one of the error codes
 typedef int (*mp_key_func_t)(int fd);
 // These functions should act like read but they must use our error code (if needed ;-)
 typedef int (*mp_cmd_func_t)(int fd,char* dest,int size);
 // These are used to close the driver
 typedef void (*mp_close_func_t)(int fd);
 
-// Set this to grab all incoming key code 
+// Set this to grab all incoming key codes
 extern void (*mp_input_key_cb)(int code);
 // Should return 1 if the command was processed
 typedef int (*mp_input_cmd_filter)(mp_cmd_t* cmd, int paused, void* ctx);
 
-// This function add a new key driver.
+// This function adds a new key driver.
 // The first arg is a file descriptor (use a negative value if you don't use any fd)
-// The second arg tell if we use select on the fd to know if something is avaible.
-// The third arg is optional. If null a default function wich read an int from the
+// The second arg tells if we use select on the fd to know if something is available.
+// The third arg is optional. If null a default function wich reads an int from the
 // fd will be used.
 // The last arg can be NULL if nothing is needed to close the driver. The close
 // function can be used
 int
 mp_input_add_cmd_fd(int fd, int select, mp_cmd_func_t read_func, mp_close_func_t close_func);
 
-// This remove a cmd driver, you usally don't need to use it
+// This removes a cmd driver, you usually don't need to use it.
 void
 mp_input_rm_cmd_fd(int fd);
 
-// The args are the sames as for the keys drivers. If you don't use any valid fd you MUST
+// The args are the same as for the key's drivers. If you don't use any valid fd you MUST
 // give a read_func.
 int
 mp_input_add_key_fd(int fd, int select, mp_key_func_t read_func, mp_close_func_t close_func);
 
-// As for the cmd one you usally don't need this function
+// As for the cmd one you usually don't need this function.
 void
 mp_input_rm_key_fd(int fd);
 
-// This function can be used to reput a command in the system. It's used by libmpdemux
-// when it perform a blocking operation to resend the command it received to the main
+// This function can be used to put a command in the system again. It's used by libmpdemux
+// when it performs a blocking operation to resend the command it received to the main
 // loop.
 int
 mp_input_queue_cmd(mp_cmd_t* cmd);
 
-// This function retrive the next avaible command waiting no more than time msec.
+// This function retrieves the next available command waiting no more than time msec.
 // If pause is true, the next input will always return a pause command.
 mp_cmd_t*
 mp_input_get_cmd(int time, int paused);
@@ -192,8 +192,8 @@ mp_input_get_cmd(int time, int paused);
 mp_cmd_t*
 mp_input_parse_cmd(char* str);
 
-/// These filter allow you to process the command before mplayer
-/// If a filter return a true value mp_input_get_cmd will return NULL
+/// These filters allow you to process the command before MPlayer.
+/// If a filter returns a true value mp_input_get_cmd will return NULL.
 void
 mp_input_add_cmd_filter(mp_input_cmd_filter, void* ctx);
 
@@ -202,11 +202,11 @@ mp_input_add_cmd_filter(mp_input_cmd_filter, void* ctx);
 void
 mp_cmd_free(mp_cmd_t* cmd);
 
-// This create a copy of a command (used by the auto repeat stuff)
+// This creates a copy of a command (used by the auto repeat stuff).
 mp_cmd_t*
 mp_cmd_clone(mp_cmd_t* cmd);
 
-// When you create a new driver you should add it in this 2 functions.
+// When you create a new driver you should add it in these 2 functions.
 void
 mp_input_init(void);
 
