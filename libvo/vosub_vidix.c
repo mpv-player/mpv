@@ -3,6 +3,7 @@
  *  vosub_vidix.c
  *
  *	Copyright (C) Nick Kurshev <nickols_k@mail.ru> - 2002
+ *	Copyright (C) Alex Beregszaszi
  *
  *  You can redistribute this file under terms and conditions
  *  of GNU General Public licence v2.
@@ -86,12 +87,18 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 	    "format=%s dest_bpp=%u vid_w=%u vid_h=%u\n"
 	    ,src_width,src_height,x_org,y_org,dst_width,dst_height
 	    ,vo_format_name(format),dest_bpp,vid_w,vid_h);
-	if(vid_w > vidix_cap.maxwidth || vid_w < vidix_cap.minwidth ||
-	   vid_h > vidix_cap.maxheight || vid_h < vidix_cap.minheight)
+
+	if(((vidix_cap.maxwidth != -1) && (vid_w > vidix_cap.maxwidth)) ||
+	    ((vidix_cap.minwidth != -1) && (vid_w < vidix_cap.minwidth)) ||
+	    ((vidix_cap.maxheight != -1) && (vid_h > vidix_cap.maxheight)) ||
+	    ((vidix_cap.minwidth != -1 ) && (vid_h < vidix_cap.minheight)))
 	{
-	  printf("vosub_vidix: video server has unsupported resolution by vidix\n");
+	  printf("vosub_vidix: video server has unsupported resolution (%dx%d), supported: %dx%d-%dx%d\n",
+	    vid_w, vid_h, vidix_cap.minwidth, vidix_cap.minheight,
+	    vidix_cap.maxwidth, vidix_cap.maxheight);
 	  return -1;
 	}
+
 	err = 0;
 	switch(dest_bpp)
 	{
