@@ -149,10 +149,10 @@ typedef struct {
 	uint16_t framebuf_used;
 	uint16_t max_pl_size;
 	int32_t last_tr;
-	uint32_t max_tr;
+	int max_tr;
 	uint8_t id, reorder, is_mpeg12, telecine;
 	uint64_t vframes;
-	uint8_t rff, tff;
+	uint8_t trf;
 	mp_mpeg_header_t picture;
 } muxer_headers_t;
 
@@ -177,7 +177,6 @@ m_option_t mpegopts_conf[] = {
 	{"reorder", &conf_reorder, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"noreorder", &conf_reorder, CONF_TYPE_FLAG, 0, 0, 0, NULL},
 	{"telecine", &conf_telecine, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"telecine2", &conf_telecine, CONF_TYPE_FLAG, 0, 0, 2, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -237,7 +236,9 @@ static inline int is_mpeg4(uint32_t x)
 		(x == mmioFOURCC('x','v','i','x')) ||
 		(x == mmioFOURCC('X','V','I','X')) ||
 		(x == mmioFOURCC('m','p','4','v')) ||
-		(x == mmioFOURCC('M','P','4','V'))
+		(x == mmioFOURCC('M','P','4','V')) ||
+		(x == mmioFOURCC('F', 'M','P','4')) ||
+		(x == mmioFOURCC('f', 'm','p','4'))
 	);
 }
 
@@ -1805,14 +1806,15 @@ static uint64_t parse_fps(int fps)
 	}
 }
 
-static int soft_telecine(muxer_headers_t *vpriv, uint8_t *fps_ptr, uint8_t *se_ptr, uint8_t *pce_ptr)
+
+static int soft_telecine(muxer_headers_t *vpriv, uint8_t *fps_ptr, uint8_t *se_ptr, uint8_t *pce_ptr, int n)
 {
-	uint8_t fps; 
+	uint8_t fps, tff, rff; 
 	
 	if(fps_ptr != NULL)
 	{
 		fps = *fps_ptr & 0x0f;
-		if(fps > FRAMERATE_24)
+		if((!fps) || (fps > FRAMERATE_24))
 		{
 			mp_msg(MSGT_MUXER, MSGL_ERR, "\nERROR! FRAMERATE IS INVALID: %d, disabling telecining\n", (int) fps);
 			vpriv->telecine = 0;
@@ -1820,13 +1822,7 @@ static int soft_telecine(muxer_headers_t *vpriv, uint8_t *fps_ptr, uint8_t *se_p
 		}
 		*fps_ptr = (*fps_ptr & 0xf0) | (fps + 3);
 	}
-
-	if(se_ptr && (vpriv->telecine==2))
-		se_ptr[1] &= 0xf7;
 	
-	if(! pce_ptr)
-		return 0;
-		
 	//in pce_ptr starting from bit 0 bit 24 is tff, bit 30 is rff, 
 	if(pce_ptr[3] & 0x2)
 	{
@@ -1834,25 +1830,29 @@ static int soft_telecine(muxer_headers_t *vpriv, uint8_t *fps_ptr, uint8_t *se_p
 		vpriv->telecine = 0;
 		return 0;
 	}
+
+	if(se_ptr)
+		se_ptr[1] &= 0xf7;
 	
+	if(! pce_ptr)
+		return 0;
+			
 	if(! vpriv->vframes)	//initial value of tff
-		vpriv->tff = (pce_ptr[3] & 0x80) >> 7;
+		vpriv->trf = (pce_ptr[3] >> 6) & 0x2;
 
 	//sets curent tff/rff bits
-	mp_msg(MSGT_MUXER, MSGL_V, "\nTFF: %d, RFF: %d\n", vpriv->tff, vpriv->rff);
-	pce_ptr[3] = (pce_ptr[3] & 0xfd) | ((vpriv->tff << 7) & 0x80) | ((vpriv->rff << 1) & 0x2);
+	tff = (vpriv->trf & 0x2) ? 0x80 : 0;
+	rff = (vpriv->trf & 0x1) ? 0x2 : 0;
+	mp_msg(MSGT_MUXER, MSGL_V, "\nTFF: %d, RFF: %d\n", tff >> 7, rff >> 1);
+	pce_ptr[3] = (pce_ptr[3] & 0xfd) | tff | rff;
+	pce_ptr[4] &= 0x80;	//sets progressive frame
 	
 	if(! vpriv->vframes)
 		mp_msg(MSGT_MUXER, MSGL_INFO, "\nENABLED SOFT TELECINING, FPS=%s, INITIAL PATTERN IS TFF:%d, RFF:%d\n", 
-		framerates[fps+3], vpriv->tff, vpriv->rff);
+		framerates[fps+3], tff >> 7, rff >> 1);
 	
-	if(vpriv->rff)
-	{
-		vpriv->rff = 0;
-		vpriv->tff = !vpriv->tff;
-	}
-	else
-		vpriv->rff = 1;
+	while(n < 0) n+=4;
+	vpriv->trf = (vpriv->trf + n) % 4;
 	
 	return 1;
 }
@@ -1863,6 +1863,7 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 	uint8_t *fps_ptr = NULL;	//pointer to the fps byte in the sequence header
 	uint8_t *se_ptr = NULL;		//pointer to sequence extension
 	uint8_t *pce_ptr = NULL;	//pointer to picture coding extension
+	int frames_diff, d1;		//how any frames we advanced respect to the last one
 	
 	mp_msg(MSGT_MUXER, MSGL_V,"parse_mpeg12_video, len=%u\n", (uint32_t) len);
 	if(s->buffer[0] != 0 || s->buffer[1] != 0 || s->buffer[2] != 1 || len<6) 
@@ -1878,7 +1879,6 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 		
 		if(s->buffer[3] == 0xb3) //sequence
 		{
-			//uint8_t fps = s->buffer[7] & 0x0f;
 			fps_ptr = &(s->buffer[7]);
 			mp_header_process_sequence_header(&(spriv->picture), &(s->buffer[4]));
 			spriv->delta_pts = spriv->nom_delta_pts = parse_fps(spriv->picture.fps);
@@ -1934,6 +1934,8 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 		{
 			pt = (s->buffer[ptr+5] & 0x1c) >> 3;
 			temp_ref = (s->buffer[ptr+4]<<2)+(s->buffer[ptr+5]>>6);
+			if(!spriv->vframes)
+				spriv->last_tr = spriv->max_tr = temp_ref;
 			mp_msg(MSGT_MUXER, MSGL_V, "Video frame type: %c, TR: %d\n", FTYPE(pt), temp_ref);
 			if(spriv->picture.mpeg1 == 0) 
 			{
@@ -1954,6 +1956,22 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 			
 				ptr = tmp;
 			}
+			
+			d1 = temp_ref - spriv->last_tr;
+			if(d1 < -6)	//there's a wraparound
+				frames_diff = spriv->max_tr + 1 + temp_ref - spriv->last_tr;
+			else if(d1 > 6)	//there's a wraparound
+				frames_diff = spriv->max_tr + 1 + spriv->last_tr - temp_ref;
+			else
+				frames_diff = d1;
+			mp_msg(MSGT_MUXER, MSGL_V, "\nLAST: %d, TR: %d, DIFF: %d, MAX: %d, d1: %d\n", 
+			spriv->last_tr, temp_ref, frames_diff, spriv->max_tr, d1);
+			if(!temp_ref)
+				spriv->max_tr = 0;
+			else if(temp_ref > spriv->max_tr)
+				spriv->max_tr = temp_ref;
+			
+			spriv->last_tr = temp_ref;
 		}
 		
 		switch (pt) {
@@ -1980,7 +1998,7 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 		}
 
 		if(spriv->telecine)
-			soft_telecine(spriv, fps_ptr, se_ptr, pce_ptr);
+			soft_telecine(spriv, fps_ptr, se_ptr, pce_ptr, frames_diff);
 
 		spriv->vframes++;
 		reorder_frame(spriv, s->buffer, len, pt, temp_ref, spriv->delta_pts);
