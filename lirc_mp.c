@@ -12,7 +12,11 @@
 
 // hack, will be remove later when ./configure fixed...
 #include "config.h"
+
 #ifdef HAVE_LIRC
+
+#include "mp_msg.h"
+#include "help_mp.h"
 
 // start of LIRC support
 
