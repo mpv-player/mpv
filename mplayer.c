@@ -310,6 +310,14 @@ int set_of_sub_size = 0;
 int set_of_sub_pos = -1;
 float sub_last_pts = -303;
 #endif
+int global_sub_size = 0; // this encompasses all subtitle sources
+int global_sub_pos = -1; // this encompasses all subtitle sources
+#define SUB_SOURCE_SUBS 0
+#define SUB_SOURCE_VOBSUB 1
+#define SUB_SOURCE_DEMUX 2
+#define SUB_SOURCES 3
+int global_sub_indices[SUB_SOURCES];
+int global_sub_quiet_osd_hack = 0;
 
 static stream_t* stream=NULL;
 static demuxer_t *demuxer=NULL;
@@ -681,6 +689,21 @@ int playtree_add_playlist(play_tree_t* entry)
 
 static int play_tree_step = 1;
 
+int sub_source()
+{
+    int source = -1;
+    int top = -1;
+    int i;
+    for (i = 0; i < SUB_SOURCES; i++) {
+        int j = global_sub_indices[i];
+        if ((j >= 0) && (j > top) && (global_sub_pos >= j)) {
+            source = i;
+            top = j;
+        }
+    }
+    return source;
+}
+
 #ifdef USE_SUB
 
 sub_data* subdata = NULL;
@@ -690,14 +713,6 @@ void add_subtitles(char *filename, float fps, int silent)
     sub_data *subd;
 
     if (filename == NULL) {
-	subd = (sub_data*)malloc(sizeof(sub_data));
-	subd->filename = strdup("none");
-	subd->subtitles = NULL;
-	subd->sub_uses_time = 1;
-	subd->sub_num = 0;
-	subd->sub_errs = 0;
-	set_of_subtitles[set_of_sub_size] = subd;
-	++set_of_sub_size;
 	return;
     }
 
@@ -710,6 +725,7 @@ void add_subtitles(char *filename, float fps, int silent)
     printf("SUB: added subtitle file (%d): %s\n", set_of_sub_size, filename);
 }
 
+// FIXME: if/when the GUI calls this, global sub numbering gets (potentially) broken.
 void update_set_of_subtitles()
     // subdata was changed, set_of_sub... have to be updated.
 {
@@ -1189,6 +1205,11 @@ current_module = NULL;
 
 play_next_file:
 
+  // init global sub numbers
+  global_sub_size = 0;
+  { int i; for (i = 0; i < SUB_SOURCES; i++) global_sub_indices[i] = -1; }
+  global_sub_quiet_osd_hack = 1;
+
   if (filename) load_per_file_config (mconfig, filename);
 
 // We must enable getch2 here to be able to interrupt network connection
@@ -1260,11 +1281,14 @@ if(!noconsolecontrols && !slave_mode){
       free(buf);
     }
     if(vo_vobsub){
-      sub_auto=0; // don't do autosub for textsubs if vobsub found
       inited_flags|=INITED_VOBSUB;
       vobsub_set_from_lang(vo_vobsub, dvdsub_lang);
       // check if vobsub requested only to display forced subtitles
       forced_subs_only=vobsub_get_forced_subs_flag(vo_vobsub);
+
+      // setup global sub numbering
+      global_sub_indices[SUB_SOURCE_VOBSUB] = global_sub_size; // the global # of the first vobsub.
+      global_sub_size += vobsub_get_indexes_count(vo_vobsub);
     }
 
 //============ Open & Sync STREAM --- fork cache2 ====================
@@ -1343,6 +1367,9 @@ if(stream->type==STREAMTYPE_DVD){
   current_module="dvd lang->id";
   if(audio_id==-1) audio_id=dvd_aid_from_lang(stream,audio_lang);
   if(dvdsub_lang && dvdsub_id==-1) dvdsub_id=dvd_sid_from_lang(stream,dvdsub_lang);
+  // setup global sub numbering
+  global_sub_indices[SUB_SOURCE_DEMUX] = global_sub_size; // the global # of the first demux-specific sub.
+  global_sub_size += dvd_number_of_subs(stream);
   current_module=NULL;
 }
 #endif
@@ -1449,6 +1476,21 @@ if(!demuxer)
   goto goto_next_file;
 }
 inited_flags|=INITED_DEMUXER;
+
+#ifdef HAVE_MATROSKA
+if (demuxer->type==DEMUXER_TYPE_MATROSKA) {
+  // setup global sub numbering
+  global_sub_indices[SUB_SOURCE_DEMUX] = global_sub_size; // the global # of the first demux-specific sub.
+  global_sub_size += demux_mkv_num_subs(demuxer);
+}
+#endif
+#ifdef HAVE_OGGVORBIS
+if (demuxer->type==DEMUXER_TYPE_OGG) {
+  // setup global sub numbering
+  global_sub_indices[SUB_SOURCE_DEMUX] = global_sub_size; // the global # of the first demux-specific sub.
+  global_sub_size += demux_ogg_num_subs(demuxer);
+}
+#endif
 
 current_module="demux_open2";
 
@@ -1641,18 +1683,37 @@ if(sh_video) {
         add_subtitles (NULL, sh_video->fps, 1);
   }
   if (set_of_sub_size > 0)  {
-      //osd_show_sub_changed = sh_video->fps;
-      subdata = set_of_subtitles[set_of_sub_pos=0];
-  
-      if(stream_dump_type==3) list_sub_file(subdata);
-      if(stream_dump_type==4) dump_mpsub(subdata, sh_video->fps);
-      if(stream_dump_type==6) dump_srt(subdata, sh_video->fps);
-      if(stream_dump_type==7) dump_microdvd(subdata, sh_video->fps);
-      if(stream_dump_type==8) dump_jacosub(subdata, sh_video->fps);
-      if(stream_dump_type==9) dump_sami(subdata, sh_video->fps);
+      // setup global sub numbering
+      global_sub_indices[SUB_SOURCE_SUBS] = global_sub_size; // the global # of the first sub.
+      global_sub_size += set_of_sub_size;
   }
 }
 #endif
+
+if (global_sub_size) {
+  // find the best sub to use
+  if (vobsub_id >= 0) {
+    // if user asks for a vobsub id, use that first.
+    global_sub_pos = global_sub_indices[SUB_SOURCE_VOBSUB] + vobsub_id;
+  } else if (dvdsub_id >= 0 && global_sub_indices[SUB_SOURCE_DEMUX] >= 0) {
+    // if user asks for a dvd sub id, use that next.
+    global_sub_pos = global_sub_indices[SUB_SOURCE_DEMUX] + dvdsub_id;
+  } else if (global_sub_indices[SUB_SOURCE_SUBS] >= 0) {
+    // if there are text subs to use, use those.  (autosubs come last here)
+    global_sub_pos = global_sub_indices[SUB_SOURCE_SUBS];
+/*
+  } else if (global_sub_indices[SUB_SOURCE_DEMUX] >= 0) {
+    // if nothing else works, get subs from the demuxer.
+    global_sub_pos = global_sub_indices[SUB_SOURCE_DEMUX];
+*/
+  } else {
+    // nothing worth doing automatically.
+    global_sub_pos = -1;
+  }
+  // rather than duplicate code, use the SUB_SELECT handler to init the right one.
+  global_sub_pos--;
+  mp_input_queue_cmd(mp_input_parse_cmd("sub_select"));
+}
 
 //================== Init AUDIO (codec) ==========================
 if(sh_audio){
@@ -3098,65 +3159,68 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 #endif
 	} break;
     case MP_CMD_SUB_SELECT:
-#ifdef USE_SUB  
-    if (set_of_sub_size > 0){ //change subtitle file  
-        set_of_sub_pos = (set_of_sub_pos + 1) % set_of_sub_size;
-        subdata = set_of_subtitles[set_of_sub_pos];
-        osd_show_sub_changed = sh_video->fps;
+    if (global_sub_size) {
+        int source = -1;
+
+        global_sub_pos++;
+        if (global_sub_pos >= global_sub_size)
+            global_sub_pos = -1;
+        if (global_sub_pos >= 0)
+            source = sub_source();
+
+	mp_msg(MSGT_CPLAYER, MSGL_DBG3, "subtitles: %d subs, (v@%d s@%d d@%d), @%d, source @%d\n",
+		global_sub_size, global_sub_indices[SUB_SOURCE_VOBSUB],
+		global_sub_indices[SUB_SOURCE_SUBS], global_sub_indices[SUB_SOURCE_DEMUX],
+		global_sub_pos, source);
+
+#ifdef USE_SUB
+        set_of_sub_pos = -1;
+        subdata = NULL;
         vo_sub = NULL;
-        vo_osd_changed(OSDTYPE_SUBTITLE); 
-    }
 #endif
-    if (vo_vobsub)
-    {
-	int new_id = vobsub_id + 1;
-	if (vobsub_id < 0)
-	    new_id = 0;
-	if ((unsigned int) new_id >= vobsub_get_indexes_count(vo_vobsub))
-	    new_id = -1;
-        if(new_id != vobsub_id)
-	    osd_show_vobsub_changed = sh_video->fps;
-	vobsub_id = new_id;
-    }
+        vobsub_id = -1;
+        dvdsub_id = -1;
+        if (d_dvdsub) d_dvdsub->id = -1;
+
+        // be careful!
+        // if sub_changed is till on but subdata's been reset, bad things happen.
+        osd_show_vobsub_changed = 0;
+        osd_show_sub_changed = 0;
+
+        if (source == SUB_SOURCE_VOBSUB) {
+            vobsub_id = global_sub_pos - global_sub_indices[SUB_SOURCE_VOBSUB];
+            if (!global_sub_quiet_osd_hack) osd_show_vobsub_changed = sh_video->fps;
+#ifdef USE_SUB
+        } else if (source == SUB_SOURCE_SUBS) {
+            set_of_sub_pos = global_sub_pos - global_sub_indices[SUB_SOURCE_SUBS];
+            subdata = set_of_subtitles[set_of_sub_pos];
+            if (!global_sub_quiet_osd_hack) osd_show_sub_changed = sh_video->fps;
+            vo_osd_changed(OSDTYPE_SUBTITLE); 
+
+            // FIXME: is this the correct place for these?
+            if(stream_dump_type==3) list_sub_file(subdata);
+            if(stream_dump_type==4) dump_mpsub(subdata, sh_video->fps);
+            if(stream_dump_type==6) dump_srt(subdata, sh_video->fps);
+            if(stream_dump_type==7) dump_microdvd(subdata, sh_video->fps);
+            if(stream_dump_type==8) dump_jacosub(subdata, sh_video->fps);
+            if(stream_dump_type==9) dump_sami(subdata, sh_video->fps);
+#endif
+        } else if (source == SUB_SOURCE_DEMUX) {
+            dvdsub_id = global_sub_pos - global_sub_indices[SUB_SOURCE_DEMUX];
+            if (d_dvdsub) {
 #ifdef USE_DVDREAD
-    if (vo_spudec && stream->type == STREAMTYPE_DVD)
-    {
-	int new_id = dvdsub_id + 1;
-	if (dvdsub_id < 0)
-	    new_id = 0;
-	if ((unsigned int) new_id >= dvd_number_of_subs(stream))
-	    new_id = -1;
-	if(new_id != dvdsub_id)
-	    osd_show_vobsub_changed = sh_video->fps;
-	d_dvdsub->id = dvdsub_id = new_id;
-	spudec_reset(vo_spudec);
-    }
+                if (vo_spudec && stream->type == STREAMTYPE_DVD) {
+                    d_dvdsub->id = dvdsub_id;
+                    spudec_reset(vo_spudec);
+                }
 #endif
 #ifdef HAVE_OGGVORBIS
-    if (d_dvdsub && demuxer->type == DEMUXER_TYPE_OGG)
-    {
-	int new_id = dvdsub_id + 1;
-	if (dvdsub_id < 0)
-	    new_id = 0;
-	if ((unsigned int) new_id >= demux_ogg_num_subs(demuxer))
-	    new_id = -1;
-	if (new_id != dvdsub_id)
-	    osd_show_vobsub_changed = sh_video->fps;
-	dvdsub_id = new_id;
-	d_dvdsub->id = demux_ogg_sub_id(demuxer, new_id);
-    }
+                if (demuxer->type == DEMUXER_TYPE_OGG)
+                    d_dvdsub->id = demux_ogg_sub_id(demuxer, dvdsub_id);
 #endif
 #ifdef HAVE_MATROSKA
-    if (d_dvdsub && demuxer->type == DEMUXER_TYPE_MATROSKA) {
-      int new_id = dvdsub_id + 1;
-      if (dvdsub_id < 0)
-        new_id = 0;
-      if ((unsigned int) new_id >= demux_mkv_num_subs(demuxer))
-        new_id = -1;
-      if (new_id != dvdsub_id)
-        osd_show_vobsub_changed = sh_video->fps;
-      dvdsub_id = new_id;
-      d_dvdsub->id = demux_mkv_change_subs(demuxer, new_id);
+                if (demuxer->type == DEMUXER_TYPE_MATROSKA) {
+                    d_dvdsub->id = demux_mkv_change_subs(demuxer, dvdsub_id);
       if (d_dvdsub->id >= 0 && ((mkv_sh_sub_t *)d_dvdsub->sh)->type == 'v') {
         mkv_sh_sub_t *mkv_sh_sub = (mkv_sh_sub_t *)d_dvdsub->sh;
         if (vo_spudec != NULL)
@@ -3175,6 +3239,17 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       }
     }
 #endif
+            }
+            if (!global_sub_quiet_osd_hack) osd_show_vobsub_changed = sh_video->fps;
+        } else { // off
+            if (!global_sub_quiet_osd_hack) osd_show_vobsub_changed = sh_video->fps;
+#ifdef USE_SUB
+            vo_osd_changed(OSDTYPE_SUBTITLE); 
+#endif
+	}
+        // it's annoying and dumb to show osd saying "off" at every subless file...
+        global_sub_quiet_osd_hack = 0;
+    }
         break;
     case MP_CMD_SUB_FORCED_ONLY:
       if (vo_spudec) {

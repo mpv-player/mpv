@@ -146,6 +146,7 @@ typedef struct ogg_demuxer {
 extern int index_mode;
 
 extern char *dvdsub_lang, *audio_lang;
+extern int dvdsub_id;
 
 //-------- subtitle support - should be moved to decoder layer, and queue
 //                          - subtitles up in demuxer buffer...
@@ -444,6 +445,7 @@ static void demux_ogg_check_comments(demuxer_t *d, ogg_stream_t *os, int id, vor
       if (os->text && d->sub->id == -1 && demux_ogg_check_lang(val, dvdsub_lang))
       {
 	d->sub->id = id;
+	dvdsub_id = index;
         mp_msg(MSGT_DEMUX, MSGL_V, "Ogg demuxer: Displaying subtitle stream id %d which matched -slang %s\n", id, val);
       }
       else

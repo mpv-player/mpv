@@ -227,6 +227,7 @@ typedef struct __attribute__((__packed__))
 /* for e.g. "-slang ger" */
 extern char *dvdsub_lang;
 extern char *audio_lang;
+extern int dvdsub_id;
 
 
 static mkv_track_t *
@@ -2043,6 +2044,24 @@ demux_mkv_open_sub (demuxer_t *demuxer, mkv_track_t *track)
 
 void demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, int flags);
 
+/** \brief Given a matroska track number, find the subtitle number that mplayer would ask for.
+ *  \param d The demuxer for which the subtitle id should be returned.
+ *  \param num The matroska track number we are looking up.
+ */
+static int demux_mkv_sub_reverse_id(mkv_demuxer_t *d, int num)
+{
+  int i, id;
+  
+  for (i=0, id=0; i < d->num_tracks; i++)
+    if (d->tracks[i] != NULL && d->tracks[i]->type == MATROSKA_TRACK_SUBTITLE) {
+      if (d->tracks[i]->tnum == num)
+        return id;
+      id++;
+    }
+  
+  return -1;
+}
+
 int
 demux_mkv_open (demuxer_t *demuxer)
 {
@@ -2256,6 +2275,7 @@ demux_mkv_open (demuxer_t *demuxer)
           {
             mp_msg (MSGT_DEMUX, MSGL_INFO,
                     "[mkv] Will display subtitle track %u\n", track->tnum);
+	    dvdsub_id = demux_mkv_sub_reverse_id(mkv_d, track->tnum);
             demuxer->sub->id = track->tnum;
           }
   else
