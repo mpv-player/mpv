@@ -822,9 +822,9 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
     priv->format = format;
     
 #ifdef HAVE_X11
-	if(getenv("DISPLAY")) {
+    XDisplay = XOpenDisplay(NULL);
+    if(XDisplay) {
 		if(verbose) printf("SDL: deactivating XScreensaver/DPMS\n");
-		XDisplay = XOpenDisplay(getenv("DISPLAY"));
 		XScreen = DefaultScreen(XDisplay);
 		priv->XWidth = DisplayWidth(XDisplay, XScreen);
 		priv->XHeight = DisplayHeight(XDisplay, XScreen);
@@ -1607,9 +1607,10 @@ uninit(void)
 {
 #ifdef HAVE_X11
 	static Display *XDisplay;
-	if(getenv("DISPLAY")) {
+    XDisplay = XOpenDisplay(NULL);
+    if(XDisplay) {
 		if(verbose) printf("SDL: activating XScreensaver/DPMS\n");
-		XDisplay = XOpenDisplay(getenv("DISPLAY"));
+
 		saver_on(XDisplay);
 		XCloseDisplay(XDisplay);
 	}
