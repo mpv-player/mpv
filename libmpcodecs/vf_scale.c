@@ -93,8 +93,10 @@ static int config(struct vf_instance_s* vf,
     if(vf->priv->ctx) freeSwsContext(vf->priv->ctx);
     
     // new swscaler:
-    vf->priv->ctx=getSwsContextFromCmdLine(width,height,outfmt,
-		  vf->priv->w,vf->priv->h,best);
+    vf->priv->ctx=getSwsContextFromCmdLine(width,height,
+	    (outfmt==IMGFMT_I420 || outfmt==IMGFMT_IYUV)?IMGFMT_YV12:outfmt,
+		  vf->priv->w,vf->priv->h,
+	    (best==IMGFMT_I420 || best==IMGFMT_IYUV)?IMGFMT_YV12:best);
     if(!vf->priv->ctx){
 	// error...
 	printf("Couldn't init SwScaler for this setup\n");
