@@ -44,10 +44,6 @@ typedef struct ao_data_s
 extern char *ao_subdevice;
 extern ao_data_t ao_data;
 
-// prototypes
-extern char *audio_out_format_name(int format);
-extern int   audio_out_format_bits(int format);
-
 void list_audio_out();
 ao_functions_t* init_best_audio_out(char** ao_list,int use_plugin,int rate,int channels,int format,int flags);
 
