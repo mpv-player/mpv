@@ -72,7 +72,7 @@ typedef struct af_resample_s
 } af_resample_t;
 
 // Euclids algorithm for calculating Greatest Common Divisor GCD(a,b)
-inline int gcd(register int a, register int b)
+static inline int gcd(register int a, register int b)
 {
   register int r = min(a,b);
   a=max(a,b);
