@@ -378,7 +378,7 @@ static void radeon_vid_display_video( void )
     {
 	OUTREG(OV0_GRAPHICS_KEY_MSK, besr.graphics_key_msk);
 	OUTREG(OV0_GRAPHICS_KEY_CLR, besr.graphics_key_clr);
-	OUTREG(OV0_KEY_CNTL,GRAPHIC_KEY_FN_FALSE|VIDEO_KEY_FN_FALSE|CMP_MIX_OR);
+	OUTREG(OV0_KEY_CNTL,GRAPHIC_KEY_FN_EQ|VIDEO_KEY_FN_FALSE|CMP_MIX_OR);
     }
     else OUTREG(OV0_KEY_CNTL,GRAPHIC_KEY_FN_NE);
    
@@ -457,15 +457,24 @@ static void radeon_vid_display_video( void )
 void radeon_vid_set_color_key(int ckey_on, uint8_t R, uint8_t G, uint8_t B)
 {
     besr.ckey_on = ckey_on;
-    if(radeon_vid_get_dbpp() == 16)
-    {  /* 5.6.5 mode, 
-          note that these values depend on DAC_CNTL.EXPAND_MODE setting */
-       R = (R<<3);
-       G = (G<<2);
-       B = (B<<3);
-       besr.graphics_key_msk=((R|0x7)<<16)|((G|0x3)<<8)|(B|0x7)|(0xff<<24);
+    switch(radeon_vid_get_dbpp() == 16)
+    { 
+	case 16:
+        	/* 5.6.5 mode, 
+    	    	note that these values depend on DAC_CNTL.EXPAND_MODE setting */
+		R = (R<<3);
+		G = (G<<2);
+		B = (B<<3);
+//		besr.graphics_key_msk=((R|0x7)<<16)|((G|0x3)<<8)|(B|0x7)|(0xff<<24);
+		besr.graphics_key_msk=((R|0x7)<<16)|((G|0x3)<<8)|(B|0x7)|(0xff<<24);
+		break;
+	case 24: besr.graphics_key_msk = ((R)<<16)|((G)<<8)|(B);
+		break;
+	case 32:
+	default: besr.graphics_key_msk = ((R)<<16)|((G)<<8)|(B)|(0xff<<24);
+		break;
     }
-    else besr.graphics_key_msk = ((R)<<16)|((G) <<8)|(B)|(0xff<<24);
+    besr.graphics_key_msk=(1ULL<<radeon_vid_get_dbpp()) - 1;
     besr.graphics_key_clr=(R<<16)|(G<<8)|(B)|(0x00 << 24);
 }
 

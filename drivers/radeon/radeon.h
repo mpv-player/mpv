@@ -510,8 +510,13 @@
 #define OV0_SCALE_CNTL                         0x0420  
 #	define SCALER_PIX_EXPAND               0x00000001L
 #	define SCALER_Y2R_TEMP                 0x00000002L
+#ifdef RAGE128
+#	define SCALER_HORZ_PICK_NEAREST        0x00000003L
+#	define SCALER_VERT_PICK_NEAREST        0x00000004L
+#else
 #	define SCALER_HORZ_PICK_NEAREST        0x00000004L
 #	define SCALER_VERT_PICK_NEAREST        0x00000008L
+#endif
 #	define SCALER_SIGNED_UV                0x00000010L
 #	define SCALER_GAMMA_SEL_MASK           0x00000060L
 #	define SCALER_GAMMA_SEL_BRIGHT         0x00000000L
@@ -540,7 +545,11 @@
 #	define SCALER_UNKNOWN_FLAG0            0x00002000L /* ??? */
 #	define SCALER_UNKNOWN_FLAG1            0x00004000L /* ??? */
 #	define SCALER_SMART_SWITCH             0x00008000L
+#ifdef RAGE128
 #	define SCALER_BURST_PER_PLANE          0x00ff0000L
+#else
+#	define SCALER_BURST_PER_PLANE          0x007f0000L
+#endif
 #	define SCALER_DOUBLE_BUFFER            0x01000000L
 #	define SCALER_UNKNOWN_FLAG3            0x02000000L /* ??? */
 #	define SCALER_UNKNOWN_FLAG4            0x04000000L /* ??? */
@@ -628,16 +637,34 @@
 #define OV0_GRAPHICS_KEY_CLR                   0x04EC
 #define OV0_GRAPHICS_KEY_MSK                   0x04F0
 #define OV0_KEY_CNTL                           0x04F4  
+#ifdef RAGE128
 #	define VIDEO_KEY_FN_MASK               0x00000007L
+#else
+#	define VIDEO_KEY_FN_MASK               0x00000003L
+#endif
 #	define VIDEO_KEY_FN_FALSE              0x00000000L
 #	define VIDEO_KEY_FN_TRUE               0x00000001L
+#ifdef RAGE128
 #	define VIDEO_KEY_FN_EQ                 0x00000004L
 #	define VIDEO_KEY_FN_NE                 0x00000005L
+#else
+#	define VIDEO_KEY_FN_EQ                 0x00000002L
+#	define VIDEO_KEY_FN_NE                 0x00000003L
+#endif
+#ifdef RAGE128
 #	define GRAPHIC_KEY_FN_MASK             0x00000070L
+#else
+#	define GRAPHIC_KEY_FN_MASK             0x00000030L
+#endif
 #	define GRAPHIC_KEY_FN_FALSE            0x00000000L
 #	define GRAPHIC_KEY_FN_TRUE             0x00000010L
+#ifdef RAGE128
 #	define GRAPHIC_KEY_FN_EQ               0x00000040L
 #	define GRAPHIC_KEY_FN_NE               0x00000050L
+#else
+#	define GRAPHIC_KEY_FN_EQ               0x00000020L
+#	define GRAPHIC_KEY_FN_NE               0x00000030L
+#endif
 #	define CMP_MIX_MASK                    0x00000100L
 #	define CMP_MIX_OR                      0x00000000L
 #	define CMP_MIX_AND                     0x00000100L
