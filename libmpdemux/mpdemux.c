@@ -1,9 +1,6 @@
-
 #include "config.h"
 #include <stdlib.h>
 
-
-#ifdef HAVE_NEW_INPUT
 #include "../input/input.h"
 int mpdemux_check_interrupt(int time) {
   mp_cmd_t* cmd;
@@ -26,12 +23,3 @@ int mpdemux_check_interrupt(int time) {
     return 0;
   }
 }
-
-#else // Default function
-int mpdemux_check_interrupt(int time){
-  usec_sleep(time*1000);
-  return 0;
-}
-#endif
-
-
