@@ -90,8 +90,14 @@ typedef struct flac_struct_st
 
 FLAC__StreamDecoderReadStatus flac_read_callback (const FLAC__StreamDecoder *decoder, FLAC__byte buffer[], unsigned *bytes, void *client_data)
 {
-	int b = demux_read_data(((flac_struct_t*)client_data)->sh->ds, buffer,  *bytes);
-	mp_msg(MSGT_DECAUDIO, MSGL_DBG2, "\nread %d bytes\n", b);
+  /* Don't be greedy. Try to read as few packets as possible. *bytes is often
+     > 60kb big which is more than one second of data. Reading it all at
+     once sucks in all packets available making d_audio->pts jump to the
+     pts of the last packet read which is not what we want. We're decoging
+     only one FLAC block anyway, so let's just read as few bytes as
+     neccessary. */
+	int b = demux_read_data(((flac_struct_t*)client_data)->sh->ds, buffer, *bytes > 500 ? 500 : *bytes);
+	mp_msg(MSGT_DECAUDIO, MSGL_DBG2, "\nFLAC READ CB read %d bytes\n", b);
 	*bytes = b;
 	if (b <= 0)
 		return FLAC__STREAM_DECODER_READ_STATUS_END_OF_STREAM;
