@@ -103,13 +103,29 @@ static int config(struct vf_instance_s* vf,
     }
 
     // calculate the missing parameters:
+    switch(best) {
+    case IMGFMT_YUY2:		/* YUY2 needs w rounded to 2 */
+	if(vf->priv->w==-3) vf->priv->w=(vf->priv->h*width/height+1)&~1; else
+	if(vf->priv->w==-2) vf->priv->w=(vf->priv->h*d_width/d_height+1)&~1;
+	if(vf->priv->h==-3) vf->priv->h=vf->priv->w*height/width; else
+	if(vf->priv->h==-2) vf->priv->h=vf->priv->w*d_height/d_width;
+	break;
+    case IMGFMT_YV12:		/* YV12 needs w & h rounded to 2 */
+	if(vf->priv->w==-3) vf->priv->w=(vf->priv->h*width/height+1)&~1; else
+	if(vf->priv->w==-2) vf->priv->w=(vf->priv->h*d_width/d_height+1)&~1;
+	if(vf->priv->h==-3) vf->priv->h=(vf->priv->w*height/width+1)&~1; else
+	if(vf->priv->h==-2) vf->priv->h=(vf->priv->w*d_height/d_width+2)&~1;
+	break;
+    default:
     if(vf->priv->w==-3) vf->priv->w=vf->priv->h*width/height; else
     if(vf->priv->w==-2) vf->priv->w=vf->priv->h*d_width/d_height;
+    if(vf->priv->h==-3) vf->priv->h=vf->priv->w*height/width; else
+    if(vf->priv->h==-2) vf->priv->h=vf->priv->w*d_height/d_width;
+    break;
+    }
     if(vf->priv->w<0) vf->priv->w=width; else
     if(vf->priv->w==0) vf->priv->w=d_width;
     
-    if(vf->priv->h==-3) vf->priv->h=vf->priv->w*height/width; else
-    if(vf->priv->h==-2) vf->priv->h=vf->priv->w*d_height/d_width;
     if(vf->priv->h<0) vf->priv->h=height; else
     if(vf->priv->h==0) vf->priv->h=d_height;
     
