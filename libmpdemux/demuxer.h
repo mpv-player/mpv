@@ -282,6 +282,7 @@ int demux_control(demuxer_t *demuxer, int cmd, void *arg);
 /* Found in demux_ogg.c */
 int demux_ogg_num_subs(demuxer_t *demuxer);
 int demux_ogg_sub_id(demuxer_t *demuxer, int index);
+char *demux_ogg_sub_lang(demuxer_t *demuxer, int index);
 #endif
 
 #endif

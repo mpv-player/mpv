@@ -132,6 +132,7 @@ typedef struct ogg_demuxer {
   /* Used for subtitle switching. */
   int n_text;
   int *text_ids;
+  char **text_langs;
 } ogg_demuxer_t;
 
 #define NUM_VORBIS_HDR_PACKETS 3
@@ -429,6 +430,8 @@ static void demux_ogg_check_comments(demuxer_t *d, ogg_stream_t *os, int id, vor
 {
   char *hdr, *val;
   char **cmt = vc->user_comments;
+  int index;
+  ogg_demuxer_t *ogg_d = (ogg_demuxer_t *)d->priv;
 
   while(*cmt)
   {
@@ -441,6 +444,13 @@ static void demux_ogg_check_comments(demuxer_t *d, ogg_stream_t *os, int id, vor
     else if (!strncasecmp(*cmt, "LANGUAGE=", 9))
     {
       val = *cmt + 9;
+      // copy this language name into the array
+      index = demux_ogg_sub_reverse_id(d, id);
+      if (index >= 0) {
+	// in case of malicious files with more than one lang per track:
+	if (ogg_d->text_langs[index]) free(ogg_d->text_langs[index]);
+	ogg_d->text_langs[index] = strdup(val);
+      }
       // check for -slang if subs are uninitialized yet
       if (os->text && d->sub->id == -1 && demux_ogg_check_lang(val, dvdsub_lang))
       {
@@ -683,6 +693,27 @@ int demux_ogg_num_subs(demuxer_t *demuxer) {
 int demux_ogg_sub_id(demuxer_t *demuxer, int index) {
   ogg_demuxer_t *ogg_d = (ogg_demuxer_t *)demuxer->priv;
   return (index < 0) ? index : (index >= ogg_d->n_text) ? -1 : ogg_d->text_ids[index];
+}
+
+/** \brief Translate the ogg track number into the subtitle number.
+ *  \param demuxer The demuxer about whose subtitles we are inquiring.
+ *  \param id The ogg track number of the subtitle track.
+ */
+static int demux_ogg_sub_reverse_id(demuxer_t *demuxer, int id) {
+  ogg_demuxer_t *ogg_d = (ogg_demuxer_t *)demuxer->priv;
+  int i;
+  for (i = 0; i < ogg_d->n_text; i++)
+    if (ogg_d->text_ids[i] == id) return i;
+  return -1;
+}
+
+/** \brief Lookup the subtitle language by the subtitle number.  Returns NULL on out-of-bounds input.
+ *  \param demuxer The demuxer about whose subtitles we are inquiring.
+ *  \param index The subtitle number.
+ */
+char *demux_ogg_sub_lang(demuxer_t *demuxer, int index) {
+  ogg_demuxer_t *ogg_d = (ogg_demuxer_t *)demuxer->priv;
+  return (index < 0) ? NULL : (index >= ogg_d->n_text) ? NULL : ogg_d->text_langs[index];
 }
 
 /// Open an ogg physical stream
@@ -934,6 +965,8 @@ int demux_ogg_open(demuxer_t* demuxer) {
           ogg_d->n_text++;
           ogg_d->text_ids = (int *)realloc(ogg_d->text_ids, sizeof(int) * ogg_d->n_text);
           ogg_d->text_ids[ogg_d->n_text - 1] = ogg_d->num_sub;
+          ogg_d->text_langs = (char **)realloc(ogg_d->text_langs, sizeof(char *) * ogg_d->n_text);
+          ogg_d->text_langs[ogg_d->n_text - 1] = NULL;
           demux_ogg_init_sub();
 	//// Unknown header type
       } else
@@ -1382,6 +1415,7 @@ void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
 
 void demux_close_ogg(demuxer_t* demuxer) {
   ogg_demuxer_t* ogg_d = demuxer->priv;
+  int i;
 
   if(!ogg_d)
     return;
@@ -1396,6 +1430,11 @@ void demux_close_ogg(demuxer_t* demuxer) {
     free(ogg_d->syncpoints);
   if (ogg_d->text_ids)
     free(ogg_d->text_ids);
+  if (ogg_d->text_langs) {
+    for (i = 0; i < ogg_d->n_text; i++)
+      if (ogg_d->text_langs[i]) free(ogg_d->text_langs[i]);
+    free(ogg_d->text_langs);
+  }
   free(ogg_d);
 }
 

@@ -3719,12 +3719,17 @@ while (next_edl_record)
 	      language = vobsub_get_id(vo_vobsub, (unsigned int) vobsub_id);
 	  snprintf(osd_text_tmp, 63, "Subtitles: (%d) %s", vobsub_id, language ? language : "unknown");
 	  }
+#ifdef HAVE_OGGVORBIS
 	  if (d_dvdsub && demuxer->type == DEMUXER_TYPE_OGG) {
 	      if (dvdsub_id < 0)
 		snprintf(osd_text_tmp, 63, "Subtitles: (off)");
-	      else
-		snprintf(osd_text_tmp, 63, "Subtitles: (%d)", dvdsub_id);
+	      else {
+		char *lang = demux_ogg_sub_lang(demuxer, dvdsub_id);
+		if (!lang) lang = "unknown";
+		snprintf(osd_text_tmp, 63, "Subtitles: (%d) %s", dvdsub_id, lang);
+	      }
 	  }
+#endif
 #ifdef USE_DVDREAD
 	  if (vo_spudec && (demuxer->type != DEMUXER_TYPE_MATROSKA)) {
 	      char lang[5] = "none";
