@@ -27,6 +27,10 @@ demuxer:
 FUTURE:
 ~~~~~~~
 
+decoders:
+- fix DLLs: pegasusm, pegasusl, pegasusmwv, 3ivX, morgands, alaris, vcr1, tm20,
+  pim1, qpeg, rricm
+
 demuxer:
 - demux_mpg: support for VDR's index files for more accurate seeking
 - implement seeking for YUV4MPEG_2_ and Real
