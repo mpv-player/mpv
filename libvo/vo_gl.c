@@ -32,9 +32,6 @@ static vo_info_t info =
 
 LIBVO_EXTERN(gl)
 
-/* local data */
-static unsigned char *ImageData=NULL;
-
 static GLXContext wsGLXContext;
 static int                  wsGLXAttrib[] = { GLX_RGBA,
                                        GLX_RED_SIZE,1,
@@ -48,6 +45,7 @@ static uint32_t image_width;
 static uint32_t image_height;
 static uint32_t image_bytes;
 static int many_fmts;
+static GLenum gl_texfmt;
 static GLenum gl_format;
 static GLenum gl_type;
 
@@ -72,17 +70,22 @@ static void resize(int x,int y){
 
 static int find_gl_format (uint32_t format)
 {
+  image_bytes = (IMGFMT_RGB_DEPTH(format)+7)/8;
+  gl_texfmt = 3;
   switch (format) {
     case IMGFMT_RGB24:
       gl_format = GL_RGB;
       gl_type = GL_UNSIGNED_BYTE;
       break;
     case IMGFMT_RGB32:
+      gl_texfmt = 4;
       gl_format = GL_RGBA;
       gl_type = GL_UNSIGNED_BYTE;
       break;
     case IMGFMT_Y800:
     case IMGFMT_Y8:
+      gl_texfmt = 1;
+      image_bytes = 1;
       gl_format = GL_LUMINANCE;
       gl_type = GL_UNSIGNED_BYTE;
       break;
@@ -120,15 +123,20 @@ static int find_gl_format (uint32_t format)
       gl_type = GL_UNSIGNED_BYTE;
       break;
     case IMGFMT_BGR32:
+      gl_texfmt = 4;
       gl_format = GL_BGRA;
       gl_type = GL_UNSIGNED_BYTE;
       break;
 #endif
     default:
+      gl_texfmt = 4;
       gl_format = GL_RGBA;
       gl_type = GL_UNSIGNED_BYTE;
       return 0;
   }
+#ifdef TEXTUREFORMAT_32BPP
+  gl_texfmt = GL_RGB8;
+#endif
   return 1;
 }
 
@@ -138,6 +146,7 @@ static int find_gl_format (uint32_t format)
 static uint32_t 
 config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
+	unsigned char *ImageData=NULL;
 //	int screen;
 	unsigned int fg, bg;
 	XSizeHints hint;
@@ -230,9 +239,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
   while(texture_width<image_width || texture_width<image_height) texture_width*=2;
   texture_height=texture_width;
 
-  image_bytes=(IMGFMT_RGB_DEPTH(format)+7)/8;
-
-  if ( ImageData ) free( ImageData );
   ImageData=malloc(texture_width*texture_height*image_bytes);
   memset(ImageData,128,texture_width*texture_height*image_bytes);
 
@@ -249,21 +255,11 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 //  glBindTexture(GL_TEXTURE_2D, texture_id);
   glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  /* Old OpenGL 1.0 used the third parameter (known as internalFormat) as an
-     integer, which indicated the bytes per pixel (bpp). Later in OpenGL 1.1
-     they switched to constants, like GL_RGB8. GL_RGB8 means 8 bits for each
-     channel (R,G,B), so it's equal to RGB24. It should be safe to pass the
-     image_bytes to internalFormat with newer OpenGL versions.
-     Anyway, I'm leaving this so as it was, it doesn't hurt, as OpenGL 1.1 is
-     about 10 years old too. -- alex
-  */
-#ifdef TEXTUREFORMAT_32BPP
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, texture_width, texture_height, 0,
-#else
-  glTexImage2D(GL_TEXTURE_2D, 0, image_bytes, texture_width, texture_height, 0,
+  glTexImage2D(GL_TEXTURE_2D, 0, gl_texfmt, texture_width, texture_height, 0,
+       gl_format, gl_type, ImageData);
 #endif
-       (image_bytes==4)?GL_RGBA:GL_BGR, GL_UNSIGNED_BYTE, ImageData);
-#endif
+
+  free (ImageData);
 
   resize(d_width,d_height);
 
