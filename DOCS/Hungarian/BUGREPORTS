@@ -30,7 +30,9 @@ Mit?
 
 1. Mindenképp küldj infót a rendszeredrõl:
 - disztribúció
-  például: RedHat 7.1 / Slackware 7.0 + csomagok 7.1-bõl ...
+  például:
+	RedHat 7.1
+	Slackware 7.0 + csomagok 7.1-bõl ...
 - kernel verzió
   uname -a
 - libc verzió:
@@ -110,6 +112,38 @@ Lejátszási problémákhoz:
   küldd el!
   Ha a file a neten hozzaférhetõ, akkor a _pontos_ URL elküldése
   is elég!
+
+
+5. Segfault, SIGILL, signal 4, stb esetén:
+
+Ha létrejött coredump akkor lásd 5.a pont, máskülönben 5.b:
+
+5.a. Küldd el a coredump tartalmát (ha volt).
+Hogyan:
+Hozd létre a következõ parancs file-t:
+
+disass $eip $eip+15
+printf "eax=%08lX\n",$eax
+printf "ebx=%08lX\n",$ebx
+printf "ecx=%08lX\n",$ecx
+printf "edx=%08lX\n",$edx
+printf "esp=%08lX\n",$esp
+printf "ebp=%08lX\n",$ebp
+printf "edi=%08lX\n",$edi
+printf "esi=%08lX\n",$esi
+
+Aztán írd be a következõt:
+gdb mplayer --core=core -batch --command=parancs_file >mplayer.bug
+
+5.b.: futtasd MPlayert gdb-n keresztül:
+[a promptnál:]
+  # gdb mplayer
+[a gdb promptnál:]
+  > run -v [mplayer opciói] filenév
+  ... (várj amíg össze nem omlik)
+  > bt
+  > disass $eip-32 $eip+32
+A fenti parancsok teljes kimenetét küldd el nekünk!
 
 Általában véve:
   Ha valami nagy (log-ok stb.), akkor jobb ha FTP-re töltöd (gzip-pel),

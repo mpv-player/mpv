@@ -10,7 +10,8 @@ támogatja.
 
 Dekóder:
 ~~~~~~~~
-'dvx1' fourcc-vel ellátott AVI file-oknál használt.
+'dvx1' fourcc-vel ellátott AVI és ASF file-oknál használt.
+
 A minõséget a '-pp' opcióval állíthatod.
 Kombináld (add össze) a flageket, amiket használni akarsz:
 
@@ -26,9 +27,12 @@ Például, ha horiz+vert chroma deblocking-et akarsz, használd ezt:
 
 Megj.: a C filterek csak n*16 pixel magasságú filmeknél használhatóak
 
+Megj.: a postprocess filter-ek mpeg1/2 fileokhoz is használhatóak (-pp)
+
 Enkóder:
 ~~~~~~~~
 Az OpenDivX-be konvertálás egy nagyon kezdetleges hack. A hang automatikusan
 kikapcsolódik. Választd az 'odivx'-et outputként:
   mplayer input.mpg -vo odivx -encode output.avi
 Igen, tudom, hogy még használhatatlan, csak tesztelési célokat szolgál.
+Be van tervezve igazi encoder funkció, de csak a távoli jövõben.

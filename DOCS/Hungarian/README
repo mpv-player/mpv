@@ -1,6 +1,6 @@
-MPlayer                         (C) 2000-2001 Árpád Gereöffy (A'rpi/ESP-team)
-=============================== * Készítõk teljes listáját lásd AUTHORS file*
-http://mplayer.sourceforge.net
+MPlayer - Movie Player for LINUX (C) 2000-2001 Árpád Gereöffy (A'rpi/ESP-team)
+===============================  * Készítõk teljes listáját lásd AUTHORS file*
+http://mplayer.sourceforge.net (or http://mplayer.dev.hu)
 
 Röviden:
 ~~~~~~~~
@@ -8,8 +8,8 @@ Az MPlayer egy LINUXON mûködõ videolejátszó. Le tudja játszani a legtöbb MPEG,
 AVI és ASF file-t, valamint felsorakoztat jónéhány nativ és Win32 codecet.
 Nézhetsz vele VCD-t, DVD-t, és még DivX-et is. A másik óriási tulajdonsága az
 MPlayernek a megjelenítési módok széles választéka. Mûködik X11, Xv, DGA,
-OpenGL, SVGAlib, fbdev, AAlib driverekkel, sõt SDL-lel is (beleértve ezáltal az
-SDL képességeit is), és néhány alacsonyszintû kártyaspecifikus driver
+OpenGL, SVGAlib, fbdev, sõt SDL-lel is (beleértve ezáltal az SDL drivereit
+is, például az AAlib drivert), és néhány alacsonyszintû kártyaspecifikus driver
 (Matrox/3dfx/SiS) is használható! Legtöbbjük támogat software vagy hardware
 scaling-et, így a teljesképernyõs mód is elérhetõ. És még nem is szóltam a
 szép, élsímított, árnyékolt feliratozásról (7 támogatott típus!), ami támogat
@@ -17,9 +17,8 @@ magyar, angol, cirill, cseh és koreai fontokat, valamint OSD-t!
 
 Történet:
 ~~~~~~~~~
-Igen. Egy újabb videolejátszó Linuxra.
-Hogy mi ebben a különleges? Nos, mûködik, legalábbis nekem :)
-Nagyon sok lejátszót próbáltam Linux alatt (mtv,xmps,dvdview,livid/oms,
+Egy éve kezdõdött...
+Nagyon sok lejátszót kipróbáltam Linux alatt (mtv,xmps,dvdview,livid/oms,
 VideoLAN,xine,xanim,avifile,xmmp), de mindnek ugyanazok a problémái.
 Többnyire a különleges file-okkal, vagy a hang/kép szinkronnal. Legtöbbjük
 képtelen mind MPEG1, MPEG2 ÉS AVI (DivX) lejátszásra. Sokuknak gondjuk van
@@ -42,6 +41,8 @@ a képminõséggel, vagy a sebességgel is. Elhatároztam, hogy (át)írok egyet...
 - MPlayer v0.10:
   Az MPEG és AVI lejátszó egyetlen programban!
 - MPlayer v0.11:
+  Néhány új fejlesztõvel gyarapodtunk, és innentõl az mplayer project
+  csapatmunkán alapul!
   ASF támogatás hozzáadása, és OpenDivX (lásd www.projectmayo.com)
   en/dekódolás.
 - MPlayer v0.17 "The IdegCounter"
@@ -78,12 +79,14 @@ Támogatott formátumok:
 - MPEG 1/2 System Stream (PS/PES/VOB) és Elementary Stream (ES) formátumok
 - RIFF AVI formátum
 - ASF 1.0 formátum
-- file olvasása stdin-rõl
+- file olvasása, stdin-rõl is, továbbá hálózatról, HTTP-n keresztül
+
+Megj.: quicktime-vel és realmedia-val kapcsolatban lásd a FAQ-t !
 
 Támogatott audio és video codecek:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 *** Lásd http://mplayer.sourceforge.net/DOCS/codecs.html ***
-***                a teljes listához                     ***
+***        a teljes, naponta frissített listához         ***
 
 A legfontosabb video codecek:
 - MPEG1 (VCD) és MPEG2 (DVD) video
@@ -93,8 +96,8 @@ A legfontosabb video codecek:
 - MJPEG, ASV2 és más hardware formátumok
 
 A legfontosabb audio codecek:
-- MPEG layer 2, és layer 3 (MP3) audio
-- AC3 dolby audio
+- MPEG layer 2, és layer 3 (MP3) audio (natív kód, 3DNow! optimalizációval)
+- AC3 dolby audio (natív kód, 3DNow! optimalizációval)
 - VoxWare audio
 - alaw, msgsm, pcm és más régi formátumok
 
@@ -105,21 +108,19 @@ file-okat, amikben le van írva, mit kell tenned, hogy támogassuk a codeced!
 Támogatott video outputok:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Általános:
-- x11:  X11 az SHM kiterjesztéssel
+- x11:  X11, opcionálisan az SHM kiterjesztéssel
 - xv:   X11 az XVideo kiterjesztés overlay-eivel (hardware támogatás)
 - gl:   OpenGL renderelõ, egyelõre csak ezekkel megy:
         - bármely kártyával, Utah-GLX-szel
         - Matrox kártyák + X/DRI >=4.0.3
         - Radeon + X/DRI CVS
 - dga:  X11 a DGA kiterjesztéssel
-- fsdga:X11 a DGA kiterjesztéssel + teljesképernyõs render (csak 24/32bpp
-        és MPEG!)
 - fbdev:Megjelenítés általános framebuffereken
 - svga: Megjelenítés SVGAlib-bel
 - sdl:  1.1.7 : software scaling
 	1.1.8 : támogatja a hardware-es gyorsítást XVideo-n keresztül
-	1.2.0 : aalib támogatás
-- aalib:Szöveges módú render (SDL-en keresztül, nativ driver hamarosan!)
+	1.2.0 : aalib támogatás (szöveges módú megjelenítés)
+- ggi:  SDL-hez hasonló
 
 Kártyaspecifikus:
 - mga:  Matrox G200/G400 hardware-es YUV overlay az mga_vid-en keresztül
@@ -139,9 +140,12 @@ Megj.: olvasd el a DOCS/VIDEOCARDS file-t !
 
 Támogatott audio outputok:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-- OSS driver
-- ALSA driver OSS emulációval (kizárólag ALSA >= 0.9 !)
-- ESD az 'esddsp' programmal (nincs tesztelve)
+- OSS (ioctl) driver
+- SDL driver (up/downsampling támogatás, esd, arts, stb)
+- natív ALSA 0.5 driver
+- natív ALSA 0.9 driver (bugos, használj OSS emulációt!)
+- natív ESD driver (készülõben?)
+- SUN audio driver (/dev/audio) BSD és Solaris8-ra
 
 Megj.: olvasd el a DOCS/SOUNDCARDS file-t !
 
@@ -153,11 +157,15 @@ lásd DOCS/MTRR . Néhány *régi* sebességteszt eredményét lásd DOCS/SPEED .
 
 Használat:
 ~~~~~~~~~~
-  mplayer [opciók] [-vo driver] [útvonal/]filenév
+  file:	mplayer [opciók] [útvonal/]filenév
+  VCD:	mplayer [opciók] -vcd trackszám /dev/cdrom
+  DVD:	mplayer [opciók] -dvdauth /dev/dvd filenév.VOB
+  net:	mplayer [opciók] http://site.com/file.[mpg|avi]
 
   Opciók:
     lásd `mplayer -h'
-    lásd `mplayer -vo help'  a rendelkezésre álló driverek listájához
+    lásd `mplayer -vo help'  a rendelkezésre álló video driverek listájához
+    lásd `mplayer -ao help'  a rendelkezésre álló audio driverek listájához
 
   Billentyûk:
     <-  or  ->      hátra/elõre seek, 10 másodpercnyi
