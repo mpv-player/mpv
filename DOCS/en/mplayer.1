@@ -316,7 +316,7 @@ adjust saturation
 .B GUI keyboard control
 .PD 0
 .RSs
-.IPs "ENTER"
+.IPs ENTER
 start playing
 .IPs s\ \ \ \ 
 stop playing
@@ -976,7 +976,7 @@ hardware ID for ALSA
 .REss
 .IPs audioid=<value>
 choose an audio output of the capture card, if it has more of them
-.IPs "[volume|bass|treble|balance]=<0\-65535>"
+.IPs [volume|bass|treble|balance]=<0\-65535>
 These options set parameters of the mixer on the video capture card.
 They will have no effect, if your card doesn't have one.
 .IPs immediatemode=<bool>
@@ -1620,7 +1620,7 @@ Note: This option is only supported by vo xv, xvidix and tdfxfb.
 Places the window at x=50, y=40
 .IPs 50%:50%
 Places the window in the middle of the screen
-.IPs 100%
+.IPs 100%\ 
 Places the window at the top left corner of the screen
 .IPs 100%:100%
 Places the window at the bottom left corner of the screen
@@ -1901,7 +1901,7 @@ unsigned or signed
 .br
 le or be (little or big endian)
 .br
-.IPs "volume[=v:sc]"
+.IPs volume[=v:sc]
 Select the output volume level.
 This filter is not reentrant and can therefore only be enabled once for every
 audio stream.
@@ -1912,21 +1912,21 @@ completely and +40dB equals a gain of 1000).
 .br
 sc: enable soft clipping.
 .REss
-.IPs "pan[=n:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...]"
+.IPs pan[=n:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...]
 Mixes channels arbitrarily, see DOCS/sound.html for details.
 .RSss
 n: number of output channels (1 - 6).
 .br
 lij: how much of input channel j is mixed into output channel i.
 .REss
-.IPs "sub[=fc:ch]"
+.IPs sub[=fc:ch]
 Add sub-woofer channel.
 .RSss
 fc: Cutoff frequency for low-pass filter (20Hz to 300Hz) default is 60Hz.
 .br
 ch: channel number for the sub-channel.
 .REss
-.IPs "surround[=d]"
+.IPs surround[=d]
 Decoder for matrix encoded surround sound, works on many 2 channel files.
 .RSss
 d: delay time in ms for the rear speakers (0ms to 1000ms) default is 15ms.
@@ -2248,9 +2248,9 @@ Deactivate direct rendering method 2.
 .B \-xy <value>
 .PD 0
 .RSs
-.IPs "value<=8"
+.IPs value<=8
 Scale image by factor <value>.
-.IPs "value>8\ "
+.IPs value>8
 Set width to value and calculate height to keep correct aspect ratio.
 .RE
 .PD 1
@@ -2704,7 +2704,7 @@ interlaced frames.
 The default, -1, means "not in telecine sequence".
 The number specified here is the type for the imaginary previous
 frame before the movie starts.
-.IPs tr0, tr1, tr2, tr3
+.IPs "tr0, tr1, tr2, tr3"
 Threshold values to be used in certain modes.
 .RE
 .TP
@@ -2835,17 +2835,17 @@ FIFO commands are:
 .RE
 .PD 0
 .RSs
-.IPs RGBA32 width height xpos ypos alpha clear
+.IPs "RGBA32 width height xpos ypos alpha clear"
 followed by width*height*4 Bytes of raw RGBA32 data.
-.IPs ABGR32 width height xpos ypos alpha clear
+.IPs "ABGR32 width height xpos ypos alpha clear"
 followed by width*height*4 Bytes of raw ABGR32 data.
-.IPs RGB24 width height xpos ypos alpha clear
+.IPs "RGB24 width height xpos ypos alpha clear"
 followed by width*height*3 Bytes of raw RGB32 data.
-.IPs BGR24 width height xpos ypos alpha clear
+.IPs "BGR24 width height xpos ypos alpha clear"
 followed by width*height*3 Bytes of raw BGR32 data.
-.IPs ALPHA width height xpos ypos alpha
+.IPs "ALPHA width height xpos ypos alpha"
 change alpha for area
-.IPs CLEAR width height xpos ypos
+.IPs "CLEAR width height xpos ypos"
 clear area
 .IPs OPAQUE
 disable all alpha transparency.
@@ -2862,9 +2862,9 @@ Arguments are:
 .RE
 .PD 0
 .RSs
-.IPs width, height
+.IPs "width, height"
 size of image/area
-.IPs xpos, ypos
+.IPs "xpos, ypos"
 start blitting at X/Y position   
 .IPs alpha
 set alpha difference.
@@ -3241,15 +3241,15 @@ ABR encoding at average given kbps bitrate.
 .RE
 .PD 0
 .RSs
-.IPs "fast:preset=standard"
+.IPs fast:preset=standard
 for most people on most music and already quite high in quality.
-.IPs "cbr:preset=192"
+.IPs cbr:preset=192
 encode with ABR presets at a 192 kbps forced constant bitrate.
-.IPs "preset=172"
+.IPs preset=172
 encode with ABR presets at a 172 kbps average bitrate.
-.IPs "preset=extreme"
+.IPs preset=extreme
 for people with extremely good hearing and similar equipment.
-.IPs "preset=help"
+.IPs preset=help
 print additional options and informations on presets settings.
 .RE
 .PD 1
@@ -3260,7 +3260,7 @@ print additional options and informations on presets settings.
 .I EXAMPLE:
 .PD 0
 .RSs
-.IPs "vcodec=msmpeg4:vbitrate=1800:vhq:keyint=250"
+.IPs vcodec=msmpeg4:vbitrate=1800:vhq:keyint=250
 .RE
 .PD 1
 
@@ -3405,9 +3405,9 @@ huffyuv:
 .RE
 .PD 0
 .RSs
-.IPs "pass 1"
+.IPs pass 1
 saves statistics
-.IPs "pass 2"
+.IPs pass 2
 encodes with an optimal Huffman table based upon pass 1 statistics.
 .RE
 .PD 1
@@ -3574,7 +3574,7 @@ is 1 if a>b, 0 otherwise
 is 1 if a<b, 0 otherwise
 .IPs eq(a,b)
 is 1 if a==b, 0 otherwise
-.IPs sin, cos, tan, sinh, cosh, tanh, exp, log, abs
+.IPs "sin, cos, tan, sinh, cosh, tanh, exp, log, abs"
 .RE
 .PD 1
 .
@@ -3584,9 +3584,9 @@ User specified quality for specific parts (ending, credits, ..) (pass\ 1/\:2).
 The options are <start-frame>, <end-frame>, <quality>[/\:<start-frame>,
 <end-frame>, <quality>[/...]]:
 .RSs
-.IPs quality (2\-31)
+.IPs "quality (2\-31)"
 quantizer
-.IPs quality (\-500\-0)
+.IPs "quality (\-500\-0)"
 quality correction in %
 .RE
 .TP
@@ -3825,23 +3825,23 @@ comparison function for full pel motion estimation
 comparison function for sub pel motion estimation
 .PD 0
 .RSs
-.IPs 0 (SAD)
+.IPs "0 (SAD)"
 sum of absolute differences, fast (default)
-.IPs 1 (SSE)
+.IPs "1 (SSE)"
 sum of squared errors
-.IPs 2 (SATD)
+.IPs "2 (SATD)"
 sum of absolute hadamard transformed differences
-.IPs 3 (DCT)
+.IPs "3 (DCT)"
 sum of absolute dct transformed differences
-.IPs 4 (PSNR)
+.IPs "4 (PSNR)"
 sum of the squared quantization errors (don't use, low quality)
-.IPs 5 (BIT)
+.IPs "5 (BIT)"
 number of bits needed for the block
-.IPs 6 (RD)
+.IPs "6 (RD)"
 rate distortion optimal, slow
-.IPs 7 (ZERO)
+.IPs "7 (ZERO)"
 0
-.IPs +256
+.IPs +256\ 
 use chroma too, doesn't work (correctly) with B frames currently
 .RE
 .PD 1
