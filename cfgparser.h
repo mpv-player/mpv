@@ -13,6 +13,8 @@
 #define CONF_TYPE_FUNC_PARAM	5
 #define CONF_TYPE_PRINT		6
 #define CONF_TYPE_FUNC_FULL	7
+#define CONF_TYPE_SUBCONFIG	8
+
 
 
 #define ERR_NOT_AN_OPTION	-1
@@ -31,7 +33,7 @@
 struct config {
 	char *name;
 	void *p;
-	unsigned int type :3;
+	unsigned int type :4;
 	unsigned int flags:4;
 	float min,max;
 };
