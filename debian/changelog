@@ -1,3 +1,10 @@
+mplayer (0.60-2) unstable; urgency=low
+
+  * This is meaningless, just to mark that more then 2 months have passed
+    since last release and lots of thing in mplayer have changed. 
+
+ -- Dariush Pietrzak <eyck@ghost.anime.pl>  Thu,  7 Mar 2002 00:34:20 +0100
+
 mplayer (0.60-1) unstable; urgency=low
 
   * Post 0.60 release.
