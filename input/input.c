@@ -509,20 +509,17 @@ mp_input_read_cmd(mp_input_fd_t* mp_fd, char** ret) {
   char* end;
   (*ret) = NULL;
 
+  // Allocate the buffer if it dont exist
   if(!mp_fd->buffer) {
     mp_fd->buffer = (char*)malloc(MP_CMD_MAX_SIZE*sizeof(char));
     mp_fd->pos = 0;
     mp_fd->size = MP_CMD_MAX_SIZE;
   } 
-
-  if(mp_fd->size - mp_fd->pos == 0) {
-    mp_msg(MSGT_INPUT,MSGL_ERR,"Cmd buffer of fd %d is full : dropping content\n",mp_fd->fd);
-    mp_fd->pos = 0;
-    mp_fd->flags |= MP_FD_DROP;
-  }      
-
-  while( !(mp_fd->flags & MP_FD_EOF) && (mp_fd->size - mp_fd->pos > 1) ) {
+  
+  // Get some data if needed/possible
+  while( !(mp_fd->flags & MP_FD_GOT_CMD) && !(mp_fd->flags & MP_FD_EOF) && (mp_fd->size - mp_fd->pos > 1) ) {
     int r = ((mp_cmd_func_t)mp_fd->read_func)(mp_fd->fd,mp_fd->buffer+mp_fd->pos,mp_fd->size - 1 - mp_fd->pos);
+    // Error ?
     if(r < 0) {
       if(errno == EINTR)
 	continue;
@@ -530,6 +527,7 @@ mp_input_read_cmd(mp_input_fd_t* mp_fd, char** ret) {
 	break;
       mp_msg(MSGT_INPUT,MSGL_ERR,"Error while reading cmd fd %d : %s\n",mp_fd->fd,strerror(errno));
       return MP_INPUT_ERROR;
+      // EOF ?
     } else if(r == 0) {
       mp_fd->flags |= MP_FD_EOF;
       break;
@@ -538,13 +536,25 @@ mp_input_read_cmd(mp_input_fd_t* mp_fd, char** ret) {
     break;
   }
 
+  // Reset the got_cmd flag
+  mp_fd->flags &= ~MP_FD_GOT_CMD;
 
   while(1) {
     int l = 0;
+    // Find the cmd end
     mp_fd->buffer[mp_fd->pos] = '\0';
     end = strchr(mp_fd->buffer,'\n');
-    if(!end)
+    // No cmd end ?
+    if(!end) {
+      // If buffer is full we must drop all until the next \n
+      if(mp_fd->size - mp_fd->pos <= 1) {
+	mp_msg(MSGT_INPUT,MSGL_ERR,"Cmd buffer of fd %d is full : dropping content\n",mp_fd->fd);
+	mp_fd->pos = 0;
+	mp_fd->flags |= MP_FD_DROP;
+      }
       break;
+    }
+    // We alredy have a cmd : set the got_cmd flag
     else if((*ret)) {
       mp_fd->flags |= MP_FD_GOT_CMD;
       break;
@@ -552,15 +562,16 @@ mp_input_read_cmd(mp_input_fd_t* mp_fd, char** ret) {
 
     l = end - mp_fd->buffer;
 
+    // Not dropping : put the cmd in ret
     if( ! (mp_fd->flags & MP_FD_DROP)) {
       (*ret) = (char*)malloc((l+1)*sizeof(char));
       strncpy((*ret),mp_fd->buffer,l);
       (*ret)[l] = '\0';
-    } else {
+    } else { // Remove the dropping flag
       mp_fd->flags &= ~MP_FD_DROP;
     }
     if( mp_fd->pos - (l+1) > 0)
-      memmove(mp_fd->buffer,end,mp_fd->pos-(l+1));
+      memmove(mp_fd->buffer,end+1,mp_fd->pos-(l+1));
     mp_fd->pos -= l+1;
   }
    
@@ -786,7 +797,7 @@ static mp_cmd_t*
 mp_input_read_cmds(int time) {
   fd_set fds;
   struct timeval tv,*time_val;
-  int i,n = 0,max_fd = 0;
+  int i,n = 0,max_fd = 0,got_cmd = 0;
   mp_cmd_t* ret;
   static int last_loop = 0;
 
@@ -801,6 +812,8 @@ mp_input_read_cmds(int time) {
       continue;
     } else if(cmd_fds[i].flags & MP_FD_NO_SELECT)
       continue;
+    if(cmd_fds[i].flags & MP_FD_GOT_CMD)
+      got_cmd = 1;
     if(cmd_fds[i].fd > max_fd)
       max_fd = cmd_fds[i].fd;
     FD_SET(cmd_fds[i].fd,&fds);
@@ -824,7 +837,8 @@ mp_input_read_cmds(int time) {
 	  continue;
 	mp_msg(MSGT_INPUT,MSGL_ERR,"Select error : %s\n",strerror(errno));
       }
-      return NULL;
+      if(!got_cmd)
+	return NULL;
     }
     break;
   }
