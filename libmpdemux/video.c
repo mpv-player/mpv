@@ -89,6 +89,7 @@ switch(d_video->demuxer->file_format){
        sh_video->aspect=4.0/3.0;
      break;
      case 3:  // PAL/NTSC Widescreen SVCD/DVD 16:9
+     case 6:  // (PAL?)/NTSC Widescreen SVCD 16:9
        sh_video->aspect=16.0/9.0;
      break;
      default:
