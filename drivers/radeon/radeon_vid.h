@@ -52,12 +52,41 @@ uint32_t num_frames;
 #define IMGFMT_BGR24 (IMGFMT_BGR|24)
 #define IMGFMT_BGR32 (IMGFMT_BGR|32)
 
-#define IMGFMT_YV12 0x32315659
-#define IMGFMT_IYUV (('I'<<24)|('Y'<<16)|('U'<<8)|'V')
-#define IMGFMT_I420 (('I'<<24)|('4'<<16)|('2'<<8)|'0')
-#define IMGFMT_YUY2 (('Y'<<24)|('U'<<16)|('Y'<<8)|'2')
-#define IMGFMT_UYVY (('U'<<24)|('Y'<<16)|('V'<<8)|'Y')
+#define IMGFMT_IS_RGB(fmt) ((fmt&IMGFMT_RGB_MASK)==IMGFMT_RGB)
+#define IMGFMT_IS_BGR(fmt) ((fmt&IMGFMT_BGR_MASK)==IMGFMT_BGR)
+
+#define IMGFMT_RGB_DEPTH(fmt) (fmt&~IMGFMT_RGB)
+#define IMGFMT_BGR_DEPTH(fmt) (fmt&~IMGFMT_BGR)
+
+
+/* Planar YUV Formats */
+
 #define IMGFMT_YVU9 0x39555659
+#define IMGFMT_IF09 0x39304649
+#define IMGFMT_YV12 0x32315659
+#define IMGFMT_I420 0x30323449
+#define IMGFMT_IYUV 0x56555949
+#define IMGFMT_CLPL 0x4C504C43
+
+/* Packed YUV Formats */
+
+#define IMGFMT_IYU1 0x31555949
+#define IMGFMT_IYU2 0x32555949
+#define IMGFMT_UYVY 0x59565955
+#define IMGFMT_UYNV 0x564E5955
+#define IMGFMT_cyuv 0x76757963
+#define IMGFMT_YUY2 0x32595559
+#define IMGFMT_YUNV 0x564E5559
+#define IMGFMT_YVYU 0x55595659
+#define IMGFMT_Y41P 0x50313459
+#define IMGFMT_Y211 0x31313259
+#define IMGFMT_Y41T 0x54313459
+#define IMGFMT_Y42T 0x54323459
+#define IMGFMT_V422 0x32323456
+#define IMGFMT_V655 0x35353656
+#define IMGFMT_CLJR 0x524A4C43
+#define IMGFMT_YUVP 0x50565559
+#define IMGFMT_UYVP 0x50565955
 
 #define MGA_VID_CONFIG    _IOR('J', 1, mga_vid_config_t)
 #define MGA_VID_ON        _IO ('J', 2)
