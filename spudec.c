@@ -164,7 +164,7 @@ static void spudec_process_data(spudec_handle_t *this)
   }
 }
 
-static void spudec_process_control(spudec_handle_t *this)
+static void spudec_process_control(spudec_handle_t *this, int pts100)
 {
   int a,b; /* Temporary vars */
   int date, type;
@@ -190,12 +190,12 @@ static void spudec_process_control(spudec_handle_t *this)
       case 0x01:
 	/* Start display */
 	mp_msg(MSGT_SPUDEC,MSGL_DBG2,"Start display!\n");
-	this->start_pts = this->now_pts + date;
+	this->start_pts = pts100 + date;
 	break;
       case 0x02:
 	/* Stop display */
 	mp_msg(MSGT_SPUDEC,MSGL_DBG2,"Stop display!\n");
-	this->end_pts = this->now_pts + date;
+	this->end_pts = pts100 + date;
 	break;
       case 0x03:
 	/* Palette */
@@ -257,9 +257,9 @@ static void spudec_process_control(spudec_handle_t *this)
   }
 }
 
-static void spudec_decode(spudec_handle_t *this)
+static void spudec_decode(spudec_handle_t *this,int pts100)
 {
-  spudec_process_control(this);
+  spudec_process_control(this, pts100);
   spudec_process_data(this);
 }
 
@@ -267,7 +267,7 @@ static void spudec_decode(spudec_handle_t *this)
 void spudec_assemble(void *this, unsigned char *packet, int len, int pts100)
 {
   spudec_handle_t *spu = (spudec_handle_t*)this;
-  spudec_heartbeat(this, pts100);
+//  spudec_heartbeat(this, pts100);
   if (spu->packet_offset == 0) {
     unsigned int len2 = get_be16(packet);
     // Start new fragment
@@ -304,7 +304,7 @@ void spudec_assemble(void *this, unsigned char *packet, int len, int pts100)
       if(x>=4 && x==y){		// if it points to self - we're done!
         // we got it!
 	mp_msg(MSGT_SPUDEC,MSGL_DBG2,"SPUgot: off=%d  size=%d \n",spu->packet_offset,spu->packet_size);
-	spudec_decode(spu);
+	spudec_decode(spu, pts100);
 	spu->packet_offset = 0;
 	break;
       }
@@ -318,7 +318,7 @@ void spudec_assemble(void *this, unsigned char *packet, int len, int pts100)
   }
 #else
   if (spu->packet_offset == spu->packet_size) {
-    spudec_decode(spu);
+    spudec_decode(spu, pts100);
     spu->packet_offset = 0;
   }
 #endif
