@@ -26,6 +26,12 @@ Homepage:   http://flac.sourceforge.net/
 Directory:  libmpflac
 License:    X11 style, see libmpflac/COPYING.Xiph
 
+Name:       GSM 06.10 library
+Version:    patchlevel 10
+Homepage:   http://kbs.cs.tu-berlin.de/~jutta/toast.html
+Directory:  libmpcodecs/native/
+License:    permissive, see libmpcodecs/native/xa_gsm.c
+
 Name:       liba52
 Version:    0.7.1b + patches
 Homepage:   http://liba52.sourceforge.net/
@@ -66,6 +72,12 @@ Name:       dvbstream
 Version:    0.4.3-pre3 (cvs checkout)
 Homepage:   http://www.linuxstb.org/dvbstream/
 Directory:  libmpdemux
+License:    GNU General Public License
+
+Name:       id3edit
+Version:    1.9
+Homepage:   http://id3edit.sourceforge.net/
+Directory:  libmpdemux/genres.h
 License:    GNU General Public License
 
 Name:       fbset
