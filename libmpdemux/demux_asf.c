@@ -183,7 +183,8 @@ int demux_asf_fill_buffer(demuxer_t *demux){
 	    case 2: plen=LOAD_LE16(p);p+=2;break;	// word
 	    case 1: plen=p[0];p++;break;		// byte
 	    default: plen=0;
-		mp_msg(MSGT_DEMUX,MSGL_V,"Invalid plen type! assuming plen=0\n");
+		//plen==0 is handled later
+		//mp_msg(MSGT_DEMUX,MSGL_V,"Invalid plen type! assuming plen=0\n");
 	    }
 
             // Read sequence:
