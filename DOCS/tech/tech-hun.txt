@@ -1,0 +1,156 @@
+[yes, this is hungarian. maybe someone will translate this to russian or
+something else...]
+
+Nos, akkor leirom, hogyan is mûködik ez az egész.
+
+Az ékezetekkel majd lesz valami, nem nagyon vagyok hozzászokva az
+ékezetes gépeléshez...
+
+A program felépítése alapjaiban logikus, de eleg gányul van megirva :)
+
+A fõ modulok:
+
+1. streamer.c: ez az input, azaz ez olvassa a filet vagy VCD-t.
+   amit tudnia kell: megfelelõ bufferelés, seek, skip funkciók,
+	 byte-onkénti ill. tetszõleges méretû blockonkénti olvasás.
+	 Egy stream (input device/file) leírására a stream_t struktura szolgál.
+	 
+2. demuxer.c: ez végzi az input szétszedését audio és video csatornákra,
+   és a kiválasztott scatornák bufferelt package-nkénti olvasását.
+	 A demuxer.c inkább csak egy framework, ami közös minden input
+	 formátumra, és az egyes formátumokhoz (mpeg-es,mpeg-ps, avi, avi-ni, asf)
+	 külön parser van, ezek a demux_*.c fileokban vannak.
+	 A hozza tartozo struktura a demuxer_t. osszesen egy demuxer van.
+	 
+2.a. demuxer stream, azaz ds. struct: demux_stream_t
+   minden egyes csatornahoz (a/v) tartozik egy ilyen.
+	 egyelore demuxer-enkent 2 ilyen lehet, egy a hanghoz es egy a kephez.
+	 
+2.b. demux_packet_t, azaz dp.
+   ez egy darab chunk-ot (avi) vagy packet-et (asf,mpg) tartalmaz.
+	 memoriaban ezek lancolt listaban vannak, mivel kulonbozo meretuek.
+
+  hogy is muxik ez a beolvasosdi?
+	 - meghivodik a demuxer.c/demux_read_data(), megkapja melyik ds-bol
+	   (audio vagy video), mennyi byteot es hova (memoriacim) szeretnenk 
+		 beolvasni. ezt hivogatjak gyakorlatilag a codec-ek.
+	 - ez megenzi,hogy az adott ds bufferében van-e valami, ha igen akkor 
+	   onnan olvas amennyit kell. ha nincs/nincs eleg, akkor meghivja
+		 a ds_fill_buffer()-t ami:
+	 - megnezi hogy az adott ds-ben vannak-e bufferelve csomagok (dp-k)
+	   ha igen, akkor a legregebbit atrakja a bufferbe es olvas tovabb.
+		 ha ures a lancolt lista, akkor meghivja a demux_fill_buffer()-t:
+	 - ez az input formatumnak megfelelo parset meghivja ami olvassa
+	   tovabb a filet, es a talalt csomagokat rakja be a megfelelo bufferbe.
+		 na ha mondjuk audio csomagot szeretennk, de csak egy rakat video csomag
+		 van, akkor jon elobb-utobb a DEMUXER: Too many (%d in %d bytes) audio 
+		 packets in the buffer... hibauzenet.
+
+Eddig kb tiszta ugy, ezt akarom majd atrakni kulon lib-be.
+
+na nezzuk tovabb:
+
+3. mplayer.c - igen, o a fonok :)
+   az idozites eleg erdekesen van megoldva, foleg azert mert minden
+	 fileformatumnal maskepp kell/celszeru, es neha tobbfele keppen is lehet.
+	 van egy a_frame es egy v_frame nevu float valtozo, ez tarolja az epp
+	 lathato/hallhato a/v poziciojat masodpercben.
+	 akkor jelenit meg ujabb video frame-t, ha v_frame<a_frame, es akkor
+	 dekodol tovabb hangot ha a_frame<v_frame.
+	 amikor lejatszik (hang/kep) akkor a lejatszott valami idotartamaval
+	 noveli a megfelelo valtozot. videonal ez altalaban 1.0/fps, persze
+	 meg kell jegyeznem hogy videonal nem igazna szamit az fps, asf-nel
+	 pl. nincs is olyan, ahelyett duration van es framenkent valtozhat.
+	 mpeg2-nel pedig repeat_count van ami 1-2.5 idotartamban elnyujtja
+	 a framet... avi-nal van talan egyedul fix fps, meg mpeg1-nel.
+
+	 Na most ez addig nagyon szepen mukodik, amig a hang es kep tokeletes
+	 szinkronban van, mivel igy vegulis a hang szol, az adja az idozitest,
+	 es amikor eltelt egy framenyi ido akkor kirakja a kovetkezo framet.
+	 de mi van ha valamiert az input fileban csuszik a ketto?
+	 Akkor jon be a PTS correction. az input demuxer-ek olvassak a csomagokkal
+	 egyutt a hozzajuk tartozo PTS-t (presentation timestamp) is, ami alapjan
+	 eszreveheto ha el van csuszva a ketto. ilyenkor egy megadott maximalis
+	 hataron (alsd -mc opcio) belul kepes az mplayer korrigalni az a_frame 
+	 erteket. a korrekciok osszege van a c_total-ban.
+	 
+	 persze ez meg nem minden szinkron ugyben, van meg nemi gaz.
+	 pl. az hogy a hangkartya eleg rendesen kesleltet, ezt az mplayernek
+	 korrigalnia kepp: ezert kell enki az audio buffer merete. amit a
+	 select()-e tud lemerni amit viszont nem tdu minden kartya...
+	 ilyenkor kell a -abs opcioval megadni.
+	 
+	 aztan van olyan gond is, hogy pl. mpegnel nem framenkent van PTS
+	 hanem szektoronkent, ami tartalmazhat 10 framet is de 0.1-et is.
+	 hogy ez nem csessze el az idozitest, atlagoljuk 5 framenkent a 
+	 PTS-t es ezt az atlag erteket vesszuk figyelembe korrekcional.
+	 
+	 avi-nal sem egyszeru az elet. ott a 'hivatalos' idozitesi mod a
+	 BPS-alapu, azaz a headerben le va tarolva hany tomoritett audio
+	 byte tartozik egy masodpercnyi (fps darab) kephez.
+	 ez persze nem mindig mukodik... miert is mukodne :)
+	 ezer en megcsinaltam hogy az mpeg-nel hasznalatos sectoronkenti
+	 PTS erteket emulalom avi-ra is, azaz az AVI parser minden beolvasott
+	 chunk-nal szamol egy kamu PTS-t a framek tipusa alapjan. es ez
+	 alapjan idozitek. es van amikor ez mukodik jobban.
+	 persze itt meg bejatszik az is, hogy AVI-nal altalaban elore letarolnak
+	 egy nagyobb adag hangot, es csak utana kezdodik a kep. ezt persze
+	 bele kell szamolni a kesleltetesbe, ez az Initial PTS delay.
+	 ilyen persze 2 is van, az egyik a headerben le is van irva, es
+	 nem nagyon hasznlajak :) a masik sehol nincs leirva de hasznaljak, ezt
+	 csak merni lehet...
+	 
+4. codecek. ezek kulonbozo lib-ek szanaszet mindenfelol.
+   mint pl. libac3, libmpeg2, xa/*, alaw.c, opendivx/*, loader, mp3lib.
+	 az mplayer.c hivogatja oket amikor egy egy darab hangot vagy framet
+	 kell lejatszani (lasd 3. pont elejen)
+	 ezek pedig hivjak a megfelelo demuxert hogy megkapjak a tomoritett
+	 adatokat (lasd 2. pont).
+	 
+4.a codec controller: na ez a legnagypbb gány az egeszben :)
+	 a libmpeg2 ugyanis annyira instabil hogy az mar hatareset.
+	 persze ezt nem ugy kell erteni hogy szar :) hanem ugy, hogy csak
+	 teljesen szabvanyos, hibatlan mpeg steramet eszik meg. ha hibat
+	 talal, egyszeruen segfault ;)  es enm rohogni, ez nagyon jo igy,
+	 teljesitmeny szempontbol 50-100%-al lasabb lenne ha teleraknak
+	 ellenorzesekkel. ezert csinaltam azt a megoldast, hogy kulon
+	 processzben futtatom, es ha elszall, hat kit izgat, majd inditok
+	 egy masikat. ehhez azert kell par dolog:
+	 - codec controller process: egy kulon processz, ami sleep-el, de
+	   ha a gyereke (a libmpeg2 processze) meghal, akkor indit gyorsan
+		 egy masikat. igy az mplayer-nek nem kell ezzel fogallkoznia, o
+		 csak pumpalja a gyerekbe a tomoritett adatot az meg rakja kifele.
+	 - shmem: a tomoritett adatok, es a kitomoritett framek is shared
+	   memoryban vannak, tehat mind a 3 processz (mplayer, codeccontrol,
+		 libmpeg2 codec) is latja. igy tudnak gyorsan adatot cserelni.
+	 - a koztuk levo kommunikaciora meg FIFO van.
+	 - valamint ha dekodolas kozben meghal a gyerek, az altala sikeresen
+		 dekodolt adatok nem vesznek el, hanem a shmem-en keresztul oroklodik
+		 az uj gyereknek! ezert max egy pici hiba latszik a kepen, nem tunik
+		 el az egesz meg zoldul be, mint a regi verzioban.
+	 hatranya ennek az egesznek, hogy a libvo-libmpeg2 szoros kapcsolodasa
+	 miatt a libvo is abban a processzben kell fusson, amiben a libmpeg2,
+	 tehat abban ami allandoan megdolgik-ujraszuletik, es nem abban amiben
+	 a vezerlo processz, az mplayer fut. ez eleg sok gondot okozik, foleg
+	 a libvo ablakban tortent esemenyek (billentyunyomas pl) kezelesekor.
+	 erre mindenfele workaroundok vannak, FIFO-k minden mennyisegben, meg
+	 trukk ami kihasznalja hogy az X-nek mind1 melyik processz kerdezi
+	 le az Event-jeit.
+	 
+	 szeretnem a kozeljovoben ezt megszuntetni, es az mpeg2dec-devel
+	 listan kidolgozott signal/longjmp (szinten gány :)) modszert hasznalni.
+
+5. libvo: ez vegzi a kep kirakasat. jelenleg 2 kulonbozo kepkirako
+   van benne:
+5.a draw_slice(): ez planar YV12 kepet rak ki (3 db frame, egy teljes
+	 meretu ami a fenyerot tartalmazza, es 2 negyedakkora, ami a
+	 szin infot). ezt hasznaljak az mpeg codecek (libmpeg2,opendivx).
+	 ez mar tud olyat hogy nem az egesz kep kirakasa, hanem csak kis
+	 reszletek updatelese: ilyenkor a sarkanak es a darabka meretenek
+	 megadasaval lehet csinalni.
+5.b draw_frame(): ez a regebbi interface, ez csak komplett framet rak ki,
+   es csak packed formatumot (YUY2, RGB/BGR) tud.
+	 ezt hasznaljak a win32 codecek (divx,indeo stb).
+	 
+
+
