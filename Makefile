@@ -306,6 +306,10 @@ ifeq ($(GUI),yes)
 	@if test ! -d $(DATADIR)/Skin ; then mkdir -p $(DATADIR)/Skin ; fi
 	@echo "*** Download skin(s) at http://www.mplayerhq.hu/homepage/dload.html"
 	@echo "*** for GUI, and extract to $(DATADIR)/Skin/"
+	@if test ! -d $(prefix)/share/pixmaps ; then mkdir -p $(prefix)/share/pixmaps ; fi
+	$(INSTALL) -m 644 Gui/mplayer/pixmaps/mplayer-desktop.xpm $(prefix)/share/pixmaps/mplayer-desktop.xpm
+	@if test ! -d $(prefix)/share/applications ; then mkdir -p $(prefix)/share/applications ; fi
+	$(INSTALL) -m 644 etc/mplayer.desktop $(prefix)/share/applications/mplayer.desktop
 endif
 	@if test ! -d $(CONFDIR) ; then mkdir -p $(CONFDIR) ; fi
 	@if test -f $(CONFDIR)/codecs.conf ; then mv -f $(CONFDIR)/codecs.conf $(CONFDIR)/codecs.conf.old ; fi
@@ -324,6 +328,8 @@ endif
 uninstall:
 	-rm -f $(BINDIR)/$(PRG) $(BINDIR)/gmplayer $(MANDIR)/man1/mplayer.1
 	-rm -f  $(BINDIR)/$(PRG_MENCODER) $(MANDIR)/man1/mencoder.1
+	-rm -f $(prefix)/share/pixmaps/mplayer-desktop.xpm
+	-rm -f $(prefix)/share/applications/mplayer.desktop
 	@echo "Uninstall completed"
 
 clean:
