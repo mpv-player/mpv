@@ -250,14 +250,12 @@ static int play(void* data,int len,int flags){
   // Limit length to avoid over flow in plugins
   int tmp = get_space();
   int ret_len =(tmp<len)?tmp:len;
+  // keep all channels of each sample together
+  ret_len -= ret_len % (ao_plugin_local_data.channels*ao_plugin_local_data.bpm/8);
   if(ret_len){
     // Filter data
     ao_plugin_data.len=ret_len;
     ao_plugin_data.data=data;
-
-// update plugins and uncoment that
-//    ao_plugin_data.channels=ao_plugin_local_data.channels;
-//    ao_plugin_data.format=ao_plugin_local_data.format;
     
     while(plugin(i))
       plugin(i++)->play();
