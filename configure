@@ -2309,6 +2309,25 @@ else
 fi
 
 
+echocheck "__builtin_expect"
+# GCC branch prediction hint
+cat > $TMPC << EOF
+int foo (int a) {
+    a = __builtin_expect (a, 10);
+    return a == 10 ? 0 : 1;
+}
+int main() { return foo(10) && foo(0); }
+EOF
+_builtin_expect=no
+cc_check && _builtin_expect=yes
+if test "$_builtin_expect" = yes ; then
+  _def_builtin_expect='#define HAVE_BUILTIN_EXPECT 1'
+else
+  _def_builtin_expect='#undef HAVE_BUILTIN_EXPECT'
+fi
+echores "$_builtin_expect"
+
+
 echocheck "kstat"
 cat > $TMPC << EOF
 #include <kstat.h>
@@ -6671,6 +6690,9 @@ $_def_dynamic_plugins
 
 /* "restrict" keyword */
 $_def_restrict_keyword
+
+/* __builtin_expect branch prediction hint */
+$_def_builtin_expect
 
 /* attribute(used) as needed by some compilers */
 #if (__GNUC__ * 100 + __GNUC_MINOR__ >= 300)
