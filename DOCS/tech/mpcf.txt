@@ -89,17 +89,24 @@ main header:
 	version					v
 	stream_count				v
 	max_distance				v
+	global_time_base_nom			v
+	global_time_base_denom			v
+	short_startcode				v
 	for(i=0; i<256; ){
 		tmp_flag			v
 		tmp_stream			v
 		tmp_mul				v
 		tmp_size			v
+		tmp_timestamp			s
+		tmp_res				v
 		count				v
 		for(j=0; j<count; j++, i++){
 			flags[i]= tmp_flag;
 			stream_id_plus1[i]= tmp_stream;
 			data_size_mul[i]= tmp_mul;
 			data_size_lsb[i]= tmp_size;
+			timestamp_delta[i]= tmp_timestamp;
+			reserved_v[i]= tmp_res;
 			if(++tmp_size >= tmp_mul){
 				tmp_size=0;
 				tmp_stream++;
@@ -120,7 +127,6 @@ stream_header:
 	time_base_nom				v
 	time_base_denom				v
 	msb_timestamp_shift			v
-	initial_timestamp_predictor		v(3)
 	decode_delay				v
 	fixed_fps				u(1)
 	index_flag				u(1)
@@ -155,12 +161,14 @@ frame
 	if(stream_id_plus1[frame_code]==0){
 		stream_id			v
 	}
-	if((flags[frame_code]&3)==3){
+	if(timestamp_delta[frame_code]==0){
 		coded_timestamp			v
 	}
-	if(flags[frame_code]&4){
+	if(flags[frame_code]&1){
 		data_size_msb			v
 	}
+	for(i=0; i<reserved_v[frame_code]; i++)
+		reserved			v
 	data
                 
 Index:
@@ -195,6 +203,10 @@ info_packet: (optional)
 	reserved_bytes
         checksum				u(32)
         
+sync_point
+	frame_startcode				f(64)
+		global_timestamp		v
+
 file
 	file_id_string
 	while(!eof){
@@ -205,14 +217,14 @@ file
 			else
 				audio_stream_header
 		}
-		while(next_packet != main_header){
-			if(next_packet == info_packet)
+		while(next_code != main_startcode){
+			if(next_code == info_startcode)
 				info_packet
 			else{
-				if(next_byte == 'N'){
-					FIXME short startcode
-					frame_startcode
-				}
+				if(next_code == short_startcode)
+					short_startcode    u(24)
+				else if(next_code == frame_startcode)                
+					sync_point
 				frame
 			}
 		}
@@ -254,6 +266,11 @@ max_distance
 	damage results in a too long chain
 	SHOULD be set to <=16384 to ensure reasonable error recovery
 
+short_startcode
+	MUST be 3 bytes long and MUST have 'N' as first byte, the second byte
+	MUST not be a printable uppercase letter / must not be within 65..90, 
+	default is 0x4EFE79
+        
 stream_id
 	Note: streams with a lower relative class MUST have a lower relative id
 	so a stream with class 0 MUST allways have a id which is lower then any
@@ -298,6 +315,24 @@ time_base_nom / time_base_denom = time_base
 		Note: the advantage to using a large sample_rate_mul is that the
 		      timestamps need fewer bits
 
+global_time_base_nom / global_time_base_denom = global_time_base
+	the number of timer ticks per second
+	global_time_base_denom MUST not be 0
+	global_time_base_nom and global_time_base_denom MUST be relative prime
+	global_time_base_nom MUST be < 2^31
+
+global_timestamp
+	timestamp in global_time_base units
+	when a global_timestamp is encountered the last_timestamp of all streams
+	is set to the following:
+	ln= global_time_base_denom*time_base_nom
+	sn= global_timestamp
+	d1= global_time_base_nom
+	d2= time_base_denom
+	last_timestamp= (ln/d1*sn + ln%d1*sn/d1)/d2
+	Note, this calculation MUST be done with unsigned 64 bit integers, and 
+	is equivalent to (ln*sn)/(d1*d2) but this would require a 96bit integer
+
 msb_timestamp_shift
 	amount of bits in lsb_timestamp
 	MUST be <16
@@ -335,29 +370,13 @@ frame_code
 	different from the first byte of any startcode
 
 flags[frame_code]
-	the bits of the flags from MSB to LSB are KDTT
-	TT is the timestamp_code
-		00,01,10 predicted delta timestamps
-		11 timestamp coded, either lsb or full timestamp
-		
-		predicted delta timestamp use the last timestamp from the
-		current stream + the first, second and third last unique
-		timestamp difference, so if the timestamp differences, where
-		+3,+1,+2,+2,+1 then last difference is +1, second is +2 and
-		third is +3
-		predicted delta timestamps MUST NOT be used in frames if there
-		was no full timestamp in the current stream after the last
-		frame_startcode
-
-		the least recent used delta timestamps are reset to the 
-		initial_timestamp_predictor values from the stream header if a
-		frame_startcode is encountered
+	the bits of the flags from MSB to LSB are KD
 	if D is 1 then data_size_msb is coded, otherwise data_size_msb is 0
 	K is the keyframe_type 
 		0-> no keyframe, 
 		1-> keyframe, 
-	flags=16 can be used to mark illegal frame_code bytes
-	frame_code=78 must have flags=16
+	flags=4 can be used to mark illegal frame_code bytes
+	frame_code=78 must have flags=4
 	* frames MUST not depend(1) upon frames prior to the last
 	  frame_startcode
 	depend(1) means dependancy on the container level (NUT) not dependancy
@@ -372,6 +391,9 @@ data_size_mul[frame_code]
 
 data_size_lsb[frame_code]
 	must be <16384
+
+timestamp_delta[frame_code]
+	must be <16384 and >-16384
 
 data_size       
 	data_size= data_size_lsb + data_size_msb*data_size_mul;
