@@ -109,6 +109,10 @@ static void draw_func(int x0,int y0, int w,int h,unsigned char* src, unsigned ch
     case IMGFMT_YV12:
     case IMGFMT_I420:
     case IMGFMT_IYUV:
+    case IMGFMT_YVU9:
+    case IMGFMT_IF09:
+    case IMGFMT_Y800:
+    case IMGFMT_Y8:
 	vo_draw_alpha_yv12(w,h,src,srca,stride,dst,vf->priv->dmpi->stride[0]);
 	break;
     case IMGFMT_YUY2:
