@@ -793,12 +793,10 @@
 	make
 	make install</PRE>
 
-<P>Innentõl használatra kész állapotban van az <B>MPlayer</B>. Az
-  <CODE>$PREFIX/etc/mplayer</CODE> könyvtár tartalmazza a
-  <CODE>codecs.conf</CODE> file-t, ami megmondja a programnak a használható
-  codec-eket és azok tulajdonságait. Ez a file csak akkor kell, ha meg akarod
-  változtatni a codec-ek egyes tulajdonságait, mivel az MPlayer beépítve
-  tárolja ennek a file-nak egy másolatát.</P>
+<P>Innentõl használatra kész állapotban van az <B>MPlayer</B>. A
+  <CODE>$PREFIX/etc/mplayer/codecs.conf</CODE> file - mivel az MPlayer beépítve
+  tárolja ennek a file-nak egy másolatát - csak akkor kell, ha meg akarod
+  változtatni a codec-ek egyes tulajdonságait, </P>
 
 <P><B>Debian felhasználók</B> egyszerûen készíthetnek .deb csomagot maguknak,
   csak a <CODE>fakeroot debian/rules binary</CODE> parancsot kell beírniuk az
@@ -817,9 +815,7 @@
   ha TTF (TrueType) feliratot használsz. Részletekért olvasd el az
   <A HREF=#install_osd>OSD installálás</A> fejezetet.</P>
 
-<P>Már csak egy dolog maradt hátra: másold át a <B>codecs.conf</B> file-t
-  az <CODE>etc</CODE> könyvtárból (az <B>MPlayer</B> könyvtáron belül) a $HOME/.mplayer/codecs.conf-ba.
-  Ajánlatos továbbá az <CODE>example.conf</CODE> és a manpage átnézése, hogy
+<P>Ajánlatos továbbá az <CODE>example.conf</CODE> és a manpage átnézése, hogy
   képet kapj az opciókról.</P>
 
 
@@ -1673,22 +1669,18 @@ end
 
 <PRE>
   $(INSTALL) -c -m 644 DOCS/mplayer.1 $(MANDIR)/man1/mplayer.1
-
-  $(INSTALL) -c -m 644 etc/codecs.conf $(CONFDIR)/codecs.conf
 </PRE>
 
 <P>erre:</P>
 
 <PRE>
   $(INSTALL) -m 644 mplayer.1 $(MANDIR)/man1/
-
-  $(INSTALL) -m 644 codecs.conf $(CONFDIR)/
 </PRE>
 
 <P>Add ki a következõ parancsokat (az MPlayer forrás könyvtárában):</P>
 
 <PRE>
-  cp DOCS/mplayer.1 . ; cp etc/codecs.conf .
+  cp DOCS/mplayer.1 .
 </PRE>
 
 <P>ezután símán fordítsd le az MPlayer-t.</P>

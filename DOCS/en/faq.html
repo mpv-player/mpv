@@ -462,15 +462,6 @@
     send us a proper bug report.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: I got this playing MPEG files: Can't find codec for video format
-    0x10000001!</DT>
-  <DD>A: You have an old version of <CODE>codecs.conf</CODE> in
-    <CODE>~/.mplayer/</CODE>, <CODE>/etc/</CODE>, <CODE>/usr/local/etc/</CODE>
-    or similar. Remove it.<BR>
-    <B>OR</B> you have the <CODE>vc=</CODE> option or something similar in your
-    config file(s).</DD>
-  <DD>&nbsp;</DD>
-
   <DT>Q: When starting MPlayer under KDE I just get a black screen and nothing
     happens. After about one minute the video starts playing.</DT>
   <DD>A: The KDE arts sound daemon is blocking the sound device. Either wait
@@ -479,13 +470,6 @@
     driver (<CODE>-ao arts</CODE>). If it fails or isn't compiled in, try SDL
     (<CODE>-ao sdl</CODE>) and make sure your SDL can handle arts sound. Yet
     another option is to start MPlayer with artsdsp.</DD>
-  <DD>&nbsp;</DD>
-
-  <DT>Q: I have an AVI that produces a gray screen when played with
-    <CODE>-vc odivx</CODE> and a green one with <CODE>-vc divx4</CODE>.</DT>
-  <DD>A: It's not a DivX file, but an M$ MPEG4v3. If you have an old version
-    of <CODE>codecs.conf</CODE> in <CODE>~/.mplayer/</CODE>, <CODE>/etc/</CODE>,
-    <CODE>/usr/local/etc/</CODE> or similar, remove it.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: When I play this movie I get video-audio desync and/or MPlayer crashes
@@ -522,14 +506,6 @@
   <DD>A: You have a buggy sound card/driver. Most likely it's fixed at 44100Hz,
     and you try to play a file which has 22050Hz audio. Try the resample audio
     plugin.</DD>
-  <DD>&nbsp;</DD>
-
-  <DT>Q: All the WMV (or other..) files I play create a green/gray window and
-    there is only sound! MPlayer prints:<BR>
-    <CODE>Detected video codec: [null] drv:0 (NULL codec (no decoding))</CODE></DT>
-  <DD>A: If you have an old version of <CODE>codecs.conf</CODE> in
-    <CODE>~/.mplayer/</CODE>, <CODE>/etc/</CODE>, <CODE>/usr/local/etc/</CODE>
-    or similar, remove it.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: I get very strange percentage values (way too big) while playing files
