@@ -15,8 +15,10 @@
 #endif
 
 #if defined(sun)
-#ifndef __EXTENSIONS__
-#define __EXTENSIONS__
+# ifndef __EXTENSIONS__
+# define __EXTENSIONS__
+# endif
+# include <sys/psw.h>
 #endif
 
 static __inline__ int enable_os_io(void)
