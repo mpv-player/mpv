@@ -1,5 +1,5 @@
 // sync'ed with help_mp-en.h 1.66
-// Updates & fixes by pl <p_l@gmx.fr>
+// Updates & fixes by pl <p_l@gmx.fr> & n.le gaillart <n@tourmentine.com>
 // Original transation by Firebird <firebird@chez.com>
 
 // ========================= Aide MPlayer ===========================
@@ -7,51 +7,50 @@
 #ifdef HELP_MP_DEFINE_STATIC
 static char* banner_text=
 "\n\n"
-"MPlayer " VERSION "(C) 2000-2002 Arpad Gereoffy (lisez les DOCS!)\n"
+"MPlayer " VERSION "(C) 2000-2002 Arpad Gereoffy (voir les DOCS)\n"
 "\n";
 
 static char help_text[]=
-"Utilisation:   mplayer [options] [répertoire/]fichier\n"
+"Utilisation:   mplayer [options] [url|répertoire/]fichier\n"
 "\n"
-"Options de base (voir la page man pour TOUTES les autres options):\n"
+"Options de base: (liste complète dans la page de man)\n"
 " -vo <pil[:pér]>  Sél. le pil. et le périph. vidéo ('-vo help' pour la liste)\n"
 " -ao <pil[:pér]>  Sél. le pil. et le périph. audio ('-ao help' pour la liste)\n"
 #ifdef HAVE_VCD
-" -vcd <n°piste>   Joue à partir d'un VCD plutôt que d'un fichier\n"
+" -vcd <n°piste>   Lit une piste VCD (Video CD) plutôt qu'un fichier\n"
 #endif
 #ifdef HAVE_LIBCSS
 " -dvdauth <pér>   Précise le chemin du lecteur DVD (pour les DVD cryptés)\n"
 #endif
 #ifdef USE_DVDREAD
-" -dvd <nrtitre>   Joue à partir du lecteur DVD plutôt que d'un fichier\n"
-" -alang/-slang    Sélectionne la langue pour l'audio/les sous-titres (fr,en,...)\n"
+" -dvd <n°titre>   Joue un titre DVD plutôt qu'un fichier\n"
+" -alang/-slang    Sélectionne la langue audio/sous-titres (code pays à 2 lettres)\n"
 #endif
 " -ss <temps>      Démarre la lecture à 'temps' (temps en secondes ou hh:mm:ss)\n"
 " -nosound         Ne joue aucun son\n"
-" -fs -vm -zoom    Options plein-écran (fs: plein-écran, vm: changement de mode\n"
-"                  vidéo, zoom: changement de taille logiciel)\n"
-" -x <x> -y <y>    Résolution de l'affichage (chgts. de mode vidéo ou zoom soft)\n"
+" -fs              Lecture plein-écran (ou -vm, -zoom, détails dans la page de man)\n"
+" -x <x> -y <y>    Résolution de l'affichage (à utiliser avec -vm ou -zoom)\n"
 " -sub <fich>      Spécifie les sous-titres à utiliser (cf. -subfps, -subdelay)\n"
 " -playlist <fich> Spécifie la liste des fichiers à jouer\n"
 " -vid x -aid y    Spécifie les flux vidéo (x) et audio (y) à jouer\n"
 " -fps x -srate y  Options pour changer les fréq. vidéo (x fps) et audio (y Hz)\n"
-" -pp <qualité>    Filtres de sorties (voir la page de man et les docs)\n"
+" -pp <qualité>    Active le filtre de postprocessing (détails dans la page de man)\n"
 " -framedrop       saut d'images (pour les machines lentes)\n"
 "\n"
-"Fonctions au clavier: (voir la page man et regarder dans input.conf)\n"
+"Fonctions au clavier: (liste complète dans la page de man, voir aussi input.conf)\n"
 " <- ou ->         + / - 10 secondes\n"
 " haut ou bas      + / - 1 minute\n"
 " PgUp ou PgDown   + / - de 10 minutes\n"
 " < ou >           Fichier suivant / précédent dans la playlist\n"
 " p ou ESPACE      Pause (presser n'importe quelle touche pour continuer)\n"
-" q ou ESC         Quitter\n"
+" q ou ESC         Arrète la lecture et quitte le programme\n"
 " + ou -           Synchro audio / vidéo: +/- 0.1 seconde\n"
 " o                Change l'OSD: rien / barre de recherche / barre rech. + temps\n"
 " * ou /           Augmente/diminue le volume PCM\n"
 " z ou x           Synchro des sous-titres: +/- 0.1 seconde\n"
-" r ou t           Pos. des sous-titres: plus haut/plus bas (cf. -vop expand !)\n"
+" r ou t           Pos. des sous-titres: plus haut/plus bas, voir aussi -vop expand\n"
 "\n"
-" *** VOIR LA PAGE MAN POUR LES DETAILS ET LES AUTRES OPTIONS (AVANCEES) ***\n"
+" * * * VOIR LA PAGE MAN POUR LES DETAILS ET LES AUTRES OPTIONS ET TOUCHES (AVANCEES) * * *\n"
 "\n";
 #endif
 
@@ -67,79 +66,80 @@ static char help_text[]=
 #define MSGTR_NoHomeDir "Ne peut trouver répertoire HOME\n"
 #define MSGTR_GetpathProblem "Problème get_path(\"config\")\n"
 #define MSGTR_CreatingCfgFile "Création du fichier de config: %s\n"
-#define MSGTR_InvalidVOdriver "Nom du pilote de sortie vidéo invalide: %s\nUtiliser '-vo help' pour avoir une liste des pilotes disponibles.\n"
-#define MSGTR_InvalidAOdriver "Nom du pilote de sortie audio invalide: %s\nUtiliser '-ao help' pour avoir une liste des pilotes disponibles.\n"
-#define MSGTR_CopyCodecsConf "Copiez/liez etc/codecs.conf (dans le source de MPlayer) vers ~/.mplayer/codecs.conf)\n"
+#define MSGTR_InvalidVOdriver "Nom du pilote de sortie vidéo invalide: %s\nUtilisez '-vo help' pour avoir une liste des pilotes disponibles.\n"
+#define MSGTR_InvalidAOdriver "Nom du pilote de sortie audio invalide: %s\nUtilisez '-ao help' pour avoir une liste des pilotes disponibles.\n"
+#define MSGTR_CopyCodecsConf "Copiez/liez etc/codecs.conf depuis le source de MPlayer vers ~/.mplayer/codecs.conf)\n"
 #define MSGTR_CantLoadFont "Ne peut charger la police: %s\n"
 #define MSGTR_CantLoadSub "Ne peut charger les sous-titres: %s\n"
 #define MSGTR_ErrorDVDkey "Erreur avec la clé du DVD.\n"
 #define MSGTR_CmdlineDVDkey "La clé DVD demandée sera utilisée pour le décryptage.\n"
 #define MSGTR_DVDauthOk "La séquence d'authentification DVD semble OK.\n"
-#define MSGTR_DumpSelectedStreamMissing "dump: FATAL: le flux sélectionné est manquant\n"
-#define MSGTR_CantOpenDumpfile "Ne peut ouvrir un fichier dump!!!\n"
-#define MSGTR_CoreDumped "core dumped :)\n"
-#define MSGTR_FPSnotspecified "FPS non spécifié (ou invalide) dans l'entête! Utiliser l'option -fps!\n"
-#define MSGTR_TryForceAudioFmtStr "Tente de forcer famille de pilotes codec audio de famille %s ...\n"
-#define MSGTR_CantFindAfmtFallback "Ne peut trouver de codec audio pour famille de pilotes imposée, utilisation d'autres.\n"
-#define MSGTR_CantFindAudioCodec "Ne peut trouver codec pour format audio 0x%X !\n"
+#define MSGTR_DumpSelectedStreamMissing "dump: FATAL: le flux sélectionné est manquant!\n"
+#define MSGTR_CantOpenDumpfile "Impossible d'ouvrir le fichier dump!!!\n"
+#define MSGTR_CoreDumped "Core dumped :)\n"
+#define MSGTR_FPSnotspecified "FPS non spécifié ou invalide dans l'entête! Utilisez l'option -fps.\n"
+#define MSGTR_TryForceAudioFmtStr "Tente de forcer la famille de pilotes %s du codec audio ...\n"
+#define MSGTR_CantFindAfmtFallback "Ne peut trouver de codec audio pour la famille de pilotes imposée, utilisation d'autres.\n"
+#define MSGTR_CantFindAudioCodec "Ne peut trouver de codec pour le format audio 0x%X !\n"
 #define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Tentez de mettre à jour %s à partir de etc/codecs.conf\n*** Si ce n'est toujours pas bon, alors lisez DOCS/codecs.html ou DOCS/fr/codecs.html !\n"
-#define MSGTR_CouldntInitAudioCodec "Ne peut trouver de codec audio! -> Aucun son\n"
-#define MSGTR_TryForceVideoFmtStr "Tente de forcer famille de pilotes codec vidéo %s ...\n"
+#define MSGTR_CouldntInitAudioCodec "Impossible d'initialiser le codec audio -> pas de son\n"
+#define MSGTR_TryForceVideoFmtStr "Tente de forcer famille de pilotes %s du codec vidéo %s ...\n"
 #define MSGTR_CantFindVideoCodec "Ne peut trouver codec pour format vidéo 0x%X !\n"
-#define MSGTR_VOincompCodec "Désolé, le pilote de sortie vidéo choisi n'est pas compatible avec ce codec.\n"
-#define MSGTR_CannotInitVO "FATAL: Ne peut initialiser le pilote vidéo!\n"
-#define MSGTR_CannotInitAO "Ne peut ouvrir/initialiser le périphérique audio -> Aucun son\n"
-#define MSGTR_StartPlaying "Démarre la reproduction...\n"
-#define MSGTR_SystemTooSlow "\n***********************************************************************"\
-			    "\n** Votre système est trop lent. Essayez l'option -framedrop ou RTFM! **"\
-			    "\n***********************************************************************\n"\
-			    "!!! Raisons possibles, problèmes, solutions: \n"\
-			    "- Le plus probable: pilote audio _buggé_ => essayer -ao sdl ou\n"\
-			    "  ALSA 0.5 ou l'émulation OSS d'ALSA 0.9 => lire DOCS/sound.html\n"\
-			    "  Essayer aussi avec -autosync 30 ou d'autres valeurs.\n"\
-			    "- Vidéo lente => essayer avec plusieurs pilotes -vo (pour la liste: -vo help) ou\n"\
-			    "  avec -framedrop => lire DOCS/video.html\n"\
-			    "- CPU lent => éviter les gros DVD/DivX => essayer -hardframedrop\n"\
-			    "- Fichier corrompu => essayer des mélanges de -nobps -ni -mc 0 -forceidx\n"\
-			    "- Pour jouer d'un média lent (nfs/smb, dvd, vcd, ...), essayer avec -cache 8192\n"\
-			    "- -cache est utilisé avec un fichier AVI mal multiplexé => essayer avec -nocache\n"\
-			    "Si rien de tout cela ne résout le problème, lire DOCS/bugreports.html !\n\n"
+#define MSGTR_VOincompCodec "Le pilote de sortie vidéo choisi n'est pas compatible avec ce codec.\n"
+#define MSGTR_CannotInitVO "FATAL: Ne peut initialiser le pilote vidéo.\n"
+#define MSGTR_CannotInitAO "Ne peut ouvrir/initialiser le périphérique audio -> aucun son\n"
+#define MSGTR_StartPlaying "Démarre la lecture...\n"
+#define MSGTR_SystemTooSlow "\n\n"\
+"         ************************************************************"\n"\
+"         **** Votre système est trop LENT pour jouer ce fichier! ****"\n"\
+"         ************************************************************\n"\
+"!!! Raisons possibles, problèmes, solutions: \n"\
+"- Le plus courant: pilote _audio_ cassé/bogué: Essayez -ao sdl ou utilisez\n"\
+"  ALSA 0.5 ou l'émulation OSS d'ALSA 0.9. Lisez DOCS/sound.html pour plus d'astuces!\n"\
+"  Essayez aussi avec -autosync 30 ou d'autres valeurs.\n"\
+"- Vidéo lente. Essayez avec un pilotes -vo différent (-vo help pour la liste) ou\n"\
+"  esssayez avec -framedrop! lisez DOCS/video.html pour les astuces de réglage.\n"\
+"- CPU lent. Evitez de lire de gros DVD/DivX sur un CPU lent! essayez -hardframedrop.\n"\
+"- Fichier corrompu => essayez des mélanges de: -nobps -ni -mc 0 -forceidx\n"\
+"- Pour jouer depuis un média lent (nfs/smb, DVD, VCD, etc.), essayez avec -cache 8192\n"\
+"- -cache est utilisé avec un fichier AVI mal multiplexé? Essayez avec -nocache\n"\
+"Si rien de tout cela ne résout le problème, lisez DOCS/bugreports.html.\n\n"
 
 #define MSGTR_NoGui "MPlayer a été compilé SANS support GUI!\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI a besoin de X11!\n"
 #define MSGTR_Playing "Joue %s\n"
-#define MSGTR_NoSound "Audio: Aucun son!!!\n"
+#define MSGTR_NoSound "Audio: aucun son!!!\n"
 #define MSGTR_FPSforced "FPS forcé à %5.3f  (ftime: %5.3f)\n"
-#define MSGTR_CompiledWithRuntimeDetection "Compilé avec détection du CPU à l'exécution - attention, c'est sous-optimal! Pour de meilleures performances, recompilez MPlayer avec l'option --disable-runtime-cpudetection\n"
+#define MSGTR_CompiledWithRuntimeDetection "Compilé avec détection du CPU à l'exécution - ATTENTION, ce n'est pas optimal! Pour de meilleures performances, recompilez MPlayer avec l'option --disable-runtime-cpudetection\n"
 #define MSGTR_CompiledWithCPUExtensions "Compilé pour CPU x86 avec les extensions:"
-#define MSGTR_AvailableVideoOutputPlugins "Plugins de sortie vidéo:\n"
-#define MSGTR_AvailableVideoOutputDrivers "Modules de sortie vidéo disponibles:\n"
-#define MSGTR_AvailableAudioOutputDrivers "Modules de sortie audio disponibles::\n"
+#define MSGTR_AvailableVideoOutputPlugins "Plugins de sortie vidéo disponibles:\n"
+#define MSGTR_AvailableVideoOutputDrivers "Pilotes de sortie vidéo disponibles:\n"
+#define MSGTR_AvailableAudioOutputDrivers "Pilotes de sortie audio disponibles::\n"
 #define MSGTR_AvailableAudioCodecs "Codecs audio disponibles:\n"
 #define MSGTR_AvailableVideoCodecs "Codecs vidéo disponibles:\n"
-#define MSGTR_AvailableAudioFm "\n(Familles de) Codecs audio disponibles (inclus à la compilation):\n"
-#define MSGTR_AvailableVideoFm "\n(Familles de) Codecs vidéo disponibles (inclus à la compilation):\n"
+#define MSGTR_AvailableAudioFm "\nFamilles/pilotes de codecs audio disponibles (inclus à la compilation):\n"
+#define MSGTR_AvailableVideoFm "\nFamilles/pilotes de codecs vidéo disponibles (inclus à la compilation):\n"
 #define MSGTR_UsingRTCTiming "Utilisation de la synchronisation matérielle par RTC (%ldHz)\n"
 #define MSGTR_CannotReadVideoProperties "Vidéo: ne pas pas lire les propriétés\n"
 #define MSGTR_NoStreamFound "Pas de flux trouvé\n"
 #define MSGTR_InitializingAudioCodec "Initialisation des codecs audio...\n"
-#define MSGTR_ErrorInitializingVODevice "Erreur à l'ouverture/l'initialisation de la sortie vidéo choisie (-vo)!\n"
+#define MSGTR_ErrorInitializingVODevice "Erreur à l'ouverture/initialisation de la sortie vidéo choisie (-vo)!\n"
 #define MSGTR_ForcedVideoCodec "Codec vidéo forcé: %s\n"
 #define MSGTR_ForcedAudioCodec "Codec audio forcé: %s\n"
 #define MSGTR_AODescription_AOAuthor "AO: Description: %s\nAO: Auteur: %s\n"
 #define MSGTR_AOComment "AO: Commentaire: %s\n"
-#define MSGTR_Video_NoVideo "Vidéo: pas de vidéo!!!\n"
-#define MSGTR_NotInitializeVOPorVO "\nFATAL: n'a pas pu initialiser les filtres vidéo (-vop) ou la sortie vidéo (-vo) !\n"
-#define MSGTR_Paused "\n------ EN PAUSE -------\r"
+#define MSGTR_Video_NoVideo "Vidéo: Pas de vidéo!!!\n"
+#define MSGTR_NotInitializeVOPorVO "\nFATAL: n'a pas pu initialiser les filtres vidéo (-vop) ou la sortie vidéo (-vo).\n"
+#define MSGTR_Paused "\n================= PAUSE =================\n"
 #define MSGTR_PlaylistLoadUnable "\nNe peut pas charger la liste de lecture %s\n"
 
 // mencoder.c
 
-#define MSGTR_MEncoderCopyright "(C) 2000-2002 Arpad Gereoffy (voir les DOCS!)\n"
+#define MSGTR_MEncoderCopyright "(C) 2000-2002 Arpad Gereoffy (voir les DOCS)\n"
 #define MSGTR_UsingPass3ControllFile "Utilisation du fichier de contrôle de la passe 3\n"
 #define MSGTR_MissingFilename "\nNom de fichier manquant!\n\n"
-#define MSGTR_CannotOpenFile_Device "Ne peut pas ouvrir le fichier/le périph.\n"
-#define MSGTR_ErrorDVDAuth "Erreur à l'authentification du DVD...\n"
+#define MSGTR_CannotOpenFile_Device "Ne peut pas ouvrir le fichier/périph.\n"
+#define MSGTR_ErrorDVDAuth "Erreur dans l'authentification du DVD.\n"
 #define MSGTR_CannotOpenDemuxer "Ne peut pas ouvrir le démultiplexeur\n"
 #define MSGTR_NoAudioEncoderSelected "\nPas d'encodeur audio (-oac) choisi! Choisissez en un ou utilisez -nosound. Essayez -oac help !\n"
 #define MSGTR_NoVideoEncoderSelected "\nPas d'encodeur vidéo (-ovc) choisi! Choisissez-en un, essayez -ovc help !\n"
@@ -147,18 +147,18 @@ static char help_text[]=
 #define MSGTR_EncoderOpenFailed "N'a pas pu ouvrir l'encodeur\n"
 #define MSGTR_ForcingOutputFourcc "Code fourcc de sortie forcé à %x [%.4s]\n"
 #define MSGTR_WritingAVIHeader "Ecriture de l'entête AVI...\n"
-#define MSGTR_DuplicateFrames "\n%d trame(s) dupliquée(s)!!!    \n"
-#define MSGTR_SkipFrame "\ntrame supprimée!!!    \n"
-#define MSGTR_ErrorWritingFile "%s: erreur à l'écriture du fichier.\n"
+#define MSGTR_DuplicateFrames "\n%d trame(s) dupliquée(s)!!!\n"
+#define MSGTR_SkipFrame "\nTrame supprimée!!!    \n"
+#define MSGTR_ErrorWritingFile "%s: Erreur durant l'écriture du fichier.\n"
 #define MSGTR_WritingAVIIndex "\nEcriture de l'index AVI...\n"
 #define MSGTR_FixupAVIHeader "Correction de l'entête AVI...\n"
 #define MSGTR_RecommendedVideoBitrate "Bitrate vidéo recommandé pour %s CD: %d\n"
-#define MSGTR_VideoStreamResult "\nFlux vidéo: %8.3f kbit/s  (%d bps)  size: %d bytes  %5.3f secs  %d trames\n"
-#define MSGTR_AudioStreamResult "\nFlux audio: %8.3f kbit/s  (%d bps)  size: %d bytes  %5.3f secs\n"
+#define MSGTR_VideoStreamResult "\nFlux vidéo: %8.3f kbit/s  (%d bps)  taille: %d octets  %5.3f secs  %d trames\n"
+#define MSGTR_AudioStreamResult "\nFlux audio: %8.3f kbit/s  (%d bps)  taille: %d octets  %5.3f secs\n"
 
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "Lecteur CD-ROM '%s' non trouvé!\n"
-#define MSGTR_ErrTrackSelect "Erreur lors du choix de la piste VCD!"
+#define MSGTR_ErrTrackSelect "Erreur lors du choix de la piste VCD.\n"
 #define MSGTR_ReadSTDIN "Lecture depuis stdin...\n"
 #define MSGTR_UnableOpenURL "Ne peut ouvrir l'URL: %s\n"
 #define MSGTR_ConnToServer "Connecté au serveur: %s\n"
@@ -169,7 +169,7 @@ static char help_text[]=
 #define MSGTR_SMBNotCompiled "MPlayer n'a pas été compilé avec le support SMB.\n"
 
 #define MSGTR_CantOpenDVD "Ne peut ouvrir le lecteur DVD: %s\n"
-#define MSGTR_DVDwait "Lecture de la structure du disque, veuillez attendre...\n"
+#define MSGTR_DVDwait "Lecture de la structure du disque, veuillez patienter...\n"
 #define MSGTR_DVDnumTitles "Il y a %d titres sur ce DVD.\n"
 #define MSGTR_DVDinvalidTitle "Numéro de titre DVD invalide: %d\n"
 #define MSGTR_DVDnumChapters "Il y a %d chapitres sur ce titre DVD.\n"
@@ -178,44 +178,43 @@ static char help_text[]=
 #define MSGTR_DVDinvalidAngle "Numéro de séquence DVD invalide: %d\n"
 #define MSGTR_DVDnoIFO "Ne peut ouvrir le fichier IFO pour le titre DVD %d.\n"
 #define MSGTR_DVDnoVOBs "Ne peut ouvrir titre VOBS (VTS_%02d_1.VOB).\n"
-#define MSGTR_DVDopenOk "DVD ouvert avec succès!\n"
+#define MSGTR_DVDopenOk "DVD ouvert avec succès.\n"
 
 // demuxer.c, demux_*.c:
-#define MSGTR_AudioStreamRedefined "Attention! Entête du flux audio %d redéfini!\n"
-#define MSGTR_VideoStreamRedefined "Attention! Entête du flux vidéo %d redéfini!\n"
-#define MSGTR_TooManyAudioInBuffer "\nDEMUXER: Trop (%d dans %d octets) de packets audio dans le tampon!\n"
-#define MSGTR_TooManyVideoInBuffer "\nDEMUXER: Trop (%d dans %d octets) de packets vidéo dans le tampon!\n"
-#define MSGTR_MaybeNI "Peut-être jouez-vous un flux/fichier mal multiplexé, ou le codec n'est pas là...\n"\
-                      "Pour les fichier .AVI, essayez l'option -ni."
-#define MSGTR_SwitchToNi "\nFichier .AVI mal multiplexé - passage en mode -ni!\n"
-#define MSGTR_Detected_XXX_FileFormat "Fichier de type %s détecté!\n"
-#define MSGTR_DetectedAudiofile "Fichier audio détecté!\n"
-#define MSGTR_NotSystemStream "Pas un flux de type MPEG System... (peut-être un flux de transport?)\n"
+#define MSGTR_AudioStreamRedefined "ATTENTION: Entête du flux audio %d redéfini.\n"
+#define MSGTR_VideoStreamRedefined "ATTENTION: Entête du flux vidéo %d redéfini.\n"
+#define MSGTR_TooManyAudioInBuffer "\nDEMUXER: Trop (%d dans %d octets) de paquets audio dans le tampon!\n"
+#define MSGTR_TooManyVideoInBuffer "\nDEMUXER: Trop (%d dans %d octets) de paquets vidéo dans le tampon!\n"
+#define MSGTR_MaybeNI "Peut-être que vous jouez un flux/fichier mal multiplexé, ou qu le codec a échoué?\n" \
+                      "Pour les fichier .AVI, essayez de forcer le mode non-entrelaçé avec l'option -ni.\n"
+#define MSGTR_SwitchToNi "\nFichier .AVI non entrelaçé - passage en mode -ni...\n"
+#define MSGTR_Detected_XXX_FileFormat "Fichier de type %s détecté.\n"
+#define MSGTR_DetectedAudiofile "Fichier audio détecté.\n"
+#define MSGTR_NotSystemStream "Pas un flux de type MPEG System... (peut-être un Flux de Transport?)\n"
 #define MSGTR_InvalidMPEGES "Flux MPEG-ES invalide??? Contactez l'auteur, c'est peut-être un bug :(\n"
 #define MSGTR_FormatNotRecognized "========== Désolé, ce format de fichier n'est pas reconnu/supporté ===========\n"\
-				  "========= Si ce fichier est un fichier AVI, ASF ou MPEG en bon état, =========\n"\
-				  "======================= merci de contacter l'auteur ! ========================\n"
-#define MSGTR_MissingVideoStream "Ne peut trouver de flux vidéo!\n"
-#define MSGTR_MissingAudioStream "Ne peut trouver de flux audio...  -> pas de son\n"
+				  "== Si ce fichier est un flux AVI, ASF ou MPEG, merci de contacter l'auteur! ==\n"
+#define MSGTR_MissingVideoStream "Aucun flux vidéo trouvé.\n"
+#define MSGTR_MissingAudioStream "Aucun flux audio trouvé -> pas de son\n"
 #define MSGTR_MissingVideoStreamBug "Flux vidéo manquant!? Contactez l'auteur, c'est peut-être un bug :(\n"
 
-#define MSGTR_DoesntContainSelectedStream "Demux: le fichier ne contient pas le flux audio ou vidéo sélectionné\n"
+#define MSGTR_DoesntContainSelectedStream "Demux: le fichier ne contient pas le flux audio ou vidéo sélectionné.\n"
 
 #define MSGTR_NI_Forced "Forcé"
 #define MSGTR_NI_Detected "Détecté"
-#define MSGTR_NI_Message "%s format de fichier AVI mal multiplexé!\n"
+#define MSGTR_NI_Message "%s format de fichier AVI NON-ENTRELACE.\n"
 
 #define MSGTR_UsingNINI "Utilise le support des fichiers AVI mal multiplexés!\n"
-#define MSGTR_CouldntDetFNo "Ne peut déterminer le nombre de frames (pour recherche absolue)\n"
+#define MSGTR_CouldntDetFNo "Ne peut déterminer le nombre de trames (pour recherche absolue)\n"
 #define MSGTR_CantSeekRawAVI "Ne peut chercher dans un flux .AVI brut! (Index requis, essayez l'option -idx!)\n"
 #define MSGTR_CantSeekFile "Ne peut chercher dans ce fichier!  \n"
 
-#define MSGTR_EncryptedVOB "Fichier VOB crypté (support libcss NON compilé!) Lire DOCS/cd-dvd.html\n"
-#define MSGTR_EncryptedVOBauth "Flux crypté mais l'authentification n'a pas été demandée explicitement!\n"
+#define MSGTR_EncryptedVOB "Fichier VOB crypté (support libcss non compilé!) Lire DOCS/cd-dvd.html\n"
+#define MSGTR_EncryptedVOBauth "Flux crypté mais vous n'avez pas demandé d'authentification!!\n"
 
-#define MSGTR_MOVcomprhdr "MOV: Les entêtes compressées ne sont pas (encore) supportés!\n"
-#define MSGTR_MOVvariableFourCC "MOV: Attention! Variable FOURCC détectée!?\n"
-#define MSGTR_MOVtooManyTrk "MOV: Attention! Trop de pistes!"
+#define MSGTR_MOVcomprhdr "MOV: Les entêtes compressées ne sont pas (encore) supportées!\n"
+#define MSGTR_MOVvariableFourCC "MOV: ATTENTION: Variable FOURCC détectée!?\n"
+#define MSGTR_MOVtooManyTrk "MOV: ATTENTION: Trop de pistes!"
 #define MSGTR_FoundAudioStream "==> Flux audio trouvé: %d\n"
 #define MSGTR_FoundVideoStream "==> Flux vidéo trouvé: %d\n"
 #define MSGTR_DetectedTV "TV détectée! ;-)\n"
@@ -266,17 +265,17 @@ static char help_text[]=
 // LIRC:
 #define MSGTR_SettingUpLIRC "Mise en place du support LIRC...\n"
 #define MSGTR_LIRCdisabled "Vous ne pourrez pas utiliser votre télécommande\n"
-#define MSGTR_LIRCopenfailed "Impossible d'activer le support LIRC!\n"
-#define MSGTR_LIRCcfgerr "Impossible de lire le fichier de configuration LIRC %s !\n"
+#define MSGTR_LIRCopenfailed "Impossible d'activer le support LIRC.\n"
+#define MSGTR_LIRCcfgerr "Impossible de lire le fichier de config de LIRC %s.\n"
 
 // vf.c
-#define MSGTR_CouldNotFindVideoFilter "N'a pas pu trouvé le filtre vidéo '%s'\n"
+#define MSGTR_CouldNotFindVideoFilter "N'a pas pu trouver le filtre vidéo '%s'\n"
 #define MSGTR_CouldNotOpenVideoFilter "N'a pas pu ouvrir le filtre vidéo '%s'\n"
 #define MSGTR_OpeningVideoFilter "Ouverture du filtre vidéo: "
 #define MSGTR_CannotFindColorspace "Ne peut pas trouver d'espace de couleurs commun, même en utilisant 'scale' :(\n"
 
 // vd.c
-#define MSGTR_CodecDidNotSet "VDec: le codec n'a pas défini sh->disp_w and sh->disp_h, essai de contournement!\n"
+#define MSGTR_CodecDidNotSet "VDec: le codec n'a pas défini sh->disp_w et sh->disp_h, essai de contournement!\n"
 #define MSGTR_VoConfigRequest "VDec: requête de configuration du vo - %d x %d (csp préferé: %s)\n"
 #define MSGTR_CouldNotFindColorspace "N'a pas pu trouver d'espace de couleur correspondant - nouvel essai avec -vop scale...\n"
 #define MSGTR_MovieAspectIsSet "L'aspect du film est %.2f:1 - pré-redimensionnement à l'aspect correct.\n"
@@ -497,7 +496,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_AutoSyncValue "Autosynchro: "
 				  
 // --- messagebox
-#define MSGTR_MSGBOX_LABEL_FatalError "Erreur fatale ..."
+#define MSGTR_MSGBOX_LABEL_FatalError "Erreur fatale!"
 #define MSGTR_MSGBOX_LABEL_Error "Erreur!"
 #define MSGTR_MSGBOX_LABEL_Warning "Attention!"
 				  
