@@ -1,27 +1,29 @@
-how to make an mplayer release
+How to make an MPlayer release
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 preparations:
-- ask the DOCS maintainers to commit their final changes, check if
-  all docs is uptodate etc
-- verify manpage, remove obsolete options, mention new ones
-- ask translation maintainers to update their help_mp*.h file
-- update teh ChangeLog file (according to cvs log), ask other developers
-  to verify their parts etc. ask Diego to spellcheck it.
-- consult at -dev-eng about unstable codes which should be disabled for release
+- Ask the DOCS maintainers to commit their final changes, check if
+  all docs are up to date etc.
+- Verify man page, remove obsolete options, mention new ones.
+- Ask translation maintainers to update their help_mp*.h file.
+- update the ChangeLog file (according to CVS log), ask other developers
+  to verify their parts etc. Ask Diego to spellcheck it.
+- Consult at -dev-eng about unstable parts of the code which should be
+  disabled for the release.
 
 create the release tree:
 - cvs checkout the mplayer src tree
-- if releasing from 'main', checkout libavcodec from ffmpeg cvs
-- remove teh CVS subdirs: 
-    find 0_90 -name CVS -exec rm -rf {} \;
+- if releasing from 'main', checkout libavcodec from FFmpeg CVS
+- remove the CVS subdirs:
+    find main -name CVS -exec rm -rf {} \;
 - remove the .cvsignore files:
-    find 0_90 -name .cvsignore -exec rm {} \;
+    find main -name .cvsignore -exec rm {} \;
 - remove obsolete DOCS translations, help files
 - replace version.sh with this (change version number too...):
+
 ============
 #!/bin/sh
-echo "#define VERSION \"0.90rc5-$1 \"" >version.h
+echo "#define VERSION \"1.0pre5-$1 \"" > version.h
 ============
 
 release the tree:
@@ -32,15 +34,15 @@ release the tree:
 
 test it (download to your local machine, extract, compile, run)
 
-copy to ftp:
+copy to FTP:
     cp MPlayer-0.90rc5.tar.bz2 /home/ftp/MPlayer/releases/
 
 move the older (pre)release(s) (except the last one before the current one)
-to ../old-stuff/ dir
+to ../OLD_stuff/ dir
 
-somehow get Gabu to write a news entry for the release, and update the
-source file of dload.html and commit it. test it, it's sometimes buggy
+Somehow get Diego to write a news entry for the release, and update the
+source file of dload.html and commit it. Test it, it's sometimes buggy
 (broken links etc).
 
-done.
+Done.
 
