@@ -7,6 +7,10 @@
 
 #include "config.h"
 
+#ifdef __FreeBSD__
+#include <sys/cdrio.h>
+#endif
+
 #include "stream.h"
 
 #ifdef STREAMING
