@@ -73,6 +73,13 @@
  *     to update this all the time.
  */
 
+/* define if you want to force Xv SDL output? */
+#undef SDL_FORCEXV
+/* define to force software-surface (video surface stored in system memory)*/
+#undef SDL_NOHWSURFACE
+/* define to disable usage of the xvideo extension */
+#undef SDL_NOXV
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -82,19 +89,15 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 
+/* FIXME: MPlayer crashes in fastmemcpy.h when SDL_NOXV is defined! */
+#ifndef SDL_NOXV
 #include "fastmemcpy.h"
+#endif
 
 LIBVO_EXTERN(sdl)
 
 //#include "log.h"
 //#define LOG if(0)printf
-
-/* define if you want to force Xv SDL output? */
-#undef SDL_FORCEXV
-/* define to force software-surface (video surface stored in system memory)*/
-#undef SDL_NOHWSURFACE
-/* define to disable usage of the xvideo extension */
-#undef SDL_NOXV
 
 static vo_info_t vo_info = 
 {
@@ -385,22 +388,22 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	sdl_format = format;
         switch(format){
 		case IMGFMT_YV12:
-			printf("\nSDL: Using 0x%X (YV12) image format\n", format); break;
+			printf("SDL: Using 0x%X (YV12) image format\n", format); break;
 		case IMGFMT_IYUV:
-			printf("\nSDL: Using 0x%X (IYUV) image format\n", format); break;
+			printf("SDL: Using 0x%X (IYUV) image format\n", format); break;
 		case IMGFMT_YUY2:
-			printf("\nSDL: Using 0x%X (YUY2) image format\n", format); break;
+			printf("SDL: Using 0x%X (YUY2) image format\n", format); break;
 		case IMGFMT_UYVY:
-			printf("\nSDL: Using 0x%X (UYVY) image format\n", format); break;
+			printf("SDL: Using 0x%X (UYVY) image format\n", format); break;
 		case IMGFMT_YVYU:
-			printf("\nSDL: Using 0x%X (YVYU) image format\n", format); break;
+			printf("SDL: Using 0x%X (YVYU) image format\n", format); break;
 		case IMGFMT_I420:
-			printf("\nSDL: Using 0x%X (I420) image format\n", format);
-			printf("SDL: Mapping I420 to IYUV (untested please report if it works)\n");
+			printf("SDL: Using 0x%X (I420) image format\n", format);
+			printf("SDL: Mapping I420 to IYUV\n");
 			sdl_format = SDL_IYUV_OVERLAY;
 		break;	
 		default:
-			printf("\nSDL: Unsupported image format (0x%X)\n",format);
+			printf("SDL: Unsupported image format (0x%X)\n",format);
 			return -1;
 	}
 
