@@ -354,7 +354,7 @@ void ts_detect_streams(demuxer_t *demuxer)
 		    
 		if(es.type == AUDIO_A52)
 		{
-		    sh_audio->format = AUDIO_MP2;	//MPEG1L2 audio
+		    sh_audio->format = AUDIO_A52;	//AC3 audio
 		    if(*apid == -1)
 			*apid = es.pid;
 		    audio_found = 1;
