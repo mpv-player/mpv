@@ -249,6 +249,32 @@ while(1){
     return length;
 }
 
+// returns: number of available channels
+static int a52_printinfo(sh_audio_t *sh_audio){
+int flags, sample_rate, bit_rate;
+char* mode="unknown";
+int channels=0;
+  a52_syncinfo (sh_audio->a_in_buffer, &flags, &sample_rate, &bit_rate);
+  switch(flags&A52_CHANNEL_MASK){
+    case A52_CHANNEL: mode="channel"; channels=2; break;
+    case A52_MONO: mode="mono"; channels=1; break;
+    case A52_STEREO: mode="stereo"; channels=2; break;
+    case A52_3F: mode="3f";channels=3;break;
+    case A52_2F1R: mode="2f+1r";channels=3;break;
+    case A52_3F1R: mode="3f+1r";channels=4;break;
+    case A52_2F2R: mode="2f+2r";channels=4;break;
+    case A52_3F2R: mode="3f+2r";channels=5;break;
+    case A52_CHANNEL1: mode="channel1"; channels=2; break;
+    case A52_CHANNEL2: mode="channel2"; channels=2; break;
+    case A52_DOLBY: mode="dolby"; channels=2; break;
+  }
+  mp_msg(MSGT_DECAUDIO,MSGL_INFO,"AC3: %d.%d (%s%s)  %d Hz  %3.1f kbit/s\n",
+	channels, (flags&A52_LFE)?1:0,
+	mode, (flags&A52_LFE)?"+lfe":"",
+	sample_rate, bit_rate*0.001f);
+  return (flags&A52_LFE) ? (channels+1) : channels;
+}
+
 int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen);
 
 
@@ -519,7 +545,11 @@ case AFM_A52: {
 	mp_msg(MSGT_DECAUDIO,MSGL_ERR,"A52 sync failed\n");
 	driver=0;break;
   }
-  sh_audio->channels=audio_output_channels;
+  // 'a52 cannot upmix' hotfix:
+  sh_audio->channels=a52_printinfo(sh_audio);
+  if(audio_output_channels<sh_audio->channels)
+      sh_audio->channels=audio_output_channels;
+  
   break;
 }
 case AFM_HWAC3: {
