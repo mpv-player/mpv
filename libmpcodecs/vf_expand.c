@@ -181,7 +181,7 @@ static int config(struct vf_instance_s* vf,
 // codec -copy-> expand -copy-> vo (worst case)
 
 static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
-    if(mpi->type==MP_IMGTYPE_IPB) return; // not yet working
+//    if(mpi->type==MP_IMGTYPE_IPB) return; // not yet working
 #ifdef OSD_SUPPORT
     if(vf->priv->osd && (mpi->flags&MP_IMGFLAG_PRESERVE)){
 	// check if we have to render osd!
@@ -213,11 +213,13 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	mpi->stride[0]=vf->priv->dmpi->stride[0];
 	mpi->width=vf->priv->dmpi->width;
 	mpi->flags|=MP_IMGFLAG_DIRECT;
+	mpi->priv=(void*)vf->priv->dmpi;
     }
 }
 
 static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     if(mpi->flags&MP_IMGFLAG_DIRECT){
+	vf->priv->dmpi=mpi->priv;
 #ifdef OSD_SUPPORT
 	if(vf->priv->osd) draw_osd(vf,mpi->w,mpi->h);
 #endif
