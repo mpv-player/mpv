@@ -527,8 +527,8 @@ if(strncmp("dvd://",filename,6) == 0){
         stream=new_stream(f,STREAMTYPE_STREAM);
 	if( streaming_start( stream, file_format, url )<0){
           mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_UnableOpenURL, filename);
-	  //url_free(url);
-	  //return NULL;
+	  url_free(url);
+	  return NULL;
 	} else {
         mp_msg(MSGT_OPEN,MSGL_INFO,MSGTR_ConnToServer, url->hostname );
 	url_free(url);
