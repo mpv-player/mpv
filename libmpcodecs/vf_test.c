@@ -42,6 +42,10 @@
 #define WIDTH 512
 #define HEIGHT 512
 
+struct vf_priv_s {
+    int frame_num;
+};
+
 static int config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
@@ -103,7 +107,7 @@ static void idct(uint8_t *dst, int dstStride, int src[64])
 			for(k=0; k<8; k++)
 				sum+= c[k*8+i]*tmp[8*k+j];
 
-			v= (int)(sum+0.5);
+			v= (int)floor(sum+0.5);
 			if(v<0) v=0;
 			else if(v>255) v=255;
 
@@ -170,7 +174,7 @@ static void freq1Test(uint8_t *dst, int stride, int off)
 		int x;
 		for(x=0; x<8*16; x+=16)
 		{
-			drawBasis(dst + x + y*stride, stride, 4*(128+off), freq, 128*8);
+			drawBasis(dst + x + y*stride, stride, 4*(96+off), freq, 128*8);
 			freq++;
 		}
 	}
@@ -225,9 +229,48 @@ static void mv1Test(uint8_t *dst, int stride, int off)
 	}
 }
 
+static void ring1Test(uint8_t *dst, int stride, int off)
+{
+	int y;
+	int color=0;
+	for(y=off; y<16*16; y+=16)
+	{
+		int x;
+		for(x=off; x<16*16; x+=16)
+		{
+			drawDc(dst + x + y*stride, stride, ((x+y)&16) ? color : -color, 16, 16);
+//			dst[x + y*stride]= 255 + (off&1);
+			color++;
+		}
+	}
+}
+
+static void ring2Test(uint8_t *dst, int stride, int off)
+{
+	int y;
+	for(y=0; y<16*16; y++)
+	{
+		int x;
+		for(x=0; x<16*16; x++)
+		{
+			double d= sqrt((x-8*16)*(x-8*16) + (y-8*16)*(y-8*16));
+			double r= d/20 - (int)(d/20);
+			if(r<off/30.0)
+			{
+				dst[x + y*stride]= 255;
+				dst[x + y*stride+256]= 0;
+			}
+			else{
+				dst[x + y*stride]= x;
+				dst[x + y*stride+256]= x;
+			}
+		}
+	}
+}
+
 static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     mp_image_t *dmpi;
-    static int frame=0;
+    int frame= vf->priv->frame_num;
 
     // hope we'll get DR buffer:
     dmpi=vf_get_image(vf->next,IMGFMT_YV12,
@@ -251,11 +294,14 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	case 5:  amp1Test(dmpi->planes[1], dmpi->stride[1], frame%30); break;
 	case 6:  cbp1Test(dmpi->planes   , dmpi->stride   , frame%30); break;
 	case 7:   mv1Test(dmpi->planes[0], dmpi->stride[0], frame%30); break;
+	case 8: ring1Test(dmpi->planes[0], dmpi->stride[0], frame%30); break;
+	case 9: ring2Test(dmpi->planes[0], dmpi->stride[0], frame%30); break;
 	}
     }
 
     vf_next_put_image(vf,dmpi);
     frame++;
+    vf->priv->frame_num= frame;
 }
 
 //===========================================================================//
@@ -268,6 +314,8 @@ static int open(vf_instance_t *vf, char* args){
     vf->config=config;
     vf->put_image=put_image;
     vf->query_format=query_format;
+    vf->priv=malloc(sizeof(struct vf_priv_s));
+    vf->priv->frame_num= args ? atoi(args) : 0;
     initIdct();
     return 1;
 }
