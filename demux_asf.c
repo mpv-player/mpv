@@ -105,7 +105,7 @@ static int demux_asf_read_packet(demuxer_t *demux,unsigned char *data,int len,in
     // create new packet:
     { demux_packet_t* dp;
       if(offs>0){
-        printf("warning!  broken fragment, %d bytes missing  \n",offs);
+        if(verbose) printf("warning!  broken fragment, %d bytes missing  \n",offs);
         return 0;
       }
       dp=new_demux_packet(len);
