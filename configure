@@ -4742,7 +4742,7 @@ fi
 # Checking for CFLAGS
 _stripbinaries=yes
 if test "$_profile" != "" || test "$_debug" != "" ; then
-  CFLAGS="-W -Wall -Wno-unused-parameter -O2 $_march $_mcpu $_debug $_profile"
+  CFLAGS="-W -Wall -O2 $_march $_mcpu $_debug $_profile"
   _stripbinaries=no
 elif test -z "$CFLAGS" ; then
   if test "$host_arch" != "mips" ; then
