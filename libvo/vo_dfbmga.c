@@ -220,6 +220,7 @@ static uint32_t
 preinit( const char *arg )
 {
      DFBResult res;
+     int force_input = -1;
 
      /* Some defaults */
      use_bes = 0;
@@ -255,7 +256,7 @@ preinit( const char *arg )
                     vo_subdevice += 4;
                     opt_no = 0;
                } else if (!strncmp(vo_subdevice, "input", 5)) {
-                    use_input = !opt_no;
+                    force_input = !opt_no;
                     vo_subdevice += 5;
                     opt_no = 0;
                } else if (!strncmp(vo_subdevice, "buffermode=", 11)) {
@@ -425,6 +426,9 @@ preinit( const char *arg )
           }
           use_input = 1;
      }
+
+     if (force_input != -1)
+          use_input = force_input;
 
      if (use_bes) {
           DFBDisplayLayerConfig      dlc;
