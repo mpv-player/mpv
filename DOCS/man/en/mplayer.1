@@ -1572,7 +1572,7 @@ See \-ao help for a list of compiled-in drivers.
 .RSs
 .IPs "\-ao alsa,oss,"
 Try the ALSA driver, then the OSS driver, then others.
-.IPs "\-ao alsa:mmap:noblock:hw=0.3"
+.IPs "\-ao alsa:mmap:noblock:device=hw#0.3"
 Sets noblock-mode, mmap-mode and the device-name as first card, fourth device.
 .RE
 .PD 1
@@ -1592,9 +1592,9 @@ ALSA 0.9/1.x audio output driver.
 Sets experimental mmap-mode (does not work for more than 2 channels).
 .IPs noblock
 Sets noblock-mode.
-.IPs hw=<device>
+.IPs device=<device>
 Sets the device name.
-Replace the ',' with a '.' in the ALSA device name.
+Replace any ',' with '.' and any ':' with '#' in the ALSA device name.
 .RE
 .PD 1
 .TP
