@@ -1843,7 +1843,7 @@ if [ $_xv = yes ]; then
 fi
 
 if [ $_xinerama = yes ]; then
-  _xvlib='-lXinerama'
+  _xineramalib='-lXinerama'
 fi
 
 if [ $_sdl = yes ]; then
@@ -2241,7 +2241,7 @@ WIN32_PATH=-DWIN32_PATH=\\"$_win32libdir\\"
 
 X11_INC=$_x11incdir
 X11DIR=$_x11libdir
-X_LIBS=$_x11libdir $_extralibdir $_gllib $_ggilib $_sdllib $_dgalib $_x11lib $_xvlib $_vmlib $_svgalib $_libpng $_socklib $_aalib $_libvorbis $_libxinerama
+X_LIBS=$_x11libdir $_extralibdir $_gllib $_ggilib $_sdllib $_dgalib $_x11lib $_xvlib $_vmlib $_svgalib $_libpng $_socklib $_aalib $_libvorbis $_xineramalib
 
 TERMCAP_LIB=$_libtermcap
 XMM_LIBS = $_xmmplibs
