@@ -324,7 +324,7 @@ static uint32_t query_format(uint32_t format)
 	switch(format)
 	{
 		case IMGFMT_YV12:
-#if 1 /* Should be tested better */
+#if 0 /* Should be tested better */
 		case IMGFMT_I420:
 		case IMGFMT_IYUV:
 #endif
