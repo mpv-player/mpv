@@ -100,11 +100,7 @@ static int read_buffer(unsigned char* data,int len){
 
 // end ring buffer stuff
 
-#ifdef __FreeBSD__
-#include <SDL11/SDL.h>
-#else
-#include <SDL/SDL.h>
-#endif
+#include <SDL.h>
 
 #if	defined(sun) && defined(__svr4__)
 /* setenv is missing on solaris */
