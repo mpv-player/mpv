@@ -211,7 +211,7 @@ int ima_adpcm_decode_block(unsigned short *output, unsigned char *input,
 }
 
 int ms_adpcm_decode_block(unsigned short *output, unsigned char *input,
-  int channels)
+  int channels, int block_size)
 {
   int current_channel = 0;
   int idelta[2];
@@ -267,7 +267,7 @@ int ms_adpcm_decode_block(unsigned short *output, unsigned char *input,
     SE_16BIT(sample2[1]);
   }
 
-  while (stream_ptr < MS_ADPCM_BLOCK_SIZE * channels)
+  while (stream_ptr < block_size)
   {
     // get the next nibble
     if (upper_nibble)
@@ -295,7 +295,7 @@ int ms_adpcm_decode_block(unsigned short *output, unsigned char *input,
     current_channel ^= channels - 1;
   }
 
-  return MS_ADPCM_SAMPLES_PER_BLOCK * channels;
+  return (block_size - (MS_ADPCM_PREAMBLE_SIZE * channels)) * 2;
 }
 
 // note: This decoder assumes the format 0x62 data always comes in

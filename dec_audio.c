@@ -369,9 +369,9 @@ case AFM_IMAADPCM:
   sh_audio->ds->ss_mul=IMA_ADPCM_BLOCK_SIZE;
   break;
 case AFM_MSADPCM:
-  sh_audio->audio_out_minsize=4096;
-  sh_audio->ds->ss_div=MS_ADPCM_SAMPLES_PER_BLOCK;
-  sh_audio->ds->ss_mul=MS_ADPCM_BLOCK_SIZE;
+  sh_audio->audio_out_minsize=sh_audio->wf->nBlockAlign * 8;
+  sh_audio->ds->ss_div = MS_ADPCM_SAMPLES_PER_BLOCK;
+  sh_audio->ds->ss_mul = sh_audio->wf->nBlockAlign;
   break;
 case AFM_FOX62ADPCM:
   sh_audio->audio_out_minsize=FOX62_ADPCM_SAMPLES_PER_BLOCK * 4;
@@ -615,7 +615,7 @@ case AFM_IMAADPCM:
 case AFM_MSADPCM:
   sh_audio->channels=sh_audio->wf->nChannels;
   sh_audio->samplerate=sh_audio->wf->nSamplesPerSec;
-  sh_audio->i_bps=MS_ADPCM_BLOCK_SIZE*
+  sh_audio->i_bps = sh_audio->wf->nBlockAlign *
     (sh_audio->channels*sh_audio->samplerate) / MS_ADPCM_SAMPLES_PER_BLOCK;
   break;
 case AFM_FOX62ADPCM:
@@ -1034,12 +1034,17 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
         break;
       }
       case AFM_MSADPCM:
-      { unsigned char ibuf[MS_ADPCM_BLOCK_SIZE * 2]; // bytes / stereo frame
+      { static unsigned char *ibuf = NULL;
+        if (!ibuf)
+          ibuf = (unsigned char *)malloc
+            (sh_audio->wf->nBlockAlign * sh_audio->wf->nChannels);
         if (demux_read_data(sh_audio->ds, ibuf,
-          MS_ADPCM_BLOCK_SIZE * sh_audio->wf->nChannels) != 
-          MS_ADPCM_BLOCK_SIZE * sh_audio->wf->nChannels) 
+          sh_audio->wf->nBlockAlign) != 
+          sh_audio->wf->nBlockAlign) 
           break; // EOF
-        len=2*ms_adpcm_decode_block((unsigned short*)buf,ibuf, sh_audio->wf->nChannels);
+        len= 2 * ms_adpcm_decode_block(
+          (unsigned short*)buf,ibuf, sh_audio->wf->nChannels,
+          sh_audio->wf->nBlockAlign);
         break;
       }
       case AFM_FOX62ADPCM:
