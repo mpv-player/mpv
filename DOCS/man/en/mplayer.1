@@ -2421,6 +2421,23 @@ Parameters w:h means width x height in pixels, x:y means x;y position counted
 from the upper left corner of the bigger image.
 To get a full list of available filters, see \-vf help.
 
+Filters are managed in lists.
+There are a few commands to manage the filter list.
+.TP
+.B \-vf-add <filter1[,filter2,...]>
+Appends the filters given as arguments to the filter list.
+.TP
+.B \-vf-pre <filter1[,filter2,...]>
+Prepends the filters given as arguments to the filter list.
+.TP
+.B \-vf-del <index1[,index2,...]>
+Deletes the filters at the given indexes.
+Index numbers start at 0, negative numbers address the end of the
+list (-1 is the last).
+.TP
+.B \-vf-clr
+Completely empties the filter list.
+.PP
 Available filters are:
 .
 .TP
