@@ -215,6 +215,7 @@ static short get_driver(char *s,int audioflag)
 		"ima4",
 		"liba52",
 		"g72x",
+		"adpcm",
 		NULL
 	};
 	static char *videodrv[] = {
