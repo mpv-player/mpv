@@ -55,6 +55,7 @@ extern vd_functions_t mpcodecs_vd_mtga;
 extern vd_functions_t mpcodecs_vd_sgi;
 extern vd_functions_t mpcodecs_vd_libmpeg2;
 extern vd_functions_t mpcodecs_vd_mpegpes;
+extern vd_functions_t mpcodecs_vd_zrmjpeg;
 extern vd_functions_t mpcodecs_vd_realvid;
 extern vd_functions_t mpcodecs_vd_xvid;
 extern vd_functions_t mpcodecs_vd_libdv;
@@ -113,6 +114,9 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
         &mpcodecs_vd_libmpeg2,
 #endif
         &mpcodecs_vd_mpegpes,
+#ifdef HAVE_ZR
+        &mpcodecs_vd_zrmjpeg,
+#endif
 #ifdef USE_REALCODECS
 	&mpcodecs_vd_realvid,
 #endif

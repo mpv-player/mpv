@@ -77,6 +77,11 @@
 
 /* Compressed Formats */
 #define IMGFMT_MPEGPES (('M'<<24)|('P'<<16)|('E'<<8)|('S'))
+/* Formats that are understood by zoran chips, we include
+ * non-interlaced, interlaced top-first, interlaced bottom-first */
+#define IMGFMT_ZRMJPEGNI  (('Z'<<24)|('R'<<16)|('N'<<8)|('I'))
+#define IMGFMT_ZRMJPEGIT (('Z'<<24)|('R'<<16)|('I'<<8)|('T'))
+#define IMGFMT_ZRMJPEGIB (('Z'<<24)|('R'<<16)|('I'<<8)|('B'))
 
 // I think that this code could not be used by any other codec/format
 #define IMGFMT_XVMC 0x1DC70000

@@ -102,6 +102,12 @@ static inline void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
 	mpi->bpp=0;
 	return;
     }
+    if(out_fmt == IMGFMT_ZRMJPEGNI ||
+	    out_fmt == IMGFMT_ZRMJPEGIT ||
+	    out_fmt == IMGFMT_ZRMJPEGIB){
+	mpi->bpp=0;
+	return;
+    }
     if(IMGFMT_IS_XVMC(out_fmt)){
 	mpi->bpp=0;
 	return;

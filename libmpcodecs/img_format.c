@@ -55,6 +55,9 @@ char *vo_format_name(int format)
 	case IMGFMT_YUVP: return("Packed YUVP");
 	case IMGFMT_UYVP: return("Packed UYVP");
 	case IMGFMT_MPEGPES: return("Mpeg PES");
+	case IMGFMT_ZRMJPEGNI: return("Zoran MJPEG non-interlaced");
+	case IMGFMT_ZRMJPEGIT: return("Zoran MJPEG top field first");
+	case IMGFMT_ZRMJPEGIB: return("Zoran MJPEG bottom field first");
 	case IMGFMT_XVMC_MOCO_MPEG2: return("MPEG1/2 Motion Compensation");
 	case IMGFMT_XVMC_IDCT_MPEG2: return("MPEG1/2 Motion Compensation and IDCT");
     }
