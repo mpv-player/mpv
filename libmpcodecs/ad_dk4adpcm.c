@@ -44,9 +44,13 @@ static void uninit(sh_audio_t *sh_audio)
 {
 }
 
-static int control(sh_audio_t *sh,int cmd,void* arg, ...)
+static int control(sh_audio_t *sh_audio,int cmd,void* arg, ...)
 {
     // TODO!
+  if(cmd==ADCTRL_SKIP_FRAME){
+    demux_read_data(sh_audio->ds, sh_audio->a_in_buffer,sh_audio->wf->nBlockAlign);
+    return CONTROL_TRUE;
+  }
   return CONTROL_UNKNOWN;
 }
 
