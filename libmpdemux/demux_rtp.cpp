@@ -119,6 +119,7 @@ static char* openURL_sip(SIPClient* client, char const* url) {
 
 int rtspStreamOverTCP = 0; 
 
+extern "C" int audio_id, video_id, dvdsub_id;
 extern "C" demuxer_t* demux_open_rtp(demuxer_t* demuxer) {
   Boolean success = False;
   do {
@@ -263,7 +264,8 @@ extern "C" demuxer_t* demux_open_rtp(demuxer_t* demuxer) {
   // code to recognize this:
   if (demux_is_multiplexed_rtp_stream(demuxer)) {
     stream_t* s = new_ds_stream(demuxer->video);
-    demuxer_t* od = demux_open(s, DEMUXER_TYPE_UNKNOWN, -1, -1, -1, NULL);
+    demuxer_t* od = demux_open(s, DEMUXER_TYPE_UNKNOWN,
+			       audio_id, video_id, dvdsub_id, NULL);
     demuxer = new_demuxers_demuxer(od, od, od);
   }
 
