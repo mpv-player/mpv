@@ -1,4 +1,4 @@
-.\" synced with 1.604
+.\" synced with 1.611
 .\" MPlayer (C) 2000-2004 El equipo de MPlayer 
 .\" Esta página de manual ha sido escrita por Gabucino, Diego Biurrun,
 .\" Jonas Jermann y traducida al español por Juan Martín López.
@@ -38,9 +38,9 @@
 .TH MPlayer 1 "2004-07-19" "Proyecto MPlayer" "El Reproductor de Películas"
 .
 .SH NOMBRE
-mplayer  \- Reproductor de películas
+mplayer  \- reproductor de películas
 .br
-mencoder \- Codificador de películas
+mencoder \- codificador de películas
 .
 .\" --------------------------------------------------------------------------
 .\" Sinopsis
@@ -142,31 +142,32 @@ mencoder \- Codificador de películas
 .
 .SH DESCRIPCIÓN
 .B mplayer
-es un reproductor de películas para LINUX (funciona en muchos otros Unices y
-CPUs no-x86, vea la documentación).
+es un reproductor de películas para Linux (funciona en muchas otras
+plataformas y arquitecturas de CPU, vea la documentación).
 Reproduce la mayoría de los archivos MPEG/\:VOB, AVI, ASF/\:WMA/\:WMV, RM, 
-QT/\:MOV/\:MP4, OGG/\:OGM, VIVO, FLI, NuppelVideo, yuv4mpeg, FILM and RoQ,
-soportados de forma nativa, XAnim, y con codecs DLL Win32.
+QT/\:MOV/\:MP4, OGG/\:OGM, MKV, VIVO, FLI, NuppelVideo, yuv4mpeg, FILM and RoQ,
+soportados de forma nativa y otros codecs binarios.
 Además puede ver VideoCD, SVCD, DVD, 3ivx, DivX\ 3/\:4/\:5 e incluso películas
-WMV (sin usar la librería avifile).
+WMV.
 .PP
-Otra gran característica de MPlayer es el amplio rango de controladores de
-salida soportados.
-Funciona con X11, XV, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca, DirectFB, Quartz,
-pero también puede usar GGI, SDL (y todos sus controladores), VESA (en cualquier
-tarjeta compatible con VESA, incluso sin X11), algunos controladores de tarjetas
-específicas a bajo nivel (par Matrox, 3Dfs y ATI) y algunas tarjetas decodificadoras
-de MPEG por hardware, tales como Siemens DVB, DXR2 y DXR3/\:Hollywood+.
-La mayoría de ellos soportan escalado por software o por hardware, para que pueda
-disfrutar de las películas en pantalla completa.
+MPlayer soporta un amplio rango de controladores de salida de video y de
+audio.
+Funciona con X11, XV, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca, DirectFB,
+Quartz, pero también puede usar GGI, SDL (y todos sus controladores),
+VESA (en cualquier tarjeta compatible con VESA, incluso sin X11), algunos
+controladores de tarjetas específicas a bajo nivel (par Matrox, 3Dfs y ATI)
+y algunas tarjetas decodificadoras de MPEG por hardware, tales como Siemens
+DVB, DXR2 y DXR3/\:Hollywood+.
+La mayoría de ellos soportan escalado por software o por hardware, para que
+pueda disfrutar de las películas en modo de pantalla completa.
 .PP
 MPlayer tiene información en pantalla (OSD, On Screen Display) sobre el estado,
 subtítulos grandes y bonitos con suavizado de bordes y realimentación visual
 de los controles con teclado.
 Tipos de letra Europeo/\:ISO 8859-1,2 (Húngaro, Inglés, Checoslovaco, etc),
-Cirílico y Koreano son soportados en 11 formatos de subtítulo (MicroDVD, SubRip,
-SubViewer, Sami, VPlayer, RT, SSA, AQTitle, JACOsub, PJS y el nuestro: MPsub)
-así como subtítulos DVD (cadenas SPU, VOBSub y Closed Captions).
+Cirílico y Koreano son soportados en 14 formatos de subtítulo (MicroDVD, SubRip,
+OGM, SubViewer, Sami, VPlayer, RT, SSA, AQTitle, JACOsub, PJS y el nuestro:
+MPsub) así como subtítulos DVD (cadenas SPU, VOBSub y Closed Captions).
 .PP
 .B mencoder
 (Codificador de Películas de MPlayer) es un codificador simple de películas,
@@ -174,8 +175,7 @@ diseñado para codificar películas que se pueden reproducir con MPlayer (vea
 más arriba) a otros formatos también reproducibles con MPlayer (vea más abajo).
 Codifica a DivX4, XviD, cualquier codec de libavcodec y audio en
 PCM/\:MP3/\:VBRMP3 en 1, 2 o 3\ pasadas.
-
-Además, tiene habilidades para copiar flujos, un potente sistema de plugins
+Además, tiene habilidades para copiar flujos, un potente sistema de filtros 
 (recortar, expandir, voltear, post-procesar, rotar, escalar, ruidos, 
 conversión rgb/\:yuv) y más.
 .PP
@@ -193,14 +193,11 @@ Tiene las mismas opciones que MPlayer.
 .SH "CONTROL POR TECLADO"
 MPlayer tiene una capa de control totalmente configurable, dada por
 órdenes, que le permite controlar MPlayer usando el teclado, el ratón,
-la palanca de juegos o el mando a distancia (usando lirc).
+la palanca de juegos o el mando a distancia (usando LIRC).
 .br
 El archivo de configuración por defecto para el sistema de entrada es
 ~/.mplayer/\:input.conf pero puede ser cambiado usando la opción
 \-input conf.
-.br
-Estas teclas pueden/\:no pueden funcionar, dependiendo de su controlador
-de salida de video.
 .TP
 .B control general 
 .PD 0
@@ -240,7 +237,8 @@ así como directx y gl2 bajo Windows.
 .IPs "w and e"
 decrementa/\:incrementa el rango de panscan
 .IPs o\ \ \ \ 
-cambia entre los estados de OSD: nada / posicionado / posición+tiempo
+cambia entre los estados de OSD: nada / posición / posición + tiempo /
+posición + tiempo + tiempo total
 .IPs d\ \ \ \ 
 cambia el saltarse imágenes
 cambia entre los estados del salto de imágenes: nada / saltar el mostrar
@@ -331,9 +329,10 @@ Las opciones específicas de usuario sobreescriben a las del sistema y a su vez l
 que se pasan por línea de comandos sustituyen a estas.
 La sintaxis del archivo de configuración es 'opción=<valor>', todo lo que haya
 después de un '#' es considerado un comentario.
-Las opciones que funcionan sin valores pueden ser habilitadas estableciendo su valor
-a 'si' o '1' y deshabilitadas estableciendo su valor a 'no' o '0'. Incluso las
-subopciones pueden se especificadas de este modo.
+Las opciones que funcionan sin valores pueden ser habilitadas estableciendo
+su valor a 'si' o '1' o 'true' y deshabilitadas estableciendo su valor a 'no'
+o '0' o 'false'.
+Incluso las subopciones pueden se especificadas de este modo.
 .PP
 .I EJEMPLO:
 .br
@@ -373,8 +372,8 @@ Archivo de configuración específico que se consultará después del que haya por
 defecto.
 .TP
 .B \-quiet\ \ 
-Con esta opción la línea de estado (i.e. A:  0.7 V:  0.6 A-V: 0.068 ...)
-no será mostrada.
+Hace que MPlayer muestre menos información; en particular oculta la línea de
+estado (i.e. A:  0.7 V:  0.6 A-V: 0.068 ...) que no será mostrada.
 Es particularmente útil en terminales lentos o donde no funciona bien el manejo
 del retorno de carro (i.e. \\r).
 .TP
@@ -406,14 +405,15 @@ Cambia dinámicamente el nivel de postprocesado dependiendo del tiempo de CPU
 disponible.
 El número que especifique será el máximo nivel usado.
 Lo normal es que pueda usar cualquier número grande.
-Deberá usar \-vf [s]pp sin parámetros para poder usar esto.
+Deberá usar \-vf [s]pp sin parámetros para que esto funcione.
 .TP
 .B \-autosync <factor>
-Ajusta gradualmente la sincronización A/\:V basada en medidas de retardo de audio.
+Ajusta gradualmente la sincronización A/\:V basada en medidas de retardo de
+audio.
 Especificando \-autosync\ 0, por defecto, causa que el tiempo de imágenes esté
 basado completamente en medidas de retardo de audio.
 Especificando \-autosync\ 1 hará lo mismo, pero se se usará sutilmente el
-algoritmo de corrección de A/\:V usado.
+algoritmo de corrección de A/\:V.
 Un ratio de imágenes de video irregular que funciona bien con \-nosound puede
 incluso mejorarse estableciendo este a un valor entero mayor que 1.
 Cuanto más alto sea el valor, más cerca se estará de la sincronización de \-nosound.
@@ -427,7 +427,8 @@ el único efecto colateral de activar esta opción, para todos los controladores
 de sonido.
 .TP
 .B \-benchmark
-Imprime algunas estadísticas en uso de CPU y muestra imágenes del final.
+Muestra algunas estadísticas en uso de CPU e imágenes eliminadas al final de
+la reproducción.
 Úselo en combinación con \-nosound y \-vo null para medida del rendimiento del
 codec de video.
 .br
@@ -485,7 +486,7 @@ Salto mayor de imágenes (puede romper la decodificación).
 ¡Lleva a distorsiones de la imagen!
 .TP
 .B \-identify
-Muestra parámetros del archivo en un formato analizable.
+Muestra parámetros del archivo en un formato fácilmente analizable.
 El script wrapper TOOLS/midentify suprime todas las otras salidas de MPlayer y
 (con suerte) muestra los nombres de archivo.
 .TP
@@ -502,15 +503,15 @@ Las órdenes disponibles son:
 .RSs
 .IPs conf=<archivo>
 Leer input.conf alternativo.
-Si se da sin ruta, se supone que es ~/\:.mplayer.
+Si no se da la ruta completa, se asume ~/\:.mplayer/<archivo>.
 .IPs ar-delay
 Retardo en mseg antes de empezar a autorepetir una tecla (0 para deshabilitar).
 .IPs ar-rate
-Cuantas teclas pulsadas por segundo cuando se autorepite.
+Número de pulsaciones de tecla a generar por segundo en autorepetición.
 .IPs keylist
-Imprime todas las teclas que pueden ser asignadas.
+Muestra todas las teclas a las que pueden asignarse órdenes.
 .IPs cmdlist
-Imprime los comandos que pueden ser asignados.
+Muestra todas las órdenes para las que pueden asignarse teclas.
 .IPs js-dev
 Especifica el dispositivo de palanca de juegos a usar (por defecto es /dev/\:input/\:js0).
 .IPs archivo\ 
@@ -525,9 +526,7 @@ hacer 'echo "seek 10" > mp_pipe' y el pipe sigue siendo válido.
 .
 .TP
 .B \-lircconf <archivo> (LIRC solamente)
-Especifica un archivo de configuración para LIRC (Linux Infrared Remote
-Control, vea http://www.lirc.org) si no le gusta el que hay por defecto
-en ~/\:.lircrc.
+Especifica un archivo de configuración para LIRC (por defecto: ~/\:.lircrc).
 .TP
 .B \-list-options
 Imprime todas las opciones disponibles.
@@ -547,7 +546,6 @@ Especifica el menú principal.
 .TP
 .B \-nojoystick
 Desactiva el soporte de joystick.
-Por defecto está activo, si está compilado para él.
 .TP
 .B \-nolirc
 Desactiva el soporte para LIRC.
@@ -561,57 +559,63 @@ Desactiva el uso del RTC de Linux (reloj en tiempo real \- /dev/\:rtc) como
 mecanismo de control de tiempo.
 .TP
 .B \-playlist <archivo>
-Reproduce archivos de acuerdo a al archivo de lista (1 archivo por fila o formato
-Winamp o ASX).
+Reproduce archivos de acuerdo a una lista de reproducción (1 archivo por línea,
+formato Winamp o ASX).
 .br
 .I NOTA:
-Esta opción es considerada una entrada como entrada par alas opciones que después
-se aplican solo a los elementos de esta lista de reproducción.
+Esta opción es considerada una entrada como entrada par alas opciones que
+después se aplican solo a los elementos de esta lista de reproducción.
+.br
+FIXME: Esto deber aclararse mejor.
 .TP
-.B \-really-quiet
-Muestra todavía menos salida y mensajes de estado.
+.B \-really-quiet (vea también \-quiet)
+Muestra todavía menos salida y mensajes de estado que con \-quiet.
+.TP
+.B \-rtc-device <dispositivo>
+Usa el dispositivo especificado para la temporización RTC.
 .TP
 .B \-shuffle
 Reproduce archivos en orden aleatorio.
 .TP
 .B \-skin <skin\ directorio> (sólo GUI)
-Carga un skin o piel del directorio dado (SIN nombre de ruta).
+Carga un skin del directorio dado como parámetros bajo el directorio
+por defecto para los skins, /usr/local/share/mplayer/ y ~/.mplayer/.
 
 .I EJEMPLO:
 .PD 0
 .RSs
 .IPs "\-skin fittyfene"
-prueba Skin/fittyfene.
-Primero comprueba
-/usr/local/share/mplayer/
-y después ~/.mplayer/.
+Intenta usar /usr/local/share/mplayer/Skin/fittyfene y
+después ~/.mplayer/Skin/fittyfene.
 .RE
 .PD 1
 .
 .TP
-.B \-slave \ \
+.B \-slave (vea también \-input)
 Esta opción cambia a modo esclavo.
-Está pensada para usar MPlayer como un backend de otros programas.
-En lugar de interceptar eventos de teclado, MPlayer símplemente lee
-líneas de comandos desde la entrada estandar.
+El objetivo es poder hacer que MPlayer sea usado como backend para
+otros programas.
+En lugar de interceptar eventos de teclado, MPlayer leerá órdenes de stdin.
+Vea DOCS/tech/slave.txt y \-input cmdlist para una lista de órdenes como
+esclavo.
 .TP
 .B \-softsleep
-Usa timers software de alta calidad.
+Usa temporizadores software de alta calidad en lugar del RTC.
 Tan preciso como RTC sin requerir privilegios especiales.
 Se paga el precio de un consumo alto de CPU.
 .TP
 .B \-speed <0.01\-100>
-Establece la razón de velocidad de reproducción.
+Decelera o acelera la reproducción con un factor dado como parámetro.
 .TP
 .B \-sstep <seg>
-Especifica los segundos entre imágenes mostradas.
+Muestra cada imagen durante <seg> segundos.
 Útil para presentaciones.
 .TP
 .B \-use-stdin
-La entrada estandar (aka. stdin) puede ser usada para leer datos en lugar de
-eventos de teclado. Si abre /dev/stdin (o el equivalente en su sistema), use
-stdin en una lista de reproducción o si quiere intentar leer de stdin 
-mediante las órdenes loadfile o loadlist
+Se usará la entrada estándar para leer datos en lugar de eventos de
+teclado. Si abre /dev/stdin (o el equivalente en su sistema), use stdin
+en una lista de reproducción o si quiere intentar leer de stdin 
+mediante las órdenes como esclavo loadfile o loadlist
 .B necesitará
 también esta opción.
 .
@@ -805,7 +809,7 @@ Here you can tell MPlayer which angles to use (default: 1).
 Se pueden encontrar ejemplos más abajo.
 .TP
 .B \-forceidx
-Fuerza la reconstrucción del INDICE.
+Fuerza la reconstrucción del índice.
 Útil para archivos con índice mal (desincronizados, etc).
 El posicionamiento se hace posible.
 Puede arreglar el índice permanentemente con MEncoder (vea la documentación).
@@ -829,9 +833,9 @@ sincronización A/\:V. Puede ser lento especialmente cuando se posiciona hacia
 atrás \- tiene que rebobinar hasta el principio para encontrar el marco exacto.
 .TP
 .B \-idx (vea también \-forceidx)
-Reconstruye el INDICE del AVI si el INDICE no se encuentra,
-lo que permite posicionamiento.
-Es útil con descargas rotas/\:incompletas, o AVIs que están mal creados.
+Reconstruye el índice de los archivos cuando no se encuentre,
+lo que permite las búsquedas.
+Es útil con descargas rotas/\:incompletas, o archivos que están mal creados.
 .br
 .I NOTA:
 Solo puede usar esta opción si el medio que está reproduciendo soporta
@@ -1652,6 +1656,9 @@ Salida de audio a través del demonio Arts.
 .TP
 .B esd\ \ \ \ 
 Salida de audio a través del demonio ESD.
+.TP
+.B jack\ \ \ \ 
+Salida de audio a través de JACK (Jack Audio Connection Kit).
 .TP
 .B nas\ \ \ \ 
 Salida de audio a través de NAS.
