@@ -1,4 +1,4 @@
-// AVI & MPEG Player    v0.18   (C) 2000-2001. by A'rpi/ESP-team
+// Movie Player    v0.90   (C) 2000-2002. by A'rpi/ESP-team & `cat AUTHORS`
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,7 +34,7 @@
 #endif
 
 #include "libvo/video_out.h"
-extern void* mDisplay; // Display* mDisplay;
+//extern void* mDisplay; // Display* mDisplay;
 
 #include "libvo/font_load.h"
 #include "libvo/sub.h"
@@ -47,7 +47,10 @@ extern void* mDisplay; // Display* mDisplay;
 
 #include "codec-cfg.h"
 
-#include "dvdauth.h"
+#ifdef HAVE_LIBCSS
+#include "libmpdemux/dvdauth.h"
+#endif
+
 #ifdef USE_DVDNAV
 #include <dvdnav.h>
 #endif
@@ -56,9 +59,9 @@ extern void* mDisplay; // Display* mDisplay;
 #include "vobsub.h"
 
 #include "linux/getch2.h"
-#include "linux/keycodes.h"
+//#include "linux/keycodes.h"
 #include "linux/timer.h"
-#include "linux/shmem.h"
+//#include "linux/shmem.h"
 
 #include "cpudetect.h"
 
@@ -82,7 +85,6 @@ int quiet=0;
 #include "libmpdemux/tv.h"
 
 extern int tv_param_on;
-//extern tvi_handle_t *tv_handler;
 #endif
 
 //**************************************************************************//
@@ -124,10 +126,10 @@ static int cfg_include(struct config *conf, char *filename){
 
 static int max_framesize=0;
 
-#include "stream.h"
-#include "demuxer.h"
-#include "stheader.h"
-#include "parse_es.h"
+#include "libmpdemux/stream.h"
+#include "libmpdemux/demuxer.h"
+#include "libmpdemux/stheader.h"
+//#include "parse_es.h"
 
 #include "libmpcodecs/dec_audio.h"
 #include "libmpcodecs/dec_video.h"
@@ -153,8 +155,6 @@ static int total_frame_cnt=0;
 static int drop_frame_cnt=0; // total number of dropped frames
 int benchmark=0;
 
-// static int play_in_bg=0;
-
 // options:
        int auto_quality=0;
 static int output_quality=0;
@@ -166,10 +166,12 @@ int osd_level_saved=-1;
 int osd_visible=100;
 
 // seek:
-char *seek_to_sec=NULL;
-off_t seek_to_byte=0;
-off_t step_sec=0;
-int loop_times=-1;
+static char *seek_to_sec=NULL;
+static off_t seek_to_byte=0;
+static off_t step_sec=0;
+static int loop_times=-1;
+
+// may be changed by GUI:  (FIXME!)
 float rel_seek_secs=0;
 int abs_seek_pos=0;
 
@@ -184,8 +186,8 @@ int audio_id=-1;
 int video_id=-1;
 int dvdsub_id=-1;
 int vobsub_id=-1;
-char* audio_lang=NULL;
-char* dvdsub_lang=NULL;
+static char* audio_lang=NULL;
+static char* dvdsub_lang=NULL;
 static char* spudec_ifo=NULL;
 int vcd_track=0;
 char* filename=NULL; //"MI2-Trailer.avi";
@@ -220,6 +222,9 @@ static int play_n_frames_mf=-1;
 char* video_driver=NULL; //"mga"; // default
 char* audio_driver=NULL;
 
+extern char *vo_subdevice;
+extern char *ao_subdevice;
+
 // codec outfmt flags (defined in libmpcodecs/vd.c)
 extern int vo_flags;
 
@@ -238,15 +243,12 @@ subtitle* subtitles=NULL;
 float sub_last_pts = -303;
 #endif
 
-extern char *vo_subdevice;
-extern char *ao_subdevice;
-
 static stream_t* stream=NULL;
-
 static demuxer_t *demuxer=NULL;
 
 char* current_module=NULL; // for debugging
 
+// also modified by Gui/mplayer/gtk/eq.c:
 int vo_gamma_gamma = 1000;
 int vo_gamma_brightness = 1000;
 int vo_gamma_contrast = 1000;
@@ -256,7 +258,7 @@ int vo_gamma_hue = 1000;
 // ---
 
 #ifdef HAVE_RTC
-int nortc;
+static int nortc;
 #endif
 
 static unsigned int inited_flags=0;
@@ -272,7 +274,7 @@ static unsigned int inited_flags=0;
 #define INITED_DEMUXER  512
 #define INITED_ALL 0xFFFF
 
-void uninit_player(unsigned int mask){
+static void uninit_player(unsigned int mask){
   mask=inited_flags&mask;
 
   mp_msg(MSGT_CPLAYER,MSGL_DBG2,"\n*** uninit(0x%X)\n",mask);
@@ -362,7 +364,7 @@ void exit_player(char* how){
   exit(1);
 }
 
-void exit_sighandler(int x){
+static void exit_sighandler(int x){
   static int sig_count=0;
   ++sig_count;
   if(sig_count==5 || (inited_flags==0 && sig_count>1)) exit(1);
@@ -1234,8 +1236,8 @@ inited_flags|=INITED_VO;
 
 current_module="init_video_filters";
 
-sh_video->vfilter=vf_open_filter(NULL,"vo",video_out);
-sh_video->vfilter=append_filters(sh_video->vfilter);
+sh_video->vfilter=(void*)vf_open_filter(NULL,"vo",video_out);
+sh_video->vfilter=(void*)append_filters(sh_video->vfilter);
 
 current_module="init_video_codec";
 

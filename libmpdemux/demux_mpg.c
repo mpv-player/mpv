@@ -335,8 +335,6 @@ do{
   return 1;
 }
 
-//extern off_t seek_to_byte;
-
 void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,int flags){
     demux_stream_t *d_audio=demuxer->audio;
     demux_stream_t *d_video=demuxer->video;

@@ -7,7 +7,6 @@
 
 extern int use_gui;
 extern char* current_module;
-extern int fullscreen;
 extern int vcd_track;
 
 extern char ** audio_fm_list;
@@ -35,9 +34,13 @@ extern subtitle* vo_sub;
 extern char * filename;
 
 extern int stream_cache_size;
-extern int flip;
 extern int force_ni;
 extern int index_mode;
+
+// libmpcodecs:
+extern int fullscreen;
+extern int flip;
+
 extern int frame_dropping;
 
 extern int auto_quality;

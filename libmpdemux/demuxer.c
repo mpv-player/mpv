@@ -496,13 +496,12 @@ extern int num_elementary_packets1B6;
 extern int num_mp3audio_packets;
 
 // commandline options, flags:
-//extern int seek_to_byte;
 extern int force_ni;
 extern int pts_from_bps;
 
-extern int audio_id;
-extern int video_id;
-extern int dvdsub_id;
+//extern int audio_id;
+//extern int video_id;
+//extern int dvdsub_id;
 
 int asf_check_header(demuxer_t *demuxer);
 int read_asf_header(demuxer_t *demuxer);

@@ -110,7 +110,6 @@ if(vcd_track){
   if(ret2<0){ mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_ErrTrackSelect " (get)\n");return NULL;}
   ret=vcd_seek_to_track(f,vcd_track);
   if(ret<0){ mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_ErrTrackSelect " (seek)\n");return NULL;}
-//  seek_to_byte+=ret;
   mp_msg(MSGT_OPEN,MSGL_V,"VCD start byte position: 0x%X  end: 0x%X\n",ret,ret2);
 #ifdef __FreeBSD__
   if (ioctl (f, CDRIOCSETBLOCKSIZE, &bsize) == -1) {

@@ -20,8 +20,9 @@
 #include <sys/time.h>
 
 #include "config.h"
-#include "mp_msg.h"
+
 #include "version.h"
+#include "mp_msg.h"
 #include "help_mp.h"
 
 static char* banner_text=
@@ -34,12 +35,13 @@ static char* banner_text=
 #include "codec-cfg.h"
 #include "cfgparser.h"
 
-#include "stream.h"
-#include "demuxer.h"
-#include "stheader.h"
-#include "playtree.h"
+#include "libmpdemux/stream.h"
+#include "libmpdemux/demuxer.h"
+#include "libmpdemux/stheader.h"
+#include "libmpdemux/mp3_hdr.h"
+#include "libmpdemux/aviwrite.h"
 
-#include "aviwrite.h"
+#include "playtree.h"
 
 #include "libvo/video_out.h"
 
@@ -47,8 +49,6 @@ static char* banner_text=
 #include "libmpcodecs/dec_audio.h"
 #include "libmpcodecs/dec_video.h"
 #include "libmpcodecs/vf.h"
-
-#include "libmpdemux/mp3_hdr.h"
 
 // for MPEGLAYER3WAVEFORMAT:
 #include "loader/wine/mmreg.h"
@@ -64,7 +64,7 @@ static char* banner_text=
 
 #include <inttypes.h>
 
-#include "fastmemcpy.h"
+#include "libvo/fastmemcpy.h"
 
 #include "linux/timer.h"
 
@@ -87,17 +87,17 @@ int audio_id=-1;
 int video_id=-1;
 int dvdsub_id=-1;
 int vobsub_id=-1;
-char* audio_lang=NULL;
-char* dvdsub_lang=NULL;
+static char* audio_lang=NULL;
+static char* dvdsub_lang=NULL;
 static char* spudec_ifo=NULL;
 
-char** audio_codec_list=NULL;  // override audio codec
-char** video_codec_list=NULL;  // override video codec
-char** audio_fm_list=NULL;     // override audio codec family 
-char** video_fm_list=NULL;     // override video codec family 
+static char** audio_codec_list=NULL;  // override audio codec
+static char** video_codec_list=NULL;  // override video codec
+static char** audio_fm_list=NULL;     // override audio codec family 
+static char** video_fm_list=NULL;     // override video codec family 
 
-int out_audio_codec=-1;
-int out_video_codec=-1;
+static int out_audio_codec=-1;
+static int out_video_codec=-1;
 
 // audio stream skip/resync functions requires only for seeking.
 // (they should be implemented in the audio codec layer)
@@ -119,15 +119,15 @@ static float default_max_pts_correction=-1;//0.01f;
 static float max_pts_correction=0;//default_max_pts_correction;
 static float c_total=0;
 
-float audio_preload=0.5;
-float audio_delay=0.0;
-int audio_density=2;
+static float audio_preload=0.5;
+static float audio_delay=0.0;
+static int audio_density=2;
 
-float force_fps=0;
-float force_ofps=0; // set to 24 for inverse telecine
+static float force_fps=0;
+static float force_ofps=0; // set to 24 for inverse telecine
 static int skip_limit=-1;
 
-int force_srate=0;
+static int force_srate=0;
 
 char *vobsub_out=NULL;
 unsigned int vobsub_out_index=0;
@@ -189,7 +189,7 @@ int lame_param_ratio=-1; // unset
 float lame_param_scale=-1; // unset
 #endif
 
-static int vo_w=0, vo_h=0;
+//static int vo_w=0, vo_h=0;
 
 //-------------------------- config stuff:
 
@@ -243,7 +243,7 @@ void parse_cfgfiles( m_config_t* conf )
 
 //---------------------------------------------------------------------------
 
-int dec_audio(sh_audio_t *sh_audio,unsigned char* buffer,int total){
+static int dec_audio(sh_audio_t *sh_audio,unsigned char* buffer,int total){
     int size=0;
     int at_eof=0;
     while(size<total && !at_eof){
@@ -282,8 +282,8 @@ static void exit_sighandler(int x){
     interrupted=1;
 }
 
-aviwrite_t* muxer=NULL;
-FILE* muxer_f=NULL;
+static aviwrite_t* muxer=NULL;
+static FILE* muxer_f=NULL;
 
 // callback for ve_*.c:
 void mencoder_write_chunk(aviwrite_stream_t *s,int len,unsigned int flags){
@@ -600,8 +600,8 @@ case VCODEC_COPY:
 case VCODEC_FRAMENO:
     mux_v->bih=malloc(sizeof(BITMAPINFOHEADER));
     mux_v->bih->biSize=sizeof(BITMAPINFOHEADER);
-    mux_v->bih->biWidth=vo_w;
-    mux_v->bih->biHeight=vo_h;
+    mux_v->bih->biWidth=sh_video->disp_w;
+    mux_v->bih->biHeight=sh_video->disp_h;
     mux_v->bih->biPlanes=1;
     mux_v->bih->biBitCount=24;
     mux_v->bih->biCompression=mmioFOURCC('F','r','N','o');
