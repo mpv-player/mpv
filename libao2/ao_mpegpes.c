@@ -131,7 +131,7 @@ retry:
 }
 
 // close audio device
-static void uninit(){
+static void uninit(int immed){
 
 }
 

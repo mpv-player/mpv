@@ -132,7 +132,7 @@ static int init(int rate,int channels,int format,int flags){
 }
 
 // close audio device
-static void uninit(){
+static void uninit(int immed){
 	
 	if(ao_pcm_waveheader && fseek(fp, 0, SEEK_SET) == 0){ /* Write wave header */
 		wavhdr.file_length = wavhdr.data_length + sizeof(wavhdr) - 8;

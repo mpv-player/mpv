@@ -100,7 +100,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	return 1;
 }
 
-static void uninit()
+static void uninit(int immed)
 {
 	arts_close_stream(stream);
 	arts_free();

@@ -197,9 +197,9 @@ static int init(int rate,int channels,int format,int flags){
 }
 
 // close audio device
-static void uninit(){
+static void uninit(int immed){
   int i=0;
-  driver()->uninit();
+  driver()->uninit(immed);
   while(plugin(i))
     plugin(i++)->uninit();
   if(ao_plugin_local_data.plugins)

@@ -436,7 +436,7 @@ static void uninit_player(unsigned int mask){
   if(mask&INITED_AO){
     inited_flags&=~INITED_AO;
     current_module="uninit_ao";
-    audio_out->uninit(); audio_out=NULL;
+    audio_out->uninit(1); audio_out=NULL;
   }
 
 #ifdef HAVE_NEW_GUI

@@ -263,10 +263,16 @@ ac3_retry:
 }
 
 // close audio device
-static void uninit(){
+static void uninit(int immed){
     if(audio_fd == -1) return;
+#ifdef SNDCTL_DSP_SYNC
+    // to get the buffer played
+    if (!immed)
+	ioctl(audio_fd, SNDCTL_DSP_SYNC, NULL);
+#endif
 #ifdef SNDCTL_DSP_RESET
-    ioctl(audio_fd, SNDCTL_DSP_RESET, NULL);
+    if (immed)
+	ioctl(audio_fd, SNDCTL_DSP_RESET, NULL);
 #endif
     close(audio_fd);
     audio_fd = -1;
@@ -274,7 +280,7 @@ static void uninit(){
 
 // stop playing and empty buffers (for seeking/pause)
 static void reset(){
-    uninit();
+    uninit(1);
     audio_fd=open(dsp, O_WRONLY);
     if(audio_fd < 0){
 	mp_msg(MSGT_AO,MSGL_ERR,"\nFatal error: *** CANNOT RE-OPEN / RESET AUDIO DEVICE *** %s\n", strerror(errno));
@@ -300,7 +306,7 @@ static void reset(){
 // stop playing, keep buffers (for pause)
 static void audio_pause()
 {
-    uninit();
+    uninit(1);
 }
 
 // resume playing, after audio_pause()

@@ -353,7 +353,7 @@ static float get_delay()
 
 
 /* unload plugin and deregister from coreaudio */
-static void uninit()
+static void uninit(int immed)
 {
   int i;
   OSErr status;

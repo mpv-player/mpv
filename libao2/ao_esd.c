@@ -274,7 +274,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 /*
  * close audio device
  */
-static void uninit()
+static void uninit(int immed)
 {
     if (esd_play_fd >= 0) {
 	esd_close(esd_play_fd);

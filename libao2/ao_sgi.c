@@ -118,7 +118,7 @@ static int init(int rate, int channels, int format, int flags) {
 }
 
 // close audio device
-static void uninit() {
+static void uninit(int immed) {
 
   /* TODO: samplerate should be set back to the value before mplayer was started! */
 

@@ -167,7 +167,7 @@ static int init(int rate,int channels,int format,int flags)
 }
 
 // close audio device
-static void uninit()
+static void uninit(int immed)
 {
     while (buffered_bytes > 0)
 	usec_sleep(50000);
