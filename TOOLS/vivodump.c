@@ -132,32 +132,14 @@ int c;
 unsigned int head=-1;
 int pos=0;
 int frames=0;
-FILE *f=fopen("coap.viv","rb");
-FILE *f2=fopen("coap.avi","wb");
+FILE *f=fopen("bion1vd-28.viv","rb");
+FILE *f2=fopen("bion1vd-28.avi","wb");
 aviwrite_t* avi=aviwrite_new_muxer();
 aviwrite_stream_t* mux=aviwrite_new_stream(avi,AVIWRITE_TYPE_VIDEO);
+//unsigned char* buffer=malloc(0x200000);
 int i;
-
-while((c=fgetc(f))>=0){
-    ++pos;
-    head=(head<<8)|c;
-    if((head&0xFFFFFF)==0x80){
-        unsigned char buf[33];
-	int i;
-	buf[0]=buf[1]=0; buf[2]=0x80;
-	printf("%08X: 00 00 80",pos-3);
-	postable[frames++]=pos-3;
-	for(i=0;i<8;i++){
-	    c=fgetc(f);++pos;
-	    printf(" %02X",c);
-	    buf[3+i]=c;
-	}
-	printf("\n");
-	h263_decode_picture_header(buf);
-    }
-}
-postable[frames]=pos;
-printf("%d frames\n",frames);
+int v_id=0;
+int flag=0;
 
 mux->buffer_size=0x200000;
 mux->buffer=malloc(mux->buffer_size);
@@ -165,23 +147,54 @@ mux->buffer=malloc(mux->buffer_size);
 mux->h.dwScale=1; 
 mux->h.dwRate=10; 
 
-
 mux->bih=malloc(sizeof(BITMAPINFOHEADER));
 mux->bih->biSize=sizeof(BITMAPINFOHEADER);
-mux->bih->biWidth=width;
-mux->bih->biHeight=height;
 mux->bih->biPlanes=1;
 mux->bih->biBitCount=24;
 mux->bih->biCompression=0x6f766976;//      7669766f;
-mux->bih->biSizeImage=3*width*height;
 aviwrite_write_header(avi,f2);
 
-for(i=0;i<frames;i++){
-    int len=postable[i+1]-postable[i];
-    fseek(f,postable[i],SEEK_SET);
-    fread(mux->buffer,len,1,f);
-    aviwrite_write_chunk(avi,mux,f2,len,0x10);
+while((c=fgetc(f))>=0){
+    if(!flag && c!=0x40 && c!=0x10) continue;
+    flag=1;
+
+    printf("%02X\n",c);
+    if((c&0xF0)==0x40){
+	// audio
+	printf("audio: %02X (24)\n",c);
+	for(i=0;i<24;i++) fgetc(f);
+	continue;
+    }
+    if(((c&0xF0)==0x10 || (c&0xF0)==0x20) && (c&0x0F)!=v_id){
+	// end of frame:
+	printf("Frame size: %d\n",mux->buffer_len);
+	h263_decode_picture_header(mux->buffer);
+	aviwrite_write_chunk(avi,mux,f2,mux->buffer_len,0x10);
+	mux->buffer_len=0;
+    }
+    v_id=c&0x0F;
+    if((c&0xF0)==0x10){
+	// 128 byte
+	printf("video: %02X (128)\n",c);
+	fread(mux->buffer+mux->buffer_len,128,1,f);
+	mux->buffer_len+=128;
+	continue;
+    }
+    if((c&0xF0)==0x20){
+	// 128 byte
+	int len=fgetc(f);
+	printf("video: %02X (%d)\n",c,len);
+	fread(mux->buffer+mux->buffer_len,len,1,f);
+	mux->buffer_len+=len;
+	continue;
+    }
+    printf("error!\n");
 }
+
+mux->bih->biWidth=width;
+mux->bih->biHeight=height;
+mux->bih->biSizeImage=3*width*height;
+
 aviwrite_write_index(avi,f2);
 fseek(f2,0,SEEK_SET);
 aviwrite_write_header(avi,f2);
