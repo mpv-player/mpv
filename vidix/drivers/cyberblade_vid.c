@@ -506,16 +506,13 @@ int vixConfigPlayback(vidix_playback_t *info)
 			HWinStart=(TVHTotal-HDisp)&15;
 			HWinStart|=(HTotal-HDisp)&15;
 			HWinStart+=(TVHTotal-TVHSyncStart)-49;
- 
-			VWinStart=(TVVTotal-VDisp)/2-1;
-			VWinStart-=(1-((TVVTotal-VDisp)&1))+4;
 		}
 		else
 		{
 			LOGWRITE("[cyberblade] Using Standard CRTC\n");
 			HWinStart=(HTotal-HSync)+15;
-			VWinStart=(VTotal-VSync)-8;
 		}
+                VWinStart=(VTotal-VSync)-8;
 
 		printf("[cyberblade] HTotal: 0x%x, HSStart: 0x%x\n",HTotal,HSync); 
 		printf("  VTotal: 0x%x, VStart: 0x%x\n",VTotal,VSync);
