@@ -34,7 +34,7 @@ CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader -Ilibvo2 $(EXTRA_INC) # -Wall
 VO_LIBS = -Llibvo2 -lvo2 $(X_LIB) $(DXR3_LIB) $(GGI_LIB) $(MLIB_LIB) $(PNG_LIB) $(SDL_LIB) $(SVGA_LIB)
 endif
 
-A_LIBS = -Lmp3lib -lMP3 -Llibac3 -lac3 $(ALSA_LIB) $(MAD_LIB) $(VORBIS_LIB) $(SGIAUDIO_LIB)
+A_LIBS = -Lmp3lib -lMP3 -Llibac3 -lac3 $(ALSA_LIB) $(NAS_LIB) $(MAD_LIB) $(VORBIS_LIB) $(SGIAUDIO_LIB)
 
 OSDEP_LIBS = -Llinux -losdep
 PP_LIBS = -Lpostproc -lpostproc
