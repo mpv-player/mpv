@@ -738,20 +738,28 @@ case "$host_arch" in
     # LGB: check -mcpu and -march swithing step by step with enabling
     # to fall back till 386.
 
+    # gcc >= 3.4.0  doesn't support -mcpu, we have to use -mtune instead
+
+    if [ "$_cc_major" -gt 3 ] || ( [ "$_cc_major" = 3 ] && [ "$_cc_minor" -ge 4 ]) ; then
+	cpuopt=-mtune
+    else
+	cpuopt=-mcpu
+    fi
+
     echocheck "GCC & CPU optimization abilities"
 cat > $TMPC << EOF
 int main(void) { return 0; }
 EOF
   if test "$_runtime_cpudetection" = no ; then
     if test "$proc" = "athlon-xp" || test "$proc" = "athlon-4" || test "$proc" = "athlon-tbird"; then
-      cc_check -march=$proc -mcpu=$proc || proc=athlon
+      cc_check -march=$proc $cpuopt=$proc || proc=athlon
     fi
     if test "$proc" = "k6-3" || test "$proc" = "k6-2"; then
-      cc_check -march=$proc -mcpu=$proc  || proc=k6
+      cc_check -march=$proc $cpuopt=$proc  || proc=k6
     fi
     if test "$proc" = "k6"; then
-      if not cc_check -march=$proc -mcpu=$proc; then
-        if cc_check -march=i586 -mcpu=i686; then
+      if not cc_check -march=$proc $cpuopt=$proc; then
+        if cc_check -march=i586 $cpuopt=i686; then
           proc=i586-i686
         else 
           proc=i586
@@ -759,37 +767,37 @@ EOF
       fi
     fi
     if test "$proc" = "pentium4" || test "$proc" = "pentium3" || test "$proc" = "pentium2" || test "$proc" = "athlon"; then
-      cc_check -march=$proc -mcpu=$proc  || proc=i686
+      cc_check -march=$proc $cpuopt=$proc  || proc=i686
     fi
     if test "$proc" = "i686" || test "$proc" = "pentium-mmx"; then
-      cc_check -march=$proc -mcpu=$proc  || proc=i586
+      cc_check -march=$proc $cpuopt=$proc  || proc=i586
     fi
     if test "$proc" = "i586" ; then
-      cc_check -march=$proc -mcpu=$proc  || proc=i486
+      cc_check -march=$proc $cpuopt=$proc  || proc=i486
     fi
     if test "$proc" = "i486" ; then
-      cc_check -march=$proc -mcpu=$proc  || proc=i386
+      cc_check -march=$proc $cpuopt=$proc  || proc=i386
     fi
     if test "$proc" = "i386" ; then
-      cc_check -march=$proc -mcpu=$proc  || proc=error
+      cc_check -march=$proc $cpuopt=$proc  || proc=error
     fi
     if test "$proc" = "error" ; then
-      echores "Your $_cc does not even support \"i386\" for '-march' and '-mcpu'."
+      echores "Your $_cc does not even support \"i386\" for '-march' and '$cpuopt'."
       _mcpu=""
       _march=""
       _optimizing=""
     elif test "$proc" = "i586-i686"; then
       _march="-march=i586"
-      _mcpu="-mcpu=i686"
+      _mcpu="$cpuopt=i686"
       _optimizing="$proc"
     else
       _march="-march=$proc"
-      _mcpu="-mcpu=$proc"
+      _mcpu="$cpuopt=$proc"
       _optimizing="$proc"
     fi
   else
     # i686 is probably the most common CPU - optimize for it
-    _mcpu="-mcpu=i686"
+    _mcpu="$cpuopt=i686"
     # at least i486 required, for bswap instruction
     _march="-march=i486"
     cc_check $_mcpu || _mcpu=""
@@ -802,10 +810,10 @@ EOF
       # TODO: it may be a good idea to check GCC and fall back in all cases
       if test "$host_arch" = "i586-i686"; then
         _march="-march=i586"
-        _mcpu="-mcpu=i686"
+        _mcpu="$cpuopt=i686"
       else      
         _march="-march=$host_arch"
-        _mcpu="-mcpu=$host_arch"
+        _mcpu="$cpuopt=$host_arch"
       fi
     
       proc="$host_arch"
