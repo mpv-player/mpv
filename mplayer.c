@@ -348,13 +348,13 @@ static char* rtc_device;
 #endif
 
 #ifdef USE_EDL
-edl_record_ptr edl_records = NULL; // EDL entries memory area
-edl_record_ptr next_edl_record = NULL; // only for traversing edl_records
-int edl_memory_slots = 0; // No of EDL entries (1 for skip + 2 for each mute)
-int edl_operations = 0; // No of EDL operations, skip + mute
-short edl_decision = 0; // 1 when an EDL operation has been made
-FILE* edl_fd = NULL; // fd to write to when in -edlout mode
-int edl_mute_count = 0; // even number when mute has been matched mute/unmute
+edl_record_ptr edl_records = NULL; /// EDL entries memory area
+edl_record_ptr next_edl_record = NULL; /// only for traversing edl_records
+int edl_memory_slots = 0; /// number of EDL entries (1 for skip + 2 for each mute)
+int edl_operations = 0; /// number of EDL operations, skip + mute
+short edl_decision = 0; /// 1 when an EDL operation has been made
+FILE* edl_fd = NULL; /// fd to write to when in -edlout mode
+int edl_mute_count = 0; /// even number when mute and unmute has been matched
 #endif
 
 static unsigned int inited_flags=0;
@@ -476,6 +476,9 @@ static void exit_player_with_rc(char* how, int rc){
 
   current_module="exit_player";
 
+#ifdef USE_EDL
+  if(edl_records != NULL) free(edl_records); // free mem allocated for EDL
+#endif
   if(how) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_ExitingHow,mp_gettext(how));
   mp_msg(MSGT_CPLAYER,MSGL_DBG2,"max framesize was %d bytes\n",max_framesize);
 
@@ -975,13 +978,8 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 #ifdef USE_EDL
 if (edl_check_mode() == EDL_ERROR && edl_filename)
 {
-    mp_msg(MSGT_CPLAYER, MSGL_WARN,
-           "Cant use -edl and -edlout at the same time\n");
-    mp_msg(MSGT_CPLAYER, MSGL_WARN, "Not using EDL at all!!!\n");
-    edl_filename = NULL;
-    edl_output_filename = NULL;
-    edl_records = NULL;
-    next_edl_record = edl_records;
+    mp_msg(MSGT_CPLAYER, MSGL_ERR, MSGTR_EdlCantUseBothModes);
+    exit_player(NULL);
 } else if (edl_filename)
 {
     edl_memory_slots = edl_count_entries();
@@ -990,20 +988,18 @@ if (edl_check_mode() == EDL_ERROR && edl_filename)
         edl_records = calloc(edl_memory_slots, sizeof(struct edl_record));
         if (edl_records == NULL)
         {
-            mp_msg(MSGT_CPLAYER, MSGL_FATAL,
-                   "Cant allocate enough memory to hold EDL data, exiting!\n");
+            mp_msg(MSGT_CPLAYER, MSGL_FATAL, MSGTR_EdlOutOfMem);
             exit_player(NULL);	    
         } else
         {
             if ((edl_operations = edl_parse_file(edl_records)) > 0)
             {
-                mp_msg(MSGT_CPLAYER, MSGL_INFO, "Readed %d EDL actions\n",
+                mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_EdlRecordsNo,
                        edl_operations);
             } else
             {
 
-                mp_msg(MSGT_CPLAYER, MSGL_INFO,
-                       "There are no EDL actions to take care of\n");
+                mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_EdlQueueEmpty);
             }
         }
     }
@@ -1014,11 +1010,9 @@ if (edl_check_mode() == EDL_ERROR && edl_filename)
 {
     if ((edl_fd = fopen(edl_output_filename, "w")) == NULL)
     {
-        mp_msg(MSGT_CPLAYER, MSGL_WARN, 
-	       "Error opening file [%s] for writing!\n",
+        mp_msg(MSGT_CPLAYER, MSGL_ERR, MSGTR_EdlCantOpenForWrite,
                edl_output_filename);
-        edl_output_filename = NULL;
-        next_edl_record = edl_records;
+        exit_player(NULL);
     }
 }
 #endif
@@ -2450,7 +2444,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 #ifdef USE_EDL
  if( next_edl_record ) { // Are we (still?) doing EDL?
   if ( !sh_video ) {
-    mp_msg( MSGT_CPLAYER, MSGL_ERR, "Cannot use edit list without video. EDL disabled.\n" );
+    mp_msg( MSGT_CPLAYER, MSGL_ERR, MSGTR_EdlNOsh_video );
     next_edl_record->next = NULL;
   } else {
    if( sh_video->pts >= next_edl_record->start_sec ) {
@@ -2464,7 +2458,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
        edl_decision = 1;
      } else if( next_edl_record->action == EDL_MUTE ) {
        mixer_mute(&mixer);
-       edl_mute_count++; // new edl seek behavior need this
+       edl_mute_count++; // new EDL seek behavior needs this
 #ifdef DEBUG_EDL
        printf( "\nEDL_MUTE: [%f]\n", next_edl_record->start_sec );
 #endif
@@ -3524,16 +3518,16 @@ if(rel_seek_secs || abs_seek_pos){
   }
 #ifdef USE_EDL
 /*
- * We Saw a seek, have to rewind the edl operations stak
- * and find the next edl action to take care off
+ * We saw a seek, have to rewind the EDL operations stack
+ * and find the next EDL action to take care of.
  */
 
 next_edl_record = edl_records;
 
 while (next_edl_record)
 {
-    /* trying to remember if we need to mute/unmute first
-     * prior edl implementation lacks this
+    /* Trying to remember if we need to mute/unmute first;
+     * prior EDL implementation lacks this.
      */
   
     if (next_edl_record->start_sec >= sh_video->pts)

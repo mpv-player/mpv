@@ -159,6 +159,18 @@ static char help_text[]=
 "  DOCS/HTML/en/bugreports.html and follow the instructions there. We can't and\n"\
 "  won't help unless you provide this information when reporting a possible bug.\n"
 
+#define MSGTR_EdlCantUseBothModes "Can't use -edl and -edlout at the same time.\n"
+#define MSGTR_EdlOutOfMem "Can't allocate enough memory to hold EDL data.\n"
+#define MSGTR_EdlRecordsNo "Read %d EDL actions.\n"
+#define MSGTR_EdlQueueEmpty "There are no EDL actions to take care of.\n"
+#define MSGTR_EdlCantOpenForWrite "Error opening file [%s] for writing.\n"
+#define MSGTR_EdlCantOpenForRead "Can't open EDL file [%s] for reading.\n"
+#define MSGTR_EdlNOsh_video "Cannot use EDL without video, disabling.\n"
+#define MSGTR_EdlNOValidLine "Invalid EDL line: %s\n"
+#define MSGTR_EdlBadlyFormattedLine "Badly formatted EDL line [%d] Discarding.\n"
+#define MSGTR_EdlBadLineOverlap "Last stop position was [%f]; next start is "\
+"[%f]. Entries must be in chronological order, cannot overlap. Discarding.\n"
+#define MSGTR_EdlBadLineBadStop "Stop time has to be after start time.\n"
 
 // mencoder.c:
 

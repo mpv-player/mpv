@@ -163,6 +163,21 @@ static char help_text[]=
 "  se encuentran. No podemos y no lo ayudaremos a menos que nos provea esa\n"\
 "  información cuando este reportando algún posible defecto.\n"
 
+#define MSGTR_EdlCantUseBothModes "Imposible usar -edl y -edlout al mismo tiempo.\n"
+#define MSGTR_EdlOutOfMem "No hay memoria suficiente para almacenar los datos EDL.\n"
+#define MSGTR_EdlRecordsNo "Leidas %d acciones EDL.\n"
+#define MSGTR_EdlQueueEmpty "No hay acciones EDL de las que ocuparse.\n"
+#define MSGTR_EdlCantOpenForWrite "Error tratando de escribir en [%s].\n"
+#define MSGTR_EdlCantOpenForRead "Error tratando de leer desde [%s].\n"
+#define MSGTR_EdlNOsh_video "Imposible usar EDL sin video.\n"
+#define MSGTR_EdlNOValidLine "Linea EDL inválida: %s\n"
+#define MSGTR_EdlBadlyFormattedLine "Ignorando linea EDL mal formateada [%d].\n"
+#define MSGTR_EdlBadLineOverlap "Ultima posición de parada fue [%f]; próxima "\
+"posición de partida es [%f]. Las operaciones deben estar en orden cronológico"\
+", sin sobreponerse, ignorando.\n"
+#define MSGTR_EdlBadLineBadStop "La posición de parada debe ser posterior a la"\
+" posición de partida.\n"
+
 // mencoder.c:
 
 #define MSGTR_UsingPass3ControllFile "Usando el archivo de control pass3: %s\n"

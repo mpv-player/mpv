@@ -3,8 +3,17 @@
 #include "config.h"
 #include "mp_msg.h"
 #include "edl.h"
+#include "help_mp.h"
 
 #ifdef USE_EDL
+
+/**
+ *  We can't do -edl and -edlout at the same time
+ *  so we check that here.
+ *
+ *  \return EDL_ERROR on error and 1 otherwise.
+ *  \brief Makes sure EDL has been called correctly.
+ */
 
 int edl_check_mode(void)
 {
@@ -15,6 +24,13 @@ int edl_check_mode(void)
 
     return (1);
 }
+
+/** Calculates the total amount of edl_records we will need
+ *  to hold the EDL operations queue, we need one edl_record
+ *  for each SKIP and two for each MUTE.
+ *  \return Number of necessary EDL entries, EDL_ERROR when file can't be read.
+ *  \brief Counts needed EDL entries.
+ */
 
 int edl_count_entries(void)
 {
@@ -29,8 +45,7 @@ int edl_count_entries(void)
     {
         if ((fd = fopen(edl_filename, "r")) == NULL)
         {
-            mp_msg(MSGT_CPLAYER, MSGL_WARN,
-                   "Invalid EDL file, cant open '%s' for reading!\n",
+            mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlCantOpenForRead,
                    edl_filename);
             return (EDL_ERROR);
         } else
@@ -46,8 +61,7 @@ int edl_count_entries(void)
                         entries += 2;
                 } else
                 {
-                    mp_msg(MSGT_CPLAYER, MSGL_WARN,
-                           "Invalid EDL line: %s\n", line);
+                    mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlNOValidLine, line);
                     return (EDL_ERROR);
                 }
 
@@ -60,6 +74,11 @@ int edl_count_entries(void)
 
     return (entries);
 }
+
+/** Parses edl_filename to fill EDL operations queue.
+ *  \return Number of stored EDL records or EDL_ERROR when file can't be read.
+ *  \brief Fills EDL operations queue.
+ */
 
 int edl_parse_file(edl_record_ptr edl_records)
 {
@@ -84,9 +103,8 @@ int edl_parse_file(edl_record_ptr edl_records)
                 if ((sscanf(line, "%f %f %d", &start, &stop, &action))
                     != 3)
                 {
-                    mp_msg(MSGT_CPLAYER, MSGL_WARN,
-                           "Badly formated EDL line [%d]. Discarding!\n",
-                           lineCount + 1, line);
+                    mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlBadlyFormattedLine,
+                           lineCount + 1);
                     continue;
                 } else
                 {
@@ -95,21 +113,18 @@ int edl_parse_file(edl_record_ptr edl_records)
                         if (start <= (next_edl_record - 1)->stop_sec)
                         {
                             mp_msg(MSGT_CPLAYER, MSGL_WARN,
-                                   "Invalid EDL line [%d]: %s",
-                                   lineCount, line);
+                                   MSGTR_EdlNOValidLine, line);
                             mp_msg(MSGT_CPLAYER, MSGL_WARN,
-                                   "Last stop position was [%f]; next start is [%f]. Entries must be in chronological order and cannot overlap. Discarding!\n",
+                                   MSGTR_EdlBadLineOverlap,
                                    (next_edl_record - 1)->stop_sec, start);
                             continue;
                         }
                     }
                     if (stop <= start)
                     {
-                        mp_msg(MSGT_CPLAYER, MSGL_WARN,
-                               "Invalid EDL line [%d]: %s", lineCount,
+                        mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlNOValidLine,
                                line);
-                        mp_msg(MSGT_CPLAYER, MSGL_WARN,
-                               "Stop time must follow start time. Discarding!\n");
+                        mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlBadLineBadStop);
                         continue;
                     }
                     next_edl_record->action = action;
