@@ -123,10 +123,12 @@ static int config(struct vf_instance_s* vf,
 
     lavc_venc_context.flags|= lavc_param_v4mv ? CODEC_FLAG_4MV : 0;
 
-    /* motion estimation (0 = none ... 3 = high quality but slow) */
-    /* this is just an extern from libavcodec but it should be in the
-       encoder context - FIXME */
+#ifdef ME_ZERO
+    // workaround Juanjo's stupid incompatible change:
     motion_estimation_method = lavc_param_vme;
+#else
+    lavc_venc_context.me_method = ME_ZERO+lavc_param_vme;
+#endif
 
     /* fixed qscale :p */
     if (lavc_param_vqscale)
