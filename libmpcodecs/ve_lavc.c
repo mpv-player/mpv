@@ -446,7 +446,10 @@ static int config(struct vf_instance_s* vf,
 
 	if (e && ratio > 0.1 && ratio < 10.0) {
 #if LIBAVCODEC_BUILD >= 4687
-	    lavc_venc_context->sample_aspect_ratio= av_d2q(ratio * height / width, 30000);
+	    lavc_venc_context->sample_aspect_ratio= av_d2q(ratio * height / width, 255);
+	    mp_dbg(MSGT_MENCODER, MSGL_DBG2, "sample_aspect_ratio: %d/%d\n", 
+                lavc_venc_context->sample_aspect_ratio.num,
+                lavc_venc_context->sample_aspect_ratio.den);
 #else
 	    lavc_venc_context->aspect_ratio= ratio;
 #endif
