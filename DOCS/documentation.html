@@ -1583,32 +1583,28 @@ end
 <UL>
   <LI><B><A HREF="mailto:mplayer-users@mplayerhq.hu">Árpád Gereöffy (A'rpi/ESP-team)</A></B>
     <UL>
-      <LI>player code (mpeg stream demultiplexer and avi/asf parser, A-V sync, seek...)</LI>
+      <LI>mplayer, mencoder core, A-V sync</LI>
+      <LI>libmpdemux, demultiplexer for mpeg, asf, avi, various fixes in others</LI>
       <LI>mp3lib, based on mpglib sources  [MP3 audio decoder]</LI>
       <LI>getch2  [keyboard handler]</LI>
       <LI>some changes in libmpeg2 code (progressive frames, bitrate &amp; fps support)</LI>
       <LI>libvo improvements: adding OpenGL support, bugfix in mga driver...</LI>
       <LI>triple buffering &amp; YUY2 support (for DivX/MPEG4) into mga_vid driver</LI>
-      <LI>scripts in the TVout directory (TVout on Matrox G400DH, read documentation)</LI>
-      <LI>hacking DivX/Mpeg4 VfW codecs to get YUV output</LI>
-      <LI>opendivx decoder speed optimizations (see opendivx/ChangeLog)</LI>
       <LI>OSD &amp; SUB display code</LI>
       <LI>FFmpeg/libavcodec integration</LI>
       <LI>DivX4Linux (Project Mayo) support (see documentation)</LI>
       <LI>New DVD-Support using libdvdread</LI>
-      <LI>DVB support</LI>
       <LI>MPEG PES output &amp; DVB card support</LI>
-      <LI>anything that isn't mentioned elsewhere</LI>
+      <LI>libmpcodecs design, porting video decoders, filters</LI>
     </UL>
   </LI>
   <LI><B><A HREF="mailto:pontscho@makacs.poliod.hu">Zoltán Ponekker (Pontscho/Fresh!)</A></B>
     <UL>
-      <LI>configure script and Makefiles for easy compile</LI>
+      <LI>the original configure script and Makefiles for easy compile</LI>
       <LI>GUI system</LI>
-      <LI>3DNow! support into mp3lib</LI>
-      <LI>3DNow! support into fastmemcpy.h</LI>
-      <LI>various X11 driver changes (keyboard handling, fullscreen, bpp detect, etc)</LI>
-      <LI>libvo: adding xmga driver, and fullscreen support to xv</LI>
+      <LI>3DNow! support into mp3lib and fastmemcpy.h</LI>
+      <LI>various X11 driver changes, fixes (keyboard handling, fullscreen, bpp detect, etc)</LI>
+      <LI>libvo: adding xmga driver</LI>
       <LI>audio mixer (volume) support</LI>
     </UL>
   </LI>
@@ -1616,7 +1612,7 @@ end
     <UL>
       <LI>configure script improvements</LI>
       <LI>Makefile improvements</LI>
-      <LI>preliminary DVD support</LI>
+      <LI>preliminary DVD support (libcss)</LI>
       <LI>various X11 cleanups and fixes</LI>
       <LI>HTMLization of documentation</LI>
     </UL>
@@ -1665,7 +1661,7 @@ end
       <LI>ALSA output driver in libao2</LI>
       <LI>vo_ggi output driver in libvo (www.ggi-project.org)</LI>
       <LI>XAnim codecs support</LI>
-      <LI>VIVO files support</LI>
+      <LI>VIVO files, codecs support</LI>
       <LI>TV grabbing support</LI>
       <LI>Quicktime hackings</LI>
       <LI>libavcodec support in MEncoder</LI>
@@ -1696,9 +1692,8 @@ end
       <LI>SDL audio driver in libao2</LI>
       <LI>RAW PCM/WAVE file writer for libao2</LI>
       <LI>Ogg Vorbis audio support</LI>
-      <LI>Various aspect code</LI>
+      <LI>Various aspect ratio code, prescaling support</LI>
       <LI>Win32 (Cygwin) port</LI>
-      <LI>priority support in codecs.conf (never used ;)</LI>
       <LI>DivX5Linux support</LI>
       <LI>AAC decoding support via libfaad2</LI>
       <LI>Darwin (MacOS X) port</LI>
@@ -1706,7 +1701,7 @@ end
   </LI>
   <LI><B><A HREF="mailto:telenieko@telenieko.com">TeLeNiEkO</A></B>
     <UL>
-      <LI>Spanish translation of documentation</LI>
+      <LI>Spanish translation of documentation (outdated)</LI>
     </UL>
   </LI>
   <LI><B><A HREF="mailto:mgraffam@idsi.net">Michael Graffam</A></B>
@@ -1726,10 +1721,10 @@ end
       <LI>memcpy optimizations for AMD K7 and Intel Pentium III  (fastmemcpy.h)</LI>
       <LI>CD-ROM tune info</LI>
       <LI>further 3DNow! optimizations into mp3lib and libac3 and FFmpeg</LI>
-      <LI>Russian translation of documentation</LI>
+      <LI>Russian translation of documentation (outdated)</LI>
       <LI>radeon_vid, rage128_vid, radeonfb</LI>
       <LI>libvo driver: vo_vesa</LI>
-      <LI>VIDIX and libdha design, programming</LI>
+      <LI>VIDIX and libdha design, programming, rage128/radeon vidix drivers</LI>
     </UL>
   </LI>
   <LI><B><A HREF="mailto:german@piraos.com">German Gomez Garcia</A></B>
@@ -1765,7 +1760,7 @@ end
   </LI>
   <LI><B><A HREF="mailto:bertrand_baudet@yahoo.com">Bertrand Baudet</A></B>
     <UL>
-      <LI>network streaming support</LI>
+      <LI>network streaming support author, maintainer</LI>
       <LI>CDDB support</LI>
     </UL>
   </LI>
@@ -1779,9 +1774,9 @@ end
       <LI>MMS network streaming patches</LI>
       <LI>Playtree and per-entry config</LI>
       <LI>Playlist parsers</LI>
-      <LI>New input</LI>
+      <LI>New input layer, slave mode improvements</LI>
       <LI>Audio only support</LI>
-      <LI>MP3, WAV and Ogg demuxers</LI>
+      <LI>MP3, WAV and Ogg demuxers, Ogg-in-AVI fixes</LI>
       <LI>Support for audio from external file</LI>
       <LI>DXR2 driver</LI>
       <LI>vo_aa improvements</LI>
@@ -1809,15 +1804,11 @@ end
       <LI>native AAlib driver (-vo aa)</LI>
     </UL>
   </LI>
-  <LI><B><A HREF="mailto:ktoman@email.cz">Kamil Toman</A></B>
-    <UL>
-      <LI>Czech fonts</LI>
-    </UL>
-  </LI>
   <LI><B><A HREF="mailto:iive@yahoo.com">Ivan Kalvatchev</A></B>
     <UL>
       <LI>interlaced MPEG2 support (libmpeg2)</LI>
       <LI>libvo2 draft</LI>
+      <LI>configfile parser fixes</LI>
     </UL>
   </LI>
   <LI><B><A HREF="mailto:p_l@gmx.fr">pl</A></B>
@@ -1828,12 +1819,13 @@ end
   </LI>
   <LI><B><A HREF="mailto:michaelni@gmx.at">Michael Niedermayer</A></B>
     <UL>
-      <LI>new postprocessing code (with deinterlacing etc...)</LI>
-      <LI>software scaling C/MMX/MMX2/3DNow support (swscale.c)</LI>
+      <LI>new, GPL postprocessing code (with deinterlacing etc...)</LI>
+      <LI>software scaling with MMX/MMX2/3DNow support (swscale.c)</LI>
       <LI>various rgb/yuv bpp converters</LI>
-      <LI>new, better IDCT code for libavcodec</LI>
+      <LI>new, better IDCT code for libavcodec, speedup of divx decoders</LI>
       <LI>runtime CPU detection</LI>
       <LI>SSE optimization of liba52</LI>
+      <LI>various encoder/decoder fixes, improvements in libavcodec, DR support</LI>
     </UL>
   </LI>
   <LI><B><A HREF="mailto:sgoethel@jausoft.com">Sven Goethel</A></B>
@@ -1843,7 +1835,7 @@ end
   </LI>
   <LI><B><A HREF="mailto:joy@pingfm.org">joy_ping</A></B>
     <UL>
-      <LI>ao_alsa9 fixes</LI>
+      <LI>ao_alsa9 fixes, AC3 passthrough support</LI>
     </UL>
   </LI>
   <LI><B><A HREF="mailto:eanholt@gladstone.uoregon.edu">Eric Anholt</A></B>
@@ -1866,13 +1858,12 @@ end
   </LI>
   <LI><B><A HREF="mailto:jeroen.dobbelaere@acunia.com">Jeroen Dobbelaere</A></B>
     <UL>
-      <LI><A HREF="http://mad.sourceforge.net">libmad</A> support</LI>
+      <LI>the original <A HREF="http://mad.sourceforge.net">libmad</A> support</LI>
     </UL>
   </LI>
   <LI><B><A HREF="mailto:dholm@telia.com">David Holm</A></B>
     <UL>
       <LI>DXR3 support</LI>
-      <LI>libmp1e import</LI>
     </UL>
   </LI>
   <LI><B><A HREF="mailto:takis@lumumba.luc.ac.be">Panagiotis Issaris</A></B>
@@ -1887,11 +1878,10 @@ end
       <LI>FLI demuxer, decoder</LI>
       <LI>Unified ADPCM Decoder (supports IMA/DVI, MS ADPCM, several others)</LI>
       <LI>FILM (.cpk) file demuxer</LI>
-      <LI>RoQ file demuxer</LI>
-      <LI>RoQ Audio/Video decoder</LI>
+      <LI>RoQ file demuxer, Audio/Video decoder</LI>
       <LI>QT SMC decoder</LI>
       <LI>QT RLE decoder</LI>
-      <LI>MS RLE decoder</LI>
+      <LI>MS RLE decoder re-implementation</LI>
     </UL>
   </LI>
   <LI><B><A HREF="mailto:ranma@gmx.at">Tobias Diedrich</A></B>
@@ -1921,6 +1911,7 @@ end
       <LI>original German docs translation</LI>
       <LI>some improvements in configure, small patches</LI>
       <LI>found somebody (Thilo Wunderlich) who sent a DVB card</LI>
+      <LI>msg translations (help_mp-XX.h) maintainer</LI>
     </UL>
   </LI>
   <LI><B><A HREF="mailto:kmkaplan@selfoffice.com">Kim Minh Kaplan</A></B>
@@ -1954,6 +1945,7 @@ end
     <UL>
       <LI>Open source QT RPZA decoder</LI>
       <LI>Open source HuffYUV decoder</LI>
+      <LI>Open source MSZH/ZLIB decoder</LI>
     </UL>
   </LI>
   <LI><B><A HREF="mailto:wojtekka@bydg.pdi.net">Wojtek Kaniewski</A></B>
@@ -1964,11 +1956,32 @@ end
   <LI><B><A HREF="mailto:freku045@student.liu.se">Fredrik Kuivinen</A></B>
     <UL>
       <LI>OSD/subtitles outside movie - for SDL</LI>
+      <LI>video filter layer draft, first implementation</LI>
+      <LI>virtualdub filter support (not yet finised/commited)</LI>
     </UL>
   </LI>
   <LI><B><A HREF="mailto:flo-mplayer-dev@gmx.net">Florian Schneider</A></B>
     <UL>
-      <LI>RealVideo libraries loader</LI>
+      <LI>RealVideo codec libraries interface, .rm demuxer fixes</LI>
+    </UL>
+  </LI>
+  <LI><B><A HREF="mailto:makovick@KMLinux.fjfi.cvut.cz">Jindrich Makovicka</A></B>
+    <UL>
+      <LI>various bugfixes</LI>
+      <LI>rewrote v4l video capturing, implemented audio capturing layer</LI>
+      <LI>freetype2 font rendering support</LI>
+    </UL>
+  </LI>
+  <LI><B><A HREF="mailto:dalias@aerifal.cx">D Richard Felker III</A></B>
+    <UL>
+      <LI>various bugfixes</LI>
+      <LI>soft eq and halfpack video filters</LI>
+    </UL>
+  </LI>
+  <LI><B><A HREF="mailto:dominik@rangers.eu.org">Dominik Mierzejewski</A></B>
+    <UL>
+      <LI>compiler warning fixes</LI>
+      <LI>official RPM packages</LI>
     </UL>
   </LI>
 </UL>
@@ -1989,14 +2002,15 @@ end
 <UL>
   <LI>Aaron Holtzman:  &lt;aholtzma@engr.uvic.ca&gt;
     <UL>
-      <LI>ac3dec (and libac3) author  [AC3 audio decoder]</LI>
-      <LI>mga_vid driver  [Matrox G200/G400 YUV Back-end Scaler]</LI>
+      <LI>ac3dec (and libac3) author  [old AC3 audio decoder]</LI>
+      <LI>the original mga_vid driver  [Matrox G200/G400 YUV Back-end Scaler]</LI>
       <LI>mpeg2dec        [Fast MPEG1/MPEG2 video decoder, currently used in player]</LI>
     </UL>
   </LI>
   <LI>Michel Lespinasse:  &lt;walken@zoy.org&gt;
     <UL>
       <LI>did large libmpeg2 changes for better speed and mpeg conformance</LI>
+      <LI>liba52 author  [current AC3 audio decoder]</LI>
     </UL>
   </LI>
   <LI>Eugene Kuznetsov:  &lt;divx@euro.ru&gt;
@@ -2008,8 +2022,8 @@ end
   </LI>
   <LI>Zdenek Kabelac:  &lt;kabi@informatics.muni.cz&gt;
     <UL>
-      <LI>current avifile maintainer(?)</LI>
-      <LI>some technical help about the win32 stuff and timers</LI>
+      <LI>current avifile maintainer</LI>
+      <LI>some technical help about the win32 stuff, .asf formats and timers</LI>
     </UL>
   </LI>
   <LI>Gerard Lantau: &lt;glantau@yahoo.fr&gt;
@@ -2049,6 +2063,11 @@ end
   other technical help from:</P>
 
 <UL>
+  <LI>Avery Lee &lt;phaeron@virtualdub.org&gt;
+    <UL>
+      <LI>VirtualDub author, help understanding AVI with VBR audio and other AVI issues</LI>
+    </UL>
+  </LI>
   <LI>John F. McGowan   http://www.jmcgowan.com/
     <UL>
       <LI>AVI FAQ author/collector. [site with many useful docs on codecs and avi format]</LI>
@@ -2079,8 +2098,9 @@ end
 <H2>English documentation</H2>
 <UL>
   <LI><B>user docs:</B> Gabucino</LI>
-  <LI><B>review, grammar fixes:</B> Diego Biurrun, Nilmoni Deb</LI>
+  <LI><B>review, grammar fixes:</B> Diego Biurrun, Nilmoni Deb, Andras Mohari</LI>
   <LI><B>input layer, lirc, slave mode docs:</B> Albeu</LI>
+  <LI><B>manpage:</B> <A HREF="mailto:jjermann@gmx.net">Jonas Jermann</A></LI>
   <LI><B>tech/* docs:</B> A'rpi</LI>
 </UL>
 
@@ -2098,8 +2118,11 @@ end
 <H2>Platforms/ports</H2>
 <UL>
   <LI><B>DEBIAN packaging:</B> Dariusz Pietrzak</LI>
+  <LI><B>RedHat/RPM packaging:</B> Dominik Mierzejewski</LI>
   <LI><B>FreeBSD support:</B> Vladimir Kushnir, Nexus</LI>
   <LI><B>BSD/OS support:</B> Steven Schultz</LI>
+  <LI><B>NetBSD support:</B> Bernd Ernesti</LI>
+  <LI><B>OpenBSD support:</B> Bjorn Sandell</LI>
   <LI><B>Solaris 8 support:</B> Jürgen Keil, pl</LI>
   <LI><B>MIPS support:</B> Oliver Schoenbrunner</LI>
   <LI><B>Win32/Cygwin support:</B> Atmosfear</LI>
@@ -2109,34 +2132,33 @@ end
 <UL>
   <LI><B>A-V sync code:</B> A'rpi</LI>
   <LI><B>libmpdemux, libmpcodecs:</B> A'rpi</LI>
-  <LI><B>TV input:</B> Alex</LI>
-  <LI><B>DVD support (newest - dvdnav):</B> Kees Cook</LI>
+  <LI><B>TV input:</B> Alex, Jindrich Makovicka</LI>
+  <LI><B>DVD support (experimental - dvdnav):</B> -</LI>
   <LI><B>DVD support (new - dvdread/dvdcss):</B> A'rpi</LI>
   <LI><B>DVD support (old - libcss):</B> LGB</LI>
   <LI><B>network streaming:</B> Bertrand Baudet</LI>
-  <LI><B>ascii subtitles file parser/reader/writer:</B> Lez</LI>
   <LI><B>DVD/VOB subtitles:</B> Kim Minh Kaplan</LI>
-  <LI><B>SUB/OSD renderer:</B> Adam Tla/lka</LI>
-  <LI><B>config files &amp; commandline parser:</B> Szabi</LI>
+  <LI><B>config files &amp; commandline parser:</B> Albeu, Szabi</LI>
   <LI><B>playtree, input layer:</B> Albeu</LI>
   <LI><B>postproc, colorspace converters:</B> Michael Niedermayer</LI>
-  <LI><B>LIRC support (old):</B> Acki</LI>
-  <LI><B>VIDIX core, libdha:</B> Nick Kurshev</LI>
+  <LI><B>libavcodec:</B> Michael Niedermayer, Fabrice Bellard @ ffmpeg</LI>
+  <LI><B>VIDIX core, libdha, drivers:</B> Alex, Nick Kurshev @ mplayerxp</LI>
 </UL>
 
 <H2>libvo drivers:</H2>
 <UL>
   <LI><B>vo_3dfx.c</B> - OBSOLETED, use xv or tdfxfb</LI>
-  <LI><B>vo_tdfxfb.c</B> - Mark Zealey (mark@zealos.org)</LI>
   <LI><B>vo_aa.c</B> - Folke Ashberg</LI>
-  <LI><B>vo_directfb.c</B> - <A HREF="mailto:Jiri.Svoboda@seznam.cz">Jiri Svoboda</A></LI>
   <LI><B>vo_dga.c</B> - Acki (outdated)</LI>
+  <LI><B>vo_directfb[2].c</B> - <A HREF="mailto:Jiri.Svoboda@seznam.cz">Jiri Svoboda</A></LI>
   <LI><B>vo_dxr2.c</B> - Albeu</LI>
   <LI><B>vo_dxr3.c</B> - David Holm</LI>
   <LI><B>vo_fbdev.c</B> - Szabi</LI>
-  <LI><B>vo_ggi.c</B> - al3x</LI>
+  <LI><B>vo_ggi.c</B> - Alex</LI>
+  <LI><B>vo_gif89a.c</B> - Joey Parrish</LI>
   <LI><B>vo_gl.c</B> - A'rpi (outdated)</LI>
   <LI><B>vo_gl2.c</B> - <A HREF="mailto:sgoethel@jausoft.com">Sven Goethel</A></LI>
+  <LI><B>vo_jpeg.c</B> - Pontscho</LI>
   <LI><B>vo_md5.c</B> - A'rpi</LI>
   <LI><B>vo_mga.c</B> - A'rpi</LI>
   <LI><B>vo_mpegpes.c</B> - A'rpi</LI>
@@ -2145,32 +2167,38 @@ end
   <LI><B>vo_png.c</B> - Atmos</LI>
   <LI><B>vo_sdl.c</B> - Atmos</LI>
   <LI><B>vo_svga.c</B> - Matan Ziv-Av</LI>
-  <LI><B>vo_vesa.c</B> - Nick Kurshev</LI>
+  <LI><B>vo_tdfxfb.c</B> - Mark Zealey (mark@zealos.org)</LI>
+  <LI><B>vo_vesa.c</B> - ? (Nick Kurshev)</LI>
   <LI><B>vo_x11.c</B> - Pontscho</LI>
-  <LI><B>vo_xmga.c</B> - Pontscho</LI>
+  <LI><B>vo_xmga.c</B> - Pontscho, A'rpi</LI>
   <LI><B>vo_xv.c</B> - Pontscho</LI>
-  <LI><B>vo_xvidix.c</B> - al3x</LI>
+  <LI><B>vo_xvidix.c</B> - Pontscho, Alex</LI>
+  <LI><B>vo_yuv4mpeg.c</B> - ?</LI>
   <LI><B>vo_zr.c</B> - <A HREF="mailto:rsnel@cube.dyndns.org">Rik Snel</A></LI>
 </UL>
 
 <H2>VIDIX drivers:</H2>
 <UL>
   <LI><B>genfb_vid</B> - al3x</LI>
-  <LI><B>mach64_vid</B> - Michael Niedermayer</LI>
+  <LI><B>mach64_vid</B> - Michael Niedermayer, A'rpi</LI>
   <LI><B>mga_vid</B> - al3x ?</LI>
   <LI><B>nvidia_vid</B> - al3x (development stopped - don't expect it)</LI>
-  <LI><B>radeon_vid</B> - Nick Kurshev</LI>
-  <LI><B>rage128_vid</B> - Nick Kurshev</LI>
+  <LI><B>radeon_vid</B> - al3x, Nick Kurshev @ mplayerxp</LI>
+  <LI><B>rage128_vid</B> - ? , Nick Kurshev @ mplayerxp</LI>
 </UL>
 
 <H2>libao2 drivers:</H2>
 <UL>
   <LI><B>ao_alsa5.c</B>  - al3x</LI>
-  <LI><B>ao_alsa9.c</B>  - al3x (fixed by <A HREF="mailto:joy@pingfm.org">joy_ping</A>)</LI>
+  <LI><B>ao_alsa9.c</B>  - <A HREF="mailto:joy@pingfm.org">joy_ping</A></LI>
+  <LI><B>ao_arts.c</B>   - ?</LI>
   <LI><B>ao_dxr2.c</B>   - Albeu</LI>
+  <LI><B>ao_mpegpes.c</B> - A'rpi</LI>
+  <LI><B>ao_nas.c</B>    - ?</LI>
   <LI><B>ao_null.c</B>   - A'rpi</LI>
   <LI><B>ao_oss.c</B>    - A'rpi</LI>
   <LI><B>ao_pcm.c</B>    - Atmos</LI>
+  <LI><B>ao_plugin.c</B> - Anders Johansson</LI>
   <LI><B>ao_sdl.c</B>    - Atmos</LI>
   <LI><B>ao_sgi.c</B>    - <A HREF="oliver.schoenbrunner@jku.at">Oliver Schoenbrunner</A></LI>
   <LI><B>ao_sun.c</B>    - Jürgen Keil</LI>
