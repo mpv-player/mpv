@@ -162,21 +162,27 @@ extern "C" void demux_open_rtp(demuxer_t* demuxer) {
 	  // Create a dummy video stream header
 	  // to make the main mplayer code happy:
 	  sh_video_t* sh_video = new_sh_video(demuxer,0);
+	  BITMAPINFOHEADER* bih
+	    = (BITMAPINFOHEADER*)calloc(1,sizeof(BITMAPINFOHEADER));
+	  bih->biSize = sizeof(BITMAPINFOHEADER);
+	  sh_video->bih = bih;
 	  demux_stream_t* d_video = demuxer->video;
 	  d_video->sh = sh_video; sh_video->ds = d_video;
 
-	  // Map known video MIME types to the format code that this prog uses:
+	  // Map known video MIME types to the BITMAPINFOHEADER parameters
+	  // that this program uses.  (Note that not all types need all
+	  // of the parameters to be set.)
 	  if (strcmp(subsession->codecName(), "MPV") == 0 ||
 	      strcmp(subsession->codecName(), "MP1S") == 0 ||
 	      strcmp(subsession->codecName(), "MP2T") == 0) {
 	    isMPEG = 1;
 	  } else if (strcmp(subsession->codecName(), "H263") == 0 ||
 		     strcmp(subsession->codecName(), "H263-1998") == 0) {
-	    sh_video->format = mmioFOURCC('H','2','6','3');
+	    bih->biCompression = sh_video->format
+	      = mmioFOURCC('H','2','6','3');
 	  } else if (strcmp(subsession->codecName(), "H261") == 0) {
-	    sh_video->format = mmioFOURCC('H','2','6','1');
-	  } else if (strcmp(subsession->codecName(), "JPEG") == 0) {
-	    sh_video->format = mmioFOURCC('M','J','P','G');
+	    bih->biCompression = sh_video->format
+	      = mmioFOURCC('H','2','6','1');
 	  } else {
 	    fprintf(stderr,
 		    "Unknown mplayer format code for MIME type \"video/%s\"\n",
@@ -186,23 +192,46 @@ extern "C" void demux_open_rtp(demuxer_t* demuxer) {
 	  // Create a dummy audio stream header
 	  // to make the main mplayer code happy:
 	  sh_audio_t* sh_audio = new_sh_audio(demuxer,0);
-	  sh_audio->wf = (WAVEFORMATEX*)calloc(1,sizeof(WAVEFORMATEX));
+	  WAVEFORMATEX* wf = (WAVEFORMATEX*)calloc(1,sizeof(WAVEFORMATEX));
+	  sh_audio->wf = wf;
 	  demux_stream_t* d_audio = demuxer->audio;
 	  d_audio->sh = sh_audio; sh_audio->ds = d_audio;
 
-	  // Map known audio MIME types to the format code that this prog uses:
+	  // Map known audio MIME types to the WAVEFORMATEX parameters
+	  // that this program uses.  (Note that not all types need all
+	  // of the parameters to be set.)
+	  wf->nSamplesPerSec
+	    = subsession->rtpSource()->timestampFrequency(); // by default
 	  if (strcmp(subsession->codecName(), "MPA") == 0 ||
 	      strcmp(subsession->codecName(), "MPA-ROBUST") == 0 ||
 	      strcmp(subsession->codecName(), "X-MP3-DRAFT-00") == 0) {
-	    sh_audio->format = 0x50;
+	    wf->wFormatTag = sh_audio->format = 0x55;
+	        // Note: 0x55 is for layer III, but should work for I,II also
+	    wf->nSamplesPerSec = 0; // sample rate is deduced from the data
 	  } else if (strcmp(subsession->codecName(), "AC3") == 0) {
-	    sh_audio->format = 0x2000;
+	    wf->wFormatTag = sh_audio->format = 0x2000;
+	    wf->nSamplesPerSec = 0; // sample rate is deduced from the data
 	  } else if (strcmp(subsession->codecName(), "PCMU") == 0) {
-	    sh_audio->format = 0x7;
+	    wf->wFormatTag = sh_audio->format = 0x7;
+	    wf->nChannels = 1;
+	    wf->nAvgBytesPerSec = 8000;
+	    wf->nBlockAlign = 1;
+	    wf->wBitsPerSample = 8;
+	    wf->cbSize = 0;
 	  } else if (strcmp(subsession->codecName(), "PCMA") == 0) {
-	    sh_audio->format = 0x6;
+	    wf->wFormatTag = sh_audio->format = 0x6;
+	    wf->nChannels = 1;
+	    wf->nAvgBytesPerSec = 8000;
+	    wf->nBlockAlign = 1;
+	    wf->wBitsPerSample = 8;
+	    wf->cbSize = 0;
 	  } else if (strcmp(subsession->codecName(), "GSM") == 0) {
-	    sh_audio->format = 0x31;
+	    wf->wFormatTag = sh_audio->format = 0x31;
+	    wf->nChannels = 1;
+	    wf->nAvgBytesPerSec = 1650;
+	    wf->nBlockAlign = 33;
+	    wf->wBitsPerSample = 16;
+	    wf->cbSize = 0;
 	  } else {
 	    fprintf(stderr,
 		    "Unknown mplayer format code for MIME type \"audio/%s\"\n",
