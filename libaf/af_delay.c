@@ -103,7 +103,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
     // Copy beginning of buffer to beginning of output buffer
     memcpy(l->audio,s->buf,c->len);
     // Move buffer left
-    memcpy(s->buf,s->buf+c->len,s->len-c->len);
+    memmove(s->buf,s->buf+c->len,s->len-c->len);
     // Save away current audio to end of buffer
     memcpy(s->buf+s->len-c->len,c->audio,c->len);
   }
