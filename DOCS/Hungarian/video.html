@@ -468,16 +468,39 @@ esd, arts)</TD><TR>
 
 <P><B><A NAME=2.3.1.5>2.3.1.5.  SVGAlib</A></B></P>
 
-<P>Ha nincs X-ed, használd az SVGAlib meghajtót! Bizonyosodj meg róla, hogy nem
-  használod a -fs kapcsolót, mert ez itt a szoftveres scaler-t kapcsolja be,
-  és ez LASSÚÚÚÚ egyelõre, hacsak nincs egy igazán gyors procid (és/vagy
-  MTRR?). :(</P>
-
-<P>Természetesen fel kell installálnod az svgalib-et, és a fejlesztõi
-  környezetét, hogy az <B>MPlayer</B> le tudja fordítani az SVGAlib meghajtót
-  (automatikusan detektálja, de lehet kényszeríteni is), és ne felejtsd el
-  átszerkeszteni az /etc/vga/libvga.config-ot, hogy tükrözze a kártyád és a
+<P><B><U>Installálás</U></B><BR>
+  Fel kell installálnod az svgalib-et, és a fejlesztõi környezetét, hogy az
+  <B>MPlayer</B> le tudja fordítani az SVGAlib meghajtót (automatikusan
+  detektálja, de lehet kényszeríteni is), és ne felejtsd el átszerkeszteni az
+  <CODE>/etc/vga/libvga.config</CODE>-ot, hogy tükrözze a kártyád és a
   monitorod tulajdonságait.</P>
+
+<P><B><U>Megjegyzések</U></B><BR>
+ Bizonyosodj meg róla, hogy nem használod a -fs kapcsolót, mert ez itt a
+  szoftveres scaler-t kapcsolja be, ami pedig lassú. Ha tényleg szükséged van
+  rá használd az <CODE>-sws 4</CODE> opciót, ami valamivel rosszabb minõség
+  mellett sokkal gyorsabban mûködik.</P>
+
+<P><B><U>EGA (4bpp) támogatás</U></B><BR>
+  Az SVGAlib tartalmazza az EGAlib-et, és az <B>MPlayer</B> képes 4bpp
+  színmélységben lejátszani bármilyen filmet. A kettõ együttesen a következõ
+  együttesek támogatását jelenti:</P>
+
+<UL>
+  <LI>EGA kártya EGA monitorral: 320x200x4bpp, 640x200x4bpp, 640x350x4bpp</LI>
+  <LI>EGA kártya CGA monitorral: 320x200x4bpp, 640x200x4bpp</LI>
+</UL>
+
+<P>A bpp (bits per pixel) értéket kézzel kell 4-re állítani:<BR>
+  &nbsp;&nbsp;<CODE>-bpp 4</CODE><BR>
+  A filmet valószínûleg le kell kicsinyíteni egy EGA módra:<BR>
+  &nbsp;&nbsp;<CODE>-vop scale=640:350</CODE> vagy<BR>
+  &nbsp;&nbsp;<CODE>-vop scale=320:200</CODE><BR>
+  Ehhez pedig egy gyors scaler kell:<BR>
+  &nbsp;&nbsp;<CODE>-sws 4</CODE><BR>
+  Valószínûleg az aspektus javítást ki kell kapcsolni:<BR>
+  &nbsp;&nbsp;<CODE>-noaspect</CODE><BR>                    
+</P>
 
 
 <P><B><A NAME=2.3.1.6>2.3.1.6.  Framebuffer meghajtó (FBdev)</A></B></P>

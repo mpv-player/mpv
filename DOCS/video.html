@@ -477,14 +477,37 @@ It's bug in SDL, I can't change it (tested with SDL 1.2.1).
 
 <P><B><A NAME=2.3.1.5>2.3.1.5. SVGAlib</A></B></P>
 
-<P>If you don't have X, you can use the SVGAlib target! Be sure not to use the
--fs switch, since it toggles the usage of the software scaler, and it's
-SLOOOW now, unless you have a real fast CPU (and/or MTRR?). :(</P>
+<P><B><U>Installation</U></B><BR>
+  You'll have to install svgalib and its development package in order for
+  <B>MPlayer</B> build its SVGAlib driver (autodetected, but can be forced),
+  and don't forget to edit /etc/vga/libvga.config to suit your card &amp;
+  monitor.</P>
 
-<P>Of course you'll have to install svgalib and its development package in
-order for <B>MPlayer</B> build its SVGAlib driver (autodetected, but can be
-forced), and don't forget to edit /etc/vga/libvga.config to suit your
-card &amp; monitor.</P>
+<P><B><U>Notes</U></B><BR>
+  Be sure not to use the -fs switch, since it toggles the usage of the software
+  scaler, and it's slow. If you really need it, use the <CODE>-sws 4</CODE>
+  option which will produce bad quality, but is somewhat faster.</P>
+
+<P><B><U>EGA (4bpp) support</U></B><BR>
+  SVGAlib incorporates EGAlib, and <B>MPlayer</B> has the possibility to
+  display any movie in 16 colors, thus usable in the following sets:</P>
+
+<UL>
+  <LI>EGA card with EGA monitor: 320x200x4bpp, 640x200x4bpp, 640x350x4bpp</LI>
+  <LI>EGA card with CGA monitor: 320x200x4bpp, 640x200x4bpp</LI>
+</UL>
+
+<P>The bpp (bits per pixel) value must be set to 4 by hand:<BR>
+  &nbsp;&nbsp;<CODE>-bpp 4</CODE><BR>
+  The movie probably must be scaled down to fit in EGA mode:<BR>
+  &nbsp;&nbsp;<CODE>-vop scale=640:350</CODE> or<BR>
+  &nbsp;&nbsp;<CODE>-vop scale=320:200</CODE><BR>
+  For that we need fast but bad quality scaling routine:<BR>
+  &nbsp;&nbsp;<CODE>-sws 4</CODE><BR>
+  Maybe automatic aspect correction has to be shut off:<BR>
+  &nbsp;&nbsp;<CODE>-noaspect</CODE><BR>
+</P>
+
 
 <P><B><A NAME=2.3.1.6>2.3.1.6. Framebuffer output (FBdev)</A></B></P>
 
