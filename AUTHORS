@@ -545,6 +545,7 @@ Arwed v. Merkatz <v.merkatz@gmx.net>
 Daniele Forghieri <guru@digitalfantasy.it>
     * TGA output driver
     * framestep & tile filters
+    * Initial italian man page translation
 
 David Kühling <dvdkhlng@gmx.de>
     * libtheora support, ogg/theora demuxing changes
