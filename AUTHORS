@@ -199,7 +199,7 @@ Ferguson, Tim <timf@mail.csse.monash.edu.au>
     * open source Cinepak decoder
     * open source CYUV decoder
 
-Forghieri, Daniele <guru@digitalfantasy.it>
+Forghieri, Daniele (danny) <guru@digitalfantasy.it>
     * TGA output driver
     * framestep & tile filters
     * initial Italian man page translation
@@ -515,6 +515,9 @@ rgselk <rgselknospam@yahoo.com>
 
 Rune <runner@mail.tele.dk>
     * adapter selection support for vo directx
+
+Saari, Ville <vs@iki.fi>
+    * divtc & phase filters
 
 Sabbi, Nico <nsabbi@tiscali.it>
     * DVB input support
