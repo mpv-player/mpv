@@ -17,11 +17,11 @@ mplayer (1.0)
     * fixed compilation of Matroska on MinGW32/Cygwin
     * support for detecting non-Intel CPUs under Cygwin
     * sub autoloading under Windows
-    * removed pthread dependancy (compiles out of the box on a default NetBSD
+    * removed pthread dependency (compiles out of the box on a default NetBSD
       install)
-    * more 64bit fixes
-    * lot of Mac OS X fixes
-    * prefer our cpuinfo routines over linuxemu's proc/cpuinfo under FreeBSD/x86
+    * more 64 bit fixes
+    * a lot of Mac OS X fixes
+    * prefer TOOLS/cpuinfo over linuxemu's /proc/cpuinfo under FreeBSD/x86
 
     Codecs and demuxers:
     * better support for (buggy) MEncoder created streams in libmpeg2
@@ -41,14 +41,14 @@ mplayer (1.0)
     * improved FLAC-in-Ogg support
     * Matroska: better AC3 detection
     * Matroska: VobSubs, MP2, FLAC, AAC and HE-AAC support
-    * improved detection of Real RTSP through analyzing the URL
+    * improved detection of Real RTSP through URL analysis
     * fixed stereo 16 bit TWOS
     
     Filters:
-    * some fixes in the delogo filter 
+    * some fixes in the delogo filter
     * optimized eq2 filter
     * weighted gamma support in the eq2 filter
-    * new filters: hue, spp, fil
+    * new filters: hue, spp, fil, yuvcsp
     * alternative postprocessing filter (spp)
     * big scale filter updates
     * zrmjpeg filter, a kick-ass mjpeg encoder using FFmpeg/libavcodec
@@ -68,7 +68,7 @@ mplayer (1.0)
     * fixed decoding if aspect ratio changes
     * MMX2 optimizations in HuffYUV
     * lots of bugs squashed in HuffYUV
-    * fixed the long standing decoding errors after 'first frame is not keyframe'
+    * long standing decoding errors after 'first frame is not keyframe' fixed
     * CRI ADX support
     * XA ADPCM support
     * fixed files with odd dimensions on PPC
@@ -77,7 +77,7 @@ mplayer (1.0)
     * support for IBM's XLC compiler
     * support for SAR (sample aspect ratio)
     * floating point AAN DCT
-    * dynamically alloc big data fields (lower memory consumption for most cases!)
+    * dynamically alloc big data fields (lower memory usage in most cases!)
     * fixed stereo IMA-ADPCM encoding
     * inline vs always_inline - some speedups
     * MMX2 optimized FDCT
@@ -138,8 +138,8 @@ mplayer (1.0)
 
     MEncoder:
     * FFmpeg/libavcodec audio encoding support
-    * exit if there's no video stream (no more unexpected segfaults in that case)
-    * huge bug fixed (missing InitTimer call), which screwed up timers in some cases
+    * exit if there's no video stream (avoids unexpected segfaults)
+    * huge bug fixed (missing InitTimer call), screwed up timers in some cases
 
 
   pre2:
@@ -858,7 +858,7 @@ mplayer (0.90)
     * libmpdvdkit + gcc 3.x issue solved (our CFLAGS triggered a gcc3 bug...)
     * GUI aspect ratio and fullscreen switch fixes, cleanups
     * low FPS .wmv playback fixed
-    * MACOS-X (Darwin) port?
+    * Mac OS X (Darwin) port?
     * buggy v4l audio grabbing disabled, we cannot fix, but patches are welcomed!
     * various mjpeg improvements in libavcodec
 
