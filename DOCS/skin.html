@@ -1,23 +1,24 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
+
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<title>Creating Skins - MPlayer - The Movie Player for Linux</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <title>Creating Skins - MPlayer - The Movie Player for Linux</title>
   <link rel="stylesheet" type="text/css" href="default.css">
-<style type="text/css">
-em.note {color: green;
-         font-style: normal;}
-em.warn {color: red;
-         font-style: normal;}
-</style>
+  <style type="text/css">
+    em.note {color: green;
+             font-style: normal;}
+    em.warn {color: red;
+             font-style: normal;}
+    </style>
 </head>
 
 <body>
 
 <h1>Appendix D - MPlayer skin format</h1>
 
-The purpose of this document is to describe the MPlayer skin format.
-The information contained here might be wrong, for
+<p>The purpose of this document is to describe the MPlayer skin format.
+  The information contained here might be wrong, for</p>
 
 <ol type="a">
   <li>It is not me who wrote the GUI.</li>
@@ -25,41 +26,37 @@ The information contained here might be wrong, for
   <li>I might be wrong.</li>
 </ol>
 
-So do not be surprised if something does not work as described here.
+<p>So do not be surprised if something does not work as described here.</p>
 
-<p>
-Thanks to <em>Zoltán Ponekker</em> for his help.
-</p>
+<p>Thanks to <em>Zoltán Ponekker</em> for his help.</p>
 
-<p>
-<em>András Mohari &lt;mayday@freemail.hu&gt;</em>
-</p>
+<p><em>András Mohari &lt;mayday@freemail.hu&gt;</em></p>
 
 
 <h2><a name="overview">D.1 Overview</a></h2>
 
-It does not really have anything to do with the skin format, but you should
-know that MPlayer has <b>no</b> builtin skin, so <b>at least one skin
-must be installed in order to be able to use the GUI.</b>
+<p>It does not really have anything to do with the skin format, but you should
+  know that MPlayer has <b>no</b> builtin skin, so <b>at least one skin
+  must be installed in order to be able to use the GUI.</b></p>
 
 
 <h3><a name="directories">D.1.1 Directories</a></h3>
 
-The directories searched for skins are (in order):
+<p>The directories searched for skins are (in order):</p>
+
 <pre>
     $(DATADIR)/Skin/
     $(PREFIX)/share/mplayer/Skin/
     ~/.mplayer/Skin/
 </pre>
 
-<p>
-Note that the first path may vary according to the way MPlayer was
-configured (see the <code>--prefix</code> and  <code>--datadir</code> arguments
-of the <code>configure</code> script).
-</p>
+<p>Note that the first path may vary according to the way MPlayer was configured
+  (see the <code>--prefix</code> and  <code>--datadir</code> arguments of the
+  <code>configure</code> script).</p>
 
-Every skin is installed into its own directory under one of the directories
-listed above, for example:
+<p>Every skin is installed into its own directory under one of the directories
+  listed above, for example:</p>
+
 <pre>
     $(PREFIX)/share/mplayer/Skin/default/
 </pre>
@@ -67,201 +64,173 @@ listed above, for example:
 
 <h3><a name="images">D.1.2 Image formats</a></h3>
 
-Images must be truecolor (24 or 32 bpp) PNGs.
+<p>Images must be truecolor (24 or 32 bpp) PNGs.</p>
 
-<p>
-In the main window and in the playbar (see below) you can use images with `transparency':
-Regions filled with the color #FF00FF (<font color="#FF00FF">magenta</font>)
-are fully transparent when viewed by MPlayer. This means that you can even
-have shaped windows if your X server has the XShape extension.
-</p>
+<p>In the main window and in the playbar (see below) you can use images with
+  `transparency': Regions filled with the color #FF00FF
+  (<font color="#FF00FF">magenta</font>) are fully transparent when viewed by
+  MPlayer. This means that you can even have shaped windows if your X server
+  has the XShape extension.</p>
 
 
 <h3><a name="components">D.1.3 Skin components</a></h3>
 
-Skins are quite free-format (unlike the fixed-format skins of
-Winamp/XMMS, for example), so it is up to you to create something great.
+<p>Skins are quite free-format (unlike the fixed-format skins of Winamp/XMMS,
+  for example), so it is up to you to create something great.</p>
 
-<p>
-Currently there are three windows to be decorated: the
-<a href="#mainwin">main window</a>, the <a href="#subwindow">subwindow</a>, the
-<a href="#mainwin">playbar</a>, and
-the <a href="#skinmenu">skin menu</a> (which can be activated by a right
-click).
-</p>
+<p>Currently there are three windows to be decorated: the
+  <a href="#mainwin">main window</a>, the <a href="#subwindow">subwindow</a>,
+  the <a href="#mainwin">playbar</a>, and the <a href="#skinmenu">skin menu</a>
+  (which can be activated by a right click).</p>
 
 <ul>
-<li>
-The <b>main window</b> and/or the <b>playbar</b> is where you can control MPlayer. The background of
-the window is an image. Various items can (and must) be
-placed in the window: <em>buttons</em>, <em>potmeters</em> (sliders) and
-<em>labels</em>. For every item, you must
-specify its position and size.
+  <li><p>The <b>main window</b> and/or the <b>playbar</b> is where you can
+    control MPlayer. The background of the window is an image. Various items
+    can (and must) be placed in the window: <em>buttons</em>, <em>potmeters</em>
+    (sliders) and <em>labels</em>. For every item, you must specify its position
+    and size.</p>
 
-<p>
-A <b>button</b> has three states (pressed, released,
-disabled), thus its image must be divided into three parts vertically.
-See the <a href="#main.button">button</a> item for details.
-</p>
+    <p>A <b>button</b> has three states (pressed, released, disabled), thus its
+      image must be divided into three parts vertically. See the
+      <a href="#main.button">button</a> item for details.</p>
 
-<p>
-A <b>potmeter</b> (mainly used for the seek bar and volume/balance
-control) can have any number of phases by dividing its image into different
-parts below each other.
-See <a href="#main.hpotmeter">hpotmeter</a> and
-<a href="#main.potmeter">potmeter</a> for details.
-</p>
+    <p>A <b>potmeter</b> (mainly used for the seek bar and volume/balance
+      control) can have any number of phases by dividing its image into
+      different parts below each other. See
+      <a href="#main.hpotmeter">hpotmeter</a> and
+      <a href="#main.potmeter">potmeter</a> for details.</p>
 
-<p>
-<b>Labels</b> are a bit special: The characters needed to draw them are taken
-from an image file, and the characters in the image are described
-by a <a href="#fonts">font description file</a>.
-The latter is a plain text file which specifies
-the x,y position and size of each character in the image (the
-image file and its font description file form a font <em>together</em>).
-See <a href="#main.dlabel">dlabel</a> and <a href="#main.slabel">slabel</a>
-for details.
-</p>
+    <p><b>Labels</b> are a bit special: The characters needed to draw them are
+    taken from an image file, and the characters in the image are described by
+    a <a href="#fonts">font description file</a>. The latter is a plain text
+    file which specifies the x,y position and size of each character in the
+    image (the image file and its font description file form a font
+    <em>together</em>). See <a href="#main.dlabel">dlabel</a> and
+    <a href="#main.slabel">slabel</a> for details.</p>
 
-<p>
-<em class=note>
-<b>Note:</b> all images can have full transparency as described in the
-section about <a href="#images">image formats</a>. If the X Server doesn't
-support the XShape extension, the parts marked transparent will be black. If
-you'd like to use this feature, the width of the main window's background image
-must be dividable by 8.
-</em>
-</p>
-</li>
+    <p><em class="note"><b>Note:</b> all images can have full transparency as
+    described in the section about <a href="#images">image formats</a>. If the X
+    server doesn't support the XShape extension, the parts marked transparent
+    will be black. If you'd like to use this feature, the width of the main
+    window's background image must be dividable by 8.</em></p>
+  </li>
 
-<li>
-The <b>subwindow</b> is where the movie appears. It can display a specified
-image if there is no movie loaded (it is quite boring to have an empty
-window :-))
-<em class=note><b>Note:</b> transparency
-is <b>not allowed</b> here.</em>
-</li>
+  <li>The <b>subwindow</b> is where the movie appears. It can display a
+    specified image if there is no movie loaded (it is quite boring to have an
+    empty window :-)) <em class=note><b>Note:</b> transparency is
+    <b>not allowed</b> here.</em></li>
 
-<li>
-The <b>skin menu</b> is just a way to control MPlayer by means of
-menu entries. Two images are required for the menu: one of them is the base
-image that shows the menu in its normal state, the other one is used to
-display the selected entries. When you pop up the menu, the first image is
-shown. If you move the mouse over the menu entries, the currently selected
-entry is copied from the second image over the menu entry below the mouse
-pointer (the second image is never shown as a whole).
-<p>
-A menu entry is defined by its position and size in the image (see the
-section about the <a href="#skinmenu">skin menu</a> for details).
-</p>
-</li>
+  <li><p>The <b>skin menu</b> is just a way to control MPlayer by means of menu
+    entries. Two images are required for the menu: one of them is the base image
+    that shows the menu in its normal state, the other one is used to display
+    the selected entries. When you pop up the menu, the first image is shown. If
+    you move the mouse over the menu entries, the currently selected entry is
+    copied from the second image over the menu entry below the mouse pointer
+    (the second image is never shown as a whole).</p>
+
+    <p>A menu entry is defined by its position and size in the image (see the
+      section about the <a href="#skinmenu">skin menu</a> for details).</p>
+  </li>
 </ul>
 
-<p>
-There is an important thing not mentioned yet: For buttons, potmeters and
-menu entries to work, MPlayer must know what to do if they are clicked.
-This is done by <a href="#guimsg">messages</a> (events). For these items
-you must define the messages to be generated when they are clicked.
-</p>
+<p>There is an important thing not mentioned yet: For buttons, potmeters and
+  menu entries to work, MPlayer must know what to do if they are clicked. This
+  is done by <a href="#guimsg">messages</a> (events). For these items you must
+  define the messages to be generated when they are clicked.</p>
+
 
 <h3><a name="files">D.1.4 Files</a></h3>
 
-You need the following files to build a skin:
+<p>You need the following files to build a skin:</p>
+
 <ul>
-<li>
-The configuration file named <a href="#skin">skin</a> tells MPlayer how
-to put different parts of the skin together and what to do if you click
-somewhere in the window.
-</li>
-<li>The background image for the main window.</li>
-<li>Images for the items in the main window (including one or more font
-description files needed to draw labels).</li>
-<li>The image to be displayed in the subwindow (optional).</li>
-<li>Two images for the skin menu (they are needed only if you want to create
-a menu).</li>
+  <li>The configuration file named <a href="#skin">skin</a> tells MPlayer how
+    to put different parts of the skin together and what to do if you click
+    somewhere in the window.</li>
+  <li>The background image for the main window.</li>
+  <li>Images for the items in the main window (including one or more font
+    description files needed to draw labels).</li>
+  <li>The image to be displayed in the subwindow (optional).</li>
+  <li>Two images for the skin menu (they are needed only if you want to create
+    a menu).</li>
 </ul>
 
-With the exception of the skin configuration file, you can name the other
-files whatever you want (but note that font description files must have
-a <code>.fnt</code> extension).
+<p>With the exception of the skin configuration file, you can name the other
+  files whatever you want (but note that font description files must have
+  a <code>.fnt</code> extension).</p>
 
 
 <h2><a name="skinfile">D.2 The skin file</a></h2>
 
-<p>
-As mentioned above, this is the skin configuration file.
-It is line oriented; comment lines start with a '<code>;</code>' character
-at the beginning of the line (only spaces and tabs are allowed before the
-'<code>;</code>').
-</p>
+<p>As mentioned above, this is the skin configuration file. It is line oriented;
+  comment lines start with a '<code>;</code>' character at the beginning of the
+  line (only spaces and tabs are allowed before the '<code>;</code>').</p>
 
-<p>
-The file is made up of sections. Each section describes the skin for an
-application and has the following form:
-</p>
+<p>The file is made up of sections. Each section describes the skin for an
+  application and has the following form:</p>
 
-<table border=1 width="100%"><tr bgcolor=silver><td><pre>
+<table border="1" width="100%">
+  <tr bgcolor="silver">
+    <td>
+<pre>
 section = <i>section name</i>
 .
 .
 .
 end
-</pre></td></tr></table>
+</pre>
+    </td>
+  </tr>
+</table>
 
-<p>
-Currently there is only one application, so you need only one section:
-its name is <b>movieplayer</b>.
-</p>
+<p>Currently there is only one application, so you need only one section: its
+   name is <b>movieplayer</b>.</p>
 
-<p>
-Within this section each window is described by a block of the following form:
-</p>
+<p>Within this section each window is described by a block of the following
+  form:</p>
 
-<table border=1 width="100%"><tr bgcolor=silver><td><pre>
+<table border="1" width="100%">
+  <tr bgcolor="silver">
+    <td>
+<pre>
 window = <i>window name</i>
 .
 .
 .
 end
-</pre></td></tr></table>
+</pre>
+    </td>
+  </tr>
+</table>
 
-<p>
-where <i>window name</i> can be one of these strings:
-</p>
+<p>where <i>window name</i> can be one of these strings:</p>
 
 <ul>
-<li><b>main</b> - for the main window</li>
-<li><b>sub</b> - for the subwindow</li>
-<li><b>menu</b> - for the skin menu</li>
-<li><b>playbar</b> - playbar</li>
+  <li><b>main</b> - for the main window</li>
+  <li><b>sub</b> - for the subwindow</li>
+  <li><b>menu</b> - for the skin menu</li>
+  <li><b>playbar</b> - playbar</li>
 </ul>
 
-<p>
-(The sub and menu blocks are optional - you do not need to create a menu or
-decorate the subwindow.)
-</p>
+<p>(The sub and menu blocks are optional - you do not need to create a menu or
+  decorate the subwindow.)</p>
 
-<p>
-Within a window block, you can define each item for the window
-by a line in this form:
-</p>
+<p>Within a window block, you can define each item for the window by a line in
+  this form:</p>
 
 <dl>
-<dt>
-<b><code>item = parameter</code></b>
-</dt>
-<dd>
-Where <code>item</code> is a string that identifies the type of the GUI item,
-<code>parameter</code> is a numeric or textual value (or a list of values
-separated by commas).
-</dd>
+  <dt><b><code>item = parameter</code></b></dt>
+  <dd>Where <code>item</code> is a string that identifies the type of the GUI
+    item, <code>parameter</code> is a numeric or textual value (or a list of
+    values separated by commas).</dd>
 </dl>
 
-<p>
-Putting the above together, the whole file looks something like this:
-</p>
+<p>Putting the above together, the whole file looks something like this:</p>
 
-<table border=1 width="100%"><tr bgcolor=silver><td><pre>
+<table border="1" width="100%">
+  <tr bgcolor="silver">
+    <td>
+<pre>
 section = movieplayer
   window = main
   ; ... items for main window ...
@@ -279,23 +248,23 @@ section = movieplayer
   ; ... items for playbar ...
   end
 end
-</pre></td></tr></table>
+</pre>
+    </td>
+  </tr>
+</table>
 
-<p>
-The name of an image file must be given without leading directories - images are
-searched for in the <code>Skin</code> directory. You may (but you need not)
-specify the extension of the file. If the file does not exist, MPlayer
-tries to load the file <code>&lt;filename&gt;.&lt;ext&gt;</code>, where
-<code>png</code> and <code>PNG</code> are tried for <code>&lt;ext&gt;</code>
-(in this order). The first matching file will be used.
-</p>
+<p>The name of an image file must be given without leading directories - images
+  are searched for in the <code>Skin</code> directory. You may (but you need
+  not) specify the extension of the file. If the file does not exist, MPlayer
+  tries to load the file <code>&lt;filename&gt;.&lt;ext&gt;</code>, where
+  <code>png</code> and <code>PNG</code> are tried for <code>&lt;ext&gt;</code>
+  (in this order). The first matching file will be used.</p>
 
-<p>
-Finally some words about positioning. The main window and the subwindow can be
-placed in the different corners of the screen by giving <code>X</code> and
-<code>Y</code> coordinates. <code>0</code> is top or left, <code>-1</code> is
-center and <code>-2</code> is right or bottom, as shown in this illustration:
-</p>
+<p>Finally some words about positioning. The main window and the subwindow can
+  be placed in the different corners of the screen by giving <code>X</code> and
+  <code>Y</code> coordinates. <code>0</code> is top or left, <code>-1</code> is
+  center and <code>-2</code> is right or bottom, as shown in this
+  illustration:</p>
 
 <pre>
 
@@ -309,56 +278,48 @@ center and <code>-2</code> is right or bottom, as shown in this illustration:
 
 </pre>
 
-<table border=1 cellpadding=5 width="100%"><tr bgcolor="#ffffcc"><td>
-Here is an example to make this clear. Suppose that you have an image called
-<code>main.png</code> that you use for the main window:
-<blockquote>
+<table border="1" cellpadding="5" width="100%">
+  <tr bgcolor="#ffffcc">
+    <td>Here is an example to make this clear. Suppose that you have an image
+      called <code>main.png</code> that you use for the main window:
+      <blockquote>
 <pre>
     base = main, -1, -1
 </pre>
-</blockquote>
-
-MPlayer tries to load <code>main</code>, <code>main.png</code>,
-<code>main.PNG</code> files.
-<br>
-</td></tr></table>
+      </blockquote>
+      MPlayer tries to load <code>main</code>, <code>main.png</code>,
+      <code>main.PNG</code> files.<br>
+    </td>
+  </tr>
+</table>
 
 
 <h3><a name="mainwindow">D.2.1 Main window and playbar</a></h3>
 
-Below is the list of entries that can be used in the 
-'<code>window = main</code>' .&nbsp;.&nbsp;. '<code>end</code>', and the
-'<code>window = playbar</code>' &nbsp;.&nbsp;. '<code>end</code>' blocks.
+<p>Below is the list of entries that can be used in the
+  '<code>window = main</code>' .&nbsp;.&nbsp;. '<code>end</code>', and the
+  '<code>window = playbar</code>' &nbsp;.&nbsp;. '<code>end</code>' blocks.</p>
 
 <dl>
-<dt><a name="main.base">
-<b><code>base = image, X, Y</code></b>
-</a></dt>
-<dd>
-Lets you specify the background image to be used for the main window.
-The window will appear at the given <code>X,Y</code> position on the screen
-The window will have the size of the image.
-<div>
-<em class=warn>
-<b>Note:</b> These coordinates do not currently work for the display window.
-</em>
-<br>
-<em class=warn>
-<b>Warning:</b> Transparent regions in the image (colored #FF00FF) appear
-black on X servers without the XShape extension. The image's width must be
-dividable by 8.
-</em>
-</div>
-</dd>
+  <dt><a name="main.base"><b><code>base = image, X, Y</code></b></a></dt>
+  <dd>Lets you specify the background image to be used for the main window.
+    The window will appear at the given <code>X,Y</code> position on the screen
+    The window will have the size of the image.
+    <div><em class="warn"><b>Note:</b> These coordinates do not currently work
+      for the display window.</em><br>
+      <em class="warn"><b>Warning:</b> Transparent regions in the image (colored
+      #FF00FF) appear black on X servers without the XShape extension. The
+      image's width must be dividable by 8.</em>
+    </div>
+  </dd>
 
-<dt><a name="main.button">
-<b><code>button = image, X, Y, width, height, message</code></b></a></dt>
-<dd>
-Place a button of <code>width</code> * <code>height</code> size at position
-<code>X</code>,<code>Y</code>. The specified <code>message</code> is generated
-when the button is clicked. The image given by <code>image</code> must have
-three parts below each other (according to the possible states of the button),
-like this:
+  <dt><a name="main.button"><b><code>button = image, X, Y, width, height,
+    message</code></b></a></dt>
+  <dd>Place a button of <code>width</code> * <code>height</code> size at
+    position <code>X</code>,<code>Y</code>. The specified <code>message</code>
+    is generated when the button is clicked. The image given by
+    <code>image</code> must have three parts below each other (according to the
+    possible states of the button), like this:
 <pre>
 +------------+
 |  pressed   |
@@ -368,50 +329,38 @@ like this:
 |  disabled  |
 +------------+
 </pre>
-</dd>
+  </dd>
 
-<dt><a name="main.decoration">
-<b><code>decoration = enable|disable</code></b>
-</a></dt>
-<dd>
-Enable or disable window manager decoration of the main window. Default
-is <b>disable</b>.
-<br>
-<br>
-<em class=warn>
-<b>Note:</b> This doesn't work for the display window, there is no need to.
-</em>
-<br>
-</dd>
+  <dt><a name="main.decoration"><b><code>decoration = enable|disable</code></b>
+    </a></dt>
+  <dd>Enable or disable window manager decoration of the main window. Default
+    is <b>disable</b>.<br><br>
+    <em class="warn"><b>Note:</b> This doesn't work for the display window,
+    there is no need to.</em><br>
+  </dd>
 
-<dt>
-<a name="main.hpotmeter">
-<b>
-<code>hpotmeter = button, bwidth, bheight, phases, numphases, default, X, Y, width, height, message</code>
-<br>
-<code>vpotmeter = button, bwidth, bheight, phases, numphases, default, X, Y, width, height, message</code>
-</b>
-</a>
-</dt>
-<dd>
-Place a horizontal potmeter of <code>width</code> * <code>height</code> size
-at position <code>X</code>,<code>Y</code>. The image can be divided into
-different parts for the different phases of the potmeter (for example,
-you can have a pot for volume control that turns from green to red
-while its value changes from the minimum to the maximum.).
-<code>hpotmeter</code> can have a button that can be dragged horizontally.
+  <dt><a name="main.hpotmeter"><b><code>hpotmeter = button, bwidth, bheight,
+    phases, numphases, default, X, Y, width, height, message</code><br>
+    <code>vpotmeter = button, bwidth, bheight, phases, numphases, default, X, Y,
+    width, height, message</code></b></a></dt>
+  <dd>Place a horizontal potmeter of <code>width</code> * <code>height</code>
+    size at position <code>X</code>,<code>Y</code>. The image can be divided
+    into different parts for the different phases of the potmeter (for example,
+    you can have a pot for volume control that turns from green to red while its
+    value changes from the minimum to the maximum.). <code>hpotmeter</code> can
+    have a button that can be dragged horizontally.
 
-<div>The parameters are:</div>
+    <div>The parameters are:</div>
 
-<ul>
-<li><code>button</code> - the image to be used for the button
-(must have three parts below each other, like in case of
-<a href="#main.button">button</a>)</li>
-<li><code>bwidth</code>, <code>bheight</code> - size of the button</li>
-<li><code>phases</code> - The image to be used for the different phases of the
-hpotmeter.  A special value of <code>NULL</code> can be used if you want
-no such image. The image must be divided into <code>numphases</code> parts
-vertically like this:
+    <ul>
+      <li><code>button</code> - the image to be used for the button (must have
+        three parts below each other, like in case of
+        <a href="#main.button">button</a>)</li>
+      <li><code>bwidth</code>, <code>bheight</code> - size of the button</li>
+      <li><code>phases</code> - The image to be used for the different phases of
+        the hpotmeter.  A special value of <code>NULL</code> can be used if you
+        want no such image. The image must be divided into
+        <code>numphases</code>parts vertically like this:
 <pre>
 +------------+
 |  phase #1  |
@@ -423,254 +372,209 @@ vertically like this:
 |  phase #n  |
 +------------+
 </pre>
-</li>
-<li><code>numphases</code> - number of phases stored in the <code>phases</code>
-image</li>
-<li><code>default</code> - default value for hpotmeter (in the range 0 to
-100)</li>
-<li><code>X</code>, <code>Y</code> - position for the hpotmeter</li>
-<li><code>width</code>, <code>height</code> - width and height of the
-<code>hpotmeter</code></li>
-<li><code>message</code> - the message to be generated when the value of
-<code>hpotmeter</code> is changed</li>
-</ul>
+      </li>
+      <li><code>numphases</code> - number of phases stored in the
+        <code>phases</code> image</li>
+      <li><code>default</code> - default value for hpotmeter (in the range 0 to
+        100)</li>
+      <li><code>X</code>, <code>Y</code> - position for the hpotmeter</li>
+      <li><code>width</code>, <code>height</code> - width and height of the
+        <code>hpotmeter</code></li>
+      <li><code>message</code> - the message to be generated when the value of
+        <code>hpotmeter</code> is changed</li>
+    </ul>
+  </dd>	
 
-</dd>	
+  <dt><a name="main.potmeter"><b><code>potmeter = phases, numphases, default, X,
+    Y, width, height, message</code></b></a></dt>
+  <dd>A <code>hpotmeter</code> without a button. (I guess it is meant to be
+    turned around, but it reacts to horizontal dragging only.) For the
+    description of the parameters see <a href="#main.hpotmeter">hpotmeter</a>.
+    <code>phases</code> can be <code>NULL</code>, but it is quite useless, since
+    you cannot see where the <code>potmeter</code> is set.</dd>
 
-<dt><a name="main.potmeter">
-<b><code>potmeter = phases, numphases, default, X, Y, width, height, message</code></b>
-</a></dt>
-<dd>
-A <code>hpotmeter</code> without a button. (I guess it is meant to be turned
-around, but it reacts to horizontal dragging only.)
-For the description of the parameters see
-<a href="#main.hpotmeter">hpotmeter</a>. <code>phases</code> can be
-<code>NULL</code>, but it is quite useless, since you cannot see where
-the <code>potmeter</code> is set.
-</dd>
+  <dt><a name="main.font"><b><code>font = fontfile, fontid</code></b></a></dt>
+  <dd>Defines a font. <code>fontfile</code> is the name of a font description
+    file with a <code>.fnt</code> extension (<b>do not</b> specify the extension
+    here). <code>fontid</code> is used to refer to the font (see
+    <a href="#main.dlabel">dlabel</a> and <a href="#main.slabel">slabel</a>).
+    Up to 25 fonts can be defined.</dd>
 
-<dt><a name="main.font">
-<b><code>font = fontfile, fontid</code></b>
-</a></dt>
-<dd>
-Defines a font. <code>fontfile</code> is the name of a font description file
-with a <code>.fnt</code> extension (<b>do not</b> specify the extension here).
-<code>fontid</code> is used to refer to the font 
-(see <a href="#main.dlabel">dlabel</a> and <a href="#main.slabel">slabel</a>).
-Up to 25 fonts can be defined.
-</dd>
+  <dt><a name="main.slabel"><b><code>slabel = X, Y, fontid, "text"</code></b>
+    </a></dt>
+  <dd>
+    Place a static label at the position <code>X</code>,<code>Y</code>.
+    <code>text</code> is displayed using the font identified by <code>fontid</code>.
+    The text is just a raw string (<code>$x</code> variables do not work) that must
+    be enclosed between double quotes (but the <code>"</code> character cannot be
+    part of the text). The label is displayed using the font identified by
+    <code>fontid</code>.</dd>
 
-<dt><a name="main.slabel">
-<b><code>slabel = X, Y, fontid, "text"</code></b>
-</a></dt>
-<dd>
-Place a static label at the position <code>X</code>,<code>Y</code>.
-<code>text</code> is displayed using the font identified by <code>fontid</code>.
-The text is just a raw string (<code>$x</code> variables do not work) that must
-be enclosed between double quotes (but the <code>"</code> character cannot be
-part of the text). The label is displayed using the font identified by
-<code>fontid</code>.
-</dd>
+  <dt><a name="main.dlabel"><b><code>dlabel = X, Y, length, align, fontid,
+    "text"</code></b></a></dt>
+  <dd>Place a dynamic label at the position <code>X</code>,<code>Y</code>. The
+    label is called dynamic because its text is refreshed periodically. The
+    maximum length of the label is given by <code>length</code> (its height is
+    the height of a character). If the text to be displayed is wider than that,
+    it will be scrolled, otherwise it is aligned within the specified space by
+    the value of the <code>align</code> parameter: <code>0</code> is for right,
+    <code>1</code> is for center, <code>2</code> is for left.<br>
+    The text to be displayed is given by <code>text</code>: It must be written
+    between double quotes (but the <code>"</code> character cannot be part of
+    the text). The label is displayed using the font identified by
+    <code>fontid</code>. You can use the following variables in the text:
 
-<dt><a name="main.dlabel">
-<b><code>dlabel = X, Y, length, align, fontid, "text"</code></b>
-</a></dt>
-<dd>
-Place a dynamic label at the position <code>X</code>,<code>Y</code>. The label is
-called dynamic because its text is refreshed periodically. The maximum length of
-the label is given by <code>length</code> (its height is the height of a
-character). If the text to be displayed is wider than that, it will be scrolled,
-otherwise it is aligned within the specified space by the value of the
-<code>align</code> parameter: <code>0</code> is for right, <code>1</code> is for
-center, <code>2</code> is for left.
-<br>
-The text to be displayed is given by <code>text</code>: It must be written
-between double quotes (but the <code>"</code> character cannot be part of the
-text). The label is displayed using the font identified by <code>fontid</code>.
-You can use the following variables in the text:
+    <table align="center" border="1">
+      <tr align="center"><th>Variable</th><th align="left">Meaning</th></tr>
+      <tr><td align="center"><kbd>$1</kbd></td>
+        <td>play time in <em>hh:mm:ss</em> format</td></tr>
+      <tr><td align="center"><kbd>$2</kbd></td>
+        <td>play time in <em>mmmm:ss</em> format</td></tr>
+      <tr><td align="center"><kbd>$3</kbd></td>
+        <td>play time in <em>hh</em> format (hours)</td></tr>
+      <tr><td align="center"><kbd>$4</kbd></td>
+        <td>play time in <em>mm</em> format (minutes)</td></tr>
+      <tr><td align="center"><kbd>$5</kbd></td>
+        <td>play time in <em>ss</em> format (seconds)</td></tr>
+      <tr><td align="center"><kbd>$6</kbd></td>
+        <td>movie length in <em>hh:mm:ss</em> format</td></tr>
+      <tr><td align="center"><kbd>$7</kbd></td>
+        <td>movie length in <em>mmmm:ss</em> format</td></tr>
+      <tr><td align="center"><kbd>$8</kbd></td>
+        <td>play time in <em>h:mm:ss</em> format</td></tr>
+      <tr><td align="center"><kbd>$v</kbd></td>
+        <td>volume in <em>xxx.xx%</em> format</td></tr>
+      <tr><td align="center"><kbd>$V</kbd></td>
+        <td>volume in <em>xxx.x</em> format</td></tr>
+      <tr><td align="center"><kbd>$b</kbd></td>
+        <td>balance in <em>xxx.xx%</em> format</td></tr>
+      <tr><td align="center"><kbd>$B</kbd></td>
+        <td>balance in <em>xxx.x</em> format</td></tr>
+      <tr><td align="center"><kbd>$$</kbd></td>
+        <td>the <kbd>$</kbd> character</td></tr>
+      <tr><td align="center"><kbd>$a</kbd></td>
+        <td>a character according to the audio type (none: <code>n</code>,
+          mono: <code>m</code>, stereo: <code>t</code>)</td></tr>
+      <tr><td align="center"><kbd>$t</kbd></td>
+        <td>track number (in playlist)</td></tr>
+      <tr><td align="center"><kbd>$o</kbd></td>
+        <td>filename</td></tr>
+      <tr><td align="center"><kbd>$f</kbd></td>
+        <td>filename in lower case</td></tr>
+      <tr><td align="center"><kbd>$F</kbd></td>
+        <td>filename in upper case</td></tr>
+      <tr><td align="center"><kbd>$T</kbd></td>
+        <td>a character according to the stream type (file: <code>f</code>,
+          Video CD: <code>v</code>, DVD: <code>d</code>, URL: <code>u</code>)
+          </td></tr>
+      <tr><td align="center"><kbd>$p</kbd></td>
+        <td>the "p" character (if a movie is playing and the font has the "p"
+          character)</td></tr>
+      <tr><td align="center"><kbd>$s</kbd></td>
+        <td>the "s" character (if the movie is stopped and the font has the "s"
+          character)</td></tr>
+      <tr><td align="center"><kbd>$e</kbd></td>
+        <td>the "e" character (if playback is paused and the font has the "e"
+          character)</td></tr>
+      <tr><td align="center"><kbd>$x</kbd></td>
+        <td>movie width</td></tr>
+      <tr><td align="center"><kbd>$y</kbd></td>
+        <td>movie height</td></tr> 
+      <tr><td align="center"><kbd>$C</kbd></td>
+        <td>name of the codec used</td></tr> 
+    </table>
 
-<table align="center" border="1">
-<tr align=center><th>Variable</th><th align=left>Meaning</th></tr>
-<tr><td align=center><kbd>$1</kbd></td>
-    <td>play time in <em>hh:mm:ss</em> format</td></tr>
-<tr><td align=center><kbd>$2</kbd></td>
-    <td>play time in <em>mmmm:ss</em> format</td></tr>
-<tr><td align=center><kbd>$3</kbd></td>
-    <td>play time in <em>hh</em> format (hours)</td></tr>
-<tr><td align=center><kbd>$4</kbd></td>
-    <td>play time in <em>mm</em> format (minutes)</td></tr>
-<tr><td align=center><kbd>$5</kbd></td>
-    <td>play time in <em>ss</em> format (seconds)</td></tr>
-<tr><td align=center><kbd>$6</kbd></td>
-    <td>movie length in <em>hh:mm:ss</em> format</td></tr>
-<tr><td align=center><kbd>$7</kbd></td>
-    <td>movie length in <em>mmmm:ss</em> format</td></tr>
-<tr><td align=center><kbd>$8</kbd></td>
-    <td>play time in <em>h:mm:ss</em> format</td></tr>
-<tr><td align=center><kbd>$v</kbd></td>
-    <td>volume in <em>xxx.xx%</em> format</td></tr>
-<tr><td align=center><kbd>$V</kbd></td>
-    <td>volume in <em>xxx.x</em> format</td></tr>
-<tr><td align=center><kbd>$b</kbd></td>
-    <td>balance in <em>xxx.xx%</em> format</td></tr>
-<tr><td align=center><kbd>$B</kbd></td>
-    <td>balance in <em>xxx.x</em> format</td></tr>
-<tr><td align=center><kbd>$$</kbd></td>
-    <td>the <kbd>$</kbd> character</td></tr>
-<tr><td align=center><kbd>$a</kbd></td>
-    <td>a character according to the audio type (none: <code>n</code>,
-    mono: <code>m</code>, stereo: <code>t</code>)</td></tr>
-<tr><td align=center><kbd>$t</kbd></td>
-    <td>track number (in playlist)</td></tr>
-<tr><td align=center><kbd>$o</kbd></td>
-    <td>filename</td></tr>
-<tr><td align=center><kbd>$f</kbd></td>
-    <td>filename in lower case</td></tr>
-<tr><td align=center><kbd>$F</kbd></td>
-    <td>filename in upper case</td></tr>
-<tr><td align=center><kbd>$T</kbd></td>
-    <td>a character according to the stream type (file: <code>f</code>,
-    Video CD: <code>v</code>, DVD: <code>d</code>, URL: <code>u</code>)
-    </td></tr>
-<tr><td align=center><kbd>$p</kbd></td>
-    <td>the "p" character (if a movie is playing and the font has the "p"
-    character)
-    </td></tr>
-<tr><td align=center><kbd>$s</kbd></td>
-    <td>the "s" character (if the movie is stopped and the font has the "s"
-    character)
-    </td></tr>
-<tr><td align=center><kbd>$e</kbd></td>
-    <td>the "e" character (if playback is paused and the font has the "e"
-    character)
-    </td></tr>
-<tr><td align=center><kbd>$x</kbd></td>
-    <td>movie width
-    </td></tr>
-<tr><td align=center><kbd>$y</kbd></td>
-    <td>movie height
-    </td></tr> 
-<tr><td align=center><kbd>$C</kbd></td>
-    <td>name of the codec used
-    </td></tr> 
-</table>
-
-<em class="note">
-<b>Note:</b> The <kbd>$a</kbd>, <kbd>$T</kbd>, <kbd>$p</kbd>, <kbd>$s</kbd>
-and <kbd>$e</kbd> variables all return characters that should be displayed
-as special symbols (for example, "e" is for the pause symbol that usually
-looks something like <code>||</code>). You should have a font for normal
-characters and a different font for symbols.
-See the section about <a href="#symbols">symbols</a> for more information.
-</em>
-</dd>
+    <em class="note"><b>Note:</b> The <kbd>$a</kbd>, <kbd>$T</kbd>,
+    <kbd>$p</kbd>, <kbd>$s</kbd>and <kbd>$e</kbd> variables all return
+    characters that should be displayed as special symbols (for example, "e" is
+    for the pause symbol that usually looks something like <code>||</code>). You
+    should have a font for normal characters and a different font for symbols.
+    See the section about <a href="#symbols">symbols</a> for more
+    information.</em>
+  </dd>
 </dl>
 
 
 <h3><a name="subwindow">D.2.2 Subwindow</a></h3>
 
-The following entries can be used in the
-'<code>window = sub</code>' .&nbsp;.&nbsp;. '<code>end</code>' block.
+<p>The following entries can be used in the '<code>window = sub</code>'
+  .&nbsp;.&nbsp;. '<code>end</code>' block.</p>
 
 <dl>
-<dt><a name="sub.base">
-<b><code>base = image, X, Y, width, height</code></b>
-</a></dt>
-<dd>
-The image to be displayed in the window.
-The window will appear at the given <code>X</code>,<code>Y</code> position
-on the screen (<code>0,0</code> is the top left corner). You can specify
-<code>-1</code> for center and <code>-2</code> for right (<code>X</code>) and
-bottom (<code>Y</code>). The window will be as large as the image. 
-<code>width</code> and <code>height</code> denote the size of the window; they
-are optional (if they are missing, the window is the same size as the image).
-</dd>
+  <dt><a name="sub.base"><b><code>base = image, X, Y, width, height</code></b>
+    </a></dt>
+  <dd>The image to be displayed in the window. The window will appear at the
+    given <code>X</code>,<code>Y</code> position on the screen (<code>0,0</code>
+    is the top left corner). You can specify <code>-1</code> for center and
+    <code>-2</code> for right (<code>X</code>) and bottom (<code>Y</code>). The
+    window will be as large as the image. <code>width</code> and
+    <code>height</code> denote the size of the window; they are optional (if
+    they are missing, the window is the same size as the image).</dd>
 
-<dt><a name="sub.background">
-<b><code>background = R, G, B</code></b>
-</a></dt>
-<dd>
-Lets you set the background color. It is useful if the image is smaller than
-the window.
-<code>R</code>, <code>G</code> and <code>B</code> specifies the red, green and blue
-component of the color (each of them is a decimal number from 0 to 255).
-</dd>
+  <dt><a name="sub.background"><b><code>background = R, G, B</code></b></a></dt>
+  <dd>Lets you set the background color. It is useful if the image is smaller
+    than the window. <code>R</code>, <code>G</code> and <code>B</code> specifies
+    the red, green and blue component of the color (each of them is a decimal
+    number from 0 to 255).</dd>
 </dl>
 
 
 <h3><a name="skinmenu">D.2.3 Skin menu</a></h3>
 
-As mentioned earlier, the menu is displayed using two images.
-Normal menu entries are taken from the image specified by the <code>base</code>
-item, while the currently selected entry is taken from the image specified
-by the <code>selected</code> item. You must define the position and size of each
-menu entry through the <code>menu</code> item.
+<p>As mentioned earlier, the menu is displayed using two images. Normal menu
+  entries are taken from the image specified by the <code>base</code> item,
+  while the currently selected entry is taken from the image specified by the
+  <code>selected</code> item. You must define the position and size of each menu
+  entry through the <code>menu</code> item.</p>
 
-<p>
-These are the entries that can be used in the '<code>window = menu</code>'
-.&nbsp;.&nbsp;. '<code>end</code>' block.
-</p>
+<p>These are the entries that can be used in the '<code>window = menu</code>'
+  .&nbsp;.&nbsp;. '<code>end</code>' block.</p>
 
 <dl>
-<dt><a name="menu.base">
-<b><code>base = image</code></b>
-</a></dt>
-<dd>
-The image for normal menu entries.
-</dd>
+  <dt><a name="menu.base"><b><code>base = image</code></b></a></dt>
+  <dd>The image for normal menu entries.</dd>
 
-<dt><a name="menu.selected">
-<b><code>selected = image</code></b>
-</a></dt>
-<dd>
-The image showing the menu with all entries selected.
-</dd>
+  <dt><a name="menu.selected"><b><code>selected = image</code></b></a></dt>
+  <dd>The image showing the menu with all entries selected.</dd>
 
-<dt><a name="menu.menu">
-<b><code>menu = X, Y, width, height, message</code></b>
-</a></dt>
-<dd>
-Defines the <code>X,Y</code> position and the size of a menu entry in
-the image. <code>message</code> is the message to be generated when
-the mouse button is released over the entry.
-</dd>
+  <dt><a name="menu.menu"><b><code>menu = X, Y, width, height, message</code>
+    </b></a></dt>
+  <dd>Defines the <code>X,Y</code> position and the size of a menu entry in the
+    image. <code>message</code> is the message to be generated when the mouse
+    button is released over the entry.</dd>
 </dl>
 
 
 <h2><a name="fonts">D.3 Fonts</a></h2>
 
-As mentioned in the section about the parts of a skin, a font is defined
-by an image and a description
-file. You can place the characters anywhere in the image, but make sure that
-their position and size is given in the description file exactly.
+<p>As mentioned in the section about the parts of a skin, a font is defined by
+  an image and a description file. You can place the characters anywhere in the
+  image, but make sure that their position and size is given in the description
+  file exactly.</p>
 
-<p>
-The font description file (with <code>.fnt</code> extension) can have comment
-lines starting with '<code>;</code>'. The file must have a line in the form
-</p>
+<p>The font description file (with <code>.fnt</code> extension) can have comment
+  lines starting with '<code>;</code>'. The file must have a line in the
+  form</p>
 
 <dl>
-<dt><a name="font.image">
-<b><code>image = image</code></b>
-</a></dt>
-<dd>
-Where <code>image</code> is the name of the image file to be used for
-the font (you do not have to specify the extension).
-</dd>
+  <dt><a name="font.image"><b><code>image = image</code></b></a></dt>
+  <dd>Where <code>image</code> is the name of the image file to be used for the
+    font (you do not have to specify the extension).</dd>
 
-<dt><a name="font.char">
-<b><code>"char" = X, Y, width, height</code></b>
-</a></dt>
-<dd>
-Here <code>X</code> and <code>Y</code> specify the position of the
-<code>char</code> character in the image (<code>0,0</code> is the upper left
-corner). <code>width</code> and <code>height</code> are the dimensions of the
-character in pixels.
-</dd>
+  <dt><a name="font.char"><b><code>"char" = X, Y, width, height</code></b>
+    </a></dt>
+  <dd>Here <code>X</code> and <code>Y</code> specify the position of the
+    <code>char</code> character in the image (<code>0,0</code> is the upper left
+    corner). <code>width</code> and <code>height</code> are the dimensions of
+    the character in pixels.</dd>
 </dl>
 
-This example defines the A, B, C characters using <code>font.png</code>.
-<table width="100%" border=1><tr bgcolor=silver><td><pre>
+<p>This example defines the A, B, C characters using <code>font.png</code>.</p>
+
+<table width="100%" border="1">
+  <tr bgcolor="silver">
+    <td>
+<pre>
 ; Can be "font" instead of "font.png".
 image = font.png
 
@@ -678,217 +582,222 @@ image = font.png
 "A" =  0,0, 7,13
 "B" =  7,0, 7,13
 "C" = 14,0, 7,13
-</pre></td></tr></table>
+</pre>
+    </td>
+  </tr>
+</table>
 
 
 <h3><a name="symbols">D.3.1 Symbols</a></h3>
 
-Some characters have special meanings when returned by some of the variables
-used in <a href="#main.dlabel">dlabel</a>. These characters are meant to be
-shown as symbols so that things like a nice DVD logo can be displayed instead
-of the character 'd' for a DVD stream.
+<p>Some characters have special meanings when returned by some of the variables
+  used in <a href="#main.dlabel">dlabel</a>. These characters are meant to be
+  shown as symbols so that things like a nice DVD logo can be displayed instead
+  of the character 'd' for a DVD stream.</p>
 
-<p>
-The following table lists all the characters that can be used to display
-symbols (and thus require a different font).
-</p>
+<p>The following table lists all the characters that can be used to display
+  symbols (and thus require a different font).</p>
 
 <table align="center" border="1">
-<tr><th align=center>Character</th><th align=left>Symbol</th></tr>
-<tr><td align=center><kbd>p</kbd></td>
+  <tr><th align="center">Character</th><th align="left">Symbol</th></tr>
+  <tr><td align="center"><kbd>p</kbd></td>
     <td align=left>play</td></tr>
-<tr><td align=center><kbd>s</kbd></td>
+  <tr><td align="center"><kbd>s</kbd></td>
     <td align=left>stop</td></tr>
-<tr><td align=center><kbd>e</kbd></td>
+  <tr><td align="center"><kbd>e</kbd></td>
     <td align=left>pause</td></tr>
-<tr><td align=center><kbd>n</kbd></td>
+  <tr><td align="center"><kbd>n</kbd></td>
     <td align=left>no sound</td></tr>
-<tr><td align=center><kbd>m</kbd></td>
+  <tr><td align="center"><kbd>m</kbd></td>
     <td align=left>mono sound</td></tr>
-<tr><td align=center><kbd>t</kbd></td>
+  <tr><td align="center"><kbd>t</kbd></td>
     <td align=left>stereo sound</td></tr>
-<tr><td align=center><kbd>f</kbd></td>
+  <tr><td align="center"><kbd>f</kbd></td>
     <td align=left>stream is a file</td></tr>
-<tr><td align=center><kbd>v</kbd></td>
+  <tr><td align="center"><kbd>v</kbd></td>
     <td align=left>stream is a Video CD</td></tr>
-<tr><td align=center><kbd>d</kbd></td>
+  <tr><td align="center"><kbd>d</kbd></td>
     <td align=left>stream is a DVD</td></tr>
-<tr><td align=center><kbd>u</kbd></td>
-    <td align=left>stream is a URL</td></tr>
+  <tr><td align="center"><kbd>u</kbd></td>
+    <td align="left">stream is a URL</td></tr>
 </table>
 
 
 <h2><a name="guimessages">D.4 GUI messages</a></h2>
 
-These are the messages that can be generated by buttons, potmeters and
-menu entries.
+<p>These are the messages that can be generated by buttons, potmeters and menu
+  entries.</p>
 
-<p>
-<em class=note>
-<b>Note:</b> Some of the messages might not work as expected (or not work at
-all). As you know, the GUI is under development.</em>
-</p>
+<p><em class="note"><b>Note:</b> Some of the messages might not work as expected
+  (or not work at all). As you know, the GUI is under development.</em></p>
 
 
 <h3>Playback control:</h3>
+
 <blockquote>
-<dl>
-<dt><b>evNext</b>
-<dd>Jump to next track in the playlist.
+  <dl>
+    <dt><b>evNext</b></dt>
+    <dd>Jump to next track in the playlist.</dd>
 
-<dt><b>evPause</b>
-<dd>Pause playing.
+    <dt><b>evPause</b></dt>
+    <dd>Pause playing.</dd>
 
-<dt><b>evPauseSwitchToPlay</b>
-<dd>Forms a switch together with <code>evPlaySwitchToPause</code>. They can be
-used to have a common play/pause button. Both messages should be assigned
-to buttons displayed at the very same position in the window. This
-message pauses playing and the image for the <code>evPlaySwitchToPause</code> button
-is displayed (to indicate that the button can be pressed to continue playing).
+    <dt><b>evPauseSwitchToPlay</b></dt>
+    <dd>Forms a switch together with <code>evPlaySwitchToPause</code>. They can
+      be used to have a common play/pause button. Both messages should be
+      assigned to buttons displayed at the very same position in the window.
+      This message pauses playing and the image for the
+      <code>evPlaySwitchToPause</code> button is displayed (to indicate that the
+      button can be pressed to continue playing).</dd>
 
-<dt><b>evPlay</b>
-<dd>Start playing.
+    <dt><b>evPlay</b></dt>
+    <dd>Start playing.</dd>
 
-<dt><b>evPlaySwitchToPause</b>
-<dd>The opposite of <code>evPauseSwitchToPlay</code>. This message starts playing
-and the image for the <code>evPauseSwitchToPlay</code> button is displayed (to
-indicate that the button can be pressed to pause playing).
+    <dt><b>evPlaySwitchToPause</b></dt>
+    <dd>The opposite of <code>evPauseSwitchToPlay</code>. This message starts
+      playing and the image for the <code>evPauseSwitchToPlay</code> button is
+      displayed (to indicate that the button can be pressed to pause
+      playing).</dd>
 
-<dt><b>evPrev</b>
-<dd>Jump to previous track in the playlist.
+    <dt><b>evPrev</b></dt>
+    <dd>Jump to previous track in the playlist.</dd>
 
-<dt><b>evStop</b>
-<dd>Stop playing.
-</dl>
+    <dt><b>evStop</b></dt>
+    <dd>Stop playing.</dd>
+  </dl>
 </blockquote>
 
 
 <h3>Seeking:</h3>
+
 <blockquote>
-<dl>
-<dt><b>evBackward10sec</b>
-<dt><b>evBackward1min</b>
-<dt><b>evBackward10min</b>
-<dd>Seek backward 10 seconds / 1 minute / 10 minutes.
+  <dl>
+    <dt><b>evBackward10sec</b></dt>
+    <dt><b>evBackward1min</b></dt>
+    <dt><b>evBackward10min</b></dt>
+    <dd>Seek backward 10 seconds / 1 minute / 10 minutes.</dd>
 
-<dt><b>evForward10sec</b>
-<dt><b>evForward1min</b>
-<dt><b>evForward10min</b>
-<dd>Seek forward 10 seconds / 1 minute / 10 minutes.
+    <dt><b>evForward10sec</b></dt>
+    <dt><b>evForward1min</b></dt>
+    <dt><b>evForward10min</b></dt>
+    <dd>Seek forward 10 seconds / 1 minute / 10 minutes.</dd>
 
-<dt><b>evSetMoviePosition</b>
-<dd>Seek to position (can be used by a potmeter; the relative
-value (0-100%) of the potmeter is used).
-</dl>
+    <dt><b>evSetMoviePosition</b></dt>
+    <dd>Seek to position (can be used by a potmeter; the relative value (0-100%)
+      of the potmeter is used).</dd>
+  </dl>
 </blockquote>
   
 
 <h3>Video control:</h3>
+
 <blockquote>
-<dl>
-<dt><b>evDoubleSize</b>
-<dd>Set the movie window to double size.
+  <dl>
+    <dt><b>evDoubleSize</b></dt>
+    <dd>Set the movie window to double size.</dd>
 
-<dt><b>evFullScreen</b>
-<dd>Switch fullscreen mode on/off.
+    <dt><b>evFullScreen</b></dt>
+    <dd>Switch fullscreen mode on/off.</dd>
 
-<dt><b>evNormalSize</b>
-<dd>Set the movie window to its normal size.
-</dl>
+    <dt><b>evNormalSize</b></dt>
+    <dd>Set the movie window to its normal size.</dd>
+  </dl>
 </blockquote>
 
 
 <h3>Audio control:</h3>
+
 <blockquote>
-<dl>
-<dt><b>evDecAudioBufDelay</b>
-<dd>Decrease audio buffer delay.
+  <dl>
+    <dt><b>evDecAudioBufDelay</b></dt>
+    <dd>Decrease audio buffer delay.</dd>
 
-<dt><b>evDecBalance</b>
-<dd>Decrease balance.
+    <dt><b>evDecBalance</b></dt>
+    <dd>Decrease balance.</dd>
 
-<dt><b>evDecVolume</b>
-<dd>Decrease volume.
+    <dt><b>evDecVolume</b></dt>
+    <dd>Decrease volume.</dd>
 
-<dt><b>evIncAudioBufDelay</b>
-<dd>Increase audio buffer delay.
+    <dt><b>evIncAudioBufDelay</b></dt>
+    <dd>Increase audio buffer delay.</dd>
 
-<dt><b>evIncBalance</b>
-<dd>Increase balance.
+    <dt><b>evIncBalance</b></dt>
+    <dd>Increase balance.</dd>
 
-<dt><b>evIncVolume</b>
-<dd>Increase volume.
+    <dt><b>evIncVolume</b></dt>
+    <dd>Increase volume.</dd>
 
-<dt><b>evMute</b>
-<dd>Mute/unmute the sound.
+    <dt><b>evMute</b></dt>
+    <dd>Mute/unmute the sound.</dd>
 
-<dt><b>evSetBalance</b>
-<dd>Set balance (can be used by a potmeter; the relative
-value (0-100%) of the potmeter is used).
+    <dt><b>evSetBalance</b></dt>
+    <dd>Set balance (can be used by a potmeter; the relative value (0-100%) of
+      the potmeter is used).</dd>
 
-<dt><b>evSetVolume</b>
-<dd>Set volume (can be used by a potmeter; the relative
-value (0-100%) of the potmeter is used).
-</dl>
+    <dt><b>evSetVolume</b></dt>
+    <dd>Set volume (can be used by a potmeter; the relative value (0-100%) of
+      the potmeter is used).</dd>
+  </dl>
 </blockquote>
 
 
 <h3>Miscellaneous:</h3>
+
 <blockquote>
-<dl>
-<dt><b>evAbout</b>
-<dd>Open the about window.
+  <dl>
+    <dt><b>evAbout</b></dt>
+    <dd>Open the about window.</dd>
 
-<dt><b>evDropSubtitle</b>
-<dd>Disables the currently used subtitle.
+    <dt><b>evDropSubtitle</b></dt>
+    <dd>Disables the currently used subtitle.</dd>
 
-<dt><b>evEqualizer</b>
-<dd>Turn the equalizer on/off.
+    <dt><b>evEqualizer</b></dt>
+    <dd>Turn the equalizer on/off.</dd>
 
-<dt><b>evExit</b>
-<dd>Quit the program.
+    <dt><b>evExit</b></dt>
+    <dd>Quit the program.</dd>
 
-<dt><b>evIconify</b>
-<dd>Iconify the window.
+    <dt><b>evIconify</b></dt>
+    <dd>Iconify the window.</dd>
 
-<dt><b>evLoad</b>
-<dd>Load a file (by opening a file browser window, where you can choose a
-file).
+    <dt><b>evLoad</b></dt>
+    <dd>Load a file (by opening a file browser window, where you can choose a
+      file).</dd>
 
-<dt><b>evLoadPlay</b>
-<dd>Does the same as <code>evLoad</code>, but it automatically starts
-playing after the file is loaded.
+    <dt><b>evLoadPlay</b></dt>
+    <dd>Does the same as <code>evLoad</code>, but it automatically starts
+      playing after the file is loaded.</dd>
 
-<dt><b>evLoadSubtitle</b>
-<dd>Loads a subtitle file (with the fileselector)
+    <dt><b>evLoadSubtitle</b></dt>
+    <dd>Loads a subtitle file (with the fileselector)</dd>
 
-<dt><b>evLoadAudioFile</b>
-<dd>Loads an audio file (with the fileselector)
+    <dt><b>evLoadAudioFile</b></dt>
+    <dd>Loads an audio file (with the fileselector)</dd>
 
-<dt><b>evNone</b>
-<dd>Empty message, it has no effect (except maybe in CVS versions :-)).
+    <dt><b>evNone</b></dt>
+    <dd>Empty message, it has no effect (except maybe in CVS versions :-)).</dd>
 
-<dt><b>evPlayList</b>
-<dd>Open/close the playlist window.
+    <dt><b>evPlayList</b></dt>
+    <dd>Open/close the playlist window.</dd>
 
-<dt><b>evPlayDVD</b>
-<dd>Tries to open the disc in the given DVD-ROM drive.
+    <dt><b>evPlayDVD</b></dt>
+    <dd>Tries to open the disc in the given DVD-ROM drive.</dd>
 
-<dt><b>evPlayVCD</b>
-<dd>Tries to open the disc in the given CD-ROM drive.
+    <dt><b>evPlayVCD</b></dt>
+    <dd>Tries to open the disc in the given CD-ROM drive.</dd>
 
-<dt><b>evPreferences</b>
-<dd>Open the preferences window.
+    <dt><b>evPreferences</b></dt>
+    <dd>Open the preferences window.</dd>
 
-<dt><b>evSetAspect</b>
-<dd>Sets displayed image aspect.
+    <dt><b>evSetAspect</b></dt>
+    <dd>Sets displayed image aspect.</dd>
 
-<dt><b>evSetURL</b>
-<dd>Displays the URL dialog window.
+    <dt><b>evSetURL</b></dt>
+    <dd>Displays the URL dialog window.</dd>
 
-<dt><b>evSkinBrowser</b>
-<dd>Open the skin browser window.
-</dl>
+    <dt><b>evSkinBrowser</b></dt>
+    <dd>Open the skin browser window.</dd>
+  </dl>
 </blockquote>
 
 </body>
