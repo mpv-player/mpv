@@ -48,7 +48,6 @@ static GtkWidget * CBAFM;
 static GtkWidget * CBAudioEqualizer;
 //static GtkWidget * CBSurround;
 static GtkWidget * CBExtraStereo;
-static GtkWidget * CBNoSound;
 static GtkWidget * CBNormalize;
 static GtkWidget * CBDoubleBuffer;
 static GtkWidget * CBDR;
@@ -169,8 +168,6 @@ void ShowPreferences( void )
 
 // -- 1. page 
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBAudioEqualizer ),gtkEnableAudioEqualizer );
- gtkAONoSound=muted;
- gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBNoSound ),gtkAONoSound );
 #if 0
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBSurround ),gtkAOSurround );
 #endif
@@ -370,7 +367,6 @@ void ShowPreferences( void )
  gtk_signal_connect( GTK_OBJECT( CBExtraStereo ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)0 );
  gtk_signal_connect( GTK_OBJECT( CBNormalize ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)1 );
  gtk_signal_connect( GTK_OBJECT( CBAudioEqualizer ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)2 );
- gtk_signal_connect( GTK_OBJECT( CBNoSound ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)3 );
 #ifdef HAVE_FREETYPE
  gtk_signal_connect( GTK_OBJECT( RBFontNoAutoScale ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)4 );
  gtk_signal_connect( GTK_OBJECT( BRFontAutoScaleWidth ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)5 );
@@ -450,7 +446,6 @@ void prButton( GtkButton * button,gpointer user_data )
         gtkEnableAudioEqualizer=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBAudioEqualizer ) );
 	gtkAOExtraStereo=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBExtraStereo ) );
 	gtkAONorm=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBNormalize ) );
-	gtkAONoSound=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBNoSound ) );
 	gtkSet( gtkSetExtraStereo,HSExtraStereoMuladj->value,NULL );
 	audio_delay=HSAudioDelayadj->value;
 
@@ -615,9 +610,6 @@ static void prToggled( GtkToggleButton * togglebutton,gpointer user_data )
 //   case 2: // equalizer
 //	if ( guiIntfStruct.Playing ) gtkMessageBox( GTK_MB_WARNING,"Please remember, this function need restart the playing." );
 //	break;
-   case 3: // no sound
-        mixer_mute();
-	break;
    case 4:
    case 5:
    case 6:
@@ -750,8 +742,6 @@ GtkWidget * create_Preferences( void )
       AddFrame( NULL,GTK_SHADOW_ETCHED_OUT,hbox1,1 ),1 ),0 );
     gtk_widget_set_usize( vbox3,250,-2 );
 
-  CBNoSound=AddCheckButton( MSGTR_PREFERENCES_DoNotPlaySound,vbox3 );
-  AddHSeparator( vbox3 );
   CBNormalize=AddCheckButton( MSGTR_PREFERENCES_NormalizeSound,vbox3 );
   CBAudioEqualizer=AddCheckButton( MSGTR_PREFERENCES_EnEqualizer,vbox3 );
 #if 0
@@ -1080,7 +1070,6 @@ GtkWidget * create_Preferences( void )
   gtk_signal_connect( GTK_OBJECT( BLoadFont ),"clicked",GTK_SIGNAL_FUNC( prButton ),(void*)bLFont );
 
 #if 0
-  gtk_signal_connect( GTK_OBJECT( CBNoSound ),"toggled",GTK_SIGNAL_FUNC( on_CBNoSound_toggled ),NULL );
   gtk_signal_connect( GTK_OBJECT( CBNormalize ),"toggled",GTK_SIGNAL_FUNC( on_CBNormalize_toggled ),NULL );
   gtk_signal_connect( GTK_OBJECT( CBSurround ),"toggled",GTK_SIGNAL_FUNC( on_CBSurround_toggled ),NULL );
   gtk_signal_connect( GTK_OBJECT( CBExtraStereo ),"toggled",GTK_SIGNAL_FUNC( on_CBExtraStereo_toggled ),NULL );

@@ -567,9 +567,6 @@ int guiGetEvent( int type,char * arg )
 	 btnModify( evSetBalance,guiIntfStruct.Balance );
 	}
 
-	if ( gtkAONoSound ) { if ( !muted ) mixer_mute(); }
-	 else if ( muted ) mixer_mute();
-
 	if ( gtkEnableAudioEqualizer )
 	 {
 	  equalizer_t eq;

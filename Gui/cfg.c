@@ -31,7 +31,6 @@ int    gtkVopPP = 0;
  int    gtkVopFAME = 0;
 #endif
 
-int    gtkAONoSound = 0;
 int    gtkAONorm = 0;
 int    gtkAOSurround = 0;
 int    gtkAOExtraStereo = 0;
@@ -96,7 +95,6 @@ static config_t gui_opts[] =
 #endif
 
  { "ao_driver",&audio_driver_list,CONF_TYPE_STRING_LIST,0,0,0,NULL },
- { "ao_nosound",&gtkAONoSound,CONF_TYPE_FLAG,0,0,1,NULL },
  { "ao_volnorm",&gtkAONorm,CONF_TYPE_FLAG,0,0,1,NULL },
  { "ao_surround",&gtkAOSurround,CONF_TYPE_FLAG,0,0,1,NULL },
  { "ao_extra_stereo",&gtkAOExtraStereo,CONF_TYPE_FLAG,0,0,1,NULL },

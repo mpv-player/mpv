@@ -8,7 +8,6 @@ extern int    gtkVopPP;
 extern int    gtkVopLAVC;
 extern int    gtkVopFAME;
 
-extern int    gtkAONoSound;
 extern int    gtkAONorm;
 extern int    gtkAOFakeSurround;
 extern int    gtkAOExtraStereo;
