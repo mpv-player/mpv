@@ -70,6 +70,8 @@ extern int verbose;
 extern int osd_level;
 extern int nogui;
 
+float a_frame;    // Audio
+
 extern float rel_seek_secs;
 
 extern int osd_visible;
