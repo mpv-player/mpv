@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #include <sys/types.h>
@@ -654,8 +655,7 @@ int demux_info_add(demuxer_t *demuxer, char *opt, char *param)
 	    mp_msg(MSGT_DEMUX, MSGL_WARN, "Demuxer info->name already present\n!");
 	    return(0);
 	}
-	info->name = malloc(strlen(param));
-	strcpy(info->name, param);
+	info->name = strdup(param);
 	return(1);
     }
 
@@ -666,8 +666,7 @@ int demux_info_add(demuxer_t *demuxer, char *opt, char *param)
 	    mp_msg(MSGT_DEMUX, MSGL_WARN, "Demuxer info->author already present\n!");
 	    return(0);
 	}
-	info->author = malloc(strlen(param));
-	strcpy(info->author, param);
+	info->author = strdup(param);
 	return(1);
     }
 
@@ -678,8 +677,7 @@ int demux_info_add(demuxer_t *demuxer, char *opt, char *param)
 	    mp_msg(MSGT_DEMUX, MSGL_WARN, "Demuxer info->encoder already present\n!");
 	    return(0);
 	}
-	info->encoder = malloc(strlen(param));
-	strcpy(info->encoder, param);
+	info->encoder = strdup(param);
 	return(1);
     }
 
@@ -690,8 +688,7 @@ int demux_info_add(demuxer_t *demuxer, char *opt, char *param)
 	    mp_msg(MSGT_DEMUX, MSGL_WARN, "Demuxer info->comments already present\n!");
 	    return(0);
 	}
-	info->comments = malloc(strlen(param));
-	strcpy(info->comments, param);
+	info->comments = strdup(param);
 	return(1);
     }
 
@@ -702,8 +699,7 @@ int demux_info_add(demuxer_t *demuxer, char *opt, char *param)
 	    mp_msg(MSGT_DEMUX, MSGL_WARN, "Demuxer info->copyright already present\n!");
 	    return(0);
 	}
-	info->copyright = malloc(strlen(param));
-	strcpy(info->copyright, param);
+	info->copyright = strdup(param);
 	return(1);
     }
 
