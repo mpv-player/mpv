@@ -363,3 +363,24 @@ void demux_close_audio(demuxer_t* demuxer) {
   free(priv);
 }
 
+int demux_audio_control(demuxer_t *demuxer,int cmd, void *arg){
+    sh_audio_t *sh_audio=demuxer->audio->sh;
+    int audio_length = demuxer->movi_end / sh_audio->i_bps;
+    da_priv_t* priv = demuxer->priv;
+	    
+    switch(cmd) {
+	case DEMUXER_CTRL_GET_TIME_LENGTH:
+	    if (audio_length<=0) return DEMUXER_CTRL_DONTKNOW;
+	    *((unsigned long *)arg)=(unsigned long)audio_length;
+	    return DEMUXER_CTRL_GUESS;
+
+	case DEMUXER_CTRL_GET_PERCENT_POS:
+	    if (audio_length<=0) 
+    		return DEMUXER_CTRL_DONTKNOW;
+    	    *((int *)arg)=(int)( (priv->last_pts*100)  / audio_length);
+	    return DEMUXER_CTRL_OK;
+
+	default:
+	    return DEMUXER_CTRL_NOTIMPL;
+    }
+}
