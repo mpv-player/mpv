@@ -3073,7 +3073,7 @@ if test "$_fbdev" = auto ; then
 fi
 if test "$_fbdev" = yes ; then
   _def_fbdev='#define HAVE_FBDEV 1'
-  _vosrc="$_vosrc vo_fbdev.c"
+  _vosrc="$_vosrc vo_fbdev.c vo_fbdev2.c"
   _vomodules="fbdev $_vomodules"
 else
   _def_fbdev='#undef HAVE_FBDEV'
