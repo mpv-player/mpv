@@ -139,7 +139,7 @@ connect2Server(char *host, int port) {
 
 	socket_server_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if( socket_server_fd==-1 ) {
-		mp_msg(MSGT_NETWORK,MSGL_ERR,"Failed to create socket");
+		mp_msg(MSGT_NETWORK,MSGL_ERR,"Failed to create socket\n");
 		return -1;
 	}
 
@@ -161,7 +161,7 @@ connect2Server(char *host, int port) {
 	fcntl( socket_server_fd, F_SETFL, fcntl(socket_server_fd, F_GETFL) | O_NONBLOCK );
 	if( connect( socket_server_fd, (struct sockaddr*)&server_address, sizeof(server_address) )==-1 ) {
 		if( errno!=EINPROGRESS ) {
-			mp_msg(MSGT_NETWORK,MSGL_ERR,"Failed to connect to server");
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"Failed to connect to server\n");
 			close(socket_server_fd);
 			return -1;
 		}
@@ -172,7 +172,7 @@ connect2Server(char *host, int port) {
 	FD_SET( socket_server_fd, &set );
 	// When the connection will be made, we will have a writable fd
 	while((ret = select(socket_server_fd+1, NULL, &set, NULL, &tv)) == 0) {
-	      if( ret<0 ) mp_msg(MSGT_NETWORK,MSGL_ERR,"select failed");
+	      if( ret<0 ) mp_msg(MSGT_NETWORK,MSGL_ERR,"select failed\n");
 	      else if(ret > 0) break;
 	      else if(count > 15 || mpdemux_check_interrupt(500)) {
 		if(count > 15)
@@ -622,7 +622,7 @@ rtp_open_socket( URL_t *url ) {
 	socket_server_fd = socket(AF_INET, SOCK_DGRAM, 0);
 //	fcntl( socket_server_fd, F_SETFL, fcntl(socket_server_fd, F_GETFL) | O_NONBLOCK );
 	if( socket_server_fd==-1 ) {
-		mp_msg(MSGT_NETWORK,MSGL_ERR,"Failed to create socket");
+		mp_msg(MSGT_NETWORK,MSGL_ERR,"Failed to create socket\n");
 		return -1;
 	}
 
@@ -641,7 +641,7 @@ rtp_open_socket( URL_t *url ) {
 
 	if( bind( socket_server_fd, (struct sockaddr*)&server_address, sizeof(server_address) )==-1 ) {
 		if( errno!=EINPROGRESS ) {
-			mp_msg(MSGT_NETWORK,MSGL_ERR,"Failed to connect to server");
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"Failed to connect to server\n");
 			close(socket_server_fd);
 			return -1;
 		}
@@ -650,7 +650,7 @@ rtp_open_socket( URL_t *url ) {
 	// Increase the socket rx buffer size to maximum -- this is UDP
 	rxsockbufsz = 240 * 1024;
 	if( setsockopt( socket_server_fd, SOL_SOCKET, SO_RCVBUF, &rxsockbufsz, sizeof(rxsockbufsz))) {
-		mp_msg(MSGT_NETWORK,MSGL_ERR,"Couldn't set receive socket buffer size");
+		mp_msg(MSGT_NETWORK,MSGL_ERR,"Couldn't set receive socket buffer size\n");
 	}
 
 	if((ntohl(server_address.sin_addr.s_addr) >> 28) == 0xe) {
@@ -658,7 +658,7 @@ rtp_open_socket( URL_t *url ) {
 		//mcast.imr_interface.s_addr = inet_addr("10.1.1.2");
 		mcast.imr_interface.s_addr = 0;
 		if( setsockopt( socket_server_fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mcast, sizeof(mcast))) {
-			mp_msg(MSGT_NETWORK,MSGL_ERR,"IP_ADD_MEMBERSHIP failed (do you have multicasting enabled in your kernel?)");
+			mp_msg(MSGT_NETWORK,MSGL_ERR,"IP_ADD_MEMBERSHIP failed (do you have multicasting enabled in your kernel?)\n");
 			return -1;
 		}
 	}
