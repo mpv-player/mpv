@@ -35,4 +35,5 @@ You know base address and memory size, let's setup mtrr registers!
   ram (size=0x2000000) just execute:
 echo "base=0xd8000000 size=0x2000000 type=write-combining" >| /proc/mtrr
 
-(older K6-2's [around 266Mhz, stepping 0] may not support MTRR.)
+- Older K6-2's [around 266Mhz, stepping 0] may not support MTRR.
+- K6-2 with 'stepping 12' (do a cat /proc/cpuinfo) supports MTRR.
