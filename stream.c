@@ -1,21 +1,23 @@
 
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <sys/ioctl.h>
+#include <unistd.h>
+
+//#include <sys/types.h>
+//#include <sys/stat.h>
+//#include <fcntl.h>
+
+#include <linux/cdrom.h>
+
+#include "stream.h"
+
+extern int verbose; // defined in mplayer.c
+
 #include "vcd_read.c"
 
 //=================== STREAMER =========================
-
-#define STREAM_BUFFER_SIZE 2048
-
-#define STREAMTYPE_FILE 0
-#define STREAMTYPE_VCD  1
-
-typedef struct {
-  int fd;
-  long pos;
-  int eof;
-  int type; // 0=file 1=VCD
-  unsigned int buf_pos,buf_len;
-  unsigned char buffer[STREAM_BUFFER_SIZE];
-} stream_t;
 
 int stream_fill_buffer(stream_t *s){
   int len;
@@ -39,87 +41,14 @@ int stream_fill_buffer(stream_t *s){
   return len;
 }
 
-inline int stream_read_char(stream_t *s){
-  return (s->buf_pos<s->buf_len)?s->buffer[s->buf_pos++]:
-    (stream_fill_buffer(s)?s->buffer[s->buf_pos++]:-256);
-//  if(s->buf_pos<s->buf_len) return s->buffer[s->buf_pos++];
-//  stream_fill_buffer(s);
-//  if(s->buf_pos<s->buf_len) return s->buffer[s->buf_pos++];
-//  return 0; // EOF
-}
-
-inline unsigned int stream_read_word(stream_t *s){
-  int x,y;
-  x=stream_read_char(s);
-  y=stream_read_char(s);
-  return (x<<8)|y;
-}
-
-inline unsigned int stream_read_dword(stream_t *s){
-  unsigned int y;
-  y=stream_read_char(s);
-  y=(y<<8)|stream_read_char(s);
-  y=(y<<8)|stream_read_char(s);
-  y=(y<<8)|stream_read_char(s);
-  return y;
-}
-
-inline unsigned int stream_read_word_le(stream_t *s){
-  int x,y;
-  x=stream_read_char(s);
-  y=stream_read_char(s);
-  return (y<<8)|x;
-}
-
-inline unsigned int stream_read_dword_le(stream_t *s){
-  unsigned int y;
-  y=stream_read_char(s);
-  y|=stream_read_char(s)<<8;
-  y|=stream_read_char(s)<<16;
-  y|=stream_read_char(s)<<24;
-  return y;
-}
-
-inline void stream_read(stream_t *s,char* mem,int len){
-  while(len>0){
-    int x;
-    x=s->buf_len-s->buf_pos;
-    if(x==0){
-      if(!stream_fill_buffer(s)) return; // EOF
-      x=s->buf_len-s->buf_pos;
-    }
-    if(s->buf_pos>s->buf_len) printf("stream_read: WARNING! s->buf_pos>s->buf_len\n");
-    if(x>len) x=len;
-    memcpy(mem,&s->buffer[s->buf_pos],x);
-    s->buf_pos+=x; mem+=x; len-=x;
-  }
-}
-
-inline int stream_eof(stream_t *s){
-  return s->eof;
-}
-
-inline int stream_tell(stream_t *s){
-  return s->pos+s->buf_pos-s->buf_len;
-}
-
-inline int stream_seek(stream_t *s,unsigned int pos){
+int stream_seek_long(stream_t *s,unsigned int pos){
 unsigned int newpos;
 
-  if(verbose>=3) printf("seek to 0x%X\n",pos);
-
-  if(pos<s->pos){
-    int x=pos-(s->pos-s->buf_len);
-    if(x>=0){
-      s->buf_pos=x;
-//      putchar('*');fflush(stdout);
-      return 1;
-    }
-  }
+//  if(verbose>=3) printf("seek to 0x%X\n",pos);
 
 if(verbose>=3){
   printf("s->pos=%X  newpos=%X  new_bufpos=%X  buflen=%X  \n",
-    s->pos,newpos,pos,s->buf_len);
+    (unsigned int)s->pos,newpos,pos,s->buf_len);
 }
 
   s->buf_pos=s->buf_len=0;
@@ -157,27 +86,10 @@ if(newpos==0 || newpos!=s->pos){
     s->buf_pos=pos; // byte position in sector
     return 1;
   }
-  printf("stream_seek: WARNING! Can't seek to 0x%X !\n",pos+newpos);
+  if(verbose) printf("stream_seek: WARNING! Can't seek to 0x%X !\n",pos+newpos);
   return 0;
 }
 
-inline void stream_skip(stream_t *s,int len){
-  if(len<0 || len>2*STREAM_BUFFER_SIZE){
-    // negative or big skip!
-    stream_seek(s,stream_tell(s)+len);
-    return;
-  }
-  while(len>0){
-    int x=s->buf_len-s->buf_pos;
-    if(x==0){
-      if(!stream_fill_buffer(s)) return; // EOF
-      x=s->buf_len-s->buf_pos;
-    }
-    if(x>len) x=len;
-    //memcpy(mem,&s->buf[s->buf_pos],x);
-    s->buf_pos+=x; len-=x;
-  }
-}
 
 void stream_reset(stream_t *s){
   if(s->eof){

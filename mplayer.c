@@ -233,7 +233,7 @@ static int max_framesize=0;
 //             Input media streaming & demultiplexer:
 //**************************************************************************//
 
-#include "stream.c"
+#include "stream.h"
 #include "demuxer.c"
 
 #include "stheader.h"
@@ -605,11 +605,13 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 
 if(vcd_track){
 //============ Open VideoCD track ==============
+  int ret;
   f=open(filename,O_RDONLY);
   if(f<0){ printf("CD-ROM Device '%s' not found!\n",filename);return 1; }
   vcd_read_toc(f);
-  if(!vcd_seek_to_track(f,vcd_track)){ printf("Error selecting VCD track!\n");return 1;}
-  seek_to_byte+=VCD_SECTOR_DATA*vcd_get_msf();
+  ret=vcd_seek_to_track(f,vcd_track);
+  if(ret==-1){ printf("Error selecting VCD track!\n");return 1;}
+  seek_to_byte+=ret;
   if(verbose) printf("VCD start byte position: 0x%X\n",seek_to_byte);
   stream_type=STREAMTYPE_VCD;
 #ifdef VCD_CACHE
