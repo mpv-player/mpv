@@ -6,7 +6,6 @@
 
 extern GtkWidget * OSSConfig;
 extern GtkWidget * Preferences;
-extern int    	   gtkVPreferences;
 extern GtkWidget * prEFontName;
 
 extern GtkWidget * create_Preferences( void );

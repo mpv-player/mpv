@@ -17,6 +17,7 @@
 #include "../../interface.h"
 #include "../widgets.h"
 #include "pl.h"
+#include "common.h"
 
 static char * book_open_xpm[] = {
 	"16 16 4 1",
@@ -66,7 +67,7 @@ static char * book_closed_xpm[] = {
 	"      ..        ",
 	"                "};
 
-       GtkWidget * PlayList;
+       GtkWidget * PlayList = NULL;
 static GtkWidget * CTDirTree;
 static GtkWidget * CLFiles;
 static GtkWidget * CLSelected;
@@ -79,7 +80,6 @@ static GdkPixmap * pxClosedBook;
 static GdkBitmap * msOpenedBook;
 static GdkBitmap * msClosedBook;
 
-static int   gtkVPlaylist = 0;
 static int   NrOfEntrys = 0;
 static int   NrOfSelected = 0;
 static int * CLFileSelected = NULL;
@@ -114,7 +114,7 @@ static void scan_dir( char * path );
 
 void ShowPlayList( void )
 {
- if ( gtkVPlaylist ) gtkActive( PlayList );
+ if ( PlayList ) gtkActive( PlayList );
   else PlayList=create_PlayList();
 
  if ( old_path && *old_path )
@@ -175,17 +175,14 @@ void ShowPlayList( void )
 
 void HidePlayList( void )
 {
- if ( !gtkVPlaylist ) return;
- gtkVPlaylist=NrOfSelected=NrOfEntrys=0;
- if ( CLListSelected ) free( CLListSelected ); CLListSelected=NULL;
- if ( CLFileSelected ) free( CLFileSelected ); CLFileSelected=NULL;
+ if ( !PlayList ) return;
+ NrOfSelected=NrOfEntrys=0;
+ gfree( (void **)&CLListSelected ); gfree( (void **)&CLFileSelected );
  if ( old_path ) free( old_path ); old_path=strdup( current_path );
  gtk_widget_hide( PlayList );
  gtk_widget_destroy( PlayList );
+ PlayList=NULL;
 }
-
-static void plDestroy( GtkObject * object,gpointer user_data )
-{ HidePlayList(); }
 
 static void plRowSelect( GtkCList * clist,gint row,gint column,GdkEvent * event,gpointer user_data )
 {
@@ -392,40 +389,26 @@ static void plCTRow(GtkWidget * widget, gint row, gint column, GdkEventButton * 
  if ( CLFileSelected ) free( CLFileSelected ); CLFileSelected=calloc( 1,NrOfEntrys * sizeof( int ) );
 }
 
-static void plShow( GtkWidget * widget,gpointer user_data )
-{ gtkVPlaylist=(int)user_data; }
-
 GtkWidget * create_PlayList( void )
 {
-  GtkWidget 	* frame1;
-  GtkWidget 	* frame2;
-  GtkWidget 	* frame3;
-  GtkWidget 	* frame4;
   GtkWidget 	* vbox1;
   GtkWidget 	* hbox1;
-  GtkWidget 	* frame5;
   GtkWidget 	* scrolledwindow1;
-  GtkWidget 	* label2;
-  GtkWidget 	* frame6;
   GtkWidget 	* vbox2;
   GtkWidget 	* scrolledwindow2;
-  GtkWidget 	* label3;
-  GtkWidget 	* hseparator2;
   GtkWidget 	* scrolledwindow3;
-  GtkWidget 	* label5;
-  GtkWidget 	* hseparator1;
   GtkWidget 	* hbuttonbox1;
   GtkAccelGroup * accel_group;
-  GdkColor 		  transparent = { 0 };
-  gchar 		* root = "/";
-  gchar 		* dummy = "dummy";
+  GdkColor 	  transparent = { 0,0,0,0 };
+  gchar 	* root = "/";
+  gchar 	* dummy = "dummy";
   DirNodeType 	* DirNode;
 
   accel_group=gtk_accel_group_new();
 
   PlayList=gtk_window_new( GTK_WINDOW_TOPLEVEL );
   gtk_object_set_data( GTK_OBJECT( PlayList ),"PlayList",PlayList );
-  gtk_widget_set_usize( PlayList,512,300 );
+  gtk_widget_set_usize( PlayList,512,384 );
   gtk_window_set_title( GTK_WINDOW( PlayList ),MSGTR_PlayList );
   gtk_window_set_position( GTK_WINDOW( PlayList ),GTK_WIN_POS_CENTER );
 //  gtk_window_set_policy( GTK_WINDOW( PlayList ),FALSE,FALSE,FALSE );
@@ -434,64 +417,17 @@ GtkWidget * create_PlayList( void )
   gtk_widget_realize( PlayList );
   gtkAddIcon( PlayList );
 
-  frame1=gtk_frame_new( NULL );
-  gtk_widget_ref( frame1 );
-  gtk_object_set_data_full( GTK_OBJECT( PlayList ),"frame1",frame1,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame1 );
-  gtk_container_add( GTK_CONTAINER( PlayList ),frame1 );
-  gtk_container_set_border_width( GTK_CONTAINER( frame1 ),1 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame1 ),GTK_SHADOW_IN );
-
-  frame2=gtk_frame_new( NULL );
-  gtk_widget_ref( frame2 );
-  gtk_object_set_data_full( GTK_OBJECT( PlayList ),"frame2",frame2,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame2 );
-  gtk_container_add( GTK_CONTAINER( frame1 ),frame2 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame2 ),GTK_SHADOW_NONE );
-
-  frame3=gtk_frame_new( NULL );
-  gtk_widget_ref( frame3 );
-  gtk_object_set_data_full( GTK_OBJECT( PlayList ),"frame3",frame3,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame3 );
-  gtk_container_add( GTK_CONTAINER( frame2 ),frame3 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame3 ),GTK_SHADOW_ETCHED_OUT );
-
-  frame4=gtk_frame_new( NULL );
-  gtk_widget_ref( frame4 );
-  gtk_object_set_data_full( GTK_OBJECT( PlayList ),"frame4",frame4,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame4 );
-  gtk_container_add( GTK_CONTAINER( frame3 ),frame4 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame4 ),GTK_SHADOW_NONE );
-
-  vbox1=gtk_vbox_new( FALSE,0 );
-  gtk_widget_ref( vbox1 );
-  gtk_object_set_data_full( GTK_OBJECT( PlayList ),"vbox1",vbox1,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( vbox1 );
-  gtk_container_add( GTK_CONTAINER( frame4 ),vbox1 );
-
-  hbox1=gtk_hbox_new( FALSE,0 );
-  gtk_widget_ref( hbox1 );
-  gtk_object_set_data_full( GTK_OBJECT( PlayList ),"hbox1",hbox1,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( hbox1 );
-  gtk_box_pack_start( GTK_BOX( vbox1 ),hbox1,TRUE,TRUE,0 );
-
-  frame5=gtk_frame_new( NULL );
-  gtk_widget_ref( frame5 );
-  gtk_object_set_data_full( GTK_OBJECT( PlayList ),"frame5",frame5,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame5 );
-  gtk_box_pack_start( GTK_BOX( hbox1 ),frame5,TRUE,TRUE,0 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame5 ),GTK_SHADOW_ETCHED_OUT );
+  vbox1=AddVBox( AddDialogFrame( PlayList ),0 );
+  hbox1=AddHBox( NULL,1 );
+   gtk_box_pack_start( GTK_BOX( vbox1 ),hbox1,TRUE,TRUE,0 );
 
   scrolledwindow1=gtk_scrolled_window_new( NULL,NULL );
-  gtk_widget_ref( scrolledwindow1 );
-  gtk_object_set_data_full( GTK_OBJECT( PlayList ),"scrolledwindow1",scrolledwindow1,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( scrolledwindow1 );
-  gtk_container_add( GTK_CONTAINER( frame5 ),scrolledwindow1 );
+  gtk_container_add( GTK_CONTAINER( 
+    AddFrame( NULL,0,hbox1,1 ) ),scrolledwindow1 );
   gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scrolledwindow1 ),GTK_POLICY_AUTOMATIC,GTK_POLICY_AUTOMATIC );
 
   CTDirTree=gtk_ctree_new( 1,0 );
-  gtk_widget_ref( CTDirTree );
-  gtk_object_set_data_full( GTK_OBJECT( PlayList ),"CTDirTree",CTDirTree,(GtkDestroyNotify)gtk_widget_unref );
   gtk_signal_connect( GTK_OBJECT( CTDirTree ),"tree_expand",GTK_SIGNAL_FUNC( plCTree ),(void*)0 );
   gtk_signal_connect( GTK_OBJECT( CTDirTree ),"select_row",GTK_SIGNAL_FUNC( plCTRow ),(void *)0 );
   gtk_container_add( GTK_CONTAINER( scrolledwindow1 ),CTDirTree );
@@ -501,8 +437,6 @@ GtkWidget * create_PlayList( void )
   gtk_ctree_set_line_style( GTK_CTREE( CTDirTree ),GTK_CTREE_LINES_SOLID );
   gtk_clist_column_titles_show( GTK_CLIST( CTDirTree ) );
   gtk_clist_set_shadow_type( GTK_CLIST( CTDirTree ),GTK_SHADOW_NONE );
-
-  gtk_widget_realize( PlayList );
 
   if ( !pxOpenedBook ) pxOpenedBook=gdk_pixmap_create_from_xpm_d( PlayList->window,&msOpenedBook,&transparent,book_closed_xpm );
   if ( !pxClosedBook ) pxClosedBook=gdk_pixmap_create_from_xpm_d( PlayList->window,&msClosedBook,&transparent,book_open_xpm );
@@ -514,38 +448,20 @@ GtkWidget * create_PlayList( void )
   sibling=gtk_ctree_insert_node( GTK_CTREE( CTDirTree ),parent,NULL,&dummy,4,NULL,NULL,NULL,NULL,TRUE,TRUE );
   gtk_ctree_expand( GTK_CTREE( CTDirTree ),parent );
   gtk_widget_show( CTDirTree );
+
   
-  label2=gtk_label_new( MSGTR_PLAYLIST_DirectoryTree );
-  gtk_widget_ref( label2 );
-  gtk_object_set_data_full( GTK_OBJECT( PlayList ),"label2",label2,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( label2 );
-  gtk_clist_set_column_widget( GTK_CLIST( CTDirTree ),0,label2 );
-  gtk_misc_set_alignment( GTK_MISC( label2 ),0.02,0.5 );
-
-  frame6=gtk_frame_new( NULL );
-  gtk_widget_ref( frame6 );
-  gtk_object_set_data_full( GTK_OBJECT( PlayList ),"frame6",frame6,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( frame6 );
-  gtk_box_pack_start( GTK_BOX( hbox1 ),frame6,TRUE,TRUE,0 );
-  gtk_widget_set_usize( frame6,170,-2 );
-  gtk_frame_set_shadow_type( GTK_FRAME( frame6 ),GTK_SHADOW_ETCHED_OUT );
-
-  vbox2=gtk_vbox_new( FALSE,0 );
-  gtk_widget_ref( vbox2 );
-  gtk_object_set_data_full( GTK_OBJECT( PlayList ),"vbox2",vbox2,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( vbox2 );
-  gtk_container_add( GTK_CONTAINER( frame6 ),vbox2 );
+  gtk_clist_set_column_widget( GTK_CLIST( CTDirTree ),0,
+    AddLabel( MSGTR_PLAYLIST_DirectoryTree,NULL ) );
+  
+  vbox2=AddVBox(
+    AddFrame( NULL,1,hbox1,1 ),0 );
 
   scrolledwindow2=gtk_scrolled_window_new( NULL,NULL );
-  gtk_widget_ref( scrolledwindow2 );
-  gtk_object_set_data_full( GTK_OBJECT( PlayList ),"scrolledwindow2",scrolledwindow2,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( scrolledwindow2 );
   gtk_box_pack_start( GTK_BOX( vbox2 ),scrolledwindow2,TRUE,TRUE,0 );
   gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scrolledwindow2 ),GTK_POLICY_AUTOMATIC,GTK_POLICY_AUTOMATIC );
 
   CLFiles=gtk_clist_new( 1 );
-  gtk_widget_ref( CLFiles );
-  gtk_object_set_data_full( GTK_OBJECT( PlayList ),"CLFiles",CLFiles,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( CLFiles );
   gtk_container_add( GTK_CONTAINER( scrolledwindow2 ),CLFiles );
   gtk_clist_set_column_width( GTK_CLIST( CLFiles ),0,80 );
@@ -553,30 +469,17 @@ GtkWidget * create_PlayList( void )
   gtk_clist_column_titles_show( GTK_CLIST( CLFiles ) );
   gtk_clist_set_shadow_type( GTK_CLIST( CLFiles ),GTK_SHADOW_NONE );
 
-  label3=gtk_label_new( MSGTR_PLAYLIST_Files );
-  gtk_widget_ref( label3 );
-  gtk_object_set_data_full( GTK_OBJECT( PlayList ),"label3",label3,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( label3 );
-  gtk_clist_set_column_widget( GTK_CLIST( CLFiles ),0,label3 );
-  gtk_misc_set_alignment( GTK_MISC( label3 ),0.02,0.5 );
+  gtk_clist_set_column_widget( GTK_CLIST( CLFiles ),0,
+    AddLabel( MSGTR_PLAYLIST_Files,NULL ) );
 
-  hseparator2=gtk_hseparator_new();
-  gtk_widget_ref( hseparator2 );
-  gtk_object_set_data_full( GTK_OBJECT( PlayList ),"hseparator2",hseparator2,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( hseparator2 );
-  gtk_box_pack_start( GTK_BOX( vbox2 ),hseparator2,FALSE,FALSE,0 );
-  gtk_widget_set_usize( hseparator2,-2,3 );
+  AddHSeparator( vbox2 );
 
   scrolledwindow3=gtk_scrolled_window_new( NULL,NULL );
-  gtk_widget_ref( scrolledwindow3 );
-  gtk_object_set_data_full( GTK_OBJECT( PlayList ),"scrolledwindow3",scrolledwindow3,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( scrolledwindow3 );
   gtk_box_pack_start( GTK_BOX( vbox2 ),scrolledwindow3,TRUE,TRUE,0 );
   gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scrolledwindow3 ),GTK_POLICY_AUTOMATIC,GTK_POLICY_AUTOMATIC );
 
   CLSelected=gtk_clist_new( 2 );
-  gtk_widget_ref( CLSelected );
-  gtk_object_set_data_full( GTK_OBJECT( PlayList ),"CLSelected",CLSelected,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( CLSelected );
   gtk_container_add( GTK_CONTAINER( scrolledwindow3 ),CLSelected );
   gtk_clist_set_column_width( GTK_CLIST( CLSelected ),0,295 );
@@ -585,80 +488,36 @@ GtkWidget * create_PlayList( void )
   gtk_clist_column_titles_show( GTK_CLIST( CLSelected ) );
   gtk_clist_set_shadow_type( GTK_CLIST( CLSelected ),GTK_SHADOW_NONE );
 
-  label5=gtk_label_new( MSGTR_PLAYLIST_Selected );
-  gtk_widget_ref( label5 );
-  gtk_object_set_data_full( GTK_OBJECT( PlayList ),"label5",label5,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( label5 );
-  gtk_clist_set_column_widget( GTK_CLIST( CLSelected ),0,label5 );
-  gtk_misc_set_alignment( GTK_MISC( label5 ),0.02,0.5 );
+  gtk_clist_set_column_widget( GTK_CLIST( CLSelected ),0,
+    AddLabel( MSGTR_PLAYLIST_Selected,NULL ) );
 
-  label5=gtk_label_new( MSGTR_PLAYLIST_Path );
-  gtk_widget_ref( label5 );
-  gtk_object_set_data_full( GTK_OBJECT( PlayList ),"label5",label5,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( label5 );
-  gtk_clist_set_column_widget( GTK_CLIST( CLSelected ),1,label5 );
-  gtk_misc_set_alignment( GTK_MISC( label5 ),0.02,0.5 );
+  gtk_clist_set_column_widget( GTK_CLIST( CLSelected ),1,
+    AddLabel( MSGTR_PLAYLIST_Path,NULL ) );
 
-  hseparator1=gtk_hseparator_new();
-  gtk_widget_ref( hseparator1 );
-  gtk_object_set_data_full( GTK_OBJECT( PlayList ),"hseparator1",hseparator1,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( hseparator1 );
-  gtk_box_pack_start( GTK_BOX( vbox1 ),hseparator1,FALSE,FALSE,0 );
-  gtk_widget_set_usize( hseparator1,-2,6 );
+  AddHSeparator( vbox1 );
 
-  hbuttonbox1=gtk_hbutton_box_new();
-  gtk_widget_ref( hbuttonbox1 );
-  gtk_object_set_data_full( GTK_OBJECT( PlayList ),"hbuttonbox1",hbuttonbox1,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( hbuttonbox1 );
-  gtk_box_pack_start( GTK_BOX( vbox1 ),hbuttonbox1,FALSE,FALSE,0 );
-  gtk_button_box_set_layout( GTK_BUTTON_BOX( hbuttonbox1 ),GTK_BUTTONBOX_END );
-  gtk_button_box_set_spacing( GTK_BUTTON_BOX( hbuttonbox1 ),10 );
-  gtk_button_box_set_child_size( GTK_BUTTON_BOX( hbuttonbox1 ),-1,20 );
-  gtk_button_box_set_child_ipadding( GTK_BUTTON_BOX( hbuttonbox1 ),0,-1 );
+  hbuttonbox1=AddHButtonBox( vbox1 );
+    gtk_button_box_set_layout( GTK_BUTTON_BOX( hbuttonbox1 ),GTK_BUTTONBOX_END );
+    gtk_button_box_set_spacing( GTK_BUTTON_BOX( hbuttonbox1 ),10 );
 
-  Add=gtk_button_new_with_label( MSGTR_Add );
-  gtk_widget_ref( Add );
-  gtk_object_set_data_full( GTK_OBJECT( PlayList ),"Add",Add,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( Add );
-  gtk_container_add( GTK_CONTAINER( hbuttonbox1 ),Add );
-  GTK_WIDGET_UNSET_FLAGS( Add,GTK_CAN_FOCUS );
+  Add=AddButton( MSGTR_Add,hbuttonbox1 );
+  Remove=AddButton( MSGTR_Remove,hbuttonbox1 );
+  Ok=AddButton( MSGTR_Ok,hbuttonbox1 );
+  Cancel=AddButton( MSGTR_Cancel,hbuttonbox1 );
 
-  Remove=gtk_button_new_with_label( MSGTR_Remove );
-  gtk_widget_ref( Remove );
-  gtk_object_set_data_full( GTK_OBJECT( PlayList ),"Remove",Remove,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( Remove );
-  gtk_container_add( GTK_CONTAINER( hbuttonbox1 ),Remove );
-  GTK_WIDGET_UNSET_FLAGS( Remove,GTK_CAN_FOCUS );
+  gtk_widget_add_accelerator( Cancel,"clicked",accel_group,GDK_Escape,0,GTK_ACCEL_VISIBLE );
 
-  Ok=gtk_button_new_with_label( MSGTR_Ok );
-  gtk_widget_ref( Ok );
-  gtk_object_set_data_full( GTK_OBJECT( PlayList ),"Ok",Ok,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( Ok );
-  gtk_container_add( GTK_CONTAINER( hbuttonbox1 ),Ok );
-  GTK_WIDGET_UNSET_FLAGS( Ok,GTK_CAN_FOCUS );
-//  gtk_widget_add_accelerator( Ok,"released",accel_group,GDK_Return,0,GTK_ACCEL_VISIBLE );
-
-  Cancel=gtk_button_new_with_label( MSGTR_Cancel );
-  gtk_widget_ref( Cancel );
-  gtk_object_set_data_full( GTK_OBJECT( PlayList ),"Cancel",Cancel,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( Cancel );
-  gtk_container_add( GTK_CONTAINER( hbuttonbox1 ),Cancel );
-  GTK_WIDGET_UNSET_FLAGS( Cancel,GTK_CAN_FOCUS );
-  gtk_widget_add_accelerator( Cancel,"released",accel_group,GDK_Escape,0,GTK_ACCEL_VISIBLE );
-
-  gtk_signal_connect( GTK_OBJECT( PlayList ),"destroy",GTK_SIGNAL_FUNC( plDestroy ),NULL );
-  gtk_signal_connect( GTK_OBJECT( PlayList ),"show",GTK_SIGNAL_FUNC( plShow ),(void *)1 );
-  gtk_signal_connect( GTK_OBJECT( PlayList ),"hide",GTK_SIGNAL_FUNC( plShow ),(void *)0 );
+  gtk_signal_connect( GTK_OBJECT( PlayList ),"destroy",GTK_SIGNAL_FUNC( gtk_widget_destroyed ),&PlayList );
 
   gtk_signal_connect( GTK_OBJECT( CLFiles ),"select_row",GTK_SIGNAL_FUNC( plRowSelect ),(void *)0 );
   gtk_signal_connect( GTK_OBJECT( CLFiles ),"unselect_row",GTK_SIGNAL_FUNC( plUnRowSelect ),(void *)0 );
   sigSel=gtk_signal_connect( GTK_OBJECT( CLSelected ),"select_row",GTK_SIGNAL_FUNC( plRowSelect ),(void*)1 );
   sigUnsel=gtk_signal_connect( GTK_OBJECT( CLSelected ),"unselect_row",GTK_SIGNAL_FUNC( plUnRowSelect ),(void*)1 );
 
-  gtk_signal_connect( GTK_OBJECT( Add ),"released",GTK_SIGNAL_FUNC( plButtonReleased ),(void*)3 );
-  gtk_signal_connect( GTK_OBJECT( Remove ),"released",GTK_SIGNAL_FUNC( plButtonReleased ),(void*)2 );
-  gtk_signal_connect( GTK_OBJECT( Ok ),"released",GTK_SIGNAL_FUNC( plButtonReleased ),(void*)1 );
-  gtk_signal_connect( GTK_OBJECT( Cancel ),"released",GTK_SIGNAL_FUNC( plButtonReleased ),(void*)0 );
+  gtk_signal_connect( GTK_OBJECT( Add ),"clicked",GTK_SIGNAL_FUNC( plButtonReleased ),(void*)3 );
+  gtk_signal_connect( GTK_OBJECT( Remove ),"clicked",GTK_SIGNAL_FUNC( plButtonReleased ),(void*)2 );
+  gtk_signal_connect( GTK_OBJECT( Ok ),"clicked",GTK_SIGNAL_FUNC( plButtonReleased ),(void*)1 );
+  gtk_signal_connect( GTK_OBJECT( Cancel ),"clicked",GTK_SIGNAL_FUNC( plButtonReleased ),(void*)0 );
 
   gtk_window_add_accel_group( GTK_WINDOW( PlayList ),accel_group );
 

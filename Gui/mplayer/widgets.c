@@ -146,7 +146,7 @@ void gtkMessageBox( int type,gchar * str )
  gtkSetLayer( MessageBox );
  gtkActive( MessageBox );
  if ( type == GTK_MB_FATAL )
-  while ( gtkVMessageBox ) gtk_main_iteration_do( 0 );
+  while ( MessageBox ) gtk_main_iteration_do( 0 );
 }
 
 void gtkSetLayer( GtkWidget * wdg )
@@ -204,7 +204,7 @@ void gtkShow( int type,char * param )
 	break;
    case evAbout:
 	ShowAboutBox();
-	gtkSetLayer( AboutBox );
+	gtkSetLayer( About );
         break;
    case evShowPopUpMenu:
         gtkPopupMenu=evNone;

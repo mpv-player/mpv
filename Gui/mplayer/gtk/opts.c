@@ -27,7 +27,7 @@ typedef struct sh_audio_t sh_audio_t;
 #include "../../../libmpcodecs/vd.h"
 #include "../../../libmpcodecs/ad.h"
 
-       GtkWidget * Preferences;
+       GtkWidget * Preferences = NULL;
 static GtkWidget * AConfig;
 static GtkWidget * VConfig;
 //static GtkWidget * BLoadSubtitle;
@@ -128,7 +128,6 @@ static struct
 char * lCEncoding = NULL;
 #endif
 	    
-       int    gtkVPreferences = 0;
 static int    old_audio_driver = 0;
 static char * ao_driver[3];
 static char * vo_driver[3];
@@ -153,7 +152,7 @@ extern int    muted;
 
 void ShowPreferences( void )
 {
- if ( gtkVPreferences ) gtkActive( Preferences );
+ if ( Preferences ) gtkActive( Preferences );
    else Preferences=create_Preferences();
 
 // -- 1. page 
@@ -372,7 +371,6 @@ void ShowPreferences( void )
  gtk_signal_connect( GTK_OBJECT( CLADrivers ),"select_row",GTK_SIGNAL_FUNC( prCListRow ),(void*)0 );
  gtk_signal_connect( GTK_OBJECT( CLVDrivers ),"select_row",GTK_SIGNAL_FUNC( prCListRow ),(void*)1 );
 
- gtkVPreferences=1;
  gtk_widget_show( Preferences );
  gtkSetLayer( Preferences );
  gtkMessageBox( GTK_MB_WARNING,MSGTR_PREFERENCES_Message );
@@ -380,9 +378,10 @@ void ShowPreferences( void )
 
 void HidePreferences( void )
 {
- if ( !gtkVPreferences ) return;
- gtkVPreferences=0;
- gtk_widget_hide( Preferences ); gtk_widget_destroy( Preferences );
+ if ( !Preferences ) return;
+ gtk_widget_hide( Preferences );
+ gtk_widget_destroy( Preferences );
+ Preferences=NULL;
 #ifdef USE_OSS_AUDIO
  HideOSSConfig();
 #endif
@@ -403,12 +402,6 @@ static void prEntry( GtkContainer * container,GtkWidget * widget,gpointer user_d
  if ( lEncoding[i].comment ) gtkSet( gtkSetFontEncoding,0,lEncoding[i].name );
 }
 #endif
-
-static void prDestroy( GtkObject * object,gpointer user_data )
-{ HidePreferences(); }
-
-static void prShow( GtkWidget * widget,gpointer user_data )
-{ gtkVPreferences=(int)user_data; }
 
 #define bAConfig   0
 #define bVconfig   1
@@ -501,12 +494,14 @@ void prButton( GtkButton * button,gpointer user_data )
 	HidePreferences();
 	break;
    case bAConfig:
+	if ( !ao_driver[0] ) break;
         gtk_widget_set_sensitive( AConfig,FALSE );
 #ifdef USE_OSS_AUDIO
         if ( !strncmp( ao_driver[0],"oss",3 ) ) { ShowOSSConfig(); gtk_widget_set_sensitive( AConfig,TRUE ); }
 #endif
 	break;
    case bVconfig:
+	if ( !vo_driver[0] ) break;
         gtk_widget_set_sensitive( VConfig,FALSE );
 #ifdef HAVE_DXR3
 	if ( !gstrcmp( vo_driver[0],"dxr3" ) ) { ShowDXR3Config(); gtk_widget_set_sensitive( VConfig,TRUE ); }
@@ -670,18 +665,9 @@ GtkWidget * create_Preferences( void )
   gtk_widget_realize( Preferences );
   gtkAddIcon( Preferences );
 
-  frame=AddFrame( NULL,GTK_SHADOW_IN,Preferences,1 );
-  gtk_container_set_border_width( GTK_CONTAINER( frame ),1 );
-  frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
-  frame=AddFrame( NULL,GTK_SHADOW_ETCHED_OUT,frame,1 );
-  frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
-
-  vbox1=AddVBox( frame );
-
+  vbox1=AddVBox( AddDialogFrame( Preferences ),0 );
   notebook1=gtk_notebook_new();
   gtk_widget_set_name( notebook1,"notebook1" );
-  gtk_widget_ref( notebook1 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"notebook1",notebook1,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( notebook1 );
   gtk_box_pack_start( GTK_BOX( vbox1 ),notebook1,TRUE,TRUE,0 );
 
@@ -690,36 +676,31 @@ GtkWidget * create_Preferences( void )
   frame=AddFrame( NULL,GTK_SHADOW_ETCHED_OUT,hbox1,1 );
   frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
 
-  vbox2=AddVBox( frame );
+  vbox2=AddVBox( frame,0 );
 
   scrolledwindow3=gtk_scrolled_window_new( NULL,NULL );
   gtk_widget_set_name( scrolledwindow3,"scrolledwindow3" );
-  gtk_widget_ref( scrolledwindow3 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"scrolledwindow3",scrolledwindow3,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( scrolledwindow3 );
   gtk_box_pack_start( GTK_BOX( vbox2 ),scrolledwindow3,TRUE,TRUE,0 );
   gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scrolledwindow3 ),GTK_POLICY_AUTOMATIC,GTK_POLICY_AUTOMATIC );
 
   CLADrivers=gtk_clist_new( 2 );
   gtk_widget_set_name( CLADrivers,"CLADrivers" );
-  gtk_widget_ref( CLADrivers );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"CLADrivers",CLADrivers,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( CLADrivers );
   gtk_container_add( GTK_CONTAINER( scrolledwindow3 ),CLADrivers );
   gtk_clist_set_column_width( GTK_CLIST( CLADrivers ),0,50 );
   gtk_clist_column_titles_show( GTK_CLIST( CLADrivers ) );
   gtk_clist_set_shadow_type( GTK_CLIST( CLADrivers ),GTK_SHADOW_NONE );
   gtk_widget_set_usize( CLADrivers,200,-2 );
+  gtk_clist_set_column_widget( GTK_CLIST( CLADrivers ),0,
+    AddLabel( MSGTR_PREFERENCES_AvailableDrivers,NULL ) );
 
-  label=AddLabel( MSGTR_PREFERENCES_AvailableDrivers,NULL );
-    gtk_clist_set_column_widget( GTK_CLIST( CLADrivers ),0,label );
+  AConfig=AddButton( MSGTR_ConfigDriver,
+    AddHButtonBox( vbox2 ) );
 
-  hbuttonbox2=AddHButtonBox( vbox2 );
-  AConfig=AddButton( MSGTR_ConfigDriver,hbuttonbox2 );
-
-  frame=AddFrame( NULL,GTK_SHADOW_ETCHED_OUT,hbox1,1 );
-  frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
-  vbox3=AddVBox( frame );
+  vbox3=AddVBox( 
+    AddFrame( NULL,GTK_SHADOW_NONE,
+      AddFrame( NULL,GTK_SHADOW_ETCHED_OUT,hbox1,1 ),1 ),0 );
     gtk_widget_set_usize( vbox3,250,-2 );
 
   CBNoSound=AddCheckButton( MSGTR_PREFERENCES_DoNotPlaySound,vbox3 );
@@ -747,22 +728,18 @@ GtkWidget * create_Preferences( void )
     gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook1 ),gtk_notebook_get_nth_page( GTK_NOTEBOOK( notebook1 ),0 ),label );
   hbox2=AddHBox( notebook1,0 );
 
-  frame=AddFrame( NULL,GTK_SHADOW_ETCHED_OUT,hbox2,1 );
-  frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
-  vbox4=AddVBox( frame );
+  vbox4=AddVBox( 
+    AddFrame( NULL,GTK_SHADOW_NONE,
+      AddFrame( NULL,GTK_SHADOW_ETCHED_OUT,hbox2,1 ),1 ),0 );
 
   scrolledwindow2=gtk_scrolled_window_new( NULL,NULL );
   gtk_widget_set_name( scrolledwindow2,"scrolledwindow2" );
-  gtk_widget_ref( scrolledwindow2 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"scrolledwindow2",scrolledwindow2,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( scrolledwindow2 );
   gtk_box_pack_start( GTK_BOX( vbox4 ),scrolledwindow2,TRUE,TRUE,0 );
   gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scrolledwindow2 ),GTK_POLICY_AUTOMATIC,GTK_POLICY_AUTOMATIC );
 
   CLVDrivers=gtk_clist_new( 2 );
   gtk_widget_set_name( CLVDrivers,"CLVDrivers" );
-  gtk_widget_ref( CLVDrivers );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"CLVDrivers",CLVDrivers,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( CLVDrivers );
   gtk_container_add( GTK_CONTAINER( scrolledwindow2 ),CLVDrivers );
   gtk_clist_set_column_width( GTK_CLIST( CLVDrivers ),0,50 );
@@ -776,9 +753,9 @@ GtkWidget * create_Preferences( void )
   hbuttonbox3=AddHButtonBox( vbox4 );
   VConfig=AddButton( MSGTR_ConfigDriver,hbuttonbox3 );
 
-  frame=AddFrame( NULL,GTK_SHADOW_ETCHED_OUT,hbox2,1 );
-  frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
-  vbox5=AddVBox( frame );
+  vbox5=AddVBox( 
+    AddFrame( NULL,GTK_SHADOW_NONE,
+      AddFrame( NULL,GTK_SHADOW_ETCHED_OUT,hbox2,1 ),1 ),0 );
     gtk_widget_set_usize( vbox5,250,-2 );
 
   CBDoubleBuffer=AddCheckButton( MSGTR_PREFERENCES_DoubleBuffer,vbox5 );
@@ -797,19 +774,20 @@ GtkWidget * create_Preferences( void )
 
   label=AddLabel( MSGTR_PREFERENCES_Video,NULL );
     gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook1 ),gtk_notebook_get_nth_page( GTK_NOTEBOOK( notebook1 ),1 ),label );
-  vbox6=AddVBox( notebook1 );
 
-  frame=AddFrame( MSGTR_PREFERENCES_FRAME_OSD_Level,GTK_SHADOW_ETCHED_OUT,vbox6,1 );
-  frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
-  vbox600=AddVBox( frame );
+  vbox6=AddVBox( notebook1,0 );
+
+  vbox600=AddVBox( 
+    AddFrame( NULL,GTK_SHADOW_NONE,
+      AddFrame( MSGTR_PREFERENCES_FRAME_OSD_Level,GTK_SHADOW_ETCHED_OUT,vbox6,1 ),1 ),0 );
 
   RBOSDNone=AddRadioButton( MSGTR_PREFERENCES_None,&OSD_group,vbox600 );
   RBOSDTandP=AddRadioButton( MSGTR_PREFERENCES_OSDTimer,&OSD_group,vbox600 );
   RBOSDIndicator=AddRadioButton( MSGTR_PREFERENCES_OSDProgress,&OSD_group,vbox600 );
 
-  frame=AddFrame( MSGTR_PREFERENCES_FRAME_Subtitle,GTK_SHADOW_ETCHED_OUT,vbox6,1 );
-  frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
-  vbox7=AddVBox( frame );
+  vbox7=AddVBox( 
+    AddFrame( NULL,GTK_SHADOW_NONE,
+      AddFrame( MSGTR_PREFERENCES_FRAME_Subtitle,GTK_SHADOW_ETCHED_OUT,vbox6,1 ),1 ),0 );
 
 #if 0
   hbox4=AddHBox( vbox7,1 );
@@ -818,8 +796,6 @@ GtkWidget * create_Preferences( void )
 
   ESubtitleName=gtk_entry_new();
   gtk_widget_set_name( ESubtitleName,"ESubtitleName" );
-  gtk_widget_ref( ESubtitleName );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"ESubtitleName",ESubtitleName,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( ESubtitleName );
   gtk_box_pack_start( GTK_BOX( hbox4 ),ESubtitleName,TRUE,TRUE,0 );
 
@@ -828,12 +804,10 @@ GtkWidget * create_Preferences( void )
   BLoadSubtitle=AddButton( MSGTR_Browse,hbuttonbox4 );
 #endif
 
-  vbox8=AddVBox( vbox7 );
+  vbox8=AddVBox( vbox7,0 );
 
   table1=gtk_table_new( 3,2,FALSE );
   gtk_widget_set_name( table1,"table1" );
-  gtk_widget_ref( table1 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"table1",table1,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( table1 );
   gtk_box_pack_start( GTK_BOX( vbox8 ),table1,FALSE,FALSE,0 );
 
@@ -858,16 +832,16 @@ GtkWidget * create_Preferences( void )
   HSSubFPS=AddHScaler( HSSubFPSadj,NULL,1 );
     gtk_table_attach( GTK_TABLE( table1 ),HSSubFPS,1,2,1,2,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 
-  vbox9=AddVBox( vbox8 );
+  vbox9=AddVBox( vbox8,0 );
 
   CBNoAutoSub=AddCheckButton( MSGTR_PREFERENCES_SUB_AutoLoad,vbox9 );
   CBSubUnicode=AddCheckButton( MSGTR_PREFERENCES_SUB_Unicode,vbox9 );
   CBDumpMPSub=AddCheckButton( MSGTR_PREFERENCES_SUB_MPSUB,vbox9 );
   CBDumpSrt=AddCheckButton( MSGTR_PREFERENCES_SUB_SRT,vbox9 );
 
-  frame=AddFrame( MSGTR_PREFERENCES_FRAME_Font,GTK_SHADOW_ETCHED_OUT,vbox6,1 );
-  frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
-  vbox603=AddVBox( frame );
+  vbox603=AddVBox( 
+    AddFrame( NULL,GTK_SHADOW_NONE,
+      AddFrame( MSGTR_PREFERENCES_FRAME_Font,GTK_SHADOW_ETCHED_OUT,vbox6,1 ),1 ),0 );
 
   hbox6=AddHBox( vbox603,1 );
 
@@ -875,8 +849,6 @@ GtkWidget * create_Preferences( void )
 
   prEFontName=gtk_entry_new();
   gtk_widget_set_name( prEFontName,"prEFontName" );
-  gtk_widget_ref( prEFontName );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"prEFontName",prEFontName,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( prEFontName );
   gtk_box_pack_start( GTK_BOX( hbox6 ),prEFontName,TRUE,TRUE,0 );
 
@@ -898,8 +870,6 @@ GtkWidget * create_Preferences( void )
 
   table1=gtk_table_new( 3,2,FALSE );
   gtk_widget_set_name( table1,"table1" );
-  gtk_widget_ref( table1 );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"table1",table1,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( table1 );
   gtk_box_pack_start( GTK_BOX( vbox603 ),table1,FALSE,FALSE,0 );
 
@@ -908,7 +878,6 @@ GtkWidget * create_Preferences( void )
   
   CBFontEncoding=gtk_combo_new();
   gtk_widget_set_name( CBFontEncoding,"CBFontEncoding" );
-  gtk_widget_ref( CBFontEncoding );
   gtk_widget_show( CBFontEncoding );
   gtk_table_attach( GTK_TABLE( table1 ),CBFontEncoding,1,2,0,1,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
   {
@@ -921,8 +890,6 @@ GtkWidget * create_Preferences( void )
   EFontEncoding=GTK_COMBO( CBFontEncoding )->entry;
   gtk_widget_set_name( EFontEncoding,"EFontEncoding" );
   gtk_entry_set_editable( GTK_ENTRY( EFontEncoding ),FALSE );
-  gtk_widget_ref( EFontEncoding );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"EFontEncoding",EFontEncoding,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( EFontEncoding );
 
   label=AddLabel( MSGTR_PREFERENCES_FontBlur,NULL );
@@ -956,11 +923,11 @@ GtkWidget * create_Preferences( void )
 
   label=AddLabel( MSGTR_PREFERENCES_SubtitleOSD,NULL );
     gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook1 ),gtk_notebook_get_nth_page( GTK_NOTEBOOK( notebook1 ),2 ),label );
-  vbox601=AddVBox( notebook1 );
+  vbox601=AddVBox( notebook1,0 );
 
-  frame=AddFrame( MSGTR_PREFERENCES_FRAME_PostProcess,GTK_SHADOW_ETCHED_OUT,vbox601,0 );
-  frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
-  vbox602=AddVBox( frame );
+  vbox602=AddVBox( 
+    AddFrame( NULL,GTK_SHADOW_NONE,
+      AddFrame( MSGTR_PREFERENCES_FRAME_PostProcess,GTK_SHADOW_ETCHED_OUT,vbox601,0 ),1 ),0 );
 
   CBPostprocess=AddCheckButton( MSGTR_PREFERENCES_PostProcess,vbox602 );
 
@@ -972,9 +939,9 @@ GtkWidget * create_Preferences( void )
    else HSPPQualityadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,100,0,0,0 ) );
   HSPPQuality=AddHScaler( HSPPQualityadj,hbox5,0 );
 
-  frame=AddFrame( MSGTR_PREFERENCES_FRAME_CodecDemuxer,GTK_SHADOW_ETCHED_OUT,vbox601,0 );
-  frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
-  vbox602=AddVBox( frame );
+  vbox602=AddVBox( 
+    AddFrame( NULL,GTK_SHADOW_NONE,
+      AddFrame( MSGTR_PREFERENCES_FRAME_CodecDemuxer,GTK_SHADOW_ETCHED_OUT,vbox601,0 ),1 ),0 );
 
   CBNonInterlaved=AddCheckButton( MSGTR_PREFERENCES_NI,vbox602 );
   CBIndex=AddCheckButton( MSGTR_PREFERENCES_IDX,vbox602 );
@@ -985,15 +952,12 @@ GtkWidget * create_Preferences( void )
 
   CBVFM=gtk_combo_new();
   gtk_widget_set_name( CBVFM,"CBVFM" );
-  gtk_widget_ref( CBVFM );
   gtk_widget_show( CBVFM );
   gtk_box_pack_start( GTK_BOX( hbox5 ),CBVFM,TRUE,TRUE,0 );
 
   EVFM=GTK_COMBO( CBVFM )->entry;
   gtk_widget_set_name( EVFM,"CEVFM" );
   gtk_entry_set_editable( GTK_ENTRY( EVFM ),FALSE );
-  gtk_widget_ref( EVFM );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"EVFM",EVFM,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( EVFM );
 
   hbox5=AddHBox( vbox602,1 );
@@ -1002,20 +966,17 @@ GtkWidget * create_Preferences( void )
 
   CBAFM=gtk_combo_new();
   gtk_widget_set_name( CBAFM,"CBAFM" );
-  gtk_widget_ref( CBAFM );
   gtk_widget_show( CBAFM );
   gtk_box_pack_start( GTK_BOX( hbox5 ),CBAFM,TRUE,TRUE,0 );
 
   EAFM=GTK_COMBO( CBAFM )->entry;
   gtk_widget_set_name( EAFM,"EAFM" );
   gtk_entry_set_editable( GTK_ENTRY( EAFM ),FALSE );
-  gtk_widget_ref( EAFM );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"EAFM",EAFM,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( EAFM );
 
-  frame=AddFrame( MSGTR_PREFERENCES_FRAME_Cache,GTK_SHADOW_ETCHED_OUT,vbox601,0 );
-  frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
-  vbox602=AddVBox( frame );
+  vbox602=AddVBox( 
+    AddFrame( NULL,GTK_SHADOW_NONE,
+      AddFrame( MSGTR_PREFERENCES_FRAME_Cache,GTK_SHADOW_ETCHED_OUT,vbox601,0 ),1 ),0 );
 
   CBCache=AddCheckButton( MSGTR_PREFERENCES_Cache,vbox602 );
   
@@ -1025,14 +986,12 @@ GtkWidget * create_Preferences( void )
 
   SBCacheadj=GTK_ADJUSTMENT( gtk_adjustment_new( 2048,4,65535,1,10,10 ) );
   SBCache=gtk_spin_button_new( GTK_ADJUSTMENT( SBCacheadj ),1,0 );
-  gtk_widget_ref( SBCache );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"SBCache",SBCache,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( SBCache );
   gtk_box_pack_start( GTK_BOX( hbox5 ),SBCache,TRUE,TRUE,0 );
 
-  frame=AddFrame( MSGTR_PREFERENCES_FRAME_Misc,GTK_SHADOW_ETCHED_OUT,vbox601,0 );
-  frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
-  vbox602=AddVBox( frame );
+  vbox602=AddVBox( 
+    AddFrame( NULL,GTK_SHADOW_NONE,
+      AddFrame( MSGTR_PREFERENCES_FRAME_Misc,GTK_SHADOW_ETCHED_OUT,vbox601,0 ),1 ),0 );
 
   CBLoadFullscreen=AddCheckButton( MSGTR_PREFERENCES_LoadFullscreen,vbox602 );
 
@@ -1047,21 +1006,19 @@ GtkWidget * create_Preferences( void )
   BOk=AddButton( MSGTR_Ok,hbuttonbox1 );
   BCancel=AddButton( MSGTR_Cancel,hbuttonbox1 );
   
-  gtk_widget_add_accelerator( BOk,"released",accel_group,GDK_Return,0,GTK_ACCEL_VISIBLE );
-  gtk_widget_add_accelerator( BCancel,"released",accel_group,GDK_Escape,0,GTK_ACCEL_VISIBLE );
+  gtk_widget_add_accelerator( BOk,"clicked",accel_group,GDK_Return,0,GTK_ACCEL_VISIBLE );
+  gtk_widget_add_accelerator( BCancel,"clicked",accel_group,GDK_Escape,0,GTK_ACCEL_VISIBLE );
 
-  gtk_signal_connect( GTK_OBJECT( Preferences ),"destroy",GTK_SIGNAL_FUNC( prDestroy ),NULL );
-  gtk_signal_connect( GTK_OBJECT( Preferences ),"show",GTK_SIGNAL_FUNC( prShow ),(void*)1 );
-  gtk_signal_connect( GTK_OBJECT( Preferences ),"hide",GTK_SIGNAL_FUNC( prShow ),(void*)0 );
+  gtk_signal_connect( GTK_OBJECT( Preferences ),"destroy",GTK_SIGNAL_FUNC( gtk_widget_destroyed ),&Preferences );
   
-  gtk_signal_connect( GTK_OBJECT( AConfig ),"released",GTK_SIGNAL_FUNC( prButton ),(void*)bAConfig );
-  gtk_signal_connect( GTK_OBJECT( BOk ),"released",GTK_SIGNAL_FUNC( prButton ),(void*)bOk );
-  gtk_signal_connect( GTK_OBJECT( BCancel ),"released",GTK_SIGNAL_FUNC( prButton ),(void*)bCancel );
-  gtk_signal_connect( GTK_OBJECT( VConfig ),"released",GTK_SIGNAL_FUNC( prButton ),(void*)bVconfig );
+  gtk_signal_connect( GTK_OBJECT( AConfig ),"clicked",GTK_SIGNAL_FUNC( prButton ),(void*)bAConfig );
+  gtk_signal_connect( GTK_OBJECT( BOk ),"clicked",GTK_SIGNAL_FUNC( prButton ),(void*)bOk );
+  gtk_signal_connect( GTK_OBJECT( BCancel ),"clicked",GTK_SIGNAL_FUNC( prButton ),(void*)bCancel );
+  gtk_signal_connect( GTK_OBJECT( VConfig ),"clicked",GTK_SIGNAL_FUNC( prButton ),(void*)bVconfig );
 #if 0
-  gtk_signal_connect( GTK_OBJECT( BLoadSubtitle ),"released",GTK_SIGNAL_FUNC( prButton ),(void*)bLSubtitle );
+  gtk_signal_connect( GTK_OBJECT( BLoadSubtitle ),"clicked",GTK_SIGNAL_FUNC( prButton ),(void*)bLSubtitle );
 #endif
-  gtk_signal_connect( GTK_OBJECT( BLoadFont ),"released",GTK_SIGNAL_FUNC( prButton ),(void*)bLFont );
+  gtk_signal_connect( GTK_OBJECT( BLoadFont ),"clicked",GTK_SIGNAL_FUNC( prButton ),(void*)bLFont );
 
 #if 0
   gtk_signal_connect( GTK_OBJECT( CBNoSound ),"toggled",GTK_SIGNAL_FUNC( on_CBNoSound_toggled ),NULL );
@@ -1114,11 +1071,9 @@ static GtkWidget * CBOssDevice;
 static GtkWidget * BOssOk;
 static GtkWidget * BOssCancel;
 
-       int         gtkVOSSConfig = 0;
-
 void ShowOSSConfig( void )
 {
- if ( gtkVOSSConfig ) gtkActive( OSSConfig );
+ if ( OSSConfig ) gtkActive( OSSConfig );
    else OSSConfig=create_OSSConfig();
 
  gtk_entry_set_text( GTK_ENTRY( CEOssMixer ),gtkAOOSSMixer );
@@ -1126,22 +1081,15 @@ void ShowOSSConfig( void )
 
  gtk_widget_show( OSSConfig );
  gtkSetLayer( OSSConfig );
- gtkVOSSConfig=1;
 }
 
 void HideOSSConfig( void )
 {
- if ( !gtkVOSSConfig ) return;
+ if ( !OSSConfig ) return;
  gtk_widget_hide( OSSConfig );
  gtk_widget_destroy( OSSConfig ); 
- gtkVOSSConfig=0;
+ OSSConfig=NULL;
 }
-
-static void ossDestroy( GtkObject * object,gpointer user_data )
-{ HideOSSConfig(); }
-
-static void ossShow( GtkWidget * widget,gpointer user_data )
-{ gtkVOSSConfig=(int)user_data; }
 
 static void ossButton( GtkButton * button,gpointer user_data )
 {
@@ -1158,9 +1106,8 @@ static void ossButton( GtkButton * button,gpointer user_data )
 
 GtkWidget * create_OSSConfig( void )
 {
-  GList 	* CBOssDevice_items=NULL;
-  GList 	* CBOssMixer_items=NULL;
-  GtkWidget * frame;
+  GList     * CBOssDevice_items=NULL;
+  GList     * CBOssMixer_items=NULL;
   GtkWidget * vbox604;
   GtkWidget * table2;
   GtkWidget * label;
@@ -1181,18 +1128,10 @@ GtkWidget * create_OSSConfig( void )
   gtk_widget_realize( OSSConfig );
   gtkAddIcon( OSSConfig );
 
-  frame=AddFrame( NULL,GTK_SHADOW_IN,OSSConfig,1 );
-  gtk_container_set_border_width( GTK_CONTAINER( frame ),1 );
-  frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
-  frame=AddFrame( NULL,GTK_SHADOW_ETCHED_OUT,frame,1 );
-  frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
-
-  vbox604=AddVBox( frame );
+  vbox604=AddVBox( AddDialogFrame( OSSConfig ),0 );
 
   table2=gtk_table_new( 2,2,FALSE );
   gtk_widget_set_name( table2,"table2" );
-  gtk_widget_ref( table2 );
-  gtk_object_set_data_full( GTK_OBJECT( OSSConfig ),"table2",table2,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( table2 );
   gtk_box_pack_start( GTK_BOX( vbox604 ),table2,TRUE,TRUE,0 );
 
@@ -1202,11 +1141,7 @@ GtkWidget * create_OSSConfig( void )
   label=AddLabel( MSGTR_PREFERENCES_OSS_Mixer,NULL );
     gtk_table_attach( GTK_TABLE( table2 ),label,0,1,1,2,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 
-  CBOssDevice=gtk_combo_new();
-  gtk_widget_set_name( CBOssDevice,"CBOssDevice" );
-  gtk_widget_ref( CBOssDevice );
-  gtk_object_set_data_full( GTK_OBJECT( OSSConfig ),"CBOssDevice",CBOssDevice,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( CBOssDevice );
+  CBOssDevice=AddComboBox( NULL );
   gtk_table_attach( GTK_TABLE( table2 ),CBOssDevice,1,2,0,1,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
   CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/dsp" );
   CBOssDevice_items=g_list_append( CBOssDevice_items,(gpointer)"/dev/dsp0" );
@@ -1225,16 +1160,10 @@ GtkWidget * create_OSSConfig( void )
 
   CEOssDevice=GTK_COMBO( CBOssDevice )->entry;
   gtk_widget_set_name( CEOssDevice,"CEOssDevice" );
-  gtk_widget_ref( CEOssDevice );
-  gtk_object_set_data_full( GTK_OBJECT( OSSConfig ),"CEOssDevice",CEOssDevice,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( CEOssDevice );
 
-  CBOssMixer=gtk_combo_new();
-  gtk_widget_set_name( CBOssMixer,"CBOssMixer" );
-  gtk_widget_ref( CBOssMixer );
-  gtk_object_set_data_full( GTK_OBJECT( OSSConfig ),"CBOssMixer",CBOssMixer,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( CBOssMixer );
-  gtk_table_attach( GTK_TABLE( table2 ),CBOssMixer,1,2,1,2,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+  CBOssMixer=AddComboBox( NULL );
+    gtk_table_attach( GTK_TABLE( table2 ),CBOssMixer,1,2,1,2,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
   CBOssMixer_items=g_list_append( CBOssMixer_items,(gpointer)"/dev/mixer" );
   CBOssMixer_items=g_list_append( CBOssMixer_items,(gpointer)"/dev/mixer0" );
   CBOssMixer_items=g_list_append( CBOssMixer_items,(gpointer)"/dev/mixer1" );
@@ -1245,8 +1174,6 @@ GtkWidget * create_OSSConfig( void )
 
   CEOssMixer=GTK_COMBO( CBOssMixer )->entry;
   gtk_widget_set_name( CEOssMixer,"CEOssMixer" );
-  gtk_widget_ref( CEOssMixer );
-  gtk_object_set_data_full( GTK_OBJECT( OSSConfig ),"CEOssMixer",CEOssMixer,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( CEOssMixer );
 
   AddHSeparator( vbox604 );
@@ -1257,15 +1184,13 @@ GtkWidget * create_OSSConfig( void )
   BOssOk=AddButton( MSGTR_Ok,hbuttonbox6 );
   BOssCancel=AddButton( MSGTR_Cancel,hbuttonbox6 );
 
-  gtk_signal_connect( GTK_OBJECT( OSSConfig ),"destroy",GTK_SIGNAL_FUNC( ossDestroy ),NULL );
-  gtk_signal_connect( GTK_OBJECT( OSSConfig ),"hide",GTK_SIGNAL_FUNC( ossShow ),(void*)0 );
-  gtk_signal_connect( GTK_OBJECT( OSSConfig ),"show",GTK_SIGNAL_FUNC( ossShow ),(void*)1 );
+  gtk_signal_connect( GTK_OBJECT( OSSConfig ),"destroy",GTK_SIGNAL_FUNC( gtk_widget_destroyed ),&OSSConfig );
   
-  gtk_signal_connect( GTK_OBJECT( BOssOk ),"released",GTK_SIGNAL_FUNC( ossButton ),(void*)1 );
-  gtk_signal_connect( GTK_OBJECT( BOssCancel ),"released",GTK_SIGNAL_FUNC( ossButton ),(void*)0 );
+  gtk_signal_connect( GTK_OBJECT( BOssOk ),"clicked",GTK_SIGNAL_FUNC( ossButton ),(void*)1 );
+  gtk_signal_connect( GTK_OBJECT( BOssCancel ),"clicked",GTK_SIGNAL_FUNC( ossButton ),(void*)0 );
 
-  gtk_widget_add_accelerator( BOssOk,"released",accel_group,GDK_Return,0,GTK_ACCEL_VISIBLE );
-  gtk_widget_add_accelerator( BOssCancel,"released",accel_group,GDK_Escape,0,GTK_ACCEL_VISIBLE );
+  gtk_widget_add_accelerator( BOssOk,"clicked",accel_group,GDK_Return,0,GTK_ACCEL_VISIBLE );
+  gtk_widget_add_accelerator( BOssCancel,"clicked",accel_group,GDK_Escape,0,GTK_ACCEL_VISIBLE );
 
   gtk_window_add_accel_group( GTK_WINDOW( OSSConfig ),accel_group );
 
@@ -1290,13 +1215,11 @@ static GtkWidget * RBVNone;
 static GtkWidget * dxr3BOk;
 static GtkWidget * dxr3BCancel;
 
-static int gtkVDXR3Config = 0;
-
 GtkWidget * create_DXR3Config( void );
 
 void ShowDXR3Config( void )
 {
- if ( gtkVDXR3Config ) gtkActive( DXR3Config );
+ if ( DXR3Config ) gtkActive( DXR3Config );
   else DXR3Config=create_DXR3Config();
 
  gtk_entry_set_text( GTK_ENTRY( CEDXR3Device ),gtkDXR3Device );
@@ -1311,15 +1234,14 @@ void ShowDXR3Config( void )
  
  gtk_widget_show( DXR3Config );
  gtkSetLayer( DXR3Config );
- gtkVDXR3Config=1;
 }
 
 void HideDXR3Config( void )
 {
- if ( !gtkVDXR3Config ) return;
+ if ( !DXR3Config ) return;
  gtk_widget_hide( DXR3Config );
  gtk_widget_destroy( DXR3Config );
- gtkVDXR3Config=0;
+ DXR3Config=NULL;
 }
 
 static void dxr3Button( GtkButton * button,gpointer user_data )
@@ -1334,22 +1256,14 @@ static void dxr3Button( GtkButton * button,gpointer user_data )
 #ifdef USE_LIBFAME
        gtkVopFAME=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBVFame ) );
 #endif
-  case 2: // Destroy
   case 1: // Cancel
        HideDXR3Config();
-       break;
-  case 3: // Show
-       gtkVDXR3Config=1;
-       break;
-  case 4: // Hide
-       gtkVDXR3Config=0;
        break;
  }
 }
 
 GtkWidget * create_DXR3Config( void )
 {
- GtkWidget * frame;
  GtkWidget * vbox1;
  GtkWidget * vbox2;
  GtkWidget * hbox1;
@@ -1368,30 +1282,19 @@ GtkWidget * create_DXR3Config( void )
  GTK_WIDGET_SET_FLAGS( DXR3Config,GTK_CAN_DEFAULT );
  gtk_window_set_title( GTK_WINDOW( DXR3Config ),"DXR3/H+" );
  gtk_window_set_position( GTK_WINDOW( DXR3Config ),GTK_WIN_POS_CENTER );
- gtk_window_set_modal( GTK_WINDOW( DXR3Config ),TRUE );
  gtk_window_set_policy( GTK_WINDOW( DXR3Config ),FALSE,FALSE,FALSE );
  gtk_window_set_wmclass( GTK_WINDOW( DXR3Config ),"DXR3","MPlayer" );
 
  gtk_widget_realize( DXR3Config );
  gtkAddIcon( DXR3Config );
 
- frame=AddFrame( NULL,GTK_SHADOW_IN,DXR3Config,1 );
- gtk_container_set_border_width( GTK_CONTAINER( frame ),1 );
- frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
- frame=AddFrame( NULL,GTK_SHADOW_ETCHED_OUT,frame,1 );
- frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
-
- vbox1=AddVBox( frame );
- vbox2=AddVBox( vbox1 );
+ vbox1=AddVBox( AddDialogFrame( DXR3Config ),0 );
+ vbox2=AddVBox( vbox1,0 );
  hbox1=AddHBox( vbox2,1 );
  AddLabel( MSGTR_PREFERENCES_OSS_Device,hbox1 );
 
- CBDevice=gtk_combo_new();
- gtk_widget_set_name( CBDevice,"CBDevice" );
- gtk_widget_ref( CBDevice );
- gtk_object_set_data_full( GTK_OBJECT( DXR3Config ),"CBDevice",CBDevice,(GtkDestroyNotify)gtk_widget_unref );
- gtk_widget_show( CBDevice );
- gtk_box_pack_start( GTK_BOX( hbox1 ),CBDevice,TRUE,TRUE,0 );
+ CBDevice=AddComboBox( hbox1 );
+
  CBDevice_items=g_list_append( CBDevice_items,( gpointer ) "/dev/em8300" );
  CBDevice_items=g_list_append( CBDevice_items,( gpointer ) "/dev/em8300-0" );
  CBDevice_items=g_list_append( CBDevice_items,( gpointer ) "/dev/em8300-1" );
@@ -1402,14 +1305,12 @@ GtkWidget * create_DXR3Config( void )
 
  CEDXR3Device=GTK_COMBO( CBDevice )->entry;
  gtk_widget_set_name( CEDXR3Device,"CEDXR3Device" );
- gtk_widget_ref( CEDXR3Device );
- gtk_object_set_data_full( GTK_OBJECT( DXR3Config ),"CEDXR3Device",CEDXR3Device,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( CEDXR3Device );
  gtk_entry_set_text( GTK_ENTRY( CEDXR3Device ),"/dev/em8300" );
 
 #if defined( USE_LIBAVCODEC ) || defined( USE_LIBFAME )
  AddHSeparator( vbox2 );
- vbox3=AddVBox( vbox2 );
+ vbox3=AddVBox( vbox2,0 );
  AddLabel( MSGTR_PREFERENCES_DXR3_VENC,vbox3 );
  RBVNone=AddRadioButton( MSGTR_PREFERENCES_None,&VEncoder_group,vbox3 );
 #ifdef USE_LIBAVCODEC
@@ -1429,15 +1330,13 @@ GtkWidget * create_DXR3Config( void )
  dxr3BOk=AddButton( MSGTR_Ok,hbuttonbox1 );
  dxr3BCancel=AddButton( MSGTR_Cancel,hbuttonbox1 );
 
- gtk_widget_add_accelerator( dxr3BOk,"released",accel_group,GDK_Return,0,GTK_ACCEL_VISIBLE );
- gtk_widget_add_accelerator( dxr3BCancel,"released",accel_group,GDK_Escape,0,GTK_ACCEL_VISIBLE );
+ gtk_widget_add_accelerator( dxr3BOk,"clicked",accel_group,GDK_Return,0,GTK_ACCEL_VISIBLE );
+ gtk_widget_add_accelerator( dxr3BCancel,"clicked",accel_group,GDK_Escape,0,GTK_ACCEL_VISIBLE );
 
- gtk_signal_connect( GTK_OBJECT( DXR3Config ),"destroy",GTK_SIGNAL_FUNC( dxr3Button ),(void *)2 );
- gtk_signal_connect( GTK_OBJECT( DXR3Config ),"show",GTK_SIGNAL_FUNC( dxr3Button ),(void *)3 );
- gtk_signal_connect( GTK_OBJECT( DXR3Config ),"hide",GTK_SIGNAL_FUNC( dxr3Button ),(void *)4 );
+ gtk_signal_connect( GTK_OBJECT( DXR3Config ),"destroy",GTK_SIGNAL_FUNC( gtk_widget_destroyed ),&DXR3Config );
  
- gtk_signal_connect( GTK_OBJECT( dxr3BOk ),"released",GTK_SIGNAL_FUNC( dxr3Button ),(void *)0 );
- gtk_signal_connect( GTK_OBJECT( dxr3BCancel ),"released",GTK_SIGNAL_FUNC( dxr3Button ),(void *)1 );
+ gtk_signal_connect( GTK_OBJECT( dxr3BOk ),"clicked",GTK_SIGNAL_FUNC( dxr3Button ),(void *)0 );
+ gtk_signal_connect( GTK_OBJECT( dxr3BCancel ),"clicked",GTK_SIGNAL_FUNC( dxr3Button ),(void *)1 );
 
  gtk_window_add_accel_group( GTK_WINDOW( DXR3Config ),accel_group );
 

@@ -6,6 +6,7 @@
 #include "../../../config.h"
 #include "../../../help_mp.h"
 #include "../../../mplayer.h"
+#include "../../../mixer.h"
 
 #include "../../app.h"
 
@@ -417,7 +418,8 @@ GtkWidget * create_PopUpMenu( void )
   AddMenuItem( AspectMenu,"2.35",( 4 << 16 ) + evSetAspect );
 
   AddSeparator( Menu );
-  AddMenuItem( Menu,MSGTR_MENU_Mute, evMute );
+  MenuItem=AddMenuCheckItem( Menu,MSGTR_MENU_Mute,muted,evMute );
+  if ( !guiIntfStruct.AudioType ) gtk_widget_set_sensitive( MenuItem,FALSE );
   AddMenuItem( Menu,MSGTR_MENU_PlayList, evPlayList );
   AddMenuItem( Menu,MSGTR_MENU_SkinBrowser, evSkinBrowser );
   AddMenuItem( Menu,MSGTR_MENU_Preferences, evPreferences );

@@ -4,7 +4,7 @@
 
 #include <gtk/gtk.h>
 
-extern GtkWidget * AboutBox;
+extern GtkWidget * About;
 
 extern GtkWidget * create_About( void );
 extern void ShowAboutBox( void );

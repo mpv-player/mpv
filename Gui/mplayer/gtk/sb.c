@@ -7,6 +7,8 @@
 #include <stdio.h>
 
 #include "sb.h"
+#include "common.h"
+
 #include "../../app.h"
 #include "../../../config.h"
 #include "../../../help_mp.h"
@@ -14,7 +16,7 @@
 #include "../widgets.h"
 #include "../app.h"
 
-GtkWidget * SkinList;
+GtkWidget * SkinList = NULL;
 char      * sbSelectedSkin=NULL;
 char      * sbMPlayerDirInHome=NULL;
 char      * sbMPlayerPrefixDir=NULL;
@@ -22,20 +24,20 @@ char      * sbMPlayerPrefixDir=NULL;
 char * gtkOldSkin;
 static char * prev;
 
-int         gtkVSkinBrowser = 0;
-GtkWidget * SkinBrowser;
+GtkWidget * SkinBrowser = NULL;
 
 void ShowSkinBrowser( void )
 {
- if ( gtkVSkinBrowser ) gtkActive( SkinBrowser );
+ if ( SkinBrowser ) gtkActive( SkinBrowser );
    else SkinBrowser=create_SkinBrowser();
 }
 
 void HideSkinBrowser( void )
 {
- if ( !gtkVSkinBrowser ) return;
- gtkVSkinBrowser=0;
+ if ( !SkinBrowser ) return;
+ gtk_widget_hide( SkinBrowser );
  gtk_widget_destroy( SkinBrowser );
+ SkinBrowser=NULL;
 }
 
 int gtkFillSkinList( gchar * mdir )
@@ -59,7 +61,7 @@ int gtkFillSkinList( gchar * mdir )
  free( str[0] );
 
  glob( mdir,GLOB_NOSORT,NULL,&gg );
- for( i=0;i<gg.gl_pathc;i++ )
+ for( i=0;i<(int)gg.gl_pathc;i++ )
   {
    if ( !strcmp( gg.gl_pathv[i],"." ) || !strcmp( gg.gl_pathv[i],".." ) ) continue;
    stat( gg.gl_pathv[i],&fs );
@@ -77,27 +79,23 @@ int gtkFillSkinList( gchar * mdir )
  return 1;
 }
 
-void on_SkinBrowser_destroy( GtkObject * object,gpointer user_data )
-{ HideSkinBrowser(); }
-
-void on_SkinBrowser_show( GtkObject * object,gpointer user_data )
-{ gtkVSkinBrowser=(int)user_data; }
-
-void on_SkinBrowser_Cancel( GtkObject * object,gpointer user_data )
+static void prButton( GtkObject * object,gpointer user_data )
 {
- if ( strcmp( sbSelectedSkin,gtkOldSkin ) ) ChangeSkin( gtkOldSkin );
+ switch ( (int)user_data )
+  {
+   case 0: // cancel
+	if ( strcmp( sbSelectedSkin,gtkOldSkin ) ) ChangeSkin( gtkOldSkin );
+	break;
+   case 1: // ok
+	ChangeSkin( sbSelectedSkin );
+	if ( skinName ) free( skinName );
+	skinName=strdup( sbSelectedSkin );
+	break;   
+  }
  HideSkinBrowser();
 }
 
-void on_SkinBrowser_Ok( GtkObject * object,gpointer user_data )
-{
- ChangeSkin( sbSelectedSkin );
- if ( skinName ) free( skinName );
- skinName=strdup( sbSelectedSkin );
- HideSkinBrowser();
-}
-
-void on_SkinList_select_row( GtkCList * clist,gint row,gint column,GdkEvent * bevent,gpointer user_data )
+static void on_SkinList_select_row( GtkCList * clist,gint row,gint column,GdkEvent * bevent,gpointer user_data )
 {
  gtk_clist_get_text( clist,row,0,&sbSelectedSkin );
  if ( strcmp( prev,sbSelectedSkin ) )
@@ -117,17 +115,8 @@ void on_SkinList_select_row( GtkCList * clist,gint row,gint column,GdkEvent * be
 
 GtkWidget * create_SkinBrowser( void )
 {
- GtkWidget     * SkinBrowser;
- GtkWidget     * frame5;
- GtkWidget     * frame6;
- GtkWidget     * frame7;
- GtkWidget     * frame8;
  GtkWidget     * vbox5;
- GtkWidget     * label;
- GtkWidget     * hseparator4;
  GtkWidget     * scrolledwindow1;
- GtkWidget     * label2;
- GtkWidget     * hseparator5;
  GtkWidget     * hbuttonbox4;
  GtkWidget     * Cancel;
  GtkWidget     * Ok;
@@ -140,72 +129,19 @@ GtkWidget * create_SkinBrowser( void )
  gtk_object_set_data( GTK_OBJECT( SkinBrowser ),MSGTR_SkinBrowser,SkinBrowser );
  gtk_widget_set_usize( SkinBrowser,256,320 );
  gtk_container_set_border_width( GTK_CONTAINER( SkinBrowser ),1 );
-// GTK_WIDGET_SET_FLAGS( SkinBrowser,GTK_CAN_FOCUS );
  GTK_WIDGET_SET_FLAGS( SkinBrowser,GTK_CAN_DEFAULT );
  gtk_widget_set_events( SkinBrowser,GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK | GDK_FOCUS_CHANGE_MASK | GDK_STRUCTURE_MASK | GDK_PROPERTY_CHANGE_MASK | GDK_VISIBILITY_NOTIFY_MASK );
  gtk_window_set_title( GTK_WINDOW( SkinBrowser ),MSGTR_SkinBrowser );
  gtk_window_set_position( GTK_WINDOW( SkinBrowser ),GTK_WIN_POS_CENTER );
  gtk_window_set_policy( GTK_WINDOW( SkinBrowser ),FALSE,FALSE,TRUE );
- gtk_window_set_wmclass( GTK_WINDOW( SkinBrowser ),MSGTR_SkinBrowser,"MPlayer" );
+ gtk_window_set_wmclass( GTK_WINDOW( SkinBrowser ),"SkinBrowser","MPlayer" );
 
  gtk_widget_realize( SkinBrowser );
  gtkAddIcon( SkinBrowser );
 
- frame5=gtk_frame_new( NULL );
- gtk_widget_set_name( frame5,"frame5" );
- gtk_widget_ref( frame5 );
- gtk_object_set_data_full( GTK_OBJECT( SkinBrowser ),"frame5",frame5,(GtkDestroyNotify)gtk_widget_unref );
- gtk_widget_show( frame5 );
- gtk_container_add( GTK_CONTAINER( SkinBrowser ),frame5 );
- gtk_frame_set_shadow_type( GTK_FRAME( frame5 ),GTK_SHADOW_IN );
-
- frame6=gtk_frame_new( NULL );
- gtk_widget_set_name( frame6,"frame6" );
- gtk_widget_ref( frame6 );
- gtk_object_set_data_full( GTK_OBJECT( SkinBrowser ),"frame6",frame6,(GtkDestroyNotify)gtk_widget_unref );
- gtk_widget_show( frame6 );
- gtk_container_add( GTK_CONTAINER( frame5 ),frame6 );
- gtk_frame_set_shadow_type( GTK_FRAME( frame6 ),GTK_SHADOW_NONE );
-
- frame7=gtk_frame_new( NULL );
- gtk_widget_set_name( frame7,"frame7" );
- gtk_widget_ref( frame7 );
- gtk_object_set_data_full( GTK_OBJECT( SkinBrowser ),"frame7",frame7,(GtkDestroyNotify)gtk_widget_unref );
- gtk_widget_show( frame7 );
- gtk_container_add( GTK_CONTAINER( frame6 ),frame7 );
- gtk_frame_set_shadow_type( GTK_FRAME( frame7 ),GTK_SHADOW_ETCHED_OUT );
-
- frame8=gtk_frame_new( NULL );
- gtk_widget_set_name( frame8,"frame8" );
- gtk_widget_ref( frame8 );
- gtk_object_set_data_full( GTK_OBJECT( SkinBrowser ),"frame8",frame8,(GtkDestroyNotify)gtk_widget_unref );
- gtk_widget_show( frame8 );
- gtk_container_add( GTK_CONTAINER( frame7 ),frame8 );
- gtk_frame_set_shadow_type( GTK_FRAME( frame8 ),GTK_SHADOW_NONE );
-
- vbox5=gtk_vbox_new( FALSE,0 );
- gtk_widget_set_name( vbox5,"vbox5" );
- gtk_widget_ref( vbox5 );
- gtk_object_set_data_full( GTK_OBJECT( SkinBrowser ),"vbox5",vbox5,(GtkDestroyNotify)gtk_widget_unref );
- gtk_widget_show( vbox5 );
- gtk_container_add( GTK_CONTAINER( frame8 ),vbox5 );
-
- label=gtk_label_new( MSGTR_SKIN_LABEL );
- gtk_widget_set_name( label,"label" );
- gtk_widget_ref( label );
- gtk_object_set_data_full( GTK_OBJECT( SkinBrowser ),"label",label,(GtkDestroyNotify)gtk_widget_unref );
- gtk_widget_show( label );
- gtk_box_pack_start( GTK_BOX( vbox5 ),label,FALSE,FALSE,0 );
- gtk_label_set_justify( GTK_LABEL( label ),GTK_JUSTIFY_RIGHT );
- gtk_misc_set_alignment( GTK_MISC( label ),7.45058e-09,7.45058e-09 );
-
- hseparator4=gtk_hseparator_new();
- gtk_widget_set_name( hseparator4,"hseparator4" );
- gtk_widget_ref( hseparator4 );
- gtk_object_set_data_full( GTK_OBJECT( SkinBrowser ),"hseparator4",hseparator4,(GtkDestroyNotify)gtk_widget_unref );
- gtk_widget_show( hseparator4 );
- gtk_box_pack_start( GTK_BOX( vbox5 ),hseparator4,FALSE,TRUE,0 );
- gtk_widget_set_usize( hseparator4,-2,5 );
+ vbox5=AddVBox( AddDialogFrame( SkinBrowser ),0 );
+ AddLabel( MSGTR_SKIN_LABEL,vbox5 );
+ AddHSeparator( vbox5 );
 
  scrolledwindow1=gtk_scrolled_window_new( NULL,NULL );
  gtk_widget_set_name( scrolledwindow1,"scrolledwindow1" );
@@ -227,57 +163,22 @@ GtkWidget * create_SkinBrowser( void )
  gtk_clist_column_titles_hide( GTK_CLIST( SkinList ) );
  gtk_clist_set_shadow_type( GTK_CLIST( SkinList ),GTK_SHADOW_ETCHED_OUT );
 
- label2=gtk_label_new( "label2" );
- gtk_widget_set_name( label2,"label2" );
- gtk_widget_ref( label2 );
- gtk_object_set_data_full( GTK_OBJECT( SkinBrowser ),"label2",label2,(GtkDestroyNotify)gtk_widget_unref );
- gtk_widget_show( label2 );
- gtk_clist_set_column_widget( GTK_CLIST( SkinList ),0,label2 );
+ AddHSeparator( vbox5 );
 
- hseparator5=gtk_hseparator_new();
- gtk_widget_set_name( hseparator5,"hseparator5" );
- gtk_widget_ref( hseparator5 );
- gtk_object_set_data_full( GTK_OBJECT( SkinBrowser ),"hseparator5",hseparator5,(GtkDestroyNotify)gtk_widget_unref );
- gtk_widget_show( hseparator5 );
- gtk_box_pack_start( GTK_BOX( vbox5 ),hseparator5,FALSE,TRUE,0 );
- gtk_widget_set_usize( hseparator5,-2,9 );
+ hbuttonbox4=AddHButtonBox( vbox5 );
+  gtk_button_box_set_layout( GTK_BUTTON_BOX( hbuttonbox4 ),GTK_BUTTONBOX_SPREAD );
+  gtk_button_box_set_spacing( GTK_BUTTON_BOX( hbuttonbox4 ),10 );
 
- hbuttonbox4=gtk_hbutton_box_new();
- gtk_widget_set_name( hbuttonbox4,"hbuttonbox4" );
- gtk_widget_ref( hbuttonbox4 );
- gtk_object_set_data_full( GTK_OBJECT( SkinBrowser ),"hbuttonbox4",hbuttonbox4,(GtkDestroyNotify)gtk_widget_unref );
- gtk_widget_set_usize( hbuttonbox4,-2,25 );
- gtk_widget_show( hbuttonbox4 );
- gtk_box_pack_start( GTK_BOX( vbox5 ),hbuttonbox4,FALSE,TRUE,0 );
- gtk_button_box_set_layout( GTK_BUTTON_BOX( hbuttonbox4 ),GTK_BUTTONBOX_END );
- gtk_button_box_set_spacing( GTK_BUTTON_BOX( hbuttonbox4 ),5 );
- gtk_button_box_set_child_size( GTK_BUTTON_BOX( hbuttonbox4 ),75,0 );
+ Ok=AddButton( MSGTR_Ok,hbuttonbox4 );
+ Cancel=AddButton( MSGTR_Cancel,hbuttonbox4 );
 
- Ok=gtk_button_new_with_label( MSGTR_Ok );
- gtk_widget_set_name( Ok,MSGTR_Ok );
- gtk_widget_ref( Ok );
- gtk_object_set_data_full( GTK_OBJECT( SkinBrowser ),MSGTR_Ok,Ok,(GtkDestroyNotify)gtk_widget_unref );
- gtk_widget_show( Ok );
- gtk_container_add( GTK_CONTAINER( hbuttonbox4 ),Ok );
- gtk_widget_set_usize( Ok,-2,22 );
- gtk_widget_add_accelerator( Ok,"released",accel_group,GDK_Return,0,GTK_ACCEL_VISIBLE );
+ gtk_widget_add_accelerator( Ok,"clicked",accel_group,GDK_Return,0,GTK_ACCEL_VISIBLE );
+ gtk_widget_add_accelerator( Cancel,"clicked",accel_group,GDK_Escape,0,GTK_ACCEL_VISIBLE );
 
- Cancel=gtk_button_new_with_label( MSGTR_Cancel );
- gtk_widget_set_name( Cancel,MSGTR_Cancel );
- gtk_widget_ref( Cancel );
- gtk_object_set_data_full( GTK_OBJECT( SkinBrowser ),MSGTR_Cancel,Cancel,(GtkDestroyNotify)gtk_widget_unref );
- gtk_widget_show( Cancel );
- gtk_container_add( GTK_CONTAINER( hbuttonbox4 ),Cancel );
- gtk_widget_set_usize( Cancel,-2,22 );
- gtk_widget_add_accelerator( Cancel,"released",accel_group,GDK_Escape,0,GTK_ACCEL_VISIBLE );
-
- gtk_signal_connect( GTK_OBJECT( SkinBrowser ),"destroy",GTK_SIGNAL_FUNC( on_SkinBrowser_destroy ),0 );
- gtk_signal_connect( GTK_OBJECT( SkinBrowser ),"show",GTK_SIGNAL_FUNC( on_SkinBrowser_show ),(void *)1 );
- gtk_signal_connect( GTK_OBJECT( SkinBrowser ),"hide",GTK_SIGNAL_FUNC( on_SkinBrowser_show ),0 );
- 
+ gtk_signal_connect( GTK_OBJECT( SkinBrowser ),"destroy",GTK_SIGNAL_FUNC( gtk_widget_destroyed ),&SkinBrowser );
  gtk_signal_connect( GTK_OBJECT( SkinList ),"select_row",GTK_SIGNAL_FUNC( on_SkinList_select_row ),NULL );
- gtk_signal_connect( GTK_OBJECT( Ok ),"released",GTK_SIGNAL_FUNC( on_SkinBrowser_Ok ),NULL );
- gtk_signal_connect( GTK_OBJECT( Cancel ),"released",GTK_SIGNAL_FUNC( on_SkinBrowser_Cancel ),NULL );
+ gtk_signal_connect( GTK_OBJECT( Ok ),"clicked",GTK_SIGNAL_FUNC( prButton ),(void *)1 );
+ gtk_signal_connect( GTK_OBJECT( Cancel ),"clicked",GTK_SIGNAL_FUNC( prButton ),(void *)0 );
 
  if ( ( sbMPlayerDirInHome=(char *)calloc( 1,strlen( skinDirInHome ) + 4 ) ) != NULL )
   { strcpy( sbMPlayerDirInHome,skinDirInHome ); strcat( sbMPlayerDirInHome,"/*" ); }
