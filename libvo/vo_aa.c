@@ -27,6 +27,7 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 #include "../postproc/rgb2rgb.h"
+#include "font_load.h"
 #include "sub.h"
 
 #include "linux/keycodes.h"
