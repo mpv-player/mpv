@@ -295,7 +295,7 @@ int cue_read_cue (char *in_cue_filename)
   else {
      *t = '\0';
      t = s;
-     if (*t)
+     if (*t == '\0')
        strcpy(t, "/");
   }
   printf ("dirname: %s\n", t);
