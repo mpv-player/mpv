@@ -5801,7 +5801,9 @@ fi
 _ld_dl_dynamic=''
 bsd && _ld_dl_dynamic='-rdynamic'
 test "$_xanim" = yes && _ld_dl_dynamic='-rdynamic'
-test "$_real" = yes && _ld_dl_dynamic='-rdynamic'
+if test "$_real" = yes && not win32 ; then
+  _ld_dl_dynamic='-rdynamic'
+fi
 
 _ld_arch="$_ld_arch $_ld_pthread $_ld_dl $_ld_dl_dynamic"
 bsdos && _ld_arch="$_ld_arch -ldvd"
