@@ -1525,14 +1525,13 @@ if(auto_quality>0){
     case 'x':
       sub_delay += 0.1;
       break;
-    case '9': c='/'; goto _jump1;
-    case '0': c='*';
-_jump1:
+    case '9':
+    case '0':
     case '*':
     case '/': {
         float mixer_l, mixer_r;
         mixer_getvolume( &mixer_l,&mixer_r );
-        if(c=='*'){
+        if(c=='*' || c=='0'){
             if ( ++mixer_l > 100 ) mixer_l = 100;
             if ( ++mixer_r > 100 ) mixer_r = 100;
         } else {
