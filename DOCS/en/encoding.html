@@ -90,9 +90,9 @@
 <H2><A NAME="mpeg">7.2 Encoding to MPEG format</A></H2>
 
 <P>MEncoder can create MPEG (MPEG-PS) format output files. It's probably
-  useful only with libavcodec's <I>mpeg1video</I> codec, because players
-  - except MPlayer - expect MPEG1 video, and MPEG1 layer 2 (MP2) audio streams
-  in MPEG files.</P>
+  useful only with <A HREF="codecs.html#libavcodec">libavcodec</A>'s
+  <I>mpeg1video</I> codec, because players - except MPlayer - expect MPEG1
+  video, and MPEG1 layer 2 (MP2) audio streams in MPEG files.</P>
   
 <P>This feature is not very useful right now, aside that it probably has
   many bugs, but the more importantly because MEncoder currently cannot encode
@@ -309,9 +309,10 @@ Explanation of the process:
   Regretfully, there are <U>no</U> video players outside which support this
   attribute of MPEG4. Except MPlayer.</P>
 
-<P>This feature can be used only with <B>libavcodec</B>'s <CODE>mpeg4</CODE>
-  codec. Keep in mind: although MPlayer will correctly play the created file,
-  other players will use the wrong aspect ratio.</P>
+<P>This feature can be used only with <A HREF="codecs.html#libavcodec">
+  libavcodec</A>'s <CODE>mpeg4</CODE> codec. Keep in mind: although MPlayer
+  will correctly play the created file, other players will use the wrong
+  aspect ratio.</P>
 
 <P>You seriously should crop the black bands over and below the movie image.
   See the man page for the usage of the <CODE>cropdetect</CODE> and
@@ -321,6 +322,53 @@ Explanation of the process:
 
 <P><CODE>$ mencoder sample-svcd.mpg -ovc lavc -lavcopts
   vcodec=mpeg4:autoaspect -vf crop=714:548:0:14 -oac copy -o output.avi</CODE></P>
+
+<H2><A NAME="custommatrices">7.10 Custom inter/intra matrices</A></H2>
+
+<P>Whit this feature of <A HREF="codecs.html#libavcodec">libavcodec</A> you are
+  able to set custom inter (I-frames/key frames) and intra (P-frames/predicted
+  frames) matrices. It is supported by many of the codecs: <CODE>mpeg1video</CODE>
+  and <CODE>mpeg2video</CODE> are reported as working.</P>
+
+<P>A typical usage of this feature is to set the matrices preferred by the 
+  <A HREF="http://www.kvcd.net/">KVCD</A> specifications.<BR><BR>
+  The <B>KVCD "Notch" Quantization Matrix</B>:<BR>
+  <I>Intra:</I>
+  <PRE>
+  8 9 12 22 26 27 29 34
+  9 10 14 26 27 29 34 37
+  12 14 18 27 29 34 37 38
+  22 26 27 31 36 37 38 40
+  26 27 29 36 39 38 40 48
+  27 29 34 37 38 40 48 58
+  29 34 37 38 40 48 58 69
+  34 37 38 40 48 58 69 79
+  </PRE>
+  <I>Inter:</I>
+  <PRE>
+  16 18 20 22 24 26 28 30
+  18 20 22 24 26 28 30 32
+  20 22 24 26 28 30 32 34
+  22 24 26 30 32 32 34 36
+  24 26 28 32 34 34 36 38
+  26 28 30 32 34 36 38 40
+  28 30 32 34 36 38 42 42
+  30 32 34 36 38 40 42 44
+  </PRE>
+</P>
+
+<H4>Usage:</H4>
+
+<P><CODE>$ mencoder input.avi -o output.avi -oac copy -ovc lavc -lavcopts
+  inter_matrix=...:intra_matrix=...</CODE></P>
+
+<P><CODE>$ mencoder input.avi -ovc lavc -lavcopts
+  vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,<BR>
+  12,14,18,27,29,34,37,38,22,26,27,31,36,37,38,40,26,27,29,36,39,38,40,48,27,<BR>
+  29,34,37,38,40,48,58,29,34,37,38,40,48,58,69,34,37,38,40,48,58,69,79<BR>
+  :inter_matrix=16,18,20,22,24,26,28,30,18,20,22,24,26,28,30,32,20,22,24,26,<BR>
+  28,30,32,34,22,24,26,30,32,32,34,36,24,26,28,32,34,34,36,38,26,28,30,32,34,<BR>
+  36,38,40,28,30,32,34,36,38,42,42,30,32,34,36,38,40,42,44 -oac copy -o svcd.mpg</CODE></P>
 
 </BODY>
 </HTML>
