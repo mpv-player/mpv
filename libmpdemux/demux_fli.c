@@ -74,10 +74,16 @@ demuxer_t* demux_open_fli(demuxer_t* demuxer){
   int speed;
   unsigned int frame_size;
   int magic_number;
+  unsigned char * header;
 
   // go back to the beginning
   stream_reset(demuxer->stream);
   stream_seek(demuxer->stream, 0);
+
+  header = malloc(sizeof(BITMAPINFOHEADER) + 128);
+  stream_read(demuxer->stream, header + sizeof(BITMAPINFOHEADER), 128);
+  stream_seek(demuxer->stream, 0);
+
   demuxer->movi_start = 128;
   demuxer->movi_end = stream_read_dword_le(demuxer->stream);
 
@@ -116,6 +122,10 @@ demuxer_t* demux_open_fli(demuxer_t* demuxer){
   sh_video->disp_w = stream_read_word_le(demuxer->stream);
   sh_video->disp_h = stream_read_word_le(demuxer->stream);
 
+  // pass extradata to codec
+  sh_video->bih = (BITMAPINFOHEADER*)header;
+  sh_video->bih->biSize = sizeof(BITMAPINFOHEADER) + 128;
+    
   // skip the video depth and flags
   stream_skip(demuxer->stream, 4);
 
