@@ -40,6 +40,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-noxv ]
 .RB [ \-forcexv ]
 .RB [ \-ss\ sec ]
+.RB [ \-dumpaudio ]
 .I - or file
 .PP
 .SH DESCRIPTION
@@ -203,6 +204,9 @@ disable XVideo hardware acceleration (with SDL only!)
 .TP
 .B \-forcexv
 force using XVideo (SDL!)
+.TP
+.B \-dumpaudio
+writes audio stream of the file to ./stream.dump
 .IP
 .SH "ALPHA/BETA CODE"
 .TP
