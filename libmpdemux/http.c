@@ -72,7 +72,7 @@ int
 http_response_parse( HTTP_header_t *http_hdr ) {
 	char *hdr_ptr, *ptr;
 	char *field=NULL;
-	int pos_hdr_sep, len;
+	int pos_hdr_sep, hdr_sep_len, len;
 	if( http_hdr==NULL ) return -1;
 	if( http_hdr->is_parsed ) return 0;
 
@@ -123,6 +123,7 @@ http_response_parse( HTTP_header_t *http_hdr ) {
 	http_hdr->reason_phrase[len]='\0';
 
 	// Set the position of the header separator: \r\n\r\n
+	hdr_sep_len = 4;
 	ptr = strstr( http_hdr->buffer, "\r\n\r\n" );
 	if( ptr==NULL ) {
 		ptr = strstr( http_hdr->buffer, "\n\n" );
@@ -130,6 +131,7 @@ http_response_parse( HTTP_header_t *http_hdr ) {
 			mp_msg(MSGT_NETWORK,MSGL_ERR,"Header may be incomplete. No CRLF CRLF found.\n");
 			return -1;
 		}
+		hdr_sep_len = 2;
 	}
 	pos_hdr_sep = ptr-http_hdr->buffer;
 
@@ -153,10 +155,10 @@ http_response_parse( HTTP_header_t *http_hdr ) {
 	
 	if( field!=NULL ) free( field );
 
-	if( pos_hdr_sep+4<http_hdr->buffer_size ) {
+	if( pos_hdr_sep+hdr_sep_len<http_hdr->buffer_size ) {
 		// Response has data!
-		http_hdr->body = http_hdr->buffer+pos_hdr_sep+4;
-		http_hdr->body_size = http_hdr->buffer_size-(pos_hdr_sep+4);
+		http_hdr->body = http_hdr->buffer+pos_hdr_sep+hdr_sep_len;
+		http_hdr->body_size = http_hdr->buffer_size-(pos_hdr_sep+hdr_sep_len);
 	}
 
 	http_hdr->is_parsed = 1;
