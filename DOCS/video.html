@@ -851,7 +851,14 @@
 <UL>
   <LI>You can use standalone video output driver: <CODE>-vo xvidix</CODE><BR>
     This driver was developed as X11's front end to VIDIX technology.  It
-    requires X server and can work only under X server.</LI>
+    requires X server and can work only under X server. Note that, as it
+    directly accesses the hardware and circumvents the X driver, pixmaps
+    cached in the graphics card's memory may be corrupted. You can prevent
+    this by limiting the amount of video memory used by X with the XF86Config
+    option "VideoRam" in the device section. You should set this to the amount
+    of memory installed on your card minus 4MB. If you have less than 8MB of
+    video ram, you can use the option "XaaNoPixmapCache" in the screen section
+    instead.</LI>
   <LI>You can use VIDIX subdevice which was applied to several video output
     drivers, such as:<BR>
     <CODE>-vo vesa:vidix</CODE> (<B>Linux only</B>) and <CODE>-vo fbdev:vidix</CODE></LI>
