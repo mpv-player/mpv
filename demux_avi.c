@@ -51,7 +51,7 @@ demux_stream_t* demux_avi_select_stream(demuxer_t *demux,unsigned int id){
   }
   if(id!=mmioFOURCC('J','U','N','K')){
      // unknown
-     mp_dbg(MSGT_DEMUX,MSGL_DBG2,"Unknown chunk: %.4s (%X)\n",(char *) &id,id);
+     mp_msg(MSGT_DEMUX,MSGL_DBG2,"Unknown chunk: %.4s (%X)\n",(char *) &id,id);
   }
   return NULL;
 }
@@ -219,12 +219,12 @@ do{
     }
   }
   ret=demux_avi_read_packet(demux,id,len,priv->idx_pos-1,flags);
-      if(!ret && priv->skip_video_frames<=0)
-        if(--max_packs==0){
-          demux->stream->eof=1;
-          mp_msg(MSGT_DEMUX,MSGL_ERR,MSGTR_DoesntContainSelectedStream);
-          return 0;
-        }
+//      if(!ret && priv->skip_video_frames<=0)
+//        if(--max_packs==0){
+//          demux->stream->eof=1;
+//          mp_msg(MSGT_DEMUX,MSGL_ERR,MSGTR_DoesntContainSelectedStream);
+//          return 0;
+//        }
 } while(ret!=1);
   return 1;
 }
@@ -296,12 +296,12 @@ do{
     if(idx->dwFlags&AVIIF_KEYFRAME) flags=1;
   } else return 0;
   ret=demux_avi_read_packet(demux,id,len,idx_pos,flags);
-      if(!ret && priv->skip_video_frames<=0)
-        if(--max_packs==0){
-          demux->stream->eof=1;
-          mp_msg(MSGT_DEMUX,MSGL_ERR,MSGTR_DoesntContainSelectedStream);
-          return 0;
-        }
+//      if(!ret && priv->skip_video_frames<=0)
+//        if(--max_packs==0){
+//          demux->stream->eof=1;
+//          mp_msg(MSGT_DEMUX,MSGL_ERR,MSGTR_DoesntContainSelectedStream);
+//          return 0;
+//        }
 } while(ret!=1);
   return 1;
 }
