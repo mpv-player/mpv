@@ -26,6 +26,9 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 
+#include "osd.h"
+#include "sub.h"
+
 #include "yuv2rgb.h"
 extern void rgb15to16_mmx(char *s0, char *d0, int count);
 
@@ -708,6 +711,69 @@ static void clear_bg(void)
 		memset(frame_buffer + offset, 0x0, out_width * fb_pixel_size);
 }
 
+static void lots_of_printf(void)
+{
+	if (verbose > 0) {
+		printf(FBDEV "var info:\n");
+		printf(FBDEV "xres: %u\n", fb_vinfo.xres);
+		printf(FBDEV "yres: %u\n", fb_vinfo.yres);
+		printf(FBDEV "xres_virtual: %u\n", fb_vinfo.xres_virtual);
+		printf(FBDEV "yres_virtual: %u\n", fb_vinfo.yres_virtual);
+		printf(FBDEV "xoffset: %u\n", fb_vinfo.xoffset);
+		printf(FBDEV "yoffset: %u\n", fb_vinfo.yoffset);
+		printf(FBDEV "bits_per_pixel: %u\n", fb_vinfo.bits_per_pixel);
+		printf(FBDEV "grayscale: %u\n", fb_vinfo.grayscale);
+		printf(FBDEV "red: %lu %lu %lu\n",
+				(unsigned long) fb_vinfo.red.offset,
+				(unsigned long) fb_vinfo.red.length,
+				(unsigned long) fb_vinfo.red.msb_right);
+		printf(FBDEV "green: %lu %lu %lu\n",
+				(unsigned long) fb_vinfo.green.offset,
+				(unsigned long) fb_vinfo.green.length,
+				(unsigned long) fb_vinfo.green.msb_right);
+		printf(FBDEV "blue: %lu %lu %lu\n",
+				(unsigned long) fb_vinfo.blue.offset,
+				(unsigned long) fb_vinfo.blue.length,
+				(unsigned long) fb_vinfo.blue.msb_right);
+		printf(FBDEV "transp: %lu %lu %lu\n",
+				(unsigned long) fb_vinfo.transp.offset,
+				(unsigned long) fb_vinfo.transp.length,
+				(unsigned long) fb_vinfo.transp.msb_right);
+		printf(FBDEV "nonstd: %u\n", fb_vinfo.nonstd);
+		if (verbose > 1) {
+			printf(FBDEV "activate: %u\n", fb_vinfo.activate);
+			printf(FBDEV "height: %u\n", fb_vinfo.height);
+			printf(FBDEV "width: %u\n", fb_vinfo.width);
+			printf(FBDEV "accel_flags: %u\n", fb_vinfo.accel_flags);
+			printf(FBDEV "timing:\n");
+			printf(FBDEV "pixclock: %u\n", fb_vinfo.pixclock);
+			printf(FBDEV "left_margin: %u\n", fb_vinfo.left_margin);
+			printf(FBDEV "right_margin: %u\n", fb_vinfo.right_margin);
+			printf(FBDEV "upper_margin: %u\n", fb_vinfo.upper_margin);
+			printf(FBDEV "lower_margin: %u\n", fb_vinfo.lower_margin);
+			printf(FBDEV "hsync_len: %u\n", fb_vinfo.hsync_len);
+			printf(FBDEV "vsync_len: %u\n", fb_vinfo.vsync_len);
+			printf(FBDEV "sync: %u\n", fb_vinfo.sync);
+			printf(FBDEV "vmode: %u\n", fb_vinfo.vmode);
+		}
+		printf(FBDEV "fix info:\n");
+		printf(FBDEV "framebuffer size: %d bytes\n", fb_finfo.smem_len);
+		printf(FBDEV "type: %lu\n", (unsigned long) fb_finfo.type);
+		printf(FBDEV "type_aux: %lu\n", (unsigned long) fb_finfo.type_aux);
+		printf(FBDEV "visual: %lu\n", (unsigned long) fb_finfo.visual);
+		printf(FBDEV "line_length: %lu bytes\n", (unsigned long) fb_finfo.line_length);
+		if (verbose > 1) {
+			printf(FBDEV "id: %.16s\n", fb_finfo.id);
+			printf(FBDEV "smem_start: %p\n", (void *) fb_finfo.smem_start);
+			printf(FBDEV "xpanstep: %u\n", fb_finfo.xpanstep);
+			printf(FBDEV "ypanstep: %u\n", fb_finfo.ypanstep);
+			printf(FBDEV "ywrapstep: %u\n", fb_finfo.ywrapstep);
+			printf(FBDEV "mmio_start: %p\n", (void *) fb_finfo.mmio_start);
+			printf(FBDEV "mmio_len: %u bytes\n", fb_finfo.mmio_len);
+			printf(FBDEV "accel: %u\n", fb_finfo.accel);
+		}
+	}
+}
 static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 		uint32_t d_height, uint32_t fullscreen, char *title,
 		uint32_t format)
@@ -789,97 +855,12 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 		printf(FBDEV "Can't get FSCREENINFO: %s\n", strerror(errno));
 		return 1;
 	}
-#if 0
-	if (ioctl(fb_dev_fd, FBIOGET_VSCREENINFO, &fb_vinfo)) {
-		printf(FBDEV "Can't get VSCREENINFO: %s\n", strerror(errno));
+
+	lots_of_printf();
+
+	if (fb_finfo.type != FB_TYPE_PACKED_PIXELS) {
+		printf(FBDEV "type %d not supported\n", fb_finfo.type);
 		return 1;
-	}
-#endif
-
-	if (verbose > 0) {
-		printf(FBDEV "var info:\n");
-		printf(FBDEV "xres: %u\n", fb_vinfo.xres);
-		printf(FBDEV "yres: %u\n", fb_vinfo.yres);
-		printf(FBDEV "xres_virtual: %u\n", fb_vinfo.xres_virtual);
-		printf(FBDEV "yres_virtual: %u\n", fb_vinfo.yres_virtual);
-		printf(FBDEV "xoffset: %u\n", fb_vinfo.xoffset);
-		printf(FBDEV "yoffset: %u\n", fb_vinfo.yoffset);
-		printf(FBDEV "bits_per_pixel: %u\n", fb_vinfo.bits_per_pixel);
-		printf(FBDEV "grayscale: %u\n", fb_vinfo.grayscale);
-		printf(FBDEV "red: %lu %lu %lu\n",
-				(unsigned long) fb_vinfo.red.offset,
-				(unsigned long) fb_vinfo.red.length,
-				(unsigned long) fb_vinfo.red.msb_right);
-		printf(FBDEV "green: %lu %lu %lu\n",
-				(unsigned long) fb_vinfo.green.offset,
-				(unsigned long) fb_vinfo.green.length,
-				(unsigned long) fb_vinfo.green.msb_right);
-		printf(FBDEV "blue: %lu %lu %lu\n",
-				(unsigned long) fb_vinfo.blue.offset,
-				(unsigned long) fb_vinfo.blue.length,
-				(unsigned long) fb_vinfo.blue.msb_right);
-		printf(FBDEV "transp: %lu %lu %lu\n",
-				(unsigned long) fb_vinfo.transp.offset,
-				(unsigned long) fb_vinfo.transp.length,
-				(unsigned long) fb_vinfo.transp.msb_right);
-		printf(FBDEV "nonstd: %u\n", fb_vinfo.nonstd);
-		if (verbose > 1) {
-			printf(FBDEV "activate: %u\n", fb_vinfo.activate);
-			printf(FBDEV "height: %u\n", fb_vinfo.height);
-			printf(FBDEV "width: %u\n", fb_vinfo.width);
-			printf(FBDEV "accel_flags: %u\n", fb_vinfo.accel_flags);
-			printf(FBDEV "timing:\n");
-			printf(FBDEV "pixclock: %u\n", fb_vinfo.pixclock);
-			printf(FBDEV "left_margin: %u\n", fb_vinfo.left_margin);
-			printf(FBDEV "right_margin: %u\n", fb_vinfo.right_margin);
-			printf(FBDEV "upper_margin: %u\n", fb_vinfo.upper_margin);
-			printf(FBDEV "lower_margin: %u\n", fb_vinfo.lower_margin);
-			printf(FBDEV "hsync_len: %u\n", fb_vinfo.hsync_len);
-			printf(FBDEV "vsync_len: %u\n", fb_vinfo.vsync_len);
-			printf(FBDEV "sync: %u\n", fb_vinfo.sync);
-			printf(FBDEV "vmode: %u\n", fb_vinfo.vmode);
-		}
-		printf(FBDEV "fix info:\n");
-		printf(FBDEV "framebuffer size: %d bytes\n", fb_finfo.smem_len);
-		printf(FBDEV "type: %lu\n", (unsigned long) fb_finfo.type);
-		printf(FBDEV "type_aux: %lu\n", (unsigned long) fb_finfo.type_aux);
-		printf(FBDEV "visual: %lu\n", (unsigned long) fb_finfo.visual);
-		printf(FBDEV "line_length: %lu bytes\n", (unsigned long) fb_finfo.line_length);
-		if (verbose > 1) {
-			printf(FBDEV "id: %.16s\n", fb_finfo.id);
-			printf(FBDEV "smem_start: %p\n", (void *) fb_finfo.smem_start);
-			printf(FBDEV "xpanstep: %u\n", fb_finfo.xpanstep);
-			printf(FBDEV "ypanstep: %u\n", fb_finfo.ypanstep);
-			printf(FBDEV "ywrapstep: %u\n", fb_finfo.ywrapstep);
-			printf(FBDEV "mmio_start: %p\n", (void *) fb_finfo.mmio_start);
-			printf(FBDEV "mmio_len: %u bytes\n", fb_finfo.mmio_len);
-			printf(FBDEV "accel: %u\n", fb_finfo.accel);
-		}
-	}
-
-	switch (fb_finfo.type) {
-		case FB_TYPE_VGA_PLANES:
-			printf(FBDEV "FB_TYPE_VGA_PLANES not supported.\n");
-			return 1;
-		case FB_TYPE_PLANES:
-			printf(FBDEV "FB_TYPE_PLANES not supported.\n");
-			return 1;
-		case FB_TYPE_INTERLEAVED_PLANES:
-			printf(FBDEV "FB_TYPE_INTERLEAVED_PLANES not supported.\n");
-			return 1;
-#ifdef FB_TYPE_TEXT
-		case FB_TYPE_TEXT:
-			printf(FBDEV "FB_TYPE_TEXT not supported.\n");
-			return 1;
-#endif
-		case FB_TYPE_PACKED_PIXELS:
-			/* OK */
-			if (verbose > 0)
-				printf(FBDEV "FB_TYPE_PACKED_PIXELS: OK\n");
-			break;
-		default:
-			printf(FBDEV "unknown FB_TYPE: %d\n", fb_finfo.type);
-			return 1;
 	}
 
 	switch (fb_finfo.visual) {
@@ -906,10 +887,10 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 			free(cmap->blue);
 			free(cmap);
 			break;
-		case FB_VISUAL_PSEUDOCOLOR:
-			printf(FBDEV "visual is FB_VISUAL_PSEUDOCOLOR."
-					"it's not tested!\n");
-			break;
+//		case FB_VISUAL_PSEUDOCOLOR:
+//			printf(FBDEV "visual is FB_VISUAL_PSEUDOCOLOR."
+//					"it's not tested!\n");
+//			break;
 		default:
 			printf(FBDEV "visual: %d not yet supported\n",
 					fb_finfo.visual);
@@ -995,8 +976,6 @@ static const vo_info_t *get_info(void)
 	return &vo_info;
 }
 
-#include "osd.h"
-
 static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
 		unsigned char *srca, int stride)
 {
@@ -1075,8 +1054,6 @@ static void put_frame(void)
 		in_offset += in_width * fb_pixel_size;
 	}
 }
-
-#include "sub.h"
 
 static void flip_page(void)
 {
