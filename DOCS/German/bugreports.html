@@ -1,11 +1,12 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
 
 <HEAD>
 <LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
 </HEAD>
 
-<BODY BGCOLOR=white>
-
+<BODY>
 
 <P><B><A NAME=C>Anhang C - Wie man einen Fehler berichtet</A></B></P>
 
@@ -19,20 +20,30 @@ gefunden werden.</P>
 Dokumentationen nachgesehen werden. Wenn dein Problem nicht bekannt ist oder durch unsere Anweisungen
 nicht gelöst werden kann, dann berichte über den Fehler:</P>
 
+<P>Wenn man geschickt genugt ist, kann man versuchen den Fehler selber zu beheben,
+was äusserst positiv aufgenommen wird. Falls dies schon getan ist, sollte
+<A HREF="../tech/patches.txt">dieses kurze Dokument</A> gelesen werden um zu erfahren,
+wie der Code in <B>MPlayer</B> integriert werden kann. Die Leute auf der
+<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</A>
+Mailingliste können ansonsten bei Fragen helfen.</P>
+
 <P><B>Wo sollen Fehler berichtet werden?</B></P>
 
 <P>Tritt der mplayer-users Mailingliste bei:<BR>
 &nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-users">http://mplayerhq.hu/mailman/listinfo/mplayer-users</A><BR>
 und sende deinen Fehlerbericht an:<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="mailto:mplayer-users@mplayerhq.hu">mplayer-users@mplayerhq.hu</A><BR>
-Es sei darauf hingewiesen, dass wir keine individuellen Kopien (CC) versenden werden.
-Es ist also eine gute Idee sich anzumelden, wenn man auch eine Antwort erhalten will.</P>
+&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="mailto:mplayer-users@mplayerhq.hu">mplayer-users@mplayerhq.hu</A></P>
 
-<P>Sende auf keinen Fall Fehlerberichte an individuelle Entwickler. MPlayer ist Gemeinschaftsarbeit,
+<P>Die Sprache der Liste ist <B>Englisch</B>. Es wird gebeten den <A HREF="http://www.ietf.org/rfc/rfc1855.txt">Netiquette Richtlinien</A>
+zu folgen und <B>keine HTML Mails</B> zu irgendeiner unserer Listen zu senden.
+Man wird dabei bloss ignoriert oder von der Liste verstossen. Es sei auch darauf hingewiesen,
+keine individuellen Kopien (CC) versandt werden. Es ist also eine gute Idee sich anzumelden,
+wenn man auch seine Antwort erhalten will.</P>
+
+<P>Sende auf keinen Fall Fehlerberichte an individuelle Entwickler. <B>MPlayer</B> ist Gemeinschaftsarbeit,
 also wird es vielleicht mehrere interessierte Leute geben.
 Es kommt auch teilweise vor, dass derselbe Fehler von anderen Benutzern erlebt wurde, die bereits eine Lösung
-zur Umgehung des Problems haben (sogar bei einem Fehler im MPlayer Code).<BR>
-Die Sprache dieser Mailingliste ist ENGLISCH!</P>
+zur Umgehung des Problems haben (sogar bei einem Fehler im <B>MPlayer</B> Code).</P>
 
 <P>Bitte beschreibe dein Problem detailiert - Beispiele usw. - aber vergiss
 nicht, dass dein Bericht folgendes beinhalten sollte:</P>
@@ -42,63 +53,65 @@ nicht, dass dein Bericht folgendes beinhalten sollte:</P>
 <P><B>Systeminformationen:</B></P>
 
 <UL>
-<LI>Deine Linux Distribution oder Betriebssystem:<BR>
+  <LI>Deine Linux Distribution oder Betriebssystem:<BR>
     <UL>
-        <LI>RedHat 7.1
-        <LI>Slackware 7.0 + Development Pakete von 7.1 ...
-   </UL>
-<LI>Kernel Version:<BR>
-    <CODE>uname -a</CODE>
-<LI>libc Version:<BR>
-    <CODE>ls -l /lib/libc[.-]*</CODE>
-<LI>X Version:<BR>
-    <CODE>X -version</CODE>
-<LI>gcc und ld Versionen:<BR>
+      <LI>RedHat 7.1</LI>
+      <LI>Slackware 7.0 + Development Pakete von 7.1 ...</LI>
+    </UL></LI>
+  <LI>Kernel Version:<BR>
+    <CODE>uname -a</CODE></LI>
+  <LI>libc Version:<BR>
+    <CODE>ls -l /lib/libc[.-]*</CODE></LI>
+  <LI>X Version:<BR>
+    <CODE>X -version</CODE></LI>
+  <LI>gcc und ld Versionen:<BR>
     <CODE>gcc -v<BR>
-    ld -v</CODE>
-<LI>binutils Version:<BR>
-    <CODE>as --version</CODE>
+    ld -v</CODE></LI>
+  <LI>binutils Version:<BR>
+    <CODE>as --version</CODE></LI>
 </UL>
 
 <P><B>Hardware &amp; Treiber:</B></P>
 
 <UL>
-<LI>CPU Infos (dies funktioniert nur mit Linux):<BR>
-    <CODE>cat /proc/cpuinfo</CODE>
-<LI>Grafikkartenhersteller und Modell:<BR>
+  <LI>CPU Infos (dies funktioniert nur mit Linux):<BR>
+    <CODE>cat /proc/cpuinfo</CODE></LI>
+  <LI>Grafikkartenhersteller und Modell:<BR>
     <UL>
-	<LI>ASUS V3800U, Chipset: nVidia TNT2 Ultra Pro 32MB SDRAM
-        <LI>Matrox G400 DH 32MB SGRAM
-    </UL>
-<LI>Grafikkartentreiber-Typ &amp; Version:<BR>
+      <LI>ASUS V3800U, Chipset: nVidia TNT2 Ultra Pro 32MB SDRAM
+      <LI>Matrox G400 DH 32MB SGRAM
+    </UL></LI>
+  <LI>Grafikkartentreiber-Typ &amp; Version:<BR>
     <UL>
-        <LI>X eigener Treiber
-        <LI>nvidia 0.9.623
-        <LI>Utah-GLX CVS 2001-02-17
-        <LI>DRI von X 4.0.3
-    </UL>
-<LI>Soundkartentyp und Treiber:<BR>
+      <LI>X eigener Treiber
+      <LI>nvidia 0.9.623
+      <LI>Utah-GLX CVS 2001-02-17
+      <LI>DRI von X 4.0.3
+    </UL></LI>
+  <LI>Soundkartentyp und Treiber:<BR>
     <UL>
-        <LI>Creative SBLive! Gold mit OSS Treiber von oss.creative.com
-        <LI>Creative SB16 mit OSS Treiber des Kernels
-        <LI>GUS PnP mit ALSA OSS Emulation
-    </UL>
-<LI>wenn du dir unsicher bist, schick die Ausgabe von <CODE>lspci -vv</CODE> mit (auf Linux Systemen)
+      <LI>Creative SBLive! Gold mit OSS Treiber von oss.creative.com
+      <LI>Creative SB16 mit OSS Treiber des Kernels
+      <LI>GUS PnP mit ALSA OSS Emulation
+    </UL></LI>
+  <LI>Wenn man sich unsicher ist, sollte die Ausgabe von <CODE>lspci -vv</CODE>
+    mitgeschickt werden (auf Linux Systemen)</LI>
 </UL>
 
 <P><B>Bei Kompilierungsfehlern/-problemen:</B></P>
 
 <P><B>Bitte schicke diese Dateien mit:</B></P>
+
 <UL>
-<LI>configure.log
-<LI>config.h
-<LI>config.mak
-<LI>libvo/config.mak
+  <LI>configure.log</LI>
+  <LI>config.h</LI>
+  <LI>config.mak</LI>
+  <LI>libvo/config.mak</LI>
 </UL>
 
 <P><B>Bei Wiedergabeproblemen:</B></P>
 
-<P>Bitte gib die Ausgabe von MPlayer in Ausführlichkeits-Stufe 1, aber denk daran
+<P>Bitte gib die Ausgabe von <B>MPlayer</B> in Ausführlichkeits-Stufe 1, aber denk daran
 <B>die Ausgabe nicht zu kürzen</B> wenn diese dem Mail eingefügt wird. Die Entwickler
 benötigen alle Meldungen, um eine geignete Diagnose des Problems durchführen zu können.
 Die Ausgabe kann mit folgendem Befehl in eine Datei geschrieben werden:</P>
@@ -106,26 +119,27 @@ Die Ausgabe kann mit folgendem Befehl in eine Datei geschrieben werden:</P>
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -v [Optionen] [Dateiname] &amp;&gt; mplayer.log</CODE></P>
   
 <P><B>Wenn das Problem spezifisch für eine oder einige wenige Dateien besteht,
-  lade die Datei bitte auf</B></P>
-<P><CODE>&nbsp;&nbsp;&nbsp;<A HREF="ftp://mplayerhq.hu/MPlayer/incoming/">ftp://mplayerhq.hu/MPlayer/incoming/</A></P>
-  Uploade auch eine kleine .txt-Datei mit dem selben Namen wie die Datei 
-  (+ .txt Endung), die eine Problembeschreibung zur jeweiligen Datei, die 
-  detaillierte Ausgabe (-v) von MPlayer und deine Email-Adresse enthält!
-  Normalerweise reichen die ersten 1-5MB der Datei aus um das Problem zu
-  reproduzieren, aber als erstes solltest du folgendes ausprobieren:
-<P><CODE>&nbsp;&nbsp;&nbsp;dd if=deinedatei of=kleinedatei bs=1024k count=5</CODE></P>
-  (kopiert die ersten 5 MB von 'deinedatei' in die Datei 'kleinedatei'.)
-  Nun versuche es nochmals mit dieser kleinen Datei, wenn der Fehler
-  immer noch auftritt reicht es die kleine Datei hochzuladen.<BR>
-  Sende <STRONG>NIE</STRONG> solche Dateien via Mail! Lade es herauf und schicke nur den Pfad/
-  Dateinamen der Datei auf den FTP Server.<BR>
-  Wenn die Datei im Internet bereits verfügbar ist reicht die <STRONG>exakte</STRONG> URL
-  aus!
+lade die Datei bitte auf <A HREF="ftp://mplayerhq.hu/MPlayer/incoming/">ftp://mplayerhq.hu/MPlayer/incoming/</A></P>
+
+<P>Uploade auch eine kleine .txt-Datei mit dem selben Namen wie die Datei 
+(+ .txt Endung), die eine Problembeschreibung zur jeweiligen Datei, die 
+detaillierte Ausgabe (-v) von <B>MPlayer</B> und deine Email-Adresse enthält!
+Normalerweise reichen die ersten 1-5MB der Datei aus um das Problem zu
+reproduzieren, aber als erstes solltest du folgendes ausprobieren:</P>
+
+<P><CODE>&nbsp;&nbsp;&nbsp;dd if=deinedatei of=kleinedatei bs=1024k count=5</CODE><BR>
+(kopiert die ersten 5 MB von 'deinedatei' in die Datei 'kleinedatei'.)
+Nun versuche es nochmals mit dieser kleinen Datei, wenn der Fehler
+immer noch auftritt reicht es die kleine Datei hochzuladen.<BR>
+Sende <STRONG>NIE</STRONG> solche Dateien via Mail! Lade es herauf und schicke nur den Pfad/
+Dateinamen der Datei auf den FTP Server.<BR>
+Wenn die Datei im Internet bereits verfügbar ist reicht die <STRONG>exakte</STRONG> URL
+aus!</P>
 
 <P><B>Bei Abstürze:</B></P>
 
 <P>Wenn du ein Speicherabbild (core dump) vom Absturz besitzt, lies beim nächsten
-  Paragraph weiter, ansonsten lass ihn aus.</P>
+Paragraph weiter, ansonsten lass ihn aus.</P>
 
 <P><B>Wie brauchbare Informationen von einem core dump extrahiert werden können:</B></P>
 
@@ -143,22 +157,24 @@ printf "esi=%08lX\n",$esi<BR>
 </CODE></P>
 
 <P>Dann führe einfach den folgenden Befehl auf der Konsole aus:</P>
+
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=Kommandodatei &gt; mplayer.bug</CODE></P>
 
 <P><B>Wie Informationen eines reproduzierbaren Absturzes bewahrt werden können:</B></P>
-<P>Kompiliere MPlayer mit eingeschaltetem Debugging mit:<P>
-<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;./configure --enable-debug=3<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;make</CODE></P>
-lass dann MPlayer mit gdb laufen:
-<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;gdb mplayer</CODE></P>
 
-<P>Du benutzt nun gdb. Gib folgendes ein:</P>
-<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;run -v [Optionen von mplayer] dateiname</CODE></P>
+<P>Kompiliere <B>MPlayer</B> mit eingeschaltetem Debugging mit:<BR>
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;./configure --enable-debug=3<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;make</CODE><BR>
+Lass dann <B>MPlayer</B> mit gdb laufen:<BR>
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;gdb mplayer</CODE></P>
+
+<P>Du benutzt nun gdb. Gib folgendes ein:<BR>
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;run -v [Optionen von mplayer] dateiname</CODE><BR>
 und reproduziere deinen Absturz. Sobald du dies getan hast, wird gdb zur Eingabeaufforderung
 zurückkehren, wo folgendes einzugeben hast:<BR>
-<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;bt<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;disass $eip-32 $eip+32</CODE></P>
-Sende uns die gesamte Ausgabe obiger Dinge!
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;bt<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;disass $eip-32 $eip+32</CODE><BR>
+Sende uns die gesamte Ausgabe obiger Dinge!</P>
 
 <P><B>Allgemeine Hinweise</B></P>
 
@@ -169,7 +185,7 @@ anzugebeben.</P>
 <P><B>Ich weiss was ich mache...</B></P>
 
 <P>Wenn du einen Fehlerbericht wie oben beschrieben geschreiben hast und du dir sicher bist
-das ein Bug in MPlayer, nicht ein Problem mit dem Kompiler oder eine defekte Datei ist kannst
+das ein Bug in <B>MPlayer</B>, nicht ein Problem mit dem Kompiler oder eine defekte Datei ist kannst
 du auch der mplayer-advusers - Mailingliste beitreten und dort posten wenn du alle
 Dokumentation gelesen hast und dein Soundtreiber ok ist. Du wirst schnellere und besser
 Antworten erhalten.<BR><BR>
@@ -177,8 +193,7 @@ Aber sei gewarnt: Wenn du Newbiefragen oder Fragen welche hier beantwortet werde
 wirst du sofort gebannt anstatt eine Antwort zu erhalten.<BR>
 Also ärgere uns nicht und trette der -advusers-Liste nur bei, wenn du weisst was du machst und 
 du dich wie ein Advanced-MPlayer-User oder Entwickler fühlst. Wenn du wirklich ein Advanced-User 
-bist sollte es kein Problem für dich sein zu subscriben...
-</P>
+bist sollte es kein Problem für dich sein zu subscriben...</P>
 
 </BODY>
 </HTML>

@@ -1,34 +1,36 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
 
 <HEAD>
 <LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
 </HEAD>
 
-<BODY BGCOLOR=white>
+<BODY>
 
 
 <P><B><A NAME=4.1>4.1. CD-ROM Laufwerke</A></B></P>
 
 <P><B>Abspielen von Standard Video-CDs:</B></P>
 
-<P>
-mplayer -vcd <I>tracknummer</I> [-cdrom-device Device]<BR><BR>
-Beispiele:<BR>
-mplayer -vcd 1<BR>
-mplayer -fs -vcd 2 -cdrom-device /dev/hdc<BR>
-</P>
+<P>mplayer -vcd <I>tracknummer</I> [-cdrom-device Device]</P>
 
-<P>
-Hinweise:<BR>
-- Mounte die VCD NICHT und spiele die DAT-Dateien nicht direkt ab! Es funktioniert
-vielleicht unter Windows, aber wird unter Linux nicht funktionieren. Du musst
-diese CDs direkt mit der -vcd Option abspielen!<BR>
-- VCDs haben normalerweise 2 Tracks: ein Daten-Track (enthält das Autostart-Windows
-Abspielprogramm, Karaoke-Daten usw.) und einen Mode-2-Track (den Film), also
-versuche zuerst -vcd 2 !<BR>
-- das Standard-Gerät (Device) ist /dev/cdrom. Wenn dein Gerät ein anderes ist,
-musst du einen symbolischen Link setzten oder es mit einer Option angeben!
-</P>
+<P>Beispiele:<BR>
+mplayer -vcd 1<BR>
+mplayer -fs -vcd 2 -cdrom-device /dev/hdc<BR></P>
+
+<P>Hinweise:</P>
+
+<UL>
+  <LI>Mounte die VCD NICHT und spiele die DAT-Dateien nicht direkt ab! Es funktioniert
+    vielleicht unter Windows, aber wird unter Linux nicht funktionieren. Du musst
+    diese CDs direkt mit der -vcd Option abspielen!</LI>
+  <LI>VCDs haben normalerweise 2 Tracks: ein Daten-Track (enthält das Autostart-Windows
+    Abspielprogramm, Karaoke-Daten usw.) und einen Mode-2-Track (den Film), also
+    versuche zuerst -vcd 2 !</LI>
+  <LI>Das Standard-Gerät (Device) ist /dev/cdrom. Wenn dein Gerät ein anderes ist,
+    musst du einen symbolischen Link setzten oder es mit einer Option angeben!</LI>
+</UL>
 
 <P>Aus der Linux-Dokumentation:</P>
 
@@ -70,83 +72,79 @@ Es ist auch zu empfehlenswert das CD-Rom via 'hdparm' einzustellellen:</P>
 <P><B><A NAME=4.2>4.2. DVD Wiedergabe</A></B></P>
   
 <P><B>MPlayer</B> benutzt <CODE>libdvdread</CODE> und <CODE>libdvdcss</CODE> für
-  die DVD Entschlüsselung und Wiedergabe. Diese beiden Bibliotheken sind im
-  <CODE>libmpdvdkit/</CODE> Unterverzeichnis enthalten, sie müssen nicht separat
-  installiert werden. Wir gehen in diese Richtung, da ein libdvdread Bug
-  behoben werden musste und wir einen Patch hinzufügt haben, welcher
-  <B>Cache Support für gecrackte CSS-Keys</B> für libdvdcss erlaubt (führt zu einer
-  hohen Geschwindigkeitssteigerung vor der Wiedergabe). Die gecrackten Keys werden
-  im <CODE>$HOME/.mplayer/DVDKeys</CODE> Verzeichnis abgelegt.</P>
+die DVD Entschlüsselung und Wiedergabe. Diese beiden Bibliotheken sind im
+<CODE>libmpdvdkit/</CODE> Unterverzeichnis enthalten, sie müssen nicht separat
+installiert werden. Wir gehen in diese Richtung, da ein libdvdread Bug
+behoben werden musste und wir einen Patch hinzufügt haben, welcher
+<B>Cache Support für gecrackte CSS-Keys</B> für libdvdcss erlaubt (führt zu einer
+hohen Geschwindigkeitssteigerung vor der Wiedergabe). Die gecrackten Keys werden
+im <CODE>$HOME/.mplayer/DVDKeys</CODE> Verzeichnis abgelegt.</P>
 
 <P>Unterstützung für <CODE>dvdnav</CODE> wurde hinzugefügt (momentan nicht benutzbar).</P>
   
 <P><B>Alte DVD Unterstützung - <I>OPTIONAL</I></B></P>
 
 <P>Nützlich, wenn du verschlüsselte VOBs von der Festplatte abspielen willst. Kompiliere und installiere <B>libcss</B>
- 0.0.1 (nicht neuer) (wenn <B>MPlayer</B> sie nicht findet, dann benutze die Option <CODE>-csslib /pfad/zu/libcss.so</CODE>).</I><BR>
+0.0.1 (nicht neuer) (wenn <B>MPlayer</B> sie nicht findet, dann benutze die Option <CODE>-csslib /pfad/zu/libcss.so</CODE>).</P>
 
 <P><B>Kompiliere MPlayer:</B></P>
 
 <P>Lass <CODE>./configure</CODE> laufen. Wenn das <CODE>libmpdvdkit</CODE>
-  Unterverzeichnis nicht gelöscht wurde, sollte ./configure folgendes sagen:</P>
+Unterverzeichnis nicht gelöscht wurde, sollte ./configure folgendes sagen:</P>
 
 <P><CODE>Checking for DVD support (libmpdvdkit) ... yes</CODE></P>
 
 <P>(natürlich kann man beliebte configure Optionen in der Kommandozeile angeben,
-  wenn ./configure gestartet wird)</P>
+wenn ./configure gestartet wird)</P>
 
 <P><B>MPlayer</B> kann die systemweiten Bibliotheken <CODE>libdvdread</CODE>
-  und <CODE>libdvdcss</CODE> verwenden aber diese Lösung ist NICHT EMPFOHLEN,
-  da sie zu Fehlern, Inkompatibilitäten und einer langsameren Geschwindigkeit
-  führen kann.</P>
+und <CODE>libdvdcss</CODE> verwenden aber diese Lösung ist NICHT EMPFOHLEN,
+da sie zu Fehlern, Inkompatibilitäten und einer langsameren Geschwindigkeit
+führen kann.</P>
 
 <P>Wie auch immer, gib folgendes ein: <CODE>make</CODE> und dann <CODE>make install</CODE>.</P>
 
 <P><B>Verwendung von MPlayer zum DVD-Spielen:</B></P>
 
 
-<TABLE BORDER=0 WIDTH=100%>
-<TD VALIGN=top>-dvd &lt;title_id&gt;&nbsp;</TD>
-<TD>Aktiviert die DVD-Unterstützung und wählt den Titel aus.</TD><TR>
-<TD VALIGN=top>-chapter &lt;chapter_id&gt;&nbsp;</TD>
-<TD>Wählt das DVD-Kapitel (Standard: Wiedergabe von Kapitel 1).
-  Beispiel : <CODE>-chapter 5-10</CODE> oder <CODE>-chapter -9</CODE></TD><TR>
-<TD VALIGN=top>-dvdangle &lt;angle_id&gt;&nbsp;</TD>
-<TD>Zum Auswählen der Kamera-Perspektive (Standard: 1)</TD><TR>
-<TD VALIGN=top>-alang &lt;Ländercode&gt;&nbsp;</TD>
-<TD>Der <CODE>Ländercode</CODE> sagt <B>MPlayer</B> welche Sprache bevorzugt werden soll.
-  Gib die Option <CODE>-v</CODE> nach den DVD-Optionen an und betrachte die Ausgabe, 
-  um eine Liste der verfügbaren Sprachen zu erhalten.<BR>
-  Zum Beispiel:<BR>
-  &nbsp;&nbsp;<CODE>-alang hu,en</CODE> - versucht zuerst den ungarischen Ton zu finden und spielt
-  den englischen Ton, falls es jenen nicht findet.</TD></TR>
-<TD VALIGN=top>-slang &lt;Ländercode&gt;&nbsp;</TD>
-<TD>Aktiviert die DVD-Untertitel. Der <CODE>Ländercode</CODE> sagt <B>MPlayer</B>,
-  welche Sprache bevorzugt werden soll.
-  Gib die Option <CODE>-v</CODE> nach den DVD-Optionen an und betrachte die Ausgabe,
-  um eine Liste der verf|gbaren Sprachen zu erhalten.<BR>
-  Zum Beispiel:<BR>
-  &nbsp;&nbsp;<CODE>-slang hu,en</CODE> - versucht zuerst die ungarischen Untertitel anzuzeigen und zeigt
-  die englischen Untertitel, falls es die ungarischen nicht findet.</TD></TR>
-<TD VALIGN=top>-sid &lt;subtitel_id&gt;&nbsp;</TD>
-<TD>Aktiviert die DVD-Untertitel Ausgabe für einen bestimmten Kanal durch die gegebenen <CODE>subtitel_id</CODE> 
-  (Die Werte können von 0-31 sein). Nützlich um z.B. schlecht erstellte DVDs abzuspielen, 
-  wo eine Länderangabe den falschen Kanal wählt.</TD></TR>
-<TD VALIGN=top>-csslib &lt;pfad/dateiname&gt;</TD>
-<TD>(alte DVD Option) Diese Option wird benützt die Lage von <CODE>libcss.so</CODE> anzugeben.
-</TD></TR>
-<TD VALIGN=top>-dvdauth &lt;DVD Gerät (Device)&gt;&nbsp;</TD>
-<TD>(alte DVD Option) Aktiviert die DVD Authentifizierung des angegebenen Gerätes.
-</TD></TR>
-<TD VALIGN=top>-dvdkey &lt;CSS key&gt;</TD>
-<TD>(alte DVD Option) Wenn keine DVD dekodiert wird, gibt diese Option den CSS Key an welcher benötigt wird
-  um die DVD zu knacken. (Der CSS Key wird bei der Authentifizierung mit der DVD angezeigt).
-</TD></TR>
+<TABLE BORDER=0>
+  <TR><TD VALIGN=top>-dvd &lt;title_id&gt;&nbsp;</TD>
+    <TD>Aktiviert die DVD-Unterstützung und wählt den Titel aus.</TD></TR>
+  <TR><TD VALIGN=top>-chapter &lt;chapter_id&gt;&nbsp;</TD>
+    <TD>Wählt das DVD-Kapitel (Standard: Wiedergabe von Kapitel 1).
+    Beispiel : <CODE>-chapter 5-10</CODE> oder <CODE>-chapter -9</CODE></TD></TR>
+  <TR><TD VALIGN=top>-dvdangle &lt;angle_id&gt;&nbsp;</TD>
+    <TD>Zum Auswählen der Kamera-Perspektive (Standard: 1)</TD></TR>
+  <TR><TD VALIGN=top>-alang &lt;Ländercode&gt;&nbsp;</TD>
+    <TD>Der <CODE>Ländercode</CODE> sagt <B>MPlayer</B> welche Sprache bevorzugt werden soll.
+    Gib die Option <CODE>-v</CODE> nach den DVD-Optionen an und betrachte die Ausgabe, 
+    um eine Liste der verfügbaren Sprachen zu erhalten.<BR>
+    Zum Beispiel:<BR>
+    &nbsp;&nbsp;<CODE>-alang hu,en</CODE> - versucht zuerst den ungarischen Ton zu finden und spielt
+    den englischen Ton, falls es jenen nicht findet.</TD></TR>
+  <TR><TD VALIGN=top>-slang &lt;Ländercode&gt;&nbsp;</TD>
+    <TD>Aktiviert die DVD-Untertitel. Der <CODE>Ländercode</CODE> sagt <B>MPlayer</B>,
+    welche Sprache bevorzugt werden soll.
+    Gib die Option <CODE>-v</CODE> nach den DVD-Optionen an und betrachte die Ausgabe,
+    um eine Liste der verf|gbaren Sprachen zu erhalten.<BR>
+    Zum Beispiel:<BR>
+    &nbsp;&nbsp;<CODE>-slang hu,en</CODE> - versucht zuerst die ungarischen Untertitel anzuzeigen und zeigt
+    die englischen Untertitel, falls es die ungarischen nicht findet.</TD></TR>
+  <TR><TD VALIGN=top>-sid &lt;subtitel_id&gt;&nbsp;</TD>
+    <TD>Aktiviert die DVD-Untertitel Ausgabe für einen bestimmten Kanal durch die gegebenen <CODE>subtitel_id</CODE> 
+    (Die Werte können von 0-31 sein). Nützlich um z.B. schlecht erstellte DVDs abzuspielen, 
+    wo eine Länderangabe den falschen Kanal wählt.</TD></TR>
+  <TR><TD VALIGN=top>-csslib &lt;pfad/dateiname&gt;</TD>
+    <TD>(alte DVD Option) Diese Option wird benützt die Lage von <CODE>libcss.so</CODE> anzugeben.</TD></TR>
+  <TR><TD VALIGN=top>-dvdauth &lt;DVD Gerät (Device)&gt;&nbsp;</TD>
+    <TD>(alte DVD Option) Aktiviert die DVD Authentifizierung des angegebenen Gerätes.</TD></TR>
+  <TR><TD VALIGN=top>-dvdkey &lt;CSS key&gt;</TD>
+    <TD>(alte DVD Option) Wenn keine DVD dekodiert wird, gibt diese Option den CSS Key an welcher benötigt wird
+    um die DVD zu knacken. (Der CSS Key wird bei der Authentifizierung mit der DVD angezeigt).</TD></TR>
 </TABLE>
 
 <P>Standard-Gerät ist <CODE>/dev/dvd</CODE>, du kannst das in config.h (compile time
-Option) ändern oder es mit Hilfe der <CODE>-dvd-device</CODE> Option angeben:
-</P>
+Option) ändern oder es mit Hilfe der <CODE>-dvd-device</CODE> Option angeben:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -dvd-device /dev/dvd</CODE></P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -slang de -dvd-device /dev/dvd</CODE></P>

@@ -4,7 +4,7 @@
 .TH "MPlayer" "1" "2002-06-09"
 
 .SH "NAME"
-mplayer \- Movie Player für Linux
+mplayer  \- Movie Player für Linux
 .br
 mencoder \- Movie Encoder für Linux
 
@@ -36,11 +36,11 @@ ist ein Filmspieler für LINUX (läuft auf vielen anderen Unix-Varianten und nicht
 CPUs, siehe Dokumentation). Er spielt die meisten MPEG, VOB, AVI, OGG, VIVO, ASF/WMV, QT/MOV,
 FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ Dateien, unterstützt von vielen eingebauten, XAnim und
 Win32 DLL Codecs. Es lassen sich VideoCD, SVCD, DVD, 3ivx, DivX 3/4/5 und sogar WMV Filme
-betrachten (ohne die avifile-Bibliothek überhaupt zu brauchen!).
+betrachten (ohne die avifile-Bibliothek).
 
-Ein anderes grosses Feature von mplayer ist die enorme Auswahl an unterstützten Ausgabetreibern.
-Er unterstützt X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, DirectFB. Es können aber auch GGI,
-SDL (und alle davon unterstützen Treiber), VESA (auf jeder VESA kompatiblen Karte, sogar ohne X!)
+Ein anderes grossartiges Feature von mplayer ist die enorme Auswahl an unterstützten Ausgabetreibern.
+Er unterstützt X11, XV, DGA, OpenGL, SVGAlib, fbdev, AAlib, DirectFB. Es können aber auch GGI,
+SDL (und alle davon unterstützen Treiber), VESA (auf jeder VESA kompatiblen Karte, sogar ohne X11!)
 und einige hardwarenahen kartenspezifische Treiber (für Matrox, 3Dfx und Radeon) benutzt werden!
 .br
 Die meisten davon unterstützen Software- oder Hardware-Skalierung, so dass die Filme im Vollbild
@@ -66,17 +66,17 @@ ist MPlayer mit einer grafischen Benutzeroberfläche. Er besitzt dieselben Option
 
 
 .SH "ALLGEMEINE HINWEISE"
-Jede "flag" Option hat ein "noflag" Partner, -fs hat z.B. -nofs als Gegenteil.
+Jede "flag" Option hat ein "noflag" Gegenstück, -fs hat z.B. -nofs als Gegenteil.
 .br
-.B Es sollte auch die Dokumentation überprüft werden!
+.B Es sollte auch die HTML Dokumentation überprüft werden!
 
 .SH "DEMUXER/STREAM OPTIONEN"
 .TP
 .B \-aid\ <id>
-Wählt den Audiokanal [MPG: 0-31 AVI: 1-99 ASF: 0-127 VOB: 128-...]
+Wählt den Audiokanal [MPG: 0-31 AVI: 1-99 ASF: 0-127 VOB: 128-...].
 .br
 .I HINWEIS:
-Es kann \-alang benutzt werden, um die Sprache durch einen Namen zu wählen.
+Es kann \-alang benutzt werden, um die Sprache zu wählen.
 .TP
 .B \-alang\ <Tonspur\ Sprache>
 Wird bei der Wiedergabe von DVDs benutzt. Erwartet einen zwei-Zeichen Ländercode als
@@ -90,10 +90,10 @@ demuxers.h definiert ist, angegeben werden.
 Die Option \-audio\-demuxer 17 kann verwendet werden um eine MP3-Erkennung zu erzwingen!
 .TP
 .B \-audiofile\ <Dateiname>
-Spielt den Ton aus einer externen Datei (WAV, MP3, oder OggVorbis)
+Spielt den Ton aus einer externen Datei (WAV, MP3, oder Ogg Vorbis).
 .TP
 .B \-cdrom-device\ <Pfad\ zum\ Device>
-Benutze das CDROM mit dem Gerätenamen <Pfad zum Device> anstatt /dev/cdrom
+Benutze das CDROM mit dem Gerätenamen <Pfad zum Device> anstatt /dev/cdrom.
 .TP
 .B \-cache\ <kbytes>
 Diese Option gibt an, wieviel Speicher beim precaching von Dateien/URLs verwenden werden soll.
@@ -130,7 +130,7 @@ Verfügbare Optionen sind:
 Erzwingt den Demuxer Typ. Es muss eine Demuxer ID, welche in demuxers.h definiert ist, angegeben werden.
 .TP
 .B \-dumpaudio (nur MPLAYER)
-Schreibt den Audiostream in ./stream.dump (Hauptsächlich benutzbar mit mpeg/ac3)
+Schreibt den Audiostream in ./stream.dump (Hauptsächlich benutzbar mit mpeg/ac3).
 .TP
 .B \-dumpfile <Dateiname> (nur MPLAYER)
 Gibt die Datei an, in die MPlayer schreiben soll. Diese Option sollte mit \-dumpaudio/\-dumpvideo/\-dumpstream
@@ -140,15 +140,15 @@ verwendet werden.
 Schreibt den ganzen Stream in die Datei in ./stream.dump (nützlich beim Rippen von DVDs).
 .TP
 .B \-dumpvideo (nur MPLAYER)
-Schreibt den Videostream in ./stream.dump (nicht sehr verwertbar)
+Schreibt den Videostream in ./stream.dump (nicht sehr verwertbar).
 .TP
 .B \-dvd\ <Titel\ id>
-Sagt MPlayer, welcher Film (markiert durch die Titelid) abgespielt werden soll. Manchmal sind z.B. '1'
+Sagt MPlayer, welcher Film (angegeben durch die Titelid) abgespielt werden soll. Manchmal sind z.B. '1'
 Trailer und '2' der richtige Film. Für die DVD-Wiedergabe wird manchmal deinterlacing benötigt:
 Es sollten dann die '-pp 0x20000' oder '-npp lb' Optionen verwendet werden.
 .TP
 .B \-dvd-device\ <Device>
-Überschreibt den normalen DVD-Device-Name /dev/dvd
+Überschreibt den normalen DVD-Device-Name /dev/dvd.
 .TP
 .B \-dvdangle\ <Winkel\ id>
 Einige DVDs enthalten Szenen, welche von mehreren Standpunkten betrachtet werden können.
@@ -171,7 +171,7 @@ Erzwingt den Wiederaufbau des INDEX. Nützlich für Dateien mit kaputtem Index (de
 Seeking wird möglich sein. Du kannst den Index mit MEncoder permanent reparieren (siehe Dokumentation).
 .TP
 .B \-fps\ <Wert>
-Erzwingt die Framerate (wenn der Wert im Header falsch ist) (Fliesskommazahl)
+Erzwingt die Framerate (wenn der Wert im Header falsch ist) (Fliesskommazahl).
 .TP
 .B \-frames\ <Nummer>
 MPlayer spielt/konvertiert <Nummer> Frames und beendet sich dann.
@@ -187,7 +187,7 @@ Baut den INDEX des AVIs neu, falls keiner gefunden wurde, und erlaubt dadurch da
 Nützlich für kaputte/unvollständige Downloads oder schlecht generierte AVIs.
 .TP
 .B \-mc\ <Sekunden/5frame>
-Maximale sync-Korrektur für 5 Frames (in Sekunden)
+Maximale sync-Korrektur für 5 Frames (in Sekunden).
 .TP
 .B \-mf <Option1:Option2:...>
 Wird verwendet, wenn von mehreren PNG- oder JPEG-Dateien dekodiert/konvertiert wird
@@ -201,21 +201,21 @@ Wird verwendet, wenn von mehreren PNG- oder JPEG-Dateien dekodiert/konvertiert w
 .TP
 .B \-ni (nur .AVI)
 Erzwingt den Gebrauch des non-interleaved AVI-Parsers (repariert die Wiedergabe
-einiger kaputter AVI-Dateien)
+einiger kaputter AVI-Dateien).
 .TP
 .B \-nobps
 Benutze keine byte/Sekunde-Werte für die Ton/Bild-Synchronisation (AVI).
 Dies hilft bei einigen AVI-Dateien mit kaputtem Header.
 .TP
 .B \-skipopening
-Überspringt die DVD-Eröffnung (nur DVDNAV)
+Überspringt die DVD-Eröffnung (nur DVDNAV).
 .TP
 .B \-sb\ <byte\ Position> (siehe auch \-ss Option!)
 Springt zur angegebenen byte Position. Nützlich bei der Wiedergabe von einer CDROM-Images
 / VOB-Dateien mit unbrauchbarem Material am Anfang.
 .TP
 .B \-srate <Hz>
-Gibt die Frequenz zur Audiowiedergabe an. Hat einen Einfluss auf die Wiedergabegeschwindigkeit!
+Gibt die Frequenz zur Audiowiedergabe an. Beeinflusst die Wiedergabegeschwindigkeit!
 .TP
 .B \-ss\ <Zeit> (siehe auch \-sb Option!)
 Sucht die angegebene Zeitposition.
@@ -242,13 +242,13 @@ Verfügbare Optionen sind:
     chanlist=<Wert>  verfügbar: us-bcast, us-cable, europe-west, europe-east, etc
 .TP
 .B \-vcd\ <Track>
-Spielt eine Video-CD Spur vom Device anstatt von einer normalen Datei
+Spielt eine Video-CD Spur vom Device anstatt von einer normalen Datei.
 .TP
 .B \-vid\ <id>
-Wählt den Videokanal [MPG: 0\-15  AVI: 0\-255 ]
+Wählt den Videokanal [MPG: 0\-15  AVI: 0\-255].
 .TP
 .B \-vivo <Optionen> (DEBUG CODE)
-Erzwingt die Audioparameter des .vivo Demuxers (für Testzwecke)
+Erzwingt die Audioparameter des .vivo Demuxers (für Testzwecke).
 
 
 .SH "DEKODIERUNG/FILTER OPTIONEN"
@@ -264,10 +264,10 @@ Erzwingt den Gebrauch des angegebenen Audiocodecs, nach dessen Name in der codec
     -ac vorbis  benutze den libvorbis
     -ac ffmp3   benutze den MP3-Dekoder von ffmpeg (LANGSAM)
 
-Siehe '-ac help' für eine VOLLSTÄNDIGE Liste!
+Siehe -ac help für eine VOLLSTÄNDIGE Liste!
 .TP
 .B \-afm <1-12> (VERALTET)
-Erzwingt den Gebrauch eines bestimmten Audioformates.
+Erzwingt den Gebrauch einer bestimmten Familie von Audioformaten.
 
 .I BEISPIEL:
     -afm 1   benutze die libmp3 (mp2/mp3, aber nicht mp1)
@@ -278,7 +278,7 @@ Erzwingt den Gebrauch eines bestimmten Audioformates.
     -afm 10  benutze die libvorbis
     -afm 11  benutze den MP3-Dekoder von ffmpeg (sogar mp1)
 
-Siehe '-ac help' für eine VOLLSTÄNDIGE Liste!
+Siehe -afm help für eine VOLLSTÄNDIGE Liste!
 .TP
 .B \-aspect <Verhältnis>
 Setzt das Seitenverhältnis von Filmen. Es wird bei MPEG-Dateien automatisch ermittelt,
@@ -289,19 +289,19 @@ kann bei AVI-Dateien jedoch nicht automatisch erkannt werden. Beispiele:
     -aspect 16:9 oder -aspect 1.7777
 .TP
 .B \-flip
-Spiegelt das Bild vertikal
+Spiegelt das Bild vertikal.
 .TP
 .B \-nosound
-Ton nicht abspielen/codieren
+Spielt den Ton nicht ab / codiert keinen Ton.
 .TP
 .B \-npp\ <Option1,Option2,...>
-Diese Option erlaubt einem, etwas "literarischere" Optionen für das Postprocessing zu übergeben
+Diese Option erlaubt einem, etwas 'literarischere' Postprocessing Optionen zu übergeben
 und ist eine andere Möglichkeit, diese aufzurufen (nicht mit -pp).
 .br
 HINWEIS: -npp kontrolliert nur den externen Nachbearbeitungsfilter, ES MUSS manuell geladen werden
-(mit der Options '-vop pp') und wird NICHT automatisch geladen!
+(mit der Options -vop pp) und wird NICHT automatisch geladen!
 .br
-Die Verwendung ist demnach: -vop pp -npp <Optionen>
+Verwendung: -vop pp -npp <Optionen>
 
 .I BEISPIEL:
     -pp 0x2007f <=> -npp hb,vb,dr,al,lb
@@ -317,9 +317,9 @@ Diese Schlüsselwörter akkzeptieren ein '-' Präfix um die Option zu deaktivieren.
 
 Ein ':' gefolgt von einem Buchstaben kann zu einer Option hinzugefügt werden um 
 dessen Zuständigkeitsbereich festzulegen.
-    a  schaltet den Filter automatisch ab, falls die CPU zu langsam ist
-    c  mache auch eine Chroma-Filterung
-    y  mache keine Chroma-Filterung (also nur Luma-Filterung)
+    a  Schaltet den Filter automatisch ab, falls die CPU zu langsam ist.
+    c  Macht auch eine Chroma-Filterung.
+    y  Macht keine Chroma-Filterung (also nur Luma-Filterung).
 
 Jeder Filter enthält 'c' (Chromafilterung) als Standard.
 
@@ -340,7 +340,7 @@ verwendet!
 Der gültige Bereich der \-pp Werte für die eingebauten Filter ist hängt von dem jeweiligen Codec ab.
 Meistens 0-6, wobei 0=deaktiviert und 6=langsamsten/besten ist.
 
-Für den externen pp Filter ist dies die numerische Methode den Filter zu verwenden. Die '\-npp' Option
+Für den externen pp Filter ist dies die numerische Methode den Filter zu verwenden. Die \-npp Option
 erzeugt dieselben Effekte mit Buchstaben. Um mehrere Filter gleichzeitig anzuwenden, müssen bloss die
 jeweiligen Hexadezimalwerte addiert werden.
 
@@ -351,12 +351,12 @@ Die folgenden Werte sollten z.B. gute Resultate liefern:
 .B \-ssf <Modus> (BETA CODE)
 Gibt die SwScaler Parameter an. Verfügbare Optionen sind:
 
-    lgb=[0..100]  gauss'scher Unschärfefilter (Luma)
-    cgb=[0..100]  gauss'scher Unschärfefilter (Chroma)
+    lgb=[0..100]  Gauss'scher Unschärfefilter (Luma)
+    cgb=[0..100]  Gauss'scher Unschärfefilter (Chroma)
     ls=[0..100]   Schärfefilter (Luma)
     cs=[0..100]   Schärfefilter (Chroma)
-    cvs=x         vertikale chroma Verlagerung
-    chs=x         horizontale chroma Verlagerung
+    cvs=x         Vertikale chroma Verlagerung
+    chs=x         Horizontale chroma Verlagerung
 .TP
 .B \-stereo <Modus>
 Wählt den Typ der MP2/MP3-Stereoausgabe.
@@ -385,9 +385,9 @@ Erzwingt den Gebrauch eines speziellen Videocodecs, nach dessen Name in der code
     -vc divxds    benutze den DirectShow DivX Codec
     -vc ffdivx    benutze den libavcodec DivX Codec
     -vc ffmpeg12  benutze den libavcodec MPEG1/2 Codec
-    -vc divx4     benutze den ProjectMayo DivX Codec
+    -vc divx4     benutze den Project Mayo DivX Codec
 
-Siehe '-vc help' für eine VOLLSTÄNDIGE Liste!
+Siehe -vc help für eine VOLLSTÄNDIGE Liste!
 .TP
 .B \-vfm <1-12>
 Erzwingt den Gebrauch einer speziellen CODECFAMILIE und fällt in die normale zurück, falls es fehlschlägt.
@@ -402,7 +402,7 @@ Erzwingt den Gebrauch einer speziellen CODECFAMILIE und fällt in die normale zur
              (das gleiche wie -vc divx4 aber mit Rückfallmöglichkeiten)
     -vfm 10  benutze die XAnim Codecs
 
-Siehe '-vc help' für eine VOLLSTÄNDIGE Liste!
+Siehe -vc help für eine VOLLSTÄNDIGE Liste!
 
 .I HINWEIS:
 Wenn libdivxdecore-Unterstützung einkompiliert wurde, enthalten Typ 3 und 7 nun den gleichen 
@@ -504,11 +504,11 @@ Sucht die OSD/SUB-Schriften in einem anderen Verzeichnis (normal :
     -font ~/.mplayer/arial-14/font.desc
 .TP
 .B \-noautosub
-Deaktiviert automatische Untertitel
+Deaktiviert automatische Untertitel.
 .TP
 .B \-osdlevel\ <0\-2>
 Gibt an, in welchem Modus das OSD starten soll (0 : aus, 1 : Suche, 2: Suche+Spielzeit)
-(Standard = 2)
+(Standard = 2).
 .TP
 .B \-sid\ <0-31> (siehe auch \-slang Option!)
 Wählt und aktiviert die DVD-Untertitel Wiedergabe/Sprache über eine Nummer.
@@ -522,7 +522,7 @@ falls erstere nicht vorhanden sind. Für eine Liste der verfügbaren Untertitel ka
 -v und ein Blick auf deren Ausgabe benutzt werden.
 .TP
 .B \-sub\ <Dateiname>
-Benutze/zeige diese Untertitel-Datei
+Benutzt/zeigt diese Untertitel-Datei.
 .TP
 .B \-subcp\ <Codepage>
 Wenn dein System iconv(3) unterstützt, kannst du diese Option benutzen um die Codepage 
@@ -544,7 +544,7 @@ Gibt die Framerate der Untertitel-Datei an (Fliesskommazahl, in Bildern/Sek.)
 (Standard: die gleiche fps-Rate wie der Film).
 .TP
 .B \-subfile <Dateiname> (BETA CODE)
-Momentan unbrauchbar. Gleich wie -audiofile, jedoch für Untertitel-Streams. (OggDS?)
+Momentan unbrauchbar. Gleich wie -audiofile, jedoch für Untertitel-Streams (OggDS?).
 .TP
 .B \-subpos <0-100> (nützlich mit -vop expand)
 Gibt die Untertitelposition an. Der Wert ist die vertikale Position der Untertitel in % der Bildhöhe.
@@ -594,7 +594,7 @@ Verfügbare Optionen sind:
     softclip         Verdichtungs-/"soft\-clipping"-Fähigkeiten (nur volume-Plugin)
 .TP
 .B \-channels <n>
-Wählt die Anzahl der Audio-Ausgangskanäle, die benutzt werden sollen
+Wählt die Anzahl der Audio-Ausgangskanäle, die benutzt werden sollen.
 
     Stereo        2
     Surround      4
@@ -603,7 +603,7 @@ Wählt die Anzahl der Audio-Ausgangskanäle, die benutzt werden sollen
 Momentan wird diese Option nur bei AC3-Audio und/oder dem surround-Plugin beachtet.
 .TP
 .B \-delay\ <Sekunden>
-Audioverzögerung in Sekunden (Fliesskommazahl, kann auch negativ sein)
+Audioverzögerung in Sekunden (Fliesskommazahl, kann auch negativ sein).
 .TP
 .B \-mixer\ <Device>
 Diese Option lässt MPlayer ein anderes Device zum Mischen (mixing) verwenden
@@ -648,21 +648,21 @@ es auf Karten mit sehr kleinem Videospeicher nicht funktionieren wird.
 .B \-dr
 Aktiviert "direct rendering" (nicht von allen Codecs und Videoausgaben unterstützt).
 .TP
-.B \-fb\ <Device> (nur FBdev oder DirectFB)
+.B \-fb\ <Device> (nur fbdev oder DirectFB)
 Gibt an, welches Framebuffer-Device verwendet werden soll. Standardmässig wird /dev/fb0 verwendet.
 .TP
-.B \-fbmode\ <Modusname> (nur FBdev)
+.B \-fbmode\ <Modusname> (nur fbdev)
 Ändert den Videomodus zu einem unter der Bezeichnung <Modusname> in /etc/fb.modes eingetragenem.
 .br
 .I HINWEIS:
 Der VESA Framebuffer unterstützt keinen Moduswechsel.
 .TP
-.B \-fbmodeconfig\ <Dateiname> (nur FBdev)
+.B \-fbmodeconfig\ <Dateiname> (nur fbdev)
 Benutzt diese Konfigurationsdatei anstelle der normalen /etc/fb.modes.
 Nur gültig für den fbdev-Treiber.
 .TP
 .B \-forcexv (nur SDL)
-Erzwingt den Gebrauch von XVideo
+Erzwingt den Gebrauch von XVideo.
 .TP
 .B \-fs
 Vollbild-Wiedergabe (zentriert den Film und erzeugt schwarze Streifen um ihn).
@@ -696,12 +696,12 @@ Gibt Optionen für die JPEG Ausgabe (-vo jpeg) an (siehe Dokumentation!).
 Verfügbare Optionen sind [no]progressiv, [no]baseline, optimize, smooth,
 quality und outdir.
 .TP
-.B \-monitor_dotclock <dotclock\ (oder\ pixelclock)\ Bereich> (nur FBdev)
+.B \-monitor_dotclock <dotclock\ (oder\ pixelclock)\ Bereich> (nur fbdev)
 Lies dazu in etc/example.conf oder DOCS/German/video.html, um weitere Informationen zu erhalten.
 .TP
-.B \-monitor_hfreq <horizontaler Frequenzbereich>  (nur FBdev)
+.B \-monitor_hfreq <horizontaler Frequenzbereich>  (nur fbdev)
 .TP
-.B \-monitor_vfreq <vertikaler Frequenzbereich>  (nur FBdev)
+.B \-monitor_vfreq <vertikaler Frequenzbereich>  (nur fbdev)
 .TP
 .B \-monitoraspect <Verhältnis>
 Setzt das Seitenverhältnis deines Bildschirms. Beispiele:
@@ -752,11 +752,11 @@ Du erhältst eine Liste der verfügbaren Treiber durch ausführen dieses Befehles:
 .I mplayer -vo help
 .TP
 .B \-vsync
-Aktiviert VBI für vesa
+Aktiviert VBI für vesa.
 .TP
 .B \-wid <Fenster\ id>
 Dies sagt MPlayer, welches X11-Fenster er verwenden soll, was nützlich ist um MPlayer in
-einen Browser einzubetten (z.B. mit der Plugger-Erweiterung)
+einen Browser einzubetten (z.B. mit der Plugger-Erweiterung).
 .TP
 .B \-xineramascreen <Bildschirmnummer>
 In den Xinerama-Konfigurationen (bei einem einzelnen Desktop, welcher über mehrere Bildschirme verlöuft)
@@ -764,7 +764,7 @@ sagt diese Option MPlayer, welcher Bildschirm für die Filmwiedergabe verwendet w
 0 - ...
 .TP
 .B \-z\ <0-9>
-Wählt den Kompressions-Level für die PNG-Ausgabe
+Wählt den Kompressions-Level für die PNG-Ausgabe.
     0  keine Kompression
     9  maximale Kompression
 .TP
@@ -778,7 +778,7 @@ Man erhält eine Liste und Erklärung aller verfügbaren Optionen durch folgenden B
 .B \-autoq\ <Qualität>
 Ändert dynamisch die Stufe der Nachbearbeitung (postprocess), abhängig von der Prozessorauslastung.
 Die Nummer, die du angibst wird als maximale Stufe verwendet. Normalerweise kannst du irgendeine hohe Zahl
-benutzen. Du kannst dies nicht zusammen mit -pp verwenden, dafuer jedoch mit -npp!
+benutzen. Man kann diese Option nicht zusammen mit -pp verwenden, dafür jedoch mit -npp!
 .TP
 .B \-benchmark
 Zeigt am Ende einige Statistiken zum CPU-Gebrauch und den übersprungenen (dropped) Frames.
@@ -792,10 +792,10 @@ Bilder weglassen (frame dropping) : dekodiert alle (ausser B) Frames, Video kann
 Dies ist nützlich für die Wiedergabe auf alten VGA-Karten.
 .TP
 .B \-gui (BETA CODE)
-Startet MPlayer im GUI-Modus
+Startet MPlayer im GUI-Modus.
 .TP
 .B \-h, \-\-help
-Zeigt eine kurze Zusammenfassung der Optionen
+Zeigt eine kurze Zusammenfassung der Optionen.
 .TP
 .B \-hardframedrop (siehe auch \-framedrop Option)
 Intensiveres Framedropping (unterbricht die Dekodierung). Führt zu Bildverzerrungen!
@@ -837,7 +837,7 @@ Deaktiviert die Joystick-Unterstützung. Normalerweise aktiviert, falls mit einko
 Deaktiviert die lirc-Unterstützung.
 .TP
 .B \-nortc
-Deaktiviert den Gebrauch von /dev/rtc (real-time clock)
+Deaktiviert den Gebrauch von /dev/rtc (real-time clock).
 .TP
 .B \-playlist <Datei>
 Spielt Dateien nach dieser Dateiliste (1 Datei/Zeile, Winamp- oder ASX-Format).
@@ -846,7 +846,7 @@ Spielt Dateien nach dieser Dateiliste (1 Datei/Zeile, Winamp- oder ASX-Format).
 Zeige weniger Ausgaben und Zustandsangaben.
 .TP
 .B \-skin <Skinverzeichnis>
-Lädt die Skin aus diesem Verzeichnis (OHNE Pfadname!). Zum Beispiel probiert '-skin fittyfene' diese:
+Lädt die Skin aus diesem Verzeichnis (OHNE Pfadname!). Zum Beispiel probiert -skin fittyfene diese:
 
     /usr/local/share/mplayer/Skin/fittyfene
     ~/.mplayer/Skin/fittyfene
@@ -872,7 +872,7 @@ Deaktiviert xscreensaver beim Starten und aktiviert ihn wieder am Ende.
 .B \-use-stdin
 .TP
 .B \-v
-Aktiviert die detaillierte Ausgabe
+Aktiviert die detaillierte Ausgabe.
 
 
 .SH "KONVERTIERUNGS OPTIONEN (NUR MENCODER)"
@@ -910,7 +910,7 @@ unterschiedliche Weisen festgelegt werden:
 .I BEISPIEL:
     -endpos 56        konvertiert nur 56 Sekunden
     -endpos 01:10:00  konvertiert nur 1 Stunde
-    -endpos 100mb     konvertiert nur 100 mbytes
+    -endpos 100mb     konvertiert nur 100 MBytes
 
 Kann im Zusammenhang mit der -ss oder -sb Option benützt werden!
 .br
@@ -1087,14 +1087,14 @@ Die folgenden Optionen können nur im 2. Schritt des 2pass Modus verwendet werden
 Alle anderen Optionen können überall verwendet werden.
 .TP
 .B \-noskip
-Überspringt keine Frames
+Überspringt keine Frames.
 .TP
 .B \-o <Dateiname>
-Erzeugt den angegebenen Dateinamen, anstelle des normalen 'test.avi'.
+Erzeugt den angegebenen Dateinamen, anstelle des normalen test.avi.
 .TP
 .B \-oac <Codecname>
 Konvertiert mit dem angegebenen Codec (Codecnamen sind von der codecs.conf).
-Siehe '-oac help' für eine VOLLSTÄNDIGE Liste!
+Siehe -oac help für eine VOLLSTÄNDIGE Liste!
 
 .I BEISPIEL:
     -oac help     gibt Hilfe
@@ -1109,7 +1109,7 @@ entspricht nicht dem effektiven, z.B. 29.97fps telecined mpeg) gesetzt werden.
 .TP
 .B \-ovc <Codecname>
 Konvertiert mit dem angegebenen Codec (Die Codecnamen sind von der codecs.conf).
-Siehe '-ovc help' für eine VOLLSTÄNDIGE Liste!
+Siehe -ovc help für eine VOLLSTÄNDIGE Liste!
 
 .I BEISPIEL:
     -ovc help   gibt Hilfe
@@ -1134,7 +1134,7 @@ Maximale Anzahl der zu ubespringenden Frames nach einem nicht-übersprungenen
 (-noskiplimit für eine unbegrenzte Anzahl).
 .TP
 .B \-v, \-\-verbose
-Aktiviert die detaillierte Ausgabe
+Aktiviert die detaillierte Ausgabe.
 
 
 .SH "TASTATURBEDIENUNG"
@@ -1319,7 +1319,7 @@ Systemweite Einstellungen
 Usereinstellungen
 .br
 .BR ~/.mplayer/input.conf\ 
-Tastaturbelegung. Der Befehl '\-input keylist' zeigt eine
+Tastaturbelegung. Der Befehl \-input keylist zeigt eine
                        vollständige Tastenliste!
 .br
 .BR ~/.mplayer/font/\ \ \ \ \ \ 

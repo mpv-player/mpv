@@ -1,227 +1,227 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
 
 <HEAD>
 <LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
 </HEAD>
 
-<BODY BGCOLOR=WHITE>
+<BODY>
 
-
-<P><CENTER><B>MPlayer - Movie Player für LINUX (C) 2000-2002 Arpad Gereoffy (A'rpi/ESP-team)</B><BR>
-<BR><A HREF="http://www.mplayerhq.hu">http://www.mplayerhq.hu</A><BR><BR>
-[ Deutsch ]</A>
+<CENTER><B>MPlayer - Movie Player für LINUX (C) 2000-2002 Arpad Gereoffy (A'rpi/ESP-team)</B><BR><BR>
+<A HREF="http://www.mplayerhq.hu">http://www.mplayerhq.hu</A><BR><BR>
+[ Deutsch ]
 <A HREF="../documentation.html">[ Englisch ]</A>
 <A HREF="../Hungarian/documentation.html">[ Ungarisch ]</A>
 <A HREF="../French/documentation.html">[ Französisch ]</A>
 <A HREF="../Polish/documentation.html">[ Polnisch ]</A>
 <A HREF="../Italian/documentation.html">[ Italienisch ]</A>
-</CENTER></P>
+</CENTER>
 
-<P><HR></P>
+<HR>
 
 <P>Inhaltsverzeichnis</P>
 
-<P><HR></P>
+<HR>
 
-<P>
 <UL>
   <LI><A HREF="#0">0. Wie diese Dokumentation zu lesen ist</A></LI>
   <LI><A HREF="#1">1. Einleitung</A>
-  <UL>
-    <LI><A HREF="#1.1">1.1 Übersicht</A></LI>
-    <LI><A HREF="#1.2">1.2 Geschichte</A></LI>
-    <LI><A HREF="#1.3">1.3 Installation / Hinweise</A></LI>
-    <LI><A HREF="#1.4">1.4 Was ist mit dem GUI?</A></LI>
-    <LI><A HREF="#1.5">1.5 Untertitel und OSD</A></LI>
-  </UL>
+    <UL>
+      <LI><A HREF="#1.1">1.1 Übersicht</A></LI>
+      <LI><A HREF="#1.2">1.2 Geschichte</A></LI>
+      <LI><A HREF="#1.3">1.3 Installation / Hinweise</A></LI>
+      <LI><A HREF="#1.4">1.4 Was ist mit dem GUI?</A></LI>
+      <LI><A HREF="#1.5">1.5 Untertitel und OSD</A></LI>
+    </UL></LI>
   <LI><A HREF="#2">2. Features</A>
-  <UL>
-    <LI><A HREF="formats.html">2.1 Unterstützte Formate</A></LI>
     <UL>
-      <LI><A HREF="formats.html#2.1.1">2.1.1 Video</A></LI>
-      <UL>
-        <LI><A HREF="formats.html#2.1.1.1">2.1.1.1 MPG, VOB, DAT Dateien</A></LI>
-	<LI><A HREF="formats.html#2.1.1.2">2.1.1.2 AVI Dateien</A></LI>
-        <LI><A HREF="formats.html#2.1.1.3">2.1.1.3 ASF/WMV Dateien</A></LI>
-        <LI><A HREF="formats.html#2.1.1.4">2.1.1.4 QT/MOV Dateien</A></LI>
-        <LI><A HREF="formats.html#2.1.1.5">2.1.1.5 VIVO Dateien</A></LI>
-        <LI><A HREF="formats.html#2.1.1.6">2.1.1.6 FLI Dateien</A></LI>
-        <LI><A HREF="formats.html#2.1.1.7">2.1.1.7 RealMedia Dateien</A></LI>
-        <LI><A HREF="formats.html#2.1.1.8">2.1.1.8 NuppelVideo Dateien</A></LI>
-        <LI><A HREF="formats.html#2.1.1.9">2.1.1.9 yuv4mpeg Dateien</A></LI>
-        <LI><A HREF="formats.html#2.1.1.10">2.1.1.10 FILM Dateien</A></LI>
-        <LI><A HREF="formats.html#2.1.1.11">2.1.1.11 RoQ Dateien</A></LI>
-        <LI><A HREF="formats.html#2.1.1.12">2.1.1.12 OGG Dateien</A></LI>
-      </UL>
-      <LI><A HREF="formats.html#2.1.2">2.1.2 Audio</A></LI>
-      <UL>
-        <LI><A HREF="formats.html#2.1.2.1">2.1.2.1 MP3 Dateien</A></LI>
-        <LI><A HREF="formats.html#2.1.2.2">2.1.2.2 WAV Dateien</A></LI>
-        <LI><A HREF="formats.html#2.1.1.12">2.1.2.3 OGG Dateien (Vorbis)</A></LI>
-        <LI><A HREF="formats.html#2.1.1.3">2.1.2.4 WMA/ASF Dateien</A></LI>
-        <LI><A HREF="formats.html#2.1.2.5">2.1.2.5 MP4 Dateien</A></LI>
-      </UL>
-    </UL>
-    <LI><A HREF="codecs.html#2.2">2.2 Unterstützte Codecs</A></LI>
-    <UL>
-      <LI><A HREF="codecs.html#2.2.1">2.2.1 Video</A></LI>
-      <UL>
-        <LI><A HREF="codecs.html#2.2.1.1">2.2.1.1 DivX4/DivX5</A></LI>
-        <LI><A HREF="codecs.html#2.2.1.2">2.2.1.2 ffmpegs DivX/libavcodec</A></LI>
-        <LI><A HREF="codecs.html#2.2.1.3">2.2.1.3 XAnim Codecs</A></LI>
-        <LI><A HREF="codecs.html#2.2.1.4">2.2.1.4 VIVO Video</A></LI>
-        <LI><A HREF="codecs.html#2.2.1.5">2.2.1.5 MPEG1/2 Video</A></LI>
-	<LI><A HREF="codecs.html#2.2.1.6">2.2.1.6 MS Video1</A></LI>
-	<LI><A HREF="codecs.html#2.2.1.7">2.2.1.7 Cinepak CVID</A></LI>
-        <LI><A HREF="codecs.html#2.2.1.8">2.2.1.8 RealVideo</A></LI>
-	<LI><A HREF="codecs.html#2.2.1.9">2.2.1.9 XViD</A></LI>
-      </UL>
-      <LI><A HREF="codecs.html#2.2.2">2.2.2 Audio</A></LI>
-      <UL>
-	<LI><A HREF="codecs.html#2.2.2.1">2.2.2.1 Software AC3 Decodierung</A></LI>
-	<LI><A HREF="codecs.html#2.2.2.2">2.2.2.2 Hardware AC3 Decodierung</A></LI>
-	<LI><A HREF="codecs.html#2.2.2.3">2.2.2.3 libmad Unterstützung</A></LI>
-        <LI><A HREF="codecs.html#2.2.2.4">2.2.2.4 VIVO Audio</A></LI>
-        <LI><A HREF="codecs.html#2.2.2.5">2.2.2.5 RealAudio</A></LI>
-      </UL>
-      <LI><A HREF="codecs.html#2.2.3">2.2.3 Win32 Codec Einbindungs-Howto</A></LI>
-      <UL>
-        <LI><A HREF="codecs.html#2.2.3.1">2.2.3.1 VFW Codecs</A></LI>
-        <LI><A HREF="codecs.html#2.2.3.2">2.2.3.2 DirectShow Codecs</A></LI>
-      </UL>
-    </UL>
-    <LI><A HREF="video.html">2.3 Ausgabe-Geräte</A></LI>
-    <UL>
-      <LI><A HREF="video.html#2.3.1">2.3.1 Video</A></LI>
-      <UL>
-        <LI><A HREF="video.html#2.3.1.1">2.3.1.1 Einrichten von MTRR</A></LI>
-	<LI><A HREF="video.html#2.3.1.2">2.3.1.2 Xv</A></LI>
-	<UL>
-	  <LI><A HREF="video.html#2.3.1.2.1">2.3.1.2.1 3dfx</A></LI>
-	  <LI><A HREF="video.html#2.3.1.2.2">2.3.1.2.2 S3</A></LI>
-	  <LI><A HREF="video.html#2.3.1.2.3">2.3.1.2.3 nVidia</A></LI>
-	  <LI><A HREF="video.html#2.3.1.2.4">2.3.1.2.4 ATI</A></LI>
-	  <LI><A HREF="video.html#2.3.1.2.5">2.3.1.2.5 NeoMagic</A></LI>
-          <LI><A HREF="video.html#2.3.1.2.6">2.3.1.2.6 Trident Karten</A></LI>
-	</UL>
-	<LI><A HREF="video.html#2.3.1.3">2.3.1.3 DGA</A></LI>
-	<UL>
-	  <LI><A HREF="video.html#2.3.1.3.1">2.3.1.3.1 Zusammenfassung</A></LI>
-	  <LI><A HREF="video.html#2.3.1.3.2">2.3.1.3.2 Was ist DGA</A></LI>
-	  <LI><A HREF="video.html#2.3.1.3.3">2.3.1.3.3 Installation der DGA-Unterstützung für  MPlayer</A></LI>
-	  <LI><A HREF="video.html#2.3.1.3.4">2.3.1.3.4 Änderung der Auflösung</A></LI>
-	  <LI><A HREF="video.html#2.3.1.3.5">2.3.1.3.5 DGA & MPlayer</A></LI>
-	  <LI><A HREF="video.html#2.3.1.3.6">2.3.1.3.6 Features des DGA-Treibers</A></LI>
-	  <LI><A HREF="video.html#2.3.1.3.7">2.3.1.3.7 Geschwindigkeit</A></LI>
-	  <LI><A HREF="video.html#2.3.1.3.8">2.3.1.3.8 Bekannte Probleme</A></LI>
-	  <LI><A HREF="video.html#2.3.1.3.9">2.3.1.3.9 Zukünftige Arbeiten</A></LI>
-	  <LI><A HREF="video.html#2.3.1.3.A">2.3.1.3.A Einige Modus-Einstellungen</A></LI>
-	  <LI><A HREF="video.html#2.3.1.3.B">2.3.1.3.B Fehlerberichte</A></LI>
-	</UL>
-	<LI><A HREF="video.html#2.3.1.4">2.3.1.4 SDL</A></LI>
-	<LI><A HREF="video.html#2.3.1.5">2.3.1.5 SVGAlib</A></LI>
-	<LI><A HREF="video.html#2.3.1.6">2.3.1.6 Framebuffer Ausgabe (FBdev)</A></LI>
-	<LI><A HREF="video.html#2.3.1.7">2.3.1.7 Matrox Framebuffer (mga_vid)</A></LI>
-	<LI><A HREF="video.html#2.3.1.8">2.3.1.8 SiS 6326 Framebuffer (sis_vid)</A></LI>
-	<LI><A HREF="video.html#2.3.1.9">2.3.1.9 3dfx YUV Unterstützung (tdfxfb)</A></LI>
-	<LI><A HREF="video.html#2.3.1.10">2.3.1.10 OpenGL Ausgabe</A></LI>
-	<LI><A HREF="video.html#2.3.1.11">2.3.1.11 AAlib - Textmodus-Anzeige</A></LI>
-	<LI><A HREF="video.html#2.3.1.12">2.3.1.12 VESA - zum VESA BIOS</A></LI>
-	<LI><A HREF="video.html#2.3.1.13">2.3.1.13 X11</A></LI>
-	<LI><A HREF="video.html#2.3.1.14">2.3.1.14 Rage128 / Radeon Videooverlay (VERALTET - siehe Vidix!)</A></LI>
-        <LI><A HREF="video.html#2.3.1.15">2.3.1.15 Vidix</A></LI>
-        <LI><A HREF="video.html#2.3.1.16">2.3.1.16 Zr (Für einige MJPEG Aufnahme-/Wiedergabe-Karten)</A></LI>
-       	<LI><A HREF="video.html#2.3.1.A">2.3.1.A TVout</A></LI>
-	<UL>
-	  <LI><A HREF="video.html#2.3.1.A.1">2.3.1.A.1 Matrox G400</A></LI>
-	  <LI><A HREF="video.html#2.3.1.A.2">2.3.1.A.2 ATI</A></LI>
-	  <LI><A HREF="video.html#2.3.1.A.3">2.3.1.A.3 Voodoo 3/Banshee</A></LI>
-	</UL>
-      </UL>
-      <LI><A HREF="sound.html#2.3.2">2.2.2 Audio</A></LI>
-      <UL>
-        <LI><A HREF="sound.html#2.3.2.1">2.3.2.1 Soundkarten Erfahrungen, Empfehlungen</A></LI>
-	<LI><A HREF="sound.html#2.3.2.2">2.3.2.2 Audio Plugins</A></LI>
-          <UL>
-            <LI><A HREF="sound.html#2.3.2.2">2.3.2.2 Zusammenfassung</A></LI>
-            <LI><A HREF="sound.html#2.3.2.2.1">2.3.2.2.1 Up-/Downsampling</A></LI>
-            <LI><A HREF="sound.html#2.3.2.2.2">2.3.2.2.2 Surround Sound Decodierung</A></LI>
-	    <LI><A HREF="sound.html#2.3.2.2.3">2.3.2.2.3 Beispiel Formats-Konvertierer</A></LI>
-	    <LI><A HREF="sound.html#2.3.2.2.4">2.3.2.2.4 Verzögerung</A></LI>
-            <LI><A HREF="sound.html#2.3.2.2.5">2.3.2.2.5 Software Lautstärkeregelung</A></LI>
-            <LI><A HREF="sound.html#2.3.2.2.6">2.3.2.2.6 Extrastereo</A></LI>
-            <LI><A HREF="sound.html#2.3.2.2.7">2.3.2.2.7 Lautstärke-Normalisierer</A>
-            <LI><A HREF="sound.html#2.3.2.2.8">2.3.2.2.8 Surround</A></LI>
-          </UL>
-      </UL>
-    </UL>
-    <LI><A HREF="encoding.html#2.4">2.4 MEncoder - Ein Encoder basierend auf MPlayer</A></LI>
-      <UL>
-        <LI><A HREF="encoding.html#2.4.1">2.4.1 Übersicht</A></LI>
-        <LI><A HREF="encoding.html#2.4.2">2.4.2 Kompierung</A></LI>
-        <LI><A HREF="encoding.html#2.4.3">2.4.3 Features</A></LI>
-          <UL>
-            <LI><A HREF="encoding.html#2.4.3">2.4.3 Zusammenfassung</A></LI>
-            <LI><A HREF="encoding.html#2.4.3.1">2.4.3.1 2-Pass DivX4 Encodierung</A></LI>
-	    <LI><A HREF="encoding.html#2.4.3.2">2.4.3.2 Rescaling von Filmen</A></LI>
-	    <LI><A HREF="encoding.html#2.4.3.3">2.4.3.3 Streamcopy</A></LI>
-	    <LI><A HREF="encoding.html#2.4.3.4">2.4.3.4 Reparieren von AVIs mit defektem Index</A></LI>
-	    <LI><A HREF="encoding.html#2.4.3.5">2.4.3.5 Encodierung mit der libavcodec Codec-Familie</A></LI>
-	    <LI><A HREF="encoding.html#2.4.3.6">2.4.3.6 Encodierung von mehreren Eingangsbildern (MJPEG/MPNG)</A></LI>
-          </UL>
-        <LI><A HREF="encoding.html#2.4.4">2.4.4 Syntax</A></LI>
-	<LI><A HREF="encoding.html#2.4.5">2.4.5 Verfügbare Optionen</A></LI>
-	<LI><A HREF="encoding.html#2.4.6">2.4.6 Beispiele</A></LI>
-      </UL>
-    <LI><A HREF=#2.5>2.5 TV Eingang</A></LI>
-    <UL>
-      <LI><A HREF=#2.5.1>2.5.1 Übersicht</A></LI>
-      <LI><A HREF=#2.5.2>2.5.2 Kompilierung</A></LI>
-      <LI><A HREF=#2.5.3>2.5.3 Verfügbare Optionen</A></LI>
-      <LI><A HREF=#2.5.4>2.5.4 Tastatursteuerung</A></LI>
-      <LI><A HREF=#2.5.5>2.5.5 Beispiele</A></LI>
-    </UL>
-    <LI><A HREF=#2.6>2.6 Video Filter</A></LI>
-    <UL>
-      <LI><A HREF=#2.6.1>2.6.1 Übersicht</A></LI>
-      <LI><A HREF=#2.6.2>2.6.2 Verwendung</A></LI>
-      <LI><A HREF=#2.6.3>2.6.3 Schneiden (crop)</A></LI>
-      <LI><A HREF=#2.6.4>2.6.4 Erweitern (expand)</A></LI>
-      <LI><A HREF=#2.6.5>2.6.5 Fame/Lavc</A></LI>
-      <LI><A HREF=#2.6.6>2.6.6 Spiegeln (flip)</A></LI>
-      <LI><A HREF=#2.6.7>2.6.7 Format</A></LI>
-      <LI><A HREF=#2.6.8>2.6.8 Nachbearbeiten (postprocess)</A></LI>
-      <LI><A HREF=#2.6.9>2.6.9 RGB2BGR</A></LI>
-      <LI><A HREF=#2.6.10>2.6.10 Drehen (rotate)</A></LI>
-      <LI><A HREF=#2.6.11>2.6.11 Skalieren (scale)</A></LI>
-      <LI><A HREF=#2.6.12>2.6.12 YUY2</A></LI>
-      <LI><A HREF=#2.6.13>2.6.13 Spiegeln (mirror)</A></LI>
-      <LI><A HREF=#2.6.14>2.6.14 DVBscale</A></LI>
-      <LI><A HREF=#2.6.15>2.6.15 Cropdetect</A></LI>
-    </UL>
-  </UL>
-  <LI><A HREF="#3">3. Verwendung</A></LI>
+      <LI><A HREF="formats.html">2.1 Unterstützte Formate</A>
+        <UL>
+          <LI><A HREF="formats.html#2.1.1">2.1.1 Video</A>
+            <UL>
+              <LI><A HREF="formats.html#2.1.1.1">2.1.1.1 MPG, VOB, DAT Dateien</A></LI>
+	      <LI><A HREF="formats.html#2.1.1.2">2.1.1.2 AVI Dateien</A></LI>
+              <LI><A HREF="formats.html#2.1.1.3">2.1.1.3 ASF/WMV Dateien</A></LI>
+              <LI><A HREF="formats.html#2.1.1.4">2.1.1.4 QT/MOV Dateien</A></LI>
+              <LI><A HREF="formats.html#2.1.1.5">2.1.1.5 VIVO Dateien</A></LI>
+              <LI><A HREF="formats.html#2.1.1.6">2.1.1.6 FLI Dateien</A></LI>
+              <LI><A HREF="formats.html#2.1.1.7">2.1.1.7 RealMedia Dateien</A></LI>
+              <LI><A HREF="formats.html#2.1.1.8">2.1.1.8 NuppelVideo Dateien</A></LI>
+              <LI><A HREF="formats.html#2.1.1.9">2.1.1.9 yuv4mpeg Dateien</A></LI>
+              <LI><A HREF="formats.html#2.1.1.10">2.1.1.10 FILM Dateien</A></LI>
+              <LI><A HREF="formats.html#2.1.1.11">2.1.1.11 RoQ Dateien</A></LI>
+              <LI><A HREF="formats.html#2.1.1.12">2.1.1.12 OGG Dateien</A></LI>
+            </UL></LI>
+          <LI><A HREF="formats.html#2.1.2">2.1.2 Audio</A>
+            <UL>
+              <LI><A HREF="formats.html#2.1.2.1">2.1.2.1 MP3 Dateien</A></LI>
+              <LI><A HREF="formats.html#2.1.2.2">2.1.2.2 WAV Dateien</A></LI>
+              <LI><A HREF="formats.html#2.1.1.12">2.1.2.3 OGG Dateien (Vorbis)</A></LI>
+              <LI><A HREF="formats.html#2.1.1.3">2.1.2.4 WMA/ASF Dateien</A></LI>
+              <LI><A HREF="formats.html#2.1.2.5">2.1.2.5 MP4 Dateien</A></LI>
+            </UL></LI>
+        </UL></LI>
+      <LI><A HREF="codecs.html#2.2">2.2 Unterstützte Codecs</A>
+        <UL>
+          <LI><A HREF="codecs.html#2.2.1">2.2.1 Video</A>
+            <UL>
+              <LI><A HREF="codecs.html#2.2.1.1">2.2.1.1 DivX4/DivX5</A></LI>
+              <LI><A HREF="codecs.html#2.2.1.2">2.2.1.2 ffmpegs DivX/libavcodec</A></LI>
+              <LI><A HREF="codecs.html#2.2.1.3">2.2.1.3 XAnim Codecs</A></LI>
+              <LI><A HREF="codecs.html#2.2.1.4">2.2.1.4 VIVO Video</A></LI>
+              <LI><A HREF="codecs.html#2.2.1.5">2.2.1.5 MPEG1/2 Video</A></LI>
+	      <LI><A HREF="codecs.html#2.2.1.6">2.2.1.6 MS Video1</A></LI>
+	      <LI><A HREF="codecs.html#2.2.1.7">2.2.1.7 Cinepak CVID</A></LI>
+              <LI><A HREF="codecs.html#2.2.1.8">2.2.1.8 RealVideo</A></LI>
+	      <LI><A HREF="codecs.html#2.2.1.9">2.2.1.9 XViD</A></LI>
+            </UL></LI>
+          <LI><A HREF="codecs.html#2.2.2">2.2.2 Audio</A>
+            <UL>
+     	      <LI><A HREF="codecs.html#2.2.2.1">2.2.2.1 Software AC3 Decodierung</A></LI>
+	      <LI><A HREF="codecs.html#2.2.2.2">2.2.2.2 Hardware AC3 Decodierung</A></LI>
+	      <LI><A HREF="codecs.html#2.2.2.3">2.2.2.3 libmad Unterstützung</A></LI>
+              <LI><A HREF="codecs.html#2.2.2.4">2.2.2.4 VIVO Audio</A></LI>
+              <LI><A HREF="codecs.html#2.2.2.5">2.2.2.5 RealAudio</A></LI>
+            </UL></LI>
+          <LI><A HREF="codecs.html#2.2.3">2.2.3 Win32 Codec Einbindungs-Howto</A>
+            <UL>
+              <LI><A HREF="codecs.html#2.2.3.1">2.2.3.1 VFW Codecs</A></LI>
+              <LI><A HREF="codecs.html#2.2.3.2">2.2.3.2 DirectShow Codecs</A></LI>
+            </UL></LI>
+        </UL></LI>
+      <LI><A HREF="video.html">2.3 Ausgabe-Geräte</A>
+        <UL>
+          <LI><A HREF="video.html#2.3.1">2.3.1 Video</A>
+            <UL>
+              <LI><A HREF="video.html#2.3.1.1">2.3.1.1 Einrichten von MTRR</A></LI>
+	      <LI><A HREF="video.html#2.3.1.2">2.3.1.2 Xv</A>
+	        <UL>
+	          <LI><A HREF="video.html#2.3.1.2.1">2.3.1.2.1 3dfx</A></LI>
+	          <LI><A HREF="video.html#2.3.1.2.2">2.3.1.2.2 S3</A></LI>
+	          <LI><A HREF="video.html#2.3.1.2.3">2.3.1.2.3 nVidia</A></LI>
+	          <LI><A HREF="video.html#2.3.1.2.4">2.3.1.2.4 ATI</A></LI>
+	          <LI><A HREF="video.html#2.3.1.2.5">2.3.1.2.5 NeoMagic</A></LI>
+                  <LI><A HREF="video.html#2.3.1.2.6">2.3.1.2.6 Trident Karten</A></LI>
+	        </UL></LI>
+	      <LI><A HREF="video.html#2.3.1.3">2.3.1.3 DGA</A>
+	        <UL>
+	          <LI><A HREF="video.html#2.3.1.3.1">2.3.1.3.1 Zusammenfassung</A></LI>
+	          <LI><A HREF="video.html#2.3.1.3.2">2.3.1.3.2 Was ist DGA</A></LI>
+	          <LI><A HREF="video.html#2.3.1.3.3">2.3.1.3.3 Installation der DGA-Unterstützung für MPlayer</A></LI>
+	          <LI><A HREF="video.html#2.3.1.3.4">2.3.1.3.4 Änderung der Auflösung</A></LI>
+	          <LI><A HREF="video.html#2.3.1.3.5">2.3.1.3.5 DGA & MPlayer</A></LI>
+	          <LI><A HREF="video.html#2.3.1.3.6">2.3.1.3.6 Features des DGA-Treibers</A></LI>
+	          <LI><A HREF="video.html#2.3.1.3.7">2.3.1.3.7 Geschwindigkeit</A></LI>
+	          <LI><A HREF="video.html#2.3.1.3.8">2.3.1.3.8 Bekannte Probleme</A></LI>
+	          <LI><A HREF="video.html#2.3.1.3.9">2.3.1.3.9 Zukünftige Arbeiten</A></LI>
+	          <LI><A HREF="video.html#2.3.1.3.A">2.3.1.3.A Einige Modus-Einstellungen</A></LI>
+	          <LI><A HREF="video.html#2.3.1.3.B">2.3.1.3.B Fehlerberichte</A></LI>
+	        </UL></LI>
+	      <LI><A HREF="video.html#2.3.1.4">2.3.1.4 SDL</A></LI>
+	      <LI><A HREF="video.html#2.3.1.5">2.3.1.5 SVGAlib</A></LI>
+	      <LI><A HREF="video.html#2.3.1.6">2.3.1.6 Framebuffer Ausgabe (FBdev)</A></LI>
+	      <LI><A HREF="video.html#2.3.1.7">2.3.1.7 Matrox Framebuffer (mga_vid)</A></LI>
+	      <LI><A HREF="video.html#2.3.1.8">2.3.1.8 SiS 6326 Framebuffer (sis_vid)</A></LI>
+	      <LI><A HREF="video.html#2.3.1.9">2.3.1.9 3dfx YUV Unterstützung (tdfxfb)</A></LI>
+	      <LI><A HREF="video.html#2.3.1.10">2.3.1.10 OpenGL Ausgabe</A></LI>
+	      <LI><A HREF="video.html#2.3.1.11">2.3.1.11 AAlib - Textmodus-Anzeige</A></LI>
+	      <LI><A HREF="video.html#2.3.1.12">2.3.1.12 VESA - zum VESA BIOS</A></LI>
+	      <LI><A HREF="video.html#2.3.1.13">2.3.1.13 X11</A></LI>
+	      <LI><A HREF="video.html#2.3.1.14">2.3.1.14 Rage128 / Radeon Videooverlay (VERALTET - siehe Vidix!)</A></LI>
+              <LI><A HREF="video.html#2.3.1.15">2.3.1.15 Vidix</A></LI>
+              <LI><A HREF="video.html#2.3.1.16">2.3.1.16 Zr (Für einige MJPEG Aufnahme-/Wiedergabe-Karten)</A></LI>
+       	      <LI><A HREF="video.html#2.3.1.A">2.3.1.A TVout</A>
+	        <UL>
+	          <LI><A HREF="video.html#2.3.1.A.1">2.3.1.A.1 Matrox G400</A></LI>
+	          <LI><A HREF="video.html#2.3.1.A.2">2.3.1.A.2 ATI</A></LI>
+	          <LI><A HREF="video.html#2.3.1.A.3">2.3.1.A.3 Voodoo 3/Banshee</A></LI>
+	        </UL></LI>
+            </UL></LI>
+          <LI><A HREF="sound.html#2.3.2">2.2.2 Audio</A>
+            <UL>
+              <LI><A HREF="sound.html#2.3.2.1">2.3.2.1 Soundkarten Erfahrungen, Empfehlungen</A></LI>
+	      <LI><A HREF="sound.html#2.3.2.2">2.3.2.2 Audio Plugins</A>
+                <UL>
+                  <LI><A HREF="sound.html#2.3.2.2">2.3.2.2 Zusammenfassung</A></LI>
+                  <LI><A HREF="sound.html#2.3.2.2.1">2.3.2.2.1 Up-/Downsampling</A></LI>
+                  <LI><A HREF="sound.html#2.3.2.2.2">2.3.2.2.2 Surround Sound Decodierung</A></LI>
+	          <LI><A HREF="sound.html#2.3.2.2.3">2.3.2.2.3 Beispiel Formats-Konvertierer</A></LI>
+	          <LI><A HREF="sound.html#2.3.2.2.4">2.3.2.2.4 Verzögerung</A></LI>
+                  <LI><A HREF="sound.html#2.3.2.2.5">2.3.2.2.5 Software Lautstärkeregelung</A></LI>
+                  <LI><A HREF="sound.html#2.3.2.2.6">2.3.2.2.6 Extrastereo</A></LI>
+                  <LI><A HREF="sound.html#2.3.2.2.7">2.3.2.2.7 Lautstärke-Normalisierer</A>
+                  <LI><A HREF="sound.html#2.3.2.2.8">2.3.2.2.8 Surround</A></LI>
+                </UL></LI>
+            </UL></LI>
+        </UL></LI>
+      <LI><A HREF="encoding.html#2.4">2.4 MEncoder - Ein Encoder basierend auf MPlayer</A>
+        <UL>
+          <LI><A HREF="encoding.html#2.4.1">2.4.1 Übersicht</A></LI>
+          <LI><A HREF="encoding.html#2.4.2">2.4.2 Kompierung</A></LI>
+          <LI><A HREF="encoding.html#2.4.3">2.4.3 Features</A></LI>
+            <UL>
+              <LI><A HREF="encoding.html#2.4.3">2.4.3 Zusammenfassung</A></LI>
+              <LI><A HREF="encoding.html#2.4.3.1">2.4.3.1 2-Pass DivX4 Encodierung</A></LI>
+	      <LI><A HREF="encoding.html#2.4.3.2">2.4.3.2 Rescaling von Filmen</A></LI>
+	      <LI><A HREF="encoding.html#2.4.3.3">2.4.3.3 Streamcopy</A></LI>
+	      <LI><A HREF="encoding.html#2.4.3.4">2.4.3.4 Reparieren von AVIs mit defektem Index</A></LI>
+	      <LI><A HREF="encoding.html#2.4.3.5">2.4.3.5 Encodierung mit der libavcodec Codec-Familie</A></LI>
+	      <LI><A HREF="encoding.html#2.4.3.6">2.4.3.6 Encodierung von mehreren Eingangsbildern (MJPEG/MPNG)</A></LI>
+            </UL></LI>
+          <LI><A HREF="encoding.html#2.4.4">2.4.4 Syntax</A></LI>
+	  <LI><A HREF="encoding.html#2.4.5">2.4.5 Verfügbare Optionen</A></LI>
+	  <LI><A HREF="encoding.html#2.4.6">2.4.6 Beispiele</A></LI>
+        </UL></LI>
+      <LI><A HREF="#2.5">2.5 TV Eingang</A>
+        <UL>
+          <LI><A HREF="#2.5.1">2.5.1 Übersicht</A></LI>
+          <LI><A HREF="#2.5.2">2.5.2 Kompilierung</A></LI>
+          <LI><A HREF="#2.5.3">2.5.3 Verfügbare Optionen</A></LI>
+          <LI><A HREF="#2.5.4">2.5.4 Tastatursteuerung</A></LI>
+          <LI><A HREF="#2.5.5">2.5.5 Beispiele</A></LI>
+        </UL></LI>
+      <LI><A HREF="#2.6">2.6 Videofilter</A>
+        <UL>
+          <LI><A HREF="#2.6.1">2.6.1 Übersicht</A></LI>
+          <LI><A HREF="#2.6.2">2.6.2 Verwendung</A></LI>
+          <LI><A HREF="#2.6.3">2.6.3 Schneiden (crop)</A></LI>
+          <LI><A HREF="#2.6.4">2.6.4 Erweitern (expand)</A></LI>
+          <LI><A HREF="#2.6.5">2.6.5 Fame/Lavc</A></LI>
+          <LI><A HREF="#2.6.6">2.6.6 Spiegeln (flip)</A></LI>
+          <LI><A HREF="#2.6.7">2.6.7 Format</A></LI>
+          <LI><A HREF="#2.6.8">2.6.8 Nachbearbeiten (postprocess)</A></LI>
+          <LI><A HREF="#2.6.9">2.6.9 RGB2BGR</A></LI>
+          <LI><A HREF="#2.6.10">2.6.10 Drehen (rotate)</A></LI>
+          <LI><A HREF="#2.6.11">2.6.11 Skalieren (scale)</A></LI>
+          <LI><A HREF="#2.6.12">2.6.12 YUY2</A></LI>
+          <LI><A HREF="#2.6.13">2.6.13 Spiegeln (mirror)</A></LI>
+          <LI><A HREF="#2.6.14">2.6.14 DVBscale</A></LI>
+          <LI><A HREF="#2.6.15">2.6.15 Cropdetect</A></LI>
+        </UL></LI>
+    </UL></LI>
+  <LI><A HREF="#3">3. Verwendung</A>
     <UL>
       <LI><A HREF="#3.1">3.1 Kommandozeile</A></LI>
-      <LI><A HREF="#3.2">3.2 Steuerung</A></LI>
-      <UL>
-        <LI><A HREF="#3.2.1">3.2.1 Standard Steuerung</A></LI>
-        <LI><A HREF="#3.2.2">3.2.2 Steuerungskonfiguration</A></LI>
+      <LI><A HREF="#3.2">3.2 Steuerung</A>
         <UL>
-           <LI><A HREF="#3.2.2.1">3.2.2.1 Tastennamen</A></LI>
-           <LI><A HREF="#3.2.2.2">3.2.2.2 Befehle</A></LI>
-        </UL>
-        <LI><A HREF="#3.2.3">3.2.3 Steuerung von LIRC</A></LI>
-        <LI><A HREF="#3.2.4">3.2.4 Slave Modus</A></LI>
-      </UL>
+          <LI><A HREF="#3.2.1">3.2.1 Standard Steuerung</A></LI>
+          <LI><A HREF="#3.2.2">3.2.2 Steuerungskonfiguration</A>
+            <UL>
+             <LI><A HREF="#3.2.2.1">3.2.2.1 Tastennamen</A></LI>
+             <LI><A HREF="#3.2.2.2">3.2.2.2 Befehle</A></LI>
+            </UL></LI>
+          <LI><A HREF="#3.2.3">3.2.3 Steuerung von LIRC</A></LI>
+          <LI><A HREF="#3.2.4">3.2.4 Slave Modus</A></LI>
+        </UL></LI>
       <LI><A HREF="#3.3">3.3 Streaming von Netzwerk oder Pipes</A></LI>
-    </UL>
+    </UL></LI>
   <LI><A HREF="cd-dvd.html#4">4. CD/DVD Sektion</A>
     <UL>
       <LI><A HREF="cd-dvd.html#4.1">4.1 CD Laufwerke</A></LI>
       <LI><A HREF="cd-dvd.html#4.2">4.2 DVD Wiedergabe</A></LI>
-      </UL>
-  <LI><A HREF="faq.html">5. FAQ Sektion</A></LI>
+    </UL></LI>
+  <LI><A HREF="faq.html">5. FAQ Sektion</A>
     <UL>
       <LI><A HREF="faq.html#5.1">5.1 Kompilierung</A></LI>
       <LI><A HREF="faq.html#5.2">5.2 Allgemeine Fragen</A></LI>
@@ -230,8 +230,8 @@
       <LI><A HREF="faq.html#5.5">5.5 DVD Wiedergabe</A></LI>
       <LI><A HREF="faq.html#5.6">5.6 Feature-Wünsche</A></LI>
       <LI><A HREF="faq.html#5.7">5.7 Konvertierung</A></LI>
-    </UL>
-  <LI><A HREF="#6">6. Verschiedene Betriebssysteme</A></LI>
+    </UL></LI>
+  <LI><A HREF="#6">6. Verschiedene Betriebssysteme</A>
     <UL>
       <LI><A HREF="#6.1">6.1 Debain Paketierung</A></LI>
       <LI><A HREF="#6.2">6.2 FreeBSD</A></LI>
@@ -240,36 +240,32 @@
       <LI><A HREF="#6.5">6.5 SGI/Irix</A></LI>
       <LI><A HREF="#6.6">6.6 QNX</A></LI>
       <LI><A HREF="#6.7">6.7 OpenBSD</A></LI>
-    </UL>
-  <LI><A HREF="../documentation.html#A">A. Autoren (Englisch)</A></LI>
-  <UL>
-    <LI><A HREF="../documentation.html#A2">A/2. Beteiligte (Englisch)</A></LI>
-  </UL>
+      <LI><A HREF="#6.8">6.8 Cygwin</A></LI>
+    </UL></LI>
+  <LI><A HREF="../documentation.html#A">A. Autoren (Englisch)</A>
+    <UL>
+      <LI><A HREF="../documentation.html#A2">A/2. Beteiligte (Englisch)</A></LI>
+    </UL></LI>
   <LI><A HREF="#B">B. Mailing-Listen</A></LI>
-  <LI><A HREF="bugreports.html">C. Wie man einen Fehler berichtet</A></LI>
-  <UL>
-    <LI><A HREF="../tech/patches.txt">C/2. Wie man Patches einschickt (Englisch)</A></LI>
-  </UL>
+  <LI><A HREF="bugreports.html">C. Wie man einen Fehler berichtet</A>
+    <UL>
+      <LI><A HREF="../tech/patches.txt">C/2. Wie man Patches einschickt (Englisch)</A></LI>
+    </UL></LI>
   <LI><A HREF="#D">D. Bekannte Probleme</A></LI>
-  <LI><A HREF="../skin-en.html">X. Wie man ein befühmter SkinMaker in 5 min wird! (Englisch)</A>
+  <LI><A HREF="../skin-en.html">X. Wie man ein befühmter SkinMaker in 5 min wird! (Englisch)</A></LI>
 </UL>
-</P>
 
-<P>
 <HR>
 Entwicklerschreie (Englisch)
 <HR>
-</P>
 
-<P>
 <UL>
   <LI><A HREF="../users_against_developers.html#gcc">1. GCC 2.96</A></LI>
   <LI><A HREF="../users_against_developers.html#nvidia">2. Meinungen zu nVidia</A></LI>
   <LI><A HREF="../users_against_developers.html#kotsog">3. Über Joe Barr</A></LI>
 </UL>
-</P>
         
-<P><HR></P>
+<HR>
 
 <P><B><A NAME=0>0. Wie diese Dokumentation zu lesen ist</A></B></P>
 
@@ -327,46 +323,47 @@ meisten waren unfähig beides abzuspielen, MPEG1, MPEG2 und AVI (DivX) Dateien.
 Einige Player hatten auch Probleme mit der Bildqualität und der Geschwindkeit.
 So beschloss ich einen Player zu schreiben/zu modifizieren...</P>
 
-<P><UL>
-<LI><B>mpg12play v0.1-v0.3:</B> Sep 22-25, 2000<BR>
+<UL>
+  <LI><B>mpg12play v0.1-v0.3:</B> Sep 22-25, 2000<BR>
     Der erste Versuch, zuzweit gehackt in einer halben Stunden! Ich verwendete
     libmpeg3 von www.heroinewarrior.com bis zu Version 0.3, aber es gab
     Bildqualitäts- und Geschwindigkeitsprobleme.
-<LI><B>mpg12play v0.5-v0.87:</B> Sep 28-Oct 20, 2000<BR>
+  <LI><B>mpg12play v0.5-v0.87:</B> Sep 28-Oct 20, 2000<BR>
     MPEG Codec wurde ersetzt durch DVDview von Dirk Farin, es war ein großartiges
     Programm, aber es war langsam und in C++ geschrieben (ich hasse C++!!!)
-<LI><B>mpg12play v0.9-v0.95pre5:</B> Oct 21-Nov 2, 2000<BR>
+  <LI><B>mpg12play v0.9-v0.95pre5:</B> Oct 21-Nov 2, 2000<BR>
     MPEG Codec wurde libmpeg2 (mpeg2dec) von Aaron Holtzman & Michel Lespinasse.
     Es ist großartig, optimiert und schneller C-Code mit perfekter Bildqualität
     und 100% MPEG Standard.
-<LI><B>MPlayer v0.3-v0.9:</B> Nov 18-Dec 4, 2000<BR>
+  <LI><B>MPlayer v0.3-v0.9:</B> Nov 18-Dec 4, 2000<BR>
     Es war ein Paket aus 2 Programmen: mpg12play v0.95pre6 und mein neuer, einfacher
     AVI-Player 'avip' basierend auf Avifiles Win32 DLL Loader.
-<LI><B>MPlayer v0.10:</B> Jan 1, 2001<BR>
+  <LI><B>MPlayer v0.10:</B> Jan 1, 2001<BR>
     Der MPEG und AVI Player in einer einizigen Binary!
-<LI><B>MPlayer v0.11pre Serien:</B><BR>
+  <LI><B>MPlayer v0.11pre Serien:</B><BR>
     Einigen neue Entwickler sind beigetreten und seit 0.11 war MPlayer Team-Arbeit!
     .ASF Datei-Unterstützung hinzugefügt und OpenDivX (siehe www.projectmayo.com)
     für en-/decoding.
-<LI><B>MPlayer v0.17 "The IdegCounter"</B> Apr 27, 2001<BR>
+  <LI><B>MPlayer v0.17 "The IdegCounter"</B> Apr 27, 2001<BR>
     Die Release-Version nach 0.11pre nach 4 Monaten schwerer Entwicklung!
     Probiere es und sei überrascht! Tausende von neuen Features hinzugefügt ...
     und natürlich wurde auch der alte Code verbessert, Bugs entfernt usw.
-<LI><B>MPlayer 0.18 "The BugCounter"</B> Jul 9, 2001<BR>
+  <LI><B>MPlayer 0.18 "The BugCounter"</B> Jul 9, 2001<BR>
     2 Monate seit 0.17 und hier ist die neue Release.. Komplette ASF-Unterstützung,
     mehr Untertitel-Formate, libao wurde eingeführt (wie libvo, aber für Audio),
     stabiler den je, und so weiter. Es ist ein MUSS !
-<LI><B>MPlayer 0.50 "The Faszom(C)ounter"</B> Oct 8, 2001<BR>
+  <LI><B>MPlayer 0.50 "The Faszom(C)ounter"</B> Oct 8, 2001<BR>
     Hmmm. Wieder eine Release. Tonnen von neuen Featues, beta GUI Version, Fehler
     beseitigt, neue vo und ao Treiber, Ports zu vielen Systemen inklusive OpenSource
     DivX Codecs und vieles mehr. Probier's!
-<LI><B>MPlayer 0.60 "The RTFMCounter"</B> Jan 3, 2002<BR>
+  <LI><B>MPlayer 0.60 "The RTFMCounter"</B> Jan 3, 2002<BR>
     MOV/VIVO/RM/FLI/NUV Dateiformat-Unterstützung, native CRAM, Cinepak, ADPCM Codecs
     und Support für die Binary-Codecs von XAnim; DVD Untertitel-Unterstützung, erstes
     Release des MEncoders, TV-Grabbing, Cache, liba52, unzählbare Fehlerbehebungen.</LI>           
-<LI><B>MPlayer 0.90 "?"</B> May? ??, 2002<BR>
+  <LI><B>MPlayer 0.90 "?"</B> May? ??, 2002<BR>
     </LI>
-</UL></P>
+</UL>
+
 
 <P><B><A NAME=1.3>1.3. Installation</A></B></P>
 
@@ -418,62 +415,52 @@ es zahlt sich aus.</P>
 <P><B><I>CODECS</I></B></P>
 
 <UL>
-	<LI><B>libavcodec</B> : Wenn du diese DivX3/DivX4/DivX5/MP41/MP42/usw Codecs verwenden willst schau dir die Sektion
-<A HREF="codecs.html#2.2.1.2">2.2.1.2</A> vor dem Kompilieren an. Features:<BR>
-<UL>
-  <LI><B><I>DivX/DivX4/DivX5/MP41/MP42</I>-Wiedergabe auf nicht-x86 Maschinen</B></LI>
-  <LI>Wiedergabe von RealVideo 1.0/VIVO/MJPEG/h263/andere und Encodierung</LI>
-  <LI>dieser Codec hat die <B>größte Geschwindigkeit beim Decodieren</B> von DivX/DivX4/DivX5
-  Filmen (auch schneller als der originale DivX4-Codec) !</LI>
-</UL>
-</LI>
-
-<LI><B>Win32 Codecs</B> : Wenn du planst, <B>MPlayer</B> auf einer x86 Architektur zu verwenden,
-willst du sie möglicherweise brauchen. Lade dir dazu die w32codecs.zip herunter und entpacke sie
-nach /usr/lib/win32 . Hinweis: Das Avifile-Projekt hat ein ähnliches Codecs-Paket, aber es unterscheidet
-sich von unserem. Also wenn du alle unterstützten Codecs verwenden willst, verwende
-unser Paket! Wie auch immer, du kannst auch unserer Paket für avifile nutzen. Features:<BR>
-<UL>
-  <LI>du wirst sie möglicherweise brauchen um Video mit verschiedenen Hardware-Kompressoren, 
-  wie Tuner Karten und digitalen Kameras (z.B. DV, ATI VCR, MJPEG) abzuspielen oder zu enkodieren</LI>
-  <LI>erforderlich um <B>WMV Filme</B> oder ältere (MP41/MP42) ASFs abzuspielen</LI>
-</UL>
-</LI>
-
-<LI><B>DivX4/DivX5</B> : Informationen zu diesem Codec sind in der Sektion <A HREF="codecs.html#2.2.1.1">2.2.1.1</A>
-erhältlich. Wenn du <B>MEncoder</B> nicht verwendest, kannst du auch <B>libavcodec</B> (siehe oben)
-verwenden, was schneller wäre.<BR>
-Features:<UL>
-  <LI>1 Pass oder 2 Pass Enkodierung mit <A HREF="encoding.html">MEncoder</A></LI>
-  <LI>du kannst alte <B>DivX3</B>-Film schneller als mit Win32-DLL-Codecs betrachten aber langsamer
-  als <B>libavcodec</B></LI>
-  <LI>es ist Closed-Source und nur in einer x86-Version verfügbar.</LI>
-</UL>
-</LI>
-
-<LI><B>XviD</B> : Opensource Enkodierungs-Alternative zu Divx4Linux<BR>
-Features :<UL>
-  <LI>1 Pass oder 2 Pass Encodierung mit <A HREF="encoding.html">MEncoder</A></LI>
-  <LI>es ist Open-Source, also nicht nur als x86 Version verfügbar.</LI>
-  <LI>es ist ungefähr 2 mal schneller als DivX4 bei der Enkodierung - mit der annähernd gleichen Qualität.</LI>
-</UL>
-</LI>
-
-<LI>Die <A HREF=codecs.html#2.2.1.3>XAnim Codecs</A> sind die besten (Vollbild,
-Hardwaremäßiger YUV Zoom) um <B>3ivx</B>, Indeo 3/4/5 Filme und einige alte Formate
-abzuspielen. Und sie sind multiplatform, also sind sie die einzige Möglichkeit um Indeo
-auf nicht-x86 Plattformen zu sehen (nun mal abgesehen von XAnim :). Aber z.B. Cinepak
-Filme werden mit dem <B>MPlayer</B> eigenen Cinepak-Decoder am besten wiedergegeben !</LI>
-
-<LI>Für <B>Ogg Vorbis</B> Audiodekodierung wird eine korrekte Installation von
-  <CODE>libvorbis</CODE> benötigt. Es sollten, falls vorhanden, deb/rpm-Pakete verwendet werden
-  oder <A HREF="http://ogg.org/ogg/vorbis/download/vorbis_nightly_cvs.tgz">diese Sourcen</A>
-  kompiliert werden (dies ist eine täglich erneuerter tarball des Vorbis CVS).</LI>
-
-<LI><B>MPlayer</B> kann die Libraries von RealPlayer 8 oder RealONE verwenden, um
-  <B>RealVideo 2.0 und 3.0</B> Dateien wiederzugeben. Eine Installationsanleitung und weitere
-  Informationen finden sich in der Sektion <A HREF="formats.html#2.1.1.7">RealMedia Dateiformat</A>!</LI>
-
+  <LI><B>libavcodec</B>: Wenn du diese DivX3/DivX4/DivX5/MP41/MP42/usw Codecs verwenden willst schau dir die Sektion
+    <A HREF="codecs.html#2.2.1.2">2.2.1.2</A> vor dem Kompilieren an. Features:
+    <UL>
+      <LI><B><I>DivX/DivX4/DivX5/MP41/MP42</I>-Wiedergabe auf nicht-x86 Maschinen</B></LI>
+      <LI>Wiedergabe von RealVideo 1.0/VIVO/MJPEG/h263/andere und Encodierung</LI>
+      <LI>dieser Codec hat die <B>größte Geschwindigkeit beim Decodieren</B> von DivX/DivX4/DivX5
+        Filmen (auch schneller als der originale DivX4-Codec) !</LI>
+    </UL></LI>
+  <LI><B>Win32 Codecs</B>: Wenn du planst, <B>MPlayer</B> auf einer x86 Architektur zu verwenden,
+    willst du sie möglicherweise brauchen. Lade dir dazu die w32codecs.zip herunter und entpacke sie
+    nach /usr/lib/win32 . Hinweis: Das Avifile-Projekt hat ein ähnliches Codecs-Paket, aber es unterscheidet
+    sich von unserem. Also wenn du alle unterstützten Codecs verwenden willst, verwende
+    unser Paket! Wie auch immer, du kannst auch unserer Paket für avifile nutzen. Features:
+    <UL>
+      <LI>du wirst sie möglicherweise brauchen um Video mit verschiedenen Hardware-Kompressoren, 
+        wie Tuner Karten und digitalen Kameras (z.B. DV, ATI VCR, MJPEG) abzuspielen oder zu enkodieren</LI>
+      <LI>erforderlich um <B>WMV Filme</B> oder ältere (MP41/MP42) ASFs abzuspielen</LI>
+    </UL></LI>
+  <LI><B>DivX4/DivX5</B>: Informationen zu diesem Codec sind in der Sektion <A HREF="codecs.html#2.2.1.1">2.2.1.1</A>
+    erhältlich. Wenn du <B>MEncoder</B> nicht verwendest, kannst du auch <B>libavcodec</B> (siehe oben)
+    verwenden, was schneller wäre. Features:
+    <UL>
+      <LI>1 Pass oder 2 Pass Enkodierung mit <A HREF="encoding.html">MEncoder</A></LI>
+      <LI>du kannst alte <B>DivX3</B>-Film schneller als mit Win32-DLL-Codecs betrachten aber langsamer
+        als <B>libavcodec</B></LI>
+      <LI>es ist Closed-Source und nur in einer x86-Version verfügbar.</LI>
+    </UL></LI>
+  <LI><B>XviD</B>: Opensource Enkodierungs-Alternative zu Divx4Linux<BR>
+    Features:
+    <UL>
+      <LI>1 Pass oder 2 Pass Encodierung mit <A HREF="encoding.html">MEncoder</A></LI>
+      <LI>es ist Open-Source, also nicht nur als x86 Version verfügbar.</LI>
+      <LI>es ist ungefähr 2 mal schneller als DivX4 bei der Enkodierung - mit der annähernd gleichen Qualität.</LI>
+    </UL></LI>
+  <LI>Die <A HREF="codecs.html#2.2.1.3">XAnim Codecs</A> sind die besten (Vollbild,
+    Hardwaremäßiger YUV Zoom) um <B>3ivx</B>, Indeo 3/4/5 Filme und einige alte Formate
+    abzuspielen. Und sie sind multiplatform, also sind sie die einzige Möglichkeit um Indeo
+    auf nicht-x86 Plattformen zu sehen (nun mal abgesehen von XAnim :). Aber z.B. Cinepak
+    Filme werden mit dem <B>MPlayer</B> eigenen Cinepak-Decoder am besten wiedergegeben !</LI>
+  <LI>Für <B>Ogg Vorbis</B> Audiodekodierung wird eine korrekte Installation von
+    <CODE>libvorbis</CODE> benötigt. Es sollten, falls vorhanden, deb/rpm-Pakete verwendet werden
+    oder <A HREF="http://ogg.org/ogg/vorbis/download/vorbis_nightly_cvs.tgz">diese Sourcen</A>
+    kompiliert werden (dies ist eine täglich erneuerter tarball des Vorbis CVS).</LI>
+  <LI><B>MPlayer</B> kann die Libraries von RealPlayer 8 oder RealONE verwenden, um
+    <B>RealVideo 2.0 und 3.0</B> Dateien wiederzugeben. Eine Installationsanleitung und weitere
+    Informationen finden sich in der Sektion <A HREF="formats.html#2.1.1.7">RealMedia Dateiformat</A>!</LI>
 </UL>
 
 <P><B><I>VIDEOKARTEN</I></B></P>
@@ -481,152 +468,132 @@ Filme werden mit dem <B>MPlayer</B> eigenen Cinepak-Decoder am besten wiedergege
 <P>Es gibt allgemein gesprochen zwei Arten von Grafikkarten. Die eine Art (und die neueren Karten) besitzen
 <B>Hardware Scaling und YUV Beschleunigung</B>, die anderen nicht.</P>
 
-<P>
-<B><I>YUV Karten</I></B></P>
+<P><B><I>YUV Karten</I></B></P>
 
-<P>
-Sie können das Bild anzeigen und Scalen (Zoomen), in jeder Größe die in ihren Speicher passen und das
+<P>Sie können das Bild anzeigen und Scalen (Zoomen), in jeder Größe die in ihren Speicher passen und das
 auch noch mit <B>geringer CPU Auslastung</B> (Zoomen erhöht sie nicht!), darum bekommst du
 auch ein nettes und sehr schnelle Vollbild.</P>
 
-<P>
 <UL>
-<LI><B>Matrox G200/G400/G450/G550 Karten</B> : Obwohl ein
-  <A HREF="video.html#2.3.1.9">Vidix Treiber</A> zur Verfügung gestellt wird,
-  wird empfohlen, stattdessen die alten mga_vid Kernelmodule zu verwenden,
-  diese funktionieren viel besser. Näheres zur Installation und dem Gebrauch
-  findet man in der <A HREF="video.html#2.3.1.7">mga_vid</A> Sektion. Es ist
-  wichtig, diese Schritte <I>vor</I> der Kompilierung von <B>MPlayer</B>
-  vorzunehmen, da ansonsten keine mga_vid Unterstützung einkompiliert wird.
-  Man sollte auch die <A HREF="video.html#2.3.1.A.1">Matrox TV-out</A> Sektion
-  lesen.
-  <U><B>Nicht-Linux Benutzer</B></U> können nur noch die Vidix Treiber verwenden:
-  Dazu sollte die <A HREF="video.html#2.3.1.15">Vidix</A> Dokumentation gelesen
-  werden!</LI>
-
-<LI><B>3Dfx Voodoo3/Banshee Karten</B> : Es sollte die Sektion
-  <A HREF="video.html#2.3.1.9">2.3.1.9</A> gelesen werden, um eine möglichst
-  hohe Geschwindigkeit zu erzielen. Es ist wichtig, diese Schritte <I>vor</I>
-  der Kompilierung von <B>MPlayer</B> vorzunehmen, da ansonsten keine 3Dfx
-  Unterstützung einkompiliert wird. Man sollte auch die 
-  <A HREF="video.html#2.3.1.A.3">3dfx TV-out</A> Sektion lesen. Wenn X verwendet
-  wird, sollte mindestens Version 4.2.0 verwendet werden, da die 3dfx Xv-Treiber
-  in 4.1.0 und den früheren Versionen kaputt waren!</LI>
-
-<LI><B>ATI Karten</B> : Der <A HREF="video.html#2.3.1.14">Vidix Treiber</A>
-  wird für folgende Karten zur Verfügung gestellt:
-  <B>Radeon</B>, <B>Rage128</B>, <B>Mach64</B> (Rage XL/Mobility, Xpert98).
-  Es sollte auch die <A HREF="video.html#2.3.1.A.2">ATI Karten</A> Sektion
-  der TV-out Dokumentation gelesen werden um herauszufinden, ob der jeweilige
-  TV-out der Karte unter Linux/MPlayer unterstützt wird.</LI>
-
-<LI><B>S3 Karten</B> : Die Savage und Virge/DX Chips besitzen
-  Hardwarebeschleunigung. Verwende die neueste XFree86 Version, ältere Treiber
-  sind fehlerhaft. Savage Chips machen Problem mit YV12 Anzeige, siehe
-  <A HREF="video.html#2.3.1.2.2">S3 Xv Sektion</A> für Details. Ältere, Trio
-  Karten haben keinen oder langsamen Hardwaresupport.</LI>
-
-<LI><B>nVidia Karten</B> : sehr schlechte Wahl für Videowiedergabe. nVidias Karten
-  werden im Fernen Osten erzeugt und haben sehr billige und qualitativ
-  minderwertige Chips.
-  <U>Der eingebaute nVidia Treiber in XFree86 enthält keine Hardwareunterstützung
-  für YUV Beschleunigung!</U> Du musst dir die Closed-Source Treiber von
-  nvidia.com downloaden. Nähere Details finden sich in der
-  <A HREF="video.html#2.3.1.2.3">Nvidia Xv Treiber</A> Sektion.</LI>
-
-<LI><B>3DLabs GLINT R3 und Permedia3</B> : Ein Vidix-Treiber steht zur Verfügung
-  (pm3_vid). Es sollten auch die
-  <A HREF="video.html#2.3.1.15">Vidix Instruktionen</A> gelesen werden.
-</LI>
-
-<LI><B>andere Karten</B> : keine oben genannte?
-  <UL>
-    <LI>Schau ob dein XFree86 Treiber (und deine Karte) Hardwarebeschleunigung unterstützt.
-      Siehe <A HREF="video.html#2.3.1.2">Xv Sektion</A> für Details.</LI>
-    <LI>Wenn nicht, werden die Features deiner Karte unter deinem OS nicht unterstützt :(<BR>
-      Wenn die Hardware Skalierung unter Windows läuft, bedeutet dies nicht, dass das auch unter
-      Linux oder anderen OS funktioniert. Es hängt von den Treibern ab! Die meisten Hersteller erstellen weder
-      Linux Treiber, noch geben sie die Chip Spezifikationen frei - du bist also der Unglückliche, wenn
-      du diese Karten verwendest. Lies die nächste Sektion:
-    </LI>
-  </UL>
-</LI>
-
+  <LI><B>Matrox G200/G400/G450/G550 Karten</B>: Obwohl ein
+    <A HREF="video.html#2.3.1.9">Vidix Treiber</A> zur Verfügung gestellt wird,
+    wird empfohlen, stattdessen die alten mga_vid Kernelmodule zu verwenden,
+    diese funktionieren viel besser. Näheres zur Installation und dem Gebrauch
+    findet man in der <A HREF="video.html#2.3.1.7">mga_vid</A> Sektion. Es ist
+    wichtig, diese Schritte <I>vor</I> der Kompilierung von <B>MPlayer</B>
+    vorzunehmen, da ansonsten keine mga_vid Unterstützung einkompiliert wird.
+    Man sollte auch die <A HREF="video.html#2.3.1.A.1">Matrox TV-out</A> Sektion
+    lesen.
+    <U><B>Nicht-Linux Benutzer</B></U> können nur noch die Vidix Treiber verwenden:
+    Dazu sollte die <A HREF="video.html#2.3.1.15">Vidix</A> Dokumentation gelesen
+    werden!</LI>
+  <LI><B>3Dfx Voodoo3/Banshee Karten</B>: Es sollte die Sektion
+    <A HREF="video.html#2.3.1.9">2.3.1.9</A> gelesen werden, um eine möglichst
+    hohe Geschwindigkeit zu erzielen. Es ist wichtig, diese Schritte <I>vor</I>
+    der Kompilierung von <B>MPlayer</B> vorzunehmen, da ansonsten keine 3Dfx
+    Unterstützung einkompiliert wird. Man sollte auch die 
+    <A HREF="video.html#2.3.1.A.3">3dfx TV-out</A> Sektion lesen. Wenn X verwendet
+    wird, sollte mindestens Version 4.2.0 verwendet werden, da die 3dfx Xv-Treiber
+    in 4.1.0 und den früheren Versionen kaputt waren!</LI>
+  <LI><B>ATI Karten</B>: Der <A HREF="video.html#2.3.1.14">Vidix Treiber</A>
+    wird für folgende Karten zur Verfügung gestellt:
+    <B>Radeon</B>, <B>Rage128</B>, <B>Mach64</B> (Rage XL/Mobility, Xpert98).
+    Es sollte auch die <A HREF="video.html#2.3.1.A.2">ATI Karten</A> Sektion
+    der TV-out Dokumentation gelesen werden um herauszufinden, ob der jeweilige
+    TV-out der Karte unter Linux/MPlayer unterstützt wird.</LI>
+  <LI><B>S3 Karten</B>: Die Savage und Virge/DX Chips besitzen
+    Hardwarebeschleunigung. Verwende die neueste XFree86 Version, ältere Treiber
+    sind fehlerhaft. Savage Chips machen Problem mit YV12 Anzeige, siehe
+    <A HREF="video.html#2.3.1.2.2">S3 Xv Sektion</A> für Details. Ältere, Trio
+    Karten haben keinen oder langsamen Hardwaresupport.</LI>
+  <LI><B>nVidia Karten</B>: sehr schlechte Wahl für Videowiedergabe. nVidias Karten
+    werden im Fernen Osten erzeugt und haben sehr billige und qualitativ
+    minderwertige Chips.
+    <U>Der eingebaute nVidia Treiber in XFree86 enthält keine Hardwareunterstützung
+    für YUV Beschleunigung!</U> Du musst dir die Closed-Source Treiber von
+    nvidia.com downloaden. Nähere Details finden sich in der
+    <A HREF="video.html#2.3.1.2.3">Nvidia Xv Treiber</A> Sektion.</LI>
+  <LI><B>3DLabs GLINT R3 und Permedia3</B>: Ein Vidix-Treiber steht zur Verfügung
+    (pm3_vid). Es sollten auch die
+    <A HREF="video.html#2.3.1.15">Vidix Instruktionen</A> gelesen werden.</LI>
+  <LI><B>andere Karten</B>: keine oben genannte?
+    <UL>
+      <LI>Schau ob dein XFree86 Treiber (und deine Karte) Hardwarebeschleunigung unterstützt.
+        Siehe <A HREF="video.html#2.3.1.2">Xv Sektion</A> für Details.</LI>
+      <LI>Wenn nicht, werden die Features deiner Karte unter deinem OS nicht unterstützt :(<BR>
+        Wenn die Hardware Skalierung unter Windows läuft, bedeutet dies nicht, dass das auch unter
+        Linux oder anderen OS funktioniert. Es hängt von den Treibern ab! Die meisten Hersteller erstellen weder
+        Linux Treiber, noch geben sie die Chip Spezifikationen frei - du bist also der Unglückliche, wenn
+        du diese Karten verwendest. Lies die nächste Sektion:</LI>
+    </UL></LI>
 </UL>
-</P>
 			
-<P>
-<B><I>Nicht-YUV Karten</I></B></P>
+<P><B><I>Nicht-YUV Karten</I></B></P>
 			
-<P>
-Vollbild kann durch Zoomen <B>per Software</B> (benutze die Option -zoom, aber sei gewarnt: Es ist laaaangsam!)
+<P>Vollbild kann durch Zoomen <B>per Software</B> (benutze die Option -zoom, aber sei gewarnt: Es ist laaaangsam!)
 oder durch den Wechsel in einen kleineren Videomodus erreicht werden, z.B. zu 352x288. Wenn du keine YUV Beschleunigung
 zur Verfügung hast, ist diese letztgenannte Methode zu empfehlen. 
 Bei <B>MPlayer</B> <U>kann dieses Verhalten durch das Verwenden
-der <CODE>-vm</CODE> Option</U> und mit den folgenden Treibern beeinflusst werden:
+der <CODE>-vm</CODE> Option</U> und mit den folgenden Treibern beeinflusst werden:</P>
+
 <UL>
   <LI><B>Verwendung von</B> XFree86: siehe Details in der
-  <A HREF="video.html#2.3.1.3">DGA Treiber</A> und der
-  <A HREF="video.html#2.3.1.13">X11 Treiber</A> Sektion. DGA ist empfohlen!
+    <A HREF="video.html#2.3.1.3">DGA Treiber</A> und der
+    <A HREF="video.html#2.3.1.13">X11 Treiber</A> Sektion. DGA ist empfohlen!
     Versuche auch DGA via SDL zu verwenden, manchmal ist es besser.</LI>
-  <LI><B>Ohne</B> XFree86 : versuche die Treiber in folgender Reihenfolge:
+  <LI><B>Ohne</B> XFree86: versuche die Treiber in folgender Reihenfolge:
     <A HREF="video.html#2.3.1.12">vesa</A>,
     <A HREF="video.html#2.3.1.6">fbdev</A>,
     <A HREF="video.html#2.3.1.5">svgalib</A>,
     <A HREF="video.html#2.3.1.11">aalib</A>.</LI>
 </UL>
-</P>
-				
+
 <P><B><I>SOUNDKARTEN</I></B></P>
 
 <UL>
-
-<LI><B>Soundblaster Live!</B> : Diese Karte kann 4 oder 6 (<B>5.1</B>) Kanäle (von AC3)
-anstelle von 2 verwenden. Lies die <A HREF="codecs.html#2.2.2.1">Softwaremäßige AC3-Decodierung</A> Sektion.</LI>
-
-<LI><B>C-Media mit SP/DIF Ausgang</B> : Hardware AC3 Durchgabe ist möglich
-  mit diesen Karten, siehe
-  <A HREF="codecs.html#2.2.2.2">Hardware AC3 Decodierung</A> Sektion.
-  Für Hardware AC3 Durchgabe MUSS die ALSA 0.9 OSS Emulation verwendet werden!</LI>
-    
-<LI>Die Features von <B>anderen Karten</B> werden von <B>MPlayer</B> nicht unterstützt.
-  <U>Es ist sehr zu empfehlen die <A HREF="sound.html#2.3.2">Soundkarten Sektion</A> zu lesen !</U>
+  <LI><B>Soundblaster Live!</B>: Diese Karte kann 4 oder 6 (<B>5.1</B>) Kanäle (von AC3)
+    anstelle von 2 verwenden. Lies die <A HREF="codecs.html#2.2.2.1">Softwaremäßige AC3-Decodierung</A> Sektion.</LI>
+  <LI><B>C-Media mit SP/DIF Ausgang</B>: Hardware AC3 Durchgabe ist möglich
+    mit diesen Karten, siehe
+    <A HREF="codecs.html#2.2.2.2">Hardware AC3 Decodierung</A> Sektion.
+    Für Hardware AC3 Durchgabe MUSS die ALSA 0.9 OSS Emulation verwendet werden!</LI>
+  <LI>Die Features von <B>anderen Karten</B> werden von <B>MPlayer</B> nicht unterstützt.
+    <U>Es ist sehr zu empfehlen die <A HREF="sound.html#2.3.2">Soundkarten Sektion</A> zu lesen !</U></LI>
 </UL>
     
 <P><B><I>FEATURES</I></B></P>
 
 <UL>
-<LI>Entscheide dich, ob du das GUI brauchst. Wenn du es braucht, wirf einen Blick auf die
-<A HREF=#1.4>Sektion 1.4</A> vor dem Kompilieren.</LI>
-
-<LI>Wenn du <B>MEncoder</B> installieren willst (unser grossartiger, vielseitiger Encoder),
-siehe <A HREF="encoding.html#2.4">MEncoder Sektion</A> .</LI>
-
-
-<LI>Wenn du eine V4L-kompatible <B>TV-Tuner</B> Karte hast und du mit <B>MPlayer</B>
-fernsehen oder encodieren willst, siehe in der <A HREF=#2.5>TV-Input</A> Sektion.</LI>
-
-<LI>Es gibt 3 Codes für die Zeitmessung in <B>MPlayer</B>. Um die alte Methode
-zu verwenden musst du nichts tun. Es verwendet <CODE>usleep()</CODE>
-um die A/V Sync einzustellen, mit +/- 10ms Abweichung. Wie auch immer, manchmal
-ist muss der Sync einfach feiner eingestellt sein. Der neue Timer-Coder werdet die 
-RTC (Real Time Clock [Echtzeituhr]) für diese Aufgabe, da es Timer mit genau 1ms
-erzeugen kann. Dies erfordert Root-Privilegien oder <I>setuid root</I>-Binary von
-<B>MPlayer</B> (oder ein wenig Kernel-Hacking). Du kannst die Effizienz des neuen
-Timers in der Status Leiste sehen. Der dritte Timercode wird mit der Option     
-<CODE>-softsleep</CODE> aktiviert. Er besitzt dieselbe Effizienz wie die RTC, 
-braucht jedoch kein RTC. Er braucht jedoch auch mehr CPU-Leistung. 
-Hinweis: <B>Installiere NIE eine setuid-Binary von MPlayer auf einem Multiuser-System!</B>.
-Es wäre für jeden ein einfacher Weg Root zu werden.</LI>
-
+  <LI>Entscheide dich, ob du das GUI brauchst. Wenn du es braucht, wirf einen Blick auf die
+    <A HREF="#1.4">Sektion 1.4</A> vor dem Kompilieren.</LI>
+  <LI>Wenn du <B>MEncoder</B> installieren willst (unser grossartiger, vielseitiger Encoder),
+    siehe <A HREF="encoding.html#2.4">MEncoder Sektion</A> .</LI>
+  <LI>Wenn du eine V4L-kompatible <B>TV-Tuner</B> Karte hast und du mit <B>MPlayer</B>
+    fernsehen oder encodieren willst, siehe in der <A HREF="#2.5">TV-Input</A> Sektion.</LI>
+  <LI>Es gibt 3 Methoden der Zeitmessung in <B>MPlayer</B>.<BR><BR>
+    <B>Um die alte Methode zu verwenden</B>, muss nichts getan werden. <B>MPlayer</B> verwendet
+    <CODE>usleep()</CODE> um die A/V Sync einzustellen, mit +/- 10ms Abweichung. Wie auch immer,
+    manchmal muss die Synchronisation einfach feiner eingestellt werden.<BR>
+    <B>Der neue Timercode</B> verwendet die RTC (Real Time Clock [Echtzeituhr]) für diese
+    Aufgabe, da er Timer mit genau 1ms Abweichung erzeugen kann. Dies erfordert Root-Privilegien
+    oder <I>setuid root</I>-Binary von <B>MPlayer</B> (oder ein wenig Kernel-Hacking). Man kann
+    die Effizienz des neuen Timers in der Statusleiste sehen. In einigen Hardwarekombinationen
+    (bestätigt durch die Verwendung eines nicht-DMA DVD-Laufwerkes auf einem ALi1541-Board)
+    verursacht der RTC-Timer eine rucklige Wiedergabe. Es wird empfohlen die folgende Methode in
+    diesen Fällen zu verwenden.<BR>
+    <B>Der dritte Timercode</B> wird mit der Option <CODE>-softsleep</CODE> aktiviert. Er besitzt
+    dieselbe Effizienz wie die RTC, braucht jedoch kein RTC. Er braucht jedoch auch mehr CPU-Leistung.<BR>
+    Hinweis: <B>Installiere NIE eine setuid-Binary von MPlayer auf einem Multiuser-System!</B>.
+    Es wäre für jeden ein einfacher Weg Root zu werden.</LI>
 </UL>
-
 
 <P>Nun kompiliere <B>MPlayer</B>:</P>
 
-<PRE>    ./configure
+<PRE>
+    ./configure
     make
-    make install</PRE>
+    make install
+</PRE>
 
 <P>Ab diesem Zeitpunkt ist <B>MPlayer</B> zur Benutzung bereit. Das Verzeichnis
 <CODE>$PREFIX/share/mplayer</CODE> enthält die <CODE>codecs.conf</CODE>
@@ -646,32 +613,33 @@ was eingebaut wird, und was nicht. Du kannst dir auch die config.h und config.ma
 Dateien ansehen.<BR>
 Wenn einige Bibliotheken installiert sind, jedoch nicht von ./configure erkannt werden, sollte 
 überprüft werden, ob auch die richtigen Header-Dateien installiert sind (normalerweise die -dev Pakete)
-und ob deren Versionen stimmen. Das configure.log sagt die normalerweise, was fehlt.
-</P>
-
+und ob deren Versionen stimmen. Das configure.log sagt die normalerweise, was fehlt.</P>
 
 <P>Wenn auch unwichtig sollten trotzdem die Schriften installiert werden um das OSD und die
 Untertitel-Unterstützung zu ermöglichen. Lade dir mp_arial-iso-8859-*.zip und optionale (fall
-sie existieren) Sprachupdates. Es ist SEHR ZU EMPFEHLEN die <A HREF=#1.5>Sektion 1.5</A>
+sie existieren) Sprachupdates. Es ist SEHR ZU EMPFEHLEN die <A HREF="#1.5">Sektion 1.5</A>
 für Details zu lesen.</P>
 
-<PRE>    mkdir ~/.mplayer/font
+<PRE>
+    mkdir ~/.mplayer/font
     cd ~/.mplayer/font
     unzip mp_arial-iso-8859-1.zip
-    ln -s ~/.mplayer/font/arial-24 font</PRE>
+    ln -s ~/.mplayer/font/arial-24 font
+</PRE>
+
 
 <P><B><A NAME=1.4>1.4. Was ist mit dem GUI?</A></B></P>
 
 <P>Das GUI basiert auf GTK, es muss also auch gtk (und dessen devel-Pakete) installiert sein.
 Du kannst es durch den Parameter <CODE>--enable-gui</CODE> bei ./configure einbauen.
-Um MPlayer im GUI-Modus zu betreiben kannst du entweder
+Um MPlayer im GUI-Modus zu betreiben kannst du entweder</P>
+
 <UL>
   <LI>die <CODE>-gui</CODE> Option verwenden</LI>
   <LI><CODE>gui=yes</CODE> in deine Config-File eintragen</LI>
   <LI><CODE>ln -s $PREFIX/bin/mplayer $PREFIX/bin/gmplayer</CODE> ausführen 
-  und <CODE>gmplayer</CODE> aufrufen.
+    und <CODE>gmplayer</CODE> aufrufen.</LI>
 </UL>
-</P>
 
 <P>HINWEIS: benütze die mittlere Maustaste (auf 2 Tastenmäusen drücke links und rechts
 gleichzeitig) um ein GTK-Menu  mit DVD Wiedergabeoptionen zu öffnen!</P>
@@ -684,27 +652,27 @@ sucht standardmäßig nach einem Verzeichnis namens <I>default</I>, aber du kannst
 mit der Option <I>-skin (neuer Skin)</I> oder dem Eintrag <I>skin=(neuer Skin)</I> in
 der Konfigurationsdatei den Skin <CODE>*/Skin/(neuer Skin)</CODE> auswählen.
   
+  
 <P><B><A NAME=1.5>1.5. Untertitel und OSD</A></B></P>
 
-<P>
-<B>MPlayer</B> kann Untertitel zu Filmen darstellen. Momentan sind folgende Formate unterstützt:
-<UL>
-<LI>VobSub</LI>
-<LI>Microdvd</LI>
-<LI>SubRip</LI>
-<LI>SubViewer</LI>
-<LI>Sami</LI>
-<LI>VPlayer</LI>   
-<LI>RT</LI>
-<LI>SSA</LI>
-<LI>MPsub</LI>
-<LI>AQTitle</LI>
-</UL>
-Die Kommandozeilen-Option unterscheidet sich leicht für die unterschiedlichen Formate:
-</P>
+<P><B>MPlayer</B> kann Untertitel zu Filmen darstellen. Momentan sind folgende Formate unterstützt:</P>
 
-<P>
-<B>VobSub subtitles</B><BR>
+<UL>
+  <LI>VobSub</LI>
+  <LI>Microdvd</LI>
+  <LI>SubRip</LI>
+  <LI>SubViewer</LI>
+  <LI>Sami</LI>
+  <LI>VPlayer</LI>   
+  <LI>RT</LI>
+  <LI>SSA</LI>
+  <LI>MPsub</LI>
+  <LI>AQTitle</LI>
+</UL>
+
+<P>Die Kommandozeilen-Option unterscheidet sich leicht für die unterschiedlichen Formate:</P>
+
+<P><B>VobSub subtitles</B><BR>
 VobSub Untertitel bestehen aus einer grossen .SUB Datei und optional .IDX und/oder 
 .IFO Dateien.<BR>
 Benutzung: wenn du Dateien wie <CODE>beispiel.sub</CODE>, 
@@ -713,42 +681,35 @@ Benutzung: wenn du Dateien wie <CODE>beispiel.sub</CODE>,
 Die <CODE>-vobsubid</CODE> Option ist wie <CODE>-sid</CODE> für DVDs, du kannst mit ihm
 zwischen Untertitel-Abschnitten (Sprache) wählen.</P>
 
-<P>
-<B>Andere Untertitel</B><BR>
+<P><B>Andere Untertitel</B><BR>
 Die anderen Formate bestehen aus einer einzigen Textdatei, welche das Timing, die Plazierung und
 die Textinformationen enthält.<BR>
 Verwendung: Wenn man eine Datei wie <CODE>beispiel.txt</CODE> hat, übergibt man einfach die
-Option <CODE>-sub beispiel.txt</CODE> (natürlich optional mit Pfadname).
-</P>
+Option <CODE>-sub beispiel.txt</CODE> (natürlich optional mit Pfadname).</P>
 
-<P>
-<B>Angleichung der Untertitel Timings und Plazierungen</B><BR>
+<P><B>Angleichung der Untertitel Timings und Plazierungen</B><BR>
+<CODE>-subdelay &lt;sec&gt;</CODE>: Verzögert die Untertitel um &lt;sec&gt; Sekunden. Kann negativ sein.<BR>
+<CODE>-subfps &lt;rate&gt;</CODE>: Gibt die Frame/sec Rate der Untertitel-Datei an (Fliesskommazahl)<BR>
+<CODE>-subpos &lt;0 - 100&gt;</CODE>: Gibts die Position der Untertitel an.<BR></P>
 
-<CODE>-subdelay &lt;sec&gt;</CODE> : Verzögert die Untertitel um &lt;sec&gt; Sekunden. Kann negativ sein.<BR>
-<CODE>-subfps &lt;rate&gt;</CODE> : Gibt die Frame/sec Rate der Untertitel-Datei an (Fliesskommazahl)<BR>
-<CODE>-subpos &lt;0 - 100&gt;</CODE> : Gibts die Position der Untertitel an.<BR>
-</P>
-<P>
-Wenn eine höherwerdende Verzögerung zwischen dem Film und den Untertiteln festgestellt wird bei
+<P>Wenn eine höherwerdende Verzögerung zwischen dem Film und den Untertiteln festgestellt wird bei
 einer MicroDVD Untertitel-Datei, dann sind höchstwahrscheinlich die Frameraten des Filmes und der
 Untertitel-Datei unterschiedlich.<BR>
 Hinweis: Das MicroDVD Untertitel-Format verwendet eine absolute Framenummer für sein Timing, desshalb
 kann die <CODE>-subfps</CODE> Option nicht für dieses Format verwendet werden. Da <B>MPlayer</B> keine
 Möglichkeit besitzt die Framerate einer Untertitel-Datei zu erraten, muss die Framerate manuell konvertiert
 werden. Im <CODE>contrib</CODE> Verzeichnis der MPlayer ftp-Seite befindet sich ein kleines Perl-Script,
-das diese Konvertierung für dich vornimmt.
-</P>
+das diese Konvertierung für dich vornimmt.</P>
 
 <P>Für DVD Untertitel lese die <A HREF="cd-dvd.html#4.2">DVD Sektion</A>.</P>
 
 <P><B>MPlayer</B> unterstützt ein neues Untertitel-Format, genannt <B><I>MPsub</I></B>.
 Es wurde von mir (Gabucino) entwickelt. Das Haupt-Feature ist grundsätzlich <I>dynamisch</I>
 zeitabhängig (obwohl es auch einen Frame-basierende Modus besitzt). Ein Beispiel (von
-<A HREF="http://www.mplayerhq.hu/DOCS/tech/mpsub.sub">DOCS/tech/mpsub.sub</A>) :
-</P>
+<A HREF="http://www.mplayerhq.hu/DOCS/tech/mpsub.sub">DOCS/tech/mpsub.sub</A>):</P>
 
 <P><CODE><I>
-# erste Nummer  : warte so lange nach dem Verschwinden des vorherigen Untertitels<BR>
+# erste Nummer : warte so lange nach dem Verschwinden des vorherigen Untertitels<BR>
 # zweite Nummer : zeige den momentanen Untertitel für so viele Sekunden<BR>
 <BR>
 15 3<BR>
@@ -775,42 +736,40 @@ anzuzeigen.</P>
 <P><B>INSTALLATION des OSD und der Untertitel</B></P>
 
 <P>Du brauchst ein <B>MPlayer</B>-Schriftenpaket, dass du das OSD/SUB Feature
-verwenden kannt. Es gibt mehrere Möglichkeiten um eines zu bekommen:
+verwenden kannt. Es gibt mehrere Möglichkeiten um eines zu bekommen:</P>
+
 <UL>
-
-<LI>downloade die fertigen Schiftpaketen von der <B>MPlayer</B> Seite.
-Hinweis: die aktuell verfügbaren Schriften sind beschränkt auf ISO 8859-1/2-Unterstützung,
-und es gibt noch einige andere (einschliesslich koreanische, russische, 8859-8 etc)
-Schriften in der contrib/font Sektion auf dem FTP-Server, von Benutzern gemacht.
-Die Schriften sollte eine passende font.desc-Datei haben, welche die 
-Unicode-Schrift an die aktuelle Codepage und den Untertitel-Text anpasst. Eine andere Lösung
-ist, dass man die Untertitel im UTF8 Format encodiert und die -utf8 Option verwendet
-oder die Untertitel-Datei in <video_name>.utf umbenennt. Das Neu-Kodieren von
-verschiedenen Codepages zu UTF8 kann mit dem konwert (debian) oder iconv (RedHat)
-Programm gemacht werden.<BR>
-Einige URLs:
-<UL>
-  <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/">ftp://ftp.mplayerhq.hu/MPlayer/releases</A> - ISO-Schiften
-  <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/">ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts</A> - verschiedene Schriften von Anwendern
-  <LI><A HREF="http://realtime.ssu.ac.kr/~lethean/mplayer">http://realtime.ssu.ac.kr/~lethean/mplayer</A> - koreanische Schrift und RAW-Plugin
+  <LI>downloade die fertigen Schiftpaketen von der <B>MPlayer</B> Seite.
+    Hinweis: die aktuell verfügbaren Schriften sind beschränkt auf ISO 8859-1/2-Unterstützung,
+    und es gibt noch einige andere (einschliesslich koreanische, russische, 8859-8 etc)
+    Schriften in der contrib/font Sektion auf dem FTP-Server, von Benutzern gemacht.
+    Die Schriften sollte eine passende font.desc-Datei haben, welche die 
+    Unicode-Schrift an die aktuelle Codepage und den Untertitel-Text anpasst. Eine andere Lösung
+    ist, dass man die Untertitel im UTF8 Format encodiert und die -utf8 Option verwendet
+    oder die Untertitel-Datei in &lt;video_name&gt;.utf umbenennt. Das Neu-Kodieren von
+    verschiedenen Codepages zu UTF8 kann mit dem konwert (debian) oder iconv (RedHat)
+    Programm gemacht werden.<BR>
+    Einige URLs:
+    <UL>
+      <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/">ftp://ftp.mplayerhq.hu/MPlayer/releases</A> - ISO-Schiften</LI>
+      <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/">ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts</A> - verschiedene Schriften von Anwendern</LI>
+      <LI><A HREF="http://realtime.ssu.ac.kr/~lethean/mplayer">http://realtime.ssu.ac.kr/~lethean/mplayer</A> - koreanische Schrift und RAW-Plugin</LI>
+    </UL></LI>
+  <LI>verwende das Schrift-Erzeugungs-Tool, du kann es finden unter TOOLS/subfont-c .
+    Es ist ein komplettes Tool um TTF/Type1/usw. Schriften zu einem <B>MPlayer</B>-Schriftpaket
+    zu konvertieren (lese TOOLS/subfont-c/README für Details)</LI>
+  <LI>verwende das GIMP-Plugin für Schrift-Erzeugung unter TOOLS/subfont-GIMP
+    (Hinweis: Du musst den HSI RAW Plugin auch haben, siehe URL unten)</LI>
 </UL>
-
-<LI>verwende das Schrift-Erzeugungs-Tool, du kann es finden unter TOOLS/subfont-c .
-Es ist ein komplettes Tool um TTF/Type1/usw. Schriften zu einem <B>MPlayer</B>-Schriftpaket
-zu konvertieren (lese TOOLS/subfont-c/README für Details)
-
-<LI>verwende das GIMP-Plugin für Schrift-Erzeugung unter TOOLS/subfont-GIMP
-(Hinweis: Du musst den HSI RAW Plugin auch haben, siehe URL unten)
-</UL>
-</P>
 
 <P>Nach den Download entpacke die Dateien nach <CODE>~/.mplayer</CODE> oder
 <CODE>$PREFIX/share/mplayer</CODE>. Dann benennst du eine davon um oder erstellst 
-einen symbolischen Links zu <CODE>font</CODE> (wie z.B. : <CODE>ln -s ~/.mplayer/arial-24 
+einen symbolischen Links zu <CODE>font</CODE> (wie z.B.: <CODE>ln -s ~/.mplayer/arial-24 
 ~/.mplayer/font</CODE>). Nun musst du die Zeit im oberen, linken Ecke des Films sehen (kann
 man mit der Taste "o" ausschalten).</P>
 
-<P>Das OSD hat 3 Anzeigearten: (Wechsel mit 'o')<BR>
+<P>Das OSD hat 3 Anzeigearten: (Wechsel mit 'o')</P>
+
 <UL>
   <LI>Zeit + Lautstärken- + Suchleiste + Untertitel (Standard)
   <LI>Lautstärken- + Suchleiste + Untertitel
@@ -823,23 +782,17 @@ in der Konfigurationsdatei einstellen.</P>
 
 <P><B><A NAME=2>2. Features</A></B></P>
 
+<P><A NAME=2.1>2.1.</A> <A HREF="formats.html">Unterstützte Formate</A></P>
 
-<P><A NAME=2.1>2.1. <A HREF="formats.html">Unterstützte Formate</A></P>
+<P><A NAME=2.2>2.2.</A> <A HREF="codecs.html">Unterstützte Codecs</A></P>
 
+<P><A NAME=2.3>2.3.</A> <A HREF="video.html">Video</A> & <A HREF="sound.html">Audio</A> Ausgabegeräte</P>
 
-<P><A NAME=2.2>2.2. <A HREF="codecs.html">Unterstützte Codecs</A></P>
+<P><A NAME=2.4>2.4.</A> <A HREF="encoding.html">MEncoder - Ein vielseitiger Encoder</A></P>
 
+<P><A NAME=2.5><B>2.5. TV input</B></A></P>
 
-<P><A NAME=2.3>2.3. <A HREF="video.html">Video</A> & <A HREF="sound.html">Audio</A> Ausgabegeräte</P>
-
-
-<P><A NAME=2.4>2.4. <A HREF="encoding.html">MEncoder - Ein vielseitiger Encoder</A></P>
-
-
-<P><A NAME=2.5><B>2.5. TV input</B></P>
-
-
-<A NAME=2.5.1><P><B><I>2.5.1.  Übersicht</I></B></P>
+<P><A NAME=2.5.1><P><B><I>2.5.1.  Übersicht</I></B></A></P>
 
 <P>Dieser Teil der Docs zeigt wie man <B>das Sehen/Grabben über einen V4L-kompatiblen
 TV-Tuner ermöglicht</B>.</P>
@@ -848,195 +801,167 @@ TV-Tuner ermöglicht</B>.</P>
   Bearbeiten/Experimentieren zu erwarten!</B></P>
 
 
-<A NAME=2.5.2><P><B><I>2.5.2.  Kompilierung</I></B></P>
+<P><A NAME=2.5.2><P><B><I>2.5.2.  Kompilierung</I></B></A></P>
 
-<P>
 <UL>
    <LI>Als erstes musst du neu kompilieren. <CODE>./configure</CODE> erkennt automatisch die Kernel-Header von 
-    v4l und ob die /dev/video* Einträge existieren. Wenn sie existieren wird die TV Unterstützung eingebaut.
-    (siehe Ausgabe von configure !).</LI>
+     v4l und ob die /dev/video* Einträge existieren. Wenn sie existieren wird die TV Unterstützung eingebaut.
+     (siehe Ausgabe von configure !).</LI>
    <LI>stelle sicher, dass dein Tuner mit anderer TV-Software unter Linux funktioniert,
-    zum Beispiel xawtv.</LI>
+     zum Beispiel xawtv.</LI>
 </UL>
-</P>
 
 <P><B>Hinweis</B>: sind die Farben falsch? Dann kein dein Tuner kein YV12 darstellen.
-   Versuche I420 (verwende die auch die <CODE>-vc rawi420</CODE> Option!), YUY2, UYVY oder RGB32 (mit
-   <CODE>-vo sdl</CODE>) Colorspaces.
-   Du kannst diese Eigenschaft mit der <CODE>outfmt=YV12</CODE> Option (siehe unten) einstellen.</P>
+Versuche I420 (verwende die auch die <CODE>-vc rawi420</CODE> Option!), YUY2, UYVY oder RGB32 (mit
+<CODE>-vo sdl</CODE>) Colorspaces.
+Du kannst diese Eigenschaft mit der <CODE>outfmt=YV12</CODE> Option (siehe unten) einstellen.</P>
 
-<A NAME=2.5.3><P><B><I>2.5.3.  Verfügbare Optionen</I></B><BR>
+
+<P><A NAME=2.5.3><P><B><I>2.5.3.  Verfügbare Optionen</I></B></A></P>
+
 <TABLE BORDER=0>
-<TR>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD><I>on</I></TD>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD>verwenden des TV-Inputs</TD>
-</TR>
-<TR>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD><I>noaudio</I></TD>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD>kein Ton</TD>
-</TR>
-<TR>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD><I>driver</I></TD>
-  <TD></TD>
-  <TD><B>dummy</B> - NULL TV-Input :) Nur zum Testen, erzeugt Dummy-Input.<BR>
-    <B>v4l</B> - nimmt Bilder vom Standard-V4L-Interface (normalerweise
-    <CODE>/dev/video0</CODE>)</TD>
-</TR>
-<TR>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD><I>device</I></TD>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD>wählt einen anderen
-  Treiber als <CODE>/dev/video0</CODE></TD>
-</TR>
-<TR>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD><I>input</I></TD>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD>welcher Eingang
-    des TV-Tuners verwendet werden soll (z.B. <B>television</B>, <B>s-video</B>, 
-    <B>composite</B>, ...)<BR>
-    Beim Inizialisieren werden die verfügbaren Eingänge angezeigt.</TD>
-</TR>
-<TR>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD><I>freq</I></TD>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD>wählt die Frequenz
-  für den Tuner (z.B. <B>511.250</B>)</TD>
-</TR>
-<TR>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD><I>outfmt</I></TD>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD>Format, mit
-    dem ausgegeben werden soll (<B>rgb32</B>, <B>rgb24</B>, <B>yv12</B>, <B>uyvy</B>, 
-    <B>i420</B> (für i420 musst du die Option <CODE>-vc rawi420</CODE> übergeben, 
-    wegen eines fourcc Konflikts))</TD>
-</TR>
-<TR>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD><I>width</I></TD>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD>die Breite des Ausgabe-Fensters, in Pixel</TD>
-</TR>
+  <TR><TD>&nbsp;&nbsp;</TD>
+    <TD><I>on</I></TD>
+    <TD>&nbsp;&nbsp;</TD>
+    <TD>verwenden des TV-Inputs</TD></TR>
+  <TR><TD>&nbsp;&nbsp;</TD>
+    <TD><I>noaudio</I></TD>
+    <TD>&nbsp;&nbsp;</TD>
+    <TD>kein Ton</TD></TR>
+  <TR><TD>&nbsp;&nbsp;</TD>
+    <TD><I>driver</I></TD>
+    <TD></TD>
+    <TD><B>dummy</B> - NULL TV-Input :) Nur zum Testen, erzeugt Dummy-Input.<BR>
+      <B>v4l</B> - nimmt Bilder vom Standard-V4L-Interface (normalerweise
+      <CODE>/dev/video0</CODE>)</TD></TR>
+  <TR><TD>&nbsp;&nbsp;</TD>
+    <TD><I>device</I></TD>
+    <TD>&nbsp;&nbsp;</TD>
+    <TD>wählt einen anderen Treiber als <CODE>/dev/video0</CODE></TD></TR>
+  <TR><TD>&nbsp;&nbsp;</TD>
+    <TD><I>input</I></TD>
+    <TD>&nbsp;&nbsp;</TD>
+    <TD>welcher Eingang des TV-Tuners verwendet werden soll (z.B. <B>television</B>, <B>s-video</B>, 
+      <B>composite</B>, ...)<BR>
+      Beim Inizialisieren werden die verfügbaren Eingänge angezeigt.</TD></TR>
+  <TR><TD>&nbsp;&nbsp;</TD>
+    <TD><I>freq</I></TD>
+    <TD>&nbsp;&nbsp;</TD>
+    <TD>wählt die Frequenz für den Tuner (z.B. <B>511.250</B>)</TD></TR>
   <TR>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD><I>height</I></TD>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD>die Höhe des Ausgabe-Fensters, in Pixel</TD>
-</TR>
-<TR>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD><I>norm</I></TD>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD>verfügbare Normen: PAL, SECAM, NTSC</TD>
-</TR>
-<TR>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD><I>channel</I></TD>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD>Tuner auf eingestellten Kanal setzen</TD>
-</TR>
-<TR>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD><I>chanlist</I></TD>
-  <TD>&nbsp;&nbsp;</TD>
-  <TD>verfügbar: <CODE>us-bcast, us-cable, europe-west, europe-east, usw</CODE></TD>
-</TR>
+    <TD>&nbsp;&nbsp;</TD>
+    <TD><I>outfmt</I></TD>
+    <TD>&nbsp;&nbsp;</TD>
+    <TD>Format, mit dem ausgegeben werden soll (<B>rgb32</B>, <B>rgb24</B>, <B>yv12</B>, <B>uyvy</B>, 
+      <B>i420</B> (für i420 musst du die Option <CODE>-vc rawi420</CODE> übergeben, 
+      wegen eines fourcc Konflikts))</TD></TR>
+  <TR><TD>&nbsp;&nbsp;</TD>
+    <TD><I>width</I></TD>
+    <TD>&nbsp;&nbsp;</TD>
+    <TD>die Breite des Ausgabe-Fensters, in Pixel</TD></TR>
+  <TR><TD>&nbsp;&nbsp;</TD>
+    <TD><I>height</I></TD>
+    <TD>&nbsp;&nbsp;</TD>
+    <TD>die Höhe des Ausgabe-Fensters, in Pixel</TD></TR>
+  <TR>
+    <TD>&nbsp;&nbsp;</TD>
+    <TD><I>norm</I></TD>
+    <TD>&nbsp;&nbsp;</TD>
+    <TD>verfügbare Normen: PAL, SECAM, NTSC</TD></TR>
+  <TR><TD>&nbsp;&nbsp;</TD>
+    <TD><I>channel</I></TD>
+    <TD>&nbsp;&nbsp;</TD>
+    <TD>Tuner auf eingestellten Kanal setzen</TD></TR>
+  <TR>
+    <TD>&nbsp;&nbsp;</TD>
+    <TD><I>chanlist</I></TD>
+    <TD>&nbsp;&nbsp;</TD>
+    <TD>verfügbar: <CODE>us-bcast, us-cable, europe-west, europe-east, usw</CODE></TD></TR>
 </TABLE>
-</P>
 
-<A NAME=2.5.4><P><B><I>2.5.4.  Tastatursteuerung</I></B></P>
+
+<P><A NAME=2.5.4><P><B><I>2.5.4.  Tastatursteuerung</I></B></A></P>
 
 <TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD>h oder l</TD><TD>&nbsp;&nbsp;</TD><TD>wählt
-vorherigen/nächsten Kanal</TD><TR>
-<TD></TD><TD>n</TD><TD></TD><TD>ändern der Norm</TD><TR>
-<TD></TD><TD>b</TD><TD></TD><TD>ändern der Kanalliste</TD><TR>
+  <TR><TD>&nbsp;&nbsp;</TD><TD>h oder l</TD><TD>&nbsp;&nbsp;</TD><TD>wählt
+    vorherigen/nächsten Kanal</TD></TR>
+  <TR><TD></TD><TD>n</TD><TD></TD><TD>ändern der Norm</TD></TR>
+  <TR><TD></TD><TD>b</TD><TD></TD><TD>ändern der Kanalliste</TD></TR>
 </TABLE>
 
-<A NAME=2.5.5><P><B><I>2.5.5.  Beispiele</I></B></P>
 
-<P>
-Dummy Ausgabe zu AAlib :)<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=dummy:width=640:height=480 -vo aa</CODE><BR>
-<BR>
+<P><A NAME=2.5.5><P><B><I>2.5.5.  Beispiele</I></B></A></P>
+
+<P>Dummy Ausgabe zu AAlib :)<BR>
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=dummy:width=640:height=480 -vo aa</CODE><BR><BR>
 Eingabe von Standard-V4L<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv</CODE><BR>
-</P>
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv</CODE><BR></P>
 
 
-<A NAME=2.6><P><B><I>2.6.  Video Filter</I></B></P>
+<P><A NAME=2.6><P><B><I>2.6.  Videofilter</I></B></A></P>
 
-
-<A NAME=2.6.1><P><B><I>2.6.1.  Übersicht</I></B></P>
+<P><A NAME=2.6.1><P><B><I>2.6.1.  Übersicht</I></B></A></P>
 
 <P>Beide, <B>MPlayer</B> und <B>MEncoder</B>, unterstützen die Benutzung einer
-  universalen Video-Filterschicht (video filter layer), welche eine grosse Anzahl
-  Plugins enthält, die unten aufgelistet und beschrieben werden. Diese Plugins 
-  können verschiedene Aktionen auf die Bilder ausführen, wie Neuskalierungen (rescale),
-  Abschneiden (crop) schwarzer Ränder (nicht nur für eine Konvertierung nützlich, 
-  sondern auch für die Wiedergabe, da die schwarzen Ränder den Bus-Gebrauch eröhen:
-  Das Abschneiden von jenen kann die Wiedergabegeschwindigkeit auf langsamen Boards
-  erhöhen), Erweitern (expand) von Bildern (für SVCDs).</P>
+universalen Video-Filterschicht (video filter layer), welche eine grosse Anzahl
+Plugins enthält, die unten aufgelistet und beschrieben werden. Diese Plugins 
+können verschiedene Aktionen auf die Bilder ausführen, wie Neuskalierungen (rescale),
+Abschneiden (crop) schwarzer Ränder (nicht nur für eine Konvertierung nützlich, 
+sondern auch für die Wiedergabe, da die schwarzen Ränder den Bus-Gebrauch eröhen:
+Das Abschneiden von jenen kann die Wiedergabegeschwindigkeit auf langsamen Boards
+erhöhen), Erweitern (expand) von Bildern (für SVCDs).</P>
 
 <P>Mit dieser Filterschicht ist es möglich schnelle Bildformat-Konvertierungen
-  zwischen verschiedenen RGB und YUV durchzuführen falls nötig. Dies erlaubt zum
-  Beispiel die Wiedergabe von RGB Daten auf den <CODE>xv</CODE> und <CODE>xmga</CODE>
-  Ausgaben, neben anderen. (siehe <A HREF=#2.6.11>Skalieren (Scale)</A>)</P>
+zwischen verschiedenen RGB und YUV durchzuführen falls nötig. Dies erlaubt zum
+Beispiel die Wiedergabe von RGB Daten auf den <CODE>xv</CODE> und <CODE>xmga</CODE>
+Ausgaben, neben anderen. (siehe <A HREF="#2.6.11">Skalieren (Scale)</A>)</P>
 
 <P>Die Schicht erlaubt auch <B>Direct Rendering</B> zwischen den Plugins, um die
-  Geschwindigkeit zu maximieren.</P>
+Geschwindigkeit zu maximieren.</P>
 
 <P>Hinweis: Der Nachbearbeitung (postprocessing) Code ist nun auch Teil dieser Schicht.
-  Dies wird später erklärt.</P>
+Dies wird später erklärt.</P>
 
-<A NAME=2.6.2><P><B><I>2.6.2.  Verwendung</I></B></P>
 
-<P><CODE>&nbsp;&nbsp;mplayer/mencoder -vop filter1,filter2,filter3,...</CODE>
-  </P>
+<P><A NAME=2.6.2><P><B><I>2.6.2.  Verwendung</I></B></A></P>
+
+<P><CODE>&nbsp;&nbsp;mplayer/mencoder -vop filter1,filter2,filter3,...</CODE></P>
 
 <P>Dies erzeugt eine Filter-Pipeline (man kann eine beliebige Anzahl Filter verwenden).
-  Deren Parameter sind optional und einige haben, wenn ausgelassen, Standard-Werte,
-  so wie z.B. <I>x und y</I> beide auf die Mitte des Bildschirms gesetzt sind und 
-  <I>höhe und breite</I> werden auf die Höhe und Breite des Films gesetzt.</P>
+Deren Parameter sind optional und einige haben, wenn ausgelassen, Standard-Werte,
+so wie z.B. <I>x und y</I> beide auf die Mitte des Bildschirms gesetzt sind und 
+<I>höhe und breite</I> werden auf die Höhe und Breite des Films gesetzt.</P>
 
 <P>Die Filter werden von libvo eingereiht, so dass <CODE>filter1</CODE> der zuletzt
-  ausgeführte Filter sein wird (danach kommt libvo oder, wenn <B>MEncoder</B> verwendet
-  wird, encoding).</P>
+ausgeführte Filter sein wird (danach kommt libvo oder, wenn <B>MEncoder</B> verwendet
+wird, encoding).</P>
 
 <P>Um eine Liste aller verfügbaren Videofilter zu erhalten, kann folgender Befehl
-  verwendet werden:<BR>
-  <CODE>mplayer -vop help</CODE></P>
+verwendet werden:<BR>
+<CODE>mplayer -vop help</CODE></P>
 
 
-<A NAME=2.6.3><P><B><I>2.6.3.  Schneiden (crop)</I></B></P>
+<P><A NAME=2.6.3><P><B><I>2.6.3.  Schneiden (crop)</I></B></A></P>
 
 <P><B><U>Beschreibung</U></B>:</P>
 
 <P>Schneidet einen vorgegebenen Teil aus dem Bild aus und verwirft den Rest. Nützlich, um
-  die schwarzen Ränder auf Breitbild-Filmen zu löschen.</P>
+die schwarzen Ränder auf Breitbild-Filmen zu löschen.</P>
 
 <P><B><U>Verwendung</U></B>:</P>
 
 <P><CODE>&nbsp;&nbsp;-vop crop[=höhe:breite:x:y]</CODE></P>
 
 
-<A NAME=2.6.4><P><B><I>2.6.4.  Erweitern (expand)</I></B></P>
+<P><A NAME=2.6.4><P><B><I>2.6.4.  Erweitern (expand)</I></B></A></P>
 
 <P><B><U>Beschreibung</U></B>:</P>
   
 <P>Erweitert (NICHT skaliert) die Filmauflösung um den gegebenen Wert, plaziert das
-  unskalierte Original auf <I>x</I> <I>y</I>. Für Filme, die keine schwarzen Ränder besitzen,
-  kann dies verwendet werden, um diese hinzuzufügen. Dies ist gut bei der Erstellung von SVCDs
-  oder bei der Benutzung des <A HREF="video.html#2.3.1.4">SDL Videoausgabe</A>, welche Untertitel
-  in diesen Rändern unterbringen können.</P>
+unskalierte Original auf <I>x</I> <I>y</I>. Für Filme, die keine schwarzen Ränder besitzen,
+kann dies verwendet werden, um diese hinzuzufügen. Dies ist gut bei der Erstellung von SVCDs
+oder bei der Benutzung des <A HREF="video.html#2.3.1.4">SDL Videoausgabe</A>, welche Untertitel
+in diesen Rändern unterbringen können.</P>
   
 <P><B><U>Verwendung</U></B>:</P>
 
@@ -1055,7 +980,7 @@ Eingabe von Standard-V4L<BR>
 <P><CODE>&nbsp;&nbsp;-vop lavc</CODE></P>
 
 
-<A NAME=2.6.6><P><B><I>2.6.6.  Spiegeln (flip)</I></B></P>
+<P><A NAME=2.6.6><P><B><I>2.6.6.  Spiegeln (flip)</I></B></A></P>
 
 <P><B><U>Beschreibung</U></B>:</P>
 
@@ -1067,22 +992,22 @@ bilder wiedergeben können (diese werden automatisch erkannt).</P>
 <P><CODE>&nbsp;&nbsp;-vop flip</CODE></P>
 
 
-<A NAME=2.6.7><P><B><I>2.6.7.  Format</I></B></P>
+<P><A NAME=2.6.7><P><B><I>2.6.7.  Format</I></B></A></P>
 
 <P><B><U>Beschreibung</U></B>:</P>
 
 <P>Dieser Filter ist KEIN Bildformat-Konvertierer. Es zwingt bloss den
-  nächsten Filter (oder libvo), welches Bildformat verwendet werden soll.
-  Nützlich für Karten mit langsamen YV12, wie tdfx und Savage4. Für eine
-  echte Konvertierung sollte der <I>Skalier (scale)</I> Filter verwendet werden.</P>
+nächsten Filter (oder libvo), welches Bildformat verwendet werden soll.
+Nützlich für Karten mit langsamen YV12, wie tdfx und Savage4. Für eine
+echte Konvertierung sollte der <I>Skalier (scale)</I> Filter verwendet werden.</P>
 
 <P><B><U>Verwendung</U></B>:</P>
 
 <P><CODE>&nbsp;&nbsp;-vop format[=format]</CODE> (wobei
-  <CODE>format</CODE> z.B. dies sein kann: rgb32, yuy2, etc...)</P>
+<CODE>format</CODE> z.B. dies sein kann: rgb32, yuy2, etc...)</P>
 
 
-<A NAME=2.6.8><P><B><I>2.6.8.  Nachbearbeiten (postprocess)</I></B></P>
+<P><A NAME=2.6.8><P><B><I>2.6.8.  Nachbearbeiten (postprocess)</I></B></A></P>
 
 <P><B><U>Beschreibung</U></B>:</P>
 
@@ -1095,7 +1020,7 @@ bilder wiedergeben können (diese werden automatisch erkannt).</P>
 <P><CODE>&nbsp;&nbsp;-vop pp[=postprocess Optionen/Schlüsselwörter]</CODE></P>
 
 
-<A NAME=2.6.9><P><B><I>2.6.9.  RGB2BGR</I></B></P>
+<P><A NAME=2.6.9><P><B><I>2.6.9.  RGB2BGR</I></B></A></P>
 
 <P><B><U>Beschreibung</U></B>:</P>
 
@@ -1108,7 +1033,7 @@ bilder wiedergeben können (diese werden automatisch erkannt).</P>
 <P><CODE>&nbsp;&nbsp;-vop rgb2bgr[=swap]</CODE></P>
 
 
-<A NAME=2.6.10><P><B><I>2.6.10.  Drehen (rotate)</I></B></P>
+<P><A NAME=2.6.10><P><B><I>2.6.10.  Drehen (rotate)</I></B></A></P>
 
 <P><B><U>Beschreibung</U></B>:</P>
 
@@ -1120,7 +1045,7 @@ bilder wiedergeben können (diese werden automatisch erkannt).</P>
 <P><CODE>&nbsp;&nbsp;-vop rotate[=x]</CODE></P>
 
 
-<A NAME=2.6.11><P><B><I>2.6.11.  Skalieren (scale)</I></B></P>
+<P><A NAME=2.6.11><P><B><I>2.6.11.  Skalieren (scale)</I></B></A></P>
 
 <P><B><U>Beschreibung</U></B>:</P>
 
@@ -1139,7 +1064,7 @@ bilder wiedergeben können (diese werden automatisch erkannt).</P>
 <P><CODE>&nbsp;&nbsp;-vop scale[=höhe:breite]</CODE></P>
 
 
-<A NAME=2.6.12><P><B><I>2.6.12.  YUY2</I></B></P>
+<P><A NAME=2.6.12><P><B><I>2.6.12.  YUY2</I></B></A></P>
 
 <P><B><U>Beschreibung</U></B>:</P>
 
@@ -1150,7 +1075,7 @@ bilder wiedergeben können (diese werden automatisch erkannt).</P>
 <P><CODE>&nbsp;&nbsp;-vop yuy2</CODE></P>
 
 
-<A NAME=2.6.13><P><B><I>2.6.13.  Spiegeln (mirror)</I></B></P>
+<P><A NAME=2.6.13><P><B><I>2.6.13.  Spiegeln (mirror)</I></B></A></P>
 
 <P><B><U>Beschreibung</U></B>:</P>
 
@@ -1161,7 +1086,7 @@ bilder wiedergeben können (diese werden automatisch erkannt).</P>
 <P><CODE>&nbsp;&nbsp;-vop mirror</CODE></P>
 
 
-<A NAME=2.6.14><P><B><I>2.6.14.  DVBscale</I></B></P>
+<P><A NAME=2.6.14><P><B><I>2.6.14.  DVBscale</I></B></A></P>
 
 <P><B><U>Beschreibung</U></B>:</P>
 
@@ -1172,7 +1097,7 @@ bilder wiedergeben können (diese werden automatisch erkannt).</P>
 <P><CODE>&nbsp;&nbsp;-vop dvbscale</CODE></P>
 
 
-<A NAME=2.6.15><P><B><I>2.6.15.  Cropdetect</I></B></P>
+<P><A NAME=2.6.15><P><B><I>2.6.15.  Cropdetect</I></B></A></P>
 
 <P><B><U>Beschreibung</U></B>:</P>
 
@@ -1189,32 +1114,32 @@ bilder wiedergeben können (diese werden automatisch erkannt).</P>
 <P><B><A NAME=3.1>3.1. Kommandozeile</A></B></P>
 
 <P><B>MPlayer</B> benützt einen komplexen playtree. Er besteht aus globalen Optionen
- am Anfang (z.B. <CODE>mplayer -vfm 5</CODE>) und Optionen nach dem Dateiname, 
- welche nur für die jeweilige Datei/URL/etc gelten (z.B.
- <CODE>mplayer -vfm 5 movie1.avi movie2.avi -vfm 4</CODE>).<BR>
- Es können Dateinamen/URL Groupen mit { und } gebildet werden. Dies ist nützlich mit der Option
- -loop: <CODE>mplayer { 1.avi -loop 2 2.avi } -loop 3</CODE> spielt die Dateien in dieser Reihenfolge:
- 1 1 2 1 1 2 1 1 2<BR>
-</P>
+am Anfang (z.B. <CODE>mplayer -vfm 5</CODE>) und Optionen nach dem Dateiname, 
+welche nur für die jeweilige Datei/URL/etc gelten (z.B.
+<CODE>mplayer -vfm 5 movie1.avi movie2.avi -vfm 4</CODE>).<BR>
+Es können Dateinamen/URL Groupen mit { und } gebildet werden. Dies ist nützlich mit der Option
+-loop: <CODE>mplayer { 1.avi -loop 2 2.avi } -loop 3</CODE> spielt die Dateien in dieser Reihenfolge:
+1 1 2 1 1 2 1 1 2<BR></P>
       
-<P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD>Datei</TD><TD>&nbsp;&nbsp;</TD><TD><CODE>mplayer [Optionen] [Pfad/]Dateiname</CODE></TD><TR>
-<TD></TD><TD>Datei</TD><TD></TD><TD><CODE>mplayer [standard Optionen] [Pfad/]Dateiname [Optionen für datei1] datei2 datei3 [Optionen für datei3]</CODE></TD><TR>
-<TD></TD><TD>VCD</TD><TD></TD><TD><CODE>mplayer [Optionen] -vcd Tracknr [-cdrom-device /dev/cdrom]</CODE></TD><TR>
-<TD></TD><TD>DVD</TD><TD></TD><TD><CODE>mplayer [Optionen] -dvd Titelnr [-dvd-device /dev/dvd]</CODE></TD><TR>
-<TD></TD><TD>Netz</TD><TD></TD><TD><CODE>mplayer [Optionen] http://site.com/datei.asf (playlist kann auch benutzt werden)</CODE></TD><TR>
-</TABLE></P>
+<TABLE BORDER=0>
+  <TR><TD>&nbsp;&nbsp;</TD><TD>Datei</TD><TD>&nbsp;&nbsp;</TD><TD><CODE>mplayer [Optionen] [Pfad/]Dateiname</CODE></TD></TR>
+  <TR><TD></TD><TD>Datei</TD><TD></TD><TD><CODE>mplayer [standard Optionen] [Pfad/]Dateiname [Optionen für datei1] datei2 datei3 [Optionen für datei3]</CODE></TD></TR>
+  <TR><TD></TD><TD>VCD</TD><TD></TD><TD><CODE>mplayer [Optionen] -vcd Tracknr [-cdrom-device /dev/cdrom]</CODE></TD></TR>
+  <TR><TD></TD><TD>DVD</TD><TD></TD><TD><CODE>mplayer [Optionen] -dvd Titelnr [-dvd-device /dev/dvd]</CODE></TD></TR>
+  <TR><TD></TD><TD>Netz</TD><TD></TD><TD><CODE>mplayer [Optionen] http://site.com/datei.asf (playlist kann auch benutzt werden)</CODE></TD></TR>
+</TABLE>
 
-<P>
- Die neusten Versionen von MPlayer akkzeptieren auch VCD und DVD Tracks im URL-Style, wie z.B. auch
- Xine: <CODE>mplayer dvd://1</CODE> oder <CODE>mplayer vcd://1</CODE>
-</P>
+<P>Die neusten Versionen von MPlayer akkzeptieren auch VCD und DVD Tracks im URL-Style, wie z.B. auch
+Xine: <CODE>mplayer dvd://1</CODE> oder <CODE>mplayer vcd://1</CODE></P>
 
-<P><PRE>  mplayer -vo x11 /mnt/Filme/Contact/contact2.mpg
+<PRE>
+  mplayer -vo x11 /mnt/Filme/Contact/contact2.mpg
   mplayer -vcd 2
   mplayer -afm 3 /mnt/DVDtrailers/alien4.vob
   mplayer -dvd 1
-  mplayer -abs 65536 -delay -0.4 -nobps ~/movies/test.avi</PRE></P>
+  mplayer -abs 65536 -delay -0.4 -nobps ~/movies/test.avi
+</PRE>
+
 
 <P><B><A NAME=3.2>3.2. Steuerung</A></B></P>
 
@@ -1222,70 +1147,70 @@ bilder wiedergeben können (diese werden automatisch erkannt).</P>
 (control layer), der es erlaubt <B>MPlayer</B> mit Tastatur, Maus, Joystick oder Fernbedienung (verwendet lirc)
 zu steuern.</P>
 
+
 <P><B><A NAME=3.2.1>3.2.1. Standard Steuerung</A></B></P>
 
 <P><B>Tastatur</B></P>
   
-<P><TABLE BORDER=0>
-<TR><TD>&nbsp;&nbsp;</TD><TD>&lt;-  oder  -&gt;</TD><TD>&nbsp;&nbsp;</TD><TD>Suche zurück/vorwärts 10 Sekunden</TD></TR>
-<TR><TD></TD><TD>nach-oben und nach-unten</TD><TD></TD><TD>suche zurück/vorwärts 1 Minute</TD></TR>
-<TR><TD></TD><TD>Bild-nach-oben und Bild-nach-unten</TD><TD></TD><TD>suche zurück/vorwärts 10 Minute</TD></TR>
-<TR><TD></TD><TD>&lt; oder &gt;</TD><TD></TD><TD>suche rück-/vorwärts in der Playliste</TD><TR>
-<TR><TD></TD><TD>p oder Leertaste</TD><TD></TD><TD>Pause (drücke irgendeine Taste um weiterzumachen)</TD></TR>
-<TR><TD></TD><TD>q oder ESC</TD><TD></TD><TD>stoppe die Wiedergabe und beende Programm</TD></TR>
-<TR><TD></TD><TD>+ oder -</TD><TD></TD><TD>einstellen des Audio-Delays, +/- 0,1 Sekunden</TD></TR>
-<TR><TD></TD><TD>/ oder *</TD><TD></TD><TD>vermindere/erhöhe Lautstärke</TD></TR>
-<TR><TD></TD><TD>f</TD><TD></TD><TD>wechselt den Vollbildschirm-Modus</TD></TR>
-<TR><TD></TD><TD>o</TD><TD></TD><TD>wechselt OSD: kein / Suchleiste / Suchleiste und Zeit</TD></TR>
-<TR><TD></TD><TD>z oder x</TD><TD></TD><TD>einstellen des Untertitel-Delays, +/- 0,1 Sekunden</TD></TR>
-<TR><TD></TD><TD>r oder t</TD><TD></TD><TD>einstellen der Untertitel-Position</TD></TR>
-<TR><TD></TD><TD>&gt; oder &lt;</TD><TD></TD><TD>nächster/vorheriger playtree Eintrag</TD></TR>
-<TR><TD></TD><TD>HOME oder END</TD><TD></TD><TD>nächster/vorheriger playtree Eintrag in der übergeordneten Liste</TD></TR>
-<TR><TD></TD><TD>INSERT oder DELETE</TD><TD></TD><TD>nächste/vorherige alternative Quelle
-  (nur verfügbar in der asx Wiedergabeliste)</TD></TR>
-
-<TR><TD COLSPAN=4><P><I>(die folgende Tasten sind nur gültig, wenn man <CODE>-vo xv</CODE> verwendet)</I></P></TD></TR>
-
-<TR><TD></TD><TD>1 oder 2</TD><TD></TD><TD>Kontrast-Einstellung</TD></TR>
-<TR><TD></TD><TD>3 oder 4</TD><TD></TD><TD>Helligkeits-Einstellung</TD></TR>
-<TR><TD></TD><TD>5 oder 6</TD><TD></TD><TD>Farbton-Einstellung</TD></TR>
-<TR><TD></TD><TD>7 oder 8</TD><TD></TD><TD>Sättigungs-Einstellung</TD></TR>
-</TABLE></P>
+<TABLE BORDER=0>
+  <TR><TD>&nbsp;&nbsp;</TD><TD>&lt;-  oder  -&gt;</TD><TD>&nbsp;&nbsp;</TD><TD>Suche zurück/vorwärts 10 Sekunden</TD></TR>
+  <TR><TD></TD><TD>nach-oben und nach-unten</TD><TD></TD><TD>suche zurück/vorwärts 1 Minute</TD></TR>
+  <TR><TD></TD><TD>Bild-nach-oben und Bild-nach-unten</TD><TD></TD><TD>suche zurück/vorwärts 10 Minute</TD></TR>
+  <TR><TD></TD><TD>&lt; oder &gt;</TD><TD></TD><TD>suche rück-/vorwärts in der Playliste</TD></TR>
+  <TR><TD></TD><TD>p oder Leertaste</TD><TD></TD><TD>Pause (drücke irgendeine Taste um weiterzumachen)</TD></TR>
+  <TR><TD></TD><TD>q oder ESC</TD><TD></TD><TD>stoppe die Wiedergabe und beende Programm</TD></TR>
+  <TR><TD></TD><TD>+ oder -</TD><TD></TD><TD>einstellen des Audio-Delays, +/- 0,1 Sekunden</TD></TR>
+  <TR><TD></TD><TD>/ oder *</TD><TD></TD><TD>vermindere/erhöhe Lautstärke</TD></TR>
+  <TR><TD></TD><TD>f</TD><TD></TD><TD>wechselt den Vollbildschirm-Modus</TD></TR>
+  <TR><TD></TD><TD>o</TD><TD></TD><TD>wechselt OSD: kein / Suchleiste / Suchleiste und Zeit</TD></TR>
+  <TR><TD></TD><TD>z oder x</TD><TD></TD><TD>einstellen des Untertitel-Delays, +/- 0,1 Sekunden</TD></TR>
+  <TR><TD></TD><TD>r oder t</TD><TD></TD><TD>einstellen der Untertitel-Position</TD></TR>
+  <TR><TD></TD><TD>&gt; oder &lt;</TD><TD></TD><TD>nächster/vorheriger playtree Eintrag</TD></TR>
+  <TR><TD></TD><TD>HOME oder END</TD><TD></TD><TD>nächster/vorheriger playtree Eintrag in der übergeordneten Liste</TD></TR>
+  <TR><TD></TD><TD>INSERT oder DELETE</TD><TD></TD><TD>nächste/vorherige alternative Quelle
+    (nur verfügbar in der asx Wiedergabeliste)</TD></TR>
+  <TR><TD COLSPAN=4><P><I>(die folgende Tasten sind nur gültig, wenn man <CODE>-vo xv</CODE> verwendet)</I></P></TD></TR>
+  <TR><TD></TD><TD>1 oder 2</TD><TD></TD><TD>Kontrast-Einstellung</TD></TR>
+  <TR><TD></TD><TD>3 oder 4</TD><TD></TD><TD>Helligkeits-Einstellung</TD></TR>
+  <TR><TD></TD><TD>5 oder 6</TD><TD></TD><TD>Farbton-Einstellung</TD></TR>
+  <TR><TD></TD><TD>7 oder 8</TD><TD></TD><TD>Sättigungs-Einstellung</TD></TR>
+</TABLE>
 
 <P><B>GUI</B></P>
    
-<P><TABLE BORDER=0>
-<TR><TD>&nbsp;&nbsp;</TD><TD>, und .</TD><TD>&nbsp;&nbsp;</TD><TD>vorherige / nächste Datei</TD></TR>
-<TR><TD></TD><TD>graues - und +</TD><TD></TD><TD>verringere / erhöhe Lautstärke</TD></TR>
-<TR><TD></TD><TD>Enter</TD><TD></TD><TD>startet Wiedergabe</TD></TR>
-<TR><TD></TD><TD>Leertaste</TD><TD></TD><TD>Pause</TD></TR>
-<TR><TD></TD><TD>s</TD><TD></TD><TD>Stop</TD></TR>
-<TR><TD></TD><TD>a</TD><TD></TD><TD>über</TD></TR>
-<TR><TD></TD><TD>l</TD><TD></TD><TD>lädt Datei</TD></TR>
-<TR><TD></TD><TD>b</TD><TD></TD><TD>Skin-Browser</TD></TR>
-<TR><TD></TD><TD>e</TD><TD></TD><TD>zeigt Equalizer</TD></TR>
-<TR><TD></TD><TD>p</TD><TD></TD><TD>zeigt Playliste</TD></TR>
-<TR><TD></TD><TD>f</TD><TD></TD><TD>wechselt zu/von Vollbild</TD></TR>
-<TR><TD></TD><TD>m</TD><TD></TD><TD>aktiviert/deaktiviert Mute</TD></TR>
-</TABLE></P>
+<TABLE BORDER=0>
+  <TR><TD>&nbsp;&nbsp;</TD><TD>, und .</TD><TD>&nbsp;&nbsp;</TD><TD>vorherige / nächste Datei</TD></TR>
+  <TR><TD></TD><TD>graues - und +</TD><TD></TD><TD>verringere / erhöhe Lautstärke</TD></TR>
+  <TR><TD></TD><TD>Enter</TD><TD></TD><TD>startet Wiedergabe</TD></TR>
+  <TR><TD></TD><TD>Leertaste</TD><TD></TD><TD>Pause</TD></TR>
+  <TR><TD></TD><TD>s</TD><TD></TD><TD>Stop</TD></TR>
+  <TR><TD></TD><TD>a</TD><TD></TD><TD>über</TD></TR>
+  <TR><TD></TD><TD>l</TD><TD></TD><TD>lädt Datei</TD></TR>
+  <TR><TD></TD><TD>b</TD><TD></TD><TD>Skin-Browser</TD></TR>
+  <TR><TD></TD><TD>e</TD><TD></TD><TD>zeigt Equalizer</TD></TR>
+  <TR><TD></TD><TD>p</TD><TD></TD><TD>zeigt Playliste</TD></TR>
+  <TR><TD></TD><TD>f</TD><TD></TD><TD>wechselt zu/von Vollbild</TD></TR>
+  <TR><TD></TD><TD>m</TD><TD></TD><TD>aktiviert/deaktiviert Mute</TD></TR>
+</TABLE>
 
 <P><B>TV</B></P>
 
-<P><TABLE BORDER=0>
-<TR><TD></TD><TD>h oder l</TD><TD>&nbsp;&nbsp;</TD><TD>vorheriger/nächster Kanal</TD></TR>
-<TR><TD></TD><TD>n</TD><TD></TD><TD>ändern der Norm</TD></TR>
-<TR><TD></TD><TD>b</TD><TD></TD><TD>ändern der Kanalliste/TD></TR>
+<TABLE BORDER=0>
+  <TR><TD></TD><TD>h oder l</TD><TD>&nbsp;&nbsp;</TD><TD>vorheriger/nächster Kanal</TD></TR>
+  <TR><TD></TD><TD>n</TD><TD></TD><TD>ändern der Norm</TD></TR>
+  <TR><TD></TD><TD>b</TD><TD></TD><TD>ändern der Kanalliste/TD></TR>
+</TABLE>
 
-</TABLE></P>
 
 <P><B><A NAME=3.2.2>3.2.2. Steuerungskonfiguration</A></B></P>
 
 <P><B>MPlayer</B> erlaubt dir eine beliebige Taste auf ein Befehl von <B>MPlayer</B> festzulegen unter Verwendung
 einer einfachen Konfigurationsdatei. Die Syntax besteht aus einem Tastennamen gefolgt von einem Befehl.
 Die standard Konfigurationsdatei befindet sich in <CODE>$HOME/.mplayer/input.conf</CODE>, kann jedoch
-durch die <CODE>-input conf</CODE> überschrieben werden (relative Pfade sind relativ zu <CODE>$HOME/.mplayer</CODE>).
-<P>
-Beispiel:
+durch die <CODE>-input conf</CODE> überschrieben werden (relative Pfade sind relativ zu <CODE>$HOME/.mplayer</CODE>).</P>
+
+<P>Beispiel:</P>
+
 <PRE>
 ##
 ## MPlayer Eingabe-Konfigurationsdatei
@@ -1299,9 +1224,8 @@ q quit
 > pt_step 1
 < pt_step -1
 ENTER pt_step 1 1
-</PRE></P>
+</PRE>
 
-</P>
 
 <P><B><A NAME=3.2.2.1>3.2.2.1. Tastennamen</A></B></P>
 
@@ -1309,128 +1233,108 @@ ENTER pt_step 1 1
 
 <P><B>Tastatur</B></P>
 
-<P><UL>
-<LI>Irgendein druckbares Zeichen</LI>
-<LI>SPACE</LI>
-<LI>ENTER</LI>
-<LI>TAB</LI>
-<LI>CTRL</LI>
-<LI>BS</LI>
-<LI>DEL</LI>
-<LI>INS</LI>
-<LI>HOME</LI>
-<LI>END</LI>
-<LI>PGUP</LI>
-<LI>PGDWN</LI>
-<LI>ESC</LI>
-<LI>RIGHT</LI>
-<LI>LEFT</LI>
-<LI>UP</LI>
-<LI>DOWN</LI>
-</UL></P>
+<UL>
+  <LI>Irgendein druckbares Zeichen</LI>
+  <LI>SPACE</LI>
+  <LI>ENTER</LI>
+  <LI>TAB</LI>
+  <LI>CTRL</LI>
+  <LI>BS</LI>
+  <LI>DEL</LI>
+  <LI>INS</LI>
+  <LI>HOME</LI>
+  <LI>END</LI>
+  <LI>PGUP</LI>
+  <LI>PGDWN</LI>
+  <LI>ESC</LI>
+  <LI>RIGHT</LI>
+  <LI>LEFT</LI>
+  <LI>UP</LI>
+  <LI>DOWN</LI>
+</UL>
 
 
 <P><B>Maus</B></P>
 
 <P>Hinweis: Die Maus ist nur unter X unterstützt</P>
 
-<P><UL>
-<LI>MOUSE_BTN0 (Linke Taste)</LI>
-<LI>MOUSE_BTN1 (Rechte Taste)</LI>
-<LI>MOUSE_BTN2 (Mittlere Taste)</LI>
-<LI>MOUSE_BTN3 (Whell)</LI>
-<LI>MOUSE_BTN4 (Whell)</LI>
-<LI>...</LI>
-<LI>MOUSE_BTN9</LI>
-</UL></P>
+<UL>
+  <LI>MOUSE_BTN0 (Linke Taste)</LI>
+  <LI>MOUSE_BTN1 (Rechte Taste)</LI>
+  <LI>MOUSE_BTN2 (Mittlere Taste)</LI>
+  <LI>MOUSE_BTN3 (Wheel)</LI>
+  <LI>MOUSE_BTN4 (Wheel)</LI>
+  <LI>...</LI>
+  <LI>MOUSE_BTN9</LI>
+</UL>
 
 <P><B>Joystick</B></P>
 
 <P>Hinweis: Joystick-Unterstützung muss bei der Kompilierung aktiviert sein</P>
 
-<P><UL>
-<LI>JOY_RIGHT oder JOY_AXIS0_PLUS</LI>
-<LI>JOY_LEFT oder JOY_AXIS0_MINUS</LI>
-<LI>JOY_UP oder JOY_AXIS1_MINUS</LI>
-<LI>JOY_DOWN oder JOY_AXIS1_PLUS</LI>
-<LI>JOY_AXIS2_PLUS</LI>
-<LI>JOY_AXIS2_MINUS</LI>
-<LI>....</LI>
-<LI>JOY_AXIS9_PLUS</LI>
-<LI>JOY_AXIS9_MINUS</LI>
-</UL></P>
+<UL>
+  <LI>JOY_RIGHT oder JOY_AXIS0_PLUS</LI>
+  <LI>JOY_LEFT oder JOY_AXIS0_MINUS</LI>
+  <LI>JOY_UP oder JOY_AXIS1_MINUS</LI>
+  <LI>JOY_DOWN oder JOY_AXIS1_PLUS</LI>
+  <LI>JOY_AXIS2_PLUS</LI>
+  <LI>JOY_AXIS2_MINUS</LI>
+  <LI>....</LI>
+  <LI>JOY_AXIS9_PLUS</LI>
+  <LI>JOY_AXIS9_MINUS</LI>
+</UL>
 
 
 <P><B><A NAME=3.2.2.2>3.2.2.2. Befehle</A></B></P>
 
 <P>Mit folgendem Befehl erhält man eine vollständige Liste: <CODE>mplayer -input cmdlist</CODE></P>
 
-<P>
 <UL>
   <LI><B>seek</B> (int) Wert [(int) type=0]
-         <P>Sucht bis zu einer gewissen Stelle im Film.<BR>
-              Type 0 ist eine relative Suche von +/- Wert Sekunden.<BR>
-              Type 1 sucht bis Wert % im Film. </P>
-  </LI>
+    <P>Sucht bis zu einer gewissen Stelle im Film.<BR>
+    Type 0 ist eine relative Suche von +/- Wert Sekunden.<BR>
+    Type 1 sucht bis Wert % im Film. </P></LI>
   <LI><B>audio_delay</B> (float) Wert
-         <P>Korrigiert die Audioverzögerung um Wert Sekunden</P>
-  </LI>
+    <P>Korrigiert die Audioverzögerung um Wert Sekunden</P></LI>
   <LI><B>quit</B>
-         <P>Beendet <B>MPlayer</B></P>
-  </LI>
+    <P>Beendet <B>MPlayer</B></P></LI>
   <LI><B>pause</B>
-         <P>Wechselt zwischen Pause und Weiterspielen</P>
-  </LI>
+    <P>Wechselt zwischen Pause und Weiterspielen</P></LI>
   <LI><B>grap_frames</B>
-         <P>Weiss das jemand?</P>
-  </LI>
+    <P>Weiss das jemand?</P></LI>
   <LI><B>pt_step</B> (int) Wert [(int) force=0]
-         <P>Springt zum nächsten/vorherigen Eintrag im playtree. Das Vorzeichen von Wert bestimmt die Richtung.<BR>
-            Wenn kein neuer Eintrag mehr vorhanden ist, geschieht gar nichts, es sei denn, force ist nicht 0.
-         </P>
-  </LI>
+    <P>Springt zum nächsten/vorherigen Eintrag im playtree. Das Vorzeichen von Wert bestimmt die Richtung.<BR>
+    Wenn kein neuer Eintrag mehr vorhanden ist, geschieht gar nichts, es sei denn, force ist nicht 0.</P></LI>
   <LI><B>pt_up_step</B> (int) Wert [(int) force=0]
-         <P>Wie pt_step, springt jedoch zum nächsten/vorherigen Eintrag in der übergeordneten Liste.
-           Dies ist nützlich, um eine innere Schleife im playtree zu unterbrechen.</P>
-  </LI>
+    <P>Wie pt_step, springt jedoch zum nächsten/vorherigen Eintrag in der übergeordneten Liste.
+    Dies ist nützlich, um eine innere Schleife im playtree zu unterbrechen.</P></LI>
   <LI><B>alt_src_step</B> (int) Wert
-         <P>Wenn mehr als eine Quelle vorhanden ist, wählt dies die nächste/vorherige
-           (nur unterstützt für asx Wiedergabelisten).</P>
-  </LI>
+    <P>Wenn mehr als eine Quelle vorhanden ist, wählt dies die nächste/vorherige
+    (nur unterstützt für asx Wiedergabelisten).</P></LI>
   <LI><B>sub_delay</B> (float) Wert [(int) abs=0]
-         <P>Korrigiert die Untertitel-Verzögerung um +/- Wert Sekunden oder setzt sie auf Wert Sekunden,
-            wenn abs nicht null ist.</P>
-  </LI>
+    <P>Korrigiert die Untertitel-Verzögerung um +/- Wert Sekunden oder setzt sie auf Wert Sekunden,
+    wenn abs nicht null ist.</P></LI>
   <LI><B>osd</B> [(int) level=-1]
-         <P>Wechselt den OSD-Modus oder setzt in auf level, wenn level > 0.</P>
-  </LI>
+    <P>Wechselt den OSD-Modus oder setzt in auf level, wenn level > 0.</P></LI>
   <LI><B>volume</B> (int) dir
-         <P>Erhöht/erniedrigt die Lautstärke</P>
-  </LI>
+    <P>Erhöht/erniedrigt die Lautstärke</P></LI>
   <LI><B>contrast</B> (int) Wert [(int) abs=0]</LI>
   <LI><B>brightness</B> (int) Wert [(int) abs=0]</LI>
   <LI><B>hue</B> (int) Wert [(int) abs=0]</LI>
   <LI><B>saturation</B> (int) Wert [(int) abs=0]
-         <P>Setzt/korrigiert die Video-Parameter. Die Wert Reichweite von -100 bis 100.</P>
-  </LI>
+    <P>Setzt/korrigiert die Video-Parameter. Die Wert Reichweite von -100 bis 100.</P></LI>
   <LI><B>frame_drop</B> [(int) type=-1]
-         <P>Wechselt den Framedrop-Modus.</P>
-  </LI>
+    <P>Wechselt den Framedrop-Modus.</P></LI>
   <LI><B>sub_pos</B> (int) Wert
-         <P>Korrigiert die Untertitel-Position.</P>
-  </LI>
+    <P>Korrigiert die Untertitel-Position.</P></LI>
   <LI><B>vo_fullscreen</B>
-         <P>Wechselt den Vollbildschirm-Modus.</P>
-  </LI>
+    <P>Wechselt den Vollbildschirm-Modus.</P></LI>
   <LI><B>tv_step_channel</B> (int) dir
-         <P>Wählt nächsten/vorherigen Tv-Kanal.</P>
-  </LI>
+    <P>Wählt nächsten/vorherigen Tv-Kanal.</P></LI>
   <LI><B>tv_step_norm</B>
-         <P>Ändert TV norm.</P>
-  </LI>
+    <P>Ändert TV norm.</P></LI>
   <LI><B>tv_step_chanlist</B>
-         <P>Ändert Kanalliste.</P>
-  </LI>
+    <P>Ändert Kanalliste.</P></LI>
   <LI><B>gui_loadfile</B></LI>
   <LI><B>gui_loadsubtitle</B></LI>
   <LI><B>gui_about</B></LI>
@@ -1438,10 +1342,10 @@ ENTER pt_step 1 1
   <LI><B>gui_stop</B></LI>
   <LI><B>gui_playlist</B></LI>
   <LI><B>gui_preferences</B></LI>
-  <LI><B>gui_skinbrowser</B></LI>
-         <P>GUI Aktionen</P>
+  <LI><B>gui_skinbrowser</B>
+    <P>GUI Aktionen</P></LI>
 </UL>
-</P>
+
 
 <P><B><A NAME=3.2.3>3.2.3. Steuerung von LIRC</A></B></P>
 
@@ -1469,7 +1373,7 @@ Man kann irgendein mplayer Befehl verwenden, sogar mehr als ein Befehl kann mit 
 werden. Dabei sollte das repeat Flag in .lircrc nicht vergessen werden, wenn es Sinn macht (seek,
 volume, usw.). Hier ist ein Auszug aus .lircrc:</P>
 
-<P><PRE>
+<PRE>
 begin
      button = VOLUME_PLUS
      prog = mplayer
@@ -1495,17 +1399,19 @@ begin
     prog = mplayer
     config = seek 0 1\npause
 end
-</PRE></P>
+</PRE>
 
 <P>Wenn du die Standard-Position der LIRC-Konfigurationsdatei (~/.lircrc) nicht
 magst, verwende den -lircconf &lt;Dateiname&gt; Parameter um eine andere Datei
 anzugeben.</P>
+
 
 <P><B><A NAME=3.2.4>3.2.4. Slave Modus</A></B></P>
 
 <P>Der Slave-Modues erlaubt es einem, ein einfaches Frontend für <B>MPlayer</B> zu erstellen. Wenn aktiviert
 (mit der <CODE>-slave</CODE> Option) liest <B>MPlayer</B> durch neue Zeilen unterbrochene Befehle (\n)
 vom stdin.</P>
+
 
 <P><B><A NAME=3.3>3.3. Streaming von Netzwerk oder Pipes</A></B></P>
 
@@ -1514,11 +1420,9 @@ MMS Protokoll.</P>
 
 <P>Abspielen geht einfach durch die Hinzufügung der URL zu der Kommandozeile. <B>MPlayer</B>
 berücksichtigt auch die http_proxy Variable und benutzt einen Proxy, falls vorhanden.
-Der Proxygebrauch kann auch erzwungen werden :</P>
+Der Proxygebrauch kann auch erzwungen werden:</P>
 
-<P><CODE>mplayer 
-http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</CODE>
-</P>
+<P><CODE>mplayer http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</CODE></P>
 
 <P><B>MPlayer</B> kann auch von stdin lesen (NICHT benannte Pipes). Dies ist ein
 Beispiel für die Verwendung um von FTP zu spielen:</P>
@@ -1528,35 +1432,42 @@ Beispiel für die Verwendung um von FTP zu spielen:</P>
 aktivieren:</P> 
 <P><CODE>wget ftp://micorsops.com/etwas.avi -O - | mplayer -cache 8192 -</CODE></P>
 
-<P><B><A NAME=4>4. <A HREF="faq.html">FAQ Sektion</A></A></B></P>
 
-<P><B><A NAME=5>5. <A HREF="cd-dvd.html">CD/DVD Sektion</A></A></B></P>
+<P><B><A NAME=4></A>4. <A HREF="faq.html">FAQ Sektion</A></A></B></P>
 
-<P><B><A NAME=6>6. Verschiedene OS's</A></B></P>
+<P><B><A NAME=5></A>5. <A HREF="cd-dvd.html">CD/DVD Sektion</A></A></B></P>
 
-<P><B><A NAME=6.1>6.1. Debian Paketierung</A></B></P>
+<P><B><A NAME=6></A>6. Verschiedene OS's</A></B></P>
+
+<P><B><A NAME=6.1></A>6.1. Debian Paketierung</A></B></P>
 
 <P>Um das Paket zu machen, besorge dir die CVS-Version oder .tgz, entpacke sie
 und wechsle in das Programm-Verzeichnis:</P>
 
-<P><PRE>    cd main
-    fakeroot debian/rules binary</PRE></P>
+<PRE>
+    cd main
+    fakeroot debian/rules binary
+</PRE>
 
 <P>(... MPlayer stellt die Hard-/Software fest, kompiliert sich und.. )
   dpkg-deb: building package `mplayer' in `../mplayer_0.18-1_i386.deb'.</P>
 
 <P>Und nun einfach root werden und:</P>
 
-<P><PRE>	dpkg -i ../mplayer_0.18-1_i386.deb als root.</PRE></P>
+<PRE>
+	dpkg -i ../mplayer_0.18-1_i386.deb als root.
+</PRE>
 
 <P>So sieht es dann aus:</P>
 
-<P><PRE>    eyck@incubus:/src/main$ sudo dpkg -i ../mplayer_0.18-1_i386.deb 
+<PRE>
+    eyck@incubus:/src/main$ sudo dpkg -i ../mplayer_0.18-1_i386.deb 
     Password:
     (Reading database ... 26946 files and directories currently installed.)
     Preparing to replace mplayer 0.17a-1 (using ../mplayer_0.18-1_i386.deb)
     Unpacking replacement mplayer ...
-    Setting up mplayer (0.18-1) ...</PRE></P>
+    Setting up mplayer (0.18-1) ...
+</PRE>
 
 
 <P><B><A NAME=6.2>6.2. FreeBSD</A></B></P>
@@ -1573,6 +1484,7 @@ verwenden (FreeBSD-STABLE erforderlich, oder verwende Kernel-Patches).</P>
 symbolischen Link setzen: <CODE>ln -s /dev/(dein CD-ROM Device) /dev/cdrom</CODE></P>
 
 <P>Es gibt bis jetzt keine DVD-Unterstützung unter FreeBSD.</P>
+
 
 <P><B><A NAME=6.3>6.3. Solaris</A></B></P>
 
@@ -1596,8 +1508,10 @@ installiert haben.</P>
 das originale Solaris Make wird nicht funktionieren. Dies ist ein typischer Fehler, denn
 du bekommen wirst, wenn du Solaris' Make anstatt von GNU Make verwendest:</P>
 
-<P><PRE>    % /usr/ccs/bin/make
-    make: Fatal error in reader: Makefile, line 25: Unexpected end of line seen</PRE></P>
+<PRE>
+    % /usr/ccs/bin/make
+    make: Fatal error in reader: Makefile, line 25: Unexpected end of line seen
+</PRE>
 
 <P>Unter Solaris SPARC brauchst du den GNU C/C++ Compiler; es spielt keine Rolle
 ob der GNU C/C++ Compiler mit oder ohne GNU Assembler konfiguriert ist.</P>
@@ -1615,10 +1529,12 @@ Skript, wo es den GNU "as" auf deinem System finden kann).</P>
 <P>Fehlermeldungen von configure auf einem Solaris x86 System bei Verwendung von
 GCC ohne GNU Assembler:</P>
 
-<P><PRE>    % configure
+<PRE>
+    % configure
     ...
     Checking assembler (/usr/ccs/bin/as) ... , failed
-    Please upgrade(downgrade) binutils to 2.10.1...</PRE></P>
+    Please upgrade(downgrade) binutils to 2.10.1...
+</PRE>
 
 <P>(Lösung: Installiere und verwende einen gcc, der mit "--with-as=gas"
 konfiguriert ist)</P>
@@ -1626,14 +1542,16 @@ konfiguriert ist)</P>
 <P>Ein typischer Fehler beim Kompilieren mit einem GNU C Compiler, der nicht den
 GNU as verwendet:</P>
   
-<P><PRE>    % gmake
+<PRE>
+    % gmake
     ...
     gcc -c -Iloader -Ilibvo -O4 -march=i686 -mcpu=i686 -pipe -ffast-math 
 	-fomit-frame-pointer  -I/usr/local/include   -o mplayer.o mplayer.c
     Assembler: mplayer.c
     "(stdin)", line 3567 : Illegal mnemonic
     "(stdin)", line 3567 : Syntax error
-    ... more "Illegal mnemonic" and "Syntax error" errors ...</PRE><P>
+    ... more "Illegal mnemonic" and "Syntax error" errors ...
+</PRE>
 
 <P>Für DVD-Unterstützung musst du die gepatchte Libcss installieren. Patch:
 <A HREF="http://www.tools.de/solaris/mplayer/">http://www.tools.de/solaris/mplayer/</A>.</P>
@@ -1641,17 +1559,16 @@ GNU as verwendet:</P>
 <P>Aufgrund dieser zwei Bugs in Solaris 8 x86 ist es nicht möglich, DVDs mit
 einer Speicherkapazität von mehr als 4GB zu verwenden:</P>
 
-<P><UL><LI>Der sd(7D) Treiber von Solaris 8 x86 hat eine Fehler beim Zugriff auf
-einen Dateiblock >4GB auf einem Gerät, dass eine logische Blockgröße != DEV_BSIZE
-(z.B. CDROM und DVD Medien) aufweist. Beim Zugriff auf eine Adresse >4 GB gibt
-es also einen  32bit Int Overflow.
-(<A HREF="http://groups.yahoo.com/group/solarisonintel/message/22516">http://groups.yahoo.com/group/solarisonintel/message/22516</A>)</LI>
-
-<LI>Ein ähnlicher Bug existiert im hsfs(7FS) Dateisystem-Code (ISO9660), hsfs
-unterstützt zur Zeit keine Partitions/Disks >4GB.
-(<A HREF="http://groups.yahoo.com/group/solarisonintel/message/22592">http://groups.yahoo.com/group/solarisonintel/message/22592</A>)</LI>
-
-</UL></P>
+<UL>
+  <LI>Der sd(7D) Treiber von Solaris 8 x86 hat eine Fehler beim Zugriff auf
+    einen Dateiblock >4GB auf einem Gerät, dass eine logische Blockgröße != DEV_BSIZE
+    (z.B. CDROM und DVD Medien) aufweist. Beim Zugriff auf eine Adresse >4 GB gibt
+    es also einen  32bit Int Overflow.
+    (<A HREF="http://groups.yahoo.com/group/solarisonintel/message/22516">http://groups.yahoo.com/group/solarisonintel/message/22516</A>)</LI>
+  <LI>Ein ähnlicher Bug existiert im hsfs(7FS) Dateisystem-Code (ISO9660), hsfs
+    unterstützt zur Zeit keine Partitions/Disks >4GB.
+    (<A HREF="http://groups.yahoo.com/group/solarisonintel/message/22592">http://groups.yahoo.com/group/solarisonintel/message/22592</A>)</LI>
+</UL>
 
 <P>Bei Solaris mit einer UltraSPARC CPU kannst du zusätzliche Geschwindigkeit
 gewinnen, indem du die VIS-Befehle für rechenintensive Operationen verwendest.
@@ -1661,13 +1578,16 @@ Aufrufen von Funktionen in Suns <A HREF="http://www.sun.com/sparc/vis/mediaLib.h
 <P>VIS-Beschleunigungen von mediaLib werden für MPEG2 Video-Decodierung und
 für Color Space Konversationen im Videoausgabetreiber verwendet.</P>
 
+
 <P><B><A NAME=6.4>6.4. StrongARM</A></B></P>
 
 <P>Es wurde berichtet, dass man <B>MPlayer</B> auf einem StrongARM kompilieren
 kann. Verwende die folgende Kommandozeile:</P>
 
-<P><PRE>    ./configure --target=arm-linux --disable-css --with-x11libdir=/usr/arm/lib
-	--with-x11incdir=/usr/arm/lib --disable-gcc-checking</PRE></P>
+<PRE>
+    ./configure --target=arm-linux --disable-css --with-x11libdir=/usr/arm/lib
+	--with-x11incdir=/usr/arm/lib --disable-gcc-checking
+</PRE>
 
 
 <P><B><A NAME=6.5>6.5. Silicon Graphics Indigo / IRIX</A></B></P>
@@ -1706,152 +1626,154 @@ Kernel mit "<CODE>option USER_LDT</CODE>" neu kompiliert werden.</P>
 <CODE>/dev/dvd</CODE> nicht zu finden, dann erstelle einen symbolischen Link
 (<CODE>ln -s /dev/rcd0c /dev/cdrom</CODE>)</P>
   
+
+<P><B><A NAME=6.8>6.8. Cygwin</A></B></P>
+
+<P>Dazu muss vom <B>MPlayer</B> Verzeichnis aus eine Kopie oder ein symbolischer Link
+von <CODE>etc/cygwin_inttypes.h</CODE> nach <CODE>/usr/include/inttypes.h</CODE>
+angelegt werden, um <B>MPlayer</B> zu kompilieren. Ansonsten wird er sich über die
+fehlende <CODE>intypes.h</CODE> beklagen.</P>
+
 	
 <P><B><A NAME=B>Anhang B - Mailing-Listen</A></B></P>
 
 <P>Es gibt einige öffentliche Mailinglisten für <B>MPlayer</B>.
 Anmelden kann man sich unter den folgenden Adressen:</P>
 
-<P><UL>
-<LI>MPlayer Entwickler Liste:<BR>
-<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng</A>
-<P>Diese Liste ist über MPlayer Entwicklung! Es wird über Interface/API
-Änderungen, neue Librarys, Code-Optimierungencode und ./configure Änderungen diskuttiert.
-Du kannst auch deine Patches hier herschicken.
-Sende KEINE Fehlerberichte, Anwenderfragen, Featurewünsche oder Beschwerden 
-hierher! Diese Liste sollte wenig verwendet werden.</P>
-
-</LI><LI>MPlayer Anwender (Users) Liste:<BR>
-<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-users">http://mplayerhq.hu/mailman/listinfo/mplayer-users</A>
-<P><UL>
-    <LI>sende hier Fehlerberichte (nach lesen von DOCS/<A HREF="#D">BUGS</A>, Anhang <A HREF="#C">C</A>)</LI>
-    <LI>sende hier Featurewünsche (nach lesen von DOCS/TODO)</LI>
-    <LI>sende hier Anwenderfragen (nach lesen von DOCS/TODO)</LI>
-</UL></P>
-
-</LI><LI>MPlayer Anwender (Users) Liste (ungarisch):<BR>
-<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok">http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok</A>
-<P><UL>
-    <LI>Liste mit ungarischer Sprache</LI>
-    <LI>Inhalt? Wir werden sehen... hauptsächlich Beschwerden und RTFM-Fragen :(</LI>
-</UL></P>
-
-
-</LI><LI>MPlayer &amp; Matrox G200/G400/G450/G550 Anwender:<BR>
-<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-matrox">http://mplayerhq.hu/mailman/listinfo/mplayer-matrox</A>
-<P>Sende hierher Matrox-betreffende Fragen<UL>
-    <LI>Sachen über mga_vid</LI>
-    <LI>Matroxs offizielle Beta Treiber (für X 4.x.x)</LI>
-    <LI>und über matroxfb-TVout.</LI>
-</UL></P>
-
-</LI><LI>MPlayer &amp; DVB-Karten Anwender:<BR>
-<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb">http://mplayerhq.hu/mailman/listinfo/mplayer-dvb</A>
-<P>Dinge im Bezug auf DVB-Hardwaredecoder Karten. (NICHT dxr3!)</P>
-
-</LI><LI>MPlayer CVS-log:<BR>
-<A HREF="http://mp.dev.hu/mailman/listinfo/mplayer-cvslog">http://mp.dev.hu/mailman/listinfo/mplayer-cvslog</A>
-<P>Sende hier nur Fragen über CVS-Änderungen. (wenn du nicht verstehst, warum
-eine Änderung erforderlich ist, du eine bessere Lösung hast oder einen möblichen
-Fehler/Problem im Patch gefunden hast)
-Sei dir aber sicher, dass der Ziel-Entwickler diese Liste liest!</P>
-
-</LI></UL></P>
+<UL>
+  <LI>MPlayer Entwickler Liste:<BR>
+    <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng</A>
+    <P>Diese Liste ist über MPlayer Entwicklung! Es wird über Interface/API
+    Änderungen, neue Librarys, Code-Optimierungencode und ./configure Änderungen diskuttiert.
+    Du kannst auch deine Patches hier herschicken.
+    Sende KEINE Fehlerberichte, Anwenderfragen, Featurewünsche oder Beschwerden 
+    hierher! Diese Liste sollte wenig verwendet werden.</P></LI>
+  <LI>MPlayer Anwender (Users) Liste:<BR>
+    <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-users">http://mplayerhq.hu/mailman/listinfo/mplayer-users</A>
+    <P><UL>
+      <LI>sende hier Fehlerberichte (nach lesen von DOCS/<A HREF="#D">BUGS</A>, Anhang <A HREF="#C">C</A>)</LI>
+      <LI>sende hier Featurewünsche (nach lesen von DOCS/TODO)</LI>
+      <LI>sende hier Anwenderfragen (nach lesen von DOCS/TODO)</LI>
+    </UL></P></LI>
+  <LI>MPlayer Anwender (Users) Liste (ungarisch):<BR>
+    <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok">http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok</A>
+    <P><UL>
+      <LI>Liste mit ungarischer Sprache</LI>
+      <LI>Inhalt? Wir werden sehen... hauptsächlich Beschwerden und RTFM-Fragen :(</LI>
+    </UL></P></LI>
+  <LI>MPlayer &amp; Matrox G200/G400/G450/G550 Anwender:<BR>
+    <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-matrox">http://mplayerhq.hu/mailman/listinfo/mplayer-matrox</A>
+    <P>Sende hierher Matrox-betreffende Fragen
+    <UL>
+      <LI>Sachen über mga_vid</LI>
+      <LI>Matroxs offizielle Beta Treiber (für X 4.x.x)</LI>
+      <LI>und über matroxfb-TVout.</LI>
+    </UL></P></LI>
+  <LI>MPlayer &amp; DVB-Karten Anwender:<BR>
+    <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb">http://mplayerhq.hu/mailman/listinfo/mplayer-dvb</A>
+    <P>Dinge im Bezug auf DVB-Hardwaredecoder Karten. (NICHT dxr3!)</P></LI>
+  <LI>MPlayer CVS-log:<BR>
+    <A HREF="http://mp.dev.hu/mailman/listinfo/mplayer-cvslog">http://mp.dev.hu/mailman/listinfo/mplayer-cvslog</A>
+    <P>Sende hier nur Fragen über CVS-Änderungen. (wenn du nicht verstehst, warum
+    eine Änderung erforderlich ist, du eine bessere Lösung hast oder einen möblichen
+    Fehler/Problem im Patch gefunden hast)
+    Sei dir aber sicher, dass der Ziel-Entwickler diese Liste liest!</P></LI>
+</UL>
 
 <P>HINWEIS: Sprache der oberen Listen ist ENGLISCH, ausser wenn es extra
 anders angeben ist. Bitte sende keine Nachrichten in andere Sprache!</P>	   
 
-<P>HINWEIS: Du kannst das durchsuchbare Mailinglisten-Archiv <A HREF="http://www.mplayerhq.hu/cgi-bin/htsearch">hier</A> erreichen<P><B><A NAME=C><A HREF="bugreports.html">Anhang C</A> - Wie man einen Fehler berichtet</A></B></P>
+<P>HINWEIS: Du kannst das durchsuchbare Mailinglisten-Archiv <A HREF="http://www.mplayerhq.hu/cgi-bin/htsearch">hier</A> erreichen<P><B><A NAME=C></A><A HREF="bugreports.html">Anhang C</A> - Wie man einen Fehler berichtet</A></B></P>
+
 
 <P><B><A NAME=D>Anhang D - Bekannte Probleme</A></B></P>
 
 <P>Spezielle System-/CPU-spezifische Bugs/Probleme:</P>
+
 <UL>
-<LI>SIGILL (signal 4) auf einem P3 mit 2.2.x Kernel:<BR>
-  Problem: Kernel 2.2.x hat keinen richtige SSE Unterstützung<BR>
-  Endlösung: update den Kernel auf 2.4.x<BR>
-  Abhilfe: ./configure --disable-sse</LI>
-
-<LI>Allgemein SIGILL (signal 4):<BR>
-  Problem: du hast MPlayer auf einem anderem Computer kompiliert, als auf dem du
-  abspielst (z.B. kompiliert auf einem P3 und wiedergabe auf eine Celeron)<BR>
-  Endlösung: kompiliere MPlayer auf dem Rechner, wie du abspielst<BR>
-  Abhilfe: ./configure --disable-sse usw.</LI> 
-
-<LI>"Internal buffer inconsistency" wird während der Verwendung von MEncoder:<BR>
-  Problem: bekannter gcc 2.96 Bug, wurde noch nicht gelöst. Wenn du gcc 2.95 nimmst,
-  hast du eine libmp3lame Bibliothek dir mit gcc 2.96 kompiliert wurde (möglichweise aus
-  einem deb/rpm Paket?). Prüfe welche Bibliothek MEncoder findet: ldd mencoder.</LI>
+  <LI>SIGILL (signal 4) auf einem P3 mit 2.2.x Kernel:<BR>
+    Problem: Kernel 2.2.x hat keinen richtige SSE Unterstützung<BR>
+    Endlösung: update den Kernel auf 2.4.x<BR>
+    Abhilfe: ./configure --disable-sse</LI>
+  <LI>Allgemein SIGILL (signal 4):<BR>
+    Problem: du hast MPlayer auf einem anderem Computer kompiliert, als auf dem du
+    abspielst (z.B. kompiliert auf einem P3 und wiedergabe auf eine Celeron)<BR>
+    Endlösung: kompiliere MPlayer auf dem Rechner, wie du abspielst<BR>
+    Abhilfe: ./configure --disable-sse usw.</LI> 
+  <LI>"Internal buffer inconsistency" wird während der Verwendung von MEncoder:<BR>
+    Problem: bekannter gcc 2.96 Bug, wurde noch nicht gelöst. Wenn du gcc 2.95 nimmst,
+    hast du eine libmp3lame Bibliothek dir mit gcc 2.96 kompiliert wurde (möglichweise aus
+    einem deb/rpm Paket?). Prüfe welche Bibliothek MEncoder findet: ldd mencoder.</LI>
+  <LI>Hässlicher MP2/MP3-Ton auf PPC:<BR>
+    Problem: bekannter gcc Fehlcompilierungs-Bug auf PPC Platformen, 
+    es ist noch keine Fehlerbehebung vorhanden.<BR>
+    Abhilfe: benutze FFmpeg's (langsamen) MP1/MP2/MP3 Decoder (<CODE>-ac ffmpeg</CODE>)</LI>
+  <LI>sig11 in libmpeg2, beim Skalieren und Encodieren:<BR>
+    Problem: bekannter gcc 2.95.2 MMX Bug, aktualisiere auf 2.95.3.</LI>
 </UL>
-
-<LI>Hässlicher MP2/MP3-Ton auf PPC:<BR>
-  Problem: bekannter gcc Fehlcompilierungs-Bug auf PPC Platformen, 
-  es ist noch keine Fehlerbehebung vorhanden.<BR>
-  Abhilfe: benutze FFmpeg's (langsamen) MP1/MP2/MP3 Decoder (<CODE>-ac
-ffmpeg</CODE>)</LI>
-
-<LI>sig11 in libmpeg2, beim Skalieren und Encodieren:<BR>
-  Problem: bekannter gcc 2.95.2 MMX Bug, aktualisiere auf 2.95.3.</LI>
- </UL>
 
 <P>Verschiedene A-V Sync- und andere Audio-Probleme</P>
 
-Allgemein Audio-Abbruch und ruckartiger Sound (existiert mit allen oder einigen Dateien)<BR>
-<UL>
-<LI>am häufigsten: fehlerhafte Audio-Treiber! - es sollten unterschiedliche
-  Treiber getestet werden, so ALSA 0.9 OSS Emulation mit -ao oss und auch
-  -ao sdl hilft teilweise.
-  Wenn die Datei mit -nosound ohne Probleme wiedergegeben wird, ist das
-  höchstwahrscheinlich ein Soundkarten Treiber-Problem.</LI>
-<LI>Audio Pufferprobleme (Puffergröße schlecht erkannt)<BR>
-  Abhilfe: mplayer -abs</LI>
-<LI>Samplerate Probleme - vielleicht wird die Samplerate in den benutzten Dateien
-  von der Karte nicht unterstützt - dazu sollte das Resampling Plugin (-aop) 
-  getestet werden</LI>
-<LI>Langsamer Rechner (CPU oder Grafik)<BR>
-  versuche es mit -vo null, wenn es gut funktioniert hast du eine langsame
-  VGA-Karte oder einen langsamen Treiber.<BR>
-  Abhilfe: kaufe eine schneller Karte oder lese die Dokumentationen, wie man die
-  Geschwingkeiten erhöht.<BR>
-  Versuche auch -framedrop</LI>
-</UL><BR>
+<P>Allgemein Audio-Abbruch und ruckartiger Sound (existiert mit allen oder einigen Dateien):</P>
 
-Audio (verschiebt sich / verliert die Synchronisation / bricht nach einer gewissen Zeit ab) 
-bei einer oder mehreren Dateien<BR>
 <UL>
-<LI>defekte Datei<BR>
-Abhilfe:
-<UL>
-    <LI>-ni oder -nobps Option (für nicht-interlaced oder defekte Dateien)<BR></LI>
-  und/oder
-    <LI>-mc 0 (erforderlich bei Dateien mit schlechtem Interleave und VBR-Audio)<BR></LI>
-  und/oder
-    <LI>-delay Option oder +/- Tasten bei Abspielen</LI>
+  <LI>am häufigsten: fehlerhafte Audio-Treiber! - es sollten unterschiedliche
+    Treiber getestet werden, so ALSA 0.9 OSS Emulation mit -ao oss und auch
+    -ao sdl hilft teilweise.
+    Wenn die Datei mit -nosound ohne Probleme wiedergegeben wird, ist das
+    höchstwahrscheinlich ein Soundkarten Treiber-Problem.</LI>
+  <LI>Audio Pufferprobleme (Puffergröße schlecht erkannt)<BR>
+    Abhilfe: mplayer -abs</LI>
+  <LI>Samplerate Probleme - vielleicht wird die Samplerate in den benutzten Dateien
+    von der Karte nicht unterstützt - dazu sollte das Resampling Plugin (-aop) 
+    getestet werden</LI>
+  <LI>Langsamer Rechner (CPU oder Grafik)<BR>
+    versuche es mit -vo null, wenn es gut funktioniert hast du eine langsame
+    VGA-Karte oder einen langsamen Treiber.<BR>
+    Abhilfe: kaufe eine schneller Karte oder lese die Dokumentationen, wie man die
+    Geschwingkeiten erhöht.<BR>
+    Versuche auch -framedrop</LI>
 </UL>
-Wenn keine dieser Optionen hilft, kann die Datei auf den Server geladen werden.
-Wir werden sie untersuchen (und das Problem lösen).
-<LI>deine Soundkarte unterstützt keine 48KHz Wiedergabe<BR>
-Abhilfe: kaufe eine bessere Soundkarte... versuche die Bilder/Sekunde um 10% zu vermindern 
-(verwende -fps 27 bei 30fps-Filmen) oder verwende das Resampler-Plugin</LI>
-<LI>langsamer Rechner<BR>
-(wenn A-V nicht etwa 0 ist und die letzte Nummer in der Status-Leiste steigt)<BR>
-Abhilfe: -framedrop</LI>
-</UL><BR>
 
-Überhaupt kein Ton:<BR>
+<P>Audio (verschiebt sich / verliert die Synchronisation / bricht nach einer gewissen Zeit ab) 
+bei einer oder mehreren Dateien:</P>
+
 <UL>
-<LI>deine Datei verwendet eine nicht unterstützten Audio-Codec<BR>
-Abhilfe: lese die Dokumentationen und hilf uns, dass wir ihn in Zukunft unterstützen</LI>
+  <LI>defekte Datei<BR>
+    Abhilfe:
+    <UL>
+      <LI>-ni oder -nobps Option (für nicht-interlaced oder defekte Dateien)<BR>
+        und/oder</LI>
+      <LI>-mc 0 (erforderlich bei Dateien mit schlechtem Interleave und VBR-Audio)<BR>
+        und/oder</LI>
+      <LI>-delay Option oder +/- Tasten bei Abspielen</LI>
+    </UL>
+    Wenn keine dieser Optionen hilft, kann die Datei auf den Server geladen werden.
+    Wir werden sie untersuchen (und das Problem lösen).
+  <LI>deine Soundkarte unterstützt keine 48KHz Wiedergabe<BR>
+    Abhilfe: kaufe eine bessere Soundkarte... versuche die Bilder/Sekunde um 10% zu vermindern 
+    (verwende -fps 27 bei 30fps-Filmen) oder verwende das Resampler-Plugin</LI>
+  <LI>langsamer Rechner<BR>
+    (wenn A-V nicht etwa 0 ist und die letzte Nummer in der Status-Leiste steigt)<BR>
+    Abhilfe: -framedrop</LI>
+</UL>
+
+<P>Überhaupt kein Ton:</P>
+
+<UL>
+  <LI>deine Datei verwendet eine nicht unterstützten Audio-Codec<BR>
+    Abhilfe: lese die Dokumentationen und hilf uns, dass wir ihn in Zukunft unterstützen</LI>
 </UL>
   
-Überhaupt kein Bild (nur ein graues/grünes Fenster):<BR>
+<P>Überhaupt kein Bild (nur ein graues/grünes Fenster):</P>
+
 <UL>
-<LI>deine Datei verwendet einen nicht unterstützten Videocodec<BR>
-  Abhilfe: lies die Dokumentation und hilf uns den Codec zu unterstützen</LI>
-<LI>der automatisch gewählte Codec kann die Datei nicht decodieren, versuche
-  einen anderen mit den -vc oder -vfm Optionen zu wählen.</LI>
-<LI>es wird versuchst eine DivX 3.x Datei mit dem opendivx oder XviD Decoder
-  (-vc odivx) abzuspielen - installiere Divx4Linux kompiliere MPlayer neu</LI>
+  <LI>deine Datei verwendet einen nicht unterstützten Videocodec<BR>
+    Abhilfe: lies die Dokumentation und hilf uns den Codec zu unterstützen</LI>
+  <LI>der automatisch gewählte Codec kann die Datei nicht decodieren, versuche
+    einen anderen mit den -vc oder -vfm Optionen zu wählen.</LI>
+  <LI>es wird versuchst eine DivX 3.x Datei mit dem opendivx oder XviD Decoder
+    (-vc odivx) abzuspielen - installiere Divx4Linux kompiliere MPlayer neu</LI>
 </UL>
 
 <P>Videoausgabe-Probleme:</P>
@@ -1861,14 +1783,19 @@ werden (noch) nicht von allen Treiber unterstützt. Also ist dies kein Bug wenn
 es nicht funktioniert. Nur einige Treiber unterstützten Scaling/Zooming,
 erwarte das nicht von x11 oder dga.</P>
 
-<P>Zucken des OSD/Untertiteln:<BR>
- - x11 Treiber: Sorry, es kann zur Zeit nicht gelöst werden (GEFIXT)<BR>
- - xv Treiber: verwende die -double Option (GEFIXT)</P>
+<P>Zucken des OSD/Untertiteln:</P>
 
-<P>Grünes Bild bei der Verwendung von mga_vid (-vo mga / -vo xmga):<BR>
- - mga_vid hat die Grösse des RAMs falsch erkannt, lade das Modul neu mit der
- Option mga_ram_size<BR>
-</P>
+<UL>
+  <LI>x11 Treiber: Sorry, es kann zur Zeit nicht gelöst werden (GEFIXT)</LI>
+  <LI>xv Treiber: verwende die -double Option (GEFIXT)</LI>
+</UL>
+
+<P>Grünes Bild bei der Verwendung von mga_vid (-vo mga / -vo xmga):</P>
+
+<UL>
+  <LI>mga_vid hat die Grösse des RAMs falsch erkannt, lade das Modul neu mit der
+    Option mga_ram_size</LI>
+</UL>
 
 </BODY>
 </HTML>

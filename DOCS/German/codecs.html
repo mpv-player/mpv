@@ -1,14 +1,14 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
 
 <HEAD>
 <LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
 </HEAD>
 
-<BODY BGCOLOR=WHITE>
-
+<BODY>
 
 <P><B><A NAME=2.2>2.2. Unterstützte Codecs</A></B></P>
-
 
 <P><B><A NAME=2.2.1>2.2.1. Video Codecs</A></B></P>
 
@@ -16,23 +16,25 @@
 täglich generierte Liste!!!</P>
 
 <P>Die wichtigsten Video-Codecs:</P>
+
 <UL>
-<LI>MPEG1 (VCD) und MPEG2 (DVD) video</LI>
-<LI>DivX ;-), OpenDivX (DivX4), DivX 5.01, 3ivx, M$ MPEG4 v2 und andere MPEG4 Varianten</LI>
-<LI>Windows Media Video 7 (WMV1) und 8 (WMV2), verwendet in .wmv-Dateien</LI>
-<LI>Cinepak und Intel Indeo Codecs (3.1, 3.2, 4.1, 5.0)</LI>
-<LI>MJPEG, AVID, VCR2, ASV2 und andere Hardwareformate</LI>
-<LI>XAnim Codecs</LI>
-<LI>VIVO 1.0, 2.0, I263 und andere h263(+) Varianten</LI>
-<LI>FLI/FLC</LI>
-<LI>RealVideo 1.0 von ffmpeg und RealVideo 2.0, 3.0 durch
+  <LI>MPEG1 (VCD) und MPEG2 (DVD) video</LI>
+  <LI>DivX ;-), OpenDivX (DivX4), DivX 5.01, 3ivx, M$ MPEG4 v2 und andere MPEG4 Varianten</LI>
+  <LI>Windows Media Video 7 (WMV1) und 8 (WMV2), verwendet in .wmv-Dateien</LI>
+  <LI>Cinepak und Intel Indeo Codecs (3.1, 3.2, 4.1, 5.0)</LI>
+  <LI>MJPEG, AVID, VCR2, ASV2 und andere Hardwareformate</LI>
+  <LI>XAnim Codecs</LI>
+  <LI>VIVO 1.0, 2.0, I263 und andere h263(+) Varianten</LI>
+  <LI>FLI/FLC</LI>
+  <LI>RealVideo 1.0 von ffmpeg und RealVideo 2.0, 3.0 durch
     die RealPlayer Libraries</LI>
-<LI>Verschiedene alte, einfache RLE-ähnliche Formate</LI>
+  <LI>Verschiedene alte, einfache RLE-ähnliche Formate</LI>
 </UL>
 
 <P>Wenn du einen Codec hast, der noch nicht aufgelistet und unterstützt ist,
 lies <A HREF="#2.2.3">Win32 Codec-Importierungs HOWTO</A> und hilf uns, 
 die Unterstützung hinzuzufügen!</P>
+
 
 <P><B><A NAME=2.2.1.1>2.2.1.1. DivX4/DivX5</A></B></P>
 
@@ -48,12 +50,14 @@ decodieren, die mit diesen relativ unbekannten DivX-Codecs erzeugt wurden!
 Dazu ist er noch um einiges schneller als die traditionelle Win32 DivX DLL
 aber immer noch langsamer als libavcodec. Der Gebrauch dieses Codecs ist 
 desshalb <B>ENTMUTIGEND</B>. Er lässt sich jedoch trotzdem zur Encodierung 
-verwenden. Ein Nachteil diese Codecs ist, dass er zur Zeit Closed-Source ist. </P>
+verwenden. Ein Nachteil diese Codecs ist, dass er zur Zeit Closed-Source ist.</P>
 
 <P>Der Codec kann von einer der folgenden URLs heruntergeladen werden:</P>
 
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://avifile.sourceforge.net">http://avifile.sourceforge.net</A></P>
-&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://divx.com">http://divx.com</A></P>
+<UL>
+  <LI><A HREF="http://avifile.sourceforge.net">http://avifile.sourceforge.net</A></LI>
+  <LI><A HREF="http://divx.com">http://divx.com</A></LI>
+</UL>
 
 <P>Entpacke es und starte <CODE>./install.sh</CODE> als Root.</P>
 
@@ -71,13 +75,13 @@ zur gleichen Zeit in <B>MPlayer</B> einkompiliert werden.</P>
 bei der Verwendung des Codecs folgende Optionen auswählen kann:</P>
 
 <TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><CODE>-vc&nbsp;odivx</CODE></TD><TD>&nbsp;&nbsp;</TD>
-<TD>Verwendet den Codec nach OpenDivX-Art. 
-In diesem Fall produziert es YV12 Bilder in seinem eigenen Buffer, und
-<B>MPlayer</B> führt die Colorspace-Konversion via libvo durch (<B>EMPFOHLEN</B>).</TD><TR>
-<TD></TD><TD VALIGN=top><CODE>-vc&nbsp;divx4</CODE></TD><TD></TD>
-<TD>verwendet die Colorspace-Konversion des Codecs. 
-In diesem Fall kannst du auch YUY2/UYVY verwenden.</TD><TR>
+  <TR><TD>&nbsp;&nbsp;</TD><TD VALIGN=top><CODE>-vc&nbsp;odivx</CODE></TD><TD>&nbsp;&nbsp;</TD>
+    <TD>Verwendet den Codec nach OpenDivX-Art. 
+    In diesem Fall produziert es YV12 Bilder in seinem eigenen Buffer, und
+    <B>MPlayer</B> führt die Colorspace-Konversion via libvo durch (<B>EMPFOHLEN</B>).</TD></TR>
+  <TR><TD></TD><TD VALIGN=top><CODE>-vc&nbsp;divx4</CODE></TD><TD></TD>
+    <TD>verwendet die Colorspace-Konversion des Codecs. 
+    In diesem Fall kannst du auch YUY2/UYVY verwenden.</TD></TR>
 </TABLE>
 
 <P>Die <CODE>-vc odivx</CODE> Methode ist normalerweise schneller, da es die Daten in einem YV12
@@ -94,12 +98,12 @@ schnellste Lösung.</P>
 Option <CODE>-oldpp</CODE>. Der Bereich der Werte ist jedoch seltsam:</P>
 
 <TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD>0</TD>
-<TD>&nbsp;&nbsp;</TD><TD>kein Postprocessing</TD><TR>
-<TD>&nbsp;&nbsp;</TD><TD>10 .. 20</TD>
-<TD>&nbsp;&nbsp;</TD><TD>Postprocessing, normal (wie Level 2 mit DivX-DS)</TD><TR>
-<TD>&nbsp;&nbsp;</TD><TD>30 .. 60</TD>
-<TD>&nbsp;&nbsp;</TD><TD>starkes Postprocessing, benötigt viel CPU Zeit (wie Level 4 bei DivX-DS)</TD><TR>
+  <TR><TD>&nbsp;&nbsp;</TD><TD>0</TD>
+    <TD>&nbsp;&nbsp;</TD><TD>kein Postprocessing</TD></TR>
+  <TR><TD>&nbsp;&nbsp;</TD><TD>10 .. 20</TD>
+    <TD>&nbsp;&nbsp;</TD><TD>Postprocessing, normal (wie Level 2 mit DivX-DS)</TD></TR>
+  <TR><TD>&nbsp;&nbsp;</TD><TD>30 .. 60</TD>
+    <TD>&nbsp;&nbsp;</TD><TD>starkes Postprocessing, benötigt viel CPU Zeit (wie Level 4 bei DivX-DS)</TD></TR>
 </TABLE>
 
 
@@ -143,6 +147,7 @@ Bibliothek (library) zu erhalten.</P>
 <P>Mit FFmpeg und meiner Matrox G400 kann ich sogar DivX-Filme in hoher 
 Auflösung auf meinem K6/2 500 ohne Framedrops betrachten.</P>
 
+
 <P><B><A NAME=2.2.1.3>2.2.1.3. XAnim Codecs</A></B></P>
 
 <P>Vorwort:<BR>
@@ -150,26 +155,23 @@ Es ist darauf hinzuweisen, dass die XAnim Binary-Codecs mit einem Textstück
 geliefert werden, dass eine legal bindende Softwarelizenz sein soll, welche
 (neben einigen anderen Einschränkungen) dem Benutzer das Verwenden der Codecs mit
 anderen Programmen als XAnim verbietet. Der XAnim-Autor hat jedoch noch keine 
-rechtliche Schritte gegen irgendjemanden wegen Codec bezogenen Fragen unternommen.
-</P>
+rechtliche Schritte gegen irgendjemanden wegen Codec bezogenen Fragen unternommen.</P>
 
 <P><B>MPlayer</B> kann XAnims Codecs für das Decodieren verwenden. Um diese 
 zu aktivieren sollte folgende Anleitung befolgt werden:</P>
 
 <UL>
   <LI>Lade dir die Codecs, die du verwenden willst von der 
-  <A HREF="http://xanim.va.pubnix.com">XAnim-Seite</A> herunter. 
-  Der <B>3ivx</B> Codec befindet sich nicht dort, kann jedoch von der
-  <A HREF="http://www.3ivx.com">3ivx-Seite</A> heruntergeladen werden.</LI>
-
+    <A HREF="http://xanim.va.pubnix.com">XAnim-Seite</A> herunter. 
+    Der <B>3ivx</B> Codec befindet sich nicht dort, kann jedoch von der
+    <A HREF="http://www.3ivx.com">3ivx-Seite</A> heruntergeladen werden.</LI>
   <LI>verwende die <CODE>--with-xanimlibdir</CODE> Option um configure zu sagen, wo
     es die XAnim-Codecs finden kann. Normalerweise werden diese in 
     <CODE>/usr/local/lib/xanim/mods, /usr/lib/xanim/mods/ und /usr/lib/xanim</CODE> gesucht.
     Ansonsten kannst du auch die Umgebungsvariable <I>XANIM_MOD_DIR</I> zum Verzeichnis
     der XAnim Codecs setzen.</LI>
-
   <LI>Entferne/Symlinke die Dateinamen, indem du das Architektur-Zeugs löschst, so dass die 
-    Dateinamen etwa so aussehen: <CODE>vid_cvid.xa, vid_h263.xa, vid_iv50.xa</CODE>.
+    Dateinamen etwa so aussehen: <CODE>vid_cvid.xa, vid_h263.xa, vid_iv50.xa</CODE>.</LI>
 </UL>
   
 <P>XAnim ist die Videocodec-Familie Nummer 10. Es kann also die <CODE>-vfm 10</CODE>
@@ -216,13 +218,13 @@ Videoausgabetreiber unterstützt wird.</P>
 
 <P><B><A NAME=2.2.1.8>2.2.1.8. RealVideo</A></B></P>
 
-<P><B>MPlayer</B> unterstützt die Dekodierung aller Versionen von RealVideo:
-  <UL>
-    <LI>RealVideo 1.0 (fourcc RV10) - En/Dekodierung durch <B>libavcodec</B> unterstützt</LI>
-    <LI>RealVideo 2.0 (fourcc RV20) - Dekodierung durch <B>RealPlayer Libraries</B> unterstützt</LI>
-    <LI>RealVideo 3.0 (fourcc RV30) - Dekodierung durch <B>RealPlayer Libraries</B> unterstützt</LI>
-  </UL>
-</P>
+<P><B>MPlayer</B> unterstützt die Dekodierung aller Versionen von RealVideo:</P>
+
+<UL>
+  <LI>RealVideo 1.0 (fourcc RV10) - En/Dekodierung durch <B>libavcodec</B> unterstützt</LI>
+  <LI>RealVideo 2.0 (fourcc RV20) - Dekodierung durch <B>RealPlayer Libraries</B> unterstützt</LI>
+  <LI>RealVideo 3.0 (fourcc RV30) - Dekodierung durch <B>RealPlayer Libraries</B> unterstützt</LI>
+</UL>
 
 <P>Wie die RealPlayer Libraries installiert werden können, wird in der Sektion
   <A HREF="formats.html#2.1.1.7">RealMedia Dateiformat</A> behandelt.</P>
@@ -234,40 +236,44 @@ Videoausgabetreiber unterstützt wird.</P>
 (deren erste Entwicklung war DivX4).</P>
 
 <P><B>Vorteile:</B></P>
-  <UL>
-    <LI>Open source</LI>
-    <LI>Die API ist kompatibel mit DivX4, so dass es leicht ist Unterstützung dafür einzubauen.</LI>
-    <LI>2-Pass Encodierungs-Unterstützung</LI>
-    <LI>gute Encodierungsqualität, höhere Geschwindigkeit als DivX4 (man kann es, während dem 
+
+<UL>
+  <LI>Open Source</LI>
+  <LI>Die API ist kompatibel mit DivX4, so dass es leicht ist Unterstützung dafür einzubauen.</LI>
+  <LI>2-Pass Encodierungs-Unterstützung</LI>
+  <LI>gute Encodierungsqualität, höhere Geschwindigkeit als DivX4 (man kann es, während dem 
     Kompilieren, spezifisch für den jeweiligen Rechner optimieren)</LI>
-  </UL>
+</UL>
 
 <P><B>Nachteile:</B></P>
-  <UL>
-    <LI>Es <B>decodiert</B> momentan nicht alle DivX/DivX4-Dateien sauber
-      (kein Problem, da man sie ja immer noch mit der libavcodec abspielen kann)</LI>
-    <LI>Man muss sich beim Kompilieren für die DivX4 <B>ODER</B> 
-      XViD Unterstützung entscheiden.</LI>
-    <LI>in der Entwicklung</LI>
-  </UL>
+
+<UL>
+  <LI>Es <B>decodiert</B> momentan nicht alle DivX/DivX4-Dateien sauber
+    (kein Problem, da man sie ja immer noch mit der libavcodec abspielen kann)</LI>
+  <LI>Man muss sich beim Kompilieren für die DivX4 <B>ODER</B> 
+    XViD Unterstützung entscheiden.</LI>
+  <LI>in der Entwicklung</LI>
+</UL>
 
 <P><B>Installation:</B> Es ist momentan nur als CVS erhältlich. Hier sind die
-  Download- und Installations-Anweisungen :<BR>
-  <UL>
-    <LI><CODE>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid login</CODE></LI>
-    <LI><CODE>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid co xvidcore</CODE></LI>
-    <LI><CODE>cd xvidcore/build/generic</CODE></LI>
-    <LI>bearbeite <CODE>Makefile.linux</CODE> deinen Bedürfnissen entsprechend</LI>
-    <LI><CODE>make -f Makefile.linux</CODE><LI>
-    <LI>Nimm die <CODE>encore2.h</CODE> und <CODE>decore.h</CODE> vom 
-      Divx4linux-Paket und kopiere diese nach <CODE>/usr/local/include/</CODE>.</LI>
-    <LI>kompiliere <B>MPlayer</B> neu mit <CODE>--with-xvidcore=/pfad/zu/libcore.a</CODE>.</LI>
-  </UL>
+  Download- und Installations-Anweisungen:</P>
+
+<OL>
+  <LI><CODE>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid login</CODE></LI>
+  <LI><CODE>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid co xvidcore</CODE></LI>
+  <LI><CODE>cd xvidcore/build/generic</CODE></LI>
+  <LI>bearbeite <CODE>Makefile.linux</CODE> deinen Bedürfnissen entsprechend</LI>
+  <LI><CODE>make -f Makefile.linux</CODE><LI>
+  <LI>Nimm die <CODE>encore2.h</CODE> und <CODE>decore.h</CODE> vom 
+    Divx4linux-Paket und kopiere diese nach <CODE>/usr/local/include/</CODE>.</LI>
+  <LI>kompiliere <B>MPlayer</B> neu mit <CODE>--with-xvidcore=/pfad/zu/libcore.a</CODE>.</LI>
+</OL>
 
 
 <P><B><A NAME=2.2.2>2.2.2. Audiocodecs</A></B></P>
 
-<P>Die wichtigsten Audiocodecs als erstes:<BR></P>
+<P>Die wichtigsten Audiocodecs als erstes:</P>
+
 <UL>
   <LI>MPEG layer 2 und layer 3 (MP3) Audio (<B>eingebauter</B> Code, mit MMX/SSE/3DNow! Optimierungen)</LI>
   <LI>MPEG layer 1 Audio (<B>eingebauter</B> Code, mit libavcodec)</LI>
@@ -313,6 +319,7 @@ Der AC3-Decoder sollte mit dem SP/DIF Ausgang verbunden werden und die Option
 <CODE>-ac hwac3</CODE> verwendet werden. Es ist experimentell, sollte aber mit
 C-Media Karten und SB Live! + ALSA (nicht OSS) Treiber funktionieren.</P>
 
+
 <P><B><A NAME=2.2.2.3>2.2.2.3. libmad Unterstützung</A></B></P>
 
 <P><A HREF="http://mad.sourceforge.net">libmad</A> ist eine multiplatform Bibliothek für
@@ -334,16 +341,16 @@ kopieren.</P>
 
 <P><B><A NAME=2.2.2.5>2.2.2.5.  RealAudio</A></B></P>
 
-<P><B>MPlayer</B> unterstützt die Dekodierung aller RealAudio Versionen:
-  <UL>
-    <LI>RealAudio DNET - Dekodierung durch <B>libavcodec</B></LI>
-    <LI>RealAudio Cook - Dekodierung durch <B>RealPlayer Libraries</B></LI>
-    <LI>RealAudio Sipro - Dekodierung durch <B>RealPlayer Libraries</B></LI>
-  </UL>
-</P>
+<P><B>MPlayer</B> unterstützt die Dekodierung aller RealAudio Versionen:</P>
+
+<UL>
+  <LI>RealAudio DNET - Dekodierung durch <B>libavcodec</B></LI>
+  <LI>RealAudio Cook - Dekodierung durch <B>RealPlayer Libraries</B></LI>
+  <LI>RealAudio Sipro - Dekodierung durch <B>RealPlayer Libraries</B></LI>
+</UL>
 
 <P>Wie die RealPlayer Libraries installiert werden können, wird in der Sektion
-  <A HREF="formats.html#2.1.1.7">RealMedia Dateiformat</A> behandelt.</P>
+<A HREF="formats.html#2.1.1.7">RealMedia Dateiformat</A> behandelt.</P>
 
 
 <P><B><A NAME=2.2.3>2.2.3. Win32 Codec-Importierungs HOWTO</A></B></P>
@@ -381,29 +388,31 @@ auf folgende FTP-Seite geladen werden:</P>
 
 <P>DirectShow ist die neuere Video-Programmierschnittstelle, welche noch
 schlimmer als ihr Vorgänger ist. Es ist schwieriger mit DirectShow, denn</P>
+
 <UL>
-<LI>die <CODE>system.ini</CODE> enthält nicht die Informationen die man braucht, stattdessen
-sind diese in der Registrierungsdatenbank gespeichert und <LI>man braucht die GUID des Codecs.
+  <LI>die <CODE>system.ini</CODE> enthält nicht die Informationen die man braucht, stattdessen
+    sind diese in der Registrierungsdatenbank gespeichert und <LI>man braucht die GUID des Codecs.</LI>
 </UL>
 
 <P>Atme tief durch und beginne mit dem Durchsuchen der Registrierung...</P>
-<UL>
-<LI>Starte <CODE>regedit</CODE>
-<LI>Drücke <CODE>Strg-f</CODE>, deaktiviere die ersten beiden Auswahlfelder und 
-aktiviere das Dritte. Nun gib den fourcc des Codecs ein (z.B.: TM20).
-<LI>Du solltest ein Feld sehen, welches den Pfad und Dateinamen enthält
-(z.B.: <CODE>C:\WINDOWS\SYSTEM\TM20DEC.AX</CODE>).
-<LI>Jetzt da man die Datei hat, braucht man die GUID. Versuche erneut zu
-suchen, aber nun nach dem Codec-Namen, nicht nach der fourcc. Der Codec-Name
-kann bei der Wiedergabe mit dem Windows Media Player herausgefunden werden,
-indem man unter Datei-&gt;Eigenschaften-&gt;Erweitert nachschaut.
-Falls dies nichts bringt, hast du Pech. Versuche zu raten (suche z.B. nach: 
-TrueMotion).
-<LI>Wenn die GUID gefunden wurde, sollte ein FriendlyName- und ein CLSID-Feld
-auftauchen. Schreibe 16 Byte der CLSID auf, dies ist die von uns benötigte GUID.
-</UL>
 
-<P>HINWEIS : Wenn die Suche fehlschlägt, versuche alle Auswahlfelder zu aktivieren...
+<OL>
+  <LI>Starte <CODE>regedit</CODE></LI>
+  <LI>Drücke <CODE>Strg-f</CODE>, deaktiviere die ersten beiden Auswahlfelder und 
+    aktiviere das Dritte. Nun gib den fourcc des Codecs ein (z.B.: TM20).</LI>
+  <LI>Du solltest ein Feld sehen, welches den Pfad und Dateinamen enthält
+    (z.B.: <CODE>C:\WINDOWS\SYSTEM\TM20DEC.AX</CODE>).</LI>
+  <LI>Jetzt da man die Datei hat, braucht man die GUID. Versuche erneut zu
+    suchen, aber nun nach dem Codec-Namen, nicht nach der fourcc. Der Codec-Name
+    kann bei der Wiedergabe mit dem Windows Media Player herausgefunden werden,
+    indem man unter Datei-&gt;Eigenschaften-&gt;Erweitert nachschaut.
+    Falls dies nichts bringt, hast du Pech. Versuche zu raten (suche z.B. nach: 
+    TrueMotion).</LI>
+  <LI>Wenn die GUID gefunden wurde, sollte ein FriendlyName- und ein CLSID-Feld
+    auftauchen. Schreibe 16 Byte der CLSID auf, dies ist die von uns benötigte GUID.</LI>
+</OL>
+
+<P>HINWEIS: Wenn die Suche fehlschlägt, versuche alle Auswahlfelder zu aktivieren...
 du hast möglicherweise falsche Ergebnisse, aber vielleicht hast du auch Glück...</P>
 
 <P>Da nun alle nötigen Informationen vorhanden sind (fourcc, GUID, Codec-Datei, 

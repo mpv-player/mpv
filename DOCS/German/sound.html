@@ -1,11 +1,12 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
 
 <HEAD>
 <LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
 </HEAD>
 
-<BODYBGCOLOR=white>
-
+<BODY>
 
 <P><B><A NAME=2.3.2>2.3.2. Audio Ausgabe-Geräte</A></B></P>
 
@@ -13,155 +14,134 @@
 zur Zeit diese Treiber:</P>
 
 <TABLE BORDER=0>
-
-<TR><TD COLSPAN=4><P><B>Allgemein:</B></P></TD></TR>
-
-<TR><TD>&nbsp;&nbsp;</TD><TD VALIGN=top>oss</TD><TD>&nbsp;&nbsp;</TD><TD>OSS (ioctl) Treiber (unterstützt Hardware AC3-Durchgabe)</TD></TR>
-<TR><TD></TD><TD VALIGN=top>sdl</TD><TD></TD><TD>SDL Treiber (unterstützt Up-/Downsampling, <B>ESD</B>, <B>ARTS</B> usw.)</TD></TR>
-<TR><TD></TD><TD VALIGN=top>nas</TD><TD></TD><TD>NAS (Network Audio System) Treiber</TD></TR>
-<TR><TD></TD><TD VALIGN=top>alsa5</TD><TD></TD><TD>ALSA 0.5 Treiber</TD></TR>
-<TR><TD></TD><TD VALIGN=top>alsa9</TD><TD></TD><TD>ALSA 0.9 Treiber (funkioniert, macht aber Probleme -> verwende OSS) (unterstützt Hardware AC3-Durchgabe)</TD></TR>
-<TR><TD></TD><TD VALIGN=top>sun</TD><TD></TD><TD>SUN Audio-Treiber (<CODE>/dev/audio</CODE>) für BSD und Solaris8 Anwender</TD></TR>
-<TR><TD></TD><TD VALIGN=top>arts</TD><TD></TD><TD>ARTS Treiber (hauptsächlich für KDE Benutzer)</TD></TR>
+  <TR><TD COLSPAN=4><P><B>Allgemein:</B></P></TD></TR>
+  <TR><TD>&nbsp;&nbsp;</TD><TD VALIGN=top>oss</TD><TD>&nbsp;&nbsp;</TD><TD>OSS (ioctl) Treiber (unterstützt Hardware AC3-Durchgabe)</TD></TR>
+  <TR><TD></TD><TD VALIGN=top>sdl</TD><TD></TD><TD>SDL Treiber (unterstützt Up-/Downsampling, <B>ESD</B>, <B>ARTS</B> usw.)</TD></TR>
+  <TR><TD></TD><TD VALIGN=top>nas</TD><TD></TD><TD>NAS (Network Audio System) Treiber</TD></TR>
+  <TR><TD></TD><TD VALIGN=top>alsa5</TD><TD></TD><TD>ALSA 0.5 Treiber</TD></TR>
+  <TR><TD></TD><TD VALIGN=top>alsa9</TD><TD></TD><TD>ALSA 0.9 Treiber (funkioniert, macht aber Probleme -> verwende OSS) (unterstützt Hardware AC3-Durchgabe)</TD></TR>
+  <TR><TD></TD><TD VALIGN=top>sun</TD><TD></TD><TD>SUN Audio-Treiber (<CODE>/dev/audio</CODE>) für BSD und Solaris8 Anwender</TD></TR>
+  <TR><TD></TD><TD VALIGN=top>arts</TD><TD></TD><TD>ARTS Treiber (hauptsächlich für KDE Benutzer)</TD></TR>
 </TABLE>
 
 <P>Fakt ist, dass Linux-Soundkartentreiber Kompatibilitätsprobleme haben.
 Es <B>kann</B> vielleicht eine Weile dauern, bis du die optimale Einstellung hat.</P>
 
 <UL>
-<LI>Wenn du einen OSS-Treiber hast, versuche als erstes <CODE>-ao oss</CODE> (dies ist Standard).
-Wenn du keine Fehler, Verzögerungen oder irgendetwas anderes ungewöhliches hörst,
-versuche mal <CODE>-ao sdl</CODE> (HINWEIS: die neue SDL Library und das dazugehörigen Devel-Paket
-müssen installiert sein). Der SDL-Audiotreiber hilft in vielen Fällen (er unterstützt auch
-ESD, ARTS und Up-/Downsampling. (ESD ist der Sounddaemon von GNOME, arts der von KDE).</LI>
-<LI>Wenn du ALSA Version 0.5 verwendest, musst du fast immer <CODE>-ao alsa5</CODE> nehmen,
-weil ALSA 0.5 einen fehlerhaften OSS Emulationscode hat. <B>MPlayer</B> wird mit
-etwa so einer Meldung <B>abstürzen</B>:<BR>
-<CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE></UL>
-</LI>
-<LI>Wenn du ALSA Version 0.9 hast, kannst du zwischen <CODE>-ao oss</CODE> und <CODE>-ao sdl</CODE> wählen.
-Du kannst auch <CODE>-ao alsa9</CODE> verwenden, aber es hat noch einige Probleme, wie Synchronisation
-oder ein plötzliches Verschwinden des Tons.</LI>
+  <LI>Wenn du einen OSS-Treiber hast, versuche als erstes <CODE>-ao oss</CODE> (dies ist Standard).
+    Wenn du keine Fehler, Verzögerungen oder irgendetwas anderes ungewöhliches hörst,
+    versuche mal <CODE>-ao sdl</CODE> (HINWEIS: die neue SDL Library und das dazugehörigen Devel-Paket
+    müssen installiert sein). Der SDL-Audiotreiber hilft in vielen Fällen (er unterstützt auch
+    ESD, ARTS und Up-/Downsampling. (ESD ist der Sounddaemon von GNOME, arts der von KDE).</LI>
+  <LI>Wenn du ALSA Version 0.5 verwendest, musst du fast immer <CODE>-ao alsa5</CODE> nehmen,
+    weil ALSA 0.5 einen fehlerhaften OSS Emulationscode hat. <B>MPlayer</B> wird mit
+    etwa so einer Meldung <B>abstürzen</B>:<BR>
+    <CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE></LI>
+  <LI>Wenn du ALSA Version 0.9 hast, kannst du zwischen <CODE>-ao oss</CODE> und <CODE>-ao sdl</CODE> wählen.
+    Du kannst auch <CODE>-ao alsa9</CODE> verwenden, aber es hat noch einige Probleme, wie Synchronisation
+    oder ein plötzliches Verschwinden des Tons.</LI>
 </UL>
 
 <P>Verwende auf <B>Solaris/FreeBSD</B> Systemen den SUN Audio-Treiber mit der <CODE>-ao sun</CODE> Option,
 ansonsten wirst du weder Video noch Ton haben.</P>    
 
+
 <P><B><A NAME=2.3.2.1>2.3.2.1. Soundkarten Erfahrungen, Empfehlungen</A></B></P>
 
 <TABLE BORDER=0 WIDTH=100%>
-<TR><TD COLSPAN=3><B>VIA Onboard-Chipset (via82cxxx) nur 48Khz</B></TD><TR>
-<TD></TD><TD>Treiber:</TD><TD> siehe 
-  <A HREF="http://sourceforge.net/project/showfiles.php?group_id=3242&amp;release_id=59602">hier</A></TD><TR>
-
-<TD COLSPAN=3><B>Aureal Vortex 2</B></TD><TR>
-<TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD><TD>OSS/Free:</TD><TD>kein Treiber</TD><TR>
-<TD></TD><TD>OSS:</TD><TD>OK</TD><TR>
-<TD></TD><TD>ALSA:</TD><TD>kein Treiber</TD><TR>
-<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
-<TD></TD><TD>Treiber:</TD><TD><A HREF="http://aureal.sourceforge.net">aureal.sourceforge.net</A></TD><TR>
-<TD></TD><TD>Treiber2:</TD><TD> von <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">hier</A><BR>
-  (<I>Buffergröße erhöht auf 32k</I>)</TD><TR>
-
-<TD COLSPAN=3><B>GUS PnP</B></TD><TR>
-<TD></TD><TD>OSS:</TD><TD>kein Treiber</TD><TR>
-<TD></TD><TD>OSS/Pro:</TD><TD>OK</TD><TR>
-<TD></TD><TD>ALSA:</TD><TD>OK</TD><TR>
-<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
-
-<TD COLSPAN=3><B>SB Live!</B></TD><TR>
-<TD></TD><TD>OSS:</TD><TD>Analog OK, SP/DIF funktioniert nicht</TD><TR>
-<TD></TD><TD>ALSA:</TD><TD>Beide OK</TD><TR>
-<TD></TD><TD>Max kHz:</TD><TD>192</TD><TR>
-
-<TD COLSPAN=3><B>SB AWE 64</B></TD><TR>
-<TD></TD><TD>OSS:</TD><TD>max 44kHz</TD><TR>
-<TD></TD><TD>ALSA:</TD><TD>48kHz schlechte Soundqualität</TD><TR>
-<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
-
-<TD COLSPAN=3><B>Gravis UltraSound ACE</B></TD><TR>
-<TD></TD><TD>OSS:</TD><TD>nicht OK</TD><TR>
-<TD></TD><TD>ALSA:</TD><TD>OK</TD><TR>
-<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
-
-<TD COLSPAN=3><B>Gravis UltraSound MAX</B></TD><TR>
-<TD></TD><TD>OSS:</TD><TD>OK</TD><TR>
-<TD></TD><TD>ALSA:</TD><TD>OK (?)</TD><TR>
-<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
-
-<TD COLSPAN=3><B>ESS 688</B></TD><TR>
-<TD></TD><TD>OSS:</TD><TD>OK</TD><TR>
-<TD></TD><TD>ALSA:</TD><TD>OK (?)</TD><TR>
-<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
-
-<TD COLSPAN=3><B>C-Media Karten (welche?)</B></TD><TR>
-<TD></TD><TD>OSS:</TD><TD>nicht OK (zischen) (?)</TD><TR>
-<TD></TD><TD>ALSA:</TD><TD>OK (?)</TD><TR>
-<TD></TD><TD>Max kHz:</TD><TD>?</TD><TR>
-
-<TD COLSPAN=3><B>Yamaha Karten (*ymf*)</B></TD><TR>
-<TD></TD><TD>OSS:</TD><TD>nicht OK (?) (vielleicht <CODE>-ao sdl</CODE>)</TD><TR>
-<TD></TD><TD>ALSA:</TD><TD>OK, nur mit ALSA 0.5 mit OSS-Emulation <B>UND</B> <CODE>-ao sdl</CODE> (!) (?)</TD><TR>
-<TD></TD><TD>Max kHz:</TD><TD>?</TD><TR>
-
-<TD COLSPAN=3><B>Karten mit envy24 Chips (wie Terratec EWS88MT)</B></TD><TR>
-<TD></TD><TD>OSS:</TD><TD>?</TD><TR>
-<TD></TD><TD>OSS/Pro:</TD><TD>OK</TD><TR>
-<TD></TD><TD>ALSA:</TD><TD>?</TD><TR>
-<TD></TD><TD>Max kHz:</TD><TD>?</TD><TR>
-
-<TD COLSPAN=3><B>PC Speaker oder DAC</B></TD><TR>
-<TD></TD><TD>OSS:</TD><TD>OK (verwende den SDL-Treiber: <CODE>-ao sdl</CODE>)</TD><TR>
-<TD></TD><TD>ALSA:</TD><TD>kein Treiber</TD><TR>
-<TD></TD><TD>Max kHz:</TD><TD>der Treiber emuliert 44.1, möglicherweise mehr</TD><TR>
-<TD></TD><TD>Treiber:</TD><TD><A HREF="ftp://ftp.infradead.org/pub/pcsp">ftp://ftp.infradead.org/pub/pcsp</A></TD>
+  <TR><TD COLSPAN=3><B>VIA Onboard-Chipset (via82cxxx) nur 48Khz</B></TD></TR>
+  <TR><TD></TD><TD>Treiber:</TD><TD> siehe
+    <A HREF="http://sourceforge.net/project/showfiles.php?group_id=3242&amp;release_id=59602">hier</A></TD></TR>
+  <TR><TD COLSPAN=3><B>Aureal Vortex 2</B></TD></TR>
+  <TR><TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD><TD>OSS/Free:</TD><TD>kein Treiber</TD></TR>
+  <TR><TD></TD><TD>OSS:</TD><TD>OK</TD></TR>
+  <TR><TD></TD><TD>ALSA:</TD><TD>kein Treiber</TD></TR>
+  <TR><TD></TD><TD>Max kHz:</TD><TD>48</TD></TR>
+  <TR><TD></TD><TD>Treiber:</TD><TD><A HREF="http://aureal.sourceforge.net">aureal.sourceforge.net</A></TD></TR>
+  <TR><TD></TD><TD>Treiber2:</TD><TD> von <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">hier</A><BR>
+    (<I>Buffergröße erhöht auf 32k</I>)</TD></TR>
+  <TR><TD COLSPAN=3><B>GUS PnP</B></TD></TR>
+  <TR><TD></TD><TD>OSS:</TD><TD>kein Treiber</TD></TR>
+  <TR><TD></TD><TD>OSS/Pro:</TD><TD>OK</TD></TR>
+  <TR><TD></TD><TD>ALSA:</TD><TD>OK</TD></TR>
+  <TR><TD></TD><TD>Max kHz:</TD><TD>48</TD></TR>
+  <TR><TD COLSPAN=3><B>SB Live!</B></TD></TR>
+  <TR><TD></TD><TD>OSS:</TD><TD>Analog OK, SP/DIF funktioniert nicht</TD></TR>
+  <TR><TD></TD><TD>ALSA:</TD><TD>Beide OK</TD></TR>
+  <TR><TD></TD><TD>Max kHz:</TD><TD>192</TD></TR>
+  <TR><TD COLSPAN=3><B>SB AWE 64</B></TD></TR>
+  <TR><TD></TD><TD>OSS:</TD><TD>max 44kHz</TD></TR>
+  <TR><TD></TD><TD>ALSA:</TD><TD>48kHz schlechte Soundqualität</TD></TR>
+  <TR><TD></TD><TD>Max kHz:</TD><TD>48</TD></TR>
+  <TR><TD COLSPAN=3><B>Gravis UltraSound ACE</B></TD></TR>
+  <TR><TD></TD><TD>OSS:</TD><TD>nicht OK</TD></TR>
+  <TR><TD></TD><TD>ALSA:</TD><TD>OK</TD></TR>
+  <TR><TD></TD><TD>Max kHz:</TD><TD>48</TD></TR>
+  <TR><TD COLSPAN=3><B>Gravis UltraSound MAX</B></TD></TR>
+  <TR><TD></TD><TD>OSS:</TD><TD>OK</TD></TR>
+  <TR><TD></TD><TD>ALSA:</TD><TD>OK (?)</TD></TR>
+  <TR><TD></TD><TD>Max kHz:</TD><TD>48</TD></TR>
+  <TR><TD COLSPAN=3><B>ESS 688</B></TD></TR>
+  <TR><TD></TD><TD>OSS:</TD><TD>OK</TD></TR>
+  <TR><TD></TD><TD>ALSA:</TD><TD>OK (?)</TD></TR>
+  <TR><TD></TD><TD>Max kHz:</TD><TD>48</TD></TR>
+  <TR><TD COLSPAN=3><B>C-Media Karten (welche?)</B></TD></TR>
+  <TR><TD></TD><TD>OSS:</TD><TD>nicht OK (zischen) (?)</TD></TR>
+  <TR><TD></TD><TD>ALSA:</TD><TD>OK (?)</TD></TR>
+  <TR><TD></TD><TD>Max kHz:</TD><TD>?</TD></TR>
+  <TR><TD COLSPAN=3><B>Yamaha Karten (*ymf*)</B></TD></TR>
+  <TR><TD></TD><TD>OSS:</TD><TD>nicht OK (?) (vielleicht <CODE>-ao sdl</CODE>)</TD></TR>
+  <TR><TD></TD><TD>ALSA:</TD><TD>OK, nur mit ALSA 0.5 mit OSS-Emulation <B>UND</B> <CODE>-ao sdl</CODE> (!) (?)</TD></TR>
+  <TR><TD></TD><TD>Max kHz:</TD><TD>?</TD></TR>
+  <TR><TD COLSPAN=3><B>Karten mit envy24 Chips (wie Terratec EWS88MT)</B></TD></TR>
+  <TR><TD></TD><TD>OSS:</TD><TD>?</TD></TR>
+  <TR><TD></TD><TD>OSS/Pro:</TD><TD>OK</TD></TR>
+  <TR><TD></TD><TD>ALSA:</TD><TD>?</TD></TR>
+  <TR><TD></TD><TD>Max kHz:</TD><TD>?</TD></TR>
+  <TR><TD COLSPAN=3><B>PC Speaker oder DAC</B></TD></TR>
+  <TR><TD></TD><TD>OSS:</TD><TD>OK (verwende den SDL-Treiber: <CODE>-ao sdl</CODE>)</TD></TR>
+  <TR><TD></TD><TD>ALSA:</TD><TD>kein Treiber</TD></TR>
+  <TR><TD></TD><TD>Max kHz:</TD><TD>der Treiber emuliert 44.1, möglicherweise mehr</TD></TR>
+  <TR><TD></TD><TD>Treiber:</TD><TD><A HREF="ftp://ftp.infradead.org/pub/pcsp">ftp://ftp.infradead.org/pub/pcsp</A></TD></TR>
 </TABLE>
 
 <UL>
-<LI>Unter Linux wird ein 2.4.x Kernel sehr empfohlen, Kernel 2.2 wird nicht getestet.</LI>
-<LI>Wenn der sound während der Wiedergabe von CD-ROM "klickende" Geräusche
+  <LI>Unter Linux wird ein 2.4.x Kernel sehr empfohlen, Kernel 2.2 wird nicht getestet.</LI>
+  <LI>Wenn der sound während der Wiedergabe von CD-ROM "klickende" Geräusche
     verursacht, schalte die Interupt-Unmaskierung ein, zum Beispiel
     <CODE>hdparm -u1 /dev/cdrom</CODE> (<CODE>man hdparm</CODE>).
-    Dies ist allgemein besser und wird in der <A HREF="cd-dvd.html#4.1">CD-ROM Sektion</A> genauer beschrieben.
-<LI>Von einer Verwendung der Soundkarte mit anderen Anwendungen wie XMMS <B>wird stark abgeraten</B>!
-  Wenn die andere Anwendung ESD verwendet, starte <B>MPlayer</B> mit der Option <CODE>-vo sdl:esd</CODE>
-  um beide Soundausgaben zu kombinieren! Die Option <CODE>-vo sdl:esd</CODE> könnte auch verwendet
-  werden, wenn nur <B>Mplayer</B> alleine etwas wiedergibt.</LI>
-<LI>Rückmeldungen zu diesem Dokument sind willkommen. Bitte sag uns, wie <B>MPlayer</B> und
-  deine Soundkarte(n) zusammen funktionieren.</LI>
+    Dies ist allgemein besser und wird in der <A HREF="cd-dvd.html#4.1">CD-ROM Sektion</A> genauer beschrieben.</LI>
+  <LI>Von einer Verwendung der Soundkarte mit anderen Anwendungen wie XMMS <B>wird stark abgeraten</B>!
+    Wenn die andere Anwendung ESD verwendet, starte <B>MPlayer</B> mit der Option <CODE>-vo sdl:esd</CODE>
+    um beide Soundausgaben zu kombinieren! Die Option <CODE>-vo sdl:esd</CODE> könnte auch verwendet
+    werden, wenn nur <B>Mplayer</B> alleine etwas wiedergibt.</LI>
+  <LI>Rückmeldungen zu diesem Dokument sind willkommen. Bitte sag uns, wie <B>MPlayer</B> und
+    deine Soundkarte(n) zusammen funktionieren.</LI>
 </UL>
 
 
-
-<P><B><A NAME=2.3.2.2>2.3.2.2. Audio Plugins</A></B></P>
+<P><B><A NAME="2.3.2.2>2.3.2.2. Audio Plugins</A></B></P>
 
 <P><B>MPlayer</B> hat Unterstützung für Audio Plugins. Audio Plugins können 
-  benutzt werden, um die Einstellungen der Audio-Daten zu ändern bevor der Ton die
-  Soundkarte erreicht. Sie werden aktiviert durch den <CODE>-aop</CODE> Schalter, welcher
-  <CODE>list=plugin1,plugin2,...</CODE> als Argument hat. Das <CODE>list</CODE>
-  ist benötigt, um festzustellen welche Plugins in welcher Reihenfolge benutzt werden
-  sollen. Beispiel:
-</P>
+benutzt werden, um die Einstellungen der Audio-Daten zu ändern bevor der Ton die
+Soundkarte erreicht. Sie werden aktiviert durch den <CODE>-aop</CODE> Schalter, welcher
+<CODE>list=plugin1,plugin2,...</CODE> als Argument hat. Das <CODE>list</CODE>
+ist benötigt, um festzustellen welche Plugins in welcher Reihenfolge benutzt werden
+sollen. Beispiel:</P>
 
 <P>&nbsp;&nbsp;<CODE>mplayer media.avi -aop list=resample,format</CODE></P>
 
-<P>würde den Ton durch das Resampling-Plugin laufen lassen, gefolgt von dem Format des
-  Plugins.
-</P>
+<P>würde den Ton durch das Resampling-Plugin laufen lassen, gefolgt von dem Format des Plugins.</P>
 
 <P>Die Plugins können auch Schalter haben, welche ihr Verhalten ändern.
-  Diese Schalter sind im unteren Abschnitt im Detail beschrieben. Ein Plugin wird
-  mit den Standardeinstellungen gestartet, wenn dessen Optionen nicht mitgegeben werden.
-  Hier ist ein Beispiel, wie man Plugins in Kombination mit Plugin spezifischen Schaltern verwendet:
-</P>
+Diese Schalter sind im unteren Abschnitt im Detail beschrieben. Ein Plugin wird
+mit den Standardeinstellungen gestartet, wenn dessen Optionen nicht mitgegeben werden.
+Hier ist ein Beispiel, wie man Plugins in Kombination mit Plugin spezifischen Schaltern verwendet:</P>
 
-<P>&nbsp;&nbsp;<CODE>mplayer media.avi -aop
-  list=resample,format:fout=44100:format=0x8</CODE>
-</P>
+<P>&nbsp;&nbsp;<CODE>mplayer media.avi -aop list=resample,format:fout=44100:format=0x8</CODE></P>
 
 <P>würde die Ausgabefrequenz des Resample-Plugins auf 44100Hz and das
-  Ausgabeformat des Format-Plugins auf AFMT_U8 stellen.
-</P>
+Ausgabeformat des Format-Plugins auf AFMT_U8 stellen.</P>
            
 <P>Momentan können Audio-Plugins nicht im <B>MEncoder</B> verwendet werden.</P>
           
@@ -174,7 +154,7 @@ besitzt oder wenn man eine alte Soundkarte am Hals hat, welche nur max 44.1kHz v
 Beschränkungen in der Hardware werden nicht automatisch erkannt, also muss man die 
 Sample-Frequenz explizit angeben. Dieses Plugin hat einen Schalter:
 <CODE>fout</CODE>, welcher benutzt wird um die gewünschte Ausgabefrequenz zu setzen.
-Der Standard ist 48kHz, und wird in &lt;Hz&gt; angegeben.
+Der Standard ist 48kHz, und wird in &lt;Hz&gt; angegeben.</P>
 
 <P>Verwendung:<BR>
 &nbsp;&nbsp;<CODE>mplayer medium.avi -aop list=resample:fout=&lt;erforderliche Frequenz in Hz, z.B. 44100&gt;</CODE></P>
@@ -182,6 +162,7 @@ Der Standard ist 48kHz, und wird in &lt;Hz&gt; angegeben.
 <P>Hinweis: Die Ausgabefrequenz sollte nicht vom Standard-Wert hochscaliert werden.
 Die Skalierung führt dazu, dass der Audio- und Video-Stream in Zeitlupe wiedergegeben
 werden, zusätzlich zu den Audioverzerrungen.</P>
+
 
 <P><B><A NAME=2.3.2.2.2>2.3.2.2.2. Surround Sound Decodierung</A></B></P>
 
@@ -197,79 +178,73 @@ Um dieses Feature zu benutzen, brauchst du eine Soundkarte mit mindestens 4 Kanä
 <P><B><A NAME=2.3.2.2.3>2.3.2.2.3. Sample Format Konvertierer</A></B></P>
 
 <P>Wenn deine Soundkarte keinen signed 16bit <CODE>int</CODE> Datentyp unterstützt, kann dieses
-  Plugin benutzt werden um das Format in eines zu ändern, das deine Soundkarte versteht.
-  Es hat nur einen Schalter <CODE>format</CODE>, welcher auf eine Nummer gestellt werden kann, 
-  die man der Datei <CODE>libao2/afmt.h</CODE> findet. Dieses Plugin wird praktisch nie gebraucht
-  und ist für erfahrene Anwender gedacht. Bedenke, dass dieses Plugin nur das Sample Format und
-  nicht die Samplefrequenz oder die Anzahl Kanäle ändert.
-</P>
+Plugin benutzt werden um das Format in eines zu ändern, das deine Soundkarte versteht.
+Es hat nur einen Schalter <CODE>format</CODE>, welcher auf eine Nummer gestellt werden kann, 
+die man der Datei <CODE>libao2/afmt.h</CODE> findet. Dieses Plugin wird praktisch nie gebraucht
+und ist für erfahrene Anwender gedacht. Bedenke, dass dieses Plugin nur das Sample Format und
+nicht die Samplefrequenz oder die Anzahl Kanäle ändert.</P>
 
 <P>Verwendung:<BR>
-  &nbsp;&nbsp;<CODE>mplayer medium.avi -aop
-  list=format:format=&lt;required output format&gt;</CODE>
-</P>
+&nbsp;&nbsp;<CODE>mplayer medium.avi -aop
+list=format:format=&lt;required output format&gt;</CODE></P>
 
 
 <P><B><A NAME=2.3.2.2.4>2.3.2.2.4. Verzögerung</A></B></P>
   
 <P>Dieses Plugin verzögert den Ton und ist als Beispiel gedacht, wie man neue Plugins 
-  schreibt. Es kann für nichts sinnvolles aus der Anwenderperspektive verwendet werden
-  und ist hier nur aus Gründen der Vollständigkeit erwähnt. Verwende dieses Plugin nicht,
-  wenn du kein Entwickler bist.</P>
+schreibt. Es kann für nichts sinnvolles aus der Anwenderperspektive verwendet werden
+und ist hier nur aus Gründen der Vollständigkeit erwähnt. Verwende dieses Plugin nicht,
+wenn du kein Entwickler bist.</P>
+
 
 <P><B><A NAME=2.3.2.2.5>2.3.2.2.5. Software Lautstärkeregelung</A></B></P>
 
 <P>Dieses Plugin ist ein Software-Ersatz für die Lautstärkereglung und
-  kann in Maschinen mit kaputtem Mixer-Device verwendet werden. Es kann
-  auch verwendet werden, wenn man die Ausgabelautstärke von <B>MPlayer</B>
-  zu ändern ohne die Einstellung der PCM-Lautstärke im Mixer zu ändern.
-  Es gibt einen Schalter <CODE>volume</CODE>, welcher verwendet wird um
-  den anfänglichen Schallpegel festzulegen. Der anfängliche Schallpegel
-  kann auf Werte zwischen 0 und 255 festgelegt werden (normal auf 101, 
-  was 0db Verstärkung entspricht). Benutze dieses Plugin mit Vorsicht, 
-  da es das Signal auf das Geräuschverhältnis des Tons reduzieren kann. 
-  In den meisten Fällen ist es das beste, die Stufe für den PCM-Ton auf 
-  das Maximum zu stellen, dieses Plugin nicht zu verwenden und die Lautstärke
-  zu deinen Boxen mit der Master-Lautstärkeregelung zu kontrollieren.
-  Wenn ein externer Verstärker mit dem Computer verbunden ist (was fast
-  immer der Fall ist), kann der Geräuschepegel durch die Anpassung des
-  Master-Stufe und der Lautstärkeknöpfe des Verstärkers minimiert werden,
-  bis das Hintergrundrauschen verschwindet.
-</P>
+kann in Maschinen mit kaputtem Mixer-Device verwendet werden. Es kann
+auch verwendet werden, wenn man die Ausgabelautstärke von <B>MPlayer</B>
+zu ändern ohne die Einstellung der PCM-Lautstärke im Mixer zu ändern.
+Es gibt einen Schalter <CODE>volume</CODE>, welcher verwendet wird um
+den anfänglichen Schallpegel festzulegen. Der anfängliche Schallpegel
+kann auf Werte zwischen 0 und 255 festgelegt werden (normal auf 101, 
+was 0db Verstärkung entspricht). Benutze dieses Plugin mit Vorsicht, 
+da es das Signal auf das Geräuschverhältnis des Tons reduzieren kann. 
+In den meisten Fällen ist es das beste, die Stufe für den PCM-Ton auf 
+das Maximum zu stellen, dieses Plugin nicht zu verwenden und die Lautstärke
+zu deinen Boxen mit der Master-Lautstärkeregelung zu kontrollieren.
+Wenn ein externer Verstärker mit dem Computer verbunden ist (was fast
+immer der Fall ist), kann der Geräuschepegel durch die Anpassung des
+Master-Stufe und der Lautstärkeknöpfe des Verstärkers minimiert werden,
+bis das Hintergrundrauschen verschwindet.</P>
 
 <P>Verwendung:<BR>
-  &nbsp;&nbsp;<CODE>mplayer media.avi -aop
-  list=volume:volume=&lt;0-255&gt;</CODE>
-</P>
+&nbsp;&nbsp;<CODE>mplayer media.avi -aop
+list=volume:volume=&lt;0-255&gt;</CODE></P>
 
 <P>Dieses Plugin besitzt auch einen Kompressor oder "soft-clipping" Fähigkeiten.
-  Die Kompression kann benutzt werden, wenn der dynamische Bereich des Tons sehr hoch
-  ist oder wenn der dynamische Bereich der Lautsprecher sehr niedrig ist. Sei dir bewusst,
-  dass dieses Feature Verzerrungen verursacht, es sollte erst als letzte Möglichkeit
-  in Betracht gezogen werden.
-</P>
+Die Kompression kann benutzt werden, wenn der dynamische Bereich des Tons sehr hoch
+ist oder wenn der dynamische Bereich der Lautsprecher sehr niedrig ist. Sei dir bewusst,
+dass dieses Feature Verzerrungen verursacht, es sollte erst als letzte Möglichkeit
+in Betracht gezogen werden.</P>
 
 <P>Verwendung:<BR>
-  &nbsp;&nbsp;<CODE>mplayer media.avi -aop
-  list=volume:softclip</CODE>
-</P>
+&nbsp;&nbsp;<CODE>mplayer media.avi -aop
+list=volume:softclip</CODE></P>
 
 
 <P><B><A NAME=2.3.2.2.6>2.3.2.2.6. Extrastereo</A></B></P>
 
 <P>Dieses Plugin erhäht (linear) die Differenz zwischen dem linken und rechten
-  Kanal (wie das XMMS Extrastereo-Plugin), was zum Teil zu "live"-Effekten
-  bei der Wiedergabe führt.
-</P>
+Kanal (wie das XMMS Extrastereo-Plugin), was zum Teil zu "live"-Effekten
+bei der Wiedergabe führt.</P>
 
 <P>Verwendung:<BR>
-  &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=extrastereo</CODE><BR>
-  &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=extrastereo:mul=3.45</CODE></P>
+&nbsp;&nbsp;<CODE>mplayer media.avi -aop list=extrastereo</CODE><BR>
+&nbsp;&nbsp;<CODE>mplayer media.avi -aop list=extrastereo:mul=3.45</CODE></P>
 
 <P>Der normale Koeffizient (<CODE>mul</CODE>) ist eine Fliesskommazahl welche standardmässig
-  auf 2.5 gestellt ist. Wenn man den Wert auf 0.0 setzt, erhält man einen Mono-Ton 
-  (Durchschnitt beider Kanäle). Wenn man den Wert auf 1.0 setzt, bleibt der Ton gleich.
-  wenn man den Wert auf -1.0 setzt, wird der linke und rechte Kanal vertauscht.</P>
+auf 2.5 gestellt ist. Wenn man den Wert auf 0.0 setzt, erhält man einen Mono-Ton 
+(Durchschnitt beider Kanäle). Wenn man den Wert auf 1.0 setzt, bleibt der Ton gleich.
+wenn man den Wert auf -1.0 setzt, wird der linke und rechte Kanal vertauscht.</P>
 
 
 <P><B><A NAME=2.3.2.2.7>2.3.2.2.7. Lautstärke Normalisierer</A></B></P>
@@ -277,7 +252,7 @@ Um dieses Feature zu benutzen, brauchst du eine Soundkarte mit mindestens 4 Kanä
 <P>Dieses Plugin maximiert die Lautstärke ohne den Ton zu verzerren.</P>
 
 <P>Verwendung:<BR>
-  &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=volnorm</CODE><BR>
+&nbsp;&nbsp;<CODE>mplayer media.avi -aop list=volnorm</CODE></P>
 
 
 <P><B><A NAME=2.3.2.2.8>2.3.2.2.8. Surround</A></B></P>
