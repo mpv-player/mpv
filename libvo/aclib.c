@@ -144,6 +144,7 @@ inline void * fast_memcpy(void * to, const void * from, size_t len)
 #endif
 
 #endif //!RUNTIME_CPUDETECT
+	return to;
 }
 
 inline void * mem2agpcpy(void * to, const void * from, size_t len)
