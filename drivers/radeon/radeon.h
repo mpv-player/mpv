@@ -268,6 +268,8 @@
 #define ISYNC_CNTL                             0x1724  
 #define RBBM_GUICNTL                           0x172C  
 #define RBBM_STATUS                            0x0E40  
+#	define RBBM_FIFOCNT_MASK               0x007f
+#	define RBBM_ACTIVE                     (1 << 31)
 #define RBBM_STATUS_alt_1                      0x1740  
 #define RBBM_CNTL                              0x00EC  
 #define RBBM_CNTL_alt_1                        0x0E44  
@@ -484,6 +486,7 @@
 #define AUX_WINDOW_VERT_CNTL                   0x02DC  
 #define DDA_CONFIG			       0x02e0
 #define DDA_ON_OFF			       0x02e4
+
 #define GRPH_BUFFER_CNTL                       0x02F0
 #define VGA_BUFFER_CNTL                        0x02F4
 /* first overlay unit (there is only one) */
@@ -723,6 +726,7 @@
 #define DP_SRC_ENDIAN                          0x15D4
 #define DP_SRC_FRGD_CLR                        0x15D8  
 #define DP_SRC_BKGD_CLR                        0x15DC  
+#define DP_WRITE_MASK                          0x16cc
 #define SC_LEFT                                0x1640  
 #define SC_RIGHT                               0x1644  
 #define SC_TOP                                 0x1648  
@@ -809,6 +813,7 @@
 #	define RB2D_DC_FLUSH		       (3 << 0)
 #	define RB2D_DC_FLUSH_ALL	       0xf
 #	define RB2D_DC_BUSY		       (1 << 31)
+#define DEFAULT_OFFSET                         0x16e0
 #define DEFAULT_PITCH_OFFSET                   0x16E0  
 #define DEFAULT_SC_BOTTOM_RIGHT                0x16E8  
 /* DEFAULT_SC_BOTTOM_RIGHT bit constants */
@@ -882,6 +887,7 @@
 #define SC_BOTTOM_RIGHT                        0x16F0  
 #define SRC_SC_BOTTOM_RIGHT                    0x16F4  
 #define RB2D_DSTCACHE_CTLSTAT		       0x342C
+#define RB2D_DSTCACHE_MODE                     0x3428
 
 #define RADEON_BASE_CODE                    0x0f0b
 #define RADEON_BIOS_0_SCRATCH               0x0010

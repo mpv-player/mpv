@@ -261,6 +261,7 @@ struct radeonfb_info {
 	int hasTVout;
 	int isM7;
 	int isR200;
+	int theatre_num;
 
 	u32 mmio_base_phys;
 	u32 fb_base_phys;
@@ -398,6 +399,7 @@ static __inline__ void _radeon_engine_idle (struct radeonfb_info *rinfo)
 		}
 	}
 }
+
 
 
 #define radeon_engine_idle()		_radeon_engine_idle(rinfo)
@@ -620,6 +622,106 @@ static struct pci_driver radeonfb_driver = {
 	remove:		radeonfb_pci_unregister,
 };
 
+static void _radeon_wait_for_idle(struct radeonfb_info *rinfo);
+/* Restore the acceleration hardware to its previous state. */
+static void _radeon_engine_restore(struct radeonfb_info *rinfo)
+{
+    int pitch64;
+
+    radeon_fifo_wait(1);
+    /* turn of all automatic flushing - we'll do it all */
+    OUTREG(RB2D_DSTCACHE_MODE, 0);
+
+    pitch64 = ((rinfo->xres * (rinfo->bpp / 8) + 0x3f)) >> 6;
+
+    radeon_fifo_wait(1);
+    OUTREG(DEFAULT_OFFSET, (INREG(DEFAULT_OFFSET) & 0xC0000000) |
+				  (pitch64 << 22));
+
+    radeon_fifo_wait(1);
+#if defined(__BIG_ENDIAN)
+    OUTREGP(DP_DATATYPE,
+	    HOST_BIG_ENDIAN_EN, ~HOST_BIG_ENDIAN_EN);
+#else
+    OUTREGP(DP_DATATYPE, 0, ~HOST_BIG_ENDIAN_EN);
+#endif
+
+    radeon_fifo_wait(1);
+    OUTREG(DEFAULT_SC_BOTTOM_RIGHT, (DEFAULT_SC_RIGHT_MAX
+				    | DEFAULT_SC_BOTTOM_MAX));
+    radeon_fifo_wait(1);
+    OUTREG(DP_GUI_MASTER_CNTL, (INREG(DP_GUI_MASTER_CNTL)
+				       | GMC_BRUSH_SOLID_COLOR
+				       | GMC_SRC_DATATYPE_COLOR));
+
+    radeon_fifo_wait(7);
+    OUTREG(DST_LINE_START,    0);
+    OUTREG(DST_LINE_END,      0);
+    OUTREG(DP_BRUSH_FRGD_CLR, 0xffffffff);
+    OUTREG(DP_BRUSH_BKGD_CLR, 0x00000000);
+    OUTREG(DP_SRC_FRGD_CLR,   0xffffffff);
+    OUTREG(DP_SRC_BKGD_CLR,   0x00000000);
+    OUTREG(DP_WRITE_MASK,     0xffffffff);
+
+    _radeon_wait_for_idle(rinfo);
+}
+
+/* The FIFO has 64 slots.  This routines waits until at least `entries' of
+   these slots are empty. */
+#define RADEON_TIMEOUT  2000000 /* Fall out of wait loops after this count */
+static void _radeon_wait_for_fifo_function(struct radeonfb_info *rinfo, int entries)
+{
+    int i;
+
+    for (;;) {
+	for (i = 0; i < RADEON_TIMEOUT; i++) {
+	    if((INREG(RBBM_STATUS) & RBBM_FIFOCNT_MASK) >= entries) return;
+	}
+	radeon_engine_reset();
+	_radeon_engine_restore(rinfo);
+	/* it might be that DRI has been compiled in, but corresponding
+	   library was not loaded.. */
+    }
+}
+/* Wait for the graphics engine to be completely idle: the FIFO has
+   drained, the Pixel Cache is flushed, and the engine is idle.  This is a
+   standard "sync" function that will make the hardware "quiescent". */
+static void _radeon_wait_for_idle(struct radeonfb_info *rinfo)
+{
+    int i;
+
+    _radeon_wait_for_fifo_function(rinfo, 64);
+
+    for (;;) {
+	for (i = 0; i < RADEON_TIMEOUT; i++) {
+	    if (!(INREG(RBBM_STATUS) & RBBM_ACTIVE)) {
+		radeon_engine_flush(rinfo);
+		return;
+	    }
+	}
+	_radeon_engine_reset(rinfo);
+	_radeon_engine_restore(rinfo);
+    }
+}
+
+
+static u32 RADEONVIP_idle(struct radeonfb_info *rinfo)
+{
+   u32 timeout;
+   
+   _radeon_wait_for_idle(rinfo);
+   timeout = INREG(VIPH_TIMEOUT_STAT);
+   if(timeout & VIPH_TIMEOUT_STAT__VIPH_REG_STAT) /* lockup ?? */
+   {
+       radeon_fifo_wait(2);
+       OUTREG(VIPH_TIMEOUT_STAT, (timeout & 0xffffff00) | VIPH_TIMEOUT_STAT__VIPH_REG_AK);
+       _radeon_wait_for_idle(rinfo);
+       return (INREG(VIPH_CONTROL) & 0x2000) ? VIP_BUSY : VIP_RESET;
+   }
+   _radeon_wait_for_idle(rinfo);
+   return (INREG(VIPH_CONTROL) & 0x2000) ? VIP_BUSY : VIP_IDLE ;
+}
+
 
 int __init radeonfb_init (void)
 {
@@ -683,6 +785,75 @@ MODULE_DESCRIPTION("framebuffer driver for ATI Radeon chipset. Ver: "RADEON_VERS
 MODULE_PARM(nomtrr, "i");
 MODULE_PARM_DESC(nomtrr, "Don't touch MTRR (touch=0(default))");
 #endif
+
+/* address format:
+     ((device & 0x3)<<14)   | (fifo << 12) | (addr)
+*/
+
+static int RADEONVIP_read(struct radeonfb_info *rinfo, u32 address, u32 count, u8 *buffer)
+{
+   u32 status,tmp;
+
+   if((count!=1) && (count!=2) && (count!=4))
+   {
+    printk("radeonfb: Attempt to access VIP bus with non-stadard transaction length\n");
+    return 0;
+   }
+   
+   radeon_fifo_wait(2);
+   OUTREG(VIPH_REG_ADDR, address | 0x2000);
+   while(VIP_BUSY == (status = RADEONVIP_idle(rinfo)));
+   if(VIP_IDLE != status) return 0;
+   
+/*
+         disable VIPH_REGR_DIS to enable VIP cycle.
+         The LSB of VIPH_TIMEOUT_STAT are set to 0
+         because 1 would have acknowledged various VIP
+         interrupts unexpectedly 
+*/	
+   radeon_fifo_wait(2);
+   OUTREG(VIPH_TIMEOUT_STAT, INREG(VIPH_TIMEOUT_STAT) & (0xffffff00 & ~VIPH_TIMEOUT_STAT__VIPH_REGR_DIS) );
+/*
+         the value returned here is garbage.  The read merely initiates
+         a register cycle
+*/
+    _radeon_wait_for_idle(rinfo);
+    INREG(VIPH_REG_DATA);
+    
+    while(VIP_BUSY == (status = RADEONVIP_idle(rinfo)));
+    if(VIP_IDLE != status) return 0;
+/*
+        set VIPH_REGR_DIS so that the read won't take too long.
+*/
+    _radeon_wait_for_idle(rinfo);
+    tmp=INREG(VIPH_TIMEOUT_STAT);
+    OUTREG(VIPH_TIMEOUT_STAT, (tmp & 0xffffff00) | VIPH_TIMEOUT_STAT__VIPH_REGR_DIS);	      
+    _radeon_wait_for_idle(rinfo);
+    switch(count){
+        case 1:
+	     *buffer=(u8)(INREG(VIPH_REG_DATA) & 0xff);
+	     break;
+	case 2:
+	     *(u16 *)buffer=(u16) (INREG(VIPH_REG_DATA) & 0xffff);
+	     break;
+	case 4:
+	     *(u32 *)buffer=(u32) ( INREG(VIPH_REG_DATA) & 0xffffffff);
+	     break;
+	}
+     while(VIP_BUSY == (status = RADEONVIP_idle(rinfo)));
+     if(VIP_IDLE != status) return 0;
+ /*	
+ so that reading VIPH_REG_DATA would not trigger unnecessary vip cycles.
+*/
+     OUTREG(VIPH_TIMEOUT_STAT, (INREG(VIPH_TIMEOUT_STAT) & 0xffffff00) | VIPH_TIMEOUT_STAT__VIPH_REGR_DIS);
+     return 1;
+}
+
+static int theatre_read(struct radeonfb_info *rinfo,u32 reg, u32 *data)
+{
+   if(rinfo->theatre_num<0) return 0;
+   return RADEONVIP_read(rinfo, ((rinfo->theatre_num & 0x3)<<14) | reg,4, (u8 *) data);
+}
 
 static char * GET_MON_NAME(int type)
 {
@@ -1002,8 +1173,23 @@ static int radeonfb_pci_register (struct pci_dev *pdev,
 		printk("radeonfb: MTRR set to ON\n");
 	}
 #endif /* CONFIG_MTRR */
-
-	return 0;
+   rinfo->theatre_num = -1;
+   for(i=0;i<4;i++)
+   {
+	if(RADEONVIP_read(rinfo, ((i & 0x03)<<14) | VIP_VIP_VENDOR_DEVICE_ID, 4, (u8 *)&tmp) && 
+	          (tmp==RT_ATI_ID))
+        {
+           rinfo->theatre_num=i;
+	   break;
+	}
+   }
+   if(rinfo->theatre_num >= 0) {
+     printk("radeonfb: Device %d on VIP bus ids as %x\n",i,tmp);
+     theatre_read(rinfo,VIP_VIP_REVISION_ID, &tmp);
+     printk("radeonfb: Detected Rage Theatre revision %8.8X\n", tmp);
+   }
+   else printk("radeonfb: Rage Theatre not detected\n");
+   return 0;
 }
 
 
