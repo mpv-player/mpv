@@ -196,7 +196,7 @@ Er encodiert nach DivX4, XviD, jeden der libavcodec-Codecs und Audio
 nach PCM/\:MP3/\:VBR\-MP3, das ganze in 1, 2 oder 3 Durchgängen.
 Weiterhin kann er Streams kopieren und verfügt über ein mächtiges
 Filter\-System (Entfernen (cropping) und Hinzufügen (expanding) von Rändern, 
-horizontales Spiegeln, Nachbearbeitung (Postprocessing), Rotation, Skalierung, 
+horizontales Spiegeln, Postprocessing (Nachbearbeitung), Rotation, Skalierung,
 Rauschunterdrückung (denoising), RGB/\:YUV\-Konvertierung und mehr).
 .PP
 .B gmplayer
@@ -411,7 +411,7 @@ gibt alles aus, was mit dem Input-Parser zu tun hat (parser-Debug)
 .
 .TP
 .B \-autoq <Qualität> (zusammen mit \-vf [s]pp)
-Ändert dynamisch das Qualitätslevel der Nachbearbeitung, je nachdem, wieviel
+Ändert dynamisch das Qualitätslevel des Postprocessings, je nachdem, wieviel
 CPU-Zeit gerade frei ist.
 Das angegebene Level ist das maximal verwendete Level.
 Normalerweise kanns du eine große Nummer wählen.
@@ -2885,6 +2885,9 @@ Probiere andere Codecs, ausgenommen den MP3-Decoder von FFmpeg.
 Aktiviert eine kommaseparierte Liste von Audiofiltern zusammen mit ihren
 Optionen.
 Siehe auch die Sektion Audiofilter der (englischen) Dokumentation.
+.br
+.I ANMERKUNG:
+Für eine vollständige Liste der verfügbaren Audiofilter, siehe \-af help.
 .sp 1
 Die verfügbaren Filter lauten:
 .RSs
@@ -3007,7 +3010,7 @@ Probiert zuerst die Win32-Codecs.
 .B \-aspect <Verhältnis>
 Überschreibt das Höhen-/\:Breitenverhältnis des Films.
 Bei MPEG-Dateien wird das Verhältnis automatisch erkannt, bei den
-meisten AVI-Dateienist dies nicht möglich.
+meisten AVI-Dateien ist dies nicht möglich.
 .sp 1
 .I BEISPIEL:
 .PD 0
@@ -3028,7 +3031,7 @@ Stellt das Bild auf den Kopf (horizontales Spiegeln).
 .
 .TP
 .B \-lavdopts <Option1:Option2:...> (DEBUG-CODE)
-Gibt Parameter für das Decoding des libavcodec an.
+Gibt Parameter für das Decodieren mit libavcodec an.
 .sp 1
 .I BEISPIEL:
 .PD 0
@@ -3048,30 +3051,30 @@ Umgehe Fehler (Bugs) des Encoders manuell:
 .br
 1: automatische Erkennung von Fehlern (Standard)
 .br
-2: (msmpeg4v3): manche ältere, von lavc generierte msmpeg4v3-Dateien (keine
+2 (msmpeg4v3): manche ältere, von lavc generierte msmpeg4v3-Dateien (keine
 automatische Erkennung)
 .br
-4: (mpeg4): XviD-Interlacing-Fehler (automatisch erkennt bei fourcc==XVIX)
+4 (mpeg4): XviD-Interlacing-Fehler (automatisch erkannt bei fourcc==XVIX)
 .br
-8: (mpeg4): UMP4 (automatisch erkennt bei fourcc==UMP4)
+8 (mpeg4): UMP4 (automatisch erkannt bei fourcc==UMP4)
 .br
-16: (mpeg4): Padding-Fehler (automatisch erkennt)
+16 (mpeg4): Padding-Fehler (automatisch erkannt)
 .br
-32: (mpeg4): Fehler durch ungültigen vlc (automatisch erkannt durch fourcc)
+32 (mpeg4): Fehler durch ungültigen vlc (automatisch erkannt durch fourcc)
 .br
-64: (mpeg4): qpel-Fehler bei XviD und DivX (automatisch erkannt durch
+64 (mpeg4): qpel-Fehler bei XviD und DivX (automatisch erkannt durch
 fourcc/\:version)
 .br
-128: (mpeg4): alter qpel-Standardfehler (automatisch erkannt durch
+128 (mpeg4): alter qpel-Standardfehler (automatisch erkannt durch
 fourcc/\:version)
 .br
-256: (mpeg4): noch ein anderer qpel-Fehler (automatisch erkannt durch
+256 (mpeg4): noch ein anderer qpel-Fehler (automatisch erkannt durch
 fourcc/\:version)
 .br
-512: (mpeg4): Fehler bei direkter qpel-Blockgröße (automatisch erkannt durch
+512 (mpeg4): Fehler bei direkter qpel-Blockgröße (automatisch erkannt durch
 fourcc/\:version)
 .br
-1024: (mpeg4): Randfüllungsfehler (edge padding, automatisch erkannt durch
+1024 (mpeg4): Randfüllungsfehler (edge padding, automatisch erkannt durch
 fourcc/\:version)
 .REss
 .IPs debug=<Wert>
@@ -3086,13 +3089,13 @@ Debugging:
 .br
 4: Bitstream 
 .br
-8: Makroblock (MB)-Typ
+8: Makroblock-Typ (MB type)
 .br
 16: Quantisierungsparameter (QP)
 .br
-32: Bewegungsvektor (Motion-Vector, MV)
+32: Motion-Vector (MV)
 .br
-0x0040: Bewegungsvektor-Visualisierung (benutze \-noslices)
+0x0040: Motion-Vector-Visualisierung (benutze \-noslices)
 .br
 0x0080: Überspringen des Makroblocks (MB)
 .br
@@ -3109,9 +3112,9 @@ Debugging:
 .IPs ec=<Wert>
 Verbergen von Fehlern:
 .RSss
-1: Benutze einen starken Deblock-Filter bei beschädigten Macroblöcken (MBs).
+1: Benutze einen starken Deblock-Filter bei beschädigten Makroblöcken (MBs).
 .br
-2: iterative Bewegungsvektor (MV)-Suche (langsam)
+2: iterative Motion-Vector-Suche (langsam)
 .br
 3: alles (Standard)
 .REss
@@ -3140,23 +3143,23 @@ vorgenommen werden, um fehlerhafte Bitstreams zu erkennen.
 Decodierung nur mit Graustufen (was ein bischen schneller als mit Farbe ist)
 .IPs "idct=<0\-99> (siehe \-lavcopts)"
 Um die beste Decodierqualität zu erreichen, benutze denselben idct-Algorithmus
-für Encoding und Decoding.
+für Encodierung und Decodierung.
 Dies kann allerdings auf Kosten der Genauigkeit gehen.
 .IPs "sb=<Nummer> (nur bei MPEG2)"
-Überspringe unten die angegebene Anzahl von Macroblockreihen.
+Überspringe unten die angegebene Anzahl von Makroblockreihen.
 .IPs "st=<Nummer> (nur bei MPEG2)"
-Überspringe oben die angegebene Anzahl von Macroblockreihen.
+Überspringe oben die angegebene Anzahl von Makroblockreihen.
 .IPs vismv=<Wert>
 vismv:
 .RSss
 .br
 0: deaktiviert
 .br
-1: mache von P-Frames vorhergesagte Bewegungsvektoren sichtbar
+1: mache von P-Frames vorwärts vorausberechnete Motion-Vectors sichtbar
 .br
-2: mache von B-Frames vorhergesagte Bewegungsvektoren sichtbar
+2: mache von B-Frames vorwärts vorausberechnete Motion-Vectors sichtbar
 .br
-4: mache von B-Frames nach-gesagte Bewegungsvektoren sichtbar
+4: mache von B-Frames rückwärts vorausberechnete Motion-Vectors sichtbar
 .REss
 .IPs vstats
 Gebe Statistiken aus und speichere sie in ./vstats_*.log.
@@ -3165,7 +3168,7 @@ Gebe Statistiken aus und speichere sie in ./vstats_*.log.
 .TP
 .B \-noslices
 Deaktiviert die Anzeige des Videos in 16-Pixel-hohen Streifen und stellt den
-kompletten Frame statt dessen in einem einzigen durchgang dar.
+kompletten Frame statt dessen in einem einzigen Durchgang dar.
 Dies kann die Darstellung schneller oder langsamer machen, abhängig von der
 Hardware/\:dem Cache.
 Dies hat nur einen Effekt bei den Codecfamilien libmpeg2 und libavcodec.
@@ -3178,28 +3181,37 @@ Spielt keinen Sound ab bzw.\& encodiert keinen Sound.
 Spielt kein Video ab bzw.\& encodiert kein Video.
 .
 .TP
+.B \-oldpp <Qualität> (nur bei OpenDivX) (OBSOLET)
+Benutze den Postprocessing-Code von opendivx anstelle des internen.
+Das interne Postprocessing liefert bessere Qualität und Performance, ersetzt
+durch \-pp.
+Der gültige Wertebereich für \-oldpp variiert je nach Codec, ist meistens
+aber 0\-6, wobei 0=deaktiviert und 6=langsamster/\:bester Modus bedeutet.
+.
+.TP
 .B \-pp <Qualität> (siehe auch \-vf pp)
-Setzt das Level der Nachbearbeitung der DLL. Diese Option kann
-NICHT MEHR für MPlayers Nachbearbeitungsfilter verwendet werden, sondern
-nur noch für diejnigen Win32-DirectShow-DLLs, die eigene interne
-Nachbearbeitungsroutinen mitbringen.
-Der gültige Wertebereich für \-pp hängt vom Codec ab, ist meistens aber
-0\-6, wobei 0=deaktiviert und 6=langsamster/bester Modus bedeutet.
+Setzt das Postprocessing-Level der DLL.
+Diese Option kann nicht mehr in Verbindung mit \-vf pp verwendet werden,
+sondern nur noch mit Win32-DirectShow-DLLs, die eigene interne 
+Postprocessing-Routinen mitbringen.
+Der gültige Wertebereich für \-pp variiert je nach Codec, ist meistens aber
+0\-6, wobei 0=deaktiviert und 6=langsamster/\:bester Modus bedeutet.
+.
 .TP
 .B \-pphelp (siehe auch \-vf pp)
-Zeigt eine Zusammenfassung der vorhandenen Nachbearbeitungsfilter und
+Zeigt eine Zusammenfassung der vorhandenen Postprocessing-Filter und
 Nutzungshinweise an.
+.
 .TP
 .B \-ssf <Modus>
-Wählt den Modus für den Softwareskalierer.
-
+Gibt die Parameter für den Softwareskalierer an.
+.sp 1
 .I BEISPIEL:
 .PD 0
 .RSs
 \-vf scale \-ssf lgb=3.0
 .RE
 .PD 1
-
 .PD 0
 .RSs
 .IPs lgb=<0\-100>
@@ -3220,7 +3232,6 @@ Vertikale Verschiebung des Farbanteils
 .TP
 .B \-stereo <Modus>
 Wählt den Tpy der MP2/\:MP3-Stereoausgabe.
-
 .PD 0
 .RSs
 .IPs 0
@@ -3233,19 +3244,14 @@ Rechter Kanal
 .PD 1
 .
 .TP
-.B \-sws <Typ\ des\ Softwareskalierers> (siehe auch \-vf scale)
+.B \-sws <Typ\ des\ Softwareskalierers> (siehe auch \-vf scale und \-zoom)
 Mit dieser Option wird die Qualität (und damit auch die Geschwindigkeit)
 des Softwareskalierers gewählt, der bei \-zoom zum Einsatz kommt.
 Dieser wird beispielsweise bei x11 oder anderen Videotreibern benutzt,
 die keine Hardwarebeschleunigung bieten.
+.sp 1
 Mögliche Werte sind:
-
-.I ANMERKUNG:
-.br
-Für \-sws\ 2 und 7 kann die Schärfe mit dem Skalierungsparameter (p) des
-Skalierungsfilters (\-vf scale (0 (weich) \-  100 (scharf))) gesetzt werden.
-Bei \-sws 9 gibt dieser Parameter dagegen die Filterlänge an (1 \- 10).
-
+.sp 1
 .PD 0
 .RSs
 .IPs 0
@@ -3272,27 +3278,33 @@ lanczos
 bicubic spline
 .RE
 .PD 1
+.sp 1
+.RS
+.I ANMERKUNG:
+Für \-sws\ 2 und 7 kann die Schärfe mit dem Skalierungsparameter (p) des
+Skalierungsfilters (\-vf scale (0 (weich) \-  100 (scharf))) gesetzt werden.
+Bei \-sws 9 gibt dieser Parameter dagegen die Filterlänge an (1 \- 10).
+.RE
 .
 .TP
-.B \-vc <[-]codec1,[-]codec2,...[,]>
+.B \-vc <[-]Codec1,[-]Codec2,...[,]>
 Gibt eine Prioritätsliste der zu verwendenden Videocodecs an, so wie sie
 in codecs.conf definiert werden.
 Ein '-' vor dem Codecnamen deaktiviert diesen Codec.
-
+Wenn die Liste mit ',' endet, dann greift MPlayer auch auf auch nicht
+aufgeführte Codecs zurück.
+.br
 .I ANMERKUNG:
-.br
 Mit \-vc help wird eine vollständige Liste der verfügbaren Codecs ausgegben.
-.br
-Wenn die Liste mit ',' endet, dann werden notfalls auch nicht aufgeführte
-Codecs benutzt.
-
+.sp 1
 .I BEISPIEL:
 .PD 0
 .RSs
 .IPs "\-vc divx"
 Erzwingt den Win32/\:VFW DivX-Codec; andere werden nicht ausprobiert.
 .IPs "\-vc divx4,"
-Probiet zuerst den divx4-Codec oder andere, wenn dieser nicht funktioniert.
+Probiet zuerst den divx4linux-Codec, danach andere, wenn dieser nicht
+funktioniert.
 .IPs "\-vc -divxds,-divx,"
 Probiert alle Codecs außer den Win32-DivX-Codecs.
 .IPs "\-vc ffmpeg12,mpeg12,"
@@ -3369,7 +3381,7 @@ durch. Benutze ihn zusammen mit dem scale-Filter, um tatsächlich eine
 Konvertierung durchzuführen.
 .IPs pp[=Filter1[:Option1[:Option2...]]/[-]Filter2...] (siehe \-pphelp)
 Diese Option aktiviert die Benutzung von MPlayers internen
-Nachbearbeitungsfilter. Außerdem ist dieses die Schnittstelle, um an die
+Postprocessing-Filter. Außerdem ist dieses die Schnittstelle, um an die
 Filter Parameter zu übergeben.
 Eine Liste mit allen vorhandenen Filtern erhälst du mit \-pphelp.
 .br
@@ -3652,22 +3664,16 @@ kleiner Teil des Bildschirms ändert.
 Gibt eine Prioritätsliste der zu verwendenden Videocodecfamilien an, so wie sie
 in codecs.conf definiert werden.
 Wenn keiner davon funktioniert, werden die Standardfamilien ausprobiert.
-
+.br
 .I ANMERKUNG:
-.br
-Falls MPlayer mit Unterstützung für libdivxdecore compiert wurde, dann
-verwenden odivx und divx4 den gleichen DivX4-Codec, benutzen aber ein
-unterschiedliches API.
-Unterschiede und Anmerkungen, wann welcher der beiden benutzt werden sollte,
-befinden sich in der DivX4-Sektion der Dokumentation.
-.br
 Mit \-vfm help wird eine vollständige Liste der verfügbaren Treiber ausgegeben.
-
+.sp 1
 .I BEISPIEL:
 .PD 0
 .RSs
 .IPs "\-vfm ffmpeg,dshow,vfw"
-Probiert zuerst libavcodec, dann DirectShow, dann die VfW-Codecs und schließlich
+Probiert zuerst libavcodec, dann DirectShow, dann die VfW-Codecs und
+schließlich
 andere, falls keine der Familien funktioniert hat.
 .IPs "\-vfm xanim"
 Probiert zuerst die XAnim-Codecs.
@@ -3676,12 +3682,13 @@ Probiert zuerst die XAnim-Codecs.
 .
 .TP
 .B \-x <x> (nur bei MPlayer)
-Skaliert das Bild auf eine Breite von x (falls Software\-/\:Hardwareskalierung
-verfügbar ist). Deaktiviert die Berechnung des Höhen\-/\:Breitenverhältnisses.
-s.TP
-.B \-xvidopts <option1:option2:...>
+Skaliert das Bild auf eine Breite von <x> (falls
+Software-/\:Hardwareskalierung verfügbar ist).
+Deaktiviert die Berechnung des Höhen-/\:Breitenverhältnisses.
+.
+.TP
+.B \-xvidopts <Option1:Option2:...>
 Gibt zusätzliche Parameter für die Decodierung mti XviD an.
-
 .PD 0
 .RSs
 .IPs dr2\ \ 
@@ -3758,7 +3765,7 @@ bit  <16001\-24000000> an
 maximale Anzahl Bilder zwischen zwei Schlüsselbildern (key frames)
 .IPs deinterlace
 aktiviert Deinterlacing (vermeide das, da es bei DivX4 buggy ist. Nimm lieber
-einen der Nachbearbeitungsfilter dafür.)
+einen der Postprocessing-Filter dafür.)
 .IPs q=<1\-5>
 Qualitätslevel (1\-am schnellsten, 5\-am besten)
 .IPs min_quant=<1\-31>
@@ -3913,8 +3920,8 @@ setzt die Audioeingangsverstärkung
 2: automatische Anpassung
 .REss
 .IPs fast
-Aktiviert schnelles encoding bei nachfolgenden VBR\-Presets. Etwas schlechtere
-Qualität und höhere Bitraten sind die Nachteile.
+Aktiviert schnelles Encodieren bei nachfolgenden VBR-Presets.
+Etwas schlechtere Qualität und höhere Bitraten sind die Nachteile.
 .IPs preset=<Wert>
 Stellt Presets für die bestmöglichen Qualitätseinstellungen zur Verfügung:
 +.RSss
@@ -3992,9 +3999,9 @@ konstate Quantizer (wählt einen Modus mit fest vorgegebenen Quantizern)
 .IPs vqmax=<1\-31>
 maximaler Quantizer (bei Durchgang 1/\:2) (Standardwert: 31)
 .IPs mbqmin=<1\-31>
-minimale Makroblock\-Quantizer (bei Durchgang\ 1/\:2) (Standardwert: 2)
+minimale Makroblock-Quantizer (bei Durchgang\ 1/\:2) (Standardwert: 2)
 .IPs mbqmax=<1\-31>
-maximale Makroblock\-Quantizer (bei Durchgang\ 1/\:2) (Standardwert: 31)
+maximale Makroblock-Quantizer (bei Durchgang\ 1/\:2) (Standardwert: 31)
 .IPs vqdiff=<1\-31>
 maximale Differenz der Quantizer zwischen I\- oder P\-Bildern (bei
 Durchgang 1/\:2) (Standardwert: 3)
@@ -4025,7 +4032,7 @@ Modus für hohe Qualität. Encodiert jeden Makroblock in allen Modi und
 wählt dann das kleinste Ergebnis (langsam) (Standard: hohe Qualität
 deaktiviert)
 .IPs v4mv
-vier Bewegungsvektoren pro Makroblock (etwas bessere Qualität)
+vier Motion-Vectors pro Makroblock (etwas bessere Qualität)
 (standardmäßig deaktivert).
 .IPs keyint=<0\-300>
 Maximale Anzahl von Bildern zwischen zwie Schlüsselbildern (key frames).
@@ -4154,9 +4161,9 @@ avgPPTexaverage: Nicht\-Intra\-Texturkomplexität bei P\-Frames
 .br
 avgBPTexaverage: Nicht\-Intra\-Texturkomplexität bei B\-Frames
 .br
-mv:              für Bewegungsvektoren verwendete Bits
+mv:              für Motion-Vectors verwendete Bits
 .br
-fCode:           maximale Länge der Bewegungsvektoren (log2)
+fCode:           maximale Länge der Motion-Vectors (log2)
 .br
 iCount:          Anzahl der Intra\-Makroblöcke / Anzahl der Makroblöcke
 .br
@@ -4563,7 +4570,7 @@ Quantizer an.
 .IPs me_quality=<0\-6>
 Gibt die Qualität der Bewegungserkennung an (Standardwert: 4).
 .IPs 4mv
-Benutzt vier Bewegungsvektoren pro Makroblock, was eine bessere Kompression
+Benutzt vier Motion-Vectors pro Makroblock, was eine bessere Kompression
 auf Kosten der Encodiergeschwindigkeit bringen kann (standardmäßig aus).
 .IPs rc_reaction_delay_factor=<Wert>
 Gibt an, wie schnell die Bitratenkontrolle reagiert. Niedrigere Werte stehen
@@ -4592,7 +4599,7 @@ sind (standardmäßig aus, nur beim Modus mit zwei Durchgängen).
 Benutze einen Algorithmus zur Helligkeitsmaskierung (standardmäßig aus,
 scheint buggy zu sein)
 .IPs hintedme
-Speichert während des ersten Durchgangs die Bewegungsvektoren in einer Datei
+Speichert während des ersten Durchgangs die Motion-Vectors in einer Datei
 und benutzt diese Datei beim zweitn Durchgang (standardmä-ig aus, scheint
 buggy zu sein, nur beim Modus mit zwei Durchgängen).
 .IPs hintfile
@@ -4746,8 +4753,9 @@ Siehe Datei AUTHORS für eine Liste einiger der vielen anderen Beitragenden.
 .PP
 MPlayer is (C) 2000\-2004 The MPlayer Team
 .PP
-Diese Manpage wurde zum größten Teil von Gabucino, Diego Biurrun, Jonas
-Jermann, Moritz Bunkus und Sebastian Krämer geschrieben.
+Diese Manpage wurde zum größten Teil von Gabucino, Diego Biurrun und
+Jonas Jermann geschrieben und von Moritz Bunkus und Sebastian Krämer
+ins Deutsche übersetzt.
 Sie wird gepflegt von Sebastian Krämer.
 Schicke Mails die Manpage betreffend bitte an die MPlayer-DOCS-Mailingliste.
 .\" Ende der Datei
