@@ -1361,12 +1361,14 @@ int too_fast_frame_cnt=0;
 // for auto-quality:
 float AV_delay=0; // average of A-V timestamp differences
 double vdecode_time;
-unsigned int lastframeout_ts;
+unsigned int lastframeout_ts=0;
 float time_frame_corr_avg=0;
 
 float next_frame_time=0;
 int frame_time_remaining=0; // flag
 int blit_frame=0;
+
+osd_text_buffer[0]=0;
 
 //================ SETUP AUDIO ==========================
 
