@@ -473,6 +473,26 @@ vf_instance_t* vf_open_filter(vf_instance_t* next, char *name, char **args){
   return vf_open_plugin(filter_list,next,name,args);
 }
 
+/**
+ * \brief adds a filter before the last one (which should be the vo filter).
+ * \param vf start of the filter chain.
+ * \param name name of the filter to add.
+ * \param args argument list for the filter.
+ * \return pointer to the filter instance that was created.
+ */
+vf_instance_t* vf_add_before_vo(vf_instance_t **vf, char *name, char **args) {
+  vf_instance_t *vo, *prev = NULL, *new;
+  // Find the last filter (should be vf_vo)
+  for (vo = *vf; vo->next; vo = vo->next)
+    prev = vo;
+  new = vf_open_filter(vo, name, args);
+  if (prev)
+    prev->next = new;
+  else
+    *vf = new;
+  return new;
+}
+
 //============================================================================
 
 unsigned int vf_match_csp(vf_instance_t** vfp,unsigned int* list,unsigned int preferred){

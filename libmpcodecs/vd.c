@@ -253,7 +253,8 @@ csp_again:
     if(vo_flags&VFCAP_FLIPPED) flip^=1;
     if(flip && !(vo_flags&VFCAP_FLIP)){
 	// we need to flip, but no flipping filter avail.
-	sh->vfilter=vf=vf_open_filter(vf,"flip",NULL);
+	vf_add_before_vo(&vf, "flip", NULL);
+	sh->vfilter = vf;
     }
 
     // time to do aspect ratio corrections...

@@ -77,6 +77,7 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 
 vf_instance_t* vf_open_plugin(vf_info_t** filter_list, vf_instance_t* next, char *name, char **args);
 vf_instance_t* vf_open_filter(vf_instance_t* next, char *name, char **args);
+vf_instance_t* vf_add_before_vo(vf_instance_t **vf, char *name, char **args);
 vf_instance_t* vf_open_encoder(vf_instance_t* next, char *name, char *args);
 
 unsigned int vf_match_csp(vf_instance_t** vfp,unsigned int* list,unsigned int preferred);
