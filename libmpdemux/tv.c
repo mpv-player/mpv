@@ -544,7 +544,7 @@ int demux_open_tv(demuxer_t *demuxer)
 	    case AF_FORMAT_AC3:
 	    default:
 		mp_msg(MSGT_TV, MSGL_ERR, "Audio type '%s (%x)' unsupported!\n",
-		    af_fmt2str(audio_format, &buf, 128), audio_format);
+		    af_fmt2str(audio_format, buf, 128), audio_format);
 		goto no_audio;
 	}
 	

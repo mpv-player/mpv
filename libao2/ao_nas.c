@@ -393,7 +393,7 @@ static int init(int rate,int channels,int format,int flags)
 	memset(nas_data, 0, sizeof(struct ao_nas_data));
 
 	mp_msg(MSGT_AO, MSGL_V, "ao2: %d Hz  %d chans  %s\n",rate,channels,
-		af_fmt2str(format,&buf,128));
+		af_fmt2str(format,buf,128));
 
 	ao_data.format = format;
 	ao_data.samplerate = rate;

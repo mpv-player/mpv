@@ -137,8 +137,8 @@ static int init(){
 
   // Tell the world what we are up to
   printf("[pl_format] Input format: %s, output format: %s \n",
-	 af_fmt2str(ao_plugin_data.format, &buf1, 128),
-	 af_fmt2str(ao_plugin_cfg.pl_format_type, &buf2, 128));
+	 af_fmt2str(ao_plugin_data.format, buf1, 128),
+	 af_fmt2str(ao_plugin_cfg.pl_format_type, buf2, 128));
 
   // We are changing the format
   ao_plugin_data.format=ao_plugin_cfg.pl_format_type;

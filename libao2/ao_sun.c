@@ -546,7 +546,7 @@ static int init(int rate,int channels,int format,int flags){
 
     if (!ok) {
 	mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_SUN_UnsupSampleRate,
-	       channels, af_fmt2str(format, &buf, 128), rate);
+	       channels, af_fmt2str(format, buf, 128), rate);
 	return 0;
     }
 

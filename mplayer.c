@@ -2108,7 +2108,7 @@ if(sh_audio){
     char buf[128];
     mp_msg(MSGT_CPLAYER,MSGL_INFO,"AF_pre: %dHz %dch %s\n",
       ao_data.samplerate, ao_data.channels,
-      af_fmt2str(ao_data.format,&buf,128));
+      af_fmt2str(ao_data.format, buf, 128));
   }
 #endif  
   current_module="ao2_init";
@@ -2128,7 +2128,7 @@ if(sh_audio){
     mp_msg(MSGT_CPLAYER,MSGL_INFO,"AO: [%s] %dHz %dch %s (%d bps)\n",
       audio_out->info->short_name,
       ao_data.samplerate, ao_data.channels,
-      af_fmt2str(ao_data.format, &buf, 128),
+      af_fmt2str(ao_data.format, buf, 128),
       af_fmt2bits(ao_data.format)/8 );
     mp_msg(MSGT_CPLAYER,MSGL_V,"AO: Description: %s\nAO: Author: %s\n",
       audio_out->info->name, audio_out->info->author);

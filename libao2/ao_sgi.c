@@ -43,7 +43,7 @@ static int control(int cmd, void *arg){
 static int init(int rate, int channels, int format, int flags) {
 
   char buf[128];  
-  mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AO_SGI_InitInfo, rate, (channels > 1) ? "Stereo" : "Mono", af_fmt2str(format, &buf, 128));
+  mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AO_SGI_InitInfo, rate, (channels > 1) ? "Stereo" : "Mono", af_fmt2str(format, buf, 128));
   
   { /* from /usr/share/src/dmedia/audio/setrate.c */
   
