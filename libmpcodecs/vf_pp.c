@@ -5,6 +5,7 @@
 #include "../config.h"
 #include "../mp_msg.h"
 
+#include "../libvo/img_format.h"
 #include "../mp_image.h"
 #include "vf.h"
 
@@ -16,6 +17,16 @@ struct vf_priv_s {
 };
 
 //===========================================================================//
+
+static int query_format(struct vf_instance_s* vf, unsigned int fmt){
+    switch(fmt){
+    case IMGFMT_YV12:
+    case IMGFMT_I420:
+    case IMGFMT_IYUV:
+	return vf_next_query_format(vf,fmt);
+    }
+    return 0;
+}
 
 static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
     if(vf->priv->pp&0xFFFF) return; // non-local filters enabled
@@ -62,6 +73,7 @@ extern int divx_quality;
 
 static int open(vf_instance_t *vf, char* args){
     char *endptr;
+    vf->query_format=query_format;
     vf->get_image=get_image;
     vf->put_image=put_image;
     vf->priv=malloc(sizeof(struct vf_priv_s));
