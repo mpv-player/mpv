@@ -65,7 +65,7 @@ char *devname=vo_subdevice?vo_subdevice:"/dev/mga_vid";
 		aspect_save_screenres(vo_screenwidth,vo_screenheight);
 	
 		if(fullscreen&0x01) /* -fs */
-			aspect(&d_width,&d_height,A_NOZOOM);
+			aspect(&d_width,&d_height,A_ZOOM);
 		else
 			aspect(&d_width,&d_height,A_NOZOOM);
 	}
