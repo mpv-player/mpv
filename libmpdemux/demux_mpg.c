@@ -144,7 +144,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
             ds=demux->sub;
         }
           
-      } else if((aid & 0xC0) == 0x80) {
+      } else if((aid & 0xC0) == 0x80 || (aid & 0xE0) == 0x00) {
 
 //        aid=128+(aid&0x7F);
         // aid=0x80..0xBF
