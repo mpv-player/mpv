@@ -137,7 +137,7 @@ inline static int stream_seek(stream_t *s,off_t pos){
   return cache_stream_seek_long(s,pos);
 }
 
-inline static int stream_skip(stream_t *s,int len){
+inline static int stream_skip(stream_t *s,off_t len){
   if(len<0 || (len>2*STREAM_BUFFER_SIZE && s->type!=STREAMTYPE_STREAM)){
     // negative or big skip!
     return stream_seek(s,stream_tell(s)+len);
