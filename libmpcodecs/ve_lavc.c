@@ -48,6 +48,7 @@ static int lavc_param_vqmax = 15;
 static int lavc_param_vqdiff = 3;
 static float lavc_param_vqcompress = 0.5;
 static float lavc_param_vqblur = 0.5;
+static int lavc_param_vmax_b_frames = 0;
 static int lavc_param_keyint = -1;
 
 #include "cfgparser.h"
@@ -66,6 +67,7 @@ struct config lavcopts_conf[]={
 	{"vqdiff", &lavc_param_vqdiff, CONF_TYPE_INT, CONF_RANGE, 1, 31, NULL},
 	{"vqcomp", &lavc_param_vqcompress, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 1.0, NULL},
 	{"vqblur", &lavc_param_vqblur, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 1.0, NULL},
+	{"vmax_b_frames", &lavc_param_vmax_b_frames, CONF_TYPE_INT, CONF_RANGE, 0, FF_MAX_B_FRAMES, NULL},
 	{"keyint", &lavc_param_keyint, CONF_TYPE_INT, 0, 0, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
@@ -107,6 +109,7 @@ static int config(struct vf_instance_s* vf,
     lavc_venc_context.max_qdiff= lavc_param_vqdiff;
     lavc_venc_context.qcompress= lavc_param_vqcompress;
     lavc_venc_context.qblur= lavc_param_vqblur;
+    lavc_venc_context.max_b_frames= lavc_param_vmax_b_frames;
     /* keyframe interval */
     if (lavc_param_keyint >= 0) /* != -1 */
 	lavc_venc_context.gop_size = lavc_param_keyint;
