@@ -298,7 +298,7 @@ Anders Johansson <ajh@atri.curtin.edu.au>
     * old audio plugin system, some effect plugins
     * new libaf interface design, implementation, plugins
 
-Roberto Togni <rtogni@freemail.it>
+Roberto Togni <r_togni@tiscali.it>
     * open source QT RPZA decoder
     * open source HuffYUV decoder
     * open source MSZH/ZLIB decoder
@@ -582,6 +582,7 @@ Reimar Döffinger <reimar.doeffinger@stud.uni-karlsruhe.de>
 
 adland <adland123@yahoo.com>
     * support for various Windows DLL codecs (LCW2, ASLC)
+    * smil playlist parser
 
 Tilmann Bitterberg
     * AVI OpenDML read support
