@@ -178,6 +178,9 @@ mf= type=png:fps=25
 
 .SH "PLAYER OPTIONS (MPLAYER ONLY)"
 .TP
+.B \-, \-use-stdin
+Read data from stdin. \-idx option does not work in conjunction with this.
+.TP
 .B \-autoq <quality> (use with \-vop pp)
 Dynamically changes the level of postprocessing depending on available spare
 CPU time.
@@ -207,17 +210,16 @@ Use in combination with \-nosound and \-vo null for benchmarking only the
 video codec.
 .TP
 .B \-edl <filename>
-Enables edit decision list actions during playback. Video will be
-skipped over and audio will be muted and unmuted according to the
-entries in the given file. See DOCS/edl.html for details on how to use
-this.
+Enables edit decision list (EDL) actions during playback. Video will be skipped
+over and audio will be muted and unmuted according to the entries in the given
+file. See DOCS/documentation.html#edl for details on how to use this.
 .TP
 .B \-edlout <filename>
-Creates a new file and writes edit decision list records to that
-file. During playback, when the user hits 'i', an entry to skip over
-the last two seconds of playback will be written to the file. This
-provides a starting point from which the user can fine-tune EDL
-entries later. See DOCS/edl.html for details.
+Creates a new file and writes edit decision list (EDL) records to that file.
+During playback, when the user hits 'i', an entry to skip over the last two
+seconds of playback will be written to the file. This provides a starting point
+from which the user can fine-tune EDL entries later. See
+DOCS/documentation.html#edl for details.
 .TP
 .B \-framedrop (also see \-hardframedrop)
 Skips displaying some frames to maintain A/\:V sync on slow systems.
@@ -336,8 +338,6 @@ Set playback speed rate.
 .B \-sstep <sec>
 Specifies seconds between displayed frames.
 Useful for slideshows.
-.TP
-.B \-use-stdin
 
 
 .SH "DEMUXER/STREAM OPTIONS"
@@ -2588,7 +2588,7 @@ switch to fixed quantizer mode and specify the quantizer to be used
 specify the motion detection quality (default=4)
 .IPs 4mv
 use 4 motion vectors per macro-block, might give better compression at the cost 
-of slower encoding (default=off)
+of a slower encoding (default=off)
 .IPs rc_reaction_delay_factor=<value>
 specify how fast the rate control reacts, lower values are faster
 .IPs rc_averaging_period=<value>
@@ -2686,6 +2686,8 @@ switch subtitle language
 adjust subtitle delay by +/\:\- 0.1 second
 .IPs "r and t"
 adjust subtitle position
+.IPs "i"
+set EDL mark
 
 .PP
 (The following keys are valid only when using \-vo xv or
