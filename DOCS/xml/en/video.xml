@@ -1778,7 +1778,7 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </para>
 
 <screen>
-  mencoder -o r1.avi -ovc xvid -xvidenctopts bitrate=800 -oac mp3lame -lameopts cbr:br=128 -vf ci dvb://R1
+  mencoder -o r1.avi -ovc xvid -xvidenctopts bitrate=800 -oac mp3lame -lameopts cbr:br=128 -pp=ci dvb://R1
 </screen>
 
 <para>
