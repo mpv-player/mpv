@@ -33,7 +33,7 @@
 .\" Title
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2004-11-17" "The MPlayer Project" "The Movie Player"
+.TH MPlayer 1 "2004-11-30" "The MPlayer Project" "The Movie Player"
 .
 .SH NAME
 mplayer  \- movie player
@@ -1959,15 +1959,6 @@ on.
 .PD 1
 .
 .TP
-.B \-double
-Enables double buffering.
-Fixes flicker by storing two frames in memory, and displaying one while
-decoding another.
-Can affect OSD negatively, but often it removes OSD flickering.
-Needs twice the memory of a single buffer, so it won't work on cards with
-very little video memory.
-.
-.TP
 .B \-dr \ \ \ 
 Turns on direct rendering (not supported by all codecs and video outputs)
 .br
@@ -2193,6 +2184,15 @@ Set the aspect ratio of your monitor or TV screen.
 \-monitoraspect 16:9 or 1.7777
 .RE
 .PD 1
+.
+.TP
+.B \-nodouble
+Disables double buffering.
+Double buffering fixes flicker by storing two frames in memory, and
+displaying one while decoding another.
+It can affect OSD negatively, but often removes OSD flickering.
+It needs twice the memory of a single buffer and thus will not
+work on cards with very little video memory.
 .
 .TP
 .B \-nograbpointer
