@@ -47,7 +47,7 @@ static char help_text[]=
 " o               Cambiar modo OSD:  nada / búsqueda / búsqueda y tiempo.\n"
 " * ó /           Aumentar o disminuir el volumen (presione 'm' para elegir entre master/pcm).\n"
 " z ó x           Ajustar el retardo de la subtítulación en más o menos 0.1 segundos.\n"
-" r ó t           Ajustar posición de la subtítulación (mira también -vop expand).
+" r ó t           Ajustar posición de la subtítulación (mira también -vop expand).\n"
 "\n"
 " *** Lee la página man para más opciones (avanzadas) y teclas! ***\n"
 "\n";
