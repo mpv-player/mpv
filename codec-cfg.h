@@ -1,8 +1,6 @@
 #ifndef __CODEC_CFG_H
 #define __CODEC_CFG_H
 
-//#include <inttypes.h>
-
 #ifndef IMGFMT_YV12
 #define IMGFMT_YV12 0x32315659
 #define IMGFMT_YUY2 (('2'<<24)|('Y'<<16)|('U'<<8)|'Y')
@@ -30,7 +28,6 @@
 #define CODECS_STATUS_WORKING		2
 
 
-//#warning nem kellene ket typedef GUID-nak...
 typedef struct {
 	unsigned long f1;
 	unsigned short f2;
@@ -38,7 +35,6 @@ typedef struct {
 	unsigned char f4[8];
 } GUID;
 
-/* I just rearranged, to use less memory... */
 typedef struct {
 	unsigned int fourcc[CODECS_MAX_FOURCC];
 	unsigned int fourccmap[CODECS_MAX_FOURCC];
