@@ -1,10 +1,7 @@
 TO DO:
 ~~~~~~
 For the Release:
-- fix -framedrop, support for mpeg files
-
-- audio playback rate setting [Jelmer Feenstra]
-- RESET_AUDIO optional - DONE? - with libao2 it shouldn't be problem
+- finish ASF seeking (find next keyframe)
 
 DONE:
 - sub sync +/- keys - DONE (lez)
@@ -13,19 +10,21 @@ DONE:
 - fix x11 driver to work without SHM (for remote playing etc) - DONE?
 - fast OSD renderer - DONE (arpi)
 - fix -fps option for mpeg2 - DONE (arpi)
+- fix -framedrop, support for mpeg files - DONE
+- audio playback rate setting [Jelmer Feenstra] - DONE
+- RESET_AUDIO optional - DONE? - with libao2 it shouldn't be problem
+- support SSA subtitles : http://www.eswat.demon.co.uk - DONE???
+- fix X4.0.x/DRI OpenGL - DONE?  mga&radeon works with 4.0.3/DRI
 
 High Priority:
-- finish ASF seeking (find next keyframe)
 - further optimizations - DONE?
 - support mpeg2 interlaced files (field pictures) - hacked
+- integrating the gui? - DONE?
 
 Medium Priority:
 - show current frame number [Gabucino]
 - seek_to_frame and seek_to_index options
-- audio copy/encoding capability
-- support SSA subtitles : http://www.eswat.demon.co.uk
 
 Low Priority:
-- fix X4.0.x/DRI OpenGL - DONE?  mga&radeon works with 4.0.3/DRI
 - support for MPEG TS (transport streams) - I need sample files!
-- integrating the gui? - DONE?
+- audio copy/encoding capability
