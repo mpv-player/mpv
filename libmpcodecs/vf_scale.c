@@ -16,6 +16,7 @@
 struct vf_priv_s {
     int w,h;
     int v_chr_drop;
+    int param;
     unsigned int fmt;
     SwsContext *ctx;
 };
@@ -30,6 +31,16 @@ static unsigned int outfmt_list[]={
     IMGFMT_BGR24,
     IMGFMT_BGR16,
     IMGFMT_BGR15,
+    IMGFMT_BGR8,
+    IMGFMT_BGR4,
+    IMGFMT_BGR1,
+    IMGFMT_RGB32,
+    IMGFMT_RGB24,
+    IMGFMT_RGB16,
+    IMGFMT_RGB15,
+    IMGFMT_RGB8,
+    IMGFMT_RGB4,
+    IMGFMT_RGB1,
     IMGFMT_YV12,
     IMGFMT_I420,
     IMGFMT_IYUV,
@@ -112,6 +123,7 @@ static int config(struct vf_instance_s* vf,
     // new swscaler:
     swsGetFlagsAndFilterFromCmdLine(&int_sws_flags, &srcFilter, &dstFilter);
     int_sws_flags|= vf->priv->v_chr_drop << SWS_SRC_V_CHR_DROP_SHIFT;
+    int_sws_flags|= vf->priv->param      << SWS_PARAM_SHIFT;
     vf->priv->ctx=getSwsContext(width,height,
 	    (outfmt==IMGFMT_I420 || outfmt==IMGFMT_IYUV)?IMGFMT_YV12:outfmt,
 		  vf->priv->w,vf->priv->h,
@@ -195,10 +207,12 @@ static int open(vf_instance_t *vf, char* args){
     vf->priv->w=
     vf->priv->h=-1;
     vf->priv->v_chr_drop=0;
-    if(args) sscanf(args, "%d:%d:%d",
+    vf->priv->param=0;
+    if(args) sscanf(args, "%d:%d:%d:%d",
     &vf->priv->w,
     &vf->priv->h,
-    &vf->priv->v_chr_drop);
+    &vf->priv->v_chr_drop,
+    &vf->priv->param);
     mp_msg(MSGT_VFILTER,MSGL_V,"SwScale params: %d x %d (-1=no scaling)\n",
     vf->priv->w,
     vf->priv->h);
