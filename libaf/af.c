@@ -48,7 +48,6 @@ af_instance_t* af_get(af_stream_t* s, char* name)
   af_instance_t* af=s->first; 
   // Find the filter
   while(af != NULL){
-    printf("%s\n",af->info->name);
     if(!strcmp(af->info->name,name))
       return af;
     af=af->next;
