@@ -1,4 +1,6 @@
 
+#define USE_G72X
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -30,8 +32,10 @@ extern int verbose; // defined in mplayer.c
 static sample_t * a52_samples;
 static a52_state_t a52_state;
 
+#ifdef USE_G72X
 #include "g72x/g72x.h"
 static G72x_DATA g72x_data;
+#endif
 
 #include "alaw.h"
 
@@ -295,6 +299,7 @@ case AFM_MPEG:
   // MPEG Audio:
   sh_audio->audio_out_minsize=4608;
   break;
+#ifdef USE_G72X
 case AFM_G72X:
 //  g72x_reader_init(&g72x_data,G723_16_BITS_PER_SAMPLE);
   g72x_reader_init(&g72x_data,G723_24_BITS_PER_SAMPLE);
@@ -302,6 +307,7 @@ case AFM_G72X:
 //  g72x_reader_init(&g72x_data,G721_40_BITS_PER_SAMPLE);
   sh_audio->audio_out_minsize=g72x_data.samplesperblock*4;
   break;
+#endif
 case AFM_FFMPEG:
 #ifndef USE_LIBAVCODEC
    mp_msg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_NoLAVCsupport);
@@ -458,6 +464,7 @@ case AFM_ALAW: {
   sh_audio->i_bps=sh_audio->channels*sh_audio->samplerate;
   break;
 }
+#ifdef USE_G72X
 case AFM_G72X: {
   // GSM 723 audio codec:
   sh_audio->channels=sh_audio->wf->nChannels;
@@ -465,6 +472,7 @@ case AFM_G72X: {
   sh_audio->i_bps=(sh_audio->samplerate/g72x_data.samplesperblock)*g72x_data.blocksize;
   break;
 }
+#endif
 #ifdef USE_LIBAVCODEC
 case AFM_FFMPEG: {
    int x;
@@ -920,6 +928,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
         len=2*320;
         break;
       }
+#ifdef USE_G72X
       case AFM_G72X:  // GSM 723 decoder
       { if(demux_read_data(sh_audio->ds,g72x_data.block, g72x_data.blocksize)!=g72x_data.blocksize) break; // EOF
         g72x_decode_block(&g72x_data);
@@ -927,6 +936,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
 	memcpy(buf,g72x_data.samples,len);
         break;
       }
+#endif
       case AFM_IMAADPCM:
       { unsigned char ibuf[IMA_ADPCM_BLOCK_SIZE * 2]; // bytes / stereo frame
         if (demux_read_data(sh_audio->ds, ibuf,
