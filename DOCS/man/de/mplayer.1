@@ -5608,20 +5608,39 @@ Füge Fehlerkorrektur hinzu.
 Debugging-Level
 .RE
 .PD 1
-.TP
-.B \-lavcopts <option1:option2:...>
-Wenn du mit libavcodec encodierst, kannst du hiermit die Optionen angeben.
-
+.
+.
+.SS lavc (\-lavcopts)
+Viele Optionen von libavcodec (kurz lavc) sind nur knapp dokumentiert.
+Lies die Sourcen für alle Details.
+.PP
 .I BEISPIEL:
 .PD 0
 .RSs
-\-lavcopts vcodec=msmpeg4:vbitrate=1800:vhq:keyint=250
+.IPs vcodec=msmpeg4:vbitrate=1800:vhq:keyint=250
 .RE
 .PD 1
-
-.RS
-(FIXME) Verfügbare Optionen sind:
+.
+.TP
+.B acodec=<Wert>
+Audiocodec (Standard: mp2)
+.PD 0
+.RSs
+.IPs mp2\ \ 
+MPEG Layer 2
+.IPs mp3\ \ 
+MPEG Layer 3
+.IPs ac3\ \ 
+AC3
+.IPs adpcm_ima_wav
+IMA Adaptive PCM (4 Bits pro Sample, 4:1-Kompression)
 .RE
+.PD 1
+.
+.\" manpage is synced from top down to this option.
+.TP
+.B abitrate=<Wert>
+Audiobitrate in kbps (Standard: 224)
 .
 .TP
 .B threads=<1\-8>
