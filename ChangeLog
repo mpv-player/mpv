@@ -3,6 +3,8 @@ mplayer (1.0)
   pre3: "FilterCounter"
 
     DOCS:
+    * all MPlayer and MEncoder options documented
+    * almost all lavc options documented
     * Support for building incomplete XML documentation
     * Support for building all-in-one HTML docs
     * HTML documentation obsoleted
@@ -77,6 +79,9 @@ mplayer (1.0)
     * fixed aspect and geometry
     * fixed compilation when libavcodec is missing (although it's a bad idea)
     * support for newer Apple GCC's
+    * support for detecting non-Intel CPUs under Cygwin
+    * MTRR detection added to TOOLS/cpuinfo
+    * FAAD detection in configure fixed/improved
 
 
   pre2:
