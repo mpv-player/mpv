@@ -541,7 +541,8 @@ static uint8_t *frame_buffer;
 static struct fb_fix_screeninfo fb_finfo;
 static struct fb_var_screeninfo fb_orig_vinfo;
 static struct fb_var_screeninfo fb_vinfo;
-static struct fb_cmap *fb_oldcmap = NULL;
+static struct fb_cmap fb_oldcmap;
+static int fb_cmap_changed = 0;
 static int fb_pixel_size;	// 32:  4  24:  3  16:  2  15:  2
 static int fb_real_bpp;		// 32: 24  24: 24  16: 16  15: 15
 static int fb_bpp;		// 32: 32  24: 24  16: 16  15: 15
@@ -855,7 +856,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 		case FB_VISUAL_DIRECTCOLOR:
 			if (verbose > 0)
 				printf(FBDEV "creating cmap for directcolor\n");
-			if (ioctl(fb_dev_fd, FBIOGETCMAP, fb_oldcmap)) {
+			if (ioctl(fb_dev_fd, FBIOGETCMAP, &fb_oldcmap)) {
 				printf(FBDEV "can't get cmap: %s\n",
 						strerror(errno));
 				return 1;
@@ -867,6 +868,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 						strerror(errno));
 				return 1;
 			}
+			fb_cmap_changed = 1;
 			free(cmap->red);
 			free(cmap->green);
 			free(cmap->blue);
@@ -1105,10 +1107,10 @@ static void uninit(void)
 {
 	if (verbose > 0)
 		printf(FBDEV "uninit\n");
-	if (fb_oldcmap) {
-		if (ioctl(fb_dev_fd, FBIOPUTCMAP, fb_oldcmap))
+	if (fb_cmap_changed) {
+		if (ioctl(fb_dev_fd, FBIOPUTCMAP, &fb_oldcmap))
 			printf(FBDEV "Can't restore original cmap\n");
-		fb_oldcmap = NULL;
+		fb_cmap_changed = 0;
 	}
 	if (ioctl(fb_dev_fd, FBIOPUT_VSCREENINFO, &fb_orig_vinfo))
 		printf(FBDEV "Can't set virtual screensize to original value: %s\n", strerror(errno));
