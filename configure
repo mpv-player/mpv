@@ -2512,7 +2512,7 @@ EOF
   echores "$_glib (with $_glibconfig)"
 
   _def_gui='#define HAVE_NEW_GUI 1'
-  _ld_gui='-LGui -lgui $(GTKLIB) $(GLIBLIB)'
+  _ld_gui='$(GTKLIB) $(GLIBLIB)'
 
   echo
   echo "Creating Gui/config.mak"
@@ -2675,7 +2675,7 @@ BINUTILS = $_binutils
 # --- GUI stuff ---
 GTKLIB = $_ld_static $_ld_gtk
 GLIBLIB = $_ld_static  $_ld_glib
-GUI_LIBS =  $_ld_static $_ld_gui
+GTK_LIBS =  $_ld_static $_ld_gui
 GUI = $_gui
 DEBUG = -DDEBUG
 
