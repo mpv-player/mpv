@@ -150,7 +150,9 @@ static void uninit(sh_video_t *sh){
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
   XVID_DEC_FRAME dec;
   DEC_PICTURE d4_pic;
+#ifdef XVID_CSP_EXTERN
   XVID_DEC_PICTURE pic;
+#endif
   priv_t* p = sh->context;
 
   mp_image_t* mpi = mpcodecs_get_image(sh,  p->img_type,
