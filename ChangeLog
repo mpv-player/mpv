@@ -29,23 +29,28 @@ MPlayer (1.0)
     * dropped support of old faad2 versions (<= 1.1)
     * support for Real 10 cook Linux binary codec (decodes cook5.1)
     * improved NV12/NV21 support
+    * support for 32 bit float and extended WAV files
+    * prefer native RealAudio 1.0 / 2.0 decoder over binary decoders
     * support for multichannel WAV files
-    * alac (QuickTime lossless audio) support via lavc
+    * ALAC (QuickTime lossless audio) support via lavc
+    * WNV1 support via lavc
 
     Demuxers:
     * vqf demuxer
     * seeking in MPEG-ES fixed
     * support for Real multirate files
-    * framerate autodetection for MPEG-4 and H264 video in ES and TS streams
+    * framerate autodetection for MPEG-4 and H.264 video in ES and TS streams
     * MP3 in Real files
     * more user-friendly info about audio and subtitle tracks in Ogg files
     * avisynth demuxer
     * Multichannel MP3 in MP4 files support (MP3on4)
+    * some classes of nonworking 14.4/28.8 RealAudio files fixed
 
     Streaming:
     * stream selection and bandwidth support for MMS over HTTP
     * fallback to HTTP if connection refused on pnm://
     * support for UDP streaming (udp://)
+    * support for vstream TiVo streams (tivo://)
 
     FFmpeg/libavcodec:
     * RV20 fixes
@@ -55,8 +60,9 @@ MPlayer (1.0)
     * 32 bit RGB support in TSCC
     * multichannel MP3 decoder (MP3on4)
     * 3g2 support
-    * alac audio decoder
-    * loco video decoder
+    * ALAC audio decoder
+    * LOCO video decoder
+    * WNV1 video decoder
     * shorten audio decoder and demuxer
 
     GUI:
