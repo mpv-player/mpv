@@ -1089,10 +1089,7 @@ static void check_events (void)
 					    	priv->windowsize.w = priv->surface->w;
 						priv->windowsize.h = priv->surface->h;
 						if(verbose > 1) printf("SDL: Normal size\n");
-					}
-				}	
-
-				else if ( keypressed == SDLK_d ) {
+					} else
 					if (priv->surface->w != priv->width * 2 || priv->surface->h != priv->height * 2) {
 						priv->surface = SDL_SetVideoMode(priv->width * 2, priv->height * 2, priv->bpp, priv->sdlflags);
 					    	priv->windowsize.w = priv->surface->w;
@@ -1100,7 +1097,7 @@ static void check_events (void)
 						if(verbose > 1) printf("SDL: Double size\n");
 					}
 				}	
-                                
+
                                 else switch(keypressed){
 				case SDLK_RETURN:
 					if (!firstcheck) { firstcheck = 1; break; }
