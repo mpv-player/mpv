@@ -60,7 +60,7 @@
               <LI><A HREF="formats.html#yuv4mpeg">2.1.1.9 yuv4mpeg files</A></LI>
               <LI><A HREF="formats.html#film">2.1.1.10 FILM files</A></LI>
               <LI><A HREF="formats.html#roq">2.1.1.11 RoQ files</A></LI>
-              <LI><A HREF="formats.html#ogg">2.1.1.12 OGG files</A></LI>
+              <LI><A HREF="formats.html#ogg">2.1.1.12 OGG/OGM files</A></LI>
             </UL>
           </LI>
           <LI><A HREF="formats.html#audio_formats">2.1.2 Audio formats</A>
@@ -318,8 +318,8 @@
   the avifile
   library at all!). Another big feature of <B>MPlayer</B> is the wide range of
   supported output drivers. It works with X11, Xv, DGA, OpenGL, SVGAlib, fbdev,
-  AAlib, DirectFB, but you can use GGI and SDL (and this way all their drivers)
-  and some lowlevel card-specific drivers (for Matrox, 3Dfx and Radeon,
+  AAlib, DirectFB, but you can also use GGI and SDL (and this way all their
+  drivers) and some lowlevel card-specific drivers (for Matrox, 3Dfx and Radeon,
   Mach64, Permedia3) too! Most
   of them supports software or hardware scaling, so you can enjoy movies in
   fullscreen. <B>MPlayer</B> supports displaying through some hardware MPEG
@@ -417,7 +417,7 @@
     still NOT fixed, they have been WORKED AROUND in <B>MPlayer</B>!), see the
     <A HREF="users_against_developers.html#gcc">gcc 2.96</A> section and the
     <A HREF="faq.html">FAQ</A>.</LI>
-  <LI><B>XFree86</B> - suggested version is <B>always the newest (4.2.0)</B>.
+  <LI><B>XFree86</B> - suggested version is <B>always the newest (4.2.1)</B>.
     Normally, everyone wants this, as starting with XFree86 4.0.2, it contains
     the <A HREF="video.html#xv">XVideo</A> extension (somewhere referred to
     as <B>Xv</B>) which is needed to enable the hardware YUV acceleration (fast
@@ -525,7 +525,7 @@
 <UL>
   <LI><B>Matrox G200/G400/G450/G550 cards</B>: although a
     <A HREF="video.html#vidix">Vidix driver</A> is provided, it is recommended
-    to use the old mga_vid kernel module instead, for it works much better.
+    to use the mga_vid kernel module instead, for it works much better.
     Please see the <A HREF="video.html#mga_vid">mga_vid</A> section about its
     installation and usage. It is important to do these steps <I>before</I>
     compiling <B>MPlayer</B>, otherwise no mga_vid support will be built. Also
@@ -1091,14 +1091,18 @@ TV tuner</B>.</P>
   <TR><TD></TD><TD>q or ESC</TD><TD></TD><TD>stop playing and quit program</TD></TR>
   <TR><TD></TD><TD>+ or -</TD><TD></TD><TD>adjust audio delay by +/- 0.1 second</TD></TR>
   <TR><TD></TD><TD>/ or *</TD><TD></TD><TD>decrease/increase volume</TD></TR>
+  <TR><TD></TD><TD>9 or 0</TD><TD></TD><TD>decrease/increase volume</TD></TR>
+  <TR><TD></TD><TD>m</TD><TD></TD><TD>mute sound</TD></TR>
   <TR><TD></TD><TD>f</TD><TD></TD><TD>toggle fullscreen</TD></TR>
+  <TR><TD></TD><TD>w or e</TD><TD></TD><TD>decrease/increase panscan range</TD></TR>
   <TR><TD></TD><TD>o</TD><TD></TD><TD>toggle OSD: none / seek / seek+timer</TD></TR>
+  <TR><TD></TD><TD>d</TD><TD></TD><TD>toggle frame dropping</TD></TR>
   <TR><TD></TD><TD>v</TD><TD></TD><TD>toggle subtitle visibility</TD></TR>
   <TR><TD></TD><TD>z or x</TD><TD></TD><TD>adjust subtitle delay by +/- 0.1 second</TD></TR>
   <TR><TD></TD><TD>r or t</TD><TD></TD><TD>adjust subtitle position</TD></TR>
   <TR><TD></TD><TD>HOME or END</TD><TD></TD><TD>go to next/previous playtree entry in the parent list</TD></TR>
   <TR><TD></TD><TD>INSERT or DELETE</TD><TD></TD><TD>go to next/previous alternative source (only available in asx playlist)</TD></TR>
-  <TR><TD COLSPAN=4><P><I>(the following keys are valid only when using <CODE>-vo xv</CODE>)</I></P></TD></TR>
+  <TR><TD COLSPAN=4><P><I>(the following keys are valid only when using -vo xv or -vo [vesa|fbdev]:vidix or -vo xvidix -vo (x)mga or -vc divxds (slow).)</I></P></TD></TR>
   <TR><TD></TD><TD>1 or 2</TD><TD></TD><TD>adjust contrast</TD></TR>
   <TR><TD></TD><TD>3 or 4</TD><TD></TD><TD>adjust brightness</TD></TR>
   <TR><TD></TD><TD>5 or 6</TD><TD></TD><TD>adjust hue</TD></TR>
@@ -1570,7 +1574,13 @@ end
   stated otherwise the language of these lists is <B>English</B>. Please do
   not send messages in other languages or HTML mail! Message size limit is 80k.
   If you have something bigger put it up for download somewhere. Click the
-  links to subscribe.</P>
+  links to subscribe. On the mailing lists, the same rules about writing
+  and quoting aply as on usenet. Please follow them, it makes the life of
+  those who read your mails a lot easier. If you dont know them please
+  read <A HREF="http://learn.to/edit_messages">HOWTO edit messages</A> or
+  (if you are in a hurry)
+  <A HREF="http://www.xs4all.nl/~hanb/documents/quotingguide.html">
+  Quoting HOWTO</A>.</P>
 
 <UL>
   <LI>MPlayer developers list:

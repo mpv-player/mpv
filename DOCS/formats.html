@@ -88,13 +88,14 @@
 <P>There are two kinds of AVI files:</P>
 <UL>
   <LI><B>Interleaved:</B> Audio and video content is interleaved. This is the
-    standard usage. Recommended and mostly used. Some tools create interleaved
-    AVIs with bad sync. <B>MPlayer</B> detects these as interleaved, and this
-    climaxes in loss of A/V sync, probably at seeking. These files should be
-    played as non-interleaved (with the <CODE>-ni</CODE> option).</LI>
+    standard usage. Recommended and mostly used. Some tools create 
+    non-interleaved AVIs with bad sync. <B>MPlayer</B> detects these as
+    interleaved, and this climaxes in loss of A/V sync, probably at seeking.
+    These files should be played as non-interleaved (with the <CODE>-ni</CODE>
+    option).</LI>
   <LI><B>Non-interleaved:</B> First comes the whole video stream, then the whole
     audio stream. It thus needs a lot of seeking, making playing from network or
-    CD-Rom difficult.</LI>
+    CD-Rom difficult. (should be played with the <CODE>-ni</CODE> option)</LI>
 </UL>
 
 <P><B>MPlayer</B> supports two kinds of timings for AVI files:</P>
@@ -207,7 +208,7 @@
   Return to Castle Wolfenstein.</P>
 
 
-<H4><A NAME="ogg">2.1.1.12 OGG files</A></H4>
+<H4><A NAME="ogg">2.1.1.12 OGG/OGM files</A></H4>
 
 <P>This is a new file format from <A HREF="http://www.xiph.org">Xiphophorus</A>.
   It can contain any video or audio codec, CBR or VBR. You will need to
