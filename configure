@@ -226,7 +226,6 @@ done # for parm in ...
 _cc=gcc
 test "$CC" && _cc="$CC"
 _as=auto
-_enable_xp=no
 _runtime_cpudetection=yes
 for ac_option do
   case "$ac_option" in
@@ -244,12 +243,6 @@ for ac_option do
     ;;
   --disable-gcc-checking)
     _skip_cc_check=yes
-    ;;
-  --enable-xp)
-    _enable_xp=yes
-    ;;
-  --disable-xp)
-    _enable_xp=no
     ;;
   --enable-static)
     _ld_static='-static'
@@ -3337,10 +3330,6 @@ else
 fi
 echores "$_lirc"
 
-# checking for extra performance
-_def_xp='#undef __ENABLE_XP'
-test "$_enable_xp" = yes && _def_xp='#define __ENABLE_XP 1'
-echo Checking for xp = bleeding edge ... "$_enable_xp"
 
 #############################################################################
 echo "Creating config.mak"
@@ -3441,10 +3430,6 @@ GLIBLIB = $_ld_static  $_ld_glib
 GTK_LIBS =  $_ld_static $_ld_gui
 GUI = $_gui
 DEBUG = -DDEBUG
-
-# --- HAZARDOUS STUFF
-
-ENABLE_XP=$_enable_xp
 
 EOF
 
@@ -3778,12 +3763,6 @@ $_def_xshape
 
 #if defined(HAVE_GL) || defined(HAVE_X11) || defined(HAVE_XV)
 #define X11_FULLSCREEN 1
-#endif
-
-$_def_xp
-
-#ifdef __ENABLE_XP
-#define __ENABLE_DEC_AHEAD 1
 #endif
 
 EOF
