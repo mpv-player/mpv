@@ -168,16 +168,16 @@ connect2Server(char *host, int port) {
 			return -1;
 		}
 	}
-	tv.tv_sec = 5;
-	tv.tv_usec = 0;
+	tv.tv_sec = 0;
+	tv.tv_usec = 500000;
 	FD_ZERO( &set );
 	FD_SET( socket_server_fd, &set );
 	// When the connection will be made, we will have a writable fd
 	while((ret = select(socket_server_fd+1, NULL, &set, NULL, &tv)) == 0) {
 	      if( ret<0 ) mp_msg(MSGT_NETWORK,MSGL_ERR,"select failed\n");
 	      else if(ret > 0) break;
-	      else if(count > 15 || mpdemux_check_interrupt(500)) {
-		if(count > 15)
+	      else if(count > 30 || mpdemux_check_interrupt(500)) {
+		if(count > 30)
 		  mp_msg(MSGT_NETWORK,MSGL_ERR,"Connection timeout\n");
 		else
 		  mp_msg(MSGT_NETWORK,MSGL_V,"Connection interuppted by user\n");
@@ -186,6 +186,8 @@ connect2Server(char *host, int port) {
 	      count++;
 	      FD_ZERO( &set );
 	      FD_SET( socket_server_fd, &set );
+	      tv.tv_sec = 0;
+	      tv.tv_usec = 500000;
 	}
 
 	// Turn back the socket as blocking
