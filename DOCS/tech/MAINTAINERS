@@ -58,8 +58,7 @@ MPlayer code:
     * A-V sync code, MPlayer/MEncoder core: Alex Beregszaszi
     * libmpdemux, libmpcodecs: Alex Beregszaszi
     * TV input/capture: Jindrich Makovicka
-    * DVD support (experimental - dvdnav): None
-    * DVD support (new - dvdread/dvdcss): None
+    * DVD support (dvdread/dvdcss): None
     * network streaming: Bertrand Baudet
     * DVD/VOB subtitles: Kim Minh Kaplan
     * config files & commandline parser: Alban Bedel, Alex Beregszaszi
