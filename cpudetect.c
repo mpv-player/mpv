@@ -246,6 +246,7 @@ char *GetCpuFriendlyName(unsigned int regs[], unsigned int regs2[]){
 			}
 		}
 	}
+	retname[255] = 0;
 
 	//printf("Detected CPU: %s\n", retname);
 	return retname;
