@@ -157,6 +157,7 @@ static int fd_control = -1;
 static int fd_video = -1;
 static int fd_spu = -1;
 static char fdv_name[80];
+static char fds_name[80];
 
 /* on screen display/subpics */
 static char *osdpicbuf = NULL;
@@ -200,7 +201,10 @@ uint32_t control(uint32_t request, void *data, ...)
 		if (!noprebuf) {
 			close(fd_video);
 			fd_video = open(fdv_name, O_WRONLY);
+			close(fd_spu);
+			fd_spu = open(fds_name, O_WRONLY);
 			fsync(fd_video);
+			fsync(fd_spu);
 		}
 		return VO_TRUE;
 	case VOCTRL_QUERY_FORMAT:
@@ -510,7 +514,7 @@ static void draw_osd(void)
 		if (!noprebuf) {
 			ioctl(fd_spu, EM8300_IOCTL_SPU_SETPTS, &vo_pts);
 		}
-		/*write(fd_spu, spued->data, spued->count);*/
+		write(fd_spu, spued->data, spued->count);
 	}
 	disposd++;
 }
@@ -742,6 +746,7 @@ static uint32_t preinit(const char *arg)
 			return -1;
 		}
 	}
+	strcpy(fds_name, devname);
 
 #if defined(USE_LIBAVCODEC)
 	if (mpeg_codec == MPG_CODEC_AVCODEC && !avcodec_inited) {
