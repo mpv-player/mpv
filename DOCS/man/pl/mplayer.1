@@ -1,4 +1,4 @@
-.\" synced with 1.635
+.\" synced with 1.637
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -5088,7 +5088,8 @@ Naq spróbuje dostroiæ kwantyzatory na MB dla utrzymania prawid³owej ¶redniej.
 u¿ywa dct z przeplotem
 .TP
 .B ilme\ \ \ 
-u¿ywa metody przewidywania ruchu z przeplotem
+U¿ywa metody przewidywania ruchu z przeplotem (wzajemnie wykluczaj±cy
+siê z qpel).
 .TP
 .B alt\ \ \ \ 
 korzysta z alternatywnej scantable
@@ -5170,7 +5171,8 @@ model du¿ego kontekstu
 .PD 1
 .TP
 .B qpel\ \ \ 
-u¿ywa kompensacji ruchu quarter pel
+U¿ywa kompensacji ruchu quarter pel (wzajemnie wykluczaj±cy
+siê z ilme).
 Wskazówka: Przydatne tylko dla kodowanie z wysokim bitrate.
 .TP
 .B ildctcmp=<0\-2000>
@@ -5448,75 +5450,106 @@ okre¶la przej¶cie w trybie dwuprzej¶ciowym
 .B bitrate=<warto¶æ>
 ustawia ¿±dany bitrate kbit/\:sekundê je¿eli <16000 lub bit/\:sekundê
 je¿eli >16000
-(CBR lub tryb dwuprzej¶ciowy, domy¶lnie=687 kbits/s)
+(CBR lub tryb dwuprzej¶ciowy, domy¶lnie: 687 kbits/s)
 .TP
 .B fixed_quant=<1\-31>
 prze³±cza w tryb ustalonego kwantyzatora i okre¶la jaki ma byæ u¿yty
 .TP
 .B me_quality=<0\-6>
-okre¶la jako¶æ wykrywania ruchu (domy¶lnie=6)
+Opcja ta kontroluje podsystem przewidywania ruchu.
+Im wy¿sza warto¶æ, tym przewidywanie bêdzie dok³adniejsze.
+Precyzja jest osi±gana kosztem mocy obliczeniowej, wiêc zmniejsz jej
+warto¶æ, je¿eli masz zamiar kodowaæ w czasie rzeczywistym.
+(domy¶lnie: 6)
 .TP
 .B interlacing
-w³±cza wsparcie dla zbioru z przeplotem (domy¶lnie=wy³±czone)
+Je¿eli korzystasz z materia³u filmowego z przeplotem, w³±cz t± opcjê.
+.I INFORMACJA: 
+Ta opcja nie usuwa przeplotu z materia³u, ale koduje je bazuj±c na polach
+(domy¶lnie: wy³±czone).
 .TP
 .B 4mv\ \ \ \ 
 korzysta z 4 wektorów ruchu na makroblok, mo¿e daæ siê lepiej skompresowaæ
-kosztem wolniejszego kodowania (domy¶lnie=wy³±czone)
+kosztem wolniejszego kodowania (domy¶lnie: wy³±czone)
+.br
+.I UWAGA:
+Ta opcja nie istnieje w XviD-1.0.x.
 .TP
 .B rc_reaction_delay_factor=<warto¶æ>
-okre¶la jak szybko reaguje kontrola tempa, przy ni¿szych warto¶ciach reaguje szybciej
+Ten parametr okre¶la opó¼nienie w ramkach, po jakim kontroler tempa CBR zareaguje na zmianê
+warto¶ci bitrate i spróbuje wyrównaæ zmianê, tak aby uzyskaæ sta³y bitrate na u¶redniaj±cym
+zakresie klatek.
 .TP
 .B rc_averaging_period=<warto¶æ>
-okres osi±gniêcia ¿±danej ¶redniej
+Prawdziwe CBR jest trudne do osi±gniêcia.
+Zale¿nie od materia³u filmowego, bitrate mo¿e byæ zmienny i trudny do przewidzenia.
+Dlatego XviD wykorzystuje okres u¶redniaj±cy, dla którego gwarantuje zadan± ilo¶æ
+bitów (minus ma³a ró¿nica).
+To ustawienie wyra¿a "ilo¶æ klatek", dla których XviD u¶rednia bitrate i próbuje
+osi±gn±æ CBR.
 .TP
 .B rc_buffer=<warto¶æ>
 rozmiar bufora kontroli tempa
 .TP
 .B quant_range=<1\-31>\-<1\-31>[/<1\-31>\-<1\-31>]
-min. i maks. kwantyzator dla wszystkich klatek (domy¶lnie=2\-31, tryb CBR)
+min. i maks. kwantyzator dla wszystkich klatek (domy¶lnie:v2\-31, tryb CBR)
 .br
-min. i maks. kwantyzator dla klatek I/P (domy¶lnie=2\-31/2\-31, tryb dwuprzej¶ciowy)
+min. i maks. kwantyzator dla klatek I/P (domy¶lnie: 2\-31/2\-31, tryb dwuprzej¶ciowy)
 .TP
 .B min_key_interval=<warto¶æ>
-minimalna przerwa miêdzy klatkami kluczowymi (domy¶lnie=0, tylko tryb dwuprzej¶ciowy)
+minimalna przerwa miêdzy klatkami kluczowymi (domy¶lnie: 0, tylko tryb dwuprzej¶ciowy)
 .TP
 .B max_key_interval=<warto¶æ>
-maksymalna przerwa miêdzy klatkami kluczowymi (domy¶lnie=10*fps)
+maksymalna przerwa miêdzy klatkami kluczowymi (domy¶lnie: 10*fps)
 .TP
 .B mpeg_quant
-wykorzystuje kwantyzator MPEG zamiast H.263 (domy¶lnie=wy³±czone)
+Dla wysokich warto¶ci bitrate, zauwa¿ysz, ¿e kwantyzacja MPEG zachowa wiêcej
+szczegó³ów. Dla niskich warto¶ci bitrate, wyg³adzanie H.263 da w rezultacie
+mniej szumu blokowego. Kiedy wykorzystywane s± okre¶lone przez u¿ytkownika matryce,
+MPEG musi byæ wykorzystany.
+(domy¶lnie: wy³±czone)
 .TP
 .B mod_quant
-decyduje czy wykorzystywaæ kwantyzatory MPEG czy H.263 na podstawia badania klatka po klatce.
-(domy¶lnie=wy³±czone, tylko tryb dwuprzej¶ciowy)
+decyduje czy wykorzystywaæ kwantyzatory MPEG czy H.263 na podstawia badania
+klatka po klatce.
+(domy¶lnie: wy³±czone, tylko tryb dwuprzej¶ciowy)
 .TP
 .B greyscale
-koduje w czerni i bieli (domy¶lnie=wy³±czone)
+Sprawia, ¿e XviD ignoruje przestrzeñ kolorów, wiêc wynikowy film jest tylko
+w skali szaro¶ci. Zauwa¿, ¿e nie przyspiesza to kodowania, zapobiega to tylko zapisaniu
+danych kolorów w ostatniej fazie kodowania.
+(domy¶lnie: wy³±czone)
 .TP
 .B debug\ \ 
-Zapisuje statystyki ka¿dej ramki w xvid.dbg (domy¶lnie=wy³±czone).
+Zapisuje statystyki ka¿dej ramki w ./xvid.dbg (domy¶lnie: wy³±czone).
 To NIE jest plik kontroli trybu dwuprzej¶ciowego.
 .TP
 .B keyframe_boost=<0\-1000>
-(domy¶lnie=0, tylko tryb dwuprzej¶ciowy)
+Przesuwa kilka bitów z ramek innego rodzaju do klatek intra,
+polepszaj±c przy tym jako¶æ klatek kluczowych.
+(domy¶lnie: 0, tylko tryb dwuprzej¶ciowy)
 .TP
 .B kfthreshold=<warto¶æ>
-(domy¶lnie=10, tylko tryb dwuprzej¶ciowy)
+(domy¶lnie: 10, tylko tryb dwuprzej¶ciowy)
 .TP
 .B kfreduction=<0\-100>
 (domy¶lnie=30, tylko tryb dwuprzej¶ciowy)
+Powy¿sze dwa parametry mog± byæ wykorzystane do okre¶lenia rozmiaru klatek
+kluczowych, których po³o¿enie uwa¿asz za zbyt bliskie do pierwszej (w rzêdzie).
+kfthreshold ustawia zakres, w którym klatki kluczowe s± redukowane, a
+kfreduction okre¶la ich redukcjê bitrate'ow±.
+Ostatnia i-klatka jest traktowana normalnie. 
+(domy¶lnie: 30, tylko tryb dwuprzej¶ciowy)
 .RE
 .PP
 
-Poni¿sze opcje s± dostêpne tylko w najnowszej stabilnej wersji - XviD 0.9.2 (api3)
-i s± oznaczone jako eksperymentalne i niestabilne.
-Najnowsza wersja rozwojowa XviD 1.0 (api4) ca³kowicie je obs³uguje.
+Poni¿sze opcje s± dostêpne tylko w najnowszych stabilnych wersjach XviD 1.0.x (api4).
 .TP
 .B packed\ 
-tworzy strumieñ który mo¿e byæ dekodowany bez opó¼nieñ (domy¶lnie=wy³±czone)
+tworzy strumieñ który mo¿e byæ dekodowany bez opó¼nieñ (domy¶lnie: wy³±czone)
 .br
 .I UWAGA:
-stworzy to niepoprawny bitstream i nie zbiór NIE BÊDZIE odtwarzany przez
+stworzy to niepoprawny bitstream i NIE BÊDZIE odtwarzany przez
 dekodery ISO-MPEG4 poza DivX/libavcodec/XviD
 .br
 .I UWAGA:
@@ -5524,41 +5557,82 @@ zapisuje to tak¿e fa³szyw± wersjê DivX do pliku, tak¿e wadliwa autodedetekcja
 niektórych dekoderów mo¿e siê gubiæ
 .TP
 .B divx5bvop
-wygeneruje kompatybilne z DivX5 klatki B (domy¶lnie=w³±czone)
+wygeneruje kompatybilne z DivX5 klatki B (domy¶lnie: w³±czone)
 .TP
 .B qpel\ \ \ 
-w³±cza przewidywanie ruchu qpel (quarter-pixel) (domy¶lnie=wy³±czone)
+MPEG4 domy¶lnie u¿ywa precyzji co do po³owy piksela przy wyszukiwaniu ruchu.
+Standard proponuje tryb, w którym kodery mog± korzystaæ z precyzji quarter
+pixel (co do æwieræ piskela).
+Opcja to przewa¿nie sprawia, ¿e obraz jest ostrzejszy.
+Niestety ma to du¿y wp³yw na warto¶æ bitrate i czasami wykorzystanie wy¿szej warto¶ci
+spowoduje otrzymanie gorszego obrazu przy sta³ym bitrate.
+Najlepiej jest sprawdziæ rezutlat z i bez tej opcji, i samemu zdecydowaæ czy jest warta w³±czenia.
+(domy¶lnie: wy³±czona)
 .TP
 .B gmc\ \ \ \ 
-w³±cza globaln± kompensacjê ruchu, mo¿e zachowaæ wiele bitów w scenach
-panoramicznych (domy¶lnie=wy³±czone)
+W³±cza Globaln± Kompensacjê Ruchu (Enable Global Motion Compensation),
+która sprawia, ¿e XviD generuje Klatki Sprite najlepiej opisuj±ce
+obrazy w trybie Pan/przybli¿one/oddalone/obracaj±ce siê.
+Decyzja o w³±czeniu tej opcji lub o straceniu bitów zale¿y od materia³u filmowego
+(domy¶lnie: wy³±czona)
+.TP
+.B trellis
+Kwantyzacja Trellis (Trellis Quantization) jest rodzajem metody kwantyzacji
+adaptatywnej, która zachowuje bity poprzez modyfikacjê skwantyzowanych
+wspó³czynników, tak aby lepiej ulaga³y kompresji przez koder entropii.
+Dobrze wp³ywa na poprawê jako¶ci, a je¶li VHQ u¿ywa zbyt du¿o mocy obliczeniowej
+dla ciebie, ta opcja mo¿e byæ dobr± alternatyw± do zaoszczêdzenia kilku bitów (i
+poprawy jako¶ci przy sta³ym bitrate) przy mniejszym obci±¿eniu ni¿ VHQ
+(domy¶lnie: wy³±czona).
+.TP
+.B cartoon
+W³±cz t± opcjê, je¿eli zakodowana sekwencja jest rysunkowa.
+Modyfikuje ona kilka wewnêtrznych progów XviD, tak ¿e te podejmuje
+lepsze decyzje o typie ramek i wektorach ruchu dla p³askich rysunków.
 .TP
 .B chroma_me
-wykorzustuje informacje barw do przewidywania ruchu (domy¶lnie=wy³±czone)
+Zwyk³y algorytm przewidywania ruchu u¿ywa tylko informacji o jasno¶ci
+dla znalezienia najlepszego wektora ruchu.
+Jednak¿e dla niektórych filmów, wykorzystanie przestrzeni kolorów pozwoli
+znale¼æ lepsze wektory.
+Ten parametr w³±cza wykorzystanie przestrzeni barw dla przewidywania ruchu
+(domy¶lnie: wy³±czona).
 .TP
 .B chroma_opt
-uruchamia prefiltr optymalizacji barw (domy¶lnie=wy³±czony)
+uruchamia prefiltr optymalizacji barw (domy¶lnie: wy³±czony)
 .TP
 .B reduced
-w³±cza kodowania klatek o zmniejszonej rozdzielczo¶ci (domy¶lnie=wy³±czone)
+w³±cza kodowania klatek o zmniejszonej rozdzielczo¶ci (domy¶lnie: wy³±czone)
 .TP
 .B max_bframes=<0\-4>
-maksymalna ilo¶æ klatek B do umieszczenia miêdzy klatkami I/P (domy¶lnie=0)
+maksymalna ilo¶æ klatek B do umieszczenia miêdzy klatkami I/P (domy¶lnie: 0)
 .TP
 .B bquant_ratio=<0\-1000>
-stosunek kwantyzatora pomiêdzy klatkami B a ró¿nymi od nich, 150=1.50 (domy¶lnie=150)
+stosunek kwantyzatora pomiêdzy klatkami B a ró¿nymi od nich, 150=1.50 (domy¶lnie: 150)
 .TP
 .B bquant_offset=<-1000\-1000>
-offset kwantyzatora pomiêdzy klatkami B a ró¿nymi od nich, 100=1.00 (domy¶lnie=100)
+offset kwantyzatora pomiêdzy klatkami B a ró¿nymi od nich, 100=1.00 (domy¶lnie: 100)
 .TP
 .B bf_threshold=<-255\-255>
-zmienia prawdopodobieñstwo, ¿e klatka bêdzie typu B (domy¶lnie=0)
+Czasami klatki typy B nie wygl±daj± zbyt dobrze i prezentuje ró¿ne pozosta³o¶ci,
+kiedy wiêkszo¶æ klatki jest sta³a, a kilka ma³ych stref zawiera du¿o ruchu
+(w scenach statycznych z rozmawiaj±cym cz³owiekiem, jego usta bêd±
+prawdopodobnie wygl±da³y ¼le, je¿eli wszystko co go otacza jest statyczne).
+Ten parametr pozwala okre¶liæ prawdopodobieñstwo pojawienia siê klatek typu B.
+Im wy¿sza warto¶æ, tym wy¿sze prawdopodobieñstwo wykorzystania klatki B.
+(domy¶lnie: 0)
 .TP
 .B hq_ac\ \ 
 w³±cza lepsze przewidywania sk³adowej AC (domy¶lnie=wy³±czone)
 .TP
 .B vhq=<0\-4>
-w³±cza przeszukiwanie ME lepszej jako¶ci wykorzystuj±c DCT, od najszybszej do najwolniejszej:
+Algorytm wyszukiwania ruchu jest oparty na szukaniu w zwyk³ej domenie koloru
+i próbuje znale¼æ wektor ruchu, który zminimalizuje ró¿nice miêdzy ramk± pierwotn±
+a zakodowan±.
+Z tym parametrem XviD u¿yje równie¿ domenê czêstotliwo¶ci (DCT),
+aby szukaæ wektora ruchu, który nie tylko zminimalizuje ró¿nicê przestrzenn±,
+ale równie¿ d³ugo¶æ kodowania bloku.
+Od najszybszego do najwolniejszego:
 .PD 0
 .RSs
 .IPs 0
@@ -5577,8 +5651,8 @@ szerokie przeszukiwanie
 .B aspect=<x/y | f (warto¶æ rzeczywista)>
 Przechowuje proporcje wewnêtrznie, podobnie jak pliki MPEG.
 O wiele lepsze rozwi±zanie ni¿ ponowne skalowanie, poniewa¿ nie spada jako¶æ.
-Tylko MPlayer i kilka innych odtwarzaczy bêd± interpretowa³y te pliki poprawnie, inne wy¶wietl± je
-w z³ych proporcjach.
+Tylko MPlayer i kilka innych odtwarzaczy bêd± interpretowa³y te pliki poprawnie,
+inne wy¶wietl± je w z³ych proporcjach.
 Parametr proporcji mo¿e byæ podany jako stosunek lub liczba rzeczywista.
 .TP
 .B autoaspect
@@ -5587,7 +5661,8 @@ pod uwagê wszystkie filtry dostrajaj±ce (crop/expand/scale/itp) podane w ³añcuch
 .TP
 .B psnr\ \ \ 
 Drukuje psnr (proporcja warto¶ci szczytowej sygna³u do szumu) dla ca³ego filmu po
-kodowaniu i przechowuje psnr dla ka¿dej klatki w pliku o nazwie typu 'psnr_hhmmss.log'.
+kodowaniu i przechowuje psnr dla ka¿dej klatki w pliku o nazwie typu 'psnr_hhmmss.log
+w bie¿±cym katalogu.
 Zwracane warto¶ci s± w dB (decybelach), im wy¿sze tym lepsze.
 .
 .
