@@ -1,4 +1,4 @@
-.\" synced with 1.625
+.\" synced with 1.629
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -1676,9 +1676,10 @@ Mo¿esz otrzymaæ listê oraz wyja¶nienia dostêpnych opcji wykonuj±c
 .I mplayer \-aahelp
 .TP
 .B \-adapter <warto¶æ>
-Ustaw kartê graficzn±, która otrzyma obraz.
+Ustawia kartê graficzn±, która otrzyma obraz.
 Do poprawnego dzia³ania wymaga opcji \-vm.
 Listê dostêpnych kart otrzymasz stosuj±c tê opcjê z \-v.
+Obecnie dzia³a tylko z \-vo directx.
 .TP
 .B \-bpp <g³êbia>
 U¿ywa innej g³êbi kolorów ni¿ wykryta.
@@ -1932,13 +1933,14 @@ Katalog, gdzie zapisywane bêd± zbiory JPEG
 .PD 1
 .
 .TP
-.B \-monitor-dotclock <zakres\ dotclock\ (lub\ pixelclock)>  (tylko fbdev i vesa)
-Zajrzyj do etc/\:example.conf po dalsze informacje i do
-DOCS/HTML/pl/devices.html#video-dev.
+.B \-monitor-dotclock <zakres[,zakres,...]> (tylko fbdev i vesa)
+Okre¶la zakres dotclock lub pixelclock monitora.
 .TP
-.B \-monitor-hfreq <zakres czêstotliwo¶ci poziomej>  (tylko fbdev i vesa)
+.B \-monitor-hfreq <zakres[,zakres,...]> (tylko fbdev i vesa)
+Okre¶la zakres czêstotliwo¶ci poziomej monitora.
 .TP
-.B \-monitor-vfreq <zakres czêstotliwo¶ci pionowej>  (tylko fbdev i vesa)
+.B \-monitor-vfreq <zakres[,zakres,...]> (tylko fbdev i vesa)
+Okre¶la zakres czêstotliwo¶ci pionowej monitora.
 .TP
 .B \-monitoraspect <stosunek>
 Ustawia proporcje Twojego monitora lub ekranu TV.
@@ -5732,13 +5734,6 @@ Pocztê odno¶nie manuala prosimy przesy³aæ do grupy mailingowej MPlayer-DOCS,
 informacje o b³êdach w t³umaczeniu bezpo¶rednio do t³umaczy.
 .
 .
-.SH "ADNOTACJA"
-U¿ywaj tylko na w³asn± odpowiedzialno¶æ!
-Mog± znajdowaæ siê tu b³êdy i nie¶cis³o¶ci, które mog³yby uszkodziæ Twój system,
-lub Twoje oczy.
-U¿ywaj z ostro¿no¶ci± i choæ jest to ma³o prawdopodobne, autor nie bierze
-jakiejkolwiek za to odpowiedzialno¶ci!
-
 .SH "OD T£UMACZY"
 T³umaczenie mo¿e zawieraæ liczne b³êdy, niektóre s³owa mog³y byæ
 przet³umaczone b³êdnie lub nie powinny byæ t³umaczone.
