@@ -318,8 +318,10 @@ int sub_autodetect (FILE *fd) {
 	if (sscanf (line, "%d:%d:%d:",     &i, &i, &i )==3)
 		{sub_uses_time=1;return 4;}
 	//TODO: just checking if first line of sub starts with "<" is WAY
-	// to weak test for RT
-	if (strcmp("<",line))
+	// too weak test for RT
+	// Please someone who knows the format of RT... FIX IT!!!
+	// It may conflict with other sub formats in the future
+	if ( *line == '<' )
 		{sub_uses_time=1;return 5;}
     }
 
