@@ -57,7 +57,11 @@ Current plugins:
         possible width while keeping the boundaries visible.
     x,y (rectangle's top left corner position) defauts (-1) to upper
         left most position.
-    MPI: TEMP
+    The plugin responds to the input.conf directive "change_control"
+    that takes two parameters.  The first parameter can be 0 for w, 1
+    for h, 2 for x or 3 for y.  The second parameter is the amount to
+    change the designated rectangle boundary.
+    MPI: TEMP, accepts stride
 
 -vop rotate[=x]
     Rotate image +/- 90 degrees
