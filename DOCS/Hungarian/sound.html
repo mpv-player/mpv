@@ -11,6 +11,8 @@
 
 <H3><A NAME=2.3.2>2.3.2.  Támogatott audio kimenetek:</A></H3>
 
+<H4><A NAME=sync>2.3.2.1. Az MPlayer hang/kép szinkronizáló metódusa</A></H4>
+
 <P>Az <B>MPlayer</B> audio interfészének a neve <I>libao2</I>. Jelenleg
 a következõ meghajtókat tartalmazza :</P>
 
@@ -28,9 +30,25 @@ a következõ meghajtókat tartalmazza :</P>
 
 </TABLE>
 
-<P>A helyzet az, hogy a Linux hangkártyameghajtói nem túl jók, ráadásul
-  olyan inkompatibilisek amennyire csak lehet. Lehetséges hogy eltart egy
-  ideig amíg megtalálod az optimális beállitásokat.</P>
+<P>A helyzet az, hogy a Linux hangkártyameghajtói nem túl jók. Az MPlayer
+  a hangkártyameghajtók egyik olyan funkcióját használja a kép illetve a
+  hang lejátszásának szinkronizálásához, melyet a meghajtókészítõk
+  elõszeretettel felejtenek el helyesen implementálni, mivel ez szükségtelen
+  MP3-ak, hangeffektek és egyebek lejátszásához.</P>
+
+<P>Más médialejátszók (mint például az aviplay, a xine) általában mûködni
+  szoktak (már ha éppen szoknak:) az ilyen meghajtókkal, tekintve hogy
+  belsõ idõzítéssel szinkronizálnak. Megjegyzendõ hogy az idõ az MPlayer
+  módszerét hozta ki hatékonyabbnak.</P>
+
+<P>Normálisan megírt hangkártyameghajtó használatával semmiféle hangból eredõ
+  szinkronizációs probléma nem adódhat, kivéve ha már maga a file is hibás.</P>
+
+<P>Ha rossz audiomeghajtód van, az <CODE>-autosync</CODE> opció használata
+  jó eséllyel segíteni fog. A pontos használatát és leírását lásd a man
+  page-ben.</P>
+
+<P>Néhány megjegyzés:</P>
 
 <UL>
   <LI>ha OSS meghajtót használsz, elõször próbálkozz az <I>-ao oss</I> opcióval
@@ -43,11 +61,9 @@ a következõ meghajtókat tartalmazza :</P>
     használnod, mert a 0.5 hibás OSS emulációs kódot tartalmaz, amitõl kissé
     összeesik az <B>MPlayer</B> :
     <CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE></LI>
-  <LI>ha ALSA 0.9-ed van, használd az <I>-ao oss</I>-t vagy az <I>-ao sdl</I>-t,
-    izlés szerint. Használhatod az <I>-ao alsa9</I>-et is, de az még elég bugos.</LI>
 </UL>
 
-<P><B>Solaris/FreeBSD</B> rendszereken természetesen a SUN audio meghajtót
+<P><B>Solaris</B> rendszeren természetesen a SUN audio meghajtót
   kell használni, az <I>-ao sun</I> opcióval, különben lõttek mind a video,
   mind az audio lejátszásnak.</P>
 

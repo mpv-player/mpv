@@ -19,7 +19,8 @@
   <A HREF="../German/documentation.html">[ Német ]</A>
   <A HREF="../French/documentation.html">[ Francia ]</A>
   <A HREF="../Polish/documentation.html">[ Lengyel ]</A>
-  <A HREF="../Italian/documentation.html">[ Olasz ]</A></P>
+  <A HREF="../Italian/documentation.html">[ Olasz ]</A>
+  <A HREF="../Chinese/documentation.html">[ Kínai ]</A></P>
 
 <HR>
 
@@ -60,6 +61,7 @@
         <LI><A HREF="formats.html#roq">2.1.1.11 RoQ file-ok</A></LI>
         <LI><A HREF="formats.html#ogg">2.1.1.12 OGG/OGM file-ok</A></LI>
         <LI><A HREF="formats.html#sdp">2.1.1.13 SDP file-ok</A></LI>
+        <LI><A HREF="formats.html#pva">2.1.1.14 PVA file-ok</A></LI>
       </UL>
       <LI><A HREF="formats.html#audio_formats">2.1.2 Audio</A></LI>
       <UL>
@@ -68,6 +70,7 @@
         <LI><A HREF="formats.html#ogg_vorbis">2.1.2.3 OGG/OGM file-ok (Vorbis)</A></LI>
         <LI><A HREF="formats.html#wma">2.1.2.4 WMA/ASF file-ok</A></LI>     
         <LI><A HREF="formats.html#mp4">2.1.2.5 MP4 file-ok</A></LI>
+        <LI><A HREF="formats.html#cdda">2.1.2.6 CD audio</A></LI>
       </UL>
     </UL>
     <LI><A HREF="codecs.html">2.2 Támogatott codec-ek</A></LI>
@@ -103,63 +106,77 @@
     <UL>
       <LI><A HREF="video.html">2.3.1 Video</A></LI>
       <UL>
-	<LI><A HREF="video.html#mtrr">2.3.1.1 MTRR</A></LI>
-	<LI><A HREF="video.html#xv">2.3.1.2 Xv</A></LI>
+	<LI><A HREF="video.html#mtrr">2.3.1.1 Az MTRR beállítása</A></LI>
+        <LI><A HREF="video.html#normal">2.3.1.2 Video kimenetek szabvány videokártyákra</A></LI>
+        <UL>
+	  <LI><A HREF="video.html#xv">2.3.1.2.1 Xv</A></LI>
+	  <UL>
+	    <LI><A HREF="video.html#xv_3dfx">2.3.1.2.1.1 3dfx kártyák</A></LI>
+	    <LI><A HREF="video.html#xv_s3">2.3.1.2.1.2 S3 kártyák</A></LI>
+	    <LI><A HREF="video.html#xv_nvidia">2.3.1.2.1.3 nVidia kártyák</A></LI>
+	    <LI><A HREF="video.html#xv_ati">2.3.1.2.1.4 ATI kártyák</A></LI>
+	    <LI><A HREF="video.html#xv_neomagic">2.3.1.2.1.5 NeoMagic kártyák</A></LI>
+	    <LI><A HREF="video.html#xv_trident">2.3.1.2.1.6 Trident kártyák</A></LI>
+	  </UL>
+	  <LI><A HREF="video.html#dga">2.3.1.2.2 DGA</A></LI>
+	  <UL>
+	    <LI><A HREF="video.html#dga_summary">2.3.1.2.2.1 Elõszó</A></LI>
+	    <LI><A HREF="video.html#dga_whatis">2.3.1.2.2.2 Mi az a DGA</A></LI>
+	    <LI><A HREF="video.html#dga_installation">2.3.1.2.2.3 DGA támogatás telepítése MPlayer-be</A></LI>
+	    <LI><A HREF="video.html#dga_resolution">2.3.1.2.2.4 Felbontásváltás</A></LI>
+	    <LI><A HREF="video.html#dga_mplayer">2.3.1.2.2.5 DGA és MPlayer</A></LI>
+	    <LI><A HREF="video.html#dga_features">2.3.1.2.2.6 A DGA driver képességei</A></LI>
+	    <LI><A HREF="video.html#dga_speed">2.3.1.2.2.7 Sebesség</A></LI>
+	    <LI><A HREF="video.html#dga_bugs">2.3.1.2.2.8 Ismert hibák</A></LI>
+	    <LI><A HREF="video.html#dga_future">2.3.1.2.2.9 Beépítendõ dolgok</A></LI>
+	    <LI><A HREF="video.html#dga_modelines">2.3.1.2.2.A Néhány modeline</A></LI>
+	    <LI><A HREF="video.html#dga_bug_reports">2.3.1.2.2.B Hibabejelentés</A></LI>
+	  </UL>
+	  <LI><A HREF="video.html#sdl">2.3.1.2.3 SDL</A></LI>
+	  <LI><A HREF="video.html#svgalib">2.3.1.2.4 SVGAlib</A></LI>
+	  <LI><A HREF="video.html#fbdev">2.3.1.2.5 Framebuffer kimenet (FBdev)</A></LI>
+	  <LI><A HREF="video.html#mga_vid">2.3.1.2.6 Matrox framebuffer (mga_vid)</A></LI>
+	  <LI><A HREF="video.html#tdfxfb">2.3.1.2.7 3dfx YUV támogatás (tdfxfb)</A></LI>
+	  <LI><A HREF="video.html#opengl">2.3.1.2.8 OpenGL kimenet</A></LI>
+	  <LI><A HREF="video.html#aalib">2.3.1.2.9 AAlib - szöveges módú megjelenítés</A></LI>
+	  <LI><A HREF="video.html#vesa">2.3.1.2.10 VESA - megjelenítés a VESA BIOS segítségével</A></LI>
+	  <LI><A HREF="video.html#x11">2.3.1.2.11 X11</A></LI>
+	  <LI><A HREF="video.html#vidix">2.3.1.2.12 Vidix</A></LI>
+	  <LI><A HREF="video.html#directfb">2.3.1.2.13 DirectFB</A></LI>
+	  <LI><A HREF="video.html#dfbmga">2.3.1.2.14 DirectFB/Matrox (dfbmga)</A></LI>
+        </UL>
+	<LI><A HREF="video.html#mpegdec">2.3.1.3 MPEG dekóder kártyák</A></LI>
+        <UL>
+	  <LI><A HREF="../video.html#dvb">2.3.1.3.1 DVB (untrans)</A></LI>
+	  <LI><A HREF="../video.html#dxr2">2.3.1.3.2 DXR2</A></LI>
+	  <LI><A HREF="../video.html#dxr3">2.3.1.3.3 DXR3/Hollywood+ (untrans)</A></LI>
+        </UL>
+	<LI><A HREF="video.html#other">2.3.1.4 Egyéb vizualizációs ketyerék</A></LI>
+        <UL>
+	  <LI><A HREF="video.html#zr">2.3.1.4.1 Zoran JPEG dekóderek</A></LI>
+	  <LI><A HREF="video.html#blinken">2.3.1.4.2 Blinkenlights</A></LI>
+        </UL>
+	<LI><A HREF="video.html#tv_out">2.3.1.5 TV kimenet</A></LI>
 	<UL>
-	  <LI><A HREF="video.html#xv_3dfx">2.3.1.2.1 3dfx kártyák</A></LI>
-	  <LI><A HREF="video.html#xv_s3">2.3.1.2.2 S3 kártyák</A></LI>
-	  <LI><A HREF="video.html#xv_nvidia">2.3.1.2.3 nVidia kártyák</A></LI>
-	  <LI><A HREF="video.html#xv_ati">2.3.1.2.4 ATI kártyák</A></LI>
-	  <LI><A HREF="video.html#xv_neomagic">2.3.1.2.5 NeoMagic kártyák</A></LI>
-	  <LI><A HREF="video.html#xv_trident">2.3.1.2.6 Trident kártyák</A></LI>
-	</UL>
-	<LI><A HREF="video.html#dga">2.3.1.3 DGA</A></LI>
-	<UL>
-	  <LI><A HREF="video.html#dga_summary">2.3.1.3.1 Elõszó</A></LI>
-	  <LI><A HREF="video.html#dga_whatis">2.3.1.3.2 Mi az a DGA</A></LI>
-	  <LI><A HREF="video.html#dga_installation">2.3.1.3.3 DGA támogatás telepítése MPlayer-be</A></LI>
-	  <LI><A HREF="video.html#dga_resolution">2.3.1.3.4 Felbontásváltás</A></LI>
-	  <LI><A HREF="video.html#dga_mplayer">2.3.1.3.5 DGA és MPlayer</A></LI>
-	  <LI><A HREF="video.html#dga_features">2.3.1.3.6 A DGA driver képességei</A></LI>
-	  <LI><A HREF="video.html#dga_speed">2.3.1.3.7 Sebesség</A></LI>
-	  <LI><A HREF="video.html#dga_bugs">2.3.1.3.8 Ismert hibák</A></LI>
-	  <LI><A HREF="video.html#dga_future">2.3.1.3.9 Beépítendõ dolgok</A></LI>
-	  <LI><A HREF="video.html#dga_modelines">2.3.1.3.A Néhány modeline</A></LI>
-	  <LI><A HREF="video.html#dga_bug_reports">2.3.1.3.B Hibabejelentés</A></LI>
-	</UL>
-	<LI><A HREF="video.html#sdl">2.3.1.4 SDL</A></LI>
-	<LI><A HREF="video.html#svgalib">2.3.1.5 SVGAlib</A></LI>
-	<LI><A HREF="video.html#fbdev">2.3.1.6 Framebuffer kimenet (FBdev)</A></LI>
-	<LI><A HREF="video.html#mga_vid">2.3.1.7 Matrox framebuffer (mga_vid)</A></LI>
-	<LI><A HREF="video.html#tdfxfb">2.3.1.8 3dfx YUV támogatás (tdfxfb)</A></LI>
-	<LI><A HREF="video.html#opengl">2.3.1.9 OpenGL kimenet</A></LI>
-	<LI><A HREF="video.html#aalib">2.3.1.10 AAlib - szöveges módú megjelenítés</A></LI>
-	<LI><A HREF="video.html#vesa">2.3.1.11 VESA - megjelenítés a VESA BIOS segítségével</A></LI>
-	<LI><A HREF="video.html#x11">2.3.1.12 X11</A></LI>
-	<LI><A HREF="video.html#vidix">2.3.1.13 Vidix</A></LI>
-	<LI><A HREF="video.html#zr">2.3.1.14 Zr (néhány MJPEG dekóder kártyához)</A></LI>
-	<LI><A HREF="../video.html#dvb">2.3.1.15 DVB (untrans)</A></LI>
-	<LI><A HREF="../video.html#dxr3">2.3.1.16 DXR3 (untrans)</A></LI>
-	<LI><A HREF="video.html#tv_out">2.3.1.A TV kimenet</A></LI>
-	<UL>
-	  <LI><A HREF="video.html#tv-out_matrox">2.3.1.A.1 Matrox G400</A></LI>
-	  <LI><A HREF="video.html#tv-out_matrox_g450">2.3.1.A.2 Matrox G450/G550</A></LI>
-	  <LI><A HREF="video.html#tv-out_ati">2.3.1.A.3 ATI</A></LI>
-	  <LI><A HREF="video.html#tv-out_voodoo">2.3.1.A.4 Voodoo 3/Banshee</A></LI>
+	  <LI><A HREF="video.html#tv-out_matrox">2.3.1.5.1 Matrox G400</A></LI>
+	  <LI><A HREF="video.html#tv-out_matrox_g450">2.3.1.5.2 Matrox G450/G550</A></LI>
+	  <LI><A HREF="video.html#tv-out_ati">2.3.1.5.3 ATI</A></LI>
+	  <LI><A HREF="video.html#tv-out_voodoo">2.3.1.5.4 Voodoo 3/Banshee</A></LI>
 	</UL>
       </UL>
       <LI><A HREF="sound.html">2.3.2 Hangkártyák, audio kimenetek</A></LI>
       <UL>
-	<LI><A HREF="sound.html#experiences">2.3.2.1 Ajánlott beállítások különféle hangkártyákhoz</A></LI>
-	<LI><A HREF="sound.html#plugins">2.3.2.2 Audio pluginek</A></LI>
+	<LI><A HREF="sound.html#sync">2.3.2.1 Az MPlayer hang/kép szinkronizáló metódusa</A></LI>
+	<LI><A HREF="sound.html#experiences">2.3.2.2 Ajánlott beállítások különféle hangkártyákhoz</A></LI>
+	<LI><A HREF="sound.html#plugins">2.3.2.3 Audio pluginek</A></LI>
 	<UL>
-	    <LI><A HREF="sound.html#resample">2.3.2.2.1 Up/Downsampling</A></LI>
-	    <LI><A HREF="sound.html#surround_decoding">2.3.2.2.2 Térhatású hangok dekódolása</A></LI>
-	    <LI><A HREF="sound.html#format">2.3.2.2.3 Sample formátum konvertáló</A></LI>
-	    <LI><A HREF="sound.html#delay">2.3.2.2.4 Delay</A></LI>
-	    <LI><A HREF="sound.html#volume">2.3.2.2.5 Szoftveres hangerõszabályzás</A></LI>
-	    <LI><A HREF="sound.html#extrastereo">2.3.2.2.6 Extrastereo</A></LI>
-	    <LI><A HREF="sound.html#normalizer">2.3.2.2.7 Volume Normalizer</A></LI>
+	    <LI><A HREF="sound.html#resample">2.3.2.3.1 Up/Downsampling</A></LI>
+	    <LI><A HREF="sound.html#surround_decoding">2.3.2.3.2 Térhatású hangok dekódolása</A></LI>
+	    <LI><A HREF="sound.html#format">2.3.2.3.3 Sample formátum konvertáló</A></LI>
+	    <LI><A HREF="sound.html#delay">2.3.2.3.4 Delay</A></LI>
+	    <LI><A HREF="sound.html#volume">2.3.2.3.5 Szoftveres hangerõszabályzás</A></LI>
+	    <LI><A HREF="sound.html#extrastereo">2.3.2.3.6 Extrastereo</A></LI>
+	    <LI><A HREF="sound.html#normalizer">2.3.2.3.7 Volume Normalizer</A></LI>
 	</UL>
       </UL>
     </UL>
@@ -319,6 +336,8 @@
     Az MPEG codec itt az Aaron Holtzman és Michel Lespinasse készítette libmpeg2
     (mpeg2dec). Nagyon jó, optimalizált, gyors C kód, tökéletes képminõség és   
     100%-os megfelelés a szabványnak.</LI>
+<LI><B>MPlayer v0.01:</B> Nov 11, 2000<BR>
+    TODO: A'rpi, mondanál ide néhány kedves szót?:)</LI>
 <LI><B>MPlayer v0.3-v0.9:</B> Nov 18-Dec 4, 2000<BR>
     Egyvelege két programnak: mpg12play v0.95pre6 és az új, egyszerû AVI
     lejátszómnak ('avip'), ami az avifile Win32 DLL loaderén alapul.</LI>
@@ -346,7 +365,10 @@
     codec-ek, XAnim bináris codec-einek támogatása; DVD feliratok támogatása, a
     MEncoder elsõ verziója, grabbelés TV-rõl, cache, liba52, rengeteg
     fix.</LI>
-<LI><B>MPlayer 0.90 "???"</B> Aug? ??, 2002<BR>
+<LI><B>MPlayer 0.90pre10 "The BirthdayCounter"</B> Nov 11, 2002<BR>
+    Bár ez nem egy release azért megemlítem, tekintve hogy pont az MPlayer
+    2 éves évfordulóján jött ki. Boldog szülinapot, MPlayer!</LI>
+<LI><B>MPlayer 0.90 "???"</B> Dátum egyelõre ismeretlen<BR>
     </LI>
 </UL>
 
@@ -410,6 +432,13 @@
     lejátszásához.</LI>
   <LI><B>libvorbis</B> - opcionális, szükséges az OGG Vorbis formátumú audio
     lejátszásához.</LI>
+  <LI><B><A HREF="http://www.live.com/mplayer/">LIVE.COM Streaming Media</A></B> -
+    opcionális, RTSP/RTP stream-ek lejátszásához szükséges.</LI>
+  <LI><B>directfb</B> - opcionális, letölthetõ a
+    <A HREF="http://www.directfb.org">http://www.directfb.org</A> címrõl.</LI>
+  <LI><B>cdparanoia</B> - opcionális, CDDA támogatáshoz szükséges.</LI>
+  <LI><B>libfreetype</B> - opcionális, TTF betûtipusok használatához szükséges.
+    Legalább 2.0.9-es verzió kell!</LI>
 </UL>
 
 <P><B><I>CODECEK</I></B></P>
@@ -524,8 +553,8 @@
   kimenet</A> fejezetet is. Ha X-et fogsz használni, legalább 4.2.1-ás
   legyen mert a korábbiak 3dfx támogatása bugos.</LI>
 
-<LI><B>ATI kártyák</B>: amennyiben valamilyen ATI kártyád van, a <A HREF="video.html#tv-out_ati">
-  2.3.1.A.3 fejezetben</A> megtalálod a kártyád támogatottságára vonatkozó
+<LI><B>ATI kártyák</B>: amennyiben valamilyen ATI kártyád van, az <A HREF="video.html#tv-out_ati">
+  ATI fejezetben</A> megtalálod a kártyád támogatottságára vonatkozó
   információkat. Ha <B>Radeon</B>, <B>Rage128</B> vagy <B>Mach64</B> kártyád
   van, van neked egy <B>Vidix</B> meghajtónk, TV kimenettel! Lásd
   <A HREF="video.html#2.3.1.14">ezt</A> a fejezetet! <U><B>Ha nem Linux-ot
@@ -732,6 +761,15 @@
   <LI>AQTitle</LI>
 </UL>
 
+<P>Az MPlayer az elõzõ listán felsorolt felirattipusokat a következõ
+  formátumokba tudja alakítani, a megadott opcióval:</P>
+
+<UL>
+  <LI>MPsub: <CODE>-dumpmpsub</CODE></LI>
+  <LI>SubRip: <CODE>-dumpsrtsub</CODE></LI>
+  <LI>Microdvd: <CODE>-dumpmicrodvdsub</CODE></LI>
+</UL>
+
 <P>A következõ formátumokra más opciók érvényesek mint egyébként:</P>
 
 <H4>VobSub feliratok</H4>
@@ -809,30 +847,28 @@ Naboo was under an attack.<BR>
   megszerzésére:</P>
 
 <UL>
-
-<LI>kész csomag letöltése, az <B>MPlayer</B> honlapról.
-  Megjegyzés: a jelenleg rendelkezésre álló csomagok csak ISO 8859-1/2-t
-  tudnak, és van néhány speciális verzió koreai, orosz, stb kódlapokhoz.
-  A font mellett kell egy font.desc file, ami hozzárendeli az unicode
-  font pozíciókat a felirat tényleges kódlapjához. Másik megoldás lehet
-  a felirat UTF8 formátummá alakítása, és az -utf8 opció használata, avagy
-  a felirat file kiterjesztésének megváltoztatása .utf-re. Ezt az
-  átalakítást a konwert (debian) vagy iconv (RedHat) programokkal lehet
-  elvégezni.<BR>
-  <UL>
-    <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/">ftp://ftp.mplayerhq.hu/MPlayer/releases/</A> - ISO betûtipusok
-    <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/">ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/</A> - felhasználók által készített betûtipusok
-    <LI><A HREF="http://realtime.ssu.ac.kr/~lethean/mplayer">http://realtime.ssu.ac.kr/~lethean/mplayer</A> - koreai betûtipus, RAW plugin
-  </UL>
-</LI>
-
-<LI>a TOOLS/subfont-c könyvtárban található betûtipusgenerátor. Teljesértékû
-  program TTF/Type1/stb betûtipusok MPlayer tipussá alakítására. Olvasd el a
-  TOOLS/subfont-c/README file-t a részletekért)</LI>
-
-<LI>a betûtipus generáló GIMP plugin használata, ami a TOOLS/subfont-GIMP
-  könyvtárban található. Megjegyzés: kell hozzá a HSI RAW plugin, lásd fentebb.</LI>
-
+  <LI>kész csomag letöltése, az <B>MPlayer</B> honlapról.
+    Megjegyzés: a jelenleg rendelkezésre álló csomagok csak ISO 8859-1/2-t
+    tudnak, és van néhány speciális verzió koreai, orosz, stb kódlapokhoz.
+    A font mellett kell egy font.desc file, ami hozzárendeli az unicode
+    font pozíciókat a felirat tényleges kódlapjához. Másik megoldás lehet
+    a felirat UTF8 formátummá alakítása, és az -utf8 opció használata, avagy
+    a felirat file kiterjesztésének megváltoztatása .utf-re. Ezt az
+    átalakítást a konwert (debian) vagy iconv (RedHat) programokkal lehet
+    elvégezni.<BR>
+    <UL>
+      <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/">ftp://ftp.mplayerhq.hu/MPlayer/releases/</A> - ISO betûtipusok
+      <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/">ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/</A> - felhasználók által készített betûtipusok
+      <LI><A HREF="http://realtime.ssu.ac.kr/~lethean/mplayer">http://realtime.ssu.ac.kr/~lethean/mplayer</A> - koreai betûtipus, RAW plugin
+    </UL>
+  </LI>
+  <LI>a TOOLS/subfont-c könyvtárban található betûtipusgenerátor. Teljesértékû
+    program TTF/Type1/stb betûtipusok MPlayer tipussá alakítására. Olvasd el a
+    TOOLS/subfont-c/README file-t a részletekért)</LI>
+  <LI>a betûtipus generáló GIMP plugin használata, ami a TOOLS/subfont-GIMP
+    könyvtárban található. Megjegyzés: kell hozzá a HSI RAW plugin, lásd fentebb.</LI>
+  <LI>TTF font használata. Ehhez a freetype könyvtár legalább 2.0.9-es
+    verziója szükséges. TODO: befejezni</LI>
 </UL>
 
 <P>Ezután, tömörítsd ki a letöltött file-t a <CODE>~/.mplayer</CODE> vagy a

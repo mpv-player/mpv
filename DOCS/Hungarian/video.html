@@ -8,9 +8,9 @@
 
 <BODY>
 
-<H3><A NAME=2.3.1>2.3.1.  Video kimeneti eszközök</A></H3>
+<H3><A NAME=2.3.1>2.3.1 Video kimeneti eszközök</A></H3>
 
-<H4><A NAME=mtrr>2.3.1.1.  MTRR</A></H4>
+<H4><A NAME=mtrr>2.3.1.1 MTRR</A></H4>
 
 <P>Nagyon ajánlott az MTRR helyes beállítása, mert minden esetben
   sebességnövekedést eredményez.</P>
@@ -66,7 +66,10 @@
   megadja a stepping értékét</CODE>).</P>
 
 
-<H4><A NAME=xv>2.3.1.2.  Xv</A></H4>
+<H4><A NAME=normal>2.3.1.2. Video kimenetek szabvány videokártyákra</A></H4>
+
+
+<H4><A NAME=xv>2.3.1.2.1 Xv</A></H4>
 
 <P>XFree86 4.0.2 vagy újabb alatt használhatod a kártyád hardveres YUV
   rutinjait, az XVideo kiterjesztéssel. Ezt használja a '-vo xv' opció.
@@ -125,7 +128,7 @@
 </UL>
 
 
-<H5><A NAME=xv_3dfx>2.3.1.2.1.  3dfx kártyák</A></H5>
+<H4><A NAME=xv_3dfx>2.3.1.2.1.1 3dfx kártyák</A></H4>
 
 <P>Régebbi 3dfx meghajtóknak problémái vannak az XVideo gyorsítással,
   nem támogatták a YUY2-t vagy YV12-t, ésígytovább. Ellenõrizd hogy az
@@ -138,7 +141,7 @@
   <A HREF=#2.3.1.9>2.3.1.9-es</A> fejezet.</P>
 
 
-<H5><A NAME=xv_s3>2.3.1.2.2.  S3 kártyák</A></H5>
+<H4><A NAME=xv_s3>2.3.1.2.1.2 S3 kártyák</A></H4>
 
 <P>S3 Savage3D-knek mûködniük kell, de Savage4-hez 4.0.3-as de inkább újabb
   XFree86 kell (ha bajok vannak a képpel, próbáld meg 16bpp-n). S3 Virge-re vonatkozólag..
@@ -150,7 +153,7 @@
   érdeklõdj az mplayer-users listán egy MMX/3DNow-képes meghajtóról.</P>
 
 
-<H5><A NAME=xv_nvidia>2.3.1.2.3.  nVidia kártyák</A></H5>
+<H4><A NAME=xv_nvidia>2.3.1.2.1.3 nVidia kártyák</A></H4>
 
 <P>nVidia nem túl jó választás Linux alá.. A bináris, zárt forráskódú nVidia
   meghajtót kell használnod, ami az nVidia honlapjáról tölthetõ le. A szabvány
@@ -164,7 +167,7 @@
   Panaszkodj az nVidiának.</LI></UL>
 
 
-<H5><A NAME=xv_ati>2.3.1.2.4.  ATI kártyák</A></H5>
+<H4><A NAME=xv_ati>2.3.1.2.1.4 ATI kártyák</A></H4>
 
 <UL>
 <LI>A <A HREF="http://gatos.sf.net">GATOS meghajtó</A> (amit
@@ -185,7 +188,7 @@
 </UL>
 
 
-<H5><A NAME=xv_neomagic>2.3.1.2.5. NeoMagic kártyák</A></H5>
+<H4><A NAME=xv_neomagic>2.3.1.2.1.5. NeoMagic kártyák</A></H4>
 
 <P>Ezek a kártyák sok laptopban megtalálhatók. Sajnos az alap 4.2.0-es X-ben
   lévõ meghajtó nem tud Xv-t. Tölts le tõlünk egy módosított, Xv-t tudó
@@ -206,22 +209,22 @@
 </P>
 
 
-<H5><A NAME=xv_trident>2.3.1.2.6. Trident kártyák</A></H5>
+<H4><A NAME=xv_trident>2.3.1.2.1.6. Trident kártyák</A></H4>
 
 <P>Ha egy Trident kártyád van és a 4.1.0-es X-szel nem mûködik az xv kimenet,
   installáld a 4.2.0-ás XFree-t, amiben már van teljesképernyõs támogatás a
   Cyberblade XP kártyákhoz.</P>
 
 
-<H4><A NAME=dga>2.3.1.3.  DGA</A></H4>
+<H4><A NAME=dga>2.3.1.2.2 DGA</A></H4>
 
-<H5><A NAME=dga_summary>2.3.1.3.1.  Elõszó</A></H5>
+<H4><A NAME=dga_summary>2.3.1.2.2.1 Elõszó</A></H4>
 
 <P>Ez a dokumentum néhány szóban elmagyarázza, hogy általában véve mi is az a
   DGA, és mit tud az MPlayerben (és mit nem).</P>
 
 
-<H5><A NAME=dga_whatis>2.3.1.3.2.  Mi az a DGA ?</A></H5>
+<H4><A NAME=dga_whatis>2.3.1.2.2.2 Mi az a DGA ?</A></H4>
 
 <P>A DGA szó a Direct Graphics Access rövidítése, és egy olyan módszert takar,
   amivel a program az X szerver kikerülésével közvetlenül írhat a framebuffer
@@ -244,7 +247,7 @@
   X-es driverétõl, ezért nem minden rendszeren mûködik ...</P>
 
 
-<H5><A NAME=dga_installation>2.3.1.3.3.  DGA támogatás telepítése <B>MPlayer</B>-be</A></H5>
+<H4><A NAME=dga_installation>2.3.1.2.2.3 DGA támogatás telepítése <B>MPlayer</B>-be</A></H4>
 
 <P>Elõször bizonyosodj meg arról, hogy az X betölti-e a DGA kiterjesztést, lásd
   /var/log/XFree86.0.log :</P>
@@ -281,7 +284,7 @@
   Ajánlatos kipróbálni továbbá a '-vo sdl:dga' opciót is, ha mûködik.
   Sokkal gyorsabb!!!</P>
 
-<H5><A NAME=dga_resolution>2.3.1.3.4.  Felbontásváltás</A></H5>
+<H4><A NAME=dga_resolution>2.3.1.2.2.4 Felbontásváltás</A></H4>
 
 <P>A DGA driver képes felbontásváltásra. Ezzel kikerülhetõ a (lassú) szoftveres
   scale, ugyanakkor teljesképernyõs lesz a lejátszás. Ideális esetben pontosan
@@ -294,14 +297,14 @@
   Az A függelékben néhány modeline példa található.</P>
 
 
-<H5><A NAME=dga_mplayer>2.3.1.3.5.  DGA és <B>MPlayer</B></A></H5>
+<H4><A NAME=dga_mplayer>2.3.1.2.2.5 DGA és <B>MPlayer</B></A></H4>
 
 <P>Az <B>MPlayer</B>-ben két helyen lehet DGA-t használni: az SDL driverben
   (-vo sdl:dga), valamint a DGA driverben (-vo dga). A fentiek mindkettõre
   igazak; a következõ néhány részben elmagyarazom, hogy is mûködik az <B>MPlayer</B>
   DGA drivere.</P>
 
-<H5><A NAME=dga_features>2.3.1.3.6.  A DGA meghajtó képességei</A></H5>
+<H4><A NAME=dga_features>2.3.1.2.2.6 A DGA meghajtó képességei</A></H4>
 
 <P>A DGA driver meghívása a -vo dga parancssori opció megadásával történik.
   Az alapértelmezett magatartás szerint a video méretéhez legközelebb esõ
@@ -333,7 +336,7 @@
   függõen a videokártyád DGA driverértõl.</P>
 
 
-<H5><A NAME=dga_speed>2.3.1.3.7.  Sebesség</A></H5>
+<H4><A NAME=dga_speed>2.3.1.2.2.7 Sebesség</A></H4>
 
 <P>A DGA framebuffer használatával legalább olyan gyors képet kapunk mint X11-el,
   plusz teljeskepérnyõs módot. A százalékos CPU használati értekeket, amiket az 
@@ -354,7 +357,7 @@
 <P>Már láttam (divx) AVI file-okat lejátszódni Pentium MMX 266-on. AMD K6/2 CPU-k
   400Mhz-en vagy afölött már jók.</P>
 
-<H5><A NAME=dga_bugs>2.3.1.3.8.  Ismert hibák</A></H5>
+<H4><A NAME=dga_bugs>2.3.1.2.2.8 Ismert hibák</A></H4>
 
 <P>Nos, néhány XFree fejlesztõ szerint a DGA nagy szörnyûség. Szerintük nem
   érdemes használni. Az implementációja nem minden driverben tökeletes.</P>
@@ -376,7 +379,7 @@
 </UL>
 
 
-<H5><A NAME=dga_future>2.3.1.3.9.  Beépítendõ dolgok</A></H5>
+<H4><A NAME=dga_future>2.3.1.2.2.9 Beépítendõ dolgok</A></H4>
 
 <UL>
   <LI>az új X11 render interface használata OSD-hez</LI>
@@ -384,7 +387,7 @@
 </UL>
 
 
-<H5><A NAME=dga_modelines>2.3.1.3.A.  Néhány modeline</A></H5>
+<H4><A NAME=dga_modelines>2.3.1.2.2.A Néhány modeline</A></H4>
 
 <PRE>
   Section "Modes"
@@ -402,7 +405,7 @@
 <P>Ezek a bejegyzések mûködnek az én Riva128-asomon, az nv.o driverrel.</P>
 
 
-<H5><A NAME=dga_bug_reports>2.3.1.3.B.  Bug Reports</A></H5>
+<H4><A NAME=dga_bug_reports>2.3.1.2.2.B Bug Reports</A></H4>
 
 <P>If you experience troubles with the DGA driver please feel free to file 
   a bug report to me (e-mail address below). Please start mplayer with the 
@@ -416,7 +419,7 @@
 <P><I>Acki (acki@acki-netz.de, www.acki-netz.de)</I></P>
 
 
-<H4><A NAME=sdl>2.3.1.4.  SDL</A></H4>
+<H4><A NAME=sdl>2.3.1.2.3 SDL</A></H4>
 
 <P>Az SDL (Simple Directmedia Layer) alapvetõen egy egységes felületet nyújt
   video/audio meghajtókhoz történõ hozzáféréshez. A programok amik az SDL-t
@@ -469,7 +472,7 @@ esd, arts)</TD><TR>
 </UL>
 
 
-<H4><A NAME=svgalib>2.3.1.5.  SVGAlib</A></H4>
+<H4><A NAME=svgalib>2.3.1.2.4 SVGAlib</A></H4>
 
 <P><B><U>Installálás</U></B><BR>
   Fel kell installálnod az svgalib-et, és a fejlesztõi környezetét, hogy az
@@ -506,7 +509,7 @@ esd, arts)</TD><TR>
 </P>
 
 
-<H4><A NAME=fbdev>2.3.1.6.  Framebuffer meghajtó (FBdev)</A></H4>
+<H4><A NAME=fbdev>2.3.1.2.5 Framebuffer meghajtó (FBdev)</A></H4>
 
 <P>Annak eldöntése, hogy legyen-e framebuffer meghajtó, a ./configure alatt dõl
   el. Olvasd el a kernelforrásban található framebuffer dokumentációt
@@ -548,13 +551,13 @@ a framebuffer egység megadása (/dev/fb0)</TD><TR>
 <P>Megj: az FBdev módváltás _NEM_ mûködik a VESA framebufferrel, és ne is
 	kérdezd miért, mert nem <B>MPlayer</B> hiba.</P>
 
-<H4><A NAME=mga_vid>2.3.1.7.  Matrox framebuffer (mga_vid)</A></H4>
+<H4><A NAME=mga_vid>2.3.1.2.6 Matrox framebuffer (mga_vid)</A></H4>
 
 <P>Ez a rész a Matrox G200/G400/G450/G550 BES (Back-End Scaler) támogatásról szól,
   azaz az mga_vid kernel meghajtóról. Hardveres VSYNC támogatást tartalmaz,
   tripla buffereléssel. Framebufferes konzolon is, és X alatt is mûködik.</P>
 
-<P><B>FIGYELEM</B>: nem Linux rendszereken <A HREF=#2.3.1.15>Vidix</A>-en
+<P><B>FIGYELEM</B>: nem Linux rendszereken <A HREF=#vidix>Vidix</A>-en
   keresztül lehet csak használni az mga_vid-et !!!</P>
 
 <P>A használatához elõszöris le kell fordítani :</P>
@@ -599,14 +602,14 @@ a framebuffer egység megadása (/dev/fb0)</TD><TR>
   <CODE>echo "brightness=120" &gt; /dev/mga_vid</CODE></P>
 
 
-<H4><A NAME=tdfxfb>2.3.1.8.  3dfx YUV támogatás</A></H4>
+<H4><A NAME=tdfxfb>2.3.1.2.7 3dfx YUV támogatás</A></H4>
 
 <P>Ez a meghajtó a kernel tdfx framebufferét használva jelenít meg filmeket
   hardveres gyorsítással. tdfxfb kell a kernelbe, és a következõképp kell
   újrafordítani az <B>MPlayer</B>-t : <CODE>./configure
   --enable-tdfxfb</CODE></P>
 
-<H4><A NAME=opengl>2.3.1.9.  OpenGL kimenet</A></H4>
+<H4><A NAME=opengl>2.3.1.2.8 OpenGL kimenet</A></H4>
 
 <P>Az <B>MPlayer</B> támogatja filmek lejátszását OpenGL-en keresztül. Sajnos,
   nem minden meghajtónak van meg ez a képessége. Például az Utah-GLX
@@ -616,7 +619,7 @@ a framebuffer egység megadása (/dev/fb0)</TD><TR>
 <P>XFree86(DRI) &gt;= 4.0.3 csak Matrox, és Radeon kártyákkal támogatja.
   Lásd a <A HREF="http://dri.sourceforge.net">http://dri.sourceforge.net</A> címen.</P>
 
-<H4><A NAME=aalib>2.3.1.10.  AAlib - szöveges módú megjelenítés</A></H4>
+<H4><A NAME=aalib>2.3.1.2.9 AAlib - szöveges módú megjelenítés</A></H4>
 
 <P>Az <B>AAlib</B> könyvtár grafikák szöveges módban történõ megjelenítésére
   szolgál. Nagyon sok program támogatja, mint például a Doom vagy a Quake, stb.
@@ -665,7 +668,7 @@ Here are some important:</P></B></TD><TR>
 	részletekért.</P>
 
 
-<H4><A NAME=vesa>2.3.1.11.  VESA - megjelenítés a VESA BIOS segítségével</A></H4>
+<H4><A NAME=vesa>2.3.1.2.10 VESA - megjelenítés a VESA BIOS segítségével</A></H4>
 
 <P>Ez egy <B>általános meghajtó</B> minden olyan kártyára, melynek VESA VBE 2.0+
   kompatibilis BIOS-a van. Ezen kívül még egy oka van ezen meghajtó
@@ -695,7 +698,7 @@ Here are some important:</P></B></TD><TR>
 <UL>
   <LI>Akkor is nézhetsz filmeket ha a Linux <B>nem is ismeri</B> a kártyádat.</LI>
   <LI>Nem kell semmilyen grafikai program a Linuxodra (mint az XFree86, fbdev,
-    stb).  Ez a meghajtó <B>szöveges módból</B> is futtatható.</LI>
+    stb). Ez a meghajtó <B>szöveges módból</B> is futtatható.</LI>
   <LI>Lehetséges hogy mûködni fog vele a <B>TV kimenet</B>. (ATI kártyákkal
     legalábbis)</LI>
   <LI>A meghajtó a <B>10h megszakítást</B> hívja, tehát nem emulátor - az
@@ -742,7 +745,7 @@ Here are some important:</P></B></TD><TR>
 </UL>
 
 
-<H4><A NAME=x11>2.3.1.12.  X11</A></H4>
+<H4><A NAME=x11>2.3.1.2.11 X11</A></H4>
 
 <P>Kerülendõ. Szabványos X11 kimenet (megosztott memóriával - mitshm),
   és abszolut nélkülözi a hardveres gyorsítást. Támogat (MMX/3DNow/SSE
@@ -773,7 +776,7 @@ Here are some important:</P></B></TD><TR>
   amiket ezek a módok használnak.</P>
 
 
-<H4><A NAME=vidix>2.3.1.13. VIDIX</A></H4>
+<H4><A NAME=vidix>2.3.1.2.12. VIDIX</A></H4>
 
 <P><B><I>MI IS AZ A VIDIX?</I></B></P>
 
@@ -887,7 +890,48 @@ A <B>VIDIX</B> számára mindez teljesen lényegtelen.
 </P>
 
 
-<H4><A NAME=zr>2.3.1.14. Zr</A></H4>
+<H4><A NAME=directfb>2.3.1.2.13 DirectFB</A></H4>
+
+<P><I>"A DirectFB egy embedded rendszerek szem elõtt tartásával tervezett
+  grafikus könyvtár. Minimális erõforrásigénnyel nyújt maximális
+  teljesítményt."</I> - állítja a
+  <A HREF="http://www.directfb.org">http://www.directfb.org</A>.</P>
+
+<P>Ez a fejezet nem írja le a DirectFB képességeit.</P>
+
+<P>Bár az MPlayer nem egy DirectFB által támogatott "video provider", ez
+  a video kimeneti meghajtó a DirectFB-n keresztül nagyszerû videolejátszást
+  biztosít. Teszi ezt a DirectFB-nek megfelelõ sebességgel: a Matrox G400-amon
+  a sebesség egyenértékû volt az XVideo-val.</P>
+
+<P>Mindig próbáld meg a DirectFB lehetõ legújabb verzióját használni. A
+  DirectFB-nek parancssorban a <CODE>-dfbopts</CODE> opcióval lehet
+  opciókat átadni. A használandó layer megadása subdevice-ként történik,
+  például: <CODE>-vo directfb:2</CODE> (a -1 az alapértelmezett:
+  autodetektálás)</P>
+
+
+<H4><A NAME=dfbmga>2.3.1.2.14 DirectFB/Matrox (dfbmga)</A></H4>
+
+<P>Olvasd el a <A HREF=#directfb>fõ DirectFB fejezetet</A> az általános
+  információkhoz.</P>
+
+<P>Ez a video kimeneti meghajtó a Matrox G400-as kártyákon lévõ második fej
+  bekapcsolására szolgál (tipikusan TV), ezáltal az elsõ fejtõl függetlenül
+  képes video megjelenítésére.</P>
+
+<P>A mûködésre bírásához szükséges információ a következõ címen található:
+  <A HREF="http://www.sci.fi/~syrjala/directfb/readme.txt">http://www.sci.fi/~syrjala/directfb/readme.txt</A></P>
+
+
+<H4><A NAME=mpegdec>2.3.1.3 MPEG dekóderek kártyák</A></H4>
+
+<P>Ezeket kurvára le kéne már fordítani ;)</P>
+
+
+<H4><A NAME=other>2.3.1.4 Egyéb vizualizációs ketyerék</A></H4>
+
+<H4><A NAME=zr>2.3.1.4.1. Zr</A></H4>
 
 <P>Ez a meghajtó néhány hardveres MJPEG capture/dekóder kártyával használható
   (DC10+-szal van lett tesztelve, de mûködnie kell LML33-mal és DC10-zel is).
@@ -911,10 +955,18 @@ A <B>VIDIX</B> számára mindez teljesen lényegtelen.
   <LI>az OSD nem támogatott</LI>
 </UL>
 
+<P>TODO update</P>
 
-<H4><A NAME=tv_out>2.3.1.A.  TV kimenet</A></H4>
 
-<H5><A NAME=tv-out_matrox>2.3.1.A.1.  Matrox G400 kártyák</A></H5>
+<H4><A NAME=blinken>2.3.1.4.2. Blinkenlights</A></H4>
+
+<P>Ez a kimeneti meghajtó a Blinkenlights UDP protokolljával játszik le
+  videot. Ha nem tudod mi az a Blinkenlights, nincs erre szükséged.</P>
+
+
+<H4><A NAME=tv_out>2.3.1.5 TV kimenet</A></H4>
+
+<H4><A NAME=tv-out_matrox>2.3.1.5.1 Matrox G400 kártyák</A></H4>
 
 <P>Linux alatt két lehetõséged van a G400 TV kimenetre :</P>
 
@@ -983,7 +1035,18 @@ A <B>VIDIX</B> számára mindez teljesen lényegtelen.
   </LI>
 </UL>
 
-<H5><A NAME=tv-out_matrox_g450>2.3.1.A.2. Matrox G450/G550 kártyák</A></H5>
+<H4>Matrox TV kábel építése</H4>
+
+<P>Ezt a kis infót <B>Rácz Balázs</B> küldte. Természetesen senki nem
+  vállal semmilyen felelõsséget az ebbõl fakadó károkért, sem pedig nyújt
+  garanciát a módszer mûködésére.</P>
+
+<P>A kompozit video jelet a második fej csatlakozójának 4-es tûjérõl lehet
+  leszedni, földet hozzá pedig a 6-7-8-as tûkrõl. Nekem spec nem volt tvout
+  kábelem, de ennyi info alapján tudtam csinálni (és nagyon szépen futott).
+
+
+<H4><A NAME=tv-out_matrox_g450>2.3.1.5.2 Matrox G450/G550 kártyák</A></H4>
 
 <P>Ezekhez a kártyákhoz csak most kezdõdött el a Linuxos TV kimenet
   fejlesztése, és még nem került be a fõ kernelfába. Úgy tudom jelenleg
@@ -1004,7 +1067,7 @@ A <B>VIDIX</B> számára mindez teljesen lényegtelen.
   címrõl tölthetõ le.</P>
 
 
-<H5><A NAME=tv-out_ati>2.3.1.A.3. ATI kártyák</A></H5>
+<H4><A NAME=tv-out_ati>2.3.1.5.3 ATI kártyák</A></H4>
 
 <P>Az ATI TV kimenetek jelenlegi támogatottsága:</P>
 <UL>
@@ -1037,7 +1100,7 @@ A <B>VIDIX</B> számára mindez teljesen lényegtelen.
 <P>A részleteket lásd a <A HREF=#2.3.1.12>VESA meghajtó</A> leírásánál.</P>
 
 
-<H5><A NAME=tv-out_voodoo>2.3.1.A.4. Voodoo 3</A></H5>
+<H4><A NAME=tv-out_voodoo>2.3.1.5.4 Voodoo 3</A></H4>
 
 <P>
   Nézd meg <A HREF="http://www.iki.fi/too/tvout-voodoo3-3000-xfree">ezt az URL-t</A>.
