@@ -199,6 +199,13 @@ static void exit_sighandler(int x){
 int stream_enable_cache(stream_t *stream,int size,int min,int prefill){
   int ss=(stream->type==STREAMTYPE_VCD)?VCD_SECTOR_DATA:STREAM_BUFFER_SIZE;
   cache_vars_t* s;
+
+  if (stream->fd < 0) {
+    // The stream has no 'fd' behind it, so is non-cacheable
+    mp_msg(MSGT_CACHE,MSGL_STATUS,"\rThis stream is non-cacheable\n");
+    return 1;
+  }
+
   if(size<32*1024) size=32*1024; // 32kb min
   s=cache_init(size,ss);
   stream->cache_data=s;
