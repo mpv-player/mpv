@@ -1,24 +1,4 @@
-/    /* configuration */
-    /*
-    if (osdcolor;
-    int  subcolor;
-    int  extended;
-    int  eight;
-    char *driver;
-    char *font;
-    int  dim;
-    int  bold;
-    int  reverse;
-    int  normal;
-    int  boldfont;
-
-    int  inverse;
-    int  bright;
-    int  contrast;
-    int  gamma;
-    int  dimmul;
-    int  boldmul;
-    */*
+/*
  * MPlayer
  * 
  * Video driver for AAlib - alpha version
