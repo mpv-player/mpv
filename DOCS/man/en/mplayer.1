@@ -1536,14 +1536,17 @@ Signed 32-bit (Big-Endian)
 .B \-mixer <device>
 This option will tell MPlayer to use a different device for mixing than
 /dev/\:mixer.
+For ALSA this is the mixer name.
 .TP
-.B \-mixer-channel <mixer line> (\-ao oss only)
+.B \-mixer-channel <mixer line> (\-ao oss and \-ao alsa only)
 This option will tell MPlayer to use a different channel for controlling
 volume than the default PCM.
-Options include
+Options for OSS include
 .B vol, pcm, line.
 For a complete list of options look for SOUND_DEVICE_NAMES in
 /usr/include/linux/soundcard.h.
+For ALSA you can use the names e.g. alsamixer displays, like 
+.B Master, Line, PCM.
 .TP
 .B \-nowaveheader (\-ao pcm only)
 Don't include wave header.
