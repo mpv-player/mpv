@@ -586,7 +586,8 @@ linux && _fbdev=yes
 _lirc=no
 _css=no
 _dvdread=no
-_win32=yes _dshow=yes
+_win32=yes
+_dshow=yes
 _xanim=yes
 test "$host_arch" != i386 && _dshow=no _win32=no
 _fastmemcpy=yes
@@ -1750,7 +1751,7 @@ if test "$_xmga" = "autodetect" ; then
 fi
 
 if test "$_xanim" = yes && test "$_libdl" = no ; then
-  _xanim = no
+  _xanim=no
 fi
 
 # to screen.
