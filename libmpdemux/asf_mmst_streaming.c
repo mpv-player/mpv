@@ -90,7 +90,7 @@ static void send_command (int s, int command, uint32_t switches,
 
   memcpy (&cmd.buf[48], data, length);
 
-  if (write (s, cmd.buf, length+48) != (length+48)) {
+  if (send (s, cmd.buf, length+48, 0) != (length+48)) {
     printf ("write error\n");
   }
 }
@@ -118,7 +118,7 @@ static void get_answer (int s)
   while (command == 0x1b) {
     int len;
 
-    len = read (s, data, BUF_SIZE) ;
+    len = recv (s, data, BUF_SIZE, 0) ;
     if (!len) {
       printf ("\nalert! eof\n");
       return;
@@ -138,7 +138,7 @@ static int get_data (int s, char *buf, size_t count)
 
   while (total < count) {
 
-    len = read (s, &buf[total], count-total);
+    len = recv (s, &buf[total], count-total, 0);
 
     if (len<0) {
       perror ("read error:");
@@ -460,7 +460,7 @@ int asf_mmst_streaming_start(stream_t *stream)
 // send_command(s, commandno ....)
   send_command (s, 1, 0, 0x0004000b, strlen(str) * 2+8, data);
 
-  len = read (s, data, BUF_SIZE) ;
+  len = recv (s, data, BUF_SIZE, 0) ;
 
   /*This sends details of the local machine IP address to a Funnel system at the server. 
   * Also, the TCP or UDP transport selection is sent.
@@ -475,7 +475,7 @@ int asf_mmst_streaming_start(stream_t *stream)
   memset (data, 0, 8);
   send_command (s, 2, 0, 0, 28*2+8, data);
 
-  len = read (s, data, BUF_SIZE) ;
+  len = recv (s, data, BUF_SIZE, 0) ;
 
   /* This command sends file path (at server) and file name request to the server.
   * 0x5 */

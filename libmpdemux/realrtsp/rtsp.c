@@ -158,7 +158,7 @@ static int write_stream(int s, const char *buf, int len) {
   while (total < len){ 
     int n;
 
-    n = write (s, &buf[total], len - total);
+    n = send (s, &buf[total], len - total, 0);
 
     if (n > 0)
       total += n;
@@ -181,7 +181,7 @@ static ssize_t read_stream(int fd, void *buf, size_t count) {
 
   while (total < count) {
   
-    ret=read (fd, ((uint8_t*)buf)+total, count-total);
+    ret=recv (fd, ((uint8_t*)buf)+total, count-total, 0);
 
     if (ret<0) {
       if(errno == EAGAIN) {

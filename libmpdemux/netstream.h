@@ -45,7 +45,7 @@ typedef struct mp_net_stream_opened_st {
 static int net_read(int fd, char* buf, int len) {
   int r = 0;
   while(len) {
-    r = read(fd,buf,len);
+    r = recv(fd,buf,len,0);
     if(r <= 0) {
       if(errno == EINTR) continue;
       if(r < 0)
@@ -95,7 +95,7 @@ static mp_net_stream_packet_t* read_packet(int fd) {
 static int net_write(int fd, char* buf, int len) {
   int w;
   while(len) {
-    w = write(fd,buf,len);
+    w = send(fd,buf,len,0);
     if(w <= 0) {
       if(errno == EINTR) continue;
       if(w < 0)

@@ -656,7 +656,7 @@ asf_http_streaming_start( stream_t *stream, int *demuxer_type ) {
 		http_hdr = asf_http_request( stream->streaming_ctrl );
 		mp_msg(MSGT_NETWORK,MSGL_DBG2,"Request [%s]\n", http_hdr->buffer );
 		for(i=0; i < (int)http_hdr->buffer_size ; ) {
-			int r = write( fd, http_hdr->buffer+i, http_hdr->buffer_size-i );
+			int r = send( fd, http_hdr->buffer+i, http_hdr->buffer_size-i, 0 );
 			if(r <0) {
 				mp_msg(MSGT_NETWORK,MSGL_ERR,"Socket write error : %s\n",strerror(errno));
 				return -1;
@@ -666,7 +666,7 @@ asf_http_streaming_start( stream_t *stream, int *demuxer_type ) {
 		http_free( http_hdr );
 		http_hdr = http_new_header();
 		do {
-			i = read( fd, buffer, BUFFER_SIZE );
+			i = recv( fd, buffer, BUFFER_SIZE, 0 );
 //printf("read: %d\n", i );
 			if( i<=0 ) {
 				perror("read");

@@ -428,7 +428,7 @@ http_send_request( URL_t *url ) {
 	}
 	mp_msg(MSGT_NETWORK,MSGL_DBG2,"Request: [%s]\n", http_hdr->buffer );
 	
-	ret = write( fd, http_hdr->buffer, http_hdr->buffer_size );
+	ret = send( fd, http_hdr->buffer, http_hdr->buffer_size, 0 );
 	if( ret!=(int)http_hdr->buffer_size ) {
 		mp_msg(MSGT_NETWORK,MSGL_ERR,"Error while sending HTTP request: didn't sent all the request\n");
 		return -1;
@@ -451,7 +451,7 @@ http_read_response( int fd ) {
 	}
 
 	do {
-		i = read( fd, response, BUFFER_SIZE ); 
+		i = recv( fd, response, BUFFER_SIZE, 0 ); 
 		if( i<0 ) {
 			mp_msg(MSGT_NETWORK,MSGL_ERR,"Read failed\n");
 			http_free( http_hdr );
@@ -794,7 +794,7 @@ nop_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *stream_ctr
 
 	if( len<size ) {
 		int ret;
-		ret = read( fd, buffer+len, size-len );
+		ret = recv( fd, buffer+len, size-len, 0 );
 		if( ret<0 ) {
 			mp_msg(MSGT_NETWORK,MSGL_ERR,"nop_streaming_read error : %s\n",strerror(errno));
 		}

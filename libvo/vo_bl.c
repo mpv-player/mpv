@@ -175,7 +175,7 @@ static int udp_init(bl_host_t *h) {
 }
 
 static void udp_send(bl_host_t *h) {
-	if (write(h->fd, bl_packet, bl_size) != bl_size) 
+	if (send(h->fd, bl_packet, bl_size, 0) != bl_size) 
 		mp_msg(MSGT_VO, MSGL_ERR, "unable to send to %s\n", h->name);
 }
 

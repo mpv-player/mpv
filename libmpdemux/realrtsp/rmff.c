@@ -502,7 +502,7 @@ rmff_header_t *rmff_scan_header_stream(int fd) {
 
   do {
     buf = xbuffer_ensure_size(buf, index+8);
-    read(fd, buf+index, 8);
+    recv(fd, buf+index, 8, 0);
     chunk_type=BE_32(buf+index); index+=4;
     chunk_size=BE_32(buf+index); index+=4;
 
@@ -514,7 +514,7 @@ rmff_header_t *rmff_scan_header_stream(int fd) {
       case RMF_TAG:
       case PROP_TAG:
         buf = xbuffer_ensure_size(buf, index+chunk_size-8);
-        read(fd, buf+index, (chunk_size-8));
+        recv(fd, buf+index, (chunk_size-8), 0);
 	index+=(chunk_size-8);
         break;
       default:
