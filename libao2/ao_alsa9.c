@@ -619,7 +619,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 		   snd_strerror(err));
 	    return(0);
 	  }
-/	if (verbose>0)
+//	if (verbose>0)
 	  printf("alsa-init: buffer_time: %d, period_time :%d\n",alsa_buffer_time, err);
       }
 #endif
