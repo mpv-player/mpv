@@ -2534,7 +2534,7 @@ if(step_sec>0) {
       if(abs)
 	v_bright = v > 100 ? 100 : v;
       else {
-	if ( (v_bright += v) > 100 ) v_cont = 100;
+	if ( (v_bright += v) > 100 ) v_bright = 100;
       }
       if(v_hw_equ_cap & VEQ_CAP_BRIGHTNESS) {
 	if(v_bright < -100) v_bright = -100;
