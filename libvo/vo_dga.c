@@ -23,6 +23,10 @@
  * - works only on x86 architectures
  *
  * $Log$
+ * Revision 1.25  2001/06/17 22:21:47  acki2
+ * - if DGA fails to report some valid modes, vo_dga now exits gracefully
+ *   instead of crashing ... (100000x100000 bug ...)
+ *
  * Revision 1.24  2001/06/17 20:59:39  acki2
  * - doublebuffering now can be switched on and off with the -(no)double switch.
  *   Default in libvo is disabled.
@@ -154,6 +158,8 @@ static vo_info_t vo_info =
 
 //#define BITSPP (vo_dga_modes[vo_dga_active_mode].vdm_bitspp)
 //#define BYTESPP (vo_dga_modes[vo_dga_active_mode].vdm_bytespp)
+
+#define VO_DGA_INVALID_RES 100000
 
 #define HW_MODE (vo_dga_modes[vo_dga_hw_mode])
 #define SRC_MODE (vo_dga_modes[vo_dga_src_mode]) 
@@ -766,7 +772,7 @@ static uint32_t init( uint32_t width,  uint32_t height,
 
 #ifdef HAVE_DGA2
   // needed to change DGA video mode
-  int modecount, mX=100000, mY=100000 , mVBI=100000, mMaxY=0, i,j=0;
+  int modecount, mX=VO_DGA_INVALID_RES, mY=VO_DGA_INVALID_RES , mVBI=100000, mMaxY=0, i,j=0;
   int dga_modenum;
   XDGAMode   *modelines=NULL;
   XDGADevice *dgadevice;
@@ -776,7 +782,7 @@ static uint32_t init( uint32_t width,  uint32_t height,
   unsigned int vm_event, vm_error;
   unsigned int vm_ver, vm_rev;
   int i, j=0, have_vm=0;
-  int modecount, mX=100000, mY=100000, mVBI=100000, mMaxY=0, dga_modenum;  
+  int modecount, mX=VO_DGA_INVALID_RES, mY=VO_DGA_INVALID_RES, mVBI=100000, mMaxY=0, dga_modenum;  
 #endif
   int bank, ram;
 #endif
@@ -954,7 +960,21 @@ static uint32_t init( uint32_t width,  uint32_t height,
 #endif
      return 1;
   }
-		         
+
+  if(vo_dga_vp_width == VO_DGA_INVALID_RES){
+    vd_printf( VD_ERR, "vo_dga: Something is wrong with your DGA. There doesn't seem to be a\n"
+		       "single suitable mode!\n");
+#ifndef HAVE_DGA2
+#ifdef HAVE_XF86VM
+    if(vo_dga_vidmodes){
+       XFree(vo_dga_vidmodes);
+       vo_dga_vidmodes = NULL;
+    }
+#endif
+#endif
+    return 1;
+  }
+  
 // now lets start the DGA thing 
 
 #ifdef HAVE_DGA2
