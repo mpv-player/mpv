@@ -377,6 +377,7 @@ _css=no
 _dshow=yes
 _fastmemcpy=yes
 _streaming=no
+_libavcodec=no
 
 _x=1
 _y=1
@@ -438,6 +439,11 @@ else
  fi
 fi
 
+if [ -d libavcodec ]; then
+ if [ -e libavcodec/Makefile ]; then
+  _libavcodec=yes
+ fi
+fi
 
 if [ -c /dev/mga_vid ]; then
  _mga=yes
@@ -1140,6 +1146,7 @@ echo "Checking for Sun Audio ... $_sun_audio"
 echo "Checking for DeCSS support ... $_css"
 echo "Checking for PNG support ... $_png"
 echo "Checking for DirectShow ... $_dshow"
+echo "Checking for libavcodec ... $_libavcodec"
 echo "Checking for fastmemcpy ... $_fastmemcpy"
 echo "Extra libs : $_extralibdir"
 echo "Extra headers : $_extraincdir"
@@ -1190,6 +1197,16 @@ else
    _dshowlib=''
    _dshowdep=''
    _dshow='#undef USE_DIRECTSHOW'
+fi
+
+if [ $_libavcodec = yes ]; then
+   _lavclib='-Llibavcodec -lavcodec'
+   _lavcdep='libavcodec/libavcodec.a'
+   _libavcodec='#define USE_LIBAVCODEC'
+else
+   _lavclib=''
+   _lavcdep=''
+   _libavcodec='#undef USE_LIBAVCODEC'
 fi
 
 if [ $_fastmemcpy = yes ]; then
@@ -1520,8 +1537,8 @@ LIRC_LIBS = $_lirclibs
 CSS_LIB = $_csslib
 CSS_INC = $_cssinc
 SDL_INC = $_sdlcflags
-DS_DEP = $_dshowdep
-DS_LIB = $_dshowlib
+DS_DEP = $_dshowdep $_lavcdep
+DS_LIB = $_dshowlib $_lavclib
 ALSA_LIB = $_alsalib
 ESD_LIB = $_esdlib
 ARCH_LIBS = $_archlibs
@@ -1608,6 +1625,9 @@ $_css
 
 /* DirectShow support */
 $_dshow
+
+/* ffmpeg's libavcodec support (requires libavcodec source) */
+$_libavcodec
 
 /* Use 3dnow/mmxext/sse/mmx optimized fast memcpy() [maybe buggy... signal 4]*/
 $_fastmemcpy

@@ -40,6 +40,9 @@ loader/libloader.a:
 loader/DirectShow/libDS_Filter.a:
 	$(MAKE) -C loader/DirectShow
 
+libavcodec/libavcodec.a:
+	$(MAKE) -C libavcodec
+
 libmpeg2/libmpeg2.a:
 	$(MAKE) -C libmpeg2
 
