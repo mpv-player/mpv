@@ -7,64 +7,65 @@ accept our rules. We cannot afford to spend our time fixing buggy, broken or
 outdated patches. The closer you follow our rules the higher is the probability
 that your patch will be included.
 
-0. Do not send complete files. These need to be diffed by hand to see the
-   changes, which makes reviews harder and less likely to occur. Besides as
-   soon as one of the files changes, your version becomes harder to apply,
-   thus reducing its chances of being accepted.
+ 0. Do not send complete files. These need to be diffed by hand to see the
+    changes, which makes reviews harder and less likely to occur. Besides as
+    soon as one of the files changes, your version becomes harder to apply,
+    thus reducing its chances of being accepted.
 
-1. Always make patches for the CVS version. The README describes how to check
-   out CVS and daily CVS snapshots are available from our download page.
-   We do not accept patches for releases or outdated CVS versions.
+ 1. Always make patches for the CVS version. The README describes how to check
+    out CVS and daily CVS snapshots are available from our download page.
+    We do not accept patches for releases or outdated CVS versions.
 
-2. Make unified diffs ('diff -Naur' or 'cvs diff -u'). Unified diffs can easily
-   be applied with 'patch'. This is much harder with other diff types.
+ 2. Make unified diffs ('diff -Naur' or 'cvs diff -u'). Unified diffs can be
+    applied easily with 'patch'. This is much harder with other diff types.
 
-3. Test the functionality of your patch. We'll *refuse* it if it breaks
-   something, even if it extends other features!
+ 3. Test the functionality of your patch. We'll *refuse* it if it breaks
+    something, even if it extends other features!
 
-4. Read your patch. We'll *refuse* it if it changes indentation of the
-   code or if it does tab/space conversion or other cosmetical changes!
+ 4. Read your patch. We'll *refuse* it if it changes indentation of the
+    code or if it does tab/space conversion or other cosmetical changes!
 
-   NOTE: If you alread wrote some code and did cosmetic changes, you can use
-   'diff -uwbBE' to help you remove them. Don't forget to check the patch
-   to make sure diff didn't ignore some important change and remove any
-   remaining cosmetics!
+    NOTE: If you alread wrote some code and did cosmetic changes, you can
+    use 'diff -uwbBE' to help you remove them. Don't forget to check the
+    patch to make sure diff didn't ignore some important change and remove
+    any remaining cosmetics!
 
-5. Comment parts that really need it (tricky side-effects etc).
-   Commenting trivial code not required. Comments must be English!
+ 5. Comment parts that really need it (tricky side-effects etc).
+    Commenting trivial code not required. Comments must be English!
 
-6. If you implement new features, add or change command line switches or modify
-   the behavior of existing features, please do not forget to also update the
-   documentation. The documentation maintainers will assist you in doing this.
-   Updating the English documentation is enough. If you speak several languages
-   you are of course welcome to update some of the translations as well.
+ 6. If you implement new features, add or change command line switches or
+    modify the behavior of existing features, please do not forget to also
+    update the documentation. The documentation maintainers will assist you
+    in doing this. Updating the English documentation is enough. If you
+    speak several languages you are of course welcome to update some of the
+    translations as well.
 
-7. Send your patch to the mplayer-dev-eng mailing list as a base64-encoded
-   attachment (use gzip or bzip2 *only* if it's bigger than 80k or if you know
-   that your mailer messes up (reformats) text attachments) with the subject
-   line: '[PATCH] very short description of the patch'.
-   In the mail, describe in a few sentences what you change and why.
-   If you made independent changes, try to send them as separate patches.
-   The subject line is very important if you do not want your patch to get
-   lost in the noise. We need the uppercase [PATCH] to be able to search
-   for unapplied patches, so please use it.
-   You have to subscribe to mplayer-dev-eng since we blocked postings from
-   non-subscribers after spam problems and because patches get reviewed by the
-   developers on the list. We want you to be available for discussing your
-   code, you might be asked to make modifications before we accept it. Don't
-   worry, mplayer-dev-eng is not high traffic and you can subscribe with the
-   nomail option if you do not wish to receive all the mails.
+ 7. Send your patch to the mplayer-dev-eng mailing list as a base64-encoded
+    attachment (use gzip or bzip2 *only* if it's bigger than 80k or if you
+    know that your mailer messes up (reformats) text attachments) with the
+    subject line: '[PATCH] very short description of the patch'.
+    In the mail, describe in a few sentences what you change and why.
+    If you made independent changes, try to send them as separate patches.
+    The subject line is very important if you do not want your patch to get
+    lost in the noise. We need the uppercase [PATCH] to be able to search
+    for unapplied patches, so please use it.
+    You have to subscribe to mplayer-dev-eng since we blocked postings from
+    non-subscribers after spam problems and because patches get reviewed by
+    the developers on the list. We want you to be available for discussing
+    your code, you might be asked to make modifications before we accept it.
+    Don't worry, mplayer-dev-eng is not high traffic and you can subscribe
+    with the nomail option if you do not wish to receive all the mails.
 
-8. Give us a few days to react. We try to review patches as fast as possible,
-   but unfortunately we are constantly overloaded with work, be it MPlayer
-   related or from our day to day lives. If your patch seems to be ignored,
-   please resend it and mention that you got ignored. We are interested in your
-   work and will eventually either accept it or reject it with an explanation
-   what and why we disliked about your patch.
+ 8. Give us a few days to react. We try to review patches as fast as possible,
+    but unfortunately we are constantly overloaded with work, be it MPlayer
+    related or from our day to day lives. If your patch seems to be ignored,
+    please resend it and mention that you got ignored. We are interested in
+    your work and will eventually either accept it or reject it with an
+    explanation what and why we disliked about your patch.
 
-9. Do not immediately ask for CVS write access. If you contributed one or more
-   nice, acceptable patches and they need maintaining or you want to be an
-   MPlayer developer, you'll get CVS write access.
+ 9. Do not immediately ask for CVS write access. If you contributed one or
+    more nice, acceptable patches and they need maintaining or you want to
+    be an MPlayer developer, you'll get CVS write access.
 
 10. For consistency reasons all option names must use '-' instead of '_'.
 
