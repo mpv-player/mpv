@@ -221,11 +221,8 @@ static int play(void* data,int len,int flags){
     // Filter data
     ao_plugin_data.len=ret_len;
     ao_plugin_data.data=data;
-    while(plugin(i)){
-      printf("%i  \n",ao_plugin_data.len);
+    while(plugin(i))
       plugin(i++)->play();
-      printf("%i  \n",ao_plugin_data.len);
-    }
     // Copy data to output buffer
     memcpy(ao_plugin_local_data.buf+ao_plugin_local_data.len,
 	   ao_plugin_data.data,ao_plugin_data.len);
