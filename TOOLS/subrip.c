@@ -1,4 +1,4 @@
-/* -*- compile-command: "gcc -g -Wall -I.. -o subrip subrip.c ../vobsub.o ../spudec.o ../mp_msg.o" -*- */
+/* -*- compile-command: "gcc -g -Wall -I.. -o subrip subrip.c ../vobsub.o ../spudec.o ../mp_msg.o ../unrarlib.o ../postproc/swscale.o ../postproc/rgb2rgb.o ../postproc/yuv2rgb.o ../libmpcodecs/img_format.o -lm" -*- */
 /*
  * Use with CVS JOCR/GOCR.
  *
@@ -9,7 +9,7 @@
  */
 
 /* Make sure this accesses the CVS version of JOCR/GOCR */
-#define GOCR_PROGRAM "/usr/local/src/cvs/jocr/jocr/src/gocr"
+#define GOCR_PROGRAM "gocr"
 
 #include <ctype.h>
 #include <stdio.h>
@@ -21,8 +21,26 @@
 #include "vobsub.h"
 #include "spudec.h"
 
-/* XXX Kludge ahead, this MUST be the same as the definition found in ../spudec.c */
+/* XXX Kludge ahead, this MUST be the same as the definitions found in ../spudec.c */
+typedef struct packet_t packet_t;
+struct packet_t {
+  unsigned char *packet;
+  unsigned int palette[4];
+  unsigned int alpha[4];
+  unsigned int control_start;	/* index of start of control data */
+  unsigned int current_nibble[2]; /* next data nibble (4 bits) to be
+                                     processed (for RLE decoding) for
+                                     even and odd lines */
+  int deinterlace_oddness;	/* 0 or 1, index into current_nibble */
+  unsigned int start_col, end_col;
+  unsigned int start_row, end_row;
+  unsigned int width, height, stride;
+  unsigned int start_pts, end_pts;
+  packet_t *next;
+};
 typedef struct {
+  packet_t *queue_head;
+  packet_t *queue_tail;
   unsigned int global_palette[16];
   unsigned int orig_frame_width, orig_frame_height;
   unsigned char* packet;
@@ -30,7 +48,6 @@ typedef struct {
   unsigned int packet_offset;	/* end of the currently assembled fragment */
   unsigned int packet_size;	/* size of the packet once all fragments are assembled */
   unsigned int packet_pts;	/* PTS for this packet */
-  unsigned int control_start;	/* index of start of control data */
   unsigned int palette[4];
   unsigned int alpha[4];
   unsigned int cuspal[4];
@@ -40,10 +57,6 @@ typedef struct {
   unsigned int start_col, end_col;
   unsigned int start_row, end_row;
   unsigned int width, height, stride;
-  unsigned int current_nibble[2]; /* next data nibble (4 bits) to be
-                                     processed (for RLE decoding) for
-                                     even and odd lines */
-  int deinterlace_oddness;	/* 0 or 1, index into current_nibble */
   size_t image_size;		/* Size of the image buffer */
   unsigned char *image;		/* Grayscale value */
   unsigned char *aimage;	/* Alpha value */
@@ -63,6 +76,7 @@ int use_gui;
 int gtkMessageBox;
 int verbose=1;
 int vobsub_id=0;
+int sub_pos=0;
 
 static spudec_handle_t *spudec;
 static FILE *fsub = NULL;
@@ -171,6 +185,12 @@ draw_alpha(int x0, int y0, int w, int h, unsigned char *src, unsigned char *srca
     unlink(tmpfname);
 }
 
+void
+fast_memcpy(void *a, void *b, int s)
+{ //FIXME
+    memcpy(a, b, s);
+}
+
 int
 main(int argc, char **argv)
 {
@@ -200,9 +220,11 @@ main(int argc, char **argv)
     vobsub = vobsub_open(vobsubname, NULL, 0, &spudec);
     while ((packet_len=vobsub_get_next_packet(vobsub, &packet, &pts100)) >= 0) {
 	spudec_assemble(spudec, packet, packet_len, pts100);
-	spudec_heartbeat(spudec, spudec->start_pts);
+	if (spudec->queue_head) {
+		spudec_heartbeat(spudec, spudec->queue_head->start_pts);
 	if (spudec_changed(spudec)) 
 	    spudec_draw(spudec, draw_alpha);
+	}
     }
 
     if (vobsub)
