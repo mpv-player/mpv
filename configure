@@ -2441,7 +2441,7 @@ cat > $CHELP << EOF
 EOF
 
 if [ $_mtrr = yes ]; then
- echo "Please check mtrr settings at /proc/mtrr (see DOCS/MTRR)"
+ echo "Please check mtrr settings at /proc/mtrr (see DOCS/video.html#2.2.1.1)"
  echo
 fi
 
