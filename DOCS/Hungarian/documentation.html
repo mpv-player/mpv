@@ -160,39 +160,41 @@
       <UL>
 	<LI><A HREF="sound.html#sync">2.3.2.1 Az MPlayer hang/kép szinkronizáló metódusa</A></LI>
 	<LI><A HREF="sound.html#experiences">2.3.2.2 Ajánlott beállítások különféle hangkártyákhoz</A></LI>
-	<LI><A HREF="sound.html#plugins">2.3.2.3 Audio pluginek</A></LI>
+              <LI><A HREF="sound.html#af">2.3.2.3 Audio filters</A>
+                <UL>
+                  <LI><A HREF="sound.html#af_resample">2.3.2.3.1 Up/Downsampling</A></LI>
+                  <LI><A HREF="sound.html#af_channels">2.3.2.3.2 Csatornaszám megváltoztatása</A></LI>
+                  <LI><A HREF="sound.html#af_format">2.3.2.3.3 Sample formátum konvertáló</A></LI>
+                  <LI><A HREF="sound.html#af_delay">2.3.2.3.4 Delay</A></LI>
+                  <LI><A HREF="sound.html#af_volume">2.3.2.3.5 Szoftveres hangerõszabályzás</A></LI>
+                  <LI><A HREF="sound.html#af_equalizer">2.3.2.3.6 Equalizer</A></LI>
+                  <LI><A HREF="sound.html#af_panning">2.3.2.3.7 Panning</A></LI>
+                  <LI><A HREF="sound.html#af_sub">2.3.2.3.8 Sub-woofer</A></LI>
+                  <LI><A HREF="sound.html#af_surround">2.3.2.3.9 Térhatású hangok dekódolása</A></LI>
+                </UL>
+              </LI>
+	<LI><A HREF="sound.html#plugins">2.3.2.4 Audio pluginek (régi)</A></LI>
 	<UL>
-	    <LI><A HREF="sound.html#resample">2.3.2.3.1 Up/Downsampling</A></LI>
-	    <LI><A HREF="sound.html#surround_decoding">2.3.2.3.2 Térhatású hangok dekódolása</A></LI>
-	    <LI><A HREF="sound.html#format">2.3.2.3.3 Sample formátum konvertáló</A></LI>
-	    <LI><A HREF="sound.html#delay">2.3.2.3.4 Delay</A></LI>
-	    <LI><A HREF="sound.html#volume">2.3.2.3.5 Szoftveres hangerõszabályzás</A></LI>
-	    <LI><A HREF="sound.html#extrastereo">2.3.2.3.6 Extrastereo</A></LI>
-	    <LI><A HREF="sound.html#normalizer">2.3.2.3.7 Volume Normalizer</A></LI>
+	    <LI><A HREF="sound.html#resample">2.3.2.4.1 Up/Downsampling</A></LI>
+	    <LI><A HREF="sound.html#surround_decoding">2.3.2.4.2 Térhatású hangok dekódolása</A></LI>
+	    <LI><A HREF="sound.html#format">2.3.2.4.3 Sample formátum konvertáló</A></LI>
+	    <LI><A HREF="sound.html#delay">2.3.2.4.4 Delay</A></LI>
+	    <LI><A HREF="sound.html#volume">2.3.2.4.5 Szoftveres hangerõszabályzás</A></LI>
+	    <LI><A HREF="sound.html#extrastereo">2.3.2.4.6 Extrastereo</A></LI>
+	    <LI><A HREF="sound.html#normalizer">2.3.2.4.7 Volume Normalizer</A></LI>
 	</UL>
       </UL>
     </UL>
-    <LI><A HREF="encoding.html">2.4 MEncoder - Az MPlayer-en alapuló enkóder</A></LI>
-      <UL>
-        <LI><A HREF="encoding.html#2pass">2.4.1 2 vagy 3 menetes DivX4 enkódolása</A></LI>
-        <LI><A HREF="encoding.html#rescaling">2.4.2 Filmek átméretezése</A></LI>
-        <LI><A HREF="encoding.html#copying">2.4.3 Stream másolása</A></LI>
-        <LI><A HREF="encoding.html#fixing">2.4.4 Hibás index-û AVI-k rendbehozása</A></LI>
-        <LI><A HREF="encoding.html#libavcodec">2.4.5 Enkódolás a libavcodec codec-ekkel</A></LI>
-        <LI><A HREF="encoding.html#image_files">2.4.6 Enkódolás több bemeneti file-ból (JPEG, PNG)</A></LI>  
-        <LI><A HREF="encoding.html#vobsub">2.4.7 DVD feliratok VOBsub formátumúvá alakítása</A></LI>  
-        <LI><A HREF="encoding.html#aspect">2.4.8 Aspect ratio megõrzése</A></LI>
-      </UL>
-    <LI><A HREF="#tv">2.5 TV bemenet</A></LI>
+    <LI><A HREF="#tv">2.4 TV bemenet</A></LI>
     <UL>
-      <LI><A HREF="#tv_compilation">2.5.1 Fordítás</A></LI>
-      <LI><A HREF="#tv_tips">2.5.2 Tippek a használathoz</A></LI>
-      <LI><A HREF="#tv_examples">2.5.3 Példák</A></LI>
+      <LI><A HREF="#tv_compilation">2.4.1 Fordítás</A></LI>
+      <LI><A HREF="#tv_tips">2.4.2 Tippek a használathoz</A></LI>
+      <LI><A HREF="#tv_examples">2.4.3 Példák</A></LI>
     </UL>
-    <LI><A HREF="#edl">2.6 Edit Decision Lists (EDL)</A></LI>
+    <LI><A HREF="#edl">2.5 Edit Decision Lists (EDL)</A></LI>
     <UL>
-       <LI><A HREF="#edl_using">2.6.1 Using an EDL file</A></LI>
-       <LI><A HREF="#edl_making">2.6.2 Making an EDL file</A></LI>
+       <LI><A HREF="#edl_using">2.5.1 Using an EDL file</A></LI>
+       <LI><A HREF="#edl_making">2.5.2 Making an EDL file</A></LI>
     </UL>
   </UL>
   <LI><A HREF="#usage">3. Használat</A></LI>
@@ -246,11 +248,21 @@
       <LI><A HREF="#qnx">6.5 QNX</A></LI>
       <LI><A HREF="#cygwin">6.6 Cygwin</A></LI>
     </UL>
+    <LI><A HREF="encoding.html">7. MEncoder - Az MPlayer-en alapuló enkóder</A></LI>
+      <UL>
+        <LI><A HREF="encoding.html#2pass">7.1 2 vagy 3 menetes DivX4 enkódolása</A></LI>
+        <LI><A HREF="encoding.html#mpeg">7.2 Enkódolás MPEG formátumba</A></LI>
+        <LI><A HREF="encoding.html#rescaling">7.3 Filmek átméretezése</A></LI>
+        <LI><A HREF="encoding.html#copying">7.4 Stream másolása</A></LI>
+        <LI><A HREF="encoding.html#fixing">7.5 Hibás index-û AVI-k rendbehozása</A></LI>
+        <LI><A HREF="encoding.html#libavcodec">7.6 Enkódolás a libavcodec codec-ekkel</A></LI>
+        <LI><A HREF="encoding.html#image_files">7.7 Enkódolás több bemeneti file-ból (JPEG, PNG)</A></LI>  
+        <LI><A HREF="encoding.html#vobsub">7.8 DVD feliratok VOBsub formátumúvá alakítása</A></LI>  
+        <LI><A HREF="encoding.html#aspect">7.9 Aspect ratio megõrzése</A></LI>
+      </UL>
+
   <LI><A HREF="#mailing_lists">A függelék - Levelezési listák</A></LI>
   <LI><A HREF="bugreports.html">B függelék - Hogyan jelents be hibát</A></LI>
-  <UL>
-    <LI><A HREF="../tech/patches.txt">B/2 függelék - Hogyan küldj patch-et</A></LI>
-  </UL>
   <LI><A HREF="../documentation.html#known_bugs">C függelék - Ismert hibák</A></LI>
   <LI><A HREF="skin.html">D függelék - MPlayer skin formátum</A>
     <UL>
@@ -262,9 +274,9 @@
           <LI><A HREF="skin.html#files">D.1.4 File-ok</A></LI>
         </UL>
       </LI>
-      <LI><A HREF="skin.html#skinfile">D.2 A skin file</A>
+      <LI><A HREF="skin.html#skin">D.2 A skin file</A>
         <UL>
-          <LI><A HREF="skin.html#mainwindow">D.2.1 A fõ ablak, és a playbar</A></LI>
+          <LI><A HREF="skin.html#mainwin">D.2.1 A fõ ablak, és a playbar</A></LI>
           <LI><A HREF="skin.html#subwindow">D.2.2 A sub ablak</A></LI>
           <LI><A HREF="skin.html#skinmenu">D.2.3 Skin menü</A></LI>
         </UL>
@@ -274,7 +286,7 @@
           <LI><A HREF="skin.html#symbols">D.3.1 Szimbólumok</A></LI>
         </UL>
       </LI>
-      <LI><A HREF="skin.html#guimessages">D.4 A GUI üzenetei</A></LI>
+      <LI><A HREF="skin.html#guimsg">D.4 A GUI üzenetei</A></LI>
     </UL>
   </LI>
   <LI><A HREF="../users_against_developers.html">E függelék - Fejlesztõi sirámok</A></LI>
@@ -284,6 +296,7 @@
     <LI><A HREF="../users_against_developers.html#nvidia">nVidia</A></LI
     <LI><A HREF="../users_against_developers.html#barr">Joe Barr</A></LI>
   </UL>
+  <LI><A HREF="../tech/patches.txt">F függelék - Hogyan küldj patch-et</A></LI>
 </UL>
 
 <HR>
@@ -380,7 +393,6 @@
 <UL>
   <LI>még szélesebb skálája a be/kimeneti formátumoknak, codec-eknek
     (VOB file-ok DivX4/Indeo5/VIVO videoval... :)</LI>
-  <LI>audio enkódolása v4l-rõl (BSD-n már kész?)</LI>
 </UL>
 
 

@@ -222,7 +222,49 @@
   értesz az SCSI programozásához, <A HREF="tech/patches.txt">segíts</A>
   a VCD-k SCSI-n történõ támogatásában.</P>
 
-<P>TODO FORDITANI</P>
+<P>Addigis VCD-rõl az adatot a
+  <A HREF="http://140.132.1.204/OS/Linux/packages/X/viewers/readvcd/">readvcd</A>
+  programmal lehet leszedni, az így keletkezõ file-t pedig az MPlayer is
+  lejátsza.</P>
+
+<H4>A VCD-k struktúrája</H4>
+
+<UL>
+  <LI>Az elsõ sáv egy 2048 byte/sector méretú szabvány sáv iso9660
+    filerendszerrel, általában Windows-os VCD lejátszó programot tartalmaz,
+    néha egyéb információ (képek, szöveg, stb).</LI>
+  <LI>A második, és utána következõ sávok nyers 2324 byte/sector méretû
+    MPEG (film) sávog, mindegyik egy-egy MPEG-PS adat/sector-t tartalmaz
+    filerendszer helyett. Hasonlóan az audio CD sávokhoz, ezeket a sávokat
+    <B>sem lehet mountolni</B> (Mountoltál már valaha audio CD-t hogy
+    lejátszd?). Mivel a legtöbb film ebben a sávban van, a <CODE>-vcd 2</CODE>
+    opciót kell használnod.</LI>
+  <LI>Léteznek VCD lemezek amelyeken nincs rajta az elsõ sáv (tehát csak
+    egyetlen sávot tartalmaznak, filerendszer nélkül). Ezek is lejátszhatóak,
+    de nem mountolhatóak.</LI>
+</UL>
+
+<H4>A .DAT file-okról:</H4>
+
+<P>A ~600Mb-os fileok amik a mountolt Video CD-k elsõ sávján találhatóak
+  nem igazi file-ok! Ez az úgynevezett ISO gateway, amiknek a célja hogy
+  Windows-os applikációk is hozzá tudjanak férni az MPEG sávokhoz (mivel
+  a Windows egyáltalán nem engedi a nyers hozzáférést applikációk számára).
+  Linux alatt ezek a file-ok nem megtekinhetõk, sem pedig lejátszhatók.
+  Windows alatt azért lehetséges mert az iso9660 meghajtója emulálja a nyers
+  olvasást ezekre a fileokra. A .DAT file-ok lejátszására kernel patch-re
+  van szükséged, melyet a PowerDVD Linux-os verziója tartalmaz. Ez egy
+  módosított iso9660 filerendszer meghajtót tartalmaz
+  (<CODE>vcdfs/isofs-2.4.X.o</CODE>), mely szintén képes ilyen emulációra.
+  Ha ezzel a meghajtóval mountolod a lemezt, képes leszel az ilyen file-ok
+  másolására, lejátszására. De a standard kernel meghajtójával <B>nem</B>.
+  Egyébkéntis használd a <CODE>-vcd</CODE> opciót inkább. A VCD-k másolására
+  egyéb alternatíva az új
+  <A HREF="http://www.elis.rug.ac.be/~ronsse/cdfs/">cdfs</A> kernel meghajtó
+  (nem része a hivatalos kernelnek), amely a CD <I>session-okat</I> image
+  file-ként mutatja, valamint a
+  <A HREF="http://cdrdao.sourceforge.net/">cdrdao</A>, egy bitrõl-bitre
+  grabbelõ CD másoló alkalmazás.</P>
 
 </BODY>
 

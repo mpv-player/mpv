@@ -80,7 +80,7 @@ a következõ meghajtókat tartalmazza :</P>
   kell használni, az <I>-ao sun</I> opcióval, különben lõttek mind a video,
   mind az audio lejátszásnak.</P>
 
-<H4><A NAME=experiences>2.3.2.1.  Ajánlott beállítások különféle hangkártyákhoz</A></H4>
+<H4><A NAME=experiences>2.3.2.2.  Ajánlott beállítások különféle hangkártyákhoz</A></H4>
 
 <TABLE BORDER=0 WIDTH="100%">
 <TR><TD COLSPAN=3><B>VIA alaplapi chipset (via82cxxx) 48Khz-ra limitált</B></TD></TR>
@@ -159,7 +159,407 @@ a következõ meghajtókat tartalmazza :</P>
   <LI>Írd meg nekünk, hogy mûködik együtt az MPlayer és a kartyád!</LI>
 </UL>
 
-<H4><A NAME=plugins>2.3.2.2.  Audio pluginek</A></H4>
+
+<H4><A NAME="af">2.3.2.3 Audio szûrõk</A></H4>
+
+<P>Az audio szûrõk a hang tulajdonságainak megváltoztatására szolgálnak. 
+  (De)aktivációjuk automatikusan történik, ha a hang tulajdonságai különböznek
+  a hangkártya által igényelttõl. Az <CODE>-af szûrõ1,szûrõ2,...</CODE>
+  opcióval bírálható felül a szûrõk használata, és természetesen itt lehetséges
+  egyéb, nem automatikusan beillesztett szûrõk használatba vétele is. A szûrõk
+  végrehajtása a megadott sorrendben történik.</P>
+
+<P>Példa:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af resample,pan media.avi </CODE></P>
+
+<P>Ez a parancs átvezeti a hangot a resampling (újramintavételezõ), majd a pan
+  szûrõkön.</P>
+
+<P>A legtöbb szûrõnek vannak opciói, melyeket a most következõ fejezetekben
+  tárgyalunk. Ha nincs megadva opció, a szûrõ az alapértelmezett opcióit
+  használja. Itt egy példa:</P>
+
+<P>&nbsp;&nbsp;<CODE>mplayer -af resample=11025,pan=1:0.5:0.5 -channels 1
+  -srate 11025 media.avi</CODE></P>
+
+<P>Itt megadjuk hogy a hang legyen 11025Hz-re mintavételezve, ezután pedig
+  egy csatornásra keverjük át a hangot a pan szûrõvel.</P>
+
+<P>A szûrõ réteg viselkedésére globálisan az <CODE>-af-adv</CODE> opcióval
+  lehet hatni. Ennek két alopciója van:</P>
+
+<DL>
+  <DT><CODE>force</CODE><DT>
+  <DD>itt lehet megadni a szûrõk automatizálásának feltételeit, valamint hogy
+    milyen sebesség/pontosság optimalizációk használhatóak:
+    <DL>
+      <DT><CODE>0</CODE></DT>
+      <DD>Automatikus beillesztés, CPU sebességre optimalizálás.</DD>
+      <DT><CODE>1</CODE></DT>
+      <DD>Automatikus beillesztés, leggyorsabb sebességre optimalizálás.<BR>
+        <EM>Figyelem:</EM> Minõségromlással járhat.</DD>
+      <DT><CODE>2</CODE></DT>
+      <DD>Automatikus beillesztés, minõségre optimalizálás.</DD>
+      <DT><CODE>3</CODE></DT>
+      <DD>Nincs automatizálás, nincs optimalizáció.<BR>
+        <I>Figyelem:</I> Lehetséges hogy az MPlayer nem fog futni ezzel az
+        opcióval.</DD>
+      <DT><CODE>4</CODE></DT>
+      <DD>Automatikus beillesztés mint a 0-nál, de lebegõpontos számítások
+        elõnyben részesítésével.</DD>
+      <DT><CODE>5</CODE></DT>
+      <DD>Automatikus beillesztés mint a 1-nál, de lebegõpontos számítások
+        elõnyben részesítésével.</DD>
+      <DT><CODE>6</CODE></DT>
+      <DD>Automatikus beillesztés mint a 2-nál, de lebegõpontos számítások
+        elõnyben részesítésével.</DD>
+      <DT><CODE>7</CODE></DT>
+      <DD>Nincs automatizálás, mint a 3-nál, de lebegõpontos számítások
+        elõnyben részesítésével.</DD>
+    </DL>
+  </DD>
+
+  <DT><CODE>list</CODE></DT>
+  <DD>egy alias az -af opcióra.</DD>
+</DL>
+
+<P>A szûrõ rétegre a következõ általános opciók is hatással vannak:
+
+<DL>
+  <DT><CODE>-v</CODE></DT>
+  <DD>Üzenetek részletességének megnövelése</DD>
+  <DT><CODE>-channels</CODE></DT>
+  <DD>Ezzel az opcióval lehet megadni a hangkártyádnak hogy hány csatornán
+    próbálja lejátszani a hangot. Azt is befolyásolja továbbá hogy a
+    lejátszott médiábol hány csatorna legyen dekódolva. Ha a lejátszandó hang
+    több csatornát tartalmaz mint amit a hangkártyád kiadni képes, a
+    "channels" szûrõ automatikusan beillesztésre kerül.</DD>
+  <DT><CODE>-srate</CODE></DT>
+  <DD>Ezzel az opcióval lehet megadni hogy mekkora mintavételezési frekvencián
+    történjen a lejátszás (a hangkártya limitje ennek persze korlátot szab).
+    Ha a lejátszandó hang frekvenciája kívül esik a hangkártyád képességein,
+    a "resample" szûrõ automatikusan beillesztésre kerül hogy
+    kompenzáljon.</DD>
+  <DT><CODE>-format</CODE><DT>
+  <DD>Ezzel az opcióval meg lehet adni hogy milyen formátumban dolgozzon
+    az audio szûrõ réteg, és a hangkártya. Ha a lejátszandó hang formátuma
+    más mint amit a hangkártya lejátszani képes, a "format" szûrõ
+    automatikusan beillesztésre kerül.</DD>
+</DL>
+
+
+<H5><A NAME="af_resample">2.3.2.3.1 Up/Down-sampling</A></H5>
+
+<P>Az MPlayer teljes mértékben támogatja a fel/lemintavételezést a
+  <CODE>resample</CODE> szûrõ segítségével. Ezt többek között akkor lehet
+  értelmesen használni ha egy régi hangkártyád van ami maximum csak 44.1kHz-et
+  tud. Három opciója van:</P>
+
+<DL>
+  <DT><CODE>srate &lt;8000-192000&gt;</CODE></DT>
+  <DD>egy egész szám, mely a mintavételezési frekvencia Hz-ben. A tartománya
+    8kHz-tõl 192kHz-ig terjed. Ha a bemeneti és a kimeneti frekvencia
+    ugyanannyi, a szûrõ automatikusan eltávolításra kerül. A magas frekvencia
+    általában növeli a hangminõséget, fõleg más szûrõk használatával
+    együtt.</DD>
+
+  <DT><CODE>sloppy</CODE></DT>
+  <DD>ez egy opcionális bináris paraméter mely megadása esetén engedélyezi
+    a szûrõnek hogy kicsit eltérjen a <CODE>srate</CODE> opciónál megadott
+    értéktõl. Akkor használandó, ha a lejátszás nagyon lassan indul.
+    Alapállapotban be van kapcsolva.</DD>
+
+  <DT><CODE>type &lt;0-2&gt;</CODE><DT>
+  <DD>ez egy egész szám 0 és 2 között, melyek megadják a használandó
+    átmintavételezõ rutint. A <CODE>0</CODE> jelenti a lineáris
+    interpolációt, az <CODE>1</CODE> az egész számú poly-phase filter-bank-ot,
+    a <CODE>2</CODE> az elõbbinek a lebegõpontos verziója. A lineáris
+    interpoláció a leggyorsabb, de a hangminõség hagy némi kívánnivalót maga
+    után, fõleg a felmintavételezésnél. A legjobb minõséget a <CODE>2</CODE>
+    eredményezi, de természetesen ennek a legnagyobb a CPU igénye.</DD>
+</DL>
+
+<P>Példa:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af resample=44100:0:0</CODE></P>
+
+<P>Ez 44100Hz-re állítja a frekvenciát pontos kimenettel, és lineáris
+  interpolációval.</P>
+
+
+<H5><A NAME="af_channels">2.3.2.3.2 Csatornák számának megváltoztatása</A></H5>
+
+<P>A <CODE>channels</CODE> szûrõ csatornák hozzáadására és eltávolítására,
+  valamint a csatornák routolására és másolására szolgál. Ha használata
+  fölösleges, nem töltõdik be. Az opciók száma dinamikus:</P>
+
+<DL>
+  <DT><CODE>nch &lt;1-6&gt;</CODE></DT>
+  <DD>egész szám 1 és 6 között, a csatornaszám megadására. Megadása
+    szükséges.</DD>
+
+  <DT><CODE>nr &lt;1-6&gt;</CODE></DT>
+  <DD>egész szám 1 és 6 között mely az útvonalak számát adja meg.
+    Opcionális.</DD>
+
+  <DT><CODE>from1:to1:from2:to2:from3:to3...</CODE></DT>
+  <DD>számpárok 0 és 5 között, amelyek megadják hova lesznek átirányítva
+    a csatornák.</DD>
+</DL>
+
+<P>Az átirányítás (route) lényege: ha kevesebb csatornából többre történik
+  konvertálás, üres csatornák jönnek létre (kivéve a mono->stereo konvertálást).
+  Ha pedig a kimeneti csatornák száma kevesebb mint a bemeneti, a limitet
+  túllépett csatornák nem lesznek hallhatóak.</P>
+
+<P>Példa 1:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af channels=4:4:0:1:1:0:2:2:3:3 media.avi </CODE></P>
+
+<P>Ez megváltoztatja a csatorák számát 4-re, és 4 útvonalat állít fel,
+  melyek felcserélik a 0-ás és 1-es csatornát, a 2-es és 3-as érintetlenül
+  hagyásával. Persze ha a lejátszandó média 2 csatornából áll, a 2-es és 3-as
+  csatornák mindössze csendet fognak tartalmazni.</P>
+
+<P>Példa 2:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af channels=6:4:0:0:0:1:0:2:0:3 media.avi </CODE></P>
+
+<P>6-ra változtatja a csatornák számát, és 4 útvonallal a 0-ás csatornát
+  lemásolja a 0-tól a 3-ig terjedõ csatornákra. A 4-es és 5-ös csatornákon
+  csak csend van.</P>
+
+
+<H5><A NAME="af_format">2.3.2.3.3 Sample formátum konvertáló</A></H5>
+
+<P>A <CODE>format</CODE> szûrõ a hang tulajdonságait konvertálja át.</P>
+
+<DL>
+  <DT><CODE>bps &lt;szám&gt;</CODE></DT>
+  <DD>a lehetséges értékek: <CODE>1</CODE>, <CODE>2</CODE> vagy <CODE>4</CODE>,
+    amik a mintánkénti byte-ok számat adják meg. Ezen opció megadása
+    szükséges.</DD>
+
+  <DT><CODE>f &lt;formátum&gt;</CODE></DT>
+  <DD>szöveges string, amely leírja a sample formátumot. A string lehetséges
+    értékei a következõk, egybe kell õket írni:
+    <CODE>alaw</CODE>, <CODE>mulaw</CODE> vagy
+    <CODE>imaadpcm</CODE>, <CODE>float</CODE> vagy <CODE>int</CODE>,
+    <CODE>unsigned</CODE> vagy <CODE>signed</CODE>, <CODE>le</CODE> vagy
+    <CODE>be</CODE> (little vagy big endian). Ezen opció megadása
+    szükséges.</DD>
+</DL>
+
+<P>Példa:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af format=4:float media.avi</CODE></P>
+
+<P>beállítja a kimeneti formátumot 4 byte-ra mintánként.</P>
+
+
+<H5><A NAME="af_delay">2.3.2.3.4 Delay</A></H5>
+
+<P>A <CODE>delay</CODE> szûrõvel késleltetni lehet a hangszórókhoz érkezõ
+  hangot hogy a különbözõ helyrõl jövõ hangok egyszerre érjenek oda a
+  hallgatóhoz.
+  Csak akkor hasznos ha több mint 2 hangszóród van. A paraméterek:</P>
+
+<DL>
+  <DT><CODE>d1:d2:d3...</CODE></DT>
+  <DD>lebegõpontos számok, ms-ben megadják a késleltetést a különbözõ
+    csatornákra vonatkoztatva. A minimális késleltetés 0ms, a maximális
+    pedig 1000ms.</DD>
+</DL>
+
+<P>A megfelelõ értékek kiszámítása a következõképpen történik:</P>
+
+<OL>
+  <LI>Mérd le a távolságot a hangszóróidtól hozzád, méterben. A távolságokat
+    nevezd el s1-tõl s5-ig (5.1-es rendszert feltételezve).
+    A sub-woofert nincs értelme kompenzálni.</LI>
+  <LI>Vond ki az s1-tõl s5-ig az összes távolságot a legnagyobb távból, pl<BR>
+    s[i] = max(s) - s[i]; i = 1...5</LI>
+  <LI>A szükséges késleltetés (ms) kiszámítása<BR>
+    d[i] = 1000*s[i]/342; i = 1...5 </LI>
+</OL>
+
+<P>Pl:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af delay=10.5:10.5:0:0:7:0 media.avi</CODE></P>
+
+<P>Ez az elülsõ bal és jobb csatornákat 10.5ms-el késlelteti, a két hátsót
+  és a sub-ot 0ms-el, a középet pedig 7ms-el.</P>
+
+
+<H5><A NAME="af_volume">2.3.2.3.5 Szoftveres hangerõszabályzás</A></H5>
+
+<P>A szoftveres hangerõszabályzást a <CODE>volume</CODE> audio szûrõ
+  valósítja meg. Óvatosan használd, mert a jelet egészen a zajszintig lehet
+  vele csökkenteni. A legtöbb esetben érdemes inkább a MASTER hangerõt
+  a maximumra rakni, utána pedig külsõ erõsítõt használni, ezt a filtert
+  pedig mellõzni. Ha külsõ erõsítõt csatlakoztattál a gépedhez (majdnem
+  mindig így van), a zajszint a MASTER szint és az erõsítõ hangerõszabályzójának
+  együttes állítgatásával lecsökkenthetõ. Két opció van:</P>
+
+<DL>
+  <DT><CODE>v &lt;-200 - +60&gt;</CODE></DT>
+  <DD>lebegõpontos szám <CODE>-200</CODE> és <CODE>+60</CODE> között mely a
+    hangerõt adja meg dB-ben. Az alapértelmezett érték a 0dB.</DD>
+
+  <DT><CODE>c</CODE></DT>
+  <DD>bináris opció mely a "soft clipping"-et kapcsolja ki/be. Ez a funkció
+    sokkal folyamatosabbá teheti a hangot ha nagyon magas hangerõ van
+    beállítva. Akkor kapcsold ezt be, ha a hangszóróid dinamikája alacsony.
+    Viszont már most mondom hogy torzítást okoz, és csak végsõ esetben
+    ajánlott.</DD>
+</DL>
+
+<P>Példa:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af volume=10.1:0 media.avi</CODE></P>
+
+<P>ez a hangot 10.1dB-lel erõsíti, és hard-clip-el ha a hangerõ túl magas.</P>
+
+<P>Ennek a szûrõnek van egy második funkciója is: méri a maximális hangerõt
+  és kilépéskor kiírja. Ezt aztán a MEncoder-rel használva a teljes
+  dinamikát ki lehet tölteni.</P>
+
+
+<H5><A NAME="af_equalizer">2.3.2.3.6 Equalizer</A></H5>
+
+<P>Az <CODE>equalizer</CODE> szûrõ egy 10 sávos equalizer,
+  10 IIR sáv pass szûrõ implementálásával. Bármilyen lejátszandó hanggal
+  mûködik. A 10 sáv középsõ értékei a következõk:</P>
+
+<TABLE BORDER="0" WIDTH="100%">
+  <TR><TD>Sáv száma</TD><TD>Középérték</TD></TR>
+  <TR><TD>0</TD><TD>31.25 Hz</TD></TR>
+  <TR><TD>1</TD><TD>62.50 Hz</TD></TR>
+  <TR><TD>2</TD><TD>125.0 Hz</TD></TR>
+  <TR><TD>3</TD><TD>250.0 Hz</TD></TR>
+  <TR><TD>4</TD><TD>500.0 Hz</TD></TR>
+  <TR><TD>5</TD><TD>1.000 kHz</TD></TR>
+  <TR><TD>6</TD><TD>2.000 kHz</TD></TR>
+  <TR><TD>7</TD><TD>4.000 kHz</TD></TR>
+  <TR><TD>8</TD><TD>8.000 kHz</TD></TR>
+  <TR><TD>9</TD><TD>16.00 kHz</TD></TR>
+</TABLE>
+
+<P>Ha a lejátszott hang mintavételezési frekvenciája alacsonabb mint az
+  egyik sáv megadott frekvenciája, akkor az adott sáv nem lesz használva.
+  Ezen szûrõ egyik ismert hibája, hogy a legfelsõ sáv karakterisztikája
+  nem teljesen szimmetrikus ha a mintavételezési freki közel van sáv
+  középértékéhez. Ez a probléma kiküszöbölhetõ a hang felmintavételezésével
+  (resample szûrõ).</P>
+
+<P>Ennek a szûrõnek 10 paramétere van:</P>
+
+<DL>
+  <DT><CODE>g1:g2:g3...g10</CODE></DT>
+  <DD>lebegõpontos számok <CODE>-12</CODE> és <CODE>+12</CODE> között amik
+    a dB-ben adják meg a kívánt különbséget az egyes sávokban</DD>
+</DL>
+
+<P>Példa:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af equalizer=11:11:10:5:0:-12:0:5:12:12 media.avi</CODE></P>
+
+<P>erõsíti a hangot a felsõ és alsó frekvenciatartományban, míg majdnem
+  teljesen kioltja 1kHz körül.</P>
+
+
+<H5><A NAME="af_panning">2.3.2.3.7 Panning szûrõ</A></H5>
+
+<P>A <CODE>pan</CODE> szûrõvel lehetséges a csatornák átkeverése. Gyakorlatilag
+  a hangerõszabályzó és a "channels" szûrõk kombinációja. Kétféleképpen
+  lehet használni:</P>
+
+<OL>
+  <LI>Sok csatorna egy csatornává mixelése, pl sztereórol monóra.</LI>
+  <LI>Térhatású rendszerben a középsõ hangszóró "szélességének"
+    beállítása.</LI>
+</OL>
+
+<P>Ezt a szûrõt nehéz használni, és idõt kell ráfordítani hogy a kívánt
+  eredményt elérd. A használandó opciók száma függ a kimeneti csatornák
+  számától:</P>
+
+<DL>
+  <DT><CODE>nch &lt;1-6&gt;</CODE></DT>
+  <DD>egész szám <CODE>1</CODE> és <CODE>6</CODE> között, és a kimeneti
+    csatornák számának megadására szolgál. Megadása kötelezõ.</DD>
+
+  <DT><CODE>l00:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...</CODE></DT>
+  <DD>lebegõpontos számok <CODE>0</CODE> és <CODE>1</CODE> között.
+    <CODE>l[i][j]</CODE> megadja, hogy mennyire lesz a j bemeneti csatorna
+    belemixelve az i kimeneti csatornába.</DD>
+</DL>
+
+<P>Példa 1:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af pan=1:0.5:0.5 -channels 1 media.avi</CODE></P>
+
+<P>stereo -> mono lemixelés.</P>
+
+<P>Példa 2:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af pan=3:1:0:1:0.5:0.5 -channels 3 media.avi</CODE></P>
+
+<P>3 kiement csatornát eredményez, melyek a 0-ás és 1-es csatornák eredeti
+  állapotban, a 2-es csatorna pedig a 0-ás és az 1-es egybemixelése
+  (melyet aztán el lehet küldeni egy sub-woofernek például).</P>
+
+
+<H5><A NAME="af_sub">2.3.2.3.8 Sub-woofer</A></H5>
+
+<P>A <CODE>sub</CODE> szûrõ egy sub woofer csatornát illeszt az audioba. Ez a
+  csatorna a 0-ás és 1-es csatornák átlaga lesz. Az így keletkezõ hangot
+  ezután áteresztjük egy 4th order Butterworth szûrõn, alapállapotban
+  60Hz-es vágási frekvenciával, ezután pedig hozzáadjuk az audiohoz.
+  Figyelem: ezt a szûrõt ki kell kapcsolni Dolby Digital 5.1-es hang esetén,
+  különben eltorzítja a sub woofer hangját. Két paramétere van:</P>
+
+<DL>
+  <DT><CODE>fc &lt;20-300&gt;</CODE></DT>
+  <DD>opcionális lebegõpontos szám a vágási freki megadására, Hz-ben.
+    A használható tartomány 20Hz-tõl 300Hz. A legjobb minõséghez olyan
+    alacsonyra kell állítani amilyenre csak lehet. Ez javítani fogja a stereo
+    vagy a térhatás élményét. Alapállapotban 60Hz.</DD>
+
+  <DT><CODE>ch &lt;0-5&gt;</CODE></DT>
+  <DD>opcionális egész szám <CODE>0</CODE> és <CODE>5</CODE> melyek
+    megadják hogy melyik csatornába legyen beillesztve a sub audio.
+    Alapállapotban <CODE>5</CODE>. Megfigyelendõ, hogy a csatornák száma
+    automatikusan meg lesz növelve erre az értékre, ha szükséges.</DD>
+</DL>
+
+<P>Példa:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af sub=100:4 -channels 5 media.avi</CODE></P>
+
+<P>hozzáad egy sub-woofer csatornát 100Hz-es vágási frekvenciával a 4-es
+  számú csatornára.</P>
+
+
+<H5><A NAME="af_surround">2.3.2.3.9 Térhatás dekóder</A></H5>
+
+<P>Matrix enkódolás térhatású hang dekódolására a <CODE>surround</CODE>
+  szûrõ használatos. A Dolby Surround egy példa matrix enkódolású hangra.
+  Sok 2 csatornás hang valójában matrix térhatású hangot tartalmaz.
+  Ezen feature használatához legalább 4 csatornát támogató hangkártya
+  szükséges. Egy paramétere van:</P>
+
+<DL>
+  <DT><CODE>d &lt;0-1000&gt;</CODE></DT>
+  <DD>opcionális lebegõpontos szám <CODE>0</CODE> és <CODE>1000</CODE>
+    között, mely ms-ban megadja a hátsó hangszórók késleltetését.
+    Ez a késleltetés a következõképp állítható be: ha d1 a táv
+    a hallgatótol az elülsõ hangszórókig, és d2 a táv a hallgatótol
+    a hátsó hangszórókig, akkor a késleltetés értéke <CODE>d</DOE>
+    15ms-re állítandó ha d1 &lt;= d2, és 15+5*(d1-d2)-re ha d1 &gt; d2.
+    Az alapértelmezett értéke <CODE>d</CODE>-nek 20ms.</DD>
+</DL>
+
+<P>Példa:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af surround=15 -channels 4 media.avi</CODE></P>
+
+<P>a hátsó hangszórókat 15ms-el késleltetve térhatású hang dekódolása.</P>
+
+
+<H4><A NAME=plugins>2.3.2.4.  Audio pluginek (régi)</A></H4>
+
+<H2><STRONG>Megjegyzés: az audio plugin-eket felváltották az audio szûrõk,
+  ezért az elõbbiek hamarosan eltávolításra kerülnek.</STRONG></H2>
 
 <P>Az <B>MPlayer</B> tartalmaz néhány audio plugint. Ezek a hang
   tulajdonságainak megváltoztatására használhatóak. A használatuk az
@@ -192,7 +592,7 @@ a következõ meghajtókat tartalmazza :</P>
 <P>Currently audio plugins can not be used in <B>MEncoder</B>.</P>
 
 
-<H5><A NAME=resample>2.3.2.2.1.  Up/Downsampling</A></H5>
+<H5><A NAME=resample>2.3.2.4.1.  Up/Downsampling</A></H5>
 
 <P>Az <B>MPlayer</B> képes az audio stream frekvenciáját növelni illetve
 csökkenteni. Ennek szükségessége <B>autodetektálva van</B>.
@@ -203,7 +603,7 @@ Ez a funkció még nem mûködik a <B>MEncoder</B>-ben.</P>
   frekvencia Hz-ben, pl 44100&gt;</CODE></P>
 
 
-<H5><A NAME=surround_decoding>2.3.2.2.2.  Térhatású hangok dekódolása</A></H5>
+<H5><A NAME=surround_decoding>2.3.2.4.2.  Térhatású hangok dekódolása</A></H5>
 
 <P>Az <B>MPlayer</B>-nek van egy audio pluginje ami a mátrix-kódolt hangok
 dekódolására szolgál (ilyen például a Dolby Surround).</P>
@@ -218,7 +618,7 @@ hangkártyára+meghajtóra van szükség.</P>
 &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=surround</CODE></P>
 
 
-<H5><A NAME=format>2.3.2.2.3. Sample formátum konvertáló</A></H5>
+<H5><A NAME=format>2.3.2.4.3. Sample formátum konvertáló</A></H5>
 
 <P>Ha a hangkártyád nem támogatja a signed 16bit int formátumot, ezzel
   a pluginnel átalakíthatod a kimeneti hangot olyanba amit visz.
@@ -232,11 +632,11 @@ hangkártyára+meghajtóra van szükség.</P>
 </P>
 
 
-<H5><A NAME=delay>2.3.2.2.4. Delay</A></H5>
+<H5><A NAME=delay>2.3.2.4.4. Delay</A></H5>
 
 <P>Példa plugin, csak developereknek. Lásd angol dox.</P>
 
-<H5><A NAME=volume>2.3.2.2.5. Szoftveres hangerõszabályzás</A></H5>
+<H5><A NAME=volume>2.3.2.4.5. Szoftveres hangerõszabályzás</A></H5>
 
 <P>Ez a plugin szoftveres hangerõállításra képes, ezáltal olyan gépeken
   is használható, ahol a hardveres mixer eszköz nem mûködik. Használható
@@ -268,7 +668,7 @@ hangkártyára+meghajtóra van szükség.</P>
 </P>
 
 
-<H5><A NAME=extrastereo>2.3.2.2.6. Extrastereo</A></H5>
+<H5><A NAME=extrastereo>2.3.2.4.6. Extrastereo</A></H5>
 
 <P>Ez a plugin lineárisan növeli a bal és jobb hangcsatorna közti különbséget
   (mint az XMMS extrastereo plugin) ezáltal "életszerûbb" effektust
@@ -283,7 +683,7 @@ hangkártyára+meghajtóra van szükség.</P>
   0.0-ra írod át, mono hangot kapsz.</P>
 
 
-<H5><A NAME=normalizer>2.3.2.2.7. Volume Normalizer</A></H5>
+<H5><A NAME=normalizer>2.3.2.4.7. Volume Normalizer</A></H5>
 
 <P>Ez a plugin beállítja a hangerõt arra a maximális erõsségre, ahol
   még nem lép fel torzítás.

@@ -9,7 +9,7 @@
 <BODY>
 
 
-<H2><A NAME=2.4>2.4 Enkódolás a MEncoderrel</A></H2>
+<H2><A NAME="encoding">7 Enkódolás a MEncoderrel</A></H2>
 
 <P>A rendelkezésre álló opciók és példák teljes listáját lásd a man
   page-ben. Számos példa áll rendelkezésre a különbözõ opciókról a
@@ -20,7 +20,7 @@
   <A HREF="http://mplayerhq.hu/pipermail/mplayer-users/">archívumát</A>
   böngészgetni infóért.</P>
 
-<H3><A NAME=2pass>2.4.1 2, 3 menetes MPEG4 ("DivX") enkódolása</A></H3>
+<H3><A NAME=2pass>7.1 2, 3 menetes MPEG4 ("DivX") enkódolása</A></H3>
 
 <P><U><B>2 menetes enkódolás:</B></U> az elnevezés onnan jön, hogy ezzel a
   módszerrel a file <I>kétszer</I> lesz enkódolva. Az elsõ menet néhány pár
@@ -87,7 +87,27 @@
 </P>
 
 
-<H3><A NAME=rescaling>2.4.2 Filmek átméretezése</A></H3>
+<H2><A NAME="mpeg">7.2 Enkódolás MPEG formátumba</A></H2>
+
+<P>A MEncoder képes MPEG (MPEG-PS) formátumú kimeneti file-t generálni.
+  Ez persze valószínûleg csak a libavcodec <I>mpeg1video</I> codec-ével
+  hasznos, mert (az MPlayer-t kivéve) minden lejátszó MPEG1 video, és
+  MPEG1 layer2 (MP2) audio stream-re számít az MPEG file-okban.</P>
+
+<P>A MEncoder ezen képessége jelenleg nem túl hasznos, mert - attól eltekintve
+  hogy még eléggé bugos is -, még nem lehet MPEG 1 layer 2 (MP2) audio-ba
+  enkódolni MEncoderen belül, márpedig az MPEG file-okba az esetek 99%-ában
+  ez kell.</P>
+
+<P>A MEncoder kimeneti formátumának megváltoztatására az <CODE>-of mpeg</CODE>
+  opció szolgál.</P>
+
+<P>Példa:<BR>
+  &nbsp;&nbsp;<CODE>mencoder -of mpeg -ovc lavc -lavcopts vcodec=mpeg1video
+  -oac copy &lt;other options&gt; media.avi -o output.mpg</CODE></P>
+
+
+<H3><A NAME=rescaling>7.3 Filmek átméretezése</A></H3>
 
 <P>Gyakran elõjön a filmek átméretezésének igénye. Ennek sok oka lehet,
   például a fileméret csökkentése, illetve a szükséges hálózati
@@ -104,7 +124,7 @@
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder sample-svcd.mpg -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=1300 -vop
   scale=640:480 -oac copy -o output.avi</CODE></P>
 
-<H3><A NAME=copying>2.4.3 Stream másolása</A></H3>
+<H3><A NAME=copying>7.4 Stream másolása</A></H3>
 
 <P>A <B>MEncoder</B> kétféleképpen tudja a bemeneti stream-eket kezelni:
   <B>enkódolja</B> vagy csak <B>átmásolja</B> õket. Ez a rész a <B>másolásról</B>
@@ -125,7 +145,7 @@
     használni.</LI>
 </UL>
 
-<H3><A NAME=fixing>2.4.4 Hibás index-szel rendelkezõ AVI-k rendbehozása</A></H3>
+<H3><A NAME=fixing>7.5 Hibás index-szel rendelkezõ AVI-k rendbehozása</A></H3>
 
 <P>A legkönnyebb dolog a világon. Egyszerûen átmásoljuk a video és audio
   streameket, és közben a <B>MEncoder</B> létrehozza a megfelelõ indexet is.
@@ -135,7 +155,7 @@
 <P>A parancs: <CODE>mencoder -idx input.avi -ovc copy -oac copy -o output.avi</CODE></P>
 
 
-<H3><A NAME=libavcodec>2.4.5 Enkódolás a <I>libavcodec</I> codec-ekkel</A></H3>
+<H3><A NAME=libavcodec>7.6 Enkódolás a <I>libavcodec</I> codec-ekkel</A></H3>
 
 <P>A <A HREF="codecs.html#libavcodec">libavcodec</A>-kel egyszerûen lehet kódolni
   jónéhány érdekes video és audio formátumba (jelenleg az audio codec-ek nem
@@ -163,7 +183,7 @@
     -lavcopts vcodec=mjpeg -oac copy</CODE></P>
 
 
-<H3><A NAME=image_files>2.4.6 Enkódolás több bemeneti file-ból (JPEG, PNG)</A></H3>
+<H3><A NAME=image_files>7.7 Enkódolás több bemeneti file-ból (JPEG, PNG)</A></H3>
 
 <P>A <B>MEncoder</B> képes több JPEG vagy PNG file-ból filmet létrehozni.
   Egyszerû framecopy használatával pedig MJPEG (Motion JPEG) vagy MPNG
@@ -180,8 +200,7 @@
 
 <P><B><I>Példák</I></B></P>
 
-<P>Az <CODE>-mf</CODE> opció magyarázata a lenti összefoglaló
-  <A HREF=#2.4.3>Opciók</A> fejezetben, illetve a manpage-ben található.</P>
+<P>Az <CODE>-mf</CODE> opció magyarázata a manpage-ben található.</P>
 
 <P><I>DivX4 film létrehozása az aktuális könyvtárban található összes JPEG fileból:</I><BR>
   &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25 -ovc divx4 -o
@@ -204,7 +223,7 @@
   -o kimenet.avi \*.png</CODE></P>
 
 
-<H3><A NAME=vobsub>2.4.7  DVD feliratok VOBsub formátumúvá alakítása</A></H3>
+<H3><A NAME=vobsub>7.8  DVD feliratok VOBsub formátumúvá alakítása</A></H3>
 
 <P>A <B>MEncoder</B> képes DVD-rõl kivonni a feliratot, és átalakítani
   Vobsub formátumú felirattá. Ezek egy <CODE>.idx</CODE> és egy
@@ -243,7 +262,7 @@
     -vobsuboutindex 0 -vobsuboutid fr -sid 1</CODE></P>
 
 
-<H3><A NAME=aspect>2.4.8 Aspect ratio megõrzése</A></H3>
+<H3><A NAME=aspect>7.9 Aspect ratio megõrzése</A></H3>
 
 <P>A DVD-k és az SVCD-k (tehát az MPEG1/2 file-ok) tartalmazzák azt az értéket
   amibõl a lejátszó tudni fogja merre és mennyire kell a képet széthúzni,
