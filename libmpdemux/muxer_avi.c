@@ -53,6 +53,9 @@ struct avi_stream_info {
 	int idxpos;
 	int superidxpos;
 	int superidxsize;
+	int riffofspos;
+	int riffofssize;
+	off_t *riffofs;
 	struct avi_odmlidx_entry *idx;
 	struct avi_odmlsuperidx_entry *superidx;
 };
@@ -107,6 +110,9 @@ static muxer_stream_t* avifile_new_stream(muxer_t *muxer,int type){
     memset(si,0,sizeof(struct avi_stream_info));
     si->idxsize=256;
     si->idx=malloc(sizeof(struct avi_odmlidx_entry)*si->idxsize);
+    si->riffofssize=16;
+    si->riffofs=malloc(sizeof(off_t)*(si->riffofssize+1));
+    memset(si->riffofs, 0, sizeof(off_t)*si->riffofssize);
 
     switch(type){
     case MUXER_TYPE_VIDEO:
@@ -159,11 +165,18 @@ static void avifile_write_index(muxer_t *muxer);
 
 static void avifile_odml_new_riff(muxer_t *muxer)
 {
+    struct avi_stream_info *vsi = muxer->def_v->priv;
     FILE *f = muxer->file;
     uint32_t riff[3];
 
-    /* Pad to ODML_CHUNKLEN */
-    write_avi_chunk(f,ckidAVIPADDING,ODML_CHUNKLEN - (ftello(f)%ODML_CHUNKLEN) - 8,NULL);
+    mp_msg(MSGT_MUXER, MSGL_INFO, "ODML: Starting new RIFF chunk at %dMiB.\n", (int)(muxer->file_end/1024/1024));
+
+    vsi->riffofspos++;
+    if (vsi->riffofspos>=vsi->riffofssize) {
+        vsi->riffofssize+=16;
+        vsi->riffofs=realloc(vsi->riffofs,sizeof(off_t)*(vsi->riffofssize+1));
+    }
+    vsi->riffofs[vsi->riffofspos] = ftello(f);
 
     /* RIFF/AVIX chunk */
     riff[0]=le2me_32(mmioFOURCC('R','I','F','F'));
@@ -172,15 +185,29 @@ static void avifile_odml_new_riff(muxer_t *muxer)
     fwrite(riff,12,1,f);
 
     write_avi_list(f,listtypeAVIMOVIE,0);
+
+    muxer->file_end = ftello(f);
 }
 
 static void avifile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags){
-    off_t pos;
-    struct avi_stream_info *si = s->priv;
+    off_t rifflen;
     muxer_t *muxer=s->muxer;
-    int isodml = muxer->file_end > ODML_CHUNKLEN ? 1 : 0;
+    struct avi_stream_info *si = s->priv;
+    struct avi_stream_info *vsi = muxer->def_v->priv;
+    int paddedlen = len + (len&1);
 
-    if (!isodml) {
+    rifflen = muxer->file_end - vsi->riffofs[vsi->riffofspos] - 8;
+    if (vsi->riffofspos == 0) {
+	rifflen += 8+muxer->idx_pos*sizeof(AVIINDEXENTRY);
+    }
+    if (rifflen + paddedlen > ODML_CHUNKLEN) {
+	if (vsi->riffofspos == 0) {
+            avifile_write_index(muxer);
+	}
+	avifile_odml_new_riff(muxer);
+    }
+
+    if (vsi->riffofspos == 0) {
         // add to the traditional index:
         if(muxer->idx_pos>=muxer->idx_size){
             muxer->idx_size+=256; // 4kB
@@ -188,7 +215,7 @@ static void avifile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags)
         }
         muxer->idx[muxer->idx_pos].ckid=s->ckid;
         muxer->idx[muxer->idx_pos].dwFlags=flags; // keyframe?
-        muxer->idx[muxer->idx_pos].dwChunkOffset=ftello(muxer->file)-(muxer->movi_start-4);
+        muxer->idx[muxer->idx_pos].dwChunkOffset=muxer->file_end-(muxer->movi_start-4);
         muxer->idx[muxer->idx_pos].dwChunkLength=len;
         ++muxer->idx_pos;
     }
@@ -199,23 +226,9 @@ static void avifile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags)
 	si->idx=realloc(si->idx,sizeof(*si->idx)*si->idxsize);
     }
     si->idx[si->idxpos].flags=(flags&AVIIF_KEYFRAME)?0:ODML_NOTKEYFRAME;
-    si->idx[si->idxpos].ofs=ftello(muxer->file);
+    si->idx[si->idxpos].ofs=muxer->file_end;
     si->idx[si->idxpos].len=len;
     ++si->idxpos;
-
-    pos = muxer->file_end;
-    if (pos < ODML_CHUNKLEN &&
-	pos + 16*muxer->idx_pos + len + 8 > ODML_CHUNKLEN) {
-
-	avifile_write_index(muxer);
-	avifile_odml_new_riff(muxer);
-
-	pos = muxer->file_end = ftello(muxer->file);
-    }
-    if (pos % ODML_CHUNKLEN + len + 8 > ODML_CHUNKLEN) {
-	avifile_odml_new_riff(muxer);
-	muxer->file_end = ftello(muxer->file);
-    }
 
     // write out the chunk:
     write_avi_chunk(muxer->file,s->ckid,len,s->buffer); /* unsigned char */
@@ -236,7 +249,7 @@ static void avifile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags)
     s->size+=len;
     if((unsigned int)len>s->h.dwSuggestedBufferSize) s->h.dwSuggestedBufferSize=len;
 
-    muxer->file_end += len + len&1 + 8;
+    muxer->file_end += 8 + paddedlen;
 }
 
 static void write_avi_list(FILE *f,unsigned int id,int len){
@@ -264,7 +277,8 @@ static void avifile_write_header(muxer_t *muxer){
   VideoPropHeader vprp;
   uint32_t aspect = avi_aspect(muxer->def_v);
   off_t pos;
-  int isodml = muxer->file_end > ODML_CHUNKLEN ? 1 : 0;
+  struct avi_stream_info *vsi = muxer->def_v->priv;
+  int isodml = vsi->riffofspos > 0;
 
   if (aspect == 0) {
     mp_msg(MSGT_MUXER, MSGL_INFO, "ODML: Aspect information not (yet?) available or unspecified, not writing vprp header.\n");
@@ -273,28 +287,27 @@ static void avifile_write_header(muxer_t *muxer){
   }
 
   if (isodml) {
-    for (pos = 0; pos < muxer->file_end; pos += ODML_CHUNKLEN) {
       unsigned int rifflen, movilen;
+      int i;
 
-      /* fixup RIFF length */
-      if (muxer->file_end - pos > ODML_CHUNKLEN) {
-	  rifflen = le2me_32(ODML_CHUNKLEN - 8);
-	  movilen = le2me_32(ODML_CHUNKLEN - 20);
-      } else {
-	  rifflen = le2me_32(muxer->file_end - pos - 8);
-	  movilen = le2me_32(muxer->file_end - pos - 20);
+      vsi->riffofs[vsi->riffofspos+1] = muxer->file_end;
+
+      /* fixup RIFF lengths */
+      for (i=0; i<=vsi->riffofspos; i++) {
+          rifflen = vsi->riffofs[i+1] - vsi->riffofs[i] - 8;
+          movilen = le2me_32(rifflen - 12);
+          rifflen = le2me_32(rifflen);
+          fseeko(f, vsi->riffofs[i]+4, SEEK_SET);
+          fwrite(&rifflen,4,1,f);
+
+          /* fixup movi length */
+          if (i > 0) {
+              fseeko(f, vsi->riffofs[i]+16, SEEK_SET);
+              fwrite(&movilen,4,1,f);
+          }
       }
-      fseeko(f, pos + 4, SEEK_SET);
-      fwrite(&rifflen,4,1,f);
 
-      /* fixup movi length */
-      if (pos > 0) {
-	  fseeko(f, pos + 16, SEEK_SET);
-	  fwrite(&movilen,4,1,f);
-      }
-    }
-
-    fseeko(f, 12, SEEK_SET);
+      fseeko(f, 12, SEEK_SET);
   } else {
     // RIFF header:
     riff[0]=mmioFOURCC('R','I','F','F');
@@ -525,6 +538,7 @@ info[i].id=0;
     write_avi_list(f,listtypeAVIMOVIE,muxer->movi_end-ftello(f)-12);
   }
   muxer->movi_start=ftello(muxer->file);
+  if (muxer->file_end == 0) muxer->file_end = ftello(muxer->file);
 }
 
 static void avifile_odml_write_index(muxer_t *muxer){
