@@ -372,14 +372,14 @@ static int config(struct vf_instance_s* vf,
     lavc_venc_context->b_quant_factor= lavc_param_vb_qfactor;
     lavc_venc_context->rc_strategy= lavc_param_vrc_strategy;
     lavc_venc_context->b_frame_strategy= lavc_param_vb_strategy;
-    lavc_venc_context->b_quant_offset= lavc_param_vb_qoffset;
+    lavc_venc_context->b_quant_offset= (int)(FF_QP2LAMBDA * lavc_param_vb_qoffset + 0.5);
     lavc_venc_context->luma_elim_threshold= lavc_param_luma_elim_threshold;
     lavc_venc_context->chroma_elim_threshold= lavc_param_chroma_elim_threshold;
     lavc_venc_context->rtp_payload_size= lavc_param_packet_size;
     if(lavc_param_packet_size )lavc_venc_context->rtp_mode=1;
     lavc_venc_context->strict_std_compliance= lavc_param_strict;
     lavc_venc_context->i_quant_factor= lavc_param_vi_qfactor;
-    lavc_venc_context->i_quant_offset= lavc_param_vi_qoffset;
+    lavc_venc_context->i_quant_offset= (int)(FF_QP2LAMBDA * lavc_param_vi_qoffset + 0.5);
     lavc_venc_context->rc_qsquish= lavc_param_rc_qsquish;
     lavc_venc_context->rc_qmod_amp= lavc_param_rc_qmod_amp;
     lavc_venc_context->rc_qmod_freq= lavc_param_rc_qmod_freq;
