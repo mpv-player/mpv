@@ -1799,7 +1799,7 @@ if test "$_nas" = auto || test "$_nas" = yes ; then
 int main(void) { return 0; }
 EOF
   _nas=no
-  cc_check -laudio -lX11 -lXt -L$_x11libdir && _nas=yes
+  cc_check -laudio -lX11 -lXt -lm -I$_x11incdir -L$_x11libdir && _nas=yes
 fi
 if test "$_nas" = yes ; then
   _def_nas='#define HAVE_NAS 1'

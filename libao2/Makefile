@@ -7,7 +7,7 @@ LIBNAME = libao2.a
 SRCS=afmt.c audio_out.c ao_mpegpes.c ao_null.c ao_pcm.c ao_plugin.c pl_delay.c pl_format.c $(OPTIONAL_SRCS)
 OBJS=$(SRCS:.c=.o)
 
-CFLAGS  = $(OPTFLAGS) -I. -I.. $(SDL_INC) $(EXTRA_INC)
+CFLAGS  = $(OPTFLAGS) -I. -I.. $(SDL_INC) $(X11_INC) $(EXTRA_INC)
 
 .SUFFIXES: .c .o
 
