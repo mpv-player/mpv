@@ -72,6 +72,7 @@ Supported video output devices:
 	(NOT supported by us! Don't submit SDL bugreports!)
 - fbdev:Output to general framebuffers
 - svga: Output to SVGAlib
+- png:  PNG file output (use -z switch to set compression)
 - null:	Null output (for speed tests/benchmarking)
 - 3dfx:	Voodoo2/3 hardware YUV (/dev/3dfx) support (not yet tested, maybe broken)
 - odivx:OpenDivX AVI File writer

@@ -33,6 +33,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-subfps\ rate ]
 .RB [ \-subdelay\ sec ]
 .RB [ \-dvd\ device ]
+.RB [ \-z\ <0-8> ]
 .I file
 .PP
 .SH DESCRIPTION
@@ -169,6 +170,11 @@ force usage of non-interleaved AVI parser
 .TP
 .B \-include
 specify config file to be parsed after the default
+.TP
+.B \-z\ <0-8>
+specifies compression level for PNG output
+          0 : no compression
+          8 : max compression
 .IP
 .SH "ALPHA/BETA CODE"
 .TP

@@ -62,6 +62,7 @@ Felix Bünemann: <Felix.Buenemann@gmx.de>
 - SDL driver fixes
 - Additional YUV formats fixes
 - New font (coming soon!?)
+- PNG file output support in libvo
 
 TeLeNiEkO: <telenieko@telenieko.com>
 - debian packaging support (see debian/* and DOCS/DEBIAN)
