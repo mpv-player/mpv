@@ -30,7 +30,7 @@ void mplFullScreen( void )
 {
  static int sx,sy;
 
- if ( guiIntfStruct.Playing )
+ if ( !guiIntfStruct.Playing )
   {
    wsVisibleWindow( &appMPlayer.subWindow,wsHideWindow );
    if ( appMPlayer.subWindow.isFullScreen )
