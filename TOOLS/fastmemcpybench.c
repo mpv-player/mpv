@@ -116,6 +116,6 @@ int main( void )
   v2 = read_tsc();
   t=GetTimer()-t;
   // ARR_SIZE*100/(1024*1024)/(t/1000000) = ARR_SIZE*95.36743/t
-  printf(NAME": v2-v1=%llu = %dus  (%5.3ffps)  %5.1fMB/s\n",v2-v1,t,100000000.0f/(float)t,(float)ARR_SIZE*95.36743f/(float)t);
+  printf(NAME": cpu clocks=%llu = %dus  (%5.3ffps)  %5.1fMB/s\n",v2-v1,t,100000000.0f/(float)t,(float)ARR_SIZE*95.36743f/(float)t);
   return 0;
 }
