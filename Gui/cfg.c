@@ -56,6 +56,7 @@ int    gtkLoadFullscreen = 0;
 extern char * get_path( char * filename );
 extern int    flip;
 extern int    frame_dropping;
+extern int    stop_xscreensaver;
 
 static m_config_t * gui_conf;
 static config_t gui_opts[] =
@@ -114,6 +115,7 @@ static config_t gui_opts[] =
  { "cache_size",&gtkCacheSize,CONF_TYPE_INT,CONF_RANGE,-1,65535,NULL },
  
  { "load_fullscreen",&gtkLoadFullscreen,CONF_TYPE_FLAG,0,0,1,NULL },
+ { "stopxscreensaver",&stop_xscreensaver,CONF_TYPE_FLAG,0,0,1,NULL },
  
  { "gui_skin",&skinName,CONF_TYPE_STRING,0,0,0,NULL },
 

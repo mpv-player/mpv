@@ -65,6 +65,7 @@ static GtkWidget * CBDumpSrt;
 static GtkWidget * CBPostprocess;
 static GtkWidget * CBCache;
 static GtkWidget * CBLoadFullscreen;
+static GtkWidget * CBStopXScreenSaver;
 
 static GtkWidget * SBCache;
 static GtkAdjustment * SBCacheadj;
@@ -149,6 +150,7 @@ static void prEntry( GtkContainer * container,GtkWidget * widget,gpointer user_d
 #endif
 
 extern int    muted;
+extern int    stop_xscreensaver;
 
 void ShowPreferences( void )
 {
@@ -277,6 +279,7 @@ void ShowPreferences( void )
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBIndex ),index_mode );
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBPostprocess ),gtkVopPP );
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBLoadFullscreen ),gtkLoadFullscreen );
+ gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBStopXScreenSaver ),stop_xscreensaver );
  gtk_adjustment_set_value( HSPPQualityadj,auto_quality );
  {
   int     i;
@@ -469,6 +472,7 @@ void prButton( GtkButton * button,gpointer user_data )
 	index_mode=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBIndex ) );
 	gtkVopPP=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBPostprocess ) ); 
 	gtkLoadFullscreen=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBLoadFullscreen ) );
+	stop_xscreensaver=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBStopXScreenSaver ) );
 	gtkSet( gtkSetAutoq,HSPPQualityadj->value,NULL );
 
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBCache ) ) ) { gtkCacheSize=(int)SBCacheadj->value; gtkCacheOn=1; }
@@ -994,6 +998,7 @@ GtkWidget * create_Preferences( void )
       AddFrame( MSGTR_PREFERENCES_FRAME_Misc,GTK_SHADOW_ETCHED_OUT,vbox601,0 ),1 ),0 );
 
   CBLoadFullscreen=AddCheckButton( MSGTR_PREFERENCES_LoadFullscreen,vbox602 );
+  CBStopXScreenSaver=AddCheckButton( MSGTR_PREFERENCES_XSREENSAVER,vbox602 );
 
   label=AddLabel( MSGTR_PREFERENCES_Misc,NULL );
     gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook1 ),gtk_notebook_get_nth_page( GTK_NOTEBOOK( notebook1 ),3 ),label );
