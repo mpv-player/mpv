@@ -9,11 +9,8 @@
 	
 	MPlayer Mac OSX Quartz video out module.
 	
-	todo:	-key binding to set zoom, a la quicktime
-			-screen overlay output
-			-while mouse button down event mplayer is locked, fix that
+	todo:	-screen overlay output
 			-Enable live resize
-			-fix menu
 			-RGB32 lost HW accel in fullscreen
 			-(add sugestion here)
  */
@@ -178,7 +175,8 @@ static inline int convert_key(UInt32 key, UInt32 charcode)
     }
 }
 
-static OSStatus MainEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData);
+static OSStatus MainWindowEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData);
+static OSStatus MainWindowCommandHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData);
 
 static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src, unsigned char *srca, int stride)
 {
@@ -202,7 +200,7 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src, unsigne
 }
 
 //default window event handler
-static OSStatus MainEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
+static OSStatus MainWindowEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
 {
     OSStatus result = noErr;
 	UInt32 class = GetEventClass (event);
@@ -218,7 +216,6 @@ static OSStatus MainEventHandler(EventHandlerCallRef nextHandler, EventRef event
 		switch ( theHICommand.commandID )
 		{
 			case kHICommandQuit:
-				uninit();
 				mplayer_put_key(KEY_ESC);
 				break;
 				
@@ -250,38 +247,7 @@ static OSStatus MainEventHandler(EventHandlerCallRef nextHandler, EventRef event
 				vo_fs = (!(vo_fs)); window_fullscreen();
 				break;
 
-			default:
-				printf("\nHI Command ID Unknown: %d\n", theHICommand.commandID);
-				break;
-		}
-	}
-	else if(class == kEventClassWindow)
-	{
-		WindowRef     window;
-		Rect          rectPort = {0,0,0,0};
-		
-		GetEventParameter(event, kEventParamDirectObject, typeWindowRef, NULL, sizeof(WindowRef), NULL, &window);
-	
-		if(window)
-		{
-			GetPortBounds(GetWindowPort(window), &rectPort);
-		}   
-	
-		switch (kind)
-		{
-			//close window
-			case kEventWindowClosed:
-				uninit();
-				mplayer_put_key(KEY_ESC);
-				break;
-		
-			//resize window
-			case kEventWindowBoundsChanged:
-				window_resized();
-				flip_page();
-				break;
-			
-			default:result = eventNotHandledErr;break;
+			default:break;
 		}
 	}
 	else if(class == kEventClassKeyboard)
@@ -404,6 +370,93 @@ static OSStatus MainEventHandler(EventHandlerCallRef nextHandler, EventRef event
     return result;
 }
 
+//default window command handler
+static OSStatus MainWindowCommandHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
+{
+    OSStatus result = noErr;
+	UInt32 class = GetEventClass (event);
+	UInt32 kind = GetEventKind (event); 
+
+	result = CallNextEventHandler(nextHandler, event);
+
+	if(class == kEventClassCommand)
+	{
+		HICommand theHICommand;
+		GetEventParameter( event, kEventParamDirectObject, typeHICommand, NULL, sizeof( HICommand ), NULL, &theHICommand );
+		
+		switch ( theHICommand.commandID )
+		{
+			case kHICommandQuit:
+				mplayer_put_key(KEY_ESC);
+				break;
+				
+			case kHalfScreenCmd:
+					ShowMenuBar();
+					ShowCursor();
+					SizeWindow(theWindow, (imgRect.right/2), (imgRect.bottom/2), 1);
+					RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
+					window_resized();
+				break;
+
+			case kNormalScreenCmd:
+					ShowMenuBar();
+					ShowCursor();
+					SizeWindow(theWindow, imgRect.right, imgRect.bottom, 1);
+					RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
+					window_resized();
+				break;
+
+			case kDoubleScreenCmd:
+					ShowMenuBar();
+					ShowCursor();
+					SizeWindow(theWindow, (imgRect.right*2), (imgRect.bottom*2), 1);
+					RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
+					window_resized();
+				break;
+
+			case kFullScreenCmd:
+				vo_fs = (!(vo_fs)); window_fullscreen();
+				break;
+
+			default:
+				result = eventNotHandledErr;
+				break;
+		}
+	}
+	else if(class == kEventClassWindow)
+	{
+		WindowRef     window;
+		Rect          rectPort = {0,0,0,0};
+		
+		GetEventParameter(event, kEventParamDirectObject, typeWindowRef, NULL, sizeof(WindowRef), NULL, &window);
+	
+		if(window)
+		{
+			GetPortBounds(GetWindowPort(window), &rectPort);
+		}   
+	
+		switch (kind)
+		{
+			case kEventWindowClosed:
+				theWindow = NULL;
+				mplayer_put_key(KEY_ESC);
+				break;
+				
+			//resize window
+			case kEventWindowBoundsChanged:
+				window_resized();
+				flip_page();
+				break;
+			
+			default:
+				result = eventNotHandledErr;
+				break;
+		}
+	}
+	
+    return result;
+}
+
 static void quartz_CreateWindow(uint32_t d_width, uint32_t d_height, WindowAttributes windowAttrs) 
 {
 	CFStringRef		titleKey;
@@ -455,15 +508,22 @@ static void quartz_CreateWindow(uint32_t d_width, uint32_t d_height, WindowAttri
 	CFRelease(windowTitle);
   
 	//Install event handler
-	const EventTypeSpec winEvents[] = { { kEventClassKeyboard, kEventRawKeyDown },
-										{ kEventClassKeyboard, kEventRawKeyRepeat },
-										{ kEventClassMouse, kEventMouseDown },
-										{ kEventClassMouse, kEventMouseWheelMoved },
-										{ kEventClassWindow, kEventWindowClosed }, 
-										{ kEventClassWindow, kEventWindowBoundsChanged },
-										{ kEventClassCommand, kEventCommandProcess } };
-  
-	InstallApplicationEventHandler (NewEventHandlerUPP (MainEventHandler), GetEventTypeCount(winEvents), winEvents, NULL, NULL);
+    const EventTypeSpec commands[] = {
+        { kEventClassWindow, kEventWindowClosed },
+		{ kEventClassWindow, kEventWindowBoundsChanged },
+        { kEventClassCommand, kEventCommandProcess }
+    };
+
+    const EventTypeSpec events[] = {
+		{ kEventClassKeyboard, kEventRawKeyDown },
+		{ kEventClassKeyboard, kEventRawKeyRepeat },
+		{ kEventClassMouse, kEventMouseDown },
+		{ kEventClassMouse, kEventMouseWheelMoved }
+    };
+
+    
+	InstallApplicationEventHandler (NewEventHandlerUPP (MainWindowEventHandler), GetEventTypeCount(events), events, NULL, NULL);	
+	InstallWindowEventHandler (theWindow, NewEventHandlerUPP (MainWindowCommandHandler), GetEventTypeCount(commands), commands, theWindow, NULL);
 }
 
 static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
@@ -772,6 +832,9 @@ static void draw_osd(void)
 
 static void flip_page(void)
 {
+	if(theWindow == NULL)
+		return;
+		
 	switch (image_format) 
 	{
 		case IMGFMT_RGB32:
