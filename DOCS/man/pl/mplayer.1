@@ -233,7 +233,6 @@ prze³±cza tryb pe³noekranowy
 prze³±cza zostañ-na-wierzchu
 Obs³ugiwane przez sterowniki wyj¶cia video u¿ywaj±ce X11, poza SDL, oraz directx i gl2 pod Windows.
 .IPs "w i e"
-.\" Torinthiel: - ki diabe³?
 zmniejsza/\:zwiêksza zakres panscan
 .IPs o\ \ \ \ 
 prze³±cza tryby OSD: ¿aden / czas / czas+timer
@@ -500,7 +499,6 @@ Lista wszystkich komendy, które mog± byæ przypisane do klawiszy.
 .IPs js-dev
 Wybiera u¿ywany joystick (domy¶lnie jest to /dev/\:input/\:js0).
 .IPs plik
-.\" Torinthiel: Zostawiæ fifo, kolejkê czy jeszcze co¶?
 Czyta polecenia z podanego zbioru.
 Opcja g³ównie przydatny przy kolejce fifo.
 .br
@@ -558,8 +556,6 @@ Odtwarza zbiory wed³ug pliku listy odtwarzania (w formatach ASX, Winamp, SMIL lu
 zbiór w ka¿dym wierszu).
 .br
 .I INFORMACJA:
-.\" Torinthiel: Jak tê pozycjê napisaæ po polsku
-.\" Paszczi: moze pozycja wyjsciowa to nastepnych opcji??
 Opcja ta jest uwa¿ana za pozycjê wyj¶ciow±, wiêc opcje nastêpuj±ce po niej odnosz± siê
 tylko do zbiorów na tej li¶cie.
 .br
@@ -607,8 +603,6 @@ Wy¶wietla jedn± klatke co <sek> sekund.
 U¿yteczny w pokazie slajdów.
 .
 .
-.\" Torinthiel: Tego demuxera te¿ by trzeba przet³umaczyæ
-.\"Paszczi: IMHO zostawiæ, bo tu ju¿ w ogóle bêdzie kasznka :)
 .SH "OPCJE DEMUXERA/STRUMIENI"
 .TP
 .B \-a52drc <poziom>
@@ -681,7 +675,6 @@ ustal poziom  paranoi (0\-2)
 .RSss
 0: wy³±cza sprawdzanie
 .br
-.\" Torinthiel: Co to jest?
 1: sprawdza tylko overlap (domy¶lnie)
 .br
 2: pe³na korekcja i weryfikacja danych
@@ -691,10 +684,8 @@ u¿ywa podanego standardowego urz±dzenia SCSI
 .IPs sector-size=<warto¶æ>
 rozmiar bloku jednorazowego czytania
 .IPs overlap=<warto¶æ>
-.\" Torinthiel: Co to jest? (jw)
 wymusza minimalne przeszukiwanie overlap podczas weryfikacji do <warto¶æ> sektorów.
 .IPs toc-bias
-.\" Torinthiel: Nie³adne
 Zak³ada ¿e adres pocz±tku pierwszej ¶cie¿ki zapisany w TOC bêdzie adresowany
 jako LBA\ 0.
 Niektóre sterowniki Toshiba potrzebuj± tego by poprawnie okre¶liæ granice
@@ -1185,8 +1176,6 @@ Zrzuca podstrumieñ napisów ze strumieni VOB
 Zobacz tak¿e opcje \-dump*sub i \-vobsubout*.
 .TP
 .B \-ffactor <numer> (tylko OSD)
-.\" Torinthiel: To tak nie mo¿e zostaæ
-.\" Paszczi: a moze chodzi o zmiane kanalu aplha czcionki?
 Zmienia alphamap czcionki.
 Mo¿e byæ:
 .
@@ -1213,8 +1202,6 @@ Szuka czcionek OSD/\:SUB w innym katalogu (domy¶lny dla zwyk³ych czcionek to
 ~/\:.mplayer/\:subfont.ttf).
 .br
 .I INFORMACJA:
-.\" Torinthiel: To jest tekstowy zbiór czcionek czy zbiór tekstowych czcionek?
-.\" Paszczi: IMHO zbior/plik czcionki tekstowej
 Z FreeType, ta opcja ustala ¶cie¿kê do zbioru czcionki tekstowej.
 .br
 Z fontconfig, ta opcja podaje nazwê czcionki wg fontconfig.
@@ -1312,7 +1299,6 @@ rozmycie Gaussa (bardzo ³adne)
 .
 .TP
 .B \-spualign <-1\-2>
-.\" Torinthiel: spu
 Ustala jak powinny byæ wyrównane napisy spu (DVD/VOBsub).
 Warto¶ci s± takie same jak przy opcji \-subalign z dodatkow± mo¿liwo¶ci± -1
 zachowuj±c± oryginaln± pozycjê.
@@ -1367,7 +1353,6 @@ Ustala jak napisy powinny byæ wyrównane do \-subpos.
 .B \-subcc \ 
 Wy¶wietla napisy DVD Closed Caption (CC).
 NIE s± to napisy VOB, s± to specjalne napisy ASCII dla nies³ysz±cych
-.\" Torinthiel: VOB userdata stream - nie da siê ³adniej?
 zakodowane w strumieniu danych u¿ytkownika VOB na wiêkszo¶ci DVD z regionu 1.
 Jak dot±d niespotykane na DVD z innych regionów.
 .TP
@@ -1424,7 +1409,6 @@ Mo¿e byæ:
 .IPs 0
 bez automatycznego skalowania
 .IPs 1
-.\" Torinthiel: Jaki tu ma byæ rodzaj?
 proporcjonalny do wysoko¶ci filmu
 .IPs 2
 proporcjonalny do szeroko¶ci filmu
@@ -1743,14 +1727,12 @@ Ta opcja jest u¿ywana do kontroli sterownika dxr2.
 .
 .RSs
 .IPs ar-mode=<warto¶æ>
-.\" Torinthiel: Ten aspect ratio mnie gryzie.
 tryb proporcji (aspect ratio) (0 = normalny, 1 = pan scan, 2 = letterbox (domy¶lnie))
 .IPs iec958-encoded
 tryb wyj¶cia iec958
 .IPs iec958-decoded
 ustawia wyj¶cie iec958 w tryb zdekodowany (domy¶lne)
 .IPs macrovision=<warto¶æ>
-.\" Torinthiel: Co to jest "2 = agc 2 colorstripe"
 tryb macrovision (0 = wy³±czone (domy¶lnie), 1 = agc, 2 = agc 2 colorstripe
 3 = agc 4 colorstripe)
 .IPs mute\ 
@@ -1786,7 +1768,6 @@ ustawia tryb ccir601 piksela
 .RE
 .RS
 
-.\" Torinthiel: nie³adne. Ca³y akapit
 .I Nak³adka (Overlay)
 .RE
 .RSs
@@ -1799,7 +1780,6 @@ ustawia warto¶æ obcinania z góry (domy¶lnie 0)
 .IPs cr-bottom=<0\-500>
 ustawia warto¶æ obcinania z do³u (domy¶lnie 0)
 .IPs ck-[r|g|b]=<0\-255>
-.\" Torinthiel: a pfuj
 ustawia czerwony (r), zielony (g) lub niebieski (b) kolor klucza nak³adki
 .IPs ck-[r|g|b]min=<0\-255>
 minimalna warto¶æ odpowiedniego klucza koloru
@@ -1976,8 +1956,6 @@ Patrz te¿ \-aspect je¶li chcesz podaæ proporcje filmu
 .TP
 .B \-nograbpointer
 Nie przechwytuje kursora muszki po zmianie VidMode (\-vm), przydatne do
-.\" Torinthiel: wieloekranowych?
-.\" Paszczi: AFAIK tak :) - juz mam dosc tego mana ;P
 ustawieñ wieloekranowych.
 .TP
 .B \-nokeepaspect
@@ -2069,7 +2047,6 @@ Okre¶la zbiór urz±dzenia nale¿±cy do Twojej karty MJPEG, domy¶lnie sterownik
 ten bierze pierwsze urz±dzenie v4l które znajdzie.
 .TP
 .B \-zrfd (tylko \-vo zr)
-.\" Torinthiel: decimation
 Wymusza dziesi±tkowanie (decimation): Dziesi±tkowanie okre¶lone przez \-zrhdec i \-zrvdec,
 nastêpuje tylko, gdy sprzêt skaluj±cy potrafi rozci±gn±æ obraz do jego
 oryginalnych rozmiarów.
@@ -2335,7 +2312,6 @@ W³±cza CRTC2 (drugi monitor), wy¶wietlaj±c obraz niezale¿nie od pierwszego.
 .PD 0
 .RSs
 .IPs (no)bes
-.\"Paszczi: backend scaler - ciun go wiem, system skanujacy niskiego poziomu??? :P
 W³±cza Matrox BES (backend scaler - koñcowy system skaluj±cy) (domy¶lnie: wy³±czony).
 Daje bardzo dobre rezultaty bior±c pod uwagê zarówno szybko¶æ jak i wyj¶ciow± jako¶æ,
 jako ¿e interpolowana obróbka obrazu jest przeprowadzana sprzêtowo.
@@ -2788,7 +2764,6 @@ Prawid³owy zakres warto¶ci \-oldpp zale¿y od kodeka, najczê¶ciej
 0\-6, gdzie 0=wy³±czony 6=powolny/\:najlepszy.
 .TP
 .B \-pp <jako¶æ> (zobacz tak¿e opcjê \-vf pp!)
-.\" Torinthiel: postprocessing.
 Ustawia poziom postprocessingu dla DLL.
 Ta opcja NIE DZIA£A JU¯ z filtrami postprocessingu MPlayera,
 ale tylko z Win32 DirectShow DLL które maj± wewnêtrzny postprocessing.
@@ -3104,7 +3079,6 @@ Zobacz tak¿e opcjê \-flip.
 Tworzy lustrzane odbicie wzglêdem osi Y.
 .TP
 .B rotate[=<0\-7>]
-.\" Torinthiel: to jest ¼le
 Obraca obraz o +/- 90 stopni. Dla parametrów pomiêdzy 4\-7 obracanie wykona siê
 tylko je¿eli geometria filmu jest portretem a nie krajobrazem.
 .TP
@@ -3264,7 +3238,6 @@ jasno¶ci/\:kontrastu i usuwanie przeplotu liniowym rozmyciem.
 .IPs "\-vf pp=de/\-al"
 domy¶lne filtry bez korekty jasno¶ci/\:kontrastu
 .IPs "\-vf pp=de/tn:1:2:3"
-.\" Torinthiel: temporal denoiser
 domy¶lne filtry i tymczasowy odszumiacz.
 .IPs "\-vf pp=hb:y/vb:a \-autoq 6"
 Poziome odblokowywanie jasno¶ci i odblokowywanie pionowe w zale¿no¶ci od
@@ -3359,7 +3332,6 @@ rozs±dne warto¶ci.
 .PD 0
 .RSs
 .IPs luma\ 
-.\" Torinthiel: obytrzy parametry
 wp³yw przestrzeni jasno¶ci (domy¶lnie = 4)
 .IPs chroma
 wp³yw przestrzeni kolorów (domy¶lnie = 3)
@@ -3433,7 +3405,6 @@ U¿yteczne tylko z MEncoderem.
 Je¿eli harddup jest u¿ywany przy kodowaniu, wymusza umieszczenie zduplikowanych
 ramek w wyj¶ciu.
 Wymaga to trochê wiêcej miejsca, ale jest konieczne przy tworzeniu plików MPEG
-.\" Paszczi: - demux/remux?
 lub je¶li planujesz dalsze demuksowanie i remuksowanie strumienia video.
 Parametr powinien byæ umieszczony na koñcu ³añcucha filtrów lub blisko niego,
 chyba ¿e masz dobry powód aby zrobiæ inaczej.
@@ -3448,7 +3419,6 @@ Parametr powinien byæ umieszczony po wy¿ej wymienionych filtrach i
 po kolejnych filtrach, które wymagaj± du¿ej mocy obliczeniowej.
 .TP
 .B decimate[=max:hi:lo:u³]
-.\" Torinthiel: framerate
 Usuwa ramki, które niewiele ró¿ni± siê od poprzednich w celu zmiejszenia
 framerate.
 Argument max (je¶li dodatni) ustawia maksymaln± ilo¶æ kolejnych ramek, które
@@ -3462,11 +3432,9 @@ warto¶ciach pikseli, wiêc granica 64 przek³ada siê na 1 jednostkê ró¿nicy na
 ka¿dym pikselu lub to samo inaczej rozmieszczone w ca³ym bloku.
 G³ówne zastosowanie tego filtra to kodowanie-z-bardzo-niskim-tempem-bitowym
 (np.\& strumieniowanie przez modem), ale teoretycznie mo¿e on byæ u¿yty do
-.\" Torinthiel: Telecine
 naprawy filmów w których nieprawid³owo odwrócono telecine.
 .TP
 .B dint[=czu³o¶æ:poziom]
-.\" Torinthiel: Mam wra¿enie ¿e to nie o to sz³o
 Wykrywa i usuwa pierwsz± klatkê z przeplotem w strumieniu video.
 Warto¶ci mog± byæ z zakresu 0.0 do 1.0 \- pierwszy (domy¶lnie 0.1) jest wzglêdn±
 ró¿nic± pomiêdzy s±siaduj±cymi pikselami, drugi (domy¶lnie 0.15) okre¶la w
@@ -3564,10 +3532,8 @@ Próbuje odwróciæ proces "telecine" by uzyskaæ czysty strumieñ bez przeplotu
 przy prêdko¶ci klatek filmu.
 By³ to pierwszy i najbardziej prymitywny filtr odwróconego telecine, który
 zosta³ zaimolementowany w MPlayerze/MEncoderze.
-.\"Paszczi: a co tu biega???
 Dzia³a przez skupienie siê na wzorcu telecine 3:2 i pod±¿aniu nim tak d³ugo, jak
 to tylko mo¿lwie.
-.\"Paszczi: tragedia:((((
 Dlatego pasuje on doskonale dla perfekcyjnie ztelecinowanego materia³u, nawet
 w przypadku obecno¶ci sporej warto¶ci szumu, ale nie zadzia³a po z³o¿onej
 edycji po telecinowaniu.
@@ -3618,8 +3584,6 @@ wydaj± siê byæ dok³adniejsze.
 .B pullup[=jl:jr:jt:jb:sb]\ 
 Filtr odwracania telecine trzeciej generacji, zdolny do przetwarzania
 mieszanki twardego telecine (hard-telecine) oraz progresywnej zawarto¶ci 24 i 30 fps.
-.\" Torinthiel Czy aby na pewno?
-.\" capable of handling mixed hard-telecine, 24 fps progressive, and 30 fps progressive content 
 Filtr pullup jest zaprojektowany, aby by³ skuteczniejszy ni¿ detc czy ivtc, 
 poprzez wykorzystywanie kontekstu przy podejmowaniu decyzji.
 Podobnie jak ivtc, pullup jest bezstanowy w sensie takim, ¿e nie skupia siê na
@@ -3693,7 +3657,6 @@ dok³adno¶ci.
 Je¶li n=4 lub 5, to szybszy, ale o wiele mniej dok³adny, algorytm jest u¿ywany do
 szukania prze³omu klatek.
 Jest on bardziej sk³onny do wykrycia du¿ych pionowych detali jako przeplotu.
-.\" Torinthiel: high vertical detail
 .IPs verbose=n
 Je¶li n jest niezerowe, wy¶wietla szczegó³owe metryki dla ka¿dej ramki.
 Przydatne przy debugowaniu.
@@ -3715,7 +3678,6 @@ Suma progów Ca³kowitej Ró¿nicy (Absolute Difference), domy¶lnie 64.
 .B softpulldown
 Ten filtr prawid³owo dzia³a tylko z MEncoderem i dzia³a na flagach MPEG2
 u¿ywanych do miêkkiego telecine 3:2.
-.\" Torinthiel: used for soft 3:2 pulldown (soft telecine)
 Je¶li chcesz u¿yæ filtru ivtc lub detc na filmach, które maj± czê¶ciowe miêkkie
 telecine to wstawienie przed nie tego filtra mo¿e sprawiæ ¿e bêd± one
 dok³adniejsze.
@@ -3767,7 +3729,6 @@ na pocz±tku.
 Poza tym, pierwsze przej¶cie trybu dwuprzej¶ciowego te¿ korzysta z tej opcji,
 wiêc je¿eli zachowasz wyj¶cie to otrzymasz w efekcie sta³a fazê.
 .IPs deghost=warto¶æ
-.\"Pazczi : jakas ladna alternatywa dla deghost - odduszanie???
 Ustawia pole deghostingu (0\-255 dla trybu jednoprzej¶ciowego, -255\-255 dla trybu
 dwuprzej¶ciowego, domy¶lnie 0).
 Je¿eli warto¶æ jest ró¿na od 0, tryb deghostingu jest w³±czony.
@@ -3787,7 +3748,6 @@ Podaj t± opcjê dla trybu dwuprzej¶ciowegop, przy jednoprzej¶ciowym nie odnosi to
 .B phase=[t|b|p|a|u|T|B|A|U][:v]
 Opó¼nia film z przeplotem o jedno pole czasowe, tak ¿e kolejno¶æ pól ulega zmianie.
 Zamierzonym dzia³aniem jest naprawienie filmów w trybie PAL, które by³y przechwycone
-.\"Paszczi: Nie wiem czy dokladnie o to chodzi
 z odwrotn± kolejno¶ci± wzglêdem procesu przenoszenia film-video.
 Przyjmowane parametry:
 .RSs
@@ -3854,8 +3814,6 @@ pozostaje niezmieniona
 opuszcza klatki nieparzyste, na wyj¶cie przekazuje tylko parzyste, wysoko¶æ
 pozostaje niezmieniona
 .IPs 3
-.\"Paszczi: nie wiem czy o to chodzi a tym bardziej nei wiem co to oznacza :)
-.\"Torinthiel: Bo ja wiem...
 poszerza ka¿d± klatkê do pe³nej wysoko¶ci i wype³nia pozosta³e linie na czarno
 czarno, szybko¶æ klatek pozostaje niezmieniona
 .RE
@@ -4084,7 +4042,6 @@ Pozycja lewego, górnego rogu logo.
 .IPs w,h
 Szeroko¶æ i wysoko¶æ czyszczonego prostok±tu.
 .IPs t
-.\"Paszczi: nie wiem czy o to chodzi - fuzzy edge
 Grubo¶æ niewyra¼nej krawêdzi (dodana do w i h). Kiedy ustawiona zostanie
 na -1, zielony prostok±t zostanie narysowany na ekranie, aby upro¶ciæ odnalezienie
 w³a¶ciwych parametrów x,y,w,h.
@@ -4594,9 +4551,6 @@ o MB w przysz³o¶ci, msmpeg4 nie mo¿e byæ poprawiony poniewa¿ nie obs³uguje tego)
 .RE
 .TP
 .B lmin=<0.01\-255.0>
-.\"Paszczi: co to u licha lagrange ?
-.\"Torinthiel: Lagrange to by³ taki facet, który sporo ciekawtych rzeczy wymysli³.
-.\"  Na studiach siê ci±gle pa³êta
 Minimalny mno¿nik lagrange dla kontroli tempa, prawdopodobnie chcesz, ¿eby by³ równy
 lub mniejszy ni¿ vqmin. (domy¶lnie: 2.0)
 .RE
@@ -4859,9 +4813,6 @@ z qcomp 0.5 czy co¶ takiego (domy¶lnie)
 .RE
 .PP
 .RS
-.\"Paszczi - infix operators?
-.\"Torinthiel - wrostkowe, tzn normalne 2 + 3. A nie np. 2 3 + (przyrostkowe) 
-.\" albo + 2 3 (przedrostkowe). Ja bym zostawi³ jak jest.
 operatory:  +,-,*,/,^
 .RE
 .PP
@@ -4944,7 +4895,6 @@ u¿ywa przyjemnej, ró¿niczkowalnej funkcji (domy¶lnie)
 .PD 1
 .TP
 .B vlelim=<-1000\-1000>
-.\"Paszczi: single coefficient elimination threshold for luminance - kij go wie czy tak ma byv
 próg eliminowania pojedynczych wspó³czynników jasno¶ci.
 Warto¶ci ujemne bêd± bra³y pod uwagê tak¿e wspó³czynnik dc (powinny byæ równe co najmniej -4
 lub ni¿ej dla kodowania z quant=1):
@@ -5125,7 +5075,6 @@ u¿ywa dct z przeplotem
 u¿ywa metody przewidywania ruchu z przeplotem
 .TP
 .B alt\ \ \ \ 
-.\"Paszczi: co to?? tablica zrzutów?
 korzysta z alternatywnej scantable
 .TP
 .B top=<-1\-1>\ \ \ 
@@ -5178,7 +5127,6 @@ przewidywanie górnej-lewej
 .IPs 3
 czyste/gradientowe przewidywanie
 .IPs 6
-.\"Paszczi mean - chyba o to tu chodzi
 przewidywanie przeciêtnej
 .RE
 .PD 1
@@ -5375,7 +5323,6 @@ niograniczona liczba MV (tylko H.263+)
 Zezwala na kodowanie z dowolnie d³ugimi MV.
 .TP
 .B ibias=<-256\-256>
-.\"Paszczi nie mam pojecia jak za biasa sie zabrac...
 bias kwantyzatora intra (256 == 1.0)
 .br
 kwantyzator w stylu mpeg, domy¶lnie: 96
@@ -5403,7 +5350,6 @@ Wskazówka: wiêksza warto¶æ bias (-32 \- -16 zamiast -64) wydaje siê polepszaæ PS
 redukcja szumów, 0 oznacza wy³±czon±
 .TP
 .B qns=<0\-3>
-.\"Torinthiel: Kurcze, nie wiem które
 kszta³towanie szumu kwantyzatora, ogranicza d¼wiêcz±ce pozosta³o¶ci, wiêksze warto¶ci
 s± wolniejsze, ale nie koniecznie wp³yn± na polepszenie jako¶ci.
 Opcja mo¿e i powinna byæ u¿ywana razem z kwantyzacj± kratow±, w takim przypadku
