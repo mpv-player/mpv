@@ -86,12 +86,13 @@ inline static unsigned int stream_read_dword_le(stream_t *s){
   return y;
 }
 
-inline static void stream_read(stream_t *s,char* mem,int len){
+inline static int stream_read(stream_t *s,char* mem,int total){
+  int len=total;
   while(len>0){
     int x;
     x=s->buf_len-s->buf_pos;
     if(x==0){
-      if(!cache_stream_fill_buffer(s)) return; // EOF
+      if(!cache_stream_fill_buffer(s)) return total-len; // EOF
       x=s->buf_len-s->buf_pos;
     }
     if(s->buf_pos>s->buf_len) printf("stream_read: WARNING! s->buf_pos>s->buf_len\n");
@@ -99,6 +100,7 @@ inline static void stream_read(stream_t *s,char* mem,int len){
     memcpy(mem,&s->buffer[s->buf_pos],x);
     s->buf_pos+=x; mem+=x; len-=x;
   }
+  return total;
 }
 
 inline static int stream_eof(stream_t *s){
