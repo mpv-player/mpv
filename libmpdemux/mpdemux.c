@@ -28,7 +28,7 @@ int mpdemux_check_interrupt(int time) {
 }
 
 #else // Default function
-int mpdemux_input_check_interrupt(int time){
+int mpdemux_check_interrupt(int time){
   usec_sleep(time*1000);
   return 0;
 }
