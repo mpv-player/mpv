@@ -14,9 +14,7 @@
  *
  *  This file is a video out driver using the SDL library (http://libsdl.org/),
  *  to be used with MPlayer [The Movie Player for Linux] project, further info
- *  from http://mplayer.sourceforge.net.
- *
- *  Current license is not decided yet, but we're heading for GPL.
+ *  from http://www.mplayerhq.hu
  *
  *  -- old disclaimer --
  *
