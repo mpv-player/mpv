@@ -1,4 +1,4 @@
-.\" synced with 1.915
+.\" synced with 1.921
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "15 Mars 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "21 Mars 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -158,15 +158,25 @@ mencoder \- Encodeur vidéo
 [options]
 .br
 .B gmplayer
+'in +\n[.k]u
 [options]
 [\-skin\ skin]
 .
 .br
 .in
 .B mencoder
+'in +\n[.k]u
 [options]
 .RI [ \ fichier\  | \ URL\  | \ \-\  ]
 [\-o\ fichier]
+.
+.br
+.in
+.B mencoder
+'in +\n[.k]u
+[options globales]
+.I file1
+[options spécifique] [fichier2] [options spécifique]
 .ad
 .hy
 .
@@ -513,14 +523,14 @@ lecture de vidéo uniquement (vous pouvez le comprendre comme des fps infinis).
 Affecte une valeur RVB de votre choix à la couleur clé.
 0x000000 est noir et 0xffffff est blanc.
 Géré par les pilotes de sortie vidéo cvidix, fbdev, svga, vesa, winvidix, xmga,
-xvidix, xover, xv (voir -vo xv:ck), xvmc (voir -vo xv:ck) et directx
+xvidix, xover, xv (voir \-vo xv:ck), xvmc (voir \-vo xv:ck) et directx
 uniquement.
 .
 .TP
 .B \-nocolorkey
 Désactive la couleur de transparence.
 Géré par les pilotes de sortie vidéo cvidix, fbdev, svga, vesa, winvidix, xmga,
-xvidix, xv (voir -vo xv:ck), xvmc (voir -vo xv:ck) et xover uniquement.
+xvidix, xv (voir \-vo xv:ck), xvmc (voir \-vo xv:ck) et xover uniquement.
 .
 .TP
 .B \-crash-debug (CODE DE DÉBOGAGE)
@@ -751,11 +761,6 @@ DOCS/tech/\:slave.txt pour leur description.
 Utilise des timers logiciels de haute qualité au lieu de RTC.
 Aussi précis que le RTC sans nécessiter de privilèges spéciaux,
 au prix toutefois d'une charge CPU accrue.
-.
-.TP
-.B \-speed <0.01\-100>
-Accélère ou diminue la vitesse de lecture en fonction du facteur donné
-en paramètre.
 .
 .TP
 .B \-sstep <sec>
@@ -1183,6 +1188,11 @@ Cette option est obsolète maintenant que MPlayer gère OpenDML.
 Se place à la position donnée en octets.
 Utile pour la lecture d'images CDROM ou fichiers VOB avec des informations
 erronées au début.
+.
+.TP
+.B \-speed <0.01\-100>
+Ralentit ou accélère la lecture du facteur donné en paramètre.
+Il n'est pas garanti que ceci fonctionne correctement avec \-oac copy.
 .
 .TP
 .B \-srate <Hz>
@@ -2598,9 +2608,9 @@ A/\:V (par défaut\ : noqueue).
 Utilise la fonction sleep() lorsque MPlayer attend la fin de l'affichage de
 l'image (déconseillé sous Linux) (par défaut\ : nosleep).
 .IPs ck=cur|use|set
-Comme pour -vo xv:ck (voir \-vo xv).
+Comme pour \-vo xv:ck (voir \-vo xv).
 .IPs ck-method=man|bg|auto
-Comme pour -vo xv:ck-method (voir \-vo xv).
+Comme pour \-vo xv:ck-method (voir \-vo xv).
 .RE
 .PD 1
 .
@@ -5093,13 +5103,13 @@ exemple la capture TV.
 Le paramètre optionnel (itvc=1) correspond à l'option dr=1 du filtre detc,
 et devrait être utilisé avec MEncoder mais pas avec MPlayer.
 Comme pour detc, vous devez définir le débit de trame de sortie correct
-(\-ofps 23.976) en utilisant MEncoder.
+(\-ofps 24000/1001) en utilisant MEncoder.
 .
 .TP
 .B pullup[=jg:jd:jh:jb:cs:mp]\ 
 Filtre d'inversion de pulldown (telecine inversé) de troisième génération,
-capable de gérer une vidéo composée de hard-telecine, 24 fps progressif, et
-30 fps progressif.
+capable de gérer une vidéo composée de hard-telecine, 24000/1001 fps
+progressif, et 30 fps progressif.
 Le filtre pullup est conçu pour être plus robuste que detc ou ivtc, en se
 basant sur le contexte futur pour prendre ses décisions.
 Tout comme ivtc, pullup est sans état, dans le sens où il ne reste pas
@@ -5147,7 +5157,7 @@ aux "field-flags" initialisés par l'encodeur MPEG-2.
 Suivant la source MPEG, il est inutile de tenir compte de ce conseil, tant
 que vous ne voyez pas une multitude d'avertissements "Bottom-first field".
 Sans options il fait un telecine inverse normal, et devrait être utilisé avec
-mencoder \-fps 29.97 \-ofps 23.976.
+mencoder \-fps 30000/1001 \-ofps 24000/1001.
 Quand ce filtre est utilisé avec mplayer, cela produira un débit impair
 pendant la lecture, mais il sera généralement meilleur qu'en utilisant
 pp=lb ou pas de désentrelacement du tout.
@@ -5221,7 +5231,7 @@ la vidéo se retrouve saccadée dont une trame sur quatre est dupliquée.
 Ce filtre a pour but de trouver et jeter ces trames dupliquées pour
 retrouver le débit de trame (framerate) original.
 Lorsque vous utilisez ce filtre, vous devez définir \-ofps à 4/\:5 du débit
-de trame du fichier d'entrée (23.976 si l'entrée est à 29.97fps).
+de trame du fichier d'entrée (24000/1001 si l'entrée est à 30000/1001 fps).
 Les options sont\ :
 .RSs
 .IPs pass=1|2
@@ -5340,7 +5350,7 @@ au carré des champs pour les modes t, b, and p.
 .B "telecine[=départ]"
 Applique un processus telecine 3:2 "telecine" pour augmenter le débit de 20%.
 Cela ne fonctionnera surement pas correctement avec MPlayer, mais peut être
-utilisé avec 'mencoder \-fps 29.97 \-ofps 29.97 \-vf telecine'.
+utilisé avec 'mencoder \-fps 30000/1001 \-ofps 30000/1001 \-vf telecine'.
 Les deux options fps sont essentielles !
 (la synchro A/\:V sera brisée si elles sont mauvaises.)
 Le paramètre optionnel départ indique où démarrer (0-3).
@@ -5818,7 +5828,7 @@ flux vidéo brut (pas de multiplexage \- uniquement un flux vidéo)
 Définit le rapport trame/\:sec (fps) du fichier de sortie,
 qui peut être différent de celui de la source.
 Vous devez le définir pour les fichiers à fps variable
-(ASF, quelques MOV) et progressifs (MPEG téléciné à 29.97fps).
+(ASF, quelques MOV) et progressifs (MPEG téléciné à 30000/1001 fps).
 .
 .TP
 .B \-ovc <nom codec>
@@ -8390,7 +8400,7 @@ Défini le ratio d'aspect pour les vidéos MPEG-1/2.
 Défini le débit binaire vidéo kbit/s pour les vidéos MPEG-1/2.
 .
 .TP
-.B vframerate=<23.976 | 24 | 25 | 29.97 | 30 | 50 | 59.94 | 60 >
+.B vframerate=<24000/1001 | 24 | 25 | 30000/1001 | 30 | 50 | 60000/1001 | 60 >
 Défini le nombre de trames par secondes pour les vidéos MPEG-1/2.
 Cette option sera ignorée si vous l'utilisez l'utilisez en même
 temps que l'option téléciné.
