@@ -12,6 +12,8 @@ SHORTNAME = libdha.dll
 else
 SHORTNAME = libdha.so.$(MAJOR_VERSION)
 SONAME_FLAGS = -Wl,-soname,$(SHORTNAME)
+#SHORTNAME = libdha.so
+VSHORTNAME = libdha.so
 endif
 LIBNAME = libdha.so.$(VERSION)
 
@@ -37,6 +39,7 @@ $(LIBNAME):     $(OBJS)
 	#$(CC) -shared $(SONAME_FLAGS) -o $(LIBNAME) $(OBJS) $(LIBS)
 	$(CC) -shared -Wl,-soname -Wl,$(LIBNAME) -o $(LIBNAME) $(OBJS) $(LIBS)
 	ln -sf $(LIBNAME) $(SHORTNAME)
+	ln -sf $(LIBNAME) $(VSHORTNAME)
 
 all:    $(LIBNAME) $(SHORTNAME)
 
