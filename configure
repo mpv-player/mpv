@@ -6,6 +6,10 @@
 #
 # Changes in reversed order:
 #
+# 2000/02/26 by A'rpi:
+#  - added DGA option:  --enable-dga
+#  - no notify if --with-win32libdir used [Tibcu]
+#
 # 2000/02/25 by LGB:
 #  - TMPDIR or TEMPDIR variable is honored during tests for temporary files
 #  - ChangeLog inside configure was reversed ;-)
@@ -24,7 +28,7 @@
 #  - Some useless { ... } are removed
 #
 # some changes by A'rpi/ESP-team:
-#  - the --win32libdir patch by Aaron Hope applied
+#  - the --with-win32libdir patch by Aaron Hope applied
 #  - some english bugfix again :)
 #  - cpu type selection changed:
 #    ( k7->k6->k5-> ) || (i686->pentiumpro-> ) pentium-> i486 -> i386 -> error!
@@ -133,6 +137,7 @@ _syncfb=no
 _mlib=no
 _mpg123=no
 _xmga=no
+_dga=no
 _lirc=no
 
 _x=1
@@ -383,6 +388,9 @@ do
   --enable-xmga)
         _xmga=yes
         ;;	
+  --enable-dga)
+        _dga=yes
+        ;;	
   --enable-xv)
         _xv=yes
         ;;
@@ -445,6 +453,7 @@ do
         ;;
   --with-win32libdir=*)
         _win32libdir=`echo $ac_option | cut -d '=' -f 2`
+	_win32libdirnotify=no
         ;;
   --size-x=*)
 	_x=`echo $ac_option | cut -d '=' -f 2`
@@ -622,6 +631,13 @@ else
  _3dfx='#undef HAVE_3DFX'
 fi
 
+if [ $_dga = yes ]; then
+ _dga='#define HAVE_DGA'
+ _vosrc=$_vosrc' vo_dga.c'
+else
+ _dga='#undef HAVE_DGA'
+fi
+
 if [ $_mpg123 = yes ]; then
  _mpg123='#define DEFAULT_MPG123'
 else
@@ -690,6 +706,7 @@ $_ssem     // only define if you have SSE (Intel Pentium III or Celeron II)
 $_x11
 $_xv
 $_gl
+$_dga
 $_sdldef
 $_3dfx
 $_mga
