@@ -261,7 +261,7 @@ if(dvd_title){
 	    tmp,
 	    d->audio_streams[d->nr_of_channels].id
 	    );
-
+	    
 	  d->nr_of_channels++;
 	 }
       }
@@ -403,8 +403,44 @@ tv_err:
 
 }
 
-
 #ifdef USE_DVDREAD
+
+int dvd_aid_from_lang(stream_t *stream, unsigned char* lang){
+dvd_priv_t *d=stream->priv;
+int code,i;
+  while(lang && strlen(lang)>=2){
+    code=lang[1]|(lang[0]<<8);
+    for(i=0;i<d->nr_of_channels;i++){
+	if(d->audio_streams[i].language==code){
+	    mp_msg(MSGT_OPEN,MSGL_INFO,"Selected DVD audio channel: %d language: %c%c\n",
+		d->audio_streams[i].id, lang[0],lang[1]);
+	    return d->audio_streams[i].id;
+	}
+//	printf("%X != %X  (%c%c)\n",code,d->audio_streams[i].language,lang[0],lang[1]);
+    }
+    lang+=2; while (lang[0]==',' || lang[0]==' ') ++lang;
+  }
+  mp_msg(MSGT_OPEN,MSGL_INFO,"No matching DVD audio language found!\n");
+  return -1;
+}
+
+int dvd_sid_from_lang(stream_t *stream, unsigned char* lang){
+dvd_priv_t *d=stream->priv;
+int code,i;
+  while(lang && strlen(lang)>=2){
+    code=lang[1]|(lang[0]<<8);
+    for(i=0;i<d->nr_of_subtitles;i++){
+	if(d->subtitles[i].language==code){
+	    mp_msg(MSGT_OPEN,MSGL_INFO,"Selected DVD subtitle channel: %d language: %c%c\n",
+		d->subtitles[i].id, lang[0],lang[1]);
+	    return d->subtitles[i].id;
+	}
+    }
+    lang+=2; while (lang[0]==',' || lang[0]==' ') ++lang;
+  }
+  mp_msg(MSGT_OPEN,MSGL_INFO,"No matching DVD subtitle language found!\n");
+  return -1;
+}
 
 static int dvd_next_cell(dvd_priv_t *d){
     int next_cell=d->cur_cell;

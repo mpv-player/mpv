@@ -203,6 +203,9 @@ typedef struct {
   stream_language_t subtitles[32];
 } dvd_priv_t;
 
+int dvd_aid_from_lang(stream_t *stream, unsigned char* lang);
+int dvd_sid_from_lang(stream_t *stream, unsigned char* lang);
+
 #endif
 							    
 #endif // __STREAM_H
