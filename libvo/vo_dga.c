@@ -23,6 +23,12 @@
  * - works only on x86 architectures
  *
  * $Log$
+ * Revision 1.13  2001/04/17 20:51:58  acki2
+ * - query_format() now uses new return value concept
+ * - now support for OSD :-))) for RGB modes
+ *   YV12 is flickering in quite an ugly fashion; have to fix this, but
+ *   will cost an extra copying of image data ... :-(((
+ *
  * Revision 1.12  2001/04/13 22:11:08  acki2
  * - fixed bug with depth and mpg when current bpp of XServer was != 32
  * - when -bpp is selected, I accept only query_modes() for THIS particular depth
@@ -100,6 +106,9 @@ static vo_info_t vo_info =
 
 #define BITSPP (vo_dga_modes[vo_dga_active_mode].vdm_bitspp)
 #define BYTESPP (vo_dga_modes[vo_dga_active_mode].vdm_bytespp)
+
+#define HW_MODE (vo_dga_modes[vo_dga_active_mode])
+
 
 struct vd_modes {
   int    vdm_mplayer_depth;
@@ -240,18 +249,42 @@ static Display  *vo_dga_dpy;
 #define VD_DBG   2
 #define VD_RES   1
 
-
 void vd_printf( int level, const char *str, ...){
   
-  // show resolution and DBG-messages only in verbose mode ...
-
 #ifndef VO_DGA_DBG
+  // show resolution and DBG-messages only in verbose mode ...
   if( !verbose && level)return;         
 #endif
-
   vprintf( str, (&str)+1 );
-    
 }
+
+//---------------------------------------------------------
+
+
+static void draw_alpha( int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride ){
+
+  char *d;
+  unsigned int offset = (y0*vo_dga_width+x0);
+
+  d = (&((char *)vo_dga_base)[vo_dga_vp_offset + vo_dga_dbf_current * vo_dga_dbf_mem_offset]);
+     
+
+    switch( HW_MODE.vdm_mplayer_depth ){
+        case 24: 
+          vo_draw_alpha_rgb24(w,h,src,srca,stride, d+3*offset , 3*vo_dga_width);
+          break;
+        case 32: 
+          vo_draw_alpha_rgb32(w,h,src,srca,stride, d+4*offset , 4*vo_dga_width); 
+          break;
+        case 15:
+          vo_draw_alpha_rgb15(w,h,src,srca,stride, d+2*offset , 2*vo_dga_width);
+          break;
+        case 16:        
+          vo_draw_alpha_rgb16(w,h,src,srca,stride, d+2*offset , 2*vo_dga_width);
+          break;
+    }
+}
+
 
 //---------------------------------------------------------
 
@@ -311,6 +344,7 @@ static void check_events(void)
 
 static void flip_page( void ){
 
+  vo_draw_text(vo_dga_src_width,vo_dga_src_height,draw_alpha);
   
   if(vo_dga_dbf_mem_offset != 0){
 
@@ -430,7 +464,7 @@ static uint32_t query_format( uint32_t format )
  if( format==IMGFMT_YV12 ) return 1;
  
  if( (format&IMGFMT_BGR_MASK) == IMGFMT_BGR && 
-     vd_ModeValid(format&0xff)) return 1;
+     vd_ModeValid(format&0xff)) return 7;
  
  return 0;
 }
