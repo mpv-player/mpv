@@ -1,0 +1,1445 @@
+<?xml version="1.0" encoding="iso-8859-2"?>
+<!-- Synced with: 1.64  -->
+<chapter id="faq" xreflabel="FAQ">
+<title>Často Kladené Dotazy (FAQ)</title>
+
+<qandaset defaultlabel="qanda">
+
+<qandadiv id="faq-development">
+<title>Vývoj</title>
+
+<qandaentry>
+<question><para>
+Jak vytvořím správně patch pro <application>MPlayer</application>?
+</para></question>
+<answer><para>
+Sepsali jsme <ulink url="../../tech/patches.txt">krátký dokument</ulink>
+popisující všechny nezbytné detaily. Následujte tyto instrukce.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Jak přeložím <application>MPlayer</application> do nového jazyka?
+</para></question>
+<answer><para>
+Přečtěte si <ulink url="../../tech/translations.txt">translation HOWTO</ulink>,
+to vám objasní vše. Podrobnější pomoc můžete dostat v
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">mplayer-docs</ulink>
+mailing listu.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Jak mohu podpořit vývoj <application>MPlayer</application>u?
+</para></question>
+<answer><para>
+Rádi přijmeme vaše hardwarové a softwarové
+<ulink url="http://www.mplayerhq.hu/homepage/donations.html">příspěvky</ulink>.
+Ty nám pomáhají neustále vylepšovat <application>MPlayer</application>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Jak se mohu stát vývojářem <application>MPlayer</application>u?
+</para></question>
+<answer><para>
+Vždy uvítáme nové kodéry i dokumentaristy. Přečtěte si
+<ulink url="../../tech/">technickou dokumentaci</ulink>
+abyste dostali obecnou představu. Pak byste se měli přihlásit do
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</ulink>
+mailing listu a začít psát kód. Pokud chcete pomoci s dokumentací, připojte se do
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">mplayer-docs</ulink>
+mailing listu.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Proč nepoužíváte autoconf/automake?
+</para></question>
+<answer><para>
+Máme modulární, ručně dělaný konfigurační a překladový systém, který odvádí
+docela dobrou práci, tak proč to měnit? Konec konců se nám nelíbí auto*
+nástroje, stejně jako
+<ulink url="http://freshmeat.net/articles/view/889/">ostatním lidem</ulink>.
+</para></answer>
+</qandaentry>
+</qandadiv>
+
+<qandadiv id="faq-compilation">
+<title>Kompilace</title>
+<qandaentry>
+<question><para>
+Kompilace skončí s chybou a <application>gcc</application> vypíše nějakou
+záhadnou zprávu obsahující frázi
+<systemitem>internal compiler error</systemitem> nebo
+<systemitem>unable to find a register to spill</systemitem>.
+</para></question>
+<answer><para>
+Právě jste narazili na chybu v <application>gcc</application>.
+<ulink url="http://gcc.gnu.org/bugs.html">Nahlaste ji prosím týmu gcc</ulink>,
+nikoli nám. Z nějakého důvodu se zdá, že <application>MPlayer</application>
+často spouští chyby kompileru. Přesto je však nebudeme odstraňovat, ani je
+v našich zdrojových textech obcházet. Chcete-li se vyhnout těmto problémům,
+zůstaňte věrni té verzi kompileru, která je známa jako spolehlivá a stabilní,
+nebo často upgradujte.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Existují binární (RPM/deb) balíčky <application>MPlayer</application>u?
+</para></question>
+<answer><para>
+Podrobnosti viz sekce <link linkend="debian">Debian</link> a <link linkend="rpm">RPM</link>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Jak mohu skompilovat 32 bitový <application>MPlayer</application> na 64 bitovém
+Athlonu?
+</para></question>
+<answer><para>
+Vyzkoušejte následující volby configure:
+<screen>
+./configure --target=athlon_xp --cc="gcc -m32" --as="as --32" --with-extralibdir=/usr/lib
+</screen>
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Kompilace skončí s chybou podobnou této:
+<screen>
+    cfft.c: In function`passf2':
+    cfft.c:556: unable to find a register to spill in class `FLOAT_REGS'
+    cfft.c:556: this is the insn:
+    (insn 235 233 246 (set (subreg:SF (reg/v:DI 29 rmm0 [110]) 0)
+            (minus:SF (mem:SF (plus:SI (mult:SI (reg:SI 1 edx [112])
+                            (const_int 8 [0x8]))
+                        (reg/v/f:SI 3 ebx [62])) [4 S4 A32])
+                (reg:SF 8 st(0) [132]))) 533 {*fop_sf_1_nosse} (insn_list
+    232 (nil))    (expr_list:REG_DEAD (reg:SF 8 st(0) [132])
+            (nil)))
+    cfft.c:556: confused by earlier errors, bailing out
+</screen>
+</para></question>
+<answer><para>
+Toto je známý problém <application>gcc</application> 3.2, problém vyřeší
+upgrade na verzi 3.3. Jak nainstalovat gcc popisujeme v sekci
+<link linkend="gcc-296">gcc 2.96</link>. Alternativně můžete použít externí
+knihovnu FAAD, která je popsána v sekci
+<link linkend="aac">AAC</link>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Kompilace skončí s chybou podobnou této:
+<screen>
+    In file included from mplayer.c:34:
+    mw.h: In function `mplMainDraw':
+    mw.h:209: Internal compiler error in print_rtl_and_abort, at flow.c:6458
+    Please submit a full bug report,
+    with preprocessed source if appropriate.
+</screen>
+</para></question>
+<answer><para>
+Toto je známý problém <application>gcc</application> 3.0.4, problém vyřeší
+upgrade na verzi 3.1. Jak nainstalovat gcc popisujeme v sekci
+<link linkend="gcc-296">gcc 2.96</link>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Configure skončí s následujícím textem a <application>MPlayer</application> se nezkompiluje!
+<screen>Your gcc does not support even i386 for '-march' and '-mcpu'</screen>
+</para></question>
+<answer><para>
+Vaše gcc není správně nainstalováno, detaily naleznete v souboru
+<filename>configure.log</filename>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Co je za problém s gcc 2.96?
+</para></question>
+<answer><para>
+<emphasis role="bold">Velmi nedoporučujeme používat gcc 2.96!</emphasis>
+Přečtěte si <link linkend="gcc-296">tento</link> dokument pro detaily o tom
+proč Red Hat uvolnil gcc 2.96 a jaké jsou s tím problémy. Pokud jsme vás dosud
+neodradili a chcete jej dále používat, alespoň se ujistěte, že máte poslední
+uvolněnou verzi a zadejte volbu
+<option>--disable-gcc-checking</option> pro configure. Pamatujte, že teď je
+to už jen na vás. <emphasis role="bold">Neoznamujte</emphasis> žádné chyby,
+<emphasis role="bold">nežádejte</emphasis> o pomoc v mailing listech.
+<emphasis role="bold">Neposkytneme</emphasis> vám žádnou podporu v případě, že
+se dostanete do potíží.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Skvěle, mám gcc 3.0.1 od Red Hatu/Mandrake, takže jsem v pohodě!
+</para></question>
+<answer><para>
+Nejste, protože s těmito kompilátory jsou/byly rovněž problémy.
+Stav podpory současných kompilátorů <application>MPlayer</application>em
+zjistíte v sekci <link linkend="install">Instalace</link>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+.. gcc 2.96 ... (Ano, někteří lidé POŘÁD brojí s gcc 2.96!)
+</para></question>
+<answer><para>
+Citováno z <ulink url="http://www.mplayerhq.hu/pipermail/mplayer-users/2001-October/005351.html">mailu</ulink>
+který A'rpi poslal do listu <ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>
+(slovo 'ideg' je vysvětleno níže) (POZOR: Tento překlad se snaží být co nejblíže
+smyslu původního textu, ale místy jde jen stěží. Pozn. překl.):
+<blockquote>
+<para>
+A my máme idegy. A naše počitadlo idegů znovu a znovu přetéká.
+</para>
+<para>
+Naneštěstí je <application>MPlayer</application> nekontrolovatelný.
+Používají jej lameři, uživatelé Linuxu kteří neumí používat dokonce ani Windows
+a nikdy nezkusili kompilovat jádro (kernel). Nainstalovali si (s výchozími
+volbami) Mandrake nebo Red Hat nebo SuSE a bez RTFM (přečti si ten za...ný manuál)
+posílají na všechny strany zprávy typu 'nefunguje to! pomozte mi! prosím!
+jsem Linuxový začátečník! pomoc! pomozte!'.
+Nemůžeme je zastavit, ale můžeme je alespoň přinutit k RTFM a k tomu, aby si
+přečetli zprávy vypisované ./configure a <application>MPlayer</application>em.
+</para>
+<para>
+A vy chytráci si přijdete a otravujete nás s gcc 2.96 a binárními balíčky,
+místo abyste pomáhali uživatelům nebo dělali patche pomáhající s odstraňováním
+problémů.
+</para>
+<para>
+Polovinu našeho vyhrazeného/volného času trávíme odpovídáním na tyto pitomé maily
+a vymýšlením nových triků a testů do configure abychom se jim vyhnuli.
+</para>
+<para>
+A tady se to vyrovnává. Na straně jedné jste vy, chytrolíni, kteří říkáte že jsme
+mizerové, protože nemáme rádi chybami prolezené gcc 2.96 a na straně druhé jsou
+ti 'noví v Linuxu', kteří nám ukazují jak chybné gcc 2.96 je.
+</para>
+<para>
+Závěr: Nemůžeme být dobří. Polovina lidí bude vždy říkat, že jsme špatní.
+</para>
+<para>
+Možná bychom měli uzavřít projekt, udělat jej closed source, komerční a poskytovat
+instalační podporu. Pak bychom mohli odejít z práce, takže by se vývoj zrychlil,
+vydělali bychom velké peníze a koupili si za ně dům, atd atp.
+Opravdu to tak chcete? Zdá se že jo.
+</para>
+</blockquote>
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+SDL výstup nepracuje, nebo se nedá zkompilovat. Problém je ...
+</para></question>
+<answer><para>
+Testovali jsme jej se SDL 1.2.x a může pracovat na SDL 1.1.7+.
+<emphasis role="bold">Nepracuje</emphasis> s jakoukoli předchozí verzí.
+Pokud se rozhodnete použít starší verzi, jste v tom sám/sama.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Pořád mám problémy s kompilací podpory SDL. gcc vypisuje něco jako
+<screen>undefined reference to SDL_EnableKeyRepeat</screen>. Co teď?
+</para></question>
+<answer><para>
+Kde máte nainstalovánu knihovnu SDL? Pokud je nainstalována v
+<filename class="directory">/usr/local</filename> (výchozí), vyeditujte
+kořenový <filename>config.mak</filename> a přidejte
+<systemitem>-L/usr/local/lib</systemitem> za <systemitem>X_LIBS=</systemitem>.
+Nyní zadejte <command>make</command>. Hotovo!
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Mám Matrox G200/G400/G450/G550, jak zkompiluji/použiji ovladač mga_vid?
+</para></question>
+<answer><para>
+Přečtěte si sekci <link linkend="mga_vid">mga_vid</link>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Během 'make', si <application>MPlayer</application> stěžuje na X11 knihovny.
+Tomu nerozumím, vždyť MÁM nainstalovány X!?
+</para></question>
+<answer><para>
+... ale nemáte nainstalován vývojářský (dev/devel) balíček pro X.
+Nebo ne správně.
+V Red Hatu se nazývá <filename>XFree86-devel*</filename>,
+v Debianu Woody je to <filename>xlibs-dev</filename>,
+v Debianu Sarge je to <filename>libx11-dev</filename>. Také se přesvědčte,
+že symlinky <filename class="directory">/usr/X11</filename> a
+<filename class="directory">/usr/include/X11</filename> existují (to může být
+problém v Mandrake). Můžete si je vytvořit těmito příkazy:
+<screen>
+     # ln -sf /usr/X11R6 /usr/X11
+     # ln -sf /usr/X11R6/include/X11 /usr/include/X11
+</screen>
+Vaše distribuce se může lišit od
+<ulink url="http://www.pathname.com/fhs/">Standardní Hierarchie Souborového systému</ulink>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Nemohu zkompilovat SVGAlib. Používám jádro 2.3/2.4 ...
+</para></question>
+<answer><para>
+Vyeditujte si <filename>Makefile.cfg</filename> v SVGAlib a zakomentujte řádek
+<systemitem>BACKGROUND = y</systemitem>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Zkompiloval(a) jsme <application>MPlayer</application> s podporou libdvdcss/libdivxdecore,
+ale když jej zkusím spustit, vypíše:
+<screen>
+error while loading shared libraries: lib*.so.0: cannot load shared object file: No such file or directory
+</screen>
+Hledal(a) jsem ty soubory a JSOU zde v <filename class="directory">/usr/local/lib</filename> ...
+</para></question>
+<answer><para>
+Přidejte <filename class="directory">/usr/local/lib</filename> do <filename>/etc/ld.so.conf</filename>
+a spusťte <command>ldconfig</command>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Při kompilaci <application>MEncoder</application>u, to spadne (segfault) při linkování!
+</para></question>
+<answer><para>
+Toto je problém linkeru. Měl by pomoct upgrade binutils (2.11.92.*
+nebo novější by měly být v pořádku). Protože to není naše chyba, prosíme
+<emphasis role="bold">nehlaste</emphasis> nám ji!
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+<application>MPlayer</application> spadne (segmentation fault) během kontroly pthread!
+</para></question>
+<answer><para>
+<command>chmod 644 /usr/lib/libc.so</command>
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Rád bych zkompiloval <application>MPlayer</application> na Minixu!
+</para></question>
+<answer><para>
+Já taky. :)
+</para></answer>
+</qandaentry>
+
+</qandadiv>
+
+<qandadiv id="faq-general">
+<title>Obecné dotazy</title>
+
+<qandaentry>
+<question><para>
+Existují nějaké mailing listy pro <application>MPlayer</application>?
+</para></question>
+<answer><para>
+Ano. Viz sekci <link linkend="mailinglists">mailing listy</link>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Našel/našla jsem odpornou chybu když jsem chtěl(a) přehrát svůj oblíbený film!
+Jak mám dát zprávu?
+</para></question>
+<answer><para>
+Přečtěte si prosím
+<link linkend="bugreports">postupy hlášení chyb</link>
+a následujte instrukce.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Mám potíže s přehráváním souborů s ... kodekem. Mohu je používat?
+</para></question>
+<answer><para>
+Prověřte
+<ulink url="http://www.mplayerhq.hu/homepage/codecs-status.html">stav kodeku</ulink>,
+pokud neobsahuje váš kodek, přečtěte si
+<link linkend="codecs">kodekovou dokumentaci</link>,
+zvláště <link linkend="codec-importing">codec importing HOWTO</link>
+a kontaktujte nás.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Při startu přehrávání dostanu následující hlášku, ale jinak vše vypadá dobře:
+<screen>Linux RTC init: ioctl (rtc_pie_on): Permission denied</screen>
+</para></question>
+<answer><para>
+Potřebujete práva roota nebo speciálně nastavené jádro, abychom mohli použít
+nový kód časování. Detaily naleznete v <link linkend="rtc">RTC</link> části
+dokumentace.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Jak si mohu udělat snímek obrazovky?
+</para></question>
+<answer><para>
+Abyste si mohli udělat snímek, musíte použít video výstupní rozhraní, které
+nepoužívá překrývání. Jde to například pod X11 s <option>-vo x11</option>, pod
+Windows funguje <option>-vo directx:noaccel</option>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+V levém horním rohu je počítadlo. Jak se ho zbavím?
+</para></question>
+<answer><para>
+Stiskněte <keycap>o</keycap> a vyzkoušejte volbu <option>-osdlevel</option>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Volba <option>-xy</option> ani <option>-fs</option> nepracují v rozhraní x11
+(<option>-vo x11</option>) ...
+</para></question>
+<answer><para>
+Pracují, ale musíte explicitně nastavit softwarové škálování (velmi pomalé)
+pomocí volby <option>-zoom</option>. Raději použijte podporu XF86VidMode:
+Musíte zadat volbu <option>-vm</option> a volbu <option>-fs</option>,
+a to je vše.
+Ujistěte se, že máte správné nastavení grafických režimů v souboru
+<filename>XF86Config</filename>, a zkuste zprovoznit
+<link linkend="dga">DGA ovladač</link> a
+<link linkend="sdl">DGA ovladač z SDL</link>. Jsou mnohem rychlejší.
+Pokud pracuje DGA ovladač z SDL, bude ještě rychlejší.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Co znamenají čísla na stavovém řádku?
+</para></question>
+<answer><para>
+Příklad:
+<screen>A: 2.1 V: 2.2 A-V: -0.167 ct: 0.042 57/57 41% 0% 2.6% 0 4 49%</screen>
+<itemizedlist>
+<listitem><para>A: audio pozice v sekundách</para></listitem>
+<listitem><para>V: video pozice v sekundách</para></listitem>
+<listitem><para>A-V: odchylka pozice audia a videa v sekundách (delay)</para></listitem>
+<listitem><para>ct: celková provedená korekce A-V synchronizace</para></listitem>
+<listitem><para>počet přehraných snímků (od posledního převíjení)</para></listitem>
+<listitem><para>počet dekódovaných snímků (od posledního převíjení)</para></listitem>
+<listitem><para>procentuální zatížení CPU video kodekem (při slices a DR to
+zahrnuje video_out)</para></listitem>
+<listitem><para>video_out zatížení CPU</para></listitem>
+<listitem><para>procentuální zatížení CPU audio kodekem</para></listitem>
+<listitem><para>počet zahozených snímků pro udržení A-V synchronizace</para></listitem>
+<listitem><para>aktuální úroveň postprocesingu obrazu (při použití
+<option>-autoq</option>)</para></listitem>
+<listitem><para>aktuální naplnění vyrovnávací paměti (běžně okolo 50%)</para></listitem>
+<listitem><para>rychlost přehrávání v násobcích původní rychlosti</para></listitem>
+</itemizedlist>
+Většina z nich je určena pro ladění chyb a jednou budou odstraněny.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Co mám udělat, aby se nezobrazovaly?
+</para></question>
+<answer><para>
+Použijte volbu <option>-quiet</option> a přečtěte si manuálovou stránku.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Jak to, že video_out nijak nezatěžuje (0%) CPU u některých souborů?
+</para></question>
+<answer><para>
+Zátěž není nulová, ale zobrazení je voláno přímo kodekem, takže nemůže být měřena odděleně.
+Měli byste zkusit přehrát soubor s využitím <option>-vo null</option> a
+pak <option>-vo ...</option> a sledovat odchylky v rychlosti video_out.
+</para></answer>
+<answer><para>
+Používáte Direct Rendering tehdy, kdy kodek vykresluje přímo do video paměti.
+V tom případě zátěž dekódováním zahrnuje i zátěž vykreslováním.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Dostávám chybová hlášení, že nebyl nalezen soubor <filename>/usr/local/lib/codecs/</filename> ...
+</para></question>
+<answer><para>
+Stáhněte si Win32 kodeky z naší
+<ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">stránky s kodeky</ulink>
+(soubor kodeků z avifile obsahuje jinou sadu DLL) a nainstalujte je.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Co to je &quot;IdegCounter&quot;?
+</para></question>
+<answer><para>
+Bulharsko anglická složenina. &quot;Ideg&quot; je v bulharštině
+něco jako &quot;nerve&quot; (nerv) v angličtině, a je prohlášen za něčím jako
+&quot;ydaegh&quot;. Poprvé byl použit jako měřič A'rpiho nervozity po
+(mm) &quot;záhadném&quot; zmizení CVS kódu ;)
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+A co je ten &quot;Faszom(C)ounter&quot;?
+</para></question>
+<answer><para>
+&quot;Fasz&quot; znamená v bulharštině něco co nechcete vědět, to ostatní má co
+do činění s perverzními mozky vývojářů <application>MPlayer</application>u.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Titulky jsou hezké, nejkrásnější jaké jsem viděl, ale zpomalují přehrávání!
+Vím že je to nepravděpodobné ...
+</para></question>
+<answer><para>
+Poté co provedete <filename>./configure</filename>, vyeditujte <filename>config.h</filename>
+a nahraďte <systemitem>#undef FAST_OSD</systemitem> za
+<systemitem>#define FAST_OSD</systemitem>. Pak rekompilujte.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Co přesně je ten <systemitem class="library">libavcodec</systemitem>?
+</para></question>
+<answer><para>
+Viz sekci
+<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Ale configure říká
+<screen>Checking for libavcodec ... no</screen>
+</para></question>
+<answer><para>
+Musíte si opatřit <systemitem class="library">libavcodec</systemitem>
+z CVS FFmpegu. Přečtěte si instrukce v sekci
+<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Nemohu se dostat do GUI menu. Kliknu pravým tlačítkem, ale nemám přístup
+k žádné z položek!
+</para></question>
+<answer><para>
+Používáte FVWM? Zkuste následující:
+<orderedlist>
+<listitem><para>Start -> Settings -> Configuration -> Base Configuration</para></listitem>
+<listitem><para>Set <systemitem>Use Applications position hints</systemitem>
+to <systemitem>Yes</systemitem></para></listitem>
+</orderedlist>
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Jak mohu spustit <application>MPlayer</application> na pozadí?
+</para></question>
+<answer><para>
+Use:
+<screen>mplayer <replaceable>volby</replaceable> <replaceable>soubor</replaceable> &lt; /dev/null &amp;</screen>
+</para></answer>
+</qandaentry>
+</qandadiv>
+
+<qandadiv id="faq-playback">
+<title>Potíže s přehráváním</title>
+
+<qandaentry>
+<question><para>
+Jak mohu vybrat audio/titulkové stopy z DVD, OGM, Matroska nebo NUT souboru?
+</para></question>
+<answer><para>
+Musíte použít <option>-aid</option> (ID zvuku) nebo <option>-alang</option>
+(jazyk zvuku), <option>-sid</option>(ID titulků) nebo <option>-slang</option>
+(jazyk titulků), například:
+<screen>
+mplayer example.mkv -alang eng -slang eng
+mplayer example.mkv -aid 1 -sid 1
+</screen>
+Chcete-li vědět jaké jsou k dispozici:
+<screen>
+mplayer -vo null -ao null -frames 0 -v <replaceable>filename</replaceable> | grep sid
+mplayer -vo null -ao null -frames 0 -v <replaceable>filename</replaceable> | grep aid
+</screen>
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Zkouším přehrávat náhodný stream z internetu, ale nedaří se mi to.
+</para></question>
+<answer><para>
+Zkuste přehrávat stream s volbou <option>-playlist</option>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Stáhnul jsem si film přes P2P síť ale nefunguje!
+</para></question>
+<answer><para>
+Váš soubor je poškozený nebo falešný. Pokud jej máte od kámoše a jemu funguje,
+zkuste si porovnat
+<application>md5sum</application> hashe.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Právě jsem nainstalil <application>MPlayer</application>. Když chci otevřít
+video soubor, nastane fatální chyba:
+<screen>
+inicializace zvoleného video_out (-vo) rozhraní.
+</screen>
+Jak to mám vyřešit?
+</para></question>
+<answer><para>
+Jen změňte své video výstupní rozhraní. Spusťte následující příkaz a
+dostanete seznam dostupných video výstupních rozhraní:
+<screen>
+mplayer -vo help
+</screen>
+Až si vyberete správné video rozhraní, přidejte jej do
+svého konfiguračního souboru. Přidejte
+<programlisting>
+ vo = <replaceable>vybraný_vo</replaceable>
+</programlisting>
+do <filename>~/.mplayer/config</filename> a/nebo
+<programlisting>
+vo_driver = <replaceable>vybraný_vo</replaceable>
+</programlisting>
+do <filename>~/.mplayer/gui.conf</filename>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Nedaří se mi přimět titulky, aby se zobrazovaly, pomoc!!
+</para></question>
+<answer><para>
+Ujistěte se, že máte správně nainstalovány fonty. Znovu proveďte kroky v části
+<link linkend="mpsub-install">OSD a titulky</link> sekce instalace.
+Pokud používáte TrueType fonty, ověřte zda máte nainstalovánu
+<systemitem class="library">FreeType</systemitem> knihovnu.
+Další postup zahrnuje prověření vašich titulků v textovém editoru nebo v jiných
+přehrávačích. Také je zkuste převézt do jiného formátu.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Nemohu přijít na kloub podivným problémům při přehrávání.
+</para></question>
+<answer><para>
+Máte zatoulaný soubor <filename>codecs.conf</filename> v
+<filename>~/.mplayer/</filename>, <filename>/etc/</filename>,
+<filename>/usr/local/etc/</filename> nebo podobném místě? Vymažte ho,
+zastaralé <filename>codecs.conf</filename> soubory mohou způsobovat obskurní
+problémy. <application>MPlayer</application> bude místo nich používat svůj
+vestavěný.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Proč <application>MPlayer</application> nefunguje na Fedora Core?
+</para></question>
+<answer><para>
+Ve Fedoře je špatná spolupráce mezi exec-shieldem,
+prelinkem a jakoukoli aplikací používající Windows DLL
+(tak jako <application>MPlayer</application>).
+</para>
+<para>
+Problém je v tom, že exec-shield znáhodní načítací adresy všech systémových
+knihoven. Toto znáhodnění nastane v době předlinkování (prelink time)(jednou
+za dva týdny).
+</para>
+<para>
+Když se <application>MPlayer</application> pokouší nahrát Windows DLL, chce ji
+umístit na specifickou adresu (0x400000). Pokud tam ale již je důležitá
+systémová knihovna, <application>MPlayer</application>
+zhavaruje.
+(Typickým projevem je segmentation fault při pokusu o přehrání
+Windows Media 9 souborů.)
+</para>
+<para>
+Pokud narazíte na tento problém, máte dvě možnosti:
+<itemizedlist>
+<listitem><para>Počkat dva týdny. Možná to bude opět fungovat.</para></listitem>
+<listitem><para>Přelinkovat všechny knihovny systému s odlišnými prelink
+volbami.
+Zde jsou instrukce krok za krokem:</para>
+<para>
+<orderedlist>
+<listitem><para>Vyeditujte <filename>/etc/syconfig/prelink</filename> a změňte</para>
+<para>
+<programlisting>
+PRELINK_OPTS=-mR
+</programlisting>
+</para>
+<para>
+na
+<programlisting>
+PRELINK_OPTS="-mR --no-exec-shield"
+</programlisting>
+</para>
+</listitem>
+<listitem><para><command>touch /var/lib/misc/prelink.force</command></para></listitem>
+<listitem><para><command>/etc/cron.daily/prelink</command>
+(To přelinkuje všechny aplikace a bude to trvat opravdu dlouho.)
+</para></listitem>
+<listitem>
+<para><command>execstack -s <replaceable>/cesta/k/</replaceable>mplayer</command>
+(Tohle vypne exec-shield pro binárku <application>MPlayer</application>u.)
+</para>
+</listitem>
+</orderedlist>
+</para>
+</listitem>
+</itemizedlist>
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+... pracuje s <application>xine/vlc/...</application>, ale ne s
+<application>MPlayer</application>em.
+</para></question>
+<answer><para>
+<application>MPlayer</application> není <application>xine/vlc/...</application>.
+Ačkoli mají tyto přehrávače část kódu společnou, sada kodeků (DLL),
+synchronizace, demultiplexace atd jsou odlišné neměly by být srovnávány.
+Pokud máte soubor, který <application>MPlayer</application> nedokáže správně
+přehrát, ale jiný přehrávač ano, přečtěte si prosím
+<link linkend="bugreports">postup hlášení chyb</link> a nahrajte soubor na náš
+FTP server.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Zvuk se začne rozcházet s videem při přehrávání AVI souboru.
+</para></question>
+<answer><para>
+Zkuste volbu <option>-bps</option> nebo <option>-nobps</option>. Pokud se to
+nezlepší, přečtěte si <link linkend="bugreports">toto</link> a nahrajte
+soubor na FTP.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+<application>MPlayer</application> skončí s chybou při použití
+<filename>l3codeca.acm</filename>.
+</para></question>
+<answer><para>
+Zkontrolujte výstup z <command>ldd /usr/local/bin/mplayer</command>. Pokud
+obsahuje <screen>libc.so.6 => /lib/libc.so.6 (0x4???????)</screen>
+kde &quot;?&quot; je jakékoli číslo, pak je to OK a chyba je jinde. Pokud je to:
+<screen>libc.so.6 => /lib/libc.so.6 (0x00??????)</screen>
+pak je problém ve vašem kernelu/libc. Možná používáte některé bezpečnostní
+patche (například OpenWall patch od Solar Designer) který vynucuje nahrávání
+knihoven na velmi nízké adresy. Protože <filename>l3codeca.acm</filename> je
+nerealokovatelná DLL, musí být nahrána do <literal>0x40000000</literal> a my to
+nemůžeme změnit. Měli byste použít nepatchovaný kernel, nebo použít
+<application>MPlayer</application>ovu volbu <option>-afm 1</option> pro
+potlačení použití <filename>l3codeca.acm</filename>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Můj počítač přehrává MS DivX AVI s rozlišením ~ 640x300 a stereo MP3 zvukem
+příliš pomalu. Když použiji volbu <option>-nosound</option>, vše je OK
+(jen bez zvuku).
+</para></question>
+<answer><para>
+Máte pomalý počítač nebo je špatný ovladač vaší zvukové karty. Prostudujte si
+dokumentaci a uvidíte zda dokážete zvýšit výkon.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+<application>MPlayer</application> zkolabuje s hláškou
+<screen>MPlayer interrupted by signal 4 in module: decode_video</screen>
+</para></question>
+<answer><para>
+Zkuste spustit <application>MPlayer</application> na počítači kde jste jej
+skompilovali. Nebo jej zkuste rekompilovat s detekcí CPU za běhu
+(<command>./configure --enable-runtime-cpudetection</command>).
+Nepoužívejte <application>MPlayer</application> na CPU odlišném než ten, na
+kterém jste jej kompilovali bez použití výše zmíněné vlastnosti.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Mám potíže s [váš okenní manažer] a celoobrazovkovými xv/xmga/sdl/x11 režimy ...
+</para></question>
+<answer><para>
+Přečtěte si <link linkend="bugreports">postupy pro nahlášení chyb</link> a
+pošlete nám patřičné hlášení o chybách.
+Rovněž zkuste experimentovat s volbou <option>-fstype</option>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Při pokusu přehrát MPEG soubory dostanu asi toto: Nemohu nalézt kodek pro video
+formát 0x10000001!
+</para></question>
+<answer><para>
+Máte starou verzi <filename>codecs.conf</filename> v
+<filename class="directory">~/.mplayer/</filename>,
+<filename class="directory">/etc/</filename>,
+<filename class="directory">/usr/local/etc/</filename> a podobně. Odstraňte jej,
+nyní již není potřeba.
+<emphasis role="bold">NEBO</emphasis> máte volbu <option>vc=</option> nebo něco
+podobného v některém svém konfiguračním souboru.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Pokud spustím <application>MPlayer</application> pod KDE, dostanu pouze černou
+obrazovku a nic se neděje. Po asi minutě se začne video přehrávat.
+</para></question>
+<answer><para>
+Zvukový démon arts z KDE blokuje zvukové zařízení. Buď počkejte dokud video
+nezačne hrát, nebo vypněte démon arts v control center. Pokud chcete používat
+arts zvuk, nastavte zvukový výstup přes nativní arts audio rozhraní
+(<option>-ao arts</option>). Pokud selže, nebo není zakompilován, zkuste SDL
+(<option>-ao sdl</option>) a ujistěte se, že vaše SDL umí použít arts zvuk.
+Další možností je spustit <application>MPlayer</application> s artsdsp.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Mám AVI, které produkují šedou obrazovku při přehrávání s <option>-vc odivx</option>
+a zelenou s <option>-vc divx4</option>.
+</para></question>
+<answer><para>
+Není to DivX soubor, ale MS MPEG4v3.
+Pokud máte starou verzi <filename>codecs.conf</filename> v
+<filename class="directory">~/.mplayer/</filename>,
+<filename class="directory">/etc/</filename>,
+<filename class="directory">/usr/local/etc/</filename> a podobně, odstraňte jej.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Při přehrávání tohoto filmu se mi rozejde video se zvukem a/nebo
+<application>MPlayer</application> spadne se zprávou:
+<screen>DEMUXER: Příliš mnoho (945 ve 8390980 bajtech) video paketů ve
+vyrovnávací paměti!</screen>
+</para></question>
+<answer><para>
+Příčin může být několik.
+<itemizedlist>
+<listitem><para>
+Váš CPU <emphasis role="bold">a/nebo</emphasis> video karta
+<emphasis role="bold">a/nebo</emphasis> sběrnice je/jsou příliš pomalé.
+<application>MPlayer</application> zobrazí zprávu, pokud je to tento případ
+(a čítač zahozených snímků se rychle zvyšuje).
+</para></listitem>
+<listitem><para>
+Pokud se jedná o AVI, možná má špatné prokládání. Zkuste volbu
+<option>-ni</option>.
+</para></listitem>
+<listitem><para>
+Ovladač vaší zvukové karty je vadný, nebo používáte ALSA 0.5 s <option>-ao oss</option>.
+Viz <link linkend="audio">sekci zvuková karta</link>.
+</para></listitem>
+<listitem><para>
+AVI má špatnou hlavičku, zkuste volbu <option>-nobps</option> a/nebo
+<option>-mc 0</option>.
+</para></listitem>
+</itemizedlist>
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Mám MJPEG soubor, který pracuje v ostatních přehrávačích, ale v
+<application>MPlayer</application>u jen černou obrazovku
+</para></question>
+<answer><para>
+Použijte jiný kodek k přehrávání souboru, zkuste <option>-vc ffmjpeg</option>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Když se pokusím grabovat ze svého přijímače, funguje to, ale dostanu divné barvy.
+V ostatních aplikacích je vše v pořádku.
+</para></question>
+<answer><para>
+Pravděpodobně hlásí vaše karta některé barevné prostory jako podporované, ale
+ve skutečnosti je nepodporuje. Zkuste YUY2 místo výchozího YV12
+(viz sekce <link linkend="tv-input">TV</link>).
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Mám problémy s A/V synchronizací. Některé AVI se přehrávají normálně, některé
+se však přehrávají s dvojnásobnou rychlostí!
+</para></question>
+<answer><para>
+Máte vadnou zvukovou kartu/její ovladač. Nejspíš je fixována na 44100Hz a
+zkoušíte přehrát soubor, který má zvuk 22050Hz. Zkuste audio filtr resample.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Všechny WMV (nebo jiné...) soubory které přehrávám, produkují zelenou/šedou
+obrazovku a hrají pouze zvuk! <application>MPlayer</application> vypíše:
+<screen>Detekován video kodek: [null] drv:0 (NULL kodek (žádné dekódování))</screen>
+</para></question>
+<answer><para>
+Pokud máte starou verzi <filename>codecs.conf</filename> v
+<filename class="directory">~/.mplayer/</filename>,
+<filename class="directory">/etc/</filename>,
+<filename class="directory">/usr/local/etc/</filename> a podobně, odstraňte jej.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Dostávám podivné procentuální hodnoty (příliš vysoké) při přehrávání na
+notebooku.
+</para></question>
+<answer><para>
+Toto je power managementu / systému šetřícím energií vašeho notebooku
+(BIOS, nikoli jádro). Zapojte konektor externího napájení
+<emphasis role="bold">před</emphasis> zapnutím notebooku. Rovněž můžete zkusit,
+jestli vám pomůže <ulink url="http://www.brodo.de/cpufreq/">cpufreq</ulink>
+(interface ke SpeedStep v Linuxu).
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Audio/video se úplně rozejdou když pouštím <application>MPlayer</application>
+jako root na notebooku. Když jej spouštím jako uživatel, pracuje normálně.
+</para></question>
+<answer><para>
+To je opět efekt power managementu (viz výš). Připojte externí napájení
+<emphasis role="bold">před</emphasis> zapnutím notebooku, nebo použijte
+volbu <option>-nortc</option>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Film začne být během přehrávání trhaný a dostanu následující zprávu:
+<screen>Detekován špatně prokládaný AVI soubor - přepínám do -ni režimu...</screen>
+</para></question>
+<answer><para>
+Špatně prokládané soubory a <option>-cache</option> nejdou dobře dohromady.
+Zkuste <option>-nocache</option>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Jak přehraji MPEG Layer 2 (MP2) audio soubory?
+</para></question>
+<answer><para>
+Musíte použít <option>-rawaudio on:format=0x50</option>.
+</para></answer>
+</qandaentry>
+</qandadiv>
+
+
+<qandadiv id="faq-driver">
+<title>Potíže s video/audio rozhraním (vo/ao)</title>
+
+<qandaentry>
+<question><para>
+Jak mohu použít <application>dmix</application> spolu s
+<application>MPlayer</application>em?
+</para></question>
+<answer><para>
+Poté co nastavíte
+<ulink url="http://alsa.opensrc.org/index.php?page=DmixPlugin">asoundrc</ulink>
+musíte použít <option>-ao alsa:device=dmix</option>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Nemám zvuk při přehrávání videa a dostanu chybovou zprávu podobnou této:
+<screen>
+    AO: [oss] 44100Hz 2ch Signed 16-bit (Little-Endian)
+    audio_setup: Nelze otevřít audio zařízení /dev/dsp: Zařízení nebo rozhraní je již používáno
+    nelze otevřít/inicializovat audio zařízení -> BEZ ZVUKU
+    Audio: bez zvuku!!!
+    Začínám přehrávat...
+</screen>
+</para></question>
+<answer><para>
+Máte spuštěno KDE nebo GNOME s ARTS nebo ESD zvukovým démonem? Zkuste zakázat
+zvukový démon, nebo použijte volbu <option>-ao arts</option> nebo
+<option>-ao esd</option>, aby <application>MPlayer</application> použil ARTS
+nebo ESD.
+Možná provozujete ALSA bez OSS emulace, zkuste nahrát jaderné moduly pro ALSA
+OSS, nebo nařiďte použití výstupního rozhraní ALSA přidáním volby
+<option>-ao alsa</option> do příkazového řádku.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Co takhle DGA rozhraní? Nemohu je najít!
+</para></question>
+<answer><para>
+<filename>./configure</filename> automaticky detekuje váš DGA ovladač.
+Pokud <option>-vo help</option> nenabízí DGA, pak je problém ve vaší instalaci X.
+Zkuste <command>./configure --enable-dga</command> a přečtěte si sekci
+<link linkend="dga">DGA</link>. Alternativně zkuste DGA ovladač přes SDL, pomocí
+volby <option>-vo sdl:dga</option>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+OK, <option>-vo help</option> ukazuje DGA rozhraní, ale stěžuje si na práva.
+Pomozte mi!
+</para></question>
+<answer><para>
+Pracuje to pouze pokud pracujete jako root! Jedná se o limitaci DGA. Měli byste
+se stát rootem (<command>su -</command>) a zkuste to znovu. Dalším řešením je
+nastavit <application>MPlayer</application>u SUID root, ale to nedoporučujeme!
+<screen>
+     chown root /usr/local/bin/mplayer
+     chmod 755 /usr/local/bin/mplayer
+     chmod +s /usr/local/bin/mplayer
+ </screen>
+<warning><para>
+Je to <emphasis role="bold">velké</emphasis> bezpečnostní riziko!
+<emphasis role="bold">Nikdy</emphasis> to nedělejte na serveru nebo na počítači,
+který zcela neovládáte, jelikož ostatní uživatelé mohou získat práva roota
+díky SUID root <application>MPlayer</application>u.
+<emphasis role="bold">Byli jste varováni.</emphasis>.
+</para></warning>
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Když použiji XVideo, moje Voodoo 3/Banshee napíše:
+<screen>
+X Error of failed request: BadAccess (attempt to access private resource denied)
+   Major opcode of failed request: 147 (MIT-SHM)
+   Minor opcode of failed request: 1 (X_ShmAttach)
+   Serial number of failed request: 26
+   Current serial number in output stream:27
+</screen>
+</para></question>
+<answer><para>
+Ovladač <systemitem>tdfx</systemitem> v XFree86 4.0.2/4.0.3 má tuto chybu.
+Ta byla odstraněna
+<ulink url="http://www.xfree86.org/cvs/changes_4_1.html">bug fixem #621
+CVS logu XFree86 4.1.0</ulink>. Takže upgradujte na XFree86 4.1.0 nebo novější.
+Alternativně si buď stáhněte (alespoň) DRI verze 0.6 z
+<ulink url="http://dri.sf.net">domácí stránky DRI</ulink>, nebo použijte DRI z
+CVS.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Výstup do OpenGL (<option>-vo gl</option>) nefunguje (selže/černá obrazovka/chyby
+X11/...).
+</para></question>
+<answer><para>
+Vaše OpenGL rozhraní nepodporuje dynamickou změnu textury (glTexSubImage).
+Je známo, že to nefunguje s binárním bordelem od nVidie. Naopak to funguje s
+Utah-GLX/DRI a kartami Matrox G400. Rovněž tak s DRI a kartami Radeon. Nefunguje
+to s DRI a ostatními kartami. Nebude to fungovat s kartami 3DFX, protože mají
+omezenu velikost textury na 256x256.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Mám kartu TNT/TNT2 od nVidie a pod filmem mám pruh s podivnými barvami!
+Čí je to vina?
+</para></question>
+<answer><para>
+Je to chyba binárního X ovladače od nVidie. Tyto chyby se objevují pouze při
+použití karet TNT/TNT2 a my s tím nemůžeme nic udělat. Problém vyřešte upgradem
+na poslední verzi binárního ovladače od nVidie. Pokud je to stále špatně,
+stěžujte si nVidii!
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Mám kartu nVidia XYZ a když kliknu na okno GUI, abych přepnul(a) zobrazení
+GUI panelu, objeví se černý čtverec v místě kliknutí. Mám nejnovější ovladač.
+</para></question>
+<answer><para>
+Ano, nVidia opravila předchozí chybu (výš) a vyrobila novou.
+Všichni jim gratulujme. UPDATE: Podle <link linkend="nvidia">nVidie</link>
+to již bylo opraveno.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Svět je krutý ...! SDL má pouze <systemitem>x11</systemitem> cíl,
+ale nikoli <systemitem>xv</systemitem>!
+</para></question>
+<answer><para>
+Zkuste ten <systemitem>x11</systemitem> cíl znovu. Teď zkuste <option>-vo x11
+-fs -zoom</option>. Vidíte rozdíl? Ne?! OK, tady je důvod:
+SDL cíl <systemitem>x11</systemitem> používá xv, pokud je dostupné, nemusíte se
+tím trápit... Poznámka: S SDL můžete vynutit/vypnout Xv použitím
+<option>-forcexv</option> a <option>-noxv</option>.
+</para></answer>
+</qandaentry>
+</qandadiv>
+
+<qandadiv id="faq-dvd">
+<title>Přehrávání DVD</title>
+<qandaentry>
+<question><para>
+Což takhle DVD navigace/nabídky?
+</para></question>
+<answer><para>
+<application>MPlayer</application> nepodporuje DVD nabídky díky závažným
+omezením svého návrhu znemožňujícím správné nakládání se stabilními obrázky a
+interaktivním obsahem. Pokud chcete mít své oblíbené nabídky (menu), budete
+muset použít jiný přehrávač jako <application>xine</application>,
+<application>vlc</application> nebo <application>Ogle</application>.
+Pokud chcete mít DVD navigaci v <application>MPlayer</application>u, musíte si
+ji naprogramovat, ale uvědomte si, že to bude velká akce.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Při přehrávání DVD jsem narazil(a) na tuto chybu:
+<screen>mplayer: ifo_read.c:1143: ifoRead_C_ADT_internal: Assertion nfo_length / sizeof(cell_adr_t) >= c_adt->nr_of_vobs' failed.</screen>
+</para></question>
+<answer><para>
+Toto je známá chyba libdvdread 0.9.1/0.9.2. Použijte
+<emphasis role="bold">libmpdvdkit2</emphasis>, kterou naleznete ve zdrojových
+kódech <application>MPlayer</application>u a je používána jako výchozí.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Mohu zkompilovat libdvdread a libdvdcss na mém sladkém SPARCu pod Solarisem?
+</para></question>
+<answer><para>
+Kdo ví... Říká se, že to jde, takže to prosíme zkuste a napište nám jak to šlo.
+Odvoláváme se na dokumentaci libdvdread a také její domácí stránku. My nejsme
+autory libdvdread. Použijte <emphasis role="bold">libmpdvdkit2</emphasis>,
+kterou naleznete ve zdrojových kódech <application>MPlayer</application>u
+a je používána jako výchozí.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Co takhle titulky? Umí je <application>MPlayer</application> zobrazovat?
+</para></question>
+<answer><para>
+Ano. Viz <link linkend="dvd">kapitola DVD</link>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Jak nastavím kód regionu na mé DVD mechanice? Nemám Windows!
+</para></question>
+<answer><para>
+Použijte nástroj <ulink url="http://linvdr.org/projects/regionset/">regionset</ulink>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Musím být (setuid) root, abych mohl(a) přehrávat DVD?
+</para></question>
+<answer><para>
+Ne. Ačkoli musíte mít příslušná práva k souboru DVD zařízení
+(v <filename class="directory">/dev/</filename>).
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Kde si mohu opatřit balíčky libdvdread a libdvdcss?
+</para></question>
+<answer><para>
+Vůbec je nepotřebujete. Použijte <emphasis role="bold">libmpdvdkit2</emphasis>,
+kterou naleznete ve zdrojových kódech <application>MPlayer</application>u
+a je používána jako výchozí.
+Zmíněné balíčky si můžete stáhnout ze
+<ulink url="http://www.dtek.chalmers.se/groups/dvd/">serveru Ogle</ulink>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Je možné přehrát/enkódovat pouze vybrané kapitoly?
+</para></question>
+<answer><para>
+Ano, vyzkoušejte volbu <option>-chapter</option>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Přehrávání DVD je zdlouhavé!
+</para></question>
+<answer><para>
+Použijte volbu <option>-cache</option> (popsanou v man stránce) a zkuste
+zapnout DMA pro DVD mechaniku pomocí nástroje <command>hdparm</command>
+(popsaného v <link linkend="drives">CD kapitole</link>).
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Zkopíroval(a) jsem DVD pomocí vobcopy. Jak jej mohu přehrát/enkódovat
+z harddisku?
+</para></question>
+<answer><para>
+Použijte volbu <option>-dvd-device</option> pro nastavení adresáře, které
+obsahují soubory:
+<screen>
+mplayer dvd://1 -dvd-device /cesta/do/adresáře
+</screen>
+</para></answer>
+</qandaentry>
+</qandadiv>
+
+<qandadiv id="faq-features">
+<title>Požadavky na vlastnosti</title>
+<qandaentry>
+<question><para>
+Pokud je <application>MPlayer</application> v pauze a já se pokusím převíjet,
+nebo stisknu jakoukoli klávesu, <application>MPlayer</application> se odpauzuje.
+Rád(a) bych převíjel(a) film v pauze.
+</para></question>
+<answer><para>
+Je velmi choulostivé zavést tuto vlastnost bez ztráty A/V synchronizace.
+Všechny pokusy zatím selhaly, ale patche jsou vítány.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Rád(a) bych převíjel(a) o +/- 1 snímek místo o 10 sekund.
+</para></question>
+<answer><para>
+Můžete se posunout o jedno pole vpřed stiskem <keycap>.</keycap>.
+Pokud není film pauzován, zapauzuje se pak (detaily viz man stránka).
+Krokování zpět pravděpodobně nebude v dohledné době implementováno.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Jak přiměji <application>MPlayer</application> k zapamatování voleb, které
+používám pro tento konkrétní soubor, např. <filename>film.avi</filename>?
+</para></question>
+<answer><para>
+Vytvořte soubor jménem <filename>film.avi.conf</filename> s volbami
+specifickými pro tento film a umístěte jej do adresáře
+<filename class="directory">~/.mplayer</filename> nebo do stejného adresáře
+jako soubor.
+</para></answer>
+</qandaentry>
+</qandadiv>
+
+<qandadiv id="faq-encoding">
+<title>Enkódování</title>
+<qandaentry>
+<question><para>
+Jak mohu enkódovat?
+</para></question>
+<answer><para>
+Přečtěte si sekci
+<link linkend="mencoder"><application>MEncoder</application></link>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Jak vytvořím VCD?
+</para></question>
+<answer><para>
+Zkuste skript <filename>mencvcd</filename> z podadresáře
+<filename class="directory">TOOLS</filename>. Pomocí něj můžete enkódovat DVD
+nebo jiné filmy do VCD nebo SVCD formátu a dokonce je vypálit přímo na CD.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Jak spojím dva video soubory?
+</para></question>
+<answer><para>
+Tohle bylo ze všech stran diskutováno na mplayer-users. Prohledejte
+<ulink url="http://mplayerhq.hu/cgi-bin/s-arch.cgi?sbm=mplayer-users">archivy</ulink>
+pro úplnou odpověď. Je to komplikovaná záležitost a postup velmi závisí na druhu
+souborů, které chcete spojit. MPEGy mohou být s trochou štěstí jednoduše
+spojeny do jednoho souboru. Pro AVI máte k dispozici dva nástroje,
+<ulink url="http://fixounet.free.fr/avidemux/">avidemux</ulink> a
+<application>avimerge</application> (součást sady nástrojů
+<ulink url="http://www.theorie.physik.uni-goettingen.de/~ostreich/transcode/">transcode</ulink>).
+Můžete také zkusit <application>MEncoder</application>, pokud máte dva soubory
+sdílející stejné rozměry a kodek. Zkuste:
+<screen>
+     cat soubor1 soubor2 > soubor3
+     mencoder -ovc copy -oac copy -o out.avi -forceidx soubor3.avi
+</screen>
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Nemohu zakódovat DVD titulky do AVI!
+</para></question>
+<answer><para>
+Musíte správně nastavit volbu <option>-sid</option>!
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Jak mohu enkódovat pouze některé kapitoly z DVD?
+</para></question>
+<answer><para>
+Použijte správně volbu <option>-chapter</option>, jako: <option>-chapter 5-7</option>
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Zkouším pracovat s 2GB+ soubory na souborovém systému VFAT. Bude to fungovat?
+</para></question>
+<answer><para>
+Ne, VFAT nepodporuje 2GB+ soubory.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Jakto že je doporučený bitrate vypisovaný <application>MEncoder</application>em
+záporný?
+</para></question>
+<answer><para>
+Protože datový tok při kterém enkódujete audio je příliš velký, aby se film
+vešel na jakékoli CD. Ověřte si, že máte dobře nainstalovaný libmp3lame.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Nemohu kompilovat ASF soubor do AVI/MPEG-4 (DivX) protože používá 1000 fps.
+</para></question>
+<answer><para>
+Protože ASF používá variabilní snímkovou rychlost zatímco AVI pevnou, musíte
+ji nastavit ručně pomocí volby <option>-ofps</option>.
+</para></answer>
+</qandaentry>
+
+
+<qandaentry>
+<question><para>
+Jak vložím titulky do výstupního souboru?
+</para></question>
+<answer><para>
+Jen přidejte volbu <option>-sub &lt;soubor&gt;</option> (nebo obdobně volbu
+<option>-sid</option>) do příkazového řádku
+<application>MEncoder</application>u.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Jak zakóduji pouze zvuk z hudebního videa?
+</para></question>
+<answer><para>
+Přímo to není možné, ale můžete zkusit toto (všimněte si
+<emphasis role="bold">&amp;</emphasis> na konci příkazu
+<command>mplayer</command>):
+<screen>
+    mkfifo encode
+    mplayer -ao pcm -aofile encode dvd://1 &amp;
+    lame <replaceable>vaše_volby</replaceable> encode hudba.mp3
+    rm encode
+</screen>
+Toto vám umožňuje použít jakýkoli enkodér, ne jen <application>LAME</application>,
+jen zaměňte <command>lame</command> svým oblíbeným enkodérem zvuku v příkazu
+výše.
+</para></answer>
+</qandaentry>
+
+</qandadiv>
+</qandaset>
+
+</chapter>
+
