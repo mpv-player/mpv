@@ -2,7 +2,7 @@
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" Tuto man stránku napsali/pí¹í Gabucino, Diego Biurrun, Jonas Jermann
 .\" Pøeklad (translation): Jiøí Heryán
-.\" Stav pøekladu (ts status): ALFA
+.\" Stav pøekladu (ts status): ALFA2
 .\" Kódování (encoding): ISO8859-2
 .\"
 .
@@ -14,20 +14,20 @@
 .nr IN 7
 .\" definice odsazení pro pododstavce
 .nr SS 5
-.\" pøidat novou pod-volbu
+.\" pøidat novou podvolbu
 .de IPs
 .IP "\\$1" \n(SS
 ..
-.\" zaèátek první úrovnì pod-voleb, ukonèeno pomocí .RE
+.\" zaèátek první úrovnì podvoleb, ukonèeno pomocí .RE
 .de RSs
 .RS \n(IN+3
 ..
-.\" zaèátek druhé úrovnì pod-voleb
+.\" zaèátek druhé úrovnì podvoleb
 .de RSss
 .PD 0
 .RS \n(SS+3
 ..
-.\" konec druhé úrovnì pod-voleb
+.\" konec druhé úrovnì podvoleb
 .de REss
 .RE
 .PD 1
@@ -162,15 +162,15 @@ mencoder \- filmový enkodér
 je multimediální pøehrávaè pro Linux (bì¾í na mnoha platformách a CPU
 architekturách, viz dokumentace).
 Pøehraje vìt¹inu MPEG/\:VOB, AVI, ASF/\:WMA/\:WMV, RM, QT/\:MOV/\:MP4, OGG/\:OGM,
-MKV, VIVO, FLI, NuppelVideo, yuv4mpeg, FILM a RoQ souborù, podporovaných mnoha
-nativními a binárními kodeky.
+MKV, VIVO, FLI, NuppelVideo, yuv4mpeg, FILM a RoQ souborù s podporou mnoha
+nativních i binárních kodekù.
 Mù¾ete sledovat VideoCD, SVCD, DVD, 3ivx, DivX\ 3/\:4/\:5 a dokonce
 i WMV.
 .PP
 MPlayer podporuje velké mno¾ství výstupních audio a video rozhraní.
 Pracuje s X11, XV, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca, DirectFB,
-Quartz, také mù¾ete pou¾ít GGI, SDL (a v¹echny jejich ovladaèe), VESA (na v¹ech
-VESA-kompatibilních kartách, dokonce bez X11), nìkterými nízkoúrovòovými ovladaèi
+Quartz, také mù¾ete pou¾ít GGI, SDL (a v¹echny její ovladaèe), VESA (na v¹ech
+VESA-kompatibilních kartách, dokonce bez X11), nìkteré nízkoúrovòové ovladaèe
 (pro Matrox, 3Dfx a ATI) a nìkterými hardvérovými MPEG dekódovacími kartami, jako je
 Siemens DVB, DXR2 a DXR3/\:Hollywood+.
 Mnoho z nich podporuje hardvérové nebo softvérové ¹kálování, tak¾e si mù¾ete
@@ -184,12 +184,12 @@ SubViewer, Sami, VPlayer, RT, SSA, AQTitle, JACOsub, PJS a ná¹ vlastní: MPsub) a
 také DVD titulky (SPU proudy, VOBsub a Closed Captions).
 .PP
 .B mencoder
-(MPlayerùv filmový Enkodér) je jednoduchý filmový enkodér, navr¾ený pro pøevod
+(MPlayerùv filmový Enkodér) je jednoduchý filmový enkodér navr¾ený pro pøevod
 Mplayerem pøehratelných filmù (viz vý¹) do jiného formátu pøehratelného
 MPlayerem (viz ní¾).
 Kóduje video do DivX4, XviD, nìkterého z libavcodec kodekù a PCM/\:MP3/\:VBRMP3
 audio v 1, 2 nebo 3\ prùchodech.
-Dále umí proudovì kopírovat (stream copy) a má rozsáhlý systém filtrù (crop,
+Dále umí kopírovat datový proud (stream copy) a má rozsáhlý systém filtrù (crop,
 expand, flip, postprocess, rotate, scale, noise, konverze RGB/\:yuv) a mnoho
 dal¹ích.
 .PP
@@ -200,7 +200,7 @@ stránky.
 je MPlayer s grafickým u¾ivatelským rozhraním (GUI).
 Má stejné volby jako MPlayer.
 .PP
-.B Rovnì¾ viz HTML dokumentace!
+.B Pøeètìte si také HTML dokumentaci!
 .
 .
 .\" --------------------------------------------------------------------------
@@ -208,7 +208,7 @@ Má stejné volby jako MPlayer.
 .\" --------------------------------------------------------------------------
 .
 .SH "OVLÁDÁNÍ Z KLÁVESNICE"
-MPlayer má plnì nastavitelnou, pøíkazovì orientovanou ovládací vrstvu
+MPlayer má plnì nastavitelnou, pøíkazovì orientovanou ovládací vrstvu,
 která jej umo¾òuje ovládat pomocí klávesnice, my¹i, joysticku
 nebo dálkového ovládaèe (s pomocí LIRC).
 .br
@@ -243,13 +243,13 @@ Ztlumení/\:zesílení hlasitosti
 .IPs m\ \ \ \ 
 Vypnutí zvuku.
 .IPs f\ \ \ \ 
-Pøepíná na celou obrazovku a zpìt (viz také volbu \-fs).
+Pøepínaè na celou obrazovku a zpìt (viz také volbu \-fs).
 .IPs T\ \ \ \ 
-Pøepíná funkci v¾dy-nahoøe (stay-on-top) (viz také volbu \-ontop).
+Pøepínaè funkce v¾dy-nahoøe (stay-on-top) (viz také volbu \-ontop).
 .IPs "w a e"
-Sní¾ení/\:zvý¹ení rozsahu panscan.
+Sní¾ení/\:zvý¹ení rozsahu panscan (lupa).
 .IPs o\ \ \ \ 
-Pøepíná zobrazení OSD: nic / posuvník / posuvník + èas /
+Pøepínaè zobrazení OSD: nic / posuvník / posuvník + èas /
 posuvník + èas + celkový èas.
 .IPs d\ \ \ \ 
 Pøepínaè zahazování snímkù:  nic / zru¹ zobrazení / zru¹ dekódování
@@ -340,7 +340,7 @@ Syntax konfiguraèního souboru je 'volba=<hodnota>', v¹ecko za '#' je pova¾ováno
 za komentáø.
 Volby které nemají hodnoty jsou povoleny nastavením na 'yes' nebo '1' nebo
  'true' a zakázány nastavením na 'no' nebo '0' nebo 'false'.
-I pod-volby mohou být takto nastavovány.
+I podvolby mohou být takto nastavovány.
 .PP
 .I PØÍKLAD:
 .nf
@@ -373,7 +373,7 @@ Pou¾ije vypsaný soubor namísto systémového nebo vestavìného souboru codecs.conf.
 Vypsaný soubor bude zpracován po ostatních konfiguraèních souborech.
 .
 .TP
-.B \-quiet\ \
+.B \-quiet\ \ 
 Ménì upovídaný výstup na konzoli; konkrétnì potlaèí zobrazování stavového øádku
 (tedy\& A:   0.7 V:   0.6 A-V:  0.068 ...).
 Volba je u¾iteèná na pomalých nebo vadných terminálech, které nezvládají
@@ -430,8 +430,8 @@ Volbu pou¾ijte v kombinaci s \-nosound a \-vo null pro benchmark pouze
 video kodeku.
 .br
 .I POZNÁMKA:
-S touto volbou MPlayer rovnì¾ ignoruje snímkování pøehrává-li pouze video
-(mù¾ete to brát jako nekoneèné fps).
+Pokud MPlayer s touto volbou pøehrává pouze video, pak ignoruje rychlost
+snímkování (mù¾ete to brát jako nekoneèné fps).
 .
 .TP
 .B \-colorkey <èíslo>
@@ -471,6 +471,8 @@ pøehrání.
 Vynutí stejný videosystém (okno) pro více souborù (jedna (od)inicializace pro
 v¹echny soubory).
 Pro v¹echny soubory bude pou¾ito pouze jednou otevøené okno.
+Takto lze lze pøehrávat film rozdìlený do více souborù bez prodlev mezi
+jednotlivými èástmi.
 V souèasnosti umo¾òují fixed-vo jen tyto video výstupy: gl2, mga, svga, x11,
 xmga, xv, xvidix a dfbmga.
 .
@@ -482,7 +484,7 @@ B snímky se ani nedekódují.
 .
 .TP
 .B \-h, \-help, \-\-help
-Vypí¹e krátké shrnutí mo¾ných voleb.
+Vypí¹e krátké shrnutí dostupných voleb.
 .
 .TP
 .B \-hardframedrop
@@ -492,7 +494,7 @@ Vede ke zkreslení obrazu!
 .TP
 .B \-identify
 Vypí¹e parametry souboru ve snadno zpracovatelném formátu.
-Skript TOOLS/\:midentify potlaèí ostatní výstup MPlayeru a (z trochou ¹tìstí)
+Skript TOOLS/\:midentify potlaèí ostatní výstup MPlayeru a (s\ trochou ¹tìstí)
 upraví jména souborù pro shell.
 .
 .TP
@@ -520,9 +522,9 @@ Vypí¹e v¹echny klávesy, kterým mohou být pøiøazeny pøíkazy.
 .IPs cmdlist
 Vypí¹e v¹echny pøíkazy, které lze pøiøadit klávesám.
 .IPs js-dev
-Nastav zadaný joystik pro pou¾ití (default: /dev/\:input/\:js0).
+Nastaví zadaný joystik pro pou¾ití (default: /dev/\:input/\:js0).
 .IPs file\ 
-Èti pøíkazy ze zadaného souboru.
+Ète pøíkazy ze zadaného souboru.
 Nejpou¾itelnìj¹í s FIFO (pojmenovaná roura).
 .br
 .I POZNÁMKA:
@@ -564,7 +566,7 @@ Zobrazí hlavní menu pøi startu MPlayeru.
 .B \-noconsolecontrols
 Zamezí MPlayeru èíst stisky kláves ze standardního vstupu.
 Pou¾itelné pokud naèítáte data ze standardního vstupu.
-Tato volba je automaticky zapnutá kdy¾ je \- nalezena na pøíkazovém øádku.
+Tato volba je automaticky zapnutá kdy¾ je '\-' nalezen na pøíkazovém øádku.
 Zde máte pøíklad kdy je nutné nastavit volbu ruènì:\&
 pokud otevøete /dev/\:stdin (nebo ekvivalent na va¹em systému), pou¾ijete stdin
 v playlistu nebo plánujete èíst stdin pozdìji pøíkazem loadfile nebo
@@ -576,7 +578,7 @@ Vypne ovládání joystikem.
 .
 .TP
 .B \-nolirc
-Vypne ovládání pomocí DO.
+Vypne ovládání pomocí dálkového ovládaèe.
 .
 .TP
 .B \-nomouseinput (pouze X11)
@@ -586,7 +588,7 @@ tuto volbu).
 .TP
 .B \-nortc (pouze RTC)
 Vypne pou¾ití Linuxového RTC (hodiny reálného èasu \- /dev/\:rtc) jako
-èasovací mechanismus.
+èasové základny.
 .
 .TP
 .B \-playlist <soubor>
@@ -605,7 +607,7 @@ Vypisuje je¹tì ménì výstupních a stavových informací ne¾ s \-quiet.
 .
 .TP
 .B \-rtc-device <zaøízení>
-Pou¾ije vypsané zaøízení pro RTC èasování.
+Pou¾ije zadané <zaøízení> hodin reálného èasu jako èasovou základnu.
 .
 .TP
 .B \-shuffle
@@ -613,8 +615,8 @@ Pøehraje soubory v náhodném poøadí.
 .
 .TP
 .B \-skin <jméno> (pouze GUI)
-Nahraje skin z adresáøe uvedeného jako parametr, ní¾e jsou defaultní
-adresáøe se skiny, /usr/\:local/\:share/\:mplayer/\:Skin/\: a ~/.mplayer/\:Skin/.
+Nahraje skin z adresáøe <jméno>. Zde jsou defaultní
+adresáøe se skiny:\& /usr/\:local/\:share/\:mplayer/\:Skin/\: a ~/.mplayer/\:Skin/.
 .sp 1
 .I PØÍKLAD:
 .PD 0
@@ -627,18 +629,19 @@ a poté ~/.mplayer/\:Skin/\:fittyfene.
 .
 .TP
 .B \-slave (viz té¾ \-input)
-Pøepne do závislého re¾imu, v nìm¾ MPlayer slou¾í jako backend pro ostatní programy.
-Namísto zpracování vstupu z klávesnice apod., ète MPlayer pøíkazy ze std. vstupu.
+Pøepne do závislého re¾imu. V nìm MPlayer slou¾í jako podkladová aplikace
+(backend) pro jiné programy.
+MPlayer ète pøíkazy ze std. vstupu, nezpracovává v¹ak vstupy z klávesnice apod.
 .br
 .I POZNÁMKA:
-Viz volbu \-input cmdlist pro seznam pøíkazù a DOCS/tech/slave.txt pro jejich
-popis.
+Prostudujte si volbu \-input cmdlist pro seznam pøíkazù a DOCS/tech/slave.txt
+pro jejich popis.
 .
 .TP
 .B \-softsleep
-Pou¾ije kvalitní softvérové èasovaèe místo RTC.
+Pou¾ije kvalitní softvérové èasovaèe místo hodin reálného èasu (RTC).
 Za cenu vìt¹í zátì¾e CPU poskytují stejnì precizní èasování jako RTC bez nárokù na
-speciální práva.
+zvlá¹tní pøístupová práva.
 .
 .TP
 .B \-speed <0.01\-100>
@@ -650,12 +653,12 @@ Zobrazí jeden snímek ka¾dých <sek> sekund.
 Pou¾itelné pro slideshow.
 .
 .
-.SH "VOLBY PRO DEMUXER/\:PROUD"
+.SH "VOLBY PRO DEMUXER/\:DATOVÝ PROUD"
 .
 .TP
 .B \-a52drc <úroveò>
-Vybere Dynamickou Kompresní úroveò pro AC3 zvukové proudy.
-<úroveò> je desetinné èíslo v rozsahu od 0 do 1, kde 0 znamená bez komprese 
+Vybere dynamickou kompresní úroveò pro AC3 zvukové proudy, kde
+<úroveò> je desetinné èíslo v rozsahu od 0 do 1. Úroveò 0 znamená bez komprese 
 a 1 (co¾ je default) znamená plná komprese (tiché pasá¾e jsou je¹tì ti¹¹í 
 a naopak).
 Tato volba se projeví pouze pokud AC3 proud obsahuje informaci o po¾adovaném 
@@ -1166,7 +1169,6 @@ aktuální audio re¾im.
 Nastaví audio zaøízení.
 <hodnota> mù¾e být /dev/\:xxx pro OSS a ID hardvéru pro ALSA.
 Zpùsob jak urèit ID hardvéru naleznete v dokumentaci k \-ao alsa.
-.REss
 .IPs audioid=<hodnota>
 Vybere zvukový výstup zachytávací karty, pokud je jich více ne¾ jeden.
 .IPs "[volume|bass|treble|balance]=<0\-65535> (v4l1)"
@@ -1220,7 +1222,7 @@ Z pøehrávaného MPEG-TS proudu pou¾ije MPlayer/\:MEncoder první program
 (pokud je) s vybraným video proudem.
 .
 .TP
-.B \-vivo <pod-volby> (LADÍCÍ KÓD)
+.B \-vivo <podvolby> (LADÍCÍ KÓD)
 Vynutí audio parametry pro VIVO demuxer (pro úèely ladìní).
 .
 .
@@ -1713,12 +1715,12 @@ Výstupní zvukové ovladaèe jsou rozhraními k rùzným audio výstupním zaøízením.
 Syntax je:
 .
 .TP
-.B \-ao <ovladaè1[:pod-volba1[=hodnota]:...],ovladaè2,...[,]>
+.B \-ao <ovladaè1[:podvolba1[=hodnota]:...],ovladaè2,...[,]>
 Nastavuje seznam pou¾itých audio výstupních rozhraní podle priority.
 .PP
 Pokud seznam konèí ',', pak se v pøípadì selhání v¹ech zadaných rozhraní pou¾ijí
 i ostatní.
-Pod-volby jsou volitelné a v mnoha pøípadech je nemusíte vùbec pou¾ít.
+Podvolby jsou volitelné a v mnoha pøípadech je nemusíte vùbec pou¾ít.
 .br
 .I POZNÁMKA:
 Seznam zakompilovaných ovladaèù (rozhraní) získáte pomocí \-ao help.
@@ -2282,12 +2284,12 @@ Výstupní video rozhraní jsou rozhraní k rùzným výstupním zaøízením.
 Syntax je:
 .
 .TP
-.B \-vo <rozhraní1[:pod-volba1[=hodnota]:...],rozhraní2,...[,]>
+.B \-vo <rozhraní1[:podvolba1[=hodnota]:...],rozhraní2,...[,]>
 Udává seznam video rozhraní k pou¾ití podle priority.
 .PP
 Konèí-li seznam èárkou ',', prozkou¹í MPlayer v pøípadì selhání i rozhraní neuvedená
 v seznamu.
-Pod-volby jsou volitelné a vìt¹inou mohou být vynechány.
+Podvolby jsou volitelné a vìt¹inou mohou být vynechány.
 .br
 .I POZNÁMKA:
 Viz \-vo help pro seznam zakompilovaných video rozhraní.
@@ -6404,7 +6406,7 @@ Poznamenejme, ¾e toto nezrychlí enkódování, pouze zabrání, aby byla barvonosná d
 zapsána v poslední fázi enkódování.
 .
 .TP
-.B debug\ \
+.B debug\ \ 
 Ukládat snímkové statistiky v xvid.dbg.
 (Toto NENÍ ovládací soubor 2prùchodového re¾imu.)
 .RE
@@ -6669,7 +6671,7 @@ stejné jako viz. vý¹
 stejné jako viz. vý¹
 .IPs ntsc169
 stejné jako viz. vý¹ (Nezapomeòte zadat pøesný pomìr stran.)
-.IPs ext\ \
+.IPs ext\ \ 
 Umo¾òuje nastavit vá¹ vlastní pomìr stran pixelu pomocí par_width a
 par_height.
 .RE
