@@ -446,7 +446,7 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
 			sh->a_in_buffer_size=
 			sh->a_in_buffer_len=sh->wf->nBlockAlign*h;
 		} else
-    if(!sps){
+    if((sh->format == mmioFOURCC('s','i','p','r')) || !sps){ // is !sps really needed? (cook with sipr matrix?)
       // 'sipr' way
       int j,n;
       int bs=h*w*2/96; // nibbles per subpacket
