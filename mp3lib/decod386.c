@@ -147,10 +147,10 @@ static int synth_1to1_r(real *bandPtr,int channel,unsigned char *out,int *pnt)
 }
 #endif
 
-synth_func_t synth_func;
+static synth_func_t synth_func;
 
 #if defined(CAN_COMPILE_X86_ASM)
-int synth_1to1_MMX( real *bandPtr,int channel,short * samples)
+static int synth_1to1_MMX( real *bandPtr,int channel,short * samples)
 {
     static short buffs[2][2][0x110];
     static int bo = 1;

@@ -1167,7 +1167,7 @@ static void III_antialias(real xr[SBLIMIT][SSLIMIT],struct gr_info_s *gr_info) {
  * III_hybrid
  */
  
-dct36_func_t dct36_func;
+static dct36_func_t dct36_func;
   
 static void III_hybrid(real fsIn[SBLIMIT][SSLIMIT],real tsOut[SSLIMIT][SBLIMIT],
    int ch,struct gr_info_s *gr_info)
