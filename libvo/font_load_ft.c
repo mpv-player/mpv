@@ -882,10 +882,12 @@ void free_font_desc(font_desc_t *desc)
 	if (desc->pic_a[i]) {
 	    if (desc->pic_a[i]->bmp) free(desc->pic_a[i]->bmp);
 	    if (desc->pic_a[i]->pal) free(desc->pic_a[i]->pal);
+	    free (desc->pic_a[i]);
 	}
 	if (desc->pic_b[i]) {
 	    if (desc->pic_b[i]->bmp) free(desc->pic_b[i]->bmp);
 	    if (desc->pic_b[i]->pal) free(desc->pic_b[i]->pal);
+	    free (desc->pic_b[i]);
 	}
     }
 
@@ -909,7 +911,9 @@ static int load_sub_face(char *name, FT_Face *face)
     if (name) err = FT_New_Face(library, name, 0, face);
 
     if (err) {
-	err = FT_New_Face(library, get_path("subfont.ttf"), 0, face);
+	char *font_file = get_path("subfont.ttf");
+	err = FT_New_Face(library, font_file, 0, face);
+	free(font_file);
 	if (err) {
 	    err = FT_New_Face(library, MPLAYER_DATADIR "/subfont.ttf", 0, face);
 	    if (err) {

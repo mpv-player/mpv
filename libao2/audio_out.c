@@ -137,20 +137,26 @@ ao_functions_t* init_best_audio_out(char** ao_list,int use_plugin,int rate,int c
     // first try the preferred drivers, with their optional subdevice param:
     if(ao_list && ao_list[0])
       while(ao_list[0][0]){
-        char* ao=strdup(ao_list[0]);
+        char* ao=ao_list[0];
+        int ao_len;
         if (strncmp(ao, "alsa9", 5) == 0 || strncmp(ao, "alsa1x", 6) == 0) {
           mp_msg(MSGT_AO, MSGL_FATAL, MSGTR_AO_ALSA9_1x_Removed);
-          free(ao);
           exit_player(NULL);
+        }
+        if (ao_subdevice) {
+          free(ao_subdevice);
+          ao_subdevice = NULL;
         }
 	ao_subdevice=strchr(ao,':');
 	if(ao_subdevice){
-	    ao_subdevice[0]=0;
-	    ++ao_subdevice;
+	    ao_len = ao_subdevice - ao;
+	    ao_subdevice = strdup(&ao[ao_len + 1]);
 	}
+	else
+	    ao_len = strlen(ao);
 	for(i=0;audio_out_drivers[i];i++){
 	    ao_functions_t* audio_out=audio_out_drivers[i];
-	    if(!strcmp(audio_out->info->short_name,ao)){
+	    if(!strncmp(audio_out->info->short_name,ao,ao_len)){
 		// name matches, try it
 		if(use_plugin){
 		    audio_out_plugin.control(AOCONTROL_SET_PLUGIN_DRIVER,audio_out);
@@ -161,12 +167,14 @@ ao_functions_t* init_best_audio_out(char** ao_list,int use_plugin,int rate,int c
 	    }
 	}
         // continue...
-	free(ao);
 	++ao_list;
 	if(!(ao_list[0])) return NULL; // do NOT fallback to others
       }
+    if (ao_subdevice) {
+      free(ao_subdevice);
+      ao_subdevice = NULL;
+    }
     // now try the rest...
-    ao_subdevice=NULL;
     for(i=0;audio_out_drivers[i];i++){
 	ao_functions_t* audio_out=audio_out_drivers[i];
 	if(use_plugin){
