@@ -785,9 +785,9 @@ void vo_zr_revertoption(config_t* opt,char* param) {
   else if (!strcasecmp(param, "zrvdec"))
     zr->vdec = 1;
   else if (!strcasecmp(param, "zrxdoff"))
-    zr->vdec = -1;
+    zr->xdoff = -1;
   else if (!strcasecmp(param, "zrydoff"))
-    zr->vdec = -1;
+    zr->ydoff = -1;
   else if (!strcasecmp(param, "zrquality"))
     zr->quality = 2;
   else if (!strcasecmp(param, "zrnorm"))
