@@ -20,6 +20,7 @@
 #include <math.h>
 
 #include "config.h"
+#include "mp_msg.h"
 
 #define DBUG	0
 #define MAX_STRIPS 32
@@ -29,7 +30,36 @@ typedef struct
 {
 	unsigned char y0, y1, y2, y3;
 	char u, v;
-	unsigned long rgb0, rgb1, rgb2, rgb3;		/* should be a union */
+
+	// These variables are for YV12 output: The v1 vars are for
+	// when the vector is doublesized and used by itself to paint a
+	// 4x4 block.
+	// This quad (y0 y0 y1 y1) is used on the 2 upper rows.
+	unsigned long yv12_v1_u;
+	// This quad (y2 y2 y3 y3) is used on the 2 lower rows.
+	unsigned long yv12_v1_l;
+	// The v4 vars are for when the vector is used as 1 of 4 vectors
+	// to paint a 4x4 block.
+	// Upper pair (y0 y1):
+	unsigned short yv12_v4_u;
+	// Lower pair (y2 y3):
+	unsigned short yv12_v4_l;
+
+	// These longs are for YUYV output: The v1 vars are for when the
+	// vector is doublesized and used by itself to paint a 4x4 block.
+	// The names stand for the upper-left, upper-right,
+	// lower-left, and lower-right YUYV pixel pairs.
+        unsigned long yuyv_v1_ul, yuyv_v1_ur;
+        unsigned long yuyv_v1_ll, yuyv_v1_lr;
+	// The v4 vars are for when the vector is used as 1 of 4 vectors
+	// to paint a 4x4 block. The names stand for upper and lower
+	// YUYV pixel pairs.
+        unsigned long yuyv_v4_u, yuyv_v4_l;
+
+	// These longs are for BGR32 output
+	unsigned long rgb0, rgb1, rgb2, rgb3;
+
+	// These char arrays are for BGR24 output
 	unsigned char r[4], g[4], b[4];
 } cvid_codebook;
 
@@ -58,6 +88,134 @@ static long CU_Y_tab[256], CV_Y_tab[256], CU_Cb_tab[256], CV_Cb_tab[256],
 
 
 /* ---------------------------------------------------------------------- */
+
+#define PACK_YV12_V1_Y(cb,y0,y1) ((((unsigned char)cb->y1)<<24)|(cb->y1<<16)|(((unsigned char)cb->y0)<<8)|(cb->y0))
+#define PACK_YV12_V4_Y(cb,y0,y1) ((((unsigned char)cb->y1)<<8)|(cb->y0))
+
+static inline void read_codebook_yv12(cvid_codebook *c, int mode)
+{
+unsigned char y0, y1, y2, y3, u, v;
+int y_uv;
+
+	if(mode)		/* black and white */
+		{
+		c->y0 = get_byte();
+		c->y1 = get_byte();
+		c->y2 = get_byte();
+		c->y3 = get_byte();
+		c->u = c->v = 128;
+		}
+	else			/* colour */
+		{
+		y0 = get_byte();  /* luma */
+		y1 = get_byte();
+		y2 = get_byte();
+		y3 = get_byte();
+		u = 128+get_byte(); /* chroma */
+		v = 128+get_byte();
+
+		/*             YUV * inv(CinYUV)
+		 *  | Y  |   | 1 -0.0655  0.0110 | | CY |
+		 *  | Cb | = | 0  1.1656 -0.0062 | | CU |
+		 *  | Cr |   | 0  0.0467  1.4187 | | CV |
+		 */
+		y_uv = (int)((CU_Y_tab[u] + CV_Y_tab[v]) >> SCALEBITS);
+		c->y0 = uiclp[y0 + y_uv];
+		c->y1 = uiclp[y1 + y_uv];
+		c->y2 = uiclp[y2 + y_uv];
+		c->y3 = uiclp[y3 + y_uv];
+		c->u = uiclp[(int)((CU_Cb_tab[u] + CV_Cb_tab[v]) >> SCALEBITS)];
+		c->v = uiclp[(int)((CU_Cr_tab[u] + CV_Cr_tab[v]) >> SCALEBITS)];
+
+		c->yv12_v1_u = PACK_YV12_V1_Y(c, y0, y1);
+		c->yv12_v1_l = PACK_YV12_V1_Y(c, y2, y3);
+		c->yv12_v4_u = PACK_YV12_V4_Y(c, y0, y1);
+		c->yv12_v4_l = PACK_YV12_V4_Y(c, y2, y3);
+		}
+}
+
+/* ---------------------------------------------------------------------- */
+
+static unsigned char *yv12_y_plane = NULL;
+static unsigned char *yv12_v_plane = NULL;
+static unsigned char *yv12_u_plane = NULL;
+
+inline void cvid_v1_yv12(unsigned char *frm, unsigned char *end, int stride, cvid_codebook *cb)
+{
+int uv_offset = (frm - yv12_y_plane) / 4;
+int row_inc = stride / sizeof(unsigned long);
+unsigned long *y_ptr = (unsigned long *)frm;
+unsigned char *v_ptr = yv12_v_plane + uv_offset;
+unsigned char *u_ptr = yv12_u_plane + uv_offset;
+int uv_stride = stride / 2;
+
+	// take care of the luminance
+	if(y_ptr > (unsigned long *)end) return;
+	*y_ptr = cb->yv12_v1_u;
+	y_ptr += row_inc; if(y_ptr > (unsigned long *)end) return;
+	*y_ptr = cb->yv12_v1_u;
+	y_ptr += row_inc; if(y_ptr > (unsigned long *)end) return;
+	*y_ptr = cb->yv12_v1_l;
+	y_ptr += row_inc; if(y_ptr > (unsigned long *)end) return;
+	*y_ptr = cb->yv12_v1_l;
+
+	// now for the chrominance
+	v_ptr[0] = cb->v;
+	v_ptr[1] = cb->v;
+	v_ptr += uv_stride;
+	v_ptr[0] = cb->v;
+	v_ptr[1] = cb->v;
+
+	u_ptr[0] = cb->u;
+	u_ptr[1] = cb->u;
+	u_ptr += uv_stride;
+	u_ptr[0] = cb->u;
+	u_ptr[1] = cb->u;
+}
+
+/* ---------------------------------------------------------------------- */
+inline void cvid_v4_yv12(unsigned char *frm, unsigned char *end, int stride, cvid_codebook *cb0,
+	cvid_codebook *cb1, cvid_codebook *cb2, cvid_codebook *cb3)
+{
+int uv_offset = (frm - yv12_y_plane) / 4;
+int row_inc = stride / sizeof(unsigned short);
+unsigned short *y_ptr = (unsigned short *)frm;
+unsigned char *v_ptr = yv12_v_plane + uv_offset;
+unsigned char *u_ptr = yv12_u_plane + uv_offset;
+int uv_stride = stride / 2;
+
+	// take care of the luminance
+	if(y_ptr > (unsigned short *)end) return;
+	y_ptr[0] = cb0->yv12_v4_u;
+	y_ptr[1] = cb1->yv12_v4_u;
+	y_ptr += row_inc; if(y_ptr > (unsigned short *)end) return;
+	y_ptr[0] = cb0->yv12_v4_l;
+	y_ptr[1] = cb1->yv12_v4_l;
+	y_ptr += row_inc; if(y_ptr > (unsigned short *)end) return;
+	y_ptr[0] = cb2->yv12_v4_u;
+	y_ptr[1] = cb3->yv12_v4_u;
+	y_ptr += row_inc; if(y_ptr > (unsigned short *)end) return;
+	y_ptr[0] = cb2->yv12_v4_l;
+	y_ptr[1] = cb3->yv12_v4_l;
+
+	// now for the chrominance
+	v_ptr[0] = cb0->v;
+	v_ptr[1] = cb1->v;
+	v_ptr += uv_stride;
+	v_ptr[0] = cb2->v;
+	v_ptr[1] = cb3->v;
+
+	u_ptr[0] = cb0->u;
+	u_ptr[1] = cb1->u;
+	u_ptr += uv_stride;
+	u_ptr[0] = cb2->u;
+	u_ptr[1] = cb3->u;
+}
+
+/* ---------------------------------------------------------------------- */
+
+#define PACK_YUYV(cb,y0,y1,u,v) ((((unsigned char)cb->v)<<24)|(cb->y1<<16)|(((unsigned char)cb->u)<<8)|(cb->y0))
+
 static inline void read_codebook_yuy2(cvid_codebook *c, int mode)
 {
 unsigned char y0, y1, y2, y3, u, v;
@@ -92,40 +250,37 @@ int y_uv;
 		c->y3 = uiclp[y3 + y_uv];
 		c->u = uiclp[(int)((CU_Cb_tab[u] + CV_Cb_tab[v]) >> SCALEBITS)];
 		c->v = uiclp[(int)((CU_Cr_tab[u] + CV_Cr_tab[v]) >> SCALEBITS)];
+
+		c->yuyv_v4_u = PACK_YUYV(c, y0, y1, u, v);
+		c->yuyv_v4_l = PACK_YUYV(c, y2, y3, u, v);
+		c->yuyv_v1_ul = PACK_YUYV(c, y0, y0, u, v);
+		c->yuyv_v1_ur = PACK_YUYV(c, y1, y1, u, v);
+		c->yuyv_v1_ll = PACK_YUYV(c, y2, y2, u, v);
+		c->yuyv_v1_lr = PACK_YUYV(c, y3, y3, u, v);
 		}
 }
-
-//#define PACK_YUV(cb,y0,y1,u,v) ((cb->y0<<24)|(((unsigned char)cb->u)<<16)|(cb->y1<<8)|(((unsigned char)cb->v)))
-#define PACK_YUV(cb,y0,y1,u,v) ((((unsigned char)cb->v)<<24)|(cb->y1<<16)|(((unsigned char)cb->u)<<8)|(cb->y0))
-
-#define TO_YUY2_U0(cb) PACK_YUV(cb,y0,y0,u,v)
-#define TO_YUY2_U1(cb) PACK_YUV(cb,y1,y1,u,v)
-#define TO_YUY2_L0(cb) PACK_YUV(cb,y2,y2,u,v)
-#define TO_YUY2_L1(cb) PACK_YUV(cb,y3,y3,u,v)
-
-#define TO_YUY2_U(cb) PACK_YUV(cb,y0,y1,u,v)
-#define TO_YUY2_L(cb) PACK_YUV(cb,y2,y3,u,v)
 
 /* ------------------------------------------------------------------------ */
 inline void cvid_v1_yuy2(unsigned char *frm, unsigned char *end, int stride, cvid_codebook *cb)
 {
-unsigned long *vptr = (unsigned long *)frm, rgb;
+unsigned long *vptr = (unsigned long *)frm;
 int row_inc = stride/4;
 
-	vptr[0] = TO_YUY2_U0(cb);
-	vptr[1] = TO_YUY2_U1(cb);
-	vptr += row_inc; if(vptr > (unsigned long *)end) return;
+	if(vptr > (unsigned long *)end) return;
+	vptr[0] = cb->yuyv_v1_ul;
+	vptr[1] = cb->yuyv_v1_ur;
 
-	vptr[0] = TO_YUY2_U0(cb);
-	vptr[1] = TO_YUY2_U1(cb);
 	vptr += row_inc; if(vptr > (unsigned long *)end) return;
+	vptr[0] = cb->yuyv_v1_ul;
+	vptr[1] = cb->yuyv_v1_ur;
 
-	vptr[0] = TO_YUY2_L0(cb);
-	vptr[1] = TO_YUY2_L1(cb);
 	vptr += row_inc; if(vptr > (unsigned long *)end) return;
+	vptr[0] = cb->yuyv_v1_ll;
+	vptr[1] = cb->yuyv_v1_lr;
 
-	vptr[0] = TO_YUY2_L0(cb);
-	vptr[1] = TO_YUY2_L1(cb);
+	vptr += row_inc; if(vptr > (unsigned long *)end) return;
+	vptr[0] = cb->yuyv_v1_ll;
+	vptr[1] = cb->yuyv_v1_lr;
 }
 
 
@@ -136,21 +291,21 @@ inline void cvid_v4_yuy2(unsigned char *frm, unsigned char *end, int stride, cvi
 unsigned long *vptr = (unsigned long *)frm;
 int row_inc = stride/4;
 
-	vptr[0] = TO_YUY2_U(cb0);
-	vptr[1] = TO_YUY2_U(cb1);
+	if(vptr > (unsigned long *)end) return;
+	vptr[0] = cb0->yuyv_v4_u;
+	vptr[1] = cb1->yuyv_v4_u;
+
 	vptr += row_inc; if(vptr > (unsigned long *)end) return;
+	vptr[0] = cb0->yuyv_v4_l;
+	vptr[1] = cb1->yuyv_v4_l;
 
-	vptr[0] = TO_YUY2_L(cb0);
-	vptr[1] = TO_YUY2_L(cb1);
 	vptr += row_inc; if(vptr > (unsigned long *)end) return;
+	vptr[0] = cb2->yuyv_v4_u;
+	vptr[1] = cb3->yuyv_v4_u;
 
-	vptr[0] = TO_YUY2_U(cb2);
-	vptr[1] = TO_YUY2_U(cb3);
 	vptr += row_inc; if(vptr > (unsigned long *)end) return;
-
-	vptr[0] = TO_YUY2_L(cb2);
-	vptr[1] = TO_YUY2_L(cb3);
-
+	vptr[0] = cb2->yuyv_v4_l;
+	vptr[1] = cb3->yuyv_v4_l;
 }
 
 
@@ -377,13 +532,17 @@ int i, x;
  * context - the context created by decode_cinepak_init().
  * buf - the input buffer to be decoded
  * size - the size of the input buffer
- * frame - the output frame buffer (24 or 32 bit per pixel)
+ * frame - the output frame buffer
  * width - the width of the output frame
  * height - the height of the output frame
  * bit_per_pixel - the number of bits per pixel allocated to the output
- *   frame (only 24 or 32 bpp are supported)
+ *   frame; depths support:
+ *     32: BGR32
+ *     24: BGR24
+ *     16: YUYV
+ *     12: YV12
  */
-void decode_cinepak(void *context, unsigned char *buf, int size, unsigned char *frame, int width, int height, int bit_per_pixel, int stride_)
+void decode_cinepak(void *context, unsigned char *buf, int size, unsigned char *frame, unsigned int width, unsigned int height, int bit_per_pixel, int stride_)
 {
 cinepak_info *cvinfo = (cinepak_info *)context;
 cvid_codebook *v4_codebook, *v1_codebook, *codebook = NULL;
@@ -391,7 +550,7 @@ unsigned long x, y, y_bottom, frame_flags, strips, cv_width, cv_height, cnum,
 	strip_id, chunk_id, x0, y0, x1, y1, ci, flag, mask;
 long len, top_size, chunk_size;
 unsigned char *frm_ptr, *frm_end;
-int i, cur_strip, d0, d1, d2, d3, frm_stride, bpp = 3;
+unsigned int i, cur_strip, d0, d1, d2, d3, frm_stride, bpp = 3;
 int modulo;
 void (*read_codebook)(cvid_codebook *c, int mode) = read_codebook_24;
 void (*cvid_v1)(unsigned char *frm, unsigned char *end, int stride, cvid_codebook *cb) = cvid_v1_24;
@@ -409,19 +568,29 @@ void (*cvid_v4)(unsigned char *frm, unsigned char *end, int stride, cvid_codeboo
 
 	switch(bit_per_pixel)
 		{
-		case 16:
+		case 12:  // YV12
+			bpp = 1;  // for the purposes of stride
+			read_codebook = read_codebook_yv12;
+			cvid_v1 = cvid_v1_yv12;
+			cvid_v4 = cvid_v4_yv12;
+			yv12_y_plane = frame;
+			yv12_v_plane = frame + width * height;
+			yv12_u_plane = frame + (width * height) +
+				(width * height / 4);
+			break;
+		case 16:  // YUYV
 			bpp = 2;
 			read_codebook = read_codebook_yuy2;
 			cvid_v1 = cvid_v1_yuy2;
 			cvid_v4 = cvid_v4_yuy2;
 			break;
-		case 24:
+		case 24:  // BGR24
 			bpp = 3;
 			read_codebook = read_codebook_24;
 			cvid_v1 = cvid_v1_24;
 			cvid_v4 = cvid_v4_24;
 			break;
-		case 32:
+		case 32:  // BGR32
 			bpp = 4;
 			read_codebook = read_codebook_32;
 			cvid_v1 = cvid_v1_32;
@@ -438,7 +607,7 @@ void (*cvid_v4)(unsigned char *frm, unsigned char *end, int stride, cvid_codeboo
 		if(len & 0x01) len++; /* AVIs tend to have a size mismatch */
 		if(len != size)
 			{
-			printf("CVID: corruption %d (QT/AVI) != %ld (CV)\n", size, len);
+			mp_msg(MSGT_DECVIDEO, MSGL_WARN, "CVID: corruption %d (QT/AVI) != %ld (CV)\n", size, len);
 			// return;
 			}
 		}
@@ -451,7 +620,7 @@ void (*cvid_v4)(unsigned char *frm, unsigned char *end, int stride, cvid_codeboo
 		{
 		if(strips >= MAX_STRIPS) 
 			{
-			printf("CVID: strip overflow (more than %d)\n", MAX_STRIPS);
+			mp_msg(MSGT_DECVIDEO, MSGL_WARN, "CVID: strip overflow (more than %d)\n", MAX_STRIPS);
 			return;
 			}
 
@@ -459,13 +628,13 @@ void (*cvid_v4)(unsigned char *frm, unsigned char *end, int stride, cvid_codeboo
 			{
 			if((cvinfo->v4_codebook[i] = (cvid_codebook *)calloc(sizeof(cvid_codebook), 260)) == NULL)
 				{
-				printf("CVID: codebook v4 alloc err\n");
+				mp_msg(MSGT_DECVIDEO, MSGL_WARN, "CVID: codebook v4 alloc err\n");
 				return;
 				}
 
 			if((cvinfo->v1_codebook[i] = (cvid_codebook *)calloc(sizeof(cvid_codebook), 260)) == NULL)
 				{
-				printf("CVID: codebook v1 alloc err\n");
+				mp_msg(MSGT_DECVIDEO, MSGL_WARN, "CVID: codebook v1 alloc err\n");
 				return;
 				}
 			}
@@ -473,7 +642,7 @@ void (*cvid_v4)(unsigned char *frm, unsigned char *end, int stride, cvid_codeboo
 	cvinfo->strip_num = strips;
 
 #if DBUG
-	printf("CVID: <%ld,%ld> strips %ld\n", cv_width, cv_height, strips);
+	mp_msg(MSGT_DECVIDEO, MSGL_WARN, "CVID: <%ld,%ld> strips %ld\n", cv_width, cv_height, strips);
 #endif
 
 	for(cur_strip = 0; cur_strip < strips; cur_strip++)
@@ -498,10 +667,10 @@ void (*cvid_v4)(unsigned char *frm, unsigned char *end, int stride, cvid_codeboo
 		top_size -= 12;
 		x = 0;
 		if(x1 != width) 
-			printf("CVID: Warning x1 (%ld) != width (%d)\n", x1, width);
+			mp_msg(MSGT_DECVIDEO, MSGL_WARN, "CVID: Warning x1 (%ld) != width (%d)\n", x1, width);
 x1 = width;
 #if DBUG
-	printf("   %d) %04lx %04ld <%ld,%ld> <%ld,%ld> yt %ld  %d\n",
+	mp_msg(MSGT_DECVIDEO, MSGL_WARN, "   %d) %04lx %04ld <%ld,%ld> <%ld,%ld> yt %ld  %d\n",
 		cur_strip, strip_id, top_size, x0, y0, x1, y1, y_bottom);
 #endif
 
@@ -511,7 +680,7 @@ x1 = width;
 			chunk_size = get_word();
 
 #if DBUG
-	printf("        %04lx %04ld\n", chunk_id, chunk_size);
+	mp_msg(MSGT_DECVIDEO, MSGL_WARN, "        %04lx %04ld\n", chunk_id, chunk_size);
 #endif
 			top_size -= chunk_size;
 			chunk_size -= 4;
@@ -526,7 +695,7 @@ x1 = width;
 					cnum = (chunk_size - modulo) / 6;
 					for(i = 0; i < cnum; i++) read_codebook(codebook+i, 0);
 					while (modulo--)
-						get_byte();
+						in_buffer++;
 					break;
 
 				case 0x2400:
@@ -689,7 +858,7 @@ x1 = width;
 					break;
 
 				default:
-					printf("CVID: unknown chunk_id %08lx\n", chunk_id);
+					mp_msg(MSGT_DECVIDEO, MSGL_WARN, "CVID: unknown chunk_id %08lx\n", chunk_id);
 					while(chunk_size > 0) { skip_byte(); chunk_size--; }
 					break;
 				}
@@ -706,7 +875,7 @@ x1 = width;
 			xlen = get_byte() << 16;
 			xlen |= get_byte() << 8;
 			xlen |= get_byte(); /* Read Len */
-			printf("CVID: END INFO chunk size %d cvid size1 %ld cvid size2 %ld\n", size, len, xlen);
+			mp_msg(MSGT_DECVIDEO, MSGL_WARN, "CVID: END INFO chunk size %d cvid size1 %ld cvid size2 %ld\n", size, len, xlen);
 			}
 		}
 }
