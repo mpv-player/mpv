@@ -278,6 +278,9 @@ Play files according to a playlist (1 file per row or Winamp or ASX format).
 .B \-quiet \ \ 
 Display less output and status messages.
 .TP
+.B \-rnd \ \ 
+Play files in random order.
+.TP
 .B \-sdp
 Specifies that the input file is a SDP ('Session Description Protocol')
 file that describes an RTP session (see http://www.live.com/mplayer/).
@@ -910,25 +913,35 @@ empty channels are inserted (except mixing from mono to stereo, then the mono
 channel is repeated in both of the output channels).
 If the number of output channels is smaller than the number of input channels
 the exceeding channels are truncated.
-.IPs format[=f,bps]
-Select the format f used for output from the filter layer.
-The format is selected according to the defines in libao2/afmt.h.
-The option bps is an integer and denotes bytes per sample and has to conform
-to the chosen format.
-.IPs "volume[=v0:v1:v2:v3:v4:v5:sc:pr:en]"
+.IPs format[=bps,f]
+Select the format f and bits per sample bps used for output from the
+filter layer. The option bps is an integer and denotes bytes per
+sample. The format f is a string containing a concatenated mix of:
+.br
+alaw, mulaw or imaadpcm
+.br
+float or int
+.br
+unsigned or signed
+.br
+le or be (little or big endian)
+.br
+.IPs "volume[=v:sc:pr:en]"
 Select the output volume level.
 This filter is not reentrant and can therefore only be enabled once for every
 audio stream.
 .RSss
-v0 to v5: desired gain in dB for each channel in the stream.
-The gain can be set from -60dB to +20dB (where -60dB equals a gain of 1/1000
-and +20dB equals a gain of 10).
+v: desired gain in dB for all channels in the stream. The gain can be
+set from -200dB to +40dB (where -200dB mutes the sound completely and
++40dB equals a gain of 1000). The default gain is -20dB.
 .br
 sc: enable soft clipping.
 .br
-pr: enable probing of the audio stream instantaneous.
-The maximal volume is probed on a per channel basis and can only be accessed
-through the runtime interface of the filter.
+pr: enable probing of the volume level for each audio stream. Both the
+maximum and instantaneous volume is probed. The instantaneous volume
+can only be accessed through the runtime interface, but the maximum
+volume is printed at the end of the movie. This value can be used when
+transcoding movies to maximize the utilization of the dynamic range.
 .br
 en: enable and disable the volume control.
 .REss
