@@ -4,7 +4,7 @@
 
 require ConfHelper;
 
-use Debian::DebConf::Client::ConfModule qw(:all);
+use Debconf::Client::ConfModule qw(:all);
 use IO::Handle;
 use Fcntl;
 my $version = version(1.0);

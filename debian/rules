@@ -6,7 +6,8 @@
 export DH_COMPAT=3
 
 package        := mplayer
-prefix := debian/$(package)
+prefix := $(shell pwd)/debian/$(package)
+
 arch   := $(shell dpkg --print-architecture)
   
 ifeq ($(arch),powerpc)
@@ -53,8 +54,10 @@ binary-arch: build
 	dh_installdirs
 
 	# commands to install the package into debian/<packagename>
-	$(MAKE) prefix=$(prefix)/usr CONFDIR=$(prefix)/etc/mplayer DATADIR=$(prefix)/usr/share/mplayer install
-	dh_link usr/bin/mplayer usr/bin/gmplayer
+	$(MAKE) prefix=$(prefix)/usr CONFDIR=$(prefix)/etc/mplayer DATADIR=$(prefix)/usr/share/mplayer  MANDIR=$(prefix)/usr/share/man  install
+	dh_link usr/bin/mplayer usr/bin/gmplayer \
+		usr/share/man/man1/mplayer.1.gz usr/share/man/man1/gmplayer.1.gz
+
 
 	dh_installdebconf	
 	dh_installdocs DOCS/*
