@@ -77,7 +77,7 @@ binary-arch: build install
 #	dh_installmime
 #	dh_installinit
 #	dh_installcron
-	dh_installman DOCS/mplayer.1
+	dh_installmanpages DOCS/mplayer.1
 	dh_installinfo
 #	dh_undocumented
 	dh_installchangelogs
