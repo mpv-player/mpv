@@ -1763,6 +1763,18 @@ if(auto_quality>0){
       // success:
 
       if(sh_audio){
+	if(verbose){
+	    float a_pts=d_audio->pts;
+            a_pts+=(ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
+	    printf("SEEK: A: %5.3f  V: %5.3f  A-V: %5.3f   \n",a_pts,d_video->pts,a_pts-d_video->pts);
+	}
+        printf("A:%6.1f  V:%6.1f  A-V:%7.3f  ct: ?   \r",d_audio->pts,d_video->pts,0.0f);
+      } else {
+        printf("A: ---   V:%6.1f   \r",d_video->pts);
+      }
+      fflush(stdout);
+
+      if(sh_audio){
         current_module="audio_reset";
         audio_out->reset(); // stop audio, throwing away buffered data
         current_module=NULL;
@@ -1784,6 +1796,7 @@ if(auto_quality>0){
       max_pts_correction=0.1;
       force_redraw=5;
       audio_time_usage=0; video_time_usage=0; vout_time_usage=0;
+      drop_frame_cnt=0;
   
   }
   rel_seek_secs=0;
