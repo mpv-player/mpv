@@ -202,6 +202,7 @@ void ChangeSkin( void )
 
 void EventHandling( void )
 {
- wsHandleEvents();mplTimerHandler(0); // handle GUI timer events
+ wsHandleEvents();
+ //mplTimerHandler(0); // handle GUI timer events
  if ( mplShMem->SkinChange ) ChangeSkin();
 }

@@ -374,15 +374,15 @@ void wsCreateWindow( wsTWindow * win,int X,int Y,int wX,int hY,int bW,int cV,uns
  win->SizeHint.y=win->Y;
  win->SizeHint.width=win->Width;
  win->SizeHint.height=win->Height;
- if ( D & wsMaxSize )
-  {
-   win->SizeHint.flags|=PMaxSize;
-   win->SizeHint.min_width=win->Width;
-   win->SizeHint.min_height=win->Height;
-  }
  if ( D & wsMinSize )
   {
    win->SizeHint.flags|=PMinSize;
+   win->SizeHint.min_width=win->Width;
+   win->SizeHint.min_height=win->Height;
+  }
+ if ( D & wsMaxSize )
+  {
+   win->SizeHint.flags|=PMaxSize;
    win->SizeHint.max_width=win->Width;
    win->SizeHint.max_height=win->Height;
   }
@@ -613,7 +613,7 @@ buttonreleased:
 
    case PropertyNotify:
 	break;
-//        fprintf(stderr,"[ws] PropertyNotify %s\n",XGetAtomName( wsDisplay,Event->xproperty.atom ) );
+        fprintf(stderr,"[ws] PropertyNotify %s\n",XGetAtomName( wsDisplay,Event->xproperty.atom ) );
         if ( Event->xproperty.atom == wsWindowList[l]->AtomRemote )
          {
           Atom            type;
@@ -709,18 +709,6 @@ void wsFullScreen( wsTWindow * win )
    win->Width=win->OldWidth;
    win->Height=win->OldHeight;
    win->isFullScreen=False;
-   if ( win->Property & wsMaxSize )
-    {
-     win->SizeHint.flags|=PMaxSize;
-     win->SizeHint.max_width=win->Width;
-     win->SizeHint.max_height=win->Height;
-    }
-   if ( win->Property & wsMinSize )
-    {
-     win->SizeHint.flags|=PMinSize;
-     win->SizeHint.min_width=win->Width;
-     win->SizeHint.min_height=win->Height;
-    }
    decoration=win->Decorations;
    wsScreenSaverOn( wsDisplay );
   }
@@ -731,18 +719,6 @@ void wsFullScreen( wsTWindow * win )
     win->X=0; win->Y=0;
     win->Width=wsMaxX; win->Height=wsMaxY;
     win->isFullScreen=True;
-//    if ( win->Property & wsMaxSize )
-//     {
-//      win->SizeHint.flags|=PMaxSize;
-//      win->SizeHint.min_width=0;
-//      win->SizeHint.min_height=0;
-//     }
-//    if ( win->Property & wsMinSize )
-//     {
-//      win->SizeHint.flags|=PMinSize;
-//      win->SizeHint.max_width=4096;
-//      win->SizeHint.max_height=4096;
-//     }
     wsScreenSaverOff( wsDisplay );
    }
 
@@ -751,6 +727,18 @@ void wsFullScreen( wsTWindow * win )
  win->SizeHint.y=win->Y;
  win->SizeHint.width=win->Width;
  win->SizeHint.height=win->Height;
+ if ( win->Property & wsMaxSize )
+  {
+   win->SizeHint.flags|=PMaxSize;
+   win->SizeHint.max_width=win->Width;
+   win->SizeHint.max_height=win->Height;
+  }
+ if ( win->Property & wsMinSize )
+  {
+   win->SizeHint.flags|=PMinSize;
+   win->SizeHint.min_width=win->Width;
+   win->SizeHint.min_height=win->Height;
+  }
  XSetWMNormalHints( wsDisplay,win->WindowID,&win->SizeHint );
 
  XMoveResizeWindow( wsDisplay,win->WindowID,win->X,win->Y,win->Width,win->Height );

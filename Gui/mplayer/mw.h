@@ -318,6 +318,8 @@ NoPause:
    case evBackward10sec:    mplRelSeek( -10 ); break;
    case evSetMoviePosition: mplAbsSeek( param ); break;
 
+   case evIncVolume:  vo_x11_putkey( wsGrayMul ); break;
+   case evDecVolume:  vo_x11_putkey( wsGrayDiv ); break;
    case evMute:       mplShMem->Mute=1; break;
    case evSetVolume:  
    case evSetBalance: mplShMem->VolumeChanged=1; break;

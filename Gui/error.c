@@ -5,7 +5,7 @@
 
 #include "error.h"
 
-int    debug_level = 6;
+int    debug_level = 2;
 FILE * debug_file;
 int    debug_stderr = 0;
 

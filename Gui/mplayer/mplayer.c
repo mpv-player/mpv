@@ -81,7 +81,7 @@ void mplInit( int argc,char* argv[], char *envp[], void* disp )
  
  wsCreateWindow( &appMPlayer.mainWindow,
   appMPlayer.main.x,appMPlayer.main.y,appMPlayer.main.width,appMPlayer.main.height,
-  wsNoBorder,wsShowMouseCursor|wsHandleMouseButton|wsHandleMouseMove,wsHideFrame|wsMaxSize|wsMinSize|wsShowWindow,"MPlayer" );
+  wsNoBorder,wsShowMouseCursor|wsHandleMouseButton|wsHandleMouseMove,wsHideFrame|wsMaxSize|wsShowWindow,"MPlayer" ); //wsMinSize|
 
  wsSetShape( &appMPlayer.mainWindow,appMPlayer.main.Mask.Image );
 
