@@ -893,7 +893,7 @@ EOF
 
         0-0)    proc="ev4";   cpu_understands_mvi="0";;
         1-0)    proc="ev5";   cpu_understands_mvi="0";;
-        1-1)    proc="ev56";  cpu_understands_mvi="1";; 
+        1-1)    proc="ev56";  cpu_understands_mvi="0";; 
         1-101)  proc="pca56"; cpu_understands_mvi="1";;
         2-303)  proc="ev6";   cpu_understands_mvi="1";;
         2-307)  proc="ev67";  cpu_understands_mvi="1";;
