@@ -1,3 +1,5 @@
+//#define USE_QTX_CODECS
+
 //  QuickTime MOV file parser by A'rpi
 //  additional work by Atmos
 //  based on TOOLS/movinfo.c by A'rpi & Al3x
@@ -31,6 +33,10 @@
 
 #include "qtpalette.h"
 #include "parse_mp4.h" // MP3 specific stuff
+
+#ifdef USE_QTX_CODECS
+#include "../loader/qtx/qtxsdk/components.h"
+#endif
 
 #ifdef HAVE_ZLIB
 #include <zlib.h>
@@ -111,6 +117,8 @@ typedef struct {
     mov_durmap_t* durmap;
     int keyframes_size;
     unsigned int* keyframes;
+    //
+    void* desc; // image/sound/etc description (pointer to ImageDescription etc)
 } mov_track_t;
 
 void mov_build_index(mov_track_t* trak){
@@ -785,6 +793,33 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 //      82  char[4]	atom type
 //	86  ...		atom data
 
+#ifdef USE_QTX_CODECS
+	{	ImageDescription* id=malloc(8+trak->stdata_len);
+		trak->desc=id;
+		id->idSize=8+trak->stdata_len;
+		id->cType=trak->fourcc;
+		id->version=char2short(trak->stdata,8);
+		id->revisionLevel=char2short(trak->stdata,10);
+		id->vendor=char2int(trak->stdata,12);
+		id->temporalQuality=char2int(trak->stdata,16);
+		id->spatialQuality=char2int(trak->stdata,20);
+		id->width=char2short(trak->stdata,24);
+		id->height=char2short(trak->stdata,26);
+		id->hRes=char2int(trak->stdata,28);
+		id->vRes=char2int(trak->stdata,32);
+		id->dataSize=char2int(trak->stdata,36);
+		id->frameCount=char2short(trak->stdata,40);
+		memcpy(&id->name,trak->stdata+42,32);
+		id->depth=char2short(trak->stdata,74);
+		id->clutID=char2short(trak->stdata,76);
+		memcpy(((char*)&id->clutID)+2,trak->stdata+78,trak->stdata_len-78);
+		if(1) // debug
+		{   FILE *f=fopen("ImageDescription","wb");
+		    fwrite(id,id->idSize,1,f);
+		    fclose(f);
+		}
+	}
+#endif
 
 		if(trak->stdata_len >= 86) { // extra atoms found
 		  int pos=78;
