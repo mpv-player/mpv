@@ -1084,14 +1084,16 @@ static void check_events (void)
 				}
 
 				else if ( keypressed == SDLK_n ) {
-					if (priv->surface->w != priv->width || priv->surface->h != priv->height) {
-						priv->surface = SDL_SetVideoMode(priv->width, priv->height, priv->bpp, priv->sdlflags);
+					int newwidth = priv->dstwidth, newheight = priv->dstheight;
+					aspect(&newwidth, &newheight, priv->dstwidth, (int)((float)priv->dstwidth*((float)priv->XHeight / (float)priv->XWidth)));
+					if (priv->surface->w != newwidth || priv->surface->h != newheight) {
+						priv->surface = SDL_SetVideoMode(newwidth, newheight, priv->bpp, priv->sdlflags);
 					    	priv->windowsize.w = priv->surface->w;
 						priv->windowsize.h = priv->surface->h;
 						if(verbose > 1) printf("SDL: Normal size\n");
 					} else
-					if (priv->surface->w != priv->width * 2 || priv->surface->h != priv->height * 2) {
-						priv->surface = SDL_SetVideoMode(priv->width * 2, priv->height * 2, priv->bpp, priv->sdlflags);
+					if (priv->surface->w != newwidth * 2 || priv->surface->h != newheight * 2) {
+						priv->surface = SDL_SetVideoMode(newwidth * 2, newheight * 2, priv->bpp, priv->sdlflags);
 					    	priv->windowsize.w = priv->surface->w;
 						priv->windowsize.h = priv->surface->h;
 						if(verbose > 1) printf("SDL: Double size\n");
