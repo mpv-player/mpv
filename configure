@@ -4902,8 +4902,8 @@ fi
 if test "$_zr" = yes ; then
   if test "$_libavcodec" = yes ; then
     _def_zr='#define HAVE_ZR 1'
-    _vosrc="$_vosrc vo_zr.c jpeg_enc.c"
-    _vomodules="zr $_vomodules"
+    _vosrc="$_vosrc vo_zr2.c vo_zr.c jpeg_enc.c"
+    _vomodules="zr zr2 $_vomodules"
     echores "$_zr"
   else
     echores "libavcodec (static) is required by zr, sorry"
@@ -4912,7 +4912,7 @@ if test "$_zr" = yes ; then
   fi
 else
   _def_zr='#undef HAVE_ZR'
-  _novomodules="zr $_novomodules"
+  _novomodules="zr zr2 $_novomodules"
   echores "$_zr"
 fi
 
