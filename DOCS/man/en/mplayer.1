@@ -2777,6 +2777,18 @@ Allows specifying the output filename (default: ./md5).
 .PD 1
 .
 .TP
+.B md5sum\ \ \ \ 
+Calculate the MD5 sum of each frame and write them to a file.
+Supports RGB24 and YV12 colorspaces.
+Useful for debugging.
+.PD 0
+.RSs
+.IPs outfile=<value>
+Specify the output filename (default: ./md5sums).
+.RE
+.PD 1
+.
+.TP
 .B yuv4mpeg
 Transforms the video stream into a sequence of uncompressed YUV 4:2:0
 images and stores it in a file called 'stream.yuv' in the current
@@ -2852,6 +2864,45 @@ If it's not specified, no subdirectories are created
 and all JPEG files are written to the same directory.
 .IPs maxfiles=<value>
 Maximum number of JPEG files to be saved per subdirectory in case subdirs
+is specified.
+Must be equal to or larger than 1 (default: 1000).
+.RE
+.PD 1
+.
+.TP
+.B pnm\ \ \ \ 
+Output each frame into a PNM file in the current directory.
+Each file takes the frame number padded with leading zeros as name.
+It supports PPM, PGM and PGMYUV files in both raw and ASCII mode.
+See also 
+.BR pnm (5),
+.BR ppm (5)
+and
+.BR pgm (5).
+.PD 0
+.RSs
+.IPs ppm
+Write PPM files (default).
+.IPs pgm
+Write PGM files.
+.IPs pgmyuv
+Write PGMYUV files.
+PGMYUV is like PGM, but it also contains the U and V plane, appended at the
+bottom of the picture.
+.IPs raw
+Write PNM files in raw mode (default).
+.IPs ascii
+Write PNM files in ASCII mode.
+.IPs outdir=<value>
+Specify the directory to save the PNM files to.
+If not specified, all PNM files are written to the current directory.
+.IPs subdirs=<value>
+If specified, MPlayer will create numbered subdirectories with the
+specified prefix.
+If it's not specified, no subdirectories are created
+and all PNM files are written to the same directory.
+.IPs maxfiles=<value>
+Maximum number of PNM files to be saved per subdirectory in case subdirs
 is specified.
 Must be equal to or larger than 1 (default: 1000).
 .RE
