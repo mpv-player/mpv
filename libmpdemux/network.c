@@ -32,7 +32,7 @@
 extern int verbose;
 extern m_config_t *mconfig;
 
-/* Variables for the command line option -user & -pass */
+/* Variables for the command line option -user & -passwd */
 char *network_username;
 char *network_password;
 
@@ -344,7 +344,7 @@ http_authenticate(HTTP_header_t *http_hdr, URL_t *url, int *auth_retry) {
 	int ret;
 	if( *auth_retry==1 ) {
 		mp_msg(MSGT_NETWORK,MSGL_ERR,"Authentication failed\n");
-		mp_msg(MSGT_NETWORK,MSGL_ERR,"Please use the option -user and -pass to provide your username/password for a list of URLs,\n");
+		mp_msg(MSGT_NETWORK,MSGL_ERR,"Please use the option -user and -passwd to provide your username/password for a list of URLs,\n");
 		mp_msg(MSGT_NETWORK,MSGL_ERR,"or form an URL like: http://username:password@hostname/file\n");
 		return -1;
 	}
@@ -381,14 +381,14 @@ http_authenticate(HTTP_header_t *http_hdr, URL_t *url, int *auth_retry) {
 		strcpy(url->username, username);
 	} else {
 		mp_msg(MSGT_NETWORK,MSGL_ERR,"Unable to read the username\n");
-		mp_msg(MSGT_NETWORK,MSGL_ERR,"Please use the option -user and -pass to provide your username/password for a list of URLs,\n");
+		mp_msg(MSGT_NETWORK,MSGL_ERR,"Please use the option -user and -passwd to provide your username/password for a list of URLs,\n");
 		mp_msg(MSGT_NETWORK,MSGL_ERR,"or form an URL like: http://username:password@hostname/file\n");
 		return -1;
 	}
-	ret = m_config_is_option_set(mconfig,"pass");
+	ret = m_config_is_option_set(mconfig,"passwd");
 	if( ret==1 ) {
 		char *password;
-		password = *((char**)m_config_get_option_ptr(mconfig, "pass"));
+		password = *((char**)m_config_get_option_ptr(mconfig, "passwd"));
 		if( password==NULL ) return -1;
 		url->password = (char*)malloc(strlen(password)+1);
 		if( url->password==NULL ) {
