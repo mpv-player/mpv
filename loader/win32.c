@@ -2154,8 +2154,8 @@ int WINAPI expLoadLibraryA(char* name)
     if(strncmp(name, ".\\", 2)==0) name += 2;
 
     dbgprintf("Entering LoadLibraryA(%s)\n", name);
-    // PIMJ is loading  kernel32.dll
-    if (strcasecmp(name, "kernel32.dll") == 0)
+    // PIMJ and VIVO audio are loading  kernel32.dll
+    if (strcasecmp(name, "kernel32.dll") == 0 || strcasecmp(name, "kernel32") == 0)
 	return MODULE_HANDLE_kernel32;
 
     result=LoadLibraryA(name);
