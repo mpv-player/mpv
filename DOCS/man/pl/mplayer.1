@@ -1,4 +1,4 @@
-.\" synced with 1.657
+.\" synced with 1.658
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -3648,6 +3648,7 @@ Domy¶lnie jest to 8 pikseli z ka¿dej strony.
 Ustawiaj±c opcjê sb (strict breaks - sta³e przerwy) na 1, zmniejsza siê
 szansa, ¿e pullup stworzy niepasuj±c± klatkê, ale mo¿e równie¿ prowadziæ do
 ominiêcia wielu ramek podczas scen z du¿± ilo¶ci± ruchu.
+.br
 .I INFORMACJA:
 Zawsze stosuj filtr softskip po pullup przy kodowaniu, aby mieæ pewno¶æ,
 ¿e ten drugi bêdzie mia³ dostêp do wszystkich klatek.
@@ -4653,6 +4654,7 @@ rozs±dny zakres dla MPEG4
 .TP
 .B vme=<0\-5>
 metoda szacowania ruchu
+.br
 .I INFORMACJA:
 Warto¶ci 0\-3 obecnie ignoruj± ilo¶æ zu¿ytych Bitów,
 wiêc jako¶æ mo¿e byæ niska.
@@ -4800,6 +4802,7 @@ przybli¿ona tolerancja rozmiaru pliku w kBit.
 1000\-100000 jest rozs±dnym zakresem.
 (uwaga: 1kBit = 1000 Bitów)
 (domy¶lnie: 8000)
+.br
 .I INFORMACJA:
 Warto¶æ vratetol nie powinna byæ zbyt du¿a podczas drugiego przej¶cia, inaczej
 mog± wyst±piæ problemy, je¿eli wykorzystane bêdzie vrc_(min|max)rate.
@@ -5067,6 +5070,7 @@ floating point AAN
 .TP
 .B idct=<0\-99>
 algorytm idct.
+.br
 .I INFORMACJA:
 Z tego co wiemy te wszystkie IDCT przechodz± testy IEEE1180.
 .PD 0
@@ -5297,6 +5301,7 @@ Typ i rozmiar diamentu dla wstêpnego przej¶cia przewidywania ruchu
 .TP
 .B dia=<-99\-6>
 Typ i rozmiar diamentu dla przewidywania ruchu
+.br
 .I INFORMACJA:
 Rozmiary normalnych diamentów i tych przystosowuj±cych kszta³ty nie maj±
 takiego samego efektu.
@@ -5386,6 +5391,7 @@ zawsze
 .TP
 .B subq=<1\-8>
 jako¶æ udoskonalenia subpel (dla qpel) (domy¶lnie: 8).
+.br
 .I INFORMACJA:
 Ma to powa¿ny wp³yw na szybko¶æ.
 .TP
@@ -5400,6 +5406,7 @@ Wykorzystuje kwantyzatory MPEG zamiast H.263.
 .TP
 .B aic\ \ \ \ 
 przewidywanie ac (=zaawansowane przewidywanie intra dla H.263+)
+.br
 .I INFORMACJA:
 vqmin powinno byæ równe 8 lub wiêksze dla AIC H.263+.
 .TP
