@@ -471,7 +471,7 @@ void fs_Ok_released( GtkButton * button,gpointer user_data )
    case fsVideoSelector:
           guiSetDF( guiIntfStruct.Filename,fsSelectedDirectory,fsSelectedFile );
           guiIntfStruct.StreamType=STREAMTYPE_FILE;
-          guiIntfStruct.FilenameChanged=1;
+          guiIntfStruct.FilenameChanged=1; sub_fps=0;
 	  gfree( (void **)&guiIntfStruct.AudioFile );
 	  gfree( (void **)&guiIntfStruct.Subtitlename );
           fs_PersistantHistory( fsSelectedDirectory );      //totem, write into history

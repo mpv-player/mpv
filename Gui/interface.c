@@ -170,7 +170,6 @@ void guiInit( void )
 #ifdef HAVE_DXR3
  if ( !gtkDXR3Device ) gtkDXR3Device=strdup( "/dev/em8300-0" );
 #endif
- fullscreen=gtkLoadFullscreen;
  if ( stream_cache_size != -1 ) { gtkCacheOn=1; gtkCacheSize=stream_cache_size; }
  if ( autosync && autosync != gtkAutoSync ) { gtkAutoSyncOn=1; gtkAutoSync=autosync; }
    
@@ -189,7 +188,7 @@ void guiInit( void )
    case -2: mp_msg( MSGT_GPLAYER,MSGL_ERR,MSGTR_SKIN_SKINCFG_SkinCfgReadError,skinName ); exit( 0 );
   }
 // --- initialize windows
- if ( ( mplDrawBuffer = (unsigned char *)calloc( 1,appMPlayer.main.Bitmap.ImageSize ) ) == NULL )
+ if ( ( mplDrawBuffer = (unsigned char *)malloc( appMPlayer.main.Bitmap.ImageSize ) ) == NULL )
   {
    fprintf( stderr,MSGTR_NEMDB );
    exit( 0 );
@@ -259,6 +258,7 @@ void guiInit( void )
   appMPlayer.subWindow.Mapped=wsMapped;
  }
 
+ if ( !fullscreen ) fullscreen=gtkLoadFullscreen;
  if ( fullscreen )
   {
    mplFullScreen();

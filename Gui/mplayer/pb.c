@@ -39,11 +39,19 @@ int		mplPBFade = 0;
 
 void mplPBDraw( void )
 {
+ int x;
+ 
  if ( !appMPlayer.subWindow.isFullScreen ) return;
  if ( !mplPBVisible || !appMPlayer.barIsPresent ) return;
 
- appMPlayer.bar.x=( appMPlayer.subWindow.Width - appMPlayer.bar.width ) / 2;
-
+// appMPlayer.bar.x=( appMPlayer.subWindow.Width - appMPlayer.bar.width ) / 2;
+ switch( appMPlayer.bar.x )
+  {
+   case -1: x=( appMPlayer.subWindow.Width - appMPlayer.bar.width ) / 2; break;
+   case -2: x=( appMPlayer.subWindow.Width - appMPlayer.bar.width ); break;
+   default: x=appMPlayer.bar.x;
+  }
+	      
  switch ( mplPBFade )
   {
    case 1: // fade in
@@ -54,7 +62,7 @@ void mplPBDraw( void )
 	  mplPBFade=0;
 	  vo_mouse_autohide=0;
 	 }
-        wsMoveWindow( &appMPlayer.barWindow,0,appMPlayer.bar.x,mplPBLength ); 
+        wsMoveWindow( &appMPlayer.barWindow,0,x,mplPBLength ); 
 	break;
    case 2: // fade out
 	mplPBLength+=10;
@@ -66,7 +74,7 @@ void mplPBDraw( void )
           wsVisibleWindow( &appMPlayer.barWindow,wsHideWindow ); 
 	  return;
 	 }
-        wsMoveWindow( &appMPlayer.barWindow,0,appMPlayer.bar.x,mplPBLength ); 
+        wsMoveWindow( &appMPlayer.barWindow,0,x,mplPBLength ); 
 	break;
   }
 

@@ -1275,6 +1275,7 @@ if(!demuxer)
   play_tree_t* entry;
   // Handle playlist
   current_module="handle_playlist";
+  if ( stream->type != STREAMTYPE_PLAYLIST ) goto goto_next_file;
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"Falling back on trying to parse playlist %s...\n",filename);
   stream_reset(stream);
   stream_seek(stream,stream->start_pos);
