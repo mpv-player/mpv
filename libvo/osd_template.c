@@ -269,6 +269,9 @@ static inline void RENAME(vo_draw_alpha_rgb24)(int w,int h, unsigned char* src, 
 static inline void RENAME(vo_draw_alpha_rgb32)(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
     int y;
 PROFILE_START();
+#ifdef WORDS_BIGENDIAN
+    dstbase++;
+#endif
     for(y=0;y<h;y++){
         register int x;
 #ifdef ARCH_X86
