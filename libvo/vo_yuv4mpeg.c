@@ -43,7 +43,7 @@
 
 static vo_info_t info = 
 {
-	"yuv4mpeg output for mjpegtools (to \"stream.yuv\")",
+	"yuv4mpeg output for mjpegtools",
 	"yuv4mpeg",
 	"Robert Kesterson <robertk@robertk.com>",
 	""
@@ -61,6 +61,8 @@ static uint8_t *image_v = NULL;
 
 static uint8_t *rgb_buffer = NULL;
 static uint8_t *rgb_line_buffer = NULL;
+
+static char *yuv_filename = NULL;
 
 static int using_format = 0;
 static FILE *yuv_out;
@@ -126,11 +128,12 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	write_bytes = image_width * image_height * 3 / 2;
 	image = malloc(write_bytes);
 
-	yuv_out = fopen("stream.yuv", "wb");
+	yuv_out = fopen(yuv_filename ? yuv_filename : "stream.yuv", "wb");
 	if (!yuv_out || image == 0) 
 	{
 		mp_msg(MSGT_VO,MSGL_FATAL,
-			MSGTR_VO_YUV4MPEG_OutFileOpenError);
+			MSGTR_VO_YUV4MPEG_OutFileOpenError,
+			yuv_filename ? yuv_filename : "stream.yuv");
 		return -1;
 	}
 	image_y = image;
@@ -462,6 +465,10 @@ static void uninit(void)
 	if(rgb_line_buffer)
 		free(rgb_line_buffer);
 	rgb_line_buffer = NULL;
+
+	if (yuv_filename)
+		free(yuv_filename);
+	yuv_filename = NULL;
 }
 
 
@@ -472,28 +479,41 @@ static void check_events(void)
 
 static uint32_t preinit(const char *arg)
 {
-    int arg_unrecognized = 0;
-
     if(arg) 
     {
-        /* configure output mode */
-	if (strcmp(arg, "interlaced"))
-            arg_unrecognized++;
-	else
-	    config_interlace = Y4M_ILACE_TOP_FIRST;
+	int parse_err = 0;
+	unsigned int parse_pos = 0;
 
-        if (strcmp(arg, "interlaced_bf"))
-            arg_unrecognized++;
-        else
-            config_interlace = Y4M_ILACE_BOTTOM_FIRST;
-
-        /* If both tests failed the argument is invalid */
-        if (arg_unrecognized == 2)
-        {
-	        mp_msg(MSGT_VO,MSGL_FATAL,
-			MSGTR_VO_YUV4MPEG_UnknownSubDev,arg);
-			return -ENOSYS;
+	while (arg[parse_pos] && !parse_err) {
+	    if (strncmp (&arg[parse_pos], "interlaced", 10) == 0) {
+		parse_pos += 10;
+		config_interlace = Y4M_ILACE_TOP_FIRST;
+	    }
+	    else if (strncmp (&arg[parse_pos], "interlaced_bf", 13) == 0) {
+		parse_pos += 13;
+		config_interlace = Y4M_ILACE_BOTTOM_FIRST;
+	    }
+	    else if (strncmp (&arg[parse_pos], "file=", 5) == 0) {
+		int file_len;
+		parse_pos += 5;
+		file_len = strcspn (&arg[parse_pos], ":");
+		if (file_len < 0) {
+		    parse_err = 1;
+		    break;
 		}
+		yuv_filename = malloc (file_len + 1);
+		memcpy (yuv_filename, &arg[parse_pos], file_len);
+		yuv_filename[file_len] = 0;
+		parse_pos += file_len;
+	    }
+	    if (arg[parse_pos] == ':') parse_pos++;
+	    else if (arg[parse_pos]) parse_err = 1;
+	}
+	if (parse_err) { 
+	    mp_msg(MSGT_VO,MSGL_FATAL, 
+		    MSGTR_VO_YUV4MPEG_UnknownSubDev,arg); 
+	    return -1;
+	}
     }
 
     /* Inform user which output mode is used */
