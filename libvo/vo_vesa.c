@@ -397,12 +397,29 @@ static uint32_t draw_frame(uint8_t *src[])
     return 0;
 }
 
+#define SUBDEV_NODGA     0x00000001UL
+#define SUBDEV_FORCEDGA  0x00000002UL
+static uint32_t parseSubDevice(const char *sd)
+{
+   uint32_t flags;
+   flags = 0;
+   if(strcmp(sd,"nodga") == 0) { flags |= SUBDEV_NODGA; flags &= ~(SUBDEV_FORCEDGA); }
+   else
+   if(strcmp(sd,"dga") == 0)   { flags &= ~(SUBDEV_NODGA); flags |= SUBDEV_FORCEDGA; }
+   else
+   if(memcmp(sd,"lvo:",4) == 0) lvo_name = &sd[4]; /* lvo_name will be valid within init() */
+   else if(verbose) printf("vo_vesa: Unknown subcommand: %s\n", sd);
+   return flags;
+}
+
+
 static uint32_t query_format(uint32_t format)
 {
   uint32_t retval;
     if(verbose > 2)
         printf("vo_vesa: query_format was called: %x (%s)\n",format,vo_format_name(format));
-    if(lvo_name) return vlvo_query_info(format);
+    if(vo_subdevice) parseSubDevice(vo_subdevice);
+    if(lvo_name) return 1;
 	switch(format)
 	{
 		case IMGFMT_YV12:
@@ -504,20 +521,6 @@ unsigned fillMultiBuffer( unsigned long vsize, unsigned nbuffs )
   return i;
 }
 
-#define SUBDEV_NODGA     0x00000001UL
-#define SUBDEV_FORCEDGA  0x00000002UL
-uint32_t parseSubDevice(const char *sd)
-{
-   uint32_t flags;
-   flags = 0;
-   if(strcmp(sd,"nodga") == 0) { flags |= SUBDEV_NODGA; flags &= ~(SUBDEV_FORCEDGA); }
-   else
-   if(strcmp(sd,"dga") == 0)   { flags &= ~(SUBDEV_NODGA); flags |= SUBDEV_FORCEDGA; }
-   else
-   if(memcmp(sd,"lvo:",4) == 0) lvo_name = &sd[4]; /* lvo_name will be valid within init() */
-   else if(verbose) printf("vo_vesa: Unknown subcommand: %s\n", sd);
-   return flags;
-}
 
 /* fullscreen:
  * bit 0 (0x01) means fullscreen (-fs)
@@ -849,6 +852,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		  if(vlvo_init(lvo_name,width,height,x_offset,y_offset,image_width,image_height,format,video_mode_info.BitsPerPixel) != 0)
 		  {
 		    printf("vo_vesa: Can't initialize Linux Video Overlay\n");
+		    lvo_name = NULL;
 		    vesa_term();
 		    return -1;
 		  }
