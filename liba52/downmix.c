@@ -65,7 +65,7 @@ int downmix_init (int input, int flags, sample_t * level,
     output = flags & A52_CHANNEL_MASK;
     if (output > A52_DOLBY)
 	return -1;
-
+    
     output = table[output][input & 7];
 
     if ((output == A52_STEREO) &&
@@ -593,9 +593,25 @@ static void move2to1 (sample_t * src, sample_t * dest, sample_t bias)
 static void zero (sample_t * samples)
 {
     int i;
-
+#ifdef HAVE_MMX
+	asm volatile(
+		"movl $-1024, %%esi		\n\t"
+		"pxor %%mm0, %%mm0		\n\t"
+		"1:				\n\t"
+		"movq %%mm0, (%0, %%esi)	\n\t"
+		"movq %%mm0, 8(%0, %%esi)	\n\t"
+		"movq %%mm0, 16(%0, %%esi)	\n\t"
+		"movq %%mm0, 24(%0, %%esi)	\n\t"
+		"addl $32, %%esi		\n\t"
+		" jnz 1b			\n\t"
+		"emms"
+	:: "r" (samples+256)
+	: "%esi"
+	);
+#else
     for (i = 0; i < 256; i++)
 	samples[i] = 0;
+#endif
 }
 
 void downmix (sample_t * samples, int acmod, int output, sample_t bias,
