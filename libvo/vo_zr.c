@@ -24,6 +24,7 @@
 #include "video_out_internal.h"
 #include "../mp_msg.h"
 #include "../cfgparser.h"
+#include "fastmemcpy.h"
 
 LIBVO_EXTERN (zr)
 
