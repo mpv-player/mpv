@@ -12,7 +12,7 @@ CFLAGS  = $(OPTFLAGS) -I. -I.. -I../libmpcodecs $(EXTRA_INC) -Wall
 
 
 .c.o:
-	$(CC) -c $(CFLAGS) -o $@ $<
+	$(CC) -c $(CFLAGS) $(FREETYPE_INC) -o $@ $<
 
 $(LIBNAME):     $(OBJS)
 	$(AR) r $(LIBNAME) $(OBJS)

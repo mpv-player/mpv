@@ -262,6 +262,20 @@ inline static draw_alpha_f get_draw_alpha(uint32_t fmt) {
   return NULL;
 }
 
+// return the real height of a char:
+static inline int get_height(int c,int h){
+    int font;
+    if ((font=vo_font->font[c])>=0)
+	if(h<vo_font->pic_a[font]->h) h=vo_font->pic_a[font]->h;
+    return h;
+}
+
+#ifdef HAVE_FREETYPE
+#define render_txt(t)  { char* p = t;  while(*p) render_one_glyph(vo_font,*p++); }
+#else
+#define render_txt(t)
+#endif
+    
 
 void menu_draw_text(mp_image_t* mpi,char* txt, int x, int y) {
   draw_alpha_f draw_alpha = get_draw_alpha(mpi->imgfmt);
@@ -271,6 +285,8 @@ void menu_draw_text(mp_image_t* mpi,char* txt, int x, int y) {
     printf("Unsupported outformat !!!!\n");
     return;
   }
+
+  render_txt(txt);
 
   while (*txt) {
     unsigned char c=*txt++;
@@ -300,6 +316,8 @@ void menu_draw_text_full(mp_image_t* mpi,char* txt,
     printf("Unsupported outformat !!!!\n");
     return;
   }
+
+  render_txt(txt);
 
   if(x > mpi->w || y > mpi->h)
     return;
@@ -456,6 +474,7 @@ void menu_draw_text_full(mp_image_t* mpi,char* txt,
 	  
 int menu_text_length(char* txt) {
   int l = 0;
+  render_txt(txt);
   while (*txt) {
     unsigned char c=*txt++;
     l += vo_font->width[c]+vo_font->charspace;
@@ -466,7 +485,8 @@ int menu_text_length(char* txt) {
 void menu_text_size(char* txt,int max_width, int vspace, int warp, int* _w, int* _h) {
   int l = 1, i = 0;
   int w = 0;
-    
+
+  render_txt(txt);
   while (*txt) {
     unsigned char c=*txt++;
     if(c == '\n' || (warp && i + vo_font->width[c] >= max_width)) {
@@ -486,6 +506,7 @@ void menu_text_size(char* txt,int max_width, int vspace, int warp, int* _w, int*
 
 int menu_text_num_lines(char* txt, int max_width) {
   int l = 1, i = 0;
+  render_txt(txt);
   while (*txt) {
     unsigned char c=*txt++;
     if(c == '\n' || i + vo_font->width[c] > max_width) {
@@ -500,6 +521,7 @@ int menu_text_num_lines(char* txt, int max_width) {
   
 char* menu_text_get_next_line(char* txt, int max_width) {
   int i = 0;
+  render_txt(txt);
   while (*txt) {
     unsigned char c=*txt;
     if(c == '\n') {

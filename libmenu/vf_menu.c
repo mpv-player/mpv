@@ -14,6 +14,7 @@
 
 #include "../libvo/fastmemcpy.h"
 #include "../libvo/video_out.h"
+#include "../libvo/font_load.h"
 #include "../input/input.h"
 #include "../m_struct.h"
 #include "menu.h"
@@ -217,6 +218,17 @@ static void uninit(vf_instance_t *vf) {
      }
 }
 
+static int config(struct vf_instance_s* vf, int width, int height, int d_width, int d_height,
+		  unsigned int flags, unsigned int outfmt) { 
+#ifdef HAVE_FREETYPE    
+  // here is the right place to get screen dimensions
+  if (force_load_font) {
+    force_load_font = 0;
+    load_font(width,height);
+  }
+#endif
+  return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
+}
 static int open(vf_instance_t *vf, char* args){
   if(!st_priv) {
     st_priv = calloc(1,sizeof(struct vf_priv_s));
@@ -229,6 +241,7 @@ static int open(vf_instance_t *vf, char* args){
     mp_input_add_cmd_filter((mp_input_cmd_filter)cmd_filter,st_priv);
   }
 
+  vf->config = config;
   vf->put_image = put_image;
   vf->get_image = get_image;
   vf->uninit=uninit;
