@@ -5319,41 +5319,16 @@ if test "$_faad_external" != no ; then
     _faad_external=no
     cat > $TMPC << EOF
 #include <faad.h>
-int main(void) { faacDecHandle testhand; faacDecFrameInfo testinfo; testhand = faacDecOpen(); return 0; }
+#ifndef FAAD_MIN_STREAMSIZE
+#error Too old version
+#endif
+int main(void) { faacDecHandle testhand; faacDecFrameInfo testinfo; testhand = faacDecOpen(); faacDecInit(0, 0, 0, 0, 0); return 0; }
 EOF
     cc_check $_inc_faad $_ld_faad $_ld_lm && _faad_external=yes
   fi
   echores "$_faad_external"
 else
   echores "no"
-fi
-
-if test "$_faad_internal" = yes -o "$_faad_external" = yes; then
-echocheck "FAAD2 version"
-cat > $TMPC <<EOF
-#include <faad.h>
-#ifndef FAAD_MIN_STREAMSIZE
-#error Too old version
-#endif
-int main(void) {
-#ifdef FAAD2_VERSION
-  printf("%s\n",FAAD2_VERSION);
-#else
-  printf("1.0\n");
-#endif
-  return 0;
-}
-EOF
-  if cc_check -I- $_inc_faad $_ld_faad $_ld_lm && "$TMPO" >> "$TMPLOG" ; then
-    _faad_version=`"$TMPO"`
-    _faad_tempversion=`"$TMPO" | sed -e 's/^\([0-9]\{1,\}\)\.\([0-9]\{1,\}\).*/\1\2/'`
-    _def_faad_version="#define FAADVERSION $_faad_tempversion"
-    echores "$_faad_version"
-  else
-    _faad_external=no
-    _faad_internal=no
-    echores "failed to get version"
-  fi
 fi
 
 if test "$_faad_external" = yes; then
@@ -7345,7 +7320,6 @@ $_def_matroska
 /* enable FAAD (AAC) support */
 $_def_faad
 $_def_faad_internal
-$_def_faad_version
 
 /* enable LADSPA plugin support */
 $_def_ladspa

@@ -21,6 +21,7 @@ MPlayer (1.0)
     * fixed decoding of stereo alaw files
     * preload QT DLLs to work around problems with their hardcoded paths
     * support for Real 10 RV30/40 binary codec
+    * dropped support of old faad2 versions (<= 1.1)
 
     Demuxers:
     * vqf demuxer
