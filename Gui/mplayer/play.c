@@ -53,6 +53,7 @@ void mplStop()
 printf("%%%%%% STOP  \n");
 // ---
  mplShMem->Playing=0;
+ mplSubRender=1;
 }
 
 void mplPlay( void )
@@ -63,6 +64,7 @@ void mplPlay( void )
 printf("%%%%%% PLAY  \n");
 // ---
  mplShMem->Playing=1;
+ mplSubRender=0;
 }
 
 void mplPause( void )
@@ -72,6 +74,7 @@ void mplPause( void )
 printf("%%%%%% PAUSE  \n");
 // ---
  mplShMem->Playing=2;
+ mplSubRender=0;
 }
 
 void mplResize( unsigned int X,unsigned int Y,unsigned int width,unsigned int height )

@@ -323,9 +323,6 @@ NoPause:
    case evSetBalance: mixerSetBalance( param ); break;
    case evMute:       mixerMute();       break;
 
-//   case evIncAudioBufDelay: mplIncAudioBufDelay(); break;
-//   case evDecAudioBufDelay: mplDecAudioBufDelay(); break;
-
    case evNormalSize:
         if ( mplShMem->Playing ) 
 	 {

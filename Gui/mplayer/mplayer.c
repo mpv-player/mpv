@@ -78,7 +78,6 @@ void mplInit( int argc,char* argv[], char *envp[], void* disp )
 
  vo_setwindow(appMPlayer.subWindow.WindowID, appMPlayer.subWindow.wGC);
  vo_setwindowsize( appMPlayer.sub.width,appMPlayer.sub.height );
- mplSubRender=0;
  
  wsCreateWindow( &appMPlayer.mainWindow,
   appMPlayer.main.x,appMPlayer.main.y,appMPlayer.main.width,appMPlayer.main.height,
