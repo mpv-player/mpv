@@ -112,12 +112,20 @@ static void hide_terminal_output( void )
 
 static unsigned hh_int_10_seg;
 static int fd_mem;
+/*
+the list of supported video modes is stored in the reserved portion of
+the SuperVGA information record by some implementations, and it may
+thus be necessary to either copy the mode list or use a different
+buffer for all subsequent VESA calls
+*/
+static void *controller_info;
 int vbeInit( void )
 {
    unsigned short iopl_port;
    size_t i;
    int retval;
    if(!LRMI_init()) return VBE_VM86_FAIL;
+   if(!(controller_info = LRMI_alloc_real(sizeof(struct VbeInfoBlock)))) return VBE_OUT_OF_DOS_MEM;
    /*
     Allow read/write to ALL io ports
    */
@@ -144,6 +152,7 @@ int vbeDestroy( void )
 {
   __set_cursor_type(my_stdout,1);
   close(fd_mem);
+  LRMI_free_real(controller_info);
   return VBE_OK;
 }
 
@@ -216,25 +225,19 @@ static void print_wrd(unsigned short *str)
 int vbeGetControllerInfo(struct VbeInfoBlock *data)
 {
   struct LRMI_regs r;
-  void *rm_space;
   int retval;
-  if(!(rm_space = LRMI_alloc_real(sizeof(struct VbeInfoBlock)))) return VBE_OUT_OF_DOS_MEM;
-  memcpy(rm_space,data,sizeof(struct VbeInfoBlock));
+  memcpy(controller_info,data,sizeof(struct VbeInfoBlock));
   memset(&r,0,sizeof(struct LRMI_regs));
   r.eax = 0x4f00;
-  r.es  = VirtToPhysSeg(rm_space);
-  r.edi = VirtToPhysOff(rm_space);
-  if(!VBE_LRMI_int(0x10,&r))
-  {
-     LRMI_free_real(rm_space);
-     return VBE_VM86_FAIL;
-  }
+  r.es  = VirtToPhysSeg(controller_info);
+  r.edi = VirtToPhysOff(controller_info);
+  if(!VBE_LRMI_int(0x10,&r)) return VBE_VM86_FAIL;
   retval = r.eax & 0xffff;
   if(retval == 0x4f)
   {
     FarPtr fpdata;
     retval = VBE_OK;
-    memcpy(data,rm_space,sizeof(struct VbeInfoBlock));
+    memcpy(data,controller_info,sizeof(struct VbeInfoBlock));
     fpdata.seg = (unsigned long)(data->OemStringPtr) >> 16;
     fpdata.off = (unsigned long)(data->OemStringPtr) & 0xffff;
     data->OemStringPtr = PhysToVirt(fpdata);
@@ -325,6 +328,7 @@ int vbeGetModeInfo(unsigned mode,struct VesaModeInfoBlock *data)
     retval = VBE_OK;
     memcpy(data,rm_space,sizeof(struct VesaModeInfoBlock));
   }
+  LRMI_free_real(rm_space);
   return retval;
 }
 
@@ -344,7 +348,7 @@ int vbeSetMode(unsigned mode,struct VesaCRTCInfoBlock *data)
   r.eax = 0x4f02;
   r.ebx = mode;
   retval = VBE_LRMI_int(0x10,&r);
-  if(rm_space) LRMI_free_real(rm_space);
+  LRMI_free_real(rm_space);
   if(!retval) return VBE_VM86_FAIL;
   retval = r.eax & 0xffff;
   if(retval == 0x4f)
@@ -682,7 +686,7 @@ int vbeWriteString(int x, int y, int attr, char *str)
   memcpy(rm_space,str,r.ecx);
   r.eax = 0x1300;
   retval = VBE_LRMI_int(0x10,&r);
-  if(rm_space) LRMI_free_real(rm_space);
+  LRMI_free_real(rm_space);
   if(!retval) return VBE_VM86_FAIL;
   retval = r.eax & 0xffff;
   if(retval == 0x4f) retval = VBE_OK;
