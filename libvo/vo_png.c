@@ -56,6 +56,10 @@ struct pngdata {
 	enum {OK,ERROR} status;  
 };
 	
+static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
+    vo_draw_alpha_rgb24(w, h, src, srca, stride, image_data + 3 * (y0 * image_width + x0), 3 * image_width);
+}
+
 static uint32_t
 init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format)
 {
@@ -84,7 +88,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	     return 1;     
     }		
     
-    if((z_compression < 0) || (z_compression < 9)) {
+    if((z_compression >= 0) && (z_compression <= 9)) {
 	    if(z_compression == 0) {
 		    printf("PNG Warning: compression level set to 0, compression disabled!\n");
 		    printf("PNG Info: Use the -z <n> switch to set compression level from 0 to 9.\n");
@@ -223,6 +227,7 @@ static uint32_t draw_frame(uint8_t * src[])
 
 static void draw_osd(void)
 {
+    vo_draw_text(image_width, image_height, draw_alpha);
 }
 
 static void flip_page (void)
