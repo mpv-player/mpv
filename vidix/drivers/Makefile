@@ -17,6 +17,12 @@ RAGE128_OBJS=rage128_vid.o
 RAGE128_LIBS=-L../../libdha -ldha
 RAGE128_CFLAGS=$(OPTFLAGS) -fPIC -I. -I.. -Wall -W -DRAGE128
 
+PM3_VID=pm3_vid.so
+PM3_SRCS=pm3_vid.c
+PM3_OBJS=pm3_vid.o
+PM3_LIBS=-L../../libdha -ldha
+PM3_CFLAGS=$(OPTFLAGS) -fPIC -I. -I.. -Wall -W
+
 MACH64_VID=mach64_vid.so
 MACH64_SRCS=mach64_vid.c
 MACH64_OBJS=mach64_vid.o
@@ -47,12 +53,18 @@ MGA_CRTC2_OBJS=mga_crtc2_vid.o
 MGA_CRTC2_LIBS=-L../../libdha -ldha -lm
 MGA_CRTC2_CFLAGS=$(OPTFLAGS) -fPIC -I. -I.. -Wall -W -DCRTC2
 
-all:    $(RADEON_VID) $(RAGE128_VID) $(MACH64_VID) $(NVIDIA_VID) $(GENFB_VID) $(MGA_VID) $(MGA_CRTC2_VID)
+all:    $(RADEON_VID) $(RAGE128_VID) $(MACH64_VID) $(NVIDIA_VID) $(GENFB_VID) $(MGA_VID) $(MGA_CRTC2_VID) $(PM3_VID)
 
 
 .SUFFIXES: .c .o
 
 # .PHONY: all clean
+
+$(PM3_OBJS):    $(PM3_SRCS)
+	$(CC) -c $(PM3_CFLAGS) -o $@ $<
+
+$(PM3_VID):     $(PM3_OBJS)
+	$(LD) $(PM3_LIBS) -shared -soname $(PM3_VID) -o $(PM3_VID) $(PM3_OBJS)
 
 $(RADEON_OBJS):    $(RADEON_SRCS)
 	$(CC) -c $(RADEON_CFLAGS) -o $@ $<
@@ -105,11 +117,15 @@ distclean:
 dep:    depend
 
 depend:
-	echo "depend not supported"
+# do nothing here
 
 install:
 	mkdir -p $(BINDIR)
 	install -m 755 -s -p *.so $(BINDIR)
+uninstall:
+	rm -f $(BINDIR)/*.so
+	rmdir -p --ignore-fail-on-non-empty $(BINDIR)
+
 #
 # include dependency files if they exist
 #

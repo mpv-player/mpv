@@ -280,6 +280,49 @@ static void radeon_wait_vsync(void)
     }
 }
 
+#ifdef RAGE128
+static void _radeon_engine_idle(void);
+static void _radeon_fifo_wait(unsigned);
+#define radeon_engine_idle()		_radeon_engine_idle()
+#define radeon_fifo_wait(entries)	_radeon_fifo_wait(entries)
+/* Flush all dirty data in the Pixel Cache to memory. */
+static __inline__ void radeon_engine_flush ( void )
+{
+    unsigned i;
+
+    OUTREGP(PC_NGUI_CTLSTAT, PC_FLUSH_ALL, ~PC_FLUSH_ALL);
+    for (i = 0; i < 2000000; i++) {
+	if (!(INREG(PC_NGUI_CTLSTAT) & PC_BUSY)) break;
+    }
+}
+
+/* Reset graphics card to known state. */
+static void radeon_engine_reset( void )
+{
+    uint32_t clock_cntl_index;
+    uint32_t mclk_cntl;
+    uint32_t gen_reset_cntl;
+
+    radeon_engine_flush();
+
+    clock_cntl_index = INREG(CLOCK_CNTL_INDEX);
+    mclk_cntl        = INPLL(MCLK_CNTL);
+
+    OUTPLL(MCLK_CNTL, mclk_cntl | FORCE_GCP | FORCE_PIPE3D_CP);
+
+    gen_reset_cntl   = INREG(GEN_RESET_CNTL);
+
+    OUTREG(GEN_RESET_CNTL, gen_reset_cntl | SOFT_RESET_GUI);
+    INREG(GEN_RESET_CNTL);
+    OUTREG(GEN_RESET_CNTL,
+	gen_reset_cntl & (uint32_t)(~SOFT_RESET_GUI));
+    INREG(GEN_RESET_CNTL);
+
+    OUTPLL(MCLK_CNTL,        mclk_cntl);
+    OUTREG(CLOCK_CNTL_INDEX, clock_cntl_index);
+    OUTREG(GEN_RESET_CNTL,   gen_reset_cntl);
+}
+#else
 
 static __inline__ void radeon_engine_flush ( void )
 {
@@ -345,9 +388,10 @@ static void radeon_engine_reset( void )
 
 	return;
 }
-
+#endif
 static void radeon_engine_restore( void )
 {
+#ifndef RAGE128
     int pitch64;
     uint32_t xres,yres,bpp;
     radeon_fifo_wait(1);
@@ -389,11 +433,45 @@ static void radeon_engine_restore( void )
     OUTREG(DP_WRITE_MASK,     0xffffffff);
 
     radeon_engine_idle();
+#endif
 }
-
+#ifdef RAGE128
 static void _radeon_fifo_wait (unsigned entries)
 {
-    int i;
+    unsigned i;
+
+    for(;;)
+    {
+	for (i=0; i<2000000; i++)
+		if ((INREG(GUI_STAT) & GUI_FIFOCNT_MASK) >= entries)
+			return;
+	radeon_engine_reset();
+	radeon_engine_restore();
+    }
+}
+
+static void _radeon_engine_idle ( void )
+{
+    unsigned i;
+
+    /* ensure FIFO is empty before waiting for idle */
+    radeon_fifo_wait (64);
+    for(;;)
+    {
+	for (i=0; i<2000000; i++) {
+		if ((INREG(GUI_STAT) & GUI_ACTIVE) == 0) {
+			radeon_engine_flush ();
+			return;
+		}
+	}
+	radeon_engine_reset();
+	radeon_engine_restore();
+    }
+}
+#else
+static void _radeon_fifo_wait (unsigned entries)
+{
+    unsigned i;
 
     for(;;)
     {
@@ -404,7 +482,6 @@ static void _radeon_fifo_wait (unsigned entries)
 	radeon_engine_restore();
     }
 }
-
 static void _radeon_engine_idle ( void )
 {
     int i;
@@ -414,7 +491,7 @@ static void _radeon_engine_idle ( void )
     for(;;)
     {
 	for (i=0; i<2000000; i++) {
-		if (((INREG(RBBM_STATUS) & GUI_ACTIVE)) == 0) {
+		if (((INREG(RBBM_STATUS) & RBBM_ACTIVE)) == 0) {
 			radeon_engine_flush ();
 			return;
 		}
@@ -423,8 +500,7 @@ static void _radeon_engine_idle ( void )
 	radeon_engine_restore();
     }
 }
-
-
+#endif
 
 #ifndef RAGE128
 /* Reference color space transform data */
@@ -1064,6 +1140,10 @@ static unsigned radeon_query_pitch(unsigned fourcc,const vidix_yuv_t *spitch)
 		if(spy > 16 && spu == spy/2 && spv == spy/2)	pitch = spy;
 		else						pitch = 32;
 		break;
+	case IMGFMT_YVU9:
+		if(spy > 32 && spu == spy/4 && spv == spy/4)	pitch = spy;
+		else						pitch = 64;
+		break;
 	default:
 		if(spy >= 16)	pitch = spy;
 		else		pitch = 16;
@@ -1099,6 +1179,7 @@ static int radeon_vid_init_video( vidix_playback_t *config )
     mpitch = best_pitch-1;
     switch(config->fourcc)
     {
+	case IMGFMT_YVU9:
 	/* 4:2:0 */
 	case IMGFMT_IYUV:
 	case IMGFMT_YV12:
@@ -1125,11 +1206,10 @@ static int radeon_vid_init_video( vidix_playback_t *config )
     dest_w = config->dest.w;
     dest_h = config->dest.h;
     if(radeon_is_dbl_scan()) dest_h *= 2;
-    else
-    if(radeon_is_interlace()) dest_h /= 2;
     besr.dest_bpp = radeon_vid_get_dbpp();
     besr.fourcc = config->fourcc;
     besr.v_inc = (src_h << 20) / dest_h;
+    if(radeon_is_interlace()) besr.v_inc *= 2;
     h_inc = (src_w << 12) / dest_w;
     step_by = 1;
     while(h_inc >= (2 << 12)) {
@@ -1236,46 +1316,50 @@ static void radeon_compute_framesize(vidix_playback_t *info)
     case IMGFMT_YV12:
     case IMGFMT_IYUV:
 		awidth = (info->src.w + (pitch-1)) & ~(pitch-1);
-		info->frame_size = (awidth*(info->src.h+info->src.h/2)+dbpp-1)/dbpp;
+		info->frame_size = awidth*(info->src.h+info->src.h/2);
 		break;
     case IMGFMT_RGB32:
     case IMGFMT_BGR32:
 		awidth = (info->src.w*4 + (pitch-1)) & ~(pitch-1);
-		info->frame_size = ((awidth*info->src.h)+dbpp-1)/dbpp;
+		info->frame_size = awidth*info->src.h;
 		break;
     /* YUY2 YVYU, RGB15, RGB16 */
     default:	
 		awidth = (info->src.w*2 + (pitch-1)) & ~(pitch-1);
-		info->frame_size = ((awidth*info->src.h)+dbpp-1)/dbpp;
+		info->frame_size = awidth*info->src.h;
 		break;
   }
-  info->frame_size *= dbpp;
 }
 
 int vixConfigPlayback(vidix_playback_t *info)
 {
-  unsigned rgb_size;
+  unsigned rgb_size,nfr;
   if(!is_supported_fourcc(info->fourcc)) return ENOSYS;
-  if(info->num_frames>=VID_PLAY_MAXFRAMES) info->num_frames=VID_PLAY_MAXFRAMES-1;
+  if(info->num_frames>VID_PLAY_MAXFRAMES) info->num_frames=VID_PLAY_MAXFRAMES;
   if(info->num_frames==1) besr.double_buff=0;
   else                    besr.double_buff=1;
   radeon_compute_framesize(info);
     
-  rgb_size = radeon_get_xres()*radeon_get_yres()*radeon_vid_get_dbpp();
-  for(;info->num_frames>0; info->num_frames--)
+  rgb_size = radeon_get_xres()*radeon_get_yres()*((radeon_vid_get_dbpp()+7)/8);
+  nfr = info->num_frames;
+  for(;nfr>0; nfr--)
   {
-      radeon_overlay_off = radeon_ram_size - info->frame_size*info->num_frames;
+      radeon_overlay_off = radeon_ram_size - info->frame_size*nfr;
       radeon_overlay_off &= 0xffff0000;
       if(radeon_overlay_off >= (int)rgb_size ) break;
   }
-  if(info->num_frames <= 3)
-   for(;info->num_frames>0; info->num_frames--)
+  if(nfr <= 3)
+  {
+   nfr = info->num_frames;
+   for(;nfr>0; nfr--)
    {
-      radeon_overlay_off = radeon_ram_size - info->frame_size*info->num_frames;
+      radeon_overlay_off = radeon_ram_size - info->frame_size*nfr;
       radeon_overlay_off &= 0xffff0000;
       if(radeon_overlay_off > 0) break;
    }
-  if(info->num_frames <= 0) return EINVAL;
+  }
+  if(nfr <= 0) return EINVAL;
+  info->num_frames = nfr;
   besr.vid_nbufs = info->num_frames;
   info->dga_addr = (char *)radeon_mem_base + radeon_overlay_off;  
   radeon_vid_init_video(info);
@@ -1453,9 +1537,10 @@ static void set_gr_key( void )
 {
     if(radeon_grkey.ckey.op == CKEY_TRUE)
     {
+	int dbpp=radeon_vid_get_dbpp();
 	besr.ckey_on=1;
 
-	switch(radeon_vid_get_dbpp())
+	switch(dbpp)
 	{
 	case 15:
 		besr.graphics_key_clr=
@@ -1486,8 +1571,13 @@ static void set_gr_key( void )
 		besr.graphics_key_msk=0;
 		besr.graphics_key_clr=0;
 	}
-	besr.graphics_key_msk = besr.graphics_key_clr;
+#ifdef RAGE128
+	besr.graphics_key_msk=(1<<dbpp)-1;
+	besr.ckey_cntl = VIDEO_KEY_FN_TRUE|GRAPHIC_KEY_FN_NE|CMP_MIX_AND;
+#else
+	besr.graphics_key_msk=besr.graphics_key_clr;
 	besr.ckey_cntl = VIDEO_KEY_FN_TRUE|GRAPHIC_KEY_FN_EQ|CMP_MIX_AND;
+#endif
     }
     else
     {

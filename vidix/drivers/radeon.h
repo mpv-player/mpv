@@ -63,6 +63,15 @@
 #define	CONFIG_CNTL				0x00E0
 /* CONFIG_CNTL bit constants */
 #	define CFG_VGA_RAM_EN			0x00000100
+#ifdef RAGE128
+#define GEN_RESET_CNTL				0x00f0
+#	define SOFT_RESET_GUI			0x00000001
+#	define SOFT_RESET_VCLK			0x00000100
+#	define SOFT_RESET_PCLK			0x00000200
+#	define SOFT_RESET_ECP			0x00000400
+#	define SOFT_RESET_DISPENG_XCLK		0x00000800
+#	define SOFT_RESET_MEMCTLR_XCLK		0x00001000
+#endif
 #define	CONFIG_MEMSIZE				0x00F8
 #define	CONFIG_APER_0_BASE			0x0100
 #define	CONFIG_APER_1_BASE			0x0104
@@ -85,7 +94,7 @@
 #define	AMCGPIO_EN_REG				0x01a8
 #define	AMCGPIO_MASK				0x0194
 #define	AMCGPIO_Y_REG				0x01a4
-#define	BM_STATUS				0x0160
+/*#define	BM_STATUS				0x0160*/
 #define	MPP_TB_CONFIG				0x01c0 /* ? */
 #define	MPP_GP_CONFIG				0x01c8 /* ? */
 #define	VENDOR_ID				0x0F00
@@ -200,10 +209,21 @@
 #define	MEM_INIT_LATENCY_TIMER			0x0154
 #define	MEM_SDRAM_MODE_REG			0x0158
 #define	AGP_BASE				0x0170
+#ifdef RAGE128
+#define PCI_GART_PAGE				0x017c
+#define PC_NGUI_MODE				0x0180
+#define PC_NGUI_CTLSTAT				0x0184
+#	define PC_FLUSH_GUI			(3 << 0)
+#	define PC_RI_GUI			(1 << 2)
+#	define PC_FLUSH_ALL			0x00ff
+#	define PC_BUSY				(1 << 31)
+#define PC_MISC_CNTL				0x0188
+#else
 #define	MEM_IO_CNTL_A1				0x017C
 #define	MEM_IO_CNTL_B0				0x0180
 #define	MEM_IO_CNTL_B1				0x0184
 #define	MC_DEBUG				0x0188
+#endif
 #define	MC_STATUS				0x0150
 #define	MEM_IO_OE_CNTL				0x018C
 #define	MC_FB_LOCATION				0x0148
@@ -554,7 +574,9 @@
 #	define SCALER_UNKNOWN_FLAG3		0x02000000L /* ??? */
 #	define SCALER_UNKNOWN_FLAG4		0x04000000L /* ??? */
 #	define SCALER_DIS_LIMIT			0x08000000L
+#ifdef RAGE128
 #	define SCALER_PRG_LOAD_START		0x10000000L
+#endif
 #	define SCALER_INT_EMU			0x20000000L
 #	define SCALER_ENABLE			0x40000000L
 #	define SCALER_SOFT_RESET		0x80000000L
@@ -686,6 +708,18 @@
 #define	OV0_GRAPHICS_KEY_CLR			0x04EC
 #define	OV0_GRAPHICS_KEY_MSK			0x04F0
 #define	OV0_KEY_CNTL				0x04F4
+#ifdef RAGE128
+#	define VIDEO_KEY_FN_MASK		0x00000007L
+#	define VIDEO_KEY_FN_FALSE		0x00000000L
+#	define VIDEO_KEY_FN_TRUE		0x00000001L
+#	define VIDEO_KEY_FN_EQ			0x00000004L
+#	define VIDEO_KEY_FN_NE			0x00000005L
+#	define GRAPHIC_KEY_FN_MASK		0x00000070L
+#	define GRAPHIC_KEY_FN_FALSE		0x00000000L
+#	define GRAPHIC_KEY_FN_TRUE		0x00000010L
+#	define GRAPHIC_KEY_FN_EQ		0x00000040L
+#	define GRAPHIC_KEY_FN_NE		0x00000050L
+#else
 #	define VIDEO_KEY_FN_MASK		0x00000003L
 #	define VIDEO_KEY_FN_FALSE		0x00000000L
 #	define VIDEO_KEY_FN_TRUE		0x00000001L
@@ -696,6 +730,7 @@
 #	define GRAPHIC_KEY_FN_TRUE		0x00000010L
 #	define GRAPHIC_KEY_FN_EQ		0x00000020L
 #	define GRAPHIC_KEY_FN_NE		0x00000030L
+#endif
 #	define CMP_MIX_MASK			0x00000100L
 #	define CMP_MIX_OR			0x00000000L
 #	define CMP_MIX_AND			0x00000100L
@@ -783,6 +818,9 @@
 #define SCRATCH_UMSK				0x0770
 #define SCRATCH_ADDR				0x0774
 #define DMA_GUI_TABLE_ADDR			0x0780
+#	define DMA_GUI_COMMAND__BYTE_COUNT_MASK	0x001fffff
+#	define DMA_GUI_COMMAND__INTDIS		0x40000000
+#	define DMA_GUI_COMMAND__EOL		0x80000000
 #define DMA_GUI_SRC_ADDR			0x0784
 #define DMA_GUI_DST_ADDR			0x0788
 #define DMA_GUI_COMMAND				0x078C
@@ -990,6 +1028,11 @@
 #define	DST_Y_X					0x1438
 #define	DST_WIDTH_HEIGHT			0x1598
 #define	DST_HEIGHT_WIDTH			0x143c
+#ifdef RAGE128
+#define GUI_STAT				0x1740
+#	define GUI_FIFOCNT_MASK			0x0fff
+#	define GUI_ACTIVE			(1 << 31)
+#endif
 #define	SRC_CLUT_ADDRESS			0x1780
 #define	SRC_CLUT_DATA				0x1784
 #define	SRC_CLUT_DATA_RD			0x1788
@@ -1195,13 +1238,29 @@
 #define	PPLL_DIV_2				0x0006
 #define	PPLL_DIV_3				0x0007
 #define	VCLK_ECP_CNTL				0x0008
+#	define VCLK_SRC_SEL_MASK		0x03
+#	define VCLK_SRC_SEL_CPUCLK		0x00
+#	define VCLK_SRC_SEL_PSCANCLK		0x01
+#	define VCLK_SRC_SEL_BYTECLK		0x02
+#	define VCLK_SRC_SEL_PPLLCLK		0x03
 #define	HTOTAL_CNTL				0x0009
 #define	HTOTAL2_CNTL				0x002e /* PLL */
 #define	M_SPLL_REF_FB_DIV			0x000a
 #define	AGP_PLL_CNTL				0x000b
 #define	SPLL_CNTL				0x000c
 #define	SCLK_CNTL				0x000d
+#	define DYN_STOP_LAT_MASK		0x00007ff8
+#	define CP_MAX_DYN_STOP_LAT		0x0008
+#	define SCLK_FORCEON_MASK		0xffff8000
+#define SCLK_MORE_CNTL				0x0035 /* PLL */
+#	define SCLK_MORE_FORCEON		0x0700
 #define	MPLL_CNTL				0x000e
+#ifdef RAGE128
+#define MCLK_CNTL				0x000f /* PLL */
+#	define FORCE_GCP			(1 << 16)
+#	define FORCE_PIPE3D_CP			(1 << 17)
+#	define FORCE_RCP			(1 << 18)
+#else
 #define	MCLK_CNTL				0x0012
 /* MCLK_CNTL bit constants */
 #	define FORCEON_MCLKA			(1 << 16)
@@ -1210,6 +1269,7 @@
 #	define FORCEON_YCLKB			(1 << 19)
 #	define FORCEON_MC			(1 << 20)
 #	define FORCEON_AIC			(1 << 21)
+#endif
 #define	PLL_TEST_CNTL				0x0013
 #define	P2PLL_CNTL				0x002a /* P2PLL	*/
 #	define P2PLL_RESET			(1 <<  0)
@@ -1224,6 +1284,12 @@
 #	define P2PLL_REF_DIV_MASK		0x03ff
 #	define P2PLL_ATOMIC_UPDATE_R		(1 << 15) /* same as _W */
 #	define P2PLL_ATOMIC_UPDATE_W		(1 << 15) /* same as _R */
+#define PIXCLKS_CNTL				0x002d
+#	define PIX2CLK_SRC_SEL_MASK		0x03
+#	define PIX2CLK_SRC_SEL_CPUCLK		0x00
+#	define PIX2CLK_SRC_SEL_PSCANCLK		0x01
+#	define PIX2CLK_SRC_SEL_BYTECLK		0x02
+#	define PIX2CLK_SRC_SEL_P2PLLCLK		0x03
 
 /* masks */
 
@@ -1236,15 +1302,43 @@
 #define	PPLL_FB3_DIV_MASK		0x000007ff
 #define	PPLL_POST3_DIV_MASK		0x00070000
 
-#define	GUI_ACTIVE			0x80000000
+/* BUS MASTERING */
+#define BM_FRAME_BUF_OFFSET			0xA00
+#define BM_SYSTEM_MEM_ADDR			0xA04
+#define BM_COMMAND				0xA08
+#	define BM_INTERRUPT_DIS			0x08000000
+#	define BM_TRANSFER_DEST_REG		0x10000000
+#	define BM_FORCE_TO_PCI			0x20000000
+#	define BM_FRAME_OFFSET_HOLD		0x40000000
+#	define BM_END_OF_LIST			0x80000000
+#define BM_STATUS				0xA0c
+#define BM_QUEUE_STATUS				0xA10
+#define BM_QUEUE_FREE_STATUS			0xA14
+#define BM_CHUNK_0_VAL				0xA18
+#	define BM_PTR_FORCE_TO_PCI		0x00200000
+#	define BM_PM4_RD_FORCE_TO_PCI		0x00400000
+#	define BM_GLOBAL_FORCE_TO_PCI		0x00800000
+#	define BM_VIP3_NOCHUNK			0x10000000
+#	define BM_VIP2_NOCHUNK			0x20000000
+#	define BM_VIP1_NOCHUNK			0x40000000
+#	define BM_VIP0_NOCHUNK			0x80000000
+#define BM_CHUNK_1_VAL				0xA1C
+#define BM_VIP0_BUF				0xA20
+#	define SYSTEM_TRIGGER_SYSTEM_TO_VIDEO	0x0
+#	define SYSTEM_TRIGGER_VIDEO_TO_SYSTEM	0x1
+#define BM_VIP0_ACTIVE				0xA24
+#define BM_VIP1_BUF				0xA30
+#define BM_VIP1_ACTIVE				0xA34
+#define BM_VIP2_BUF				0xA40
+#define BM_VIP2_ACTIVE				0xA44
+#define BM_VIP3_BUF				0xA50
+#define BM_VIP3_ACTIVE				0xA54
+#define BM_VIDCAP_BUF0				0xA60
+#define BM_VIDCAP_BUF1				0xA64
+#define BM_VIDCAP_BUF2				0xA68
+#define BM_VIDCAP_ACTIVE			0xA6c
+#define BM_GUI					0xA80
 
-/* GEN_RESET_CNTL bit constants	*/
-#define	SOFT_RESET_GUI				0x00000001
-#define	SOFT_RESET_VCLK				0x00000100
-#define	SOFT_RESET_PCLK				0x00000200
-#define	SOFT_RESET_ECP				0x00000400
-#define	SOFT_RESET_DISPENG_XCLK			0x00000800
-						
 /* RAGE	THEATER	REGISTERS */
 
 #define DMA_VIPH0_COMMAND			0x0A00

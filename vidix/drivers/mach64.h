@@ -845,18 +845,19 @@ This means that this sources don't support ISA and VLB cards */
 /*	?				0x80000000ul */
 #define TV_OUT_DATA		BlockIOTag(0x27u)	/* LTPro */
 #define BUS_CNTL		IOPortTag(0x13u, 0x28u)
-#define BUS_WS				0x0000000ful
-#define BUS_DBL_RESYNC			0x00000001ul	/* VTB/GTB/LT */
-#define BUS_MSTR_RESET			0x00000002ul	/* VTB/GTB/LT */
-#define BUS_FLUSH_BUF			0x00000004ul	/* VTB/GTB/LT */
-#define BUS_STOP_REQ_DIS		0x00000008ul	/* VTB/GTB/LT */
-#define BUS_ROM_WS			0x000000f0ul
-#define BUS_APER_REG_DIS		0x00000010ul	/* VTB/GTB/LT */
-#define BUS_EXTRA_PIPE_DIS		0x00000020ul	/* VTB/GTB/LT */
-#define BUS_MASTER_DIS			0x00000040ul	/* VTB/GTB/LT */
-#define BUS_ROM_WRT_EN			0x00000080ul	/* GTPro */
-#define BUS_ROM_PAGE			0x00000f00ul
-#define BUS_MINOR_REV_ID		0x00000700ul	/* LTPro */
+#	define BUS_WS			0x0000000ful
+#	define BUS_DBL_RESYNC		0x00000001ul	/* VTB/GTB/LT */
+#	define BUS_MSTR_RESET		0x00000002ul	/* VTB/GTB/LT */
+#	define BUS_FLUSH_BUF		0x00000004ul	/* VTB/GTB/LT */
+#	define BUS_STOP_REQ_DIS		0x00000008ul	/* VTB/GTB/LT */
+#	define BUS_ROM_WS		0x000000f0ul
+#	define BUS_APER_REG_DIS		0x00000010ul	/* VTB/GTB/LT */
+#	define BUS_EXTRA_PIPE_DIS	0x00000020ul	/* VTB/GTB/LT */
+#	define BUS_MASTER_DIS		0x00000040ul	/* VTB/GTB/LT */
+#	define BUS_ROM_WRT_EN		0x00000080ul	/* GTPro */
+#	define BUS_ROM_PAGE		0x00000f00ul
+#	define BUS_MINOR_REV_ID		0x00000700ul	/* LTPro */
+#	define BUS_EXT_REG_EN		0x08000000ul
 /*		First silicom - Prototype (A11)	0x00000000ul */
 /*		Metal mask spin (A12 & A13)	0x00000100ul */
 /*		All layer spin (A21)		0x00000200ul */
@@ -1283,20 +1284,24 @@ This means that this sources don't support ISA and VLB cards */
 #define SRC_HEIGHT2		BlockIOTag(0x6bu)
 #define SRC_HEIGHT2_WIDTH2	BlockIOTag(0x6cu)
 #define SRC_CNTL		BlockIOTag(0x6du)
-#define SRC_PATT_EN			0x00000001ul
-#define SRC_PATT_ROT_EN			0x00000002ul
-#define SRC_LINEAR_EN			0x00000004ul
-#define SRC_BYTE_ALIGN			0x00000008ul
-#define SRC_LINE_X_DIR			0x00000010ul
-#define SRC_8X8X8_BRUSH			0x00000020ul	/* VTB/GTB */
-#define FAST_FILL_EN			0x00000040ul	/* VTB/GTB */
-#define SRC_TRACK_DST			0x00000080ul	/* VTB/GTB */
-#define BUS_MASTER_EN			0x00000100ul	/* VTB/GTB */
-#define BUS_MASTER_SYNC			0x00000200ul	/* VTB/GTB */
-#define BUS_MASTER_OP			0x00000c00ul	/* VTB/GTB */
-#define SRC_8X8X8_BRUSH_LOADED		0x00001000ul	/* VTB/GTB */
-#define COLOR_REG_WRITE_EN		0x00002000ul	/* VTB/GTB */
-#define BLOCK_WRITE_EN			0x00004000ul	/* VTB/GTB */
+#	define SRC_PATT_EN		0x00000001ul
+#	define SRC_PATT_ROT_EN		0x00000002ul
+#	define SRC_LINEAR_EN		0x00000004ul
+#	define SRC_BYTE_ALIGN		0x00000008ul
+#	define SRC_LINE_X_DIR		0x00000010ul
+#	define SRC_8X8X8_BRUSH		0x00000020ul	/* VTB/GTB */
+#	define FAST_FILL_EN		0x00000040ul	/* VTB/GTB */
+#	define SRC_TRACK_DST		0x00000080ul	/* VTB/GTB */
+#	define BUS_MASTER_EN		0x00000100ul	/* VTB/GTB */
+#	define BUS_MASTER_SYNC		0x00000200ul	/* VTB/GTB */
+#	define BUS_MASTER_OP		0x00000c00ul	/* VTB/GTB */
+#	define BM_OP_FRAME_TO_SYSTEM	(0 << 10)
+#	define BM_OP_SYSTEM_TO_FRAME	(1 << 10)
+#	define BM_OP_REG_TO_SYSTEM	(2 << 10)
+#	define BM_OP_SYSTEM_TO_REG	(3 << 10)
+#	define SRC_8X8X8_BRUSH_LOADED	0x00001000ul	/* VTB/GTB */
+#	define COLOR_REG_WRITE_EN	0x00002000ul	/* VTB/GTB */
+#	define BLOCK_WRITE_EN		0x00004000ul	/* VTB/GTB */
 /*	?				0xffff8000ul */
 /*	?			BlockIOTag(0x6eu) */
 /*	?			BlockIOTag(0x6fu) */
@@ -1348,6 +1353,11 @@ This means that this sources don't support ISA and VLB cards */
 #define BM_ADDR			BlockIOTag(0x92u)	/* VTB/GTB */
 #define BM_DATA			BlockIOTag(0x92u)	/* VTB/GTB */
 #define BM_GUI_TABLE_CMD	BlockIOTag(0x93u)	/* GTPro */
+#	define CIRCULAR_BUF_SIZE_16KB	(0 << 0)
+#	define CIRCULAR_BUF_SIZE_32KB	(1 << 0)
+#	define CIRCULAR_BUF_SIZE_64KB	(2 << 0)
+#	define CIRCULAR_BUF_SIZE_128KB	(3 << 0)
+#	define LAST_DESCRIPTOR		(1 << 31)
 /*	?			BlockIOTag(0x94u) */
 /*	?			BlockIOTag(0x95u) */
 /*	?			BlockIOTag(0x96u) */
@@ -1409,21 +1419,57 @@ This means that this sources don't support ISA and VLB cards */
 #define DP_C14_RGB_HIGH_NIBBLE		0x08000000ul	/* GTB */
 #define DP_SCALE_PIX_WIDTH		0xf0000000ul	/* GTB */
 #define DP_MIX			BlockIOTag(0xb5u)
-#define DP_BKGD_MIX			0x0000001ful
-/*	?				0x0000ffe0ul */
-#define DP_FRGD_MIX			0x001f0000ul
-/*	?				0xffe00000ul */
+#	define BKGD_MIX_NOT_D		(0 << 0)
+#	define BKGD_MIX_ZERO		(1 << 0)
+#	define BKGD_MIX_ONE		(2 << 0)
+#	define BKGD_MIX_D	(3 << 0)
+#	define BKGD_MIX_NOT_S		(4 << 0)
+#	define BKGD_MIX_D_XOR_S		(5 << 0)
+#	define BKGD_MIX_NOT_D_XOR_S	(6 << 0)
+#	define BKGD_MIX_S	(7 << 0)
+#	define BKGD_MIX_NOT_D_OR_NOT_S	(8 << 0)
+#	define BKGD_MIX_D_OR_NOT_S	(9 << 0)
+#	define BKGD_MIX_NOT_D_OR_S	(10 << 0)
+#	define BKGD_MIX_D_OR_S		(11 << 0)
+#	define BKGD_MIX_D_AND_S		(12 << 0)
+#	define BKGD_MIX_NOT_D_AND_S	(13 << 0)
+#	define BKGD_MIX_D_AND_NOT_S	(14 << 0)
+#	define BKGD_MIX_NOT_D_AND_NOT_S	(15 << 0)
+#	define BKGD_MIX_D_PLUS_S_DIV2	(23 << 0)
+#	define FRGD_MIX_NOT_D		(0 << 16)
+#	define FRGD_MIX_ZERO		(1 << 16)
+#	define FRGD_MIX_ONE		(2 << 16)
+#	define FRGD_MIX_D		(3 << 16)
+#	define FRGD_MIX_NOT_S		(4 << 16)
+#	define FRGD_MIX_D_XOR_S		(5 << 16)
+#	define FRGD_MIX_NOT_D_XOR_S	(6 << 16)
+#	define FRGD_MIX_S		(7 << 16)
+#	define FRGD_MIX_NOT_D_OR_NOT_S	(8 << 16)
+#	define FRGD_MIX_D_OR_NOT_S	(9 << 16)
+#	define FRGD_MIX_NOT_D_OR_S	(10 << 16)
+#	define FRGD_MIX_D_OR_S		(11 << 16)
+#	define FRGD_MIX_D_AND_S		(12 << 16)
+#	define FRGD_MIX_NOT_D_AND_S	(13 << 16)
+#	define FRGD_MIX_D_AND_NOT_S	(14 << 16)
+#	define FRGD_MIX_NOT_D_AND_NOT_S	(15 << 16)
+#	define FRGD_MIX_D_PLUS_S_DIV2	(23 << 16)
 #define DP_SRC			BlockIOTag(0xb6u)
-#define DP_BKGD_SRC			0x00000007ul
-/*	?				0x000000feul */
-#define DP_FRGD_SRC			0x00000700ul
-/*	?				0x0000fe00ul */
-#define DP_MONO_SRC			0x00030000ul
-#define DP_MONO_SRC_ALLONES			0x00000000ul
-#define DP_MONO_SRC_PATTERN			0x00010000ul
-#define DP_MONO_SRC_HOST			0x00020000ul
-#define DP_MONO_SRC_BLIT			0x00030000ul
-/*	?				0xfffc0000ul */
+#	define BKGD_SRC_BKGD_CLR	(0 << 0)
+#	define BKGD_SRC_FRGD_CLR	(1 << 0)
+#	define BKGD_SRC_HOST		(2 << 0)
+#	define BKGD_SRC_BLIT		(3 << 0)
+#	define BKGD_SRC_PATTERN		(4 << 0)
+#	define BKGD_SRC_3D		(5 << 0)
+#	define FRGD_SRC_BKGD_CLR	(0 << 8)
+#	define FRGD_SRC_FRGD_CLR	(1 << 8)
+#	define FRGD_SRC_HOST		(2 << 8)
+#	define FRGD_SRC_BLIT		(3 << 8)
+#	define FRGD_SRC_PATTERN		(4 << 8)
+#	define FRGD_SRC_3D		(5 << 8)
+#	define MONO_SRC_ONE		(0 << 16)
+#	define MONO_SRC_PATTERN		(1 << 16)
+#	define MONO_SRC_HOST		(2 << 16)
+#	define MONO_SRC_BLIT		(3 << 16)
 #define DP_FRGD_CLR_MIX		BlockIOTag(0xb7u)	/* VTB/GTB */
 #define DP_FRGD_BKGD_CLR	BlockIOTag(0xb8u)	/* VTB/GTB */
 /*	?			BlockIOTag(0xb9u) */
@@ -1677,12 +1723,16 @@ This means that this sources don't support ISA and VLB cards */
 #define GUI_CMDFIFO_DEBUG	BlockIOTag(0x15cu)	/* GT2c/VT4 */
 #define GUI_CMDFIFO_DATA	BlockIOTag(0x15du)	/* GT2c/VT4 */
 #define GUI_CNTL		BlockIOTag(0x15eu)	/* GT2c/VT4 */
-#define CMDFIFO_SIZE_MODE		0x00000003ul
+#	define CMDFIFO_SIZE_MASK	0x00000003ul
+#	define CMDFIFO_SIZE_192		0x00000000ul
+#	define CMDFIFO_SIZE_128		0x00000001ul
+#	define CMDFIFO_SIZE_64		0x00000002ul
 /*	?				0x0000fffcul */
-#define IDCT_PRSR_MODE			0x00010000ul	/* XL/XC */
-#define IDCT_BLOCK_GUI_INITIATOR	0x00020000ul	/* XL/XC */
+#	define IDCT_PRSR_MODE		0x00010000ul	/* XL/XC */
+#	define IDCT_BLOCK_GUI_INITIATOR	0x00020000ul	/* XL/XC */
 /*	?				0xfffc0000ul */
 /*	?			BlockIOTag(0x15fu) */
+/* BUS MASTERING */
 #define BM_FRAME_BUF_OFFSET	BlockIOTag(0x160u)	/* VTB/GTB */
 #define BM_SYSTEM_MEM_ADDR	BlockIOTag(0x161u)	/* VTB/GTB */
 #define BM_COMMAND		BlockIOTag(0x162u)	/* VTB/GTB */
@@ -1699,6 +1749,14 @@ This means that this sources don't support ISA and VLB cards */
 /*	?			BlockIOTag(0x16du) */
 #define BM_GUI_TABLE		BlockIOTag(0x16eu)	/* VTB/GTB */
 #define BM_SYSTEM_TABLE		BlockIOTag(0x16fu)	/* VTB/GTB */
+#	define DMA_GUI_COMMAND__BYTE_COUNT_MASK			0x001fffff
+#	define DMA_GUI_COMMAND__HOLD_VIDEO_OFFSET		0x40000000
+#	define DMA_GUI_COMMAND__EOL				0x80000000
+#	define SYSTEM_TRIGGER_SYSTEM_TO_VIDEO				0x0
+#	define SYSTEM_TRIGGER_VIDEO_TO_SYSTEM				0x1
+#	define SYSTEM_TRIGGER_VIDEO_TO_SYSTEM_AFTER_BUF0_READY		0x2
+#	define SYSTEM_TRIGGER_VIDEO_TO_SYSTEM_AFTER_BUF1_READY		0x3
+#	define SYSTEM_TRIGGER_VIDEO_TO_SYSTEM_AFTER_SNAPSHOT_READY	0x4
 /*	?			BlockIOTag(0x170u) */
 /*	?			BlockIOTag(0x171u) */
 /*	?			BlockIOTag(0x172u) */
