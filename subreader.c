@@ -110,9 +110,11 @@ subtitle *sub_read_line_sami(FILE *fd, subtitle *current) {
 
 char *sub_readtext(char *source, char **dest) {
     int len=0;
-    char *p;
+    char *p=source;
     
-    for (p=source;*p!='\r' && *p!='\n' && *p!='|'; p++,len++);
+    while ( !eol(*p) && *p!= '|' ) {
+	p++,len++;
+    }
     
     *dest= (char *)malloc (len+1);
     if (!dest) {return ERR;}
@@ -136,21 +138,17 @@ subtitle *sub_read_line_microdvd(FILE *fd,subtitle *current) {
 
     do {
 	if (!fgets (line, 1000, fd)) return NULL;
-    } while (*line=='\n' || *line == '\r' || !*line);
-    
-    if (sscanf (line, "{%ld}{%ld}%s", &(current->start), &(current->end),line2) <2) {return ERR;}
+    } while (sscanf (line, "{%ld}{%ld}%[^\r\n]", &(current->start), &(current->end),line2) <3);
 
-    p=line;
-    while (*p++!='}');
-    while (*p++!='}');
+    p=line2;
 
     next=p, i=0;
-    while ((next =sub_readtext (next, &(current->text[i])))) {
+    while (next =sub_readtext (next, &(current->text[i]))) {
         if (current->text[i]==ERR) {return ERR;}
 	i++;
 	if (i>=SUB_MAX_TEXT) { printf ("Too many lines in a subtitle\n");current->lines=i;return;}
     }
-    current->lines=i+1;
+    current->lines= ++i;
 
     return current;
 }
