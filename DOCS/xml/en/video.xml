@@ -325,7 +325,7 @@ can do (and what it can't).
 <para>
 <acronym>DGA</acronym> is short for <emphasis>Direct Graphics
 Access</emphasis> and is a means for a program to bypass the X server and
-directly modifying the framebuffer memory.  Technically spoken this happens
+directly modifying the framebuffer memory. Technically spoken this happens
 by mapping the framebuffer memory into the memory range of your process.
 This is allowed by the kernel only if you have superuser privileges. You
 can get these either by logging in as <systemitem
@@ -468,7 +468,7 @@ for both; in the following sections I'll explain how the DGA driver for
 
 <para>
 The DGA driver is invoked by specifying <option>-vo dga</option> at the
-command line.  The default behavior is to switch to a resolution matching
+command line. The default behavior is to switch to a resolution matching
 the original resolution of the video as close as possible. It deliberately
 ignores the <option>-vm</option> and <option>-fs</option> options
 (enabling of video mode switching and fullscreen) - it always tries to
@@ -518,7 +518,7 @@ of CPU time!) depending on the implementation of DGA for your hardware.
 <para>
 Generally spoken, DGA framebuffer access should be at least as fast as
 using the X11 driver with the additional benefit of getting a fullscreen
-image.  The percentage speed values printed by
+image. The percentage speed values printed by
 <application>MPlayer</application> have to be interpreted with some care,
 as for example, with the X11 driver they do not include the time used by
 the X server needed for the actual drawing. Hook a terminal to a serial
@@ -602,7 +602,7 @@ with every chipset driver for XFree out there.
 <para>
 <acronym>SDL</acronym> (Simple Directmedia Layer) is basically a unified
 video/audio interface. Programs that use it know only about SDL, and not
-about what video or audio driver does SDL actually use.  For example a Doom
+about what video or audio driver does SDL actually use. For example a Doom
 port using SDL can run on svgalib, aalib, X, fbdev, and others, you only
 have to specify the (for example) video driver to use with the
 <envar>SDL_VIDEODRIVER</envar> environment variable. Well, in theory.
@@ -1231,8 +1231,8 @@ limitation of preventing simultaneous use of the independent controllers,
 but allows applications released before VBE 3.0 to operate normally. The
 VBE Function 00h (Return Controller Information) returns the combined
 information of both controllers, including the combined list of available
-modes.  When the application selects a mode, the appropriate controller is
-activated.  Each of the remaining VBE functions then operates on the active
+modes. When the application selects a mode, the appropriate controller is
+activated. Each of the remaining VBE functions then operates on the active
 controller.
 </para>
 </formalpara>
@@ -1422,7 +1422,7 @@ main goal of this interface is to maximize the speed of video playback.
 <title>USAGE</title>
 <listitem><simpara>
   You can use standalone video output driver: <option>-vo xvidix</option>.
-  This driver was developed as X11's front end to VIDIX technology.  It
+  This driver was developed as X11's front end to VIDIX technology. It
   requires X server and can work only under X server. Note that, as it directly
   accesses the hardware and circumvents the X driver, pixmaps cached in the
   graphics card's memory may be corrupted. You can prevent this by limiting
@@ -2271,7 +2271,7 @@ for Matrox G450/G550 TV-out instructions, please see the next section!
   <listitem><para>
     Using the <emphasis role="bold">matroxfb modules</emphasis> in the 2.4
     kernels. 2.2 kernels don't have the TVout feature in them, thus unusable
-    for this.  You have to enable ALL matroxfb-specific feature during compilation
+    for this. You have to enable ALL matroxfb-specific feature during compilation
     (except MultiHead), and compile them into <emphasis role="bold">modules</emphasis>!
     You'll also need I2C enabled.
     </para>
@@ -2526,7 +2526,7 @@ with a simple analog TV encoder, some have a more advanced one.
   </simpara>
   <itemizedlist>
     <listitem><simpara>NTSC 320x240, 640x480 and maybe 800x600 too.</simpara></listitem>
-    <listitem><simpara>PAL  320x240, 400x300, 640x480, 800x600.  </simpara></listitem>
+    <listitem><simpara>PAL  320x240, 400x300, 640x480, 800x600.</simpara></listitem>
   </itemizedlist>
   <simpara>Mode 512x384 is not supported in BIOS. You must scale the image
   to a different resolution to activate TV out. If you can see an image on the
