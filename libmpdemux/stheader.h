@@ -63,6 +63,7 @@ typedef struct {
   // buffers:
   float num_frames;       // number of frames played
   int num_frames_decoded;       // number of frames decoded
+  unsigned our_out_buffer_size;
   char *our_out_buffer;
   mp_image_t *image;
   // win32 codec stuff:

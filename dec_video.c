@@ -455,6 +455,7 @@ unsigned int out_fmt=sh_video->codec->outfmt[sh_video->outfmtidx];
 pitches[0] = pitches[1] =pitches[2] = 0; /* fake unknown */
 
 sh_video->our_out_buffer=NULL;
+sh_video->our_out_buffer_size=0U;
 
 sh_video->image=new_mp_image(sh_video->disp_w,sh_video->disp_h);
 mp_image_setfmt(sh_video->image,out_fmt);
@@ -464,8 +465,8 @@ switch(sh_video->codec->driver){
 #ifdef USE_MP_IMAGE
    sh_video->image->type=MP_IMGTYPE_STATIC;
 #else
-   sh_video->our_out_buffer = 
-     (char*)memalign(64, sh_video->disp_w * sh_video->disp_h * 1.5);
+   sh_video->our_out_buffer_size = sh_video->disp_w * sh_video->disp_h * 1.5;
+   sh_video->our_out_buffer = (char*)memalign(64, sh_video->our_out_buffer_size);
 #endif
    sh_video->context = roq_decode_video_init();
    break;
@@ -474,8 +475,8 @@ switch(sh_video->codec->driver){
    sh_video->image->type=MP_IMGTYPE_STATIC;
 #else
    int bpp=((out_fmt&255)+7)/8;
-   sh_video->our_out_buffer = 
-     (char*)memalign(64, sh_video->disp_w*sh_video->disp_h*bpp);
+   sh_video->our_out_buffer_size = sh_video->disp_w*sh_video->disp_h*bpp;
+   sh_video->our_out_buffer = (char*)memalign(64, sh_video->our_out_buffer_size);
 #endif
    sh_video->context = decode_cinepak_init();
    break;
@@ -548,8 +549,8 @@ switch(sh_video->codec->driver){
      bpp=((out_fmt&255)+7)&(~7);
      DS_VideoDecoder_SetDestFmt(ds_vdec,out_fmt&255,0);           // RGB/BGR
    }
-
-   sh_video->our_out_buffer = (char*)memalign(64,sh_video->disp_w*sh_video->disp_h*bpp/8); // FIXME!!!
+   sh_video->our_out_buffer_size = sh_video->disp_w*sh_video->disp_h*bpp/8; // FIXME!!!
+   sh_video->our_out_buffer = (char*)memalign(64,sh_video->our_out_buffer_size); 
 #endif
    /* Warning: these pitches tested only with YUY2 fourcc */
    pitches[0] = 16; pitches[1] = pitches[2] = 8;
@@ -625,7 +626,8 @@ switch(sh_video->codec->driver){
 #ifdef USE_MP_IMAGE
 	sh_video->image->type=MP_IMGTYPE_STATIC;
 #else
-	sh_video->our_out_buffer = (char*)memalign(64,((bits*dec_param.x_dim+7)/8)*dec_param.y_dim);
+	sh_video->our_out_buffer_size = ((bits*dec_param.x_dim+7)/8)*dec_param.y_dim;
+	sh_video->our_out_buffer = (char*)memalign(64,sh_video->our_out_buffer_size);
 //	sh_video->our_out_buffer = shmem_alloc(dec_param.x_dim*dec_param.y_dim*5);
 #endif
    }
@@ -699,7 +701,8 @@ switch(sh_video->codec->driver){
 #ifdef USE_MP_IMAGE
     sh_video->image->type=MP_IMGTYPE_STATIC;
 #else
-    sh_video->our_out_buffer = (char*)memalign(64,sh_video->disp_w*sh_video->disp_h*bpp); // FIXME!!!
+    sh_video->our_out_buffer_size = sh_video->disp_w*sh_video->disp_h*bpp; // FIXME!!!
+    sh_video->our_out_buffer = (char*)memalign(64,sh_video->our_out_buffer_size); 
 #endif
    if(bpp==2){  // 15 or 16 bpp ==> palette conversion!
      unsigned int* pal=(unsigned int*)(((char*)sh_video->bih)+40);
@@ -734,8 +737,8 @@ switch(sh_video->codec->driver){
     sh_video->image->type=MP_IMGTYPE_STATIC;
 #else
    int bpp=((out_fmt&255)+7)/8; // RGB only
-   sh_video->our_out_buffer = 
-     (char*)memalign(64, sh_video->disp_w*sh_video->disp_h*bpp); // FIXME!!!
+   sh_video->our_out_buffer_size =  sh_video->disp_w*sh_video->disp_h*bpp; // FIXME!!!
+   sh_video->our_out_buffer = (char*)memalign(64,sh_video->our_out_buffer_size); 
 #endif
 if ((sh_video->codec->driver == VFM_QTRLE) && (sh_video->bih->biBitCount != 24))
   printf (
@@ -754,8 +757,8 @@ if ((sh_video->codec->driver == VFM_QTRLE) && (sh_video->bih->biBitCount != 24))
     sh_video->image->type=MP_IMGTYPE_STATIC;
 #else
    int bpp=((out_fmt&255)+7)/8; // RGB only
-   sh_video->our_out_buffer = 
-     (char*)memalign(64, sh_video->disp_w*sh_video->disp_h*bpp); // FIXME!!!
+   sh_video->our_out_buffer_size = sh_video->disp_w*sh_video->disp_h*bpp; // FIXME!!!
+   sh_video->our_out_buffer = (char*)memalign(64, sh_video->our_out_buffer_size); 
 #endif
    break;
    }
@@ -763,7 +766,8 @@ if ((sh_video->codec->driver == VFM_QTRLE) && (sh_video->bih->biBitCount != 24))
 #ifdef USE_MP_IMAGE
     sh_video->image->type=MP_IMGTYPE_STATIC;
 #else
-    sh_video->our_out_buffer = (char *)memalign(64, sh_video->disp_w*sh_video->disp_h*3/2);
+    sh_video->our_out_buffer_size =  sh_video->disp_w*sh_video->disp_h*3/2;
+    sh_video->our_out_buffer = (char *)memalign(64,sh_video->our_out_buffer_size);
 #endif
    break;
  case VFM_CYUV: {
@@ -771,8 +775,8 @@ if ((sh_video->codec->driver == VFM_QTRLE) && (sh_video->bih->biBitCount != 24))
 #ifdef USE_MP_IMAGE
     sh_video->image->type=MP_IMGTYPE_STATIC;
 #else
-   sh_video->our_out_buffer =
-     (char*)memalign(64, sh_video->disp_w*sh_video->disp_h*3);
+   sh_video->our_out_buffer_size = sh_video->disp_w*sh_video->disp_h*3;
+   sh_video->our_out_buffer = (char*)memalign(64, sh_video->our_out_buffer_size);
 #endif
    break;
    }
