@@ -87,6 +87,16 @@ too */
 
 /* Neither is this. */
 
+Doxygen comments should come before the definition:
+
+/** description */
+int a_variable;
+
+However, you can use '<' to describe things AFTER they are defined, like this:
+
+int some_var; ///< description
+#define foo(x) (x + 2) /**< returns x plus 2 */
+
 There are a couple of special tags for doxygen:
 
 \brief <one line text>
