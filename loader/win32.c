@@ -2815,16 +2815,24 @@ static long WINAPI expInterlockedExchangeAdd( long* dest, long incr )
     return ret;
 }
 
+static long WINAPI expInterlockedCompareExchange( unsigned long* dest, unsigned long exchange, unsigned long comperand)
+{
+    unsigned long retval = *dest;
+    if(*dest == comperand)
+	*dest = exchange;
+    return retval;
+}
+
 static long WINAPI expInterlockedIncrement( long* dest )
 {
     long result=expInterlockedExchangeAdd( dest, 1 ) + 1;
-//    dbgprintf("InterlockedIncrement(0x%x => %d) => %d\n", dest, *dest, result);
+    dbgprintf("InterlockedIncrement(0x%x => %d) => %d\n", dest, *dest, result);
     return result;
 }
 static long WINAPI expInterlockedDecrement( long* dest )
 {
     long result=expInterlockedExchangeAdd( dest, -1 ) - 1;
-//    dbgprintf("InterlockedDecrement(0x%x => %d) => %d\n", dest, *dest, result);
+    dbgprintf("InterlockedDecrement(0x%x => %d) => %d\n", dest, *dest, result);
     return result;
 }
 
@@ -3190,9 +3198,8 @@ long CoCreateInstance(GUID* rclsid, struct IUnknown* pUnkOuter,
 static int WINAPI expIsRectEmpty(CONST RECT *lprc)
 {
     int r = 0;
-//    int r = (!lprc || (lprc->right == lprc->left) || (lprc->top == lprc->bottom));
     int w,h;
-
+//trapbug();
     if (lprc)
     {
 	w = lprc->right - lprc->left;
@@ -3204,9 +3211,9 @@ static int WINAPI expIsRectEmpty(CONST RECT *lprc)
 	r = 1;
 
     dbgprintf("IsRectEmpty(%p) => %s\n", lprc, (r) ? "TRUE" : "FALSE");
-//    printf("Rect: left: %d, top: %d, right: %d, bottom: %d\n",
-//	lprc->left, lprc->top, lprc->right, lprc->bottom);
-    return r;
+    //printf("Rect: left: %d, top: %d, right: %d, bottom: %d\n", lprc->left, lprc->top, lprc->right, lprc->bottom);
+//    return 0;	// wmv9?
+    return r; // TM20
 }
 
 static int _adjust_fdiv=0; //what's this? - used to adjust division
@@ -3286,7 +3293,7 @@ static WIN_BOOL WINAPI expFindClose(HANDLE h)
 }
 static UINT WINAPI expSetErrorMode(UINT i)
 {
-//    dbgprintf("SetErrorMode(%d) => 0\n", i);
+    dbgprintf("SetErrorMode(%d) => 0\n", i);
     return 0;
 }
 static UINT WINAPI expGetWindowsDirectoryA(LPSTR s,UINT c)
@@ -3757,6 +3764,80 @@ static int expdelete(void* memory)
     my_release(memory);
     return 0;
 }
+
+/*
+ * local definition - we need only the last two members at this point
+ * otherwice we would have to introduce here GUIDs and some more types..
+ */
+typedef struct __attribute__((__packed__))
+{
+    char hay[0x40];
+    unsigned long cbFormat;		//0x40
+    char*	pbFormat;		//0x44
+} MY_MEDIA_TYPE;
+static HRESULT WINAPI expMoCopyMediaType(MY_MEDIA_TYPE* dest, const MY_MEDIA_TYPE* src)
+{
+    if (!dest || !src)
+	return E_POINTER;
+    memcpy(dest, src, sizeof(MY_MEDIA_TYPE));
+    if (dest->cbFormat)
+    {
+	dest->pbFormat = (char*) my_mreq(dest->cbFormat, 0);
+	if (!dest->pbFormat)
+            return E_OUTOFMEMORY;
+	memcpy(dest->pbFormat, src->pbFormat, dest->cbFormat);
+    }
+    return S_OK;
+}
+static HRESULT WINAPI expMoInitMediaType(MY_MEDIA_TYPE* dest, DWORD cbFormat)
+{
+    if (!dest)
+        return E_POINTER;
+    memset(dest, 0, sizeof(MY_MEDIA_TYPE));
+    if (cbFormat)
+    {
+	dest->pbFormat = (char*) my_mreq(cbFormat, 0);
+	if (!dest->pbFormat)
+            return E_OUTOFMEMORY;
+    }
+    return S_OK;
+}
+static HRESULT WINAPI expMoCreateMediaType(MY_MEDIA_TYPE** dest, DWORD cbFormat)
+{
+    if (!dest)
+	return E_POINTER;
+    *dest = my_mreq(sizeof(MY_MEDIA_TYPE), 0);
+    return expMoInitMediaType(*dest, cbFormat);
+}
+static HRESULT WINAPI expMoDuplicateMediaType(MY_MEDIA_TYPE** dest, const void* src)
+{
+    if (!dest)
+	return E_POINTER;
+    *dest = my_mreq(sizeof(MY_MEDIA_TYPE), 0);
+    return expMoCopyMediaType(*dest, src);
+}
+static HRESULT WINAPI expMoFreeMediaType(MY_MEDIA_TYPE* dest)
+{
+    if (!dest)
+	return E_POINTER;
+    if (dest->pbFormat)
+    {
+	my_release(dest->pbFormat);
+	dest->pbFormat = 0;
+        dest->cbFormat = 0;
+    }
+    return S_OK;
+}
+static HRESULT WINAPI expMoDeleteMediaType(MY_MEDIA_TYPE* dest)
+{
+    if (!dest)
+	return E_POINTER;
+    expMoFreeMediaType(dest);
+    my_release(dest);
+    return S_OK;
+}
+
+
 #if 0
 static int exp_initterm(int v1, int v2)
 {
@@ -4079,10 +4160,29 @@ static void exp_ftol(void)
 	);
 }
 
+#warning check for _CIpow
+static double exp_CIpow(double x, double y)
+{
+    /*printf("Pow %f  %f    0x%Lx  0x%Lx  => %f\n", x, y, *((int64_t*)&x), *((int64_t*)&y), pow(x, y));*/
+    return pow(x, y);
+}
+
 static double exppow(double x, double y)
 {
     /*printf("Pow %f  %f    0x%Lx  0x%Lx  => %f\n", x, y, *((int64_t*)&x), *((int64_t*)&y), pow(x, y));*/
     return pow(x, y);
+}
+
+static double expldexp(double x, int expo)
+{
+    /*printf("Cos %f => %f  0x%Lx\n", x, cos(x), *((int64_t*)&x));*/
+    return ldexp(x, expo);
+}
+
+static double expfrexp(double x, int* expo)
+{
+    /*printf("Cos %f => %f  0x%Lx\n", x, cos(x), *((int64_t*)&x));*/
+    return frexp(x, expo);
 }
 
 
@@ -4580,6 +4680,7 @@ struct exports exp_kernel32[]=
     FF(IsProcessorFeaturePresent, -1)
     FF(GetProcessAffinityMask, -1)
     FF(InterlockedExchange, -1)
+    FF(InterlockedCompareExchange, -1)
     FF(MulDiv, -1)
     FF(lstrcmpiA, -1)
     FF(lstrlenA, -1)
@@ -4635,13 +4736,18 @@ struct exports exp_msvcrt[]={
     FF(pow, -1)
     FF(cos, -1)
     FF(_ftol,-1)
+    FF(_CIpow,-1)
+    FF(ldexp,-1)
+    FF(frexp,-1)
     FF(sprintf,-1)
     FF(sscanf,-1)
     FF(fopen,-1)
     FF(fprintf,-1)
     FF(printf,-1)
     FF(getenv,-1)
+#ifdef MPLAYER
     FF(_EH_prolog,-1)
+#endif
     FF(calloc,-1)
     {"ceil",-1,(void*)&ceil},
 /* needed by imagepower mjpeg2k */
@@ -4762,14 +4868,12 @@ struct exports exp_wsock32[]={
 };
 struct exports exp_msdmo[]={
     FF(memcpy, -1) // just test
-/*
-    FF(MoCopyMediaType)
-    FF(MoCreateMediaType)
-    FF(MoDeleteMediaType)
-    FF(MoDuplicateMediaType)
-    FF(MoFreeMediaType)
-    FF(MoInitMediaType)
-*/
+    FF(MoCopyMediaType, -1)
+    FF(MoCreateMediaType, -1)
+    FF(MoDeleteMediaType, -1)
+    FF(MoDuplicateMediaType, -1)
+    FF(MoFreeMediaType, -1)
+    FF(MoInitMediaType, -1)
 };
 struct exports exp_oleaut32[]={
     FF(VariantInit, 8)
@@ -4886,7 +4990,7 @@ static int pos=0;
 static char extcode[20000];// place for 200 unresolved exports
 static const char* called_unk = "Called unk_%s\n";
 
-static void* add_stub()
+static void* add_stub(void)
 {
     // generated code in runtime!
     char* answ = (char*)extcode+pos*0x30;
