@@ -1,9 +1,9 @@
-#ifndef ASF_H
-#define ASF_H
+#ifndef __ASF_H
+#define __ASF_H
 
 #include <inttypes.h>
 
-#include "url.h"
+#include "network.h"
 
 #ifndef MIN
 #define MIN(a,b) ((a<b)?a:b)
@@ -115,6 +115,9 @@ typedef enum {
 
 
 int asf_http_streaming_type(char *content_type, char *features);
-int asf_http_streaming_start( URL_t **url_ref );
+int asf_http_streaming_start( streaming_ctrl_t *streaming_ctrl );
+int asf_http_streaming_read( streaming_ctrl_t *streaming_ctrl );
+
+int asf_streaming(char *data, int length, int *drop_packet );
 
 #endif
