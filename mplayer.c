@@ -34,16 +34,12 @@
 #endif
 
 #include "libvo/video_out.h"
-//extern void* mDisplay; // Display* mDisplay;
 
 #include "libvo/font_load.h"
 #include "libvo/sub.h"
 
 #include "libao2/audio_out.h"
 #include "libao2/audio_plugin.h"
-
-#include "libmpeg2/mpeg2.h"
-#include "libmpeg2/mpeg2_internal.h"
 
 #include "codec-cfg.h"
 
@@ -59,9 +55,7 @@
 #include "vobsub.h"
 
 #include "linux/getch2.h"
-//#include "linux/keycodes.h"
 #include "linux/timer.h"
-//#include "linux/shmem.h"
 
 #include "cpudetect.h"
 
@@ -73,7 +67,7 @@
 
 int slave_mode=0;
 int verbose=0;
-int quiet=0;
+static int quiet=0;
 
 #define ABS(x) (((x)>=0)?(x):(-(x)))
 
@@ -83,7 +77,6 @@ int quiet=0;
 
 #ifdef USE_TV
 #include "libmpdemux/tv.h"
-
 extern int tv_param_on;
 #endif
 
@@ -483,7 +476,6 @@ play_tree_iter_t* playtree_iter = NULL;
 int file_format=DEMUXER_TYPE_UNKNOWN;
 
 int delay_corrected=1;
-//char* title="MPlayer";
 
 // movie info:
 int eof=0;
@@ -598,15 +590,8 @@ int gui_no_filename=0;
       exit(0);
     }
 
-    audio_driver=audio_driver_list?audio_driver_list[0]:NULL;
-    if(audio_driver && strcmp(audio_driver,"help")==0){
-      mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AvailableAudioOutputDrivers);
-      i=0;
-      while (audio_out_drivers[i]) {
-        const ao_info_t *info = audio_out_drivers[i++]->info;
-	printf("\t%s\t%s\n", info->short_name, info->name);
-      }
-      printf("\n");
+    if(audio_driver_list && strcmp(audio_driver_list[0],"help")==0){
+      list_audio_out();
       exit(0);
     }
 
@@ -846,56 +831,6 @@ if(!use_stdin && !slave_mode){
     if(vo_vobsub)
       sub_auto=0; // don't do autosub for textsubs if vobsub found
 
-//==================== Init Audio Out ============================
-
-// check audio_out driver name:
-{
-    char* ao = audio_driver ? strdup(audio_driver) : NULL;
-    if(ao_subdevice) {
-      free(ao_subdevice);
-      ao_subdevice = NULL;
-    }
-    if (audio_driver)
-	if ((i = strcspn(audio_driver, ":")) > 0)
-	{
-	    size_t i2 = strlen(audio_driver);
-
-	    if (audio_driver[i] == ':')
-	    {
-		ao_subdevice = malloc(i2-i);
-		if (ao_subdevice != NULL)
-		    strncpy(ao_subdevice, (char *)(audio_driver+i+1), i2-i);
-		ao[i] = '\0';
-	    }
-//	    printf("audio_driver: %s, subdevice: %s\n", audio_driver, ao_subdevice);
-	}
-  if(!audio_driver)
-    audio_out=audio_out_drivers[0];
-  else
-  for (i=0; audio_out_drivers[i] != NULL; i++){
-    const ao_info_t *info = audio_out_drivers[i]->info;
-    if(strcmp(info->short_name,ao) == 0){
-      audio_out = audio_out_drivers[i];break;
-    }
-  }
-  if (!audio_out){
-    mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_InvalidAOdriver,ao?ao:"?");
-    exit_player(MSGTR_Exit_error);
-  }
-  if(ao)
-    free(ao);
-  /* Initailize audio plugin interface if used */
-  if(ao_plugin_cfg.plugin_list){
-    for (i=0; audio_out_drivers[i] != NULL; i++){
-      const ao_info_t *info = audio_out_drivers[i]->info;
-      if(strcmp(info->short_name,"plugin") == 0){
-	audio_out_drivers[i]->control(AOCONTROL_SET_PLUGIN_DRIVER,(int)audio_out);
-	audio_out = audio_out_drivers[i];
-	break;
-      }
-    }
-  }
-}
 //============ Open & Sync STREAM --- fork cache2 ====================
 
   stream=NULL;
@@ -1296,25 +1231,27 @@ osd_text_buffer[0]=0;
 //================ SETUP AUDIO ==========================
 
 if(sh_audio){
-  const ao_info_t *info=audio_out->info;
-  current_module="setup_audio";
-  mp_msg(MSGT_CPLAYER,MSGL_INFO,"AO: [%s] %iHz %dch %s\n",
-      info->short_name,
+  //const ao_info_t *info=audio_out->info;
+  current_module="ao2_init";
+  if(!(audio_out=init_best_audio_out(audio_driver_list,
+      (ao_plugin_cfg.plugin_list), // plugin flag
+      force_srate?force_srate:sh_audio->samplerate,
+      sh_audio->channels,sh_audio->sample_format,0))){
+    // FAILED:
+    mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CannotInitAO);
+    sh_audio=d_audio->sh=NULL; // -> nosound
+  } else {
+    // SUCCESS:
+    inited_flags|=INITED_AO;
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"AO: [%s] %iHz %dch %s\n",
+      audio_out->info->short_name,
       force_srate?force_srate:sh_audio->samplerate,
       sh_audio->channels,
-      audio_out_format_name(sh_audio->sample_format)
-  );
-  mp_msg(MSGT_CPLAYER,MSGL_V,MSGTR_AODescription_AOAuthor,
-      info->name, info->author);
-  if(strlen(info->comment) > 0)
-      mp_msg(MSGT_CPLAYER,MSGL_V,MSGTR_AOComment, info->comment);
-
-  if(!audio_out->init(force_srate?force_srate:sh_audio->samplerate,
-      sh_audio->channels,sh_audio->sample_format,0)){
-    mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CannotInitAO);
-    sh_audio=d_audio->sh=NULL;
-  } else {
-    inited_flags|=INITED_AO;
+      audio_out_format_name(sh_audio->sample_format));
+    mp_msg(MSGT_CPLAYER,MSGL_V,MSGTR_AODescription_AOAuthor,
+      audio_out->info->name, audio_out->info->author);
+    if(strlen(audio_out->info->comment) > 0)
+      mp_msg(MSGT_CPLAYER,MSGL_V,MSGTR_AOComment, audio_out->info->comment);
   }
 }
 

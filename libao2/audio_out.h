@@ -48,9 +48,11 @@ extern ao_data_t ao_data;
 extern char *audio_out_format_name(int format);
 extern int   audio_out_format_bits(int format);
 
+void list_audio_out();
+ao_functions_t* init_best_audio_out(char** ao_list,int use_plugin,int rate,int channels,int format,int flags);
+
 // NULL terminated array of all drivers
 extern ao_functions_t* audio_out_drivers[];
-
 
 #define CONTROL_OK 1
 #define CONTROL_TRUE 1
