@@ -1,5 +1,5 @@
 /*
-    Driver for CyberBlade/i1 - Version 0.1.1
+    Driver for CyberBlade/i1 - Version 0.1.4
 
     Copyright (C) 2002 by Alastair M. Robinson.
     Official homepage: http://www.blackfiveservices.co.uk/EPIAVidix.shtml
@@ -21,6 +21,14 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+    Changes:
+    18/01/03
+      MMIO is no longer used, sidestepping cache issues on EPIA-800
+      TV-Out modes are now better supported - this should be the end
+        of the magenta stripes :)
+      Brightness/Contrast controls disabled for the time being - they were
+        seriously degrading picture quality, especially with TV-Out.
 
     To Do:
     Implement Hue/Saturation controls
@@ -46,14 +54,17 @@
 
 pciinfo_t pci_info;
 
-unsigned char *cyberblade_reg_base;
-unsigned char *cyberblade_mem;
-int cyberblade_crtc;
 char save_colourkey[6];
+char *cyberblade_mem;
 
-/* Helper functions for reading registers.
-   Implementing these as macros leads to problems
-   which are either cache or timing related... */
+#ifdef DEBUG_LOGFILE
+FILE *logfile=0;
+#define LOGWRITE(x) {if(logfile) fprintf(logfile,x);}
+#else
+#define LOGWRITE(x)
+#endif
+
+/* Helper functions for reading registers. */    
 
 static int CRINW(int reg)
 {
@@ -83,6 +94,27 @@ static void SROUTW(int reg,int val)
 	SROUTB(reg+1,(val>>8)&255);
 }
 
+void DumpRegisters()
+{
+        int reg,val;
+#ifdef DEBUG_LOGFILE
+        if(logfile)
+        {
+                LOGWRITE("CRTC Register Dump:\n")
+                for(reg=0;reg<256;++reg)
+                {
+                        val=CRINB(reg);
+                        fprintf(logfile,"CR0x%2x: 0x%2x\n",reg,val);
+                }
+                LOGWRITE("SR Register Dump:\n")
+                for(reg=0;reg<256;++reg)
+                {
+                        val=SRINB(reg);
+                        fprintf(logfile,"SR0x%2x: 0x%2x\n",reg,val);
+                }
+        }
+#endif
+}
 /* --- */
 
 static vidix_capability_t cyberblade_cap =
@@ -166,28 +198,27 @@ int vixProbe(int verbose, int force)
 
 int vixInit(void)
 {
-	cyberblade_reg_base = map_phys_mem(pci_info.base1, 0x20000);
-	cyberblade_mem = map_phys_mem(pci_info.base0, 0x800000);
-	if(INB(0x3cc)&1)
-		cyberblade_crtc=0x3d0;
-	else
-		cyberblade_crtc=0x3b0;
-
-	printf("[cyberblade] Using IOBase: 0x%lx, FBBase: 0x%lx, CRTC at 0x%x\n",cyberblade_reg_base,cyberblade_mem,cyberblade_crtc);
-
+	cyberblade_mem = map_phys_mem(pci_info.base0, 0x800000); 
+	enable_app_io();
 	save_colourkey[0]=SRINB(0x50);
 	save_colourkey[1]=SRINB(0x51);
 	save_colourkey[2]=SRINB(0x52);
 	save_colourkey[3]=SRINB(0x54);
 	save_colourkey[4]=SRINB(0x55);
 	save_colourkey[5]=SRINB(0x56);
-
+#ifdef DEBUG_LOGFILE
+	logfile=fopen("/tmp/cyberblade_vidix.log","w");
+#endif
 	return 0;
 }
 
 void vixDestroy(void)
 {
 	int protect;
+#ifdef DEBUG_LOGFILE
+	if(logfile)
+		fclose(logfile);
+#endif
 	protect=SRINB(0x11);
 	SROUTB(0x11, 0x92);
 	CROUTB(0x8E, 0xc4); /* Disable overlay */
@@ -198,9 +229,8 @@ void vixDestroy(void)
 	SROUTB(0x55,save_colourkey[4]);
 	SROUTB(0x56,save_colourkey[5]);
 	SROUTB(0x11, protect);
-	unmap_phys_mem(cyberblade_reg_base, 0x20000);
-	unmap_phys_mem(cyberblade_mem, 0x800000);
 	disable_app_io();
+	unmap_phys_mem(cyberblade_mem, 0x800000); 
 }
 
 
@@ -410,7 +440,6 @@ int vixConfigPlayback(vidix_playback_t *info)
 		frames[i] = base0+info->offsets[i];
 	}
 
-	enable_app_io();
 	OUTPORT8(0x3d4,0x39);
 	OUTPORT8(0x3d5,INPORT(0x3d5)|1);
 
@@ -424,74 +453,69 @@ int vixConfigPlayback(vidix_playback_t *info)
 	SROUTB(0x21, 0x34); /* Signature control */
 	SROUTB(0x37, 0x30); /* Video key mode */
 
-	{
-		int pixfmt=CRINB(0x38);
-		if(pixfmt&0x28) /* 32 or 24 bpp */
-		{
-			SROUTB(0x50, cyberblade_grkey.ckey.blue); /* Colour Key */
-			SROUTB(0x51, cyberblade_grkey.ckey.green); /* Colour Key */
-			SROUTB(0x52, cyberblade_grkey.ckey.red); /* Colour Key */
-			SROUTB(0x54, 0xff); /* Colour Key Mask */
-			SROUTB(0x55, 0xff); /* Colour Key Mask */
-			SROUTB(0x56, 0xff); /* Colour Key Mask */
-                        printf("[cyberblade] 24/32-bit mode detected\n"); 
-		}
-		else
-		{
-			int tmp=((cyberblade_grkey.ckey.blue & 0xf8)>>3)
-				|((cyberblade_grkey.ckey.green & 0xfc)<<3)
-				|((cyberblade_grkey.ckey.red & 0xf8)<<8);
-			SROUTB(0x50, tmp&0xff); /* Colour Key */
-			SROUTB(0x51, (tmp>>8)&0xff); /* Colour Key */
-			SROUTB(0x52, 0x00); /* Colour Key */
-			SROUTB(0x54, 0xff); /* Colour Key Mask */
-			SROUTB(0x55, 0xff); /* Colour Key Mask */
-			SROUTB(0x56, 0x00); /* Colour Key Mask */
-                        printf("[cyberblade] 16-bit assumed\n"); 
-		}
-	}
+        vixSetGrKeys(&cyberblade_grkey);
+
 	/* compute_scale_factor(&src_w, &drw_w, &shrink, &zoom); */
 	{
-		int HTotal,VTotal,HSync,VSync,Overflow;
+		int HTotal,VTotal,HSync,VSync,Overflow,HDisp,VDisp;
+		int HWinStart,VWinStart;
 		int tx1,ty1,tx2,ty2;
+
+		HTotal=CRINB(0x00);
+		HSync=CRINB(0x04);
+		VTotal=CRINB(0x06);
+		VSync=CRINB(0x10);
+		Overflow=CRINB(0x07);
+		HTotal <<=3;
+		HSync <<=3;
+		VTotal |= (Overflow & 1) <<8;
+		VTotal |= (Overflow & 0x20) <<4;
+		VTotal +=4;
+		VSync |= (Overflow & 4) <<6;
+		VSync |= (Overflow & 0x80) <<2;
 
 		if(CRINB(0xd1)&0x80)
 		{
-			printf("[cyberblade] Using TV-CRTC\n");
-			HTotal=CRINB(0xe0);
-			HSync=CRINB(0xe4);
-			VTotal=CRINB(0xe6);
-			VSync=CRINB(0xf0);
-			Overflow=CRINB(0xe7);
-			HTotal <<=3; HTotal-=16;
-			HSync <<=3;
-			VTotal |= (Overflow & 1) <<8;
-			VTotal |= (Overflow & 0x20) <<4;
-			VTotal +=5;
-			VSync |= (Overflow & 4) <<6;
-			VSync |= (Overflow & 0x80) <<2;
+			int hcorr,vcorr;
+			int TVHTotal,TVVTotal,TVHSyncStart,TVVSyncStart,TVOverflow;
+			LOGWRITE("[cyberblade] Using TV-CRTC\n");
+
+    			HDisp=(1+CRINB(0x01))*8;
+    			VDisp=1+CRINB(0x12);
+    			Overflow=CRINB(0x07);
+    			VDisp |= (Overflow & 2) <<7;
+    			VDisp |= (Overflow & 0x40) << 3;
+ 
+    			TVHTotal=CRINB(0xe0)*8;
+    			TVVTotal=CRINB(0xe6);
+    			TVOverflow=CRINB(0xe7);
+    			if(TVOverflow&0x20) TVVTotal|=512;
+    			if(TVOverflow&0x01) TVVTotal|=256;
+    			TVHTotal+=40; TVVTotal+=2;
+ 
+    			TVHSyncStart=CRINB(0xe4)*8;
+    			TVVSyncStart=CRINB(0xf0);
+    			if(TVOverflow&0x80) TVVSyncStart|=512;
+			if(TVOverflow&0x04) TVVSyncStart|=256;
+ 
+			HWinStart=(TVHTotal-HDisp)&15;
+			HWinStart|=(HTotal-HDisp)&15;
+			HWinStart+=(TVHTotal-TVHSyncStart)-49;
+ 
+			VWinStart=(TVVTotal-VDisp)/2-1;
+			VWinStart-=(1-((TVVTotal-VDisp)&1))+4;
 		}
 		else
 		{
-			printf("[cyberblade] Using Standard CRTC\n");
-			HTotal=CRINB(0x00);
-			HSync=CRINB(0x04);
-			VTotal=CRINB(0x06);
-			VSync=CRINB(0x10);
-			Overflow=CRINB(0x07);
-			HTotal <<=3;
-			HSync <<=3;
-			VTotal |= (Overflow & 1) <<8;
-			VTotal |= (Overflow & 0x20) <<4;
-			VTotal +=4;
-			VSync |= (Overflow & 4) <<6;
-			VSync |= (Overflow & 0x80) <<2;
+			LOGWRITE("[cyberblade] Using Standard CRTC\n");
+			HWinStart=(HTotal-HSync)+15;
+			VWinStart=(VTotal-VSync)-8;
 		}
 
 		printf("[cyberblade] HTotal: 0x%x, HSStart: 0x%x\n",HTotal,HSync); 
 		printf("  VTotal: 0x%x, VStart: 0x%x\n",VTotal,VSync);
-		tx1=(HTotal-HSync)+15+info->dest.x;
-		ty1=(VTotal-VSync)-8+info->dest.y;
+		tx1=HWinStart+info->dest.x;
+		ty1=VWinStart+info->dest.y;
 		tx2=tx1+info->dest.w;
 		ty2=ty1+info->dest.h;
 
@@ -532,7 +556,7 @@ int vixConfigPlayback(vidix_playback_t *info)
 		CROUTB(0xBB, 0x00); /* Chroma key */
 		CROUTB(0xBC, 0xFF); /* Chroma key */
 		CROUTB(0xBD, 0xFF); /* Chroma key */
-		CROUTB(0xBE, 0x05); /* Capture control */
+		CROUTB(0xBE, 0x04); /* Capture control */
 
 		if(src_w > 384)
 			layout|=4; /* 2x line buffers */
@@ -551,7 +575,7 @@ int vixConfigPlayback(vidix_playback_t *info)
 			default:
 				CROUTB(0x8F, 0x20); /* VDE Flags - Edge Recovery */
 				CROUTB(0xBF, 0x00); /* Video format - YUV */
-				SROUTB(0xBE, 0x03); /* HSCB enabled */
+				SROUTB(0xBE, 0x00); /* HSCB disable - was 0x03*/
 				break;
 		}
 
@@ -576,7 +600,7 @@ int vixConfigPlayback(vidix_playback_t *info)
 
 int vixPlaybackOn(void)
 {
-	/* Enable overlay */
+	LOGWRITE("Enable overlay\n");
 	CROUTB(0x8E, 0xd4); /* VDE Flags*/
 
 	return 0;
@@ -585,7 +609,7 @@ int vixPlaybackOn(void)
 
 int vixPlaybackOff(void)
 {
-	/* Disable overlay */
+        LOGWRITE("Disable overlay\n"); 
 	CROUTB(0x8E, 0xc4); /* VDE Flags*/
 
 	return 0;
@@ -595,6 +619,7 @@ int vixPlaybackOff(void)
 int vixPlaybackFrameSelect(unsigned int frame)
 {
 	int protect;
+        LOGWRITE("Frame select\n"); 
 	protect=SRINB(0x11);
 	SROUTB(0x11, 0x92);
 	/* Set overlay address to that of selected frame */

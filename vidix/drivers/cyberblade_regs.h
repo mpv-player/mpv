@@ -125,22 +125,12 @@
 #define BiosNewMode2 0x5c
 #define BiosReg      0x5d
 
-/* --- MMIO Macros by AMR --- */
+/* --- IO Macros by AMR --- */
 
-int HACKBUCKET12345678;  /* Horrible hack to work around cache/speed issue */
-
-#define INB(addr) (HACKBUCKET12345678=*(cyberblade_reg_base+(addr)))
-#define INW(addr) (HACKBUCKET12345678=*(unsigned short *)(cyberblade_reg_base+(addr)))
-#define OUTB(addr,val) (*(cyberblade_reg_base+(addr))=(val))
-#define OUTW(addr,val) (*(unsigned short *)(cyberblade_reg_base+(addr))=(val))
-
-#define SRINB(reg) (OUTB(0x3c4,reg), INB(0x3c5))
-#define SROUTB(reg,val) (OUTW(0x3c4,((val)<<8)|(reg)))
-
-#define CRINB(reg) \
-	(OUTB(cyberblade_crtc+4,reg), INB(cyberblade_crtc+5))
-
-#define CROUTB(reg,val) \
-	(OUTW(cyberblade_crtc+4,((val)<<8)|(reg)))
+#define CRINB(reg) (OUTPORT8(0x3d4,reg), INPORT8(0x3d5))
+#define SRINB(reg) (OUTPORT8(0x3c4,reg), INPORT8(0x3c5))
+#define CROUTB(reg,val) (OUTPORT8(0x3d4,reg), OUTPORT8(0x3d5,val))
+#define SROUTB(reg,val) (OUTPORT8(0x3c4,reg), OUTPORT8(0x3c5,val))
 
 /* --- */
+
