@@ -960,13 +960,13 @@ int vixInit( void )
 #ifdef RADEON
   switch(def_cap.device_id)
     {
-    case DEVICE_ATI_RADEON_QW:
     case DEVICE_ATI_RADEON_MOBILITY_M6:
     case DEVICE_ATI_RADEON_MOBILITY_M62:
     case DEVICE_ATI_RADEON_MOBILITY_M63:
     case DEVICE_ATI_RADEON_MOBILITY_M64:
     case DEVICE_ATI_RADEON_9000_IF:
       rage_ckey_model=1;
+    case DEVICE_ATI_RADEON_QW:
     case DEVICE_ATI_RADEON_QD:
     case DEVICE_ATI_RADEON_QE:
     case DEVICE_ATI_RADEON_QF:
