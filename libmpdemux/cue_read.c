@@ -8,7 +8,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <libgen.h>
+//#include <libgen.h>
 
 #include "config.h"
 #include "mp_msg.h"
@@ -33,6 +33,8 @@
 #define MODE2_2336 40
 #define UNKNOWN -1
 
+// from libgen:
+extern char *dirname(char *path);
 
 static FILE* fd_cue;
 static int fd_bin = 0;
