@@ -854,7 +854,7 @@ fi
 if [ $_x11 = yes ]; then
 
 $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXdpms $_socklib > /dev/null 2>&1 && _xdpms_3=yes
-nm `echo $_x11libdir|cut -b 3-`/libXext.a | grep -q DPMSQueryExtension && _xdpms_4=yes
+nm `echo $_x11libdir|cut -b 3-`/libXext.a | grep DPMSQueryExtension > /dev/null 2>&1 && _xdpms_4=yes
 $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXv $_socklib > /dev/null 2>&1 && _xv=yes
 $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXxf86vm $_socklib > /dev/null 2>&1 && _vm=yes
 
