@@ -1,11 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "codec-cfg.h"
-
 #include "config.h"
 #include "mp_msg.h"
 
+#include "codec-cfg.h"
 #include "../libvo/img_format.h"
 
 #include "stream.h"
@@ -55,12 +54,21 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     mp_image_t* mpi;
     if(len<=0) return NULL; // skipped frame
     
-    mpi=mpcodecs_get_image(sh, MP_IMGTYPE_STATIC, MP_IMGFLAG_PRESERVE | MP_IMGFLAG_ACCEPT_STRIDE, sh->disp_w, sh->disp_h);
+    mpi=mpcodecs_get_image(sh, MP_IMGTYPE_STATIC, MP_IMGFLAG_PRESERVE | MP_IMGFLAG_ACCEPT_STRIDE, 
+	(sh->disp_w+3)&(~3),
+	(sh->disp_h+3)&(~3));
     
     if(!mpi){	// temporary!
 	printf("couldn't allocate image for cinepak codec\n");
 	return NULL;
     }
+    
+    printf("mpi: %p/%d %p/%d %p/%d (%d) (%d)  \n",
+	mpi->planes[0], mpi->stride[0],
+	mpi->planes[1], mpi->stride[1],
+	mpi->planes[2], mpi->stride[2],
+	mpi->planes[1]-mpi->planes[0],
+	mpi->planes[2]-mpi->planes[1]);
     
 //    decode_cinepak(sh->context, data, len, mpi->planes[0], sh->disp_w, sh->disp_h,
 //	(mpi->flags&MP_IMGFLAG_YUV)?16:(mpi->imgfmt&255), mpi->stride[0]);
