@@ -276,14 +276,7 @@ static uint32_t draw_frame(uint8_t *src[])
 				in_height, in_width * (fb_bpp / 8),
 				in_width, in_width / 2);
 	} else if ((pixel_format & IMGFMT_BGR_MASK) == IMGFMT_BGR) {
-		int i;
-		uint8_t *dst = next_frame;
-		uint8_t *s = src[0];
-		for (i = 0; i < in_height; i++) {
-			memcpy(dst, s, in_width * (fb_bpp / 8));
-			dst += in_width * (fb_bpp / 8);
-			s += in_width * (fb_bpp / 8);
-		}
+		memcpy(next_frame, src[0], in_width * in_height * (fb_bpp / 8));
 	} else if ((pixel_format & IMGFMT_RGB_MASK) == IMGFMT_RGB) {
 	}
 	return 0;
