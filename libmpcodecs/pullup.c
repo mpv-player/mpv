@@ -502,7 +502,7 @@ static int decide_frame_length(struct pullup_context *c)
 	
 	switch (l) {
 	case 1:
-		if (c->strict_breaks > 0 && f0->affinity == 1 && f1->affinity == -1)
+		if (c->strict_breaks < 1 && f0->affinity == 1 && f1->affinity == -1)
 			return 2;
 		else return 1;
 	case 2:
