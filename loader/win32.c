@@ -4034,6 +4034,12 @@ static char* expstrcpy(char* str1, const char* str2)
     dbgprintf("strcpy(0x%x, 0x%x='%s') => %p\n", str1, str2, str2, result);
     return result;
 }
+static char* expstrncpy(char* str1, const char* str2, size_t count)
+{
+    char* result= strncpy(str1, str2, count);
+    dbgprintf("strncpy(0x%x, 0x%x='%s', %d) => %p\n", str1, str2, str2, count, result);
+    return result;
+}
 static int expstrcmp(const char* str1, const char* str2)
 {
     int result=strcmp(str1, str2);
@@ -4752,6 +4758,7 @@ struct exports exp_msvcrt[]={
     FF(strchr, -1)
     FF(strlen, -1)
     FF(strcpy, -1)
+    FF(strncpy, -1)
     FF(wcscpy, -1)
     FF(strcmp, -1)
     FF(strncmp, -1)
@@ -4943,6 +4950,13 @@ struct exports exp_pncrt[]={
     {"_adjust_fdiv", -1, (void*)&_adjust_fdiv},
     FF(_ftol,-1)
     FF(_initterm, -1)
+    {"??3@YAXPAX@Z", -1, expdelete},
+    {"??2@YAPAXI@Z", -1, expnew},
+    FF(__dllonexit, -1)
+    FF(strncpy, -1)
+    FF(_CIpow,-1)
+    FF(calloc,-1)
+    FF(memmove, -1)
 };
 #endif
 
