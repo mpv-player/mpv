@@ -50,16 +50,28 @@ static int format2oss(int format)
     case AF_FORMAT_U16_BE: return AFMT_U16_BE;
     case AF_FORMAT_S16_LE: return AFMT_S16_LE;
     case AF_FORMAT_S16_BE: return AFMT_S16_BE;
-#ifdef AFMT_S24_LE
+#ifdef AFMT_U24_LE
     case AF_FORMAT_U24_LE: return AFMT_U24_LE;
+#endif
+#ifdef AFMT_U24_BE
     case AF_FORMAT_U24_BE: return AFMT_U24_BE;
+#endif
+#ifdef AFMT_S24_LE
     case AF_FORMAT_S24_LE: return AFMT_S24_LE;
+#endif
+#ifdef AFMT_S24_BE
     case AF_FORMAT_S24_BE: return AFMT_S24_BE;
 #endif
-#ifdef AFMT_S32_LE
+#ifdef AFMT_U32_LE
     case AF_FORMAT_U32_LE: return AFMT_U32_LE;
+#endif
+#ifdef AFMT_U32_BE
     case AF_FORMAT_U32_BE: return AFMT_U32_BE;
+#endif
+#ifdef AFMT_S32_LE
     case AF_FORMAT_S32_LE: return AFMT_S32_LE;
+#endif
+#ifdef AFMT_S32_BE
     case AF_FORMAT_S32_BE: return AFMT_S32_BE;
 #endif
 #ifdef AFMT_FLOAT
@@ -90,16 +102,28 @@ static int oss2format(int format)
     case AFMT_U16_BE: return AF_FORMAT_U16_BE;
     case AFMT_S16_LE: return AF_FORMAT_S16_LE;
     case AFMT_S16_BE: return AF_FORMAT_S16_BE;
-#ifdef AFMT_S24_LE
+#ifdef AFMT_U24_LE
     case AFMT_U24_LE: return AF_FORMAT_U24_LE;
+#endif
+#ifdef AFMT_U24_BE
     case AFMT_U24_BE: return AF_FORMAT_U24_BE;
+#endif
+#ifdef AFMT_S24_LE
     case AFMT_S24_LE: return AF_FORMAT_S24_LE;
+#endif
+#ifdef AFMT_S24_BE
     case AFMT_S24_BE: return AF_FORMAT_S24_BE;
 #endif
-#ifdef AFMT_S32_LE
+#ifdef AFMT_U32_LE
     case AFMT_U32_LE: return AF_FORMAT_U32_LE;
+#endif
+#ifdef AFMT_U32_BE
     case AFMT_U32_BE: return AF_FORMAT_U32_BE;
+#endif
+#ifdef AFMT_S32_LE
     case AFMT_S32_LE: return AF_FORMAT_S32_LE;
+#endif
+#ifdef AFMT_S32_BE
     case AFMT_S32_BE: return AF_FORMAT_S32_BE;
 #endif
 #ifdef AFMT_FLOAT
