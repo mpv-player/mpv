@@ -80,14 +80,14 @@ void DS_Filter::Create(const char* dllname, const GUID* id,
 	if (!m_iHandle)
 	{
 	    char e[256];
-	    printf("Could not open DirectShow DLL: %.200s", dllname);
+	    snprintf((char *)&e[0], 256, "Could not open DirectShow DLL: %.200s", dllname);
 	    throw FATAL(e);
 	}
         GETCLASS func = (GETCLASS)GetProcAddress(m_iHandle, "DllGetClassObject");
 	if (!func)
 	{
 	    char e[256];
-	    printf("Illegal or corrupt DirectShow DLL: %.200s", dllname);
+	    snprintf((char *)&e[0], 256, "Illegal or corrupt DirectShow DLL: %.200s", dllname);
 	    throw FATAL(e);
 	}
 
