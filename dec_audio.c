@@ -548,8 +548,8 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
         } // from else, packetout ok
 
         break;
-#endif
       }
+#endif
       case AFM_PCM: // AVI PCM
         len=demux_read_data(sh_audio->ds,buf,minlen);
         break;
