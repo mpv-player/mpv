@@ -43,15 +43,13 @@ Andreas Ackermann:  <asackerm@stud.informatik.uni-erlangen.de>
 Felix Bünemann: <Felix.Buenemann@gmx.de>
 - SDL driver fixes
 
-Michael Graffam: <mgraffam@idsi.net>
-- XF86VidMode support for x11 driver
-
 TeLeNiEkO: <telenieko@telenieko.com>
 - debian packaging support (see debian/* and DOCS/DEBIAN)
 - spanish translations (see DOCS/Spanish/*)
 
-Michael Graffam: (mgraffam@idsi.net)
+Michael Graffam: <mgraffam@idsi.net>
 - XF86VidMode support to vo_x11
+- Video mode switching code to vo_dga
 
 Main testers:
   Balazs Tibor (Tibcu)

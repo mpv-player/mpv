@@ -241,6 +241,11 @@ static uint32_t init( uint32_t width,  uint32_t height,
   int bank, ram;
   int x_off, y_off;
 
+// needed to change DGA video mode
+  int modecount,mX, mY, X, Y, i,j;
+  XDGAMode *modelines=NULL;
+  XDGADevice *dgadevice;
+
   if( vo_dga_is_running )return -1;
 
   if( !vo_init() ){
@@ -254,11 +259,48 @@ static uint32_t init( uint32_t width,  uint32_t height,
     return 1;
   } 
 
+// Code to change the video mode added by Michael Graffam
+// mgraffam@idsi.net
+  if (modelines==NULL)
+    modelines=XDGAQueryModes(vo_dga_dpy, XDefaultScreen(vo_dga_dpy),&modecount);
+  
+  mX=modelines[0].imageWidth;
+  mY=modelines[0].imageHeight;
+  X=d_width; Y=d_height; 
+  
+  j=0; 
+  for (i=1; i<=modecount; i++)
+  {
+    if ( (modelines[i].bitsPerPixel == vo_depthonscreen) && 
+         (modelines[i].maxViewportX) && 
+         (modelines[i].viewportWidth >= X) && 
+         (modelines[i].viewportHeight >= Y) && 
+         (modelines[i].viewportWidth < mX) &&
+         (modelines[i].viewportHeight < mY) ) 
+        {
+           mX=modelines[i].viewportWidth;
+           mY=modelines[i].viewportHeight;
+           j=i;
+        }
+   }
+  X=(modelines[j].imageWidth-mX)/2;
+  Y=(modelines[j].imageHeight-mY)/2;
+  printf("vo_dga: Selected video mode %dx%d for image size %dx%d.\n", mX, mY,width, height);  
+
+  XF86DGASetViewPort (vo_dga_dpy, XDefaultScreen(vo_dga_dpy), X,Y);
+  dgadevice=XDGASetMode(vo_dga_dpy, XDefaultScreen(vo_dga_dpy), modelines[j].num);
+  XDGASync(vo_dga_dpy, XDefaultScreen(vo_dga_dpy));
+
+  XFree(modelines);
+  XFree(dgadevice);
+
+// end mode change code
+
   XF86DGAGetVideo (vo_dga_dpy, XDefaultScreen(vo_dga_dpy), 
                   (char **)&vo_dga_base, &vo_dga_width, &bank, &ram);
-  XF86DGAGetViewPortSize (vo_dga_dpy, XDefaultScreen (vo_dga_dpy),
-			  &vo_dga_vp_width, &vo_dga_vp_height);
 
+  vo_dga_vp_width=modelines[j].viewportWidth;
+  vo_dga_vp_height=modelines[j].viewportHeight;
   
   // do some more checkings here ...
   if( format==IMGFMT_YV12 ) 
@@ -298,8 +340,6 @@ static uint32_t init( uint32_t width,  uint32_t height,
          vo_dga_vp_offset, vo_dga_vp_skip, vo_dga_bytes_per_line);
 
 
-  
-  XF86DGASetViewPort (vo_dga_dpy, XDefaultScreen(vo_dga_dpy), 0, 0);
   XF86DGADirectVideo (vo_dga_dpy, XDefaultScreen(vo_dga_dpy), 
                       XF86DGADirectGraphics | XF86DGADirectMouse | 
                       XF86DGADirectKeyb);
