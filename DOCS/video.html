@@ -4,11 +4,11 @@
 
 <PRE>
 
-  <A NAME=2.2.1>2.2.1.  Video output devices   
+  <A NAME=2.2.1>2.2.1.  Video output devices</A>
 
   General:
   - x11:  X11 with optional SHM extension
-  - xv:   X11 using overlays with the Xvideo extension (hardware YUV & scaling)
+  - xv:   X11 using overlays with the Xvideo extension (hardware YUV &amp; scaling)
   - gl:   OpenGL renderer, so far works only with :
           - all cards with Utah-GLX
           - Matrox cards with X/DRI >=4.0.3
@@ -40,7 +40,7 @@
   NOTE: check the following subsections for details and requirements!
 
 
-  <A NAME=2.2.1.1>2.2.1.1.  MTRR
+  <A NAME=2.2.1.1>2.2.1.1.  MTRR</A>
 
   It is VERY recommended to set MTRR registers up properly, because they can
   give a big performance boost. First you have to find the base address.
@@ -85,7 +85,7 @@
   to check it).
 
 
-  <A NAME=2.2.1.2>2.2.1.2.  Xv
+  <A NAME=2.2.1.2>2.2.1.2.  Xv</A>
 
   Under XFree86 4.0.2 or newer, you can use your card's hardware YUV routines
   using the XVideo extension. This is what the option '-vo xv' uses.
@@ -142,7 +142,7 @@
      ./configure prints this.
 
 
-  <A NAME=2.2.1.2.1>2.2.1.2.1.  3dfx cards
+  <A NAME=2.2.1.2.1>2.2.1.2.1.  3dfx cards</A>
 
   Older 3dfx drivers were known to have problems with XVideo acceleration,
   it didn't support either YUY2 or YV12, and so. Verify that you have
@@ -152,13 +152,13 @@
   and see if it helps. Check the <A HREF="#2.2.1.4">SDL section</A> for details.
 
 
-  <A NAME=2.2.1.2.2>2.2.1.2.2.  S3 cards
+  <A NAME=2.2.1.2.2>2.2.1.2.2.  S3 cards</A>
 
   S3 Savage3D's should work fine, but for Savage4, use XFree86 version 4.0.3
   or greater. As for S3 Virge.. sell it.
 
 
-  <A NAME=2.2.1.2.3>2.2.1.2.3.  nVidia cards
+  <A NAME=2.2.1.2.3>2.2.1.2.3.  nVidia cards</A>
 
   nVidia isn't a very good choice under Linux.. You'll have to use the
   binary nVidia driver, available at nVidia's website. The standard X
@@ -169,22 +169,22 @@
      Complain to NVidia.
 
 
-  <A NAME=2.2.1.2.4>2.2.1.2.4.  ATI cards
+  <A NAME=2.2.1.2.4>2.2.1.2.4.  ATI cards</A>
 
   The GATOS driver has VSYNC enabled by default. It means that decoding speed
   (!) is synced to the monitor's refresh rate. If playing seems to be slow, try
   disabling VSYNC somehow, or set refresh rate to n*(fps of the movie) Hz.
 
 
-  <A NAME=2.2.1.3>2.2.1.3.  DGA
+  <A NAME=2.2.1.3>2.2.1.3.  DGA</A>
 
-  <A NAME=2.2.1.3.1>2.2.1.3.1.  Summary
+  <A NAME=2.2.1.3.1>2.2.1.3.1.  Summary</A>
 
   This document tries to explain in some words what DGA is in general and
   what the DGA video output driver for mplayer can do (and what it can't).
 
 
-  <A NAME=2.2.1.3.2>2.2.1.3.2.  What is DGA
+  <A NAME=2.2.1.3.2>2.2.1.3.2.  What is DGA</A>
 
   DGA is short for Direct Graphics Access and is a means for a program to
   bypass the X-Server and directly modifying the framebuffer memory. 
@@ -211,7 +211,7 @@
   driver that controls this chip. So it does not work on every system ...
 
 
-<A NAME=2.2.1.3.3>2.2.1.3.3.  Installing DGA support for <B>MPlayer</B>
+<A NAME=2.2.1.3.3>2.2.1.3.3.  Installing DGA support for <B>MPlayer</B></A>
 
   First make sure X loads the DGA extension, see in /var/log/XFree86.0.log :
 
@@ -251,7 +251,7 @@
   faster!!!
 
 
-  <A NAME=2.2.1.3.4>2.2.1.3.4.  Resolution switching
+  <A NAME=2.2.1.3.4>2.2.1.3.4.  Resolution switching</A>
 
   The DGA driver allows for switching the resolution of the output signal.
   This avoids the need for doing (slow) software scaling and at the same
@@ -267,7 +267,7 @@
   See appendix A for some sample modeline definitions.
 
 
-  <A NAME=2.2.1.3.5>2.2.1.3.5.  DGA & <B>MPlayer</B>       
+  <A NAME=2.2.1.3.5>2.2.1.3.5.  DGA &amp; <B>MPlayer</B></A>
 
   DGA is used in two places with <B>MPlayer</B>: The SDL driver can be made to make
   use of it (-vo sdl:dga) and within the DGA driver (-vo dga).
@@ -275,7 +275,7 @@
   how the DGA driver for <B>MPlayer</B> works.
 
 
-  <A NAME=2.2.1.3.6>2.2.1.3.6.  Features of the DGA driver
+  <A NAME=2.2.1.3.6>2.2.1.3.6.  Features of the DGA driver</A>
  
   The DGA driver is invoked by specifying -vo dga at the command line.
   The default behaviour is to switch to a resolution matching the original 
@@ -314,7 +314,7 @@
   CPU time!) depending on the implementation of DGA for your hardware. 
  
 
-  <A NAME=2.2.1.3.7>2.2.1.3.7.  Speed issues
+  <A NAME=2.2.1.3.7>2.2.1.3.7.  Speed issues</A>
 
   Generally spoken, DGA framebuffer access should be at least as fast as using
   the X11 driver with the additional benefit of getting a fullscreen image.
@@ -338,7 +338,7 @@
   CPUs might work at 400 MHZ and above.
 
 
-  <A NAME=2.2.1.3.8>2.2.1.3.8.  Known bugs
+  <A NAME=2.2.1.3.8>2.2.1.3.8.  Known bugs</A>
 
   Well, according to some developpers of XFree, DGA is quite a beast. They 
   tell you better not to use it. Its implementation is not always flawless
@@ -358,13 +358,13 @@
   o OSD only works with doublebuffering enabled
 
 
-  <A NAME=2.2.1.3.9>2.2.1.3.9.  Future work
+  <A NAME=2.2.1.3.9>2.2.1.3.9.  Future work</A>
 
   o use of the new X11 render interface for OSD
   o where is my TODO list ???? :-(((
 
 
-  <A NAME=2.2.1.3.A>2.2.1.3.A.  Some modelines
+  <A NAME=2.2.1.3.A>2.2.1.3.A.  Some modelines</A>
 
   Section "Modes"
     Identifier    "Modes[0]"
@@ -382,7 +382,7 @@
   module.
 
 
-  <A NAME=2.2.1.3.B>2.2.1.3.B.  Bug Reports
+  <A NAME=2.2.1.3.B>2.2.1.3.B.  Bug Reports</A>
 
   If you experience troubles with the DGA driver please feel free to file 
   a bug report to me (e-mail address below). Please start mplayer with the 
@@ -396,7 +396,7 @@
   Acki (acki@acki-netz.de, www.acki-netz.de)
 
 
-  <A NAME=2.2.1.4>2.2.1.4.  SDL
+  <A NAME=2.2.1.4>2.2.1.4.  SDL</A>
 
   Here are some notes about SDL out in <B>MPlayer</B>.
 
@@ -420,7 +420,7 @@
     It's bug in SDL, I can't change it (tested with SDL 1.2.1).
 
 
-  <A NAME=2.2.1.5>2.2.1.5.  SVGAlib
+  <A NAME=2.2.1.5>2.2.1.5.  SVGAlib</A>
 
   If you don't have X, you can use the SVGAlib target! Be sure not to use the
   -fs switch, since it toggles the usage of the software scaler, and it's
@@ -429,10 +429,10 @@
   Of course you'll have to install svgalib and its development package in
   order for <B>MPlayer</B> build its SVGAlib driver (autodetected, but can be
   forced), and don't forget to edit /etc/vga/libvga.config to suit your
-  card & monitor.
+  card &amp; monitor.
 
 
-  <A NAME=2.2.1.6>2.2.1.6.  Framebuffer output (FBdev)
+  <A NAME=2.2.1.6>2.2.1.6.  Framebuffer output (FBdev)</A>
 
   Whether to build the FBdev target is autodetected during ./configure .
   Read the framebuffer documentation in the kernel sources
@@ -469,7 +469,7 @@
 	and don't ask for it, since it's not an <B>MPlayer</B> limitation.
 
 
-  <A NAME=2.2.1.7>2.2.1.7.  Matrox framebuffer (mga_vid)
+  <A NAME=2.2.1.7>2.2.1.7.  Matrox framebuffer (mga_vid)</A>
 
   This section is about the Matrox G200/G400/G450 BES (Back-End Scaler)
   support, the mga_vid kernel driver.  It's active developed by me (A'rpi), and
@@ -525,7 +525,7 @@
   <B>MPlayer</B> with '-vo mga' . It should fix Xv.
   
 
-  <A NAME=2.2.1.8>2.2.1.8.  SiS 6326 framebuffer (sis_vid)
+  <A NAME=2.2.1.8>2.2.1.8.  SiS 6326 framebuffer (sis_vid)</A>
 
   SiS 6326 YUV Framebuffer driver -> sis_vid kernel driver
 
@@ -534,7 +534,7 @@
   needed to test it and bring the code up-to-date.
 
 
-  <A NAME=2.2.1.9>2.2.1.9.  3dfx YUV support
+  <A NAME=2.2.1.9>2.2.1.9.  3dfx YUV support</A>
 
   3dfx has native YUV+scaler support, using /dev/3dfx (tdfx.o driver?)
   The /dev/3dfx kernel driver exists only for 2.2.x kernels, for use with
@@ -542,7 +542,7 @@
   supported. Volunteers needed to test it and bring the code up-to-date.
 
 
-  <A NAME=2.2.1.10>2.2.1.10.  OpenGL output
+  <A NAME=2.2.1.10>2.2.1.10.  OpenGL output</A>
 
   <B>MPlayer</B> support displaying movies using OpenGL. Unfortunately, not all
   drivers support this ability. For example the Utah-GLX drivers
@@ -553,7 +553,7 @@
   See <A HREF="http://dri.sourceforge.net">http://dri.sourceforge.net</A> for download, and installation instructions.
 
 
-  <A NAME=2.2.1.11>2.2.1.11.  AAlib - text mode displaying
+  <A NAME=2.2.1.11>2.2.1.11.  AAlib - text mode displaying</A>
 
   <B>AAlib</B> is a library for displaying graphics in text mode, using powerful
   ASCII renderer. There are LOTS of programs already supporting it, like Doom,
@@ -571,11 +571,11 @@
 	a : toggles between aa and mplayer control)
 
   
-
   The following command line options can be used:
 	-aaosdcolor=V : change osd color
 	-aasubcolor=V : change subtitle color
-              where V can be: (0/normal, 1/dark, 2/bold, 3/boldfont, 4/reverse, 5/special) 
+              where V can be: (0/normal, 1/dark, 2/bold, 3/boldfont, 4/reverse,
+			       5/special) 
 	      
         AAlib itselves provides a large sum of options.
 	Here are some important:
@@ -585,27 +585,26 @@
 	-aahelp       : prints out all aalib options
 	
 	
-
-        
-
   NOTE: the rendering is very CPU intensive, especially when using AA-on-X
         (using aalib on X), and it's least CPU intensive on standard,
         non-framebuffer console. Use SVGATextMode to set up a big textmode,
         then enjoy! (secondary head Hercules cards rock :)) (anyone can enhance
 	fbdev to do conversion/dithering to hgafb? Would be neat :)
 	
-	Use the -framedrop option if your comp isn't fast enough to render all frames!
+	Use the -framedrop option if your comp isn't fast enough to render all
+	frames!
 
-	Playing on terminal you'll get better speed and quality using the linux driver, not
-	curses (-aadriver linux). But therefore you need write access on /dev/vcsa<terminal>!
-	That isn't autodetected by aalib, bu vo_aa tries to find the best mode.
-	See http://aa-project.sourceforge.net/tune/ for further tuning issues.
+	Playing on terminal you'll get better speed and quality using the linux
+	driver, not curses (-aadriver linux). But therefore you need write
+	access on /dev/vcsa(terminal)!  That isn't autodetected by aalib, bu
+	vo_aa tries to find the best mode.  See
+	http://aa-project.sourceforge.net/tune/ for further tuning issues.
 
 
-  <A NAME=2.2.1.A>2.2.1.A.  TV-out support
+  <A NAME=2.2.1.A>2.2.1.A.  TV-out support</A>
 
 
-  <A NAME=2.2.1.A.1>2.2.1.A.1.  Matrox cards
+  <A NAME=2.2.1.A.1>2.2.1.A.1.  Matrox cards</A>
 
   <I> What I'd love to see in mplayer is the the same feature that I see in my
    windows box. When I start a movie in windows (in a window or in full screen)
@@ -636,7 +635,7 @@
   -  Compile all the matrox-related things to modules in the kernel.
      (you MUST compile them to modules, at least I couldn't get them
      working built-in yet)
-     [reboot to new kernel & install modules, but don't load them yet!]
+     [reboot to new kernel &amp; install modules, but don't load them yet!]
 
     cd TVout  
     ./compile.sh

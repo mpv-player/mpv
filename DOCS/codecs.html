@@ -4,10 +4,10 @@
 
 <PRE>
 
-  <A NAME=2.1>2.1.  Video Formats, Audio & Video Codecs
+  <A NAME=2.1>2.1.  Video Formats, Audio &amp; Video Codecs</A>
 
 
-  <A NAME=2.1.1>2.1.1.  Supported input formats
+  <A NAME=2.1.1>2.1.1.  Supported input formats</A>
 
   <B>MPlayer</B> can read/play from the following devices/formats:
    - VCD (Video CD) directly from CD-ROM or from CDRwin's .bin image file     
@@ -21,9 +21,9 @@
   Note: about quicktime (.mov/.qt) and realmedia (.ra/.rm) support read the FAQ!
 
 
-  <A NAME=2.1.2>2.1.2.  Supported audio & video codecs
+  <A NAME=2.1.2>2.1.2.  Supported audio &amp; video codecs</A>
 
-  See http://mplayer.sourceforge.net/DOCS/codecs.html for the complete,
+  See http://mplayerhq.hu/MPlayer/DOCS/codecs.html for the complete,
   daily updated list!!!
 
   The most important video codecs:
@@ -36,15 +36,16 @@
   The most important audio codecs:
   - MPEG layer 2, and layer 3 (MP3) audio (native code, with 3dnow optimization)
   - AC3 dolby audio (native code, with 3dnow optimization)
+  - AC3 passthrough to soundcard's decoder
   - Voxware audio
   - alaw, msgsm, pcm and other simple old audio formats
 
   If you have a codec not listed here, and not supported yet, just
-  read http://mplayer.sourceforge.net/DOCS/codecs.html
+  read http://mplayerhq.hu/MPlayer/DOCS/codecs.html
   to get info about its status and about how to help us adding support for it!
 
 
-  <A NAME=2.1.2.1>2.1.2.1.  DivX4
+  <A NAME=2.1.2.1>2.1.2.1.  DivX4</A>
 
   This section contains information about the DivX4 codec of
   <A HREF="http://www.projectmayo.com">ProjectMayo</A>. Their first available alpha version was the OpenDivX 4.0
@@ -108,7 +109,7 @@
 			(like level 4 with divxds)
 
 
-  <A NAME=2.1.2.2>2.1.2.2.  ffmpeg's DivX/libavcodec
+  <A NAME=2.1.2.2>2.1.2.2.  ffmpeg's DivX/libavcodec</A>
 
   Beginning with version 0.4.2 , <A HREF="http://ffmpeg.sourceforge.net">ffmpeg</A> contains an <B>opensource</B> DivX codec,
   which is compatible with the traditional DivX. <B>MPlayer</B> supports this codec,
@@ -145,10 +146,18 @@
         focus on ffdivx, and it's unlikely that this will change.
 
 
-  <A NAME=2.1.4>2.1.4.  Codec importing howto
+  <A NAME=2.1.2.3>2.1.2.3.  Hardware AC3 decoding</A>
+
+  You will need a soundcard with AC3 passthrough capability to digital out
+  (SP/DIF). Also, the its driver has to support AFMT_AC3 (SB Live! for example)
+  Connect the hardware AC3 decoder to your soundcard's SP/DIF, and use
+  -ac hwac3 . It may work.
 
 
-  <A NAME=2.1.4.1>2.1.4.1.  VFW codecs
+  <A NAME=2.1.4>2.1.4.  Codec importing howto</A>
+
+
+  <A NAME=2.1.4.1>2.1.4.1.  VFW codecs</A>
 
   VfW (Video for Windows) is the old Video API for Windows. Its codecs have
   the .DLL or (rarely) .DRV extension.
@@ -180,7 +189,7 @@
     ftp://mplayerhq.hu/MPlayer/incoming/[codecname]/
 
 
-  <A NAME=2.1.4.2>2.1.4.2.  DirectShow codecs
+  <A NAME=2.1.4.2>2.1.4.2.  DirectShow codecs</A>
 
   DirectShow is the newer Video API, which is even worse than its predecessor.
   Things are harder with DirectShow, since

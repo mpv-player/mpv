@@ -35,6 +35,7 @@ Tartalomjegyzék
         <A HREF="codecs.html#2.1.2">2.1.2 Támogatott audio és video codec-ek</A>
 	     <A HREF="codecs.html#2.1.2.1">2.1.2.1 DivX4</A>
 	     <A HREF="codecs.html#2.1.2.2">2.1.2.2 ffmpeg DivX/libavcodec</A>
+             <A HREF="codecs.html#2.1.2.3">2.1.2.3 Hardware-es AC3 dekódolás</A>    
 	<A HREF="codecs.html#2.1.4">2.1.4 Hogyan használj ismeretlen Win32 codec-et</A>
 	     <A HREF="codecs.html#2.1.4.1">2.1.4.1 VFW</A>
 	     <A HREF="codecs.html#2.1.4.2">2.1.4.2 DirectShow</A>
@@ -82,12 +83,12 @@ Tartalomjegyzék
      <A HREF="#3.3">3.3 Lejátszás hálózatról, vagy pipe-on keresztül</A>
 </P>
 <P>
-  <A HREF="dvd.html#4">4. CD/DVD fejezet</A>
+  <A HREF="cd-dvd.html#4">4. CD/DVD fejezet</A>
 </P>
 <P>
-     <A HREF="dvd.html#4.1">4.1 CD  meghajtók</A>
-     <A HREF="dvd.html#4.2">4.2 DVD meghajtók</A>
-     <A HREF="dvd.html#4.3">4.3 DVD FAQ</A>
+     <A HREF="cd-dvd.html#4.1">4.1 CD  meghajtók</A>
+     <A HREF="cd-dvd.html#4.2">4.2 DVD lejátszás</A>
+     <A HREF="cd-dvd.html#4.3">4.3 DVD FAQ</A>
 </P>
 <P>
   <A HREF="faq.html">5. FAQ fejezet</A>
@@ -121,10 +122,10 @@ Tartalomjegyzék
 <P><HR></P>
 
 <P><PRE>
-  <A NAME=1>1.  Bevezetés
+  <A NAME=1>1.  Bevezetés</A>
 
 
-  <A NAME=1.1>1.1.  Röviden
+  <A NAME=1.1>1.1.  Röviden</A>
 
   Az <B>MPlayer</B> egy LINUXON mûködõ videolejátszó. Le tudja játszani a legtöbb
   MPEG, AVI és ASF file-t, valamint felsorakoztat jónéhány nativ és Win32
@@ -147,7 +148,7 @@ Tartalomjegyzék
   stabilitás és a minõség a legfontosabbak a számomra, de a sebesség se semmi.
 
 
-  <A NAME=1.2>1.2.  Történelem
+  <A NAME=1.2>1.2.  Történelem</A>
 
   Egy éve kezdõdött...
   Nagyon sok lejátszót kipróbáltam Linux alatt (mtv,xmps,dvdview,livid/oms,
@@ -187,7 +188,7 @@ Tartalomjegyzék
     stabilabb, mint eddig! KÖTELEZÕ !
 
 
-  <A NAME=1.3>1.3.  Installálás
+  <A NAME=1.3>1.3.  Installálás</A>
 
   Ha az <B>MPlayer</B>-t x86-os gépen fogod használni, valószínûleg használni
   akarod a Win32 codec-eket. Töltsd le és tömörítsd ki a w32codecs.zip-et az
@@ -226,7 +227,7 @@ Tartalomjegyzék
 	unzip mp_font3_hu.zip
 
 
-  <A NAME=1.4>1.4.  És a grafikus felület ?
+  <A NAME=1.4>1.4.  És a grafikus felület ?</A>
 
   Én nem vagyok GUI (grafikus felület) fejlesztõ. Nem szeretem ezeket,
   szívesebben használom az egyszerû fekete 80x25-ös konzolt.  Ezért a lejátszó
@@ -236,16 +237,16 @@ Tartalomjegyzék
   grafikus vagy, írj neki!!!
 
 
-  <A NAME=2>2.  Funkciók
+  <A NAME=2>2.  Funkciók</A>
 
 
-  <A NAME=2.1>2.1.  <A HREF="codecs.html">Video formátumok, audio és video codec-ek</A>
+  <A NAME=2.1>2.1.  <A HREF="codecs.html">Video formátumok, audio és video codec-ek</A></A>
 
 
-  <A NAME=2.2>2.2.  <A HREF="video.html">Video</A> és <A HREF="sound.html">audio</A> kimeneti eszközök
+  <A NAME=2.2>2.2.  <A HREF="video.html">Video</A> és <A HREF="sound.html">audio</A> kimeneti eszközök</A>
 
 
-  <A NAME=3>3.  Használat
+  <A NAME=3>3.  Használat</A>
 
   file:  mplayer [opciók] [útvonal/]filenév
   VCD:   mplayer [opciók] -vcd trackszám /dev/cdrom
@@ -253,7 +254,7 @@ Tartalomjegyzék
   net:   mplayer [opciók] http://site.com/file.[mpg|avi]
 
 
-  <A NAME=3.1>3.1.  Irányítás billentyûzetrõl
+  <A NAME=3.1>3.1.  Irányítás billentyûzetrõl</A>
 
 
     <-  és  ->          hátra/elõre seek, 10 másodpercnyi
@@ -283,7 +284,7 @@ Tartalomjegyzék
     7 vagy 8            szaturáció
 
 
-  <A NAME=3.2>3.2.  Irányítás LIRC-cel
+  <A NAME=3.2>3.2.  Irányítás LIRC-cel</A>
 
   Linux Infrared Remote Control - használj egy otthon is könnyen elkészíthetõ
   infravörös távirányítót, hogy irányítsd vele a géped!
@@ -333,7 +334,7 @@ Tartalomjegyzék
   a -lircconf [file-név] kapcsolót.
 
 
-  <A NAME=3.3>3.3.  Streaming from network or pipes
+  <A NAME=3.3>3.3.  Streaming from network or pipes</A>
 
   Az <B>MPlayer</B> a HTTP protokolllal tud lejátszani hálózaton keresztül,
   és béta állapotú ASF streaming támogatással is rendelkezik.
@@ -350,16 +351,16 @@ Tartalomjegyzék
         wget ftp://micorsops.com/something.avi -O - | mplayer -
 
 
-  <A NAME=4>4.  <A HREF="faq.html">FAQ fejezet</A>
+  <A NAME=4>4.  <A HREF="faq.html">FAQ fejezet</A></A>
 
 
-  <A NAME=5>5.  <A HREF="dvd.html">CD/DVD fejezet</A>
+  <A NAME=5>5.  <A HREF="cd-dvd.html">CD/DVD fejezet</A></A>
 
 
-  <A NAME=6>6.  Különbözõ operációs rendszerek
+  <A NAME=6>6.  Különbözõ operációs rendszerek</A>
 
 
-  <A NAME=6.1>6.1.  Debian csomagolás
+  <A NAME=6.1>6.1.  Debian csomagolás</A>
 
   A csomag felépítéséhez töltsd le a cvs verziót vagy .tgz-t, tömörítsd ki,
   majd lépj bele :
@@ -388,7 +389,7 @@ Tartalomjegyzék
 	Setting up mplayer (0.18-1) ...
 
 
-  <A NAME=6.2>6.2.  FreeBSD
+  <A NAME=6.2>6.2.  FreeBSD</A>
 
   A fordításhoz szükséged lesz GNU make-re (gmake, /usr/ports/devel/gmake),
   natív BSD make nem jó.
@@ -405,7 +406,7 @@ Tartalomjegyzék
   Nyugodtan csinálj egyet :-)
 
 
-  <A NAME=6.3>6.3.  Solaris 8
+  <A NAME=6.3>6.3.  Solaris 8</A>
 
   Az AVI file-ok lejátszása legjobban Solarix x86-on mûködik, mert itt
   megteheted hogy win32-es codec-eket használsz, az x86-os platform miatt.
@@ -473,7 +474,7 @@ Tartalomjegyzék
      (http://groups.yahoo.com/group/solarisonintel/message/22592)
 
 
-  <A NAME=6.4>6.4.  StrongARM
+  <A NAME=6.4>6.4.  StrongARM</A>
 
   Az <B>MPlayer</B> állítólag lefordul StrongARM-on. A következõ opciókat
   használd :
@@ -483,10 +484,10 @@ Tartalomjegyzék
 	      --with-x11incdir=/usr/arm/lib --disable-gcc-checking
 
 
-  <A NAME=A>Appendix A - Authors
+  <A NAME=A>Appendix A - Authors</A>
 
 
-  <A NAME=B>Appendix B - Mailing lists
+  <A NAME=B>Appendix B - Mailing lists</A>
 
   Jónéhány <B>MPlayer</B> lista van. A következõ címeken lehet feliratkozni:
 
@@ -513,8 +514,8 @@ Tartalomjegyzék
         - felhasználói kérdéseket (miután elolvastad ezt az egész
           dokumentációt.)
 
-  - <B>MPlayer</B> & Matrox G200/G400/G450 felhasználók:
-	<A HREF="http://lists.sourceforge.net/lists/listinfo/mplayer-matrox">http://lists.sourceforge.net/lists/listinfo/mplayer-matrox</A>
+  - <B>MPlayer</B> &amp; Matrox G200/G400/G450 felhasználók:
+	<A HREF="http://lists.sourceforge.net/lists/listinfo/mplayer-matrox">http://lists.sourceforge.net/lists/listinfo/mplayer-matrox</A>
 
         Matrox-szal kapcsolatos kérdések helye,
         - mga_vid
@@ -538,7 +539,7 @@ Tartalomjegyzék
        Más nyelven ne küldj üzenetet!
 
 
-  <A NAME=C><A HREF="bugreports.html">Appendix C</A> - How to report bugs
+  <A NAME=C><A HREF="bugreports.html">Appendix C</A> - How to report bugs</A>
 
 </PRE>
 

@@ -30,17 +30,18 @@ Table of Contents
   <A HREF="#2">2. Features</A>
 </P>
 <P>
-     <A HREF="codecs.html">2.1 Video Formats, Audio & Video Codecs</A>
+     <A HREF="codecs.html">2.1 Video Formats, Audio &amp; Video Codecs</A>
 	<A HREF="codecs.html#2.1.1">2.1.1 Supported input formats</A>
-        <A HREF="codecs.html#2.1.2">2.1.2 Supported audio & video codecs</A>
+        <A HREF="codecs.html#2.1.2">2.1.2 Supported audio &amp; video codecs</A>
 	     <A HREF="codecs.html#2.1.2.1">2.1.2.1 DivX4</A>
 	     <A HREF="codecs.html#2.1.2.2">2.1.2.2 ffmpeg's DivX/libavcodec</A>
+	     <A HREF="codecs.html#2.1.2.3">2.1.2.3 Hardware AC3 decoding</A>
 	<A HREF="codecs.html#2.1.4">2.1.4 Codec importing howto</A>
 	     <A HREF="codecs.html#2.1.4.1">2.1.4.1 VFW codecs</A>
 	     <A HREF="codecs.html#2.1.4.2">2.1.4.2 DirectShow codecs</A>
 </P>
 <P>
-     <A HREF="video.html">2.2 Video & Audio output devices</A>
+     <A HREF="video.html">2.2 Video &amp; Audio output devices</A>
 	<A HREF="video.html#2.2.1">2.2.1 Video output devices</A>
 	     <A HREF="video.html#2.2.1.1">2.2.1.1 MTRR</A>
 	     <A HREF="video.html#2.2.1.2">2.2.1.2 Xv</A>
@@ -53,7 +54,7 @@ Table of Contents
 		    <A HREF="video.html#2.2.1.3.2">2.2.1.3.2 What is DGA</A>
 		    <A HREF="video.html#2.2.1.3.3">2.2.1.3.3 Installing DGA support for MPlayer</A>
 		    <A HREF="video.html#2.2.1.3.4">2.2.1.3.4 Resolution switching</A>
-		    <A HREF="video.html#2.2.1.3.5">2.2.1.3.5 DGA & MPlayer</A>
+		    <A HREF="video.html#2.2.1.3.5">2.2.1.3.5 DGA &amp; MPlayer</A>
 		    <A HREF="video.html#2.2.1.3.6">2.2.1.3.6 Features of the DGA driver</A>
 		    <A HREF="video.html#2.2.1.3.7">2.2.1.3.7 Speed issues</A>
 		    <A HREF="video.html#2.2.1.3.8">2.2.1.3.8 Known bugs</A>
@@ -121,10 +122,10 @@ Table of Contents
 <P><HR></P>
 
 <P><PRE>
-  <A NAME=1>1.  Introduction
+  <A NAME=1>1.  Introduction</A>
 
 
-  <A NAME=1.1>1.1.  Overview
+  <A NAME=1.1>1.1.  Overview</A>
 
   <B>MPlayer</B> is a movie player for LINUX. It plays most MPEG, AVI and ASF files,
   supported by many native and Win32 DLL codecs. You can watch VCD, DVD and
@@ -147,7 +148,7 @@ Table of Contents
   but the speed is also amazing.
 
 
-  <A NAME=1.2>1.2.  History
+  <A NAME=1.2>1.2.  History</A>
 
   This began a year ago...
   I've tried lots of players under linux (mtv,xmps,dvdview,livid/oms,VideoLAN,
@@ -164,7 +165,7 @@ Table of Contents
     Mpeg codec replaced with DVDview by Dirk Farin, it was a great stuff,
     but it was slow and was written in C++ (I hate C++!!!)
   - mpg12play v0.9-v0.95pre5:
-    Mpeg codec was libmpeg2 (mpeg2dec) by Aaron Holtzman & Michel Lespinasse.
+    Mpeg codec was libmpeg2 (mpeg2dec) by Aaron Holtzman &amp; Michel Lespinasse.
     It's great, optimized very fast C code with perfect image quality and
     100% MPEG standard conformance.
   - <B>MPlayer</B> v0.3-v0.9:
@@ -185,7 +186,7 @@ Table of Contents
     even more stable than ever, and so on. It's a MUST !  
 
 
-  <A NAME=1.3>1.3.  Installation
+  <A NAME=1.3>1.3.  Installation</A>
 
   If you plan to use <B>MPlayer</B> on x86 architecture, you possibly want to use
   Win32 codecs. Download and unzip w32codecs.zip to /usr/lib/win32 .
@@ -224,7 +225,7 @@ Table of Contents
 	unzip mp_font3_hu.zip
 
 
-  <A NAME=1.4>1.4.  What about the GUI ?
+  <A NAME=1.4>1.4.  What about the GUI ?</A>
 
   I'm not a GUI programmer. I hate GUIs, I like the pure black 80x25 console.
   So the player has only keyboard control from the controlling console/xterm now.
@@ -233,16 +234,16 @@ Table of Contents
   BTW he needs some nice skins, if you are a good graphician, contact him!!!
 
 
-  <A NAME=2>2.  Features
+  <A NAME=2>2.  Features</A>
 
 
-  <A NAME=2.1>2.1.  <A HREF="codecs.html">Video Formats, Audio & Video Codecs</A>
+  <A NAME=2.1>2.1.  <A HREF="codecs.html">Video Formats, Audio &amp; Video Codecs</A></A>
 
 
-  <A NAME=2.2>2.2.  <A HREF="video.html">Video</A> & <A HREF="sound.html">Audio</A> output devices
+  <A NAME=2.2>2.2.  <A HREF="video.html">Video</A> &amp; <A HREF="sound.html">Audio</A> output devices</A>
 
 
-  <A NAME=3>3.  Usage
+  <A NAME=3>3.  Usage</A>
 
   file:  mplayer [options] [path/]filename
   VCD:   mplayer [options] -vcd trackno /dev/cdrom
@@ -256,7 +257,7 @@ Table of Contents
   mplayer -abs 65536 -delay -0.4 -nobps ~/movies/test.avi
 
 
-  <A NAME=3.1>3.1.  Control from keyboard
+  <A NAME=3.1>3.1.  Control from keyboard</A>
 
 
     <-  or  ->          seek backward/forward  10 seconds
@@ -278,7 +279,7 @@ Table of Contents
     7 or 8              adjust saturation   
    
 
-  <A NAME=3.2>3.2.  Control from LIRC
+  <A NAME=3.2>3.2.  Control from LIRC</A>
 
   Linux Infrared Remote Control - use an easy to build home-brewn IR-receiver, 
   an (almost) arbitrary remote control and control your linux box with it!
@@ -328,7 +329,7 @@ Table of Contents
   use the -lircconf [filename] switch to specify another file.
 
 
-  <A NAME=3.3>3.3.  Streaming from network or pipes
+  <A NAME=3.3>3.3.  Streaming from network or pipes</A>
 
   <B>MPlayer</B> can play media from network, by using the HTTP protocol, and even
   beta ASF streaming (FROM network) is available.
@@ -345,16 +346,16 @@ Table of Contents
         wget ftp://micorsops.com/something.avi -O - | mplayer -
 
 
-  <A NAME=4>4.  <A HREF="faq.html">FAQ section</A>
+  <A NAME=4>4.  <A HREF="faq.html">FAQ section</A></A>
 
 
-  <A NAME=5>5.  <A HREF="cd-dvd.html">CD/DVD section</A>
+  <A NAME=5>5.  <A HREF="cd-dvd.html">CD/DVD section</A></A>
 
 
-  <A NAME=6>6. Misc OS'es
+  <A NAME=6>6. Misc OS'es</A>
 
 
-  <A NAME=6.1>6.1.  Debian packaging
+  <A NAME=6.1>6.1.  Debian packaging</A>
 
   To build the package, get the cvs version, or .tgz and uncompress it,
   and cd into programs directory:
@@ -383,7 +384,7 @@ Table of Contents
 	Setting up mplayer (0.18-1) ...
 
 
-  <A NAME=6.2>6.2.  FreeBSD
+  <A NAME=6.2>6.2.  FreeBSD</A>
 
   To build the package you will need GNU make (gmake, /usr/ports/devel/gmake), 
   native BSD make will not work.
@@ -400,7 +401,7 @@ Table of Contents
   Feel free to add it :-)
 
 
-  <A NAME=6.3>6.3.  Solaris 8
+  <A NAME=6.3>6.3.  Solaris 8</A>
 
   AVI file playback works best on Solaris x86, because you have the
   option to use the win32 codecs on the x86 platform.  On Solaris SPARC,
@@ -474,7 +475,7 @@ Table of Contents
      (http://groups.yahoo.com/group/solarisonintel/message/22592)
 
 
-  <A NAME=6.4>6.4.  StrongARM
+  <A NAME=6.4>6.4.  StrongARM</A>
 
   <B>MPlayer</B> is reported to compile on StrongARM. Use the following command line:
 
@@ -483,9 +484,9 @@ Table of Contents
 	      --with-x11incdir=/usr/arm/lib --disable-gcc-checking
 
 
-  <A NAME=A>Appendix A - Authors
+  <A NAME=A>Appendix A - Authors</A>
 
-NOTE: Do *NOT* send bugreports, help & feature requests directly to the authors!
+NOTE: Do *NOT* send bugreports, help &amp; feature requests directly to the authors!
 ===== Read Appendix <A HREF="#C">C</A> and subscribe to mplayer-users mailing lists.
 
 ========================== The <B>MPlayer</B> project: ===============================
@@ -494,13 +495,13 @@ NOTE: Do *NOT* send bugreports, help & feature requests directly to the authors!
 - player code (mpeg stream demultiplexer and avi/asf parser, A-V sync, seek...)
 - mp3lib, based on mpglib sources  [MP3 audio decoder]
 - getch2  [keyboard handler]
-- some changes in libmpeg2 code (progressive frames, bitrate & fps support)
+- some changes in libmpeg2 code (progressive frames, bitrate &amp; fps support)
 - libvo improvements: adding OpenGL support, bugfix in mga driver...
-- triple buffering & YUY2 support (for DivX/MPEG4) into mga_vid driver 
+- triple buffering &amp; YUY2 support (for DivX/MPEG4) into mga_vid driver 
 - scripts in the TVout directory (TVout on Matrox G400DH, read documentation)
 - hacking DivX/Mpeg4 VfW codecs to get YUV output
 - opendivx decoder speed optimizations (see opendivx/ChangeLog)
-- OSD & SUB display code
+- OSD &amp; SUB display code
 - ffmpeg/libavcodec integration
 - DivX4Linux (ProjectMayo) support (see documentation)
 
@@ -523,9 +524,9 @@ Gábor Lénárt (LGB): [lgb@lgb.hu]
 Gábor Bérczi (Gabucino):  [gabucino@k2.jozsef.kando.hu]
 - documentation maintainer
 - hungarian translation of documentation
-- second webpage design&gfx
+- second webpage design&amp;gfx
 - webpage maintainer
-- testing, codecs quality & speed comparsions
+- testing, codecs quality &amp; speed comparsions
 - IRC channel #<B>MPlayer</B> operator
   (devel channel, users earn kickban)
 - experimental MINIX port
@@ -543,7 +544,7 @@ László Megyer (Lez, Laaz): [lez@sch.bme.hu]
 
 Gyula László (Chass, Tégla): [chass-@freemail.hu]
 - first fonts (mp_font1.zip)
-- third (current) homepage design&gfx
+- third (current) homepage design&amp;gfx
 
 Zoltán Márk Vicián (Se7en): [se7en@sch.bme.hu]
 - SVGAlib support in libvo
@@ -606,7 +607,7 @@ Vladimir Kushnir: [vkushnir@Alfacom.net]
 Bertrand BAUDET: [bertrand_baudet@yahoo.com]
 - network streaming support
 
-Artur Zaprzala: <zybi@fanthom.irc.pl>
+Artur Zaprzala: [zybi@fanthom.irc.pl]
 - Complete font generator prog + OSD font (TOOLS/subfont-c)
 
 lanzz@lanzz.org:
@@ -671,7 +672,7 @@ Adam Williams:   [broadcast@earthling.net]
 - libmpeg3 (and xmovie) author  [MPEG1/MPEG2 video decoder, used in v0.1-v0.4]
 
 
-  <A NAME=B>Appendix B - Mailing lists
+  <A NAME=B>Appendix B - Mailing lists</A>
 
   There are some public mailing lists on <B>MPlayer</B>. Subscribing can be
   achieved on the following addresses:
@@ -698,7 +699,7 @@ Adam Williams:   [broadcast@earthling.net]
 	- send feature requests here (after reading DOCS/TODO)
 	- send user questions here (after reading all this documentation)
 
-  - <B>MPlayer</B> & Matrox G200/G400/G450 users:
+  - <B>MPlayer</B> &amp; Matrox G200/G400/G450 users:
 	http://lists.sourceforge.net/lists/listinfo/mplayer-matrox
 
 	Send matrox-related questions here,
@@ -731,7 +732,7 @@ Adam Williams:   [broadcast@earthling.net]
         otherwise.  Please do not send messages using other language!
 
 
-  <A NAME=C><A HREF="bugreports.html">Appendix C</A> - How to report bugs
+  <A NAME=C><A HREF="bugreports.html">Appendix C</A> - How to report bugs</A>
 
 </PRE>
 

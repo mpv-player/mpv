@@ -4,10 +4,10 @@
 
 <PRE>
 
-  <A NAME=2.1>2.1.  Video formátumok, audio és video codecek
+  <A NAME=2.1>2.1.  Video formátumok, audio és video codecek</A>
 
 
-  <A NAME=2.1.1>2.1.1.  Támogatott formátumok
+  <A NAME=2.1.1>2.1.1.  Támogatott formátumok</A>
 
   <B>MPlayer</B> közvetlenül tudja olvasni/lejátszani a következõket:
    - VCD (Video CD) közvetlen a CD-ROM-ról, vagy image file-ból
@@ -20,9 +20,9 @@
   Megj.: quicktime-vel és realmedia-val kapcsolatban lásd a FAQ-t !
 
 
-  <A NAME=2.1.2>2.1.2.  Támogatott audio és video codec-ek
+  <A NAME=2.1.2>2.1.2.  Támogatott audio és video codec-ek</A>
 
-  Lásd http://mplayer.sourceforge.net/DOCS/codecs.html a teljes, naponta
+  Lásd http://mplayerhq.hu/MPlayer/DOCS/codecs.html a teljes, naponta
   frissített listához!!!
 
   A legfontosabb video codecek:
@@ -36,15 +36,16 @@
   A legfontosabb audio codecek:
   - MPEG layer 2, és layer 3 (MP3) audio (nativ kód, 3DNow! optimalizációval)
   - AC3 dolby audio (nativ kód, 3DNow! optimalizációval)
+  - AC3 dekódolás a hangkártya dekóderével
   - VoxWare audio
   - alaw, msgsm, pcm és más régi formátumok
 
   Ha van olyan codeced, ami nincs felsorolva vagy támogatva, olvasd el a
-  http://mplayer.sourceforge.net/DOCS/codecs.html és DOCS/CODECS
+  http://mplayerhq.hu/MPlayer/DOCS/codecs.html és DOCS/CODECS
   file-okat, amikben le van írva, mit kell tenned, hogy támogassuk a codeced!
 
 
-  <A NAME=2.1.2.1>2.1.2.1.  DivX4
+  <A NAME=2.1.2.1>2.1.2.1.  DivX4</A>
 
   Ez a fejezet a <A HREF="http://www.projectmayo.com">ProjectMayo</A> DivX4 codec-érõl tartalmaz információkat.
   Az elsõ hozzáférhetõ alfa verzió az OpenDivX alpha 47 és 48 volt. A
@@ -110,7 +111,7 @@
 			(mint a 4-es)
 
 
-  <A NAME=2.1.2.2>2.1.2.2.  ffmpeg DivX/libavcodec
+  <A NAME=2.1.2.2>2.1.2.2.  ffmpeg DivX/libavcodec</A>
 
   A 0.4.2-es verzióval kezdve az <A HREF="http://ffmpeg.sourceforge.net">ffmpeg</A> tartalmaz egy <B>nyitott forráskódú</B>
   DivX codec-et, amely kompatibilis a hagyományossal. Az <B>MPlayer</B>
@@ -143,10 +144,18 @@
   manpage vagy az example.conf mondja (a -vfm opció).
 
 
-  <A NAME=2.1.4>2.1.4.  Hogyan használj ismeretlen Win32 codec-et
+  <A NAME=2.1.2.3>2.1.2.3.  Hardware-es AC3 dekódolás
+
+  Kell egy AC3 képes hangkártya, digitális kimenettel (SP/DIF). A kártya
+  meghajtójának támogatnia kell az AFMT_AC3 formátumot (ilyen például az
+  SB Live!). Kapcsold rá a hardware-es AC3 dekódered az SP/DIF kimenetre,
+  és használd az -ac hwac3 opciót. Akár mûködhet is.
 
 
-  <A NAME=2.1.4.1>2.1.4.1.  VfW
+  <A NAME=2.1.4>2.1.4.  Hogyan használj ismeretlen Win32 codec-et</A>
+
+
+  <A NAME=2.1.4.1>2.1.4.1.  VfW</A>
 
   VfW (Video for Windows) a régi Video API Windowshoz. A codec-jei .DLL vagy
   (ritkábban) .DRV kiterjesztést kapnak.
@@ -178,7 +187,7 @@
     ftp://mplayerhq.hu/MPlayer/incoming/[codecname]/
 
 
-  <A NAME=2.1.4.2>2.1.4.2.  DirectShow
+  <A NAME=2.1.4.2>2.1.4.2.  DirectShow</A>
 
   DirectShow az újabb Video API, ami történetesen sokkal rosszabb, mint az
   elõdje. Nehezebb dolgod lesz a DirectShow-val, mivel
