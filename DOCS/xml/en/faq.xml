@@ -1181,7 +1181,7 @@ I can't encode ASF files to AVI/DivX because it uses 1000 fps?
 </para></question>
 <answer><para>
 Because ASF uses variable frame rate but AVI uses a fixed one, you 
-have to set it by hand using <option>-ofps</option>.</DD>
+have to set it by hand using <option>-ofps</option>.
 </para></answer>
 </qandaentry>
 
