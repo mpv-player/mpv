@@ -20,10 +20,12 @@
 #include "mp_image.h"
 #include "vf.h"
 
+#ifdef HAVE_DIVX4ENCORE
 #include "divx4_vbr.h"
+extern char* passtmpfile;
+#endif
 
 extern int pass;
-extern char* passtmpfile;
 
 //===========================================================================//
 
@@ -185,10 +187,14 @@ static int config(struct vf_instance_s* vf,
 
 
     /* lavc internal 2pass bitrate control */
-    if(lavc_param_vpass==1)
-        lavc_venc_context.flags|= CODEC_FLAG_PASS1;
-    else if(lavc_param_vpass==2)
-        lavc_venc_context.flags|= CODEC_FLAG_PASS2;
+#ifdef HAVE_DIVX4ENCORE
+    switch(lavc_param_vpass){
+#else
+    switch(lavc_param_vpass?lavc_param_vpass:pass){
+#endif
+    case 1: lavc_venc_context.flags|= CODEC_FLAG_PASS1; break;
+    case 2: lavc_venc_context.flags|= CODEC_FLAG_PASS2; break;
+    }
 
 #ifdef ME_ZERO
     // workaround Juanjo's stupid incompatible change:
@@ -205,6 +211,7 @@ static int config(struct vf_instance_s* vf,
 	lavc_venc_context.quality = lavc_param_vqscale;
     }
 
+#ifdef HAVE_DIVX4ENCORE
     switch(pass){
     case 1:
 	if (VbrControl_init_2pass_vbr_analysis(passtmpfile, 5) == -1){
@@ -224,6 +231,7 @@ static int config(struct vf_instance_s* vf,
 	    lavc_venc_context.flags|=CODEC_FLAG_QSCALE|CODEC_FLAG_TYPE; // VBR
 	break;
     }
+#endif
 
     if (avcodec_open(&lavc_venc_context, vf->priv->codec) != 0) {
 	mp_msg(MSGT_MENCODER,MSGL_ERR,MSGTR_CantOpenCodec);
@@ -264,6 +272,7 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     lavc_venc_picture.linesize[1]=mpi->stride[1];
     lavc_venc_picture.linesize[2]=mpi->stride[2];
 
+#ifdef HAVE_DIVX4ENCORE
     if(pass==2){ // handle 2-pass:
 	lavc_venc_context.flags|=CODEC_FLAG_QSCALE; // enable VBR
 	lavc_venc_context.quality=VbrControl_get_quant();
@@ -274,17 +283,19 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	VbrControl_update_2pass_vbr_encoding(lavc_venc_context.mv_bits,
 	      lavc_venc_context.i_tex_bits+lavc_venc_context.p_tex_bits,
 	      8*out_size);
-    } else {
+    } else
+#endif
+    {
 	out_size = avcodec_encode_video(&lavc_venc_context, mux_v->buffer, mux_v->buffer_size,
 	    &lavc_venc_picture);
-
+#ifdef HAVE_DIVX4ENCORE
 	if(pass==1){
 	  VbrControl_update_2pass_vbr_analysis(lavc_venc_context.key_frame,
 	      lavc_venc_context.mv_bits,
 	      lavc_venc_context.i_tex_bits+lavc_venc_context.p_tex_bits,
 	      8*out_size, lavc_venc_context.quality);
 	}
-	
+#endif
     }
 
     mencoder_write_chunk(mux_v,out_size,lavc_venc_context.key_frame?0x10:0);
@@ -369,7 +380,7 @@ static int vf_open(vf_instance_t *vf, char* args){
 vf_info_t ve_info_lavc = {
     "libavcodec encoder",
     "lavc",
-    "A'rpi and Alex",
+    "A'rpi, Alex, Michael",
     "for internal use by mencoder",
     vf_open
 };
