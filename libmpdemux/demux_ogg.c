@@ -164,7 +164,7 @@ void demux_ogg_add_sub (char* packet) {
     lcv = 3;
     while (1) {
       int c = packet[lcv++];
-      if(c=='\r' || c==0 || line_pos >= OGG_SUB_MAX_LINE-1){
+      if(c=='\n' || c==0 || line_pos >= OGG_SUB_MAX_LINE-1){
 	  ogg_sub.text[ogg_sub.lines][line_pos] = 0; // close sub
           if(line_pos) ogg_sub.lines++;
 	  if(!c || ogg_sub.lines>=SUB_MAX_TEXT) break; // EOL or TooMany
@@ -182,7 +182,7 @@ void demux_ogg_add_sub (char* packet) {
           ignoring = 0;
           break;
         default:
-          //if(!ignoring) 
+          if(!ignoring) 
 	  ogg_sub.text[ogg_sub.lines][line_pos++] = c;
           break;
       }
