@@ -11,8 +11,13 @@
 
 #ifdef USE_LIBAVCODEC
 
+#ifdef USE_LIBAVCODEC_SO
+#include <ffmpeg/avcodec.h>
+#include <ffmpeg/rational.h>
+#else
 #include "../libavcodec/avcodec.h"
 #include "../libavcodec/rational.h"
+#endif
 
 #define CHANS 6
 
