@@ -8,6 +8,10 @@
 #include "mp_msg.h"
 #include "vd_internal.h"
 
+#ifdef USE_WIN32DLL
+#include "ldt_keeper.h"
+#endif
+
 static vd_info_t info = {
 	"Quicktime Video decoder",
 	"qtvideo",
@@ -100,20 +104,20 @@ static int init(sh_video_t *sh){
 
     handler = LoadLibraryA("qtmlClient.dll");
 
-    InitializeQTML = GetProcAddress(handler, "InitializeQTML");
-    EnterMovies = GetProcAddress(handler, "EnterMovies");
-    FindNextComponent = GetProcAddress(handler, "FindNextComponent");
-    CountComponents = GetProcAddress(handler, "CountComponents");
-    GetComponentInfo = GetProcAddress(handler, "GetComponentInfo");
-    OpenComponent = GetProcAddress(handler, "OpenComponent");
-    ImageCodecInitialize = GetProcAddress(handler, "ImageCodecInitialize");
-    ImageCodecGetCodecInfo = GetProcAddress(handler, "ImageCodecGetCodecInfo");
-    ImageCodecBeginBand = GetProcAddress(handler, "ImageCodecBeginBand");
-    ImageCodecPreDecompress = GetProcAddress(handler, "ImageCodecPreDecompress");
-    ImageCodecBandDecompress = GetProcAddress(handler, "ImageCodecBandDecompress");
-    GetGWorldPixMap = GetProcAddress(handler, "GetGWorldPixMap");
-    QTNewGWorldFromPtr = GetProcAddress(handler, "QTNewGWorldFromPtr");
-    NewHandleClear = GetProcAddress(handler, "NewHandleClear");
+    InitializeQTML = (OSErr (*)(long))GetProcAddress(handler, "InitializeQTML");
+    EnterMovies = (OSErr (*)(void))GetProcAddress(handler, "EnterMovies");
+    FindNextComponent = (Component (*)(Component,ComponentDescription*))GetProcAddress(handler, "FindNextComponent");
+    CountComponents = (long (*)(ComponentDescription*))GetProcAddress(handler, "CountComponents");
+    GetComponentInfo = (OSErr (*)(Component,ComponentDescription*,Handle,Handle,Handle))GetProcAddress(handler, "GetComponentInfo");
+    OpenComponent = (ComponentInstance (*)(Component))GetProcAddress(handler, "OpenComponent");
+    ImageCodecInitialize = (ComponentResult (*)(ComponentInstance,ImageSubCodecDecompressCapabilities *))GetProcAddress(handler, "ImageCodecInitialize");
+    ImageCodecGetCodecInfo = (ComponentResult (*)(ComponentInstance,CodecInfo *))GetProcAddress(handler, "ImageCodecGetCodecInfo");
+    ImageCodecBeginBand = (ComponentResult (*)(ComponentInstance,CodecDecompressParams *,ImageSubCodecDecompressRecord *,long))GetProcAddress(handler, "ImageCodecBeginBand");
+    ImageCodecPreDecompress = (ComponentResult (*)(ComponentInstance,CodecDecompressParams *))GetProcAddress(handler, "ImageCodecPreDecompress");
+    ImageCodecBandDecompress = (ComponentResult (*)(ComponentInstance,CodecDecompressParams *))GetProcAddress(handler, "ImageCodecBandDecompress");
+    GetGWorldPixMap = (PixMapHandle (*)(GWorldPtr))GetProcAddress(handler, "GetGWorldPixMap");
+    QTNewGWorldFromPtr = (OSErr(*)(GWorldPtr *,OSType,const Rect *,CTabHandle,void*,GWorldFlags,void *,long))GetProcAddress(handler, "QTNewGWorldFromPtr");
+    NewHandleClear = (OSErr(*)(Size))GetProcAddress(handler, "NewHandleClear");
     //     = GetProcAddress(handler, "");
     
     if(!InitializeQTML || !EnterMovies || !FindNextComponent || !ImageCodecBandDecompress){
@@ -371,7 +375,7 @@ if(!codec_inited){
 
 if((int)sh->context==0x73797639){	// Sorenson 16-bit YUV -> std YVU9
 
-    short *src0=((char*)decpar.dstPixMap.baseAddr+0x20);
+    short *src0=(short *)((char*)decpar.dstPixMap.baseAddr+0x20);
 
     for(i=0;i<mpi->h;i++){
 	int x;

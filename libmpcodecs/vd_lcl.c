@@ -491,7 +491,8 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
         for (row = 0; row < height; row++) {
           pixel_ptr = row * width * 3;
           yq = encoded[pixel_ptr++];
-          uqvq = encoded[pixel_ptr++] + (encoded[pixel_ptr++] << 8);
+          uqvq = encoded[pixel_ptr++];
+	  uqvq+=(encoded[pixel_ptr++] << 8);
           for (col = 1; col < width; col++) {
             encoded[pixel_ptr] = yq -= encoded[pixel_ptr];
             uqvq -= (encoded[pixel_ptr+1] | (encoded[pixel_ptr+2]<<8));
@@ -505,7 +506,8 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
         for (row = 0; row < height; row++) {
           pixel_ptr = row * width * 3;
           yq = encoded[pixel_ptr++];
-          uqvq = encoded[pixel_ptr++] + (encoded[pixel_ptr++] << 8);
+          uqvq = encoded[pixel_ptr++];
+	  uqvq+=(encoded[pixel_ptr++] << 8);
           for (col = 1; col < width; col++) {
             encoded[pixel_ptr] = yq -= encoded[pixel_ptr];
             uqvq -= (encoded[pixel_ptr+1] | (encoded[pixel_ptr+2]<<8));

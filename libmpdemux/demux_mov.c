@@ -1,5 +1,3 @@
-#define USE_QTX_CODECS
-
 //  QuickTime MOV file parser by A'rpi
 //  additional work by Atmos
 //  based on TOOLS/movinfo.c by A'rpi & Al3x

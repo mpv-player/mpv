@@ -274,7 +274,7 @@ void render() {
 #ifndef NEW_DESC
 	fprintf(f, "charspace %i\n",	-2*padding);
 #endif
-	fprintf(f, "height %i\n",	f266ToInt(face->size->metrics.height));
+	fprintf(f, "height %li\n",	f266ToInt(face->size->metrics.height));
 #ifdef NEW_DESC
 	fprintf(f, "ascender %i\n",	f266CeilToInt(face->size->metrics.ascender));
 	fprintf(f, "descender %i\n",	f266FloorToInt(face->size->metrics.descender));
@@ -303,7 +303,7 @@ void render() {
 	else {
 	    glyph_index = FT_Get_Char_Index(face, uni_charmap ? character:code);
 	    if (glyph_index==0) {
-		WARNING("Glyph for char 0x%02x|U+%04X|%c not found.", code, character,
+		WARNING("Glyph for char 0x%02lx|U+%04lX|%c not found.", code, character,
 			 code<' '||code>255 ? '.':code);
 		continue;
 	    }
@@ -312,7 +312,7 @@ void render() {
 	// load glyph
 	error = FT_Load_Glyph(face, glyph_index, load_flags);
 	if (error) {
-	    WARNING("FT_Load_Glyph 0x%02x (char 0x%02x|U+%04X) failed.", glyph_index, code, character);
+	    WARNING("FT_Load_Glyph 0x%02x (char 0x%02lx|U+%04lX) failed.", glyph_index, code, character);
 	    continue;
 	}
 	slot = face->glyph;
@@ -321,7 +321,7 @@ void render() {
 	if (slot->format != ft_glyph_format_bitmap) {
 	    error = FT_Render_Glyph(slot, ft_render_mode_normal);
 	    if (error) {
-		WARNING("FT_Render_Glyph 0x%04x (char 0x%02x|U+%04X) failed.", glyph_index, code, character);
+		WARNING("FT_Render_Glyph 0x%04x (char 0x%02lx|U+%04lX) failed.", glyph_index, code, character);
 		continue;
 	    }
 	}
@@ -329,7 +329,7 @@ void render() {
 	// extract glyph image
 	error = FT_Get_Glyph(slot, (FT_Glyph*)&glyph);
 	if (error) {
-	    WARNING("FT_Get_Glyph 0x%04x (char 0x%02x|U+%04X) failed.", glyph_index, code, character);
+	    WARNING("FT_Get_Glyph 0x%04x (char 0x%02lx|U+%04lX) failed.", glyph_index, code, character);
 	    continue;
 	}
 	glyphs[glyphs_count++] = (FT_Glyph)glyph;
@@ -365,7 +365,7 @@ void render() {
 	pen_xa = pen_x + f266ToInt(slot->advance.x) + 2*padding;
 
 	/* font.desc */
-	fprintf(f, "0x%04x %i %i;\tU+%04X|%c\n", unicode_desc ? character:code,
+	fprintf(f, "0x%04lx %i %i;\tU+%04lX|%c\n", unicode_desc ? character:code,
 		pen_x,						// bitmap start
 		pen_xa-1,					// bitmap end
 		character, code<' '||code>255 ? '.':code);

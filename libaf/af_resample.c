@@ -48,7 +48,7 @@
 // Macro to add data to circular que 
 #define ADDQUE(xi,xq,in)\
   xq[xi]=xq[xi+L]=(*in);\
-  xi=(--xi)&(L-1);
+  xi=(xi-1)&(L-1);
 
 
 

@@ -17,6 +17,7 @@
 #include "registry.h"
 #include "ldt_keeper.h"
 #include "driver.h"
+#include "ext.h"
 
 extern char* def_path;
 

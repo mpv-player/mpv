@@ -8,6 +8,7 @@
 #include "guids.h"
 #include "interfaces.h"
 #include "registry.h"
+#include "../ldt_keeper.h"
 
 #ifndef NOAVIFILE_HEADERS
 #include "videodecoder.h"
@@ -234,7 +235,7 @@ DMO_VideoDecoder * DMO_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHE
 		if (!result)
 		{
 		    this->m_Caps = (this->m_Caps | c->cap);
-		    printf("%.4s ", &c->fcc);
+		    printf("%.4s ", (char*) &c->fcc);
 		}
 	    }
 	    printf("\n");

@@ -392,8 +392,8 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 #endif
 #include "srfftp_3dnow.h"
 
-const i_cmplx_t x_plus_minus_3dnow __attribute__ ((aligned (8))) = { 0x00000000UL, 0x80000000UL }; 
-const i_cmplx_t x_minus_plus_3dnow __attribute__ ((aligned (8))) = { 0x80000000UL, 0x00000000UL }; 
+const i_cmplx_t x_plus_minus_3dnow __attribute__ ((aligned (8))) = {{ 0x00000000UL, 0x80000000UL }}; 
+const i_cmplx_t x_minus_plus_3dnow __attribute__ ((aligned (8))) = {{ 0x80000000UL, 0x00000000UL }}; 
 const complex_t HSQRT2_3DNOW __attribute__ ((aligned (8))) = { 0.707106781188, 0.707106781188 };
 
 #undef HAVE_3DNOWEX

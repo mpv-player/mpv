@@ -336,9 +336,10 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 		 if (sub_utf8){
 		    if ((c & 0xe0) == 0xc0)    /* 2 bytes U+00080..U+0007FF*/
 		       c = (c & 0x1f)<<6 | (t[++j] & 0x3f);
-		    else if((c & 0xf0) == 0xe0)/* 3 bytes U+00800..U+00FFFF*/
-		       c = ((c & 0x0f)<<6 |
-			    (t[++j] & 0x3f))<<6 | (t[++j] & 0x3f);
+		    else if((c & 0xf0) == 0xe0){ /* 3 bytes U+00800..U+00FFFF*/
+		       c = (((c & 0x0f)<<6) | (t[++j] & 0x3f))<<6;
+		       c |= (t[++j] & 0x3f);
+		    }
 		 } else if (sub_unicode) 
 		       c = (c<<8) + t[++j]; 
 	      }

@@ -43,6 +43,8 @@ void list_sub_file(subtitle* subs);
 void dump_srt(subtitle* subs, float fps);
 void dump_mpsub(subtitle* subs, float fps);
 void dump_microdvd(subtitle* subs, float fps);
+void dump_jacosub(subtitle* subs, float fps);
+void dump_sami(subtitle* subs, float fps);
 void sub_free( subtitle * subs );
 void find_sub(subtitle* subtitles,int key);
 void step_sub(subtitle *subtitles, float pts, int movement);

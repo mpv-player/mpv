@@ -1676,7 +1676,10 @@ void ReadTables(void)
       UnpReadBuf(0);
     DecodeNumber((struct Decode *)&BD);
     if (Number<16)
-      Table[I++]=(Number+UnpOldTable[I]) & 0xf;
+    {
+      Table[I]=(Number+UnpOldTable[I]) & 0xf;
+      I++;
+    }
     else
       if (Number==16)
       {

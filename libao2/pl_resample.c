@@ -171,7 +171,7 @@ static int play(){
   if(pl_resample.up==pl_resample.dn){
     register int16_t*	in    = ((int16_t*)ao_plugin_data.data);
     register int16_t* 	end   = in+ao_plugin_data.len/2;
-    while(in < end) *in=(*in++)>>1;
+    while(in < end) *(in++)>>=1;
     return 1;
   }
   if(pl_resample.up>pl_resample.dn)

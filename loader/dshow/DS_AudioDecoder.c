@@ -24,6 +24,7 @@ struct _DS_AudioDecoder
 };
 
 #include "DS_AudioDecoder.h"
+#include "../ldt_keeper.h"
 
 #include <string.h>
 #include <stdio.h>

@@ -1281,7 +1281,7 @@ static int parse_end_at(struct config *conf, const char* param)
         
         end_at_type = END_AT_SIZE;
 
-        if(sscanf(param, "%d%3s", &end_at, unit) == 2) {
+        if(sscanf(param, "%lf%3s", &end_at, unit) == 2) {
             if(!strcasecmp(unit, "b"))
                 ;
             else if(!strcasecmp(unit, "kb"))

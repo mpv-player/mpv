@@ -10,6 +10,10 @@
 #include "ad_internal.h"
 #include "bswap.h"
 
+#ifdef USE_WIN32DLL
+#include "ldt_keeper.h"
+#endif
+
 static ad_info_t info =  {
 	"QuickTime Audio Decoder",
 	"qtaudio",

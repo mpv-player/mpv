@@ -35,6 +35,7 @@ struct _DS_VideoDecoder
 #include "DS_VideoDecoder.h"
 
 #include "../wine/winerror.h"
+#include "../ldt_keeper.h"
 
 #ifndef NOAVIFILE_HEADERS
 #define VFW_E_NOT_RUNNING               0x80040226
@@ -66,7 +67,7 @@ typedef struct _ct ct;
 struct _ct {
 		unsigned int bits;
 		fourcc_t fcc;
-		GUID *subtype;
+		const GUID *subtype;
 		int cap;
 	    };
             
@@ -224,7 +225,7 @@ DS_VideoDecoder * DS_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHEAD
 		if (!result)
 		{
 		    this->m_Caps = (this->m_Caps | c->cap);
-		    printf("%.4s ", &c->fcc);
+		    printf("%.4s ", (char *)&c->fcc);
 		}
 	    }
 	    printf("\n");
