@@ -101,6 +101,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
  XSizeHints hint;
  XVisualInfo vinfo;
  XEvent xev;
+ XvPortID xv_p;
 
  XGCValues xgcv;
  XSetWindowAttributes xswa;
@@ -177,9 +178,16 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
      return -1;
     }
    /* check adaptors */
-   for (i = 0; i < adaptors; i++)
+   for (i = 0; i < adaptors && xv_port == 0; i++)
     {
-     if ((ai[i].type & XvInputMask) && (ai[i].type & XvImageMask) && (xv_port == 0)) xv_port = ai[i].base_id;
+     if ((ai[i].type & XvInputMask) && (ai[i].type & XvImageMask))
+	 for (xv_p = ai[i].base_id; xv_p < ai[i].base_id+ai[i].num_ports; ++xv_p)
+	     if (!XvGrabPort(mDisplay, xv_p, CurrentTime)) {
+		 xv_port = xv_p;
+		 break;
+	     } else {
+		 printf("Xv: could not grab port %i\n", (int)xv_p);
+	     }
     }
    /* check image formats */
    if (xv_port != 0)
