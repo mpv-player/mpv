@@ -607,7 +607,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 		   ||(0==strcmp(&sub_name[l-4],".UTF"))))
 	  sub_utf8=1;
        subtitles=sub_read_file(sub_name);
-       if (sub_num == 0) printf ("No subtitles found in %s\n",sub_name);
+       if (sub_num == 0) printf ("SUB: No subtitles found in %s\n",sub_name);
        if(!subtitles || sub_num == 0) mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadSub,sub_name);
   }
 #endif
