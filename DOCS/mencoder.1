@@ -1,0 +1,99 @@
+.\" MPlayer (C) 2000-2001 Arpad Gereoffy <arpi@esp-team.scene.hu>
+.\" This manpage was written, and is maintained by Gabucino
+.\"
+.TH MEncoder
+.SH NAME
+mencoder \- Movie Encoder for Linux
+.SH SYNOPSIS
+.B mencoder
+.RB [ \-i\ input\ file(s) ]
+.RB [ \-o\ input\ file ]
+.RB [ \-video\ mode ]
+.RB [ \-audio\ mode ]
+.RB [ \-vbr\ bitrate ]
+.RB [ \-abr\ bitrate ]
+.RB [ \-ivc\ codec ]
+.RB [ \-iac\ codec ]
+.PP
+.SH DESCRIPTION
+.I mencoder
+Encoder.
+.LP
+.SH "GENERAL OPTIONS"
+.TP
+.I NOTE
+Every "flag" option has "noflag" pair, e.g. -fs opposite is -nofs
+.TP
+.B \-i\ files
+specify input file(s) for encoding. Examples:
+
+   -i /dev/dvd
+   -i video.avi stream1.mp3 stream2.wav
+.TP
+.B \-o\ file
+specify output file. Examples:
+
+   -o /dev/cdrw ;))
+   -o -
+   -o output.avi
+   -o video.avi audio.mp3
+.TP
+.B \-video\ encoding mode
+specify what to do with the video stream(s?):
+
+   -video copy
+   -video divx4
+   -video divx42 (2 pass)
+.TP
+.B \-audio\ encoding mode
+specify what to do with the audio stream(s?):
+
+   -audio copy
+   -audio mp3
+   -audio vbrmp3
+.TP
+.B \-vbr\ bitrate
+specify video bitrate to encode at (in kbits).
+
+   -vbr 910
+.TP
+.B \-abr\ bitrate
+specify audio bitrate to encode at (in kbits).
+
+   -abr 128
+.TP
+.B \-ivc\ codec
+use this codec to decode input video stream(s?) (from codecs.conf)
+
+   -ivc ffdivx
+.TP
+.B \-avc\ codec
+use this codec to decode input audio stream(s?) (from codecs.conf)
+
+   -ivc mp3lib
+.IP
+.SH BUGS
+This manpage is under SEVERE construction !!!
+
+Probably. Check the documentation.
+
+Bugreports should be addressed to the MPlayer-users mailing list
+(mplayer-users@mplayerhq.hu) ! If you want to submit a bugreport
+(which we love to receive!), please double-check the bugreports.html, and
+tell us all that we need to know to identify your problem.
+
+.LP
+.SH AUTHORS
+Check documentation !
+
+MPlayer is (C) 2000-2001
+.I Arpad Gereoffy <arpi@thot.banki.hu>
+
+This manpage is written and maintained by
+.I Gabucino .
+.LP
+.SH STANDARD DISCLAIMER
+Use only at your own risk! There may be errors and inaccuracies that could 
+be damaging to your system or your eye. Proceed with caution, and although
+this is highly unlikely, the author doesn't take any responsibility for that!
+.\" end of file
