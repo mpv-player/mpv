@@ -591,6 +591,8 @@ play_next_file:
   }
 #endif
 
+  if(subtitles && stream_dump_type==3) list_sub_file(subtitles);
+
     stream=NULL;
     demuxer=NULL;
     d_audio=NULL;
@@ -1784,7 +1786,7 @@ if(rel_seek_secs || abs_seek_pos){
 #ifdef USE_SUB
   // find sub
   if(subtitles && d_video->pts>0){
-      int pts=d_video->pts;
+      float pts=d_video->pts;
       if(sub_fps==0) sub_fps=sh_video->fps;
       current_module="find_sub";
       find_sub(subtitles,sub_uses_time?(100*(pts+sub_delay)):((pts+sub_delay)*sub_fps)); // FIXME! frame counter...
