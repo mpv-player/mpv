@@ -15,7 +15,7 @@
 <P>Pour avoir la liste complète des options disponibles de MEncoder et des exemples,
   voir la page de man.</P>
 
-<H3><A NAME="2pass">2.4.1 Encodage DIVX4 2 ou 3-passes</A></H3>
+<H3><A NAME="2pass">2.4.1 Encodage MPEG-4 (&quot;DIVX&quot;) 2 ou 3-passes</A></H3>
 
 <P><U><B>Encodage 2-passes:</B></U> le nom vient du fait que cette méthode encode
   le fichier <I>deux fois</I>. Le premier encodage (<I>passe</I> doublée)
@@ -26,8 +26,8 @@
   Si c'est la première fois que vous entendez parler de ça, vous devriez consulter les
   guides disponibles sur le Net.</P>
 
-<P>Cet exemple montre comment encoder un DVD en AVI DIVX4 2-passes. Seulement
-  deux commandes sont requises:<BR>
+<P>Cet exemple montre comment encoder un DVD en AVI MPEG-4 (&quot;DIVX&quot;) AVI 2-passes. 
+  Seules deux commandes sont requises:<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> - enlevez ce fichier, qui peut
     provenir d'un encodage 3-passes précédent (il interfère avec l'actuel)<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc lavc -lavcopts
@@ -53,15 +53,15 @@
   <LI>Seconde passe:
     <P><CODE>mencoder &lt;fichier/DVD&gt; -oac copy
       -ovc lavc -lavcopts vcodec=mpeg4:vpass=1:vbitrate=&lt;bitrate&gt;</CODE></P>
-    <P>Faites un alias de la première passe de l'encodage DivX4.
+    <P>Ceci est la première passe de l'encodage vidéo.
       Éventuellement spécifiez le bitrate vidéo que MEncoder à affiché à la
       fin de la passe précédente.</P></LI>
   <LI>Troisième passe:
     <P><CODE>mencoder &lt;fichier/DVD&gt; -oac copy
       -ovc lavc -lavcopts vcodec=mpeg4:vpass=2:vbitrate=&lt;bitrate&gt;</CODE></P>
-    <P>Faites un alias de la seconde passe de l'encodage DivX4.
-      Éventuellement spécifiez le bitrate vidéo que MEncoder à affiché à la
-      fin de la passe précédente. Dans cette passe, l'audio de <CODE>frameno.avi</CODE>
+    <P>Ceci est la seconde passe de l'encodage vidéo.
+      Spécifiez le même bitrate vidéo que celui de la passe précédente à moins que vous
+      ne sachiez réélement ce que vous faites. Dans cette passe, l'audio de <CODE>frameno.avi</CODE>
       sera inséré dans le fichier de destination.. et c'est tout prêt!</P></LI>
  </OL>
 
@@ -137,11 +137,13 @@
   <LI>mjpeg - Motion JPEG</LI>
   <LI>h263 - H263</LI>
   <LI>h263p - H263 Plus</LI>
-  <LI>mpeg4 - DivX4</LI>
-  <LI>msmpeg4 - le vieux DivX</LI>
-  <LI>msmpeg4v2 - Micro$oft MPEG4 V2 (DivX alias le prédecesseur de MP43)</LI>
+  <LI>mpeg4 - standard ISO (compatible DivX 4/5, OpenDivX, XVID)</LI>
+  <LI>msmpeg4 - variante pré-standard de MPEG-4 par MS, v3 (alias DivX3)</LI>
+  <LI>msmpeg4v2 - MPEG-4 pré-standard de MS, v2 (utilisé dans les anciens fichiers asf)</LI>
+  <LI>wmv1 - Windows Media Video, version 1 (alias WMV7)</LI>
   <LI>rv10 - un vieux codec RealVideo</LI>
   <LI>mpeg1video - MPEG1 video :)</LI>
+  <LI>huffyuv - compression sans perte</LI>
 </UL>
 
 <P>La première colonne contient le nom du codec qui devrait être passé après la
@@ -164,10 +166,8 @@ Explication du processus:
   <LI>MEncoder <I>décode</I> le(s) image(s) d'origine avec
     <CODE>libjpeg</CODE> (pour encoder des PNGs, il utilisera <B>libpng</B>).</LI>
 
-  <LI>Mencoder envoie alors l'image décodée au compresseur vidéo demandé
-    (DivX4, Xvid, ffmpeg msmpeg4, etc...). Regardez pour le décodeur PN, car
-    actuellement il ne peut sortir qu'au format RGB, ainsi il ne peut être utilisé avec
-    des codecs qui requièrent de l'YUV en entrée, comme DivX4 ou msmpeg4 de ffmpeg.</LI>
+  <LI>Mencoder envoie alors l'image décodée au compresseur vidéo choisi
+    (DivX4, Xvid, ffmpeg msmpeg4, etc...).</LI>
 </OL>
 
 <H4>Exemples</H4>
