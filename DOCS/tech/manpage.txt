@@ -148,9 +148,9 @@ General:
     - Don't forget the quotation marks around expressions, etc...
     - Each new sentence should start on a line of its own.
     - Put a backslash before a '-' if it denotes a range (1\-10), an option
-      (\-fs) or a dash (mplayer  \- Movie Player for Linux). Use just '-' if
-      it is a hyphen (A-V) or a minus (-1). Please note that is should be
-      \-dvd-device and not \-dvd\-device.
+      (\-fs), stdin (\-) or a dash (mplayer  \- Movie Player for Linux).
+      Use just '-' if it is a hyphen (A-V) or a minus (-1). Please note that
+      it should be \-dvd-device and not \-dvd\-device.
 
 
 Option descriptions:
