@@ -12,6 +12,8 @@
 
 #include "config.h"
 
+int tv_param_on = 0;
+
 #ifdef USE_TV
 #include "mp_msg.h"
 #include "help_mp.h"
@@ -25,7 +27,6 @@
 unsigned long tv_param_freq = 0;
 char *tv_param_channel = "0";
 char *tv_param_norm = "pal";
-int tv_param_on = 0;
 char *tv_param_device = NULL;
 char *tv_param_driver = "dummy";
 int tv_param_width = -1;

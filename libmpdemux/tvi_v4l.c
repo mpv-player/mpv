@@ -206,12 +206,12 @@ tvi_handle_t *tvi_init_v4l(char *device)
     /* set video device name */
     if (!device)
     {
-	priv->video_device = malloc(strlen("/dev/video0"));
+	priv->video_device = (char *)malloc(strlen("/dev/video0"));
 	sprintf(priv->video_device, "/dev/video0");
     }
     else
     {
-	priv->video_device = malloc(strlen(device));
+	priv->video_device = (char *)malloc(strlen(device));
 	strcpy(priv->video_device, device);
     }
 
@@ -265,7 +265,7 @@ static int init(priv_t *priv, tvi_param_t *params)
     priv->height = priv->capability.minheight;
     mp_msg(MSGT_TV, MSGL_INFO, " Inputs: %d\n", priv->capability.channels);
 
-    priv->channels = malloc(sizeof(struct video_channel)*priv->capability.channels);
+    priv->channels = (struct video_channel *)malloc(sizeof(struct video_channel)*priv->capability.channels);
     memset(priv->channels, 0, sizeof(struct video_channel)*priv->capability.channels);
     for (i = 0; i < priv->capability.channels; i++)
     {
@@ -298,7 +298,7 @@ static int init(priv_t *priv, tvi_param_t *params)
 	priv->mbuf.size, priv->mbuf.frames);
     priv->mmap = mmap(0, priv->mbuf.size, PROT_READ|PROT_WRITE,
 		MAP_SHARED, priv->fd, 0);
-    if (priv->mmap == -1)
+    if (priv->mmap == (unsigned char *)-1)
     {
 	mp_msg(MSGT_TV, MSGL_ERR, "Unabel to map memory for buffers: %s\n", strerror(errno));
 	goto err;
@@ -309,7 +309,7 @@ static int init(priv_t *priv, tvi_param_t *params)
     priv->nbuf = priv->mbuf.frames;
     
     /* video buffers */
-    priv->buf = malloc(priv->nbuf * sizeof(struct video_mmap));
+    priv->buf = (struct video_mmap *)malloc(priv->nbuf * sizeof(struct video_mmap));
     memset(priv->buf, 0, priv->nbuf * sizeof(struct video_mmap));
     
     return(1);

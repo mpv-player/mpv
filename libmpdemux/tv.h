@@ -1,5 +1,7 @@
 #include "config.h"
 
+extern int tv_param_on;
+
 #ifdef USE_TV
 #include "../libao2/afmt.h"
 #include "../libvo/img_format.h"
@@ -9,7 +11,6 @@
 extern unsigned long tv_param_freq;
 extern char *tv_param_channel;
 extern char *tv_param_norm;
-extern int tv_param_on;
 extern char *tv_param_device;
 extern char *tv_param_driver;
 extern int tv_param_width;

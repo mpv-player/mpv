@@ -21,7 +21,7 @@ static tvi_functions_t functions =
 
 static tvi_handle_t *new_handle()
 {
-    tvi_handle_t *h = malloc(sizeof(tvi_handle_t));
+    tvi_handle_t *h = (tvi_handle_t *)malloc(sizeof(tvi_handle_t));
 
     if (!h)
 	return(NULL);
