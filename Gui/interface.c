@@ -842,8 +842,9 @@ int guiGetEvent( int type,char * arg )
 	  tmp = calloc( 1,strlen( gtkAOOSSDevice ) + 7 );
 	  sprintf( tmp,"oss:%s",gtkAOOSSDevice );
 	  } else
-	    tmp = "oss";
+	    tmp = strdup("oss");
 	  gaddlist( &audio_driver_list,tmp );
+	  free(tmp);
 	 }
 #endif
 #if defined(HAVE_ALSA9) || defined (HAVE_ALSA1X)
@@ -856,8 +857,9 @@ int guiGetEvent( int type,char * arg )
 	    tmp = calloc( 1,strlen( gtkAOALSADevice ) + 14 );
 	    sprintf( tmp,"alsa:device=%s",gtkAOALSADevice );
 	  } else
-	    tmp = "alsa";
+	    tmp = strdup("alsa");
 	  gaddlist( &audio_driver_list,tmp );
+	  free(tmp);
 	 }
 #endif
 #ifdef HAVE_SDL
@@ -868,8 +870,9 @@ int guiGetEvent( int type,char * arg )
 	  tmp = calloc( 1,strlen( gtkAOSDLDriver ) + 10 );
 	  sprintf( tmp,"sdl:%s",gtkAOSDLDriver );
 	  } else
-	    tmp = "sdl";
+	    tmp = strdup("sdl");
 	  gaddlist( &audio_driver_list,tmp );
+	  free(tmp);
 	 }
 #endif
 // -- subtitle
