@@ -143,20 +143,7 @@ demuxer_t* demux_open_nsv ( demuxer_t* demuxer )
     nsv_priv_t * priv = malloc(sizeof(nsv_priv_t));
     demuxer->priv=priv;
     priv->video_pack_no=0;
-    /* Create a new video stream header */
-    sh_video = new_sh_video ( demuxer, 0 );
 
-    /* Make sure the demuxer knows about the new video stream header
-     * (even though new_sh_video() ought to take care of it)
-     */
-    demuxer->video->sh = sh_video;
-
-    /* Make sure that the video demuxer stream header knows about its
-     * parent video demuxer stream (this is getting wacky), or else
-     * video_read_properties() will choke
-         */
-    sh_video->ds = demuxer->video;
-        
       /* disable seeking yet to be fixed*/
     demuxer->seekable = 0;
         
@@ -240,6 +227,20 @@ demuxer_t* demux_open_nsv ( demuxer_t* demuxer )
         priv->fps=hdr[16];
             
         if (strncmp(hdr+4,"NONE", 4)) {
+            /* Create a new video stream header */
+            sh_video = new_sh_video ( demuxer, 0 );
+
+            /* Make sure the demuxer knows about the new video stream header
+             * (even though new_sh_video() ought to take care of it)
+             */
+            demuxer->video->sh = sh_video;
+
+            /* Make sure that the video demuxer stream header knows about its
+             * parent video demuxer stream (this is getting wacky), or else
+             * video_read_properties() will choke
+             */
+            sh_video->ds = demuxer->video;
+        
             //   bytes 4-7  video codec fourcc
             priv->v_format = sh_video->format=mmioFOURCC(hdr[4],hdr[5],hdr[6],hdr[7]);
         
@@ -285,7 +286,6 @@ demuxer_t* demux_open_nsv ( demuxer_t* demuxer )
 
                 stream_seek(demuxer->stream,stream_tell(demuxer->stream)-9);
             } 
-        }
 
             
         switch(priv->fps){
@@ -308,6 +308,7 @@ demuxer_t* demux_open_nsv ( demuxer_t* demuxer )
             sh_video->fps = (float)priv->fps;
         }       
         sh_video->frametime = (float)1.0 / (float)sh_video->fps;
+       }
     }   
 
     
