@@ -321,7 +321,7 @@ are required.)
 <title>PVA files</title>
 <para>
 PVA is an MPEG-like format used by DVB TV boards' software (e.g.:
-<application>MultiDec</application>, <application>WinTV</application> under Windows.
+<application>MultiDec</application>, <application>WinTV</application> under Windows).
 </para>
 
 <para>
