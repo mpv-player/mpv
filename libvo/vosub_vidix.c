@@ -1,4 +1,3 @@
-
 /*
  *  vosub_vidix.c
  *
@@ -45,11 +44,23 @@ static vidix_playback_t   vidix_play;
 static vidix_fourcc_t	  vidix_fourcc;
 
 static int  vidix_get_bes_da(bes_da_t *);
+static int  vidix_get_video_eq(vidix_video_eq_t *info);
+static int  vidix_set_video_eq(const vidix_video_eq_t *info);
+static int  vidix_get_num_fx(unsigned *info);
+static int  vidix_get_oem_fx(vidix_oem_fx_t *info);
+static int  vidix_set_oem_fx(const vidix_oem_fx_t *info);
+static int  vidix_set_deint(const vidix_deinterlace_t *info);
 
 static void vidix_query_vaa(vo_vaa_t *vaa)
 {
   memset(vaa,0,sizeof(vo_vaa_t));
   vaa->query_bes_da=vidix_get_bes_da;
+  vaa->get_video_eq=vidix_get_video_eq;
+  vaa->set_video_eq=vidix_set_video_eq;
+  vaa->get_num_fx=vidix_get_num_fx;
+  vaa->get_oem_fx=vidix_get_oem_fx;
+  vaa->set_oem_fx=vidix_set_oem_fx;
+  vaa->set_deint=vidix_set_deint;
 }
 
 int vidix_preinit(const char *drvname,void *server)
@@ -192,7 +203,7 @@ int vidix_start(void)
 	printf("vosub_vidix: Can't start playback: %s\n",strerror(err));
 	return -1;
     }
-
+    video_on=1;
     if (vidix_cap.flags & FLAG_EQUALIZER)
     {
 	if(verbose > 1)
@@ -213,7 +224,7 @@ int vidix_start(void)
 	       ,vo_gamma_blue_intensity);
 	}
         /* To use full set of vid_eq.cap */
-	if(vdlPlaybackGetEq(vidix_handler,&vid_eq) == 0)
+	if(vidix_get_video_eq(&vid_eq) == 0)
 	{
 		vid_eq.brightness = vo_gamma_brightness;
 		vid_eq.saturation = vo_gamma_saturation;
@@ -223,10 +234,9 @@ int vidix_start(void)
 		vid_eq.green_intensity = vo_gamma_green_intensity;
 		vid_eq.blue_intensity = vo_gamma_blue_intensity;
 		vid_eq.flags = VEQ_FLG_ITU_R_BT_601;
-		vdlPlaybackSetEq(vidix_handler,&vid_eq);
+		vidix_set_video_eq(&vid_eq);
 	}
     }
-    video_on=1;
     return 0;
 }
 
@@ -447,4 +457,40 @@ static int  vidix_get_bes_da(bes_da_t *info)
   memcpy(&info->offset,&vidix_play.offset,sizeof(vidix_yuv_t));
   info->dga_addr = vidix_play.dga_addr;
   return 0;
+}
+
+static int  vidix_get_video_eq(vidix_video_eq_t *info)
+{
+  if(!video_on) return EPERM;
+  return vdlPlaybackGetEq(vidix_handler, info);
+}
+
+static int  vidix_set_video_eq(const vidix_video_eq_t *info)
+{
+  if(!video_on) return EPERM;
+  return vdlPlaybackSetEq(vidix_handler, info);
+}
+
+static int  vidix_get_num_fx(unsigned *info)
+{
+  if(!video_on) return EPERM;
+  return vdlQueryNumOemEffects(vidix_handler, info);
+}
+
+static int  vidix_get_oem_fx(vidix_oem_fx_t *info)
+{
+  if(!video_on) return EPERM;
+  return vdlGetOemEffect(vidix_handler, info);
+}
+
+static int  vidix_set_oem_fx(const vidix_oem_fx_t *info)
+{
+  if(!video_on) return EPERM;
+  return vdlSetOemEffect(vidix_handler, info);
+}
+
+static int  vidix_set_deint(const vidix_deinterlace_t *info)
+{
+  if(!video_on) return EPERM;
+  return vdlPlaybackSetDeint(vidix_handler, info);
 }
