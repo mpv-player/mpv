@@ -1,19 +1,17 @@
 Recommended options for better sound sync:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-(first try without these, maybe it works well without 'hacking' defaults)
-
-ALSA:			-abs 65536
+Due to the constant fixes/changes in MPlayer, the contents of this file
+must be considered only as advice, and are subjects to change without
+warning.
 
 Aureal Vortex2:		-abs 65536 -delay -0.5
 
 SB Live!:		Kernel 2.2 : Use default settings
 			Kernel 2.4 : try -noalsa
 
-OSS/Free:	        Please contact me for good parameters
-
-Gravis Ultrasound ACE:	Use OSS, and default settings will be OK.
-			It doesn't work reliably with ALSA.
+Gravis Ultrasound ACE:	OSS (2.4) : default settings are OK
+			ALSA : if video lags, use OSS or mplayerHQ
 
  - if sound clicks when playing from CD-ROM, turn on IRQ unmasking !
    for example "hdparm -u1 /dev/cdrom" (see "man hdparm" !!!)
