@@ -224,7 +224,7 @@ switch(d_video->demuxer->file_format){
    sh_video->disp_h=picture.display_picture_height;
    // bitrate:
    if(picture.bitrate!=0x3FFFF) // unspecified/VBR ?
-       sh_video->i_bps=1000*picture.bitrate/16;
+       sh_video->i_bps=picture.bitrate * 400 / 8;
    // info:
    mp_dbg(MSGT_DECVIDEO,MSGL_DBG2,"mpeg bitrate: %d (%X)\n",picture.bitrate,picture.bitrate);
    mp_msg(MSGT_DECVIDEO,MSGL_INFO,"VIDEO:  %s  %dx%d  (aspect %d)  %4.2f fps  %5.1f kbps (%4.1f kbyte/s)\n",
@@ -232,8 +232,8 @@ switch(d_video->demuxer->file_format){
     sh_video->disp_w,sh_video->disp_h,
     picture.aspect_ratio_information,
     sh_video->fps,
-    picture.bitrate*0.5f,
-    picture.bitrate/16.0f );
+    sh_video->i_bps * 8 / 1000.0,
+    sh_video->i_bps / 1000.0 );
   break;
  }
 } // switch(file_format)
