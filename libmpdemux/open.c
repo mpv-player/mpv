@@ -540,6 +540,30 @@ if(strncmp("dvbin://",filename,8) == 0)
   }
   
 #ifdef STREAMING
+#ifdef STREAMING_LIVE_DOT_COM
+  // Check for a SDP file:
+  if (strncmp("sdp://",filename,6) == 0) {
+       filename += 6;
+#if defined(__CYGWIN__) || defined(__MINGW32__)
+       f=open(filename,O_RDONLY|O_BINARY);
+#else
+       f=open(filename,O_RDONLY);
+#endif
+       if(f<0){ mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_FileNotFound,filename);return NULL; }
+
+       len=lseek(f,0,SEEK_END); lseek(f,0,SEEK_SET);
+       if (len == -1)
+           return NULL;
+
+#ifdef _LARGEFILE_SOURCE
+	 mp_msg(MSGT_OPEN,MSGL_V,"File size is %lld bytes\n", (long long)len);
+#else
+	 mp_msg(MSGT_OPEN,MSGL_V,"File size is %u bytes\n", (unsigned int)len);
+#endif
+	 return stream_open_sdp(f, len, file_format);
+  }
+#endif
+
   url = url_new(filename);
   if(url) {
 	if (strcmp(url->protocol, "smb")==0){
@@ -590,32 +614,9 @@ if(strncmp("dvbin://",filename,8) == 0)
 	return stream;
   }
   }
+#endif
 
 //============ Open STDIN or plain FILE ============
-#ifdef STREAMING_LIVE_DOT_COM
-  //  a SDP file: I hope the sdp protocol isn't really in use
-  if(strncmp("sdp://",filename,6) == 0) {
-       filename += 6;
-#if defined(__CYGWIN__) || defined(__MINGW32__)
-       f=open(filename,O_RDONLY|O_BINARY);
-#else
-       f=open(filename,O_RDONLY);
-#endif
-       if(f<0){ mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_FileNotFound,filename);return NULL; }
-
-       len=lseek(f,0,SEEK_END); lseek(f,0,SEEK_SET);
-       if (len == -1)
-           return NULL;
-
-#ifdef _LARGEFILE_SOURCE
-	 mp_msg(MSGT_OPEN,MSGL_V,"File size is %lld bytes\n", (long long)len);
-#else
-	 mp_msg(MSGT_OPEN,MSGL_V,"File size is %u bytes\n", (unsigned int)len);
-#endif
-	 return stream_open_sdp(f, len, file_format);
-  }
-#endif
-#endif
 
   return open_stream_full(filename,STREAM_READ,options,file_format);
 }
