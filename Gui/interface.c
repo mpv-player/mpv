@@ -82,7 +82,7 @@ void guiInit( void )
  memset( &gtkEquChannels,0,sizeof( gtkEquChannels ) );
  gtkAOOSSMixer=strdup( PATH_DEV_MIXER );
  gtkAOOSSDevice=strdup( PATH_DEV_DSP );
- cfg_read();
+// cfg_read(); // !!! moved to Gui/mplayer/mplayer.c::mplInit() after gtkInit()
  appInit( (void*)mDisplay );
  if ( plCurrent && !filename ) mplSetFileName( plCurrent->path,plCurrent->name );
 #if defined( USE_OSD ) || defined( USE_SUB )

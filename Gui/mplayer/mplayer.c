@@ -49,8 +49,10 @@ void mplInit( void * disp )
  guiIntfStruct.Balance=50.0f;
  guiIntfStruct.StreamType=-1;
 
- // fork() a process which runs gtkThreadProc()  [gtkPID]
  gtkInit();
+
+ // read gui.conf, gui.pl
+ cfg_read();
 
  // opens X display, checks for extensions (XShape, DGA etc)
  wsXInit( disp );
