@@ -57,6 +57,13 @@
 	<LI><A HREF="formats.html#2.1.1.11">2.1.1.11 Pliki RoQ</A></LI>
       </UL>
       <LI><A HREF="formats.html#2.1.2">2.1.2 D¼wiêk</A></LI>
+      <UL>
+        <LI><A HREF="formats.html#2.1.2.1">2.1.2.1 Pliki MP3</A></LI>
+        <LI><A HREF="formats.html#2.1.2.2">2.1.2.2 Pliki WAV</A></LI>
+        <LI><A HREF="formats.html#2.1.2.3">2.1.2.3 Pliki OGG (Vorbis)</A></LI>
+        <LI><A HREF="formats.html#2.1.1.3">2.1.2.4 Pliki WMA/ASF</A></LI>
+        <LI><A HREF="formats.html#2.1.2.5">2.1.2.5 Pliki MP4</A></LI>
+      </UL>
     </UL>
     <LI><A HREF="codecs.html#2.2">2.2 Wspierane kodeki</A></LI>
     <UL>
@@ -151,6 +158,7 @@
 	    <LI><A HREF="sound.html#2.3.2.2.5">2.3.2.2.5 Programowe sterowanie g³o¶no¶ci±</A></LI>
 	    <LI><A HREF="sound.html#2.3.2.2.6">2.3.2.2.6 Extrastereo</A></LI>
 	    <LI><A HREF="sound.html#2.3.2.2.7">2.3.2.2.7 Normalizator g³o¶no¶ci</A></LI>
+	    <LI><A HREF="sound.html#2.3.2.2.8">2.3.2.2.8 D¼wiêk otaczaj±cy</A></LI>
 	  </UL>  
       </UL>
     </UL>
@@ -167,7 +175,7 @@
             <LI><A HREF="encoding.html#2.4.3.3">2.4.3.3 Streamcopy</A></LI>
 	    <LI><A HREF="encoding.html#2.4.3.4">2.4.3.4 Naprawa plików AVI z uszkodzonym indeksem</A></LI>
 	    <LI><A HREF="encoding.html#2.4.3.5">2.4.3.5 Kodowanie za pomoc±  rodziny kodeków libavcodec</A></LI>
-	    <LI><A HREF="encoding.html#2.4.3.6">2.4.3.6  Kodowanie z wielowej¶ciowych obrazów (MJPEG/MPNG)</A></LI>
+	    <LI><A HREF="encoding.html#2.4.3.6">2.4.3.6 Kodowanie z wielowej¶ciowych obrazów (MJPEG/MPNG)</A></LI>
           </UL>
         <LI><A HREF="encoding.html#2.4.4">2.4.4 Sk³adnia</A></LI>
         <LI><A HREF="encoding.html#2.4.5">2.4.5 Dostêpne opcje</A></LI>
@@ -181,6 +189,22 @@
       <LI><A HREF=#2.5.4>2.5.4 Sterowanie z klawiatury</A></LI>
       <LI><A HREF=#2.5.5>2.5.5 Przyk³ady</A></LI>
     </UL>
+    <UL>
+      <LI><A HREF=#2.6.1>2.6.1 O zagadnieniu</A></LI>
+      <LI><A HREF=#2.6.2>2.6.2 U¿ycie</A></LI>
+      <LI><A HREF=#2.6.3>2.6.3 Crop</A></LI>
+      <LI><A HREF=#2.6.4>2.6.4 Expand</A></LI>
+      <LI><A HREF=#2.6.5>2.6.5 Fame</A></LI>
+      <LI><A HREF=#2.6.6>2.6.6 Flip</A></LI>
+      <LI><A HREF=#2.6.7>2.6.7 Format</A></LI>
+      <LI><A HREF=#2.6.8>2.6.8 Postprocess</A></LI>
+      <LI><A HREF=#2.6.9>2.6.9 RGB2BGR</A></LI>
+      <LI><A HREF=#2.6.10>2.6.10 Rotate</A></LI>
+      <LI><A HREF=#2.6.11>2.6.11 Scale</A></LI>
+      <LI><A HREF=#2.6.12>2.6.12 VO/A></LI>
+      <LI><A HREF=#2.6.13>2.6.13 YUY2</A></LI>
+    </UL>
+
   </UL>
   <LI><A HREF="#3">3. Sposób u¿ycia</A></LI>
     <UL>
@@ -223,7 +247,7 @@
     <LI><A HREF="tech/patches.txt">C/2. Jak wysy³aæ ³aty</A></LI>
   </UL>
   <LI><A HREF="#D">D. Znane b³êdy</A></LI>
-  <LI><A HREF="skin-en.html">X. Jak zostaæ s³awnym twórc± skórki w 5 minut!</A></LI>
+  <LI><A HREF="skin-pl.html">X. Jak zostaæ s³awnym twórc± skórki w 5 minut!</A></LI>
 </UL>
 </P>
 
@@ -941,6 +965,167 @@ Wej¶cie ze standardowego V4L<BR>
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv</CODE><BR>
 </P>
 
+<A NAME=2.6><P><B><I>2.6. Filtry obrazu</I></B></P>
+
+
+<A NAME=2.6.1><P><B><I>2.6.1. O zagadnieniu</I></B></P>
+
+<P>Zarówno <B>MPlayer</B> jak i <B>MEncoder</B> umo¿liwiaj± u¿ycie universal
+  video filter layer, który sk³ada siê z wielu wtyczek - wymienionych i wyja¶nionych 
+  poni¿ej. Te wtyczki mog± wykonywaæ ró¿ne operacje na obrazie takie, jak
+  przeskalowanie, obciêcie obrazu za pomoc± czarnych pasów (u¿yteczne nie tylko
+  przy kodowaniu, ale równie¿ przy odgrywaniu, poniewa¿ czarne pasy zwiêkszaj± 
+  u¿ycie szyny i odciêcie ich mo¿e zwiêkszyæ szbko¶æ odgrywania przy wolnych kartach),
+  rozszerzenie obrazu (dla SVCD).</P>
+  
+<P>Z tym layer'em filtrów mo¿liwe jest przeprowadzenie szybkiej konwersji formatu obrazu
+  pomiêdzy ró¿nymi RGB i YUV, je¶³i to konieczne. Umo¿liwia on miêdzy innymi odgrywanie 
+  danych RGB na wyj¶ciach <CODE>xv</CODE> i <CODE>xmga</CODE> (zobacz filtr 
+  <A HREF=#2.6.11>Scale</A>).</P>
+
+<P>Layer równie¿ wykonuje <B>Direct Rendering</B> pomiêdzy wtyczkami, aby zmaksymalizowaæ prêdko¶æ.
+  </P> 
+
+<P>Zauwa¿, ¿e kod postprocessing'u jest teraz równie¿ czê¶ci± layer'a. 
+  Bêdzie to wyja¶nione poni¿êj.</P>
+
+<A NAME=2.6.2><P><B><I>2.6.2.  U¿ycie</I></B></P>
+
+<P><CODE>&nbsp;&nbsp;mplayer/mencoder -vop filter1,filter2,filter3,...</CODE>
+  </P>
+
+<P>Ustawia kolejkê filtrów (mo¿êsz u¿yæ dowolnej liczby filtrów). 
+  Parametry filtrów s± opcjonalne i je¶li siê je pominie, niektóre z nich bêd±
+  ustawione na domy¶lne warto¶ci, jak <I>x i y</I> s± obie ustawiane na ¶rodek
+  ekranu, a <I>szeroko¶æ i wysoko¶æ</I> - na szeroko¶æ i wysoko¶æ
+  filmu.</P>
+
+<P>Filters are queued starting from libvo, so <CODE>filter1</CODE> will be the
+  last called filter (after that libvo comes, or when using <B>MEncoder</B>,
+  encoding).</P>
+
+
+<A NAME=2.6.3><P><B><I>2.6.3.  Crop</I></B></P>
+
+<P><B><U>Opis</U></B>:</P>
+
+<P>Odcina podana czê¶æ obrazu i odrzuca resztê. U¿yteczne 
+  do usuwania czarnych pasów w filmach szerokoekranowych.</P>
+
+<P><B><U>U¿ycie</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop crop[=width:height:x:y]</CODE></P>
+
+
+<A NAME=2.6.4><P><B><I>2.6.4.  Expand</I></B></P>
+
+<P><B><U>Opis</U></B>:</P>
+
+<P>Rozszerza (NIE skaluje) rozdzielczo¶æ filmu do podanej warto¶ci i umieszcza
+nieprzeskalowany oryginalny obraz w <I>x</I> <I>y</I>. W filmach, które tego
+nie maj±, mo¿na dodaæ dziêki temu filtrowi czarne pasy. Jest to dobre, gdy
+tworzy siê SVCD, albo w przypadku u¿ycia <A HREF="video.html#2.3.1.4">wyj¶cia obrazu
+na SDL</A>, dziêki czemu mo¿na na czarnych pasach umie¶ciæ napisy.</P>
+
+<P><B><U>U¿ycie</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop expand[=width:height:x:y]</CODE></P>
+
+
+<A NAME=2.6.5><P><B><I>2.6.5.  Fame</I></B></P>
+
+<P>Hmm, ma pe³no segfault'ów. :)</P>
+
+
+<A NAME=2.6.6><P><B><I>2.6.6.  Flip</I></B></P>
+
+<P><B><U>Opis</U></B>:</P>
+
+<P>Zwyczajnie odwraca obraz. U¿yteczny w pewnych starych kodekach, które mog± mieæ na wyj¶ciu
+   jedynie odwrócone obrazy (jest to automatycznie wykrywane).</P>
+
+<P><B><U>Usage</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop flip</CODE></P>
+
+
+<A NAME=2.6.7><P><B><I>2.6.7.  Format</I></B></P>
+
+<P><B><U>Opis</U></B>:</P>
+
+<P>Ten filtr  NIE jest konwerterem formatu obrazu. On jedynie wymusza format
+obrazu, który ma byæ u¿yty w nastêpnym filtrze (lub libvo).U¿yteczny przy
+kartach z wolnym YV12, jak tdfx i Savage4. Dla rzeczywistej konwersji u¿yj
+filtru <I>scale</I>.</P>
+
+<P><B><U>Usage</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop format[=format]</CODE> (where
+  <CODE>format</CODE> can be for example: rgb32, yuy2, etc...)</P>
+
+
+<A NAME=2.6.8><P><B><I>2.6.8.  Postprocess</I></B></P>
+
+<P><B><U>Opis</U></B>:</P>
+
+<P>To jest nasz stary dobry postprocess, tylko przekonwertowany na filter layer.
+  Poprawia jako¶æ obrazu, deinterlacing, itp., zobacz
+  <CODE>-npp help</CODE> w celu obejrzenia dostêpnych opcji.</P>
+
+<P><B><U>U¿ycie</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop pp[=postprocess options/keywords]</CODE></P>
+
+
+<A NAME=2.6.9><P><B><I>2.6.9.  RGB2BGR</I></B></P>
+
+<P><B><U>Opis</U></B>:</P>
+
+<P>Powoduje konwersje przestrzeni kolorów RGB 24/32 <-> BGR 24/32 (zachowanie domy¶lne)
+  lub konwersjê RGB 24/32 <-> RGB 24/32 oraz R<->B swapping (z opcj± 'swap')</P>
+
+<P><B><U>U¿ycie</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop rgb2bgr[=swap]</CODE></P>
+
+
+<A NAME=2.6.10><P><B><I>2.6.10.  Rotate (obroty)</I></B></P>
+
+<P>Jakie s± parametry?</P>
+
+
+<A NAME=2.6.11><P><B><I>2.6.11.  Scale (skalowanie)</I></B></P>
+
+<P><B><U>Opis</U></B>:</P>
+
+<P>Skaluje obraz za pomoc± programowego skalera (powolne). Mo¿esz dostosowaæ 
+  jako¶æ skalera za pomoc± opcji <CODE>-sws</CODE>  - zobacz stronê manuala.
+  Dobra jako¶æ powoduje straty na prêdko¶ci.</P>
+
+<P><B>UWAGA:</B>: u¿ycie tego filtru bez opcji oznbacza <B>konwersjê
+przestrzeni kolorów</B>!  To jest wygodne dla kodeków, które nie mog±
+wyprowadzaæ wyników w ¿±danym formacie dla podanego u¿±dzenia wyj¶ciowego
+video. S± one zazwyczaj automatycznie wykrywane i filtr skaluj±cy jest
+wywo³ywany w celu konwersji. W innym przypadku mo¿esz go u¿yæ rêcznie.</P>
+
+<P><B><U>U¿ycie</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop scale[=szeroko¶æ:wysoko¶æ]</CODE></P>
+
+
+<A NAME=2.6.12><P><B><I>2.6.12.  VO</I></B></P>
+
+<P>WTF</P>
+
+<A NAME=2.6.13><P><B><I>2.6.13.  YUY2</I></B></P>
+
+<P><B><U>Opis</U></B>:</P>
+
+<P>Wymuszona konwersja programowa  YV12/I420 do YUY2.</P>
+
+<P><B><U>U¿ycie</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop yuy2</CODE></P>
 
 <P><B><A NAME=3>3. Sposób u¿ycia</A></B></P>
 <P><B><A NAME=3.1>3.1. Linia poleceñ</A></B></P>
@@ -1000,102 +1185,105 @@ vcd://1</CODE></P>
 <P><B><A NAME=3.2>3.2. Sterowanie za pomoc± kalwiatury</A></B></P>
 
 <P><TABLE BORDER=0>
-<TR><TD>&nbsp;&nbsp;</TD>
-<TD> <FONT CLASS="text">&lt;- lub -&gt;</TD>
-<TD>&nbsp;&nbsp;</TD>
-<TD><FONT CLASS="text">poszukiwanie wstecz/naprzód o 10 sekund</TD>
+<TR>
+ <TD></TD>
+ <TD> <FONT CLASS="text">&lt;- lub -&gt;</TD>
+ <TD></TD>
+ <TD><FONT CLASS="text">poszukiwanie wstecz/naprzód o 10 sekund</TD>
 </TR>
 <TR>
-<TD></TD>
-<TD><FONT CLASS="text">strza³ka w górê lub w dó³</TD>
-<TD></TD>
-<TD><FONT CLASS="text">poszukiwanie wstecz/naprzód o 1 minutê</TD>
+ <TD></TD>
+ <TD><FONT CLASS="text">strza³ka w górê lub w dó³</TD>
+ <TD></TD>
+ <TD><FONT CLASS="text">poszukiwanie wstecz/naprzód o 1 minutê</TD>
 </TR>
 <TR>
-<TD></TD>
-<TD> <FONT CLASS="text">pgup/pgdown</TD>
-<TD></TD>
-<TD><FONT CLASS="text">poszukiwanie wstecz/naprzód o 10 minut</TD></TR>
-<TR>
-<TD></TD>
-<TD><FONT CLASS="text">&lt; lub &gt;</TD>
-<TD></TD>
-<TD><FONT CLASS="text">poszukiwanie wstecz/naprzód po playli¶cie</TD>
+ <TD></TD>
+ <TD> <FONT CLASS="text">pgup/pgdown</TD>
+ <TD></TD>
+ <TD><FONT CLASS="text">poszukiwanie wstecz/naprzód o 10 minut</TD></TR>
 </TR>
 <TR>
-<TD></TD>
-<TD><FONT CLASS="text">p lub spacja</TD>
-<TD></TD>
-<TD> <FONT CLASS="text">zatrzymanie filmu (wci¶nij jakikolwiek przycisk)</TD>
+ <TD></TD>
+ <TD><FONT CLASS="text">&lt; lub &gt;</TD>
+ <TD></TD>
+ <TD><FONT CLASS="text">poszukiwanie wstecz/naprzód po playli¶cie</TD>
 </TR>
 <TR>
-<TD></TD>
-<TD> <FONT CLASS="text">q lub ESC</TD>
-<TD></TD>
-<TD><FONT CLASS="text">zakoñczenie odgrywania i wyj¶cie z programu</TD>
+ <TD></TD>
+ <TD><FONT CLASS="text">p lub spacja</TD>
+ <TD></TD>
+ <TD> <FONT CLASS="text">zatrzymanie filmu (wci¶nij jakikolwiek przycisk)</TD>
 </TR>
 <TR>
-<TD></TD>
-<TD><FONT CLASS="text">+ lub -</TD>
-<TD></TD>
-<TD><FONT CLASS="text">dopasuj opó¼nienie d¼wiêku o +/- 0.1 sekundy</TD>
+ <TD></TD>
+ <TD> <FONT CLASS="text">q lub ESC</TD>
+ <TD></TD>
+ <TD><FONT CLASS="text">zakoñczenie odgrywania i wyj¶cie z programu</TD>
 </TR>
 <TR>
-<TD></TD>
-<TD><FONT CLASS="text">/ lub *</TD>
-<TD></TD>
-<TD><FONT CLASS="text">zmniejsz/zwiêksz g³o¶no¶æ</TD>
+ <TD></TD>
+ <TD><FONT CLASS="text">+ lub -</TD>
+ <TD></TD>
+ <TD><FONT CLASS="text">dopasuj opó¼nienie d¼wiêku o +/- 0.1 sekundy</TD>
 </TR>
 <TR>
-<TD></TD>
-<TD><FONT CLASS="text">o</TD>
-<TD></TD>
-<TD><FONT CLASS="text">w³±cz/wy³±cz OSD: nic /pasek poszukiwania / pasek
-poszukiwania + zegar</TD>
+ <TD></TD>
+ <TD><FONT CLASS="text">/ lub *</TD>
+ <TD></TD>
+ <TD><FONT CLASS="text">zmniejsz/zwiêksz g³o¶no¶æ</TD>
 </TR>
 <TR>
-<TD></TD>
-<TD><FONT CLASS="text">m</TD>
-<TD></TD>
-<TD><FONT CLASS="text">w³±cz/wy³±cz u¿ywanie d¼wiêku  master/pcm</TD>
+ <TD></TD>
+ <TD><FONT CLASS="text">o</TD>
+ <TD></TD>
+ <TD><FONT CLASS="text">w³±cz/wy³±cz OSD: nic /pasek poszukiwania / pasek
+  poszukiwania + zegar</TD>
 </TR>
 <TR>
-<TD></TD>
-<TD><FONT CLASS="text">z lub x</TD>
-<TD></TD>
-<TD><FONT CLASS="text">dopasuj opó¼nienie napisów o +/- 0.1 sekundy</TD>
+ <TD></TD>
+ <TD><FONT CLASS="text">m</TD>
+ <TD></TD>
+ <TD><FONT CLASS="text">w³±cz/wy³±cz u¿ywanie d¼wiêku  master/pcm</TD>
 </TR>
 <TR>
-<TD COLSPAN=4>
-<P>
-<I><FONT CLASS="text">(nastêpuj±ce klawisze s± wa¿ne tylko wtedy, gdy u¿ywasz
-opcji <CODE>-vo xv</CODE>)</I>
-</P>
-</TD>
+ <TD></TD>
+ <TD><FONT CLASS="text">z lub x</TD>
+ <TD></TD>
+ <TD><FONT CLASS="text">dopasuj opó¼nienie napisów o +/- 0.1 sekundy</TD>
 </TR>
 <TR>
-<TD></TD>
-<TD><FONT CLASS="text">1 lub 2</TD>
-<TD></TD>
-<TD><FONT CLASS="text">dostosuj kontrast</TD>
+ <TD COLSPAN=4>
+ <P>
+ <I><FONT CLASS="text">(nastêpuj±ce klawisze s± wa¿ne tylko wtedy, gdy u¿ywasz
+ opcji <CODE>-vo xv</CODE>)</I>
+ </P>
+ </TD>
 </TR>
 <TR>
-<TD></TD>
-<TD><FONT CLASS="text">3 lub 4</TD>
-<TD></TD>
-<TD><FONT CLASS="text">dostosuj jasno¶æ</TD>
+ <TD></TD>
+ <TD><FONT CLASS="text">1 lub 2</TD>
+ <TD></TD>
+ <TD><FONT CLASS="text">dostosuj kontrast</TD>
 </TR>
 <TR>
-<TD></TD>
-<TD><FONT CLASS="text">5 lub 6</TD>
-<TD></TD>
-<TD><FONT CLASS="text">dostosuj odcieñ</TD>
+ <TD></TD>
+ <TD><FONT CLASS="text">3 lub 4</TD>
+ <TD></TD>
+ <TD><FONT CLASS="text">dostosuj jasno¶æ</TD>
 </TR>
 <TR>
-<TD></TD>
-<TD><FONT CLASS="text">7 lub 8</TD>
-<TD></TD>
-<TD><FONT CLASS="text">dostosuj nasycenie</TD></TR>
+ <TD></TD>
+ <TD><FONT CLASS="text">5 lub 6</TD>
+ <TD></TD>
+ <TD><FONT CLASS="text">dostosuj odcieñ</TD>
+</TR>
+<TR>
+ <TD></TD>
+ <TD><FONT CLASS="text">7 lub 8</TD>
+ <TD></TD>
+ <TD><FONT CLASS="text">dostosuj nasycenie</TD>
+</TABLE>
 
 <P><B>Obs³uga GUI z klawiatury</B></P>
 
@@ -1945,8 +2133,7 @@ MPlayera</A></B></P>
   <LI><B>francuskie</B>: <A HREF="mailto:smarteau@eso.org">Stephane Marteau</A> (nieaktualne)
   <LI><B>w³oskie</B>: TeLeNiEkO (nieaktualne)
   <LI><B>rosyjskie</B>: Nick Kurshev (nieaktualne)
-  <LI><B>polskie</B>: Dariusz Pietrzak (dawna wersja nieshierarchizowana, w ascii) oraz 
-  <A HREF="mailto:nell@skrzynka.pl">Justyna Bia³a</A> (wersja aktualna, w html)
+  <LI><B>polskie</B>: <A HREF="mailto:nell@skrzynka.pl">Justyna Bia³a</A>
 </UL></P>
 <P>Platformy sprzêtowe/porty:
 <UL>
