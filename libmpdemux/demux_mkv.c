@@ -1306,11 +1306,11 @@ display_tracks (mkv_demuxer_t *mkv_d)
           break;
         case MATROSKA_TRACK_AUDIO:
           type = "audio";
-          sprintf (str, "-aid %u, -alang %s",aid++,mkv_d->tracks[i]->language);
+          sprintf (str, "-aid %u, -alang %.5s",aid++,mkv_d->tracks[i]->language);
           break;
         case MATROSKA_TRACK_SUBTITLE:
           type = "sutitles";
-          sprintf (str, "-sid %u, -slang %s",sid++,mkv_d->tracks[i]->language);
+          sprintf (str, "-sid %u, -slang %.5s",sid++,mkv_d->tracks[i]->language);
           break;
         }
       mp_msg(MSGT_DEMUX, MSGL_INFO, "[mkv] Track ID %u: %s (%s), %s\n",
