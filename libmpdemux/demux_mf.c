@@ -122,3 +122,11 @@ demuxer_t* demux_open_mf(demuxer_t* demuxer){
 
   return demuxer;
 }
+
+void demux_close_mf(demuxer_t* demuxer) {
+  demuxer_mf_t *dmf = demuxer->priv;
+
+  if(!dmf)
+    return;
+  free(dmf);  
+}

@@ -302,3 +302,16 @@ int nuv_check_file ( demuxer_t* demuxer )
 	stream_seek ( demuxer->stream, orig_pos );
 	return 1;
 }
+
+void demux_close_nuv(demuxer_t* demuxer) {
+  nuv_priv_t* priv = demuxer->priv;
+  nuv_position_t* pos;
+  if(!priv)
+    return;
+  for(pos = priv->index_list ; pos != NULL ; ) {
+    nuv_position_t* p = pos;
+    pos = pos->next;
+    free(p);
+  }
+  free(priv);
+}

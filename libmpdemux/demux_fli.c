@@ -153,3 +153,18 @@ demuxer_t* demux_open_fli(demuxer_t* demuxer){
 
   return demuxer;
 }
+
+void demux_close_fli(demuxer_t* demuxer) {
+  fli_frames_t *frames = demuxer->priv;
+
+  if(!frames)
+    return;
+
+  if(frames->filepos)
+    free(frames->filepos);
+  if(frames->frame_size)
+    free(frames->frame_size);
+
+  free(frames);
+
+}

@@ -137,9 +137,39 @@ void free_sh_video(sh_video_t* sh){
     free(sh);
 }
 
+extern void demux_close_vivo(demuxer_t *demuxer);
+extern void demux_close_real(demuxer_t *demuxer);
+extern void demux_close_y4m(demuxer_t *demuxer);
+extern void demux_close_mf(demuxer_t* demuxer);
+extern void demux_close_roq(demuxer_t* demuxer);
+extern void demux_close_film(demuxer_t* demuxer);
+extern void demux_close_bmp(demuxer_t* demuxer);
+extern void demux_close_fli(demuxer_t* demuxer);
+extern void demux_close_nuv(demuxer_t* demuxer);
+
 void free_demuxer(demuxer_t *demuxer){
     int i;
     mp_msg(MSGT_DEMUXER,MSGL_V,"DEMUXER: freeing demuxer at %p  \n",demuxer);
+    switch(demuxer->type) {
+    case DEMUXER_TYPE_VIVO:
+      demux_close_vivo(demuxer); break;
+    case DEMUXER_TYPE_REAL:
+      demux_close_real(demuxer); break;
+    case DEMUXER_TYPE_Y4M:
+      demux_close_y4m(demuxer); break;
+    case DEMUXER_TYPE_MF:
+      demux_close_mf(demuxer); break;
+    case DEMUXER_TYPE_ROQ:
+      demux_close_roq(demuxer);  break;
+    case DEMUXER_TYPE_FILM:
+      demux_close_film(demuxer); break;
+    case DEMUXER_TYPE_BMP:
+      demux_close_bmp(demuxer); break;
+    case DEMUXER_TYPE_FLI:
+      demux_close_fli(demuxer); break;
+    case DEMUXER_TYPE_NUV:
+      demux_close_nuv(demuxer); break;
+    }
     // free streams:
     for(i=0;i<256;i++){
 	if(demuxer->a_streams[i]) free_sh_audio(demuxer->a_streams[i]);

@@ -242,3 +242,12 @@ demuxer_t* demux_open_roq(demuxer_t* demuxer)
 
   return demuxer;
 }
+
+void demux_close_roq(demuxer_t* demuxer) {
+  roq_data_t *roq_data = demuxer->priv;
+
+  if(!roq_data)
+    return;
+  free(roq_data);
+}
+  

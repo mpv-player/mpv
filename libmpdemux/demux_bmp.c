@@ -109,3 +109,11 @@ demuxer_t* demux_open_bmp(demuxer_t* demuxer)
 
   return demuxer;
 }
+
+void demux_close_bmp(demuxer_t* demuxer) {
+  bmp_image_t *bmp_image = demuxer->priv;
+
+  if(!bmp_image)
+    return;
+  free(bmp_image);
+}

@@ -255,7 +255,9 @@ int demux_seek_y4m(demuxer_t *demuxer, float rel_seek_secs, int flags) {
 void demux_close_y4m(demuxer_t *demuxer)
 {
     y4m_priv_t* priv = demuxer->priv;
-    
+
+    if(!priv)
+      return;
     if (!priv->is_older)
 	y4m_fini_stream_info(((y4m_priv_t*)demuxer->priv)->si);
     free(((y4m_priv_t*)demuxer->priv)->si);

@@ -8,6 +8,9 @@
     TODO: fix the whole syncing mechanism
     
     $Log$
+    Revision 1.10  2002/04/24 15:36:06  albeu
+    Added demuxer uninit
+
     Revision 1.9  2002/03/15 15:51:37  alex
     added PRE-ALPHA seeking ability and index table generator (like avi's one)
 
@@ -510,6 +513,7 @@ void demux_open_real(demuxer_t* demuxer)
 		{
 		    buf = malloc(len+1);
 		    stream_read(demuxer->stream, buf, len);
+		    buf[len] = 0;
 		    demux_info_add(demuxer, "name", buf);
 		    free(buf);
 		}

@@ -413,3 +413,14 @@ demuxer_t* demux_open_film(demuxer_t* demuxer)
 
   return demuxer;
 }
+
+void demux_close_film(demuxer_t* demuxer) {
+  film_data_t *film_data = demuxer->priv;
+
+  if(!film_data)
+    return;
+  if(film_data->chunks)
+    free(film_data->chunks);
+  free(film_data);
+  
+}
