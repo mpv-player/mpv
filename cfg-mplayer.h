@@ -6,7 +6,9 @@
 extern char *fb_dev_name;
 extern char *fb_mode_cfgfile;
 extern char *fb_mode_name;
-extern int fb_mode_depth;
+extern char *monitor_hfreq_str;
+extern char *monitor_vfreq_str;
+extern char *monitor_dotclock_str;
 #endif
 
 struct config conf[]={
@@ -20,7 +22,9 @@ struct config conf[]={
 	{"fb", &fb_dev_name, CONF_TYPE_STRING, 0, 0, 0},
 	{"fbmode", &fb_mode_name, CONF_TYPE_STRING, 0, 0, 0},
 	{"fbmodeconfig", &fb_mode_cfgfile, CONF_TYPE_STRING, 0, 0, 0},
-	{"fbdepth", &fb_mode_depth, CONF_TYPE_INT, CONF_RANGE, 15, 32},
+	{"monitor_hfreq", &monitor_hfreq_str, CONF_TYPE_STRING, 0, 0, 0},
+	{"monitor_vfreq", &monitor_vfreq_str, CONF_TYPE_STRING, 0, 0, 0},
+	{"monitor_dotclock", &monitor_dotclock_str, CONF_TYPE_STRING, 0, 0, 0},
 #endif
 	{"encode", &encode_name, CONF_TYPE_STRING, 0, 0, 0},
 	{"sub", &sub_name, CONF_TYPE_STRING, 0, 0, 0},
