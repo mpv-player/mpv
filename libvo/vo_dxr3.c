@@ -83,9 +83,9 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 #include "aspect.h"
-#include "../postproc/rgb2rgb.h"
-#include "../postproc/swscale.h"
-#include "../cpudetect.h"
+#include "postproc/rgb2rgb.h"
+#include "postproc/swscale.h"
+#include "cpudetect.h"
 
 #define USE_LIBFAME
 
@@ -103,14 +103,17 @@ static fame_object_t *fame_obj;
 #ifdef USE_LIBAVCODEC
 #ifdef USE_LIBAVCODEC_SO
 #include <libffmpeg/avcodec.h>
+#include <libffmpeg/dsputil.h>
 #else
 #include "libavcodec/avcodec.h"
+#include "libavcodec/dsputil.h"
 #endif
 /* for video encoder */
 static AVCodec *avc_codec = NULL;
 static AVCodecContext *avc_context = NULL;
 static AVPicture avc_picture;
 int avc_outbuf_size = 100000;
+extern int avcodec_inited;
 #endif
 
 char *picture_data[] = { NULL, NULL, NULL };
@@ -679,10 +682,12 @@ static uint32_t preinit(const char *arg)
 	}
 
 #if defined(USE_LIBAVCODEC)
-	if (mpeg_codec == MPG_CODEC_AVCODEC && !avc_context) {
+	if (mpeg_codec == MPG_CODEC_AVCODEC && !avcodec_inited) {
 		avcodec_init();
-		avcodec_register_all();
+		avcodec_register_all();	
+		avcodec_inited = 1;
 	}
+	
 #endif
 	
 	return 0;
