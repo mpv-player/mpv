@@ -1,4 +1,4 @@
-.\" synced with 1.792
+.\" synced with 1.793
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "21 Octobre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "22 Octobre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -200,7 +200,7 @@ rotation, redimensionnement, bruit, conversion rgb/\:yuv) et bien plus.
 est l'interface graphique de MPlayer.
 Il possède les mêmes options que MPlayer.
 .PP
-Des exemples d'usages pour vous familiariser rapidement sont disponibles
+Des exemples d'usage pour vous familiariser rapidement sont disponibles
 à la fin de cette page de manuel.
 .PP
 .B Regardez également la documentation HTML !
@@ -3173,6 +3173,7 @@ Les filtres disponibles sont:
 .IPs resample[=srate[:sloppy][:type]]
 Change la fréquence d'échantillonnage du flux audio à un entier srate en Hz.
 Il ne permet que le format 16 bit little endian.
+Avec MEncoder, vous devez aussi utiliser \-srate <srate>.
 .IPs channels[=nch]
 Change le nombre de canaux à nch canaux de sortie.
 Si le nombre de canaux de sortie est plus grand que le nombre de canaux
@@ -5393,7 +5394,7 @@ laissera LAME choisir la fréquence automatiquement.
 valeurs de preset
 .RSs
 .IPs help\ 
-Affiche d'autres options et des informations sur sur les modes
+Affiche d'autres options et des informations sur les modes
 pré-sélectionnés.
 .IPs medium
 encodage VBR, bonne qualité, intervalle bitrate 150\-180 kbps
@@ -5578,7 +5579,7 @@ Une valeur basse signifie une meilleur qualité mais de gros fichiers
 .TP
 .B vqmax=<1\-31>
 Quantificateur maximum (passe\ 1/\:2) 10\-31 devrait être un intervalle
-raisonable (par défaut\ : 31).
+raisonnable (par défaut\ : 31).
 .
 .TP
 .B mbqmin=<1\-31>
@@ -7057,7 +7058,7 @@ effectif est appelée "overflow".
 Bien évidemment, la deuxième passe s'efforce de compenser cet overflow,
 en le distribuant sur toutes les trames suivantes.
 Cette option vous permet de contrôler quelle fraction de cet overflow est
-distribué à chaque nouvelle trame.
+distribuée à chaque nouvelle trame.
 Une valeur basse permet un contrôle de l'overflow paresseux, où des grosses
 demandes de bitrate sont compensés lentement (ce qui peut faire beaucoup
 varier la taille des petites vidéos).
@@ -7187,7 +7188,7 @@ paramètre.
 .TP
 .B keyint=<valeur>
 Définit l'intervalle maximum autorisé entre trames-I.
-Un intervalle plus grand fait économiser des bit, et donc améliore la
+Un intervalle plus grand fait économiser des bits, et donc améliore la
 qualité, mais rend la navigation moins précise (par défaut\ : 250).
 .
 .TP
