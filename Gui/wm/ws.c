@@ -230,6 +230,7 @@ int wsWindowManagerType( void )
 }
 
 extern int vo_wm_type;
+extern int vo_find_depth_from_visuals(Display *dpy, int screen, Visual **visual_return);
 
 void wsXInit( void* mDisplay )
 {
