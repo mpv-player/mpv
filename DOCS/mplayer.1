@@ -707,6 +707,15 @@ Available plugins are:
                        The values can be from -100
                        to 100.
 
+  halfpack             Convert planar YUV 4:2:0
+                       to half-height packed 4:2:2,
+                       downsampling luma but keeping
+                       all chroma samples. Useful
+                       for output to low-resolution
+                       display devices when hardware
+                       downscaling is poor quality
+                       or is not available.
+
 .I NOTE:
 The parameters are optional and if omitted, some of them are set to default values.
 Use -1 to keep the default value.
