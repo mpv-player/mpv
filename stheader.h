@@ -11,6 +11,7 @@ typedef struct {
   demux_stream_t *ds;
   unsigned int format;
   codecs_t *codec;
+  int inited;
   // output format:
   float timer;		   // value of old a_frame
   int samplerate;
@@ -45,6 +46,7 @@ typedef struct {
   demux_stream_t *ds;
   unsigned int format;
   codecs_t *codec;
+  int inited;
   // output format:
   float timer;		   // value of old v_frame
   float fps;
