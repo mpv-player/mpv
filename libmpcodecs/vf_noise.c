@@ -193,13 +193,13 @@ static inline void lineNoise_C(uint8_t *dst, uint8_t *src, int8_t *noise, int le
 /***************************************************************************/
 
 static inline void lineNoiseAvg_C(uint8_t *dst, uint8_t *src, int len, int8_t **shift){
-	int i, j, n;
+	int i;
+        int8_t *src2= (int8_t*)src;
 	
 	for(i=0; i<len; i++)
 	{
-	    for(j=0,n=0;j<3;j++)
-		n+=shift[j][i];
-	    dst[i]= src[i]+n*(128-abs(128-src[i]))/128;
+	    const int n= shift[0][i] + shift[1][i] + shift[2][i];
+	    dst[i]= src2[i]+((n*src2[i])>>7);
 	}
 }
 
