@@ -10,7 +10,7 @@ endif
 ifeq ($(STREAMING),yes)
 SRCS += asf_streaming.c url.c http.c network.c asf_mmst_streaming.c pnm.c
 ifeq ($(STREAMING_LIVE_DOT_COM),yes)
-CPLUSPLUSSRCS = demux_rtp.cpp
+CPLUSPLUSSRCS = demux_rtp.cpp demux_rtp_codec.cpp
 CPLUSPLUSINCLUDE = -I$(LIVE_LIB_DIR)/liveMedia/include
 CPLUSPLUSINCLUDE += -I$(LIVE_LIB_DIR)/UsageEnvironment/include
 CPLUSPLUSINCLUDE += -I$(LIVE_LIB_DIR)/BasicUsageEnvironment/include
