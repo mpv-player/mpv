@@ -2402,6 +2402,9 @@ demux_close_mkv (demuxer_t *demuxer)
   if (mkv_d)
     {
       int i;
+#ifdef USE_ICONV
+      subcp_close();
+#endif
       free_cached_dps (demuxer);
       if (mkv_d->tracks)
         {
