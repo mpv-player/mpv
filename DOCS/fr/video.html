@@ -15,7 +15,7 @@
 
 <H4><A NAME="mtrr">2.3.1.1 Réglage MTRR</A></H4>
 
-<P>Il est FORTEMENT recommandé de bien ajuster ses registres MTRR, 
+<P>Il est FORTEMENT recommandé de bien ajuster ses registres MTRR,
   qui apportent un gain important de performances.</P>
 
 <P>Faites un '<CODE>cat /proc/mtrr</CODE>':</P>
@@ -454,10 +454,9 @@
 </DL>
 
 <TABLE BORDER=0>
-  <TR><TD COLSPAN=4><P><B>Touches SDL :</B></P></TD></TR>
-  <TR><TD></TD><TD><CODE>F</CODE></TD><TD></TD><TD>passe du mode plein écran au mode fenêtré</TD></TR>
-  <TR><TD></TD><TD><CODE>C</CODE></TD><TD></TD><TD>passe par tous les modes plein écran valides</TD></TR>
-  <TR><TD></TD><TD><CODE>W/S</CODE></TD><TD></TD><TD>mappings pour les touches * et / (contrôle du mixer)</TD></TR>
+  <TR><TD COLSPAN=4><P><B>Touches SDL uniquement :</B></P></TD></TR>
+  <TR><TD></TD><TD><CODE>c</CODE></TD><TD></TD><TD>passe par tous les modes plein écran valides</TD></TR>
+  <TR><TD></TD><TD><CODE>n</CODE></TD><TD></TD><TD>revient au mode normal</TD></TR>
 </TABLE>
 
 <H4>Bogues connus :</H4>
@@ -638,6 +637,14 @@
   4.2.0 ou supérieur supporte la Rage128. Voir
   <A HREF="http://dri.sourceforge.net">http://dri.sourceforge.net</A>
   pour son téléchargement et les infos d'installation.</P>
+
+<P>L'astuce d'un de nos utilisateurs: la sortie vidéo GL peut être utilisée pour
+  obtenir une sortie TV &quot;vsynchronisée&quot;. Vous devez initialiser une
+  variable d'environnement (du moins sur nVidia):</P>
+
+<P>
+  <CODE>export $__GL_SYNC_TO_VBLANK=1</CODE>
+</P>
 
 
 <H4><A NAME="aalib">2.3.1.2.9 AAlib - affichage en mode texte</A></H4>
@@ -1004,7 +1011,7 @@ De plus le pilote de sortie vidéo utilisé avec <B>VIDIX</B> n'a pas d'importance
 
 <H4><A NAME="mpegdec">2.3.1.3 Décodeurs MPEG</A></H4>
 
-<H4><A NAME="dvb">2.3.1.3.1 DVB</A></H4>
+<H4><A NAME="dvb">2.3.1.3.1 Sortie et entrée DVB</A></H4>
 
 <P>MPlayer supporte les cartes équipées du chipset DVB Siemens des vendeurs
   tels que Siemens, Technotrend, Galaxis ou Hauppauge. Les derniers pilotes DVB
@@ -1091,23 +1098,81 @@ De plus le pilote de sortie vidéo utilisé avec <B>VIDIX</B> n'a pas d'importance
 
 <P>Pour garder les dimensions des fichiers DivX et obtenir les paramètres de zoom
   optimaux (zoom matériel horizontal et zoom logiciel vertical en gardant l'aspect
-  original), utilisez le nouveau plugin dvbscale:w/P>
+  original), utilisez le nouveau plugin dvbscale:</P>
 
 <PRE>
 pour une TV 4:3:  -vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1
 pour une TV 16:9: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </PRE>
 
+<H4>Utilisation de votre carte DVB pour regarder la TV numérique (module d'entrée DVB)</H4>
+
+<P>D'abord vous devez passer le paramètre <CODE>dvb_shutdown_timeout=0</CODE>
+  au module noyau <CODE>dvb-core</CODE>, ou MPlayer mourrera après 10
+  secondes.</P>
+
+<P>Vous devez aussi avoir les programmes <CODE>scan</CODE> et
+  <CODE>szap/tzap/czap</CODE> installés; ils sont inclus dans le paquet des pilotes.</P>
+
+<P>Vérifiez que vos pilotes fonctionnent correctement avec un programme tel que
+  <A HREF="http://www.sf.net/projects/dvbtools/"><CODE>dvbstream</CODE></A>
+  (c'est la base du module d'entrée DVB).</P>
+
+<P>Maintenant vous devriez compiler un fichier <CODE>~/.mplayer/channels.conf</CODE>,
+  avec la syntaxe acceptée par <CODE>szap/tzap/czap</CODE>, ou le faire compiler par
+  <CODE>scan</CODE>.</P>
+
+<P>Assurez-vous de n'avoir <B>que</B> les canaux disponibles dans votre fichier
+  <CODE>channels.conf</CODE>, ou MPlayer plantera sur les autres.</P>
+
+<P>Pour afficher le premier des canaux présents dans votre liste, exécutez</P>
+
+<PRE>
+  mplayer dvb://
+</PRE>
+
+<P>Si vous voulez voir un canal particulier, tel que <CODE>R1</CODE>, exécutez</P>
+
+<PRE>
+  mplayer dvb://R1
+</PRE>
+
+<P>Pour changer de canal appuyez sur les touches <CODE>'h'</CODE> (suivant) et
+  <CODE>'k'</CODE> (précédent), ou utilisez le menu <CODE>OSD</CODE> (requiert
+  un <A HREF="documentation.html#subtitles_osd">sous-systèe OSD</a> fonctionnel).</P>
+
+<P>si votre <CODE>~/.mplayer/menu.conf</CODE> contiens une entrée <B>&lt;dvbsel&gt;</b>,
+  comme celle du fichier exemple <CODE>etc/dvb-menu.conf</CODE>
+  (que vous pouvez utiliser pour outrepasser <CODE>~/.mplayer/menu.conf</CODE>), the
+  le menu principal contiendra un sous-menu vous permettant de selectionner un des canaux
+  présents dans votre <CODE>channels.conf</CODE>.</P>
+
+<P>Si vous voulez sauvegarder un programme sur disque vous pouvez utiliser</P>
+
+<PRE>
+  mplayer -dumpfile r1.ts -dumpstream dvb://R1
+</PRE>
+
+<P>Si vous voulez l'enregistrer dans un format différent (le ré-encoder), à la place
+vous pouvez exécuter une commande telle que</P>
+
+<PRE>
+  mencoder -o r1.avi -ovc xvid -xvidenctopts bitrate=800 -oac mp3lame -lameopts cbr:br=128 -vf ci dvb://R1
+</PRE>
+
+<P>Lisez la page de man pour avoir une liste des options à passer au module
+  d'entrée DVB.</P>
+
 <H4>FUTUR</H4>
 
 <P>Si vous avez des questions ou voulez entendre les annonces de fonctionnalités
   et participer aux discussions sur ce sujet, rejoignez notre liste de diffusion
-  <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb">MPlayer-DVB</A>. 
+  <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb">MPlayer-DVB</A>.
   Rappelez-vous que la langue de la liste est l'Anglais SVP.</P>
 
 <P>Dans le futur vous pouvez vous attendre à pouvoir afficher l'OSD et les
   sous-titres en utilisant la fonction OSD native des cartes DVB, ainsi
-  qu'a une lecture plus régulière des films non-25fps et le transcodage
+  qu'à une lecture plus régulière des films non-25fps et le transcodage
   temps-réel entre MPEG2 et MPEG4 (décompression partielle).</P>
 
 

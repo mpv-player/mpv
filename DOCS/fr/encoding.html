@@ -101,7 +101,7 @@
 
 <P>Exemple:<BR>
   &nbsp;&nbsp;<CODE>mencoder -of mpeg -ovc lavc -lavcopts vcodec=mpeg1video
-  -oac copy &lt;other options&gt; media.avi -o sortie.mpg</CODE></P>
+  -oac copy &lt;autres options&gt; media.avi -o sortie.mpg</CODE></P>
 
   
 <H2><A NAME="rescaling">7.3 Redimensionnement des films</A></H2>
@@ -139,7 +139,7 @@
     encodé (comme du PCM non-compressé en MP3).</LI>
 
   <LI><B>Flux audio</B> (option <CODE>-oac copy</CODE>): très simple.
-    Il est possible de prendre un fichier audio externe (MP3, Vorbis) et de le
+    Il est possible de prendre un fichier audio externe (MP3, WAV) et de le
     muxer dans le flux sortant. Utilisez l'option <CODE>-audiofile &lt;nomfichier&gt;</CODE>
     pour cela.</LI>
 </UL>
@@ -176,15 +176,21 @@
 
 <UL>
   <LI>mjpeg - Motion JPEG</LI>
+  <LI>ljpeg - Lossless JPEG (compression sans perte)</LI>
   <LI>h263 - H263</LI>
   <LI>h263p - H263 Plus</LI>
-  <LI>mpeg4 - standard ISO (compatible DivX 4/5, OpenDivX, XviD)</LI>
+  <LI>mpeg4 - MPEG-4 standard ISO (DivX 5, compatible XviD)</LI>
   <LI>msmpeg4 - variante pré-standard de MPEG-4 par MS, v3 (alias DivX3)</LI>
   <LI>msmpeg4v2 - MPEG-4 pré-standard de MS, v2 (utilisé dans les anciens fichiers asf)</LI>
   <LI>wmv1 - Windows Media Video, version 1 (alias WMV7)</LI>
+  <LI>wmv1 - Windows Media Video, version 2 (alias WMV8)</LI>
   <LI>rv10 - un vieux codec RealVideo</LI>
-  <LI>mpeg1video - MPEG1 video :)</LI>
+  <LI>mpeg1video - MPEG1 video</LI>
+  <LI>mpeg2video - MPEG2 video</LI>
   <LI>huffyuv - compression sans perte</LI>
+  <LI>asv1 - ASUS Video v1</LI>
+  <LI>asv2 - ASUS Video v2</LI>
+  <LI>ffv1 - codec vidéo sans perte de FFmpeg</LI>
 </UL>
 
 <P>La première colonne contient le nom du codec qui devrait être passé après la
@@ -295,8 +301,8 @@ Explication du processus:
 <P>Il y en a une.</P>
 
 <P>MPEG4 a une fonction unique: le flux vidéo peut contenir l'aspect ratio requis.
-  Oui, tout comme les fichiers MPEG1/2 (DVD, SVCD). Malheureusement, il n'y a pas
-  de lecteurs vidéo au dehors qui supportent cet attribut. Excepté MPlayer.</P>
+  Oui, tout comme les fichiers MPEG1/2 (DVD, SVCD) et H263. Malheureusement, il n'y a pas
+  de lecteurs vidéo au dehors qui supportent cet attribut de MPEG-4. Excepté MPlayer.</P>
 
 <P>Cette fonction ne peut être utilisé qu'avec le codec <CODE>mpeg4</CODE>
   de <B>libavcodec</B>. Gardez à l'esprit: bien que MPlayer lise correctement
@@ -310,6 +316,53 @@ Explication du processus:
 
 <P><CODE>$ mencoder sample-svcd.mpg -ovc lavc -lavcopts
   vcodec=mpeg4:autoaspect -vf crop=714:548:0:14 -oac copy -o sortie.avi</CODE></P>
+
+<H2><A NAME="custommatrices">7.10 inter/intra matrices personnalisées</A></H2>
+
+<P>Avec cette fonction de <A HREF="codecs.html#libavcodec">libavcodec</A> vous êtes
+  capable d'initialiser des matrices personnalisées inter (I-frames/trames-clé)
+  et intra (P-frames/trames prévues). Elle est supportée par de nombreux codecs:
+  <CODE>mpeg1video</CODE> et <CODE>mpeg2video</CODE> fonctionnent.</P>
+
+<P>Une utilisation typique de cette fonction est d'initialiser les matrices
+  recommandées par les spécifications <A HREF="http://www.kvcd.net/">KVCD</A>.<BR><BR>
+  La <B>matrice de Quantisation "Notch" KVCD</B>:<BR>
+  <I>Intra:</I>
+  <PRE>
+  8 9 12 22 26 27 29 34
+  9 10 14 26 27 29 34 37
+  12 14 18 27 29 34 37 38
+  22 26 27 31 36 37 38 40
+  26 27 29 36 39 38 40 48
+  27 29 34 37 38 40 48 58
+  29 34 37 38 40 48 58 69
+  34 37 38 40 48 58 69 79
+  </PRE>
+  <I>Inter:</I>
+  <PRE>
+  16 18 20 22 24 26 28 30
+  18 20 22 24 26 28 30 32
+  20 22 24 26 28 30 32 34
+  22 24 26 30 32 32 34 36
+  24 26 28 32 34 34 36 38
+  26 28 30 32 34 36 38 40
+  28 30 32 34 36 38 42 42
+  30 32 34 36 38 40 42 44
+  </PRE>
+</P>
+
+<H4>Utilisation:</H4>
+
+<P><CODE>$ mencoder entree.avi -o sortie.avi -oac copy -ovc lavc -lavcopts
+  inter_matrix=...:intra_matrix=...</CODE></P>
+
+<P><CODE>$ mencoder entree.avi -ovc lavc -lavcopts
+  vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,<BR>
+  12,14,18,27,29,34,37,38,22,26,27,31,36,37,38,40,26,27,29,36,39,38,40,48,27,<BR>
+  29,34,37,38,40,48,58,29,34,37,38,40,48,58,69,34,37,38,40,48,58,69,79<BR>
+  :inter_matrix=16,18,20,22,24,26,28,30,18,20,22,24,26,28,30,32,20,22,24,26,<BR>
+  28,30,32,34,22,24,26,30,32,32,34,36,24,26,28,32,34,34,36,38,26,28,30,32,34,<BR>
+  36,38,40,28,30,32,34,36,38,42,42,30,32,34,36,38,40,42,44 -oac copy -o svcd.mpg</CODE></P>
 
 </BODY>
 </HTML>

@@ -1934,7 +1934,7 @@ film par rapport au coin supérieur gauche de l'écran.
 Le film est centré par défaut.
 
 
-.SH "OPTIONS DE DECODAGE/FILTRAGE"
+.SH "OPTIONS DE DÉCODAGE/FILTRAGE"
 .TP
 .B \-ac <[-]codec1,[-]codec2,...[,]>
 Spécifie la liste de priorité des codecs audio à utiliser, à partir de leur
@@ -1980,7 +1980,7 @@ canal audio est répété sur chacun des canaux de sortie).
 Si le nombre de canaux de sortie est plus petit que le nombre de canaux d'entrée
 les canaux en trop seront tronqués.
 .IPs format[=bps,f]
-Selectionne le format f et bits par échantillon bps utilisés pour la sortie
+Sélectionne le format f et octets par échantillon bps utilisés pour la sortie
 depuis la couche filtre.
 L'option bps est un entier et définis les Octets par sample.
 Le format f est une chaine contenant un mix concaténé de:
@@ -2583,15 +2583,18 @@ Pas de filtrage de la chrominance (filtrage de la luminance uniquement).
 .RE
 .PD 0
 .RSs
+.IPs "\-vf pp=hb/vb/dr/al"
+Débloquage horizontal et vertical, "deringing" et luminosité/\:contraste auto
 .IPs "\-vf pp=hb/vb/dr/al/lb"
-.IPs "\-vf pp=hb/vb/dr/al/lb"
+Débloquage horizontal et vertical, "deringing" et luminosité/\:contraste auto
+et désentrelacement "linear blend"
 .IPs "\-vf pp=de/\-al"
-filtres par défaut sans correction de luminosité/\:contraste
+Filtres par défaut sans correction de luminosité/\:contraste
 .IPs "\-vf pp=de/tn:1:2:3"
-Active les filtres par défaut & le débruiteur temporel
+Active les filtres par défaut & le débruiteur temporel.
 .IPs "\-vf pp=hb:y/vb:a \-autoq 6"
 Débloque la luminance horizontale uniquement et active ou désactive
-le déblocage vertical suivant le temps CPU disponible
+le déblocage vertical suivant le temps CPU disponible.
 .RE
 .PD 1
 .TP

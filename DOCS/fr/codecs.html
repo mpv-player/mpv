@@ -23,13 +23,13 @@
 <P>Les plus importants d'entre eux:</P>
 <UL>
   <LI>vidéo <B>MPEG1</B> (<B>VCD</B>) et <B>MPEG2</B> (<B>DVD</B>)</LI>
-  <LI>décodeurs natifs pour DivX ;-), OpenDivX, DivX4, DivX5,
-    M$ MPEG4 v1, v2 et autres variantes MPEG4</LI>
-  <LI>décodeur natif pour Windows Media Video <B>7/8</B> (<B>WMV1/WMV2</B>), et
+  <LI>décodeurs natifs pour <B>DivX ;-)</B>, <B>OpenDivX</B>, <B>DivX4</B>,
+    <B>DivX5</B>, <B>MS MPEG4<B> v1, v2 et autres variantes MPEG4</LI>
+  <LI>décodeur natif pour <B>Windows Media Video 7/8</B> (<B>WMV1/WMV2</B>), et
     décodeur de DLL Win32 pour <B>Windows Media Video 9</B> (<B>WMV3</B>), utilisés
     tous les deux dans les fichiers .wmv</LI>
   <LI><B>décodeur <B>Sorenson 1 (SVQ1)</B> natif</B></LI>
-  <LI><B>décodeur <B>Sorenson 3 (SVQ3)</B> Win32/QT</B></LI>
+  <LI><B>décodeur <B>Sorenson 3 (SVQ3)</B> natif</B></LI>
   <LI>décodeur <B>3ivx</B> v1, v2</LI>
   <LI>codecs Cinepak et <B>Intel Indeo</B> (3.1, 3.2, 4.1, 5.0)</LI>
   <LI><B>MJPEG</B>, AVID, VCR2, ASV2 et autres formats matériels</LI>
@@ -57,7 +57,7 @@
 
 <P>La nouvelle génération de ce codec est appelée DivX4 et peut même décoder les vidéos 
   créées avec le très mauvais codec DivX ! De plus il est plus rapide que les DLLs Win32
-  DivX natives mais plus lent que libavcodec. Son utilisation en tant que décodeur est
+  DivX natives mais plus lent que <B>libavcodec</B>. Son utilisation en tant que décodeur est
   donc <B>DÉCOURAGÉ</B>. Cependant, il est utile pour l'encodage. Un désavantage de ce
   codec est que ces sources sont ne sont pas disponibles sous une
   licence Open source.</P>
@@ -66,7 +66,7 @@
 
 <DL>
   <DT><CODE>-vc odivx</CODE></DT>
-  <DD>Utilise le codec divx4 à la manière d'OpenDivX. Dans ce cas il affiche des 
+  <DD>Utilise le codec divx4 à la manière d'OpenDivX. Dans ce cas il affiche des
     images YV12 dans son propre buffer, et MPlayer fait la conversion de palette
     via libvo. (<B>Rapide, recommandé !</B>)</DD>
 
@@ -130,18 +130,24 @@
   correcte.</P>
 
 
-<H4><A NAME="libavcodec">2.2.1.2 DivX/libavcodec de FFmpeg</A></H4>
+<H4><A NAME="libavcodec">2.2.1.2 FFmpeg/libavcodec</A></H4>
 
 <P><A HREF="http://ffmpeg.sourceforge.net">FFmpeg</A> contient un codec
   <B>open source</B>, qui est capable de décoder des flux encodés avec
-  des codecs vidéo H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/HuffYUV,
-  ou audio WMA (Windows Media Audio). Mais seuls quelques-uns peuvent être encodés
+  des codecs vidéo H263/MJPEG/LJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/
+  HuffYUV/SVQ1/SVQ3/MPEG1/MPEG2/VCR1/VCR2/ASV1/ASV2/CLJR,
+  ou audio WMA (Windows Media Audio). Non seulement quelques-uns peuvent être encodés
   avec, mais il offre également une vitesse plus rapide que les codecs Win32
   ou que la librairie DivX4/5 de DivX.com!</P>
 
 <P>Il contient plein de bons codecs, les plus importantes étant les variantes MPEG4:
-  DivX 3, DivX 4, DivX 5, Windows Media Video 7 (WMV1). Le décodeur WMA est également
+  DivX 3, DivX 4, DivX 5, Windows Media Video 7/8 (WMV1/WMV2). Le décodeur WMA est également
   très intéressant.</P>
+
+<P>Le codec le plus rescent à signaler est le codec <B>Sorenson 3</B> (SVQ3).
+  C'est la première implémentation complètement opensource de ce codec. Il est
+  même plus rapide que l'original. Assurez-vous d'utiliser celui-ci plutôt que
+  le codec binaire !</P>
 
 <P>Si vous utilisez une version officielle vous avez libavcodec directement dans le
   paquetage, construisez comme d'habitude. Si vous utilisez la version CVS de MPlayer
@@ -323,16 +329,10 @@ Après avoir téléchargé le paquet de codecs Real, extrayez-le dans le répertoire
   avec les décodeurs suivants:</P>
 
 <UL>
-  <LI>Sorenson 1 (fourcc <I>SVQ1</I>) - décodage supporté par des <B>codecs
-    natifs</B><BR>
-    En fait il y a deux (presque égaux) décodeurs pour SVQ1: l'un est inclus dans
-    MPlayer, l'autre est dans libavcodec. Vous pouvez invoquer chacun d'eux avec les
-    options <CODE>-vc svq1</CODE> et <CODE>-vc ffsvq1</CODE> respectivement.
-    Certains fichiers peuvent fonctionner avec l'un, et pas avec l'autre, donc testez
-    les deux décodeurs. Le décodeur a été écrit (par reverse-engineering) par les
-    auteurs de <A HREF="http://www.xinehq.de">xine</A>.</LI>
-  <LI>Sorenson 3 (fourcc <I>SVQ3</I>) - décodage supporté par les <B>librairies
-    QuickTime Win32</B></LI>
+  <LI>Sorenson Video v1 (fourcc <I>SVQ1</I>) - décodage supporté par des <B>codecs
+    natifs</B>(<A HREF="#libavcodec">libavcodec</A>)</LI>
+  <LI>Sorenson Video v3 (fourcc <I>SVQ3</I>) - décodage supporté par des <B>codecs
+    natifs</B>(<A HREF="#libavcodec">libavcodec</A>)</LI>
 </UL>
 
 <H4>COMPILER MPLAYER AVEC LE SUPPORT DES LIBRAIRIES QUICKTIME</H4>
@@ -458,27 +458,8 @@ MPlayer supporte le décodage de presque toutes les versions de RealAudio:
 <P>AAC (Advanced Audio Coding) est un codec parfoit présent dans les fichiers MOV et MP4.
   Un décodeur open source appelé FAAD est disponible sur
   <A HREF="http://www.audiocoding.com/">AudioCoding.com</A>.
-  Vous pouvez télécharger le codec de seconde génération FAAD2 sur leur
-  <A HREF="http://www.audiocoding.com/download.php">page de téléchargement</A>.
-  Malheureusement FAAD2 1.1 ne compile pas sous Linux, vous devez donc utiliser la
-  version CVS. Voici comment:</P>
+  MPlayer contient libfaad 2.0RC1, vous n'avez donc pas à l'obtenir séparemment.</P>
 
-<OL>
-  <LI>cvs -d:pserver:anonymous@cvs.audiocoding.com:/cvsroot/faac login</LI>
-  <LI>cvs -z3 -d:pserver:anonymous@cvs.audiocoding.com:/cvsroot/faac co faad2</LI>
-  <LI>cd faad2/</LI>
-  <LI>chmod +x bootstrap</LI>
-  <LI>./bootstrap</LI>
-  <LI>./configure</LI>
-  <LI>make</LI>
-  <LI>make install</LI>
-</OL>
-
-<P>Les binaires sont disponibles sur audiocoding.com, mais vous pouvez obtenir (apt-get)
-  les paquets Debian depuis la
-  <A HREF="http://marillat.free.fr/">page de Christian Marillat</A>
-  et les RPMs Mandrake sur le site du
-  <A HREF="http://plf.zarb.org/">P.L.F</A>.</P>
 
 
 <H3><A NAME="importing">2.2.3 Comment importer des codecs</A></H3>

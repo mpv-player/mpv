@@ -89,7 +89,7 @@
     <A HREF="users_against_developers.html#gcc">gcc 2.96</A>.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: Configure se termine par ce texte, et MPlayer ne compile pas!<BR>
+  <DT>Q: Configure se termine par ce texte, et MPlayer ne compile pas !<BR>
     <CODE>"Your gcc does not support even i386 for '-march' and '-mcpu'."</CODE>
     </DT>
   <DD>A: Votre gcc n'est pas installé correctement, voir le fichier <CODE>config.log</CODE>
@@ -297,7 +297,7 @@
     C'est bien plus rapide. Si le DGA de SDL fonctionne, utilisez-le, ce sera encore plus rapide.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: Quelle est la signification des nombres sur la ligne de commande?</DT>
+  <DT>Q: Quelle est la signification des nombres sur la ligne de commande ?</DT>
   <DD>A: Exemple:
     <CODE>A: 2.1  V: 2.2  A-V: -0.167  ct: 0.042  57/57  41%  0%  2.6% 0 4 49%</CODE>
     <UL>
@@ -334,7 +334,7 @@
   <DD>&nbsp;</DD>
 
   <DT>Q: Il a des messages d'erreur à propos d'un fichier non-trouvé
-    <CODE>/usr/local/lib/codecs/</CODE> ...</DT>
+    <CODE>/usr/local/lib/codecs/...</CODE></DT>
   <DD>A: Téléchargez les codecs Win32 sur notre
     <A HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/codecs/">page des codecs</A>
     (c'est le paquetage de codecs avifile mais avec un ensemble de DLL différent)
@@ -413,6 +413,14 @@
 
 <DL>
 
+  <DT>Q: Je n'arrive pas à déterminer la cause de certains problèmes de lecture.</DT>
+  <DD>A: Avez-vous un fichier <CODE>codecs.conf</CODE> restant dans
+    <CODE>~/.mplayer/</CODE>, <CODE>/etc/</CODE>, <CODE>/usr/local/etc/</CODE>
+    ou dans un endroit similaire ? Supprimez-le(s), les fichiers <CODE>codecs.conf</CODE>
+    périmés peuvent causer d'obscures problèmes, MPlayer utilisera son fichier
+    intégré à la place.</DD>
+  <DD>&nbsp;</DD>
+
   <DT>Q: ... fonctionne avec xine/avifile/... mais pas avec MPlayer.</DT>
   <DD>A: MPlayer n'est pas xine/avifile/... Bien que ces lecteurs aient
     du code en commun, l'ensemble des codecs (DLL), la synchronisation,
@@ -464,14 +472,6 @@
     envoyez-nous un rapport de bogue.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: J'obtiens ceci quand je lis des fichiers MPEG: Can't find codec for video format
-    0x10000001!</DT>
-  <DD>A: Vous avez une ancienne version de codecs.conf dans <CODE>~/.mplayer/</CODE>.
-    Upgradez-le depuis <CODE>/etc/</CODE>.<BR>
-    <B>OU</B> vous avez l'option <CODE>vc=</CODE> ou quelque chose de similaire dans
-    votre (vos) fichier(s) de config.</DD>
-  <DD>&nbsp;</DD>
-
   <DT>Q: Quand je lance MPlayer sous KDE Je n'obtient qu'un écran noir et rien ne se passe.
     Après environ une minute la vidéo commence à défiler.</DT>
   <DD>A: Le démon arts de KDE bloque le périphérique son. Attendez que la vidéo se lance
@@ -480,11 +480,6 @@
     (<CODE>-ao arts</CODE>). Si il échoue ou qu'il n'est pas compilé, essayez SDL
     (<CODE>-ao sdl</CODE>) et assurez-vous que SDL puisse gérer le son arts. Un autre
     option est de lancer MPlayer avec artsdsp.</DD>
-  <DD>&nbsp;</DD>
-
-  <DT>Q: J'ai un AVI qui produit un écran gris quand il est joué avec
-    <CODE>-vc odivx</CODE> et un vert avec <CODE>-vc divx4</CODE>.</DT>
-  <DD>A: Ce n'est pas un fichier DivX, mais un MS MPEG4v3. Mettez à jour votre codecs.conf.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: Quand je lis ce film j'obtiens des désynchro vidéo-audio et/ou MPlayer plante
@@ -519,14 +514,8 @@
 
   <DT>Q: J'ai des problèmes de synchro A/V. Certains de mes AVIs sont lus correctement, mais d'autres
     sont lus à double vitesse!</DT>
-  <DD>A: Vous avez une carte son/pilote boguée. Elle est certainement fixé à 44100Hz,
+  <DD>A: Vous avez une carte son/un pilote bogué(e). Elle est certainement fixé à 44100Hz,
     et vous essayez de lire un fichier qui a de l'audio à 22050Hz. Essayez le plugin resample.</DD>
-  <DD>&nbsp;</DD>
-
-  <DT>Q: Tous les fichiers WMV (ou d'autres..) que je lis créent une fenêtre verte/grise et il
-    n'y a que le son! MPlayer affiche:<BR>
-    <CODE>Detected video codec: [null] drv:0 (NULL codec (no decoding))</CODE></DT>
-  <DD>A: Mettez à jour votre <CODE>codecs.conf</CODE>.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: J'obtiens un pourcentage très étrange (bien trop grand) en lisant des fichiers
@@ -538,7 +527,7 @@
     pour Linux) vous aide.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: l'audio/video se désynchronise complètement quand je lance MPlayer en root sur
+  <DT>Q: L'audio/vidéo se désynchronise complètement quand je lance MPlayer en root sur
     mon notebook. Cela fonctionne normalement quand je le lance en tant qu'utilisateur.</DT>
   <DD>A: C'est là encore un effet de la gestion d'énergie (voir ci-dessus). Branchez l'alimentation secteur
     <B>avant</B> d'allumer votre notebook ou utilisez l'option <CODE>-nortc</CODE>.</DD>
@@ -731,8 +720,8 @@
   <DT>Q: Comment puis-je faire pour que MPlayer se rappelle des options que
     j'utilise pour ce fichier en particulier ?</DT>
   <DD>A: Créez un fichier nommé <CODE>movie.avi.conf</CODE> avec les options
-    spécifiques à l'intérieur et placez-le dans le même répertoire que le
-    fichier.</DD>
+    spécifiques à l'intérieur et placez-le dans <CODE>~/.mplayer</CODE> ou dans
+    le même répertoire que le fichier.</DD>
   <DD>&nbsp;</DD>
 
 </DL>
@@ -768,20 +757,20 @@
   <DD>&nbsp;</DD>
 
   <DT>Q: Mon tuner fonctionne, Je peut entendre le son et voir la vidéo avec MPlayer,
-    mais MEncoder est incapable d'encoder l'audio!</DT>
+    mais MEncoder est incapable d'encoder l'audio !</DT>
   <DD>A: L'encodage audio TV pour Linux n'est actuellement pas implémenté, nous travaillons
     dessus. Pour le moment cela ne fonctionne que sur BSD.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: Je ne peux pas encoder les sous-titres en AVI!</DT>
-  <DD>A: Vous devez spécifier l'option <CODE>-sid</CODE> correctement!</DD>
+  <DT>Q: Je ne peux pas encoder les sous-titres en AVI !</DT>
+  <DD>A: Vous devez spécifier l'option <CODE>-sid</CODE> correctement !</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: MEncoder provoque une segfault au démarrage!</DT>
+  <DT>Q: MEncoder provoque une segfault au démarrage !</DT>
   <DD>A: Mettez à jour DivX4Linux.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: Comment puis-je encoder seulement certains chapitres d'un DVD?</DT>
+  <DT>Q: Comment puis-je encoder seulement certains chapitres d'un DVD ?</DT>
   <DD>A: Utilisez l'option <CODE>-chapter</CODE> correctement, comme:
     <CODE>-chapter 5-7</CODE></DD>
   <DD>&nbsp;</DD>
@@ -790,11 +779,22 @@
   <DD>A: Non, VFAT ne supporte pas les fichiers plus gros que 2Go.</DD>
   <DD>&nbsp;</DD>
 
-  <DT>Q: Pourquoi le bitrate affiché par MEncoder est négatif?</DT>
+  <DT>Q: Pourquoi le bitrate affiché par MEncoder est-il négatif?</DT>
   <DD>A: Parce que le bitrate avec lequel vous avez encodé l'audio est trop grand pour faire tenir
     le film sur un CD. Vérifiez que libmp3lame est installé correctement.</DD>
   <DD>&nbsp;</DD>
-  
+
+  <DT>Q: Je ne peut pas convertir de fichiers ASF en AVI/DivX parce qu'ils utilisent
+    1000 fps ?</DT>
+  <DD>A: Vous devez initialiser un débit (framerate) à la main en utilisant <CODE>-ofps</CODE>
+  car ASF utilise un framerate variable.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Comment puis-je insérer les sous-titres dans le fichier de sortie ?</DT>
+  <DD>A: Passez simplement l'option <CODE>-sub &lt;nomfichier&gt;</CODE> (ou
+    <CODE>-sid</CODE>, <CODE>-vobsub</CODE>, respectivement) à MEncoder.</DD>
+  <DD>&nbsp;</DD>
+
 </DL>
 
 </BODY>
