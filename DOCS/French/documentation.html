@@ -11,7 +11,7 @@
 
 <H1 ALIGN="center">MPlayer - Le Lecteur vidéo pour LINUX</H1>
 
-<H2 ALIGN="center">&copy; 2000-2002 Arpad Gereoffy (A'rpi/ESP-team)<BR>
+<H2 ALIGN="center">&copy; 2000-2003 Arpad Gereoffy (A'rpi/ESP-team)<BR>
   <A HREF="http://www.mplayerhq.hu">http://www.mplayerhq.hu</A></H2>
 
 <P ALIGN="center">
@@ -975,16 +975,21 @@ par moi (Gabucino). Son principal avantage est de se baser
   <CODE>font</CODE> (par ex: <CODE>ln -s ~/.mplayer/arial-24 ~/.mplayer/font</CODE>). Vous pouvez maintenant
   voir un compteur dans le coin supérieur gauche du film. (Faites les apparaitre/disparaitre avec la touche 'o').</P>
 
-<P>OSD possède trois états: (interchangeable avec 'o')</P>
+<P>L'OSD possède 4 états: (interchangeable avec 'o')</P>
+
+<P>(les sous-titres sont <I>toujours activés</I>, pour les désactiver merci de lire
+  la page de man)</P>
 
 <UL>
-  <LI>compteur + barre de volume + barre d'avancement + sous-titres</LI>
-  <LI>barre de volume + barre d'avancement + sous-titres (par défaut)</LI>
+  <LI>barre de volume + barre d'avancement (par défaut)</LI>
+  <LI>barre de volume + barre d'avancement + compteur + position en pourcentages quand déplacement</LI>
+  <LI>barre de volume + barre d'avancement + compteur + durée totale du média</LI>
   <LI>uniquement les sous-titres </LI>
 </UL>
 
 <P>Vous pouvez en modifier le comportement par défaut en spécifiant la variable <CODE>osdlevel=</CODE> 
-  dans le fichier config.</P>
+  dans le fichier config, ou en précisant l'option <CODE>-osdlevel</CODE> en ligne
+  de commande.</P>
 
 
 <H3><A NAME="menu">1.4.3 Menu OSD</A></H3>
@@ -1670,19 +1675,23 @@ end
 <P>Pour le support DVD vous devez avoir libcss patché installé. Patch:
   <A HREF="http://www.tools.de/solaris/mplayer/">http://www.tools.de/solaris/mplayer/</A>.</P>
 
-<P>A cause de deux bogues dans Solaris 8 x86, vous ne pouvez pas lire de disques DVD plus gros
-  que 4 Go de façon fiable:</P>
+<P>A cause de bogues dans Solaris 8, il se peut que vous ne pouviez pas lire de 
+  disques DVD plus gros que 4 Go:</P>
 
 <UL>
-  <LI>Le pilote sd(7D) de Solaris 8 x86 à un bogue quand on accède un bloc disque
-    &gt;4Go sur un périphérique en utilisant une taille de bloc logique != DEV_BSIZE (c-a-d CD-ROM
+  <LI>Le pilote sd(7D) de Solaris 8 x86 a un bogue quand on accède à un bloc disque
+    &gt;4Go sur un périphérique en utilisant une taille de bloc logique != DEV_BSIZE (c-a-d. CD-ROM
     et DVD).  A cause d'un dépassement des entiers 32Bit, on accède à une adresse disque modulo 4 Go.
-    (<A HREF="http://groups.yahoo.com/group/solarisonintel/message/22516">http://groups.yahoo.com/group/solarisonintel/message/22516</A>)
+    (<A HREF="http://groups.yahoo.com/group/solarisonintel/message/22516">http://groups.yahoo.com/group/solarisonintel/message/22516</A>).
+    Ce problème n'existe pas sur la version SPARC de Solaris 8.
   </LI>
   <LI>Un bogue similaire est présent dans le code du système de fichier hsfs(7FS) (aka
-    ISO9660), hsfs ne supporte actuellement pas les partitions/disques plus gros que 4GB, toutes les
+    ISO9660), il se peut que hsfs ne supporte pas les partitions/disques plus gros(ses) que 4GB, toutes les
     donnés sont accédés modulo 4Go.
-    (<A HREF="http://groups.yahoo.com/group/solarisonintel/message/22592">http://groups.yahoo.com/group/solarisonintel/message/22592</A>)
+    (<A HREF="http://groups.yahoo.com/group/solarisonintel/message/22592">http://groups.yahoo.com/group/solarisonintel/message/22592</A>).
+    <P>
+    Le problème hsfs peut être résolu en installant le patch 109764-04 (sparc) / 
+    109765-04 (x86).
   </LI>
 </UL>
 
