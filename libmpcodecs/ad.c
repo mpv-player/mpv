@@ -35,6 +35,7 @@ extern ad_functions_t mpcodecs_ad_faad;
 extern ad_functions_t mpcodecs_ad_vorbis;
 extern ad_functions_t mpcodecs_ad_libmad;
 extern ad_functions_t mpcodecs_ad_real;
+extern ad_functions_t mpcodecs_ad_libdv;
 
 ad_functions_t* mpcodecs_ad_drivers[] =
 {
@@ -70,6 +71,9 @@ ad_functions_t* mpcodecs_ad_drivers[] =
 #endif
 #ifdef USE_REALCODECS
   &mpcodecs_ad_real,
+#endif
+#ifdef HAVE_LIBDV095
+  &mpcodecs_ad_libdv,
 #endif
   NULL
 };

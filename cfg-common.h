@@ -104,8 +104,8 @@
 	{"nosound", &has_audio, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
 	// select audio/video codec (by name) or codec family (by number):
-	{"afm", &audio_family, CONF_TYPE_INT, CONF_MIN, 0, 16, NULL}, // keep ranges in sync
-	{"vfm", &video_family, CONF_TYPE_INT, CONF_MIN, 0, 14, NULL}, // with codec-cfg.c
+	{"afm", &audio_family, CONF_TYPE_INT, CONF_MIN, 0, 22, NULL}, // keep ranges in sync
+	{"vfm", &video_family, CONF_TYPE_INT, CONF_MIN, 0, 29, NULL}, // with codec-cfg.c
 	{"ac", &audio_codec, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"vc", &video_codec, CONF_TYPE_STRING, 0, 0, 0, NULL},
 

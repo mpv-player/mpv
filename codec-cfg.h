@@ -48,6 +48,7 @@
 #define AFM_ROQAUDIO 19
 #define AFM_AAC 20
 #define AFM_REAL 21
+#define AFM_LIBDV 22
 
 #define VFM_MPEG 1
 #define VFM_VFW 2
@@ -77,6 +78,7 @@
 #define VFM_REAL 26
 #define VFM_SVQ1 27
 #define VFM_XVID 28
+#define VFM_LIBDV 29
 
 #ifndef GUID_TYPE
 #define GUID_TYPE

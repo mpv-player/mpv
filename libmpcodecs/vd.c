@@ -53,6 +53,7 @@ extern vd_functions_t mpcodecs_vd_mpegpes;
 extern vd_functions_t mpcodecs_vd_real;
 extern vd_functions_t mpcodecs_vd_svq1;
 extern vd_functions_t mpcodecs_vd_xvid;
+extern vd_functions_t mpcodecs_vd_libdv;
 
 vd_functions_t* mpcodecs_vd_drivers[] = {
         &mpcodecs_vd_null,
@@ -104,6 +105,9 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 	&mpcodecs_vd_svq1,
 #ifdef HAVE_XVID
 	&mpcodecs_vd_xvid,
+#endif
+#ifdef HAVE_LIBDV095
+  &mpcodecs_vd_libdv,
 #endif
 	NULL
 };
