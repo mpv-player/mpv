@@ -2574,7 +2574,9 @@ fi
 echocheck "DVD support (libmpdvdkit)"
 if test "$_dvdkit" = auto ; then
  _dvdkit=no
- test -f "./libmpdvdkit/Makefile" && _dvdkit=yes
+ if linux || bsd || sunos ; then
+  test -f "./libmpdvdkit/Makefile" && _dvdkit=yes
+ fi
 fi
 if test "$_dvdkit" = yes ; then
   test "$_dvd" = yes || test "$_cdrom" = yes || test "$_cdio" = yes || test "$_dvdio" = yes || test "$_bdsi_dvd" = yes && _dvdkit=yes
