@@ -1,6 +1,8 @@
 TO DO:
 ~~~~~~
 For the Release:
+- update homepage about CVS access (new server)
+- fix cvslog postings for new CVS server
 
 After the release:
 - finish OSD control (mixer, brightness/contrast/etc..)
