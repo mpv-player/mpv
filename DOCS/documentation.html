@@ -1599,6 +1599,10 @@ Table of Contents
      Also, open the possibility to play DivX on virtually every computer that
      has a C compiler. Kinda great stuff, isn't it?
 
+  <B>Q: But configure tells me "Checking for libavcodec ... no"!
+  </B>A: You need to get libavcodec from FFmpeg's CVS. Read the instructions in
+     the <A HREF="#2.1.2.2">ffmpeg section</A> .
+
 
   <A NAME=6.3>6.3.  File playing problems
 
@@ -1823,6 +1827,8 @@ Table of Contents
 
   To run <B>MPlayer</B> you will need to re-compile the kernel with 
   "options USER_LDT" (unless you are running -CURRENT, where this is default).
+  If you have a CPU with SSE also use "options CPU_ENABLE_SSE" to use it
+  (FreeBSD-STABLE required, or use kernel patches).
 
   If <B>MPlayer</B> complains about "CD-ROM Device '/dev/cdrom' not found!" make a 
   symbolic link : ln -s /dev/(your_cdrom_device) /dev/cdrom 

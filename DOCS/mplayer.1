@@ -65,6 +65,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-fb\ device ]
 .RB [ \-fbmode\ modename ]
 .RB [ \-fbmodeconfig filename ]
+.RB [ \-benchmark ]
 .I - or file
 .PP
 .SH DESCRIPTION
@@ -141,6 +142,7 @@ The supported formats and settings are:
 
         MPEG 1/2   0 (none), 1, 3, 7, 15, 31, 63
         OpenDivX   0 (none), 1, 3, 7, 15, 31, 63
+        DivX4      0 (none) - 60
         DivX       0 (none), 1, 2, 3, 4
 
 .I NOTE
@@ -178,11 +180,14 @@ specifies which mode the OSD should start in (0 : none, 1 : seek, 2: seek+timer)
 .B \-lircconf\ configfile
 specifies a configfile for LIRC (see http://www.lirc.org) if you don't like the default ~/.lircrc 
 .TP
-.B \-v\
+.B \-v
 enable verbose output (more -v means more verbose)
 .TP
-.B \-quiet\
+.B \-quiet
 display less output, status messages.
+.TP
+.B \-benchmark
+used in combination with -nosound and -vo null for benchmarking.
 .IP
 .SH "ADVANCED OPTIONS"
 .TP
@@ -401,6 +406,17 @@ o               toggle OSD: none / seek / seek+timer
 m               toggle using master/pcm volume
 
 z or x          adjust subtitle delay by +/- 0.1 second
+
+(the following keys are valid only when using DirectShow DivX codec)
+
+1 or 2          adjust contrast
+
+3 or 4          adjust brightness
+
+5 or 6          adjust ?
+
+7 or 8          adjust saturation
+
 .IP
 .SH FILES AND DIRECTORIES
 .TP
