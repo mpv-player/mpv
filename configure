@@ -531,8 +531,8 @@ if x86 || ppc; then
     3dnowext)     _3dnow=yes  _3dnowex=yes ;;
     mmx)          _mmx=yes                 ;;
     mmxext)       _mmx2=yes                ;;
-    mtrr|k6_mtrr) _mtrr=yes                ;;
-    xmm|sse|kni)  _sse=yes    _mmx2=yes	   ;;
+    mtrr|k6_mtrr|cyrix_arr)   _mtrr=yes    ;;
+    xmm|sse|kni)  _sse=yes    _mmx2=yes    ;;
     sse2)         _sse2=yes                ;;
     esac
   done
