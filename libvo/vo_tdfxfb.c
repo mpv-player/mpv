@@ -28,6 +28,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <string.h>
+#include <unistd.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <sys/mman.h>
@@ -38,6 +40,7 @@
 #include "video_out.h"
 #include "video_out_internal.h"
 #include "drivers/3dfx.h"
+#include "aspect.h"
 
 LIBVO_EXTERN(tdfxfb)
 
@@ -45,7 +48,7 @@ static vo_info_t vo_info =
 {
 	"3Dfx Banshee/Voodoo3/Voodoo5",
 	"tdfxfb",
-	"Mark Zealey <mark@zealos.org>"
+	"Mark Zealey <mark@zealos.org>",
 	""
 };
 
@@ -62,13 +65,13 @@ struct YUV_plane {
   char V[0x0100000];
 };
 
-static int fd;
+static int fd = -1;
 static struct fb_fix_screeninfo fb_finfo;
 static struct fb_var_screeninfo fb_vinfo;
 static uint32_t in_width, in_height, in_format, in_depth, in_voodoo_format,
 	screenwidth, screenheight, screendepth, vidwidth, vidheight, vidx, vidy,
 	vid_voodoo_format, *vidpage, *hidpage, *inpage, vidpageoffset,
-	hidpageoffset, inpageoffset, *memBase0, *memBase1, fs, r_width, r_height;
+	hidpageoffset, inpageoffset, *memBase0 = NULL, *memBase1 = NULL, r_width, r_height;
 static volatile voodoo_io_reg *reg_IO;
 static voodoo_2d_reg *reg_2d;
 static voodoo_yuv_reg *reg_YUV;
@@ -79,7 +82,9 @@ static uint32_t preinit(const char *arg)
 {
 	char *name;
 
-	if(!(name = getenv("FRAMEBUFFER")))
+	if(arg)
+	  name = (char*)arg;
+	else if(!(name = getenv("FRAMEBUFFER")))
 		name = "/dev/fb0";
 
 	if((fd = open(name, O_RDWR)) == -1) {
@@ -90,12 +95,16 @@ static uint32_t preinit(const char *arg)
 	if(ioctl(fd, FBIOGET_FSCREENINFO, &fb_finfo)) {
 		printf("tdfxfb: problem with FBITGET_FSCREENINFO ioctl: %s\n",
 				strerror(errno));
+		close(fd);
+		fd = -1;
 		return -1;
 	}
 
 	if(ioctl(fd, FBIOGET_VSCREENINFO, &fb_vinfo)) {
 		printf("tdfxfb: problem with FBITGET_VSCREENINFO ioctl: %s\n",
 				strerror(errno));
+		close(fd);
+		fd = -1;
 		return -1;
 	}
 
@@ -103,7 +112,22 @@ static uint32_t preinit(const char *arg)
 	if (fb_finfo.accel != FB_ACCEL_3DFX_BANSHEE) {
 		printf("tdfxfb: This driver is only supports the 3Dfx Banshee,"
 				" Voodoo3 and Voodoo 5\n");
+		close(fd);
+		fd = -1;
 		return -1;
+	}
+
+	// Check the depth now as config() musn't fail
+	switch(fb_vinfo.bits_per_pixel) {
+	case 16:
+	case 24:
+	case 32:
+	  break; // Ok
+	default:
+	  printf("tdfxfb: %d bpp output is not supported\n", fb_vinfo.bits_per_pixel);
+	  close(fd);
+	  fd = -1;
+	  return -1;
 	}
 
 	/* Open up a window to the hardware */
@@ -114,6 +138,11 @@ static uint32_t preinit(const char *arg)
 
 	if((long)memBase0 == -1 || (long)memBase1 == -1) {
 		printf("tdfxfb: Couldn't map memory areas: %s\n", strerror(errno));
+		if((long)memBase0 != -1)
+		  munmap(memBase0, fb_finfo.smem_len);
+		if((long)memBase1 != -1)
+		  munmap(memBase1, fb_finfo.smem_len);
+		memBase0 = memBase1 = NULL;
 		return -1;
 	}
 
@@ -171,29 +200,14 @@ static void clear_screen()
 /* Setup output screen dimensions etc */
 static void setup_screen(uint32_t full)
 {
-	fs = full;
+	vo_fs = full;
 
-	if(fs) {					/* Full screen */
-		double ratio = (double)in_width / in_height;
-		vidwidth = screenwidth;
-		vidheight = screenheight;
-
-		if(screenwidth / ratio <= screenheight)
-			vidheight = (double)screenwidth / ratio;
-		else
-			vidwidth = (double)screenheight * ratio;
-
-		vidx = (screenwidth - vidwidth) / 2;
-		vidy = (screenheight - vidheight) / 2;
-	} else {					/* Reset to normal size */
-		if(r_width > screenwidth || r_height > screenheight)
-			printf("tdfxfb: your resolution is too small to display "
-					"the whole movie...\n");
-
-		vidwidth = r_width;
-		vidheight = r_height;
-		vidx = vidy = 0;
-	}
+	aspect(&vidwidth,&vidheight, vo_fs ? A_ZOOM : A_NOZOOM);
+	if(vo_fs) {
+	  vidx = (screenwidth - vidwidth) / 2;
+	  vidy = (screenheight - vidheight) / 2;
+	} else
+	  vidx = vidy = 0;
 
 	clear_screen();
 }
@@ -203,13 +217,16 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 {
 	screenwidth = fb_vinfo.xres;
 	screenheight = fb_vinfo.yres;
+	aspect_save_screenres(fb_vinfo.xres,fb_vinfo.yres);
 
 	in_width = width;
 	in_height = height;
 	in_format = format;
+	aspect_save_orig(width,height);
 
 	r_width = d_width;
 	r_height = d_height;
+	aspect_save_prescale(d_width,d_height);
 
 	/* Setup the screen for rendering to */
 	switch(fb_vinfo.bits_per_pixel) {
@@ -232,7 +249,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		break;
 
 	default:
-		printf("tdfxfb: %d bpp output is not supported\n", fb_vinfo.bits_per_pixel);
+		printf("tdfxfb: %d bpp output is not supported (This should never happend)\n", fb_vinfo.bits_per_pixel);
 		return -1;
 	}
 
@@ -249,7 +266,9 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	case IMGFMT_IYUV:
 	case IMGFMT_YUY2:
 		break;
-
+	case IMGFMT_UYVY:
+		in_voodoo_format = VOODOO_BLT_FORMAT_UYVY;
+		break;
 	case IMGFMT_BGR16:
 		in_voodoo_format = VOODOO_BLT_FORMAT_16;
 		alpha_func = vo_draw_alpha_rgb16;
@@ -424,16 +443,20 @@ static uint32_t draw_slice(uint8_t *i[], int s[], int w, int h, int x, int y)
 /* Attempt to start doing DR */
 static uint32_t get_image(mp_image_t *mpi)
 {
-	static int enabled = 0;
 
-	if(!enabled && mpi->flags & MP_IMGFLAG_READABLE)	/* slow video ram */
-			return VO_FALSE;
+	if(mpi->flags & MP_IMGFLAG_READABLE)
+		return VO_FALSE;
+	if(mpi->type == MP_IMGTYPE_STATIC && vo_doublebuffering)
+		return VO_FALSE;
+	if(mpi->type > MP_IMGTYPE_TEMP)
+		return VO_FALSE; // TODO ??
 
 	switch(in_format) {
 	case IMGFMT_YUY2:
 	case IMGFMT_BGR16:
 	case IMGFMT_BGR24:
 	case IMGFMT_BGR32:
+	case IMGFMT_UYVY:
 		mpi->planes[0] = (char *)inpage;
 		mpi->stride[0] = in_width * in_depth;
 		break;
@@ -441,23 +464,18 @@ static uint32_t get_image(mp_image_t *mpi)
 	case IMGFMT_YV12:
 	case IMGFMT_I420:
 	case IMGFMT_IYUV:
-		if(!enabled)
-			if(!(mpi->flags & MP_IMGFLAG_ACCEPT_STRIDE))
-				return VO_FALSE;
-
+		if(!(mpi->flags & MP_IMGFLAG_ACCEPT_STRIDE) && mpi->w != YUV_STRIDE)
+			return VO_FALSE;
 		mpi->planes[0] = YUV->Y;
 		mpi->planes[1] = YUV->U;
 		mpi->planes[2] = YUV->V;
 		mpi->stride[0] = mpi->stride[1] = mpi->stride[2] = YUV_STRIDE;
+		reg_YUV->yuvBaseAddr = inpageoffset;
+		reg_YUV->yuvStride = in_width * in_depth;
 		break;
 
 	default:
 		return VO_FALSE;
-	}
-
-	if(!enabled) {
-		printf("tdfxfb: get_image() SUCCESS -> Direct Rendering ENABLED\n");
-		enabled = 1;
 	}
 
 	mpi->width = in_width;
@@ -478,6 +496,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 		case IMGFMT_I420:
 		case IMGFMT_IYUV:
 		case IMGFMT_YUY2:
+		case IMGFMT_UYVY:
 		case IMGFMT_BGR16:
 		case IMGFMT_BGR24:
 		case IMGFMT_BGR32:
@@ -488,7 +507,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 		return 0;		/* Not supported */
 
 	case VOCTRL_FULLSCREEN:
-		setup_screen(!fs);
+		setup_screen(!vo_fs);
 		return 0;
 	}
 
