@@ -2684,8 +2684,11 @@ if(rel_seek_secs || abs_seek_pos){
       /* FIXME there should be real seeking for vobsub */
       if (vo_vobsub)
 	vobsub_reset(vo_vobsub);
-
+      if(sh_video && d_video->packs == 0)
+	ds_fill_buffer(d_video);
       if(sh_audio){
+	if(d_audio->packs == 0)
+	  ds_fill_buffer(d_audio);
 	if(verbose){
 	    float a_pts=d_audio->pts;
             a_pts+=(ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
