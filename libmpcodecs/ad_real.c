@@ -158,27 +158,58 @@ static void uninit(sh_audio_t *sh){
   // again: you don't have to free() a_in_buffer here! it's done by the core.
 }
 
+static unsigned char sipr_swaps[38][2]={
+    {0,63},{1,22},{2,44},{3,90},{5,81},{7,31},{8,86},{9,58},{10,36},{12,68},
+    {13,39},{14,73},{15,53},{16,69},{17,57},{19,88},{20,34},{21,71},{24,46},
+    {25,94},{26,54},{28,75},{29,50},{32,70},{33,92},{35,74},{38,85},{40,56},
+    {42,87},{43,65},{45,59},{48,79},{49,93},{51,89},{55,95},{61,76},{67,83},
+    {77,80} };
+
 static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen){
   int result;
   int len=-1;
   int sps=((short*)(sh->wf+1))[0];
   int w=sh->wf->nBlockAlign; // 5
   int h=((short*)(sh->wf+1))[1];
-  
-  if(sps) w/=sps; else sps=1;
-  
-//  printf("bs=%d  sps=%d  w=%d h=%d \n",sh->wf->nBlockAlign,sps,w,h);
 
+//  printf("bs=%d  sps=%d  w=%d h=%d \n",sh->wf->nBlockAlign,sps,w,h);
+  
 #if 1
   if(sh->a_in_buffer_len<=0){
       // fill the buffer!
+    if(!sps){
+      // 'sipr' way
+      int j,n;
+      int bs=h*w*2/96; // nibbles per subpacket
+      unsigned char *p=sh->a_in_buffer;
+      demux_read_data(sh->ds, p, h*w);
+      for(n=0;n<38;n++){
+          int i=bs*sipr_swaps[n][0];
+          int o=bs*sipr_swaps[n][1];
+	  // swap nibbles of block 'i' with 'o'      TODO: optimize
+	  for(j=0;j<bs;j++){
+	      int x=(i&1) ? (p[(i>>1)]>>4) : (p[(i>>1)]&15);
+	      int y=(o&1) ? (p[(o>>1)]>>4) : (p[(o>>1)]&15);
+	      if(o&1) p[(o>>1)]=(p[(o>>1)]&0x0F)|(x<<4);
+	        else  p[(o>>1)]=(p[(o>>1)]&0xF0)|x;
+	      if(i&1) p[(i>>1)]=(p[(i>>1)]&0x0F)|(y<<4);
+	        else  p[(i>>1)]=(p[(i>>1)]&0xF0)|y;
+	      ++i;++o;
+	  }
+      }
+      sh->a_in_buffer_size=
+      sh->a_in_buffer_len=w*h;
+    } else {
+      // 'cook' way
       int x,y;
+      w/=sps;
       for(y=0;y<h;y++)
         for(x=0;x<w;x++){
 	    demux_read_data(sh->ds, sh->a_in_buffer+sps*(h*x+((h+1)/2)*(y&1)+(y>>1)), sps);
 	}
       sh->a_in_buffer_size=
       sh->a_in_buffer_len=w*h*sps;
+    }
   }
 
 #else
