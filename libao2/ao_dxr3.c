@@ -53,61 +53,59 @@ static int control(int cmd,int arg)
 // return: 1=success 0=fail
 static int init(int rate,int channels,int format,int flags)
 {
-  int ioval;
-  fd_audio = open( "/dev/em8300_ma", O_WRONLY );  
-  if( fd_audio < 0 )
-  {
-    printf("AO: [dxr3] Can't open audio device /dev/em8300_ma  -> nosound\n");
-    return 0;
-  }
+    int ioval;
+    fd_audio = open( "/dev/em8300_ma", O_WRONLY );  
+    if( fd_audio < 0 )
+    {
+	printf("AO: [dxr3] Can't open audio device /dev/em8300_ma  -> nosound\n");
+	return 0;
+    }
   
-  fd_control = open( "/dev/em8300", O_WRONLY );
-  if( fd_control < 0 )
-  {
-    printf("AO: [dxr3] Can't open em8300 control /dev/em8300\n");
-    return 0;
-  }
+    fd_control = open( "/dev/em8300", O_WRONLY );
+    if( fd_control < 0 )
+    {
+	printf("AO: [dxr3] Can't open em8300 control /dev/em8300\n");
+	return 0;
+    }
 
-  ioctl(fd_audio, SNDCTL_DSP_RESET, NULL);
-  ao_data.format = format;
-  if( ioctl (fd_audio, SNDCTL_DSP_SETFMT, &ao_data.format) < 0 )
-    printf( "AO: [dxr3] Unable to set audio format\n" );
-  if(format == AFMT_AC3 && ao_data.format != AFMT_AC3) 
-  {
-      printf("AO: [dxr3] Can't set audio device /dev/em8300_ma to AC3 output\n");
-      return 0;
-  }
-  printf("AO: [dxr3] Sample format: %s (requested: %s)\n",
+    ioctl(fd_audio, SNDCTL_DSP_RESET, NULL);
+    ao_data.format = format;
+    if( ioctl (fd_audio, SNDCTL_DSP_SETFMT, &ao_data.format) < 0 )
+	printf( "AO: [dxr3] Unable to set audio format\n" );
+    if(format == AFMT_AC3 && ao_data.format != AFMT_AC3) 
+    {
+	printf("AO: [dxr3] Can't set audio device /dev/em8300_ma to AC3 output\n");
+	return 0;
+    }
+  
+    printf("AO: [dxr3] Sample format: %s (requested: %s)\n",
     audio_out_format_name(ao_data.format), audio_out_format_name(format));
   
-  if(format != AFMT_AC3) 
-  {
-	ao_data.channels=channels-1;
-        if( ioctl (fd_audio, SNDCTL_DSP_STEREO, &ao_data.channels) < 0 )
-	    printf( "AO: [dxr3] Unable to set number of channels\n" );
-  
-	ao_data.bps = (channels+1)*rate;
-	ao_data.samplerate=rate;
-	if( ioctl (fd_audio, SNDCTL_DSP_SPEED, &ao_data.samplerate) < 0 )
-	{
-	    printf( "AO: [dxr3] Unable to set samplerate\n" );
-	    return 0;
-	}
-	if( rate < ao_data.samplerate )
-	{
-	    ao_data.samplerate = 44100;
-	    ioctl(fd_audio, SNDCTL_DSP_SPEED, &ao_data.samplerate);
-    	    if( ao_data.samplerate != 44100 )
-	    {
-	        printf( "AO: [dxr3] Unable to set samplerate\n" );
-	        return 0;
-	    }
-	    printf("AO: [dxr3] Using %d Hz samplerate (requested: %d) (Upsampling)\n",ao_data.samplerate,rate);
-	    ao_data.samplerate = rate;
-	}
+    ao_data.channels=channels-1;
+    if( ioctl (fd_audio, SNDCTL_DSP_STEREO, &ao_data.channels) < 0 )
+    printf( "AO: [dxr3] Unable to set number of channels\n" );
+ 
+    ao_data.bps = (channels+1)*rate;
+    ao_data.samplerate=rate;
+    if( ioctl (fd_audio, SNDCTL_DSP_SPEED, &ao_data.samplerate) < 0 )
+    {
+        printf( "AO: [dxr3] Unable to set samplerate\n" );
+        return 0;
+    }
+    if( rate < ao_data.samplerate )
+    {
+        ao_data.samplerate = 44100;
+        ioctl(fd_audio, SNDCTL_DSP_SPEED, &ao_data.samplerate);
+        if( ao_data.samplerate != 44100 )
+        {
+            printf( "AO: [dxr3] Unable to set samplerate\n" );
+            return 0;
+        }
+        printf("AO: [dxr3] Using %d Hz samplerate (requested: %d) (Upsampling)\n",ao_data.samplerate,rate);
+        ao_data.samplerate = rate;
+    }
 	else printf("AO: [dxr3] Using %d Hz samplerate (requested: %d)\n",ao_data.samplerate,rate);
-  }
-  else ao_data.bps *= 2;
+  if(format == AFMT_AC3 ) ao_data.bps *= 2;
 
   if( ioctl(fd_audio, SNDCTL_DSP_GETOSPACE, &dxr3_buf_info)==-1 )
   {
