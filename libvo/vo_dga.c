@@ -23,6 +23,9 @@
  * - works only on x86 architectures
  *
  * $Log$
+ * Revision 1.42  2002/02/12 23:19:37  michael
+ * use mem2agpcpy() instead of fast_memcpy()
+ *
  * Revision 1.41  2002/02/09 01:21:48  arpi
  * 10000hl to Holm... control MUST BE static...
  *
@@ -480,14 +483,14 @@ static uint32_t draw_frame( uint8_t *src[] ){
       // use some stride ...
       int i;
       for(i=0; i< vo_dga_lines; i++){
-        memcpy(d, s, vo_dga_bytes_per_line);
+        mem2agpcpy(d, s, vo_dga_bytes_per_line);
 	d+=vo_dga_vp_skip;
 	d+=vo_dga_bytes_per_line;
 	s+=vo_dga_bytes_per_line;
       }
     }else{
       // no stride, cool + fast ...
-      memcpy(d,s, vo_dga_bytes_per_line * vo_dga_lines);
+      mem2agpcpy(d,s, vo_dga_bytes_per_line * vo_dga_lines);
     }	  
 #else /* ARCH_X86 and NO_MMX */
     // use some homebrewn assembly code ...
