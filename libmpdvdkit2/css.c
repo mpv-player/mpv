@@ -405,7 +405,7 @@ int _dvdcss_title ( dvdcss_t dvdcss, int i_block )
  *****************************************************************************/
 int _dvdcss_disckey( dvdcss_t dvdcss )
 {
-    unsigned char p_buffer[2048];
+    unsigned char p_buffer[ DVD_DISCKEY_SIZE ];
     dvd_key_t p_disc_key;
     int i;
 
@@ -432,7 +432,7 @@ int _dvdcss_disckey( dvdcss_t dvdcss )
     }
 
     /* Decrypt disc key using bus key */
-    for( i = 0 ; i < 2048 ; i++ )
+    for( i = 0 ; i < DVD_DISCKEY_SIZE ; i++ )
     {
         p_buffer[ i ] ^= dvdcss->css.p_bus_key[ 4 - (i % KEY_SIZE) ];
     }
@@ -490,7 +490,7 @@ int _dvdcss_disckey( dvdcss_t dvdcss )
  *****************************************************************************/
 int _dvdcss_titlekey( dvdcss_t dvdcss, int i_pos, dvd_key_t p_title_key )
 {
-    static uint8_t p_garbage[ 2048 ];     /* static because we never read it */
+    static uint8_t p_garbage[ DVDCSS_BLOCK_SIZE ];  /* we never read it back */
     uint8_t p_key[ KEY_SIZE ];
     int i, i_ret = 0;
 
@@ -523,7 +523,7 @@ int _dvdcss_titlekey( dvdcss_t dvdcss, int i_pos, dvd_key_t p_title_key )
         {
             case -1:
                 /* An error getting the ASF status, something must be wrong. */
-                _dvdcss_debug( dvdcss, "lost ASF reqesting title key" );
+                _dvdcss_debug( dvdcss, "lost ASF requesting title key" );
                 ioctl_InvalidateAgid( dvdcss->i_fd, &dvdcss->css.i_agid );
                 i_ret = -1;
                 break;
@@ -531,7 +531,7 @@ int _dvdcss_titlekey( dvdcss_t dvdcss, int i_pos, dvd_key_t p_title_key )
             case 0:
                 /* This might either be a title that has no key,
                  * or we encountered a region error. */
-                _dvdcss_debug( dvdcss, "lost ASF reqesting title key" );
+                _dvdcss_debug( dvdcss, "lost ASF requesting title key" );
                 break;
 
             case 1:
@@ -554,7 +554,7 @@ int _dvdcss_titlekey( dvdcss_t dvdcss, int i_pos, dvd_key_t p_title_key )
                 p_key[ i ] ^= dvdcss->css.p_bus_key[ 4 - (i % KEY_SIZE) ];
             }
 
-            /* If p_key is all zero then there realy wasn't any key pressent
+            /* If p_key is all zero then there really wasn't any key present
              * even though we got to read it without an error. */
             if( !( p_key[0] | p_key[1] | p_key[2] | p_key[3] | p_key[4] ) )
             {
@@ -606,7 +606,7 @@ int _dvdcss_titlekey( dvdcss_t dvdcss, int i_pos, dvd_key_t p_title_key )
 int _dvdcss_unscramble( dvd_key_t p_key, uint8_t *p_sec )
 {
     unsigned int    i_t1, i_t2, i_t3, i_t4, i_t5, i_t6;
-    uint8_t        *p_end = p_sec + 0x800;
+    uint8_t        *p_end = p_sec + DVDCSS_BLOCK_SIZE;
 
     /* PES_scrambling_control */
     if( p_sec[0x14] & 0x30)
@@ -990,7 +990,7 @@ static int DecryptDiscKey( uint8_t const *p_struct_disckey,
         { 0xfc, 0x95, 0xa9, 0x87, 0x35 }
     };
 
-    /* Decrypt disc key with player keys from csskeys.h */
+    /* Decrypt disc key with the above player keys */
     while( n < sizeof(player_keys) / sizeof(dvd_key_t) )
     {
         for( i = 1; i < 409; i++ )
@@ -1000,7 +1000,7 @@ static int DecryptDiscKey( uint8_t const *p_struct_disckey,
                         p_disc_key );
 
             /* The first part in the struct_disckey block is the
-             * 'disc key' encrypted with it self.  Using this we
+             * 'disc key' encrypted with itself.  Using this we
              * can check if we decrypted the correct key. */
             DecryptKey( 0, p_disc_key, p_struct_disckey, p_verify );
 
@@ -1247,7 +1247,7 @@ end:
  * Function designed by Frank Stevenson
  *****************************************************************************
  * Called from Attack* which are in turn called by CrackTitleKey.  Given
- * a guessed(?) plain text and the chiper text.  Returns -1 on failure.
+ * a guessed(?) plain text and the cipher text.  Returns -1 on failure.
  *****************************************************************************/
 static int RecoverTitleKey( int i_start, uint8_t const *p_crypted,
                             uint8_t const *p_decrypted,
@@ -1397,11 +1397,12 @@ static int i_tries = 0, i_success = 0;
 static int CrackTitleKey( dvdcss_t dvdcss, int i_pos, int i_len,
                           dvd_key_t p_titlekey )
 {
-    uint8_t       p_buf[0x800];
+    uint8_t       p_buf[ DVDCSS_BLOCK_SIZE ];
     const uint8_t p_packstart[4] = { 0x00, 0x00, 0x01, 0xba };
     int i_reads = 0;
     int i_encrypted = 0;
     int b_stop_scanning = 0;
+    int b_read_error = 0;
     int i_ret;
 
     _dvdcss_debug( dvdcss, "cracking title key" );
@@ -1427,6 +1428,18 @@ static int CrackTitleKey( dvdcss_t dvdcss, int i_pos, int i_len,
             if( i_ret == 0 )
             {
                 _dvdcss_debug( dvdcss, "read returned 0 (end of device?)" );
+            }
+            else if( !b_read_error )
+            {
+                _dvdcss_debug( dvdcss, "read error, resorting to secret "
+                                       "arcanes to recover" );
+
+                /* Reset the drive before trying to continue */
+                _dvdcss_close( dvdcss );
+                _dvdcss_open( dvdcss );
+
+                b_read_error = 1;
+                continue;
             }
             break;
         }
@@ -1478,8 +1491,10 @@ static int CrackTitleKey( dvdcss_t dvdcss, int i_pos, int i_len,
 
     } while( !b_stop_scanning && i_len > 0);
 
-    if( i_len <= 0 )
+    if( !b_stop_scanning )
+    {
         _dvdcss_debug( dvdcss, "end of title reached" );
+    }
 
     { /* Print some statistics. */
         char psz_info[128];
@@ -1514,7 +1529,7 @@ static int CrackTitleKey( dvdcss_t dvdcss, int i_pos, int i_len,
  * Then it guesses that the plain text for first encrypted bytes are
  * a contiuation of that pattern.
  *****************************************************************************/
-static int AttackPattern( uint8_t const p_sec[0x800],
+static int AttackPattern( uint8_t const p_sec[ DVDCSS_BLOCK_SIZE ],
                           int i_pos, uint8_t *p_key )
 {
     unsigned int i_best_plen = 0;
@@ -1574,13 +1589,13 @@ static int AttackPattern( uint8_t const p_sec[0x800],
  * DVD specifies that there must only be one type of data in every sector.
  * Every sector is one pack and so must obviously be 2048 bytes long.
  * For the last pice of video data before a VOBU boundary there might not
- * be exactly the right amount of data to fill a sector. They one has to
- * pad the pack to 2048 bytes. For just a few bytes this is doen in the
+ * be exactly the right amount of data to fill a sector. Then one has to
+ * pad the pack to 2048 bytes. For just a few bytes this is done in the
  * header but for any large amount you insert a PES packet from the
  * Padding stream. This looks like 0x00 00 01 be xx xx ff ff ...
  * where xx xx is the length of the padding stream.
  *****************************************************************************/
-static int AttackPadding( uint8_t const p_sec[0x800],
+static int AttackPadding( uint8_t const p_sec[ DVDCSS_BLOCK_SIZE ],
                           int i_pos, uint8_t *p_key )
 {
     unsigned int i_pes_length;
@@ -1589,18 +1604,18 @@ static int AttackPadding( uint8_t const p_sec[0x800],
     i_pes_length = (p_sec[0x12]<<8) | p_sec[0x13];
 
     /* Coverd by the test below but usfull for debuging. */
-    if( i_pes_length == 0x800 - 0x14 ) return 0;
+    if( i_pes_length == DVDCSS_BLOCK_SIZE - 0x14 ) return 0;
 
     /* There must be room for at least 4? bytes of padding stream,
      * and it must be encrypted.
      * sector size - pack/pes header - padding startcode - padding length */
-    if( ( 0x800 - 0x14 - 4 - 2 - i_pes_length < 4 ) ||
+    if( ( DVDCSS_BLOCK_SIZE - 0x14 - 4 - 2 - i_pes_length < 4 ) ||
         ( p_sec[0x14 + i_pes_length + 0] == 0x00 &&
           p_sec[0x14 + i_pes_length + 1] == 0x00 &&
           p_sec[0x14 + i_pes_length + 2] == 0x01 ) )
     {
       fprintf( stderr, "plain %d %02x:%02x:%02x:%02x (type %02x sub %02x)\n",
-               0x800 - 0x14 - 4 - 2 - i_pes_length,
+               DVDCSS_BLOCK_SIZE - 0x14 - 4 - 2 - i_pes_length,
                p_sec[0x14 + i_pes_length + 0],
                p_sec[0x14 + i_pes_length + 1],
                p_sec[0x14 + i_pes_length + 2],
@@ -1610,7 +1625,7 @@ static int AttackPadding( uint8_t const p_sec[0x800],
     }
 
     /* If we are here we know that there is a where in the pack a
-       encrypted PES header is (startcode + lenght). It's never more
+       encrypted PES header is (startcode + length). It's never more
        than  two packets in the pack, so we 'know' the length. The
        plaintext at offset (0x14 + i_pes_length) will then be
        00 00 01 e0/bd/be xx xx, in the case of be the following bytes

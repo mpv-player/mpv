@@ -31,6 +31,10 @@
 
 #if defined( WIN32 )
 
+#ifndef PATH_MAX
+#   define PATH_MAX MAX_PATH
+#endif
+
 /* several type definitions */
 #   if defined( __MINGW32__ )
 #       if !defined( _OFF_T_ )
