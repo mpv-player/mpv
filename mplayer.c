@@ -589,6 +589,10 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 #ifdef USE_SUB
 // check .sub
   if(sub_name){
+       int l=strlen(sub_name);
+       if ((l>4) && ((0==strcmp(&sub_name[l-4],".utf"))
+		   ||(0==strcmp(&sub_name[l-4],".UTF"))))
+	  sub_utf8=1;
        subtitles=sub_read_file(sub_name);
        if(!subtitles) mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadSub,sub_name);
   } else {

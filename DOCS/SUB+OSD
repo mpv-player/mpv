@@ -25,7 +25,14 @@ There are many ways to get it:
    Note: currently available fonts are only for limited iso 8859-1/2 support,
    and there is a few special version for korean, russian etc codepages.
    You'd better building font yourself with tool mentioned above.
-   
+   Font should have appropriate font.desc file which maps unicode font
+   positions to the actual code page of the subtitles text. Other solution
+   is to have subtitles encoded in utf8 encoding and use -utf8 option
+   or just name the subtitles file <video_name>.utf and have it in the same
+   dir as the video file. Recoding from different codepages to utf8 could be
+   done by using konwert (debian) or iconv (RedHat) programs.
+
+
    some usefull URLs:
    ftp://ftp.mplayerhq.hu/MPlayer/releases/         - ISO fonts, OBSOLETED!
    ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/    - various fonts by users
