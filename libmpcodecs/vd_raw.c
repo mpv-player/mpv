@@ -32,6 +32,7 @@ static int init(sh_video_t *sh){
     // set format fourcc for raw RGB:
     if(sh->format==0){
 	switch(sh->bih->biBitCount){
+	case 8:  sh->format=IMGFMT_BGR8; break;
 	case 15: 
 	case 16: sh->format=IMGFMT_BGR15; break;
 	case 24: sh->format=IMGFMT_BGR24; break;
@@ -72,6 +73,10 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     } else {
 	mpi->planes[0]=data;
 	mpi->stride[0]=mpi->width*(mpi->bpp/8);
+	if(mpi->imgfmt==IMGFMT_RGB8 || mpi->imgfmt==IMGFMT_BGR8){
+	    // export palette:
+	    mpi->planes[1]=((unsigned char*)&sh->bih)+40;
+	}
     }
     
     return mpi;
