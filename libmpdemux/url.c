@@ -17,7 +17,7 @@ URL_t*
 url_new(char* url) {
 	int pos1, pos2;
 	URL_t* Curl;
-	char *ptr1, *ptr2;
+	char *ptr1, *ptr2, *ptr3;
 
 	// Create the URL container
 	Curl = (URL_t*)malloc(sizeof(URL_t));
@@ -49,6 +49,9 @@ url_new(char* url) {
 
 	// look if the port is given
 	ptr2 = strstr(ptr1+3, ":");
+	// If the : is after the first / it isn't the port
+	ptr3 = strstr(ptr1+3, "/");
+	if(ptr3 && ptr3 - ptr2 < 0) ptr2 = NULL;
 	if( ptr2==NULL ) {
 		// No port is given
 		// Look if a path is given

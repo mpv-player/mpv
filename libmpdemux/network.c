@@ -137,6 +137,17 @@ connect2Server(char *host, int port) {
 
 	// Turn back the socket as blocking
 	fcntl( socket_server_fd, F_SETFL, fcntl(socket_server_fd, F_GETFL) & ~O_NONBLOCK );
+	// Check if there were any error
+	err_len = sizeof(int);
+	ret =  getsockopt(socket_server_fd,SOL_SOCKET,SO_ERROR,&err,&err_len);
+	if(ret < 0) {
+		printf("getsockopt failed : %s\n",strerror(errno));
+		return -1;
+	}
+	if(err > 0) {
+		printf("Connect error : %s\n",strerror(err));
+		return -1;
+	}
 	return socket_server_fd;
 }
 
@@ -356,8 +367,8 @@ printf("read %d bytes from buffer\n", len );
 	if( len<size ) {
 		int ret;
 		ret = read( fd, buffer+len, size-len );
-		if( ret==0 ) {
-			printf("nop_streaming_read read 0 -ie- EOF\n");
+		if( ret<0 ) {
+			printf("nop_streaming_read error : %s\n",strerror(errno));
 		}
 		len += ret;
 //printf("read %d bytes from network\n", len );

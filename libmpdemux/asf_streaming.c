@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "config.h"
 
@@ -468,13 +469,16 @@ asf_http_streaming_start( stream_t *stream ) {
 		//http_hdr = asf_http_request( url );
 		http_hdr = asf_http_request( stream->streaming_ctrl );
 printf("Request [%s]\n", http_hdr->buffer );
-		write( fd, http_hdr->buffer, http_hdr->buffer_size );
-printf("1\n");
+                                for(i=0; i <  http_hdr->buffer_size ; ) {
+			int r = write( fd, http_hdr->buffer+i, http_hdr->buffer_size-i );
+			if(r <0) {
+			  printf("Socket write error : %s\n",strerror(errno));
+			  return -1;
+			}
+			i += r;
+		}       
 	//	http_free( http_hdr );
-printf("2\n");
-
 		http_hdr = http_new_header();
-printf("3\n");
 		do {
 			i = read( fd, buffer, BUFFER_SIZE );
 printf("read: %d\n", i );
