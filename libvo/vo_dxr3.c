@@ -244,7 +244,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	monitor_aspect = (float) width / (float) height;
 	
 	/* libavcodec requires a width and height that is x|16 */
-	aspect_save_orig(width, height);
+	/*aspect_save_orig(width, height);
 	aspect_save_prescale(d_width, d_height);
 	ioctl(fd_control, EM8300_IOCTL_GET_VIDEOMODE, &ioval);
 	if (ioval == EM8300_VIDEOMODE_NTSC) {
@@ -256,7 +256,9 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	}
 	aspect(&s_width, &s_height, A_ZOOM);
 	s_width -= s_width % 16;
-	s_height -= s_height % 16;
+	s_height -= s_height % 16;*/
+	s_width = ((v_width + 15) / 16) * 16;
+	s_height = ((height + 15) / 16) * 16;
 	
 	/* Try to figure out whether to use widescreen output or not */
 	/* Anamorphic widescreen modes makes this a pain in the ass */
