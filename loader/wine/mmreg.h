@@ -57,7 +57,16 @@ typedef struct _WAVEFORMATEX {
 } WAVEFORMATEX, *PWAVEFORMATEX, *NPWAVEFORMATEX, *LPWAVEFORMATEX;
 #endif /* _WAVEFORMATEX_ */
 
-#ifdef GUID_DEFINED
+#ifndef GUID_TYPE
+#define GUID_TYPE
+typedef struct
+{
+    unsigned long f1;
+    unsigned short f2;
+    unsigned short f3;
+    unsigned char f4[8];
+} GUID;
+#endif
 
 #ifndef _WAVEFORMATEXTENSIBLE_
 #define _WAVEFORMATEXTENSIBLE_
@@ -92,8 +101,6 @@ typedef WAVEFORMATEXTENSIBLE          WAVEFORMATIEEEFLOATEX; /* Format.cbSize = 
 typedef WAVEFORMATIEEEFLOATEX       *PWAVEFORMATIEEEFLOATEX;
 typedef WAVEFORMATIEEEFLOATEX NEAR *NPWAVEFORMATIEEEFLOATEX;
 typedef WAVEFORMATIEEEFLOATEX FAR  *LPWAVEFORMATIEEEFLOATEX;
-
-#endif // GUID_DEFINED
 
 
 /* WAVE form wFormatTag IDs */

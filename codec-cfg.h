@@ -38,12 +38,16 @@
 #define VFM_DIVX4 7
 #define VFM_RAW 8
 
+#ifndef GUID_TYPE
+#define GUID_TYPE
 typedef struct {
 	unsigned long f1;
 	unsigned short f2;
 	unsigned short f3;
 	unsigned char f4[8];
 } GUID;
+#endif
+
 
 typedef struct {
 	unsigned int fourcc[CODECS_MAX_FOURCC];
