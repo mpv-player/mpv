@@ -173,6 +173,8 @@ static void set_window(int force_update,const vo_tune_info_t *info)
     /* mDrawColorKey: */
 
     /* fill drawable with specified color */
+    XSetBackground( mDisplay,mGC,0 );
+    XClearWindow( mDisplay,mWindow );
     XSetForeground(mDisplay, mGC, fgColor);
     XFillRectangle(mDisplay, mWindow, mGC, drwX, drwY, drwWidth,
 	(mFullscreen ? drwHeight - 1 : drwHeight));
