@@ -387,9 +387,6 @@ NoPause:
         break;
 
 // --- timer events
-   case evHideMouseCursor:
-        wsVisibleMouse( &appMPlayer.subWindow,wsHideMouseCursor );
-        break;
    case evRedraw:
         mplMainRender=1;
         wsPostRedisplay( &appMPlayer.mainWindow );
@@ -418,8 +415,6 @@ void mplMainMouseHandle( int Button,int X,int Y,int RX,int RY )
 
  static int     SelectedItem = -1;
         int     currentselected = -1;
-
- wsVisibleMouse( &appMPlayer.subWindow,wsShowMouseCursor );
 
  for ( i=0;i < appMPlayer.NumberOfItems + 1;i++ )
   if ( ( appMPlayer.Items[i].pressed != btnDisabled )&&

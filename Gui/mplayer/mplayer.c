@@ -21,10 +21,8 @@
 #include "../../libmpdemux/stream.h"
 #include "../../mp_msg.h"
 
-#define mplMouseTimerConst  10
 #define mplRedrawTimerConst 5
 
-int mplMouseTimer  = mplMouseTimerConst;
 int mplRedrawTimer = mplRedrawTimerConst;
 int mplTimer = 0;
 
@@ -40,9 +38,7 @@ void mplEventHandling( int msg,float param );
 void mplTimerHandler( void )
 {
  mplTimer++;
- mplMouseTimer--;
  mplRedrawTimer--;
- if ( mplMouseTimer == 0 ) mplEventHandling( evHideMouseCursor,0 );
  if ( mplRedrawTimer == 0 ) mplEventHandling( evRedraw,0 );
 }
 

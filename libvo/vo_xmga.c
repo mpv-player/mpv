@@ -278,7 +278,7 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
    xWAttribs.colormap=XCreateColormap( mDisplay,RootWindow( mDisplay,mScreen ),vinfo.visual,AllocNone );
    xWAttribs.background_pixel=0;
    xWAttribs.border_pixel=0;
-   xWAttribs.event_mask=StructureNotifyMask | ExposureMask | KeyPressMask | ButtonPressMask | ButtonReleaseMask;
+   xWAttribs.event_mask=StructureNotifyMask | ExposureMask | KeyPressMask | ButtonPressMask | ButtonReleaseMask | PointerMotionMask;
    xswamask=CWBackPixel | CWBorderPixel | CWColormap | CWEventMask;
 
     if ( WinID>=0 ){
@@ -341,6 +341,8 @@ uninit(void)
 {
  if(!inited) return;
  inited=0;
+ XSetBackground( mDisplay,vo_gc,0 );
+ XClearWindow( mDisplay,vo_window );
  mga_uninit();
  saver_on(mDisplay);
  vo_x11_uninit(mDisplay, vo_window);

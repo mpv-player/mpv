@@ -216,6 +216,8 @@ extern int vo_vsync;
 extern int vo_fs;
 extern int vo_fsmode;
 
+extern int vo_mouse_timer_const;
+
 extern int vo_pts;
 extern float vo_fps;
 

@@ -1223,6 +1223,7 @@ if((video_out->preinit(vo_subdevice))!=0){
     mp_msg(MSGT_CPLAYER,MSGL_FATAL,"Error opening/initializing the selected video_out (-vo) device!\n");
     goto goto_next_file; // exit_player(MSGTR_Exit_error);
 }
+vo_mouse_timer_const=(int)sh_video->fps;
 sh_video->video_out=video_out;
 inited_flags|=INITED_VO;
 
@@ -2902,18 +2903,6 @@ if(benchmark){
   
 }
 
-#ifdef HAVE_NEW_GUI
- if( use_gui ) 
-  {
-#ifdef USE_DVDREAD
-   if ( !guiIntfStruct.DVDChanged ) 
-#endif
-   mplStop();
-#warning workaround for kiba playtree with gui ... if i dont play the prev/next file, then playtree sig6 (assert)
-//   eof=0;
-  }	
-#endif
-
 uninit_player(INITED_VO|INITED_AO);
 
 if(eof == PT_NEXT_ENTRY || eof == PT_PREV_ENTRY) {
@@ -2938,6 +2927,16 @@ if(eof == PT_NEXT_ENTRY || eof == PT_PREV_ENTRY) {
      uninit_player(INITED_ALL-(INITED_GUI+INITED_LIRC+INITED_INPUT));
      eof = eof == PT_PREV_SRC ? -1 : 1;
 }
+
+#ifdef HAVE_NEW_GUI
+ if( use_gui && !playtree_iter ) 
+  {
+#ifdef USE_DVDREAD
+   if ( !guiIntfStruct.DVDChanged ) 
+#endif
+   mplStop();
+  }	
+#endif
 
 if(eof == 0) eof = 1;
 

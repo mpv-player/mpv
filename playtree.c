@@ -477,6 +477,9 @@ int
 play_tree_iter_step(play_tree_iter_t* iter, int d,int with_nodes) {
   play_tree_t* pt;
 
+  if ( !iter ) return PLAY_TREE_ITER_ENTRY;
+  if ( !iter->root ) return PLAY_TREE_ITER_ENTRY;
+  
 #ifdef MP_DEBUG
   assert(iter != NULL);
   assert(iter->root != NULL);

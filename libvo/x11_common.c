@@ -86,8 +86,11 @@ void vo_hidecursor ( Display *disp , Window win )
 	bm_no = XCreateBitmapFromData(disp, win, bm_no_data, 8,8);    
 	no_ptr=XCreatePixmapCursor(disp, bm_no, bm_no,&black, &black,0, 0);									          
 	XDefineCursor(disp,win,no_ptr);
+	XFreeCursor( disp,no_ptr );
 }
 
+void vo_showcursor( Display *disp, Window win )
+{ XDefineCursor( disp,win,0 ); }
 
 #ifdef	SCAN_VISUALS
 /*
@@ -447,14 +450,20 @@ int vo_x11_uninit(Display *display, Window window)
     return(1);
 }
 
+       int vo_mouse_timer_const = 30;
+static int vo_mouse_counter = 30;
+
 int vo_x11_check_events(Display *mydisplay){
  int ret=0;
  XEvent         Event;
  char           buf[100];
  KeySym         keySym;
  static XComposeStatus stat;
+
 // unsigned long  vo_KeyTable[512];
 
+ if ( --vo_mouse_counter == 0 ) vo_hidecursor( mydisplay,vo_window );
+ 
  while ( XPending( mydisplay ) )
   {
    XNextEvent( mydisplay,&Event );
@@ -503,8 +512,12 @@ int vo_x11_check_events(Display *mydisplay){
             ret|=VO_EVENT_KEYPRESS;
 	   }
            break;
+      case MotionNotify:
+           vo_showcursor( mydisplay,vo_window ); vo_mouse_counter=vo_mouse_timer_const;
+           break;
 #ifdef HAVE_NEW_INPUT
       case ButtonPress:
+           vo_showcursor( mydisplay,vo_window ); vo_mouse_counter=vo_mouse_timer_const;
            // Ignore mouse whell press event
            if(Event.xbutton.button == 4 || Event.xbutton.button == 5) break;
 	   #ifdef HAVE_NEW_GUI
@@ -514,6 +527,7 @@ int vo_x11_check_events(Display *mydisplay){
            mplayer_put_key((MOUSE_BTN0+Event.xbutton.button-1)|MP_KEY_DOWN);
            break;
       case ButtonRelease:
+           vo_showcursor( mydisplay,vo_window ); vo_mouse_counter=vo_mouse_timer_const;
            #ifdef HAVE_NEW_GUI
 	    // Ignor mouse button 1 - 3 under gui 
 	    if ( use_gui && ( Event.xbutton.button >= 1 )&&( Event.xbutton.button <= 3 ) ) break;

@@ -21,8 +21,11 @@ extern int mScreen;
 extern int mLocalDisplay;
 extern int WinID;
 
+extern int vo_mouse_timer_const;
+
 int vo_init( void );
 int vo_hidecursor ( Display* , Window );
+extern void vo_showcursor( Display *disp, Window win );
 void vo_x11_decoration( Display * vo_Display,Window w,int d );
 void vo_x11_classhint( Display * display,Window window,char *name );
 void vo_x11_sizehint( int x, int y, int width, int height );

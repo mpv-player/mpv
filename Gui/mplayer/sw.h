@@ -26,10 +26,6 @@ void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )
  static int mplSubMoved = 0;
  static int msButton = 0;
 
- mplMouseTimer=mplMouseTimerConst;
- wsVisibleMouse( &appMPlayer.subWindow,wsShowMouseCursor );
-
-
  switch( Button )
   {
    case wsPMMouseButton:
@@ -67,7 +63,6 @@ void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )
                    break;
             case wsPRMouseButton:
                    mplMenuMouseHandle( X,Y,RX,RY );
-                   mplMouseTimer=mplMouseTimerConst;
                    break;
            }
           break;
