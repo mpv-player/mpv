@@ -278,39 +278,18 @@
   <LI><A HREF="encoding.html">7. Encoding with MEncoder</A>
     <UL>
       <LI><A HREF="encoding.html#2pass">7.1 Encoding 2 or 3-pass MPEG-4 ("DIVX")</A></LI>
-      <LI><A HREF="encoding.html#rescaling">7.2 Rescaling movies</A></LI>
-      <LI><A HREF="encoding.html#copying">7.3 Stream copying</A></LI>
-      <LI><A HREF="encoding.html#fixing">7.4 Fixing AVIs with broken index</A></LI>
-      <LI><A HREF="encoding.html#libavcodec">7.5 Encoding with the libavcodec codec family</A></LI>
-      <LI><A HREF="encoding.html#image_files">7.6 Encoding from multiple input image files (JPEGs or PNGs)</A></LI>
-      <LI><A HREF="encoding.html#vobsub">7.7 Extracting DVD subtitles to a Vobsub file</A></LI>
-      <LI><A HREF="encoding.html#aspect">7.8 Preserving aspect ratio</A></LI>
+      <LI><A HREF="encoding.html#mpeg">7.2 Encoding to MPEG format</A></LI>
+      <LI><A HREF="encoding.html#rescaling">7.3 Rescaling movies</A></LI>
+      <LI><A HREF="encoding.html#copying">7.4 Stream copying</A></LI>
+      <LI><A HREF="encoding.html#fixing">7.5 Fixing AVIs with broken index</A></LI>
+      <LI><A HREF="encoding.html#libavcodec">7.6 Encoding with the libavcodec codec family</A></LI>
+      <LI><A HREF="encoding.html#image_files">7.7 Encoding from multiple input image files (JPEGs or PNGs)</A></LI>
+      <LI><A HREF="encoding.html#vobsub">7.8 Extracting DVD subtitles to a Vobsub file</A></LI>
+      <LI><A HREF="encoding.html#aspect">7.9 Preserving aspect ratio</A></LI>
     </UL>
   </LI>
   <LI><A HREF="#mailing_lists">Appendix A - Mailing lists</A></LI>
-  <LI><A HREF="bugreports.html">Appendix B - How to report bugs</A>
-    <UL>
-      <LI><A HREF="bugreports.html#fix">B.1 How to fix bugs</A></LI>
-      <LI><A HREF="bugreports.html#report">B.2 How to report bugs</A></LI>
-      <LI><A HREF="bugreports.html#where">B.3 Where to report bugs</A></LI>
-      <LI><A HREF="bugreports.html#what">B.4 What to report</A>
-        <UL>
-          <LI><A HREF="bugreports.html#system">B.4.1 System information</A></LI>
-          <LI><A HREF="bugreports.html#hardware">B.4.2 Hardware and Drivers</A></LI>
-          <LI><A HREF="bugreports.html#compilation">B.4.3 Compilation problems</A></LI>
-          <LI><A HREF="bugreports.html#configure">B.4.4 Configure problems</A></LI>
-          <LI><A HREF="bugreports.html#playback">B.4.5 Playback problems</A></LI>
-          <LI><A HREF="bugreports.html#crash">B.4.6 Crashes</A>
-            <UL>
-              <LI><A HREF="bugreports.html#debug">B.4.6.1 How to conserve information about a reproducible crash</A></LI>
-              <LI><A HREF="bugreports.html#core">B.4.6.2 How to extract meaningful information from a core dump</A></LI>
-            </UL>
-          </LI>
-        </UL>
-      </LI>
-      <LI><A HREF="bugreports.html#advusers">B.5 I know what I am doing...</A></LI>
-    </UL>
-  </LI>
+  <LI><A HREF="bugreports.html">Appendix B - How to report bugs</A></LI>
   <LI><A HREF="#known_bugs">Appendix C - Known bugs</A></LI>
   <LI><A HREF="skin.html">Appendix D - MPlayer skin format</A>
     <UL>
@@ -1104,7 +1083,7 @@ There are three timing methods in MPlayer.
     The power management functions of some notebook BIOSes with speedstep CPUs
     interact badly with RTC. Audio and video may get out of sync. Plugging the
     external power connector in before you power up your notebook seems to help.
-    You can always turn off RTC support with the <CODE>-nortc</CODE> switch.
+    You can always turn off RTC support with the <CODE>-nortc</CODE> option.
     In some hardware combinations (confirmed during usage of non-DMA DVD
     drive on an ALi1541 board) usage of the RTC timer causes skippy playback.
     It's recommended to use the third method in these cases.</LI>
@@ -1360,7 +1339,7 @@ on:driver=v4l:width=640:height=480 -vo xv</CODE><BR>
   using a simple config file.  The syntax consist of a key name followed by a
   command. The default config file location is
   <CODE>$HOME/.mplayer/input.conf</CODE> but it can be overridden using the
-  <CODE>-input</CODE> conf switch (relative path are relative to
+  <CODE>-input</CODE> conf option (relative path are relative to
   <CODE>$HOME/.mplayer</CODE>).
 
 <P>Example:</P>
@@ -1548,13 +1527,13 @@ end
 </PRE>
 
 <P>If you don't like the standard location for the lirc-config file (~/.lircrc)
-  use the -lircconf &lt;filename&gt; switch to specify another file.</P>
+  use the -lircconf &lt;filename&gt; option to specify another file.</P>
 
 
 <H3><A NAME="slave">3.2.3 Slave mode</A></H3>
 
 <P>The slave mode allow you to build simple frontend to MPlayer. When
-  enabled (with the <CODE>-slave</CODE> switch) MPlayer will read
+  enabled (with the <CODE>-slave</CODE> option) MPlayer will read
   commands separated by new line (\n) from stdin.</P>
 
 

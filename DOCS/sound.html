@@ -237,7 +237,7 @@
   is normally automated but can be overridden. The filters are activated when
   the properties of the audio data differ from those required by the sound card
   and deactivated if unnecessary. The <CODE>-af filter1,filter2,...</CODE>
-  switch is used to override the automatic activation of filters or to insert
+  option is used to override the automatic activation of filters or to insert
   filters that are not automatically inserted. The filters will be executed as
   they appear in the comma separated list.</P>
 
@@ -247,10 +247,10 @@
 <P>would run the sound through the resampling filter followed by the pan filter.
   Observe that the list must not contain any spaces, else it will fail.</P>
 
-<P>The filters often have switches that change their behavior. These switches
+<P>The filters often have options that change their behavior. These options
   are explained in detail in the sections below. A filter will execute using
-  default settings if its switches are omitted. Here is an example of how to use
-  filters in combination with filter specific switches:</P>
+  default settings if its options are omitted. Here is an example of how to use
+  filters in combination with filter specific options:</P>
 
 <P>&nbsp;&nbsp;<CODE>mplayer -af resample=11025,pan=1:0.5:0.5 -channels 1
   -srate 11025 media.avi</CODE></P>
@@ -259,7 +259,7 @@
   the audio to 1 channel using the pan filter.</P>
 
 <P>The overall execution of the filter layer is controlled using the
-  <CODE>-af-adv</CODE> switch. This switch has two suboptions:</P>
+  <CODE>-af-adv</CODE> option. This option has two suboptions:</P>
 
 <DL>
   <DT><CODE>force</CODE><DT>
@@ -296,28 +296,30 @@
   </DD>
 
   <DT><CODE>list</CODE></DT>
-  <DD>is an alias for the -af switch.</DD>
+  <DD>is an alias for the -af option.</DD>
 </DL>
 
-<P>The filter layer is also affected by the following generic switches:
+<P>The filter layer is also affected by the following generic options:
 
 <DL>
   <DT><CODE>-v</CODE></DT>
   <DD>Increases the verbosity level and makes most filters print out extra
     status messages.</DD>
   <DT><CODE>-channels</CODE></DT>
-  <DD>This option sets the number of output channels your sound card is using.
+  <DD>This option sets the number of output channels you would like your
+    sound card to use.
     It also affects the number of channels that are being decoded from the
     media. If the media contains less channels than requested the channels
     filter (see below) will automatically be inserted. The routing will be the
     default routing for the channels filter.</DD>
   <DT><CODE>-srate</CODE></DT>
-  <DD>This option selects the sample rate of your sound card. If the sample
+  <DD>This option selects the sample rate you would like your sound card to
+    use (of course the cards have limits on this). If the sample
     frequency of your sound card is different from that of the current media,
     the resample filter (see below) will be inserted into the audio filter layer
     to compensate for the difference.</DD>
   <DT><CODE>-format</CODE><DT>
-  <DD>This option sets the sample format of the audio filter layer and the sound
+  <DD>This option sets the sample format between the audio filter layer and the sound
     card. If the requested sample format of your sound card is different from
     that of the current media, a format filter (see below) will be inserted to
     rectify the difference.</DD>
@@ -331,7 +333,7 @@
   have a fixed frequency sound card or if you are stuck with an old sound card
   that is only capable of max 44.1kHz. This filter is automatically enabled if
   it is necessary, but it can also be explicitly enabled on the command line. It
-  has three switches:</P>
+  has three options:</P>
 
 <DL>
   <DT><CODE>srate &lt;8000-192000&gt;</CODE></DT>
@@ -344,7 +346,7 @@
 
   <DT><CODE>sloppy</CODE></DT>
   <DD>is an optional binary parameter that allows the output frequency to differ
-    slightly from the frequency given by <CODE>srate</CODE>. This switch can be
+    slightly from the frequency given by <CODE>srate</CODE>. This option can be
     used if the startup of the playback is extremely slow. It is enabled by
     default.</DD>
 
@@ -373,12 +375,12 @@
   channels, it can also be used for routing or copying channels. It is
   automatically enabled when the output from the audio filter layer differs from
   the input layer or when it is requested by another filter. This filter unloads
-  itself if not needed. The number of switches is dynamic:</P>
+  itself if not needed. The number of options is dynamic:</P>
 
 <DL>
   <DT><CODE>nch &lt;1-6&gt;</CODE></DT>
   <DD>is an integer between <CODE>1</CODE> and <CODE>6</CODE> that is used for
-    setting the number of output channels. This switch is required, leaving it
+    setting the number of output channels. This option is required, leaving it
     empty results in a runtime error.</DD>
 
   <DT><CODE>nr &lt;1-6&gt;</CODE></DT>
@@ -421,7 +423,7 @@
 <DL>
   <DT><CODE>bps &lt;number&gt;</CODE></DT>
   <DD>can be <CODE>1</CODE>, <CODE>2</CODE> or <CODE>4</CODE> and denotes the
-    number of bytes per sample. This switch is required, leaving it empty
+    number of bytes per sample. This option is required, leaving it empty
     results in a runtime error.</DD>
 
   <DT><CODE>f &lt;format&gt;</CODE></DT>
@@ -429,7 +431,7 @@
     concatenated mix of: <CODE>alaw</CODE>, <CODE>mulaw</CODE> or
     <CODE>imaadpcm</CODE>, <CODE>float</CODE> or <CODE>int</CODE>,
     <CODE>unsigned</CODE> or <CODE>signed</CODE>, <CODE>le</CODE> or
-    <CODE>be</CODE> (little or big endian). This switch is required, leaving it
+    <CODE>be</CODE> (little or big endian). This option is required, leaving it
     empty results in a runtime error.</DD>
 </DL>
 
@@ -485,7 +487,7 @@
   If there is an external amplifier connected to the computer (this is almost
   always the case), the noise level can be minimized by adjusting the master
   level and the volume knob on the amplifier until the hissing noise in the
-  background is gone. This filter has two switches:</P>
+  background is gone. This filter has two options:</P>
 
 <DL>
   <DT><CODE>v &lt;-200 - +60&gt;</CODE></DT>
@@ -495,7 +497,7 @@
   <DT><CODE>c</CODE></DT>
   <DD>is a binary control that turns soft clipping on and off. Soft-clipping can
     make the sound more smooth if very high volume levels are used. Enable this
-    switch if the dynamic range of the loudspeakers is very low. Be aware that
+    option if the dynamic range of the loudspeakers is very low. Be aware that
     this feature creates distortion and should be considered a last resort.</DD>
 </DL>
 
@@ -554,11 +556,11 @@
   canceling it almost completely around 1kHz.</P>
 
 
-<H5><A NAME="af_panning">2.3.2.3.7 Panning filter </A></H5>
+<H5><A NAME="af_panning">2.3.2.3.7 Panning filter</A></H5>
 
 <P>Use the <CODE>pan</CODE> filter to mix channels arbitrarily. It is basically
   a combination of the volume control and the channels filter. There are two
-  major uses for this filter: </P>
+  major uses for this filter:</P>
 
 <OL>
   <LI>Down-mixing many channels to only a few, stereo to mono for example.</LI>
@@ -566,13 +568,13 @@
 </OL>
 
 <P>This filter is hard to use, and will require some tinkering before the
-  desired result is obtained. The number of switches for this filter depends on
+  desired result is obtained. The number of options for this filter depends on
   the number of output channels:</P>
 
 <DL>
   <DT><CODE>nch &lt;1-6&gt;</CODE></DT>
   <DD>is an integer between <CODE>1</CODE> and <CODE>6</CODE> and is used for
-    setting the number of output channels. This switch is required, leaving it
+    setting the number of output channels. This option is required, leaving it
     empty results in a runtime error.</DD>
 
   <DT><CODE>l00:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...</CODE></DT>
@@ -653,16 +655,14 @@
   speakers.</P>
 
 
-
+<H4><A NAME="plugins">2.3.2.4 Audio plugins (deprecated)</A></H4>
 
 <H2><STRONG>Note: Audio plugins have been deprecated by audio filters and will be
   removed soon.</STRONG></H2>
 
-<H4><A NAME="plugins">2.3.2.4 Audio plugins (deprecated)</A></H4>
-
 <P>MPlayer has support for audio plugins. Audio plugins can be used to
   change the properties of the audio data before it reaches the sound
-  card. They are enabled using the <CODE>-aop</CODE> switch which takes a
+  card. They are enabled using the <CODE>-aop</CODE> option which takes a
   <CODE>list=plugin1,plugin2,...</CODE> argument. The <CODE>list</CODE> argument
   is required and determines which plugins should be used and in which order they
   should be executed. Example:</P>
@@ -672,10 +672,10 @@
 <P>would run the sound through the resampling plugin followed by the format
   plugin.</P>
 
-<P>The plugins can also have switches that change their behavior. These
-  switches are explained in detail in the sections below. A plugin will execute
-  using default settings if its switches are omitted.  Here is an example of how
-  to use plugins in combination with plugin specific switches:</P>
+<P>The plugins can also have options that change their behavior. These
+  options are explained in detail in the sections below. A plugin will execute
+  using default settings if its options are omitted.  Here is an example of how
+  to use plugins in combination with plugin specific options:</P>
 
 <P>&nbsp;&nbsp;<CODE>mplayer media.avi -aop
   list=resample,format:fout=44100:format=0x8</CODE></P>
@@ -692,7 +692,7 @@
   be used if you have a fixed frequency sound card or if you are
   stuck with an old sound card that is only capable of max 44.1kHz.
   MPlayer <EM>autodetects</EM> whether or not usage of this plugin is necessary.
-  This plugin has one switch, <CODE>fout</CODE>, which is used for setting the
+  This plugin has one option, <CODE>fout</CODE>, which is used for setting the
   desired output sample frequency. The value is given in Hz, and defaults to
   48kHz.</P>
 
@@ -721,7 +721,7 @@
 <P>If your sound card driver does not support signed 16bit <CODE>int</CODE> data type,
   this plugin can
   be used to change the format to one which your sound card can understand. It
-  has one switch, <CODE>format</CODE>, which can be set to one of the numbers
+  has one option, <CODE>format</CODE>, which can be set to one of the numbers
   found in <CODE>libao2/afmt.h</CODE>. This plugin is hardly ever needed and is
   intended for advanced users. Keep in mind that this plugin only changes the
   sample format and not the sample frequency or the number of channels.</P>
@@ -749,7 +749,7 @@
   can be used on machines with a broken mixer device. It can also be
   used if one wants to change the output volume of MPlayer
   without changing the PCM volume setting in the mixer. It has one
-  switch <CODE>volume</CODE> that is used for setting the initial
+  option <CODE>volume</CODE> that is used for setting the initial
   sound level. The initial sound level can be set to values between 0
   and 255 and defaults to 101 which equals 0dB amplification. Use this
   plugin with caution since it can reduce the signal to noise ratio of

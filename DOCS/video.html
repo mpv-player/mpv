@@ -258,7 +258,7 @@
   --enable-dga.</P>
 
 <P>If the driver couldn't switch to a smaller resolution, experiment with
-  switches -vm (only with X 3.3.x), -fs, -bpp, -zoom to find a video mode that
+  options -vm (only with X 3.3.x), -fs, -bpp, -zoom to find a video mode that
   the movie fits in. There is no converter right now :(</P>
 
 <P>Become root. DGA needs root access to be able to write directly to video
@@ -315,7 +315,7 @@
 <P>The DGA driver is invoked by specifying -vo dga at the command line.
   The default behavior is to switch to a resolution matching the original
   resolution of the video as close as possible. It deliberately ignores the
-  -vm and -fs switches (enabling of video mode switching and fullscreen) -
+  -vm and -fs options (enabling of video mode switching and fullscreen) -
   it always tries to cover as much area of your screen as possible by switching
   the video mode, thus refraining to use a single additional cycle of your CPU
   to scale the image.
@@ -459,7 +459,7 @@
 <P>SDL video output supports displaying subtitles under the movie, on the (if
   present) black bar.</P>
 
-<P><B>There are several command line switches for SDL:</B></P>
+<P><B>There are several command line options for SDL:</B></P>
 <DL>
   <DT><CODE>-vo sdl:name</CODE></DT>
   <DD>specifies sdl video driver to use (i.e.. aalib, dga, x11)</DD>
@@ -501,7 +501,7 @@
 
 <H4>Notes</H4>
 
-<P>Be sure not to use the -fs switch, since it toggles the usage of the software
+<P>Be sure not to use the -fs option, since it toggles the usage of the software
   scaler, and it's slow. If you really need it, use the <CODE>-sws 4</CODE>
   option which will produce bad quality, but is somewhat faster.</P>
 
@@ -705,8 +705,8 @@
 <P>NOTE: the rendering is very CPU intensive, especially when using AA-on-X
   (using aalib on X), and it's least CPU intensive on standard,
   non-framebuffer console. Use SVGATextMode to set up a big textmode,
-  then enjoy! (secondary head Hercules cards rock :)) (anyone can enhance
-  fbdev to do conversion/dithering to hgafb? Would be neat :)</P>
+  then enjoy! (secondary head Hercules cards rock :)) (but imho you can use
+  <CODE>-vop 1bpp</CODE> option to get graphics on hgafb:)</P>
 
 <P>Use the <CODE>-framedrop</CODE> option if your computer isn't fast enough to
   render all frames!</P>
@@ -1041,7 +1041,7 @@ Indeed it doesn't matter which video output driver is used with <B>VIDIX</B>.
   <CODE>expand=w:h:x:y:1</CODE> (the 5th parameter <CODE>:1</CODE> at the end
   will enable OSD rendering). You may want to move the image up a bit to get a
   bigger black zone for subtitles. You may also want to move subtitles up, if
-  they are outside your TV screen, use the <CODE>-subpos &lt;0-100&gt;</CODE> switch
+  they are outside your TV screen, use the <CODE>-subpos &lt;0-100&gt;</CODE> option
   to adjust this (<CODE>-subpos 80</CODE> is a good choice).</P>
 
 <P>In order to play non-25fps movies on a PAL TV or with a slow CPU, add the

@@ -87,6 +87,25 @@
     -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o movie.avi</CODE></P>
 
 
+<H2><A NAME="mpeg">7.1 Encoding to MPEG format</A></H2>
+
+<P>MEncoder can create MPEG (MPEG-PS) format output files. It's probably
+  useful only with libavcodec's <I>mpeg1video</I> codec, because players
+  - except MPlayer - expect MPEG1 video, and MPEG1 layer 2 (MP2) audio streams
+  in MPEG files.</P>
+  
+<P>This feature is not very useful right now, aside that it probably has
+  many bugs, but the more importantly because MEncoder currently cannot encode
+  MPEG1 layer 2 (MP2) audio, which all other players expect in MPEG files.</P>
+  
+<P>To change MEncoder's output file format, use the <CODE>-of mpeg</CODE>
+  option.</P>
+
+<P>Example:<BR>
+  &nbsp;&nbsp;<CODE>mencoder -of mpeg -ovc lavc -lavcopts vcodec=mpeg1video
+  -oac copy &lt;other options&gt; media.avi -o output.mpg</CODE></P>
+
+
 <H2><A NAME="rescaling">7.2 Rescaling movies</A></H2>
 
 <P>Often the need to resize movie images' size emerges. Its reasons can be
@@ -185,7 +204,7 @@ Explanation of the process:
 <H4>Examples</H4>
 
 <P>The explanation of the <CODE>-mf</CODE> option can be found below in the
-  global <A HREF="#options">Options</A> section and in the man page.</P>
+  man page.</P>
 
 <P><I>Creating a DivX4 file from all the JPEG files in the current dir:</I><BR>
   &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25 -ovc divx4
