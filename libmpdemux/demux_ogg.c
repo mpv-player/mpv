@@ -129,6 +129,72 @@ typedef struct ogg_demuxer {
 
 extern int index_mode;
 
+//-------- subtitle support - should be moved to decoder layer, and queue
+//                          - subtitles up in demuxer buffer...
+
+#include "../subreader.h"
+#include "../libvo/sub.h"
+#define OGG_SUB_MAX_LINE 128
+
+static subtitle ogg_sub;
+extern subtitle* vo_sub;
+//FILE* subout;
+
+void demux_ogg_init_sub () {
+  int lcv;
+  if(!ogg_sub.text[0]) // not yet allocated
+  for (lcv = 0; lcv < SUB_MAX_TEXT; lcv++) {
+    ogg_sub.text[lcv] = (char*)malloc(OGG_SUB_MAX_LINE);
+  }
+}
+
+void demux_ogg_add_sub (char* packet) {
+  int lcv;
+  int line_pos = 0;
+  int ignoring = 0;
+
+  mp_msg(MSGT_DEMUX,MSGL_DBG2,"\ndemux_ogg_add_sub %02X %02X %02X '%s'\n",
+      (unsigned char)packet[0],
+      (unsigned char)packet[1],
+      (unsigned char)packet[2],
+      &packet[3]);
+
+  ogg_sub.lines = 0;
+  if (((unsigned char)packet[0]) == 0x88) { // some subtitle text
+    lcv = 3;
+    while (1) {
+      int c = packet[lcv++];
+      if(c=='\r' || c==0 || line_pos >= OGG_SUB_MAX_LINE-1){
+	  ogg_sub.text[ogg_sub.lines][line_pos] = 0; // close sub
+          if(line_pos) ogg_sub.lines++;
+	  if(!c || ogg_sub.lines>=SUB_MAX_TEXT) break; // EOL or TooMany
+          line_pos = 0;
+      }
+      switch (c) {
+        case '\r':
+        case '\n': // just ignore linefeeds for now
+                   // their placement seems rather haphazard
+          break;
+        case '<': // some html markup, ignore for now
+          ignoring = 1;
+          break;
+        case '>':
+          ignoring = 0;
+          break;
+        default:
+          //if(!ignoring) 
+	  ogg_sub.text[ogg_sub.lines][line_pos++] = c;
+          break;
+      }
+    }
+  }
+
+  mp_msg(MSGT_DEMUX,MSGL_DBG2,"ogg sub lines: %d  first: '%s'\n",
+      ogg_sub.lines, ogg_sub.text[0]);
+  vo_sub = &ogg_sub;
+  vo_osd_changed(OSDTYPE_SUBTITLE);
+}
+
 
 // get the logical stream of the current page
 // fill os if non NULL and return the stream id
@@ -209,6 +275,10 @@ static int demux_ogg_add_packet(demux_stream_t* ds,ogg_stream_t* os,ogg_packet* 
   float pts = 0;
   int flags = 0;
 
+  if (ds == d->sub) { // don't want to add subtitles to the demuxer for now
+    demux_ogg_add_sub(pack->packet);
+    return 0;
+  }
   // If packet is an header we jump it except for vorbis
   if((*pack->packet & PACKET_TYPE_HEADER) && 
      (ds == d->video || (ds == d->audio && ( ((sh_audio_t*)ds->sh)->format != 0xFFFE || os->hdr_packets >= NUM_VORBIS_HDR_PACKETS ) ) ))
@@ -345,7 +415,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
   ogg_demuxer_t* ogg_d;
   stream_t *s;
   char* buf;
-  int np,s_no, n_audio = 0, n_video = 0;
+  int np,s_no, n_audio = 0, n_video = 0, n_text = 0;
   ogg_sync_state* sync;
   ogg_page* page;
   ogg_packet pack;
@@ -516,8 +586,11 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	if(verbose) print_wave_header(sh_a->wf);
 
 	/// Check for text (subtitles) header
-      } else if(strncmp(st->streamtype,"text",4) == 0) {
-	mp_msg(MSGT_DEMUX,MSGL_WARN,"OGG text stream are not supported\n");
+      } else if (strncmp(st->streamtype, "text", 4) == 0) {
+          mp_msg(MSGT_DEMUX, MSGL_V, "OGG stream %d is text\n", ogg_d->num_sub);
+          if(demuxer->sub->id==-1) demuxer->sub->id = ogg_d->num_sub;
+          n_text++;
+          demux_ogg_init_sub();
 	//// Unknow header type
       } else
 	mp_msg(MSGT_DEMUX,MSGL_ERR,"OGG stream %d has a header marker but is of an unknow type\n",ogg_d->num_sub);
@@ -570,6 +643,8 @@ int demux_ogg_open(demuxer_t* demuxer) {
     demuxer->video->id = -2;
   if(!n_audio)
     demuxer->audio->id = -2;
+  if(!n_text)
+    demuxer->sub->id = -2;
 
   if(!s->end_pos)
     demuxer->seekable = 0;
@@ -581,7 +656,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
       demux_ogg_build_syncpoints_table(demuxer);
   }
 
-  mp_msg(MSGT_DEMUX,MSGL_V,"OGG demuxer : found %d audio stream and %d video stream\n",n_audio,n_video);
+  mp_msg(MSGT_DEMUX,MSGL_V,"OGG demuxer : found %d audio stream%s, %d video stream%s and %d text stream%s\n",n_audio,n_audio>1?"s":"",n_video,n_video>1?"s":"",n_text,n_text>1?"s":"");
  
   return 1;
 }
@@ -658,6 +733,8 @@ int demux_ogg_fill_buffer(demuxer_t *d) {
       ds = d->audio;
     else if(id == d->video->id)
       ds = d->video;
+    else if (id == d->sub->id)
+      ds = d->sub;
 
     if(ds) {
       if(!demux_ogg_add_packet(ds,&ogg_d->subs[id],&pack))
