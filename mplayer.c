@@ -628,7 +628,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 	printf("Using %s timing\n",softsleep?"software":"usleep()");
 
 #ifdef USE_TERMCAP
-  if ( !use_gui ) load_termcap(NULL); // load key-codes
+  load_termcap(NULL); // load key-codes
 #endif
 
 // ========== Init keyboard FIFO (connection to libvo) ============
@@ -685,10 +685,12 @@ play_next_file:
 #ifdef USE_SUB
 // check .sub
   if(sub_name){
+#if 0
        int l=strlen(sub_name);
        if ((l>4) && ((0==strcmp(&sub_name[l-4],".utf"))
 		   ||(0==strcmp(&sub_name[l-4],".UTF"))))
 	  sub_utf8=1;
+#endif  
        subtitles=sub_read_file(sub_name);
        if(!subtitles || sub_num == 0) mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadSub,sub_name);
   }
@@ -696,7 +698,9 @@ play_next_file:
       if(sub_auto && filename) { // auto load sub file ...
          subtitles=sub_read_file( sub_filename( get_path("sub/"), filename ) );
       }
+#if 0
       if(!subtitles) subtitles=sub_read_file(get_path("default.sub")); // try default
+#endif
   }
 #endif
 
