@@ -1,5 +1,7 @@
 /*
- *  video_out_sdl.c
+ *  vo_sdl.c
+ *
+ *  (was video_out_sdl.c from OMS project)
  *
  *  Copyright (C) Ryan C. Gordon <icculus@lokigames.com> - April 22, 2000.
  *
@@ -50,13 +52,16 @@
  *    - Minor bugfix to aspect-ratio vor non-4:3-resolutions (like 1280x1024)
  *    - Bugfix to check_events() to reveal mouse cursor after 'q'-quit in
  *       fullscreen-mode
- *    Felix Buenemann <Atmosfear@users.sourceforge.net> - March 12, 2001
+ *    Felix Buenemann <Atmosfear@users.sourceforge.net> - April 10, 2001
  *    - Changed keypress-detection from keydown to keyup, seems to fix keyrepeat
  *       bug (key had to be pressed twice to be detected)
  *    - Changed key-handling: 'f' cycles fullscreen/windowed, ESC/RETURN/'q' quits
  *    - Bugfix which avoids exit, because return is passed to sdl-output on startup,
  *       which caused the player to exit (keyboard-buffer problem? better solution
  *       recommed)
+ *    Felix Buenemann <Atmosfear@users.sourceforge.net> - April 11, 2001
+ *    - OSD and subtitle support added
+ *    - some minor code-changes
  */
 
 #include <stdio.h>
@@ -74,6 +79,9 @@ LIBVO_EXTERN(sdl)
 
 //#include "log.h"
 //#define LOG if(0)printf
+
+/* Uncomment if you want to force Xv SDL output? */
+/* #define SDL_FORCEXV */
 
 static vo_info_t vo_info = 
 {
@@ -117,7 +125,26 @@ static struct sdl_priv_s {
 } sdl_priv;
 
 
-/** OMS Plugin functions **/
+/** libvo Plugin functions **/
+
+/**
+ * draw_alpha is used for osd and subtitle display.
+ *
+ **/
+
+//void vo_draw_alpha_yv12(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride);
+//void vo_draw_alpha_yuy2(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride);
+
+static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
+    struct sdl_priv_s *priv = &sdl_priv;
+    int x,y;
+	
+  if (priv->format==IMGFMT_YV12)
+    vo_draw_alpha_yv12(w,h,src,srca,stride,((uint8_t *) *(priv->overlay->pixels))+priv->width*y0+x0,priv->width);
+  else
+    vo_draw_alpha_yuy2(w,h,src,srca,stride,((uint8_t *) *(priv->overlay->pixels))+2*(priv->width*y0+x0),2*priv->width);
+
+}
 
 
 /**
@@ -156,6 +183,11 @@ static int sdl_open (void *plugin, void *name)
 	opened = 1;
 
 //	LOG (LOG_DEBUG, "SDL video out: Opened Plugin");
+
+	/* does the user want SDL to try and force Xv */
+	#ifdef SDL_FORCEXV
+		setenv("SDL_VIDEO_X11_NODIRECTCOLOR", "1", 1);
+	#endif
 	
 	/* default to no fullscreen mode, we'll set this as soon we have the avail. modes */
 	priv->fullmode = -2;
@@ -165,6 +197,7 @@ static int sdl_open (void *plugin, void *name)
 	priv->surface = NULL;
 	priv->overlay = NULL;
 	priv->fullmodes = NULL;
+	priv->bpp = 0; //added atmos
 
 	/* initialize the SDL Video system */
 	if (SDL_Init (SDL_INIT_VIDEO)) {
@@ -218,7 +251,6 @@ increase your display's color depth, if possible", priv->bpp);
 	
 	/* We dont want those in out event queue */
 	SDL_EventState(SDL_ACTIVEEVENT, SDL_IGNORE);
-	//SDL_EventState(SDL_KEYUP, SDL_IGNORE);
 	SDL_EventState(SDL_KEYDOWN, SDL_IGNORE);
 	SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
 	SDL_EventState(SDL_MOUSEBUTTONDOWN, SDL_IGNORE);
@@ -242,9 +274,6 @@ increase your display's color depth, if possible", priv->bpp);
 static int sdl_close (void)
 {
 	struct sdl_priv_s *priv = &sdl_priv;
-	
-//	LOG (LOG_DEBUG, "SDL video out: Closed Plugin");
-//	LOG (LOG_INFO, "SDL video out: Closed Plugin");
 
 	/* Cleanup YUV Overlay structure */
 	if (priv->overlay) 
@@ -254,10 +283,13 @@ static int sdl_close (void)
 	if (priv->surface)
 		SDL_FreeSurface(priv->surface);
 	
-	/* TODO: cleanup the full_modes array */
+	/* DONT attempt to free the fullscreen modes array. SDL_Quit* does this for us */
 	
 	/* Cleanup SDL */
-	SDL_Quit();
+	SDL_Quit(); /* might have to be changed to quitsubsystem only, if plugins become
+		       changeable on the fly */
+
+//	LOG (LOG_DEBUG, "SDL video out: Closed Plugin");
 
 	return 0;
 }
@@ -316,17 +348,27 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 //static int sdl_setup (int width, int height)
 {
 	struct sdl_priv_s *priv = &sdl_priv;
-        unsigned int sdl_format, aspectheight;
+        unsigned int sdl_format;
+
 
         switch(format){
-          case IMGFMT_YV12: sdl_format=SDL_YV12_OVERLAY;break;
-          case IMGFMT_YUY2: sdl_format=SDL_YUY2_OVERLAY;break;
+          case IMGFMT_YV12:
+	  	sdl_format=SDL_YV12_OVERLAY;
+		printf("SDL: Using YV12 image format\n");
+	  break;
+          case IMGFMT_YUY2:
+	  	sdl_format=SDL_YUY2_OVERLAY;
+		printf("SDL: Using YUY2 image format\n");
+	  break;
           default:
             printf("SDL: Unsupported image format (0x%X)\n",format);
             return -1;
         }
 
 	sdl_open (NULL, NULL);
+
+	/* Set output window title */
+	SDL_WM_SetCaption (".: MPlayer : F = Fullscreen/Windowed : Keypad + = Cycle Fullscreen Resolutions :.", "SDL Video Out");
 
 	/* Save the original Image size */
 	
@@ -569,6 +611,9 @@ static void flip_page (void)
 {
 	struct sdl_priv_s *priv = &sdl_priv;
 
+	//vo_draw_alpha_yuy2(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride)
+	vo_draw_text(priv->width,priv->height,draw_alpha);	
+		
 	/* check and react on keypresses and window resizes */
 	check_events();
 
