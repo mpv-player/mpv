@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<sect1 id="edl" xreflabel="TV input">
+<title>Edit Decision Lists (EDL)</title>
+
+<para>
+The edit decision list (EDL) system allows you to automatically skip
+or mute sections of videos during playback, based on a movie specific
+EDL configuration file.
+</para>
+
+<para>
+This is useful for those who may want to watch a film in "family-friendly"
+mode. You can cut out any violence, profanity, Jar-Jar Binks .. from a movie
+according to your own personal preferences. Aside from this, there are other
+uses, like automatically skipping over commercials in video files you watch.
+</para>
+
+<para>
+The EDL file format is pretty bare-bones. Once the EDL system has reached a
+certain level of maturity, an XML-based file format will probably be implemented
+(keeping backwards compatibility with previous EDL formats).
+</para>
+
+<para>
+The maximum number of EDL entries for the current incarnation of EDL is 1000.
+If you happen to need more, change the <systemitem>#define MAX_EDL_ENTRIES</systemitem>
+in the <filename>edl.h</filename> file.
+</para>
+
+<sect2 id="edl_using">
+<title>Using an EDL file</title>
+<para>
+Include the <option>-edl &lt;filename&gt;</option> flag when you run
+<application>MPlayer</application>, with the name of the EDL file you
+want applied to the video.
+</para>
+</sect2>
+
+<sect2 id="edl_making">
+<title>Making an EDL file</title>
+<para>
+The current EDL file format is:
+<programlisting>
+[begin second] [end second] [action]
+</programlisting>
+Where the seconds are floating-point numbers and the action is either
+<literal>0</literal> for skip or <literal>1</literal> for mute. Example:
+<programlisting>
+5.3   7.1    0
+15    16.7   1
+420   422    0
+</programlisting>
+This will skip from second 5.3 to second 7.1 of the video, then mute at
+15 seconds, unmute at 16.7 seconds and skip from second 420 to second 422
+of the video. These actions will be performed when the playback timer
+reaches the times given in the file.
+</para>
+
+<para>
+To create an EDL file to work from, use the <option>-edlout &lt;filename&gt;</option>
+flag. During playback, when you want to mark the previous two seconds to skip over,
+hit <keycap>i</keycap>. A corresponding entry will be written to the file for
+that time. You can then go back and fine-tune the generated EDL file.
+</para>
+</sect2>
+</sect1>

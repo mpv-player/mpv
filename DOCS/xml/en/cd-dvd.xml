@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<chapter id="cd-dvd">
+<title>CD/DVD usage</title>
+
+<sect1 id="drives">
+<title>CD/DVD drives</title>
+<para>
+Linux documentation excerpt:
+</para>
+
+<para>
+Modern CD-ROM drives can attain very high head speeds, yet some CD-ROM drives
+are capable of running at reduced speeds. There are several reasons that might
+make you consider changing the speed of a CD-ROM drive:
+</para>
+
+<itemizedlist>
+<listitem><para>
+There have been reports of read errors at high speeds, especially
+with badly pressed CD-ROMs. Reducing the speed can prevent data loss under
+these circumstances.
+</para></listitem>
+
+<listitem><para>
+Many CD-ROM drives are annoyingly loud, a lower speed may reduce the noise.
+</para></listitem>
+</itemizedlist>
+
+<para>
+You can reduce the speed of IDE CD-ROM drives with <command>hdparm</command> or a
+program called <command>setcd</command>.  It works like this:
+<screen>hdparm -E [speed] [cdrom device]</screen>
+<screen>setcd -x [speed] [cdrom device]</screen>
+</para>
+
+<para>
+You can also try
+<screen>echo current_speed:4 &gt; /proc/ide/[cdrom device]/settings</screen>
+but you will need root privileges. The following command may also help:
+<screen>echo file_readahead:2000000 &gt; /proc/ide/[cdrom device]/settings</screen>
+</para>
+
+<para>
+This sets prefetched file reading to 2MB, which helps with scratched CD-ROMs.
+If you set it to too high, the drive will continuously spin up and down, and
+will dramatically decrease the performance.
+It is recommended that you also tune your CD-ROM drive with <command>hdparm</command>:
+<screen>hdparm -d1 -a8 -u1 <replaceable>cdrom device</replaceable></screen>
+</para>
+
+<para>
+This enables DMA access, read-ahead, and IRQ unmasking (read the <command>hdparm</command>
+man page for a detailed explanation).
+</para>
+
+<para>
+Please refer to &quot;<filename>/proc/ide/[cdrom device]/settings&quot;</filename>
+for fine-tuning your CD-ROM.
+</para>
+
+<para>
+SCSI drives do not have a uniform way of setting these parameters (Do you know one?
+Tell us!) There is a tool that works for
+<ulink url="http://das.ist.org/~georg/">Plextor SCSI drives</ulink>.
+</para>
+
+<para>FreeBSD:</para>
+<para>Speed: <command>cdcontrol [-f device] speed [speed]</command></para>
+<para>DMA: <command>sysctl hw.ata.atapi_dma=1</command></para>
+</sect1>
+
+<sect1 id="dvd">
+<title>DVD playback</title>
+<para>
+For the complete list of available options, please read the man page.
+The Syntax for a standard Digital Versatile Disc (DVD) is as follows:
+<screen>mplayer -dvd &lt;track&gt; [-dvd-device &lt;device&gt;]</screen>
+</para>
+
+<para>
+Example:
+<screen>mplayer -dvd 1 -dvd-device /dev/hdc</screen>
+</para>
+
+<para>
+The default DVD device is <filename>/dev/dvd</filename>. If your setup
+differs, make a symlink or specify the correct device on the command
+line with the <option>-dvd-device</option> option.
+</para>
+
+<formalpara>
+<title>New-style DVD support (mpdvdkit2)</title>
+<para>
+<application>MPlayer</application> uses <systemitem>libdvdread</systemitem> and
+<systemitem>libdvdcss</systemitem> for DVD decryption and playback. These two
+libraries are contained in the <filename class="directory">libmpdvdkit2/</filename>
+subdirectory of the MPlayer source tree, you do not have to install them separately.
+We opted for this solution because we had to fix a <systemitem>libdvdread</systemitem>
+bug and apply a patch which adds
+<emphasis role="bold">cracked CSS keys caching support</emphasis> to
+<systemitem>libdvdcss</systemitem> This results in a large speed increase because the
+keys do not have to be cracked every time before playing.
+</para>
+</formalpara>
+
+<para>
+<application>MPlayer</application> can also use system-wide <systemitem>libdvdread</systemitem>
+and <systemitem>libdvdcss</systemitem> libraries, but this solution is
+<emphasis role="bold">not</emphasis> recommended, as it can result in bugs,
+library incompatibilities and slower speed.
+</para>
+
+<formalpara>
+<title>DVD Navigation support (dvdnav)</title>
+<para>
+Support for DVD navigation via <systemitem>dvdnav</systemitem> was being worked
+on, but it was never finished properly and it is currently unmaintained. Who
+knows, it might even compile.
+</para>
+</formalpara>
+
+<formalpara>
+<title>Old-style DVD support - OPTIONAL</title>
+<para>
+Useful if you want to play encoded VOBs from <emphasis role="bold">hard disk</emphasis>.
+Compile and install <emphasis role="bold">libcss</emphasis> 0.0.1 (not newer) for this
+(If MPlayer fails to detect it, use the <option>-csslib /path/to/libcss.so</option>
+option). To use it, you need to be root, use a suid root MPlayer binary or let
+MPlayer call the suid-root fibmap_mplayer wrapper program.
+</para>
+</formalpara>
+
+<formalpara>
+<title>DVD structure</title>
+<para>
+DVD disks have 2048 bytes per sector with ECC/CRC. They usually have an UDF
+filesystem on a single track, containing various files (small .IFO and .BUK
+files and big (1GB) .VOB files). They are real files and can be copied/played
+from the mounted filesystem of an unencrypted DVD.
+</para>
+</formalpara>
+
+<para>
+The .IFO files contain the movie navigation information (chapter/title/angle
+map, language table, etc) and are needed to read and interpret the .VOB content
+(movie). The .BUK files are backups of them. They use
+<emphasis role="bold">sectors</emphasis> everywhere, so you need to use raw
+addressing of sectors of the disc to implement DVD navigation or decrypt the
+content.
+</para>
+
+<para>
+The whole old-style DVD support with <systemitem>libcss</systemitem> therefore
+needs a mounted DVD filesystem and raw sector-based access to the device.
+Unfortunately you must (under Linux) be root to get the sector address of a
+file. You have the following choices:
+
+<itemizedlist>
+<listitem><para>
+Be root or use a suid-root <application>MPlayer</application> binary.
+</para></listitem>
+
+<listitem><para>
+Let <application>MPlayer</application> call the suid-root fibmap_mplayer
+wrapper program to access the DVD (used in the old-style DVD playback over
+<systemitem>libcss</systemitem>).
+</para></listitem>
+
+<listitem><para>
+Don't use the kernel's filesystem driver at all and reimplement it in
+userspace. <systemitem>libdvdread</systemitem> 0.9.x and <systemitem>libmpdvdkit</systemitem>
+do this (new-style DVD support). The kernel UDF filesystem driver is not
+needed as they already have their own builtin UDF filesystem driver.
+Also the DVD does not have to be mounted as only the raw sector-based
+access is used.
+</para></listitem>
+</itemizedlist>
+</para>
+
+<para>
+Sometimes <filename>/dev/dvd</filename> cannot be read by users, so the
+<systemitem>libdvdread</systemitem> authors implemented an emulation layer
+which transfers sector addresses to filenames+offsets, to emulate raw
+access on top of a mounted filesystem or even on a hard disk.
+</para>
+
+<para>
+<systemitem>libdvdread</systemitem> even accepts the mountpoint instead of
+the device name for raw access and checks <filename>/proc/mounts</filename>
+to get the device name. It was developed for Solaris, where device names
+are dynamically allocated.
+</para>
+
+<para>
+The default DVD device is <filename>/dev/dvd</filename>. If your setup differs,
+make a symlink, or specify the correct device on the command line with the
+<option>-dvd-device</option> option.
+</para>
+
+<formalpara>
+<title>DVD authentication</title>
+<para>
+The authentication and decryption method of the new-style DVD support is done
+using a patched <systemitem>libdvdcss</systemitem> (see above). The method can
+be specified through the environment variable <envar>DVDCSS_METHOD</envar>,
+which can be set to key, disk or title.
+</para>
+</formalpara>
+
+<para>
+If nothing is specified it tries the following methods (default: key,
+title request):
+</para>
+
+<orderedlist>
+<listitem><para>
+<emphasis role="bold">bus key</emphasis>: This key is negotiated during
+authentication (a long mix of ioctls and various key exchanges, crypto
+stuff) and is used to encrypt the title and disk keys before sending them
+over the unprotected bus (to prevent eavesdropping). The bus key is needed
+to get and predecrypt the crypted disk key.
+</para></listitem>
+
+<listitem><para>
+<emphasis role="bold">cached key</emphasis>: <application>MPlayer</application>
+looks for already cracked title keys which are stored in the
+<filename class="directory">~/.mplayer/DVDKeys</filename> directory (fast ;).
+</para></listitem>
+
+<listitem><para>
+<emphasis role="bold">key</emphasis>: If no cached key is available,
+<application>MPlayer</application> tries to decrypt the disk key with a set
+of included player keys.
+</para></listitem>
+
+<listitem><para>
+<emphasis role="bold">disk</emphasis>: If the key method fails
+(e.g. no included player keys), <application>MPlayer</application>
+will crack the disk key using a brute force algorithm. This process
+is CPU intensive and requires 64 MB of memory (16M 32Bit entries hash
+table) to store temporary data. This method should always work (slow).
+</para></listitem>
+
+<listitem><para>
+<emphasis role="bold">title request</emphasis>: With the disk key
+<application>MPlayer</application> requests the crypted title keys,
+which are inside <emphasis>hidden sectors</emphasis> using <systemitem>ioctl()</systemitem>.
+The region protection of RPC-2 drives is performed in this step and may fail on such drives.
+If it succeeds, the title keys will be decrypted with the bus and disk key.
+</para></listitem>
+
+<listitem><para>
+<emphasis role="bold">title</emphasis>: This method is used if the title
+request failed and does not rely on any key exchange with the DVD drive.
+It uses a crypto attack to guess the title key directly (by finding a
+repeating pattern in the decrypted VOB content and guessing that the
+plain text corresponding to the first encrypted bytes is a continuation
+of that pattern). The method is also known as &quot;known plaintext attack&quot;
+or &quot;DeCSSPlus&quot;. In rare cases this may fail because there is not
+enough encrypted data on the disk to perform a statistical attack or because
+the key changes in the middle of a title. This method is the only way to
+decrypt a DVD stored on a hard disk or a DVD with the wrong region on an
+RPC2 drive (slow).
+</para></listitem>
+</orderedlist>
+
+<para>
+RPC-1 DVD drives only protect region settings through software. RPC-2 drives
+have a hardware protection that allows 5 changes only. It might be
+needed/recommended to upgrade the firmware to RPC-1 if you have a RPC-2 DVD
+drive. Firmware upgrades can be found on this
+<ulink url="http://www.firmware-flash.com">firmware page</ulink>. If there is
+no firmware upgrade available for your device, use the
+<ulink url="http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz">regionset tool</ulink>
+to set the region code of your DVD drive (under Linux).
+<emphasis role="bold">Warning</emphasis>: You can only set the region 5 times.
+</para>
+</sect1>
+
+<sect1 id="vcd">
+<title>VCD playback</title>
+<para>
+For the complete list of available options, please read the man page. The Syntax for a
+standard Video CD (VCD) is as follows:
+<screen>mplayer -vcd &lt;track&gt; [-cdrom-device &lt;device&gt;]</screen>
+Example:
+<screen>mplayer -vcd 2 -cdrom-device /dev/hdc</screen>
+The default VCD device is <filename>/dev/cdrom</filename>. If your setup
+differs, make a symlink or specify the correct device on the command line
+with the <option>-cdrom-device</option> option.
+</para>
+
+<note><para>
+At least Plextor and some Toshiba SCSI CD-ROM drives have horrible performance
+reading VCDs. This is because the the CDROMREADRAW <systemitem>ioctl</systemitem>
+is not fully implemented for these drives. If you have some knowledge of SCSI
+programming, please <ulink url="../../tech/patches.txt">help us</ulink>
+implement generic SCSI support for VCDs.
+</para></note>
+
+<para>
+In the meantime you can extract data from VCDs with
+<ulink url="http://140.132.1.204/OS/Linux/packages/X/viewers/readvcd/">readvcd</ulink>
+and play the resulting file with <application>MPlayer</application>.
+</para>
+
+<formalpara>
+<title>VCD structure</title>
+<para>VCD disks consist of one or more tracks:</para>
+</formalpara>
+
+<itemizedlist>
+<listitem><para>
+The first track is a small 2048 bytes/sector data track with an iso9660
+filesystem, usually containing Windows VCD player programs and maybe other
+information (images, text, etc).
+</para></listitem>
+
+<listitem><para>
+The second and other tracks are raw 2324 bytes/sector MPEG (movie)
+tracks, containing one MPEG PS data packet per sector instead of a
+filesystem. Similar to audio CD tracks, these tracks <emphasis role="bold">cannot
+be mounted</emphasis> (Did you ever mount an audio CD to play it?).
+As most movies are inside this track, you should try <option>-vcd 2</option> first.
+</para></listitem>
+
+<listitem><para>
+There exist VCD disks without the first track (single track and no filesystem
+at all). They are still playable, but cannot be mounted.
+</para></listitem>
+</itemizedlist>
+
+<formalpara>
+<title>About .DAT files</title>
+<para>
+The ~600 MB file visible on the first track of the mounted VCD is not a real
+file! It is a so called ISO gateway, created to allow Windows to handle such
+tracks (Windows does not allow raw device access to applications at all).
+Under Linux you cannot copy or play such files (they contain garbage). Under
+Windows it is possible as its iso9660 driver emulates the raw reading of
+tracks in this file. To play a .DAT file you need the kernel driver which can
+be found in the Linux version of PowerDVD. It has a modified iso9660 filesystem
+(<filename>vcdfs/isofs-2.4.X.o</filename>) driver, which is able to emulate the
+raw tracks through this shadow .DAT file. If you mount the disc using their
+driver, you can copy and even play .DAT files with mplayer. But it will not
+work with the standard iso9660 driver of the Linux kernel! Use the
+<option>-vcd</option> option instead. Alternatives for VCD copying are the
+new <ulink url="http://www.elis.rug.ac.be/~ronsse/cdfs/">cdfs</ulink> kernel
+driver (not part of the official kernel) that shows CD sessions as image files and
+<ulink url="http://cdrdao.sourceforge.net/">cdrdao</ulink>, a bit-by-bit
+CD grabbing/copying application.
+</para>
+</formalpara>
+</sect1>
+</chapter>

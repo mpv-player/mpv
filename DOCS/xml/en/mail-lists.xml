@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<appendix id="mailinglists">
+<title>Mailing lists</title>
+<para>
+There are some public mailing lists on <application>MPlayer</application>. Unless
+explicitly stated otherwise the language of these lists is <emphasis role="bold">English</emphasis>.
+Please do not send messages in other languages or HTML mail! Message size limit
+is 80k. If you have something bigger put it up for download somewhere. Click the
+links to subscribe. On the mailing lists, the same rules about writing and quoting
+apply as on usenet. Please follow them, it makes the life of those who read your
+mails a lot easier. If you do not know them please read
+<ulink url="http://learn.to/edit_messages">HOWTO edit messages</ulink> or (if you
+are in a hurry) <ulink url="http://www.xs4all.nl/~hanb/documents/quotingguide.html">Quoting HOWTO</ulink>.
+<itemizedlist>
+<listitem><para>
+MPlayer announce list:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-announce"/>
+List for MPlayer announcements. Subscribe here if you want to get
+announcements about new features.
+</para></listitem>
+<listitem><para>
+MPlayer developers list:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng"/>
+This list is about MPlayer development! Talking about interface/API changes,
+new libraries, code optimization, configure changes is ontopic here. Send patches
+but not bug reports, user questions, feature requests or flames here to keep the
+list traffic low.
+</para></listitem>
+<listitem><para>
+MPlayer users list:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"/>
+  <itemizedlist>
+  <listitem><para>
+  Send bug reports here after reading the <link linkend="bugs">Known Bugs</link>
+  and <link linkend="bugreports">bug reporting section</link>).
+  </para></listitem>
+  <listitem><para>
+  Send feature requests here (after reading the <emphasis role="bold">whole
+  documentation</emphasis>).
+  </para></listitem>
+  <listitem><para>
+  Send user questions here (after reading the <emphasis role="bold">whole
+  documentation</emphasis>).
+  </para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+MPlayer Hungarian users list:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok"/>
+  <itemizedlist>
+  <listitem><para>
+  Hungarian language list
+  </para></listitem>
+  <listitem><para>
+  Topic? We'll see about it... mostly flame and RTFM questions up to now :(
+  </para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+MPlayer &amp; Matrox G200/G400/G450/G550 users:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-matrox"/>
+Matrox related questions like
+  <itemizedlist>
+  <listitem><para>
+  things about mga_vid
+  </para></listitem>
+  <listitem><para>
+  Matrox's official beta drivers (for X 4.x.x)
+  </para></listitem>
+  <listitem><para>
+  matroxfb-TVout stuff
+  </para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+MPlayer &amp; DVB card users:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb"/>
+Things related to the hardware decoder card called DVB (not <emphasis role="bold">DXR3</emphasis>!).
+</para></listitem>
+<listitem><para>
+MPlayer CVS-log:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog"/>
+All changes in MPlayer code are automatically sent to this list. Only
+questions about these changes belong here (if you do not understand why a
+change is required or you have a better fix or you have noticed a possible
+bug/problem in the commit).
+</para></listitem>
+<listitem><para>
+MPlayer CygWin-porting list:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin"/>
+List for discussion about MPlayer's CygWin port.
+</para></listitem>
+<listitem><para>
+MPlayer OS/2-porting list:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-os2"/>
+List for discussion about MPlayer's OS/2 port.
+</para></listitem>
+<listitem><para>
+MPlayer Weekly News' editors and translators list:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-mwn"/>
+List for discussion about the Weekly News releases.
+</para></listitem>
+</itemizedlist>
+<note><para>
+You can reach the searchable mailing list archives at
+<ulink url="http://www.mplayerhq.hu/cgi-bin/htsearch"/>.
+</para></note>
+</para>
+</appendix>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!-- FIXME: history really should be in the appendix -->
+<sect1 id="history">
+<title>History</title>
+ 
+<para>
+This began a year ago...  I (A'rpi) have tried lots of players under linux
+(mtv, xmps, dvdview, livid/oms, videolan, xine, xanim, avifile, xmmp) but
+they all have some problem. Mostly with special files or with audio/video
+sync.  Most of them is unable to play both MPEG1, MPEG2 and AVI (DivX)
+files. Many players have image quality or speed problems too. So I've
+decided to write/modify one...
+
+<itemizedlist>
+<listitem><para>
+  <emphasis role="bold">mpg12play v0.1-v0.3</emphasis>: Sep 22-25, 2000
+  </para>
+  <para>The first try, hacked together in a half hour!  I've used libmpeg3
+  from <ulink url="http://www.heroinewarrior.com"/> up to the version 0.3, but
+  there were image quality and speed problems with it.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">mpg12play v0.5-v0.87</emphasis>: Sep 28-Oct 20, 2000
+  </para><para>Mpeg codec replaced with DVDview by Dirk Farin, it was a
+  great stuff, but it was slow and was written in C++ (I hate C++!!!)
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">mpg12play v0.9-v0.95pre5</emphasis>: Oct 21-Nov 2, 2000
+  </para><para>Mpeg codec was libmpeg2 (mpeg2dec) by Aaron Holtzman and
+  Michel Lespinasse.  It's great, optimized very fast C code with perfect
+  image quality and 100% MPEG standard conformance.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer v0.3-v0.9</emphasis>: Nov 18-Dec 4, 2000
+  </para><para>It was a pack of two programs: mpg12play v0.95pre6 and my
+  new simple AVI player 'avip' based on avifile's Win32 DLL loader.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer v0.10</emphasis>: Jan 1, 2001
+  </para><para>The MPEG and AVI player in a single binary!
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer v0.11pre series</emphasis>:
+  </para><para>Some new developers joined and from 0.11 the mplayer project
+  is a team-work!  Added ASF file support, and OpenDivX
+  (see <ulink url="http://www.projectmayo.com"/>) en/decoding.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer v0.17a "The IdegCounter"</emphasis> Apr 27, 2001
+  </para><para>The release version of the 0.11pre after 4 months of heavy
+  development!  Try it, and be amazed! Thousands of new features added...
+  and of course old code was improved too, bugs removed etc.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer 0.18 "The BugCounter"</emphasis> Jul 9, 2001
+  </para><para>2 months since 0.17 and here's a new release.. Completed ASF
+  support, more subtitle formats, introduced libao (similar to libvo but to
+  audio), even more stable than ever, and so on. It's a MUST!
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer 0.50 "The Faszom(C)ounter"</emphasis> Oct 8, 2001
+  </para><para>Hmm. Release again. Tons of new features, beta GUI version,
+  bugs fixed, new vo and ao drivers, ported to many systems, including
+  opensource DivX codecs and much more. Try it!
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer 0.60 "The RTFMCounter"</emphasis> Jan 3, 2002
+  </para><para>MOV/VIVO/RM/FLI/NUV fileformats support, native CRAM, Cinepak,
+  ADPCM codecs, and support for XAnim's binary codecs; DVD subtitles support,
+  first release of MEncoder, TV grabbing, cache, liba52, countless fixes.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer 0.90pre10 "The BirthdayCounter"</emphasis> Nov 11, 2002
+  </para><para> Although this is not a release, I am going to mention it because it
+  came out 2 years after MPlayer v0.01. Happy birthday, MPlayer!
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer 0.90rc1 "The CodecCounter"</emphasis> Dec 7, 2002
+  </para><para>Again not a release, but after adding Sorenson 3 (QuickTime)
+  and Windows Media 9 support, MPlayer is the world's first movie player with
+  support for all known video formats!
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">MPlayer 0.90 "?"</emphasis> Date yet unknown
+  </para></listitem>
+</itemizedlist>
+</para>
+</sect1>

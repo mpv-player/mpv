@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<appendix id="bugreports">
+<title>How to report bugs</title>
+<para>
+Good bug reports are a very valuable contribution to the development of any
+software project. But just like writing good software, good problem reports
+involve some work. Please realize that most developers are extremely busy and
+receive obscene amounts of email. So while your feedback is crucial in improving
+MPlayer and very much appreciated, please understand that you have to provide
+<emphasis role="bold">all</emphasis> of the information we request and follow
+the instructions in this document closely.
+</para>
+<sect1 id="bugreports_fix">
+<title>How to fix bugs</title>
+<para>
+If you feel have the necessary skills you are invited to have a go at fixing the
+bug yourself. Or maybe you already did that? Please read
+<ulink url="../../tech/patches.txt">this short document</ulink> to find out how to
+get your code included in MPlayer. The people on the
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</ulink>
+mailing list will assist you if you have questions.
+</para>
+</sect1>
+<sect1 id="bugreports_report">
+<title>How to report bugs</title>
+<para>
+First of all please try the latest CVS version of MPlayer as your bug might
+already be fixed there. Development moves extremely fast, most problems in
+official releases are reported within days or even hours, so please use
+<emphasis role="bold">only CVS</emphasis> to report bugs. This includes
+binary packages of MPlayer. CVS instructions can be found at the bottom of
+<ulink url="http://www.mplayerhq.hu/homepage/dload.html">this page</ulink> or in
+the README. If this did not help please refer to the list of
+<link linkend="bugs">known bugs</link> and the rest of the documentation. If your
+problem is not known or not solvable by our instructions, then please report the bug.
+</para>
+
+<para>
+Please do not send bug reports privately to individual developers. This is
+community work and thus there might be several people interested in it. Sometimes
+other users already experienced your troubles and know how to circumvent a problem
+even if it is a bug in MPlayer code.
+</para>
+
+<para>
+Please describe your problem in as much detail as possible. Do a little detective
+work to narrow down the circumstances under which the problem occurs. Does the bug
+only show up in certain situations? Is it specific to certain files or file types?
+Does it occur with only one codec or is it codec independent? Can you reproduce it
+with all output drivers? The more information you provide the better are our
+chances at fixing your problem. Please do not forget to also include the valuable
+information requested below, we will be unable to properly diagnose your problem
+otherwise.
+</para>
+
+<para>
+An excellent and well written guide to asking questions in public forums is
+<ulink url="http://www.tuxedo.org/~esr/faqs/smart-questions.html">How To Ask
+Questions The Smart Way</ulink> by <ulink url="http://www.tuxedo.org/~esr/">Eric S. Raymond</ulink>.
+There is another called
+<ulink url="http://www.chiark.greenend.org.uk/~sgtatham/bugs.html">How to Report
+Bugs Effectively</ulink> by <ulink url="http://www.chiark.greenend.org.uk/~sgtatham/">Simon Tatham</ulink>.
+If you follow these guidelines you should be able to get help. But please
+understand that we all follow the mailing lists voluntarily in our free time. We
+are very busy and cannot guarantee that you will get a solution for your problem
+or even an answer.
+</para>
+
+</sect1>
+
+<sect1 id="bugreports_where">
+<title>Where to report bugs</title>
+<para>
+Subscribe to the mplayer-users mailing list:
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"/>
+and send your bug report to:
+<ulink url="mailto:mplayer-users@mplayerhq.hu"/>
+</para>
+<para>
+The language of this list is English. Please follow the standard
+<ulink url="http://www.ietf.org/rfc/rfc1855.txt">Netiquette Guidelines</ulink> and
+do not send HTML mail to any of our mailing lists. You will only get ignored or
+banned. If you do not know what HTML mail is or why it is evil, read this
+<ulink url="http://expita.com/nomime.html">fine document</ulink>. It explains all
+the details and has instructions for turning HTML off. Also note that we will not
+individually CC (carbon-copy) people so it is a good idea to subscribe to actually
+receive your answer.
+</para>
+</sect1>
+
+<sect1 id="bugreports_what">
+<title>What to report</title>
+<para>
+You may need to include log, configuration or sample files in your bug report.
+If some of them are quite big then it is better to upload them to our
+<ulink url="ftp://mplayerhq.hu/MPlayer/incoming/">FTP server</ulink> in a
+compressed format (gzip and bzip2 preferred) and include only the path and file
+name in your bug report. Our mailing lists have a message size limit of 80k, if
+you have something bigger you have to compress or upload it.
+</para>
+
+<sect2 id="bugreports_system">
+<title>System Information</title>
+<para>
+<itemizedlist>
+<listitem><para>
+Your Linux distribution or operating system and version e.g.:
+  <itemizedlist>
+    <listitem><para>Red Hat 7.1</para></listitem>
+    <listitem><para>Slackware 7.0 + devel packs from 7.1 ...</para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+kernel version:
+<screen>uname -a</screen>
+</para></listitem>
+<listitem><para>
+libc version:
+<screen>ls -l /lib/libc[.-]*</screen>
+</para></listitem>
+<listitem><para>
+gcc and ld versions:
+<screen>
+gcc -v
+ld -v
+</screen>
+</para></listitem>
+<listitem><para>
+If you have problems with fullscreen mode:
+  <itemizedlist>
+    <listitem><para>Window manager type and version</para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+If you have problems with XVIDIX:
+  <itemizedlist>
+    <listitem><para>X colour depth:
+<screen>xdpyinfo | grep &quot;depth of root&quot;</screen>
+    </para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+If only the GUI is buggy:
+  <itemizedlist>
+    <listitem><para>GTK version</para></listitem>
+    <listitem><para>GLIB version</para></listitem>
+    <listitem><para>libpng version</para></listitem>
+    <listitem><para>GUI situation in which the bug occurs</para></listitem>
+  </itemizedlist>
+</para></listitem>
+</itemizedlist>
+</para>
+</sect2>
+
+<sect2 id="bugreports_hardware">
+<title>Hardware and drivers</title>
+<para>
+<itemizedlist>
+<listitem><para>
+CPU info (this works on Linux only):
+<screen>cat /proc/cpuinfo</screen>
+</para></listitem>
+<listitem><para>
+Video card manufacturer and model, e.g.:
+  <itemizedlist>
+    <listitem><para>ASUS V3800U chip: nVidia TNT2 Ultra pro 32MB SDRAM</para></listitem>
+    <listitem><para>Matrox G400 DH 32MB SGRAM</para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+Video driver type &amp; version, e.g.:
+  <itemizedlist>
+    <listitem><para>X built-in driver</para></listitem>
+    <listitem><para>nVidia 0.9.623</para></listitem>
+    <listitem><para>Utah-GLX CVS 2001-02-17</para></listitem>
+    <listitem><para>DRI from X 4.0.3</para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+Sound card type &amp; driver, e.g.:
+  <itemizedlist>
+    <listitem><para>Creative SBLive! Gold with OSS driver from oss.creative.com</para></listitem>
+    <listitem><para>Creative SB16 with kernel OSS drivers</para></listitem>
+    <listitem><para>GUS PnP with ALSA OSS emulation</para></listitem>
+  </itemizedlist>
+</para></listitem>
+<listitem><para>
+If in doubt include <command>lspci -vv</command> output on Linux systems.
+</para></listitem>
+</itemizedlist>
+</para>
+</sect2>
+
+<sect2 id="bugreports_configure">
+<title>Configure problems</title>
+<para>
+If you get errors while running <command>./configure</command>, or autodetection
+of something fails, read <filename>configure.log</filename>. You may find the
+answer there, for example multiple versions of the same library mixed on your
+system, or you forgot to install the development package (those with the -dev
+suffix). If you think there is a bug, include <filename>configure.log</filename>
+in your bug report.
+</para>
+</sect2>
+
+<sect2 id="bugreports_conpilation">
+<title>Compilation problems</title>
+<para>
+Please include these files:
+<itemizedlist>
+<listitem><para>config.h</para></listitem>
+<listitem><para>config.mak</para></listitem>
+</itemizedlist>
+Only if compilation fails below one of these directories, include these files:
+<itemizedlist>
+<listitem><para>Gui/config.mak</para></listitem>
+<listitem><para>libvo/config.mak</para></listitem>
+<listitem><para>libao2/config.mak</para></listitem>
+</itemizedlist>
+</para>
+</sect2>
+
+<sect2 id="bugreports_playback">
+<title>Playback problems</title>
+<para>
+Please include the output of <application>MPlayer</application> at verbosity level
+1, but remember to <emphasis role="bold">not truncate the output</emphasis> when
+you paste it into your mail. The developers need all of the messages to properly
+diagnose a problem. You can direct the output into a file like this:
+<screen>mplayer -v <replaceable>options</replaceable> <replaceable>filename</replaceable> &gt; mplayer.log 2&gt;&amp;1</screen>
+</para>
+
+<para>
+If your problem is specific to one or more files, then please upload the offender(s) to:
+<ulink url="ftp://mplayerhq.hu/MPlayer/incoming/"/>
+</para>
+
+<para>
+Also upload a small text file having the same base name as your file with a .txt
+extension. Describe the problem you are having with the particular file there and
+include your email address as well as the output of MPlayer at verbosity level 1.
+Usually the first 1-5 MB of a file are enough to reproduce the problem, but to be
+sure we ask you to:
+<screen>dd if=<replaceable>yourfile</replaceable> of=<replaceable>smallfile</replaceable> bs=1024k count=5</screen>
+It will take the first five megabytes of '<emphasis role="bold">your-file</emphasis>'
+and write it to '<emphasis role="bold">small-file</emphasis>'. Then try again on
+this small file and if the bug still shows up your sample is sufficient for us.
+Please <emphasis role="bold">do not ever</emphasis> send such files via mail!
+Upload it, and send only the path/filename of the file on the FTP-server. If the
+file is accessible on the net, then sending the <emphasis role="bold">exact</emphasis>
+URL is sufficient.
+</para>
+</sect2>
+
+<sect2 id="bugreports_crash">
+<title>Crashes</title>
+<para>
+You have to run <application>MPlayer</application> inside <command>gdb</command>
+and send us the complete output or if you have a <filename>core</filename> dump of
+the crash you can extract useful information from the Core file. Here's how:
+</para>
+
+<sect3 id="bugreports_debug">
+<title>How to conserve information about a reproducible crash</title>
+<para>
+Recompile MPlayer with debugging code enabled:
+<screen>
+./configure --enable-debug=3
+make
+</screen>
+and then run MPlayer within gdb using:
+<screen>gdb ./mplayer</screen>
+You are now within gdb. Type:
+<screen>run -v <replaceable>options-to-mplayer</replaceable> <replaceable>filename</replaceable></screen>
+and reproduce your crash. As soon as you did it, gdb will return you to the command
+line prompt where you have to enter
+<screen>
+bt
+disass $pc-32 $pc+32
+info all-registers
+</screen>
+</para>
+</sect3>
+
+<sect3 id="bugreports_core">
+<title>How to extract meaningful information from a core dump</title>
+<para>
+Please create the following command file:
+<screen>
+bt
+disass $pc-32 $pc+32
+info all-registers
+</screen>
+Then simply execute the following on your command line:
+<screen>gdb mplayer --core=core -batch --command=<replaceable>command_file</replaceable> &gt; mplayer.bug</screen>
+</para>
+</sect3>
+</sect2>
+</sect1>
+
+<sect1 id="bugreports_advusers">
+<title>I know what I am doing...</title>
+<para>
+If you created a proper bug report following the steps above and you are confident
+it is a bug in MPlayer, not a compiler problem or broken file, you have already
+read the documentation and you could not find a solution, your sound drivers are
+OK, then you might want to subscribe to the mplayer-advusers list and send your
+bug report there to get a better and faster answer.
+</para>
+
+<para>
+Please be advised that if you post newbie questions or questions answered in the
+manual there, you will be ignored or flamed instead of getting an appropriate answer.
+So do not flame us and subscribe to -advusers only if you really know what you are
+doing and feel like being an advanced MPlayer user or developer. If you meet these
+criteria it should not be difficult to find out how to subscribe...
+</para>
+
+</sect1>
+
+</appendix>

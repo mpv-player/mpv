@@ -1,0 +1,1144 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<sect2 id="audio-dev">
+<title>Audio output devices</title>
+<sect3 id="sync">
+<title>Audio/Video synchronisation</title>
+
+<para>
+<application>MPlayer</application>'s audio interface is called
+<emphasis>libao2</emphasis>. It currently contains these drivers:
+</para>
+
+<informaltable>
+<tgroup cols="2">
+<thead>
+  <row><entry>Driver</entry><entry>Comment</entry></row>
+</thead>
+<tbody>
+<row><entry>oss</entry><entry>
+  OSS (ioctl) driver (supports hardware AC3 passthrough)
+  </entry></row>
+<row><entry>sdl</entry><entry>
+  SDL driver (supports sound daemons like <emphasis role="bold">ESD</emphasis>
+  and <emphasis role="bold">ARTS</emphasis>)
+  </entry></row>
+<row><entry>nas</entry><entry>
+  NAS (Network Audio System) driver
+  </entry></row>
+<row><entry>alsa5</entry><entry>
+  native ALSA 0.5 driver
+  </entry></row>
+<row><entry>alsa9</entry><entry>
+  native ALSA 0.9 driver (supports hardware AC3 passthrough)
+  </entry></row>
+<row><entry>sun</entry><entry>
+  SUN audio driver (<filename>/dev/audio</filename>) for BSD and Solaris8 users
+  </entry></row>
+<row><entry>arts</entry><entry>
+  native ARTS driver (mostly for KDE users)
+  </entry></row>
+<row><entry>esd</entry><entry>
+  native ESD driver (mostly for GNOME users)
+  </entry></row>
+</tbody>
+</tgroup>
+</informaltable>
+
+<para>
+Linux sound card drivers have compatibility problems. This is because
+<application>MPlayer</application> relies on an in-built feature of
+<emphasis>properly</emphasis> coded sound drivers that enable them to
+maintain correct audio/video sync. Regrettably, some driver authors
+don't take the care to code this feature since it is not needed for
+playing MP3s or sound effects.
+</para>
+
+<para>
+Other media players like <ulink url="http://avifile.sourceforge.net">aviplay</ulink>
+or <ulink url="http://xine.sourceforge.net">xine</ulink> possibly work
+out-of-the-box with these drivers because they use "simple" methods
+with internal timing. Measuring showed that their methods are not as
+efficient as <application>MPlayer</application>'s.
+</para>
+
+<para>
+Using <application>MPlayer</application> with a properly written audio
+driver will never result in A/V desyncs related to the audio, except
+only with very badly created files (check the man page for workarounds).
+</para>
+
+<para>
+If you happen to have a bad audio driver, try the <option>-autosync</option>
+option, it should sort out your problems. See the man page for detailed
+information.
+</para>
+
+<itemizedlist>
+<title>Some notes:</title>
+<listitem><para>
+  If you have an OSS driver, first try <option>-ao oss</option> (this is
+  the default).  If you experience glitches, halts or anything out of the
+  ordinary, try <option>-ao sdl</option> (NOTE: you need to have SDL libraries
+  and header files installed). The SDL audio driver helps in a lot of cases
+  and also supports ESD (GNOME) and ARTS (KDE).
+  </para></listitem>
+<listitem><para>
+  If you have ALSA version 0.5, then you almost always have to use
+  <option>-ao alsa5</option>, since ALSA 0.5 has buggy OSS emulation code,
+  and will <emphasis role="bold">crash <application>MPlayer</application></emphasis>
+  with a message like this:
+  <screen>
+DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!<!--
+--></screen>
+  </para></listitem>
+<listitem><para>
+  On Solaris, use the SUN audio driver with the <option>-ao sun</option> option,
+  otherwise neither video nor audio will work.
+  </para></listitem>
+<listitem><para>
+  If the sound clicks when playing from CD-ROM, turn on IRQ unmasking, e.g.
+  <command>hdparm -u1 /dev/cdrom</command> (<command>man hdparm</command>).
+  This is generally beneficial and described in more detail in the
+  <link linkend="drives">CD-ROM section</link>.
+ </para></listitem>
+</itemizedlist>
+</sect3>
+
+<sect3 id="experiences">
+<title>Soundcard experiences, recommendations</title>
+<para>
+On Linux, a 2.4.x kernel is highly recommended. Kernel 2.2 is not tested.
+</para>
+
+<para>
+Linux sound drivers are primarily provided by the free version of OSS.
+These drivers have been superceded by <ulink url="http://www.alsa-project.org">ALSA</ulink>
+(Advanced Linux Sound Architecture) in the 2.5 development series. If
+your distribution does not already use ALSA you may wish to try their
+drivers if you experience sound problems. ALSA drivers are generally
+superior to OSS in compatibility, performance and features. But some
+sound cards are only supported by the commercial OSS drivers from
+<ulink url="http://www.opensound.com/">4Front Technologies</ulink>.
+They also support several non-Linux systems.
+</para>
+
+<informaltable>
+<tgroup cols="8">
+  <colspec colname="c1"/>
+  <colspec colname="c2"/>
+  <colspec colname="c3"/>
+  <colspec colname="c4"/>
+  <colspec colname="c5"/>
+  <colspec colname="c6"/>
+  <colspec colname="c7"/>
+  <colspec colname="c8"/>
+  <spanspec spanname="driver" namest="c2" nameend="c5"/>
+  <spanspec spanname="ossfree" namest="c2" nameend="c2"/>
+  <spanspec spanname="alsa" namest="c3" nameend="c3"/>
+  <spanspec spanname="osspro" namest="c4" nameend="c4"/>
+  <spanspec spanname="others" namest="c5" nameend="c5"/>
+<thead>
+  <row>
+    <entry morerows="2" valign="middle">SOUND CARD</entry>
+    <entry spanname="driver">DRIVER</entry>
+    <entry morerows="2" valign="middle">Max kHz</entry>
+    <entry morerows="2" valign="middle">Max Channels</entry>
+    <entry morerows="2" valign="middle">Max Opens
+      <footnote id="maxopens">
+        <para>the number of applications that are able to use
+          the device <emphasis>at the same time</emphasis>.</para>
+      </footnote>
+    </entry>
+  </row>
+
+  <row>
+    <entry spanname="ossfree">OSS/Free</entry>
+    <entry spanname="alsa">ALSA</entry>
+    <entry spanname="osspro">OSS/Pro</entry>
+    <entry spanname="others">other</entry>
+  </row>
+</thead>
+
+<tbody>
+  <row>
+    <entry>VIA onboard (686/A/B, 8233, 8235)</entry>
+    <entry>
+      <ulink url="http://sourceforge.net/project/showfiles.php?group_id=3242&amp;release_id=59602">via82cxxx_audio</ulink>
+    </entry>
+    <entry>snd-via82xx</entry>
+    <entry></entry>
+    <entry></entry>
+    <entry>4-48 kHz or 48 kHz only, depending on the chipset</entry>
+    <entry></entry>
+    <entry></entry>
+  </row>
+
+  <row>
+    <entry>Aureal Vortex 2</entry>
+    <entry>none</entry>
+    <entry>none</entry>
+    <entry>OK</entry>
+    <entry>
+      <ulink url="http://aureal.sourceforge.net">Linux Aureal Drivers</ulink>
+      <ulink url="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">buffer size increased to 32k</ulink>
+    </entry>
+    <entry>48</entry>
+    <entry>4.1</entry>
+    <entry>5+</entry>
+  </row>
+
+  <row>
+    <entry>SB Live!</entry>
+    <entry>Analog OK, SP/DIF not working</entry>
+    <entry>Both OK</entry>
+    <entry>Both OK</entry>
+    <entry>
+      <ulink url="http://opensource.creative.com">Creative's OSS driver (SP/DIF support)</ulink>
+    </entry>
+    <entry>192</entry>
+    <entry>4.0/5.1</entry>
+    <entry>32</entry>
+  </row>
+
+  <row>
+    <entry>SB 128 PCI (es1371)</entry>
+    <entry>OK</entry>
+    <entry>?</entry>
+    <entry></entry>
+    <entry></entry>
+    <entry>48</entry>
+    <entry>stereo</entry>
+    <entry>2</entry>
+  </row>
+
+  <row>
+    <entry>SB AWE 64</entry>
+    <entry>max 44kHz</entry>
+    <entry>48kHz sounds bad</entry>
+    <entry></entry>
+    <entry></entry>
+    <entry>48</entry>
+    <entry></entry>
+    <entry></entry>
+  </row>
+
+  <row>
+    <entry>GUS PnP</entry>
+    <entry>none</entry>
+    <entry>OK</entry>
+    <entry>OK</entry>
+    <entry></entry>
+    <entry>48</entry>
+    <entry></entry>
+    <entry></entry>
+  </row>
+
+  <row>
+    <entry>Gravis UltraSound ACE</entry>
+    <entry></entry>
+    <entry></entry>
+    <entry></entry>
+    <entry></entry>
+    <entry></entry>
+    <entry></entry>
+    <entry></entry>
+  </row>
+
+  <row>
+    <entry>Gravis UltraSound MAX</entry>
+    <entry>OK</entry>
+    <entry>OK (?)</entry>
+    <entry></entry>
+    <entry></entry>
+    <entry>48</entry>
+    <entry></entry>
+    <entry></entry>
+  </row>
+
+  <row>
+    <entry>ESS 688</entry>
+    <entry>OK</entry>
+    <entry>OK (?)</entry>
+    <entry></entry>
+    <entry></entry>
+    <entry>48</entry>
+    <entry></entry>
+    <entry></entry>
+  </row>
+
+  <row>
+    <entry>C-Media cards (which ones?)</entry>
+    <entry>not OK (hissing) (?)</entry>
+    <entry>OK</entry>
+    <entry></entry>
+    <entry></entry>
+    <entry>?</entry>
+    <entry></entry>
+    <entry></entry>
+  </row>
+
+  <row>
+    <entry>Yamaha cards (*ymf*)</entry>
+    <entry>not OK (?) (maybe <option>-ao sdl</option>)</entry>
+    <entry>OK only with ALSA 0.5 with OSS emulation
+      <emphasis role="bold">AND</emphasis> <option>-ao sdl</option> (!) (?)</entry>
+    <entry></entry>
+    <entry></entry>
+    <entry></entry>
+    <entry></entry>
+    <entry></entry>
+  </row>
+
+  <row>
+    <entry>Cards with envy24 chips (like Terratec EWS88MT)</entry>
+    <entry>?</entry>
+    <entry>?</entry>
+    <entry>OK</entry>
+    <entry></entry>
+    <entry>?</entry>
+    <entry></entry>
+    <entry></entry>
+  </row>
+
+  <row>
+    <entry>PC Speaker or DAC</entry>
+    <entry>OK</entry>
+    <entry>none</entry>
+    <entry></entry>
+    <entry>
+      <ulink url="http://www.geocities.com/stssppnn/pcsp.html">Linux PC speaker OSS driver</ulink>
+    </entry>
+    <entry>The driver emulates 44.1, maybe more.</entry>
+    <entry>mono</entry>
+    <entry>1</entry>
+  </row>
+
+</tbody>
+</tgroup>
+</informaltable>
+
+<para>
+Feedback to this document is welcome. Please tell us how
+<application>MPlayer</application> and your sound card(s) worked together.
+</para>
+</sect3>
+
+<sect3 id="af">
+<title>Audio filters</title>
+<para>
+  The old audio plugins have been superseded by a new audio filter layer. Audio
+  filters are used for changing the properties of the audio data before the
+  sound reaches the sound card. The activation and deactivation of the filters
+  is normally automated but can be overridden. The filters are activated when
+  the properties of the audio data differ from those required by the sound card
+  and deactivated if unnecessary. The <option>-af filter1,filter2,...</option>
+  option is used to override the automatic activation of filters or to insert
+  filters that are not automatically inserted. The filters will be executed as
+  they appear in the comma separated list.
+</para>
+
+<para>
+Example:
+<screen>mplayer -af resample,pan movie.avi</screen>
+would run the sound through the resampling filter followed by the pan filter.
+Observe that the list must not contain any spaces, else it will fail.
+</para>
+
+<para>
+The filters often have options that change their behavior. These options
+are explained in detail in the sections below. A filter will execute using
+default settings if its options are omitted. Here is an example of how to use
+filters in combination with filter specific options:
+<screen>mplayer -af resample=11025,pan=1:0.5:0.5 -channels 1 -srate 11025 media.avi</screen>
+would set the output frequency of the resample filter to 11025Hz and downmix
+the audio to 1 channel using the pan filter.
+</para>
+
+
+<para>
+The overall execution of the filter layer is controlled using the
+<option>-af-adv</option> option. This option has two suboptions:
+</para>
+
+<para>
+<option>force</option> is a bit field that controls how the filters
+are inserted and what speed/accuracy optimizations they use:
+</para>
+
+<variablelist>
+<varlistentry>
+<term><option>0</option></term>
+<listitem><para>
+Use automatic insertion of filters and optimize according to CPU speed.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>1</option></term>
+<listitem><para>
+Use automatic insertion of filters and optimize for the highest speed.
+<emphasis>Warning:</emphasis> Some features in the audio filters may
+silently fail, and the sound quality may drop.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>2</option></term>
+<listitem><para>
+Use automatic insertion of filters and optimize for quality.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>3</option></term>
+<listitem><para>
+Use no automatic insertion of filters and no optimization.
+<emphasis>Warning:</emphasis> It may be possible to crash MPlayer
+using this setting.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>4</option></term>
+<listitem><para>
+Use automatic insertion of filters according to 0 above,
+but use floating point processing when possible.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>5</option></term>
+<listitem><para>
+Use automatic insertion of filters according to 1 above,
+but use floating point processing when possible.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>6</option></term>
+<listitem><para>
+Use automatic insertion of filters according to 2 above,
+but use floating point processing when possible.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>7</option></term>
+<listitem><para>
+Use no automatic insertion of filters according to 3 above,
+and use floating point processing when possible.
+</para></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+<option>list</option> is an alias for the -af option.
+</para>
+
+<para>
+The filter layer is also affected by the following generic options:
+</para>
+
+<variablelist>
+<varlistentry>
+<term><option>-v</option></term>
+<listitem><para>
+Increases the verbosity level and makes most filters print out extra
+status messages.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-channels</option></term>
+<listitem><para>
+This option sets the number of output channels you would like your
+sound card to use. It also affects the number of channels that are
+being decoded from the media. If the media contains less channels
+than requested the channels filter (see below) will automatically
+be inserted. The routing will be the default routing for the channels
+filter.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>-srate</option></term>
+<listitem><para>
+This option selects the sample rate you would like your sound card
+to use (of course the cards have limits on this). If the sample frequency
+of your sound card is different from that of the current media, the resample
+filter (see below) will be inserted into the audio filter layer to compensate
+for the difference.
+</para></listitem>
+</varlistentry>
+<varlistentry>
+<term><option>-format</option></term>
+<listitem><para>
+This option sets the sample format between the audio filter layer and the
+sound card. If the requested sample format of your sound card is different
+from that of the current media, a format filter (see below) will be inserted
+to rectify the difference.
+</para></listitem>
+</varlistentry>
+</variablelist>
+
+<sect4 id="af_resample">
+<title>Up/Downsampling</title>
+
+<para>
+MPlayer fully supports sound up/down-sampling through the
+<systemitem>resample</systemitem> filter. It can be used if you
+have a fixed frequency sound card or if you are stuck with an old sound card
+that is only capable of max 44.1kHz. This filter is automatically enabled if
+it is necessary, but it can also be explicitly enabled on the command line. It
+has three options:
+</para>
+
+<variablelist>
+<varlistentry>
+<term><option>srate &lt;8000-192000&gt;</option></term>
+<listitem><para>
+    is an integer used for setting the output sample
+    frequency in Hz. The valid range for this parameter is 8kHz to 192kHz. If
+    the input and output sample frequency are the same or if this parameter is
+    omitted the filter is automatically unloaded. A high sample frequency
+    normally improves the audio quality, especially when used in combination
+    with other filters.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>sloppy</option></term>
+<listitem><para>
+    is an optional binary parameter that allows the output frequency to differ
+    slightly from the frequency given by <option>srate</option>. This option
+    can be used if the startup of the playback is extremely slow. It is enabled
+    by default.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>type &lt;0-2&gt;</option></term>
+<listitem><para>
+    is an optional integer between <literal>0</literal> and <literal>2</literal> that
+    selects which resampling method to use. Here <literal>0</literal> represents
+    linear interpolation as resampling method, <literal>1</literal> represents
+    resampling using a poly-phase filter-bank and integer processing and
+    <literal>2</literal> represents resampling using a poly-phase filter-bank and
+    floating point processing. Linear interpolation is extremely fast, but
+    suffers from poor sound quality especially when used for up-sampling. The
+    best quality is given by <literal>2</literal> but this method also suffers from
+    the highest CPU load.
+</para></listitem>
+</varlistentry>
+</variablelist>
+
+<para>Example:
+<screen>mplayer -af resample=44100:0:0</screen>
+would set the output frequency of the resample filter to 44100Hz using exact output
+frequency scaling and linear interpolation.
+</para>
+</sect4>
+
+<sect4 id="af_channels">
+<title>Changing the number of channels</title>
+<para>
+The <option>channels</option> filter can be used for adding and removing
+channels, it can also be used for routing or copying channels. It is
+automatically enabled when the output from the audio filter layer differs from
+the input layer or when it is requested by another filter. This filter unloads
+itself if not needed. The number of options is dynamic:
+</para>
+
+<variablelist>
+<varlistentry>
+<term><option>nch &lt;1-6&gt;</option></term>
+<listitem><para>
+  is an integer between <literal>1</literal> and <literal>6</literal> that is used
+  for setting the number of output channels. This option is required, leaving it
+  empty results in a runtime error.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>nr &lt;1-6&gt;</option></term>
+<listitem><para>
+  is an integer between <literal>1</literal> and <literal>6</literal> that is used
+  for specifying the number of routes. This parameter is optional. If it is
+  omitted the default routing is used.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>from1:to1:from2:to2:from3:to3...</option></term>
+<listitem><para>
+  are pairs of numbers between <literal>0</literal> and <literal>5</literal>
+  that define where each channel should be routed.
+</para></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+  If only <option>nch</option> is given the default routing is used, it works
+  as follows: If the number of output channels is bigger than the number of input
+  channels empty channels are inserted (except mixing from mono to stereo, then
+  the mono channel is repeated in both of the output channels). If the number of
+  output channels is smaller than the number of input channels the exceeding
+  channels are truncated.
+</para>
+
+<para>
+Example 1:
+<screen>mplayer -af channels=4:4:0:1:1:0:2:2:3:3 media.avi</screen>
+would change the number of channels to 4 and set up 4 routes that swap
+channel 0 and channel 1 and leave channel 2 and 3 intact. Observe that
+if media containing two channels was played back, channels 2 and 3 would
+contain silence but 0 and 1 would still be swapped.
+</para>
+
+<para>
+Exemple 2:
+<screen>mplayer -af channels=6:4:0:0:0:1:0:2:0:3 media.avi</screen>
+would change the number of channels to 6 and set up 4 routes that copy
+channel 0 to channels 0 to 3. Channel 4 and 5 will contain silence.
+</para>
+</sect4>
+
+<sect4 id="af_format">
+<title>Sample format converter</title>
+<para>
+The <option>format</option> filter converts between different sample formats. It
+  is automatically enabled when needed by the sound card or another filter.
+</para>
+
+<variablelist>
+<varlistentry>
+<term><option>bps &lt;number&gt;</option></term>
+<listitem><para>
+    can be <literal>1</literal>, <literal>2</literal> or <literal>4</literal> and
+    denotes the number of bytes per sample. This option is required, leaving it empty
+    results in a runtime error.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>f &lt;format&gt;</option></term>
+<listitem><para>
+    is a text string describing the sample format. The string is a
+    concatenated mix of: <option>alaw</option>, <option>mulaw</option> or
+    <option>imaadpcm</option>, <option>float</option> or <option>int</option>,
+    <option>unsigned</option> or <option>signed</option>, <option>le</option> or
+    <option>be</option> (little or big endian). This option is required,
+    leaving it empty results in a runtime error.
+</para></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+Example:
+<screen>mplayer -af format=4:float media.avi</screen>
+would set the output format to 4 bytes per sample floating point data.
+</para>
+</sect4>
+
+<sect4 id="af_delay">
+<title>Delay</title>
+<para>
+The <option>delay</option>  filter delays the sound to the loudspeakers such that
+the sound from the different channels arrives at the listening position
+simultaneously.
+It is only useful if you have more than 2 loudspeakers. This filter has a
+variable number of parameters:
+</para>
+
+<variablelist>
+<varlistentry>
+<term><option>d1:d2:d3...</option></term>
+<listitem><para>
+    are floating point numbers representing the delays in ms that should be
+    imposed on the different channels. The minimum delay is 0ms and the maximum
+    is 1000ms.
+</para></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+To calculate the required delay for the different channels do as follows:
+</para>
+
+<orderedlist>
+<listitem><para>
+    Measure the distance to the loudspeakers in meters in relation to your
+    listening position, giving you the distances s1 to s5 (for a 5.1 system).
+    There is no point in compensating for the sub-woofer (you will not hear the
+    difference anyway).
+</para></listitem>
+<listitem><para>
+Subtract the distances s1 to s5 from the maximum distance i.e.
+    s[i] = max(s) - s[i]; i = 1...5
+</para></listitem>
+<listitem><para>
+alculated the required delays in ms as
+    d[i] = 1000*s[i]/342; i = 1...5
+    s[i] = max(s) - s[i]; i = 1...5
+</para></listitem>
+</orderedlist>
+
+<para>
+Example:
+<screen>mplayer -af delay=10.5:10.5:0:0:7:0 media.avi</screen>
+would delay front left and right by 10.5ms, the two rear channels and the sub
+by 0ms and the center channel by 7ms.
+</para>
+
+</sect4>
+
+<sect4 id="af_volume">
+<title>Software volume control</title>
+<para>Software volume control is implemented by the <option>volume</option>
+audio filter. Use this filter with caution since it can reduce the signal to
+noise ratio of the sound. In most cases it is best to set the level for the
+PCM sound to max, leave this filter out and control the output level to your
+speakers with the master volume control of the mixer. In case your sound card
+has a digital PCM mixer instead of an analog one, and you hear distortion,
+use the MASTER mixer instead. If there is an external amplifier connected to
+the computer (this is almost always the case), the noise level can be minimized
+by adjusting the master level and the volume knob on the amplifier until the
+hissing noise in the background is gone. This filter has two options:
+</para>
+
+<variablelist>
+<varlistentry>
+<term><option>v &lt;-200 - +60&gt;</option></term>
+<listitem><para>
+    is a floating point number between <literal>-200</literal> and <literal>+60</literal>
+    which represents the volume level in dB. The default level is 0dB.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>c</option></term>
+<listitem><para>
+    is a binary control that turns soft clipping on and off. Soft-clipping can
+    make the sound more smooth if very high volume levels are used. Enable this
+    option if the dynamic range of the loudspeakers is very low. Be aware that
+    this feature creates distortion and should be considered a last resort.
+</para></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+Example:
+<screen>mplayer -af volume=10.1:0 media.avi</screen>
+would amplify the sound by 10.1dB and hard-clip if the sound level is too high.
+</para>
+
+<para>
+This filter has a second feature: It measures the overall maximum sound level
+and prints out that level when MPlayer exits. This volume estimate can be used
+for setting the sound level in MEncoder such that the maximum dynamic range is
+utilized.
+</para>
+</sect4>
+
+<sect4 id="af_equalizer">
+<title>Equalizer</title>
+<para>
+The <option>equalizer</option> filter represents a 10 octave band graphic
+equalizer, implemented using 10 IIR band pass filters. This means that
+it works regardless of what type of audio is being played back. The center
+frequencies for the 10 bands are:
+</para>
+
+<informaltable>
+<tgroup cols="2">
+<thead>
+  <row>
+    <entry>Band No.</entry><entry>Center frequency</entry>
+  </row>
+</thead>
+<tbody>
+  <row><entry>0</entry><entry>31.25 Hz</entry></row>
+  <row><entry>1</entry><entry>62.50 Hz</entry></row>
+  <row><entry>2</entry><entry>125.0 Hz</entry></row>
+  <row><entry>3</entry><entry>250.0 Hz</entry></row>
+  <row><entry>4</entry><entry>500.0 Hz</entry></row>
+  <row><entry>5</entry><entry>1.000 kHz</entry></row>
+  <row><entry>6</entry><entry>2.000 kHz</entry></row>
+  <row><entry>7</entry><entry>4.000 kHz</entry></row>
+  <row><entry>8</entry><entry>8.000 kHz</entry></row>
+  <row><entry>9</entry><entry>16.00 kHz</entry></row>
+</tbody>
+</tgroup>
+</informaltable>
+
+<para>
+If the sample rate of the sound being played back is lower than the center
+frequency for a frequency band, then that band will be disabled. A known
+bug with this filter is that the characteristics for the uppermost band
+are not completely symmetric if the sample rate is close to the center
+frequency of that band. This problem can be worked around by up-sampling
+the sound using the resample filter before it reaches this filter.
+</para>
+
+<para>
+This filter has 10 parameters:
+</para>
+
+<variablelist>
+<varlistentry>
+<term><option>g1:g2:g3...g10</option></term>
+<listitem><para>
+are floating point numbers between <literal>-12</literal> and <literal>+12</literal>
+representing the gain in dB for each frequency band.
+</para></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+Example:
+<screen>mplayer -af equalizer=11:11:10:5:0:-12:0:5:12:12 media.avi</screen>
+would amplify the sound in the upper and lower frequency region while
+canceling it almost completely around 1kHz.
+</para>
+</sect4>
+
+<sect4 id="af_panning">
+<title>Panning filter</title>
+<para>
+Use the <option>pan</option> filter to mix channels arbitrarily. It is
+basically a combination of the volume control and the channels filter.
+There are two major uses for this filter:
+</para>
+
+<orderedlist>
+<listitem><para>
+Down-mixing many channels to only a few, stereo to mono for example.
+</para></listitem>
+<listitem><para>
+Varying the &quot;width&quot; of the center speaker in a surround sound system.
+</para></listitem>
+</orderedlist>
+
+<para>
+This filter is hard to use, and will require some tinkering before the
+desired result is obtained. The number of options for this filter
+depends on the number of output channels:
+</para>
+
+<variablelist>
+<varlistentry>
+<term><option>nch &lt;1-6&gt;</option></term>
+<listitem><para>
+is an integer between <literal>1</literal> and <literal>6</literal> and is used
+for setting the number of output channels. This option is required, leaving it
+empty results in a runtime error.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>l00:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...</option></term>
+<listitem><para>
+are floating point values between <literal>0</literal> and <literal>1</literal>.
+<option>l[i][j]</option> determines how much of input channel j is mixed into
+output channel i.
+</para></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+Example 1:
+<screen>mplayer -af pan=1:0.5:0.5 -channels 1 media.avi</screen>
+would down-mix from stereo to mono.
+</para>
+
+<para>
+Example 2:
+<screen>mplayer -af pan=3:1:0:1:0.5:0.5 -channels 3 media.avi</screen>
+would give 3 channel output leaving channels 0 and 1 intact, and mix
+channels 0 and 1 into output channel 2 (which could be sent to a
+sub-woofer for example).
+</para>
+</sect4>
+
+<sect4 id="af_sub">
+<title>Sub-woofer</title>
+<para>
+The <option>sub</option>  filter adds a sub woofer channel to the audio
+stream. The audio data used for creating the sub-woofer channel is an
+average of the sound in channel 0 and channel 1. The resulting sound is
+then low-pass filtered by a 4th order Butterworth filter with a default
+cutoff frequency of 60Hz and added to a separate channel in the audio
+stream. Warning: Disable this filter when you are playing DVDs with Dolby
+Digital 5.1 sound, otherwise this filter will disrupt the sound to the
+sub-woofer. This filter has two parameters:
+</para>
+
+<variablelist>
+<varlistentry>
+<term><option>fc &lt;20-300&gt;</option></term>
+<listitem><para>
+    is an optional floating point number used for setting the cutoff frequency
+    for the filter in Hz. The valid range is 20Hz to 300Hz. For the best result
+    try setting the cutoff frequency as low as possible. This will improve the
+    stereo or surround sound experience. The default cutoff frequency is 60Hz.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>ch &lt;0-5&gt;</option></term>
+<listitem><para>
+    is an optional integer between <literal>0</literal> and <literal>5</literal>
+    which determines the channel number in which to insert the sub-channel audio.
+    The default is channel number <literal>5</literal>. Observe that the number of
+    channels will automatically be increased to <replaceable>ch</replaceable> if
+    necessary.
+</para></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+Example:
+<screen>mplayer -af sub=100:4 -channels 5 media.avi</screen>
+would add a sub-woofer channel with a cutoff frequency of
+100Hz to output channel 4.
+</para>
+</sect4>
+
+<sect4 id="af_surround">
+<title>Surround-sound decoder</title>
+<para>
+Matrix encoded surround sound can be decoded by the <option>surround</option>
+filter. Dolby Surround is an example of a matrix encoded format. Many files
+with 2 channel audio actually contain matrixed surround sound. To use this
+feature you need a sound card supporting at least 4 channels. This filter has
+one parameter:
+</para>
+
+<variablelist>
+<varlistentry>
+<term><option>d &lt;0-1000&gt;</option></term>
+<listitem><para>
+is an optional floating point number between <literal>0</literal> and
+<literal>1000</literal> used for setting the delay time in ms for the
+rear speakers. This delay should be set as follows: if d1 is the distance
+from the listening position to the front speakers and d2 is the distance
+from the listening position to the rear speakers, then the delay d should
+be set to 15ms if d1 &lt;= d2 and to 15 + 5*(d1-d2) if d1 &gt; d2. The default
+value for d is 20ms.
+</para></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+Example:
+<screen>mplayer -af surround=15 -channels 4 media.avi</screen>
+would add surround sound decoding with 15ms delay for the sound to the
+rear speakers.
+</para>
+</sect4>
+</sect3>
+
+<sect3 id="audio-plugins">
+<title>Audio plugins (deprecated)</title>
+<note><para><emphasis role="bold">Audio plugins have been deprecated by audio filters and will
+be removed soon.</emphasis></para></note>
+
+<para>
+<application>MPlayer</application> has support for audio plugins.  Audio
+plugins can be used for changing the properties of the audio data before
+the sound reaches the sound card. They are enabled using the
+<option>-aop</option> switch which takes a
+<option>list=plugin1,plugin2,...</option> argument. The
+<option>list</option> argument is required and determines which plugins
+should be used and in which order they should be executed. Example:
+
+<screen>mplayer media.avi -aop list=resample,format</screen>
+
+would run the sound through the resampling plugin followed by the format
+plugin.
+</para>
+
+<para>
+The plugins can also have switches that change their behavior. These
+switches are explained in detail in the sections below. A plugin will
+execute using default settings if its switches are omitted.  Here is an
+example of how to use plugins in combination with plugin specific switches:
+
+<screen>mplayer media.avi -aop list=resample,format:fout=44100:format=0x8</screen>
+
+would set the output frequency of the resample plugin to 44100 Hz and the
+output format of the format plugin to AFMT_U8.
+</para>
+
+<para>
+Currently audio plugins can not be used in
+<application>MEncoder</application>.
+</para>
+
+
+<sect4 id="updn-sampling">
+<title>Up/Downsampling</title>
+
+<para>
+<application>MPlayer</application> fully supports up/downsampling of the sound. This plugin can be
+used if you have a fixed frequency sound card or if you are stuck with an
+old sound card that is only capable of max 44.1 kHz. Limitations in your
+hardware are not auto detected, so you have to specify the sample frequency
+explicitly. This plugin has one switch: <option>fout</option> which is used for setting the
+desired output sample frequency. It defaults to 48 kHz, and is given in
+Hz.
+</para>
+
+<para>
+Usage:
+
+<screen>
+mplayer <replaceable>media.avi</replaceable> -aop list=resample:fout=<replaceable>freq</replaceable></screen>
+
+where <literal><replaceable>freq</replaceable></literal> is the frequency
+in Hz, like <literal>44100</literal>.
+</para>
+
+<note>
+<para>
+The output frequency should not be scaled up from the default value.
+Scaling up will cause the audio and video streams to be played in slow
+motion in addition to audio distortion.
+</para>
+</note>
+</sect4>
+
+
+<sect4 id="surround-decode">
+<title>Surround Sound decoding</title>
+
+<para>
+<application>MPlayer</application> has an audio plugin that can decode
+matrix encoded surround sound. Dolby Surround is an example of a matrix
+encoded format.  Many files with 2 channel audio actually contain matrixed
+surround sound.  To use this feature you need a sound card supporting at
+least 4 channels.
+</para>
+
+<para>
+Usage:
+<screen>mplayer <replaceable>media.avi</replaceable> -aop list=surround</screen>
+</para>
+</sect4>
+
+
+<sect4 id="sample-format-conv">
+<title>Sample format converter</title>
+
+<para>
+If your sound card driver does not support signed 16-bit int data type,
+this plugin can be used to change the format to one which your sound card
+can understand. It has one switch, <option>format</option>, which can be
+set to one of the numbers found in <filename>libao2/afmt.h</filename>. This
+plugin is hardly ever needed and is intended for advanced users. Keep in
+mind that this plugin only changes the sample format and not the sample
+frequency or the number of channels.
+</para>
+
+<para>
+Usage:
+
+<screen>
+mplayer <replaceable>media.avi</replaceable> -aop list=format:format=<replaceable>outfmt</replaceable></screen>
+
+where <literal><replaceable>outfmt</replaceable></literal> is the 
+required output format.
+</para>
+</sect4>
+
+
+<sect4 id="audio-delay">
+<title>Delay</title>
+<para>
+This plugin delays the sound and is intended as an example of how to
+develop new plugins. It can not be used for anything useful from a users
+perspective and is mentioned here for the sake of completeness only. Do not
+use this plugin unless you are a developer.
+</para>
+</sect4>
+
+
+<sect4 id="sw-volume">
+<title>Software volume control</title>
+
+<para>
+This plugin is a software replacement for the volume control, and can be
+used on machines with a broken mixer device. It can also be used if one
+wants to change the output volume of <application>MPlayer</application>
+without changing the PCM volume setting in the mixer. It has one switch
+<option>volume</option> that is used for setting the initial sound level.
+The initial sound level can be set to values between 0 and 255 and defaults
+to 101 which equals 0dB amplification. Use this plugin with caution since
+it can reduce the signal to noise ratio of the sound. In most cases it is
+best to set the level for the PCM sound to max, leave this plugin out and
+control the output level to your speakers with the master volume control of
+the mixer. If there is an external amplifier connected to the computer
+(this is almost always the case), the noise level can be minimized by
+adjusting the master level and the volume knob on the amplifier until the
+hissing noise in the background is gone.
+</para>
+
+<para>
+Usage:
+<screen>
+mplayer <replaceable>media.avi</replaceable> -aop list=volume:volume=<replaceable>0-255</replaceable></screen>
+</para>
+
+<para>
+This plugin also has compressor or "soft-clipping" capabilities.
+Compression can be used if the dynamic range of the sound is very high or
+if the dynamic range of the loudspeakers is very low. Be aware that this
+feature creates distortion and should be considered a last resort.
+</para>
+
+<para>
+Usage:
+<screen>
+mplayer <replaceable>media.avi</replaceable> -aop list=volume:softclip</screen>
+</para>
+</sect4>
+
+<sect4 id="extrastereo">
+<title>Extrastereo</title>
+
+<para>
+This plugin (linearly) increases the difference between left and right
+channels (like the XMMS extrastereo plugin) which gives some sort of "live"
+effect to playback.
+</para>
+
+<para>
+Usage:
+<screen>
+mplayer <replaceable>media.avi</replaceable> -aop list=extrastereo
+mplayer <replaceable>media.avi</replaceable> -aop list=extrastereo:mul=3.45<!--
+--></screen>
+
+The default coefficient (<option>mul</option>) is a float number that
+defaults to 2.5. If you set it to <literal>0.0</literal>, you will have
+mono sound (average of both channels). If you set it to
+<literal>1.0</literal>, sound will be unchanged, if you set it to
+<literal>-1.0</literal>, left and right channels will be swapped.
+</para>
+</sect4>
+
+
+<sect4 id="volnorm">
+<title>Volume normalizer</title>
+
+<para>
+This plugin maximizes the volume without distorting the sound.
+</para>
+
+<para>
+Usage:
+<screen>mplayer <replaceable>media.avi</replaceable> -aop list=volnorm</screen>
+</para>
+</sect4>
+</sect3>
+</sect2>

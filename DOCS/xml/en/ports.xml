@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<chapter id="ports" xreflabel="Ports">
+<title>Ports</title>
+
+<sect1 id="linux">
+<title>Linux</title>
+<para>
+The main development platform is Linux on x86, although
+<application>MPlayer</application> works on many other Linux ports.
+Binary packages of MPlayer are available from several sources. However,
+<emphasis role="bold">none of these packages are supported</emphasis>.
+Report problems to the authors, not to us.
+</para>
+
+<sect2 id="debian">
+<title>Debian packaging</title>
+<para>
+To build a Debian package, run the following command in the MPlayer
+source directory:
+<screen>fakeroot debian/rules binary</screen>
+As root you can then install the <filename>.deb</filename> package as usual:
+<screen>dpkg -i ../mplayer_<replaceable>version</replaceable>.deb</screen>
+</para>
+
+<para>
+Christian Marillat has been making unofficial Debian MPlayer, MEncoder and font
+packages for a while, you can (apt-)get them from his
+<ulink url="http://marillat.free.fr/">homepage</ulink>.
+</para>
+</sect2>
+
+<sect2 id="rpm">
+<title>RPM packaging</title>
+<para>
+Dominik Mierzejewski created and maintains official Red Hat RPM packages of
+<application>MPlayer</application>. They are available from his
+<ulink url="http://www.piorunek.pl/~dominik/linux/pkgs/mplayer/">homepage</ulink>.
+</para>
+
+<para>
+Mandrake RPM packages are available from the <ulink url="http://plf.zarb.org/">P.L.F.</ulink>.
+SuSE includes a crippled version of MPlayer in their distribution. If you want all the features
+you will have to install from source.
+</para>
+</sect2>
+
+<sect2 id="arm">
+<title>ARM</title>
+<para>
+MPlayer works on Linux PDAs with ARM CPU e.g. Sharp Zaurus, Compaq Ipaq. The
+easiest way to obtain MPlayer is to get it from one of the
+<ulink url="http://www.openzaurus.org">OpenZaurus</ulink> package feeds. If
+you want to compile it yourself, you should look at the
+<ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/mplayer?nav=index.html|src/.|src/packages">MPlayer</ulink>
+and the
+<ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/libavcodec?nav=index.html|src/.|src/packages">libavcodec</ulink>
+directory in the OpenZaurus distribution buildroot. These always have the latest
+Makefile and patches used for building a CVS MPlayer with libavcodec.
+If you need a GUI frontend, you can use xmms-embedded.
+</para>
+</sect2>
+</sect1>
+
+<sect1 id="bsd">
+<title>*BSD</title>
+<para>
+<application>MPlayer</application> runs on FreeBSD, OpenBSD, NetBSD,
+BSD/OS and Darwin. There are ports/pkgsrc/fink/etc versions of MPlayer
+available that are probably easier to use than our raw sources.
+</para>
+
+<para>
+To build MPlayer you will need GNU make (gmake - native BSD make
+will not work) and a recent version of binutils.
+</para>
+
+<para>
+If MPlayer complains about not finding <filename>/dev/cdrom</filename> or
+<filename>/dev/dvd</filename>, create an appropiate symbolic link:
+<screen>ln -s /dev/(your_cdrom_device) /dev/cdrom</screen>
+</para>
+
+<para>
+To use Win32 DLLs with MPlayer you will need to re-compile the kernel with
+&quot;<envar>option USER_LDT</envar>&quot; (unless you run FreeBSD-CURRENT,
+where this is the default).
+</para>
+
+
+<sect2 id="freebsd">
+<title>FreeBSD</title>
+<para>
+If your CPU has SSE, recompile your kernel with
+&quot;<envar>options CPU_ENABLE_SSE</envar>&quot; (FreeBSD-STABLE or kernel
+patches required).
+</para>
+</sect2>
+
+<sect2 id="openbsd">
+<title>OpenBSD</title>
+<para>
+Due to limitations in different versions of gas (relocation vs MMX), you
+will need to compile in two steps: First make sure that the non-native as
+is first in your <envar>$PATH</envar> and do a <command>gmake -k</command>, then
+make sure that the native version is used and do <command>gmake</command>.
+</para>
+</sect2>
+</sect1>
+
+<sect1 id="solaris">
+<title>Solaris</title>
+<para>
+<application>MPlayer</application> should work on Solaris 2.6 or newer.
+</para>
+
+<para>
+On <emphasis role="bold">UltraSPARCs</emphasis>, MPlayer takes advantage of their
+<emphasis role="bold">VIS</emphasis> extensions (equivalent to MMX), currently
+only in <emphasis>libmpeg2</emphasis>, <emphasis>libvo</emphasis> and
+<emphasis>libavcodec</emphasis>, but not in mp3lib. You can watch a VOB file
+on a 400MHz CPU. You'll need
+<ulink url="http://www.sun.com/sparc/vis/mediaLib.html">mLib</ulink> installed.
+</para>
+
+<para>
+To build the package you will need GNU <application>make</application>
+(<filename>gmake</filename>, <filename>/opt/sfw/gmake</filename>), native
+Solaris make will not work. Typical error you get when building with
+Solaris' make instead of GNU make:
+<screen>
+   % /usr/ccs/bin/make
+   make: Fatal error in reader: Makefile, line 25: Unexpected end of line seen
+</screen>
+</para>
+
+<para>
+On Solaris SPARC, you need the GNU C/C++ Compiler; it does not matter if
+GNU C/C++ compiler is configured with or without the GNU assembler.
+</para>
+
+<para>
+On Solaris x86, you need the GNU assembler and the GNU C/C++ compiler,
+configured to use the GNU assembler! The mplayer code on the x86 platform
+makes heavy use of MMX, SSE and 3DNOW! instructions that cannot be compiled
+using Sun's assembler <filename>/usr/ccs/bin/as</filename>.
+</para>
+
+<para>The <filename>configure</filename> script tries to find out, which
+assembler program is used by your &quot;gcc&quot; command (in case the autodetection
+fails, use the <option>--as=/whereever/you/have/installed/gnu-as</option>
+option to tell the <filename>configure</filename> script where it can find GNU
+"as" on your system).
+</para>
+
+<para>
+Error message from <filename>configure</filename> on a Solaris x86 system using
+GCC without GNU assembler:
+<screen>
+   % configure
+   ...
+   Checking assembler (/usr/ccs/bin/as) ... , failed
+   Please upgrade(downgrade) binutils to 2.10.1...
+</screen>
+(Solution: Install and use a gcc configured with <option>--with-as=gas</option>)
+</para>
+
+<para>
+Typical error you get when building with a GNU C compiler that does not use GNU as:
+<screen>
+   % gmake
+   ...
+   gcc -c -Iloader -Ilibvo -O4 -march=i686 -mcpu=i686 -pipe -ffast-math
+        -fomit-frame-pointer  -I/usr/local/include   -o mplayer.o mplayer.c
+   Assembler: mplayer.c
+   "(stdin)", line 3567 : Illegal mnemonic
+   "(stdin)", line 3567 : Syntax error
+   ... more "Illegal mnemonic" and "Syntax error" errors ...
+</screen>
+</para>
+
+<para>
+Due to bugs in Solaris 8, you may not be able to play DVD discs larger than 4 GB:
+</para>
+
+<itemizedlist>
+<listitem><para>
+The sd(7D) driver on Solaris 8 x86 has a bug when accessing a disk block >4GB
+on a device using a logical blocksize != DEV_BSIZE (i.e. CD-ROM and DVD media).
+Due to a 32Bit int overflow, a disk address modulo 4GB is accessed
+(<ulink url="http://groups.yahoo.com/group/solarisonintel/message/22516"/>).
+This problem does not exist in the SPARC version of Solaris 8.
+</para></listitem>
+
+<listitem><para>
+A similar bug is present in the hsfs(7FS) filesystem code (aka ISO9660),
+hsfs may not not support partitions/disks larger than 4GB, all data is
+accessed modulo 4GB
+(<ulink url="http://groups.yahoo.com/group/solarisonintel/message/22592"/>).
+The hsfs problem can be fixed by installing patch 109764-04 (sparc) / 109765-04 (x86).
+</para></listitem>
+</itemizedlist>
+
+<para>
+On Solaris with an UltraSPARC CPU, you can get some extra speed by using the
+CPU's VIS instructions for certain time consuming operations. VIS acceleration
+can be used in MPlayer by calling functions in Sun's
+<ulink url="http://www.sun.com/sparc/vis/mediaLib.html">mediaLib</ulink>.
+</para>
+
+<para>
+VIS accelerated operations from mediaLib are used for mpeg2 video decoding
+and for color space conversion in the video output drivers.
+</para>
+</sect1>
+
+<sect1 id="sgi">
+<title>Silicon Graphics / Irix</title>
+<para>
+You can either try to install the GNU install program, and (if you did
+not put it in your global path) then point to the location with:
+<screen>./configure --install-path=PATH</screen>
+</para>
+
+<para>
+Or you can use the default install delivered with IRIX 6.5 in which case
+you will have to edit the <filename>Makefile</filename> by hand a little bit.
+Change the following two lines:
+<programlisting>
+  $(INSTALL) -c -m 644 DOCS/mplayer.1 $(MANDIR)/man1/mplayer.1
+
+  $(INSTALL) -c -m 644 etc/codecs.conf $(CONFDIR)/codecs.conf
+</programlisting>
+to:
+<programlisting>
+  $(INSTALL) -m 644 mplayer.1 $(MANDIR)/man1/
+
+  $(INSTALL) -m 644 codecs.conf $(CONFDIR)/
+</programlisting>
+And then do (from within the MPlayer source dir):
+<screen>cp DOCS/mplayer.1 . ; cp etc/codecs.conf .</screen>
+and then go on with building and installing.
+</para>
+</sect1>
+
+<sect1 id="qnx">
+<title>QNX</title>
+<para>
+Works. You'll need to download SDL for QNX, and install it. Then run
+<application>MPlayer</application> with <option>-vo sdl:photon</option>
+and <option>-ao sdl:nto</option> options, and it should be fast.
+</para>
+
+<para>
+The <option>-vo x11</option> output will be even slower than on Linux,
+since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
+</para>
+</sect1>
+
+<sect1 id="cygwin">
+<title>Cygwin</title>
+<para>
+The Cygwin port is still in its infancy. Currently there is no support for
+Win32 DLLs or OpenGL. SDL is known to distort sound and image or crash on
+some systems. <ulink url="../../tech/patches.txt">Patches</ulink>
+are always welcome. Best results are achieved with the native DirectX video
+output driver (<option>-vo directx</option>) and the native Windows waveout
+audio driver (<option>-ao win32</option>). You should also check out the
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">mplayer-cygwin</ulink>
+mailing list for help and latest information.
+</para>
+
+<para>
+You have to copy or symlink <filename>etc/cygwin_inttypes.h</filename>
+from the MPlayer source directory to <filename>/usr/include/inttypes.h</filename>
+in order to make MPlayer compile.
+</para>
+
+<para>
+To get native DirectX video, download
+<ulink url="http://www.videolan.org/vlc/dx7headers.tgz">DirectX 7 header files</ulink>,
+extract them to <filename>/usr/include/</filename> or <filename>/usr/local/include/</filename>
+and recompile. If the image is distorted, try turning off hardware acceleration with
+<option>-vo directx:noaccel</option>
+</para>
+
+<para>
+Instructions and files for making SDL run under Cygwin can be found on the
+<ulink url="http://www.libsdl.org/extras/win32/cygwin/">libsdl site</ulink>.
+</para>
+
+<para>
+You can play VCDs by playing the .DAT or .MPG files that Windows exposes on
+VCDs. It works like this (adjust for the drive letter of your CD-ROM):
+<screen>mplayer d:/mpegav/avseq01.dat</screen>
+<screen>mplayer /cygdrive/d/MPEG2/AVSEQ01.MPG</screen>
+</para>
+
+<para>
+DVDs also work, just set the DVD device correctly to whatever your CD-ROM
+device is:
+<screen>mplayer -dvd &lt;title&gt; -dvd-device '\\.\d:'</screen>
+</para>
+
+<para>
+QuickTime DLLs have also been reported to work. Compile with
+<option>--enable-qtx-codecs</option> and put the codecs into
+the default Windows DLL location, <filename class="directory">C:\WINNT\system32</filename>
+or <filename class="directory">C:\Windows\system</filename> depending on your
+Windows version.
+</para>
+</sect1>
+
+</chapter>

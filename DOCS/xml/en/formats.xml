@@ -1,0 +1,455 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<sect1 id="formats">
+<title>Supported formats</title>
+
+<para>
+It is important to clarify a common mistake. When people see a file with a
+<filename>.AVI</filename> extension, they immediately conclude that it is
+not an MPEG file.  That is not true. At least not entirely. Contrary to
+popular belief such a file <emphasis>can</emphasis> contain MPEG1 video.
+</para>
+
+<para>
+You see, a <emphasis role="bold">codec</emphasis> is not the same as a
+<emphasis role="bold">file format</emphasis>.
+Examples of video <emphasis role="bold">codecs</emphasis> are: MPEG1, MPEG2, DivX, Indeo5, 3ivx.
+Examples of file <emphasis role="bold">formats</emphasis> are: MPG, AVI, ASF.
+</para>
+
+<para>
+In theory, you can put an OpenDivX video and MP3 audio
+into an <emphasis role="bold">MPG format file</emphasis>. However, most
+players will not play it, since they expect MPEG1 video and MP2 audio (unlike
+<emphasis role="bold">AVI</emphasis>, <emphasis role="bold">MPG</emphasis>
+does not have the necessary fields to describe its video and audio streams).
+Or you might put MPEG1 video into an AVI file.
+<ulink url="http://ffmpeg.sourceforge.net/">FFmpeg</ulink> and
+<link linkend="mencoder">MEncoder</link> can create these files.
+</para>
+
+
+<sect2 id="video-formats">
+<title>Video formats</title>
+
+<sect3 id="mpg-vob-dat">
+<title>MPEG files</title>
+
+<para>
+MPEG files come in different guises:
+</para>
+
+<itemizedlist>
+<listitem><simpara>
+  MPG: This is the most <emphasis role="bold">basic</emphasis> form of the
+  MPEG file formats. It contains MPEG1 video, and MP2 (MPEG-1 layer 2) or
+  rarely MP1 audio.
+  </simpara></listitem>
+<listitem><simpara>
+  DAT: This is the very same format as MPG with a different extension. It
+  is used on <emphasis role="bold">Video CDs</emphasis>. Due to the way VCDs
+  are created and Linux is designed, the DAT files cannot be played nor copied
+  from VCDs as regular files. You have to use the <option>-vcd</option> option
+  to play the Video CD.
+  </simpara></listitem>
+<listitem><simpara>
+  VOB: This is the MPEG file format on <emphasis role="bold">DVDs</emphasis>.
+  It is the same as MPG, plus the capability to contain subtitles or non-MPEG
+  (AC3) audio. It contains encoded MPEG2 video and usually AC3 audio, but DTS,
+  MP2 and uncompressed LPCM are allowed, too.  Read the
+  <link linkend="dvd">DVD section</link>!
+  </simpara></listitem>
+</itemizedlist>
+
+<para>
+Series of frames form independent groups in MPEG files. This means that you
+can cut/join an MPEG file with standard file tools (like
+<command>dd</command>, <command>cut</command>), and it remains completely
+functional.
+</para>
+
+<para>
+One important feature of MPGs is that they have a field to describe the
+aspect ratio of the video stream within. For example SVCDs have 480x480
+resolution video, and in the header that field is set to 4:3, so that it is
+played at 640x480. AVI files do not have this field, so they have to be
+rescaled during encoding or played with the <option>-aspect</option>
+option.
+</para>
+</sect3>
+
+
+<sect3 id="avi">
+<title>AVI files</title>
+
+<para>
+Designed by Microsoft, <emphasis role="bold">AVI (Audio Video Interleaved)</emphasis>
+is a widespread multipurpose format currently used mostly for DivX and DivX4
+video. It has many known drawbacks and shortcomings (for example in streaming). It
+supports one video stream and 0 to 99 audio streams and can be as big as
+2GB. There exists an extension allowing bigger files called OpenDML. Microsoft
+currently strongly discourages its use and encourages ASF/WMV. Not that
+anybody cares.
+</para>
+
+<para>
+There is a hack that allows AVI files to contain an Ogg Vorbis audio
+stream, but makes them incompatible with standard AVI.
+<application>MPlayer</application> supports playing these files. Seeking is
+also implemented but severely hampered by badly encoded files with
+confusing headers. Unfortunately the only encoder currently capable of
+creating these files, <application>NanDub</application>, has this problem.
+</para>
+
+<note>
+<para>
+DV cameras create raw DV streams that DV grabbing utilities convert to two
+different types of AVI files. The AVI will then contain either separate
+audio and video streams that <application>MPlayer</application> can play or
+the raw DV stream for which support is under development.
+</para>
+</note>
+
+<para>
+There are two kinds of AVI files:
+<itemizedlist>
+<listitem><simpara>
+  <emphasis role="bold">Interleaved:</emphasis> Audio and video content is
+  interleaved. This is the standard usage. Recommended and mostly used. Some tools
+  create interleaved AVIs with bad sync. <application>MPlayer</application>
+  detects these as interleaved, and this climaxes in loss of A/V sync,
+  probably at seeking.  These files should be played as non-interleaved
+  (with the <option>-ni</option> option).
+  </simpara></listitem>
+<listitem><simpara>
+  <emphasis role="bold">Non-interleaved:</emphasis> First comes the whole
+  video stream, then the whole audio stream. It thus needs a lot of seeking,
+  making playing from network or CD-ROM difficult.
+  </simpara></listitem>
+</itemizedlist>
+</para>
+
+<para>
+<application>MPlayer</application> supports two kinds of timings for AVI
+files:
+<itemizedlist>
+<listitem><simpara>
+  <emphasis role="bold">bps-based:</emphasis> It is based on the
+  bitrate/samplerate of the video/audio stream. This method is used by
+  most players, including <ulink url="http://avifile.sourceforge.net">avifile</ulink>
+  and <application>Windows Media Player</application>. Files with broken
+  headers, and files created with VBR audio but not VBR-compliant encoder
+  will result in A/V desync with this method (mostly at seeking).
+  </simpara></listitem>
+<listitem><simpara>
+  <emphasis role="bold">interleaving-based:</emphasis> It does not use the bitrate
+  value of the header, instead it uses the relative position of interleaved
+  audio and video chunks, making badly encoded files with VBR audio playable.
+  </simpara></listitem>
+</itemizedlist>
+</para>
+
+<para>
+Any audio and video codec is allowed, but note that VBR audio is not well
+supported by most players. The file format makes it possible to use VBR
+audio, but most players expect CBR audio, thus they fail with VBR. VBR is
+uncommon and Microsoft's AVI specs only describe CBR audio. I also noticed
+that most AVI encoders/multiplexers create bad files when using VBR audio.
+There are only two known exceptions:
+<application>NanDub</application> and <link linkend="mencoder">MEncoder</link>.
+</para>
+</sect3>
+
+
+<sect3 id="asf-wmv">
+<title>ASF/WMV files</title>
+<para>
+ASF (Active Streaming Format) comes from Microsoft. They developed two
+variants of ASF, v1.0 and v2.0. v1.0 is used by their media tools (<application>Windows
+Media Player</application> and <application>Windows Media Encoder</application>)
+and is very secret. v2.0 is published and patented :). Of course they differ,
+there is no compatibility at all (it is just another legal game).
+<application>MPlayer</application> supports only v1.0, as nobody has ever seen
+v2.0 files :). Note that ASF files nowadays come with the extension
+<filename>.WMA</filename> or <filename>.WMV</filename>.
+</para>
+</sect3>
+
+
+<sect3 id="qt-mov">
+<title>QuickTime/MOV files</title>
+
+<para>
+These formats were designed by Apple and can contain any codec, CBR or VBR.
+They usually have a <filename>.QT</filename> or <filename>.MOV</filename>
+extension. Note that since the MPEG4 group chose QuickTime as the recommended
+file format for MPEG4, their MOV files come with a <filename>.MPG</filename> or
+<filename>.MP4</filename> extension (Interestingly the video and audio
+streams in these files are real MPG and AAC files. Yo can even extract them with the
+<option>-dumpvideo</option> and <option>-dumpaudio</option> options.).
+</para>
+
+<note>
+<para>
+Most new QuickTime files use <emphasis role="bold">Sorenson</emphasis> video and
+QDesign Music audio. See our <link linkend="sorenson">Sorenson</link> codec section.
+</para>
+</note>
+</sect3>
+
+
+<sect3 id="vivo">
+<title>VIVO files</title>
+
+<para>
+<application>MPlayer</application> happily demuxes VIVO file formats. The
+biggest disadvantage of the format is that it has no index block, nor a
+fixed packet size or sync bytes and most files lack even keyframes, so
+forget seeking!
+</para>
+
+<para>
+The video codec of VIVO/1.0 files is standard <emphasis role="bold">h.263</emphasis>.
+The video codec of VIVO/2.0 files is a modified, nonstandard
+<emphasis role="bold">h.263v2</emphasis>. The audio is the same, it may be
+<emphasis role="bold">g.723 (standard)</emphasis>, or
+<emphasis role="bold">Vivo Siren</emphasis>.
+</para>
+
+<para>
+See the
+<link linkend="vivo-video">VIVO video codec</link> and
+<link linkend="vivo-audio">VIVO audio codec</link>
+sections for installation instructions.
+</para>
+</sect3>
+
+
+<sect3 id="fli">
+<title>FLI files</title>
+<para>
+<emphasis role="bold">FLI</emphasis> is a very old file format used by
+Autodesk Animator, but it is a common file format for short animations on the net.
+<application>MPlayer</application> demuxes and decodes FLI movies and is
+even able to seek within them (useful when looping with the
+<option>-loop</option> option). FLI files do not have keyframes, so the
+picture will be messy for a short time after seeking.
+</para>
+</sect3>
+
+
+<sect3 id="realmedia">
+<title>RealMedia (RM) files</title>
+
+<para>
+Yes, <application>MPlayer</application> can read (demux) RealMedia
+(<filename>.rm</filename>) files. Seeking works, but you have to explicitly
+specify the <option>-forceidx</option> option (the format supports
+keyframes). Here are the lists of the supported <link
+linkend="realvideo">RealVideo</link> and <link
+linkend="realaudio">RealAudio</link> codecs.
+</para>
+</sect3>
+
+
+<sect3 id="nuppelvideo">
+<title>NuppelVideo files</title>
+<para>
+<ulink url="http://mars.tuwien.ac.at/~roman/nuppelvideo">NuppelVideo</ulink>
+is a TV grabber tool (AFAIK:). <application>MPlayer</application> can read
+its <filename>.NUV</filename> files (only NuppelVideo 5.0). Those files can
+contain uncompressed YV12, YV12+RTJpeg compressed, YV12 RTJpeg+lzo
+compressed, and YV12+lzo compressed frames.
+<application>MPlayer</application> decodes (and also <emphasis role="bold">encodes</emphasis>
+them with <application>MEncoder</application> to DivX/etc!) them all. Seeking works.
+</para>
+</sect3>
+
+
+<sect3 id="yuv4mpeg">
+<title>yuv4mpeg files</title>
+<para>
+<ulink url="http://mjpeg.sourceforge.net">yuv4mpeg / yuv4mpeg2</ulink>
+is a file format used by the
+<ulink url="http://mjpeg.sf.net">mjpegtools programs</ulink>.
+You can grab, produce, filter or encode video in this format using these tools.
+The file format is really a sequence of uncompressed YUV 4:2:0 images.
+</para>
+</sect3>
+
+
+<sect3 id="film">
+<title>FILM files</title>
+<para>
+This format is used on old Sega Saturn CD-ROM games.
+</para>
+</sect3>
+
+
+<sect3 id="roq">
+<title>RoQ files</title>
+<para>
+RoQ files are multimedia files used in some ID games such as Quake III and
+Return to Castle Wolfenstein.
+</para>
+</sect3>
+
+
+<sect3 id="ogg">
+<title>OGG/OGM files</title>
+<para>
+This is a new fileformat from <ulink url="http://www.xiph.org">Xiphophorus</ulink>.
+It can contain any video or audio codec, CBR or VBR. You'll need
+<systemitem class="library">libogg</systemitem> and
+<systemitem class="library">libvorbis</systemitem> installed before
+compiling <application>MPlayer</application> to be able to play it.
+</para>
+</sect3>
+
+
+<sect3 id="sdp">
+<title>SDP files</title>
+<para>
+<ulink url="ftp://ftp.rfc-editor.org/in-notes/rfc2327.txt">SDP</ulink> is an
+IETF standard format for describing video and/or audio RTP streams.
+(The &quot;<ulink url="http://www.live.com/mplayer/">LIVE.COM Streaming Media</ulink>&quot;
+are required.)
+</para>
+</sect3>
+
+
+<sect3 id="pva">
+<title>PVA files</title>
+<para>
+PVA is an MPEG-like format used by DVB TV boards' software (e.g.:
+<application>MultiDec</application>, <application>WinTV</application> under Windows.
+</para>
+
+<para>
+The PVA specifications can be downloaded from the following address:
+<ulink url="http://www.technotrend.de/download/av_format_v1.pdf"/>
+</para>
+</sect3>
+
+
+<sect3 id="gif">
+<title>GIF files</title>
+<para>
+The <emphasis role="bold">GIF</emphasis> format is a common format for web
+graphics. There are two versions of the GIF spec, GIF87a and GIF89a. The
+main difference is that GIF89a allows for animation. MPlayer supports both
+formats through use of <systemitem class="library">libungif</systemitem> or
+another libgif-compatible library. Non-animated GIFs will be displayed as
+single frame videos. (Use the <option>-loop</option> and <option>-fixed-vo</option>
+options to display these longer.)
+</para>
+
+<para>
+<application>MPlayer</application> currently does not support seeking in GIF
+files. GIF files do not necessarily have a fixed frame size, nor a fixed
+framerate. Rather, each frame is of independent size and is supposed to be
+positioned in a certain place on a field of fixed-size. The framerate is
+controlled by an optional block before each frame that specifies the next
+frame's delay in centiseconds.
+</para>
+
+<para>
+Standard GIF files contain 24-bit RGB frames with at most an 8-bit indexed
+pallete. These frames are usually LZW-compressed, although some GIF encoders
+produce uncompressed frames to avoid patent issues with LZW compression.
+</para>
+
+<para>
+If your distribution does not come with <systemitem class="library">libungif</systemitem>,
+download a copy from the
+<ulink url="http://prtr-13.ucsc.edu/~badger/software/libungif/index.shtml">libungif
+homepage</ulink>. For detailed technical information, have a look at the
+<ulink url="http://www.w3.org/Graphics/GIF/spec-gif89a.txt">GIF89a specification</ulink>.
+</para>
+</sect3>
+</sect2>
+
+<!-- ********** -->
+
+<sect2 id="audio-formats">
+<title>Audio formats</title>
+
+<para>
+<application>MPlayer</application> is a <emphasis role="bold">movie</emphasis>
+and not a <emphasis role="bold">media</emphasis> player, although it can play
+some audio file formats (they are listed in the sections below).  This is not
+a recommended usage of <application>MPlayer</application>, you better use <ulink
+url="http://www.xmms.org">XMMS</ulink>.
+</para>
+
+<sect3 id="mp3">
+<title>MP3 files</title>
+<para>
+You may have problems playing certain MP3 files that
+<application>MPlayer</application> will misdetect as MPEGs and play
+incorrectly or not at all. This cannot be fixed without dropping support
+for certain broken MPEG files and thus will remain like this for the
+foreseeable future. The <option>-demuxer</option> flag described in the
+manpage may help you in these cases.
+</para>
+</sect3>
+
+<sect3 id="wav">
+<title>WAV files</title>
+<para>
+</para>
+</sect3>
+
+<sect3 id="ogg-vorbis">
+<title>OGG/OGM files (Vorbis)</title>
+<para>
+Requires properly installed
+<systemitem class="library">libogg</systemitem> and
+<systemitem class="library">libvorbis</systemitem>.
+</para>
+</sect3>
+
+<sect3 id="wma-asf">
+<title>WMA/ASF files</title>
+<para>
+</para>
+</sect3>
+
+<sect3 id="mp4">
+<title>MP4 files</title>
+<para></para>
+</sect3>
+
+<sect3 id="cdda">
+<title>CD audio</title>
+<para>
+<application>MPlayer</application> can use <application>cdparanoia</application>
+to play CDDA (Audio CD). The scope of this section does not contain enumerating
+<application>cdparanoia</application>'s features.
+</para>
+
+<para>
+See the man page's <option>-cdda</option> option which can be used to pass
+options to <application>cdparanoia</application>.
+</para>
+</sect3>
+
+<sect3 id="xmms">
+<title>XMMS</title>
+<para>
+<application>MPlayer</application> can use <application>XMMS</application> input
+plugins to play many file formats. There are plugins for SNES game tunes, SID
+tunes (from Commodore 64), many Amiga formats, .xm, .it, VQF, musepack, Bonk,
+shorten and many others. You can find them at the
+<ulink url="http://www.xmms.org/plugins_input.html">XMMS input plugin page</ulink>.
+</para>
+
+<para>
+For this feature you need to have <application>XMMS</application> and compile
+<application>MPlayer</application> with <filename>./configure --enable-xmms</filename>.
+If that does not work, you might need to set the <application>XMMS</application>
+plugin and library path explicitly by way of the <option>--with-xmmsplugindir</option>
+and <option>--withxmmslibdir</option> options.
+</para>
+</sect3>
+</sect2>
+</sect1>

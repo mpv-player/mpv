@@ -1,0 +1,436 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<chapter id="usage">
+<title>Usage</title>
+
+<sect1 id="commandline">
+<title>Command line</title>
+
+<para>
+<application>MPlayer</application> utilizes a complex playtree. It consists
+of global options written as first, for example
+
+<screen>mplayer -vfm 5</screen>
+
+and options written after filenames, that apply only to the given
+filename/URL/whatever, for example:
+
+<screen>mplayer -vfm 5 movie1.avi movie2.avi -vfm 4</screen>
+</para>
+
+<para>
+You can group filenames/URLs together using <literal>{</literal> and
+<literal>}</literal>. It's useful with option <option>-loop</option>:
+
+<screen>mplayer { 1.avi - loop 2 2.avi } -loop 3</screen>
+
+The above command will play files in this order: 1, 1, 2, 1, 1, 2, 1, 1, 2.
+</para>
+
+<para>
+Playing a file:
+<synopsis>
+<command>mplayer</command><!--
+--> [<replaceable>options</replaceable>]<!--
+--> [<replaceable>path</replaceable>/]<replaceable>filename</replaceable>
+</synopsis>
+</para>
+
+<para>
+Playing more files:
+<synopsis>
+<command>mplayer</command><!--
+--> [<replaceable>default options</replaceable>]<!--
+--> [<replaceable>path</replaceable>/]<replaceable>filename1</replaceable><!--
+--> [<replaceable>options for filename1</replaceable>]<!--
+--> <replaceable>filename2</replaceable><!--
+--> [<replaceable>options for filename2</replaceable>] ...
+</synopsis>
+</para>
+
+<para>
+Playing VCD:
+<synopsis>
+<command>mplayer</command> [<replaceable>options</replaceable>]<!--
+--> -vcd <replaceable>trackno</replaceable><!--
+--> [-cdrom-device <replaceable>/dev/cdrom</replaceable>]
+</synopsis>
+</para>
+
+<para>
+Playing DVD:
+<synopsis>
+<command>mplayer</command> [<replaceable>options</replaceable>]<!--
+--> -dvd <replaceable>titleno</replaceable><!--
+--> [-dvd-device <replaceable>/dev/dvd</replaceable>]
+</synopsis>
+</para>
+
+<para>
+Playing from the WWW:
+<synopsis>
+<command>mplayer</command> [<replaceable>options</replaceable>]<!--
+--> http://<replaceable>site.com/file.asf</replaceable>
+</synopsis>
+(playlists can be used, too)
+</para>
+
+<para>
+Playing from RTSP:
+<synopsis>
+<command>mplayer</command> [<replaceable>options</replaceable>]<!--
+--> rtsp://<replaceable>server.example.com/streamName</replaceable>
+</synopsis>
+</para>
+
+<para>
+Latest versions of <application>MPlayer</application> also accepts VCD and
+DVD tracks in URL style, just like <application>Xine</application> does:
+<screen>mplayer dvd://1</screen>
+or
+<screen>mplayer vcd://1</screen>
+</para>
+
+<para>
+Examples:
+<screen>
+mplayer -vo x11 /mnt/Films/Contact/contact2.mpg
+mplayer -vcd 2
+mplayer -afm 3 /mnt/DVDtrailers/alien4.vob
+mplayer -dvd 1 -dvd-device /dev/hdc
+mplayer -abs 65536 -delay -0.4 -nobps ~/movies/test.avi<!--
+--></screen>
+</para>
+</sect1>
+
+
+<sect1 id="control">
+<title>Control</title>
+
+<para>
+<application>MPlayer</application> has a fully configurable, command
+driven, control layer which lets you control
+<application>MPlayer</application> with keyboard, mouse, joystick or remote
+control (using LIRC). See the man page for the complete list of keyboard controls.
+</para>
+
+
+<sect2 id="ctrl-cfg">
+<title>Controls configuration</title>
+
+<para>
+<application>MPlayer</application> allows you bind any key/button to any
+MPlayer command using a simple config file.  The syntax consist of a key
+name followed by a command. The default config file location is
+<filename>$HOME/.mplayer/input.conf</filename> but it can be overridden
+using the <option>-input <replaceable>conf</replaceable></option> option
+(relative path are relative to <filename>$HOME/.mplayer</filename>).
+</para>
+
+<example>
+<title>A simple input control file</title>
+<programlisting>
+##
+## MPlayer input control file
+##
+
+RIGHT seek +10
+LEFT seek -10
+- audio_delay 0.100
++ audio_delay -0.100
+q quit
+&gt; pt_step 1
+&lt; pt_step -1
+ENTER pt_step 1 1<!--
+--></programlisting>
+</example>
+
+
+<sect3 id="ctrl-cfg-keys">
+<title>Key names</title>
+
+<para>
+You can have a full list by running
+<command>mplayer -input keylist</command>.
+</para>
+
+<itemizedlist>
+<title>Keyboard</title>
+<listitem><simpara>Any printable character</simpara></listitem>
+<listitem><simpara><literal>SPACE</literal></simpara></listitem>
+<listitem><simpara><literal>ENTER</literal></simpara></listitem>
+<listitem><simpara><literal>TAB</literal></simpara></listitem>
+<listitem><simpara><literal>CTRL</literal></simpara></listitem>
+<listitem><simpara><literal>BS</literal></simpara></listitem>
+<listitem><simpara><literal>DEL</literal></simpara></listitem>
+<listitem><simpara><literal>INS</literal></simpara></listitem>
+<listitem><simpara><literal>HOME</literal></simpara></listitem>
+<listitem><simpara><literal>END</literal></simpara></listitem>
+<listitem><simpara><literal>PGUP</literal></simpara></listitem>
+<listitem><simpara><literal>PGDWN</literal></simpara></listitem>
+<listitem><simpara><literal>ESC</literal></simpara></listitem>
+<listitem><simpara><literal>RIGHT</literal></simpara></listitem>
+<listitem><simpara><literal>LEFT</literal></simpara></listitem>
+<listitem><simpara><literal>UP</literal></simpara></listitem>
+<listitem><simpara><literal>DOWN</literal></simpara></listitem>
+</itemizedlist>
+
+<itemizedlist>
+<title>Mouse (only supported under X)</title>
+<listitem><simpara>
+  <literal>MOUSE_BTN0</literal> (Left button)</simpara></listitem>
+<listitem><simpara>
+  <literal>MOUSE_BTN1</literal> (Right button)</simpara></listitem>
+<listitem><simpara>
+  <literal>MOUSE_BTN2</literal> (Middle button)</simpara></listitem>
+<listitem><simpara>
+  <literal>MOUSE_BTN3</literal> (Wheel)</simpara></listitem>
+<listitem><simpara>
+  <literal>MOUSE_BTN4</literal> (Wheel)</simpara></listitem>
+<listitem><simpara>...</simpara></listitem>
+<listitem><simpara><literal>MOUSE_BTN9</literal></simpara></listitem>
+</itemizedlist>
+
+<itemizedlist>
+<title>Joystick (support must be enabled at compile time)</title>
+<listitem><simpara>
+  <literal>JOY_RIGHT</literal> or
+  <literal>JOY_AXIS0_PLUS</literal></simpara></listitem>
+<listitem><simpara>
+  <literal>JOY_LEFT</literal> or
+  <literal>JOY_AXIS0_MINUS</literal></simpara></listitem>
+<listitem><simpara>
+  <literal>JOY_UP</literal> or
+  <literal>JOY_AXIS1_MINUS</literal></simpara></listitem>
+<listitem><simpara>
+  <literal>JOY_DOWN</literal> or
+  <literal>JOY_AXIS1_PLUS</literal></simpara></listitem>
+<listitem><simpara><literal>JOY_AXIS2_PLUS</literal></simpara></listitem>
+<listitem><simpara><literal>JOY_AXIS2_MINUS</literal></simpara></listitem>
+<listitem><simpara>...</simpara></listitem>
+<listitem><simpara><literal>JOY_AXIS9_PLUS</literal></simpara></listitem>
+<listitem><simpara><literal>JOY_AXIS9_MINUS</literal></simpara></listitem>
+</itemizedlist>
+</sect3>
+
+
+<sect3 id="ctrl-cfg-commands">
+<title>Commands</title>
+
+<para>
+You can have a full list of known commands by running
+<command>mplayer -input cmdlist</command>.
+</para>
+
+<itemizedlist>
+<listitem><para><literal>seek</literal> (int) val [(int) type=0]</para>
+  <para>
+  Seek to some place in the movie.
+  Type <literal>0</literal> is a relative seek of +/- val seconds.
+  Type <literal>1</literal> seek to val % in the movie.
+  </para></listitem>
+<listitem><para><literal>audio_delay</literal> (float) val</para>
+  <para>
+  Adjust the audio delay of val seconds
+  </para></listitem>
+<listitem><para><literal>quit</literal></para>
+  <para>
+  Quit <application>MPlayer</application>
+  </para></listitem>
+<listitem><para><literal>pause</literal></para>
+  <para>
+  Pause/unpause the playback
+  </para></listitem>
+<listitem><para><literal>grap_frames</literal></para>
+  <para>
+  Somebody know ?
+  </para></listitem>
+<listitem><para><literal>pt_step</literal> (int) val [(int) force=0]</para>
+  <para>
+  Go to next/previous entry in playtree. Val sign tell the direction.  If
+  no other entry is available in the given direction it won't do anything
+  unless force is non 0.
+  </para></listitem>
+<listitem><para><literal>pt_up_step</literal> (int) val [(int) force=0]</para>
+  <para>
+  Like pt_step but it jump to next/previous in the parent list. It's useful
+  to break inner loop in the playtree.
+  </para></listitem>
+<listitem><para><literal>alt_src_step</literal> (int) val</para>
+  <para>
+  When more than one source is available it select the next/previous one
+  (only supported by asx playlist).
+  </para></listitem>
+<listitem><para><literal>sub_delay</literal> (float) val [(int) abs=0]</para>
+  <para>
+  Adjust the subtitles delay of +/- val seconds or set it to val seconds
+  when abs is non zero.
+  </para></listitem>
+<listitem><para><literal>osd</literal> [(int) level=-1]</para>
+  <para>
+  Toggle osd mode or set it to level when level &gt; 0.
+  </para></listitem>
+<listitem><para><literal>volume</literal> (int) dir</para>
+  <para>Increase/decrease volume
+  </para></listitem>
+<listitem><simpara><literal>contrast</literal> (int) val [(int) abs=0]
+  </simpara></listitem>
+<listitem><simpara><literal>brightness</literal> (int) val [(int) abs=0]
+  </simpara></listitem>
+<listitem><simpara><literal>hue</literal> (int) val [(int) abs=0]
+  </simpara></listitem>
+<listitem><para><literal>saturation</literal> (int) val [(int) abs=0]</para>
+  <para>
+  Set/Adjust video parameters. Val range from -100 to 100.
+  </para></listitem>
+<listitem><para><literal>frame_drop</literal> [(int) type=-1]</para>
+  <para>
+  Toggle/Set frame dropping mode.
+  </para></listitem>
+<listitem><para><literal>sub_visibility</literal></para>
+  <para>
+  Adjust subtitles visibility.
+  </para></listitem>
+<listitem><para><literal>sub_pos</literal> (int) val</para>
+  <para>
+  Adjust subtitles position.
+  </para></listitem>
+<listitem><para><literal>vobsub_lang</literal></para>
+  <para>
+  Change the language of VobSub subtitles.
+  </para></listitem>
+<listitem><para><literal>vo_fullscreen</literal></para>
+  <para>
+  Switch fullscreen mode.
+  </para></listitem>
+<listitem><para><literal>tv_step_channel</literal> (int) dir</para>
+  <para>
+  Select next/previous tv channel.
+  </para></listitem>
+<listitem><para><literal>tv_step_norm</literal></para>
+  <para>
+  Change TV norm.
+  </para></listitem>
+<listitem><para><literal>tv_step_chanlist</literal></para>
+  <para>
+  Change channel list.
+  </para></listitem>
+<listitem><simpara><literal>gui_loadfile</literal></simpara></listitem>
+<listitem><simpara><literal>gui_loadsubtitle</literal></simpara></listitem>
+<listitem><simpara><literal>gui_about</literal></simpara></listitem>
+<listitem><simpara><literal>gui_play</literal></simpara></listitem>
+<listitem><simpara><literal>gui_stop</literal></simpara></listitem>
+<listitem><simpara><literal>gui_playlist</literal></simpara></listitem>
+<listitem><simpara><literal>gui_preferences</literal></simpara></listitem>
+<listitem><para><literal>gui_skinbrowser</literal></para>
+  <para>
+  GUI actions
+  </para></listitem>
+</itemizedlist>
+</sect3>
+</sect2>
+
+
+<sect2 id="lirc">
+<title>Control from LIRC</title>
+
+<para>
+Linux Infrared Remote Control - use an easy to build home-brewn IR-receiver,
+an (almost) arbitrary remote control and control your linux box with it!
+More about it at <ulink url="http://www.lirc.org">www.lirc.org</ulink>.
+</para>
+
+<para>
+If you have installed the lirc-package, configure will autodetect it. If
+everything went fine, <application>MPlayer</application> will print a
+message like "<computeroutput>Setting up lirc support...</computeroutput>"
+on startup. If an error occurs it will tell you. If it doesn't tell you
+anything about LIRC there's no support compiled in. That's it :-)
+</para>
+
+<para>
+The application name for <application>MPlayer</application> is - oh wonder
+- <filename>mplayer</filename>.  You can use any mplayer commands and even
+pass more than one command by separating them with <literal>\n</literal>.
+Don't forget to enable the repeat flag in <filename>.lircrc</filename> when
+it make sense (seek, volume, etc). Here's an excerpt from my
+<filename>.lircrc</filename>:
+</para>
+
+<programlisting>
+begin
+     button = VOLUME_PLUS
+     prog = mplayer
+     config = volume 1
+     repeat = 1
+end
+
+begin
+    button = VOLUME_MINUS
+    prog = mplayer
+    config = volume -1
+    repeat = 1
+end
+
+begin
+    button = CD_PLAY
+    prog = mplayer
+    config = pause
+end
+
+begin
+    button = CD_STOP
+    prog = mplayer
+    config = seek 0 1\npause
+end<!--
+--></programlisting>
+
+<para>
+If you don't like the standard location for the lirc-config file
+(<filename>~/.lircrc</filename>) use the <option>-lircconf
+<replaceable>filename</replaceable></option> switch to specify another
+file.
+</para>
+</sect2>
+
+
+<sect2 id="slave-mode">
+<title>Slave mode</title>
+<para>
+The slave mode allow you to build simple frontend to
+<application>MPlayer</application>. When enabled (with the
+<option>-slave</option> option) <application>MPlayer</application> will
+read commands separated by new line (\n) from stdin.
+</para>
+</sect2>
+</sect1>
+
+
+<sect1 id="streaming">
+<title>Streaming from network or pipes</title>
+
+<para>
+<application>MPlayer</application> can play files from network, using the
+HTTP or MMS protocol.
+</para>
+
+<para>
+Playing goes by simply using adding the URL to the command line.
+<application>MPlayer</application> also honors the
+<envar>http_proxy</envar> environment variable, and uses proxy if
+available.  Proxy usage can also be forced:
+<screen>mplayer http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</screen>
+</para>
+
+<para>
+<application>MPlayer</application> can read from stdin
+(<emphasis>not</emphasis> named pipes). This can be for example used to
+play from FTP:
+<screen>wget ftp://micorsops.com/something.avi -O - | mplayer -</screen>
+</para>
+
+<para>
+Note: it's also recommended to enable CACHE when playback from network:
+<screen>wget ftp://micorsops.com/something.avi -O - | mplayer -cache 8192 -</screen>
+</para>
+</sect1>
+</chapter>

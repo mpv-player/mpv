@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<appendix id="bugs">
+<title>Known bugs</title>
+<sect1 id="bugs-special">
+<title>Special system/CPU-specific bugs/problems</title>
+<itemizedlist>
+<listitem>
+<para>SIGILL (signal 4) on P3 using 2.2.x kernels:</para>
+<para>Problem: kernel 2.2.x doesn't have proper (working) SSE support</para>
+<para>Solution: upgrade kernel to 2.4.x</para>
+<para>Workaround: <command>./configure --disable-sse</command></para>
+</listitem>
+<listitem>
+<para>General SIGILL (signal 4):</para>
+<para>Problem: you compiled and run mplayer in different machines
+(for example compiled on P3 and running on Celeron)</para>
+<para>Solution: compile MPlayer on the same machine where you will use it!</para>
+<para>Workaround: <command>./configure --disable-sse</command> etc. options</para>
+</listitem>
+<listitem>
+<para>&quot;Internal buffer inconsistency&quot; during MEncoder run:</para>
+<para>Problem: known problem when lame &lt; 3.90 was compiled with gcc 2.96 or 3.x.</para>
+<para>Solution: use lame &gt;=3.90.</para>
+<para>Workaround: compile lame with gcc 2.95.x and remove any already installed
+lame packages, they may have been compiled with gcc 2.96.</para>
+</listitem>
+<listitem>
+<para>Messed up MP2/MP3 sound on PPC:</para>
+<para>Problem: known GCC miscompilation bug on PPC platforms, no fix yet.</para>
+<para>Workaround: use FFmpeg's (slow) MP1/MP2/MP3 decoder (<option>-ac ffmpeg</option>)</para>
+</listitem>
+<listitem>
+<para>sig11 in libmpeg2, when scaling+encoding:</para>
+<para>Problem: known GCC 2.95.2 MMX bug, upgrade to 2.95.3.</para>
+</listitem>
+</itemizedlist>
+</sect1>
+
+<sect1 id="bugs-audio">
+<title>Various A-V sync and other audio problems</title>
+
+<sect2 id="bugs-delay-all">
+<title>General audio delay or jerky sound (exists with all or many files)</title>
+<itemizedlist>
+<listitem><para>
+most common: buggy audio driver! - try to use different drivers, try ALSA 0.9 OSS
+emulation with <option>-ao oss</option>, also try <option>-ao sdl</option>,
+sometimes it helps. If your file plays fine with -nosound, then you can be sure
+it's sound card (driver) problem.
+</para></listitem>
+</itemizedlist>
+<itemizedlist>
+<listitem>
+<para>audio buffer problems (buffer size badly detected)</para>
+<para>Workaround: mplayer <option>-abs</option> option</para>
+</listitem>
+</itemizedlist>
+<itemizedlist>
+<listitem><para>
+samplerate problems - maybe your card doesn't support the samplerate used in your
+files - try the resampling plugin (<option>-aop</option>)
+</para></listitem>
+</itemizedlist>
+<itemizedlist>
+<listitem>
+<para>slow machine (CPU or VGA)</para>
+<para>try with <option>-vo null</option>, if it plays well, then you have slow
+VGA card/driver</para>
+<para>Workaround: buy a faster card or read this documentation about how to
+speed up</para>
+<para>Also try <option>-framedrop</option></para>
+</listitem>
+</itemizedlist>
+</sect2>
+
+<sect2 id="bugs-delay-specific">
+<title>Audio delay/de-sync specific to one or a few files</title>
+<itemizedlist>
+<listitem>
+<para>bad file</para>
+<para>
+Workaround:
+  <itemizedlist>
+  <listitem>
+    <para><option>-ni</option> or <option>-nobps</option> option (for
+    non-interleaved or bad files)</para>
+    <para>and/or</para>
+  </listitem>
+  <listitem>
+    <para><option>-mc 0</option>(required for files with badly
+    interleaved VBR audio)</para>
+    <para>and/or</para>
+  </listitem>
+  <listitem>
+    <para><option>-delay</option> or <keycap>+</keycap>/<keycap>-</keycap>
+    keys at runtime to adjust delay</para>
+  </listitem>
+  </itemizedlist>
+If none of these help, please upload the file, we'll check (and fix).
+</para>
+</listitem>
+<listitem>
+<para>your sound card doesn't support 48kHz playback</para>
+<para>Workaround: buy a better sound card... or try to decrease fps by 10% (use
+<option>-fps 27</option> for a 30fps movie) or use the resampler plugin</para>
+</listitem>
+<listitem>
+<para>slow machine(if A-V is not around 0, and the last number in the status
+line increasing)</para>
+<para>Workaround: <option>-framedrop</option></para>
+</listitem>
+</itemizedlist>
+</sect2>
+
+<sect2 id="bugs-nosound">
+<title>No sound at all</title>
+<itemizedlist>
+<listitem>
+<para>your file uses an unsupported audio codec</para>
+<para>read the documentation and help us adding support for it</para>
+</listitem>
+</itemizedlist>
+</sect2>
+
+<sect2 id="bugs-nopicture">
+<title>No picture at all (just plain grey/green window)</title>
+<itemizedlist>
+<listitem>
+<para>your file uses an unsupported video codec</para>
+<para>Workaround: read the documentation and help us adding support for it</para>
+</listitem>
+<listitem>
+<para>
+auto-selected codec can't decode the file, try to select another using
+<option>-vc</option> or <option>-vfm</option> options
+</para>
+</listitem>
+<listitem>
+<para>
+you try to play DivX 3.x file with OpenDivX decoder or XviD
+(<option>-vc odivx</option>) - install Divx4Linux and recompile player
+</para>
+</listitem>
+</itemizedlist>
+</sect2>
+
+<sect2 id="bugs-video">
+<title>Video-out problems</title>
+<para>
+First note: options <option>-fs -vm</option> and <option>-zoom</option> are just
+recommendations, not (yet) supported by all drivers. So it isn't a bug if it
+doesn't work. Only a few driver supports scaling/zooming, don't expect this from
+x11 or dga.
+</para>
+
+<formalpara>
+<title>OSD/sub flickering</title>
+<para>
+<itemizedlist>
+<listitem><para>x11 driver: sorry, it can't be fixed now</para></listitem>
+<listitem><para>xv driver: use <option>-double</option> option</para></listitem>
+</itemizedlist>
+</para>
+</formalpara>
+
+<formalpara>
+<title>Green image using mga_vid (<option>-vo mga</option> / <option>-vo xmga</option>)</title>
+<para>
+<itemizedlist>
+<listitem><para>mga_vid misdetected your card's RAM amount, reload it using
+<option>mga_ram_size</option> option
+</para></listitem>
+</itemizedlist>
+</para>
+</formalpara>
+
+</sect2>
+</sect1>
+
+</appendix>

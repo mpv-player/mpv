@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="iso-8859-1" standalone="no"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+	"/usr/share/sgml/docbook/dtd/xml/4.1.2/docbookx.dtd"
+[
+<!ENTITY audio.xml		SYSTEM "audio.xml">
+<!ENTITY bugreports.xml		SYSTEM "bugreports.xml">
+<!ENTITY bugs.xml		SYSTEM "bugs.xml">
+<!ENTITY cd-dvd.xml		SYSTEM "cd-dvd.xml">
+<!ENTITY codecs.xml		SYSTEM "codecs.xml">
+<!ENTITY edl.xml		SYSTEM "edl.xml">
+<!ENTITY faq.xml		SYSTEM "faq.xml">
+<!ENTITY features.xml		SYSTEM "features.xml">
+<!ENTITY formats.xml		SYSTEM "formats.xml">
+<!ENTITY history.xml		SYSTEM "history.xml">
+<!ENTITY install.xml		SYSTEM "install.xml">
+<!ENTITY mail-lists.xml		SYSTEM "mail-lists.xml">
+<!ENTITY mencoder.xml		SYSTEM "mencoder.xml">
+<!ENTITY patches.xml		SYSTEM "patches.xml">
+<!ENTITY ports.xml		SYSTEM "ports.xml">
+<!ENTITY skin.xml		SYSTEM "skin.xml">
+<!ENTITY tvinput.xml		SYSTEM "tvinput.xml">
+<!ENTITY usage.xml		SYSTEM "usage.xml">
+<!ENTITY users-vs-dev.xml	SYSTEM "users-vs-dev.xml">
+<!ENTITY video-filters.xml	SYSTEM "video-filters.xml">
+<!ENTITY video.xml		SYSTEM "video.xml">
+]>
+
+<book lang="en">
+<bookinfo id="toc">
+<title>MPlayer - The Movie Player for LINUX</title>
+<subtitle><ulink url="http://www.mplayerhq.hu"></ulink></subtitle>
+<date>July 4, 2002</date>
+<copyright>
+  <year>2000</year>
+  <year>2001</year>
+  <year>2002</year>
+  <year>2003</year>
+  <holder>Arpad Gereoffy (A'rpi/ESP-team)</holder>
+</copyright>
+<!--
+<legalnotice>
+  <title>License</title>
+  <para>This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by the
+  Free Software Foundation; either version 2 of the License, or (at your
+  option) any later version.</para>
+
+  <para>This program is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+  for more details.</para>
+
+  <para>You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software Foundation,
+  Inc., 59 Temple Place, Suite 330, Boston, MA, 02111-1307, USA.</para>
+</legalnotice>
+-->
+</bookinfo>
+
+
+<preface id="howtoread">
+<title>How to read this documentation</title>
+
+<para>
+If you are a first-time installer: be sure to read everything from here to
+the end of the Installation section, and follow the links you will find. If
+you have any other questions, return to the <link linkend="toc">Table of
+Contents</link> and search for the topic, read the <xref linkend="faq"/>,
+or try grepping through the files.
+</para>
+
+<para>
+The main rule of this documentation: if it's not documented, it
+<emphasis>does not exist.</emphasis> If I don't say you encode audio from
+TV tuner, you can't.  A healthy quantity of combining ability is welcomed,
+though.  Good luck. You'll need it :) And for another good advice, let me
+quote Chris Phillips from the mplayer-users mailing list:
+</para>
+
+<blockquote><para>
+I said a while ago that there is such a difference between a newbie and a
+dumbass. No matter what you actually know about a system (linux, cars,
+girls :D) you should ALWAYS be able to take a step back and be objective,
+otherwise, you're just dumb IMHO. A girl i live with assumed the vacuum
+cleaner was broken because it didn't suck things up. never thought to
+change the bag, becasue she'd never done it before... now that's just
+stupid, not a case of simply not knowing what to do... Simply not being
+that familiar with your surroundings is no excuse for a) laziness and b)
+ignorance. So many people seem to see the word "error" and then stop...
+few seem to actually read the words on the OTHER side of the colon.
+</para></blockquote>
+</preface>
+
+
+<chapter id="intro">
+<title>Introduction</title>
+
+<para>
+<application>MPlayer</application> is a movie player for Linux (runs on
+many other Unices, and <emphasis role="bold">non-x86</emphasis> CPUs, see
+<xref linkend="ports"/>). It plays most MPEG, VOB, AVI, OGG/OGM, VIVO, ASF/WMA/WMV,
+QT/MOV/MP4, FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ, PVA files, supported by
+many native, XAnim, RealPlayer, and Win32 DLL codecs. You can watch
+<emphasis role="bold">VideoCD, SVCD, DVD, 3ivx, RealMedia</emphasis>, and
+<emphasis role="bold">DivX</emphasis> movies too (and you don't need the avifile
+library at all!). Another big feature of mplayer is the wide range of
+supported output drivers. It works with X11, Xv, DGA, OpenGL, SVGAlib,
+fbdev, AAlib, DirectFB, but you can use GGI and SDL (and this way all their
+drivers) and some lowlevel card-specific drivers (for Matrox, 3Dfx and
+Radeon, Mach64, Permedia3) too! Most of them supports software or hardware
+scaling, so you can enjoy movies in fullscreen.
+<application>MPlayer</application> supports displaying through some
+hardware MPEG decoder boards, such as the DVB and DXR3/Hollywood+ !  And
+what about the nice big antialiased shaded subtitles
+(<emphasis role="bold">10 supported types</emphasis>) with European/ISO 8859-1,2
+(Hungarian, English, Czech, etc), Cyrillic, Korean fonts, and the onscreen display
+(OSD)?
+</para>
+
+<para>
+The player is rock solid playing damaged MPEG files (useful for some VCDs),
+and it plays bad AVI files which are unplayable with the famous windows
+media player. Even AVI files without index chunk are playable, and you can
+temporarily rebuild their indexes with the <option>-idx</option> option, or
+permanently with <application>MEncoder</application>, thus enabling
+seeking!  As you see, stability and quality are the most important things,
+but the speed is also amazing.
+</para>
+
+<para>
+<application>MEncoder</application> (MPlayer's Movie Encoder) is a simple movie
+encoder, designed to encode MPlayer-playable movies
+(<emphasis role="bold">AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</emphasis>)
+to other MPlayer-playable formats (see below). It can encode with various codecs,
+like DivX4 (1 or 2 passes), libavcodec, <emphasis role="bold">PCM/MP3/VBR MP3</emphasis>
+audio. Also has powerful plugin system for video manipulation.
+</para>
+
+
+<itemizedlist>
+<title>MEncoder features</title>
+<listitem><simpara>
+  Encoding from the wide range of fileformats and decoders of
+  <application>MPlayer</application>
+  </simpara></listitem>
+<listitem><simpara>
+  Encoding to all the codecs of ffmpeg's <link
+  linkend="ffmpeg">libavcodec</link>
+  </simpara></listitem>
+<listitem><simpara>
+  Video encoding from <emphasis role="bold">V4L compatible TV tuners</emphasis>
+  </simpara></listitem>
+<listitem><simpara>
+  Encoding/multiplexing to interleaved AVI files with proper index
+  </simpara></listitem>
+<listitem><simpara>
+  Creating files from external audio stream
+  </simpara></listitem>
+<listitem><simpara>
+  1, 2 or 3 pass encoding
+  </simpara></listitem>
+<listitem><para>
+  <emphasis role="bold">VBR</emphasis> MP3 audio
+  <important><simpara>
+  VBR MP3 audio doesn't always play nicely on windows players!
+  </simpara></important>
+  </para></listitem>
+<listitem><simpara>
+  PCM audio
+  </simpara></listitem>
+<listitem><simpara>
+  Stream copying
+  </simpara></listitem>
+<listitem><simpara>
+  Input A/V synchronizing (PTS-based, can be disabled with
+  <option>-mc 0</option> option)
+  </simpara></listitem>
+<listitem><simpara>
+  FPS correction with <option>-ofps</option> option (useful when encoding
+  29.97 fps VOB to 24 fps AVI)
+  </simpara></listitem>
+<listitem><simpara>
+  Using our very powerful plugin system (crop, expand, flip, postprocess,
+  rotate, scale, rgb/yuv conversion)
+  </simpara></listitem>
+<listitem><simpara>
+  Can encode DVD/VOBsub <emphasis role="bold">AND</emphasis> text subtitles
+  into the output file
+  </simpara></listitem>
+<listitem><simpara>
+  Can rip DVD subtitles to Vobsub format
+  </simpara></listitem>
+</itemizedlist>
+
+<itemizedlist>
+<title>Planned features</title>
+<listitem><simpara>
+  Even wider variety of available en/decoding formats/codecs
+  (creating VOB files with DivX4/Indeo5/VIVO streams :).
+  </simpara></listitem>
+</itemizedlist>
+
+<!-- FIXME: the license should be in bookinfo -->
+<para>
+<application>MPlayer</application> and <application>MEncoder</application>
+can be distributed under the terms of the GNU General Public License Version 2.
+</para>
+
+&history.xml;
+&install.xml;
+</chapter>
+
+
+&features.xml;
+&usage.xml;
+&faq.xml;
+&cd-dvd.xml;
+&ports.xml;
+&mencoder.xml;
+&mail-lists.xml;
+&bugreports.xml;
+&bugs.xml;
+&skin.xml;
+&users-vs-dev.xml;
+&patches.xml;
+</book>

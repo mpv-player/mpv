@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<appendix id="users-vs-dev">
+<title>Developer cries</title>
+
+<sect1 id="gcc-296">
+<title>GCC 2.96</title>
+
+<formalpara>
+<title>The background:</title>
+<para>
+The GCC <emphasis>2.95</emphasis> series is an official GNU release and
+version 2.95.3 of GCC is the most bug-free in that series.  We have never
+noticed compilation problems that we could trace to gcc-2.95.3. Starting
+with Red Hat Linux 7.0, <emphasis>Red Hat</emphasis> included a heavily
+patched CVS version of GCC in their distribution and named it
+<emphasis>2.96</emphasis>. Red Hat included this version in the
+distribution because GCC 3.0 was not finished at the time, and they needed
+a compiler that worked well on all of their supported platforms, including
+IA64 and s390. The Linux distributor <emphasis>Mandrake</emphasis> also
+followed Red Hat's example and started shipping GCC 2.96 with their
+Linux-Mandrake 8.0 series.
+</para>
+</formalpara>
+
+<formalpara>
+<title>The statements:</title>
+<para>
+The GCC team disclaimed any link with GCC 2.96 and issued an
+<ulink url="http://gcc.gnu.org/gcc-2.96.html">official response</ulink>
+to GCC 2.96.  Many developers around the world began having problems with
+GCC 2.96, and started recommending other compilers. Examples are
+<ulink url="http://www.mysql.com/downloads/mysql-3.23.html">MySQL</ulink>,
+<ulink url="http://avifile.sourceforge.net/news-old1.htm">avifile</ulink>
+and
+<ulink url="http://www.winehq.com/news/?view=92#RH 7.1 gcc fixes compiler bug">Wine</ulink>.
+Other interesting links are 
+<ulink url="http://www.atnf.csiro.au/people/rgooch/linux/docs/kernel-newsflash.html">
+Linux kernel news flash about kernel 2.4.17</ulink>
+and
+<ulink url="http://www.voy.com/3516/572.html">Voy Forum</ulink>.
+<application>MPlayer</application> also suffered from intermittent problems
+that were all solved by switching to a different version of GCC. Several
+projects started implementing workarounds for some of the 2.96 issues, but
+we refused to fix other people's bugs, especially since some workarounds
+may imply a performance penalty.
+</para>
+</formalpara>
+
+<para>
+You can read about the other side of the story
+<ulink url="http://www.bero.org/gcc296.html">at this site</ulink>.
+GCC 2.96 does not allow <literal>|</literal> (pipe) characters in assembler
+comments because it supports Intel as well as AT&amp;T Syntax and the
+<literal>|</literal> character is a symbol in the Intel variant. The
+problem is that it <emphasis>silently</emphasis> ignores the whole
+assembler block. This is supposedly fixed now, GCC prints a warning instead
+of skipping the block.
+</para>
+
+<formalpara>
+<title>The present:</title>
+<para>
+Red Hat says that GCC 2.96-85 and above is fixed. The situation has indeed
+improved, yet we still see problem reports on our mailing lists that
+disappear with a different compiler. In any case it does not matter any
+longer. Hopefully a maturing GCC 3.x will solve the issue for good.  If you
+want to compile with 2.96 give the <option>--disable-gcc-checking</option>
+flag to <filename>configure</filename>. Remember that you are on your own
+and <emphasis>do not report any bugs</emphasis>. If you do, you will only
+get banned from our mailing list because we have had more than enough flame
+wars over GCC 2.96. Please let the matter rest.
+</para>
+</formalpara>
+
+<para>
+If you have problems with GCC 2.96, you can get 2.96-85 packages from the
+Red Hat <ulink url="ftp://updates.redhat.com">ftp server</ulink>, or just
+go for the 3.0.4 packages offered for version 7.2 and later. You can also
+get <ulink url="ftp://people.redhat.com/jakub/gcc/3.2-10/">gcc-3.2-10 packages</ulink>
+(unofficial, but working fine)
+and you can install them along the gcc-2.96 you already have. MPlayer will
+detect it and use 3.1 instead of 2.96. If you do not want to or cannot use
+the binary packages, here is how you can compile GCC 3.1 from source:
+</para>
+
+<procedure>
+<step><para>
+  Go to the
+  <ulink url="http://gcc.gnu.org/mirrors.html">GCC mirrors page</ulink>
+  page and download <filename>gcc-core-XXX.tar.gz</filename> where XXX is
+  the version number.  This includes the complete C compiler and is sufficient for
+  <application>MPlayer</application>. If you also want C++, Java or some of
+  the other advanced GCC features <filename>gcc-XXX.tar.gz</filename> may
+  better suit your needs.
+  </para></step>
+<step><para>
+  Extract the archive with
+  <screen>tar -xvzf gcc-core-XXX.tar.gz</screen>
+  </para></step>
+<step><para>
+  GCC is not built inside the source directory itself like most programs,
+  but needs a build directory outside the source directory.  Thus you need
+  to create this directory via
+  <screen>mkdir gcc-build</screen>
+  </para></step>
+<step><para>
+  Then you can proceed to configure gcc in the build directory, but you
+  need the configure from the source directory:
+  <screen>
+cd gcc-build
+../gcc-3.XXX/configure</screen>
+  </para></step>
+<step><para>
+  Compile GCC by issuing this command in the build directory:
+  <screen>make bootstrap</screen>
+  </para></step>
+<step><para>
+  Now you can install GCC (as root) by typing
+  <screen>make install</screen>
+  </para></step>
+</procedure>
+</sect1>
+
+
+<sect1 id="mplayer-binary">
+<title>Binary distribution</title>
+
+<para>
+<application>MPlayer</application> previously contained source from the
+OpenDivX project, which disallows binary redistribution.This code has been
+removed in version 0.90-pre1 and the remaining file <filename>divx_vbr.c</filename>
+that is derived from OpenDivX sources has been put under the GPL by its authors
+as of version 0.90pre9. You are now welcome to create binary packages as you
+see fit.
+</para>
+
+<para>
+Another impediment to binary redistribution was compiletime optimizations
+for CPU architecture.  <application>MPlayer</application> now supports
+runtime CPU detection (specify the
+<option>--enable-runtime-cpudetection</option> option when compiling). It
+is disabled by default because it implies a small speed sacrifice, it is
+now possible to create binaries that run on different members of the Intel
+CPU family.
+</para>
+</sect1>
+
+
+<sect1 id="nvidia-opinions">
+<title>nVidia</title>
+
+<para>
+We dislike the fact that <ulink url="http://www.nvidia.com">nVidia</ulink>
+only provides binary drivers (for use with XFree86), which are often buggy. 
+We have had many reports on
+<ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>
+about problems related to these closed-source drivers
+and their poor quality, instability and poor user and expert support.
+Here is an example from the
+<ulink url="http://www.nvnews.net/forum/showthread.php?s=fda5725bc2151e29453b2da3bd5d2930&amp;threadid=14306">nVidia Linux Forum</ulink>.
+Many of these problems/issues keep appearing repeatedly.
+We have been contacted by nVidia lately, and they said these bugs do not
+exist, instability is caused by bad AGP chips, and they received no reports
+of driver bugs (like the purple line). So if you have a problem with your
+nVidia card, you are advised to update the nVidia driver and/or buy a new
+motherboard or ask nVidia to supply open-source drivers.  In any case, if
+you are using the nVidia binary drivers and facing driver related problems,
+please be aware that you will receive very little help from our side
+because we have little power to help in this matter.
+</para>
+</sect1>
+
+
+<sect1 id="joe-barr">
+<title>Joe Barr</title>
+
+<para>
+Joe Barr became infamous by writing a less than favorable
+<ulink url="http://www.linuxworld.com/site-stories/2001/1214.mplayer.html">
+<application>MPlayer</application> review</ulink>.
+He found <application>MPlayer</application> hard to install, but then
+again he is not very fond of
+<ulink
+url="http://www.linuxworld.com/linuxworld/lw-2000-06/lw-06-exam.html">reading documentation</ulink>.
+He also concluded that the developers were unfriendly and the documentation
+incomplete and insulting. You be the judge.
+He went on to mention <application>MPlayer</application> negatively in his
+<ulink url="http://www.linuxworld.com/site-stories/2001/1227.predictions.html">10 Linux predictions for 2002</ulink>.
+In a followup
+<ulink url="http://www.linuxworld.com/site-stories/2002/0125.xine.html">review of xine</ulink>
+he continued stirring up controversy. Ironically at the end of that article
+he quotes his exchange with Günter Bartsch, the original author of xine,
+that perfectly summarizes the whole situation:
+
+<blockquote><para>
+However, he also went on to say that he was "surprised" by my column about
+Mplayer and thought it was unfair, reminding me that it is a free software
+project. "If you don't like it," Bartsch said, "you're free not to use it." 
+</para></blockquote>
+</para>
+
+<para>
+He does not reply to our mails. His editor does not reply to our mails.
+Here are some quotes from different people about Joe Barr, so you can form
+your own opinion:
+</para>
+
+<para>
+Marc Rassbach has
+<ulink url="http://daily.daemonnews.org/view_story.php3?story_id=2102">something to say</ulink>
+about the man
+
+<blockquote><para>
+You may all remember the LinuxWorld 2000, when he claimed that Linus T said
+that 'FreeBSD is just a handful of programmers'. Linus said NOTHING of the
+sort. When Joe was called on this, his reaction was to call BSD supporters
+assholes and jerks.
+</para></blockquote>
+</para>
+
+<para>
+A <ulink url="http://www.mplayerhq.hu/pipermail/mplayer-users/2001-December/009118.html">quote</ulink>
+from Robert Munro on the
+<ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>
+mailing list:
+
+<blockquote>
+<para>
+He's interesting, but not good at avoiding, um... controversy.  Joe Barr
+used to be one of the regulars on Will Zachmann's Canopus forum on
+Compuserve, years ago.  He was an OS/2 advocate then (I was an OS/2 fan
+too).
+</para>
+
+<para>
+He used to go over-the-top, flaming people, and I suspect he had some hard
+times, then. He's mellowed some, judging by his columns recently.
+Moderately subtle humor was not his mode in those earlier days, not at all.
+</para>
+</blockquote>
+</para>
+
+</sect1>
+</appendix>
