@@ -164,6 +164,7 @@ static int config(struct vf_instance_s* vf,
 // codec -copy-> expand -copy-> vo (worst case)
 
 static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
+    if(mpi->type==MP_IMGTYPE_IPB) return; // not yet working
 #ifdef OSD_SUPPORT
     if(vf->priv->osd && (mpi->flags&MP_IMGFLAG_PRESERVE)){
 	// check if we have to render osd!
