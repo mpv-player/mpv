@@ -16,6 +16,8 @@
 
 #define CHANS 6
 
+int64_t ff_gcd(int64_t a, int64_t b);
+
 // Data for specific instances of this filter
 typedef struct af_resample_s{
     struct AVResampleContext *avrctx;
@@ -26,12 +28,14 @@ typedef struct af_resample_s{
     int filter_length;
     int linear;
     int phase_shift;
+    double cutoff;
 }af_resample_t;
 
 
 // Initialization and runtime control
 static int control(struct af_instance_s* af, int cmd, void* arg)
 {
+  int g;
   af_resample_t* s   = (af_resample_t*)af->setup; 
   af_data_t *data= (af_data_t*)arg;
 
@@ -46,16 +50,18 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     af->data->nch    = data->nch;
     af->data->format = AF_FORMAT_SI | AF_FORMAT_NE;
     af->data->bps    = 2;
-    af->mul.n = af->data->rate;
-    af->mul.d = data->rate;
-    af->delay = 500*s->filter_length/(double)min(af->mul.n, af->mul.d);
+    g= ff_gcd(af->data->rate, data->rate);
+    af->mul.n = af->data->rate/g;
+    af->mul.d = data->rate/g;
+    af->delay = 500*s->filter_length/(double)min(af->data->rate, data->rate);
 
     if(s->avrctx) av_resample_close(s->avrctx);
-    s->avrctx= av_resample_init(af->mul.n, /*in_rate*/af->mul.d, s->filter_length, s->phase_shift, s->linear);
+    s->avrctx= av_resample_init(af->mul.n, /*in_rate*/af->mul.d, s->filter_length, s->phase_shift, s->linear, s->cutoff);
 
     return AF_OK;
   case AF_CONTROL_COMMAND_LINE:{
-    sscanf((char*)arg,"%d:%d:%d:%d", &af->data->rate, &s->filter_length, &s->linear, &s->phase_shift);
+    sscanf((char*)arg,"%d:%d:%d:%d:%lf", &af->data->rate, &s->filter_length, &s->linear, &s->phase_shift, &s->cutoff);
+    if(s->cutoff <= 0.0) s->cutoff= max(1.0 - 1.0/s->filter_length, 0.80);
     return AF_OK;
   }
   case AF_CONTROL_RESAMPLE_RATE | AF_CONTROL_SET:
@@ -93,7 +99,9 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
       return NULL;
   
   out= (int16_t*)af->data->audio;
-
+  
+  out_len= min(out_len, af->data->len/(2*chans));
+  
   if(s->in_alloc < in_len + s->index){
       s->in_alloc= in_len + s->index;
       for(i=0; i<chans; i++){
