@@ -30,6 +30,9 @@
   <xsl:param name="admon.graphics" select="'0'"/>
   <xsl:param name="navig.graphics" select="'0'"/>
   <xsl:param name="navig.showtitles" select="'1'"/>
+
+  <!-- Generate more links for Site Navigation Bar -->
+  <xsl:param name="html.extra.head.links" select="1"/>
  
   <!-- Label sections too (eg. 2.1, 2.1.1) -->
   <xsl:param name="section.autolabel" select="'1'"/>
