@@ -532,13 +532,6 @@ static uint32_t draw_frame( uint8_t *src[] ){
 #endif
 }
 
-static uint32_t draw_image(mp_image_t *mpi){
-    // if -dr or -slices then do nothing:
-    if(mpi->flags&(MP_IMGFLAG_DIRECT|MP_IMGFLAG_DRAW_CALLBACK)) return VO_TRUE;
-    draw_slice(mpi->planes,mpi->stride,mpi->w,mpi->h,0,0);
-    return VO_TRUE;
-}
-
 static uint32_t get_image(mp_image_t *mpi)
 {
     if (zoomFlag ||
@@ -575,9 +568,9 @@ static uint32_t query_format( uint32_t format )
 	if (IMGFMT_BGR_DEPTH(format) == 8)
 	    return 0; // TODO 8bpp not yet fully implemented
 	if (IMGFMT_BGR_DEPTH(format) == vo_depthonscreen)
-	    return 3|VFCAP_OSD|VFCAP_SWSCALE|VFCAP_FLIP;
+	    return 3|VFCAP_OSD|VFCAP_SWSCALE|VFCAP_FLIP|VFCAP_ACCEPT_STRIDE;
 	else
-	    return 1|VFCAP_OSD|VFCAP_SWSCALE|VFCAP_FLIP;
+	    return 1|VFCAP_OSD|VFCAP_SWSCALE|VFCAP_FLIP|VFCAP_ACCEPT_STRIDE;
     }
 
  switch( format )
@@ -592,7 +585,7 @@ static uint32_t query_format( uint32_t format )
    case IMGFMT_I420:
    case IMGFMT_IYUV:
    case IMGFMT_YV12:
-    return 1|VFCAP_OSD|VFCAP_SWSCALE;
+    return 1|VFCAP_OSD|VFCAP_SWSCALE|VFCAP_ACCEPT_STRIDE;
   }
  return 0;
 }
@@ -636,8 +629,6 @@ static uint32_t control(uint32_t request, void *data, ...)
     return VO_TRUE;
   case VOCTRL_GET_IMAGE:
     return get_image(data);
-  case VOCTRL_DRAW_IMAGE:
-    return draw_image(data);
   case VOCTRL_FULLSCREEN:
     vo_x11_fullscreen();
     return VO_TRUE;
