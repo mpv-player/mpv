@@ -23,6 +23,7 @@ int sub_format=-1;     // 0 for microdvd
 		      // 1 for SubRip
 		     // 2 for the third format (what's this?)
 		    // 3 for SAMI (smi)
+		   // 4 for vplayer format
 
 int eol(char p) {
     return (p=='\r' || p=='\n' || p=='\0');
@@ -214,6 +215,45 @@ subtitle *sub_read_line_third(FILE *fd,subtitle *current) {
     return current;
 }
 
+subtitle *sub_read_line_vplayer(FILE *fd,subtitle *current) {
+	char line[1001];
+	char line2[1001];
+	int a1,a2,a3,b1,b2,b3;
+	int setime,etime;
+	char *p=NULL, *q=NULL, *l=NULL,*next;
+	int i,len,len2;
+
+	bzero (current, sizeof(current));
+
+	while (!current->text[0]) {
+		if (!fgets (line, 1000, fd)) return NULL;
+		if ((len=sscanf (line, "%d:%d:%d:",&a1,&a2,&a3)) < 3)
+			continue;
+		if (!fgets (line2, 1000, fd)) return NULL;
+		if ((len2=sscanf (line2, "%d:%d:%d:",&b1,&b2,&b3)) < 3)
+			continue;
+		// przewiñ o linijkê do ty³u:
+		fseek(fd,-strlen(line2),SEEK_CUR);
+
+		current->start = a1*360000+a2*6000+a3*100;
+		current->end   = b1*360000+b2*6000+b3*100;
+		// teraz czas na wkopiowanie stringu
+		p=line;	p+=9;i=0;
+		if (*p!='|') {
+			//
+			next = p,i=0;
+			while ((next =sub_readtext (next, &(current->text[i])))) {
+				if (current->text[i]==ERR) {return ERR;}
+				i++;
+				if (i>=SUB_MAX_TEXT) { printf ("Too many lines in a subtitle\n");current->lines=i;return;}
+			}
+			current->lines=i+1;
+		}
+	}
+	return current;
+}
+
+
 
 int sub_autodetect (FILE *fd) {
     char line[1001];
@@ -233,6 +273,9 @@ int sub_autodetect (FILE *fd) {
 		{sub_uses_time=1;return 2;}
 	if (strstr (line, "<SAMI>"))
 		{sub_uses_time=1; return 3;}
+	if (sscanf (line, "%d:%d:%d:",     &i, &i, &i )==3)
+		{sub_uses_time=1;return 4;}
+
     }
 
     return -1;  // too many bad lines
@@ -243,12 +286,13 @@ subtitle* sub_read_file (char *filename) {
     FILE *fd;
     int n_max;
     subtitle *first;
-    subtitle * (*func[4])(FILE *fd,subtitle *dest)=
+    subtitle * (*func[5])(FILE *fd,subtitle *dest)=
     {
 	    sub_read_line_microdvd,
 	    sub_read_line_subrip,
 	    sub_read_line_third,
-	    sub_read_line_sami
+	    sub_read_line_sami,
+	    sub_read_line_vplayer
     };
 
     fd=fopen (filename, "r"); if (!fd) return NULL;

@@ -9,6 +9,7 @@ extern int sub_format;     // 0 for microdvd
 			  // 1 for SubRip
 			 // 2 for the third format
 			// 3 for SAMI (smi)
+		       // 4 for vplayer format
 
 #define SUB_MAX_TEXT 5
 
