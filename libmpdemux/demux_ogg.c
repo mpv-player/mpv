@@ -664,7 +664,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
   sh_video_t* sh_v;
 
 #ifdef USE_ICONV
-  subcp_open();
+  subcp_open_noenca();
 #endif
 
   clear_sub = -1;

@@ -178,6 +178,7 @@ Optional features:
   --enable-menu          Enable OSD menu support (NOT DVD MENU) [disabled]
   --disable-sortsub      Disable subtitles sorting [enabled]
   --enable-fribidi       Enable using the FriBiDi libs [disabled]
+  --disable-enca         Disable using ENCA charset oracle library [autodetect]
   --disable-macosx       Disable Mac OS X specific features [autodetect]
   --disable-inet6        Disable IPv6 support [autodetect]
   --disable-gethostbyname2  gethostbyname() function is not provided by the C
@@ -1248,6 +1249,7 @@ _sortsub=yes
 _freetypeconfig='freetype-config'
 _fribidi=no
 _fribidiconfig='fribidi-config'
+_enca=auto
 _inet6=auto
 _gethostbyname2=auto
 _ftp=yes
@@ -1471,6 +1473,9 @@ for ac_option do
 
   --enable-fribidi)     _fribidi=yes    ;;
   --disable-fribidi)    _fribidi=no     ;;
+
+  --enable-enca)        _enca=yes    ;;
+  --disable-enca)       _enca=no     ;;
 
   --enable-inet6)	_inet6=yes	;;
   --disable-inet6)	_inet6=no	;;
@@ -4440,6 +4445,30 @@ fi
 echores "$_fribidi"
 
 
+echocheck "ENCA"
+if test "$_enca" = auto ; then
+    cat > $TMPC << EOF
+#include <enca.h>
+int main()
+{
+    const char **langs;
+    size_t langcnt;
+    langs = enca_get_languages(&langcnt);
+    return 0;
+}
+EOF
+    _enca=no
+    cc_check -lenca && _enca=yes
+    if test "$_enca" = yes ; then
+	_def_enca='#define HAVE_ENCA 1'
+	_ld_enca='-lenca'
+    else
+	_def_enca='#undef HAVE_ENCA'
+    fi
+fi
+echores "$_enca"
+
+
 echocheck "zlib"
 cat > $TMPC << EOF
 #include <zlib.h>
@@ -5966,6 +5995,7 @@ Z_LIB =  $_ld_static $_ld_zlib
 HAVE_MLIB = $_mlib
 WIN32_LIB = $_ld_win32libs
 STATIC_LIB = $_ld_static
+ENCA_LIB = $_ld_enca
 
 X11_INC = $_inc_x11
 X11DIR = $_ld_x11
@@ -6514,6 +6544,9 @@ $_def_fontconfig
 
 /* enable FriBiDi usage */
 $_def_fribidi
+
+/* enable ENCA usage */
+$_def_enca
 
 /* liblzo support */
 $_def_liblzo

@@ -53,7 +53,8 @@ typedef struct {
 
 sub_data* sub_read_file (char *filename, float pts);
 subtitle* subcp_recode1 (subtitle *sub);
-void subcp_open (void); /* for demux_ogg.c */
+void subcp_open (char *current_sub_cp); /* for demux_ogg.c */
+void subcp_open_noenca (); /* for demux_ogg.c */
 void subcp_close (void); /* for demux_ogg.c */
 char ** sub_filenames(char *path, char *fname);
 void list_sub_file(sub_data* subd);

@@ -1832,7 +1832,7 @@ demux_mkv_open (demuxer_t *demuxer)
   char *str;
 
 #ifdef USE_ICONV
-  subcp_open();
+  subcp_open_noenca();
 #endif
 
   stream_seek(s, s->start_pos);
