@@ -14,7 +14,6 @@ MPlayer (1.0)
     * audio output driver section added to the man page
     * several bug fixes and improvements in the MEncoder documentation
     * DVD ripping guide extended and improved
-    * -vo winvidix documented
     * AUTHORS file massively extended
     * German man page partially updated
     * Hungarian XML documentation translation started
@@ -79,30 +78,31 @@ MPlayer (1.0)
     * vf_harddup: frame duplication filter for MEncoder
     * vf_pullup minor fixes and improvements
     * AltiVec-optimized YUV to RGB converter
+    * vf_spp memory corruption fix on reallocation
 
     FFmpeg/libavcodec:
-    * dc_precision=11 fixed
+    * MPEG-2 8,9,10 bit DC precision
+    * dc clipping fix, intra_dc_precision > 0 support
     * Cinepak fixes and palette support
     * support skipping of MB rows during decoding
     * Vorbis in NUT fixed
-    * segfault and artifact fixes in SVQ3 decoder
-    * coefficient saturation fix in H.263
     * NUT updated to latest specification
+    * segfault and artifact fixes in SVQ3 decoder
     * motion estimation code: overflow and chroma fixes
+    * change qscale -> lambda for the motion estimation
+    * noise preserving sum of squares comparison function in ME code
     * fixed memory overwrite in truemotion decoder
     * clip input motion vectors, better error tolerance on bad vectors
     * FLAC decoder cleanup (partial demuxer/decoder separation)
-    * noise preserving sum of squares comparison function in ME code
     * memalign hack for SSE/SSE2 on that alternative OS :)
     * lots of AltiVec optimizations
     * qscale + qprd fix
-    * change qscale -> lambda for the motion estimation
     * QTrle4 support
     * H.261 decoder
+    * coefficient saturation fix in H.263
+    * H.263 MCBPC fix
     * per line lowpass filter in MMX and faster C lowpass filter
     * SVQ1 encoder
-    * dc clipping fix, intra_dc_precision > 0 support
-    * H.263 MCBPC fix
     * as usual, lots of bug fixes and optimizations
 
     Others:
