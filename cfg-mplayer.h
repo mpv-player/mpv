@@ -85,6 +85,8 @@ extern float monitor_aspect;
 struct config conf[]={
 	/* name, pointer, type, flags, min, max */
 	{"include", cfg_include, CONF_TYPE_FUNC_PARAM, 0, 0, 0}, /* this must be the first!!! */
+
+//---------------------- libao/libvo/mplayer options ------------------------
 	{"o", "Option -o has been renamed to -vo (video-out), use -vo !\n",
             CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
 	{"vo", &video_driver, CONF_TYPE_STRING, 0, 0, 0},
@@ -97,26 +99,7 @@ struct config conf[]={
 	{"display", &mDisplayName, CONF_TYPE_STRING, 0, 0, 0},
 #endif
 	{"osdlevel", &osd_level, CONF_TYPE_INT, CONF_RANGE, 0, 2 },
-#ifdef HAVE_LIBCSS
-        {"dvdauth", &dvd_auth_device, CONF_TYPE_STRING, 0, 0, 0},
-        {"dvdkey", &dvdimportkey, CONF_TYPE_STRING, 0, 0, 0},
-//	{"dvd", "Option -dvd will be \"full disk\" mode, old meaning has been renamed to -dvdauth.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
-#else
-//        {"dvd", "DVD support was not compiled in. See file DOCS/DVD.\n",
-//            CONF_TYPE_PRINT, CONF_NOCFG, 0 , 0},
-#ifdef USE_DVDREAD
-        {"dvdkey", "MPlayer was compiled with libdvdread support, this option not available.\n",
-            CONF_TYPE_PRINT, CONF_NOCFG, 0 , 0},
-        {"dvdauth", "MPlayer was compiled with libdvdread support! Use option -dvd !\n",
-            CONF_TYPE_PRINT, CONF_NOCFG, 0 , 0},
-#else
-        {"dvdkey", "DVD support was not compiled in. See file DOCS/DVD.\n",
-            CONF_TYPE_PRINT, CONF_NOCFG, 0 , 0},
-        {"dvdauth", "DVD support was not compiled in. See file DOCS/DVD.\n",
-            CONF_TYPE_PRINT, CONF_NOCFG, 0 , 0},
-#endif
-#endif
-			    
+
 #ifdef HAVE_FBDEV
 	{"fb", &fb_dev_name, CONF_TYPE_STRING, 0, 0, 0},
 	{"fbmode", &fb_mode_name, CONF_TYPE_STRING, 0, 0, 0},
@@ -153,33 +136,21 @@ struct config conf[]={
 	{"nosound", &has_audio, CONF_TYPE_FLAG, 0, 1, 0},
 	{"abs", &ao_buffersize, CONF_TYPE_INT, CONF_MIN, 0, 0},
 	{"delay", &audio_delay, CONF_TYPE_FLOAT, CONF_RANGE, -10.0, 10.0},
-	{"bps", &pts_from_bps, CONF_TYPE_FLAG, 0, 0, 1},
-	{"nobps", &pts_from_bps, CONF_TYPE_FLAG, 0, 1, 0},
 
-//	{"alsa", &alsa, CONF_TYPE_FLAG, 0, 0, 1},
-//	{"noalsa", &alsa, CONF_TYPE_FLAG, 0, 1, 0},
-	{"alsa", "Option -alsa has been removed, new audio code doesn't need it!\n",
+	{"alsa", "Option -alsa has been removed, new audio code doesn't need it! Remove it from your config file!\n",
             CONF_TYPE_PRINT, 0, 0, 0},
-	{"noalsa", "Option -noalsa has been removed, new audio code doesn't need it!\n",
+	{"noalsa", "Option -noalsa has been removed, new audio code doesn't need it! Remove it from your config file!\n",
             CONF_TYPE_PRINT, 0, 0, 0},
-
-	{"ni", &force_ni, CONF_TYPE_FLAG, 0, 0, 1},
-	{"noni", &force_ni, CONF_TYPE_FLAG, 0, 1, 0},
 
 	{"framedrop", &frame_dropping, CONF_TYPE_FLAG, 0, 0, 1},
 	{"hardframedrop", &frame_dropping, CONF_TYPE_FLAG, 0, 0, 2},
 	{"noframedrop", &frame_dropping, CONF_TYPE_FLAG, 0, 1, 0},
 
+	{"autoq", &auto_quality, CONF_TYPE_INT, CONF_RANGE, 0, 100},
+
 	{"frames", &play_n_frames, CONF_TYPE_INT, CONF_MIN, 0, 0},
 	{"benchmark", &benchmark, CONF_TYPE_FLAG, 0, 0, 1},
 	
-	{"aid", &audio_id, CONF_TYPE_INT, CONF_RANGE, 0, 255},
-	{"vid", &video_id, CONF_TYPE_INT, CONF_RANGE, 0, 255},
-	{"sid", &dvdsub_id, CONF_TYPE_INT, CONF_RANGE, 0, 31},
-#ifdef USE_FAKE_MONO
-	{"stereo", &fakemono, CONF_TYPE_INT, CONF_RANGE, 0, 2},
-#endif
-
 	{"dumpfile", &stream_dump_name, CONF_TYPE_STRING, 0, 0, 0},
 	{"dumpaudio", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 1},
 	{"dumpvideo", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 2},
@@ -190,40 +161,9 @@ struct config conf[]={
 	{"waveheader", &ao_pcm_waveheader, CONF_TYPE_FLAG, 0, 0, 1},
 	{"nowaveheader", &ao_pcm_waveheader, CONF_TYPE_FLAG, 0, 1, 0},
 
-//	{"auds", &avi_header.audio_codec, CONF_TYPE_STRING, 0, 0, 0},
-//	{"vids", &avi_header.video_codec, CONF_TYPE_STRING, 0, 0, 0},
-	{"mc", &default_max_pts_correction, CONF_TYPE_FLOAT, CONF_RANGE, 0, 10},
-	{"fps", &force_fps, CONF_TYPE_FLOAT, CONF_MIN, 0, 0},
-	{"srate", &force_srate, CONF_TYPE_INT, CONF_RANGE, 1000, 8*48000},
-	{"afm", &audio_family, CONF_TYPE_INT, CONF_RANGE, 0, 13}, // keep ranges in sync
-	{"vfm", &video_family, CONF_TYPE_INT, CONF_RANGE, 0, 10}, // with codec-cfg.c
-	{"ac", &audio_codec, CONF_TYPE_STRING, 0, 0, 0},
-	{"vc", &video_codec, CONF_TYPE_STRING, 0, 0, 0},
 	{"dshow", &allow_dshow, CONF_TYPE_FLAG, 0, 0, 1}, // Is this still needed? atmos ::
 	{"nodshow", &allow_dshow, CONF_TYPE_FLAG, 0, 1, 0},
-#ifdef USE_STREAM_CACHE
-	{"cache", &stream_cache_size, CONF_TYPE_INT, CONF_RANGE, 4, 65536},
-#else
-	{"cache", "MPlayer was compiled WITHOUT cache2 support", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
-#endif
-	{"vcd", &vcd_track, CONF_TYPE_INT, CONF_RANGE, 1, 99},
-#ifdef USE_DVDREAD
-	{"dvd", &dvd_title, CONF_TYPE_INT, CONF_RANGE, 1, 99},
-	{"dvdangle", &dvd_angle, CONF_TYPE_INT, CONF_RANGE, 1, 99},
-	{"chapter", &dvd_chapter, CONF_TYPE_INT, CONF_RANGE, 1, 99},
-#else
-	{"dvd", "MPlayer was compiled WITHOUT libdvdread support!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
-#endif
-	{"divxq", "Option -divxq has been renamed to -pp (postprocessing), use -pp !\n",
-            CONF_TYPE_PRINT, 0, 0, 0},
-	{"pp", &divx_quality, CONF_TYPE_INT, CONF_MIN, 0, 63},
-#ifdef HAVE_ODIVX_POSTPROCESS
-        {"oldpp", &use_old_pp, CONF_TYPE_FLAG, 0, 0, 1},
-#else
-        {"oldpp", "MPlayer was compiled without opendivx library", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
-#endif
-	{"autoq", &auto_quality, CONF_TYPE_INT, CONF_RANGE, 0, 100},
-//	{"br", &encode_bitrate, CONF_TYPE_INT, CONF_RANGE, 10000, 10000000},
+
 #ifdef HAVE_PNG
 	{"z", &z_compression, CONF_TYPE_INT, CONF_RANGE, 0, 9},
 #endif	
@@ -259,24 +199,22 @@ struct config conf[]={
 	{"nodouble", &vo_doublebuffering, CONF_TYPE_FLAG, 0, 1, 0},
 #endif
 
-#ifdef HAVE_LIRC
-	{"lircconf", &lirc_configfile, CONF_TYPE_STRING, 0, 0, 0}, 
-#endif
-
 #ifdef HAVE_AA
 	{"aa*",	vo_aa_parseoption,  CONF_TYPE_FUNC_FULL, 0, 0, 0 },
+#endif
+
+#ifdef HAVE_LIRC
+	{"lircconf", &lirc_configfile, CONF_TYPE_STRING, 0, 0, 0}, 
 #endif
 
 	{"gui", &use_gui, CONF_TYPE_FLAG, 0, 0, 1},
 	{"nogui", &use_gui, CONF_TYPE_FLAG, 0, 1, 0},
       
-	{"noidx", &index_mode, CONF_TYPE_FLAG, 0, -1, 0},
-	{"idx", &index_mode, CONF_TYPE_FLAG, 0, -1, 1},
-	{"forceidx", &index_mode, CONF_TYPE_FLAG, 0, -1, 2},
-	
 #ifdef HAVE_NEW_GUI
 	{"skin", &skinName, CONF_TYPE_STRING, 0, 0, 0},
 #endif
+
+#include "cfg-common.h"
         
 	{"quiet", &quiet, CONF_TYPE_FLAG, 0, 0, 1},
 	{"verbose", &verbose, CONF_TYPE_INT, CONF_RANGE, 0, 100},
