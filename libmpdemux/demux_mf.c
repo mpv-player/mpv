@@ -38,7 +38,7 @@ int demux_mf_fill_buffer(demuxer_t *demuxer){
   mf=(mf_t*)demuxer->stream->priv;
 
   stat( mf->names[dmf->curr_frame],&fs );
-//  printf( "[demux_mf] frame: %d (%s,%d)\n",dmf->curr_frame,mf->names[dmf->curr_frame],fs.st_size );
+  printf( "[demux_mf] frame: %d (%s,%d)\n",dmf->curr_frame,mf->names[dmf->curr_frame],fs.st_size );
 
   if ( !( f=fopen( mf->names[dmf->curr_frame],"r" ) ) ) return 0;
   {
@@ -93,6 +93,17 @@ demuxer_t* demux_open_mf(demuxer_t* demuxer){
   sh_video->disp_h = mf_h;
   sh_video->fps = mf_fps;
   sh_video->frametime = 1 / sh_video->fps;
+
+  // emulate BITMAPINFOHEADER:
+  sh_video->bih=malloc(sizeof(BITMAPINFOHEADER));
+  memset(sh_video->bih,0,sizeof(BITMAPINFOHEADER));
+  sh_video->bih->biSize=40;
+  sh_video->bih->biWidth = mf_w;
+  sh_video->bih->biHeight = mf_h;
+  sh_video->bih->biPlanes=1;
+  sh_video->bih->biBitCount=24;
+  sh_video->bih->biCompression=sh_video->format;
+  sh_video->bih->biSizeImage=sh_video->bih->biWidth*sh_video->bih->biHeight*3;
 
   /* disable seeking */
   demuxer->seekable = 0;
