@@ -101,12 +101,15 @@ char *devname=vo_subdevice?vo_subdevice:"/dev/mga_vid";
 
         switch(format){
         case IMGFMT_YV12:
+	    width+=width&1;height+=height&1;
 	    mga_vid_config.frame_size = ((width + 31) & ~31) * height + (((width + 31) & ~31) * height) / 2;
             mga_vid_config.format=MGA_VID_FORMAT_YV12; break;
         case IMGFMT_I420:
+	    width+=width&1;height+=height&1;
 	    mga_vid_config.frame_size = ((width + 31) & ~31) * height + (((width + 31) & ~31) * height) / 2;
             mga_vid_config.format=MGA_VID_FORMAT_I420; break;
         case IMGFMT_IYUV:
+	    width+=width&1;height+=height&1;
 	    mga_vid_config.frame_size = ((width + 31) & ~31) * height + (((width + 31) & ~31) * height) / 2;
             mga_vid_config.format=MGA_VID_FORMAT_IYUV; break;
         case IMGFMT_YUY2:
