@@ -542,12 +542,18 @@ mp_input_add_key_fd(int fd, int select, mp_key_func_t read_func, mp_close_func_t
 mp_cmd_t*
 mp_input_parse_cmd(char* str) {
   int i,l;
+  int pausing = 0;
   char *ptr,*e;
   mp_cmd_t *cmd, *cmd_def;
 
 #ifdef MP_DEBUG
   assert(str != NULL);
 #endif
+
+  if (strncmp(str, "pausing ", 8) == 0) {
+    pausing = 1;
+    str = &str[8];
+  }
 
   for(ptr = str ; ptr[0] != '\0'  && ptr[0] != '\t' && ptr[0] != ' ' ; ptr++)
     /* NOTHING */;
@@ -572,6 +578,7 @@ mp_input_parse_cmd(char* str) {
   cmd = (mp_cmd_t*)malloc(sizeof(mp_cmd_t));
   cmd->id = cmd_def->id;
   cmd->name = strdup(cmd_def->name);
+  cmd->pausing = pausing;
 
   ptr = str;
 

@@ -139,6 +139,7 @@ typedef struct mp_cmd {
   char* name;
   int nargs;
   mp_cmd_arg_t args[MP_CMD_MAX_ARGS];
+  int pausing;
 } mp_cmd_t;
 
 

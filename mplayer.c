@@ -2749,7 +2749,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     } break;
     case MP_CMD_FRAME_STEP :
     case MP_CMD_PAUSE : {
-      osd_function=OSD_PAUSE;
+      cmd->pausing = 1;
       brk_cmd = 1;
     } break;
     case MP_CMD_QUIT : {
@@ -3664,6 +3664,8 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       mp_msg(MSGT_CPLAYER, MSGL_V, "Received unknown cmd %s\n",cmd->name);
     }
     }
+    if (cmd->pausing)
+      osd_function = OSD_PAUSE;
     mp_cmd_free(cmd);
   }
 }

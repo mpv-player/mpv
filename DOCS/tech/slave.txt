@@ -231,3 +231,8 @@ hide
 
 run <value>
     ???
+
+All commands can be prefixed with "pausing ", causing MPlayer to get into
+paused mode as soon as possible after processing the command.
+Please note that this can be before the command is fully executed.
+
