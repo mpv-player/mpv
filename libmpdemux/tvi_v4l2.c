@@ -1529,9 +1529,10 @@ static void *audio_grabber(void *data)
     struct timeval tv;
     int i, audio_skew_ptr = 0;
     long long current_time, prev_skew = 0, prev_skew_uncorr = 0;
+    long long start_time_avg;
 
     gettimeofday(&tv, NULL);
-    priv->audio_start_time = (long long)1e6*tv.tv_sec + tv.tv_usec;
+    start_time_avg = priv->audio_start_time = (long long)1e6*tv.tv_sec + tv.tv_usec;
     audio_in_start_capture(&priv->audio_in);
     for (i = 0; i < priv->aud_skew_cnt; i++)
 	priv->audio_skew_buffer[i] = 0;
@@ -1550,7 +1551,7 @@ static void *audio_grabber(void *data)
 	if (priv->first_frame == 0) {
 	    // there is no first frame yet (unlikely to happen)
 	    gettimeofday(&tv, NULL);
-	    priv->audio_start_time = (long long)1e6*tv.tv_sec + tv.tv_usec;
+	    start_time_avg = priv->audio_start_time = (long long)1e6*tv.tv_sec + tv.tv_usec;
 //	    fprintf(stderr, "warning - first frame not yet available!\n");
 	    pthread_mutex_unlock(&priv->skew_mutex);
 	    continue;
@@ -1561,6 +1562,11 @@ static void *audio_grabber(void *data)
 
 	priv->audio_recv_blocks_total++;
 	current_time = (long long)1e6*tv.tv_sec + tv.tv_usec - priv->audio_start_time;
+
+	if (priv->audio_recv_blocks_total < priv->aud_skew_cnt*2) {
+	    start_time_avg += (long long)1e6*tv.tv_sec + tv.tv_usec - 1e6*priv->audio_secs_per_block*priv->audio_recv_blocks_total;
+	    priv->audio_start_time = start_time_avg/(priv->audio_recv_blocks_total+1);
+	}
 
 //	fprintf(stderr, "spb = %lf, bs = %d, skew = %lf\n", priv->audio_secs_per_block, priv->audio_in.blocksize,
 //		(double)(current_time - 1e6*priv->audio_secs_per_block*priv->audio_recv_blocks_total)/1e6);
@@ -1608,20 +1614,14 @@ static void *audio_grabber(void *data)
 	} else {
 	    priv->audio_skew_factor = 0.0;
 	}
-	
+
 	priv->audio_skew_measure_time = current_time;
 	prev_skew = priv->audio_skew;
-	priv->audio_skew -= priv->audio_start_time - priv->first_frame;
-
-	// re-adjust the skew to zero after first few audio frames
-	if (priv->audio_recv_blocks_total == priv->aud_skew_cnt) {
-	    priv->audio_start_time += priv->audio_skew;
-	}
-
+	priv->audio_skew += priv->audio_start_time - priv->first_frame;
 	pthread_mutex_unlock(&priv->skew_mutex);
-
-//	fprintf(stderr, "audio_skew = %lf, delta = %lf\n", (double)priv->audio_skew/1e6, (double)priv->audio_skew_delta_total/1e6);
 	
+//	fprintf(stderr, "audio_skew = %lf, delta = %lf\n", (double)priv->audio_skew/1e6, (double)priv->audio_skew_delta_total/1e6);
+
 	if ((priv->audio_tail+1) % priv->audio_buffer_size == priv->audio_head) {
 	    mp_msg(MSGT_TV, MSGL_ERR, "\ntoo bad - dropping audio frame !\n");
 	    priv->audio_drop++;
