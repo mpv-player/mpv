@@ -7,8 +7,6 @@
 
 int    mplParent = 1;
 
-float gui_position=-1;
-
 int    mplx,mply,mplwidth,mplheight;
 
 #include "../app.h"
@@ -106,7 +104,7 @@ void mplMPlayerInit( int argc,char* argv[], char *envp[] )
  mplShMem=calloc( 1,ShMemSize );
 #endif
  signal( SIGTYPE,mplMainSigHandler );
- signal( SIGCHLD,SIG_IGN );
+// signal( SIGCHLD,SIG_IGN );
 
  mplShMem->Playing=0;
  mplShMem->Volume=0.0f;
@@ -124,14 +122,13 @@ void mplMPlayerInit( int argc,char* argv[], char *envp[] )
 
 float mplGetPosition( void )
 { // return 0.0 ... 100.0
-// return (gui_position<0)?(mplShMem->Position):(gui_position*100.0);
  return mplShMem->Position;
 }
 
 void mplRelSeek( float s )
 { // -+s
 // ---
-printf("%%%%%% RelSEEK=%5.3f  \n",s);
+//printf("%%%%%% RelSEEK=%5.3f  \n",s);
 // ---
  rel_seek_secs=s; abs_seek_pos=0;
 }
@@ -139,7 +136,7 @@ printf("%%%%%% RelSEEK=%5.3f  \n",s);
 void mplAbsSeek( float s )
 { // 0.0 ... 100.0
 // ---
-printf("%%%%%% AbsSEEK=%5.3f  \n",s);
+//printf("%%%%%% AbsSEEK=%5.3f  \n",s);
  rel_seek_secs=0.01*s; abs_seek_pos=3;
 // ---
 }

@@ -56,6 +56,7 @@
 #define evRedraw          7002
 #define evHideWindow      7003
 #define evShowWindow      7004
+#define evFirstLoad       7005
 
 // ----------------------
 
