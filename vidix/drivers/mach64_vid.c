@@ -734,7 +734,7 @@ static int mach64_vid_init_video( vidix_playback_t *config )
     v_inc>>=4; // convert 16.16 -> 20.12
     v_inc/= dest_h;
     
-    h_inc = (src_w << (12+ecp)) / dest_w;
+    h_inc = (src_w << 12) / dest_w;
     /* keep everything in 16.16 */
     config->offsets[0] = 0;
     for(i=1; i<config->num_frames; i++)
