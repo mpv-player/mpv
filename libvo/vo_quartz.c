@@ -349,7 +349,7 @@ static OSStatus MainWindowCommandHandler(EventHandlerCallRef nextHandler, EventR
 						vo_fs = (!(vo_fs)); window_fullscreen();
 					}
 						
-					SizeWindow(theWindow, (d_width/2), (d_height/2)+border, 1);
+					SizeWindow(theWindow, (d_width/2), ((d_width/movie_aspect)/2)+border, 1);
 					RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
 					window_resized();
 				break;
@@ -360,7 +360,7 @@ static OSStatus MainWindowCommandHandler(EventHandlerCallRef nextHandler, EventR
 						vo_fs = (!(vo_fs)); window_fullscreen();
 					}
 						
-					SizeWindow(theWindow, d_width, d_height+border, 1);
+					SizeWindow(theWindow, d_width, (d_width/movie_aspect)+border, 1);
 					RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
 					window_resized();
 				break;
@@ -371,7 +371,7 @@ static OSStatus MainWindowCommandHandler(EventHandlerCallRef nextHandler, EventR
 						vo_fs = (!(vo_fs)); window_fullscreen();
 					}
 						
-					SizeWindow(theWindow, (d_width*2), (d_height*2)+border, 1);
+					SizeWindow(theWindow, (d_width*2), ((d_width/movie_aspect)*2)+border, 1);
 					RepositionWindow(theWindow, NULL, kWindowCascadeOnMainScreen);
 					window_resized();
 				break;
