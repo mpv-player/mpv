@@ -147,6 +147,7 @@ static char help_text[]=
 #define MSGTR_TooManyAudioInBuffer "\nDEMUXER: Too many (%d in %d bytes) audio packets in the buffer!\n"
 #define MSGTR_TooManyVideoInBuffer "\nDEMUXER: Too many (%d in %d bytes) video packets in the buffer!\n"
 #define MSGTR_MaybeNI "(maybe you play a non-interleaved stream/file or the codec failed)\n"
+#define MSGTR_DetectedFILMfile "Detected FILM file format!\n"
 #define MSGTR_DetectedFLIfile "Detected FLI file format!\n"
 #define MSGTR_DetectedAVIfile "Detected AVI file format!\n"
 #define MSGTR_DetectedASFfile "Detected ASF file format!\n"

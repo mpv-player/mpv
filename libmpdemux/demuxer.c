@@ -150,6 +150,7 @@ void ds_read_packet(demux_stream_t *ds,stream_t *stream,int len,float pts,off_t 
 // return value:
 //     0 = EOF or no stream found or invalid type
 //     1 = successfully read a packet
+int demux_film_fill_buffer(demuxer_t *demux);
 int demux_fli_fill_buffer(demuxer_t *demux);
 int demux_mpg_es_fill_buffer(demuxer_t *demux);
 int demux_mpg_fill_buffer(demuxer_t *demux);
@@ -175,6 +176,7 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
   // Note: parameter 'ds' can be NULL!
 //  printf("demux->type=%d\n",demux->type);
   switch(demux->type){
+    case DEMUXER_TYPE_FILM: return demux_film_fill_buffer(demux);
     case DEMUXER_TYPE_FLI: return demux_fli_fill_buffer(demux);
     case DEMUXER_TYPE_MPEG_ES: return demux_mpg_es_fill_buffer(demux);
     case DEMUXER_TYPE_MPEG_PS: return demux_mpg_fill_buffer(demux);
@@ -364,6 +366,7 @@ demuxer_t* demux_open_avi(demuxer_t* demuxer);
 int mov_check_file(demuxer_t* demuxer);
 int mov_read_header(demuxer_t* demuxer);
 int demux_open_fli(demuxer_t* demuxer);
+int demux_open_film(demuxer_t* demuxer);
 
 extern int vivo_check_file(demuxer_t *demuxer);
 extern void demux_open_vivo(demuxer_t *demuxer);
@@ -467,12 +470,25 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_REAL){
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_FLI){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_FLI,audio_id,video_id,dvdsub_id);
   {
-    int size=stream_read_dword_le(demuxer->stream);
-    int id=stream_read_word_le(demuxer->stream);
-    // chech for the FLI file magic number
+    int id;
+    stream_seek(demuxer->stream, 4);
+    id=stream_read_word_le(demuxer->stream);
+    // check for the FLI file magic number
     if((id==0xAF11) || (id==0xAF12)){ 
       mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedFLIfile);
       file_format=DEMUXER_TYPE_FLI;
+    }
+  }
+}
+//=============== Try to open as FILM file: =================
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_FILM){
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_FILM,audio_id,video_id,dvdsub_id);
+  {
+    int signature=stream_read_fourcc(demuxer->stream);
+    // check for the FLI file magic number
+    if(signature==mmioFOURCC('F', 'I', 'L', 'M')){ 
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedFILMfile);
+      file_format=DEMUXER_TYPE_FILM;
     }
   }
 }
@@ -552,6 +568,10 @@ demuxer->file_format=file_format;
 switch(file_format){
  case DEMUXER_TYPE_FLI: {
   if (!demux_open_fli(demuxer)) return NULL;
+  break;
+ }
+ case DEMUXER_TYPE_FILM: {
+  if (!demux_open_film(demuxer)) return NULL;
   break;
  }
  case DEMUXER_TYPE_MOV: {
@@ -807,4 +827,6 @@ int demux_info_print(demuxer_t *demuxer)
 	if (info->encoder)
 	    mp_msg(MSGT_DEMUX, MSGL_INFO, " Encoder: %s\n", info->encoder);
     }
+
+    return 0;
 }

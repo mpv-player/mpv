@@ -83,6 +83,8 @@ inline static unsigned int stream_read_dword(stream_t *s){
   return y;
 }
 
+#define stream_read_fourcc stream_read_dword_le
+
 inline static unsigned int stream_read_word_le(stream_t *s){
   int x,y;
   x=stream_read_char(s);

@@ -147,6 +147,7 @@ static char help_text[]=
 #define MSGTR_TooManyAudioInBuffer "\nDEMUXER: 버퍼에 너무 많은 (%d in %d bytes) 오디오 패킷이 있습니다!\n"
 #define MSGTR_TooManyVideoInBuffer "\nDEMUXER: 버퍼에 너무 많은 (%d in %d bytes) 비디오 패킷이 있습니다!\n"
 #define MSGTR_MaybeNI "(non-interleaved 스트림/파일을 재생하고있거나 코덱이 잘못되었습니다.)\n"
+#define MSGTR_DetectedFILMfile "FILM 파일 형식을 발견했습니다!\n"
 #define MSGTR_DetectedFLIfile "FLI 파일 형식을 발견했습니다!\n"
 #define MSGTR_DetectedAVIfile "AVI 파일 형식을 발견했습니다!\n"
 #define MSGTR_DetectedASFfile "ASF 파일 형식을 발견했습니다!\n"

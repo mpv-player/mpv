@@ -141,6 +141,7 @@ static char help_text[]=
 #define MSGTR_TooManyAudioInBuffer "\nDEMUXER: Trop (%d dans %d octets) de packets audio dans le tampon!\n"
 #define MSGTR_TooManyVideoInBuffer "\nDEMUXER: Trop (%d dans %d octets) de packets vidéo dans le tampon!\n"
 #define MSGTR_MaybeNI "(Peut-être jouez-vous un flux/fichier non-entrelacé, ou le codec manque...)\n"
+#define MSGTR_DetectedFILMfile "Format de fichier FILE détecté!\n"
 #define MSGTR_DetectedFLIfile "Format de fichier FLI détecté!\n"
 #define MSGTR_DetectedAVIfile "Format de fichier AVI détecté!\n"
 #define MSGTR_DetectedASFfile "Format de fichier ASF détecté!\n"

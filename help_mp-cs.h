@@ -146,6 +146,7 @@ static char help_text[]=
 #define MSGTR_TooManyAudioInBuffer "\nDEMUXER: Pøíli¹ mnoho (%d v %d bajtech) audio paketù v bufferu!\n"
 #define MSGTR_TooManyVideoInBuffer "\nDEMUXER: Pøíli¹ mnoho (%d v %d bajtech) video paketù v bufferu!\n"
 #define MSGTR_MaybeNI "(mo¾ná pøehráváte neprokládaný proud/soubor nebo kodek selhal)\n"
+#define MSGTR_DetectedFILMfile "Detekován FILM formát souboru!\n"
 #define MSGTR_DetectedFLIfile "Detekován FLI formát souboru!\n"
 #define MSGTR_DetectedAVIfile "Detekován AVI formát souboru!\n"
 #define MSGTR_DetectedASFfile "Detekován ASF formát souboru!\n"
