@@ -752,10 +752,11 @@
     in vm86 mode).</LI>
   <LI>You can use Vidix with it, thus getting accelerated video display
     <B>AND</B> TV output at the same time! (recommended for ATI cards)</LI>
-  <LI>If you have VESA VBE 3.0+, and you had specified monitor_hfreq, monitor_vfreq, 
-  monitor_dotclock somewhere (config file, or commandline) you will get highest 
-  possible refresh rate. (Using General Timing Formula). To enable this
-  feature you have to specify <B>ALL</B> monitor's options.</LI>
+  <LI>If you have VESA VBE 3.0+, and you had specified <CODE>monitor_hfreq</CODE>,
+    <CODE>monitor_vfreq</CODE>, <CODE>monitor_dotclock</CODE> somewhere (config
+    file, or commandline) you will get the highest possible refresh rate. (Using
+    General Timing Formula). To enable this feature you have to specify
+    <B>all</B> your monitor options.</LI>
 </UL>
 
 <H4>Disadvantages:</H4>
@@ -772,16 +773,9 @@
 <DL>
   <DT><CODE>-vo vesa:opts</CODE></DT>
   <DD>currently recognized: <B>dga</B> to force dga mode and <B>nodga</B> to
-    disable dga mode. Note: you may omit these parameters to enable <B>autodetect</B>
-    of dga mode.</DD>
-
-  <DT><CODE>-double</CODE></DT>
-  <DD>enables double buffering mode. (Available only in DGA mode). Should be
-    slower of single buffering, but has no flickering effects.</DD>
-  <DT><CODE>-monitor_hfreq</CODE></DT>
-  <DT><CODE>-monitor_vfreq</CODE></DT>
-  <DT><CODE>-monitor_dotclock</CODE></DT>
-  <DD><STRONG>Important</STRONG> values, see <CODE>example.conf</CODE></DD>
+    disable dga mode. In dga mode you can enable double buffering via the
+    <CODE>-double</CODE> option. Note: you may omit these parameters to enable
+    <B>autodetection</B> of dga mode.</DD>
 </DL>
 
 <H4>Known problems and workaround:</H4>
