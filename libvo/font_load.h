@@ -91,18 +91,9 @@ void load_font(int width, int height);
 raw_file* load_raw(char *name,int verbose);
 font_desc_t* read_font_desc(char* fname,float factor,int verbose);
 
-extern void inline render_one_glyph(font_desc_t *desc, int c) 
-{
-}
-
-extern int inline kerning(font_desc_t *desc, int prevc, int c) 
-{
-    return 0;
-}
-
-extern void inline load_font(int width, int height)
-{
-}
+static void inline render_one_glyph(font_desc_t *desc, int c) {}
+static int inline kerning(font_desc_t *desc, int prevc, int c) { return 0; }
+static void inline load_font(int width, int height){}
 
 #endif
 
