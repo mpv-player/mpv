@@ -224,7 +224,7 @@ static int get_space(){
 static int play(void* data,int len,int flags){
   int l,i=0;
   // Limit length to avoid over flow in plugins
-  int tmp = driver()->get_space();
+  int tmp = get_space();
   int ret_len =(tmp<len)?tmp:len;
   if(ret_len){
     // Filter data
