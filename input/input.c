@@ -166,6 +166,8 @@ static mp_key_name_t key_names[] = {
   { KEY_F+8, "F8" },
   { KEY_F+9, "F9" },
   { KEY_F+10, "F10" },
+  { KEY_F+11, "F11" },
+  { KEY_F+12, "F12" },
   { KEY_KP0, "KP0" },
   { KEY_KP1, "KP1" },
   { KEY_KP2, "KP2" },

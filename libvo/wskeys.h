@@ -114,6 +114,8 @@
 #define wsF8            0xc5 + 256
 #define wsF9            0xc6 + 256
 #define wsF10           0xc7 + 256
+#define wsF11           0xc8 + 256
+#define wsF12           0xc9 + 256
 #define wsInsert        0x63 + 256
 #define wsDelete        0xff + 256
 #define wsHome          0x50 + 256

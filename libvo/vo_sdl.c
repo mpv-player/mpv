@@ -1271,6 +1271,8 @@ static void check_events (void)
  				case SDLK_F8: mplayer_put_key(KEY_F+8);break;
  				case SDLK_F9: mplayer_put_key(KEY_F+9);break;
  				case SDLK_F10: mplayer_put_key(KEY_F+10);break;
+ 				case SDLK_F11: mplayer_put_key(KEY_F+11);break;
+ 				case SDLK_F12: mplayer_put_key(KEY_F+12);break;
                                 /*case SDLK_o: mplayer_put_key('o');break;
                                 case SDLK_SPACE: mplayer_put_key(' ');break;
                                 case SDLK_p: mplayer_put_key('p');break;*/

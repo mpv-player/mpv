@@ -479,6 +479,8 @@ void vo_x11_putkey(int key){
    case wsF8:        mplayer_put_key(KEY_F+8); break;
    case wsF9:        mplayer_put_key(KEY_F+9); break;
    case wsF10:       mplayer_put_key(KEY_F+10); break;
+   case wsF11:       mplayer_put_key(KEY_F+11); break;
+   case wsF12:       mplayer_put_key(KEY_F+12); break;
    case wsq:
    case wsQ:         mplayer_put_key('q'); break;
    case wsp:

@@ -28,6 +28,7 @@ TwsKeyNames wsKeyNames[ wsKeyNumber ] =
 
   { wsF1, "F1" }, { wsF2, "F2" }, { wsF3, "F3" }, { wsF4, "F4" }, { wsF5,   "F5" },
   { wsF6, "F6" }, { wsF7, "F7" }, { wsF8, "F8" }, { wsF9, "F9" }, { wsF10, "F10" },
+  { wsF11, "F11" }, { wsF12, "F12" },
 
   { wsEnter,         "Enter" }, { wsTab,             "Tab" }, { wsSpace,         "Space" },
   { wsInsert,       "Insert" }, { wsDelete,       "Delete" }, { wsHome,           "Home" },
