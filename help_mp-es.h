@@ -109,7 +109,7 @@ static char help_text[]=
 "  -ao sdl o ALSA 0.5 o ALSA 0.9 con emulacion OSS. Lea DOCS/soung.html\n"\
 "  para más ayuda\n"\
 "- Salida de video lenta: pruebe otro -vo driver (para obtener una lista,\n"\
-   -vo help) o pruebe -framedrop ! Lea DOCS/video.html para mas ayuda.\n"\
+"   -vo help) o pruebe -framedrop ! Lea DOCS/video.html para mas ayuda.\n"\
 "- CPU lenta: no reproduzca DVD/DivX grandes en una CPU lenta. pruebe\n"\
 "  -hardframedrop !\n"\
 "- Fichero erróneo: pruebe combinaciones de: -nobps -ni -mc 0 -forceidx\n"\
