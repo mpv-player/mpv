@@ -24,6 +24,7 @@
 #define MP_CMD_TV_STEP_CHANNEL_LIST 19
 #define MP_CMD_VO_FULLSCREEN 20
 #define MP_CMD_SUB_POS 21
+#define MP_CMD_DVDNAV 22
 
 #define MP_CMD_GUI_EVENTS       5000
 #define MP_CMD_GUI_LOADFILE     5001
@@ -35,6 +36,13 @@
 #define MP_CMD_GUI_PREFERENCES  5007
 #define MP_CMD_GUI_FULLSCREEN   5008
 #define MP_CMD_GUI_SKINBROWSER  5009
+
+#define MP_CMD_DVDNAV_UP        1
+#define MP_CMD_DVDNAV_DOWN      2
+#define MP_CMD_DVDNAV_LEFT      3
+#define MP_CMD_DVDNAV_RIGHT     4
+#define MP_CMD_DVDNAV_MENU      5
+#define MP_CMD_DVDNAV_SELECT    6
 
 // The args types
 #define MP_CMD_ARG_INT 0

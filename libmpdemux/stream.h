@@ -16,6 +16,7 @@
 #define STREAMTYPE_PLAYLIST 6
 #define STREAMTYPE_MF   7
 #define STREAMTYPE_DS   8
+#define STREAMTYPE_DVDNAV 9
 
 #define VCD_SECTOR_SIZE 2352
 #define VCD_SECTOR_OFFS 24
@@ -197,6 +198,7 @@ extern int dvd_title;
 extern int dvd_chapter;
 extern int dvd_last_chapter;
 extern int dvd_angle;
+extern int dvd_nav;
 int dvd_parse_chapter_range(struct config*, const char*);
 //#endif
 

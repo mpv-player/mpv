@@ -207,6 +207,7 @@ Use these options if autodetection fails:
   --with-csslibdir=DIR     libcss in DIR
   --with-madlibdir=DIR     libmad (libmad shared lib.) in DIR
   --with-mlibdir=DIR       libmlib (MLIB support) in DIR (Solaris only)
+  --with-libdvdnav=DIR     libdvdnav in DIR
   --with-win32libdir=DIR   W*ndows DLL files in DIR
   --with-xanimlibdir=DIR   XAnim DLL files in DIR
   --with-xvidcore=PATH     path to XviD libcore.a (e.g: /opt/lib/libcore.a)
@@ -787,6 +788,7 @@ _mad=auto
 _vorbis=auto
 _faad=auto
 _css=auto
+_dvdnav=no
 _dvdread=auto
 _xanim=auto
 _xinerama=auto
@@ -969,6 +971,10 @@ for ac_option do
 
   --language=*)
     LINGUAS=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --with-libdvdnav=*)
+    _dvdnavdir=`echo $ac_option | cut -d '=' -f 2`
+    _dvdnav=yes
     ;;
 
   --with-win32libdir=*)
@@ -2414,7 +2420,6 @@ else
   echores "no"
 fi
 
-
 echocheck "DVD support (libdvdread - new style)"
 if test "$_dvdread" = auto ; then
   cat > $TMPC << EOF
@@ -2440,6 +2445,28 @@ if test "$_dvdread" = yes ; then
 else
   _def_dvdread='#undef USE_DVDREAD'
   _noinputmodules="dvdread $_noinputmodules"
+  echores "no"
+fi
+
+echocheck "libdvdnav"
+if test "$_dvdnav" = yes ; then
+  cat > $TMPC <<EOF
+#include <dvdnav.h>
+int main(void) { dvdnav_t *dvd=0; return 0; }
+EOF
+  _dvdnav=no
+  cc_check $_inc_extra -I$_dvdnavdir $_ld_css -L$_dvdnavdir/.libs -ldvdnav && _dvdnav=yes
+fi
+if test "$_dvdnav" = yes ; then
+  _largefiles=yes
+  _def_dvdnav='#define USE_DVDNAV 1'
+  _ld_css="$_ld_css -L$_dvdnavdir/.libs -ldvdnav"
+  _inc_extra="$_inc_extra -I$_dvdnavdir"
+  _inputmodules="dvdnav $_inputmodules"
+  echores "yes"
+else
+  _def_dvdnav='#undef USE_DVDNAV'
+  _noinputmodules="dvdnav $_noinputmodules"
   echores "no"
 fi
 
@@ -3465,6 +3492,9 @@ $_def_lirc
 
 /* DeCSS support using libcss */
 $_def_css
+
+/* DVD navigation support using libdvdnav */
+$_def_dvdnav
 
 /* Define this to enable MPEG 1/2 image postprocessing (requires FAST cpu!) */
 #define MPEG12_POSTPROC 1

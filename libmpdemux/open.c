@@ -31,6 +31,11 @@ int dvd_last_chapter=0;
 int dvd_angle=1;
 char* dvd_device=NULL;
 char* cdrom_device=NULL;
+int dvd_nav=0;
+
+#ifdef USE_DVDNAM
+#include <dvdnav.h>
+#endif
 
 #ifdef USE_DVDREAD
 
@@ -110,10 +115,29 @@ if(vcd_track){
 #endif
 
 //============ Open DVD title ==============
+#ifdef USE_DVDNAV
+if(dvd_nav){
+    dvdnav_t *dvdnav;
+    int event,len,tmplen=0;
+    if(!filename) filename=DEFAULT_DVD_DEVICE;
+    if(dvdnav_open(&dvdnav,filename)!=DVDNAV_STATUS_OK) {
+	mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,filename);
+        return NULL;
+    }
+
+    stream=new_stream(-1,STREAMTYPE_DVDNAV);
+    if (!stream) {
+        mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_Exit_error);
+        return NULL;
+    }
+    stream->priv=(void*)dvdnav;
+    return stream;
+}
+#endif
 #ifdef USE_DVDREAD
 if(dvd_title){
 //  int ret,ret2;
-  dvd_priv_t *d;
+    dvd_priv_t *d;
     int ttn,pgc_id,pgn;
     dvd_reader_t *dvd;
     dvd_file_t *title;

@@ -48,6 +48,9 @@ extern void* mDisplay; // Display* mDisplay;
 #include "codec-cfg.h"
 
 #include "dvdauth.h"
+#ifdef USE_DVDNAV
+#include <dvdnav.h>
+#endif
 #ifdef USE_DVDREAD
 #include "spudec.h"
 #endif
@@ -627,7 +630,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
     }
 
 
-    if(!filename && !vcd_track && !dvd_title && !tv_param_on){
+    if(!filename && !vcd_track && !dvd_title && !dvd_nav && !tv_param_on){
       if(!use_gui){
 	// no file/vcd/dvd -> show HELP:
 	mp_msg(MSGT_CPLAYER, MSGL_INFO, help_text);
@@ -1962,6 +1965,13 @@ if(step_sec>0) {
       break;
     // quit
     case KEY_ESC: // ESC
+#ifdef USE_DVDNAV
+      if(dvd_nav) {
+              printf("menu\n");
+        dvdnav_menu_call(stream->priv,DVD_MENU_Root);
+        break;
+      }
+#endif
     case 'q': 
       exit_player(MSGTR_Exit_quit);
     case KEY_ENTER: // ESC
@@ -2437,6 +2447,34 @@ if(step_sec>0) {
 	if(sub_pos >100) sub_pos=100;
 	if(sub_pos <0) sub_pos=0;
     }	break;
+#ifdef USE_DVDNAV
+    case MP_CMD_DVDNAV: {
+      switch (cmd->args[0].v.i) {
+        case MP_CMD_DVDNAV_UP:
+          dvdnav_upper_button_select(stream->priv);
+          break;
+        case MP_CMD_DVDNAV_DOWN:
+          dvdnav_lower_button_select(stream->priv);
+          break;
+        case MP_CMD_DVDNAV_LEFT:
+          dvdnav_left_button_select(stream->priv);
+          break;
+        case MP_CMD_DVDNAV_RIGHT:
+          dvdnav_right_button_select(stream->priv);
+          break;
+        case MP_CMD_DVDNAV_MENU:
+          dvdnav_menu_call(stream->priv,DVD_MENU_Root);
+          break;
+        case MP_CMD_DVDNAV_SELECT:
+          dvdnav_button_activate(stream->priv);
+          break;
+        default:
+          mp_msg(MSGT_CPLAYER, MSGL_V, "Weird DVD Nav cmd %d\n",cmd->args[0].v.i);
+          break;
+      }
+      break;
+    }
+#endif
     default : {
 #ifdef HAVE_NEW_GUI
       if ( ( use_gui )&&( cmd->id > MP_CMD_GUI_EVENTS ) ) guiGetEvent( guiIEvent,(char *)cmd->id );

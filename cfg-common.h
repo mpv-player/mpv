@@ -12,6 +12,9 @@
 #else
 	{"vcd", "VCD support is NOT available on this system!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
+#ifdef USE_DVDNAV
+	{"dvdnav", &dvd_nav, CONF_TYPE_FLAG, 0, 0, 1},
+#endif
 #ifdef USE_DVDREAD
 	{"dvd-device", &dvd_device,  CONF_TYPE_STRING, 0, 0, 0, NULL}, 
 	{"dvd", &dvd_title, CONF_TYPE_INT, CONF_RANGE, 1, 99, NULL},
