@@ -118,8 +118,8 @@ static void changeMode(void) {
     vo_screenwidth = dm.dmPelsWidth;
     vo_screenheight = dm.dmPelsHeight;
     aspect_save_screenres(vo_screenwidth, vo_screenheight);
-    if (vo_fs)
-	aspect(&vo_dwidth, &vo_dheight, A_ZOOM);
+    vo_dwidth = vo_screenwidth;
+    vo_dheight = vo_screenheight;
 
     ChangeDisplaySettings(&dm, CDS_FULLSCREEN);
 }
@@ -264,4 +264,5 @@ void vo_w32_uninit() {
     destroyRenderingContext();
     DestroyWindow(vo_hwnd);
     vo_hwnd = 0;
+    UnregisterClass(classname, 0);
 }
