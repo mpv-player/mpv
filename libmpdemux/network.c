@@ -434,6 +434,9 @@ extension=NULL;
 						*file_format = DEMUXER_TYPE_AUDIO;
 						return 0;
 					}
+					case 400: // Server Full
+						mp_msg(MSGT_NETWORK,MSGL_ERR,"Error: ICY-Server is full, skipping!\n");
+						return -1;
 					case 401: // Service Unavailable
 						mp_msg(MSGT_NETWORK,MSGL_ERR,"Error: ICY-Server return service unavailable, skipping!\n");
 						return -1;
