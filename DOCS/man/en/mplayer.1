@@ -5979,6 +5979,10 @@ you need realtime encoding.
 .B interlacing
 Encode the fields of interlaced video material.
 Turn this option on for interlaced content.
+.br
+.I NOTE:
+Should you rescale the video, you would need a interlace-aware resizer,
+which you can activate with -vf scale=<width>:<height>:1.
 .
 .TP
 .B 4mv\ \ \ \ 
@@ -5986,7 +5990,9 @@ Use 4 motion vectors per macroblock.
 This might give better compression, but slows down encoding.
 .br
 .I WARNING:
-This option doesn't exist in XviD-1.0.x.
+This option is deprecated in XviD-1.0.x, as all is now taken care of
+by the me_quality option.
+When me_quality > 4, 4mv is activated.
 .
 .TP
 .B rc_reaction_delay_factor=<value>
