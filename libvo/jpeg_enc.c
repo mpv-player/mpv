@@ -79,7 +79,7 @@ static void convert_matrix(MpegEncContext *s, int (*qmat)[64],
 {
     int qscale;
 
-    for(qscale=qmin; qscale<qmax; qscale++){
+    for(qscale=qmin; qscale<=qmax; qscale++){
         int i;
 	if (s->dsp.fdct == ff_jpeg_fdct_islow) {
 		for (i = 0; i < 64; i++) {
@@ -367,7 +367,7 @@ jpeg_enc_t *jpeg_enc_init(int w, int h, int y_psize, int y_rsize,
 		j->s->intra_matrix[i] = CLAMP_TO_8BIT(
 			(ff_mpeg1_default_intra_matrix[i]*j->s->qscale) >> 3);
 	convert_matrix(j->s, j->s->q_intra_matrix, j->s->q_intra_matrix16, 
-			j->s->intra_matrix, j->s->intra_quant_bias, 1, 31);
+			j->s->intra_matrix, j->s->intra_quant_bias, 8, 8);
 	return j;
 }	
 
