@@ -65,6 +65,7 @@ MPlayer code:
     * GUI: Zoltan Ponekker
     * GUI skins: Diego Biurrun
     * audio filters: None
+    * EDL code: Reynaldo H. Verdejo Pinochet
 
 Imported libs/projects:
     * libavcodec, libavformat: Michael Niedermayer
