@@ -54,6 +54,7 @@ static uint32_t x_pos, y_pos; // Position
 static uint8_t vid_modes[VID_MODE_NUM];
 static vid_mode_nums[VID_MODE_NUM] = {17,18,19,34,20,21,22,35,23,24,25,36};
 static uint8_t vid_mode;
+static uint8_t bpp;
 
 static uint32_t pformat;
 
@@ -75,13 +76,11 @@ static void checksupportedmodes() {
 static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
                      uint32_t d_height, uint32_t fullscreen, char *title, 
 		     uint32_t format) {
-  static uint8_t bpp;
-  
   if (!checked) {
     checksupportedmodes(); // Looking for available video modes
   }
   pformat = format;
-  if (format == IMGFMT_YV12) bpp = 32; 
+  if (format == IMGFMT_YV12) bpp = 32;
   else bpp = format & 255;
   if (d_width > 800)
     switch (bpp) {
@@ -151,6 +150,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
     yuvbuf = malloc(maxw * maxh * BYTESPERPIXEL);
   }
   
+//  printf("Vid_mode: %d\n",vid_mode);
   printf("SVGAlib resolution: %dx%d %dbpp - ", WIDTH, HEIGHT, bpp);
   if (maxw != orig_w || maxh != orig_h) printf("Video scaled to: %dx%d\n",maxw,maxh);
   else printf("No video scaling\n");
@@ -189,23 +189,20 @@ static const vo_info_t* get_info(void) {
 
 static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
                        unsigned char *srca, int stride) {
-  int x, y, i;
-  uint8_t *dest, buf;
-  
-//  if (pformat == IMGFMT_YV12) {
-    for (y = 0; y < h; y++) {
-      dest = virt->vbuf + ((WIDTH * (y0 + y) + x0) * BYTESPERPIXEL);
-      for (x = 0; x < w; x++) {
-        if (srca[x]) {
-	  for (i = 0; i < BYTESPERPIXEL; i++)
-            dest[i] = /*((dest[i] * srca[x]) >> 8) +*/ src[x] >> 6;
-        }
-        dest += BYTESPERPIXEL;
-      }
-      src += stride;
-      srca += stride;
-    }
-//  }
+  switch (bpp) {
+    case 32: 
+      vo_draw_alpha_rgb32(w, h, src, srca, stride, virt->vbuf+4*(y0*WIDTH+x0), 4*WIDTH);
+      break;
+    case 24: 
+      vo_draw_alpha_rgb24(w, h, src, srca, stride, virt->vbuf+3*(y0*WIDTH+x0), 3*WIDTH);
+      break;
+    case 16:
+      vo_draw_alpha_rgb16(w, h, src, srca, stride, virt->vbuf+2*(y0*WIDTH+x0), 2*WIDTH);
+      break;
+    case 15:
+      vo_draw_alpha_rgb15(w, h, src, srca, stride, virt->vbuf+2*(y0*WIDTH+x0), 2*WIDTH);
+      break;
+  }
 }		
 
 static uint32_t draw_frame(uint8_t *src[]) {
@@ -240,7 +237,7 @@ static void flip_page(void) {
   } else {
       gl_fillbox(0, 0, x_pos, HEIGHT, 0);
       gl_fillbox(WIDTH - x_pos, 0, x_pos, HEIGHT, 0);
-    } 
+    }
   vo_draw_text(WIDTH, HEIGHT, draw_alpha);
   gl_copyscreen(screen);
 }
