@@ -21,7 +21,7 @@ typedef struct {
   int eof;
   int type; // 0=file 1=VCD
   unsigned int buf_pos,buf_len;
-  unsigned char buffer[STREAM_BUFFER_SIZE];
+  unsigned char buffer[STREAM_BUFFER_SIZE>VCD_SECTOR_SIZE?STREAM_BUFFER_SIZE:VCD_SECTOR_SIZE];
 } stream_t;
 
 int stream_fill_buffer(stream_t *s);
