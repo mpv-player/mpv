@@ -1132,12 +1132,12 @@ if(sub_name){
   if(subtitles && stream_dump_type==4) dump_mpsub(subtitles, sh_video->fps);
 #endif	
 
-/* display clip info */
-demux_info_print(demuxer);
-
 //================== Init AUDIO (codec) ==========================
 init_audio:
 current_module="init_audio_codec";
+
+/* display clip info */
+demux_info_print(demuxer);
 
 if(sh_audio){
   // Go through the codec.conf and find the best codec...
