@@ -5089,7 +5089,10 @@ void* LookupExternal(const char* library, int ordinal)
 	}
     }
 
-#ifdef LOADLIB_TRY_NATIVE
+#ifndef LOADLIB_TRY_NATIVE
+  /* hack for truespeech */
+  if (!strcmp(library, "tsd32.dll"))
+#endif
     /* ok, this is a hack, and a big memory leak. should be fixed. - alex */
     {
 	int hand;
@@ -5117,7 +5120,6 @@ void* LookupExternal(const char* library, int ordinal)
 	       hand, func);
 	return func;
     }
-#endif
 
 no_dll:
     if(pos>150)return 0;
