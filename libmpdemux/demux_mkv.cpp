@@ -277,6 +277,11 @@ static mkv_track_t *new_mkv_track(mkv_demuxer_t *d) {
       return NULL;
     d->tracks[d->num_tracks] = t;
     d->num_tracks++;
+
+    // Set default values.
+    t->default_track = 1;
+    t->a_sfreq = 8000.0;
+    t->a_channels = 1;
   }
   
   return t;
@@ -962,6 +967,9 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
                                    0xFFFFFFFFL, true, 1);
         }
 
+        if (mkv_d->tc_scale == 0)
+          mkv_d->tc_scale = MKVD_TIMECODESCALE;
+
       } else if (EbmlId(*l1) == KaxTracks::ClassInfos.GlobalId) {
         // Yep, we've found our KaxTracks element. Now find all tracks
         // contained in this segment.
@@ -1339,9 +1347,6 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
     mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] caught exception\n");
     return 0;
   }
-
-  if (mkv_d->tc_scale == 0)
-    mkv_d->tc_scale = MKVD_TIMECODESCALE;
 
   if (!check_track_information(mkv_d)) {
     free_mkv_demuxer(mkv_d);
