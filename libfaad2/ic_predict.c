@@ -1,6 +1,6 @@
 /*
 ** FAAD2 - Freeware Advanced Audio (AAC) Decoder including SBR decoding
-** Copyright (C) 2003 M. Bakker, Ahead Software AG, http://www.nero.com
+** Copyright (C) 2003-2004 M. Bakker, Ahead Software AG, http://www.nero.com
 **  
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: ic_predict.c,v 1.12 2003/07/29 08:20:12 menno Exp $
+** $Id: ic_predict.c,v 1.1 2003/08/30 22:30:21 arpi Exp $
 **/
 
 #include "common.h"
@@ -34,9 +34,9 @@
 #include "ic_predict.h"
 #include "pns.h"
 
-static void flt_round(real_t *pf)
+
+static void flt_round(float32_t *pf)
 {
-    /* more stable version for clever compilers like gcc 3.x */
     int32_t flg;
     uint32_t tmp, tmp1, tmp2;
 
@@ -44,7 +44,6 @@ static void flt_round(real_t *pf)
     flg = tmp & (uint32_t)0x00008000;
     tmp &= (uint32_t)0xffff0000;
     tmp1 = tmp;
-
     /* round 1/2 lsb toward infinity */
     if (flg)
     {
@@ -53,70 +52,143 @@ static void flt_round(real_t *pf)
         tmp2 = tmp;                             /* add 1 lsb and elided one */
         tmp &= (uint32_t)0xff800000;       /* extract exponent and sign */
         
-        *pf = *(real_t*)&tmp1+*(real_t*)&tmp2-*(real_t*)&tmp;/* subtract elided one */
+        *pf = *(float32_t*)&tmp1 + *(float32_t*)&tmp2 - *(float32_t*)&tmp;
     } else {
-        *pf = *(real_t*)&tmp;
+        *pf = *(float32_t*)&tmp;
     }
+}
+
+static int16_t quant_pred(float32_t x)
+{
+    int16_t q;
+    uint32_t *tmp = (uint32_t*)&x;
+
+    q = (int16_t)(*tmp>>16);
+
+    return q;
+}
+
+static float32_t inv_quant_pred(int16_t q)
+{
+    float32_t x;
+    uint32_t *tmp = (uint32_t*)&x;
+    *tmp = ((uint32_t)q)<<16;
+
+    return x;
 }
 
 static void ic_predict(pred_state *state, real_t input, real_t *output, uint8_t pred)
 {
+    uint16_t tmp;
+    int16_t i, j;
     real_t dr1, predictedvalue;
     real_t e0, e1;
     real_t k1, k2;
 
-    real_t *r;
-    real_t *KOR;
-    real_t *VAR;
+    real_t r[2];
+    real_t COR[2];
+    real_t VAR[2];
 
-    r   = state->r;   /* delay elements */
-    KOR = state->KOR; /* correlations */
-    VAR = state->VAR; /* variances */
+    r[0] = inv_quant_pred(state->r[0]);
+    r[1] = inv_quant_pred(state->r[1]);
+    COR[0] = inv_quant_pred(state->COR[0]);
+    COR[1] = inv_quant_pred(state->COR[1]);
+    VAR[0] = inv_quant_pred(state->VAR[0]);
+    VAR[1] = inv_quant_pred(state->VAR[1]);
 
-    if (VAR[0] <= 1)
-        k1 = 0;
-    else
-        k1 = KOR[0]/VAR[0]*B;
+
+#if 1
+    tmp = state->VAR[0];
+    j = (tmp >> 7);
+    i = tmp & 0x7f;
+    if (j >= 128)
+    {
+        j -= 128;
+        k1 = COR[0] * exp_table[j] * mnt_table[i];
+    } else {
+        k1 = REAL_CONST(0);
+    }
+#else
+
+    {
+#define B 0.953125
+        real_t c = COR[0];
+        real_t v = VAR[0];
+        real_t tmp;
+        if (c == 0 || v <= 1)
+        {
+            k1 = 0;
+        } else {
+            tmp = B / v;
+            flt_round(&tmp);
+            k1 = c * tmp;
+        }
+    }
+#endif
 
     if (pred)
     {
-        /* only needed for the actual predicted value, k1 is always needed */
-        if (VAR[1] <= 1)
+#if 1
+        tmp = state->VAR[1];
+        j = (tmp >> 7);
+        i = tmp & 0x7f;
+        if (j >= 128)
+        {
+            j -= 128;
+            k2 = COR[1] * exp_table[j] * mnt_table[i];
+        } else {
+            k2 = REAL_CONST(0);
+        }
+#else
+
+#define B 0.953125
+        real_t c = COR[1];
+        real_t v = VAR[1];
+        real_t tmp;
+        if (c == 0 || v <= 1)
+        {
             k2 = 0;
-        else
-            k2 = KOR[1]/VAR[1]*B;
+        } else {
+            tmp = B / v;
+            flt_round(&tmp);
+            k2 = c * tmp;
+        }
+#endif
 
-        predictedvalue = MUL(k1, r[0]) + MUL(k2, r[1]);
+        predictedvalue = k1*r[0] + k2*r[1];
         flt_round(&predictedvalue);
-
         *output = input + predictedvalue;
-    } else {
-        *output = input;
     }
 
     /* calculate new state data */
     e0 = *output;
-    e1 = e0 - MUL(k1, r[0]);
+    e1 = e0 - k1*r[0];
+    dr1 = k1*e0;
 
-    dr1 = MUL(k1, e0);
+    VAR[0] = ALPHA*VAR[0] + 0.5f * (r[0]*r[0] + e0*e0);
+    COR[0] = ALPHA*COR[0] + r[0]*e0;
+    VAR[1] = ALPHA*VAR[1] + 0.5f * (r[1]*r[1] + e1*e1);
+    COR[1] = ALPHA*COR[1] + r[1]*e1;
 
-    VAR[0] = MUL(ALPHA, VAR[0]) + MUL(REAL_CONST(0.5), (MUL(r[0], r[0]) + MUL(e0, e0)));
-    KOR[0] = MUL(ALPHA, KOR[0]) + MUL(r[0], e0);
-    VAR[1] = MUL(ALPHA, VAR[1]) + MUL(REAL_CONST(0.5), (MUL(r[1], r[1]) + MUL(e1, e1)));
-    KOR[1] = MUL(ALPHA, KOR[1]) + MUL(r[1], e1);
+    r[1] = A * (r[0]-dr1);
+    r[0] = A * e0;
 
-    r[1] = MUL(A, (r[0]-dr1));
-    r[0] = MUL(A, e0);
+    state->r[0] = quant_pred(r[0]);
+    state->r[1] = quant_pred(r[1]);
+    state->COR[0] = quant_pred(COR[0]);
+    state->COR[1] = quant_pred(COR[1]);
+    state->VAR[0] = quant_pred(VAR[0]);
+    state->VAR[1] = quant_pred(VAR[1]);
 }
 
 static void reset_pred_state(pred_state *state)
 {
     state->r[0]   = 0;
     state->r[1]   = 0;
-    state->KOR[0] = 0;
-    state->KOR[1] = 0;
-    state->VAR[0] = REAL_CONST(1.0);
-    state->VAR[1] = REAL_CONST(1.0);
+    state->COR[0] = 0;
+    state->COR[1] = 0;
+    state->VAR[0] = 0x3F80;
+    state->VAR[1] = 0x3F80;
 }
 
 void pns_reset_pred_state(ic_stream *ics, pred_state *state)
@@ -157,7 +229,7 @@ void reset_all_predictors(pred_state *state, uint16_t frame_len)
 
 /* intra channel prediction */
 void ic_prediction(ic_stream *ics, real_t *spec, pred_state *state,
-                   uint16_t frame_len)
+                   uint16_t frame_len, uint8_t sf_index)
 {
     uint8_t sfb;
     uint16_t bin;
@@ -166,7 +238,7 @@ void ic_prediction(ic_stream *ics, real_t *spec, pred_state *state,
     {
         reset_all_predictors(state, frame_len);
     } else {
-        for (sfb = 0; sfb < ics->pred.limit; sfb++)
+        for (sfb = 0; sfb < max_pred_sfb(sf_index); sfb++)
         {
             uint16_t low  = ics->swb_offset[sfb];
             uint16_t high = ics->swb_offset[sfb+1];
@@ -174,8 +246,7 @@ void ic_prediction(ic_stream *ics, real_t *spec, pred_state *state,
             for (bin = low; bin < high; bin++)
             {
                 ic_predict(&state[bin], spec[bin], &spec[bin],
-                    (ics->predictor_data_present &&
-                    ics->pred.prediction_used[sfb]));
+                    (ics->predictor_data_present && ics->pred.prediction_used[sfb]));
             }
         }
 

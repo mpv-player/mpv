@@ -1,6 +1,6 @@
 /*
 ** FAAD2 - Freeware Advanced Audio (AAC) Decoder including SBR decoding
-** Copyright (C) 2003 M. Bakker, Ahead Software AG, http://www.nero.com
+** Copyright (C) 2003-2004 M. Bakker, Ahead Software AG, http://www.nero.com
 **  
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: lt_predict.c,v 1.12 2003/09/09 18:09:52 menno Exp $
+** $Id: lt_predict.c,v 1.2 2003/10/03 22:22:27 alex Exp $
 **/
 
 
@@ -37,27 +37,55 @@
 #include "filtbank.h"
 #include "tns.h"
 
-static real_t codebook[8] =
+
+/* static function declarations */
+static int16_t real_to_int16(real_t sig_in);
+
+
+/* check if the object type is an object type that can have LTP */
+uint8_t is_ltp_ot(uint8_t object_type)
 {
-    COEF_CONST(0.570829),
-    COEF_CONST(0.696616),
-    COEF_CONST(0.813004),
-    COEF_CONST(0.911304),
-    COEF_CONST(0.984900),
-    COEF_CONST(1.067894),
-    COEF_CONST(1.194601),
-    COEF_CONST(1.369533)
+#ifdef LTP_DEC
+    if ((object_type == LTP)
+#ifdef ERROR_RESILIENCE
+        || (object_type == ER_LTP)
+#endif
+#ifdef LD_DEC
+        || (object_type == LD)
+#endif
+#ifdef SCALABLE_DEC
+        || (object_type == 6) /* TODO */
+#endif
+        )
+    {
+        return 1;
+    }
+#endif
+
+    return 0;
+}
+
+ALIGN static const real_t codebook[8] =
+{
+    REAL_CONST(0.570829),
+    REAL_CONST(0.696616),
+    REAL_CONST(0.813004),
+    REAL_CONST(0.911304),
+    REAL_CONST(0.984900),
+    REAL_CONST(1.067894),
+    REAL_CONST(1.194601),
+    REAL_CONST(1.369533)
 };
 
 void lt_prediction(ic_stream *ics, ltp_info *ltp, real_t *spec,
-                   real_t *lt_pred_stat, fb_info *fb, uint8_t win_shape,
+                   int16_t *lt_pred_stat, fb_info *fb, uint8_t win_shape,
                    uint8_t win_shape_prev, uint8_t sr_index,
                    uint8_t object_type, uint16_t frame_len)
 {
     uint8_t sfb;
     uint16_t bin, i, num_samples;
-    real_t *x_est;
-    real_t *X_est;
+    ALIGN real_t x_est[2048];
+    ALIGN real_t X_est[2048];
 
     if (ics->window_sequence != EIGHT_SHORT_SEQUENCE)
     {
@@ -65,15 +93,20 @@ void lt_prediction(ic_stream *ics, ltp_info *ltp, real_t *spec,
         {
             num_samples = frame_len << 1;
 
-            x_est = (real_t*)malloc(num_samples*sizeof(real_t));
-            X_est = (real_t*)malloc(num_samples*sizeof(real_t));
-
             for(i = 0; i < num_samples; i++)
             {
                 /* The extra lookback M (N/2 for LD, 0 for LTP) is handled
                    in the buffer updating */
+
+#if 0
                 x_est[i] = MUL_R_C(lt_pred_stat[num_samples + i - ltp->lag],
                     codebook[ltp->coef]);
+#else
+                /* lt_pred_stat is a 16 bit int, multiplied with the fixed point real
+                   this gives a real for x_est
+                */
+                x_est[i] = (real_t)lt_pred_stat[num_samples + i - ltp->lag] * codebook[ltp->coef];
+#endif
             }
 
             filter_bank_ltp(fb, ics->window_sequence, win_shape, win_shape_prev,
@@ -95,14 +128,49 @@ void lt_prediction(ic_stream *ics, ltp_info *ltp, real_t *spec,
                     }
                 }
             }
-
-            free(x_est);
-            free(X_est);
         }
     }
 }
 
-void lt_update_state(real_t *lt_pred_stat, real_t *time, real_t *overlap,
+#ifdef FIXED_POINT
+static INLINE int16_t real_to_int16(real_t sig_in)
+{
+    if (sig_in >= 0)
+    {
+        sig_in += (1 << (REAL_BITS-1));
+        if (sig_in >= REAL_CONST(32768))
+            return 32767;
+    } else {
+        sig_in += -(1 << (REAL_BITS-1));
+        if (sig_in <= REAL_CONST(-32768))
+            return -32768;
+    }
+
+    return (sig_in >> REAL_BITS);
+}
+#else
+static INLINE int16_t real_to_int16(real_t sig_in)
+{
+    if (sig_in >= 0)
+    {
+#ifndef HAS_LRINTF
+        sig_in += 0.5f;
+#endif
+        if (sig_in >= 32768.0f)
+            return 32767;
+    } else {
+#ifndef HAS_LRINTF
+        sig_in += -0.5f;
+#endif
+        if (sig_in <= -32768.0f)
+            return -32768;
+    }
+
+    return lrintf(sig_in);
+}
+#endif
+
+void lt_update_state(int16_t *lt_pred_stat, real_t *time, real_t *overlap,
                      uint16_t frame_len, uint8_t object_type)
 {
     uint16_t i;
@@ -125,16 +193,16 @@ void lt_update_state(real_t *lt_pred_stat, real_t *time, real_t *overlap,
         {
             lt_pred_stat[i]  /* extra 512 */  = lt_pred_stat[i + frame_len];
             lt_pred_stat[frame_len + i]       = lt_pred_stat[i + (frame_len * 2)];
-            lt_pred_stat[(frame_len * 2) + i] = time[i];
-            lt_pred_stat[(frame_len * 3) + i] = overlap[i];
+            lt_pred_stat[(frame_len * 2) + i] = real_to_int16(time[i]);
+            lt_pred_stat[(frame_len * 3) + i] = real_to_int16(overlap[i]);
         }
     } else {
 #endif
         for (i = 0; i < frame_len; i++)
         {
             lt_pred_stat[i]                   = lt_pred_stat[i + frame_len];
-            lt_pred_stat[frame_len + i]       = time[i];
-            lt_pred_stat[(frame_len * 2) + i] = overlap[i];
+            lt_pred_stat[frame_len + i]       = real_to_int16(time[i]);
+            lt_pred_stat[(frame_len * 2) + i] = real_to_int16(overlap[i]);
 #if 0 /* set to zero once upon initialisation */
             lt_pred_stat[(frame_len * 3) + i] = 0;
 #endif

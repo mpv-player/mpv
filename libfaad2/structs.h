@@ -1,6 +1,6 @@
 /*
 ** FAAD2 - Freeware Advanced Audio (AAC) Decoder including SBR decoding
-** Copyright (C) 2003 M. Bakker, Ahead Software AG, http://www.nero.com
+** Copyright (C) 2003-2004 M. Bakker, Ahead Software AG, http://www.nero.com
 **  
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: structs.h,v 1.16 2003/09/23 08:12:29 menno Exp $
+** $Id: structs.h,v 1.2 2003/10/03 22:22:27 alex Exp $
 **/
 
 #ifndef __STRUCTS_H__
@@ -32,6 +32,7 @@
 extern "C" {
 #endif
 
+#include "cfft.h"
 #ifdef SBR_DEC
 #include "sbr_dec.h"
 #endif
@@ -45,32 +46,27 @@ extern "C" {
 
 /* used to save the prediction state */
 typedef struct {
-    real_t r[2];
-    real_t KOR[2];
-    real_t VAR[2];
+    int16_t r[2];
+    int16_t COR[2];
+    int16_t VAR[2];
 } pred_state;
-
-typedef struct
-{
-    uint16_t n;
-    uint16_t ifac[15];
-    complex_t *work;
-    complex_t *tab;
-} cfft_info;
 
 typedef struct {
     uint16_t N;
     cfft_info *cfft;
     complex_t *sincos;
-    complex_t *Z1;
+#ifdef PROFILE
+    int64_t cycles;
+    int64_t fft_cycles;
+#endif
 } mdct_info;
 
 typedef struct
 {
-    real_t *long_window[2];
-    real_t *short_window[2];
+    const real_t *long_window[2];
+    const real_t *short_window[2];
 #ifdef LD_DEC
-    real_t *ld_window[2];
+    const real_t *ld_window[2];
 #endif
 
     mdct_info *mdct256;
@@ -78,6 +74,12 @@ typedef struct
     mdct_info *mdct1024;
 #endif
     mdct_info *mdct2048;
+#ifdef PROFILE
+    int64_t cycles;
+#endif
+#ifdef USE_SSE
+    void (*if_func)(void *a, uint8_t b, uint8_t c, uint8_t d, real_t *e, real_t *f, uint8_t g, uint16_t h);
+#endif
 } fb_info;
 
 typedef struct
@@ -252,7 +254,7 @@ typedef struct
     uint8_t num_sec[8]; /* number of sections in a group */
 
     uint8_t global_gain;
-    int16_t scale_factors[8][51];
+    int16_t scale_factors[8][51]; /* [0..255] */
 
     uint8_t ms_mask_present;
     uint8_t ms_used[MAX_WINDOW_GROUPS][MAX_SFB];
@@ -331,6 +333,7 @@ typedef struct faacDecConfiguration
     uint8_t outputFormat;
     uint8_t downMatrix;
     uint8_t useOldADTSFormat;
+    uint8_t dontUpSampleImplicitSBR;
 } faacDecConfiguration, *faacDecConfigurationPtr;
 
 typedef struct faacDecFrameInfo
@@ -377,11 +380,26 @@ typedef struct
 
     uint8_t downMatrix;
     uint8_t first_syn_ele;
-    uint8_t last_syn_ele;
     uint8_t has_lfe;
+    /* number of channels in current frame */
     uint8_t fr_channels;
+    /* number of elements in current frame */
     uint8_t fr_ch_ele;
 
+    /* element_output_channels:
+       determines the number of channels the element will output
+    */
+    uint8_t element_output_channels[MAX_SYNTAX_ELEMENTS];
+    /* element_alloced:
+       determines whether the data needed for the element is allocated or not
+    */
+    uint8_t element_alloced[MAX_SYNTAX_ELEMENTS];
+    /* alloced_channels:
+       determines the number of channels where output data is allocated for
+    */
+    uint8_t alloced_channels;
+
+    /* output data buffer */
     void *sample_buffer;
 
     uint8_t window_shape_prev[MAX_CHANNELS];
@@ -392,19 +410,21 @@ typedef struct
     drc_info *drc;
 
     real_t *time_out[MAX_CHANNELS];
+    real_t *fb_intermed[MAX_CHANNELS];
 
 #ifdef SBR_DEC
     int8_t sbr_present_flag;
     int8_t forceUpSampling;
+    /* determines whether SBR data is allocated for the gives element */
+    uint8_t sbr_alloced[MAX_SYNTAX_ELEMENTS];
 
-    real_t *time_out2[MAX_CHANNELS];
-
-    uint8_t sbr_used[32];
-
-    sbr_info *sbr[32];
+    sbr_info *sbr[MAX_SYNTAX_ELEMENTS];
 #ifdef DRM
     int8_t lcstereo_flag;
 #endif
+#endif
+#if (defined(PS_DEC) || defined(DRM_PS))
+    uint8_t ps_used[MAX_SYNTAX_ELEMENTS];
 #endif
 
 #ifdef SSR_DEC
@@ -417,23 +437,29 @@ typedef struct
     pred_state *pred_stat[MAX_CHANNELS];
 #endif
 #ifdef LTP_DEC
-    real_t *lt_pred_stat[MAX_CHANNELS];
-#endif
-
-#ifndef FIXED_POINT
-#if POW_TABLE_SIZE
-    real_t *pow2_table;
-#endif
+    int16_t *lt_pred_stat[MAX_CHANNELS];
 #endif
 
     /* Program Config Element */
     uint8_t pce_set;
     program_config pce;
-    uint8_t channel_element[MAX_CHANNELS];
+    uint8_t element_id[MAX_CHANNELS];
     uint8_t internal_channel[MAX_CHANNELS];
 
     /* Configuration data */
     faacDecConfiguration config;
+
+#ifdef USE_SSE
+    void (*apply_sf_func)(void *a, void *b, void *c, uint16_t d);
+#endif
+
+#ifdef PROFILE
+    int64_t cycles;
+    int64_t spectral_cycles;
+    int64_t output_cycles;
+    int64_t scalefac_cycles;
+    int64_t requant_cycles;
+#endif
 } faacDecStruct, *faacDecHandle;
 
 

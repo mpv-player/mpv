@@ -1,6 +1,6 @@
 /*
 ** FAAD2 - Freeware Advanced Audio (AAC) Decoder including SBR decoding
-** Copyright (C) 2003 M. Bakker, Ahead Software AG, http://www.nero.com
+** Copyright (C) 2003-2004 M. Bakker, Ahead Software AG, http://www.nero.com
 **  
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: common.c,v 1.1 2003/08/30 22:30:21 arpi Exp $
+** $Id: common.c,v 1.2 2003/10/03 22:22:27 alex Exp $
 **/
 
 /* just some common functions that could be used anywhere */
@@ -30,10 +30,73 @@
 #include "common.h"
 #include "structs.h"
 
+#include <stdlib.h>
 #include "syntax.h"
 
+#ifdef USE_SSE
+__declspec(naked) static int32_t __fastcall test_cpuid(void)
+{
+    __asm
+    {
+        pushf
+        pop eax
+        mov ecx,eax
+        xor eax,(1<<21)
+        push eax
+        popf
+        pushf
+        pop eax
+        push ecx
+        popf
+        cmp eax,ecx
+        mov eax,0
+        setne al
+        ret
+    }
+}
+
+__declspec(naked) static void __fastcall run_cpuid(int32_t param, int32_t out[4])
+{
+    __asm
+    {
+        pushad
+        push edx
+        mov eax,ecx
+        cpuid
+        pop edi
+        mov [edi+0],eax
+        mov [edi+4],ebx
+        mov [edi+8],ecx
+        mov [edi+12],edx
+        popad
+        ret
+    }
+}
+
+uint8_t cpu_has_sse()
+{
+    int32_t features[4];
+
+    if (test_cpuid())
+    {
+        run_cpuid(1, features);
+    }
+
+    /* check for SSE */
+    if (features[3] & 0x02000000)
+        return 1;
+
+    return 0;
+}
+#else
+uint8_t cpu_has_sse()
+{
+    return 0;
+}
+#endif
+
 /* Returns the sample rate index based on the samplerate */
-uint8_t get_sr_index(uint32_t samplerate)
+uint8_t get_sr_index(const uint32_t samplerate)
 {
     if (92017 <= samplerate) return 0;
     if (75132 <= samplerate) return 1;
@@ -52,7 +115,7 @@ uint8_t get_sr_index(uint32_t samplerate)
 }
 
 /* Returns the sample rate based on the sample rate index */
-uint32_t get_sample_rate(uint8_t sr_index)
+uint32_t get_sample_rate(const uint8_t sr_index)
 {
     static const uint32_t sample_rates[] =
     {
@@ -66,8 +129,58 @@ uint32_t get_sample_rate(uint8_t sr_index)
     return 0;
 }
 
+uint8_t max_pred_sfb(const uint8_t sr_index)
+{
+    static const uint8_t pred_sfb_max[] =
+    {
+        33, 33, 38, 40, 40, 40, 41, 41, 37, 37, 37, 34
+    };
+
+
+    if (sr_index < 12)
+        return pred_sfb_max[sr_index];
+
+    return 0;
+}
+
+uint8_t max_tns_sfb(const uint8_t sr_index, const uint8_t object_type,
+                    const uint8_t is_short)
+{
+    /* entry for each sampling rate	
+     * 1    Main/LC long window
+     * 2    Main/LC short window
+     * 3    SSR long window
+     * 4    SSR short window
+     */
+    static const uint8_t tns_sbf_max[][4] =
+    {
+        {31,  9, 28, 7}, /* 96000 */
+        {31,  9, 28, 7}, /* 88200 */
+        {34, 10, 27, 7}, /* 64000 */
+        {40, 14, 26, 6}, /* 48000 */
+        {42, 14, 26, 6}, /* 44100 */
+        {51, 14, 26, 6}, /* 32000 */
+        {46, 14, 29, 7}, /* 24000 */
+        {46, 14, 29, 7}, /* 22050 */
+        {42, 14, 23, 8}, /* 16000 */
+        {42, 14, 23, 8}, /* 12000 */
+        {42, 14, 23, 8}, /* 11025 */
+        {39, 14, 19, 7}, /*  8000 */
+        {39, 14, 19, 7}, /*  7350 */
+        {0,0,0,0},
+        {0,0,0,0},
+        {0,0,0,0}
+    };
+    uint8_t i = 0;
+
+    if (is_short) i++;
+    if (object_type == SSR) i += 2;
+
+    return tns_sbf_max[sr_index][i];
+}
+
 /* Returns 0 if an object type is decodable, otherwise returns -1 */
-int8_t can_decode_ot(uint8_t object_type)
+int8_t can_decode_ot(const uint8_t object_type)
 {
     switch (object_type)
     {
@@ -117,6 +230,26 @@ int8_t can_decode_ot(uint8_t object_type)
     return -1;
 }
 
+/* common malloc function */
+void *faad_malloc(int32_t size)
+{
+#if 0 // defined(_WIN32) && !defined(_WIN32_WCE)
+    return _aligned_malloc(size, 16);
+#else
+    return malloc(size);
+#endif
+}
+
+/* common free function */
+void faad_free(void *b)
+{
+#if 0 // defined(_WIN32) && !defined(_WIN32_WCE)
+    _aligned_free(b);
+#else
+    free(b);
+#endif
+}
+
 static const  uint8_t    Parity [256] = {  // parity
 	0,1,1,0,1,0,0,1,1,0,0,1,0,1,1,0,1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1,
 	1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1,0,1,1,0,1,0,0,1,1,0,0,1,0,1,1,0,
@@ -160,7 +293,6 @@ static uint32_t  __r2 = 1;
  */
 uint32_t random_int(void)
 {
-    static const uint32_t rnd_seed = 16428320;
 	uint32_t  t1, t2, t3, t4;
 
 	t3   = t1 = __r1;   t4   = t2 = __r2;       // Parity calculation is done via table lookup, this is also available
@@ -170,11 +302,3 @@ uint32_t random_int(void)
 
 	return (__r1 = (t3 >> 1) | t1 ) ^ (__r2 = (t4 + t4) | t2 );
 }
-
-#define LOG2 0.30102999566398
-
-int32_t int_log2(int32_t val)
-{
-    return (int32_t)ceil(log(val)/log(2));
-}
-

@@ -1,6 +1,6 @@
 /*
 ** FAAD2 - Freeware Advanced Audio (AAC) Decoder including SBR decoding
-** Copyright (C) 2003 M. Bakker, Ahead Software AG, http://www.nero.com
+** Copyright (C) 2003-2004 M. Bakker, Ahead Software AG, http://www.nero.com
 **  
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: filtbank.h,v 1.1 2003/08/30 22:30:21 arpi Exp $
+** $Id: filtbank.h,v 1.2 2003/10/03 22:22:27 alex Exp $
 **/
 
 #ifndef __FILTBANK_H__
@@ -47,14 +47,16 @@ void filter_bank_ltp(fb_info *fb,
                      uint16_t frame_len);
 #endif
 
-void ifilter_bank(fb_info *fb,
-                  uint8_t window_sequence,
-                  uint8_t window_shape,
-                  uint8_t window_shape_prev,
-                  real_t *freq_in,
-                  real_t *time_out,
-                  uint8_t object_type,
-                  uint16_t frame_len);
+void ifilter_bank(fb_info *fb, uint8_t window_sequence, uint8_t window_shape,
+                  uint8_t window_shape_prev, real_t *freq_in,
+                  real_t *time_out, real_t *overlap,
+                  uint8_t object_type, uint16_t frame_len);
+
+#ifdef USE_SSE
+void ifilter_bank_sse(fb_info *fb, uint8_t window_sequence, uint8_t window_shape,
+                      uint8_t window_shape_prev, real_t *freq_in,
+                      real_t *time_out, uint8_t object_type, uint16_t frame_len);
+#endif
 
 #ifdef __cplusplus
 }

@@ -1,6 +1,6 @@
 /*
 ** FAAD2 - Freeware Advanced Audio (AAC) Decoder including SBR decoding
-** Copyright (C) 2003 M. Bakker, Ahead Software AG, http://www.nero.com
+** Copyright (C) 2003-2004 M. Bakker, Ahead Software AG, http://www.nero.com
 **  
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: fixed.h,v 1.1 2003/08/30 22:30:21 arpi Exp $
+** $Id: fixed.h,v 1.2 2003/10/03 22:22:27 alex Exp $
 **/
 
 #ifndef __FIXED_H__
@@ -32,111 +32,162 @@
 extern "C" {
 #endif
 
+#ifdef _WIN32_WCE
+#include <cmnintrin.h>
+#endif
 
 #define COEF_BITS 28
 #define COEF_PRECISION (1 << COEF_BITS)
 #define REAL_BITS 14 // MAXIMUM OF 14 FOR FIXED POINT SBR
 #define REAL_PRECISION (1 << REAL_BITS)
 
+/* FRAC is the fractional only part of the fixed point number [0.0..1.0) */
+#define FRAC_SIZE 32 /* frac is a 32 bit integer */
+#define FRAC_BITS 31
+#define FRAC_PRECISION ((uint32_t)(1 << FRAC_BITS))
+#define FRAC_MAX 0x7FFFFFFF
 
 typedef int32_t real_t;
 
 
-#define REAL_CONST(A) ((real_t)((A)*(REAL_PRECISION)))
-#define COEF_CONST(A) ((real_t)((A)*(COEF_PRECISION)))
+#define REAL_CONST(A) (((A) >= 0) ? ((real_t)((A)*(REAL_PRECISION)+0.5)) : ((real_t)((A)*(REAL_PRECISION)-0.5)))
+#define COEF_CONST(A) (((A) >= 0) ? ((real_t)((A)*(COEF_PRECISION)+0.5)) : ((real_t)((A)*(COEF_PRECISION)-0.5)))
+#define FRAC_CONST(A) (((A) == 1.00) ? ((real_t)FRAC_MAX) : (((A) >= 0) ? ((real_t)((A)*(FRAC_PRECISION)+0.5)) : ((real_t)((A)*(FRAC_PRECISION)-0.5))))
 
 #if defined(_WIN32) && !defined(_WIN32_WCE)
 
-/* multiply real with real */
-static INLINE MUL(real_t A, real_t B)
+/* multiply with real shift */
+static INLINE real_t MUL_R(real_t A, real_t B)
 {
     _asm {
         mov eax,A
         imul B
-#if 0
         shrd eax,edx,REAL_BITS
-#else
-        shr eax,REAL_BITS
-        shl edx,(32-REAL_BITS)
-        or eax,edx
-#endif
     }
 }
 
-/* multiply coef with coef */
-static INLINE MUL_C_C(real_t A, real_t B)
+/* multiply with coef shift */
+static INLINE real_t MUL_C(real_t A, real_t B)
 {
     _asm {
         mov eax,A
         imul B
-#if 0
         shrd eax,edx,COEF_BITS
-#else
-        shr eax,COEF_BITS
-        shl edx,(32-COEF_BITS)
-        or eax,edx
-#endif
     }
 }
 
-/* multiply real with coef */
-static INLINE MUL_R_C(real_t A, real_t B)
+static INLINE real_t _MulHigh(real_t A, real_t B)
 {
     _asm {
         mov eax,A
         imul B
-#if 0
-        shrd eax,edx,COEF_BITS
-#else
-        shr eax,COEF_BITS
-        shl edx,(32-COEF_BITS)
-        or eax,edx
-#endif
+        mov eax,edx
     }
+}
+
+/* multiply with fractional shift */
+static INLINE real_t MUL_F(real_t A, real_t B)
+{
+    return _MulHigh(A,B) << (FRAC_SIZE-FRAC_BITS);
+}
+
+/* Complex multiplication */
+static INLINE void ComplexMult(real_t *y1, real_t *y2,
+    real_t x1, real_t x2, real_t c1, real_t c2)
+{
+    *y1 = (_MulHigh(x1, c1) + _MulHigh(x2, c2))<<(FRAC_SIZE-FRAC_BITS);
+    *y2 = (_MulHigh(x2, c1) - _MulHigh(x1, c2))<<(FRAC_SIZE-FRAC_BITS);
 }
 
 #elif defined(__GNUC__) && defined (__arm__)
 
 /* taken from MAD */
 #define arm_mul(x, y, SCALEBITS) \
-       ({      uint32_t __hi; \
-               uint32_t __lo; \
-               uint32_t __result; \
-               asm ("smull  %0, %1, %3, %4\n\t" \
-                    "movs   %0, %0, lsr %5\n\t" \
-                    "adc    %2, %0, %1, lsl %6" \
-                    : "=&r" (__lo), "=&r" (__hi), "=r" (__result) \
-                    : "%r" (x), "r" (y), \
-                      "M" (SCALEBITS), "M" (32 - (SCALEBITS)) \
-                    : "cc"); \
-               __result; \
-       })
+({ \
+    uint32_t __hi; \
+    uint32_t __lo; \
+    uint32_t __result; \
+    asm("smull  %0, %1, %3, %4\n\t" \
+        "movs   %0, %0, lsr %5\n\t" \
+        "adc    %2, %0, %1, lsl %6" \
+        : "=&r" (__lo), "=&r" (__hi), "=r" (__result) \
+        : "%r" (x), "r" (y), \
+        "M" (SCALEBITS), "M" (32 - (SCALEBITS)) \
+        : "cc"); \
+        __result; \
+})
 
-static INLINE real_t MUL(real_t A, real_t B)
+static INLINE real_t MUL_R(real_t A, real_t B)
 {
-       return arm_mul( A, B, REAL_BITS);
+    return arm_mul(A, B, REAL_BITS);
 }
 
-static INLINE real_t MUL_C_C(real_t A, real_t B)
+static INLINE real_t MUL_C(real_t A, real_t B)
 {
-       return arm_mul( A, B, COEF_BITS);
+    return arm_mul(A, B, COEF_BITS);
 }
 
-static INLINE real_t MUL_R_C(real_t A, real_t B)
+static INLINE real_t _MulHigh(real_t x, real_t y)
 {
-       return arm_mul( A, B, COEF_BITS);
+    uint32_t __lo;
+    uint32_t __hi;
+    asm("smull\t%0, %1, %2, %3"
+        : "=&r"(__lo),"=&r"(__hi)
+        : "%r"(x),"r"(y)
+        : "cc");
+    return __hi;
+}
+
+static INLINE real_t MUL_F(real_t A, real_t B)
+{
+    return _MulHigh(A, B) << (FRAC_SIZE-FRAC_BITS);
+}
+
+/* Complex multiplication */
+static INLINE void ComplexMult(real_t *y1, real_t *y2,
+    real_t x1, real_t x2, real_t c1, real_t c2)
+{
+    int32_t tmp, yt1, yt2;
+    asm("smull %0, %1, %4, %6\n\t"
+        "smlal %0, %1, %5, %7\n\t"
+        "rsb   %3, %4, #0\n\t"
+        "smull %0, %2, %5, %6\n\t"
+        "smlal %0, %2, %3, %7"
+        : "=&r" (tmp), "=&r" (yt1), "=&r" (yt2), "=r" (x1)
+        : "3" (x1), "r" (x2), "r" (c1), "r" (c2)
+        : "cc" );
+    *y1 = yt1 << (FRAC_SIZE-FRAC_BITS);
+    *y2 = yt2 << (FRAC_SIZE-FRAC_BITS);
 }
 
 #else
 
-  /* multiply real with real */
-  #define MUL(A,B) (real_t)(((int64_t)(A)*(int64_t)(B)+(1 << (REAL_BITS-1))) >> REAL_BITS)
-  /* multiply coef with coef */
-  #define MUL_C_C(A,B) (real_t)(((int64_t)(A)*(int64_t)(B)+(1 << (COEF_BITS-1))) >> COEF_BITS)
-  /* multiply real with coef */
-  #define MUL_R_C(A,B) (real_t)(((int64_t)(A)*(int64_t)(B)+(1 << (COEF_BITS-1))) >> COEF_BITS)
+  /* multiply with real shift */
+  #define MUL_R(A,B) (real_t)(((int64_t)(A)*(int64_t)(B)+(1 << (REAL_BITS-1))) >> REAL_BITS)
+  /* multiply with coef shift */
+  #define MUL_C(A,B) (real_t)(((int64_t)(A)*(int64_t)(B)+(1 << (COEF_BITS-1))) >> COEF_BITS)
+  /* multiply with fractional shift */
+#ifndef _WIN32_WCE
+  #define _MulHigh(A,B) (real_t)(((int64_t)(A)*(int64_t)(B)+(1 << (FRAC_SIZE-1))) >> FRAC_SIZE)
+  #define MUL_F(A,B) (real_t)(((int64_t)(A)*(int64_t)(B)+(1 << (FRAC_BITS-1))) >> FRAC_BITS)
+#else
+  /* eVC for PocketPC has an intrinsic function that returns only the high 32 bits of a 32x32 bit multiply */
+  static INLINE real_t MUL_F(real_t A, real_t B)
+  {
+      return _MulHigh(A,B) << (32-FRAC_BITS);
+  }
+#endif
+
+/* Complex multiplication */
+static INLINE void ComplexMult(real_t *y1, real_t *y2,
+    real_t x1, real_t x2, real_t c1, real_t c2)
+{
+    *y1 = (_MulHigh(x1, c1) + _MulHigh(x2, c2))<<(FRAC_SIZE-FRAC_BITS);
+    *y2 = (_MulHigh(x2, c1) - _MulHigh(x1, c2))<<(FRAC_SIZE-FRAC_BITS);
+}
 
 #endif
+
 
 
 #ifdef __cplusplus

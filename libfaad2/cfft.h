@@ -1,6 +1,6 @@
 /*
 ** FAAD2 - Freeware Advanced Audio (AAC) Decoder including SBR decoding
-** Copyright (C) 2003 M. Bakker, Ahead Software AG, http://www.nero.com
+** Copyright (C) 2003-2004 M. Bakker, Ahead Software AG, http://www.nero.com
 **  
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: cfft.h,v 1.6 2003/07/29 08:20:12 menno Exp $
+** $Id: cfft.h,v 1.1 2003/08/30 22:30:21 arpi Exp $
 **/
 
 #ifndef __CFFT_H__
@@ -32,25 +32,23 @@
 extern "C" {
 #endif
 
+typedef struct
+{
+    uint16_t n;
+    uint16_t ifac[15];
+    complex_t *work;
+    complex_t *tab;
+} cfft_info;
+
 
 void cfftf(cfft_info *cfft, complex_t *c);
 void cfftb(cfft_info *cfft, complex_t *c);
 cfft_info *cffti(uint16_t n);
 void cfftu(cfft_info *cfft);
 
-
-static void passf2(uint16_t ido, uint16_t l1, complex_t *cc, complex_t *ch,
-                   complex_t *wa, int8_t isign);
-static void passf3(uint16_t ido, uint16_t l1, complex_t *cc, complex_t *ch,
-                   complex_t *wa1, complex_t *wa2, int8_t isign);
-static void passf4(uint16_t ido, uint16_t l1, complex_t *cc, complex_t *ch,
-                   complex_t *wa1, complex_t *wa2, complex_t *wa3, int8_t isign);
-static void passf5(uint16_t ido, uint16_t l1, complex_t *cc, complex_t *ch,
-                   complex_t *wa1, complex_t *wa2, complex_t *wa3, complex_t *wa4,
-                   int8_t isign);
-INLINE void cfftf1(uint16_t n, complex_t *c, complex_t *ch,
-                   uint16_t *ifac, complex_t *wa, int8_t isign);
-static void cffti1(uint16_t n, complex_t *wa, uint16_t *ifac);
+#ifdef USE_SSE
+void cfftb_sse(cfft_info *cfft, complex_t *c);
+#endif
 
 
 #ifdef __cplusplus

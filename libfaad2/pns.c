@@ -1,6 +1,6 @@
 /*
 ** FAAD2 - Freeware Advanced Audio (AAC) Decoder including SBR decoding
-** Copyright (C) 2003 M. Bakker, Ahead Software AG, http://www.nero.com
+** Copyright (C) 2003-2004 M. Bakker, Ahead Software AG, http://www.nero.com
 **  
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -22,13 +22,18 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: pns.c,v 1.22 2003/09/09 18:09:52 menno Exp $
+** $Id: pns.c,v 1.2 2003/10/03 22:22:27 alex Exp $
 **/
 
 #include "common.h"
 #include "structs.h"
 
 #include "pns.h"
+
+
+/* static function declarations */
+static void gen_rand_vector(real_t *spec, int16_t scale_factor, uint16_t size,
+                            uint8_t sub);
 
 
 #ifdef FIXED_POINT
@@ -116,7 +121,7 @@ static INLINE void gen_rand_vector(real_t *spec, int16_t scale_factor, uint16_t 
         else
             tmp = (tmp & ((1<<(REAL_BITS-1))-1));
 
-        energy += MUL(tmp,tmp);
+        energy += MUL_R(tmp,tmp);
 
         spec[i] = tmp;
     }
@@ -138,11 +143,11 @@ static INLINE void gen_rand_vector(real_t *spec, int16_t scale_factor, uint16_t 
             scale <<= exp;
 
         if (frac)
-            scale = MUL_R_C(scale, pow2_table[frac + 3]);
+            scale = MUL_C(scale, pow2_table[frac + 3]);
 
         for (i = 0; i < size; i++)
         {
-            spec[i] = MUL(spec[i], scale);
+            spec[i] = MUL_R(spec[i], scale);
         }
     }
 #endif

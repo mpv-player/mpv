@@ -1,6 +1,6 @@
 /*
 ** FAAD2 - Freeware Advanced Audio (AAC) Decoder including SBR decoding
-** Copyright (C) 2003 M. Bakker, Ahead Software AG, http://www.nero.com
+** Copyright (C) 2003-2004 M. Bakker, Ahead Software AG, http://www.nero.com
 **  
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: sbr_dct.h,v 1.3 2003/09/24 11:52:12 menno Exp $
+** $Id: sbr_dct.h,v 1.2 2003/10/03 22:22:27 alex Exp $
 **/
 
 #ifndef __SBR_DCT_H__
@@ -34,7 +34,9 @@ extern "C" {
 
 void DCT3_32_unscaled(real_t *y, real_t *x);
 void DCT2_64_unscaled(real_t *y, real_t *x);
+void DST2_64_unscaled(real_t *y, real_t *x);
 void DCT4_64(real_t *y, real_t *x);
+void DCT4_64_kernel(real_t *y, real_t *t2);
 
 
 #ifdef __cplusplus

@@ -1,19 +1,19 @@
 /*
 ** FAAD2 - Freeware Advanced Audio (AAC) Decoder including SBR decoding
-** Copyright (C) 2003 M. Bakker, Ahead Software AG, http://www.nero.com
-**  
+** Copyright (C) 2003-2004 M. Bakker, Ahead Software AG, http://www.nero.com
+**
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
 ** the Free Software Foundation; either version 2 of the License, or
 ** (at your option) any later version.
-** 
+**
 ** This program is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
-** 
+**
 ** You should have received a copy of the GNU General Public License
-** along with this program; if not, write to the Free Software 
+** along with this program; if not, write to the Free Software
 ** Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 **
 ** Any non-GPL usage of this software or parts of this software is strictly
@@ -32,9 +32,17 @@
 extern "C" {
 #endif
 
-#  include "../config.h"
+/* Allow build on cygwin*/
+#if defined(__CYGWIN__)
+#define __STRICT_ANSI__
+#endif
 
 #define INLINE __inline
+#if defined(_WIN32) && !defined(_WIN32_WCE)
+#define ALIGN __declspec(align(16))
+#else
+#define ALIGN
+#endif
 
 #ifndef max
 #define max(a, b) (((a) > (b)) ? (a) : (b))
@@ -43,13 +51,17 @@ extern "C" {
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 #endif
 
-
 /* COMPILE TIME DEFINITIONS */
 
 /* use double precision */
 /* #define USE_DOUBLE_PRECISION */
 /* use fixed point reals */
 //#define FIXED_POINT
+
+#ifdef _WIN32_WCE
+#define FIXED_POINT
+#endif
+
 
 #define ERROR_RESILIENCE
 
@@ -62,6 +74,11 @@ extern "C" {
 #define LTP_DEC
 /* Allow decoding of LD profile AAC */
 #define LD_DEC
+/* Allow decoding of scalable profiles */
+//#define SCALABLE_DEC
+/* Allow decoding of Digital Radio Mondiale (DRM) */
+//#define DRM
+//#define DRM_PS
 
 /* LD can't do without LTP */
 #ifdef LD_DEC
@@ -73,13 +90,47 @@ extern "C" {
 #endif
 #endif
 
+#define ALLOW_SMALL_FRAMELENGTH
+
+
+// Define LC_ONLY_DECODER if you want a pure AAC LC decoder (independant of SBR_DEC)
+//#define LC_ONLY_DECODER
+#ifdef LC_ONLY_DECODER
+  #undef LTP_DEC
+  #undef MAIN_DEC
+  #undef SSR_DEC
+  #undef DRM
+  #undef ALLOW_SMALL_FRAMELENGTH
+  #undef ERROR_RESILIENCE
+#endif
 
 #define SBR_DEC
 //#define SBR_LOW_POWER
+//#define PS_DEC
 
+/* FIXED POINT: No MAIN decoding, no SBR decoding */
 #ifdef FIXED_POINT
-#ifndef SBR_LOW_POWER
-#define SBR_LOW_POWER
+# ifdef MAIN_DEC
+#  undef MAIN_DEC
+# endif
+//# ifndef SBR_LOW_POWER
+//#  define SBR_LOW_POWER
+//# endif
+# ifdef SBR_DEC
+#  undef SBR_DEC
+# endif
+#endif // FIXED_POINT
+
+#ifdef DRM
+# ifndef SCALABLE_DEC
+#  define SCALABLE_DEC
+# endif
+#endif
+
+#if ((defined(_WIN32) && !defined(_WIN32_WCE)) /* || ((__GNUC__ >= 3) && defined(__i386__)) */ )
+#ifndef FIXED_POINT
+/* includes <xmmintrin.h> to enable SSE intrinsics */
+//#define USE_SSE
 #endif
 #endif
 
@@ -96,16 +147,11 @@ extern "C" {
 #else
 #define qmf_t real_t
 #define QMF_RE(A) (A)
-#define QMF_IM(A) 0
+#define QMF_IM(A)
 #endif
 
 
 /* END COMPILE TIME DEFINITIONS */
-
-#ifndef FIXED_POINT
-#define POW_TABLE_SIZE 200
-#endif
-
 
 #if defined(_WIN32)
 
@@ -125,10 +171,9 @@ typedef float float32_t;
 
 
 #else
-
 /* Define if needed */
-/* #undef HAVE_FLOAT32_T */
 
+/* #undef HAVE_FLOAT32_T */
 /* Define if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
 
@@ -144,7 +189,9 @@ typedef float float32_t;
 /* Define if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
-
+#ifdef HAVE_CONFIG_H
+#  include "../config.h"
+#endif
 
 #include <stdio.h>
 #if HAVE_SYS_TYPES_H
@@ -224,12 +271,6 @@ char *strchr(), *strrchr();
 
 #if defined(FIXED_POINT)
 
-  #ifdef HAS_MATHF_H
-    #include <mathf.h>
-  #else
-    #include <math.h>
-  #endif
-
   #include "fixed.h"
 
 #elif defined(USE_DOUBLE_PRECISION)
@@ -238,23 +279,74 @@ char *strchr(), *strrchr();
 
   #include <math.h>
 
-  #define MUL(A,B) ((A)*(B))
-  #define MUL_C_C(A,B) ((A)*(B))
-  #define MUL_R_C(A,B) ((A)*(B))
+  #define MUL_R(A,B) ((A)*(B))
+  #define MUL_C(A,B) ((A)*(B))
+  #define MUL_F(A,B) ((A)*(B))
+
+  /* Complex multiplication */
+  static INLINE void ComplexMult(real_t *y1, real_t *y2,
+      real_t x1, real_t x2, real_t c1, real_t c2)
+  {
+      *y1 = MUL_F(x1, c1) + MUL_F(x2, c2);
+      *y2 = MUL_F(x2, c1) - MUL_F(x1, c2);
+  }
 
   #define REAL_CONST(A) ((real_t)(A))
   #define COEF_CONST(A) ((real_t)(A))
+  #define FRAC_CONST(A) ((real_t)(A)) /* pure fractional part */
 
 #else /* Normal floating point operation */
 
   typedef float real_t;
 
-  #define MUL(A,B) ((A)*(B))
-  #define MUL_C_C(A,B) ((A)*(B))
-  #define MUL_R_C(A,B) ((A)*(B))
+#ifdef USE_SSE
+# include <xmmintrin.h>
+#endif
+
+  #define MUL_R(A,B) ((A)*(B))
+  #define MUL_C(A,B) ((A)*(B))
+  #define MUL_F(A,B) ((A)*(B))
 
   #define REAL_CONST(A) ((real_t)(A))
   #define COEF_CONST(A) ((real_t)(A))
+  #define FRAC_CONST(A) ((real_t)(A)) /* pure fractional part */
+
+  /* Complex multiplication */
+  static INLINE void ComplexMult(real_t *y1, real_t *y2,
+      real_t x1, real_t x2, real_t c1, real_t c2)
+  {
+      *y1 = MUL_F(x1, c1) + MUL_F(x2, c2);
+      *y2 = MUL_F(x2, c1) - MUL_F(x1, c2);
+  }
+
+
+  #if defined(_WIN32) && !defined(__MINGW32__)
+    #define HAS_LRINTF
+    static INLINE int lrintf(float f)
+    {
+        int i;
+        __asm
+        {
+            fld   f
+            fistp i
+        }
+        return i;
+    }
+  #elif (defined(__i386__) && defined(__GNUC__)) && !defined(__MINGW32__)
+    #define HAS_LRINTF
+    // from http://www.stereopsis.com/FPU.html
+    static INLINE int lrintf(float f)
+    {
+        int i;
+        __asm__ __volatile__ (
+            "flds %1        \n\t"
+            "fistpl %0      \n\t"
+            : "=m" (i)
+            : "m" (f));
+        return i;
+    }
+  #endif
+
 
   #ifdef __ICL /* only Intel C compiler has fmath ??? */
 
@@ -268,6 +360,14 @@ char *strchr(), *strrchr();
     #define sqrt sqrtf
 
   #else
+
+#ifdef HAVE_LRINTF
+#  define HAS_LRINTF
+#  define _ISOC9X_SOURCE 1
+#  define _ISOC99_SOURCE 1
+#  define __USE_ISOC9X   1
+#  define __USE_ISOC99   1
+#endif
 
     #include <math.h>
 
@@ -298,20 +398,42 @@ char *strchr(), *strrchr();
 
 #endif
 
+#ifndef HAS_LRINTF
+/* standard cast */
+#define lrintf(f) ((int32_t)(f))
+#endif
+
 typedef real_t complex_t[2];
 #define RE(A) A[0]
 #define IM(A) A[1]
 
 
 /* common functions */
-int32_t int_log2(int32_t val);
+uint8_t cpu_has_sse(void);
 uint32_t random_int(void);
-uint8_t get_sr_index(uint32_t samplerate);
-uint32_t get_sample_rate(uint8_t sr_index);
-int8_t can_decode_ot(uint8_t object_type);
+uint8_t get_sr_index(const uint32_t samplerate);
+uint8_t max_pred_sfb(const uint8_t sr_index);
+uint8_t max_tns_sfb(const uint8_t sr_index, const uint8_t object_type,
+                    const uint8_t is_short);
+uint32_t get_sample_rate(const uint8_t sr_index);
+int8_t can_decode_ot(const uint8_t object_type);
+
+void *faad_malloc(int32_t size);
+void faad_free(void *b);
+
+//#define PROFILE
+#ifdef PROFILE
+static int64_t faad_get_ts()
+{
+    __asm
+    {
+        rdtsc
+    }
+}
+#endif
 
 #ifndef M_PI
-#define M_PI 3.14159265358979323846f
+#define M_PI 3.14159265358979323846
 #endif
 #ifndef M_PI_2 /* PI/2 */
 #define M_PI_2 1.57079632679489661923

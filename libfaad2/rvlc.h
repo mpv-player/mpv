@@ -1,6 +1,6 @@
 /*
 ** FAAD2 - Freeware Advanced Audio (AAC) Decoder including SBR decoding
-** Copyright (C) 2003 M. Bakker, Ahead Software AG, http://www.nero.com
+** Copyright (C) 2003-2004 M. Bakker, Ahead Software AG, http://www.nero.com
 **  
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: rvlc.h,v 1.3 2003/09/09 18:09:52 menno Exp $
+** $Id: rvlc.h,v 1.2 2003/10/03 22:22:27 alex Exp $
 **/
 
 #ifndef __RVLC_SCF_H__
@@ -45,18 +45,6 @@ typedef struct
 
 uint8_t rvlc_scale_factor_data(ic_stream *ics, bitfile *ld);
 uint8_t rvlc_decode_scale_factors(ic_stream *ics, bitfile *ld);
-
-static uint8_t rvlc_decode_sf_forward(ic_stream *ics,
-                                      bitfile *ld_sf,
-                                      bitfile *ld_esc,
-                                      uint8_t *is_used);
-static uint8_t rvlc_decode_sf_reverse(ic_stream *ics,
-                                      bitfile *ld_sf,
-                                      bitfile *ld_esc,
-                                      uint8_t is_used);
-static int8_t rvlc_huffman_sf(bitfile *ld_sf, bitfile *ld_esc,
-                              int8_t direction);
-static int8_t rvlc_huffman_esc(bitfile *ld_esc, int8_t direction);
 
 
 #ifdef __cplusplus

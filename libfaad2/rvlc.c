@@ -1,6 +1,6 @@
 /*
 ** FAAD2 - Freeware Advanced Audio (AAC) Decoder including SBR decoding
-** Copyright (C) 2003 M. Bakker, Ahead Software AG, http://www.nero.com
+** Copyright (C) 2003-2004 M. Bakker, Ahead Software AG, http://www.nero.com
 **  
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: rvlc.c,v 1.6 2003/09/09 18:09:52 menno Exp $
+** $Id: rvlc.c,v 1.2 2003/10/03 22:22:27 alex Exp $
 **/
 
 /* RVLC scalefactor decoding
@@ -52,25 +52,41 @@
 
 //#define PRINT_RVLC
 
+/* static function declarations */
+static uint8_t rvlc_decode_sf_forward(ic_stream *ics,
+                                      bitfile *ld_sf,
+                                      bitfile *ld_esc,
+                                      uint8_t *is_used);
+#if 0
+static uint8_t rvlc_decode_sf_reverse(ic_stream *ics,
+                                      bitfile *ld_sf,
+                                      bitfile *ld_esc,
+                                      uint8_t is_used);
+#endif
+static int8_t rvlc_huffman_sf(bitfile *ld_sf, bitfile *ld_esc,
+                              int8_t direction);
+static int8_t rvlc_huffman_esc(bitfile *ld_esc, int8_t direction);
+
+
 uint8_t rvlc_scale_factor_data(ic_stream *ics, bitfile *ld)
 {
     uint8_t bits = 9;
 
     ics->sf_concealment = faad_get1bit(ld
         DEBUGVAR(1,149,"rvlc_scale_factor_data(): sf_concealment"));
-    ics->rev_global_gain = faad_getbits(ld, 8
+    ics->rev_global_gain = (uint8_t)faad_getbits(ld, 8
         DEBUGVAR(1,150,"rvlc_scale_factor_data(): rev_global_gain"));
 
     if (ics->window_sequence == EIGHT_SHORT_SEQUENCE)
         bits = 11;
 
     /* the number of bits used for the huffman codewords */
-    ics->length_of_rvlc_sf = faad_getbits(ld, bits
+    ics->length_of_rvlc_sf = (uint16_t)faad_getbits(ld, bits
         DEBUGVAR(1,151,"rvlc_scale_factor_data(): length_of_rvlc_sf"));
 
     if (ics->noise_used)
     {
-        ics->dpcm_noise_nrg = faad_getbits(ld, 9
+        ics->dpcm_noise_nrg = (uint16_t)faad_getbits(ld, 9
             DEBUGVAR(1,152,"rvlc_scale_factor_data(): dpcm_noise_nrg"));
 
         ics->length_of_rvlc_sf -= 9;
@@ -81,13 +97,13 @@ uint8_t rvlc_scale_factor_data(ic_stream *ics, bitfile *ld)
 
     if (ics->sf_escapes_present)
     {
-        ics->length_of_rvlc_escapes = faad_getbits(ld, 8
+        ics->length_of_rvlc_escapes = (uint8_t)faad_getbits(ld, 8
             DEBUGVAR(1,154,"rvlc_scale_factor_data(): length_of_rvlc_escapes"));
     }
 
     if (ics->noise_used)
     {
-        ics->dpcm_noise_last_position = faad_getbits(ld, 9
+        ics->dpcm_noise_last_position = (uint16_t)faad_getbits(ld, 9
             DEBUGVAR(1,155,"rvlc_scale_factor_data(): dpcm_noise_last_position"));
     }
 
@@ -136,8 +152,8 @@ uint8_t rvlc_decode_scale_factors(ic_stream *ics, bitfile *ld)
 //        &ld_rvlc_esc_rev, intensity_used);
 
 
-    if (rvlc_esc_buffer) free(rvlc_esc_buffer);
-    if (rvlc_sf_buffer) free(rvlc_sf_buffer);
+    if (rvlc_esc_buffer) faad_free(rvlc_esc_buffer);
+    if (rvlc_sf_buffer) faad_free(rvlc_sf_buffer);
 
     if (ics->length_of_rvlc_sf > 0)
         faad_endbits(&ld_rvlc_sf);
@@ -235,6 +251,7 @@ static uint8_t rvlc_decode_sf_forward(ic_stream *ics, bitfile *ld_sf, bitfile *l
     return 0;
 }
 
+#if 0 // not used right now, doesn't work correctly yet
 static uint8_t rvlc_decode_sf_reverse(ic_stream *ics, bitfile *ld_sf, bitfile *ld_esc,
                                       uint8_t intensity_used)
 {
@@ -283,9 +300,8 @@ static uint8_t rvlc_decode_sf_reverse(ic_stream *ics, bitfile *ld_sf, bitfile *l
                         t = rvlc_huffman_sf(ld_sf, ld_esc, -1);
                         is_position -= t;
 
-                        ics->scale_factors[g][sfb] = is_position;
+                        ics->scale_factors[g][sfb] = (uint8_t)is_position;
                     }
-
                     break;
                 case NOISE_HCB: /* noise books */
 
@@ -299,8 +315,7 @@ static uint8_t rvlc_decode_sf_reverse(ic_stream *ics, bitfile *ld_sf, bitfile *l
                         noise_energy -= t;
                     }
 
-                    ics->scale_factors[g][sfb] = noise_energy;
-
+                    ics->scale_factors[g][sfb] = (uint8_t)noise_energy;
                     break;
                 default: /* spectral books */
 
@@ -315,11 +330,10 @@ static uint8_t rvlc_decode_sf_reverse(ic_stream *ics, bitfile *ld_sf, bitfile *l
                         scale_factor -= t;
                     }
 
-                    ics->scale_factors[g][sfb] = scale_factor;
-
                     if (scale_factor < 0)
                         return 4;
 
+                    ics->scale_factors[g][sfb] = (uint8_t)scale_factor;
                     break;
                 }
 #ifdef PRINT_RVLC
@@ -340,6 +354,7 @@ static uint8_t rvlc_decode_sf_reverse(ic_stream *ics, bitfile *ld_sf, bitfile *l
 
     return 0;
 }
+#endif
 
 /* index == 99 means not allowed codeword */
 static rvlc_huff_table book_rvlc[] = {
@@ -512,3 +527,4 @@ static int8_t rvlc_huffman_esc(bitfile *ld,
 }
 
 #endif
+

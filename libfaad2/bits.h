@@ -1,6 +1,6 @@
 /*
 ** FAAD2 - Freeware Advanced Audio (AAC) Decoder including SBR decoding
-** Copyright (C) 2003 M. Bakker, Ahead Software AG, http://www.nero.com
+** Copyright (C) 2003-2004 M. Bakker, Ahead Software AG, http://www.nero.com
 **  
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -56,9 +56,9 @@ typedef struct _bitfile
 } bitfile;
 
 
-#if defined (_WIN32) && !defined(_WIN32_WCE) && !defined(__GNUC__)
+#if defined (_WIN32) && !defined(_WIN32_WCE) && !defined(__MINGW32__)
 #define BSWAP(a) __asm mov eax,a __asm bswap eax __asm mov a, eax
-#elif defined(ARCH_X86) && (defined(DJGPP) || defined(__GNUC__))
+#elif defined(LINUX) || defined(DJGPP)
 #define BSWAP(a) __asm__ ( "bswapl %0\n" : "=r" (a) : "0" (a) )
 #else
 #define BSWAP(a) \
@@ -71,9 +71,11 @@ static uint32_t bitmask[] = {
     0x1FFFF, 0x3FFFF, 0x7FFFF, 0xFFFFF, 0x1FFFFF, 0x3FFFFF,
     0x7FFFFF, 0xFFFFFF, 0x1FFFFFF, 0x3FFFFFF, 0x7FFFFFF,
     0xFFFFFFF, 0x1FFFFFFF, 0x3FFFFFFF, 0x7FFFFFFF
+    /* added bitmask 32, correct?!?!?! */
+    , 0xFFFFFFFF
 };
 
-void faad_initbits(bitfile *ld, void *buffer, uint32_t buffer_size);
+void faad_initbits(bitfile *ld, const void *buffer, const uint32_t buffer_size);
 void faad_endbits(bitfile *ld);
 void faad_initbits_rev(bitfile *ld, void *buffer,
                        uint32_t bits_in_buffer);
@@ -83,20 +85,36 @@ void faad_flushbits_ex(bitfile *ld, uint32_t bits);
 void faad_rewindbits(bitfile *ld);
 uint8_t *faad_getbitbuffer(bitfile *ld, uint32_t bits
                        DEBUGDEC);
+#ifdef DRM
+void *faad_origbitbuffer(bitfile *ld);
+uint32_t faad_origbitbuffer_size(bitfile *ld);
+#endif
 
 /* circumvent memory alignment errors on ARM */
 static INLINE uint32_t getdword(void *mem)
 {
 #ifdef ARM
     uint32_t tmp;
+#ifndef ARCH_IS_BIG_ENDIAN
+    ((uint8_t*)&tmp)[0] = ((uint8_t*)mem)[3];
+    ((uint8_t*)&tmp)[1] = ((uint8_t*)mem)[2];
+    ((uint8_t*)&tmp)[2] = ((uint8_t*)mem)[1];
+    ((uint8_t*)&tmp)[3] = ((uint8_t*)mem)[0];
+#else
     ((uint8_t*)&tmp)[0] = ((uint8_t*)mem)[0];
     ((uint8_t*)&tmp)[1] = ((uint8_t*)mem)[1];
     ((uint8_t*)&tmp)[2] = ((uint8_t*)mem)[2];
     ((uint8_t*)&tmp)[3] = ((uint8_t*)mem)[3];
+#endif
 
     return tmp;
 #else
-    return *(uint32_t*)mem;
+    uint32_t tmp;
+    tmp = *(uint32_t*)mem;
+#ifndef ARCH_IS_BIG_ENDIAN
+    BSWAP(tmp);
+#endif
+    return tmp;
 #endif
 }
 
@@ -107,8 +125,8 @@ static INLINE uint32_t faad_showbits(bitfile *ld, uint32_t bits)
         return (ld->bufa >> (ld->bits_left - bits)) & bitmask[bits];
     }
 
-        bits -= ld->bits_left;
-        return ((ld->bufa & bitmask[ld->bits_left]) << bits) | (ld->bufb >> (32 - bits));
+    bits -= ld->bits_left;
+    return ((ld->bufa & bitmask[ld->bits_left]) << bits) | (ld->bufb >> (32 - bits));
 }
 
 static INLINE void faad_flushbits(bitfile *ld, uint32_t bits)
@@ -148,12 +166,20 @@ static INLINE uint8_t faad_get1bit(bitfile *ld DEBUGDEC)
 {
     uint8_t r;
 
-    if (ld->bits_left == 0)
-        return (uint8_t)faad_getbits(ld, 1 DEBUGVAR(print,var,dbg));
+    if (ld->bits_left > 0)
+    {
+        ld->bits_left--;
+        r = (uint8_t)((ld->bufa >> ld->bits_left) & 1);
+        return r;
+    }
 
-    ld->bits_left--;
-    r = (uint8_t)((ld->bufa >> ld->bits_left) & 1);
-
+    /* bits_left == 0 */
+#if 0
+    r = (uint8_t)(ld->bufb >> 31);
+    faad_flushbits_ex(ld, 1);
+#else
+    r = (uint8_t)faad_getbits(ld, 1);
+#endif
     return r;
 }
 
@@ -200,9 +226,6 @@ static INLINE void faad_flushbits_rev(bitfile *ld, uint32_t bits)
 
         ld->bufa = ld->bufb;
         tmp = getdword(ld->start);
-#ifndef ARCH_IS_BIG_ENDIAN
-        BSWAP(tmp);
-#endif
         ld->bufb = tmp;
         ld->start--;
         ld->bits_left += (32 - bits);
@@ -248,7 +271,7 @@ static uint8_t faad_check_CRC(bitfile *ld, uint16_t len)
 
     faad_rewindbits(ld);
 
-    CRC = ~faad_getbits(ld, 8
+    CRC = (uint8_t) ~faad_getbits(ld, 8
         DEBUGVAR(1,999,"faad_check_CRC(): CRC"));          /* CRC is stored inverted */
 
     for (; len>0; len--)

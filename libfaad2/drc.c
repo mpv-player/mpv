@@ -1,6 +1,6 @@
 /*
 ** FAAD2 - Freeware Advanced Audio (AAC) Decoder including SBR decoding
-** Copyright (C) 2003 M. Bakker, Ahead Software AG, http://www.nero.com
+** Copyright (C) 2003-2004 M. Bakker, Ahead Software AG, http://www.nero.com
 **  
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: drc.c,v 1.1 2003/08/30 22:30:21 arpi Exp $
+** $Id: drc.c,v 1.2 2003/10/03 22:22:27 alex Exp $
 **/
 
 #include "common.h"
@@ -35,7 +35,7 @@
 
 drc_info *drc_init(real_t cut, real_t boost)
 {
-    drc_info *drc = (drc_info*)malloc(sizeof(drc_info));
+    drc_info *drc = (drc_info*)faad_malloc(sizeof(drc_info));
     memset(drc, 0, sizeof(drc_info));
 
     drc->ctrl1 = cut;
@@ -51,7 +51,7 @@ drc_info *drc_init(real_t cut, real_t boost)
 
 void drc_end(drc_info *drc)
 {
-    if (drc) free(drc);
+    if (drc) faad_free(drc);
 }
 
 #ifdef FIXED_POINT
@@ -153,14 +153,14 @@ void drc_decode(drc_info *drc, real_t *spec)
             {
                 spec[i] >>= -exp;
                 if (frac)
-                    spec[i] = MUL(spec[i],drc_pow2_table[frac+23]);
+                    spec[i] = MUL_R(spec[i],drc_pow2_table[frac+23]);
             }
         } else {
             for (i = bottom; i < top; i++)
             {
                 spec[i] <<= exp;
                 if (frac)
-                    spec[i] = MUL(spec[i],drc_pow2_table[frac+23]);
+                    spec[i] = MUL_R(spec[i],drc_pow2_table[frac+23]);
             }
         }
 #endif

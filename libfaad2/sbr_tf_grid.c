@@ -1,6 +1,6 @@
 /*
 ** FAAD2 - Freeware Advanced Audio (AAC) Decoder including SBR decoding
-** Copyright (C) 2003 M. Bakker, Ahead Software AG, http://www.nero.com
+** Copyright (C) 2003-2004 M. Bakker, Ahead Software AG, http://www.nero.com
 **  
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: sbr_tf_grid.c,v 1.4 2003/09/30 16:32:02 menno Exp $
+** $Id: sbr_tf_grid.c,v 1.2 2003/10/03 22:22:27 alex Exp $
 **/
 
 /* Time/Frequency grid */
@@ -36,6 +36,15 @@
 
 #include "sbr_syntax.h"
 #include "sbr_tf_grid.h"
+
+
+/* static function declarations */
+#if 0
+static int16_t rel_bord_lead(sbr_info *sbr, uint8_t ch, uint8_t l);
+static int16_t rel_bord_trail(sbr_info *sbr, uint8_t ch, uint8_t l);
+#endif
+static uint8_t middleBorder(sbr_info *sbr, uint8_t ch);
+
 
 uint8_t envelope_time_border_vector(sbr_info *sbr, uint8_t ch)
 {
@@ -155,6 +164,7 @@ void noise_floor_time_border_vector(sbr_info *sbr, uint8_t ch)
     }
 }
 
+#if 0
 static int16_t rel_bord_lead(sbr_info *sbr, uint8_t ch, uint8_t l)
 {
     uint8_t i;
@@ -209,10 +219,11 @@ static int16_t rel_bord_trail(sbr_info *sbr, uint8_t ch, uint8_t l)
 
     return 0;
 }
+#endif
 
 static uint8_t middleBorder(sbr_info *sbr, uint8_t ch)
 {
-    int8_t retval;
+    int8_t retval = 0;
 
     switch (sbr->bs_frame_class[ch])
     {
