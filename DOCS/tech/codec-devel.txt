@@ -1,5 +1,6 @@
 A Guide To Developing MPlayer Codecs
 by Mike Melanson (melanson at pcisys dot net)
+updated to libmpcodecs arch by A'rpi
 
 Introduction
 ------------
@@ -55,11 +56,6 @@ Typical Development Cycle
 First things first, there's a big song and dance to go through in order to
 let the MPlayer program know that you have a new codec to incorporate.
 
-MPlayer does not feature what some would term a "clean" codec plugin
-architecture. Some log this as a complaint. Personally, I think it's
-necessary to allow MPlayer the type of flexibility to incorporate so many
-open- and closed-source codecs.
-
 First, modify your local copy of codecs.conf. It may be system-shared or
 in your home directory. Add a new entry for your codec. If it's an open
 source codec, it would be a good idea to place the new entry with the rest
@@ -70,56 +66,14 @@ file. Create a new audiocodec or videocodec block with the proper info,
 FOURCCs/format numbers, output formats, and a unique driver name. Remember
 the driver name.
 
-Next, edit the file codec-cfg.h. You will find a list of #define's that
-map names like AFM_MSADPCM and VFM_MSVIDC to numbers. The definitions that
-begin with AFM_ are audio drivers. The definitions that begin with VFM_
-are video drivers. If you want to implement a new audio driver, go to the
-end of the AFM_ list and create a new AFM_ definition for your decoder
-using the next available number in the list. If you want to make a new 
-video decoder, do the same thing to the VFM_ list.
-
-Next, edit the file codec-cfg.c. You will find an array of audio driver
-names and video driver names. If you are implementing a new audio codec,
-add your new driver name (the one you entered into the codecs.conf
-file) between the last non-NULL entry and the NULL at the end of the
-audio driver array. If you are implementing a new video codec, do the
-same in the video driver array.
-
 Next, create a new source file which contains the main decoding function
 that MPlayer will call to decode data. Eventually, you may have multiple
-files which comprise your decoder, but let's start simple here. Create the
-skeleton function for your decoder. Since you will also have to write the
-code to invoke the function, you can make the decoding function look
-however you want, with whatever parameters you feel will be
-necessary. Here's an example video decoder:
+files which comprise your decoder, but let's start simple here. 
+For audio codecs, see ad_sample.c skeleton. For video, choose one of the
+existing vd_*.c files which you think is close to your codec in behaviour.
 
-void some_video_decoder(
-  char *encoded,	// buffer of encoded data
-  int encoded_size,	// length of encoded buffer
-  char *decoded,	// buffer where decoded data is written
-  int width,		// width of decoded frame in pixels
-  int height,		// height of decoded frame in pixels
-  int bytes_per_pixel)	// bytes/pixel in output image
-
-Here's an example audio decoder:
-
-int some_audio_decoder(
-  unsigned short *output,  // buffer where decoded 16-bit PCM samples go
-  unsigned char *input,	   // encoded data
-  int channels)	           // mono = 1, stereo = 2
-
-Next, modify the Makefile so that it will compile your new source
-file.
-
-Next, modify either dec_audio.c or dec_video.c, depending on whether
-you're writing an audio or video decoder. You'll probably put the new
-decoder function header at the top of the file unless you've created a
-header file to handle it, in which case, you'll include the new header
-file. The dec_*.c functions are in charge of initializing codecs and then
-passing encoded data to the proper decoder function. The init and decode
-functions are big switch statements that key off of the codec definition
-numbers from codec-cfg.h. Your best bet in here is to examine some other
-simple decoders and clone relevant portions of the case blocks.
+Next, modify the Makefile so that it will compile your new source file.
+Also, add your codec to the array in ad.c (for audio) or vd.c (for video).
 
 Next, compile the project and see if you have everything correct so far.
 
@@ -227,12 +181,10 @@ development team for approval. You will likely need to diff the following
 files:
 - Makefile
 - etc/codecs.conf
-- codec-cfg.c
-- codec-cfg.h
-- dec_audio.c -OR- dec_video.c
-Of course, you will need to include your newly-created file(s). If you
-contribute enough decoders, the development team may even grant you write
-privileges to the CVS repository.
+- ad.c or vd.c
+Of course, you will need to include your newly-created file(s): 
+vd_<name>.c -OR- ad_<name>.c. If you contribute enough decoders, the
+development team may even grant you write privileges to the CVS repository.
 
 5) Wait for bug reports to start rolling in
 You may think you're finished when you release the codec and if you're
