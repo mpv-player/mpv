@@ -287,6 +287,7 @@ switch(sh_video->codec->driver){
 	return 0; //exit(1);
     }
     memset(&lavc_context, 0, sizeof(lavc_context));
+//    sh_video->disp_h/=2; // !!
     lavc_context.width=sh_video->disp_w;
     lavc_context.height=sh_video->disp_h;
     printf("libavcodec.size: %d x %d\n",lavc_context.width,lavc_context.height);
@@ -406,17 +407,31 @@ switch(sh_video->codec->driver){
 #ifdef USE_LIBAVCODEC
   case VFM_FFMPEG: {        // libavcodec
     int got_picture=0;
-    printf("Calling ffmpeg...\n");
+if(verbose) printf("Calling ffmpeg...\n");
     if(drop_frame<2 && in_size>0){
         int ret = avcodec_decode_video(&lavc_context, &lavc_picture,
 	     &got_picture, start, in_size);
-    printf("DONE -> got_picture=%d\n",got_picture);
+if(verbose){
+     unsigned char *x="???";
+     switch(lavc_context.pix_fmt){
+     case PIX_FMT_YUV420P: x="YUV420P";break;
+     case PIX_FMT_YUV422: x="YUV422";break;
+     case PIX_FMT_RGB24: x="RGB24";break;
+     case PIX_FMT_BGR24: x="BGR24";break;
+     case PIX_FMT_YUV422P: x="YUV422P";break;
+     case PIX_FMT_YUV444P: x="YUV444P";break;
+     }
+     printf("DONE -> got_picture=%d  format=0x%X (%s) \n",got_picture,
+	lavc_context.pix_fmt,x);
+}
 	if(ret<0) fprintf(stderr, "Error while decoding frame!\n");
 	if(!drop_frame && got_picture){
 //	if(!drop_frame){
 	  if(planar){
 	    planes=lavc_picture.data;
 	    stride=lavc_picture.linesize;
+	    //stride[1]=stride[2]=0;
+	    //stride[0]/=2;
             blit_frame=2;
 	  } else {
 	    int y;
@@ -579,14 +594,15 @@ switch(d_video->demuxer->file_format){
 //     exit(1);
    }
    if(sync_video_packet(d_video)==0x1B5){ // next packet is seq. ext.
-    videobuf_len=0;
+//    videobuf_len=0;
+    int pos=videobuf_len;
     if(!read_video_packet(d_video)){ 
       fprintf(stderr,"FATAL: Cannot read sequence header extension!\n");
       return 0;
 //      GUI_MSG( mplMPEGErrorCannotReadSeqHeaderExt )
 //      exit(1);
     }
-    if(header_process_extension (picture, &videobuffer[4])) {
+    if(header_process_extension (picture, &videobuffer[pos+4])) {
       printf ("bad sequence header extension!\n");  
       return 0;
 //      GUI_MSG( mplMPEGErrorBadSeqHeaderExt )

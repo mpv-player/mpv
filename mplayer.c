@@ -1252,7 +1252,7 @@ if(1)
   if(file_format==DEMUXER_TYPE_MPEG_ES || file_format==DEMUXER_TYPE_MPEG_PS){
         int in_frame=0;
         float newfps;
-        videobuf_len=0;
+        //videobuf_len=0;
         while(videobuf_len<VIDEOBUFFER_SIZE-MAX_VIDEO_PACKET_SIZE){
           int i=sync_video_packet(d_video);
 	  void* buffer=&videobuffer[videobuf_len+4];
@@ -1307,6 +1307,7 @@ if(1)
     // fix mpeg2 frametime:
     frame_time=(100+picture->repeat_count)*0.01f;
     picture->repeat_count=0;
+    videobuf_len=0;
 
   } else {
       // frame-based file formats: (AVI,ASF,MOV)
