@@ -50,20 +50,6 @@ static vo_info_t info =
 
 LIBVO_EXTERN(xv)
 
-#include <X11/extensions/Xv.h>
-#include <X11/extensions/Xvlib.h>
-// FIXME: dynamically allocate this stuff
-static void allocate_xvimage(int);
-static unsigned int ver,rel,req,ev,err;
-static unsigned int formats, adaptors,i,xv_port,xv_format;
-static XvAdaptorInfo        *ai = NULL;
-static XvImageFormatValues  *fo;
-
-static int current_buf=0;
-static int current_ip_buf=0;
-static int num_buffers=1; // default
-static XvImage* xvimage[NUM_BUFFERS];
-
 #ifdef HAVE_SHM
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -75,6 +61,23 @@ int XShmGetEventBase(Display*);
 static XShmSegmentInfo Shminfo[NUM_BUFFERS];
 static int Shmem_Flag;
 #endif
+
+// Note: depends on the inclusion of X11/extensions/XShm.h
+#include <X11/extensions/Xv.h>
+#include <X11/extensions/Xvlib.h>
+
+// FIXME: dynamically allocate this stuff
+static void allocate_xvimage(int);
+static unsigned int ver,rel,req,ev,err;
+static unsigned int formats, adaptors, xv_port, xv_format;
+static XvAdaptorInfo        *ai = NULL;
+static XvImageFormatValues  *fo;
+
+static int current_buf=0;
+static int current_ip_buf=0;
+static int num_buffers=1; // default
+static XvImage* xvimage[NUM_BUFFERS];
+
 
 static uint32_t image_width;
 static uint32_t image_height;
@@ -163,13 +166,16 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
  num_buffers=vo_doublebuffering?(vo_directrendering?NUM_BUFFERS:2):1;
 
    /* check image formats */
+   {
+     unsigned int i;
+
      xv_format=0;
      for(i = 0; i < formats; i++){
        mp_msg(MSGT_VO,MSGL_V,"Xvideo image format: 0x%x (%4.4s) %s\n", fo[i].id,(char*)&fo[i].id, (fo[i].format == XvPacked) ? "packed" : "planar");
        if (fo[i].id == format) xv_format = fo[i].id;
      }
      if (!xv_format) return -1;
- 
+   }
  aspect_save_screenres(vo_screenwidth,vo_screenheight);
 
 #ifdef HAVE_NEW_GUI
@@ -565,6 +571,7 @@ static uint32_t get_image(mp_image_t *mpi){
 
 static uint32_t query_format(uint32_t format)
 {
+    uint32_t i;
     int flag=VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|
 	    VFCAP_HWSCALE_UP|VFCAP_HWSCALE_DOWN|VFCAP_OSD|VFCAP_ACCEPT_STRIDE; // FIXME! check for DOWN
    /* check image formats */
@@ -592,6 +599,7 @@ static uint32_t preinit(const char *arg)
 {
     XvPortID xv_p;
     int busy_ports=0;
+    unsigned int i;
     
     xv_port = 0;
 
