@@ -3,6 +3,10 @@
 
 #include <inttypes.h>
 
+#ifndef MIN
+#define MIN(a,b) ((a<b)?a:b)
+#endif
+
 ///////////////////////
 // MS GUID definition
 ///////////////////////
@@ -92,10 +96,10 @@ typedef struct __attribute__((packed)) {
 //////////////////////
 typedef struct __attribute__((packed)) {
 	uint16_t	type;
-	uint16_t	length;
+	uint16_t	size;
 	uint32_t	sequence_number;
 	uint16_t	unknown;
-	uint16_t	length2;
+	uint16_t	size_confirm;
 } ASF_stream_chunck_t;
 
 
