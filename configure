@@ -224,6 +224,7 @@ _cc=gcc
 test "$CC" && _cc="$CC"
 _as=auto
 _enable_xp=no
+_runtime_cpudetection=yes
 for ac_option do
   case "$ac_option" in
   --target=*)
@@ -261,6 +262,12 @@ for ac_option do
     ;;
   --with-extralibdir=*)
     _ld_extra=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
+    ;;
+  --enable-runtime-cpudetection)
+    _runtime_cpudetection=yes
+    ;;
+  --disable-runtime-cpudetection)
+    _runtime_cpudetection=no
     ;;
   esac
 done
@@ -495,6 +502,16 @@ if x86 ; then
   echocheck "CPU type"
   echores "$pname"
 
+  if test "$_runtime_cpudetection" = yes ; then
+    _mmx=yes
+    _3dnow=yes
+    _3dnowex=yes
+    _mmx2=yes
+    _sse=yes
+    _sse2=yes
+    _mtrr=yes
+  fi
+
 fi
 
 
@@ -570,7 +587,7 @@ case "$host_arch" in
 cat > $TMPC << EOF
 int main(void) { return 0; }
 EOF
-
+  if test "_$runtime_cpudetection" = "no" ; then
     if test "$proc" = "k7" ; then
       cc_check -march=$proc -mcpu=$proc || proc=athlon
     fi
@@ -599,11 +616,21 @@ EOF
       cc_check -march=$proc -mcpu=$proc  || proc=error
     fi
     if test "$proc" = "error" ; then
-      die "Your $_cc does not support even \"i386\" for '-march' and '-mcpu'."
+      echores "Your $_cc does not support even \"i386\" for '-march' and '-mcpu'."
+      _mcpu=""
+      _march=""
+    else
+      _march="-march=$proc"
+      _mcpu="-mcpu=$proc"
     fi
-
-    _march="-march=$proc"
-    _mcpu="-mcpu=$proc"
+  else
+    # i686 is probably the most common cpu - optimize to it
+    _mcpu="-mcpu=i686"
+    # at least i486 required, for bswap instruction
+    _march="-march=i486"
+    cc_check $_mcpu || _mcpu=""
+    cc_check $_march $_mcpu || _march=""
+  fi
 
     ## Gabucino : --target takes effect here (hopefully...) by overwriting
     ##             autodetected mcpu/march parameters
@@ -694,7 +721,7 @@ _binutils=no
 $_as libac3/downmix/downmix_i386.S -o $TMPO > /dev/null 2>&1 && _binutils=yes
 echores "$_binutils"
 
-if x86 ; then
+if x86 && test "$_runtime_cpudetection" = no ; then
   extcheck() {
     if test "$1" = yes ; then
       echocheck "kernel support of $2"
@@ -797,7 +824,6 @@ _language=en
 _shm=auto
 _linux_devfs=no
 _i18n=no
-_runtime_cpudetection=yes
 
 for ac_option do
   case "$ac_option" in
@@ -811,15 +837,14 @@ for ac_option do
   --disable-static*) ;;
   --with-extraincdir=*) ;;
   --with-extralibdir=*) ;;
-
+  --enable-runtime-cpudetection) ;;
+  --disable-runtime-cpudetection) ;;
 
   # Real 2nd pass
   --enable-mencoder)	_mencoder=yes	;;
   --disable-mencoder)	_mencoder=no	;;
   --enable-i18n)	_i18n=yes	;;
   --disable-i18n)	_i18n=no	;;
-  --enable-runtime-cpudetection)  _runtime_cpudetection=yes ;;
-  --disable-runtime-cpudetection) _runtime_cpudetection=no  ;;
   --enable-x11)		_x11=yes	;;
   --disable-x11)	_x11=no		;;
   --enable-xv)		_xv=yes		;;
