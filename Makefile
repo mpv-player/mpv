@@ -31,7 +31,7 @@ all:	$(PRG)
 .c.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-COMMONLIBS = libvo/libvo.a libao2/libao.a libac3/libac3.a mp3lib/libMP3.a
+COMMONLIBS = libvo/libvo.a libao2/libao2.a libac3/libac3.a mp3lib/libMP3.a
 
 loader/libloader.a:
 	$(MAKE) -C loader
@@ -45,7 +45,7 @@ libmpeg2/libmpeg2.a:
 libvo/libvo.a:
 	$(MAKE) -C libvo
 
-libao2/libao.a:
+libao2/libao2.a:
 	$(MAKE) -C libao2
 
 libac3/libac3.a:
@@ -64,7 +64,7 @@ mplayerwithoutlink:	version.h mplayer.o $(OBJS) loader/libloader.a $(DS_DEP) lib
 	@for a in mp3lib libac3 libmpeg2 libvo opendivx encore loader/DirectShow ; do $(MAKE) -C $$a all ; done
 
 $(PRG):	version.h mplayer.o $(OBJS) loader/libloader.a $(DS_DEP) libmpeg2/libmpeg2.a opendivx/libdecore.a $(COMMONLIBS) encore/libencore.a
-	$(CC) $(CFLAGS) -o $(PRG) mplayer.o $(OBJS) $(XMM_LIBS) $(LIRC_LIBS) $(A_LIBS) -lm $(TERMCAP_LIB) -Lloader -lloader $(DS_LIB) -Llibmpeg2 -lmpeg2 -Lopendivx -ldecore $(VO_LIBS) -Llibao2 -lao $(CSS_LIB) -Lencore -lencore $(ARCH_LIBS)
+	$(CC) $(CFLAGS) -o $(PRG) mplayer.o $(OBJS) $(XMM_LIBS) $(LIRC_LIBS) $(A_LIBS) -lm $(TERMCAP_LIB) -Lloader -lloader $(DS_LIB) -Llibmpeg2 -lmpeg2 -Lopendivx -ldecore -Llibao2 -lao2 $(VO_LIBS) $(CSS_LIB) -Lencore -lencore $(ARCH_LIBS)
 
 # $(PRG_HQ):	depfile mplayerHQ.o $(OBJS) loader/libloader.a libmpeg2/libmpeg2.a opendivx/libdecore.a $(COMMONLIBS) encore/libencore.a
 # 	$(CC) $(CFLAGS) -o $(PRG_HQ) mplayerHQ.o $(OBJS) $(XMM_LIBS) $(LIRC_LIBS) $(A_LIBS) -lm $(TERMCAP_LIB) -Lloader -lloader -ldl -Llibmpeg2 -lmpeg2 -Lopendivx -ldecore $(VO_LIBS) -Lencore -lencore -lpthread
