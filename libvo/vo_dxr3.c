@@ -1,11 +1,14 @@
 /*
  * vo_dxr3.c - DXR3/H+ video out
  *
- * Copyright (C) 2002 David Holm <dholm@iname.com>
+ * Copyright (C) 2002-2003 David Holm <david@realityrift.com>
  *
  */
 
 /* ChangeLog added 2002-01-10
+ * 2003-01-12:
+ *  Added patch from Tamas Kohegyi to fix subpic placement with freetype.
+ *
  * 2003-01-02:
  *  Added patch from Jens Axboe that makes vo_dxr3 return to previous TV norm
  *   after quiting.
@@ -527,7 +530,11 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 
 #ifdef SPU_SUPPORT
 #ifdef HAVE_FREETYPE
-	s_width*=1.5;
+	if (ioval == EM8300_ASPECTRATIO_16_9) {
+		s_width *= 1.5;
+	} else {
+		s_width *= 0.84;
+	}
 #else
 	s_width*=2;
 	s_height*=2;
