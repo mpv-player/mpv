@@ -748,9 +748,10 @@ force audio demuxer type for -audiofile. Give the demuxer ID as defined in
 demuxers.h .
 .TP
 .B \-hr-mp3-seek
-hi-res mp3 seeking. Default is: enable for MP3 playing. It seek exactly where
-it should but can be slow especially when seeking backwards - it has to
-rewind to the beginning to find the exact frame.
+hi-res mp3 seeking. Default is: enabled when playing from external MP3 file, as
+we need to seek to the very exact position to keep A/V sync. It can be slow
+especially when seeking backwards - it has to rewind to the beginning to find
+the exact frame.
 .IP
 .SH "ALPHA/BETA CODE"
 .TP

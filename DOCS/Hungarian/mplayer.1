@@ -682,8 +682,9 @@ audio demuxer tipusának kényszerítése. A demuxers.h file-ban megadott ID kell,
 mint paraméter.
 .TP
 .B \-hr-mp3-seek
-pontos MP3 seekelés. Alapállapotban be van kapcsolva, MP3 lejátszásnál.
-Pontosan oda seekel ahova kell, de lassú lehet - fõleg visszafelé tekerésnél.
+pontos MP3 seekelés. Akkor van használva ha külsõ MP3 file-ból történik az
+audio lejátszás, mivel ilyenkor nagyon pontosan kell seekelni hogy az A/V
+szinkron megmaradjon. Ez lassú lehet visszafelé tekerésnél.
 .IP
 .SH "ALPHA/BETA ÁLLAPOTÚ FUNKCIÓK"
 .TP
