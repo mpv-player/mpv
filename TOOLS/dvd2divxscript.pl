@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 #
-# (c) 2002 by Florian Schilhabel <florian.schilhabel@web.de>
+# (c) 2002-2004 by Florian Schilhabel <florian.schilhabel@web.de>
 #
 #
 # version 0.1  initial release  22/08/2002
@@ -36,7 +36,8 @@ $abr_default = 128;          # The default AudioBitRate
 $lang_default = "de";        # ... the language
 $cdsize_default = 700;       # ... the CD-Rom Size
 $writedev_default = "0,1,0"; # ... the CD Writer Device
-$speed_default = 4;          # and the writer speed
+$speed_default = 4;          # ... the writer speed
+$dvd_device = "/dev/dvd";    # and the DVD Rom Device
 
 # end of default Settings
 
@@ -67,7 +68,8 @@ GetOptions( 		"help" => \$help,
 			"out=s" => \$output,
 			"writecd" => \$writecd,
 			"writedev=s" => \$writedev,
-			"speed=i" => \$speed );
+			"speed=i" => \$speed,
+			"dvd-device=s" => \$dvd_device );
 
 if ($help) {
 	print "Welcome to the DVD to DIVX Helper Script\n";
@@ -98,6 +100,8 @@ if ($help) {
 	print "                    for example 0,1,0\n";
 	print "--speed             the writing speed\n";
 	print "                    Default: 4\n";
+	print "--dvd-device        device to pull the video off\n";
+	print "                    Default: /dev/dvd\n";
 	exit;
 }
 
@@ -201,7 +205,7 @@ if ($writecd) {
 # here comes the fun part...
 
 print "precacheing...\n";
-$status = system ("mencoder dvd://$dvd_track -ovc copy -oac copy -alang $lang -o $vob_tempfile 1>/dev/tty8 2>/dev/tty8");
+$status = system ("mencoder dvd://$dvd_track -ovc copy -oac copy -dvd-device $dvd_device -alang $lang -o $vob_tempfile 1>/dev/tty8 2>/dev/tty8");
 die "Prechacheing failed. mencoder exited with Status Code $?" unless $status == 0;
 
 print "Encoding Audio...\n";
