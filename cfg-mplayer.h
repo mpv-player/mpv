@@ -156,6 +156,7 @@ struct config conf[]={
 	{"sb", &seek_to_byte, CONF_TYPE_INT, CONF_MIN, 0, 0},
 	{"ss", &seek_to_sec, CONF_TYPE_STRING, CONF_MIN, 0, 0},
 	{"sstep", &step_sec, CONF_TYPE_INT, CONF_MIN, 0, 0},
+	{"noloop", &loop_times, CONF_TYPE_FLAG, 0, 0, -1},
 	{"loop", &loop_times, CONF_TYPE_INT, CONF_RANGE, -1, 10000},
 	{"sound", &has_audio, CONF_TYPE_FLAG, 0, 0, 1},
 	{"nosound", &has_audio, CONF_TYPE_FLAG, 0, 1, 0},
