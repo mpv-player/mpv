@@ -15,6 +15,7 @@
  *
  */
 
+#include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,8 +23,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
 
-#include "config.h"
 #include "mp_msg.h"
 
 #ifdef HAVE_DVB
@@ -33,7 +34,6 @@
 #include <sys/ioctl.h>
 #include <stdio.h>
 #include <time.h>
-#include <unistd.h>
 
 #include <ost/dmx.h>
 #include <ost/frontend.h>
