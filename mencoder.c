@@ -953,8 +953,6 @@ if(sh_audio){
     if(in_size<0){ at_eof=1; break; }
     sh_video->timer+=frame_time; ++decoded_frameno;
 
-    v_timer_corr-=frame_time-(float)mux_v->h.dwScale/mux_v->h.dwRate;
-
 if(demuxer2){	// 3-pass encoding, read control file (frameno.avi)
     // find our frame:
 	while(next_frameno<decoded_frameno){
@@ -981,6 +979,8 @@ if(demuxer2){	// 3-pass encoding, read control file (frameno.avi)
 
 // check frame duplicate/drop:
 
+//printf("\r### %5.3f ###\n",v_timer_corr);
+
 if(v_timer_corr>=(float)mux_v->h.dwScale/mux_v->h.dwRate &&
     (skip_limit<0 || skip_flag<skip_limit) ){
     v_timer_corr-=(float)mux_v->h.dwScale/mux_v->h.dwRate;
@@ -1006,6 +1006,8 @@ if( (v_pts_corr>=(float)mux_v->h.dwScale/mux_v->h.dwRate && skip_flag<0)
 
 } // demuxer2
 
+v_timer_corr-=frame_time-(float)mux_v->h.dwScale/mux_v->h.dwRate;
+
 ptimer_start = GetTimerMS();
 
 switch(mux_v->codec){
@@ -1020,8 +1022,16 @@ case VCODEC_FRAMENO:
 default:
     // decode_video will callback down to ve_*.c encoders, through the video filters
     blit_frame=decode_video(sh_video,start,in_size,(skip_flag>0)?1:0);
-    if(skip_flag>0) break;
-    if(!blit_frame) aviwrite_write_chunk(muxer,mux_v,muxer_f,0,0); // empty.
+    if(!blit_frame && skip_flag<=0){
+	// unwanted skipping of a frame, what to do?
+	if(skip_limit==0){
+	    // skipping not allowed -> write empty frame:
+	    aviwrite_write_chunk(muxer,mux_v,muxer_f,0,0);
+	} else {
+	    // skipping allowed -> skip it and distriubute timer error:
+	    v_timer_corr-=(float)mux_v->h.dwScale/mux_v->h.dwRate;
+	}
+    }
 }
 
 videosamples++;
