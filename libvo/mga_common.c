@@ -2,10 +2,12 @@
 #include "fastmemcpy.h"
 #include "../mmx_defs.h"
 #include "../postproc/rgb2rgb.h"
+#include "mp_msg.h"
 
 // mga_vid drawing functions
+static void set_window( void );		/* forward declaration to kill warnings */
 #ifdef VO_XMGA
-static void set_window( void );	/* forward declaration to kill warnings */
+static void mDrawColorKey( void );	/* forward declaration to kill warnings */
 #endif
 
 static int mga_next_frame=0;
@@ -13,6 +15,9 @@ static int mga_next_frame=0;
 static mga_vid_config_t mga_vid_config;
 static uint8_t *vid_data, *frames[4];
 static int f = -1;
+
+static uint32_t               drwX,drwY,drwWidth,drwHeight,drwBorderWidth,drwDepth;
+static uint32_t               drwcX,drwcY,dwidth,dheight;
 
 static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
     uint32_t bespitch = (mga_vid_config.src_width + 31) & ~31;
@@ -297,6 +302,9 @@ static uint32_t control(uint32_t request, void *data, ...)
     else
 	printf("Screen width/height unknown!\n");
     return VO_TRUE;
+  case VOCTRL_GET_PANSCAN:
+      if ( !vo_fs ) return VO_FALSE;
+      return VO_TRUE;
 #endif
 
 #if defined( VO_XMGA ) && defined( HAVE_NEW_GUI )
@@ -312,6 +320,7 @@ static uint32_t control(uint32_t request, void *data, ...)
       vo_x11_fullscreen();
       vo_panscan_amount=0;
     /* indended, fallthrough to update panscan on fullscreen/windowed switch */
+#endif
   case VOCTRL_SET_PANSCAN:
       if ( vo_fs && ( vo_panscan != vo_panscan_amount ) ) // || ( !vo_fs && vo_panscan_amount ) )
        {
@@ -321,7 +330,6 @@ static uint32_t control(uint32_t request, void *data, ...)
 	set_window();
        }
       return VO_TRUE;
-#endif
   }
   return VO_NOTIMPL;
 }
@@ -416,3 +424,84 @@ static uint32_t preinit(const char *vo_subdevice)
   return 0;
 }
 
+static void set_window( void ){
+
+#ifdef VO_XMGA
+	 if ( WinID )
+	  {
+           XGetGeometry( mDisplay,vo_window,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
+           mp_msg(MSGT_VO,MSGL_V,"[xmga] x: %d y: %d w: %d h: %d\n",drwX,drwY,drwWidth,drwHeight );
+           drwX=0; drwY=0;
+           XTranslateCoordinates( mDisplay,vo_window,mRoot,0,0,&drwcX,&drwcY,&mRoot );
+           mp_msg(MSGT_VO,MSGL_V,"[xmga] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
+
+	  }
+	  else
+#endif
+	  { drwX=drwcX=vo_dx; drwY=drwcY=vo_dy; drwWidth=vo_dwidth; drwHeight=vo_dheight; }
+
+         aspect(&dwidth,&dheight,A_NOZOOM);
+         if ( vo_fs )
+          {
+           aspect(&dwidth,&dheight,A_ZOOM);
+           drwX=( vo_screenwidth - (dwidth > vo_screenwidth?vo_screenwidth:dwidth) ) / 2;
+           drwcX+=drwX;
+           drwY=( vo_screenheight - (dheight > vo_screenheight?vo_screenheight:dheight) ) / 2;
+           drwcY+=drwY;
+           drwWidth=(dwidth > vo_screenwidth?vo_screenwidth:dwidth);
+           drwHeight=(dheight > vo_screenheight?vo_screenheight:dheight);
+           mp_msg(MSGT_VO,MSGL_V,"[xmga-fs] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
+          }
+	 vo_dwidth=drwWidth; vo_dheight=drwHeight;
+
+#ifdef VO_XMGA
+#ifdef HAVE_XINERAMA
+		 if(XineramaIsActive(mDisplay))
+		 {
+		 	XineramaScreenInfo *screens;
+		 	int num_screens;
+		 	int i;
+
+		 	screens = XineramaQueryScreens(mDisplay,&num_screens);
+
+		 	/* find the screen we are on */
+		 	i = 0;
+		 	while(!(screens[i].x_org <= drwcX && screens[i].y_org <= drwcY &&
+		 	       screens[i].x_org + screens[i].width >= drwcX &&
+		 	       screens[i].y_org + screens[i].height >= drwcY ))
+		 	{
+		 		i++;
+		 	}
+
+		 	/* set drwcX and drwcY to the right values */
+		 	drwcX = drwcX - screens[i].x_org;
+		 	drwcY = drwcY - screens[i].y_org;
+		 	XFree(screens);
+		 }
+
+#endif
+
+         mDrawColorKey();
+#endif
+
+         mga_vid_config.x_org=drwcX;
+         mga_vid_config.y_org=drwcY;
+         mga_vid_config.dest_width=drwWidth;
+         mga_vid_config.dest_height=drwHeight;
+	 if ( vo_panscan > 0.0f && vo_fs )
+	  {
+	   drwX-=vo_panscan_x>>1;
+	   drwY-=vo_panscan_y>>1;
+	   drwWidth+=vo_panscan_x;
+	   drwHeight+=vo_panscan_y;
+
+	   mga_vid_config.x_org-=vo_panscan_x>>1;
+	   mga_vid_config.y_org-=vo_panscan_y>>1;
+           mga_vid_config.dest_width=drwWidth;
+           mga_vid_config.dest_height=drwHeight;
+#ifdef VO_XMGA
+	   mDrawColorKey();
+#endif
+	   if ( ioctl( f,MGA_VID_CONFIG,&mga_vid_config ) ) mp_msg(MSGT_VO,MSGL_WARN,"Error in mga_vid_config ioctl (wrong mga_vid.o version?)" );
+	  }
+}
