@@ -530,6 +530,20 @@ static void mach64_vid_display_video( void )
 // bit 8-27 no effect
 // bit 28-31 nothing interresting just crashed my system when i played with them  :(
 
+    mach64_fifo_wait(3);
+    if(besr.ckey_on)
+    {
+	OUTREG(OVERLAY_GRAPHICS_KEY_MSK, besr.graphics_key_msk);
+	OUTREG(OVERLAY_GRAPHICS_KEY_CLR, besr.graphics_key_clr);
+	OUTREG(OVERLAY_KEY_CNTL,0x50);
+    }
+    else
+    {
+	OUTREG(OVERLAY_GRAPHICS_KEY_MSK, 0ULL);
+	OUTREG(OVERLAY_GRAPHICS_KEY_CLR, 0ULL);
+	OUTREG(OVERLAY_KEY_CNTL,0x50);
+    }
+
     mach64_wait_for_idle();
     vf = INREG(VIDEO_FORMAT);
 
