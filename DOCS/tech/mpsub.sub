@@ -13,6 +13,9 @@ FORMAT=TIME				# this file contains measures based on
 
 NOTE=MPlayerSub test file v0.1
 
+# first number  : wait this much after previous subtitle disappeared
+# second number : display the current subtitle for this many seconds
+
 15 3
 A long, long time ago...
 
