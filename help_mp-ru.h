@@ -1,5 +1,5 @@
 /* Translated by:  Nick Kurshev <nickols_k@mail.ru>
-
+   Was synced with help_mp-en.h: rev 1.16
  ========================= MPlayer help =========================== */
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -30,9 +30,11 @@ static char help_text[]=
 #ifdef USE_FAKE_MONO
 " -stereo <режим> выбор MPEG1 стерео вывода (0:стерео 1:левый 2:правый)\n"
 #endif
+" -channels <n>   номер выходных каналов звука\n"
 " -fs -vm -zoom   опции полноэкранного проигрывания (fullscr,vidmode chg,softw.scale)\n"
 " -x <x> -y <y>   масштабировать картинку в <x> * <y> разрешение [если -vo драйвер поддерживает!]\n"
 " -sub <file>     указать файл субтитров (см. также -subfps, -subdelay)\n"
+" -playlist <file> указать playlist\n"
 " -vid x -aid y   опции для выбора видео (x) и аудио (y) потока для проишрывания\n"
 " -fps x -srate y опции для изменения видео (x кадр/сек) и аудио (y Hz) скорости\n"
 " -pp <quality>   разрешить постпроцессный фильтр (0-4 для DivX, 0-63 для mpegs)\n"
@@ -42,6 +44,7 @@ static char help_text[]=
 "Ключи:\n"
 " <-  или ->      перемещение вперед/назад на 10 секунд\n"
 " up или down     перемещение вперед/назад на  1 минуту\n"
+" < или >         перемещение вперед/назад в playlist'е\n"
 " p или ПРОБЕЛ    приостановить фильм (любая клавиша - продолжить)\n"
 " q или ESC       остановить воспроизведение и выход\n"
 " + или -         регулировать задержку звука по +/- 0.1 секунде\n"
@@ -94,9 +97,19 @@ static char help_text[]=
 #define MSGTR_CannotInitVO "FATAL: Не могу проинициализировать видео драйвер!\n"
 #define MSGTR_CannotInitAO "не могу открыть/проинициализировать аудио устройство -> БЕЗ ЗВУКА\n"
 #define MSGTR_StartPlaying "Начало вопроизведения...\n"
-#define MSGTR_SystemTooSlow "\n*****************************************************************************************"\
-			    "\n** Ваша система слишком МЕДЛЕННАЯ чтобы играть это! Попытайтесь с -framedrop или RTFM! **"\
-			    "\n*****************************************************************************************\n"
+#define MSGTR_SystemTooSlow "\n\n"\
+"         *****************************************************************\n"\
+"         **** Ваша система слишком МЕДЛЕННА чтобы вопроизводить это!  ****\n"\
+"         *****************************************************************\n"\
+"!!! Возможные причины, проблемы, обходы: \n"\
+"- Наиболее общие: плохой/сырой _аудио_ драйвер. обход: попытпйтесь -ao sdl или\n"\
+"  используйте ALSA 0.5 или эмуляцию oss на ALSA 0.9. Читайте DOCS/sound.html!\n"\
+"- Медленный видео вывод. Попытайтесь другие -vo driver (список: -vo help) или\n"\
+"  попытайтесь с -framedrop ! Читайте DOCS/video.html.\n"\
+"- Медленный ЦПУ. Не пытайтесь вопроизводить большие dvd/divx на медленных\n"\
+"  процессорах! попытайтесь -hardframedrop\n"\
+"- Битый файл. Попытайтесь различные комбинации: -nobps  -ni  -mc 0  -forceidx\n"\
+"Если ничего не помогло, тогда читайте DOCS/bugreports.html !\n\n"
 
 #define MSGTR_NoGui "MPlayer был скомрпилен БЕЗ поддержки GUI!\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI требует X11!\n"
@@ -179,6 +192,7 @@ static char help_text[]=
 #define MSGTR_NoACMSupport "Win32/ACM аудио кодек запрещен, или недоступен на не-x86 ЦПУ -> блокируйте звук :(\n"
 #define MSGTR_NoDShowAudio "Скомпилен без поддержки DirectShow -> блокируйте звук :(\n"
 #define MSGTR_NoOggVorbis "OggVorbis аудио кодек запрещен -> блокируйте звук :(\n"
+#define MSGTR_NoXAnimSupport "MPlayer был скомпилен БЕЗ поддержки XAnim!\n"
 
 #define MSGTR_MpegPPhint "ПРЕДУПРЕЖДЕНИЕ! Вы запросили постпроцессинг для MPEG 1/2 видео,\n" \
 			 "         но скомпилили MPlayer без поддержки MPEG 1/2 постпроцессинга!\n" \
@@ -212,6 +226,8 @@ static char help_text[]=
 // --- labels ---
 #define MSGTR_About "О себе"
 #define MSGTR_FileSelect "Выбрать файл ..."
+#define MSGTR_SubtitleSelect "Выбрать субтитры ..."
+#define MSGTR_OtherSelect "Выбор ..."
 #define MSGTR_MessageBox "Сообщение"
 #define MSGTR_PlayList "PlayList"
 #define MSGTR_SkinBrowser "Просмоторщик скинов"
