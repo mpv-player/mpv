@@ -138,7 +138,7 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
 <listitem><para>
   <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>:
   This codec package is capable
-  of decoding H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/SVQ1/SVQ3 encoded video
+  of decoding H.263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/SVQ1/SVQ3 encoded video
   streams and WMA (Windows Media Audio) v1/v2 audio streams, on multiple
   platforms. It is also known to be the fastest for this task. See
   <link linkend="ffmpeg">FFmpeg</link> section for details. Features:

@@ -50,7 +50,7 @@ The most important ones above all:
   formats
   </simpara></listitem>
 <listitem><simpara>
-  VIVO 1.0, 2.0, I263 and other <emphasis role="bold">h263(+)</emphasis> variants
+  VIVO 1.0, 2.0, I263 and other <emphasis role="bold">H.263(+)</emphasis> variants
   </simpara></listitem>
 <listitem><simpara>
   FLI/FLC
@@ -334,7 +334,7 @@ to use them if possible.
 
 <para>
 Tested codecs include: <emphasis role="bold">Indeo 3.2, 4.1, 5.0, CVID, 3ivX,
-h263.</emphasis>
+H.263.</emphasis>
 </para>
 </sect3>
 
@@ -343,7 +343,7 @@ h263.</emphasis>
 <title>VIVO video</title>
 <para>
 <application>MPlayer</application> can play Vivo (1.0 and 2.0) videos. The
-most suitable codec for 1.0 files is FFmpeg's H263 decoder, you can use it
+most suitable codec for 1.0 files is FFmpeg's H.263 decoder, you can use it
 with the <option>-vc ffh263</option> option. For 2.0 files, use the
 Win32 DLL through the <option>-vc vivo</option> option. If you do not supply
 command line options <application>MPlayer</application> selects the best codec

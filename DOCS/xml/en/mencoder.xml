@@ -204,10 +204,10 @@ You can encode to the following codecs (more or less up to date):
    Lossless JPEG
   </entry></row>
 <row><entry>h263</entry><entry>
-  H263
+  H.263
   </entry></row>
 <row><entry>h263p</entry><entry>
-  H263 Plus
+  H.263+
   </entry></row>
 <row><entry>mpeg4</entry><entry>
   ISO standard MPEG4 (DivX 5, XVID compatible)
@@ -427,7 +427,7 @@ way!
 
 <para>
 MPEG4 has an unique feature: the video stream can contain its needed aspect
-ratio. Yes, just like MPEG1/2 (DVD, SVCD) and H263 files. Regretfully, there are
+ratio. Yes, just like MPEG1/2 (DVD, SVCD) and H.263 files. Regretfully, there are
 <emphasis role="bold">no</emphasis> video players outside which support this
 attribute of MPEG4, except <application>MPlayer</application>.
 </para>
