@@ -317,8 +317,12 @@ static int init(int rate_hz, int channels, int format, int flags)
 	  }
 	  else if (strcmp(*(token_str+i3), "hw") == 0) {
 	    if ((i3 < i2-1) && (strcmp(*(token_str+i3+1), "noblock") != 0) && (strcmp(*(token_str+i3+1), "mmap") != 0)) {
+              char *tmp;
+
 	      alsa_device = alloca(ALSA_DEVICE_SIZE);
 	      snprintf(alsa_device, ALSA_DEVICE_SIZE, "hw:%s", *(token_str+(i3+1)));
+	      if ((tmp = strrchr(alsa_device, '.')) && isdigit(*(tmp+1)))
+                *tmp = ',';
 	      device_set = 1;
 	    }
 		else {
@@ -421,9 +425,9 @@ static int init(int rate_hz, int channels, int format, int flags)
 	printf("alsa-help: available options are:\n");
 	printf("           mmap: sets mmap-mode\n");
 	printf("           noblock: sets noblock-mode\n");
-	printf("           device-name: sets device name\n");
-	printf("           example -ao alsa9:mmap:noblock:hw:0,3 sets noblock-mode,\n");
-	printf("           mmap-mode and the device-name as first card third device\n");
+	printf("           device-name: sets device name (change comma to point)\n");
+	printf("           example -ao alsa9:mmap:noblock:hw:0.3 sets noblock-mode,\n");
+	printf("           mmap-mode and the device-name as first card fourth device\n");
 	return(0);
       } else {
 		printf("alsa-init: soundcard set to %s\n", alsa_device);
