@@ -566,8 +566,16 @@ static uint32_t draw_frame(uint8_t *src[])
 
      // YV12 planar
      memcpy(xvimage[current_buf]->data,src[0],image_width*image_height);
-     memcpy(xvimage[current_buf]->data+image_width*image_height,src[2],image_width*image_height/4);
-     memcpy(xvimage[current_buf]->data+image_width*image_height*5/4,src[1],image_width*image_height/4);
+     if (xv_format == IMGFMT_YV12)
+     {
+        memcpy(xvimage[current_buf]->data+image_width*image_height,src[2],image_width*image_height/4);
+        memcpy(xvimage[current_buf]->data+image_width*image_height*5/4,src[1],image_width*image_height/4);
+     }
+     else
+     {
+        memcpy(xvimage[current_buf]->data+image_width*image_height,src[1],image_width*image_height/4);
+        memcpy(xvimage[current_buf]->data+image_width*image_height*5/4,src[2],image_width*image_height/4);
+     }
      break;
  }
 
