@@ -41,13 +41,14 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	    mpi->stride[2]=-vf->priv->dmpi->stride[2];
 	}
 	mpi->flags|=MP_IMGFLAG_DIRECT;
+	mpi->priv=(void*)vf->priv->dmpi;
     }
 }
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     if(mpi->flags&MP_IMGFLAG_DIRECT){
 	// we've used DR, so we're ready...
-	return vf_next_put_image(vf,vf->priv->dmpi);
+	return vf_next_put_image(vf,(mp_image_t*)mpi->priv);
     }
 
     vf->priv->dmpi=vf_get_image(vf->next,mpi->imgfmt,
