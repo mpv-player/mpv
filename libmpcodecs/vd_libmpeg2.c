@@ -143,6 +143,12 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 		(info->sequence->picture_height+15)&(~15) );
 	    if(!mpi) return 0; // VO ERROR!!!!!!!!
 	    mpeg2_set_buf(mpeg2dec, mpi->planes, mpi);
+	    if (info->current_picture->flags&PIC_FLAG_TOP_FIELD_FIRST)
+		mpi->mpeg2_flags |= MP_IMGMPEG2FLAG_TOP_FIELD_FIRST;
+	    else mpi->mpeg2_flags &= ~MP_IMGMPEG2FLAG_TOP_FIELD_FIRST;
+	    if (info->current_picture->flags&PIC_FLAG_REPEAT_FIRST_FIELD)
+		mpi->mpeg2_flags |= MP_IMGMPEG2FLAG_REPEAT_FIRST_FIELD;
+	    else mpi->mpeg2_flags &= ~MP_IMGMPEG2FLAG_REPEAT_FIRST_FIELD;
 
 #ifdef MPEG12_POSTPROC
 	    if(!mpi->qscale){

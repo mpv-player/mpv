@@ -64,6 +64,9 @@
 
 #define MP_MAX_PLANES	4
 
+#define MP_IMGMPEG2FLAG_TOP_FIELD_FIRST 0x01
+#define MP_IMGMPEG2FLAG_REPEAT_FIRST_FIELD 0x02
+
 typedef struct mp_image_s {
     unsigned short flags;
     unsigned char type;
@@ -76,6 +79,7 @@ typedef struct mp_image_s {
     char * qscale;
     int qstride;
     int pict_type; // 0->unknown, 1->I, 2->P, 3->B
+    int mpeg2_flags;
     int qscale_type; // 0->mpeg1/4/h263, 1->mpeg2
     int num_planes;
     /* these are only used by planar formats Y,U(Cb),V(Cr) */
