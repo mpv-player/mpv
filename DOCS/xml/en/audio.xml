@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!-- $Revision$ -->
-<sect2 id="audio-dev">
+<sect1 id="audio">
 <title>Audio output devices</title>
-<sect3 id="sync">
+<sect2 id="sync">
 <title>Audio/Video synchronisation</title>
 
 <para>
@@ -112,9 +112,9 @@ DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!<!--
   <link linkend="drives">CD-ROM</link> section.
  </para></listitem>
 </itemizedlist>
-</sect3>
+</sect2>
 
-<sect3 id="experiences">
+<sect2 id="experiences">
 <title>Soundcard experiences, recommendations</title>
 <para>
 On Linux, a 2.4.x kernel is highly recommended. Kernel 2.2 is not tested.
@@ -331,9 +331,9 @@ They also support several non-Linux systems.
 Feedback to this document is welcome. Please tell us how
 <application>MPlayer</application> and your sound card(s) worked together.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="af">
+<sect2 id="af">
 <title>Audio filters</title>
 <para>
   The old audio plugins have been superseded by a new audio filter layer. Audio
@@ -491,7 +491,7 @@ to rectify the difference.
 </varlistentry>
 </variablelist>
 
-<sect4 id="af_resample">
+<sect3 id="af_resample">
 <title>Up/Downsampling</title>
 
 <para>
@@ -547,9 +547,9 @@ has three options:
 would set the output frequency of the resample filter to 44100Hz using exact output
 frequency scaling and linear interpolation.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="af_channels">
+<sect3 id="af_channels">
 <title>Changing the number of channels</title>
 <para>
 The <option>channels</option> filter can be used for adding and removing
@@ -611,9 +611,9 @@ Example 2:
 would change the number of channels to 6 and set up 4 routes that copy
 channel 0 to channels 0 to 3. Channel 4 and 5 will contain silence.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="af_format">
+<sect3 id="af_format">
 <title>Sample format converter</title>
 <para>
 The <option>format</option> filter converts between different sample formats. It
@@ -648,9 +648,9 @@ Example:
 <screen>mplayer -af format=4:float <replaceable>media.avi</replaceable></screen>
 would set the output format to 4 bytes per sample floating point data.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="af_delay">
+<sect3 id="af_delay">
 <title>Delay</title>
 <para>
 The <option>delay</option> filter delays the sound to the loudspeakers such that
@@ -699,9 +699,9 @@ would delay front left and right by 10.5ms, the two rear channels and the sub
 by 0ms and the center channel by 7ms.
 </para>
 
-</sect4>
+</sect3>
 
-<sect4 id="af_volume">
+<sect3 id="af_volume">
 <title>Software volume control</title>
 <para>Software volume control is implemented by the <option>volume</option>
 audio filter. Use this filter with caution since it can reduce the signal to
@@ -747,9 +747,9 @@ and prints out that level when <application>MPlayer</application> exits.
 This volume estimate can be used for setting the sound level in
 <application>MEncoder</application> such that the maximum dynamic range is utilized.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="af_equalizer">
+<sect3 id="af_equalizer">
 <title>Equalizer</title>
 <para>
 The <option>equalizer</option> filter represents a 10 octave band graphic
@@ -809,9 +809,9 @@ Example:
 would amplify the sound in the upper and lower frequency region while
 canceling it almost completely around 1kHz.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="af_panning">
+<sect3 id="af_panning">
 <title>Panning filter</title>
 <para>
 Use the <option>pan</option> filter to mix channels arbitrarily. It is
@@ -867,9 +867,9 @@ would give 3 channel output leaving channels 0 and 1 intact, and mix
 channels 0 and 1 into output channel 2 (which could be sent to a
 sub-woofer for example).
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="af_sub">
+<sect3 id="af_sub">
 <title>Sub-woofer</title>
 <para>
 The <option>sub</option> filter adds a sub woofer channel to the audio
@@ -911,9 +911,9 @@ Example:
 would add a sub-woofer channel with a cutoff frequency of
 100Hz to output channel 4.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="af_surround">
+<sect3 id="af_surround">
 <title>Surround-sound decoder</title>
 <para>
 Matrix encoded surround sound can be decoded by the <option>surround</option>
@@ -944,9 +944,9 @@ Example:
 would add surround sound decoding with 15ms delay for the sound to the
 rear speakers.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="af_export">
+<sect3 id="af_export">
 <title>Audio Exporter</title>
 <para>
 This audio filter exports the incoming signal to other processes using memory
@@ -984,9 +984,9 @@ Example:
 <screen>mplayer -af export=/tmp/mplayer-af_export:1024 <replaceable>media.avi</replaceable></screen>
 would export 1024 samples per channel to <filename>/tmp/mplayer-af_export</filename>.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="af_extrastereo">
+<sect3 id="af_extrastereo">
 <title>Extrastereo</title>
 
 <para>
@@ -1015,9 +1015,9 @@ mplayer -af extrastereo <replaceable>media.avi</replaceable>
 mplayer -af extrastereo=3.45 <replaceable>media.avi</replaceable><!--
 --></screen>
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="af_volnorm">
+<sect3 id="af_volnorm">
 <title>Volume normalizer</title>
 
 <para>
@@ -1028,11 +1028,11 @@ This audio filter maximizes the volume without distorting the sound.
 Usage:
 <screen>mplayer -af volnorm <replaceable>media.avi</replaceable></screen>
 </para>
-</sect4>
-
 </sect3>
 
-<sect3 id="audio-plugins">
+</sect2>
+
+<sect2 id="audio-plugins">
 <title>Audio plugins (deprecated)</title>
 <note><para><emphasis role="bold">Audio plugins have been deprecated by audio filters and will
 be removed soon.</emphasis></para></note>
@@ -1070,7 +1070,7 @@ Currently audio plugins can not be used in
 </para>
 
 
-<sect4 id="updn-sampling">
+<sect3 id="updn-sampling">
 <title>Up/Downsampling</title>
 
 <para>
@@ -1100,10 +1100,10 @@ Scaling up will cause the audio and video streams to be played in slow
 motion in addition to audio distortion.
 </para>
 </note>
-</sect4>
+</sect3>
 
 
-<sect4 id="surround-decode">
+<sect3 id="surround-decode">
 <title>Surround Sound decoding</title>
 
 <para>
@@ -1118,10 +1118,10 @@ least 4 channels.
 Usage:
 <screen>mplayer <replaceable>media.avi</replaceable> -aop list=surround</screen>
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="sample-format-conv">
+<sect3 id="sample-format-conv">
 <title>Sample format converter</title>
 
 <para>
@@ -1143,10 +1143,10 @@ mplayer <replaceable>media.avi</replaceable> -aop list=format:format=<replaceabl
 where <literal><replaceable>outfmt</replaceable></literal> is the
 required output format.
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="audio-delay">
+<sect3 id="audio-delay">
 <title>Delay</title>
 <para>
 This plugin delays the sound and is intended as an example of how to
@@ -1154,10 +1154,10 @@ develop new plugins. It can not be used for anything useful from a users
 perspective and is mentioned here for the sake of completeness only. Do not
 use this plugin unless you are a developer.
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="sw-volume">
+<sect3 id="sw-volume">
 <title>Software volume control</title>
 
 <para>
@@ -1195,9 +1195,9 @@ Usage:
 <screen>
 mplayer <replaceable>media.avi</replaceable> -aop list=volume:softclip</screen>
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="extrastereo">
+<sect3 id="extrastereo">
 <title>Extrastereo</title>
 
 <para>
@@ -1219,10 +1219,10 @@ mono sound (average of both channels). If you set it to
 <literal>1.0</literal>, sound will be unchanged, if you set it to
 <literal>-1.0</literal>, left and right channels will be swapped.
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="volnorm">
+<sect3 id="volnorm">
 <title>Volume normalizer</title>
 
 <para>
@@ -1233,6 +1233,6 @@ This plugin maximizes the volume without distorting the sound.
 Usage:
 <screen>mplayer <replaceable>media.avi</replaceable> -aop list=volnorm</screen>
 </para>
-</sect4>
 </sect3>
 </sect2>
+</sect1>

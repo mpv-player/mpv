@@ -6,11 +6,8 @@
 &formats.xml;
 &codecs.xml;
 
-<sect1 id="devices">
-<title>Output devices</title>
 &video.xml;
 &audio.xml;
-</sect1>
 
 &tvinput.xml;
 

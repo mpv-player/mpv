@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!-- $Revision$ -->
-<sect2 id="video-dev">
+<sect1 id="video">
 <title>Video output devices</title>
 
-<sect3 id="mtrr">
+<sect2 id="mtrr">
 <title>Setting up MTRR</title>
 
 <para>
@@ -83,11 +83,11 @@ Not all CPUs have MTRRs. For example older K6-2 (around 266MHz,
 stepping 0) CPUs don't have MTRRs, but stepping 12 does
 (execute <command>cat /proc/cpuinfo</command> to check it).
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="output-trad">
+<sect2 id="output-trad">
 <title>Video outputs for traditional video cards</title>
-<sect4 id="xv">
+<sect3 id="xv">
 <title>Xv</title>
 
 <para>
@@ -161,7 +161,7 @@ screen #0
 </orderedlist>
 </para>
 
-<sect5 id="tdfx">
+<sect4 id="tdfx">
 <title>3dfx cards</title>
 
 <para>
@@ -179,10 +179,10 @@ If you experience strange effects using <option>-vo xv</option>, try SDL
 <option>-vo tdfxfb</option> driver! See the <link linkend="tdfxfb">tdfxfb</link>
 section.
 </para>
-</sect5>
+</sect4>
 
 
-<sect5 id="s3">
+<sect4 id="s3">
 <title>S3 cards</title>
 
 <para>
@@ -198,10 +198,10 @@ driver (slow). If you suspect your card, get a newer driver, or ask politely
 on the mplayer-users mailing list for an MMX/3DNow! enabled driver.
 </para>
 </note>
-</sect5>
+</sect4>
 
 
-<sect5 id="nvidia">
+<sect4 id="nvidia">
 <title>nVidia cards</title>
 
 <para>
@@ -224,10 +224,10 @@ However, <application>MPlayer</application> contains a
 is in beta stage, and has some drawbacks. For more information, see
 <link linkend="vidix-nvidia">nVidia VIDIX</link> section.
 </para>
-</sect5>
+</sect4>
 
 
-<sect5 id="ati">
+<sect4 id="ati">
 <title>ATI cards</title>
 
 <para>
@@ -245,10 +245,10 @@ happily get <emphasis role="bold">accelerated</emphasis> display, with or withou
 <emphasis role="bold">TV output</emphasis>, and no libraries or X are needed.
 Read the <link linkend="vidix">VIDIX</link> section.
 </para>
-</sect5>
+</sect4>
 
 
-<sect5 id="neomagic">
+<sect4 id="neomagic">
 <title>NeoMagic cards</title>
 
 <para>
@@ -277,10 +277,10 @@ Section "Device"
 EndSection<!--
 --></programlisting>
 </para>
-</sect5>
+</sect4>
 
 
-<sect5 id="trident">
+<sect4 id="trident">
 <title>Trident cards</title>
 <para>
 If you want to use xv with a trident card, provided that it doesn't work
@@ -293,22 +293,22 @@ Alternatively, <application>MPlayer</application> contains a
 <link linkend="vidix">VIDIX</link> driver for the Cyberblade/i1 card.
 </para>
 
-</sect5>
+</sect4>
 
 
-<sect5 id="kyro">
+<sect4 id="kyro">
 <title>Kyro/PowerVR cards</title>
 <para>
 If you want to use Xv with a Kyro based card (for example Hercules
 Prophet 4000XT), you should download the drivers from the
 <ulink url="http://www.powervr.com/">PowerVR site</ulink>
 </para>
-</sect5>
 </sect4>
+</sect3>
 
 <!-- ********** -->
 
-<sect4 id="dga">
+<sect3 id="dga">
 <title>DGA</title>
 
 <formalpara>
@@ -591,12 +591,12 @@ with every chipset driver for XFree out there.
   </simpara></listitem>
 </itemizedlist>
 
-</sect4>
-<!--</sect3>-->
+</sect3>
+<!--</sect2>-->
 
 <!-- ********** -->
 
-<sect4 id="sdl">
+<sect3 id="sdl">
 <title>SDL</title>
 
 <para>
@@ -684,10 +684,10 @@ present) black bar.
   DO NOT USE SDL with GUI! It won't work as it should.
   </simpara></listitem>
 </itemizedlist>
-</sect4>
+</sect3>
 
 
-<sect4 id="svgalib">
+<sect3 id="svgalib">
 <title>SVGAlib</title>
 
 <formalpara>
@@ -760,10 +760,10 @@ samplerate on my box, because the sound was broken on 44kHz:
 You can turn on OSD and subtitles only with the <option>expand</option>
 filter, see the man page for exact parameters.
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="fbdev">
+<sect3 id="fbdev">
 <title>Framebuffer output (FBdev)</title>
 
 <para>
@@ -857,10 +857,10 @@ framebuffer, and don't ask for it, since it's not an
 <application>MPlayer</application> limitation.
 </para>
 </note>
-</sect4>
+</sect3>
 
 
-<sect4 id="mga_vid">
+<sect3 id="mga_vid">
 <title>Matrox framebuffer (mga_vid)</title>
 
 <para>
@@ -934,10 +934,10 @@ info, for example by
 and can be written for brightness change:
 <screen>echo "brightness=120" &gt; /dev/mga_vid</screen>
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="tdfxfb" xreflabel="3Dfx YUV support (tdfxfb)">
+<sect3 id="tdfxfb" xreflabel="3Dfx YUV support (tdfxfb)">
 <title>3Dfx YUV support</title>
 <para>
 This driver uses the kernel's tdfx framebuffer driver to play movies with
@@ -945,10 +945,10 @@ YUV acceleration. You'll need a kernel with tdfxfb support, and recompile
 with
 <screen>./configure --enable-tdfxfb</screen>
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="opengl">
+<sect3 id="opengl">
 <title>OpenGL output</title>
 
 <para>
@@ -983,10 +983,10 @@ least on nVidia):
 <command>export $__GL_SYNC_TO_VBLANK=1</command>
 </para>
 
-</sect4>
+</sect3>
 
 
-<sect4 id="aalib">
+<sect3 id="aalib">
 <title>AAlib - text mode displaying</title>
 
 <para>
@@ -1112,10 +1112,10 @@ That isn't autodetected by aalib, but vo_aa tries to find the best mode.
 See <ulink url="http://aa-project.sourceforge.net/tune"/> for further
 tuning issues.
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="caca">
+<sect3 id="caca">
 <title><systemitem class="library">libcaca</systemitem> - Color ASCII Art library</title>
 
 <para>
@@ -1205,10 +1205,10 @@ Use the <option>-framedrop</option> option if your computer is not fast
 enough to render all frames.
 </para>
 
-</sect4>
+</sect3>
 
 
-<sect4 id="vesa">
+<sect3 id="vesa">
 <title>VESA - output to VESA BIOS</title>
 
 <para>
@@ -1344,10 +1344,10 @@ It won't work!
   itself only once during POST procedure.
   </simpara></listitem>
 </itemizedlist>
-</sect4>
+</sect3>
 
 
-<sect4 id="x11">
+<sect3 id="x11">
 <title>X11</title>
 
 <para>
@@ -1392,10 +1392,10 @@ If you can't find the modes you inserted, browse XFree86's output. Some
 drivers can't use low pixelclocks that are needed for low resolution
 video modes.
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="vidix">
+<sect3 id="vidix">
 <title>VIDIX</title>
 
 <formalpara>
@@ -1541,7 +1541,7 @@ Alternatively, you can use a special kernel module, like this:
   </para></step>
 </procedure>
 
-<sect5 id="vidix-ati">
+<sect4 id="vidix-ati">
 <title>ATI cards</title>
 <para>
 Currently most ATI cards are supported natively, from Mach64 to the
@@ -1553,9 +1553,9 @@ There are two compiled binaries: <filename>radeon_vid</filename> for Radeon and
 <filename>rage128_vid</filename> for Rage 128 cards. You may force one or let
 the VIDIX system autoprobe all available drivers.
 </para>
-</sect5>
+</sect4>
 
-<sect5 id="vidix-mga">
+<sect4 id="vidix-mga">
 <title>Matrox cards</title>
 <para>
 Matrox G200, G400, G450 and G550 have been reported to work.
@@ -1565,9 +1565,9 @@ Matrox G200, G400, G450 and G550 have been reported to work.
 The driver supports video equalizers and should be nearly as fast as the
 <link linkend="mga_vid">Matrox framebuffer</link>
 </para>
-</sect5>
+</sect4>
 
-<sect5 id="vidix-trident">
+<sect4 id="vidix-trident">
 <title>Trident cards</title>
 <para>
 There is a driver available for the Trident Cyberblade/i1 chipset, which
@@ -1578,17 +1578,17 @@ can be found on VIA Epia motherboards.
 The driver was written and is maintained by
 <ulink url="http://www.blackfiveservices.co.uk/EPIAVidix.shtml">Alastair M. Robinson</ulink>
 </para>
-</sect5>
+</sect4>
 
-<sect5 id="vidix-3dlabs">
+<sect4 id="vidix-3dlabs">
 <title>3DLabs cards</title>
 <para>
 Although there is a driver for the 3DLabs GLINT R3 and Permedia3 chips, no one
 has tested it, so reports are welcome.
 </para>
-</sect5>
+</sect4>
 
-<sect5 id="vidix-nvidia">
+<sect4 id="vidix-nvidia">
 <title>nVidia cards</title>
 <para>
 There's a relatively new nVidia driver out there, it's known to work on Riva
@@ -1631,9 +1631,9 @@ There's a relatively new nVidia driver out there, it's known to work on Riva
 <para>
 Reports awaited!
 </para>
-</sect5>
+</sect4>
 
-<sect5 id="vidix-sis">
+<sect4 id="vidix-sis">
 <title>SiS cards</title>
 <para>
 This is very experimental code, just like nvidia_vid.
@@ -1647,10 +1647,10 @@ SiS versions of the "Shuttle XPC" barebones boxes out there)
 <para>
 Reports awaited!
 </para>
-</sect5>
 </sect4>
+</sect3>
 
-<sect4 id="directfb">
+<sect3 id="directfb">
 <title>DirectFB</title>
 <blockquote><para>
 &quot;DirectFB is a graphics library which was designed with embedded systems
@@ -1673,9 +1673,9 @@ the command line, using the <option>-dfbopts</option> option. Layer selection ca
 be done by the subdevice method, e.g.: <option>-vo directfb:2</option>
 (layer -1 is default: autodetect)
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="dfbmga">
+<sect3 id="dfbmga">
 <title>DirectFB/Matrox (dfbmga)</title>
 <para>
 Please read the <link linkend="directfb">main DirectFB</link> section for general
@@ -1703,13 +1703,13 @@ patch from the URL above). Porting the CRTC2 code to
 <link linkend="mga_vid">mga_vid</link> has been planned for years,
 <ulink url="../../tech/patches.txt">patches</ulink> are welcome.
 </para></note>
-</sect4>
 </sect3>
+</sect2>
 
-<sect3 id="mpeg_decoders">
+<sect2 id="mpeg_decoders">
 <title>MPEG decoders</title>
 
-<sect4 id="dvb">
+<sect3 id="dvb">
 <title>DVB output and input</title>
 <para>
 <application>MPlayer</application> supports cards with the Siemens DVB chipset
@@ -1945,9 +1945,9 @@ the native OSD feature of DVB cards, as well as more fluent playback of
 non-25fps movies and realtime transcoding between MPEG2 and MPEG4 (partial
 decompression).
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="dxr2">
+<sect3 id="dxr2">
 <title>DXR2</title>
 <para><application>MPlayer</application> supports hardware accelerated playback
   with the Creative DXR2 card.</para>
@@ -1985,9 +1985,9 @@ the colorkey settings you should be able to get acceptable results.
 </para>
 
 <para>Please see the man page for available options.</para>
-</sect4>
+</sect3>
 
-<sect4 id="dxr3">
+<sect3 id="dxr3">
 <title>DXR3/Hollywood+</title>
 <para>
 <application>MPlayer</application> supports hardware accelerated playback
@@ -2109,14 +2109,14 @@ it must be used to specify the DXR3's output instead of a sound card.
 </para></listitem>
 </varlistentry>
 </variablelist>
-</sect4>
-
 </sect3>
 
-<sect3 id="other">
+</sect2>
+
+<sect2 id="other">
 <title>Other visualization hardware</title>
 
-<sect4 id="zr">
+<sect3 id="zr">
 <title>Zr</title>
 
 <para>
@@ -2209,9 +2209,9 @@ during playback, it will crash your computer. It is, however, fine to
 start <application>MPlayer</application>, wait for <application>MPlayer</application>
 to finish and <emphasis role="bold">THEN</emphasis> stop XawTV.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="blinkenlights">
+<sect3 id="blinkenlights">
 <title>Blinkenlights</title>
 <para>
 This driver is capable of playback using the Blinkenlights UDP protocol. If you
@@ -2225,13 +2225,13 @@ has to offer. Just watch some of the
 On the Arcade video you can see the Blinkenlights output driver in
 action at 00:07:50.
 </para>
-</sect4>
 </sect3>
+</sect2>
 
-<sect3 id="tvout">
+<sect2 id="tvout">
 <title>TV-out support</title>
 
-<sect4 id="tvout-mga-g400">
+<sect3 id="tvout-mga-g400">
 <title>Matrox G400 cards</title>
 
 <para>
@@ -2371,9 +2371,9 @@ ground are the fifth, sixth, seventh, and fifteenth (5, 6, 7, 15)
 pins. (info contributed from Balázs Kerekes)
 </para>
 </formalpara>
-</sect4>
+</sect3>
 
-<sect4 id="tv-out_matrox_g450">
+<sect3 id="tv-out_matrox_g450">
 <title>Matrox G450/G550 cards</title>
 <para>
 TV output support for these cards has only been recently introduced, and is
@@ -2397,10 +2397,10 @@ recommended for G400, see the section above.
 The necessary kernel patch and the detailed HOWTO is downloadable from
 <ulink url="http://www.bglug.ca/matrox_tvout/"/>
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="tvout-ati">
+<sect3 id="tvout-ati">
 <title>ATI cards</title>
 
 <formalpara>
@@ -2443,17 +2443,17 @@ Only thing you need to do - <emphasis role="bold">Have the TV connector
 plugged in before booting your PC</emphasis> since video BIOS initializes
 itself only once during POST procedure.
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="tvout-voodoo">
+<sect3 id="tvout-voodoo">
 <title>Voodoo 3</title>
 <para>
 Check <ulink url="http://www.iki.fi/too/tvout-voodoo3-3000-xfree">this URL</ulink>.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="tvout-nvidia">
+<sect3 id="tvout-nvidia">
 <title>nVidia</title>
 <para>
 First, you MUST download the closed-source drivers from <ulink url="http://nvidia.com"/>.
@@ -2490,9 +2490,9 @@ EndSection
 <para>
 Of course the important thing is the TwinView part.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="tvout-neomagic">
+<sect3 id="tvout-neomagic">
 <title>NeoMagic</title>
 <para>
 The NeoMagic chip is found in a variety of laptops, some of them are equipped
@@ -2539,6 +2539,6 @@ with a simple analog TV encoder, some have a more advanced one.
 </listitem>
 </itemizedlist>
 </para>
-</sect4>
 </sect3>
 </sect2>
+</sect1>

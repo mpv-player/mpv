@@ -429,7 +429,7 @@ it works with the following drivers:
 <listitem><simpara>
   Features of <emphasis role="bold">other cards</emphasis> aren't supported by
   <application>MPlayer</application>. <emphasis role="bold">It's very recommended
-  to read the <link linkend="audio-dev">sound card</link> section!</emphasis>
+  to read the <link linkend="audio">sound card</link> section!</emphasis>
   </simpara></listitem>
 </itemizedlist>
 </sect2>

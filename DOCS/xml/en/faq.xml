@@ -918,7 +918,7 @@ If it is an AVI, maybe it has bad interleaving. Try the <option>-ni</option> opt
 </para></listitem>
 <listitem><para>
 Your sound driver is buggy, or you use ALSA 0.5 with <option>-ao oss</option>.
-See the <link linkend="audio-dev">sound card section</link>.
+See the <link linkend="audio">sound card section</link>.
 </para></listitem>
 <listitem><para>
 The AVI has a bad header, try the <option>-nobps</option> option, and/or <option>-mc 0</option>.
