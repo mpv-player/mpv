@@ -78,6 +78,7 @@ static mp_cmd_t mp_cmds[] = {
   { MP_CMD_SUB_ALIGNMENT, "sub_alignment",0, { {MP_CMD_ARG_INT,{-1}}, {-1,{0}} } },
   { MP_CMD_SUB_VISIBILITY, "sub_visibility", 0, { {-1,{0}} } },
   { MP_CMD_VOBSUB_LANG, "vobsub_lang", 0, { {-1,{0}} } },
+  { MP_CMD_SUB_SELECT, "sub_select", 0, { {-1,{0}} } },
   { MP_CMD_GET_PERCENT_POS, "get_percent_pos", 0, { {-1,{0}} } },
   { MP_CMD_GET_TIME_LENGTH, "get_time_length", 0, { {-1,{0}} } },
 #ifdef USE_TV
@@ -303,6 +304,7 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { { 't', 0 }, "sub_pos +1" },
   { { 'a', 0 }, "sub_alignment" },
   { { 'v', 0 }, "sub_visibility" },
+  { { 'b', 0 }, "sub_select" },
   { { 'j', 0 }, "vobsub_lang" },
   { { 'F', 0 }, "forced_subs_only" },
 #ifdef USE_EDL

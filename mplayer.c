@@ -3118,8 +3118,10 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	    osd_show_vobsub_changed = 9;
 	vobsub_id = new_id;
     }
+        break;
+    case MP_CMD_SUB_SELECT:
 #ifdef USE_SUB  
-    else if (set_of_sub_size > 0){ //change subtitle file  
+    if (set_of_sub_size > 0){ //change subtitle file  
         set_of_sub_pos = (set_of_sub_pos + 1) % set_of_sub_size;
         subdata = set_of_subtitles[set_of_sub_pos];
         osd_show_sub_changed = sh_video->fps;
