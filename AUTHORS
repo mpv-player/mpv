@@ -81,13 +81,13 @@ Bérczi, Gábor (Gabucino) <gabucino@mplayerhq.hu>
 Berecz, Szabolcs (Szabi) <szabi@inf.elte.hu>
     * codecs.conf file parser
     * config file and command line parser
-    * mga_vid fixes, module option etc
+    * mga_vid fixes, module option, etc
     * fbdev video output driver
     * type #7 subtitle support
 
 Beregszászi, Alex (al3x) <alex@fsn.hu>
     * second project maintainer
-    * ALSA audio output driver in libao2
+    * alsa5 and alsa9 audio output drivers in libao2
     * ggi video output driver (www.ggi-project.org)
     * XAnim codecs support
     * VIVO files, codecs support
@@ -304,8 +304,8 @@ Hertel, Christopher R. <crh@ubiqx.mn.org>
     * md5sum code used by vo_md5sum. part of uCIFS library.
 
 Heryan, Jiri <technik@domotech.cz>
-    * czech manpage translation
-    * some other czech translation related work
+    * Czech man page translation
+    * some other Czech translation related work
 
 Hess, Andreas <jaska@gmx.net>
     * upgrading libdvdcss in libmpdvdkit2
@@ -394,9 +394,9 @@ Kärkkäinen, Samuli <skarkkai@woods.iki.fi>
 Keil, Jürgen <jk@tools.de>
     * patched MPlayer to work on Solaris 8 x86
     * various fixes (Win32, configure, etc)
-    * SUN audio output driver in libao2
+    * sun audio output driver in libao2
     * mediaLib support in libavcodec
-    * ESD audio output driver in libao2
+    * esd audio output driver in libao2
 
 Kesterson, Robert <robertk@robertk.com>
     * yuv4mpeg video output driver
