@@ -4,17 +4,22 @@ mplayer (1.0)
   
     DOCS:
     * new Copyright file covering the licenses involved
+    * new Japanese console message translation
+    * Polish translation almost finished
+    * DVD ripping guide
+    * video out driver section added to the man page
+    * Miscellaneous updates all over the place
 
     Ports:
     * better PA-RISC detection
     * support for VAX (tested on VAXstation 4000/VLC) -- really, believe me!
-    * optimizing for specific MIPS cpus under IRIX
+    * optimizing for specific MIPS CPUs under IRIX
     * AMD64 detection under BSDs
-    
+
     Demuxers:
-    * matroska containing realvideo works better
-    * fixed random segfaults in vivo
-    * endianess fixes in cdda
+    * Matroska containing RealVideo works better
+    * fixed random segfaults in VIVO
+    * endianess fixes in CDDA
     * UYVY support in tvi/v4l2
     * tvi/bsdbt848 now working under FreeBSD 5.2-CURRENT
     * tvi/bsdbt848 audio part working under NetBSD
@@ -25,13 +30,13 @@ mplayer (1.0)
       vd/8bps, vd/msrle, vd/msvideo1, vd/rpza, vd/smc
     * workaround for buggy codecs in ad/acm (support for Sharp G.726)
     * synced to original FLAC sources
-    
+
     Filters:
     * vf/bmovl bugfixes
     * vf/filmdint now handles 15fps NTSC input
     * huge updates and speedup on vf/pullup
-    * big updates to vf/ilpack (proper interpolation and mmx optimizations)
-    * new filter: vf/zrmjpeg (fast mjpeg encoder using libavcodec for zoran)
+    * big updates to vf/ilpack (proper interpolation and MMX optimizations)
+    * new filter: vf/zrmjpeg (fast MJPEG encoder using libavcodec for Zoran)
     * interlaced scaling support in vf/scale
 
     Drivers:
@@ -45,10 +50,10 @@ mplayer (1.0)
     * lot of CBR improvements
     * MB type and QP visualization
     * lot of code cleanup
-    * splitted intra & inter dequantization -> speedup
+    * intra & inter dequantization split -> speedup
     * fixed stereo IMA ADPCM encoding
     * VBV delay setting support (MPEG2 CBR)
-    * improved RV20 decoder (all known errors eliminated)
+    * improved RV20 decoder (most known errors eliminated)
     * interlaced DCT
     * interlaced motion estimation
     * interlaced MPEG2 encoding
