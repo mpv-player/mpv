@@ -9,6 +9,8 @@
 */
 #define real float /* ugly - but only way */
 
+#include "../mangle.h"
+
 static unsigned long long int __attribute__((aligned(8))) x_plus_minus_3dnow = 0x8000000000000000ULL;
 static float plus_1f = 1.0;
 
@@ -21,7 +23,7 @@ void __attribute__ (( __stdcall__ )) dct64_MMX_3dnowex(real *a,real *b,real *c)
 "	leal 128+%3,%%edx\n\t"
 "	movl %0,%%esi\n\t"
 "	movl %1,%%edi\n\t"
-"	movl $costab_mmx,%%ebx\n\t"
+"	movl $"MANGLE(costab_mmx)",%%ebx\n\t"
 "	leal %3,%%ecx\n\t"
 
 /* Phase 1*/
@@ -378,7 +380,7 @@ void __attribute__ (( __stdcall__ )) dct64_MMX_3dnowex(real *a,real *b,real *c)
 /* Phase 6. This is the end of easy road. */
 /* Code below is coded in scalar mode. Should be optimized */
 
-"	movd	plus_1f, %%mm6\n\t"
+"	movd	"MANGLE(plus_1f)", %%mm6\n\t"
 "	punpckldq 120(%%ebx), %%mm6\n\t"      /* mm6 = 1.0 | 120(%%ebx)*/
 "	movq	x_plus_minus_3dnow, %%mm7\n\t" /* mm7 = +1 | -1 */
 
