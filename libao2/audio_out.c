@@ -69,9 +69,6 @@ ao_functions_t* audio_out_drivers[] =
 #ifdef HAVE_WIN32WAVEOUT
         &audio_out_win32,
 #endif
-#ifdef MACOSX
-	&audio_out_macosx,
-#endif
 #ifdef USE_OSS_AUDIO
         &audio_out_oss,
 #endif
@@ -102,6 +99,9 @@ ao_functions_t* audio_out_drivers[] =
 #endif
 #ifdef HAVE_SDL
         &audio_out_sdl,
+#endif
+#ifdef MACOSX
+	&audio_out_macosx,
 #endif
         &audio_out_null,
 // should not be auto-selected:
