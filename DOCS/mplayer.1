@@ -1041,6 +1041,11 @@ compressor / 'soft\-clipping' capabilities (volume plugin only)
 .B \-delay <sec>
 Audio delay in seconds (may be +/\:\- float value).
 .TP
+.B \-format <0\-8192>
+Select the format used for output from the filter layer. The format is selected
+according to the defines in libao2/afmt.h.
+TODO: list the formats here
+.TP
 .B \-mixer <device>
 This option will tell MPlayer to use a different device for mixing than
 /dev/\:mixer.
@@ -1285,7 +1290,7 @@ It has effect only with libmpeg2 and libavcodec codecs.
 Enables Pan & Scan functionality, i.e.\& in order to display a 16:9 movie
 on a 4:3 display, the sides of the movie are cropped to get a 4:3 image
 which fits the screen.
-This function works only with xv, xmga and xvidix drivers.
+This function works only with the xv, xmga, mga and xvidix video out drivers.
 .br
 The range controls how much of the image is cropped.
 .TP
@@ -1739,6 +1744,12 @@ Available filters are:
 .IPs crop[=w:h:x:y]
 Crops the given part of the image and discards the rest.
 Useful to remove black bands from widescreen movies.
+.IPs cropdetect[=0\-255]
+Calculates necessary cropping parameters and prints the recommended parameters
+to stdout.
+The threshold can be optionally specified from nothing (0) to everything
+(255).
+(default: 24)
 .IPs rectangle[=w:h:x:y]
 Draws a rectangle of the requested width and height at the specified
 coordinates over the image (used to test crop).
@@ -1786,12 +1797,6 @@ Realtime MPEG1 encoder for use with DVB/\:DXR3 (libfame)
 .IPs dvbscale[=aspect]
 Set up optimal scaling for DVB cards.
 (aspect = DVB_HEIGHT*ASPECTRATIO, default: 768)
-.IPs cropdetect[=0\-255]
-Calculates necessary cropping parameters and prints the recommended parameters
-to stdout.
-The threshold can be optionally specified from nothing (0) to everything
-(255).
-(default: 24)
 .IPs "noise[=luma[u][t|a][h][p]:chroma[u][t|a][h][p]]"
 Adds noise
 .RSss
@@ -1823,6 +1828,8 @@ Detects and drops first of interlaced frames in video stream.
 Values can be from 0.0 to 1.0 - first (default 0.1) is relative difference
 between neighbor pixels, second (default 0.15) is what part of image have to
 be detected as interlaced to drop the frame.
+.IPs lavcdeint
+Use libavcodec's deinterlace filter.
 .IPs "unsharp=l|cWxH:amount[:l|cWxH:amount]"
 Unsharp mask / gaussian blur.
 .RSss
@@ -1854,15 +1861,16 @@ radius: size of the filter
 .br
 power: how often the filter should be applied
 .REss
-
-
-
-!!! .IPs 1bpp
-!!! .IPs 2xsai
-!!! .IPs eq2
-!!! .IPs yvu9
-!!! more (IMHO all of -vop help should be documented),
-!!! especially bmovl (see .c file), add vo/test?
+.IPs 2xsai
+Use the 2x scale and interpolate algorithm for scaling and smoothing images.
+.IPs 1bpp
+TODO: document this
+.IPs eq2
+TODO: document this
+.IPs yvu9
+TODO: document this
+.IPs bmovl
+TODO: document this
 
 
 
