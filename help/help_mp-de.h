@@ -41,7 +41,7 @@ static char help_text[]=
 " <- oder ->       Springe zehn Sekunden vor/zurück\n"
 " Cursor hoch/runter Springe eine Minute vor/zurück\n"
 " Bild hoch/runter Springe 10 Minuten vor/zurück\n"
-" < oder >         Springe in der Abspieliste vor/zurück\n"
+" < oder >         Springe in der Abspielliste vor/zurück\n"
 " p oder LEER      Pause (beliebige Taste zum Fortsetzen)\n"
 " q oder ESC       Abspielen stoppen und Programm beenden\n"
 " + oder -         Audioverzögerung um +/- 0.1 Sekunde verändern\n"
@@ -593,7 +593,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FPS "FPS des Films:"
 #define MSGTR_PREFERENCES_ShowVideoWindow "Zeige Videofenster an, wenn inaktiv"
 
-#define MSGTR_ABOUT_UHU "GUI-Entwicklugn wurde von UHU Linux gesponsort.\n"
+#define MSGTR_ABOUT_UHU "GUI-Entwicklung wurde von UHU Linux gesponsert.\n"
 #define MSGTR_ABOUT_CoreTeam "   MPlayer-Kernteam:\n"
 #define MSGTR_ABOUT_AdditionalCoders " Weitere Programmierer:\n"
 #define MSGTR_ABOUT_MainTesters "     Haupttester:\n"
