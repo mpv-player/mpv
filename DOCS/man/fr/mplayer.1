@@ -2593,7 +2593,7 @@ MPlayer n'ont aucun effet sur SDL.
 .PD 0
 .RSs
 .IPs driver=<pilote>
-Choisit explicitement le pilote SDL à utiliser (par défaut\ : x11).
+Choisit explicitement le pilote SDL à utiliser.
 .IPs (no)forcexv
 Utilise XVideo à travers le pilote de sortie viéo sdl (par défaut\ : forcexv).
 .IPs (no)hwaccel
@@ -3694,14 +3694,60 @@ Les filtres disponibles sont:
 .
 .TP
 .B resample[=srate[:sloppy][:type]]
-Change la fréquence d'échantillonnage du flux audio à un entier srate en Hz.
-Il ne permet que le format 16 bit little endian.
+Change la fréquence d'échantillonnage du flux audio.
+Peut être utilisé si vous disposez d'une carte son dont la fréquence
+sonore est fixe ou si vous votre carte ne gère qu'une fréquence maximale
+de 44.1kHz.
+Ce filtre est automatiquement activé si nécessaire.
+Il ne gère en entrée que le format 16-bit entier et flottant en boutisme
+(endianness) natif.
+.br
+.I NOTE\ :
 Avec MEncoder, vous devez aussi utiliser \-srate <srate>.
+.PD 0
+.RSs
+.IPs <srate>
+fréquence d'échantillonnage de sortie en Hz.
+L'intervalle de valeurs valide pour ce paramètre est 8000 jusqu'à 192000.
+Si l'entrée et la sortie ont la même fréquence d'échantillonnage, ou
+si ce paramètre est omis, ce filtre est automatiquement déchargé.
+Une haute fréquence d'échantillonnage améliore généralement la qualité
+sonore, tout particulièrement quand il est utilisé avec d'autres filtres.
+.IPs <sloppy>
+Autorise (1) ou interdit (0) que la fréquence de sortie soit légèrement
+différente de la fréquence donnée par <srate> (par défaut\ : 1).
+Peut être utilisé si le démarrage de la lecture est extrêmement lent.
+.IPs <type>
+Défini la méthode de ré-échantillonnage à utiliser.
+.RSss
+0: interpolation linéaire (rapide, mauvaise qualité tout particulièrement
+en cas de sur-échantillonnage)
+.br
+1: banque de filtres polyphases et traitement en entiers
+.br
+2: banque de filtres polyphases et traitement en virgule flottante
+(lent, meilleure qualité)
+.REss
+.PD 1
+.RE
+.sp 1
+.RS
+.I EXEMPLE\ :
+.RE
+.PD 0
+.RSs
+.IPs "mplayer -af resample=44100:0:0"
+mettrait la fréquence de sortie du filtre resample filter à 44100Hz
+en réalisant une changement de fréquence et une interpolation linéaire.
+.RE
+.PD 1
 .
 .TP
 .B lavcresample[=srate[:longueur[:linéaire[:count[:cutoff]]]]]
-Change le taux d'échantillonnage du flux audio en un entier srate en Hz.
-Ne gère que le format 16-bit little-endian.
+Change le taux d'échantillonnage du flux audio en un entier <srate> en Hz.
+Ne gère que le format 16-bit en boutisme (endianness) natif.
+.br
+.I NOTE\ :
 Avec MEncoder, vous devez aussi utiliser \-srate <srate>.
 .PD 0
 .RSs
@@ -3732,13 +3778,42 @@ Convertit un son multicanaux vers 2 canaux pour un casque stéréo, tout en
 préservant la spatialité du son.
 .
 .TP
-.B channels[=nch]
-Change le nombre de canaux à <nch> canaux de sortie.
-Si le nombre de canaux de sortie est plus grand que le nombre de canaux
-d'entrée des canaux vides sont insérés (excepté pour le mixage de mono vers
-stéréo, où le canal audio est répété sur chacun des canaux de sortie).
+.B channels=nch[:nr:from1:to1:from2:to2:from3:to3:...]
+Peut être utilisé pour ajouter, supprimer, re-router et copier des
+canaux audios.
+Si seulement <nch> est donné, le routage par défaut est utilisée, ça
+fonctionne la la façon suivante\ : Si le nombre de canaux de sortie est
+plus grand que le nombre de canaux d'entrée des canaux vides sont insérés
+(excepté pour le mixage de mono vers stéréo, où le canal audio est répété
+sur chacun des canaux de sortie).
 Si le nombre de canaux de sortie est plus petit que le nombre de canaux
 d'entrée les canaux en trop seront tronqués.
+.PD 0
+.RSs
+.IPs <nch>
+nombre de canaux de sortie (1\-6)
+.IPs <nr>\ 
+nombre de routes (1\-6)
+.IPs <from1:to1:from2:to2:from3:to3:...>
+Paires de nombres entre 0 and 5 définissant où router chaque canal.
+.RE
+.sp 1
+.RS
+.I EXEMPLE\ :
+.RE
+.RSs
+.IPs "mplayer -af channels=4:4:0:1:1:0:2:2:3:3 media.avi"
+Changera le nombre de canaux à 4 et défini 4 routes qui
+échangent le canal 0 et le canal 1 et laisse le canal 2 et 3 intact.
+Veuillez noter que si un média contenant deux canaux était joué, les
+canaux 2 et 3 contiendraient uniquement du silence, mais 0 et 1 seraient
+quand même échangés.
+.IPs "mplayer -af channels=6:4:0:0:0:1:0:2:0:3 media.avi"
+Changerait le nombre de canaux à 6 et construit 4 routes copiant
+les canaux 0 vers les canaux 0 et 3
+Les canaux 4 et 5 contiendra du silence.
+.RE
+.PD 1
 .
 .TP
 .B format[=format] (voir aussi \-format)
