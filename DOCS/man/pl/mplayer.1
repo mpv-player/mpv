@@ -1,4 +1,4 @@
-.\" synced with 1.778
+.\" synced with 1.782
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -1774,6 +1774,8 @@ Ustawia tryb noblock (noblock-mode).
 .IPs device=<urz±dzenie>
 Ustawia nazwê urz±dzenia.
 Zamiast "," w nazwie urz±dzenia ALSA wstaw ".", a zamiast ":" wstaw "=".
+Upewnij siê ¿e nie ustawiasz tego je¶li chcesz uzyskaæ wyj¶cie w formacie hwac3
+poprzez S/PDIF, chyba ¿e dobrze wiesz jak to prawid³owo ustawiæ.
 .RE
 .PD 1
 .
@@ -2561,12 +2563,19 @@ Zamiarem by³o dzia³anie na nawet najprostszych implementacjach OpenGL.
 W³±cza obs³ugê wiêkszej ilo¶ci formatów kolorów (RGB i BGR).
 Wymaga wersji OpenGL >= 1.2.
 .IPs slice-height=<0\-...>
-Ilo¶æ lini kopiowana do tekstury w jednym kawa³ku (domy¶lnie: 4).
+Ilo¶æ linii kopiowana do tekstury w jednym kawa³ku (domy¶lnie: 4).
 0 oznacza ca³y obraz.
 .IPs (no)osd
 W³±cza lub wy³±cza obs³ugê wy¶wietlania OSD przez OpenGL (domy¶lnie: w³±czona).
 Przeznaczone g³ównie do testów,
 powiniene¶ skorzystaæ z \-osdlevel 0, aby wy³±czyæ OSD.
+.IPs (no)scaled-osd
+Zmienia sposób zachowania OSD przy zmianie wielko¶ci okna
+(domy¶lnie: wy³±czone).
+Je¿eli w³±czona zachowuje siê podobniej do pozosta³ych wyj¶æ video.
+Jest to lepsze przy czcionkach o sta³ej szeroko¶ci znaków,
+podczas gdy wy³±czone lepiej wygl±da z czcionkami freetype
+oraz u¿ywa ramek w trybie pe³noekranowym
 .IPs (no)aspect
 W³±cza lub wy³±cza przeliczanie proporcji i trybu panoramicznego
 (domy¶lnie: w³±czone)
@@ -3465,25 +3474,34 @@ programowe).
 Wy³±cza przeliczania proporcji.
 .
 .TP
-.B \-xvidopts <opcia1:opcja2:...>
+.B \-xvidopts <opcja1:opcja2:...>
 Podaje dodatkowe parametry przy dekodowaniu XviD.
+.br
+.I NOTATKA:
+Jako ¿e dekodowanie przy pomocy XviD jest nieco wolniejsze ni¿ libavcodec,
+mo¿esz chcieæ ich u¿ywaæ w zamian.
+.sp 1
+Wewnêtrzne filtry postprocesingo Xvid:
 .PD 0
 .RSs
 .IPs deblock-chroma
-Uruchamia wewnêtrzny filtr postprocessingu XviD: chroma deblock filter.
-Sprawd¼ równie¿ opcjê \-vf pp, która jest szybsza ni¿ filtr XviD.
+filtr odblokowywania barwy chroma
 .IPs deblock-luma
-Uruchamia wewnêtrzny filtr postprocessingu XviD: luma deblock filter.
-Sprawd¼ równie¿ opcjê \-vf pp, która jest szybsza ni¿ filtr XviD.
+filtr odblokowywania jasno¶ci
+.IPs filmeffect
+Dodaje sztuczn± ziarnisto¶æ filmu do video.
+Mo¿e zwiêkszyæ postrzegaln± jako¶æ, jednocze¶nie obni¿aj±c prawdziw± jako¶æ.
+.RE
+.sp 1
+.RS
+metody wy¶wietlania
+.RE
+.PD 0
+.RSs
 .IPs dr2\ \ 
 W³±cza bezpo¶rednie wy¶wietlanie metod± 2 (direct rendering method 2).
 .IPs nodr2
 Wy³±cza bezpo¶rednie wy¶wietlanie metod± 2.
-.IPs filmeffect
-W³±cza wewnêtrzny efekt ziarnisto¶ci filmu (XviD).
-Dodaje sztuczn± ziarnisto¶æ filmu do video.
-Mo¿e zwiêkszyæ postrzegaln± jako¶æ, jednocze¶nie obni¿aj±c prawdziw± jako¶æ.
-Sprawd¼ równie¿ \-vf noise.
 .RE
 .PD 1
 .
