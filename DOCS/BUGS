@@ -38,7 +38,7 @@ General audio delay or jerky sound (exists with all or many files):
 
 Audio delay specific to one or a few files:
 - bad file (pleae upload the file, so we can check & fix)
-  Workaround: -ni and/or -bps options
+  Workaround: -ni option
               -delay option or +/- keys at runtime to adjuts delay
 - your soundcard doesn't support 48Khz playback
   Workaround: buy a better soundcard...
