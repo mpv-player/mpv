@@ -10,6 +10,7 @@ void *spudec_new_scaled(unsigned int *palette, unsigned int frame_width, unsigne
 void *spudec_new(unsigned int *palette);
 void spudec_free(void *this);
 void spudec_reset(void *this);	// called after seek
+int spudec_visible(void *this); // check if spu is visible
 
 #endif
 

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "config.h"
+#include "mp_msg.h"
 #include "video_out.h"
 #include "font_load.h"
 #include "sub.h"
@@ -63,12 +64,17 @@ int vo_osd_progbar_value=100;   // 0..256
 // 
 //  the above schema is rescalled to n=elems bars
 
-inline static void vo_draw_text_progbar(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
-   	unsigned char *s;
-   	unsigned char *sa;
-        int i,w,h,st,mark;
+inline static void vo_update_text_progbar(mp_osd_obj_t* obj,int dxs,int dys){
+
+    obj->flags|=OSDFLAG_CHANGED|OSDFLAG_VISIBLE;
+    
+    if(vo_osd_progbar_type<0 || !vo_font){
+       obj->flags&=~OSDFLAG_VISIBLE;
+       return;
+    }
+    
+    {
         int y=(dys-vo_font->height)/2;
-        int c,font;
         int delimw=vo_font->width[OSD_PB_START]
      		  +vo_font->width[OSD_PB_END]
      		  +vo_font->charspace;
@@ -76,6 +82,24 @@ inline static void vo_draw_text_progbar(int dxs,int dys,void (*draw_alpha)(int x
    	int charw=vo_font->width[OSD_PB_0]+vo_font->charspace;
         int elems=width/charw;
    	int x=(dxs-elems*charw-delimw)/2;
+	obj->bbox.x1=obj->x=x;
+	obj->bbox.y1=obj->y=y;
+	obj->bbox.x2=x+width+delimw;
+	obj->bbox.y2=y+vo_font->height;
+	obj->params.progbar.elems=elems;
+    }
+    
+}
+
+inline static void vo_draw_text_progbar(mp_osd_obj_t* obj,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
+   	unsigned char *s;
+   	unsigned char *sa;
+        int i,w,h,st,mark;
+   	int x=obj->x;
+        int y=obj->y;
+        int c,font;
+   	int charw=vo_font->width[OSD_PB_0]+vo_font->charspace;
+        int elems=obj->params.progbar.elems;
 
 	if (vo_osd_progbar_value<=0)
      	   mark=0;
@@ -153,19 +177,9 @@ inline static void vo_draw_text_progbar(int dxs,int dys,void (*draw_alpha)(int x
 
 subtitle* vo_sub=NULL;
 
-#define MAX_UCS 1600
-#define MAX_UCSLINES 16
+// vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride))
 
-
-inline static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
-   static int utbl[MAX_UCS+1];
-   static int xtbl[MAX_UCSLINES];
-   static int lines;
-   static subtitle *memsub=NULL;
-   static int memy;
-   static int memdxs;
-   static int memdys;
-   
+inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
    unsigned char *t;
    int c,i,j,l,x,y,font;
    int len;
@@ -174,14 +188,18 @@ inline static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,in
    int xsize,lastxsize;
    int h,lasth;
    
-   if ((memsub!=vo_sub)||(memdxs!=dxs)||(memdys!=dys)){
-      
-      memsub=vo_sub;
-      memdxs=dxs;
-      memdys=memy=dys;
-      
+   obj->flags|=OSDFLAG_CHANGED|OSDFLAG_VISIBLE;
+   
+   if(!vo_sub || !vo_font){
+       obj->flags&=~OSDFLAG_VISIBLE;
+       return;
+   }
+   
+   obj->y=dys;
+   obj->params.subtitle.lines=0;
+
       // too long lines divide into a smaller ones
-      i=k=lines=lasth=0;
+      i=k=lasth=0;
       h=vo_font->height;
       xsize=-vo_font->charspace;
       lastStripPosition=-1;
@@ -208,7 +226,7 @@ inline static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,in
 	      }
 	      if (k==MAX_UCS){
 		 len=j; // end here
-		 printf ("\nMAX_UCS exceeded!\n");
+		 mp_msg(MSGT_OSD,MSGL_WARN,"\nMAX_UCS exceeded!\n");
 	      }
 	      if (!c) c++; // avoid UCS 0
 	      if (c==' '){
@@ -220,7 +238,7 @@ inline static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,in
 		     h=vo_font->pic_a[font]->h;
 		  }
 	      }
-	      utbl[k++]=c;
+	      obj->params.subtitle.utbl[k++]=c;
 	      xsize+=vo_font->width[c]+vo_font->charspace;
 	      if (dxs<xsize){
 		 if (lastStripPosition>0){
@@ -234,14 +252,14 @@ inline static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,in
 		 }
 	      } else if (j<len)
 		   continue;
-	      if (h>memy){ // out of the screen so end parsing
-		 memy -= lasth - vo_font->height; // correct the y position
+	      if (h>obj->y){ // out of the screen so end parsing
+		 obj->y -= lasth - vo_font->height; // correct the y position
 		 l=0;
 		 break;
 	      }
-	      utbl[k++]=0;
-	      xtbl[lines++]=(dxs-xsize)/2;
-	      if (lines==MAX_UCSLINES||k>MAX_UCS){
+	      obj->params.subtitle.utbl[k++]=0;
+	      obj->params.subtitle.xtbl[obj->params.subtitle.lines++]=(dxs-xsize)/2;
+	      if (obj->params.subtitle.lines==MAX_UCSLINES||k>MAX_UCS){
 		 l=0; len=j; // end parsing
 	      } else if(l || j<len){ // not the last line or not the last char
 		 lastStripPosition=-1;
@@ -250,83 +268,173 @@ inline static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,in
 		 h=vo_font->height;
 	      }
 //	      printf("h: %d -> %d  \n",vo_font->height,h);
-	      memy -=h; // according to max of vo_font->pic_a[font]->h 
+	      obj->y -=h; // according to max of vo_font->pic_a[font]->h 
 	  }
       }
-   }
-   
-   if (memy < (dys * sub_pos / 100)) { y = memy; } else { y = dys * sub_pos /100;};
+      
+      // TODO: calculate bbox
+      
+}
+
+inline static void vo_draw_text_sub(mp_osd_obj_t* obj,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
+   int y,i,j,c,x,l,font;
+
+   // FIXME (bbox):
+   if (obj->y < (obj->dys * sub_pos / 100)) { y = obj->y; } else { y = obj->dys * sub_pos /100;};
    
 //   printf("lines=%d  y=%d\n",lines,y);
 
    i=j=0;
-   if ((l=lines)) for (;;) {
- 	 x=xtbl[i++]; 
-	 while ((c=utbl[j++])){
+   if ((l=obj->params.subtitle.lines)) for (;;) {
+ 	 x=obj->params.subtitle.xtbl[i++]; 
+	 while ((c=obj->params.subtitle.utbl[j++])){
 	       if ((font=vo_font->font[c])>=0)
 		  draw_alpha(x,y,
 			     vo_font->width[c],
-			     vo_font->pic_a[font]->h+y<dys ? vo_font->pic_a[font]->h : dys-y,
+			     vo_font->pic_a[font]->h+y<obj->dys ? vo_font->pic_a[font]->h : obj->dys-y,
 			     vo_font->pic_b[font]->bmp+vo_font->start[c],
 			     vo_font->pic_a[font]->bmp+vo_font->start[c],
 			     vo_font->pic_a[font]->w);
 	          x+=vo_font->width[c]+vo_font->charspace;
 	 }
-         if (!--l) 
-	    return;
+         if (!--l) break;
          y+=vo_font->height;
    }
 }
 
 void *vo_spudec=NULL;
 void *vo_vobsub=NULL;
-inline static void vo_draw_spudec(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
-    spudec_draw_scaled(vo_spudec, dxs, dys, draw_alpha);
-}
-inline static void vo_draw_vobsub(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
-    vobsub_draw(vo_vobsub, dxs, dys, draw_alpha);
-}
 
 static int draw_alpha_init_flag=0;
 
 extern void vo_draw_alpha_init();
 
-void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
+static mp_osd_obj_t* vo_osd_list=NULL;
 
-    if(vo_spudec){
-	vo_draw_spudec(dxs,dys,draw_alpha);
+mp_osd_obj_t* new_osd_obj(int type){
+    mp_osd_obj_t* osd=malloc(sizeof(mp_osd_obj_t));
+    memset(osd,0,sizeof(mp_osd_obj_t));
+    osd->next=vo_osd_list;
+    vo_osd_list=osd;
+    osd->type=type;
+    return osd;
+}
+
+void free_osd_list(){
+    mp_osd_obj_t* obj=vo_osd_list;
+    while(obj){
+	mp_osd_obj_t* next=obj->next;
+	free(obj);
+	obj=next;
     }
+    vo_osd_list=NULL;
+}
 
-    if(vo_vobsub){
-	vo_draw_vobsub(dxs,dys,draw_alpha);
+int vo_update_osd(int dxs,int dys){
+    mp_osd_obj_t* obj=vo_osd_list;
+    int chg=0;
+    while(obj){
+      if(dxs!=obj->dxs || dys!=obj->dys || obj->flags&OSDFLAG_FORCE_UPDATE){
+        int vis=obj->flags&OSDFLAG_VISIBLE;
+	switch(obj->type){
+	case OSDTYPE_SUBTITLE:
+	    vo_update_text_sub(obj,dxs,dys);
+	    break;
+	case OSDTYPE_PROGBAR:
+	    vo_update_text_progbar(obj,dxs,dys);
+	    break;
+	case OSDTYPE_SPU:
+	    if(vo_spudec && spudec_visible(vo_spudec))
+		obj->flags|=OSDFLAG_VISIBLE|OSDFLAG_CHANGED;
+	    else
+		obj->flags&=~OSDFLAG_VISIBLE;
+	    break;
+	case OSDTYPE_VOBSUB:
+	    if(vo_vobsub)
+		obj->flags|=OSDFLAG_VISIBLE|OSDFLAG_CHANGED;
+	    else
+		obj->flags&=~OSDFLAG_VISIBLE;
+	    break;
+	case OSDTYPE_OSD:
+	    if(vo_font && vo_osd_text && vo_osd_text[0])
+		obj->flags|=OSDFLAG_VISIBLE|OSDFLAG_CHANGED;
+	    else
+		obj->flags&=~OSDFLAG_VISIBLE;
+	    break;
+	}
+	// check if visibility changed:
+	if(vis != (obj->flags&OSDFLAG_VISIBLE) ) obj->flags|=OSDFLAG_CHANGED;
+	// remove the cause of updating:
+	obj->dxs=dxs; obj->dys=dys;
+	obj->flags&=~OSDFLAG_FORCE_UPDATE;
+      }
+      if(obj->flags&OSDFLAG_CHANGED){
+        chg|=1<<obj->type;
+	mp_msg(MSGT_OSD,MSGL_DBG2,"OSD chg: %d  V: %s  pb:%d  \n",obj->type,(obj->flags&OSDFLAG_VISIBLE)?"yes":"no",vo_osd_progbar_type);
+      }
+      obj=obj->next;
     }
+    return chg;
+}
 
-    if(!vo_font) return; // no font
-
+void vo_init_osd(){
     if(!draw_alpha_init_flag){
 	draw_alpha_init_flag=1;
 	vo_draw_alpha_init();
     }
-
-    if(vo_osd_text){
-        vo_draw_text_osd(dxs,dys,draw_alpha);
-    }
-
-    if(vo_sub){
-        vo_draw_text_sub(dxs,dys,draw_alpha);
-    }
-    
-    if(vo_osd_progbar_type>=0 && vo_font->font[OSD_PB_0]>=0){
-        vo_draw_text_progbar(dxs,dys,draw_alpha);
-    }
-
+    if(vo_osd_list) free_osd_list;
+    // temp hack, should be moved to mplayer/mencoder later
+    new_osd_obj(OSDTYPE_OSD);
+    new_osd_obj(OSDTYPE_SUBTITLE);
+    new_osd_obj(OSDTYPE_PROGBAR);
+    new_osd_obj(OSDTYPE_SPU);
+    new_osd_obj(OSDTYPE_VOBSUB);
 }
-         
+
+void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
+    mp_osd_obj_t* obj=vo_osd_list;
+
+    vo_update_osd(dxs,dys);
+
+    while(obj){
+	if(obj->flags&OSDFLAG_VISIBLE)
+	switch(obj->type){
+	case OSDTYPE_SPU:
+	    spudec_draw_scaled(vo_spudec, dxs, dys, draw_alpha); // FIXME
+	    break;
+	case OSDTYPE_VOBSUB:
+	    vobsub_draw(vo_vobsub, dxs, dys, draw_alpha);  // FIXME
+	    break;
+	case OSDTYPE_OSD:
+	    vo_draw_text_osd(dxs,dys,draw_alpha);
+	    break;
+	case OSDTYPE_SUBTITLE:
+	    vo_draw_text_sub(obj,draw_alpha);
+	    break;
+	case OSDTYPE_PROGBAR:
+	    vo_draw_text_progbar(obj,draw_alpha);
+	    break;
+	}
+	obj->old_bbox=obj->bbox;
+	obj->flags&=~OSDFLAG_CHANGED;
+
+	obj=obj->next;
+    }
+}
+
 static int vo_osd_changed_status = 0;
 
 int vo_osd_changed(int new_value)
 {
+    mp_osd_obj_t* obj=vo_osd_list;
     int ret = vo_osd_changed_status;
     vo_osd_changed_status = new_value;
+
+    while(obj){
+	if(obj->type==new_value) obj->flags|=OSDFLAG_FORCE_UPDATE;
+	obj=obj->next;
+    }
+
     return ret;
 }
+

@@ -368,6 +368,13 @@ void spudec_heartbeat(void *this, unsigned int pts100)
   ((spudec_handle_t *)this)->now_pts = pts100;
 }
 
+int spudec_visible(void *this){
+    spudec_handle_t *spu = (spudec_handle_t *)this;
+    int ret=(spu->start_pts <= spu->now_pts && spu->now_pts < spu->end_pts);
+//    printf("spu visible: %d  \n",ret);
+    return ret;
+}
+
 void spudec_draw(void *this, void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride))
 {
     spudec_handle_t *spu = (spudec_handle_t *)this;

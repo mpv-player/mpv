@@ -669,6 +669,8 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
   }
 #endif
 
+  vo_init_osd();
+
 #if defined(HAVE_LIRC) && ! defined(HAVE_NEW_INPUT)
   lirc_mp_setup();
   inited_flags|=INITED_LIRC;
@@ -1798,7 +1800,9 @@ if(auto_quality>0){
 
 #ifdef USE_OSD
   if(osd_visible){
-    if (!--osd_visible){ vo_osd_progbar_type=-1; // disable
+    if (!--osd_visible){
+       vo_osd_progbar_type=-1; // disable
+       vo_osd_changed(OSDTYPE_PROGBAR);
        if (osd_function != OSD_PAUSE)
 	   osd_function = OSD_PLAY;
     }
@@ -2038,6 +2042,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
           osd_visible=sh_video->fps; // 1 sec
           vo_osd_progbar_type=OSD_VOLUME;
           vo_osd_progbar_value=(mixer_getbothvolume()*256.0)/100.0;
+          vo_osd_changed(OSDTYPE_PROGBAR);
           //printf("volume: %d\n",vo_osd_progbar_value);
         }
 #endif
@@ -2086,6 +2091,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	    	    vo_osd_progbar_type=OSD_CONTRAST;
             	    vo_osd_progbar_value=((v_cont)<<8)/100;
 		    if(v_hw_equ_cap) vo_osd_progbar_value = ((v_cont+100)<<8)/200;
+	            vo_osd_changed(OSDTYPE_PROGBAR);
 		}
 #endif
 	}
@@ -2114,6 +2120,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	    	    vo_osd_progbar_type=OSD_BRIGHTNESS;
             	    vo_osd_progbar_value=((v_bright)<<8)/100;
 		    if(v_hw_equ_cap) vo_osd_progbar_value = ((v_bright+100)<<8)/200;
+	            vo_osd_changed(OSDTYPE_PROGBAR);
 		}
 #endif
 	}
@@ -2142,6 +2149,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	    	    vo_osd_progbar_type=OSD_HUE;
             	    vo_osd_progbar_value=((v_hue)<<8)/100;
 		    if(v_hw_equ_cap) vo_osd_progbar_value = ((v_hue+100)<<8)/200;
+	            vo_osd_changed(OSDTYPE_PROGBAR);
 		}
 #endif
 	}
@@ -2170,6 +2178,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	    	    vo_osd_progbar_type=OSD_SATURATION;
             	    vo_osd_progbar_value=((v_saturation)<<8)/100;
 		    if(v_hw_equ_cap) vo_osd_progbar_value = ((v_saturation+100)<<8)/200;
+	            vo_osd_changed(OSDTYPE_PROGBAR);
 		}
 #endif
 	}
@@ -2302,6 +2311,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	osd_visible=sh_video->fps; // 1 sec
 	vo_osd_progbar_type=OSD_VOLUME;
 	vo_osd_progbar_value=(mixer_getbothvolume()*256.0)/100.0;
+	vo_osd_changed(OSDTYPE_PROGBAR);
       }
 #endif
     } break;
@@ -2322,6 +2332,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	  osd_visible=sh_video->fps; // 1 sec
 	  vo_osd_progbar_type=OSD_CONTRAST;
 	  vo_osd_progbar_value=((v_cont)<<8)/100;
+	  vo_osd_changed(OSDTYPE_PROGBAR);
 	}
 #endif
       }
@@ -2344,6 +2355,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	  osd_visible=sh_video->fps; // 1 sec
 	  vo_osd_progbar_type=OSD_BRIGHTNESS;
 	  vo_osd_progbar_value=((v_bright)<<8)/100;
+	  vo_osd_changed(OSDTYPE_PROGBAR);
 	}
 #endif
       }      
@@ -2366,6 +2378,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	  osd_visible=sh_video->fps; // 1 sec
 	  vo_osd_progbar_type=OSD_HUE;
 	  vo_osd_progbar_value=((v_hue)<<8)/100;
+	  vo_osd_changed(OSDTYPE_PROGBAR);
 	}
 #endif
       }	
@@ -2388,6 +2401,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	  osd_visible=sh_video->fps; // 1 sec
 	  vo_osd_progbar_type=OSD_SATURATION;
 	  vo_osd_progbar_value=((v_saturation)<<8)/100;
+	  vo_osd_changed(OSDTYPE_PROGBAR);
 	}
 #endif
       }
@@ -2701,6 +2715,7 @@ if(rel_seek_secs || abs_seek_pos){
 	   osd_visible=sh_video->fps; // 1 sec
 	   vo_osd_progbar_type=0;
 	   vo_osd_progbar_value=(demuxer->filepos-demuxer->movi_start)/len;
+	   vo_osd_changed(OSDTYPE_PROGBAR);
 	}
       }
 #endif
@@ -2745,6 +2760,7 @@ if(rel_seek_secs || abs_seek_pos){
             osd_visible=sh_video->fps; // 1 sec
             vo_osd_progbar_type=OSD_VOLUME;
             vo_osd_progbar_value=( ( guiIntfStruct.Volume ) * 256.0 ) / 100.0;
+	    vo_osd_changed(OSDTYPE_PROGBAR);
            }
 #endif
 	 } 
@@ -2787,12 +2803,12 @@ if(rel_seek_secs || abs_seek_pos){
       
       if(strcmp(vo_osd_text, osd_text_tmp)) {
 	      strcpy(vo_osd_text, osd_text_tmp);
-	      vo_osd_changed(1);
+	      vo_osd_changed(OSDTYPE_OSD);
       }
   } else {
       if(vo_osd_text) {
       vo_osd_text=NULL;
-	  vo_osd_changed(1);
+	  vo_osd_changed(OSDTYPE_OSD);
       }
   }
 //  for(i=1;i<=11;i++) osd_text_buffer[10+i]=i;osd_text_buffer[10+i]=0;
@@ -2821,7 +2837,7 @@ if(rel_seek_secs || abs_seek_pos){
       vobsub_process(vo_vobsub,d_video->pts+sub_delay);
     
     /* Don't know how to detect wether the sub has changed or not */
-    vo_osd_changed(1);
+    vo_osd_changed(OSDTYPE_VOBSUB);
     current_module=NULL;
   }
 
@@ -2846,7 +2862,7 @@ if(rel_seek_secs || abs_seek_pos){
     spudec_heartbeat(vo_spudec,90000*d_video->pts);
 
     /* Don't know how to detect wether the sub has changed or not */
-    vo_osd_changed(1);
+    vo_osd_changed(OSDTYPE_SPU);
     current_module=NULL;
   }
   
