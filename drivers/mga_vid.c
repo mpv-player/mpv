@@ -157,7 +157,6 @@ static uint32_t mga_ram_size = 0;	// how much megabytes videoram we have
 
 MODULE_PARM(mga_ram_size, "i");
 
-
 static struct pci_dev *pci_dev;
 
 static mga_vid_config_t mga_config; 
@@ -733,14 +732,15 @@ static int mga_vid_find_card(void)
 
 //	temp = (card_option >> 10) & 0x17;
 
-#ifdef MGA_MEMORY_SIZE
-	mga_ram_size = MGA_MEMORY_SIZE;
-	printk(KERN_INFO "mga_vid: hard-coded RAMSIZE is %d MB\n", (unsigned int) mga_ram_size);
-
-#else
 	if (mga_ram_size) {
 		printk(KERN_INFO "mga_vid: RAMSIZE forced to %d MB\n", mga_ram_size);
 	} else {
+
+#ifdef MGA_MEMORY_SIZE
+	    mga_ram_size = MGA_MEMORY_SIZE;
+	    printk(KERN_INFO "mga_vid: hard-coded RAMSIZE is %d MB\n", (unsigned int) mga_ram_size);
+
+#else
 
 	    if (is_g400){
 		switch((card_option>>10)&0x17){
@@ -778,9 +778,9 @@ static int mga_vid_find_card(void)
 	    }
 #endif
 	    printk(KERN_INFO "mga_vid: detected RAMSIZE is %d MB\n", (unsigned int) mga_ram_size);
+#endif
         }
 
-#endif
 
 #ifdef MGA_ALLOW_IRQ
 	if ( mga_irq != -1 ) {
