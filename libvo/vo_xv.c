@@ -1,3 +1,4 @@
+/* vo_xv.c, X11 Xv interface */
 
 // Number of buffers _FOR_DOUBLEBUFFERING_MODE_
 // Use option -double to enable double buffering! (default: single buffer)
@@ -14,21 +15,6 @@ Buffer allocation:
   1: TEMP
   3: 2*STATIC+TEMP
 */
-
-
-/*
- * vo_xv.c, X11 Xv interface
- *
- * Copyright (C) 1996, MPEG Software Simulation Group. All Rights Reserved.
- *
- * Hacked into mpeg2dec by
- *
- * Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
- *
- * Xv image suuport by Gerd Knorr <kraxel@goldbach.in-berlin.de>
- * fullscreen support by Pontscho
- * double buffering support by A'rpi
- */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -258,6 +244,8 @@ static int xv_get_eq(char *name, int *value)
     return(VO_FALSE);
 }
 
+static void deallocate_xvimage(int foo);
+
 /*
  * connect to server, create and map window,
  * allocate colors and (shared) memory
@@ -377,7 +365,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
         XMapWindow( mDisplay,vo_window );
        } else { drwX=vo_dx; drwY=vo_dy; }
     } else 
-       {
+    if ( vo_window == None ){
         vo_window = XCreateWindow(mDisplay, mRootWin,
           hint.x, hint.y, hint.width, hint.height,
           0, depth,CopyFromParent,vinfo.visual,xswamask,&xswa);
@@ -396,7 +384,9 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 #ifdef HAVE_XINERAMA
 	vo_x11_xinerama_move(mDisplay,vo_window);
 #endif
-       }
+    } else 
+	XMoveResizeWindow( mDisplay,vo_window,hint.x,hint.y,hint.width,hint.height );
+
     vo_gc = XCreateGC(mDisplay, vo_window, 0L, &xgcv);
     XFlush(mDisplay);
     XSync(mDisplay, False);
@@ -424,6 +414,10 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	case IMGFMT_UYVY: draw_alpha_fnc=draw_alpha_uyvy; break;
 	default:   	  draw_alpha_fnc=draw_alpha_null;
        }
+
+      if ( vo_config_count )
+        for(current_buf=0;current_buf<num_buffers;++current_buf)
+         deallocate_xvimage(current_buf);
 
       for(current_buf=0;current_buf<num_buffers;++current_buf)
        allocate_xvimage(current_buf);
