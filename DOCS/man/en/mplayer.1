@@ -3529,19 +3529,21 @@ If the number of output channels is smaller than the number of input channels
 the exceeding channels are truncated.
 .
 .TP
-.B format[=bps:f]
-Select the bytes per sample and the format used for output from the
-filter layer.
-The option bps is an integer and denotes Bytes per sample.
-The format f is a string containing a concatenated mix of:
-.br
-alaw, mulaw or imaadpcm
-.br
-float or int
-.br
-unsigned or signed
-.br
-le or be (little- or big-endian)
+.B format[=format]
+Change the current sample format.
+.PD 0
+.RSs
+.IPs format
+Sets the desired format.
+The general form is 'sbe', where s denotes the sign (either s for signed or u
+for unsigned), b denotes the number of bits per sample (16, 24 or 32) and e
+denotes the endianness (le equals to little-endian, be to big-endian and ne to
+the endianness that's native to the computer MPlayer is running on).
+Valid values (amongst others) are: s16le, u32be and u24ne.
+Exceptions to this rule are: u8, s8, floatle, floatbe, floatne, mulaw, alaw,
+mpeg2, ac3 and imaadpcm.
+.RE
+.PD 1
 .br
 .
 .TP
