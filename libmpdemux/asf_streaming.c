@@ -47,11 +47,8 @@ int asf_mmst_streaming_start( stream_t *stream );
 
 int
 asf_streaming_start( stream_t *stream, int *demuxer_type) {
-	char proto_s[10];
-	int protolen, fd = -1;
-	
-	strncpy( proto_s, stream->streaming_ctrl->url->protocol, 10 );
-    protolen=strlen(proto_s);
+    char *proto_s = stream->streaming_ctrl->url->protocol;
+    int protolen = strlen(proto_s), fd = -1;
 
     // Is protocol even valid mms,mmsu,mmst,http,http_proxy?
     if (!(
