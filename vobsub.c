@@ -1161,7 +1161,7 @@ vobsub_set_from_lang(void *vobhandle, unsigned char * lang)
           if ((strncmp(vob->spu_streams[i].id, lang, 2)==0)){
 	    vobsub_id=i;
 	    mp_msg(MSGT_VOBSUB, MSGL_INFO, "Selected VOBSUB language: %d language: %s\n", i, vob->spu_streams[i].id);
-	    return;
+	    return 0;
 	  }
       lang+=2;while (lang[0]==',' || lang[0]==' ') ++lang;
     }

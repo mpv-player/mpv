@@ -16,6 +16,10 @@
 #include "../loader/qtx/qtxsdk/components.h"
 #include "wine/windef.h"
 
+#ifdef USE_WIN32DLL
+#include "ldt_keeper.h"
+#endif
+
 #include "codec-cfg.h"
 #include "stream.h"
 #include "demuxer.h"
@@ -292,18 +296,18 @@ static int vf_open(vf_instance_t *vf, char* args){
 
     Setup_LDT_Keeper();
     handler = LoadLibraryA("qtmlClient.dll");
-    InitializeQTML = GetProcAddress(handler, "InitializeQTML");
-    GetGWorldPixMap = GetProcAddress(handler, "GetGWorldPixMap");
-    QTNewGWorldFromPtr = GetProcAddress(handler, "QTNewGWorldFromPtr");
-    NewHandleClear = GetProcAddress(handler, "NewHandleClear");
-    FindCodec = GetProcAddress(handler,"FindCodec");
-    CompressSequenceBegin = GetProcAddress(handler,"CompressSequenceBegin");
-    CompressSequenceFrame = GetProcAddress(handler,"CompressSequenceFrame");
-    GetMaxCompressionSize = GetProcAddress(handler,"GetMaxCompressionSize");
-    CDSequenceEnd = GetProcAddress(handler,"CDSequenceEnd");
-    FindNextComponent = GetProcAddress(handler, "FindNextComponent");
-    CountComponents = GetProcAddress(handler, "CountComponents");
-    GetComponentInfo = GetProcAddress(handler, "GetComponentInfo");
+    InitializeQTML = (OSErr (*)(long))GetProcAddress(handler, "InitializeQTML");
+    GetGWorldPixMap = (PixMapHandle (*)(GWorldPtr))GetProcAddress(handler, "GetGWorldPixMap");
+    QTNewGWorldFromPtr = (OSErr(*)(GWorldPtr *,OSType,const Rect *,CTabHandle,void*,GWorldFlags,void *,long))GetProcAddress(handler, "QTNewGWorldFromPtr");
+    NewHandleClear = (OSErr(*)(Size))GetProcAddress(handler, "NewHandleClear");
+    FindCodec = (OSErr (*)(CodecType,CodecComponent,CompressorComponent *,DecompressorComponent *))GetProcAddress(handler,"FindCodec");
+    CompressSequenceBegin = (OSErr(*)(ImageSequence *,PixMapHandle,PixMapHandle,const Rect *,const Rect *,short,CodecType,CompressorComponent,CodecQ,CodecQ,long,CTabHandle,CodecFlags,ImageDescriptionHandle))GetProcAddress(handler,"CompressSequenceBegin");
+    CompressSequenceFrame = (OSErr(*)(ImageSequence,PixMapHandle,const Rect *,CodecFlags,Ptr,long *,UInt8 *,ICMCompletionProcRecordPtr))GetProcAddress(handler,"CompressSequenceFrame");
+    GetMaxCompressionSize = (OSErr(*)(PixMapHandle,const Rect *,short,CodecQ,CodecType,CompressorComponent,long *))GetProcAddress(handler,"GetMaxCompressionSize");
+    CDSequenceEnd = (OSErr (*)(ImageSequence))GetProcAddress(handler,"CDSequenceEnd");
+    FindNextComponent = (Component (*)(Component,ComponentDescription*))GetProcAddress(handler, "FindNextComponent");
+    CountComponents = (long (*)(ComponentDescription*))GetProcAddress(handler, "CountComponents");
+    GetComponentInfo = (OSErr (*)(Component,ComponentDescription*,Handle,Handle,Handle))GetProcAddress(handler, "GetComponentInfo");
     if(!InitializeQTML  ||!CompressSequenceBegin){
         printf("invalid qt DLL!\n");
         return 0;

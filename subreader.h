@@ -39,6 +39,8 @@ typedef struct {
 
 subtitle* sub_read_file (char *filename, float pts);
 subtitle* subcp_recode1 (subtitle *sub);
+void subcp_open (void); /* for demux_ogg.c */
+void subcp_close (void); /* for demux_ogg.c */
 char * sub_filename(char *path, char * fname);
 void list_sub_file(subtitle* subs);
 void dump_srt(subtitle* subs, float fps);

@@ -857,7 +857,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
        next_edl_record->next = NULL;
      } else {
        if( ( edl_fd = fopen( edl_output_filename, "w" ) ) == NULL ) {
-	 printf( "Error opening file [%s] for writing!\n" );
+	 printf( "Error opening file [%s] for writing!\n", edl_output_filename );
 	 edl_output_filename = NULL;
 	 next_edl_record->next = NULL;
        }
