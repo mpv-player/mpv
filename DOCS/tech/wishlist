@@ -1,0 +1,121 @@
+
+If wishes were fishes, we'd all cast nets ...
+
+
+Documentation:
+
+ * a nice and complete MEncoder tutorial
+
+ * continue docs review
+
+ * check docs for completeness
+
+ * write documentation HOWTO/rules document
+
+ * New german documentation maintainer ;)
+
+
+Bug fixes:
+
+ * fix mf ijpg encoding
+
+ * fix crashing DLLs
+
+
+Small improvements:
+
+ * vo mga should completely blank the screen like fbdev and tdfxfb
+   (maybe there should be an option - some people seem to like it the
+   way it is, but then fbdev should also behave like this..)
+
+ * Debian package creates mplayer.conf.1 .2 ...
+
+ * -vo fbdev -fb device ---> -fbdev:device
+
+ * accept -dvd 9-12 command line
+
+ * specify suboptions in a config file without breaking playback (use
+   channel 21 if using -tv, same idea for -vop, -aop, etc...) 
+
+
+Cleanup:
+
+ * move -dump* options to mencoder
+
+ * integrate dvdnav into mplayer structure
+
+ * integrate libmpdvdkit2 into mplayer structure (message system and
+   command line options)
+
+ * remove all obsolete code, options, files etc
+
+ * modularize all VOs, AOs, as well as audio/video codecs/filters like
+   vidix drivers; it'd make the main binary smaller and packager's job
+   easier
+
+ * move zoran jpeg encoder to video filters
+
+ * convert -zr options to -zr suboption:suboption format
+
+
+Filters:
+
+ * eq filter should support RGB in addition to YUV
+
+ * drop-deinterlace plugin
+
+ * hue, saturation sw eq filters
+
+ * implement gamma correcture filter
+
+
+Enhancements:
+
+ * adapt colored output from MPlayerXP
+
+ * merge VIDIX from MPlayerXP
+
+ * SSA style & colors handling
+
+ * plugin structure for vop/aop
+
+ * support for VirtualDub and Winamp plugins
+
+ * implement xawtv config file parser (for channels, etc)
+
+ * finish icc support
+
+ * G400 2nd head through mga_vid ;)
+
+ * dts support
+
+ * do more things automagically
+
+ * guess correct DVD title
+
+ * syuv support in swscaler
+
+
+Difficult stuff:
+
+ * reverse engineer all closed codecs (SVQ3, QDM2, WMV8/9...)
+
+ * stay in pause after seek, fullscreen etc
+
+ * write something like mptv to replace xawtv
+
+ * write a C implementation of rtsp (redundant)
+
+ * real mmsu:// support
+
+ * encode to mpg, ogm, mp4, asf
+
+ * develop new video overlay interface (something like vidix but with
+   less idiotic interface and more compatible with Xv for easier
+   driver porting) 
+
+ * scale playback speed
+
+ * xinerama video filter that splits movie to 2 screens (like zr)
+
+ * top notch DVD navigation like a hardware player
