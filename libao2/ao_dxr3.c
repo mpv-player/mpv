@@ -81,11 +81,21 @@ static int init(int rate,int channels,int format,int flags)
     printf("AO: [dxr3] Sample format: %s (requested: %s)\n",
     audio_out_format_name(ao_data.format), audio_out_format_name(format));
   
-    ao_data.channels=channels-1;
-    if( ioctl (fd_audio, SNDCTL_DSP_STEREO, &ao_data.channels) < 0 )
-    printf( "AO: [dxr3] Unable to set number of channels\n" );
+    ao_data.channels=channels;
+    if(format != AFMT_AC3)
+	if(channels>2)
+	    if( ioctl (fd_audio, SNDCTL_DSP_CHANNELS, &ao_data.channels) < 0 )
+		printf( "AO: [dxr3] Unable to set number of channels\n" );
+    else
+    {
+	int c = channels-1;
+	if( ioctl(fd_audio,SNDCTL_DSP_STEREO,&c) < 0)
+	    printf( "AO: [dxr3] Unable to set number of channels for AC3\n" );
+    }
  
-    ao_data.bps = (channels+1)*rate;
+    ao_data.bps = channels*rate;
+    if(format != AFMT_U8 && format != AFMT_S8)
+	ao_data.bps*=2;
     ao_data.samplerate=rate;
     if( ioctl (fd_audio, SNDCTL_DSP_SPEED, &ao_data.samplerate) < 0 )
     {
@@ -105,7 +115,6 @@ static int init(int rate,int channels,int format,int flags)
         ao_data.samplerate = rate;
     }
 	else printf("AO: [dxr3] Using %d Hz samplerate (requested: %d)\n",ao_data.samplerate,rate);
-  if(format == AFMT_AC3 ) ao_data.bps *= 2;
 
   if( ioctl(fd_audio, SNDCTL_DSP_GETOSPACE, &dxr3_buf_info)==-1 )
   {
@@ -207,50 +216,8 @@ static int get_space()
 // return: number of bytes played
 static int play(void* data,int len,int flags)
 {
-    if( ao_data.samplerate < 44100 )
-    {
-	int i,j,ratio,len2;
-	unsigned char *data2,*s,*d;
-	
-	ratio = 44100/ao_data.samplerate;ratio/=2;ratio*=2;
-	len2 = len * ratio;
-	data2 = malloc(len2);
-	
-	s = data;
-	d = data2;
-	
-	//Upsampler
-	if( ao_data.format == AFMT_U8 )
-	{
-	    for(i=0;i<ratio/2;i++)
-		for(j=0;j<len;j++)
-		{
-		    *d = *s;
-		    d++;
-		    *d = *s;
-		    d++;s++;
-		}
-	}
-	else
-	{
-	    for(i=0;i<ratio/2;i++)
-		for(j=0;j<len/2;j++)
-		{
-		    *d = *s;
-		    d++;s++;
-		    *d = *s;
-		    d++;s--;
-		    *d = *s;
-		    d++;s++;
-		    *d = *s;
-		    d++;s++;
-		}
-	}
-	if( len2 < 0 ) return 0;
-	write(fd_audio,data2,len2);
-	return len;
-    }
-    return write(fd_audio,data,len);
+    len /= ao_data.outburst;
+    return write(fd_audio,data,len*ao_data.outburst);
 }
 
 // return: delay in seconds between first and last sample in buffer
