@@ -185,7 +185,7 @@ m_option_t lavcopts_conf[]={
 	{"vqblur", &lavc_param_vqblur, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 1.0, NULL},
 	{"vb_qfactor", &lavc_param_vb_qfactor, CONF_TYPE_FLOAT, CONF_RANGE, -31.0, 31.0, NULL},
 	{"vmax_b_frames", &lavc_param_vmax_b_frames, CONF_TYPE_INT, CONF_RANGE, 0, FF_MAX_B_FRAMES, NULL},
-	{"vpass", &lavc_param_vpass, CONF_TYPE_INT, CONF_RANGE, 0, 2, NULL},
+	{"vpass", &lavc_param_vpass, CONF_TYPE_INT, CONF_RANGE, 0, 3, NULL},
 	{"vrc_strategy", &lavc_param_vrc_strategy, CONF_TYPE_INT, CONF_RANGE, 0, 2, NULL},
 	{"vb_strategy", &lavc_param_vb_strategy, CONF_TYPE_INT, CONF_RANGE, 0, 10, NULL},
 	{"vb_qoffset", &lavc_param_vb_qoffset, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 31.0, NULL},
@@ -635,15 +635,8 @@ static int config(struct vf_instance_s* vf,
     if(!stats_file) {
     /* lavc internal 2pass bitrate control */
     switch(lavc_param_vpass){
-    case 1: 
-	lavc_venc_context->flags|= CODEC_FLAG_PASS1; 
-	stats_file= fopen(passtmpfile, "wb");
-	if(stats_file==NULL){
-	    mp_msg(MSGT_MENCODER,MSGL_ERR,"2pass failed: filename=%s\n", passtmpfile);
-            return 0;
-	}
-	break;
     case 2:
+    case 3:
 	lavc_venc_context->flags|= CODEC_FLAG_PASS2; 
 	stats_file= fopen(passtmpfile, "rb");
 	if(stats_file==NULL){
@@ -661,6 +654,18 @@ static int config(struct vf_instance_s* vf,
 	    mp_msg(MSGT_MENCODER,MSGL_ERR,"2pass failed: reading from filename=%s\n", passtmpfile);
             return 0;
 	}        
+	if(lavc_param_vpass == 2)
+	    break;
+	else
+	    fclose(stats_file);
+	    /* fall through */
+    case 1: 
+	lavc_venc_context->flags|= CODEC_FLAG_PASS1; 
+	stats_file= fopen(passtmpfile, "wb");
+	if(stats_file==NULL){
+	    mp_msg(MSGT_MENCODER,MSGL_ERR,"2pass failed: filename=%s\n", passtmpfile);
+            return 0;
+	}
 	break;
     }
     }
