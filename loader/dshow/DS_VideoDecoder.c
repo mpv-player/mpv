@@ -155,6 +155,8 @@ DS_VideoDecoder::DS_VideoDecoder(const CodecInfo& info, const BITMAPINFOHEADER& 
 		     || (info.dll == string("divx_c32.ax"))
 		     || (info.dll == string("wmvds32.ax"))
 		     || (info.dll == string("wmv8ds32.ax")));
+
+	printf("m_bIsDivX=%d\n",m_bIsDivX);
     }
     catch (FatalError& error)
     {
@@ -548,8 +550,11 @@ HRESULT DS_VideoDecoder::SetValue(const char* name, int value)
 {
     if (m_bIsDivX)
     {
+
 	if (m_State != START)
 	    return VFW_E_NOT_RUNNING;
+
+	printf("DS_VideoDecoder::SetValue(%s,%d)\n",name,value);
 
 	//cout << "set value " << name << "  " << value << endl;
 // brightness 87

@@ -279,8 +279,8 @@ struct IVideoDecoder
     virtual ~IVideoDecoder(){};
     virtual void StartInternal()=0;
     virtual void StopInternal()=0;
-    void Stop(){ StopInternal();}
-    void Start(){StartInternal();}
+    void Stop(){ StopInternal();  m_State = STOP;}
+    void Start(){StartInternal(); m_State = START;}
 
     const CodecInfo& record;
     DecodingMode m_Mode;	// should we do precaching (or even change Quality on the fly)

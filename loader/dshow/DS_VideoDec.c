@@ -44,12 +44,12 @@ extern "C" int DS_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHEADER*
 
 extern "C" void DS_VideoDecoder_Start(){
     DS_VideoDecoder* dec=(DS_VideoDecoder*) _handle;
-    dec->StartInternal();
+    dec->Start();
 }
 
 extern "C" void DS_VideoDecoder_Stop(){
     DS_VideoDecoder* dec=(DS_VideoDecoder*) _handle;
-    dec->StopInternal();
+    dec->Stop();
 }
 
 extern "C" void DS_VideoDecoder_Restart(){
@@ -72,6 +72,7 @@ extern "C" int DS_VideoDecoder_SetDestFmt(int bits, int csp){
 
 extern "C" int DS_SetValue_DivX(char* name, int value){
     DS_VideoDecoder* dec=(DS_VideoDecoder*) _handle;
+    printf("DS_SetValue_DivX(%s),%d)\n",name,value);
     return (int) dec->SetValue(name,value);
 }
 
