@@ -86,83 +86,35 @@ void GetCpuCaps( CpuCaps *caps)
 	unsigned int regs2[4];
 	
 	bzero(caps, sizeof(*caps));
-	printf("CPUid available: %s\n",has_cpuid()?"yes":"no");
-	/*if (!has_cpuid())
-		return;*/
-	do_cpuid(0x00000000, regs);
-	printf("CPU vendor name: %.4s%.4s%.4s  cpuid level: %d\n",&regs[1],&regs[3],&regs[2],regs[0]);
-	if (regs[0]>0x00000001) 
+	if (!has_cpuid()) {
+	    printf("CPUID not supported!???\n");
+	    return;
+	}
+	do_cpuid(0x00000000, regs); // get _max_ cpuid level and vendor name
+	printf("CPU vendor name: %.4s%.4s%.4s  max cpuid level: %d\n",&regs[1],&regs[3],&regs[2],regs[0]);
+	if (regs[0]>=0x00000001)
 	{
 		do_cpuid(0x00000001, regs2);
-		printf("CPU family: %d\n",(regs2[0] >> 8)&0xf);
-		switch ((regs2[0] >> 8)&0xf) {
-			case 3:
-				caps->cpuType=CPUTYPE_I386;
-				break;
-			case 4:
-				caps->cpuType=CPUTYPE_I486;
-				break;
-			case 5:
-				caps->cpuType=CPUTYPE_I586;
-				break;
-			case 6:
-				caps->cpuType=CPUTYPE_I686;
-				break;
-			default:
-				caps->cpuType=CPUTYPE_I386;
-				printf("Unknown cpu type, default to i386\n");
-				break;
+		caps->cpuType=(regs2[0] >> 8)&0xf;
+		if(caps->cpuType==0xf){
+		    // use extended family (P4, IA64)
+		    caps->cpuType=8+((regs2[0]>>20)&255);
 		}
+
+		// general feature flags:
 		caps->hasMMX  = (regs2[3] & (1 << 23 )) >> 23; // 0x0800000
-		
-		// FIXME: is this ok for non-intel CPUs too? (cyrix,amd)
 		caps->hasSSE  = (regs2[3] & (1 << 25 )) >> 25; // 0x2000000
 		caps->hasSSE2 = (regs2[3] & (1 << 26 )) >> 26; // 0x4000000
-		/* FIXME: Does SSE2 need more OS support, too? */
-#if defined(__linux__) || defined(__FreeBSD__)
-		if (caps->hasSSE)
-			check_os_katmai_support();
-		if (!caps->hasSSE)
-			caps->hasSSE2 = 0;
-#else
-		caps->hasSSE=0;
-		caps->hasSSE2 = 0;
-#endif
-		/* FIXME: Are MMX2 ops on the same set of processors as SSE?  Do they need OS support?*/
-		caps->hasMMX2 = caps->hasSSE;
+		caps->hasMMX2 = caps->hasSSE; // SSE cpus supports mmxext too
 	}
-	if (regs[1] == 0x68747541 &&    // AuthenticAMD
-            regs[3] == 0x69746e65 &&
-            regs[2] == 0x444d4163) {
-		do_cpuid(0x00000001, regs2);
-		printf("CPU family: %d\n",(regs2[0] >> 8)&0xf);
-		switch ((regs2[0] >> 8)&0xf) {
-			case 3:
-				caps->cpuType=CPUTYPE_I386;
-				break;
-			case 4:
-				caps->cpuType=CPUTYPE_I486;
-				break;
-			case 5:
-				caps->cpuType=CPUTYPE_I586;
-				break;
-			case 6:
-				caps->cpuType=CPUTYPE_I686;
-				break;
-			default:
-				caps->cpuType=CPUTYPE_I386;
-				printf("Unknown cpu type, default to i386\n");
-				break;
-		}
-		do_cpuid(0x80000000, regs);
-		printf("AMD cpuid-level: 0x%X\n",regs[0]);
-		if (regs[0]>=0x80000001) {
-			do_cpuid(0x80000001, regs2);
-			caps->hasMMX  = (regs2[3] & (1 << 23 )) >> 23; // 0x0800000
-			caps->hasMMX2 = (regs2[3] & (1 << 22 )) >> 22; // 0x400000
-			caps->has3DNow    = (regs2[3] & (1 << 31 )) >> 31; //0x80000000
-			caps->has3DNowExt = (regs2[3] & (1 << 30 )) >> 30;
-		}
+	do_cpuid(0x80000000, regs);
+	if (regs[0]>=0x80000001) {
+		printf("extended cpuid-level: %d\n",regs[0]&0x7FFFFFFF);
+		do_cpuid(0x80000001, regs2);
+		caps->hasMMX  = (regs2[3] & (1 << 23 )) >> 23; // 0x0800000
+		caps->hasMMX2 = (regs2[3] & (1 << 22 )) >> 22; // 0x400000
+		caps->has3DNow    = (regs2[3] & (1 << 31 )) >> 31; //0x80000000
+		caps->has3DNowExt = (regs2[3] & (1 << 30 )) >> 30;
 	}
 #if 0
 	printf("cpudetect: MMX=%d MMX2=%d SSE=%d SSE2=%d 3DNow=%d 3DNowExt=%d\n",
@@ -173,6 +125,18 @@ void GetCpuCaps( CpuCaps *caps)
 		gCpuCaps.has3DNow,
 		gCpuCaps.has3DNowExt );
 #endif
+
+		/* FIXME: Does SSE2 need more OS support, too? */
+#if defined(__linux__) || defined(__FreeBSD__)
+		if (caps->hasSSE)
+			check_os_katmai_support();
+		if (!caps->hasSSE)
+			caps->hasSSE2 = 0;
+#else
+		caps->hasSSE=0;
+		caps->hasSSE2 = 0;
+#endif
+
 
 }
 
