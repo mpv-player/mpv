@@ -18,6 +18,9 @@ CFLAGS  = $(OPTFLAGS)
 libMP3.a:	.depend $(OBJS)
 	$(AR) r libMP3.a $(OBJS)
 
+test:	libMP3.a test.c
+	$(CC) $(CFLAGS) test.c -o test -I.. -L. -lMP3
+
 all:	libMP3.a
 
 clean:
