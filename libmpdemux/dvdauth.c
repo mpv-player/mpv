@@ -8,7 +8,14 @@
    2001		fibmap_mplayer to avoid uid=0 mplayer need (LGB)
    2001		Support for libcss with the new API (by ???)
    2002/Jan/04  Use dlopen to access libcss.so to avoid conflict with
-                libdvdread [now with only libcss with old API (LGB)          
+                libdvdread [now with only libcss with old API (LGB)
+   2002/Sep/21  Fix a bug which caused segmentation fault when using
+		-dvdkey option, since css.so was only loaded by -dvdauth.
+		(LGB, reported and suggested by "me andi" <wortelsapje@hotmail.com>)
+		Also some cosmetic fix with return value of dvd_css_descramble().
+   2002/Sep/21  Try to load css syms with AND without underscore at their
+		names, probably not only OpenBSD requires this so it's a
+		better solution (LGB).
 		
    TODO:
 		support for libcss libraries with new API		     */
@@ -76,6 +83,9 @@ unsigned char key_title[5];
 unsigned char *dvdimportkey=NULL;
 int descrambling=0;
 
+
+static int css_so_is_loaded=0;
+
 static void *dlid;
 static int (*dl_CSSisEncrypted)(int);
 static int (*dl_CSSAuthDisc)(int,char *);
@@ -84,7 +94,8 @@ static int (*dl_CSSGetASF)(int);
 static int (*dl_CSSDecryptTitleKey)(char *, char *);
 static void (*dl_CSSDescramble)(u_char *, u_char *);
 
-dvd_css_descramble ( u_char *sec , u_char *key )
+
+void dvd_css_descramble ( u_char *sec , u_char *key )
 {
 	(*dl_CSSDescramble)(sec,key);
 }
@@ -189,6 +200,53 @@ static void reset_agids ( DVDHandle dvd )
 }
 
 
+static int dvd_load_css_so ( void )
+{
+	if (css_so_is_loaded) {
+		printf("DVD: warning: attempt to load css.so twice, ignoring.\n");
+		return 0;
+	}
+	if (!css_so) css_so=strdup("libcss.so");
+	printf("DVD: opening libcss.so as %s ...\n",css_so);
+	dlid=dlopen(css_so,RTLD_NOW);
+	if (!dlid) {
+		printf("DVD: dlopen: %s\n",dlerror());
+		return 1;
+	} printf("DVD: dlopen OK!\n");
+
+/* #ifdef __OpenBSD__
+#define CSS_DLSYM(v,s) if (!(v=dlsym(dlid,"_" s))) {\
+fprintf(stderr,"DVD: %s\n  Hint: use libcss version 0.1!\n",dlerror());\
+return 1; }
+#else
+#define CSS_DLSYM(v,s) if (!(v=dlsym(dlid,s))) {\
+fprintf(stderr,"DVD: %s\n  Hint: use libcss version 0.1!\n",dlerror());\
+return 1; }
+#endif */
+
+#define CSS_DLSYM(v,s) \
+if (!(v=dlsym(dlid,s))) {\
+	if (!(v=dlsym(dlid,"_" s))) {\
+		fprintf(stderr,"DVD: %s\n Hint: use libcss version 0.1!\n",dlerror());\
+		return 1;\
+	}\
+}
+
+
+	CSS_DLSYM(dl_CSSisEncrypted,"CSSisEncrypted");
+	CSS_DLSYM(dl_CSSAuthDisc,"CSSAuthDisc");
+	CSS_DLSYM(dl_CSSAuthTitle,"CSSAuthTitle");
+	CSS_DLSYM(dl_CSSGetASF,"CSSGetASF");
+	CSS_DLSYM(dl_CSSDecryptTitleKey,"CSSDecryptTitleKey");
+	CSS_DLSYM(dl_CSSDescramble,"CSSDescramble");
+
+#undef CSS_DLSYM
+
+	css_so_is_loaded=1;
+	return 0;
+}
+
+
 int dvd_import_key ( unsigned char *hexkey )
 {
 	unsigned char *t=key_title;
@@ -209,6 +267,7 @@ int dvd_import_key ( unsigned char *hexkey )
 	}
 	if (*hexkey) return 1;
 	printf("DVD: DVD key (requested): %02X%02X%02X%02X%02X\n",key_title[0],key_title[1],key_title[2],key_title[3],key_title[4]);
+	if (dvd_load_css_so()) return 1;
 	descrambling=1;
 	return 0;
 }
@@ -219,32 +278,7 @@ int dvd_auth ( char *dev , char *filename )
 {
     	DVDHandle dvd;  /* DVD device handle */
 
-	if (!css_so) css_so=strdup("libcss.so");
-	printf("DVD: opening libcss.so as %s ...\n",css_so);
-	dlid=dlopen(css_so,RTLD_NOW);
-	if (!dlid) {
-		printf("DVD: dlopen: %s\n",dlerror());
-		return 1;
-	} printf("DVD: dlopen OK!\n");
-
-#ifdef __OpenBSD__
-#define CSS_DLSYM(v,s) if (!(v=dlsym(dlid,"_" s))) {\
-fprintf(stderr,"DVD: %s\n  Hint: use libcss version 0.1!\n",dlerror());\
-return 1; }
-#else
-#define CSS_DLSYM(v,s) if (!(v=dlsym(dlid,s))) {\
-fprintf(stderr,"DVD: %s\n  Hint: use libcss version 0.1!\n",dlerror());\
-return 1; }
-#endif
-
-	CSS_DLSYM(dl_CSSisEncrypted,"CSSisEncrypted");
-	CSS_DLSYM(dl_CSSAuthDisc,"CSSAuthDisc");
-	CSS_DLSYM(dl_CSSAuthTitle,"CSSAuthTitle");
-	CSS_DLSYM(dl_CSSGetASF,"CSSGetASF");
-	CSS_DLSYM(dl_CSSDecryptTitleKey,"CSSDecryptTitleKey");
-	CSS_DLSYM(dl_CSSDescramble,"CSSDescramble");
-
-#undef CSS_DLSYM
+	if (dvd_load_css_so()) return 1;
 
 	if ((dvd=DVDOpenDevice(dev)) == DVDOpenFailed) {
 		fprintf(stderr,"DVD: cannot open DVD device \"%s\": %s.\n",
