@@ -1,6 +1,6 @@
 To build the package:
  Get the cvs version, or .tgz and uncompress it,
- cd into programs direcotry:
+ cd into programs directory:
 eyck@incubus:~/src$ cd main
 eyck@incubus:~/src/main$ fakeroot debian/rules binary
  (... mplayer detects hardware/software, builds itself and.. )
