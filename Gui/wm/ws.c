@@ -776,7 +776,7 @@ void wsSetLayer( Display * wsDisplay, Window win, int layer )
  Atom            type;
  int             format;
  unsigned long   nitems, bytesafter;
- unsigned char * args = NULL;
+ Atom          * args = NULL;
 
  if ( wsWMType == wsWMIceWM )
   {
@@ -794,15 +794,21 @@ void wsSetLayer( Display * wsDisplay, Window win, int layer )
  type=XInternAtom( wsDisplay,"_NET_SUPPORTED",False );
  if ( Success == XGetWindowProperty( wsDisplay,wsRootWin,type,0,65536 / sizeof( int32_t ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
   {
+   int    i;
    XEvent e;
+   
    e.xclient.type=ClientMessage;
    e.xclient.message_type=XInternAtom( wsDisplay,"_NET_WM_STATE",False );
    e.xclient.display=wsDisplay;
    e.xclient.window=win;
    e.xclient.format=32;
    e.xclient.data.l[0]=layer;
+   
    e.xclient.data.l[1]=XInternAtom( wsDisplay,"_NET_WM_STATE_STAYS_ON_TOP",False );
-//   e.xclient.data.l[1]=XInternAtom( wsDisplay,"_NET_WM_STATE_FULLSCREEN",False );
+   type=XInternAtom( wsDisplay,"_NET_WM_STATE_FULLSCREEN",False );
+   for ( i=0;i < nitems;i++ )
+    if ( args[i] == type ) { e.xclient.data.l[1]=XInternAtom( wsDisplay,"_NET_WM_STATE_FULLSCREEN",False ); break; }
+
    e.xclient.data.l[2]=0l;
    e.xclient.data.l[3]=0l;
    e.xclient.data.l[4]=0l;

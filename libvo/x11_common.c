@@ -635,7 +635,7 @@ void vo_x11_setlayer( int layer )
  Atom            type;
  int             format;
  unsigned long   nitems, bytesafter;
- unsigned char * args = NULL;
+ Atom          * args = NULL;
 
  if ( WinID >= 0 ) return;
  
@@ -658,6 +658,7 @@ void vo_x11_setlayer( int layer )
  if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,16384,False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
   {
    XEvent e;
+   int    i;
    
    mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] NET style stay on top ( layer %d ).\n",layer );
    memset( &e,0,sizeof( e ) );
@@ -667,8 +668,12 @@ void vo_x11_setlayer( int layer )
    e.xclient.window=vo_window;
    e.xclient.format=32;
    e.xclient.data.l[0]=layer;
+
    e.xclient.data.l[1]=XInternAtom( mDisplay,"_NET_WM_STATE_STAYS_ON_TOP",False );
-//   e.xclient.data.l[1]=XInternAtom( mDisplay,"_NET_WM_STATE_FULLSCREEN",False );
+   type=XInternAtom( mDisplay,"_NET_WM_STATE_FULLSCREEN",False );
+   for ( i=0;i < nitems;i++ )
+     if ( args[i] == type ) { e.xclient.data.l[1]=XInternAtom( mDisplay,"_NET_WM_STATE_FULLSCREEN",False ); break; }
+
    XSendEvent( mDisplay,mRootWin,False,SubstructureRedirectMask,&e );
 								   
    XFree( args );
