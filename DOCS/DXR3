@@ -20,29 +20,45 @@ harddisk.
 
 2. Usage
 
-     -vo dxr3:<devicenum>		For video output :<devicenum> is not needed unless
- 					you have more than one em8300 device in your computer
-     -vo dxr3:noprebuf			Turn of prebuffering. This is only needed if you are
- 					having sync issues with normal playback, this will
- 					make playback appear less smooth and will not use all
- 					available cpu power when playing non-mpeg content.
- 					Note: With prebuffering A-V: should be negative, if
- 					      it's nonnegative your computer is too slow to
- 					      properly play the video and you should disble
- 					      prebuffering if you have sync issues.
- 					      Without prebuffering this value should stay
- 					      close to 0 at all times.
- 					Note2: Some very fast computers seems to have issues
- 					       with prebuffering. Blame Sigma for that ;).
- 					       You can safely use :noprebuf since your machines
- 					       are fast enough to give you smooth playback anyway.
+     -vo dxr3:<devicenum>		For video output :<devicenum> is not
+    					needed unless you have more than one
+					em8300 device in your computer
+     -vo dxr3:noprebuf			Turn of prebuffering. This is only
+    					needed if you are having sync issues
+					with normal playback, this will make
+					playback appear less smooth and will
+					not use all available cpu power when
+					playing non-mpeg content.
+ 					 * With prebuffering A-V: should be
+					   negative, if it's nonnegative your
+					   computer is too slow to properly
+					   play the video and you should
+					   disble prebuffering if you have
+					   sync issues.
+ 					   Without prebuffering this value
+					   should stay close to 0 at all
+					   times.
+ 					 * Some very fast computers seems to
+					   have issues with prebuffering.
+					   Blame Sigma for that ;).
+ 					   You can safely use :noprebuf since
+					   your machines are fast enough to give
+					   you smooth playback anyway.
+					 * If you plan to do other stuff that
+					   uses resources simultaneously with
+					   watching video, this options is
+					   probably preffered as it is much less
+					   sensitive to syncloss.
+					 * If you loose sync do a small seek
+					   (using left/right arrow, it will
+					   resync)
     -ao oss:<devicefile>		For audio output
     -ac hwac3				For digital audio output instead of
 					analog
     -vc mpegpes				For mpeg playback
     -aop list=resample:fout=48000	If samplerate is below 44100Hz
- 					This does not work with digital audio output
- 					(-ac hwac3)
+ 					This does not work with digital audio
+					output (-ac hwac3)
     <devicenum>				Number of device to use for playback
 				        (if you	have more than one card.).
 					This can usually be left out (-vo dxr3).
