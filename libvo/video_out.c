@@ -43,6 +43,8 @@ int vo_dbpp=0;
 int vo_doublebuffering = 0;
 int vo_fsmode = 0;
 
+int vo_pts=0; // for hw decoding
+
 char *vo_subdevice = NULL;
 
 //

@@ -114,5 +114,7 @@ extern int vo_dbpp;
 extern int vo_doublebuffering;
 extern int vo_fsmode;
 
+extern int vo_pts;
+
 extern char *vo_subdevice;
 
