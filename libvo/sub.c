@@ -186,10 +186,16 @@ static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,int y0, i
 
 }
 
+static int draw_alpha_init_flag=0;
 
 void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
 
     if(!vo_font) return; // no font
+
+    if(!draw_alpha_init_flag){
+	draw_alpha_init_flag=1;
+	vo_draw_alpha_init();
+    }
 
     if(vo_osd_text){
         vo_draw_text_osd(dxs,dys,draw_alpha);

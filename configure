@@ -1118,6 +1118,10 @@ $_fastmemcpy
 /* gui support, please do not edit this option */
 $_gui
 
+/* Enable fast OSD/SUB renderer (looks ugly, but uses less CPU power) */
+#undef FAST_OSD
+#undef FAST_OSD_TABLE
+
 /* Define if your processor stores words with the most significant
    byte first (like Motorola and SPARC, unlike Intel and VAX).  */
 /* #define WORDS_BIGENDIAN */

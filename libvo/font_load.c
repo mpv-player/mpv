@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "config.h"
 #include "font_load.h"
 
 char *get_path ( char * );
@@ -210,8 +211,12 @@ for(i=0;i<=fontdb;i++){
         int j;
         if(verbose) printf("font: resampling alpha by factor %5.3f (%d) ",factor,f);fflush(stdout);
         for(j=0;j<size;j++){
-            int x=desc->pic_a[i]->bmp[j];
-            int y=desc->pic_b[i]->bmp[j];
+            int x=desc->pic_a[i]->bmp[j];	// alpha
+            int y=desc->pic_b[i]->bmp[j];	// bitmap
+
+#ifdef FAST_OSD
+	    x=(x<(255-f))?0:1;
+#else
 
 	    x=255-((x*f)>>8); // scale
 	    //if(x<0) x=0; else if(x>255) x=255;
@@ -226,6 +231,7 @@ for(i=0;i<=fontdb;i++){
 
             if(x<1) x=1; else
             if(x>=252) x=0;
+#endif
 
             desc->pic_a[i]->bmp[j]=x;
 //            desc->pic_b[i]->bmp[j]=0; // hack

@@ -1,14 +1,26 @@
 // Generic alpha renderers for all YUV modes and RGB depths.
 // These are "reference implementations", should be optimized later (MMX, etc)
 
+//#define FAST_OSD
+//#define FAST_OSD_TABLE
+
+#include "config.h"
 #include "osd.h"
 
 void vo_draw_alpha_yv12(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
     int y;
+#ifdef FAST_OSD
+    w=w>>1;
+#endif
     for(y=0;y<h;y++){
         register int x;
         for(x=0;x<w;x++){
+#ifdef FAST_OSD
+            if(srca[2*x+0]) dstbase[2*x+0]=src[2*x+0];
+            if(srca[2*x+1]) dstbase[2*x+1]=src[2*x+1];
+#else
             if(srca[x]) dstbase[x]=((dstbase[x]*srca[x])>>8)+src[x];
+#endif
         }
         src+=srcstride;
         srca+=srcstride;
@@ -19,10 +31,18 @@ void vo_draw_alpha_yv12(int w,int h, unsigned char* src, unsigned char *srca, in
 
 void vo_draw_alpha_yuy2(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
     int y;
+#ifdef FAST_OSD
+    w=w>>1;
+#endif
     for(y=0;y<h;y++){
         register int x;
         for(x=0;x<w;x++){
+#ifdef FAST_OSD
+            if(srca[2*x+0]) dstbase[4*x+0]=src[2*x+0];
+            if(srca[2*x+1]) dstbase[4*x+2]=src[2*x+1];
+#else
             if(srca[x]) dstbase[2*x]=((dstbase[2*x]*srca[x])>>8)+src[x];
+#endif
         }
         src+=srcstride;
         srca+=srcstride;
@@ -38,9 +58,13 @@ void vo_draw_alpha_rgb24(int w,int h, unsigned char* src, unsigned char *srca, i
         register int x;
         for(x=0;x<w;x++){
             if(srca[x]){
+#ifdef FAST_OSD
+		dst[0]=dst[1]=dst[2]=src[x];
+#else
 		dst[0]=((dst[0]*srca[x])>>8)+src[x];
 		dst[1]=((dst[1]*srca[x])>>8)+src[x];
 		dst[2]=((dst[2]*srca[x])>>8)+src[x];
+#endif
             }
             dst+=3; // 24bpp
         }
@@ -57,9 +81,13 @@ void vo_draw_alpha_rgb32(int w,int h, unsigned char* src, unsigned char *srca, i
         register int x;
         for(x=0;x<w;x++){
             if(srca[x]){
+#ifdef FAST_OSD
+		dstbase[4*x+0]=dstbase[4*x+1]=dstbase[4*x+2]=src[x];
+#else
 		dstbase[4*x+0]=((dstbase[4*x+0]*srca[x])>>8)+src[x];
 		dstbase[4*x+1]=((dstbase[4*x+1]*srca[x])>>8)+src[x];
 		dstbase[4*x+2]=((dstbase[4*x+2]*srca[x])>>8)+src[x];
+#endif
             }
         }
         src+=srcstride;
@@ -69,6 +97,21 @@ void vo_draw_alpha_rgb32(int w,int h, unsigned char* src, unsigned char *srca, i
     return;
 }
 
+#ifdef FAST_OSD_TABLE
+static unsigned short fast_osd_15bpp_table[256];
+static unsigned short fast_osd_16bpp_table[256];
+#endif
+
+void vo_draw_alpha_init(){
+#ifdef FAST_OSD_TABLE
+    int i;
+    for(i=0;i<256;i++){
+        fast_osd_15bpp_table[i]=((i>>3)<<10)|((i>>3)<<5)|(i>>3);
+        fast_osd_16bpp_table[i]=((i>>3)<<11)|((i>>2)<<5)|(i>>3);
+    }
+#endif
+}
+
 void vo_draw_alpha_rgb15(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
     int y;
     for(y=0;y<h;y++){
@@ -76,6 +119,14 @@ void vo_draw_alpha_rgb15(int w,int h, unsigned char* src, unsigned char *srca, i
         register int x;
         for(x=0;x<w;x++){
             if(srca[x]){
+#ifdef FAST_OSD
+#ifdef FAST_OSD_TABLE
+                dst[x]=fast_osd_15bpp_table[src[x]];
+#else
+		register unsigned int a=src[x]>>3;
+                dst[x]=(a<<10)|(a<<5)|a;
+#endif
+#else
                 unsigned char r=dst[x]&0x1F;
                 unsigned char g=(dst[x]>>5)&0x1F;
                 unsigned char b=(dst[x]>>10)&0x1F;
@@ -83,6 +134,7 @@ void vo_draw_alpha_rgb15(int w,int h, unsigned char* src, unsigned char *srca, i
                 g=(((g*srca[x])>>5)+src[x])>>3;
                 b=(((b*srca[x])>>5)+src[x])>>3;
                 dst[x]=(b<<10)|(g<<5)|r;
+#endif
             }
         }
         src+=srcstride;
@@ -99,6 +151,13 @@ void vo_draw_alpha_rgb16(int w,int h, unsigned char* src, unsigned char *srca, i
         register int x;
         for(x=0;x<w;x++){
             if(srca[x]){
+#ifdef FAST_OSD
+#ifdef FAST_OSD_TABLE
+                dst[x]=fast_osd_16bpp_table[src[x]];
+#else
+                dst[x]=((src[x]>>3)<<11)|((src[x]>>2)<<5)|(src[x]>>3);
+#endif
+#else
                 unsigned char r=dst[x]&0x1F;
                 unsigned char g=(dst[x]>>5)&0x3F;
                 unsigned char b=(dst[x]>>11)&0x1F;
@@ -106,6 +165,7 @@ void vo_draw_alpha_rgb16(int w,int h, unsigned char* src, unsigned char *srca, i
                 g=(((g*srca[x])>>6)+src[x])>>2;
                 b=(((b*srca[x])>>5)+src[x])>>3;
                 dst[x]=(b<<11)|(g<<5)|r;
+#endif
             }
         }
         src+=srcstride;
