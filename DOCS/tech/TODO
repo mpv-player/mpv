@@ -5,19 +5,16 @@ TODO:
 FOR THE NEXT PRE_RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 - fix -vop expand=-50 + ffdivx
-- fix the commandline/configfile parser bug (-nosound vs vfm=...)
-- cleanup qtaudio/qtvideo (move globals to context)
-- cleanup DMO interfaces
-- fix/remove -vop lavcdeint
-- remove -vop yuy2, yvu9
-- fix lowrate QDMC audio
+- fix/remove -vop lavcdeint, remove -vop yuy2, yvu9
 - fix -npp in manpage
-- fix ffmjpeg vs. -mf (Gabu's bugreport)
-- fix FindFIrst/NextFile for *.qtx
-
+- fix ffmjpeg vs. -mf (Gabu's bugreport) - FIXED?
+- fix FindFIrst/NextFile for *.qtx, requires for QCLP too
+- fix 'releasing corrupted memory' in loader
 
 FOR THE v0.90 RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
+- cleanup qtaudio/qtvideo (move globals to context)
+- cleanup DMO interfaces
 - re-design makefile dependency system
 - finish audio filter layer
 - new demuxer layer - at least modularized...
