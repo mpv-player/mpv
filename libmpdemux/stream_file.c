@@ -56,7 +56,11 @@ static int seek_forward(stream_t *s,off_t newpos) {
     return 0;
   }
   while(s->pos<newpos){
-    if(s->fill_buffer(s,s->buffer,STREAM_BUFFER_SIZE)<=0) break; // EOF
+    int len=s->fill_buffer(s,s->buffer,STREAM_BUFFER_SIZE);
+    if(len<=0){ s->eof=1; s->buf_pos=s->buf_len=0; break; } // EOF
+    s->buf_pos=0;
+    s->buf_len=len;
+    s->pos+=len;
   }
   return 1;
 }

@@ -449,7 +449,7 @@ demuxer_t* demux_open_avi(demuxer_t* demuxer){
   demuxer->priv=(void*)priv;
 
   //---- AVI header:
-  read_avi_header(demuxer,(demuxer->stream->flags & STREAM_SEEK)?index_mode:-2);
+  read_avi_header(demuxer,(demuxer->stream->flags & STREAM_SEEK_BW)?index_mode:-2);
   
   if(demuxer->audio->id>=0 && !demuxer->a_streams[demuxer->audio->id]){
       mp_msg(MSGT_DEMUX,MSGL_WARN,"AVI: invalid audio stream ID: %d - ignoring (nosound)\n",demuxer->audio->id);

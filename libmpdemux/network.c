@@ -754,7 +754,11 @@ extension=NULL;
 			streaming_ctrl->data = (void*)http_hdr;
 
 			// Check if we can make partial content requests and thus seek in http-streams
-		        seekable=(http_hdr!=NULL && http_hdr->status_code==200 && strncmp(http_get_field(http_hdr,"Accept-Ranges"),"bytes",5)==0);
+		        if( http_hdr!=NULL && http_hdr->status_code==200 ) {
+			    char *accept_ranges;
+			    if( (accept_ranges = http_get_field(http_hdr,"Accept-Ranges")) != NULL )
+				seekable = strncmp(accept_ranges,"bytes",5)==0;
+			} 
 
 			// Check if the response is an ICY status_code reason_phrase
 			if( !strcasecmp(http_hdr->protocol, "ICY") ) {

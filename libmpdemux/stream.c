@@ -317,7 +317,7 @@ if(newpos==0 || newpos!=s->pos){
     if(s->seek) { // new stream seek is much cleaner than streaming_ctrl one
       if(!s->seek(s,newpos)) {
       	mp_msg(MSGT_STREAM,MSGL_ERR, "Seek failed\n");
-      	return 1;
+      	return 0;
       }
       break;
     }
