@@ -434,8 +434,8 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	  printf("\nvo_vesa: Modes in detail:\n");
 	}
 	mode_ptr = vib.VideoModePtr;
-	w = d_width ? d_width : width;
-	h = d_height ? d_height : height;
+	w = vo_screenwidth ? vo_screenwidth : width;
+	h = vo_screenheight ? vo_screenheight : height;
         for(i=0;i < num_modes;i++)
 	{
 		if((err=vbeGetModeInfo(mode_ptr[i],&vmib)) != VBE_OK)
