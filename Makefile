@@ -57,7 +57,7 @@ PARTS += Gui
 endif
 
 ifneq ($(W32_LIB),)
-PARTS += loader loader/DirectShow
+PARTS += loader loader/dshow
 SRCS_MPLAYER += dll_init.c
 SRCS_MENCODER += dll_init.c
 # SRCS += dll_init.c
@@ -100,6 +100,9 @@ libmpdemux/libmpdemux.a:
 
 loader/DirectShow/libDS_Filter.a:
 	$(MAKE) -C loader/DirectShow
+
+loader/dshow/libDS_Filter.a:
+	$(MAKE) -C loader/dshow
 
 libmp1e/libmp1e.a:
 	$(MAKE) -C libmp1e

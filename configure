@@ -674,7 +674,7 @@ _sunaudio=auto
 _alsa=auto
 _fastmemcpy=yes
 _win32=auto
-_dshow=auto
+_dshow=yes
 _select=yes
 _tv=yes
 _tv_v4l=auto
@@ -2126,12 +2126,15 @@ if test "$_win32" = yes ; then
   echores "$_win32 (found: $_win32libdir)"
 else
   _def_win32='#undef USE_WIN32DLL'
+  _dshow=no
   echores "$_win32"
 fi
 
-
 echocheck "DirectShow"
-if test "$_win32" = yes && test "$_dshow" = auto ; then
+
+if false ; then
+
+if test "$_dshow" != no ; then
   _dshow=no
   # check if compiler supports C++ and C++-libs are installed correctly
   cat > "$TMPCPP" << EOF
@@ -2165,14 +2168,16 @@ to disable building of the C++ based DirectShow code.
 EOF
     die "$_cc's C++ is broken"
   fi
-else
-  _dshow=no
-  echores "$_dshow"
 fi
+
+fi
+
+echores "$_dshow"
+
 if test "$_dshow" = yes ; then
   _def_dshow='#define USE_DIRECTSHOW 1'
-  _ld_dshow='-Lloader/DirectShow -lDS_Filter -lstdc++'
-  _dep_dshow='loader/DirectShow/libDS_Filter.a'
+  _ld_dshow='-Lloader/dshow -lDS_Filter'
+  _dep_dshow='loader/dshow/libDS_Filter.a'
   _codecmodules="directshow $_codecmodules"
 else
   _def_dshow='#undef USE_DIRECTSHOW'
