@@ -204,7 +204,8 @@ preinit( const char *arg )
      }
 
      if (!inited) {
-          DirectFBInit( NULL, NULL );
+          if (DirectFBInit( NULL, NULL ) != DFB_OK)
+               return -1;
 
           if (!fb_dev_name && !(fb_dev_name = getenv( "FRAMEBUFFER" )))
                fb_dev_name = "/dev/fb0";
@@ -212,24 +213,28 @@ preinit( const char *arg )
           DirectFBSetOption( "no-cursor", "" );
           DirectFBSetOption( "bg-color", "00000000" );
 
-          DirectFBCreate( &dfb );
+          if (DirectFBCreate( &dfb ) != DFB_OK)
+               return -1;
 
           inited = 1;
      }
 
      if (use_bes) {
-          dfb->GetDisplayLayer( dfb, 1, &bes );
+          if (dfb->GetDisplayLayer( dfb, 1, &bes ) != DFB_OK)
+               return -1;
           bes->SetCooperativeLevel( bes, DLSCL_EXCLUSIVE );
           bes->SetOpacity( bes, 0 );
      }
 
      if (use_crtc2) {
-          dfb->GetDisplayLayer( dfb, 2, &crtc2 );
+          if (dfb->GetDisplayLayer( dfb, 2, &crtc2 ) != DFB_OK)
+               return -1;
           crtc2->SetCooperativeLevel( crtc2, DLSCL_EXCLUSIVE );
           crtc2->SetOpacity( crtc2, 0 );
      }
 
-     dfb->GetInputDevice( dfb, DIDID_KEYBOARD, &keyboard );
+     if (dfb->GetInputDevice( dfb, DIDID_KEYBOARD, &keyboard ) != DFB_OK)
+          dfb->Release( dfb );
      keyboard->CreateEventBuffer( keyboard, &buffer );
      buffer->Reset( buffer );
 
@@ -290,7 +295,8 @@ config( uint32_t width, uint32_t height,
           dsc.height      = in_height;
           dsc.pixelformat = dlc.pixelformat;
 
-          dfb->CreateSurface( dfb, &dsc, &frame );
+          if (dfb->CreateSurface( dfb, &dsc, &frame ) != DFB_OK)
+               return -1;
      }
 
      if (use_crtc2) {
@@ -368,7 +374,8 @@ config( uint32_t width, uint32_t height,
           DFBColor          color;
           int               i;
 
-          dfb->GetDisplayLayer( dfb, 3, &spic );
+          if (dfb->GetDisplayLayer( dfb, 3, &spic ) != DFB_OK)
+               return -1;
           spic->SetCooperativeLevel( spic, DLSCL_EXCLUSIVE );
           spic->SetOpacity( spic, 0 );
 
@@ -707,19 +714,19 @@ draw_osd( void )
 {
      if (use_spic)
           subframe->Clear( subframe, 0, 0, 0, 0 );
-     else if (!use_crtc2) {
+     else if (use_crtc2) {
           /* Clear black bars around the picture */
-          c2frame->SetColor( c2frame, 0, 0, 0, 0 );
-          c2frame->FillRectangle( c2frame,
+          subframe->SetColor( subframe, 0, 0, 0, 0 );
+          subframe->FillRectangle( subframe,
                                   0, 0,
                                   drect.x, drect.y + drect.h );
-          c2frame->FillRectangle( c2frame,
+          subframe->FillRectangle( subframe,
                                   0, drect.y + drect.h,
                                   drect.x + drect.w, drect.y );
-          c2frame->FillRectangle( c2frame,
+          subframe->FillRectangle( subframe,
                                   drect.x, 0,
                                   drect.x + drect.w, drect.y );
-          c2frame->FillRectangle( c2frame,
+          subframe->FillRectangle( subframe,
                                   drect.x + drect.w, drect.y,
                                   drect.x, drect.y + drect.h );
      }
@@ -782,30 +789,29 @@ uninit( void )
       */
 }
 
-#if 0
 static int
-directfb_set_video_eq( const vidix_video_eq_t * info )
+directfb_set_video_eq( char *data, int value )
 {
      DFBColorAdjustment ca;
-     float factor = (float) 0xffff / 2000.0;
+     float factor = (float) 0xffff / 200.0;
 
      ca.flags = DCAF_NONE;
 
-     if (info->cap & VEQ_CAP_BRIGHTNESS) {
+     if (!strcasecmp( data, "brightness" )) {
           ca.flags      |= DCAF_BRIGHTNESS;
-          ca.brightness  = info->brightness * factor + 0x8000;
+          ca.brightness  = value * factor + 0x8000;
      }
-     if (info->cap & VEQ_CAP_CONTRAST) {
+     if (!strcasecmp( data, "contrast" )) {
           ca.flags    |= DCAF_CONTRAST;
-          ca.contrast  = info->contrast * factor + 0x8000;
+          ca.contrast  = value * factor + 0x8000;
      }
-     if (info->cap & VEQ_CAP_HUE) {
+     if (!strcasecmp( data, "hue" )) {
           ca.flags |= DCAF_HUE;
-          ca.hue    = info->hue * factor + 0x8000;
+          ca.hue    = value * factor + 0x8000;
      }
-     if (info->cap & VEQ_CAP_SATURATION) {
+     if (!strcasecmp( data, "saturation" )) {
           ca.flags      |= DCAF_SATURATION;
-          ca.saturation  = info->saturation * factor + 0x8000;
+          ca.saturation  = value * factor + 0x8000;
      }
 
      /* Prefer CRTC2 over BES */
@@ -818,10 +824,10 @@ directfb_set_video_eq( const vidix_video_eq_t * info )
 }
 
 static int
-directfb_get_video_eq( vidix_video_eq_t * info )
+directfb_get_video_eq( char *data, int *value )
 {
      DFBColorAdjustment ca;
-     float factor = 2000.0 / (float) 0xffff;
+     float factor = 200.0 / (float) 0xffff;
 
      /* Prefer CRTC2 over BES */
      if (use_crtc2)
@@ -831,26 +837,21 @@ directfb_get_video_eq( vidix_video_eq_t * info )
      else
           return 0;
 
-     if (ca.flags & DCAF_BRIGHTNESS) {
-          info->cap        |= VEQ_CAP_BRIGHTNESS;
-          info->brightness  = (ca.brightness - 0x8000) * factor;
-     }
-     if (ca.flags & DCAF_CONTRAST) {
-          info->cap      |= VEQ_CAP_CONTRAST;
-          info->contrast  = (ca.contrast - 0x8000) * factor;
-     }
-     if (ca.flags & DCAF_HUE) {
-          info->cap |= VEQ_CAP_HUE;
-          info->hue  = (ca.hue - 0x8000) * factor;
-     }
-     if (ca.flags & DCAF_SATURATION) {
-          info->cap        |= VEQ_CAP_SATURATION;
-          info->saturation  = (ca.saturation - 0x8000) * factor;
-     }
+     if (!strcasecmp( data, "brightness" ) &&
+         (ca.flags & DCAF_BRIGHTNESS))
+          *value = (ca.brightness - 0x8000) * factor;
+     if (!strcasecmp( data, "contrast" ) &&
+         (ca.flags & DCAF_CONTRAST))
+          *value = (ca.contrast - 0x8000) * factor;
+     if (!strcasecmp( data, "hue" ) &&
+         (ca.flags & DCAF_HUE))
+          *value = (ca.hue - 0x8000) * factor;
+     if (!strcasecmp( data, "saturation" ) &&
+         (ca.flags & DCAF_SATURATION))
+          *value = (ca.saturation - 0x8000) * factor;
 
      return 0;
 }
-#endif
 
 static uint32_t
 control( uint32_t request, void *data, ... )
@@ -858,34 +859,16 @@ control( uint32_t request, void *data, ... )
      switch (request) {
      case VOCTRL_QUERY_FORMAT:
 	  return query_format( *((uint32_t *) data) );
-#if 0
      case VOCTRL_SET_EQUALIZER:
           {
                va_list ap;
                int value;
-               vidix_video_eq_t info;
 
                va_start( ap, data );
                value = va_arg( ap, int );
                va_end( ap );
 
-               if (!strcasecmp( data, "brightness" )) {
-                    info.cap = VEQ_CAP_BRIGHTNESS;
-                    info.brightness = value * 10;
-               }
-               if (!strcasecmp( data, "contrast" )) {
-                    info.cap = VEQ_CAP_CONTRAST;
-                    info.contrast = value * 10;
-               }
-               if (!strcasecmp( data, "saturation" )) {
-                    info.cap = VEQ_CAP_SATURATION;
-                    info.saturation = value * 10;
-               }
-               if (!strcasecmp( data, "hue" )) {
-                    info.cap = VEQ_CAP_HUE;
-                    info.hue = value * 10;
-               }
-               if (directfb_set_video_eq( &info ))
+               if (directfb_set_video_eq( data, value ))
                     return VO_FALSE;
 
                return VO_TRUE;
@@ -894,32 +877,18 @@ control( uint32_t request, void *data, ... )
           {
                va_list ap;
                int *value;
-               vidix_video_eq_t info;
-
-               if (directfb_get_video_eq( &info ))
-                    return VO_FALSE;
 
                va_start( ap, data );
                value = va_arg( ap, int* );
                va_end( ap );
 
-               if (!strcasecmp( data, "brightness" ))
-                    if (info.cap & VEQ_CAP_BRIGHTNESS)
-                         *value = info.brightness / 10;
-               if (!strcasecmp( data, "contrast" ))
-                    if (info.cap & VEQ_CAP_CONTRAST)
-                         *value = info.contrast / 10;
-               if (!strcasecmp( data, "saturation" ))
-                    if (info.cap & VEQ_CAP_SATURATION)
-                         *value = info.saturation / 10;
-               if (!strcasecmp( data, "hue" ))
-                    if (info.cap & VEQ_CAP_HUE)
-                         *value = info.hue / 10;
+               if (directfb_get_video_eq( data, value ))
+                    return VO_FALSE;
 
                return VO_TRUE;
           }
-#endif
      }
+
      return VO_NOTIMPL;
 }
 
@@ -930,7 +899,6 @@ extern void mplayer_put_key( int code );
 static void
 check_events( void )
 {
-     static int opa = 255;
      DFBInputEvent event;
 
      if (buffer->GetEvent( buffer, DFB_EVENT( &event )) == DFB_OK) {
