@@ -31,6 +31,7 @@
 #include <errno.h>
 #include <math.h>
 #include <limits.h>
+#include <time.h>
 
 #include "../config.h"
 #include "../mp_msg.h"
@@ -165,6 +166,8 @@ static int xvidenc_stats = 0;
 static int xvidenc_max_key_interval = 0; /* Let xvidcore set a 10s interval by default */
 static int xvidenc_frame_drop_ratio = 0;
 static int xvidenc_greyscale = 0;
+static int xvidenc_debug = 0;
+static int xvidenc_psnr = 0;
 
 static int xvidenc_max_bframes = 2;
 static int xvidenc_bquant_ratio = 150;
@@ -226,7 +229,9 @@ m_option_t xvidencopts_conf[] =
 	{"max_key_interval", &xvidenc_max_key_interval, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
 	{"greyscale", &xvidenc_greyscale, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"turbo", &xvidenc_turbo, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"debug", &xvidenc_debug, CONF_TYPE_INT , 0 ,0,-1,NULL},
 	{"stats", &xvidenc_stats, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"psnr",  &xvidenc_psnr , CONF_TYPE_FLAG, 0, 0, 1, NULL},
 
 
 	/* section [quantizer] */
@@ -298,10 +303,13 @@ typedef struct _xvid_mplayer_module_t
 	int min_sse_y;
 	int min_sse_u;
 	int min_sse_v;
+	int min_framenum;
 	int max_sse_y;
 	int max_sse_u;
 	int max_sse_v;
+	int max_framenum;
 	
+	int pixels;
 	int d_width, d_height;
 } xvid_mplayer_module_t;
 
@@ -387,13 +395,9 @@ uninit(struct vf_instance_s* vf)
 
 	/* Display stats */
 	if(mod->frames) {
-		int pixels;
-
 		mod->sse_y /= mod->frames;
 		mod->sse_u /= mod->frames;
 		mod->sse_v /= mod->frames;
-
-		pixels = mod->create.width*mod->create.height;
 
 #define SSE2PSNR(sse, nbpixels) \
 ((!(sse)) ? 99.99f : 48.131f - 10*(double)log10((double)(sse)/(double)((nbpixels))))
@@ -401,22 +405,24 @@ uninit(struct vf_instance_s* vf)
 		       "The value 99.99dB is a special value and represents "
 		       "the upper range limit\n");
 		mp_msg(MSGT_MENCODER, MSGL_INFO,
-		       "xvid:     Min PSNR y : %.2f dB, u : %.2f dB, v : %.2f dB\n",
-		       SSE2PSNR(mod->max_sse_y, pixels),
-		       SSE2PSNR(mod->max_sse_u, pixels/4),
-		       SSE2PSNR(mod->max_sse_v, pixels/4));
+		       "xvid:     Min PSNR y : %.2f dB, u : %.2f dB, v : %.2f dB, in frame %d\n",
+		       SSE2PSNR(mod->max_sse_y, mod->pixels),
+		       SSE2PSNR(mod->max_sse_u, mod->pixels/4),
+		       SSE2PSNR(mod->max_sse_v, mod->pixels/4),
+		       mod->max_framenum);
 		mp_msg(MSGT_MENCODER, MSGL_INFO,
-		       "xvid: Average PSNR y : %.2f dB, u : %.2f dB, v : %.2f dB\n",
-		       SSE2PSNR(mod->sse_y, pixels),
-		       SSE2PSNR(mod->sse_u, pixels/4),
-		       SSE2PSNR(mod->sse_v, pixels/4));
+		       "xvid: Average PSNR y : %.2f dB, u : %.2f dB, v : %.2f dB, for %d frames\n",
+		       SSE2PSNR(mod->sse_y, mod->pixels),
+		       SSE2PSNR(mod->sse_u, mod->pixels/4),
+		       SSE2PSNR(mod->sse_v, mod->pixels/4),
+		       mod->frames);
 		mp_msg(MSGT_MENCODER, MSGL_INFO,
-		       "xvid:     Max PSNR y : %.2f dB, u : %.2f dB, v : %.2f dB\n",
-		       SSE2PSNR(mod->min_sse_y, pixels),
-		       SSE2PSNR(mod->min_sse_u, pixels/4),
-		       SSE2PSNR(mod->min_sse_v, pixels/4));
+		       "xvid:     Max PSNR y : %.2f dB, u : %.2f dB, v : %.2f dB, in frame %d\n",
+		       SSE2PSNR(mod->min_sse_y, mod->pixels),
+		       SSE2PSNR(mod->min_sse_u, mod->pixels/4),
+		       SSE2PSNR(mod->min_sse_v, mod->pixels/4),
+		       mod->min_framenum);
 	}
-#undef SSE2PSNR
 
 	/* ToDo: free matrices, and some string settings (quant method, matrix
 	 * filenames...) */
@@ -495,7 +501,6 @@ put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 
 	/* Did xvidcore returned stats about an encoded frame ? (asynchronous) */
 	if(xvidenc_stats && stats.type > 0) {
-		mod->frames++;
 		mod->sse_y += stats.sse_y;
 		mod->sse_u += stats.sse_u;
 		mod->sse_v += stats.sse_v;
@@ -504,14 +509,46 @@ put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 			mod->min_sse_y = stats.sse_y;
 			mod->min_sse_u = stats.sse_u;
 			mod->min_sse_v = stats.sse_v;
+			mod->min_framenum = mod->frames;
 		}
 
 		if(mod->max_sse_y < stats.sse_y) {
 			mod->max_sse_y = stats.sse_y;
 			mod->max_sse_u = stats.sse_u;
 			mod->max_sse_v = stats.sse_v;
+			mod->max_framenum = mod->frames;
 		}
+		if (xvidenc_psnr) {
+                    static FILE *fvstats = NULL;
+                    char filename[20];
+
+                    if (!fvstats) {
+                        time_t today2;
+                        struct tm *today;
+                        today2 = time (NULL);
+                        today = localtime (&today2);
+                        sprintf (filename, "psnr_%02d%02d%02d.log", today->tm_hour, today->tm_min, today->tm_sec);
+                        fvstats = fopen (filename,"w");
+                        if (!fvstats) {
+                            perror ("fopen");
+                            xvidenc_psnr = 0; // disable block
+                        }
+                    }
+                    fprintf (fvstats, "%6d, %2d, %6d, %2.2f, %2.2f, %2.2f, %2.2f %c\n",
+                             mod->frames,
+                             stats.quant,
+                             stats.length,
+                             SSE2PSNR (stats.sse_y, mod->pixels),
+                             SSE2PSNR (stats.sse_u, mod->pixels / 4),
+                             SSE2PSNR (stats.sse_v, mod->pixels / 4),
+                             SSE2PSNR (stats.sse_y + stats.sse_u + stats.sse_v,(double)mod->pixels * 1.5),
+                             stats.type==1?'I':stats.type==2?'P':stats.type==3?'B':stats.type?'S':'?'
+                             );
+		}
+		mod->frames++;
+
 	}
+#undef SSE2PSNR
 
 	/* xvidcore outputed bitstream -- mux it */
 	muxer_write_chunk(mod->mux,
@@ -590,6 +627,7 @@ vf_open(vf_instance_t *vf, char* args)
 	/* Initialize the xvid_gbl_init structure */
 	memset(&xvid_gbl_init, 0, sizeof(xvid_gbl_init_t));
 	xvid_gbl_init.version = XVID_VERSION;
+	xvid_gbl_init.debug = xvidenc_debug;
 
 	/* Initialize the xvidcore library */
 	if (xvid_global(NULL, XVID_GBL_INIT, &xvid_gbl_init, NULL) < 0) {
@@ -644,6 +682,9 @@ static void dispatch_settings(xvid_mplayer_module_t *mod)
 
 	if(xvidenc_closed_gop)
 		create->global |= XVID_GLOBAL_CLOSED_GOP;
+
+        if(xvidenc_psnr)
+	    xvidenc_stats = 1;
 
 	if(xvidenc_stats)
 		create->global |= XVID_GLOBAL_EXTRASTATS_ENABLE;
@@ -857,6 +898,9 @@ static int set_create_struct(xvid_mplayer_module_t *mod)
 	/* Width and Height */
 	create->width  = mod->mux->bih->biWidth;
 	create->height = mod->mux->bih->biHeight;
+
+	/* Pixels are needed for PSNR calculations */
+	mod->pixels = create->width * create->height;
 
 	/* FPS */
 	create->fincr = mod->mux->h.dwScale;
