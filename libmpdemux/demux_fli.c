@@ -139,7 +139,7 @@ demuxer_t* demux_open_fli(demuxer_t* demuxer){
     stream_skip(demuxer->stream, frame_size - 6);
 
     // if this chunk has the right magic number, index it
-    if (magic_number == 0xF1FA)
+    if ((magic_number == 0xF1FA) || (magic_number == 0xF5FA))
     {
       frames->frame_size[frame_number] = frame_size;
       frame_number++;
