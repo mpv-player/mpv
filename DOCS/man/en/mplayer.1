@@ -2273,10 +2273,6 @@ Uses the DirectX driver with acceleration features turned off.
 .RE
 .PD 1
 .sp 1
-FIXME: Document suboptions for x11, xover, dga, sdl, vidix, xvidix, fbdev,
-fbdev2, vesa, aa, bl, ggi, mga, xmga, syncfb, 3dfx, tdfx_vid,
-tdfxfb, dxr2, dxr3, mpegpes, zr, zr2.
-.sp 1
 Available video output drivers are:
 .
 .TP
@@ -2301,6 +2297,12 @@ works whenever X11 is present.
 .B xover (X11 only)
 Adds X11 support to all overlay based video output drivers.
 Currently only supported by tdfx_vid.
+.PD 0
+.RSs
+.IPs <vo_driver>
+Select the driver to use as source to overlay on top of X11.
+.RE
+.PD 1
 .
 .TP
 .B xvmc (X11, \-vc ffmpeg12mc only)
@@ -2330,11 +2332,17 @@ Play video through the XFree86 Direct Graphics Access extension.
 Considered obsolete.
 .
 .TP
-.B sdl (SDL only)
+.B sdl (SDL only, also see \-forcexv, \-noxv)
 Highly platform independent SDL (Simple Directmedia Layer) library
 video output driver.
 Since SDL uses its own X11 layer, MPlayer X11 options do not have
 any effect on SDL.
+.PD 0
+.RSs
+.IPs <driver>
+Explicitly choose the SDL driver to use.
+.RE
+.PD 1
 .
 .TP
 .B vidix\ \ 
@@ -2407,11 +2415,25 @@ Choose the display device to use in fullscreen.
 .TP
 .B fbdev (Linux only)
 Uses the kernel framebuffer to play video.
+.PD 0
+.RSs
+.IPs <device>
+Explicitly choose the fbdev device name to use (e.g.\& /dev/\:fb0) or the
+name of the vidix subdevice if the device name start with vidix (e.g.\&
+vidixsis_vid to enable the sis driver).
+.RE
+.PD 1
 .
 .TP
 .B fbdev2 (Linux only)
 Uses the kernel framebuffer to play video,
 alternative implementation.
+.PD 0
+.RSs
+.IPs <device>
+Explicitly choose the fbdev device name to use (default: /dev/\:fb0).
+.RE
+.PD 1
 .
 .TP
 .B vesa\ \ \ 
@@ -2423,10 +2445,14 @@ compatible card.
 Turns on DGA mode.
 .IPs nodga
 Turns off DGA mode.
+.IPs neotv_pal
+Activate the neomagic's TV out and set it to PAL norm.
+.IPs neotv_ntsc
+Activate the neomagic's TV out and set it to NTSC norm.
 .IPs vidix
-FIXME: document this
-.IPs lvo\ \ 
-FIXME: document this
+Use the VIDIX driver.
+.IPs lvo:\ \ \ 
+Activate the Linux Video Overlay on top of vesa mode.
 .RE
 .PD 1
 .
@@ -2463,7 +2489,7 @@ the maximum texture size of your OpenGL implementation.
 Intended to work even with the most simple OpenGL implementations.
 .PD 0
 .RSs
-.IPs manyfmts
+.IPs (no)manyfmts
 Enables support for more (RGB and BGR) color formats.
 Needs OpenGL version >= 1.2, NOT yet WORKING correctly.
 .IPs slice-height=<0\-...>
@@ -2481,10 +2507,9 @@ Supports OSD and videos larger than the maximum texture size.
 .B null\ \ \ 
 Produces no video output.
 Useful for benchmarking.
-Actually there are no suboptions available.
 .
 .TP
-.B aa\ \ \ \ \ 
+.B aa (also see \-aa*)
 ASCII art video output driver that works on a text console.
 .
 .TP
@@ -2495,10 +2520,25 @@ Color ASCII art video output driver that works on a text console.
 .B bl\ \ \ \ \ 
 Video playback using the Blinkenlights UDP protocol.
 This driver is highly hardware specific.
+.PD 0
+.RSs
+.IPs <subdevice>
+Explicitly choose the Blinkenlights subdevice driver to use.
+It's something like arcade:host=localhost:2323 or
+hdl:file=name1,file=name2. 
+You must specify a subdevice.
+.RE
+.PD 1
 .
 .TP
 .B ggi\ \ \ \ 
 GGI graphics system video output driver
+.PD 0
+.RSs
+.IPs <driver>
+Explicitly choose the GGI driver to use.
+.RE
+.PD 1
 .
 .TP
 .B directfb
@@ -2570,10 +2610,22 @@ which norm to use by looking at the framerate of the movie.
 Matrox specific video output driver that makes use of the YUV back
 end scaler on Gxxx cards through a kernel module.
 If you have a Matrox card, this is the fastest option.
+.PD 0
+.RSs
+.IPs <device>
+Explicitly choose the matrox device name to use (default: /dev/\:mga_vid).
+.RE
+.PD 1
 .
 .TP
 .B xmga (Linux, X11 only)
 The mga video output driver, running in an X11 window.
+.PD 0
+.RSs
+.IPs <device>
+Explicitly choose the matrox device name to use (default: /dev/\:mga_vid).
+.RE
+.PD 1
 .
 .TP
 .B syncfb\ 
@@ -2585,29 +2637,41 @@ the vertical retrace of your monitor.
 .TP
 .B 3dfx (Linux only)
 3Dfx specific video output driver.
-FIXME: What's the difference between 3dfx, tdfxfb and tdfx_vid?
+This driver uses directly the 3dfx hardware on top of X11.
+Only 16 bpp are supported.
+FIXME: It' ok the difference between 3dfx, tdfxfb and tdfx_vid?
 .
 .TP
 .B tdfxfb (Linux only)
 This driver employs the tdfx framebuffer driver to play movies with
-YUV acceleration.
-FIXME: What's the difference between 3dfx, tdfxfb and tdfx_vid?
+YUV acceleration on 3Dfx cards.
+FIXME: It' ok the difference between 3dfx, tdfxfb and tdfx_vid?
+.PD 0
+.RSs
+.IPs <device>
+Explicitly choose the fbdev device name to use (default: /dev/\:fb0).
+.RE
+.PD 1
 .
 .TP
 .B tdfx_vid (Linux only)
 3Dfx specific video output driver.
-Works in conjunction with a kernel module.
-FIXME: What's the difference between 3dfx, tdfxfb and tdfx_vid?
+This driver use directly the tdfx_vid kernel module.
+FIXME: It' ok the difference between 3dfx, tdfxfb and tdfx_vid?
+.PD 0
+.RSs
+.IPs <device>
+Explicitly choose the device name to use (default: /dev/\:tdfx_vid).
+.RE
+.PD 1
 .
 .TP
 .B dxr2 (also see \-dxr2) (DXR2 only)
 Creative DXR2 specific video output driver.
 .PD 0
 .RSs
-.IPs x11
-Enables overlay.
-.IPs xv
-Enables overlay.
+.IPs <vo_driver>
+Output video sub driver to use as overlay (x11, xv).
 .RE
 .PD 1
 .
@@ -2639,19 +2703,22 @@ Specifies the TV norm.
 .br
 5: NTSC
 .REss
-.IPs device=<number>
+.IPs 0\ 1\ 2\ 3\ 
 Specifies the device number to use if you have more than one em8300 card.
 .RE
 .PD 1
 .
 .TP
 .B mpegpes (DVB only)
-DVB specific video output driver.
+DVB specific video output driver or MPEG-PES format file writer.
 .PD 0
 .RSs
 .IPs card=<1\-4>
 Specifies the device number to use if you have more than one DVB output card
 (V3 API only, such as 1.x.y series drivers).
+.IPs <filename>
+If you don't have a DVB card this video output driver writes a file in MPEG-PES
+format on the file you specify (default: ./grab.mpg).
 .RE
 .PD 1
 .
@@ -2664,6 +2731,20 @@ Video output driver for a number of MJPEG capture/\:playback cards.
 Video output driver for a number of MJPEG capture/\:playback cards,
 second generation.
 Also see the zrmjpeg video filter.
+.PD 0
+.RSs
+.IPs dev=<device>
+Specifies the device to use.
+.IPs PAL\ \ \ 
+Activate pal video norm.
+.IPs SECAM
+Activate secam video norm.
+.IPs NTSC\ \ \ 
+Activate ntsc video norm.
+.IPs prebuf
+Activate prebuffering, not yet supported.
+.RE
+.PD 1
 .
 .TP
 .B md5\ \ \ \ 
@@ -2694,7 +2775,7 @@ Write the output as interlaced frames, bottom field first.
 .REss
 .PD 1
 .RS
-.br
+.sp 1
 .I NOTE:
 If you don't specify any option the output is progressive
 (i.e.\& not interlaced).
@@ -2707,18 +2788,25 @@ It supports only RGB format with 24 bpp and the output is converted to 256
 colors.
 .PD 0
 .RSs
-.IPs fps\ \ \ 
+.IPs <fps>\ \ \ 
 Float value to specify framerate (default: 5.0).
-.IPs filename
+.IPs <filename>
 Specify the output filename (default: ./out.gif).
 .REss
 .PD 1
 .RS
-.br
+.sp 1
 .I NOTE:
 You must specify the framerate before the filename or the framerate will
 be part of the filename.
+.sp 1
+.I EXAMPLE:
 .RE
+.PD 0
+.RSs
+mplayer video.nut \-vo gif89a:15.0:test.gif
+.RE
+.PD 1
 .
 .TP
 .B jpeg\ \ \ 
@@ -2763,13 +2851,10 @@ coordinates 0,height for width/2,height/2 you have the U plane
 and at width/2,height for width/2,height/2 you have the V plane.
 .
 .TP
-.B png\ \ \ \ 
+.B png (also see \-z)
 Output each frame into a PNG file in the current directory.
 Each file takes the frame number padded with leading zeros as name.
 24bpp RGB and BGR formats are supported.
-There are no suboptions available but you can specify the compression level
-with the \-z option, ranging from 0 (no compression) to 9 (maximum
-compression).
 .
 .TP
 .B tga\ \ \ \ 
@@ -2778,14 +2863,13 @@ Each file takes the frame number padded with leading zeros as name.
 The purpose of this video output driver is to have a simple lossless
 image writer to use without any external library.
 It supports the BGR[A] color format, with 15, 24 and 32 bpp.
-There are no suboptions.
 You can force a particular format with the format video filter.
 .sp 1
 .I EXAMPLE:
+.RE
 .PD 0
 .RSs
-.IPs "\-vf format=bgr15"
-Saves images with 2 bytes per pixel.
+mplayer video.nut \-vf format=bgr15 \-vo tga
 .RE
 .PD 1
 .
