@@ -843,12 +843,18 @@ int vixQueryFourcc(vidix_fourcc_t *to)
 int vixConfigPlayback(vidix_playback_t *info)
 {
   if(!is_supported_fourcc(info->fourcc)) return ENOSYS;
-  if(info->num_frames>3) info->num_frames=3; //more than 3 make no sense at the moment but they do work
 
   mach64_compute_framesize(info);
-  mach64_overlay_offset = mach64_ram_size - info->frame_size*info->num_frames;
-  mach64_overlay_offset &= 0xffff0000;
-  if(mach64_overlay_offset < 0) return EINVAL;
+
+  if(info->num_frames>4) info->num_frames=4;
+  for(;info->num_frames>0; info->num_frames--)
+  {
+      mach64_overlay_offset = mach64_ram_size - info->frame_size*info->num_frames;
+      mach64_overlay_offset &= 0xffff0000;
+      if(mach64_overlay_offset>0) break;
+  }
+  if(info->num_frames <= 0) return EINVAL;
+
   info->dga_addr = (char *)mach64_mem_base + mach64_overlay_offset;
   mach64_vid_init_video(info);
   return 0;
