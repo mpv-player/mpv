@@ -1681,13 +1681,14 @@ if [ $_gl = yes ]; then
    fi
 fi
 
+_cssdef='#undef HAVE_LIBCSS'
 _csslib=''
 _cssinc=''
 
 if [ $_dvdread = yes ]; then
-   _css='#undef HAVE_LIBCSS'
    _csslib='-ldvdread'
    _dvdreaddef='#define USE_DVDREAD'
+   _css='no'
 else
    _dvdreaddef='#undef USE_DVDREAD'
 
@@ -1697,14 +1698,12 @@ if [ $_css = yes ]; then
    else
      _csslib='-lcss'
    fi
-   _css='#define HAVE_LIBCSS'
+   _cssdef='#define HAVE_LIBCSS'
    if [ ! -z "$_cssincdir" ]; then
      _cssinc="-I${_cssincdir}"
    else
      _cssinc=""
    fi
-else
-   _css='#undef HAVE_LIBCSS'
 fi
 
 fi
@@ -2148,6 +2147,7 @@ X_LIBS=$_x11libdir $_extralibdir $_gllib $_ggilib $_sdllib $_dgalib $_x11lib $_x
 TERMCAP_LIB=$_libtermcap
 XMM_LIBS = $_xmmplibs
 LIRC_LIBS = $_lirclibs
+CSS_USE=$_css
 CSS_LIB = $_csslib
 CSS_INC = $_cssinc
 SDL_INC = $_sdlcflags
@@ -2274,7 +2274,7 @@ $_have_libkstat
 $_lircdefs
 
 /* DeCSS support using libcss */
-$_css
+$_cssdef
 
 /* Define this to enable MPEG 1/2 image postprocessing (requires FAST cpu!) */
 #define MPEG12_POSTPROC
