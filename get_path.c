@@ -14,8 +14,8 @@ char *get_path(char *filename){
 	{
     	int __stdcall GetModuleFileNameA(void* hModule,char* lpFilename,int nSize);
         int i,imax=0;       
-        char exedir[MAX_PATH];       
-        GetModuleFileNameA(NULL, exedir, MAX_PATH);
+        char exedir[260];       
+        GetModuleFileNameA(NULL, exedir, 260);
         for(i=0; i< strlen(exedir);i++)if(exedir[i] =='\\'){exedir[i]='/';imax=i;}
         exedir[imax]='\0';
 	    homedir = exedir;
