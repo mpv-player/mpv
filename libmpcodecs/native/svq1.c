@@ -38,7 +38,7 @@ typedef struct vlc_code_s {
 
 //char temp_buf[VIDEOBUFSIZE];
 
-#define MEDIAN(a,b,c)	((a < b != b >= c) ? b : ((a < c != c > b) ? c : a))
+#define MEDIAN(a,b,c)	(((a < b) != (b >= c)) ? b : (((a < c) != (c > b)) ? c : a))
 
 #include "svq1.h"
 #include "svq1_cb.h"
