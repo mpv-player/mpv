@@ -1,6 +1,7 @@
 // Translated by: Gabucino the Almighty! <gabucino@mplayerhq.hu>
 // Send me money/hw/babes!
 // ... Okay enough of the hw, now send the other two!
+// Sync'ed with help_mp-en.h 1.97
 
 // ========================= MPlayer help ===========================
 
@@ -556,9 +557,9 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding1 "Unicode"
 #define MSGTR_PREFERENCES_FontEncoding2 "Nyugat-Európai karakterkészlet (ISO-8859-1)"
 #define MSGTR_PREFERENCES_FontEncoding3 "Nyugat-Európai karakterkészlet euróval (ISO-8859-15)"
-#define MSGTR_PREFERENCES_FontEncoding4 "Szláv / Közép-Európai karakterkészlet (ISO-8859-2)"
-#define MSGTR_PREFERENCES_FontEncoding5 "Eszperantó, gall, máltai, török karakterkészlet (ISO-8859-3)"
-#define MSGTR_PREFERENCES_FontEncoding6 "Régi baltik karakterkészlet (ISO-8859-4)"
+#define MSGTR_PREFERENCES_FontEncoding4 "Szláv és közép-európai karakterkészlet (ISO-8859-2)"
+#define MSGTR_PREFERENCES_FontEncoding5 "Eszperantó, gall, máltai és török karakterkészlet (ISO-8859-3)"
+#define MSGTR_PREFERENCES_FontEncoding6 "Régi balti karakterkészlet (ISO-8859-4)"
 #define MSGTR_PREFERENCES_FontEncoding7 "Cirill karakterkészlet (ISO-8859-5)"
 #define MSGTR_PREFERENCES_FontEncoding8 "Arab karakterkészlet (ISO-8859-6)"
 #define MSGTR_PREFERENCES_FontEncoding9 "Modern görög karakterkészlet (ISO-8859-7)"
@@ -573,7 +574,8 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding18 "Japán karakterkészlet (SHIFT-JIS)"
 #define MSGTR_PREFERENCES_FontEncoding19 "Koreai karakterkészlet (CP949)"
 #define MSGTR_PREFERENCES_FontEncoding20 "Thai karakterkészlet (CP874)"
-#define MSGTR_PREFERENCES_FontEncoding21 "Cirill Winnyóz (CP1251)"
+#define MSGTR_PREFERENCES_FontEncoding21 "Cirill karakterkészlet (Windows) (CP1251)"
+#define MSGTR_PREFERENCES_FontEncoding22 "Szláv és közép-európai karakterkészlet (Windows) (CP1250)"
 #define MSGTR_PREFERENCES_FontNoAutoScale "Nincs automata karakterméret választás"
 #define MSGTR_PREFERENCES_FontPropWidth "Karakterméret film szélességéhez való állítása"
 #define MSGTR_PREFERENCES_FontPropHeight "Karakterméret film magasságához való állítása"
