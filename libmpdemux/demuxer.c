@@ -136,6 +136,7 @@ extern void demux_close_xmms(demuxer_t* demuxer);
 extern void demux_close_gif(demuxer_t* demuxer);
 extern void demux_close_ts(demuxer_t* demuxer);
 extern void demux_close_mkv(demuxer_t* demuxer);
+extern void demux_close_ra(demuxer_t* demuxer);
 
 #ifdef USE_TV
 #include "tv.h"
@@ -212,6 +213,8 @@ void free_demuxer(demuxer_t *demuxer){
 #endif
     case DEMUXER_TYPE_MPEG_TS:
       demux_close_ts(demuxer); break;
+    case DEMUXER_TYPE_REALAUDIO:
+      demux_close_ra(demuxer); break;
 
     }
     // free streams:
@@ -291,6 +294,7 @@ int demux_pva_fill_buffer(demuxer_t *demux);
 int demux_xmms_fill_buffer(demuxer_t *demux,demux_stream_t *ds);
 int demux_gif_fill_buffer(demuxer_t *demux);
 int demux_ts_fill_buffer(demuxer_t *demux);
+int demux_ra_fill_buffer(demuxer_t *demux);
 
 extern int demux_demuxers_fill_buffer(demuxer_t *demux,demux_stream_t *ds);
 extern int demux_ogg_fill_buffer(demuxer_t *d);
@@ -349,6 +353,7 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
     case DEMUXER_TYPE_GIF: return demux_gif_fill_buffer(demux);
 #endif
     case DEMUXER_TYPE_MPEG_TS: return demux_ts_fill_buffer(demux);
+    case DEMUXER_TYPE_REALAUDIO: return demux_ra_fill_buffer(demux);
   }
   return 0;
 }
@@ -584,6 +589,8 @@ extern int gif_check_file(demuxer_t *demuxer);
 extern int demux_open_gif(demuxer_t* demuxer);
 extern int ts_check_file(demuxer_t * demuxer);
 extern int demux_open_mkv(demuxer_t *demuxer);
+extern int ra_check_file(demuxer_t *demuxer);
+extern int demux_open_ra(demuxer_t* demuxer);
 
 extern demuxer_t* init_avi_with_ogg(demuxer_t* demuxer);
 
@@ -723,6 +730,17 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MATROSKA){
   }
 }
 #endif
+//=============== Try to open as REALAUDIO file: =================
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_REALAUDIO){
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_REALAUDIO,audio_id,video_id,dvdsub_id);
+  if(ra_check_file(demuxer)){
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"REALAUDIO");
+      file_format=DEMUXER_TYPE_REALAUDIO;
+  } else {
+      free_demuxer(demuxer);
+      demuxer = NULL;
+  }
+}
 
 //=============== Try based on filename EXTENSION: =================
 // Ok. We're over the stable detectable fileformats, the next ones are a bit
@@ -1202,6 +1220,10 @@ switch(file_format){
 #endif
  case DEMUXER_TYPE_MPEG_TS: {
   demux_open_ts(demuxer);
+  break;
+ }
+ case DEMUXER_TYPE_REALAUDIO: {
+  if (!demux_open_ra(demuxer)) return NULL;
   break;
  }
 } // switch(file_format)
