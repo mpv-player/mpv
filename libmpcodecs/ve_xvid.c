@@ -45,12 +45,12 @@
 static int const motion_presets[7] = {
 #ifdef XVID_API_UNSTABLE
 	0,
-	PMV_QUICKSTOP16,
 	0,
 	0,
-	PMV_HALFPELREFINE16 | PMV_HALFPELDIAMOND8,
-	PMV_HALFPELREFINE16 | PMV_HALFPELDIAMOND8 | PMV_ADVANCEDDIAMOND16,
-	PMV_HALFPELREFINE16 | PMV_EXTSEARCH16 | PMV_HALFPELREFINE8 | PMV_HALFPELDIAMOND8 | PMV_USESQUARES16
+	0,
+	PMV_HALFPELREFINE16 | PMV_HALFPELDIAMOND8 | HALFPELREFINE16_BITS,
+	PMV_HALFPELREFINE16 | PMV_HALFPELDIAMOND8 | PMV_ADVANCEDDIAMOND16 | HALFPELREFINE16_BITS,
+	PMV_HALFPELREFINE16 | PMV_EXTSEARCH16 | PMV_HALFPELREFINE8 | PMV_HALFPELDIAMOND8 | PMV_USESQUARES16 | EXTSEARCH_BITS | HALFPELREFINE8_BITS | HALFPELREFINE16_BITS | CHECKPREDICTION_BITS
 #else
         0,
 	PMV_QUICKSTOP16,
@@ -94,6 +94,10 @@ static int xvidenc_bquant_offset = 60;
 static int xvidenc_gmc = 0;
 static int xvidenc_me_colour = 0;
 static int xvidenc_reduced = 0;
+static int xvidenc_xstat=0;
+static int xvidenc_hqac=0;
+static int xvidenc_vhq=0;
+static int xvidenc_pref=0;
 #endif
 
 struct config xvidencopts_conf[] = {
@@ -119,6 +123,7 @@ struct config xvidencopts_conf[] = {
     { "hintedme", &xvidenc_hintedme, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     { "hintfile", &xvidenc_hintfile, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #ifdef XVID_API_UNSTABLE
+    { "extrastatl", &xvidenc_xstat, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     { "qpel", &xvidenc_qpel, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     { "max_bframes", &xvidenc_max_bframes, CONF_TYPE_INT, CONF_RANGE, 0, 4, NULL},
     { "bquant_ratio", &xvidenc_bquant_ratio, CONF_TYPE_INT, CONF_RANGE, 0, 1000, NULL},
@@ -126,6 +131,9 @@ struct config xvidencopts_conf[] = {
     { "reduced", &xvidenc_reduced, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     { "gmc", &xvidenc_gmc, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     { "me_colour", &xvidenc_me_colour, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    { "hq_ac", &xvidenc_hqac, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    { "vhq", &xvidenc_vhq, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    { "chroma_opt", &xvidenc_pref, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #endif
     { NULL, NULL, 0, 0, 0, 0, NULL}
 };
@@ -210,6 +218,9 @@ config(struct vf_instance_s* vf,
     enc_param.bquant_offset = xvidenc_bquant_offset;
     if (xvidenc_reduced)
 	enc_param.global |= XVID_GLOBAL_REDUCED;
+    if (xvidenc_xstat)
+	enc_param.global |= XVID_GLOBAL_EXTRASTATS;
+
 #endif
     enc_param.rc_reaction_delay_factor = xvidenc_rc_reaction_delay_factor;
     enc_param.rc_averaging_period = xvidenc_rc_averaging_period;
@@ -243,14 +254,22 @@ config(struct vf_instance_s* vf,
 #ifdef XVID_API_UNSTABLE
     if (xvidenc_qpel) {
 	fp->enc_frame.general |= XVID_QUARTERPEL;
-	fp->enc_frame.motion |= PMV_QUARTERPELREFINE16 | PMV_QUARTERPELREFINE8;
+	fp->enc_frame.motion |= PMV_QUARTERPELREFINE16 | PMV_QUARTERPELREFINE8 |QUARTERPELREFINE16_BITS | QUARTERPELREFINE8_BITS;
     }
+    if (xvidenc_vhq)
+	fp->enc_frame.general |= XVID_MODEDECISION_BITS;
     if (xvidenc_gmc)
 	fp->enc_frame.general |= XVID_GMC;
+    if (xvidenc_xstat)
+	fp->enc_frame.general |= XVID_EXTRASTATS;
     if (xvidenc_me_colour)
-	fp->enc_frame.general |= XVID_ME_COLOUR;
+	fp->enc_frame.motion |= PMV_CHROMA16 | PMV_CHROMA8;
     if(xvidenc_reduced)
 	fp->enc_frame.general |= XVID_REDUCED;
+    if(xvidenc_hqac)
+	fp->enc_frame.general |= XVID_HQACPRED;
+    if (xvidenc_pref)
+	fp->enc_frame.general |= XVID_CHROMAOPT;
 #endif
 
     switch (outfmt) {
@@ -388,14 +407,17 @@ put_image(struct vf_instance_s* vf, mp_image_t *mpi)
     // get quantizers & I/P decision from the VBR engine
 #ifdef XVID_API_UNSTABLE
     if (xvidenc_max_bframes >= 1) {
-	if (!xvidenc_fixed_quant) {
+	if (xvidenc_fixed_quant!=0) {
 	    // hack, the internal VBR engine isn't fixed-quant aware
 	    fp->enc_frame.quant = xvidenc_fixed_quant;
 	    fp->enc_frame.intra = -1;
 	    fp->enc_frame.bquant = (xvidenc_fixed_quant * xvidenc_bquant_ratio + xvidenc_bquant_offset) / 100;
 	} else
 	    // use the internal VBR engine since the external one isn't bframe aware
-	    fp->enc_frame.quant = fp->enc_frame.intra = fp->enc_frame.bquant = -1;
+//	    fp->enc_frame.quant = fp->enc_frame.intra = fp->enc_frame.bquant = -1;
+	    fp->enc_frame.quant =0;
+	    fp->enc_frame.intra =-1;
+	    fp->enc_frame.bquant = 0;
     } else {
 	fp->enc_frame.quant = vbrGetQuant(&fp->vbr_state);
 	fp->enc_frame.intra = vbrGetIntra(&fp->vbr_state);

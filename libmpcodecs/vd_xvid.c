@@ -11,16 +11,6 @@
 
 #include <xvid.h>
 
-typedef struct
-{
-	void *y;
-	void *u;
-	void *v;
-	int stride_y;
-	int stride_uv;
-}
-DIVX4_DEC_PICTURE;
-
 #ifdef XVID_API_UNSTABLE
 #warning *******************************************************************
 #warning **                                                               **
@@ -33,6 +23,18 @@ DIVX4_DEC_PICTURE;
 #warning **                                                               **
 #warning *******************************************************************
 #endif
+
+typedef struct
+{
+	void *y;
+	void *u;
+	void *v;
+	int stride_y;
+	int stride_uv;
+}
+DIVX4_DEC_PICTURE;
+
+
 
 static vd_info_t info = 
 {
@@ -245,5 +247,4 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
   return mpi;
 }
-
-#endif
+#endif  //have_xvid
