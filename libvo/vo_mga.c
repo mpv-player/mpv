@@ -50,8 +50,7 @@ static vo_info_t vo_info =
 };
 
 static mga_vid_config_t mga_vid_config;
-static uint8_t *vid_data, *frame0, *frame1;
-static int next_frame = 0;
+static uint8_t *vid_data, *frames[4];
 static int f;
 
 #include "mga_common.c"
@@ -98,14 +97,16 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	ioctl(f,MGA_VID_ON,0);
 
 	frame_size = ((width + 31) & ~31) * height + (((width + 31) & ~31) * height) / 2;
-	frame_mem = (char*)mmap(0,frame_size*2,PROT_WRITE,MAP_SHARED,f,0);
-	frame0 = frame_mem;
-	frame1 = frame_mem + frame_size;
-	vid_data = frame0;
-	next_frame = 0;
+	frame_mem = (char*)mmap(0,frame_size*4,PROT_WRITE,MAP_SHARED,f,0);
+	frames[0] = frame_mem;
+	frames[1] = frame_mem + 1*frame_size;
+	frames[2] = frame_mem + 2*frame_size;
+	frames[3] = frame_mem + 3*frame_size;
+	mga_next_frame = 0;
+	vid_data = frames[mga_next_frame];
 
 	//clear the buffer
-	memset(frame_mem,0x80,frame_size*2);
+	memset(frame_mem,0x80,frame_size*4);
 
   return 0;
 }

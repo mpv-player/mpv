@@ -35,6 +35,8 @@
 // Externally visible list of all vo drivers
 //
 
+int mga_next_frame=0;
+
 extern vo_functions_t video_out_mga;
 extern vo_functions_t video_out_xmga;
 extern vo_functions_t video_out_x11;

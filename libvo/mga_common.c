@@ -1,6 +1,8 @@
 
 // mga_vid drawing functions
 
+extern int mga_next_frame;
+
 static void
 write_frame_g200(uint8_t *y,uint8_t *cr, uint8_t *cb)
 {
@@ -154,17 +156,15 @@ draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
 static void
 vo_mga_flip_page(void)
 {
-#if 0
-	ioctl(f,MGA_VID_FSEL,&next_frame);
 
-	if (next_frame) 
-		vid_data = frame1;
-	else
-		vid_data = frame0;
+//    printf("-- flip to %d --\n",mga_next_frame);
 
-	next_frame = 2 - next_frame; // switch between fields A1 and B1
-
+#if 1
+	ioctl(f,MGA_VID_FSEL,&mga_next_frame);
+	mga_next_frame=(mga_next_frame+1)&3;
+	vid_data=frames[mga_next_frame];
 #endif
+
 }
 
 
