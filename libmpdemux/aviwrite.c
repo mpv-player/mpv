@@ -5,6 +5,7 @@
 #include <sys/types.h>
 
 #include "config.h"
+#include "../version.h"
 
 //#include "stream.h"
 //#include "demuxer.h"
