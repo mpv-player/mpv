@@ -54,7 +54,7 @@ static int int_pause;
 static uint32_t texture_width;
 static uint32_t texture_height;
 
-static int slice_height=1;
+static unsigned int slice_height = 1;
 
 static void resize(int x,int y){
   mp_msg(MSGT_VO, MSGL_V, "[gl] Resize: %dx%d\n",x,y);
@@ -314,7 +314,7 @@ static uint32_t draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y
 static uint32_t
 draw_frame(uint8_t *src[])
 {
-int i;
+unsigned int i;
 uint8_t *ImageData=src[0];
 
   if (slice_height == 0)
@@ -358,26 +358,40 @@ uninit(void)
 static uint32_t preinit(const char *arg)
 {
     int parse_err = 0;
+    unsigned int parse_pos = 0;
     many_fmts = 0;
     slice_height = 4;
     if(arg) 
     {
-        char *parse_pos = (char *)&arg[0];
-        while (parse_pos[0] && !parse_err) {
-            if (strncmp (parse_pos, "manyfmts", 8) == 0) {
-                parse_pos = &parse_pos[8];
+        while (arg[parse_pos] && !parse_err) {
+            if (strncmp (&arg[parse_pos], "manyfmts", 8) == 0) {
+                parse_pos += 8;
                 many_fmts = 1;
-            } else if (strncmp (parse_pos, "slice-height=", 13) == 0) {
-                parse_pos = &parse_pos[13];
-                slice_height = strtol(parse_pos, &parse_pos, 0);
-                if (slice_height < 0) parse_err = 1;
+            } else if (strncmp (&arg[parse_pos], "nomanyfmts", 10) == 0) {
+                parse_pos += 10;
+                many_fmts = 0;
+            } else if (strncmp (&arg[parse_pos], "slice-height=", 13) == 0) {
+                int val;
+                char *end;
+                parse_pos += 13;
+                val = strtol(&arg[parse_pos], &end, 0);
+                if (val < 0) parse_err = 1;
+                else {
+                  slice_height = val;
+                  parse_pos = end - arg;
+                }
             }
-            if (parse_pos[0] == ':') parse_pos = &parse_pos[1];
-            else if (parse_pos[0]) parse_err = 1;
+            if (arg[parse_pos] == ':') parse_pos++;
+            else if (arg[parse_pos]) parse_err = 1;
         }
     }
     if (parse_err) {
-      mp_msg(MSGT_VO, MSGL_ERR,
+      unsigned int i;
+      mp_msg(MSGT_VO, MSGL_FATAL, "Could not parse arguments:\n%s\n", arg);
+      for (i = 0; i < parse_pos; i++)
+        mp_msg(MSGT_VO, MSGL_FATAL, " ");
+      mp_msg(MSGT_VO, MSGL_FATAL, "^\n");
+      mp_msg(MSGT_VO, MSGL_FATAL,
               "\n-vo gl command line help:\n"
               "Example: mplayer -vo gl:slice-height=4\n"
               "\nOptions:\n"
