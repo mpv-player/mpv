@@ -1,0 +1,114 @@
+<HTML>
+<BODY BGCOLOR=WHITE>
+
+<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+
+
+<P><B><A NAME=2.1>2.1. Unterstützte Formate</A></B></P>
+
+<P><B>MPlayer</B> kann von den folgenden Geräten/Formaten lesen:<BR>
+<UL>
+<LI> <A HREF="#2.1.1.1">VCD</A> (Video CD) direkt vom CD-ROM oder von einer CDRwin-.bin-Image-Datei 
+<LI> <A HREF="#2.1.1.1">DVD</A>, direkt von der DVD-Disk, optionial mit libdvdread zur Entschlüsselung
+<LI> <A HREF="#2.1.1.1">MPEG 1/2</A> System Stream (PS/PES/VOB) und Elementary Stream (ES) Dateiformate
+<LI> <A HREF="#2.1.1.2">RIFF AVI</A> Dateiformat
+<LI> <A HREF="#2.1.1.3">ASF/WMV</A> 1.0 Dateiformat
+<LI> <A HREF="#2.1.1.4">QT/MOV</A> Dateiformat mit (un)komprimierten Headers
+<LI> <A HREF="#2.1.1.5">VIVO</A> Format (.viv Dateien)
+<LI> unterstützt <A HREF="documentation.html#3.3">lesen von stdin</A> oder Netzwerk über HTTP
+</UL></P>
+
+<P>Hinweis: zu RealMedia (.ra/.rm) Support siehe FAQ!</P>
+
+<P>Es ist wichtig einen allgemeinen Fehler zu berichtigen. Wenn Leute eine Datei
+mit <B>.AVI</B>-Erweiterung sehen denken sie das es keine MPEG-Datei ist.
+Das ist nicht war. Zumindest nicht vollständig. Wenn du jemanden sagst, das eine
+solche Datei MPEG1-Video enthalten kann wird er lachen. Trette sie und sage
+ihnen sie sollten RTFM.</P>
+
+<P>Ein <B>codec</B> ist nicht das selbe wie ein <B>Dateiformet</B>.<BR>
+Video <B>codecs</B> sind: MPEG1, MPEG2, DivX, Indeo5, 3ivx.<BR>
+Video <B>formats</B> sind: MPG, VOB, AVI, ASF.<BR>
+</P>
+
+<P>Theoretisch kann du ein OpenDivX Video und MP3 Audio in ein <B>.MPG</B>
+Dateiformat geben. Die meisten Player könnten es jedoch nicht abspielen,
+das die MPEG1 Video und MP2 Audio erwarten. (<B>.MPG</B> hat die nötigen
+Felder nicht, die die Video und Audio Streams beschreiben, wie bei <B>.AVI</B>.
+Oder du kannst ein MPEG1 Video in ein .AVI geben. 
+<A HREF="http://ffmpeg.sourceforge.net">ffmpeg</A> kann solche Dateien erzeugen.</P>
+
+<P>Audio <B>codecs</B> and <B>formats</B> are basically the same terms.</P>
+
+
+<P><B><A NAME=2.1.1>2.1.1. Video Formate</A></B></P>
+
+
+<P><B><A NAME=2.1.1.1>2.1.1.1. MPG, VOB, DAT files</A></B></P>
+
+<P>
+<LI>MPG : Dies ist die <B>grundlegende</B> Form des MPEG Dateiformates. Es
+enthält MPEG1 Video und MP2 Audio.</LI>
+<LI>VOB : VOB ist das MPEG Dateiformat das bei <B>DVD</B>s verwendet wird.
+Es enthält MPEG2 video und normalerweise AC3 Audio.<BR>
+<B>Lese die <A HREF="cd-dvd.html#4.2">DVD Sektion</A> !</B></LI>
+<LI>DAT : Dies ist das MPEG Dateiformat auf <B>Video CD</B>s. Es ist gleich
+zu MPG, aber aufgund der Tatsache dass VCDs erzeugt und Linux entworfen wurde
+kann man die DAT-Dateien einer VCD weder abspielen noch kopieren. Du musst die
+<CODE>-vcd</CODE> Option zum Abspielen verwenden.</LI>
+</P>
+
+<P>Ein wichtiges Feature von MPGs ist, dass sie ein Feld besitzen das die
+Aspect Ratio des Video Streams angibt. SVCDs haben zum Beispiel Video mit
+480x480 Auflösung und im Header ist diese Feld auf 4:3 gesetzt, also wird es
+als 640x480 abgespielt. AVI-Dateien habe diese Feld nicht, darum müssen sie
+während des Encodings skaliert werden.</P>
+
+
+<P><B><A NAME=2.1.1.2>2.1.1.2. AVI Dateien</A></B></P>
+
+<P>Entworfen von Micro$oft, ist <B>AVI (Audio Video Interleaved)</B> ein
+weitverbeitetes Multifunktionsformat, es wird zur Zeit hauptsächlich für
+DivX und DivX4 Videos verwendet. Es hat einige bekannte Nachteile und
+Unfähigkeiten (zum Beispiel Streaming). Es unterstützt einen Videostream
+und 99 Audiostreams und die Dateien können bis zu 2 GB groß sein. Es
+existiert eine Erweiterung für größere Dateien, genannt <B>OpenDMS</B>.
+M$ versucht zur Zeit von der Verwendung stark abzuraten und propergiert
+ASF/WMV. Aber keiner achtet darauf.<BR>
+<B>HINWEIS</B>: DV-Kameras können 2 Arten von AVI-Formaten erzeugen, eines ist
+normal und abspielbar das andere weder normal noch abspielbar.</P>
+
+
+<P><B><A NAME=2.1.1.3>2.1.1.3. ASF/WMV Dateien</A></B></P>
+
+<P>ASF ist ein sehr neues, undokumentiertes Dateiformat von M$ und WMV ist
+der Nachfolger. Sie sind sehr kommerziell und wenn jemand versucht einen
+Opensource Parser zu entwickeln, wird bald ein bestimmtes Verhängnis treffen.
+Während er Erzeugung des Parsers war es offensichtlich zu sehen, wie aufgeblasen,
+scheisse und unbrauchbar es ist. Nicht das jemand was anderes von M$ erwartet
+hätte.
+
+
+<P><B><A NAME=2.1.1.4>2.1.1.4. QT/MOV Dateien</A></B></P>
+
+<P>Dies ist Apples Dateiformat. Nicht viel zu sagen, grundsätzlich gut
+entworfen, vielseitig und streamable, viele Features usw. Es ist schwer Dokumentationen zu
+finden, aber wir denken der der Parser perfekt ist.
+
+<P><B><A NAME=2.1.1.5>2.1.1.5. VIV Dateien</A></B></P>
+
+<P><B>MPlayer</B> demuxt nun auch fröhlich VIVO-Dateiformate. Dieser Code ist
+neu und möglicherweise fehlerhalft und es gibt noch keine Suchfunktion. Siehe
+<A HREF=codecs.html#2.2.1.4>VIVO Videocodec</A> und <A HREF=codecs.html#2.2.2.3>VIVO Audiocodec</A>
+Sektion für Anweisungen zur Installation.</P>
+
+
+<P><B><A NAME=2.1.2>2.1.2. Audio Formate</A></B></P>
+
+<P>Zur Zeit ist <B>MPlayer</B> immer nicht ein <B>Video</B> und kein <B>Media</B>
+Player, darum sind reine Audioformate (zum Beispiel MP3, WAV, Audio-ASF) nicht
+abspielbar. Verwende <A HREF="http://www.xmms.org">xmms</A>,
+<A HREF="http://www.mpg123.de">mpg123</A> oder was auch immer.</P>
+
+</BODY>
+</HTML>
