@@ -12,10 +12,12 @@
  */
 
 #include <inttypes.h>
-#include <sys/ioctl.h>
 #include <unistd.h>
 #include <fcntl.h>
+#ifndef __MINGW32__
+#include <sys/ioctl.h>
 #include <sys/mman.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
