@@ -49,6 +49,13 @@ extern int ao_pcm_waveheader;
 extern char *mDisplayName;
 #endif
 
+#ifdef HAVE_AA
+extern int  aaopt_osdcolor;
+extern int  aaopt_extended;
+extern int  aaopt_eight;
+extern char aaopt_driver;
+#endif
+
 struct config conf[]={
 	/* name, pointer, type, flags, min, max */
 	{"include", cfg_include, CONF_TYPE_FUNC_PARAM, 0, 0, 0}, /* this must be the first!!! */
@@ -194,7 +201,15 @@ struct config conf[]={
 #ifdef HAVE_LIRC
 	{"lircconf", &lirc_configfile, CONF_TYPE_STRING, 0, 0, 0}, 
 #endif
-	
+
+#ifdef HAVE_AA
+	{"aaosdfont", &aaopt_osdcolor, CONF_TYPE_INT, CONF_RANGE, 0, 5 }, 
+	{"aaextended", &aaopt_extended, CONF_TYPE_FLAG, 0, 0, 1 },
+	{"aaeight", &aaopt_eight, CONF_TYPE_FLAG, 0, 0, 1 },
+	{"aadriver", &aaopt_driver, CONF_TYPE_STRING, 0, 0, 0 },
+#endif
+
+      
 	{"noidx", &index_mode, CONF_TYPE_FLAG, 0, -1, 0},
 	{"idx", &index_mode, CONF_TYPE_FLAG, 0, -1, 1},
 	{"forceidx", &index_mode, CONF_TYPE_FLAG, 0, -1, 2},

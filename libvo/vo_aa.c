@@ -75,10 +75,18 @@ static int *sty;
 double accum;
 
 /* our version of the playmodes :) */
-static char * osdmodes[] ={ ">", "\"", "#", "-" , "+" };
+static char * osdmodes[] ={ "|>", "||", ">>", "[]" , ">>" };
 
 extern void mplayer_put_key(int code);
 
+/* to disable stdout outputs when curses/linux mode */
+extern int quiet;
+
+/* config options */
+int aaopt_extended = 0;
+int aaopt_eight = 0;
+int aaopt_osdcolor = AA_SPECIAL;
+char *aaopt_driver = NULL;
 
 void
 resize(void){
@@ -199,8 +207,15 @@ init(uint32_t width, uint32_t height, uint32_t d_width,
     aa_recommendhidisplay("curses");
     aa_recommendhidisplay("X11");
     aa_recommendlowdisplay("linux");
+    
+    /* options ? */
+    if (aaopt_eight) aa_defparams.supported|=AA_EIGHT;
+    if (aaopt_extended && !aaopt_eight) aa_defparams.supported|=AA_EXTENDED;
+    if (aaopt_driver!=NULL){
+	aa_recommendhidisplay(aaopt_driver);
+    }
 
-
+    
     c = aa_autoinit(&aa_defparams);
     aa_resizehandler(c, (void *)resize);
 
@@ -223,8 +238,10 @@ init(uint32_t width, uint32_t height, uint32_t d_width,
     aa_hidecursor(c);
     p = aa_getrenderparams();
 
-    if ((strstr(c->driver->name,"curses")) || (strstr(c->driver->name,"libux"))) 
+    if ((strstr(c->driver->name,"curses")) || (strstr(c->driver->name,"linux"))){
 	freopen("/dev/null", "w", stderr);
+	quiet=1; /* disable mplayer outputs */
+    }
     
     image_height = height;
     image_width = width;
@@ -246,7 +263,12 @@ init(uint32_t width, uint32_t height, uint32_t d_width,
 
     printf(
 		"\n"
-		"\tAA-MPlayer Keys:\n"
+		"Options\n"
+		"\t-aaosdfont   0=normal, 1=dark, 2=bold, 3-boldfont, 4=reverse, 5=special\n"
+		"\t-aaextended  use use all 256 characters\n"
+		"\t-aaeight     use eight bit ascii\n"
+		"\n"
+		"AA-MPlayer Keys:\n"
 		"\t1 : fast rendering\n"
 		"\t2 : dithering\n"
 		"\t3 : invert image\n"
@@ -329,10 +351,10 @@ printosd()
      */
     if (vo_osd_text){
 	if (vo_osd_text[0]-1<=5)
-	  aa_puts(c, 0,0, AA_BOLDFONT, osdmodes[vo_osd_text[0]-1]);
-	else aa_puts(c, 0,0, AA_BOLDFONT, "?");
-	aa_puts(c,1,0, AA_BOLDFONT, vo_osd_text+1);
-	aa_puts(c,strlen(vo_osd_text),0, AA_BOLDFONT, " ");
+	  aa_puts(c, 0,0, aaopt_osdcolor, osdmodes[vo_osd_text[0]-1]);
+	else aa_puts(c, 0,0, aaopt_osdcolor, "?");
+	aa_puts(c,2,0, aaopt_osdcolor, vo_osd_text+1);
+	aa_puts(c,strlen(vo_osd_text)+1,0, aaopt_osdcolor, " ");
     }
 }
 
@@ -505,8 +527,10 @@ uninit(void) {
     free(stx);
     free(sty);
     if (convertbuf!=NULL) free(convertbuf);
-    if (strstr(c->driver->name,"curses") || strstr(c->driver->name,"libux")) 
+    if (strstr(c->driver->name,"curses") || strstr(c->driver->name,"libux")){
 	freopen("/dev/tty", "w", stderr);
+	quiet=0; /* enable mplayer outputs */
+    }
 }
 
 static void
