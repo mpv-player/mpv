@@ -15,13 +15,13 @@
 function defaultmode {
 	# You can choose the mode to use in monitor-only mode
 	# 640x480 60Hz 32bpp	(14" monitors)
-	fbset -a -xres 640 -yres 480 -vxres 640 -vyres 480 -depth 32 -pixclock 39721 -left 48 -right 16 -upper 33 -lower 10 -hslen 96 -vslen 2 -hsync high -accel true
+	fbset -a -xres 640 -yres 480 -vxres 640 -vyres 480 -depth 32 -pixclock 39721 -left 48 -right 16 -upper 33 -lower 10 -hslen 96 -vslen 2 -hsync high -accel true -laced false
 	# 768x576 60Hz 32bpp	(14" monitors)
-	# fbset -a -xres 768 -yres 576 -vxres 768 -vyres 5460 -depth 32 -pixclock 26101 -left 144 -right 16 -upper 28 -lower 6 -hslen 112 -vslen 4 -accel true
+	# fbset -a -xres 768 -yres 576 -vxres 768 -vyres 5460 -depth 32 -pixclock 26101 -left 144 -right 16 -upper 28 -lower 6 -hslen 112 -vslen 4 -accel true -laced false
 	# 800x600 76Hz 32bpp	(15" monitors)
-	# fbset -a -xres 800 -yres 600 -vxres 800 -vyres 1440 -depth 32 -pixclock 20000 -left 128 -right 16 -upper 24 -lower 2 -hslen 96 -vslen 6
+	# fbset -a -xres 800 -yres 600 -vxres 800 -vyres 1440 -depth 32 -pixclock 20000 -left 128 -right 16 -upper 24 -lower 2 -hslen 96 -vslen 6 -laced false
 	# 1024x768 70Hz 32bpp	(15" monitors)
-	# fbset -a -xres 1024 -yres 768 -vxres 1024 -vyres 1440 -depth 32 -pixclock 12500 -left 144 -right 32 -upper 30 -lower 2 -hslen 192 -vslen 6
+	# fbset -a -xres 1024 -yres 768 -vxres 1024 -vyres 1440 -depth 32 -pixclock 12500 -left 144 -right 32 -upper 30 -lower 2 -hslen 192 -vslen 6 -laced false
 }
 
 function TVdefaultmode {
@@ -31,20 +31,20 @@ function TVdefaultmode {
 	##
 
 	# 640x512 80Hz 32bpp
-	fbset -depth 32 -left 60 -right 0 -upper 70 -lower 39 -hslen 76 -vslen 4 -xres 640 -yres 512 -bcast true
+	fbset -a -depth 32 -left 60 -right 0 -upper 70 -lower 39 -hslen 76 -vslen 4 -xres 640 -yres 512 -bcast true -laced false
 	# 640x528 83Hz 32bpp
-	# fbset -depth 32 -left 40 -right 0 -upper 63 -lower 29 -hslen 56 -vslen 4 -xres 640 -yres 528 -vxres 640 -vyres 528 -laced false -bcast true
+	# fbset -a -depth 32 -left 40 -right 0 -upper 63 -lower 29 -hslen 56 -vslen 4 -xres 640 -yres 528 -vxres 640 -vyres 528 -laced false -bcast true
 	# 720x576 78Hz 32bpp
-	# fbset -depth 32 -left 54 -right -36 -upper 55 -lower -6 -hslen 46 -vslen 4 -xres 720 -yres 576 -vxres 720 -vyres 576 -laced false -bcast true
+	# fbset -a -depth 32 -left 54 -right -36 -upper 55 -lower -6 -hslen 46 -vslen 4 -xres 720 -yres 576 -vxres 720 -vyres 576 -laced false -bcast true
 
 	##
 	## NTSC modes
 	##
 
 	# 640x240 non-interlaced 32bpp
-	# fbset -depth 32 -xres 640 -yres 240 -vxres 640 -vyres 240 -pixclock 79443 -left 72 -right 40 -upper 15 -lower 5 -hslen 48 -vslen 3
+	# fbset -a -depth 32 -xres 640 -yres 240 -vxres 640 -vyres 240 -pixclock 79443 -left 72 -right 40 -upper 15 -lower 5 -hslen 48 -vslen 3 -laced false
 	# 640x480 interlaced 32bpp
-	# fbset -depth 32 -xres 640 -yres 480 -vxres 640 -vyres 480 -pixclock 79443 -left 72 -right 40 -upper 30 -lower 10 -hslen 48 -vslen 5 -laced true
+	# fbset -a -depth 32 -xres 640 -yres 480 -vxres 640 -vyres 480 -pixclock 79443 -left 72 -right 40 -upper 30 -lower 10 -hslen 48 -vslen 5 -laced true
 }
 
 function SetTVstandard {
@@ -181,28 +181,28 @@ case "$ABC" in
 
 	a)
 	# 640x512 80Hz 32bpp
-	fbset -depth 32 -left 60 -right 0 -upper 70 -lower 39 -hslen 76 -vslen 4 -xres 640 -yres 512 -bcast true
+	fbset -a -depth 32 -left 60 -right 0 -upper 70 -lower 39 -hslen 76 -vslen 4 -xres 640 -yres 512 -bcast true -laced false
 	;;
 
 	s)
 	# 640x528 83Hz 32bpp
-	fbset -depth 32 -left 40 -right 0 -upper 63 -lower 29 -hslen 56 -vslen 4 -xres 640 -yres 528 -vxres 640 -vyres 528 -laced false -bcast true
+	fbset -a -depth 32 -left 40 -right 0 -upper 63 -lower 29 -hslen 56 -vslen 4 -xres 640 -yres 528 -vxres 640 -vyres 528 -laced false -bcast true
 	;;
 
 	d)
 	# 720x576 78Hz 32bpp
-#	fbset -depth 32 -left 54 -right -36 -upper 55 -lower -6 -hslen 46 -vslen 4 -xres 720 -yres 576 -vxres 720 -vyres 576 -laced false -bcast true
-	fbset -depth 32 -right -36 -lower -6 -hslen 46 -vslen 4 -xres 720 -yres 576 -vxres 720 -vyres 576 -laced false -bcast true
+#	fbset -a -depth 32 -left 54 -right -36 -upper 55 -lower -6 -hslen 46 -vslen 4 -xres 720 -yres 576 -vxres 720 -vyres 576 -laced false -bcast true
+	fbset -a -depth 32 -right -36 -lower -6 -hslen 46 -vslen 4 -xres 720 -yres 576 -vxres 720 -vyres 576 -laced false -bcast true
 	;;
 
 	f)
 	# 640x240 non-interlaced 32bpp
-	fbset -depth 32 -xres 640 -yres 240 -vxres 640 -vyres 240 -pixclock 79443 -left 72 -right 40 -upper 15 -lower 5 -hslen 48 -vslen 3
+	fbset -a -depth 32 -xres 640 -yres 240 -vxres 640 -vyres 240 -pixclock 79443 -left 72 -right 40 -upper 15 -lower 5 -hslen 48 -vslen 3 -laced false
 	;;
 
 	g)
 	# 640x480 interlaced 32bpp
-	fbset -depth 32 -xres 640 -yres 480 -vxres 640 -vyres 480 -pixclock 79443 -left 72 -right 40 -upper 30 -lower 10 -hslen 48 -vslen 5 -laced true
+	fbset -a -depth 32 -xres 640 -yres 480 -vxres 640 -vyres 480 -pixclock 79443 -left 72 -right 40 -upper 30 -lower 10 -hslen 48 -vslen 5 -laced true
 	;;
 esac
 
