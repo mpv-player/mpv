@@ -1,0 +1,20 @@
+To build the package:
+ Get the cvs version, or .tgz and uncompress it,
+ move main to something nicer... mv main mplayer-0.11pre (optional)
+ move there (cd main)
+ run dpkg-buildpackage
+ be patient... and you're done!
+ go up a directory and run:
+  dpkg -i --force-overwrite mplayerXXXXXX.deb !!!!
+
+ That's all folks!
+
+TeLeNiEkO:/opt# dpkg -i --force-overwrite mplayer_0.11pre-1_i386.deb
+Seleccionando el paquete mplayer previamente no seleccionado.
+(Leyendo la base de datos ...
+55966 ficheros y directorios instalados actualmente.)
+Desempaquetando mplayer (de mplayer_0.11pre-1_i386.deb) ...
+Configurando mplayer (0.11pre-1) ... <- Installed!
+
+TeLeNiEkO:/opt#
+
