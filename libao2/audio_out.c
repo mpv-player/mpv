@@ -42,7 +42,9 @@ extern ao_functions_t audio_out_sgi;
 extern ao_functions_t audio_out_dxr3;
 #endif
 extern ao_functions_t audio_out_pcm;
+#ifndef USE_LIBVO2
 extern ao_functions_t audio_out_mpegpes;
+#endif
 extern ao_functions_t audio_out_pss;
 
 ao_functions_t* audio_out_drivers[] =
@@ -73,7 +75,9 @@ ao_functions_t* audio_out_drivers[] =
 	&audio_out_dxr3,
 #endif
 	&audio_out_pcm,
+#ifndef USE_LIBVO2
 	&audio_out_mpegpes,
+#endif
 //	&audio_out_pss,
 	NULL
 };
