@@ -62,7 +62,7 @@ int quant_store[MBR+1][MBC+1]; // [Review]
 void mpeg2_init (void)
 {
 
-    printf (PACKAGE"-"VERSION" (C) 2000 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>\n");
+    printf (PACKAGE"-"VERSION" (C) 2000-2001 Aaron Holtzman & Michel Lespinasse\n");
     config.flags = 0;
 #ifdef HAVE_MMX
     config.flags |= MM_ACCEL_X86_MMX;
@@ -77,7 +77,7 @@ void mpeg2_init (void)
     config.flags |= MM_ACCEL_MLIB;
 #endif
 
-    printf("libmpeg2 config flags = 0x%X\n",config.flags);
+//    printf("libmpeg2 config flags = 0x%X\n",config.flags);
 
     picture=shmem_alloc(sizeof(picture_t)); // !!! NEW HACK :) !!!
 
@@ -328,7 +328,7 @@ while(current<end){
 #ifdef ARCH_X86
 	    if (config.flags & MM_ACCEL_X86_MMX) emms ();
 #endif
-      printf("@@@ libmpeg2 returned from sig11... @@@\n");
+      printf("@@@ libmpeg2 returned from sig11... (bad file?) @@@\n");
     }
   }
   //--------------------
