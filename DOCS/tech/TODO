@@ -4,13 +4,8 @@ TODO:
 
 FOR THE v0.90 RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
-- use codec family names instead of IDs (-afm/-vfm changes)
 - codec (vc/ac) priority option
 - ao/vo priority option
-
-real demuxer:
-- fix buggy .rm files (broken rv20/30 frames) - Florian?
-- add+test non-cook realaudio codecs - samples?
 
 FOR THE v1.00 RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -49,10 +44,11 @@ demuxer:
 
 decoders:
 - fix DLLs: pegasusm, pegasusl, pegasusmwv, 3ivX, morgands, alaris, vcr1, pim1,
-  qpeg, rricm
+  rricm
 
 decoders:
 - qtx support?
+- WMO (wmv9) support?
 
 other:
 - dvd server
