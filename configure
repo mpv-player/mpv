@@ -2289,6 +2289,57 @@ else
 fi
 echores "$_vsscanf"
 
+
+echocheck "posix select()"
+cat > $TMPC << EOF
+#include <sys/select.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
+int main(void) {int nfds = 1; fd_set readfds; struct timeval timeout; select(nfds,&readfds,NULL,NULL,&timeout); return 0; }
+EOF
+_posix_select=no
+cc_check && _posix_select=yes
+if test "$_posix_select" = no ; then
+  _def_no_posix_select='#define HAVE_NO_POSIX_SELECT 1'
+else
+  _def_no_posix_select='#undef HAVE_NO_POSIX_SELECT'
+fi
+echores "$_posix_select"
+
+
+echocheck "gettimeofday()"
+cat > $TMPC << EOF
+#include <stdio.h>
+#include <sys/time.h>
+int main(void) {struct timeval tv_start; gettimeofday(&tv_start, NULL); return 0; }
+EOF
+_gettimeofday=no
+cc_check && _gettimeofday=yes
+if test "$_gettimeofday" = yes ; then
+  _def_gettimeofday='#define HAVE_GETTIMEOFDAY 1'
+else
+  _def_gettimeofday='#undef HAVE_GETTIMEOFDAY'
+fi
+echores "$_gettimeofday"
+
+
+echocheck "glob()"
+cat > $TMPC << EOF
+#include <stdio.h>
+#include <glob.h>
+int main(void) { glob_t gg; glob("filename",0,NULL,&gg); return 0; }
+EOF
+_glob=no
+cc_check && _glob=yes
+if test "$_glob" = yes ; then
+  _def_glob='#define HAVE_GLOB 1'
+else
+  _def_glob='#undef HAVE_GLOB'
+fi
+echores "$_glob"
+
+
 echocheck "sys/sysinfo.h"
 cat > $TMPC << EOF
 #include <sys/sysinfo.h>
@@ -5352,6 +5403,15 @@ $_def_strsep
 
 /* Define this if your system has vsscanf */
 $_def_vsscanf
+
+/* Define this if your system has no posix select */
+$_def_no_posix_select
+
+/* Define this if your system has gettimeofday */
+$_def_gettimeofday
+
+/* Define this if your system has glob */
+$_def_glob
 
 /* LIRC (remote control, see www.lirc.org) support: */
 $_def_lirc
