@@ -48,14 +48,17 @@ extern ao_plugin_cfg_t ao_plugin_cfg;
 // This block should not be available in the pl_xxxx files
 // due to compilation issues
 #ifndef PLUGIN
-#define NPL 2+1 // Number of PLugins ( +1 list ends with NULL )
+#define NPL 3+1 // Number of PLugins ( +1 list ends with NULL )
 // List of plugins 
 extern ao_plugin_functions_t audio_plugin_delay;
 extern ao_plugin_functions_t audio_plugin_format; 
+extern ao_plugin_functions_t audio_plugin_surround;
+
 
 #define AO_PLUGINS { \
    &audio_plugin_delay, \
    &audio_plugin_format, \
+   &audio_plugin_surround, \
    NULL \
 }
 #endif /* PLUGIN */
