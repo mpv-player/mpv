@@ -127,6 +127,24 @@ static int init(sh_video_t *sh){
 //    result=EnterMovies();
 //    printf("EnterMovies->%d\n",result);
 
+#if 0
+    memset(&desc,0,sizeof(desc));
+    while((prev=FindNextComponent(prev,&desc))){
+	ComponentDescription desc2;
+	unsigned char* c1=&desc2.componentType;
+	unsigned char* c2=&desc2.componentSubType;
+	memset(&desc2,0,sizeof(desc2));
+//	printf("juhee %p (%p)\n",prev,&desc);
+	GetComponentInfo(prev,&desc2,NULL,NULL,NULL);
+	printf("DESC: %c%c%c%c/%c%c%c%c [0x%X/0x%X] 0x%X\n",
+	    c1[3],c1[2],c1[1],c1[0],
+	    c2[3],c2[2],c2[1],c2[0],
+	    desc2.componentType,desc2.componentSubType,
+	    desc2.componentFlags);
+    }
+#endif
+
+
     memset(&desc,0,sizeof(desc));
     desc.componentType= (((unsigned char)'i')<<24)|
 			(((unsigned char)'m')<<16)|
@@ -146,23 +164,6 @@ static int init(sh_video_t *sh){
     desc.componentFlagsMask=0;
 
     printf("Count = %d\n",CountComponents(&desc));
-#if 0
-    memset(&desc,0,sizeof(desc));
-    while((prev=FindNextComponent(prev,&desc))){
-	ComponentDescription desc2;
-	unsigned char* c1=&desc2.componentType;
-	unsigned char* c2=&desc2.componentSubType;
-	memset(&desc2,0,sizeof(desc2));
-	printf("juhee %p (%p)\n",prev,&desc);
-	GetComponentInfo(prev,&desc2,NULL,NULL,NULL);
-	printf("DESC: %c%c%c%c/%c%c%c%c [0x%X/0x%X] 0x%X\n",
-	    c1[3],c1[2],c1[1],c1[0],
-	    c2[3],c2[2],c2[1],c2[0],
-	    desc2.componentType,desc2.componentSubType,
-	    desc2.componentFlags);
-    }
-#endif
-
     prev=FindNextComponent(NULL,&desc);
     if(!prev){
 	printf("Cannot find requested component\n");
