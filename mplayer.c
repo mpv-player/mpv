@@ -53,7 +53,9 @@ extern void* mDisplay; // Display* mDisplay;
 #include "codec-cfg.h"
 
 #include "dvdauth.h"
+#ifdef USE_DVDREAD
 #include "spudec.h"
+#endif
 
 #include "linux/getch2.h"
 #include "linux/keycodes.h"
@@ -256,11 +258,13 @@ static unsigned int inited_flags=0;
 
 void uninit_player(unsigned int mask){
   mask=inited_flags&mask;
+#ifdef USE_DVDREAD
   if (mask&INITED_SPUDEC){
     inited_flags&=~INITED_SPUDEC;
     current_module="uninit_spudec";
     spudec_free(vo_spudec);
   }
+#endif
   if(mask&INITED_VO){
     inited_flags&=~INITED_VO;
     current_module="uninit_vo";
@@ -779,10 +783,12 @@ play_next_file:
   inited_flags|=INITED_STREAM;
   stream->start_pos+=seek_to_byte;
 
+#ifdef USE_DVDREAD
   current_module="spudec";
   vo_spudec=spudec_new(stream->priv);
   if (vo_spudec!=NULL)
     inited_flags|=INITED_SPUDEC;
+#endif
   current_module=NULL;
 
   if(stream_cache_size) stream_enable_cache(stream,stream_cache_size*1024);
@@ -2039,6 +2045,8 @@ if(rel_seek_secs || abs_seek_pos){
   }
 #endif
   
+
+#ifdef USE_DVDREAD
   // DVD sub:
   if(vo_spudec){
     unsigned char* packet=NULL;
@@ -2056,6 +2064,7 @@ if(rel_seek_secs || abs_seek_pos){
     }
     current_module=NULL;
   }
+#endif
   
 } // while(!eof)
 

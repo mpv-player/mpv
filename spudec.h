@@ -1,3 +1,4 @@
+#ifdef USE_DVDREAD
 #ifndef _MPLAYER_SPUDEC_H
 #define _MPLAYER_SPUDEC_H
 
@@ -9,4 +10,5 @@ void spudec_draw(void *this, void (*draw_alpha)(int x0,int y0, int w,int h, unsi
 void *spudec_new(dvd_priv_t *dvd_info);
 void spudec_free(void *this);
 
+#endif
 #endif

@@ -11,6 +11,8 @@
 
  */
 
+#ifdef USE_DVDREAD
+
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -318,3 +320,6 @@ void spudec_free(void *this)
     free(spu);
   }
 }
+
+#endif /* USE_DVDREAD */
+

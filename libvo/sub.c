@@ -273,10 +273,11 @@ inline static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,in
 }
 
 void *vo_spudec=NULL;
-
+#ifdef USE_DVDREAD
 inline static void vo_draw_spudec(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
     spudec_draw(vo_spudec, draw_alpha);
 }
+#endif
 
 static int draw_alpha_init_flag=0;
 
@@ -302,10 +303,11 @@ void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h,
     if(vo_osd_progbar_type>=0 && vo_font->font[OSD_PB_0]>=0){
         vo_draw_text_progbar(dxs,dys,draw_alpha);
     }
-
+#ifdef USE_DVDREAD
     if(vo_spudec){
 	vo_draw_spudec(dxs,dys,draw_alpha);
     }
+#endif
 
 }
          
