@@ -6,7 +6,7 @@
 
 <P><B><A NAME=C>Dodatek C - Jak zg³aszaæ b³êdy</A></B></P>
 
-<P><B>Jak zg³aszaæ b³êdy ?</B></P>
+<P><B>Jak zg³aszaæ b³êdy?</B></P>
 
 <P> Najpierw sprawd¼ ostatnie CVS, byæ mo¿e twój b³±d zosta³ ju¿ poprawiony.
 Instrukcje (nieskomplikowane), jak ¶ci±gn±æ CVS, znajdziesz na naszej stronie
@@ -16,25 +16,25 @@ domowej.</P>
 D</A> i inne dokumenty. Je¿eli twój problem nie jest znany lub nie rozwi±zuj±
 go nasze instrukcje, wtedy zg³o¶ b³±d: </P>
 
-<P><B>Gdzie ?</B></P>
+<P><B>Gdzie?</B></P>
 
 <P>Zapisz siê na listê u¿ytkowników mplayera:<BR>
 &nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-users">http://mplayerhq.hu/mailman/listinfo/mplayer-users</A><BR>
 i wy¶lij swój raport do:<BR>
 &nbsp;&nbsp;&nbsp;&nbsp;<A HREF="mailto:mplayer-users@mplayehq.hu">mplayer-users@mplayerhq.hu</A><BR>
-Nie odpiszemy bezpo¶rednio wiêc pamiêtaj, aby zasubskrybowaæ listê!!!</P>
+Nie odpiszemy bezpo¶rednio, wiêc pamiêtaj, aby zasubskrybowaæ listê!!!</P>
 
 <P> Nie wysy³aj raportów o b³êdach prywatnie, bezpo¶rednio na adres autora!!!
 Pracujemy wspólnie nad kodem, wiêc wszyscy s± zainteresowani.  Swoj± drog±,
 czêsto inni u¿ytkownicy znaj± rozwi±zanie (problemy z konfiguracj± systemu, z³e
-sterowniki itd.), nawet kiedy my my¶limy, ¿e to b³±d w kodzie.  Jêzykiem tej
-listy jest ANGIELSKI!  </P>
+sterowniki itd.), nawet kiedy my my¶limy, ¿e to b³±d w kodzie. Jêzykiem tej
+listy jest ANGIELSKI!</P>
 
 <P>Opisz swój problem ze szczegó³ami i nie zapomnij do³±czyæ tego:</P>
 
-<P><B>Czego ?</B></P>
+<P><B>Czego?</B></P>
 
-<P><B><I>1.Informacja o systemie, jak± chcemy znaæ:</I></B></P>
+<P><B><I>1.Informacja o systemie, jak± zawsze chcemy dostaæ:</I></B></P>
 
 <UL>
 <LI>dystrybucja linuksa<BR>
@@ -47,7 +47,7 @@ przyk³ady:<UL>
     <CODE>ls -l /lib/libc[.-]*</CODE>
 <LI>wersja X:<BR>
     <CODE>X -version</CODE>
-<LI>wersje gcc i ld:<BR>
+<LI>wersja gcc i ld:<BR>
     <CODE>gcc -v<BR>
     ld -v</CODE>
 <LI>wersja binutils:<BR>
@@ -59,13 +59,13 @@ przyk³ady:<UL>
 <UL>
 <LI>informacja o CPU:<BR>
     <CODE>cat /proc/cpuinfo</CODE>
-<LI>producent i model karty video:<BR>
+<LI>producent i model karty wideo:<BR>
     przyk³ady:<BR><UL>
     <LI>ASUS V3800U chip: nVidia TNT2 Ultra pro 32MB SDRAM
     <LI>Matrox G400 DH 32MB SGRAM</UL>
 <LI>typ i wersja sterownika karty graficznej<BR>
     przyk³ady:<UL>
-    <LI>sterownik dostarczony w X
+    <LI>wbudowany sterownik X-ów
     <LI>nvidia 0.9.623
     <LI>Utah-GLX CVS 2001-02-17
     <LI>DRI z X 4.0.3</UL>
@@ -105,14 +105,13 @@ prze¶lij te pliki na adres:</I></B></P>
   Za³aduj to przez ftp, a na listê wy¶lij tylko ¶cie¿kê/nazwê pliku. Je¿eli
   plik jest dostêpny przez sieæ, to wystarczy wys³aæ _dok³adny_ URL do niego.
 
-<P><B><I>5. :W przypadku przerwañ w dzia³aniu programu ( segfault, SIGILL, sygna³ 4 itd.):</I></B></P>
+<P><B><I>5. W przypadku przerwañ w dzia³aniu programu ( segfault, SIGILL, sygna³ 4 itd.):</I></B></P>
 
-<P><I>Je¿eli masz coredump po tym zdarzeniu, patrz 5.a, je¶li nie patrz 5.b:</I></P>
+<P><I>Je¿eli masz coredump po tym zdarzeniu, zobacz 5.a, je¶li nie - zobacz 5.b:</I></P>
 
 <P><B><I>5.a: Zapisz i wy¶lij nam coredump (je¿eli zosta³ stworzony).</I></B></P>
 
-<P>Jak to zrobiæ:
-Utwórz nastêpuj±cy skrypt:</P>
+<P>Jak to zrobiæ: utwórz nastêpuj±cy skrypt:</P>
 
 <P><CODE>disass $eip-32 $eip+32<BR>
 printf "eax=%08lX\n",$eax<BR>
@@ -151,20 +150,19 @@ przez ftp oraz do³±czyæ jedynie ¶cie¿kê/nazwê pliku w raporcie!  </P>
 <P><B>Wiem co robiê...</B></P>
 
 <P> Je¶li stworzy³e¶ w³a¶ciwy raport o b³êdzie, postêpuj±c zgodnie z podanymi
-wskazówkami oraz jeste¶ pewien, ¿e to b³±d mplayera, nie kompilatora czy
+wskazówkami oraz jeste¶ pewien, ¿e to b³±d mplayera, nie kompilatora, czy
 zepsutego pliku, przeczyta³e¶ dokumentacjê i nadal nie znalaz³e¶ rozwi±zania,
-a twoje sterowniki kart d¼wiêkowej s± w porz±dku, wówczas mo¿esz zasubskrybowaæ
+a twoje sterowniki karty d¼wiêkowej s± w porz±dku, wówczas mo¿esz zasubskrybowaæ
 listê dyskusyjn± mplayer-advusers i wys³aæ swój raport, aby dostaæ szybsz± i
 lepsz± odpowied¼.
-Ale strze¿ siê: je¶li wy¶lesz pytanie w stylu pocz±tkuj±cego u¿ytkownika b±d¼ w
-typie rtfm, natychmiast zostaniesz zbanowany, nawet nie uzyskuj±c czêsto
-odpowiedzi na swoje pytania.   
+Ale STRZE¯ SIÊ: je¶li wy¶lesz pytanie w stylu pocz±tkuj±cego u¿ytkownika, b±d¼
+w typie rtfm ("read the fucken manual" - przeczytaj pieprzony manual),
+natychmiast zostaniesz zbanowany, zazwyczaj nie uzyskuj±c nawet odpowiedzi na
+swoje pytania.   
 A wiêc nie dra¿nij nas, zasubskrybuj -advusers tylko, je¶li naprawdê wiesz, co
 robisz i czujesz, ¿e jeste¶ ju¿ zaawansowanym u¿ytkownikiem lub developerem
 mplayera (a propos tego, jak subskrybowaæ: dowiedz siê sam! je¶li jeste¶
 naprawdê zaawansowanym u¿ytkownikiem, nie powinno to byæ dla ciebie problemem
-...).
-</P>
-
+...).</P>
 </BODY>
 </HTML>

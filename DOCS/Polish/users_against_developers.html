@@ -5,117 +5,183 @@
 
 <P><B><I>In medias res</I></B></P>
 
-<P>There are two major topic which always causes huge dispute and flame on the
-<A HREF="http://www.MPlayerHQ.hu/cgi-bin/htsearch">mplayer-users</A>
-mailing list. Number one is of course the topic of the</P>
+<P>S± takie dwa tematy, które zawsze wywo³uj± wielk± dyskusjê i ogniste boje na
+li¶cie dyskusyjnej <A
+HREF="http://www.MPlayerHQ.hu/cgi-bin/htsearch">u¿ytkowników mplayera</A>.
+Tematem numer jeden jest:</P>
 
-<P><B><I>GCC 2.96 series</I></B></P>
+<A NAME=gcc><P><B><I>serie GCC 2.96</I></B></P>
 
-<P><B>Also read <A HREF="gcc-2.96-3.0.html">this</A> text !!!</B></P>
+<P><B>Przeczytaj te¿ <A HREF="gcc-2.96-3.0.html">ten</A> tekst !!!</B></P>
 
-<P>The <I>background</I> : there were/are the GCC <B>2.95</B> series. The
-best of them was 2.95.3 . Please note the style of the version numbering.
-This is how the GCC team numbers their compilers. The 2.95 series are good.
-We never ever saw anything that was miscompiled because of the 2.95's faultiness.</P>
+<P><I>T³o</I>: by³y/s± serie GCC <B>2.95</B>. Najlepsz± z nich by³a 2.95.3.
+Zwróæ uwagê na sposób numerowania wersji j±dra. Oto jak dru¿yna GCC numeruje
+swoje kompilatory. Serie 2.95 s± dobre. Nigdy nie widziano, aby co¶ ¼le siê
+skompilowa³o z przyczyny b³êdów w 2.95.</P>
 
-<P>The <I>action</I> : <B>RedHat</B> started to include a GCC version of <B>2.96</B>
-with their distributions. Note the version numbering. This should be the GCC
-team's versioning. They patched the CVS version of GCC (something between 2.95 and 3.0)
-They patched it very deep, and used this version in the distrib because 3.0
-wasn't out at time, and they wanted IA64 support ASAP (business reasons).
-Oh, and GCC 2.95 miscompiles bash on the s390 architecture (there is
-no RedHat distribution for s390..) .</P>
+<P><I>Poczynania</I>: <B>RedHat</B> rozpocz±³ w³±czanie wersji GCC <B>2.96</B>
+w swoich dystrybucjach. Zwróæ uwagê na numeracjê wersji. To powinno byæ
+numerowanie dru¿yny GCC. Oni na³o¿yli ³atê na wersjê CVS GCC (co¶ na
+pograniczu 2.95 a 3.0). Ta ³ata by³a bardzo powa¿na i tej werji u¿yto do
+dystrybucji, poniewa¿ wersja 3.0 nie by³a skoñczona na czas, a oni chcieli mieæ
+obs³ugê IA64 ASAP (z powodów w³asnych interesów). A przecie¿ GCC 2.95
+¼le kompiluje bash na architekturze s390 (nie ma dystrybucji RedHata dla
+s390..).</P>
 
-<P>The <I>facts</I> : <B>MPlayer</B>'s compile process needs the
-<CODE>--disable-gcc-checking</CODE> to proceed upon detecting a GCC version of
-2.96 (apparently it needs this option on <B>egcs</B> too. It's because we don't
-test <B>MPlayer</B> on egcs. Pardon us, but we rather develop <B>MPlayer</B>).
-If you know <B>MPlayer</B>, you should know that it has great speed. It
-achieves this by having overoptimized MMX/SSE/3DNow/etc codes, fastmemcpy, and
-lots of other features. <B>MPlayer</B> contained MMX/3DNow instructions in a
-syntax that all Linux compilers accept it... except RedHat's GCC (it's more
-standard compliant). It simply <B><I>skips</I></B> them. It doesn't give
-errors. It doesn't give warnings. <B>And</B>, there is Lame. With gcc 2.96, its quality check
-(<CODE>make test</CODE> after compiling) <I>doesn't even run !!!</I>
-But hey, it compiles bash on s390 and IA64.</P>
+<P><I>Fakty</I>: proces kompilacji <B>MPlayera</B> wymaga
+<CODE>--disable-gcc-checking</CODE>, aby pomin±æ wykrywanie wersji GCC 2.96
+(wyra¼nie wymagana jest ta opcja przy <B>egcs</B> równie¿; to dlatego, ¿e my
+nie testujemy <B>MPlayera</B> na egcs. Proszê nam wybaczyæ, ale my raczej
+zajmujemy siê rozwijaniem <B>MPlayera</B>). Je¿eli znasz <B>MPlayera</B>,
+powiniene¶ wiedzieæ, ¿e jest on bardzo szybki. Osi±ga to poprzez
+zoptymalizowanie kodu dla MMX/SSE/3DNow/itp., dziêki fastmemcpy i wielu innym
+w³a¶ciwo¶ciom. <B>MPlayer</B> zawiera³ instrujkcje MMX/3DNow w sk³adni, któr±
+wszystkie kompilatory Linuksowe akceptuj± ... za wyj±tkiem GCC RedHata (to
+okre¶lenie jest bardziej zgodne ze standardem). On po prostu je
+<B><I>przeskakuje</I></B>. Nie zg³asza b³êdów. Nie wysy³a ostrze¿eñ. <B>I</B>,
+tam jest "Lame". Z gcc 2.96, sprawdzanie jako¶ci (<CODE>make test</CODE> po
+kompilacji) <I>nawet siê nie uruchamia!!!</I> Hej, ale on kompiluje bash na
+s390 i IA64.</P>
 
-<P>The <I>statements</I> : most developers around the world begun having
-bad feelings about RedHat's GCC 2.96 , and told their RedHat users to
-compile with other compiler than 2.96 . RedHat users' disappointment slowly
-went into anger. What was all good
-for, apart from giving headaches to developers, putting oil on anti-RedHat
-flame, confusing users? The answer, I do not know.</P>
+<P><I>Wnioski</I>: wiêkszo¶æ developerów na ¶wiecie zaczê³o mieæ z³e odczucia
+w zwi±zku z GCC 2.96 RedHata. Powiedzieli oni swoim u¿ytkownikom RedHat'a, aby 
+u¿ywali do kompilacji innych kompilatorów, ni¿ 2.96. Rozczarowanie u¿ytkowników
+RedHata powoli przemieni³o siê w gniew. Co by³o takiego dobrego, w
+przeciwieñstwie do bólu g³owy developerów, w dolewaniu oliwy do
+anty-RedHatowskiego ognia, wprawiaj±cym u¿ytkowników w konsternacjê? Ja nie
+znam odpowiedzi na to pytanie.</P>
 
-<P><I>Present age, present time</I> : RedHat says that GCC 2.96-85 and above
-is fixed, and works properly. Note the versioning. They should have started
-with something like this. What about GCC 2.96.85 ? It doesn't matter now.
-I don't search, but I still see bugs with 2.96 . It doesn't matter now,
-hopefully now <B>RedHat will forget about 2.96</B> and turn towards <B>3.0</B>.
-Towards a deep patched 3.0...
-</P>
+<P><I>Tera¼niejszo¶æ</I>: RedHat twierdzi, ¿e GCC 2.96-85 i kolejne wersje s±
+naprawione i pracuj± w³a¶ciwie. Zwróæ uwagê na numeracjê wersji.To typowe, ¿e 
+zaczêli z czym¶ takim. A co z GCC 2.96.85? Nieistotne. Nie szukam, ale
+wci±¿ widzê b³êdy w 2.96. To jest bez znaczenia teraz, miejmy nadziejê, ¿e
+<B>RedHat zapomni o 2.96</B> i skieruje siê ku <B>3.0</B>. W kierunku
+porz±dnie za³atanego 3.0...</P>
 
-<P><I>What I don't understand</I> is why are we hated by RedHat users for
-putting warning messages, and stay-away documents in <B>MPlayer</B> .
-Why are we called "brain damaged", "total asshole", "childish" by
-<B>RedHat users</B>, on our mailing list, and even on the <B>redhat-devel</B> .
-They even considered forking <B>MPlayer</B> for themselves. RedHat users.
-Why? It's RedHat that made the compiler, why do <U>you</U> have to hate us?
-Are you <U>that</U> fellow RedHat worshippers? Please stop it. We don't hold
-a grudge against users, doesn't matter how loud you advertise its contrary.
-Please go flame Linus Torvalds, the DRI developers (oh, now I know why
-there were laid off by VA!), the Wine, avifile. Even if we are arrogant,
-are we not the same as the previously listed ones? Why do <B>we</B> have
-to suffer from your unrightful wrath?</P>
+<P><I>To, czego ja tu nie rozumiem</I>, to z jakiego powodu jeste¶my oblegani
+przez u¿ytkowników RedHata, ¿al±cych siê na komunikaty ostrzegawcze i dokumenty
+w rodzaju "trzymaj siê z dala" w <B>MPlayerze</B>. Dlaczego jeste¶my nazywani
+"umys³owo upo¶ledzonymi", "totalnymi dupkami", "dziecinnymi w swoim my¶leniu"
+przez <B>u¿ytkowników RedHata</B>, na naszej mailowej li¶cie dyskusyjnej, a
+nawet na li¶cie <B>redhat-devel</B>. Rozwa¿ali oni nawet stworzenie odga³êzienia
+<B>MPlayera</B> dla nich samych. U¿ytkownicy RedHata. Dlaczego? Czy to RedHat
+stworzy³ kompilator, dlaczego <U>wy</U> musicie nas nienawidzieæ? Jeste¶cie a¿
+<U>takimi</U> wyznawcami RedHata? Proszê, przestañcie. My nie chowamy
+urazy do u¿ytkowników, nie wa¿ne jak g³o¶no og³aszacie co¶ przeciwnego. Id¼cie,
+proszê, u¿eraæ siê z Linusem Torvaldsem, z developerami DRI (och, teraz wiem ju¿
+dlaczego oni zostali opuszczeni przez VA!), Wine, avifile. Je¶li nawet
+jeste¶my aroganccy, czy nie jeste¶my tacy sami jak wcze¶niej wspomniani?
+Dlaczego to <B>my</B> musimy cierpieæ z powodu nies³usznego gniewu?</P>
 
-<P>I'm closing this topic. Think over it please. I (Gabucino) personally begun
-with <A HREF="http://www.redhat.com">RedHat</A>, then used Mandrake (sorry I
-don't know their URL), now I have <A
-HREF="http://www.linuxfromscratch.com">LFS</A>. Never held a grudge against
-RedHat or RedHat users, and I still don't. Hate is only comfortable. It
-won't bring you anywhere.</P>
-
-<P><B><I>Binary distribution of MPlayer</I></B></P>
-
-<P>Tons of users asked us about this. For example Debian users tend to say: Oh,
-I can <CODE>apt-get install avifile</CODE>, why should I <B>compile MPlayer</B> ?
-While this may sound reasonable, the problem lies a bit deeper than
-those-fuckin-MPlayer-developers-hate-gcc-2.96-and-RedHat-and-Debian.</P>
-
-<P>Reasons: <B>Law</B></P>
-
-<P><B>MPlayer</B> describes the <U>sourcecode</U>. It contains several files with incompatible
-licenses especially on the redistribution clauses. As source files, they are
-allowed to coexist in a same project.</P>
-
-<P>Therefore, <U>NEITHER BINARIES NOR BINARY PACKAGES OF <B>MPlayer</B> ARE ALLOWED TO EXIST SINCE
-SUCH OBJECTS BREAK LICENSES</U>. PEOPLE WHO DISTRIBUTE SUCH BINARY PACKAGES ARE
-DOING ILLEGAL ACTIVITIES.</P>
-
-<P>So if you know somebody who maintains a binary package then forward her/him
-this text and (ask him to) contact us. What (s)he is doing is illegal and IT IS
-NO LONGER <B>MPlayer</B>, but <U>his/her</U> mplayer. If it breaks, it is
-his/her fault. Don't come and cry on the <B>MPlayer</B> mailing lists, you will
-most likely be blacklisted.</P>
-
-<P>Reasons: <B>Technical</B></P>
+<P><A HREF="mailto:willis_matthew@yahoo.com">Matt Willis</A> uprzejmie
+dostarczy³ proste howto (jak to zrobiæ) kompilacji GCC-3.0.3, które poni¿ej
+zamieszczam:</P>
 
 <P>
 <UL>
-  <LI><B>MPlayer's</B> speed (MMX, SSE, fastmemcpy, etc) optimizations are
-    determined during compilation. Thus a compiled binary contains very
-    processor-specific code. An <B>MPlayer</B> binary compiled for K6 will die
-    on Pentiums and vice versa. This has to be workarounded by runtime
-    detection, which is not an easy thing to do becase it causes massive speed
-    decrease. If you don't believe (it was explained in details 10000 times on
-    mplayer-users, search the archive), solve it and send us a patch. Someone
-    begun work on it, but disappeared since then.</LI>
-  <LI><B>MPlayer's</B> video/audio system is not plugin based. It is compiled
-    into the binary, thus making the binary depend on various libraries (the
-    GUI depends on GTK, DivX4 depends on libdivxdecore, SDL depends on libSDL,
-    every SDL release contains an unique bug that has to be workarounded during
-    compiletime, X11 output compiles differently for X3 and X4, etc). You may
-    say: yes, let's make 30 versions of downloadable binaries! We won't. We
-    will make these stuff pluggable in the future.</LI>
+ <LI>¦ci±gnij gcc. Id¼ na stronê: <A
+  HREF="http://gcc.gnu.org/mirrors.html">http://gcc.gnu.org/mirrors.html</A>.
+   Ja ¶ci±gn±³em nastêpuj±ce pliki, ale ty nie potrzebujesz ich wszystkich:<BR>
+    <CODE>gcc-g++-3.0.3.tar.gz<BR>
+    gcc-objc-3.0.3.tar.gz<BR>
+    gcc-3.0.3.tar.gz<BR>
+    gcc-g77-3.0.3.tar.gz<BR>
+    gcc-testsuite-3.0.3.tar.gz<BR>
+    gcc-core-3.0.3.tar.gz<BR>
+    gcc-java-3.0.3.tar.gz</CODE>
+  </LI>
+
+  <LI>Rozpakuj pliki, stwórz katalog w którym bêdizesz budowa³ i zbuduj:
+  <CODE><PRE>
+     tar xvzf gcc-*3.0.3.tar.gz
+     mkdir gcc-build; cd gcc-build
+     ../gcc-3.0.3/configure --prefix=/opt --program-suffix=-3.0.3
+     make bootstrap; mkdir -p /opt; make install</PRE></CODE>
+
+  <LI>Ustaw swoj± ¶cie¿kê, aby zawiera³a /opt/bin<BR>
+     <CODE>export PATH=/opt/bin:${PATH}</CODE>
+
+  <LI>Teraz mo¿esz budowaæ MPlayera.</LI>
+</UL>
+</P>
+
+<A NAME=binary><P><B><I>Dystrybucja MPlayera w postaci binariów</I></B></P>
+
+<P>Tony u¿ytkowników prosz± nas o to. Na przyk³ad u¿ytkownicy Debiana maja
+zwyczaj mówiæ: Oh, mogê zrobiæ <CODE>apt-get install avifile</CODE>, dlaczego
+mam <B>kompilowaæ MPlayera</B>? To brzmi rozs±dnie, ale problem le¿y nieco
+g³êbiej, ni¿:
+ci-pieprzeni-developerzy-MPlayera-nienawidz±-gcc-2.96-i-RedHata-i-Debiana.</P>
+
+<P>Przyczyny: <B>Prawo</B></P>
+
+<P><B>MPlayer</B> zapisany jest jako <U>¼ród³a</U>. Zawiera on kilka plików z
+niekompatybilnymi liecencjami w punktach dotycz±cych redystrybucji. Jako
+¼ród³owe pliki, maj± one prawo wspó³istnieæ w tym samym projekcie.</P>
+
+<P>Jednak¿e <U>ANI BINARIA, ANI BINARNE PAKIETY <B>MPlayera</B> NIE MAJ¡ PRAWA
+ISTNIEÆ W CHWILI, GDY TAKIE OBIEKTY £AMI¡ LICENCJE</U>. LUDZIE, KTÓRZY
+ROZPROWADZAJ¡ TAKIE PAKIETY BINARNE POSTÊPUJ¡ NIELEGALNIE.</P>
+
+<P>Wiêc je¶li znasz kogo¶, kto rozporz±dza binarnymi pakietami, wówczas daj mu
+do przeczytania ten tekst i (popro¶ go o) kontakt z nami. To co on/ona robi,
+jest nielegalne I TO JU¯ NIE JEST <B>MPlayer</B>, a <U>jego/jej</U> mplayer.
+Je¶li ¼le dzia³a, to to jest jego/jej wina. Niech nikt nie przychodzi i nie
+¿ali siê na listê mailow± <B>MPlayera</B>, bo najprawdopodobniej zostanie
+zapisany na czarn± listê.</P>
+
+<P>Przyczyny: <B>Techniczne</B></P>
+
+<P>
+<UL>
+  <LI>Optymalizacja szybko¶ci dzia³ania <B>MPlayera</B> (MMX, SSE, fastmemcpy,
+    itp) jest zdeterminowana podczas kompilacji. Z tego powodu skompilowane
+    binaria zawieraj± bardzo specyficzny dla danego procesora kod.  Binaria
+    <B>MPlayera</B> skompilowane dla K6 nie bêd± wydolne na procesorach Pentium
+    i vice versa. To zosta³o rozpracowane poprzez wykrywanie runtime, co nie
+    jest ³atw± do obej¶cia zrobienia, gdy¿ sprawia masow± utratê prêdko¶ci.
+    Je¶li nie wierzysz (to by³o juz 10000 razy wyja¶nione w szczegó³ach na
+    mplayer-users, przeszukaj archiwum), to rozwik³aj to i wy¶lij nam patch.
+    Kto¶ zacz±³ nad tym pracowaæ, ale nie ma o nim wie¶ci od tamtej pory.</LI>
+  <LI>System audio/video <B>MPlayera</B> nie jest oparty na systemie
+    wtyczek. System audio/video jest wkompilowany w binaria, co powoduje
+    zale¿no¶æ binariów od ró¿nych bibliotek (GUI zale¿y od GTK, DivX4 zale¿y od
+    libdivxdecore, SDL zale¿y od libSDL, ka¿de wydanie SDL zawiera unikalny
+    b³±d, ktory musi byæ ominiêty w czasie kompilacji, X11 wyj¶cie w ró¿ny
+    sposób siê kompiluje X3 i X4, itp). Mo¿esz powiedzieæ: wiêc zróbmy 30
+    wersji binariów do ¶ci±gniêcia! Nie zrobimy tego. Zrobimy te rzeczy w
+    postaci wtyczek w przysz³o¶ci.</LI>
 </UL>
 
+<A NAME=nvidia><P><B><I>NVidia</I></B></P>
+
+<P>Nie lubimy binarnych sterowników nvidii, ich jako¶ci, niestabilno¶ci,
+nieistniej±cego wsparcia dla u¿ytkowników, wci±¿ pojawiaj±cych siê nowych
+b³êdów. Wiêkszo¶æ u¿ytkowników ma do nich podobne podej¶cie. Skontaktowali siê
+z nami pó¼niej ludzie z NVidii i powiedzieli, ¿e te b³êdy nie istniej±,
+niestabilno¶æ jest win± chipów AGP i odmówili opublikowania raportu o
+b³êdach sterownika (np. o fioletowej linii). Wiêc je¶li masz problem ze swoj±
+NVidi±, uaktualizuj sterownik nvidii i/lub kup now± p³ytê g³ówn±.</P>
+
+<A NAME=kotsog><P><B><I>Joe Barr</I></B></P>
+
+<P>On nie odpowiada na nasze maile. Jego wydawca nie odpowiada na nasze maile.
+Sieæ jest pe³na jego fa³szywych stwierdzeñ i oskar¿eñ (on widocznie nei lubi na
+przyk³ad ch³opaków z BSD, z powodu ró¿nicy pogl±dów [na jaki temat?]).</P>
+
+<P>Oto kilka cytatów wypowiedzi ró¿nych ludzi na temat Joe Barr (tylko po to,
+aby¶ zrozumia³, dlaczego on siê kompletnie nie liczy):</P>
+
+<P><I>"Wszyscy pamiêtacie LinuxWorld 2000, kiedy on twierdzi³, ¿e Linus T.
+powiedzia³, ¿e FreeBSD, to garstka developerów. Linus nie powiedzia³ NICZEGO w
+tym rodzaju. Kiedy to wypomniano Joe'mu, jego reakcj± by³o wyzwanie ludzi
+utrzymuj±cych BSD of dupków i glupków."</I></P>
+
+<P><I>"On jest interesuj±cy, ale kiepsko mu wychodzi unikanie ...
+kontrowersyjno¶ci. Joe Barr by³ regularnym uczestnikiem forum Willa Zachmanna
+w Compuserve, kilka lat temu. By³ zwolennikiem OS/2 (ja równie¿ by³em
+zwolennikiem OS/2). Czêsto przekracza³ wszelkie granice, rozw¶cieczaj±c ludzi
+i podejrzewam, ¿e to by³y ciê¿kie czasy dla niego. Trochê z³agodnia³ ostatnio,
+bêd±c ocenionym przez w³asny dzia³ redakcyjny. Stonowany, subtelny humor nie by³
+jednak jesgo stylem w tamtych wczesnych dniach w zupe³no¶ci.  "</I></P>
 </HTML>
