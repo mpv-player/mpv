@@ -517,7 +517,7 @@ bugs!
 
         GCC 2.96 IS NOT AND WILL NOT BE SUPPORTED BY US !
 
-     *** For details please read DOCS/users_against_developers.html ***
+    *** For details please read DOCS/en/users_against_developers.html ***
 
 EOF
     die "Bad gcc version"
@@ -528,14 +528,14 @@ cat <<EOF
 ******************************************************************************
 
 Hmm. You really want to compile MPlayer with an *UNSUPPORTED* C compiler?
-Ok. You know. Do it. Did you already read DOCS/users_against_developers.html???
+Ok. You know. Do it. Did you read DOCS/en/users_against_developers.html???
 
 DO NOT SEND BUGREPORTS OR COMPLAIN, it's *YOUR* compiler's fault!
 Get ready for mysterious crashes, no-picture bugs, strange noises... REALLY!
 Lame which is used by mencoder produces weird errors, too.
 
 If you have any problem, install a GCC 2.95.x or 3.x version and try again.
-If the problem _still_ exists, then read DOCS/bugreports.html !
+If the problem _still_ exists, then read DOCS/en/bugreports.html !
 
   *** DO NOT SEND BUG REPORTS OR COMPLAIN it's *YOUR* compiler's fault! ***
 
@@ -1895,7 +1895,7 @@ if test "$_inttypes" = yes ; then
   # nothing to do
   :
 else
-  die "cannot find header inttypes.h (see DOCS/faq.html)"
+  die "cannot find header inttypes.h (see DOCS/en/faq.html)"
 fi
 echores "$_inttypes"
 
@@ -4315,7 +4315,7 @@ if test "$_xanim" = auto ; then
     if test "$_xanim" = yes ; then
       echores "yes (using $_xanimlibdir)"
     else
-      echores "no (no suitable directory found - see DOCS/codecs.html)"
+      echores "no (no suitable directory found - see DOCS/en/codecs.html)"
     fi
   else
     echores "no (dynamic loader support needed)"
@@ -4358,7 +4358,7 @@ if test "$_real" = auto ; then
       if test "$_real" = yes ; then
         echores "yes (using $_reallibdir)"
       else
-        echores "no (no suitable directory found - see DOCS/codecs.html)"
+        echores "no (no suitable directory found - see DOCS/en/codecs.html)"
       fi
     fi
   else
@@ -4475,7 +4475,7 @@ if test "$_libavcodec" = auto ; then
       echores "no (old ffmpeg version, use CVS !)"
     fi
   else
-    echores "no (see DOCS/codecs.html)"
+    echores "no (see DOCS/en/codecs.html)"
   fi
 else
   echores "$_libavcodec"
@@ -6000,7 +6000,7 @@ EOF
 
 
 if test "$_mtrr" = yes ; then
-  echo "Please check mtrr settings at /proc/mtrr (see DOCS/video.html#mtrr)"
+  echo "Please check mtrr settings at /proc/mtrr (see DOCS/en/video.html#mtrr)"
   echo
 fi
 
@@ -6048,7 +6048,7 @@ cat <<EOF
 Check $TMPLOG if you wonder why an autodetection failed (check whether
 the development headers/packages are installed).
 
-If you suspect a bug, please read DOCS/bugreports.html.
+If you suspect a bug, please read DOCS/en/bugreports.html.
 
 EOF
 

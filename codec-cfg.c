@@ -1033,8 +1033,8 @@ int main(int argc, char* argv[])
 		exit(0);
 	}
 
-        f1=fopen("DOCS/codecs-in.html","rb"); if(!f1) exit(1);
-        f2=fopen("DOCS/codecs-status.html","wb"); if(!f2) exit(1);
+        f1=fopen("DOCS/en/codecs-in.html","rb"); if(!f1) exit(1);
+        f2=fopen("DOCS/en/codecs-status.html","wb"); if(!f2) exit(1);
         
         while((c=fgetc(f1))>=0){
             if(c!='%'){

@@ -4,7 +4,7 @@
 # it is already done in english DOCS)
 #
 # Usage:
-#  cd DOCS/French
+#  cd DOCS/fr/
 #  ...
 #  TOCrenumber.sh 2.3.1.2.1 xv_3dfx
 #  ...
