@@ -512,10 +512,11 @@ static int pnm_get_headers(pnm_t *p, int *need_response) {
     ptr+=chunk_size;
   }
   
-  /* set pre-buffer to a low number */
-  /* prop_hdr[36]=0x01;
-  prop_hdr[37]=0xd6; */
-
+  if (!prop_hdr) {
+    printf("input_pnm: error while parsing headers.\n");
+    return 0;
+  }
+  
   /* set data offset */
   size--;
   prop_hdr[42]=(size>>24)%0xff;
@@ -740,7 +741,7 @@ static int pnm_get_stream_chunk(pnm_t *p) {
 pnm_t *pnm_connect(int fd, char *path) {
   
   pnm_t *p=malloc(sizeof(pnm_t));
-  int need_response;
+  int need_response=0;
   
   p->path=strdup(path);
   p->s=fd;
