@@ -428,15 +428,15 @@ GtkWidget * create_FileSelect( void )
  GdkBitmap     * upmask;
  GtkStyle      * upstyle;
 
- fsFileSelect=gtk_window_new( GTK_WINDOW_DIALOG );
+ fsFileSelect=gtk_window_new( GTK_WINDOW_TOPLEVEL );
  gtk_widget_set_name( fsFileSelect,"fsFileSelect" );
  gtk_object_set_data( GTK_OBJECT( fsFileSelect ),"fsFileSelect",fsFileSelect );
- gtk_widget_set_usize( fsFileSelect,416,256 );
+ gtk_widget_set_usize( fsFileSelect,512,300 );
  GTK_WIDGET_SET_FLAGS( fsFileSelect,GTK_CAN_DEFAULT );
  gtk_widget_set_events( fsFileSelect,GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK | GDK_FOCUS_CHANGE_MASK | GDK_STRUCTURE_MASK | GDK_PROPERTY_CHANGE_MASK | GDK_VISIBILITY_NOTIFY_MASK );
  gtk_window_set_title( GTK_WINDOW( fsFileSelect ),MSGTR_FileSelect );
  gtk_window_set_position( GTK_WINDOW( fsFileSelect ),GTK_WIN_POS_CENTER );
- gtk_window_set_policy( GTK_WINDOW( fsFileSelect ),FALSE,FALSE,TRUE );
+ gtk_window_set_policy( GTK_WINDOW( fsFileSelect ),TRUE,TRUE,TRUE );
  fsColorMap=gdk_colormap_get_system();
 
  style=gtk_widget_get_style( fsFileSelect );
@@ -495,7 +495,7 @@ GtkWidget * create_FileSelect( void )
  gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"hbox4",hbox4,
                           ( GtkDestroyNotify ) gtk_widget_unref );
  gtk_widget_show( hbox4 );
- gtk_box_pack_start( GTK_BOX( vbox4 ),hbox4,TRUE,TRUE,0 );
+ gtk_box_pack_start( GTK_BOX( vbox4 ),hbox4,FALSE,FALSE,0 );
 
  fsCombo4=gtk_combo_new();
  gtk_widget_set_name( fsCombo4,"fsCombo4" );
