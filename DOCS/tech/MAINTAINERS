@@ -77,6 +77,7 @@ libvo drivers:
     * vo_dga.c - ? (Acki (outdated))
     * vo_dfbmga.c - Ville Syrjala
     * vo_directfb[2].c - Jiri Svoboda
+    * vo_directx.c - Sascha Sommer
     * vo_dxr2.c - Albeu
     * vo_dxr3.c - ? (David Holm)
     * vo_fbdev.c - Joey Parrish
@@ -130,6 +131,7 @@ libao2 drivers:
     * ao_sdl.c - Atmos
     * ao_sgi.c - Oliver Schoenbrunner
     * ao_sun.c - Jürgen Keil
+    * ao_win32.c - Sascha Sommer
 
 TOOLS:
     * subfont-c - Artur Zaprzala
