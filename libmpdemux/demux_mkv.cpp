@@ -2357,10 +2357,10 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
                                                     sizeof(mkv_sh_sub_t));
       demuxer->sub->id = track->xid;
 
-    } else if (strcmp(track->codec_id, MKV_S_TEXTASCII) &&
+    } else if (!(strcmp(track->codec_id, MKV_S_TEXTASCII) &&
                strcmp(track->codec_id, MKV_S_TEXTUTF8) && 
                strcmp(track->codec_id, MKV_S_TEXTSSA) &&
-               strcmp(track->codec_id, "S_SSA"))
+               strcmp(track->codec_id, "S_SSA")))
       mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] Subtitle type '%s' is not "
              "supported. Track will not be displayed.\n", track->codec_id);
     else {
