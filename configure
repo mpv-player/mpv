@@ -1804,7 +1804,7 @@ fi
 if test "$_mlib" = yes ; then
   _def_mlib='#define HAVE_MLIB 1'
   _inc_mlib=" -I${_mlibdir}/include "
-  _ld_mlibl=" -L${_mlibdir}/lib -R${_mlibdir}/lib -lmlib "
+  _ld_mlib=" -L${_mlibdir}/lib -R${_mlibdir}/lib -lmlib "
 else
   _def_mlib='#undef HAVE_MLIB'
 fi
@@ -2367,7 +2367,7 @@ else
   _confcygwin="TARGET_CYGWIN = no"
 fi
 
-_ld_arch="$_ld_pthread $_ld_dl $_ld_dl_dynamic"
+_ld_arch="${_ld_arch} $_ld_pthread $_ld_dl $_ld_dl_dynamic"
 #bsd && _ld_arch="-rdynamic $_ld_arch"
 bsdos && _ld_arch="$_ld_arch -ldvd"
 
