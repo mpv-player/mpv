@@ -23,6 +23,9 @@
  * - works only on x86 architectures
  *
  * $Log$
+ * Revision 1.15  2001/04/19 21:39:10  arpi_esp
+ * driver info now depends on detected DGA version
+ *
  * Revision 1.14  2001/04/17 22:28:09  acki2
  * - now also supports OSD for YV12 (big speed penalty by having to build image
  *   in offscreen memory and then copying;
@@ -99,7 +102,11 @@ LIBVO_EXTERN( dga )
 
 static vo_info_t vo_info =
 {
-        "DGA ( Direct Graphic Access, V1.0+XF86VidModeExtension and V2.0)",
+#ifdef HAVE_DGA2
+        "DGA ( Direct Graphic Access V2.0 )",
+#else
+        "DGA ( Direct Graphic Access V1.0+XF86VidModeExtension )",
+#endif
         "dga",
         "Andreas Ackermann <acki@acki-netz.de>",
         ""
