@@ -1,6 +1,8 @@
 // Generic alpha renderers for all YUV modes and RGB depths.
 // These are "reference implementations", should be optimized later (MMX, etc)
 
+#include "osd.h"
+
 void vo_draw_alpha_yv12(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
     int y;
     for(y=0;y<h;y++){
