@@ -2433,17 +2433,17 @@ fi
 echores "$_tv"
 
 echocheck "Video 4 Linux TV interface"
-if test "$_tv_v4l" = auto && test "$_tv" = yes && linux ; then
-  _tv_v4l=no
-  if test -c /dev/video0 ; then
+if test "$_tv_v4l" = auto ; then
+ _tv_v4l=no
+ if test "$_tv" = yes && linux ; then
+  if test -c /dev/video0 || test -c /dev/video ; then
     cat > $TMPC <<EOF
 #include <linux/videodev.h>
 int main(void) { return 0; }
 EOF
     cc_check && _tv_v4l=yes
   fi
-else
-  _tv_v4l=no
+ fi
 fi
 if test "$_tv_v4l" = yes ; then
   _def_tv_v4l='#define HAVE_TV_V4L 1'
