@@ -68,8 +68,8 @@ int                  wsOutMask = 0;
 
 int                  wsTrue    = True;
 
-wsTWindow          * wsWindowList[5] = { NULL,NULL,NULL,NULL,NULL };
-int                  wsWLCount = 0;
+#define	wsWLCount 5
+wsTWindow          * wsWindowList[wsWLCount] = { NULL,NULL,NULL,NULL,NULL };
 
 unsigned long        wsKeyTable[512];
 
@@ -446,7 +446,14 @@ void wsCreateWindow( wsTWindow * win,int X,int Y,int wX,int hY,int bW,int cV,uns
  wsCreateImage( win,win->Width,win->Height );
 // --- End of creating --------------------------------------------------------------------------
 
- wsWindowList[wsWLCount++]=win;
+ {
+  int i;
+  for ( i=0;i < wsWLCount;i++ )
+   if ( wsWindowList[i] == NULL ) break;
+  if ( i == wsWLCount )
+   { printf( "!!! tul sok nyitott ablak van.\n" ); exit( 1 ); }
+  wsWindowList[i]=win;
+ }
 
  XFlush( wsDisplay );
  XSync( wsDisplay,False );
@@ -469,9 +476,11 @@ void wsDestroyWindow( wsTWindow * win )
     XFreeCursor( wsDisplay,win->wsCursor );
     win->wsCursor=None;
    }
+ XFreeGC( wsDisplay,win->wGC );
  XUnmapWindow( wsDisplay,win->WindowID );
  wsDestroyImage( win );
  XDestroyWindow( wsDisplay,win->WindowID );
+#if 0
  win->ReDraw=NULL;
  win->ReSize=NULL;
  win->Idle=NULL;
@@ -481,6 +490,7 @@ void wsDestroyWindow( wsTWindow * win )
  win->Focused=0;
  win->Mapped=0;
  win->Rolled=0;
+#endif
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -490,7 +500,7 @@ void wsDestroyWindow( wsTWindow * win )
 inline int wsSearch( Window win )
 {
  int i;
- for ( i=0;i<wsWLCount;i++ ) if ( wsWindowList[i]->WindowID == win ) return i;
+ for ( i=0;i<wsWLCount;i++ ) if ( wsWindowList[i] && wsWindowList[i]->WindowID == win ) return i;
  return -1;
 }
 

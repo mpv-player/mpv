@@ -191,6 +191,7 @@ listItems tmpList;
 void ChangeSkin( char * name )
 {
  int ret;
+ int prev = appMPlayer.menuIsPresent;
 
  mainVisible=0;
 
@@ -208,7 +209,8 @@ void ChangeSkin( char * name )
    mainVisible=1;
    return;
   }
- if ( appMPlayer.menuBase.Bitmap.Image )
+
+ if ( prev && appMPlayer.menuIsPresent )
   {
    if ( mplMenuDrawBuffer ) free( mplMenuDrawBuffer );
    if ( ( mplMenuDrawBuffer = (unsigned char *)calloc( 1,appMPlayer.menuBase.Bitmap.ImageSize ) ) == NULL )
@@ -217,7 +219,7 @@ void ChangeSkin( char * name )
    wsResizeImage( &appMPlayer.menuWindow,appMPlayer.menuBase.width,appMPlayer.menuBase.height );
    wsSetShape( &appMPlayer.menuWindow,appMPlayer.menuBase.Mask.Image );
    wsVisibleWindow( &appMPlayer.menuWindow,wsHideWindow );
-  }
+  } else { mplMenuInit(); }
 
  if ( appMPlayer.sub.Bitmap.Image ) wsResizeImage( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Width,appMPlayer.sub.Bitmap.Height );
  if ( ( !appMPlayer.subWindow.isFullScreen )&&( !guiIntfStruct.Playing ) )
@@ -238,7 +240,9 @@ void ChangeSkin( char * name )
  if ( ( mplDrawBuffer = (unsigned char *)calloc( 1,appMPlayer.main.Bitmap.ImageSize ) ) == NULL )
   { mp_msg( MSGT_GPLAYER,MSGL_STATUS,MSGTR_NEMDB ); return; }
 
- if ( vo_wm_type == vo_wm_Unknown ) wsVisibleWindow( &appMPlayer.mainWindow,wsHideWindow );
+#if 0
+// if ( vo_wm_type == vo_wm_Unknown ) 
+  wsVisibleWindow( &appMPlayer.mainWindow,wsHideWindow );
  wsResizeWindow( &appMPlayer.mainWindow,appMPlayer.main.width,appMPlayer.main.height );
  wsMoveWindow( &appMPlayer.mainWindow,True,appMPlayer.main.x,appMPlayer.main.y );
  wsResizeImage( &appMPlayer.mainWindow,appMPlayer.main.width,appMPlayer.main.height );
@@ -246,7 +250,26 @@ void ChangeSkin( char * name )
  wsWindowDecoration( &appMPlayer.mainWindow,appMPlayer.mainDecoration );
  mainVisible=1; mplMainRender=1; wsPostRedisplay( &appMPlayer.mainWindow );
  wsVisibleWindow( &appMPlayer.mainWindow,wsShowWindow );
+#else
+ wsDestroyWindow( &appMPlayer.mainWindow );
 
+ wsCreateWindow( &appMPlayer.mainWindow,
+   appMPlayer.main.x,appMPlayer.main.y,appMPlayer.main.width,appMPlayer.main.height,
+   wsNoBorder,wsShowMouseCursor|wsHandleMouseButton|wsHandleMouseMove,wsShowFrame|wsMaxSize|wsHideWindow,"MPlayer" );
+ wsCreateImage( &appMPlayer.mainWindow,appMPlayer.main.Bitmap.Width,appMPlayer.main.Bitmap.Height );
+ wsSetShape( &appMPlayer.mainWindow,appMPlayer.main.Mask.Image );
+ wsSetIcon( wsDisplay,appMPlayer.mainWindow.WindowID,guiIcon,guiIconMask );
+
+ appMPlayer.mainWindow.ReDraw=(void *)mplMainDraw;
+ appMPlayer.mainWindow.MouseHandler=mplMainMouseHandle;
+ appMPlayer.mainWindow.KeyHandler=mplMainKeyHandle;
+ appMPlayer.mainWindow.DandDHandler=mplDandDHandler;
+
+ wsXDNDMakeAwareness( &appMPlayer.mainWindow );
+ if ( !appMPlayer.mainDecoration ) wsWindowDecoration( &appMPlayer.mainWindow,0 );
+ wsVisibleWindow( &appMPlayer.mainWindow,wsShowWindow );
+ mainVisible=1;
+#endif
  btnModify( evSetVolume,guiIntfStruct.Volume );
  btnModify( evSetBalance,guiIntfStruct.Balance );
  btnModify( evSetMoviePosition,guiIntfStruct.Position );

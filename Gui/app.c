@@ -138,6 +138,8 @@ void appInitStruct( listItems * item )
  item->subR=0;
  item->subG=0;
  item->subB=0;
+ item->barIsPresent=0;
+ item->menuIsPresent=0;
 }
 
 int appFindKey( unsigned char * name )

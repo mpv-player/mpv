@@ -15,6 +15,7 @@ int             mplMenuRender = 1;
 int             mplMenuItem = -1;
 int             mplOldMenuItem = -1;
 int             mplMenuX,mplMenuY;
+static int      mplMenuIsInitialized = 0;
 
 void mplHideMenu( int mx,int my,int w );
 
@@ -24,7 +25,7 @@ void mplMenuDraw( void )
  uint32_t * drw = NULL;
  int             x,y,tmp;
 
- if ( !appMPlayer.menuBase.Bitmap.Image ) return;
+ if ( !appMPlayer.menuIsPresent || !appMPlayer.menuBase.Bitmap.Image ) return;
  if ( !mplMenuRender && !appMPlayer.menuWindow.Visible ) return;
 
  if ( mplMenuRender || mplMenuItem != mplOldMenuItem )
@@ -78,7 +79,7 @@ void mplShowMenu( int mx,int my )
 {
  int x,y;
 
- if ( !appMPlayer.menuBase.Bitmap.Image ) return;
+ if ( !appMPlayer.menuIsPresent || !appMPlayer.menuBase.Bitmap.Image ) return;
 
  x=mx;
  if ( x + appMPlayer.menuWindow.Width > wsMaxX ) x=wsMaxX - appMPlayer.menuWindow.Width - 1;
@@ -101,7 +102,7 @@ void mplHideMenu( int mx,int my,int w )
 {
  int x,y,i=mplMenuItem;
 
- if ( !appMPlayer.menuBase.Bitmap.Image ) return;
+ if ( !appMPlayer.menuIsPresent || !appMPlayer.menuBase.Bitmap.Image ) return;
 
  x=mx-mplMenuX;
  y=my-mplMenuY;
@@ -126,7 +127,7 @@ void mplHideMenu( int mx,int my,int w )
 void mplMenuInit( void )
 {
 
- if ( !appMPlayer.menuBase.Bitmap.Image ) return;
+ if ( mplMenuIsInitialized || !appMPlayer.menuIsPresent || !appMPlayer.menuBase.Bitmap.Image ) return;
 
  appMPlayer.menuBase.x=0;
  appMPlayer.menuBase.y=0;
@@ -150,6 +151,7 @@ void mplMenuInit( void )
   mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[menu.h] menu: 0x%x\n",(int)appMPlayer.menuWindow.WindowID );
  #endif
 
+ mplMenuIsInitialized=1;
  appMPlayer.menuWindow.ReDraw=mplMenuDraw;
 // appMPlayer.menuWindow.MouseHandler=mplMenuMouseHandle;
 // appMPlayer.menuWindow.KeyHandler=mplMainKeyHandle;

@@ -210,7 +210,7 @@ void guiInit( void )
  i=wsShowFrame|wsMaxSize|wsHideWindow;
  wsCreateWindow( &appMPlayer.mainWindow,
   appMPlayer.main.x,appMPlayer.main.y,appMPlayer.main.width,appMPlayer.main.height,
-  wsNoBorder,wsShowMouseCursor|wsHandleMouseButton|wsHandleMouseMove,i,"MPlayer" ); //wsMinSize|
+  wsNoBorder,wsShowMouseCursor|wsHandleMouseButton|wsHandleMouseMove,i,"MPlayer" );
 
  wsSetShape( &appMPlayer.mainWindow,appMPlayer.main.Mask.Image );
  wsXDNDMakeAwareness(&appMPlayer.mainWindow);

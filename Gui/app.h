@@ -145,7 +145,11 @@ typedef struct
  wItem           sub;
  wsTWindow       subWindow;
  int             subR,subG,subB;
- int             subPixel;
+
+ wItem           bar;
+ wsTWindow       barWindow;
+ int             barR,barG,barB;
+ int             barIsPresent;
 
  wItem           eq;
  wsTWindow       eqWindow;
@@ -153,6 +157,7 @@ typedef struct
  wItem           menuBase;
  wItem           menuSelected;
  wsTWindow       menuWindow;
+ int		 menuIsPresent;
 
 // ---
  int             NumberOfItems;
