@@ -1001,6 +1001,10 @@ if(stream_dump_type==5){
   int len;
   FILE *f;
   current_module="dumpstream";
+  if(stream->fd<0){
+    mp_msg(MSGT_CPLAYER,MSGL_FATAL,"Cannot dump this stream - no 'fd' available\n");
+    exit_player(MSGTR_Exit_error);
+  }
   stream_reset(stream);
   stream_seek(stream,stream->start_pos);
   f=fopen(stream_dump_name,"wb");
