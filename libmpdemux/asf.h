@@ -190,13 +190,4 @@ typedef enum {
 #define le2me_WAVEFORMATEX(h)	    /**/
 #endif
 
-
-#ifdef	STREAMING
-//int asf_http_streaming_type(char *content_type, char *features);
-int asf_http_streaming_start( stream_t *stream );
-int asf_http_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *streaming_ctrl );
-
-int asf_streaming(ASF_stream_chunck_t *stream_chunck, int *drop_packet );
-#endif
-
 #endif
