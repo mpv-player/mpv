@@ -237,8 +237,10 @@ static uint32_t preinit(const char *arg)
                     show_help = 1;
                     vo_subdevice += 4;
                     break;
-               }
-               }
+               } else  {
+                    vo_subdevice++;
+	       }
+          }
 	       
           if (show_help) {
                mp_msg( MSGT_VO, MSGL_ERR,
@@ -611,6 +613,25 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 		    }
 	    }
 	} // vm end
+
+// just for sure clear primary layer
+#if DIRECTFBVERSION > 913
+        ret = dfb->GetDisplayLayer( dfb, DLID_PRIMARY, &layer);
+	if (ret==DFB_OK) {
+	    ret = layer->GetSurface(layer,&primary);
+	    if (ret==DFB_OK) {
+		primary->Clear(primary,0,0,0,0xff);
+		ret = primary->Flip(primary,NULL,0);
+		if (ret==DFB_OK) { 
+		    primary->Clear(primary,0,0,0,0xff);
+		}
+    	    primary->Release(primary);
+	    }
+	primary=NULL;
+        layer->Release(layer);
+	}
+	layer=NULL;
+#endif
 
 // find best layer
 
@@ -1184,6 +1205,19 @@ static uint32_t get_image(mp_image_t *mpi)
 	   mpi->width=width;
 	   mpi->stride[0]=pitch;
        }
+
+       // center image
+       
+       if (!frame) {
+            if(mpi->flags&MP_IMGFLAG_PLANAR){
+		mpi->planes[0]= dst + yoffset * pitch + xoffset;
+		mpi->planes[1]+= (yoffset * pitch) >> 2 + xoffset >> 1;
+		mpi->planes[2]+= (yoffset * pitch) >> 2 + xoffset >> 1;
+	    } else {
+		mpi->planes[0]=dst + yoffset * pitch + xoffset * (mpi->bpp >> 3);
+	    }		   
+       }
+       
        mpi->flags|=MP_IMGFLAG_DIRECT;
 //       if (verbose) printf("DirectFB: get_image() SUCCESS -> Direct Rendering ENABLED\n");
        return VO_TRUE;
@@ -1200,6 +1234,8 @@ static uint32_t draw_slice(uint8_t *src[], int stride[], int w, int h, int x, in
         void *dst2;
         void *srcp;
 	unsigned int p;
+
+//        if (verbose) printf("DirectFB: draw_slice entered\n");
 
 	unlock();
 
@@ -1315,6 +1351,7 @@ static uint32_t put_image(mp_image_t *mpi){
             memcpy(dst+i*pitch,src+i*mpi->stride[0],p);
         }
 
+	
 	if (pixel_format == DSPF_YV12) {
 
             dst += pitch*height;
@@ -1353,7 +1390,9 @@ static uint32_t put_image(mp_image_t *mpi){
 	unlock();
 
     } else {
+// I had to disable native directfb blit because it wasn't working under some conditions :-(
 
+/*
 	dsc.flags = DSDESC_HEIGHT | DSDESC_PIXELFORMAT | DSDESC_WIDTH | DSDESC_PREALLOCATED;
 	dsc.preallocated[0].data = mpi->planes[0];
 	dsc.preallocated[0].pitch = mpi->stride[0];
@@ -1374,6 +1413,23 @@ static uint32_t put_image(mp_image_t *mpi){
 		DFBCHECK (tmp->Blit(tmp,primary,&rect,xoffset,yoffset));
         };
         tmp->Release(tmp);
+*/
+
+	unsigned int pitch;
+        void *dst;
+
+//        if (verbose) printf("DirectFB: Put_image - non planar branch\n");
+	if (frame) {
+		DFBCHECK (frame->Lock(frame,DSLF_WRITE,&dst,&pitch));
+		framelocked = 1;
+		mem2agpcpy_pic(dst,mpi->planes[0] + mpi->y * mpi->stride[0] + mpi->x * (mpi->bpp >> 3)  ,mpi->w * (mpi->bpp >> 3),mpi->h,pitch,mpi->stride[0]);
+        } else {
+		DFBCHECK (primary->Lock(primary,DSLF_WRITE,&dst,&pitch));
+		primarylocked = 1;
+		mem2agpcpy_pic(dst + yoffset * pitch + xoffset * (mpi->bpp >> 3),mpi->planes[0] + mpi->y * mpi->stride[0] + mpi->x * (mpi->bpp >> 3)  ,mpi->w * (mpi->bpp >> 3),mpi->h,pitch,mpi->stride[0]);
+        };
+	unlock();
+
     }
     return VO_TRUE;
 }
