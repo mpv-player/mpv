@@ -541,13 +541,18 @@
       <LI>you need this if you want to play or encode for example movies recorded
         with various hardware compressors, like tuner cards, digital cameras
         (example: DV, ATI VCR, MJPEG)</LI>
-      <LI>needed if you want to play <B>WMV8 movies</B>. Not needed for old
+      <LI>needed if you want to play <B>WMV8, WMV9/WMA9 movies</B>.</LI>
+      <LI>Not needed for old
         ASF's with MP41 or MP42 video (though VoxWare audio is frequent for these
         files - it's done by the Win32 codec), or WMV7. Also not needed
         for WMA (Windows Media Audio), libavcodec has opensource decoder
         for that.</LI>
     </UL>
   </LI>
+  <LI><B>QuickTime codecs</B>: on x86 platforms these codecs can be used
+    to decode Sorenson v1/v3, RPZA, and other QuickTime video, and
+    QDesign audio streams. Installation instructions can be found in the
+    <A HREF="codecs.html#sorenson">Sorenson video codec</A> section.</LI>
   <LI><B>DivX4/DivX5</B>: information about this codec is available in the
     <A HREF="codecs.html#divx">DivX4/DivX5</A> section. You possibly don't want
     this codec as <B>libavcodec</B> (see above) is much faster and has better
