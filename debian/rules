@@ -53,7 +53,7 @@ binary-arch: build
 	dh_installdirs
 
 	# commands to install the package into debian/<packagename>
-	$(MAKE) prefix=$(prefix)/usr CONFDIR=$(prefix)/share/mplayer install
+	$(MAKE) prefix=$(prefix)/usr CONFDIR=$(prefix)/share/mplayer DATADIR=${CONFDIR} install
 	#install -m 755 -s mplayer $(CURDIR)/debian/`dh_listpackages`/usr/bin/mplayer
 	dh_link usr/bin/mplayer usr/bin/gmplayer
 	#install -o root -g root -m 0644 etc/codecs.conf $(prefix)/usr/share/mplayer
