@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.36 -->
+<!-- synced with 1.37 -->
 <sect1 id="codecs">
 <title>Wspierane kodeki</title>
 
@@ -235,7 +235,7 @@ większość funkcji. W celu zdobycia libavcodec wykonaj następujące czynności:
   <screen>cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg login</screen>
   </para></step>
 <step><para>
-  <screen>cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg co ffmpeg</screen>
+  <screen>cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg co -P ffmpeg/libavcodec</screen>
   </para></step>
 <step><para>
   Przenieś katalog <filename>libavcodec</filename> ze źródeł FFmpega
