@@ -50,13 +50,13 @@ int WinID=-1;
 
 void vo_hidecursor ( Display *disp , Window win )
 {
-	if(WinID==0) return;	// do not hide, if we're playing at rootwin
-
 	Cursor no_ptr;
 	Pixmap bm_no;
 	XColor black,dummy;
 	Colormap colormap;
 	static unsigned char bm_no_data[] = { 0,0,0,0, 0,0,0,0  };
+
+	if(WinID==0) return;	// do not hide, if we're playing at rootwin
 	
 	colormap = DefaultColormap(disp,DefaultScreen(disp));
 	XAllocNamedColor(disp,colormap,"black",&black,&dummy);	
