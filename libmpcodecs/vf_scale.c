@@ -85,8 +85,13 @@ static int config(struct vf_instance_s* vf,
     }
 
     // calculate the missing parameters:
+    if(vf->priv->w==-3) vf->priv->w=vf->priv->h*width/height; else
+    if(vf->priv->w==-2) vf->priv->w=vf->priv->h*d_width/d_height;
     if(vf->priv->w<0) vf->priv->w=width; else
     if(vf->priv->w==0) vf->priv->w=d_width;
+    
+    if(vf->priv->h==-3) vf->priv->h=vf->priv->w*height/width; else
+    if(vf->priv->h==-2) vf->priv->h=vf->priv->w*d_height/d_width;
     if(vf->priv->h<0) vf->priv->h=height; else
     if(vf->priv->h==0) vf->priv->h=d_height;
     
