@@ -74,7 +74,13 @@
 
 #ifdef USE_LIBAVCODEC
 // for lavc audio encoding
+
+#ifdef USE_LIBAVCODEC_SO
+#include <ffmpeg/avcodec.h>
+#else
 #include "libavcodec/avcodec.h"
+#endif
+
 static AVCodec        *lavc_acodec;
 static AVCodecContext *lavc_actx = NULL;
 extern char    *lavc_param_acodec;
