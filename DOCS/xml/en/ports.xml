@@ -305,8 +305,8 @@ device is:
 </para>
 
 <para>
-QuickTime DLLs have also been reported to work. Compile with
-<option>--enable-qtx</option> and put the codecs into
+QuickTime and Real DLLs also work. Compile with <option>--enable-qtx</option>
+and <option>--enable-real</option> and put the codecs into
 the default Windows DLL location, <filename class="directory">C:\WINNT\system32</filename>
 or <filename class="directory">C:\Windows\system</filename> depending on your
 Windows version.
