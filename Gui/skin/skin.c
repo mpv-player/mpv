@@ -593,10 +593,10 @@ int skinRead( char * dname )
  unsigned char   param[256];
  int             c,i;
 
- setname( skinMPlayerDir,dname );
+ setname( skinDirInHome,dname );
  if ( ( skinFile = fopen( fn,"rt" ) ) == NULL )
   {
-   setname( skinDirInHome,dname );
+   setname( skinMPlayerDir,dname );
    if ( ( skinFile = fopen( fn,"rt" ) ) == NULL )
     {
      mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[skin] file ( %s ) not found.\n",fn );
