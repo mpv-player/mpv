@@ -89,8 +89,33 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
   }
 
   pformat = format;
-  if (format == IMGFMT_YV12) bpp = 32;
-  else bpp = format & 255;
+  
+  // -bpp check
+  if (!vo_dbpp) {
+    if (format == IMGFMT_YV12) bpp = 32;
+    else bpp = format & 255;
+  } else {
+      bpp = vo_dbpp;
+      switch (bpp) {
+        case 32: if (!(vid_modes[_640x480x16M32] | vid_modes[_800x600x16M32] | vid_modes[_1024x768x16M32])) {
+	           printf("vo_svga: %dbpp not supported by HW or SVGAlib",bpp);
+		   return(1);
+                 }
+        case 24: if (!(vid_modes[_640x480x16M] | vid_modes[_800x600x16M] | vid_modes[_1024x768x16M])) {
+	           printf("vo_svga: %dbpp not supported by HW or SVGAlib",bpp);
+		   return(1);
+                 }
+        case 16: if (!(vid_modes[_640x480x64K] | vid_modes[_800x600x64K] | vid_modes[_1024x768x64K])) {
+	           printf("vo_svga: %dbpp not supported by HW or SVGAlib",bpp);
+		   return(1);
+                 }
+        case 15: if (!(vid_modes[_640x480x32K] | vid_modes[_800x600x32K] | vid_modes[_1024x768x32K])) {
+	           printf("vo_svga: %dbpp not supported by HW or SVGAlib",bpp);
+		   return(1);
+                 }
+      }
+    }
+  
   if (wid > 800)
     switch (bpp) {
       case 32: vid_mode = 36; break;
