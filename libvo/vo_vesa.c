@@ -50,6 +50,7 @@ extern int verbose;
 #define min(a,b) ((a)<(b)?(a):(b))
 #endif
 
+#define UNUSED(x) ((void)(x)) /**< Removes warning about unused arguments */
 
 static vo_info_t vo_info = 
 {
@@ -291,6 +292,13 @@ static void draw_alpha_15(int x0,int y0, int w,int h, unsigned char* src, unsign
 
 static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)
 {
+  UNUSED(x0);
+  UNUSED(y0);
+  UNUSED(w);
+  UNUSED(h);
+  UNUSED(src);
+  UNUSED(srca);
+  UNUSED(stride);
 }
 
 
@@ -829,9 +837,8 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	  printf("vo_vesa: VESA initialization complete\n");
 	  fflush(stdout);
 	}
-	if(HAS_DGA())
+	if(HAS_DGA() && vo_doublebuffering)
 	{
-	    int y = 0;
 	    for(i=0;i<MAX_BUFFERS;i++)
 	    {
 		win.ptr = dga_buffer = video_base + multi_buff[i];
