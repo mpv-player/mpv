@@ -34,6 +34,10 @@ char *audio_out_format_name(int format)
 	    return("Signed 32-bit (Little-Endian)");
 	case AFMT_S32_BE:
 	    return("Signed 32-bit (Big-Endian)");
+	case AFMT_S24_LE:
+	    return("Signed 24-bit (Little-Endian)");
+	case AFMT_S24_BE:
+	    return("Signed 24-bit (Big-Endian)");
 	case AFMT_FLOAT:
 	    return("Floating Point");
     }
@@ -54,6 +58,10 @@ int audio_out_format_bits(int format){
 	case AFMT_S32_BE:
 	case AFMT_FLOAT:
 	return 32;
+
+	case AFMT_S24_LE:
+	case AFMT_S24_BE:
+	return 24;
 	
 	case AFMT_MU_LAW:
 	case AFMT_A_LAW:

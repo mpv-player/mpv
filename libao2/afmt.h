@@ -32,29 +32,39 @@
 #	define AFMT_AC3			0x00000400	/* Dolby Digital AC3 */
 #endif
 
-/* 32 bit formats (MSB aligned) formats */
-#ifndef AFMT_S32_LE
-# define AFMT_S32_LE              0x00001000
-# define AFMT_S32_BE              0x00002000
+/* 24 bit formats from the linux kernel */
+#ifndef AFMT_S24_LE
+#define AFMT_S24_LE		0x00000800
+#define AFMT_S24_BE		0x00001000
+#define AFMT_U24_LE		0x00002000
+#define AFMT_U24_BE		0x00004000
 #endif
 
+/* 32 bit formats from the linux kernel */
+#ifndef AFMT_S32_LE
+#define AFMT_S32_LE		0x00008000
+#define AFMT_S32_BE		0x00010000
+#define AFMT_U32_LE		0x00020000
+#define AFMT_U32_BE		0x00040000
+#endif
 
 /* native endian formats */
 #ifndef	AFMT_S16_NE
 # if WORDS_BIGENDIAN
 #  define AFMT_S16_NE	AFMT_S16_BE
+#  define AFMT_S24_NE	AFMT_S24_BE
 #  define AFMT_S32_NE	AFMT_S32_BE
 # else
 #  define AFMT_S16_NE	AFMT_S16_LE
+#  define AFMT_S24_NE	AFMT_S24_LE
 #  define AFMT_S32_NE	AFMT_S32_LE
 # endif
 #endif
 
 #ifndef AFMT_FLOAT
-# define AFMT_FLOAT               0x00004000
+# define AFMT_FLOAT               0x00100000
 #endif
 
 /* for formats that don't have a corresponding AFMT_* type,
  * use the flags from libaf/af_format.h or'ed with this */
 #define AFMT_AF_FLAGS             0x70000000
-
