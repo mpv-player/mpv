@@ -134,7 +134,7 @@ static int init(int rate,int channels,int format,int flags)
         ao_data.channels = wformat.nChannels = 2;
 	    ao_data.samplerate = wformat.nSamplesPerSec = 44100;
 	    ao_data.format = AFMT_S16_LE;
-	    ao_data.bps=ao_data.channels * ao_data.samplerate;
+	    ao_data.bps=ao_data.channels * ao_data.samplerate*2;
 	    ao_data.buffersize=wformat.wBitsPerSample=16;
         wformat.nBlockAlign     = wformat.nChannels * (wformat.wBitsPerSample >> 3);
         wformat.nAvgBytesPerSec = wformat.nSamplesPerSec * wformat.nBlockAlign;
