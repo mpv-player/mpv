@@ -920,7 +920,7 @@ subtitle* subcp_recode (subtitle *sub)
 
 #endif
 
-static void adjust_subs_time(subtitle* sub, float subtime, float fps){
+static void adjust_subs_time(subtitle* sub, float subtime, float fps, int block){
 	int n,m;
 	subtitle* nextsub;
 	int i = sub_num;
@@ -928,6 +928,7 @@ static void adjust_subs_time(subtitle* sub, float subtime, float fps){
 	
 	n=m=0;
 	if (i)	for (;;){
+	    if (!block)
 		if (sub->end <= sub->start){
 			sub->end = sub->start + subfms;
 			m++;
@@ -935,6 +936,7 @@ static void adjust_subs_time(subtitle* sub, float subtime, float fps){
 		}
 		if (!--i) break;
 		nextsub = sub + 1;
+	    if (block){
 		if (sub->end >= nextsub->start){
 			sub->end = nextsub->start - 1;
 			if (sub->end - sub->start > subfms)
@@ -957,6 +959,7 @@ static void adjust_subs_time(subtitle* sub, float subtime, float fps){
 			sub->start *= sub_fps/fps;
 			sub->end   *= sub_fps/fps;
 		}
+	    }
 
 		sub = nextsub;
 		m = 0;
@@ -966,8 +969,8 @@ static void adjust_subs_time(subtitle* sub, float subtime, float fps){
 
 subtitle* sub_read_file (char *filename, float fps) {
     FILE *fd;
-    int n_max;
-    subtitle *first;
+    int n_max, n_first, i, j, sub_first, sub_orig;
+    subtitle *first, *second;
     char *fmtname[] = { "microdvd", "subrip", "subviewer", "sami", "vplayer",
 			"rt", "ssa", "dunnowhat", "mpsub", "aqt", "subviewer 2.0", "subrip 0.9", "jacosub" };
     subtitle * (*func[])(FILE *fd,subtitle *dest)= 
@@ -1036,8 +1039,103 @@ subtitle* sub_read_file (char *filename, float fps) {
 	return NULL;
     }
 
-    adjust_subs_time(first, 6.0, fps); /* ~6 secs AST */
-    return first;
+    adjust_subs_time(first, 6.0, fps, 0);	/* ~6 secs AST */
+
+// here we manage overlapping subtitles
+    sub_orig = sub_num;
+    n_first = sub_num;
+    n_max = 0;
+    sub_num = 0;
+    second = NULL;
+// for each subtitle in first[]
+    for (sub_first = 0; sub_first < n_first; ++sub_first) {
+	while (first[sub_first].start <= first[sub_first].end) {
+	    unsigned long end_time = first[sub_first].end;
+	    int lines_to_add = 0, sub_to_add, event, ls, lf;
+
+// there is a new subtitle, so let's make second[] bigger
+	    n_max += 1;
+	    second = realloc(second, n_max * sizeof(subtitle));
+	    memset(&second[n_max - 1], '\0', sizeof(subtitle));
+
+// find the number of lines and subtitles that overlap the current subtitle
+	    for (sub_to_add = 0;
+		 (end_time > first[sub_first + sub_to_add + 1].start)
+		 && (sub_first + sub_to_add + 1 < n_first); ++sub_to_add) {
+		lines_to_add += first[sub_first + sub_to_add + 1].lines;
+	    }
+	    if ((lines_to_add > 0)
+		&& (first[sub_first].lines + lines_to_add <
+		    SUB_MAX_TEXT)) {
+		unsigned long next;
+
+// find next beginning-of-a-subtitle time
+		next = first[sub_first].end + 1;
+		event = sub_first;
+		for (j = 0; j < lines_to_add; j++) {
+		    if ((first[sub_first + j + 1].end + 1 < next)
+			&& (first[sub_first + j + 1].end >=
+			    first[sub_first].start)) {
+			event = sub_first + j + 1;
+			next = first[event].end + 1;
+		    }
+		    if ((first[sub_first + j + 1].start < next)
+			&& (first[sub_first + j + 1].start >
+			    first[sub_first].start)) {
+			event = sub_first + j + 1;
+			next = first[event].start;
+		    }
+		}
+		second[sub_num].start = first[sub_first].start;
+		second[sub_num].end = next - 1;
+		second[sub_num].lines = first[sub_first].lines;
+		for (ls = 0, lf = 0; ls < second[sub_num].lines; ls++, lf++) {
+		    second[sub_num].text[ls] =
+			strdup(first[sub_first].text[lf]);
+		}
+		for (j = 0; j < sub_to_add; j++) {
+		    if ((first[sub_first + j + 1].start <=
+			 second[sub_num].start)
+			&& (first[sub_first + j + 1].end >=
+			    second[sub_num].end)
+			&& (second[sub_num].lines +
+			    first[sub_first + j + 1].lines <=
+			    SUB_MAX_TEXT)) {
+			for (lf = 0; lf < first[sub_first + j + 1].lines;
+			     lf++, ls++)
+			    second[sub_num].text[ls] =
+				strdup(first[sub_first + j + 1].text[lf]);
+			first[sub_first + j + 1].start = next;
+		    } else
+			for (lf = 0; lf < first[sub_first + j + 1].lines;
+			     lf++, ls++)
+			    second[sub_num].text[ls] = strdup(" ");
+		    second[sub_num].lines +=
+			first[sub_first + j + 1].lines;
+		}
+		first[sub_first].start = next;
+	    } else {
+		second[sub_num].start = first[sub_first].start;
+		second[sub_num].end = first[sub_first].end;
+		second[sub_num].lines = first[sub_first].lines;
+		for (ls = 0; ls < second[sub_num].lines; ls++)
+		    second[sub_num].text[ls] =
+			strdup(first[sub_first].text[ls]);
+		first[sub_first].start = first[sub_first].end + 1;
+	    }
+	    ++sub_num;
+	}			// while
+    }
+    adjust_subs_time(second, 6.0, fps, 1);	/* ~6 secs AST */
+
+    for (j = sub_orig - 1; j <= 0; --j) {
+	for (i = first[j].lines - 1; i <= 0; --i) {
+	    free(first[j].text[i]);
+	}
+	free(&first[j]);
+    }
+
+    return second;
 }
 
 #if 0
