@@ -1647,7 +1647,9 @@ if(sh_audio){
   current_module="ao2_init";
   if(!(audio_out=init_best_audio_out(audio_driver_list,
       (ao_plugin_cfg.plugin_list!=NULL), // plugin flag
-      ao_data.samplerate, ao_data.channels, ao_data.format,0))){
+      force_srate?force_srate:ao_data.samplerate,
+      audio_output_channels?audio_output_channels:ao_data.channels,
+      audio_output_format?audio_output_format:ao_data.format,0))){
     // FAILED:
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CannotInitAO);
     uninit_player(INITED_ACODEC); // close codec
@@ -1673,9 +1675,9 @@ if(sh_audio){
 	ao_data.samplerate, ao_data.channels, ao_data.format,
 	audio_out_format_bits(ao_data.format)/8, /* ao_data.bps, */
 	ao_data.outburst*4, ao_data.buffersize)){
-      mp_msg(MSGT_CPLAYER,MSGL_ERR,"Couldn't find matching filter / ao format!\n");
-//      uninit_player(INITED_ACODEC|INITED_AO); // close codec & ao
-//      sh_audio=d_audio->sh=NULL; // -> nosound
+      mp_msg(MSGT_CPLAYER,MSGL_ERR,"Couldn't find matching filter / ao format! -> NOSOUND\n");
+      uninit_player(INITED_ACODEC|INITED_AO); // close codec & ao
+      sh_audio=d_audio->sh=NULL; // -> nosound
     }
 #endif
   }
