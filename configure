@@ -152,6 +152,8 @@ params:
         --disable-sunaudio      disable Sun sound support [autodetect]
 		
 	--disable-gcc-checking  disable gcc version checking
+	--disable-kernel-extchk disables checking for CPU extension support in
+	                        your kernel (MMX, SSE, ...)
 
 	--disable-select        disable audio select() support ( for example required this
 	                        option ALSA or Vortex2 driver )
@@ -439,6 +441,7 @@ _dshow=yes
 _fastmemcpy=yes
 _streaming=no
 _libavcodec=no
+_kernelextcheck=yes
 
 _x=1
 _y=1
@@ -1051,6 +1054,9 @@ for ac_option; do
   --disable-png)
 	_png=no
 	;;
+  --disable-kernel-extchk)
+        _kernelextcheck=no
+	;;
   --disable-sse)
         _sse=no
         ;;
@@ -1249,6 +1255,35 @@ else
   else
     echo "YOU'VE SELECTED '--disable-as-checking'. PLEASE DON'T SEND US ANY BUGREPORTS!"
   fi
+fi
+
+# Atmosfear: Checking kernel support for cpu extensions ...
+extcheck() {
+if test "$1" = "yes" ; then
+echo $_echo_n "Checking $2 support in Kernel ... $_echo_c"
+cat > $TMPC <<EOF
+int main(void){__asm__ __volatile__ ("$3":::"memory");return(0);}
+EOF
+
+if ($_cc $TMPC -o $TMPO && $TMPO) > /dev/null 2>&1 ; then 
+	echo "ok"
+	return 1
+else
+	echo "failed"
+	echo "It seems that your kernel does not correctly support $2. To use $2 extensions in MPlayer, you have to upgrade/recompile your kernel!"
+	return 0
+fi
+fi
+return 1
+}
+if [ "$_kernelextcheck" = "yes" ];then
+if extcheck $_mmx "mmx" "emms" ; then _mmx=no ; fi
+if extcheck $_3dnow "3dnow" "femms" ; then _3dnow=no ; fi
+if extcheck $_3dnowex "3dnowex" "pswapd %%mm0, %%mm0" ; then _3dnowex=no ; fi
+if extcheck $_mmx2 "mmx2" "movntq %%mm0, (%%eax)" ; then _mmx2=no ; fi
+if extcheck $_sse "sse" "xorps %%xmm0, %%xmm0" ; then _sse=no ; fi
+#if extcheck $_sse2 "sse2" "xorpd %%xmm0, %%xmm0" ; then _sse2=no ; fi
+rm -f $TMPS $TMPO $TMPC
 fi
 
 # Checking kernel version...
