@@ -7,6 +7,12 @@
 
 #include "../../linux/shmem.h"
 
+#define GTK_MB_SIMPLE 0
+#define GTK_MB_MODAL 1
+#define GTK_MB_FATAL 2
+#define GTK_MB_ERROR 4
+#define GTK_MB_WARNING 8
+
 typedef struct
 {
  char dir[ 1024 ];
@@ -19,6 +25,7 @@ typedef struct
  int  sy;
  int  tsx;
  int  tsy;
+ int  type;
  char str[512];
 } gtkMessageBoxStruct;
 
@@ -73,7 +80,7 @@ extern void widgetsCreate( void );
 
 extern void gtkInit( int argc,char* argv[], char *envp[] );
 extern void gtkDone( void );
-extern void gtkMessageBox( gchar * str );
+extern void gtkMessageBox( int type,gchar * str );
 extern int  gtkFillSkinList( gchar * dir );
 extern void gtkClearList( GtkWidget * list );
 extern void gtkSetDefaultToCList( GtkWidget * list,char * item );

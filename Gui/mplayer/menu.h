@@ -123,7 +123,7 @@ void mplMenuInit( void )
    #ifdef DEBUG
     dbprintf( 1,MSGTR_NEMFMR );
    #endif
-   gtkMessageBox( MSGTR_NEMFMR );
+   gtkMessageBox( GTK_MB_FATAL,MSGTR_NEMFMR );
    return;
   }
 

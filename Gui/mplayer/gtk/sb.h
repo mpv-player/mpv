@@ -11,7 +11,6 @@
 #include "../app.h"
 
 GtkWidget * SkinList;
-GtkWidget * sbOk;
 char      * sbSelectedSkin=NULL;
 char      * sbMPlayerDirInHome=NULL;
 char      * sbMPlayerPrefixDir=NULL;
@@ -38,7 +37,7 @@ int gtkFillSkinList( gchar * mdir )
  strcpy( gtkOldSkin,gtkShMem->sb.name );
  if ( ( str[0]=(char *)calloc( 1,7 ) ) == NULL )
   {
-   gtkMessageBox( MSGTR_SKINBROWSER_NotEnoughMemory );
+   gtkMessageBox( GTK_MB_FATAL,MSGTR_SKINBROWSER_NotEnoughMemory );
    return 0;
   }
  str[1]="";
@@ -55,7 +54,7 @@ int gtkFillSkinList( gchar * mdir )
     {
      tmp=strrchr( gg.gl_pathv[i],'/' ); tmp++;
      if ( !strcmp( tmp,"default" ) ) continue;
-     if ( ( str[0]=(char *)malloc( strlen( tmp ) + 1 ) ) == NULL ) { gtkMessageBox( MSGTR_SKINBROWSER_NotEnoughMemory ); return 0; }
+     if ( ( str[0]=(char *)malloc( strlen( tmp ) + 1 ) ) == NULL ) { gtkMessageBox( GTK_MB_FATAL,MSGTR_SKINBROWSER_NotEnoughMemory ); return 0; }
      strcpy( str[0],tmp );
      if ( gtkFindCList( SkinList,str[0] ) == -1 ) gtk_clist_append( GTK_CLIST( SkinList ),str );
      free( str[0] );
@@ -83,16 +82,6 @@ void on_SkinList_select_row( GtkCList * clist,gint row,gint column,GdkEvent * be
  if( bevent->type == GDK_2BUTTON_PRESS ) HideSkinBrowser();
 }
 
-gboolean on_SkinBrowser_key_release_event( GtkWidget * widget,GdkEventKey * event,gpointer user_data )
-{
- switch ( event->keyval )
-  {
-   case GDK_Escape: on_SkinBrowser_Cancel( NULL,0 ); break;
-   case GDK_Return: HideSkinBrowser(); break;
-  }
- return FALSE;
-}
-
 GtkWidget * create_SkinBrowser( void )
 {
  GtkWidget     * SkinBrowser;
@@ -108,6 +97,10 @@ GtkWidget * create_SkinBrowser( void )
  GtkWidget     * hseparator5;
  GtkWidget     * hbuttonbox4;
  GtkWidget     * Cancel;
+ GtkWidget     * Ok;
+ GtkAccelGroup * accel_group;
+
+ accel_group = gtk_accel_group_new ();
 
  SkinBrowser=gtk_window_new( GTK_WINDOW_DIALOG );
  gtk_widget_set_name( SkinBrowser,MSGTR_SkinBrowser );
@@ -209,16 +202,14 @@ GtkWidget * create_SkinBrowser( void )
  label2=gtk_label_new( "label2" );
  gtk_widget_set_name( label2,"label2" );
  gtk_widget_ref( label2 );
- gtk_object_set_data_full( GTK_OBJECT( SkinBrowser ),"label2",label2,
-                          ( GtkDestroyNotify ) gtk_widget_unref );
+ gtk_object_set_data_full( GTK_OBJECT( SkinBrowser ),"label2",label2,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( label2 );
  gtk_clist_set_column_widget( GTK_CLIST( SkinList ),0,label2 );
 
  hseparator5=gtk_hseparator_new();
  gtk_widget_set_name( hseparator5,"hseparator5" );
  gtk_widget_ref( hseparator5 );
- gtk_object_set_data_full( GTK_OBJECT( SkinBrowser ),"hseparator5",hseparator5,
-                          ( GtkDestroyNotify ) gtk_widget_unref );
+ gtk_object_set_data_full( GTK_OBJECT( SkinBrowser ),"hseparator5",hseparator5,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( hseparator5 );
  gtk_box_pack_start( GTK_BOX( vbox5 ),hseparator5,FALSE,TRUE,0 );
  gtk_widget_set_usize( hseparator5,-2,9 );
@@ -226,55 +217,44 @@ GtkWidget * create_SkinBrowser( void )
  hbuttonbox4=gtk_hbutton_box_new();
  gtk_widget_set_name( hbuttonbox4,"hbuttonbox4" );
  gtk_widget_ref( hbuttonbox4 );
- gtk_object_set_data_full( GTK_OBJECT( SkinBrowser ),"hbuttonbox4",hbuttonbox4,
-                          ( GtkDestroyNotify ) gtk_widget_unref );
+ gtk_object_set_data_full( GTK_OBJECT( SkinBrowser ),"hbuttonbox4",hbuttonbox4,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( hbuttonbox4 );
  gtk_box_pack_start( GTK_BOX( vbox5 ),hbuttonbox4,FALSE,TRUE,0 );
  gtk_button_box_set_layout( GTK_BUTTON_BOX( hbuttonbox4 ),GTK_BUTTONBOX_END );
  gtk_button_box_set_spacing( GTK_BUTTON_BOX( hbuttonbox4 ),0 );
  gtk_button_box_set_child_size( GTK_BUTTON_BOX( hbuttonbox4 ),80,0 );
 
- sbOk=gtk_button_new_with_label( MSGTR_Ok );
- gtk_widget_set_name( sbOk,MSGTR_Ok );
- gtk_widget_ref( sbOk );
- gtk_object_set_data_full( GTK_OBJECT( SkinBrowser ),MSGTR_Ok,sbOk,
-                          ( GtkDestroyNotify ) gtk_widget_unref );
- gtk_widget_show( sbOk );
- gtk_container_add( GTK_CONTAINER( hbuttonbox4 ),sbOk );
- gtk_widget_set_usize( sbOk,-2,33 );
- GTK_WIDGET_SET_FLAGS( sbOk,GTK_CAN_DEFAULT );
+ Ok=gtk_button_new_with_label( MSGTR_Ok );
+ gtk_widget_set_name( Ok,MSGTR_Ok );
+ gtk_widget_ref( Ok );
+ gtk_object_set_data_full( GTK_OBJECT( SkinBrowser ),MSGTR_Ok,Ok,(GtkDestroyNotify)gtk_widget_unref );
+ gtk_widget_show( Ok );
+ gtk_container_add( GTK_CONTAINER( hbuttonbox4 ),Ok );
+ gtk_widget_set_usize( Ok,-2,33 );
+ GTK_WIDGET_SET_FLAGS( Ok,GTK_CAN_DEFAULT );
+ gtk_widget_add_accelerator( Ok,"released",accel_group,GDK_Return,0,GTK_ACCEL_VISIBLE );
 
  Cancel=gtk_button_new_with_label( MSGTR_Cancel );
  gtk_widget_set_name( Cancel,MSGTR_Cancel );
  gtk_widget_ref( Cancel );
- gtk_object_set_data_full( GTK_OBJECT( SkinBrowser ),MSGTR_Cancel,Cancel,
-                          ( GtkDestroyNotify ) gtk_widget_unref );
+ gtk_object_set_data_full( GTK_OBJECT( SkinBrowser ),MSGTR_Cancel,Cancel,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( Cancel );
  gtk_container_add( GTK_CONTAINER( hbuttonbox4 ),Cancel );
  gtk_widget_set_usize( Cancel,-2,33 );
  GTK_WIDGET_SET_FLAGS( Cancel,GTK_CAN_DEFAULT );
+ gtk_widget_add_accelerator( Cancel,"released",accel_group,GDK_Escape,0,GTK_ACCEL_VISIBLE );
 
- gtk_signal_connect( GTK_OBJECT( SkinBrowser ),"destroy",
-                     GTK_SIGNAL_FUNC( on_SkinBrowser_destroy ),
-                     NULL );
- gtk_signal_connect( GTK_OBJECT( SkinBrowser ),"key_release_event",
-                     GTK_SIGNAL_FUNC( on_SkinBrowser_key_release_event ),
-                     NULL );
- gtk_signal_connect( GTK_OBJECT( SkinList ),"select_row",
-                     GTK_SIGNAL_FUNC( on_SkinList_select_row ),
-                     NULL );
- gtk_signal_connect( GTK_OBJECT( sbOk ),"released",
-                     GTK_SIGNAL_FUNC( on_SkinBrowser_destroy ),
-                     NULL );
- gtk_signal_connect( GTK_OBJECT( Cancel ),"released",
-                     GTK_SIGNAL_FUNC( on_SkinBrowser_Cancel ),
-                     NULL );
+ gtk_signal_connect( GTK_OBJECT( SkinBrowser ),"destroy",GTK_SIGNAL_FUNC( on_SkinBrowser_destroy ),NULL );
+ gtk_signal_connect( GTK_OBJECT( SkinList ),"select_row",GTK_SIGNAL_FUNC( on_SkinList_select_row ),NULL );
+ gtk_signal_connect( GTK_OBJECT( Ok ),"released",GTK_SIGNAL_FUNC( on_SkinBrowser_destroy ),NULL );
+ gtk_signal_connect( GTK_OBJECT( Cancel ),"released",GTK_SIGNAL_FUNC( on_SkinBrowser_Cancel ),NULL );
 
  if ( ( sbMPlayerDirInHome=(char *)calloc( 1,strlen( skinDirInHome ) + 4 ) ) != NULL )
   { strcpy( sbMPlayerDirInHome,skinDirInHome ); strcat( sbMPlayerDirInHome,"/*" ); }
  if ( ( sbMPlayerPrefixDir=(char *)calloc( 1,strlen( skinMPlayerDir ) + 4 ) ) != NULL )
   { strcpy( sbMPlayerPrefixDir,skinMPlayerDir ); strcat( sbMPlayerPrefixDir,"/*" ); }
 
+ gtk_window_add_accel_group( GTK_WINDOW( SkinBrowser ),accel_group );
  gtk_widget_grab_focus( SkinList );
 
  return SkinBrowser;

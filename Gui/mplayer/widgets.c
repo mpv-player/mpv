@@ -27,6 +27,9 @@
 #include "pixmaps/file.xpm"
 #include "pixmaps/logo.xpm"
 #include "pixmaps/about.xpm"
+#include "pixmaps/stop.xpm"
+#include "pixmaps/error.xpm"
+#include "pixmaps/warning.xpm"
 
 GtkWidget     * SkinBrowser;
 GtkWidget     * PlayList;
@@ -57,7 +60,7 @@ void widgetsCreate( void )
  SkinBrowser=create_SkinBrowser();
  PlayList=create_PlayList();
  FileSelect=create_FileSelect();
- MessageBox=create_MessageBox();
+ MessageBox=create_MessageBox(0);
  Options=create_Options();
 }
 
@@ -103,17 +106,9 @@ void gtkDone( void ){
  kill( gtkPID,SIGKILL );
 }
 
-void gtkMessageBox( gchar * str )
+void gtkMessageBox( int type,gchar * str )
 {
- gtkShMem->mb.sx=420; gtkShMem->mb.sy=128;
- gtkShMem->mb.tsx=384; gtkShMem->mb.tsy=77;
- if ( strlen( str ) > 200 )
-  {
-   gtkShMem->mb.sx=512;
-   gtkShMem->mb.sy=128;
-   gtkShMem->mb.tsx=476;
-   gtkShMem->mb.tsy=77;
-  }
+ gtkShMem->mb.type=type;
  strcpy( gtkShMem->mb.str,str );
  gtkSendMessage( evMessageBox );
 }

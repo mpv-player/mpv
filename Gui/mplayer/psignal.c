@@ -16,7 +16,6 @@
 
 #include "../../config.h"
 #include "../../libvo/x11_common.h"
-//#include "../../libvo/sub.h"
 
 #include "./mplayer.h"
 
@@ -41,7 +40,7 @@ void mplErrorHandler( int critical,const char * format, ... )
  n=vsnprintf( p,512,format,ap );
  va_end( ap );
  mplCriticalError=critical;
- gtkMessageBox( p );
+ gtkMessageBox( GTK_MB_ERROR,p );
 }
 
 void gtkSigHandler( int s )
@@ -63,8 +62,7 @@ void gtkSigHandler( int s )
    case evSkinBrowser:
         if ( gtkVisibleSkinBrowser ) gtk_widget_hide( SkinBrowser );
         gtkClearList( SkinList );
-        if ( !gtkFillSkinList( sbMPlayerPrefixDir ) ) break;
-        if ( gtkFillSkinList( sbMPlayerDirInHome ) )
+        if ( gtkFillSkinList( sbMPlayerPrefixDir )&&gtkFillSkinList( sbMPlayerDirInHome ) )
          {
           gtkSetDefaultToCList( SkinList,skinName );
           gtk_widget_show( SkinBrowser );
@@ -97,8 +95,6 @@ void gtkSigHandler( int s )
         break;
    case evMessageBox:
         gtk_label_set_text( gtkMessageBoxText,(char *)gtkShMem->mb.str );
-        gtk_widget_set_usize( MessageBox,gtkShMem->mb.sx,gtkShMem->mb.sy );
-        gtk_widget_set_usize( gtkMessageBoxText,gtkShMem->mb.tsx,gtkShMem->mb.tsy );
         if ( gtkVisibleMessageBox ) gtk_widget_hide( MessageBox );
         gtk_widget_show( MessageBox );
         gtkVisibleMessageBox=1;

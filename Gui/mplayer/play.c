@@ -127,78 +127,73 @@ listItems tmpList;
 
 void ChangeSkin( void )
 {
- if ( strcmp( skinName,gtkShMem->sb.name ) )
-  {
-   int ret;
+ int ret;
+ if ( !strcmp( skinName,gtkShMem->sb.name ) ) return;
 #ifdef DEBUG
-   dbprintf( 1,"[psignal] skin: %s\n",gtkShMem->sb.name );
+ dbprintf( 1,"[psignal] skin: %s\n",gtkShMem->sb.name );
 #endif
 
-   mainVisible=0;
+ mainVisible=0;
 
-   appInitStruct( &tmpList );
-   skinAppMPlayer=&tmpList;
-   ret=skinRead( gtkShMem->sb.name );
+ appInitStruct( &tmpList );
+ skinAppMPlayer=&tmpList;
+ fntFreeFont();
+ ret=skinRead( gtkShMem->sb.name );
 
-   fntFreeFont();
-
-   appInitStruct( &tmpList );
-   skinAppMPlayer=&appMPlayer;
-   appInitStruct( &appMPlayer );
-   if ( !ret ) strcpy( skinName,gtkShMem->sb.name );
-   skinRead( skinName );
-
-   if ( ret )
-    {
-     mainVisible=1;
-     return;
-    }
-
-   if ( appMPlayer.menuBase.Bitmap.Image )
-    {
-     if ( mplMenuDrawBuffer ) free( mplMenuDrawBuffer );
-     if ( ( mplMenuDrawBuffer = (unsigned char *)calloc( 1,appMPlayer.menuBase.Bitmap.ImageSize ) ) == NULL )
-      { message( False,MSGTR_NEMDB ); return; }
-     wsResizeWindow( &appMPlayer.menuWindow,appMPlayer.menuBase.width,appMPlayer.menuBase.height );
-     wsResizeImage( &appMPlayer.menuWindow,appMPlayer.menuBase.width,appMPlayer.menuBase.height );
-    }
-
-   mplSkinChanged=1;
-   if ( appMPlayer.sub.Bitmap.Image ) wsResizeImage( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Width,appMPlayer.sub.Bitmap.Height );
-   if ( !mplShMem->Playing )
-    {
-     mplSkinChanged=0;
-     if ( !appMPlayer.subWindow.isFullScreen ) 
-      {
-       wsResizeWindow( &appMPlayer.subWindow,appMPlayer.sub.width,appMPlayer.sub.height );
-       wsMoveWindow( &appMPlayer.subWindow,appMPlayer.sub.x,appMPlayer.sub.y );
-      } 
-     wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
-     wsClearWindow( appMPlayer.subWindow );
-     mplSubRender=1; wsPostRedisplay( &appMPlayer.subWindow );
-    }
-
-   if ( mplDrawBuffer ) free( mplDrawBuffer );
-   if ( ( mplDrawBuffer = (unsigned char *)calloc( 1,appMPlayer.main.Bitmap.ImageSize ) ) == NULL )
-    { message( False,MSGTR_NEMDB ); return; }
-   wsVisibleWindow( &appMPlayer.mainWindow,wsHideWindow );
-   wsResizeWindow( &appMPlayer.mainWindow,appMPlayer.main.width,appMPlayer.main.height );
-   wsMoveWindow( &appMPlayer.mainWindow,appMPlayer.main.x,appMPlayer.main.y );
-   wsResizeImage( &appMPlayer.mainWindow,appMPlayer.main.width,appMPlayer.main.height );
-   wsSetShape( &appMPlayer.mainWindow,appMPlayer.main.Mask.Image );
-   mainVisible=1; mplMainRender=1; wsPostRedisplay( &appMPlayer.mainWindow );
-   wsWindowDecoration( &appMPlayer.mainWindow,appMPlayer.mainDecoration );
-   wsVisibleWindow( &appMPlayer.mainWindow,wsShowWindow );
-   
-   btnModify( evSetVolume,mplShMem->Volume );
-   btnModify( evSetBalance,mplShMem->Balance );
-   btnModify( evSetMoviePosition,mplShMem->Position );
+ appInitStruct( &tmpList );
+ skinAppMPlayer=&appMPlayer;
+ appInitStruct( &appMPlayer );
+ if ( !ret ) strcpy( skinName,gtkShMem->sb.name );
+ skinRead( skinName );
+ if ( ret )
+  {
+   mainVisible=1;
+   return;
   }
- mplShMem->SkinChange=0; 
+
+ if ( appMPlayer.menuBase.Bitmap.Image )
+  {
+   if ( mplMenuDrawBuffer ) free( mplMenuDrawBuffer );
+   if ( ( mplMenuDrawBuffer = (unsigned char *)calloc( 1,appMPlayer.menuBase.Bitmap.ImageSize ) ) == NULL )
+    { message( False,MSGTR_NEMDB ); return; }
+   wsResizeWindow( &appMPlayer.menuWindow,appMPlayer.menuBase.width,appMPlayer.menuBase.height );
+   wsResizeImage( &appMPlayer.menuWindow,appMPlayer.menuBase.width,appMPlayer.menuBase.height );
+  }
+
+ mplSkinChanged=1;
+ if ( appMPlayer.sub.Bitmap.Image ) wsResizeImage( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Width,appMPlayer.sub.Bitmap.Height );
+ if ( !mplShMem->Playing )
+  {
+   mplSkinChanged=0;
+   if ( !appMPlayer.subWindow.isFullScreen ) 
+    {
+     wsResizeWindow( &appMPlayer.subWindow,appMPlayer.sub.width,appMPlayer.sub.height );
+     wsMoveWindow( &appMPlayer.subWindow,appMPlayer.sub.x,appMPlayer.sub.y );
+    } 
+   wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
+   wsClearWindow( appMPlayer.subWindow );
+   mplSubRender=1; wsPostRedisplay( &appMPlayer.subWindow );
+  }
+
+ if ( mplDrawBuffer ) free( mplDrawBuffer );
+ if ( ( mplDrawBuffer = (unsigned char *)calloc( 1,appMPlayer.main.Bitmap.ImageSize ) ) == NULL )
+  { message( False,MSGTR_NEMDB ); return; }
+ wsVisibleWindow( &appMPlayer.mainWindow,wsHideWindow );
+ wsResizeWindow( &appMPlayer.mainWindow,appMPlayer.main.width,appMPlayer.main.height );
+ wsMoveWindow( &appMPlayer.mainWindow,appMPlayer.main.x,appMPlayer.main.y );
+ wsResizeImage( &appMPlayer.mainWindow,appMPlayer.main.width,appMPlayer.main.height );
+ wsSetShape( &appMPlayer.mainWindow,appMPlayer.main.Mask.Image );
+ mainVisible=1; mplMainRender=1; wsPostRedisplay( &appMPlayer.mainWindow );
+ wsWindowDecoration( &appMPlayer.mainWindow,appMPlayer.mainDecoration );
+ wsVisibleWindow( &appMPlayer.mainWindow,wsShowWindow );
+   
+ btnModify( evSetVolume,mplShMem->Volume );
+ btnModify( evSetBalance,mplShMem->Balance );
+ btnModify( evSetMoviePosition,mplShMem->Position );
 }
 
 void EventHandling( void )
 {
  wsHandleEvents();mplTimerHandler(0); // handle GUI timer events
- if ( mplShMem->SkinChange ) ChangeSkin();
+ if ( mplShMem->SkinChange ) { ChangeSkin(); mplShMem->SkinChange=0;  }
 }

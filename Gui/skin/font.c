@@ -77,7 +77,7 @@ int fntRead( char * path,char * fname,int id )
      cutItem( param,tmp,',',2 ); Fonts[id]->Fnt[i].sx=atoi( tmp );
      cutItem( param,tmp,',',3 ); Fonts[id]->Fnt[i].sy=atoi( tmp );
      #ifdef DEBUG
-      dbprintf( 0,"[font]  char: '%s' params: %d,%d %dx%d\n",command,Fonts[id]->Fnt[i].x,Fonts[id]->Fnt[i].y,Fonts[id]->Fnt[i].sx,Fonts[id]->Fnt[i].sy );
+      dbprintf( 3,"[font]  char: '%s' params: %d,%d %dx%d\n",command,Fonts[id]->Fnt[i].x,Fonts[id]->Fnt[i].y,Fonts[id]->Fnt[i].sx,Fonts[id]->Fnt[i].sy );
      #endif
     }
     else
@@ -86,7 +86,7 @@ int fntRead( char * path,char * fname,int id )
        {
         strcpy( tmp,path ); strcat( tmp,param );
         #ifdef DEBUG
-         dbprintf( 0,"[font] font imagefile: %s\n",tmp );
+         dbprintf( 3,"[font] font imagefile: %s\n",tmp );
         #endif
         if ( skinBPRead( tmp,&Fonts[id]->Bitmap ) ) return -2;
        }
