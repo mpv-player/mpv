@@ -45,8 +45,9 @@ static tvi_handle_t *new_handle()
 
 static void free_handle(tvi_handle_t *h)
 {
-    if (h->priv)
-	free(h->priv);
-    if (h)
+    if (h) {
+	if (h->priv)
+	    free(h->priv);
 	free(h);
+    }
 }

@@ -227,14 +227,14 @@ tvi_handle_t *tvi_init_v4l(char *device)
 
     /* set video device name */
     if (!device)
-    {
-	priv->video_device = (char *)malloc(strlen("/dev/video0"));
-	sprintf(priv->video_device, "/dev/video0");
-    }
+	priv->video_device = strdup("/dev/video0");
     else
-    {
-	priv->video_device = (char *)malloc(strlen(device));
-	strcpy(priv->video_device, device);
+	priv->video_device = strdup(device);
+
+    /* allocation failed */
+    if (!priv->video_device) {
+	free_handle(h);
+	return(NULL);
     }
 
     return(h);
@@ -278,6 +278,8 @@ static int init(priv_t *priv, tvi_param_t *params)
     mp_msg(MSGT_TV, MSGL_INFO, " Inputs: %d\n", priv->capability.channels);
 
     priv->channels = (struct video_channel *)malloc(sizeof(struct video_channel)*priv->capability.channels);
+    if (!priv->channels)
+	goto malloc_failed;
     memset(priv->channels, 0, sizeof(struct video_channel)*priv->capability.channels);
     for (i = 0; i < priv->capability.channels; i++)
     {
@@ -357,10 +359,18 @@ static int init(priv_t *priv, tvi_param_t *params)
     
     /* video buffers */
     priv->buf = (struct video_mmap *)malloc(priv->nbuf * sizeof(struct video_mmap));
+    if (!priv->buf)
+	goto malloc_failed;
     memset(priv->buf, 0, priv->nbuf * sizeof(struct video_mmap));
     
     return(1);
 
+
+malloc_failed:
+    if (priv->channels)
+	free(priv->channels);
+    if (priv->buf)
+	free(priv->buf);
 err:
     if (priv->fd != -1)
 	close(priv->fd);
