@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.30 -->
+<!-- synced with 1.33 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Preguntas de Usuario Frecuentes</title>
 
@@ -37,7 +37,7 @@ ahí debe estar todo explicado. Puede obtener más ayuda en la lista de correo
 Estamos más que felices de aceptar sus
 <ulink url="http://www.mplayerhq.hu/homepage/donations.html">donaciones</ulink>
 de hardware y software.
-Eso nos ayuda a mejorar contínuamente MPlayer.
+Eso nos ayuda a mejorar contínuamente <application>MPlayer</application>.
 </para></answer>
 </qandaentry>
 
@@ -127,7 +127,7 @@ sección <link linkend="gcc-296">gcc 2.96</link>.
 
 <qandaentry>
 <question><para>
-Configure termina con este texto, y ¡MPlayer no compila!
+Configure termina con este texto, y ¡<application>MPlayer</application> no compila!
 <screen>Su gcc no soporta ni un i386 para '-march' and '-mcpu'</screen>
 
 </para></question>
@@ -160,8 +160,9 @@ Muy bien, yo tengo gcc 3.0.1 de Red Hat/Mandrake, ¡entonces estoy bien!
 </para></question>
 <answer><para>
 No, porque también hay problemas con esos compiladores.
-Para comprobar el estado del soporte de compiladores de MPlayer, vea la
-sección de <link linkend="install">Instalación</link>.
+Para comprobar el estado del soporte de compiladores de
+<application>MPlayer</application>, vea la sección de
+<link linkend="install">Instalación</link>.
 </para></answer>
 </qandaentry>
 
@@ -178,13 +179,14 @@ A'rpi envió a la lista <ulink url="http://mplayerhq.hu/pipermail/mplayer-users/"
 Y tenemos idegs. Y nuestro contador de idegs se desborda una y otra vez.
 </para>
 <para>
-Desafortunadamente MPlayer está fuera de nuestro control. Es usado por lamers,
-usuarios de Linux que no quieren seguri usando Windows, y nunca han intentado
+Desafortunadamente <application>MPlayer</application> está fuera de
+nuestro control. Es usado por lamers, usuarios de Linux que no quieren
+seguri usando Windows, y nunca han intentado
 compilar un kernel. Ellos instalan (con las opciones por defecto) Mandrake o
 Red Hat o SuSE, y sin RTFM'ear envían mensajes diciendo '¡no funciona! ¡ayúdame!
 ¡por favor! ¡soy nuevo en Linux! ¡ayuda! ¡oh! ¡ayúdame!'. No podemos parar esto,
 pero por lo menos podemos forzarlos a RTFM y a leer los mensajes del ./configure
-y MPlayer
+y <application>MPlayer</application>
 (Nota del traductor: RTFM son las siglas de Read The Fucking Manual en inglés, que
 viene a ser 'Lea el jodido manual' y es muy usado en la jerga de Linux.)
 </para>
@@ -288,8 +290,8 @@ Actualice su kernel, modutils y <application>MPlayer</application>.
 
 <qandaentry>
 <question><para>
-Durante 'make', MPlayer se queja de algunas bibliotecas de X11. No lo entiendo,
-¡yo TENGO X instalado!?
+Durante 'make', <application>MPlayer</application> se queja de algunas
+bibliotecas de X11. No lo entiendo, ¡yo TENGO X instalado!?
 </para></question>
 <answer><para>
 ... pero no tiene los paquetes de desarrollo de X instalados. O no de la manera correcta.
@@ -319,8 +321,8 @@ Debe editar los <filename>Makefile.cfg</filename> de SVGAlib y dejar como coment
 
 <qandaentry>
 <question><para>
-He compilado MPlayer con soporte libdvdcss/libdivxdecore, pero cuanto intento iniciarlo,
-me dice:
+He compilado <application>MPlayer</application> con soporte libdvdcss/libdivxdecore,
+pero cuanto intento iniciarlo, me dice:
 <screen>
 error cargando bibliotecas compartidas: lib*.so.0: no se puede cargar el archivo objeto compartido: No se encuentra el archivo o directorio
 </screen>
@@ -345,7 +347,8 @@ o posterior deben ir bien). Ya que no es un problema nuestro, ¡por favor
 
 <qandaentry>
 <question><para>
-¡MPlayer muere con segmentation fault durante la comprobación pthread!
+¡<application>MPlayer</application> muere con segmentation fault durante
+la comprobación pthread!
 </para></question>
 <answer><para>
 <command>chmod 644 /usr/lib/libc.so</command>
@@ -513,7 +516,8 @@ de la (umm) &quot;misteriosa&quot; desaparición de codigo CVS ;)
 </para></question>
 <answer><para>
 &quot;Fasz&quot; es una palabra Húngara que no quieres saber, las otras están
-conectadas a las mentes pervertidas de los desarrolladores de Mplayer.
+conectadas a las mentes pervertidas de los desarrolladores de
+<application>Mplayer</application>.
 </para></answer>
 </qandaentry>
 
@@ -600,7 +604,7 @@ a <systemitem>Yes</systemitem></para></listitem>
 
 <qandaentry>
 <question><para>
-¿Cómo puedo hacer que Mplayer funcione en segundo plano?
+¿Cómo puedo hacer que <application>Mplayer</application> funcione en segundo plano?
 </para></question>
 <answer><para>
 Use:
@@ -621,7 +625,67 @@ No puedo identificar la causa de algun extraño problema de reproduccion.
 <filename>~/.mplayer/</filename>, <filename>/etc/</filename>,
 <filename>/usr/local/etc/</filename> o lugar similar? Quítelo,
 archivos <filename>codecs.conf</filename> anticuados pueden causar problemas
-extraños. MPlayer usará uno que tiene incorporado en su lugar.
+extraños. <application>MPlayer</application> usará uno que tiene incorporado en su lugar.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+¿Por qué no funciona <application>MPlayer</application> en Fedora Core?
+</para></question>
+<answer><para>
+Hay una mala interacción en Fedora entre exec-shield,
+prelink, y cualquier aplicación que use DLLs de Windows
+(tales como <application>MPlayer</application>).
+</para>
+<para>
+El problema es que exec-shield aleatoriza la dirección de carga de
+todas las bibliotecas del sistema. Esta aleatorización ocurre en el
+tiempo del prelink (una vez cada dos semanas).
+</para>
+<para>
+Cuando <application>MPlayer</application> intenta cargar una DLL de
+Windows intenta colocarla en una dirección específica (0x400000). Si
+una biblioteca importante del sistema resulta que está en esa dirección,
+<application>MPlayer</application> fallará.
+(Un síntoma típico es un fallo de segmentación cuando se intentan reproducir
+archivos Windows Media 9.)
+</para>
+<para>
+Si le ocurre este problema tiene dos opciones:
+<itemizedlist>
+<listitem><para>Esperar dos semanas. Puede que vuelva a funcionar de
+nuevo.</para></listitem>
+<listitem><para>Hacer el relink de todos los binarios del sistema con
+diferentes opciones del prelink. Aquí tiene las instrucciones paso a
+paso:</para>
+<para>
+<orderedlist>
+<listitem><para>Edite <filename>/etc/sysconfig/prelink</filename> y cambie</para>
+<para>
+<programlisting>
+PRELINK_OPTS=-mR
+</programlisting>
+</para>
+<para>
+a
+<programlisting>
+PRELINK_OPTS="-mR --no-exec-shield"
+</programlisting>
+</para>
+</listitem>
+<listitem><para><command>touch /var/lib/misc/prelink.force</command></para></listitem>
+<listitem><para><command>/etc/cron.daily/prelink</command>
+(Esto relinka todas las aplicaciones, y tardará un buen rato.)</para></listitem>
+<listitem>
+<para><command>execstack -s <replaceable>/ruta/a/</replaceable>mplayer</command>
+(Esto desactiva el execshield para el binario de <application>MPlayer</application>.)
+</para>
+</listitem>
+</orderedlist>
+</para>
+</listitem>
+</itemizedlist>
 </para></answer>
 </qandaentry>
 

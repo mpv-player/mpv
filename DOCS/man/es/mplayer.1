@@ -1,4 +1,4 @@
-.\" synced with 1.549
+.\" synced with 1.565
 .\" MPlayer (C) 2000-2004 El equipo de MPlayer 
 .\" Esta página de manual ha sido escrita por Gabucino, Diego Biurrun,
 .\" Jonas Jermann y traducida al español por Juan Martín López.
@@ -598,9 +598,9 @@ Especifica los segundos entre imágenes mostradas.
 La entrada estandar (aka. stdin) puede ser usada para leer datos en lugar de
 eventos de teclado. Si abre /dev/stdin (o el equivalente en su sistema), use
 stdin en una lista de reproducción o si quiere intentar leer de stdin 
-después desde abrir-archivo o abrir-lista 
-.B necesita
-esta opción.
+mediante las órdenes loadfile o loadlist
+.B necesitará
+también esta opción.
 .
 .
 .SH "OPCIONES DE DEMUXER/STREAM"
@@ -629,7 +629,7 @@ Reproduce en Español y cambia a Inglés si el Español no está disponible.
 .TP
 .B \-audio-demuxer <number> (\-audiofile solo)
 Fuerza el tipo de audio demuxer para \-audiofile.
-Tome el ID del demuxer como se define en demuxers.h.
+Tome el ID del demuxer como se define en libmpdemux/demuxer.h.
 Use \-audio-demuxer 17 para forzar detección .mp3.
 .TP
 .B \-audiofile <nombredearchivo>
@@ -739,7 +739,7 @@ y "~/.mozilla/".
 .TP
 .B \-demuxer <número>
 Fuerza el tipo de demuxer.
-Dado el ID del demuxer como se define en demuxers.h
+Dado el ID del demuxer como se define en libmpdemux/demuxer.h
 Use \-demuxer 17 para forzar detección .mp3.
 .TP
 .B \-dumpaudio (MPLAYER solamente)
@@ -828,7 +828,7 @@ del AVI. Es más, MPlayer no le avisará si carga un archivo índice generado
 desde un AVI diferente, pero seguramente obtendrá resultados poco favorables.
 .br
 .I NOTA:
-¡esta opción estará obsoleta una vez que AVI tenga soporte ODML!
+Esta opción está obsoleta, ya que MPlayer tiene soporte para OpenDML.
 .TP
 .B \-mc <segundos/marco>
 Máxima sincronización A-V por marco (en segundos).
@@ -937,22 +937,11 @@ no acepta paquetes UDP entrantes (vea http://www.live.com/mplayer/).
 .TP
 .B \-saveidx <archivo>
 Fuerza la reconstrucción del INDEX y da la salida en un archivo especificado
-en el nombre de archivo que tiene como argumento. Actualmente solo funciona
-con archivos AVI. Aunque puede usar MEncoder para arreglar archivos sin
-índice, el formato contenedor AVI está limitado para indexar archivos de hasta
-2GB en tamaño. Sin embargo es posible guardar el índice en un archivo por
-separado y usarlo posteriormente con \-loadidx, que es mucho más rápido que
-reconstruir el índice (con \-idx o \-forceidx) cada vez que se abre la película.
-(Esta es una limitación del formato AVI, y aunque existen extensiones para
-indexar más allá de 2GB, MPlayer no tiene aún soporte para esas extensiones.)
-Después que el archivo de índice ha sido creado, MPlayer comienza la reproducción
-del video. Si quiere automatizar la generación de archivos de índice (después de
-codificar un archivo grande desde una tarjeta de captura de TV, por ejemplo), puede
-especificar \-frames 0 para prevenir que MPlayer reproduzca el video después de
-generar el índice.
+en el nombre de archivo que tiene como argumento.
+Actualmente solo funciona con archivos AVI.
 .br
 .I NOTA:
-¡esta opción quedará OBSOLETA una vez que AVI soporte ODML!
+Esta opción está obsoleta, ya que MPlayer tiene soporte para OpenDML.
 .TP
 .B \-sb <posición\ del\ byte> (vea también la opción \-ss)
 Se posiciona en el byte indicado.
@@ -1584,6 +1573,12 @@ Puede obtener una lista y explicación de las opciones disponibles
 ejecutando
 .I mplayer \-aahelp
 .TP
+.B \-adapter <valor> (\-vo directx solamente)
+Establece la tarjeta gráfica que recibirá la imagen.
+Necesita la opción \-vm para funcionar.
+Puede obtener una lista de las tarjeta gráficas disponibles cuando ejecute
+esta opción con \-v.
+.TP
 .B \-bpp <profundidad>
 Usar una profundidad de color diferente a la autodetectada.
 No todos los drivers \-vo lo soportan (fbdev, dga2, svga, vesa).
@@ -1597,7 +1592,7 @@ el negro hasta la pantalla blanca.
 Ajusta el contraste del video de salida (por defecto 0).
 Funciona de manera similar al brillo.
 .TP
-.B \-dfbopts <valor> (\-vo directfb2 solamente)
+.B \-dfbopts <valor> (\-vo directfb solamente)
 Especifica una lista de parámetros del controlador directfb.
 .TP
 .B \-display <nombre>
@@ -1781,8 +1776,8 @@ Vea la ayuda de \-fstype para una lista completa de los modos disponibles.
 .TP
 .B \-geometry x[%][:y[%]] or [WxH][+x+y]
 Ajusta donde se tendrá la salida en pantalla inicialmente.
-Las especificaciones x e y son medidas en pixels desde arriba-derecha de la
-pantalla hasta arriba-derecha de la imagen que será mostrada, sin embargo
+Las especificaciones x e y son medidas en pixels desde arriba-izquierda de la
+pantalla hasta arriba-izquierda de la imagen que será mostrada, sin embargo
 si se indica el signo de porcentaje después del argumento el valor se toma
 como un porcentaje del tamaño de la pantalla en esa dirección.
 También soporta el formato de opción estandar de la opción \-geometry del
@@ -1797,13 +1792,13 @@ directx y tdfxfb.
 .PD 0
 .RSs
 .IPs 50:40
-Coloca la ventana en x=50, y=40
+Coloca la ventana en x=50, y=40.
 .IPs 50%:50%
-Coloca la ventana en la mitad de la pantalla
+Coloca la ventana en la mitad de la pantalla.
 .IPs 100%\ 
-Coloca la ventana en la esquina superior izquierda de la pantalla
+Coloca la ventana en la esquina superior izquierda de la pantalla.
 .IPs 100%:100%
-Coloca la ventana en la esquina inferior izquierda de la pantalla
+Coloca la ventana en la esquina inferior izquierda de la pantalla.
 .RE
 .PD 1
 .
@@ -1888,6 +1883,11 @@ xvidix.
 .br
 El rango controla cuánto de la imagen será recortado.
 .TP
+.B \-refreshrate <Hz>
+Establece la frecuencia de refresco del monitor en Hz.
+Actualmente solo está soportado por \-vo directx combinado con la opción
+\-vm.
+.TP
 .B \-rootwin
 Reproduce la película en la ventana raíz (fondo de escritorio) en lugar
 de abrir una nueva.
@@ -1897,7 +1897,7 @@ Funciona solo con los controladores de x11, xv, xmga y xvidix.
 Ajusta la saturación de la salida de video (por defecto: 0).
 Puede obtener salida en escala de grises con esta opción.
 .TP
-.B \-screenw <pixels> \-screenh <pixels>
+.B \-screenh <pixels> \-screenw <pixels>
 Si usa un controlador de salida que no conoce la resolución de la pantalla
 (fbdev/\:x11 y/\:o TVout) aquí es donde puede especificar la resolución
 horizontal y vertical.
@@ -1909,6 +1909,9 @@ al finalizar.
 .B \-vm \ \ \ 
 Intenta cambiar a un modo de video mejor.
 dga, x11/\:xv (XF86VidMode) y los drivers de salida sdl lo soportan.
+Si se usa con el controlador de salida de video de directx las opciones
+\-screenw, \-screenh, \-bpp y \-refreshrate pueden usarse para establecer
+un nuevo modo de pantalla.
 .TP
 .B \-vsync \ \ 
 Activa VBI para vesa.
@@ -2140,6 +2143,10 @@ mayoría de los archivos AVI.
 .PD 1
 .
 .TP
+.B \-noaspect
+Desactiva la compensación automática de la relación de aspecto de la
+película.
+.TP
 .B \-flip \ 
 Voltea la imagen arriba-abajo.
 .TP
@@ -2240,7 +2247,7 @@ corrige manualmente errores en el codificador:
 2 (msmpeg4v3): algunos archivos antiguos msmpeg4v3 generados con lavc 
 (no autodetectado)
 .br
-4 (mpeg4): error de entrelazado de xvid (autodetectado si fourcc==XVIX) 
+4 (mpeg4): error de entrelazado de XviD (autodetectado si fourcc==XVIX) 
 .br
 8 (mpeg4): UMP4 (autodetectado si fourcc==UMP4)
 .br
@@ -2248,7 +2255,7 @@ corrige manualmente errores en el codificador:
 .br
 32 (mpeg4): error de vlc ilegal (autodetectado para fourcc)
 .br
-64 (mpeg4): error qpel XVID y DIVX (autodetectado para fourcc/ver)
+64 (mpeg4): error qpel XviD y DivX (autodetectado para fourcc/ver)
 .br
 128 (mpeg4): qpel estandar antiguo (autodetectado para fourcc/ver)
 .br
@@ -2266,9 +2273,6 @@ y codificar. Esto, sin embargo, hace que se pague un precio en precisión.
 decodificación solo en escala de grises (un poco más rápida que con color)
 .RE
 .
-.TP
-.B \-noaspect
-Desactiva la compensación automática de razón de aspecto de la película.
 .TP
 .B \-noslices
 Desactiva el dibujado de video por bandas/\:rebanadas de altura de 16-pixels,
@@ -2445,10 +2449,10 @@ Especifica parámetros adicionales cuando se decodifica con XviD.
 .PD 0
 .RSs
 .IPs deblock-chroma
-Activa el filtro de postprocesado interno de xvid: filtro de debloque de croma.
+Activa el filtro de postprocesado interno de XviD: filtro de debloque de croma.
 Vea también \-vf pp, que es más rápido que el propio filtro de XviD.
 .IPs deblock-luma
-Activa el filtro de postprocesado interno de xvid: filtro de debloque de luminancia.
+Activa el filtro de postprocesado interno de XviD: filtro de debloque de luminancia.
 Vea también \-vf pp, que es más rápido que el propio filtro de XviD.
 .IPs dr2\ \ 
 Activa el método 2 de renderizado directo.
@@ -2776,13 +2780,17 @@ desactiva dependiendo de la disponibiblidad del tiempo de CPU.
 .RE
 .PD 1
 .TP
-.B spp[=quality[:qp]]
+.B spp[=quality[:qp[:modo]]]
 filtro de postprocesado simple
 .RSs
 .IPs quality
-0\-6
+0\-6 (por defecto: 3)
 .OPs qp\ \ \ 
-parámetro para forzar la cuantización
+parámetro para forzar la cuantización (por defecto: 0, usa qp del video)
+.IPs modo\ \ \ 
+0: umbral fuerte (por defecto)
+.br
+1: umbral suave (mejor deringing, peor difuminado de imagen)
 .RE
 .TP
 .B qp=ecuación
@@ -2956,17 +2964,17 @@ imagen debe ser detectada como entrelazada para eliminar la imagen.
 .B lavcdeint
 Usa el filtro de desentrelazado de livavcodec.
 .TP
-.B kerndeint[=map[:order[:thresh[:sharp[:twoway]]]]]
+.B kerndeint[=umbral[map[:orden[:sharp[:twoway]]]]]
 Desentralazador de núcleo adaptativo de Donald Graft.
 Desentrelaza partes de video si se excede un umbral configurable.
 .PD 0
 .RSs
+.IPs umbral (0 - 255)
+Umbral (por defecto 10).
 .IPs map (0 ó 1)
 Pinta pixels que exceden el umbral de blanco (por defecto 0).
-.IPs order (0 ó 1)
+.IPs orden (0 ó 1)
 Intercambia campos si 1 (por defecto 0).
-.IPs thresh (0 - 255)
-Umbral (por defecto 10).
 .IPs sharp (0 ó 1)
 Activa perfilado adicional (por defecto 0).
 .IPs twoway (0 ó 1)
@@ -3103,9 +3111,8 @@ o aceleradas desde su tasa de bits original para TV.
 Solo se usa el plano luma para encontrar los cortes de marcos de imagen.
 Si un campo no tiene coincidencia, es desentrelazado con una aproximación
 lineal simple.
-Si la fuente es MPEG-2, debe ser usado libmpeg2 para la decodificación (¡no
-ffmpeg2!), y este debe ser el primer filtro para permitir acceso a los
-field-flags establecidos por el decodificador MPEG-2.
+Si la fuente es MPEG-2, y debe ser el primer filtro para permitir acceso
+a los field-flags establecidos por el decodificador MPEG-2.
 Dependiendo de la fuente mpeg, puede que le funcione ignorando este aviso y
 no vea un montón de advertencias "Bottom-first field".
 Sin opciones realiza un telecine inverso normal, y debe usarse junto con
@@ -3175,8 +3182,57 @@ Si desea usar el filtro ivtc o detc en películas que estén parcialmente
 con telecine por software, insertando este filtro antes el proceso se hace
 de manera más fiable.
 Actualmente solo libmpeg2 exporta las marcas necesarias.
-Si se usa en material donde esto no se haya establecido o si se usa ffmpeg12,
-el filtro no hará nada.
+Si se usa en material que no lo tiene, el filtro no hará nada.
+.TP
+.B phase=[t|b|p|a|u|T|B|A|U][:v]
+Retardo del video entrelazado por un campo temporal para el cambio de orden
+en el campo.
+La intención del uso de esto es arreglar películas PAL que hayan sido
+capturadas con el orden de campo opuesto a la transferencia de película
+a video.
+Las opciones son:
+.RSs
+.IPs t
+Orden del campo de captura primero-arriba, transferir primero-abajo.
+El filtro retrasa el campo inferior.
+.IPs b
+Captura campo-inferior, transferir primero-arriba.
+El filtro retrasa el campo superior.
+.IPs p
+Captura y transfiere con el mismo orden el campo.
+Este modo solo existe para la documentación de las otras opciones que se
+refieren a él, pero si actualmetne lo selecciona, no hará nada ;-)
+.IPs a
+Orden de captura de campo determinado automáticamente por etiquetas de campo,
+transferencia opuesta.
+El filtro selecciona el modo t y b en una base marco a marco usando etiquetas
+de campo.
+Si no hay información de campo disponible, entonces funciona igual que el u.
+.IPs u
+Captura desconocida o variante, transferencia opuesta.
+El filtro selecciona el modo t y b en una base marco a marco analizando las
+imágenes y seleccionando la alternativa que produce la mejor relación entre los
+campos.
+.IPs T
+Captura top-first, transferencia desconocida o variante.
+El filtro selecciona t y p usando análisis de la imagen.
+.IPs B
+Captura bottom-first, transferencia desconocida o variante.
+El filtro selecciona cuánto b y p usando análisis de la imagen.
+.IPs A
+Captura determinada por etiquetas de campo, transferencia desconocida o variante.
+El filtro selecciona cuántos t, b y p usando etiquetas de campo y análisis de
+la imagen.
+Si no hay información de campo disponible, entonces funciona como el modo U.
+Este es el modo por defecto.
+.IPs U
+Ambas capturas y transferencia desconocida o variante.
+El filtro selecciona la cantidad de t, b y p usando análisis de imagen solamente.
+.IPs v
+Operación prolija.
+Muestra el modo seleccionado para cada marco y hace la media cuadrada de la
+diferencia entre campos para t, b y p alternativamente.
+.RE
 .TP
 .B telecine[=inicio]
 Aplica proceso de "telecine" 3:2 para incrementar las imágenes por segundo
@@ -3458,7 +3514,7 @@ Decimación vertical 1, 2 ó 4.
 .IPs quality=1-20
 Establece la calidad en la compresión JPEG [MEJOR] 1 - 20 [MUY MALA].
 .IPs fd|nofd
-Por defecto, la decimación solo se hace si el hardware zoran puede
+Por defecto, la decimación solo se hace si el hardware Zoran puede
 sobreescalar las imágenes MJPEG resultantes al tamaño original.
 La opción fd le indica al filtro que siempre haga la decimación
 (antiestético).
@@ -3603,13 +3659,26 @@ Controlador de salida para el sistema gráfico GGI.
 Reproduce video usando la biblioteca DirectFB.
 .PD 0
 .RSs
-.IPs número
-Elige la capa.
+.IPs (no)input
+Usa el código de teclado de DirectFB en lugar del de MPlayer
+(por defecto: activado).
+.IPs buffermode=single|double|triple
+Doble y triple buffer da mejores resultados si quiere evitar problemas de
+desgarros de imagen. El buffer triple es más eficiente que el doble buffer
+ya que no bloquea MPlayer mientras se espera al refresco vertial.
+El buffer simple debe evitarse (por defecto: single).
+.IPs fieldparity=top|bottom
+Controla el orden de salida de los marcos entrelazados (por defecto: desactivado).
+Valores válidos son top = campos superiores primero, bottom = campos
+inferiores primero.
+Esta opción no tiene ningún efecto en material filmográfico progresivo como
+lo son la mayoría de las películas MPEG.
+Necesitará activar esta opción si tiene problemas de desgarros de imagen/movimientos
+no suaves mientras visualiza material entrelazado.
+.IPs layer=N
+Forzará la capa con id N para la reproducción (por defecto: -1 - auto).
 .RE
 .PD 1
-.TP
-.B directfb2
-Reproduce video usando la biblioteca DirectFB, segunda generación.
 .TP
 .B dfbmga\ 
 Controlador específico de salida para Matrox G400/G450/G550 que usa
@@ -3942,6 +4011,10 @@ se tendrá un archivo de salida conteniendo 'div3' como fourcc de video.
 .PD 1
 .
 .TP
+.B \-force-avi-aspect <0.2\-3.0>
+Sobreescribe la razón de aspecto guardada en la cabecera vprp del AVI OpenDML.
+Puede usarse para cambiar la razón de aspecto con \-ovc copy.
+.TP
 .B \-info <opción1:opción2:...> (AVI solamente)
 Especifica la información de cabecera del archivo AVI resultante.
 .br
@@ -4009,6 +4082,8 @@ Use \-of help para obtener una lista de formatos disponibles.
 codifica a avi (por defecto)
 .IPs "\-of mpeg"
 codifica a mpeg
+.IPs "\-of rawvideo"
+flujo de video sin procesar (no multiplexa - solo video, solo un flujo)
 .RE
 .PD 1
 .
@@ -4072,7 +4147,7 @@ Donde <codec> puede ser: lavc, xvidenc, divx4, lame
 .
 .
 .SS divx4 (\-divx4opts)
-divx4 está obsoleto y solo tiene soporte por completitud.
+DivX4 está obsoleto y solo tiene soporte por completitud.
 Para detalles acerca de las opciones para divx4, lea el código, la
 mayoría de las opciones no se describen aquí.
 .TP
@@ -5265,10 +5340,10 @@ crea un flujo de bits que pueden ser decodificados libres-de-retardo
 .br
 .I ADVERTENCIA:
 esto puede generar flujo de bits ilegal, y PUEDE NO ser
-decodificable por decodificadores ISO-MPEG4 excepto divx/libavcodec/xvid
+decodificable por decodificadores ISO-MPEG4 excepto DivX/libavcodec/XviD
 .br
 .I ADVERTENCIA:
-esto puede también almacenar una versión errónea de divx en el archivo
+esto puede también almacenar una versión errónea de DivX en el archivo
 de modo que la autodetección de errores de algunos decodificadores puede
 verse confundida
 .TP
@@ -5420,10 +5495,10 @@ mplayer /dev/zero \-rawvideo on:pal:fps=xx \-vc null \-vo null \-noframedrop
 mplayer tv:// \-tv driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420
 \-vo xv
 .TP
-.B Reproducción en tarjeta zoran (al viejo estilo, desvalorizado)
+.B Reproducción en tarjeta Zoran (al viejo estilo, desvalorizado)
 mplayer -vo zr -vf scale=352:288 archivo.avi
 .TP
-.B Reproducción en tarjeta zoran (nuevo estilo)
+.B Reproducción en tarjeta Zoran (nuevo estilo)
 mplayer -vo zr2 -vf scale=352:288,zrmjpeg archivo.avi
 .TP
 .B Codificación del título #2 del DVD, solo los capítulos seleccionados

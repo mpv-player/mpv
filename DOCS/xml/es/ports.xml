@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.37 -->
+<!-- synced with 1.38 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Adaptaciones</title>
 
@@ -293,7 +293,8 @@ solo tiene <emphasis>emulación</emphasis> de X que es MUY lenta. Use SDL.
 
 <para>Se obtienen mejores resultados con el controlador de salida DirectX nativo
   (<option>-vo directx</option>) y el controlador nativo de salida de audio de
-  Windows (<option>-ao win32</option>) ya que OpenGL no funciona y SDL se sabe que
+  Windows (<option>-ao win32</option>). Alternativas son OpenGL y SDL, pero el
+  rendimiento de OpenGL varía en gran medida entre sistemas y se sabe que SDL
   distorsiona el sonido y la imagen o bloquea algunos sistemas. Si la imagen se ve
   distorsionada, pruebe a desactivar la aceleración por hardware con
   <option>-vo directx:noaccel</option>.
