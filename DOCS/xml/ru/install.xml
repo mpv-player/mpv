@@ -377,7 +377,7 @@ nVidia TV-выход</link>, если Вы хотите использовать TV.
 </sect2>
 
 
-<sect2 id="sounc-cards">
+<sect2 id="sound-cards">
 <title>Звуковые карты:</title>
 
 <itemizedlist>
@@ -482,14 +482,7 @@ OSD и субтитры. Рекомендуемый метод - установка TTF шрифта и указание MPlyer'у
 в PNG формате, поэтому GTK, <systemitem class="library">libpng</systemitem> (и их части для разработчиков, обычно они
 называются <systemitem class="library">gtk-dev</systemitem> и <systemitem class="library">libpng-dev</systemitem>) должны быть установлены.
 Вы можете собрать GUI, указав <option>--enable-gui</option> в <option>./configure</option>.
-Затем, чтобы включить GUI, Вы либо
-<itemizedlist>
-<listitem><para>
-  указываете <literal>gui=yes</literal> в конфигурационном файле
-  </para></listitem>
-<listitem><para>
-  <screen>ln -s $PREFIX/bin/mplayer $PREFIX/bin/gmplayer</screen>,
-и вызываете <command>gmplayer</command>.
+Затем, чтобы использовать GUI, Вы должны запускать <command>gmplayer</command>.
   </para></listitem>
 </itemizedlist>
 </para>
