@@ -93,105 +93,6 @@ int verbose=0;
 static subtitle* subtitles=NULL;
 void find_sub(subtitle* subtitles,int key);
 
-
-#if 0
-//**************************************************************************//
-//             .SUB 
-//**************************************************************************//
-
-static current_sub=0;
-
-static subtitle* subtitles=NULL;
-static int nosub_range_start=-1;
-static int nosub_range_end=-1;
-
-void find_sub(int key){
-    int i,j;
-    if(vo_sub){
-      if(key>=vo_sub->start && key<=vo_sub->end) return; // OK!
-    } else {
-      if(key>nosub_range_start && key<nosub_range_end) return; // OK!
-    }
-    // sub changed!
-    
-//    printf("\r---- sub changed ----\n");
-    
-    // check next sub.
-    if(current_sub>=0 && current_sub+1<sub_num){
-      if(key>subtitles[current_sub].end && key<subtitles[current_sub+1].start){
-          // no sub
-          nosub_range_start=subtitles[current_sub].end;
-          nosub_range_end=subtitles[current_sub+1].start;
-          vo_sub=NULL;
-          return;
-      }
-      // next sub?
-      ++current_sub;
-      vo_sub=&subtitles[current_sub];
-      if(key>=vo_sub->start && key<=vo_sub->end) return; // OK!
-    }
-
-//    printf("\r---- sub log search... ----\n");
-    
-    // use logarithmic search:
-    i=0;j=sub_num-1;
-//    printf("Searching %d in %d..%d\n",key,subtitles[i].start,subtitles[j].end);
-    while(j>=i){
-        current_sub=(i+j+1)/2;
-        vo_sub=&subtitles[current_sub];
-        if(key<vo_sub->start) j=current_sub-1;
-        else if(key>vo_sub->end) i=current_sub+1;
-        else return; // found!
-    }
-//    if(key>=vo_sub->start && key<=vo_sub->end) return; // OK!
-    
-    // check where are we...
-    if(key<vo_sub->start){
-      if(current_sub<=0){
-          // before the first sub
-          nosub_range_start=key-1; // tricky
-          nosub_range_end=vo_sub->start;
-//          printf("FIRST...  key=%d  end=%d  \n",key,vo_sub->start);
-          vo_sub=NULL;
-          return;
-      }
-      --current_sub;
-      if(key>subtitles[current_sub].end && key<subtitles[current_sub+1].start){
-          // no sub
-          nosub_range_start=subtitles[current_sub].end;
-          nosub_range_end=subtitles[current_sub+1].start;
-//          printf("No sub... 1 \n");
-          vo_sub=NULL;
-          return;
-      }
-      printf("HEH????  ");
-    } else {
-      if(key<=vo_sub->end) printf("JAJJ!  "); else
-      if(current_sub+1>=sub_num){
-          // at the end?
-          nosub_range_start=vo_sub->end;
-          nosub_range_end=0x7FFFFFFF; // MAXINT
-//          printf("END!?\n");
-          vo_sub=NULL;
-          return;
-      } else
-      if(key>subtitles[current_sub].end && key<subtitles[current_sub+1].start){
-          // no sub
-          nosub_range_start=subtitles[current_sub].end;
-          nosub_range_end=subtitles[current_sub+1].start;
-//          printf("No sub... 2 \n");
-          vo_sub=NULL;
-          return;
-      }
-    }
-    
-    printf("SUB ERROR:  %d  ?  %d --- %d  [%d]  \n",key,vo_sub->start,vo_sub->end,current_sub);
-
-    vo_sub=NULL; // no sub here
-}
-
-#endif
-
 //**************************************************************************//
 //             Config file
 //**************************************************************************//
@@ -1214,6 +1115,7 @@ char osd_text_buffer[64];
 int osd_level=2;
 int osd_visible=100;
 int osd_function=OSD_PLAY;
+int osd_last_pts=-303;
 
 #ifdef HAVE_LIRC
   lirc_mp_setup();
@@ -1598,6 +1500,13 @@ switch(sh_video->codec->driver){
         // .ASF files has no fixed FPS - just frame durations!
         float d=d_video->pts-pts1;
         if(d>=0 && d<5) frame_time=d;
+        if(d>0){
+          if(verbose)
+            if((int)sh_video->fps==1000)
+              printf("\rASF framerate: %d fps             \n",(int)(1.0f/d));
+          sh_video->frametime=d; // 1ms
+          sh_video->fps=1.0f/d;
+        }
     }
     v_frame+=frame_time;
     v_pts+=frame_time;
@@ -1936,15 +1845,6 @@ switch(file_format){
         demuxer->idx_pos,audio_chunk_pos,video_chunk_pos,
         skip_video_frames,skip_audio_bytes,skip_audio_secs);
 
-        // Set OSD:
-      if(osd_level){
-        osd_visible=sh_video->fps; // 1 sec
-        vo_osd_progbar_type=0;
-        vo_osd_progbar_value=(demuxer->filepos)/((demuxer->movi_end-demuxer->movi_start)>>8);
-        //printf("avi filepos = %d  \n",vo_osd_progbar_value);
-  //      printf("avi filepos = %d  (len=%d)  \n",demuxer->filepos,(demuxer->movi_end-demuxer->movi_start));
-      }
-
   }
   break;
 
@@ -1989,6 +1889,18 @@ switch(file_format){
   break;
 
 } // switch(file_format)
+
+        // Set OSD:
+      if(osd_level){
+        int len=((demuxer->movi_end-demuxer->movi_start)>>8);
+        if(len>0){
+          osd_visible=sh_video->fps; // 1 sec
+          vo_osd_progbar_type=0;
+          vo_osd_progbar_value=(demuxer->filepos)/len;
+        }
+        //printf("avi filepos = %d  \n",vo_osd_progbar_value);
+  //      printf("avi filepos = %d  (len=%d)  \n",demuxer->filepos,(demuxer->movi_end-demuxer->movi_start));
+      }
 
       //====================== re-sync audio: =====================
       if(has_audio){
@@ -2057,8 +1969,10 @@ switch(file_format){
 //================= Update OSD ====================
 { int i;
   if(osd_level>=2){
+      int pts=v_pts;
+      if(pts==osd_last_pts-1) ++pts; else osd_last_pts=pts;
       vo_osd_text=osd_text_buffer;
-      sprintf(vo_osd_text,"%c %02d:%02d:%02d",osd_function,(int)v_pts/3600,((int)v_pts/60)%60,((int)v_pts)%60);
+      sprintf(vo_osd_text,"%c %02d:%02d:%02d",osd_function,pts/3600,(pts/60)%60,pts%60);
   } else {
       vo_osd_text=NULL;
   }
