@@ -841,62 +841,61 @@ documentation).
 .br
 .I NOTES:
 Vous ne pouvez utiliser cette option que si le media en question supporte les
-déplacements (c-a-d pas depuis stdin, un pipe, etc).
+déplacements (c-à-d pas depuis stdin, un pipe, etc).
 .TP
 .B \-fps <flottant>
-Forcer le débit vidéo (si la valeur est mauvaise ou absente de l'entête).
+Forcer le nombre de trames/sec de la vidéo (si la valeur est mauvaise ou
+absente de l'entête).
 .TP
 .B \-frames <nombre>
 Joue/\:convertit uniquement les <nombre> premières trames, puis sort.
 .TP
 .B \-hr-mp3-seek (MP3 uniquement)
-Placement mp3 haute résolution.
+Déplacement haute résolution dans mp3.
 Par défaut, activé quand un fichier MP3 externe est lu, car nous devons nous 
 placer à la très exacte position pour garder la synchro A/\:V. Cela peut être 
-lent surtout en allant en arrière \- il doit revenir au début pour trouver 
-la trame exacte.
+lent,surtout en allant en arrière, puisqu'il faut revenir au début pour
+trouver la trame exacte.
 .TP
 .B \-idx (voir aussi \-forceidx)
-Reconstruit l'INDEX du fichier AVI si aucun INDEX n'a été trouvé,
+Reconstruit l'index du fichier vidéo si aucun index n'est trouvé,
 permet ainsi de ce déplacer.
-Utile avec les téléchargements cassés/\:incomplets, ou les AVIs de mauvaise 
-qualité.
+Utile avec les téléchargements cassés/\:incomplets, les vidéos en cours
+de/ou mal générée.
 .br
 .I NOTES:
 Vous ne pouvez utiliser cette option que si le media en question supporte les
-déplacements (c-a-d pas depuis stdin, un pipe, etc).
+déplacements (c-à-d pas depuis stdin, un pipe, etc).
 .TP
-.B \-ipv4-only-proxy
+.B \-ipv4-only-proxy (réseau uniquement)
 Saute le proxy pour les adresses IPv6.
 Il sera toujours utilisé pour les connections IPv4.
 .TP
 .B \-loadidx <nomfichier>
-Le nom du fichier à partir duquel lire les données d'INDEX, tel que sauvées par
-\-saveidx.
-MPlayer lira l'index depuis le fichier et utilisera ces données pour le
-déplacement. Ces données seront utilisées à la place des éventuelles données
-d'index présentes dans l'AVI lui-même.
-De plus, MPlayer ne vous préviendra pas du chargement d'un fichier d'index
+Lit l'index depuis <nomfichier>, tel que sauvées par \-saveidx.
+Cet index aura priorité, (pour le déplacement par ex.\&) sur l'index de
+la vidéo jouée
+Attention, MPlayer ne vous empêchera pas de charger l'index
 généré pour un AVI différent, mais cela vous causera sûrement des torts.
 .I NOTE:
-Cette option sera obsolète dès que AVI aura le support ODML\ !
+Cette option est obsolète maintenant que Mplayer supporte OpenDML.
 .TP
 .B \-mc <secondes/trame>
 Correction de synchro A-V maximum par trame (en secondes).
 .TP
 .B \-mf <option1:option2:...>
-Utilisé pour décodage de multiples fichiers PNG ou JPEG.
-
+Utilisé lors du décodage de multiples fichiers PNG ou JPEG.
+.sp 1
 Les options disponibles sont:
-
+.sp 1
 .PD 0
 .RSs
 .IPs w=<valeur>
-largeur de la sortie (autodétection)
+largeur de la sortie (autodétection par défaut)
 .IPs h=<valeur>
-hauteur de la sortie (autodétection)
+hauteur de la sortie (autodétection par défaut)
 .IPs fps=<valeur>
-fps de la sortie (défaut: 25)
+fps de la sortie (25 par défaut)
 .IPs type=<valeur>
 type des fichiers d'entrée (types disponibles: jpeg, png, tga, sgi)
 .RE
@@ -905,41 +904,49 @@ type des fichiers d'entrée (types disponibles: jpeg, png, tga, sgi)
 .TP
 .B \-ni (AVI uniquement)
 Forcer l'utilisation du filtre AVI non entrelacé (permet de
-lire certains mauvais fichiers AVI).
+jouer certains mauvais fichiers AVI).
+.I NOTE\ :
+Il ne s'agit pas d'entrelacement au sens de celle présente dans
+une vidéo issue d'un caméscope numérique, mais d'entrelacement au
+sens de multiplexage audio vidéo dans le fichier vidéo.
 .TP
 .B \-nobps (AVI uniquement)
-Ne pas utiliser la valeur octet/\:sec moyenne pour la synchro A-V (AVI).
+Ne pas utiliser la valeur octet/\:sec moyenne pour la synchro A-V.
 Aide pour certains fichiers AVI avec une entête cassée.
 .TP
 .B \-noextbased
-Désactive la sélection de demuxer basée sur l'extension du fichier.
-Par défaut, quand le type de fichier (demuxer) ne peut être détecté de façon
-fiable (le fichier n'a pas d'entête ou n'est pas suffisamment fiable),
-l'extension du fichier est utilisée pour sélectionner le demuxer. Il se rabat
-toujours sur une sélection de demuxer basée sur le contenu.
+Désactive la sélection de démultiplexeur basée sur l'extension du fichier.
+Par défaut, quand le type de fichier (respectivement, de démultiplexeur)
+ne peut être détecté de façon fiable (le fichier n'a pas d'entête ou
+n'est pas suffisamment fiable), l'extension du fichier est utilisée
+pour sélectionner le démultiplexeur.
+Il se rabat toujours sur une sélection de démultiplexeur basée sur le
+contenu.
 .TP
-.B \-passwd <mot\ de\ passe> (voir également l'option \-user)
+.B \-passwd <mot\ de\ passe> (voir également l'option \-user) (réseau \
+uniquement)
 Indique le mot de passe pour l'identification http.
 .TP
-.B \-prefer-ipv4
+.B \-prefer-ipv4 (réseau uniquement)
 Utilise IPv4 pour les connections réseau.
-Se rabat sur IPv6 automatiquement.
+Se rabat automatiquement sur IPv6.
 .TP
-.B \-prefer-ipv6
+.B \-prefer-ipv6 (réseau IPv6 uniquement)
 Utilise IPv4 pour les connections réseau.
-Se rabat sur IPv4 automatiquement.
+Se rabat automatiquement sur IPv4.
 .TP
 .B \-rawaudio <option1:option2:...>
 Cette option vous permet de lire des fichiers audio bruts.
 Il peut aussi être utilisé pour lire des CD audio qui ne sont pas 44KHz
-16Bit stéréo.
+16-bit stéréo.
+Pour lire un flux AC3 brut, utilisez \-rawaudio on:format=0x2000.
 
 Les options disponibles sont:
-
+.sp 1
 .PD 0
 .RSs
-.IPs on
-utilise le demuxer audio brut
+.IPs on\ \ \ 
+utilise le démultiplexeur audio brut
 .IPs channels=<valeur>
 nombre de canaux
 .IPs rate=<valeur>
@@ -954,17 +961,17 @@ fourcc en hexa
 .TP
 .B \-rawvideo <option1:option2:...>
 Cette option vous permet de lire des fichiers vidéo bruts.
-
+.sp 1
 Les options disponibles sont:
-
+.sp 1
 .PD 0
 .RSs
-.IPs on
-utilise le demuxer vidéo brut
+.IPs on\ \ \
+utilise le démultiplexeur vidéo brut
 .IPs fps=<valeur>
-débit en trames par seconde, par défaut 25.0
+débit en trames par seconde (25.0 par défaut)
 .IPs sqcif|qcif|cif|4cif|pal|ntsc
-définie la taille d'image standard
+défini la taille d'image standard
 .IPs w=<valeur>
 largeur de l'image en pixels
 .IPs h=<valeur>
@@ -979,43 +986,33 @@ taille de trame en octets
 .PD 1
 .
 .TP
-.B \-rtsp-stream-over-tcp
-Utilisé avec 'rtsp://', URLs pour spécifier que les paquets RTP et RTCP
-entrants seront streamés sur TCP (en utilisant la même connexion TCP que RTSP).
-Cette option peut être utile si vous avez une connexion Internet cassée qui ne
-redirige pas les paquets UDP entrants (voir http://www.live.com/mplayer/).
+.B \-rtsp-stream-over-tcp (live.com uniquement)
+Utilisé avec 'rtsp://', URLs pour indiquer que les paquets RTP et RTCP
+entrants seront streamés sur TCP (en utilisant la même connexion TCP que
+RTSP).
+Cette option peut être utile si vous avez une mauvaise connexion Internet
+qui bloque les paquets UDP entrants (voir http://www.live.com/mplayer/).
 .TP
 .B \-saveidx <nomfichier>
-Force la reconstruction de l'INDEX et le sauvegarde dans un fichier séparé
-spécifié par l'argument nomfichier.
+Force la reconstruction de l'index et le sauvegarde dans <nomfichier>.
 Pour l'instant cela ne fonctionne qu'avec les fichiers AVI.
-Bien que vous puissiez utiliser MEncoder pour réparer les fichiers sans index,
-le format AVI est limité à l'indexage de fichiers d'au plus 2 Go.
-Il est cependant possible de placer l'index dans un fichier séparé et de
-l'utiliser plus tard avec \-loadidx, ce qui est plus rapide que de reconstruire
-l'index (avec \-idx ou \-forceidx) à chaque fois que le film est lu
-(C'est une limitation du format AVI, et bien qu'il existe une extension pour
-les indexes au delà de 2 Go, MPlayer ne supporte pas encore cette extension).
-Après que le fichier d'index ait été créé, MPlayer va lire la vidéo.
-Si vous voulez automatiser la génération de fichier d'index (après avoir
-encodé un gros fichier à partir d'une carte TV, par exemple), vous pouvez
-spécifier \-frame 0 pour empécher MPlayer de lire la vidéo après avoir généré
-l'index.
+.br
 .I NOTE:
-Cette option sera obsolète dès que AVI aura le support ODML\ !
+Cette option est obsolète maintenant que Mplayer supporte OpenDML.
 .TP
-.B \-sb <position\ octet> (voir l'option \-ss également)
-Se place à la position donnée par 'octet'.
-Utile pour la lecture d'images CDROM / fichiers .VOB avec des saletés au début.
+.B \-sb <position\ octet> (voir aussi l'option \-ss)
+Se place à la position donnée en octets.
+Utile pour la lecture d'images CDROM ou fichiers VOB avec des saletés au
+début.
 .TP
 .B \-srate <Hz>
 Sélectionne  la fréquence d'échantillonage audio, en ré-échantillonant si 
 nécessaire.
-MEncoder passe cette valeur à lame pour le ré-échantillonnage.
+MEncoder passe cette valeur à LAME pour le ré-échantillonnage.
 .TP
-.B \-ss <temps> (voir l'option \-sb également)
-Se place à la position indiquée par 'temps'.
-
+.B \-ss <temps> (voir aussi l'option \-sb)
+Se place à la position temporelle indiquée.
+.sp 1
 .I EXEMPLE:
 .PD 0
 .RSs
@@ -1033,21 +1030,23 @@ flux.
 Parfois requis pour lire des fichiers MPEG-TS corrompus.
 .
 .TP
+.B \-tsprobe <position\ octet>
+Pour la lecture de flux MPEG-TS, cette option vous permet d'indiquer sur
+combien d'octets du flux MPlayer devra chercher les pids audio et vidéo
+désirés.
+.
+.TP
 .B \-tsprog <1\-65534>
 Pour la lecture de flux MPEG-TS, vous pouvez indiquer quel programme (si
-présent) vous voulez lire. Peut être utilisé avec \-vid et \-aid.
+présent) vous voulez lire.
+Peut être utilisé avec \-vid et \-aid.
 .
 .TP
-.B \-tsprobe <position\ octet>
-Pour la lecture de flux MPEG-TS, cette option vous permet de spécifier dans
-combien d'octets du flux MPlayer devra chercher les pids audio et vidéo désirés.
-.
-.TP
-.B \-tv <option1:option2:...>
-Cette option active les facultés de capture TV de MPlayer. Pour regarder la TV
-avec MPlayer, utilisez 'tv://' ou 'tv://<numéro_canal>' ou même
-'tv://<nom_canal>' (voir l'option channels pour numéro_canal plus bas) comme URL
-de film.
+.B \-tv <option1:option2:...> (TV uniquement)
+Cette option active les facultés de capture TV de MPlayer.
+Pour regarder la TV avec MPlayer, utilisez 'tv://' ou 'tv://<numéro_canal>'
+ou même 'tv://<nom_canal>' (voir l'option channels pour numéro_canal
+plus bas) comme URL de film.
 
 .I NOTE:
 .br
@@ -1070,8 +1069,8 @@ disponible: dummy, v4l, v4l2, bsdbt848
 .IPs device=<valeur>
 Spécifie un autre périphérique que celui par défaut /dev/\:video0.
 .IPs input=<valeur>
-Spécifie une autre entrée que celle par défaut 0 (Télévision) (voir
-la sortie pour en obtenir la liste)
+Défini une autre entrée que celle par défaut 0 (Télévision) (voir
+la sortie console pour en obtenir la liste)
 .IPs freq=<valeur>
 Spécifie sur quelle fréquence régler le tuner (par exemple \& 511.250).
 Non compatible avec le paramètre channels.
@@ -1087,12 +1086,12 @@ hauteur de la fenêtre
 .IPs fps=<valeur>
 fréquence de la capture vidéo (trames par seconde)
 .IPs buffersize=<valeur>
-taille maximale du tampon de capture en mégaoctets (la moitié de la mémoire 
-physique par défaut)
+taille maximale du tampon de capture en mégaoctets (ajusté de façon
+dynamique par défaut)
 .IPs norm=<valeur>
 disponible: PAL, SECAM, NTSC. Pour v4l2 utilisez l'option normid ci-dessous.
-.IPs normid=<value>
-v4l2 uniquement. Voir mes messages de MPlayer pour une liste des normes TV
+.IPs "normid=<value> (v4l2 uniquement)"
+Voir mes messages de MPlayer sur la console pour une liste des normes TV
 disponibles.
 .IPs channel=<valeur>
 Régler le tuner sur le canal <valeur>
@@ -1100,21 +1099,26 @@ Régler le tuner sur le canal <valeur>
 disponible: europe-east, europe-west, us-bcast, us-cable, etc
 .IPs channels=<canal>\-<nom>,<canal>\-<nom>,...
 Défini des noms pour les canaux. 
-Utilisez _ pour les espaces dans les noms (ou jouez avec les quotes ;-).
+Utilisez _ pour les espaces dans les noms (ou jouez avec les guillemets ;-).
 Les noms de canaux seront ensuite écrits en utilisant l'OSD, et les commandes 
 tv_step_channel, tv_set_channel et tv_last_channel seront utilisables
-avec une télécommande (voir. lirc).
+avec une télécommande (voir. LIRC).
 Non compatible avec le paramètre frequency.
-Attention : Le numéro de canal sera sa position dans la liste des 'channels',
-en commençant à 1. 
+.br 
+.I NOTE\ :
+Le numéro de canal sera sa position dans la liste des 'channels',
+en commençant à 1.
+.br
+.I EXEMPLE\:
 Exemple: utilisez tv://1, tv://2, tv://TV1, tv_set_channel 1, tv_set_channel 2,
 tv_set_channel TV1, etc.
 .IPs [brightness|contrast|hue|saturation]=<-100\-100>
-Initialise les paramètres de couleur de la carte
+Initialise les paramètres de couleur de la carte. 
+Correspondent à [luminosité|contraste|tonalité|saturation]
 .IPs audiorate=<valeur>
-Initialise la fréquence de capture audio
+Défini le débit binaire de capture audio.
 .IPs forceaudio
-capture l'audio même si il n'y a pas de sources audio signalées par v4l
+Capture l'audio même si il n'y a pas de sources audio signalées par v4l.
 .IPs alsa
 capture depuis ALSA
 .IPs amode=<0\-3>
@@ -1136,16 +1140,17 @@ tenir compte de l'option amode et des valeurs retournés par v4l.
 Elle peut être utilisé quand la carte tv est incapable de renvoyer le 
 mode audio courant.
 .IPs adevice=<valeur>
-Indique un périphérique audio
+Indique un périphérique audio.
 .RSss
 /dev/\:...\& pour OSS
 .br
-ID matériel pour ALSA
+ID matériel pour ALSA.
+Voir la documentation de \-ao alsa pour savoir comment définir l'ID matériel.
 .REss
 .IPs audioid=<valeur>
-choisis la sortie audio de la carte de capture, si elle à plus
-.IPs [volume|bass|treble|balance]=<0\-65535>
-.IPs [volume|bass|treble|balance]=<0\-100>
+choisit la sortie audio de la carte de capture, si elle en a plus qu'une.
+.IPs "[volume|bass|treble|balance]=<0\-65535> (v4l1)"
+.IPs "[volume|bass|treble|balance]=<0\-100> (v4l1)"
 Ces options règlent les paramètres du mixeur de la carte de capture vidéo.
 Elles n'auront aucun effet si votre carte ne dispose pas d'un mixeur.
 Pour v4l1, 0\-65535 est un intervalle valide.
@@ -5311,6 +5316,8 @@ L'efficacité de cette option dépend de la vidéo source.
 Active un préfiltre d'optimisation chroma qui améliore la qualité 
 .I subjective
 de l'image, tout en dégradant sensiblement le PSNR et la vitesse d'encodage.
+Étant donné que cette option travaille sur l'information de chroma, vous
+pouvez désactiver cette option lors d'un encodage en noir et blanc.
 .TP
 .B reduced
 Active l'encodage de trames en résolution réduite.
