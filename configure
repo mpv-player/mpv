@@ -81,6 +81,7 @@ params:
         --enable-mmx            build with mmx support [autodetect]
         --enable-mmx2           build with mmx2 support (PIII, Athlon) [autodetect]
         --enable-3dnow          build with 3dnow! support [autodetect]
+        --enable-3dnowex        build with 3dnow-dsp! support (K7) [autodetect]
         --enable-sse            build with sse support [autodetect]
         --enable-gl             build with OpenGL render support [autodetect]
         --enable-dga            build with DGA support [autodetect]
@@ -196,6 +197,7 @@ pstepping=`cat /proc/cpuinfo | grep 'stepping' | cut -d ':' -f 2 | cut -d ' ' -f
 _mmx=no
 _mmx2=no
 _3dnow=no
+_3dnowex=no
 _mtrr=no
 _sse=no
 
@@ -236,6 +238,11 @@ for i in `echo $pparam`; do
  case "$i" in
   3dnow)
         _3dnow=yes
+        _mpg123=yes
+        ;;
+  3dnowext)
+        _3dnow=yes
+        _3dnowex=yes
         _mpg123=yes
         ;;
   mmx)
@@ -531,6 +538,10 @@ do
   --enable-3dnow)
         _3dnow=yes
         ;;
+  --enable-3dnowex)
+        _3dnow=yes
+        _3dnowex=yes
+        ;;
   --enable-mmx)
         _mmx=yes
         ;;
@@ -605,6 +616,10 @@ do
         ;;
   --disable-3dnow)
         _3dnow=no
+        _3dnowex=no
+        ;;
+  --disable-3dnowex)
+        _3dnowex=no
         ;;
   --disable-mmx)
         _mmx=no
@@ -703,6 +718,7 @@ echo "Optimizing to ... $proc"
 echo "Checking for mmx support ... $_mmx"
 echo "Checking for mmx2 support ... $_mmx2"
 echo "Checking for 3dnow support ... $_3dnow"
+echo "Checking for 3dnowex support ... $_3dnowex"
 echo "Checking for sse support ... $_sse"
 echo "Checking for mtrr support ... $_mtrr"
 echo "Screen size ... ${_x}x${_y}"
@@ -868,6 +884,12 @@ if [ $_3dnow = yes ]; then
  _3dnowm='#define HAVE_3DNOW'
 else
  _3dnowm='#undef HAVE_3DNOW'
+fi
+
+if [ $_3dnowex = yes ]; then
+ _3dnowexm='#define HAVE_3DNOWEX'
+else
+ _3dnowexm='#undef HAVE_3DNOWEX'
 fi
 
 if [ $_sse = yes ]; then
@@ -1081,6 +1103,7 @@ $_png
 /* Extension defines */
 $_mlib     // available only on solaris
 $_3dnowm   // only define if you have 3DNOW (AMD k6-2, AMD Athlon, iDT WinChip, etc.)
+$_3dnowexm // only define if you have 3DNOWEX (AMD Athlon, etc.)
 $_mmx      // only define if you have MMX
 $_mmx2     // only define if you have MMX2
 $_ssem     // only define if you have SSE (Intel Pentium III or Celeron II)
@@ -1154,12 +1177,17 @@ EOF
 
 echo "Creating mp3lib/config.mak"
 
+if [ $_3dnowex = yes ]; then
+ _3dnowobjectsrcs='dct36_k7.s dct64_k7.s decode_k7.s dct36_3dnow.s dct64_3dnow.s decode_3dnow.s'
+ _3dnowobjectobjs='dct36_k7.o dct64_k7.o decode_k7.o dct36_3dnow.o dct64_3dnow.o decode_3dnow.o'
+else
 if [ $_3dnow = yes ]; then
  _3dnowobjectsrcs='dct36_3dnow.s dct64_3dnow.s decode_3dnow.s'
  _3dnowobjectobjs='dct36_3dnow.o dct64_3dnow.o decode_3dnow.o'
 else
  _3dnowobjectsrcs=
  _3dnowobjectobjs=
+fi
 fi
 
 cat > mp3lib/config.mak << EOF

@@ -1,7 +1,7 @@
 
 / ---------------------------------------------------------------------------
-/  Cpu function detect by Pontscho/fresh!mindworkz
-/   (c) 2000 - 2000
+/  Cpu function detect by Pontscho/fresh!mindworkz (c) 2000 - 2000
+/  3dnow-dsp detection by Nick Kurshev (C) 2001
 / ---------------------------------------------------------------------------
 
 .text
@@ -62,7 +62,9 @@ exit:
 
 / ---------------------------------------------------------------------------
 /  in C: unsigned long a3dnow( void );
-/   return: 0 if this processor not requiment 3dnow! else above 1.
+/  return: 0 if this processor does not support 3dnow!
+/          1 otherwise
+/          2 if this cpu supports 3dnow-dsp extension
 / ---------------------------------------------------------------------------
 a3dnow:
         pushl  %ebx
@@ -71,21 +73,24 @@ a3dnow:
 
 
         call   ipentium
-        shrl   $1,%eax
-        jnc    no_3dnow
+        testl  %eax,%eax
+        jz     exit2
 
         movl   $0x80000000,%eax
         cpuid
         cmpl   $0x80000000,%eax
-        jbe    no_3dnow
+        jbe    exit2
         movl   $0x80000001,%eax
         cpuid
-        testl  $0x80000000,%edx
-        jz     no_3dnow
-        movl   $1,%eax
-        jmp    exit2
-no_3dnow:
         xorl   %eax,%eax
+        testl  $0x80000000,%edx
+        jz     exit2
+/// eax=1 - K6 3DNow!
+        inc    %eax
+        testl  $0x40000000,%edx
+        jz     exit2
+/// eax=2 - K7 3DNowEx!	
+        inc    %eax
 exit2:
 
         popl   %ecx
