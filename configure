@@ -4322,7 +4322,10 @@ int main(void) {
   return 0;
 }
 EOF
-  if cc_check $_inc_faad $_ld_faad -lm && "$TMPO" >> "$TMPLOG" ; then
+  if test "$_cc_major" -eq "3" && test "$_cc_minor" -eq "2" ; then 
+    _faad=no
+    echores "no (buggy gcc fails compiling)"
+  elif cc_check $_inc_faad $_ld_faad -lm && "$TMPO" >> "$TMPLOG" ; then
     _faad_version=`"$TMPO"`
     _faad_tempversion=`"$TMPO" | sed -e 's/^\([0-9]\{1,\}\)\.\([0-9]\{1,\}\).*/\1\2/'`
     _def_faad_version="#define FAADVERSION $_faad_tempversion"
