@@ -1,5 +1,5 @@
 /* SPUdec.c
-   Skeleton of function spudec_process_controll() was written by Apri.
+   Skeleton of function spudec_process_controll() is from xine sources.
    Further works:
    LGB,... (yeah, try to improve it and insert your name here! ;-) */
 
