@@ -100,32 +100,39 @@ static void mDrawColorKey( void )
  XFlush( mDisplay );
 }
 
-static void check_events(void)
-{
-    int e=vo_x11_check_events(mDisplay);
+static void set_window(){
 
-    if(e&VO_EVENT_RESIZE){
          XGetGeometry( mDisplay,mWindow,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
-         drwX=0; drwY=0;
+         drwX=0; drwY=0; // drwWidth=wndWidth; drwHeight=wndHeight;
          XTranslateCoordinates( mDisplay,mWindow,mRoot,0,0,&drwcX,&drwcY,&mRoot );
+         fprintf( stderr,"[xmga] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
+
          if ( mFullscreen )
           {
            drwX=( vo_screenwidth - (dwidth > vo_screenwidth?vo_screenwidth:dwidth) ) / 2;
-           drwcX=drwX;
+           drwcX+=drwX;
            drwY=( vo_screenheight - (dheight > vo_screenheight?vo_screenheight:dheight) ) / 2;
-           drwcY=drwY;
+           drwcY+=drwY;
            drwWidth=(dwidth > vo_screenwidth?vo_screenwidth:dwidth);
            drwHeight=(dheight > vo_screenheight?vo_screenheight:dheight);
+           fprintf( stderr,"[xmga-fs] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
           }
 
          mDrawColorKey();
+
          mga_vid_config.x_org=drwcX;
          mga_vid_config.y_org=drwcY;
          mga_vid_config.dest_width=drwWidth;
          mga_vid_config.dest_height=drwHeight;
 
-         fprintf( stderr,"[xmga] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
+}
 
+static void check_events(void)
+{
+    int e=vo_x11_check_events(mDisplay);
+
+    if(e&VO_EVENT_RESIZE){
+         set_window();
          if ( ioctl( f,MGA_VID_CONFIG,&mga_vid_config ) )
           {
            fprintf( stderr,"Error in mga_vid_config ioctl" );
@@ -251,31 +258,11 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
  mGC=XCreateGC( mDisplay,mWindow,GCForeground,&wGCV );
 
  XMapWindow( mDisplay,mWindow );
-
- XGetGeometry( mDisplay,mWindow,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
- drwX=0; drwY=0; drwWidth=wndWidth; drwHeight=wndHeight;
- XTranslateCoordinates( mDisplay,mWindow,mRoot,0,0,&drwcX,&drwcY,&mRoot );
-
- if ( fullscreen )
-  {
-   drwX=( vo_screenwidth - (dwidth > vo_screenwidth?vo_screenwidth:dwidth) ) / 2;
-   drwcX=drwX;
-   drwY=( vo_screenheight - (dheight > vo_screenheight?vo_screenheight:dheight) ) / 2;
-   drwcY=drwY;
-   drwWidth=(dwidth > vo_screenwidth?vo_screenwidth:dwidth);
-   drwHeight=(dheight > vo_screenheight?vo_screenheight:dheight);
-  }
-
- mDrawColorKey();
+ 
+ set_window();
 
  mga_vid_config.src_width=width;
  mga_vid_config.src_height=height;
- mga_vid_config.dest_width=drwWidth;
- mga_vid_config.dest_height=drwHeight;
- mga_vid_config.x_org=drwcX;
- mga_vid_config.y_org=drwcY;
-
- fprintf( stderr,"[xmga] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
 
  mga_vid_config.colkey_on=1;
  mga_vid_config.colkey_red=255;
