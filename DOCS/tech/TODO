@@ -7,14 +7,15 @@ FOR THE NEXT PRE_RELEASE:
 - fix -vop expand=-50 + ffdivx
 - fix partial -dr + ffmpeg + B frames (different stride per frame)
 - remove or fix -vop lavcdeint
-- NEWSTRUCT DVB driver detection & support
+- NEWSTRUCT DVB driver detection & support - DONE ?
 - fix locale problems (add common float parser / mp_sscanf())
-- apply the delayed patches
+- apply the delayed patches - DONE ?
 - fix the known bugs: 
    ... [Gabu: please list your bugs here...]
 
 FOR THE v0.90 RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
+- remove SVQ1 from libmpcodecs
 - remove -vop yuy2, yvu9
 - cleanup qtaudio/qtvideo (move globals to context)
 - cleanup DMO interfaces
