@@ -108,16 +108,9 @@ int conv24to32( txSample * bf )
    memset( bf->Image,0,bf->ImageSize );
    for ( c=0,i=0;i < (int)(bf->Width * bf->Height * 3); )
     {
-#ifndef WORDS_BIGENDIAN
      bf->Image[c++]=tmpImage[i++];	//red
      bf->Image[c++]=tmpImage[i++];	//green
      bf->Image[c++]=tmpImage[i++]; c++;	//blue
-#else
-     unsigned char t=tmpImage[i++];
-     bf->Image[c++]=tmpImage[i++];	//green
-     bf->Image[c++]=t;             c++;	//red
-     bf->Image[c++]=tmpImage[i++]; 	//blue
-#endif
     }
    free( tmpImage );
   }
@@ -188,11 +181,10 @@ int bpRead( char * fname, txSample * bf )
    mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[bitmap] Sorry, only 24 and 32 bpp bitmaps are supported.\n" );
    return -1;
   }
-#ifdef WORDS_BIGENDIAN
- if (bf->BPP == 32)
-    swab(bf->Image, bf->Image, bf->ImageSize);
-#endif
  if ( conv24to32( bf ) ) return -8;
+#ifdef WORDS_BIGENDIAN
+ swab(bf->Image, bf->Image, bf->ImageSize);
+#endif
  bgr2rgb( bf );
  Normalize( bf );
  return 0;
@@ -204,7 +196,7 @@ void Convert32to1( txSample * in,txSample * out,int adaptivlimit )
  out->Height=in->Height;
  out->BPP=1;
  out->ImageSize=(out->Width * out->Height + 7) / 8;
- mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[c1to32] imagesize: %d\n",out->ImageSize );
+ mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[c32to1] imagesize: %d\n",out->ImageSize );
  out->Image=(char *)calloc( 1,out->ImageSize );
  if ( out->Image == NULL ) mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[c32to1] Not enough memory for image.\n" );
  {
@@ -229,7 +221,7 @@ void Convert1to32( txSample * in,txSample * out )
  out->BPP=32;
  out->ImageSize=out->Width * out->Height * 4;
  out->Image=(char *)calloc( 1,out->ImageSize );
- mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[c32to1] imagesize: %d\n",out->ImageSize );
+ mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[c1to32] imagesize: %d\n",out->ImageSize );
  if ( out->Image == NULL ) mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[c1to32] Not enough memory for image.\n" );
  {
   int i,b,c=0; unsigned int * buf = NULL; unsigned char tmp = 0;
