@@ -108,6 +108,7 @@ char* ac3_filename=NULL;
 
 static int pass=0;
 static char* passtmpfile="divx2pass.log";
+int pass_working=0;
 
 static int play_n_frames=-1;
 
@@ -524,6 +525,9 @@ case VCODEC_DIVX4:
     mux_v->bih->biBitCount=24;
     mux_v->bih->biCompression=mmioFOURCC('d','i','v','x');
     mux_v->bih->biSizeImage=mux_v->bih->biWidth*mux_v->bih->biHeight*(mux_v->bih->biBitCount/8);
+
+    if (pass)
+	printf("Divx: 2-pass logfile: %s\n", passtmpfile);
     break;
 }
 
@@ -617,14 +621,26 @@ case VCODEC_DIVX4:
     }
     switch(pass){
     case 1:
-	VbrControl_init_2pass_vbr_analysis(passtmpfile, divx4_param.quality);
+	if (VbrControl_init_2pass_vbr_analysis(passtmpfile, divx4_param.quality) == -1)
+	{
+	    printf("2pass failed: filename=%s\n", passtmpfile);
+	    pass_working = 0;
+	}
+	else
+	    pass_working = 1;
 	break;
     case 2:
-        VbrControl_init_2pass_vbr_encoding(passtmpfile,
+        if (VbrControl_init_2pass_vbr_encoding(passtmpfile,
 					 divx4_param.bitrate,
 					 divx4_param.framerate,
 					 divx4_crispness,
-					 divx4_param.quality);
+					 divx4_param.quality) == -1)
+	{
+	    printf("2pass failed: filename=%s\n", passtmpfile);
+	    pass_working = 0;
+	}
+	else
+	    pass_working = 1;
 	break;
     }
     break;
@@ -798,8 +814,8 @@ case VCODEC_DIVX4:
     enc_frame.mvs=NULL;
     enc_frame.quant=0;
     enc_frame.intra=0;
-    if(pass==2){	// handle 2-pass:
-	enc_frame.quant = VbrControl_get_quant();
+    if(pass==2 && pass_working){	// handle 2-pass:
+    	enc_frame.quant = VbrControl_get_quant();
 	enc_frame.intra = VbrControl_get_intra();
 	encore(enc_handle,ENC_OPT_ENCODE_VBR,&enc_frame,&enc_result);
         VbrControl_update_2pass_vbr_encoding(enc_result.motion_bits,
@@ -807,7 +823,7 @@ case VCODEC_DIVX4:
 					    enc_result.total_bits);
     } else {
 	encore(enc_handle,ENC_OPT_ENCODE,&enc_frame,&enc_result);
-	if(pass==1){
+	if(pass==1 && pass_working){
 	  VbrControl_update_2pass_vbr_analysis(enc_result.is_key_frame, 
 					       enc_result.motion_bits, 
 					       enc_result.texture_bits, 
