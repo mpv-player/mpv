@@ -16,10 +16,10 @@
 <LI><A HREF="#2.1.1.3">ASF/WMV</A> 1.0 formátum
 <LI><A HREF="#2.1.1.4">QT/MOV</A> formátum
 <LI><A HREF="#2.1.1.5">VIVO</A> formátum (.viv fileok)
+<LI><A HREF="#2.1.1.5">FLI</A> formátum
+<LI><A HREF="#2.1.1.5">RealMedia</A> formátum (.rm fileok)
 <LI>file olvasása <A HREF="documentation.html#3.3">standard bemenetrõl</A>, hálózatról HTTP-n keresztül
 </UL></P>
-
-<P>Megjegyzés: realmedia-val (.ra/.rm) kapcsolatban lásd a FAQ-t!</P>
 
 <P>Fontos tisztázni egy elterjedt tévhitet. Amikor az emberek egy <B>.AVI</B>
 kiterjesztésû file-t látnak, azonnal azt mondják hogy az nem MPEG file.
@@ -162,6 +162,24 @@ ugyanez a helyzet, <B>g.723</B> (szabvány), vagy <B>Vivo Siren</B>.</P>
 <P>Lásd a <A HREF=codecs.html#2.2.1.4>VIVO video codec</A>
 és <A HREF=codecs.html#2.2.2.4>VIVO audio codec</A> fejezeteket az installálási
 útmutatóhoz.</P>
+
+
+<P><B><A NAME=2.1.1.6>2.1.1.6. FLI file-ok</A></B></P>
+
+<P>A <B>FLI</B> egy - az Autodesk Animator által használt - nagyon régi
+fileformátum, de a Neten igen elterjedt. Az <B>MPlayer</B> teljeskörûen
+támogatja ezen formátum beolvasását és dekódolását, seekeléssel is,
+természetesen. A FLI file-ok nem tartalmaznak keyframe-eket, így a seekelés
+után a kép rövid ideig zavaros lesz.</P>
+
+
+<P><B><A NAME=2.1.1.7>2.1.1.7. RealMedia file-ok</A></B></P>
+
+<P>Igen, az <B>MPlayer</B> képes RealMedia (.rm) file-ok beolvasására (demux).
+A seek-elés implementálása folyamatban van, és mivel az RM file-ok tartalmaznak
+keyframe-eket, ez zökkenõmentes lesz. Itt található a támogatott
+<A HREF="codecs.html#2.2.1.8">RealVideo</A> és
+<A HREF="codecs.html#2.2.2.5">RealAudio</A> codec-ek listája.</P>
 
 
 <P><B><A NAME=2.1.2>2.1.2. Audio formátumok</A></B></P>
