@@ -43,7 +43,9 @@
 #include <dlfcn.h>
 #include <math.h>
 
+#ifndef __FreeBSD__
 #include <stdint.h>
+#endif
 
 #include "config.h"
 
