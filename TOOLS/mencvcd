@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Version:          0.1.7
+# Version:          0.1.8
 #
 # Licence:          GPL
 #
@@ -41,6 +41,8 @@
 # 2002/05/15        v0.1.7
 #                     - bugfixes
 #                     - more help
+# 2002/05/26        v0.1.8
+#                     - new option "-sync"
 #
 ################################################################################
 #
@@ -78,6 +80,8 @@ function usage() {
    echo "-ratio <s>    output ratio size of frames, see yuvscaler (1)."
    echo "-size <X>x<Y> sets output size of frames."
    echo "-svcdout      encode to SVCD format [VCD default]."
+   echo "-sync <n>     set the presentation timestamp offset of video"
+   echo "              stream w.r.t. audio stream (video-audio) in mSec."
    echo "-vbr <n>      output video bitrate in kbs [VCD:1152, SVCD:2500]."
    echo "-vfr <n>      sets the frame-rate of the output-stream. Currently"
    echo "              only the standard MPEG rates are supported."
@@ -145,6 +149,7 @@ mpegnorm="-f $VCDMODE -b $vbr -B 260 -V 46"
 imaget="-t vcd2"
 yuvin=""
 framerate=""
+sync=""
 
 while [ "$1"x != "x" ]; do
    case $1 in
@@ -209,6 +214,10 @@ while [ "$1"x != "x" ]; do
         ;;
       -svcdout)
         norm="SVCD"
+	;;
+      -sync)
+        sync="-O $2"
+	shift 1
 	;;
       -vbr)
         vbr=$2
@@ -281,7 +290,7 @@ if [ $burnonly -eq 0 ]; then
    # multiplex streams
    [ -f $NAME.mpv -a -f $NAME.mpa ] || exit 1
    rm -f ${NAME}*.mpg
-   mplex $mplexnorm $NAME.mpv $NAME.mpa -o ${NAME}%d.mpg
+   mplex $mplexnorm $sync $NAME.mpv $NAME.mpa -o ${NAME}%d.mpg
 
    # create cd images
    for mpg in ${NAME}*.mpg; do 
