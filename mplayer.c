@@ -1401,7 +1401,7 @@ while(!eof){
 
     if(play_n_frames>=0){
       --play_n_frames;
-      if(play_n_frames<0) exit_player(MSGTR_Exit_frames);
+      if(play_n_frames<0) eof = PT_NEXT_ENTRY;
     }
 
   vo_pts=sh_video->timer*90000.0;
