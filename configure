@@ -1013,7 +1013,7 @@ if test "$_vidix" = yes ; then
 _awk_verc_fail=yes
 echocheck "awk"
 for _awk in mawk gawk nawk awk; do
-  if ( echo 'BEGIN{testme();}function testme(){print"";}'|$_awk -f/dev/stdin ) >> "$TMPLOG" 2>&1; then
+  if ( $_awk 'BEGIN{testme();}function testme(){print"";}' ) >> "$TMPLOG" 2>&1; then
     _awk_verc_fail=no
     break
   fi
