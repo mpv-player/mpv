@@ -168,7 +168,7 @@ static void avifile_odml_new_riff(muxer_t *muxer)
     FILE *f = muxer->file;
     uint32_t riff[3];
 
-    mp_msg(MSGT_MUXER, MSGL_INFO, "ODML: Starting new RIFF chunk at %dMiB.\n", (int)(muxer->file_end/1024/1024));
+    mp_msg(MSGT_MUXER, MSGL_INFO, "ODML: Starting new RIFF chunk at %dMB.\n", (int)(muxer->file_end/1024/1024));
 
     vsi->riffofspos++;
     if (vsi->riffofspos>=vsi->riffofssize) {
