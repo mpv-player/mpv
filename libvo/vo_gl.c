@@ -80,7 +80,7 @@ static uint32_t texture_width;
 static uint32_t texture_height;
 
 static void resize(int x,int y){
-  printf("Resize: %dx%d\n",x,y);
+  printf("[gl] Resize: %dx%d\n",x,y);
   glViewport( 0, 0, x, y );
 
   glMatrixMode(GL_PROJECTION);
@@ -121,7 +121,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 
 	if (mydisplay == NULL)
 	{
-		printf("Can not open display\n");
+		printf("[gl] Can not open display\n");
 		return -1;
 	}
 
@@ -173,6 +173,11 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 
 //	XMatchVisualInfo(mydisplay, screen, depth, TrueColor, &vinfo);
   vinfo=glXChooseVisual( mydisplay,screen,wsGLXAttrib );
+  if (vinfo == NULL)
+  {
+    printf("[gl] no GLX support present\n");
+    return -1;
+  }
 
 	xswa.background_pixel = 0;
 	xswa.border_pixel     = 1;
@@ -239,7 +244,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	if (myximage->byte_order != LSBFirst) 
 #endif
 	{
-		fprintf( stderr, "No support fon non-native XImage byte order!\n" );
+		printf("[gl] no support fon non-native XImage byte order!\n");
 		return -1;
 	}
 
@@ -262,7 +267,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 
   if(format==IMGFMT_YV12){
     yuv2rgb_init(8*BYTES_PP, MODE_BGR);
-    printf("YUV init OK!\n");
+    printf("[gl] YUV init OK!\n");
     image_bpp=8*BYTES_PP;
     image_bytes=BYTES_PP;
   } else {
@@ -280,7 +285,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 
   glEnable(GL_TEXTURE_2D);
 
-  printf("Creating %dx%d texture...\n",texture_width,texture_height);
+  printf("[gl] Creating %dx%d texture...\n",texture_width,texture_height);
 
 #if 1
 //  glBindTexture(GL_TEXTURE_2D, texture_id);
@@ -492,4 +497,3 @@ static void
 uninit(void)
 {
 }
-
