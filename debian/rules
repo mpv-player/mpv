@@ -3,7 +3,7 @@
 # based on the sample debian/rules file for GNU hello by Ian Jackson.
 #export DH_VERBOSE=1
 # This is the debhelper compatability version to use.
-export DH_COMPAT=2
+export DH_COMPAT=3
 
 package        := mplayer
 prefix := debian/$(package)
@@ -54,19 +54,14 @@ binary-arch: build
 
 	# commands to install the package into debian/<packagename>
 	$(MAKE) prefix=$(prefix)/usr CONFDIR=$(prefix)/usr/share/mplayer DATADIR=$(prefix)/usr/share/mplayer install
-	#install -m 755 -s mplayer $(CURDIR)/debian/`dh_listpackages`/usr/bin/mplayer
 	dh_link usr/bin/mplayer usr/bin/gmplayer
-	#install -o root -g root -m 0644 etc/codecs.conf $(prefix)/usr/share/mplayer
 
 	dh_installdebconf	
 	dh_installdocs DOCS/*
 	dh_installexamples etc/example.conf
 	dh_installmenu
 #	dh_installmime
-#	dh_installmanpages TVout/fbset/fb.modes.5 TVout/fbset/fbset.8
-#       dh_installmanpages      # handled by make install above
 	dh_installinfo
-#	dh_undocumented
 	dh_installchangelogs
 	dh_link
 	dh_strip
