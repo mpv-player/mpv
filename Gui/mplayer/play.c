@@ -134,6 +134,8 @@ void ChangeSkin( void )
    skinAppMPlayer=&tmpList;
    ret=skinRead( gtkShMem->sb.name );
 
+   fntFreeFont();
+
    appInitStruct( &tmpList );
    skinAppMPlayer=&appMPlayer;
    appInitStruct( &appMPlayer );

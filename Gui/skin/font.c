@@ -23,8 +23,18 @@ int fntAddNewFont( char * name )
  return id;
 }
 
-void fntFreeFont( int id )
+void fntFreeFont( void )
 {
+ int i;
+ for( i=0;i<25;i++ )
+  {
+   if ( Fonts[i] )
+    {
+     if ( Fonts[i]->Bitmap.Image ) free( Fonts[i]->Bitmap.Image );
+     free( Fonts[i] );
+     Fonts[i]=NULL;
+    }
+  }
 }
 
 int fntRead( char * path,char * fname,int id )

@@ -22,7 +22,7 @@ extern txSample   Bitmap;
 extern bmpFont  * Fonts[25];
 
 extern int  fntAddNewFont( char * name );
-extern void fntFreeFont( int id );
+extern void fntFreeFont( void );
 extern int  fntFindID( char * name );
 
 extern int        fntRead( char * path,char * fname,int id );
