@@ -5,11 +5,8 @@ TODO:
 FOR THE NEXT PRE_RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 - fix -vop expand=-50 + ffdivx
-- fix/remove -vop lavcdeint, remove -vop yuy2, yvu9
 - fix -npp in manpage
-- fix ffmjpeg vs. -mf (Gabu's bugreport) - FIXED?
-- fix FindFIrst/NextFile for *.qtx, requires for QCLP too
-- fix 'releasing corrupted memory' in loader
+- remove -vop lavcdeint, remove -vop yuy2, yvu9
 
 FOR THE v0.90 RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
