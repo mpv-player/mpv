@@ -945,8 +945,8 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
   }
 
 #ifdef TEXTUREFORMAT_ALWAYS
-  gl_internal_format=TEXTURE_FORMAT_ALWAYS;
-  gl_internal_format_s=TEXTURE_FORMAT_ALWAYS_S;
+  gl_internal_format=TEXTUREFORMAT_ALWAYS;
+  gl_internal_format_s=TEXTUREFORMAT_ALWAYS_S;
 #endif
 
   if (IMGFMT_IS_BGR(format))
