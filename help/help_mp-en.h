@@ -839,7 +839,7 @@ static char help_text[]=
 // cfg.c
 
 #define MSGTR_ConfigFileReadError "[cfg] config file read error ...\n"
-#define MSGTR_UnableToSaveOption "Unable to save the '%s' option.\n"
+#define MSGTR_UnableToSaveOption "[cfg] Unable to save the '%s' option.\n"
 
 // interface.c
 
