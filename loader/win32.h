@@ -34,7 +34,5 @@ typedef struct tls_s tls_t;
 
 extern void* LookupExternal(const char* library, int ordinal);
 extern void* LookupExternalByName(const char* library, const char* name);
-extern int expRegisterClassA(const void/*WNDCLASSA*/ *wc);
-extern int expUnregisterClassA(const char *className, HINSTANCE hInstance);
 
 #endif

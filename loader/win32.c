@@ -497,6 +497,37 @@ static int WINAPI ext_unknown()
     return 0;
 }
 
+static int  WINAPI expGetVolumeInformationA( const char *root, char *label,
+                                       unsigned int label_len, unsigned int *serial,
+                                       unsigned int *filename_len,unsigned int *flags,
+                                       char *fsname, unsigned int fsname_len )
+{
+dbgprintf("GetVolumeInformationA( %s, 0x%x, %ld, 0x%x, 0x%x, 0x%x, 0x%x, %ld) => 1\n",
+		      root,label,label_len,serial,filename_len,flags,fsname,fsname_len);
+//hack Do not return any real data - do nothing
+return 1;
+}
+
+static unsigned int WINAPI expGetDriveTypeA( const char *root )
+{
+ dbgprintf("GetDriveTypeA( %s ) => %d\n",root,DRIVE_FIXED);
+ // hack return as Fixed Drive Type
+ return DRIVE_FIXED;
+}
+
+static unsigned int WINAPI expGetLogicalDriveStringsA( unsigned int len, char *buffer )
+{
+ dbgprintf("GetLogicalDriveStringsA(%d, 0x%x) => 4\n",len,buffer);
+ // hack only have one drive c:\ in this hack
+  *buffer++='c';
+  *buffer++=':';
+  *buffer++='\\';
+  *buffer++='\0';
+  *buffer= '\0';
+return 4; // 1 drive * 4 bytes (includes null)
+}
+
+
 static int WINAPI expIsBadWritePtr(void* ptr, unsigned int count)
 {
     int result = (count == 0 || ptr != 0) ? 0 : 1;
@@ -1650,6 +1681,13 @@ static int WINAPI expGlobalSize(void* amem)
     dbgprintf("GlobalSize(0x%x)\n", amem);
     return size;
 }
+
+static int WINAPI expLoadIconA( long hinstance, char *name )
+{
+ dbgprintf("LoadIconA( %ld, 0x%x ) => 1\n",hinstance,name);
+ return 1;
+}
+
 static int WINAPI expLoadStringA(long instance, long  id, void* buf, long size)
 {
     int result=LoadStringA(instance, id, buf, size);
@@ -3930,6 +3968,16 @@ static HRESULT WINAPI expMoDeleteMediaType(MY_MEDIA_TYPE* dest)
     return S_OK;
 }
 
+static int exp_snprintf( char *str, int size, const char *format, ... )
+{
+      int x;
+      va_list va;
+      va_start(va, format);
+      x=snprintf(str,size,format,va);
+      dbgprintf("_snprintf( 0x%x, %d, %s, ... ) => %d\n",str,size,format,x);
+      va_end(va);
+      return x;
+}
 
 #if 0
 static int exp_initterm(int v1, int v2)
@@ -3982,7 +4030,7 @@ static void* exp__dllonexit()
     return NULL;
 }
 
-static int expwsprintfA(char* string, char* format, ...)
+static int expwsprintfA(char* string, const char* format, ...)
 {
     va_list va;
     int result;
@@ -3997,7 +4045,7 @@ static int expsprintf(char* str, const char* format, ...)
 {
     va_list args;
     int r;
-    dbgprintf("sprintf(%s, %s)\n", str, format);
+    dbgprintf("sprintf(0x%x, %s)\n", str, format);
     va_start(args, format);
     r = vsprintf(str, format, args);
     va_end(args);
@@ -4513,13 +4561,13 @@ static void WINAPI expVariantInit(void* p)
     return;
 }
 
-int expRegisterClassA(const void/*WNDCLASSA*/ *wc)
+static int WINAPI expRegisterClassA(const void/*WNDCLASSA*/ *wc)
 {
     dbgprintf("RegisterClassA(%p) => random id\n", wc);
     return time(NULL); /* be precise ! */
 }
 
-int expUnregisterClassA(const char *className, HINSTANCE hInstance)
+static int WINAPI expUnregisterClassA(const char *className, HINSTANCE hInstance)
 {
     dbgprintf("UnregisterClassA(%s, %p) => 0\n", className, hInstance);
     return 0;
@@ -4656,6 +4704,9 @@ struct libs
 
 struct exports exp_kernel32[]=
 {
+    FF(GetVolumeInformationA,-1)
+    FF(GetDriveTypeA,-1)
+    FF(GetLogicalDriveStringsA,-1)
     FF(IsBadWritePtr, 357)
     FF(IsBadReadPtr, 354)
     FF(IsBadStringPtrW, -1)
@@ -4811,6 +4862,7 @@ struct exports exp_msvcrt[]={
     FF(malloc, -1)
     FF(_initterm, -1)
     FF(__dllonexit, -1)
+    FF(_snprintf,-1)
     FF(free, -1)
     {"??3@YAXPAX@Z", -1, expdelete},
     {"??2@YAPAXI@Z", -1, expnew},
@@ -4878,6 +4930,7 @@ struct exports exp_winmm[]={
 #endif
 };
 struct exports exp_user32[]={
+    FF(LoadIconA,-1)
     FF(LoadStringA, -1)
     FF(wsprintfA, -1)
     FF(GetDC, -1)
