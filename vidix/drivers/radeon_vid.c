@@ -309,16 +309,16 @@ REF_TRANSFORM trans[2] =
  *            cont - contrast                                               *
  *            sat - saturation                                              *
  *            hue - hue                                                     *
- *            red_intense - intense of red component                        *
- *            green_intense - intense of green component                    *
- *            blue_intense - intense of blue component                      *
+ *            red_intensity - intense of red component                      *
+ *            green_intensity - intense of green component                  *
+ *            blue_intensity - intense of blue component                    *
  *            ref - index to the table of refernce transforms               *
  *   Outputs: NONE                                                          *
  ****************************************************************************/
 
 static void radeon_set_transform(float bright, float cont, float sat,
-				 float hue, float red_intense,
-				 float green_intense,float blue_intense,
+				 float hue, float red_intensity,
+				 float green_intensity,float blue_intensity,
 				 unsigned ref)
 {
 	float OvHueSin, OvHueCos;
@@ -346,9 +346,9 @@ static void radeon_set_transform(float bright, float cont, float sat,
 
 	CAdjLuma = cont * trans[ref].RefLuma;
 	CAdjOff = cont * trans[ref].RefLuma * bright * 1023.0;
-	RedAdj = cont * trans[ref].RefLuma * red_intense * 1023.0;
-	GreenAdj = cont * trans[ref].RefLuma * green_intense * 1023.0;
-	BlueAdj = cont * trans[ref].RefLuma * blue_intense * 1023.0;
+	RedAdj = cont * trans[ref].RefLuma * red_intensity * 1023.0;
+	GreenAdj = cont * trans[ref].RefLuma * green_intensity * 1023.0;
+	BlueAdj = cont * trans[ref].RefLuma * blue_intensity * 1023.0;
 
 	CAdjRCb = sat * -OvHueSin * trans[ref].RefRCr;
 	CAdjRCr = sat * OvHueCos * trans[ref].RefRCr;
@@ -389,8 +389,12 @@ static void radeon_set_transform(float bright, float cont, float sat,
 	dwOvROff = ((int)(OvROff * 2.0)) & 0x1fff;
 	dwOvGOff = (int)(OvGOff * 2.0) & 0x1fff;
 	dwOvBOff = (int)(OvBOff * 2.0) & 0x1fff;
+	/* Whatever docs say about R200 having 3.8 format instead of 3.11
+	   as in Radeon is a lie */
+#if 0
 	if(!IsR200)
 	{
+#endif
 		dwOvLuma =(((int)(OvLuma * 2048.0))&0x7fff)<<17;
 		dwOvRCb = (((int)(OvRCb * 2048.0))&0x7fff)<<1;
 		dwOvRCr = (((int)(OvRCr * 2048.0))&0x7fff)<<17;
@@ -398,6 +402,7 @@ static void radeon_set_transform(float bright, float cont, float sat,
 		dwOvGCr = (((int)(OvGCr * 2048.0))&0x7fff)<<17;
 		dwOvBCb = (((int)(OvBCb * 2048.0))&0x7fff)<<1;
 		dwOvBCr = (((int)(OvBCr * 2048.0))&0x7fff)<<17;
+#if 0
 	}
 	else
 	{
@@ -409,7 +414,7 @@ static void radeon_set_transform(float bright, float cont, float sat,
 		dwOvBCb = (((int)(OvBCb * 256.0))&0x7ff)<<4;
 		dwOvBCr = (((int)(OvBCr * 256.0))&0x7ff)<<20;
 	}
-
+#endif
 	OUTREG(OV0_LIN_TRANS_A, dwOvRCb | dwOvLuma);
 	OUTREG(OV0_LIN_TRANS_B, dwOvROff | dwOvRCr);
 	OUTREG(OV0_LIN_TRANS_C, dwOvGCb | dwOvLuma);
@@ -1071,7 +1076,14 @@ int vixPlaybackFrameSelect(unsigned frame)
     return 0;
 }
 
-vidix_video_eq_t equal = { 0, 0, 0, 0, 0, 0, 0, 0 };
+vidix_video_eq_t equal =
+{
+ VEQ_CAP_BRIGHTNESS | VEQ_CAP_SATURATION
+#ifndef RAGE128
+ | VEQ_CAP_CONTRAST | VEQ_CAP_HUE | VEQ_CAP_RGB_INTENSITY
+#endif
+ ,
+ 0, 0, 0, 0, 0, 0, 0, 0 };
 
 int 	vixPlaybackGetEq( vidix_video_eq_t * eq)
 {
@@ -1082,6 +1094,7 @@ int 	vixPlaybackGetEq( vidix_video_eq_t * eq)
 #ifndef RAGE128
 #define RTFSaturation(a)   (1.0 + ((a)*1.0)/1000.0)
 #define RTFBrightness(a)   (((a)*1.0)/2000.0)
+#define RTFIntensity(a)    (((a)*1.0)/2000.0)
 #define RTFContrast(a)   (1.0 + ((a)*1.0)/1000.0)
 #define RTFHue(a)   (((a)*3.1416)/1000.0)
 #define RTFCheckParam(a) {if((a)<-1000) (a)=-1000; if((a)>1000) (a)=1000;}
@@ -1094,7 +1107,17 @@ int 	vixPlaybackSetEq( const vidix_video_eq_t * eq)
 #else
   int itu_space;
 #endif
-    memcpy(&equal,eq,sizeof(vidix_video_eq_t));
+    if(eq->cap & VEQ_CAP_BRIGHTNESS) equal.brightness = eq->brightness;
+    if(eq->cap & VEQ_CAP_CONTRAST)   equal.contrast   = eq->contrast;
+    if(eq->cap & VEQ_CAP_SATURATION) equal.saturation = eq->saturation;
+    if(eq->cap & VEQ_CAP_HUE)        equal.hue        = eq->hue;
+    if(eq->cap & VEQ_CAP_RGB_INTENSITY)
+    {
+      equal.red_intensity   = eq->red_intensity;
+      equal.green_intensity = eq->green_intensity;
+      equal.blue_intensity  = eq->blue_intensity;
+    }
+    equal.flags = eq->flags;
 #ifdef RAGE128
     br = equal.brightness * 64 / 1000;
     if(br < -64) br = -64; if(br > 63) br = 63;
@@ -1107,16 +1130,16 @@ int 	vixPlaybackSetEq( const vidix_video_eq_t * eq)
   RTFCheckParam(equal.saturation);
   RTFCheckParam(equal.contrast);
   RTFCheckParam(equal.hue);
-  RTFCheckParam(equal.red_intense);
-  RTFCheckParam(equal.green_intense);
-  RTFCheckParam(equal.blue_intense);
+  RTFCheckParam(equal.red_intensity);
+  RTFCheckParam(equal.green_intensity);
+  RTFCheckParam(equal.blue_intensity);
   radeon_set_transform(RTFBrightness(equal.brightness),
 		       RTFContrast(equal.contrast),
 		       RTFSaturation(equal.saturation),
 		       RTFHue(equal.hue),
-		       RTFBrightness(equal.red_intense),
-		       RTFBrightness(equal.green_intense),
-		       RTFBrightness(equal.blue_intense),
+		       RTFIntensity(equal.red_intensity),
+		       RTFIntensity(equal.green_intensity),
+		       RTFIntensity(equal.blue_intensity),
 		       itu_space);
 #endif
   return 0;
