@@ -1712,9 +1712,6 @@ Sets noblock-mode, mmap-mode and the device-name as first card, fourth device.
 .RE
 .PD 1
 .sp 1
-FIXME: Document suboptions for sdl, arts, esd, jack, nas, macosx, sgi, sun,
-dxr2, mpegpes, null, pcm, plugin.
-.sp 1
 Available audio output drivers are:
 .
 .TP
@@ -1760,6 +1757,12 @@ Sets the audio-output device (default: /dev/\:dsp).
 .B sdl\ \ \ \ 
 Highly platform independent SDL (Simple Directmedia Layer) library
 audio output driver.
+.PD 0
+.RSs
+.IPs <driver>
+Explicitly choose the SDL audio driver to use (default: let SDL choose).
+.RE
+.PD 1
 .
 .TP
 .B arts\ \ \ 
@@ -1768,6 +1771,12 @@ Audio output through the Arts daemon.
 .TP
 .B esd\ \ \ \ 
 Audio output through the ESD daemon.
+.PD 0
+.RSs
+.IPs <server>
+Explicitly choose the ESD server (default: localhost).
+.RE
+.PD 1
 .
 .TP
 .B jack\ \ \ \ 
@@ -1788,6 +1797,12 @@ Native SGI audio output driver.
 .TP
 .B sun (Sun only)
 Native Sun audio output driver.
+.PD 0
+.RSs
+.IPs <device>
+Explicitly choose the audio device to use (default: /dev/\:audio).
+.RE
+.PD 1
 .
 .TP
 .B win32 (Windows only)
