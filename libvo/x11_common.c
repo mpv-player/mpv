@@ -762,6 +762,9 @@ void vo_x11_fullscreen( void )
  if(vo_wm_type==vo_wm_Unknown && !(vo_fsmode&16))
      XUnmapWindow( mDisplay,vo_window );  // required for MWM
  XMoveResizeWindow( mDisplay,vo_window,x,y,w,h );
+#ifdef HAVE_XINERAMA
+ vo_x11_xinerama_move(mDisplay,vo_window);
+#endif
  XMapRaised( mDisplay,vo_window );
  XRaiseWindow( mDisplay,vo_window );
  XFlush( mDisplay );
