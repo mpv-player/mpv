@@ -1,0 +1,189 @@
+<HTML>
+<BODY BGCOLOR=white>
+
+<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+
+<P><B><A NAME=4.1>4.1. CD-ROM Laufwerke</A></B></P>
+
+<P>Aus der Linux-Dokumentation:</P>
+
+<P>Einige CDROM-Laufwerke verfügen über die Möglichkeit die Abtastgeschwindigkeit
+zu verändern. Es gibt mehrere Gründe für das Ändern der Geschwindigkeit
+eines CDROM-Laufwerks. Schlecht erzeute CDROMs arbeiten bei einer geringeren
+Abtastrate möglicherweise besser als bei der maximalen. Moderne CDROM-Laufwerke
+können sehr hohe Abtastraten erreichen (bis zu 50-fach ist normal). Es wurde
+berichtet, dass diese Laufwerke bei diesen hohen Geschwindkeiten Lesefehler
+erzeugen; das herabsetzen der Geschwindigkeit kann die Datenverluste verringern.
+Zu guter letzt erzeugen einige dieser Laufwerke störend laute Geräusche, die
+eine niedrigere Geschwindigkeit ebenfalls reduzieren kann.</P>
+
+<P>Der empfohlene Weg die Lesegeschwindigkeit zu verringen ist mittels des
+Programmes 'setcd'. Es ist recht alt, aber es sollte nicht zu schwer im Internet
+zu finden sein. (UPDATE : das neue hdparm hat eine Option dafür !)
+Verwendung:</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>setcd -x <Geschwingkeit> <CDROM-Gerät></CODE></P>
+
+<P>Du kannst auch folgendes probieren:</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo current_speed:4 >/proc/ide/<CDROM-Gerät>/settings</CODE></P>
+
+<P>Aber man braucht dazu Root-Privilegien. Ich verwende auch diesen Befehl:</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo file_readahead:2000000 >/proc/ide/<CDROM-Device>/settings</CODE></P>
+
+<P>für 2MB Lesepuffer für die Dateien (nützlich bei zerkratzten CDs).
+Es ist auch zu empfehlenswert das CD-Rom via 'hdparm' einzustellellen:</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>hdparm -d1 -a8 -u1 (CDROM-Device</CODE></P>
+
+<P>um den DMA-Zugriff, Vorauslesen und IRQ-Unmasking zu aktivieren.
+(Wenn du das nicht verstehst *lies die hdparm manpage*)</P>
+
+<P>Bitte schau dir "<CODE>/proc/ide/<CDROM-Gerät>/settings</CODE>" an um das CD-ROM feinein-
+zustellen.</P>
+
+<P><B><A NAME=4.2>4.2. DVD Wiedergabe</A></B></P>
+  
+<P>Ja, richtige DVD-Unterstützung wurde erreicht. Du brauchst nicht mehr manuell
+VOB Dateien von der Disk abspielen und über die Dateien im video_ts Verzeichnis
+bescheid wissen, du musst dir nicht gedanken machen, ob es sich um eine verschüs-
+selte DVD handelt oder nicht (in alten Versionen von <B>MPlayer</B> musstest du
+den '-dvdauth /dev/dvd' Parameter verwenden, wenn es eine verschlüsselte DVD war),
+und du brauchst nicht mal mehr die DVD mounten um sie spielen zu können :)</P>
+  
+<P>WICHTIGER HINWEIS: Bitte erwarte _KEINE_ erweiterten Merkmale von der DVD-
+Wiedergabe. Dies ist die erste Version mit richtiger DVD-Unterstützung in
+<B>MPlayer</B> und wir sind beschäftigt damit, Fehler zu suchen und grundlegende
+DVD-Player Funktionen zu implementieren.</P>
+
+<P><B>MPlayer</B> verwendet libdvdread, welches eingebaute Unterstützung für IFO
+Parsing, lesen von Navi Blöcken und Authentifizierung/Entschlüsselung hat. libdvdread
+verwendet die gute alte libcss die die letztgenannten Funktionen. Also musst du libcss
+und libdvdread heruntergeladen, kompiliert und installiert haben, BEVOR du den 
+./configure Script von <B>MPlayer</B>, welcher libdvdread automatisch erkennt, aus-
+führst.</P>
+
+<UL>  
+<LI><P><B>Laden der Sourcen von libdvdread und libcss.</B></P>
+  
+<P><I>Du sie hier downloaden:
+<A HREF="http://www.dtek.chalmers.se/groups/dvd">http://www.dtek.chalmers.se/groups/dvd</A>
+(klicke auf 'download' im Menü links, und du kannst libcss und libdvdread in der
+Tabelle finden).</I></P></LI>
+  
+<LI><P><B>Kompiliere und Installiere libcss, DANN libdvdread.</B></P>
+    
+<P><I>Lese die Dokumentationen dieser Pakete um diesen Schritt einfach zu machen.</I></P></LI>
+  
+<LI><P><B>Kompiliere MPlayer neu.</B></P>
+  
+<P><I>Lass <CODE>./configure</CODE> laufen. Wenn du libdvdread richtig installiert hast,
+wird ./configure etwa so was sagen:<BR><CODE>Checking for DVDread support ... yes</CODE><BR>
+(Natürlich kannst du deine Lieblings-Optionen verwenden, wenn du ./configure laufen lässt).
+Das wars! Tippe: <CODE>make</CODE>, dann <CODE>make install</CODE>.</I></P></LI>
+</UL>
+
+<P>Natürlich müsst die libcss und libdvdread nicht neu kompilieren, wenn du MPlayer
+neu kompilierst (z.B. aufgrund einer neuen CVS-Version), wenn diese 2 Pakete bereits
+installiert sind.</P>
+
+<P><B>Verwendung von MPlayer zum DVD-Spielen:</B></P>
+
+
+<TABLE BORDER=0 WIDTH=100%>
+<TD VALIGN=top>-dvd &lt;title_id&gt;&nbsp;</TD>
+<TD>Aktiviert die DVD-Unterstützung und wählt den Titel aus.</TD><TR>
+<TD VALIGN=top>-chapter &lt;chapter_id&gt;&nbsp;</TD>
+<TD>Wählt das DVD-Kapitel (Standard: wiedergabe von Kapitel 1)</TD><TR>
+<TD VALIGN=top>-dvdangle &lt;angle_id&gt;&nbsp;</TD>
+<TD>Zum aus wählen der Kamera-Perspektive (Standard: 1)</TD><TR>
+</TABLE>
+
+<P>Standard-Geräte ist <CODE>/dev/dvd</CODE>, du kannst das in config.h (compile time
+option) ändern, oder du kannst es als Dateinamen für <B>MPlayer</B> angeben:
+</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 /dev/dvd</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 2 -chapter 5 -dvdangle 2</CODE></P>
+
+<P><B><A NAME=4.3>4.3. DVD Wiedergabe FAQ</A></B></P>
+
+<TABLE BORDER=0 ALIGN=left WIDTH=100%>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+Kann ich libdvdread und libcss z.B. auf meinem süssen Sparc/Solaris kompilieren?
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+Was weiss ... Bitte teste es und sag uns bescheid. Aber es wird gesagt, dass es
+funktionieren sollte. Bitte lese auch die Documentation von libdvdread und seiner
+homepage. Wir sind nicht die Autoren von libdvdread.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+Was ist mit den Untertiteln? Kann MPlayer die dekodieren?
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+Ja, das kann es (oder es sollte zumindest so sein) aber es ist z.Z. DVD-Unter-
+titel keine Anzeige-Funktion implementiert in <B>MPlayer</B> (DVD-Untertitel
+werden als Bilder, nicht als Text gespeichert!). Wie auch immer, es ist ein
+gaplantes Feature (in der Zeit von libvo2).
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+I höre keinen Sound / schlechten Sound (Spanisch oder anderen grässliche Dinge).
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+<B>MPlayer</B> verwendent zur Zeit noch nicht alle Informationen der IFO Blöcke
+der DVD. Du kannst den richtigen DVD-Audio Stream mit der '-aid 128' Option
+auswählen, wobei 128 die Stream ID des gewünschten Audio-Streams ist. Du kannst
+probiren mit Nummern: 128,129,... und so weiter. Natürlich wird diese Problem
+in Zukunft gelöst werden.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+Es gibt eigenartige Effekte (ändlich wie Interlace) speziell wenn schnellere
+Bewegungen von Objekten in Film gezeigt werden.
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+Bekanntes Problem, wie versuchen es später zu lösen (wenn wir zu libvo2 wechseln).
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+Wie kann ich den Reginal-Code meine DVD-Laufwerks einstellen ? I habe kein Win-
+dows!
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+Verwende das 'regionset'-Tool:
+http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+Also MPlayer kann DVDs abspielen? Dann musst du DeCSS verwerden! Du bist ver-
+haftet unter dem XYZ#$ Paragraphen von dem--
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+Weiche von mir Arschloch, es ist kein DeCSS-Code im <B>MPlayer</B>. <B>MPlayer</B> 
+verwendet libdvdread durch linken und libdvdread verwendet libcss durch dynami-
+sches laden.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+Muss ich (setuid) root/setuid sein, dass fibmap_mplayer DVDs spielen kann?
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+No, musst du nicht. Das ist Vergangenheit :) Natürlich brauchst du aber die
+Zugriffsrechte für das DVD-Laufwerk (in /dev).
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+Wie kann ich ... (füge hier erwartetes Features eines DVD Player ein)?
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+Die aktuelle Implementation ist die Erste mit einer richtiger DVD-Player
+Funkionalität. Als erstes möchten wir aber bestehende Bugs lösen und grund-
+legende Funtionen einbauen, bevor wir zu den neuen Features gehen.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B>
+Wo kann ich die libdvdread und libcss Pakete bekommen?
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>
+Von der Seite von Ogle:
+<A HREF="http://www.dtek.chalmers.se/groups/dvd">http://www.dtek.chalmers.se/groups/dvd</A>.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+</TABLE>
+
+</BODY>
+</HTML>
