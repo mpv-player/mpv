@@ -104,16 +104,15 @@ int out_audio_codec=ACODEC_PCM;
 #endif
 
 int out_video_codec=
-#ifdef HAVE_DIVX4ENCORE
-    VCODEC_DIVX4;
-#else
 #ifdef USE_LIBAVCODEC
     VCODEC_LIBAVCODEC;
+#else
+#ifdef HAVE_DIVX4ENCORE
+    VCODEC_DIVX4;
 #else
     VCODEC_COPY;
 #endif
 #endif
-
 
 // audio stream skip/resync functions requires only for seeking.
 // (they should be implemented in the audio codec layer)
@@ -144,8 +143,6 @@ static int skip_limit=-1;
 int force_srate=0;
 
 char* out_filename="test.avi";
-char* mp3_filename=NULL;
-char* ac3_filename=NULL;
 
 char *force_fourcc=NULL;
 
