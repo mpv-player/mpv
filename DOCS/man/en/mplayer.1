@@ -463,13 +463,13 @@ only video (you can think of that as infinite fps).
 Changes the colorkey to an RGB value of your choice.
 0x000000 is black and 0xffffff is white.
 Only supported by the cvidix, fbdev, svga, vesa, winvidix, xmga, xvidix,
-xover and directx video out drivers.
+xover and directx video output drivers.
 .
 .TP
 .B \-nocolorkey
 Disables colorkeying.
 Only supported by the cvidix, fbdev, svga, vesa, winvidix, xmga, xvidix and
-xover video out drivers.
+xover video output drivers.
 .
 .TP
 .B \-crash-debug (DEBUG CODE)
@@ -582,7 +582,7 @@ Specifies a configuration file for LIRC (default: ~/\:.lircrc).
 .
 .TP
 .B \-list-options
-Prints out all the available options.
+Prints all available options.
 .
 .TP
 .B \-loop <number>
@@ -2272,7 +2272,7 @@ the new display mode.
 Enables VBI for the vesa, dfbmga and svga video output drivers.
 .
 .TP
-.B \-wid <window\ ID> (also see \-guiwid) (X11 and DirectX only)
+.B \-wid <window\ ID> (also see \-guiwid, \-geometry) (X11 and DirectX only)
 This tells MPlayer to attach to an existing window.
 Useful to embed MPlayer in a browser (e.g.\& the plugger extension).
 .
