@@ -1,6 +1,6 @@
 
 // prototypes:
-static vd_info_t info;
+//static vd_info_t info;
 static int control(sh_video_t *sh,int cmd,void* arg,...);
 static int init(sh_video_t *sh);
 static void uninit(sh_video_t *sh);
