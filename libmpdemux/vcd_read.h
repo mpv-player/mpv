@@ -137,7 +137,7 @@ static int sun_vcd_read(mp_vcd_priv_t* vcd, int *offset)
   cdxa.cdxa_data = vcd->buf;
   cdxa.cdxa_format = CDROM_XA_SECTOR_DATA;
   
-  if(ioctl(fd,CDROMCDXA,&cdxa)==-1) {
+  if(ioctl(vcd->fd,CDROMCDXA,&cdxa)==-1) {
     mp_msg(MSGT_STREAM,MSGL_ERR,"CDROMCDXA: %s\n",strerror(errno));
     return 0;
   }
@@ -148,7 +148,7 @@ static int sun_vcd_read(mp_vcd_priv_t* vcd, int *offset)
   cdread.cdread_bufaddr = vcd->buf;
   cdread.cdread_buflen = 2336;
 
-  if(ioctl(fd,CDROMREADMODE2,&cdread)==-1) {
+  if(ioctl(vcd->fd,CDROMREADMODE2,&cdread)==-1) {
     mp_msg(MSGT_STREAM,MSGL_ERR,"CDROMREADMODE2: %s\n",strerror(errno));
     return 0;
   }
@@ -195,7 +195,7 @@ static int sun_vcd_read(mp_vcd_priv_t* vcd, int *offset)
   sc.uscsi_buflen = 2336;
   sc.uscsi_flags = USCSI_ISOLATE | USCSI_READ;
   sc.uscsi_timeout = 20;
-  if (ioctl(fd, USCSICMD, &sc)) {
+  if (ioctl(vcd->fd, USCSICMD, &sc)) {
       mp_msg(MSGT_STREAM,MSGL_ERR,"USCSICMD: READ CD: %s\n",strerror(errno));
       return -1;
   }
