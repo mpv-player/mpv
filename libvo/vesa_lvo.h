@@ -12,7 +12,9 @@
 #ifndef __VESA_LVO_INCLUDED
 #define __VESA_LVO_INCLUDED
 
-int      vlvo_init(const char *drvname,unsigned src_width,unsigned src_height,
+int	 vlvo_preinit(
+const char *drvname);
+int      vlvo_init(unsigned src_width,unsigned src_height,
 		   unsigned x_org,unsigned y_org,unsigned dst_width,
 		   unsigned dst_height,unsigned format,unsigned dest_bpp);
 void     vlvo_term( void );

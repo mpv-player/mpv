@@ -40,17 +40,22 @@ extern int verbose;
 #define SCREEN_LINE_SIZE(pixel_size) (video_mode_info.XResolution*(pixel_size) )
 #define IMAGE_LINE_SIZE(pixel_size) (image_width*(pixel_size))
 
-int      vlvo_init(const char *drvname,unsigned src_width,unsigned src_height,
+int vlvo_preinit(const char *drvname)
+{
+	lvo_handler = open(drvname,O_RDWR);
+	if(lvo_handler == -1)
+	{
+		printf("vesa_lvo: Couldn't open '%s'\n",drvname);
+		return -1;
+	}
+	return 0;
+}
+
+int      vlvo_init(unsigned src_width,unsigned src_height,
 		   unsigned x_org,unsigned y_org,unsigned dst_width,
 		   unsigned dst_height,unsigned format,unsigned dest_bpp)
 {
   size_t i,awidth;
-	lvo_handler = open(drvname,O_RDWR);
-	if(lvo_handler == -1)
-	{
-		printf("Couldn't open %s\n",drvname);
-		return -1;
-	}
 	image_width = src_width;
 	image_height = src_height;
 	mga_vid_config.version=MGA_VID_VERSION;
@@ -99,8 +104,8 @@ int      vlvo_init(const char *drvname,unsigned src_width,unsigned src_height,
 	mga_vid_config.num_frames=NUM_FRAMES;
 	if (ioctl(lvo_handler,MGA_VID_CONFIG,&mga_vid_config))
 	{
-		perror("Error in mga_vid_config ioctl()");
-                printf("Your mga_vid driver version is incompatible with this MPlayer version!\n");
+		perror("vesa_lvo: Error in mga_vid_config ioctl()");
+                printf("vesa_lvo: Your fb_vid driver version is incompatible with this MPlayer version!\n");
 		return -1;
 	}
 	ioctl(lvo_handler,MGA_VID_ON,0);

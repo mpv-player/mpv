@@ -98,6 +98,7 @@ uint8_t   multi_idx=0; /* active buffer */
 
 /* Linux Video Overlay */
 static const char *lvo_name = NULL;
+static int pre_init_err = 0;
 
 #define HAS_DGA()  (win.idx == -1)
 #define MOVIE_MODE (MODE_ATTR_COLOR | MODE_ATTR_GRAPHICS)
@@ -412,14 +413,23 @@ static uint32_t parseSubDevice(const char *sd)
    return flags;
 }
 
-
 static uint32_t query_format(uint32_t format)
 {
+  static int first = 1;
   uint32_t retval;
     if(verbose > 2)
         printf("vo_vesa: query_format was called: %x (%s)\n",format,vo_format_name(format));
-    if(vo_subdevice) parseSubDevice(vo_subdevice);
-    if(lvo_name) return 1;
+    if(first)
+    {
+      if(verbose > 2)
+        printf("vo_vesa: subdevice %s have been initialized\n",vo_subdevice);
+      if(vo_subdevice) parseSubDevice(vo_subdevice);
+      if(lvo_name) pre_init_err = vlvo_preinit(lvo_name);
+      if(verbose > 2)
+        printf("vo_subdevice: initialization returns: %i\n",pre_init_err);
+      first = 0;
+    }
+    if(!pre_init_err && lvo_name) return vlvo_query_info(format);
 	switch(format)
 	{
 		case IMGFMT_YV12:
@@ -543,6 +553,11 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	fs_mode = 0;
 	rgb2rgb_fnc = NULL;
         sd_flags = 0;
+	if(pre_init_err)
+	{
+	  printf("vo_vesa: initialization have been terminated due wrong preinitialization\n");
+	  return -1;
+	}  
         if(vo_subdevice) sd_flags = parseSubDevice(vo_subdevice);
 	if(sd_flags == -1) return -1;
 	if(flags & 0x8)
@@ -850,7 +865,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		}
 		if(lvo_name)
 		{
-		  if(vlvo_init(lvo_name,width,height,x_offset,y_offset,image_width,image_height,format,video_mode_info.BitsPerPixel) != 0)
+		  if(vlvo_init(width,height,x_offset,y_offset,image_width,image_height,format,video_mode_info.BitsPerPixel) != 0)
 		  {
 		    printf("vo_vesa: Can't initialize Linux Video Overlay\n");
 		    lvo_name = NULL;
