@@ -1,5 +1,5 @@
 .\" $Revision$
-.\" MPlayer (C) 2000-2003 MPlayer Team
+.\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .
 .\" --------------------------------------------------------------------------
@@ -33,7 +33,7 @@
 .\" Title
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2003-07-05"
+.TH MPlayer 1 "2004-01-16" "The MPlayer Project" "The Movie Player For Linux"
 .
 .SH NAME
 mplayer  \- Movie Player for Linux
@@ -219,6 +219,10 @@ flip=yes
 # start with mf://filemask
 .br
 mf=type=png:fps=25
+.br
+# Eerie negative images are cool.
+.br
+vf=eq2=1.0:-0.8
 .PP
 You can also write file-specific configuration files.
 If you wish to have a configuration file for a file called 'movie.avi', create a file
@@ -5132,7 +5136,7 @@ explains how to create useful bug reports.
 MPlayer was initially written by Arpad Gereoffy.
 See the AUTHORS file for a list of some of the many other contributors.
 .TP
-MPlayer is (C) 2000\-2003
+MPlayer is (C) 2000\-2004
 .B The MPlayer Team
 .TP
 This man page is written and maintained by
