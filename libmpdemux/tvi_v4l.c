@@ -1224,19 +1224,19 @@ static void *video_grabber(void *data)
     priv_t *priv = (priv_t*)data;
     struct timeval curtime;
     long long skew, prev_skew, xskew, interval, prev_interval;
-    int frame, nextframe;
+    int frame;
     int i;
     int first = 1;
     int framecount;
 
     /* start the capture process */
-    if (ioctl(priv->video_fd, VIDIOCMCAPTURE, &priv->buf[0]) == -1)
-    {
-	mp_msg(MSGT_TV, MSGL_ERR, "\nioctl mcapture failed: %s\n", strerror(errno));
+
+    for (i=0; i < priv->nbuf; i++) {
+	if (ioctl(priv->video_fd, VIDIOCMCAPTURE, &priv->buf[i]) == -1)
+	{
+	    mp_msg(MSGT_TV, MSGL_ERR, "\nioctl mcapture failed: %s\n", strerror(errno));
+	}
     }
-    while (ioctl(priv->video_fd, VIDIOCSYNC, &priv->buf[1].frame) < 0 &&
-	   (errno == EAGAIN || errno == EINTR));
-    mp_dbg(MSGT_TV, MSGL_DBG3, "\npicture sync failed\n");
 
     prev_interval = 0;
     prev_skew = 0;
@@ -1255,14 +1255,7 @@ static void *video_grabber(void *data)
 	    }
 		
 	    frame = i;
-	    nextframe = (i+1)%priv->nbuf;
-	    
-	    if (ioctl(priv->video_fd, VIDIOCMCAPTURE, &priv->buf[nextframe]) == -1)
-	    {
-		mp_msg(MSGT_TV, MSGL_ERR, "\nioctl mcapture failed: %s\n", strerror(errno));
-		continue;
-	    }
-	    
+
 	    while (ioctl(priv->video_fd, VIDIOCSYNC, &priv->buf[frame].frame) < 0 &&
 		   (errno == EAGAIN || errno == EINTR));
 	    mp_dbg(MSGT_TV, MSGL_DBG3, "\npicture sync failed\n");
@@ -1353,6 +1346,12 @@ static void *video_grabber(void *data)
 		copy_frame(priv, priv->video_ringbuffer[priv->video_tail], priv->mmap+priv->mbuf.offsets[frame]);
 		priv->video_tail = (priv->video_tail+1)%priv->video_buffer_size_current;
 		priv->video_cnt++;
+	    }
+
+	    if (ioctl(priv->video_fd, VIDIOCMCAPTURE, &priv->buf[frame]) == -1)
+	    {
+		mp_msg(MSGT_TV, MSGL_ERR, "\nioctl mcapture failed: %s\n", strerror(errno));
+		continue;
 	    }
 
 	}
