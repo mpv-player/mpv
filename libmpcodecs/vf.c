@@ -48,6 +48,7 @@ extern vf_info_t vf_info_2xsai;
 extern vf_info_t vf_info_unsharp;
 extern vf_info_t vf_info_swapuv;
 extern vf_info_t vf_info_il;
+extern vf_info_t vf_info_boxblur;
 
 char** vo_plugin_args=(char**) NULL;
 
@@ -89,6 +90,7 @@ static vf_info_t* filter_list[]={
     &vf_info_unsharp,
     &vf_info_swapuv,
     &vf_info_il,
+    &vf_info_boxblur,
     NULL
 };
 
