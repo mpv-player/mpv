@@ -405,6 +405,7 @@ static int init(int rate_hz, int channels, int format, int flags)
         }
     }
 
+  if (!device_set) {
     /* switch for spdif
      * sets opening sequence for SPDIF
      * sets also the playback and other switches 'on the fly'
@@ -430,24 +431,21 @@ static int init(int rate_hz, int channels, int format, int flags)
  		s[0], s[1], s[2], s[3]);
 
 	mp_msg(MSGT_AO,MSGL_V,"alsa-spdif-init: playing AC3, %i channels\n", channels);
-	device_set = 1;
 	break;
       case 4:
 	strncpy(alsa_device, "surround40", ALSA_DEVICE_SIZE);
-	device_set = 1;
 	break;
     
       case 6:
 	strncpy(alsa_device, "surround51", ALSA_DEVICE_SIZE);
-	device_set = 1;
 	break;
 
       default:
 	mp_msg(MSGT_AO,MSGL_ERR,"alsa-spdif-init: %d channels are not supported\n", channels);
       }
     }
+  else
 
-    if (!device_set)
       {
 	int tmp_device, tmp_subdevice, err;
 
@@ -474,6 +472,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	  }
 
 	mp_msg(MSGT_AO,MSGL_INFO,"alsa-init: %d soundcard%s found, using: %s\n", cards+1,(cards >= 0) ? "" : "s", alsa_device);
+      }
       } else {
 		mp_msg(MSGT_AO,MSGL_INFO,"alsa-init: soundcard set to %s\n", alsa_device);
       }
