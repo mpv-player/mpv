@@ -76,6 +76,8 @@ printf ("current, total chunks = %d, %d; seek %5.3f sec, new chunk guess = %d\n"
 
 printf ("  (flags = %X)  actual new chunk = %d (syncinfo1 = %08X)\n",
   flags, film_data->current_chunk, film_data->chunks[film_data->current_chunk].syncinfo1);
+  demuxer->video->pts=film_data->chunks[film_data->current_chunk].pts;
+  
 }
 
 // return value:
