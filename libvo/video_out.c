@@ -227,10 +227,14 @@ vo_functions_t* init_best_video_out(char** vo_list){
 	    if(!strcmp(info->short_name,vo)){
 		// name matches, try it
 		if(!video_driver->preinit(vo_subdevice))
+		{
+		    free(vo);
 		    return video_driver; // success!
+		}
 	    }
 	}
         // continue...
+	free(vo);
 	++vo_list;
 	if(!(vo_list[0])) return NULL; // do NOT fallback to others
       }

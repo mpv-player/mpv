@@ -1739,6 +1739,8 @@ char** sub_filenames(char* path, char *fname)
 	result2[i] = result[i].fname;
     }
     result2[subcnt] = NULL;
+    
+    free(result);
 
     return result2;
 }
