@@ -41,14 +41,15 @@ DS_AudioDecoder * DS_AudioDecoder_Open(char* dllname, GUID* guid, WAVEFORMATEX* 
     sz = 18 + wf->cbSize;
     this->m_sVhdr = malloc(sz);
     memcpy(this->m_sVhdr, wf, sz);
-    this->m_sVhdr2 = malloc(sz);
-    memcpy(this->m_sVhdr2, this->m_sVhdr, sz);
+    this->m_sVhdr2 = malloc(18);
+    memcpy(this->m_sVhdr2, this->m_sVhdr, 18);
     
     pWF = (WAVEFORMATEX*)this->m_sVhdr2;
     pWF->wFormatTag = 1;
     pWF->wBitsPerSample = 16;
-    pWF->nBlockAlign = 2*pWF->nChannels;
+    pWF->nBlockAlign = pWF->nChannels * (pWF->wBitsPerSample + 7) / 8;
     pWF->cbSize = 0;
+    pWF->nAvgBytesPerSec = pWF->nBlockAlign * pWF->nSamplesPerSec;
     
     memcpy(&this->in_fmt,wf,sizeof(WAVEFORMATEX));
 
@@ -67,18 +68,21 @@ DS_AudioDecoder * DS_AudioDecoder_Open(char* dllname, GUID* guid, WAVEFORMATEX* 
     memset(&this->m_sDestType, 0, sizeof(this->m_sDestType));
     this->m_sDestType.majortype=MEDIATYPE_Audio;
     this->m_sDestType.subtype=MEDIASUBTYPE_PCM;
-    this->m_sDestType.subtype.f1=pWF->wFormatTag;
+//    this->m_sDestType.subtype.f1=pWF->wFormatTag;
     this->m_sDestType.formattype=FORMAT_WaveFormatEx;
     this->m_sDestType.bFixedSizeSamples=1;
     this->m_sDestType.bTemporalCompression=0;
-    this->m_sDestType.lSampleSize=2*wf->nChannels;
+    this->m_sDestType.lSampleSize=pWF->nBlockAlign;
     if (wf->wFormatTag == 0x130)
 	// ACEL hack to prevent memory corruption
         // obviosly we are missing something here
 	this->m_sDestType.lSampleSize *= 288;
     this->m_sDestType.pUnk=0;
-    this->m_sDestType.cbFormat=pWF->cbSize;
+    this->m_sDestType.cbFormat=18; //pWF->cbSize;
     this->m_sDestType.pbFormat=this->m_sVhdr2;
+
+print_wave_header(this->m_sVhdr);
+print_wave_header(this->m_sVhdr2);
 
     /*try*/
     {
