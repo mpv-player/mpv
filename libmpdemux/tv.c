@@ -459,71 +459,15 @@ int tv_set_color_options(tvi_handle_t *tvh, int opt, int value)
     switch(opt)
     {
 	case TV_COLOR_BRIGHTNESS:
-	    if (value == 50)
-		value = 32768;
-	    if (value > 50)
-	    {
-		value *= 100;
-		value += 32768;
-	    }
-	    if (value < 50)
-	    {
-		int i;
-		value *= 100;
-		i = value;
-		value = 32768 - i;
-	    }
 	    funcs->control(tvh->priv, TVI_CONTROL_VID_SET_BRIGHTNESS, &value);
 	    break;
 	case TV_COLOR_HUE:
-	    if (value == 50)
-		value = 32768;
-	    if (value > 50)
-	    {
-		value *= 100;
-		value += 32768;
-	    }
-	    if (value < 50)
-	    {
-		int i;
-		value *= 100;
-		i = value;
-		value = 32768 - i;
-	    }
 	    funcs->control(tvh->priv, TVI_CONTROL_VID_SET_HUE, &value);
 	    break;
 	case TV_COLOR_SATURATION:
-	    if (value == 50)
-		value = 32512;
-	    if (value > 50)
-	    {
-		value *= 100;
-		value += 32512;
-	    }
-	    if (value < 50)
-	    {
-		int i;
-		value *= 100;
-		i = value;
-		value = 32512 - i;
-	    }
 	    funcs->control(tvh->priv, TVI_CONTROL_VID_SET_SATURATION, &value);
 	    break;
 	case TV_COLOR_CONTRAST:
-	    if (value == 50)
-		value = 27648;
-	    if (value > 50)
-	    {
-		value *= 100;
-		value += 27648;
-	    }
-	    if (value < 50)
-	    {
-		int i;
-		value *= 100;
-		i = value;
-		value = 27648 - i;
-	    }
 	    funcs->control(tvh->priv, TVI_CONTROL_VID_SET_CONTRAST, &value);
 	    break;
 	default:
