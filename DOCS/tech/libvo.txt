@@ -80,6 +80,16 @@ Each vo driver _has_ to implement these:
       So, you can check for vo_config_count>0 in uninit() when freeing
       resources allocated in config() to avoid crash!
 
+      You should call geometry() in config() to enable user defined
+      window size and position. The code should look as following:
+      ---
+      set x,y,w,h to the values supplied by the caller or to those you deam
+      usefull.
+      call geometry(&x, &y, &w, &h, screenw, screenh)
+      call aspect()
+      ---
+      see libvo/geometry.c for further information
+
     draw_slice(): this displays YV12 pictures (3 planes, one full sized that
 	 contains brightness (Y), and 2 quarter-sized which the colour-info
 	 (U,V). MPEG codecs (libmpeg2, opendivx) use this. This doesn't have
