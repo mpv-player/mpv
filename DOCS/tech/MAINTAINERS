@@ -125,7 +125,7 @@ libvo drivers:
     * vo_dxr3.c - None
     * vo_fbdev.c - Joey Parrish
     * vo_fbdev2.c - Joey Parrish
-    * vo_ggi.c - Alex Beregszaszi
+    * vo_ggi.c - Christoph Egger
     * vo_gif89a.c - Joey Parrish
     * vo_gl.c - Reimar Döffinger
     * vo_gl2.c - Reimar Döffinger

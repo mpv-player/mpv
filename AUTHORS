@@ -206,6 +206,9 @@ Dönmez, Ismail (cartman) <ismail.donmez@boun.edu.tr>
     * compile fix for mga_vid to compile with Linux 2.5/2.6 kernels
     * small fixes all around
 
+Egger, Christoph <christoph_egger@gmx.de>
+    * vo_ggi updates
+
 Ernesti, Bernd <mplayer@lists.veego.de>
     * NetBSD support patches
 
