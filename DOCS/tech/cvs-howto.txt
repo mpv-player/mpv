@@ -49,41 +49,49 @@ I. TECH SIDE:
 
 3. Committing changes:
 
-    cvs -z3 commit -m "comment - what you changed and why" filename(s)
+    cvs -z3 update -dPA
+    cvs -z3 commit filename(s)
 
   Do not use comments such as: "bug fix." or "files changed" or "dunno".
   You don't have to include the filename in the comment, as comments are linked
   to files. If you have made several independent changes, commit them
-  separately, not at the same time. If you leave out -m at the command line you
-  will be prompted for a comment in an editor (usually vi).
+  separately, not at the same time. You will be prompted for a comment in an
+  editor (see 'cvs -e', usually vi).
 
 4. Adding new files/dirs:
 
     cvs add filename/dirname
+    cvs commit filename
+
+  Directories are added immediately, no commit necessary.
 
 5. Removing files:
 
     rm filename
     cvs remove filename
-    cvs commit -m "reason for removing this file" filename
+    cvs commit filename
 
 6. Checking changes:
 
     cvs -z3 diff -u filename(s)
 
-  It's recommended to check changes before committing. especially if you forget
-  what you changed :)
-  This way you will see if your patch has debug stuff or indentation changes
-  and you can fix it before committing and triggering me to use cvs-backup.
+  Doublecheck your changes before committing to avoid trouble later on.
+  This way you will see if your patch has debug stuff or indentation
+  changes and you can fix it before committing and triggering flames.
 
 7. Checking changelog:
 
     cvs -z3 log filename(s)
+    cvs -z3 annotate filename(s)
+
+  You may also find viewcvs, a web frontend for CVS helpful. It's often more
+  comfortable than using cvs log, cvs annotate and cvs diff. Find it here:
+  http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main
 
 8. Renaming/moving files or content of files, removing empty directories:
 
   You CANNOT do that. Ask the CVS server admin (A'rpi) to do it!
-  Do NOT remove & re-add a file - it will kill the changelog!!!!
+  Do NOT remove & readd a file - it will kill the changelog!!!!
 
   Don't do a lot of cut'n'paste from one file to another without a very good
   reason and discuss it on the mplayer-dev-eng mailing list first. It will make
@@ -96,8 +104,9 @@ I. TECH SIDE:
 
   In case you committed something really broken and wish to undo it completely,
   you can use the 'cvs admin -o' command, which removes entries from the
-  revision history of a file. For the corner case that you remove the last
-  revision this amounts to reverting a commit.
+  revision history of a file. It does not undo the changes related to that
+  revision, but for the corner case that you remove the last revision (and only
+  then!) this amounts to reverting a commit.
 
   Assuming that 1.123 is the last revision
 
@@ -106,8 +115,9 @@ I. TECH SIDE:
   will remove revision 1.123, thus reverting the file back to revision 1.122.
 
   ONLY use this command to delete the LAST revision of a file. Removing other
-  revisions will NOT undo the changes from that revision in the last revision
-  and leave holes in the revision history.
+  revisions will NOT undo the changes connected to that revision, so the last
+  revision will remain unmodified, only revision history will be lost and
+  holes left in the revision numbering.
 
 
 Contact A'rpi <arpi@thot.banki.hu> if you have technical problems with the CVS
@@ -118,64 +128,72 @@ server.
 II. POLICY / RULES:
 ===================
 
-1. You shouldn't commit code which breaks MPlayer! (Meaning unfinished but
+1. You must not commit code which breaks MPlayer! (Meaning unfinished but
    enabled code which breaks compilation or compiles but does not work.)
+   You can commit unfinished stuff (for testing etc), but it must be disabled
+   (#ifdef etc) by default so it does not interfere with other developers'
+   work.
 
 2. You don't have to over-test things. If it works for you, and you think it
    should work for others, too, then commit. If your code has problems
    (portability, exploits compiler bugs, unusual environment etc) they will be
    reported and eventually fixed.
 
-3. You can commit unfinished stuff (for testing etc), but it must be disabled
-   (#ifdef etc) by default.
+3. Do not commit unrelated changes together, split them into self-contained
+   pieces.
 
 4. Do not change behavior of the program (renaming options etc) without
-   discussing it first at the mplayer-dev-eng mailing list. Do not remove
+   first discussing it on the mplayer-dev-eng mailing list. Do not remove
    functionality from the code. Just improve!
-   Do not commit changes to the build system (Makefiles, configure script)
-   which change behaviour, defaults etc, without asking (and your change being
-   accepted) on the mplayer-dev-eng mailing list first. The same applies to
-   compiler warning fixes and trivial looking fixes. We usually have a reason
-   for doing things the way we do. Send them as patches to the mailing list,
-   and if the code maintainers say OK, you may commit. This does not apply to
-   files written and/or maintained by you.
 
-5. We refuse source indentation and other cosmetic changes, such commits will
-   be rejected and removed. Every developer has his own indentation style, you
-   should not change it. Of course if you (re)write something, you can use your
-   own style... (Many projects force a given indentation style - we don't.)
+5. Do not commit changes to the build system (Makefiles, configure script)
+   which change behaviour, defaults etc, without asking first. The same
+   applies to compiler warning fixes, trivial looking fixes and to code
+   maintained by other developers. We usually have a reason for doing things
+   the way we do. Send your changes as patches to the mplayer-dev-eng mailing
+   list, and if the code maintainers say OK, you may commit. This does not
+   apply to files you wrote and/or maintain.
+
+6. We refuse source indentation and other cosmetic changes if they are mixed
+   with functional changes, such commits will be rejected and removed. Every
+   developer has his own indentation style, you should not change it. Of course
+   if you (re)write something, you can use your own style... (Many projects
+   force a given indentation style - we don't.) If you really need to make
+   indentation changes (try to avoid this), separate them strictly from real
+   changes.
 
    NOTE: If you had to put if(){ .. } over a large (> 5 lines) chunk of code,
-   do NOT change the indentation of the inner part (move it right)!
+   do NOT change the indentation of the inner part (don't move it to the right)!
 
-6. Always fill out the comment at committing (-m switch of CVS, or in the
-   editor if you left out -m). Describe in a few lines (usually one line is
-   enough) what you changed and why. You can refer to mailing list postings if
-   you fix a particular bug. Comments such as "fixed!" or "Changed it." are not
-   acceptable.
+7. Always fill out the commit log message. Describe in a few lines what you
+   changed and why. You can refer to mailing list postings if you fix a
+   particular bug. Comments such as "fixed!" or "Changed it." are unacceptable.
 
-7. If you apply a patch by someone else, include his name and email address in
-   the CVS comment! Do NOT commit patches for other developer's code (code not
-   maintained by you) without his permission! If he didn't commit - he probably
-   has a reason! Send an answer to mplayer-dev-eng (or wherever you got the
-   patch from) saying that you applied it.
+8. If you apply a patch by someone else, include the name and email address in
+   the CVS log message. Since the mplayer-cvslog mailing list is publicly
+   archived you should add some spam protection to the email address. Send an
+   answer to mplayer-dev-eng (or wherever you got the patch from) saying that
+   you applied the patch.
 
-8. A'rpi developed something called cvs-backup. It archives the CVS repository
-   after each commit - so commits can be reversed (without messing up the
-   changelog) if they are bad. If you think your bug fix or other change was
-   bad and unneeded, ask A'rpi to reverse it instead of committing the previous
-   version!
-
-9. You will have write access to DOCS/. This used to be different to avoid
-   breaking docs or getting translations or the homepage desynced. If you are
-   unsure about this, send a patch to mplayer-dev-eng or even better to
-   mplayer-docs, the documentation maintainers will review and commit your
-   stuff.
+9. Do NOT commit to code actively maintained by others without permission. Send
+   a patch to mplayer-dev-eng instead.
 
 10. Subscribe to the mplayer-cvslog mailing list. The diffs of all CVS commits
     are sent there and reviewed by all the other developers. Bugs and possible
     improvements or general questions regarding commits are discussed there. We
     expect you to react if problems with your code are uncovered.
+
+11. Update the documentation if you change behavior or add features. If you are
+    unsure how best to do this, send a patch to mplayer-docs, the documentation
+    maintainers will review and commit your stuff.
+
+12. Revert a commit ONLY in case of a big blunder like committing something not
+    intended to be committed or committing a wrong file, the wrong version of a
+    patch, cosmetics or broken code and you are going to recommit the right
+    thing immediately.
+
+    Never revert changes made a long time ago or buggy code. Fix it in the
+    normal way instead.
 
 Also read DOCS/tech/patches.txt !!!!
 
