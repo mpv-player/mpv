@@ -310,6 +310,8 @@ static config_t mplayer_opts[]={
 	// set a-v distance, should be moved to -common and support in mencoder
 	{"delay", &audio_delay, CONF_TYPE_FLOAT, CONF_RANGE, -100.0, 100.0, NULL},
 
+	{"speed", &playback_speed, CONF_TYPE_FLOAT, CONF_RANGE, 0.01, 100.0, NULL},
+
 	{"framedrop", &frame_dropping, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"hardframedrop", &frame_dropping, CONF_TYPE_FLAG, 0, 0, 2, NULL},
 	{"noframedrop", &frame_dropping, CONF_TYPE_FLAG, 0, 1, 0, NULL},

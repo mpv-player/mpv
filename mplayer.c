@@ -152,6 +152,8 @@ int benchmark=0;
        int auto_quality=0;
 static int output_quality=0;
 
+float playback_speed=1.0;
+
 int use_gui=0;
 
 int osd_level=1;
@@ -1236,7 +1238,7 @@ if(sh_audio){
   current_module="ao2_init";
   if(!(audio_out=init_best_audio_out(audio_driver_list,
       (ao_plugin_cfg.plugin_list), // plugin flag
-      force_srate?force_srate:sh_audio->samplerate,
+      force_srate?force_srate:sh_audio->samplerate*playback_speed,
       audio_output_channels?audio_output_channels:
       sh_audio->channels,sh_audio->sample_format,0))){
     // FAILED:
@@ -1247,7 +1249,7 @@ if(sh_audio){
     inited_flags|=INITED_AO;
     mp_msg(MSGT_CPLAYER,MSGL_INFO,"AO: [%s] %dHz %dch %s\n",
       audio_out->info->short_name,
-      force_srate?force_srate:sh_audio->samplerate,
+      force_srate?force_srate:((int)(sh_audio->samplerate*playback_speed)),
       sh_audio->channels,
       audio_out_format_name(sh_audio->sample_format));
     mp_msg(MSGT_CPLAYER,MSGL_V,MSGTR_AODescription_AOAuthor,
@@ -1258,7 +1260,7 @@ if(sh_audio){
 #if 1
     current_module="af_init";
     if(!init_audio_filters(sh_audio, 
-        sh_audio->samplerate,
+        (int)(sh_audio->samplerate*playback_speed),
 	sh_audio->channels, sh_audio->sample_format, sh_audio->samplesize,
 	ao_data.samplerate, ao_data.channels, ao_data.format,
 	audio_out_format_bits(ao_data.format)/8, /* ao_data.bps, */
@@ -1369,7 +1371,7 @@ while(sh_audio){
   if(playsize>0){
       sh_audio->a_out_buffer_len-=playsize;
       memmove(sh_audio->a_out_buffer,&sh_audio->a_out_buffer[playsize],sh_audio->a_out_buffer_len);
-      sh_audio->timer+=playsize/((float)((ao_data.bps && sh_audio->afilter) ?
+      sh_audio->timer+=playback_speed*playsize/((float)((ao_data.bps && sh_audio->afilter) ?
           ao_data.bps : sh_audio->o_bps));
   }
 
@@ -1410,7 +1412,7 @@ if(!sh_video) {
 	// check for frame-drop:
 	current_module="check_framedrop";
 	if(sh_audio && !d_audio->eof){
-	    float delay=audio_out->get_delay();
+	    float delay=playback_speed*audio_out->get_delay();
 	    float d=(sh_video->timer)-(sh_audio->timer-delay);
 	    // we should avoid dropping to many frames in sequence unless we
 	    // are too late. and we allow 100ms A-V delay here:
@@ -1484,7 +1486,7 @@ if(!sh_video) {
       time_frame-=GetRelativeTime(); // reset timer
 
       if(sh_audio && !d_audio->eof){
-	  float delay=audio_out->get_delay();
+	  float delay=playback_speed*audio_out->get_delay();
 	  mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"delay=%f\n",delay);
 
 	  if (autosync){
@@ -1603,7 +1605,7 @@ if(time_frame>0.001 && !(vo_flags&256)){
     float v_pts=0;
 
     // unplayed bytes in our and soundcard/dma buffer:
-    float delay=audio_out->get_delay()+(float)sh_audio->a_buffer_len/(float)sh_audio->o_bps;
+    float delay=playback_speed*audio_out->get_delay()+(float)sh_audio->a_buffer_len/(float)sh_audio->o_bps;
 
     if (autosync){
       /*
@@ -1665,9 +1667,9 @@ if(time_frame>0.001 && !(vo_flags&256)){
         if(!quiet) mp_msg(MSGT_AVSYNC,MSGL_STATUS,"A:%6.1f V:%6.1f A-V:%7.3f ct:%7.3f  %3d/%3d  %2d%% %2d%% %4.1f%% %d %d %d%%\r",
 	  a_pts-audio_delay-delay,v_pts,AV_delay,c_total,
           (int)sh_video->num_frames,(int)sh_video->num_frames_decoded,
-          (sh_video->timer>0.5)?(int)(100.0*video_time_usage/(double)sh_video->timer):0,
-          (sh_video->timer>0.5)?(int)(100.0*vout_time_usage/(double)sh_video->timer):0,
-          (sh_video->timer>0.5)?(100.0*audio_time_usage/(double)sh_video->timer):0
+          (sh_video->timer>0.5)?(int)(100.0*video_time_usage*playback_speed/(double)sh_video->timer):0,
+          (sh_video->timer>0.5)?(int)(100.0*vout_time_usage*playback_speed/(double)sh_video->timer):0,
+          (sh_video->timer>0.5)?(100.0*audio_time_usage*playback_speed/(double)sh_video->timer):0
           ,drop_frame_cnt
 	  ,output_quality
 	  ,cache_fill_status
