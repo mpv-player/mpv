@@ -2512,7 +2512,8 @@ colorspace conversion (also see \-sws option).
 .RSs
 .IPs w,h
 new width/height after scaling (default: original width,height)
-Note: If \-zoom is used, and underlying filters (including libvo) are
+.I NOTE:
+If \-zoom is used, and underlying filters (including libvo) are
 incapable of scaling, then it defaults to d_width/\:d_height!
 .RSss
  0:   scaled d_width/\:d_height
@@ -2873,7 +2874,8 @@ Set the frame dropping mode.
 1 means always drop a frame when there have been no drops or telecine
 merges in the past 5 frames.
 2 means always maintain exact 5:4 input to output frame ratio.
-(Note: use mode 1 with MEncoder!)
+.I NOTE:
+Use mode 1 with MEncoder.
 .IPs am
 Analysis mode.
 Available values are 0 (fixed pattern with initial frame number
@@ -2912,7 +2914,8 @@ No configuration options are available yet.
 As the underlying pulldown reversal engine is designed to take
 advantage of the new features in MPlayer G2, the current
 implementation in G1 is meant to serve mainly as a testbed.
-Note: presently pullup lacks any way to cap the output framerate, so
+.I NOTE:
+Presently pullup lacks any way to cap the output framerate, so
 during 30 fps progressive sequences or stills, it will output more
 than 24 fps, meaning you'll have trouble if you use it with mencoder
 \-ofps 23.976.
@@ -3685,7 +3688,8 @@ sane range for MPEG4
 .TP
 .B vme=<0\-5>
 motion estimation method.
-Note: 0\-3 currently ignores the amount of Bits spent,
+.I NOTE:
+0\-3 currently ignores the amount of Bits spent,
 so quality may be low.
 Available methods are:
 .PD 0
@@ -3706,7 +3710,7 @@ X1 (experimental)
 .PD 1
 .TP
 .B me_range=<0\-9999>
-motion estimation search range, note, 0 is unlimited and default
+motion estimation search range, 0 (default) means unlimited
 .TP
 .B mbd=<0\-2>
 Macroblock decision algorithm (high quality mode), encode each macro
@@ -3820,7 +3824,8 @@ minimum bitrate in kbit/\:sec (pass\ 1/\:2)
 buffer size in kbit (pass\ 1/\:2).
 For MPEG1/2 this also sets the vbv buffer size, use 327 for VCD,
 917 for SVCD and 1835 for DVD.
-Note: vratetol should not be too large during the second pass or there might
+.I NOTE:
+vratetol should not be too large during the second pass or there might
 be problems if vrc_(min|max)rate is used.
 .TP
 .B vrc_buf_aggressivity
@@ -4067,8 +4072,8 @@ floating point AAN
 .TP
 .B idct=<0\-99>
 idct algorithm.
-Note: To the best of our knowledge all these IDCTs do pass the IEEE1180
-tests.
+.I NOTE:
+To the best of our knowledge all these IDCTs do pass the IEEE1180 tests.
 .PD 0
 .RSs
 .IPs 0
@@ -4256,7 +4261,9 @@ Diamond type and size for motion estimation pre pass
 .TP
 .B dia=<-99\-6>
 Diamond type & size for motion estimation.
-Note: The sizes of the normal diamonds and shape adaptive ones dont have the same meaning
+.I NOTE:
+The sizes of the normal diamonds and shape adaptive ones don't have
+the same meaning.
 .RSs
 .IPs -3
 shape adaptive (fast) diamond with size 3
@@ -4342,7 +4349,8 @@ always
 .TP
 .B subq=<1\-8>
 subpel refinement quality (for qpel) (default: 8).
-Note: This has a significant effect on the speed.
+.I NOTE:
+This has a significant effect on speed.
 .TP
 .B psnr\ \ \ 
 print the psnr (peak signal to noise ratio) for the whole video after encoding
@@ -4355,7 +4363,8 @@ use MPEG quantizers instead of H.263.
 .TP
 .B aic\ \ \ \ 
 ac prediction (=advanced intra prediction for H.263+)
-Note: vqmin should be 8 or larger for AIC H263+
+.I NOTE:
+vqmin should be 8 or larger for AIC H263+.
 .TP
 .B umv\ \ \ \ 
 unlimited MVs (H.263+ only)
@@ -4368,8 +4377,9 @@ mpeg style quantizer default: 96
 .br
 h263 style quantizer default: 0
 .br
-Note: the h263 MMX quantizer cannot handle positive biases (set vfdct=1or2)
-      the mpeg MMX quantizer cannot handle negative biases (set vfdct=1or2)
+.I NOTE:
+The h263 MMX quantizer cannot handle positive biases (set vfdct=1or2),
+the mpeg MMX quantizer cannot handle negative biases (set vfdct=1or2).
 .TP
 .B pbias=<-256\-256>
 inter quantizer bias (256 == 1.0)
@@ -4378,8 +4388,9 @@ mpeg style quantizer default: 0
 .br
 h263 style quantizer default: -64
 .br
-Note: the h263 MMX quantizer cannot handle positive biases (set vfdct=1or2)
-      the mpeg MMX quantizer cannot handle negative biases (set vfdct=1or2)
+.I NOTE:
+The h263 MMX quantizer cannot handle positive biases (set vfdct=1or2),
+the mpeg MMX quantizer cannot handle negative biases (set vfdct=1or2).
 .br
 Tip: a more positive bias (-32 \- -16 instead of -64) seems to improve the PSNR
 .TP
@@ -4407,7 +4418,8 @@ But both passes can be enabled or not.
 So you can in fact output raw i420, lzo compressed i420, rtjpeg, or the
 default lzo compressed rtjpeg.
 .br
-Note: The nuvrec documentation contains some advice and examples about the
+.I NOTE:
+The nuvrec documentation contains some advice and examples about the
 settings to use for the most common TV encodings.
 .TP
 .B c=<0\-20>
