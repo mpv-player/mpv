@@ -240,7 +240,13 @@ subtitle *sub_read_line_vplayer(FILE *fd,subtitle *current) {
 		current->end   = b1*360000+b2*6000+b3*100;
 		if ((current->end - current->start) > 1000) {current->end = current->start + 1000;} // not too long though. 
 		// teraz czas na wkopiowanie stringu
-		p=line;	p+=plen;i=0;
+ 		p=line;	
+ 		// finds the body of the subtitle
+ 		for (i=0; i<3; i++){              
+                   p=strchr(p,':')+1;
+                 } 
+ 		i=0;
+
 		if (*p!='|') {
 			//
 			next = p,i=0;
