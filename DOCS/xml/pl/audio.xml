@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.16  -->
+<!-- synced with 1.17 -->
 <sect2 id="audio-dev">
 <title>Urządzenia wyjściowe audio</title>
 <sect3 id="sync">
@@ -657,7 +657,7 @@ kartę lub inny filtr dźwiękowy.
     <option>alaw</option>, <option>mulaw</option> lub
     <option>imaadpcm</option>, <option>float</option> lub <option>int</option>,
     <option>unsigned</option> lub <option>signed</option>, <option>le</option> lub
-    <option>be</option> (little lub big endian). Opcja ta jest wymagana. Jej nie
+    <option>be</option> (little- lub big-endian). Opcja ta jest wymagana. Jej nie
     podanie, spowoduje błąd podczas uruchamiania (runtime error).
 </para></listitem>
 </varlistentry>
