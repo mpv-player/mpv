@@ -2,8 +2,6 @@ gcc bios2dump.c -o bios2dump
 gcc mem2dump.c -o mem2dump
 gcc movinfo.c -o movinfo
 
-gcc audio-select.c -o audio-select
-
 gcc png2raw.c -o png2raw -lpng
 
 gcc -g -DNAME=\"mmx\" -DHAVE_MMX fastmemcpybench.c -o fastmem-mmx
