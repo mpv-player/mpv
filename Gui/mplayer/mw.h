@@ -263,7 +263,6 @@ play_dvd_2:
    case evPlaySwitchToPause:
 play:
 
-        mplMainAutoPlay=0;
         if ( ( msg == evPlaySwitchToPause )&&( guiIntfStruct.Playing == 2 ) ) goto NoPause;
 
 	vcd_track=0;

@@ -41,8 +41,6 @@ extern GdkBitmap * gtkIconMask;
 extern Pixmap      guiIcon;
 extern Pixmap	   guiIconMask;
 
-extern int gtkVisible;
-
 extern void widgetsCreate( void );
 
 extern void gtkInit( void );
@@ -60,8 +58,5 @@ extern void gtkShow( int type,char * param );
 extern void gtkMessageBox( int type,gchar * str );
 extern void gtkSetLayer( GtkWidget * wdg );
 extern void gtkActive( GtkWidget * wdg );
-
-extern void gtkIncVisible( void );
-extern void gtkDecVisible( void );
 
 #endif

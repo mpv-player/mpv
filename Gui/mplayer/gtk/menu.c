@@ -294,10 +294,10 @@ GtkWidget * create_PopUpMenu( void )
 //    AddMenuItem( SubMenu,"Fwd 10 sec", evForward10sec );
 //    AddMenuItem( SubMenu,"Back 1 min", evBackward1min );
 //    AddMenuItem( SubMenu,"Fwd 1 min", evForward1min );
-   SubMenu=AddSubMenu( Menu,MSGTR_MENU_Size );
-    AddMenuItem( SubMenu,MSGTR_MENU_NormalSize"      ", evNormalSize );
-    AddMenuItem( SubMenu,MSGTR_MENU_DoubleSize, evDoubleSize );
-    AddMenuItem( SubMenu,MSGTR_MENU_FullScreen, evFullScreen );
+//   SubMenu=AddSubMenu( Menu,MSGTR_MENU_Size );
+//    AddMenuItem( SubMenu,MSGTR_MENU_NormalSize"      ", evNormalSize );
+//    AddMenuItem( SubMenu,MSGTR_MENU_DoubleSize, evDoubleSize );
+//    AddMenuItem( SubMenu,MSGTR_MENU_FullScreen, evFullScreen );
 #ifdef HAVE_VCD
    VCDSubMenu=AddSubMenu( Menu,MSGTR_MENU_VCD );
     AddMenuItem( VCDSubMenu,MSGTR_MENU_PlayDisc,evPlayVCD );
@@ -393,6 +393,10 @@ GtkWidget * create_PopUpMenu( void )
   AddMenuItem( Menu,MSGTR_MENU_SkinBrowser, evSkinBrowser );
   AddMenuItem( Menu,MSGTR_MENU_Preferences, evPreferences );
   AddMenuItem( Menu,MSGTR_Equalizer, evEqualizer );
+  AddSeparator( Menu );
+  AddMenuItem( Menu,MSGTR_MENU_NormalSize"      ", evNormalSize );
+  AddMenuItem( Menu,MSGTR_MENU_DoubleSize, evDoubleSize );
+  AddMenuItem( Menu,MSGTR_MENU_FullScreen, evFullScreen );
   AddSeparator( Menu );
   AddMenuItem( Menu,MSGTR_MENU_Exit, evExit );
 

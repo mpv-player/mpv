@@ -102,6 +102,8 @@ void mplEnd( void )
   } 
   else
     {
+     if ( mplMainAutoPlay ) { mplMainAutoPlay=0; return; }
+
      guiIntfStruct.TimeSec=0;
      guiIntfStruct.Position=0;
      guiIntfStruct.AudioType=0;

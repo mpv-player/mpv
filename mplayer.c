@@ -1358,7 +1358,7 @@ fflush(stdout);
      guiGetEvent( guiSetFileName,filename );
      if ( sh_audio ) guiIntfStruct.AudioType=sh_audio->channels; else guiIntfStruct.AudioType=0;
      if ( !sh_video && sh_audio ) guiGetEvent( guiSetAudioOnly,(char *)1 ); else guiGetEvent( guiSetAudioOnly,(char *)0 );
-     guiGetEvent( guiSetVolume,NULL );
+     guiGetEvent( guiSetValues,NULL );
     }
 #endif
 
@@ -2930,6 +2930,7 @@ if(rel_seek_secs || abs_seek_pos){
 	if ( sh_video ) guiIntfStruct.TimeSec=d_video->pts;
 	  else if ( sh_audio ) guiIntfStruct.TimeSec=sh_audio->timer;
 	guiGetEvent( guiReDraw,NULL );
+	guiGetEvent( guiSetVolume,NULL );
 	if(guiIntfStruct.Playing==0) break; // STOP
 	if(guiIntfStruct.Playing==2) osd_function=OSD_PAUSE;
         if ( guiIntfStruct.DiskChanged || guiIntfStruct.FilenameChanged ) goto goto_next_file;

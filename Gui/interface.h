@@ -115,6 +115,7 @@ extern guiInterface_t guiIntfStruct;
 #define guiReDraw	    10
 #define guiSetVolume        11
 #define guiSetDefaults	    12
+#define guiSetValues	    13
 
 #define guiSetStop  0
 #define guiSetPlay  1

@@ -117,12 +117,12 @@ void ShowPreferences( void )
   int    i = 0;
   char * tmp[3]; tmp[2]="";
   old_audio_driver=0;
+  if ( audio_driver && !gtkAODriver ) gtkAODriver=gstrdup( audio_driver );
   while ( audio_out_drivers[i] )
    {
     const ao_info_t *info = audio_out_drivers[i++]->info;
     if ( !strcmp( info->short_name,"plugin" ) ) continue;
-    if ( gtkAODriver )
-      if ( !strcmp( gtkAODriver,info->short_name ) ) old_audio_driver=i - 1;
+    if ( !strcmp( gtkAODriver,info->short_name ) ) old_audio_driver=i - 1;
     tmp[0]=(char *)info->short_name; tmp[1]=(char *)info->name; gtk_clist_append( GTK_CLIST( CLADrivers ),tmp );
    }
   gtk_clist_select_row( GTK_CLIST( CLADrivers ),old_audio_driver,0 );
@@ -143,12 +143,21 @@ void ShowPreferences( void )
   int i = 0, c = 0;
   char * tmp[3]; tmp[2]="";
   old_video_driver=0; 
+  if ( video_driver && !gtkVODriver )
+   {
+    while ( video_out_drivers[i] )
+     if ( video_out_drivers[i++]->control( VOCTRL_GUISUPPORT,NULL ) == VO_TRUE )
+      {
+       const vo_info_t *info = video_out_drivers[i - 1]->get_info(); 
+       if ( !gstrcmp( video_driver,info->short_name ) ) gtkVODriver=gstrdup( video_driver );
+      }
+   }
+  i=0;
   while ( video_out_drivers[i] )
    if ( video_out_drivers[i++]->control( VOCTRL_GUISUPPORT,NULL ) == VO_TRUE )
     { 
      const vo_info_t *info = video_out_drivers[i - 1]->get_info();
-     if ( gtkVODriver )
-      if ( !strcmp( gtkVODriver,info->short_name ) ) old_video_driver=c; c++;
+     if ( !gstrcmp( gtkVODriver,info->short_name ) ) old_video_driver=c; c++;
      tmp[0]=(char *)info->short_name; tmp[1]=(char *)info->name; gtk_clist_append( GTK_CLIST( CLVDrivers ),tmp );
     }
   gtk_clist_select_row( GTK_CLIST( CLVDrivers ),old_video_driver,0 );
@@ -228,7 +237,7 @@ void ShowPreferences( void )
  gtk_signal_connect( GTK_OBJECT( CLADrivers ),"select_row",GTK_SIGNAL_FUNC( prCListRow ),(void*)0 );
  gtk_signal_connect( GTK_OBJECT( CLVDrivers ),"select_row",GTK_SIGNAL_FUNC( prCListRow ),(void*)1 );
 
- gtkVPreferences=1; gtkIncVisible();
+ gtkVPreferences=1;
  gtk_widget_show( Preferences );
  gtkSetLayer( Preferences );
  gtkMessageBox( GTK_MB_WARNING,MSGTR_PREFERENCES_Message );
@@ -237,7 +246,7 @@ void ShowPreferences( void )
 void HidePreferences( void )
 {
  if ( !gtkVPreferences ) return;
- gtkVPreferences=0; gtkDecVisible();
+ gtkVPreferences=0;
  gtk_widget_hide( Preferences ); gtk_widget_destroy( Preferences );
  HideOSSConfig();
 }
@@ -1465,7 +1474,7 @@ void ShowOSSConfig( void )
 
  gtk_widget_show( OSSConfig );
  gtkSetLayer( OSSConfig );
- gtkVOSSConfig=1; gtkIncVisible();
+ gtkVOSSConfig=1;
 }
 
 void HideOSSConfig( void )
@@ -1473,7 +1482,7 @@ void HideOSSConfig( void )
  if ( !gtkVOSSConfig ) return;
  gtk_widget_hide( OSSConfig );
  gtk_widget_destroy( OSSConfig ); 
- gtkVOSSConfig=0; gtkDecVisible();
+ gtkVOSSConfig=0;
 }
 
 static void ossDestroy( GtkObject * object,gpointer user_data )

@@ -169,7 +169,7 @@ void ShowPlayList( void )
   }
  gtk_clist_thaw( GTK_CLIST( CLSelected ) );
 
- gtk_widget_show( PlayList ); gtkIncVisible();
+ gtk_widget_show( PlayList );
 }
 
 void HidePlayList( void )
@@ -180,7 +180,7 @@ void HidePlayList( void )
  if ( CLFileSelected ) free( CLFileSelected ); CLFileSelected=NULL;
  if ( old_path ) free( old_path ); old_path=strdup( current_path );
  gtk_widget_hide( PlayList );
- gtk_widget_destroy( PlayList ); gtkDecVisible();
+ gtk_widget_destroy( PlayList );
 }
 
 static void plDestroy( GtkObject * object,gpointer user_data )

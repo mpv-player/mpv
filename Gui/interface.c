@@ -286,6 +286,18 @@ void guiGetEvent( int type,char * arg )
 	mplEventHandling( evRedraw,0 );
 	break;
    case guiSetVolume:
+        if ( audio_out )
+	{
+	 float l,r;
+	 mixer_getvolume( &l,&r );
+	 guiIntfStruct.Volume=(r>l?r:l);
+	 if ( r != l ) guiIntfStruct.Balance=( ( r - l ) + 100 ) * 0.5f;
+	   else guiIntfStruct.Balance=50.0f;
+	 btnModify( evSetVolume,guiIntfStruct.Volume );
+	 btnModify( evSetBalance,guiIntfStruct.Balance );
+	}
+	break;
+   case guiSetValues:
 // -- audio
         if ( audio_out )
 	{
@@ -329,21 +341,31 @@ void guiGetEvent( int type,char * arg )
 	 }
 
        guiIntfStruct.DiskChanged=0;
-//       guiIntfStruct.FilenameChanged=0;
 
 // --- video opts	 
        if ( !gtkVODriver )
 	{
          int i = 0;
-         while ( video_out_drivers[i++] )
-	  if ( video_out_drivers[i - 1]->control( VOCTRL_GUISUPPORT,NULL ) == VO_TRUE ) 
-	   {
-	    const vo_info_t *info = video_out_drivers[i - 1]->get_info();
-	     { gtkVODriver=gstrdup( (char *)info->short_name ); break; }
-	   }
+	 if ( video_driver && !gtkVODriver )
+	  {
+	   while ( video_out_drivers[i] )
+	    if ( video_out_drivers[i++]->control( VOCTRL_GUISUPPORT,NULL ) == VO_TRUE )
+	     {
+	      const vo_info_t *info = video_out_drivers[i - 1]->get_info();
+	      if ( !gstrcmp( video_driver,(char *)info->short_name ) ) gtkVODriver=gstrdup( video_driver );
+	     }
+	  }
+	  else
+           while ( video_out_drivers[i++] )
+	    if ( video_out_drivers[i - 1]->control( VOCTRL_GUISUPPORT,NULL ) == VO_TRUE ) 
+	     {
+	      const vo_info_t *info = video_out_drivers[i - 1]->get_info();
+	      gtkVODriver=gstrdup( (char *)info->short_name );
+	      break;
+	     }
 	 }
 	
-	if ( gtkVODriver ) { if ( video_driver ) free( video_driver ); video_driver=strdup( gtkVODriver ); }
+	if ( gtkVODriver ) { gfree( (void **)&video_driver ); video_driver=gstrdup( gtkVODriver ); }
 	  else { gtkMessageBox( GTK_MB_FATAL,MSGTR_IDFGCVD ); exit_player( "gui init" ); }
 	
 	if ( gtkVPP )
@@ -393,7 +415,8 @@ void guiGetEvent( int type,char * arg )
 	  ao_plugin_cfg.pl_extrastereo_mul=gtkAOExtraStereoMul;
 	 }
 	mixer_device=gtkAOOSSMixer;
-	if ( audio_driver ) free( audio_driver ); 
+	if ( audio_driver && !gtkAODriver ) gtkAODriver=gstrdup( audio_driver );
+	gfree( (void **)&audio_driver );
 	if ( !gstrcmp( gtkAODriver,"oss" ) && gtkAOOSSDevice )
 	 {
 	  char * tmp = calloc( 1,strlen( gtkAODriver ) + strlen( gtkAOOSSDevice ) + 2 );
