@@ -341,7 +341,6 @@ static fb_mode_t *find_mode_by_name(char *name)
 
 static int fb_init_done = 0;
 static int fb_works = 0;
-char *fb_dev_name = NULL;
 static int fb_dev_fd;
 static size_t fb_size;
 static uint8_t *frame_buffer;
@@ -353,7 +352,9 @@ static int fb_pixel_size;	// 32:  4  24:  3  16:  2  15:  2
 static int fb_real_bpp;		// 32: 24  24: 24  16: 16  15: 15
 static int fb_bpp;		// 32: 32  24: 24  16: 16  15: 15
 static int fb_screen_width;
+static int fb_orig_depth;
 
+char *fb_dev_name = NULL;
 char *fb_mode_cfgfile = "/etc/fb.modes";
 char *fb_mode_name = NULL;
 int fb_mode_depth = 0;
@@ -525,6 +526,7 @@ static int fb_init(void)
 		fb_vinfo.sync = fb_mode->sync;
 		fb_vinfo.vmode = fb_mode->vmode;
 	} else if (fb_mode_depth) {
+		fb_orig_depth = fb_vinfo.bits_per_pixel;
 		fb_vinfo.bits_per_pixel = fb_mode_depth;
 		switch (fb_mode_depth) {
 			case 32:
@@ -829,7 +831,42 @@ static void uninit(void)
 	}
 	if (fb_switch_mode)
 		fb_vinfo = fb_orig_vinfo;
-	else {
+	else if (fb_mode_depth) {
+		fb_vinfo.bits_per_pixel = fb_orig_depth;
+		switch (fb_mode_depth) {
+			case 32:
+			case 24:
+				fb_vinfo.red.offset = 16;
+				fb_vinfo.red.length = 8;
+				fb_vinfo.red.msb_right = 0;
+				fb_vinfo.green.offset = 8;
+				fb_vinfo.green.length = 8;
+				fb_vinfo.green.msb_right = 0;
+				fb_vinfo.blue.offset = 0;
+				fb_vinfo.blue.length = 8;
+				fb_vinfo.blue.msb_right = 0;
+			case 16:
+				fb_vinfo.red.offset = 11;
+				fb_vinfo.red.length = 5;
+				fb_vinfo.red.msb_right = 0;
+				fb_vinfo.green.offset = 5;
+				fb_vinfo.green.length = 6;
+				fb_vinfo.green.msb_right = 0;
+				fb_vinfo.blue.offset = 0;
+				fb_vinfo.blue.length = 5;
+				fb_vinfo.blue.msb_right = 0;
+			case 15:
+				fb_vinfo.red.offset = 10;
+				fb_vinfo.red.length = 5;
+				fb_vinfo.red.msb_right = 0;
+				fb_vinfo.green.offset = 5;
+				fb_vinfo.green.length = 5;
+				fb_vinfo.green.msb_right = 0;
+				fb_vinfo.blue.offset = 0;
+				fb_vinfo.blue.length = 5;
+				fb_vinfo.blue.msb_right = 0;
+		}
+	} else {
 		fb_vinfo.xres_virtual = fb_orig_vinfo.xres_virtual;
 		fb_vinfo.yres_virtual = fb_orig_vinfo.yres_virtual;
 	}
