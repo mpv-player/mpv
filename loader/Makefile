@@ -4,9 +4,13 @@ include ../config.mak
 DEFINES=-DMPLAYER -D__WINE__ #-Ddbg_printf=__vprintf \
 	#-DTRACE=__vprintf # -DDETAILED_OUT
 
+ifeq ($(TARGET_WIN32),yes)
+LIB_OBJECTS= driver.o afl.o vfl.o
+else
 LIB_OBJECTS= ldt_keeper.o pe_image.o module.o \
 ext.o win32.o driver.o pe_resource.o \
 resource.o registry.o elfdll.o afl.o vfl.o wrapper.o
+endif
 
 # gcc-3.0 produces buggy code for acmStreamOpen() with
 # "-O3 -fomit-frame-pointer" or "-O2 -fomit-frame-pointer

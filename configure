@@ -5011,20 +5011,17 @@ fi
 if test "$_win32" != no ; then
   _def_win32_loader='#undef WIN32_LOADER'
   echocheck "Win32 loader support"
+  _ld_win32='loader/libloader.a'
+  _dep_win32='loader/libloader.a'
+  _codecmodules="win32 $_codecmodules"
+  if openbsd ; then
+    x86 && _ld_win32="$_ld_win32 -li386"
+  fi
   if not win32 ; then
-    _ld_win32='loader/libloader.a'
-    _dep_win32='loader/libloader.a'
-    _codecmodules="win32 $_codecmodules"
-    if openbsd ; then
-      x86 && _ld_win32="$_ld_win32 -li386"
-    fi
     _def_win32_loader='#define WIN32_LOADER 1'
     echores "yes"
   else
-    _ld_win32='loader/driver.o loader/vfl.o loader/afl.o'
-    _dep_win32='loader/driver.o loader/vfl.o loader/afl.o'
     _ld_win32libs="$_ld_win32libs -ladvapi32 -lole32"
-    _codecmodules="win32 $_codecmodules"
     echores "no (using native windows)"
   fi
 fi
