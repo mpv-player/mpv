@@ -9,6 +9,7 @@
 #define VCODEC_XVID 9
 #define VCODEC_QTVIDEO 10
 #define VCODEC_NUV 11
+#define VCODEC_RAWYUV 12
 
 #define ACODEC_COPY 0
 #define ACODEC_PCM 1
@@ -691,6 +692,8 @@ default:
         sh_video->vfilter=vf_open_encoder(NULL,"lavc",(char *)mux_v); break;
     case VCODEC_RAWRGB:
         sh_video->vfilter=vf_open_encoder(NULL,"rawrgb",(char *)mux_v); break;
+    case VCODEC_RAWYUV:
+        sh_video->vfilter=vf_open_encoder(NULL,"rawyuv",(char *)mux_v); break;
     case VCODEC_VFW:
         sh_video->vfilter=vf_open_encoder(NULL,"vfw",(char *)mux_v); break;
     case VCODEC_LIBDV:

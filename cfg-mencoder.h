@@ -66,6 +66,7 @@ m_option_t ovc_conf[]={
 	{"lavc", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_LIBAVCODEC, NULL},
 //	{"null", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_NULL, NULL},
 	{"rawrgb", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_RAWRGB, NULL},
+	{"rawyuv", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_RAWYUV, NULL},
 	{"vfw", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_VFW, NULL},
 	{"libdv", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_LIBDV, NULL},
 	{"xvid", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_XVID, NULL},
@@ -75,6 +76,7 @@ m_option_t ovc_conf[]={
 	"   copy     - frame copy, without re-encoding. doesn't work with filters!\n"
 	"   frameno  - special audio-only file for 3-pass encoding, see DOCS!\n"
 	"   rawrgb   - uncompressed RGB 24bpp video\n"
+	"   rawyuv   - uncompressed 4:2:0 YUV (I420) 12bpp video\n"
 	"   nuv      - nuppel video\n"
 #ifdef HAVE_DIVX4ENCORE
 #ifdef ENCORE_XVID
