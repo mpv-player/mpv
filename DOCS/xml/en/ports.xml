@@ -402,6 +402,12 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 
 <para>Extract DirectX header files to <filename class="directory">/mingw/include/</filename>.</para>
 
+<para>MOV compressed header support requires
+  <ulink url="http://www.gzip.org/zlib/">zlib</ulink>, which
+  <application>MinGW</application> does not provide by default.
+  Configure it with <option>--prefix=/mingw</option> and install
+  it before compiling <application>MPlayer</application>.</para>
+
 </sect2>
 
 
