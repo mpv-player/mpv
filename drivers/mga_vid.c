@@ -202,8 +202,6 @@ typedef struct bes_registers_s
 
 
 	//configurable stuff
-	int brightness;
-	int contrast;
 	int blackie;
 
 } bes_registers_t;
@@ -248,10 +246,15 @@ static uint32_t mga_ram_size = 0;	// how much megabytes videoram we have
 
 static uint32_t mga_top_reserved = 0;	// reserved space for console font (matroxfb + fastfont)
 
+static int mga_brightness = 0;	// initial brightness
+static int mga_contrast = 0;	// initial contrast
+
 //static int mga_force_memsize = 0;
 
 MODULE_PARM(mga_ram_size, "i");
 MODULE_PARM(mga_top_reserved, "i");
+MODULE_PARM(mga_brightness, "i");
+MODULE_PARM(mga_contrast, "i");
 
 static struct pci_dev *pci_dev;
 
@@ -744,9 +747,9 @@ switch(config->format){
 	regs.besglobctl |= (1<<5) + (1<<7);
 	
 	// brightness ; default is 0x7f;
-	regs.beslumactl = (regs.brightness << 16);
+	regs.beslumactl = (mga_brightness << 16);
 	// contrast:
-	regs.beslumactl|= ((regs.contrast+0x80)<<0);
+	regs.beslumactl|= ((mga_contrast+0x80)<<0);
 
 	//Setup destination window boundaries
 	besleft = x > 0 ? x : 0;
@@ -1368,8 +1371,8 @@ static void mga_param_buff_fill( void )
     len += sprintf(&mga_param_buff[len],"MMIO: %p\n",mga_mmio_base);
     len += sprintf(&mga_param_buff[len],"Configurable stuff:\n");
     len += sprintf(&mga_param_buff[len],"~~~~~~~~~~~~~~~~~~~\n");
-    len += sprintf(&mga_param_buff[len],PARAM_BRIGHTNESS"%d\n",regs.brightness);
-    len += sprintf(&mga_param_buff[len],PARAM_CONTRAST"%d\n",regs.contrast);
+    len += sprintf(&mga_param_buff[len],PARAM_BRIGHTNESS"%d\n",mga_brightness);
+    len += sprintf(&mga_param_buff[len],PARAM_CONTRAST"%d\n",mga_contrast);
     len += sprintf(&mga_param_buff[len],PARAM_BLACKIE"%s\n",regs.blackie?"on":"off");
     mga_param_buff_len = len;
     // check boundaries of mga_param_buff before writing to it!!!
@@ -1396,7 +1399,7 @@ static ssize_t mga_vid_write(struct file *file, const char *buf, size_t count, l
 		brightness=simple_strtol(&buf[strlen(PARAM_BRIGHTNESS)],NULL,10);
 		if (brightness>127 || brightness<-128) { brightness=0;} 
 //		printk(KERN_DEBUG "mga_vid: brightness modified ( %d ) \n",brightness);
-		regs.brightness=brightness;
+		mga_brightness=brightness;
 	} else 
 	if(memcmp(buf,PARAM_CONTRAST,min(count,strlen(PARAM_CONTRAST))) == 0)
 	{
@@ -1404,7 +1407,7 @@ static ssize_t mga_vid_write(struct file *file, const char *buf, size_t count, l
 		contrast=simple_strtol(&buf[strlen(PARAM_CONTRAST)],NULL,10);
 		if (contrast>127 || contrast<-128) { contrast=0;} 
 //		printk(KERN_DEBUG "mga_vid: contrast modified ( %d ) \n",contrast);
-		regs.contrast=contrast;
+		mga_contrast=contrast;
 	} else 
 
         if(memcmp(buf,PARAM_BLACKIE,min(count,strlen(PARAM_BLACKIE))) == 0)
