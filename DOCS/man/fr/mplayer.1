@@ -1,4 +1,4 @@
-.\" synced with 1.721
+.\" synced with 1.722
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "17 Septembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "18 Septembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -1880,7 +1880,7 @@ Sortie audio par le démon ESD.
 .PD 0
 .RSs
 .IPs <serveur>
-Choisit explicitement le serveur ESD (par défaut\ : localhost).
+Choisit explicitement le serveur ESD à utiliser (par défaut\ : localhost).
 .RE
 .PD 1
 .
@@ -3208,7 +3208,7 @@ des fichiers AVI.
 Désactive la compensation automatique du rapport hauteur/\:largeur.
 .
 .TP
-.B \-flip \ 
+.B \-flip\ \ 
 Renverse l'image de haut en bas.
 .
 .TP
@@ -3455,7 +3455,7 @@ sincR
 .IPs 9
 lanczos
 .IPs 10
-bicubique spline
+bicubique spline naturelle
 .RE
 .PD 1
 .sp 1
@@ -3699,9 +3699,8 @@ rendu OSD/\:sous-titres
 .RE
 .
 .TP
-.B flip\ \ \ 
+.B flip  (voir aussi \-flip)
 Inverse l'image de haut en bas.
-Voir aussi l'option \-flip.
 .
 .TP
 .B mirror
@@ -3714,11 +3713,11 @@ Pour les paramètres entre 4\-7 la rotation n'est faite que si la géométrie
 du film est en mode portrait et non en paysage.
 .
 .TP
-.B scale[=l:h[:interlaced[:chr_drop[:param[:presize]]]]]
+.B scale[=w:h[:interlaced[:chr_drop[:param[:param2[:presize]]]]]]
 Redimensionne l'image avec le zoom logiciel (lent) et applique une conversion
 de palette YUV<\->RGB (voir également l'option \-sws).
 .RSs
-.IPs l,h\ \ 
+.IPs <l>,<h>
 largeur/\:hauteur redimensionnées (par défaut\ : largeur, hauteur originales)
 .br
 .I NOTE:
@@ -3738,7 +3737,7 @@ hauteur/\:largeur original.
 .REss
 .IPs interlaced
 Bascule le redimmensionnement entrelacé.
-.IPs chr_drop
+.IPs <chr_drop>
 saute le chroma
 .RSss
 0: Utilise toutes les lignes d'entrée disponibles pour le chroma.
@@ -3749,17 +3748,25 @@ saute le chroma
 .br
 3: N'utilise qu'une ligne d'entrée sur 8 pour le chroma.
 .REss
-.IPs param
-paramètres de redimensionnement (dépends de la méthode de redimensionnement
-utilisée)
+.IPs <param>
 .RSss
--sws 2 (bicubique)\ : netteté (0 (doux) \- 100 (dur))
+-sws 2 (bicubique)\ : B (flou) et C (ringing: scintillement)
+.br
+(0.00, 0.60) par défaut
+.br
+(0.00, 0.75) le "precise bicubic" de VirtualDub
++.br
++(0.00, 0.50) spline de Catmull-Rom
++.br
++(0.33, 0.33) spline de Mitchell-Netravali
++.br
++(1.00, 0.00) spline-B cubique
 .br
 -sws 7 (gaussien)\ : netteté (0 (doux) \- 100 (dur))
 .br
 -sws 9 (lanczos)\ : longueur du filtre (1\-10)
 .REss
-IPs presize
+IPs <presize>
 Redimensionne à une taille pré-définie.
 Scale to preset sizes.
 .RSss
@@ -3791,7 +3798,7 @@ en corrigeant le rapport hauteur/\:largeur.
 .
 .TP
 .B yuy2\ \ \ 
-Force la conversion logicielle YV12/\:I420 ou 422P vers YUY2
+Force la conversion logicielle YV12/\:I420/\:422P vers YUY2
 Utile pour les cartes graphiques/\:pilotes qui gèrent YV12 trop lentement mais
 YUY2 rapidement.
 .
@@ -3824,6 +3831,8 @@ utilisant palette.
 .B format[=fourcc]
 Restreint l'espace de couleur du prochain filtre sans faire de conversion.
 Utilisez-le avec le filtre scale pour faire une véritable conversion.
+.br
+.I NOTE\ :
 Pour avoir une liste des formats disponibles, voir format=fmt=help.
 .PD 0
 .RSs
@@ -3838,6 +3847,8 @@ Restreint l'espace de couleur au prochain filtre sans faire aucune conversion.
 Contrairement au filtre format, il permet n'importe quel espace de couleur
 .B excepté
 celui que vous donnez.
+.br
+.I NOTE\ :
 Pour une liste des différents formats disponible, voyez noformat=fmt=help.
 .PD 0
 .RSs
@@ -3848,45 +3859,43 @@ nom du format comme rgb15, bgr24, yv12, etc. (par défaut: yv12)
 .
 .TP
 .B pp[=filtre1[:option1[:option2...]]/\:[-]filtre2...] (voir aussi \-pphelp)
-Cette option active le filtre interne de post-traitement de MPlayer, et
-propose une interface où vous pouvez passer des options au filtre nommé.
-Les sous-filtres doivent être séparés avec le signe /.
-Chaque filtre est par défaut à 'c' (chrominance).
-Les mots-clés acceptent un préfixe '-' pour désactiver une option.
-Un ':' suivi d'une lettre peut être ajouté à l'option pour indiquer sa
-portée\ :
+Construit la chaîne de filtres spécifiée.
+Les sous-filtres doivent être séparés avec '/', peuvent être désactivés
+en les préfixant de '-', tandis que l'ajout de ':' suivi de 'a', 'c' ou 'y'
+indiquent leur portée (par défaut\ : c)\ :
 .PD 0
 .RSs
 .IPs a
-Désactive automatiquement le filtre si le CPU est trop lent.
+Désactive le sous-filtre si le CPU est trop lent.
 .IPs c
 Filtre également la chrominance.
 .IPs y
-Pas de filtrage de la chrominance (filtrage de la luminance uniquement).
+Filtrage de la luminance uniquement (pas de la chrominance).
 .RE
 .PD 1
 .sp 1
 .RS
 .br
 .I NOTE\ :
-\-pphelp affiche une liste des filtres disponibles.
+\-pphelp affiche une liste des sous-filtres disponibles.
 .sp 1
 .I EXEMPLE\ :
 .RE
 .PD 0
 .RSs
-.IPs "\-vf pp=hb/\:vb/\:dr/\:al"
+.IPs "\-vf pp=hb/vb/dr/al"
 Débloquage horizontal et vertical, "deringing" et luminosité/\:contraste auto
-.IPs "\-vf pp=hb/\:vb/\:dr/\:al/\:lb"
+.IPs "\-vf pp=hb/vb/dr/al/lb"
 Débloquage horizontal et vertical, "deringing" et luminosité/\:contraste auto
 et désentrelacement "linear blend"
-.IPs "\-vf pp=de/\:-al"
+.IPs "\-vf pp=de/-al"
 Filtres par défaut sans correction de luminosité/\:contraste
-.IPs "\-vf pp=de/\:tn:1:2:3"
+.IPs "\-vf pp=de/tn:1:2:3"
 Active les filtres par défaut & le débruiteur temporel.
-.IPs "\-vf pp=hb:y/\:vb:a \-autoq 6"
+.IPs "\-vf pp=hb:y/vb:a"
 Débloque la luminance horizontale uniquement et active ou désactive
-le déblocage vertical suivant la puissance de calcul processeur disponible.
+automatiquement le déblocage vertical suivant la puissance de calcul
+processeur disponible.
 .RE
 .PD 1
 .
@@ -3947,10 +3956,10 @@ DVB/\:DXR3.
 .
 .TP
 .B dvbscale[=aspect]
-Fixe le zoom optimum pour les cartes DVB, en redimmensionnant sur l'axe X de
-façon matérielle et en calculant le redimmensionnement sur l'axe Y de façon
+Fixe le zoom optimum pour les cartes DVB, en redimmensionnant sur l'axe x de
+façon matérielle et en calculant le redimmensionnement sur l'axe y de façon
 logicielle pour conserver le rapport hauteur/\:largeur.
-Utile uniquement avec expand+scale
+Utile uniquement quand combiné avec expand et scale
 (\-vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1,lavc).
 .RSs
 .IPs aspect
@@ -3958,6 +3967,16 @@ contrôle le rapport hauteur/\:largeur (aspect ratio), calculé comme ceci\ :
 DVB_HAUTEUR*ASPECTRATIO (par défaut\ : 576*4/\:3=768, fixez-le à
 576*(16/\:9)=1024 pour une télé 16:9).
 .RE
+.sp 1
+.RS
+.I EXEMPLE\ :
+.RE
+.PD 0
+.RSs
+.IPs "\-vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1,lavc"
+FIXME: Expliquer ce qu'il fait.
+.RE
+.PD 1
 .
 .TP
 .B "noise[=luma[u][t|a][h][p]:chroma[u][t|a][h][p]]"
@@ -3985,16 +4004,14 @@ mixe du bruit aléatoire avec un motif (semi-)régulier
 .B "denoise3d[=luma:chroma:temps]"
 Ce filtre est destiné à réduire le bruit de l'image pour que les plans fixes
 soient vraiment fixes (cela devrait améliorer la compressibilité.).
-On peut lui donner de 0 à 3 paramètres.
-Si vous omettez un paramètre, une valeur raisonnable calculée automatiquement.
 .PD 0
 .RSs
 .IPs luma\ 
-force spatiale du luma (par défaut\ = 4)
+force spatiale du luma (par défaut\ : 4)
 .IPs chroma
-force spatiale du chroma (par défaut\ = 3)
+force spatiale du chroma (par défaut\ : 3)
 .IPs time\ 
-force temporelle (par défaut\ = 6)
+force temporelle (par défaut\ : 6)
 .RE
 .PD 1
 .
@@ -4004,15 +4021,15 @@ Version haute précision\/:qualité du filtre denoise3d.
 Les paramètres et le comportement sont les mêmes.
 .
 .TP
-.B eq[=lumi:cont]
+.B eq[=lumi:cont] (OBSOLÈTE)
 Égaliseur logiciel avec contrôles interactifs tout comme les égaliseurs
 matériels, pour les cartes/\:pilotes qui ne permettent pas de contrôler
 la luminosité et le contraste de façon matérielle.
+Les valeurs initiales dans l'intervalle -100\-100 peuvent être fournies en
+ligne de commande.
 Peut également être utile avec MEncoder, soit pour réparer des films mal
 capturés, soit pour réduire légèrement le contraste pour masquer des
 artefacts et s'accomoder de débits plus bas.
-Les valeurs initiales dans l'intervalle -100\- 100 peuvent être fournies en
-ligne de commande.
 .
 .TP
 .IPs eq2[=gamma:contraste:luminosité:saturation:rg:vg:bg:poids]
@@ -4023,7 +4040,7 @@ Notez que cela utilise le même code MMX optimisé que \-vf eq si toutes les
 valeurs gamma sont 1.0.
 Les paramètres sont donnés en nombres flottants.
 Les paramètres rg, vg, bg sont les valeurs gamma indépendantes pour les
-composantes Rouge, Vert et Bleu.
+composantes rouge, vert et bleu.
 Le paramètre poids peut être utilisé pour réduire l'effet d'un gamma trop
 grand sur les parties claires de l'image, c-à-d.\& les empécher d'être
 sur-amplifiées et de devenir complètement blanches.
@@ -4122,7 +4139,7 @@ la trame.
 .
 .TP
 .B lavcdeint
-Utilise le filtre de désentrelacement de libavcodec.
+filtre de désentrelacement de libavcodec
 .
 .TP
 .B kerndeint[=seuil[:carte[:ordre[:netteté[:deuxsens]]]]]
@@ -4130,7 +4147,7 @@ désentrelaceur noyau adaptatif de Donald Graft.
 Désentrelace des parties de la vidéo si un seuil configurable est dépassé.
 .PD 0
 .RSs
-.IPs "seuil (0 - 255)"
+.IPs "seuil (0 \- 255)"
 Seuil (par défaut\ : 10).
 .IPs "carte (0 ou 1)"
 Affiche en blanc les pixels qui dépassent le seuil (par défaut\ : 0).
@@ -4146,13 +4163,13 @@ Autorise l'augmentation de la netteté (sharpening) dans les deux sens
 .
 .TP
 .B "unsharp=l|cLxH:quantité[:l|cLxH:quantité]"
-Masque unsharp / flou gaussien.
+masque unsharp / flou gaussien
 .RSs
-.IPs 1
+.IPs l\ \ \ \
 Applique l'effet sur le composant luma
-.IPs c
+.IPs c\ \ \ \ 
 Applique l'effet sur les composants chroma
-.IPs LxH
+.IPs <largeur>x<hauteur>
 largeur et hauteur de la matrice, dont les deux dimensions sont impaires
 (min = 3x3, max = 13x11 ou 11x13, généralement quelque chose entre 3x3 et 7x7)
 .IPs quantité
@@ -4171,7 +4188,7 @@ Echange les plans U & V.
 .
 .TP
 .B "il=[d|i][s][:[d|i][s]]"
-(dés)entrelace les lignes.
+(Dés)entrelace les lignes.
 Le but de ce filtre est d'ajouter la possibilité de traiter le pré-champs
 d'images entrelacées sans les désentrelacer.
 Vous pouvez filtrer votre DVD entrelacé et le jouer sur la TV sans casser
@@ -4231,7 +4248,7 @@ remplissent mieux ce rôle.
 Les arguments suivants (voir leur syntaxe plus haut) peuvent être utilisés
 pour contrôler son comportement:
 .RSs
-.IPs dr
+.IPs dr\ \ \ 
 Définit le mode saut de trames.
 0 (par défaut) signifie ne pas sauter de trames pour maintenir le débit de
 sortie.
@@ -4241,12 +4258,12 @@ telecine dans les 5 dernières trames.
 .br
 .I NOTE\ :
 Utilisez le mode 1 avec MEncoder.
-.IPs am
+.IPs am\ \ \ 
 Type d'analyse.
 Les valeurs disponibles sont 0 (motif fixé avec numéro de trame initiale
 définit par fr=#) et 1 (recherche agressive du motif telecine).
 La valeur par défaut est 1.
-.IPs fr
+.IPs fr\ \ \ 
 Définie le numéro de trame initiale de la séquence.
 0\-2 sont les trois trames progressives propres; 3 et 4 sont les deux trames
 entrelaçées.
@@ -6998,8 +7015,8 @@ progressive.
 .
 .TP
 .B fullinter
-Utilise tous les méthodes d'analyse inter-trames (i4x4, psub8x8, psub16x16)
-(par défaut\ : 4x4, psub16x16).
+Utilise tous les types de macro-blocs inter-trames (i16x16, i4x4, p16x16-4x4)
+(par défaut\ : i16x16, i4x4, p16x16-8x8).
 .
 .TP
 .B log=<-1\-3>
