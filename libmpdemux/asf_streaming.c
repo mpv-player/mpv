@@ -85,6 +85,9 @@ asf_streaming_start( stream_t *stream, int *demuxer_type) {
 		if( fd==-2 ) return -1;
 	}
 
+        if (!strncasecmp( proto_s, "mms", 3) ||  !strncasecmp( proto_s, "http", 4) || !strncasecmp( proto_s, "mmst", 4) || !strncasecmp( proto_s, "http_proxy", 10) )
+        mp_msg(MSGT_NETWORK,MSGL_ERR,"Used protocol %s\n",proto_s );
+	else
 	mp_msg(MSGT_NETWORK,MSGL_ERR,"Unknown protocol: %s\n", proto_s );
 	return -1;
 }
