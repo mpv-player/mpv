@@ -1,4 +1,4 @@
-.\" synced with 1.692
+.\" synced with 1.694
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -587,7 +587,7 @@ Wy³±cza u¿ywanie Linux RTC (real-time clock \- /dev/\:rtc) jako mechanizmu
 mierzenia czasu.
 .
 .TP
-.B \-playlist <plik>
+.B \-playlist <nazwa\ pliku>
 Odtwarza zbiory wed³ug pliku listy odtwarzania (w formatach ASX, Winamp, SMIL
 lub jeden zbiór w ka¿dym wierszu).
 .br
@@ -631,7 +631,8 @@ Zamiast przechwytywania wci¶niêtych klawiszy, MPlayer bêdzie czyta³ proste
 polecenia ze standardowego wej¶cia.
 .br
 .I INFORMACJA:
-Lista poleceñ znajduje siê w DOCS/\:tech/\:slave.txt i \-input cmdlist.
+Listê poleceñ otrzymasz z \-input cmdlist, a ich opis znajdziesz
+w DOCS/\:tech/\:slave.txt.
 .
 .TP
 .B \-softsleep
@@ -663,7 +664,7 @@ Opcja ta jest skuteczna tylko wtedy, kiedy strumieñ AC3 zawiera informacje
 o wymaganym zasiêgu kompresji.
 .
 .TP
-.B \-aid <id> (przeczytaj te¿ \-alang)
+.B \-aid <ID> (przeczytaj te¿ \-alang)
 Wybiera kana³ audio (MPEG: 0\-31 AVI/\:OGM: 1\-99 ASF/\:RM: 0\-127,
 VOB(AC3): 128\-159 VOB(LPCM): 160\-191 MPEG-TS 17\-8190).
 MPlayer wy¶wietli dostêpne identyfikatory, je¶li jest uruchomiony w trybie
@@ -799,7 +800,7 @@ pe³ne 5.1
 .PD 1
 .
 .TP
-.B \-chapter <id\ rozdzia³u[\-<id\ koñcowego\ rozdzia³u>] (tylko DVD)
+.B \-chapter <ID\ rozdzia³u[\-<ID\ koñcowego\ rozdzia³u>] (tylko DVD)
 Okre¶la numer rozdzia³u od którego nale¿y zacz±æ odtwarzanie.
 Mo¿e te¿ okre¶liæ numer rozdzia³u na którym nale¿y skoñczyæ odtwarzanie
 (domy¶lnie: 1).
@@ -809,8 +810,8 @@ Mo¿e te¿ okre¶liæ numer rozdzia³u na którym nale¿y skoñczyæ odtwarzanie
 Wysy³a cookies przy ¿±daniach HTTP.
 .
 .TP
-.B \-cookies-file <nazwa_zbioru> (tylko z sieci±)
-Czyta HTTP cookies ze <zbioru> (domy¶lnie ~/.mozilla/ i ~/.netscape/)
+.B \-cookies-file <nazwa\ zbioru> (tylko z sieci±)
+Czyta HTTP cookies z <nazwa zbioru> (domy¶lnie ~/.mozilla/ i ~/.netscape/)
 i nie czytaj z miejsc standardowych.
 Zak³ada ¿e zbiór jest w formacie Netscape.
 .
@@ -848,8 +849,8 @@ Przekazuje zamiast domy¶lnych nastêpuj±ce opcje modu³owi wej¶cia DVB:
 .RSs
 .IPs card=<1\-4>
 U¿yje karty numer 1\-4 (domy¶lnie: 1).
-.IPs file=<plik>
-Czyta listê kana³ów z <plik>.
+.IPs file=<nazwa\ pliku>
+Czyta listê kana³ów z <nazwa pliku>.
 Domy¶lnym jest ~/.mplayer/\:channels.conf.{sat,ter,cbl} (w zale¿no¶ci od
 Twojej karty) lub w ostateczno¶ci ~/.mplayer/\:channels.conf.
 .RE
@@ -860,7 +861,7 @@ Twojej karty) lub w ostateczno¶ci ~/.mplayer/\:channels.conf.
 Podaje ¶cie¿kê do urz±dzenia DVD (domy¶lnie: /dev/\:dvd).
 .
 .TP
-.B \-dvdangle <id\ ujêcia> (tylko DVD)
+.B \-dvdangle <ID\ ujêcia> (tylko DVD)
 Niektóre dyski DVD zawieraj± sceny, które mog± byæ ogl±dane z ró¿nych ujêæ.
 Opcja ta informuje MPlayera, którego ujêcia ma u¿ywaæ (domy¶lnie: 1).
 .
@@ -1209,7 +1210,7 @@ Wybiera jako¶æ kompresji JPEG
 .RE
 .
 .TP
-.B \-user <nazwa u¿ytkownika> (zobacz tak¿e opcjê \-passwd) (tylko sieæ)
+.B \-user <nazwa\ u¿ytkownika> (zobacz tak¿e opcjê \-passwd) (tylko sieæ)
 Podaje nazwê u¿ytkownika do uwierzytelnienia HTTP.
 .
 .TP
@@ -1217,7 +1218,7 @@ Podaje nazwê u¿ytkownika do uwierzytelnienia HTTP.
 Zg³asza <ci±g> jako program u¿ytkownika (user agent) w strumieniowaniu HTTP.
 .
 .TP
-.B \-vid <id>
+.B \-vid <ID>
 Wybiera kana³ video (MPG: 0\-15 ASF: 0\-255 MPEG-TS: 17\-8190).
 Przy odtwarzaniu strumienia MPEG-TS MPlayer/\:MEncoder u¿yje pierwszego
 (dostêpnego) programu z wybranym strumieniem video.
@@ -1984,14 +1985,14 @@ Okre¶la urz±dzenie bufora ramek (framebuffer).
 Domy¶lnie u¿ywany jest /dev/\:fb0.
 .
 .TP
-.B \-fbmode <nazwa trybu> (tylko fbdev)
+.B \-fbmode <nazwa\ trybu> (tylko fbdev)
 Zmienia tryb video na opisany etykiet± <nazwa trybu> w /etc/\:fb.modes.
 .br
 .I INFORMACJA:
 Bufor ramek VESA nie obs³uguje zmieniania trybu.
 .
 .TP
-.B \-fbmodeconfig <nazwa zbioru> (tylko \-vo fbdev)
+.B \-fbmodeconfig <nazwa\ zbioru> (tylko \-vo fbdev)
 U¿ywa podanego zbioru konfiguracyjnego (domy¶lnie: /etc/\:fb.modes).
 .
 .TP
@@ -2080,7 +2081,7 @@ Umieszcza okno w prawym dolnym rogu ekranu
 .PD 1
 .
 .TP
-.B \-guiwid <id\ okna> (patrz te¿ \-wid) (tylko z GUI)
+.B \-guiwid <ID\ okna> (patrz te¿ \-wid) (tylko z GUI)
 Przekazuje do GUI, ¿e ma ono równie¿ u¿ywaæ okna X11 i przykleiæ je na dole
 ekranu video, co jest przydatne by osadziæ mini-GUI w przegl±darce
 (u¿ywaj±cej na przyk³ad wtyczki MPlayer).
@@ -2221,7 +2222,7 @@ Je¿eli jest ona u¿yta ze sterownikiem wyj¶cia video directx, opcje \-screenw,
 W³±cza VBI dla sterowników wyj¶cia video vesa, dfbmga i svga.
 .
 .TP
-.B \-wid <id\ okna>] (tylko X11)
+.B \-wid <ID\ okna>] (tylko X11)
 Przekazuje MPlayerow, bt do³±czy³ siê do instniej±cego okna X11.
 Przydatne, by osadziæ MPlayera w przegl±darce (na przyk³ad za pomoc± wtyczki).
 .
@@ -2573,7 +2574,7 @@ filmów MPEG).
 Musisz w³±czyæ tê opcjê, je¿eli masz problemy z rozrywaniem/\:brakiem p³ynno¶ci
 ruchów podczas ogl±dania materia³u z przeplotem.
 .IPs layer=N
-Wymusi wybranie warstwy o id N do odtwarzania (domy¶lnie: -1 - auto).
+Wymusi wybranie warstwy o ID N do odtwarzania (domy¶lnie: -1 - auto).
 .RE
 .PD 1
 .
@@ -2799,7 +2800,7 @@ Pomija kodek MP3 FFmpeg.
 .PD 1
 .
 .TP
-.B \-af <filtr1[=opcja1:opcja2:...],filtr2,...>
+.B \-af <filtr1[=parametr1:parametr2:...],filtr2,...>
 Podaje listê oddzielanych przecinkami filtrów audio i ich opcji.
 Przeczytaj równie¿ rozdzia³ dokumentacji o filtrach audio.
 .sp 1
@@ -3288,24 +3289,24 @@ w³asno¶ci.
 Sk³adnia jest nastêpuj±ca:
 .
 .TP
-.B \-vf <filtr1[=parametry],filtr2,...>
+.B \-vf <filtr1[=parametr1:parametr2:...],filtr2,...>
 Ustawia listê filtrów video i ich opcji.
 .
 .TP
-.B \-vop <...,filtr3[=parametry],filtr2,filtr1> (PRZESTARZA£E)
+.B \-vop <...,filtr3[=parametr1:parametr2:...],filtr2,filtr1> (PRZESTARZA£E)
 Ustawia listê filtrów video do zastosowania w
 .B odwrotnej
 kolejno¶ci.
 Odradzane na rzecz \-vf.
 .PP
-Parametry s± opcjonalne i je¿eli zostan± pominiête to zostan± ustawione na
-domy¶lnie warto¶ci.
-U¿yj "-1" by zachowaæ domy¶lne warto¶ci.
+Wiele parametrów jest opcjonalnych i je¿eli zostan± pominiête, ich warto¶ci
+ustawiane s± na domy¶lne.
+U¿yj "-1", aby wyra¼nie nakazaæ ustawiania warto¶ci domy¶lnej.
 Parametry w:h oznaczaj± szeroko¶æ x wysoko¶æ w pikselach, x:y oznacza pozycjê
 od lewego górnego rogu wiêkszego obrazu.
 .br
 .I INFORMACJA:
-Mo¿esz pobraæ listê dostêpnych filtrów poprzez \-vf help.
+Mo¿esz pobraæ listê dostêpnych filtrów video poprzez \-vf help.
 .sp 1
 Filtry s± zorganizowane w listy.
 Jest kilka poleceñ zarz±dzaj±cych list± filtrów.
@@ -3561,8 +3562,7 @@ nazwa formatu taka jak rgb15, bgr24, yv12, itp (domy¶lnie: yv12)
 .B pp[=filtr1[:opcja1[:opcja2...]]/\:[-]filtr2...] (zobacz tak¿e \-pphelp)
 Ta opcja w³±cza u¿ycie wewnêtrznych filtrów postprocessingu MPlayera,
 a tak¿e daje interfejs do przekazywania filtrom opcji.
-Mo¿esz pobraæ listê dostêpnych filtrów poprzez \-pphelp.
-Ka¿dy podfiltr musi byæ oddzielony znakiem "/".
+Podfiltry musz± byæ oddzielone znakiem /.
 Ka¿dy filtr domy¶lnie ustawiony jest na "c" (chrominance).
 Parametry akceptuj± prefix "-" wy³aczaj±cy opcjê.
 Do opcji mo¿e byæ do³±czony znak ":" i litera by wskazaæ jej zakres:
@@ -3578,6 +3578,10 @@ Nie wykonuje filtrowania kolorów (tylko jasno¶ci).
 .PD 1
 .sp 1
 .RS
+.br
+.I INFORMACJA:
+\-pphelp poka¿e wszystkie dostêpne filtry postprocessingu.
+.sp 1
 .I PRZYK£AD:
 .RE
 .PD 0
@@ -3605,7 +3609,7 @@ prosty filtr postprocessingu
 .IPs jako¶æ
 0\-6 (domy¶lnie: 3)
 .IPs qp\ \ 
-wymusza parametr kwantyzacji (domy¶lnie: 0, parametr z video)
+wymusza parametr kwantyzacji (domy¶lnie: 0, parametr QP z video)
 .IPs tryb\ \ \ 
 0: twardy próg (domy¶lne)
 .br
@@ -3614,7 +3618,7 @@ wymusza parametr kwantyzacji (domy¶lnie: 0, parametr z video)
 .
 .TP
 .B qp=równanie
-filtr zmiany qp
+filtr zmiany QP
 .RSs
 .IPs równanie
 jakie¶ równanie postaci "2+2*sin(PI*qp)"
@@ -3929,6 +3933,7 @@ nie bêd± porzucane by utrzymaæ ustalon± wyj¶ciow± prêdko¶æ klatek.
 ³±czenia telecine w poprzednich 5 klatkach.
 2 oznacza, ¿e zawsze bêdzie utrzymywany dok³adny stosunek 5:4 klatek
 wej¶ciowych do wyj¶ciowych.
+.br
 .I INFORMACJA:
 Z MEncoderem u¿ywaj zawsze trybu 1 lub 2!
 .IPs am
@@ -4088,7 +4093,7 @@ Te przej¶cia NIE odpowiadaj± przej¶ciom 1 i 2 w procesie kodowania.
 Aby wykorzystaæ tryb dwuprzej¶ciowy divtc z dwuprzej¶ciowym kodowaniem, musisz
 wykonaæ nastêpuj±ce trzy kroki: 1 przej¶cie divtc i kodera, pó¼niej 2 przej¶cie
 divtc i 1 kodera, na koñcu 2 przej¶cie divtc i kodera.
-.IPs file=nazwapliku
+.IPs file=nazwa\ pliku
 Ustawia nazwê dla pliku informacyjnego kodowania 2-przebiegowego (domy¶lnie:
 "framediff.log").
 .IPs threshold=warto¶æ
@@ -4508,7 +4513,6 @@ Ustawia przerwê czasu buforowania audio (domy¶lnie: 0.5s).
 .TP
 .B \-endpos <[[hh:]mm:]ss[.ms]|size[b|kb|mb]> (patrz te¿ opcja \-ss i \-sb)
 Zatrzymuje kodowanie w podanym czasie lub pozycji bajtu.
-Mo¿liwe jest wyszczególnienie na ró¿ne sposoby:
 .br
 .I INFORMACJA:
 Pozycja bajtu nie bêdzie dok³adna, poniewa¿ mo¿e siê on tylko
@@ -4518,11 +4522,11 @@ zatrzymaæ granicy klatki.
 .PD 0
 .RSs
 .IPs "\-endpos 56"
-koduje tylko 56 sekund
+Koduje tylko 56 sekund.
 .IPs "\-endpos 01:10:00"
-koduje tylko 1 godzinê i 10 minut
+Koduje tylko 1 godzinê i 10 minut.
 .IPs "\-endpos 100mb"
-koduje tylko 100 mbajtów
+Koduje tylko 100 MBajtów.
 .RE
 .PD 1
 .
@@ -4534,7 +4538,7 @@ Mo¿na u¿ywaæ do wymuszenia fourcc video pliku wyj¶ciowego.
 .PD 0
 .RSs
 .IPs "\-ffourcc div3"
-da plik wyj¶ciowy zawieraj±cy "div3" jako video fourcc.
+Da plik wyj¶ciowy zawieraj±cy "div3" jako video fourcc.
 .RE
 .PD 1
 .
@@ -4550,7 +4554,7 @@ Wybiera informacjê nag³ówka otrzymywanego pliku AVI.
 Dostêpne opcje:
 .RSs
 .IPs help\ 
-pokazuje ten opis
+Pokazuje ten opis.
 .IPs name=<warto¶æ>
 tytu³ pliku
 .IPs artist=<warto¶æ>
@@ -4582,32 +4586,35 @@ Nie zapisuje indeksu OpenDML dla plików AVI >1GB.
 Nie opuszcza klatek.
 .
 .TP
-.B \-o <nazwa pliku>
+.B \-o <nazwa\ pliku>
 Zapisuje wyj¶cie do podanego pliku, zamiast domy¶lnego "test.avi".
 .
 .TP
-.B \-oac <nazwa kodeka>
-Koduje podanym kodekiem audio.
+.B \-oac <nazwa\ kodeka>
+Koduje podanym kodekiem audio (brak warto¶ci domy¶lnej).
+.br
+.I INFORMACJA:
 U¿yj -oac help, aby otrzymaæ listê dostêpnych kodeków.
-(brak warto¶ci domy¶lnej).
 .sp 1
 .I PRZYK£AD:
 .PD 0
 .RSs
 .IPs "\-oac copy"
-nie koduj, tylko kopiuj strumieñ
+Nie koduje, tylko kopiuje strumieñ.
 .IPs "\-oac pcm"
-koduje do odkompresowanego PCM
+Koduje do odkompresowanego PCM.
 .IPs "\-oac mp3lame"
-koduje do MP3 (u¿ywa Lame)
+Koduje do MP3 (u¿ywa Lame).
 .IPs "\-oac lavc"
-koduje kodekiem z libavcodec
+Koduje kodekiem z libavcodec.
 .RE
 .PD 1
 .
 .TP
 .B \-of <format> (KOD BETA!)
-Koduje do wybranego formatu.
+Koduje do wybranego formatu (domy¶lnie: AVI).
+.br
+.I INFORMACJA:
 U¿yj \-of help, aby otrzymaæ listê dostêpnych formatów.
 .sp 1
 .I PRZYK£AD:
@@ -4618,44 +4625,46 @@ Koduje do AVI (domy¶lne).
 .IPs "\-of mpeg"
 Koduje do MPEG.
 .IPs "\-of rawvideo"
-surowy strumieñ video (bez muksowania - tylko video, tylko jeden strumieñ)
+surowy strumieñ video (bez muksowania - tylko jeden strumieñ video)
 .RE
 .PD 1
 .
 .TP
 .B \-ofps <fps>
-Plik wyj¶ciowy bêdzie mia³ inny stosunek klatki/\:sekundê, ni¿ ¼ród³o.
-MUSISZ ustawiæ go dla zmiennych fps (asf, wiêkszo¶æ mov) i plików
+Ustawia ilo¶æ klatek na sekundê (fps) w wyj¶ciowym pliku,
+warto¶æ mo¿e byæ ró¿na ni¿ w pliku ¼ród³owym.
+PArametr musi byæ ustawiony dla zmiennego fps (ASF, niektóre MOV) i plików
 progresywnych (29.97fps ztelecinowane MPEG).
 .
 .TP
-.B \-ovc <nazwa kodeka>
-Koduje z podanym kodekiem video.
+.B \-ovc <nazwa\ kodeka>
+Koduje z podanym kodekiem video (brak domy¶lnej warto¶ci).
+.br
+.I INFORMACJA:
 U¿yj \-ovc help, aby otrzymaæ listê dostêpnych kodeków.
-(nie ma domy¶lnego)
 .sp 1
 .I PRZYK£AD:
 .PD 0
 .RSs
 .IPs "\-ovc copy"
-nie koduje, tylko kopiuje strumieñ
+Nie koduje, tylko kopiuje strumieñ.
 .IPs "\-ovc divx4"
-koduje do DivX4/\:DivX5
+Kduje do DivX4/\:DivX5.
 .IPs "\-ovc raw"
-koduje do nieskompesowanego formatu (u¿yj \-vf format, aby wybraæ)
+Koduje do nieskompesowanego formatu (u¿yj \-vf format, aby wybraæ).
 .IPs "\-ovc lavc"
-koduje z kodekami libavcodec
+Koduje z kodekiem libavcodec.
 .RE
 .PD 1
 .
 .TP
-.B \-passlogfile <nazwa pliku>
-Kiedy koduje w trybie dwuprzebiegowym, MEncoder zrzuca najpierw informacje
-o pierwszym przebiegu do podanego pliku zamiast domy¶lnego divx2pass.log.
+.B \-passlogfile <nazwa\ pliku>
+W duprzej¶ciowym kodowaniu, zrzuca informacje o pierwszym przej¶ciu do <nazwa pliku>
+zamiast domy¶lnego divx2pass.log.
 .
 .TP
 .B \-skiplimit <warto¶æ>
-Maksymalna liczba klatek do porzucenia po pozostawionej klatce
+Okre¶la maksymaln± liczbê pominiêtych klatek po zakodowaniu jednej
 (\-noskiplimit daje nieograniczon± liczbê).
 .
 .TP
@@ -4671,8 +4680,7 @@ Uniewa¿nia to, co jest czytane z DVD lub pliku .ifo.
 .
 .TP
 .B \-vobsuboutindex <index>
-Okre¶la indeks napisów w pliku wyj¶ciowym.
-(domy¶lnie: 0)
+Okre¶la indeks napisów w pliku wyj¶ciowym (domy¶lnie: 0).
 .
 .
 .
@@ -4854,14 +4862,14 @@ ni¿sza jako¶æ i wiêksze warto¶ci bitrate.
 Ustawia czêstotliwo¶æ w Hz wysokoprzej¶ciowego filtrowania (highpass filtering).
 Czêstotliwo¶ci poni¿ej podanej bêd± obcinane.
 Warto¶æ -1 wy³±czy filtrowanie, warto¶æ 0
-pozwoli lame wykryæ warto¶ci automatycznie.
+pozwoli LAME wykryæ warto¶ci automatycznie.
 .
 .TP
 .B lowpassfreq=<czêstotliwo¶æ>
 Ustawia czêstotliwo¶æ w Hz niskoprzej¶ciowego filtrowania (lowpass filtering).
 Czêstotliwo¶ci powy¿ej podanej bêd± obcinane.
 Warto¶æ -1 wy³±czy filtrowanie, warto¶æ 0
-pozwoli lame wykryæ warto¶ci automatycznie.
+pozwoli LAME wykryæ warto¶ci automatycznie.
 .
 .TP
 .B preset=<warto¶æ>
@@ -4969,9 +4977,9 @@ DivX 3
 .IPs msmpeg4v2
 MS MPEG4v2
 .IPs wmv1
-Windows Media Video, wersja 1 (aka WMV7)
+Windows Media Video, wersja 1 (AKA WMV7)
 .IPs wmv2
-Windows Media Video, wersja 2 (aka WMV8)
+Windows Media Video, wersja 2 (AKA WMV8)
 .IPs rv10
 stary kodek RealVideo
 .IPs mpeg1video
@@ -5812,7 +5820,7 @@ Po prostu znajduje blok dla minimalnej ilo¶ci b³êdów i bitów*lambda.
 .PD 0
 .RSs
 .IPs lambda
-zmienna uzale¿niona od qp
+zmienna uzale¿niona od QP
 .IPs bits\ 
 ilo¶æ bitów potrzebna do zakodowania bloku
 .IPs error
@@ -5872,8 +5880,8 @@ Ma to powa¿ny wp³yw na szybko¶æ.
 .
 .TP
 .B psnr\ \ \ 
-Drukuje psnr (warto¶æ szczytowa proporcji sygna³u do szumu) dla ca³ego filmu
-po kodowaniu i przechowuje psnr dla ka¿dej klatki w pliku o nazwie
+Drukuje PSNR (warto¶æ szczytowa proporcji sygna³u do szumu) dla ca³ego filmu
+po kodowaniu i przechowuje PSNR dla ka¿dej klatki w pliku o nazwie
 typu "psnr_hhmmss.log".
 Zwracane warto¶ci s± w dB (decybelach), im wy¿sze tym lepsze.
 .
@@ -6289,8 +6297,8 @@ pod uwagê wszystkie filtry dostrajaj±ce (crop/\:expand/\:scale/\:itp.) podane w
 .
 .TP
 .B psnr\ \ \ 
-Drukuje psnr (warto¶æ szczytowa proporcji sygna³u do szumu) dla ca³ego filmu po
-kodowaniu i przechowuje psnr dla ka¿dej klatki w pliku o nazwie typu
+Drukuje PSNR (warto¶æ szczytowa proporcji sygna³u do szumu) dla ca³ego filmu po
+kodowaniu i przechowuje PSNR dla ka¿dej klatki w pliku o nazwie typu
 "psnr_hhmmss.log" w bie¿±cym katalogu.
 Zwracane warto¶ci s± w dB (decybelach), im wy¿sze tym lepsze.
 .
@@ -6330,12 +6338,12 @@ liczba klatek B pomiêdzy klatkami I a P (domy¶lnie: 0)
 .
 .TP
 .B deblock=<0|1>
-Wykorzystuje filtr deblocking (domy¶lnie: w³±czony).
+Wykorzystuje filtr deblokuj±cy (deblock) (domy¶lnie: w³±czony).
 .
 .TP
 .B deblockalpha=<-6-6>
-Parametr AlphaC0 dla filtru deblocking (domy¶lnie: 0).
-Opcja ta dostosowuje zakresy dla filtru deblocking H.264.
+Parametr AlphaC0 dla filtru deblokuj±cego (deblock) (domy¶lnie: 0).
+Opcja ta dostosowuje zakresy dla filtru deblokuj±cego H.264.
 Po pierwsze parametr ten okre¶la maksymaln± ilo¶æ zmian jak± filtr mo¿e
 nanie¶æ na pojedynczy piksel.
 Po drugie opcja ta ma wp³yw na próg filtrowanej ró¿nicy wystêpuj±cej na krawêdzi.
@@ -6343,7 +6351,7 @@ Warto¶æ dodatnia ogranicza blokuj±ce szumy, ale rozmywa równie¿ detale.
 .
 .TP
 .B deblockbeta=<-6-6>
-Parametr Beta filtru deblocking (domy¶lnie: 0).
+Parametr Beta filtru deblokuj±cego (deblock) (domy¶lnie: 0).
 Ma wp³yw na maksymalny, dozwolony gradient miêdzy dwoma przylegaj±cymi blokami.
 .
 .TP
@@ -6453,7 +6461,7 @@ Okre¶la ilo¶æ informacji drukowanych na ekranie.
 .br
  2: PSNR i inne statystyki analiz po skoñczonym kodowaniu (domy¶lne)
 .br
- 3: PSNR, qp, typ klatki, rozmiar i inne statystyki dla ka¿dej klatki
+ 3: PSNR, QP, typ klatki, rozmiar i inne statystyki dla ka¿dej klatki
 .REss
 .
 .TP
@@ -6468,7 +6476,7 @@ Drukuje statystyki proporcji sygna³u do szumu.
 .SH PLIKI
 .
 .TP
-/etc/\:mplayer/\:mplayer.conf
+/usr/\:/local\:etc/\:mplayer/\:mplayer.conf
 g³ówny plik ustawieñ
 .
 .TP
@@ -6497,12 +6505,12 @@ rozszerzeniem .RAW.)
 Zkrakowane klucze CSS
 .
 .TP
-Napisy s± szukane w nastêpuj±cej kolejno¶ci
-(dla filmu /mnt/\:cdrom/\:movie.avi):
+Zak³adaj±c, ¿e odtwarzana jest /¶cie¿ka/\:do/\:film.avi, MPlayer bêdzie szuka³
+napisów w nastêpuj±cej kolejno¶ci:
 .RSs
-/mnt/\:cdrom/\:movie.sub
+/¶cie¿ka/\:do/\:film.avi
 .br
-~/.mplayer/\:sub/\:movie.sub
+~/.mplayer/\:sub/\:film.sub
 .br
 ~/.mplayer/\:default.sub
 .RE
@@ -6516,7 +6524,7 @@ Napisy s± szukane w nastêpuj±cej kolejno¶ci
 .SH PRZYK£ADY
 .
 .TP
-.B Szybki start odtwarzania DVD
+.B zzybki start odtwarzania DVD:
 mplayer dvd://1
 .
 .TP
@@ -6524,84 +6532,84 @@ mplayer dvd://1
 mplayer dvd://1 \-alang ja \-slang en
 .
 .TP
-.B Odtwarza tylko rozdzia³y 5, 6, 7
+.B Odtwarza tylko rozdzia³y 5, 6, 7:
 mplayer dvd://1 \-chapter 5-7
 .
 .TP
-.B Odtwarza tylko tytu³y 5, 6, 7
+.B Odtwarza tylko tytu³y 5, 6, 7:
 mplayer dvd://5-7
 .
 .TP
-.B Odtwarza DVD z ró¿nych ujêæ
+.B Odtwarza DVD z ró¿nych ujêæ:
 mplayer dvd://1 \-dvdangle 2
 .
 .TP
-.B Odtwarza z innego urz±dzenia DVD
+.B Odtwarza z innego urz±dzenia DVD:
 mplayer dvd://1 \-dvd-device /dev/\:dvd2
 .
 .TP
-.B Strumieñ z HTTP
+.B Strumieñ z HTTP:
 mplayer http://mplayer.hq/\:przyklad.avi
 .
 .TP
-.B Strumieñ u¿ywaj±cy RTSP
+.B Strumieñ u¿ywaj±cy RTSP:
 mplayer rtsp://serwer.przyklad.com/\:nazwaStrumienia
 .
 .TP
-.B Konwertuje napisy do MPsub (do ./\:dump.mpsub)
+.B Konwertuje napisy do formatu MPsub (do ./\:dump.mpsub):
 mplayer test.avi \-sub zród³o.sub \-dumpmpsub
 .
 .TP
-.B Konwertuje napisy do MPsub bez konieczno¶ci ogl±dania filmu
+.B Konwertuje napisy do formatu MPsub bez konieczno¶ci ogl±dania filmu:
 mplayer /dev/\:zero \-rawvideo on:pal:fps=xx \-vc null \-vo null \-noframedrop
 \-benchmark \-sub ¼ród³o.sub \-dumpmpsub
 .
 .TP
-.B Wej¶cie z domy¶lnego V4L
+.B Wej¶cie z domy¶lnego V4L:
 mplayer tv:// \-tv driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420
 \-vo xv
 .
 .TP
-.B Odtwarzanie na karcie Zoran (w starym stylu, odradzane)
+.B Odtwarzanie na kartach Zoran (w starym stylu, odradzane):
 mplayer \-vo zr \-vf scale=352:288 plik.avi
 .
 .TP
-.B Odtwarzanie na karcie Zoran (w nowym stylu)
+.B Odtwarzanie na kartach Zoran (w nowym stylu):
 mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg plik.avi
 .
 .TP
-.B Kodowanie tytu³u #2 DVD, tylko wybrane rozdzia³y
+.B Kodowanie tytu³u #2 DVD, tylko wybrane rozdzia³y:
 mencoder dvd://2 \-chapter 10-15 \-o tytul2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mpeg4
 .
 .TP
-.B Kodowanie tytu³u #2 DVD, zmiana rozmiaru do 640x480
+.B Kodowanie tytu³u #2 DVD, zmiana rozmiaru do 640x480:
 mencoder dvd://2 \-vf scale=640:480 \-o tytul2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mpeg4
 .
 .TP
-.B Kodowanie tytu³u #2 DVD, zmiana rozmiaru do 512xHHH (zachowuje proporcje)
+.B Kodowanie tytu³u #2 DVD, zmiana rozmiaru do 512xHHH (zachowuje proporcje):
 mencoder dvd://2 \-vf scale \-zoom \-xy 512 \-o tytul2.avi \-oac copy
 \-ovc lavc \-lavcopts vcodec=mpeg4
 .
 .TP
-.B To samo, ale z rodzin± kodeków libavcodec, kompresja MPEG4 (Divx5)
-mencoder dvd://2 \-o tytul2.avi \-ovc lavc
-\-lavcopts vcodec=mpeg4:vhq:vbitrate=1800 \-oac copy
+.B To samo, ale z bitrate ustawionym na 1800kBit i optymalizowanymi makroblokami:
+mencoder dvd://2 \-o tytu³2.avi \-oac copy \-ovc lavc
+\-lavcopts vcodec=mpeg4:mbd=1:vbitrate=1800
 .
 .TP
-.B To samo, ale z rodzin± kodeków libavcodec, kompresja MJPEG
+.B To samo, ale z kompresj± MJPEG
 mencoder dvd://2 \-o tytul2.avi \-ovc lavc
-\-lavcopts vcodec=mjpeg:vhq:vbitrate=1800 \-oac copy
+\-lavcopts vcodec=mjpeg:mbd=1:vbitrate=1800 \-oac copy
 .
 .TP
-.B Kodowanie wszystkich plików *.jpg w bie¿±cym katalogu
+.B Kodowanie wszystkich plików *.jpg w bie¿±cym katalogu:
 mencoder "mf://*.jpg" \-mf fps=25 \-o wyjscie.avi \-ovc lavc \-lavcopts vcodec=mpeg4
 .
 .TP
-.B Kodowanie z tunera (okre¶l format poprzez \-vf format)
+.B Kodowanie z tunera (okre¶l format poprzez \-vf format):
 mencoder \-tv driver=v4l:width=640:height=480 tv:// \-o tv.avi \-ovc raw
 .
 .TP
-.B Kodowanie z potoków
+.B Kodowanie z potoku:
 rar p test-SVCD.rar | mencoder \-ovc lavc \-lavcopts vcodec=mpeg4:vbitrate=800 \-ofps 24 \-
 .
 .
