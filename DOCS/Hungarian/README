@@ -68,7 +68,7 @@ a számomra, de a sebesség se semmi.
 ~~~~~~~~~~~~~~~~~~~~~~
 Én nem vagyok GUI (grafikus felület) fejlesztõ. Nem szeretem ezeket,
 szívesebben használom az egyszerû fekete 80x25-ös konzolt.
-Ezért a lejátszó most még csak billentyûzetrõl vezérelhetõ. 
+Ezért a lejátszó most még csak billentyûzetrõl vezérelhetõ.
 Pontscho/Fresh! már dolgozik a grafikus felületen, ami még fejlesztési
 stádiumban van ugyan, de hamarosan elkészül és beépítjük. Ha már itt
 tartunk, kellene neki néhány skin, ha jó grafikus vagy, írj neki!!!
@@ -97,8 +97,8 @@ A legfontosabb video codecek:
 - MJPEG, ASV2 és más hardware formátumok
 
 A legfontosabb audio codecek:
-- MPEG layer 2, és layer 3 (MP3) audio (natív kód, 3DNow! optimalizációval)
-- AC3 dolby audio (natív kód, 3DNow! optimalizációval)
+- MPEG layer 2, és layer 3 (MP3) audio (nativ kód, 3DNow! optimalizációval)
+- AC3 dolby audio (nativ kód, 3DNow! optimalizációval)
 - VoxWare audio
 - alaw, msgsm, pcm és más régi formátumok
 
@@ -143,9 +143,9 @@ Támogatott audio outputok:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - OSS (ioctl) driver
 - SDL driver (up/downsampling támogatás, esd, arts, stb)
-- natív ALSA 0.5 driver
-- natív ALSA 0.9 driver (bugos, használj OSS emulációt!)
-- natív ESD driver (készülõben?)
+- nativ ALSA 0.5 driver
+- nativ ALSA 0.9 driver (bugos, használj OSS emulációt!)
+- nativ ESD driver (készülõben?)
 - SUN audio driver (/dev/audio) BSD és Solaris8-ra
 
 Megj.: olvasd el a DOCS/SOUNDCARDS file-t !

@@ -1,6 +1,6 @@
 Hogyan küldj bugreportot?
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-Elõször is olvasd el a DOCS/BUGS file-t, és amit még találsz. Ha a
+Elõször is olvasd el a DOCS/BUGS file-t és amit még találsz. Ha a
 problémád nem ismert, vagy a mi tanácsaink alapján nem oldódik
 meg, akkor jelentsd be:
 
@@ -17,9 +17,9 @@ címre.
 Nem fogunk CC-zni, szóval légy szíves feliratkozni!!!
 
 Ne küldj bugreportot egyenesen valamelyik készítõnek!!!
-Együtt dolgozunk a kódon, ezért mindenki érdekelt.
-Elõfordulhat hogy más felhasználók már tudják a megoldást
-(konfigurációs probléma, rossz driver, stb), még ha mi azt hinnénk is,
+Együtt dolgozunk a kódon, ezért mindenkit érdekelhet.
+Elõfordulhat, hogy más felhasználók már tudják a megoldást
+(konfigurációs probléma, rossz driver stb.), még ha mi azt hinnénk is,
 hogy a kód bugos.
 
 Légy szíves részletesen leírni a problémát, példákkal stb., és ne
@@ -99,7 +99,7 @@ Lejátszási problémákhoz:
 
 5. Segfault, SIGILL, signal 4, stb esetén:
 
-Ha létrejött coredump akkor lásd 5.a pont, máskülönben 5.b:
+Ha keletkezett coredump, akkor lásd 5.a pont, máskülönben 5.b:
 
 5.a. Küldd el a coredump tartalmát (ha volt).
 Hogyan:

@@ -1,0 +1,22 @@
+Pár szó az MPlayer SDL képességeirõl:
+
+Jópár parancssori kapcsoló tartozik az sdl-hez:
+-vo sdl:<név>	a kívánt sdl video driver (pl. aalib, dga, x11) használata
+-ao sdl:<név>	a megadott sdl audio driver (ie. dsp, esd) használata
+-noxv		az Xvideo hardware gyorsítás tiltása
+-forcexv	az Xvideo gyorsítás használata (ha van)
+
+SDL billentyûk:
+F átkapcsolás teljesképernyõs és ablakos mód között
+C létezõ teljesképernyõs módok közötti váltás
+W/S a * és / gombok helyett (hangerõ szabályozás)
+
+ISMERT HIBÁK:
+- Az aalib console driverrel a leütött billenytyûk ismétlõdnek.
+  Az SDL hibája, nem tudom megváltoztatni (SDL 1.2.1-gyel teszteltem).
+
+Kérlek a hibákat vagy problémákat az sdl outtal kapcsolatban az MPlayer-users
+levelezési listára írjad!
+
+-- 
+Felix Bünemann, 2001-06-24

@@ -5,7 +5,7 @@
 1. A Kodekek: (w32codecs.zip)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   töltsd le és tömörítsd ki a w32codecs.zip-et /usr/lib/win32-be
-  A fileneveket KISBETÛSRE írd át!
+  Figyelj, hogy a filenevek KISBETÛSEK legyenek!
 
 Megj.: az avifile projectnek is hasonló csomagja van, viszont a miénk
 különbözik tõle, használd az MPlayer-ét!
@@ -20,11 +20,11 @@ különbözik tõle, használd az MPlayer-ét!
 3. A Lejátszó: (mplayer)
 ~~~~~~~~~~~~~~~~~~~~~~~~
   ./configure
-[* olvasd át amiket a ./configure kiír, hasznos lehet! *]
+[* olvasd át, amiket a ./configure kiír, hasznos lehet! *]
 [* nézd át a config.h és config.mak file-okat! *]
   make
-[* nézd meg volt-e hibaüzenet! ha nem, akkor lennie kell egy ./mplayer
-   binarisnak *]
+[* nézd meg, volt-e hibaüzenet! ha nem, akkor lennie kell egy ./mplayer
+   binárisnak *]
   make install
 
 4. Matrox G400 DH TV-out:
@@ -41,4 +41,4 @@ különbözik tõle, használd az MPlayer-ét!
   mkdir font
   cd font
   unzip mp_font3.zip
-  unzip mp_font3_hu.zip
+  unzip mp_font3_hu.zip (ez csak példa)
