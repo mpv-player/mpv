@@ -743,8 +743,8 @@ read_next:
 
 	    if(d->angle_seek){
 		int i,skip=0;
-#if defined(__GNUC__) && defined(__sparc__)
-		// workaround for a bug in the sparc version of gcc 2.95.X ... 3.2,
+#if defined(__GNUC__) && ( defined(__sparc__) || defined(hpux) )
+		// workaround for a bug in the sparc/hpux version of gcc 2.95.X ... 3.2,
 		// it generates incorrect code for unaligned access to a packed
 		// structure member, resulting in an mplayer crash with a SIGBUS
 		// signal.

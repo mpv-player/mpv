@@ -21,10 +21,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifdef __sparc__
+#if defined(__sparc__) || defined(hpux)
 /*
  * the alt bitstream reader performs unaligned memory accesses; that doesn't work
- * on sparc.  For now, disable ALT_BITSTREAM_READER.
+ * on sparc/hpux.  For now, disable ALT_BITSTREAM_READER.
  */
 #undef	ALT_BITSTREAM_READER
 #else
