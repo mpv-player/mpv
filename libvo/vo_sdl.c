@@ -1082,6 +1082,24 @@ static void check_events (void)
 						if(verbose > 1) printf("SDL: Set fullscreen mode\n");
 					}
 				}
+
+				else if ( keypressed == SDLK_n ) {
+					if (priv->surface->w != priv->width || priv->surface->h != priv->height) {
+						priv->surface = SDL_SetVideoMode(priv->width, priv->height, priv->bpp, priv->sdlflags);
+					    	priv->windowsize.w = priv->surface->w;
+						priv->windowsize.h = priv->surface->h;
+						if(verbose > 1) printf("SDL: Normal size\n");
+					}
+				}	
+
+				else if ( keypressed == SDLK_d ) {
+					if (priv->surface->w != priv->width * 2 || priv->surface->h != priv->height * 2) {
+						priv->surface = SDL_SetVideoMode(priv->width * 2, priv->height * 2, priv->bpp, priv->sdlflags);
+					    	priv->windowsize.w = priv->surface->w;
+						priv->windowsize.h = priv->surface->h;
+						if(verbose > 1) printf("SDL: Double size\n");
+					}
+				}	
                                 
                                 else switch(keypressed){
 				case SDLK_RETURN:

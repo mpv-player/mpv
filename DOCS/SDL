@@ -11,6 +11,8 @@ SDL Keys:
 F toggles fullscreen/windowed mode
 C cycles available fullscreen modes
 W/S mappings for * and / (mixer control)
+N sets normal size
+D sets double size
 
 KNOWN BUGS:
 - Keys pressed under aalib console driver repeat forever.
@@ -20,4 +22,4 @@ Please report problems or bugs with sdl out to the MPlayer-users
 mailinglist.
 
 -- 
-Felix Bünemann, 2001-06-24
+Felix Bünemann, 2001-07-28
