@@ -12,10 +12,11 @@ SB Live!:		kernel 2.2.x: -alsa
 
 OSS/Free:	        please contact me for good parameters
 
+Gravis Ultrasound ACE:	use OSS, and default settings will be OK
 
-... and not use your soundcard by other application ( for ex. XMMS ) ...
+... and don't use your soundcard by other application ( for ex. XMMS ) ...
 ... and use very-very high speed hdd or CDROM and CPU ...
 
 
-        Pontscho/fresh!mindworkz 
+        Pontscho/fresh!mindworkz	Gabucino
 	 pontscho@makacs.poliod.hu
