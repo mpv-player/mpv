@@ -32,6 +32,10 @@ extern mc_functions_t mc_functions;
 extern void (* idct_block_copy) (int16_t * block, uint8_t * dest, int stride);
 extern void (* idct_block_add) (int16_t * block, uint8_t * dest, int stride);
 
+#ifdef MPEG12_POSTPROC
+extern int quant_store[MPEG2_MBR+1][MPEG2_MBC+1]; // [Review]
+#endif
+
 #include "vlc.h"
 
 static int non_linear_quantizer_scale [] = {
