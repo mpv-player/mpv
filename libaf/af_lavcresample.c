@@ -144,16 +144,18 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
 }
 
 static int open(af_instance_t* af){
+  af_resample_t *s = calloc(1,sizeof(af_resample_t));
   af->control=control;
   af->uninit=uninit;
   af->play=play;
   af->mul.n=1;
   af->mul.d=1;
   af->data=calloc(1,sizeof(af_data_t));
-  af->setup=calloc(1,sizeof(af_resample_t));
-  ((af_resample_t*)af->setup)->filter_length= 16;
-  ((af_resample_t*)af->setup)->phase_shift= 10;
-//  ((af_resample_t*)af->setup)->setup = RSMP_INT | FREQ_SLOPPY;
+  s->filter_length= 16;
+  s->cutoff= max(1.0 - 1.0/s->filter_length, 0.80);
+  s->phase_shift= 10;
+//  s->setup = RSMP_INT | FREQ_SLOPPY;
+  af->setup=s;
   return AF_OK;
 }
 
