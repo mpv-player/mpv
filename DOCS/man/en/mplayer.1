@@ -2126,7 +2126,7 @@ Select a specific XVideo port.
 .PD 1
 .TP
 .B x11 (X11 only)
-Shared memory output driver without hardware acceleration that
+Shared memory video output driver without hardware acceleration that
 works whenever X11 is present.
 .TP
 .B xover (X11 only)
@@ -2155,7 +2155,7 @@ Do not use sleep function while waiting for rendering to finish
 .PD 1
 .TP
 .B dga (X11 only)
-Output video through the XFree86 Direct Graphics Access extension.
+Play video through the XFree86 Direct Graphics Access extension.
 Considered obsolete.
 .TP
 .B sdl (SDL only)
@@ -2165,13 +2165,13 @@ video output driver.
 .B vidix\ \ 
 VIDIX (VIDeo Interface for *niX) is an interface to the
 video acceleration features of different graphics cards.
-Very fast output driver on cards that support it.
+Very fast video output driver on cards that support it.
 .PD 0
 .RSs
 .IPs <subdevice>
 Explicitly choose the VIDIX subdevice driver to use.
 Available subdevice drivers are cyberblade_vid, mach64_vid, mga_crtc2_vid,
-mga_vid, nvidia_vid, pm3_vid, radeon_vid, rage128_vid, sis_vid.
+mga_vid, nvidia_vid, pm3_vid, radeon_vid, rage128_vid and sis_vid.
 .RE
 .PD 1
 .TP
@@ -2204,7 +2204,7 @@ same as vidix
 .PD 1
 .TP
 .B directx (Windows only)
-Output driver that uses the DirectX interface.
+Video output driver that uses the DirectX interface.
 .PD 0
 .RSs
 .IPs noaccel
@@ -2214,9 +2214,9 @@ Try this option if you have display problems.
 .PD 1
 .TP
 .B quartz (Mac OS X only)
-Mac OS X Quartz output driver.
+Mac OS X Quartz video output driver.
 Under some circumstances, it might be more efficient to force a
-packed YUV output format, with e.g.\& \-vf format=yuy2
+packed YUV output format, with e.g.\& \-vf format=yuy2.
 .PD 0
 .RSs
 .IPs device_id=<number>
@@ -2225,14 +2225,14 @@ Choose the display device to use in fullscreen.
 .PD 1
 .TP
 .B fbdev (Linux only)
-Uses the kernel framebuffer to output video.
+Uses the kernel framebuffer to play video.
 .TP
 .B fbdev2 (Linux only)
-Uses the kernel framebuffer to output video,
+Uses the kernel framebuffer to play video,
 alternative implementation.
 .TP
 .B vesa\ \ \ 
-Very general output driver that should work on any VESA VBE 2.0
+Very general video output driver that should work on any VESA VBE 2.0
 compatible card.
 .PD 0
 .RSs
@@ -2248,10 +2248,10 @@ FIXME: document this
 .PD 1
 .TP
 .B svga\ \ \ 
-Output video using the SVGA library.
+Play video using the SVGA library.
 .TP
 .B gl\ \ \ \ \ 
-OpenGL output driver.
+OpenGL video output driver.
 Very simple version, no OSD support and video size must be smaller than
 the maximum texture size of your OpenGL implementation.
 Intended to work even with the most simple OpenGL implementations.
@@ -2267,7 +2267,7 @@ Number of lines copied to texture in one piece (default: 4).
 .PD 1
 .TP
 .B gl2\ \ \ \ 
-OpenGL output driver, second generation.
+OpenGL video output driver, second generation.
 Supports OSD and videos larger than the maximum texture size.
 .TP
 .B null\ \ \ 
@@ -2275,17 +2275,17 @@ Produces no video output.
 Useful for benchmarking.
 .TP
 .B aa\ \ \ \ \ 
-ASCII art output driver that works on a text console.
+ASCII art video output driver that works on a text console.
 .TP
 .B caca\ \ \ 
-Colour AsCii Art output driver that works on a text console.
+Color ASCII art video output driver that works on a text console.
 .TP
 .B bl\ \ \ \ \ 
 Video playback using the Blinkenlights UDP protocol.
 This driver is highly hardware specific.
 .TP
 .B ggi\ \ \ \ 
-Output driver for the GGI graphics system.
+Video output driver for the GGI graphics system.
 .TP
 .B directfb
 Play video using the DirectFB library.
@@ -2311,7 +2311,8 @@ Will force layer with id N for playback (default: -1 - auto).
 .PD 1
 .TP
 .B dfbmga\ 
-Matrox G400/G450/G550 specific output driver that uses the DirectFB library.
+Matrox G400/G450/G550 specific video output driver that uses the
+DirectFB library to make use of special hardware features.
 Enables CRTC2 (second head), displaying video independently of the first head.
 .PD 0
 .RSs
@@ -2350,12 +2351,12 @@ which norm to use by looking at the framerate of the movie.
 .PD 1
 .TP
 .B mga (Linux only)
-Matrox specific output driver that makes use of the YUV back
+Matrox specific video output driver that makes use of the YUV back
 end scaler on Gxxx cards through a kernel module.
 If you have a Matrox card, this is the fastest option.
 .TP
 .B xmga (Linux, X11 only)
-The mga output driver, running in an X11 window.
+The mga video output driver, running in an X11 window.
 .TP
 .B syncfb\ 
 Video output driver for the SyncFB kernel module, which provides
@@ -2364,7 +2365,7 @@ deinterlacing, scaling and synchronizing your video output to
 the vertical retrace of your monitor.
 .TP
 .B 3dfx (Linux only)
-3Dfx specific output driver.
+3Dfx specific video output driver.
 FIXME: What's the difference between 3dfx, tdfxfb and tdfx_vid?
 .TP
 .B tdfxfb (Linux only)
@@ -2373,12 +2374,12 @@ YUV acceleration.
 FIXME: What's the difference between 3dfx, tdfxfb and tdfx_vid?
 .TP
 .B tdfx_vid (Linux only)
-3Dfx specific output driver.
+3Dfx specific video output driver.
 Works in conjunction with a kernel module.
 FIXME: What's the difference between 3dfx, tdfxfb and tdfx_vid?
 .TP
 .B dxr2 (also see \-dxr2) (DXR2 only)
-Creative DXR2 specific output driver.
+Creative DXR2 specific video output driver.
 .PD 0
 .RSs
 .IPs x11
@@ -2390,7 +2391,7 @@ Enables overlay.
 .TP
 .B dxr3 (DXR3 only)
 Sigma Designs em8300 MPEG decoder chip (Creative DXR3, Sigma Designs
-Hollywood Plus) specific output driver.
+Hollywood Plus) specific video output driver.
 Also see the lavc video filter.
 .PD 0
 .RSs
@@ -2421,7 +2422,7 @@ Specifies the device number to use if you have more than one em8300 card.
 .PD 1
 .TP
 .B mpegpes (DVB only)
-DVB specific output driver.
+DVB specific video output driver.
 .PD 0
 .RSs
 .IPs card=<1\-4>
@@ -2431,10 +2432,11 @@ Specifies the device number to use if you have more than one DVB output card
 .PD 1
 .TP
 .B zr (also see \-zr* and \-zrhelp)
-Output driver for a number of MJPEG capture/playback cards.
+Video output driver for a number of MJPEG capture/playback cards.
 .TP
 .B zr2\ \ \ \ 
-Output driver for a number of MJPEG capture/playback cards, second generation.
+Video output driver for a number of MJPEG capture/playback cards,
+second generation.
 Also see the zrmjpeg video filter.
 .TP
 .B md5\ \ \ \ 
