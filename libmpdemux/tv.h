@@ -40,7 +40,7 @@ extern int tv_param_buffer_size;
 extern int tv_param_mjpeg;
 extern int tv_param_decimation;
 extern int tv_param_quality;
-#ifdef HAVE_ALSA9
+#if defined(HAVE_ALSA9) || defined(HAVE_ALSA1X)
 extern int tv_param_alsa;
 #endif
 extern char* tv_param_adevice;

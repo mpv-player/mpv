@@ -1,11 +1,13 @@
 /*
-  ao_alsa9 - ALSA-0.9.x output plugin for MPlayer
+  ao_alsa1x - ALSA-1.x output plugin for MPlayer
 
   (C) Alex Beregszaszi
   
   modified for real alsa-0.9.0-support by Joy Winter <joy@pingfm.org>
   additional AC3 passthrough support by Andy Lo A Foe <andy@alsaplayer.org>  
   08/22/2002 iec958-init rewritten and merged with common init, joy
+  
+  Trivial port to ALSA 1.x API by Jindrich Makovicka
   
   Any bugreports regarding to this driver are welcome.
 */
@@ -36,13 +38,13 @@ extern int verbose;
 
 static ao_info_t info = 
 {
-    "ALSA-0.9.x audio output",
-    "alsa9",
+    "ALSA-1.x audio output",
+    "alsa1x",
     "Alex Beregszaszi, Joy Winter <joy@pingfm.org>",
     "under developement"
 };
 
-LIBAO_EXTERN(alsa9)
+LIBAO_EXTERN(alsa1x)
 
 
 static snd_pcm_t *alsa_handler;
@@ -58,7 +60,7 @@ static int alsa_fragsize = 4096;
  * which seems to be good avarge for most situations 
  * so buffersize is 16384 frames by default */
 static int alsa_fragcount = 16;
-static int chunk_size = 1024; //is alsa_fragsize / 4
+static snd_pcm_uframes_t chunk_size = 1024; //is alsa_fragsize / 4
 
 #define MIN_CHUNK_SIZE 1024
 
@@ -77,6 +79,8 @@ static int alsa_can_pause = 0;
 
 #undef BUFFERTIME
 #define SET_CHUNKSIZE
+//#define BUFFERTIME
+//#undef SET_CHUNKSIZE
 #undef USE_POLL
 
 
@@ -97,7 +101,7 @@ static int control(int cmd, void *arg)
       snd_mixer_elem_t *elem;
       snd_mixer_selem_id_t *sid;
 
-      static const char *mix_name = NULL;
+      static char *mix_name = NULL;
       static char *card = NULL;
 
       long pmin, pmax;
@@ -211,7 +215,8 @@ static int init(int rate_hz, int channels, int format, int flags)
 {
     int err;
     int cards = -1;
-    int period_val;
+    int dir;
+    snd_pcm_uframes_t bufsize;
     snd_pcm_info_t *alsa_info;
     char *str_block_mode;
     int device_set = 0;
@@ -358,6 +363,7 @@ static int init(int rate_hz, int channels, int format, int flags)
             alsa_device = devstr;
            break;
           default:
+	   break;
         }
     }
 
@@ -450,7 +456,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	printf("           mmap: sets mmap-mode\n");
 	printf("           noblock: sets noblock-mode\n");
 	printf("           device-name: sets device name (change comma to point)\n");
-	printf("           example -ao alsa9:mmap:noblock:hw:0.3 sets noblock-mode,\n");
+	printf("           example -ao alsa1x:mmap:noblock:hw:0.3 sets noblock-mode,\n");
 	printf("           mmap-mode and the device-name as first card fourth device\n");
 	return(0);
       } else {
@@ -538,7 +544,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	printf("alsa-init: error set block-mode %s\n", snd_strerror(err));
       }
       else if (verbose>0) {
-	printf("alsa-init: pcm opend in %s\n", str_block_mode);
+	printf("alsa-init: pcm opened in %s\n", str_block_mode);
       }
       
       snd_pcm_hw_params_alloca(&alsa_hwparams);
@@ -599,7 +605,8 @@ static int init(int rate_hz, int channels, int format, int flags)
 	  return(0);
 	}
 
-      if ((err = snd_pcm_hw_params_set_rate_near(alsa_handler, alsa_hwparams, ao_data.samplerate, 0)) < 0) 
+      dir = 0;
+      if ((err = snd_pcm_hw_params_set_rate_near(alsa_handler, alsa_hwparams, &ao_data.samplerate, &dir)) < 0) 
         {
 	  printf("alsa-init: unable to set samplerate-2: %s\n",
 		 snd_strerror(err));
@@ -609,16 +616,20 @@ static int init(int rate_hz, int channels, int format, int flags)
 #ifdef BUFFERTIME
       {
 	int alsa_buffer_time = 500000; /* original 60 */
+	int alsa_period_time;
 
-	if ((err = snd_pcm_hw_params_set_buffer_time_near(alsa_handler, alsa_hwparams, alsa_buffer_time, 0)) < 0)
+	dir = 0;
+	if ((err = snd_pcm_hw_params_set_buffer_time_near(alsa_handler, alsa_hwparams, &alsa_buffer_time, &dir)) < 0)
 	  {
 	    printf("alsa-init: unable to set buffer time near: %s\n",
 		   snd_strerror(err));
 	    return(0);
-	  } else
-	    alsa_buffer_time = err;
+	  }
 
-	if ((err = snd_pcm_hw_params_set_period_time_near(alsa_handler, alsa_hwparams, alsa_buffer_time/4, 0)) < 0)
+	alsa_period_time = alsa_buffer_time/4; ;
+
+	dir = 0;
+	if ((err = snd_pcm_hw_params_set_period_time_near(alsa_handler, alsa_hwparams, alsa_period_time, &dir)) < 0)
 	  /* original: alsa_buffer_time/ao_data.bps */
 	  {
 	    printf("alsa-init: unable to set period time: %s\n",
@@ -626,14 +637,15 @@ static int init(int rate_hz, int channels, int format, int flags)
 	    return(0);
 	  }
 	if (verbose>0)
-	  printf("alsa-init: buffer_time: %d, period_time :%d\n",alsa_buffer_time, err);
+	  printf("alsa-init: buffer_time: %d, period_time :%d\n",alsa_buffer_time, alsa_period_time);
       }
 #endif
 
 #ifdef SET_CHUNKSIZE
       {
 	//set chunksize
-	if ((err = snd_pcm_hw_params_set_period_size(alsa_handler, alsa_hwparams, chunk_size, 0)) < 0)
+	dir = 0;
+	if ((err = snd_pcm_hw_params_set_period_size_near(alsa_handler, alsa_hwparams, &chunk_size, &dir)) < 0)
 	  {
 	    printf("alsa-init: unable to set periodsize: %s\n", snd_strerror(err));
 	    return(0);
@@ -642,17 +654,13 @@ static int init(int rate_hz, int channels, int format, int flags)
 	  printf("alsa-init: chunksize set to %i\n", chunk_size);
 	}
 
-	//set period_count
-	if ((period_val = snd_pcm_hw_params_get_periods_max(alsa_hwparams, 0)) < alsa_fragcount) {
-	  alsa_fragcount = period_val;			
+	dir = 0;
+	if ((err = snd_pcm_hw_params_set_periods_near(alsa_handler, alsa_hwparams, &alsa_fragcount, &dir)) < 0) {
+	  printf("alsa-init: unable to set periods: %s\n", snd_strerror(err));
 	}
 
 	if (verbose>0)
-	  printf("alsa-init: current val=%i, fragcount=%i\n", period_val, alsa_fragcount);
-
-	if ((err = snd_pcm_hw_params_set_periods(alsa_handler, alsa_hwparams, alsa_fragcount, 0)) < 0) {
-	  printf("alsa-init: unable to set periods: %s\n", snd_strerror(err));
-	}
+	  printf("alsa-init: fragcount=%i\n", alsa_fragcount);
       }
 #endif
 
@@ -667,13 +675,13 @@ static int init(int rate_hz, int channels, int format, int flags)
 
 
       // gets buffersize for control
-      if ((err = snd_pcm_hw_params_get_buffer_size(alsa_hwparams)) < 0)
+      if ((err = snd_pcm_hw_params_get_buffer_size(alsa_hwparams, &bufsize)) < 0)
 	{
 	  printf("alsa-init: unable to get buffersize: %s\n", snd_strerror(err));
 	  return(0);
 	}
       else {
-	ao_data.buffersize = err * bytes_per_sample;
+	ao_data.buffersize = bufsize * bytes_per_sample;
 	if (verbose>0)
 	  printf("alsa-init: got buffersize=%i\n", ao_data.buffersize);
       }
@@ -717,7 +725,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	  return(0);
 	}
 
-      printf("alsa9: %d Hz/%d channels/%d bpf/%d bytes buffer/%s\n",
+      printf("alsa1x: %d Hz/%d channels/%d bpf/%d bytes buffer/%s\n",
 	     ao_data.samplerate, ao_data.channels, bytes_per_sample, ao_data.buffersize,
 	     snd_pcm_format_description(alsa_format));
 

@@ -3936,6 +3936,7 @@ EOF
 fi
 _def_alsa5='#undef HAVE_ALSA5'
 _def_alsa9='#undef HAVE_ALSA9'
+_def_alsa1x='#undef HAVE_ALSA1X'
 _def_sys_asoundlib_h='#undef HAVE_SYS_ASOUNDLIB_H'
 _def_alsa_asoundlib_h='#undef HAVE_ALSA_ASOUNDLIB_H'
 if test "$_alsaver" ; then
@@ -3958,19 +3959,15 @@ if test "$_alsaver" ; then
     _def_alsa_asoundlib_h='#define HAVE_ALSA_ASOUNDLIB_H 1'
     echores "yes (using alsa 0.9.x and alsa/asoundlib.h)"
   elif test "$_alsaver" = '1.0.x-sys' ; then
-    _aosrc="$_aosrc ao_alsa9.c"
-    _aomodules="alsa9 $_aomodules"
-    _def_alsa9="#define ALSA_PCM_OLD_HW_PARAMS_API 1
-#define ALSA_PCM_OLD_SW_PARAMS_API 1
-#define HAVE_ALSA9 1"
+    _aosrc="$_aosrc ao_alsa1x.c"
+    _aomodules="alsa1x $_aomodules"
+    _def_alsa1x="#define HAVE_ALSA1X 1"
     _def_alsa_asoundlib_h='#define HAVE_SYS_ASOUNDLIB_H 1'
     echores "yes (using alsa 1.0.x and sys/asoundlib.h)"
   elif test "$_alsaver" = '1.0.x-alsa' ; then
-    _aosrc="$_aosrc ao_alsa9.c"
-    _aomodules="alsa9 $_aomodules"
-    _def_alsa9="#define ALSA_PCM_OLD_HW_PARAMS_API 1
-#define ALSA_PCM_OLD_SW_PARAMS_API 1
-#define HAVE_ALSA9 1"
+    _aosrc="$_aosrc ao_alsa1x.c"
+    _aomodules="alsa1x $_aomodules"
+    _def_alsa1x="#define HAVE_ALSA1X 1"
     _def_alsa_asoundlib_h='#define HAVE_ALSA_ASOUNDLIB_H 1'
     echores "yes (using alsa 1.0.x and alsa/asoundlib.h)"
   fi
@@ -6250,6 +6247,7 @@ $_def_ossaudio_devdsp
 $_def_ossaudio_devmixer
 $_def_alsa5
 $_def_alsa9
+$_def_alsa1x
 $_def_arts
 $_def_esd
 $_def_esd_latency

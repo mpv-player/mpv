@@ -70,7 +70,7 @@ int tv_param_buffer_size = -1;
 int tv_param_mjpeg = 0;
 int tv_param_decimation = 2;
 int tv_param_quality = 90;
-#ifdef HAVE_ALSA9
+#if defined(HAVE_ALSA9) || defined(HAVE_ALSA1X)
 int tv_param_alsa = 0;
 #endif
 char* tv_param_adevice = NULL;

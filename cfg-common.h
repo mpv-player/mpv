@@ -351,7 +351,7 @@ m_option_t tvopts_conf[]={
 	{"mjpeg", &tv_param_mjpeg, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"decimation", &tv_param_decimation, CONF_TYPE_INT, CONF_RANGE, 1, 4, NULL},
 	{"quality", &tv_param_quality, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
-#ifdef HAVE_ALSA9
+#if defined(HAVE_ALSA9) || defined(HAVE_ALSA1X)
 	{"alsa", &tv_param_alsa, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #endif
 	{"adevice", &tv_param_adevice, CONF_TYPE_STRING, 0, 0, 0, NULL},

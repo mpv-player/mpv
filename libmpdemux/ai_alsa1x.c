@@ -4,7 +4,7 @@
 
 #include "config.h"
 
-#if defined(USE_TV) && (defined(HAVE_TV_V4L) || defined(HAVE_TV_V4L2)) && defined(HAVE_ALSA9)
+#if defined(USE_TV) && (defined(HAVE_TV_V4L) || defined(HAVE_TV_V4L2)) && defined(HAVE_ALSA1X)
 
 #include <alsa/asoundlib.h>
 #include "audio_in.h"
@@ -14,8 +14,9 @@ int ai_alsa_setup(audio_in_t *ai)
 {
     snd_pcm_hw_params_t *params;
     snd_pcm_sw_params_t *swparams;
-    int buffer_size;
+    snd_pcm_uframes_t buffer_size, period_size;
     int err;
+    int dir;
     unsigned int rate;
 
     snd_pcm_hw_params_alloca(&params);
@@ -26,51 +27,69 @@ int ai_alsa_setup(audio_in_t *ai)
 	mp_msg(MSGT_TV, MSGL_ERR, "Broken configuration for this PCM: no configurations available\n");
 	return -1;
     }
+
     err = snd_pcm_hw_params_set_access(ai->alsa.handle, params,
 				       SND_PCM_ACCESS_RW_INTERLEAVED);
     if (err < 0) {
 	mp_msg(MSGT_TV, MSGL_ERR, "Access type not available\n");
 	return -1;
     }
+
     err = snd_pcm_hw_params_set_format(ai->alsa.handle, params, SND_PCM_FORMAT_S16_LE);
     if (err < 0) {
 	mp_msg(MSGT_TV, MSGL_ERR, "Sample format not available\n");
 	return -1;
     }
+
     err = snd_pcm_hw_params_set_channels(ai->alsa.handle, params, ai->req_channels);
     if (err < 0) {
-	ai->channels = snd_pcm_hw_params_get_channels(params);
+	snd_pcm_hw_params_get_channels(params, &ai->channels);
 	mp_msg(MSGT_TV, MSGL_ERR, "Channel count not available - reverting to default: %d\n",
 	       ai->channels);
     } else {
 	ai->channels = ai->req_channels;
     }
 
-    err = snd_pcm_hw_params_set_rate_near(ai->alsa.handle, params, ai->req_samplerate, 0);
-    assert(err >= 0);
-    rate = err;
+    dir = 0;
+    rate = ai->req_samplerate;
+    err = snd_pcm_hw_params_set_rate_near(ai->alsa.handle, params, &rate, &dir);
+    if (err < 0) {
+	mp_msg(MSGT_TV, MSGL_ERR, "Cannot set samplerate\n");
+    }
     ai->samplerate = rate;
 
+    dir = 0;
     ai->alsa.buffer_time = 1000000;
-    ai->alsa.buffer_time = snd_pcm_hw_params_set_buffer_time_near(ai->alsa.handle, params,
-							       ai->alsa.buffer_time, 0);
-    assert(ai->alsa.buffer_time >= 0);
+    err = snd_pcm_hw_params_set_buffer_time_near(ai->alsa.handle, params,
+						 &ai->alsa.buffer_time, &dir);
+    if (err < 0) {
+	mp_msg(MSGT_TV, MSGL_ERR, "Cannot set buffer time\n");
+    }
+
+    dir = 0;
     ai->alsa.period_time = ai->alsa.buffer_time / 4;
-    ai->alsa.period_time = snd_pcm_hw_params_set_period_time_near(ai->alsa.handle, params,
-							       ai->alsa.period_time, 0);
-    assert(ai->alsa.period_time >= 0);
+    err = snd_pcm_hw_params_set_period_time_near(ai->alsa.handle, params,
+						 &ai->alsa.period_time, &dir);
+    if (err < 0) {
+	mp_msg(MSGT_TV, MSGL_ERR, "Cannot set period time\n");
+    }
+
     err = snd_pcm_hw_params(ai->alsa.handle, params);
     if (err < 0) {
-	mp_msg(MSGT_TV, MSGL_ERR, "Unable to install hw params:");
+	mp_msg(MSGT_TV, MSGL_ERR, "Unable to install hw params: %s\n", snd_strerror(err));
 	snd_pcm_hw_params_dump(params, ai->alsa.log);
 	return -1;
     }
-    ai->alsa.chunk_size = snd_pcm_hw_params_get_period_size(params, 0);
-    buffer_size = snd_pcm_hw_params_get_buffer_size(params);
-    if (ai->alsa.chunk_size == buffer_size) {
+
+    dir = -1;
+    snd_pcm_hw_params_get_period_size(params, &period_size, &dir);
+    snd_pcm_hw_params_get_buffer_size(params, &buffer_size);
+    ai->alsa.chunk_size = period_size;
+    if (period_size == buffer_size) {
 	mp_msg(MSGT_TV, MSGL_ERR, "Can't use period equal to buffer size (%u == %lu)\n", ai->alsa.chunk_size, (long)buffer_size);
 	return -1;
     }
+
     snd_pcm_sw_params_current(ai->alsa.handle, swparams);
     err = snd_pcm_sw_params_set_sleep_min(ai->alsa.handle, swparams,0);
     assert(err >= 0);
@@ -166,4 +185,4 @@ int ai_alsa_xrun(audio_in_t *ai)
     return -1;
 }
 
-#endif /* HAVE_ALSA9 */
+#endif /* HAVE_ALSA1X */
