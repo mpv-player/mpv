@@ -29,6 +29,13 @@ int mp_input_check_interrupt(int time){
 
 int verbose=5; // must be global!
 
+int stream_cache_size=0;
+
+// for demux_ogg:
+void* vo_sub=NULL;
+int vo_osd_changed(int new_value){return 0;}
+int   subcc_enabled=0;
+
 //---------------
 
 extern stream_t* open_stream(char* filename,int vcd_track,int* file_format);
@@ -54,13 +61,16 @@ int file_format=DEMUXER_TYPE_UNKNOWN;
 
   printf("success: format: %d  data: 0x%X - 0x%X\n",file_format, (int)(stream->start_pos),(int)(stream->end_pos));
 
-  stream_enable_cache(stream,2048*1024,0,0);
+  if(stream_cache_size)
+      stream_enable_cache(stream,stream_cache_size,0,0);
 
   demuxer=demux_open(stream,file_format,-1,-1,-1);
   if(!demuxer){
 	printf("Cannot open demuxer\n");
 	exit(1);
   }
-  
+
+  if(demuxer->video->sh)
+      video_read_properties(demuxer->video->sh);
 
 }

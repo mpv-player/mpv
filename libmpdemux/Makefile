@@ -39,7 +39,7 @@ $(LIBNAME):	$(OBJS)
 	$(AR) r $(LIBNAME) $(OBJS)
 
 test:	$(LIBNAME) test.c
-	$(CC) $(CFLAGS) test.c ../mp_msg.c ../linux/shmem.c -o test ./libmpdemux.a ../libmpdvdkit2/libmpdvdkit.a ../libvo/aclib.o ../libmpcodecs/img_format.o ../libao2/afmt.o $(ALSA_LIB) $(VORBIS_LIB) $(CDPARANOIA_LIB) -lz -lpthread
+	$(CC) $(CFLAGS) test.c ../mp_msg.c ../linux/shmem.c -o test ./libmpdemux.a ../libmpdvdkit2/libmpdvdkit.a ../libvo/aclib.o ../libmpcodecs/img_format.o ../libao2/afmt.o ../sub_cc.o $(ALSA_LIB) $(VORBIS_LIB) $(CDPARANOIA_LIB) -lz -lpthread
 
 clean:
 	rm -f *.o *.a *~
