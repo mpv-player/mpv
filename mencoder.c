@@ -290,7 +290,8 @@ divx4_param.rc_reaction_ratio  = 20;
 
   if(stream_cache_size) stream_enable_cache(stream,stream_cache_size*1024);
 
-  demuxer=demux_open(stream,file_format,video_id,audio_id,dvdsub_id);
+  //demuxer=demux_open(stream,file_format,video_id,audio_id,dvdsub_id);
+  demuxer=demux_open(stream,file_format,audio_id,video_id,dvdsub_id);
   if(!demuxer){
 	printf("Cannot open demuxer\n");
 	exit(1);
