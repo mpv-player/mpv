@@ -418,6 +418,7 @@ char * sub_filename(char* path,  char * fname )
 {
  char * sub_name1;
  char * sub_name2;
+ char * aviptr1, * aviptr2, * tmp;
  int    i,j;
  FILE * f;
  int pos=0;
@@ -433,22 +434,30 @@ char * sub_filename(char* path,  char * fname )
     ".txt",
     ".TXT"};
 
+
  if ( fname == NULL ) return NULL;
  
  sub_name1=strrchr(fname,'.');
  if (!sub_name1) return NULL;
  pos=sub_name1-fname;
  
- sub_name1=malloc(strlen(path)+strlen(fname)+8);
- strcpy(sub_name1,path);
- sub_name2=sub_name1+strlen(path);
- strncpy(sub_name2,fname,pos);
+ sub_name1=malloc(strlen(fname)+8);
+ strcpy(sub_name1,fname);
+
+ sub_name2=malloc (strlen(path) + strlen(fname) + 8);
+ if (tmp=strrchr(fname,'/'))
+	 sprintf (sub_name2, "%s%s", path, tmp+1);
+ else
+	 sprintf (sub_name2, "%s%s", path, fname);
+ 
+ aviptr1=strrchr(sub_name1,'.');
+ aviptr2=strrchr(sub_name2,'.');
  
  for(j=0;j<=1;j++){
   char* sub_name=j?sub_name1:sub_name2;
   for ( i=0;i<(sizeof(sub_exts)/sizeof(char*));i++ ) {
-   strcpy(sub_name2+pos,sub_exts[i]);
-//   printf("trying: '%s'\n",sub_name);
+   strcpy(j?aviptr1:aviptr2,sub_exts[i]);
+   printf("trying: '%s'\n",sub_name);
    if((f=fopen( sub_name,"rt" ))) {
      fclose( f );
      printf( "SUB: Detected sub file: %s\n",sub_name );
