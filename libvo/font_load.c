@@ -44,6 +44,7 @@ int i,j;
 int chardb=0;
 int fontdb=-1;
 int version=0;
+int sub_unicode=0;
 
 desc=malloc(sizeof(font_desc_t));if(!desc) return NULL;
 memset(desc,0,sizeof(font_desc_t));
@@ -174,7 +175,7 @@ while(fgets(sor,1020,f)){
           int chr=p[0][0];
           int start=atoi(p[1]);
           int end=atoi(p[2]);
-          if(chr>=0x80) chr=(chr<<8)+p[0][1];
+          if(sub_unicode && (chr>=0x80)) chr=(chr<<8)+p[0][1];
           else if(strlen(p[0])!=1) chr=strtol(p[0],NULL,0);
           if(end<start) {
               printf("error in font desc: end<start for char '%c'\n",chr);
