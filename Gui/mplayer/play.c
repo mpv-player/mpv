@@ -54,8 +54,16 @@ void mplFullScreen( void )
       appMPlayer.subWindow.OldY=( wsMaxY - appMPlayer.sub.height ) / 2;
      }
   }
+  else
+   {
+     mplx=appMPlayer.subWindow.OldX;
+     mply=appMPlayer.subWindow.OldY;
+     mplwidth=appMPlayer.subWindow.OldWidth;
+     mplheight=appMPlayer.subWindow.OldHeight;
+   }
  wsFullScreen( &appMPlayer.subWindow );
- wsMoveTopWindow( &appMPlayer.subWindow );
+// wsMoveTopWindow( &appMPlayer.subWindow );
+ mplResize( 0,0,appMPlayer.subWindow.Width,appMPlayer.subWindow.Height );
 }
 
 extern int mplSubRender;
@@ -91,7 +99,7 @@ printf("%%%%%% PAUSE  \n");
 void mplResize( unsigned int X,unsigned int Y,unsigned int width,unsigned int height )
 {
 
-//printf("mplResize(%d,%d,%d,%d)  \n",X,Y,width,height);
+printf("mplResize(%d,%d,%d,%d)  \n",X,Y,width,height);
 	vo_setwindowsize( width,height );
         vo_resize=1;
 
