@@ -665,7 +665,7 @@ getcolor(char * s){
 int
 vo_aa_parseoption(struct config * conf, char *opt, char *param){
     /* got an option starting with aa */
-    char *pseudoargv[3];
+    char *pseudoargv[4];
     int pseudoargc;
     char * x, *help;
     int i;
