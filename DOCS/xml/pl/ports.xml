@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.48 -->
+<!-- synced with 1.49 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -286,12 +286,13 @@ wolna. Używaj SDL.
 <para>Najlepsze wyniki są osiągane ze sterownikami wyjściowymi video DirectX 
   (<option>-vo directx</option>) i rdzennym wyjściem dźwiękowym wave Windows
   (<option>-ao win32</option>). Możesz skorzystać również z OpenGL lub SDL, jednak
-  wydajność OpenGL silnie zależy od systemu, a SDL może zakłócać
-  dźwięk i obraz albo wywołać błąd, i zakończyć działanie programu. 
+  wydajność OpenGL w znacznym  zależy od systemu, a SDL może powodować powstanie
+  zakłóceń w dźwięku i obrazzie albo wywołać błąd, i zakończyć działanie programu. 
   Jeżeli występują zakłócenia obrazu, spróbuj
   wyłączyć sprzętową akcelerację przez opcję <option>-vo directx:noaccel</option>. Ściągnij
   <ulink url="http://www.videolan.org/vlc/dx7headers.tgz">pliki nagłówkowe DirectX 7</ulink>,
-  żeby skompilować sterownik do wyjścia video DirectX.</para>
+  żeby skompilować sterownik do wyjścia video DirectX. Co więcej, musisz mieć
+  zainstalowany DirectX 7 lub nowszy, aby to wyjście zadziałało.</para>
 
 <para><link linkend="vidix">VIDIX</link> działa teraz również pod Windowsem jako
   <option>-vo winvidix</option>, chociaż jego obsługa jest eksperymentalna i wymaga
