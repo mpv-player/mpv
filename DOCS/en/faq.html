@@ -101,26 +101,26 @@
     list (the word 'ideg' is described below):
     <BLOCKQUOTE>
     <P>And we have idegs. And our idegcounter overflowed again and again.</P>
-  
+
     <P>Unfortunately MPlayer is out of our control. It's used by lamers, Linux
     users who can't even use Windows, and never tried to compile a kernel. They
     installed (with default options) Mandrake or Red Hat or SuSE, and without
     RTFM'ing they send messages saying 'it doesn't work! help me! please! i'm
     new to Linux! help! oh! help me!'. We can't stop them, but at least we try
     to force them to RTFM and to read the messages of ./configure and MPlayer.</P>
-  
+
     <P>And you clever guys come and flame us with gcc 2.96 and binary packages.
     Instead of helping users or making patches to help solve problems.</P>
-  
+
     <P>Half of our spare/free time is spent by answering silly mails here and
     making newer tricks and checks to configure to avoid such mails.</P>
-  
+
     <P>And there is a balance. On the one side are you, clever guys, saying we
     are very bad because we don't like buggy gcc 2.96, and on the other side
     there are the 'new to Linux' guys who are showing us gcc 2.96 is buggy.</P>
-  
+
     <P>Conclusion: We can't be good. Half the people will always say we are bad.</P>
-  
+
     <P>Maybe we should close the project, make it closed source, commercial, and
     provide install support for it. then we could leave current work, so
     development could go faster, and we could earn lots of money with it and buy
@@ -200,17 +200,17 @@
     (mainly to avoid kernel hackers debugging closed source drivers).
     Upgrade your kernel, modutils and MPlayer.</DD>
   <DD>&nbsp;</DD>
-  
+
     <DT>Q: When compiling MEncoder, it segfaults at linking!</DT>
     <DD>A: This is a linker problem. Upgrading binutils should help (2.11.92.*
       or newer should be good). Since it is not our fault, please do <B>not</B>
       report!</DD>
     <DD>&nbsp;</DD>
-  
+
     <DT>Q: MPlayer dies with segmentation fault upon pthread check!</DT>
     <DD>A: chmod 644 /usr/lib/libc.so</DD>
     <DD>&nbsp;</DD>
-  
+
     <DT>Q: I'd like to compile MPlayer on Minix!</DT>
     <DD>A: Me too. :)</DD>
   <DD>&nbsp;</DD>
@@ -543,6 +543,14 @@
     <CODE>-nortc</CODE> option.</DD>
   <DD>&nbsp;</DD>
 
+  <DT>Q: While playing a movie it suddenly gets jerky and I get
+    the following message:<BR>
+    <CODE>Badly interleaved AVI file detected - switching to -ni
+    mode...</CODE>
+  <DD>A: Badly interleaved files and <CODE>-cache</CODE> don't work well
+    together. Try <CODE>-nocache</CODE>.</DD>
+  <DD>&nbsp;</DD>
+
 </DL>
 
 
@@ -708,14 +716,6 @@
   <DD>A: Use the <CODE>-cache</CODE> option (described in the man page)
     and try enabling DMA for the DVD drive with the hdparm tool (described in
     the <A HREF="cd-dvd.html#cd">CD chapter</A> of the documentation).</DD>
-  <DD>&nbsp;</DD>
-
-  <DT>Q: While playing a movie it suddenly gets jerky and I get
-    the following message:<BR>
-    <CODE>Badly interleaved AVI file detected - switching to -ni
-    mode...</CODE>
-  <DD>A: Badly interleaved files and <CODE>-cache</CODE> don't work well
-    together. Try <CODE>-nocache</CODE>.</DD>
   <DD>&nbsp;</DD>
 
 </DL>
