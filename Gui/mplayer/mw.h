@@ -126,15 +126,11 @@ void PutImage( txSample * bf,int x,int y,int max,int ofs )
    }
 }
 
-int mainis = 1;
-
 void mplMainDraw( wsParamDisplay )
 {
  wItem    * item;
  txSample * image = NULL;
  int        i;
-
-if ( appMPlayer.mainWindow.Focused == 2 ) mainis=1;
 
  if ( appMPlayer.mainWindow.Visible == wsWindowNotVisible ||
       !mainVisible ) return;
@@ -220,8 +216,11 @@ void mplMsgHandle( int msg,float param )
 	exit_player( "Exit" );
         break;
    case evIconify:
-        IZE("evIcon");
-        wsIconify( appMPlayer.mainWindow );
+	switch ( (int)param )
+	 {
+	  case 0: wsIconify( appMPlayer.mainWindow ); break;
+	  case 1: wsIconify( appMPlayer.subWindow ); break;
+	 }
         break;
    case evFullScreen:
         IZE("evFullS");
@@ -528,8 +527,6 @@ void mplMainKeyHandle( int State,int Type,int Key )
    case ',':
    case '<':         msg=evPrev; break;
 
-   case wsx:
-   case wsX:
    case wsEscape:    msg=evExit; break;
 
    case wsUp:        msg=evForward1min; break;
@@ -558,6 +555,7 @@ void mplMainKeyHandle( int State,int Type,int Key )
    case wsS:         msg=evStop; break;
    case wsp:
    case wsP:         msg=evPlayList; break;
+   default:	     vo_x11_putkey( Key ); return;
   }
  if ( ( msg != evNone )&&( Type == wsKeyPressed ) )
   {
@@ -565,5 +563,4 @@ void mplMainKeyHandle( int State,int Type,int Key )
    mplMainRender=1;
    wsPostRedisplay( &appMPlayer.mainWindow );
   }
- vo_x11_putkey( Key );
 }
