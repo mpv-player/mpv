@@ -1665,8 +1665,9 @@ if(time_frame>0.001 && !(vo_flags&256)){
 
     if(pts_from_bps){
 	// PTS = sample_no / samplerate
-        unsigned int samples=(sh_audio->audio.dwSampleSize)?
-          ((ds_tell(d_audio)-sh_audio->a_in_buffer_len)/sh_audio->audio.dwSampleSize) :
+        unsigned int samples=
+//	  (sh_audio->audio.dwSampleSize)?
+//          ((ds_tell(d_audio)-sh_audio->a_in_buffer_len)/sh_audio->audio.dwSampleSize) :
           (d_audio->block_no); // <- used for VBR audio
 	samples+=sh_audio->audio.dwStart; // offset
         a_pts=samples*(float)sh_audio->audio.dwScale/(float)sh_audio->audio.dwRate;
