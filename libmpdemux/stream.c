@@ -40,6 +40,7 @@ int stream_fill_buffer(stream_t *s){
   switch(s->type){
   case STREAMTYPE_FILE:
   case STREAMTYPE_STREAM:
+  case STREAMTYPE_PLAYLIST:
 #ifdef STREAMING
     if( s->streaming_ctrl!=NULL ) {
 	    len=s->streaming_ctrl->streaming_read(s->fd,s->buffer,STREAM_BUFFER_SIZE, s->streaming_ctrl);break;
