@@ -249,11 +249,17 @@ static unsigned int inited_flags=0;
 #define INITED_GUI 4
 #define INITED_GETCH2 8
 #define INITED_LIRC 16
+#define INITED_SPUDEC 32
 #define INITED_STREAM 64
 #define INITED_ALL 0xFFFF
 
 void uninit_player(unsigned int mask){
   mask=inited_flags&mask;
+  if (mask&INITED_SPUDEC){
+    inited_flags&=~INITED_SPUDEC;
+    current_module="uninit_spudec";
+    spudec_free(vo_spudec);
+  }
   if(mask&INITED_VO){
     inited_flags&=~INITED_VO;
     current_module="uninit_vo";
@@ -753,6 +759,11 @@ play_next_file:
   }
 /*DSP!!  if(dsp) audio_out->control(AOCONTROL_SET_DEVICE,(int)dsp);*/
 
+  current_module="spudec";
+  vo_spudec=spudec_new();
+  if (vo_spudec!=NULL)
+    inited_flags|=INITED_SPUDEC;
+  current_module=NULL;
 
   current_module="open_stream";
   stream=open_stream(filename,vcd_track,&file_format);
@@ -1986,19 +1997,21 @@ if(rel_seek_secs || abs_seek_pos){
 #endif
   
   // DVD sub:
-  { unsigned char* packet=NULL;
+  if(vo_spudec){
+    unsigned char* packet=NULL;
     int len=ds_get_packet_sub(d_dvdsub,&packet);
+    current_module="spudec";
     if(len>=2){
       int len2;
       len2=(packet[0]<<8)+packet[1];
       mp_msg(MSGT_CPLAYER,MSGL_V,"\rDVD sub: %d / %d  \n",len,len2);
-      if(len==len2)
-        spudec_decode(packet,len);
-      else
-        mp_msg(MSGT_CPLAYER,MSGL_V,"fragmented dvd-subs not yet supported!!!\n");
-    } else if(len>=0) {
-      mp_msg(MSGT_CPLAYER,MSGL_V,"invalid dvd sub\n");
+      spudec_assemble(vo_spudec,packet,len,100*d_video->pts);
+    } else {
+      spudec_heartbeat(vo_spudec,100*d_video->pts);
+      if(len>=0)
+	mp_msg(MSGT_CPLAYER,MSGL_V,"invalid dvd sub\n");
     }
+    current_module=NULL;
   }
   
 } // while(!eof)

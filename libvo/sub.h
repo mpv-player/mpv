@@ -21,6 +21,8 @@ extern int vo_osd_progbar_value;   // 0..255
 
 extern subtitle* vo_sub;
 
+extern void* vo_spudec;
+
 #define OSD_PLAY 0x01
 #define OSD_PAUSE 0x02
 #define OSD_STOP 0x03
