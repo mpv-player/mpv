@@ -4076,6 +4076,31 @@ struct exports exp_wsock32[]={
 struct exports exp_msdmo[]={
     FF(memcpy, -1) // just test
 };
+
+/*  realplayer8:
+	DLL Name: PNCRT.dll
+	vma:  Hint/Ord Member-Name
+	22ff4	  615  free
+	2302e	  250  _ftol
+	22fea	  666  malloc
+	2303e	  609  fprintf
+	2305e	  167  _adjust_fdiv
+	23052	  280  _initterm
+
+	22ffc	  176  _beginthreadex
+	23036	  284  _iob
+	2300e	   85  __CxxFrameHandler
+	23022	  411  _purecall
+*/
+struct exports exp_pncrt[]={
+    FF(malloc, -1) // just test
+    FF(free, -1) // just test
+    FF(fprintf, -1) // just test
+    {"_adjust_fdiv", -1, (void*)&_adjust_fdiv},
+    FF(_ftol,-1)
+    FF(_initterm, -1)
+};
+
 /* needed for Morgand MJPEG */
 struct exports exp_msvfw32[]={
     {"ICOpen", -1, (void *)&ICOpen},
@@ -4101,6 +4126,7 @@ struct libs libraries[]={
     LL(wsock32)
     LL(msdmo)
     LL(msvfw32)
+    LL(pncrt)
 };
 #include "mangle.h"
 static char* called_unk = "Called unk_%s\n";
