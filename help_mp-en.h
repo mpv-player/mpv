@@ -148,6 +148,7 @@ static char help_text[]=
 #define MSGTR_TooManyVideoInBuffer "\nDEMUXER: Too many (%d in %d bytes) video packets in the buffer!\n"
 #define MSGTR_MaybeNI "(maybe you play a non-interleaved stream/file or the codec failed)?\n" \
 		      "For .AVI files, try to force non-interleaved mode with option -ni\n"
+#define MSGTR_SwitchToNi "\nDetected badly interleaved .AVI - switching to -ni mode!\n"
 #define MSGTR_DetectedFILMfile "Detected FILM file format!\n"
 #define MSGTR_DetectedFLIfile "Detected FLI file format!\n"
 #define MSGTR_DetectedROQfile "Detected RoQ file format!\n"
