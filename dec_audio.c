@@ -799,7 +799,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
       case AFM_IMA4: // IMA-ADPCM 4:1 audio codec:
       { unsigned char ibuf[IMA4_BLOCK_SIZE]; // bytes / frame
         if(demux_read_data(sh_audio->ds,ibuf,IMA4_BLOCK_SIZE)!=IMA4_BLOCK_SIZE) break; // EOF
-        len=2*ima4_decode_block(buf,ibuf,2*IMA4_SAMPLES_PER_BLOCK);
+        len=2*ima4_decode_block((unsigned short*)buf,ibuf,2*IMA4_SAMPLES_PER_BLOCK);
         break;
       }
       case AFM_AC3: // AC3 decoder
