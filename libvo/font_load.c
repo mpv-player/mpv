@@ -139,6 +139,7 @@ while(fgets(sor,1020,f)){
   } else    
 
   if(strcmp(section,"[files]")==0){
+      char *default_dir=DATADIR"/font";
       if(pdb==2 && strcmp(p[0],"alpha")==0){
     	  char *cp;
 	  if (!(cp=malloc(strlen(desc->fpath)+strlen(p[1])+2))) return NULL;
@@ -146,9 +147,16 @@ while(fgets(sor,1020,f)){
 	  snprintf(cp,strlen(desc->fpath)+strlen(p[1])+2,"%s/%s",
 		desc->fpath,p[1]);
           if(!((desc->pic_a[fontdb]=load_raw(cp,verbose)))){
-                printf("Can't load font bitmap: %s\n",p[1]);
 		free(cp);
-                return NULL;
+		if (!(cp=malloc(strlen(default_dir)+strlen(p[1])+2))) 
+		   return NULL;
+		snprintf(cp,strlen(default_dir)+strlen(p[1])+2,"%s/%s",
+			 default_dir,p[1]);
+		if (!((desc->pic_a[fontdb]=load_raw(cp,verbose)))){
+		   printf("Can't load font bitmap: %s\n",p[1]);
+		   free(cp);
+		   return NULL;
+		}
           }
 	  free(cp);
           continue;
@@ -160,9 +168,16 @@ while(fgets(sor,1020,f)){
 	  snprintf(cp,strlen(desc->fpath)+strlen(p[1])+2,"%s/%s",
 		desc->fpath,p[1]);
           if(!((desc->pic_b[fontdb]=load_raw(cp,verbose)))){
-                printf("Can't load font bitmap: %s\n",p[1]);
 		free(cp);
-                return NULL;
+		if (!(cp=malloc(strlen(default_dir)+strlen(p[1])+2))) 
+		   return NULL;
+		snprintf(cp,strlen(default_dir)+strlen(p[1])+2,"%s/%s",
+			 default_dir,p[1]);
+		if (!((desc->pic_b[fontdb]=load_raw(cp,verbose)))){
+		   printf("Can't load font bitmap: %s\n",p[1]);
+		   free(cp);
+		   return NULL;
+		}
           }
 	  free(cp);
           continue;
