@@ -22,3 +22,14 @@ unk_exp1:
 	xorl %eax,%eax
 	leave
 	ret
+.globl exp_EH_prolog
+exp_EH_prolog:
+	pushl $0xff
+	pushl %eax
+	pushl %fs:0
+	movl  %esp, %fs:0
+	movl  12(%esp), %eax
+	movl  %ebp, 12(%esp)
+	leal  12(%esp), %ebp
+	pushl %eax
+	ret
