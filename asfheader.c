@@ -213,7 +213,7 @@ while(!stream_eof(demuxer->stream)){
     case ASF_GUID_PREFIX_data_chunk: // guid_data_chunk
       demuxer->movi_start=stream_tell(demuxer->stream)+26;
       demuxer->movi_end=endpos;
-      mp_msg(MSGT_HEADER,MSGL_V,"Found movie at 0x%X - 0x%X\n",demuxer->movi_start,demuxer->movi_end);
+      mp_msg(MSGT_HEADER,MSGL_V,"Found movie at 0x%X - 0x%X\n",(int)demuxer->movi_start,(int)demuxer->movi_end);
       break;
 
 //  case ASF_GUID_PREFIX_index_chunk: return "guid_index_chunk";
