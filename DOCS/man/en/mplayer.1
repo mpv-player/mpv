@@ -1532,7 +1532,9 @@ Align at bottom.
 .TP
 .B \-subcc \ 
 Display DVD Closed Caption (CC) subtitles.
-These are NOT the VOB subtitles, these are special ASCII subtitles for the
+These are
+.B not
+the VOB subtitles, these are special ASCII subtitles for the
 hearing impaired encoded in the VOB userdata stream on most region 1 DVDs.
 CC subtitles have not been spotted on DVDs from other regions so far.
 .
@@ -4531,8 +4533,9 @@ Use two-pass mode.
 This produces best results.
 Pass 1 analyzes the video and writes the results to a log file.
 Pass 2 then reads this log file and uses the information to do the actual work.
-Note that these passes do NOT correspond to pass 1 and 2 of the encoding
-process.
+Note that these passes do
+.B not
+correspond to pass 1 and 2 of the encoding process.
 In order to use divtc two-pass with two-pass video encoding, you must perform
 three passes: first divtc pass 1 and encoder pass 1, then divtc pass 2 and
 encoder pass 1, and finally divtc pass 2 and encoder pass 2.
@@ -4759,7 +4762,7 @@ Set the default value of the 'hidden' flag (0=visible, 1=hidden).
 .IPs <opaque>
 Set the default value of the 'opaque' flag (0=transparent, 1=opaque).
 .IPs <fifo>
-path/\:filename for the FIFO (named pipe connecting mplayer \-vf bmovl to the
+path/\:filename for the FIFO (named pipe connecting 'mplayer \-vf bmovl' to the
 controlling application)
 .RE
 .PD 1
@@ -4826,7 +4829,8 @@ send 1.8MB of RGBA32 data every time a small part of the screen is updated.
 .B framestep=I|[i]step
 Renders only every nth frame or every Intra (key) frame.
 .sp 1
-If you call the filter with I (uppercase) as the parameter, then ONLY
+If you call the filter with I (uppercase) as the parameter, then
+.B only
 keyframes are rendered.
 For DVDs it generally means one in every 15/\:12  frames (IBBPBBPBBPBBPBB),
 for AVI it means every scene change or every keyint value (see \-lavcopts
@@ -4840,7 +4844,7 @@ because it contains the time (in seconds) and frame number of the keyframe
 If you call the filter with a numeric parameter 'step' then only one in
 every 'step' frames is rendered.
 .sp 1
-If you put an 'i' (lowercase) before the number then an I! is printed
+If you put an 'i' (lowercase) before the number then an 'I!' is printed
 (like the I parameter).
 .sp 1
 If you give only the i then nothing is done to the frames, only I! is
@@ -4914,8 +4918,8 @@ Color is the default.
 Horizontal decimation 1, 2 or 4.
 .IPs vdec={1,2,4}
 Vertical decimation 1, 2 or 4.
-.IPs quality=1-20
-Set JPEG compression quality [BEST] 1 - 20 [VERY BAD].
+.IPs quality=1\-20
+Set JPEG compression quality [BEST] 1 \- 20 [VERY BAD].
 .IPs fd|nofd
 By default, decimation is only performed if the Zoran hardware
 can upscale the resulting MJPEG images to the original size.
@@ -4980,7 +4984,7 @@ Will have the output file contain 'div3' as video fourcc.
 .TP
 .B \-force-avi-aspect <0.2\-3.0>
 Override the aspect stored in the AVI OpenDML vprp header.
-This can be used to change the aspect ratio with \-ovc copy.
+This can be used to change the aspect ratio with '\-ovc copy'.
 .
 .TP
 .B \-info <option1:option2:...> (AVI only)
@@ -5068,7 +5072,7 @@ Encode to AVI.
 .IPs "\-of mpeg"
 Encode to MPEG.
 .IPs "\-of rawvideo"
-raw video stream (no muxing - one video stream only)
+raw video stream (no muxing \- one video stream only)
 .RE
 .PD 1
 .
@@ -5094,7 +5098,7 @@ no encoding, just streamcopy
 .IPs "\-ovc divx4"
 Encode to DivX4/\:DivX5.
 .IPs "\-ovc raw"
-Encode to an arbitrary uncompressed format (use \-vf format to select).
+Encode to an arbitrary uncompressed format (use '\-vf format' to select).
 .IPs "\-ovc lavc"
 Encode with a libavcodec codec.
 .RE
@@ -5253,11 +5257,11 @@ bitrate in kbps (CBR and ABR only)
 .
 .TP
 .B q=<0\-9>
-quality (0\-highest, 9\-lowest) (VBR only)
+quality (0 \- highest, 9 \- lowest) (VBR only)
 .
 .TP
 .B aq=<0\-9>
-algorithmic quality (0\-best/\:slowest, 9\-worst/\:fastest)
+algorithmic quality (0 \- best/slowest, 9 \- worst/fastest)
 .
 .TP
 .B ratio=<1\-100>
@@ -5334,7 +5338,7 @@ ABR encoding at average given kbps bitrate
 .RE
 .sp 1
 .RS
-.I EXAMPLE:
+.I EXAMPLES:
 .RE
 .PD 0
 .RSs
@@ -7532,7 +7536,7 @@ explains how to create useful bug reports.
 MPlayer was initially written by Arpad Gereöffy.
 See the AUTHORS file for a list of some of the many other contributors.
 .PP
-MPlayer is (C) 2000\-2004 The MPlayer Team
+MPlayer is (C) 2000\-2005 The MPlayer Team
 .PP
 This man page was written mainly by Gabucino, Jonas Jermann and Diego Biurrun.
 It is maintained by Diego Biurrun.
