@@ -13,6 +13,7 @@
 #include "stream.h"
 
 #define MP4_DL MSGL_V
+#define freereturn(a,b) free(a); return b
 
 int mp4_read_descr_len(stream_t *s) {
   uint8_t b;
@@ -45,7 +46,7 @@ int mp4_parse_esds(unsigned char *data, int datalen, esds_t *esds) {
   if (tag == MP4ESDescrTag) {
     /* read length */
     if ((len = mp4_read_descr_len(s)) < 5 + 15) {
-      return 1;
+      freereturn(s,1);
     }
     esds->ESId = stream_read_word(s);
     esds->streamPriority = stream_read_char(s);
@@ -65,12 +66,12 @@ int mp4_parse_esds(unsigned char *data, int datalen, esds_t *esds) {
 
   /* get and verify DecoderConfigDescrTab */
   if (stream_read_char(s) != MP4DecConfigDescrTag) {
-    return 1;
+    freereturn(s,1);
   }
 
   /* read length */
   if ((len = mp4_read_descr_len(s)) < 15) {
-    return 1;
+    freereturn(s,1);
   }
 
   esds->objectTypeId = stream_read_char(s);
@@ -91,13 +92,12 @@ int mp4_parse_esds(unsigned char *data, int datalen, esds_t *esds) {
 
   /* get and verify DecSpecificInfoTag */
   if (stream_read_char(s) != MP4DecSpecificDescrTag) {
-    return 1;
+    freereturn(s,1);
   }
 
   /* read length */
   esds->decoderConfigLen = len = mp4_read_descr_len(s); 
 
-  free(esds->decoderConfig);
   esds->decoderConfig = malloc(esds->decoderConfigLen);
   if (esds->decoderConfig) {
     stream_read(s, esds->decoderConfig, esds->decoderConfigLen);
@@ -108,7 +108,10 @@ int mp4_parse_esds(unsigned char *data, int datalen, esds_t *esds) {
       "ESDS MPEG4 Decoder Specific Descriptor (%dBytes)\n", len);
 
   /* will skip the remainder of the atom */
-  return 0;
+  freereturn(s,0);
 
 }
+
+#undef freereturn
+#undef MP4_DL
 
