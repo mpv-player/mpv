@@ -181,7 +181,7 @@ n*(fps of the movie) Hz.</LI>
 <LI>Radeon VE - currently only XFree86 CVS has driver for this card, version
 4.1.0 doesn't. And no TV out support. Of course with <B>MPlayer</B> you can
 happily get <B>accelerated</B> display, with or without <B>TV output</B>, and
-no libraries or X are needed. Read <A HREF="#2.3.1.15">Vidix</A> section.</LI>
+no libraries or X are needed. Read <A HREF="#2.3.1.14">Vidix</A> section.</LI>
 </UL>
 
 
@@ -562,7 +562,7 @@ support, the mga_vid kernel driver.  It's active developed by me (A'rpi), and
 it has hardware VSYNC support with triple buffering. It works on both
 framebuffer console and under X.</P>
 
-<P><B>WARNING</B>: on non-Linux systems, use <A HREF="#2.3.1.15">Vidix</A> for
+<P><B>WARNING</B>: on non-Linux systems, use <A HREF="#2.3.1.14">Vidix</A> for
   mga_vid !!!</P>
 
 <P>To use it, you first have to compile mga_vid.o:</P>
@@ -795,7 +795,7 @@ drivers can't use low pixelclocks that are needed for low resolution
 video modes.</P>
 
 
-<P><B><A NAME=2.3.1.15>2.3.1.15. Vidix</A></B></P>
+<P><B><A NAME=2.3.1.14>2.3.1.14. Vidix</A></B></P>
 
 <P><B>WHAT IS VIDIX?</B></P>
 
@@ -926,7 +926,7 @@ recognize <CODE>:vidix</CODE> subdevice.
 </P>
 
 
-<P><B><A NAME=2.3.1.16>2.3.1.16. Zr</A></B></P>
+<P><B><A NAME=2.3.1.15>2.3.1.15. Zr</A></B></P>
 
 <P>This is a display-driver (<CODE>-vo zr</CODE>) for a number of MJPEG
 capture/playback cards (tested for DC10+ and Buz, and it should work for the
@@ -958,6 +958,103 @@ Some remarks:
     subtitles.</LI>
 </UL>
 
+
+<P><B><A NAME=2.3.1.16>2.3.1.16. DVB</A></B></P>
+
+<P><B>MPlayer</B> supports cards with the Siemens DVB chipset from vendors like
+Siemens, Technotrend, Galaxis or Hauppauge.  The latest DVB drivers are
+available from the <A HREF="http://www.linuxtv.org">Linux TV site</A>. If you
+want to do software transcoding you should have at least a 1GHz CPU.</P>
+
+<P>Configure should detect your DVB card. If it did not, force detection with
+
+<PRE>
+  ./configure --enable-dvb
+</PRE>
+
+<P>If you have ost headers at a non-standard path, set the path with</P>
+
+<PRE>
+  ./configure --with-extraincdir=&lt;DVB source directory&gt;/ost/include
+</PRE>
+
+<P>Then compile and install as usual.</P>
+
+<P>Hardware decoding (playing standard MPEG1/2 files) can be done with this
+command:</P>
+
+<PRE>
+  mplayer -ao mpegpes -vo mpegpes file.mpg|vob
+</PRE>
+
+<P>Software decoding or transcoding different formats to MPEG1 can be achieved
+using a command like this:</P>
+
+<PRE>
+  mplayer -ao mpegpes -vo mpegpes -vop lavc yourfile.ext
+  mplayer -ao mpegpes -vo mpegpes -vop fame,expand yourfile.ext
+</PRE>
+
+<P>Note that DVB cards only support heights 288 and 576 for PAL or 240 and 480
+for NTSC. You <B>must</B> rescale for other heights by adding
+<CODE>scale=width:height</CODE> with the width and height you want to the
+</CODE>-vop</CODE> option. DVB cards accept various widths, like 720, 704, 640,
+512, 480, 352 etc and do hardware scaling in horizontal direction, so you do not
+need to scale horizontally in most cases. For a 512x384 (aspect 4:3) DivX try:</P>
+
+<PRE>
+  mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=512:576
+</PRE>
+
+<P>If you have a widescreen movie and you do not want to scale it to full height,
+you can use the <CODE>expand=w:h</CODE> plugin to add black bands. To view a
+640x384 DivX, try:</P>
+
+<PRE>
+  mplayer -ao mpegpes -vo mpegpes -vop lavc,expand=640:576 file.avi
+</PRE>
+
+<P>If your CPU is too slow for a full size 720x576 DivX, try downscaling:</P>
+
+<PRE>
+  mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=352:576 file.avi
+</PRE>
+
+<P>If speed does not improve, try vertical downscaling, too:</P>
+
+<PRE>
+  mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=352:288 file.avi
+</PRE>
+
+<P>For OSD and subtitles use the expand feature of the OSD plugin. So, instead
+of <CODE>expand=w:h</CODE> or <CODE>expand=w:h:x:y</CODE>, use
+<CODE>expand=w:h:x:y:1</CODE> (the 5th parameter <CODE>:1</CODE> at the end
+will enable OSD rendering). You may want to move the image up a bit to get a
+bigger black zone for subtitles. You may also want to move subtitles up, if they
+are outside your TV screen, use the <CODE>-subpos <0-100></CODE> switch to
+adjust this (<CODE>-subpos 80</CODE> is a good choice).</P>
+
+<P>In order to play non-25fps movies on a PAL TV or with a slow CPU, add the
+<CODE>-framedrop</CODE> option.</P>
+
+<P>To keep the aspect ratio of DivX files and get the optimal scaling parameters
+(hardware horizontal scaling and software vertical scaling while keeping the
+right aspect ratio), use the new dvbscale plugin:</P>
+
+<PRE>
+for  3:4 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale
+for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
+</PRE>
+
+<P>If you have questions or want to hear feature announcements and take part in
+discussions on this subject, join our
+<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb">MPlayer-DVB</A>
+mailing list. Please remember that the list language is English.</P>
+
+<P>In the future you may expect the ability to display OSD and subtitles using
+the native OSD feature of DVB cards, as well as more fluent playback of
+non-25fps movies and realtime transcoding between MPEG2 and MPEG4 (partial
+decompression).</P>
 
 
 <P><B><A NAME=2.3.1.A>2.3.1.A. TV-out support</A></B></P>
