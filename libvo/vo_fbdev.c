@@ -1,3 +1,10 @@
+/*
+ * Video driver for Framebuffer device
+ * by Szabolcs Berecz <szabi@inf.elte.hu>
+ * 
+ * Some idea and code borrowed from Chris Lawrence's ppmtofb-0.27
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -50,10 +57,83 @@ static int screen_width;
 static uint32_t pixel_format;
 
 static int fb_init_done = 0;
+static int fb_works = 0;
+
+/*
+ * Note: this function is completely cut'n'pasted from
+ * Chris Lawrence's code.
+ * (modified to fit in my code :) )
+ */
+struct fb_cmap *make_directcolor_cmap(struct fb_var_screeninfo *var)
+{
+  /* Hopefully any DIRECTCOLOR device will have a big enough palette
+   * to handle mapping the full color depth.
+   * e.g. 8 bpp -> 256 entry palette
+   *
+   * We could handle some sort of gamma here
+   */
+  int i, cols, rcols, gcols, bcols;
+  uint16_t *red, *green, *blue;
+  struct fb_cmap *cmap;
+        
+  rcols = 1 << var->red.length;
+  gcols = 1 << var->green.length;
+  bcols = 1 << var->blue.length;
+  
+  /* Make our palette the length of the deepest color */
+  cols = (rcols > gcols ? rcols : gcols);
+  cols = (cols > bcols ? cols : bcols);
+  
+  red = malloc(cols * sizeof(red[0]));
+  if(!red) {
+	  printf("Can't allocate red palette with %d entries.\n", cols);
+	  return NULL;
+  }
+  for(i=0; i< rcols; i++)
+    red[i] = (65535/(rcols-1)) * i;
+  
+  green = malloc(cols * sizeof(green[0]));
+  if(!green) {
+	  printf("Can't allocate green palette with %d entries.\n", cols);
+	  free(red);
+	  return NULL;
+  }
+  for(i=0; i< gcols; i++)
+    green[i] = (65535/(gcols-1)) * i;
+  
+  blue = malloc(cols * sizeof(blue[0]));
+  if(!blue) {
+	  printf("Can't allocate blue palette with %d entries.\n", cols);
+	  free(red);
+	  free(green);
+	  return NULL;
+  }
+  for(i=0; i< bcols; i++)
+    blue[i] = (65535/(bcols-1)) * i;
+  
+  cmap = malloc(sizeof(struct fb_cmap));
+  if(!cmap) {
+	  printf("Can't allocate color map\n");
+	  free(red);
+	  free(green);
+	  free(blue);
+	  return NULL;
+  }
+  cmap->start = 0;
+  cmap->transp = 0;
+  cmap->len = cols;
+  cmap->red = red;
+  cmap->blue = blue;
+  cmap->green = green;
+  cmap->transp = NULL;
+  
+  return cmap;
+}
 
 static int fb_init(void)
 {
 	int fd;
+	struct fb_cmap *cmap;
 #if 0
 	int vt;
 	char vt_name[11];
@@ -112,12 +192,12 @@ static int fb_init(void)
 
 	if ((fb_dev_fd = open(fb_dev_name, O_RDWR)) == -1) {
 		printf("fb_init: Can't open %s: %s\n", fb_dev_name, strerror(errno));
-		return 1;
+		goto err_out;
 	}
 
 	if (ioctl(fb_dev_fd, FBIOGET_VSCREENINFO, &fb_var_info)) {
 		printf("fb_init: Can't get VSCREENINFO: %s\n", strerror(errno));
-		return 1;
+		goto err_out_fd;
 	}
 
 	/* disable scrolling */
@@ -128,30 +208,31 @@ static int fb_init(void)
 
 	if (ioctl(fb_dev_fd, FBIOPUT_VSCREENINFO, &fb_var_info)) {
 		printf("fb_init: Can't put VSCREENINFO: %s\n", strerror(errno));
-		return 1;
+		goto err_out_fd;
 	}
 
 	if (ioctl(fb_dev_fd, FBIOGET_FSCREENINFO, &fb_fix_info)) {
 		printf("fb_init: Can't get VSCREENINFO: %s\n", strerror(errno));
+		goto err_out_fd;
 		return 1;
 	}
 	switch (fb_fix_info.type) {
 		case FB_TYPE_VGA_PLANES:
 			printf("fb_init: FB_TYPE_VGA_PLANES not supported.\n");
-			return 1;
+			goto err_out_fd;
 			break;
 		case FB_TYPE_PLANES:
 			printf("fb_init: FB_TYPE_PLANES not supported.\n");
-			return 1;
+			goto err_out_fd;
 			break;
 		case FB_TYPE_INTERLEAVED_PLANES:
 			printf("fb_init: FB_TYPE_INTERLEAVED_PLANES not supported.\n");
-			return 1;
+			goto err_out_fd;
 			break;
 #ifdef FB_TYPE_TEXT
 		case FB_TYPE_TEXT:
 			printf("fb_init: FB_TYPE_TEXT not supported.\n");
-			return 1;
+			goto err_out_fd;
 			break;
 #endif
 		case FB_TYPE_PACKED_PIXELS:
@@ -160,7 +241,21 @@ static int fb_init(void)
 			break;
 		default:
 			printf("fb_init: unknown FB_TYPE: %d\n", fb_fix_info.type);
-			return 1;
+			goto err_out_fd;
+	}
+	if (fb_fix_info.visual == FB_VISUAL_DIRECTCOLOR) {
+		printf("fb_init: creating cmap for directcolor\n");
+		if (!(cmap = make_directcolor_cmap(&fb_var_info)))
+			goto err_out_fd;
+		if (ioctl(fb_dev_fd, FBIOPUTCMAP, cmap)) {
+			printf("fb_init: can't put cmap: %s\n",
+					strerror(errno));
+			goto err_out_fd;
+		}
+		free(cmap->red);
+		free(cmap->green);
+		free(cmap->blue);
+		free(cmap);
 	}
 
 	fb_pixel_size = fb_var_info.bits_per_pixel / 8;
@@ -171,7 +266,7 @@ static int fb_init(void)
 	if ((frame_buffer = (uint8_t *) mmap(0, fb_size, PROT_READ | PROT_WRITE,
 				MAP_SHARED, fb_dev_fd, 0)) == (uint8_t *) -1) {
 		printf("fb_init: Can't mmap %s: %s\n", fb_dev_name, strerror(errno));
-		return 1;
+		goto err_out_fd;
 	}
 
 	printf("fb_init: framebuffer @ %p\n", frame_buffer);
@@ -188,7 +283,14 @@ static int fb_init(void)
 			fb_var_info.blue.length, fb_var_info.blue.msb_right);
 
 	fb_init_done = 1;
+	fb_works = 1;
 	return 0;
+err_out_fd:
+	close(fb_dev_fd);
+	fb_dev_fd = -1;
+err_out:
+	fb_init_done = 1;
+	return 1;
 }
 
 static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
@@ -198,6 +300,8 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 	if (!fb_init_done)
 		if (fb_init())
 			return 1;
+	if (!fb_works)
+		return 1;
 
 	in_width = width;
 	in_height = height;
@@ -220,6 +324,9 @@ static uint32_t query_format(uint32_t format)
 	if (!fb_init_done)
 		if (fb_init())
 			return 0;
+	if (!fb_works)
+		return 0;
+
 	printf("vo_fbdev: query_format(%#x(%.4s)): ", format, &format);
 //	if (format & IMGFMT_BGR_MASK == IMGFMT_BGR)
 //		goto not_supported;
@@ -349,9 +456,11 @@ static void uninit(void)
 	printf("vo_fbdev: uninit\n");
 	fb_var_info.xres_virtual = fb_xres_virtual;
 	fb_var_info.yres_virtual = fb_yres_virtual;
-	if (ioctl(fb_dev_fd, FBIOPUT_VSCREENINFO, &fb_var_info))
-		printf("vo_fbdev: Can't set virtual screensize to original value: %s\n", strerror(errno));
-	close(fb_dev_fd);
+	if (fb_dev_fd != -1) {
+		if (ioctl(fb_dev_fd, FBIOPUT_VSCREENINFO, &fb_var_info))
+			printf("vo_fbdev: Can't set virtual screensize to original value: %s\n", strerror(errno));
+		close(fb_dev_fd);
+	}
 	memset(next_frame, '\0', in_height * in_width * fb_pixel_size);
 	put_frame();
 	if (vt_active >= 0)
