@@ -408,7 +408,8 @@ int af_inputlen(af_stream_t* s, int len)
 inline int af_resize_local_buffer(af_instance_t* af, af_data_t* data)
 {
   // Calculate new length
-  register int len = af_lencalc(af->mul,data->len);
+  register int len = af_lencalc(af->mul,data->len/(data->nch*data->bps)) * 
+    data->nch * data->bps;
   mp_msg(MSGT_AFILTER,MSGL_V,"Reallocating memory in module %s, old len = %i, new len = %i\n",af->info->name,af->data->len,len);
   // If there is a buffer free it
   if(af->data->audio) 
