@@ -72,7 +72,10 @@ static struct {
 	{ "audio/x-mpegurl", DEMUXER_TYPE_PLAYLIST },
 	{ "audio/x-pls", DEMUXER_TYPE_PLAYLIST },
 	// Real Media
-	{ "audio/x-pn-realaudio", DEMUXER_TYPE_REAL }
+	{ "audio/x-pn-realaudio", DEMUXER_TYPE_REAL },
+	// OGG Streaming
+	{ "application/x-ogg", DEMUXER_TYPE_OGG }
+
 };
 
 static struct {
@@ -94,6 +97,7 @@ static struct {
 	{ "ra", DEMUXER_TYPE_REAL },
 	{ "y4m", DEMUXER_TYPE_Y4M },
 	{ "mp3", DEMUXER_TYPE_AUDIO },
+	{ "ogg", DEMUXER_TYPE_OGG },
 	{ "wav", DEMUXER_TYPE_AUDIO },
 	{ "pls", DEMUXER_TYPE_PLAYLIST },
 	{ "m3u", DEMUXER_TYPE_PLAYLIST }
@@ -871,6 +875,7 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 		case DEMUXER_TYPE_FILM:
 		case DEMUXER_TYPE_ROQ:
 		case DEMUXER_TYPE_AUDIO:
+		case DEMUXER_TYPE_OGG:
 		case DEMUXER_TYPE_PLAYLIST:
 		case DEMUXER_TYPE_UNKNOWN:
 			// Generic start, doesn't need to filter
