@@ -69,7 +69,7 @@ Gyula László (Chass, Tégla) <chass-@freemail.hu>
 Zoltán Márk Vicián (Se7en) <se7en@sch.bme.hu>
     * SVGAlib support in libvo
 
-Alex Beregszaszi (al3x) <alex@naxine.org>
+Alex Beregszaszi (al3x) <alex@fsn.hu>
     * ALSA output driver in libao2
     * vo_ggi output driver in libvo (www.ggi-project.org)
     * XAnim codecs support
