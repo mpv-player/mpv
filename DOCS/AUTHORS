@@ -68,6 +68,7 @@ Felix Bünemann: <atmosfear@users.sourceforge.net>
 - Additional YUV formats fixes
 - New font (mp_font2.zip)
 - PNG file output support in libvo
+- flipping support (for Indeo 3/4, etc)
 
 TeLeNiEkO: <telenieko@telenieko.com>
 - spanish translation of documentation
