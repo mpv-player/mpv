@@ -5203,7 +5203,7 @@ void* LookupExternal(const char* library, int ordinal)
     }
     //    printf("%x %x\n", &unk_exp1, &unk_exp2);
 
-    printf("External func %s:%d\n", library, ordinal);
+    dbgprintf("External func %s:%d\n", library, ordinal);
 
     for(i=0; i<sizeof(libraries)/sizeof(struct libs); i++)
     {
