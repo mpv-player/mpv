@@ -12,6 +12,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "../config.h"
 #include "../mp_msg.h"
@@ -20,6 +21,7 @@
 #include "audio_out_internal.h"
 #include "afmt.h"
 #include <SDL.h>
+#include "osdep/timer.h"
 
 #include "../libvo/fastmemcpy.h"
 
@@ -34,16 +36,12 @@ static ao_info_t info =
 LIBAO_EXTERN(sdl)
 
 // Samplesize used by the SDLlib AudioSpec struct
-#ifdef WIN32
 #define SAMPLESIZE 2048
-#else
-#define SAMPLESIZE 1024
-#endif
 
 // General purpose Ring-buffering routines
 
 #define BUFFSIZE 4096
-#define NUM_BUFS 16 
+#define NUM_BUFS 8
 
 static unsigned char *buffer[NUM_BUFS];
 
@@ -51,7 +49,7 @@ static unsigned int buf_read=0;
 static unsigned int buf_write=0;
 static unsigned int buf_read_pos=0;
 static unsigned int buf_write_pos=0;
-static unsigned int volume=127;
+static unsigned char volume=SDL_MIX_MAXVOLUME;
 static int full_buffers=0;
 static int buffered_bytes=0;
 
@@ -80,11 +78,11 @@ static int read_buffer(unsigned char* data,int len){
   int len2=0;
   int x;
   while(len>0){
-    if(full_buffers==0) break; // no more data buffered!
+    if(buffered_bytes==0) break; // no more data buffered!
     x=BUFFSIZE-buf_read_pos;
     if(x>len) x=len;
-    memcpy(data+len2,buffer[buf_read]+buf_read_pos,x);
-    SDL_MixAudio(data+len2, data+len2, x, volume);
+    if (x>buffered_bytes) x=buffered_bytes;
+    SDL_MixAudio(data+len2,buffer[buf_read]+buf_read_pos,x,volume);
     len2+=x; len-=x;
     buffered_bytes-=x; buf_read_pos+=x;
     if(buf_read_pos>=BUFFSIZE){
@@ -122,15 +120,15 @@ static int control(int cmd,void *arg){
 		case AOCONTROL_GET_VOLUME:
 		{
 			ao_control_vol_t* vol = (ao_control_vol_t*)arg;
-			vol->left = vol->right = (float)((volume + 127)/2.55);
+			vol->left = vol->right = volume * 100 / SDL_MIX_MAXVOLUME;
 			return CONTROL_OK;
 		}
 		case AOCONTROL_SET_VOLUME:
 		{
-			float diff;
+			int diff;
 			ao_control_vol_t* vol = (ao_control_vol_t*)arg;
 			diff = (vol->left+vol->right) / 2;
-			volume = (int)(diff * 2.55) - 127;
+			volume = diff * SDL_MIX_MAXVOLUME / 100;
 			return CONTROL_OK;
 		}
 	}
@@ -265,6 +263,8 @@ void callback(void *userdata, Uint8 *stream, int len); userdata is the pointer s
 // close audio device
 static void uninit(){
 	mp_msg(MSGT_AO,MSGL_V,"SDL: Audio Subsystem shutting down!\n");
+	while(buffered_bytes > 0)
+		usec_sleep(50000);
 	SDL_CloseAudio();
 	SDL_QuitSubSystem(SDL_INIT_AUDIO);
 }
@@ -304,7 +304,7 @@ static void audio_resume()
 
 // return: how many bytes can be played without blocking
 static int get_space(){
-    return (NUM_BUFS-full_buffers)*BUFFSIZE - buf_write_pos;
+    return NUM_BUFS*BUFFSIZE - buffered_bytes;
 }
 
 // plays 'len' bytes of 'data'

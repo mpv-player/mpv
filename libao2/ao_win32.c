@@ -28,15 +28,15 @@
 #include "audio_out_internal.h"
 #include "../mp_msg.h"
 #include "../libvo/fastmemcpy.h"
+#include "osdep/timer.h"
 
-#define SAMPLESIZE   1024
+#define SAMPLESIZE   2048
 #define BUFFER_SIZE  4096
-#define BUFFER_COUNT 16 
+#define BUFFER_COUNT 8
 
 
 static WAVEHDR*     waveBlocks;         //pointer to our ringbuffer memory
 static HWAVEOUT     hWaveOut;           //handle to the waveout device
-static DWORD        restoredvolume;     //saves the volume to restore after playing
 static unsigned int buf_write=0;
 static unsigned int buf_write_pos=0;
 static int          full_buffers=0;
@@ -58,9 +58,12 @@ static void CALLBACK waveOutProc(HWAVEOUT hWaveOut,UINT uMsg,DWORD dwInstance,
 {
 	if(uMsg != WOM_DONE)
         return;
-    if(full_buffers==0) return;    //no more data buffered!
-    buffered_bytes-=BUFFER_SIZE;
-    --full_buffers;
+	if (full_buffers) {
+		buffered_bytes-=BUFFER_SIZE;
+		--full_buffers;
+	} else {
+		buffered_bytes=0;
+	}
 }
 
 // to set/get/query special features/parameters
@@ -149,7 +152,6 @@ static int init(int rate,int channels,int format,int flags)
 		return 0;
     }
     //save volume
-	waveOutGetVolume(hWaveOut,&restoredvolume); 
 	//allocate buffer memory as one big block
 	buffer = malloc(totalBufferSize);
 	memset(buffer,0x0,totalBufferSize);
@@ -157,7 +159,6 @@ static int init(int rate,int channels,int format,int flags)
     waveBlocks = (WAVEHDR*)buffer;
     buffer += sizeof(WAVEHDR) * BUFFER_COUNT;
     for(i = 0; i < BUFFER_COUNT; i++) {
-        waveBlocks[i].dwBufferLength = BUFFER_SIZE;
         waveBlocks[i].lpData = buffer;
         buffer += BUFFER_SIZE;
     }
@@ -168,11 +169,11 @@ static int init(int rate,int channels,int format,int flags)
 // close audio device
 static void uninit()
 {
-    waveOutSetVolume(hWaveOut,restoredvolume);  //restore volume
+    while (buffered_bytes > 0)
+	usec_sleep(50000);
 	waveOutReset(hWaveOut);
 	waveOutClose(hWaveOut);
 	mp_msg(MSGT_AO, MSGL_V,"waveOut device closed\n");
-	full_buffers=0;
     free(waveBlocks);
 	mp_msg(MSGT_AO, MSGL_V,"buffer memory freed\n");
 }
@@ -202,7 +203,7 @@ static void audio_resume()
 // return: how many bytes can be played without blocking
 static int get_space()
 {
-    return (BUFFER_COUNT-full_buffers)*BUFFER_SIZE - buf_write_pos;
+    return BUFFER_COUNT*BUFFER_SIZE - buffered_bytes;
 }
 
 //writes data into buffer, based on ringbuffer code in ao_sdl.c
@@ -212,7 +213,7 @@ static int write_waveOutBuffer(unsigned char* data,int len){
   int x;
   while(len>0){                       
     current = &waveBlocks[buf_write];
-	if(full_buffers==BUFFER_COUNT) break;  
+    if(buffered_bytes==BUFFER_COUNT*BUFFER_SIZE) break;
     //unprepare the header if it is prepared
 	if(current->dwFlags & WHDR_PREPARED) 
            waveOutUnprepareHeader(hWaveOut, current, sizeof(WAVEHDR));
@@ -222,6 +223,7 @@ static int write_waveOutBuffer(unsigned char* data,int len){
     len2+=x; len-=x;                 
 	buffered_bytes+=x; buf_write_pos+=x; 
 	//prepare header and write data to device
+	current->dwBufferLength = buf_write_pos;
 	waveOutPrepareHeader(hWaveOut, current, sizeof(WAVEHDR));
 	waveOutWrite(hWaveOut, current, sizeof(WAVEHDR));
     
