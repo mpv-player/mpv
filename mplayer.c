@@ -72,6 +72,8 @@ XMM xmm;
 XMM_PluginSound *pSound=NULL;
 #endif
 
+extern char *fb_dev_name;
+
 extern int vo_screenwidth;
 
 extern char* win32_codec_name;  // must be set before calling DrvOpen() !!!
@@ -1931,7 +1933,6 @@ switch(has_video){
     --osd_visible;
     if(!osd_visible) vo_osd_progbar_type=-1; // disable
   }
-
   } //  while(v_frame<a_frame || force_redraw)
 
 

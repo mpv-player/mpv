@@ -49,6 +49,7 @@ extern vo_functions_t video_out_odivx;
 extern vo_functions_t video_out_pgm;
 extern vo_functions_t video_out_md5;
 extern vo_functions_t video_out_syncfb;
+extern vo_functions_t video_out_fbdev;
 
 vo_functions_t* video_out_drivers[] =
 {
@@ -84,6 +85,7 @@ vo_functions_t* video_out_drivers[] =
         &video_out_odivx,
         &video_out_pgm,
         &video_out_md5,
+	&video_out_fbdev,
         NULL
 };
 

@@ -82,6 +82,7 @@ params:
         --enable-xv             build with Xv render support for X 4.x [autodetect]
 	--enable-vm		build with XF86VidMode support for x11 driver
         --enable-x11            build with X11 render support [autodetect]
+	--enable-fbdev		build with FBDev render support [_not_ autodetected]
 	--enable-mlib		build with MLIB support ( only Solaris )
 
 	--enable-termcap	use termcap database for key codes
@@ -166,6 +167,7 @@ _mlib=no
 _mpg123=no
 _xmga=no
 _dga=no
+_fbdev=no
 _lirc=no
 
 _x=1
@@ -457,6 +459,9 @@ do
   --enable-syncfb)
         _syncfb=yes
         ;;
+  --enable-fbdev)
+  	_fbdev=yes
+	;;
   --enable-mlib)
 	_mlib=yes
 	;;
@@ -508,6 +513,9 @@ do
   --disable-dga)
 	_dga=no
 	;;
+  --disable-fbdev)
+  	_fbdev=no
+	;;
   --disable-termcap)
 	_termcap=no
 	;;
@@ -548,6 +556,7 @@ echo "Checking for Xv ... $_xv"
 echo "Checking for X11 ... $_x11"
 echo "Checking for DGA ... $_dga"
 echo "Checking for Xf86VM ... $_vm"
+echo "Checking for FBDev ... $_fbdev"
 # write conf files.
 
 if [ $_gl = yes ]; then
@@ -718,6 +727,13 @@ else
  _dga='#undef HAVE_DGA'
 fi
 
+if [ $_fbdev = yes ]; then
+ _fbdev='#define HAVE_FBDEV'
+ _vosrc=$_vosrc' vo_fbdev.c'
+else
+ _fbdev='#undef HAVE_FBDEV'
+fi
+
 if [ $_mpg123 = yes ]; then
  _mpg123='#define DEFAULT_MPG123'
 else
@@ -795,6 +811,7 @@ $_sdldef
 $_3dfx
 $_mga
 $_syncfb
+$_fbdev
 
 #if defined(HAVE_GL)||defined(HAVE_X11)||defined(HAVE_XV)
 #define X11_FULLSCREEN
