@@ -56,6 +56,9 @@ typedef struct {
   char type;                    // t = text, v = VobSub
   unsigned int palette[16];     // for VobSubs
   int width, height;            // for VobSubs
+  int custom_colors;
+  unsigned int colors[4];
+  int forced_subs_only;
 } mkv_sh_sub_t;
 
 #endif /* __MATROSKA_H */

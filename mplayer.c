@@ -1603,10 +1603,13 @@ if (vo_spudec==NULL && stream->type==STREAMTYPE_DVD) {
 #ifdef HAVE_MATROSKA
 if ((vo_spudec == NULL) && (demuxer->type == DEMUXER_TYPE_MATROSKA) &&
     (d_dvdsub->sh != NULL) && (((mkv_sh_sub_t *)d_dvdsub->sh)->type == 'v')) {
+  mkv_sh_sub_t *mkv_sh_sub = (mkv_sh_sub_t *)d_dvdsub->sh;
   current_module = "spudec_init_matroska";
-  vo_spudec = spudec_new_scaled(((mkv_sh_sub_t *)d_dvdsub->sh)->palette,
-                                ((mkv_sh_sub_t *)d_dvdsub->sh)->width,
-                                ((mkv_sh_sub_t *)d_dvdsub->sh)->height);
+  vo_spudec =
+    spudec_new_scaled_vobsub(mkv_sh_sub->palette, mkv_sh_sub->colors,
+                             mkv_sh_sub->custom_colors, mkv_sh_sub->width,
+                             mkv_sh_sub->height);
+  forced_subs_only = mkv_sh_sub->forced_subs_only;
 }
 #endif
 
