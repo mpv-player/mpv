@@ -167,14 +167,15 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
       return 0;
    }
 
-    mpi = mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, 0, yuv.y_stride, yuv.y_height);
+    mpi = mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, 0, yuv.y_width, yuv.y_height);
     if(!mpi) return NULL;
-    mpi->planes[0]=yuv.y+yuv.y_stride*(context->inf.frame_height-1);
-    mpi->stride[0]=-yuv.y_stride;
-    mpi->planes[1]=yuv.u+yuv.uv_stride*(context->inf.frame_height/2-1);
-    mpi->stride[1]=-yuv.uv_stride;
-    mpi->planes[2]=yuv.v+yuv.uv_stride*(context->inf.frame_height/2-1);
-    mpi->stride[2]=-yuv.uv_stride;
+
+    mpi->planes[0]=yuv.y;
+    mpi->stride[0]=yuv.y_stride;
+    mpi->planes[1]=yuv.u;
+    mpi->stride[1]=yuv.uv_stride;
+    mpi->planes[2]=yuv.v;
+    mpi->stride[2]=yuv.uv_stride;
    
     return mpi;
 }
