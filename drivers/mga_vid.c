@@ -76,7 +76,9 @@
 #endif
 
 MODULE_AUTHOR("Aaron Holtzman <aholtzma@engr.uvic.ca>");
-
+#ifdef MODULE_LICENSE
+MODULE_LICENSE("GPL");
+#endif
 
 typedef struct bes_registers_s
 {
