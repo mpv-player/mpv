@@ -18,6 +18,7 @@
 <LI> <A HREF="#2.1.1.5">VIVO</A> format (.viv files)
 <LI> <A HREF="#2.1.1.6">FLI</A> format
 <LI> <A HREF="#2.1.1.7">RealMedia</A> format (.rm files)
+<LI> <A HREF="#2.1.1.8">NuppelVideo</A> format (.nuv files)
 <LI> supports <A HREF="documentation.html#3.3">reading from stdin</A>, or network via HTTP
 </UL></P>
 
@@ -172,6 +173,16 @@ will be messy for a short time after seeking.</P>
 is under implementation, and RM has keyframes so it will be flawless.
 Here are the lists of the supported <A HREF="codecs.html#2.2.1.8">RealVideo</A>
 and <A HREF="codecs.html#2.2.2.5">RealAudio</A> codecs.
+
+
+<P><B><A NAME=2.1.1.8>2.1.1.8. NuppelVideo files</A></B></P>
+
+<P><A HREF="http://mars.tuwien.ac.at/~roman/nuppelvideo">NuppelVideo</A>
+is a TV grabber tool (AFAIK:). <B>MPlayer</B> can read its <CODE>.nuv</CODE>
+files (only NuppelVideo 5.0). Those files can contain uncompressed YV12,
+YV12+RTJpeg compressed, YV12 RTJpeg+lzo compressed, and YV12+lzo compressed
+frames, <B>MPlayer</B> decodes (and also <B>encodes</B> them with MEncoder to
+DivX/etc!) them all. Seeking is under implementation.</P>
 
 
 <P><B><A NAME=2.1.2>2.1.2. Audio formats</A></B></P>
