@@ -458,7 +458,7 @@ static char help_text[]=
 #define MSGTR_MENU_Chapter "Kapitel %2d"
 #define MSGTR_MENU_AudioLanguages "Audio-Sprachen"
 #define MSGTR_MENU_SubtitleLanguages "Untertitel-Sprachen"
-#define MSGTR_MENU_PlayList "Playliste"
+#define MSGTR_MENU_PlayList "Playlist"
 #define MSGTR_MENU_SkinBrowser "Skinbrowser"
 #define MSGTR_MENU_Preferences "Einstellungen"
 #define MSGTR_MENU_Exit "Beenden ..."
