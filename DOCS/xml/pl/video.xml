@@ -1411,7 +1411,7 @@ przyśpieszenia na wyjściu na drugi monitor (second head)/TV.
 W takim przypadku widać zielone/niebieskie okno zamiast filmu. 
 To tutaj przydaje się ten sterownik, lecz potrzebujesz potężnego 
 CPU aby używać programowego skalowania. Nie używaj programowego 
-wyjścia SDL + skalowania, jakość obrazu jest wiele gorsza!
+wyjścia SDL + skalowania, jakość obrazu jest o wiele gorsza!
 </para>
 
 <para>
