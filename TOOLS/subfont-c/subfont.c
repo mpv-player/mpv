@@ -55,6 +55,7 @@ char		*font_path = NULL;
 
 
 unsigned char	*buffer;
+unsigned char	*ebuffer; // temporary buffer for alphamap creation (edges)
 unsigned char	*abuffer;
 int		width, height;
 static FT_ULong	ustring[256];
@@ -252,6 +253,7 @@ void render() {
     eprintf("bitmap size: %ix%i\n", width, height);
 
     buffer = (unsigned char*)malloc(width*height);
+    ebuffer = (unsigned char*)malloc(width*height);
     abuffer = (unsigned char*)malloc(width*height);
     if (buffer==NULL || abuffer==NULL) ERROR("malloc failed.",NULL);
 
@@ -358,15 +360,13 @@ void blur() {
 
     /* This is not a gaussian blur! */
     /* And is very slow */
-    for (y = 0; y<height; ++y){
-	for (x = 0; x<width; ++x) {
-	    float max = 0;
-	    for (my = -r; my<=r; ++my)
-		if (y+my>0 && y+my<height-1){
-		    int ay=(y+my)*width;
-		    for (mx = -r; mx<=r; ++mx) {
-			int ax=x+mx;
-			if (ax>0 && ax<width-1) {
+    
+    // PASS-1 : build edge mask:
+    memset(ebuffer,0,width*height); // clear
+    for (y = 1; y<height-1; ++y){
+	int ay=y*width;
+	int ax;
+	for (ax = 1; ax<width-1; ++ax) {
 			    int p =
 
 			  ( (buffer[ax-1+ay-width]) +
@@ -381,11 +381,25 @@ void blur() {
 
 			    (buffer[ax+ay]) ) ;
 			    
-			    max+=(p>255?255:p)*m[mx+r+(my+r)*w];
-			}
-		    
-		    }
+			    ebuffer[ax+ay]=(p>255)?255:p;
+	}
+//	printf("\n");
+    }
+
+    // PASS-2 : blur
+    for (y = 0; y<height; ++y){
+	for (x = 0; x<width; ++x) {
+	    float max = 0;
+	    for (my = -r; my<=r; ++my){
+		int ay=y+my;
+		if(ay>0 && ay<height){
+		    int by=r+(my+r)*w;
+		    ay*=width;
+		    for (mx = -r; mx<=r; ++mx)
+			if(x+mx>0 && x+mx<width)
+			    max+=ebuffer[x+mx+ay]*m[mx+by];
 		}
+	    }
 	    max*=alpha_factor/(float)sum;
 //	    printf("%5.3f ",max);
 	    if(max>255) max=255;
@@ -393,6 +407,7 @@ void blur() {
 	}
 //	printf("\n");
     }
+
     free(m);
 }
 
