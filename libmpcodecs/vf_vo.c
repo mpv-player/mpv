@@ -17,6 +17,23 @@
 static int config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
+
+  if(video_out->get_info)
+  { const vo_info_t *info = video_out->get_info();
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"VO: [%s] %dx%d => %dx%d %s %s%s%s%s\n",info->short_name,
+         width, height,
+         d_width, d_height,
+	 vo_format_name(outfmt),
+         (flags&1)?"fs ":"",
+         (flags&2)?"vm ":"",
+         (flags&4)?"zoom ":"",
+         (flags&8)?"flip ":"");
+    mp_msg(MSGT_CPLAYER,MSGL_V,"VO: Description: %s\n",info->name);
+    mp_msg(MSGT_CPLAYER,MSGL_V,"VO: Author: %s\n", info->author);
+    if(info->comment && strlen(info->comment) > 0)
+        mp_msg(MSGT_CPLAYER,MSGL_V,"VO: Comment: %s\n", info->comment);
+  }
+
     if(video_out->config(width,height,d_width,d_height,flags,"MPlayer",outfmt,NULL))
 	return 0;
     ++vo_config_count;
