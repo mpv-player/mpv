@@ -2940,7 +2940,7 @@ fi
 echocheck "OpenGL"
 cygwin && _gl=no
 #Note: this test is run even with --enable-gl since we autodetect $_ld_gl
-if test "$_x11" = yes && test "$_gl" != no ; then
+if (test "$_x11" = yes || mingw32) && test "$_gl" != no ; then
   cat > $TMPC << EOF
 #include <GL/gl.h>
 int main(void) { return 0; }
@@ -2952,16 +2952,26 @@ EOF
   elif cc_check $_inc_x11 $_ld_x11 -lGL -lm $_ld_pthread ; then
     _gl=yes
     _ld_gl="-lGL $_ld_pthread"
+  elif cc_check -lopengl32 ; then
+    _gl=yes
+    _gl_win32=yes
+    _ld_gl="-lopengl32 -lgdi32"
   fi
 else
   _gl=no
 fi
 if test "$_gl" = yes ; then
   _def_gl='#define HAVE_GL 1'
-  _vosrc="$_vosrc vo_gl.c vo_gl2.c"
+  if test "$_gl_win32" = yes ; then
+    _def_gl_win32='#define GL_WIN32 1' 
+    _vosrc="$_vosrc vo_gl2.c w32_common.c"
+  else
+    _vosrc="$_vosrc vo_gl.c vo_gl2.c"
+  fi
   _vomodules="opengl $_vomodules"
 else
   _def_gl='#undef HAVE_GL'
+  _def_gl_win32='#undef GL_WIN32'
   _novomodules="opengl $_novomodules"
 fi
 echores "$_gl"
@@ -6100,6 +6110,7 @@ $_def_xvmc
 $_def_vm
 $_def_xinerama
 $_def_gl
+$_def_gl_win32
 $_def_dga
 $_def_dga2
 $_def_sdl

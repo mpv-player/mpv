@@ -15,15 +15,22 @@
 #include "video_out_internal.h"
 #include "sub.h"
 
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-//#include <X11/keysym.h>
-#include <GL/glx.h>
+#include <GL/gl.h>
+#ifdef GL_WIN32
+    #include <windows.h>
+    #include <GL/glext.h>
+#else
+    #include <X11/Xlib.h>
+    #include <X11/Xutil.h>
+    #include <GL/glx.h>
+#endif
 #include <errno.h>
 
-#include <GL/gl.h>
-
-#include "x11_common.h"
+#ifdef GL_WIN32
+    #include "w32_common.h"
+#else
+    #include "x11_common.h"
+#endif
 #include "aspect.h"
 
 #define NDEBUG
@@ -55,7 +62,9 @@ static unsigned char *ImageData=NULL;
 
 //static int texture_id=1;
 
-static GLXContext wsGLXContext;
+#ifndef GL_WIN32
+    static GLXContext wsGLXContext;
+#endif
 
 static uint32_t image_width;
 static uint32_t image_height;
@@ -80,7 +89,6 @@ static GLint    gl_bitmap_type;
 static char *   gl_bitmap_type_s;
 static int      gl_alignment;
 static int      isGL12 = GL_FALSE;
-static int      isFullscreen = GL_FALSE;
 
 static int      gl_bilinear=1;
 static int      gl_antialias=0;
@@ -556,7 +564,7 @@ static void drawTextureDisplay ()
 
 static void resize(int x,int y){
   printf("[gl2] Resize: %dx%d\n",x,y);
-  if( isFullscreen )
+  if( vo_fs )
 	  glViewport( (vo_screenwidth-x)/2, (vo_screenheight-y)/2, x, y);
   else 
 	  glViewport( 0, 0, x, y );
@@ -587,6 +595,42 @@ static void draw_alpha_15(int x0,int y0, int w,int h, unsigned char* src, unsign
 
 static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
 }
+
+#ifdef GL_WIN32
+
+static int config_w32(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format) {
+    PIXELFORMATDESCRIPTOR pfd;
+    int pf;
+
+    o_dwidth = d_width;
+    o_dheight = d_height;
+    vo_fs = flags & VOFLAG_FULLSCREEN;
+    vo_vm = flags & VOFLAG_MODESWITCHING;
+    
+    vo_dwidth = d_width;
+    vo_dheight = d_height;
+
+    destroyRenderingContext();
+    if (!createRenderingContext())
+	return -1;
+
+    if (vo_fs)
+	aspect(&d_width, &d_height, A_ZOOM);
+
+    pf = GetPixelFormat(vo_hdc);
+    if (!DescribePixelFormat(vo_hdc, pf, sizeof pfd, &pfd)) {
+	r_sz = g_sz = b_sz = a_sz = 0;
+    } else {
+	r_sz = pfd.cRedBits;
+	g_sz = pfd.cGreenBits;
+	b_sz = pfd.cBlueBits;
+	a_sz = pfd.cAlphaBits;
+    }
+
+    return 0;
+}
+
+#else
 
 static int choose_glx_visual(Display *dpy, int scr, XVisualInfo *res_vi)
 {
@@ -632,37 +676,14 @@ static int choose_glx_visual(Display *dpy, int scr, XVisualInfo *res_vi)
 	return (best_weight < 1000000) ? 0 : -1;
 }
 
-/* connect to server, create and map window,
- * allocate colors and (shared) memory
- */
-static uint32_t 
-config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
-{
-//	int screen;
-	unsigned int fg, bg;
+static uint32_t config_glx(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format) {
 	XSizeHints hint;
 	XVisualInfo *vinfo, vinfo_buf;
 	XEvent xev;
 
-//	XGCValues xgcv;
-
-        const unsigned char * glVersion;
-
-	image_height = height;
-	image_width = width;
-	image_format = format;
-
-	int_pause = 0;
-  
-	aspect_save_orig(width,height);
-	aspect_save_prescale(d_width,d_height);
-	aspect_save_screenres(vo_screenwidth,vo_screenheight);
-
-	aspect(&d_width,&d_height,A_NOZOOM);
-
         if( flags&0x01 )
         {
-	        isFullscreen = GL_TRUE;
+	        vo_fs = VO_TRUE;
                 aspect(&d_width,&d_height,A_ZOOM);
 		hint.x = 0;
 		hint.y = 0;
@@ -670,17 +691,13 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		hint.height = vo_screenheight;
 		hint.flags = PPosition | PSize;
         } else {
+		vo_fs = VO_FALSE;
 		hint.x = 0;
 		hint.y = 0;
 		hint.width = d_width;
 		hint.height = d_height;
 		hint.flags = PPosition | PSize;
         }
-
-	/* Get some colors */
-
-	bg = WhitePixel(mDisplay, mScreen);
-	fg = BlackPixel(mDisplay, mScreen);
 
 	/* Make the window */
 
@@ -742,6 +759,101 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		 | ButtonPressMask | ButtonReleaseMask | ExposureMask
         );
 
+  if(glXGetConfig(mDisplay,vinfo,GLX_RED_SIZE, &r_sz)!=0) 
+	  r_sz=0;
+  if(glXGetConfig(mDisplay,vinfo,GLX_GREEN_SIZE, &g_sz)!=0) 
+	  g_sz=0;
+  if(glXGetConfig(mDisplay,vinfo,GLX_BLUE_SIZE, &b_sz)!=0) 
+	  b_sz=0;
+  if(glXGetConfig(mDisplay,vinfo,GLX_ALPHA_SIZE, &a_sz)!=0) 
+	  a_sz=0;
+
+        return 0;
+}
+
+#endif
+
+static int initGl(uint32_t d_width, uint32_t d_height)
+{
+  ImageDataLocal=malloc(image_width*image_height*image_bytes);
+  memset(ImageDataLocal,128,image_width*image_height*image_bytes);
+
+  ImageData=ImageDataLocal;
+
+  texture_width=image_width;
+  texture_height=image_height;
+    
+  if (initTextures() < 0)
+    return -1;
+
+  glDisable(GL_BLEND); 
+  glDisable(GL_DEPTH_TEST);
+  glDepthMask(GL_FALSE);
+  glDisable(GL_CULL_FACE);
+
+  glPixelStorei (GL_UNPACK_ROW_LENGTH, memory_x_len);
+
+  /**
+   * may give a little speed up for a kinda burst read ..
+   */
+  if( (image_width*image_bpp)%8 == 0 )
+  	gl_alignment=8;
+  else if( (image_width*image_bpp)%4 == 0 )
+  	gl_alignment=4;
+  else if( (image_width*image_bpp)%2 == 0 )
+  	gl_alignment=2;
+  else
+  	gl_alignment=1;
+
+  glPixelStorei (GL_UNPACK_ALIGNMENT, gl_alignment); 
+
+  glEnable (GL_TEXTURE_2D);
+
+  gl_set_antialias(0);
+  gl_set_bilinear(1);
+  
+  drawTextureDisplay ();
+
+  printf("[gl2] Using image_bpp=%d, image_bytes=%d, isBGR=%d, \n\tgl_bitmap_format=%s, gl_bitmap_type=%s, \n\tgl_alignment=%d, rgb_size=%d (%d,%d,%d), a_sz=%d, \n\tgl_internal_format=%s\n",
+  	image_bpp, image_bytes, image_mode==MODE_BGR, 
+        gl_bitmap_format_s, gl_bitmap_type_s, gl_alignment,
+	rgb_sz, r_sz, g_sz, b_sz, a_sz, gl_internal_format_s);
+
+  resize(vo_dwidth, vo_dheight);
+
+  glClearColor( 0.0f,0.0f,0.0f,0.0f );
+  glClear( GL_COLOR_BUFFER_BIT );
+
+  return 0;
+}
+
+/* connect to server, create and map window,
+ * allocate colors and (shared) memory
+ */
+static uint32_t 
+config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
+{
+        const unsigned char * glVersion;
+
+	image_height = height;
+	image_width = width;
+	image_format = format;
+
+	int_pause = 0;
+  
+	aspect_save_orig(width,height);
+	aspect_save_prescale(d_width,d_height);
+	aspect_save_screenres(vo_screenwidth,vo_screenheight);
+
+	aspect(&d_width,&d_height,A_NOZOOM);
+
+#ifdef GL_WIN32
+	if (config_w32(width, height, d_width, d_height, flags, title, format) == -1)
+#else
+	if (config_glx(width, height, d_width, d_height, flags, title, format) == -1)
+#endif
+	    return -1;
+	
   glVersion = glGetString(GL_VERSION);
 
   printf("[gl2] OpenGL Driver Information:\n");
@@ -758,19 +870,10 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 
   if(isGL12)
   {
-	printf("[gl2] You have an OpenGL >= 1.2 capable drivers, GOOD (16bpp and BGR is ok !)\n");
+	printf("[gl2] You have OpenGL >= 1.2 capable drivers, GOOD (16bpp and BGR is ok!)\n");
   } else {
-	printf("[gl2] You have an OpenGL < 1.2 drivers, BAD (16bpp and BGR may be damaged  !)\n");
+	printf("[gl2] You have OpenGL < 1.2 drivers, BAD (16bpp and BGR may be damaged!)\n");
   }
-
-  if(glXGetConfig(mDisplay,vinfo,GLX_RED_SIZE, &r_sz)!=0) 
-	  r_sz=0;
-  if(glXGetConfig(mDisplay,vinfo,GLX_GREEN_SIZE, &g_sz)!=0) 
-	  g_sz=0;
-  if(glXGetConfig(mDisplay,vinfo,GLX_BLUE_SIZE, &b_sz)!=0) 
-	  b_sz=0;
-  if(glXGetConfig(mDisplay,vinfo,GLX_ALPHA_SIZE, &a_sz)!=0) 
-	  b_sz=0;
 
   rgb_sz=r_sz+g_sz+b_sz;
   if(rgb_sz<=0) rgb_sz=24;
@@ -887,55 +990,11 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 			break;
   }
 
-  ImageDataLocal=malloc(image_width*image_height*image_bytes);
-  memset(ImageDataLocal,128,image_width*image_height*image_bytes);
-
-  ImageData=ImageDataLocal;
-
-  texture_width=image_width;
-  texture_height=image_height;
-  if (initTextures() < 0)
-    return -1;
-
-  glDisable(GL_BLEND); 
-  glDisable(GL_DEPTH_TEST);
-  glDepthMask(GL_FALSE);
-  glDisable(GL_CULL_FACE);
-
-  glPixelStorei (GL_UNPACK_ROW_LENGTH, memory_x_len);
-
-  /**
-   * may give a little speed up for a kinda burst read ..
-   */
-  if( (image_width*image_bpp)%8 == 0 )
-  	gl_alignment=8;
-  else if( (image_width*image_bpp)%4 == 0 )
-  	gl_alignment=4;
-  else if( (image_width*image_bpp)%2 == 0 )
-  	gl_alignment=2;
-  else
-  	gl_alignment=1;
-
-  glPixelStorei (GL_UNPACK_ALIGNMENT, gl_alignment); 
-
-  glEnable (GL_TEXTURE_2D);
-
-  gl_set_antialias(0);
-  gl_set_bilinear(1);
-  
-  drawTextureDisplay ();
-
-  printf("[gl2] Using image_bpp=%d, image_bytes=%d, isBGR=%d, \n\tgl_bitmap_format=%s, gl_bitmap_type=%s, \n\tgl_alignment=%d, rgb_size=%d (%d,%d,%d), a_sz=%d, \n\tgl_internal_format=%s\n",
-  	image_bpp, image_bytes, image_mode==MODE_BGR, 
-        gl_bitmap_format_s, gl_bitmap_type_s, gl_alignment,
-	rgb_sz, r_sz, g_sz, b_sz, a_sz, gl_internal_format_s);
-
-  resize(d_width,d_height);
-
-  glClearColor( 0.0f,0.0f,0.0f,0.0f );
-  glClear( GL_COLOR_BUFFER_BIT );
-
-      saver_off(mDisplay);  // turning off screen saver
+  if (initGl(d_width, d_height) == -1)
+      return -1;
+#ifndef GL_WIN32
+      saver_off(mDisplay);
+#endif
 
 	return 0;
 }
@@ -954,6 +1013,16 @@ static int gl_handlekey(int key)
 	}
 	return 1;
 }
+
+#ifdef GL_WIN32
+
+static void check_events(void) {
+    int e=vo_w32_check_events();
+    if(e&VO_EVENT_RESIZE) resize(vo_dwidth,vo_dheight);
+    if(e&VO_EVENT_EXPOSE && int_pause) flip_page();
+}
+
+#else
 
 static void check_events(void)
 {
@@ -986,6 +1055,8 @@ static void check_events(void)
          if(e&VO_EVENT_EXPOSE && int_pause) flip_page();
 }
 
+#endif
+
 static void draw_osd(void)
 { vo_draw_text(image_width,image_height,draw_alpha_fnc); }
 
@@ -997,7 +1068,11 @@ flip_page(void)
 
 //  glFlush();
   glFinish();
+#ifdef GL_WIN32
+  SwapBuffers(vo_hdc);
+#else
   glXSwapBuffers( mDisplay,vo_window );
+#endif
 }
 
 //static inline uint32_t draw_slice_x11(uint8_t *src[], uint32_t slice_num)
@@ -1060,8 +1135,11 @@ static void
 uninit(void)
 {
   if ( !vo_config_count ) return;
-  saver_on(mDisplay); // screen saver back on
+#ifdef GL_WIN32
+  vo_w32_uninit();
+#else
   vo_x11_uninit();
+#endif
 }
 
 static uint32_t preinit(const char *arg)
@@ -1083,8 +1161,14 @@ static uint32_t control(uint32_t request, void *data, ...)
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
   case VOCTRL_FULLSCREEN:
+#ifdef GL_WIN32
+    vo_w32_fullscreen();
+    initGl(vo_dwidth, vo_dheight);
+#else
     vo_x11_fullscreen();
+#endif 
     return VO_TRUE;
+#ifndef GL_WIN32
   case VOCTRL_SET_EQUALIZER:
     {
       va_list ap;
@@ -1105,6 +1189,7 @@ static uint32_t control(uint32_t request, void *data, ...)
       va_end(ap);
       return vo_x11_get_equalizer(data, value);
     }
+#endif
   }
   return VO_NOTIMPL;
 }
