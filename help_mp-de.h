@@ -48,7 +48,7 @@ static char help_text[]=
 #define MSGTR_Exit_frames "Angeforderte Anzahl an Frames gespielt"
 #define MSGTR_Exit_quit "Ende"
 #define MSGTR_Exit_eof "Ende der Datei"
-#define MSGTR_Exit_error "Fehler"
+#define MSGTR_Exit_error "Schwerer Fehler"
 #define MSGTR_IntBySignal "\nMPlayer wurde durch Signal %d von Modul %s beendet\n"
 #define MSGTR_NoHomeDir "Kann Homeverzeichnis nicht finden\n"
 #define MSGTR_GetpathProblem "get_path(\"config\") Problem\n"
