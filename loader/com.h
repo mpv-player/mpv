@@ -1,9 +1,13 @@
+#ifndef AVIFILE_COM_H
+#define AVIFILE_COM_H
+
+#include <inttypes.h>
+
 /**
  * Internal functions and structures for COM emulation code.
  */
 
-#ifndef COM_H
-#define COM_H
+#ifndef WIN32
 
 #ifdef __cplusplus
 extern "C" {
@@ -12,22 +16,26 @@ extern "C" {
 void* CoTaskMemAlloc(unsigned long cb);
 void CoTaskMemFree(void* cb);
 
+#ifndef GUID_TYPE
+#define GUID_TYPE
 typedef struct
 {
-    long f1;
-    short f2;
-    short f3;
-    char f4[8];
+    uint32_t f1;
+    uint16_t f2;
+    uint16_t f3;
+    uint8_t  f4[8];
 } GUID;
+#endif
 
 extern GUID IID_IUnknown;
 extern GUID IID_IClassFactory;
 
 typedef long (*GETCLASSOBJECT) (GUID* clsid, GUID* iid, void** ppv);
 int RegisterComClass(GUID* clsid, GETCLASSOBJECT gcs);
+int UnregisterComClass(GUID* clsid, GETCLASSOBJECT gcs);
 
 #ifndef STDCALL
-#define STDCALL __attribute__((__stdcall__))	
+#define STDCALL __attribute__((__stdcall__))
 #endif
 
 struct IUnknown;
@@ -57,11 +65,12 @@ struct IClassFactory
 };
 
 long CoCreateInstance(GUID* rclsid, struct IUnknown* pUnkOuter,
-                    long dwClsContext, GUID* riid, void** ppv);
+		      long dwClsContext, GUID* riid, void** ppv);
 
 #ifdef __cplusplus
 };
-#endif
+#endif /* __cplusplus */
 
-#endif
+#endif /* WIN32 */
 
+#endif /* AVIFILE_COM_H */
