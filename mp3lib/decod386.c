@@ -11,17 +11,59 @@
  */
 
 
+#include "../config.h"
 
+#if 0
+ /* old WRITE_SAMPLE */
+   /* is portable */
+#define WRITE_SAMPLE(samples,sum,clip) {			\
+  if( (sum) > 32767.0) { *(samples) = 0x7fff; (clip)++; }	\
+  else if( (sum) < -32768.0) { *(samples) = -0x8000; (clip)++; }\
+  else { *(samples) = sum;  }					\
+}
+#else
  /* new WRITE_SAMPLE */
+
+/*
+ * should be the same as the "old WRITE_SAMPLE" macro above, but uses
+ * some tricks to avoid double->int conversions and floating point compares.
+ *
+ * Here's how it works:
+ * ((((65536.0 * 65536.0 * 16)+(65536.0 * 0.5))* 65536.0)) is
+ * 0x0010000080000000LL in hex.  It computes 0x0010000080000000LL + sum
+ * as a double IEEE fp value and extracts the low-order 32-bits from the
+ * IEEE fp representation stored in memory.  The 2^56 bit in the constant
+ * is intended to force the bits of "sum" into the least significant bits
+ * of the double mantissa.  After an integer substraction of 0x80000000
+ * we have the original double value "sum" converted to an 32-bit int value.
+ *
+ * (Is that really faster than the clean and simple old version of the macro?)
+ */
+
+/*
+ * On a SPARC cpu, we fetch the low-order 32-bit from the second 32-bit
+ * word of the double fp value stored in memory.  On an x86 cpu, we fetch it
+ * from the first 32-bit word.
+ * I'm not sure if the WORDS_BIGENDIAN feature test covers all possible memory
+ * layouts of double floating point values an all cpu architectures.  If
+ * it doesn't work for you, just enable the "old WRITE_SAMPLE" macro.
+ */
+#if WORDS_BIGENDIAN
+#define	MANTISSA_OFFSET	1
+#else
+#define	MANTISSA_OFFSET	0
+#endif
+
    /* sizeof(int) == 4 */
 #define WRITE_SAMPLE(samples,sum,clip) { \
   double dtemp; long v;                  \
   dtemp = ((((65536.0 * 65536.0 * 16)+(65536.0 * 0.5))* 65536.0)) + (sum);\
-  v = ((*(int *)&dtemp) - 0x80000000); \
+  v = (((int *)&dtemp)[MANTISSA_OFFSET] - 0x80000000); \
   if( v > 32767) { *(samples) = 0x7fff; (clip)++; } \
   else if( v < -32768) { *(samples) = -0x8000; (clip)++; } \
   else { *(samples) = v; } \
 }
+#endif
 
 
 /*
