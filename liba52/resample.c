@@ -20,7 +20,10 @@
 #include "../config.h"
 
 #ifdef HAVE_MMX
-static uint64_t __attribute__((aligned(16))) magicF2W= 0x43c0000043c00000LL;
+static uint64_t __attribute__((aligned(8))) magicF2W= 0x43c0000043c00000LL;
+static uint64_t __attribute__((aligned(8))) wm1010= 0xFFFF0000FFFF0000LL;
+static uint64_t __attribute__((aligned(8))) wm0101= 0x0000FFFF0000FFFFLL;
+static uint64_t __attribute__((aligned(8))) wm1100= 0xFFFFFFFF00000000LL;
 #endif
 
 static inline int16_t convert (int32_t i)
@@ -48,10 +51,45 @@ int a52_resample(float * _f, int16_t * s16)
 
     switch (flags) {
     case A52_MONO:
+#ifdef HAVE_MMX
+	asm volatile(
+		"movl $-512, %%esi		\n\t"
+		"movq magicF2W, %%mm7		\n\t"
+		"movq wm1100, %%mm3		\n\t"
+		"movq wm0101, %%mm4		\n\t"
+		"movq wm1010, %%mm5		\n\t"
+		"pxor %%mm6, %%mm6		\n\t"
+		"1:				\n\t"
+		"movq (%1, %%esi, 2), %%mm0	\n\t"
+		"movq 8(%1, %%esi, 2), %%mm1	\n\t"
+		"leal (%%esi, %%esi, 4), %%edi	\n\t"
+		"psubd %%mm7, %%mm0		\n\t"
+		"psubd %%mm7, %%mm1		\n\t"
+		"packssdw %%mm1, %%mm0		\n\t"
+		"movq %%mm0, %%mm1		\n\t"
+		"pand %%mm4, %%mm0		\n\t"
+		"pand %%mm5, %%mm1		\n\t"
+		"movq %%mm6, (%0, %%edi)	\n\t" // 0 0 0 0
+		"movd %%mm0, 8(%0, %%edi)	\n\t" // A 0
+		"pand %%mm3, %%mm0		\n\t"
+		"movd %%mm6, 12(%0, %%edi)	\n\t" // 0 0
+		"movd %%mm1, 16(%0, %%edi)	\n\t" // 0 B
+		"pand %%mm3, %%mm1		\n\t"
+		"movd %%mm6, 20(%0, %%edi)	\n\t" // 0 0
+		"movq %%mm0, 24(%0, %%edi)	\n\t" // 0 0 C 0
+		"movq %%mm1, 32(%0, %%edi)	\n\t" // 0 0 0 B
+		"addl $8, %%esi			\n\t"
+		" jnz 1b			\n\t"
+		"emms				\n\t"
+		:: "r" (s16+1280), "r" (f+256)
+		:"%esi", "%edi", "memory"
+	);
+#else
 	for (i = 0; i < 256; i++) {
 	    s16[5*i] = s16[5*i+1] = s16[5*i+2] = s16[5*i+3] = 0;
 	    s16[5*i+4] = convert (f[i]);
 	}
+#endif
 	break;
     case A52_CHANNEL:
     case A52_STEREO:
