@@ -30,12 +30,6 @@
 #define HAVE_RTSP_H
 
 
-#ifdef __CYGWIN__
-#define uint32_t unsigned int
-#define uint16_t unsigned short int
-#define uint8_t unsigned char
-#endif
-
 /* some codes returned by rtsp_request_* functions */
 
 #define RTSP_STATUS_SET_PARAMETER  10

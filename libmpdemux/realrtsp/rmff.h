@@ -66,12 +66,6 @@
 #define PN_PERFECT_PLAY_ENABLED 0x02
 #define PN_LIVE_BROADCAST       0x04
 
-#ifdef __CYGWIN__
-#define uint32_t unsigned int
-#define uint16_t unsigned short int
-#define uint8_t unsigned char
-#endif
-
 /*
  * rm header data structs
  */

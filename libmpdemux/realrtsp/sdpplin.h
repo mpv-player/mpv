@@ -32,12 +32,6 @@
 #include "rmff.h"
 #include "rtsp.h"
 
-#ifdef __CYGWIN__
-#define uint32_t unsigned int
-#define uint16_t unsigned short int
-#define uint8_t unsigned char
-#endif
-
 typedef struct {
 
   char *id;

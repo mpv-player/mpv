@@ -33,12 +33,6 @@
 #include "rmff.h"
 #include "rtsp.h"
 
-#ifdef __CYGWIN__
-#define uint32_t unsigned int
-#define uint16_t unsigned short int
-#define uint8_t unsigned char
-#endif
-
 /*
  * calculates response and checksum of a given challenge
  * (RealChallenge1 in rtsp). See implementation for details.
