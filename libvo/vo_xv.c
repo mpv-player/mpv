@@ -744,6 +744,7 @@ static uint32_t draw_frame(uint8_t *src[])
 static uint32_t get_image(mp_image_t *mpi){
     if(mpi->type==MP_IMGTYPE_STATIC && num_buffers>1) return VO_FALSE; // it is not static
     if(mpi->type==MP_IMGTYPE_IPB && num_buffers<3 && mpi->flags&MP_IMGFLAG_READABLE) return VO_FALSE; // not enough
+    if(mpi->type==MP_IMGTYPE_IP  && num_buffers<2 && mpi->flags&MP_IMGFLAG_READABLE) return VO_FALSE; // not enough
     if(mpi->imgfmt!=image_format || mpi->imgfmt==IMGFMT_BGR24) return VO_FALSE; // needs conversion :(
 //    if(mpi->flags&MP_IMGFLAG_READABLE) return VO_FALSE; // slow video ram
     if( (mpi->flags&(MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_ACCEPT_WIDTH)) ||
