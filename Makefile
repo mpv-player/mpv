@@ -214,9 +214,6 @@ $(MENCODER_DEP): version.h
 $(PRG_CFG): version.h codec-cfg.c codec-cfg.h
 	$(CC) $(CFLAGS) -g codec-cfg.c -o $(PRG_CFG) -DCODECS2HTML
 
-jaf: 
-	echo $(COMMON_DEPS)
-
 install: $(ALL_PRG)
 ifeq ($(VIDIX),yes)
 	$(DO_MAKE)
