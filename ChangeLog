@@ -1000,7 +1000,7 @@ MPlayer (0.90)
     * MEncoder: set keyframe flag on audio packets, fixes Windows seeking
     * loader: fixed 2 10l bugs, ATI VCR2 DLL now works. using new style CS code.
     * demux_avi: always use block counter even if dwSampleSize!=0, fixes samples
-    * SPU decoder (DVD/VOB subs): fixed 2 major bugs causing lost subtitles
+    * SPU decoder (DVD/VOBsubs): fixed 2 major bugs causing lost subtitles
     * various memory leak fixes (valgrind rulez :)
     * fixed RealAudio SIPR(O) codec (the wrapper didn't find the dspr.so.6)
     * mms:// audio (radio) streaming fixed

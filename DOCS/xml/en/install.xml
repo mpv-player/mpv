@@ -774,10 +774,10 @@ OSD/SUB feature. There are many ways to get it:
   <!-- FIXME: this para should be before the list -->
   Font should have appropriate <filename>font.desc</filename> file which
   maps unicode font positions to the actual code page of the subtitles
-  text. Other solution is to have subtitles encoded in UTF8 encoding and
+  text. Other solution is to have subtitles encoded in UTF-8 encoding and
   use <option>-utf8</option> option or just name the subtitles file
   <filename>&lt;video_name&gt;.utf</filename> and have it in the same dir
-  as the video file. Recoding from different codepages to UTF8 could be
+  as the video file. Recoding from different codepages to UTF-8 could be
   done by using <command>konwert</command> or <command>iconv</command> programs.
   </para><para>
 
