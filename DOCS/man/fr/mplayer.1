@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "05 Février 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "15 Février 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -740,8 +740,9 @@ en paramètre.
 .
 .TP
 .B \-sstep <sec>
-Affiche une trame toutes les <sec> secondes.
-Utile pour les diaporamas.
+Saute <sec> secondes après chaque trame.
+Le nombre d'images par secondes affichées étant conservé, le lecture est donc
+accélérée.
 Étant donné que MPlayer ne peut se déplacer dans les flux vidéo que de
 trame-clé en trame-clé, cet intervalle ne sera pas scrupuleusement respecté.
 .
@@ -4156,15 +4157,17 @@ nom du format comme rgb15, bgr24, yv12, etc. (par défaut: yv12)
 Construit la chaîne de filtres spécifiée.
 Les sous-filtres doivent être séparés avec '/', peuvent être désactivés
 en les préfixant de '-'.
+Chaque sous-filtre et quelques options ont une forme longue et une forme
+abréviée équivalente, comme par ex\. dr/dering sont les mêmes options.
 La portée de chaque sous-filtre peut être contrôlée en ajoutant ':' suivi
 de 'a', 'c' ou 'y' (par défaut\ : c)\ :
 .PD 0
 .RSs
-.IPs a
+.IPs a/autoq
 Désactive le sous-filtre automatiquement si le micro-processeur est trop lent.
-.IPs c
-Filtre également la chrominance.
-.IPs y
+.IPs c/chrom
+Filtre également la chrominance (par défaut).
+.IPs y/nochrom
 Filtrage de la luminance uniquement (pas de la chrominance).
 .RE
 .PD 1
@@ -4173,6 +4176,101 @@ Filtrage de la luminance uniquement (pas de la chrominance).
 .br
 .I NOTE\ :
 \-pphelp affiche une liste des sous-filtres disponibles.
+.sp 1
+Les sous-filtres disponibles sont
+.RE
+.RSs
+.IPs hb/hdeblock[:différence[:platitude]]
+filtre de déblocage horizontal
+.RSss
+<différence>: Facteur de différence où plus la valeur est grande, plus le
+déblocage est important (par défaut: 32).
+.br
+<platitude>: Seuil de platitude où plus la valeur est petite, plus le
+déblocage est important (par défaut: 39).
+.REss
+.IPs vb/vdeblock[:différence[:platitude]]
+filtre de déblocage vertical
+.RSss
+<différence>: Facteur de différence où plus la valeur est grande, plus le
+déblocage est important (par défaut: 32).
+.br
+<platitude>: Seuil de platitude où plus la valeur est petite, plus le
+déblocage est important (par défaut: 39).
+.REss
+.IPs ha/hadeblock[:différence[:platitude]]
+filtre précis de déblocage horizontal
+.RSss
+<différence>: Facteur de différence où plus la valeur est grande, plus le
+déblocage est important (par défaut: 32).
+.br
+<platitude>: Seuil de platitude où plus la valeur est petite, plus le
+déblocage est important (par défaut: 39).
+.REss
+.IPs va/vadeblock[:différence[:platitude]]
+filtre précis de déblocage vertical
+.RSss
+<différence>: Facteur de différence où plus la valeur est grande, plus le
+déblocage est important (par défaut: 32).
+.br
+<platitude>: Seuil de platitude où plus la valeur est petite, plus le
+déblocage est important (par défaut: 39).
+.REss
+.sp 1
+Les filtres de déblocage horizontal et vertical partagent les mêmes
+valeurs différence et platitude, donc il n'est pas possible de leur
+donner des seuils horizontaux et verticaux différents.
+.sp 1
+.IPs h1/x1hdeblock
+filtre expérimental de déblocage horizontal
+.IPs v1/x1vdeblock
+filtre expérimental de déblocage vertical
+.IPs dr/dering
+filtre de "deringing"
+.IPs tn/tmpnoise[:seuil1[:seuil2[:seuil3]]]
+réducteur de bruit temporel
+.RSss
+<seuil1>: plus grand -> filtrage plus important
+.br
+<seuil2>: plus grand -> filtrage plus important
+.br
+<seuil3>: plus grand -> filtrage plus important
+.REss
+.IPs al/autolevels[:f/fullyrange]
+correction automatique de la luminosité / contraste
+.RSss
+f/fullyrange: Accroît la luminosité jusqu'à (0\-255).
+.REss
+.IPs lb/linblenddeint
+Filtre de désentrelacement à "mélangeage linéaire" (linear blend) filtrant
+le bloc donné en filtrant chaque ligne par un filtre (1 2 1).
+.IPs li/linipoldeint
+Filtre de désentrelacement à interpolation linéaire désentrelaçant le
+bloc donné en réalisant une interpolation linéaire d'une ligne sur deux.
+.IPs ci/cubicipoldeint
+Filtre de désentrelacement à interpolation cubique désentrelaçant le
+bloc donné en réalisant une interpolation cubique d'une ligne sur deux.
+.IPs md/mediandeint
+Filtre de désentrelacement médian désentrelaçant le bloc donné en
+appliquand un filtre médian d'une ligne sur deux.
+.IPs fd/ffmpegdeint
+Filtre de désentrelacement de FFmpeg désentrelaçant le bloc donné en
+filtrant une ligne sur deux avec un filtre (-1 4 2 4 -1).
+.IPs l5/lowpass5
+Applique un filtre passe-bas FIR désentrelaçant le bloc donné en
+filtrant toutes les lignes avec un filtre (-1 2 6 2 -1).
+.IPs fq/forceQuant[:quantum]
+Outrepasse la table des quantum de la source avec le quantum constant
+que vous donnez.
+.RSss
+<quantum>: le quantum à utiliser
+.REss
+.IPs de/default
+combinaison de filtres pp par défaut (hb:a,vb:a,dr:a)
+.IPs fa/fast
+combinaison de filtres pp rapides (h1:a,v1:a,dr:a)
+.RE
+.RS
 .sp 1
 .I EXEMPLE\ :
 .RE
@@ -4577,7 +4675,7 @@ entrelaçées.
 La valeur par défaut, -1, signifie "pas dans la séquence telecine".
 Le nombre spécifié ici est le type de la précédente trame imaginaire avant le
 début du film.
-.IPs "tr0, tr1, tr2, tr3"
+.IPs "<t0>, <t1>, <t2>, <t3>"
 Valeurs seuils à utiliser dans certains types.
 .RE
 .
@@ -5888,8 +5986,9 @@ Toujours utiliser le nombre maximum de trames-B (par défaut).
 .
 .TP
 .B vpass=<1\-3>
-Active le mode deux (ou trois) passes internes ne le spécifiez que si
-vous désirez utiliser l'encodage deux (ou trois) passes\ :
+Active le mode interne deux (ou plus) passes.
+Ne le spécifiez que si vous désirez utiliser l'encodage deux (ou plus)
+passes\ :
 .PD 0
 .RSs
 .IPs 1
@@ -5897,7 +5996,7 @@ première passe (voir aussi turbo)
 .IPs 2
 seconde passe
 .IPs 3
-Nième passe (seconde et troisième passes de l'encodage trois passes)
+Nième passe (seconde passe et passes suivantes de l'encodage N-passes)
 .RE
 .RS
 Voici comment cela fonctionne, et comment l'utiliser\ :
@@ -5909,7 +6008,7 @@ comme le fait le mode "turbo".
 En mode deux passes, la seconde passe (vpass=2) se base sur le fichier de
 stats pour allouer le bon nombre de bits aux trames (ratecontrol).
 .br
-En mode trois passes, la seconde passe (vpass=3, non ce n'est pas une
+En mode N-passes, la seconde passe (vpass=3, non ce n'est pas une
 erreur) fait les deux\ : elle lit le fichier de stats, puis ré-écrit
 par dessus.
 (Peut-être que vous devriez sauver le fichier divx2pass.log avant si
@@ -5917,11 +6016,17 @@ MEncoder peut être interrompu dans son cours).
 Vous devriez utiliser toutes les options d'encodage, à l'exception de celles
 vraiment très gourmandes, comme "qns".
 .br
-La troisième passe (vpass=3) fait la même chose que la seconde, à la
-différence près qu'elle dispose des stats de la deuxième passe pour mieux
-travailler.
-Vous pouvez utiliser toutes les options d'encodage, même les plus
-gourmandes.
+Chaque passe additionnelle utilisera les statistiques générées par la passe
+précédente pour améliorer le résultat.
+La dernière passe peut être effectuée en utilisant toutes les options
+d'encodage, même les plus gourmandes.
+.br
+Si vous voulez effectuer un encodage en 2 passes, utilisez d'abord vpass=1,
+puis vpass=2.
+.br
+Si vous voulez effectuer un encodage en 3 passes ou plus, utilisez vpass=1
+pour la première passe, puis vpass=3, puis vpass=3, encore et encore jusqu'à
+ce que le résultat vous convienne.
 .RE
 .PD 1
 .sp 1
