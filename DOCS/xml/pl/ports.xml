@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.55 -->
+<!-- synced with 1.57 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -273,6 +273,128 @@ i dalej skompiluj i zainstaluj.
 </para>
 </sect1>
 
+<sect1 id="hp-ux">
+<title>HP-UX</title>
+<para>
+Joe Page umieścił na swojej stronie domowej
+<ulink url="http://users.rcn.com/joepage/mplayer_on_hpux11.htm">dokument
+HOWTO</ulink> stworzony przez Martina Gansser'a dotyczący <application>MPlayera</application>
+na HP-UX. Korzystając z zawartych tam intrukcji program powinien się skompilować bez
+najmniejszych problemów. Poniższe informacje są zaczerpnięte z tego opracowania.
+</para>
+
+
+<para>
+Do budowy będziesz potrzebował GCC 3.4.0, GNU make 3.80, i SDL 1.2.7 lub ich
+nowszych wersji.Kompilator HP cc nie wyprodukuje działającego programu,
+a wcześniejsze wersje GCC są pełne błędów.
+Aby moć skorzystać z OpenGL, musisz zainstalować biblioteki Mesa, wtedy
+sterowniki wyjścia video gl i gl2 powinny działać. Ich wydajność może być
+tragiczna, jednak zależne jest to od mocy obliczeniowej procesora. Dobrym
+zammiennikiem, raczej kiepskiego, systemu dźwiękowego HP-UX jest GNU esound.
+</para>
+
+<para>
+Stwórz urządzenie DVD, przeskanuj magistralę SCSI komendą:
+</para>
+
+<screen>
+# ioscan -fn
+
+Class          I            H/W   Path          Driver    S/W State    H/W Type        Description
+...
+ext_bus 1    8/16/5      c720  CLAIMED INTERFACE  Built-in SCSI
+target  3    8/16/5.2    tgt   CLAIMED DEVICE
+disk    4    8/16/5.<emphasis role="bold">2</emphasis>.<emphasis role="bold">0</emphasis>  sdisk CLAIMED DEVICE     <emphasis role="bold">PIONEER DVD-ROM DVD-305</emphasis>
+                         /dev/dsk/c1t2d0 <emphasis role="bold">/dev/rdsk/c1t2d0</emphasis>
+target  4    8/16/5.7    tgt   CLAIMED DEVICE
+ctl     <emphasis role="bold">1</emphasis>    8/16/5.7.0  sctl  CLAIMED DEVICE     Initiator
+                         /dev/rscsi/c1t7d0 /dev/rscsi/c1t7l0 /dev/scsi/c1t7l0
+...
+</screen>
+
+<para>
+Z rezultatów działania komendy możemy odczytać, że na adresie 2 SCSI znajduje
+się Pioneer DVD-ROM. Instancja karty dla ścieżki sprzętowej 8/16 to 1.
+</para>
+
+<para>
+Stwórz dowiązanie surowego urządzenia do urządzenia DVD.
+</para>
+
+<screen>
+# ln -s /dev/rdsk/c<replaceable>&lt;instancja magistrali SCSI&gt;</replaceable>t<replaceable>&lt;ID docelowego SCSI&gt;</replaceable>d<replaceable>&lt;LUN&gt;</replaceable> /dev/<replaceable>&lt;urządzenie&lt;</replaceable>
+</screen>
+
+<para>
+Przykład:
+</para>
+
+<screen>
+# ln -s /dev/rdsk/c1t2d0 /dev/dvd
+</screen>
+
+<para>
+Poniżej znajdują się rozwiązania kilku najczęstszych problemów:
+</para>
+
+<itemizedlist>
+<listitem>
+<para>
+Wysypanie się programu przy uruchamianiu z komunikatem błędu:
+<screen>
+/usr/lib/dld.sl: Unresolved symbol: finite (code) from /usr/local/lib/gcc-lib/hppa2.0n-hp-hpux11.00/3.2/../../../libGL.sl
+</screen>
+</para>
+
+<para>
+Oznacza to, że funkcja <systemitem>.finite().</systemitem> jest niedostępna
+w standardowej bibliotece math HP-UX.
+Zamiast niej dostępna jest <systemitem>.isfinite().</systemitem>.
+Rozwiązanie: Skorzystaj z najnowszego pliku składowego Mesa.
+</para>
+</listitem>
+
+<listitem>
+<para>
+Wysypanie się programu przy odtwarzaniu z komunikatem:
+<screen>
+/usr/lib/dld.sl: Unresolved symbol: sem_init (code) from /usr/local/lib/libSDL-1.2.sl.0
+</screen>
+</para>
+
+<para>
+Rozwiązanie: Skorzystaj z opcji extralib skryptu configure
+<option>--with-extralibdir="/usr/lib -lrt"</option>
+</para>
+</listitem>
+
+<listitem>
+<para>
+MPlayer powoduje błąd naruszenia ochrony pamięci (segfault) z komunikatem:
+<screen>
+Pid 10166 received a SIGSEGV for stack growth failure.
+Possible causes: insufficient memory or swap space, or stack size exceeded maxssiz.
+Segmentation fault
+</screen>
+</para>
+
+<para>
+Rozwiazanie:
+Jądro HP-UX ma domyślnie zdefiniowany rozmiar stosu przeznaczonego na każdy
+proces i jest to 8MB(?).(11.0 i nowsze łatki 10.20 pozwalają Ci zwiększyć
+parametr <systemitem>maxssiz</systemitem> do 350MB dla 32-bitowych programów).
+Musisz rozszerzyć <systemitem>maxssiz</systemitem> i przekompilować jądro
+(i uruchomić ponownie komputer). Możesz wykorzystać do tego celu SAM. (Kiedy
+w nim będziesz, sprawdź wartość <systemitem>maxdsiz</systemitem>. Określa ona
+maksymalny rozmiar danych, jaką program może użyć. To czy 64MB wystarczą czy nie,
+zależy wyłącznie od wymagań Twoich aplikacji.)
+</para>
+</listitem>
+</itemizedlist>
+
+</sect1>
+
 <sect1 id="qnx">
 <title>QNX</title>
 <para>
@@ -449,17 +571,6 @@ jego skompilowanymi binariami dla Mac OS X ze strony projektu
 </para>
 </sect1>
 
-<sect1 id="hp-ux">
-<title>HP-UX</title>
-<para>
-Joe Page umieścił na swojej stronie domowej
-<ulink url="http://users.rcn.com/joepage/mplayer_on_hpux11.htm">dokument
-HOWTO</ulink> stworzony przez Martina Gansser'a dotyczący <application>MPlayera</application>
-na HP-UX. Korzystając z zawartych tam intrukcji program powinien się skompilować bez
-najmnijeszych problemów.
-</para>
-</sect1>
-
 <sect1 id="amiga">
 <title>Amiga/MorphOS (zabawki dla zapaleńców)</title>
 <para>
@@ -479,8 +590,8 @@ pakiet binarny <application>MPlayer</application> 0.91</ulink>
 źródła <application>MPlayera</application> 0.91</ulink>
 </para></listitem>
 <listitem><para>
-<ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=912">
-pakiet binarny <application>MEncodera</application> 0.91</ulink>
+<ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=92">
+pakiet binarny <application>MEncodera</application> 1.0pre3</ulink>
 </para></listitem>
 </itemizedlist>
 </para>

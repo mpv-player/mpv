@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.49 -->
+<!-- synced with 1.50 -->
 <sect1 id="install">
 <title>Instalacja</title>
 
@@ -49,13 +49,13 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądra z ser
   jedynie ich obejścia w <application>MPlayerze</application>!).
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">XFree86</emphasis> - sugerowaną wersją jest <emphasis role="bold"> 
+  <emphasis role="bold">XFree86</emphasis> - sugerowaną wersją jest <emphasis role="bold">
   zawsze najnowsza</emphasis> (4.3). Przeważnie każdy tego chce, ponieważ zaczynając
   od XFree86 4.0.2, zawiera on rozszerzenie <link linkend="xv">XVideo</link>
   (czasami również nazywane <emphasis role="bold">Xv</emphasis>),
   które jest potrzebne do włączenia sprzętowej akceleracji YUV (szybkie wyświetlanie
-  obrazów) na kartach, które je obsługują. 
-  Upewnij się, że są zainstalowane również <emphasis role="bold">pakiety rozwojowe</emphasis>, 
+  obrazów) na kartach, które je obsługują.
+  Upewnij się, że są zainstalowane również <emphasis role="bold">pakiety rozwojowe</emphasis>,
   w przeciwnym wypadku nie zadziała.
   W przypadku niektórych kart nie potrzebujesz XFree86. Zobacz listę poniżej.
   </para></listitem>
@@ -71,7 +71,7 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądra z ser
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">libjpeg</emphasis> - opcjonalny dekoder JPEG, używany
-  przez opcję <option>-mf</option> i niektóre pliki QT MOV. Użyteczny zarówno dla 
+  przez opcję <option>-mf</option> i niektóre pliki QT MOV. Użyteczny zarówno dla
   <application>MPlayera</application>, jak i <application>MEncodera</application>,
   jeżeli zamierzasz pracować z plikami jpeg.
   </para></listitem>
@@ -82,7 +82,7 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądra z ser
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">lame</emphasis> - zalecana, wymagana do zakodowania dźwięku
-  MP3 przez <application>MEncodera</application>, sugerowaną wersją jest 
+  MP3 przez <application>MEncodera</application>, sugerowaną wersją jest
   <emphasis>zawsze najnowsza</emphasis> (przynajmniej 3.90).
   </para></listitem>
 <listitem><para>
@@ -114,7 +114,7 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądra z ser
   Wymagana jest przynajmniej wersja 2.0.9.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libxmms</emphasis> - opcjonalna, do obsługi wtyczek wejściowych 
+  <emphasis role="bold">libxmms</emphasis> - opcjonalna, do obsługi wtyczek wejściowych
   XMMS. Wymagana jest przynajmniej wersja 1.2.7.
   </para></listitem>
 <listitem><para>
@@ -125,8 +125,8 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądra z ser
   dźwięku poprzez JACK, potrzebna jedynie w czasie kompilacji. Do pobrania z
   <ulink url="http://bio2jack.sf.net/">http://bio2jack.sf.net</ulink>. Ponieważ
   nie posiada ona opcji instalacji musisz samodzielnie umieścić plik
-  <filename>libbio2jack.a</filename> w swoim katalogu z bibliotekami 
-  (np. <filename>/usr/local/lib/</filename>) lub użyć opcji 
+  <filename>libbio2jack.a</filename> w swoim katalogu z bibliotekami
+  (np. <filename>/usr/local/lib/</filename>) lub użyć opcji
   <option>--with-bio2jack=KATALOG</option> aby przekazać jego lokalizację do
   skryptu <filename>./configure</filename>.
   </para></listitem>
@@ -153,7 +153,7 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądra z ser
     kodowanie większością wymienionych kodeków
     </simpara></listitem>
   <listitem><simpara>
-    ten kodek jest <emphasis role="bold">najszybszym dostępnym</emphasis> dla 
+    ten kodek jest <emphasis role="bold">najszybszym dostępnym</emphasis> dla
     DivX/3/4/5 i innych rodzajów MPEG-4. Zalecany!
     </simpara></listitem>
   </itemizedlist>
@@ -166,7 +166,7 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądra z ser
   i zainstaluj je do <filename class="directory">/usr/local/lib/codecs</filename>
   <emphasis role="bold">PRZED</emphasis> kompilacją <application>MPlayera</application>,
   w przeciwnym wypadku obsługa Win32 nie będzie wkompilowana!
-  <note><para>Projekt avifile ma podobny pakiet kodeków, ale różni się on od naszego, 
+  <note><para>Projekt avifile ma podobny pakiet kodeków, ale różni się on od naszego,
   więc jeżeli chcesz używać wszystkich, obsługiwanych kodeków, skorzystaj z
   naszej paczki (nie przejmuj się, avifile działa z nią bez problemów).</para>
   </note>
@@ -182,7 +182,7 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądra z ser
    </simpara></listitem>
   <listitem><simpara>
     Nie są potrzebne do starych plików video ASF z MP41 lub MP42 (mimo, że dźwięk VoxWare
-    jest często używany w tych plikach - realizowane jest to przez kodek Win32), lub WMV7. 
+    jest często używany w tych plikach - realizowane jest to przez kodek Win32), lub WMV7.
     Nie są również potrzebne do WMA (Windows Media Audio),
     <systemitem class="library">libavcodec</systemitem> ma potrzebne do niego dekodery ze
     świata wolnego oprogramowania.
@@ -197,7 +197,7 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądra z ser
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">DivX4/DivX5</emphasis>: informacje o tym kodeku są dostępne
-  w rozdziale <link linkend="divx4-5">DivX4/DivX5</link>. Prawdopodobnie, nie chcesz 
+  w rozdziale <link linkend="divx4-5">DivX4/DivX5</link>. Prawdopodobnie, nie chcesz
   tego kodeka jako, że <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>
   (zobacz powyżej) jest o wiele szybszy i ma lepszą jakość, zarówno dla dekodowania i
   kodowania. Cechy:
@@ -217,7 +217,7 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądra z ser
   </itemizedlist>
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">XviD</emphasis>: Alternatywa do kodowania dla DivX4Linux 
+  <emphasis role="bold">XviD</emphasis>: Alternatywa do kodowania dla DivX4Linux
   z otwartym źródłem. Cechy:
   <itemizedlist>
   <listitem><simpara>
@@ -237,21 +237,21 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądra z ser
   są najlepsze (pełny ekran, sprzętowy zoom YUV) do dekodowania filmów
   <emphasis role="bold">3ivx</emphasis>, Indeo 3/4/5 i kilku starych formatów.
   Są wieloplatformowe, więc są jednym sposobem, żeby odtworzyć Indeo na platformach
-  innych niż x86 (no, może poza użyciem XAnim:). Ale na przykład filmy Cinepak 
+  innych niż x86 (no, może poza użyciem XAnim:). Ale na przykład filmy Cinepak
   są najlepiej odtwarzane przy pomocy <application>MPlayerowego</application> dekodera Cinepak!
   </para></listitem>
 <listitem><para>
   Do dekodowania dźwięku <emphasis role="bold">Ogg Vorbis</emphasis>, będziesz musiał
-  poprawnie zainstalować <systemitem class="library">libvorbis</systemitem>. Skorzystaj
-  z pakietów deb/rpm, jeżeli są dostępne lub skompiluj ze 
-  <ulink url="http://ogg.org/ogg/vorbis/download/vorbis_nightly_cvs.tgz">źródła</ulink>
-  (jest to uaktualniana każdej nocy wersja Vorbis CVS spakowana tarem).
+  poprawnie zainstalować <systemitem class="library">libvorbis</systemitem>.
+  Źródła i odpowiednie pakiety binarne możesz pobrać ze
+  z pakietów deb/rpm, jeżeli są dostępne lub skompiluj ze
+  <ulink url="http://www.vorbis.com/download.psp">sotry ogg vorbis</ulink>.
   </para></listitem>
 <listitem><para>
   <application>MPlayer</application> może korzystać z bibliotek RealPlayer 8
   lub RealONE, żeby odtworzyć pliki z obrazem w formacie
   <emphasis role="bold">RealVideo 3.0 i 4.0</emphasis>
-  i dźwiękiem w Sipro/Cook. Zobacz rozdział 
+  i dźwiękiem w Sipro/Cook. Zobacz rozdział
   <link linkend="realmedia">format pliku RealMedia</link>,
   znajdziesz tam instrukcje i kilka informacji.
   </para></listitem>
@@ -276,7 +276,7 @@ te drugie nie.
 Wyświetlają i skalują (zoom) obraz do jakiegokolwiek rozmiaru mieszczącego
 się w ich pamięci, z <emphasis role="bold">małym zużyciem mocy CPU</emphasis> (nawet przy
 zoomie), dlatego też tryb pełnego ekranu jest miły i bardzo szybki.
-  
+
 <itemizedlist>
 <listitem><para>
   <emphasis role="bold">Karty Matrox G200/G400/G450/G550</emphasis>: mimo, że
@@ -304,14 +304,14 @@ zoomie), dlatego też tryb pełnego ekranu jest miły i bardzo szybki.
   <emphasis role="bold">Karty ATI</emphasis>: sterownik <link linkend="vidix">VIDIX</link>
   obsługuje następujące karty:
   <emphasis role="bold">Radeon, Rage128, Mach64</emphasis> (Rage XL/Mobility, Xpert98).
-  Przeczytaj również rozdział <link linkend="tvout-ati">karty ATI</link> 
-  dokumentacji wyjścia TV, aby dowiedzieć się czy wyjście TV Twojej karty jest 
+  Przeczytaj również rozdział <link linkend="tvout-ati">karty ATI</link>
+  dokumentacji wyjścia TV, aby dowiedzieć się czy wyjście TV Twojej karty jest
   obsługiwane przez  Linuksa/<application>MPlayera</application>.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">Karty S3</emphasis>: układy graficzne Savage i Virge/DX mają
   sprzętową akcelerację. Używaj jak najnowszej wersji XFree86, starsze sterowniki mają
-  liczne błędy. Układy Savage mają problemy z obrazem YV12, więcej szczegółów 
+  liczne błędy. Układy Savage mają problemy z obrazem YV12, więcej szczegółów
   znajdziesz w rozdziale <link linkend="s3">S3 Xv</link>. Starsze karty Trio nie obsługują
   w ogóle lub mają wolną akcelerację sprzętową.
   </para></listitem>
@@ -335,15 +335,15 @@ zoomie), dlatego też tryb pełnego ekranu jest miły i bardzo szybki.
   <emphasis role="bold">Inne karty</emphasis>: żadna z powyższych?
   <itemizedlist>
   <listitem><simpara>
-    Sprawdź, czy sterownik XFree86 (i Twoja karta) obsługują sprzętową akcelerację. 
+    Sprawdź, czy sterownik XFree86 (i Twoja karta) obsługują sprzętową akcelerację.
     Przeczytaj rozdział <link linkend="xv">Xv</link>, a znajdziesz więcej informacji.
     </simpara></listitem>
   <listitem><simpara>
     Jeżeli nie, oznacza to, że możliwości Twojej karty nie są obsługiwane
-    przez Twój system operacyjny :( Jeżeli sprzętowe skalowanie działa pod 
+    przez Twój system operacyjny :( Jeżeli sprzętowe skalowanie działa pod
     Windowsem, nie oznacza to, że będzie działało pod Linuksem lub gdzie indziej,
     zależy to od sterowników. Większość producentów, ani nie tworzy sterowników
-    dla Linuksa, ani nie publikuje specyfikacji swoich układów graficznych - 
+    dla Linuksa, ani nie publikuje specyfikacji swoich układów graficznych -
     więc masz pecha, jeśli używasz ich kart.
     Przeczytaj <xref linkend="non-yuv-cards"/>.
     </simpara></listitem>
@@ -358,7 +358,7 @@ zoomie), dlatego też tryb pełnego ekranu jest miły i bardzo szybki.
 <title>Karty nieobsługujące YUV</title>
 
 <para>
-Odtwarzanie pełnoekranowe może być uzyskane przez <emphasis role="bold"> programowe 
+Odtwarzanie pełnoekranowe może być uzyskane przez <emphasis role="bold"> programowe
 skalowanie </emphasis> (użyj opcji  <option>-zoom</option> lub <option>-vf</option>,
 ale ostrzegam Cię: to jest wolne) lub przełączenie na niższą rozdzielczość,
 na przykład 352x288. Jeżeli nie masz akceleracji YUV, ta druga metoda jest zalecana.
@@ -396,7 +396,7 @@ działa ona z następującymi sterownikami:
     i nie działa prawidłowo. <emphasis role="bold">Zalecane: 640x480@16bpp</emphasis>
    </simpara></listitem>
   <listitem><simpara>
-    XFree86 4: Xserver przestaje odpowiadać krótko po starcie, chyba że 
+    XFree86 4: Xserver przestaje odpowiadać krótko po starcie, chyba że
     akceleracja jest wyłączona, jednak wszystko działa wolniej niż na XFree86 3. Brak
     obsługi XVideo.
    </simpara></listitem>
@@ -425,10 +425,10 @@ działa ona z następującymi sterownikami:
 
 <itemizedlist>
 <listitem><simpara>
-  <emphasis role="bold">Soundblaster Live!</emphasis>: z tą kartą możesz używać 
+  <emphasis role="bold">Soundblaster Live!</emphasis>: z tą kartą możesz używać
   4 lub 6 (<emphasis role="bold">5.1</emphasis>) kanałowego dekodowania AC3, zamiast 2.
-  Przeczytaj rozdział <link linkend="swac3">Programowe dekodowanie AC3</link>. Dla 
-  sprzętowej obróbki AC3 <emphasis role="bold">musisz</emphasis> użyć ALSA 0.9 
+  Przeczytaj rozdział <link linkend="swac3">Programowe dekodowanie AC3</link>. Dla
+  sprzętowej obróbki AC3 <emphasis role="bold">musisz</emphasis> użyć ALSA 0.9
   z emulacją OSS!
   </simpara></listitem>
 <listitem><simpara>
@@ -464,7 +464,7 @@ działa ona z następującymi sterownikami:
   przeczytaj rozdział <link linkend="tv-input">wejście TV</link>.
   </para></listitem>
 <listitem><para>
-  Dostępne jest miłe, gotowe do użycia <emphasis role="bold">Menu OSD</emphasis>. 
+  Dostępne jest miłe, gotowe do użycia <emphasis role="bold">Menu OSD</emphasis>.
   Przeczytaj rozdział <link linkend="subosd">menu OSD</link>.
   </para></listitem>
 </itemizedlist>
@@ -758,8 +758,8 @@ Będziesz potrzebował paczki zwierającej czcionkę dla <application>MPlayera</appl
  Skorzystaj z wtyczki generator czcionki dla <application>GIMPa</application>,
  którą znajdziesz w katalogu <filename class="directory">TOOLS/subfont-GIMP</filename>
  (notka: musisz mieć również wtyczkę HSI RAW, sprawdź ten adres:
- <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/" />).
- </para></listitem>  
+ <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/index.php?pagename=MplayerKoreanFonts" />).
+ </para></listitem>
  <listitem><para>
  używanie czcionki TrueType (TTF) przy pomocy biblioteki
  <systemitem class="library">freetype</systemitem>. Konieczna do tego jest wersja
@@ -779,7 +779,7 @@ Będziesz potrzebował paczki zwierającej czcionkę dla <application>MPlayera</appl
   działały, ponieważ opcja <option>-font</option> będzie oczekiwała nazwy czcionki,
   a domyślną jest sans-serif. Aby otrzymać listę czcionek znanych
   <systemitem class="library">fontconfig</systemitem>,
-  użyj komendy <command>fc-list</command>. Przykład: 
+  użyj komendy <command>fc-list</command>. Przykład:
   <option>-font <replaceable>'Bitstream Vera Sans'</replaceable></option>
   </para></listitem>
 <listitem><para>
@@ -799,7 +799,7 @@ Będziesz potrzebował paczki zwierającej czcionkę dla <application>MPlayera</appl
   może być realizowana poprzez programy <command>konwert</command> lub
   <command>iconv</command>.
   </para><para>
-  
+
   <table>
   <title>Kilka adresów URL</title>
   <tgroup cols="2">
@@ -818,7 +818,7 @@ Będziesz potrzebował paczki zwierającej czcionkę dla <application>MPlayera</appl
     różne czcionki użytkowników
     </entry></row>
   <row><entry>
-    <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/"></ulink>
+    <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/index.php?pagename=MplayerKoreanFonts"></ulink>
     </entry><entry>
     czcionki koreańskie i wtyczka RAW
     </entry></row>

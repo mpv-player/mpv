@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.14 -->
+<!-- synced with 1.16 -->
 <appendix id="users-vs-dev">
 <title>Deweloperzy wyrywają sobie włosy</title>
 
@@ -28,11 +28,9 @@ s390. Dystrybutor <emphasis role="bold">Mandrake</emphasis> również poszedł w
 Zespół GCC wyparł się jakichkolwiek powiązań z GCC 2.96 i wystosował
 <ulink url="http://gcc.gnu.org/gcc-2.96.html">oficjalną odpowiedź</ulink>
 na GCC 2.96. Wielu developerów ze świata zaczęło mieć problemy z tym
-kompilatorem i zarekomendowali inne. Przykłady to
-<ulink url="http://www.mysql.com/downloads/mysql-3.23.html">MySQL</ulink>
-i
+kompilatorem i kilka projektów, między innymi, 
 <ulink url="http://avifile.sf.net/news-old1.htm">avifile</ulink>.
-Inne interesujące linki:
+zaczęło rekomendować inne rozwiązania. Inne interesujące linki:
 <ulink url="http://www.atnf.csiro.au/people/rgooch/linux/docs/kernel-newsflash.html">
  Krótka wiadomość o jądrze 2.4.17</ulink>
 i
@@ -77,11 +75,12 @@ Jeżeli masz problemy z GCC 2.96, możesz pobrać paczki 2.96-85
 z <ulink url="ftp://updates.redhat.com">serwera ftp</ulink> Red Hat lub
 skorzystać z pakietów 3.0.4, oferowanych z wersją 7.2 i kolejnymi. Możesz
 również ściągnąć
-<ulink url="ftp://people.redhat.com/jakub/gcc/3.2.3-11/">pakiety gcc-3.2.3-11</ulink>
-(nieoficjalne, ale działają dobrze) i zainstalować je razem z gcc-2.96, które
-już masz. <application>MPlayer</application> wykryje je i użyje 3.2 zamiast
-2.96. Jeżeli nie chcesz albo nie możesz użyć binarnych paczek, poniżej
-znajdziesz informacje, jak skompilować GCC 3 ze źródeł:
+<ulink url="ftp://people.redhat.com/jakub/gcc/errata/3.2.3-37/">pakiety
+gcc-3.2.3-37</ulink> (nieoficjalne, ale działają dobrze) i zainstalować
+je razem z gcc-2.96, które już masz. <application>MPlayer</application>
+wykryje je i użyje 3.2 zamiast 2.96. Jeżeli nie chcesz albo nie możesz
+użyć binarnych paczek, poniżej znajdziesz informacje, jak skompilować
+GCC 3 ze źródeł:
 </para>
 
 <procedure>
