@@ -20,7 +20,6 @@ static ad_info_t info =
 
 LIBAD_EXTERN(vorbis)
 
-#include <math.h>
 #include <vorbis/codec.h>
 
 // This struct is also defined in demux_ogg.c => common header ?
