@@ -414,13 +414,14 @@ static int  vidix_set_deint(const vidix_deinterlace_t *info)
   return vdlPlaybackSetDeint(vidix_handler, info);
 }
 
+static int is_422_planes_eq=0;
 int      vidix_init(unsigned src_width,unsigned src_height,
 		   unsigned x_org,unsigned y_org,unsigned dst_width,
 		   unsigned dst_height,unsigned format,unsigned dest_bpp,
 		   unsigned vid_w,unsigned vid_h,const void *info)
 {
   size_t i,awidth;
-  int err,is_422_planes_eq;
+  int err;
   uint32_t sstride,apitch;
   if(verbose > 1)
      printf("vosub_vidix: vidix_init() was called\n"
@@ -603,16 +604,19 @@ static uint32_t vidix_get_image(mp_image_t *mpi)
 {
     if(mpi->type==MP_IMGTYPE_STATIC && vidix_play.num_frames>1) return VO_FALSE;
     if(mpi->flags&MP_IMGFLAG_READABLE) return VO_FALSE; /* slow video ram */
-    mpi->planes[0]=vidix_mem+vidix_play.offsets[next_frame]+vidix_play.offset.y;
-    mpi->stride[0]=dstrides.y;
-    if(mpi->flags&MP_IMGFLAG_PLANAR)
+    if(is_422_planes_eq || (mpi->flags&(MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_ACCEPT_WIDTH)))
     {
-	mpi->planes[1]=vidix_mem+vidix_play.offsets[next_frame]+vidix_play.offset.v;
-	mpi->stride[1]=dstrides.v;
-	mpi->planes[2]=vidix_mem+vidix_play.offsets[next_frame]+vidix_play.offset.u;
-	mpi->stride[2]=dstrides.u;
+	mpi->planes[0]=vidix_mem+vidix_play.offsets[next_frame]+vidix_play.offset.y;
+	mpi->stride[0]=dstrides.y;
+	if(mpi->flags&MP_IMGFLAG_PLANAR)
+	{
+	    mpi->planes[2]=vidix_mem+vidix_play.offsets[next_frame]+vidix_play.offset.v;
+	    mpi->stride[2]=dstrides.v;
+	    mpi->planes[1]=vidix_mem+vidix_play.offsets[next_frame]+vidix_play.offset.u;
+	    mpi->stride[1]=dstrides.u;
+	}
+	mpi->flags|=MP_IMGFLAG_DIRECT;
     }
-    mpi->flags|=MP_IMGFLAG_DIRECT;
     return VO_TRUE;
 }
 
