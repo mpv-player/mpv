@@ -4315,10 +4315,15 @@ static void exp_ftol(void)
 	);
 }
 
-#warning check for _CIpow
-static double exp_CIpow(double x, double y)
+#define FPU_DOUBLES(var1,var2) double var1,var2; \
+  __asm__ __volatile__( "fstpl %0;fwait" : "=m" (var2) : ); \
+  __asm__ __volatile__( "fstpl %0;fwait" : "=m" (var1) : )
+
+static double exp_CIpow(void)
 {
-    /*printf("Pow %f  %f    0x%Lx  0x%Lx  => %f\n", x, y, *((int64_t*)&x), *((int64_t*)&y), pow(x, y));*/
+    FPU_DOUBLES(x,y);
+
+    dbgprintf("_CIpow(%lf, %lf)\n", x, y);
     return pow(x, y);
 }
 
