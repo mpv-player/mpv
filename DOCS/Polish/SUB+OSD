@@ -4,7 +4,6 @@ Tak, mplayer wspiera du¿± gamê typów napisów. Aktualnie ( 2001/06/01 )
 7 rodzaji podtytu³ów/napisów mog± byæ u¿ywany przez kod subreadera.
 Aby zobaczyæ co to za formaty zobacz plik subreader.c linia 20.
  
-Podtytu³y s¹ wystawiane na pokaz z technik¹ nazywany Na Ekranie Wystawiaj¹ na pokaz . 
 Napisy s± wy¶wietlane technik± zwan± OSD, On Screen Display.
 OSD jest u¿ywany by wy¶wietlaæ aktualny czas, wska¼nik g³o¶no¶ci oraz 
 wska¼nik wyszukiwania.
