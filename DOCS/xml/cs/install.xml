@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced to: 1.49 -->
+<!-- Synced to: 1.51 -->
 <sect1 id="install">
 <title>Instalace</title>
 
@@ -109,6 +109,10 @@ Budete potřebovat poměrně zánovní systém. Na Linuxu doporučujeme jádro řady 2.4.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">libsmb</emphasis> - volitelná, pro podporu Samby.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">ALSA</emphasis> - volitelná, pro podporu ALSA
+  zvukového výstupu. Vyžadujeme aspoň 0.9.0rc4.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">bio2jack</emphasis> - volitelný, pro podporu JACK audio výstupu,
@@ -231,10 +235,9 @@ Budete potřebovat poměrně zánovní systém. Na Linuxu doporučujeme jádro řady 2.4.
   </para></listitem>
 <listitem><para>
   Pro dekódování <emphasis role="bold">Ogg Vorbis</emphasis> audia musíte správně
-  nainstalovat <systemitem class="library">libvorbis</systemitem>. Použijte deb/rpm
-  balíčky, pokud je máte, nebo kompilujte ze
-  <ulink url="http://ogg.org/ogg/vorbis/download/vorbis_nightly_cvs.tgz">zdrojových kódů</ulink>
-  (toto je noc co noc updatovaný tarball z Vorbis CVS).
+  nainstalovat <systemitem class="library">libvorbis</systemitem>.
+  Binární balíčky a zdrojové kódy naleznete na 
+  <ulink url="http://www.vorbis.com/download.psp">stránkách Ogg Vorbis</ulink>.
   </para></listitem>
 <listitem><para>
   <application>MPlayer</application> může použít knihovny z RealPlayeru 8
@@ -731,7 +734,7 @@ OSD/TIT. Existuje mnoho způsobů jak jej získat:
 <listitem><para>
   Použijte generátor fontu ve verzi pluginu pro <application>GIMP</application> z <filename
   class="directory">TOOLS/subfont-GIMP</filename> (poznámka: musíte mít také HSI
-  RAW plugin, viz <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/" />).
+  RAW plugin, viz <ulink url="http://realtime.ssu.ac.kr/~lethean/index.php?pagename=MplayerKoreanFonts" />).
  </para></listitem>
 <listitem><para>
   použitím TrueType (TTF) fontu, ve smyslu knihovny <systemitem class="library">freetype</systemitem>.
@@ -789,7 +792,7 @@ OSD/TIT. Existuje mnoho způsobů jak jej získat:
     různé fonty od uživatelů
     </entry></row>
   <row><entry>
-    <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/"></ulink>
+    <ulink url="http://realtime.ssu.ac.kr/~lethean/index.php?pagename=MplayerKoreanFonts"></ulink>
     </entry><entry>
     Korejské fonty a RAW plugin
     </entry></row>
