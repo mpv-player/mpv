@@ -28,15 +28,17 @@
 #ifdef HAVE_3DNOW
 #define PREFETCH  "prefetch"
 #define PREFETCHW "prefetchw" 
+#define PAVGB	  "pavgusb"
 #elif defined ( HAVE_MMX2 )
 #define PREFETCH "prefetchnta"
 #define PREFETCHW "prefetcht0" 
+#define PAVGB	  "pavgb"
 #else
 #define PREFETCH "/nop"
 #define PREFETCHW "/nop" 
 #endif
 
-#ifdef HAVE_K6_2PLUS
+#ifdef HAVE_3DNOW
 /* On K6 femms is faster of emms. On K7 femms is directly mapped on emms. */
 #define EMMS     "femms"
 #else
