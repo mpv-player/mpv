@@ -76,10 +76,12 @@
 #   include <sys/scsi.h>
 #endif
 #ifdef SOLARIS_USCSI
+#   include <dlfcn.h>
 #   include <unistd.h>
 #   include <stropts.h>
 #   include <sys/scsi/scsi_types.h>
 #   include <sys/scsi/impl/uscsi.h>
+#   include <sys/smedia.h>
 #endif
 #ifdef DARWIN_DVD_IOCTL
 #   include <IOKit/storage/IODVDMediaBSDClient.h>
@@ -112,6 +114,7 @@ static void HPUXInitSCTL ( struct sctl_io *sctl_io, int i_type );
  *****************************************************************************/
 #if defined( SOLARIS_USCSI )
 static void SolarisInitUSCSI( struct uscsi_cmd *p_sc, int i_type );
+static int SolarisSendUSCSI( int fd, struct uscsi_cmd *p_sc );
 #endif
 
 /*****************************************************************************
@@ -191,7 +194,7 @@ int ioctl_ReadCopyright( int i_fd, int i_layer, int *pi_copyright )
     rs_cdb.cdb_opaque[ 6 ] = i_layer;
     rs_cdb.cdb_opaque[ 7 ] = DVD_STRUCT_COPYRIGHT;
 
-    i_ret = ioctl(i_fd, USCSICMD, &sc);
+    i_ret = SolarisSendUSCSI(i_fd, &sc);
 
     if( i_ret < 0 || sc.uscsi_status ) {
         i_ret = -1;
@@ -363,7 +366,7 @@ int ioctl_ReadDiscKey( int i_fd, int *pi_agid, u8 *p_key )
     rs_cdb.cdb_opaque[ 7 ] = DVD_STRUCT_DISCKEY;
     rs_cdb.cdb_opaque[ 10 ] = *pi_agid << 6;
     
-    i_ret = ioctl( i_fd, USCSICMD, &sc );
+    i_ret = SolarisSendUSCSI( i_fd, &sc );
     
     if( i_ret < 0 || sc.uscsi_status )
     {
@@ -525,7 +528,7 @@ int ioctl_ReadTitleKey( int i_fd, int *pi_agid, int i_pos, u8 *p_key )
     rs_cdb.cdb_opaque[ 5 ] = ( i_pos       ) & 0xff;
     rs_cdb.cdb_opaque[ 10 ] = DVD_REPORT_TITLE_KEY | (*pi_agid << 6);
     
-    i_ret = ioctl( i_fd, USCSICMD, &sc );
+    i_ret = SolarisSendUSCSI( i_fd, &sc );
     
     if( i_ret < 0 || sc.uscsi_status )
     {
@@ -676,7 +679,7 @@ int ioctl_ReportAgid( int i_fd, int *pi_agid )
     
     rs_cdb.cdb_opaque[ 10 ] = DVD_REPORT_AGID | (*pi_agid << 6);
     
-    i_ret = ioctl( i_fd, USCSICMD, &sc );
+    i_ret = SolarisSendUSCSI( i_fd, &sc );
     
     if( i_ret < 0 || sc.uscsi_status )
     {
@@ -798,7 +801,7 @@ int ioctl_ReportChallenge( int i_fd, int *pi_agid, u8 *p_challenge )
     
     rs_cdb.cdb_opaque[ 10 ] = DVD_REPORT_CHALLENGE | (*pi_agid << 6);
     
-    i_ret = ioctl( i_fd, USCSICMD, &sc );
+    i_ret = SolarisSendUSCSI( i_fd, &sc );
     
     if( i_ret < 0 || sc.uscsi_status )
     {
@@ -932,7 +935,7 @@ int ioctl_ReportASF( int i_fd, int *pi_remove_me, int *pi_asf )
     
     rs_cdb.cdb_opaque[ 10 ] = DVD_REPORT_ASF;
     
-    i_ret = ioctl( i_fd, USCSICMD, &sc );
+    i_ret = SolarisSendUSCSI( i_fd, &sc );
     
     if( i_ret < 0 || sc.uscsi_status )
     {
@@ -1065,7 +1068,7 @@ int ioctl_ReportKey1( int i_fd, int *pi_agid, u8 *p_key )
     
     rs_cdb.cdb_opaque[ 10 ] = DVD_REPORT_KEY1 | (*pi_agid << 6);
     
-    i_ret = ioctl( i_fd, USCSICMD, &sc );
+    i_ret = SolarisSendUSCSI( i_fd, &sc );
     
     if( i_ret < 0 || sc.uscsi_status )
     {
@@ -1186,7 +1189,7 @@ int ioctl_InvalidateAgid( int i_fd, int *pi_agid )
     
     rs_cdb.cdb_opaque[ 10 ] = DVD_INVALIDATE_AGID | (*pi_agid << 6);
     
-    i_ret = ioctl( i_fd, USCSICMD, &sc );
+    i_ret = SolarisSendUSCSI( i_fd, &sc );
     
     if( i_ret < 0 || sc.uscsi_status )
     {
@@ -1310,7 +1313,7 @@ int ioctl_SendChallenge( int i_fd, int *pi_agid, u8 *p_challenge )
     p_buffer[ 1 ] = 0xe;
     memcpy( p_buffer + 4, p_challenge, DVD_CHALLENGE_SIZE );
     
-    if( ioctl( i_fd, USCSICMD, &sc ) < 0 || sc.uscsi_status )
+    if( SolarisSendUSCSI( i_fd, &sc ) < 0 || sc.uscsi_status )
     {
         return -1;
     }
@@ -1447,7 +1450,7 @@ int ioctl_SendKey2( int i_fd, int *pi_agid, u8 *p_key )
     p_buffer[ 1 ] = 0xa;
     memcpy( p_buffer + 4, p_key, DVD_KEY_SIZE );
     
-    if( ioctl( i_fd, USCSICMD, &sc ) < 0 || sc.uscsi_status )
+    if( SolarisSendUSCSI( i_fd, &sc ) < 0 || sc.uscsi_status )
     {
         return -1;
     }
@@ -1589,7 +1592,7 @@ int ioctl_ReportRPC( int i_fd, int *p_type, int *p_mask, int *p_scheme )
     
     rs_cdb.cdb_opaque[ 10 ] = DVD_REPORT_RPC;
     
-    i_ret = ioctl( i_fd, USCSICMD, &sc );
+    i_ret = SolarisSendUSCSI( i_fd, &sc );
     
     if( i_ret < 0 || sc.uscsi_status )
     {
@@ -1786,6 +1789,54 @@ static void SolarisInitUSCSI( struct uscsi_cmd *p_sc, int i_type )
     p_sc->uscsi_cdblen = 12;
 
     USCSI_TIMEOUT( p_sc, 15 );
+}
+
+/*****************************************************************************
+ * SolarisSendUSCSI: send a USCSICMD structure to the Solaris kernel
+ * for execution
+ *****************************************************************************
+ * When available, this function uses the function smedia_uscsi_cmd()
+ * from solaris' libsmedia library (solaris 9 or newer) to execute the
+ * USCSI command.  smedia_uscsi_cmd() allows USCSI commands for
+ * non-root users on removable media devices on solaris 9; sending the
+ * USCSI command directly to the device using the USCSICMD ioctl fails
+ * with an EPERM error on solaris 9.
+ *
+ * The code will fall back to the USCSICMD ioctl method, when
+ * libsmedia.so is not available or does not export the
+ * smedia_uscsi_cmd() function (on solaris releases upto and including
+ * solaris 8). Fortunatelly, on these old releases non-root users are
+ * allowed to perform USCSICMD ioctls on removable media devices.
+ *****************************************************************************/
+static int SolarisSendUSCSI( int i_fd, struct uscsi_cmd *p_sc ) {
+    void *sm_hdl;
+    static int initialized;
+    static void* (*sm_get_handle)(int32_t);
+    static int (*sm_release_handle)(void*);
+    static int (*sm_uscsi_cmd)(void*, struct uscsi_cmd *);
+
+    if (!initialized)
+    {
+	void *smedia_lib;
+
+	smedia_lib = dlopen("libsmedia.so", RTLD_NOW);
+	if (smedia_lib) {
+	    sm_get_handle = dlsym(smedia_lib, "smedia_get_handle");
+	    sm_release_handle = dlsym(smedia_lib, "smedia_release_handle");
+	    sm_uscsi_cmd = dlsym(smedia_lib, "smedia_uscsi_cmd");
+	}
+	initialized = 1;
+    }
+
+    if (sm_get_handle && sm_uscsi_cmd && sm_release_handle
+	&& (sm_hdl = sm_get_handle(i_fd)))
+    {
+	int i_ret = sm_uscsi_cmd(sm_hdl, p_sc);
+	sm_release_handle(sm_hdl);
+	return i_ret;
+    }
+
+    return ioctl( i_fd, USCSICMD, p_sc );
 }
 #endif
 
