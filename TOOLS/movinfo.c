@@ -33,7 +33,7 @@ switch (type)
   case 0x64686D73: return ("Sound media header"); /* smhd */
   case 0x6468646D: return ("Media header"); /* mdhd */
   case 0x666E696D: return ("Media information"); /* minf */
-  case 0x726C6468: return ("Handler.."); /* hdlr */
+  case 0x726C6468: return ("Handler reference"); /* hdlr */
   case 0x6B617274: return ("New track (stream)"); /* trak */
   case 0x75716D72: return ("rmqu");
   case 0x65657266: return ("free");
@@ -98,6 +98,63 @@ void *audio_stream_info(FILE *f, int len)
   fseek(f,orig_pos,SEEK_SET);
 }
 
+void *userdata_info(FILE *f, int len, int pos, int level)
+{
+  int orig_pos = pos; /*ftell(f);*/
+  unsigned char data[len-8];
+  int i;
+  unsigned int atom_size = 1;
+  unsigned int atom_type;
+
+//  printf("userdata @ %d:%d (%d)\n", pos, pos+len, len);
+
+//  fseek(f, pos+3, SEEK_SET);
+
+  while (atom_size != 0)
+  {
+    atom_size=read_dword(f);//  if(fread(&atom_size_b,4,1,f)<=0) break;
+    if(fread(&atom_type,4,1,f)<=0) break;
+  
+    if(atom_size<8) break; // error
+
+//    printf("%08X:  %*s %.4s (%08X) %05d (begin: %08X)\n",pos,level*2,"",
+//	&atom_type,atom_type,atom_size,pos+8);
+
+    switch(atom_type)
+    {
+      case 0x797063A9: /* cpy (copyright) */
+        {
+	  char *data = malloc(atom_size-8);
+	  
+	  fseek(f, pos+6, SEEK_SET);
+	  fread(data, atom_size-8, 1, f);
+	  printf(" Copyright: %s\n", data);
+	  free(data);
+	}
+        break;
+      case 0x666E69A9: /* inf (information) */
+        {
+	  char data[atom_size-8];
+	  
+	  fread(&data, 1, atom_size-8, f);
+	  printf(" Owner: %s\n", &data);
+	}
+        break;
+      case 0x6D616EA9: /* nam (name) */
+        {
+	  char data[atom_size-8];
+	  
+	  fread(&data, 1, atom_size-8, f);
+	  printf(" Name: %s\n", &data);
+	}
+        break;
+    }
+  }
+  fseek(f,orig_pos,SEEK_SET);
+}
+
+int time_scale = 0;
+
 void lschunks(FILE *f,int level,unsigned int endpos){
  unsigned int atom_size;
  unsigned int atom_type;
@@ -114,6 +171,26 @@ void lschunks(FILE *f,int level,unsigned int endpos){
     atom2human_type(atom_type), pos+8); // 8: atom_size fields (4) + atom_type fields (4)
 
 #ifndef NO_SPECIAL
+//  if (atom_type == 0x61746475)
+//    userdata_info(f, atom_size, pos, level);
+
+  if (atom_type == 0x6468646D)
+  {
+    char data[4];
+    
+    fread(&data, 1, 1, f); // char
+    printf("mdhd version %d\n", data[0]);
+    fread(&data, 3, 1, f); // int24
+    fread(&data, 4, 1, f); // int32
+    fread(&data, 4, 1, f); // int32
+    fread(&data, 4, 1, f); // int32
+    time_scale = (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3];
+    printf("timescale: %d\n", time_scale);
+    fread(&data, 4, 1, f); // int32
+    fread(&data, 2, 1, f); // int16
+    fread(&data, 2, 1, f); // int16
+  }
+
   if (atom_type == 0x64686D76)
   {
     stream = S_VIDEO;
@@ -130,15 +207,14 @@ void lschunks(FILE *f,int level,unsigned int endpos){
   {
     int i;
     unsigned char data[atom_size];
-    int fps, x, y;
+    int x, y;
 
     for (i=0; i<atom_size; i++)
 	fread(&data[i], 1, 1, f);
 
-    fps = data[3];
     x = data[77];
     y = data[81];
-    printf(" Movie fps: %d\n", fps); /* na ez itt az atbaszas ;( */
+    printf(" Flags: %d\n", data[3]);
     printf(" Picture size: %dx%d\n", x, y);
     if (x == 0 && y == 0)
 	printf(" Possible audio stream!\n");
@@ -182,7 +258,11 @@ void lschunks(FILE *f,int level,unsigned int endpos){
     for(i=0;i<len;i++){
       int num=read_dword(f);
       int dur=read_dword(f);
-      printf("%5d samples: %d duration\n",num,dur);
+      printf("%5d samples: %d duration", num, dur);
+      if (stream == S_AUDIO)
+        printf("(rate: %f Hz)\n", (float)time_scale/dur);
+      else
+	printf("(fps: %f)\n", (float)time_scale/dur);
     }
   }
 
@@ -195,10 +275,7 @@ void lschunks(FILE *f,int level,unsigned int endpos){
       int first=read_dword(f);
       int spc=read_dword(f);
       int sdid=read_dword(f);
-      if (stream == S_AUDIO)
-        printf("  chunk from %d: %d Khz (desc: %d)\n", first, spc, sdid);
-      else
-        printf("  chunk %d...  %d s/c   desc: %d\n",first,spc,sdid);
+      printf("  chunk %d...  %d s/c   desc: %d\n",first,spc,sdid);
     }
   }
 
