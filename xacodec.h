@@ -112,3 +112,7 @@ typedef struct {
     unsigned char *mem;
 } xacodec_image_t;
 
+int xacodec_init_video(sh_video_t *vidinfo, int out_format);
+xacodec_image_t* xacodec_decode_frame(uint8_t *frame, int frame_size, int skip_flag);
+int xacodec_exit();
+

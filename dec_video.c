@@ -1,6 +1,4 @@
 
-#define USE_XANIM
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -9,16 +7,10 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 
-extern int verbose; // defined in mplayer.c
-extern int divx_quality;
-
-extern double video_time_usage;
-extern double vout_time_usage;
-
-extern int frameratecode2framerate[16];
-
 #include "linux/timer.h"
 #include "linux/shmem.h"
+
+extern int verbose; // defined in mplayer.c
 
 #include "stream.h"
 #include "demuxer.h"
@@ -27,16 +19,25 @@ extern int frameratecode2framerate[16];
 #include "codec-cfg.h"
 #include "stheader.h"
 
-#include "dll_init.h"
-
-//#include <inttypes.h>
-//#include "libvo/img_format.h"
-
 #ifdef USE_LIBVO2
 #include "libvo2/libvo2.h"
 #else
 #include "libvo/video_out.h"
 #endif
+
+#include "dec_video.h"
+
+// ===================================================================
+
+extern double video_time_usage;
+extern double vout_time_usage;
+
+extern int frameratecode2framerate[16];
+
+#include "dll_init.h"
+
+//#include <inttypes.h>
+//#include "libvo/img_format.h"
 
 #include "libmpeg2/mpeg2.h"
 #include "libmpeg2/mpeg2_internal.h"
@@ -45,6 +46,7 @@ extern int frameratecode2framerate[16];
 
 extern picture_t *picture;	// exported from libmpeg2/decode.c
 
+int divx_quality=0;
 
 #ifdef USE_DIRECTSHOW
 #include "loader/DirectShow/DS_VideoDec.h"
@@ -70,6 +72,8 @@ extern picture_t *picture;	// exported from libmpeg2/decode.c
 #else
 #include <decore.h>
 #endif
+
+#define USE_XANIM
 
 #ifdef USE_XANIM
 #include "xacodec.h"
@@ -224,6 +228,11 @@ void uninit_video(sh_video_t *sh_video){
     case VFM_MPEG:
 	mpeg2_free_image_buffers (picture);
 	break;
+#ifdef USE_XANIM
+    case VFM_XANIM:
+	xacodec_exit();
+	break;
+#endif
     }
     if(sh_video->our_out_buffer){
 	free(sh_video->our_out_buffer);

@@ -97,6 +97,9 @@ static int max_framesize=0;
 #include "stheader.h"
 #include "parse_es.h"
 
+#include "dec_audio.h"
+#include "dec_video.h"
+
 extern picture_t *picture;	// exported from libmpeg2/decode.c
 
 int frameratecode2framerate[16] = {
@@ -132,8 +135,6 @@ static int benchmark=0;
 // static int play_in_bg=0;
 
 // options:
-
-int divx_quality=0;
 static int auto_quality=0;
 static int output_quality=0;
 

@@ -7,19 +7,19 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 
-#include "libao2/afmt.h"
-
 extern int verbose; // defined in mplayer.c
-
-#ifdef USE_FAKE_MONO
-int fakemono=0;
-#endif
 
 #include "stream.h"
 #include "demuxer.h"
 
 #include "codec-cfg.h"
 #include "stheader.h"
+
+#include "dec_audio.h"
+
+//==========================================================================
+
+#include "libao2/afmt.h"
 
 #include "dll_init.h"
 
@@ -33,6 +33,10 @@ int fakemono=0;
 #include "ac3-iec958.h"
 
 #include "ima4.h"
+
+#ifdef USE_FAKE_MONO
+int fakemono=0;
+#endif
 
 #ifdef USE_DIRECTSHOW
 #include "loader/DirectShow/DS_AudioDec.h"
