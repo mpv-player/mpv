@@ -92,6 +92,12 @@ MODULE_LICENSE("GPL");
 #define PARAM_BRIGHTNESS "brightness="
 #define PARAM_SATURATION "saturation="
 #define PARAM_BLACKIE "blackie="
+
+#define PARAM_BUFF_SIZE 4096
+static uint8_t *mga_param_buff = NULL;
+static uint32_t mga_param_buff_size=0;
+static uint32_t mga_param_buff_len=0;
+
 // end eyck
 
 typedef struct bes_registers_s
@@ -692,7 +698,7 @@ switch(config->format){
 }
 
 	// setting black&white mode 
-	regs.besctl|=(regs.blackie<<20); // TODO: check g200 & g400 (maybe tomorrow)
+	regs.besctl|=(regs.blackie<<20); 
 
 	//Enable contrast and brightness control
 	regs.besglobctl |= (1<<5) + (1<<7);
@@ -1312,15 +1318,35 @@ static int mga_vid_find_card(void)
 	return TRUE;
 }
 
+static void mga_param_buff_fill( void )
+{
+    unsigned len;
+    len = 0;
+    len += sprintf(&mga_param_buff[len],"Interface version: %04X\n",MGA_VID_VERSION);
+    len += sprintf(&mga_param_buff[len],"Memory: %x:%xM\n",mga_mem_base,mga_ram_size);
+    len += sprintf(&mga_param_buff[len],"MMIO: %p\n",mga_mmio_base);
+    len += sprintf(&mga_param_buff[len],"Configurable stuff:\n");
+    len += sprintf(&mga_param_buff[len],"~~~~~~~~~~~~~~~~~~~\n");
+    len += sprintf(&mga_param_buff[len],PARAM_BRIGHTNESS"%X\n",regs.brightness);
+    len += sprintf(&mga_param_buff[len],PARAM_BLACKIE"%s\n",regs.blackie?"on":"off");
+    mga_param_buff_len = len;
+}
+
 
 static ssize_t mga_vid_read(struct file *file, char *buf, size_t count, loff_t *ppos)
 {
-	return -EINVAL;
+	uint32_t size;
+	if(!mga_param_buff) return -ESPIPE;
+	if(!(*ppos)) mga_param_buff_fill();
+	if(*ppos >= mga_param_buff_len) return 0;
+	size = min(count,mga_param_buff_len-(uint32_t)(*ppos));
+	memcpy(buf,mga_param_buff,size);
+	*ppos += size;
+	return size;
 }
 
 static ssize_t mga_vid_write(struct file *file, const char *buf, size_t count, loff_t *ppos)
 {
-	// WARNING: eyck changes
 	if(memcmp(buf,PARAM_BRIGHTNESS,min(count,strlen(PARAM_BRIGHTNESS))) == 0)
 	{
 		short brightness;
@@ -1338,7 +1364,6 @@ static ssize_t mga_vid_write(struct file *file, const char *buf, size_t count, l
 	} else count = -EIO;
 	// TODO: reset settings
 	return count;
-//	return -EINVAL;
 }
 
 static int mga_vid_mmap(struct file *file, struct vm_area_struct *vma)
@@ -1449,6 +1474,8 @@ static int mga_vid_initialize(void)
 		unregister_chrdev(MGA_VID_MAJOR, "mga_vid");
 		return -EINVAL;
 	}
+	mga_param_buff = kmalloc(PARAM_BUFF_SIZE,GFP_KERNEL);
+	if(mga_param_buff) mga_param_buff_size = PARAM_BUFF_SIZE;
 	
 	return(0);
 }
