@@ -1007,6 +1007,40 @@ void dump_mpsub(subtitle* subs, float fps){
 	mp_msg(MSGT_SUBREADER,MSGL_INFO,"SUB: Subtitles dumped in \'dump.mpsub\'.\n");
 }
 
+void dump_microdvd(subtitle* subs, float fps) {
+    int i, delay;
+    FILE *fd;
+    if (sub_fps == 0)
+	sub_fps = fps;
+    fd = fopen("dumpsub.txt", "w");
+    if (!fd) {
+	perror("dumpsub.txt: fopen");
+	return;
+    }
+    delay = sub_delay * sub_fps;
+    for (i = 0; i < sub_num; ++i) {
+	int j, start, end;
+	start = subs[i].start;
+	end = subs[i].end;
+	if (sub_uses_time) {
+	    start = start * sub_fps / 100 ;
+	    end = end * sub_fps / 100;
+	}
+	else {
+	    start = start * sub_fps / fps;
+	    end = end * sub_fps / fps;
+	}
+	start -= delay;
+	end -= delay;
+	fprintf(fd, "{%d}{%d}", start, end);
+	for (j = 0; j < subs[i].lines; ++j) 
+	    fprintf(fd, "%s%s", j ? "|" : "", subs[i].text[j]);
+	fprintf(fd, "\n");
+    }
+    fclose(fd);
+    mp_msg(MSGT_SUBREADER,MSGL_INFO,"SUB: Subtitles dumped in \'dumpsub.txt\'.\n");
+}
+
 void sub_free( subtitle * subs )
 {
  int i;
