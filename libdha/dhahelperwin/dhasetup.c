@@ -39,7 +39,7 @@ int main(int argc,char* argv[]){
                              NULL,
                              NULL);
     if(!hService){
-      printf("unable to register DHAHELPER Service (0x%x)\n",GetLastError());
+      printf("Unable to register DHAHELPER Service (0x%x).\n",GetLastError());
     }
   }
   else if(!strcmp(argv[1],"remove")){
