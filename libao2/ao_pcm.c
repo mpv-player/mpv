@@ -80,11 +80,10 @@ static int init(int rate,int channels,int format,int flags){
 		strcpy(ao_outputfilename,(ao_pcm_waveheader ? "audiodump.wav" : "audiodump.pcm"));
 	}
 	
-	wavhdr.fmt_length = 16; /* = format? */
 	wavhdr.channels = channels;
 	wavhdr.sample_rate = rate;
 	wavhdr.bytes_per_second = rate * (format / 8) * channels;
-	wavhdr.bits = format,
+	wavhdr.bits = format;
 
 	printf("PCM: File: %s (%s) Samplerate: %iHz Channels: %s Format %s\n", ao_outputfilename, (ao_pcm_waveheader?"WAVE":"RAW PCM"), rate, (channels > 1) ? "Stereo" : "Mono", audio_out_format_name(format));
 	printf("PCM: Info - fastest dumping is achieved with -vo null -hardframedrop.\n");
