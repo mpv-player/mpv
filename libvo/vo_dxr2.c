@@ -427,7 +427,7 @@ static int dxr2_set_vga_params(dxr2_vgaParams_t* vga,int detect) {
     memset(img,255,vo_screenwidth*vo_screenheight*3);
     vo_config_count = sub_config_count;
     if(sub_vo->config(vo_screenwidth,vo_screenheight,vo_screenwidth,vo_screenheight,
-		    VOFLAG_FULLSCREEN ,"DXR2 sub vo",IMGFMT_BGR24,NULL) != 0) {
+		    VOFLAG_FULLSCREEN ,"DXR2 sub vo",IMGFMT_BGR24) != 0) {
       mp_msg(MSGT_VO,MSGL_WARN,"VO: [dxr2] sub vo config failed => No overlay\n");
       sub_vo->uninit();
       sub_vo = NULL;
@@ -734,7 +734,7 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t width, uint
       dxr2_sixArg_t oc;
       int i,sub_flags = VOFLAG_SWSCALE | (flags & VOFLAG_FULLSCREEN);
       if(sub_vo->config(width,height,width,height,sub_flags,
-			"MPlayer DXR2 render",IMGFMT_BGR24,NULL) != 0) {
+			"MPlayer DXR2 render",IMGFMT_BGR24) != 0) {
 	mp_msg(MSGT_VO,MSGL_WARN,"VO: [dxr2] sub vo config failed => No X11 window\n");
 	sub_vo->uninit();
 	sub_vo = NULL;
