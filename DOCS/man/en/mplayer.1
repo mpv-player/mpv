@@ -3484,7 +3484,7 @@ Changes the sample rate of the audio stream.
 Can be used if you have a fixed frequency sound card or if you are
 stuck with an old sound card that is only capable of max 44.1kHz.
 This filter is automatically enabled if necessary.
-It only supports the 16-bit little-endian format.
+It only supports 16-bit integer and float in native endian format as input.
 .br
 .I NOTE:
 With MEncoder, you need to also use \-srate <srate>.
@@ -3527,7 +3527,7 @@ exact output frequency scaling and linear interpolation.
 .TP
 .B lavcresample[=srate[:length[:linear[:count[:cutoff]]]]]
 Changes the sample rate of the audio stream to an integer <srate> in Hz.
-It only supports the 16-bit little-endian format.
+It only supports the 16-bit native-endian format.
 .br
 .I NOTE:
 With MEncoder, you need to also use \-srate <srate>.
