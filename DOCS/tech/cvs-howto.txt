@@ -140,7 +140,7 @@ II. POLICY / RULES:
    and if the code maintainers say OK, you may commit. This does not apply to
    files written and/or maintained by you.
 
-5. We refuse source indentation and other cosmetical changes, such commits will
+5. We refuse source indentation and other cosmetic changes, such commits will
    be rejected and removed. Every developer has his own indentation style, you
    should not change it. Of course if you (re)write something, you can use your
    own style... (Many projects force a given indentation style - we don't.)
@@ -304,7 +304,7 @@ that my CVS commits are proper and won't get me banned.
              +
 
            That means you have added or removed tabs or spaces on that line.
-           That qualifies as a cosmetical change and is disallowed. Edit the
+           That qualifies as a cosmetic change and is disallowed. Edit the
            file and put back/remove the added/removed tabs/spaces.
            Rediff the file and make sure the cosmetic changes are fixed.
 
