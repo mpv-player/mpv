@@ -218,7 +218,7 @@ done
 # Q: what's with egcs, pgcc? - Atmos
 # A: same as with agcc! These compilers always were introduced as experimental
 # ones. Now gcc-3.0 should introduce all features of these compilers.
-# Since 3.0 is almost released we don't need to support them. - Nick 07 jun 2001
+# Since 3.0 is almost released we don't need to support them. - Nick 05 jun 2001
 if test "$_skip_cc_check" != "yes"; then
 echo -n "Checking version of $_cc ... "
 cc_version=`$_cc -v 2>&1 | sed -n 's/^.*version \([aegcygnustp-]*[0-9.]*\).*$/\1/p'`
@@ -817,7 +817,6 @@ do
 done
 
 # Checking assembler (as) compatibility...
-#as_version=`as --version 2>&1 | sed -n 's/^.*assembler \([aegcygnustp-]*[0-9.]*\).*$/\1/p'`
 as_version=`as --version 2>&1 | sed -n 's/^.*assembler \([0-9.]*\).*$/\1/p'`
 echo -n "Checking assembler (as) ... $as_version, "
 _pref_as_version='2.9.1'
@@ -878,6 +877,25 @@ else
   exit
 fi
 
+# Checking kernel version...
+_k_verc_problem=no
+kernel_name=`uname -s 2>&1`
+kernel_version=`uname -r 2>&1`
+echo -n "Checking $kernel_name kernel version ... $kernel_version, "
+case $kernel_version in
+    '') kernel_version="?.??"; _k_verc_fail=yes;;
+    2.0.[0-99]|2.2.[0-99])
+	_k_verc_problem=yes;;
+esac
+if [ $_k_verc_problem = 'yes' ] && [ $_sse = 'yes' ]; then
+_k_verc_fail=yes
+fi
+if ! test -z "$_k_verc_fail"; then
+echo "fail"
+echo "WARNING! You want to run mplayer on this system then be prepared for problems"
+else
+echo "ok"
+fi
 
 if [ $_x11 = 'yes' ]; then
  if [ $_mga = 'yes' ]; then
@@ -886,8 +904,6 @@ if [ $_x11 = 'yes' ]; then
 fi
 
 # to screen.
-echo -n "Kernel: "
-uname -a
 echo "Install prefix: $_prefix"
 echo "Checking for cpu vendor ... $pvendor ( $pfamily:$pmodel:$pstepping )"
 echo "Checking for cpu type ... $pname"
