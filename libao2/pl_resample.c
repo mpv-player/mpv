@@ -40,22 +40,22 @@ LIBAO_PLUGIN_EXTERN(resample)
 #define max(a,b)   (((a) > (b)) ? (a) : (b))
 
 /* Below definition selects the length of each poly phase component.
-   Valid definitions are L4 and L8, where the number denotes the
+   Valid definitions are L8 and L16, where the number denotes the
    length of the filter. This definition affects the computational
    complexity (see play()), the performance (see filter.h) and the
-   memory usage. For now the filterlenght is choosen to 4 and without
-   assembly optimization if no SSE is present.
+   memory usage. The filterlenght is choosen to 8 if the machine is
+   slow and to 16 if the machine is fast and has MMX.  
 */
 
-// #ifdef HAVE_SSE
+#if !defined(HAVE_SSE) && !defined(HAVE_3DNOW) //This machine is slow
 #define L8    	1	// Filter bank type
 #define W 	W8	// Filter bank parameters
 #define L   	8	// Filter length
-// #else	
-// #define L4	1
-// #define W 	W4
-// #define L   	4
-// #endif
+#else	// Fat machine
+#define L16	1
+#define W 	W16
+#define L   	16
+#endif
 
 #define CH  6	// Max number of channels
 #define UP  128  /* Up sampling factor. Increasing this value will
@@ -188,14 +188,12 @@ int upsample(){
 
     wi = pwi; xi = pxi;
 
-    LOAD_QUE(x);
     while(in < end){
       register uint16_t	i = inc;
       if(wi<level) i++;
 
-      UPDATE_QUE(in);
+      UPDATE_QUE(in,x,xi);
       in+=nch;
-      
       while(i--){
 	// Run the FIR filter
 	FIR((&x[xi]),(&w[wi*L]),out);
@@ -204,7 +202,6 @@ int upsample(){
 	wi=(wi+dn)%up;
       }
     }
-    SAVE_QUE(x);
   }
 
   // Save values that needs to be kept for next time
@@ -243,10 +240,9 @@ int downsample(){
     register int16_t* 	end   = in+ao_plugin_data.len/2;
     i = pi; wi = pwi; xi = pxi;
 
-    LOAD_QUE(x);
     while(in < end){
 
-      UPDATE_QUE(in);
+      UPDATE_QUE(in,x,xi);
       in+=nch;
       
       if(!--i){
@@ -262,7 +258,6 @@ int downsample(){
 	if(wi<level) i++;
       }
     }
-    SAVE_QUE(x);
   }
   // Save values that needs to be kept for next time
   pwi = wi;
