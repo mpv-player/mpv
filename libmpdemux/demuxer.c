@@ -900,7 +900,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_BMP){
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_OGG){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_OGG,audio_id,video_id,dvdsub_id);
   if(demux_ogg_open(demuxer)){
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"OGG");
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"Ogg");
       file_format=DEMUXER_TYPE_OGG;
   } else {
       free_demuxer(demuxer);
