@@ -128,7 +128,6 @@ int vbeInit( void )
 {
    unsigned short iopl_port;
    size_t i;
-   int retval;
    if(!LRMI_init()) return VBE_VM86_FAIL;
    if(!(controller_info = LRMI_alloc_real(sizeof(struct VbeInfoBlock)))) return VBE_OUT_OF_DOS_MEM;
    /*
@@ -141,8 +140,7 @@ int vbeInit( void )
    ioperm(0, 1024, 1);
    iopl(3);
    memset(&vbe_pm_info,0,sizeof(struct VesaProtModeInterface));
-   retval = vbeGetProtModeInfo(&vbe_pm_info);
-   if(retval != VBE_OK) return retval;
+   vbeGetProtModeInfo(&vbe_pm_info);
    i = 0;
    if(vbe_pm_info.iopl_ports) /* Can be NULL !!!*/
    while((iopl_port=vbe_pm_info.iopl_ports[i]) != 0xFFFF
@@ -399,7 +397,7 @@ int vbeSetMode(unsigned mode,struct VesaCRTCInfoBlock *data)
   if(retval == 0x4f)
   {
     /* Just info for internal use (currently in SetDiplayStart func). */
-    vbeGetModeInfo(mode&0x1f,&curr_mode_info);
+    vbeGetModeInfo(mode,&curr_mode_info);
     retval = VBE_OK;
   }
   return retval;
@@ -639,8 +637,6 @@ int vbeSetDisplayStart(unsigned long offset, int vsync)
   }
   else
   {
-#if 0
-    /* Something wrong here */
     struct LRMI_regs r;
     unsigned long pixel_num;
     memset(&r,0,sizeof(struct LRMI_regs));
@@ -653,8 +649,7 @@ int vbeSetDisplayStart(unsigned long offset, int vsync)
     if(!VBE_LRMI_int(0x10,&r)) return VBE_VM86_FAIL;
     retval = r.eax & 0xffff;
     if(retval == 0x4f) retval = VBE_OK;
-#endif
-    retval = VBE_BROKEN_BIOS;
+    else retval = VBE_BROKEN_BIOS;
   }
   return retval;
 }

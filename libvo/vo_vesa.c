@@ -739,7 +739,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		if((err=vbeGetModeInfo(mode_ptr[i],&vmib)) != VBE_OK)
 		{
 			PRINT_VBE_ERR("vbeGetModeInfo",err);
-			return -1;
+			continue;
 		}
 		if(vmib.XResolution >= w &&
 		   vmib.YResolution >= h &&
