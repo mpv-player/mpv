@@ -528,6 +528,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
         static double all_frametime=0.0;
         AVFrame *pic= lavc_venc_context->coded_frame;
         double f= lavc_venc_context->width*lavc_venc_context->height*255.0*255.0;
+	double quality=0.0;
 
         if(!fvstats) {
             time_t today2;
@@ -543,10 +544,24 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
                 /*exit(1);*/
             }
         }
+	
+	// average MB quantizer
+	{
+	    int x, y;
+	    int w = (lavc_venc_context->width+15) >> 4;
+	    int h = (lavc_venc_context->height+15) >> 4;
+	    int8_t *q = lavc_venc_context->coded_frame->qscale_table;
+	    for( y = 0; y < h; y++ ) {
+		for( x = 0; x < w; x++ )
+		    quality += (double)*(q+x);
+		q += lavc_venc_context->coded_frame->qstride;
+	    }
+	    quality /= w * h;
+	}
 
         fprintf(fvstats, "%6d, %2.2f, %6d, %2.2f, %2.2f, %2.2f, %2.2f %c\n",
             lavc_venc_context->coded_frame->coded_picture_number,
-            lavc_venc_context->coded_frame->quality,
+            quality,
             out_size,
             psnr(lavc_venc_context->coded_frame->error[0]/f),
             psnr(lavc_venc_context->coded_frame->error[1]*4/f),

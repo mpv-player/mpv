@@ -550,6 +550,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
         static int frame_number=0;
         static double all_frametime=0.0;
         AVFrame *pic= avctx->coded_frame;
+	double quality=0.0;
 
         if(!fvstats) {
             time_t today2;
@@ -567,10 +568,24 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
             }
         }
 
+	// average MB quantizer
+	{
+	    int x, y;
+	    int w = (avctx->width+15) >> 4;
+	    int h = (avctx->height+15) >> 4;
+	    int8_t *q = pic->qscale_table;
+	    for( y = 0; y < h; y++ ) {
+		for( x = 0; x < w; x++ )
+		    quality += (double)*(q+x);
+		q += pic->qstride;
+	    }
+	    quality /= w * h;
+	}
+
         all_len+=len;
         all_frametime+=sh->frametime;
         fprintf(fvstats, "frame= %5d q= %2.2f f_size= %6d s_size= %8.0fkB ",
-            ++frame_number, pic->quality, len, (double)all_len/1024);
+            ++frame_number, quality, len, (double)all_len/1024);
         fprintf(fvstats, "time= %0.3f br= %7.1fkbits/s avg_br= %7.1fkbits/s ",
            all_frametime, (double)(len*8)/sh->frametime/1000.0,
            (double)(all_len*8)/all_frametime/1000.0);
@@ -587,11 +602,14 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	case FF_B_TYPE:
             fprintf(fvstats, "type= B\n");
 	    break;
+	default:
+            fprintf(fvstats, "type= ? (%d)\n", pic->pict_type);
+	    break;
 	}
         
-        ctx->qp_stat[(int)(pic->quality+0.5)]++;
-        ctx->qp_sum += pic->quality;
-        ctx->inv_qp_sum += 1.0/pic->quality;
+        ctx->qp_stat[(int)(quality+0.5)]++;
+        ctx->qp_sum += quality;
+        ctx->inv_qp_sum += 1.0/(double)quality;
         
         break;
     }
