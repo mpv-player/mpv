@@ -777,8 +777,7 @@ static int vbr_init_2pass2(void *sstate)
 	 */
 	state->keyframe_locations[c] = state->cur_frame;
 
-	/* Compensate AVI overhead */
-	desired = state->desired_size -  state->nb_frames*24;
+	desired = state->desired_size;
 
 	switch(state->credits_mode) {
 	case VBR_CREDITS_MODE_QUANT :
