@@ -50,6 +50,10 @@ static char* banner_text=
 #include <lame/lame.h>
 #endif
 
+#ifdef HAVE_LIBCSS
+#include "libmpdemux/dvdauth.h"
+#endif
+
 #include <inttypes.h>
 #include "../postproc/swscale.h"
 
