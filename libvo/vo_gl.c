@@ -77,7 +77,7 @@ static int find_gl_format (uint32_t format)
       gl_format = GL_RGB;
       gl_type = GL_UNSIGNED_BYTE;
       break;
-    case IMGFMT_RGB32:
+    case IMGFMT_RGBA:
       gl_texfmt = 4;
       gl_format = GL_RGBA;
       gl_type = GL_UNSIGNED_BYTE;
@@ -92,15 +92,15 @@ static int find_gl_format (uint32_t format)
 #ifdef GL_VERSION_1_2
     case IMGFMT_RGB8:
       gl_format = GL_RGB;
-      gl_type = GL_UNSIGNED_BYTE_3_3_2;
+      gl_type = GL_UNSIGNED_BYTE_2_3_3_REV;
       break;
     case IMGFMT_RGB15:
       gl_format = GL_RGBA;
-      gl_type = GL_UNSIGNED_SHORT_5_5_5_1;
+      gl_type = GL_UNSIGNED_SHORT_1_5_5_5_REV;
       break;
     case IMGFMT_RGB16:
       gl_format = GL_RGB;
-      gl_type = GL_UNSIGNED_SHORT_5_6_5;
+      gl_type = GL_UNSIGNED_SHORT_5_6_5_REV;
       break;
     case IMGFMT_BGR8:
       // special case as red and blue have a differen number of bits.
@@ -108,21 +108,21 @@ static int find_gl_format (uint32_t format)
       // by nVidia drivers, and in addition would give more bits to
       // blue than to red, which isn't wanted
       gl_format = GL_RGB;
-      gl_type = GL_UNSIGNED_BYTE_2_3_3_REV;
+      gl_type = GL_UNSIGNED_BYTE_3_3_2;
       break;
     case IMGFMT_BGR15:
       gl_format = GL_BGRA;
-      gl_type = GL_UNSIGNED_SHORT_5_5_5_1;
+      gl_type = GL_UNSIGNED_SHORT_1_5_5_5_REV;
       break;
     case IMGFMT_BGR16:
       gl_format = GL_RGB;
-      gl_type = GL_UNSIGNED_SHORT_5_6_5_REV;
+      gl_type = GL_UNSIGNED_SHORT_5_6_5;
       break;
     case IMGFMT_BGR24:
       gl_format = GL_BGR;
       gl_type = GL_UNSIGNED_BYTE;
       break;
-    case IMGFMT_BGR32:
+    case IMGFMT_BGRA:
       gl_texfmt = 4;
       gl_format = GL_BGRA;
       gl_type = GL_UNSIGNED_BYTE;
@@ -340,7 +340,7 @@ uint8_t *ImageData=src[0];
 static uint32_t
 query_format(uint32_t format)
 {
-    if ((format == IMGFMT_RGB24) || (format == IMGFMT_RGB32))
+    if ((format == IMGFMT_RGB24) || (format == IMGFMT_RGBA))
         return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
     if (many_fmts && find_gl_format(format))
         return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
