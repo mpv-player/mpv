@@ -358,7 +358,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_DirectRender "Direct rendering"
 #define MSGTR_PREFERENCES_FrameDrop "Képeldobás"
 #define MSGTR_PREFERENCES_HFrameDrop "Erõszakos képeldobó"
-#define MSGTR_PREFERENCES_Flip Kép fejjel lefelé"
+#define MSGTR_PREFERENCES_Flip "Kép fejjel lefelé"
 #define MSGTR_PREFERENCES_Panscan "Panscan: "
 #define MSGTR_PREFERENCES_Video "Video"
 #define MSGTR_PREFERENCES_OSDTimer "Óra es indikatorok"
@@ -376,7 +376,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_PostProcess "Képjavítás"
 #define MSGTR_PREFERENCES_AutoQuality "Auto quality: "
 #define MSGTR_PREFERENCES_NI "non-interleaved  AVI  feltételezése (hibás AVI-knál segíthet"
-#define MSGTR_PREFERENCES_IDX "Az AVI indexének újraéptése, ha szükségesÁ
+#define MSGTR_PREFERENCES_IDX "Az AVI indexének újraéptése, ha szükségesÁ"
 #define MSGTR_PREFERENCES_VideoCodecFamily "Video kodek család:"
 #define MSGTR_PREFERENCES_FRAME_OSD_Level "OSD szint"
 #define MSGTR_PREFERENCES_FRAME_Subtitle "Felirat"
