@@ -1,0 +1,39 @@
+
+TODO:
+=====
+
+demuxer:
+- .VDR files from stdinput (ff detection bug)
+- CivIIIE3Teaser.wmv (asf demuxer bug)
+- test and cleanup FLI/FLC support (and implement seek)
+- check dvdread/dvdcss version problems
+- add -dumpstream
+
+decoders:
+- check and import videodecoding.de stuff
+- finish and switch to C directshow code
+- finish native g72x audio decoder
+- qtx support?
+
+mencoder:
+- add ffmpeg encoders support
+- add ogg/vorbis audio encoder
+- add raw video out
+- check/fix frame copy
+- implement CBR mp3 encoding
+- implement VBR audio copy
+- Estimated Size and Time
+- stop/resume
+- image resize filter
+- image cut/crop filter
+
+gui:
+- playlist ?
+- preferences ?
+
+other:
+- dvd server
+- sub database
+- mga_vid crtc2 fix
+- libvo2
+
