@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <fcntl.h>
+#include <ctype.h>
 
 #include "input.h"
 #include "mouse.h"
@@ -963,7 +964,7 @@ mp_cmd_clone(mp_cmd_t* cmd) {
   return ret;
 }
 
-static char key_str[2];
+static char key_str[12];
 
 static char*
 mp_input_get_key_name(int key) {
@@ -974,21 +975,25 @@ mp_input_get_key_name(int key) {
       return key_names[i].name;
   }
   
-  if(key >> 8 == 0) {
-    snprintf(key_str,2,"%c",(char)key);
+  if(isascii(key)) {
+    snprintf(key_str,12,"%c",(char)key);
     return key_str;
   }
 
-  return NULL;
+  // Print the hex key code
+  snprintf(key_str,12,"%#-8x",key);
+  return key_str;
+
 }
 
 static int
 mp_input_get_key_from_name(char* name) {
-  int i,ret = 0;
-  if(strlen(name) == 1) { // Direct key code
-    (char)ret = name[0];
+  int i,ret = 0,len = strlen(name);
+  if(len == 1) { // Direct key code
+    ret = (unsigned char)name[0];
     return ret;
-  }
+  } else if(len > 2 && strncasecmp("0x",name,2) == 0)
+    return strtol(name,NULL,16);
 
   for(i = 0; key_names[i].name != NULL; i++) {
     if(strcasecmp(key_names[i].name,name) == 0)
