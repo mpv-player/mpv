@@ -155,9 +155,20 @@ static int play(){
 
   out = pl_surround.databuf;  in = (int16_t *)ao_plugin_data.data;
   for (i=0; i<samples; i++) {
+
+    // About the .707 here and the /2 for surround:
+    //   Surround encoding does the following:
+    //       Lt=L+.707*C+.707*S, Rt=R+.707*C-.707*S
+    //   So S needs to be extracted as:
+    //       .707*(L-R)
+    //   But L-R could still be as much as 32767-(-32768), way off scale
+    //   for signed 16 bits, so to avoid running out of bits, whilst still
+    //   keeping levels in balance, we scale L and R down by 3dB (*.707),
+    //   and scale the surround down by 6dB (.707*.707=.5)
+
     // front left and right
-    out[0] = in[0];
-    out[1] = in[1];
+    out[0] = in[0]*.707;
+    out[1] = in[1]*.707;
     // surround - from 15msec ago
     out[2] = pl_surround.delaybuf[pl_surround.delaybuf_ptr];
     out[3] = -out[2];
