@@ -639,7 +639,7 @@ present) black bar.
   <term><option>-ao sdl:<replaceable>name</replaceable></option></term>
   <listitem><simpara>
     specifies SDL audio driver to use (i.e. <literal>dsp</literal>,
-    <literal>esd</literal>, <literal>arts</literal>)
+    <literal>esd</literal>, <literal>artsc</literal>)
   </simpara></listitem>
 </varlistentry>
 <varlistentry>
