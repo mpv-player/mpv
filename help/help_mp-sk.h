@@ -6,7 +6,7 @@
 #ifdef HELP_MP_DEFINE_STATIC
 static char* banner_text=
 "\n\n"
-"MPlayer " VERSION "(C) 2000-2002 Arpad Gereoffy (viï DOCS!)\n"
+"MPlayer " VERSION "(C) 2000-2003 Arpad Gereoffy (viï DOCS!)\n"
 "\n";
 
 // Preklad do slovenèiny 
@@ -130,7 +130,7 @@ static char help_text[]=
 
 // mencoder.c:
 
-#define MSGTR_MEncoderCopyright "(C) 2000-2002 Arpad Gereoffy (viï. DOCS!)\n"
+#define MSGTR_MEncoderCopyright "(C) 2000-2003 Arpad Gereoffy (viï. DOCS!)\n"
 #define MSGTR_UsingPass3ControllFile "Pou¾ívam pass3 ovládací súbor: %s\n"
 #define MSGTR_MissingFilename "\nChýbajúce meno súboru!\n\n"
 #define MSGTR_CannotOpenFile_Device "Nemô¾em otvori» súbor/zariadenie\n"

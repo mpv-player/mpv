@@ -134,7 +134,7 @@ static char help_text[]=
 
 // mencoder.c:
 
-#define MSGTR_MEncoderCopyright "(C) 2000-2002 Arpad Gereoffy (DOCS para más información)\n"
+#define MSGTR_MEncoderCopyright "(C) 2000-2003 Arpad Gereoffy (DOCS para más información)\n"
 #define MSGTR_UsingPass3ControllFile "Usando el archivo de control pass3: %s\n"
 #define MSGTR_MissingFilename "\nFalta el nombre del archivo.\n\n"
 #define MSGTR_CannotOpenFile_Device "No se pudo abrir el archivo o el dispositivo.\n"

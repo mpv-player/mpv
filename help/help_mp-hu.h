@@ -6,7 +6,7 @@
 #ifdef HELP_MP_DEFINE_STATIC
 static char* banner_text=
 "\n\n"
-"MPlayer " VERSION "(C) 2000-2002  Gereöffy Árpád  (lásd DOCS!)\n"
+"MPlayer " VERSION "(C) 2000-2003  Gereöffy Árpád  (lásd DOCS!)\n"
 "\n";
 
 static char help_text[]=
@@ -135,7 +135,7 @@ static char help_text[]=
 
 // mencoder.c:
 
-#define MSGTR_MEncoderCopyright "(C) 2000-2002 Arpad Gereoffy (lásd DOCS!)\n"
+#define MSGTR_MEncoderCopyright "(C) 2000-2003 Arpad Gereoffy (lásd DOCS!)\n"
 #define MSGTR_UsingPass3ControllFile "Pass3 file használata: %s\n"
 #define MSGTR_MissingFilename "\nHiányzó filenév!\n\n"
 #define MSGTR_CannotOpenFile_Device "File/eszköz megnyitása sikertelen\n"

@@ -8,7 +8,7 @@
 #ifdef HELP_MP_DEFINE_STATIC
 static char* banner_text=
 "\n\n"
-"MPlayer " VERSION "(C) 2000-2002 Arpad Gereoffy (문서 참조!)\n"
+"MPlayer " VERSION "(C) 2000-2003 Arpad Gereoffy (문서 참조!)\n"
 "\n";
 
 static char help_text[]=
@@ -302,7 +302,7 @@ static char help_text[]=
 #define MSGTR_NotInitializeVOPorVO "\n치명적: 비디오 필터(-vop) 또는 비디오 출력(-vo)을 초기화할 수 없습니다!\n"
 #define MSGTR_Paused "\n------ 잠시멈춤 -------\r"
 #define MSGTR_PlaylistLoadUnable "\n재생목록 %s을(를) 열 수 없습니다\n"
-#define MSGTR_MEncoderCopyright "(C) 2000-2002 Arpad Gereoffy (문서 참조!)\n"
+#define MSGTR_MEncoderCopyright "(C) 2000-2003 Arpad Gereoffy (문서 참조!)\n"
 #define MSGTR_UsingPass3ControllFile "pass3 컨트롤 파일 사용: %s\n"
 #define MSGTR_MissingFilename "\n파일을 찾을 수 없습니다!\n\n"
 #define MSGTR_CannotOpenFile_Device "파일/장치를 열 수 없습니다.\n"

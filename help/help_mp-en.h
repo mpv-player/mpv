@@ -8,7 +8,7 @@
 #ifdef HELP_MP_DEFINE_STATIC
 static char* banner_text=
 "\n\n"
-"MPlayer " VERSION "(C) 2000-2002 Arpad Gereoffy (see DOCS)\n"
+"MPlayer " VERSION "(C) 2000-2003 Arpad Gereoffy (see DOCS)\n"
 "\n";
 
 static char help_text[]=
@@ -138,7 +138,7 @@ static char help_text[]=
 
 // mencoder.c:
 
-#define MSGTR_MEncoderCopyright "(C) 2000-2002 Arpad Gereoffy (see DOCS)\n"
+#define MSGTR_MEncoderCopyright "(C) 2000-2003 Arpad Gereoffy (see DOCS)\n"
 #define MSGTR_UsingPass3ControllFile "Using pass3 control file: %s\n"
 #define MSGTR_MissingFilename "\nMissing filename!\n\n"
 #define MSGTR_CannotOpenFile_Device "Cannot open file/device.\n"
