@@ -7,11 +7,20 @@
  * License: GPLv2
  * Author: pl <p_l@gmx.fr> (c) 2002 and beyond...
  *
- * Sources: some ideas from volnorm for xmms
+ * Sources: some ideas from volnorm plugin for xmms
  *
  * */
 
 #define PLUGIN
+
+/* Values for AVG:
+ * 1: uses a 1 value memory and coefficients new=a*old+b*cur (with a+b=1)
+ *
+ * 2: uses several samples to smooth the variations (standard weighted mean
+ *    on past samples)
+ *
+ * */
+#define AVG 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,9 +45,11 @@ LIBAO_PLUGIN_EXTERN(volnorm)
 // and has to be in [MUL_MIN, MUL_MAX]
 #define MUL_INIT 1.0
 #define MUL_MIN 0.1
-#define MUL_MAX 15.0
+#define MUL_MAX 5.0
 static float mul;
 
+
+#if AVG==1
 // "history" value of the filter
 static float lastavg;
 
@@ -47,17 +58,44 @@ static float lastavg;
 #define SMOOTH_MUL 0.06
 #define SMOOTH_LASTAVG 0.06
 
+
+#elif AVG==2
+// Size of the memory array
+// FIXME: should depend on the frequency of the data (should be a few seconds)
+#define NSAMPLES 128
+
+// Indicates where to write (in 0..NSAMPLES-1)
+static int idx;
+// The array
+static struct {
+    float avg;		// average level of the sample
+    int32_t len;	// sample size (weight)
+} mem[NSAMPLES];
+
+// If summing all the mem[].len is lower than MIN_SAMPLE_SIZE bytes, then we
+// choose to ignore the computed value as it's not significant enough
+// FIXME: should depend on the frequency of the data (0.5s maybe)
+#define MIN_SAMPLE_SIZE 32000
+
+#else
+// Kab00m !
+#error "Unknown AVG"
+#endif
+
+
 // Some limits
 #define MIN_S16 -32768
 #define MAX_S16  32767
 
-// ideal average level
+// "Ideal" level
 #define MID_S16 (MAX_S16 * 0.25)
 
-// silence level
-#define SIL_S16 (MAX_S16 * 0.02)
+// Silence level
+// FIXME: should be relative to the level of the samples
+#define SIL_S16 (MAX_S16 * 0.01)
 
-// local data
+
+// Local data
 static struct {
   int      inuse;     	// This plugin is in use TRUE, FALSE
   int      format;	// sample fomat
@@ -101,13 +139,23 @@ static void uninit(){
 
 // empty buffers
 static void reset(){
+  int i;
   mul = MUL_INIT;
   switch(ao_plugin_data.format) {
     case(AFMT_S16_LE):
+#if AVG==1
       lastavg = MID_S16;
+#elif AVG==2
+      for(i=0; i < NSAMPLES; ++i) {
+	      mem[i].len = 0;
+	      mem[i].avg = 0;
+      }
+      idx = 0;
+#endif
+
       break;
     default:
-      fprintf(stderr,"[pl_volnorm] internal inconsistency - please bugreport.\n");
+      fprintf(stderr,"[pl_volnorm] internal inconsistency - bugreport !\n");
       *(char *) 0 = 0;
   }
 }
@@ -124,13 +172,17 @@ static int play(){
     int16_t* data=(int16_t*)ao_plugin_data.data;
     int len=ao_plugin_data.len / 2; // 16 bits samples
 
-    int32_t i;
-    register int32_t tmp;
-    register float curavg;
-    float newavg;
-    float neededmul;
+    int32_t i, tmp;
+    float curavg, newavg;
 
-    // average of the current samples
+#if AVG==1
+    float neededmul;
+#elif AVG==2
+    float avg;
+    int32_t totallen;
+#endif
+
+    // Evaluate current samples average level
     curavg = 0.0;
     for (i = 0; i < len ; ++i) {
       tmp = data[i];
@@ -138,6 +190,9 @@ static int play(){
     }
     curavg = sqrt(curavg / (float) len);
 
+    // Evaluate an adequate 'mul' coefficient based on previous state, current
+    // samples level, etc
+#if AVG==1
     if (curavg > SIL_S16) {
       neededmul = MID_S16 / ( curavg * mul);
       mul = (1.0 - SMOOTH_MUL) * mul + SMOOTH_MUL * neededmul;
@@ -145,10 +200,27 @@ static int play(){
       // Clamp the mul coefficient
       CLAMP(mul, MUL_MIN, MUL_MAX);
     }
+#elif AVG==2
+    avg = 0.0;
+    totallen = 0;
+
+    for (i = 0; i < NSAMPLES; ++i) {
+        avg += mem[i].avg * (float) mem[i].len;
+        totallen += mem[i].len;
+    }
+
+    if (totallen > MIN_SAMPLE_SIZE) {
+    	avg /= (float) totallen;
+    	if (avg >= SIL_S16) {
+    	    mul = (float) MID_S16 / avg;
+    	    CLAMP(mul, MUL_MIN, MUL_MAX);
+    	}
+    }
+#endif
 
     // Scale & clamp the samples
-    for (i=0; i < len ; ++i) {
-      tmp = data[i] * mul;
+    for (i = 0; i < len ; ++i) {
+      tmp = mul * data[i];
       CLAMP(tmp, MIN_S16, MAX_S16);
       data[i] = tmp;
     }
@@ -156,13 +228,17 @@ static int play(){
     // Evaluation of newavg (not 100% accurate because of values clamping)
     newavg = mul * curavg;
 
-#if 0
-    printf("time = %d len = %d curavg = %6.0f lastavg = %6.0f newavg = %6.0f\n"
-           " needed_m = %2.2f m = %2.2f\n\n",
-            time(NULL), len, curavg, lastavg, newavg, neededmul, mul);
-#endif
-
+    // Stores computed values for future smoothing
+#if AVG==1
     lastavg = (1.0 - SMOOTH_LASTAVG) * lastavg + SMOOTH_LASTAVG * newavg;
+    //printf("\rmul=%02.1f ", mul);
+#elif AVG==2
+    mem[idx].len = len;
+    mem[idx].avg = newavg;
+    idx = (idx + 1) % NSAMPLES;
+    //printf("\rmul=%02.1f (%04dKiB) ", mul, totallen/1024);
+#endif
+    //fflush(stdout);
 
     break;
   }
