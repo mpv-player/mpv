@@ -724,12 +724,11 @@ case AFM_MPEG: {
   MP3_Init();
 #endif
   MP3_samplerate=MP3_channels=0;
-//  printf("[\n");
   sh_audio->a_buffer_len=MP3_DecodeFrame(sh_audio->a_buffer,-1);
-//  printf("]\n");
   sh_audio->channels=2; // hack
   sh_audio->samplerate=MP3_samplerate;
   sh_audio->i_bps=MP3_bitrate*(1000/8);
+  MP3_PrintHeader();
   break;
 }
 #ifdef HAVE_OGGVORBIS
