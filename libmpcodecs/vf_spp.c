@@ -193,7 +193,7 @@ static void hardthresh_mmx(DCTELEM dst[64], DCTELEM src[64], int qp, uint8_t *pe
 		"movq %%mm0, %%mm3	\n\t"\
 		"punpcklwd %%mm1, %%mm0	\n\t" /*A*/\
 		"punpckhwd %%mm7, %%mm3	\n\t" /*C*/\
-		"punpcklwd %%mm1, %%mm7	\n\t" /*B*/\
+		"punpcklwd %%mm2, %%mm7	\n\t" /*B*/\
 		"punpckhwd %%mm2, %%mm1	\n\t" /*D*/\
 \
 		"movq %%mm0, " #dst0 "	\n\t"\
@@ -271,7 +271,7 @@ static void softthresh_mmx(DCTELEM dst[64], DCTELEM src[64], int qp, uint8_t *pe
 		"movq %%mm0, %%mm3	\n\t"\
 		"punpcklwd %%mm1, %%mm0	\n\t" /*A*/\
 		"punpckhwd %%mm7, %%mm3	\n\t" /*C*/\
-		"punpcklwd %%mm1, %%mm7	\n\t" /*B*/\
+		"punpcklwd %%mm2, %%mm7	\n\t" /*B*/\
 		"punpckhwd %%mm2, %%mm1	\n\t" /*D*/\
 \
 		"movq %%mm0, " #dst0 "	\n\t"\
