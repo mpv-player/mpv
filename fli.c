@@ -2,6 +2,8 @@
     FLI Decoder for MPlayer
     
     (C) 2001 Mike Melanson
+    
+    32bpp support (c) alex
 */
 
 #define LE_16(x) *(unsigned short *)(x)
@@ -119,7 +121,7 @@ void AVI_Decode_Fli(
           for (i = 0; i < line_packets; i++)
           {
             // account for the skip bytes
-            pixel_ptr += encoded[stream_ptr++] * 3;
+            pixel_ptr += encoded[stream_ptr++] * bytes_per_pixel;
             byte_run = encoded[stream_ptr++];
             if (byte_run < 0)
             {
@@ -131,10 +133,14 @@ void AVI_Decode_Fli(
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 0];
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 1];
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 2];
+		if (bytes_per_pixel == 4) /* 32bpp */
+		    pixel_ptr++;
 
                 decoded[pixel_ptr++] = palette[palette_ptr2 + 0];
                 decoded[pixel_ptr++] = palette[palette_ptr2 + 1];
                 decoded[pixel_ptr++] = palette[palette_ptr2 + 2];
+		if (bytes_per_pixel == 4) /* 32bpp */
+		    pixel_ptr++;
               }
             }
             else
@@ -145,6 +151,8 @@ void AVI_Decode_Fli(
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 0];
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 1];
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 2];
+		if (bytes_per_pixel == 4) /* 32bpp */
+		    pixel_ptr++;
               }
             }
           }
@@ -172,7 +180,7 @@ void AVI_Decode_Fli(
           for (i = 0; i < line_packets; i++)
           {
             // account for the skip bytes
-            pixel_ptr += encoded[stream_ptr++] * 3;
+            pixel_ptr += encoded[stream_ptr++] * bytes_per_pixel;
             byte_run = encoded[stream_ptr++];
             if (byte_run > 0)
             {
@@ -182,6 +190,8 @@ void AVI_Decode_Fli(
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 0];
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 1];
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 2];
+		if (bytes_per_pixel == 4) /* 32bpp */
+		    pixel_ptr++;
               }
             }
             else
@@ -193,6 +203,8 @@ void AVI_Decode_Fli(
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 0];
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 1];
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 2];
+		if (bytes_per_pixel == 4) /* 32bpp */
+		    pixel_ptr++;
               }
             }
           }
@@ -205,11 +217,13 @@ void AVI_Decode_Fli(
 
     case FLI_BLACK:
       // set the whole frame to color 0 (which is usually black)
-      for (pixel_ptr = 0; pixel_ptr < (width * height * 3); pixel_ptr++)
+      for (pixel_ptr = 0; pixel_ptr < (width * height * bytes_per_pixel); pixel_ptr++)
       {
         decoded[pixel_ptr++] = palette[0];
         decoded[pixel_ptr++] = palette[1];
         decoded[pixel_ptr++] = palette[2];
+	if (bytes_per_pixel == 4) /* 32bpp */
+	    pixel_ptr++;
       }
       break;
 
@@ -232,6 +246,8 @@ void AVI_Decode_Fli(
               decoded[pixel_ptr++] = palette[palette_ptr1 + 0];
               decoded[pixel_ptr++] = palette[palette_ptr1 + 1];
               decoded[pixel_ptr++] = palette[palette_ptr1 + 2];
+	      if (bytes_per_pixel == 4) /* 32bpp */
+		pixel_ptr++;
             }
           }
           else  // copy bytes if byte_run < 0
@@ -243,6 +259,8 @@ void AVI_Decode_Fli(
               decoded[pixel_ptr++] = palette[palette_ptr1 + 0];
               decoded[pixel_ptr++] = palette[palette_ptr1 + 1];
               decoded[pixel_ptr++] = palette[palette_ptr1 + 2];
+	      if (bytes_per_pixel == 4) /* 32bpp */
+		pixel_ptr++;
             }
           }
         }
