@@ -491,7 +491,9 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 	vidix_play.dest.y = y_org;
 	vidix_play.dest.w = dst_width;
 	vidix_play.dest.h = dst_height;
-	vidix_play.num_frames=vo_doublebuffering?NUM_FRAMES-1:1;
+//	vidix_play.num_frames=vo_doublebuffering?NUM_FRAMES-1:1;
+	/* we aren't mad...3 buffers are more than enough */
+	vidix_play.num_frames=vo_doublebuffering?3:1;
 	vidix_play.src.pitch.y = vidix_play.src.pitch.u = vidix_play.src.pitch.v = 0;
 
 	if((err=vdlConfigPlayback(vidix_handler,&vidix_play))!=0)
