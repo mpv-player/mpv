@@ -196,7 +196,7 @@ static void spudec_process_control(spudec_handle_t *this, unsigned int pts100)
   next_off = this->control_start;
   while (start_off != next_off) {
     start_off = next_off;
-    date = get_be16(this->packet + start_off);
+    date = get_be16(this->packet + start_off) * 1024;
     next_off = get_be16(this->packet + start_off + 2);
     mp_msg(MSGT_SPUDEC,MSGL_DBG2, "date=%d\n", date);
     off = start_off + 4;

@@ -51,9 +51,8 @@ extern void* mDisplay; // Display* mDisplay;
 #ifdef USE_DVDNAV
 #include <dvdnav.h>
 #endif
-#ifdef USE_DVDREAD
+
 #include "spudec.h"
-#endif
 #include "vobsub.h"
 
 #include "linux/getch2.h"
@@ -301,14 +300,13 @@ void uninit_player(unsigned int mask){
     getch2_disable();
   }
 
-#ifdef USE_DVDREAD
   if (mask&INITED_SPUDEC){
     inited_flags&=~INITED_SPUDEC;
     current_module="uninit_spudec";
     spudec_free(vo_spudec);
     vo_spudec=NULL;
   }
-#endif
+
   if(mask&INITED_VO){
     inited_flags&=~INITED_VO;
     current_module="uninit_vo";
@@ -2575,9 +2573,7 @@ if(rel_seek_secs || abs_seek_pos){
 	too_slow_frame_cnt=0;
 	too_fast_frame_cnt=0;
 
-#ifdef USE_DVDREAD
-      if(vo_spudec) spudec_reset(vo_spudec);
-#endif
+        if(vo_spudec) spudec_reset(vo_spudec);
       }
   }
   rel_seek_secs=0;
@@ -2683,7 +2679,6 @@ if(rel_seek_secs || abs_seek_pos){
     current_module=NULL;
   }
 
-#ifdef USE_DVDREAD
   // DVD sub:
   if(vo_flags & 0x08){
     static vo_mpegpes_t packet;
@@ -2700,15 +2695,14 @@ if(rel_seek_secs || abs_seek_pos){
     current_module="spudec";
     while((len=ds_get_packet_sub(d_dvdsub,&packet))>0){
       mp_msg(MSGT_CPLAYER,MSGL_V,"\rDVD sub: len=%d  v_pts=%5.3f  s_pts=%5.3f  \n",len,d_video->pts,d_dvdsub->pts);
-      spudec_assemble(vo_spudec,packet,len,100*d_dvdsub->pts);
+      spudec_assemble(vo_spudec,packet,len,90000*d_dvdsub->pts);
     }
-    spudec_heartbeat(vo_spudec,100*d_video->pts);
+    spudec_heartbeat(vo_spudec,90000*d_video->pts);
 
     /* Don't know how to detect wether the sub has changed or not */
     vo_osd_changed(1);
     current_module=NULL;
   }
-#endif
   
 } // while(!eof)
 
