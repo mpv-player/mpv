@@ -34,3 +34,9 @@
 #define KEY_DOWN (KEY_CRSR+2)
 #define KEY_UP (KEY_CRSR+3)
 
+/* XF86 Multimedia keyboard keys */
+#define KEY_XF86_BASE (0x100+384)
+#define KEY_XF86_PAUSE (KEY_XF86_BASE+1)
+#define KEY_XF86_STOP (KEY_XF86_BASE+2)
+#define KEY_XF86_PREV (KEY_XF86_BASE+3)
+#define KEY_XF86_NEXT (KEY_XF86_BASE+4)

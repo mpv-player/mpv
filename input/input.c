@@ -182,6 +182,12 @@ static mp_key_name_t key_names[] = {
   { JOY_BTN7, "JOY_BTN7" },
   { JOY_BTN8, "JOY_BTN8" },
   { JOY_BTN9, "JOY_BTN9" },
+
+  { KEY_XF86_PAUSE, "XF86_PAUSE" },
+  { KEY_XF86_STOP, "XF86_STOP" },
+  { KEY_XF86_PREV, "XF86_PREV" },
+  { KEY_XF86_NEXT, "XF86_NEXT" },
+
   { 0, NULL }
 };
 
@@ -284,6 +290,12 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { { 's', 0 }, "screenshot" },
   { { 'w', 0 }, "panscan -0.1" },
   { { 'e', 0 }, "panscan +0.1" },
+
+  { { KEY_XF86_PAUSE, 0 }, "pause" },
+  { { KEY_XF86_STOP, 0 }, "quit" },
+  { { KEY_XF86_PREV, 0 }, "seek -60" },
+  { { KEY_XF86_NEXT, 0 }, "seek +60" },
+
   { { 0 }, NULL }
 };
 

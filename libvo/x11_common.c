@@ -33,6 +33,7 @@
 
 #ifdef HAVE_XF86VM
 #include <X11/extensions/xf86vmode.h>
+#include <X11/XF86keysym.h>
 #endif
 
 #include "../input/input.h"
@@ -403,6 +404,19 @@ void vo_uninit( void )
 
 extern void mplayer_put_key(int code);
 
+#ifdef XF86XK_AudioPause
+void vo_x11_putkey_ext(int keysym){
+ switch ( keysym )
+  {
+   case XF86XK_AudioPause:    mplayer_put_key(KEY_XF86_PAUSE); break;
+   case XF86XK_AudioStop:     mplayer_put_key(KEY_XF86_STOP); break;
+   case XF86XK_AudioPrev:     mplayer_put_key(KEY_XF86_PREV); break;
+   case XF86XK_AudioNext:     mplayer_put_key(KEY_XF86_NEXT); break;
+   default:
+  }
+}
+#endif
+
 void vo_x11_putkey(int key){
  switch ( key )
   {
@@ -636,6 +650,9 @@ int vo_x11_check_events(Display *mydisplay){
            { 
 	    int key;
             XLookupString( &Event.xkey,buf,sizeof(buf),&keySym,&stat );
+            #ifdef XF86XK_AudioPause
+             vo_x11_putkey_ext( keySym );
+            #endif
 	    key=( (keySym&0xff00) != 0?( (keySym&0x00ff) + 256 ):( keySym ) );
 	    #ifdef HAVE_NEW_GUI
 	     if ( ( use_gui )&&( key == wsEnter ) ) break;
