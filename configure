@@ -184,17 +184,18 @@ pfamily=`cat /proc/cpuinfo | grep 'cpu family' | cut -d ':' -f 2 | cut -d ' ' -f
 pmodel=`cat /proc/cpuinfo | grep "model$TAB" | cut -d ':' -f 2 | cut -d ' ' -f 2`
 pstepping=`cat /proc/cpuinfo | grep 'stepping' | cut -d ':' -f 2 | cut -d ' ' -f 2`
 
-_css=no
 _mmx=no
 _mmx2=no
 _3dnow=no
 _mtrr=no
 _sse=no
+
 _mga=no
 _gl=no
 _sdl=no
 _xv=no
 _vm=no
+_xdpms=no
 _3dfx=no
 _syncfb=no
 _mlib=no
@@ -205,7 +206,7 @@ _dga2=no
 _svga=no
 _fbdev=yes
 _lirc=no
-_xdpms=no
+_css=no
 
 _x=1
 _y=1
@@ -404,6 +405,9 @@ $_cc $TMPC -o $TMPO -L/usr/local/lib/ -lSDL -lpthread &> /dev/null && _have_sdl=
 _termcap=no
 $_cc $TMPC -o $TMPO -ltermcap &> /dev/null && _termcap=yes
 
+_png=no
+$_cc $TMPC -o $TMPO -lpng &> /dev/null && _png=yes
+
 _binutils=no
 as libac3/downmix/downmix_i386.S -o $TMPO &> /dev/null && _binutils=yes
 
@@ -417,18 +421,18 @@ fi
 if [ $_x11 = yes ]; then
 
 $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXdpms &> /dev/null && _xdpms=yes
-$_cc $TMPC -o $TMPO $_x11libdir -lXv &> /dev/null && _xv=yes
+$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXv &> /dev/null && _xv=yes
 
-$_cc $TMPC -o $TMPO $_x11libdir -lGL &> /dev/null && _gl=yes
+$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL &> /dev/null && _gl=yes
 
 cat > $TMPC << EOF
 #include <GL/gl.h>
 int main( void ) { return 0; }
 EOF
-$_cc $TMPC -o $TMPO $_x11libdir -lGL &> /dev/null || \
+$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL &> /dev/null || \
  { _gl=no; echo "GL includes not found!";}
 
-$_cc $TMPC -o $TMPO $_x11libdir -lXxf86vm &> /dev/null && _vm=yes
+$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXxf86vm &> /dev/null && _vm=yes
 
 cat > $TMPC << EOF
 #include <stdio.h>
@@ -468,6 +472,9 @@ do
  case "$ac_option" in
   --enable-css)
 	_css=yes
+	;;
+  --enable-png)
+	_png=yes
 	;;
   --enable-sse)
         _sse=yes
@@ -537,6 +544,9 @@ do
 	;;
   --disable-css)
 	_css=no
+	;;
+  --disable-png)
+	_png=no
 	;;
   --disable-sse)
         _sse=no
@@ -645,6 +655,7 @@ echo "Checking for Xf86VM ... $_vm"
 echo "Checking for SVGAlib ... $_svga"
 echo "Checking for FBDev ... $_fbdev"
 echo "Checking for DeCSS support ... $_css"
+echo "Checking for PNG support ... $_png"
 # write conf files.
 
 if [ $_gl = yes ]; then
@@ -720,6 +731,9 @@ else
  _lirclibs=''
 fi
 
+if [ $_png = yes ]; then
+   _libpng='-lpng'
+fi
 
 echo
 echo "Creating $MCONF"
@@ -733,7 +747,7 @@ X11DIR=$_x11libdir
 # OPTFLAGS=-O4 -march=$proc -mcpu=$proc -pipe -fomit-frame-pointer -ffast-math
 OPTFLAGS=-O4 -march=$proc -mcpu=$proc -pipe -ffast-math
 # LIBS=-L/usr/lib -L/usr/local/lib $_x11libdir $_gllib $_sdllib $_dgalib $_x11lib $_xvlib
-X_LIBS=$_x11libdir $_gllib $_sdllib $_dgalib $_x11lib $_xvlib $_vmlib $_svgalib
+X_LIBS=$_x11libdir $_gllib $_sdllib $_dgalib $_x11lib $_xvlib $_vmlib $_svgalib $_libpng
 TERMCAP_LIB=$_libtermcap
 XMM_LIBS = $_xmmplibs
 LIRC_LIBS = $_lirclibs
@@ -773,6 +787,14 @@ fi
 # ---
 
 _vosrc=''
+
+if [ $_png = yes ]; then
+ _png='#define HAVE_PNG'
+ _vosrc=$_vosrc' vo_png.c'
+else
+   _png='#undef HAVE_PNG'
+fi
+
 
 if [ $_mlib = yes ]; then
  _mlib='#define HAVE_MLIB'
@@ -932,6 +954,7 @@ $_css
 
 /* termcap flag for getch2.c */
 $_termcap
+$_png
 
 /* Extension defines */
 $_mlib     // available only on solaris
