@@ -107,25 +107,25 @@ static int add_to_out(char *sfmt, char *sflags, unsigned int *outfmt,
 	        const char *name;
 	        const unsigned int num;
 	} fmt_table[] = {
-		"YV12",  IMGFMT_YV12,
-		"I420",  IMGFMT_I420,
-		"IYUV",  IMGFMT_IYUV,
+		{"YV12",  IMGFMT_YV12},
+		{"I420",  IMGFMT_I420},
+		{"IYUV",  IMGFMT_IYUV},
 
-		"YUY2",  IMGFMT_YUY2,
-		"UYVY",  IMGFMT_UYVY,
-		"YVYU",  IMGFMT_YVYU,
+		{"YUY2",  IMGFMT_YUY2},
+		{"UYVY",  IMGFMT_UYVY},
+		{"YVYU",  IMGFMT_YVYU},
 
-	        "RGB8",  IMGFMT_RGB|8,
-		"RGB15", IMGFMT_RGB|15, 
-		"RGB16", IMGFMT_RGB|16,
-		"RGB24", IMGFMT_RGB|24,
-		"RGB32", IMGFMT_RGB|32,
-		"BGR8",  IMGFMT_BGR|8,
-		"BGR15", IMGFMT_BGR|15,
-		"BGR16", IMGFMT_BGR|16,
-		"BGR24", IMGFMT_BGR|24,
-		"BGR32", IMGFMT_BGR|32,
-		NULL,    0
+	        {"RGB8",  IMGFMT_RGB|8},
+		{"RGB15", IMGFMT_RGB|15}, 
+		{"RGB16", IMGFMT_RGB|16},
+		{"RGB24", IMGFMT_RGB|24},
+		{"RGB32", IMGFMT_RGB|32},
+		{"BGR8",  IMGFMT_BGR|8},
+		{"BGR15", IMGFMT_BGR|15},
+		{"BGR16", IMGFMT_BGR|16},
+		{"BGR24", IMGFMT_BGR|24},
+		{"BGR32", IMGFMT_BGR|32},
+		{NULL,    0}
 	};
 
 	static char *flagstr[] = {
