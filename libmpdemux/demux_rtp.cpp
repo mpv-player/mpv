@@ -179,6 +179,11 @@ extern "C" void demux_open_rtp(demuxer_t* demuxer) {
 	  demux_stream_t* d_video = demuxer->video;
 	  d_video->sh = sh_video; sh_video->ds = d_video;
 
+	  // If we happen to know the subsession's video frame rate, set it,
+	  // so that the user doesn't have to give the "-fps" option instead.
+	  int fps = (int)(subsession->videoFPS());
+	  if (fps != 0) sh_video->fps = fps;
+
 	  // Map known video MIME types to the BITMAPINFOHEADER parameters
 	  // that this program uses.  (Note that not all types need all
 	  // of the parameters to be set.)
