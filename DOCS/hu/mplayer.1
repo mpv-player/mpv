@@ -1845,118 +1845,117 @@ bicubic spline
 .
 .TP
 .B \-vc <[-]codec1,[-]codec2,...[,]>
-Specify a priority list of video codecs to be used, according to their codec
-name in codecs.conf.
-Use a '-' before the codec name to omit it.
+Megadható egy prioritási lista a használandó video codec-ekrõl, a codec-ek
+codecs.conf file-ban szereplõ nevei szerint.
+A '-' jel használata a codec neve elõtt a codec használatának kikapcsolását
+jelenti.
 
-.I NOTE:
+.I MEGJEGYZÉS:
 .br
-See \-vc help for a full list of available codecs.
+A codec-ek listája a \-vc help opcióval kérhetõ le.
 .br
-If the list has a trailing ',' it will fallback to codecs not listed.
+Ha a lista végén szerepel egy ',' karakter, akkor amennyiben egyik megadott
+codec sem képes a dekódolásra, az összes többi nem megadott codec is
+automatikusan kipróbálásra kerül.
 
-.I EXAMPLE:
+.I PÉLDA:
 .PD 0
 .RSs
 .IPs "\-vc divx"
-force Win32/\:VFW DivX codec, no fallback
+Win32/\:VFW DivX codec kényszerítése
 .IPs "\-vc divx4,"
-try divx4linux codec first, then fallback to others
+elõször a divx4linux codec használata, majd az összes többié
 .IPs "\-vc -divxds,-divx,"
-try other codecs except Win32 DivX codecs
+a Win32 DivX codec használatának kikapcsolása
 .IPs "\-vc ffmpeg12,mpeg12,"
-try libavcodec's MPEG1/\:2 codec, then libmpeg2, then others
+a libavcodec MPEG1/\:2 codec-ének, majd a libmpeg2-nek, végül a többinek
+a használata
 .RE
 .PD 1
 .
 .TP
-.B \-vf <filter1[=options],filter2,...>
-Activate a comma separated list of video filters and their options.
+.B \-vf <szûrõ1[=opciók],szûrõ2,...>
+Vesszõvel elválasztott lista a használandó video szûrõkrõl, és opcióikról.
 
-.I NOTE:
+.I MEGJEGYZÉS:
 .br
-The parameters are optional and if omitted, some of them are set to default
-values.
-Use -1 to keep the default value.
-Parameters w:h means width x height in pixels, x:y means x;y position counted
-from the upper left corner of the bigger image.
+A paraméterek opciónálisak, és elhagyásuk esetén beállnak egy alap értékre.
+A -1 érték az alapértelmezés megtartását jelenti.
+A w:h paraméter jelentése szélesség x magasság (pixelben), x:y a kép bal felsõ
+sarkától számított távolság.
 .br
-To get a full list of available plugins, see \-vf help.
+A rendelkezésre álló szûrõk listája a \-vf help opcióval kérhetõ le.
 .br
-Available filters are:
+A szûrõk:
 .
 .RSs
 .IPs crop[=w:h:x:y]
-Crops the given part of the image and discards the rest.
-Useful to remove black bands from widescreen movies.
+A kép megadott részének kivágása, és a többi eldobása.
+Fekete keretek eltávolítására hasznos.
 .IPs cropdetect[=0\-255]
-Calculates necessary cropping parameters and prints the recommended parameters
-to stdout.
-The threshold can be optionally specified from nothing (0) to everything
-(255).
-(default: 24)
+A pontos vágási (crop) paraméterek kiszámítása és kiírása.
+Az érzékenység 0-tól 255-ig állítható.
+(alap: 24)
 .IPs rectangle[=w:h:x:y]
-Draws a rectangle of the requested width and height at the specified
-coordinates over the image (used to test crop).
-(default: maximum w/\:h, upper left x/\:y position)
+Egy négyszöget rajzol a kért szélességben és magasságban, a megadott
+helyen (vágás tesztelésére lehet használni).
+(alap: maximum w/\:h, bal felsõ x/\:y pozíció)
 .IPs expand[=w:h:x:y:o]
-Expands (not scales) movie resolution to the given value and places the
-unscaled original at coordinates x y. Negative values for w and h are
-treated as offsets to the original size. For example, expand=0:-50:0:0
-adds a 50 pixel border to the bottom of the picture.
-Can be used for placing subtitles/\:OSD in the resulting black bands (default:
-original w/\:h, centered x/\:y).
-The last parameter (de)activates OSD rendering (default: 0=disabled).
+Megnöveli (nem nagyítja) a film felbontását, és a nagyítatlan eredetit
+az x y koordinátákra helyezi. Amennyiben a w és h negatív értéket kap
+az az eredeti mérettõl való eltérést jelenti. Például az expand=0:-50:0:0
+egy 50 pixel szélességû keretet helyez a kép aljára.
+Az így keletkezõ fekete sávokra aztán rá lehet tenni az OSD-t és/vagy
+feliratokat. Alapértelmezésben w/\:h változatlan, a kép középre kerül.
+Az utolsó paraméter az OSD renderelését kapcsolja ki/be (alapban: 0=ki).
 .IPs flip
-Flips the image upside down.
-See also option \-flip.
+Horizontális tengelyen tükrözi a képet.
+Lásd még a \-flip opciót.
 .IPs mirror
-Flips the image on Y axis.
+Y tengely mentén tükrözi a képet.
 .IPs rotate[=<0-7>]
-Rotates and flips (optional) the image +/\:\- 90 degrees.
-For parameters between 4-7 rotation is only done if the movie's geometry is
-portrait and not landscape.
+Forgatja és (opcionálisan) tükrözi a képet +/\:\- 90 fokkal.
+4-7 közti paraméternél a forgatás csak akkor történik meg ha a film
+geometriája "portré" és nem "tájkép".
+(Ezt a sok hülyeséget az angolban nem én irtam!! - Gabucino)
 .IPs scale[=w:h[:c[:p]]]
-Scales the image with the software scaler (slow) and performs a YUV<\->RGB
-colorspace conversion (see \-sws option too).
+A kép nagyítása a szoftveres scalerrel (lassú) és YUV<\->RGB konverzió
+(lásd még \-sws opció).
 The value 0 is used for scaled (aspect) destination w/\:h.
-(default: original w/\:h, destination w/\:h with \-zoom) Optionaly chroma
-skipping (c from 0\-3) and scaling parameters can be specified.
-(see the \-sws option for details)
+(alap: eredeti w/\:h, destination w/\:h with \-zoom)
+(lásd még \-sws opció)
 .IPs yuy2
-Forces software YV12/\:I420 or 422P to YUY2 conversion.
+Szoftveres YV12/\:I420 vagy 422P-bõl YUY2 konverzió.
 .IPs rgb2bgr[=swap]
-RGB 24/\:32 <\-> BGR 24/\:32 colorspace conversion with optional R <\-> B
-swapping.
+RGB 24/\:32 <\-> BGR 24/\:32 konverzió opcionális R <\-> B
+cserével.
 .IPs palette
-RGB/\:BGR 8 \-> 15/\:16/\:24/\:32bpp colorspace conversion using palette.
+RGB/\:BGR 8 \-> 15/\:16/\:24/\:32bpp konverzió palettával.
 .IPs format[=fourcc]
-Restricts the colorspace for next filter.
-It does not do any conversion.
-Use together with the scale filter for a real conversion.
-.IPs pp[=filter1[:option1[:option2...]]/[-]filter2...] (see \-pphelp too)
-This option enables usage of MPlayer's internal postprocessing filter,
-and also gives an interface where you can pass options to the named filter.
-To get a list of available filters, use \-pphelp.
+A következõ szûrõ által használandó colorspace megadása.
+Önmagában nem konvertál, csak a scale szûrõvel együtt.
+.IPs pp[=szûrõ1[:opció1[:opció2...]]/[-]szûrõ2...] (lásd \-pphelp)
+Ezzel az opcióval kapcsolható be a minõségjavító szûrõ, valamint itt lehet
+a nevezett szûrõt felparaméterezni is.
+A rendelkezésre álló szûrõk listája a \-pphelp opcióval kérhetõ le.
 .br
-Note that each sub-filter must be separated with a / sign.
+Mindegyik al-szûrõt egy / jellel kell elválasztani.
 .br
-Each filter defaults to 'c' (chrominance).
+Alapértelmezésben minden szûrõ 'c'-re áll be (chrominance).
 .br
-The keywords accept a '\-' prefix to disable the option.
+A kulcsszavak elé írt '\-' prefix kikapcsolja az adott opciót.
 .br
-A ':' followed by a letter may be appended to the option to indicate its
-scope:
+Az opcióhoz kettõspont után írt betû a szûrõ hatáskörét szabályozza:
 .RSss
-a: Automatically switches the filter off if the CPU is too slow.
+a: Automatikusan kikapcsolja a szûrõt ha a CPU túl lassú.
 .br
-c: Do chrominance filtering, too.
+c: Chrominance szûrés bekapcsolása.
 .br
-y: Do not do chrominance filtering (only luminance filtering).
+y: Chrominance szûrés kikapcsolása (csak luminance szûrés).
 .REss
 
 .RS
-.I EXAMPLES:
+.I PÉLDÁK:
 .RE
 .RSss
 .br
@@ -1964,136 +1963,134 @@ y: Do not do chrominance filtering (only luminance filtering).
 .br
 \-vf pp=hb/vb/dr/al
 .br
-Default filters without brightness/\:contrast correction:
+Alapértelmezett szûrõk, fényerõ/\:kontraszt kivételével:
 .br
 \-vf pp=de/\-al
 .br
-Enable default filters & temporal denoiser:
+Alapértelmezett szûrõk és temporal denoiser bekapcsolása:
 .br
 \-vf pp=de/tn:1:2:3
 .br
-Deblock horizontal only luminance and switch vertical deblocking on or
-off automatically depending on available CPU time:
+Horizontális luminance elsímítása, és a vertikális elsímítás CPU idõ
+függvényében történõ ki vagy bekapcsolása:
 .br
 \-vf pp=hb:y/vb:a \-autoq 6
 .REss
 .IPs lavc[=quality:fps]
-Realtime MPEG1 encoder for use with DVB/\:DXR3 (libavcodec)
+Valósidejû MPEG1 enkóder DVB/\:DXR3-hoz (libavcodec)
 .IPs fame
-Realtime MPEG1 encoder for use with DVB/\:DXR3 (libfame)
+Valósidejû MPEG1 enkóder DVB/\:DXR3-hoz (libfame)
 .IPs dvbscale[=aspect]
-Set up optimal scaling for DVB cards.
-(aspect = DVB_HEIGHT*ASPECTRATIO, default: 768)
+Optimális nagyítás kiszámítása DVB kártyákhoz.
+(aspect = DVB_HEIGHT*ASPECTRATIO, alap: 768)
 .IPs "noise[=luma[u][t|a][h][p]:chroma[u][t|a][h][p]]"
-Adds noise
+Zaj hozzáadása
 .RSss
-<0\-100>: luma noise
+<0\-100>: luma zaj
 .br
-<0\-100>: chroma noise
+<0\-100>: chroma zaj
 .br
-u: uniform noise
+u: uniform zaj
 .br
-t: temporal noise
+t: temporal zaj
 .br
-a: averaged temporal noise
+a: averaged temporal zaj
 .br
-h: high quality
+h: jó minõség
 .br
-p: mix random noise with a (semi)regular pattern
+p: véletlenszerû zaj, félgyakori mintával
 .REss
-.IPs "denoise3d[=luma:chroma:time]"
-This filter aims to reduce image noise producing smooth images and making still
-images really still (This should enhance compressibility.).
-It can be given from 0 to 3 parameters.   If you omit a parameter, a reasonable
-value will be inferred.
+.IPs "denoise3d[=luma:chroma:idõ]"
+Ezen szûrõ célja a kép zajának csökkentése, ezáltal símább képek elérése,
+valamint az állóképek tényleg állóképpé alakítása (ez jobb tömöríthetõséget
+eredményez).
+0-tól 3 paramétert fogad el. Ha egy paramétert elhagysz, egy (a többi értékbõl)
+számolt logikus érték kerül behelyettesítésre.
 .RSss
-luma:	spatial luma strength (default = 4)
+luma:	spatial luma ereje (alap = 4)
 .br
-chroma:	spatial chroma strength (default = 3)
+chroma:	spatial chroma ereje (alap = 3)
 .br
-time:	temporal strength (default = 6)
+time:	temporal erõ (alap = 6)
 .REss
-.IPs eq[=bright:cont]
-Activates the software equalizer with interactive controls like the hardware
-eq controls.
-The values can be from -100 to 100.
-.IPs eq2[=gamma:cont:bright]
-Alternative software equalizer that uses lookup tables (very slow),
-allowing gamma correction in addition to simple brightness and
-contrast adjustment.
-The parameters are given as floating point values.
-Defaults are gamma=1.0, contrast=1.0, and brightness=0.0.
-The values are 0.1\-10 for gamma, -2\-2 for contrast (negative values result
-in negative image) and -1\-1 for brightness.
+.IPs eq[=fényerõ:kontrasz]
+Szoftveres equalizer bekapcsolása. Lehetséges interaktívan is irányítani,
+akár a hardveres equalizert.
+Az értékek -100-tól 100-ig terjedhetnek.
+.IPs eq2[=gamma:kontrasz:fényerõ]
+Alternatív szoftveres equalizer, lookup táblákat használ (lassú), valamint
+lehetséges vele a gamma állítása is.
+A paraméterek lebegõpontos számok.
+Az alapértékek: gamma=1.0, kontraszt=1.0, és fényerõ=0.0.
+Az értékek lehetnek 0.1\-10 a gammára, -2\-2 a kontrasztra (a negatív
+értékek inverz képet adnak), és -1\-1 a fényerõre.
 .IPs halfpack[=f]
-Convert planar YUV 4:2:0 to half-height packed 4:2:2, downsampling luma but
-keeping all chroma samples.
-Useful for output to low-resolution display devices when hardware downscaling
-is poor quality or is not available.
-Can also be used as a primitive luma-only deinterlacer with very low cpu
-usage.
-By default, halfpack averages pairs of lines when downsampling.
-The optional parameter f can be 0 to only use even lines, or 1 to only use
-odd lines.
-Any other value for f gives the default (averaging) behavior.
+Planáris YUV 4:2:0 átkonvertálása félmagas packed 4:2:2-vé, a luma
+lemintavételezésével, de az összes chroma minta megtartásával.
+Hasznos alacsony felbontású eszközökön történõ megjelenítésre.
+Egyszerû luma deinterlacer-ként is használható, kevés CPU idõt fogyaszt.
+Alapban minden páros sort átlagol.
+Az f opcionális paraméter lehet 0, ez esetben az átlagolás a páros, vagy 1
+esetében a páratlan sorokra érvényes.
 .IPs dint[=sense:level]
-Detects and drops first of interlaced frames in video stream.
-Values can be from 0.0 to 1.0 - first (default 0.1) is relative difference
-between neighbor pixels, second (default 0.15) is what part of image have to
-be detected as interlaced to drop the frame.
+Detektálja és eldobja a video stream-ben lévõ váltottsoros képkockák közül
+az elsõt.
+Az értékei terjedhetnek 0.0-tól 1.0-ig, ahol az elsõ (alapban 0.1) a
+szomszédos pixelek közti relatív különbséget, míg a második (alapban 0.15)
+azt adja meg, hogy a kép mely részén történjen a detektálás.
 .IPs lavcdeint
-Use libavcodec's deinterlace filter.
-.IPs "unsharp=l|cWxH:amount[:l|cWxH:amount]"
+A libavcodec deinterlace szûrõjének használata.
+.IPs "unsharp=l|cWxH:mennyiség[:l|cWxH:mennyiség]"
 Unsharp mask / gaussian blur.
 .RSss
-l: apply effect on luma component
+l: luma komponens figyelembevétele
 .br
-c: apply effect on chroma components
+c: chroma komponens figyelembevétele
 .br
-WxH: width and height of the matrix, odd sized in both directions
-(min = 3x3, max = 13x11 or 11x13, usually something between 3x3 and 7x7)
+WxH: a mátrix szélessége és magassága, mindkét irányban páratlan értéket
+kell megadni
+(min = 3x3, max = 13x11 vagy 11x13, általában 3x3 és 7x7 között)
 .br
-amount: relative amount of sharpness / blur to add to the image
-(amount < 0 = blur, amount > 0 = sharpen, usually something between -1.5 and
-1.5)
+mennyiség: az applikálandó élesítés / elmosás mértéke
+(mennyiség < 0 = elmosás, mennyiség > 0 = élesítés, általában -1.5 és
+1.5 között)
 .REss
 .IPs swapuv
-Swap U & V plane.
+U és V plane megcserélése.
 .IPs "il=[d|i][s][:[d|i][s]]"
-(de)interleaves lines.
-The goal of this filter is to add ability of processing interlaced images
-pre-field without deinterlacing it.
-You can filter your interlaced dvd and playback on TV without breaking the
-interlacing.
-While deinterlacing (with the post processing filter) removes the interlacing
-permamently (by smoothing averaging etc) deinterleaving splits the frame into
-2 fields (so called half pictures), so you can process (filter) them
-independently and then re-interleave them.
+sorok (de)interleave-elése.
+A szûrõ lényege hogy lehetõvé válik vele váltottsoros (interlace) képek
+feldolgozása a váltottsorosság megtartásával.
+Példa erre egy váltottsoros DVD valamilyen módon történõ szûrése, majd TV-n
+történõ lejátszása.
+A deinterlacing (amit a post process szûrõ hajt végre) véglegesen eltávolítja
+a váltott sorokat, de ez a szûrõ az ilyen képkockákat 2 mezõre bontja
+(félképre), amik aztán egyenként feldolgozhatók, majd újra összerakhatók
+eggyé.
 .RSss
 d: deinterleave
 .br
 i: interleave
 .br
-s: swap fields (exchange even & odd lines)
+s: mezõk megcserélése (páros és páratlan sorok cseréje)
 .REss
 .IPs "field[=n]"
-Extracts a single field from interlaced image using stride arithmetic
-to avoid wasting cpu time. The optional argument n specifies whether
-to extract the even or the odd field (depending on whether n is even
-or odd).
-.IPs "boxblur=radius:power[:radius:power]"
+Egyetlen kép megjelenítése váltottsoros videóknál. Az opcionálisan megadható
+n paraméter megadja hogy a páros avagy a páratlan mezõk kerüljenek
+megjelenítésre (attól függ hogy n páros vagy páratlan).
+.IPs "boxblur=sugár:erõsség[:sugár:erõsség]"
 box blur
 .RSss
-radius: size of the filter
+sugár: a szûrt terület mérete
 .br
-power: how often the filter should be applied
+erõsség: a szûrõ erõssége
 .REss
 .IPs "sab=rad:pfilter:cDiff[:rad:pfilter:cDiff]"
 shape adaptive blur
 .RSss
-rad: blur filter strength (~0.1\-4.0) (slower if larger)
+rad: elmosó szûrõ ereje (~0.1\-4.0) (nagyobb szám esetén lassabb)
 .br
-pfilter: prefilter strength (~0.1\-2.0)
+pfilter: elõszûrés erõssége (~0.1\-2.0)
 .br
 cDiff: how different the pixels are allowed to be to be considered
 (~0.1-100.0)
@@ -2101,19 +2098,18 @@ cDiff: how different the pixels are allowed to be to be considered
 .IPs "smartblur=rad:strength:thresh[:rad:strength:thresh]"
 smart blur
 .RSss
-rad: blur filter strength (~0.1\-5.0) (slower if larger)
+rad: elmosó szûrõ ereje (~0.1\-5.0) (nagyobb szám esetén lassabb)
 .br
-strength: blur (0.0\-1.0) or sharpen (-1.0\-0.0)
+strength: elmosás (0.0\-1.0) vagy élesítés (-1.0\-0.0) történjen
 .br
-thresh: filter all (0), filter flat areas (0\-30) or filter edges (-30\-0)
+thresh: minden (0), homogén felületek (0\-30) vagy csak élek (-30\-0) szûrése
 .REss
 .IPs "perspective=x0:y0:x1:y1:x2:y2:x3:y3:t"
-perspective correcture
+perspektívajavítás
 .RSss
-x0,y0,...: coordinates of the top left, top right, bottom left, bottom right
-corners
+x0,y0,...: a bal felsõ, jobb felsõ, bal alsó, jobb alsó sarkok
 .br
-t: linear (0) or cubic resampling (1)
+t: lineáris (0) vagy cubic resampling (1)
 .REss
 .IPs 2xsai
 Use the 2x scale and interpolate algorithm for scaling and smoothing images.
