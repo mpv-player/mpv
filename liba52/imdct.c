@@ -72,7 +72,12 @@ static uint8_t bit_reverse_256[] = {
 	0x03, 0x23, 0x13, 0x33, 0x0b, 0x2b, 0x1b, 0x3b, 
 	0x07, 0x27, 0x17, 0x37, 0x0f, 0x2f, 0x1f, 0x3f};
 
+#ifdef HAVE_SSE
+// NOTE: SSE needs 16byte alignment or it will segfault 
+static complex_t __attribute__((aligned(16))) buf[128];
+#else
 static complex_t buf[128];
+#endif
 
 /* Twiddle factor LUT */
 static complex_t w_1[1];
@@ -182,6 +187,64 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
     }
 
     /* FFT Merge */
+#ifdef HAVE_SSE
+	// Note w[0][0]={1,0}
+	// C Code for the following asm loop
+/*	for(i = 0; i < 128; i += 2) {
+		p = 0 + i;
+		q = p + 1;
+		tmp_a_r = buf[p].real;
+		tmp_a_i = buf[p].imag;
+		tmp_b_r = buf[q].real;
+		tmp_b_i = buf[q].imag;
+		buf[p].real = tmp_a_r + tmp_b_r;
+		buf[p].imag =  tmp_a_i + tmp_b_i;
+		buf[q].real = tmp_a_r - tmp_b_r;
+		buf[q].imag =  tmp_a_i - tmp_b_i;
+	}*/
+	asm volatile(
+		"xorps %%xmm1, %%xmm1	\n\t"
+		"xorps %%xmm2, %%xmm2	\n\t"
+		"movl %0, %%esi		\n\t"
+		"1:			\n\t"
+		"movlps (%%esi), %%xmm0	\n\t" //buf[p]
+		"movlps 8(%%esi), %%xmm1\n\t" //buf[q]
+		"movhps (%%esi), %%xmm0	\n\t" //buf[p]
+		"movhps 8(%%esi), %%xmm2\n\t" //buf[q]
+		"addps %%xmm1, %%xmm0	\n\t"
+		"subps %%xmm2, %%xmm0	\n\t"
+		"movaps %%xmm0, (%%esi)	\n\t"
+		"addl $16, %%esi	\n\t"
+		"cmpl %1, %%esi		\n\t"
+		" jb 1b			\n\t"
+		:: "g" (buf), "r" (buf + 128)
+		: "%esi"
+	);
+    
+    for (m=1; m < 7; m++) {
+	if(m)
+	    two_m = (1 << m);
+	else
+	    two_m = 1;
+
+	two_m_plus_one = (1 << (m+1));
+
+	for(k = 0; k < two_m; k++) {
+	    for(i = 0; i < 128; i += two_m_plus_one) {
+		p = k + i;
+		q = p + two_m;
+		tmp_a_r = buf[p].real;
+		tmp_a_i = buf[p].imag;
+		tmp_b_r = buf[q].real * w[m][k].real - buf[q].imag * w[m][k].imag;
+		tmp_b_i = buf[q].imag * w[m][k].real + buf[q].real * w[m][k].imag;
+		buf[p].real = tmp_a_r + tmp_b_r;
+		buf[p].imag =  tmp_a_i + tmp_b_i;
+		buf[q].real = tmp_a_r - tmp_b_r;
+		buf[q].imag =  tmp_a_i - tmp_b_i;
+	    }
+	}
+    }
+#else
     for (m=0; m < 7; m++) {
 	if(m)
 	    two_m = (1 << m);
@@ -205,7 +268,8 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 	    }
 	}
     }
-
+#endif
+    
     /* Post IFFT complex multiply  plus IFFT complex conjugate*/
     for( i=0; i < 128; i++) {
 	/* y[n] = z[n] * (xcos1[n] + j * xsin1[n]) ; */
