@@ -342,7 +342,15 @@ frame_type
 	2       is indicated by (flags[frame_code]&1)==1 && startcode
 	there SHOULD not be more then 0.5 seconds or 16kbyte of type 0 frames
 	wihout a intervening frame of different frame_type
-                
+	* type 2 frames MUST be decodeable independantly of any other frames
+	this means they MUST be keyframes and they MUST use a full timestamp
+	* type 1 frames MUST not depend(1) upon any other frames, this means,
+	they MUST use a full timestamp
+	* type 0 frames MUST not depend(1) upon frames prior to the last type 
+	1/2 frames
+	depend(1) means dependancy on the container level (NUT) not dependancy
+	on the codec level
+
 stream_id_plus1[frame_code]
 	must be <250
 	if its 0 then the stream_id is coded in the frame
@@ -378,6 +386,7 @@ lsb_timestamp
 		frame                    lsb_timestamp=4 -> timestamp=260
 		frame                    lsb_timestamp=2 -> timestamp=258
 		frame                    lsb_timestamp=3 -> timestamp=259
+	all timestamps of keyframes of a single stream MUST be monotone
 
 width/height
 	MUST be set to the coded width/height
