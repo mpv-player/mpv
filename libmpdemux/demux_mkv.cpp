@@ -774,7 +774,7 @@ static bool reverse_encodings(mkv_track_t *track, unsigned char *&data,
                (zstream.avail_in != 0) && (result != Z_STREAM_END));
 
       mp_msg(MSGT_DEMUX, MSGL_DBG2, "[mkv] zlib decompression: from %d to "
-            "%d \n", new_size, zstream.total_out);
+            "%d \n", (int)new_size, (int)zstream.total_out);
       new_size = zstream.total_out;
       inflateEnd(&zstream);
 
@@ -1030,6 +1030,16 @@ static int check_track_information(mkv_demuxer_t *d) {
               t->header_sizes[0] - t->header_sizes[1];
 
             t->a_formattag = 0xFFFE;
+          } else if (!strcmp(t->codec_id, MKV_A_QDMC) ||
+                     !strcmp(t->codec_id, MKV_A_QDMC2)) {
+            ;
+          } else if (!strcmp(t->codec_id, MKV_A_FLAC)) {
+            if ((t->private_data == NULL) || (t->private_size == 0)) {
+              mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] FLAC track does not "
+                     "contain valid headers.\n");
+              continue;
+            }
+            t->a_formattag = mmioFOURCC('f', 'L', 'a', 'C');
           } else if (t->private_size >= sizeof(real_audio_v4_props_t)) {
             if (!strcmp(t->codec_id, MKV_A_REAL28))
               t->a_formattag = mmioFOURCC('2', '8', '_', '8');
@@ -1041,9 +1051,6 @@ static int check_track_information(mkv_demuxer_t *d) {
               t->a_formattag = mmioFOURCC('d', 'n', 'e', 't');
             else if (!strcmp(t->codec_id, MKV_A_REALSIPR))
               t->a_formattag = mmioFOURCC('s', 'i', 'p', 'r');
-          } else if (!strcmp(t->codec_id, MKV_A_QDMC) ||
-                     !strcmp(t->codec_id, MKV_A_QDMC2)) {
-            ;
           } else {
             mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Unknown/unsupported audio "
                    "codec ID '%s' for track %u or missing/faulty private "
@@ -2347,6 +2354,21 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
       memcpy(((char *)(sh_a->wf + 1)) + 10, src, codecdata_length);
 
       track->realmedia = true;
+
+    } else if (!strcmp(track->codec_id, MKV_A_FLAC)) {
+      free(sh_a->wf);
+      sh_a->wf = NULL;
+
+      dp = new_demux_packet(4);
+      memcpy(dp->buffer, "fLaC", 4);
+      dp->pts = 0;
+      dp->flags = 0;
+      ds_add_packet(demuxer->audio, dp);
+      dp = new_demux_packet(track->private_size);
+      memcpy(dp->buffer, track->private_data, track->private_size);
+      dp->pts = 0;
+      dp->flags = 0;
+      ds_add_packet(demuxer->audio, dp);
     }
 
   } else {
