@@ -75,6 +75,7 @@ extern float monitor_aspect;
 extern int vo_keepaspect; //keep aspect ratio when resizing
 extern float movie_aspect;
 static float old_movie_aspect;
+extern float vo_panscan;
 
 static int winLevel = 1;
 int levelList[] =
@@ -124,7 +125,8 @@ enum
 	kKeepAspectCmd		= 6,
 	kAspectOrgCmd		= 7,
 	kAspectFullCmd		= 8,
-	kAspectWideCmd		= 9
+	kAspectWideCmd		= 9,
+	kPanScanCmd		= 10
 };
 
 #include "osdep/keycodes.h"
@@ -401,6 +403,11 @@ static OSStatus MainWindowCommandHandler(EventHandlerCallRef nextHandler, EventR
 				window_resized();
 				break;
 				
+			case kPanScanCmd:
+				vo_panscan = 1;
+				vo_fs = 1; window_fullscreen();
+				break;
+			
 			default:
 				result = eventNotHandledErr;
 				break;
@@ -487,6 +494,7 @@ static void quartz_CreateWindow(uint32_t d_width, uint32_t d_height, WindowAttri
 	
 	AppendMenuItemTextWithCFString(aspectMenu, CFSTR("Keep"), 0, kKeepAspectCmd, &index);
 	CheckMenuItem (aspectMenu, 1, vo_keepaspect);
+	AppendMenuItemTextWithCFString(aspectMenu, CFSTR("Pan-Scan"), 0, kPanScanCmd, &index);
 	AppendMenuItemTextWithCFString(aspectMenu, NULL, kMenuItemAttrSeparator, NULL, &index);
 	AppendMenuItemTextWithCFString(aspectMenu, CFSTR("Original"), 0, kAspectOrgCmd, &index);
 	AppendMenuItemTextWithCFString(aspectMenu, CFSTR("4:3"), 0, kAspectFullCmd, &index);
@@ -578,6 +586,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	vo_fs = flags & VOFLAG_FULLSCREEN;
 	
 	//get movie aspect
+	panscan_init();
 	aspect_save_orig(width,height);
 	aspect_save_prescale(d_width,d_height);
 	aspect_save_screenres(device_width, device_height);
@@ -1099,6 +1108,9 @@ static uint32_t control(uint32_t request, void *data, ...)
 		case VOCTRL_FULLSCREEN: vo_fs = (!(vo_fs)); window_fullscreen(); return VO_TRUE;
 		case VOCTRL_ONTOP: vo_ontop = (!(vo_ontop)); window_ontop(); return VO_TRUE;
 		case VOCTRL_QUERY_FORMAT: return query_format(*((uint32_t*)data));
+		case VOCTRL_GET_PANSCAN: return VO_TRUE;
+		case VOCTRL_SET_PANSCAN: window_resized(); return VO_TRUE;
+			
 		case VOCTRL_GET_IMAGE:
 			switch (image_format)
 			{
@@ -1166,6 +1178,13 @@ void window_resized()
 	else
 	{
 		SetRect(&dstRect, 0, 0, winRect.right, winRect.bottom-border);
+	}
+	
+	if(vo_fs)
+	{
+		panscan_calc();
+		MoveWindow(theWindow, 0-(vo_panscan_x >> 1), 0-(vo_panscan_y >> 1), 1);
+		SizeWindow(theWindow, device_width+vo_panscan_x, device_height+vo_panscan_y,1);
 	}
 
 	//Clear Background
