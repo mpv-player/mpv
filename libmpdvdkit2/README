@@ -1,0 +1,32 @@
+MPlayer DVD-kit v2.2 :)
+made by Pontscho & A'rpi for the MPlayer project
+
+What the hell is this?
+======================
+nothing special, just collection of sources and patches and fixes:
+
+- dvdread 0.9.3 + static libdvdcss (removed dlopen code)
+- libdvdcss 1.2.2 + per-disc css key cache patch
+- optimizations enabled, asserts disabled
+everything packed together with _static_ linking to maximize performance
+
+Why?
+====
+users keep complaining about the still not fixed assert() bug, the
+buggy libdvdcss 1.0 or the slow key-cracking process...
+so Pontscho decided to pack these together, fix bugs and make it
+available for the MPlayer users.
+
+Hey, I don't like this, this is not legal!
+==========================================
+It is GPL code, so should be legal, anyway if you don't want it, just
+delete this directory! MPlayer's ./configure will check if this directory
+exists, so it is OK to delete.
+
+How to ccompile mpdvdkit as shared library (lib*.so)?
+=====================================================
+After running MPlayer's ./configure, change this line in config.mak:
+DVDKIT_SHARED = no
+to:
+DVDKIT_SHARED = yes
+and make; make install; ldconfig
