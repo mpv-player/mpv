@@ -49,6 +49,8 @@ vme 0-5 (motion estimation)
 	3 phods (not recommanded, lq)
 	4 EPZS  (default)
 	5 X1    (experimantal, might change from time to time or be just broken)
+        Note: 0-3 ignores the amount of bits spend currently, so dont complain
+              about low quality
 
 vhq (high quality mode)
 	encode each MB as in all modes and choose the best (this is slow but
