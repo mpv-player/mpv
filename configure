@@ -154,6 +154,7 @@ Video:
   --enable-3dfx          build with 3dfx support [disable]
   --enable-tdfxfb        build with tdfxfb support [disable]
   --enable-directfb      build with DirectFB support [autodetect]
+  --enable-zr            build with ZR36067/ZR36060 support [disable]
 
 Audio:
   --disable-ossaudio     disable OSS sound support [autodetect]
@@ -673,6 +674,7 @@ _dga=auto	# 1 2 no auto
 _xv=auto
 _sdl=auto
 _nas=auto
+_jpeg=auto
 _png=auto
 _gl=auto
 _ggi=auto
@@ -714,6 +716,7 @@ _termios=auto
 _3dfx=no
 _tdfxfb=no
 _directfb=auto
+_zr=no
 _largefiles=no
 _vo2=no
 _language=en
@@ -744,6 +747,8 @@ for ac_option do
   --disable-sdl)	_sdl=no		;;
   --enable-nas)		_nas=yes	;;
   --disable-nas)	_nas=no		;;
+  --enable-jpeg)	_jpeg=yes	;;
+  --disable-jpeg)	_jpeg=no	;;
   --enable-png)		_png=yes	;;
   --disable-png)	_png=no		;;
   --enable-gl)		_gl=yes		;;
@@ -821,6 +826,8 @@ for ac_option do
   --disable-tdfxfb)	_tdfxfb=no	;;
   --enable-directfb)	_directfb=yes	;;
   --disable-directfb)	_directfb=no	;;
+  --enable-zr)		_zr=yes		;;
+  --disable-zr)	_zr=no		;;
   --enable-mtrr)	_mtrr=yes	;;
   --disable-mtrr)	_mtrr=no	;;
   --enable-largefiles)	_largefiles=yes	;;
@@ -1825,6 +1832,34 @@ else
 fi
 echores "$_dvb"
 
+echocheck "JPEG support"
+if test "$_jpeg" = auto; then
+  _jpeg=no
+cat > $TMPC << EOF
+#include <stdio.h>
+#include <jpeglib.h>
+int main(void) { return 0; }
+EOF
+  cc_check -ljpeg  && _jpeg=yes
+fi
+echores "$_jpeg"
+
+echocheck "zr"
+if test "$_zr" = yes ; then
+  if test "$_jpeg" = yes ; then
+    _ld_jpeg='-ljpeg'
+    _def_zr='#define HAVE_ZR 1'
+    _vosrc="$_vosrc vo_zr.c"
+    _vomodules="zr $_vomodules"
+    echores "$_zr"
+  else
+    echores "jpeglib is required by zr, sorry"
+    _def_zr='#undef HAVE_ZR'
+  fi
+else
+  _def_zr='#undef HAVE_ZR'
+  echores "$_zr"
+fi
 
 echocheck "PNG support"
 if test "$_png" = auto ; then
@@ -2800,7 +2835,7 @@ AR = ar
 CC = $_cc
 AWK = $_awk
 # OPTFLAGS = -O4 $_profile $_debug $_march $_mcpu -pipe -fomit-frame-pointer -ffast-math
-OPTFLAGS = $CFLAGS
+OPTFLAGS = -Djpeg_fdct_ifast=jpeg_fdct_ifast2 $CFLAGS
 EXTRA_INC = $_inc_extra $_inc_gtk
 WIN32_PATH = -DWIN32_PATH=\\"$_win32libdir\\"
 
@@ -2823,6 +2858,7 @@ X_LIB = $_ld_x11 $_ld_gl $_ld_dga $_ld_xv $_ld_vm $_ld_xinerama $_ld_mad $_ld_so
 GGI_LIB = $_ld_ggi
 MLIB_LIB =  $_ld_mlib
 MLIB_INC = $_inc_mlib
+JPEG_LIB = $_ld_jpeg
 PNG_LIB = $_ld_png
 SDL_LIB = $_ld_sdl
 SVGA_LIB = $_ld_svga
@@ -3140,6 +3176,7 @@ $_def_ggi
 $_def_3dfx
 $_def_tdfxfb
 $_def_directfb
+$_def_zr
 $_def_mga
 $_def_xmga
 $_def_syncfb
