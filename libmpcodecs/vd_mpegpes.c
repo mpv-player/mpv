@@ -41,7 +41,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     static vo_mpegpes_t packet;
     mpi=mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, 0, sh->disp_w, sh->disp_h);
     packet.data=data;
-    packet.size=len-4;
+    packet.size=len;
     packet.timestamp=sh->timer*90000.0;
     packet.id=0x1E0; //+sh_video->ds->id;
     mpi->planes[0]=(uint8_t*)(&packet);

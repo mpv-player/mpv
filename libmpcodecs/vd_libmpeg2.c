@@ -286,10 +286,10 @@ while(current<end){
     signal(SIGSEGV,old_sigh); // restore sighandler
 #endif
 
-    if(code==0x1FF){
+//    if(code==0x1FF){
 	ret=parse_chunk(sh, 0xFF, NULL, framedrop); // send 'end of frame'
 	if(ret) mpi=ret;
-    }
+//    }
 
     return mpi;
 }
