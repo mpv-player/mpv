@@ -1,0 +1,239 @@
+/*=============================================================================
+//	
+//  This file is part of mplayer.
+//
+//  mplayer is free software; you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation; either version 2 of the License, or
+//  (at your option) any later version.
+//
+//  mplayer is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with mplayer; if not, write to the Free Software
+//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+//  Copyright 2001 Anders Johansson ajh@atri.curtin.edu.au
+//
+//=============================================================================
+*/
+
+/* This audio output plugin changes the sample rate. The output
+   samplerate from this plugin is specified by using the switch
+   `fout=F' where F is the desired output sample frequency 
+*/
+
+#define PLUGIN
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <inttypes.h>
+
+#include "audio_out.h"
+#include "audio_plugin.h"
+#include "audio_plugin_internal.h"
+#include "afmt.h"
+//#include "../config.h"
+
+static ao_info_t info =
+{
+        "Sample frequency conversion audio plugin",
+        "resample",
+        "Anders",
+        ""
+};
+
+LIBAO_PLUGIN_EXTERN(resample)
+
+#define min(a,b)   (((a) < (b)) ? (a) : (b))
+#define max(a,b)   (((a) > (b)) ? (a) : (b))
+
+/* Below definition selects the length of each poly phase component.
+   Valid definitions are L4 and L8, where the number denotes the
+   length of the filter. This definition affects the computational
+   complexity (see play()), the performance (see filter.h) and the
+   memory usage. For now the filterlenght is choosen to 4 and without
+   assembly optimization if no SSE is present.
+*/
+#ifdef HAVE_SSE
+#define L8    	1	// Filter bank type
+#define W 	W8	// Filter bank parameters
+#define L   	8	// Filter length
+#else	
+#define L4	1
+#define W 	W4
+#define L   	4
+#endif
+
+#define CH  6	// Max number of channels
+#define UP  128  /* Up sampling factor. Increasing this value will
+                    improve frequency accuracy. Think about the L1
+                    cashing of filter parameters - how big can it be? */
+
+#include "fir.h"
+#include "filter.h"
+
+// local data
+typedef struct pl_resample_s
+{
+  int16_t*	data;		// Data buffer
+  int16_t*  	w;		// Current filter weights
+  uint16_t  	dn;     	// Down sampling factor
+  uint16_t	up;		// Up sampling factor 
+  int 		channels;	// Number of channels
+  int 		len;		// Lenght of buffer
+  int 		bypass;		// Bypass this plugin
+  int16_t	ws[UP*L];	// List of all available filters	
+  int16_t 	xs[CH][L*2]; 	// Circular buffers
+} pl_resample_t;
+
+static pl_resample_t 	pl_resample	= {NULL,NULL,1,1,1,0,0,W};
+
+// to set/get/query special features/parameters
+static int control(int cmd,int arg){
+  switch(cmd){
+  case AOCONTROL_PLUGIN_SET_LEN:
+    if(pl_resample.data) 
+      free(pl_resample.data);
+    pl_resample.len = ao_plugin_data.len;
+    pl_resample.data=(int16_t*)malloc(pl_resample.len);
+    if(!pl_resample.data)
+      return CONTROL_ERROR;
+    ao_plugin_data.len = (int)((double)ao_plugin_data.len * 
+			     ((double)pl_resample.up)/
+			     ((double)pl_resample.dn));
+    return CONTROL_OK;
+  }
+  return -1;
+}
+
+// open & setup audio device
+// return: 1=success 0=fail
+static int init(){
+  int fin=ao_plugin_data.rate;
+  int fout=ao_plugin_cfg.pl_resample_fout;
+  pl_resample.w=pl_resample.ws;
+  pl_resample.up=UP;
+
+  // Sheck input format
+  if(ao_plugin_data.format != AFMT_S16_LE){
+    fprintf(stderr,"[pl_resample] Input audio format not yet suported. \n");
+    return 0;
+  }
+  // Sanity check and calculate down sampling factor
+  if((float)max(fin,fout)/(float)min(fin,fout) > 10){
+    fprintf(stderr,"[pl_resample] The difference between fin and fout is too large.\n");
+    return 0;
+  }
+  pl_resample.dn=(int)(0.5+((float)(fin*pl_resample.up))/((float)fout));
+  if(pl_resample.dn == pl_resample.up){
+    fprintf(stderr,"[pl_resample] Fin is too close to fout no conversion is needed.\n");
+    pl_resample.bypass=1;
+    return 1;
+  }
+  pl_resample.channels=ao_plugin_data.channels;
+  if(ao_plugin_data.channels>CH){
+     fprintf(stderr,"[pl_resample] Too many channels, max is 6.\n");
+    return 0;
+  }
+
+  // Tell the world what we are up to
+  printf("[pl_resample] Up=%i, Down=%i, True fout=%f\n",
+	 pl_resample.up,pl_resample.dn,
+	 ((float)fin*pl_resample.up)/((float)pl_resample.dn));
+
+  // This plugin changes buffersize and adds some delay
+  ao_plugin_data.sz_mult/=((float)pl_resample.up)/((float)pl_resample.dn);
+  ao_plugin_data.delay_fix-= ((float)L/2) * (1/fout);
+  ao_plugin_data.rate=fout;
+  return 1;
+}
+
+// close plugin
+static void uninit(){
+  if(pl_resample.data) 
+    free(pl_resample.data);
+  pl_resample.data=NULL;
+}
+
+// empty buffers
+static void reset(){
+}
+
+// processes 'ao_plugin_data.len' bytes of 'data'
+// called for every block of data
+// FIXME: this routine needs to be optimized (it is probably possible to do a lot here)
+static int play(){
+  static uint16_t	pwi = 0; // Index for w
+  static uint16_t	pxi = 0; // Index for circular queue
+  static uint16_t	pi =  1; // Number of new samples to put in x queue
+
+  uint16_t		ci    = pl_resample.channels; 	// Index for channels
+  uint16_t		len   = 0; 			// Number of output samples
+  uint16_t		nch   = pl_resample.channels;   // Number of channels
+  uint16_t		inc   = pl_resample.dn/pl_resample.up; 
+  uint16_t		level = pl_resample.dn%pl_resample.up; 
+  uint16_t		up    = pl_resample.up;
+  uint16_t		dn    = pl_resample.dn;
+
+  register uint16_t	i,wi,xi; // Temporary indexes
+
+  if(pl_resample.bypass)
+    return 1;
+  
+  // Index current channel
+  while(ci--){
+    // Temporary pointers
+    register int16_t*	x     = pl_resample.xs[ci];
+    register int16_t*	in    = ((int16_t*)ao_plugin_data.data)+ci;
+    register int16_t*	out   = pl_resample.data+ci;
+    // Block loop end
+    register int16_t* 	end   = in+ao_plugin_data.len/2;
+    i = pi; wi = pwi; xi = pxi;
+
+    LOAD_QUE(x);
+    if(0!=i) goto L1; 
+    while(in < end){
+      // Update wi to point at the correct polyphase component
+      wi=(wi+dn)%up;  
+
+      /* Update circular buffer x. This loop will be updated 0 or 1 time
+	 for upsamling and inc or inc + 1 times for downsampling */
+      if(wi<level) goto L3;
+      if(0==i) goto L2;
+  L1:   i--;
+  L3:  	UPDATE_QUE(in);
+        in+=nch;
+	if(in >= end) goto L2;
+      if(i) goto L1;
+  L2: if(i) goto L5;
+      i=inc;
+
+      /* Get the correct polyphase component and the correct startpoint
+	 in the circular bufer and run the FIR filter */
+      FIR((&x[xi]),(&pl_resample.w[wi*L]),out);
+      len++;
+      out+=nch;
+    }
+L5:
+    SAVE_QUE(x);
+  }
+
+  // Save values that needs to be kept for next time
+  pwi = wi;
+  pxi = xi;
+  pi = i;
+  // Set new data
+  ao_plugin_data.len=len*2;
+  ao_plugin_data.data=pl_resample.data;
+  return 1;
+}
+
+
+
+
+

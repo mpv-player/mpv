@@ -83,6 +83,7 @@ struct config ao_plugin_conf[]={
 	{"list", &ao_plugin_cfg.plugin_list, CONF_TYPE_STRING, 0, 0, 0},
 	{"delay", &ao_plugin_cfg.pl_delay_len, CONF_TYPE_INT, CONF_MIN, 0, 0},
 	{"format", &ao_plugin_cfg.pl_format_type, CONF_TYPE_INT, CONF_MIN, 0, 0},
+	{"fout", &ao_plugin_cfg.pl_resample_fout, CONF_TYPE_INT, CONF_MIN, 0, 0},
 	{NULL, NULL, 0, 0, 0, 0}
 };
 

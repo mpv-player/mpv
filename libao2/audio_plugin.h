@@ -34,6 +34,7 @@ typedef struct ao_plugin_cfg_s
   char* plugin_list; 	// List of used plugins read from cfg
   int pl_format_type;	// Output format
   int pl_delay_len;	// Number of samples to delay sound output
+  int pl_resample_fout;	// Output frequency from resampling
 } ao_plugin_cfg_t;
 
 extern volatile ao_plugin_cfg_t ao_plugin_cfg;
@@ -42,23 +43,26 @@ extern volatile ao_plugin_cfg_t ao_plugin_cfg;
 #define CFG_DEFAULTS { \
  NULL, \
  AFMT_S16_LE, \
- 0 \
+ 0, \
+ 48000 \
 };
 
 // This block should not be available in the pl_xxxx files
 // due to compilation issues
 #ifndef PLUGIN
-#define NPL 3+1 // Number of PLugins ( +1 list ends with NULL )
+#define NPL 4+1 // Number of PLugins ( +1 list ends with NULL )
 // List of plugins 
 extern ao_plugin_functions_t audio_plugin_delay;
 extern ao_plugin_functions_t audio_plugin_format; 
 extern ao_plugin_functions_t audio_plugin_surround;
+extern ao_plugin_functions_t audio_plugin_resample;
 
 
 #define AO_PLUGINS { \
    &audio_plugin_delay, \
    &audio_plugin_format, \
    &audio_plugin_surround, \
+   &audio_plugin_resample, \
    NULL \
 }
 #endif /* PLUGIN */
