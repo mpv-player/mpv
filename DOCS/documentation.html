@@ -197,9 +197,7 @@
       <LI><A HREF="#tv">2.5 TV input</A>
         <UL>
           <LI><A HREF="#tv_compilation">2.5.1 Compilation</A></LI>
-          <LI><A HREF="#tv_options">2.5.2 Available options</A></LI>
-          <LI><A HREF="#tv_keyboard">2.5.3 Keyboard control</A></LI>
-          <LI><A HREF="#tv_examples">2.5.4 Examples</A></LI>
+          <LI><A HREF="#tv_examples">2.5.2 Examples</A></LI>
         </UL>
       </LI>
     </UL>
@@ -209,15 +207,14 @@
       <LI><A HREF="#command_line">3.1 Command line</A></LI>
       <LI><A HREF="#control">3.2 Control</A>
         <UL>
-          <LI><A HREF="#default_controls">3.2.1 Default controls</A></LI>
-          <LI><A HREF="#controls_configuration">3.2.2 Controls configuration</A>
+          <LI><A HREF="#controls_configuration">3.2.1 Controls configuration</A>
             <UL>
-              <LI><A HREF="#key_names">3.2.2.1 Key names</A></LI>
-              <LI><A HREF="#commands">3.2.2.2 Commands</A></LI>
+              <LI><A HREF="#key_names">3.2.1.1 Key names</A></LI>
+              <LI><A HREF="#commands">3.2.1.2 Commands</A></LI>
             </UL>
           </LI>
-          <LI><A HREF="#lirc">3.2.3 Control from LIRC</A></LI>
-          <LI><A HREF="#slave">3.2.4 Slave mode</A></LI>
+          <LI><A HREF="#lirc">3.2.2 Control from LIRC</A></LI>
+          <LI><A HREF="#slave">3.2.3 Slave mode</A></LI>
         </UL>
       </LI>
       <LI><A HREF="#streaming">3.3 Streaming from network or pipes</A></LI>
@@ -693,7 +690,7 @@
     mkdir ~/.mplayer
     cd ~/.mplayer
     unzip mp-arial-iso-8859-1.zip
-    ln -s ~/.mplayer/arial-24 font
+    ln -s ~/.mplayer/iso-8859-1/arial-24 font
 </PRE>
 
 
@@ -936,7 +933,8 @@ It's a clear way for everyone to become root.
 <H2><A NAME="tv"><B>2.5 TV input</B></A></H2>
 
 <P>This section is about how to enable <B>watching/grabbing from V4L compatible
-TV tuner</B>.</P>
+TV tuner</B>. See the man page for a description of TV options and keyboard
+controls.</P>
 
 <P><B>THIS CODE IS CURRENTLY NOT BEING WORKED ON! Do not expect it to work
   without tweaking/experimenting!</B></P>
@@ -962,65 +960,7 @@ TV tuner</B>.</P>
 </BLOCKQUOTE>
 
 
-<H3><A NAME="tv_options">2.5.2 Available options</A></H3>
-
-<DL>
-  <DT><CODE>on</CODE></DT>
-  <DD>Use TV input.</DD>
-
-  <DT><CODE>noaudio</CODE></DT>
-  <DD>No sound, thanks.</DD>
-
-  <DT><CODE>driver</CODE></DT>
-  <DD><B>dummy</B> - NULL TV input :) Used for testing only, generates dummy
-    input.<BR>
-    <B>v4l</B> - Captures images from standard V4L interface (default
-    <CODE>/dev/video0</CODE>).</DD>
-
-  <DT><CODE>device</CODE></DT>
-  <DD>Specify a device other than the default <CODE>/dev/video0</CODE>.</DD>
-
-  <DT><CODE>input</CODE></DT>
-  <DD>Specify from which input of the TV tuner you wish to grab
-    (e.g. <B>television</B>, <B>s-video</B>, <B>composite</B>, ...)<BR>
-    Prints the available ones during init.</DD>
-
-  <DT><CODE>freq</CODE></DT>
-  <DD>Specify the frequency to set the tuner to (e.g. <B>511.250</B>).</DD>
-
-  <DT><CODE>outfmt</CODE></DT>
-  <DD>Specify the output format the tuner should use to transport images to us
-    (<B>rgb32</B>, <B>rgb24</B>, <B>yv12</B>, <B>uyvy</B>, <B>i420</B> (for i420
-    you have to pass the <CODE>-vc rawi420</CODE> option, because of a fourcc
-    conflict)).</DD>
-
-  <DT><CODE>width</CODE></DT>
-  <DD>width of the output window in pixels</DD>
-
-  <DT><CODE>height</CODE></DT>
-  <DD>height of the output window in pixels</DD>
-
-  <DT><CODE>norm</CODE></DT>
-  <DD>available: PAL, SECAM, NTSC</DD>
-
-  <DT><CODE>channel</CODE></DT>
-  <DD>Set the tuner to the given channel.</DD>
-
-  <DT><CODE>chanlist</CODE></DT>
-  <DD>available: <CODE>us-bcast, us-cable, europe-west, europe-east, etc</CODE></DD>
-</DL>
-
-
-<H3><A NAME="tv_keyboard">2.5.3 Keyboard control</A></H3>
-
-<TABLE BORDER=0>
-  <TR><TD>&nbsp;&nbsp;</TD><TD>h / k</TD><TD>&nbsp;&nbsp;</TD><TD>select previous/next channel</TD></TR>
-  <TR><TD></TD><TD>n</TD><TD></TD><TD>change norm</TD></TR>
-  <TR><TD></TD><TD>b</TD><TD></TD><TD>change channel list</TD></TR>
-</TABLE>
-
-
-<H3><A NAME="tv_examples">2.5.4 Examples</A></H3>
+<H3><A NAME="tv_examples">2.5.2 Examples</A></H3>
 
 <P>Dummy output, to AAlib :)<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=dummy:width=640:height=480 -vo aa</CODE><BR>
@@ -1075,67 +1015,11 @@ TV tuner</B>.</P>
 
 <P><B>MPlayer</B> has a fully configurable, command driven, control layer which
   lets you control <B>MPlayer</B> with keyboard, mouse, joystick or remote
-  control (using LIRC).</P>
+  control (using LIRC). See the man page for the complete list of keyboard
+  controls.</P>
 
 
-<H3><A NAME="default_controls">3.2.1 Default controls</A></H3>
-
-<H4>Keyboard controls from terminal:</H4>
-
-<TABLE BORDER=0>
-  <TR><TD>&nbsp;&nbsp;</TD><TD>&lt;-  or  -&gt;</TD><TD>&nbsp;&nbsp;</TD><TD>seek backward/forward  10 seconds</TD></TR>
-  <TR><TD></TD><TD>up or down</TD><TD></TD><TD>seek backward/forward   1 minute</TD></TR>
-  <TR><TD></TD><TD>pgup/pgdown</TD><TD></TD><TD>seek backward/forward  10 minutes</TD></TR>
-  <TR><TD></TD><TD>&lt; or &gt;</TD><TD></TD><TD>seek backward/forward  in playlist</TD></TR>
-  <TR><TD></TD><TD>p or SPACE</TD><TD></TD><TD>pause movie (press any key)</TD></TR>
-  <TR><TD></TD><TD>q or ESC</TD><TD></TD><TD>stop playing and quit program</TD></TR>
-  <TR><TD></TD><TD>+ or -</TD><TD></TD><TD>adjust audio delay by +/- 0.1 second</TD></TR>
-  <TR><TD></TD><TD>/ or *</TD><TD></TD><TD>decrease/increase volume</TD></TR>
-  <TR><TD></TD><TD>9 or 0</TD><TD></TD><TD>decrease/increase volume</TD></TR>
-  <TR><TD></TD><TD>m</TD><TD></TD><TD>mute sound</TD></TR>
-  <TR><TD></TD><TD>f</TD><TD></TD><TD>toggle fullscreen</TD></TR>
-  <TR><TD></TD><TD>w or e</TD><TD></TD><TD>decrease/increase panscan range</TD></TR>
-  <TR><TD></TD><TD>o</TD><TD></TD><TD>toggle OSD: none / seek / seek+timer</TD></TR>
-  <TR><TD></TD><TD>d</TD><TD></TD><TD>toggle frame dropping</TD></TR>
-  <TR><TD></TD><TD>v</TD><TD></TD><TD>toggle subtitle visibility</TD></TR>
-  <TR><TD></TD><TD>z or x</TD><TD></TD><TD>adjust subtitle delay by +/- 0.1 second</TD></TR>
-  <TR><TD></TD><TD>r or t</TD><TD></TD><TD>adjust subtitle position</TD></TR>
-  <TR><TD></TD><TD>HOME or END</TD><TD></TD><TD>go to next/previous playtree entry in the parent list</TD></TR>
-  <TR><TD></TD><TD>INSERT or DELETE</TD><TD></TD><TD>go to next/previous alternative source (only available in asx playlist)</TD></TR>
-  <TR><TD COLSPAN=4><P><I>(the following keys are valid only when using -vo xv or -vo [vesa|fbdev]:vidix or -vo xvidix -vo (x)mga or -vc divxds (slow).)</I></P></TD></TR>
-  <TR><TD></TD><TD>1 or 2</TD><TD></TD><TD>adjust contrast</TD></TR>
-  <TR><TD></TD><TD>3 or 4</TD><TD></TD><TD>adjust brightness</TD></TR>
-  <TR><TD></TD><TD>5 or 6</TD><TD></TD><TD>adjust hue</TD></TR>
-  <TR><TD></TD><TD>7 or 8</TD><TD></TD><TD>adjust saturation</TD></TR>
-</TABLE>
-
-<H4>GUI keyboard controls:</H4>
-
-<TABLE BORDER=0>
-  <TR><TD>&nbsp;&nbsp;</TD><TD>, and .</TD><TD>&nbsp;&nbsp;</TD><TD>previous / next file</TD></TR>
-  <TR><TD></TD><TD>gray - or +</TD><TD></TD><TD>decrease / increase volume</TD></TR>
-  <TR><TD></TD><TD>enter</TD><TD></TD><TD>start playing</TD></TR>
-  <TR><TD></TD><TD>space</TD><TD></TD><TD>pause</TD></TR>
-  <TR><TD></TD><TD>s</TD><TD></TD><TD>stop</TD></TR>
-  <TR><TD></TD><TD>a</TD><TD></TD><TD>about</TD></TR>
-  <TR><TD></TD><TD>l</TD><TD></TD><TD>load file</TD></TR>
-  <TR><TD></TD><TD>b</TD><TD></TD><TD>skin browser</TD></TR>
-  <TR><TD></TD><TD>e</TD><TD></TD><TD>toggle equalizer</TD></TR>
-  <TR><TD></TD><TD>p</TD><TD></TD><TD>toggle playlist</TD></TR>
-  <TR><TD></TD><TD>f</TD><TD></TD><TD>toggle fullscreen</TD></TR>
-  <TR><TD></TD><TD>m</TD><TD></TD><TD>toggle mute</TD></TR>
-</TABLE>
-
-<H4>Keyboard controls for TV input:</H4>
-
-<TABLE BORDER=0>
-  <TR><TD>&nbsp;&nbsp;</TD><TD>h  or  l</TD><TD>&nbsp;&nbsp;</TD><TD>select previous/next channel</TD></TR>
-  <TR><TD></TD><TD>n</TD><TD></TD><TD>change norm</TD></TR>
-  <TR><TD></TD><TD>b</TD><TD></TD><TD>change channel list</TD></TR>
-</TABLE>
-
-
-<H3><A NAME="controls_configuration">3.2.2 Controls configuration</A></H3>
+<H3><A NAME="controls_configuration">3.2.1 Controls configuration</A></H3>
 
 <P><B>MPlayer</B> allows you bind any key/button to any <B>MPlayer</B> command
   using a simple config file.  The syntax consist of a key name followed by a
@@ -1162,7 +1046,7 @@ ENTER pt_step 1 1
 </PRE>
 
 
-<H4><A NAME="key_names">3.2.2.1 Key names</A></H4>
+<H4><A NAME="key_names">3.2.1.1 Key names</A></H4>
 
 <P>You can have a full list by running <CODE>mplayer -input keylist</CODE></P>
 
@@ -1215,7 +1099,7 @@ ENTER pt_step 1 1
 </UL>
 
 
-<H4><A NAME="commands">3.2.2.2 Commands</A></H4>
+<H4><A NAME="commands">3.2.1.2 Commands</A></H4>
 
 <P>You can have a full list of known commands by running "mplayer -input cmdlist"</P>
 
@@ -1280,7 +1164,7 @@ ENTER pt_step 1 1
 </UL>
 
 
-<H3><A NAME="lirc">3.2.3 Control from LIRC</A></H3>
+<H3><A NAME="lirc">3.2.2 Control from LIRC</A></H3>
 
 <P>Linux Infrared Remote Control - use an easy to build home-brewn IR-receiver,
   an (almost) arbitrary remote control and control your Linux box with it!
@@ -1330,7 +1214,7 @@ end
   use the -lircconf &lt;filename&gt; switch to specify another file.</P>
 
 
-<H3><A NAME="slave">3.2.4 Slave mode</A></H3>
+<H3><A NAME="slave">3.2.3 Slave mode</A></H3>
 
 <P>The slave mode allow you to build simple frontend to <B>MPlayer</B>. When
   enabled (with the <CODE>-slave</CODE> switch) <B>MPlayer</B> will read
@@ -1575,8 +1459,8 @@ end
   not send messages in other languages or HTML mail! Message size limit is 80k.
   If you have something bigger put it up for download somewhere. Click the
   links to subscribe. On the mailing lists, the same rules about writing
-  and quoting aply as on usenet. Please follow them, it makes the life of
-  those who read your mails a lot easier. If you dont know them please
+  and quoting apply as on usenet. Please follow them, it makes the life of
+  those who read your mails a lot easier. If you do not know them please
   read <A HREF="http://learn.to/edit_messages">HOWTO edit messages</A> or
   (if you are in a hurry)
   <A HREF="http://www.xs4all.nl/~hanb/documents/quotingguide.html">
