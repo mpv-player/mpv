@@ -71,17 +71,6 @@ demuxer_t* new_demuxer(stream_t *stream,int type,int a_id,int v_id,int s_id){
   return d;
 }
 
-sh_audio_t *get_sh_audio(demuxer_t *demuxer, int id)
-{
-    if(id > MAX_A_STREAMS-1 || id < 0)
-    {
-	mp_msg(MSGT_DEMUXER,MSGL_WARN,"Requested audio stream id overflow (%d > %d)\n",
-	    id, MAX_A_STREAMS);
-	return NULL;
-    }
-    return demuxer->a_streams[id];
-}
-
 sh_audio_t* new_sh_audio(demuxer_t *demuxer,int id){
     if(id > MAX_A_STREAMS-1 || id < 0)
     {
@@ -103,17 +92,6 @@ void free_sh_audio(sh_audio_t* sh){
     mp_msg(MSGT_DEMUXER,MSGL_V,"DEMUXER: freeing sh_audio at %p  \n",sh);
     if(sh->wf) free(sh->wf);
     free(sh);
-}
-
-sh_video_t *get_sh_video(demuxer_t *demuxer, int id)
-{
-    if(id > MAX_V_STREAMS-1 || id < 0)
-    {
-	mp_msg(MSGT_DEMUXER,MSGL_WARN,"Requested video stream id overflow (%d > %d)\n",
-	    id, MAX_V_STREAMS);
-	return NULL;
-    }
-    return demuxer->v_streams[id];
 }
 
 sh_video_t* new_sh_video(demuxer_t *demuxer,int id){
