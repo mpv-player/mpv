@@ -1,19 +1,37 @@
-.\" MPlayer (C) 2000-2001 Arpad Gereoffy <arpi@esp-team.scene.hu>
-.\" This manpage was written, and is maintained by Gabucino
+.\" MEncoder (C) 2000-2001 Arpad Gereoffy <arpi@esp-team.scene.hu>
+.\" This manpage was/is done by Gabucino
 .\"
 .TH MEncoder
 .SH NAME
 mencoder \- Movie Encoder for Linux
 .SH SYNOPSIS
 .B mencoder
-.RB [ \-i\ input\ file(s) ]
-.RB [ \-o\ input\ file ]
-.RB [ \-video\ mode ]
-.RB [ \-audio\ mode ]
-.RB [ \-vbr\ bitrate ]
-.RB [ \-abr\ bitrate ]
-.RB [ \-ivc\ codec ]
-.RB [ \-iac\ codec ]
+.RB [ \-vcd\ <track\ number> ]
+.RB [ \-dvd\ <titleid> ]
+.RB [ \-chapter\ <chapterid> ]
+.RB [ \-dvdangle\ <angleid> ]
+.RB [ \-dvdkey\ <key> ]
+.RB [ \-nobps ]
+.RB [ \-aid\ <id> ]
+.RB [ \-vid\ <id> ]
+.RB [ \-pp\ <quality> ]
+.RB [ \-vc\ <video\ codec\ name> ]
+.RB [ \-ac\ <audio\ codec\ name> ]
+.RB [ \-vfm\ <video\ codec\ family> ]
+.RB [ \-afm\ <audio\ codec\ family> ]
+.RB [ \-v ]
+.RB [ \-mp3file\ <filename> ]
+.RB [ \-ac3file\ <filename> ]
+.RB [ \-ovc\ <video\ codec\ name> ]
+.RB [ \-oac\ <audio\ codec\ name> ]
+.RB [ \-videobr\ <video\ bitrate> ]
+.RB [ \-pass\ <1/2> ]
+.RB [ \-passtmpfile\ <filename> ]
+.RB [ \-audiobr\ <audio\ bitrate> ]
+.RB [ \-vbrmode\ <0-5> ]
+.RB [ \-aquality\ <0-9> ]
+.RB [ \-encode\ <filename> ]
+.I - or file or device
 .PP
 .SH DESCRIPTION
 .I mencoder
@@ -22,59 +40,62 @@ Encoder.
 .SH "GENERAL OPTIONS"
 .TP
 .I NOTE
-Every "flag" option has "noflag" pair, e.g. -fs opposite is -nofs
+Every "flag" option has "noflag" pair, e.g. -flag opposite is -noflag
 .TP
-.B \-i\ files
-specify input file(s) for encoding. Examples:
-
-   -i /dev/dvd
-   -i video.avi stream1.mp3 stream2.wav
+.B \-vcd <track number>
+Encode the specified VCD track.
 .TP
-.B \-o\ file
-specify output file. Examples:
-
-   -o /dev/cdrw ;))
-   -o -
-   -o output.avi
-   -o video.avi audio.mp3
+.B \-dvd <title number>
+Encode the specified DVD title.
 .TP
-.B \-video\ encoding mode
-specify what to do with the video stream(s?):
-
-   -video copy
-   -video divx4
-   -video divx42 (2 pass)
+.B \-chapter <chapter id>
+Use with -dvd option (see above). Start encoding at the specified chapter.
 .TP
-.B \-audio\ encoding mode
-specify what to do with the audio stream(s?):
-
-   -audio copy
-   -audio mp3
-   -audio vbrmp3
+.B \-dvdangle <angle id>
+Use with -dvd option (see above), and if the DVD disc has multiple angles.
+It will encode the angle specified here.
 .TP
-.B \-vbr\ bitrate
-specify video bitrate to encode at (in kbits).
-
-   -vbr 910
+.B \-dvdkey <key>
+Used to decrypt CSS-encrypted streams on hard disk (with given CSS decrypt
+key).
 .TP
-.B \-abr\ bitrate
-specify audio bitrate to encode at (in kbits).
-
-   -abr 128
+.B \-nobps
+Used only for AVIs. Do not use the bps value in the AVI header, instead
+calculate it.
 .TP
-.B \-ivc\ codec
-use this codec to decode input video stream(s?) (from codecs.conf)
-
-   -ivc ffdivx
+.B \-aid <audio stream id>
+If source media contains multiple audio streams (for example DVDs), encode
+the specified one.
 .TP
-.B \-avc\ codec
-use this codec to decode input audio stream(s?) (from codecs.conf)
-
-   -ivc mp3lib
+.B \-vid <video stream id>
+If source media contains multiple video streams, encode the specified one.
+.TP
+.B \-pp <value>
+Apply a postprocess filter to enhance image quality. (values?)
+.TP
+.B \-vc <codec name>
+Use specified codec (according to codecs.conf) for decoding input video
+stream.
+.TP
+.B \-ac <codec name>
+Use specified codec (according to codecs.conf) for decoding input audio
+stream.
+.TP
+.B \-vfm <video family>
+(useful?)
+.TP
+.TP
+.B \-afm <audio family>
+(useful?)
+.TP
+.B \-OTHERS
+TODO
+.IP
+.SH FILES AND DIRECTORIES
+.IP
+.SH "EXAMPLES"
 .IP
 .SH BUGS
-This manpage is under SEVERE construction !!!
-
 Probably. Check the documentation.
 
 Bugreports should be addressed to the MPlayer-users mailing list
