@@ -302,6 +302,10 @@ static int config_is_entry_option(m_config_t *config, char *opt, char *param) {
     if(!param)
       return ERR_MISSING_PARAM;
     entry = parse_playlist_file(param);
+    if(!entry) {
+      mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Playlist parsing failed: %s\n",param);
+      return 1;
+    }
   }
 
   if(! IS_RUNNING(config)) {
@@ -1009,6 +1013,8 @@ int m_config_parse_command_line(m_config_t *config, int argc, char **argv, char 
 		    play_tree_t* entry = play_tree_new();
 		    mp_msg(MSGT_CFGPARSER, MSGL_DBG2,"Adding file %s\n",argv[i]);
 		    play_tree_add_file(entry,argv[i]);
+		    if(strcasecmp(argv[i],"-") == 0)
+		      m_config_set_option(config,"use-stdin",NULL);
 		    /* opt is not an option -> treat it as a filename */
 		    UNSET_GLOBAL(config); // We start entry specific options
 		    if(config->last_entry == NULL)
