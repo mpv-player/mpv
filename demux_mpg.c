@@ -1,5 +1,8 @@
 //  MPG/VOB file parser for DEMUXER v2.5  by A'rpi/ESP-team
 
+//#define MAX_PS_PACKETSIZE 4096
+#define MAX_PS_PACKETSIZE (224*1024)
+
 static unsigned int read_mpeg_timestamp(stream_t *s,int c){
   int d,e;
   unsigned int pts;
@@ -11,7 +14,7 @@ static unsigned int read_mpeg_timestamp(stream_t *s,int c){
   return pts;
 }
 
-static char dvdaudio_table[256];
+//static char dvdaudio_table[256];
 //static unsigned int packet_start_pos=0;
 
 static int demux_mpg_read_packet(demuxer_t *demux,int id){
@@ -27,14 +30,23 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
   
   if(verbose>=3) printf("demux_read_packet: %X\n",id);
 
+  if(id==0x1F0){
+    demux->synced=0; // force resync after 0x1F0
+    return -1;
+  }
+
 //  if(id==0x1BA) packet_start_pos=stream_tell(demux->stream);
-  if(id<0x1BC || id>0x1FF) return -1;
+  if(id<0x1BC || id>=0x1F0) return -1;
   if(id==0x1BE) return -1; // padding stream
   if(id==0x1BF) return -1; // private2
 
   len=stream_read_word(demux->stream);
   if(verbose>=3)  printf("PACKET len=%d",len);
-  if(len==0 || len>4096) return -2;  // invalid packet !!!!!!
+//  if(len==0 || len>MAX_PS_PACKETSIZE) return -2;  // invalid packet !!!!!!
+  if(len==0 || len>MAX_PS_PACKETSIZE){
+    if(verbose>=2) printf("Invalid PS packet len: %d\n",len);
+    return -2;  // invalid packet !!!!!!
+  }
 
   while(len>0){   // Skip stuFFing bytes
     c=stream_read_char(demux->stream);--len;
@@ -130,7 +142,11 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
   }
   if(verbose>=3) printf(" => len=%d\n",len);
 
-  if(len<=0 || len>4096) return -1;  // Invalid packet size
+//  if(len<=0 || len>MAX_PS_PACKETSIZE) return -1;  // Invalid packet size
+  if(len<=0 || len>MAX_PS_PACKETSIZE){
+    if(verbose>=2) printf("Invalid PS data len: %d\n",len);
+    return -1;  // invalid packet !!!!!!
+  }
   
   if(id>=0x1C0 && id<=0x1DF){
     // mpeg audio
@@ -176,7 +192,7 @@ int demux_mpg_es_fill_buffer(demuxer_t *demux){
   // Elementary video stream
   if(demux->stream->eof) return 0;
   demux->filepos=stream_tell(demux->stream);
-  ds_read_packet(demux->video,demux->stream,4096,0,0);
+  ds_read_packet(demux->video,demux->stream,STREAM_BUFFER_SIZE,0,0);
   return 1;
 }
 
