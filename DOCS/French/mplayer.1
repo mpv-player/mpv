@@ -171,7 +171,7 @@ Ceci est même applicable aux sous-options.
 
 .I EXEMPLE:
 .br
-# Utiliser les pilotes Matrox par défaut.
+# Utilise les pilotes Matrox par défaut.
 .br
 vo=xmga
 .br
@@ -179,10 +179,14 @@ vo=xmga
 .br
 flip=yes
 .br
-# Décoder/\:encoder des fichiers png, démarrer avec -mf activé
+# Décode/\:encode des fichiers png, démarre avec -mf on
 .br
 mf= type=png:fps=25
 
+Vous pouvez également écrire des fichiers de config spécifiques à un fichier.
+Si vous souhaitez avoir un fichier de config pour un fichier nommé 'film.avi',
+créez un fichier nommé 'film.avi.conf' contenant les options spécifiques à ce 
+fichier et placez-le dans ~/.mplayer ou dans le même répertoire que le fichier.
 
 .SH "OPTIONS DU LECTEUR (MPLAYER UNIQUEMENT)"
 .TP
@@ -275,7 +279,7 @@ Les commandes disponibles sont:
 .IPs conf=<fichier>
 Lit le fichier input.conf.
 Si aucun chemin n'est précisé, ~/\:.mplayer est utilisé.
-.In ar\-delay
+.IPs ar\-delay
 Temps en msec avant de démarrer la répétition automatique d'une touche 
 (0 pour désactiver).
 .IPs ar\-rate
@@ -819,7 +823,7 @@ Peut être:
 .IPs 0
 polices toutes blanches
 .IPs 0.75
-bordure noire très fine [par défaut]
+bordure noire très fine (par défaut)
 .IPs 1
 bordure noire fine
 .IPs 10
@@ -1201,12 +1205,12 @@ en éxecutant
 Utilise une profondeur de couleur différente de celle détectée.
 Les pilotes \-vo ne la supporte pas tous (fbdev, dga2, svga, vesa).
 .TP
-.B \-brightness <\-100\ \-\ 100>
+.B \-brightness <\-100\-100>
 Ajuste la luminosité de la sortie vidéo (0 par défaut).
 Cela change l'intensité des composants RGB du signal vidéo de noir jusqu'à
 blanc.
 .TP
-.B \-contrast <\-100\ \-\ 100>
+.B \-contrast <\-100\-100>
 Ajuste le contraste de la sortie vidéo (0 par défaut).
 Fonctionne de manière similaire à la luminosité.
 .TP
@@ -1340,13 +1344,17 @@ Voir aussi \-zoom.
 .B \-fsmode-dontuse <0-31> (OBSOLETE) (utiliser l'option \-fs)
 Essayez cette option si vous avez encode des problème en plein écran.
 .TP
-.B \-geometry x[%][:y[%]]
+.B \-geometry x[%][:y[%]] ou [WxH][+x+y]
 Ajuste la position d'origine de la sortie. Les variables x et y sont en pixels
 mesurés à partir du coin supérieur droit de l'écran jusqu'au coin
 supérieur droit de la vidéo affichée, cependant si un '%' est indiqué après
 la variable, cette valeur est alors considérée comme le pourcentage de la
-taille de l'écran dans cette direction.
+taille de l'écran dans cette direction. Il supporte également le format d'option
+standard pour l'option X standard \-geometry.
 Les valeur données doivent être des valeurs entières.
+
+Note: Cette option n'est supportée que par quelques vo, incluant tdfxfb, fbdev et
+xv.
 
 .I EXEMPLE:
 .PD 0
@@ -1363,7 +1371,7 @@ Place la fenêtre en bas à gauche de l'écran
 .PD 1
 .
 .TP
-.B \-hue <\-100\ \-\ 100>
+.B \-hue <\-100\-100>
 Ajuste la couleur (hue) du signal vidéo (0 par défaut).
 Vous pouvez obtenir un négatif de l'image avec cette option.
 .TP
@@ -1424,8 +1432,9 @@ Ne capte pas le pointeur de la sourie après une changement de Vidmode (\-vm),
  utile pour les configurations multihead.
 .TP
 .B \-nokeepaspect
-Ne garde pas l'aspect ratio de la fenêtre en redimensionnant les fenêtres X11.
-(ne fonctionne actuellement qu'avec \-vo x11, xv, xmga et xvidix)
+Ne garde pas l'aspect ratio de la fenêtre en redimensionnant les fenêtres X11
+(Ne fonctionne actuellement qu'avec \-vo x11, xv, xmga et xvidix et votre 
+gestionnaire de fenêtres doit comprendre les astuces d'aspect de fenêtres.).
 .TP
 .B \-noslices
 Désactive l'affichage de la vidéo par tranches/\:bandes de 16 pixels, affiche
@@ -1446,7 +1455,7 @@ Joue le film dans la fenêtre root (le fond du bureau) au lieu d'en ouvrir
 une nouvelle.
 Cette option ne fonctionne qu'avec les pilotes xv, xmga et xvidix.
 .TP
-.B \-saturation <\-100\ \-\ 100>
+.B \-saturation <\-100\-100>
 Ajuste la saturation du signal vidéo (0 par défaut).
 Vous pouvez obtenir une sortie noir&blanc avec cette option.
 .TP
@@ -2211,7 +2220,7 @@ le fichier de destination contiendra 'div3' en tant que fourcc vidéo.
 .
 .TP
 .B \-include <fichier\ de\ configuration>
-Spécifie le fichier de configuration à analyser après celui par défaut
+Spécifie le fichier de configuration à analyser après ceux par défaut.
 .TP
 .B \-info <option1:option2:...> (.AVI uniquement)
 Spécifie l'entête d'info dans le fichier .AVI de destination.
@@ -2726,7 +2735,7 @@ utilise les quantizers MPEG au lieu de H.263.
 Ne saute pas de trames.
 .TP
 .B \-o <nomfichier>
-Envoie dans nomfichier, au lieu de 'test.avi' par défaut.
+Envoie dans le nom fichier indiqué, au lieu de 'test.avi' par défaut.
 .TP
 .B \-oac <nom codec>
 Encode avec le codec audio.
@@ -3052,7 +3061,7 @@ Ajuste le décalage des sous-titres de +/\:- <valeur> secondes et l'initialise à
 Bascule le mode osd ou le met à un niveau quand level > 0.
 .IPs "volume <dir>"
 Augmente/\:diminue le volume
-.IPs "[contrast|brightness|hue|saturation] <\-100 \- 100> [abs=<valeur>]"
+.IPs "[contrast|brightness|hue|saturation] <\-100\-100> [abs=<valeur>]"
 Initialise/\:Ajuste les paramètres video.
 .IPs "frame_drop [type=<valeur>]"
 Bascule/\:Initialise le mode saut de trames.
