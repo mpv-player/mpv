@@ -950,8 +950,19 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		    int fcc=char2int(trak->stdata,48);
 		    // we have extra audio headers!!!
 		    printf("Audio extra header: len=%d  fcc=0x%X\n",len,fcc);
+		    if((len >= 4) && 
+		       (char2int(trak->stdata,52) >= 12) &&
+		       (char2int(trak->stdata,52+4) == MOV_FOURCC('f','r','m','a')) &&
+		       (char2int(trak->stdata,52+8) == MOV_FOURCC('a','l','a','c')) &&
+		       (len >= 36 + char2int(trak->stdata,52))) {
+			    sh->codecdata_len = char2int(trak->stdata,52+char2int(trak->stdata,52));
+			    mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found alac atom (%d)!\n", sh->codecdata_len);
+			    sh->codecdata = (unsigned char *)malloc(sh->codecdata_len);
+			    memcpy(sh->codecdata, &trak->stdata[52+char2int(trak->stdata,52)], sh->codecdata_len);
+		    } else {
 		    sh->codecdata_len = len-8;
 		    sh->codecdata = trak->stdata+44+8;
+		    }
 		  }
 		}
 
