@@ -30,7 +30,6 @@
 
 #include "../config.h"
 
-#include "mmx.h"
 //#include "libmpeg2/mpeg2.h"
 //#include "libmpeg2/mpeg2_internal.h"
 #include <inttypes.h>
