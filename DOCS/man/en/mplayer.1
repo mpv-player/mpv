@@ -3422,23 +3422,36 @@ Disables aspect calculations.
 .TP
 .B \-xvidopts <option1:option2:...>
 Specify additional parameters when decoding with XviD.
+.br
+.I NOTE:
+As decoding with XviD tends to be a bit slower than libavcodec
+you might want to use them instead.
+.sp 1
+XviD's internal postprocessing filters:
 .PD 0
 .RSs
-.IPs deblock-chroma
-Activate XviD internal postprocessing filter: chroma deblock filter.
-See also \-vf pp, which is faster than XviD's own filter.
-.IPs deblock-luma
-Activate XviD internal postprocessing filter: luma deblock filter.
-See also \-vf pp, which is faster than XviD's own filter.
+.IPs deblock-chroma (also see \-vf pp)
+chroma deblock filter
+.IPs deblock-luma (also see \-vf pp)
+luma deblock filter
+.IPs dering-luma (also see \-vf pp)
+luma deringing filter
+.IPs dering-chroma (also see \-vf pp)
+chroma deringing filter
+.IPs filmeffect (also see \-vf noise)
+Adds artificial film grain to the video.
+May increase perceived quality, while lowering true quality.
+.RE
+.sp 1
+.RS
+rendering methods:
+.RE
+.PD 0
+.RSs
 .IPs dr2\ \ 
 Activate direct rendering method 2.
 .IPs nodr2
 Deactivate direct rendering method 2.
-.IPs filmeffect
-Activate XviD internal film grain effect.
-Adds artificial film grain to the video.
-May increase perceived quality, while lowering true quality.
-Also see \-vf noise.
 .RE
 .PD 1
 .
