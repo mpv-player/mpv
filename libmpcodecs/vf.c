@@ -493,7 +493,7 @@ void vf_next_draw_slice(struct vf_instance_s* vf,unsigned char** src, int * stri
     }
     if (!(vf->dmpi->flags & MP_IMGFLAG_PLANAR)) {
 	memcpy_pic(vf->dmpi->planes[0]+y*vf->dmpi->stride[0]+vf->dmpi->bpp/8*x,
-	    src[0], vf->dmpi->bpp/8*w, h, vf->dmpi->stride[0], stride);
+	    src[0], vf->dmpi->bpp/8*w, h, vf->dmpi->stride[0], stride[0]);
 	return;
     }
     memcpy_pic(vf->dmpi->planes[0]+y*vf->dmpi->stride[0]+x, src[0],
