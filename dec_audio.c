@@ -104,6 +104,7 @@ static void mad_prepare_buffer(sh_audio_t* sh_audio, struct mad_stream* ms, int 
   if(sh_audio->a_in_buffer_len < length) {
     int len = demux_read_data(sh_audio->ds, sh_audio->a_in_buffer+sh_audio->a_in_buffer_len, length-sh_audio->a_in_buffer_len);
     sh_audio->a_in_buffer_len += len;
+//    printf("mad_prepare_buffer: read %d bytes\n", len);
   }
 }
 
@@ -137,6 +138,7 @@ signed short mad_scale(mad_fixed_t sample)
 static void mad_sync(sh_audio_t* sh_audio, struct mad_stream* ms)
 {
     int len;
+#if 1
     int skipped = 0;
 
 //    printf("buffer len: %d\n", sh_audio->a_in_buffer_len);    
@@ -154,21 +156,64 @@ static void mad_sync(sh_audio_t* sh_audio, struct mad_stream* ms)
     if (skipped)
     {
 	printf("Audio synced, skipped bytes: %d\n", skipped);
-	ms->skiplen += skipped;
-    }
-    
-    if (sh_audio->a_in_buffer_len - skipped < MAD_BUFFER_GUARD)
-	printf("Mad reports: too small buffer\n");
+//	ms->skiplen += skipped;
+//	printf("skiplen: %d (skipped: %d)\n", ms->skiplen, skipped);
 
-    mad_prepare_buffer(sh_audio, ms, sh_audio->a_in_buffer_len-skipped);
-    mad_stream_buffer(ms, sh_audio->a_in_buffer+skipped, sh_audio->a_in_buffer_len-skipped);
-#if 0    
+//	if (sh_audio->a_in_buffer_len - skipped < MAD_BUFFER_GUARD)
+//	    printf("Mad reports: too small buffer\n");
+
+//	mad_stream_buffer(ms, sh_audio->a_in_buffer+skipped, sh_audio->a_in_buffer_len-skipped);
+//	mad_prepare_buffer(sh_audio, ms, sh_audio->a_in_buffer_len-skipped);
+
+	/* move frame to the beginning of the buffer and fill up to a_in_buffer_size */
+	sh_audio->a_in_buffer_len -= skipped;
+	memcpy(sh_audio->a_in_buffer, sh_audio->a_in_buffer+skipped, sh_audio->a_in_buffer_len);
+	mad_prepare_buffer(sh_audio, ms, sh_audio->a_in_buffer_size);
+	mad_stream_buffer(ms, sh_audio->a_in_buffer, sh_audio->a_in_buffer_len);
+//	printf("bufflen: %d\n", sh_audio->a_in_buffer_len);
+	
+//	len = mp_decode_mp3_header(sh_audio->a_in_buffer);
+//	printf("len: %d\n", len);
+	ms->md_len = len;
+    }
+#else
     len = mad_stream_sync(&ms);
     if (len == -1)
     {
 	printf("Mad sync failed\n");
     }
 #endif
+}
+
+static void mad_print_error(struct mad_stream *mad_stream)
+{
+    printf("error (0x%x): ", mad_stream->error);
+    switch(mad_stream->error)
+    {
+	case MAD_ERROR_BUFLEN:	printf("buffer too small");		break;
+	case MAD_ERROR_BUFPTR:	printf("invalid buffer pointer"); 	break;
+	case MAD_ERROR_NOMEM:	printf("not enought memory");		break;
+	case MAD_ERROR_LOSTSYNC:	printf("lost sync");		break;
+	case MAD_ERROR_BADLAYER:	printf("bad layer");		break;
+	case MAD_ERROR_BADBITRATE:	printf("bad bitrate");		break;
+	case MAD_ERROR_BADSAMPLERATE:	printf("bad samplerate");	break;
+	case MAD_ERROR_BADEMPHASIS:	printf("bad emphasis");		break;
+	case MAD_ERROR_BADCRC:		printf("bad crc");		break;
+	case MAD_ERROR_BADBITALLOC:	printf("forbidden bit alloc val"); break;
+	case MAD_ERROR_BADSCALEFACTOR:	printf("bad scalefactor index"); break;
+	case MAD_ERROR_BADFRAMELEN:	printf("bad frame length");	break;
+	case MAD_ERROR_BADBIGVALUES:	printf("bad bigvalues count");	break;
+	case MAD_ERROR_BADBLOCKTYPE:	printf("reserved blocktype");	break;
+	case MAD_ERROR_BADSCFSI:	printf("bad scalefactor selinfo"); break;
+	case MAD_ERROR_BADDATAPTR:	printf("bad maindatabegin ptr"); break;
+	case MAD_ERROR_BADPART3LEN:	printf("bad audio data len");	break;
+	case MAD_ERROR_BADHUFFTABLE:	printf("bad huffman table sel"); break;
+	case MAD_ERROR_BADHUFFDATA:	printf("huffman data overrun");	break;
+	case MAD_ERROR_BADSTEREO:	printf("incomp. blocktype for JS"); break;
+	default:
+	    printf("unknown error");
+    }
+    printf("\n");
 }
 #endif
 
@@ -740,6 +785,7 @@ case AFM_VORBIS: {
      else
        {
 	 printf(__FILE__ ":%d:mad: frame decoding failed\n", __LINE__);
+	 mad_print_error(&mad_stream);
        }
      
      switch (mad_frame.header.mode)
@@ -1130,8 +1176,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
 	  {
 	    printf(__FILE__ ":%d:mad: frame decoding failed (error: %d)\n", __LINE__,
 		mad_stream.error);
-	    if (mad_stream.error & MAD_ERROR_LOSTSYNC)
-		printf("lost sync\n");
+	    mad_print_error(&mad_stream);
 	  }
 	
 	break;
