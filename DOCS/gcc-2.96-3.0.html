@@ -1,0 +1,49 @@
+<HTML>
+<BODY BGCOLOR=WHITE>
+
+<P>
+<B>Question:</B> What is the problem with GCC 2.96 ? And with 3.x ?
+</P>
+
+<P>
+<B>Answer:</B>
+</P>
+
+<P>
+And for the people, who periodically asks what are the exact problems with
+gcc 2.96, my answer: <I>we don't know.</I> We just see various bugreports mostly
+gcc internal bugs, compiler syntax errors in source or bad code compiled. They
+all are solved using different version of gcc. I understand that gcc 2.96
+has different default optimization flags and they conflicts with our inline
+asm code, but we can't fix them, and we really don't want to fix them as they
+work with other compilers or gcc versions, and the fix may cause speed loss.
+</P>
+
+<P>
+I think that the gcc 2.96 should be fixed to be option-compatible with other
+releases, but redhat guys refused to do it. If someone interested - ask
+Eugene K., avifile author, he has a long mailing with them, because they had
+the same problems with avifile. Finally he changed avifile source to
+<I>workaround</I> gcc 2.96 bugs...
+We simply has no interest and time to do it.
+</P>
+
+<P>
+Ah, and about the pipe-in-comment bug: it wasn't really our bug.
+I've talked one of gcc maintainers, and he told me that gcc 2.96 and 3.x
+supports intel asm syntax, and it caused the pipe bug. But it was a bug,
+because gcc silently, without any warning, ignored the whole asm block.
+*They* have fixed that, now it prints warning and doesn't skip the block.
+(at least he told me, i didn't checked)
+</P>
+
+<P>
+Other gcc 3.x problems comes from broken libstdc++ or glibc header (std_*.h)
+installation. They are not our fault. MPlayer compiles and works well with
+gcc 3.x versions. <B>Only 2.96 is broken</B>, but it depends on many environment
+elements, including gcc 2.96 release number, enabled mplayer features, etc.
+<I>If it works for you using gcc 2.96, it doesn't mean it will work for everyone.</I>
+</P>
+
+</BODY>
+</HTML>
