@@ -1729,46 +1729,47 @@ enkóderek hibáinak manuális detektáltatása:
 .br
 1: hibák autodetektálása (alap)
 .br
-2 (msmpeg4v3): some old lavc generated msmpeg4v3 files (no autodetect)
+2 (msmpeg4v3): régebbi lavc által generált msmpeg4v3 file-ok (nincs autodetect)
 .br
-4 (mpeg4): xvid interlacing bug (autodetected if fourcc==XVIX) 
+4 (mpeg4): xvid interlacing bug (autodetektálva, ha fourcc==XVIX) 
 .br
-8 (mpeg4): UMP4 (autodetected if fourcc==UMP4)
+8 (mpeg4): UMP4 (autodetektálva, ha fourcc==UMP4)
 .br
 16 (mpeg4): padding bug
 .br
-32 (mpeg4): illegal vlc bug (autodetected per fourcc)
+32 (mpeg4): illegális vlc bug (fourcc alapján autodetektálva)
 .br
-64 (mpeg4): XVID and DIVX qpel bug (autodetected)
+64 (mpeg4): XVID és DIVX qpel bug (autodetektálva)
 .REss
 .IPs idct=<0\-99>
-(see lavcopts)
+(lásd lavcopts)
 .IPs gray
-grayscale only decoding (a bit faster than with color)
+szürkeskálás dekódolás (kicsit gyorsabb mint a szines)
 .RE
 .
 .TP
 .B \-noaspect
-Disable automatic movie aspect ratio compensation.
+Képarány figyelembevételének kikapcsolása.
 .TP
 .B \-nosound
-Do not play/\:encode sound.
+Hang lejátszásának/\:enkódolásának kikapcsolása.
 .TP
-.B \-pp <quality> (see \-vop pp option too!)
-Set postprocess level of the DLL.
-This option is NO LONGER USABLE with MPlayer's postprocess filter, but only
-with Win32 DirectShow DLLs which have internal postprocessing routine.
+.B \-pp <minõség> (lásd még \-vop pp)
+A DLL minõségjavító szintjének beállítása.
+Ez az opció NEM az MPlayer postprocess szûrõjének beállítására való, hanem
+az olyan Win32 DirectShow DLL-ekre amelyeknek van beépített minõségjavító
+kódjuk.
 
-The valid range of \-pp value vary on codecs, mostly
-0\-6, where 0=disable 6=slowest/\:best.
+Az értéktartomány codecfüggõ, többnyire
+0\-6, ahol 0=kikapcsolás 6=leglassabb/\:legjobb.
 .TP
-.B \-pphelp (see \-vop pp option too)
-Show a summary about the available postprocess filters and their usage.
+.B \-pphelp (lásd még \-vop pp)
+Összefoglaló a postprocess szûrõkrõl és használatukról.
 .TP
-.B \-ssf <mode>
-Specifies SwScaler parameters.
+.B \-ssf <mód>
+SwScaler paraméterek finomhangolása.
 
-.I EXAMPLE
+.I PÉLDA
 .PD 0
 .RSs
 \-vop scale \-ssf lgb=3.0
@@ -1778,13 +1779,13 @@ Specifies SwScaler parameters.
 .PD 0
 .RSs
 .IPs lgb=<0\-100>
-Gaussian blur filter (luma)
+Gaussian blur szûrõ (luma)
 .IPs cgb=<0\-100>
-Gaussian blur filter (chroma)
+Gaussian blur szûrõ (chroma)
 .IPs ls=<0\-100>
-sharpen filter (luma)
+élesítõ szûrõ (luma)
 .IPs cs=<0\-100>
-sharpen filter (chroma)
+élesítõ szûrõ (chroma)
 .IPs chs=<h>
 chroma horizontal shifting
 .IPs cvs=<v>
@@ -1793,45 +1794,40 @@ chroma vertical shifting
 .PD 1
 .
 .TP
-.B \-stereo <mode>
-Select type of MP2/\:MP3 stereo output.
+.B \-stereo <mód>
+MP2/\:MP3 sztereó kimenet módja.
 
 .PD 0
 .RSs
 .IPs 0
-Stereo
+Sztereó
 .IPs 1
-Left channel
+Bal csatorna
 .IPs 2
-Right channel
+Jobb csatorna
 .RE
 .PD 1
 .
 .TP
-.B \-sws <software\ scaler\ type> (see \-vop scale option too)
-This option sets the quality (and speed, respectively) of the software scaler,
-with the \-zoom option.
-For example with x11 or other outputs which lack hardware acceleration.
-Possible settings are:
+.B \-sws <szoftveres\ scaler\ tipusa> (lásd még \-vop scale opció)
+Ezzel az opcióval lehet a \-zoom opcióval használható szoftveres nagyítás
+sebességét és minõségét állítani.
+Ez a hardveres gyorsítást nélkülõzõ módokhoz van, mint például az x11.
 
-.I NOTE:
-.br
-For \-sws\ 2 and 7, the sharpness can be set with the scaling parameter (p)
-of \-vop scale (0 (soft) \- 100 (sharp)), for \-sws 9, it specifies the filter
-length (1 \- 10).
+A lehetséges beállítások:
 
 .PD 0
 .RSs
 .IPs 0
-fast bilinear (default)
+gyors bilinear (alap)
 .IPs 1
 bilinear
 .IPs 2
-bicubic (good quality)
+bicubic (jó minõség)
 .IPs 3
-experimental
+kísérleti
 .IPs 4
-nearest neighbour (bad quality)
+nearest neighbour (rossz minõség)
 .IPs 5
 area
 .IPs 6
