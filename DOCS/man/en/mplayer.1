@@ -2533,9 +2533,8 @@ Needs OpenGL version >= 1.2.
 Number of lines copied to texture in one piece (default: 4).
 0 for whole image.
 .IPs (no)osd
-Enable or disable support for OSD rendering via OpenGL.
+Enable or disable support for OSD rendering via OpenGL (default: enabled).
 Mostly for testing, you should use \-osdlevel 0 to disable OSD.
-Default: enabled
 .RE
 .PD 1
 .
@@ -6037,22 +6036,22 @@ use chroma too, doesn't work (correctly) with B frames currently
 .TP
 .B ildctcmp=<0\-2000>
 Sets the comparison function for interlaced dct decision
-(see mpcmp for available comparison functions).
+(see mbcmp for available comparison functions).
 .
 .TP
 .B precmp=<0\-2000>
 Sets the comparison function for motion estimation pre pass
-(see mpcmp for available comparison functions) (default: 0).
+(see mbcmp for available comparison functions) (default: 0).
 .
 .TP
 .B cmp=<0\-2000>
 Sets the comparison function for full pel motion estimation
-(see mpcmp for available comparison functions) (default: 0).
+(see mbcmp for available comparison functions) (default: 0).
 .
 .TP
 .B subcmp=<0\-2000>
 Sets the comparison function for sub pel motion estimation
-(see mpcmp for available comparison functions) (default: 0).
+(see mbcmp for available comparison functions) (default: 0).
 .
 .TP
 .B nssew=<0\-100>
@@ -6795,8 +6794,8 @@ With small values of scenecut, the codec often has to force an I-frame
 when it would exceed keyint.
 Good values of scenecut may find a better location for the I-frame.
 Large values use more I-frames than necessary, thus wasting bits.
--1 disables scene-cut detection, so I-frames are being inserted only every
-other keyint frames, even when a scene cut happends.
+-1 disables scene-cut detection, so I-frames are inserted only once
+every other keyint frames, even if a scene-cut occurs earlier.
 This isn't recommended and wastes bitrate as scenecuts encoded as P-frames
 are just as big as I-frames, but don't reset the "keyint counter".
 .
