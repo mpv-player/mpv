@@ -10,8 +10,8 @@ extern char* current_module;
 extern int fullscreen;
 extern int vcd_track;
 
-extern char * audio_fm;
-extern char * video_fm;
+extern char ** audio_fm_list;
+extern char ** video_fm_list;
 extern char * video_driver;
 extern char * audio_driver;
 extern int    has_audio;
@@ -34,6 +34,7 @@ extern subtitle* vo_sub;
 
 extern char * filename;
 
+extern int stream_cache_size;
 extern int flip;
 extern int force_ni;
 extern int index_mode;

@@ -96,8 +96,6 @@ char *audio_codec=NULL; // override audio codec
 char *video_codec=NULL; // override video codec
 char **audio_codec_list=NULL; // override video codec
 char **video_codec_list=NULL; // override video codec
-char* audio_fm=NULL;     // override audio codec family 
-char* video_fm=NULL;     // override video codec family 
 char** audio_fm_list=NULL;     // override video codec family 
 char** video_fm_list=NULL;     // override video codec family 
 

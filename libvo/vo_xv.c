@@ -435,7 +435,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 #endif
 
      aspect(&vo_dwidth,&vo_dheight,A_NOZOOM);
-     if ( ( flags&1 )&&( !WinID ) )
+     if ( ( flags&1 )&&( WinID <= 0 ) )
       {
        aspect(&vo_dwidth,&vo_dheight,A_ZOOM);
        drwX=( vo_screenwidth - (vo_dwidth > vo_screenwidth?vo_screenwidth:vo_dwidth) ) / 2;

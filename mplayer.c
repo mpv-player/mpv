@@ -180,8 +180,6 @@ char *audio_codec=NULL; // override audio codec
 char *video_codec=NULL; // override video codec
 char **audio_codec_list=NULL; // override video codec
 char **video_codec_list=NULL; // override video codec
-char *audio_fm=NULL;    // override audio codec family 
-char *video_fm=NULL;    // override video codec family 
 char **audio_fm_list=NULL;    // override video codec family 
 char **video_fm_list=NULL;    // override video codec family 
 
@@ -197,7 +195,7 @@ int vcd_track=0;
 char* filename=NULL; //"MI2-Trailer.avi";
 
 // cache2:
-static int stream_cache_size=0;
+       int stream_cache_size=0;
 #ifdef USE_STREAM_CACHE
 extern int cache_fill_status;
 #else

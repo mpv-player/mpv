@@ -747,6 +747,9 @@ void * gtkSet( int cmd,float fparam, void * vparam )
 	if ( (unsigned int)vparam & guiVCD ) guiIntfStruct.VCDTracks=0;
 #endif
 	return NULL;
+   case gtkSetCacheSize:
+        stream_cache_size=(int)fparam;
+	return NULL;
    case gtkSetExtraStereo:
         gtkAOExtraStereoMul=fparam;
 	audio_plugin_extrastereo.control( AOCONTROL_PLUGIN_ES_SET,(int)&gtkAOExtraStereoMul );

@@ -59,8 +59,8 @@ static config_t gui_opts[] =
  { "v_flip",&flip,CONF_TYPE_INT,CONF_RANGE,-1,1,NULL },
  { "v_ni",&force_ni,CONF_TYPE_FLAG,0,0,1,NULL },
  { "v_idx",&index_mode,CONF_TYPE_INT,CONF_RANGE,-1,2,NULL },
- { "v_vfm",&video_fm,CONF_TYPE_STRING,0,0,0,NULL },
- { "a_afm",&audio_fm,CONF_TYPE_STRING,0,0,0,NULL },
+ { "v_vfm",&video_fm_list,CONF_TYPE_STRING_LIST,0,0,0,NULL },
+ { "a_afm",&audio_fm_list,CONF_TYPE_STRING_LIST,0,0,0,NULL },
 
  { "vf_pp",&gtkVopPP,CONF_TYPE_FLAG,0,0,1,NULL },
  { "vf_autoq",&auto_quality,CONF_TYPE_INT,CONF_RANGE,0,100,NULL },
@@ -87,10 +87,12 @@ static config_t gui_opts[] =
  { "font_encoding",&subtitle_font_encoding,CONF_TYPE_STRING,0,0,0,NULL },
  { "font_text_scale",&text_font_scale_factor,CONF_TYPE_FLOAT,CONF_RANGE,0,100,NULL },
  { "font_osd_scale",&osd_font_scale_factor,CONF_TYPE_FLOAT,CONF_RANGE,0,100,NULL },
- { "font_blur",&subtitle_font_thickness,CONF_TYPE_FLOAT,CONF_RANGE,0,8,NULL },
+ { "font_blur",&subtitle_font_radius,CONF_TYPE_FLOAT,CONF_RANGE,0,8,NULL },
  { "font_outline",&subtitle_font_thickness,CONF_TYPE_FLOAT,CONF_RANGE,0,8,NULL },
  { "font_autoscale",&subtitle_autoscale,CONF_TYPE_INT,CONF_RANGE,0,3,NULL },
 #endif
+
+ { "cache",&stream_cache_size,CONF_TYPE_INT,CONF_RANGE,4,65535,NULL },
  
  { "gui_skin",&skinName,CONF_TYPE_STRING,0,0,0,NULL },
 
@@ -212,6 +214,12 @@ int cfg_write( void )
             {
 	     char * tmp = *( (char **)gui_opts[i].p );
 	     if ( tmp && tmp[0] ) fprintf( f,"%s = \"%s\"\n",gui_opts[i].name,tmp );
+	     break;
+	    }
+       case CONF_TYPE_STRING_LIST:
+            {
+	     char ** tmp = *( (char **)gui_opts[i].p );
+	     if ( tmp && tmp[0] && tmp[0][0] ) fprintf( f,"%s = \"%s\"\n",gui_opts[i].name,tmp[0] );
 	     break;
 	    }
       }

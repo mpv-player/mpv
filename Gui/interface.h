@@ -187,6 +187,7 @@ extern URLItem * URLList;
 #define gtkSetFontOSDScale  24
 #define gtkSetFontEncoding  25
 #define gtkSetFontAutoScale 26
+#define gtkSetCacheSize     27
 
 extern float gtkEquChannels[6][10];
 

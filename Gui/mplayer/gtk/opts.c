@@ -62,6 +62,10 @@ static GtkWidget * CBSubUnicode;
 static GtkWidget * CBDumpMPSub;
 static GtkWidget * CBDumpSrt;
 static GtkWidget * CBPostprocess;
+static GtkWidget * CBCache;
+
+static GtkWidget * SBCache;
+static GtkAdjustment * SBCacheadj;
 
 static GtkWidget * RBOSDNone;
 static GtkWidget * RBOSDTandP;
@@ -235,8 +239,8 @@ void ShowPreferences( void )
 #ifndef HAVE_FREETYPE
  gtk_adjustment_set_value( HSFontFactoradj,font_factor );
 #else
- gtk_adjustment_set_value( HSFontBluradj,subtitle_font_radius );
- gtk_adjustment_set_value( HSFontOutLineadj,subtitle_font_thickness );
+ gtk_adjustment_set_value( HSFontBluradj,( subtitle_font_radius / 8.0f ) * 100.0f );
+ gtk_adjustment_set_value( HSFontOutLineadj,( subtitle_font_thickness / 8.0f ) * 100.0f );
  gtk_adjustment_set_value( HSFontTextScaleadj,text_font_scale_factor );
  gtk_adjustment_set_value( HSFontOSDScaleadj,osd_font_scale_factor );
  if ( subtitle_font_encoding )
@@ -270,12 +274,13 @@ void ShowPreferences( void )
   for( i=0;mpcodecs_vd_drivers[i];i++ )
    {
     Items=g_list_append( Items,(char *)mpcodecs_vd_drivers[i]->info->name );
-    if ( !gstrcmp( video_fm,(char *)mpcodecs_vd_drivers[i]->info->short_name ) ) name=(char *)mpcodecs_vd_drivers[i]->info->name;
+    if ( video_fm_list && !gstrcmp( video_fm_list[0],(char *)mpcodecs_vd_drivers[i]->info->short_name ) ) name=(char *)mpcodecs_vd_drivers[i]->info->name;
    }
   gtk_combo_set_popdown_strings( GTK_COMBO( CBVFM ),Items );
   g_list_free( Items );
   if ( name ) gtk_entry_set_text( GTK_ENTRY( EVFM ),name );
  }
+
  {
   int     i;
   GList * Items = NULL;
@@ -285,12 +290,19 @@ void ShowPreferences( void )
   for( i=0;mpcodecs_ad_drivers[i];i++ )
    {
     Items=g_list_append( Items,(char *)mpcodecs_ad_drivers[i]->info->name );
-    if ( !gstrcmp( audio_fm,(char *)mpcodecs_ad_drivers[i]->info->short_name ) ) name=(char *)mpcodecs_ad_drivers[i]->info->name;
+    if ( audio_fm_list && !gstrcmp( audio_fm_list[0],(char *)mpcodecs_ad_drivers[i]->info->short_name ) ) name=(char *)mpcodecs_ad_drivers[i]->info->name;
    }
   gtk_combo_set_popdown_strings( GTK_COMBO( CBAFM ),Items );
   g_list_free( Items );
   if ( name ) gtk_entry_set_text( GTK_ENTRY( EAFM ),name );
  }
+
+ gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBCache ),0 );
+ if ( stream_cache_size )
+  {
+   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBCache ),1 );
+   gtk_adjustment_set_value( SBCacheadj,stream_cache_size );
+  } else gtk_widget_set_sensitive( SBCache,FALSE );
 
 // -- disables
 #ifndef USE_SUB
@@ -327,6 +339,7 @@ void ShowPreferences( void )
  gtk_signal_connect( GTK_OBJECT( RBFontAutoScaleHeight ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)6 );
  gtk_signal_connect( GTK_OBJECT( RBFontAutoScaleDiagonal ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)7 );
 #endif
+ gtk_signal_connect( GTK_OBJECT( CBCache ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)8);
 
  gtk_signal_connect( GTK_OBJECT( HSExtraStereoMul ),"motion_notify_event",GTK_SIGNAL_FUNC( prHScaler ),(void*)0 );
  gtk_signal_connect( GTK_OBJECT( HSAudioDelay ),"motion_notify_event",GTK_SIGNAL_FUNC( prHScaler ),(void*)1 );
@@ -450,19 +463,44 @@ void prButton( GtkButton * button,gpointer user_data )
 	index_mode=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBIndex ) );
 	gtkVopPP=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBPostprocess ) ); 
 	gtkSet( gtkSetAutoq,HSPPQualityadj->value,NULL );
+
+	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBCache ) ) ) gtkSet( gtkSetCacheSize,SBCacheadj->value,NULL );
+	 else gtkSet( gtkSetCacheSize,0,NULL );
+
 	{
 	 int i;
 	 char * tmp = gtk_entry_get_text( GTK_ENTRY( EVFM ) );
-	 gfree( (void **)&video_fm );
+	 if ( video_fm_list )
+	  {
+	   for ( i=0;video_fm_list[i];i++ ) gfree( (void **)&video_fm_list[i] );
+	   gfree( (void **)&video_fm_list );
+	  }
          for( i=0;mpcodecs_vd_drivers[i];i++ )
-           if ( !gstrcmp( tmp,(char *)mpcodecs_vd_drivers[i]->info->name ) ) { video_fm=gstrdup( (char *)mpcodecs_vd_drivers[i]->info->short_name ); break; }
+           if ( !gstrcmp( tmp,(char *)mpcodecs_vd_drivers[i]->info->name ) ) 
+	    {
+	     video_fm_list=malloc( 8 );
+	     video_fm_list[0]=gstrdup( (char *)mpcodecs_vd_drivers[i]->info->short_name ); 
+	     video_fm_list[1]=NULL;
+	     break;
+	    }
 	}
+
 	{
 	 int i;
 	 char * tmp = gtk_entry_get_text( GTK_ENTRY( EAFM ) );
-	 gfree( (void **)&audio_fm );
+	 if ( audio_fm_list )
+	  {
+	   for ( i=0;audio_fm_list[i];i++ ) gfree( (void **)&audio_fm_list[i] );
+	   gfree( (void **)&audio_fm_list );
+	  }
          for( i=0;mpcodecs_ad_drivers[i];i++ )
-           if ( !gstrcmp( tmp,(char *)mpcodecs_ad_drivers[i]->info->name ) ) { audio_fm=gstrdup( (char *)mpcodecs_ad_drivers[i]->info->short_name ); break; }
+           if ( !gstrcmp( tmp,(char *)mpcodecs_ad_drivers[i]->info->name ) )
+	    {
+	     audio_fm_list=malloc( 8 );
+	     audio_fm_list[0]=gstrdup( (char *)mpcodecs_ad_drivers[i]->info->short_name );
+	     audio_fm_list[1]=NULL;
+	     break;
+	    }
 	}
 
    case bCancel:
@@ -553,6 +591,10 @@ static void prToggled( GtkToggleButton * togglebutton,gpointer user_data )
    case 6:
    case 7:
 	gtkSet( gtkSetFontAutoScale,(float)((int)user_data - 4 ),NULL );
+	break;
+   case 8:
+	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBCache ) ) ) gtk_widget_set_sensitive( SBCache,TRUE );
+	 else gtk_widget_set_sensitive( SBCache,FALSE );
 	break;
   }
 }
@@ -1711,6 +1753,60 @@ GtkWidget * create_Preferences( void )
   gtk_widget_ref( EAFM );
   gtk_object_set_data_full( GTK_OBJECT( Preferences ),"EAFM",EAFM,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( EAFM );
+
+  frame11=gtk_frame_new( MSGTR_PREFERENCES_FRAME_Cache );
+  gtk_widget_set_name( frame11,"frame11" );
+  gtk_widget_ref( frame11 );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame11",frame11,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( frame11 );
+  gtk_box_pack_start( GTK_BOX( vbox601 ),frame11,FALSE,FALSE,0 );
+  gtk_frame_set_shadow_type( GTK_FRAME( frame11 ),GTK_SHADOW_ETCHED_OUT );
+
+  frame=gtk_frame_new( NULL );
+  gtk_widget_set_name( frame,"frame" );
+  gtk_widget_ref( frame );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"frame",frame,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( frame );
+  gtk_container_add( GTK_CONTAINER( frame11 ),frame );
+  gtk_container_set_border_width( GTK_CONTAINER( frame ),0 );
+  gtk_frame_set_shadow_type( GTK_FRAME( frame ),GTK_SHADOW_NONE );
+
+  vbox602=gtk_vbox_new( FALSE,0 );
+  gtk_widget_set_name( vbox602,"vbox602" );
+  gtk_widget_ref( vbox602 );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"vbox602",vbox602,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( vbox602 );
+  gtk_container_add( GTK_CONTAINER( frame ),vbox602 );
+
+  CBCache=gtk_check_button_new_with_label( MSGTR_PREFERENCES_Cache );
+  gtk_widget_set_name( CBCache,"CBCache" );
+  gtk_widget_ref( CBCache );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"CBCache",CBCache,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( CBCache );
+  gtk_box_pack_start( GTK_BOX( vbox602 ),CBCache,FALSE,FALSE,0 );
+  
+  hbox5=gtk_hbox_new( FALSE,0 );
+  gtk_widget_set_name( hbox5,"hbox5" );
+  gtk_widget_ref( hbox5 );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"hbox5",hbox5,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( hbox5 );
+  gtk_box_pack_start( GTK_BOX( vbox602 ),hbox5,FALSE,FALSE,0 );
+
+  label4=gtk_label_new( "Cache size: " );
+  gtk_widget_set_name( label4,"label4" );
+  gtk_widget_ref( label4 );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"label4",label4,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( label4 );
+  gtk_box_pack_start( GTK_BOX( hbox5 ),label4,FALSE,FALSE,0 );
+  gtk_misc_set_alignment( GTK_MISC( label4 ),7.45058e-09,0.5 );
+  gtk_misc_set_padding( GTK_MISC( label4 ),4,0 );
+
+  SBCacheadj=GTK_ADJUSTMENT( gtk_adjustment_new( 2048,4,65535,1,10,10 ) );
+  SBCache=gtk_spin_button_new( GTK_ADJUSTMENT( SBCacheadj ),1,0 );
+  gtk_widget_ref( SBCache );
+  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"SBCache",SBCache,(GtkDestroyNotify)gtk_widget_unref );
+  gtk_widget_show( SBCache );
+  gtk_box_pack_start( GTK_BOX( hbox5 ),SBCache,TRUE,TRUE,0 );
 
   label4=gtk_label_new( "Misc" );
   gtk_widget_set_name( label4,"label4" );
