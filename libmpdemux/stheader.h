@@ -91,6 +91,9 @@ typedef struct {
   // frame counters:
   float num_frames;       // number of frames played
   int num_frames_decoded; // number of frames decoded
+  // timing (mostly for mpeg):
+  float pts;     // predicted/interpolated PTS of the current frame
+  float i_pts;   // PTS for the _next_ I/P frame
   // output format: (set by demuxer)
   float fps;              // frames per second (set only if constant fps)
   float frametime;        // 1/fps

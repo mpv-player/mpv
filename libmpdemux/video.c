@@ -214,6 +214,8 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
     demuxer_t *demuxer=d_video->demuxer;
     float frame_time=1;
     float pts1=d_video->pts;
+    float pts=0;
+    int picture_coding_type=0;
 //    unsigned char* start=NULL;
     int in_size=0;
     
@@ -246,6 +248,10 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
               break;
             }
           } else {
+	    if(i==0x100){
+		pts=d_video->pts;
+		d_video->pts=0;
+	    }
             //if(i==0x100) in_frame=1; // picture startcode
             if(i>=0x101 && i<0x1B0) in_frame=1; // picture startcode
             else if(!i) return -1; // EOF
@@ -258,6 +264,7 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
 	      case 0x1B3: mp_header_process_sequence_header (&picture, &videobuffer[start]);break;
 	      case 0x1B5: mp_header_process_extension (&picture, &videobuffer[start]);break;
 	      case 0x1B2: process_userdata (&videobuffer[start], videobuf_len-start);break;
+	      case 0x100: picture_coding_type=(videobuffer[start+1] >> 3) & 7;break;
 	  }
         }
         
@@ -336,7 +343,27 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
     }
     
     if(demuxer->file_format==DEMUXER_TYPE_MPEG_PS ||
-       demuxer->file_format==DEMUXER_TYPE_MPEG_ES) d_video->pts+=frame_time;
+       demuxer->file_format==DEMUXER_TYPE_MPEG_ES){
+
+//	if(pts>0.0001) printf("\r!!! pts: %5.3f [%d] (%5.3f)   \n",pts,picture_coding_type,i_pts);
+
+	sh_video->pts+=frame_time;
+	if(picture_coding_type<=2 && sh_video->i_pts){
+//	    printf("XXX predict: %5.3f pts: %5.3f error=%5.5f   \n",i_pts,d_video->pts2,i_pts-d_video->pts2);
+	    sh_video->pts=sh_video->i_pts;
+	    sh_video->i_pts=pts;
+	} else {
+	    if(pts){
+		if(picture_coding_type<=2) sh_video->i_pts=pts;
+		else {
+//		    printf("BBB predict: %5.3f pts: %5.3f error=%5.5f   \n",pts,d_video->pts2,pts-d_video->pts2);
+		    sh_video->pts=pts;
+		}
+	    }
+	}
+//	printf("\rIII pts: %5.3f [%d] (%5.3f)   \n",d_video->pts2,picture_coding_type,i_pts);
+    } else
+	sh_video->pts=d_video->pts;
     
     if(frame_time_ptr) *frame_time_ptr=frame_time;
     return in_size;
