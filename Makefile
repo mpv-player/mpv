@@ -12,6 +12,7 @@ PRG_AVIP = aviparse
 PRG_FIBMAP = fibmap_mplayer
 PRG_TV = tvision
 PRG_CFG = codec-cfg
+PRG_MENCODER = mencoder
 
 #prefix = /usr/local
 BINDIR = ${prefix}/bin
@@ -20,14 +21,20 @@ BINDIR = ${prefix}/bin
 # a BSD compatible 'install' program
 INSTALL = install
 
-SRCS = ima4.c xacodec.c cpudetect.c mp_msg.c ac3-iec958.c find_sub.c dec_audio.c dec_video.c codec-cfg.c subreader.c lirc_mp.c cfgparser.c mixer.c spudec.c
-OBJS = $(SRCS:.c=.o)
+SRCS_MENCODER = libvo/aclib.c libvo/img_format.c ima4.c xacodec.c cpudetect.c mp_msg.c ac3-iec958.c dec_audio.c dec_video.c codec-cfg.c lirc_mp.c cfgparser.c mixer.c spudec.c
+OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
+
+SRCS_MPLAYER = ima4.c xacodec.c cpudetect.c mp_msg.c ac3-iec958.c find_sub.c dec_audio.c dec_video.c codec-cfg.c subreader.c lirc_mp.c cfgparser.c mixer.c spudec.c
+OBJS_MPLAYER = $(SRCS_MPLAYER:.c=.o)
 CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader -Ilibvo $(EXTRA_INC) $(MADLIB_INC) # -Wall
 A_LIBS = -Lmp3lib -lMP3 -Llibac3 -lac3 $(ALSA_LIB) $(ESD_LIB) $(MADLIB_LIB) $(SGI_AUDIO_LIB)
 VO_LIBS = -Llibvo -lvo $(MLIB_LIB) $(X_LIBS)
 OSDEP_LIBS = -Llinux -losdep
 PP_LIBS = -Lpostproc -lpostproc
 XA_LIBS = -Lxa -lxa
+
+SRCS = $(SRCS_MENCODER) $(SRCS_MPLAYER)
+OBJS = $(OBJS_MENCODER) $(OBJS_MPLAYER)
 
 PARTS = libmpdemux mp3lib libac3 libmpeg2 opendivx libavcodec libvo libao2 drivers drivers/syncfb linux postproc xa
 
@@ -37,6 +44,8 @@ endif
 
 ifneq ($(W32_LIB),)
 PARTS += loader loader/DirectShow
+SRCS_MPLAYER += dll_init.c
+SRCS_MENCODER += dll_init.c
 SRCS += dll_init.c
 endif
 LOADER_DEP = $(W32_DEP) $(DS_DEP)
@@ -105,18 +114,27 @@ postproc/libpostproc.a:
 xa/libxa.a:
 	$(MAKE) -C xa
 
-MPLAYER_DEP = mplayer.o $(OBJS) $(LOADER_DEP) $(AV_DEP) $(COMMONLIBS) 
+MPLAYER_DEP = mplayer.o $(OBJS_MPLAYER) $(LOADER_DEP) $(AV_DEP) $(COMMONLIBS) 
 ifeq ($(GUI),yes)
 MPLAYER_DEP += Gui/libgui.a
 endif
+
+MENCODER_DEP = mencoder.o $(OBJS_MENCODER) $(LOADER_DEP) $(AV_DEP) $(COMMONLIBS)
+ifeq ($(GUI),yes)
+MENCODER_DEP += Gui/libgui.a
+endif
+
 mplayerwithoutlink: $(MPLAYER_DEP)	
 	@for a in $(PARTS); do $(MAKE) -C $$a all ; done
 
 $(PRG):	$(MPLAYER_DEP)
-	$(CC) -rdynamic $(CFLAGS) -o $(PRG) mplayer.o -Llibmpdemux -lmpdemux $(OBJS) $(XMM_LIBS) $(LIRC_LIBS) $(LIB_LOADER) $(AV_LIB) -Llibmpeg2 -lmpeg2 -Llibao2 -lao2 $(A_LIBS) $(VO_LIBS) $(CSS_LIB) $(GUI_LIBS) $(ARCH_LIBS) $(OSDEP_LIBS) $(PP_LIBS) $(XA_LIBS) $(DECORE_LIBS) $(TERMCAP_LIB) -lm
+	$(CC) -rdynamic $(CFLAGS) -o $(PRG) mplayer.o -Llibmpdemux -lmpdemux $(OBJS_MPLAYER) $(XMM_LIBS) $(LIRC_LIBS) $(LIB_LOADER) $(AV_LIB) -Llibmpeg2 -lmpeg2 -Llibao2 -lao2 $(A_LIBS) $(VO_LIBS) $(CSS_LIB) $(GUI_LIBS) $(ARCH_LIBS) $(OSDEP_LIBS) $(PP_LIBS) $(XA_LIBS) $(DECORE_LIBS) $(TERMCAP_LIB) -lm -ldivxencore
 
 $(PRG_FIBMAP): fibmap_mplayer.o
 	$(CC) -o $(PRG_FIBMAP) fibmap_mplayer.o
+
+$(PRG_MENCODER): $(MENCODER_DEP)
+	$(CC) -rdynamic $(CFLAGS) -o $(PRG_MENCODER) mencoder.o -Llibmpdemux -lmpdemux $(OBJS_MENCODER) $(X_LIBS) $(XMM_LIBS) $(LIRC_LIBS) $(LIB_LOADER) $(AV_LIB) -ldivxencore -Llibmpeg2 -lmpeg2 -Llibao2 -lao2 $(A_LIBS) $(CSS_LIB) $(GUI_LIBS) $(ARCH_LIBS) $(OSDEP_LIBS) $(PP_LIBS) $(XA_LIBS) $(DECORE_LIBS) $(TERMCAP_LIB) -lm
 
 # $(PRG_HQ):	depfile mplayerHQ.o $(OBJS) loader/libloader.a libmpeg2/libmpeg2.a opendivx/libdecore.a $(COMMONLIBS) encore/libencore.a
 # 	$(CC) $(CFLAGS) -o $(PRG_HQ) mplayerHQ.o $(OBJS) $(XMM_LIBS) $(LIRC_LIBS) $(A_LIBS) -lm $(TERMCAP_LIB) -Lloader -lloader -ldl -Llibmpeg2 -lmpeg2 -Lopendivx -ldecore $(VO_LIBS) -Lencore -lencore -lpthread
@@ -124,8 +142,8 @@ $(PRG_FIBMAP): fibmap_mplayer.o
 # $(PRG_AVIP):	depfile aviparse.o $(OBJS) loader/libloader.a $(COMMONLIBS)
 # 	$(CC) $(CFLAGS) -o $(PRG_AVIP) aviparse.o $(OBJS) $(A_LIBS) -lm $(TERMCAP_LIB) -Lloader -lloader -ldl $(VO_LIBS) -lpthread
 
-# $(PRG_TV):	depfile tvision.o $(OBJS) $(COMMONLIBS)
-# 	$(CC) $(CFLAGS) -o $(PRG_TV) tvision.o $(OBJS) -lm $(TERMCAP_LIB) $(VO_LIBS)
+#$(PRG_TV):	depfile tvision.o $(OBJS) $(COMMONLIBS)
+#	$(CC) $(CFLAGS) -o $(PRG_TV) tvision.o $(OBJS) -lm $(TERMCAP_LIB) $(VO_LIBS)
 
 # Every mplayer dependancy depends on version.h, to force building version.h
 # first (in serial mode) before any other of the dependancies for a parallel make
@@ -164,14 +182,15 @@ clean:
 	rm -f *.o *~ $(OBJS)
 
 distclean:
-	rm -f *~ $(PRG) $(PRG_FIBMAP) $(PRG_HQ) $(PRG_AVIP) $(PRG_TV) $(OBJS) *.o *.a .depend
+	rm -f *~ $(PRG) $(PRG_FIBMAP) $(PRG_HQ) $(PRG_AVIP) $(PRG_TV) $(OBJS) $(PRG_MENCODER) *.o *.a .depend
 	@for a in $(PARTS); do $(MAKE) -C $$a distclean; done
 
 dep:	depend
 
 depend:
 	./version.sh
-	$(CC) -MM $(CFLAGS) mplayer.c $(SRCS) 1>.depend
+	$(CC) -MM $(CFLAGS) mplayer.c $(SRCS_MPLAYER) 1>.depend
+	$(CC) -MM $(CFLAGS) mencoder.c $(SRCS_MENCODER) 1>.depend
 	@for a in $(PARTS); do $(MAKE) -C $$a dep; done
 
 # ./configure must be run if it changed in CVS
