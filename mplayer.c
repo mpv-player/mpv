@@ -261,7 +261,7 @@ static uint32_t our_n_frames=0;
 // screen info:
 char* video_driver=NULL; //"mga"; // default
 char* audio_driver=NULL;
-static int fullscreen=0;
+int fullscreen=0;
 static int vidmode=0;
 int softzoom=0;
 static int flip=-1;

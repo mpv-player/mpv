@@ -509,6 +509,27 @@ int vo_x11_check_events(Display *mydisplay){
   return ret;
 }
 
+void vo_x11_fullscreen( void )
+{
+ XUnmapWindow( mDisplay,vo_window );
+ if ( !vo_fs )
+  {
+   vo_fs=VO_TRUE;
+   vo_old_x=vo_dx; vo_old_y=vo_dy; vo_old_width=vo_dwidth;   vo_old_height=vo_dheight;
+   vo_dx=0;        vo_dy=0;        vo_dwidth=vo_screenwidth; vo_dheight=vo_screenheight;
+   vo_x11_decoration( mDisplay,vo_window,0 );
+  }
+  else
+   {
+    vo_fs=VO_FALSE;
+    vo_dx=vo_old_x; vo_dy=vo_old_y; vo_dwidth=vo_old_width; vo_dheight=vo_old_height;
+    vo_x11_decoration( mDisplay,vo_window,1 );
+   }
+ XMapWindow( mDisplay,vo_window );
+ XMoveResizeWindow( mDisplay,vo_window,vo_dx,vo_dy,vo_dwidth,vo_dheight );
+ return;
+}
+
 void saver_on(Display *mDisplay) {
 
 #ifdef HAVE_XDPMS

@@ -30,26 +30,33 @@ void mplFullScreen( void )
 {
  static int sx,sy;
 
- wsVisibleWindow( &appMPlayer.subWindow,wsHideWindow );
- if ( appMPlayer.subWindow.isFullScreen )
+ if ( guiIntfStruct.Playing )
   {
-   wsResizeWindow( &appMPlayer.subWindow,sx,sy );
-   wsMoveWindow( &appMPlayer.subWindow,True,appMPlayer.sub.x,appMPlayer.sub.y );
-   wsWindowDecoration( &appMPlayer.subWindow,appMPlayer.subWindow.Decorations );
-   appMPlayer.subWindow.isFullScreen=0;
-  }
-  else
-   {
-    sx=appMPlayer.subWindow.Width; sy=appMPlayer.subWindow.Height;
-    wsResizeWindow( &appMPlayer.subWindow,wsMaxX,wsMaxY );
-    wsMoveWindow( &appMPlayer.subWindow,True,0,0 );
-    wsWindowDecoration( &appMPlayer.subWindow,0 );
-    appMPlayer.subWindow.isFullScreen=1;
-   }
+   wsVisibleWindow( &appMPlayer.subWindow,wsHideWindow );
+   if ( appMPlayer.subWindow.isFullScreen )
+    {
+     wsResizeWindow( &appMPlayer.subWindow,sx,sy );
+     wsMoveWindow( &appMPlayer.subWindow,True,appMPlayer.sub.x,appMPlayer.sub.y );
+     wsWindowDecoration( &appMPlayer.subWindow,appMPlayer.subWindow.Decorations );
+     appMPlayer.subWindow.isFullScreen=0;
+     vo_fs=0;
+    }
+    else
+     {
+      sx=appMPlayer.subWindow.Width; sy=appMPlayer.subWindow.Height;
+      wsResizeWindow( &appMPlayer.subWindow,wsMaxX,wsMaxY );
+      wsMoveWindow( &appMPlayer.subWindow,True,0,0 );
+      wsWindowDecoration( &appMPlayer.subWindow,0 );
+      appMPlayer.subWindow.isFullScreen=1;
+      vo_fs=1;
+     }
+   wsVisibleWindow( &appMPlayer.subWindow,wsShowWindow );
+  } else { vo_x11_fullscreen(); appMPlayer.subWindow.isFullScreen=vo_fs; }
+  
+ fullscreen=appMPlayer.subWindow.isFullScreen;
  if ( guiIntfStruct.Playing ) wsSetBackgroundRGB( &appMPlayer.subWindow,0,0,0 );
   else wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
- wsVisibleWindow( &appMPlayer.subWindow,wsShowWindow );
- mplResize( 0,0,appMPlayer.subWindow.Width,appMPlayer.subWindow.Height );
+// mplResize( 0,0,appMPlayer.subWindow.Width,appMPlayer.subWindow.Height );
 }
 
 extern int mplSubRender;

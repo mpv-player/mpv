@@ -70,26 +70,21 @@ static uint32_t window_width, window_height;
 /* used by XGetGeometry & XTranslateCoordinates for moving/resizing window */
 static Window mRoot;
 static uint32_t drwX, drwY, drwWidth, drwHeight, drwBorderWidth,
-    drwDepth, drwcX, drwcY, dwidth, dheight, mFullscreen;
+    drwDepth, drwcX, drwcY, dwidth, dheight;
 
 static void set_window(int force_update,const vo_tune_info_t *info)
 {
 #ifdef HAVE_NEW_GUI
-    if (vo_window != None)
-    {
-	if ((vo_dwidth == vo_screenwidth) && (vo_dheight == vo_screenheight))
+	if (vo_fs)
 	{
-	    mFullscreen = 1;
 	    dwidth = vo_screenwidth;
 	    dheight = vo_screenwidth * vo_dheight / vo_dwidth;
 	}
 	else
 	{
-	    mFullscreen = 0;
 	    dwidth = vo_dwidth;
 	    dheight = vo_dheight;
 	}
-    }
 #endif
 
     XGetGeometry(mDisplay, vo_window, &mRoot, &drwX, &drwY, &drwWidth,
@@ -98,14 +93,14 @@ static void set_window(int force_update,const vo_tune_info_t *info)
     XTranslateCoordinates(mDisplay, vo_window, mRoot, 0, 0,
 	&drwcX, &drwcY, &mRoot);
 
-    if (!mFullscreen)
+    if (!vo_fs)
 	mp_msg(MSGT_VO, MSGL_V, "[xvidix] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",
 	    drwcX, drwcY, drwX, drwY, drwWidth, drwHeight);
 
     /* following stuff copied from vo_xmga.c */
     aspect(&dwidth, &dheight, A_NOZOOM);
 #if X11_FULLSCREEN
-    if (mFullscreen)
+    if (vo_fs)
     {
 	aspect(&dwidth, &dheight, A_ZOOM);
 	drwX = (vo_screenwidth - (dwidth > vo_screenwidth ? vo_screenwidth : dwidth)) / 2;
@@ -175,7 +170,7 @@ static void set_window(int force_update,const vo_tune_info_t *info)
     XClearWindow( mDisplay,vo_window );
     XSetForeground(mDisplay, vo_gc, fgColor);
     XFillRectangle(mDisplay, vo_window, vo_gc, drwX, drwY, drwWidth,
-	(mFullscreen ? drwHeight - 1 : drwHeight));
+	(vo_fs ? drwHeight - 1 : drwHeight));
     /* flush, update drawable */
     XFlush(mDisplay);
 
@@ -245,7 +240,9 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     window_width = d_width;
     window_height = d_height;
 
-    mFullscreen = flags&0x01;
+    vo_fs = flags&0x01;
+    if (vo_fs)
+     { vo_old_width=d_width; vo_old_height=d_height; }
 
     X_already_started++;
     
@@ -275,7 +272,7 @@ if (vo_window == None)
 #endif
 
 #ifdef X11_FULLSCREEN
-    if (mFullscreen) /* fullscreen */
+    if (vo_fs) /* fullscreen */
     {
         if (flags & 0x04)
         {
@@ -321,7 +318,7 @@ if (vo_window == None)
     vo_hidecursor(mDisplay, vo_window);
 
 #ifdef X11_FULLSCREEN
-    if (mFullscreen) /* fullscreen */
+    if (vo_fs) /* fullscreen */
 	vo_x11_decoration(mDisplay, vo_window, 0);
 #endif
 
@@ -456,6 +453,9 @@ static uint32_t control(uint32_t request, void *data, ...)
   switch (request) {
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
+  case VOCTRL_FULLSCREEN:
+    vo_x11_fullscreen();
+    return VO_TRUE;
   }
   return VO_NOTIMPL;
 }

@@ -374,7 +374,6 @@ NoPause:
          }
         break;
    case evFullScreen:
-        IZE("evFullS");
         for ( j=0;j<appMPlayer.NumberOfItems + 1;j++ )
          {
           if ( appMPlayer.Items[j].msg == evFullScreen )
@@ -383,8 +382,8 @@ NoPause:
             appMPlayer.Items[j].pressed=appMPlayer.Items[j].tmp;
            }
          }
-        mplMainRender=1;
         mplFullScreen();
+        mplMainRender=1;
         break;
 
 // --- timer events

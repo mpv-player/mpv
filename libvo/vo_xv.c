@@ -92,7 +92,7 @@ static int flip_flag;
 
 static Window                 mRoot;
 static uint32_t               drwX,drwY,drwWidth,drwHeight,drwBorderWidth,drwDepth;
-static uint32_t               drwcX,drwcY,dwidth,dheight,mFullscreen;
+static uint32_t               drwcX,drwcY,dwidth,dheight;
 
 #ifdef HAVE_NEW_GUI
  static uint32_t               mdwidth,mdheight;
@@ -342,7 +342,10 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
  mdheight=height;
 #endif
 
- mFullscreen=flags&1;
+ vo_fs=flags&1;
+ if ( vo_fs )
+  { vo_old_width=d_width; vo_old_height=d_height; }
+     
 #ifdef HAVE_XF86VM
  if( flags&0x02 ) vm = 1;
 #endif
@@ -377,7 +380,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
       }
     else
 #endif
-   if ( mFullscreen )
+   if ( vo_fs )
     {
      hint.width=vo_screenwidth;
      hint.height=vo_screenheight;
@@ -423,7 +426,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 #endif
    );
    XSetStandardProperties(mDisplay, vo_window, hello, hello, None, NULL, 0, &hint);
-   if ( mFullscreen ) vo_x11_decoration( mDisplay,vo_window,0 );
+   if ( vo_fs ) vo_x11_decoration( mDisplay,vo_window,0 );
    XMapWindow(mDisplay, vo_window);
 #ifdef HAVE_XINERAMA
    vo_x11_xinerama_move(mDisplay,vo_window);
@@ -501,11 +504,9 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 #ifdef HAVE_NEW_GUI
       if ( vo_window != None )
        {
-        mFullscreen=0;
         dwidth=mdwidth; dheight=mdheight;
-        if ( ( vo_dwidth == vo_screenwidth )&&( vo_dheight == vo_screenheight ) )
+        if ( vo_fs )
          {
-          mFullscreen=1;
           dwidth=vo_screenwidth;
           dheight=vo_screenwidth * mdheight / mdwidth;
          }
@@ -519,7 +520,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
      printf( "[xv] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
 
      aspect(&dwidth,&dheight,A_NOZOOM);
-     if ( mFullscreen )
+     if ( vo_fs )
       {
        aspect(&dwidth,&dheight,A_ZOOM);
        drwX=( vo_screenwidth - (dwidth > vo_screenwidth?vo_screenwidth:dwidth) ) / 2;
@@ -583,21 +584,16 @@ static void check_events(void)
    printf( "[xv] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
 
    #ifdef HAVE_NEW_GUI
-    if ( vo_window != None )
+    dwidth=mdwidth; dheight=mdheight;
+    if ( vo_fs )
      {
-      mFullscreen=0;
-      dwidth=mdwidth; dheight=mdheight;
-      if ( ( vo_dwidth == vo_screenwidth )&&( vo_dheight == vo_screenheight ) )
-       {
-        mFullscreen=1;
-        dwidth=vo_screenwidth;
-        dheight=vo_screenwidth * mdheight / mdwidth;
-       }
+      dwidth=vo_screenwidth;
+      dheight=vo_screenwidth * mdheight / mdwidth;
      }
    #endif
 
    aspect(&dwidth,&dheight,A_NOZOOM);
-   if ( mFullscreen )
+   if ( vo_fs )
     {
      aspect(&dwidth,&dheight,A_ZOOM);
      drwX=( vo_screenwidth - (dwidth > vo_screenwidth?vo_screenwidth:dwidth) ) / 2;
@@ -612,7 +608,7 @@ static void check_events(void)
  if ( e & VO_EVENT_EXPOSE )
   {
    XvShmPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf], 0, 0,  image_width, image_height, drwX, drwY, 1, 1, False);
-   XvShmPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf], 0, 0,  image_width, image_height, drwX,drwY,drwWidth,(mFullscreen?drwHeight - 1:drwHeight), False);
+   XvShmPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf], 0, 0,  image_width, image_height, drwX,drwY,drwWidth,(vo_fs?drwHeight - 1:drwHeight), False);
   }
 }
 
@@ -623,7 +619,7 @@ static void flip_page(void)
 {
  XvShmPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf],
          0, 0,  image_width, image_height,
-         drwX,drwY,drwWidth,(mFullscreen?drwHeight - 1:drwHeight),
+         drwX,drwY,drwWidth,(vo_fs?drwHeight - 1:drwHeight),
          False);
  if (num_buffers>1){
     current_buf=(current_buf+1)%num_buffers;
@@ -824,6 +820,9 @@ static uint32_t control(uint32_t request, void *data, ...)
     return query_format(*((uint32_t*)data));
   case VOCTRL_GET_IMAGE:
     return get_image(data);
+  case VOCTRL_FULLSCREEN:
+    vo_x11_fullscreen();
+    return VO_TRUE;
   }
   return VO_NOTIMPL;
 }

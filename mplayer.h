@@ -4,5 +4,6 @@
 
 extern int use_gui;
 extern char* current_module;
+extern int fullscreen;
 
 #endif

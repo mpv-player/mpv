@@ -237,6 +237,11 @@ static uint32_t control(uint32_t request, void *data, ...)
     return query_format(*((uint32_t*)data));
   case VOCTRL_GET_IMAGE:
     return get_image(data);
+#ifdef VO_XMGA
+  case VOCTRL_FULLSCREEN:
+    vo_x11_fullscreen();
+    return VO_TRUE;
+#endif
   }
   return VO_NOTIMPL;
 }

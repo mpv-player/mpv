@@ -88,7 +88,7 @@ static uint32_t               mvWidth;
 
 static Window                 mRoot;
 static uint32_t               drwX,drwY,drwWidth,drwHeight,drwBorderWidth,drwDepth;
-static uint32_t               drwcX,drwcY,dwidth,dheight,mFullscreen;
+static uint32_t               drwcX,drwcY,dwidth,dheight;
 
 #ifdef HAVE_NEW_GUI
  static uint32_t               mdwidth,mdheight;
@@ -96,32 +96,27 @@ static uint32_t               drwcX,drwcY,dwidth,dheight,mFullscreen;
 
 static XSetWindowAttributes   xWAttribs;
 
+#define VO_XMGA
 #include "mga_common.c"
+#undef  VO_XMGA
 
 static void mDrawColorKey( void )
 {
  XSetBackground( mDisplay,vo_gc,0 );
  XClearWindow( mDisplay,vo_window );
  XSetForeground( mDisplay,vo_gc,fgColor );
- XFillRectangle( mDisplay,vo_window,vo_gc,drwX,drwY,drwWidth,(mFullscreen?drwHeight - 1:drwHeight) );
+ XFillRectangle( mDisplay,vo_window,vo_gc,drwX,drwY,drwWidth,(vo_fs?drwHeight - 1:drwHeight) );
  XFlush( mDisplay );
 }
 
 static void set_window(){
 
-         #ifdef HAVE_NEW_GUI
-          if ( vo_window != None )
-           {
-            mFullscreen=0;
-            dwidth=mdwidth; dheight=mdheight;
-            if ( ( vo_dwidth == vo_screenwidth )&&( vo_dheight == vo_screenheight ) )
-             {
-              mFullscreen=1;
-              dwidth=vo_screenwidth;
-              dheight=vo_screenwidth * mdheight / mdwidth;
-             }
-           }
-         #endif
+         dwidth=mdwidth; dheight=mdheight;
+         if ( vo_fs )
+	  {
+	   dwidth=vo_screenwidth;
+	   dheight=vo_screenwidth * mdheight / mdwidth;
+	  }
 
          XGetGeometry( mDisplay,vo_window,&mRoot,&drwX,&drwY,&drwWidth,&drwHeight,&drwBorderWidth,&drwDepth );
          drwX=0; drwY=0; // drwWidth=wndWidth; drwHeight=wndHeight;
@@ -129,7 +124,7 @@ static void set_window(){
          fprintf( stderr,"[xmga] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",drwcX,drwcY,drwX,drwY,drwWidth,drwHeight );
 
          aspect(&dwidth,&dheight,A_NOZOOM);
-         if ( mFullscreen )
+         if ( vo_fs )
           {
            aspect(&dwidth,&dheight,A_ZOOM);
            drwX=( vo_screenwidth - (dwidth > vo_screenwidth?vo_screenwidth:dwidth) ) / 2;
@@ -262,7 +257,10 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
 
  wndX=0; wndY=0;
  wndWidth=d_width; wndHeight=d_height;
- mFullscreen=fullscreen&1;
+ vo_fs=fullscreen&1;
+ vo_dwidth=d_width; vo_dheight=d_height;
+ if ( vo_fs )
+  { vo_old_width=d_width; vo_old_height=d_height; }
 
  switch ( vo_depthonscreen )
   {
@@ -279,7 +277,7 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
  if ( vo_window == None )
   {
 #endif
-   if ( mFullscreen )
+   if ( vo_fs )
     {
      wndWidth=vo_screenwidth;
      wndHeight=vo_screenheight;
@@ -314,7 +312,7 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
    vo_x11_classhint( mDisplay,vo_window,"xmga" );
    vo_hidecursor(mDisplay,vo_window);
 
-   if ( mFullscreen ) vo_x11_decoration( mDisplay,vo_window,0 );
+   if ( vo_fs ) vo_x11_decoration( mDisplay,vo_window,0 );
 
    XGetNormalHints( mDisplay,vo_window,&hint );
    hint.x=wndX; hint.y=wndY;
