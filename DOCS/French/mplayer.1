@@ -2594,15 +2594,16 @@ Active le mode 2passes interne (par défaut: désactivé):
 .br
 2: seconde passe
 .REss
-.IPs aspect=<x.x/y.y>
+.IPs aspect=<x/y>
 Stocke l'aspect du film en interne, tout comme les fichiers MPEG.
 Bien meilleur solution que le redimensionnement, car la qualité
 n'en est pas diminuée.
 Seul MPlayer sera capable de relire ces fichiers correctement, les autres 
 lecteurs l'afficheront avec un mauvais aspect. 
+Le paramètre d'aspect peut être donné en tant que ratio ou nombre à virgule.
 Exemple:
 .RSss
-aspect=16.0/9.0
+aspect=16/9, aspect=1.78
 .REss
 .IPs vbitrate=<valeur>
 spécifie le bitrate (passe 1/\:2) en
@@ -2886,6 +2887,10 @@ fonction de comparaison pour sous estimation pel motion
 3 (DCT): somme des différences transformées des dct absolus
 .br
 4 (PSNR): somme des erreurs de quantisation au carré
+.br
+5 (BIT): nombre de bits requis pour le bloc
+.br
+6 (RD): taux de distortion optimal, lent
 .br
 7 (ZERO): 0
 .br
@@ -3189,6 +3194,8 @@ bascule les sauts de trame
 bascule l'affichage des sous-titres
 .IPs j
 change de langue de sous-titres
+.IPs a\ \ \ \ 
+bascule l'alignement des sous-titres: haut/milieu/bas
 .IPs "z et x"
 ajuste le décalage des sous-titres de +/\:\- 0.1 seconde
 .IPs "r et t"
@@ -3219,8 +3226,6 @@ ajuste la saturation
 démarre la lecture
 .IPs s
 stoppe la lecture
-.IPs a
-à propos
 .IPs l
 charge un fichier
 .IPs c
