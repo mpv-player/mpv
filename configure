@@ -5267,7 +5267,7 @@ int main()
 }
 EOF
     _flac=no
-    if cc_check -lFLAC ; then
+    if cc_check -lFLAC -lm ; then
       _flac=external
     fi
   else
@@ -5280,7 +5280,7 @@ if test "$_flac" = external ; then
   #Still use dither.c & replay_gain from libmpflac
   _def_mpflac='#undef USE_MPFLAC_DECODER'
   _mpflac='process'
-  _ld_flac='-lFLAC -Llibmpflac -lmpflac'
+  _ld_flac='-lFLAC -lm -Llibmpflac -lmpflac'
   _codecmodules="flac(external) $_codecmodules"
   echores "yes (using external libFLAC)"
 else
