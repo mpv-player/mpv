@@ -37,13 +37,14 @@ XFree86
 Brief:    Free port of X11 system on x86 architecture
 URL:      http://www.xfree86.org
 Checking: X -version
-Note:     Preferred versions are 4.0.2 and 4.0.3
+Note:     Preferred versions are 4.0.3 and DRI-CVS
 
 Win32 codecs:
 ~~~~~~~~~~~~~
-Brief: Collection of audio/video codecs for Windows.
-URL:   http://mplayer.sourceforge.net/DOCS/codecs.html
-Note:  Please use only this codec set
+Brief: Collection of win32 audio/video codecs.
+URL:   ftp://thot.banki.hu/MPlayer/releases/w32codec.zip
+Note:  Please use only this codec set (it differs from avifile's)
+       Status/info page: http://mplayer.sourceforge.net/DOCS/codecs.html
 
 Optional Requirements:
 **********************
@@ -62,7 +63,7 @@ Note:  For details see DOCS/VIDEOCARDS
 
 Utah-GLX
 ~~~~~~~~
-Brief: An open source hardware accelerated implementation of GLX.
+Brief: An open source hardware accelerated implementation of OpenGL/GLX.
 URL:   http://utah-glx.sourceforge.net/
 Note:  For detail see DOCS/VIDEOCARDS
 
@@ -84,6 +85,7 @@ libpng
 Brief: Portable Network Graphic library
 URL:   http://www.libpng.org/pub/png/pngcode.html
 Note:  For details see DOCS/README
+       You may need package 'zlib' too, because of libpng depends on it!
 
 libsdl
 ~~~~~~
@@ -92,7 +94,7 @@ Brief: Simple DirectMedia Layer is a cross-platform multimedia library designed
 URL:   http://www.libsdl.org
 Note:  Preferred versions are 1.2.0+. For details see DOCS/SDL
 
-xmmplib
+libxmmp
 ~~~~~~~
 Brief:   Linux MultiMedia Project
 URL:     http://www.frozenproductions.com/xmmp/
