@@ -207,7 +207,7 @@ int init_video(sh_video_t *sh_video,char* codecname,char* vfm,int status){
 extern int vo_directrendering;
 
 int decode_video(sh_video_t *sh_video,unsigned char *start,int in_size,int drop_frame){
-vf_instance_t* vf=sh_video->vfilter;
+vf_instance_t* vf;
 mp_image_t *mpi=NULL;
 unsigned int t=GetTimer();
 unsigned int t2;
@@ -236,6 +236,7 @@ video_time_usage+=tt;
 if(!mpi || drop_frame) return 0; // error / skipped frame
 
 //vo_draw_image(video_out,mpi);
+vf=sh_video->vfilter;
 vf->put_image(vf,mpi);
 vf->control(vf,VFCTRL_DRAW_OSD,NULL);
 
