@@ -42,5 +42,9 @@ Adding new translations
 7) In each translated file after the <?xml ... ?> tag you must put a note
    like <!-- synced with 1.2 -->, where 1.2 is the revision of corresponding
    English file (see comment at the top of file).
+8) While your translation isn't finished, you can change USE_SYMLINKS
+   to "yes" in your Makefile. This will help you testing your translation:
+   english files will be used instead of untranslated ones, when generating
+   HTML docs.
 
 That's all, in theory.
