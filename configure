@@ -194,6 +194,7 @@ Advanced options:
   --disable-fastmemcpy   disable 3dnow/sse/mmx optimized memcpy() [enable]
   --enable-debug[=1-3]   compile debugging information into mplayer [disable]
   --enable-profile       compile profiling information into mplayer [disable]
+  --disable-sighandler   disable sighandler for crashes [enable]
 
 Hazardous options a.k.a. "DO NOT BUGREPORT ANYTHING !"
   --disable-gcc-checking   disable gcc version checking [enable]
@@ -824,6 +825,7 @@ _language=en
 _shm=auto
 _linux_devfs=no
 _i18n=no
+_sighandler=yes
 
 for ac_option do
   case "$ac_option" in
@@ -997,6 +999,9 @@ for ac_option do
     ;;
   --enable-debug=*)
     _debug=`echo $_echo_n '-g'$_echo_c; echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --disable-sighandler)
+    _sighandler=no
     ;;
 
   --enable-sse)	_sse=yes ;;
@@ -1221,6 +1226,13 @@ fi
 _mp_help="help_mp-${LINGUAS}.h"
 test -f help_mp-${LINGUAS}.h || die "help_mp-${LINGUAS}.h not found"
 
+echocheck "enable sighandler"
+if test "$_sighandler" = yes ; then
+  _def_sighandler='#define ENABLE_SIGHANDLER 1'
+else
+  _def_sighandler='#undef ENABLE_SIGHANDLER'
+fi
+echores "$_sighandler"
 
 echocheck "runtime cpudetection"
 if test "$_runtime_cpudetection" = yes ; then
@@ -3343,6 +3355,9 @@ $_def_runtime_cpudetection
 
 #define USE_OSD 1
 #define USE_SUB 1
+
+/* enable/disable SIGHANDLER */
+$_def_sighandler
 
 /* Toggles debugging informations */
 $_def_debug

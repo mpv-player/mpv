@@ -726,12 +726,14 @@ current_module = NULL;
   signal(SIGINT,exit_sighandler);  // Interrupt from keyboard
 
   signal(SIGQUIT,exit_sighandler); // Quit from keyboard
+#ifdef ENABLE_SIGHANDLER
   // fatal errors:
   signal(SIGBUS,exit_sighandler);  // bus error
   signal(SIGSEGV,exit_sighandler); // segfault
   signal(SIGILL,exit_sighandler);  // illegal instruction
   signal(SIGFPE,exit_sighandler);  // floating point exc.
   signal(SIGABRT,exit_sighandler); // abort()
+#endif
 
 // ******************* Now, let's see the per-file stuff ********************
 
