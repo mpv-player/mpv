@@ -448,11 +448,11 @@ mencoder movie.mpg -ifo movie.ifo -vobsubout subtitles -vobsuboutindex 0 -vobsub
 <title>Preserving aspect ratio</title>
 <para>
 DVDs and SVCDs (i.e. MPEG1/2) files contain an aspect ratio value, which
-describes how should the player scale the video stream, so humans won't
+describes how the player should scale the video stream, so humans won't
 have egg heads (ex.: 480x480 + 4:3 = 640x480). However when encoding to AVI
 (DivX) files, you have be aware that AVI headers don't store this value.
-Rescaling the movie is disgusting and time consuming, there must be a better
-feature!
+Rescaling the movie is disgusting and time consuming, there has to be a better
+way!
 </para>
 
 <para>There is</para>
@@ -473,14 +473,14 @@ ratio.
 
 <para>
 You seriously should crop the black bands over and below the movie image.
-See the manpage about the usage of the <systemitem>cropdetect</systemitem> and
+See the man page for the usage of the <systemitem>cropdetect</systemitem> and
 <systemitem>crop</systemitem> filters.
 </para>
 
 <formalpara>
 <title>Usage</title>
 <para>
-<screen>mencoder sample-svcd.mpg -ovc lavc -lavcopts vcodec=mpeg4:aspect=16.0/9.0 -vf crop=714:548:0:14 -oac copy -o output.avi</screen>
+<screen>mencoder sample-svcd.mpg -ovc lavc -lavcopts vcodec=mpeg4:autoaspect -vf crop=714:548:0:14 -oac copy -o output.avi</screen>
 </para>
 </formalpara>
 </sect1>
