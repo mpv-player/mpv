@@ -190,7 +190,7 @@ did not install or configure it correctly.
 
 
 <sect3 id="ffmpeg" xreflabel="FFmpeg/libavcodec">
-<title>FFmpeg DivX/libavcodec</title>
+<title>FFmpeg/libavcodec</title>
 
 <para>
 <ulink url="http://ffmpeg.sourceforge.net">FFmpeg</ulink> contains an
