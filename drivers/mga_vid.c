@@ -88,6 +88,18 @@
 #define PCI_DEVICE_ID_MATROX_G550 0x2527
 #endif
 
+#ifndef PCI_SUBSYSTEM_ID_MATROX_G400_DH_16MB
+#define PCI_SUBSYSTEM_ID_MATROX_G400_DH_16MB 0x2159
+#endif
+
+#ifndef PCI_SUBSYSTEM_ID_MATROX_G400_16MB_SGRAM
+#define PCI_SUBSYSTEM_ID_MATROX_G400_16MB_SGRAM 0x19d8
+#endif
+
+#ifndef PCI_SUBSYSTEM_ID_MATROX_G400_16MB_SDRAM
+#define PCI_SUBSYSTEM_ID_MATROX_G400_16MB_SDRAM 0x0328
+#endif
+
 MODULE_AUTHOR("Aaron Holtzman <aholtzma@engr.uvic.ca>");
 #ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
@@ -1365,6 +1377,15 @@ static int mga_vid_find_card(void)
 		    default:
 			mga_ram_size = 16;
 			printk(KERN_INFO "mga_vid: Couldn't detect RAMSIZE, assuming 16MB!");
+		}
+		/* Check for buggy 16MB cards reporting 32 MB */
+		if(mga_ram_size != 16 &&
+		   (pci_dev->subsystem_device == PCI_SUBSYSTEM_ID_MATROX_G400_16MB_SDRAM ||
+		    pci_dev->subsystem_device == PCI_SUBSYSTEM_ID_MATROX_G400_16MB_SGRAM ||
+		    pci_dev->subsystem_device == PCI_SUBSYSTEM_ID_MATROX_G400_DH_16MB))
+		{
+		    printk(KERN_INFO "mga_vid: Detected 16MB card reporting %d MB RAMSIZE, overriding\n", mga_ram_size);
+		    mga_ram_size = 16;
 		}
 	    }else{
 		switch((card_option>>10)&0x17){
