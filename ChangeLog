@@ -1,5 +1,11 @@
 mplayer (1.0)
 
+  pre3:
+
+    DOCS:
+    * Support for building incomplete XML documentation.
+
+
   pre2:
 
     Security:

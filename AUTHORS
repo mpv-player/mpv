@@ -497,7 +497,9 @@ Juan Martin <nauj27@teleline.es>
 
 Dmitry Baryshkov <mitya@school.ioffe.ru>
     * Russian documentation translation
-    * FLAC decoding support.
+    * FLAC decoding support
+    * XML build system
+
 
 NOTE: If you think you are missing here, feel free to send a patch.
 =====
