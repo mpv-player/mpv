@@ -1257,6 +1257,8 @@ int demux_control(demuxer_t *demuxer, int cmd, void *arg) {
 	case DEMUXER_TYPE_ASF:
 	    return demux_asf_control(demuxer,cmd,arg);
 	case DEMUXER_TYPE_AVI:
+	case DEMUXER_TYPE_AVI_NI:
+	case DEMUXER_TYPE_AVI_NINI:
 	    return demux_avi_control(demuxer,cmd,arg);
 
 	default:
