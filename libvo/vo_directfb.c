@@ -1,15 +1,36 @@
 /*
- * Video driver for DirectFramebuffer device
- *
- * vo_directfb.c (C) Jiri Svoboda <Jiri.Svoboda@seznam.cz> 2001
- *
- * Inspired by vo_fbdev vo_sdl and directfb examples *
- * To get second head working delete line 120
- * from fbdev.c (from DirectFB sources version 0.9.7)
- * Line contains following:
- *      fbdev->fd = open( "/dev/fb0", O_RDWR );
- */
+   MPlayer video driver for DirectFramebuffer device
+  
+   (C) 2001
+   
+   Written by  Jiri Svoboda <Jiri.Svoboda@seznam.cz>
 
+   Inspired by vo_sdl and vo_fbdev.    
+  
+   To get second head working delete line 120
+   from fbdev.c (from DirectFB sources version 0.9.7)
+   Line contains following:
+        fbdev->fd = open( "/dev/fb0", O_RDWR );
+
+   Parts of this code taken from DirectFB examples:
+   (c) Copyright 2000  convergence integrated media GmbH.
+   All rights reserved.
+
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Lesser General Public
+   License as published by the Free Software Foundation; either
+   version 2 of the License, or (at your option) any later version.
+
+   This library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
+
+   You should have received a copy of the GNU Lesser General Public
+   License along with this library; if not, write to the
+   Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.
+*/
 
 // directfb includes
 
@@ -413,13 +434,12 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
   }
   else {//  try to set pos for YUY2 layer and proper aspect ratio
 
-// Does not work - needs to be checked - problem of directfb ->disabled
+    extern float monitor_aspect;
 
-//    float h=in_height,w=in_width;
-    float h=(float)out_height/(float)in_height,w=(float)out_width/(float)in_width;
+    float h=(float)out_height,w=(float)out_width/monitor_aspect;
     float aspect=h/w;
-    printf("in out d: %d %d, %d %d, %d %d\n",in_width,in_height,out_width,out_height,d_width,d_height);
-    printf ("Aspect y/x=%f/%f=%f\n",h,w,aspect);
+//    printf("in out d: %d %d, %d %d, %d %d\n",in_width,in_height,out_width,out_height,d_width,d_height);
+//    printf ("Aspect y/x=%f/%f=%f\n",h,w,aspect);
 
 //    if (fs) {
         // scale fullscreen
@@ -546,9 +566,24 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 
     // clear the screen
 
-/*  DFBCHECK (primary->FillRectangle (primary, 0, 0, screen_width, screen_height));
-    printf(
-"Screen cleared\n"); */
+  if (no_yuy2) {DFBCHECK (primary->FillRectangle (primary, 0, 0, screen_width, screen_height));
+}
+  else {
+     // create temporary surface and clean
+     DFBSurfaceDescription dsc;
+     DFBResult             ret;
+     IDirectFBSurface *primary = NULL;
+     int sh,sw;
+     
+     dsc.flags = DSDESC_CAPS;
+     dsc.caps  = DSCAPS_PRIMARY | DSCAPS_VIDEOONLY;//| DSCAPS_FLIPPING;
+     DFBCHECK (dfb->CreateSurface( dfb, &dsc, &primary));
+     DFBCHECK (primary->GetSize (primary, &sw, &sh));
+     DFBCHECK (primary->FillRectangle (primary, 0, 0, sw, sh));
+     primary->Release(primary);
+  
+  }
+
 // yuv2rgb transform init
 
  if (((format == IMGFMT_YV12) || (format == IMGFMT_YUY2)) && no_yuy2){ yuv2rgb_init(frame_pixel_size * 8,MODE_RGB);};
@@ -633,11 +668,10 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
                         vo_draw_alpha_rgb15(w,h,src,srca,stride,((uint8_t *) dst)+pitch*y0 + frame_pixel_size*x0,pitch);
                         break;
 
-// hopefully correct - couldn't test
-
 		case DSPF_YUY2:
     			vo_draw_alpha_yuy2(w,h,src,srca,stride,((uint8_t *) dst) + pitch*y0 + frame_pixel_size*x0,pitch);
 		break;
+
         	case DSPF_UYVY:
     			vo_draw_alpha_yuy2(w,h,src,srca,stride,((uint8_t *) dst) + pitch*y0 + frame_pixel_size*x0 + 1,pitch);
 		break;
@@ -773,7 +807,8 @@ static void check_events(void)
       DFBInputEvent event;
 
 if (buffer->GetEvent (buffer, &event) == DFB_OK) {
-     if (event.type == DIET_KEYPRESS) { switch (event.keycode) {
+     if (event.type == DIET_KEYPRESS) { 
+    		switch (event.keycode) {
                                 case DIKC_ESCAPE:
 					mplayer_put_key('q');
 				break;
@@ -789,6 +824,10 @@ if (buffer->GetEvent (buffer, &event) == DFB_OK) {
                                 case DIKC_ASTERISK:
 				case DIKC_KP_MULT:mplayer_put_key('*');break;
                                 case DIKC_KP_DIV: mplayer_put_key('/');break;
+				case DIKC_INSERT: mplayer_put_key(KEY_INSERT);break;
+				case DIKC_DELETE: mplayer_put_key(KEY_DELETE);break;
+				case DIKC_HOME: mplayer_put_key(KEY_HOME);break;
+				case DIKC_END: mplayer_put_key(KEY_END);break;
 
                 default:mplayer_put_key(event.key_ascii);
                 };
