@@ -1,4 +1,4 @@
-.\" synced with 1.723
+.\" synced with 1.725
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "18 Septembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "19 Septembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -3861,12 +3861,13 @@ nom du format comme rgb15, bgr24, yv12, etc. (par défaut: yv12)
 .B pp[=filtre1[:option1[:option2...]]/\:[-]filtre2...] (voir aussi \-pphelp)
 Construit la chaîne de filtres spécifiée.
 Les sous-filtres doivent être séparés avec '/', peuvent être désactivés
-en les préfixant de '-', tandis que l'ajout de ':' suivi de 'a', 'c' ou 'y'
-indiquent leur portée (par défaut\ : c)\ :
+en les préfixant de '-'.
+La portée de chaque sous-filtre peur être contrôlée en ajoutant ':' suivi de
+'a', 'c' ou 'y' (par défaut\ : c)\ :
 .PD 0
 .RSs
 .IPs a
-Désactive le sous-filtre si le CPU est trop lent.
+Désactive le sous-filtre automatiquement si le micro-processeur est trop lent.
 .IPs c
 Filtre également la chrominance.
 .IPs y
@@ -3891,9 +3892,9 @@ et désentrelacement "linear blend"
 .IPs "\-vf pp=de/-al"
 Filtres par défaut sans correction de luminosité/\:contraste
 .IPs "\-vf pp=de/tn:1:2:3"
-Active les filtres par défaut & le débruiteur temporel.
+Active les filtres par défaut ainsi que le débruiteur temporel.
 .IPs "\-vf pp=hb:y/vb:a"
-Débloque la luminance horizontale uniquement et active ou désactive
+Débloque la luminance horizontale uniquement, et active ou désactive
 automatiquement le déblocage vertical suivant la puissance de calcul
 processeur disponible.
 .RE
@@ -4131,7 +4132,7 @@ correctement.
 .
 .TP
 .B dint[=sens:niveau]
-Détecte et saute la première des trames entrelacées du flux video.
+Détecte et saute la première trame d'un groupe de trames entrelacées.
 Les valeurs peuvent aller de 0.0 à 1.0 \- la première (par défaut\ : 0.15)
 est la différence entre les pixels voisins, la seconde (par défaut\ : 0.15)
 est la partie de l'image qui devra être détectée comme entrelacée pour sauter
