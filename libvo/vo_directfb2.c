@@ -217,8 +217,11 @@ if (verbose) printf("DirectFB: Preinit entered\n");
    */
 
         DFBCHECK (DirectFBCreate (&dfb));
-        if (DFB_OK != dfb->SetCooperativeLevel (dfb, DFSCL_FULLSCREEN)) {
-	    printf("DirectFB: Warning - cannot swith to fullscreen mode");
+        if (DFB_OK != dfb->SetCooperativeLevel (dfb, DFSCL_EXCLUSIVE)) {
+	    printf("DirectFB: Warning - cannot swith to exclusive mode");
+            if (DFB_OK != dfb->SetCooperativeLevel (dfb, DFSCL_FULLSCREEN)) {
+		printf("DirectFB: Warning - cannot swith to fullscreen mode");
+	    };
 	};
 
   /*
@@ -316,22 +319,22 @@ DFBEnumerationResult test_format_callback( unsigned int                 id,
 
         dlc.flags       = DLCONF_PIXELFORMAT;
 	dlc.pixelformat = convformat(params->format);
-             
+
 	layer->SetOpacity(layer,0);
+             
 	ret = layer->TestConfiguration(layer,&dlc,NULL);
  
         layer->Release(layer);
 
 	if (verbose) printf("DirectFB: Test format - layer %i scale/pos %i\n",id,(desc.caps & DLCAPS_SCREEN_LOCATION));
      
-	if (!ret) {
+	if (ret==DFB_OK) {
 //	    printf("Test OK\n");     
 	    if (params->result) {
 	        if  ((!params->scale) && (desc.caps & DLCAPS_SCREEN_LOCATION)) {
 		    params->scale=1;
 		    params->id=id;
 		    if (verbose) printf("DirectFB: Test format - added layer %i scale/pos %i\n",id,(desc.caps & DLCAPS_SCREEN_LOCATION));
-		    
 		}
 	    } else {
 		params->result=1;
@@ -343,7 +346,7 @@ DFBEnumerationResult test_format_callback( unsigned int                 id,
      };
 
     };
-    
+
     return DFENUM_OK;
 }
 
@@ -475,12 +478,12 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 	    params.width=0;
 	    params.height=0;
 	    switch (format) {
-		    case IMGFMT_RGB32: 
-    		    case IMGFMT_BGR32: 
+		    case IMGFMT_RGB32:
+    		    case IMGFMT_BGR32:
 					params.bpp=32;
 					break;
-        	    case IMGFMT_RGB24: 
-		    case IMGFMT_BGR24: 
+        	    case IMGFMT_RGB24:
+		    case IMGFMT_BGR24:
 					params.bpp=24;
 					break;
 		    case IMGFMT_RGB16:
@@ -489,9 +492,9 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 	    	    case IMGFMT_BGR15:
 					params.bpp=16;
 					break;
-		    default:		params.bpp=0;		
-					
-	    }			
+		    default:		params.bpp=0;
+
+	    }
 	    if (verbose) printf("DirectFB: Config - videomode change\n");
             DFBCHECK (dfb->EnumVideoModes(dfb,video_modes_callback,&params));
 	    ret=dfb->SetVideoMode(dfb,params.width,params.height,params.bpp);
@@ -524,12 +527,12 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 	if (!params.result) {
 	    printf("DirectFB: ConfigError - no suitable layer found\n");
 	    params.id = DLID_PRIMARY;
-	}	
+	}
 /*	Uncomment following if you want to use tvout on CRTC2 (requieres patch for DirectFB from Ville Syrjala)
 	params.id=2;
 	params.scale=0;
 	params.result=1;
-*/	
+*/
 	if (verbose) printf("DirectFB: Config - layer %i\n",params.id);
 
 
@@ -543,26 +546,41 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
             dlc.flags       = DLCONF_WIDTH | DLCONF_HEIGHT;
 	    dlc.width       = s_width;
     	    dlc.height      = s_height;
-	    
+
 	    ret = layer->SetConfiguration(layer,&dlc);
-	    
+
 	    if (ret && (params.scale || verbose)) printf("DirectFB: ConfigError in layer configuration (size)\n");
-	
+
 	}
 
-        dlc.flags       = DLCONF_PIXELFORMAT;
-	dlc.pixelformat = convformat(params.format);
+        // look if we need to change pixel fromat of layer
+	// and just for sure fetch also all layer propreties
+	dlc.flags       = DLCONF_PIXELFORMAT | DLCONF_WIDTH | DLCONF_HEIGHT | DLCONF_OPTIONS | DLCONF_BUFFERMODE;
+	ret = layer->GetConfiguration(layer,&dlc);
 
-//	printf("DirectFB: Format [%x]\n",dlc.pixelformat);
-             
-        if (verbose) printf("DirectFB: Config - set layer config (format)\n");
-	ret = layer->SetConfiguration(layer,&dlc);
-	
+	dlc.flags       = DLCONF_PIXELFORMAT | DLCONF_WIDTH | DLCONF_HEIGHT;
+
 	if (ret) {
-	    printf("DirectFB: ConfigError in layer configuration (format)\n");
-	    return CONFIG_ERROR;
+	    printf("DirectFB: Warning - could not get layer properties!\n");
+	} else if (verbose) {
+	    printf("DirectFB: Layer reports format:%x\n",dlc.pixelformat);
+	}
+
+	if ((dlc.pixelformat != convformat(params.format)) || (ret != DFB_OK)) {
+
+    	    dlc.flags       = DLCONF_PIXELFORMAT;
+	    dlc.pixelformat = convformat(params.format);
+
+	    printf("DirectFB: Format [%x]\n",dlc.pixelformat);
+
+    	    if (verbose) printf("DirectFB: Config - set layer config (format)\n");
+	    ret = layer->SetConfiguration(layer,&dlc);
+
+	    if (ret) {
+		printf("DirectFB: ConfigError in layer configuration (format)\n");
+		return CONFIG_ERROR;
+	    };
 	};
-	
 
 // flipping of layer
 
