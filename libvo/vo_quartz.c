@@ -1289,7 +1289,7 @@ void window_fullscreen()
 		//go fullscreen
 		border = 0;
 		panscan_calc();
-		ChangeWindowAttributes(theWindow, 0, kWindowResizableAttribute|kWindowNoShadowAttribute);
+		ChangeWindowAttributes(theWindow, kWindowNoShadowAttribute, kWindowResizableAttribute);
 		MoveWindow(theWindow, deviceRect.left-(vo_panscan_x >> 1), deviceRect.top-(vo_panscan_y >> 1), 1);
 		SizeWindow(theWindow, device_width+vo_panscan_x, device_height+vo_panscan_y,1);
 
