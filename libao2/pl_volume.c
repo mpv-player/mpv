@@ -4,6 +4,14 @@
 
 #define PLUGIN
 
+// Some limits
+#define MIN_S16 -32650
+#define MAX_S16  32650
+#define MIN_U8   0
+#define MAX_U8   255
+#define MIN_S8  -128
+#define MAX_S8   127
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -87,7 +95,7 @@ static int init(){
   of wether this plugin is in use or not. */
   pl_volume.inuse=1;
   // Tell the world what we are up to
-  printf("[pl_volume] Software volume control in use.\n");
+  printf("[pl_volume] Software volume control in use%s.\n",ao_plugin_cfg.pl_volume_softclip?", soft clipping enabled":"");
   return 1;
 }
 
@@ -100,24 +108,54 @@ static void uninit(){
 static void reset(){
 }
 
+#define SIGN(x) (x>0?1:-1) 
 // processes 'ao_plugin_data.len' bytes of 'data'
 // called for every block of data
 static int play(){
   register int i=0;
+  register int vol=pl_volume.volume; // Logarithmic control sounds more natural
+  vol=(vol*vol*vol)>>12;
   // Change the volume.
   switch(pl_volume.format){
   case(AFMT_U8):{
     register uint8_t* data=(uint8_t*)ao_plugin_data.data;
-    for(i=0;i<ao_plugin_data.len;i++){
-      data[i]=(((data[i]-128) * pl_volume.volume) >> 8) + 128;
-    }
-    break;
+    register int x;
+      for(i=0;i<ao_plugin_data.len;i++){
+        x=((data[i]-128) * vol) >> 8; 
+        if(x>MAX_S8)
+	  data[i]=MAX_U8;
+	  else if(x<MIN_S8)
+	  data[i]=MIN_U8;
+        else{
+	  if(ao_plugin_cfg.pl_volume_softclip)
+	    data[i] = ((3*x - ((x*x*x) >> 14)) >> 1) + 128;
+	  else
+	    data[i] = x + 128;
+	}
+      }
+      break;
   }
   case(AFMT_S16_LE):{
     register int len=ao_plugin_data.len>>1;
     register int16_t* data=(int16_t*)ao_plugin_data.data;
-    for(i=0;i<len;i++)
-      data[i]=(data[i]* pl_volume.volume)>>8;
+    register int x;
+    for(i=0;i<len;i++){
+      x=(data[i] * vol) >> 8;
+      if(x>MAX_S16)
+	data[i]=MAX_S16;
+      else if(x<MIN_S16)
+	data[i]=MIN_S16;
+      else{
+	if(ao_plugin_cfg.pl_volume_softclip){
+	  int64_t t=x*x;
+	  t=(t*x) >> 30;
+	  data[i] = (3*x - (int)t) >> 1;
+	  //data[i] = 2*x - SIGN(x)*((x*x)>>15);
+	}
+	else
+	  data[i] = x;
+      }
+    }
     break;
   }
   default: 
@@ -126,8 +164,3 @@ static int play(){
   return 1;
 
 }
-
-
-
-
-

@@ -112,6 +112,7 @@ struct config ao_plugin_conf[]={
 	{"fout", &ao_plugin_cfg.pl_resample_fout, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
 	{"volume", &ao_plugin_cfg.pl_volume_volume, CONF_TYPE_INT, CONF_RANGE, 0, 255, NULL},
 	{"mul", &ao_plugin_cfg.pl_extrastereo_mul, CONF_TYPE_FLOAT, CONF_MIN, 0, 0, NULL},
+	{"softclip", &ao_plugin_cfg.pl_volume_softclip, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 

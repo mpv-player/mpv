@@ -37,6 +37,7 @@ typedef struct ao_plugin_cfg_s
   int pl_resample_fout;	// Output frequency from resampling
   int pl_volume_volume; // Initial volume setting
   float pl_extrastereo_mul; // Stereo enhancer multiplier
+  int pl_volume_softclip;   // Enable soft clipping
 } ao_plugin_cfg_t;
 
 extern ao_plugin_cfg_t ao_plugin_cfg;
@@ -47,8 +48,9 @@ extern ao_plugin_cfg_t ao_plugin_cfg;
  AFMT_S16_LE, \
  0, \
  48000, \
- 255, \
- 2.5 \
+ 101, \
+ 2.5, \
+ 0 \
 };
 
 // This block should not be available in the pl_xxxx files
