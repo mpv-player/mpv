@@ -256,7 +256,11 @@ static int       vo_dga_hw_mode = 0;     // index in mode list that is actually
 static int       vo_dga_src_mode = 0;    // index in mode list that is used by 
                                          // codec
 static int       vo_dga_XServer_mode = 0;// index in mode list for resolution
-                                         // XServer is running
+
+#ifdef HAVE_DGA2
+ static XDGAMode * vo_modelines;
+ static int        vo_modecount;
+#endif
 
 #define MAX_NR_VIDEO_BUFFERS 3
 
@@ -271,8 +275,6 @@ static struct video_buffer
 	int y;
 	uint8_t *data;
 } vo_dga_video_buffer[MAX_NR_VIDEO_BUFFERS];
-
-static Display  *vo_dga_dpy;
 
 /* saved src and dst dimensions for SwScaler */
 static unsigned int scale_srcW = 0,
@@ -398,7 +400,7 @@ static uint32_t draw_frame( uint8_t *src[] ){
 
 static void check_events(void)
 {
-  int e=vo_x11_check_events(vo_dga_dpy);
+  int e=vo_x11_check_events(mDisplay);
 }
 
 //---------------------------------------------------------
@@ -419,12 +421,12 @@ static void flip_page( void )
 	if(1 < vo_dga_nr_video_buffers)
 	{
 #ifdef HAVE_DGA2
-		XDGASetViewport(vo_dga_dpy, XDefaultScreen(vo_dga_dpy), 
+		XDGASetViewport(mDisplay, mScreen, 
 				0,
 				CURRENT_VIDEO_BUFFER.y, 
 				XDGAFlipRetrace);
 #else
-		XF86DGASetViewPort(vo_dga_dpy, XDefaultScreen(vo_dga_dpy),
+		XF86DGASetViewPort(mDisplay, mScreen,
 				   0,
 				   CURRENT_VIDEO_BUFFER.y);
 #endif
@@ -492,36 +494,38 @@ uninit(void)
   XDGADevice *dgadevice;
 #endif
 
+  if ( !vo_config_count ) return;
+
   if(vo_dga_is_running){	
     vo_dga_is_running = 0;
     mp_msg(MSGT_VO,  MSGL_V, "vo_dga: in uninit\n");
     if(vo_grabpointer)
-    XUngrabPointer (vo_dga_dpy, CurrentTime);
-    XUngrabKeyboard (vo_dga_dpy, CurrentTime);
+    XUngrabPointer (mDisplay, CurrentTime);
+    XUngrabKeyboard (mDisplay, CurrentTime);
 #ifdef HAVE_DGA2
-    XDGACloseFramebuffer(vo_dga_dpy, XDefaultScreen(vo_dga_dpy));
-    dgadevice = XDGASetMode(vo_dga_dpy, XDefaultScreen(vo_dga_dpy), 0);
+    XDGACloseFramebuffer(mDisplay, mScreen);
+    dgadevice = XDGASetMode(mDisplay, mScreen, 0);
     if(dgadevice != NULL){
       XFree(dgadevice);	
     }
 #else
-    XF86DGADirectVideo (vo_dga_dpy, XDefaultScreen(vo_dga_dpy), 0);
+    XF86DGADirectVideo (mDisplay, mScreen, 0);
     // first disable DirectVideo and then switch mode back!	
 #ifdef HAVE_XF86VM
     if (vo_dga_vidmodes != NULL ){
-      int screen; screen=XDefaultScreen( vo_dga_dpy );
+      int screen; screen=XDefaultScreen( mDisplay );
       mp_msg(MSGT_VO, MSGL_V, "vo_dga: VidModeExt: Switching back..\n");
       // seems some graphics adaptors need this more than once ...
-      XF86VidModeSwitchToMode(vo_dga_dpy,screen,vo_dga_vidmodes[0]);
-      XF86VidModeSwitchToMode(vo_dga_dpy,screen,vo_dga_vidmodes[0]);
-      XF86VidModeSwitchToMode(vo_dga_dpy,screen,vo_dga_vidmodes[0]);
-      XF86VidModeSwitchToMode(vo_dga_dpy,screen,vo_dga_vidmodes[0]);
+      XF86VidModeSwitchToMode(mDisplay,screen,vo_dga_vidmodes[0]);
+      XF86VidModeSwitchToMode(mDisplay,screen,vo_dga_vidmodes[0]);
+      XF86VidModeSwitchToMode(mDisplay,screen,vo_dga_vidmodes[0]);
+      XF86VidModeSwitchToMode(mDisplay,screen,vo_dga_vidmodes[0]);
       XFree(vo_dga_vidmodes);
     }
 #endif
 #endif
-    XCloseDisplay(vo_dga_dpy);
   }
+  vo_x11_uninit();
 }
 
 
@@ -641,24 +645,24 @@ static uint32_t config( uint32_t width,  uint32_t height,
   int x_off, y_off;
   int wanted_width, wanted_height;
 
-  unsigned char *vo_dga_base;
+  static unsigned char *vo_dga_base;
+  static int prev_width, prev_height;
 #ifdef HAVE_DGA2
   // needed to change DGA video mode
-  int modecount, mX=VO_DGA_INVALID_RES, mY=VO_DGA_INVALID_RES , mVBI=100000, mMaxY=0, i,j=0;
+  int mX=VO_DGA_INVALID_RES, mY=VO_DGA_INVALID_RES , mVBI=100000, mMaxY=0, i,j=0;
   int dga_modenum;
-  XDGAMode   *modelines=NULL, *modeline;
+  XDGAMode   *modeline;
   XDGADevice *dgadevice;
 #else
 #ifdef HAVE_XF86VM
   unsigned int vm_event, vm_error;
   unsigned int vm_ver, vm_rev;
   int i, j=0, have_vm=0;
-  int modecount, mX=VO_DGA_INVALID_RES, mY=VO_DGA_INVALID_RES, mVBI=100000, mMaxY=0, dga_modenum;  
+  int mX=VO_DGA_INVALID_RES, mY=VO_DGA_INVALID_RES, mVBI=100000, mMaxY=0, dga_modenum;  
 #endif
   int bank, ram;
 #endif
 
-  if( vo_dga_is_running )return -1;
   vo_dga_src_format = format;
 
   wanted_width = d_width;
@@ -692,13 +696,8 @@ static uint32_t config( uint32_t width,  uint32_t height,
     return 1;
   }
   
-  if((vo_dga_dpy = XOpenDisplay(0))==NULL){
-    mp_msg(MSGT_VO, MSGL_ERR, "vo_dga: Can't open display\n");
-    return 1;
-  } 
-
-  vo_dga_vp_width = DisplayWidth( vo_dga_dpy, DefaultScreen(vo_dga_dpy));
-  vo_dga_vp_height = DisplayHeight( vo_dga_dpy, DefaultScreen(vo_dga_dpy));
+  vo_dga_vp_width = vo_screenwidth;
+  vo_dga_vp_height = vo_screenheight;
 
   mp_msg(MSGT_VO, MSGL_V, "vo_dga: XServer res: %dx%d\n", 
                      vo_dga_vp_width, vo_dga_vp_height);
@@ -708,13 +707,10 @@ static uint32_t config( uint32_t width,  uint32_t height,
 #ifdef HAVE_DGA2
 // Code to change the video mode added by Michael Graffam
 // mgraffam@idsi.net
-  if (modelines==NULL)
-    modelines=XDGAQueryModes(vo_dga_dpy, XDefaultScreen(vo_dga_dpy),&modecount);
 
-  mp_msg(MSGT_VO, MSGL_V,
-	    "vo_dga: modelines=%p, modecount=%d\n", modelines, modecount);
+  mp_msg(MSGT_VO, MSGL_V, "vo_dga: vo_modelines=%p, vo_modecount=%d\n", vo_modelines, vo_modecount);
 
-  if (modelines == NULL)
+  if (vo_modelines == NULL)
   {
     mp_msg(MSGT_VO, MSGL_ERR, "vo_dga: can't get modelines\n");
     return 1;
@@ -722,23 +718,23 @@ static uint32_t config( uint32_t width,  uint32_t height,
   
   mp_msg(MSGT_VO, MSGL_INFO, 
             "vo_dga: DGA 2.0 available :-) Can switch resolution AND depth!\n");	
-  for (i=0; i<modecount; i++)
+  for (i=0; i<vo_modecount; i++)
   {
-    if(vd_ModeEqual( modelines[i].depth, 
-                     modelines[i].bitsPerPixel,
-                     modelines[i].redMask,
-		     modelines[i].greenMask,
-	             modelines[i].blueMask,
+    if(vd_ModeEqual( vo_modelines[i].depth, 
+                     vo_modelines[i].bitsPerPixel,
+                     vo_modelines[i].redMask,
+		     vo_modelines[i].greenMask,
+	             vo_modelines[i].blueMask,
                      vo_dga_hw_mode)){
 
        mp_msg(MSGT_VO, MSGL_V, "maxy: %4d, depth: %2d, %4dx%4d, ", 
-                       modelines[i].maxViewportY, modelines[i].depth,
-		       modelines[i].imageWidth, modelines[i].imageHeight );
-       if ( check_res(i, wanted_width, wanted_height, modelines[i].depth,  
-                  modelines[i].viewportWidth, 
-                  modelines[i].viewportHeight, 
-                  (unsigned) modelines[i].verticalRefresh, 
-		  modelines[i].maxViewportY,
+                       vo_modelines[i].maxViewportY, vo_modelines[i].depth,
+		       vo_modelines[i].imageWidth, vo_modelines[i].imageHeight );
+       if ( check_res(i, wanted_width, wanted_height, vo_modelines[i].depth,  
+                  vo_modelines[i].viewportWidth, 
+                  vo_modelines[i].viewportHeight, 
+                  (unsigned) vo_modelines[i].verticalRefresh, 
+		  vo_modelines[i].maxViewportY,
                    &mX, &mY, &mVBI, &mMaxY )) j = i;
      }
   }
@@ -776,12 +772,9 @@ static uint32_t config( uint32_t width,  uint32_t height,
     height = scale_dstH;
   }
 
-  vo_dga_width = modelines[j].bytesPerScanline / HW_MODE.vdm_bytespp ;
-  dga_modenum =  modelines[j].num;
-  modeline = modelines + j;
-  
-  XFree(modelines);
-  modelines = NULL;
+  vo_dga_width = vo_modelines[j].bytesPerScanline / HW_MODE.vdm_bytespp ;
+  dga_modenum =  vo_modelines[j].num;
+  modeline = vo_modelines + j;
   
 #else
 
@@ -790,8 +783,8 @@ static uint32_t config( uint32_t width,  uint32_t height,
   mp_msg(MSGT_VO,  MSGL_INFO, 
      "vo_dga: DGA 1.0 compatibility code: Using XF86VidMode for mode switching!\n");
 
-  if (XF86VidModeQueryExtension(vo_dga_dpy, &vm_event, &vm_error)) {
-    XF86VidModeQueryVersion(vo_dga_dpy, &vm_ver, &vm_rev);
+  if (XF86VidModeQueryExtension(mDisplay, &vm_event, &vm_error)) {
+    XF86VidModeQueryVersion(mDisplay, &vm_ver, &vm_rev);
     mp_msg(MSGT_VO, MSGL_INFO, "vo_dga: XF86VidMode Extension v%i.%i\n", vm_ver, vm_rev);
     have_vm=1;
   } else {
@@ -801,9 +794,8 @@ static uint32_t config( uint32_t width,  uint32_t height,
 #define GET_VREFRESH(dotclk, x, y)( (((dotclk)/(x))*1000)/(y) )
   
   if (have_vm) {
-    int screen;
-    screen=XDefaultScreen(vo_dga_dpy);
-    XF86VidModeGetAllModeLines(vo_dga_dpy,screen,&modecount,&vo_dga_vidmodes);
+    int modecount;
+    XF86VidModeGetAllModeLines(mDisplay,mScreen,&modecount,&vo_dga_vidmodes);
 
     if(vo_dga_vidmodes != NULL ){
       for (i=0; i<modecount; i++){
@@ -876,48 +868,51 @@ static uint32_t config( uint32_t width,  uint32_t height,
   
 // now lets start the DGA thing 
 
+ if ( !vo_config_count || width != prev_width || height != prev_height )
+  {
 #ifdef HAVE_DGA2
-    
-  if (!XDGAOpenFramebuffer(vo_dga_dpy, XDefaultScreen(vo_dga_dpy))){
-    mp_msg(MSGT_VO, MSGL_ERR, "vo_dga: Framebuffer mapping failed!!!\n");
-    XCloseDisplay(vo_dga_dpy);
-    return 1;
+
+  if (!XDGAOpenFramebuffer(mDisplay, mScreen)){
+   mp_msg(MSGT_VO, MSGL_ERR, "vo_dga: Framebuffer mapping failed!!!\n");
+   return 1;
   }
-  dgadevice=XDGASetMode(vo_dga_dpy, XDefaultScreen(vo_dga_dpy), dga_modenum);
-  XDGASync(vo_dga_dpy, XDefaultScreen(vo_dga_dpy));
+
+  dgadevice=XDGASetMode(mDisplay, mScreen, dga_modenum);
+  XDGASync(mDisplay, mScreen);
 
   vo_dga_base = dgadevice->data;
   XFree(dgadevice);
 
-  XDGASetViewport (vo_dga_dpy, XDefaultScreen(vo_dga_dpy), 0, 0, XDGAFlipRetrace);
-  
+  XDGASetViewport (mDisplay, mScreen, 0, 0, XDGAFlipRetrace);
+    
 #else
-  
+
 #ifdef HAVE_XF86VM
   if (have_vm)
   {
-    XF86VidModeLockModeSwitch(vo_dga_dpy,XDefaultScreen(vo_dga_dpy),0);
+    XF86VidModeLockModeSwitch(mDisplay,mScreen,0);
     // Two calls are needed to switch modes on my ATI Rage 128. Why?
     // for riva128 one call is enough!
-    XF86VidModeSwitchToMode(vo_dga_dpy,XDefaultScreen(vo_dga_dpy),vo_dga_vidmodes[dga_modenum]);
-    XF86VidModeSwitchToMode(vo_dga_dpy,XDefaultScreen(vo_dga_dpy),vo_dga_vidmodes[dga_modenum]);
+    XF86VidModeSwitchToMode(mDisplay,mScreen,vo_dga_vidmodes[dga_modenum]);
+    XF86VidModeSwitchToMode(mDisplay,mScreen,vo_dga_vidmodes[dga_modenum]);
   }
 #endif
   
-  XF86DGAGetViewPortSize(vo_dga_dpy,XDefaultScreen(vo_dga_dpy),
+  XF86DGAGetViewPortSize(mDisplay,mScreen,
 		         &vo_dga_vp_width,
 			 &vo_dga_vp_height); 
 
-  XF86DGAGetVideo (vo_dga_dpy, XDefaultScreen(vo_dga_dpy), 
+  XF86DGAGetVideo (mDisplay, mScreen, 
 		   (char **)&vo_dga_base, &vo_dga_width, &bank, &ram);
 
-  XF86DGADirectVideo (vo_dga_dpy, XDefaultScreen(vo_dga_dpy),
+  XF86DGADirectVideo (mDisplay, mScreen,
                       XF86DGADirectGraphics | XF86DGADirectMouse |
                       XF86DGADirectKeyb);
   
-  XF86DGASetViewPort (vo_dga_dpy, XDefaultScreen(vo_dga_dpy), 0, 0);
+  XF86DGASetViewPort (mDisplay, mScreen, 0, 0);
 
 #endif
+  }
 
   // do some more checkings here ...
 
@@ -947,22 +942,26 @@ static uint32_t config( uint32_t width,  uint32_t height,
          vo_dga_vp_offset, vo_dga_vp_skip, vo_dga_bytes_per_line);
 
   
-  XGrabKeyboard (vo_dga_dpy, DefaultRootWindow(vo_dga_dpy), True, 
+  XGrabKeyboard (mDisplay, DefaultRootWindow(mDisplay), True, 
                  GrabModeAsync,GrabModeAsync, CurrentTime);
   if(vo_grabpointer)
-  XGrabPointer (vo_dga_dpy, DefaultRootWindow(vo_dga_dpy), True, 
+  XGrabPointer (mDisplay, DefaultRootWindow(mDisplay), True, 
                 ButtonPressMask,GrabModeAsync, GrabModeAsync, 
                 None, None, CurrentTime);
 
-  init_video_buffers(vo_dga_base,
+  if ( !vo_config_count || width != prev_width || height != prev_height )
+   {
+    init_video_buffers(vo_dga_base,
 		     vo_dga_vp_height,
 		     vo_dga_width * HW_MODE.vdm_bytespp,
-#if HAVE_DGA2
+#ifdef HAVE_DGA2
 		     modeline->maxViewportY,
 #else
 		     vo_dga_vp_height,
 #endif
 		     vo_doublebuffering);
+     prev_width=width; prev_height=height;
+    } 
 
   mp_msg(MSGT_VO, MSGL_V, "vo_dga: Using %d frame buffer%s.\n",
 	    vo_dga_nr_video_buffers, vo_dga_nr_video_buffers == 1 ? "" : "s");
@@ -985,10 +984,6 @@ static uint32_t preinit(const char *arg)
 
  if(dga_depths_init == 0){ // FIXME!?
    int i;
-#ifdef HAVE_DGA2	
-   XDGAMode *modelines;
-   int       modecount;
-#endif
 
    vo_dga_XServer_mode = vd_ValidateMode(vo_depthonscreen);
 
@@ -1003,26 +998,25 @@ static uint32_t preinit(const char *arg)
    //}                                
  
 #ifdef HAVE_DGA2
-   modelines=XDGAQueryModes(mDisplay, mScreen, &modecount);
-   if(modelines){
-     for(i=0; i< modecount; i++){
+   vo_modelines=XDGAQueryModes(mDisplay, mScreen, &vo_modecount);
+   if(vo_modelines){
+     for(i=0; i< vo_modecount; i++){
         mp_msg(MSGT_VO, MSGL_V, "vo_dga: (%03d) depth=%d, bpp=%d, r=%08x, g=%08x, b=%08x, %d x %d\n",
 	  	i,
-		modelines[i].depth,
-		modelines[i].bitsPerPixel,
-		modelines[i].redMask,
-		modelines[i].greenMask,
-	        modelines[i].blueMask,
-	 	modelines[i].viewportWidth,
-		modelines[i].viewportHeight);			  
+		vo_modelines[i].depth,
+		vo_modelines[i].bitsPerPixel,
+		vo_modelines[i].redMask,
+		vo_modelines[i].greenMask,
+	        vo_modelines[i].blueMask,
+	 	vo_modelines[i].viewportWidth,
+		vo_modelines[i].viewportHeight);			  
         vd_EnableMode(
-		modelines[i].depth,
-		modelines[i].bitsPerPixel,
-		modelines[i].redMask,
-		modelines[i].greenMask,
-	        modelines[i].blueMask);
+		vo_modelines[i].depth,
+		vo_modelines[i].bitsPerPixel,
+		vo_modelines[i].redMask,
+		vo_modelines[i].greenMask,
+	        vo_modelines[i].blueMask);
      }
-     XFree(modelines);
    }
 #endif
    dga_depths_init = 1;
