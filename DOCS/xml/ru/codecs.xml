@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with 1.30 -->
+<!-- synced with 1.32 -->
 <sect1 id="codecs">
 <title>Поддерживаемые кодеки</title>
 
@@ -56,9 +56,8 @@
   FLI/FLC
   </simpara></listitem>
 <listitem><simpara>
-  <emphasis role="bold">RealVideo 1.0</emphasis> из libavcodec, и
-  <emphasis role="bold">RealVideo 2.0, 3.0</emphasis> и
-  <emphasis role="bold">4.0</emphasis> кодеки, используя библиотеки RealPlayer
+  <emphasis role="bold">RealVideo 1.0 &amp; 2.0 </emphasis> из libavcodec, и
+  <emphasis role="bold">RealVideo 3.0 &amp; 4.0</emphasis> кодеки, используя библиотеки RealPlayer
   </simpara></listitem>
 <listitem><simpara>
   "родной" декодер для HuffYUV
