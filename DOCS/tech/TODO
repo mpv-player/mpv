@@ -4,26 +4,29 @@ TODO:
 
 FOR THE LAST RC-RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~~~
+- Re: [Mplayer-cvslog] CVS: main/libvo vo_vesa.c,1.82,1.83
+  This patch makes mplayer unusable in console mode, always leaves the 
+  console in graphic mode.
+- -ac hwac3 problems? (see -users posts) - FIXED?
 - fix iconv issues:
    - ogm subtitles crash if compiled with libiconv - FIXED?
    - -subcp crash / no effect - FIXED?
 - fix the broken -geometry option changes (fbdev, xv etc) - FIXED?
 - fix vo_svga  (unusably broken. On my Cirrus, and Geforce2, confirmed)
-   - Dec 28: Re: [Mplayer-cvslog] CVS: main/libvo vo_svga.c,1.55,1.56
-- fix partial -dr + ffmpeg + B frames (different stride per frame)
-- remove or fix -vop lavcdeint
-- fix locale problems (add common float parser / mp_sscanf())
-- check files at FTP/incoming/!to_be_fixed/*
-- fix Gabucino's bugs:
-   - supporting Noir.rm? Garbled image now. Maybe codec scales?
-   - Nov 13: [BUG] sig11 while moving xmga window in Xinerama mode - FIXED?
-   - Nov 23: [BUG] panscan doesn't work properly with -fixed-vo (Xv)
-     UPDATE: Actually -fixed-vo -vo xv doesn't work at all with 'f'...
+   - Dec 28: Re: [Mplayer-cvslog] CVS: main/libvo vo_svga.c,1.55,1.56 - FIXED?
+- remove or fix -vop lavcdeint - WHAT TO DO?
+- Nov 13: [BUG] sig11 while moving xmga window in Xinerama mode - FIXED?
+- Nov 23: [BUG] panscan doesn't work properly with -fixed-vo (Xv)
+  UPDATE: Actually -fixed-vo -vo xv doesn't work at all with 'f'...
      no matter if panscan is used or not...
-   - Dec 19: [BUG] mencoder+mp3lame creates desynced AVI (<=22Khz support missing)
 
-FOR THE v0.90 RELEASE:
+FOR THE NEXT RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
+   - supporting Noir.rm? Garbled image now. Maybe codec scales?
+   - Dec 19: [BUG] mencoder+mp3lame creates desynced AVI (<=22Khz support missing)
+- check files at FTP/incoming/!to_be_fixed/*
+- fix locale problems (add common float parser / mp_sscanf())
+- fix partial -dr + ffmpeg + B frames (different stride per frame)
 - implementing 8bpp support in vo_x11.c
 - remove SVQ1 from libmpcodecs
 - remove -vop yuy2, yvu9
