@@ -30,11 +30,11 @@ typedef struct ao_plugin_local_data_s
   ao_plugin_functions_t* available_plugins[NPL]; // List of available plugins
 } ao_plugin_local_data_t;
 
-ao_plugin_local_data_t ao_plugin_local_data={NULL,NULL,AO_PLUGINS};
+static ao_plugin_local_data_t ao_plugin_local_data={NULL,NULL,AO_PLUGINS};
 
 // gloabal data 
-ao_plugin_data_t ao_plugin_data; // data used by the plugins
-ao_plugin_cfg_t  ao_plugin_cfg=CFG_DEFAULTS;  // cfg data set in cfg-mplayer.h
+volatile ao_plugin_data_t ao_plugin_data; // data used by the plugins
+volatile ao_plugin_cfg_t  ao_plugin_cfg=CFG_DEFAULTS;  // cfg data set in cfg-mplayer.h
 
 // to set/get/query special features/parameters
 static int control(int cmd,int arg){
