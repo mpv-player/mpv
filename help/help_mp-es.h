@@ -370,7 +370,7 @@ static char help_text[]=
 // x11_common.c
 #define MSGTR_EwmhFullscreenStateFailed "\nX11: ¡No se pudo enviar evento de pantalla completa EWMH!\n"
 
-#define MSGTR_NeedAfVolume "Mixer: Esta salida de audio necesita -af volumén para cambiar el volumén\n"
+#define MSGTR_NeedAfVolume "Mixer: Este controlador de salida de audio necesita \"-af volumén\" para cambiar el volumén.\n"
 
 // ====================== GUI messages/buttons ========================
 
@@ -415,9 +415,9 @@ static char help_text[]=
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[skin] error en configuración de skin en la línea %d: %s"
-#define MSGTR_SKIN_WARNING1 "[skin] advertencia en archivo de configuración en la línea %d:\n widget (%s) encontrado pero no se encontro \"section\" antes"
-#define MSGTR_SKIN_WARNING2 "[skin] advertencia en archivo de configuración en la línea %d:\n widget (%s) encontrado pero no se encontro \"subsection\" antes"
-#define MSGTR_SKIN_WARNING3 "[skin] advertencia en archivo de configuración en la linea %d:\nesta subsección no esta soportada por widget (%s)"
+#define MSGTR_SKIN_WARNING1 "[skin] advertencia en archivo de configuración en la línea %d:\n control (%s) encontrado pero no se encontro \"section\" antes"
+#define MSGTR_SKIN_WARNING2 "[skin] advertencia en archivo de configuración en la línea %d:\n control (%s) encontrado pero no se encontro \"subsection\" antes"
+#define MSGTR_SKIN_WARNING3 "[skin] advertencia en archivo de configuración en la linea %d:\nesta subsección no esta soportada por control (%s)"
 #define MSGTR_SKIN_BITMAP_16bit  "Mapa de bits de 16 bits o menos no soportado (%s).\n"
 #define MSGTR_SKIN_BITMAP_FileNotFound  "Archivo no encontrado (%s).\n"
 #define MSGTR_SKIN_BITMAP_BMPReadError "Error al leer BMP (%s).\n"
