@@ -104,3 +104,9 @@ Version:    development files as of september 2004
 Homepage:   http://ubiqx.org/libcifs/
 Directory:  libvo/md5sum.[ch]
 License:    GNU Lesser General Public License
+
+Name:       Tremor
+Version:    1.0 + parts CVS from december 2004
+Homepage:   http://xiph.org/
+Directory:  tremor
+License:    BSD-like, see tremor/COPYING
