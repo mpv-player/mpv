@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "config.h"
+
 #ifdef WIN32
 #define _UWIN 1  /*disable Non-underscored versions of non-ANSI functions as otherwise int eof would conflict with eof()*/
 #include <windows.h>
@@ -31,7 +33,6 @@ extern int mp_input_win32_slave_cmd_func(int fd,char* dest,int size);
 #include <errno.h>
 
 #include "version.h"
-#include "config.h"
 
 #include "mp_msg.h"
 

@@ -20,6 +20,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
+#include "config.h"
+
 #ifdef __MINGW32__
 #define        SIGQUIT 3
 #endif
@@ -29,7 +31,6 @@
 
 #include <sys/time.h>
 
-#include "config.h"
 
 #include "version.h"
 #include "mp_msg.h"
