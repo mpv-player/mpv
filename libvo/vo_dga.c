@@ -470,82 +470,6 @@ static const vo_info_t* get_info( void )
 static uint32_t query_format( uint32_t format )
 {
 
-#ifdef HAVE_DGA2	
- XDGAMode *modelines;
- int       modecount;
-#endif
- Display  *qdisp;
-
- int i;
- static int dga_depths_init = 0;
-
- if(dga_depths_init == 0){
-
-   if((qdisp = XOpenDisplay(0))==NULL){
-     mp_msg(MSGT_VO, MSGL_ERR, "vo_dga: Can't open display!\n");
-     return 0;
-   }
-   if( !vo_init() ){
-    mp_msg(MSGT_VO, MSGL_ERR, "vo_dga: vo_init() failed!\n");
-    return 0; 
-   }
-   vo_dga_XServer_mode = vd_ValidateMode(vo_depthonscreen);
- 
-   if(vo_dga_XServer_mode ==0){
-#ifndef HAVE_DGA2
-     mp_msg(MSGT_VO, MSGL_ERR, "vo_dga: Your X-Server is not running in a ");
-     mp_msg(MSGT_VO, MSGL_ERR, "resolution supported by DGA driver!\n");
-#endif     
-   }//else{
-   //  mp_msg(MSGT_VO, MSGL_INFO, "vo_dga: X running at: %s\n", 
-   //            vd_GetModeString(vo_dga_XServer_mode));
-   //}                                
- 
-#ifdef HAVE_DGA2
-   modelines=XDGAQueryModes(qdisp, XDefaultScreen(qdisp),&modecount);
-   if(modelines){
-     for(i=0; i< modecount; i++){
-        mp_msg(MSGT_VO, MSGL_V, "vo_dga: (%03d) depth=%d, bpp=%d, r=%08x, g=%08x, b=%08x, %d x %d\n",
-	  	i,
-		modelines[i].depth,
-		modelines[i].bitsPerPixel,
-		modelines[i].redMask,
-		modelines[i].greenMask,
-	        modelines[i].blueMask,
-	 	modelines[i].viewportWidth,
-		modelines[i].viewportHeight);			  
-        vd_EnableMode(
-		modelines[i].depth,
-		modelines[i].bitsPerPixel,
-		modelines[i].redMask,
-		modelines[i].greenMask,
-	        modelines[i].blueMask);
-     }
-     XFree(modelines);
-
-   }
-#endif
-   dga_depths_init = 1;
-   XCloseDisplay(qdisp);
-
-  if( !vo_dga_modes[1].vdm_supported && vo_dga_modes[2].vdm_supported ){
-    vo_dga_modes[1].vdm_supported = 1;
-  }
-
-  if( !vo_dga_modes[3].vdm_supported && vo_dga_modes[4].vdm_supported ){
-    vo_dga_modes[3].vdm_supported = 1;
-  }
-
-   for(i=1; i<vo_dga_mode_num; i++){
-     mp_msg(MSGT_VO, MSGL_INFO, "vo_dga: Mode: %s", vd_GetModeString(i));
-     if(vo_dbpp && vo_dbpp != vo_dga_modes[i].vdm_mplayer_depth){
-       vo_dga_modes[i].vdm_supported = 0;
-       mp_msg(MSGT_VO, MSGL_INFO, " ...disabled by -bpp %d", vo_dbpp );
-     }
-     mp_msg(MSGT_VO, MSGL_INFO, "\n");
-   }
- }
-
  if( format==IMGFMT_YV12 ) return VFCAP_CSP_SUPPORTED;
  
  if( (format&IMGFMT_BGR_MASK) == IMGFMT_BGR && 
@@ -744,11 +668,6 @@ static uint32_t config( uint32_t width,  uint32_t height,
 
   if(!wanted_height) wanted_height = height;
   if(!wanted_width)  wanted_width = width;
-
-  if( !vo_init() ){
-    mp_msg(MSGT_VO, MSGL_ERR, "vo_dga: vo_init() failed!\n");
-    return 1; 
-  }
 
   if( !vo_dbpp ){
  
@@ -1054,6 +973,8 @@ static uint32_t config( uint32_t width,  uint32_t height,
   return 0;
 }
 
+static int dga_depths_init = 0;
+
 static uint32_t preinit(const char *arg)
 {
     if(arg) 
@@ -1061,6 +982,71 @@ static uint32_t preinit(const char *arg)
 	mp_msg(MSGT_VO, MSGL_INFO, "vo_dga: Unknown subdevice: %s\n",arg);
 	return ENOSYS;
     }
+
+ if( !vo_init() ) return -1; // Can't open X11
+
+ if(dga_depths_init == 0){ // FIXME!?
+   int i;
+#ifdef HAVE_DGA2	
+   XDGAMode *modelines;
+   int       modecount;
+#endif
+
+   vo_dga_XServer_mode = vd_ValidateMode(vo_depthonscreen);
+
+   if(vo_dga_XServer_mode ==0){
+#ifndef HAVE_DGA2
+     mp_msg(MSGT_VO, MSGL_ERR, "vo_dga: Your X-Server is not running in a ");
+     mp_msg(MSGT_VO, MSGL_ERR, "resolution supported by DGA driver!\n");
+#endif     
+   }//else{
+   //  mp_msg(MSGT_VO, MSGL_INFO, "vo_dga: X running at: %s\n", 
+   //            vd_GetModeString(vo_dga_XServer_mode));
+   //}                                
+ 
+#ifdef HAVE_DGA2
+   modelines=XDGAQueryModes(mDisplay, mScreen, &modecount);
+   if(modelines){
+     for(i=0; i< modecount; i++){
+        mp_msg(MSGT_VO, MSGL_V, "vo_dga: (%03d) depth=%d, bpp=%d, r=%08x, g=%08x, b=%08x, %d x %d\n",
+	  	i,
+		modelines[i].depth,
+		modelines[i].bitsPerPixel,
+		modelines[i].redMask,
+		modelines[i].greenMask,
+	        modelines[i].blueMask,
+	 	modelines[i].viewportWidth,
+		modelines[i].viewportHeight);			  
+        vd_EnableMode(
+		modelines[i].depth,
+		modelines[i].bitsPerPixel,
+		modelines[i].redMask,
+		modelines[i].greenMask,
+	        modelines[i].blueMask);
+     }
+     XFree(modelines);
+   }
+#endif
+   dga_depths_init = 1;
+
+   if( !vo_dga_modes[1].vdm_supported && vo_dga_modes[2].vdm_supported ){
+     vo_dga_modes[1].vdm_supported = 1;
+   }
+
+   if( !vo_dga_modes[3].vdm_supported && vo_dga_modes[4].vdm_supported ){
+     vo_dga_modes[3].vdm_supported = 1;
+   }
+
+   for(i=1; i<vo_dga_mode_num; i++){
+     mp_msg(MSGT_VO, MSGL_INFO, "vo_dga: Mode: %s", vd_GetModeString(i));
+     if(vo_dbpp && vo_dbpp != vo_dga_modes[i].vdm_mplayer_depth){
+       vo_dga_modes[i].vdm_supported = 0;
+       mp_msg(MSGT_VO, MSGL_INFO, " ...disabled by -bpp %d", vo_dbpp );
+     }
+     mp_msg(MSGT_VO, MSGL_INFO, "\n");
+   }
+ }
+
     return 0;
 }
 
