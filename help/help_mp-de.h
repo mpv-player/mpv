@@ -435,6 +435,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_PostProcess "Postprocess"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec & Demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "Cache"
+#define MSGTR_PREFERENCES_FRAME_Misc "Sonstiges"
 #define MSGTR_PREFERENCES_OSS_Device "Gerät:"
 #define MSGTR_PREFERENCES_OSS_Mixer "Mixer:"
 #define MSGTR_PREFERENCES_Message "Bitte bedenke, mache Funktionen erfordern einen Neustart der Wiedergabe."
@@ -473,6 +474,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontOSDScale "OSD Scaling:"
 #define MSGTR_PREFERENCES_SubtitleOSD "Untertitel & OSD"
 #define MSGTR_PREFERENCES_Cache "Cache ein/aus"
+#define MSGTR_PREFERENCES_LoadFullscreen "Gestartet als Vollbild"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Fataler Fehler ..."
