@@ -14,19 +14,27 @@
 
 static vd_info_t info = {
 #ifdef DECORE_DIVX5
-	"DivX5Linux lib (divx4 mode)",
+	"DivX5Linux lib",
 #else
-	"DivX4Linux lib (divx4 mode)",
+#ifdef DECORE_XVID
+	"XviD lib (divx4 compat.)",
+#else
+	"DivX4Linux lib",
+#endif
 #endif
 	"divx4",
 	"A'rpi",
+#ifdef DECORE_XVID
+	"http://www.xvid.com",
+#else
 	"http://www.divx.com",
+#endif
 	"native binary codec"
 };
 
 LIBVD_EXTERN(divx4)
 
-#ifdef HAVE_DIVX4_H
+#ifdef DECORE_XVID
 #include <divx4.h>
 #else
 #include <decore.h>

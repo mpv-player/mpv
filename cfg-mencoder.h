@@ -73,7 +73,11 @@ struct config ovc_conf[]={
 	"   frameno  - special audio-only file for 3-pass encoding, see DOCS!\n"
 	"   rawrgb   - uncompressed RGB 24bpp video\n"
 #ifdef HAVE_DIVX4ENCORE
-	"   divx4    - using divx4linux/divx5linux or xvid (depends on configuration)\n"
+#ifdef ENCORE_XVID
+	"   divx4    - using XviD (divx4linux compat. mode)\n"
+#else
+	"   divx4    - using divx4linux/divx5linux lib (depends on configuration)\n"
+#endif
 #endif
 #ifdef USE_LIBAVCODEC
 	"   lavc     - using libavcodec codecs - best quality!\n"

@@ -9,9 +9,17 @@
 #include "vd_internal.h"
 #include "cfgparser.h"
 
-#include <divx4.h>
 #include <xvid.h>
 
+typedef struct
+{
+	void *y;
+	void *u;
+	void *v;
+	int stride_y;
+	int stride_uv;
+}
+DIVX4_DEC_PICTURE;
 
 #ifdef XVID_API_UNSTABLE
 #warning *******************************************************************
@@ -178,7 +186,7 @@ static void uninit(sh_video_t *sh){
 // decode a frame
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
   XVID_DEC_FRAME dec;
-  DEC_PICTURE d4_pic;
+  DIVX4_DEC_PICTURE d4_pic;
 #ifdef XVID_CSP_EXTERN
   XVID_DEC_PICTURE pic;
 #endif

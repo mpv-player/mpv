@@ -45,7 +45,11 @@
 static int pass;
 extern char* passtmpfile;
 
+#ifdef ENCORE_XVID
+#include <divx4.h>
+#else
 #include <encore2.h>
+#endif
 
 #ifndef ENCORE_MAJOR_VERSION
 #define ENCORE_MAJOR_VERSION 4000

@@ -13,9 +13,13 @@
 static vd_info_t info = {
 #ifdef NEW_DECORE
 #ifdef DECORE_DIVX5
-	"DivX5Linux lib (odivx mode)",
+	"DivX5Linux lib (odivx compat.)",
 #else
-	"DivX4Linux lib (odivx mode)",
+#ifdef DECORE_XVID
+	"XviD lib (odivx compat.)",
+#else
+	"DivX4Linux lib (odivx compat.)",
+#endif
 #endif
 #else
 	"Opendivx 0.48 codec",
@@ -23,7 +27,11 @@ static vd_info_t info = {
 	"odivx",
 	"A'rpi",
 #ifdef NEW_DECORE
+#ifdef DECORE_XVID
+	"http://www.xvid.com",
+#else
 	"http://www.divx.com",
+#endif
 #else
 	"http://www.projectmayo.org",
 #endif
@@ -39,7 +47,7 @@ LIBVD_EXTERN(odivx)
 #ifndef NEW_DECORE
 #include "opendivx/decore.h"
 #include "postproc/postprocess.h"
-#elif HAVE_DIVX4_H
+#elif DECORE_XVID
 #include <divx4.h>
 #else
 #include <decore.h>

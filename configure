@@ -4141,31 +4141,29 @@ echores "$_bl"
 echocheck "XviD"
 cat > $TMPC << EOF
 #include <xvid.h>
-#include <divx4.h>
 int main(void) { xvid_init(0, 0, 0, 0); return 0; }
 EOF
-if test "$_xvid" != no && cc_check -lm "$_xvidcore" ; then
+if test "$_xvid" != no && cc_check "$_xvidcore" -lm ; then
   _xvid=yes
   _ld_xvid="$_xvidcore"
   _def_xvid='#define HAVE_XVID 1'
-  _def_divx4_h='#define HAVE_DIVX4_H 1'
   _codecmodules="xvid $_codecmodules"
-elif test "$_xvid" != no && cc_check -lm -lxvidcore ; then
+elif test "$_xvid" != no && cc_check -lxvidcore -lm ; then
   _xvid=yes
   _ld_xvid='-lxvidcore'
   _def_xvid='#define HAVE_XVID 1'
-  _def_divx4_h='#define HAVE_DIVX4_H 1'
   _codecmodules="xvid $_codecmodules"
 else
   _xvid=no
   _ld_xvid=''
   _def_xvid='#undef HAVE_XVID'
-  _def_divx4_h='#undef HAVE_DIVX4_H'
   _nocodecmodules="xvid $_nocodecmodules"
 fi
 echores "$_xvid"
 
 _xvidcompat=no
+_def_decore_xvid='#undef DECORE_XVID'
+_def_encore_xvid='#undef ENCORE_XVID'
 if test "$_xvid" = yes ; then
   echocheck "DivX4 compatibility in XviD"
   cat > $TMPC << EOF
@@ -4176,16 +4174,7 @@ EOF
   echores "$_xvidcompat"
 fi
 
-if test "$_xvidcompat" != no ; then
-  _divx4linux=no
-  _opendivx=no
-  _ld_decore=''
-  _def_decore='#define NEW_DECORE 1'
-  _def_divx='#define USE_DIVX 1'
-  _def_divx5='#undef DECORE_DIVX5'
-  _def_odivx_postprocess='#undef HAVE_ODIVX_POSTPROCESS'
-  _nocodecmodules="opendivx divx5linux divx4linux $_nocodecmodules"
-else
+
 echocheck "DivX4linux/DivX5linux/OpenDivX decore"
 # DivX5: DEC_OPT_MEMORY_REQS - DivX4: DEC_OPT_FRAME_311
 cat > $TMPC << EOF
@@ -4193,7 +4182,6 @@ cat > $TMPC << EOF
 int main(void) { (void) decore(0, 0, 0, 0);  return DEC_OPT_FRAME_311; }
 EOF
 if test "$_divx4linux" != no && cc_check -lm -ldivxdecore -lm ; then
-  _divx4linux=yes
   _opendivx=no
   _ld_decore='-ldivxdecore'
   _def_decore='#define NEW_DECORE 1'
@@ -4202,7 +4190,8 @@ if test "$_divx4linux" != no && cc_check -lm -ldivxdecore -lm ; then
   _def_odivx_postprocess='#undef HAVE_ODIVX_POSTPROCESS'
   _codecmodules="divx4linux $_codecmodules"
   echores "DivX4linux (with libdivxdecore.so)"
-elif test "$_divx4linux" != no ; then 
+else
+# if test "$_divx4linux" != no ; then 
 # DivX5 check
 # OdivxPP disabled because of:
 # ld: Warning: type of symbol `dering' changed from 1 to 2 in opendivx/postprocess.o
@@ -4210,8 +4199,7 @@ cat > $TMPC << EOF
 #include <decore.h>
 int main(void) { (void) decore(0, 0, 0, 0);  return DEC_OPT_MEMORY_REQS; }
 EOF
-if cc_check -lm -ldivxdecore -lm ; then
-  _divx4linux=yes
+if test "$_divx4linux" != no && cc_check -lm -ldivxdecore -lm ; then
   _opendivx=no
 #  _ld_decore='-ldivxdecore opendivx/postprocess.o'
   _ld_decore='-ldivxdecore'
@@ -4224,7 +4212,6 @@ if cc_check -lm -ldivxdecore -lm ; then
   _nocodecmodules="divx4linux $_nocodecmodules"
   echores "DivX5linux (with libdivxdecore.so)"
 elif test "$_opendivx" != no ; then
-  _divx4linux=no
   _opendivx=yes
   _ld_decore='opendivx/libdecore.a'
   _def_decore='#undef NEW_DECORE'
@@ -4234,8 +4221,17 @@ elif test "$_opendivx" != no ; then
   _codecmodules="opendivx $_codecmodules"
   _nocodecmodules="divx5linux $_nocodecmodules"
   echores "OpenDivX"
+elif test "$_xvidcompat" = yes ; then
+  _opendivx=no
+  _ld_decore=''
+  _def_decore='#define NEW_DECORE 1'
+  _def_divx='#define USE_DIVX 1'
+  _def_divx5='#undef DECORE_DIVX5'
+  _def_decore_xvid='#define DECORE_XVID 1'
+  _def_odivx_postprocess='#undef HAVE_ODIVX_POSTPROCESS'
+  _nocodecmodules="opendivx divx5linux divx4linux $_nocodecmodules"
+  echores "XviD compat."
 else
-  _divx4linux=no
   _opendivx=no
   _ld_decore=''
   _def_decore='#undef NEW_DECORE'
@@ -4247,7 +4243,6 @@ else
 fi # DivX5 check
 fi
 
-fi # XviD divx4 compatiblity check
 
 # mencoder requires (optional) those libs: libmp3lame and divx4linux encore
 if test "$_mencoder" != no ; then
@@ -4269,27 +4264,25 @@ EOF
   echores "$_mp3lame"
 
 
-  echocheck "XviD/DivX4linux encore (for mencoder)"
+  echocheck "DivX4linux encore (for mencoder)"
   cat > $TMPC << EOF
 #include <encore2.h>
 int main(void) { (void) encore(0, 0, 0, 0); return 0; }
 EOF
-  if test "$_xvid" != no && test "$_xvidcore" && cc_check -lm "$_xvidcore" ; then
-    _def_encore='#define HAVE_DIVX4ENCORE 1'
-    _ld_encore="$_xvidcore"
-    echores "XviD (with $_xvidcore)"
-  elif test "$_xvid" != no && cc_check -lm -lxvidcore ; then
-    _def_encore='#define HAVE_DIVX4ENCORE 1'
-    _ld_encore='-lxvidcore'
-    echores "XviD (with libxvidcore.so)"
-  elif test "$_divx4linux" != no && cc_check -lm -ldivxencore ; then
+  if test "$_divx4linux" != no && cc_check -ldivxencore -lm ; then
     _def_encore='#define HAVE_DIVX4ENCORE 1'
     _ld_encore='-ldivxencore'
     echores "DivX4linux (with libdivxencore.so)"
+  elif test "$_xvidcompat" = yes ; then
+    _def_encore='#define HAVE_DIVX4ENCORE 1'
+    _ld_encore=''
+    _def_encore_xvid='#define ENCORE_XVID 1'
+    echores "XviD compat."
   else
     _def_encore='#undef HAVE_DIVX4ENCORE'
     echores "no"
   fi
+
 fi
 
 echocheck "mencoder"
@@ -4849,7 +4842,6 @@ FAME_LIB = $_ld_fame
 MP1E_DEP = $_dep_mp1e
 MP1E_LIB = $_ld_mp1e
 ARCH_LIB =  $_ld_arch $_ld_iconv
-DIVX4LINUX = $_divx4linux
 XVID = $_xvid
 XVID_LIB = $_ld_xvid
 DECORE_LIB = $_ld_decore
@@ -4964,9 +4956,8 @@ $_def_divx5
 
 /* Define if you are using XviD library */
 $_def_xvid
-
-/* Define if you have divx4.h in place of decore.h */
-$_def_divx4_h
+$_def_decore_xvid
+$_def_encore_xvid
 
 /* Define to include support for libdv-0.9.5 */
 $_def_libdv
