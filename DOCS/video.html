@@ -1015,7 +1015,7 @@ recognize <CODE>:vidix</CODE> subdevice.
   available from the <A HREF="http://www.linuxtv.org">Linux TV site</A>. If you
   want to do software transcoding you should have at least a 1GHz CPU.</P>
 
-<P>Configure should detect your DVB card. If it did not, force detection with
+<P>Configure should detect your DVB card. If it did not, force detection with</P>
 
 <PRE>
   ./configure --enable-dvb
@@ -1059,7 +1059,7 @@ recognize <CODE>:vidix</CODE> subdevice.
 </PRE>
 
 <P>If you have a widescreen movie and you do not want to scale it to full height,
-  you can use the <CODE>expand=w:h</CODE> plugin to add black bands. To view a
+  you can use the <CODE>expand=w:h</CODE> filter to add black bands. To view a
   640x384 DivX, try:</P>
 
 <PRE>
@@ -1078,7 +1078,7 @@ recognize <CODE>:vidix</CODE> subdevice.
   mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=352:288 file.avi
 </PRE>
 
-<P>For OSD and subtitles use the expand feature of the OSD plugin. So, instead
+<P>For OSD and subtitles use the OSD feature of the expand filter. So, instead
   of <CODE>expand=w:h</CODE> or <CODE>expand=w:h:x:y</CODE>, use
   <CODE>expand=w:h:x:y:1</CODE> (the 5th parameter <CODE>:1</CODE> at the end
   will enable OSD rendering). You may want to move the image up a bit to get a
@@ -1091,11 +1091,11 @@ recognize <CODE>:vidix</CODE> subdevice.
 
 <P>To keep the aspect ratio of DivX files and get the optimal scaling parameters
   (hardware horizontal scaling and software vertical scaling while keeping the
-  right aspect ratio), use the new dvbscale plugin:</P>
+  right aspect ratio), use the new dvbscale filter:</P>
 
 <PRE>
-for  3:4 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale
-for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
+for  3:4 TV: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale
+for 16:9 TV: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
 </PRE>
 
 <H4>FUTURE</H4>
