@@ -115,7 +115,7 @@ static IDirectFBSurface *frame = NULL;
  * A buffer for input events.
  */
 
-#ifdef HAVE_DIRECTFB099
+#if DIRECTFBVERSION > 908
 static IDirectFBEventBuffer *buffer = NULL;
 #else
 static IDirectFBInputBuffer *buffer = NULL;
@@ -178,7 +178,7 @@ static int framelocked=0;
 #endif
 #define FLIPPING
 #ifdef FLIPPING
-static int do_flipping=0; // turn (on) off flipping - prepared for cmd line switch
+static int do_flipping=1; // turn (on) off flipping - prepared for cmd line switch
 static int wait_vsync_after_flip=0; 
 static int flipping=0; // flipping is active
 static int invram=0; // backbuffer in video memory
@@ -222,10 +222,18 @@ return DFENUM_OK;
 }
 
 
+#if DIRECTFBVERSION > 912
+DFBEnumerationResult enum_layers_callback( DFBDisplayLayerID            id,
+                                           DFBDisplayLayerDescription   desc,
+                                           void                        *data )
+{
+     DFBDisplayLayerCapabilities  caps = desc.caps;
+#else
 DFBEnumerationResult enum_layers_callback( unsigned int                 id,
                                            DFBDisplayLayerCapabilities  caps,
                                            void                        *data )
 {
+#endif
      IDirectFBDisplayLayer **layer = (IDirectFBDisplayLayer **)data;
 if (verbose) { 
      printf("\nDirectFB: Layer %d:\n", id );
@@ -236,7 +244,7 @@ if (verbose) {
      if (caps & DLCAPS_ALPHACHANNEL)
           printf( "  - Supports blending based on alpha channel.\n" );
 
-#ifdef HAVE_DIRECTFB0910
+#if DIRECTFBVERSION > 909
      if (caps & DLCAPS_SRC_COLORKEY)
           printf( "  - Supports source based color keying.\n" );
 
@@ -344,7 +352,7 @@ if (verbose) printf("DirectFB: Preinit entered\n");
 
 //	uncomment this if you want to allow vt switching
 //       DFBCHECK (DirectFBSetOption ("vt-switching",""));
-#ifdef HAVE_DIRECTFB099
+#if DIRECTFBVERSION > 908
 //	uncomment this if you want to hide gfx cursor (req dfb >=0.9.9)
        DFBCHECK (DirectFBSetOption ("no-cursor",""));
 #endif
@@ -374,7 +382,7 @@ if (verbose) printf("DirectFB: Preinit entered\n");
 		if (verbose) printf("DirectFB: Testing videolayer caps\n");
 	
                 dlc.flags       = DLCONF_PIXELFORMAT;
-#ifdef HAVE_DIRECTFB099
+#if DIRECTFBVERSION > 908
                 dlc.pixelformat = DSPF_YV12;
                 ret = videolayer->TestConfiguration( videolayer, &dlc, &failed );
                 if (ret==DFB_OK) {
@@ -421,7 +429,13 @@ if (verbose) printf("DirectFB: Preinit entered\n");
 		// test for color caps
 		{
                 DFBDisplayLayerCapabilities  caps;
+#if DIRECTFBVERSION > 912
+                DFBDisplayLayerDescription  desc;
+                videolayer->GetDescription(videolayer,&desc);
+                caps = desc.caps;
+#else
 		videolayer->GetCapabilities(videolayer,&caps);
+#endif
 	        if (caps & DLCAPS_BRIGHTNESS) {
 		    videolayercaps.brightness=1;
 		} else {
@@ -501,7 +515,7 @@ if (verbose) printf("DirectFB: Preinit entered\n");
   /*
    * Create an input buffer for the keyboard.
    */
-#ifdef HAVE_DIRECTFB099
+#if DIRECTFBVERSION > 908
   if (keyboard) DFBCHECK (keyboard->CreateEventBuffer (keyboard, &buffer));
 #else
   if (keyboard) DFBCHECK (keyboard->CreateInputBuffer (keyboard, &buffer));
@@ -630,7 +644,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	dlc.pixelformat = 0;
         switch (pixel_format) {
 	    case IMGFMT_YV12: 
-#ifdef HAVE_DIRECTFB099
+#if DIRECTFBVERSION > 908
 			      if (videolayercaps.i420==1) { 
 				dlc.pixelformat=DSPF_I420;
 			        break;
@@ -648,7 +662,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 			    	    dlc.pixelformat=DSPF_UYVY;
 				    break;
 */
-#ifdef HAVE_DIRECTFB099
+#if DIRECTFBVERSION > 908
 			      } else if (videolayercaps.i420==1) { 
 				    dlc.pixelformat=DSPF_I420;
 			    	    break;
@@ -685,7 +699,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
                                  break;
                 case DSPF_UYVY:  printf("DirectFB: layer format UYVY\n");
                                  break;
-#ifdef HAVE_DIRECTFB099
+#if DIRECTFBVERSION > 908
                 case DSPF_YV12:  printf("DirectFB: layer format YV12\n");
                                  break;
                 case DSPF_I420:  printf("DirectFB: layer format I420\n");
@@ -852,7 +866,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
   /*
    * Create a surface based on the description of the source frame
    */
-#ifdef HAVE_DIRECTFB099
+#if DIRECTFBVERSION > 908
   if (((dsc.pixelformat==DSPF_YV12)||(dsc.pixelformat==DSPF_I420)) && buggyYV12BitBlt) {
     memcpyBitBlt = 1;
   } else {
@@ -947,7 +961,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
                 case DSPF_UYVY:  if (verbose) printf("DirectFB: frame format UYVY\n");
                                  frame_pixel_size = 2;
                                  break;
-#ifdef HAVE_DIRECTFB099
+#if DIRECTFBVERSION > 908
                 case DSPF_YV12:  if (verbose) printf("DirectFB: frame format YV12\n");
                                  frame_pixel_size = 1;
                                  break;
@@ -980,7 +994,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
      (format==IMGFMT_BGR16)&&(frame_format ==DSPF_RGB16) ||
      (format==IMGFMT_RGB15)&&(frame_format ==DSPF_RGB15) ||
      (format==IMGFMT_BGR15)&&(frame_format ==DSPF_RGB15) ||
-#ifdef HAVE_DIRECTFB099
+#if DIRECTFBVERSION > 908
      (format==IMGFMT_YUY2)&&(frame_format ==DSPF_YUY2) ||
      (format==IMGFMT_YV12)&&(frame_format ==DSPF_I420) ||
      (format==IMGFMT_YV12)&&(frame_format ==DSPF_YV12)){
@@ -1120,7 +1134,7 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
     			vo_draw_alpha_yuy2(w,h,src,srca,stride,((uint8_t *) dst) + pitch*y0 + frame_pixel_size*x0 + 1,pitch);
 		break;
 
-#ifdef HAVE_DIRECTFB099
+#if DIRECTFBVERSION > 908
         	case DSPF_I420:
 		case DSPF_YV12:
     			vo_draw_alpha_yv12(w,h,src,srca,stride,((uint8_t *) dst) + pitch*y0 + frame_pixel_size*x0,pitch);
@@ -1200,7 +1214,7 @@ static uint32_t draw_frame(uint8_t *src[])
 	                };
                         break;
 
-#ifdef HAVE_DIRECTFB099
+#if DIRECTFBVERSION > 908
                 case DSPF_YV12:
                         switch (pixel_format) {
                         	case IMGFMT_YV12: {
@@ -1311,7 +1325,7 @@ static uint32_t draw_slice(uint8_t *src[], int stride[], int w, int h, int x, in
                         	}
                          break;
 
-#ifdef HAVE_DIRECTFB099
+#if DIRECTFBVERSION > 908
                 case DSPF_YV12:
                         switch (pixel_format) {
                         	case IMGFMT_YV12: { 
@@ -1411,13 +1425,13 @@ static void check_events(void)
 
       DFBInputEvent event;
 //if (verbose) printf ("DirectFB: Check events entered\n");
-#ifdef HAVE_DIRECTFB0910
+#if DIRECTFBVERSION > 909
 if (buffer->GetEvent(buffer, DFB_EVENT (&event)) == DFB_OK) {
 #else
 if (buffer->GetEvent(buffer, &event) == DFB_OK) {
 #endif
      if (event.type == DIET_KEYPRESS) { 
-#ifdef HAVE_DIRECTFB0911
+#if DIRECTFBVERSION > 910
     		switch (event.key_symbol) {
                                 case DIKS_ESCAPE:
 					mplayer_put_key('q');
@@ -1543,11 +1557,11 @@ static void flip_page(void)
 #ifdef FLIPPING
 	 if (!flipping) {
 #endif
-#ifdef HAVE_DIRECTFB099
+#if DIRECTFBVERSION > 908
 		if (!memcpyBitBlt) {
 #endif
             	    DFBCHECK (primary->Blit(primary,frame,NULL,xoffset,yoffset));
-#ifdef HAVE_DIRECTFB099
+#if DIRECTFBVERSION > 908
 		} else {
 			
 		    int err,err2;
@@ -1631,7 +1645,7 @@ static void uninit(void)
 //  switch off BES
   if (videolayer) videolayer->SetOpacity(videolayer,0);
 
-#ifdef HAVE_DIRECTFB099
+#if DIRECTFBVERSION > 908
   if (verbose&&videolayer ) printf("DirectFB: Release videolayer\n");
   if (videolayer) videolayer->Release(videolayer);
 
@@ -1642,83 +1656,117 @@ static void uninit(void)
   if (verbose ) printf("DirectFB: Uninit done.\n");
 }
 
-static int directfb_set_video_eq( const vidix_video_eq_t *info)
+static uint32_t directfb_set_video_eq(char *data, int value) //data==name
 {
-    if (videolayeractive) {
-	DFBColorAdjustment ca;
-	float factor =  (float)0xffff / 2000.0;
 	
+	DFBColorAdjustment ca;
+	float factor =  (float)0xffff / 200.0;
+	DFBDisplayLayerCapabilities  caps;
+
+if (videolayer) {	
+	
+#if DIRECTFBVERSION > 912
+        DFBDisplayLayerDescription  desc;
+        videolayer->GetDescription(videolayer,&desc);
+        caps = desc.caps;
+#else
+	videolayer->GetCapabilities(videolayer,&caps);
+#endif
 	ca.flags=DCAF_NONE;
 	
-	if ((videolayercaps.brightness)&&(info->cap&VEQ_CAP_BRIGHTNESS)) {
-	    ca.brightness = info->brightness * factor +0x8000;
+	if (! strcmp( data,"brightness" )) {
+	    if (caps & DLCAPS_BRIGHTNESS) {
+		ca.brightness = value * factor +0x8000;
 	    ca.flags |= DCAF_BRIGHTNESS;
-	    if (verbose) printf("DirectFB: SetVEq Brightness 0x%X %i\n",ca.brightness,info->brightness);
+		if (verbose) printf("DirectFB: SetVEq Brightness 0x%X %i\n",ca.brightness,value);
+	    } else return VO_FALSE;
 	}
 
-	if ((videolayercaps.contrast)&&(info->cap&VEQ_CAP_CONTRAST)) {
-	    ca.contrast = info->contrast * factor + 0x8000;
+	if (! strcmp( data,"contrast" )) {
+	    if ((caps & DLCAPS_CONTRAST)) {
+	        ca.contrast = value * factor + 0x8000;
 	    ca.flags |= DCAF_CONTRAST;
-	    if (verbose) printf("DirectFB: SetVEq Contrast 0x%X %i\n",ca.contrast,info->contrast);
+		if (verbose) printf("DirectFB: SetVEq Contrast 0x%X %i\n",ca.contrast,value);
+	    } else return VO_FALSE;
 	}
 
-	if ((videolayercaps.hue)&&(info->cap&VEQ_CAP_HUE)) {
-	    ca.hue = info->hue * factor + 0x8000;
+	if (! strcmp( data,"hue" )) {
+    	    if ((caps & DLCAPS_HUE)) {
+		ca.hue = value * factor + 0x8000;
 	    ca.flags |= DCAF_HUE;
-	    if (verbose) printf("DirectFB: SetVEq Hue 0x%X %i\n",ca.hue,info->hue);
+		if (verbose) printf("DirectFB: SetVEq Hue 0x%X %i\n",ca.hue,value);
+	    } else return VO_FALSE;
 	}
 
-	if ((videolayercaps.saturation)&&(info->cap&VEQ_CAP_SATURATION)) {
-	    ca.saturation = info->saturation * factor + 0x8000;
+	if (! strcmp( data,"saturation" )) {
+		if ((caps & DLCAPS_SATURATION)) {
+	        ca.saturation = value * factor + 0x8000;
 	    ca.flags |= DCAF_SATURATION;
-	    if (verbose) printf("DirectFB: SetVEq Saturation 0x%X %i\n",ca.saturation,info->saturation);
+		if (verbose) printf("DirectFB: SetVEq Saturation 0x%X %i\n",ca.saturation,value);
+	    } else return VO_FALSE;
 	}
 
+	if (ca.flags != DCAF_NONE) {
 	videolayer->SetColorAdjustment(videolayer,&ca);
-    };
-    return 0;
+	    return VO_TRUE;
+	}
+}	
+
+    return VO_FALSE;
 
 }
 
-static int directfb_get_video_eq( vidix_video_eq_t *info)
+static uint32_t directfb_get_video_eq(char *data, int *value) // data==name
 {
-    if (videolayeractive) {
+	
 	DFBColorAdjustment ca;
-	float factor = 2000.0 / (float)0xffff;
+	float factor = 200.0 / (float)0xffff;
+	DFBDisplayLayerCapabilities  caps;
+	
+if (videolayer) {	
+#if DIRECTFBVERSION > 912
+        DFBDisplayLayerDescription  desc;
+        videolayer->GetDescription(videolayer,&desc);
+        caps = desc.caps;
+#else
+	videolayer->GetCapabilities(videolayer,&caps);
+#endif
+
 	videolayer->GetColorAdjustment(videolayer,&ca);
 	
-	if ((videolayercaps.brightness)&&(ca.flags&DCAF_BRIGHTNESS)) {
-	    info->brightness = (ca.brightness-0x8000) * factor;
-	    info->cap |= VEQ_CAP_BRIGHTNESS;
-	    if (verbose) printf("DirectFB: GetVEq Brightness 0x%X %i\n",ca.brightness,info->brightness);
+	if (! strcmp( data,"brightness" )) {
+	    if (caps & DLCAPS_BRIGHTNESS) {
+		*value = (int) ((ca.brightness-0x8000) * factor);
+		if (verbose) printf("DirectFB: GetVEq Brightness 0x%X %i\n",ca.brightness,*value);
+    		return VO_TRUE;
+	    } else return VO_FALSE;
 	}
 
-	if ((videolayercaps.contrast)&&(ca.flags&DCAF_CONTRAST)) {
-	    info->contrast = (ca.contrast-0x8000) * factor;
-	    info->cap |= VEQ_CAP_CONTRAST;
-	    if (verbose) printf("DirectFB: GetVEq Contrast 0x%X %i\n",ca.contrast,info->contrast);
+	if (! strcmp( data,"contrast" )) {
+	    if ((caps & DLCAPS_CONTRAST)) {
+		*value = (int) ((ca.contrast-0x8000) * factor);
+		if (verbose) printf("DirectFB: GetVEq Contrast 0x%X %i\n",ca.contrast,*value);
+    		return VO_TRUE;
+	    } else return VO_FALSE;
 	}
 
-	if ((videolayercaps.hue)&&(ca.flags&DCAF_HUE)) {
-	    info->hue = (ca.hue-0x8000) * factor;
-	    info->cap |= VEQ_CAP_HUE;
-	    if (verbose) printf("DirectFB: GetVEq Hue 0x%X %i\n",ca.hue,info->hue);
+	if (! strcmp( data,"hue" )) {
+    	    if ((caps & DLCAPS_HUE)) {
+		*value = (int) ((ca.hue-0x8000) * factor);
+    		if (verbose) printf("DirectFB: GetVEq Hue 0x%X %i\n",ca.hue,*value);
+    		return VO_TRUE;
+	    } else return VO_FALSE;
 	}
 
-	if ((videolayercaps.saturation)&&(ca.flags&DCAF_SATURATION)) {
-	    info->saturation = (ca.saturation-0x8000) * factor;
-	    info->cap |= VEQ_CAP_SATURATION;
-	    if (verbose) printf("DirectFB: GetVEq Saturation 0x%X %i\n",ca.saturation,info->saturation);
+	if (! strcmp( data,"saturation" )) {
+    	    if ((caps & DLCAPS_SATURATION)) {
+		*value = (int) ((ca.saturation-0x8000) * factor);
+    		if (verbose) printf("DirectFB: GetVEq Saturation 0x%X %i\n",ca.saturation,*value);
+    		return VO_TRUE;
+	    } else return VO_FALSE;
 	}
-
-    };
-    return 0;
 }
-static void query_vaa(vo_vaa_t *vaa)
-{
-  memset(vaa,0,sizeof(vo_vaa_t));
-  vaa->get_video_eq = directfb_get_video_eq;
-  vaa->set_video_eq = directfb_set_video_eq;
+    return VO_FALSE;
 }
 
 #ifdef DIRECTRENDER
@@ -1739,7 +1787,7 @@ static uint32_t get_image(mp_image_t *mpi){
        // we're lucky or codec accepts stride => ok, let's go!
        if(mpi->flags&MP_IMGFLAG_PLANAR){
 
-#ifdef HAVE_DIRECTFB099
+#if DIRECTFBVERSION > 908
             err = frame->Lock(frame,DSLF_WRITE/*|DSLF_READ*/,&dst,&pitch);
 //  	    err = primary->Lock(primary,DSLF_WRITE,&dst,&pitch); // for real direct rendering
 
@@ -1795,9 +1843,28 @@ static uint32_t get_image(mp_image_t *mpi){
 static uint32_t control(uint32_t request, void *data, ...)
 {
   switch (request) {
-  case VOCTRL_QUERY_VAA:
-    query_vaa((vo_vaa_t*)data);
-    return VO_TRUE;
+    case VOCTRL_SET_EQUALIZER:
+      {
+        va_list ap;
+	int value;
+    
+        va_start(ap, data);
+	value = va_arg(ap, int);
+        va_end(ap);
+    
+	return(directfb_set_video_eq(data, value));
+      }
+    case VOCTRL_GET_EQUALIZER:
+      {
+	va_list ap;
+        int *value;
+    
+        va_start(ap, data);
+        value = va_arg(ap, int*);
+        va_end(ap);
+    
+	return(directfb_get_video_eq(data, value));
+      }
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
 #ifdef DIRECTRENDER
