@@ -35,6 +35,10 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
 	mpi->w, mpi->h);
 
+    if(mpi->imgfmt==IMGFMT_422P)
+    yuv422ptoyuy2(mpi->planes[0],mpi->planes[1],mpi->planes[2], dmpi->planes[0],
+	    mpi->w,mpi->h, mpi->stride[0],mpi->stride[1],dmpi->stride[0]);
+    else
     yv12toyuy2(mpi->planes[0],mpi->planes[1],mpi->planes[2], dmpi->planes[0],
 	    mpi->w,mpi->h, mpi->stride[0],mpi->stride[1],dmpi->stride[0]);
     
@@ -51,6 +55,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     case IMGFMT_YV12:
     case IMGFMT_I420:
     case IMGFMT_IYUV:
+    case IMGFMT_422P:
 	return vf_next_query_format(vf,IMGFMT_YUY2) & (~VFCAP_CSP_SUPPORTED_BY_HW);
     }
     return 0;
@@ -64,7 +69,7 @@ static int open(vf_instance_t *vf, char* args){
 }
 
 vf_info_t vf_info_yuy2 = {
-    "fast YV12->YUY2 conversion",
+    "fast YV12/Y422p -> YUY2 conversion",
     "yuy2",
     "A'rpi",
     "",
