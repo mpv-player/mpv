@@ -607,6 +607,11 @@ static int mga_vid_set_config(mga_vid_config_t *config)
 	printk(KERN_DEBUG "mga_vid: Setting up a %dx%d+%d+%d video window (src %dx%d) format %X\n",
 	       dw, dh, x, y, sw, sh, config->format);
 
+	if(sw<4 || sh<4 || dw<4 || dh<4){
+	    printk(KERN_ERR "mga_vid: Invalid src/dest dimenstions\n");
+	    return -1;
+	}
+
 	//FIXME check that window is valid and inside desktop
 	
 	//FIXME figure out a better way to allocate memory on card
