@@ -815,7 +815,10 @@ static int DVDReadBlocksPath( dvd_file_t *dvd_file, unsigned int offset,
 		if( ret < 0 ) return ret;
 		/* FIXME: This is wrong if i is the last file in the set. 
                  * also error from this read will not show in ret. */
-		
+
+                /* Does the next part exist? If not then return now. */
+                if( !dvd_file->title_devs[ i + 1 ] ) return ret;
+
                 /* Read part 2 */
                 off = DVDinput_seek( dvd_file->title_devs[ i + 1 ], 
 				     0, DVDINPUT_NOFLAGS );
