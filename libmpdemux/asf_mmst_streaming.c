@@ -356,7 +356,7 @@ static int get_media_packet (int s, int padding, streaming_ctrl_t *stream_ctrl) 
 
     command = get_32 (data, 24) & 0xFFFF;
 
-    printf ("\ncommand packet detected, len=%d  cmd=0x%X\n", packet_len, command);
+//    printf ("\ncommand packet detected, len=%d  cmd=0x%X\n", packet_len, command);
 
     if (command == 0x1b) 
       send_command (s, 0x1b, 0, 0, 0, data);
