@@ -1,4 +1,4 @@
-.\" synced with 1.810
+.\" synced with 1.811
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -188,7 +188,7 @@ i napisów DVD (strumienie SPU, VOBSub i Closed Captions).
 (Koder Filmów MPlayera) jest to prosty koder (kompresor) filmów, zaprojektowany
 do kodowania filmów otwieralnych MPlayerem (patrz wy¿ej) do innych obs³ugiwanych
 formatów (patrz ni¿ej).
-Potrafi kodowaæ do MPEG4 (DivX4/XviD), kodeków libavcodec, a d¼wiêk do
+Potrafi kodowaæ do MPEG-4 (DivX4/XviD), kodeków libavcodec, a d¼wiêk do
 PCM/\:MP3/\:VBRMP3 w 1, 2 lub 3-przebiegach.
 Potrafi równie¿ kopiowaæ strumieniowo, posiada potê¿ny system filtrów
 (kadrowanie, powiêkszanie, odwracanie, postprocesing, obracanie, skalowanie,
@@ -2429,7 +2429,7 @@ Wybiera sterownik, którego nale¿y u¿yæ jako nak³adki na X11.
 .B xvmc (tylko X11 z \-vc ffmpeg12mc)
 Sterownik wyj¶cia video, który korzysta z rozszerzenia XvMC (X Video Motion
 Compensation) oferowanego przez XFree86 4.x, aby przyspieszyæ dekodowanie
-MPEG1/\:2 i VCR2.
+MPEG-1/\:2 i VCR2.
 .PD 0
 .RSs
 .IPs benchmark
@@ -3104,7 +3104,7 @@ d³ugo¶ci filtru
 przemiatanie sinusoidalne
 .IPs hrtf\ 
 Head-related transfer function (funkcja transferowa zwi±zana z g³ow±):
-Konwertuje wielokana³owe audio do dwóch kana³ów przeznaczonych dla s³uchawek,
+Konwertuje wielkokana³owe audio do dwóch kana³ów przeznaczonych dla s³uchawek,
 zachowuj±c przestrzenno¶æ d¼wiêku.
 .IPs channels[=il]
 Zmienia ilo¶æ kana³ów wyj¶cia na il.
@@ -3368,9 +3368,9 @@ a jedynie efekt uboczny nie dekodowania w pe³nej rozdzielczo¶ci.
 .br
 3: 1/8 rozdzielczo¶ci
 .REss
-.IPs "sb=<number> (tylko MPEG2)"
+.IPs "sb=<liczba> (tylko MPEG-2)"
 Przeskakuje podan± ilo¶æ wierszy makrobloków na dole.
-.IPs "st=<number> (tylko MPEG2)"
+.IPs "st=<liczba> (tylko MPEG-2)"
 Przeskakuje podan± ilo¶æ wierszy makrobloków na górze.
 .IPs vismv=<warto¶æ>
 vismv:
@@ -3527,7 +3527,7 @@ Próbuj najpierw kodek divx4linux, pó¼niej pozosta³e.
 .IPs "\-vc -divxds,-divx,"
 Pomija kodeki Win32 DivX.
 .IPs "\-vc ffmpeg12,mpeg12,"
-Próbuj kodeki libavcodec MPEG1/\:2, pó¼niej libmpeg2, potem inne.
+Próbuj kodeki libavcodec MPEG-1/\:2, pó¼niej libmpeg2, potem inne.
 .RE
 .PD 1
 .
@@ -4001,7 +4001,7 @@ Powiniene¶ widzieæ czerwony, zielony i niebieski pasek od góry do do³u.
 .
 .TP
 .B lavc[=jako¶æ:fps]
-Szybka programowa konwersja z YV12 na MPEG1 przy pomocy libavcodec do
+Szybka programowa konwersja z YV12 na MPEG-1 przy pomocy libavcodec do
 stosowania z DVB/\:DXR3.
 Szybsza i lepsza jako¶æ ni¿ \-vf fame.
 .RSs
@@ -4017,7 +4017,7 @@ wymusza fps wyj¶cia (liczba rzeczywista) (domy¶lnie: 0, wykrywanie wg wysoko¶ci)
 .
 .TP
 .B fame\ \ \ 
-Szybka programowa konwersja z YV12 na MPEG1 przy pomocy libfame do stosowania
+Szybka programowa konwersja z YV12 na MPEG-1 przy pomocy libfame do stosowania
 z DVB/\:DXR3.
 .
 .TP
@@ -4459,7 +4459,7 @@ Suma progów Ca³kowitej Ró¿nicy (Absolute Difference), domy¶lnie 64.
 .
 .TP
 .B softpulldown
-Ten filtr prawid³owo dzia³a tylko z MEncoderem i dzia³a na flagach MPEG2
+Ten filtr prawid³owo dzia³a tylko z MEncoderem i dzia³a na flagach MPEG-2
 u¿ywanych do miêkkiego telecine 3:2.
 Je¶li chcesz u¿yæ filtru ivtc lub detc na filmach, które maj± czê¶ciowe miêkkie
 telecine to wstawienie przed nie tego filtra mo¿e sprawiæ ¿e bêd± one
@@ -5396,7 +5396,7 @@ H.263
 .IPs h263p
 H.263 Plus
 .IPs mpeg4
-MPEG4 (DivX 4/5)
+MPEG-4 (DivX 4/5)
 .IPs msmpeg4
 DivX 3
 .IPs msmpeg4v2
@@ -5408,9 +5408,9 @@ Windows Media Video, wersja 2 (AKA WMV8)
 .IPs rv10\ 
 stary kodek RealVideo
 .IPs mpeg1video
-MPEG1 video
+MPEG-1 video
 .IPs mpeg2video
-MPEG2 video
+MPEG-2 video
 .IPs huffyuv
 HuffYUV
 .IPs asv1\ 
@@ -5484,7 +5484,7 @@ maksymalna ilo¶æ ramek B miêdzy ramkami innymi ni¿ B:
 .IPs 0
 brak klatek B (domy¶lnie)
 .IPs 0\-2
-rozs±dny zakres dla MPEG4
+rozs±dny zakres dla MPEG-4
 .RE
 .PD 1
 .
@@ -5572,7 +5572,7 @@ precyzyjne przeszukiwanie.
 0 jest równowa¿ne 1, czyli ka¿da ramka jest ramk± kluczow±.
 Warto¶ci >300 nie s± zalecane, poniewa¿ jako¶æ mo¿e byæ z³a w zale¿no¶ci od
 dekodera, kodera i szczê¶cia.
-Dla utrzymania pe³nej zgodno¶ci z MPEG1/\:2/\:4 warto¶ci powinny byæ <=132.
+Dla utrzymania pe³nej zgodno¶ci z MPEG-1/\:2/\:4 warto¶ci powinny byæ <=132.
 .
 .TP
 .B sc_threshold=<-1000000\-1000000>
@@ -5713,7 +5713,7 @@ minimalny bitrate w kbit/\:sek (przebieg\ 1/\:2)
 .TP
 .B vrc_buf_size=<warto¶æ>
 rozmiar bufora w kbit (przebieg\ 1/\:2).
-Dla MPEG1/\:2 okre¶la to równie¿ rozmiar bufora vbv, u¿yj 327 dla VCD,
+Dla MPEG-1/\:2 okre¶la to równie¿ rozmiar bufora vbv, u¿yj 327 dla VCD,
 917 dla SVCD i 1835 dla DVD.
 .
 .TP
@@ -5921,7 +5921,7 @@ zalecane przez JVT
 wy³±czona (domy¶lnie)
 .IPs 1
 Zalecane tylko w przypadku, je¿eli chcesz przekazaæ wyj¶cie do referencyjnego
-dekodera MPEG4.
+dekodera MPEG-4.
 .IPs -1
 Pozwala na niestandardowe kodowanie YV12 HuffYUV (o 20% mniejsze pliki,
 ale nie mog± byæ odtwarzane przez oficjalny kodek HuffYUV).
@@ -6679,7 +6679,7 @@ klatka po klatce (tylko tryb dwuprzebiegowy).
 .br
 .I UWAGA:
 Wygeneruje to nieprawid³owy stumieñ bitów, którego prawdopodobnie nie jest w
-stanie zdekodowaæ ¿aden dekoder MPEG4 poza libavcodec albo XviD.
+stanie zdekodowaæ ¿aden dekoder MPEG-4 poza libavcodec albo XviD.
 (tylko tryb dwuprzebiegowy)
 .br
 .I UWAGA:
@@ -6741,7 +6741,7 @@ robisz.
 .br
 .I UWAGA:
 Stworzy to niepoprawny strumieñ bitów i nie bêdzie on odtwarzany przez
-dekodery ISO-MPEG4 poza DivX/\:libavcodec/\:XviD.
+dekodery ISO-MPEG-4 poza DivX/\:libavcodec/\:XviD.
 .br
 .I UWAGA:
 Zapisuje to tak¿e fa³szyw± wersjê DivX do pliku,
@@ -6795,7 +6795,7 @@ u¿ywaj go na swoj± w³asn± odpowiedzialno¶æ!
 .
 .TP
 .B (no)qpel
-MPEG4 domy¶lnie u¿ywa precyzji co do po³owy piksela przy wyszukiwaniu ruchu.
+MPEG-4 domy¶lnie u¿ywa precyzji co do po³owy piksela przy wyszukiwaniu ruchu.
 Standard proponuje tryb, w którym kodery mog± korzystaæ z precyzji quarter
 pixel (co do æwieræ piskela).
 Opcja to przewa¿nie sprawia, ¿e obraz jest ostrzejszy.
@@ -6984,7 +6984,7 @@ Okre¶la tryb Wspó³czynnika Proporcji Piksela (Pixel Aspect Ratio - PAR)
 PAR to stosunek szeroko¶ci do wysoko¶ci pojedynczego piksela.
 Wiêc oba s± zwi±zane: DAR = PAR * (szeroko¶æ/wysoko¶æ).
 .br
-MPEG4 okre¶la 5 wspó³czynników proporcji piksela i jeden rozszerzony,
+MPEG-4 okre¶la 5 wspó³czynników proporcji piksela i jeden rozszerzony,
 daj±cy szansê na podanie konkretnego wspó³czynnika proporcji piksela.
 Mo¿e byæ podany jeden z 5 standardowych trybów:
 .PD 0
