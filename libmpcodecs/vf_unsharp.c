@@ -86,7 +86,7 @@ static void unsharp( uint8_t *dst, uint8_t *src, int dstStride, int srcStride, i
     int stepsX = fp->msizeX/2;
     int stepsY = fp->msizeY/2;
     int scalebits = (stepsX+stepsY)*2;
-    int32_t halfscale = 1 << (stepsX+stepsY);
+    int32_t halfscale = 1 << ((stepsX+stepsY)*2-1);
 
     if( !fp->amount ) {
 	if( src == dst )
@@ -138,11 +138,13 @@ static int config( struct vf_instance_s* vf,
 
     int z, stepsX, stepsY;
     FilterParam *fp;
+    char *effect;
 
     // allocate buffers
 
     fp = &vf->priv->lumaParam;
-    mp_msg( MSGT_VFILTER, MSGL_INFO, "unsharp: %dx%d:%0.2f (luma) \n", fp->msizeX, fp->msizeY, fp->amount );
+    effect = fp->amount == 0 ? "don't touch" : fp->amount < 0 ? "blur" : "sharpen";
+    mp_msg( MSGT_VFILTER, MSGL_INFO, "unsharp: %dx%d:%0.2f (%s luma) \n", fp->msizeX, fp->msizeY, fp->amount, effect );
     memset( fp->SC, 0, sizeof( fp->SC ) );
     stepsX = fp->msizeX/2;
     stepsY = fp->msizeY/2;
@@ -150,7 +152,8 @@ static int config( struct vf_instance_s* vf,
 	fp->SC[z] = memalign( 16, sizeof(*(fp->SC[z])) * (width+2*stepsX) );
 
     fp = &vf->priv->chromaParam;
-    mp_msg( MSGT_VFILTER, MSGL_INFO, "unsharp: %dx%d:%0.2f (chroma)\n", fp->msizeX, fp->msizeY, fp->amount );
+    effect = fp->amount == 0 ? "don't touch" : fp->amount < 0 ? "blur" : "sharpen";
+    mp_msg( MSGT_VFILTER, MSGL_INFO, "unsharp: %dx%d:%0.2f (%s chroma)\n", fp->msizeX, fp->msizeY, fp->amount, effect );
     memset( fp->SC, 0, sizeof( fp->SC ) );
     stepsX = fp->msizeX/2;
     stepsY = fp->msizeY/2;
@@ -317,7 +320,7 @@ static int open( vf_instance_t *vf, char* args ) {
 }
 
 vf_info_t vf_info_unsharp = {
-    "unsharp mask",
+    "unsharp mask & gaussian blur",
     "unsharp",
     "Rémi Guyomarch",
     "",
