@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with 1.50 -->
+<!-- synced with 1.52 -->
 <sect2 id="video-dev">
 <title>Urządzenia wyjścia video</title>
 
@@ -1148,7 +1148,102 @@ znaleźć najlepszy tryb. Spójrz na
 jest tam więcej informacji o dostrajaniu.
 </para>
 </sect4>
+ 
+<sect4 id="caca">
+	<title><systemitem class="library">libcaca</systemitem> - Colour AsCii
+		Art library (bibliotek kolorowego ASCII-Art)</title>
 
+<para>
+Biblioteka<ulink url="http://sam.zoy.org/projects/libcaca/"><systemitem class="library">libcaca</systemitem></ulink>
+jest bibiloteką produkującą tekst zamiast pikseli, więc może pracować na
+starszych kartach graficznych oraz terminalach tekstowych. Jest podobna do
+słunnej biblioteki <systemitem class="library">AAlib</systemitem>.
+<systemitem class="library">libcaca</systemitem> potrzebuje dop pracy terminalu,
+więc powinna działać na wszystkich systemach Uniksowych (włącznie z Mac OS X),
+używając biblioteki
+<systemitem class="library">slang</systemitem> lub biblioteki
+<systemitem class="library">ncurses</systemitem>, w DOSie używając biblioteki
+<systemitem class="library">conio.h</systemitem> i w systemach Windowsowych
+używając <systemitem class="library">slang</systemitem> lub
+<systemitem class="library">ncurses</systemitem> (poprzez emulację Cygwin) bądź
+<systemitem class="library">conio.h</systemitem>. Jeżeli
+<filename>./configure</filename>
+wykryje <systemitem class="library">libcaca</systemitem>, to zostanie abudowany
+sterownik caca libvo.
+</para>
+
+<itemizedlist>
+	<title>Różnice między <systemitem class="library">AAlib</systemitem> są
+		następujące:</title>
+<listitem><simpara>
+   16 dostępnych kolorów na wyjściu znakowym (256 par kolorów)
+  </simpara></listitem>
+<listitem><simpara>
+   dirthering obrazu kolorowego
+  </simpara></listitem>
+</itemizedlist>
+
+<itemizedlist>
+<title>Lecz <systemitem class="library">libcaca</systemitem> ma także
+	następujące ograniczenia:</title>
+<listitem><simpara>
+   brak obsługi jasności, kontrastu, gammy
+  </simpara></listitem>
+</itemizedlist>
+
+<para>
+	Aby zmienić opcje renderowania, możesz użyć pewnych klawiszy w oknie caca:
+</para>
+
+<informaltable>
+<tgroup cols="2">
+<thead>
+  <row><entry>Klawisz</entry><entry>Akcja</entry></row>
+</thead>
+<tbody>
+<row><entry><keycap>d</keycap></entry><entry>
+  Przęłączanie metod dirtheringu <systemitem class="library">libcaca</systemitem>.
+  </entry></row>
+<row><entry><keycap>a</keycap></entry><entry>
+		Przełączanie anyaliasungu (wygładzania) <systemitem
+			class="library">libcaca</systemitem>.
+  </entry></row>
+<row><entry><keycap>b</keycap></entry><entry>
+		Przełączanie tła <systemitem class="library">libcaca</systemitem>.
+  </entry></row>
+</tbody>
+</tgroup>
+</informaltable>
+
+<variablelist>
+<title><systemitem class="library">libcaca</systemitem> będzie także szukać
+	pewnych zmiennych środowiskowych:</title>
+<varlistentry>
+  <term><option>CACA_DRIVER</option></term>
+  <listitem><simpara>
+    Ustawia zwlecany sterownik caca, np. ncurses, slang, x11.
+    </simpara></listitem>
+</varlistentry>
+<varlistentry>
+  <term><option>CACA_GEOMETRY (tylko X11)</option></term>
+  <listitem><simpara>
+    Określa liczbę wierszy i kolumn, np. 128x50.
+    </simpara></listitem>
+</varlistentry>
+<varlistentry>
+  <term><option>CACA_FONT (tylko X11)</option></term>
+  <listitem><simpara>
+    Określa jakiej użyć czcionki, np. fixed, nexus.
+    </simpara></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+	Jeżeli Twój komputer nie jest wystarczająco szybki aby renderować
+	wszystkie ramki, użyj opcji <option>-framedrop</option>.
+</para>
+
+</sect4>
 
 <sect4 id="vesa">
 <title>VESA - wyjście na VESA BIOS</title>
@@ -1852,6 +1947,17 @@ naziemnego), to możesz zapisać swoje pliki kanałów jako:
 </screen>
 
 <para>
+	Jeżeli masz więcej niż jedną kartę, będziesz musiał określić numer
+	karty, na której jest widoczny kanał (np. 2), kożystając z następującej
+	składni:
+</para>
+ 
+ <screen>
+   mplayer dvb://2@R1
+ </screen>
+ 
+ <para>
+
   Aby przełączać kanały używaj klawiszy <keycap>h</keycap> (następny) oraz
   <keycap>k</keycap> (poprzedni) lub skorzystaj z menu OSD (wymaga działającego 
   <link linkend="subosd">podsystemu OSD</link>).
@@ -1863,7 +1969,9 @@ naziemnego), to możesz zapisać swoje pliki kanałów jako:
   <filename>etc/dvb-menu.conf</filename> (którego możesz użyć do nadpisania 
   <filename>~/.mplayer/menu.conf</filename>), w menu głównym pokaże się
   podmenu, które zezwoli Ci na wybór jednego kanału z obecnych w Twoim 
-  <filename>channels.conf</filename>.
+  <filename>channels.conf</filename>, możliwe, że poprzedzone menu z listą
+  dostępnych kart, jeżeli więcej niż jedna jest używalna z
+  <application>MPlayerem</application>.
 </para>
 
 <para>

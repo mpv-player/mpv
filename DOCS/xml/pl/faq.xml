@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with 1.33 -->
+<!-- synced with 1.35 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>FAQ - Często Zadawane Pytania</title>
 
@@ -624,6 +624,62 @@ Użyj:
 
 <qandadiv id="faq-playback">
 <title>Problemy z odtwarzaniem</title>
+
+<qandaentry>
+<question><para>
+Ściągnąłem film z sieci P2P i nie nie chce się odtworzyć! 
+</para></question>
+<answer><para>
+Prawdopodobnie plik jest uszkodzony lub jest to fałszywka.
+Jeżeli dostałeś go od znajomego i on mówi, że u niego działa, to spróbuj
+porównać skróty <application>md5sum</application> (md5sum hashes).
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Właśnie zainstalowałem <application>MPlayera</application>. W momencie gdy chcę
+otworzyć plik video występuje następujący błąd:
+<screen>
+Error opening/initializing the selected video_out (-vo) device.
+(Błąd przy otwarciu.inicjalizacji wybranego urządzenia video_out (-vo).)
+</screen>
+Jak mogę rozwiązać mój problem?
+</para></question>
+<answer><para>
+Po prostu zmień urządzenie wyjścai video. Aby uzyskać listę dostępnych
+sterowników wyjścia video wydaj następujące polecenie:
+<screen>
+mplayer -vo help
+</screen>
+Gdy juz wybierzesz odpowiedni sterownik wyjścia video, dodaj go do swojego pliku
+konfigurecyjnego.
+Dodaj 
+<programlisting>
+	vo = <replaceable>wybrany_vo</replaceable>
+</programlisting>
+do <filename>~/.mplayer/config</filename> i/lub
+<programlisting>
+vo_driver = <replaceable>wybrany_vo</replaceable>
+</programlisting>
+do <filename>~/.mplayer/gui.conf</filename>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Mam problem z wyświetlaniem napisów. Pomocy!
+</para></question>
+<answer><para>
+Upewnij się, ze poprawnie zainstalowałeś czcionki. Przejdź jeszcze raz przez
+kroki w części 
+<link linkend="mpsub-install">OSD i napisy</link> z sekcji traktującej o
+instalacji. Jeżeli używasz czcionek TrueType, upewnij się, że masz zainstalowaną
+bibliotekę <systemitem class="library">freetype</systemitem>.
+Sprawdź także napisy w edytorze tekstu, bądź z innymi odtwarzaczami. Spróbuj
+tekże przekonwertować je na inny format.
+</para></answer>
+</qandaentry>
 
 <qandaentry>
 <question><para>
