@@ -12,8 +12,8 @@ How to get win32 quicktime audio/video codec plugins support work?
     make install
     
 2. Get mplayer CVS (RTFM...), and compile this way:
-   ./configure --disable-win32  (--disable-win32 is VERY important)
-   add '#define USE_QTX_CODECS' to config.h
+   ./configure --disable-win32 --enable-qtx-codecs
+        (the --disable-win32 is VERY important!!!)
    make mplayer.exe.so
    
 3. Get the quicktime DLLs & wine config pack:
