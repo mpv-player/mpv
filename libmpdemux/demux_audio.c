@@ -170,6 +170,7 @@ int demux_audio_open(demuxer_t* demuxer) {
     w->nAvgBytesPerSec = stream_read_dword_le(s);
     w->nBlockAlign = stream_read_word_le(s);
     w->wBitsPerSample = sh_audio->samplesize = stream_read_word_le(s);
+    w->cbSize = 0;
     l -= 16;
     if (l > 0) {
     w->cbSize = stream_read_word_le(s);
