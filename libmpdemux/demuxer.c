@@ -1282,11 +1282,6 @@ switch(file_format){
     } else {
       sh_video=d_video->sh;sh_video->ds=d_video;
       sh_video->fps=1000.0f; sh_video->frametime=0.001f; // 1ms
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,"VIDEO:  [%.4s]  %dx%d  %dbpp\n",
-        (char *)&sh_video->bih->biCompression,
-        sh_video->bih->biWidth,
-        sh_video->bih->biHeight,
-        sh_video->bih->biBitCount);
       //      sh_video->i_bps=10*asf_packetsize; // FIXME!
     }
   }
