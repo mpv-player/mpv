@@ -159,21 +159,16 @@ static int open_tv(tvi_handle_t *tvh)
 	tvh->norm = TV_NORM_NTSC;
     else if (!strcasecmp(tv_param_norm, "secam"))
 	tvh->norm = TV_NORM_SECAM;
-    else if (!strcasecmp(tv_param_norm, "palnc"))
-	tvh->norm = TV_NORM_PALNC;
-    else if (!strcasecmp(tv_param_norm, "palm"))
-	tvh->norm = TV_NORM_PALM;
-    else if (!strcasecmp(tv_param_norm, "paln"))
-	tvh->norm = TV_NORM_PALN;
-    else if (!strcasecmp(tv_param_norm, "ntscjp"))
-	tvh->norm = TV_NORM_NTSCJP;
     else {
 	mp_msg(MSGT_TV, MSGL_V, "Bogus norm parameter, setting PAL.\n");
 	tvh->norm = TV_NORM_PAL;
     }
 
     mp_msg(MSGT_TV, MSGL_V, "Selected norm: %s\n", tv_param_norm);
-    funcs->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM, &tvh->norm);
+    if (funcs->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM, &tvh->norm) != TVI_CONTROL_TRUE) {
+	mp_msg(MSGT_TV, MSGL_ERR, "Error: cannot set norm!\n");
+	return 0;
+    }
 
     /* limits on w&h are norm-dependent -- JM */
     /* set width */
