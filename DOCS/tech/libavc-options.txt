@@ -202,10 +202,21 @@ vfdct	(0-99) dct algorithm
         2 accurate integer
         3 mmx
         4 mlib
+        
+idct	(0-99) idct algorithm
+	0 automatically select a good one (default)
+	1 jpeg reference integer
+        2 simple
+        3 simplemmx
+        4 libmpeg2mmx (inaccurate, DONT USE for encoding with keyint >100)
+        5 ps2
+        6 mlib
+        7 arm
+        note: all these IDCTs do pass the IEEE1180 tests AFIAK
 
 lumi_mask	(0.0-1.0) luminance masking
 	0.0 disabled (default)
-        0.0-0.5 should be a sane range
+        0.0-0.3 should be a sane range
         warning: be carefull, too large values can cause disasterous things
         warning2: large values might look good on some monitors but may look horrible
         on other monitors
@@ -230,6 +241,8 @@ scplx_mask	(0.0-1.0) spatial complexity masking
 
 naq	normalize adaptive quantization
 	experimental
+ 
+ildct	use interlaced dct
 
 lavdopts: (decoder options)
 ---------------------------
@@ -244,12 +257,16 @@ ver	error resilience
 bug	manual workaround encoder bugs (cant be easily detected automatically)
 	0 (default)
 	1 for msmpeg4v3	workaround for some old lavc generated msmpeg4v3 files
-	1 for mpeg4	workaround some opendivx? files 
+	1 for mpeg4	workaround some opendivx? files (autodetected hopefully)
 			see http://heroinewarrior.com for some samples
 	2 for mpeg4	workaround xvid interlacing bug
-	3 for mpeg4	workaround for UMP4
+	3 for mpeg4	workaround for UMP4 (autodetected hopefully)
 
 gray	grayscale only decoding (a bit faster than with color ...)
+
+idct	see lavcopts
+        note: the decoding quality is highest if the same idct algorithm is used 
+        for decoding as for encoding, this is often not the most accurate though
 
 
 Notes:	1. lavc will strictly follow the quantizer limits vqmin, vqmax, vqdiff
