@@ -32,19 +32,19 @@ int ao_pcm_waveheader = 1;
 
 struct WaveHeader
 {
-	unsigned long riff;
-	unsigned long file_length;
-	unsigned long wave;
-	unsigned long fmt;
-	unsigned long fmt_length;
-	short fmt_tag;
-	short channels;
-	unsigned long sample_rate;
-	unsigned long bytes_per_second;
-	short block_align;
-	short bits;
-	unsigned long data;
-	unsigned long data_length;
+	uint32_t riff;
+	uint32_t file_length;
+	uint32_t wave;
+	uint32_t fmt;
+	uint32_t fmt_length;
+	uint16_t fmt_tag;
+	uint16_t channels;
+	uint32_t sample_rate;
+	uint32_t bytes_per_second;
+	uint16_t block_align;
+	uint16_t bits;
+	uint32_t data;
+	uint32_t data_length;
 };
 
 /* init with default values */
