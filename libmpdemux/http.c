@@ -172,47 +172,66 @@ http_response_parse( HTTP_header_t *http_hdr ) {
 
 char *
 http_build_request( HTTP_header_t *http_hdr ) {
-	char *ptr;
+	char *ptr, *uri=NULL;
 	int len;
 	HTTP_field_t *field;
 	if( http_hdr==NULL ) return NULL;
 
 	if( http_hdr->method==NULL ) http_set_method( http_hdr, "GET");
 	if( http_hdr->uri==NULL ) http_set_uri( http_hdr, "/");
+	else {
+		uri = (char*)malloc(strlen(http_hdr->uri)*2);
+		if( uri==NULL ) {
+			printf("Memory allocation failed\n");
+			return NULL;
+		}
+		url_escape_string( uri, http_hdr->uri );
+	}
 
-	// Compute the request length
-	len = strlen(http_hdr->method)+strlen(http_hdr->uri)+12;	// Method line
-	field = http_hdr->first_field; 					// Fields
+	//**** Compute the request length
+	// Add the Method line
+	len = strlen(http_hdr->method)+strlen(uri)+12;
+	// Add the fields
+	field = http_hdr->first_field; 
 	while( field!=NULL ) {
 		len += strlen(field->field_name)+2;
 		field = field->next;
 	}
-	len += 2;							// CRLF
+	// Add the CRLF
+	len += 2;
+	// Add the body
 	if( http_hdr->body!=NULL ) {
 		len += http_hdr->body_size;
 	}
+	// Free the buffer if it was previously used
 	if( http_hdr->buffer!=NULL ) {
 		free( http_hdr->buffer );
 		http_hdr->buffer = NULL;
 	}
-	http_hdr->buffer = (char*)malloc(len);
+	http_hdr->buffer = (char*)malloc(len+1);
 	if( http_hdr->buffer==NULL ) {
 		printf("Memory allocation failed\n");
 		return NULL;
 	}
 	http_hdr->buffer_size = len;
 
+	//*** Building the request
 	ptr = http_hdr->buffer;
-	ptr += sprintf( ptr, "%s %s HTTP/1.%d\r\n", http_hdr->method, http_hdr->uri, http_hdr->http_minor_version );
+	// Add the method line
+	ptr += sprintf( ptr, "%s %s HTTP/1.%d\r\n", http_hdr->method, uri, http_hdr->http_minor_version );
 	field = http_hdr->first_field;
+	// Add the field
 	while( field!=NULL ) {
 		ptr += sprintf( ptr, "%s\r\n", field->field_name );
 		field = field->next;
 	}
 	ptr += sprintf( ptr, "\r\n" );
+	// Add the body
 	if( http_hdr->body!=NULL ) {
 		memcpy( ptr, http_hdr->body, http_hdr->body_size );
 	}
+
+	if( uri ) free( uri );
 	return http_hdr->buffer;	
 }
 
