@@ -411,11 +411,33 @@ static void mix32to2 (sample_t * samples, sample_t bias)
     int i;
     sample_t common;
 
+#ifdef HAVE_SSE
+	asm volatile(
+	"movlps %1, %%xmm7		\n\t"
+	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+	"movl $-1024, %%esi		\n\t"
+	"1:				\n\t"
+	"movaps 1024(%0, %%esi), %%xmm0	\n\t" 
+	"addps %%xmm7, %%xmm0		\n\t" // common
+	"movaps %%xmm0, %%xmm1		\n\t" // common
+	"addps (%0, %%esi), %%xmm0	\n\t" 
+	"addps 2048(%0, %%esi), %%xmm1	\n\t" 
+	"addps 3072(%0, %%esi), %%xmm0	\n\t" 
+	"addps 4096(%0, %%esi), %%xmm1	\n\t" 
+	"movaps %%xmm0, (%0, %%esi)	\n\t"
+	"movaps %%xmm1, 1024(%0, %%esi)	\n\t"
+	"addl $16, %%esi		\n\t"
+	" jnz 1b			\n\t"
+	:: "r" (samples+256), "m" (bias)
+	: "%esi"
+	);
+#else
     for (i = 0; i < 256; i++) {
 	common = samples[i + 256] + bias;
 	samples[i] += common + samples[i + 768];
 	samples[i + 256] = common + samples[i + 512] + samples[i + 1024];
     }
+#endif
 }
 
 static void mix32toS (sample_t * samples, sample_t bias)
