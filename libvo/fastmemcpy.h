@@ -39,4 +39,23 @@ static inline void * mem2agpcpy_pic(void * dst, void * src, int bytesPerLine, in
 	return retval;
 }
 
+static inline void * memcpy_pic(void * dst, void * src, int bytesPerLine, int height, int dstStride, int srcStride)
+{
+	int i;
+	void *retval=dst;
+
+	if(dstStride == srcStride) memcpy(dst, src, srcStride*height);
+	else
+	{
+		for(i=0; i<height; i++)
+		{
+			memcpy(dst, src, bytesPerLine);
+			src+= srcStride;
+			dst+= dstStride;
+		}
+	}
+
+	return retval;
+}
+
 #endif
