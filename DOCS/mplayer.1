@@ -52,6 +52,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-config\ file ]
 .RB [ \-display\ name ]
 .RB [ \-unicode ]
+.RB [ \-utf8 ]
 .RB [ \-fsmode\ mode ]
 .RB [ \-vc\ video\ codec\ name ]
 .RB [ \-ac\ audio\ codec\ name ]
@@ -310,8 +311,11 @@ specify the hostname and display number of the X server you want
 to display on. For example : -display xtest.localdomain:0
 .TP
 .B \-unicode
-tells MPlayer to handle the subtitle file (with -sub option) as UNICODE.
+tells MPlayer to handle the subtitle file as UNICODE.
 Contrary: -nounicode
+.TP
+.B \-utf8
+tells MPlayer to handle the subtitle file as UTF8.
 .TP
 .B \-fsmode\ mode
 This option workarounds some problems when using specific windowmanagers and

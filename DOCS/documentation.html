@@ -5,7 +5,7 @@
 <P>
 <CENTER>MPlayer - Movie Player for LINUX (C) 2000-2001 Arpad Gereoffy (A'rpi/ESP-team)<BR>
 <BR>
-http://mplayer.sourceforge.net (or http://mplayer.dev.hu)</CENTER><BR>
+<A HREF="http://www.mplayerhq.hu">http://www.mplayerhq.hu</A></CENTER><BR>
 </P>
 
 <P><HR></P>
@@ -21,7 +21,7 @@ Table of Contents
   <A HREF="#1">1. Introduction</A>
 </P>
 <P>
-     <A HREF="#1.1">1.1 Overview +speed</A>
+     <A HREF="#1.1">1.1 Overview</A>
      <A HREF="#1.2">1.2 History</A>
      <A HREF="#1.3">1.3 Installation</A>
      <A HREF="#1.4">1.4 What about the GUI?</A>
@@ -109,6 +109,7 @@ Table of Contents
      <A HREF="#7.1">7.1 Debian packaging</A>
      <A HREF="#7.2">7.2 FreeBSD</A>
      <A HREF="#7.3">7.3 Solaris 8</A>
+     <A HREF="#7.4">7.4 StrongARM</A>
 </P>
 <P>
   <A HREF="#A">A. Authors</A>
@@ -350,7 +351,7 @@ Table of Contents
   <A NAME=2.1.2.2>2.1.2.2.  ffmpeg's DivX/libavcodec
 
   Beginning with version 0.4.2 , <A HREF="http://ffmpeg.sourceforge.net">ffmpeg</A> contains an <B>opensource</B> DivX codec,
-  which is compatible with the traditional DivX. <B>MPlayer</B> supports this codec,
+  which is compatible with the traditional DivX. <B>MPlayer</B> contains this codec,
   and this makes it possible to <B>watch DivX movies on non-x86 platforms!</B>
   To get it compile, you'll need nasm, bison, and flex, above the other
   devel tools. No manual hacking is needed to build it, ./configure detects
@@ -966,6 +967,11 @@ Table of Contents
 			OSS     : OK
 			ALSA    : OK (?)
 			Max kHz : 48
+
+  C-Media cards (which ones?)
+			OSS	: not OK (hissing) (?)
+			ALSA	: OK (?)
+			Max kHz : ?
 
   PC Speaker or DAC:
 			OSS     : OK (new timing code?)
@@ -1780,6 +1786,15 @@ Table of Contents
      ISO9660), hsfs currently does not support partitions/disks >4GB,
      all data is accessed modulo 4GB
      (http://groups.yahoo.com/group/solarisonintel/message/22592)
+
+
+  <A NAME=7.4>7.4.  StrongARM
+
+  MPlayer is reported to compile on StrongARM. Use the following command line:
+
+
+  ./configure --target=arm-linux --disable-css --with-x11libdir=/usr/arm/lib
+	      --with-x11incdir=/usr/arm/lib --disable-gcc-checking
 
 
   <A NAME=A>Appendix A - Authors
