@@ -7,6 +7,9 @@ SRCS    = crc.c resample.c bit_allocate.c bitstream.c downmix.c imdct.c imdct_ml
 OBJS	= $(SRCS:.c=.o)
 
 CFLAGS  = $(MLIB_INC) $(OPTFLAGS) 
+ifeq ($(TARGET_ALTIVEC),yes)
+    CFLAGS+= -faltivec
+endif
 
 .SUFFIXES: .c .o
 

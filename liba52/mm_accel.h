@@ -34,6 +34,9 @@
 #define MM_ACCEL_X86_MMXEXT	0x20000000
 #define MM_ACCEL_X86_SSE	0x10000000
 
+/* PPC accelerations */
+#define MM_ACCEL_PPC_ALTIVEC	0x00010000
+
 uint32_t mm_accel (void);
 
 #endif /* MM_ACCEL_H */

@@ -23,6 +23,7 @@
  * SSE optimizations from Michael Niedermayer (michaelni@gmx.at)
  * 3DNOW optimizations from Nick Kurshev <nickols_k@mail.ru>
  *   michael did port them from libac3 (untested, perhaps totally broken)
+ * AltiVec optimizations from Romain Dolbeau (romain@dolbeau.org)
  */
 
 #include "config.h"
@@ -114,24 +115,24 @@ static float __attribute__((aligned(16))) *sseW[7]=
 	{NULL /*sseW0*/,sseW1,sseW2,sseW3,sseW4,sseW5,sseW6};
 static float __attribute__((aligned(16))) sseWindow[512];
 #else
-static complex_t buf[128];
+static complex_t  __attribute__((aligned(16))) buf[128];
 #endif
 
 /* Twiddle factor LUT */
-static complex_t w_1[1];
-static complex_t w_2[2];
-static complex_t w_4[4];
-static complex_t w_8[8];
-static complex_t w_16[16];
-static complex_t w_32[32];
-static complex_t w_64[64];
-static complex_t * w[7] = {w_1, w_2, w_4, w_8, w_16, w_32, w_64};
+static complex_t __attribute__((aligned(16))) w_1[1];
+static complex_t __attribute__((aligned(16))) w_2[2];
+static complex_t __attribute__((aligned(16))) w_4[4];
+static complex_t __attribute__((aligned(16))) w_8[8];
+static complex_t __attribute__((aligned(16))) w_16[16];
+static complex_t __attribute__((aligned(16))) w_32[32];
+static complex_t __attribute__((aligned(16))) w_64[64];
+static complex_t __attribute__((aligned(16))) * w[7] = {w_1, w_2, w_4, w_8, w_16, w_32, w_64};
 
 /* Twiddle factors for IMDCT */
-static sample_t xcos1[128];
-static sample_t xsin1[128];
-static sample_t xcos2[64];
-static sample_t xsin2[64];
+static sample_t __attribute__((aligned(16))) xcos1[128];
+static sample_t __attribute__((aligned(16))) xsin1[128];
+static sample_t __attribute__((aligned(16))) xcos2[64];
+static sample_t __attribute__((aligned(16))) xsin2[64];
 
 /* Windowing function for Modified DCT - Thank you acroread */
 sample_t imdct_window[] = {
@@ -383,6 +384,343 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 	*delay_ptr++  = -buf[128-i-1].real * *--window_ptr; 
     }
 }
+
+#ifdef HAVE_ALTIVEC
+
+// used to build registers permutation vectors (vcprm)
+// the 's' are for words in the _s_econd vector
+#define WORD_0 0x00,0x01,0x02,0x03
+#define WORD_1 0x04,0x05,0x06,0x07
+#define WORD_2 0x08,0x09,0x0a,0x0b
+#define WORD_3 0x0c,0x0d,0x0e,0x0f
+#define WORD_s0 0x10,0x11,0x12,0x13
+#define WORD_s1 0x14,0x15,0x16,0x17
+#define WORD_s2 0x18,0x19,0x1a,0x1b
+#define WORD_s3 0x1c,0x1d,0x1e,0x1f
+
+#define vcprm(a,b,c,d) (const vector unsigned char)(WORD_ ## a, WORD_ ## b, WORD_ ## c, WORD_ ## d)
+
+// vcprmle is used to keep the same index as in the SSE version.
+// it's the same as vcprm, with the index inversed
+// ('le' is Little Endian)
+#define vcprmle(a,b,c,d) vcprm(d,c,b,a)
+
+// used to build inverse/identity vectors (vcii)
+// n is _n_egative, p is _p_ositive
+#define FLOAT_n -1.
+#define FLOAT_p 1.
+
+#define vcii(a,b,c,d) (const vector float)(FLOAT_ ## a, FLOAT_ ## b, FLOAT_ ## c, FLOAT_ ## d)
+
+void
+imdct_do_512_altivec(sample_t data[],sample_t delay[], sample_t bias)
+{
+  int i;
+  int k;
+  int p,q;
+  int m;
+  int two_m;
+  int two_m_plus_one;
+
+  sample_t tmp_b_i;
+  sample_t tmp_b_r;
+  sample_t tmp_a_i;
+  sample_t tmp_a_r;
+
+  sample_t *data_ptr;
+  sample_t *delay_ptr;
+  sample_t *window_ptr;
+	
+  /* 512 IMDCT with source and dest data in 'data' */
+	
+  /* Pre IFFT complex multiply plus IFFT cmplx conjugate & reordering*/
+  for( i=0; i < 128; i++) {
+    /* z[i] = (X[256-2*i-1] + j * X[2*i]) * (xcos1[i] + j * xsin1[i]) ; */ 
+    int j= bit_reverse_512[i];
+    buf[i].real =         (data[256-2*j-1] * xcos1[j])  -  (data[2*j]       * xsin1[j]);
+    buf[i].imag = -1.0 * ((data[2*j]       * xcos1[j])  +  (data[256-2*j-1] * xsin1[j]));
+  }
+  
+  /* 1. iteration */
+  for(i = 0; i < 128; i += 2) {
+#if 0
+    tmp_a_r = buf[i].real;
+    tmp_a_i = buf[i].imag;
+    tmp_b_r = buf[i+1].real;
+    tmp_b_i = buf[i+1].imag;
+    buf[i].real = tmp_a_r + tmp_b_r;
+    buf[i].imag =  tmp_a_i + tmp_b_i;
+    buf[i+1].real = tmp_a_r - tmp_b_r;
+    buf[i+1].imag =  tmp_a_i - tmp_b_i;
+#else
+    vector float temp, bufv; 
+
+    bufv = vec_ld(i << 3, (float*)buf);
+    temp = vec_perm(bufv, bufv, vcprm(2,3,0,1));
+    bufv = vec_madd(bufv, vcii(p,p,n,n), temp);
+    vec_st(bufv, i << 3, (float*)buf);
+#endif
+  }
+        
+  /* 2. iteration */
+  // Note w[1]={{1,0}, {0,-1}}
+  for(i = 0; i < 128; i += 4) {
+#if 0
+    tmp_a_r = buf[i].real;
+    tmp_a_i = buf[i].imag;
+    tmp_b_r = buf[i+2].real;
+    tmp_b_i = buf[i+2].imag;
+    buf[i].real = tmp_a_r + tmp_b_r;
+    buf[i].imag =  tmp_a_i + tmp_b_i;
+    buf[i+2].real = tmp_a_r - tmp_b_r;
+    buf[i+2].imag =  tmp_a_i - tmp_b_i;
+    tmp_a_r = buf[i+1].real;
+    tmp_a_i = buf[i+1].imag;
+    /* WARNING: im <-> re here ! */
+    tmp_b_r = buf[i+3].imag;
+    tmp_b_i = buf[i+3].real;
+    buf[i+1].real = tmp_a_r + tmp_b_r;
+    buf[i+1].imag =  tmp_a_i - tmp_b_i;
+    buf[i+3].real = tmp_a_r - tmp_b_r;
+    buf[i+3].imag =  tmp_a_i + tmp_b_i;
+#else
+    vector float buf01, buf23, temp1, temp2;
+	
+    buf01 = vec_ld((i + 0) << 3, (float*)buf);
+    buf23 = vec_ld((i + 2) << 3, (float*)buf);
+    buf23 = vec_perm(buf23,buf23,vcprm(0,1,3,2));
+
+    temp1 = vec_madd(buf23, vcii(p,p,p,n), buf01);
+    temp2 = vec_madd(buf23, vcii(n,n,n,p), buf01);
+
+    vec_st(temp1, (i + 0) << 3, (float*)buf);
+    vec_st(temp2, (i + 2) << 3, (float*)buf);
+#endif
+  }
+
+  /* 3. iteration */
+  for(i = 0; i < 128; i += 8) {
+#if 0
+    tmp_a_r = buf[i].real;
+    tmp_a_i = buf[i].imag;
+    tmp_b_r = buf[i+4].real;
+    tmp_b_i = buf[i+4].imag;
+    buf[i].real = tmp_a_r + tmp_b_r;
+    buf[i].imag =  tmp_a_i + tmp_b_i;
+    buf[i+4].real = tmp_a_r - tmp_b_r;
+    buf[i+4].imag =  tmp_a_i - tmp_b_i;
+    tmp_a_r = buf[1+i].real;
+    tmp_a_i = buf[1+i].imag;
+    tmp_b_r = (buf[i+5].real + buf[i+5].imag) * w[2][1].real;
+    tmp_b_i = (buf[i+5].imag - buf[i+5].real) * w[2][1].real;
+    buf[1+i].real = tmp_a_r + tmp_b_r;
+    buf[1+i].imag =  tmp_a_i + tmp_b_i;
+    buf[i+5].real = tmp_a_r - tmp_b_r;
+    buf[i+5].imag =  tmp_a_i - tmp_b_i;
+    tmp_a_r = buf[i+2].real;
+    tmp_a_i = buf[i+2].imag;
+    /* WARNING re <-> im & sign */
+    tmp_b_r = buf[i+6].imag;
+    tmp_b_i = - buf[i+6].real;
+    buf[i+2].real = tmp_a_r + tmp_b_r;
+    buf[i+2].imag =  tmp_a_i + tmp_b_i;
+    buf[i+6].real = tmp_a_r - tmp_b_r;
+    buf[i+6].imag =  tmp_a_i - tmp_b_i;
+    tmp_a_r = buf[i+3].real;
+    tmp_a_i = buf[i+3].imag;
+    tmp_b_r = (buf[i+7].real - buf[i+7].imag) * w[2][3].imag;
+    tmp_b_i = (buf[i+7].imag + buf[i+7].real) * w[2][3].imag;
+    buf[i+3].real = tmp_a_r + tmp_b_r;
+    buf[i+3].imag =  tmp_a_i + tmp_b_i;
+    buf[i+7].real = tmp_a_r - tmp_b_r;
+    buf[i+7].imag =  tmp_a_i - tmp_b_i;
+#else
+    vector float buf01, buf23, buf45, buf67;
+
+    buf01 = vec_ld((i + 0) << 3, (float*)buf);
+    buf23 = vec_ld((i + 2) << 3, (float*)buf);
+
+    tmp_b_r = (buf[i+5].real + buf[i+5].imag) * w[2][1].real;
+    tmp_b_i = (buf[i+5].imag - buf[i+5].real) * w[2][1].real;
+    buf[i+5].real = tmp_b_r;
+    buf[i+5].imag = tmp_b_i;
+    tmp_b_r = (buf[i+7].real - buf[i+7].imag) * w[2][3].imag;
+    tmp_b_i = (buf[i+7].imag + buf[i+7].real) * w[2][3].imag;
+    buf[i+7].real = tmp_b_r;
+    buf[i+7].imag = tmp_b_i;
+
+    buf23 = vec_ld((i + 2) << 3, (float*)buf);
+    buf45 = vec_ld((i + 4) << 3, (float*)buf);
+    buf67 = vec_ld((i + 6) << 3, (float*)buf);
+    buf67 = vec_perm(buf67, buf67, vcprm(1,0,2,3));
+	
+    vec_st(vec_add(buf01, buf45), (i + 0) << 3, (float*)buf);
+    vec_st(vec_madd(buf67, vcii(p,n,p,p), buf23), (i + 2) << 3, (float*)buf);
+    vec_st(vec_sub(buf01, buf45), (i + 4) << 3, (float*)buf);
+    vec_st(vec_nmsub(buf67, vcii(p,n,p,p), buf23), (i + 6) << 3, (float*)buf);
+#endif
+  }
+    
+  /* 4-7. iterations */
+  for (m=3; m < 7; m++) {
+    two_m = (1 << m);
+
+    two_m_plus_one = two_m<<1;
+
+    for(i = 0; i < 128; i += two_m_plus_one) {
+      for(k = 0; k < two_m; k+=2) {
+#if 0
+        int p = k + i;
+        int q = p + two_m;
+        tmp_a_r = buf[p].real;
+        tmp_a_i = buf[p].imag;
+        tmp_b_r =
+          buf[q].real * w[m][k].real -
+          buf[q].imag * w[m][k].imag;
+        tmp_b_i =
+          buf[q].imag * w[m][k].real +
+          buf[q].real * w[m][k].imag;
+        buf[p].real = tmp_a_r + tmp_b_r;
+        buf[p].imag =  tmp_a_i + tmp_b_i;
+        buf[q].real = tmp_a_r - tmp_b_r;
+        buf[q].imag =  tmp_a_i - tmp_b_i;
+
+        tmp_a_r = buf[(p + 1)].real;
+        tmp_a_i = buf[(p + 1)].imag;
+        tmp_b_r =
+          buf[(q + 1)].real * w[m][(k + 1)].real -
+          buf[(q + 1)].imag * w[m][(k + 1)].imag;
+        tmp_b_i =
+          buf[(q + 1)].imag * w[m][(k + 1)].real +
+          buf[(q + 1)].real * w[m][(k + 1)].imag;
+        buf[(p + 1)].real = tmp_a_r + tmp_b_r;
+        buf[(p + 1)].imag =  tmp_a_i + tmp_b_i;
+        buf[(q + 1)].real = tmp_a_r - tmp_b_r;
+        buf[(q + 1)].imag =  tmp_a_i - tmp_b_i;
+#else
+        int p = k + i;
+        int q = p + two_m;
+        vector float vecp, vecq, vecw, temp1, temp2, temp3, temp4;
+        const vector float vczero = (const vector float)(0);
+        // first compute buf[q] and buf[q+1]
+        vecq = vec_ld(q << 3, (float*)buf);
+        vecw = vec_ld(0, (float*)&(w[m][k]));
+        temp1 = vec_madd(vecq, vecw, vczero);
+        temp2 = vec_perm(vecq, vecq, vcprm(1,0,3,2));
+        temp2 = vec_madd(temp2, vecw, vczero);
+        temp3 = vec_perm(temp1, temp2, vcprm(0,s0,2,s2));
+        temp4 = vec_perm(temp1, temp2, vcprm(1,s1,3,s3));
+        vecq = vec_madd(temp4, vcii(n,p,n,p), temp3);
+        // then butterfly with buf[p] and buf[p+1]
+        vecp = vec_ld(p << 3, (float*)buf);
+        
+        temp1 = vec_add(vecp, vecq);
+        temp2 = vec_sub(vecp, vecq);
+                
+        vec_st(temp1, p << 3, (float*)buf);
+        vec_st(temp2, q << 3, (float*)buf);
+#endif
+      }
+    }
+  }
+
+  /* Post IFFT complex multiply  plus IFFT complex conjugate*/
+  for( i=0; i < 128; i+=4) {
+    /* y[n] = z[n] * (xcos1[n] + j * xsin1[n]) ; */
+#if 0
+    tmp_a_r =        buf[(i + 0)].real;
+    tmp_a_i = -1.0 * buf[(i + 0)].imag;
+    buf[(i + 0)].real =
+      (tmp_a_r * xcos1[(i + 0)])  -  (tmp_a_i  * xsin1[(i + 0)]);
+    buf[(i + 0)].imag =
+      (tmp_a_r * xsin1[(i + 0)])  +  (tmp_a_i  * xcos1[(i + 0)]);
+
+    tmp_a_r =        buf[(i + 1)].real;
+    tmp_a_i = -1.0 * buf[(i + 1)].imag;
+    buf[(i + 1)].real =
+      (tmp_a_r * xcos1[(i + 1)])  -  (tmp_a_i  * xsin1[(i + 1)]);
+    buf[(i + 1)].imag =
+      (tmp_a_r * xsin1[(i + 1)])  +  (tmp_a_i  * xcos1[(i + 1)]);
+
+    tmp_a_r =        buf[(i + 2)].real;
+    tmp_a_i = -1.0 * buf[(i + 2)].imag;
+    buf[(i + 2)].real =
+      (tmp_a_r * xcos1[(i + 2)])  -  (tmp_a_i  * xsin1[(i + 2)]);
+    buf[(i + 2)].imag =
+      (tmp_a_r * xsin1[(i + 2)])  +  (tmp_a_i  * xcos1[(i + 2)]);
+
+    tmp_a_r =        buf[(i + 3)].real;
+    tmp_a_i = -1.0 * buf[(i + 3)].imag;
+    buf[(i + 3)].real =
+      (tmp_a_r * xcos1[(i + 3)])  -  (tmp_a_i  * xsin1[(i + 3)]);
+    buf[(i + 3)].imag =
+      (tmp_a_r * xsin1[(i + 3)])  +  (tmp_a_i  * xcos1[(i + 3)]);
+#else
+    vector float bufv_0, bufv_2, cosv, sinv, temp1, temp2;
+    vector float temp0022, temp1133, tempCS01;
+    const vector float vczero = (const vector float)(0);
+
+    bufv_0 = vec_ld((i + 0) << 3, (float*)buf);
+    bufv_2 = vec_ld((i + 2) << 3, (float*)buf);
+
+    cosv = vec_ld(i << 2, xcos1);
+    sinv = vec_ld(i << 2, xsin1);
+
+    temp0022 = vec_perm(bufv_0, bufv_0, vcprm(0,0,2,2));
+    temp1133 = vec_perm(bufv_0, bufv_0, vcprm(1,1,3,3));
+    tempCS01 = vec_perm(cosv, sinv, vcprm(0,s0,1,s1));
+    temp1 = vec_madd(temp0022, tempCS01, vczero);
+    tempCS01 = vec_perm(cosv, sinv, vcprm(s0,0,s1,1));
+    temp2 = vec_madd(temp1133, tempCS01, vczero);
+    bufv_0 = vec_madd(temp2, vcii(p,n,p,n), temp1);
+    
+    vec_st(bufv_0, (i + 0) << 3, (float*)buf);
+
+    /* idem with bufv_2 and high-order cosv/sinv */
+
+    temp0022 = vec_perm(bufv_2, bufv_2, vcprm(0,0,2,2));
+    temp1133 = vec_perm(bufv_2, bufv_2, vcprm(1,1,3,3));
+    tempCS01 = vec_perm(cosv, sinv, vcprm(2,s2,3,s3));
+    temp1 = vec_madd(temp0022, tempCS01, vczero);
+    tempCS01 = vec_perm(cosv, sinv, vcprm(s2,2,s3,3));
+    temp2 = vec_madd(temp1133, tempCS01, vczero);
+    bufv_2 = vec_madd(temp2, vcii(p,n,p,n), temp1);
+
+    vec_st(bufv_2, (i + 2) << 3, (float*)buf);
+    
+#endif
+  }
+  
+  data_ptr = data;
+  delay_ptr = delay;
+  window_ptr = imdct_window;
+
+  /* Window and convert to real valued signal */
+  for(i=0; i< 64; i++) { 
+    *data_ptr++   = -buf[64+i].imag   * *window_ptr++ + *delay_ptr++ + bias; 
+    *data_ptr++   =  buf[64-i-1].real * *window_ptr++ + *delay_ptr++ + bias; 
+  }
+    
+  for(i=0; i< 64; i++) { 
+    *data_ptr++  = -buf[i].real       * *window_ptr++ + *delay_ptr++ + bias; 
+    *data_ptr++  =  buf[128-i-1].imag * *window_ptr++ + *delay_ptr++ + bias; 
+  }
+    
+  /* The trailing edge of the window goes into the delay line */
+  delay_ptr = delay;
+
+  for(i=0; i< 64; i++) { 
+    *delay_ptr++  = -buf[64+i].real   * *--window_ptr; 
+    *delay_ptr++  =  buf[64-i-1].imag * *--window_ptr; 
+  }
+    
+  for(i=0; i<64; i++) {
+    *delay_ptr++  =  buf[i].imag       * *--window_ptr; 
+    *delay_ptr++  = -buf[128-i-1].real * *--window_ptr; 
+  }
+}
+#endif
+
 
 // Stuff below this line is borrowed from libac3
 #include "srfftp.h"
@@ -965,6 +1303,14 @@ void imdct_init (uint32_t mm_accel)
 	}
 	else
 #endif // arch_x86
+#ifdef HAVE_ALTIVEC
+        if (mm_accel & MM_ACCEL_PPC_ALTIVEC)
+	{
+	  fprintf(stderr, "Using AltiVec optimized IMDCT transform\n");
+          imdct_512 = imdct_do_512_altivec;
+	}
+        else
+#endif
 	fprintf (stderr, "No accelerated IMDCT transform found\n");
 	imdct_256 = imdct_do_256;
     }
