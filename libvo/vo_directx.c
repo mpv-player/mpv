@@ -1,6 +1,6 @@
 /******************************************************************************
  * vo_directx.c: Directx v2 or later DirectDraw interface for MPlayer
- * Copyright (c) 2002 - 2004 Sascha Sommer <saschasommer@freenet.de>.
+ * Copyright (c) 2002 - 2005 Sascha Sommer <saschasommer@freenet.de>.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -116,6 +116,7 @@ static directx_fourcc_caps g_ddpf[] =
 	{"YVU9 ",IMGFMT_YVU9 ,0,{sizeof(DDPIXELFORMAT), DDPF_FOURCC,MAKEFOURCC('Y','V','U','9'),0,0,0,0,0}},	
 	{"YUY2 ",IMGFMT_YUY2 ,0,{sizeof(DDPIXELFORMAT), DDPF_FOURCC,MAKEFOURCC('Y','U','Y','2'),0,0,0,0,0}},
 	{"UYVY ",IMGFMT_UYVY ,0,{sizeof(DDPIXELFORMAT), DDPF_FOURCC,MAKEFOURCC('U','Y','V','Y'),0,0,0,0,0}},
+ 	{"BGR8 ",IMGFMT_BGR8 ,0,{sizeof(DDPIXELFORMAT), DDPF_RGB, 0, 8,  0x00000000, 0x00000000, 0x00000000, 0}},   
 	{"RGB15",IMGFMT_RGB15,0,{sizeof(DDPIXELFORMAT), DDPF_RGB, 0, 16,  0x0000001F, 0x000003E0, 0x00007C00, 0}},   //RGB 5:5:5
 	{"BGR15",IMGFMT_BGR15,0,{sizeof(DDPIXELFORMAT), DDPF_RGB, 0, 16,  0x00007C00, 0x000003E0, 0x0000001F, 0}},   
 	{"RGB16",IMGFMT_RGB16,0,{sizeof(DDPIXELFORMAT), DDPF_RGB, 0, 16,  0x0000001F, 0x000007E0, 0x0000F800, 0}},   //RGB 5:6:5
@@ -1287,6 +1288,24 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 
 	/*create the surfaces*/
     if(Directx_CreatePrimarySurface())return 1;
+ 
+	//create palette for 256 color mode  
+	if(image_format==IMGFMT_BGR8){
+		LPDIRECTDRAWPALETTE ddpalette=NULL;
+		char* palette=malloc(4*256);
+		int i; 
+		for(i=0; i<256; i++){
+			palette[4*i+0] = ((i >> 5) & 0x07) * 255 / 7;
+			palette[4*i+1] = ((i >> 2) & 0x07) * 255 / 7;
+			palette[4*i+2] = ((i >> 0) & 0x03) * 255 / 3;
+			palette[4*i+3] = PC_NOCOLLAPSE;	
+		}
+		g_lpdd->lpVtbl->CreatePalette(g_lpdd,DDPCAPS_8BIT|DDPCAPS_INITIALIZE,palette,&ddpalette,NULL);  
+		g_lpddsPrimary->lpVtbl->SetPalette(g_lpddsPrimary,ddpalette);
+		free(palette);       
+		ddpalette->lpVtbl->Release(ddpalette);      
+	}
+
 	if (!nooverlay && Directx_CreateOverlay(image_format))
 	{
 			if(format == primary_image_format)nooverlay=1; /*overlay creation failed*/
