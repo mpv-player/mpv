@@ -15,7 +15,8 @@ decoders:
 - getting mss1 (Windows Screen Video) DLL codec working... - kabi
 - getting PIM1 codec (DLL) working... - kabi
 - getting 3ivX DLL working (CoCreateFreeThreadedMarshaler call required)
-- optimize liba52 (downmix.c in 3dnow, rematrix?)
+- optimize liba52 (downmix.c in 3dnow, imdct 3dnowex runtime detection?)
+      i dont have a 3dnow(ex) cpu so i dont want to do it (michael)
 - fix seeking with libmad audio codec (codec lost sync and can't resync?)
 
 mencoder:
