@@ -27,8 +27,10 @@ void decode_nuv( unsigned char *encoded, int encoded_size,
 	int r;
 	unsigned int out_len;
 	struct rtframeheader *encodedh = ( struct rtframeheader* ) encoded;
-	static unsigned char *buffer = 0;
-	static unsigned char *previous_buffer = 0;
+	static unsigned char *buffer = 0; /* for RTJpeg with LZO decompress */
+#ifdef KEEP_BUFFER
+	static unsigned char *previous_buffer = 0; /* to support Last-frame-copy */
+#endif
 	static is_lzo_inited = 0;
 
 //	printf("frametype: %c, comtype: %c, encoded_size: %d, width: %d, height: %d\n",
@@ -49,25 +51,9 @@ void decode_nuv( unsigned char *encoded, int encoded_size,
 	    }
 	    case 'V':
 	    {
-		/* do the buffer stuffs */
-		if ( buffer == NULL ) 
-		{
-			buffer = ( unsigned char * ) malloc ( width * height + ( width * height ) / 2 );
-#if 0
-			printf ( "Allocated for %dx%d image %d bytes\n", width, height, 
-					width * height + ( width * height ) / 2 );
-#endif
-		}
-
 #ifdef KEEP_BUFFER		
-		if ( previous_buffer == NULL ) 
-		{
+		if (!previous_buffer) 
 			previous_buffer = ( unsigned char * ) malloc ( width * height + ( width * height ) / 2 );
-#if 0
-			printf ( "Allocated for %dx%d image %d bytes\n", width, height, 
-					width * height + ( width * height ) / 2 );
-#endif
-		}
 #endif
 
 		if (((encodedh->comptype == '2') ||
@@ -91,10 +77,18 @@ void decode_nuv( unsigned char *encoded, int encoded_size,
 			RTjpeg_decompressYUV420 ( ( __s8 * ) encoded + 12, decoded );
 			break;
 		    case '2': /* RTJpeg with LZO */
+			if (!buffer) 
+			    buffer = ( unsigned char * ) malloc ( width * height + ( width * height ) / 2 );
+			if (!buffer)
+			{
+			    printf ( "Error decompressing\n" );
+			    break;
+			}
 			r = lzo1x_decompress ( encoded + 12, encodedh->packetlength, buffer, &out_len, NULL );
 			if ( r != LZO_E_OK ) 
 			{
 				printf ( "Error decompressing\n" );
+				break;
 			}
 			RTjpeg_decompressYUV420 ( ( __s8 * ) buffer, decoded );
 			break;
@@ -103,8 +97,8 @@ void decode_nuv( unsigned char *encoded, int encoded_size,
 			if ( r != LZO_E_OK ) 
 			{
 				printf ( "Error decompressing\n" );
+				break;
 			}
-//			memcpy(decoded, buffer, width*height*3/2);
 			break;
 		    case 'N': /* black frame */
 			memset ( decoded, 0,  width * height );
