@@ -56,6 +56,7 @@ mpeg2_config_t config;
 static int drop_frame = 0;
 
 #ifdef MPEG12_POSTPROC
+#include "../postproc/postprocess.h"
 int quant_store[MBR+1][MBC+1]; // [Review]
 #endif
 
@@ -186,7 +187,7 @@ static int parse_chunk (vo_functions_t * output, int code, uint8_t * buffer, int
 	    {
 #ifdef MPEG12_POSTPROC
 	       if( (picture->pp_options) && (!framedrop) ){
-                    // apply OpenDivX postprocess filter
+                    // apply postprocess filter
             	    int stride[3];
             	    stride[0]=picture->coded_picture_width;
             	    stride[1]=stride[2]=stride[0]/2;
