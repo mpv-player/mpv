@@ -437,7 +437,7 @@ static void uninit_player(unsigned int mask){
 extern void vo_uninit( void );
 #endif
 
-void exit_player(char* how){
+static void exit_player_with_rc(char* how, int rc){
 
   uninit_player(INITED_ALL);
 #ifdef X11_FULLSCREEN
@@ -452,7 +452,11 @@ void exit_player(char* how){
   if(how) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_Exiting,mp_gettext(how));
   mp_msg(MSGT_CPLAYER,MSGL_DBG2,"max framesize was %d bytes\n",max_framesize);
 
-  exit(1);
+  exit(rc);
+}
+
+void exit_player(char* how){
+  exit_player_with_rc(how, 1);
 }
 
 static void exit_sighandler(int x){
@@ -562,7 +566,7 @@ static int libmpdemux_was_interrupted(int eof) {
   if((cmd = mp_input_get_cmd(0,0)) != NULL) {
        switch(cmd->id) {
        case MP_CMD_QUIT:
-	 exit_player(MSGTR_Exit_quit);
+	 exit_player_with_rc(MSGTR_Exit_quit, 0);
        case MP_CMD_PLAY_TREE_STEP: {
 	 eof = (cmd->args[0].v.i > 0) ? PT_NEXT_ENTRY : PT_PREV_ENTRY;
        } break;
@@ -1177,7 +1181,7 @@ if(stream_dump_type==5){
   }
   fclose(f);
   mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_CoreDumped);
-  exit_player(MSGTR_Exit_eof);
+  exit_player_with_rc(MSGTR_Exit_eof, 0);
 }
 
 #ifdef USE_DVDREAD
@@ -1250,7 +1254,7 @@ if((stream_dump_type)&&(stream_dump_type<4)){
   }
   fclose(f);
   mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_CoreDumped);
-  exit_player(MSGTR_Exit_eof);
+  exit_player_with_rc(MSGTR_Exit_eof, 0);
 }
 
 sh_audio=d_audio->sh;
@@ -2181,7 +2185,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       osd_function=OSD_PAUSE;
     } break;
     case MP_CMD_QUIT : {
-      exit_player(MSGTR_Exit_quit);
+      exit_player_with_rc(MSGTR_Exit_quit, 0);
     }
     case MP_CMD_GRAB_FRAMES : {
       grab_frames=2;
@@ -3200,7 +3204,7 @@ vo_font = NULL;
 done_freetype();
 #endif
 
-exit_player(MSGTR_Exit_eof);
+exit_player_with_rc(MSGTR_Exit_eof, 0);
 
 return 1;
 }
