@@ -80,6 +80,7 @@ extern int vo_ontop;
 extern int vo_rootwin;
 extern int vidmode;
 extern int vo_colorkey;
+extern float monitor_aspect;
 
 /*****************************************************************************
  * DirectDraw GUIDs.
@@ -1196,6 +1197,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
     RECT rd;
     vo_screenwidth = monitor_rect.right - monitor_rect.left;
     vo_screenheight = monitor_rect.bottom - monitor_rect.top;
+    monitor_aspect = (float)vo_screenwidth / (float)vo_screenheight;
     vo_fs = options & 0x01;
 	image_format =  format;
 	image_width = width;
