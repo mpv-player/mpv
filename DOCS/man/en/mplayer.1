@@ -784,6 +784,14 @@ You can only use this option if the underlying media supports seeking
 Skip the proxy for IPv6 addresses.
 It will still be used for IPv4 connections.
 .TP
+.B \-loadidx <filename>
+The file name from which to read the video INDEX data.
+MPlayer will read the index from filename and use this data for seeking.
+This data will override any index data contained in the AVI itself.
+Further, MPlayer won't prevent you from loading an index file generated
+from a different AVI, but this is sure to cause unfavorable results.
+NOTE: this option will be obsoleted once AVI gets ODML support!
+.TP
 .B \-mc <seconds/frame>
 Maximum A-V sync correction per frame (in seconds).
 .TP
@@ -889,6 +897,19 @@ Used with 'rtsp://' URLs to specify that the resulting incoming RTP and RTCP
 packets be streamed over TCP (using the same TCP connection as RTSP).
 This option may be useful if you have a broken Internet connection that does
 not pass incoming UDP packets (see http://www.live.com/mplayer/).
+.TP
+.B \-saveidx <filename>
+Force rebuilding of INDEX and output to a separate file specified by the
+argument filename. Currently this only works with AVI files.
+Although you can use MEncoder to fix files without indexes, MPlayer
+does not support seeking in AVI files bigger than 2GB.
+(This is a limitation of the AVI format, and although there exists an
+extension to index beyond 2GB, MPlayer doesn't yet support this extension.)
+After the index file is created, MPlayer will begin to play the video.
+If you want to automate index file generation (after encoding a large file
+off a TV capture card, for example), you can specify \-frames 0 to
+prevent MPlayer from playing the video after generating the index.
+NOTE: this option will be obsoleted once AVI gets ODML support!
 .TP
 .B \-sb <byte\ position> (see \-ss option too)
 Seek to byte position.
