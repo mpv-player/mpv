@@ -6,6 +6,8 @@
 #include "mp_msg.h"
 
 #include <jpeglib.h>
+#define UINT16 IJPG_UINT16
+#define INT16 IJPG_INT16
 
 #include <setjmp.h>
 
