@@ -33,6 +33,10 @@
 #include "lirc.h"
 #endif
 
+#ifdef HAVE_LIRCC
+#include <lirc/lircc.h>
+#endif
+
 /// This array defines all know commands.
 /// The first field is an id used to recognize the command without too many strcmp
 /// The second is abviously the command name
@@ -381,7 +385,7 @@ static short ar_state = -1;
 static mp_cmd_t* ar_cmd = NULL;
 static unsigned int ar_delay = 100, ar_rate = 8, last_ar = 0;
 
-static int use_joystick = 1, use_lirc = 1;
+static int use_joystick = 1, use_lirc = 1, use_lircc = 1;
 static char* config_file = "input.conf";
 
 static char* js_dev = NULL;
@@ -410,6 +414,8 @@ static config_t mp_input_opts[] = {
   { "joystick", &use_joystick,  CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL },
   { "nolirc", &use_lirc, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL },
   { "lirc", &use_lirc, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL },
+  { "nolircc", &use_lircc, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL },
+  { "lircc", &use_lircc, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL },
   { NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -1478,6 +1484,14 @@ mp_input_init(void) {
     int fd = mp_input_lirc_init();
     if(fd > 0)
       mp_input_add_cmd_fd(fd,0,mp_input_lirc_read,mp_input_lirc_close);
+  }
+#endif
+
+#ifdef HAVE_LIRCC
+  if(use_lircc) {
+    int fd = lircc_init("mplayer", NULL);
+    if(fd >= 0)
+      mp_input_add_cmd_fd(fd,1,NULL,(mp_close_func_t)lircc_cleanup);
   }
 #endif
 

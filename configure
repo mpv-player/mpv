@@ -147,6 +147,7 @@ Optional features:
   --disable-iconv        do not use iconv(3) function [autodetect]
   --disable-setlocale    disable setlocale using in mplayer [autodetect]
   --enable-lirc          enable LIRC (remote control) support [autodetect]
+  --enable-lircc         enable LIRCCD (LIRC client daemon) input [autodetect]
   --enable-joystick      enable joystick support [disable]
   --disable-tv           disable TV Interface (tv/dvb grabbers) [enable]
   --disable-tv-v4l       disable Video4Linux TV Interface support [autodetect]
@@ -1064,6 +1065,7 @@ _xvid=auto
 _divx4linux=auto
 _opendivx=no
 _lirc=auto
+_lircc=auto
 _gui=no
 _termcap=auto
 _termios=auto
@@ -1249,6 +1251,8 @@ for ac_option do
   --disable-libfame)	_fame=no	;;
   --enable-lirc)	_lirc=yes	;;
   --disable-lirc)	_lirc=no	;;
+  --enable-lircc)	_lircc=yes	;;
+  --disable-lircc)	_lircc=no	;;
   --enable-gui)		_gui=yes	;;
   --disable-gui)	_gui=no		;;
   --enable-termcap)	_termcap=yes	;;
@@ -5195,6 +5199,22 @@ else
 fi
 echores "$_lirc"
 
+echocheck "lircc"
+if test "$_lircc" = auto ; then
+  _lircc=no
+  cat > $TMPC <<EOF
+#include <lirc/lircc.h>
+int main(void) { return 0; }
+EOF
+  cc_check -llircc && _lircc=yes
+fi
+if test "$_lircc" = yes ; then
+  _def_lircc='#define HAVE_LIRCC 1'
+  _ld_lircc='-llircc'
+else
+  _def_lircc='#undef HAVE_LIRCC'
+fi
+echores "$_lircc"
 
 #############################################################################
 echo "Creating config.mak"
@@ -5282,6 +5302,7 @@ SGIAUDIO_LIB = $_ld_sgiaudio
 # input/demuxer/codecs
 TERMCAP_LIB = $_ld_termcap
 LIRC_LIB = $_ld_lirc
+LIRCC_LIB = $_ld_lircc
 CSS_USE = $_css
 CSS_LIB = $_ld_css
 DVDKIT = $_dvdkit
@@ -5533,6 +5554,12 @@ $_def_glob
 
 /* LIRC (remote control, see www.lirc.org) support: */
 $_def_lirc
+
+/*
+ * LIRCCD (LIRC client daemon)
+ * See http://www.dolda2000.cjb.net/~fredrik/lirccd/
+ */
+$_def_lircc
 
 /* DeCSS support using libcss */
 $_def_css
