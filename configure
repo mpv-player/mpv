@@ -155,7 +155,7 @@ Optional features:
   --disable-streaming    disable network streaming support
                          (support for: http/mms/rtp) [enable]
   --enable-live          enable LIVE.COM Streaming Media support [disable]
-  --enable-dvdnav        Disable dvdnav support [disable]
+  --enable-dvdnav        enable dvdnav support [disable]
   --disable-dvdread      Disable libdvdread support [autodetect]
   --disable-mpdvdkit     Disable mpdvdkit/mpdvdkit2 support [autodetect]
   --disable-css          Disable old-style libcss DVD support [autodetect]
