@@ -903,14 +903,15 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		  }
 		}
 
-		if((trak->stdata[9]==0) && trak->stdata_len >= 36) { // version 0 with extra atoms
-		    int atom_len = char2int(trak->stdata,28);
-		    switch(char2int(trak->stdata,32)) { // atom type
+		if((trak->stdata[9]==0 || trak->stdata[9]==1) && trak->stdata_len >= 36) { // version 0 with extra atoms
+        int adjust = (trak->stdata[9]==1)?48:0;
+		    int atom_len = char2int(trak->stdata,28+adjust);
+		    switch(char2int(trak->stdata,32+adjust)) { // atom type
 		      case MOV_FOURCC('e','s','d','s'): {
 			mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found MPEG4 audio Elementary Stream Descriptor atom (%d)!\n", atom_len);
 			if(atom_len > 8) {
 			  esds_t esds; 				  
-			  if(!mp4_parse_esds(&trak->stdata[36], atom_len-8, &esds)) {
+			  if(!mp4_parse_esds(&trak->stdata[36+adjust], atom_len-8, &esds)) {
 			    
 			    sh->i_bps = esds.avgBitrate/8; 
 
@@ -935,7 +936,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		      } break;
 		      default:
 			mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found unknown audio atom %c%c%c%c (%d)!\n",
-			    trak->stdata[32],trak->stdata[33],trak->stdata[34],trak->stdata[35],
+			    trak->stdata[32+adjust],trak->stdata[33+adjust],trak->stdata[34+adjust],trak->stdata[35+adjust],
 			    atom_len);
 		    }
 		}  
