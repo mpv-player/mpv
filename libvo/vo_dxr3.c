@@ -451,7 +451,6 @@ static void flip_page(void)
 	static int prev_pts = 0;
 	/* Flush the device if a seek occured */
 	if (prev_pts > vo_pts) {
-		printf("\nWARNING: Seeking may or may not break a/v sync (sometimes seeking again helps)\n");
 		ioval = EM8300_SUBDEVICE_VIDEO;
 		ioctl(fd_control, EM8300_IOCTL_FLUSH, &ioval);
 	}
