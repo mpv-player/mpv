@@ -272,7 +272,7 @@ m_option_t mplayer_opts[]={
 	// set bpp (x11+vm, dga, fbdev, vesa, svga?)
         {"bpp", &vo_dbpp, CONF_TYPE_INT, CONF_RANGE, 0, 32, NULL},
 	{"colorkey", &vo_colorkey, CONF_TYPE_INT, 0, 0, 0, NULL},
-	{"nocolorkey", &vo_colorkey, CONF_TYPE_FLAG, 0, 0, 0xff000000, NULL},
+	{"nocolorkey", &vo_colorkey, CONF_TYPE_FLAG, 0, 0, 0x1000000, NULL},
 	// double buffering:  (mga/xmga, xv, vidix, vesa, fbdev)
 	{"double", &vo_doublebuffering, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"nodouble", &vo_doublebuffering, CONF_TYPE_FLAG, 0, 1, 0, NULL},

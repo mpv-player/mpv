@@ -197,7 +197,7 @@ static void set_window(int force_update)
     /* mDrawColorKey: */
 
     /* fill drawable with specified color */
-    if (vo_colorkey != 0xff000000)
+    if (!(vo_colorkey & 0xff000000))
     {
     XSetBackground(mDisplay, vo_gc, 0L);
     XClearWindow( mDisplay,vo_window );
@@ -349,7 +349,7 @@ else
     {
 	vidix_grkey_get(&gr_key);
 	gr_key.key_op = KEYS_PUT;
-	if (vo_colorkey != 0xff000000)
+	if (!(vo_colorkey & 0xff000000))
 	{
 	    gr_key.ckey.op = CKEY_TRUE;
 	    gr_key.ckey.red = r;
