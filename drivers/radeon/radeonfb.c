@@ -3248,6 +3248,7 @@ static void radeon_write_mode (struct radeonfb_info *rinfo,
 	to be set before changing CRTC_EXT register.
 	Otherwise we may get a blank screen.
 	*****/
+	int prim_mon;
 RTRACE("radeonfb: radeon_write_mode is called\n"); 
 	if(DUAL_MONITOR(rinfo))	{
 		radeon_write_crtc2_regs(rinfo,mode);
@@ -3256,7 +3257,8 @@ RTRACE("radeonfb: radeon_write_mode is called\n");
 	radeon_write_common_regs(rinfo,mode);
 	radeon_write_dda_regs(rinfo,mode);
 	radeon_write_crtc_regs(rinfo,mode);
-	if(rinfo->crtDispType == MT_DFP || rinfo->crtDispType == MT_LCD) {
+	prim_mon = PRIMARY_MONITOR(rinfo);
+	if(prim_mon == MT_DFP || prim_mon == MT_LCD) {
 		radeon_write_fp_regs(rinfo,mode);
 	}
 	radeon_write_pll_regs(rinfo,mode);
