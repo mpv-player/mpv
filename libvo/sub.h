@@ -40,6 +40,11 @@ typedef struct mp_osd_obj_s {
 	    int elems;
 	} progbar;
     } params;
+    int stride;
+
+    int allocated;
+    unsigned char *alpha_buffer;
+    unsigned char *bitmap_buffer;
 } mp_osd_obj_t;
 
 

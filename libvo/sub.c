@@ -42,17 +42,83 @@ static inline int get_height(int c,int h){
     return h;
 }
 
+// renders char to a big per-object buffer where alpha and bitmap are separated
+static void draw_alpha_buf(mp_osd_obj_t* obj, int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)
+{
+    int dststride = obj->stride;
+    int dstskip = obj->stride-w;
+    int srcskip = stride-w;
+    int i, j;
+    unsigned char *b = obj->bitmap_buffer + (y0-obj->bbox.y1)*dststride + (x0-obj->bbox.x1);
+    unsigned char *a = obj->alpha_buffer  + (y0-obj->bbox.y1)*dststride + (x0-obj->bbox.x1);
+    unsigned char *bs = src;
+    unsigned char *as = srca;
+
+    if (x0 < obj->bbox.x1 || x0+w > obj->bbox.x2 || y0 < obj->bbox.y1 || y0+h > obj->bbox.y2) {
+	fprintf(stderr, "osd text out of range: bbox [%d %d %d %d], txt [%d %d %d %d]\n",
+		obj->bbox.x1, obj->bbox.x2, obj->bbox.y1, obj->bbox.y2,
+		x0, x0+w, y0, y0+h);
+	return;
+    }
+    
+    for (i = 0; i < h; i++) {
+	for (j = 0; j < w; j++, b++, a++, bs++, as++) {
+	    if (*b < *bs) *b = *bs;
+	    if (*as) {
+		if (*a == 0 || *a > *as) *a = *as;
+	    }
+	}
+	b+= dstskip;
+	a+= dstskip;
+	bs+= srcskip;
+	as+= srcskip;
+    }
+}
+
+// allocates/enlarges the alpha/bitmap buffer
+static void alloc_buf(mp_osd_obj_t* obj)
+{
+    int len;
+    if (obj->bbox.x2 < obj->bbox.x1) obj->bbox.x2 = obj->bbox.x1;
+    if (obj->bbox.y2 < obj->bbox.y1) obj->bbox.y2 = obj->bbox.y1;
+    obj->stride = ((obj->bbox.x2-obj->bbox.x1)+7)&(~7);
+    len = obj->stride*(obj->bbox.y2-obj->bbox.y1);
+    if (obj->allocated<len) {
+	obj->allocated = len;
+	free(obj->bitmap_buffer);
+	free(obj->alpha_buffer);
+	obj->bitmap_buffer = (unsigned char *)memalign(16, len);
+	obj->alpha_buffer = (unsigned char *)memalign(16, len);
+    }
+    memset(obj->bitmap_buffer, 0, len);
+    memset(obj->alpha_buffer, 0, len);
+}
+
+// renders the buffer
+inline static void vo_draw_text_from_buffer(mp_osd_obj_t* obj,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
+    if (obj->allocated > 0) {
+	draw_alpha(obj->bbox.x1,obj->bbox.y1,
+		   obj->bbox.x2-obj->bbox.x1,
+		   obj->bbox.y2-obj->bbox.y1,
+		   obj->bitmap_buffer,
+		   obj->alpha_buffer,
+		   obj->stride);
+    }
+}
+
 inline static void vo_update_text_osd(mp_osd_obj_t* obj,int dxs,int dys){
 	unsigned char *cp=vo_osd_text;
 	int x=20;
 	int h=0;
+	int font;
 
         obj->bbox.x1=obj->x=x;
         obj->bbox.y1=obj->y=10;
 
         while (*cp){
           int c=*cp++;
-          x+=vo_font->width[c]+vo_font->charspace;
+	  render_one_glyph(vo_font, c);
+	  x+=vo_font->width[c]+vo_font->charspace;
 	  h=get_height(c,h);
         }
 	
@@ -60,22 +126,19 @@ inline static void vo_update_text_osd(mp_osd_obj_t* obj,int dxs,int dys){
 	obj->bbox.y2=obj->bbox.y1+h;
 	obj->flags|=OSDFLAG_BBOX;
 
-}
+	alloc_buf(obj);
 
-inline static void vo_draw_text_osd(mp_osd_obj_t* obj,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
-	unsigned char *cp=vo_osd_text;
-   	int font;
-        int x=obj->x;
-
+	cp=vo_osd_text;
+	x = obj->x;
         while (*cp){
           int c=*cp++;
           if ((font=vo_font->font[c])>=0)
-            draw_alpha(x,obj->y,
-              vo_font->width[c],
-              vo_font->pic_a[font]->h,
-              vo_font->pic_b[font]->bmp+vo_font->start[c],
-              vo_font->pic_a[font]->bmp+vo_font->start[c],
-              vo_font->pic_a[font]->w);
+            draw_alpha_buf(obj,x,obj->y,
+			   vo_font->width[c],
+			   vo_font->pic_a[font]->h,
+			   vo_font->pic_b[font]->bmp+vo_font->start[c],
+			   vo_font->pic_a[font]->bmp+vo_font->start[c],
+			   vo_font->pic_a[font]->w);
           x+=vo_font->width[c]+vo_font->charspace;
         }
 }
@@ -100,6 +163,13 @@ inline static void vo_update_text_progbar(mp_osd_obj_t* obj,int dxs,int dys){
        return;
     }
     
+    render_one_glyph(vo_font, OSD_PB_START);
+    render_one_glyph(vo_font, OSD_PB_END);
+    render_one_glyph(vo_font, OSD_PB_0);
+    render_one_glyph(vo_font, OSD_PB_1);
+    render_one_glyph(vo_font, vo_osd_progbar_type);
+
+    // calculate bbox corners:    
     {	int h=0;
         int y=(dys-vo_font->height)/2;
         int delimw=vo_font->width[OSD_PB_START]
@@ -109,6 +179,11 @@ inline static void vo_update_text_progbar(mp_osd_obj_t* obj,int dxs,int dys){
    	int charw=vo_font->width[OSD_PB_0]+vo_font->charspace;
         int elems=width/charw;
    	int x=(dxs-elems*charw-delimw)/2;
+	int delta = 0;
+	if (vo_osd_progbar_type>0 && vo_font->font[vo_osd_progbar_type]>=0){
+	    delta = vo_font->width[vo_osd_progbar_type]+vo_font->spacewidth;
+	    delta = (x-delta > 0) ? delta : x;
+	}
 	h=get_height(OSD_PB_START,h);
 	h=get_height(OSD_PB_END,h);
 	h=get_height(OSD_PB_0,h);
@@ -119,12 +194,13 @@ inline static void vo_update_text_progbar(mp_osd_obj_t* obj,int dxs,int dys){
 	obj->bbox.y2=y+h; //vo_font->height;
 	obj->flags|=OSDFLAG_BBOX;
 	obj->params.progbar.elems=elems;
+	obj->bbox.x1-=delta; // space for an icon
     }
-    
-}
 
-inline static void vo_draw_text_progbar(mp_osd_obj_t* obj,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
-   	unsigned char *s;
+    alloc_buf(obj);
+
+    // render it:
+    {	unsigned char *s;
    	unsigned char *sa;
         int i,w,h,st,mark;
    	int x=obj->x;
@@ -148,7 +224,7 @@ inline static void vo_draw_text_progbar(mp_osd_obj_t* obj,void (*draw_alpha)(int
         c=vo_osd_progbar_type;
         if(vo_osd_progbar_type>0 && (font=vo_font->font[c])>=0) {
 	    int xp=x-vo_font->width[c]-vo_font->spacewidth;
-	   draw_alpha((xp<0?0:xp),y,
+	   draw_alpha_buf(obj,(xp<0?0:xp),y,
               vo_font->width[c],
               vo_font->pic_a[font]->h,
               vo_font->pic_b[font]->bmp+vo_font->start[c],
@@ -158,7 +234,7 @@ inline static void vo_draw_text_progbar(mp_osd_obj_t* obj,void (*draw_alpha)(int
    
         c=OSD_PB_START;
         if ((font=vo_font->font[c])>=0)
-            draw_alpha(x,y,
+            draw_alpha_buf(obj,x,y,
               vo_font->width[c],
               vo_font->pic_a[font]->h,
               vo_font->pic_b[font]->bmp+vo_font->start[c],
@@ -174,7 +250,7 @@ inline static void vo_draw_text_progbar(mp_osd_obj_t* obj,void (*draw_alpha)(int
 	   sa=vo_font->pic_a[font]->bmp+vo_font->start[c];
 	   st=vo_font->pic_a[font]->w;
 	   if ((i=mark)) do {
-	       draw_alpha(x,y,w,h,s,sa,st);
+	       draw_alpha_buf(obj,x,y,w,h,s,sa,st);
 	       x+=charw;
 	   } while(--i);
 	}
@@ -187,14 +263,14 @@ inline static void vo_draw_text_progbar(mp_osd_obj_t* obj,void (*draw_alpha)(int
 	   sa=vo_font->pic_a[font]->bmp+vo_font->start[c];
 	   st=vo_font->pic_a[font]->w;
 	   if ((i=elems-mark)) do {
-	       draw_alpha(x,y,w,h,s,sa,st);
+	       draw_alpha_buf(obj,x,y,w,h,s,sa,st);
 	       x+=charw;
 	   } while(--i);
 	}
 
         c=OSD_PB_END;
         if ((font=vo_font->font[c])>=0)
-            draw_alpha(x,y,
+            draw_alpha_buf(obj,x,y,
               vo_font->width[c],
               vo_font->pic_a[font]->h,
               vo_font->pic_b[font]->bmp+vo_font->start[c],
@@ -202,7 +278,7 @@ inline static void vo_draw_text_progbar(mp_osd_obj_t* obj,void (*draw_alpha)(int
               vo_font->pic_a[font]->w);
 //        x+=vo_font->width[c]+vo_font->charspace;
 
-
+    }
 //        vo_osd_progbar_value=(vo_osd_progbar_value+1)&0xFF;
 
 }
@@ -213,7 +289,7 @@ subtitle* vo_sub=NULL;
 
 inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
    unsigned char *t;
-   int c,i,j,l,x,y,font;
+   int c,i,j,l,x,y,font,prevc;
    int len;
    int k,lastk;
    int lastStripPosition;
@@ -246,6 +322,9 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 //	  printf("sub(%d) '%s'\n",len,t);
 //	  if(len<0) memy -=h; // according to max of vo_font->pic_a[font]->h 
 //	  else
+
+	  prevc = -1;
+
 	  for (j=0;j<=len;j++){
 	      if ((c=t[j])>=0x80){
 		 if (sub_utf8){
@@ -262,6 +341,7 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 		 mp_msg(MSGT_OSD,MSGL_WARN,"\nMAX_UCS exceeded!\n");
 	      }
 	      if (!c) c++; // avoid UCS 0
+	      render_one_glyph(vo_font, c);
 	      if (c==' '){
 		 lastk=k;
 		 lastStripPosition=j;
@@ -272,19 +352,22 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 		  }
 	      }
 	      obj->params.subtitle.utbl[k++]=c;
-	      xsize+=vo_font->width[c]+vo_font->charspace;
+	      xsize+=vo_font->width[c]+vo_font->charspace+kerning(vo_font,prevc,c);
 	      if (dxs<xsize){
+		  prevc = -1;
 		 if (lastStripPosition>0){
 		    j=lastStripPosition;
 		    xsize=lastxsize;
 		    k=lastk;
 		 } else {
-		    xsize -=vo_font->width[c]+vo_font->charspace; // go back
+		    xsize -=vo_font->width[c]+vo_font->charspace+kerning(vo_font,prevc,c);; // go back
 		    k--; // cut line here
 		    while (t[j] && t[j]!=' ') j++; // jump to the nearest space
 		 }
-	      } else if (j<len)
-		   continue;
+	      } else if (j<len) {
+		  prevc = c;
+		  continue;
+	      }
 	      if (h>obj->y){ // out of the screen so end parsing
 		 obj->y -= lasth - vo_font->height; // correct the y position
 		 l=0;
@@ -304,6 +387,7 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 	      }
 //	      printf("h: %d -> %d  \n",vo_font->height,h);
 	      obj->y -=h; // according to max of vo_font->pic_a[font]->h 
+	      prevc = -1;
 	  }
       }
 
@@ -319,6 +403,30 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
     obj->bbox.y1=obj->y;
 //    obj->bbox.y2=obj->y+obj->params.subtitle.lines*vo_font->height;
     obj->flags|=OSDFLAG_BBOX;
+
+    alloc_buf(obj);
+
+    y = obj->y;
+    
+    i=j=0;
+    if ((l=obj->params.subtitle.lines)) for (;;) {
+ 	 x=obj->params.subtitle.xtbl[i++]; 
+	 prevc = -1;
+	 while ((c=obj->params.subtitle.utbl[j++])){
+	       x += kerning(vo_font,prevc,c);
+	       if ((font=vo_font->font[c])>=0)
+		  draw_alpha_buf(obj,x,y,
+			     vo_font->width[c],
+			     vo_font->pic_a[font]->h+y<obj->dys ? vo_font->pic_a[font]->h : obj->dys-y,
+			     vo_font->pic_b[font]->bmp+vo_font->start[c],
+			     vo_font->pic_a[font]->bmp+vo_font->start[c],
+			     vo_font->pic_a[font]->w);
+	       x+=vo_font->width[c]+vo_font->charspace;
+               prevc = c;
+	 }
+         if (!--l) break;
+         y+=vo_font->height;
+    }
     
 }
 
@@ -338,27 +446,6 @@ inline static void vo_draw_spudec_sub(mp_osd_obj_t* obj, void (*draw_alpha)(int 
 {
   spudec_draw_scaled(vo_spudec, obj->dxs, obj->dys, draw_alpha);
 }
-inline static void vo_draw_text_sub(mp_osd_obj_t* obj,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
-   int i,j,c,x,l,font;
-   int y=obj->y;
-
-   i=j=0;
-   if ((l=obj->params.subtitle.lines)) for (;;) {
- 	 x=obj->params.subtitle.xtbl[i++]; 
-	 while ((c=obj->params.subtitle.utbl[j++])){
-	       if ((font=vo_font->font[c])>=0)
-		  draw_alpha(x,y,
-			     vo_font->width[c],
-			     vo_font->pic_a[font]->h+y<obj->dys ? vo_font->pic_a[font]->h : obj->dys-y,
-			     vo_font->pic_b[font]->bmp+vo_font->start[c],
-			     vo_font->pic_a[font]->bmp+vo_font->start[c],
-			     vo_font->pic_a[font]->w);
-	          x+=vo_font->width[c]+vo_font->charspace;
-	 }
-         if (!--l) break;
-         y+=vo_font->height;
-   }
-}
 
 void *vo_spudec=NULL;
 void *vo_vobsub=NULL;
@@ -375,6 +462,9 @@ mp_osd_obj_t* new_osd_obj(int type){
     osd->next=vo_osd_list;
     vo_osd_list=osd;
     osd->type=type;
+    osd->alpha_buffer = NULL;
+    osd->bitmap_buffer = NULL;
+    osd->allocated = -1;
     return osd;
 }
 
@@ -382,6 +472,8 @@ void free_osd_list(){
     mp_osd_obj_t* obj=vo_osd_list;
     while(obj){
 	mp_osd_obj_t* next=obj->next;
+	if (obj->alpha_buffer) free(obj->alpha_buffer);
+	if (obj->bitmap_buffer) free(obj->bitmap_buffer);
 	free(obj);
 	obj=next;
     }
@@ -391,6 +483,15 @@ void free_osd_list(){
 int vo_update_osd(int dxs,int dys){
     mp_osd_obj_t* obj=vo_osd_list;
     int chg=0;
+
+#ifdef HAVE_FREETYPE    
+    // here is the right place to get screen dimensions
+    if (force_load_font) {
+	force_load_font = 0;
+	load_font(dxs, dys);
+    }
+#endif
+
     while(obj){
       if(dxs!=obj->dxs || dys!=obj->dys || obj->flags&OSDFLAG_FORCE_UPDATE){
         int vis=obj->flags&OSDFLAG_VISIBLE;
@@ -463,6 +564,9 @@ void vo_init_osd(){
     new_osd_obj(OSDTYPE_SUBTITLE);
     new_osd_obj(OSDTYPE_PROGBAR);
     new_osd_obj(OSDTYPE_SPU);
+#ifdef HAVE_FREETYPE
+    force_load_font = 1;
+#endif
 }
 
 int vo_osd_changed_flag=0;
@@ -496,13 +600,9 @@ void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h,
 	    vo_draw_spudec_sub(obj, draw_alpha); // FIXME
 	    break;
 	case OSDTYPE_OSD:
-	    vo_draw_text_osd(obj,draw_alpha);
-	    break;
 	case OSDTYPE_SUBTITLE:
-	    vo_draw_text_sub(obj,draw_alpha);
-	    break;
 	case OSDTYPE_PROGBAR:
-	    vo_draw_text_progbar(obj,draw_alpha);
+	    vo_draw_text_from_buffer(obj,draw_alpha);
 	    break;
 	}
 	obj->old_bbox=obj->bbox;
