@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.45 -->
+<!-- synced with 1.46 -->
 <sect1 id="install">
 <title>Instalacja</title>
 
@@ -140,7 +140,7 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądra z ser
 <listitem><para>
   <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>:
   Ten pakiet kodeków jest zdolny do dekodowania strumieni video zakodowanych
-  H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/SVQ1/SVQ3
+  H.263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/SVQ1/SVQ3
   i strumieni audio WMA (Windows Media Audio) v1/v2 na wielu platformach.
   Jest również uważany za najszybszy. Przeczytaj rozdział
   <link linkend="ffmpeg">FFmpeg</link>, a dowiesz się więcej. Cechy:
