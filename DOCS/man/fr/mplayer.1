@@ -1,4 +1,4 @@
-.\" synced with 1.832
+.\" synced with 1.833
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "24 Décembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "29 Décembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -7531,7 +7531,7 @@ facteur de quantification entre les trames-I et -P (par défaut\ : 1.4)
 .
 .TP
 .B pb_factor=<value>
-facteur de quantification entre les trames-P et -B (par défaut\ : 1.4)
+facteur de quantification entre les trames-P et -B (par défaut\ : 1.3)
 .
 .TP
 .B pass=<1\-2>
@@ -7606,13 +7606,45 @@ d'une trame à l'autre\ ; une valeur forte oblige la variation à être plus
 progressive.
 .
 .TP
+.B direct_pred=<0\-2>
+Détermine le type de prédicteur de mouvement utilisé pour les macro-blocs
+directs dans les trames-B.
+.PD 0
+.RSs
+.IPs 0
+Aucun\ : les macro-blocs directs ne sont pas utilisés.
+.IPs 1
+Temporel\ : les vecteur de mouvements sont interpolés d'après la trame-P
+suivante.
+.IPs 2
+Spatial\ : les vecteur de mouvements sont extrapolés d'après les blocs
+adjacents.
+.RE
+.PD 1
+Les prédicteurs spatiaux et temporels sont approximativement de la même
+vitesse, et aucun n'est strictement meilleur que l'autre.
+Le meilleur choix dépend de chaque film.
+direct_pred=0 est généralement lent et de qualité moindre.
+.
+.TP
+.B (no)b8x8mv
+Utilise les types de macro-blocs b16x8, b8x16, b8x8 (par défaut\: activé).
+Nécessite des trames-B.
+Voir 4x4mv pour plus de détails.
+.
+.TP
 .B (no)4x4mv
-Utilise tous les types de macro-blocs inter-trames (i16x16, i4x4, p16x16,
-p16x8, p8x16, p8x8, p8x4, p4x8, p4x4, skip)
+Utilise les types de macro-blocs p8x4, p4x8, p4x4.
+Les types de macro-blocs intra-trames disponibles sont i16x16, i4x4, p16x16,
+p16x8, p8x16, p8x8, p8x4, p4x8, p4x4, b16x16, b16x8, b8x16, b8x8, skip, direct.
+Les types i16x16, i4x4, p16x16-8x8, b16x16, et skip sont toujours utilisés.
+.br
 L'idée est de trouver le type et la taille des macro-blocs qui décrit le
 mieux une certaine région de l'image.
-Typiquement très efficace pour les dessins animés, qui contiennent souvent
-de grands à-plats de couleurs (par défaut\ : i16x16, i4x4, p16x16-8x8, skip).
+Par exemple, un travelling est mieux représenté par des blocs 16x16, tandis
+qu'un petit objet en mouvement sera mieux codé par des petits blocs.
+.br
+4x4mv n'est recommandé que si subq >=3.
 Suivant le type de source, ce paramètre peut améliorer ou dégrader la
 qualité, utilisez-le avec précaution.
 .
@@ -7625,11 +7657,12 @@ Utilisé correctement, cela peut améliorer la qualité de façon significative.
 .RSs
 0: halfpel uniquement (précision d'un demi-pixel)
 .br
-1: 1 itération qpel sur le candidant vainqueur (default)
+1: 1 itération qpel sur le candidant vainqueur
 .br
 2: 2 itérations qpel sur le candidant vainqueur
 .br
 3: halfpel sur tous les types de macro-blocs, qpel sur le vainqueur
+(par défaut)
 .br
 4: qpel partout
 .br
