@@ -477,6 +477,12 @@ static char help_text[]=
 #define MSGTR_EQU_Center "中间"
 #define MSGTR_EQU_Bass "低音"
 #define MSGTR_EQU_All "所有"
+#define MSGTR_EQU_Channel1 "声道 1:"
+#define MSGTR_EQU_Channel2 "声道 2:"
+#define MSGTR_EQU_Channel3 "声道 3:"
+#define MSGTR_EQU_Channel4 "声道 4:"
+#define MSGTR_EQU_Channel5 "声道 5:"
+#define MSGTR_EQU_Channel6 "声道 6:"
 
 // --- playlist
 #define MSGTR_PLAYLIST_Path "路径"
@@ -578,6 +584,13 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_AutoSyncValue "自同步: "
 #define MSGTR_PREFERENCES_CDROMDevice "CD-ROM设备:"
 #define MSGTR_PREFERENCES_DVDDevice "DVD设备:"
+#define MSGTR_PREFERENCES_FPS "电影的FPS:"
+#define MSGTR_PREFERENCES_ShowVideoWindow "在非激活状态下显示视频窗口"
+
+#define MSGTR_ABOUT_UHU "GUI开发由UHU Linux赞助\n"
+#define MSGTR_ABOUT_CoreTeam "   MPlayer核心小组:\n"
+#define MSGTR_ABOUT_AdditionalCoders "   其他开发者:\n"
+#define MSGTR_ABOUT_MainTesters "   主要测试者:\n"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "致命错误 ..."
